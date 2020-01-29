@@ -42,8 +42,8 @@
 #include "../ITMLib/Engines/VolumeEditAndCopy/CUDA/VolumeEditAndCopyEngine_CUDA.h"
 #include "../ITMLib/Engines/ViewBuilding/ITMViewBuilderFactory.h"
 #include "../ITMLib/Engines/SceneFileIO/ITMSceneFileIOEngine.h"
-#include "../ITMLib/Engines/Reconstruction/Interface/ITMDynamicSceneReconstructionEngine.h"
-#include "../ITMLib/Engines/Reconstruction/ITMDynamicSceneReconstructionEngineFactory.h"
+#include "../ITMLib/Engines/Reconstruction/Interface/DynamicSceneReconstructionEngine.h"
+#include "../ITMLib/Engines/Reconstruction/DynamicSceneReconstructionEngineFactory.h"
 
 #include "../InputSource/ImageSourceEngine.h"
 #include "../ORUtils/FileUtils.h"

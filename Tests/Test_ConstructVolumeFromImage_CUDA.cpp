@@ -24,8 +24,8 @@
 //ITMLib
 #include "TestUtilsForSnoopyFrames16And17.h"
 #include "../ITMLib/ITMLibDefines.h"
-#include "../ITMLib/Engines/Reconstruction/Interface/ITMDynamicSceneReconstructionEngine.h"
-#include "../ITMLib/Engines/Reconstruction/ITMDynamicSceneReconstructionEngineFactory.h"
+#include "../ITMLib/Engines/Reconstruction/Interface/DynamicSceneReconstructionEngine.h"
+#include "../ITMLib/Engines/Reconstruction/DynamicSceneReconstructionEngineFactory.h"
 #include "../ITMLib/Engines/ViewBuilding/Interface/ITMViewBuilder.h"
 #include "../ITMLib/Engines/ViewBuilding/ITMViewBuilderFactory.h"
 #include "../ITMLib/Utils/Configuration.h"
@@ -111,8 +111,8 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_PVA_VBH_Expanded_CUDA, Frame16And1
 	// *** construct volumes ***
 	ITMVoxelVolume<ITMVoxel, PlainVoxelArray> volume_PVA_17(MEMORYDEVICE_CUDA, InitParams<PlainVoxelArray>());
 	volume_PVA_17.Reset();
-	ITMDynamicSceneReconstructionEngine<ITMVoxel, ITMWarp, PlainVoxelArray>* reconstructionEngine_PVA =
-			ITMDynamicSceneReconstructionEngineFactory::MakeSceneReconstructionEngine<ITMVoxel, ITMWarp, PlainVoxelArray>(MEMORYDEVICE_CUDA);
+	DynamicSceneReconstructionEngine<ITMVoxel, ITMWarp, PlainVoxelArray>* reconstructionEngine_PVA =
+			DynamicSceneReconstructionEngineFactory::MakeSceneReconstructionEngine<ITMVoxel, ITMWarp, PlainVoxelArray>(MEMORYDEVICE_CUDA);
 	reconstructionEngine_PVA->GenerateTsdfVolumeFromView(&volume_PVA_17, view);
 
 
@@ -126,8 +126,8 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_PVA_VBH_Expanded_CUDA, Frame16And1
 	indexer.AllocateFromDepth(&volume_VBH_17_depth_allocation, view);
 	indexer.AllocateUsingOtherVolumeAndSetVisibilityExpanded(&volume_VBH_17, &volume_VBH_17_depth_allocation, view);
 
-	ITMDynamicSceneReconstructionEngine<ITMVoxel, ITMWarp, VoxelBlockHash>* reconstructionEngine_VBH =
-			ITMDynamicSceneReconstructionEngineFactory::MakeSceneReconstructionEngine<ITMVoxel, ITMWarp, VoxelBlockHash>(MEMORYDEVICE_CUDA);
+	DynamicSceneReconstructionEngine<ITMVoxel, ITMWarp, VoxelBlockHash>* reconstructionEngine_VBH =
+			DynamicSceneReconstructionEngineFactory::MakeSceneReconstructionEngine<ITMVoxel, ITMWarp, VoxelBlockHash>(MEMORYDEVICE_CUDA);
 	reconstructionEngine_VBH->IntegrateDepthImageIntoTsdfVolume(&volume_VBH_17, view);
 	reconstructionEngine_VBH->IntegrateDepthImageIntoTsdfVolume(&volume_VBH_17_depth_allocation, view);
 
@@ -179,8 +179,8 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CUDA) {
 	ManipulationEngine_CUDA_PVA_Voxel::Inst().ResetScene(&scene1);
 	ITMTrackingState trackingState(imageSize, settings->device_type);
 
-	ITMDynamicSceneReconstructionEngine<ITMVoxel, ITMWarp, PlainVoxelArray>* reconstructionEngine_PVA =
-			ITMDynamicSceneReconstructionEngineFactory
+	DynamicSceneReconstructionEngine<ITMVoxel, ITMWarp, PlainVoxelArray>* reconstructionEngine_PVA =
+			DynamicSceneReconstructionEngineFactory
 			::MakeSceneReconstructionEngine<ITMVoxel, ITMWarp, PlainVoxelArray>(MEMORYDEVICE_CUDA);
 	reconstructionEngine_PVA->GenerateTsdfVolumeFromView(&scene1, view, &trackingState);
 
@@ -246,8 +246,8 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CUDA) {
 	                                                   settings->device_type, {0x800, 0x20000});
 	ManipulationEngine_CUDA_VBH_Voxel::Inst().ResetScene(&scene2);
 
-	ITMDynamicSceneReconstructionEngine<ITMVoxel, ITMWarp, VoxelBlockHash>* reconstructionEngine_VBH =
-			ITMDynamicSceneReconstructionEngineFactory
+	DynamicSceneReconstructionEngine<ITMVoxel, ITMWarp, VoxelBlockHash>* reconstructionEngine_VBH =
+			DynamicSceneReconstructionEngineFactory
 			::MakeSceneReconstructionEngine<ITMVoxel, ITMWarp, VoxelBlockHash>(MEMORYDEVICE_CUDA);
 
 	ITMRenderState renderState(imageSize, configuration::get().general_voxel_volume_parameters.near_clipping_distance,
@@ -344,8 +344,8 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CUDA) {
 		ManipulationEngine_CUDA_PVA_Voxel::Inst().ResetScene(&scene1);
 
 
-		ITMDynamicSceneReconstructionEngine<ITMVoxel, ITMWarp, PlainVoxelArray>* reconstructionEngine_PVA =
-				ITMDynamicSceneReconstructionEngineFactory
+		DynamicSceneReconstructionEngine<ITMVoxel, ITMWarp, PlainVoxelArray>* reconstructionEngine_PVA =
+				DynamicSceneReconstructionEngineFactory
 				::MakeSceneReconstructionEngine<ITMVoxel, ITMWarp, PlainVoxelArray>(MEMORYDEVICE_CUDA);
 		reconstructionEngine_PVA->GenerateTsdfVolumeFromView(&scene1, view, &trackingState);
 
@@ -358,8 +358,8 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CUDA) {
 	                                                   settings->device_type);
 	ManipulationEngine_CUDA_VBH_Voxel::Inst().ResetScene(&scene3);
 
-	ITMDynamicSceneReconstructionEngine<ITMVoxel, ITMWarp, VoxelBlockHash>* reconstructionEngine_VBH =
-			ITMDynamicSceneReconstructionEngineFactory
+	DynamicSceneReconstructionEngine<ITMVoxel, ITMWarp, VoxelBlockHash>* reconstructionEngine_VBH =
+			DynamicSceneReconstructionEngineFactory
 			::MakeSceneReconstructionEngine<ITMVoxel, ITMWarp, VoxelBlockHash>(MEMORYDEVICE_CUDA);
 
 	ITMRenderState renderState(imageSize, configuration::get().general_voxel_volume_parameters.near_clipping_distance,

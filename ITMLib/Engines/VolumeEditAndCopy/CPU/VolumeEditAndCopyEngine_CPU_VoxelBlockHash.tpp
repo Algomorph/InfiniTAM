@@ -18,7 +18,7 @@
 
 #include "VolumeEditAndCopyEngine_CPU.h"
 #include "../../../Objects/Scene/ITMRepresentationAccess.h"
-#include "../../Reconstruction/ITMDynamicSceneReconstructionEngineFactory.h"
+#include "../../Reconstruction/DynamicSceneReconstructionEngineFactory.h"
 #include "../../Traversal/Shared/ITMSceneTraversal_Shared.h"
 #include "../Shared/VolumeEditAndCopyEngine_Shared.h"
 #include "../../Indexing/Shared/IndexingEngine_Shared.h"

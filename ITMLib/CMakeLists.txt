@@ -298,53 +298,53 @@ set(ITMLIB_ENGINES_RECONSTRUCTION_SOURCES
 set(ITMLIB_ENGINES_RECONSTRUCTION_HEADERS
     Engines/Reconstruction/ITMSceneReconstructionEngineFactory.h
     Engines/Reconstruction/ITMSurfelSceneReconstructionEngineFactory.h
-    Engines/Reconstruction/ITMDynamicSceneReconstructionEngineFactory.h
+	Engines/Reconstruction/DynamicSceneReconstructionEngineFactory.h
     )
 
 ##
 set(ITMLIB_ENGINES_RECONSTRUCTION_CPU_SOURCES
-    Engines/Reconstruction/CPU/ITMSceneReconstructionEngine_CPU.tpp
-    Engines/Reconstruction/CPU/ITMDynamicSceneReconstructionEngine_CPU_VoxelBlockHash.tpp
-    Engines/Reconstruction/CPU/ITMDynamicSceneReconstructionEngine_CPU_VoxelBlockHash.cpp
-    Engines/Reconstruction/CPU/ITMDynamicSceneReconstructionEngine_CPU_PlainVoxelArray.tpp
-    Engines/Reconstruction/CPU/ITMDynamicSceneReconstructionEngine_CPU_PlainVoxelArray.cpp
-    Engines/Reconstruction/CPU/ITMSurfelSceneReconstructionEngine_CPU.tpp
+	Engines/Reconstruction/CPU/SceneReconstructionEngine_CPU.tpp
+	Engines/Reconstruction/CPU/DynamicSceneReconstructionEngine_CPU_VoxelBlockHash.tpp
+	Engines/Reconstruction/CPU/DynamicSceneReconstructionEngine_CPU_VoxelBlockHash.cpp
+	Engines/Reconstruction/CPU/DynamicSceneReconstructionEngine_CPU_PlainVoxelArray.tpp
+	Engines/Reconstruction/CPU/DynamicSceneReconstructionEngine_CPU_PlainVoxelArray.cpp
+	Engines/Reconstruction/CPU/SurfelSceneReconstructionEngine_CPU.tpp
     )
 
 set(ITMLIB_ENGINES_RECONSTRUCTION_CPU_HEADERS
-    Engines/Reconstruction/CPU/ITMSceneReconstructionEngine_CPU.h
-    Engines/Reconstruction/CPU/ITMDynamicSceneReconstructionEngine_CPU.h
-    Engines/Reconstruction/CPU/ITMSurfelSceneReconstructionEngine_CPU.h
+	Engines/Reconstruction/CPU/SceneReconstructionEngine_CPU.h
+	Engines/Reconstruction/CPU/DynamicSceneReconstructionEngine_CPU.h
+	Engines/Reconstruction/CPU/SurfelSceneReconstructionEngine_CPU.h
     )
 
 ##
 set(ITMLIB_ENGINES_RECONSTRUCTION_CUDA_SOURCES
-    Engines/Reconstruction/CUDA/ITMSceneReconstructionEngine_CUDA.tcu
-    Engines/Reconstruction/CUDA/ITMSurfelSceneReconstructionEngine_CUDA.tcu
-    Engines/Reconstruction/CUDA/ITMDynamicSceneReconstructionEngine_CUDA_PlainVoxelArray.tcu
-    Engines/Reconstruction/CUDA/ITMDynamicSceneReconstructionEngine_CUDA_PlainVoxelArray.cu
-    Engines/Reconstruction/CUDA/ITMDynamicSceneReconstructionEngine_CUDA_VoxelBlockHash.tcu
-    Engines/Reconstruction/CUDA/ITMDynamicSceneReconstructionEngine_CUDA_VoxelBlockHash.cu
+	Engines/Reconstruction/CUDA/SceneReconstructionEngine_CUDA.tcu
+	Engines/Reconstruction/CUDA/SurfelSceneReconstructionEngine_CUDA.tcu
+	Engines/Reconstruction/CUDA/DynamicSceneReconstructionEngine_CUDA_PlainVoxelArray.tcu
+	Engines/Reconstruction/CUDA/DynamicSceneReconstructionEngine_CUDA_PlainVoxelArray.cu
+	Engines/Reconstruction/CUDA/DynamicSceneReconstructionEngine_CUDA_VoxelBlockHash.tcu
+	Engines/Reconstruction/CUDA/DynamicSceneReconstructionEngine_CUDA_VoxelBlockHash.cu
     )
 
 set(ITMLIB_ENGINES_RECONSTRUCTION_CUDA_HEADERS
-    Engines/Reconstruction/CUDA/ITMSceneReconstructionEngine_CUDA.h
-    Engines/Reconstruction/CUDA/ITMSurfelSceneReconstructionEngine_CUDA.h
-    Engines/Reconstruction/CUDA/ITMDynamicSceneReconstructionEngine_CUDA.h
-    Engines/Reconstruction/CUDA/ITMDynamicSceneReconstructionEngine_CUDA_VoxelBlockHash_Kernels.h
-    Engines/Reconstruction/CUDA/ITMDynamicSceneReconstructionEngine_CUDA_PlainVoxelArray_Kernels.h
+	Engines/Reconstruction/CUDA/SceneReconstructionEngine_CUDA.h
+	Engines/Reconstruction/CUDA/SurfelSceneReconstructionEngine_CUDA.h
+	Engines/Reconstruction/CUDA/DynamicSceneReconstructionEngine_CUDA.h
+	Engines/Reconstruction/CUDA/DynamicSceneReconstructionEngine_CUDA_VoxelBlockHash_Kernels.h
+	Engines/Reconstruction/CUDA/DynamicSceneReconstructionEngine_CUDA_PlainVoxelArray_Kernels.h
     )
 
 ##
 set(ITMLIB_ENGINES_RECONSTRUCTION_INTERFACE_SOURCES
-    Engines/Reconstruction/Interface/ITMSurfelSceneReconstructionEngine.tpp
+	Engines/Reconstruction/Interface/SurfelSceneReconstructionEngine.tpp
     )
 
 set(ITMLIB_ENGINES_RECONSTRUCTION_INTERFACE_HEADERS
 
-    Engines/Reconstruction/Interface/ITMSceneReconstructionEngine.h
-    Engines/Reconstruction/Interface/ITMSurfelSceneReconstructionEngine.h
-    Engines/Reconstruction/Interface/ITMDynamicSceneReconstructionEngine.h
+	Engines/Reconstruction/Interface/SceneReconstructionEngine.h
+	Engines/Reconstruction/Interface/SurfelSceneReconstructionEngine.h
+	Engines/Reconstruction/Interface/DynamicSceneReconstructionEngine.h
     )
 
 ##

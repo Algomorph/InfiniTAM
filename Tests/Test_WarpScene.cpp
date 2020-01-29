@@ -25,12 +25,12 @@
 //local
 #include "../ITMLib/ITMLibDefines.h"
 #include "../ITMLib/Objects/Scene/ITMVoxelVolume.h"
-#include "../ITMLib/Engines/Reconstruction/CPU/ITMDynamicSceneReconstructionEngine_CPU.h"
+#include "../ITMLib/Engines/Reconstruction/CPU/DynamicSceneReconstructionEngine_CPU.h"
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/ITMVoxelVolumeComparison_CPU.h"
 
 
 #ifndef COMPILE_WITHOUT_CUDA
-#include "../ITMLib/Engines/Reconstruction/CUDA/ITMDynamicSceneReconstructionEngine_CUDA.h"
+#include "../ITMLib/Engines/Reconstruction/CUDA/DynamicSceneReconstructionEngine_CUDA.h"
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/ITMVoxelVolumeComparison_CUDA.h"
 #endif
 
@@ -39,8 +39,8 @@
 
 using namespace ITMLib;
 
-typedef ITMDynamicSceneReconstructionEngine_CPU<ITMVoxel, ITMWarp, PlainVoxelArray> RecoEngine_CPU_PVA;
-typedef ITMDynamicSceneReconstructionEngine_CPU<ITMVoxel, ITMWarp, VoxelBlockHash> RecoEngine_CPU_VBH;
+typedef DynamicSceneReconstructionEngine_CPU<ITMVoxel, ITMWarp, PlainVoxelArray> RecoEngine_CPU_PVA;
+typedef DynamicSceneReconstructionEngine_CPU<ITMVoxel, ITMWarp, VoxelBlockHash> RecoEngine_CPU_VBH;
 
 //#define SAVE_TEST_DATA
 BOOST_FIXTURE_TEST_CASE(Test_WarpScene_CPU_PVA, Frame16And17Fixture) {
@@ -147,8 +147,8 @@ BOOST_FIXTURE_TEST_CASE(Test_WarpScene_CPU_VBH_to_PVA, Frame16And17Fixture) {
 	initializeVolume(&target_VBH, InitParams<VoxelBlockHash>(), MEMORYDEVICE_CPU);
 
 	// *** perform the warping
-	ITMDynamicSceneReconstructionEngine_CPU<ITMVoxel, ITMWarp, PlainVoxelArray> recoEngine_PVA;
-	ITMDynamicSceneReconstructionEngine_CPU<ITMVoxel, ITMWarp, VoxelBlockHash> recoEngine_VBH;
+	DynamicSceneReconstructionEngine_CPU<ITMVoxel, ITMWarp, PlainVoxelArray> recoEngine_PVA;
+	DynamicSceneReconstructionEngine_CPU<ITMVoxel, ITMWarp, VoxelBlockHash> recoEngine_VBH;
 
 
 	recoEngine_PVA.WarpScene_FramewiseWarps(warps_PVA, source_volume_PVA, target_PVA);
@@ -169,8 +169,8 @@ BOOST_FIXTURE_TEST_CASE(Test_WarpScene_CPU_VBH_to_PVA, Frame16And17Fixture) {
 }
 
 #ifndef COMPILE_WITHOUT_CUDA
-typedef ITMDynamicSceneReconstructionEngine_CUDA<ITMVoxel, ITMWarp, PlainVoxelArray> RecoEngine_CUDA_PVA;
-typedef ITMDynamicSceneReconstructionEngine_CUDA<ITMVoxel, ITMWarp, VoxelBlockHash> RecoEngine_CUDA_VBH;
+typedef DynamicSceneReconstructionEngine_CUDA<ITMVoxel, ITMWarp, PlainVoxelArray> RecoEngine_CUDA_PVA;
+typedef DynamicSceneReconstructionEngine_CUDA<ITMVoxel, ITMWarp, VoxelBlockHash> RecoEngine_CUDA_VBH;
 
 
 BOOST_FIXTURE_TEST_CASE(Test_WarpScene_CUDA_VBH_to_PVA, Frame16And17Fixture) {
@@ -221,9 +221,9 @@ BOOST_FIXTURE_TEST_CASE(Test_WarpScene_CUDA_VBH_to_PVA, Frame16And17Fixture) {
 	initializeVolume(&target_VBH, InitParams<VoxelBlockHash>(), MEMORYDEVICE_CUDA);
 
 	// *** perform the warping
-	ITMDynamicSceneReconstructionEngine_CUDA<ITMVoxel, ITMWarp, PlainVoxelArray> recoEngine_PVA;
-	ITMDynamicSceneReconstructionEngine_CPU<ITMVoxel, ITMWarp, VoxelBlockHash> recoEngine_VBH_CPU;
-	ITMDynamicSceneReconstructionEngine_CUDA<ITMVoxel, ITMWarp, VoxelBlockHash> recoEngine_VBH;
+	DynamicSceneReconstructionEngine_CUDA<ITMVoxel, ITMWarp, PlainVoxelArray> recoEngine_PVA;
+	DynamicSceneReconstructionEngine_CPU<ITMVoxel, ITMWarp, VoxelBlockHash> recoEngine_VBH_CPU;
+	DynamicSceneReconstructionEngine_CUDA<ITMVoxel, ITMWarp, VoxelBlockHash> recoEngine_VBH;
 
 
 	recoEngine_PVA.WarpScene_FramewiseWarps(warps_PVA, source_volume_PVA, target_PVA);

@@ -73,13 +73,13 @@
 		A6AC2C111CBD34A7000CC89D /* ITMLowLevelEngineFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6AC2B351CBD34A7000CC89D /* ITMLowLevelEngineFactory.cpp */; };
 		A6AC2C141CBD34A7000CC89D /* ITMMeshingEngine_CPU.tpp in Resources */ = {isa = PBXBuildFile; fileRef = A6AC2B401CBD34A7000CC89D /* ITMMeshingEngine_CPU.tpp */; };
 		A6AC2C151CBD34A7000CC89D /* ITMMeshingEngine_CUDA.tcu in Resources */ = {isa = PBXBuildFile; fileRef = A6AC2B431CBD34A7000CC89D /* ITMMeshingEngine_CUDA.tcu */; };
-		A6AC2C161CBD34A7000CC89D /* ITMSceneReconstructionEngine_CPU.tpp in Resources */ = {isa = PBXBuildFile; fileRef = A6AC2B4C1CBD34A7000CC89D /* ITMSceneReconstructionEngine_CPU.tpp */; };
-		A6AC2C171CBD34A7000CC89D /* ITMSurfelSceneReconstructionEngine_CPU.tpp in Resources */ = {isa = PBXBuildFile; fileRef = A6AC2B4E1CBD34A7000CC89D /* ITMSurfelSceneReconstructionEngine_CPU.tpp */; };
-		A6AC2C181CBD34A7000CC89D /* ITMSceneReconstructionEngine_CUDA.tcu in Resources */ = {isa = PBXBuildFile; fileRef = A6AC2B511CBD34A7000CC89D /* ITMSceneReconstructionEngine_CUDA.tcu */; };
-		A6AC2C191CBD34A7000CC89D /* ITMSurfelSceneReconstructionEngine_CUDA.tcu in Resources */ = {isa = PBXBuildFile; fileRef = A6AC2B531CBD34A7000CC89D /* ITMSurfelSceneReconstructionEngine_CUDA.tcu */; };
+		A6AC2C161CBD34A7000CC89D /* SceneReconstructionEngine_CPU.tpp in Resources */ = {isa = PBXBuildFile; fileRef = A6AC2B4C1CBD34A7000CC89D /* SceneReconstructionEngine_CPU.tpp */; };
+		A6AC2C171CBD34A7000CC89D /* SurfelSceneReconstructionEngine_CPU.tpp in Resources */ = {isa = PBXBuildFile; fileRef = A6AC2B4E1CBD34A7000CC89D /* SurfelSceneReconstructionEngine_CPU.tpp */; };
+		A6AC2C181CBD34A7000CC89D /* SceneReconstructionEngine_CUDA.tcu in Resources */ = {isa = PBXBuildFile; fileRef = A6AC2B511CBD34A7000CC89D /* SceneReconstructionEngine_CUDA.tcu */; };
+		A6AC2C191CBD34A7000CC89D /* SurfelSceneReconstructionEngine_CUDA.tcu in Resources */ = {isa = PBXBuildFile; fileRef = A6AC2B531CBD34A7000CC89D /* SurfelSceneReconstructionEngine_CUDA.tcu */; };
 		A6AC2C1A1CBD34A7000CC89D /* ITMSurfelSceneReconstructionEngine.tpp in Resources */ = {isa = PBXBuildFile; fileRef = A6AC2B571CBD34A7000CC89D /* ITMSurfelSceneReconstructionEngine.tpp */; };
 		A6AC2C1B1CBD34A7000CC89D /* ITMSurfelSceneReconstructionEngineFactory.tpp in Resources */ = {isa = PBXBuildFile; fileRef = A6AC2B5A1CBD34A7000CC89D /* ITMSurfelSceneReconstructionEngineFactory.tpp */; };
-		A6AC2C1C1CBD34A7000CC89D /* ITMSceneReconstructionEngine.metal in Sources */ = {isa = PBXBuildFile; fileRef = A6AC2B5C1CBD34A7000CC89D /* ITMSceneReconstructionEngine.metal */; };
+		A6AC2C1C1CBD34A7000CC89D /* SceneReconstructionEngine.metal in Sources */ = {isa = PBXBuildFile; fileRef = A6AC2B5C1CBD34A7000CC89D /* SceneReconstructionEngine.metal */; };
 		A6AC2C1D1CBD34A7000CC89D /* ITMSceneReconstructionEngine_Metal.mm in Sources */ = {isa = PBXBuildFile; fileRef = A6AC2B5E1CBD34A7000CC89D /* ITMSceneReconstructionEngine_Metal.mm */; };
 		A6AC2C1E1CBD34A7000CC89D /* ITMSwappingEngine_CPU.tpp in Resources */ = {isa = PBXBuildFile; fileRef = A6AC2B651CBD34A7000CC89D /* ITMSwappingEngine_CPU.tpp */; };
 		A6AC2C1F1CBD34A7000CC89D /* ITMSwappingEngine_CUDA.tcu in Resources */ = {isa = PBXBuildFile; fileRef = A6AC2B681CBD34A7000CC89D /* ITMSwappingEngine_CUDA.tcu */; };
@@ -239,21 +239,21 @@
 		A6AC2B451CBD34A7000CC89D /* ITMMeshingEngine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ITMMeshingEngine.h; sourceTree = "<group>"; };
 		A6AC2B461CBD34A7000CC89D /* ITMMeshingEngineFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ITMMeshingEngineFactory.h; sourceTree = "<group>"; };
 		A6AC2B481CBD34A7000CC89D /* ITMMeshingEngine_Shared.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ITMMeshingEngine_Shared.h; sourceTree = "<group>"; };
-		A6AC2B4B1CBD34A7000CC89D /* ITMSceneReconstructionEngine_CPU.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ITMSceneReconstructionEngine_CPU.h; sourceTree = "<group>"; };
-		A6AC2B4C1CBD34A7000CC89D /* ITMSceneReconstructionEngine_CPU.tpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ITMSceneReconstructionEngine_CPU.tpp; sourceTree = "<group>"; };
-		A6AC2B4D1CBD34A7000CC89D /* ITMSurfelSceneReconstructionEngine_CPU.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ITMSurfelSceneReconstructionEngine_CPU.h; sourceTree = "<group>"; };
-		A6AC2B4E1CBD34A7000CC89D /* ITMSurfelSceneReconstructionEngine_CPU.tpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ITMSurfelSceneReconstructionEngine_CPU.tpp; sourceTree = "<group>"; };
-		A6AC2B501CBD34A7000CC89D /* ITMSceneReconstructionEngine_CUDA.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ITMSceneReconstructionEngine_CUDA.h; sourceTree = "<group>"; };
-		A6AC2B511CBD34A7000CC89D /* ITMSceneReconstructionEngine_CUDA.tcu */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ITMSceneReconstructionEngine_CUDA.tcu; sourceTree = "<group>"; };
-		A6AC2B521CBD34A7000CC89D /* ITMSurfelSceneReconstructionEngine_CUDA.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ITMSurfelSceneReconstructionEngine_CUDA.h; sourceTree = "<group>"; };
-		A6AC2B531CBD34A7000CC89D /* ITMSurfelSceneReconstructionEngine_CUDA.tcu */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ITMSurfelSceneReconstructionEngine_CUDA.tcu; sourceTree = "<group>"; };
-		A6AC2B551CBD34A7000CC89D /* ITMSceneReconstructionEngine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ITMSceneReconstructionEngine.h; sourceTree = "<group>"; };
+		A6AC2B4B1CBD34A7000CC89D /* SceneReconstructionEngine_CPU.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SceneReconstructionEngine_CPU.h; sourceTree = "<group>"; };
+		A6AC2B4C1CBD34A7000CC89D /* SceneReconstructionEngine_CPU.tpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = SceneReconstructionEngine_CPU.tpp; sourceTree = "<group>"; };
+		A6AC2B4D1CBD34A7000CC89D /* SurfelSceneReconstructionEngine_CPU.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SurfelSceneReconstructionEngine_CPU.h; sourceTree = "<group>"; };
+		A6AC2B4E1CBD34A7000CC89D /* SurfelSceneReconstructionEngine_CPU.tpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = SurfelSceneReconstructionEngine_CPU.tpp; sourceTree = "<group>"; };
+		A6AC2B501CBD34A7000CC89D /* SceneReconstructionEngine_CUDA.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SceneReconstructionEngine_CUDA.h; sourceTree = "<group>"; };
+		A6AC2B511CBD34A7000CC89D /* SceneReconstructionEngine_CUDA.tcu */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = SceneReconstructionEngine_CUDA.tcu; sourceTree = "<group>"; };
+		A6AC2B521CBD34A7000CC89D /* SurfelSceneReconstructionEngine_CUDA.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SurfelSceneReconstructionEngine_CUDA.h; sourceTree = "<group>"; };
+		A6AC2B531CBD34A7000CC89D /* SurfelSceneReconstructionEngine_CUDA.tcu */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = SurfelSceneReconstructionEngine_CUDA.tcu; sourceTree = "<group>"; };
+		A6AC2B551CBD34A7000CC89D /* SceneReconstructionEngine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SceneReconstructionEngine.h; sourceTree = "<group>"; };
 		A6AC2B561CBD34A7000CC89D /* ITMSurfelSceneReconstructionEngine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ITMSurfelSceneReconstructionEngine.h; sourceTree = "<group>"; };
 		A6AC2B571CBD34A7000CC89D /* ITMSurfelSceneReconstructionEngine.tpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ITMSurfelSceneReconstructionEngine.tpp; sourceTree = "<group>"; };
 		A6AC2B581CBD34A7000CC89D /* ITMSceneReconstructionEngineFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ITMSceneReconstructionEngineFactory.h; sourceTree = "<group>"; };
 		A6AC2B591CBD34A7000CC89D /* ITMSurfelSceneReconstructionEngineFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ITMSurfelSceneReconstructionEngineFactory.h; sourceTree = "<group>"; };
 		A6AC2B5A1CBD34A7000CC89D /* ITMSurfelSceneReconstructionEngineFactory.tpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ITMSurfelSceneReconstructionEngineFactory.tpp; sourceTree = "<group>"; };
-		A6AC2B5C1CBD34A7000CC89D /* ITMSceneReconstructionEngine.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = ITMSceneReconstructionEngine.metal; sourceTree = "<group>"; };
+		A6AC2B5C1CBD34A7000CC89D /* SceneReconstructionEngine.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = SceneReconstructionEngine.metal; sourceTree = "<group>"; };
 		A6AC2B5D1CBD34A7000CC89D /* ITMSceneReconstructionEngine_Metal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ITMSceneReconstructionEngine_Metal.h; sourceTree = "<group>"; };
 		A6AC2B5E1CBD34A7000CC89D /* ITMSceneReconstructionEngine_Metal.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ITMSceneReconstructionEngine_Metal.mm; sourceTree = "<group>"; };
 		A6AC2B601CBD34A7000CC89D /* ITMSceneReconstructionEngine_Shared.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ITMSceneReconstructionEngine_Shared.h; sourceTree = "<group>"; };
@@ -737,10 +737,10 @@
 		A6AC2B4A1CBD34A7000CC89D /* CPU */ = {
 			isa = PBXGroup;
 			children = (
-				A6AC2B4B1CBD34A7000CC89D /* ITMSceneReconstructionEngine_CPU.h */,
-				A6AC2B4C1CBD34A7000CC89D /* ITMSceneReconstructionEngine_CPU.tpp */,
-				A6AC2B4D1CBD34A7000CC89D /* ITMSurfelSceneReconstructionEngine_CPU.h */,
-				A6AC2B4E1CBD34A7000CC89D /* ITMSurfelSceneReconstructionEngine_CPU.tpp */,
+				A6AC2B4B1CBD34A7000CC89D /* SceneReconstructionEngine_CPU.h */,
+				A6AC2B4C1CBD34A7000CC89D /* SceneReconstructionEngine_CPU.tpp */,
+				A6AC2B4D1CBD34A7000CC89D /* SurfelSceneReconstructionEngine_CPU.h */,
+				A6AC2B4E1CBD34A7000CC89D /* SurfelSceneReconstructionEngine_CPU.tpp */,
 			);
 			path = CPU;
 			sourceTree = "<group>";
@@ -748,10 +748,10 @@
 		A6AC2B4F1CBD34A7000CC89D /* CUDA */ = {
 			isa = PBXGroup;
 			children = (
-				A6AC2B501CBD34A7000CC89D /* ITMSceneReconstructionEngine_CUDA.h */,
-				A6AC2B511CBD34A7000CC89D /* ITMSceneReconstructionEngine_CUDA.tcu */,
-				A6AC2B521CBD34A7000CC89D /* ITMSurfelSceneReconstructionEngine_CUDA.h */,
-				A6AC2B531CBD34A7000CC89D /* ITMSurfelSceneReconstructionEngine_CUDA.tcu */,
+				A6AC2B501CBD34A7000CC89D /* SceneReconstructionEngine_CUDA.h */,
+				A6AC2B511CBD34A7000CC89D /* SceneReconstructionEngine_CUDA.tcu */,
+				A6AC2B521CBD34A7000CC89D /* SurfelSceneReconstructionEngine_CUDA.h */,
+				A6AC2B531CBD34A7000CC89D /* SurfelSceneReconstructionEngine_CUDA.tcu */,
 			);
 			path = CUDA;
 			sourceTree = "<group>";
@@ -759,7 +759,7 @@
 		A6AC2B541CBD34A7000CC89D /* Interface */ = {
 			isa = PBXGroup;
 			children = (
-				A6AC2B551CBD34A7000CC89D /* ITMSceneReconstructionEngine.h */,
+				A6AC2B551CBD34A7000CC89D /* SceneReconstructionEngine.h */,
 				A6AC2B561CBD34A7000CC89D /* ITMSurfelSceneReconstructionEngine.h */,
 				A6AC2B571CBD34A7000CC89D /* ITMSurfelSceneReconstructionEngine.tpp */,
 			);
@@ -769,7 +769,7 @@
 		A6AC2B5B1CBD34A7000CC89D /* Metal */ = {
 			isa = PBXGroup;
 			children = (
-				A6AC2B5C1CBD34A7000CC89D /* ITMSceneReconstructionEngine.metal */,
+				A6AC2B5C1CBD34A7000CC89D /* SceneReconstructionEngine.metal */,
 				A6AC2B5D1CBD34A7000CC89D /* ITMSceneReconstructionEngine_Metal.h */,
 				A6AC2B5E1CBD34A7000CC89D /* ITMSceneReconstructionEngine_Metal.mm */,
 			);
@@ -1206,7 +1206,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A6AC2C191CBD34A7000CC89D /* ITMSurfelSceneReconstructionEngine_CUDA.tcu in Resources */,
+				A6AC2C191CBD34A7000CC89D /* SurfelSceneReconstructionEngine_CUDA.tcu in Resources */,
 				A6AC2C1E1CBD34A7000CC89D /* ITMSwappingEngine_CPU.tpp in Resources */,
 				A6AC2C151CBD34A7000CC89D /* ITMMeshingEngine_CUDA.tcu in Resources */,
 				A6AC2C2B1CBD34A7000CC89D /* ITMSurfelVisualisationEngine.tpp in Resources */,
@@ -1222,13 +1222,13 @@
 				A6AC2C061CBD34A7000CC89D /* ITMDenseMapper.tpp in Resources */,
 				A6AC2AFF1CBD333D000CC89D /* CMakeLists.txt in Resources */,
 				A6AC2C101CBD34A7000CC89D /* ITMLowLevelEngine_CUDA.cu in Resources */,
-				A6AC2C181CBD34A7000CC89D /* ITMSceneReconstructionEngine_CUDA.tcu in Resources */,
+				A6AC2C181CBD34A7000CC89D /* SceneReconstructionEngine_CUDA.tcu in Resources */,
 				A6AC2C371CBD34A7000CC89D /* ITMDepthTracker_CUDA.cu in Resources */,
 				A6AC2C2D1CBD34A7000CC89D /* ITMSurfelVisualisationEngineFactory.tpp in Resources */,
 				A6AC2C1A1CBD34A7000CC89D /* ITMSurfelSceneReconstructionEngine.tpp in Resources */,
 				6F7C0CCD17F0EA0500692EC1 /* InfoPlist.strings in Resources */,
 				A6AC2C041CBD34A7000CC89D /* CMakeLists.txt in Resources */,
-				A6AC2C171CBD34A7000CC89D /* ITMSurfelSceneReconstructionEngine_CPU.tpp in Resources */,
+				A6AC2C171CBD34A7000CC89D /* SurfelSceneReconstructionEngine_CPU.tpp in Resources */,
 				A6AC2C0C1CBD34A7000CC89D /* ITMMultiSceneManager.tpp in Resources */,
 				A6AC2C291CBD34A7000CC89D /* ITMSurfelVisualisationEngine_CUDA.tcu in Resources */,
 				A6AC2C361CBD34A7000CC89D /* ITMColorTracker_CUDA.cu in Resources */,
@@ -1247,7 +1247,7 @@
 				A6AC2C281CBD34A7000CC89D /* ITMVisualisationEngine_CPU.tpp in Resources */,
 				6F7C0CDE17F0EA0500692EC1 /* Images.xcassets in Resources */,
 				A6AC2C071CBD34A7000CC89D /* ITMDenseSurfelMapper.tpp in Resources */,
-				A6AC2C161CBD34A7000CC89D /* ITMSceneReconstructionEngine_CPU.tpp in Resources */,
+				A6AC2C161CBD34A7000CC89D /* SceneReconstructionEngine_CPU.tpp in Resources */,
 				A6AC2AFD1CBD333D000CC89D /* Android.mk in Resources */,
 				A626D7631A0F96F50086B8BF /* iPad_Main.storyboard in Resources */,
 			);
@@ -1276,7 +1276,7 @@
 				A6AC2B121CBD3348000CC89D /* RelocDatabase.cpp in Sources */,
 				A6AC2C2F1CBD34A7000CC89D /* ITMVisualisationEngine_Metal.mm in Sources */,
 				A6AC2C471CBD34A7000CC89D /* Configuration.cpp in Sources */,
-				A6AC2C1C1CBD34A7000CC89D /* ITMSceneReconstructionEngine.metal in Sources */,
+				A6AC2C1C1CBD34A7000CC89D /* SceneReconstructionEngine.metal in Sources */,
 				A6AC2C3A1CBD34A7000CC89D /* ITMColorTracker.cpp in Sources */,
 				A6AC2B031CBD333D000CC89D /* SE3Pose.cpp in Sources */,
 				A6AC2C091CBD34A7000CC89D /* ITMTrackingController.cpp in Sources */,

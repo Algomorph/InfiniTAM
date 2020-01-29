@@ -20,7 +20,7 @@ namespace ITMLib
 	    into them.
 	*/
 	template<class TVoxel, class TIndex>
-	class ITMSceneReconstructionEngine
+	class SceneReconstructionEngine
 	{
 	public:
 		/** Clear and reset a scene to set up a new empty
@@ -48,7 +48,7 @@ namespace ITMLib
 		virtual void IntegrateIntoScene(ITMVoxelVolume<TVoxel,TIndex> *scene, const ITMView *view, const ITMTrackingState *trackingState,
 		                                const ITMRenderState *renderState) = 0;
 
-		ITMSceneReconstructionEngine(void) { }
-		virtual ~ITMSceneReconstructionEngine(void) { }
+		SceneReconstructionEngine(void) { }
+		virtual ~SceneReconstructionEngine(void) { }
 	};
 }

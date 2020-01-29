@@ -1,6 +1,6 @@
 // InfiniTAM: Surffuse. Copyright (c) Torr Vision Group and the authors of InfiniTAM, 2016.
 
-#include "ITMSurfelSceneReconstructionEngine_CPU.h"
+#include "SurfelSceneReconstructionEngine_CPU.h"
 
 #include "../Shared/ITMSurfelSceneReconstructionEngine_Shared.h"
 
@@ -10,14 +10,14 @@ namespace ITMLib
 //#################### CONSTRUCTORS ####################
 
 template <typename TSurfel>
-ITMSurfelSceneReconstructionEngine_CPU<TSurfel>::ITMSurfelSceneReconstructionEngine_CPU(const Vector2i& depthImageSize)
-: ITMSurfelSceneReconstructionEngine<TSurfel>(depthImageSize)
+SurfelSceneReconstructionEngine_CPU<TSurfel>::SurfelSceneReconstructionEngine_CPU(const Vector2i& depthImageSize)
+: SurfelSceneReconstructionEngine<TSurfel>(depthImageSize)
 {}
 
 //#################### PRIVATE MEMBER FUNCTIONS ####################
 
 template <typename TSurfel>
-void ITMSurfelSceneReconstructionEngine_CPU<TSurfel>::AddNewSurfels(ITMSurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState) const
+void SurfelSceneReconstructionEngine_CPU<TSurfel>::AddNewSurfels(ITMSurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState) const
 {
   // Calculate the prefix sum of the new points mask.
   const unsigned short *newPointsMask = this->m_newPointsMaskMB->GetData(MEMORYDEVICE_CPU);
@@ -59,8 +59,8 @@ void ITMSurfelSceneReconstructionEngine_CPU<TSurfel>::AddNewSurfels(ITMSurfelSce
 }
 
 template <typename TSurfel>
-void ITMSurfelSceneReconstructionEngine_CPU<TSurfel>::FindCorrespondingSurfels(const ITMSurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState,
-                                                                               const ITMSurfelRenderState *renderState) const
+void SurfelSceneReconstructionEngine_CPU<TSurfel>::FindCorrespondingSurfels(const ITMSurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState,
+                                                                            const ITMSurfelRenderState *renderState) const
 {
   unsigned int *correspondenceMap = this->m_correspondenceMapMB->GetData(MEMORYDEVICE_CPU);
   const float *depthMap = view->depth->GetData(MEMORYDEVICE_CPU);
@@ -83,7 +83,7 @@ void ITMSurfelSceneReconstructionEngine_CPU<TSurfel>::FindCorrespondingSurfels(c
 }
 
 template <typename TSurfel>
-void ITMSurfelSceneReconstructionEngine_CPU<TSurfel>::FuseMatchedPoints(ITMSurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState) const
+void SurfelSceneReconstructionEngine_CPU<TSurfel>::FuseMatchedPoints(ITMSurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState) const
 {
   const Vector4u *colourMap = view->rgb->GetData(MEMORYDEVICE_CPU);
   const int colourMapHeight = view->rgb->noDims.y;
@@ -115,7 +115,7 @@ void ITMSurfelSceneReconstructionEngine_CPU<TSurfel>::FuseMatchedPoints(ITMSurfe
 }
 
 template <typename TSurfel>
-void ITMSurfelSceneReconstructionEngine_CPU<TSurfel>::MarkBadSurfels(ITMSurfelScene<TSurfel> *scene) const
+void SurfelSceneReconstructionEngine_CPU<TSurfel>::MarkBadSurfels(ITMSurfelScene<TSurfel> *scene) const
 {
   const int surfelCount = static_cast<int>(scene->GetSurfelCount());
 
@@ -153,7 +153,7 @@ void ITMSurfelSceneReconstructionEngine_CPU<TSurfel>::MarkBadSurfels(ITMSurfelSc
 }
 
 template <typename TSurfel>
-void ITMSurfelSceneReconstructionEngine_CPU<TSurfel>::MergeSimilarSurfels(ITMSurfelScene<TSurfel> *scene, const ITMSurfelRenderState *renderState) const
+void SurfelSceneReconstructionEngine_CPU<TSurfel>::MergeSimilarSurfels(ITMSurfelScene<TSurfel> *scene, const ITMSurfelRenderState *renderState) const
 {
   const unsigned int *correspondenceMap = this->m_correspondenceMapMB->GetData(MEMORYDEVICE_CPU);
   const unsigned int *indexImage = renderState->GetIndexImage()->GetData(MEMORYDEVICE_CPU);
@@ -207,7 +207,7 @@ void ITMSurfelSceneReconstructionEngine_CPU<TSurfel>::MergeSimilarSurfels(ITMSur
 }
 
 template <typename TSurfel>
-void ITMSurfelSceneReconstructionEngine_CPU<TSurfel>::PreprocessDepthMap(const ITMView *view, const SurfelVolumeParameters& sceneParams) const
+void SurfelSceneReconstructionEngine_CPU<TSurfel>::PreprocessDepthMap(const ITMView *view, const SurfelVolumeParameters& sceneParams) const
 {
   const float *depthMap = view->depth->GetData(MEMORYDEVICE_CPU);
   const int height = view->depth->noDims.y;
@@ -247,7 +247,7 @@ void ITMSurfelSceneReconstructionEngine_CPU<TSurfel>::PreprocessDepthMap(const I
 }
 
 template <typename TSurfel>
-void ITMSurfelSceneReconstructionEngine_CPU<TSurfel>::RemoveMarkedSurfels(ITMSurfelScene<TSurfel> *scene) const
+void SurfelSceneReconstructionEngine_CPU<TSurfel>::RemoveMarkedSurfels(ITMSurfelScene<TSurfel> *scene) const
 {
   // Remove marked surfels from the scene.
   // TODO: This is is currently unimplemented on CPU. It's not worth implementing it at the moment,

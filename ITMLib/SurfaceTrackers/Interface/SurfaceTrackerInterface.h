@@ -17,7 +17,7 @@
 
 //local
 #include "../../Objects/Scene/ITMVoxelVolume.h"
-#include "../../Engines/Reconstruction/CPU/ITMSceneReconstructionEngine_CPU.h"
+#include "../../Engines/Reconstruction/CPU/SceneReconstructionEngine_CPU.h"
 #include "../../Utils/Visualization/ITMSceneSliceVisualizer2D.h"
 #include "../../Utils/FileIO/ITMSceneLogger.h"
 #include "../../Utils/ITMPrintHelpers.h"

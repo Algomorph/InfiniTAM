@@ -24,8 +24,8 @@
 // *** ITMLib ***
 #include "TestUtilsForSnoopyFrames16And17.h"
 #include "../ITMLib/ITMLibDefines.h"
-#include "../ITMLib/Engines/Reconstruction/Interface/ITMDynamicSceneReconstructionEngine.h"
-#include "../ITMLib/Engines/Reconstruction/ITMDynamicSceneReconstructionEngineFactory.h"
+#include "../ITMLib/Engines/Reconstruction/Interface/DynamicSceneReconstructionEngine.h"
+#include "../ITMLib/Engines/Reconstruction/DynamicSceneReconstructionEngineFactory.h"
 #include "../ITMLib/Engines/VolumeEditAndCopy/VolumeEditAndCopyEngineFactory.h"
 #include "../ITMLib/Utils/Analytics/ITMAlmostEqual.h"
 #include "TestUtils.h"
@@ -86,14 +86,14 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_VBH_Expnaded_CPU_CUDA, Frame16And1
 
 // *** integrate depth ***
 	// CPU
-	ITMDynamicSceneReconstructionEngine<ITMVoxel, ITMWarp, VoxelBlockHash>* reconstructionEngine_VBH_CPU =
-			ITMDynamicSceneReconstructionEngineFactory::MakeSceneReconstructionEngine<ITMVoxel, ITMWarp, VoxelBlockHash>(
+	DynamicSceneReconstructionEngine<ITMVoxel, ITMWarp, VoxelBlockHash>* reconstructionEngine_VBH_CPU =
+			DynamicSceneReconstructionEngineFactory::MakeSceneReconstructionEngine<ITMVoxel, ITMWarp, VoxelBlockHash>(
 					MEMORYDEVICE_CPU);
 	reconstructionEngine_VBH_CPU->IntegrateDepthImageIntoTsdfVolume(&volume_VBH_17_CPU, view_CPU);
 	reconstructionEngine_VBH_CPU->IntegrateDepthImageIntoTsdfVolume(&volume_VBH_17_CPU_depth_allocation, view_CPU);
 	// CUDA
-	ITMDynamicSceneReconstructionEngine<ITMVoxel, ITMWarp, VoxelBlockHash>* reconstructionEngine_VBH_CUDA =
-			ITMDynamicSceneReconstructionEngineFactory::MakeSceneReconstructionEngine<ITMVoxel, ITMWarp, VoxelBlockHash>(
+	DynamicSceneReconstructionEngine<ITMVoxel, ITMWarp, VoxelBlockHash>* reconstructionEngine_VBH_CUDA =
+			DynamicSceneReconstructionEngineFactory::MakeSceneReconstructionEngine<ITMVoxel, ITMWarp, VoxelBlockHash>(
 					MEMORYDEVICE_CUDA);
 	reconstructionEngine_VBH_CUDA->IntegrateDepthImageIntoTsdfVolume(&volume_VBH_17_CUDA, view_CUDA);
 	reconstructionEngine_VBH_CUDA->IntegrateDepthImageIntoTsdfVolume(&volume_VBH_17_CUDA_depth_allocation, view_CUDA);

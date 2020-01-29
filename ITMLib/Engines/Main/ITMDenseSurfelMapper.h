@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "../Reconstruction/Interface/ITMSurfelSceneReconstructionEngine.h"
+#include "../Reconstruction/Interface/SurfelSceneReconstructionEngine.h"
 #include "../../Objects/RenderStates/ITMSurfelRenderState.h"
 #include "../../Utils/Configuration.h"
 
@@ -17,7 +17,7 @@ namespace ITMLib
     //#################### PRIVATE VARIABLES ####################
   private:
     /** The surfel scene reconstruction engine. */
-    ITMSurfelSceneReconstructionEngine<TSurfel> *m_reconstructionEngine;
+    SurfelSceneReconstructionEngine<TSurfel> *m_reconstructionEngine;
 
     //#################### CONSTRUCTORS ####################
   public:

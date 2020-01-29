@@ -17,11 +17,11 @@
 
 #include "../../Utils/Configuration.h"
 
-#include "CPU/ITMDynamicSceneReconstructionEngine_CPU.h"
+#include "CPU/DynamicSceneReconstructionEngine_CPU.h"
 
 #ifndef COMPILE_WITHOUT_CUDA
 
-#include "CUDA/ITMDynamicSceneReconstructionEngine_CUDA.h"
+#include "CUDA/DynamicSceneReconstructionEngine_CUDA.h"
 
 #endif
 #ifdef COMPILE_WITH_METAL
@@ -33,7 +33,7 @@ namespace ITMLib {
 /**
  * \brief This struct provides functions that can be used to construct scene reconstruction engines.
  */
-struct ITMDynamicSceneReconstructionEngineFactory {
+struct DynamicSceneReconstructionEngineFactory {
 	//#################### PUBLIC STATIC MEMBER FUNCTIONS ####################
 
 	/**
@@ -42,17 +42,17 @@ struct ITMDynamicSceneReconstructionEngineFactory {
 	 * \param deviceType  The device on which the scene reconstruction engine should operate.
 	 */
 	template<typename TVoxel, typename TWarp, typename TIndex>
-	static ITMDynamicSceneReconstructionEngine<TVoxel, TWarp, TIndex>*
+	static DynamicSceneReconstructionEngine<TVoxel, TWarp, TIndex>*
 	MakeSceneReconstructionEngine(MemoryDeviceType deviceType) {
-		ITMDynamicSceneReconstructionEngine<TVoxel, TWarp, TIndex>* sceneRecoEngine = NULL;
+		DynamicSceneReconstructionEngine<TVoxel, TWarp, TIndex>* sceneRecoEngine = NULL;
 
 		switch (deviceType) {
 			case MEMORYDEVICE_CPU:
-				sceneRecoEngine = new ITMDynamicSceneReconstructionEngine_CPU<TVoxel, TWarp, TIndex>;
+				sceneRecoEngine = new DynamicSceneReconstructionEngine_CPU<TVoxel, TWarp, TIndex>;
 				break;
 			case MEMORYDEVICE_CUDA:
 #ifndef COMPILE_WITHOUT_CUDA
-				sceneRecoEngine = new ITMDynamicSceneReconstructionEngine_CUDA<TVoxel, TWarp, TIndex>;
+				sceneRecoEngine = new DynamicSceneReconstructionEngine_CUDA<TVoxel, TWarp, TIndex>;
 #endif
 				break;
 			case MEMORYDEVICE_METAL:

@@ -22,7 +22,7 @@
 
 //local
 #include "DenseDynamicMapper.h"
-#include "../Reconstruction/ITMDynamicSceneReconstructionEngineFactory.h"
+#include "../Reconstruction/DynamicSceneReconstructionEngineFactory.h"
 #include "../Swapping/ITMSwappingEngineFactory.h"
 #include "../../SurfaceTrackers/SurfaceTrackerFactory.h"
 #include "../../Utils/ITMPrintHelpers.h"
@@ -87,7 +87,7 @@ inline static void PrintOperationStatus(const char* status) {
 template<typename TVoxel, typename TWarp, typename TIndex>
 DenseDynamicMapper<TVoxel, TWarp, TIndex>::DenseDynamicMapper(const TIndex& index) :
 		sceneReconstructor(
-				ITMDynamicSceneReconstructionEngineFactory::MakeSceneReconstructionEngine<TVoxel, TWarp, TIndex>
+				DynamicSceneReconstructionEngineFactory::MakeSceneReconstructionEngine<TVoxel, TWarp, TIndex>
 						(configuration::get().device_type)),
 		sceneMotionTracker(
 				SurfaceTrackerFactory::MakeSceneMotionTracker<TVoxel, TWarp, TIndex>()),

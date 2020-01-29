@@ -34,12 +34,12 @@ namespace ITMLib {
 	into them.
 */
 template<typename TVoxel, typename TWarp, typename TIndex>
-class ITMDynamicSceneReconstructionEngine {
+class DynamicSceneReconstructionEngine {
 
 public:
 
-	ITMDynamicSceneReconstructionEngine() = default;
-	virtual ~ITMDynamicSceneReconstructionEngine() = default;
+	DynamicSceneReconstructionEngine() = default;
+	virtual ~DynamicSceneReconstructionEngine() = default;
 
 
 	virtual void

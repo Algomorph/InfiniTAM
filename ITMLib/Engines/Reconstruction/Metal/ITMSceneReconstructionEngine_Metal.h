@@ -3,7 +3,7 @@
 
 #ifndef __METALC__
 
-#include "../CPU/ITMSceneReconstructionEngine_CPU.h"
+#include "../CPU/SceneReconstructionEngine_CPU.h"
 
 namespace ITMLib
 {

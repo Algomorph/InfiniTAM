@@ -1,6 +1,6 @@
 // InfiniTAM: Surffuse. Copyright (c) Torr Vision Group and the authors of InfiniTAM, 2016.
 
-#include "ITMSurfelSceneReconstructionEngine.h"
+#include "SurfelSceneReconstructionEngine.h"
 
 namespace ITMLib
 {
@@ -8,7 +8,7 @@ namespace ITMLib
 //#################### CONSTRUCTORS ####################
 
 template <typename TSurfel>
-ITMSurfelSceneReconstructionEngine<TSurfel>::ITMSurfelSceneReconstructionEngine(const Vector2i& depthImageSize)
+SurfelSceneReconstructionEngine<TSurfel>::SurfelSceneReconstructionEngine(const Vector2i& depthImageSize)
 : m_timestamp(0)
 {
   size_t pixelCount = depthImageSize.x * depthImageSize.y;
@@ -29,7 +29,7 @@ ITMSurfelSceneReconstructionEngine<TSurfel>::ITMSurfelSceneReconstructionEngine(
 //#################### DESTRUCTOR ####################
 
 template <typename TSurfel>
-ITMSurfelSceneReconstructionEngine<TSurfel>::~ITMSurfelSceneReconstructionEngine()
+SurfelSceneReconstructionEngine<TSurfel>::~SurfelSceneReconstructionEngine()
 {
   delete m_correspondenceMapMB;
   delete m_mergeTargetMapMB;
@@ -44,8 +44,8 @@ ITMSurfelSceneReconstructionEngine<TSurfel>::~ITMSurfelSceneReconstructionEngine
 //#################### PUBLIC MEMBER FUNCTIONS ####################
 
 template <typename TSurfel>
-void ITMSurfelSceneReconstructionEngine<TSurfel>::IntegrateIntoScene(ITMSurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState,
-                                                                     const ITMSurfelRenderState *renderState)
+void SurfelSceneReconstructionEngine<TSurfel>::IntegrateIntoScene(ITMSurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState,
+                                                                  const ITMSurfelRenderState *renderState)
 {
   PreprocessDepthMap(view, scene->GetParams());
   FindCorrespondingSurfels(scene, view, trackingState, renderState);
@@ -59,7 +59,7 @@ void ITMSurfelSceneReconstructionEngine<TSurfel>::IntegrateIntoScene(ITMSurfelSc
 }
 
 template <typename TSurfel>
-void ITMSurfelSceneReconstructionEngine<TSurfel>::ResetScene(ITMSurfelScene<TSurfel> *scene) const
+void SurfelSceneReconstructionEngine<TSurfel>::ResetScene(ITMSurfelScene<TSurfel> *scene) const
 {
   scene->Reset();
 }

@@ -861,7 +861,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "26"
             endingLineNumber = "26"
-            landmarkName = "ITMSceneReconstructionEngine_CPU&lt;TVoxelCanonical,VoxelBlockHash&gt;()"
+            landmarkName = "SceneReconstructionEngine_CPU&lt;TVoxelCanonical,VoxelBlockHash&gt;()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

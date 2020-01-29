@@ -3,9 +3,9 @@
 #pragma once
 
 #include "../../Utils/Configuration.h"
-#include "CPU/ITMSceneReconstructionEngine_CPU.h"
+#include "CPU/SceneReconstructionEngine_CPU.h"
 #ifndef COMPILE_WITHOUT_CUDA
-#include "CUDA/ITMSceneReconstructionEngine_CUDA.h"
+#include "CUDA/SceneReconstructionEngine_CUDA.h"
 #endif
 #ifdef COMPILE_WITH_METAL
 #include "Metal/ITMSceneReconstructionEngine_Metal.h"
@@ -27,18 +27,18 @@ struct ITMSceneReconstructionEngineFactory
    * \param deviceType  The device on which the scene reconstruction engine should operate.
    */
   template <typename TVoxel, typename TIndex>
-  static ITMSceneReconstructionEngine<TVoxel,TIndex> *MakeSceneReconstructionEngine(MemoryDeviceType deviceType)
+  static SceneReconstructionEngine<TVoxel,TIndex> *MakeSceneReconstructionEngine(MemoryDeviceType deviceType)
   {
-    ITMSceneReconstructionEngine<TVoxel,TIndex> *sceneRecoEngine = NULL;
+    SceneReconstructionEngine<TVoxel,TIndex> *sceneRecoEngine = NULL;
 
     switch(deviceType)
     {
       case MEMORYDEVICE_CPU:
-        sceneRecoEngine = new ITMSceneReconstructionEngine_CPU<TVoxel,TIndex>;
+        sceneRecoEngine = new SceneReconstructionEngine_CPU<TVoxel,TIndex>;
         break;
       case MEMORYDEVICE_CUDA:
 #ifndef COMPILE_WITHOUT_CUDA
-        sceneRecoEngine = new ITMSceneReconstructionEngine_CUDA<TVoxel,TIndex>;
+        sceneRecoEngine = new SceneReconstructionEngine_CUDA<TVoxel,TIndex>;
 #endif
         break;
       case MEMORYDEVICE_METAL:

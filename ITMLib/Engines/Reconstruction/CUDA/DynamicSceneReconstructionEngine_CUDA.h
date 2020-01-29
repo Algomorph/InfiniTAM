@@ -15,25 +15,25 @@
 //  ================================================================
 #pragma once
 
-#include "../Interface/ITMDynamicSceneReconstructionEngine.h"
+#include "../Interface/DynamicSceneReconstructionEngine.h"
 #include "../../../Objects/Scene/PlainVoxelArray.h"
 #include "../../VolumeEditAndCopy/CUDA/VolumeEditAndCopyEngine_CUDA.h"
 #include "../../Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
 
 namespace ITMLib {
 template<typename TVoxel, typename TWarp, typename TIndex>
-class ITMDynamicSceneReconstructionEngine_CUDA
-		: public ITMDynamicSceneReconstructionEngine<TVoxel, TVoxel, TIndex> {
+class DynamicSceneReconstructionEngine_CUDA
+		: public DynamicSceneReconstructionEngine<TVoxel, TVoxel, TIndex> {
 };
 
 //region =================================== VOXEL BLOCK HASH ==========================================================
 
 template<typename TVoxel, typename TWarp>
-class ITMDynamicSceneReconstructionEngine_CUDA<TVoxel, TWarp, VoxelBlockHash>
-		: public ITMDynamicSceneReconstructionEngine<TVoxel, TWarp, VoxelBlockHash> {
+class DynamicSceneReconstructionEngine_CUDA<TVoxel, TWarp, VoxelBlockHash>
+		: public DynamicSceneReconstructionEngine<TVoxel, TWarp, VoxelBlockHash> {
 public:
-	ITMDynamicSceneReconstructionEngine_CUDA() = default;
-	~ITMDynamicSceneReconstructionEngine_CUDA() = default;
+	DynamicSceneReconstructionEngine_CUDA() = default;
+	~DynamicSceneReconstructionEngine_CUDA() = default;
 	void UpdateVisibleList(ITMVoxelVolume<TVoxel, VoxelBlockHash>* scene, const ITMView* view,
 	                       const ITMTrackingState* trackingState, const ITMRenderState* renderState,
 	                       bool resetVisibleList) override;
@@ -75,8 +75,8 @@ private:
 // region ==================================== PLAIN VOXEL ARRAY =======================================================
 
 template<typename TVoxel, typename TWarp>
-class ITMDynamicSceneReconstructionEngine_CUDA<TVoxel, TWarp, PlainVoxelArray>
-		: public ITMDynamicSceneReconstructionEngine<TVoxel, TWarp, PlainVoxelArray> {
+class DynamicSceneReconstructionEngine_CUDA<TVoxel, TWarp, PlainVoxelArray>
+		: public DynamicSceneReconstructionEngine<TVoxel, TWarp, PlainVoxelArray> {
 public:
 	void UpdateVisibleList(ITMVoxelVolume<TVoxel, PlainVoxelArray>* volume, const ITMView* view,
 	                       const ITMTrackingState* trackingState, const ITMRenderState* renderState,
@@ -104,8 +104,8 @@ public:
 			ITMVoxelVolume<TVoxel, PlainVoxelArray>* sourceTSDF,
 			ITMVoxelVolume<TVoxel, PlainVoxelArray>* targetTSDF) override;
 
-	ITMDynamicSceneReconstructionEngine_CUDA() = default;
-	~ITMDynamicSceneReconstructionEngine_CUDA() = default;
+	DynamicSceneReconstructionEngine_CUDA() = default;
+	~DynamicSceneReconstructionEngine_CUDA() = default;
 	void IntegrateDepthImageIntoTsdfVolume(ITMVoxelVolume<TVoxel, PlainVoxelArray>* volume, const ITMView* view) override;
 	void IntegrateDepthImageIntoTsdfVolume(ITMVoxelVolume<TVoxel, PlainVoxelArray>* volume, const ITMView* view,
 	                                      const ITMTrackingState* trackingState) override;

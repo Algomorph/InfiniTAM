@@ -22,7 +22,7 @@
 
 //local
 #include "ITMSceneLogger_SceneSlice.tpp"
-#include "../../Engines/Reconstruction/ITMDynamicSceneReconstructionEngineFactory.h"
+#include "../../Engines/Reconstruction/DynamicSceneReconstructionEngineFactory.h"
 #include "../../Engines/SceneFileIO/ITMSceneFileIOEngine.h"
 #include "../Analytics/SceneStatisticsCalculator/CPU/ITMSceneStatisticsCalculator_CPU.h"
 

@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "../Reconstruction/Interface/ITMSceneReconstructionEngine.h"
+#include "../Reconstruction/Interface/SceneReconstructionEngine.h"
 #include "../Swapping/Interface/ITMSwappingEngine.h"
 #include "../../Utils/Configuration.h"
 
@@ -14,7 +14,7 @@ namespace ITMLib
 	class ITMDenseMapper
 	{
 	private:
-		ITMSceneReconstructionEngine<TVoxel,TIndex> *sceneRecoEngine;
+		SceneReconstructionEngine<TVoxel,TIndex> *sceneRecoEngine;
 		ITMSwappingEngine<TVoxel,TIndex> *swappingEngine;
 
 		configuration::SwappingMode swappingMode;

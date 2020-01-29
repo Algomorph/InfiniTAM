@@ -13,9 +13,9 @@
 #include "../../Engines/MultiScene/ITMMapGraphManager.tpp"
 #include "../../Engines/Visualization/CPU/ITMMultiVisualizationEngine_CPU.tpp"
 #include "../../Engines/Reconstruction/ITMSurfelSceneReconstructionEngineFactory.tpp"
-#include "../../Engines/Reconstruction/CPU/ITMSceneReconstructionEngine_CPU.tpp"
-#include "../../Engines/Reconstruction/CPU/ITMSurfelSceneReconstructionEngine_CPU.tpp"
-#include "../../Engines/Reconstruction/Interface/ITMSurfelSceneReconstructionEngine.tpp"
+#include "../../Engines/Reconstruction/CPU/SceneReconstructionEngine_CPU.tpp"
+#include "../../Engines/Reconstruction/CPU/SurfelSceneReconstructionEngine_CPU.tpp"
+#include "../../Engines/Reconstruction/Interface/SurfelSceneReconstructionEngine.tpp"
 #include "../../Engines/Swapping/CPU/ITMSwappingEngine_CPU.tpp"
 #include "../../Engines/Visualization/ITMSurfelVisualizationEngineFactory.tpp"
 #include "../../Engines/Visualization/CPU/ITMSurfelVisualisationEngine_CPU.tpp"
@@ -42,10 +42,10 @@ namespace ITMLib
 	//surfel fusion
 	template class ITMDenseSurfelMapper<ITMSurfel_grey>;
 	template class ITMDenseSurfelMapper<ITMSurfel_rgb>;
-	template class ITMSurfelSceneReconstructionEngine<ITMSurfel_grey>;
-	template class ITMSurfelSceneReconstructionEngine<ITMSurfel_rgb>;
-	template class ITMSurfelSceneReconstructionEngine_CPU<ITMSurfel_grey>;
-	template class ITMSurfelSceneReconstructionEngine_CPU<ITMSurfel_rgb>;
+	template class SurfelSceneReconstructionEngine<ITMSurfel_grey>;
+	template class SurfelSceneReconstructionEngine<ITMSurfel_rgb>;
+	template class SurfelSceneReconstructionEngine_CPU<ITMSurfel_grey>;
+	template class SurfelSceneReconstructionEngine_CPU<ITMSurfel_rgb>;
 	template struct ITMSurfelSceneReconstructionEngineFactory<ITMSurfel_grey>;
 	template struct ITMSurfelSceneReconstructionEngineFactory<ITMSurfel_rgb>;
 	template class ITMSurfelVisualisationEngine<ITMSurfel_grey>;

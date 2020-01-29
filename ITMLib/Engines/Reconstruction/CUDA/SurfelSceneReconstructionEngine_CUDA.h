@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "../Interface/ITMSurfelSceneReconstructionEngine.h"
+#include "../Interface/SurfelSceneReconstructionEngine.h"
 
 namespace ITMLib
 {
@@ -10,7 +10,7 @@ namespace ITMLib
    * \brief An instance of an instantiation of this class template can be used to make a surfel-based reconstruction of a 3D scene using CUDA.
    */
   template <typename TSurfel>
-  class ITMSurfelSceneReconstructionEngine_CUDA : public ITMSurfelSceneReconstructionEngine<TSurfel>
+  class SurfelSceneReconstructionEngine_CUDA : public SurfelSceneReconstructionEngine<TSurfel>
   {
     //#################### CONSTRUCTORS ####################
   public:
@@ -19,7 +19,7 @@ namespace ITMLib
      *
      * \param depthImageSize  The size of the depth images that are being fused into the scene.
      */
-    explicit ITMSurfelSceneReconstructionEngine_CUDA(const Vector2i& depthImageSize);
+    explicit SurfelSceneReconstructionEngine_CUDA(const Vector2i& depthImageSize);
 
     //#################### PRIVATE MEMBER FUNCTIONS ####################
   private:

@@ -13,7 +13,7 @@ namespace ITMLib
    * \brief An instance of an instantiation of a class template deriving from this one can be used to make a surfel-based reconstruction of a 3D scene.
    */
   template <typename TSurfel>
-  class ITMSurfelSceneReconstructionEngine
+  class SurfelSceneReconstructionEngine
   {
     //#################### PROTECTED VARIABLES ####################
   protected:
@@ -58,20 +58,20 @@ namespace ITMLib
      *
      * \param depthImageSize  The size of the depth images that are being fused into the scene.
      */
-    explicit ITMSurfelSceneReconstructionEngine(const Vector2i& depthImageSize);
+    explicit SurfelSceneReconstructionEngine(const Vector2i& depthImageSize);
 
     //#################### COPY CONSTRUCTOR & ASSIGNMENT OPERATOR ####################
   private:
     // Deliberately private and unimplemented.
-    ITMSurfelSceneReconstructionEngine(const ITMSurfelSceneReconstructionEngine&);
-    ITMSurfelSceneReconstructionEngine& operator=(const ITMSurfelSceneReconstructionEngine&);
+    SurfelSceneReconstructionEngine(const SurfelSceneReconstructionEngine&);
+    SurfelSceneReconstructionEngine& operator=(const SurfelSceneReconstructionEngine&);
 
     //#################### DESTRUCTOR ####################
   public:
     /**
      * \brief Destroys the reconstruction engine.
      */
-    virtual ~ITMSurfelSceneReconstructionEngine();
+    virtual ~SurfelSceneReconstructionEngine();
 
     //#################### PRIVATE ABSTRACT MEMBER FUNCTIONS ####################
   private:

@@ -13,9 +13,9 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "ITMDynamicSceneReconstructionEngine_CUDA_PlainVoxelArray.tcu"
+#include "DynamicSceneReconstructionEngine_CUDA_PlainVoxelArray.tcu"
 #include "../../../ITMLibDefines.h"
 
 namespace ITMLib{
-template class ITMDynamicSceneReconstructionEngine_CUDA<ITMVoxel, ITMWarp, PlainVoxelArray>;
+template class DynamicSceneReconstructionEngine_CUDA<ITMVoxel, ITMWarp, PlainVoxelArray>;
 } // namespace ITMLib

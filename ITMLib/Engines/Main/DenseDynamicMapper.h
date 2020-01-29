@@ -15,7 +15,7 @@
 //  ================================================================
 #pragma once
 
-#include "../Reconstruction/Interface/ITMDynamicSceneReconstructionEngine.h"
+#include "../Reconstruction/Interface/DynamicSceneReconstructionEngine.h"
 #include "../../Utils/Configuration.h"
 #include "../Swapping/Interface/ITMSwappingEngine.h"
 #include "../../Utils/FileIO/ITMDynamicFusionLogger.h"
@@ -111,7 +111,7 @@ private:
 	void PrintSettings();
 	// endregion =======================================================================================================
 	// region =========================================== MEMBER VARIABLES =============================================
-	ITMDynamicSceneReconstructionEngine<TVoxel, TWarp, TIndex>* sceneReconstructor;
+	DynamicSceneReconstructionEngine<TVoxel, TWarp, TIndex>* sceneReconstructor;
 	ITMSwappingEngine<TVoxel, TIndex>* swappingEngine;
 	SurfaceTrackerInterface<TVoxel, TWarp, TIndex>* sceneMotionTracker;
 

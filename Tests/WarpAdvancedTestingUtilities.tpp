@@ -23,7 +23,7 @@
 #include "TestUtils.h"
 #include "TestUtilsForSnoopyFrames16And17.h"
 
-#include "../ITMLib/Engines/Reconstruction/ITMDynamicSceneReconstructionEngineFactory.h"
+#include "../ITMLib/Engines/Reconstruction/DynamicSceneReconstructionEngineFactory.h"
 #include "../ITMLib/Engines/VolumeEditAndCopy/VolumeEditAndCopyEngineFactory.h"
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/ITMVoxelVolumeComparison.h"
 
@@ -67,8 +67,8 @@ GenerateRawLiveAndCanonicalVolumes(bool allocateLiveFromBothImages,
 		IndexingEngine<ITMVoxel, TIndex, TMemoryDeviceType>::Instance().AllocateUsingOtherVolumeAndSetVisibilityExpanded(
 				live_volumes[0], live_volumes[1], view);
 	}
-	ITMDynamicSceneReconstructionEngine<ITMVoxel, ITMWarp, TIndex>* reconstructionEngine =
-			ITMDynamicSceneReconstructionEngineFactory
+	DynamicSceneReconstructionEngine<ITMVoxel, ITMWarp, TIndex>* reconstructionEngine =
+			DynamicSceneReconstructionEngineFactory
 			::MakeSceneReconstructionEngine<ITMVoxel, ITMWarp, TIndex>(TMemoryDeviceType);
 	reconstructionEngine->IntegrateDepthImageIntoTsdfVolume(live_volumes[live_index_to_start_from], view);
 	ITMSceneStatisticsCalculator<ITMVoxel,TIndex,TMemoryDeviceType>& calculator =
@@ -134,8 +134,8 @@ GenericWarpConsistencySubtest(const SlavchevaSurfaceTracker::Switches& switches,
 	VolumeEditAndCopyEngineFactory::Instance<ITMWarp, TIndex, TMemoryDeviceType>().ResetScene(
 			&ground_truth_warp_field);
 
-	ITMDynamicSceneReconstructionEngine<ITMVoxel, ITMWarp, TIndex>* recoEngine =
-			ITMDynamicSceneReconstructionEngineFactory::MakeSceneReconstructionEngine<ITMVoxel, ITMWarp, TIndex>(
+	DynamicSceneReconstructionEngine<ITMVoxel, ITMWarp, TIndex>* recoEngine =
+			DynamicSceneReconstructionEngineFactory::MakeSceneReconstructionEngine<ITMVoxel, ITMWarp, TIndex>(
 					TMemoryDeviceType);
 
 	//note: will be swapped before first iteration
