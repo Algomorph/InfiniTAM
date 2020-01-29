@@ -17,7 +17,7 @@
 
 #include "DynamicSceneReconstructionEngine_CUDA.h"
 
-#include "../../VolumeEditAndCopy/CUDA/VolumeEditAndCopyEngine_CUDA.h"
+#include "../../EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
 #include "DynamicSceneReconstructionEngine_CUDA_VoxelBlockHash_Kernels.h"
 #include "../Shared/ITMDynamicSceneReconstructionEngine_Functors.h"
 #include "../../Traversal/CUDA/ITMSceneTraversal_CUDA_VoxelBlockHash.h"

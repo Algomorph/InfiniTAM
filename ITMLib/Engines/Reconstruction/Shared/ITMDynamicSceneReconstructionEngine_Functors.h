@@ -22,7 +22,7 @@
 #include "../../../../ORUtils/PlatformIndependentAtomics.h"
 #include "../../Common/ITMWarpEnums.h"
 #include "../../Common/ITMCommonFunctors.h"
-#include "../../VolumeEditAndCopy/Shared/VolumeEditAndCopyEngine_Shared.h"
+#include "../../EditAndCopy/Shared/EditAndCopyEngine_Shared.h"
 
 
 

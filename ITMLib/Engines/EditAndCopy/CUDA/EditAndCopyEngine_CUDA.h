@@ -17,7 +17,7 @@
 
 #include "../../../Objects/Scene/PlainVoxelArray.h"
 #include "../../../Objects/Scene/ITMVoxelVolume.h"
-#include "../Interface/VolumeEditAndCopyEngineInterface.h"
+#include "../Interface/EditAndCopyEngineInterface.h"
 #include "../../../Utils/ITMHashBlockProperties.h"
 #include "../../../ITMLibDefines.h"
 
@@ -25,23 +25,23 @@
 namespace ITMLib {
 
 template<typename TVoxel, typename TIndex>
-class VolumeEditAndCopyEngine_CUDA : public VolumeEditAndCopyEngineInterface<TVoxel, TIndex> {
+class EditAndCopyEngine_CUDA : public EditAndCopyEngineInterface<TVoxel, TIndex> {
 };
 
 
 template<typename TVoxel>
-class VolumeEditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray> :
-		public VolumeEditAndCopyEngineInterface<TVoxel, PlainVoxelArray> {
+class EditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray> :
+		public EditAndCopyEngineInterface<TVoxel, PlainVoxelArray> {
 private:
 	void* readVoxelResult_device;
 	void* readVoxelResult_host;
 
 public:
-	VolumeEditAndCopyEngine_CUDA();
-	~VolumeEditAndCopyEngine_CUDA();
+	EditAndCopyEngine_CUDA();
+	~EditAndCopyEngine_CUDA();
 	//can be used as a singleton, but doesn't HAVE TO be
-	static VolumeEditAndCopyEngine_CUDA& Inst() {
-		static VolumeEditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray> instance; // Guaranteed to be destroyed.
+	static EditAndCopyEngine_CUDA& Inst() {
+		static EditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray> instance; // Guaranteed to be destroyed.
 		// Instantiated on first use.
 		return instance;
 	}
@@ -64,8 +64,8 @@ public:
 
 
 template<typename TVoxel>
-class VolumeEditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash> :
-		public VolumeEditAndCopyEngineInterface<TVoxel, VoxelBlockHash> {
+class EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash> :
+		public EditAndCopyEngineInterface<TVoxel, VoxelBlockHash> {
 private:
 	void* allocationTempData_device;
 	void* allocationTempData_host;
@@ -74,11 +74,11 @@ private:
 	void* readVoxelResult_host;
 
 public:
-	VolumeEditAndCopyEngine_CUDA();
-	~VolumeEditAndCopyEngine_CUDA();
+	EditAndCopyEngine_CUDA();
+	~EditAndCopyEngine_CUDA();
 	//can be used as a singleton, but doesn't HAVE TO be
-	static VolumeEditAndCopyEngine_CUDA& Inst() {
-		static VolumeEditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash> instance; // Guaranteed to be destroyed.
+	static EditAndCopyEngine_CUDA& Inst() {
+		static EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash> instance; // Guaranteed to be destroyed.
 		// Instantiated on first use.
 		return instance;
 	}
@@ -102,10 +102,10 @@ public:
 
 };
 
-typedef VolumeEditAndCopyEngine_CUDA<ITMVoxel, PlainVoxelArray> ManipulationEngine_CUDA_PVA_Voxel;
-typedef VolumeEditAndCopyEngine_CUDA<ITMVoxel, VoxelBlockHash> ManipulationEngine_CUDA_VBH_Voxel;
-typedef VolumeEditAndCopyEngine_CUDA<ITMWarp, PlainVoxelArray> ManipulationEngine_CUDA_PVA_Warp;
-typedef VolumeEditAndCopyEngine_CUDA<ITMWarp, VoxelBlockHash> ManipulationEngine_CUDA_VBH_Warp;
+typedef EditAndCopyEngine_CUDA<ITMVoxel, PlainVoxelArray> ManipulationEngine_CUDA_PVA_Voxel;
+typedef EditAndCopyEngine_CUDA<ITMVoxel, VoxelBlockHash> ManipulationEngine_CUDA_VBH_Voxel;
+typedef EditAndCopyEngine_CUDA<ITMWarp, PlainVoxelArray> ManipulationEngine_CUDA_PVA_Warp;
+typedef EditAndCopyEngine_CUDA<ITMWarp, VoxelBlockHash> ManipulationEngine_CUDA_VBH_Warp;
 
 
 }//namespace ITMLib

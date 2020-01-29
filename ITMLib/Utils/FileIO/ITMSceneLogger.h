@@ -24,7 +24,7 @@
 #include "../Collections/ITM3DNestedMapOfArrays.h"
 #include "../Analytics/ITMNeighborVoxelIterationInfo.h"
 #include "ITMWarpFieldLogger.h"
-#include "../../Engines/VolumeEditAndCopy/CPU/VolumeEditAndCopyEngine_CPU.h"
+#include "../../Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 
 //boost
 #include <boost/filesystem.hpp>
@@ -52,7 +52,7 @@ public:
 	static const std::string liveName;
 	static const std::string continuousHighlightsPostfix;
 
-	typedef VolumeEditAndCopyEngine_CPU<TVoxel, TIndex> sceneManipulationEngine;
+	typedef EditAndCopyEngine_CPU<TVoxel, TIndex> sceneManipulationEngine;
 
 // endregion
 // region === PUBLIC ENUMS ===

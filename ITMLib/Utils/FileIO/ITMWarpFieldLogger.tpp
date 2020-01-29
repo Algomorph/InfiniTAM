@@ -296,7 +296,7 @@ void ITMWarpFieldLogger<TVoxel, TIndex>::SaveCompact() {
 
 template<typename TVoxel, typename TIndex>
 void ITMWarpFieldLogger<TVoxel, TIndex>::LoadCompact() {
-	VolumeEditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().ResetScene(warpField);
+	EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().ResetScene(warpField);
 	ITMSceneFileIOEngine<TVoxel,TIndex>::LoadFromDirectoryCompact(warpField, scenePath.string());
 	this->voxelCount = ITMSceneStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().ComputeAllocatedVoxelCount(warpField);
 }

@@ -36,7 +36,7 @@
 #include "../ITMLib/Engines/SceneFileIO/ITMSceneFileIOEngine.h"
 #include "../ITMLib/Utils/Analytics/SceneStatisticsCalculator/CUDA/ITMSceneStatisticsCalculator_CUDA.h"
 #include "TestUtils.h"
-#include "../ITMLib/Engines/VolumeEditAndCopy/VolumeEditAndCopyEngineFactory.h"
+#include "../ITMLib/Engines/EditAndCopy/EditAndCopyEngineFactory.h"
 
 using namespace ITMLib;
 

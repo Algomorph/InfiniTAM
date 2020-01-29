@@ -21,14 +21,14 @@
 #include "../ORUtils/FileUtils.h"
 
 #ifndef COMPILE_WITHOUT_CUDA
-#include "../ITMLib/Engines/VolumeEditAndCopy/CUDA/VolumeEditAndCopyEngine_CUDA.h"
+#include "../ITMLib/Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
 #endif
 
 using namespace ITMLib;
 
 template<class TVoxel, class TIndex>
 void GenerateTestScene_CPU(ITMVoxelVolume<TVoxel, TIndex>* scene) {
-	VolumeEditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().ResetScene(scene);
+	EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().ResetScene(scene);
 	const int narrowBandThicknessVoxels = 10;
 	int xOffset = 8;
 	int surfaceSizeVoxelsZ = 16;
@@ -44,8 +44,8 @@ void GenerateTestScene_CPU(ITMVoxelVolume<TVoxel, TIndex>* scene) {
 
 		for (int z = 0; z < surfaceSizeVoxelsZ; z++) {
 			for (int y = 0; y < surfaceSizeVoxelsY; y++) {
-				VolumeEditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().SetVoxel(scene, Vector3i(xPos, y, z), voxelPos);
-				VolumeEditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().SetVoxel(scene, Vector3i(xNeg, y, z), voxelNeg);
+				EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().SetVoxel(scene, Vector3i(xPos, y, z), voxelPos);
+				EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().SetVoxel(scene, Vector3i(xNeg, y, z), voxelNeg);
 			}
 		}
 	}
@@ -55,7 +55,7 @@ void GenerateTestScene_CPU(ITMVoxelVolume<TVoxel, TIndex>* scene) {
 #ifndef COMPILE_WITHOUT_CUDA
 template<class TVoxel, class TIndex>
 void GenerateTestScene_CUDA(ITMVoxelVolume<TVoxel, TIndex>* scene) {
-	VolumeEditAndCopyEngine_CUDA<TVoxel, TIndex>::Inst().ResetScene(scene);
+	EditAndCopyEngine_CUDA<TVoxel, TIndex>::Inst().ResetScene(scene);
 	const int narrowBandThicknessVoxels = 10;
 	int xOffset = 8;
 	int surfaceSizeVoxelsZ = 16;
@@ -71,8 +71,8 @@ void GenerateTestScene_CUDA(ITMVoxelVolume<TVoxel, TIndex>* scene) {
 
 		for (int z = 0; z < surfaceSizeVoxelsZ; z++) {
 			for (int y = 0; y < surfaceSizeVoxelsY; y++) {
-				VolumeEditAndCopyEngine_CUDA<TVoxel, TIndex>::Inst().SetVoxel(scene, Vector3i(xPos, y, z), voxelPos);
-				VolumeEditAndCopyEngine_CUDA<TVoxel, TIndex>::Inst().SetVoxel(scene, Vector3i(xNeg, y, z), voxelNeg);
+				EditAndCopyEngine_CUDA<TVoxel, TIndex>::Inst().SetVoxel(scene, Vector3i(xPos, y, z), voxelPos);
+				EditAndCopyEngine_CUDA<TVoxel, TIndex>::Inst().SetVoxel(scene, Vector3i(xNeg, y, z), voxelNeg);
 			}
 		}
 	}
@@ -236,7 +236,7 @@ void buildSdfVolumeFromImage(ITMVoxelVolume<TVoxel, TIndex>** volume,
 
 		case MEMORYDEVICE_CUDA:
 #ifndef COMPILE_WITHOUT_CUDA
-			VolumeEditAndCopyEngine_CUDA<TVoxel, TIndex>::Inst().ResetScene(*volume);
+			EditAndCopyEngine_CUDA<TVoxel, TIndex>::Inst().ResetScene(*volume);
 #else
 			DIEWITHEXCEPTION_REPORTLOCATION("Trying to construct a volume in CUDA memory while code was build "
 								   "without CUDA support, aborting.");
@@ -244,7 +244,7 @@ void buildSdfVolumeFromImage(ITMVoxelVolume<TVoxel, TIndex>** volume,
 			break;
 
 		case MEMORYDEVICE_CPU:
-			VolumeEditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().ResetScene(*volume);
+			EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().ResetScene(*volume);
 			break;
 		case MEMORYDEVICE_METAL:
 			DIEWITHEXCEPTION_REPORTLOCATION("Metal framework not fully supported.");

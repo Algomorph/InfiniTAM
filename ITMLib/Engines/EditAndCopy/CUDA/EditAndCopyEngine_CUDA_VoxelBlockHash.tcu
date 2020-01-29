@@ -14,15 +14,15 @@
 //  limitations under the License.
 //  ================================================================
 
-#include "VolumeEditAndCopyEngine_CUDA.h"
-#include "../Shared/VolumeEditAndCopyEngine_Shared.h"
+#include "EditAndCopyEngine_CUDA.h"
+#include "../Shared/EditAndCopyEngine_Shared.h"
 #include "../../../Utils/ITMCUDAUtils.h"
 #include "../../../../ORUtils/PlatformIndependence.h"
 #include "../../../../ORUtils/JetbrainsCUDASyntax.hpp"
 #include "../../../Objects/Scene/ITMRepresentationAccess.h"
 #include "../../../Utils/Geometry/ITMGeometryBooleanOperations.h"
 #include "../../../Utils/Analytics/SceneStatisticsCalculator/CUDA/ITMSceneStatisticsCalculator_CUDA.h"
-#include "VolumeEditAndCopyEngine_CUDA_VoxelBlockHash_Kernels.h"
+#include "EditAndCopyEngine_CUDA_VoxelBlockHash_Kernels.h"
 #include "../../Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
 
 #include <cstring>
@@ -33,7 +33,7 @@
 
 
 template<typename TVoxel>
-VolumeEditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::VolumeEditAndCopyEngine_CUDA() {
+EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::EditAndCopyEngine_CUDA() {
 	ORcudaSafeCall(cudaMalloc((void**) &allocationTempData_device, sizeof(CopyAllocationTempData)));
 	ORcudaSafeCall(cudaMallocHost((void**) &allocationTempData_host, sizeof(CopyAllocationTempData)));
 	ORcudaSafeCall(cudaMalloc((void**) &readVoxelResult_device, sizeof(ReadVoxelResult<TVoxel>)));
@@ -41,7 +41,7 @@ VolumeEditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::VolumeEditAndCopyEngine_CU
 }
 
 template<typename TVoxel>
-VolumeEditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::~VolumeEditAndCopyEngine_CUDA() {
+EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::~EditAndCopyEngine_CUDA() {
 	ORcudaSafeCall(cudaFree(allocationTempData_device));
 	ORcudaSafeCall(cudaFreeHost(allocationTempData_host));
 	ORcudaSafeCall(cudaFree(readVoxelResult_device));
@@ -51,7 +51,7 @@ VolumeEditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::~VolumeEditAndCopyEngine_C
 
 template<typename TVoxel>
 void
-VolumeEditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::ResetScene(
+EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::ResetScene(
 		ITMVoxelVolume<TVoxel, VoxelBlockHash>* scene) {
 	int numBlocks = scene->index.GetAllocatedBlockCount();
 	int blockSize = scene->index.GetVoxelBlockSize();
@@ -75,8 +75,8 @@ VolumeEditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::ResetScene(
 
 template<typename TVoxel>
 bool
-VolumeEditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::SetVoxel(ITMVoxelVolume<TVoxel, VoxelBlockHash>* scene,
-                                                                  Vector3i at, TVoxel voxel) {
+EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::SetVoxel(ITMVoxelVolume<TVoxel, VoxelBlockHash>* scene,
+                                                         Vector3i at, TVoxel voxel) {
 	ITMHashEntry* hashTable = scene->index.GetEntries();
 
 	TVoxel* voxels = scene->localVBA.GetVoxelBlocks();
@@ -109,8 +109,8 @@ VolumeEditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::SetVoxel(ITMVoxelVolume<TV
 
 template<typename TVoxel>
 TVoxel
-VolumeEditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::ReadVoxel(ITMVoxelVolume<TVoxel, VoxelBlockHash>* scene,
-                                                                   Vector3i at) {
+EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::ReadVoxel(ITMVoxelVolume<TVoxel, VoxelBlockHash>* scene,
+                                                          Vector3i at) {
 	TVoxel* localVBA = scene->localVBA.GetVoxelBlocks();
 	const ITMHashEntry* hashTable = scene->index.GetEntries();
 
@@ -132,9 +132,9 @@ VolumeEditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::ReadVoxel(ITMVoxelVolume<T
 
 template<typename TVoxel>
 TVoxel
-VolumeEditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::ReadVoxel(ITMVoxelVolume<TVoxel, VoxelBlockHash>* scene,
-                                                                   Vector3i at,
-                                                                   VoxelBlockHash::IndexCache& cache) {
+EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::ReadVoxel(ITMVoxelVolume<TVoxel, VoxelBlockHash>* scene,
+                                                          Vector3i at,
+                                                          VoxelBlockHash::IndexCache& cache) {
 	TVoxel* localVBA = scene->localVBA.GetVoxelBlocks();
 	const ITMHashEntry* hashTable = scene->index.GetEntries();
 
@@ -156,9 +156,9 @@ VolumeEditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::ReadVoxel(ITMVoxelVolume<T
 
 template<typename TVoxel>
 TVoxel
-VolumeEditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::ReadVoxel(ITMVoxelVolume<TVoxel, VoxelBlockHash>* scene,
-                                                                   Vector3i at, int& where,
-                                                                   VoxelBlockHash::IndexCache& cache) {
+EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::ReadVoxel(ITMVoxelVolume<TVoxel, VoxelBlockHash>* scene,
+                                                          Vector3i at, int& where,
+                                                          VoxelBlockHash::IndexCache& cache) {
 	TVoxel* localVBA = scene->localVBA.GetVoxelBlocks();
 	const ITMHashEntry* hashTable = scene->index.GetEntries();
 
@@ -180,14 +180,14 @@ VolumeEditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::ReadVoxel(ITMVoxelVolume<T
 
 
 template<typename TVoxel>
-void VolumeEditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::OffsetWarps(
+void EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::OffsetWarps(
 		ITMVoxelVolume<TVoxel, VoxelBlockHash>* scene,
 		Vector3f offset) {
 	DIEWITHEXCEPTION_REPORTLOCATION("Not implemented");
 }
 
 template<typename TVoxel>
-bool VolumeEditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::CopySceneSlice(
+bool EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::CopySceneSlice(
 		ITMVoxelVolume<TVoxel, VoxelBlockHash>* destination, ITMVoxelVolume<TVoxel, VoxelBlockHash>* source,
 		Vector6i bounds, const Vector3i& offset) {
 
@@ -290,7 +290,7 @@ bool VolumeEditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::CopySceneSlice(
 }
 
 template<typename TVoxel>
-bool VolumeEditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::CopyScene(
+bool EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::CopyScene(
 		ITMVoxelVolume<TVoxel, VoxelBlockHash>* destination,
 		ITMVoxelVolume<TVoxel, VoxelBlockHash>* source,
 		const Vector3i& offset) {

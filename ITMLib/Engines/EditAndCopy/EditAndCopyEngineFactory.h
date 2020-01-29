@@ -15,27 +15,27 @@
 //  ================================================================
 
 //local
-#include "Interface/VolumeEditAndCopyEngineInterface.h"
-#include "CPU/VolumeEditAndCopyEngine_CPU.h"
-#include "CUDA/VolumeEditAndCopyEngine_CUDA.h"
+#include "Interface/EditAndCopyEngineInterface.h"
+#include "CPU/EditAndCopyEngine_CPU.h"
+#include "CUDA/EditAndCopyEngine_CUDA.h"
 
 #pragma once
 namespace ITMLib {
 
-struct VolumeEditAndCopyEngineFactory {
+struct EditAndCopyEngineFactory {
 	template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-	static VolumeEditAndCopyEngineInterface<TVoxel, TIndex>& Instance() {
+	static EditAndCopyEngineInterface<TVoxel, TIndex>& Instance() {
 		switch (TMemoryDeviceType) {
 			default:
 			case MEMORYDEVICE_CPU:
-				return VolumeEditAndCopyEngine_CPU<TVoxel, TIndex>::Inst();
+				return EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst();
 			case MEMORYDEVICE_CUDA:
 #ifndef COMPILE_WITHOUT_CUDA
-				return VolumeEditAndCopyEngine_CUDA<TVoxel, TIndex>::Inst();
+				return EditAndCopyEngine_CUDA<TVoxel, TIndex>::Inst();
 #else
 			std::cerr << "Warning: compiled without CUDA but requesting an instance of CUDA manipulation engine. "
 				"Defaulting to CPU manipulation engine." << std::endl;
-			return VolumeEditAndCopyEngine_CPU<TVoxel,TIndex>::Inst();
+			return EditAndCopyEngine_CPU<TVoxel,TIndex>::Inst();
 #endif
 			case MEMORYDEVICE_METAL:
 #ifdef COMPILE_WITH_METAL
@@ -43,7 +43,7 @@ struct VolumeEditAndCopyEngineFactory {
 #else
 				std::cerr << "Warning: compiled without METAL but requesting an instance of METAL manipulation engine. "
 				             "Defaulting to CPU manipulation engine." << std::endl;
-				return VolumeEditAndCopyEngine_CPU<TVoxel, TIndex>::Inst();
+				return EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst();
 #endif
 
 		}

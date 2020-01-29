@@ -19,7 +19,7 @@
 //local
 #include "../Interface/ITMSceneTraversal.h"
 #include "../../../Objects/Scene/ITMVoxelVolume.h"
-#include "../../VolumeEditAndCopy/CPU/VolumeEditAndCopyEngine_CPU.h"
+#include "../../EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 #include "../Shared/ITMSceneTraversal_Shared.h"
 #include "../../../Utils/Analytics/ITMIsAltered.h"
 

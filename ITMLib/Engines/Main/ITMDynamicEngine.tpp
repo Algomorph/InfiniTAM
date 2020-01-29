@@ -15,7 +15,7 @@
 //#define OUTPUT_TRAJECTORY_QUATERNIONS
 
 #include "../../../ORUtils/FileUtils.h"
-#include "../VolumeEditAndCopy/CPU/VolumeEditAndCopyEngine_CPU.h"
+#include "../EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 
 using namespace ITMLib;
 

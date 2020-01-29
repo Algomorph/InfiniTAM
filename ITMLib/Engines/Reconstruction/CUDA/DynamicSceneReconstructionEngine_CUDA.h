@@ -17,7 +17,7 @@
 
 #include "../Interface/DynamicSceneReconstructionEngine.h"
 #include "../../../Objects/Scene/PlainVoxelArray.h"
-#include "../../VolumeEditAndCopy/CUDA/VolumeEditAndCopyEngine_CUDA.h"
+#include "../../EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
 #include "../../Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
 
 namespace ITMLib {
@@ -55,8 +55,6 @@ protected:
 	void IntegrateDepthImageIntoTsdfVolume_Helper(ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
 	                                             Matrix4f depth_camera_matrix = Matrix4f::Identity());
 
-private:
-	VolumeEditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash> liveSceneManager;
 };
 
 // endregion ===========================================================================================================
@@ -86,7 +84,6 @@ public:
 	void IntegrateDepthImageIntoTsdfVolume(ITMVoxelVolume<TVoxel, PlainVoxelArray>* volume, const ITMView* view,
 	                                      const ITMTrackingState* trackingState) override;
 private:
-	VolumeEditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray> liveSceneManager;
 	void IntegrateDepthImageIntoTsdfVolume_Helper(ITMVoxelVolume<TVoxel, PlainVoxelArray>* volume, const ITMView* view,
 	                                             Matrix4f depth_camera_matrix = Matrix4f::Identity());
 

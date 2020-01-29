@@ -20,7 +20,7 @@
 #include "../../../ITMLibDefines.h"
 #include "../../../Utils/ITMHashBlockProperties.h"
 #include "../../../Utils/ITMPrintHelpers.h"
-#include "../Interface/VolumeEditAndCopyEngineInterface.h"
+#include "../Interface/EditAndCopyEngineInterface.h"
 
 
 //TODO: Make CUDA versions -Greg (GitHub: Algomorph)
@@ -30,17 +30,17 @@ namespace ITMLib {
 // region ==================== SCENE MANIPULATION ENGINE ===============================================================
 
 template<typename TVoxel, typename TIndex>
-class VolumeEditAndCopyEngine_CPU : public VolumeEditAndCopyEngineInterface<TVoxel, TIndex> {
+class EditAndCopyEngine_CPU : public EditAndCopyEngineInterface<TVoxel, TIndex> {
 };
 
 
 template<typename TVoxel>
-class VolumeEditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>
-		: public VolumeEditAndCopyEngineInterface<TVoxel, VoxelBlockHash> {
+class EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>
+		: public EditAndCopyEngineInterface<TVoxel, VoxelBlockHash> {
 public:
 	//can be used as a singleton, but doesn't HAVE TO be
-	static VolumeEditAndCopyEngine_CPU& Inst() {
-		static VolumeEditAndCopyEngine_CPU<TVoxel, VoxelBlockHash> instance; // Guaranteed to be destroyed.
+	static EditAndCopyEngine_CPU& Inst() {
+		static EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash> instance; // Guaranteed to be destroyed.
 		// Instantiated on first use.
 		return instance;
 	}
@@ -59,16 +59,16 @@ public:
 	bool CopyScene(ITMVoxelVolume<TVoxel, VoxelBlockHash>* target,
 	               ITMVoxelVolume<TVoxel, VoxelBlockHash>* source,
 	               const Vector3i& offset = Vector3i(0)) override;
-	virtual ~VolumeEditAndCopyEngine_CPU() = default;
+	virtual ~EditAndCopyEngine_CPU() = default;
 };
 
 template<typename TVoxel>
-class VolumeEditAndCopyEngine_CPU<TVoxel, PlainVoxelArray> :
-		public VolumeEditAndCopyEngineInterface<TVoxel, PlainVoxelArray> {
+class EditAndCopyEngine_CPU<TVoxel, PlainVoxelArray> :
+		public EditAndCopyEngineInterface<TVoxel, PlainVoxelArray> {
 public:
 	// can use this as singleton, but don't have to
-	static VolumeEditAndCopyEngine_CPU& Inst() {
-		static VolumeEditAndCopyEngine_CPU<TVoxel, PlainVoxelArray> instance; // Guaranteed to be destroyed.
+	static EditAndCopyEngine_CPU& Inst() {
+		static EditAndCopyEngine_CPU<TVoxel, PlainVoxelArray> instance; // Guaranteed to be destroyed.
 		// Instantiated on first use.
 		return instance;
 	}
@@ -91,10 +91,10 @@ public:
 
 // endregion ================= SCENE MANIPULATION ENGINE ===============================================================
 
-typedef VolumeEditAndCopyEngine_CPU<ITMVoxel, PlainVoxelArray> ManipulationEngine_CPU_PVA_Voxel;
-typedef VolumeEditAndCopyEngine_CPU<ITMVoxel, VoxelBlockHash> ManipulationEngine_CPU_VBH_Voxel;
-typedef VolumeEditAndCopyEngine_CPU<ITMWarp, PlainVoxelArray> ManipulationEngine_CPU_PVA_Warp;
-typedef VolumeEditAndCopyEngine_CPU<ITMWarp, VoxelBlockHash> ManipulationEngine_CPU_VBH_Warp;
+typedef EditAndCopyEngine_CPU<ITMVoxel, PlainVoxelArray> ManipulationEngine_CPU_PVA_Voxel;
+typedef EditAndCopyEngine_CPU<ITMVoxel, VoxelBlockHash> ManipulationEngine_CPU_VBH_Voxel;
+typedef EditAndCopyEngine_CPU<ITMWarp, PlainVoxelArray> ManipulationEngine_CPU_PVA_Warp;
+typedef EditAndCopyEngine_CPU<ITMWarp, VoxelBlockHash> ManipulationEngine_CPU_VBH_Warp;
 
 // region ======================================== HELPER RANGE COMPUTATION / CHECK ROUTINES ===========================
 // =====================================================================================================================

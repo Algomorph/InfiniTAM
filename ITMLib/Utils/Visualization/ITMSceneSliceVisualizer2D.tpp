@@ -234,8 +234,8 @@ template<typename TVoxel, typename TWarp, typename TIndex>
 void ITMSceneSliceVisualizer2D<TVoxel, TWarp, TIndex>::MarkWarpedSceneImageAroundPoint(
 		ITMVoxelVolume<TVoxel, TIndex>* scene, ITMVoxelVolume<TWarp, TIndex>* warpField, cv::Mat& imageToMarkOn,
 		Vector3i positionOfVoxelToMark) {
-	TVoxel voxel = VolumeEditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().ReadVoxel(scene, positionOfVoxelToMark);
-	TWarp warp = VolumeEditAndCopyEngine_CPU<TWarp, TIndex>::Inst().ReadVoxel(warpField, positionOfVoxelToMark);
+	TVoxel voxel = EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().ReadVoxel(scene, positionOfVoxelToMark);
+	TWarp warp = EditAndCopyEngine_CPU<TWarp, TIndex>::Inst().ReadVoxel(warpField, positionOfVoxelToMark);
 
 	Vector3f projectedPosition = positionOfVoxelToMark.toFloat() + warp.framewise_warp;
 	Vector3i projectedPositionFloored = projectedPosition.toIntFloor();

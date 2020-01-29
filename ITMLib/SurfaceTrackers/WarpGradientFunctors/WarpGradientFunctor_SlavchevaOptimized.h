@@ -31,7 +31,7 @@
 #include "../Shared/ITMWarpGradientCommon.h"
 #include "../../Utils/ITMVoxelFlags.h"
 #include "../../Utils/ITMCPrintHelpers.h"
-#include "../../Engines/VolumeEditAndCopy/Shared/VolumeEditAndCopyEngine_Shared.h"
+#include "../../Engines/EditAndCopy/Shared/EditAndCopyEngine_Shared.h"
 #include "../../Objects/Scene/ITMVoxelVolume.h"
 
 

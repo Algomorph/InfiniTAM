@@ -151,44 +151,44 @@ set(ITMLIB_ENGINES_TRAVERSAL_CUDA_HEADERS
 
 #====================================== SCENE MANIPULATION ENGINES =====================================================
 set(ITMLIB_ENGINES_MANIPULATION_HEADERS
-    Engines/VolumeEditAndCopy/VolumeEditAndCopyEngineFactory.h
+	Engines/EditAndCopy/EditAndCopyEngineFactory.h
 	)
 
 ##
 set(ITMLIB_ENGINES_MANIPULATION_INTERFACE_HEADERS
-	Engines/VolumeEditAndCopy/Interface/VolumeEditAndCopyEngineInterface.h
+	Engines/EditAndCopy/Interface/EditAndCopyEngineInterface.h
     )
 ##
 set(ITMLIB_ENGINES_MANIPULATION_SHARED_HEADERS
-	Engines/VolumeEditAndCopy/Shared/VolumeEditAndCopyEngine_Shared.h
-	Engines/VolumeEditAndCopy/Shared/VolumeEditAndCopyEngine_Functors.h
+	Engines/EditAndCopy/Shared/EditAndCopyEngine_Shared.h
+	Engines/EditAndCopy/Shared/EditAndCopyEngine_Functors.h
     )
 
 ##
 set(ITMLIB_ENGINES_MANIPULATION_CPU_SOURCES
-	Engines/VolumeEditAndCopy/CPU/VolumeEditAndCopyEngine_CPU.cpp
-	Engines/VolumeEditAndCopy/CPU/VolumeEditAndCopyEngine_CPU_VoxelBlockHash.tpp
-	Engines/VolumeEditAndCopy/CPU/VolumeEditAndCopyEngine_CPU_PlainVoxelArray.tpp
-	Engines/VolumeEditAndCopy/CPU/VolumeEditAndCopyEngine_CPU_VoxelBlockHash.cpp
-	Engines/VolumeEditAndCopy/CPU/VolumeEditAndCopyEngine_CPU_PlainVoxelArray.cpp
+	Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.cpp
+	Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU_VoxelBlockHash.tpp
+	Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU_PlainVoxelArray.tpp
+	Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU_VoxelBlockHash.cpp
+	Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU_PlainVoxelArray.cpp
     )
 
 set(ITMLIB_ENGINES_MANIPULATION_CPU_HEADERS
-	Engines/VolumeEditAndCopy/CPU/VolumeEditAndCopyEngine_CPU.h
+	Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h
     )
 
 ##
 set(ITMLIB_ENGINES_MANIPULATION_CUDA_SOURCES
-	Engines/VolumeEditAndCopy/CUDA/VolumeEditAndCopyEngine_CUDA_VoxelBlockHash.tcu
-	Engines/VolumeEditAndCopy/CUDA/VolumeEditAndCopyEngine_CUDA_PlainVoxelArray.tcu
-	Engines/VolumeEditAndCopy/CUDA/VolumeEditAndCopyEngine_CUDA_VoxelBlockHash.cu
-	Engines/VolumeEditAndCopy/CUDA/VolumeEditAndCopyEngine_CUDA_PlainVoxelArray.cu
+	Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA_VoxelBlockHash.tcu
+	Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA_PlainVoxelArray.tcu
+	Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA_VoxelBlockHash.cu
+	Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA_PlainVoxelArray.cu
     )
 
 set(ITMLIB_ENGINES_MANIPULATION_CUDA_HEADERS
-	Engines/VolumeEditAndCopy/CUDA/VolumeEditAndCopyEngine_CUDA.h
-	Engines/VolumeEditAndCopy/CUDA/VolumeEditAndCopyEngine_CUDA_VoxelBlockHash_Kernels.h
-	Engines/VolumeEditAndCopy/CUDA/VolumeEditAndCopyEngine_CUDA_PlainVoxelArray_Kernels.h
+	Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h
+	Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA_VoxelBlockHash_Kernels.h
+	Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA_PlainVoxelArray_Kernels.h
     )
 
 #====================================== MESHING ENGINES ================================================================

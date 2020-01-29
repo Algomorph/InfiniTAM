@@ -18,7 +18,7 @@
 #include "../../../../../ORUtils/JetbrainsCUDASyntax.hpp"
 #include "../../../../Utils/ITMCUDAUtils.h"
 #include "../../../../Objects/Scene/ITMGlobalCache.h"
-#include "../../../VolumeEditAndCopy/Shared/VolumeEditAndCopyEngine_Shared.h"
+#include "../../../EditAndCopy/Shared/EditAndCopyEngine_Shared.h"
 #include "../../Shared/IndexingEngine_Shared.h"
 
 namespace {

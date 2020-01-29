@@ -13,7 +13,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "VolumeEditAndCopyEngine_CPU.h"
+#include "EditAndCopyEngine_CPU.h"
 #include "../../../Utils/ITMMath.h"
 #include "../../../Objects/Scene/VoxelBlockHash.h"
 #include "../../../Objects/Scene/ITMRepresentationAccess.h"

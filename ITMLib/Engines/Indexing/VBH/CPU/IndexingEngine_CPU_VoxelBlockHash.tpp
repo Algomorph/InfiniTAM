@@ -17,7 +17,7 @@
 
 #include "IndexingEngine_CPU_VoxelBlockHash.h"
 #include "../../../../Objects/Scene/ITMRepresentationAccess.h"
-#include "../../../VolumeEditAndCopy/Shared/VolumeEditAndCopyEngine_Shared.h"
+#include "../../../EditAndCopy/Shared/EditAndCopyEngine_Shared.h"
 #include "../../Shared/IndexingEngine_Shared.h"
 #include "../../../../Utils/Configuration.h"
 

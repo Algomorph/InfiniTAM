@@ -21,13 +21,13 @@
 namespace ITMLib {
 
 template<typename TVoxel, typename TIndex>
-class VolumeEditAndCopyEngineInterface {
+class EditAndCopyEngineInterface {
 	/**
 	 * \brief Interface to engines implementing basic scene manipulation routines for different scene types.
 	 */
 public:
-	VolumeEditAndCopyEngineInterface() = default;
-	virtual ~VolumeEditAndCopyEngineInterface() = default;
+	EditAndCopyEngineInterface() = default;
+	virtual ~EditAndCopyEngineInterface() = default;
 	// TODO: better to make ResetScene a function of Scene (and template Scene on device type as well)
 	/**
 	 * \brief Clear out scene and reset the index

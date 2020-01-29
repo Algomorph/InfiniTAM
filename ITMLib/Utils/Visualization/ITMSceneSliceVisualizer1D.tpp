@@ -36,7 +36,7 @@
 #include "../../Objects/Scene/ITMVoxelVolume.h"
 #include "../../Objects/Scene/ITMRepresentationAccess.h"
 #include "ITMVisualizationWindowManager.h"
-#include "../../Engines/VolumeEditAndCopy/CPU/VolumeEditAndCopyEngine_CPU.h"
+#include "../../Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 
 using namespace ITMLib;
 
@@ -77,7 +77,7 @@ void ITMSceneSliceVisualizer1D::Plot1DSceneSliceHelper(ITMVoxelVolume<TVoxel, TI
 	// fill table
 	for(int iValue = 0; iValue < voxelRange; iValue++,currentVoxelPosition[axis]++){
 		int vmIndex = 0;
-		TVoxel voxel = VolumeEditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().ReadVoxel(scene, focusCoordinates, cache);
+		TVoxel voxel = EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().ReadVoxel(scene, focusCoordinates, cache);
 		table->SetValue(iValue, 0, currentVoxelPosition[axis]);
 		table->SetValue(iValue, 1, TGetSDFFunctor::GetSdf(voxel));
 	}
@@ -116,8 +116,8 @@ void ITMSceneSliceVisualizer1D::Draw1DWarpUpdateVector(
 		Vector4i color) {
 	// scene access variables
 
-	TWarp warp = VolumeEditAndCopyEngine_CPU<TWarp, TIndex>::Inst().ReadVoxel(warpField, focusCoordinates);
-	TVoxel voxel = VolumeEditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().ReadVoxel(TSDF, focusCoordinates);
+	TWarp warp = EditAndCopyEngine_CPU<TWarp, TIndex>::Inst().ReadVoxel(warpField, focusCoordinates);
+	TVoxel voxel = EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().ReadVoxel(TSDF, focusCoordinates);
 
 	float warp1D = warp.framewise_warp[axis];
 	float warpUpdate1D = warp.gradient0[axis];

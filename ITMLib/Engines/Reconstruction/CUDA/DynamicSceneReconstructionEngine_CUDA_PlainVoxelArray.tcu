@@ -43,7 +43,7 @@ DynamicSceneReconstructionEngine_CUDA<TVoxel, TWarp, PlainVoxelArray>::GenerateT
 template<typename TVoxel, typename TWarp>
 void DynamicSceneReconstructionEngine_CUDA<TVoxel, TWarp, PlainVoxelArray>::GenerateTsdfVolumeFromView(
 		ITMVoxelVolume<TVoxel, PlainVoxelArray>* volume, const ITMView* view, const Matrix4f& depth_camera_matrix) {
-	liveSceneManager.ResetScene(volume);
+	volume->Reset();
 	this->IntegrateDepthImageIntoTsdfVolume_Helper(volume, view, depth_camera_matrix);
 }
 

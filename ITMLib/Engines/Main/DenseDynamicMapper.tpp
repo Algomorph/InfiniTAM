@@ -31,11 +31,11 @@
 #include "../../Utils/Analytics/ITMBenchmarkUtils.h"
 #include "../../Utils/FileIO/ITMSceneLogger.h"
 //** CPU **
-#include "../VolumeEditAndCopy/CPU/VolumeEditAndCopyEngine_CPU.h"
+#include "../EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 #include "../../Utils/Analytics/SceneStatisticsCalculator/CPU/ITMSceneStatisticsCalculator_CPU.h"
 //** CUDA **
 #ifndef COMPILE_WITHOUT_CUDA
-#include "../VolumeEditAndCopy/CUDA/VolumeEditAndCopyEngine_CUDA.h"
+#include "../EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
 #include "../../Utils/Analytics/SceneStatisticsCalculator/CUDA/ITMSceneStatisticsCalculator_CUDA.h"
 #endif
 

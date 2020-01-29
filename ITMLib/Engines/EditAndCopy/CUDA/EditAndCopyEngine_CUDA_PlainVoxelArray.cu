@@ -15,11 +15,14 @@
 //  ================================================================
 
 #include "../../../ITMLibDefines.h"
-#include "VolumeEditAndCopyEngine_CPU_VoxelBlockHash.tpp"
+
+//Note: ".tpp" files have to be included for all explicit instantiations in order to link properly
+#include "EditAndCopyEngine_CUDA_PlainVoxelArray.tcu"
+#include "../../../Objects/Scene/ITMVoxelVolume.h"
 
 namespace ITMLib {
 template
-class VolumeEditAndCopyEngine_CPU<ITMVoxel, VoxelBlockHash>;
+class EditAndCopyEngine_CUDA<ITMVoxel, PlainVoxelArray>;
 template
-class VolumeEditAndCopyEngine_CPU<ITMWarp, VoxelBlockHash>;
-} // namespace ITMLib
+class EditAndCopyEngine_CUDA<ITMWarp, PlainVoxelArray>;
+} //namespace ITMLib

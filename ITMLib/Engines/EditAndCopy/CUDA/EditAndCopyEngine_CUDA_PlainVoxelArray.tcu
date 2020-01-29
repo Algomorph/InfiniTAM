@@ -14,13 +14,13 @@
 //  limitations under the License.
 //  ================================================================
 
-#include "VolumeEditAndCopyEngine_CUDA.h"
-#include "VolumeEditAndCopyEngine_CUDA_PlainVoxelArray_Kernels.h"
+#include "EditAndCopyEngine_CUDA.h"
+#include "EditAndCopyEngine_CUDA_PlainVoxelArray_Kernels.h"
 #include "../../../../ORUtils/PlatformIndependence.h"
 #include "../../../../ORUtils/JetbrainsCUDASyntax.hpp"
 #include "../../../Utils/ITMCUDAUtils.h"
 #include "../../../Objects/Scene/ITMRepresentationAccess.h"
-#include "../Shared/VolumeEditAndCopyEngine_Shared.h"
+#include "../Shared/EditAndCopyEngine_Shared.h"
 
 
 #include <cstring>
@@ -33,20 +33,20 @@ using namespace ITMLib;
 
 
 template<typename TVoxel>
-VolumeEditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::VolumeEditAndCopyEngine_CUDA() {
+EditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::EditAndCopyEngine_CUDA() {
 	ORcudaSafeCall(cudaMalloc((void**) &readVoxelResult_device, sizeof(ReadVoxelResult<TVoxel>)));
 	ORcudaSafeCall(cudaMallocHost((void**) &readVoxelResult_host, sizeof(ReadVoxelResult<TVoxel>)));
 }
 
 template<typename TVoxel>
-VolumeEditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::~VolumeEditAndCopyEngine_CUDA() {
+EditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::~EditAndCopyEngine_CUDA() {
 	ORcudaSafeCall(cudaFree(readVoxelResult_device));
 	ORcudaSafeCall(cudaFreeHost(readVoxelResult_host));
 }
 
 template<typename TVoxel>
 void
-VolumeEditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::ResetScene(
+EditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::ResetScene(
 		ITMVoxelVolume<TVoxel, PlainVoxelArray>* scene) {
 	int numBlocks = scene->index.GetAllocatedBlockCount();
 	int blockSize = scene->index.GetVoxelBlockSize();
@@ -61,8 +61,8 @@ VolumeEditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::ResetScene(
 
 template<typename TVoxel>
 bool
-VolumeEditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::SetVoxel(ITMVoxelVolume<TVoxel, PlainVoxelArray>* scene,
-                                                                   Vector3i at, TVoxel voxel) {
+EditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::SetVoxel(ITMVoxelVolume<TVoxel, PlainVoxelArray>* scene,
+                                                          Vector3i at, TVoxel voxel) {
 	TVoxel* localVBA = scene->localVBA.GetVoxelBlocks();
 	const PlainVoxelArray::GridAlignedBox* arrayInfo = scene->index.GetIndexData();
 	ORUtils::MemoryBlock<bool> success(1, true, true);
@@ -76,7 +76,7 @@ VolumeEditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::SetVoxel(ITMVoxelVolume<T
 
 template<typename TVoxel>
 TVoxel
-VolumeEditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::ReadVoxel(
+EditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::ReadVoxel(
 		ITMVoxelVolume<TVoxel, PlainVoxelArray>* scene,
 		Vector3i at) {
 
@@ -101,7 +101,7 @@ VolumeEditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::ReadVoxel(
 
 template<typename TVoxel>
 TVoxel
-VolumeEditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::ReadVoxel(
+EditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::ReadVoxel(
 		ITMVoxelVolume<TVoxel, PlainVoxelArray>* scene,
 		Vector3i at,
 		PlainVoxelArray::IndexCache& cache) {
@@ -110,7 +110,7 @@ VolumeEditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::ReadVoxel(
 
 template<typename TVoxel>
 void
-VolumeEditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::OffsetWarps(
+EditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::OffsetWarps(
 		ITMVoxelVolume<TVoxel, PlainVoxelArray>* scene,
 		Vector3f offset) {
 	DIEWITHEXCEPTION_REPORTLOCATION("Not implemented");
@@ -118,7 +118,7 @@ VolumeEditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::OffsetWarps(
 
 template<typename TVoxel>
 bool
-VolumeEditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::IsPointInBounds(
+EditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::IsPointInBounds(
 		ITMVoxelVolume<TVoxel, PlainVoxelArray>* scene, const Vector3i& at) {
 	bool* in_bounds_CUDA;
 	ORcudaSafeCall(cudaMalloc((void**) &in_bounds_CUDA, sizeof(bool)));
@@ -132,14 +132,14 @@ VolumeEditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::IsPointInBounds(
 }
 
 template<typename TVoxel>
-bool VolumeEditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::CopySceneSlice(
+bool EditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::CopySceneSlice(
 		ITMVoxelVolume<TVoxel, PlainVoxelArray>* destination, ITMVoxelVolume<TVoxel, PlainVoxelArray>* source,
 		Vector6i bounds, const Vector3i& offset) {
 	Vector3i min_pt_source = Vector3i(bounds.min_x, bounds.min_y, bounds.min_z);
 	Vector3i max_pt_source = Vector3i(bounds.max_x - 1, bounds.max_y - 1, bounds.max_z - 1);
 
-	if (!VolumeEditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::IsPointInBounds(source, min_pt_source) ||
-	    !VolumeEditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::IsPointInBounds(source, max_pt_source)) {
+	if (!EditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::IsPointInBounds(source, min_pt_source) ||
+	    !EditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::IsPointInBounds(source, max_pt_source)) {
 		DIEWITHEXCEPTION_REPORTLOCATION(
 				"Specified source volume is at least partially out of bounds of the source scene.");
 	}
@@ -158,10 +158,10 @@ bool VolumeEditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::CopySceneSlice(
 	Vector3i max_pt_destination = Vector3i(bounds_destination.max_x - 1, bounds_destination.max_y - 1,
 	                                       bounds_destination.max_z - 1);
 
-	if (!VolumeEditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::IsPointInBounds(destination,
-	                                                                               min_pt_destination) ||
-	    !VolumeEditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::IsPointInBounds(destination,
-	                                                                               max_pt_destination)) {
+	if (!EditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::IsPointInBounds(destination,
+	                                                                      min_pt_destination) ||
+	    !EditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::IsPointInBounds(destination,
+	                                                                      max_pt_destination)) {
 		DIEWITHEXCEPTION_REPORTLOCATION(
 				"Targeted volume is at least partially out of bounds of the destination scene.");
 	}
@@ -211,11 +211,11 @@ inline static Vector6i GetSceneBounds(ITMVoxelVolume<TVoxel, PlainVoxelArray>* s
 }
 
 template<typename TVoxel>
-bool VolumeEditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::CopyScene(
+bool EditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::CopyScene(
 		ITMVoxelVolume<TVoxel, PlainVoxelArray>* destination,
 		ITMVoxelVolume<TVoxel, PlainVoxelArray>* source,
 		const Vector3i& offset) {
-	VolumeEditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::ResetScene(destination);
+	EditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::ResetScene(destination);
 	//TODO: this bounds treatment isn't quite correct -- it assumes same bounds for source & dest. Need to fix.
 	Vector6i bounds = GetSceneBounds(source);
 	if (offset.x > 0) {
@@ -233,7 +233,7 @@ bool VolumeEditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::CopyScene(
 	} else {
 		bounds.min_z -= offset.z;
 	}
-	return VolumeEditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::
+	return EditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::
 	CopySceneSlice(destination, source, bounds, offset);
 }
 
