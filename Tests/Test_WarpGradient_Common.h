@@ -30,11 +30,11 @@
 #include "../ITMLib/Engines/VolumeEditAndCopy/VolumeEditAndCopyEngineFactory.h"
 #include "../ITMLib/Engines/VolumeEditAndCopy/CPU/VolumeEditAndCopyEngine_CPU.h"
 #include "../ITMLib/SurfaceTrackers/Interface/SurfaceTracker.h"
-#include "../ITMLib/Engines/Indexing/VBH/CPU/ITMIndexingEngine_CPU_VoxelBlockHash.h"
+#include "../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
 
 #ifndef COMPILE_WITHOUT_CUDA
-#include "../ITMLib/Engines/Indexing/VBH/CUDA/ITMIndexingEngine_CUDA_VoxelBlockHash.h"
-#include "../ITMLib/Engines/Indexing/Interface/ITMIndexingEngine.h"
+#include "../ITMLib/Engines/Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
+#include "../ITMLib/Engines/Indexing/Interface/IndexingEngine.h"
 #include "../ITMLib/Engines/VolumeEditAndCopy/CUDA/VolumeEditAndCopyEngine_CUDA.h"
 #endif
 
@@ -85,7 +85,7 @@ struct WarpGradientDataFixture {
 		};
 		loadSdfVolume(&live_volume, "snoopy_partial_frame_17_");
 		loadSdfVolume(&canonical_volume, "snoopy_partial_frame_16_");
-		ITMIndexingEngine<ITMVoxel,TIndex,TMemoryType>::Instance().AllocateUsingOtherVolume(canonical_volume, live_volume);
+		IndexingEngine<ITMVoxel,TIndex,TMemoryType>::Instance().AllocateUsingOtherVolume(canonical_volume, live_volume);
 		loadWarpVolume(&warp_field_data_term, "warp_field_0_data_");
 		loadWarpVolume(&warp_field_iter0, "warp_field_0_data_framewise_warps_");
 		loadWarpVolume(&warp_field_data_term_smoothed, "warp_field_0_smoothed_");

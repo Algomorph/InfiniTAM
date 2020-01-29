@@ -33,7 +33,7 @@ void ITMVisualizationEngine_CPU<TVoxel, VoxelBlockHash>::FindVisibleBlocks(
 	Vector4f projParams = intrinsics->projectionParamsSimple.all;
 
 	int visibleBlockCount = 0;
-	int* visibleBlockHashCodes = scene->index.GetVisibleBlockHashCodes();
+	int* visibleBlockHashCodes = scene->index.GetUtilizedBlockHashCodes();
 
 	//build visible list
 	for (int targetIdx = 0; targetIdx < hashEntryCount; targetIdx++)
@@ -54,7 +54,7 @@ void ITMVisualizationEngine_CPU<TVoxel, VoxelBlockHash>::FindVisibleBlocks(
 			visibleBlockCount++;
 		}
 	}
-	scene->index.SetVisibleHashBlockCount(visibleBlockCount);
+	scene->index.SetUtilizedHashBlockCount(visibleBlockCount);
 }
 
 template<class TVoxel, class TIndex>
@@ -67,8 +67,8 @@ template<class TVoxel>
 int ITMVisualizationEngine_CPU<TVoxel, VoxelBlockHash>::CountVisibleBlocks(const ITMVoxelVolume<TVoxel,VoxelBlockHash> *scene, const ITMRenderState *renderState, int minBlockId, int maxBlockId) const
 {
 
-	int visibleBlockCount = scene->index.GetVisibleHashBlockCount();
-	const int *visibleBlockHashCodes = scene->index.GetVisibleBlockHashCodes();
+	int visibleBlockCount = scene->index.GetUtilizedHashBlockCount();
+	const int *visibleBlockHashCodes = scene->index.GetUtilizedBlockHashCodes();
 
 	int ret = 0;
 	for (int i = 0; i < visibleBlockCount; ++i) {
@@ -112,8 +112,8 @@ void ITMVisualizationEngine_CPU<TVoxel,VoxelBlockHash>::CreateExpectedDepths(con
 	std::vector<RenderingBlock> renderingBlocks(MAX_RENDERING_BLOCKS);
 	int numRenderingBlocks = 0;
 
-	const int *visibleBlockHashCodes = scene->index.GetVisibleBlockHashCodes();
-	int visibleEntryCount = scene->index.GetVisibleHashBlockCount();
+	const int *visibleBlockHashCodes = scene->index.GetUtilizedBlockHashCodes();
+	int visibleEntryCount = scene->index.GetUtilizedHashBlockCount();
 
 	//go through list of visible 8x8x8 blocks
 	for (int blockNo = 0; blockNo < visibleEntryCount; ++blockNo) {

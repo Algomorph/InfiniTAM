@@ -3,7 +3,7 @@
 #include "ITMSceneReconstructionEngine_CPU.h"
 
 #include "../Shared/ITMSceneReconstructionEngine_Shared.h"
-#include "../../Indexing/Shared/ITMIndexingEngine_Shared.h"
+#include "../../Indexing/Shared/IndexingEngine_Shared.h"
 
 using namespace ITMLib;
 template<class TVoxel>
@@ -54,8 +54,8 @@ void ITMSceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::IntegrateIntoScen
 	TVoxel *localVBA = scene->localVBA.GetVoxelBlocks();
 	ITMHashEntry *hashTable = scene->index.GetEntries();
 
-	int *visibleBlockHashCodes = scene->index.GetVisibleBlockHashCodes();
-	int visibleHashBlockCount = scene->index.GetVisibleHashBlockCount();
+	int *visibleBlockHashCodes = scene->index.GetUtilizedBlockHashCodes();
+	int visibleHashBlockCount = scene->index.GetUtilizedHashBlockCount();
 
 	bool stopIntegratingAtMaxW = scene->sceneParams->stop_integration_at_max_weight;
 
@@ -111,7 +111,7 @@ void ITMSceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::AllocateSceneFrom
 	Matrix4f M_d, invM_d;
 	Vector4f projParams_d, invProjParams_d;
 
-	if (resetVisibleList) scene->index.SetVisibleHashBlockCount(0);
+	if (resetVisibleList) scene->index.SetUtilizedHashBlockCount(0);
 
 	M_d = trackingState->pose_d->GetM(); M_d.inv(invM_d);
 
@@ -127,7 +127,7 @@ void ITMSceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::AllocateSceneFrom
 	int *excessAllocationList = scene->index.GetExcessAllocationList();
 	ITMHashEntry *hashTable = scene->index.GetEntries();
 	ITMHashSwapState *swapStates = scene->Swapping() ? scene->globalCache->GetSwapStates(false) : 0;
-	int* visibleBlockHashCodes = scene->index.GetVisibleBlockHashCodes();
+	int* visibleBlockHashCodes = scene->index.GetUtilizedBlockHashCodes();
 	HashBlockVisibility* hashBlockVisibilityTypes = scene->index.GetBlockVisibilityTypes();
 
 	int hashEntryCount = scene->index.hashEntryCount;
@@ -147,7 +147,7 @@ void ITMSceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::AllocateSceneFrom
 
 	scene->index.ClearHashEntryAllocationStates();
 
-	for (int i = 0; i < scene->index.GetVisibleHashBlockCount(); i++)
+	for (int i = 0; i < scene->index.GetUtilizedHashBlockCount(); i++)
 		hashBlockVisibilityTypes[visibleBlockHashCodes[i]] = VISIBLE_AT_PREVIOUS_FRAME_AND_UNSTREAMED;
 
 	//build hashVisibility
@@ -281,7 +281,7 @@ void ITMSceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::AllocateSceneFrom
 		}
 	}
 
-	scene->index.SetVisibleHashBlockCount(visibleHashBlockCount);
+	scene->index.SetUtilizedHashBlockCount(visibleHashBlockCount);
 	scene->localVBA.lastFreeBlockId = lastFreeVoxelBlockId;
 	scene->index.SetLastFreeExcessListId(lastFreeExcessListId);
 }

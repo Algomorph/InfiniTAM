@@ -18,7 +18,7 @@
 #include "../Interface/ITMDynamicSceneReconstructionEngine.h"
 #include "../../../Objects/Scene/PlainVoxelArray.h"
 #include "../../VolumeEditAndCopy/CUDA/VolumeEditAndCopyEngine_CUDA.h"
-#include "../../Indexing/VBH/CUDA/ITMIndexingEngine_CUDA_VoxelBlockHash.h"
+#include "../../Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
 
 namespace ITMLib {
 template<typename TVoxel, typename TWarp, typename TIndex>

@@ -27,12 +27,12 @@
 #include "../ITMLib/Utils/Configuration.h"
 #include "TestUtilsForSnoopyFrames16And17.h"
 //local - CPU
-#include "../ITMLib/Engines/Indexing/VBH/CPU/ITMIndexingEngine_CPU_VoxelBlockHash.h"
+#include "../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
 #include "../ITMLib/Engines/VolumeEditAndCopy/CPU/VolumeEditAndCopyEngine_CPU.h"
 #include "../ITMLib/Utils/Analytics/SceneStatisticsCalculator/CPU/ITMSceneStatisticsCalculator_CPU.h"
 //local - CUDA
 #ifndef COMPLIE_WITHOUT_CUDA
-#include "../ITMLib/Engines/Indexing/VBH/CUDA/ITMIndexingEngine_CUDA_VoxelBlockHash.h"
+#include "../ITMLib/Engines/Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
 #include "../ITMLib/Engines/VolumeEditAndCopy/CUDA/VolumeEditAndCopyEngine_CUDA.h"
 #include "CUDAAtomicTesting.h"
 #include "../ITMLib/Engines/VolumeEditAndCopy/VolumeEditAndCopyEngineFactory.h"
@@ -44,8 +44,8 @@
 using namespace ITMLib;
 
 BOOST_AUTO_TEST_CASE(ExpandVolume_CPU) {
-	ITMIndexingEngine<ITMVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>& indexing_engine
-			= ITMIndexingEngine<ITMVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance();
+	IndexingEngine<ITMVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>& indexing_engine
+			= IndexingEngine<ITMVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance();
 
 	ITMVoxelVolume<ITMVoxel, VoxelBlockHash> volume1(&configuration::get().general_voxel_volume_parameters,
 	                                                    configuration::get().swapping_mode ==
@@ -164,9 +164,9 @@ void TestAllocateBasedOnVolumeExpanded_Generic() {
 	ITMTrackingState trackingState(imageSize, TMemoryDeviceType);
 	ITMRenderState renderState(imageSize, configuration::get().general_voxel_volume_parameters.near_clipping_distance,
 	                           configuration::get().general_voxel_volume_parameters.far_clipping_distance, TMemoryDeviceType);
-	ITMIndexingEngine<ITMVoxel, VoxelBlockHash, TMemoryDeviceType>::Instance().AllocateFromDepth(
+	IndexingEngine<ITMVoxel, VoxelBlockHash, TMemoryDeviceType>::Instance().AllocateFromDepth(
 			&volume1, view, &trackingState, false, false);
-	ITMIndexingEngine<ITMVoxel, VoxelBlockHash, TMemoryDeviceType>::Instance()
+	IndexingEngine<ITMVoxel, VoxelBlockHash, TMemoryDeviceType>::Instance()
 			.AllocateUsingOtherVolumeExpanded(&volume2, &volume1);
 
 	BOOST_REQUIRE_EQUAL((ITMSceneStatisticsCalculator<ITMVoxel, VoxelBlockHash, TMemoryDeviceType>::Instance()
@@ -185,8 +185,8 @@ BOOST_AUTO_TEST_CASE(TestAllocateBasedOnVolumeExpanded_CUDA) {
 }
 
 BOOST_AUTO_TEST_CASE(ExpandVolume_CUDA) {
-	ITMIndexingEngine<ITMVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>& indexing_engine
-			= ITMIndexingEngine<ITMVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance();
+	IndexingEngine<ITMVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>& indexing_engine
+			= IndexingEngine<ITMVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance();
 
 	ITMVoxelVolume<ITMVoxel, VoxelBlockHash> volume1(&configuration::get().general_voxel_volume_parameters,
 	                                                    configuration::get().swapping_mode ==

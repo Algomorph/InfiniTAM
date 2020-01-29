@@ -21,7 +21,7 @@ namespace ITMLib {
 
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, typename TDerivedClass>
 template<WarpType TWarpType, typename TWarp>
-void ITMIndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::AllocateFromWarpedVolume(
+void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::AllocateFromWarpedVolume(
 		ITMVoxelVolume<TWarp, VoxelBlockHash>* warpField,
 		ITMVoxelVolume<TVoxel, VoxelBlockHash>* sourceTSDF,
 		ITMVoxelVolume<TVoxel, VoxelBlockHash>* targetTSDF) {
@@ -44,7 +44,6 @@ void ITMIndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>:
 				warpField, hashMarkerFunctor);
 
 		//Allocate the hash entries that will potentially have any data
-
 		static_cast<TDerivedClass*>(this)->AllocateHashEntriesUsingLists(targetTSDF);
 	} while (hashMarkerFunctor.collisionDetected);
 }

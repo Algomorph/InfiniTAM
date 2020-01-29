@@ -86,7 +86,7 @@ public:
 
 private:
 	int lastFreeExcessListId;
-	int visibleHashBlockCount;
+	int utilizedHashBlockCount;
 
 	/** The actual hash entries in the hash table, ordered by their hash codes. */
 	ORUtils::MemoryBlock<ITMHashEntry> hashEntries;
@@ -124,7 +124,7 @@ public:
 		this->hashEntries.SetFrom(&other.hashEntries, memoryCopyDirection);
 		this->excessAllocationList.SetFrom(&other.excessAllocationList, memoryCopyDirection);
 		this->lastFreeExcessListId = other.lastFreeExcessListId;
-		this->visibleHashBlockCount = other.visibleHashBlockCount;
+		this->utilizedHashBlockCount = other.utilizedHashBlockCount;
 	}
 
 	~VoxelBlockHash() = default;
@@ -170,9 +170,9 @@ public:
 	/** Get a temporary list for coordinates of voxel blocks to be soon allocated**/
 	Vector3s* GetAllocationBlockCoordinates() { return allocationBlockCoordinates.GetData(memoryType); }
 
-	const int* GetVisibleBlockHashCodes() const { return visibleBlockHashCodes.GetData(memoryType); }
+	const int* GetUtilizedBlockHashCodes() const { return visibleBlockHashCodes.GetData(memoryType); }
 
-	int* GetVisibleBlockHashCodes() { return visibleBlockHashCodes.GetData(memoryType); }
+	int* GetUtilizedBlockHashCodes() { return visibleBlockHashCodes.GetData(memoryType); }
 
 	HashBlockVisibility* GetBlockVisibilityTypes() { return blockVisibilityTypes.GetData(memoryType); }
 
@@ -190,9 +190,9 @@ public:
 
 	void SetLastFreeExcessListId(int newLastFreeExcessListId) { this->lastFreeExcessListId = newLastFreeExcessListId; }
 
-	int GetVisibleHashBlockCount() const { return this->visibleHashBlockCount; }
+	int GetUtilizedHashBlockCount() const { return this->utilizedHashBlockCount; }
 
-	void SetVisibleHashBlockCount(int visibleHashBlockCount) { this->visibleHashBlockCount = visibleHashBlockCount; }
+	void SetUtilizedHashBlockCount(int utilizedHashBlockCount) { this->utilizedHashBlockCount = utilizedHashBlockCount; }
 
 	/*VBH-specific*/
 	int GetExcessListSize() const { return this->excessListSize; }

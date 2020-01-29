@@ -23,7 +23,7 @@
 #include "../../../Utils/Geometry/ITMGeometryBooleanOperations.h"
 #include "../../../Utils/Analytics/SceneStatisticsCalculator/CUDA/ITMSceneStatisticsCalculator_CUDA.h"
 #include "VolumeEditAndCopyEngine_CUDA_VoxelBlockHash_Kernels.h"
-#include "../../Indexing/VBH/CUDA/ITMIndexingEngine_CUDA_VoxelBlockHash.h"
+#include "../../Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
 
 #include <cstring>
 #include <limits>
@@ -229,7 +229,7 @@ bool VolumeEditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::CopySceneSlice(
 				cudaMemcpy(tempData, allocationTempData_device, sizeof(CopyAllocationTempData),
 				           cudaMemcpyDeviceToHost));
 		if (tempData->countOfBlocksToCopy == 0) return false; //source volume empty in bounds or destination hash full
-		ITMIndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance()
+		IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance()
 				.AllocateHashEntriesUsingLists(destination);
 
 
@@ -274,7 +274,7 @@ bool VolumeEditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::CopySceneSlice(
 		dim3 cudaBlockSizeAL(256, 1);
 		dim3 gridSizeAL((int) ceil((float) hashEntryCount / (float) cudaBlockSizeAL.x));
 
-		ITMIndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance()
+		IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance()
 				.AllocateHashEntriesUsingLists(destination);
 
 
@@ -327,7 +327,7 @@ bool VolumeEditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::CopyScene(
 						blockCoordinates_device, (CopyAllocationTempData*) allocationTempData_device, copyHashIdBuffer);
 		ORcudaKernelCheck;
 		// allocate the necessary voxel blocks in the destination structure.
-		ITMIndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance()
+		IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance()
 				.AllocateHashEntriesUsingLists(destination);
 
 

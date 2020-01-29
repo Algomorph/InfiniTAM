@@ -68,13 +68,13 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_VBH_Expnaded_CPU_CUDA, Frame16And1
 	
 // *** allocate hash blocks ***
 	// CPU
-	ITMIndexingEngine<ITMVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>& indexer_CPU =
-			ITMIndexingEngine<ITMVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance();
+	IndexingEngine<ITMVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>& indexer_CPU =
+			IndexingEngine<ITMVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance();
 	indexer_CPU.AllocateFromDepth(&volume_VBH_17_CPU_depth_allocation, view_CPU);
 	indexer_CPU.AllocateUsingOtherVolumeAndSetVisibilityExpanded(&volume_VBH_17_CPU, &volume_VBH_17_CPU_depth_allocation, view_CPU);
 	// CUDA
-	ITMIndexingEngine<ITMVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>& indexer_CUDA =
-			ITMIndexingEngine<ITMVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance();
+	IndexingEngine<ITMVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>& indexer_CUDA =
+			IndexingEngine<ITMVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance();
 	indexer_CUDA.AllocateFromDepth(&volume_VBH_17_CUDA_depth_allocation, view_CUDA);
 	indexer_CUDA.AllocateUsingOtherVolumeAndSetVisibilityExpanded(&volume_VBH_17_CUDA, &volume_VBH_17_CUDA_depth_allocation, view_CUDA);
 

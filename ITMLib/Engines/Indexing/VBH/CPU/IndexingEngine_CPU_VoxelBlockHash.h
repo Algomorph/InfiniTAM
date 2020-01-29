@@ -15,38 +15,45 @@
 //  ================================================================
 #pragma once
 
-#include "../ITMIndexingEngine_VoxelBlockHash.h"
+#include "../IndexingEngine_VoxelBlockHash.h"
 
 
 namespace ITMLib {
 
 template<typename TVoxel>
-class ITMIndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU> :
-		public ITMIndexingEngine_VoxelBlockHash<TVoxel, MEMORYDEVICE_CPU,
-				ITMIndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>> {
+class IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU> :
+		public IndexingEngine_VoxelBlockHash<TVoxel, MEMORYDEVICE_CPU,
+				IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>> {
 private:
-	ITMIndexingEngine() = default;
+	IndexingEngine() = default;
 
 	void SetVisibilityToVisibleAtPreviousFrameAndUnstreamed(HashBlockVisibility* hashBlockVisibilityTypes,
 	                                                        const int* visibleBlockHashCodes,
 	                                                        int visibleHashBlockCount);
 public:
-	static ITMIndexingEngine& Instance() {
-		static ITMIndexingEngine instance; // Guaranteed to be destroyed.
+	static IndexingEngine& Instance() {
+		static IndexingEngine instance; // Guaranteed to be destroyed.
 		// Instantiated on first use.
 		return instance;
 	}
 
-	ITMIndexingEngine(ITMIndexingEngine const&) = delete;
-	void operator=(ITMIndexingEngine const&) = delete;
+	IndexingEngine(IndexingEngine const&) = delete;
+	void operator=(IndexingEngine const&) = delete;
 
-	void AllocateFromDepth(ITMVoxelVolume<TVoxel, VoxelBlockHash>* scene, const ITMView* view,
+	void AllocateFromDepth(ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
 	                       const ITMTrackingState* trackingState, bool onlyUpdateVisibleList,
 	                       bool resetVisibleList) override;
 
 	void AllocateFromDepth(ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
 	                       const Matrix4f& depth_camera_matrix = Matrix4f::Identity(),
 	                       bool onlyUpdateVisibleList = false, bool resetVisibleList = false) override;
+
+	void AllocateFromDepthAndSdfSpan(ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume,
+	                                 const ITMRenderState* sourceRenderState,
+	                                 const ITMView* view,
+	                                 const Matrix4f& depth_camera_matrix = Matrix4f::Identity(),
+	                                 bool onlyUpdateAllocatedList = false, bool resetAllocatedList = false) override;
+
 
 	void BuildVisibilityList(ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
 	                         const Matrix4f& depth_camera_matrix = Matrix4f::Identity());
@@ -91,7 +98,8 @@ public:
 	template<typename TVoxelTarget, typename TVoxelSource>
 	void AllocateUsingOtherVolumeAndSetVisibilityExpanded(ITMVoxelVolume<TVoxelTarget, VoxelBlockHash>* targetVolume,
 	                                                      ITMVoxelVolume<TVoxelSource, VoxelBlockHash>* sourceVolume,
-	                                                      ITMView* view, const Matrix4f& depth_camera_matrix = Matrix4f::Identity());
+	                                                      ITMView* view,
+	                                                      const Matrix4f& depth_camera_matrix = Matrix4f::Identity());
 
 };
 } //namespace ITMLib

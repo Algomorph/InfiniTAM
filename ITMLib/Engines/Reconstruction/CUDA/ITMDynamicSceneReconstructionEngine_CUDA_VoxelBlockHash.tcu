@@ -29,7 +29,7 @@ template<typename TVoxel, typename TWarp>
 void ITMDynamicSceneReconstructionEngine_CUDA<TVoxel, TWarp, VoxelBlockHash>::UpdateVisibleList(
 		ITMVoxelVolume<TVoxel, VoxelBlockHash>* scene, const ITMView* view, const ITMTrackingState* trackingState,
 		const ITMRenderState* renderState, bool resetVisibleList) {
-	ITMIndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance()
+	IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance()
 			.AllocateFromDepth(scene, view, trackingState, true, resetVisibleList);
 }
 
@@ -44,7 +44,7 @@ template<typename TVoxel, typename TWarp>
 void ITMDynamicSceneReconstructionEngine_CUDA<TVoxel, TWarp, VoxelBlockHash>::GenerateTsdfVolumeFromView(
 		ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view, const Matrix4f& depth_camera_matrix) {
 	ManipulationEngine_CUDA_VBH_Voxel::Inst().ResetScene(volume);
-	ITMIndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance()
+	IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance()
 			.AllocateFromDepth(volume, view, depth_camera_matrix, false, false);
 	this->IntegrateDepthImageIntoTsdfVolume_Helper(volume, view, depth_camera_matrix);
 }
@@ -57,8 +57,8 @@ void ITMDynamicSceneReconstructionEngine_CUDA<TVoxel, TWarp, VoxelBlockHash>::Ge
 		const Matrix4f& depth_camera_matrix) {
 	volume->Reset();
 	temporaryAllocationVolume->Reset();
-	ITMIndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>& indexer =
-			ITMIndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance();
+	IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>& indexer =
+			IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance();
 	// Allocate blocks based on depth
 	indexer.AllocateFromDepth(temporaryAllocationVolume, view, depth_camera_matrix, false, false);
 	// Expand allocation by 1-ring of blocks
@@ -70,7 +70,7 @@ template<typename TVoxel, typename TWarp>
 void ITMDynamicSceneReconstructionEngine_CUDA<TVoxel, TWarp, VoxelBlockHash>::FuseOneTsdfVolumeIntoAnother(
 		ITMVoxelVolume<TVoxel, VoxelBlockHash>* targetTsdfVolume,
 		ITMVoxelVolume<TVoxel, VoxelBlockHash>* liveTsdfVolume) {
-	ITMIndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance()
+	IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance()
 			.AllocateUsingOtherVolume(targetTsdfVolume, liveTsdfVolume);
 	TSDFFusionFunctor<TVoxel> fusionFunctor(targetTsdfVolume->sceneParams->max_integration_weight);
 	ITMDualSceneTraversalEngine<TVoxel, TVoxel, VoxelBlockHash, VoxelBlockHash, MEMORYDEVICE_CUDA>::
@@ -88,7 +88,7 @@ void ITMDynamicSceneReconstructionEngine_CUDA<TVoxel, TWarp, VoxelBlockHash>::Wa
 	ITMSceneTraversalEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::VoxelTraversal(targetTSDF,flagClearFunctor);
 
 	// Allocate new blocks where necessary (based on warps from source locations)
-	ITMIndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance()
+	IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance()
 			.template AllocateFromWarpedVolume<TWarpType>(warpField, sourceTSDF, targetTSDF);
 
 	TrilinearInterpolationFunctor<TVoxel, TWarp, VoxelBlockHash, TWarpType, MEMORYDEVICE_CUDA>
@@ -109,7 +109,7 @@ void ITMDynamicSceneReconstructionEngine_CUDA<TVoxel, TWarp, VoxelBlockHash>::In
 	Matrix4f rgb_camera_matrix;
 	Vector4f projParams_d, projParams_rgb;
 
-	if (volume->index.GetVisibleHashBlockCount() == 0) return;
+	if (volume->index.GetUtilizedHashBlockCount() == 0) return;
 
 	// compute modelview matrix of the RGB camera
 	if (TVoxel::hasColorInformation) rgb_camera_matrix = view->calib.trafo_rgb_to_depth.calib_inv * depth_camera_matrix;
@@ -126,10 +126,10 @@ void ITMDynamicSceneReconstructionEngine_CUDA<TVoxel, TWarp, VoxelBlockHash>::In
 	TVoxel* localVBA = volume->localVBA.GetVoxelBlocks();
 	ITMHashEntry* hashTable = volume->index.GetEntries();
 
-	int* visibleEntryHashCodes = volume->index.GetVisibleBlockHashCodes();
+	int* visibleEntryHashCodes = volume->index.GetUtilizedBlockHashCodes();
 
 	dim3 cudaBlockSize(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
-	dim3 gridSize(volume->index.GetVisibleHashBlockCount());
+	dim3 gridSize(volume->index.GetUtilizedHashBlockCount());
 
 	integrateIntoScene_device<TVoxel> << < gridSize, cudaBlockSize >> > (localVBA, hashTable, visibleEntryHashCodes,
 			rgb, rgbImgSize, depth, confidence, depthImgSize, depth_camera_matrix, rgb_camera_matrix, projParams_d, projParams_rgb, voxelSize, mu, maxW);

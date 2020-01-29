@@ -63,7 +63,7 @@ void ITMVisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::FindVisibleBlocks(ITMV
 	dim3 gridSizeAL((int)ceil((float)hashEntryCount / (float)cudaBlockSizeAL.x));
 	buildCompleteVisibleList_device << <gridSizeAL, cudaBlockSizeAL >> >(
 			hashTable, /*cacheStates, this->scene->useSwapping,*/ hashEntryCount,
-			scene->index.GetVisibleBlockHashCodes(), visibleEntryCount_device, scene->index.GetBlockVisibilityTypes(), M, projParams,
+					scene->index.GetUtilizedBlockHashCodes(), visibleEntryCount_device, scene->index.GetBlockVisibilityTypes(), M, projParams,
 		imgSize, voxelSize);
 	ORcudaKernelCheck;
 
@@ -74,7 +74,7 @@ void ITMVisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::FindVisibleBlocks(ITMV
 			}*/
 	int visibleHashBlockCount_CPU;
 	ORcudaSafeCall(cudaMemcpy(&visibleHashBlockCount_CPU, visibleEntryCount_device, sizeof(int), cudaMemcpyDeviceToHost));
-	scene->index.SetVisibleHashBlockCount(visibleHashBlockCount_CPU);
+	scene->index.SetUtilizedHashBlockCount(visibleHashBlockCount_CPU);
 }
 
 template<class TVoxel, class TIndex>
@@ -86,8 +86,8 @@ int ITMVisualizationEngine_CUDA<TVoxel, TIndex>::CountVisibleBlocks(const ITMVox
 template<class TVoxel>
 int ITMVisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::CountVisibleBlocks(const ITMVoxelVolume<TVoxel,VoxelBlockHash> *scene, const ITMRenderState *renderState, int minBlockId, int maxBlockId) const
 {
-	int visibleEntryCount = scene->index.GetVisibleHashBlockCount();
-	const int *visibleEntryIDs_device = scene->index.GetVisibleBlockHashCodes();
+	int visibleEntryCount = scene->index.GetUtilizedHashBlockCount();
+	const int *visibleEntryIDs_device = scene->index.GetUtilizedBlockHashCodes();
 
 	ORcudaSafeCall(cudaMemset(noTotalBlocks_device, 0, sizeof(uint)));
 
@@ -132,8 +132,8 @@ void ITMVisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::CreateExpectedDepths(c
 	//go through list of visible 8x8x8 blocks
 	{
 		const ITMHashEntry *hash_entries = scene->index.GetEntries();
-		const int *visibleEntryIDs = scene->index.GetVisibleBlockHashCodes();
-		int visibleEntryCount = scene->index.GetVisibleHashBlockCount();
+		const int *visibleEntryIDs = scene->index.GetUtilizedBlockHashCodes();
+		int visibleEntryCount = scene->index.GetUtilizedHashBlockCount();
 		if (visibleEntryCount == 0) return;
 
 		dim3 blockSize(256);

@@ -22,13 +22,13 @@
 #include "../Shared/SurfaceTrackerSharedFunctors.h"
 #include "../WarpGradientFunctors/WarpGradientFunctor_SlavchevaOptimized.h"
 #include "../WarpGradientFunctors/WarpGradientFunctor_SlavchevaDiagnostic.h"
-#include "../../Engines/Indexing/Interface/ITMIndexingEngine.h"
+#include "../../Engines/Indexing/Interface/IndexingEngine.h"
 
 #include "../../Utils/Analytics/SceneStatisticsCalculator/CPU/ITMSceneStatisticsCalculator_CPU.h"
 
 #include "../../Engines/Traversal/CPU/ITMSceneTraversal_CPU_VoxelBlockHash.h"
 #include "../../Engines/Traversal/CPU/ITMSceneTraversal_CPU_PlainVoxelArray.h"
-#include "../../Engines/Indexing/VBH/CPU/ITMIndexingEngine_CPU_VoxelBlockHash.h"
+#include "../../Engines/Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
 #include "../../Engines/VolumeEditAndCopy/CPU/VolumeEditAndCopyEngine_CPU.h"
 
 #ifdef __CUDACC__
@@ -36,7 +36,7 @@
 
 #include "../../Engines/Traversal/CUDA/ITMSceneTraversal_CUDA_VoxelBlockHash.h"
 #include "../../Engines/Traversal/CUDA/ITMSceneTraversal_CUDA_PlainVoxelArray.h"
-#include "../../Engines/Indexing/VBH/CUDA/ITMIndexingEngine_CUDA_VoxelBlockHash.h"
+#include "../../Engines/Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
 #include "../../Engines/VolumeEditAndCopy/CUDA/VolumeEditAndCopyEngine_CUDA.h"
 #endif
 
@@ -94,10 +94,10 @@ SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorType>::
 	ITMSceneTraversalEngine<TWarp, TIndex, TMemoryDeviceType>::template
 	StaticVoxelTraversal<ClearOutGradientStaticFunctor<TWarp>>(warpField);
 
-	ITMIndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::Instance()
+	IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::Instance()
 			.AllocateUsingOtherVolume(canonicalScene, liveScene);
 
-	ITMIndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::Instance()
+	IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::Instance()
 			.AllocateUsingOtherVolume(warpField, liveScene);
 
 	WarpGradientFunctor<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorType>

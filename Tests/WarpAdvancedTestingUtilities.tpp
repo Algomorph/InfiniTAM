@@ -52,19 +52,19 @@ GenerateRawLiveAndCanonicalVolumes(bool allocateLiveFromBothImages,
 	Vector2i imageSize(640, 480);
 
 	if (allocateLiveFromBothImages) {
-		ITMIndexingEngine<ITMVoxel, TIndex, TMemoryDeviceType>::Instance().AllocateFromDepth(
+		IndexingEngine<ITMVoxel, TIndex, TMemoryDeviceType>::Instance().AllocateFromDepth(
 				live_volumes[1], view);
 	}
 
 	updateView(&view, "TestData/snoopy_depth_000017.png",
 	           "TestData/snoopy_color_000017.png", "TestData/snoopy_omask_000017.png",
 	           "TestData/snoopy_calib.txt", TMemoryDeviceType);
-	ITMIndexingEngine<ITMVoxel, TIndex, TMemoryDeviceType>::Instance().AllocateFromDepth(
+	IndexingEngine<ITMVoxel, TIndex, TMemoryDeviceType>::Instance().AllocateFromDepth(
 			live_volumes[1], view);
 
 	live_index_to_start_from = expand_raw_live_allocation ? 0 : 1;
 	if (expand_raw_live_allocation) {
-		ITMIndexingEngine<ITMVoxel, TIndex, TMemoryDeviceType>::Instance().AllocateUsingOtherVolumeAndSetVisibilityExpanded(
+		IndexingEngine<ITMVoxel, TIndex, TMemoryDeviceType>::Instance().AllocateUsingOtherVolumeAndSetVisibilityExpanded(
 				live_volumes[0], live_volumes[1], view);
 	}
 	ITMDynamicSceneReconstructionEngine<ITMVoxel, ITMWarp, TIndex>* reconstructionEngine =

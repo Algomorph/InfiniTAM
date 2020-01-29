@@ -36,8 +36,8 @@ ITMDynamicSceneReconstructionEngine_CPU<TVoxel, TWarp, VoxelBlockHash>::Integrat
 	TVoxel* localVBA = volume->localVBA.GetVoxelBlocks();
 	ITMHashEntry* hashTable = volume->index.GetEntries();
 
-	int* visibleEntryHashCodes = volume->index.GetVisibleBlockHashCodes();
-	int visibleEntryCount = volume->index.GetVisibleHashBlockCount();
+	int* visibleEntryHashCodes = volume->index.GetUtilizedBlockHashCodes();
+	int visibleEntryCount = volume->index.GetUtilizedHashBlockCount();
 
 #ifdef WITH_OPENMP
 #pragma omp parallel for default(none) shared(visibleEntryCount, visibleEntryHashCodes, localVBA, hashTable, voxelSize,\
@@ -103,7 +103,7 @@ template<typename TVoxel, typename TWarp>
 void ITMDynamicSceneReconstructionEngine_CPU<TVoxel, TWarp, VoxelBlockHash>::FuseOneTsdfVolumeIntoAnother(
 		ITMVoxelVolume<TVoxel, VoxelBlockHash>* canonicalScene,
 		ITMVoxelVolume<TVoxel, VoxelBlockHash>* liveScene) {
-	ITMIndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance()
+	IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance()
 			.AllocateUsingOtherVolume(canonicalScene, liveScene);
 	TSDFFusionFunctor<TVoxel> fusionFunctor(canonicalScene->sceneParams->max_integration_weight);
 	ITMDualSceneTraversalEngine<TVoxel, TVoxel, VoxelBlockHash, VoxelBlockHash, MEMORYDEVICE_CPU>::
@@ -122,7 +122,7 @@ template<typename TVoxel, typename TWarp>
 void ITMDynamicSceneReconstructionEngine_CPU<TVoxel, TWarp, VoxelBlockHash>::GenerateTsdfVolumeFromView(
 		ITMVoxelVolume<TVoxel, VoxelBlockHash>* scene, const ITMView* view, const Matrix4f& depth_camera_matrix) {
 	this->sceneManager.ResetScene(scene);
-	ITMIndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance()
+	IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance()
 			.AllocateFromDepth(scene, view, depth_camera_matrix, false, false);
 	this->IntegrateDepthImageIntoTsdfVolume_Helper(scene, view, depth_camera_matrix);
 }
@@ -134,8 +134,8 @@ void ITMDynamicSceneReconstructionEngine_CPU<TVoxel, TWarp, VoxelBlockHash>::Gen
 		const Matrix4f& depth_camera_matrix) {
 	volume->Reset();
 	temporaryAllocationVolume->Reset();
-	ITMIndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>& indexer =
-			ITMIndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance();
+	IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>& indexer =
+			IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance();
 	// Allocate blocks based on depth
 	indexer.AllocateFromDepth(temporaryAllocationVolume, view, depth_camera_matrix, false, false);
 	// Expand allocation by 1-ring of blocks
@@ -180,7 +180,7 @@ void ITMDynamicSceneReconstructionEngine_CPU<TVoxel, TWarp, VoxelBlockHash>::War
 	ITMSceneTraversalEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::VoxelTraversal(targetTSDF, flagClearFunctor);
 
 	// Allocate new blocks where necessary, filter based on flags from source
-	ITMIndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance().template AllocateFromWarpedVolume<TWarpType>(
+	IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance().template AllocateFromWarpedVolume<TWarpType>(
 			warpField, sourceTSDF, targetTSDF);
 
 	TrilinearInterpolationFunctor<TVoxel, TWarp, VoxelBlockHash, TWarpType, MEMORYDEVICE_CPU>
@@ -196,7 +196,7 @@ template<typename TVoxel, typename TWarp>
 void ITMDynamicSceneReconstructionEngine_CPU<TVoxel, TWarp, VoxelBlockHash>::UpdateVisibleList(
 		ITMVoxelVolume<TVoxel, VoxelBlockHash>* scene, const ITMView* view, const ITMTrackingState* trackingState,
 		const ITMRenderState* renderState, bool resetVisibleList) {
-	ITMIndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance()
+	IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance()
 			.AllocateFromDepth(scene, view, trackingState, true, resetVisibleList);
 }
 

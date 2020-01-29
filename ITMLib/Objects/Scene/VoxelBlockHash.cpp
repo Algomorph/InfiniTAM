@@ -16,8 +16,8 @@
 
 #include "VoxelBlockHash.h"
 #include "../../ITMLibDefines.h"
-#include "../../Engines/Indexing/VBH/CPU/ITMIndexingEngine_CPU_VoxelBlockHash.h"
-#include "../../Engines/Indexing/VBH/CUDA/ITMIndexingEngine_CUDA_VoxelBlockHash.h"
+#include "../../Engines/Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
+#include "../../Engines/Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
 
 namespace ITMLib {
 
@@ -26,11 +26,11 @@ ITMHashEntry VoxelBlockHash::GetHashEntryAt(const Vector3s& pos, int& hashCode) 
 	const ITMHashEntry* entries = this->GetEntries();
 	switch (memoryType) {
 		case MEMORYDEVICE_CPU:
-			return ITMIndexingEngine<ITMVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance()
+			return IndexingEngine<ITMVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance()
 					.FindHashEntry(*this,pos,hashCode);
 #ifndef COMPILE_WITHOUT_CUDA
 		case MEMORYDEVICE_CUDA:
-			return ITMIndexingEngine<ITMVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance()
+			return IndexingEngine<ITMVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance()
 					.FindHashEntry(*this,pos, hashCode);
 #endif
 		default:
@@ -55,7 +55,7 @@ VoxelBlockHash::VoxelBlockHash(VoxelBlockHashParameters parameters, MemoryDevice
 		memoryType(memoryType),
 		hashEntries(hashEntryCount, memoryType),
 		excessAllocationList(excessListSize, memoryType),
-		visibleHashBlockCount(0)
+		utilizedHashBlockCount(0)
 		{
 	hashEntryAllocationStates.Clear(NEEDS_NO_CHANGE);
 

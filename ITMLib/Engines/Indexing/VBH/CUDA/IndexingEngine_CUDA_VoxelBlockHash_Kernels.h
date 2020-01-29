@@ -19,7 +19,7 @@
 #include "../../../../Utils/ITMCUDAUtils.h"
 #include "../../../../Objects/Scene/ITMGlobalCache.h"
 #include "../../../VolumeEditAndCopy/Shared/VolumeEditAndCopyEngine_Shared.h"
-#include "../../Shared/ITMIndexingEngine_Shared.h"
+#include "../../Shared/IndexingEngine_Shared.h"
 
 namespace {
 //CUDA kernels

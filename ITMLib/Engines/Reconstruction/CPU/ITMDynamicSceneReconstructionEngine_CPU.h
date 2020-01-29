@@ -6,7 +6,7 @@
 #include "../Interface/ITMDynamicSceneReconstructionEngine.h"
 #include "../../../Objects/Scene/PlainVoxelArray.h"
 #include "../../VolumeEditAndCopy/CPU/VolumeEditAndCopyEngine_CPU.h"
-#include "../../Indexing/VBH/CPU/ITMIndexingEngine_CPU_VoxelBlockHash.h"
+#include "../../Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
 #include "../../Common/ITMWarpEnums.h"
 
 

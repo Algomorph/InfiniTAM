@@ -15,7 +15,7 @@
 //  ================================================================
 #pragma once
 
-#include "ITMIndexingEngine.h"
+#include "IndexingEngine.h"
 #include "../../../Objects/Scene/ITMRepresentationAccess.h"
 #include "../../VolumeEditAndCopy/Shared/VolumeEditAndCopyEngine_Shared.h"
 
@@ -23,7 +23,7 @@ using namespace ITMLib;
 
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-void ITMIndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateFromDepth(ITMVoxelVolume<TVoxel, TIndex>* scene,
+void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateFromDepth(ITMVoxelVolume<TVoxel, TIndex>* volume,
                                                                              const ITMView* view,
                                                                              const ITMTrackingState* trackingState,
                                                                              bool onlyUpdateVisibleList,
@@ -31,33 +31,43 @@ void ITMIndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateFromDepth(ITM
 
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-void ITMIndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateFromDepth(ITMVoxelVolume<TVoxel, TIndex>* scene,
+void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateFromDepth(ITMVoxelVolume<TVoxel, TIndex>* scene,
                                                                              const ITMView* view,
                                                                              const Matrix4f& depth_camera_matrix,
                                                                              bool onlyUpdateVisibleList,
                                                                              bool resetVisibleList) {}
 
+
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateFromDepthAndSdfSpan(
+		ITMVoxelVolume<TVoxel, TIndex>* targetVolume,
+		const ITMRenderState* sourceRenderState,
+		const ITMView* view,
+		const Matrix4f& depth_camera_matrix,
+		bool onlyUpdateAllocatedList, bool resetAllocatedList) {}
+
+
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 template<typename TVoxelTarget, typename TVoxelSource>
-void ITMIndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateUsingOtherVolume(
+void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateUsingOtherVolume(
 		ITMVoxelVolume<TVoxelTarget, TIndex>* targetVolume,
 		ITMVoxelVolume<TVoxelSource, TIndex>* sourceVolume) {}
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 template<WarpType TWarpType, typename TWarp>
-void ITMIndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateFromWarpedVolume(
+void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateFromWarpedVolume(
 		ITMVoxelVolume<TWarp, TIndex>* warpField,
 		ITMVoxelVolume<TVoxel, TIndex>* sourceTSDF,
 		ITMVoxelVolume<TVoxel, TIndex>* targetTSDF) {}
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 template<typename TVoxelTarget, typename TVoxelSource>
-void ITMIndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateUsingOtherVolumeExpanded(
+void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateUsingOtherVolumeExpanded(
 		ITMVoxelVolume<TVoxelTarget, TIndex>* targetVolume, ITMVoxelVolume<TVoxelSource, TIndex>* sourceVolume) {}
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 template<typename TVoxelTarget, typename TVoxelSource>
-void ITMIndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateUsingOtherVolumeAndSetVisibilityExpanded(
+void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateUsingOtherVolumeAndSetVisibilityExpanded(
 		ITMVoxelVolume<TVoxelTarget, TIndex>* targetVolume,
 		ITMVoxelVolume<TVoxelSource, TIndex>* sourceVolume,
 		ITMView* view, const Matrix4f& depth_camera_matrix) {}

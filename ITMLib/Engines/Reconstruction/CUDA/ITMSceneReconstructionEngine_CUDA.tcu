@@ -5,7 +5,7 @@
 #include "../Shared/ITMSceneReconstructionEngine_Shared.h"
 #include "../../../Utils/ITMCUDAUtils.h"
 #include "../../../../ORUtils/JetbrainsCUDASyntax.hpp"
-#include "../../Indexing/Shared/ITMIndexingEngine_Shared.h"
+#include "../../Indexing/Shared/IndexingEngine_Shared.h"
 #include "../../../Utils/Configuration.h"
 
 
@@ -100,7 +100,7 @@ void ITMSceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::AllocateSceneFro
 	Matrix4f M_d, invM_d;
 	Vector4f projParams_d, invProjParams_d;
 
-	if (resetVisibleList) scene->index.SetVisibleHashBlockCount(0);
+	if (resetVisibleList) scene->index.SetUtilizedHashBlockCount(0);
 
 	M_d = trackingState->pose_d->GetM();
 	M_d.inv(invM_d);
@@ -120,7 +120,7 @@ void ITMSceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::AllocateSceneFro
 
 	const int hashEntryCount = scene->index.hashEntryCount;
 
-	int* visibleBlockHashCodes = scene->index.GetVisibleBlockHashCodes();
+	int* visibleBlockHashCodes = scene->index.GetUtilizedBlockHashCodes();
 	HashBlockVisibility* blockVisibilityTypes = scene->index.GetBlockVisibilityTypes();
 
 	dim3 cudaBlockSizeHV(16, 16);
@@ -131,7 +131,7 @@ void ITMSceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::AllocateSceneFro
 	dim3 gridSizeAL((int) ceil((float) hashEntryCount / (float) cudaBlockSizeAL.x));
 
 	dim3 cudaBlockSizeVS(256, 1);
-	dim3 gridSizeVS((int) ceil((float) scene->index.GetVisibleHashBlockCount() / (float) cudaBlockSizeVS.x));
+	dim3 gridSizeVS((int) ceil((float) scene->index.GetUtilizedHashBlockCount() / (float) cudaBlockSizeVS.x));
 
 	float oneOverHashBlockSize = 1.0f / (voxelSize * VOXEL_BLOCK_SIZE);
 	float surface_cutoff_distance = configuration::get().general_voxel_volume_parameters.block_allocation_band_factor * mu;
@@ -149,7 +149,7 @@ void ITMSceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::AllocateSceneFro
 
 	if (gridSizeVS.x > 0) {
 		setVisibleEntriesToVisibleAtPreviousFrameAndUnstreamed << < gridSizeVS, cudaBlockSizeVS >> >
-		                                                                        (blockVisibilityTypes, visibleBlockHashCodes, scene->index.GetVisibleHashBlockCount());
+		                                                                        (blockVisibilityTypes, visibleBlockHashCodes, scene->index.GetUtilizedHashBlockCount());
 		ORcudaKernelCheck;
 	}
 
@@ -193,7 +193,7 @@ void ITMSceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::AllocateSceneFro
 	}
 
 	ORcudaSafeCall(cudaMemcpy(tempData, allocationTempData_device, sizeof(AllocationTempData), cudaMemcpyDeviceToHost));
-	scene->index.SetVisibleHashBlockCount(tempData->visibleBlockCount);
+	scene->index.SetUtilizedHashBlockCount(tempData->visibleBlockCount);
 	scene->localVBA.lastFreeBlockId = tempData->noAllocatedVoxelEntries;
 	scene->index.SetLastFreeExcessListId(tempData->noAllocatedExcessEntries);
 
@@ -210,7 +210,7 @@ void ITMSceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::IntegrateIntoSce
 	Matrix4f M_d, M_rgb;
 	Vector4f projParams_d, projParams_rgb;
 
-	if (scene->index.GetVisibleHashBlockCount()== 0) return;
+	if (scene->index.GetUtilizedHashBlockCount() == 0) return;
 
 	M_d = trackingState->pose_d->GetM();
 	// compute modelview matrix of the RGB camera
@@ -228,10 +228,10 @@ void ITMSceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::IntegrateIntoSce
 	TVoxel* localVBA = scene->localVBA.GetVoxelBlocks();
 	ITMHashEntry* hashTable = scene->index.GetEntries();
 
-	int* visibleBlockHashCodes = scene->index.GetVisibleBlockHashCodes();
+	int* visibleBlockHashCodes = scene->index.GetUtilizedBlockHashCodes();
 
 	dim3 cudaBlockSize(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
-	dim3 gridSize(scene->index.GetVisibleHashBlockCount());
+	dim3 gridSize(scene->index.GetUtilizedHashBlockCount());
 
 	if (scene->sceneParams->stop_integration_at_max_weight) {
 		integrateIntoScene_device<TVoxel, true> << < gridSize, cudaBlockSize >> > (localVBA, hashTable, visibleBlockHashCodes,

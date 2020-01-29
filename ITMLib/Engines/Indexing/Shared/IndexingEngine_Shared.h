@@ -87,7 +87,7 @@ inline bool MarkAsNeedingAllocationIfNotFound(ITMLib::HashEntryAllocationState* 
 			{
 				//single-threaded version
 				if (hashEntryStates[hashCode] != ITMLib::NEEDS_NO_CHANGE) {
-					if (!IS_EQUAL3(hashBlockCoordinates[hashCode], desiredHashBlockPosition)){
+					if (!IS_EQUAL3(hashBlockCoordinates[hashCode], desiredHashBlockPosition)) {
 						//hash code already marked for allocation, but at different coordinates, cannot allocate
 						collisionDetected = true;
 					}
@@ -223,12 +223,12 @@ struct WarpBasedAllocationMarkerFunctor {
 		int vmIndex;
 #if !defined(__CUDACC__) && !defined(WITH_OPENMP)
 		const TVoxel& sourceTSDFVoxelAtWarp = readVoxel(sourceTSDFVoxels, sourceTSDFHashEntries,
-		                                                warpedPositionTruncated,
-		                                                vmIndex, sourceTSDFCache);
+														warpedPositionTruncated,
+														vmIndex, sourceTSDFCache);
 #else //don't use cache when multithreading!
 		const TVoxel& sourceTSDFVoxelAtWarp = readVoxel(sourceTSDFVoxels, sourceTSDFHashEntries,
-														warpedPositionTruncated,
-														vmIndex);
+		                                                warpedPositionTruncated,
+		                                                vmIndex);
 #endif
 
 		int targetBlockHash = HashCodeFromBlockPosition(hashBlockPosition);
@@ -263,6 +263,120 @@ _CPU_AND_GPU_CODE_ inline int getIncrementCount(Vector3s coord1, Vector3s coord2
 	       static_cast<int>(coord1.z != coord2.z);
 }
 
+
+_CPU_AND_GPU_CODE_ inline void
+prepareForAllocationFromDepthAndTsdf(ITMLib::HashEntryAllocationState* hashEntryStates,
+                                     HashBlockVisibility* blockVisibilityTypes, int x, int y,
+                                     Vector3s* blockCoords, const CONSTPTR(float)* depth, Matrix4f invertedCameraPose,
+                                     Vector4f invertedCameraProjectionParameters, float surface_distance_cutoff,
+                                     Vector2i imgSize, float oneOverVoxelBlockSize_Meters,
+                                     const CONSTPTR(ITMHashEntry)* hashTable, float viewFrustum_min,
+                                     float viewFrustum_max,
+                                     bool& collisionDetected) {
+	float depth_measure;
+	int stepCount;
+	Vector4f pt_camera_f;
+
+	depth_measure = depth[x + y * imgSize.x];
+	if (depth_measure <= 0 || (depth_measure - surface_distance_cutoff) < 0 ||
+	    (depth_measure - surface_distance_cutoff) < viewFrustum_min ||
+	    (depth_measure + surface_distance_cutoff) > viewFrustum_max)
+		return;
+
+
+	pt_camera_f.z = depth_measure; // (orthogonal) distance to the point from the image plane (meters)
+	pt_camera_f.x =
+			pt_camera_f.z * ((float(x) - invertedCameraProjectionParameters.z) * invertedCameraProjectionParameters.x);
+	pt_camera_f.y =
+			pt_camera_f.z * ((float(y) - invertedCameraProjectionParameters.w) * invertedCameraProjectionParameters.y);
+
+	// distance to the point along camera ray
+	float norm = sqrtf(pt_camera_f.x * pt_camera_f.x + pt_camera_f.y * pt_camera_f.y + pt_camera_f.z * pt_camera_f.z);
+
+	Vector4f pt_buff;
+
+	//Vector3f offset(-halfVoxelSize);
+	pt_buff = pt_camera_f * (1.0f - surface_distance_cutoff / norm);
+	pt_buff.w = 1.0f;
+	//position along segment to march along ray in hash blocks (here -- starting point)
+	// account for the fact that voxel coordinates represent the voxel center, and we need the extreme corner position of
+	// the hash block, i.e. 0.5 voxel (1/16 block) offset from the position along the ray
+	Vector3f currentCheckPosition_HashBlocks = (TO_VECTOR3(invertedCameraPose * pt_buff)) * oneOverVoxelBlockSize_Meters
+	                                           + Vector3f(1.0f / (2.0f * VOXEL_BLOCK_SIZE));
+
+	pt_buff = pt_camera_f * (1.0f + surface_distance_cutoff / norm);
+	pt_buff.w = 1.0f;
+	//end position of the segment to march along the ray
+	Vector3f endCheckPosition_HashBlocks = (TO_VECTOR3(invertedCameraPose * pt_buff)) * oneOverVoxelBlockSize_Meters
+	                                       + Vector3f(1.0f / (2.0f * VOXEL_BLOCK_SIZE));
+
+	// segment from start of the (truncated SDF) band, through the observed point, and to the opposite (occluded)
+	// end of the (truncated SDF) band (increased by backBandFactor), along the ray cast from the camera through the
+	// point, in camera space
+	ITMLib::ITMSegment marchSegment(currentCheckPosition_HashBlocks, endCheckPosition_HashBlocks);
+
+	// number of steps to take along the truncated SDF band
+	stepCount = (int) std::ceil(2.0f * marchSegment.length());
+
+	// a single stride along the sdf band segment from one step to the next
+	Vector3f strideVector = marchSegment.direction / (float) (stepCount - 1);
+
+	Vector3s previousHashBlockPosition;
+
+	//add neighbouring blocks
+	for (int i = 0; i < stepCount; i++) {
+		//find block position at current step
+		Vector3s currentHashBlockPosition = TO_SHORT_FLOOR3(currentCheckPosition_HashBlocks);
+		int incrementCount;
+		if (i > 0 && (incrementCount = getIncrementCount(currentHashBlockPosition, previousHashBlockPosition)) > 1) {
+			if (incrementCount == 2) {
+				for (int iDirection = 0; iDirection < 3; iDirection++) {
+					if (currentHashBlockPosition.values[iDirection] != previousHashBlockPosition.values[iDirection]) {
+						Vector3s potentiallyMissedBlockPosition = previousHashBlockPosition;
+						potentiallyMissedBlockPosition.values[iDirection] = currentHashBlockPosition.values[iDirection];
+						if (SegmentIntersectsGridAlignedCube3D(marchSegment, TO_FLOAT3(potentiallyMissedBlockPosition),
+						                                       1.0f)) {
+							MarkForAllocationAndSetVisibilityTypeIfNotFound(
+									hashEntryStates,
+									blockCoords, blockVisibilityTypes, potentiallyMissedBlockPosition, hashTable,
+									collisionDetected);
+						}
+					}
+				}
+			} else {
+				//incrementCount == 3
+				for (int iDirection = 0; iDirection < 3; iDirection++) {
+					Vector3s potentiallyMissedBlockPosition = previousHashBlockPosition;
+					potentiallyMissedBlockPosition.values[iDirection] = currentHashBlockPosition.values[iDirection];
+					if (SegmentIntersectsGridAlignedCube3D(marchSegment, TO_FLOAT3(potentiallyMissedBlockPosition),
+					                                       1.0f)) {
+						MarkForAllocationAndSetVisibilityTypeIfNotFound(
+								hashEntryStates,
+								blockCoords, blockVisibilityTypes, potentiallyMissedBlockPosition, hashTable,
+								collisionDetected);
+					}
+					potentiallyMissedBlockPosition = currentHashBlockPosition;
+					potentiallyMissedBlockPosition.values[iDirection] = previousHashBlockPosition.values[iDirection];
+					if (SegmentIntersectsGridAlignedCube3D(marchSegment, TO_FLOAT3(potentiallyMissedBlockPosition),
+					                                       1.0f)) {
+						MarkForAllocationAndSetVisibilityTypeIfNotFound(
+								hashEntryStates,
+								blockCoords, blockVisibilityTypes, potentiallyMissedBlockPosition, hashTable,
+								collisionDetected);
+					}
+				}
+			}
+		}
+		MarkForAllocationAndSetVisibilityTypeIfNotFound(hashEntryStates,
+		                                                blockCoords,
+		                                                blockVisibilityTypes, currentHashBlockPosition, hashTable,
+		                                                collisionDetected);
+
+		currentCheckPosition_HashBlocks += strideVector;
+		previousHashBlockPosition = currentHashBlockPosition;
+	}
+}
+
 _CPU_AND_GPU_CODE_ inline void
 buildHashAllocAndVisibleTypePP(ITMLib::HashEntryAllocationState* hashEntryStates,
                                HashBlockVisibility* blockVisibilityTypes, int x, int y,
@@ -276,7 +390,8 @@ buildHashAllocAndVisibleTypePP(ITMLib::HashEntryAllocationState* hashEntryStates
 	Vector4f pt_camera_f;
 
 	depth_measure = depth[x + y * imgSize.x];
-	if (depth_measure <= 0 || (depth_measure - surface_distance_cutoff) < 0 || (depth_measure - surface_distance_cutoff) < viewFrustum_min ||
+	if (depth_measure <= 0 || (depth_measure - surface_distance_cutoff) < 0 ||
+	    (depth_measure - surface_distance_cutoff) < viewFrustum_min ||
 	    (depth_measure + surface_distance_cutoff) > viewFrustum_max)
 		return;
 

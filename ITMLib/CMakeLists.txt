@@ -246,45 +246,45 @@ set(ITMLIB_ENGINES_MULTISCENE_HEADERS
     )
 #====================================== INDEXING ENGINES ===============================================================
 set(ITMLIB_ENGINES_INDEXING_SOURCES
-	Engines/Indexing/VBH/ITMIndexingEngine_VoxelBlockHash.tpp
+	Engines/Indexing/VBH/IndexingEngine_VoxelBlockHash.tpp
     )
 
 set(ITMLIB_ENGINES_INDEXING_HEADERS
-	Engines/Indexing/VBH/ITMIndexingEngine_VoxelBlockHash.h
+	Engines/Indexing/VBH/IndexingEngine_VoxelBlockHash.h
 	)
 
 ##
 set(ITMLIB_ENGINES_INDEXING_CPU_SOURCES
-	Engines/Indexing/VBH/CPU/ITMIndexingEngine_CPU_VoxelBlockHash.tpp
-	Engines/Indexing/VBH/CPU/ITMIndexingEngine_CPU_VoxelBlockHash.cpp
-	Engines/Indexing/PVA/CPU/ITMIndexingEngine_CPU_PlainVoxelArray.cpp
+	Engines/Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.tpp
+	Engines/Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.cpp
+	Engines/Indexing/PVA/CPU/IndexingEngine_CPU_PlainVoxelArray.cpp
     )
 
 set(ITMLIB_ENGINES_INDEXING_CPU_HEADERS
-	Engines/Indexing/VBH/CPU/ITMIndexingEngine_CPU_VoxelBlockHash.h
+	Engines/Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h
 	)
 ##
 set(ITMLIB_ENGINES_INDEXING_CUDA_SOURCES
-	Engines/Indexing/VBH/CUDA/ITMIndexingEngine_CUDA_VoxelBlockHash.tcu
-	Engines/Indexing/VBH/CUDA/ITMIndexingEngine_CUDA_VoxelBlockHash.cu
-	Engines/Indexing/PVA/CUDA/ITMIndexingEngine_CUDA_PlainVoxelArray.cu
+	Engines/Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.tcu
+	Engines/Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.cu
+	Engines/Indexing/PVA/CUDA/IndexingEngine_CUDA_PlainVoxelArray.cu
     )
 
 set(ITMLIB_ENGINES_INDEXING_CUDA_HEADERS
-	Engines/Indexing/VBH/CUDA/ITMIndexingEngine_CUDA_VoxelBlockHash_Kernels.h
+	Engines/Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash_Kernels.h
     )
 
 ##
 set(ITMLIB_ENGINES_INDEXING_INTERFACE_HEADERS
-    Engines/Indexing/Interface/ITMIndexingEngine.h
+    Engines/Indexing/Interface/IndexingEngine.h
 
 	)
 set(ITMLIB_ENGINES_INDEXING_INTERFACE_SOURCES
-	Engines/Indexing/Interface/ITMIndexingEngine.tpp
+	Engines/Indexing/Interface/IndexingEngine.tpp
 	)
 
 set(ITMLIB_ENGINES_INDEXING_SHARED_HEADERS
-	Engines/Indexing/Shared/ITMIndexingEngine_Shared.h
+	Engines/Indexing/Shared/IndexingEngine_Shared.h
 	)
 
 

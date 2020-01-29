@@ -14,13 +14,13 @@
 //  limitations under the License.
 //  ================================================================
 #pragma once
-#include "../Interface/ITMIndexingEngine.h"
+#include "../Interface/IndexingEngine.h"
 #include "../../Common/ITMWarpEnums.h"
 
 namespace ITMLib{
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, typename TDerivedClass>
-class ITMIndexingEngine_VoxelBlockHash:
-		public ITMIndexingEngineInterface<TVoxel, VoxelBlockHash> {
+class IndexingEngine_VoxelBlockHash:
+		public IndexingEngineInterface<TVoxel, VoxelBlockHash> {
 
 public:
 	virtual void AllocateHashEntriesUsingLists(ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume) = 0;

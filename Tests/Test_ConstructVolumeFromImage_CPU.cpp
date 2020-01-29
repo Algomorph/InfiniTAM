@@ -138,8 +138,8 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_PVA_VBH_Expnaded_CPU, Frame16And17
 	ITMVoxelVolume<ITMVoxel, VoxelBlockHash> volume_VBH_17_depth_allocation(MEMORYDEVICE_CPU, InitParams<VoxelBlockHash>());
 	VolumeEditAndCopyEngineFactory::Instance<ITMVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>().ResetScene(&volume_VBH_17_depth_allocation);
 
-	ITMIndexingEngine<ITMVoxel,VoxelBlockHash, MEMORYDEVICE_CPU>& indexer =
-	ITMIndexingEngine<ITMVoxel,VoxelBlockHash, MEMORYDEVICE_CPU>::Instance();
+	IndexingEngine<ITMVoxel,VoxelBlockHash, MEMORYDEVICE_CPU>& indexer =
+	IndexingEngine<ITMVoxel,VoxelBlockHash, MEMORYDEVICE_CPU>::Instance();
 	indexer.AllocateFromDepth(&volume_VBH_17_depth_allocation, view);
 	indexer.AllocateUsingOtherVolumeAndSetVisibilityExpanded(&volume_VBH_17, &volume_VBH_17_depth_allocation, view);
 

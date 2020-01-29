@@ -21,7 +21,7 @@
 #include "../../Reconstruction/ITMDynamicSceneReconstructionEngineFactory.h"
 #include "../../Traversal/Shared/ITMSceneTraversal_Shared.h"
 #include "../Shared/VolumeEditAndCopyEngine_Shared.h"
-#include "../../Indexing/Shared/ITMIndexingEngine_Shared.h"
+#include "../../Indexing/Shared/IndexingEngine_Shared.h"
 
 using namespace ITMLib;
 
@@ -60,7 +60,7 @@ VolumeEditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::SetVoxel(ITMVoxelVolume<TVo
 	int hashCode = -1;
 	Vector3s blockPos;
 	int voxelIndexInBlock = pointToVoxelBlockPos(at, blockPos);
-	if (ITMIndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance()
+	if (IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance()
 			.AllocateHashBlockAt(volume, blockPos, hashCode)) {
 		ITMHashEntry& entry = hashTable[hashCode];
 		TVoxel* localVoxelBlock = &(voxels[entry.ptr * (VOXEL_BLOCK_SIZE3)]);
@@ -157,7 +157,7 @@ bool VolumeEditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::CopySceneSlice(
 			}
 		}
 
-		ITMIndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance().
+		IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance().
 				AllocateHashEntriesUsingLists(destination);
 
 		//iterate over source hash blocks & fill in the target hash blocks
@@ -219,7 +219,7 @@ bool VolumeEditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::CopySceneSlice(
 			}
 		}
 
-		ITMIndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance().
+		IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance().
 				AllocateHashEntriesUsingLists(destination);
 		VoxelBlockHash::IndexCache source_cache;
 
@@ -269,7 +269,7 @@ bool VolumeEditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::CopyScene(
 	bool voxelsWereCopied = false;
 
 	if (offset == Vector3i(0)) {
-		ITMIndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance().AllocateUsingOtherVolume(target, source);
+		IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance().AllocateUsingOtherVolume(target, source);
 #ifdef WITH_OPENMP
 #pragma omp parallel for default(none) shared(sourceHashTable,destinationHashTable,sourceVoxels,destinationVoxels,voxelsWereCopied)
 #endif
