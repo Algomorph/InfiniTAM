@@ -279,7 +279,7 @@ void DenseDynamicMapper<TVoxel, TWarp, TIndex>::PerformSingleOptimizationStep(
 				"Updating live frame SDF by mapping from raw live SDF to new warped SDF based on latest warp...");
 	}
 	bench::StartTimer("TrackMotion_35_WarpLiveScene");
-	WarpingEngine->WarpScene_WarpUpdates(warpField, initialLiveScene, finalLiveScene);
+	WarpingEngine->WarpVolume_WarpUpdates(warpField, initialLiveScene, finalLiveScene);
 	bench::StopTimer("TrackMotion_35_WarpLiveScene");
 	ITMDynamicFusionLogger<TVoxel, TWarp, TIndex>::Instance().SaveWarps();
 }

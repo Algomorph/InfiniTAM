@@ -57,7 +57,7 @@ BOOST_FIXTURE_TEST_CASE(Test_WarpScene_CPU_PVA, Frame16And17Fixture) {
 
 	WarpingEngine_CPU_PVA warpingEngine;
 
-	warpingEngine.WarpScene_WarpUpdates(warps, live_volume, warped_live_volume);
+	warpingEngine.WarpVolume_WarpUpdates(warps, live_volume, warped_live_volume);
 #ifdef SAVE_TEST_DATA
 	warped_live_volume->SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_PVA/warped_live_");
 #endif
@@ -89,7 +89,7 @@ BOOST_FIXTURE_TEST_CASE(Test_WarpScene_CPU_VBH, Frame16And17Fixture) {
 
 	WarpingEngine_CPU_VBH warpingEngine;
 
-	warpingEngine.WarpScene_WarpUpdates(warps, live_volume, warped_live_volume);
+	warpingEngine.WarpVolume_WarpUpdates(warps, live_volume, warped_live_volume);
 #ifdef SAVE_TEST_DATA
 	warped_live_volume->SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_VBH/warped_live_");
 #endif
@@ -151,8 +151,8 @@ BOOST_FIXTURE_TEST_CASE(Test_WarpScene_CPU_VBH_to_PVA, Frame16And17Fixture) {
 	WarpingEngine_CPU_VBH warpingEngine_VBH;
 
 
-	warpingEngine_PVA.WarpScene_WarpUpdates(warps_PVA, source_volume_PVA, target_PVA);
-	warpingEngine_VBH.WarpScene_WarpUpdates(warps_VBH, source_volume_VBH, target_VBH);
+	warpingEngine_PVA.WarpVolume_WarpUpdates(warps_PVA, source_volume_PVA, target_PVA);
+	warpingEngine_VBH.WarpVolume_WarpUpdates(warps_VBH, source_volume_VBH, target_VBH);
 
 	// *** test content
 	float absoluteTolerance = 1e-7;
@@ -226,9 +226,9 @@ BOOST_FIXTURE_TEST_CASE(Test_WarpScene_CUDA_VBH_to_PVA, Frame16And17Fixture) {
 	WarpingEngine_CUDA_VBH warpingEngine_VBH;
 
 
-	warpingEngine_PVA.WarpScene_WarpUpdates(warps_PVA, source_volume_PVA, target_PVA);
-	warpingEngine_VBH_CPU.WarpScene_WarpUpdates(warps_VBH_CPU, source_volume_VBH_CPU, target_VBH_CPU);
-	warpingEngine_VBH.WarpScene_WarpUpdates(warps_VBH, source_volume_VBH, target_VBH);
+	warpingEngine_PVA.WarpVolume_WarpUpdates(warps_PVA, source_volume_PVA, target_PVA);
+	warpingEngine_VBH_CPU.WarpVolume_WarpUpdates(warps_VBH_CPU, source_volume_VBH_CPU, target_VBH_CPU);
+	warpingEngine_VBH.WarpVolume_WarpUpdates(warps_VBH, source_volume_VBH, target_VBH);
 
 	ITMVoxelVolume<ITMVoxel, VoxelBlockHash> target_VBH_copy(*target_VBH, MEMORYDEVICE_CPU);
 
@@ -266,7 +266,7 @@ BOOST_FIXTURE_TEST_CASE(Test_WarpScene_CUDA_PVA, Frame16And17Fixture) {
 
 	WarpingEngine_CUDA_PVA warpingEngine;
 
-	warpingEngine.WarpScene_WarpUpdates(warps, live_volume, warped_live_volume);
+	warpingEngine.WarpVolume_WarpUpdates(warps, live_volume, warped_live_volume);
 	//warped_live_volume->SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_PVA/warped_live_");
 
 	ITMVoxelVolume<ITMVoxel, PlainVoxelArray>* warped_live_volume_gt;
@@ -295,7 +295,7 @@ BOOST_FIXTURE_TEST_CASE(Test_WarpScene_CUDA_VBH, Frame16And17Fixture) {
 
 	WarpingEngine_CUDA_VBH warpingEngine;
 
-	warpingEngine.WarpScene_WarpUpdates(warps, live_volume, warped_live_volume);
+	warpingEngine.WarpVolume_WarpUpdates(warps, live_volume, warped_live_volume);
 	//warped_live_volume->SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_VBH/warped_live_");
 
 	ITMVoxelVolume<ITMVoxel, VoxelBlockHash>* warped_live_volume_gt;

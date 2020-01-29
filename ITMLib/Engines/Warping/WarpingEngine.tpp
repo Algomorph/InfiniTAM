@@ -49,7 +49,7 @@ void WarpingEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::WarpScene(
 
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-void WarpingEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::WarpScene_CumulativeWarps(
+void WarpingEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::WarpVolume_CumulativeWarps(
 		ITMVoxelVolume<TWarp, TIndex>* warpField,
 		ITMVoxelVolume<TVoxel, TIndex>* sourceTSDF,
 		ITMVoxelVolume<TVoxel, TIndex>* targetTSDF) {
@@ -57,7 +57,7 @@ void WarpingEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::WarpScene_Cumulati
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-void WarpingEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::WarpScene_FramewiseWarps(
+void WarpingEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::WarpVolume_FramewiseWarps(
 		ITMVoxelVolume<TWarp, TIndex>* warpField,
 		ITMVoxelVolume<TVoxel, TIndex>* sourceTSDF,
 		ITMVoxelVolume<TVoxel, TIndex>* targetTSDF) {
@@ -65,7 +65,7 @@ void WarpingEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::WarpScene_Framewis
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-void WarpingEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::WarpScene_WarpUpdates(
+void WarpingEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::WarpVolume_WarpUpdates(
 		ITMVoxelVolume<TWarp, TIndex>* warpField,
 		ITMVoxelVolume<TVoxel, TIndex>* sourceTSDF,
 		ITMVoxelVolume<TVoxel, TIndex>* targetTSDF) {

@@ -150,8 +150,8 @@ GenericWarpConsistencySubtest(const SlavchevaSurfaceTracker::Switches& switches,
 		motionTracker.CalculateWarpGradient(canonical_volume, live_volumes[source_warped_field_ix], &warp_field);
 		motionTracker.SmoothWarpGradient(canonical_volume, live_volumes[source_warped_field_ix], &warp_field);
 		motionTracker.UpdateWarps(canonical_volume, live_volumes[source_warped_field_ix], &warp_field);
-		warpingEngine->WarpScene_WarpUpdates(&warp_field, live_volumes[source_warped_field_ix],
-		                                live_volumes[target_warped_field_ix]);
+		warpingEngine->WarpVolume_WarpUpdates(&warp_field, live_volumes[source_warped_field_ix],
+		                                      live_volumes[target_warped_field_ix]);
 		std::string path = get_path_warps(prefix, iteration);
 		std::string path_warped_live = get_path_warped_live(prefix, iteration);
 		switch (mode) {
