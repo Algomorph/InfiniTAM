@@ -93,41 +93,6 @@ public:
 	                                          ITMVoxelVolume<TVoxel, TIndex>* sourceTsdfVolume) = 0;
 
 	/**
-	 * \brief apply warp vectors to live scene: compute the the target SDF fields in live scene using trilinear lookup
-	 * at corresponding composite warps from the source SDF fields in live scene
-	 * \param canonicalScene canonical scene, where the warp update vectors are specified
-	 * \param sourceTSDF live scene (voxel grid)
-	 * \param sourceSdfIndex index of the source SDF field in each live voxel
-	 * \param targetSdfIndex index of the target SDF field in each live voxel
-	 */
-	virtual void WarpScene_CumulativeWarps(ITMVoxelVolume<TWarp, TIndex>* warpField,
-	                                       ITMVoxelVolume<TVoxel, TIndex>* sourceTSDF,
-	                                       ITMVoxelVolume<TVoxel, TIndex>* targetTSDF) = 0;
-
-	/**
-	 * \brief apply warp update vectors to live scene: compute the the target SDF fields in live scene using trilinear lookup
-	 * at corresponding flow warps from the source SDF fields in live scene
-	 * \param canonicalScene canonical scene, where the warp update vectors are specified
-	 * \param liveScene live scene (voxel grid)
-	 * \param sourceSdfIndex index of the source SDF field in each live voxel
-	 * \param targetSdfIndex index of the target SDF field in each live voxel
-	 */
-	virtual void WarpScene_FramewiseWarps(ITMVoxelVolume<TWarp, TIndex>* warpField,
-	                                 ITMVoxelVolume<TVoxel, TIndex>* sourceTSDF,
-	                                 ITMVoxelVolume<TVoxel, TIndex>* targetTSDF) = 0;
-
-	//TODO: find a better way to write this doc (I think it's not clear from first glance)
-	/**
-	 * \brief apply warp update vectors to live scene: compute the the target SDF fields in live scene using trilinear
-	 * lookup at corresponding position + warp updates from the source TSDF to the target TSDF grid
-	 * \param warpField where the warp update / interpolation vectors are specified
-	 * \param sourceTSDF this volume will be updated based on interpolated values
-	 * \param targetTSDF this volume serves a source for interpolation
-	 */
-	virtual void WarpScene_WarpUpdates(ITMVoxelVolume<TWarp, TIndex>* warpField,
-	                                   ITMVoxelVolume<TVoxel, TIndex>* sourceTSDF,
-	                                   ITMVoxelVolume<TVoxel, TIndex>* targetTSDF) = 0;
-	/**
 	 * \brief Update the voxel blocks by integrating depth and possibly color information from the given view. Assume
 	 * camera is at world origin.
 	 */

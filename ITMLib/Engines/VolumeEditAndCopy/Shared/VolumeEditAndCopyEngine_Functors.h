@@ -19,7 +19,7 @@
 #include "../../../Objects/Scene/PlainVoxelArray.h"
 
 namespace ITMLib {
-// region ==================================== Offset Warp Functor =====================================================
+// region ==================================== Offset Warping Functor =====================================================
 
 template<typename TVoxel, typename TIndex, bool hasCumulativeWarp>
 struct OffsetWarpsFunctor;

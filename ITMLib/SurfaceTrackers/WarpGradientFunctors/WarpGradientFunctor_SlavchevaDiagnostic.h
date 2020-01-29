@@ -93,8 +93,8 @@ private:
 			printf("Flags: %s vs. %s\n", VoxelFlagsAsCString(static_cast<VoxelFlags>(canonicalVoxel.flags)),
 			       VoxelFlagsAsCString(static_cast<VoxelFlags>(liveVoxel.flags)));
 			printf("===================\n");
-			printf("Warp: %s%f, %f, %f%s\n", c_green, voxelWarp.x, voxelWarp.y, voxelWarp.z, c_reset);
-			printf("Warp length: %s%f%s\n", c_green, ORUtils::length(voxelWarp), c_reset);
+			printf("Warping: %s%f, %f, %f%s\n", c_green, voxelWarp.x, voxelWarp.y, voxelWarp.z, c_reset);
+			printf("Warping length: %s%f%s\n", c_green, ORUtils::length(voxelWarp), c_reset);
 
 			printVoxelResult = true;
 		}

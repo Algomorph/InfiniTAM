@@ -41,25 +41,22 @@ ITMDynamicEngine<TVoxel, TWarp, TIndex>::ITMDynamicEngine(const ITMRGBDCalib& ca
 		meshingEngine = ITMMeshingEngineFactory::MakeMeshingEngine<TVoxel, TIndex>(deviceType, canonicalScene->index);
 
 	denseMapper = new DenseDynamicMapper<TVoxel, TWarp, TIndex>(canonicalScene->index);
-	denseMapper->ResetTSDFVolume(canonicalScene);
-	for (int iScene = 0; iScene < ITMDynamicEngine<TVoxel, TWarp, TIndex>::liveSceneCount; iScene++) {
-		denseMapper->ResetTSDFVolume(liveScenes[iScene]);
-	}
-	denseMapper->ResetWarpVolume(warpField);
+	Vector2i trackedImageSize = cameraTrackingController->GetTrackedImageSize(imgSize_rgb, imgSize_d);
+
+	trackingState = new ITMTrackingState(trackedImageSize, memoryType);
+
 
 	imuCalibrator = new ITMIMUCalibrator_iPad();
 	tracker = ITMCameraTrackerFactory::Instance().Make(imgSize_rgb, imgSize_d, lowLevelEngine, imuCalibrator,
 	                                                   canonicalScene->sceneParams);
 	cameraTrackingController = new ITMTrackingController(tracker);
 
-	Vector2i trackedImageSize = cameraTrackingController->GetTrackedImageSize(imgSize_rgb, imgSize_d);
-
 	renderState_live = new ITMRenderState(trackedImageSize, canonicalScene->sceneParams->near_clipping_distance,
 	                                      canonicalScene->sceneParams->far_clipping_distance, settings.device_type);
-
 	renderState_freeview = nullptr; //will be created if needed
 
-	trackingState = new ITMTrackingState(trackedImageSize, memoryType);
+	Reset();
+
 	tracker->UpdateInitialPose(trackingState);
 
 	view = nullptr; // will be allocated by the view builder
@@ -196,18 +193,14 @@ void ITMDynamicEngine<TVoxel, TWarp, TIndex>::LoadFromFile() {
 		}
 	}
 	catch (std::runtime_error& e) {
-		denseMapper->ResetTSDFVolume(canonicalScene);
+		canonicalScene->Reset();
 		throw std::runtime_error("Could not load scene:" + std::string(e.what()));
 	}
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 void ITMDynamicEngine<TVoxel, TWarp, TIndex>::resetAll() {
-	denseMapper->ResetTSDFVolume(canonicalScene);
-	denseMapper->ResetTSDFVolume(liveScenes[0]);
-	denseMapper->ResetTSDFVolume(liveScenes[1]);
-	denseMapper->ResetWarpVolume(warpField);
-	trackingState->Reset();
+	Reset();
 }
 
 #ifdef OUTPUT_TRAJECTORY_QUATERNIONS
@@ -624,6 +617,16 @@ void ITMDynamicEngine<TVoxel, TWarp, TIndex>::BeginProcessingFrame(ITMUChar4Imag
 	}
 
 
+}
+
+template<typename TVoxel, typename TWarp, typename TIndex>
+void ITMDynamicEngine<TVoxel, TWarp, TIndex>::Reset() {
+	canonicalScene->Reset();
+	for (int iScene = 0; iScene < ITMDynamicEngine<TVoxel, TWarp, TIndex>::liveSceneCount; iScene++) {
+		liveScenes[iScene]->Reset();
+	}
+	warpField->Reset();
+	trackingState->Reset();
 }
 
 // endregion ===========================================================================================================

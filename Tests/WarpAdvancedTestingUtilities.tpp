@@ -24,6 +24,7 @@
 #include "TestUtilsForSnoopyFrames16And17.h"
 
 #include "../ITMLib/Engines/Reconstruction/DynamicSceneReconstructionEngineFactory.h"
+#include "../ITMLib/Engines/Warping/WarpingEngineFactory.h"
 #include "../ITMLib/Engines/VolumeEditAndCopy/VolumeEditAndCopyEngineFactory.h"
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/ITMVoxelVolumeComparison.h"
 
@@ -137,6 +138,8 @@ GenericWarpConsistencySubtest(const SlavchevaSurfaceTracker::Switches& switches,
 	DynamicSceneReconstructionEngine<ITMVoxel, ITMWarp, TIndex>* recoEngine =
 			DynamicSceneReconstructionEngineFactory::MakeSceneReconstructionEngine<ITMVoxel, ITMWarp, TIndex>(
 					TMemoryDeviceType);
+	WarpingEngineInterface<ITMVoxel, ITMWarp, TIndex>* warpingEngine =
+			WarpingEngineFactory::MakeWarpingEngine<ITMVoxel,ITMWarp,TIndex>(TMemoryDeviceType);
 
 	//note: will be swapped before first iteration
 	int source_warped_field_ix = (live_index_to_start_from + 1) % 2;
@@ -147,7 +150,7 @@ GenericWarpConsistencySubtest(const SlavchevaSurfaceTracker::Switches& switches,
 		motionTracker.CalculateWarpGradient(canonical_volume, live_volumes[source_warped_field_ix], &warp_field);
 		motionTracker.SmoothWarpGradient(canonical_volume, live_volumes[source_warped_field_ix], &warp_field);
 		motionTracker.UpdateWarps(canonical_volume, live_volumes[source_warped_field_ix], &warp_field);
-		recoEngine->WarpScene_FramewiseWarps(&warp_field, live_volumes[source_warped_field_ix],
+		warpingEngine->WarpScene_WarpUpdates(&warp_field, live_volumes[source_warped_field_ix],
 		                                live_volumes[target_warped_field_ix]);
 		std::string path = get_path_warps(prefix, iteration);
 		std::string path_warped_live = get_path_warped_live(prefix, iteration);
@@ -305,10 +308,10 @@ void Warp_PVA_VBH_simple_subtest(int iteration, SlavchevaSurfaceTracker::Switche
 //	alternative_entry = volume_16_VBH->index.GetHashEntry(alternative_index);
 //	std::cout << "VBH canonical " << alternative_index << " hash block ptr: " << alternative_entry.ptr << std::endl;
 //	ITMWarp warpPVA = warps_PVA->GetValueAt(test_pos);
-//	std::cout << "PVA Warp value of interest: ";
+//	std::cout << "PVA Warping value of interest: ";
 //	warpPVA.print_self();
 //	ITMWarp warpVBH = warps_VBH->GetValueAt(test_pos);
-//	std::cout << "VBH Warp value of interest: ";
+//	std::cout << "VBH Warping value of interest: ";
 //	warpVBH.print_self();
 
 	// *** perform the warp gradient computation and warp updates
@@ -332,10 +335,10 @@ void Warp_PVA_VBH_simple_subtest(int iteration, SlavchevaSurfaceTracker::Switche
 	// *** test content
 
 //	ITMWarp warpPVA = warps_PVA->GetValueAt(test_pos);
-//	std::cout << "PVA Warp value of interest: ";
+//	std::cout << "PVA Warping value of interest: ";
 //	warpPVA.print_self();
 //	ITMWarp warpVBH = warps_VBH->GetValueAt(test_pos);
-//	std::cout << "VBH Warp value of interest: ";
+//	std::cout << "VBH Warping value of interest: ";
 //	warpVBH.print_self();
 
 	BOOST_REQUIRE(allocatedContentAlmostEqual_Verbose(warps_PVA, warps_VBH, absoluteTolerance, TMemoryDeviceType));

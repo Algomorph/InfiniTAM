@@ -29,7 +29,7 @@ namespace  ITMLib{
 /**
  * \brief Class responsible for tracking motion of rigid or dynamic surfaces within the scene
  * \tparam TVoxel TSDF voxel type
- * \tparam TWarp Warp vector voxel type
+ * \tparam TWarp Warping vector voxel type
  * \tparam TIndex Indexing structure type used for voxel volumes
  */
 template<typename TVoxel, typename TWarp, typename TIndex>

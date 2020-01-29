@@ -78,28 +78,6 @@ void DynamicSceneReconstructionEngine_CUDA<TVoxel, TWarp, VoxelBlockHash>::FuseO
 }
 
 template<typename TVoxel, typename TWarp>
-template<WarpType TWarpType>
-void DynamicSceneReconstructionEngine_CUDA<TVoxel, TWarp, VoxelBlockHash>::WarpScene(
-		ITMVoxelVolume<TWarp, VoxelBlockHash>* warpField,
-		ITMVoxelVolume<TVoxel, VoxelBlockHash>* sourceTSDF,
-		ITMVoxelVolume<TVoxel, VoxelBlockHash>* targetTSDF) {
-	// Clear out the flags at target volume
-	FieldClearFunctor<TVoxel> flagClearFunctor;
-	ITMSceneTraversalEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::VoxelTraversal(targetTSDF,flagClearFunctor);
-
-	// Allocate new blocks where necessary (based on warps from source locations)
-	IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance()
-			.template AllocateFromWarpedVolume<TWarpType>(warpField, sourceTSDF, targetTSDF);
-
-	TrilinearInterpolationFunctor<TVoxel, TWarp, VoxelBlockHash, TWarpType, MEMORYDEVICE_CUDA>
-			trilinearInterpolationFunctor(sourceTSDF, warpField);
-
-	// Interpolate to obtain the new live frame values (at target index)
-	ITMDualSceneTraversalEngine<TVoxel, TWarp, VoxelBlockHash, VoxelBlockHash, MEMORYDEVICE_CUDA>::
-	DualVoxelPositionTraversal(targetTSDF, warpField, trilinearInterpolationFunctor);
-}
-
-template<typename TVoxel, typename TWarp>
 void DynamicSceneReconstructionEngine_CUDA<TVoxel, TWarp, VoxelBlockHash>::IntegrateDepthImageIntoTsdfVolume_Helper(
 		ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view, Matrix4f depth_camera_matrix) {
 	Vector2i rgbImgSize = view->rgb->noDims;
@@ -148,32 +126,6 @@ void DynamicSceneReconstructionEngine_CUDA<TVoxel, TWarp, VoxelBlockHash>::Integ
 		ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view) {
 	IntegrateDepthImageIntoTsdfVolume_Helper(volume, view);
 }
-
-template<typename TVoxel, typename TWarp>
-void
-DynamicSceneReconstructionEngine_CUDA<TVoxel, TWarp, VoxelBlockHash>::WarpScene_CumulativeWarps(
-		ITMVoxelVolume<TWarp, VoxelBlockHash>* warpField,
-		ITMVoxelVolume<TVoxel, VoxelBlockHash>* sourceTSDF,
-		ITMVoxelVolume<TVoxel, VoxelBlockHash>* targetTSDF) {
-	this->template WarpScene<WARP_CUMULATIVE>(warpField, sourceTSDF, targetTSDF);
-}
-
-template<typename TVoxel, typename TWarp>
-void DynamicSceneReconstructionEngine_CUDA<TVoxel, TWarp, VoxelBlockHash>::WarpScene_FramewiseWarps(
-		ITMVoxelVolume<TWarp, VoxelBlockHash>* warpField,
-		ITMVoxelVolume<TVoxel, VoxelBlockHash>* sourceTSDF,
-		ITMVoxelVolume<TVoxel, VoxelBlockHash>* targetTSDF) {
-	this->template WarpScene<WARP_FLOW>(warpField, sourceTSDF, targetTSDF);
-}
-
-template<typename TVoxel, typename TWarp>
-void DynamicSceneReconstructionEngine_CUDA<TVoxel, TWarp, VoxelBlockHash>::WarpScene_WarpUpdates(
-		ITMVoxelVolume<TWarp, VoxelBlockHash>* warpField,
-		ITMVoxelVolume<TVoxel, VoxelBlockHash>* sourceTSDF,
-		ITMVoxelVolume<TVoxel, VoxelBlockHash>* targetTSDF) {
-	this->template WarpScene<WARP_UPDATE>(warpField, sourceTSDF, targetTSDF);
-}
-
 
 
 

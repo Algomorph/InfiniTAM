@@ -16,6 +16,7 @@
 #pragma once
 
 #include "../Reconstruction/Interface/DynamicSceneReconstructionEngine.h"
+#include "../Warping/WarpingEngine.h"
 #include "../../Utils/Configuration.h"
 #include "../Swapping/Interface/ITMSwappingEngine.h"
 #include "../../Utils/FileIO/ITMDynamicFusionLogger.h"
@@ -47,9 +48,6 @@ public:
 
 	// endregion =======================================================================================================
 	// region ========================================== MEMBER FUNCTIONS ==============================================
-
-	void ResetTSDFVolume(ITMVoxelVolume<TVoxel, TIndex>* volume) const;
-	void ResetWarpVolume(ITMVoxelVolume<TWarp, TIndex>* warpVolume) const;
 
 	/**
 	* \brief Tracks motions of all points between frames and fuses the new data into the canonical frame
@@ -111,13 +109,15 @@ private:
 	void PrintSettings();
 	// endregion =======================================================================================================
 	// region =========================================== MEMBER VARIABLES =============================================
-	DynamicSceneReconstructionEngine<TVoxel, TWarp, TIndex>* sceneReconstructor;
+	// *** engines ***
+	DynamicSceneReconstructionEngine<TVoxel, TWarp, TIndex>* reconstructionEngine;
+	WarpingEngineInterface<TVoxel, TWarp, TIndex>* WarpingEngine;
 	ITMSwappingEngine<TVoxel, TIndex>* swappingEngine;
-	SurfaceTrackerInterface<TVoxel, TWarp, TIndex>* sceneMotionTracker;
+	SurfaceTrackerInterface<TVoxel, TWarp, TIndex>* surfaceTracker;
 
+	// *** state ***
+	// TODO: make private, add getters where necessary)
 	configuration::SwappingMode swappingMode;
-
-	// state (//TODO: make private, add getters where necessary)
 	unsigned int iteration = 0;
 	float maxVectorUpdate;
 

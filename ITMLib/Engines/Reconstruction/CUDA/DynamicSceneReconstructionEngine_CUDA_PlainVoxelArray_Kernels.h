@@ -77,35 +77,6 @@ clearFields_device(TVoxel* voxelArray, const ITMLib::PlainVoxelArray::GridAligne
 	voxel.sdf = TVoxel::SDF_initialValue();
 }
 
-template<typename TVoxel, typename TWarp, ITMLib::WarpType TWarpType>
-__global__ void interpolateTriliearlyUsingWarps(
-		TWarp* warpSourceVoxels,
-		TVoxel* sdfSourceVoxels,
-		TVoxel* sdfTargetVoxels,
-		const PlainVoxelArray::IndexData* sdfSourceIndexData) {
-
-	int x = blockIdx.x * blockDim.x + threadIdx.x;
-	int y = blockIdx.y * blockDim.y + threadIdx.y;
-	int z = blockIdx.z * blockDim.z + threadIdx.z;
-
-	int locId = x + y * sdfSourceIndexData->size.x + z * sdfSourceIndexData->size.x * sdfSourceIndexData->size.y;
-
-	TVoxel& destinationVoxel = sdfTargetVoxels[locId];
-	TWarp& warp = warpSourceVoxels[locId];
-	PlainVoxelArray::IndexCache sdfSourceCache;
-
-	Vector3i warpAndDestinationVoxelPosition;
-
-	warpAndDestinationVoxelPosition.x = x + sdfSourceIndexData->offset.x;
-	warpAndDestinationVoxelPosition.y = y + sdfSourceIndexData->offset.y;
-	warpAndDestinationVoxelPosition.z = z + sdfSourceIndexData->offset.z;
-
-	interpolateTSDFVolume<TVoxel, TWarp, PlainVoxelArray, TWarpType>(
-			sdfSourceVoxels, sdfSourceIndexData, sdfSourceCache,
-			warp, destinationVoxel,
-			warpAndDestinationVoxelPosition, false);
-}
-
 template<typename TVoxelMulti>
 __global__ void
 copyScene_device(TVoxelMulti* sourceVoxels,

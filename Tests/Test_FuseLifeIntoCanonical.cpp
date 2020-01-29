@@ -42,7 +42,7 @@
 using namespace ITMLib;
 
 typedef DynamicSceneReconstructionEngine_CPU<ITMVoxel, ITMWarp, PlainVoxelArray> RecoEngine_CPU_PVA;
-typedef DynamicSceneReconstructionEngine_CPU<ITMVoxel, ITMWarp, VoxelBlockHash> RecoEngine_CPU_VBH;
+typedef DynamicSceneReconstructionEngine_CPU<ITMVoxel, ITMWarp, VoxelBlockHash> WarpingEngine_CPU_VBH;
 
 BOOST_FIXTURE_TEST_CASE(Test_FuseLifeIntoCanonical_CPU_PVA, Frame16And17Fixture) {
 	const int iteration = 4;
@@ -77,7 +77,7 @@ BOOST_FIXTURE_TEST_CASE(Test_FuseLifeIntoCanonical_CPU_VBH, Frame16And17Fixture)
 	loadVolume(&canonical_volume, "TestData/snoopy_result_fr16-17_partial_VBH/snoopy_partial_frame_16_",
 	           MEMORYDEVICE_CPU, InitParams<VoxelBlockHash>());
 
-	RecoEngine_CPU_VBH recoEngine;
+	WarpingEngine_CPU_VBH recoEngine;
 	recoEngine.FuseOneTsdfVolumeIntoAnother(canonical_volume, warped_live_volume);
 	//canonical_volume->SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_VBH/fused_canonical_");
 
@@ -91,8 +91,8 @@ BOOST_FIXTURE_TEST_CASE(Test_FuseLifeIntoCanonical_CPU_VBH, Frame16And17Fixture)
 }
 
 #ifndef COMPILE_WITHOUT_CUDA
-typedef DynamicSceneReconstructionEngine_CUDA<ITMVoxel, ITMWarp, PlainVoxelArray> RecoEngine_CUDA_PVA;
-typedef DynamicSceneReconstructionEngine_CUDA<ITMVoxel, ITMWarp, VoxelBlockHash> RecoEngine_CUDA_VBH;
+typedef DynamicSceneReconstructionEngine_CUDA<ITMVoxel, ITMWarp, PlainVoxelArray> WarpingEngine_CUDA_PVA;
+typedef DynamicSceneReconstructionEngine_CUDA<ITMVoxel, ITMWarp, VoxelBlockHash> WarpingEngine_CUDA_VBH;
 BOOST_FIXTURE_TEST_CASE(Test_FuseLifeIntoCanonical_CUDA_PVA, Frame16And17Fixture) {
 	const int iteration = 4;
 	ITMVoxelVolume<ITMVoxel, PlainVoxelArray>* warped_live_volume;
@@ -103,7 +103,7 @@ BOOST_FIXTURE_TEST_CASE(Test_FuseLifeIntoCanonical_CUDA_PVA, Frame16And17Fixture
 	loadVolume(&canonical_volume, "TestData/snoopy_result_fr16-17_partial_PVA/snoopy_partial_frame_16_",
 	           MEMORYDEVICE_CUDA, InitParams<PlainVoxelArray>());
 
-	RecoEngine_CUDA_PVA recoEngine;
+	WarpingEngine_CUDA_PVA recoEngine;
 	recoEngine.FuseOneTsdfVolumeIntoAnother(canonical_volume, warped_live_volume);
 //	canonical_volume->SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_PVA/fused_canonical_");
 
@@ -126,7 +126,7 @@ BOOST_FIXTURE_TEST_CASE(Test_FuseLifeIntoCanonical_CUDA_VBH, Frame16And17Fixture
 	loadVolume(&canonical_volume, "TestData/snoopy_result_fr16-17_partial_VBH/snoopy_partial_frame_16_",
 	           MEMORYDEVICE_CUDA, InitParams<VoxelBlockHash>());
 
-	RecoEngine_CUDA_VBH recoEngine;
+	WarpingEngine_CUDA_VBH recoEngine;
 	recoEngine.FuseOneTsdfVolumeIntoAnother(canonical_volume, warped_live_volume);
 	//canonical_volume->SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_VBH/fused_canonical_");
 

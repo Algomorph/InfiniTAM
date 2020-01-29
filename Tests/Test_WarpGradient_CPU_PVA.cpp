@@ -79,7 +79,7 @@ BOOST_FIXTURE_TEST_CASE(testDataTerm_CPU_PVA, DataFixture) {
 
 	TimeIt([&]() {
 		motionTracker_PVA_CPU->CalculateWarpGradient(canonical_volume, live_volume, &warp_field_CPU1);
-	}, "Calculate Warp Gradient - PVA CPU data term");
+	}, "Calculate Warping Gradient - PVA CPU data term");
 
 	//warp_field_CPU1.SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_PVA/warp_field_0_data_");
 
@@ -126,7 +126,7 @@ BOOST_FIXTURE_TEST_CASE(testSmoothWarpGradient_CPU_PVA, DataFixture) {
 
 	TimeIt([&]() {
 		motionTracker_PVA_CPU->SmoothWarpGradient(canonical_volume, live_volume, &warp_field_CPU1);
-	}, "Smooth Warp Gradient - PVA CPU");
+	}, "Smooth Warping Gradient - PVA CPU");
 //	warp_field_CPU1.SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_PVA/warp_field_0_smoothed_");
 
 	float tolerance = 1e-8;
@@ -144,7 +144,7 @@ BOOST_FIXTURE_TEST_CASE(testDataAndTikhonovTerm_CPU_PVA, DataFixture) {
 
 	TimeIt([&]() {
 		motionTracker_PVA_CPU->CalculateWarpGradient(canonical_volume, live_volume, &warp_field_CPU1);
-	}, "Calculate Warp Gradient - PVA CPU data + tikhonov term");
+	}, "Calculate Warping Gradient - PVA CPU data + tikhonov term");
 //	warp_field_CPU1.SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_PVA/warp_field_1_data_and_tikhonov_");
 
 
@@ -169,7 +169,7 @@ BOOST_FIXTURE_TEST_CASE(testDataAndKillingTerm_CPU_PVA, DataFixture) {
 
 	TimeIt([&]() {
 		motionTracker_PVA_CPU->CalculateWarpGradient(canonical_volume, live_volume, &warp_field_CPU1);
-	}, "Calculate Warp Gradient - PVA CPU data term + tikhonov term");
+	}, "Calculate Warping Gradient - PVA CPU data term + tikhonov term");
 	//warp_field_CPU1.SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_PVA/warp_field_1_data_and_killing_");
 
 	AlteredGradientCountFunctor<ITMWarp> functor;
@@ -194,7 +194,7 @@ BOOST_FIXTURE_TEST_CASE(testDataAndLevelSetTerm_CPU_PVA, DataFixture) {
 
 	TimeIt([&]() {
 		motionTracker_PVA_CPU->CalculateWarpGradient(canonical_volume, live_volume, &warp_field_CPU1);
-	}, "Calculate Warp Gradient - PVA CPU data term + level set term");
+	}, "Calculate Warping Gradient - PVA CPU data term + level set term");
 //	warp_field_CPU1.SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_PVA/warp_field_1_data_and_level_set_");
 
 	AlteredGradientCountFunctor<ITMWarp> functor;

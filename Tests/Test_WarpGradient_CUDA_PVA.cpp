@@ -57,7 +57,7 @@ BOOST_FIXTURE_TEST_CASE(testDataTerm_CUDA_PVA, DataFixture) {
 
 	TimeIt([&]() {
 		motionTracker_PVA_CUDA->CalculateWarpGradient(canonical_volume, live_volume, &warp_field_CUDA1);
-	}, "Calculate Warp Gradient - PVA CPU data term");
+	}, "Calculate Warping Gradient - PVA CPU data term");
 
 	//warp_field_CPU1.SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_PVA/warp_field_0_data_");
 
@@ -87,7 +87,7 @@ BOOST_FIXTURE_TEST_CASE(testSmoothWarpGradient_CUDA_PVA, DataFixture) {
 
 	TimeIt([&]() {
 		motionTracker_PVA_CUDA->SmoothWarpGradient(canonical_volume, live_volume, &warp_field_CUDA1);
-	}, "Smooth Warp Gradient - PVA CUDA");
+	}, "Smooth Warping Gradient - PVA CUDA");
 //	warp_field_CUDA1.SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_PVA/warp_field_0_smoothed_");
 
 	float tolerance = 1e-6;
@@ -104,7 +104,7 @@ BOOST_FIXTURE_TEST_CASE(testTikhonovTerm_CUDA_PVA, DataFixture) {
 
 	TimeIt([&]() {
 		motionTracker_PVA_CUDA->CalculateWarpGradient(canonical_volume, live_volume, &warp_field_CUDA1);
-	}, "Calculate Warp Gradient - PVA CUDA tikhonov term");
+	}, "Calculate Warping Gradient - PVA CUDA tikhonov term");
 //	warp_field_CUDA1.SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_PVA/warp_field_1_tikhonov_");
 
 	BOOST_REQUIRE(true);
@@ -130,7 +130,7 @@ BOOST_FIXTURE_TEST_CASE(testDataAndTikhonovTerm_CUDA, DataFixture) {
 
 	TimeIt([&]() {
 		motionTracker_PVA_CUDA->CalculateWarpGradient(canonical_volume, live_volume, &warp_field_CUDA1);
-	}, "Calculate Warp Gradient - PVA CPU data term + Tikhonov term");
+	}, "Calculate Warping Gradient - PVA CPU data term + Tikhonov term");
 
 
 	float tolerance = 1e-6;
@@ -148,7 +148,7 @@ BOOST_FIXTURE_TEST_CASE(testDataAndKillingTerm_CUDA, DataFixture) {
 
 	TimeIt([&]() {
 		motionTracker_PVA_CUDA->CalculateWarpGradient(canonical_volume, live_volume, &warp_field_CUDA1);
-	}, "Calculate Warp Gradient - PVA CPU data term + Killing term");
+	}, "Calculate Warping Gradient - PVA CPU data term + Killing term");
 
 
 	float tolerance = 1e-6;
@@ -166,7 +166,7 @@ BOOST_FIXTURE_TEST_CASE(testDataAndLevelSetTerm_CUDA, DataFixture) {
 	TimeIt([&]() {
 		motionTracker_PVA_CUDA->CalculateWarpGradient(canonical_volume,
 		                                              live_volume, &warp_field_CUDA1);
-	}, "Calculate Warp Gradient - PVA CPU data term + level set term");
+	}, "Calculate Warping Gradient - PVA CPU data term + level set term");
 
 
 	float tolerance = 1e-6;

@@ -355,6 +355,20 @@ set(ITMLIB_ENGINES_RECONSTRUCTION_SHARED_HEADERS
 
     Engines/Reconstruction/Shared/ITMSurfelSceneReconstructionEngine_Shared.h
     )
+## ======================================= VOLUME WARP ENGINE ==========================================================
+set(ITMLIB_ENGINES_WARP_VOLUME_SOURCES
+	Engines/Warping/WarpingEngine.tpp
+	Engines/Warping/WarpingEngine_CPU_PlainVoxelArray.cpp
+	Engines/Warping/WarpingEngine_CUDA_PlainVoxelArray.cu
+	Engines/Warping/WarpingEngine_CPU_VoxelBlockHash.cpp
+	Engines/Warping/WarpingEngine_CUDA_VoxelBlockHash.cu
+	)
+
+set(ITMLIB_ENGINES_WARP_VOLUME_HEADERS
+	Engines/Warping/WarpingEngine.h
+	Engines/Warping/WarpingFunctors.h
+	Engines/Warping/WarpingEngineFactory.h)
+
 ## ======================================= SCENE FILE IO ENGINES =======================================================
 set(ITMLIB_ENGINES_SCENEFILEIO_HEADERS
     Engines/SceneFileIO/ITMSceneFileIOEngine.h
@@ -871,6 +885,7 @@ set(sources
     ${ITMLIB_ENGINES_RECONSTRUCTION_CPU_SOURCES}
     ${ITMLIB_ENGINES_RECONSTRUCTION_CUDA_SOURCES}
     ${ITMLIB_ENGINES_RECONSTRUCTION_INTERFACE_SOURCES}
+	${ITMLIB_ENGINES_WARP_VOLUME_SOURCES}
     ${ITMLIB_ENGINES_SCENEFILEIO_SOURCES}
     ${ITMLIB_ENGINES_SWAPPING_CPU_SOURCES}
     ${ITMLIB_ENGINES_SWAPPING_CUDA_SOURCES}
@@ -932,6 +947,7 @@ set(headers
     ${ITMLIB_ENGINES_RECONSTRUCTION_CUDA_HEADERS}
     ${ITMLIB_ENGINES_RECONSTRUCTION_INTERFACE_HEADERS}
     ${ITMLIB_ENGINES_RECONSTRUCTION_SHARED_HEADERS}
+	${ITMLIB_ENGINES_WARP_VOLUME_HEADERS}
     ${ITMLIB_ENGINES_SCENEFILEIO_HEADERS}
     ${ITMLIB_ENGINES_SWAPPING_HEADERS}
     ${ITMLIB_ENGINES_SWAPPING_CPU_HEADERS}

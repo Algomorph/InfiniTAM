@@ -20,26 +20,9 @@
 #include "SurfaceTracker.h"
 
 #include "../Shared/SurfaceTrackerSharedFunctors.h"
-#include "../WarpGradientFunctors/WarpGradientFunctor_SlavchevaOptimized.h"
-#include "../WarpGradientFunctors/WarpGradientFunctor_SlavchevaDiagnostic.h"
+#include "../WarpGradientFunctors/WarpGradientFunctor.h"
 #include "../../Engines/Indexing/Interface/IndexingEngine.h"
-
-#include "../../Utils/Analytics/SceneStatisticsCalculator/CPU/ITMSceneStatisticsCalculator_CPU.h"
-
-#include "../../Engines/Traversal/CPU/ITMSceneTraversal_CPU_VoxelBlockHash.h"
-#include "../../Engines/Traversal/CPU/ITMSceneTraversal_CPU_PlainVoxelArray.h"
-#include "../../Engines/Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
-#include "../../Engines/VolumeEditAndCopy/CPU/VolumeEditAndCopyEngine_CPU.h"
-
-#ifdef __CUDACC__
-#include "../../Utils/Analytics/SceneStatisticsCalculator/CUDA/ITMSceneStatisticsCalculator_CUDA.h"
-
-#include "../../Engines/Traversal/CUDA/ITMSceneTraversal_CUDA_VoxelBlockHash.h"
-#include "../../Engines/Traversal/CUDA/ITMSceneTraversal_CUDA_PlainVoxelArray.h"
-#include "../../Engines/Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
-#include "../../Engines/VolumeEditAndCopy/CUDA/VolumeEditAndCopyEngine_CUDA.h"
-#endif
-
+#include "../../Utils/Analytics/SceneStatisticsCalculator/Interface/ITMSceneStatisticsCalculatorInterface.h"
 
 using namespace ITMLib;
 

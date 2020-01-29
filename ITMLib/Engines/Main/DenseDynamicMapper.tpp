@@ -23,6 +23,7 @@
 //local
 #include "DenseDynamicMapper.h"
 #include "../Reconstruction/DynamicSceneReconstructionEngineFactory.h"
+#include "../Warping/WarpingEngineFactory.h"
 #include "../Swapping/ITMSwappingEngineFactory.h"
 #include "../../SurfaceTrackers/SurfaceTrackerFactory.h"
 #include "../../Utils/ITMPrintHelpers.h"
@@ -86,10 +87,11 @@ inline static void PrintOperationStatus(const char* status) {
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 DenseDynamicMapper<TVoxel, TWarp, TIndex>::DenseDynamicMapper(const TIndex& index) :
-		sceneReconstructor(
+		reconstructionEngine(
 				DynamicSceneReconstructionEngineFactory::MakeSceneReconstructionEngine<TVoxel, TWarp, TIndex>
 						(configuration::get().device_type)),
-		sceneMotionTracker(
+		WarpingEngine(WarpingEngineFactory::MakeWarpingEngine<TVoxel, TWarp, TIndex>()),
+		surfaceTracker(
 				SurfaceTrackerFactory::MakeSceneMotionTracker<TVoxel, TWarp, TIndex>()),
 		swappingEngine(configuration::get().swapping_mode != configuration::SWAPPINGMODE_DISABLED
 		               ? ITMSwappingEngineFactory::MakeSwappingEngine<TVoxel, TIndex>(
@@ -106,51 +108,12 @@ DenseDynamicMapper<TVoxel, TWarp, TIndex>::DenseDynamicMapper(const TIndex& inde
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 DenseDynamicMapper<TVoxel, TWarp, TIndex>::~DenseDynamicMapper() {
-	delete sceneReconstructor;
+	delete reconstructionEngine;
+	delete WarpingEngine;
 	delete swappingEngine;
-	delete sceneMotionTracker;
+	delete surfaceTracker;
 }
 //endregion ================================= C/D ======================================================================
-
-
-//TODO: deprecate in favor of SceneManipulation
-template<typename TVoxel, typename TWarp, typename TIndex>
-void
-DenseDynamicMapper<TVoxel, TWarp, TIndex>::ResetTSDFVolume(
-		ITMVoxelVolume<TVoxel, TIndex>* volume) const {
-	switch (configuration::get().device_type) {
-		case MEMORYDEVICE_CPU:
-			VolumeEditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().ResetScene(volume);
-			break;
-		case MEMORYDEVICE_CUDA:
-#ifndef COMPILE_WITHOUT_CUDA
-			VolumeEditAndCopyEngine_CUDA<TVoxel, TIndex>::Inst().ResetScene(volume);
-#endif
-			break;
-		case MEMORYDEVICE_METAL:
-			DIEWITHEXCEPTION_REPORTLOCATION("NOT IMPLEMENTED");
-			break;
-	}
-}
-
-template<typename TVoxel, typename TWarp, typename TIndex>
-void DenseDynamicMapper<TVoxel, TWarp, TIndex>::ResetWarpVolume(
-		ITMVoxelVolume<TWarp, TIndex>* warpVolume) const {
-	switch (configuration::get().device_type) {
-		case MEMORYDEVICE_CPU:
-			VolumeEditAndCopyEngine_CPU<TWarp, TIndex>::Inst().ResetScene(warpVolume);
-			break;
-		case MEMORYDEVICE_CUDA:
-#ifndef COMPILE_WITHOUT_CUDA
-			VolumeEditAndCopyEngine_CUDA<TWarp, TIndex>::Inst().ResetScene(warpVolume);
-#endif
-			break;
-		case MEMORYDEVICE_METAL:
-			DIEWITHEXCEPTION_REPORTLOCATION("NOT IMPLEMENTED");
-			break;
-	}
-}
-
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 void DenseDynamicMapper<TVoxel, TWarp, TIndex>::ProcessInitialFrame(
@@ -159,13 +122,13 @@ void DenseDynamicMapper<TVoxel, TWarp, TIndex>::ProcessInitialFrame(
 		ITMRenderState* renderState) {
 	PrintOperationStatus("Generating raw live frame from view...");
 	bench::StartTimer("GenerateRawLiveAndCanonicalVolumes");
-	sceneReconstructor->GenerateTsdfVolumeFromView(liveScene, view, trackingState);
+	reconstructionEngine->GenerateTsdfVolumeFromView(liveScene, view, trackingState);
 	bench::StopTimer("GenerateRawLiveAndCanonicalVolumes");
 	//** prepare canonical for new frame
 	PrintOperationStatus("Fusing data from live frame into canonical frame...");
 	//** fuse the live into canonical directly
 	bench::StartTimer("FuseOneTsdfVolumeIntoAnother");
-	sceneReconstructor->FuseOneTsdfVolumeIntoAnother(canonicalScene, liveScene);
+	reconstructionEngine->FuseOneTsdfVolumeIntoAnother(canonicalScene, liveScene);
 	bench::StopTimer("FuseOneTsdfVolumeIntoAnother");
 	ProcessSwapping(canonicalScene, renderState);
 }
@@ -180,12 +143,12 @@ void DenseDynamicMapper<TVoxel, TWarp, TIndex>::InitializeProcessing(const ITMVi
 	PrintOperationStatus("Generating raw live frame from view...");
 	bench::StartTimer("GenerateRawLiveAndCanonicalVolumes");
 	if(this->use_expanded_allocation_during_TSDF_construction){
-		sceneReconstructor->GenerateTsdfVolumeFromViewExpanded(liveScenePair[0],liveScenePair[1], view, trackingState->pose_d->GetM());
+		reconstructionEngine->GenerateTsdfVolumeFromViewExpanded(liveScenePair[0], liveScenePair[1], view, trackingState->pose_d->GetM());
 	}else{
-		sceneReconstructor->GenerateTsdfVolumeFromView(liveScenePair[0], view, trackingState->pose_d->GetM());
+		reconstructionEngine->GenerateTsdfVolumeFromView(liveScenePair[0], view, trackingState->pose_d->GetM());
 	}
 	bench::StopTimer("GenerateRawLiveAndCanonicalVolumes");
-	sceneMotionTracker->ClearOutFramewiseWarp(warpField);
+	surfaceTracker->ClearOutFramewiseWarp(warpField);
 	ITMDynamicFusionLogger<TVoxel, TWarp, TIndex>::Instance().InitializeFrameRecording();
 	maxVectorUpdate = std::numeric_limits<float>::infinity();
 };
@@ -197,11 +160,11 @@ void DenseDynamicMapper<TVoxel, TWarp, TIndex>::FinalizeProcessing(
 
 	//fuse warped live into canonical
 	bench::StartTimer("FuseOneTsdfVolumeIntoAnother");
-	sceneReconstructor->FuseOneTsdfVolumeIntoAnother(canonicalScene, liveScene);
+	reconstructionEngine->FuseOneTsdfVolumeIntoAnother(canonicalScene, liveScene);
 	bench::StopTimer("FuseOneTsdfVolumeIntoAnother");
 
 	//bench::StartTimer("AddFramewiseWarpToWarp");
-	//sceneMotionTracker->AddFramewiseWarpToWarp(canonicalScene, true);
+	//surfaceTracker->AddFramewiseWarpToWarp(canonicalScene, true);
 	//bench::StopTimer("AddFramewiseWarpToWarp");
 
 	ITMDynamicFusionLogger<TVoxel, TWarp, TIndex>::Instance().FinalizeFrameRecording();
@@ -244,7 +207,7 @@ void DenseDynamicMapper<TVoxel, TWarp, TIndex>::UpdateVisibleList(
 		const ITMTrackingState* trackingState,
 		ITMVoxelVolume<TVoxel, TIndex>* scene, ITMRenderState* renderState,
 		bool resetVisibleList) {
-	sceneReconstructor->UpdateVisibleList(scene, view, trackingState, renderState, resetVisibleList);
+	reconstructionEngine->UpdateVisibleList(scene, view, trackingState, renderState, resetVisibleList);
 }
 
 // region =========================================== MOTION TRACKING ==================================================
@@ -272,7 +235,7 @@ ITMVoxelVolume<TVoxel, TIndex>* DenseDynamicMapper<TVoxel, TWarp, TIndex>::Track
 		                              liveScenePair[targetLiveSceneIndex], warpField, iteration);
 	}
 	bench::StopTimer("TrackMotion_3_Optimization");
-	PrintOperationStatus("*** Warp optimization finished for current frame. ***");
+	PrintOperationStatus("*** Warping optimization finished for current frame. ***");
 	return liveScenePair[targetLiveSceneIndex];
 }
 
@@ -293,7 +256,7 @@ void DenseDynamicMapper<TVoxel, TWarp, TIndex>::PerformSingleOptimizationStep(
 	}
 
 	bench::StartTimer("TrackMotion_31_CalculateWarpUpdate");
-	sceneMotionTracker->CalculateWarpGradient(canonicalScene, initialLiveScene, warpField);
+	surfaceTracker->CalculateWarpGradient(canonicalScene, initialLiveScene, warpField);
 	bench::StopTimer("TrackMotion_31_CalculateWarpUpdate");
 
 	if(configuration::get().verbosity_level >= configuration::VERBOSITY_PER_ITERATION){
@@ -301,14 +264,14 @@ void DenseDynamicMapper<TVoxel, TWarp, TIndex>::PerformSingleOptimizationStep(
 	}
 
 	bench::StartTimer("TrackMotion_32_ApplySmoothingToGradient");
-	sceneMotionTracker->SmoothWarpGradient(canonicalScene, initialLiveScene, warpField);
+	surfaceTracker->SmoothWarpGradient(canonicalScene, initialLiveScene, warpField);
 	bench::StopTimer("TrackMotion_32_ApplySmoothingToGradient");
 
 	if(verbosity_level >= configuration::VERBOSITY_PER_ITERATION) {
 		PrintOperationStatus("Applying warp update (based on energy gradient) to the cumulative warp...");
 	}
 	bench::StartTimer("TrackMotion_33_UpdateWarps");
-	maxVectorUpdate = sceneMotionTracker->UpdateWarps(canonicalScene, initialLiveScene, warpField);
+	maxVectorUpdate = surfaceTracker->UpdateWarps(canonicalScene, initialLiveScene, warpField);
 	bench::StopTimer("TrackMotion_33_UpdateWarps");
 
 	if(verbosity_level >= configuration::VERBOSITY_PER_ITERATION) {
@@ -316,7 +279,7 @@ void DenseDynamicMapper<TVoxel, TWarp, TIndex>::PerformSingleOptimizationStep(
 				"Updating live frame SDF by mapping from raw live SDF to new warped SDF based on latest warp...");
 	}
 	bench::StartTimer("TrackMotion_35_WarpLiveScene");
-	sceneReconstructor->WarpScene_FramewiseWarps(warpField, initialLiveScene, finalLiveScene);
+	WarpingEngine->WarpScene_WarpUpdates(warpField, initialLiveScene, finalLiveScene);
 	bench::StopTimer("TrackMotion_35_WarpLiveScene");
 	ITMDynamicFusionLogger<TVoxel, TWarp, TIndex>::Instance().SaveWarps();
 }
@@ -396,7 +359,7 @@ template<typename TVoxel, typename TWarp, typename TIndex>
 void DenseDynamicMapper<TVoxel, TWarp, TIndex>::PrintSettings() {
 	std::cout << bright_cyan << "*** DenseDynamicMapper Settings: ***" << reset << std::endl;
 	std::cout << "Max iteration count: " << this->parameters.max_iteration_threshold << std::endl;
-	std::cout << "Warp vector update threshold: " << this->parameters.max_update_length_threshold << " m, ";
+	std::cout << "Warping vector update threshold: " << this->parameters.max_update_length_threshold << " m, ";
 	std::cout << this->maxVectorUpdateThresholdVoxels << " voxels" << std::endl;
 	std::cout << bright_cyan << "*** *********************************** ***" << reset << std::endl;
 }

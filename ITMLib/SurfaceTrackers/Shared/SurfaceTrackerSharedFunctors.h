@@ -90,8 +90,8 @@ struct WarpUpdateFunctor {
 		Vector3f warpUpdate = -gradientWeight * (gradientSmoothingEnabled ?
 		                                         warp.gradient1 : warp.gradient0);
 
-		warp.warp_update = warpUpdate;
-		warp.framewise_warp = warpUpdate + momentumWeight * warp.framewise_warp ;
+		warp.warp_update = warpUpdate + momentumWeight * warp.warp_update;
+		warp.framewise_warp += warp.warp_update;
 
 		// update stats
 		float framewiseWarpLength = ORUtils::length(warp.framewise_warp);

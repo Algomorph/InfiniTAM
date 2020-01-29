@@ -72,6 +72,7 @@ namespace ITMLib
 		void turnOffMainProcessing() override;
 
 	private:
+		void Reset();
 		void InitializeScenes();
 		static const int liveSceneCount = 2;
 		void BeginProcessingFrame(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage, ITMIMUMeasurement *imuMeasurement = nullptr);

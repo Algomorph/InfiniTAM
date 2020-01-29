@@ -113,18 +113,18 @@ void DynamicSceneReconstructionEngine_CPU<TVoxel, TWarp, VoxelBlockHash>::FuseOn
 template<typename TVoxel, typename TWarp>
 void
 DynamicSceneReconstructionEngine_CPU<TVoxel, TWarp, VoxelBlockHash>::GenerateTsdfVolumeFromView(
-		ITMVoxelVolume<TVoxel, VoxelBlockHash>* scene, const ITMView* view,
+		ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
 		const ITMTrackingState* trackingState) {
-	GenerateTsdfVolumeFromView(scene, view, trackingState->pose_d->GetM());
+	GenerateTsdfVolumeFromView(volume, view, trackingState->pose_d->GetM());
 }
 
 template<typename TVoxel, typename TWarp>
 void DynamicSceneReconstructionEngine_CPU<TVoxel, TWarp, VoxelBlockHash>::GenerateTsdfVolumeFromView(
-		ITMVoxelVolume<TVoxel, VoxelBlockHash>* scene, const ITMView* view, const Matrix4f& depth_camera_matrix) {
-	this->sceneManager.ResetScene(scene);
+		ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view, const Matrix4f& depth_camera_matrix) {
+	volume->Reset();
 	IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance()
-			.AllocateFromDepth(scene, view, depth_camera_matrix, false, false);
-	this->IntegrateDepthImageIntoTsdfVolume_Helper(scene, view, depth_camera_matrix);
+			.AllocateFromDepth(volume, view, depth_camera_matrix, false, false);
+	this->IntegrateDepthImageIntoTsdfVolume_Helper(volume, view, depth_camera_matrix);
 }
 
 template<typename TVoxel, typename TWarp>
@@ -144,53 +144,8 @@ void DynamicSceneReconstructionEngine_CPU<TVoxel, TWarp, VoxelBlockHash>::Genera
 }
 
 // endregion ===========================================================================================================
-// region ===================================== APPLY WARP/UPDATE TO LIVE ==============================================
 
 
-
-/**
- * \brief Uses trilinear interpolation of the live frame at [canonical voxel positions + TWarpSource vector]
- *  (not complete warps) to generate a new live SDF grid in the target scene. Intended to be used at every iteration.
- * \details Assumes target frame is empty / has been reset.
- * Does 3 things:
- * <ol>
- *  <li> Traverses allocated canonical hash blocks and voxels, checks raw frame at [current voxel position + warp vector],
- *       if there is a non-truncated voxel in the live frame, marks the block in target SDF volume at the current hash
- *       block position for allocation
- *  <li> Traverses target hash blocks, if one is marked for allocation, allocates it
- *  <li> Traverses allocated target hash blocks and voxels, retrieves canonical voxel at same location, if it is marked
- *       as "truncated", skips it, otherwise uses trilinear interpolation at [current voxel position + warp vector] to
- *       retrieve SDF value from live frame, then stores it into the current target voxel, and marks latter voxel as
- *       truncated, non-truncated, or unknown based on the lookup flags & resultant SDF value.
- * </ol>
- * \param canonicalScene canonical scene with warp vectors at each voxel.
- * \param liveScene source (current iteration) live scene
- * \param targetLiveScene target (next iteration) live scene
- * \tparam TWarp type of warp vector to use for interpolation
- */
-template<typename TVoxel, typename TWarp>
-template<WarpType TWarpType>
-void DynamicSceneReconstructionEngine_CPU<TVoxel, TWarp, VoxelBlockHash>::WarpScene(
-		ITMVoxelVolume<TWarp, VoxelBlockHash>* warpField,
-		ITMVoxelVolume<TVoxel, VoxelBlockHash>* sourceTSDF,
-		ITMVoxelVolume<TVoxel, VoxelBlockHash>* targetTSDF) {
-
-	// Clear out the flags at target volume
-	FieldClearFunctor<TVoxel> flagClearFunctor;
-	ITMSceneTraversalEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::VoxelTraversal(targetTSDF, flagClearFunctor);
-
-	// Allocate new blocks where necessary, filter based on flags from source
-	IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance().template AllocateFromWarpedVolume<TWarpType>(
-			warpField, sourceTSDF, targetTSDF);
-
-	TrilinearInterpolationFunctor<TVoxel, TWarp, VoxelBlockHash, TWarpType, MEMORYDEVICE_CPU>
-			trilinearInterpolationFunctor(sourceTSDF, warpField);
-
-	// Interpolate to obtain the new live frame values (at target index)
-	ITMDualSceneTraversalEngine<TVoxel, TWarp, VoxelBlockHash, VoxelBlockHash, MEMORYDEVICE_CPU>::
-	//DualVoxelPositionTraversal_DefaultForMissingSecondary(targetTSDF, warpField, trilinearInterpolationFunctor);
-	DualVoxelPositionTraversal(targetTSDF, warpField, trilinearInterpolationFunctor);
-}
 
 template<typename TVoxel, typename TWarp>
 void DynamicSceneReconstructionEngine_CPU<TVoxel, TWarp, VoxelBlockHash>::UpdateVisibleList(
@@ -200,32 +155,3 @@ void DynamicSceneReconstructionEngine_CPU<TVoxel, TWarp, VoxelBlockHash>::Update
 			.AllocateFromDepth(scene, view, trackingState, true, resetVisibleList);
 }
 
-template<typename TVoxel, typename TWarp>
-void DynamicSceneReconstructionEngine_CPU<TVoxel, TWarp, VoxelBlockHash>::WarpScene_CumulativeWarps(
-		ITMVoxelVolume<TWarp, VoxelBlockHash>* warpField,
-		ITMVoxelVolume<TVoxel, VoxelBlockHash>* sourceTSDF,
-		ITMVoxelVolume<TVoxel, VoxelBlockHash>* targetTSDF) {
-	this->template WarpScene<WARP_CUMULATIVE>(warpField, sourceTSDF, targetTSDF);
-}
-
-template<typename TVoxel, typename TWarp>
-void DynamicSceneReconstructionEngine_CPU<TVoxel, TWarp, VoxelBlockHash>::WarpScene_FramewiseWarps(
-		ITMVoxelVolume<TWarp, VoxelBlockHash>* warpField,
-		ITMVoxelVolume<TVoxel, VoxelBlockHash>* sourceTSDF,
-		ITMVoxelVolume<TVoxel, VoxelBlockHash>* targetTSDF) {
-	this->template WarpScene<WARP_FLOW>(warpField, sourceTSDF, targetTSDF);
-}
-
-template<typename TVoxel, typename TWarp>
-void DynamicSceneReconstructionEngine_CPU<TVoxel, TWarp, VoxelBlockHash>::WarpScene_WarpUpdates(
-		ITMVoxelVolume<TWarp, VoxelBlockHash>* warpField,
-		ITMVoxelVolume<TVoxel, VoxelBlockHash>* sourceTSDF,
-		ITMVoxelVolume<TVoxel, VoxelBlockHash>* targetTSDF) {
-	this->template WarpScene<WARP_UPDATE>(warpField, sourceTSDF, targetTSDF);
-}
-
-
-
-
-
-// endregion ===========================================================================================================
