@@ -4,7 +4,6 @@
 #include "DynamicSceneReconstructionEngine_CPU.h"
 #include "../Shared/ITMDynamicSceneReconstructionEngine_Shared.h"
 #include "../../Traversal/CPU/ITMSceneTraversal_CPU_VoxelBlockHash.h"
-#include "../Shared/ITMDynamicSceneReconstructionEngine_Functors.h"
 
 using namespace ITMLib;
 
@@ -98,17 +97,6 @@ void DynamicSceneReconstructionEngine_CPU<TVoxel, TWarp, VoxelBlockHash>::Integr
 }
 // endregion ===========================================================================================================
 // region =================================== FUSION ===================================================================
-
-template<typename TVoxel, typename TWarp>
-void DynamicSceneReconstructionEngine_CPU<TVoxel, TWarp, VoxelBlockHash>::FuseOneTsdfVolumeIntoAnother(
-		ITMVoxelVolume<TVoxel, VoxelBlockHash>* canonicalScene,
-		ITMVoxelVolume<TVoxel, VoxelBlockHash>* liveScene) {
-	IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance()
-			.AllocateUsingOtherVolume(canonicalScene, liveScene);
-	TSDFFusionFunctor<TVoxel> fusionFunctor(canonicalScene->sceneParams->max_integration_weight);
-	ITMDualSceneTraversalEngine<TVoxel, TVoxel, VoxelBlockHash, VoxelBlockHash, MEMORYDEVICE_CPU>::
-	DualVoxelTraversal(liveScene, canonicalScene, fusionFunctor);
-}
 
 template<typename TVoxel, typename TWarp>
 void

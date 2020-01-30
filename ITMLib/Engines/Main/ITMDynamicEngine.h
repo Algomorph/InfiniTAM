@@ -37,12 +37,6 @@ namespace ITMLib
 
 		ITMTrackingState::TrackingResult ProcessFrame(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage, ITMIMUMeasurement *imuMeasurement = nullptr) override;
 
-		//_DEBUG for visual debugging
-		void BeginProcessingFrameInStepByStepMode(ITMUChar4Image* rgbImage, ITMShortImage* rawDepthImage,
-		                                          ITMIMUMeasurement* imuMeasurement = nullptr);
-		bool UpdateCurrentFrameSingleStep();
-		ITMTrackingState::TrackingResult GetStepByStepTrackingResult();
-
 		/// Extracts a mesh from the current scene and saves it to the model file specified by the file name
 		void SaveSceneToMesh(const char *fileName) override ;
 
@@ -75,6 +69,7 @@ namespace ITMLib
 		void Reset();
 		void InitializeScenes();
 		static const int liveSceneCount = 2;
+		//TODO need better function separation here, "begin" is logically too arbitrary and does too many things
 		void BeginProcessingFrame(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage, ITMIMUMeasurement *imuMeasurement = nullptr);
 
 		bool trackingActive, fusionActive, mainProcessingActive, trackingInitialised;
@@ -109,7 +104,6 @@ namespace ITMLib
 		ITMTrackingState* trackingState;
 		ITMTrackingState::TrackingResult lastTrackerResult;
 		bool fusionSucceeded;
-		bool canFuse;
 		ORUtils::SE3Pose previousFramePose;
 	};
 }

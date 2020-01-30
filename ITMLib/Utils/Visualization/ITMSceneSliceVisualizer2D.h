@@ -34,7 +34,7 @@ class ITMSceneSliceVisualizer2D {
 public:
 	static float SdfToShadeValue(float sdf);
 
-	explicit ITMSceneSliceVisualizer2D(Vector3i focusCoordinates, unsigned int imageSizeVoxels, float pixelsPerVoxel,
+	explicit ITMSceneSliceVisualizer2D(Vector3i focus_coordinates, unsigned int imageSizeVoxels, float pixelsPerVoxel,
 		                                   Plane plane);
 
 	virtual ~ITMSceneSliceVisualizer2D() = default;
@@ -85,7 +85,7 @@ private:
 	const int imgPixelRangeZ;
 
 	Plane plane;
-	const Vector3i focusCoordinates;
+	const Vector3i focus_coordinates;
 };
 
 

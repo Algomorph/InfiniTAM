@@ -19,7 +19,6 @@
 
 #include "../../EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
 #include "DynamicSceneReconstructionEngine_CUDA_VoxelBlockHash_Kernels.h"
-#include "../Shared/ITMDynamicSceneReconstructionEngine_Functors.h"
 #include "../../Traversal/CUDA/ITMSceneTraversal_CUDA_VoxelBlockHash.h"
 #include "../../../Utils/Analytics/SceneStatisticsCalculator/CUDA/ITMSceneStatisticsCalculator_CUDA.h"
 
@@ -66,16 +65,6 @@ void DynamicSceneReconstructionEngine_CUDA<TVoxel, TWarp, VoxelBlockHash>::Gener
 	this->IntegrateDepthImageIntoTsdfVolume_Helper(volume, view, depth_camera_matrix);
 }
 
-template<typename TVoxel, typename TWarp>
-void DynamicSceneReconstructionEngine_CUDA<TVoxel, TWarp, VoxelBlockHash>::FuseOneTsdfVolumeIntoAnother(
-		ITMVoxelVolume<TVoxel, VoxelBlockHash>* targetTsdfVolume,
-		ITMVoxelVolume<TVoxel, VoxelBlockHash>* liveTsdfVolume) {
-	IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance()
-			.AllocateUsingOtherVolume(targetTsdfVolume, liveTsdfVolume);
-	TSDFFusionFunctor<TVoxel> fusionFunctor(targetTsdfVolume->sceneParams->max_integration_weight);
-	ITMDualSceneTraversalEngine<TVoxel, TVoxel, VoxelBlockHash, VoxelBlockHash, MEMORYDEVICE_CUDA>::
-	DualVoxelTraversal(liveTsdfVolume, targetTsdfVolume, fusionFunctor);
-}
 
 template<typename TVoxel, typename TWarp>
 void DynamicSceneReconstructionEngine_CUDA<TVoxel, TWarp, VoxelBlockHash>::IntegrateDepthImageIntoTsdfVolume_Helper(

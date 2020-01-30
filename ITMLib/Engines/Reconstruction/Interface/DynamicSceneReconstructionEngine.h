@@ -80,18 +80,6 @@ public:
 	                                                const ITMView* view,
 	                                                const Matrix4f& depth_camera_matrix = Matrix4f::Identity()) = 0;
 
-
-	/**
-	 * \brief Fuses the live scene into the canonical scene
-	 * \details Operation happens after the motion is tracked, at this point sourceTsdfVolume should be as close to the canonical
-	 * as possible
-	 * \param targetTsdfVolume the canonical voxel grid, representing the state at the beginning of the sequence
-	 * \param sourceTsdfVolume the live voxel grid, a TSDF generated from a single recent depth image
-	 * \param liveSourceFieldIndex index of the sdf field to use at live scene voxels
-	 */
-	virtual void FuseOneTsdfVolumeIntoAnother(ITMVoxelVolume<TVoxel, TIndex>* targetTsdfVolume,
-	                                          ITMVoxelVolume<TVoxel, TIndex>* sourceTsdfVolume) = 0;
-
 	/**
 	 * \brief Update the voxel blocks by integrating depth and possibly color information from the given view. Assume
 	 * camera is at world origin.

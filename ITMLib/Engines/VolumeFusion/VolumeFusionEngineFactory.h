@@ -1,5 +1,5 @@
 //  ================================================================
-//  Created by Gregory Kramida on 1/29/20.
+//  Created by Gregory Kramida on 1/30/20.
 //  Copyright (c) 2020 Gregory Kramida
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 #pragma once
 
 //local
-#include "WarpingEngine.h"
+#include "VolumeFusionEngine.h"
 #include "../../Utils/Configuration.h"
 
 #ifdef COMPILE_WITH_METAL
@@ -24,26 +24,26 @@
 #endif
 
 namespace ITMLib{
-class WarpingEngineFactory{
+class VolumeFusionEngineFactory{
 public:
 	template<typename TVoxel, typename TWarp, typename TIndex>
-	static WarpingEngineInterface<TVoxel, TWarp, TIndex>*
-    MakeWarpingEngine(MemoryDeviceType memoryDeviceType = configuration::get().device_type){
-		WarpingEngineInterface<TVoxel, TWarp, TIndex>* warping_engine = nullptr;
+	static VolumeFusionEngineInterface<TVoxel, TWarp, TIndex>*
+	MakeVolumeFusionEngine(MemoryDeviceType memoryDeviceType = configuration::get().device_type){
+		VolumeFusionEngineInterface<TVoxel, TWarp, TIndex>* volume_fusion_engine = nullptr;
 		switch (memoryDeviceType) {
 			case MEMORYDEVICE_CPU:
-				warping_engine = new WarpingEngine<TVoxel, TWarp, TIndex, MEMORYDEVICE_CPU>();
+				volume_fusion_engine = new VolumeFusionEngine<TVoxel, TWarp, TIndex, MEMORYDEVICE_CPU>();
 				break;
 			case MEMORYDEVICE_CUDA:
 #ifdef COMPILE_WITHOUT_CUDA
 				DIEWITHEXCEPTION_REPORTLOCATION("Not built with CUDA but CUDA type requested, aborting!");
 #else
-				warping_engine = new WarpingEngine<TVoxel, TWarp, TIndex, MEMORYDEVICE_CUDA>();
+				volume_fusion_engine = new VolumeFusionEngine<TVoxel, TWarp, TIndex, MEMORYDEVICE_CUDA>();
 #endif
 
 				break;
 		}
-		return warping_engine;
-    }
+		return volume_fusion_engine;
+	}
 };
 } // namespace ITMLib

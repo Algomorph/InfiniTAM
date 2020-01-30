@@ -28,26 +28,26 @@ struct ITMSwappingEngineFactory
   template <typename TVoxel, typename TIndex>
   static ITMSwappingEngine<TVoxel,TIndex> *MakeSwappingEngine(MemoryDeviceType deviceType, const TIndex& index)
   {
-    ITMSwappingEngine<TVoxel,TIndex> *swappingEngine = NULL;
+    ITMSwappingEngine<TVoxel,TIndex> *swapping_engine = NULL;
 
     switch(deviceType)
     {
       case MEMORYDEVICE_CPU:
-        swappingEngine = new ITMSwappingEngine_CPU<TVoxel,TIndex>(index);
+	      swapping_engine = new ITMSwappingEngine_CPU<TVoxel,TIndex>(index);
         break;
       case MEMORYDEVICE_CUDA:
 #ifndef COMPILE_WITHOUT_CUDA
-        swappingEngine = new ITMSwappingEngine_CUDA<TVoxel,TIndex>(index);
+        swapping_engine = new ITMSwappingEngine_CUDA<TVoxel,TIndex>(index);
 #endif
         break;
       case MEMORYDEVICE_METAL:
 #ifdef COMPILE_WITH_METAL
-        swappingEngine = new ITMSwappingEngine_CPU<TVoxelCanonical,TIndex>;
+        swapping_engine = new ITMSwappingEngine_CPU<TVoxelCanonical,TIndex>;
 #endif
         break;
     }
 
-    return swappingEngine;
+    return swapping_engine;
   }
 };
 

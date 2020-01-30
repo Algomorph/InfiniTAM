@@ -1,4 +1,5 @@
 // Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
+// Modified code: Copyright 2020 Gregory Kramida
 
 #pragma once
 
@@ -21,13 +22,12 @@
 
 
 namespace InfiniTAM {
-namespace Engine {
+namespace Engine { //TODO: retching from the overuse of the word "Engine"
 class UIEngine_BPO {
 private:
 
 	enum MainLoopAction {
-		PROCESS_PAUSED, PROCESS_FRAME, PROCESS_VIDEO, EXIT,
-		PROCESS_N_FRAMES, PROCESS_SINGLE_STEP, PROCESS_STEPS_CONTINUOUS
+		PROCESS_PAUSED, PROCESS_FRAME, PROCESS_VIDEO, EXIT, PROCESS_N_FRAMES
 	} mainLoopAction;
 
 	struct UIColourMode {
@@ -78,7 +78,6 @@ private:
 
 	int currentFrameNo;
 	bool isRecordingImages;
-	bool inStepByStepMode = false;
 
 	InputSource::FFMPEGWriter* reconstructionVideoWriter = nullptr;
 	InputSource::FFMPEGWriter* rgbVideoWriter = nullptr;
@@ -119,11 +118,6 @@ public:
 	void PrintProcessingFrameHeader() const;
 	void ProcessFrame();
 
-	//For scene-tracking updates
-	bool BeginStepByStepMode();
-	bool InStepByStepMode() { return this->inStepByStepMode;}
-	bool ContinueStepByStepModeForFrame();
-
 	void GetScreenshot(ITMUChar4Image* dest) const;
 	void SaveScreenshot(const char* filename) const;
 
@@ -135,5 +129,5 @@ public:
 	std::string GenerateNextFrameOutputPath() const;
 	std::string GenerateCurrentFrameOutputDirectory() const;
 };
-}
-}
+} // namespace Engine -- bleh?
+} // namespace InfiniTAM

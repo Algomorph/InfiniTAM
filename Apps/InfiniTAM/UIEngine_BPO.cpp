@@ -83,13 +83,11 @@ void UIEngine_BPO::Initialize(int& argc, char** argv,
 	const bool fix_camera = false;
 	const bool load_volume_before_automatic_run = false;
 	const bool save_volume_after_automatic_run = false;
-	const bool start_in_step_by_step_mode = false;
 
 
 	this->logger = logger;
 	this->indexingMethod = configuration.indexing_method;
 
-	this->inStepByStepMode = false;
 	this->save_after_automatic_run = save_volume_after_automatic_run;
 	this->exit_after_automatic_run = configuration.automatic_run_settings.exit_after_automatic_processing;
 
@@ -186,14 +184,9 @@ void UIEngine_BPO::Initialize(int& argc, char** argv,
 		SkipFrames(configuration.automatic_run_settings.index_of_frame_to_start_at);
 	}
 
-	if (start_in_step_by_step_mode) {
-		mainLoopAction = number_of_frames_to_process_after_launch ? PROCESS_STEPS_CONTINUOUS : PROCESS_SINGLE_STEP;
-		outImageType[0] = this->colourMode_stepByStep.type;
-	} else {
-		mainLoopAction = number_of_frames_to_process_after_launch ? PROCESS_N_FRAMES : PROCESS_PAUSED;
-		outImageType[0] = this->freeviewActive ? this->colourModes_freeview[this->currentColourMode].type
-		                                       : this->colourModes_main[this->currentColourMode].type;
-	}
+	mainLoopAction = number_of_frames_to_process_after_launch ? PROCESS_N_FRAMES : PROCESS_PAUSED;
+	outImageType[0] = this->freeviewActive ? this->colourModes_freeview[this->currentColourMode].type
+	                                       : this->colourModes_main[this->currentColourMode].type;
 
 	if (configuration.telemetry_settings.record_reconstruction_video) {
 		this->reconstructionVideoWriter = new FFMPEGWriter();
@@ -302,58 +295,6 @@ void UIEngine_BPO::Shutdown() {
 	delete saveImage;
 }
 
-bool UIEngine_BPO::BeginStepByStepMode() {
-	if (!imageSource->hasMoreImages()) return false;
-
-	switch (indexingMethod) {
-		case configuration::INDEX_HASH: {
-			auto* dynamicEngine = dynamic_cast<ITMDynamicEngine<ITMVoxel, ITMWarp, VoxelBlockHash>*>(mainEngine);
-			if (dynamicEngine == nullptr) return false;
-		}
-			break;
-		case configuration::INDEX_ARRAY: {
-			auto* dynamicEngine = dynamic_cast<ITMDynamicEngine<ITMVoxel, ITMWarp, PlainVoxelArray>*>(mainEngine);
-			if (dynamicEngine == nullptr) return false;
-		}
-			break;
-	}
-
-
-	imageSource->getImages(inputRGBImage, inputRawDepthImage);
-
-	if (imuSource != nullptr) {
-		if (!imuSource->hasMoreMeasurements()) return false;
-		else imuSource->getMeasurement(inputIMUMeasurement);
-	}
-	if(logger->NeedsFramewiseOutputFolder()){
-		logger->SetOutputDirectory(
-				this->GenerateCurrentFrameOutputDirectory());
-	}
-	RecordDepthAndRGBInputToImages();
-	RecordDepthAndRGBInputToVideo();
-
-	//actual processing on the mailEngine
-	switch (indexingMethod) {
-		case configuration::INDEX_HASH: {
-			auto* dynamicEngine = dynamic_cast<ITMDynamicEngine<ITMVoxel, ITMWarp, VoxelBlockHash>*>(mainEngine);
-			if (imuSource != nullptr)
-				dynamicEngine->BeginProcessingFrameInStepByStepMode(inputRGBImage, inputRawDepthImage,
-				                                                    inputIMUMeasurement);
-			else dynamicEngine->BeginProcessingFrameInStepByStepMode(inputRGBImage, inputRawDepthImage);
-		}
-			break;
-		case configuration::INDEX_ARRAY: {
-			auto* dynamicEngine = dynamic_cast<ITMDynamicEngine<ITMVoxel, ITMWarp, PlainVoxelArray>*>(mainEngine);
-			if (imuSource != nullptr)
-				dynamicEngine->BeginProcessingFrameInStepByStepMode(inputRGBImage, inputRawDepthImage,
-				                                                    inputIMUMeasurement);
-			else dynamicEngine->BeginProcessingFrameInStepByStepMode(inputRGBImage, inputRawDepthImage);
-		}
-			break;
-	}
-	this->inStepByStepMode = true;
-	return true;
-}
 
 std::string UIEngine_BPO::GenerateNextFrameOutputPath() const {
 	fs::path path(std::string(this->output_path) + "/Frame_" + std::to_string(GetCurrentFrameIndex() + 1));
@@ -369,44 +310,6 @@ std::string UIEngine_BPO::GenerateCurrentFrameOutputDirectory() const {
 		fs::create_directories(path);
 	}
 	return path.string();
-}
-
-bool UIEngine_BPO::ContinueStepByStepModeForFrame() {
-	bool keepProcessingFrame = false;
-	switch (indexingMethod) {
-		case configuration::INDEX_HASH: {
-			auto* dynamicEngine = dynamic_cast<ITMDynamicEngine<ITMVoxel, ITMWarp, VoxelBlockHash>*>(mainEngine);
-			if (dynamicEngine == nullptr) return false;
-			keepProcessingFrame = dynamicEngine->UpdateCurrentFrameSingleStep();
-			if (!keepProcessingFrame) {
-				trackingResult = dynamicEngine->GetStepByStepTrackingResult();
-#ifndef COMPILE_WITHOUT_CUDA
-				ORcudaSafeCall(cudaDeviceSynchronize());
-#endif
-				currentFrameNo++;
-			} else {
-				RecordCurrentReconstructionFrameToVideo();
-			}
-		}
-			break;
-		case configuration::INDEX_ARRAY: {
-			auto* dynamicEngine = dynamic_cast<ITMDynamicEngine<ITMVoxel, ITMWarp, PlainVoxelArray>*>(mainEngine);
-			if (dynamicEngine == nullptr) return false;
-			keepProcessingFrame = dynamicEngine->UpdateCurrentFrameSingleStep();
-			if (!keepProcessingFrame) {
-				trackingResult = dynamicEngine->GetStepByStepTrackingResult();
-#ifndef COMPILE_WITHOUT_CUDA
-				ORcudaSafeCall(cudaDeviceSynchronize());
-#endif
-				currentFrameNo++;
-			} else {
-				RecordCurrentReconstructionFrameToVideo();
-			}
-		}
-			break;
-	}
-	inStepByStepMode = keepProcessingFrame;
-	return keepProcessingFrame;
 }
 
 //TODO: Group all recording & make it toggleable with a single keystroke / command flag

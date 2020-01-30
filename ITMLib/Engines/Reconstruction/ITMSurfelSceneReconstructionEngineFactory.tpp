@@ -8,31 +8,29 @@
 #include "CUDA/SurfelSceneReconstructionEngine_CUDA.h"
 #endif
 
-namespace ITMLib
-{
+namespace ITMLib {
 
 //#################### PUBLIC STATIC MEMBER FUNCTIONS ####################
 
-template <typename TSurfel>
-SurfelSceneReconstructionEngine<TSurfel> *
-ITMSurfelSceneReconstructionEngineFactory<TSurfel>::make_surfel_scene_reconstruction_engine(const Vector2i& depthImageSize, MemoryDeviceType deviceType)
-{
-  SurfelSceneReconstructionEngine<TSurfel> *reconstructionEngine = NULL;
+template<typename TSurfel>
+SurfelSceneReconstructionEngine<TSurfel>*
+ITMSurfelSceneReconstructionEngineFactory<TSurfel>::make_surfel_scene_reconstruction_engine(
+		const Vector2i& depthImageSize, MemoryDeviceType deviceType) {
+	SurfelSceneReconstructionEngine<TSurfel>* reconstruction_engine = NULL;
 
-  if(deviceType == MEMORYDEVICE_CUDA)
-  {
-#ifndef COMPILE_WITHOUT_CUDA
-    reconstructionEngine = new SurfelSceneReconstructionEngine_CUDA<TSurfel>(depthImageSize);
+	if (deviceType == MEMORYDEVICE_CUDA) {
+#ifdef COMPILE_WITHOUT_CUDA
+		throw std::runtime_error(
+				"Error: CUDA support not currently available. Reconfigure in CMake with the WITH_CUDA option set to on.");
 #else
-    throw std::runtime_error("Error: CUDA support not currently available. Reconfigure in CMake with the WITH_CUDA option set to on.");
-#endif
-  }
-  else
-  {
-    reconstructionEngine = new SurfelSceneReconstructionEngine_CPU<TSurfel>(depthImageSize);
-  }
+		reconstruction_engine = new SurfelSceneReconstructionEngine_CUDA<TSurfel>(depthImageSize);
 
-  return reconstructionEngine;
+#endif
+	} else {
+		reconstruction_engine = new SurfelSceneReconstructionEngine_CPU<TSurfel>(depthImageSize);
+	}
+
+	return reconstruction_engine;
 }
 
 }

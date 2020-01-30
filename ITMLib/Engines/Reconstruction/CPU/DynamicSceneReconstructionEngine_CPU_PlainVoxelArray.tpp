@@ -17,7 +17,6 @@
 #include "DynamicSceneReconstructionEngine_CPU.h"
 #include "../Shared/ITMDynamicSceneReconstructionEngine_Shared.h"
 #include "../../Traversal/CPU/ITMSceneTraversal_CPU_PlainVoxelArray.h"
-#include "../Shared/ITMDynamicSceneReconstructionEngine_Functors.h"
 
 using namespace ITMLib;
 
@@ -28,35 +27,32 @@ template<typename TVoxel, typename TWarp>
 void DynamicSceneReconstructionEngine_CPU<TVoxel, TWarp, PlainVoxelArray>::IntegrateDepthImageIntoTsdfVolume_Helper(
 		ITMVoxelVolume<TVoxel, PlainVoxelArray>* volume, const ITMView* view, Matrix4f camera_depth_matrix){
 
-	Vector2i rgbImgSize = view->rgb->noDims;
-	Vector2i depthImgSize = view->depth->noDims;
-	float voxelSize = volume->sceneParams->voxel_size;
+	const Vector2i rgbImgSize = view->rgb->noDims;
+	const Vector2i depthImgSize = view->depth->noDims;
+	const float voxelSize = volume->sceneParams->voxel_size;
 
 	Matrix4f camera_rgb_matrix;
-	Vector4f projParams_d, projParams_rgb;
-
 	if (TVoxel::hasColorInformation) camera_rgb_matrix = view->calib.trafo_rgb_to_depth.calib_inv * camera_depth_matrix;
 
-	projParams_d = view->calib.intrinsics_d.projectionParamsSimple.all;
-	projParams_rgb = view->calib.intrinsics_rgb.projectionParamsSimple.all;
+	const Vector4f projParams_d = view->calib.intrinsics_d.projectionParamsSimple.all;
+	const Vector4f projParams_rgb = view->calib.intrinsics_rgb.projectionParamsSimple.all;
 
-	float mu = volume->sceneParams->narrow_band_half_width;
-	int maxW = volume->sceneParams->max_integration_weight;
+	const float mu = volume->sceneParams->narrow_band_half_width;
+	const int maxW = volume->sceneParams->max_integration_weight;
 
-	float* depth = view->depth->GetData(MEMORYDEVICE_CPU);
-	Vector4u* rgb = view->rgb->GetData(MEMORYDEVICE_CPU);
+	const float* depth = view->depth->GetData(MEMORYDEVICE_CPU);
+	const Vector4u* rgb = view->rgb->GetData(MEMORYDEVICE_CPU);
 	TVoxel* voxelArray = volume->localVBA.GetVoxelBlocks();
 
 	const PlainVoxelArray::IndexData* arrayInfo = volume->index.GetIndexData();
 
-	float* confidence = view->depthConfidence->GetData(MEMORYDEVICE_CPU);
+	const float* confidence = view->depthConfidence->GetData(MEMORYDEVICE_CPU);
 
 #ifdef WITH_OPENMP
-#pragma omp parallel for
+#pragma omp parallel for default(none) shared(volume, voxelArray, arrayInfo, rgb, camera_rgb_matrix, depth, camera_depth_matrix, confidence)
 #endif
 	for (int locId = 0; locId < volume->index.GetVolumeSize().x * volume->index.GetVolumeSize().y *
 	                            volume->index.GetVolumeSize().z; ++locId) {
-
 
 		int z = locId / (volume->index.GetVolumeSize().x * volume->index.GetVolumeSize().y);
 		int tmp = locId - z * volume->index.GetVolumeSize().x * volume->index.GetVolumeSize().y;
@@ -92,15 +88,6 @@ template<typename TVoxel, typename TWarp>
 void DynamicSceneReconstructionEngine_CPU<TVoxel, TWarp, PlainVoxelArray>::IntegrateDepthImageIntoTsdfVolume(
 		ITMVoxelVolume<TVoxel, PlainVoxelArray>* volume, const ITMView* view){
 	IntegrateDepthImageIntoTsdfVolume_Helper(volume, view);
-}
-
-template<typename TVoxel, typename TWarp>
-void DynamicSceneReconstructionEngine_CPU<TVoxel, TWarp, PlainVoxelArray>::FuseOneTsdfVolumeIntoAnother(
-		ITMVoxelVolume<TVoxel, PlainVoxelArray>* canonicalScene,
-		ITMVoxelVolume<TVoxel, PlainVoxelArray>* liveScene) {
-	TSDFFusionFunctor<TVoxel> fusionFunctor(canonicalScene->sceneParams->max_integration_weight);
-	ITMDualSceneTraversalEngine<TVoxel, TVoxel, PlainVoxelArray, PlainVoxelArray, MEMORYDEVICE_CPU>::
-	DualVoxelTraversal(liveScene, canonicalScene, fusionFunctor);
 }
 
 template<typename TVoxel, typename TWarp>

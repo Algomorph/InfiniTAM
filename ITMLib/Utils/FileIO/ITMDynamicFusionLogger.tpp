@@ -279,7 +279,7 @@ void ITMDynamicFusionLogger<TVoxel, TWarp, TIndex>::InitializeFrameRecording() {
 
 		if (recordingScene1DSlicesWithUpdates) {
 #ifdef WITH_VTK
-			this->scene1DSliceVisualizer.reset(new ITMSceneSliceVisualizer1D(focusCoordinates, AXIS_X, 16));
+			this->scene1DSliceVisualizer.reset(new ITMSceneSliceVisualizer1D(focus_coordinates, AXIS_X, 16));
 			scene1DSliceVisualizer->Plot1DSceneSlice(canonicalScene, Vector4i(97, 181, 193, 255), 3.0);
 			scene1DSliceVisualizer->Plot1DSceneSlice(liveScene, Vector4i(183, 115, 46, 255), 3.0);
 #else
@@ -289,7 +289,7 @@ void ITMDynamicFusionLogger<TVoxel, TWarp, TIndex>::InitializeFrameRecording() {
 		}
 #ifdef WITH_OPENCV
 		scene2DSliceVisualizer.reset(
-				new ITMSceneSliceVisualizer2D<TVoxel, TWarp, TIndex>(focusCoordinates, 100,
+				new ITMSceneSliceVisualizer2D<TVoxel, TWarp, TIndex>(focus_coordinates, 100,
 				                                                     16.0,
 				                                                     planeFor2Dand3DSlices));
 
@@ -315,7 +315,7 @@ void ITMDynamicFusionLogger<TVoxel, TWarp, TIndex>::InitializeFrameRecording() {
 #ifdef WITH_VTK
 			if (!scene3DSliceVisualizer) {
 				scene3DSliceVisualizer.reset(new ITMSceneSliceVisualizer3D<TVoxel, TWarp, TIndex>
-													 (canonicalScene, liveScene, warpField, focusCoordinates,
+													 (canonicalScene, liveScene, warpField, focus_coordinates,
 													  planeFor2Dand3DSlices, _3dSliceInPlaneRadius,
 													  _3dSliceOutOfPlaneRadius));
 			} else {

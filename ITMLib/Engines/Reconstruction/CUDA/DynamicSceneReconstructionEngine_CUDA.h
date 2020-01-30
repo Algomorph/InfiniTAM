@@ -45,8 +45,6 @@ public:
 	                                        ITMVoxelVolume<TVoxel, VoxelBlockHash>* temporaryAllocationVolume,
 	                                        const ITMView* view,
 	                                        const Matrix4f& depth_camera_matrix = Matrix4f::Identity()) override;
-	void FuseOneTsdfVolumeIntoAnother(ITMVoxelVolume<TVoxel, VoxelBlockHash>* targetTsdfVolume,
-	                              ITMVoxelVolume<TVoxel, VoxelBlockHash>* liveTsdfVolume) override;
 
 	void IntegrateDepthImageIntoTsdfVolume(ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view) override;
 	void IntegrateDepthImageIntoTsdfVolume(ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
@@ -75,8 +73,6 @@ public:
 	                                        ITMVoxelVolume<TVoxel, PlainVoxelArray>* temporaryAllocationVolume,
 	                                        const ITMView* view,
 	                                        const Matrix4f& depth_camera_matrix = Matrix4f::Identity()) override;
-	void FuseOneTsdfVolumeIntoAnother(ITMVoxelVolume<TVoxel, PlainVoxelArray>* canonicalScene,
-	                              ITMVoxelVolume<TVoxel, PlainVoxelArray>* liveScene) override;
 
 	DynamicSceneReconstructionEngine_CUDA() = default;
 	~DynamicSceneReconstructionEngine_CUDA() = default;

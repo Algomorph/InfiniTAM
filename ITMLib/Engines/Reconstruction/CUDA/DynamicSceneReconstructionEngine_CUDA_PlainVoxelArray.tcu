@@ -57,27 +57,6 @@ void DynamicSceneReconstructionEngine_CUDA<TVoxel, TWarp, PlainVoxelArray>::Gene
 }
 
 template<typename TVoxel, typename TWarp>
-void DynamicSceneReconstructionEngine_CUDA<TVoxel, TWarp, PlainVoxelArray>::FuseOneTsdfVolumeIntoAnother(
-		ITMVoxelVolume<TVoxel, PlainVoxelArray>* canonicalScene,
-		ITMVoxelVolume<TVoxel, PlainVoxelArray>* liveScene) {
-
-	TVoxel* liveVoxels = liveScene->localVBA.GetVoxelBlocks();
-	TVoxel* canonicalVoxels = canonicalScene->localVBA.GetVoxelBlocks();
-	const PlainVoxelArray::GridAlignedBox* arrayInfo = canonicalScene->index.GetIndexData();
-	int maxW = canonicalScene->sceneParams->max_integration_weight;
-
-	dim3 cudaBlockSize(8, 8, 8);
-	dim3 gridSize(canonicalScene->index.GetVolumeSize().x / cudaBlockSize.x,
-	              canonicalScene->index.GetVolumeSize().y / cudaBlockSize.y,
-	              canonicalScene->index.GetVolumeSize().z / cudaBlockSize.z);
-
-	fuseSdf2Sdf_device<TVoxel>
-			<< < gridSize, cudaBlockSize >> >
-	                       (liveVoxels, canonicalVoxels, arrayInfo, maxW);
-	ORcudaKernelCheck;
-}
-
-template<typename TVoxel, typename TWarp>
 void DynamicSceneReconstructionEngine_CUDA<TVoxel, TWarp, PlainVoxelArray>::IntegrateDepthImageIntoTsdfVolume_Helper(
 		ITMVoxelVolume<TVoxel, PlainVoxelArray>* volume, const ITMView* view, Matrix4f depth_camera_matrix) {
 

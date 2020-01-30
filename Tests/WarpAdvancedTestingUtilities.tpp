@@ -24,6 +24,7 @@
 #include "TestUtilsForSnoopyFrames16And17.h"
 
 #include "../ITMLib/Engines/Reconstruction/DynamicSceneReconstructionEngineFactory.h"
+#include "../ITMLib/Engines/VolumeFusion/VolumeFusionEngineFactory.h"
 #include "../ITMLib/Engines/Warping/WarpingEngineFactory.h"
 #include "../ITMLib/Engines/EditAndCopy/EditAndCopyEngineFactory.h"
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/ITMVoxelVolumeComparison.h"
@@ -135,11 +136,13 @@ GenericWarpConsistencySubtest(const SlavchevaSurfaceTracker::Switches& switches,
 	EditAndCopyEngineFactory::Instance<ITMWarp, TIndex, TMemoryDeviceType>().ResetScene(
 			&ground_truth_warp_field);
 
-	DynamicSceneReconstructionEngine<ITMVoxel, ITMWarp, TIndex>* recoEngine =
+	DynamicSceneReconstructionEngine<ITMVoxel, ITMWarp, TIndex>* reconstruction_engine =
 			DynamicSceneReconstructionEngineFactory::MakeSceneReconstructionEngine<ITMVoxel, ITMWarp, TIndex>(
 					TMemoryDeviceType);
-	WarpingEngineInterface<ITMVoxel, ITMWarp, TIndex>* warpingEngine =
+	WarpingEngineInterface<ITMVoxel, ITMWarp, TIndex>* warping_engine =
 			WarpingEngineFactory::MakeWarpingEngine<ITMVoxel,ITMWarp,TIndex>(TMemoryDeviceType);
+	VolumeFusionEngineInterface<ITMVoxel, ITMWarp, TIndex>* volume_fusion_engine =
+			VolumeFusionEngineFactory::MakeVolumeFusionEngine<ITMVoxel,ITMWarp,TIndex>(TMemoryDeviceType);
 
 	//note: will be swapped before first iteration
 	int source_warped_field_ix = (live_index_to_start_from + 1) % 2;
@@ -150,8 +153,8 @@ GenericWarpConsistencySubtest(const SlavchevaSurfaceTracker::Switches& switches,
 		motionTracker.CalculateWarpGradient(canonical_volume, live_volumes[source_warped_field_ix], &warp_field);
 		motionTracker.SmoothWarpGradient(canonical_volume, live_volumes[source_warped_field_ix], &warp_field);
 		motionTracker.UpdateWarps(canonical_volume, live_volumes[source_warped_field_ix], &warp_field);
-		warpingEngine->WarpVolume_WarpUpdates(&warp_field, live_volumes[source_warped_field_ix],
-		                                      live_volumes[target_warped_field_ix]);
+		warping_engine->WarpVolume_WarpUpdates(&warp_field, live_volumes[source_warped_field_ix],
+		                                       live_volumes[target_warped_field_ix]);
 		std::string path = get_path_warps(prefix, iteration);
 		std::string path_warped_live = get_path_warped_live(prefix, iteration);
 		switch (mode) {
@@ -182,7 +185,7 @@ GenericWarpConsistencySubtest(const SlavchevaSurfaceTracker::Switches& switches,
 			warp_field.SaveToDirectory(std::string("../../Tests/") + get_path_warps(prefix, iteration_limit - 1));
 			live_volumes[target_warped_field_ix]->SaveToDirectory(
 					std::string("../../Tests/") + get_path_warped_live(prefix, iteration_limit - 1));
-			recoEngine->FuseOneTsdfVolumeIntoAnother(canonical_volume, live_volumes[target_warped_field_ix]);
+			volume_fusion_engine->FuseOneTsdfVolumeIntoAnother(canonical_volume, live_volumes[target_warped_field_ix]);
 			canonical_volume->SaveToDirectory(
 					std::string("../../Tests/") + get_path_fused(prefix, iteration_limit - 1));
 			break;
@@ -196,7 +199,7 @@ GenericWarpConsistencySubtest(const SlavchevaSurfaceTracker::Switches& switches,
 					get_path_warped_live(prefix, iteration_limit - 1));
 			BOOST_REQUIRE(contentAlmostEqual(live_volumes[target_warped_field_ix], &ground_truth_sdf_volume,
 			                                 absolute_tolerance, TMemoryDeviceType));
-			recoEngine->FuseOneTsdfVolumeIntoAnother(canonical_volume, live_volumes[target_warped_field_ix]);
+			volume_fusion_engine->FuseOneTsdfVolumeIntoAnother(canonical_volume, live_volumes[target_warped_field_ix]);
 			ground_truth_sdf_volume.LoadFromDirectory(get_path_fused(prefix, iteration_limit - 1));
 			BOOST_REQUIRE(contentAlmostEqual(canonical_volume, &ground_truth_sdf_volume, absolute_tolerance,
 			                                 TMemoryDeviceType));
@@ -208,7 +211,9 @@ GenericWarpConsistencySubtest(const SlavchevaSurfaceTracker::Switches& switches,
 	delete canonical_volume;
 	delete live_volumes[0];
 	delete live_volumes[1];
-	delete recoEngine;
+	delete reconstruction_engine;
+	delete warping_engine;
+	delete volume_fusion_engine;
 }
 
 

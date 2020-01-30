@@ -492,55 +492,6 @@ void ITMDynamicEngine<TVoxel, TWarp, TIndex>::turnOffMainProcessing() { mainProc
 
 // region ==================================== STEP-BY-STEP MODE =======================================================
 
-template<typename TVoxel, typename TWarp, typename TIndex>
-void ITMDynamicEngine<TVoxel, TWarp, TIndex>::BeginProcessingFrameInStepByStepMode(
-		ITMUChar4Image* rgbImage,
-		ITMShortImage* rawDepthImage,
-		ITMIMUMeasurement* imuMeasurement) {
-
-	BeginProcessingFrame(rgbImage, rawDepthImage, imuMeasurement);
-	fusionSucceeded = false;
-	canFuse = false;
-	if ((lastTrackerResult == ITMTrackingState::TRACKING_GOOD || !trackingInitialised) && (fusionActive) &&
-	    (relocalisationCount == 0)) {
-		canFuse = true;
-		denseMapper->BeginProcessingFrameInStepByStepMode(view, trackingState, warpField, liveScenes);
-	}
-}
-
-template<typename TVoxel, typename TWarp, typename TIndex>
-bool ITMDynamicEngine<TVoxel, TWarp, TIndex>::UpdateCurrentFrameSingleStep() {
-
-	bool trackingNotFinished;
-	if (canFuse) {
-		trackingNotFinished = denseMapper->TakeNextStepInStepByStepMode(canonicalScene, liveScenes, warpField,
-		                                                                renderState_live);
-		if (trackingNotFinished) {
-			fusionSucceeded = true;
-			if (framesProcessed > 50) trackingInitialised = true;
-			framesProcessed++;
-		}
-	} else {
-		trackingNotFinished = false;
-	}
-	if (!trackingNotFinished) {
-		if (lastTrackerResult == ITMTrackingState::TRACKING_GOOD ||
-		    lastTrackerResult == ITMTrackingState::TRACKING_POOR) {
-			if (!fusionSucceeded)
-				denseMapper->UpdateVisibleList(view, trackingState, liveScenes[0], renderState_live);
-
-			// raycast to renderState_live for tracking and free visualisation
-			cameraTrackingController->Prepare(trackingState, liveScenes[0], view, liveVisualisationEngine,
-			                                  renderState_live);
-		} else *trackingState->pose_d = previousFramePose;
-	}
-	return trackingNotFinished;
-}
-
-template<typename TVoxel, typename TWarp, typename TIndex>
-ITMTrackingState::TrackingResult ITMDynamicEngine<TVoxel, TWarp, TIndex>::GetStepByStepTrackingResult() {
-	return this->lastTrackerResult;
-}
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 void ITMDynamicEngine<TVoxel, TWarp, TIndex>::BeginProcessingFrame(ITMUChar4Image* rgbImage,
