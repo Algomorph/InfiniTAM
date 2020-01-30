@@ -40,10 +40,4 @@ namespace ITMLib
 	//surfel fusion
 	template class ITMDenseSurfelMapper<ITMSurfel_grey>;
 	template class ITMDenseSurfelMapper<ITMSurfel_rgb>;
-
-
-	template class SurfelVisualizationEngine<ITMSurfel_grey>;
-	template class SurfelVisualizationEngine<ITMSurfel_rgb>;
-	template class SurfelVisualizationEngine_CPU<ITMSurfel_grey>;
-	template class SurfelVisualizationEngine_CPU<ITMSurfel_rgb>;
 }

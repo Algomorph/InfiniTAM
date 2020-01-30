@@ -17,9 +17,4 @@ namespace ITMLib
 	template class ITMMultiMeshingEngine_CUDA<ITMVoxel, PlainVoxelArray>;
 	template class ITMSwappingEngine_CUDA<ITMVoxel, PlainVoxelArray>;
 
-	template class MultiVisualizationEngine_CUDA<ITMVoxel, PlainVoxelArray>;
-
-	template class SurfelVisualizationEngine_CUDA<ITMSurfel_grey>;
-	template class SurfelVisualizationEngine_CUDA<ITMSurfel_rgb>;
-
 }

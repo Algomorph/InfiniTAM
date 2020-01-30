@@ -493,7 +493,10 @@ set(ITMLIB_ENGINES_Visualization_HEADERS
 ##
 set(ITMLIB_ENGINES_Visualization_CPU_SOURCES
     Engines/Visualization/CPU/MultiVisualizationEngine_CPU.tpp
+    Engines/Visualization/CPU/MultiVisualizationEngine_CPU_PlainVoxelArray.cpp
+    Engines/Visualization/CPU/MultiVisualizationEngine_CPU_VoxelBlockHash.cpp
     Engines/Visualization/CPU/SurfelVisualizationEngine_CPU.tpp
+    Engines/Visualization/CPU/SurfelVisualizationEngine_CPU.cpp
     Engines/Visualization/CPU/VisualizationEngine_CPU.tpp
     Engines/Visualization/CPU/VisualizationEngine_CPU_VoxelBlockHash.cpp
     Engines/Visualization/CPU/VisualizationEngine_CPU_PlainVoxelArray.cpp
@@ -508,7 +511,10 @@ set(ITMLIB_ENGINES_Visualization_CPU_HEADERS
 ##
 set(ITMLIB_ENGINES_Visualization_CUDA_SOURCES
     Engines/Visualization/CUDA/MultiVisualizationEngine_CUDA.tcu
+    Engines/Visualization/CUDA/MultiVisualizationEngine_CUDA_PlainVoxelArray.cu
+    Engines/Visualization/CUDA/MultiVisualizationEngine_CUDA_VoxelBlockHash.cu
     Engines/Visualization/CUDA/SurfelVisualizationEngine_CUDA.tcu
+    Engines/Visualization/CUDA/SurfelVisualizationEngine_CUDA.cu
     Engines/Visualization/CUDA/VisualizationEngine_CUDA.tcu
     Engines/Visualization/CUDA/VisualizationHelpers_CUDA.cu
     Engines/Visualization/CUDA/VisualizationEngine_CUDA_VoxelBlockHash.cu
