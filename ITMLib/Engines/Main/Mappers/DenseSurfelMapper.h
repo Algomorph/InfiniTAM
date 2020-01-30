@@ -2,9 +2,9 @@
 
 #pragma once
 
-#include "../Reconstruction/Interface/SurfelSceneReconstructionEngine.h"
-#include "../../Objects/RenderStates/ITMSurfelRenderState.h"
-#include "../../Utils/Configuration.h"
+#include "../../Reconstruction/Interface/SurfelSceneReconstructionEngine.h"
+#include "../../../Objects/RenderStates/ITMSurfelRenderState.h"
+#include "../../../Utils/Configuration.h"
 
 namespace ITMLib
 {

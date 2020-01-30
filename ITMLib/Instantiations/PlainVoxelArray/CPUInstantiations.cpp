@@ -6,8 +6,8 @@
 #include "../../Engines/Main/BasicEngine.tpp"
 #include "../../Engines/Main/BasicSurfelEngine.tpp"
 #include "../../Engines/Main/MultiEngine.tpp"
-#include "../../Engines/Main/DenseMapper.tpp"
-#include "../../Engines/Main/DenseSurfelMapper.tpp"
+#include "../../Engines/Main/Mappers/DenseMapper.tpp"
+#include "../../Engines/Main/Mappers/DenseSurfelMapper.tpp"
 #include "../../Engines/Meshing/CPU/ITMMeshingEngine_CPU.tpp"
 #include "../../Engines/Meshing/CPU/ITMMultiMeshingEngine_CPU.tpp"
 #include "../../Engines/MultiScene/ITMMapGraphManager.tpp"
@@ -30,14 +30,11 @@ namespace ITMLib
 	template class BasicSurfelEngine<ITMSurfel_grey>;
 	template class BasicSurfelEngine<ITMSurfel_rgb>;
 	template class MultiEngine<ITMVoxel, PlainVoxelArray>;
-	template class DenseMapper<ITMVoxel, PlainVoxelArray>;
+
 	template class ITMVoxelMapGraphManager<ITMVoxel, PlainVoxelArray>;
 
 	template class ITMMeshingEngine_CPU<ITMVoxel, PlainVoxelArray>;
 	template class ITMMultiMeshingEngine_CPU<ITMVoxel, PlainVoxelArray>;
 	template class ITMSwappingEngine_CPU<ITMVoxel, PlainVoxelArray>;
 
-	//surfel fusion
-	template class DenseSurfelMapper<ITMSurfel_grey>;
-	template class DenseSurfelMapper<ITMSurfel_rgb>;
 }

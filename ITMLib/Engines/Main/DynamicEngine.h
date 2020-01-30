@@ -4,7 +4,7 @@
 #pragma once
 
 #include <array>
-#include "DenseDynamicMapper.h"
+#include "Mappers/DenseDynamicMapper.h"
 #include "MainEngine.h"
 #include "TrackingController.h"
 #include "../LowLevel/Interface/ITMLowLevelEngine.h"

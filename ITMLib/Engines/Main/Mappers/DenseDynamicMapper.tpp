@@ -22,23 +22,22 @@
 
 //local
 #include "DenseDynamicMapper.h"
-#include "../DepthFusion/DepthFusionEngineFactory.h"
-#include "../Warping/WarpingEngineFactory.h"
-#include "../Swapping/ITMSwappingEngineFactory.h"
-#include "../../SurfaceTrackers/SurfaceTrackerFactory.h"
-#include "../../Utils/ITMPrintHelpers.h"
-#include "../../Utils/Visualization/ITMSceneSliceVisualizer2D.h"
-#include "../../Utils/Analytics/ITMBenchmarkUtils.h"
-#include "../../Utils/FileIO/ITMSceneLogger.h"
+#include "../../DepthFusion/DepthFusionEngineFactory.h"
+#include "../../Warping/WarpingEngineFactory.h"
+#include "../../Swapping/ITMSwappingEngineFactory.h"
+#include "../../../SurfaceTrackers/SurfaceTrackerFactory.h"
+#include "../../../Utils/Analytics/ITMBenchmarkUtils.h"
+#include "../../EditAndCopy/Interface/EditAndCopyEngineInterface.h"
+#include "../../../Utils/Analytics/SceneStatisticsCalculator/Interface/ITMSceneStatisticsCalculatorInterface.h"
+
 //** CPU **
-#include "../EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
-#include "../../Utils/Analytics/SceneStatisticsCalculator/CPU/ITMSceneStatisticsCalculator_CPU.h"
+#include "../../EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
+#include "../../../Utils/Analytics/SceneStatisticsCalculator/CPU/ITMSceneStatisticsCalculator_CPU.h"
 //** CUDA **
 #ifndef COMPILE_WITHOUT_CUDA
-#include "../EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
-#include "../../Utils/Analytics/SceneStatisticsCalculator/CUDA/ITMSceneStatisticsCalculator_CUDA.h"
+#include "../../EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
+#include "../../../Utils/Analytics/SceneStatisticsCalculator/CUDA/ITMSceneStatisticsCalculator_CUDA.h"
 #endif
-
 
 using namespace ITMLib;
 

@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "DenseMapper.h"
+#include "Mappers/DenseMapper.h"
 #include "MainEngine.h"
 #include "TrackingController.h"
 #include "../LowLevel/Interface/ITMLowLevelEngine.h"

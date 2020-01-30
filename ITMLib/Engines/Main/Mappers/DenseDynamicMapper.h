@@ -17,16 +17,16 @@
 
 // *** local ***
 // engines & trackers
-#include "../DepthFusion/DepthFusionEngine.h"
-#include "../VolumeFusion/VolumeFusionEngine.h"
-#include "../Warping/WarpingEngine.h"
-#include "../Swapping/Interface/ITMSwappingEngine.h"
-#include "../../SurfaceTrackers/Interface/SurfaceTrackerInterface.h"
+#include "../../DepthFusion/DepthFusionEngine.h"
+#include "../../VolumeFusion/VolumeFusionEngine.h"
+#include "../../Warping/WarpingEngine.h"
+#include "../../Swapping/Interface/ITMSwappingEngine.h"
+#include "../../../SurfaceTrackers/Interface/SurfaceTrackerInterface.h"
 // utils
-#include "../../Utils/Configuration.h"
-#include "../../Utils/FileIO/ITMDynamicFusionLogger.h"
+#include "../../../Utils/Configuration.h"
+#include "../../../Utils/FileIO/ITMDynamicFusionLogger.h"
 // misc
-#include "NonRigidTrackingParameters.h"
+#include "../NonRigidTrackingParameters.h"
 
 
 namespace ITMLib {

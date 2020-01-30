@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "../../Objects/Scene/ITMLocalMap.h"
-#include "../Main/DenseMapper.h"
+#include "../Main/Mappers/DenseMapper.h"
 #include "../Visualization/Interface/VisualizationEngine.h"
 
 namespace ITMLib

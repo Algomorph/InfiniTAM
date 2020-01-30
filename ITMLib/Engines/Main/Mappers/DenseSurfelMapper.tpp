@@ -2,7 +2,7 @@
 
 #include "DenseSurfelMapper.h"
 
-#include "../Reconstruction/SurfelSceneReconstructionEngineFactory.h"
+#include "../../Reconstruction/SurfelSceneReconstructionEngineFactory.h"
 
 namespace ITMLib
 {

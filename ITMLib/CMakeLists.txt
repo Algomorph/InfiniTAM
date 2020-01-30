@@ -46,11 +46,14 @@ set(ITMLIB_TOPLEVEL_HEADERS
 set(ITMLIB_CORE_SOURCES
     Engines/Main/BasicEngine.tpp
     Engines/Main/BasicSurfelEngine.tpp
-    Engines/Main/DenseMapper.tpp
-    Engines/Main/DenseSurfelMapper.tpp
-    Engines/Main/DenseDynamicMapper.tpp
-    Engines/Main/DenseDynamicMapper_PlainVoxelArray.cpp
-    Engines/Main/DenseDynamicMapper_VoxelBlockHash.cpp
+    Engines/Main/Mappers/DenseMapper.tpp
+    Engines/Main/Mappers/DenseMapper_PlainVoxelArray.cpp
+    Engines/Main/Mappers/DenseMapper_VoxelBlockHash.cpp
+    Engines/Main/Mappers/DenseSurfelMapper.tpp
+    Engines/Main/Mappers/DenseSurfelMapper.cpp
+    Engines/Main/Mappers/DenseDynamicMapper.tpp
+    Engines/Main/Mappers/DenseDynamicMapper_PlainVoxelArray.cpp
+    Engines/Main/Mappers/DenseDynamicMapper_VoxelBlockHash.cpp
     Engines/Main/NonRigidTrackingParameters.h
     Engines/Main/MultiEngine.tpp
     Engines/Main/DynamicEngine.tpp
@@ -61,9 +64,9 @@ set(ITMLIB_CORE_SOURCES
 set(ITMLIB_CORE_HEADERS
     Engines/Main/BasicEngine.h
     Engines/Main/BasicSurfelEngine.h
-    Engines/Main/DenseMapper.h
-    Engines/Main/DenseSurfelMapper.h
-    Engines/Main/DenseDynamicMapper.h
+    Engines/Main/Mappers/DenseMapper.h
+    Engines/Main/Mappers/DenseSurfelMapper.h
+    Engines/Main/Mappers/DenseDynamicMapper.h
     Engines/Main/MainEngine.h
     Engines/Main/MultiEngine.h
     Engines/Main/TrackingController.h
