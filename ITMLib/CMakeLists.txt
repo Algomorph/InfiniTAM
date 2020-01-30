@@ -436,6 +436,8 @@ set(ITMLIB_ENGINES_SWAPPING_HEADERS
 ##
 set(ITMLIB_ENGINES_SWAPPING_CPU_SOURCES
     Engines/Swapping/CPU/SwappingEngine_CPU.tpp
+    Engines/Swapping/CPU/SwappingEngine_CPU_PlainVoxelArray.cpp
+    Engines/Swapping/CPU/SwappingEngine_CPU_VoxelBlockHash.cpp
     )
 
 set(ITMLIB_ENGINES_SWAPPING_CPU_HEADERS
@@ -445,6 +447,8 @@ set(ITMLIB_ENGINES_SWAPPING_CPU_HEADERS
 ##
 set(ITMLIB_ENGINES_SWAPPING_CUDA_SOURCES
     Engines/Swapping/CUDA/SwappingEngine_CUDA.tcu
+    Engines/Swapping/CUDA/SwappingEngine_CUDA_PlainVoxelArray.cu
+    Engines/Swapping/CUDA/SwappingEngine_CUDA_VoxelBlockHash.cu
     )
 
 set(ITMLIB_ENGINES_SWAPPING_CUDA_HEADERS

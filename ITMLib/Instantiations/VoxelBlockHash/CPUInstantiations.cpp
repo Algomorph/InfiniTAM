@@ -26,6 +26,5 @@ namespace ITMLib
 
 	template class ITMMeshingEngine_CPU<ITMVoxel, VoxelBlockHash>;
 	template class ITMMultiMeshingEngine_CPU<ITMVoxel, VoxelBlockHash>;
-	template class SwappingEngine_CPU<ITMVoxel, VoxelBlockHash>;
 
 }

@@ -92,7 +92,7 @@ DenseDynamicMapper<TVoxel, TWarp, TIndex>::DenseDynamicMapper(const TIndex& inde
 		surface_tracker(
 				SurfaceTrackerFactory::MakeSceneMotionTracker<TVoxel, TWarp, TIndex>()),
 		swapping_engine(configuration::get().swapping_mode != configuration::SWAPPINGMODE_DISABLED
-		               ? SwappingEngineFactory::MakeSwappingEngine<TVoxel, TIndex>(
+		               ? SwappingEngineFactory::Build<TVoxel, TIndex>(
 						configuration::get().device_type, index)
 		               : nullptr),
 		swapping_mode(configuration::get().swapping_mode),

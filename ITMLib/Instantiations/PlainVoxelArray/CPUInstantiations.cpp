@@ -27,6 +27,5 @@ namespace ITMLib
 
 	template class ITMMeshingEngine_CPU<ITMVoxel, PlainVoxelArray>;
 	template class ITMMultiMeshingEngine_CPU<ITMVoxel, PlainVoxelArray>;
-	template class SwappingEngine_CPU<ITMVoxel, PlainVoxelArray>;
 
 }

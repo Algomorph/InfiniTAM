@@ -26,7 +26,7 @@ struct SwappingEngineFactory
    * \param deviceType  The device on which the swapping engine should operate.
    */
   template <typename TVoxel, typename TIndex>
-  static SwappingEngine<TVoxel,TIndex> *MakeSwappingEngine(MemoryDeviceType deviceType, const TIndex& index)
+  static SwappingEngine<TVoxel,TIndex> *Build(MemoryDeviceType deviceType, const TIndex& index)
   {
     SwappingEngine<TVoxel,TIndex> *swapping_engine = NULL;
 

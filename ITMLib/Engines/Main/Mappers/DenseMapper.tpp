@@ -12,7 +12,8 @@ DenseMapper<TVoxel, TIndex>::DenseMapper(const TIndex& index)
 {
 	auto& settings = configuration::get();
 	sceneRecoEngine = SceneReconstructionEngineFactory::MakeSceneReconstructionEngine<TVoxel,TIndex>(settings.device_type);
-	swappingEngine = settings.swapping_mode != configuration::SWAPPINGMODE_DISABLED ? SwappingEngineFactory::MakeSwappingEngine<TVoxel,TIndex>(settings.device_type, index) : nullptr;
+	swappingEngine = settings.swapping_mode != configuration::SWAPPINGMODE_DISABLED ? SwappingEngineFactory::Build<TVoxel, TIndex>(
+			settings.device_type, index) : nullptr;
 
 	swappingMode = settings.swapping_mode;
 }
