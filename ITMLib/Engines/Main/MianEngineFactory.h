@@ -18,9 +18,9 @@
 
 #include "../../../ORUtils/MemoryDeviceType.h"
 #include "../../../InputSource/ImageSourceEngine.h"
-#include "BasicEngine.h"
+#include "BasicVoxelEngine.h"
 #include "MultiEngine.h"
-#include "DynamicEngine.h"
+#include "DynamicSceneVoxelEngine.h"
 #include "BasicSurfelEngine.h"
 #include "MainEngine.h"
 
@@ -35,10 +35,10 @@ MainEngine* BuildMainEngine(const ITMRGBDCalib& calib, Vector2i imgSize_rgb, Vec
 		case configuration::LIBMODE_BASIC:
 			switch (chosenIndexingMethod) {
 				case configuration::INDEX_HASH:
-					mainEngine = new BasicEngine<ITMVoxel, VoxelBlockHash>(calib, imgSize_rgb, imgSize_d);
+					mainEngine = new BasicVoxelEngine<ITMVoxel, VoxelBlockHash>(calib, imgSize_rgb, imgSize_d);
 					break;
 				case configuration::INDEX_ARRAY:
-					mainEngine = new BasicEngine<ITMVoxel, PlainVoxelArray>(calib, imgSize_rgb, imgSize_d);
+					mainEngine = new BasicVoxelEngine<ITMVoxel, PlainVoxelArray>(calib, imgSize_rgb, imgSize_d);
 					break;
 			}
 			break;
@@ -58,10 +58,10 @@ MainEngine* BuildMainEngine(const ITMRGBDCalib& calib, Vector2i imgSize_rgb, Vec
 		case configuration::LIBMODE_DYNAMIC:
 			switch (chosenIndexingMethod) {
 				case configuration::INDEX_HASH:
-					mainEngine = new DynamicEngine<ITMVoxel, ITMWarp, VoxelBlockHash>(calib, imgSize_rgb, imgSize_d);
+					mainEngine = new DynamicSceneVoxelEngine<ITMVoxel, ITMWarp, VoxelBlockHash>(calib, imgSize_rgb, imgSize_d);
 					break;
 				case configuration::INDEX_ARRAY:
-					mainEngine = new DynamicEngine<ITMVoxel, ITMWarp, PlainVoxelArray>(calib, imgSize_rgb, imgSize_d);
+					mainEngine = new DynamicSceneVoxelEngine<ITMVoxel, ITMWarp, PlainVoxelArray>(calib, imgSize_rgb, imgSize_d);
 					break;
 			}
 			break;

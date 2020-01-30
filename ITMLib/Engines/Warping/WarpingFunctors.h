@@ -83,7 +83,7 @@ struct TrilinearInterpolationFunctor {
 #if !defined(__CUDACC__) && !defined(WITH_OPENMP)
 			const TVoxel& sourceTSDFVoxelAtSameLocation = readVoxel(sdfSourceVoxels, sdfSourceIndexData,
 		                                                        warpAndDestinationVoxelPosition,
-		                                                        vmIndex, sourceTSDFCache);
+		                                                        vmIndex, sdfSourceCache);
 #else //don't use cache when multithreading!
 			const TVoxel& sourceTSDFVoxelAtSameLocation = readVoxel(sdfSourceVoxels, sdfSourceIndexData,
 			                                                        warpAndDestinationVoxelPosition,

@@ -1,6 +1,6 @@
 //  ================================================================
-//  Created by Gregory Kramida on 1/31/18.
-//  Copyright (c) 2018-2025 Gregory Kramida
+//  Created by Gregory Kramida on 1/30/20.
+//  Copyright (c) 2020 Gregory Kramida
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
 //  You may obtain a copy of the License at
@@ -14,11 +14,9 @@
 //  limitations under the License.
 //  ================================================================
 #include "../../ITMLibDefines.h"
-#include "DynamicEngine.tpp"
+#include "BasicVoxelEngine.tpp"
 
 namespace ITMLib {
 template
-class DynamicEngine<ITMVoxel, ITMWarp, PlainVoxelArray>;
+class BasicVoxelEngine<ITMVoxel, PlainVoxelArray>;
 } // namespace ITMLib
-
-

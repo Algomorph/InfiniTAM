@@ -16,7 +16,7 @@
 #include "UIEngine_BPO.h"
 #include "../../ITMLib/Utils/Analytics/ITMBenchmarkUtils.h"
 #include "../../ITMLib/Engines/Main/MultiEngine.h"
-#include "../../ITMLib/Engines/Main/BasicEngine.h"
+#include "../../ITMLib/Engines/Main/BasicVoxelEngine.h"
 #include "../../ITMLib/Utils/FileIO/ITMDynamicFusionLogger.h"
 
 

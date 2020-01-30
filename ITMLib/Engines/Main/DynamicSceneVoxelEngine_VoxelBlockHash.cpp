@@ -14,11 +14,11 @@
 //  limitations under the License.
 //  ================================================================
 #include "../../ITMLibDefines.h"
-#include "DynamicEngine.tpp"
+#include "DynamicSceneVoxelEngine.tpp"
 
 namespace ITMLib {
 template
-class DynamicEngine<ITMVoxel, ITMWarp, VoxelBlockHash>;
+class DynamicSceneVoxelEngine<ITMVoxel, ITMWarp, VoxelBlockHash>;
 } // namespace ITMLib
 
 

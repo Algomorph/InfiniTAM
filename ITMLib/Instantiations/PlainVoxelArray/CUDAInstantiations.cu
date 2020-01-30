@@ -7,7 +7,6 @@
 #include "../../Engines/Reconstruction/CUDA/SceneReconstructionEngine_CUDA.tcu"
 #include "../../Engines/Reconstruction/CUDA/SurfelSceneReconstructionEngine_CUDA.tcu"
 #include "../../Engines/Swapping/CUDA/ITMSwappingEngine_CUDA.tcu"
-#include "../../Engines/Visualization/CUDA/SurfelVisualizationEngine_CUDA.tcu"
 #include "../../Engines/Visualization/CUDA/VisualizationEngine_CUDA.tcu"
 #include "../../Engines/Visualization/CUDA/MultiVisualizationEngine_CUDA.tcu"
 

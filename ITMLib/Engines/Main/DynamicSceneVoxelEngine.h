@@ -20,7 +20,7 @@
 namespace ITMLib
 {
 	template <typename TVoxel, typename TWarp, typename TIndex>
-	class DynamicEngine : public MainEngine
+	class DynamicSceneVoxelEngine : public MainEngine
 	{
 	public:
 
@@ -29,8 +29,8 @@ namespace ITMLib
 			Omitting a separate image size for the depth images
 			will assume same resolution as for the RGB images.
 		*/
-		DynamicEngine(const ITMRGBDCalib& calib, Vector2i imgSize_rgb, Vector2i imgSize_d);
-		~DynamicEngine() override;
+		DynamicSceneVoxelEngine(const ITMRGBDCalib& calib, Vector2i imgSize_rgb, Vector2i imgSize_d);
+		~DynamicSceneVoxelEngine() override;
 
 		ITMView* GetView() override { return view; }
 		ITMTrackingState* GetTrackingState() override { return trackingState; }

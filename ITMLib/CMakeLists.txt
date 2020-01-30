@@ -44,8 +44,6 @@ set(ITMLIB_TOPLEVEL_HEADERS
 
 ##
 set(ITMLIB_CORE_SOURCES
-    Engines/Main/BasicEngine.tpp
-    Engines/Main/BasicSurfelEngine.tpp
     Engines/Main/Mappers/DenseMapper.tpp
     Engines/Main/Mappers/DenseMapper_PlainVoxelArray.cpp
     Engines/Main/Mappers/DenseMapper_VoxelBlockHash.cpp
@@ -54,23 +52,36 @@ set(ITMLIB_CORE_SOURCES
     Engines/Main/Mappers/DenseDynamicMapper.tpp
     Engines/Main/Mappers/DenseDynamicMapper_PlainVoxelArray.cpp
     Engines/Main/Mappers/DenseDynamicMapper_VoxelBlockHash.cpp
-    Engines/Main/NonRigidTrackingParameters.h
+
+    Engines/Main/BasicVoxelEngine.tpp
+    Engines/Main/BasicVoxelEngine_PlainVoxelArray.cpp
+    Engines/Main/BasicVoxelEngine_VoxelBlockHash.cpp
+
+    Engines/Main/BasicSurfelEngine.tpp
+    Engines/Main/BasicSufelEngine.cpp
+
     Engines/Main/MultiEngine.tpp
-    Engines/Main/DynamicEngine.tpp
-    Engines/Main/DynamicEngine_VoxelBlockHash.cpp
-    Engines/Main/DynamicEngine_PlainVoxelArray.cpp
+    Engines/Main/MultiEngine_PlainVoxelArray.cpp
+    Engines/Main/MultiEngine_VoxelBlockHash.cpp
+
+    Engines/Main/NonRigidTrackingParameters.h
+    Engines/Main/DynamicSceneVoxelEngine.tpp
+    Engines/Main/DynamicSceneVoxelEngine_PlainVoxelArray.cpp
+    Engines/Main/DynamicSceneVoxelEngine_VoxelBlockHash.cpp
     )
 
 set(ITMLIB_CORE_HEADERS
-    Engines/Main/BasicEngine.h
-    Engines/Main/BasicSurfelEngine.h
     Engines/Main/Mappers/DenseMapper.h
     Engines/Main/Mappers/DenseSurfelMapper.h
     Engines/Main/Mappers/DenseDynamicMapper.h
+
+    Engines/Main/BasicVoxelEngine.h
+    Engines/Main/BasicSurfelEngine.h
+
     Engines/Main/MainEngine.h
     Engines/Main/MultiEngine.h
     Engines/Main/TrackingController.h
-    Engines/Main/DynamicEngine.h
+    Engines/Main/DynamicSceneVoxelEngine.h
     Engines/Main/MianEngineFactory.h
     )
 
@@ -326,6 +337,7 @@ set(ITMLIB_ENGINES_RECONSTRUCTION_CUDA_HEADERS
 ##
 set(ITMLIB_ENGINES_RECONSTRUCTION_INTERFACE_SOURCES
     Engines/Reconstruction/Interface/SurfelSceneReconstructionEngine.tpp
+    Engines/Reconstruction/Interface/SurfelSceneReconstructionEngine.cpp
     )
 set(ITMLIB_ENGINES_RECONSTRUCTION_INTERFACE_HEADERS
     Engines/Reconstruction/Interface/SceneReconstructionEngine.h
@@ -534,6 +546,7 @@ set(ITMLIB_ENGINES_Visualization_CUDA_HEADERS
 ##
 set(ITMLIB_ENGINES_Visualization_INTERFACE_SOURCES
     Engines/Visualization/Interface/SurfelVisualizationEngine.tpp
+    Engines/Visualization/Interface/SurfelVisualizationEngine.cpp
     Engines/Visualization/Interface/VisualizationEngine.cpp
     )
 

@@ -1,6 +1,6 @@
 // Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
 
-#include "BasicEngine.h"
+#include "BasicVoxelEngine.h"
 
 #include "../LowLevel/ITMLowLevelEngineFactory.h"
 #include "../Meshing/ITMMeshingEngineFactory.h"
@@ -16,7 +16,7 @@
 using namespace ITMLib;
 
 template <typename TVoxel, typename TIndex>
-BasicEngine<TVoxel,TIndex>::BasicEngine(const ITMRGBDCalib& calib, Vector2i imgSize_rgb, Vector2i imgSize_d)
+BasicVoxelEngine<TVoxel,TIndex>::BasicVoxelEngine(const ITMRGBDCalib& calib, Vector2i imgSize_rgb, Vector2i imgSize_d)
 {
 	auto& settings = configuration::get();
 
@@ -68,7 +68,7 @@ BasicEngine<TVoxel,TIndex>::BasicEngine(const ITMRGBDCalib& calib, Vector2i imgS
 }
 
 template <typename TVoxel, typename TIndex>
-BasicEngine<TVoxel,TIndex>::~BasicEngine()
+BasicVoxelEngine<TVoxel,TIndex>::~BasicVoxelEngine()
 {
 	delete renderState_live;
 	if (renderState_freeview != NULL) delete renderState_freeview;
@@ -96,7 +96,7 @@ BasicEngine<TVoxel,TIndex>::~BasicEngine()
 }
 
 template <typename TVoxel, typename TIndex>
-void BasicEngine<TVoxel,TIndex>::SaveSceneToMesh(const char *objFileName)
+void BasicVoxelEngine<TVoxel,TIndex>::SaveSceneToMesh(const char *objFileName)
 {
 	if (meshingEngine == NULL) return;
 
@@ -109,7 +109,7 @@ void BasicEngine<TVoxel,TIndex>::SaveSceneToMesh(const char *objFileName)
 }
 
 template <typename TVoxel, typename TIndex>
-void BasicEngine<TVoxel, TIndex>::SaveToFile()
+void BasicVoxelEngine<TVoxel, TIndex>::SaveToFile()
 {
 	// throws error if any of the saves fail
 
@@ -126,7 +126,7 @@ void BasicEngine<TVoxel, TIndex>::SaveToFile()
 }
 
 template <typename TVoxel, typename TIndex>
-void BasicEngine<TVoxel, TIndex>::LoadFromFile()
+void BasicVoxelEngine<TVoxel, TIndex>::LoadFromFile()
 {
 	auto& settings = configuration::get();
 	std::string saveInputDirectory = "State/";
@@ -163,7 +163,7 @@ void BasicEngine<TVoxel, TIndex>::LoadFromFile()
 }
 
 template <typename TVoxel, typename TIndex>
-void BasicEngine<TVoxel,TIndex>::resetAll()
+void BasicVoxelEngine<TVoxel,TIndex>::resetAll()
 {
 	denseMapper->ResetScene(scene);
 	trackingState->Reset();
@@ -243,7 +243,7 @@ static void QuaternionFromRotationMatrix(const double *matrix, double *q) {
 #endif
 
 template <typename TVoxel, typename TIndex>
-ITMTrackingState::TrackingResult BasicEngine<TVoxel,TIndex>::ProcessFrame(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage, ITMIMUMeasurement *imuMeasurement)
+ITMTrackingState::TrackingResult BasicVoxelEngine<TVoxel,TIndex>::ProcessFrame(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage, ITMIMUMeasurement *imuMeasurement)
 {
 	auto& settings = configuration::get();
 	// prepare image and turn it into a depth image
@@ -348,13 +348,13 @@ ITMTrackingState::TrackingResult BasicEngine<TVoxel,TIndex>::ProcessFrame(ITMUCh
 }
 
 template <typename TVoxel, typename TIndex>
-Vector2i BasicEngine<TVoxel,TIndex>::GetImageSize(void) const
+Vector2i BasicVoxelEngine<TVoxel,TIndex>::GetImageSize(void) const
 {
 	return renderState_live->raycastImage->noDims;
 }
 
 template <typename TVoxel, typename TIndex>
-void BasicEngine<TVoxel,TIndex>::GetImage(ITMUChar4Image *out, GetImageType getImageType, ORUtils::SE3Pose *pose, ITMIntrinsics *intrinsics)
+void BasicVoxelEngine<TVoxel,TIndex>::GetImage(ITMUChar4Image *out, GetImageType getImageType, ORUtils::SE3Pose *pose, ITMIntrinsics *intrinsics)
 {
 	if (view == NULL) return;
 
@@ -364,22 +364,22 @@ void BasicEngine<TVoxel,TIndex>::GetImage(ITMUChar4Image *out, GetImageType getI
 
 	switch (getImageType)
 	{
-	case BasicEngine::InfiniTAM_IMAGE_ORIGINAL_RGB:
+	case BasicVoxelEngine::InfiniTAM_IMAGE_ORIGINAL_RGB:
 		out->ChangeDims(view->rgb->noDims);
 		if (settings.device_type == MEMORYDEVICE_CUDA)
 			out->SetFrom(view->rgb, MemoryCopyDirection::CUDA_TO_CPU);
 		else out->SetFrom(view->rgb, MemoryCopyDirection::CPU_TO_CPU);
 		break;
-	case BasicEngine::InfiniTAM_IMAGE_ORIGINAL_DEPTH:
+	case BasicVoxelEngine::InfiniTAM_IMAGE_ORIGINAL_DEPTH:
 		out->ChangeDims(view->depth->noDims);
 		if (settings.device_type == MEMORYDEVICE_CUDA) view->depth->UpdateHostFromDevice();
 		VisualizationEngine<TVoxel, TIndex>::DepthToUchar4(out, view->depth);
 
 		break;
-	case BasicEngine::InfiniTAM_IMAGE_SCENERAYCAST:
-	case BasicEngine::InfiniTAM_IMAGE_COLOUR_FROM_VOLUME:
-	case BasicEngine::InfiniTAM_IMAGE_COLOUR_FROM_NORMAL:
-	case BasicEngine::InfiniTAM_IMAGE_COLOUR_FROM_CONFIDENCE:
+	case BasicVoxelEngine::InfiniTAM_IMAGE_SCENERAYCAST:
+	case BasicVoxelEngine::InfiniTAM_IMAGE_COLOUR_FROM_VOLUME:
+	case BasicVoxelEngine::InfiniTAM_IMAGE_COLOUR_FROM_NORMAL:
+	case BasicVoxelEngine::InfiniTAM_IMAGE_COLOUR_FROM_CONFIDENCE:
 		{
 		// use current raycast or forward projection?
 		IVisualizationEngine::RenderRaycastSelection raycastType;
@@ -389,13 +389,13 @@ void BasicEngine<TVoxel,TIndex>::GetImage(ITMUChar4Image *out, GetImageType getI
 		// what sort of image is it?
 		IVisualizationEngine::RenderImageType imageType;
 		switch (getImageType) {
-		case BasicEngine::InfiniTAM_IMAGE_COLOUR_FROM_CONFIDENCE:
+		case BasicVoxelEngine::InfiniTAM_IMAGE_COLOUR_FROM_CONFIDENCE:
 			imageType = IVisualizationEngine::RENDER_COLOUR_FROM_CONFIDENCE;
 			break;
-		case BasicEngine::InfiniTAM_IMAGE_COLOUR_FROM_NORMAL:
+		case BasicVoxelEngine::InfiniTAM_IMAGE_COLOUR_FROM_NORMAL:
 			imageType = IVisualizationEngine::RENDER_COLOUR_FROM_NORMAL;
 			break;
-		case BasicEngine::InfiniTAM_IMAGE_COLOUR_FROM_VOLUME:
+		case BasicVoxelEngine::InfiniTAM_IMAGE_COLOUR_FROM_VOLUME:
 			imageType = IVisualizationEngine::RENDER_COLOUR_FROM_VOLUME;
 			break;
 		default:
@@ -415,15 +415,15 @@ void BasicEngine<TVoxel,TIndex>::GetImage(ITMUChar4Image *out, GetImageType getI
 
 		break;
 		}
-	case BasicEngine::InfiniTAM_IMAGE_FREECAMERA_SHADED:
-	case BasicEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_VOLUME:
-	case BasicEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_NORMAL:
-	case BasicEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_CONFIDENCE:
+	case BasicVoxelEngine::InfiniTAM_IMAGE_FREECAMERA_SHADED:
+	case BasicVoxelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_VOLUME:
+	case BasicVoxelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_NORMAL:
+	case BasicVoxelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_CONFIDENCE:
 	{
 		IVisualizationEngine::RenderImageType type = IVisualizationEngine::RENDER_SHADED_GREYSCALE;
-		if (getImageType == BasicEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_VOLUME) type = IVisualizationEngine::RENDER_COLOUR_FROM_VOLUME;
-		else if (getImageType == BasicEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_NORMAL) type = IVisualizationEngine::RENDER_COLOUR_FROM_NORMAL;
-		else if (getImageType == BasicEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_CONFIDENCE) type = IVisualizationEngine::RENDER_COLOUR_FROM_CONFIDENCE;
+		if (getImageType == BasicVoxelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_VOLUME) type = IVisualizationEngine::RENDER_COLOUR_FROM_VOLUME;
+		else if (getImageType == BasicVoxelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_NORMAL) type = IVisualizationEngine::RENDER_COLOUR_FROM_NORMAL;
+		else if (getImageType == BasicVoxelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_CONFIDENCE) type = IVisualizationEngine::RENDER_COLOUR_FROM_CONFIDENCE;
 
 		if (renderState_freeview == NULL)
 		{
@@ -447,19 +447,19 @@ void BasicEngine<TVoxel,TIndex>::GetImage(ITMUChar4Image *out, GetImageType getI
 }
 
 template <typename TVoxel, typename TIndex>
-void BasicEngine<TVoxel,TIndex>::turnOnTracking() { trackingActive = true; }
+void BasicVoxelEngine<TVoxel,TIndex>::turnOnTracking() { trackingActive = true; }
 
 template <typename TVoxel, typename TIndex>
-void BasicEngine<TVoxel,TIndex>::turnOffTracking() { trackingActive = false; }
+void BasicVoxelEngine<TVoxel,TIndex>::turnOffTracking() { trackingActive = false; }
 
 template <typename TVoxel, typename TIndex>
-void BasicEngine<TVoxel,TIndex>::turnOnIntegration() { fusionActive = true; }
+void BasicVoxelEngine<TVoxel,TIndex>::turnOnIntegration() { fusionActive = true; }
 
 template <typename TVoxel, typename TIndex>
-void BasicEngine<TVoxel,TIndex>::turnOffIntegration() { fusionActive = false; }
+void BasicVoxelEngine<TVoxel,TIndex>::turnOffIntegration() { fusionActive = false; }
 
 template <typename TVoxel, typename TIndex>
-void BasicEngine<TVoxel,TIndex>::turnOnMainProcessing() { mainProcessingActive = true; }
+void BasicVoxelEngine<TVoxel,TIndex>::turnOnMainProcessing() { mainProcessingActive = true; }
 
 template <typename TVoxel, typename TIndex>
-void BasicEngine<TVoxel,TIndex>::turnOffMainProcessing() { mainProcessingActive = false; }
+void BasicVoxelEngine<TVoxel,TIndex>::turnOffMainProcessing() { mainProcessingActive = false; }

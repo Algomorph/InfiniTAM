@@ -30,10 +30,10 @@
 
 //ITMLib
 #include "../../ITMLib/ITMLibDefines.h"
-#include "../../ITMLib/Engines/Main/BasicEngine.h"
+#include "../../ITMLib/Engines/Main/BasicVoxelEngine.h"
 #include "../../ITMLib/Engines/Main/BasicSurfelEngine.h"
 #include "../../ITMLib/Engines/Main/MultiEngine.h"
-#include "../../ITMLib/Engines/Main/DynamicEngine.h"
+#include "../../ITMLib/Engines/Main/DynamicSceneVoxelEngine.h"
 
 #include "../../ORUtils/FileUtils.h"
 #include "../../InputSource/FFMPEGWriter.h"

@@ -16,7 +16,7 @@
 namespace ITMLib
 {
 	template <typename TVoxel, typename TIndex>
-	class BasicEngine : public MainEngine
+	class BasicVoxelEngine : public MainEngine
 	{
 	private:
 		bool trackingActive, fusionActive, mainProcessingActive, trackingInitialised;
@@ -87,7 +87,7 @@ namespace ITMLib
 			Omitting a separate image size for the depth images
 			will assume same resolution as for the RGB images.
 		*/
-		BasicEngine(const ITMRGBDCalib& calib, Vector2i imgSize_rgb, Vector2i imgSize_d);
-		~BasicEngine();
+		BasicVoxelEngine(const ITMRGBDCalib& calib, Vector2i imgSize_rgb, Vector2i imgSize_d);
+		~BasicVoxelEngine();
 	};
 }
