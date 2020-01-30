@@ -19,7 +19,7 @@
 #include "../Reconstruction/Shared/SceneReconstructionEngine_Shared.h"
 #include "../../Utils/ITMCUDAUtils.h"
 #include "../../Objects/Scene/ITMGlobalCache.h"
-#include "ITMDynamicSceneReconstructionEngine_Shared.h"
+#include "DepthFusionEngine_Shared.h"
 
 namespace {
 //CUDA kernels

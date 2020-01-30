@@ -23,7 +23,7 @@
 #include "TestUtils.h"
 #include "TestUtilsForSnoopyFrames16And17.h"
 
-#include "../ITMLib/Engines/DepthFusion/DynamicSceneReconstructionEngineFactory.h"
+#include "../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
 #include "../ITMLib/Engines/VolumeFusion/VolumeFusionEngineFactory.h"
 #include "../ITMLib/Engines/Warping/WarpingEngineFactory.h"
 #include "../ITMLib/Engines/EditAndCopy/EditAndCopyEngineFactory.h"
@@ -69,9 +69,9 @@ GenerateRawLiveAndCanonicalVolumes(bool allocateLiveFromBothImages,
 		IndexingEngine<ITMVoxel, TIndex, TMemoryDeviceType>::Instance().AllocateUsingOtherVolumeAndSetVisibilityExpanded(
 				live_volumes[0], live_volumes[1], view);
 	}
-	DynamicSceneReconstructionEngine<ITMVoxel, ITMWarp, TIndex>* reconstructionEngine =
-			DynamicSceneReconstructionEngineFactory
-			::MakeSceneReconstructionEngine<ITMVoxel, ITMWarp, TIndex>(TMemoryDeviceType);
+	DepthFusionEngine<ITMVoxel, ITMWarp, TIndex>* reconstructionEngine =
+			DepthFusionEngineFactory
+			::Build<ITMVoxel, ITMWarp, TIndex>(TMemoryDeviceType);
 	reconstructionEngine->IntegrateDepthImageIntoTsdfVolume(live_volumes[live_index_to_start_from], view);
 	ITMSceneStatisticsCalculator<ITMVoxel,TIndex,TMemoryDeviceType>& calculator =
 			ITMSceneStatisticsCalculator<ITMVoxel,TIndex,TMemoryDeviceType>::Instance();
@@ -136,8 +136,8 @@ GenericWarpConsistencySubtest(const SlavchevaSurfaceTracker::Switches& switches,
 	EditAndCopyEngineFactory::Instance<ITMWarp, TIndex, TMemoryDeviceType>().ResetScene(
 			&ground_truth_warp_field);
 
-	DynamicSceneReconstructionEngine<ITMVoxel, ITMWarp, TIndex>* reconstruction_engine =
-			DynamicSceneReconstructionEngineFactory::MakeSceneReconstructionEngine<ITMVoxel, ITMWarp, TIndex>(
+	DepthFusionEngine<ITMVoxel, ITMWarp, TIndex>* reconstruction_engine =
+			DepthFusionEngineFactory::Build<ITMVoxel, ITMWarp, TIndex>(
 					TMemoryDeviceType);
 	WarpingEngineInterface<ITMVoxel, ITMWarp, TIndex>* warping_engine =
 			WarpingEngineFactory::MakeWarpingEngine<ITMVoxel,ITMWarp,TIndex>(TMemoryDeviceType);

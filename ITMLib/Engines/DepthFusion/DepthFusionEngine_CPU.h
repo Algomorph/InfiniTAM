@@ -3,7 +3,7 @@
 #pragma once
 
 #include "../../SurfaceTrackers/Interface/SurfaceTrackerInterface.h"
-#include "DynamicSceneReconstructionEngine.h"
+#include "DepthFusionEngine.h"
 #include "../../Objects/Scene/PlainVoxelArray.h"
 #include "../EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 #include "../Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
@@ -12,16 +12,16 @@
 
 namespace ITMLib {
 template<typename TVoxel, typename TWarp, typename TIndex>
-class DynamicSceneReconstructionEngine_CPU
-		: public DynamicSceneReconstructionEngine<TVoxel, TWarp, TIndex> {
+class DepthFusionEngine_CPU
+		: public DepthFusionEngine<TVoxel, TWarp, TIndex> {
 };
 
 template<typename TVoxel, typename TWarp>
-class DynamicSceneReconstructionEngine_CPU<TVoxel, TWarp, VoxelBlockHash>
-		: public DynamicSceneReconstructionEngine<TVoxel, TWarp, VoxelBlockHash> {
+class DepthFusionEngine_CPU<TVoxel, TWarp, VoxelBlockHash>
+		: public DepthFusionEngine<TVoxel, TWarp, VoxelBlockHash> {
 public:
-	DynamicSceneReconstructionEngine_CPU() = default;
-	~DynamicSceneReconstructionEngine_CPU() = default;
+	DepthFusionEngine_CPU() = default;
+	~DepthFusionEngine_CPU() = default;
 
 	void UpdateVisibleList(ITMVoxelVolume<TVoxel, VoxelBlockHash>* scene, const ITMView* view,
 	                       const ITMTrackingState* trackingState, const ITMRenderState* renderState,
@@ -44,8 +44,8 @@ private:
 };
 
 template<typename TVoxel, typename TWarp>
-class DynamicSceneReconstructionEngine_CPU<TVoxel, TWarp, PlainVoxelArray>
-		: public DynamicSceneReconstructionEngine<TVoxel, TWarp, PlainVoxelArray> {
+class DepthFusionEngine_CPU<TVoxel, TWarp, PlainVoxelArray>
+		: public DepthFusionEngine<TVoxel, TWarp, PlainVoxelArray> {
 public:
 	void UpdateVisibleList(ITMVoxelVolume<TVoxel, PlainVoxelArray>* scene, const ITMView* view,
 	                       const ITMTrackingState* trackingState, const ITMRenderState* renderState,
@@ -62,8 +62,8 @@ public:
 	void IntegrateDepthImageIntoTsdfVolume(ITMVoxelVolume<TVoxel, PlainVoxelArray>* volume, const ITMView* view,
 	                                      const ITMTrackingState* trackingState);
 
-	DynamicSceneReconstructionEngine_CPU() = default;
-	~DynamicSceneReconstructionEngine_CPU() = default;
+	DepthFusionEngine_CPU() = default;
+	~DepthFusionEngine_CPU() = default;
 private:
 	void IntegrateDepthImageIntoTsdfVolume_Helper(ITMVoxelVolume<TVoxel, PlainVoxelArray>* volume, const ITMView* view,
 	                                             Matrix4f camera_depth_matrix = Matrix4f::Identity());

@@ -17,11 +17,11 @@
 
 #include "../../Utils/Configuration.h"
 
-#include "DynamicSceneReconstructionEngine_CPU.h"
+#include "DepthFusionEngine_CPU.h"
 
 #ifndef COMPILE_WITHOUT_CUDA
 
-#include "DynamicSceneReconstructionEngine_CUDA.h"
+#include "DepthFusionEngine_CUDA.h"
 
 #endif
 #ifdef COMPILE_WITH_METAL
@@ -33,7 +33,7 @@ namespace ITMLib {
 /**
  * \brief This struct provides functions that can be used to construct scene reconstruction engines.
  */
-struct DynamicSceneReconstructionEngineFactory {
+struct DepthFusionEngineFactory {
 	//#################### PUBLIC STATIC MEMBER FUNCTIONS ####################
 
 	/**
@@ -42,27 +42,29 @@ struct DynamicSceneReconstructionEngineFactory {
 	 * \param deviceType  The device on which the scene reconstruction engine should operate.
 	 */
 	template<typename TVoxel, typename TWarp, typename TIndex>
-	static DynamicSceneReconstructionEngine<TVoxel, TWarp, TIndex>*
-	MakeSceneReconstructionEngine(MemoryDeviceType deviceType) {
-		DynamicSceneReconstructionEngine<TVoxel, TWarp, TIndex>* sceneRecoEngine = NULL;
+	static DepthFusionEngine<TVoxel, TWarp, TIndex>*
+	Build(MemoryDeviceType deviceType) {
+		DepthFusionEngine<TVoxel, TWarp, TIndex>* depth_fusion_engine = nullptr;
 
 		switch (deviceType) {
 			case MEMORYDEVICE_CPU:
-				sceneRecoEngine = new DynamicSceneReconstructionEngine_CPU<TVoxel, TWarp, TIndex>;
+				depth_fusion_engine = new DepthFusionEngine_CPU<TVoxel, TWarp, TIndex>;
 				break;
 			case MEMORYDEVICE_CUDA:
-#ifndef COMPILE_WITHOUT_CUDA
-				sceneRecoEngine = new DynamicSceneReconstructionEngine_CUDA<TVoxel, TWarp, TIndex>;
+#ifdef COMPILE_WITHOUT_CUDA
+				DIEWITHEXCEPTION_REPORTLOCATION("Requested instantiation of a CUDA-based specialization, but code was compiled without CUDA. Aborting.");
+#else
+				depth_fusion_engine = new DepthFusionEngine_CUDA<TVoxel, TWarp, TIndex>;
 #endif
 				break;
 			case MEMORYDEVICE_METAL:
 #ifdef COMPILE_WITH_METAL
-				sceneRecoEngine = new ITMSceneReconstructionEngine_Metal<TVoxelA,TIndex>;
+				depth_fusion_engine = new ITMSceneReconstructionEngine_Metal<TVoxelA,TIndex>;
 #endif
 				break;
 		}
 
-		return sceneRecoEngine;
+		return depth_fusion_engine;
 	}
 };
 

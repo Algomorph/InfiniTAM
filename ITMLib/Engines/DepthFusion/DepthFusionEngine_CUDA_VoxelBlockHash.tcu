@@ -15,17 +15,17 @@
 //  ================================================================
 #pragma once
 
-#include "DynamicSceneReconstructionEngine_CUDA.h"
+#include "DepthFusionEngine_CUDA.h"
 
 #include "../EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
-#include "DynamicSceneReconstructionEngine_CUDA_VoxelBlockHash_Kernels.h"
+#include "DepthFusionEngine_CUDA_VoxelBlockHash_Kernels.h"
 #include "../Traversal/CUDA/ITMSceneTraversal_CUDA_VoxelBlockHash.h"
 #include "../../Utils/Analytics/SceneStatisticsCalculator/CUDA/ITMSceneStatisticsCalculator_CUDA.h"
 
 using namespace ITMLib;
 
 template<typename TVoxel, typename TWarp>
-void DynamicSceneReconstructionEngine_CUDA<TVoxel, TWarp, VoxelBlockHash>::UpdateVisibleList(
+void DepthFusionEngine_CUDA<TVoxel, TWarp, VoxelBlockHash>::UpdateVisibleList(
 		ITMVoxelVolume<TVoxel, VoxelBlockHash>* scene, const ITMView* view, const ITMTrackingState* trackingState,
 		const ITMRenderState* renderState, bool resetVisibleList) {
 	IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance()
@@ -33,14 +33,14 @@ void DynamicSceneReconstructionEngine_CUDA<TVoxel, TWarp, VoxelBlockHash>::Updat
 }
 
 template<typename TVoxel, typename TWarp>
-void DynamicSceneReconstructionEngine_CUDA<TVoxel, TWarp, VoxelBlockHash>::GenerateTsdfVolumeFromView(
+void DepthFusionEngine_CUDA<TVoxel, TWarp, VoxelBlockHash>::GenerateTsdfVolumeFromView(
 		ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
 		const ITMTrackingState* trackingState) {
 	GenerateTsdfVolumeFromView(volume, view, trackingState->pose_d->GetM());
 }
 
 template<typename TVoxel, typename TWarp>
-void DynamicSceneReconstructionEngine_CUDA<TVoxel, TWarp, VoxelBlockHash>::GenerateTsdfVolumeFromView(
+void DepthFusionEngine_CUDA<TVoxel, TWarp, VoxelBlockHash>::GenerateTsdfVolumeFromView(
 		ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view, const Matrix4f& depth_camera_matrix) {
 	ManipulationEngine_CUDA_VBH_Voxel::Inst().ResetScene(volume);
 	IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance()
@@ -50,7 +50,7 @@ void DynamicSceneReconstructionEngine_CUDA<TVoxel, TWarp, VoxelBlockHash>::Gener
 
 
 template<typename TVoxel, typename TWarp>
-void DynamicSceneReconstructionEngine_CUDA<TVoxel, TWarp, VoxelBlockHash>::GenerateTsdfVolumeFromViewExpanded(
+void DepthFusionEngine_CUDA<TVoxel, TWarp, VoxelBlockHash>::GenerateTsdfVolumeFromViewExpanded(
 		ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume,
 		ITMVoxelVolume<TVoxel, VoxelBlockHash>* temporaryAllocationVolume, const ITMView* view,
 		const Matrix4f& depth_camera_matrix) {
@@ -67,7 +67,7 @@ void DynamicSceneReconstructionEngine_CUDA<TVoxel, TWarp, VoxelBlockHash>::Gener
 
 
 template<typename TVoxel, typename TWarp>
-void DynamicSceneReconstructionEngine_CUDA<TVoxel, TWarp, VoxelBlockHash>::IntegrateDepthImageIntoTsdfVolume_Helper(
+void DepthFusionEngine_CUDA<TVoxel, TWarp, VoxelBlockHash>::IntegrateDepthImageIntoTsdfVolume_Helper(
 		ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view, Matrix4f depth_camera_matrix) {
 	Vector2i rgbImgSize = view->rgb->noDims;
 	Vector2i depthImgSize = view->depth->noDims;
@@ -105,13 +105,13 @@ void DynamicSceneReconstructionEngine_CUDA<TVoxel, TWarp, VoxelBlockHash>::Integ
 }
 
 template<typename TVoxel, typename TWarp>
-void DynamicSceneReconstructionEngine_CUDA<TVoxel, TWarp, VoxelBlockHash>::IntegrateDepthImageIntoTsdfVolume(
+void DepthFusionEngine_CUDA<TVoxel, TWarp, VoxelBlockHash>::IntegrateDepthImageIntoTsdfVolume(
 		ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view, const ITMTrackingState* trackingState) {
 	IntegrateDepthImageIntoTsdfVolume_Helper(volume, view, trackingState->pose_d->GetM());
 }
 
 template<typename TVoxel, typename TWarp>
-void DynamicSceneReconstructionEngine_CUDA<TVoxel, TWarp, VoxelBlockHash>::IntegrateDepthImageIntoTsdfVolume(
+void DepthFusionEngine_CUDA<TVoxel, TWarp, VoxelBlockHash>::IntegrateDepthImageIntoTsdfVolume(
 		ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view) {
 	IntegrateDepthImageIntoTsdfVolume_Helper(volume, view);
 }

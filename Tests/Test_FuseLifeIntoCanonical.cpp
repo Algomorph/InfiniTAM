@@ -24,17 +24,17 @@
 //local
 #include "../ITMLib/ITMLibDefines.h"
 #include "../ITMLib/Objects/Scene/ITMVoxelVolume.h"
-#include "../ITMLib/Engines/DepthFusion/DynamicSceneReconstructionEngine_CPU.h"
+#include "../ITMLib/Engines/DepthFusion/DepthFusionEngine_CPU.h"
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/ITMVoxelVolumeComparison_CPU.h"
 #include "../ITMLib/Engines/VolumeFusion/VolumeFusionEngine.h"
 
 #ifndef COMPILE_WITHOUT_CUDA
-#include "../ITMLib/Engines/DepthFusion/DynamicSceneReconstructionEngine_CUDA.h"
+#include "../ITMLib/Engines/DepthFusion/DepthFusionEngine_CUDA.h"
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/ITMVoxelVolumeComparison_CUDA.h"
 #endif
 #include "TestUtils.h"
 #include "TestUtilsForSnoopyFrames16And17.h"
-#include "../ITMLib/Engines/DepthFusion/DynamicSceneReconstructionEngineFactory.h"
+#include "../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
 #include "../ITMLib/Engines/VolumeFusion/VolumeFusionEngineFactory.h"
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/ITMVoxelVolumeComparison.h"
 

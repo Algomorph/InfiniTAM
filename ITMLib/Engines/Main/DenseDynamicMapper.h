@@ -17,7 +17,7 @@
 
 // *** local ***
 // engines & trackers
-#include "../DepthFusion/DynamicSceneReconstructionEngine.h"
+#include "../DepthFusion/DepthFusionEngine.h"
 #include "../VolumeFusion/VolumeFusionEngine.h"
 #include "../Warping/WarpingEngine.h"
 #include "../Swapping/Interface/ITMSwappingEngine.h"
@@ -101,7 +101,7 @@ private:
 	// endregion =======================================================================================================
 	// region =========================================== MEMBER VARIABLES =============================================
 	// *** engines ***
-	DynamicSceneReconstructionEngine<TVoxel, TWarp, TIndex>* reconstruction_engine;
+	DepthFusionEngine<TVoxel, TWarp, TIndex>* reconstruction_engine;
 	WarpingEngineInterface<TVoxel, TWarp, TIndex>* warping_engine;
 	VolumeFusionEngineInterface<TVoxel, TWarp, TIndex>* volume_fusion_engine;
 

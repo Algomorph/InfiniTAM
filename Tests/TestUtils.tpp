@@ -17,7 +17,7 @@
 
 #include "TestUtils.h"
 #include "../ITMLib/Utils/Configuration.h"
-#include "../ITMLib/Engines/DepthFusion/DynamicSceneReconstructionEngineFactory.h"
+#include "../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
 #include "../ORUtils/FileUtils.h"
 
 #ifndef COMPILE_WITHOUT_CUDA
@@ -254,9 +254,9 @@ void buildSdfVolumeFromImage(ITMVoxelVolume<TVoxel, TIndex>** volume,
 	                           configuration::get().general_voxel_volume_parameters.far_clipping_distance, memoryDevice);
 	ITMTrackingState trackingState(imageSize, memoryDevice);
 
-	DynamicSceneReconstructionEngine<TVoxel, ITMWarp, TIndex>* reconstructionEngine =
-			DynamicSceneReconstructionEngineFactory
-			::MakeSceneReconstructionEngine<TVoxel, ITMWarp, TIndex>(memoryDevice);
+	DepthFusionEngine<TVoxel, ITMWarp, TIndex>* reconstructionEngine =
+			DepthFusionEngineFactory
+			::Build<TVoxel, ITMWarp, TIndex>(memoryDevice);
 
 	reconstructionEngine->GenerateTsdfVolumeFromView(*volume, *view, &trackingState);
 

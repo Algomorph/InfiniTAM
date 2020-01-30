@@ -13,11 +13,9 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "DynamicSceneReconstructionEngine_CPU_PlainVoxelArray.tpp"
+#include "DepthFusionEngine_CPU_VoxelBlockHash.tpp"
 #include "../../ITMLibDefines.h"
 
 namespace ITMLib{
-
-template class DynamicSceneReconstructionEngine_CPU<ITMVoxel, ITMWarp, PlainVoxelArray>;
-
-} // namespace ITMLib
+template class DepthFusionEngine_CPU<ITMVoxel, ITMWarp, VoxelBlockHash>;
+}

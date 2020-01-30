@@ -13,10 +13,11 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "DynamicSceneReconstructionEngine_CUDA_VoxelBlockHash.tcu"
+#include "DepthFusionEngine_CPU_PlainVoxelArray.tpp"
 #include "../../ITMLibDefines.h"
 
-namespace ITMLib {
-template
-class DynamicSceneReconstructionEngine_CUDA<ITMVoxel, ITMWarp, VoxelBlockHash>;
-}
+namespace ITMLib{
+
+template class DepthFusionEngine_CPU<ITMVoxel, ITMWarp, PlainVoxelArray>;
+
+} // namespace ITMLib

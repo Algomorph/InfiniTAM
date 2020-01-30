@@ -297,22 +297,22 @@ set(ITMLIB_ENGINES_RECONSTRUCTION_SOURCES
 set(ITMLIB_ENGINES_RECONSTRUCTION_HEADERS
     Engines/Reconstruction/SceneReconstructionEngineFactory.h
     Engines/Reconstruction/SurfelSceneReconstructionEngineFactory.h
-    Engines/DepthFusion/DynamicSceneReconstructionEngineFactory.h
+    Engines/DepthFusion/DepthFusionEngineFactory.h
     )
 
 ##
 set(ITMLIB_ENGINES_RECONSTRUCTION_CPU_SOURCES
     Engines/Reconstruction/CPU/SceneReconstructionEngine_CPU.tpp
-    Engines/DepthFusion/DynamicSceneReconstructionEngine_CPU_VoxelBlockHash.tpp
-    Engines/DepthFusion/DynamicSceneReconstructionEngine_CPU_VoxelBlockHash.cpp
-    Engines/DepthFusion/DynamicSceneReconstructionEngine_CPU_PlainVoxelArray.tpp
-    Engines/DepthFusion/DynamicSceneReconstructionEngine_CPU_PlainVoxelArray.cpp
+    Engines/DepthFusion/DepthFusionEngine_CPU_VoxelBlockHash.tpp
+    Engines/DepthFusion/DepthFusionEngine_CPU_VoxelBlockHash.cpp
+    Engines/DepthFusion/DepthFusionEngine_CPU_PlainVoxelArray.tpp
+    Engines/DepthFusion/DepthFusionEngine_CPU_PlainVoxelArray.cpp
     Engines/Reconstruction/CPU/SurfelSceneReconstructionEngine_CPU.tpp
     )
 
 set(ITMLIB_ENGINES_RECONSTRUCTION_CPU_HEADERS
     Engines/Reconstruction/CPU/SceneReconstructionEngine_CPU.h
-    Engines/DepthFusion/DynamicSceneReconstructionEngine_CPU.h
+    Engines/DepthFusion/DepthFusionEngine_CPU.h
     Engines/Reconstruction/CPU/SurfelSceneReconstructionEngine_CPU.h
     )
 
@@ -320,18 +320,18 @@ set(ITMLIB_ENGINES_RECONSTRUCTION_CPU_HEADERS
 set(ITMLIB_ENGINES_RECONSTRUCTION_CUDA_SOURCES
     Engines/Reconstruction/CUDA/SceneReconstructionEngine_CUDA.tcu
     Engines/Reconstruction/CUDA/SurfelSceneReconstructionEngine_CUDA.tcu
-    Engines/DepthFusion/DynamicSceneReconstructionEngine_CUDA_PlainVoxelArray.tcu
-    Engines/DepthFusion/DynamicSceneReconstructionEngine_CUDA_PlainVoxelArray.cu
-    Engines/DepthFusion/DynamicSceneReconstructionEngine_CUDA_VoxelBlockHash.tcu
-    Engines/DepthFusion/DynamicSceneReconstructionEngine_CUDA_VoxelBlockHash.cu
+    Engines/DepthFusion/DepthFusionEngine_CUDA_PlainVoxelArray.tcu
+    Engines/DepthFusion/DepthFusionEngine_CUDA_PlainVoxelArray.cu
+    Engines/DepthFusion/DepthFusionEngine_CUDA_VoxelBlockHash.tcu
+    Engines/DepthFusion/DepthFusionEngine_CUDA_VoxelBlockHash.cu
     )
 
 set(ITMLIB_ENGINES_RECONSTRUCTION_CUDA_HEADERS
     Engines/Reconstruction/CUDA/SceneReconstructionEngine_CUDA.h
     Engines/Reconstruction/CUDA/SurfelSceneReconstructionEngine_CUDA.h
-    Engines/DepthFusion/DynamicSceneReconstructionEngine_CUDA.h
-    Engines/DepthFusion/DynamicSceneReconstructionEngine_CUDA_VoxelBlockHash_Kernels.h
-    Engines/DepthFusion/DynamicSceneReconstructionEngine_CUDA_PlainVoxelArray_Kernels.h
+    Engines/DepthFusion/DepthFusionEngine_CUDA.h
+    Engines/DepthFusion/DepthFusionEngine_CUDA_VoxelBlockHash_Kernels.h
+    Engines/DepthFusion/DepthFusionEngine_CUDA_PlainVoxelArray_Kernels.h
     )
 
 ##
@@ -343,13 +343,13 @@ set(ITMLIB_ENGINES_RECONSTRUCTION_INTERFACE_HEADERS
 
     Engines/Reconstruction/Interface/SceneReconstructionEngine.h
     Engines/Reconstruction/Interface/SurfelSceneReconstructionEngine.h
-    Engines/DepthFusion/DynamicSceneReconstructionEngine.h
+    Engines/DepthFusion/DepthFusionEngine.h
     )
 
 ##
 set(ITMLIB_ENGINES_RECONSTRUCTION_SHARED_HEADERS
     Engines/Reconstruction/Shared/SceneReconstructionEngine_Shared.h
-    Engines/DepthFusion/ITMDynamicSceneReconstructionEngine_Shared.h
+    Engines/DepthFusion/DepthFusionEngine_Shared.h
 
     Engines/Reconstruction/Shared/SurfelSceneReconstructionEngine_Shared.h
     )

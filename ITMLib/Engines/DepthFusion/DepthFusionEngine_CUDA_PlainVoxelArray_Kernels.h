@@ -15,7 +15,7 @@
 //  ================================================================
 #pragma once
 
-#include "ITMDynamicSceneReconstructionEngine_Shared.h"
+#include "DepthFusionEngine_Shared.h"
 #include "../Common/ITMWarpEnums.h"
 
 

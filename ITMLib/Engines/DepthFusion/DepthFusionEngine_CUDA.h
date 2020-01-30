@@ -15,25 +15,25 @@
 //  ================================================================
 #pragma once
 
-#include "DynamicSceneReconstructionEngine.h"
+#include "DepthFusionEngine.h"
 #include "../../Objects/Scene/PlainVoxelArray.h"
 #include "../EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
 #include "../Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
 
 namespace ITMLib {
 template<typename TVoxel, typename TWarp, typename TIndex>
-class DynamicSceneReconstructionEngine_CUDA
-		: public DynamicSceneReconstructionEngine<TVoxel, TVoxel, TIndex> {
+class DepthFusionEngine_CUDA
+		: public DepthFusionEngine<TVoxel, TVoxel, TIndex> {
 };
 
 //region =================================== VOXEL BLOCK HASH ==========================================================
 
 template<typename TVoxel, typename TWarp>
-class DynamicSceneReconstructionEngine_CUDA<TVoxel, TWarp, VoxelBlockHash>
-		: public DynamicSceneReconstructionEngine<TVoxel, TWarp, VoxelBlockHash> {
+class DepthFusionEngine_CUDA<TVoxel, TWarp, VoxelBlockHash>
+		: public DepthFusionEngine<TVoxel, TWarp, VoxelBlockHash> {
 public:
-	DynamicSceneReconstructionEngine_CUDA() = default;
-	~DynamicSceneReconstructionEngine_CUDA() = default;
+	DepthFusionEngine_CUDA() = default;
+	~DepthFusionEngine_CUDA() = default;
 	void UpdateVisibleList(ITMVoxelVolume<TVoxel, VoxelBlockHash>* scene, const ITMView* view,
 	                       const ITMTrackingState* trackingState, const ITMRenderState* renderState,
 	                       bool resetVisibleList) override;
@@ -59,8 +59,8 @@ protected:
 // region ==================================== PLAIN VOXEL ARRAY =======================================================
 
 template<typename TVoxel, typename TWarp>
-class DynamicSceneReconstructionEngine_CUDA<TVoxel, TWarp, PlainVoxelArray>
-		: public DynamicSceneReconstructionEngine<TVoxel, TWarp, PlainVoxelArray> {
+class DepthFusionEngine_CUDA<TVoxel, TWarp, PlainVoxelArray>
+		: public DepthFusionEngine<TVoxel, TWarp, PlainVoxelArray> {
 public:
 	void UpdateVisibleList(ITMVoxelVolume<TVoxel, PlainVoxelArray>* volume, const ITMView* view,
 	                       const ITMTrackingState* trackingState, const ITMRenderState* renderState,
@@ -74,8 +74,8 @@ public:
 	                                        const ITMView* view,
 	                                        const Matrix4f& depth_camera_matrix = Matrix4f::Identity()) override;
 
-	DynamicSceneReconstructionEngine_CUDA() = default;
-	~DynamicSceneReconstructionEngine_CUDA() = default;
+	DepthFusionEngine_CUDA() = default;
+	~DepthFusionEngine_CUDA() = default;
 	void IntegrateDepthImageIntoTsdfVolume(ITMVoxelVolume<TVoxel, PlainVoxelArray>* volume, const ITMView* view) override;
 	void IntegrateDepthImageIntoTsdfVolume(ITMVoxelVolume<TVoxel, PlainVoxelArray>* volume, const ITMView* view,
 	                                      const ITMTrackingState* trackingState) override;
