@@ -19,7 +19,7 @@
 #include "VolumeFusionEngine.h"
 #include "../Indexing/Interface/IndexingEngine.h"
 #include "VolumeFusionFunctors.h"
-#include "../Traversal/Interface/ITMSceneTraversal.h"
+#include "../Traversal/Interface/VolumeTraversal.h"
 
 using namespace ITMLib;
 
@@ -29,6 +29,6 @@ void VolumeFusionEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::FuseOneTsdfVo
 	IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::Instance()
 			.AllocateUsingOtherVolume(targetVolume, sourceVolume);
 	TSDFFusionFunctor<TVoxel, TMemoryDeviceType> fusionFunctor(targetVolume->sceneParams->max_integration_weight);
-	ITMDualSceneTraversalEngine<TVoxel, TVoxel, TIndex, TIndex, TMemoryDeviceType>::
+	TwoVolumeTraversalEngine<TVoxel, TVoxel, TIndex, TIndex, TMemoryDeviceType>::
 	DualVoxelTraversal(sourceVolume, targetVolume, fusionFunctor);
 }

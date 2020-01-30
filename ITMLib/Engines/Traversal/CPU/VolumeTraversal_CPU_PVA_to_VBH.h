@@ -18,8 +18,8 @@
 #include <unordered_set>
 
 //local
-#include "../Shared/ITMSceneTraversal_Shared.h"
-#include "../Interface/ITMSceneTraversal.h"
+#include "../Shared/VolumeTraversal_Shared.h"
+#include "../Interface/VolumeTraversal.h"
 #include "../../../Objects/Scene/ITMVoxelVolume.h"
 #include "../../../Utils/Analytics/ITMIsAltered.h"
 #include "../../../Objects/Scene/ITMRepresentationAccess.h"
@@ -28,7 +28,7 @@ namespace ITMLib {
 
 
 template<typename TArrayVoxel, typename THashVoxel>
-class ITMDualSceneTraversalEngine<TArrayVoxel, THashVoxel, PlainVoxelArray, VoxelBlockHash, MEMORYDEVICE_CPU> {
+class TwoVolumeTraversalEngine<TArrayVoxel, THashVoxel, PlainVoxelArray, VoxelBlockHash, MEMORYDEVICE_CPU> {
 private:
 
 	template<typename TTwoVoxelBooleanFunctor, typename TTwoVoxelAndPositionPredicate,
@@ -499,7 +499,7 @@ public:
 
 
 template<typename TVoxelPrimary, typename TVoxelSecondary>
-class ITMDualSceneTraversalEngine<TVoxelPrimary, TVoxelSecondary, VoxelBlockHash, PlainVoxelArray, MEMORYDEVICE_CPU> {
+class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, VoxelBlockHash, PlainVoxelArray, MEMORYDEVICE_CPU> {
 public:
 	/**
 	 * \brief Routine allowing some kind of comparison function call on voxel pairs from the two scenes where both
@@ -520,7 +520,7 @@ public:
 			ITMVoxelVolume <TVoxelSecondary, PlainVoxelArray>* secondaryVolume,
 			TFunctor& functor, bool verbose) {
 		ITMFlipArgumentBooleanFunctor<TVoxelPrimary, TVoxelSecondary, TFunctor> flipFunctor(functor);
-		return ITMDualSceneTraversalEngine<TVoxelSecondary, TVoxelPrimary, PlainVoxelArray, VoxelBlockHash, MEMORYDEVICE_CPU>::
+		return TwoVolumeTraversalEngine<TVoxelSecondary, TVoxelPrimary, PlainVoxelArray, VoxelBlockHash, MEMORYDEVICE_CPU>::
 		DualVoxelTraversal_AllTrue(secondaryVolume, primaryVolume, flipFunctor, verbose);
 
 	}
@@ -533,7 +533,7 @@ public:
 			ITMVoxelVolume <TVoxelSecondary, PlainVoxelArray>* secondaryVolume,
 			TFunctor& functor) {
 		ITMFlipArgumentBooleanFunctor<TVoxelPrimary, TVoxelSecondary, TFunctor> flipFunctor(functor);
-		return ITMDualSceneTraversalEngine<TVoxelSecondary, TVoxelPrimary, PlainVoxelArray, VoxelBlockHash, MEMORYDEVICE_CPU>::
+		return TwoVolumeTraversalEngine<TVoxelSecondary, TVoxelPrimary, PlainVoxelArray, VoxelBlockHash, MEMORYDEVICE_CPU>::
 		DualVoxelTraversal_AllTrue_AllocatedOnly(secondaryVolume, primaryVolume, flipFunctor);
 	}
 };

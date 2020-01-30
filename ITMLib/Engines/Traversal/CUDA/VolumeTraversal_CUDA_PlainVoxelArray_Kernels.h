@@ -16,7 +16,7 @@
 #pragma once
 
 //local
-#include "../Interface/ITMSceneTraversal.h"
+#include "../Interface/VolumeTraversal.h"
 #include "../../../Objects/Scene/ITMVoxelVolume.h"
 #include "../../../Objects/Scene/PlainVoxelArray.h"
 

@@ -17,8 +17,8 @@
 #include <vector>
 #include "ITMSceneStatisticsCalculator_CUDA.h"
 #include "../../../Configuration.h"
-#include "../../../../Engines/Traversal/CUDA/ITMSceneTraversal_CUDA_VoxelBlockHash.h"
-#include "../../../../Engines/Traversal/CUDA/ITMSceneTraversal_CUDA_PlainVoxelArray.h"
+#include "../../../../Engines/Traversal/CUDA/VolumeTraversal_CUDA_VoxelBlockHash.h"
+#include "../../../../Engines/Traversal/CUDA/VolumeTraversal_CUDA_PlainVoxelArray.h"
 #include "../Shared/ITMSceneStatisticsCalculator_Functors.h"
 
 using namespace ITMLib;
@@ -166,7 +166,7 @@ struct ComputeNonTruncatedVoxelCountFunctor<true, TVoxel, TIndex, MEMORYDEVICE_C
 	static int compute(ITMVoxelVolume<TVoxel, TIndex>* scene) {
 		ComputeNonTruncatedVoxelCountFunctor instance;
 
-		ITMSceneTraversalEngine<TVoxel, TIndex, MEMORYDEVICE_CUDA>::
+		VolumeTraversalEngine<TVoxel, TIndex, MEMORYDEVICE_CUDA>::
 		VoxelTraversal(scene, instance);
 		int count = 0;
 		cudaMemcpy(&count, instance.count_device, sizeof(int), cudaMemcpyDeviceToHost);
@@ -234,7 +234,7 @@ template<typename TVoxel, typename TIndex>
 unsigned int
 ITMSceneStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CUDA>::ComputeAlteredVoxelCount(ITMVoxelVolume<TVoxel, TIndex>* scene) {
 	IsAlteredCountFunctor<TVoxel> functor;
-	ITMSceneTraversalEngine<TVoxel, TIndex, MEMORYDEVICE_CUDA>::VoxelTraversal(scene, functor);
+	VolumeTraversalEngine<TVoxel, TIndex, MEMORYDEVICE_CUDA>::VoxelTraversal(scene, functor);
 	return functor.GetCount();
 }
 

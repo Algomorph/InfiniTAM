@@ -118,11 +118,11 @@ set(ITMLIB_ENGINES_LOWLEVEL_SHARED_HEADERS
 
 ##
 set(ITMLIB_ENGINES_TRAVERSAL_INTERFACE_HEADERS
-    Engines/Traversal/Interface/ITMSceneTraversal.h
+    Engines/Traversal/Interface/VolumeTraversal.h
     )
 ##
 set(ITMLIB_ENGINES_TRAVERSAL_SHARED_HEADERS
-    Engines/Traversal/Shared/ITMSceneTraversal_Shared.h
+    Engines/Traversal/Shared/VolumeTraversal_Shared.h
     )
 
 ##
@@ -130,9 +130,9 @@ set(ITMLIB_ENGINES_TRAVERSAL_CPU_SOURCES
     )
 
 set(ITMLIB_ENGINES_TRAVERSAL_CPU_HEADERS
-    Engines/Traversal/CPU/ITMSceneTraversal_CPU_VoxelBlockHash.h
-    Engines/Traversal/CPU/ITMSceneTraversal_CPU_PlainVoxelArray.h
-    Engines/Traversal/CPU/ITMSceneTraversal_CPU_PVA_to_VBH.h
+    Engines/Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h
+    Engines/Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h
+    Engines/Traversal/CPU/VolumeTraversal_CPU_PVA_to_VBH.h
     )
 
 ##
@@ -140,12 +140,12 @@ set(ITMLIB_ENGINES_TRAVERSAL_CUDA_SOURCES
     )
 
 set(ITMLIB_ENGINES_TRAVERSAL_CUDA_HEADERS
-    Engines/Traversal/CUDA/ITMSceneTraversal_CUDA_VoxelBlockHash.h
-    Engines/Traversal/CUDA/ITMSceneTraversal_CUDA_VoxelBlockHash_Kernels.h
-    Engines/Traversal/CUDA/ITMSceneTraversal_CUDA_PlainVoxelArray.h
-    Engines/Traversal/CUDA/ITMSceneTraversal_CUDA_PlainVoxelArray_Kernels.h
-    Engines/Traversal/CUDA/ITMSceneTraversal_CUDA_PVA_to_VBH.h
-    Engines/Traversal/CUDA/ITMSceneTraversal_CUDA_PVA_to_VBH_Kernels.h
+    Engines/Traversal/CUDA/VolumeTraversal_CUDA_VoxelBlockHash.h
+    Engines/Traversal/CUDA/VolumeTraversal_CUDA_VoxelBlockHash_Kernels.h
+    Engines/Traversal/CUDA/VolumeTraversal_CUDA_PlainVoxelArray.h
+    Engines/Traversal/CUDA/VolumeTraversal_CUDA_PlainVoxelArray_Kernels.h
+    Engines/Traversal/CUDA/VolumeTraversal_CUDA_PVA_to_VBH.h
+    Engines/Traversal/CUDA/VolumeTraversal_CUDA_PVA_to_VBH_Kernels.h
     )
 
 
@@ -290,9 +290,6 @@ set(ITMLIB_ENGINES_INDEXING_SHARED_HEADERS
 
 #====================================== RECONSTRUCTION (SDF GENERATION) ENGINES ========================================
 ##
-set(ITMLIB_ENGINES_RECONSTRUCTION_FACTORY_SOURCES
-    Engines/Reconstruction/SurfelSceneReconstructionEngineFactory.tpp
-    )
 set(ITMLIB_ENGINES_RECONSTRUCTION_FACTORY_HEADERS
     Engines/Reconstruction/SceneReconstructionEngineFactory.h
     Engines/Reconstruction/SurfelSceneReconstructionEngineFactory.h
@@ -300,7 +297,10 @@ set(ITMLIB_ENGINES_RECONSTRUCTION_FACTORY_HEADERS
 ##
 set(ITMLIB_ENGINES_RECONSTRUCTION_CPU_SOURCES
     Engines/Reconstruction/CPU/SceneReconstructionEngine_CPU.tpp
+    Engines/Reconstruction/CPU/SceneReconstructionEngine_CPU_VoxelBlockHash.cpp
+    Engines/Reconstruction/CPU/SceneReconstructionEngine_CPU_PlainVoxelArray.cpp
     Engines/Reconstruction/CPU/SurfelSceneReconstructionEngine_CPU.tpp
+    Engines/Reconstruction/CPU/SurfelSceneReconstructionEngine_CPU.cpp
     )
 set(ITMLIB_ENGINES_RECONSTRUCTION_CPU_HEADERS
     Engines/Reconstruction/CPU/SceneReconstructionEngine_CPU.h
@@ -309,7 +309,10 @@ set(ITMLIB_ENGINES_RECONSTRUCTION_CPU_HEADERS
 ##
 set(ITMLIB_ENGINES_RECONSTRUCTION_CUDA_SOURCES
     Engines/Reconstruction/CUDA/SceneReconstructionEngine_CUDA.tcu
+    Engines/Reconstruction/CUDA/SceneReconstructionEngine_CUDA_VoxelBlockHash.cu
+    Engines/Reconstruction/CUDA/SceneReconstructionEngine_CUDA_PlainVoxelArray.cu
     Engines/Reconstruction/CUDA/SurfelSceneReconstructionEngine_CUDA.tcu
+    Engines/Reconstruction/CUDA/SurfelSceneReconstructionEngine_CUDA.cu
     )
 set(ITMLIB_ENGINES_RECONSTRUCTION_CUDA_HEADERS
     Engines/Reconstruction/CUDA/SceneReconstructionEngine_CUDA.h

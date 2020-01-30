@@ -19,7 +19,7 @@
 
 #include "../EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
 #include "DepthFusionEngine_CUDA_VoxelBlockHash_Kernels.h"
-#include "../Traversal/CUDA/ITMSceneTraversal_CUDA_VoxelBlockHash.h"
+#include "../Traversal/CUDA/VolumeTraversal_CUDA_VoxelBlockHash.h"
 #include "../../Utils/Analytics/SceneStatisticsCalculator/CUDA/ITMSceneStatisticsCalculator_CUDA.h"
 
 using namespace ITMLib;

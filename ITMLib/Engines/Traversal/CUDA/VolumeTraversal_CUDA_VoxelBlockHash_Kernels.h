@@ -17,7 +17,7 @@
 
 #include "../../../Objects/Scene/VoxelBlockHash.h"
 #include "../../../../ORUtils/JetbrainsCUDASyntax.hpp"
-#include "../Shared/ITMSceneTraversal_Shared.h"
+#include "../Shared/VolumeTraversal_Shared.h"
 #include "../../../Utils/Analytics/ITMIsAltered.h"
 
 

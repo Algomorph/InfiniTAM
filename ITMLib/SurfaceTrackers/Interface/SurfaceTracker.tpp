@@ -32,7 +32,7 @@ using namespace ITMLib;
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, GradientFunctorType TGradientFunctorType>
 void SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorType>::ResetWarps(
 		ITMVoxelVolume<TWarp, TIndex>* warpField) {
-	ITMSceneTraversalEngine<TWarp, TIndex, TMemoryDeviceType>::template
+	VolumeTraversalEngine<TWarp, TIndex, TMemoryDeviceType>::template
 	StaticVoxelTraversal<WarpClearFunctor<TWarp, TWarp::hasCumulativeWarp>>(warpField);
 };
 
@@ -40,7 +40,7 @@ void SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorTy
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, GradientFunctorType TGradientFunctorType>
 void SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorType>::ClearOutFramewiseWarp(
 		ITMVoxelVolume<TWarp, TIndex>* warpField) {
-	ITMSceneTraversalEngine<TWarp, TIndex, TMemoryDeviceType>::template
+	VolumeTraversalEngine<TWarp, TIndex, TMemoryDeviceType>::template
 	StaticVoxelTraversal<ClearOutFramewiseWarpStaticFunctor<TWarp>>(warpField);
 }
 
@@ -74,7 +74,7 @@ SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorType>::
 		ITMVoxelVolume<TWarp, TIndex>* warpField) {
 
 	// manage hash
-	ITMSceneTraversalEngine<TWarp, TIndex, TMemoryDeviceType>::template
+	VolumeTraversalEngine<TWarp, TIndex, TMemoryDeviceType>::template
 	StaticVoxelTraversal<ClearOutGradientStaticFunctor<TWarp>>(warpField);
 
 	IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::Instance()
@@ -88,7 +88,7 @@ SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorType>::
 			                         liveScene, canonicalScene, warpField,
 			                         canonicalScene->sceneParams->voxel_size, canonicalScene->sceneParams->narrow_band_half_width);
 
-	ITMDualSceneWarpTraversalEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::
+	ThreeVolumeTraversalEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::
 	DualVoxelPositionTraversal(liveScene, canonicalScene, warpField, calculateGradientFunctor);
 	calculateGradientFunctor.PrintStatistics();
 }

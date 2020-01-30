@@ -17,8 +17,8 @@
 
 #include "../../../Objects/Scene/VoxelBlockHash.h"
 #include "../../../../ORUtils/JetbrainsCUDASyntax.hpp"
-#include "ITMSceneTraversal_CUDA_VoxelBlockHash_Kernels.h"
-#include "../Interface/ITMSceneTraversal.h"
+#include "VolumeTraversal_CUDA_VoxelBlockHash_Kernels.h"
+#include "../Interface/VolumeTraversal.h"
 #include "../../../Objects/Scene/PlainVoxelArray.h"
 #include "../../../Objects/Scene/ITMVoxelVolume.h"
 
@@ -31,7 +31,7 @@ namespace ITMLib {
 // functor.
 
 template<typename TVoxel>
-class ITMSceneTraversalEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA> {
+class VolumeTraversalEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA> {
 private:
 	template<typename TFunctor, typename TDeviceFunction>
 	inline static void
@@ -109,7 +109,7 @@ public:
 };
 
 template<typename TVoxelPrimary, typename TVoxelSecondary>
-class ITMDualSceneTraversalEngine<TVoxelPrimary, TVoxelSecondary, VoxelBlockHash, VoxelBlockHash, MEMORYDEVICE_CUDA> {
+class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, VoxelBlockHash, VoxelBlockHash, MEMORYDEVICE_CUDA> {
 private:
 
 	template<typename TFunctor, typename TDeviceTraversalFunction>
@@ -314,7 +314,7 @@ public:
 
 
 template<typename TVoxel, typename TWarp>
-class ITMDualSceneWarpTraversalEngine<TVoxel, TWarp, VoxelBlockHash, MEMORYDEVICE_CUDA> {
+class ThreeVolumeTraversalEngine<TVoxel, TWarp, VoxelBlockHash, MEMORYDEVICE_CUDA> {
 	/**
 	 * \brief Concurrent traversal of 2 scenes with the same voxel type and a warp field
 	 */

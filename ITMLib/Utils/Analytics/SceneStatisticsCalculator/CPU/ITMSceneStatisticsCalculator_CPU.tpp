@@ -16,7 +16,7 @@
 //local
 #include "ITMSceneStatisticsCalculator_CPU.h"
 #include "../../../../Objects/Scene/VoxelBlockHash.h"
-#include "../../../../Engines/Traversal/CPU/ITMSceneTraversal_CPU_VoxelBlockHash.h"
+#include "../../../../Engines/Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
 #include "../../../../Objects/Scene/ITMVoxelTypes.h"
 #include "../Shared/ITMSceneStatisticsCalculator_Functors.h"
 
@@ -139,8 +139,8 @@ template<class TVoxel, typename TIndex>
 struct ComputeNonTruncatedVoxelCountFunctor<true, TVoxel, TIndex> {
 	static int compute(ITMVoxelVolume<TVoxel, TIndex>* scene) {
 		ComputeNonTruncatedVoxelCountFunctor instance;
-		ITMSceneTraversalEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>::VoxelTraversal_SingleThreaded(scene,
-		                                                                                         instance);
+		VolumeTraversalEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>::VoxelTraversal_SingleThreaded(scene,
+		                                                                                       instance);
 		return instance.count;
 	}
 
@@ -260,7 +260,7 @@ struct MaxGradientFunctor<ITMVoxel_f_warp, TIndex> {
 	static float find(ITMVoxelVolume<ITMWarp, TIndex>* scene, bool secondGradientField, Vector3i& maxPosition) {
 		MaxGradientFunctor maxGradientFunctor;
 		maxGradientFunctor.secondGradientField = secondGradientField;
-		ITMSceneTraversalEngine<ITMVoxel_f_warp, TIndex, MEMORYDEVICE_CPU>::
+		VolumeTraversalEngine<ITMVoxel_f_warp, TIndex, MEMORYDEVICE_CPU>::
 		VoxelPositionTraversal(scene, maxGradientFunctor);
 		maxPosition = maxGradientFunctor.maxPosition;
 		return maxGradientFunctor.maxLength;
@@ -306,7 +306,7 @@ template<typename TVoxel, typename TIndex>
 unsigned int
 ITMSceneStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeAlteredVoxelCount(ITMVoxelVolume<TVoxel, TIndex>* scene) {
 	IsAlteredCountFunctor<TVoxel> functor;
-	ITMSceneTraversalEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>::VoxelTraversal(scene, functor);
+	VolumeTraversalEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>::VoxelTraversal(scene, functor);
 	return functor.GetCount();
 }
 

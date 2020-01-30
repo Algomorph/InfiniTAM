@@ -19,9 +19,9 @@
 #include "../../../Objects/Scene/PlainVoxelArray.h"
 #include "../../../Objects/Scene/VoxelBlockHash.h"
 #include "../../../../ORUtils/MemoryDeviceType.h"
-#include "../../../Engines/Traversal/CPU/ITMSceneTraversal_CPU_PlainVoxelArray.h"
-#include "../../../Engines/Traversal/CPU/ITMSceneTraversal_CPU_VoxelBlockHash.h"
-#include "../../../Engines/Traversal/CPU/ITMSceneTraversal_CPU_PVA_to_VBH.h"
+#include "../../../Engines/Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
+#include "../../../Engines/Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
+#include "../../../Engines/Traversal/CPU/VolumeTraversal_CPU_PVA_to_VBH.h"
 #include "ITMVoxelVolumeComparison_Functors.h"
 
 
@@ -34,7 +34,7 @@ template<typename TVoxel, typename TIndexA, typename TIndexB, typename Tolerance
 bool contentAlmostEqual_CPU(ITMVoxelVolume<TVoxel, TIndexA>* a, ITMVoxelVolume<TVoxel, TIndexB>* b,
                             ToleranceType tolerance) {
 	VoxelEqualFunctor<TVoxel, ToleranceType> functor(tolerance);
-	return ITMDualSceneTraversalEngine<TVoxel, TVoxel, TIndexA, TIndexB, MEMORYDEVICE_CPU>
+	return TwoVolumeTraversalEngine<TVoxel, TVoxel, TIndexA, TIndexB, MEMORYDEVICE_CPU>
 	::template DualVoxelTraversal_AllTrue(a, b, functor, false);
 }
 
@@ -42,7 +42,7 @@ template<typename TVoxel, typename TIndexA, typename TIndexB, typename Tolerance
 bool contentAlmostEqual_CPU_Verbose(ITMVoxelVolume<TVoxel, TIndexA>* a, ITMVoxelVolume<TVoxel, TIndexB>* b,
                             ToleranceType tolerance) {
 	VoxelEqualVerboseFunctor<TVoxel, ToleranceType> functor(tolerance);
-	return ITMDualSceneTraversalEngine<TVoxel, TVoxel, TIndexA, TIndexB, MEMORYDEVICE_CPU>
+	return TwoVolumeTraversalEngine<TVoxel, TVoxel, TIndexA, TIndexB, MEMORYDEVICE_CPU>
 	::template DualVoxelPositionTraversal_AllTrue(a, b, functor, true);
 }
 
@@ -59,7 +59,7 @@ struct FlaggedVoxelComparisonUtility<true, TVoxel, TIndexA, TIndexB, ToleranceTy
 	bool compare(ITMVoxelVolume<TVoxel, TIndexA>* a, ITMVoxelVolume<TVoxel, TIndexB>* b, VoxelFlags flags,
 	             ToleranceType tolerance) {
 		VoxelEqualFunctor<TVoxel, ToleranceType> functor(tolerance);
-		return ITMDualSceneTraversalEngine<TVoxel, TVoxel, TIndexA, TIndexB, MEMORYDEVICE_CPU>
+		return TwoVolumeTraversalEngine<TVoxel, TVoxel, TIndexA, TIndexB, MEMORYDEVICE_CPU>
 		::template DualVoxelTraversal_AllTrue_MatchingFlags(a, b, flags, functor, false);
 	}
 
@@ -67,7 +67,7 @@ struct FlaggedVoxelComparisonUtility<true, TVoxel, TIndexA, TIndexB, ToleranceTy
 	bool compare_Verbose(ITMVoxelVolume<TVoxel, TIndexA>* a, ITMVoxelVolume<TVoxel, TIndexB>* b, VoxelFlags flags,
 	                     ToleranceType tolerance) {
 		VoxelEqualVerboseFunctor<TVoxel, ToleranceType> functor(tolerance);
-		return ITMDualSceneTraversalEngine<TVoxel, TVoxel, TIndexA, TIndexB, MEMORYDEVICE_CPU>
+		return TwoVolumeTraversalEngine<TVoxel, TVoxel, TIndexA, TIndexB, MEMORYDEVICE_CPU>
 		::template DualVoxelPositionTraversal_AllTrue_MatchingFlags(a, b, flags, functor, true);
 	}
 };
@@ -109,7 +109,7 @@ template<typename TVoxel, typename TIndexA, typename TIndexB, typename Tolerance
 bool allocatedContentAlmostEqual_CPU(ITMVoxelVolume<TVoxel, TIndexA>* a, ITMVoxelVolume<TVoxel, TIndexB>* b,
                                      ToleranceType tolerance){
 	VoxelEqualFunctor<TVoxel, ToleranceType> functor(tolerance);
-	return ITMDualSceneTraversalEngine<TVoxel, TVoxel, TIndexA, TIndexB, MEMORYDEVICE_CPU>
+	return TwoVolumeTraversalEngine<TVoxel, TVoxel, TIndexA, TIndexB, MEMORYDEVICE_CPU>
 	::template DualVoxelTraversal_AllTrue_AllocatedOnly(a, b, functor);
 
 }
@@ -118,7 +118,7 @@ template<typename TVoxel, typename TIndexA, typename TIndexB, typename Tolerance
 bool allocatedContentAlmostEqual_CPU_Verbose(ITMVoxelVolume<TVoxel, TIndexA>* a, ITMVoxelVolume<TVoxel, TIndexB>* b,
                                      ToleranceType tolerance){
 	VoxelEqualVerboseFunctor<TVoxel, ToleranceType> functor(tolerance);
-	return ITMDualSceneTraversalEngine<TVoxel, TVoxel, TIndexA, TIndexB, MEMORYDEVICE_CPU>
+	return TwoVolumeTraversalEngine<TVoxel, TVoxel, TIndexA, TIndexB, MEMORYDEVICE_CPU>
 	::template DualVoxelPositionTraversal_AllTrue_AllocatedOnly(a, b, functor);
 
 }

@@ -15,7 +15,7 @@
 //  ================================================================
 #pragma once
 
-#include "../../Traversal/CPU/ITMSceneTraversal_CPU_VoxelBlockHash.h"
+#include "../../Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
 
 namespace ITMLib {
 
@@ -40,7 +40,7 @@ void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::Al
 		//reset allocation flags
 		targetTSDF->index.ClearHashEntryAllocationStates();
 		hashMarkerFunctor.collisionDetected = false;
-		ITMSceneTraversalEngine<TWarp, VoxelBlockHash, TMemoryDeviceType>::VoxelAndHashBlockPositionTraversal(
+		VolumeTraversalEngine<TWarp, VoxelBlockHash, TMemoryDeviceType>::VoxelAndHashBlockPositionTraversal(
 				warpField, hashMarkerFunctor);
 
 		//Allocate the hash entries that will potentially have any data

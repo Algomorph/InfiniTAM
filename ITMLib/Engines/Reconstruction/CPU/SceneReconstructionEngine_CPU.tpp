@@ -1,9 +1,10 @@
 // Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
 
+//local
 #include "SceneReconstructionEngine_CPU.h"
-
 #include "../Shared/SceneReconstructionEngine_Shared.h"
 #include "../../Indexing/Shared/IndexingEngine_Shared.h"
+#include "../../../Utils/Configuration.h"
 
 using namespace ITMLib;
 template<class TVoxel>

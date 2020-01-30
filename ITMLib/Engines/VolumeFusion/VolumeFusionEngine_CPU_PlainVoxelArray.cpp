@@ -13,7 +13,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "../Traversal/CPU/ITMSceneTraversal_CPU_PlainVoxelArray.h"
+#include "../Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
 #include "../Indexing/Interface/IndexingEngine.tpp"
 #include "VolumeFusionEngine.tpp"
 #include "../../ITMLibDefines.h"

@@ -17,10 +17,10 @@
 #pragma once
 
 //local
-#include "../Interface/ITMSceneTraversal.h"
+#include "../Interface/VolumeTraversal.h"
 #include "../../../Objects/Scene/ITMVoxelVolume.h"
 #include "../../EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
-#include "../Shared/ITMSceneTraversal_Shared.h"
+#include "../Shared/VolumeTraversal_Shared.h"
 #include "../../../Utils/Analytics/ITMIsAltered.h"
 
 namespace ITMLib {
@@ -32,7 +32,7 @@ namespace ITMLib {
 
 //static-member-only classes are used here instead of namespaces to utilize template specialization (and maximize code reuse)
 template<typename TVoxel>
-class ITMSceneTraversalEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU> {
+class VolumeTraversalEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU> {
 public:
 // region ================================ DYNAMIC SINGLE-SCENE TRAVERSAL ==============================================
 
@@ -306,7 +306,7 @@ public:
 // ====================== FOR TWO SCENES WITH DIFFERING VOXEL TYPES ====================================================
 
 template<typename TVoxelPrimary, typename TVoxelSecondary>
-class ITMDualSceneTraversalEngine<TVoxelPrimary, TVoxelSecondary, VoxelBlockHash, VoxelBlockHash, MEMORYDEVICE_CPU> {
+class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, VoxelBlockHash, VoxelBlockHash, MEMORYDEVICE_CPU> {
 public:
 // region ================================ STATIC TWO-SCENE TRAVERSAL =================================================
 	template<typename TStaticFunctor>
@@ -941,7 +941,7 @@ public:
 // ====================== FOR TWO SCENES WITH DIFFERING VOXEL TYPES ====================================================
 
 template<typename TVoxel, typename TWarp>
-class ITMDualSceneWarpTraversalEngine<TVoxel, TWarp, VoxelBlockHash, MEMORYDEVICE_CPU> {
+class ThreeVolumeTraversalEngine<TVoxel, TWarp, VoxelBlockHash, MEMORYDEVICE_CPU> {
 public:
 // region ================================ DYNAMIC TWO-SCENE TRAVERSAL =================================================
 	template<typename TStaticFunctor>

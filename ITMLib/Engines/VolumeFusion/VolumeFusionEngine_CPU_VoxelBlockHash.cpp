@@ -13,7 +13,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "../Traversal/CPU/ITMSceneTraversal_CPU_VoxelBlockHash.h"
+#include "../Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
 #include "VolumeFusionEngine.tpp"
 #include "../Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.tpp"
 #include "../../ITMLibDefines.h"

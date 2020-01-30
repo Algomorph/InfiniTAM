@@ -41,8 +41,8 @@
 #include "ITMSceneSliceVisualizerCommon.h"
 #include "ITMVisualizationCommon.h"
 #include "ITMSceneSliceVisualizer3DInteractorStyle.h"
-#include "../../Engines/Traversal/CPU/ITMSceneTraversal_CPU_PlainVoxelArray.h"
-#include "../../Engines/Traversal/CPU/ITMSceneTraversal_CPU_VoxelBlockHash.h"
+#include "../../Engines/Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
+#include "../../Engines/Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
 #include "../Configuration.h"
 
 
@@ -264,7 +264,7 @@ void ITMSceneSliceVisualizer3D<TVoxel, TWarp, TIndex>::BuildVoxelAndHashBlockPol
 
 	AddVoxelPointFunctor<TVoxel> addVoxelPointFunctor(
 			scaleAttribute, alternativeScaleAttribute, colorAttribute, voxelPoints, hashBlockPoints, focusCoordinates);
-	ITMSceneTraversalEngine<TVoxel,TIndex,MEMORYDEVICE_CPU>::
+	VolumeTraversalEngine<TVoxel,TIndex,MEMORYDEVICE_CPU>::
 	        VoxelPositionAndHashEntryTraversalWithinBounds(scene, addVoxelPointFunctor, bounds);
 	sceneSlice.voxelCount = addVoxelPointFunctor.voxelCount;
 
@@ -603,7 +603,7 @@ struct DrawWarpUpdateFunctor<TWarp, TIndex, false> {
 
 		TransferWarpUpdatesToVtkStructuresFunctor<TWarp> transferWarpUpdatesToVtkStructuresFunctor(
 				updatesData, currentZebraIndex);
-		ITMSceneTraversalEngine<TWarp,TIndex,MEMORYDEVICE_CPU>::
+		VolumeTraversalEngine<TWarp,TIndex,MEMORYDEVICE_CPU>::
 		        VoxelPositionTraversalWithinBounds(warpField, transferWarpUpdatesToVtkStructuresFunctor, bounds);
 		updatesData->Modified();
 	}
@@ -620,7 +620,7 @@ struct DrawWarpUpdateFunctor<TWarp, TIndex, true> {
 		TransferWarpUpdatesToVtkStructuresFunctor_WithComponents<ITMVoxel>
 				transferSmoothingVectorsToVtkStructuresFunctor(
 				updatesData, dataTermData, smoothingTermData, componentHedgehogEndpoints, currentZebraIndex);
-		ITMSceneTraversalEngine<TWarp,TIndex,MEMORYDEVICE_CPU>::
+		VolumeTraversalEngine<TWarp,TIndex,MEMORYDEVICE_CPU>::
 		        VoxelPositionTraversalWithinBounds(warpField, transferSmoothingVectorsToVtkStructuresFunctor, bounds);
 		updatesData->Modified();
 		dataTermData->Modified();

@@ -27,7 +27,7 @@
 
 #ifdef __CUDACC__
 #include "../../../Utils/ITMCUDAUtils.h"
-#include "../../Traversal/CUDA/ITMSceneTraversal_CUDA_VoxelBlockHash.h"
+#include "../../Traversal/CUDA/VolumeTraversal_CUDA_VoxelBlockHash.h"
 #endif
 
 using namespace ITMLib;

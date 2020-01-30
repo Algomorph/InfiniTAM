@@ -16,7 +16,7 @@
 
 #include "DepthFusionEngine_CPU.h"
 #include "DepthFusionEngine_Shared.h"
-#include "../Traversal/CPU/ITMSceneTraversal_CPU_PlainVoxelArray.h"
+#include "../Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
 
 using namespace ITMLib;
 

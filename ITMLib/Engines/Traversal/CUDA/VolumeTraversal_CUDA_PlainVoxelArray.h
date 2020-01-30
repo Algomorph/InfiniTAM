@@ -19,11 +19,11 @@
 #include <cassert>
 
 //local
-#include "../Interface/ITMSceneTraversal.h"
+#include "../Interface/VolumeTraversal.h"
 #include "../../../Objects/Scene/ITMVoxelVolume.h"
 #include "../../../Objects/Scene/PlainVoxelArray.h"
 #include "../../../Utils/Configuration.h"
-#include "ITMSceneTraversal_CUDA_PlainVoxelArray_Kernels.h"
+#include "VolumeTraversal_CUDA_PlainVoxelArray_Kernels.h"
 
 namespace ITMLib {
 
@@ -31,7 +31,7 @@ namespace ITMLib {
 //TODO: many DRY violations within this file -- figure out how to reduce them
 
 template<typename TVoxel>
-class ITMSceneTraversalEngine<TVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA> {
+class VolumeTraversalEngine<TVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA> {
 public:
 // region ================================ STATIC SINGLE-SCENE TRAVERSAL ===============================================
 	template<typename TStaticFunctor>
@@ -103,7 +103,7 @@ public:
 };
 
 template<typename TVoxelPrimary, typename TVoxelSecondary>
-class ITMDualSceneTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, PlainVoxelArray, MEMORYDEVICE_CUDA> {
+class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, PlainVoxelArray, MEMORYDEVICE_CUDA> {
 private:
 	template<typename TBooleanFunctor, typename TDeviceTraversalFunction>
 	inline static bool
@@ -304,7 +304,7 @@ public:
 
 
 template<typename TVoxel, typename TWarp>
-class ITMDualSceneWarpTraversalEngine<TVoxel, TWarp, PlainVoxelArray, MEMORYDEVICE_CUDA> {
+class ThreeVolumeTraversalEngine<TVoxel, TWarp, PlainVoxelArray, MEMORYDEVICE_CUDA> {
 	/**
 	 * \brief Concurrent traversal of 2 scenes with the same voxel type and a warp field
 	 * \details All scenes must have matching dimensions

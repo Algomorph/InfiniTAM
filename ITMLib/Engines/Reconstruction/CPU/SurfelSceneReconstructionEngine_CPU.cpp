@@ -1,6 +1,6 @@
 //  ================================================================
-//  Created by Gregory Kramida on 7/27/18.
-//  Copyright (c) 2018-2025 Gregory Kramida
+//  Created by Gregory Kramida on 1/30/20.
+//  Copyright (c) 2020 Gregory Kramida
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
 //  You may obtain a copy of the License at
@@ -13,24 +13,13 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#pragma once
+//local
+#include "../../../ITMLibDefines.h"
+#include "SurfelSceneReconstructionEngine_CPU.tpp"
 
-#include "../../../Utils/Configuration.h"
-
-namespace ITMLib{
-
-template<typename TVoxel, typename TIndex, MemoryDeviceType TDeviceType>
-class ITMSceneTraversalEngine;
-
-
-template<typename TVoxelPrimary, typename TVoxelSecondary, typename TIndexPrimary, typename TIndexSecondary,
-        MemoryDeviceType TDeviceType>
-class ITMDualSceneTraversalEngine;
-
-template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TDeviceType>
-class ITMDualSceneWarpTraversalEngine;
-
-
-}//namespace ITMLib
-
-
+namespace ITMLib {
+template
+class SurfelSceneReconstructionEngine_CPU<ITMSurfel_rgb>;
+template
+class SurfelSceneReconstructionEngine_CPU<ITMSurfel_grey>;
+} // namespace ITMLib

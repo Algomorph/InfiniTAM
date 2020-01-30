@@ -1,5 +1,5 @@
 //  ================================================================
-//  Created by Gregory Kramida on 1/29/20.
+//  Created by Gregory Kramida on 1/30/20.
 //  Copyright (c) 2020 Gregory Kramida
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -13,14 +13,12 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "../Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
-#include "WarpingEngine.tpp"
-#include "../Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.tpp"
-#include "../../ITMLibDefines.h"
+//local
+#include "../../../ITMLibDefines.h"
+#include "../../../Objects/Scene/PlainVoxelArray.h"
+#include "SceneReconstructionEngine_CUDA.tcu"
 
-namespace ITMLib{
-
+namespace ITMLib {
 template
-class WarpingEngine<ITMVoxel, ITMWarp, VoxelBlockHash, MEMORYDEVICE_CPU>;
-
+class SceneReconstructionEngine_CUDA<ITMVoxel, PlainVoxelArray>;
 } // namespace ITMLib

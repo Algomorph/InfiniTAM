@@ -1,6 +1,6 @@
 //  ================================================================
-//  Created by Gregory Kramida on 1/29/20.
-//  Copyright (c) 2020 Gregory Kramida
+//  Created by Gregory Kramida on 7/27/18.
+//  Copyright (c) 2018-2025 Gregory Kramida
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
 //  You may obtain a copy of the License at
@@ -13,14 +13,24 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "../Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
-#include "WarpingEngine.tpp"
-#include "../Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.tpp"
-#include "../../ITMLibDefines.h"
+#pragma once
+
+#include "../../../Utils/Configuration.h"
 
 namespace ITMLib{
 
-template
-class WarpingEngine<ITMVoxel, ITMWarp, VoxelBlockHash, MEMORYDEVICE_CPU>;
+template<typename TVoxel, typename TIndex, MemoryDeviceType TDeviceType>
+class VolumeTraversalEngine;
 
-} // namespace ITMLib
+
+template<typename TVoxelPrimary, typename TVoxelSecondary, typename TIndexPrimary, typename TIndexSecondary,
+        MemoryDeviceType TDeviceType>
+class TwoVolumeTraversalEngine;
+
+template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TDeviceType>
+class ThreeVolumeTraversalEngine;
+
+
+}//namespace ITMLib
+
+

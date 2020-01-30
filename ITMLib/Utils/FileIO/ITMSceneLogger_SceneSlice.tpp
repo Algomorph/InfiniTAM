@@ -26,8 +26,8 @@
 #include "ITMSceneLogger.h"
 #include "../Configuration.h"
 #include "../../Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
-#include "../../Engines/Traversal/CPU/ITMSceneTraversal_CPU_VoxelBlockHash.h"
-#include "../../Engines/Traversal/CPU/ITMSceneTraversal_CPU_PlainVoxelArray.h"
+#include "../../Engines/Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
+#include "../../Engines/Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
 #include "ITMWriteAndReadFunctors.h"
 
 using namespace ITMLib;
@@ -126,7 +126,7 @@ ITMSceneLogger<TVoxel, TWarp, TIndex>::SaveSliceWarp(const Vector6i& voxelRange,
 		unsigned int sliceIterationCursor = fullWarpLogger->GetIterationCursor();
 		sliceWarpOfstream.write(reinterpret_cast<const char* >(&sliceIterationCursor), sizeof(sliceIterationCursor));
 
-		ITMSceneTraversalEngine<TWarp,TIndex,MEMORYDEVICE_CPU>::VoxelTraversalWithinBounds(fullWarpLogger->warpField, warpAndUpdateWriteFunctor, voxelRange);
+		VolumeTraversalEngine<TWarp,TIndex,MEMORYDEVICE_CPU>::VoxelTraversalWithinBounds(fullWarpLogger->warpField, warpAndUpdateWriteFunctor, voxelRange);
 	}
 	sliceWarpOfstream.close();
 	fullWarpLogger->StopLoadingWarpState();

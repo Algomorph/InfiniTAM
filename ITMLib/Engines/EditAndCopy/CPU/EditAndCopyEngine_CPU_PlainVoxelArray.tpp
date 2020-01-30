@@ -17,7 +17,7 @@
 #include "EditAndCopyEngine_CPU.h"
 #include "../../../Objects/Scene/ITMVoxelVolume.h"
 #include "../../../Objects/Scene/ITMRepresentationAccess.h"
-#include "../../Traversal/Shared/ITMSceneTraversal_Shared.h"
+#include "../../Traversal/Shared/VolumeTraversal_Shared.h"
 #include "../Shared/EditAndCopyEngine_Shared.h"
 #include "../Shared/EditAndCopyEngine_Functors.h"
 

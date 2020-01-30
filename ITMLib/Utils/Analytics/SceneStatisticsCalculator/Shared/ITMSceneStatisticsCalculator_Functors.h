@@ -21,15 +21,15 @@
 //local
 #ifdef __CUDACC__
 #include "../../../../Utils/ITMCUDAUtils.h"
-#include "../../../../Engines/Traversal/CUDA/ITMSceneTraversal_CUDA_PlainVoxelArray.h"
-#include "../../../../Engines/Traversal/CUDA/ITMSceneTraversal_CUDA_VoxelBlockHash.h"
+#include "../../../../Engines/Traversal/CUDA/VolumeTraversal_CUDA_PlainVoxelArray.h"
+#include "../../../../Engines/Traversal/CUDA/VolumeTraversal_CUDA_VoxelBlockHash.h"
 #endif
 #include "../../../../../ORUtils/PlatformIndependentAtomics.h"
 #include "../../../../../ORUtils/PlatformIndependence.h"
 #include "../../../Configuration.h"
 #include "../../../../Objects/Scene/ITMVoxelVolume.h"
-#include "../../../../Engines/Traversal/CPU/ITMSceneTraversal_CPU_PlainVoxelArray.h"
-#include "../../../../Engines/Traversal/CPU/ITMSceneTraversal_CPU_VoxelBlockHash.h"
+#include "../../../../Engines/Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
+#include "../../../../Engines/Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
 
 
 using namespace ITMLib;
@@ -96,7 +96,7 @@ struct ComputeFramewiseWarpLengthStatisticFunctor<true, TVoxel, TIndex, TDeviceT
 		ComputeFramewiseWarpLengthStatisticFunctor instance;
 		INITIALIZE_ATOMIC(double, instance.aggregate, 0.0);
 		INITIALIZE_ATOMIC(unsigned int, instance.count, 0u);
-		ITMSceneTraversalEngine<TVoxel, TIndex, TDeviceType>::VoxelTraversal(scene, instance);
+		VolumeTraversalEngine<TVoxel, TIndex, TDeviceType>::VoxelTraversal(scene, instance);
 		double aggregate = GET_ATOMIC_VALUE_CPU(instance.aggregate);
 		unsigned int count = GET_ATOMIC_VALUE_CPU(instance.count);
 		if (TStatistic == MEAN) {
@@ -132,7 +132,7 @@ struct ComputeVoxelCountWithSpecificValue<true, TVoxel, TIndex, TMemoryDeviceTyp
 
 	static int compute(ITMVoxelVolume<TVoxel, TIndex>* scene, float value) {
 		ComputeVoxelCountWithSpecificValue instance(value);
-		ITMSceneTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::VoxelTraversal(scene, instance);
+		VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::VoxelTraversal(scene, instance);
 		return GET_ATOMIC_VALUE_CPU(instance.count);
 	}
 
@@ -182,7 +182,7 @@ struct SumSDFFunctor<true, TVoxel, TIndex, TMemoryDeviceType> {
 
 	static double compute(ITMVoxelVolume<TVoxel, TIndex>* scene, ITMLib::VoxelFlags voxelType) {
 		SumSDFFunctor instance(voxelType);
-		ITMSceneTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::VoxelTraversal(scene, instance);
+		VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::VoxelTraversal(scene, instance);
 		return GET_ATOMIC_VALUE_CPU(instance.sum);
 	}
 
@@ -261,7 +261,7 @@ struct FlagMatchBBoxFunctor<true, TVoxel, TIndex, TMemoryDeviceType> {
 
 	static Extent3D compute(ITMVoxelVolume<TVoxel, TIndex>* scene, ITMLib::VoxelFlags voxelType) {
 		FlagMatchBBoxFunctor instance(voxelType);
-		ITMSceneTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::VoxelPositionTraversal(scene, instance);
+		VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::VoxelPositionTraversal(scene, instance);
 		return {GET_ATOMIC_VALUE_CPU(instance.min_x),
 		        GET_ATOMIC_VALUE_CPU(instance.min_y),
 		        GET_ATOMIC_VALUE_CPU(instance.min_z),

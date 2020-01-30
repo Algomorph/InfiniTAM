@@ -22,11 +22,11 @@
 #include <cassert>
 
 //local
-#include "../Interface/ITMSceneTraversal.h"
+#include "../Interface/VolumeTraversal.h"
 #include "../../EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 #include "../../../Utils/Geometry/ITM3DIndexConversions.h"
 #include "../../../Objects/Scene/ITMVoxelVolume.h"
-#include "../Shared/ITMSceneTraversal_Shared.h"
+#include "../Shared/VolumeTraversal_Shared.h"
 #include "../../../Utils/Geometry/ITMGeometryBooleanOperations.h"
 
 namespace ITMLib {
@@ -37,7 +37,7 @@ namespace ITMLib {
 //======================================================================================================================
 //static-member-only classes are used here instead of namespaces to utilize template specialization (and maximize code reuse)
 template<typename TVoxel>
-class ITMSceneTraversalEngine<TVoxel, PlainVoxelArray, MEMORYDEVICE_CPU> {
+class VolumeTraversalEngine<TVoxel, PlainVoxelArray, MEMORYDEVICE_CPU> {
 public:
 // region ================================ DYNAMIC SINGLE-SCENE TRAVERSAL ==============================================
 	template<typename TFunctor>
@@ -190,7 +190,7 @@ public:
 
 
 template<typename TVoxelPrimary, typename TVoxelSecondary>
-class ITMDualSceneTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, PlainVoxelArray, MEMORYDEVICE_CPU> {
+class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, PlainVoxelArray, MEMORYDEVICE_CPU> {
 private:
 
 	template<typename TFunctor, typename TFunctionCall>
@@ -560,7 +560,7 @@ public:
 };
 
 template<typename TVoxel, typename TWarp>
-class ITMDualSceneWarpTraversalEngine<TVoxel, TWarp, PlainVoxelArray, MEMORYDEVICE_CPU> {
+class ThreeVolumeTraversalEngine<TVoxel, TWarp, PlainVoxelArray, MEMORYDEVICE_CPU> {
 	/**
 	 * \brief Concurrent traversal of 2 scenes with the same voxel type and a warp field
 	 * \details All scenes must have matching dimensions

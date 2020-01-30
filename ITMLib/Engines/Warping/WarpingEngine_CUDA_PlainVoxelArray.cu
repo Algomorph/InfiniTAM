@@ -15,7 +15,7 @@
 //  ================================================================
 
 //local
-#include "../Traversal/CUDA/ITMSceneTraversal_CUDA_PlainVoxelArray.h"
+#include "../Traversal/CUDA/VolumeTraversal_CUDA_PlainVoxelArray.h"
 #include "../Indexing/Interface/IndexingEngine.tpp"
 #include "WarpingEngine.tpp"
 #include "../../ITMLibDefines.h"

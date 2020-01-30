@@ -22,8 +22,8 @@
 #include "../Analytics/SceneStatisticsCalculator/CPU/ITMSceneStatisticsCalculator_CPU.h"
 #include "../Configuration.h"
 #include "../../Engines/DepthFusion/DepthFusionEngineFactory.h"
-#include "../../Engines/Traversal/CPU/ITMSceneTraversal_CPU_PlainVoxelArray.h"
-#include "../../Engines/Traversal/CPU/ITMSceneTraversal_CPU_VoxelBlockHash.h"
+#include "../../Engines/Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
+#include "../../Engines/Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
 #include "../../Engines/SceneFileIO/ITMSceneFileIOEngine.h"
 #include "ITMWriteAndReadFunctors.h"
 
@@ -404,7 +404,7 @@ bool ITMWarpFieldLogger<TVoxel, TIndex>::SaveCurrentWarpState() {
 	warpOFStream.write(reinterpret_cast<const char* >(&this->iterationCursor), sizeof(iterationCursor));
 	WarpAndUpdateWriteFunctor<TVoxel>
 			warpAndUpdateWriteFunctor(&this->warpOFStream, this->warpByteSize, this->updateByteSize);
-	ITMSceneTraversalEngine<TVoxel,TIndex,MEMORYDEVICE_CPU>::VoxelTraversal(warpField, warpAndUpdateWriteFunctor);
+	VolumeTraversalEngine<TVoxel,TIndex,MEMORYDEVICE_CPU>::VoxelTraversal(warpField, warpAndUpdateWriteFunctor);
 	std::cout << "Written warp updates for iteration " << iterationCursor << " to disk." << std::endl;
 	iterationCursor++;
 	return true;
@@ -482,7 +482,7 @@ bool ITMWarpFieldLogger<TVoxel, TIndex>::LoadCurrentWarpState() {
 
 	WarpAndUpdateReadFunctor<TVoxel>
 			warpAndUpdateReadFunctor(&this->warpIFStream, this->warpByteSize, this->updateByteSize);
-	ITMSceneTraversalEngine<TVoxel,TIndex,MEMORYDEVICE_CPU>::VoxelTraversal(warpField, warpAndUpdateReadFunctor);
+	VolumeTraversalEngine<TVoxel,TIndex,MEMORYDEVICE_CPU>::VoxelTraversal(warpField, warpAndUpdateReadFunctor);
 	return true;
 }
 
@@ -501,7 +501,7 @@ bool ITMWarpFieldLogger<TVoxel, TIndex>::LoadPreviousWarpState() {
 	}
 	WarpAndUpdateReadFunctor<TVoxel>
 			warpAndUpdateReadFunctor(&this->warpIFStream, this->warpByteSize, this->updateByteSize);
-	ITMSceneTraversalEngine<TVoxel,TIndex,MEMORYDEVICE_CPU>::VoxelTraversal(warpField, warpAndUpdateReadFunctor);
+	VolumeTraversalEngine<TVoxel,TIndex,MEMORYDEVICE_CPU>::VoxelTraversal(warpField, warpAndUpdateReadFunctor);
 	return true;
 }
 

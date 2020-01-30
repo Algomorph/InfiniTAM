@@ -3,7 +3,7 @@
 #include <cfloat>
 #include "DepthFusionEngine_CPU.h"
 #include "DepthFusionEngine_Shared.h"
-#include "../Traversal/CPU/ITMSceneTraversal_CPU_VoxelBlockHash.h"
+#include "../Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
 
 using namespace ITMLib;
 

@@ -16,11 +16,11 @@
 #pragma once
 
 //local
-#include "../Interface/ITMSceneTraversal.h"
+#include "../Interface/VolumeTraversal.h"
 #include "../../../Objects/Scene/ITMVoxelVolume.h"
 #include "../../../Objects/Scene/PlainVoxelArray.h"
 #include "../../../Objects/Scene/VoxelBlockHash.h"
-#include "../Shared/ITMSceneTraversal_Shared.h"
+#include "../Shared/VolumeTraversal_Shared.h"
 #include "../../../Utils/Analytics/ITMIsAltered.h"
 
 namespace {
