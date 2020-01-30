@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "../../Objects/Scene/ITMLocalMap.h"
-#include "../../Engines/Main/ITMDenseMapper.h"
+#include "../Main/DenseMapper.h"
 #include "../Visualization/Interface/VisualizationEngine.h"
 
 namespace ITMLib
@@ -42,14 +42,14 @@ namespace ITMLib
 	{
 	private:
 		const VisualizationEngine<TVoxel, TIndex> *visualization_engine;
-		const ITMDenseMapper<TVoxel, TIndex> *denseMapper;
+		const DenseMapper<TVoxel, TIndex> *denseMapper;
 		Vector2i trackedImageSize;
 
 		std::vector<ITMLocalMap<TVoxel, TIndex>*> allData;
 
 	public:
 		ITMVoxelMapGraphManager(const VisualizationEngine<TVoxel, TIndex>* visualizationEngine,
-				                        const ITMDenseMapper<TVoxel, TIndex>* denseMapper, const Vector2i& trackedImageSize);
+		                        const DenseMapper<TVoxel, TIndex>* denseMapper, const Vector2i& trackedImageSize);
 		~ITMVoxelMapGraphManager(void);
 
 		int createNewLocalMap(void);

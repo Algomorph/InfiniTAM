@@ -30,10 +30,10 @@
 
 //ITMLib
 #include "../../ITMLib/ITMLibDefines.h"
-#include "../../ITMLib/Engines/Main/ITMBasicEngine.h"
-#include "../../ITMLib/Engines/Main/ITMBasicSurfelEngine.h"
-#include "../../ITMLib/Engines/Main/ITMMultiEngine.h"
-#include "../../ITMLib/Engines/Main/ITMDynamicEngine.h"
+#include "../../ITMLib/Engines/Main/BasicEngine.h"
+#include "../../ITMLib/Engines/Main/BasicSurfelEngine.h"
+#include "../../ITMLib/Engines/Main/MultiEngine.h"
+#include "../../ITMLib/Engines/Main/DynamicEngine.h"
 
 #include "../../ORUtils/FileUtils.h"
 #include "../../InputSource/FFMPEGWriter.h"
@@ -74,7 +74,7 @@ namespace bench = ITMLib::Bench;
 void UIEngine_BPO::Initialize(int& argc, char** argv,
 							  InputSource::ImageSourceEngine* imageSource,
                               InputSource::IMUSourceEngine* imuSource,
-                              ITMLib::ITMMainEngine* mainEngine,
+                              ITMLib::MainEngine* mainEngine,
 
                               const configuration::Configuration& configuration,
                               ITMLib::ITMDynamicFusionLogger_Interface* logger) {
@@ -96,19 +96,19 @@ void UIEngine_BPO::Initialize(int& argc, char** argv,
 	this->currentColourMode = 0;
 	this->number_of_frames_to_process_after_launch = configuration.automatic_run_settings.number_of_frames_to_process;
 
-	this->colourModes_main.emplace_back("shaded greyscale", ITMMainEngine::InfiniTAM_IMAGE_SCENERAYCAST);
-	this->colourModes_main.emplace_back("integrated colours", ITMMainEngine::InfiniTAM_IMAGE_COLOUR_FROM_VOLUME);
-	this->colourModes_main.emplace_back("surface normals", ITMMainEngine::InfiniTAM_IMAGE_COLOUR_FROM_NORMAL);
-	this->colourModes_main.emplace_back("confidence", ITMMainEngine::InfiniTAM_IMAGE_COLOUR_FROM_CONFIDENCE);
+	this->colourModes_main.emplace_back("shaded greyscale", MainEngine::InfiniTAM_IMAGE_SCENERAYCAST);
+	this->colourModes_main.emplace_back("integrated colours", MainEngine::InfiniTAM_IMAGE_COLOUR_FROM_VOLUME);
+	this->colourModes_main.emplace_back("surface normals", MainEngine::InfiniTAM_IMAGE_COLOUR_FROM_NORMAL);
+	this->colourModes_main.emplace_back("confidence", MainEngine::InfiniTAM_IMAGE_COLOUR_FROM_CONFIDENCE);
 
-	this->colourModes_freeview.emplace_back("canonical", ITMMainEngine::InfiniTAM_IMAGE_FREECAMERA_CANONICAL);
-	this->colourModes_freeview.emplace_back("shaded greyscale", ITMMainEngine::InfiniTAM_IMAGE_FREECAMERA_SHADED);
+	this->colourModes_freeview.emplace_back("canonical", MainEngine::InfiniTAM_IMAGE_FREECAMERA_CANONICAL);
+	this->colourModes_freeview.emplace_back("shaded greyscale", MainEngine::InfiniTAM_IMAGE_FREECAMERA_SHADED);
 	this->colourModes_freeview.emplace_back("integrated colours",
-	                                        ITMMainEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_VOLUME);
+	                                        MainEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_VOLUME);
 	this->colourModes_freeview.emplace_back("surface normals",
-	                                        ITMMainEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_NORMAL);
+	                                        MainEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_NORMAL);
 	this->colourModes_freeview.emplace_back("confidence",
-	                                        ITMMainEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_CONFIDENCE);
+	                                        MainEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_CONFIDENCE);
 
 	this->imageSource = imageSource;
 	this->imuSource = imuSource;
@@ -159,9 +159,9 @@ void UIEngine_BPO::Initialize(int& argc, char** argv,
 	saveImage = new ITMUChar4Image(imageSource->getDepthImageSize(), true, false);
 
 
-	outImageType[1] = ITMMainEngine::InfiniTAM_IMAGE_ORIGINAL_DEPTH;
-	outImageType[2] = ITMMainEngine::InfiniTAM_IMAGE_ORIGINAL_RGB;
-	if (inputRGBImage->noDims == Vector2i(0, 0)) outImageType[2] = ITMMainEngine::InfiniTAM_IMAGE_UNKNOWN;
+	outImageType[1] = MainEngine::InfiniTAM_IMAGE_ORIGINAL_DEPTH;
+	outImageType[2] = MainEngine::InfiniTAM_IMAGE_ORIGINAL_RGB;
+	if (inputRGBImage->noDims == Vector2i(0, 0)) outImageType[2] = MainEngine::InfiniTAM_IMAGE_UNKNOWN;
 
 
 	autoIntervalFrameStart = 0;

@@ -44,30 +44,30 @@ set(ITMLIB_TOPLEVEL_HEADERS
 
 ##
 set(ITMLIB_CORE_SOURCES
-    Engines/Main/ITMBasicEngine.tpp
-    Engines/Main/ITMBasicSurfelEngine.tpp
-    Engines/Main/ITMDenseMapper.tpp
-    Engines/Main/ITMDenseSurfelMapper.tpp
+    Engines/Main/BasicEngine.tpp
+    Engines/Main/BasicSurfelEngine.tpp
+    Engines/Main/DenseMapper.tpp
+    Engines/Main/DenseSurfelMapper.tpp
     Engines/Main/DenseDynamicMapper.tpp
     Engines/Main/DenseDynamicMapper_PlainVoxelArray.cpp
     Engines/Main/DenseDynamicMapper_VoxelBlockHash.cpp
     Engines/Main/NonRigidTrackingParameters.h
-    Engines/Main/ITMMultiEngine.tpp
-    Engines/Main/ITMDynamicEngine.tpp
-    Engines/Main/ITMDynamicEngine_VoxelBlockHash.cpp
-    Engines/Main/ITMDynamicEngine_PlainVoxelArray.cpp
+    Engines/Main/MultiEngine.tpp
+    Engines/Main/DynamicEngine.tpp
+    Engines/Main/DynamicEngine_VoxelBlockHash.cpp
+    Engines/Main/DynamicEngine_PlainVoxelArray.cpp
     )
 
 set(ITMLIB_CORE_HEADERS
-    Engines/Main/ITMBasicEngine.h
-    Engines/Main/ITMBasicSurfelEngine.h
-    Engines/Main/ITMDenseMapper.h
-    Engines/Main/ITMDenseSurfelMapper.h
+    Engines/Main/BasicEngine.h
+    Engines/Main/BasicSurfelEngine.h
+    Engines/Main/DenseMapper.h
+    Engines/Main/DenseSurfelMapper.h
     Engines/Main/DenseDynamicMapper.h
-    Engines/Main/ITMMainEngine.h
-    Engines/Main/ITMMultiEngine.h
-    Engines/Main/ITMTrackingController.h
-    Engines/Main/ITMDynamicEngine.h
+    Engines/Main/MainEngine.h
+    Engines/Main/MultiEngine.h
+    Engines/Main/TrackingController.h
+    Engines/Main/DynamicEngine.h
     Engines/Main/MianEngineFactory.h
     )
 

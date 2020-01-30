@@ -3,11 +3,11 @@
 #include "../../ITMLibDefines.h"
 //Note: ".tpp" files have to be included for all explicit instantiations in order to link properly
 
-#include "../../Engines/Main/ITMBasicEngine.tpp"
-#include "../../Engines/Main/ITMBasicSurfelEngine.tpp"
-#include "../../Engines/Main/ITMMultiEngine.tpp"
-#include "../../Engines/Main/ITMDenseMapper.tpp"
-#include "../../Engines/Main/ITMDenseSurfelMapper.tpp"
+#include "../../Engines/Main/BasicEngine.tpp"
+#include "../../Engines/Main/BasicSurfelEngine.tpp"
+#include "../../Engines/Main/MultiEngine.tpp"
+#include "../../Engines/Main/DenseMapper.tpp"
+#include "../../Engines/Main/DenseSurfelMapper.tpp"
 #include "../../Engines/Meshing/CPU/ITMMeshingEngine_CPU.tpp"
 #include "../../Engines/Meshing/CPU/ITMMultiMeshingEngine_CPU.tpp"
 #include "../../Engines/MultiScene/ITMMapGraphManager.tpp"
@@ -26,11 +26,11 @@
 namespace ITMLib
 {
 	//voxel fusion
-	template class ITMBasicEngine<ITMVoxel, VoxelBlockHash>;
-	template class ITMBasicSurfelEngine<ITMSurfel_grey>;
-	template class ITMBasicSurfelEngine<ITMSurfel_rgb>;
-	template class ITMMultiEngine<ITMVoxel, VoxelBlockHash>;
-	template class ITMDenseMapper<ITMVoxel, VoxelBlockHash>;
+	template class BasicEngine<ITMVoxel, VoxelBlockHash>;
+	template class BasicSurfelEngine<ITMSurfel_grey>;
+	template class BasicSurfelEngine<ITMSurfel_rgb>;
+	template class MultiEngine<ITMVoxel, VoxelBlockHash>;
+	template class DenseMapper<ITMVoxel, VoxelBlockHash>;
 	template class ITMVoxelMapGraphManager<ITMVoxel, VoxelBlockHash>;
 
 	template class ITMMeshingEngine_CPU<ITMVoxel, VoxelBlockHash>;
@@ -38,7 +38,7 @@ namespace ITMLib
 	template class ITMSwappingEngine_CPU<ITMVoxel, VoxelBlockHash>;
 
 	//surfel fusion
-	template class ITMDenseSurfelMapper<ITMSurfel_grey>;
-	template class ITMDenseSurfelMapper<ITMSurfel_rgb>;
+	template class DenseSurfelMapper<ITMSurfel_grey>;
+	template class DenseSurfelMapper<ITMSurfel_rgb>;
 
 }

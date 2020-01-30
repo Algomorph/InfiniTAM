@@ -2,9 +2,9 @@
 
 #pragma once
 
-#include "ITMDenseSurfelMapper.h"
-#include "ITMMainEngine.h"
-#include "ITMTrackingController.h"
+#include "DenseSurfelMapper.h"
+#include "MainEngine.h"
+#include "TrackingController.h"
 #include "../LowLevel/Interface/ITMLowLevelEngine.h"
 #include "../ViewBuilding/Interface/ITMViewBuilder.h"
 #include "../Visualization/Interface/SurfelVisualizationEngine.h"
@@ -15,7 +15,7 @@
 namespace ITMLib
 {
 	template <typename TSurfel>
-	class ITMBasicSurfelEngine : public ITMMainEngine
+	class BasicSurfelEngine : public MainEngine
 	{
 	private:
 		bool trackingActive, fusionActive, mainProcessingActive, trackingInitialised;
@@ -25,8 +25,8 @@ namespace ITMLib
 		SurfelVisualizationEngine<TSurfel> *surfelVisualizationEngine;
 
 		ITMViewBuilder *viewBuilder;
-		ITMDenseSurfelMapper<TSurfel> *denseSurfelMapper;
-		ITMTrackingController *trackingController;
+		DenseSurfelMapper<TSurfel> *denseSurfelMapper;
+		TrackingController *trackingController;
 
 		ITMSurfelScene<TSurfel> *surfelScene;
 		ITMSurfelRenderState *surfelRenderState_live;
@@ -83,7 +83,7 @@ namespace ITMLib
 			Omitting a separate image size for the depth images
 			will assume same resolution as for the RGB images.
 		*/
-		ITMBasicSurfelEngine(const ITMRGBDCalib& calib, Vector2i imgSize_rgb, Vector2i imgSize_d);
-		~ITMBasicSurfelEngine();
+		BasicSurfelEngine(const ITMRGBDCalib& calib, Vector2i imgSize_rgb, Vector2i imgSize_d);
+		~BasicSurfelEngine();
 	};
 }

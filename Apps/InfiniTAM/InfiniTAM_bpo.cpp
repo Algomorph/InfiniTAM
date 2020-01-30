@@ -29,10 +29,10 @@
 
 //ITMLib
 #include "../../ITMLib/ITMLibDefines.h"
-#include "../../ITMLib/Engines/Main/ITMBasicEngine.h"
-#include "../../ITMLib/Engines/Main/ITMBasicSurfelEngine.h"
-#include "../../ITMLib/Engines/Main/ITMMultiEngine.h"
-#include "../../ITMLib/Engines/Main/ITMDynamicEngine.h"
+#include "../../ITMLib/Engines/Main/BasicEngine.h"
+#include "../../ITMLib/Engines/Main/BasicSurfelEngine.h"
+#include "../../ITMLib/Engines/Main/MultiEngine.h"
+#include "../../ITMLib/Engines/Main/DynamicEngine.h"
 #include "../../ITMLib/Engines/Main/MianEngineFactory.h"
 
 //local
@@ -129,10 +129,10 @@ int main(int argc, char** argv) {
 // region ================================ BUILD MAIN ENGINE ========================================================
 		configuration::IndexingMethod chosenIndexingMethod = configuration.indexing_method;
 		ITMDynamicFusionLogger_Interface& logger = GetLogger(chosenIndexingMethod);
-		ITMMainEngine* mainEngine = BuildMainEngine(imageSource->getCalib(),
-		                                            imageSource->getRGBImageSize(),
-		                                            imageSource->getDepthImageSize(),
-		                                            false);
+		MainEngine* mainEngine = BuildMainEngine(imageSource->getCalib(),
+		                                         imageSource->getRGBImageSize(),
+		                                         imageSource->getDepthImageSize(),
+		                                         false);
 
 // endregion ===========================================================================================================
 // region =========================== SET LOGGER / VISUALIZERS WITH CLI ARGUMENTS ======================================

@@ -11,7 +11,7 @@ namespace ITMLib
 	/** \brief
 	*/
 	template<class TVoxel, class TIndex>
-	class ITMDenseMapper
+	class DenseMapper
 	{
 	private:
 		SceneReconstructionEngine<TVoxel,TIndex> *sceneRecoEngine;
@@ -32,7 +32,7 @@ namespace ITMLib
 		    Ommitting a separate image size for the depth images
 		    will assume same resolution as for the RGB images.
 		*/
-		explicit ITMDenseMapper(const TIndex& index);
-		~ITMDenseMapper();
+		explicit DenseMapper(const TIndex& index);
+		~DenseMapper();
 	};
 }

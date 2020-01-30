@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "ITMMainEngine.h"
-#include "ITMTrackingController.h"
+#include "MainEngine.h"
+#include "TrackingController.h"
 #include "../LowLevel/Interface/ITMLowLevelEngine.h"
 #include "../ViewBuilding/Interface/ITMViewBuilder.h"
 #include "../../Objects/Misc/ITMIMUCalibrator.h"
@@ -22,7 +22,7 @@ namespace ITMLib
 	/** \brief
 	*/
 	template <typename TVoxel, typename TIndex>
-	class ITMMultiEngine : public ITMMainEngine
+	class MultiEngine : public MainEngine
 	{
 	private:
 
@@ -33,10 +33,10 @@ namespace ITMLib
 		ITMMultiMeshingEngine<TVoxel, TIndex> *meshingEngine;
 
 		ITMViewBuilder *viewBuilder;
-		ITMTrackingController *trackingController;
+		TrackingController *trackingController;
 		ITMCameraTracker *tracker;
 		ITMIMUCalibrator *imuCalibrator;
-		ITMDenseMapper<TVoxel, TIndex> *denseMapper;
+		DenseMapper<TVoxel, TIndex> *denseMapper;
 
 		FernRelocLib::Relocaliser<float> *relocaliser;
 
@@ -105,7 +105,7 @@ namespace ITMLib
 			Ommitting a separate image size for the depth images
 			will assume same resolution as for the RGB images.
 		*/
-		ITMMultiEngine(const ITMRGBDCalib& calib, Vector2i imgSize_rgb, Vector2i imgSize_d);
-		~ITMMultiEngine(void);
+		MultiEngine(const ITMRGBDCalib& calib, Vector2i imgSize_rgb, Vector2i imgSize_d);
+		~MultiEngine(void);
 	};
 }

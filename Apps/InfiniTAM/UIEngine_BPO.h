@@ -7,7 +7,7 @@
 #include "../../InputSource/ImageSourceEngine.h"
 #include "../../InputSource/IMUSourceEngine.h"
 #include "../../InputSource/FFMPEGWriter.h"
-#include "../../ITMLib/Engines/Main/ITMMainEngine.h"
+#include "../../ITMLib/Engines/Main/MainEngine.h"
 #include "../../ITMLib/Objects/Tracking/ITMTrackingState.h"
 #include "../../ITMLib/Utils/Configuration.h"
 #include "../../ORUtils/FileUtils.h"
@@ -32,14 +32,14 @@ private:
 
 	struct UIColourMode {
 		const char* name;
-		ITMLib::ITMMainEngine::GetImageType type;
+		ITMLib::MainEngine::GetImageType type;
 
-		UIColourMode(const char* _name, ITMLib::ITMMainEngine::GetImageType _type)
+		UIColourMode(const char* _name, ITMLib::MainEngine::GetImageType _type)
 				: name(_name), type(_type) {}
 	};
 	std::vector<UIColourMode> colourModes_main, colourModes_freeview;
 	UIColourMode colourMode_stepByStep = UIColourMode("step_by_step",
-	                                                  ITMLib::ITMMainEngine::InfiniTAM_IMAGE_STEP_BY_STEP);
+	                                                  ITMLib::MainEngine::InfiniTAM_IMAGE_STEP_BY_STEP);
 	int currentColourMode;
 
 	int autoIntervalFrameStart;
@@ -50,7 +50,7 @@ private:
 
 	InputSource::ImageSourceEngine* imageSource;
 	InputSource::IMUSourceEngine* imuSource;
-	ITMLib::ITMMainEngine* mainEngine;
+	ITMLib::MainEngine* mainEngine;
 
 	StopWatchInterface* timer_instant;
 	StopWatchInterface* timer_average;
@@ -61,7 +61,7 @@ private:
 	Vector2i winSize;
 	uint textureId[NUM_WIN];
 	ITMUChar4Image* outImage[NUM_WIN];
-	ITMLib::ITMMainEngine::GetImageType outImageType[NUM_WIN];
+	ITMLib::MainEngine::GetImageType outImageType[NUM_WIN];
 
 	ITMUChar4Image* inputRGBImage;
 	ITMShortImage* inputRawDepthImage;
@@ -110,7 +110,7 @@ public:
 	ITMLib::configuration::IndexingMethod indexingMethod;
 
 	void Initialize(int& argc, char** argv, InputSource::ImageSourceEngine* imageSource, InputSource::IMUSourceEngine* imuSource,
-	                ITMLib::ITMMainEngine* mainEngine, const ITMLib::configuration::Configuration& configuration,
+	                ITMLib::MainEngine* mainEngine, const ITMLib::configuration::Configuration& configuration,
 	                ITMLib::ITMDynamicFusionLogger_Interface* logger);
 	void Shutdown();
 

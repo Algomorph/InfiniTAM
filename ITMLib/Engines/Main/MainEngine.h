@@ -44,7 +44,7 @@ namespace ITMLib
 	    To access the internal information, look at the member
 	    variables @ref trackingState and @ref scene.
 	*/
-	class ITMMainEngine
+	class MainEngine
 	{
 	public:
 		enum GetImageType
@@ -102,6 +102,6 @@ namespace ITMLib
 
 
 
-		virtual ~ITMMainEngine() {}
+		virtual ~MainEngine() {}
 	};
 }

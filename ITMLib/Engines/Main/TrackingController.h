@@ -14,7 +14,7 @@ namespace ITMLib
 {
 	/** \brief
 	*/
-	class ITMTrackingController
+	class TrackingController
 	{
 	private:
 		const configuration::Configuration *settings;
@@ -110,7 +110,7 @@ namespace ITMLib
 			}
 		}
 
-		ITMTrackingController(ITMCameraTracker* tracker)
+		TrackingController(ITMCameraTracker* tracker)
 		{
 			this->settings = &configuration::get();
 			this->tracker = tracker;
@@ -122,7 +122,7 @@ namespace ITMLib
 		}
 
 		// Suppress the default copy constructor and assignment operator
-		ITMTrackingController(const ITMTrackingController&);
-		ITMTrackingController& operator=(const ITMTrackingController&);
+		TrackingController(const TrackingController&);
+		TrackingController& operator=(const TrackingController&);
 	};
 }

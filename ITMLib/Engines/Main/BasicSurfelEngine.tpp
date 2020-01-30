@@ -1,6 +1,6 @@
 // Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
 
-#include "ITMBasicSurfelEngine.h"
+#include "BasicSurfelEngine.h"
 
 #include "../LowLevel/ITMLowLevelEngineFactory.h"
 #include "../ViewBuilding/ITMViewBuilderFactory.h"
@@ -15,7 +15,7 @@
 using namespace ITMLib;
 
 template<typename TSurfel>
-ITMBasicSurfelEngine<TSurfel>::ITMBasicSurfelEngine(const ITMRGBDCalib& calib, Vector2i imgSize_rgb, Vector2i imgSize_d) {
+BasicSurfelEngine<TSurfel>::BasicSurfelEngine(const ITMRGBDCalib& calib, Vector2i imgSize_rgb, Vector2i imgSize_d) {
 	auto& settings = configuration::get();
 
 	if ((imgSize_d.x == -1) || (imgSize_d.y == -1)) imgSize_d = imgSize_rgb;
@@ -29,13 +29,13 @@ ITMBasicSurfelEngine<TSurfel>::ITMBasicSurfelEngine(const ITMRGBDCalib& calib, V
 	viewBuilder = ITMViewBuilderFactory::MakeViewBuilder(calib, deviceType);
 	surfelVisualizationEngine = SurfelVisualizationEngineFactory::Build<TSurfel>(deviceType);
 
-	denseSurfelMapper = new ITMDenseSurfelMapper<TSurfel>(imgSize_d, deviceType);
+	denseSurfelMapper = new DenseSurfelMapper<TSurfel>(imgSize_d, deviceType);
 	this->surfelScene->Reset();
 
 	imuCalibrator = new ITMIMUCalibrator_iPad();
 	tracker = ITMCameraTrackerFactory::Instance().Make(imgSize_rgb, imgSize_d, lowLevelEngine, imuCalibrator,
 	                                                   &settings.general_voxel_volume_parameters);
-	trackingController = new ITMTrackingController(tracker);
+	trackingController = new TrackingController(tracker);
 
 	Vector2i trackedImageSize = trackingController->GetTrackedImageSize(imgSize_rgb, imgSize_d);
 
@@ -65,7 +65,7 @@ ITMBasicSurfelEngine<TSurfel>::ITMBasicSurfelEngine(const ITMRGBDCalib& calib, V
 }
 
 template<typename TSurfel>
-ITMBasicSurfelEngine<TSurfel>::~ITMBasicSurfelEngine() {
+BasicSurfelEngine<TSurfel>::~BasicSurfelEngine() {
 	delete surfelRenderState_live;
 	delete surfelRenderState_freeview;
 
@@ -90,22 +90,22 @@ ITMBasicSurfelEngine<TSurfel>::~ITMBasicSurfelEngine() {
 }
 
 template<typename TSurfel>
-void ITMBasicSurfelEngine<TSurfel>::SaveSceneToMesh(const char* objFileName) {
+void BasicSurfelEngine<TSurfel>::SaveSceneToMesh(const char* objFileName) {
 	// Not yet implemented for surfel scenes
 }
 
 template<typename TSurfel>
-void ITMBasicSurfelEngine<TSurfel>::SaveToFile() {
+void BasicSurfelEngine<TSurfel>::SaveToFile() {
 	// Not yet implemented for surfel scenes
 }
 
 template<typename TSurfel>
-void ITMBasicSurfelEngine<TSurfel>::LoadFromFile() {
+void BasicSurfelEngine<TSurfel>::LoadFromFile() {
 	// Not yet implemented for surfel scenes
 }
 
 template<typename TSurfel>
-void ITMBasicSurfelEngine<TSurfel>::resetAll() {
+void BasicSurfelEngine<TSurfel>::resetAll() {
 	surfelScene->Reset();
 	trackingState->Reset();
 }
@@ -185,8 +185,8 @@ static void QuaternionFromRotationMatrix(const double *matrix, double *q) {
 
 template<typename TSurfel>
 ITMTrackingState::TrackingResult
-ITMBasicSurfelEngine<TSurfel>::ProcessFrame(ITMUChar4Image* rgbImage, ITMShortImage* rawDepthImage,
-                                            ITMIMUMeasurement* imuMeasurement) {
+BasicSurfelEngine<TSurfel>::ProcessFrame(ITMUChar4Image* rgbImage, ITMShortImage* rawDepthImage,
+                                         ITMIMUMeasurement* imuMeasurement) {
 	auto& settings = configuration::get();
 	// prepare image and turn it into a depth image
 	if (imuMeasurement == nullptr)
@@ -298,13 +298,13 @@ ITMBasicSurfelEngine<TSurfel>::ProcessFrame(ITMUChar4Image* rgbImage, ITMShortIm
 }
 
 template<typename TSurfel>
-Vector2i ITMBasicSurfelEngine<TSurfel>::GetImageSize(void) const {
+Vector2i BasicSurfelEngine<TSurfel>::GetImageSize(void) const {
 	return surfelRenderState_live->GetIndexImage()->noDims;
 }
 
 template<typename TSurfel>
 typename SurfelVisualizationEngine<TSurfel>::RenderImageType
-ITMBasicSurfelEngine<TSurfel>::ToSurfelImageType(GetImageType getImageType) {
+BasicSurfelEngine<TSurfel>::ToSurfelImageType(GetImageType getImageType) {
 	switch (getImageType) {
 		case InfiniTAM_IMAGE_COLOUR_FROM_VOLUME:
 		case InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_VOLUME:
@@ -321,8 +321,8 @@ ITMBasicSurfelEngine<TSurfel>::ToSurfelImageType(GetImageType getImageType) {
 }
 
 template<typename TSurfel>
-void ITMBasicSurfelEngine<TSurfel>::GetImage(ITMUChar4Image* out, GetImageType getImageType, ORUtils::SE3Pose* pose,
-                                             ITMIntrinsics* intrinsics) {
+void BasicSurfelEngine<TSurfel>::GetImage(ITMUChar4Image* out, GetImageType getImageType, ORUtils::SE3Pose* pose,
+                                          ITMIntrinsics* intrinsics) {
 
 	auto& settings = configuration::get();
 	if (view == nullptr) return;
@@ -330,21 +330,21 @@ void ITMBasicSurfelEngine<TSurfel>::GetImage(ITMUChar4Image* out, GetImageType g
 	out->Clear();
 
 	switch (getImageType) {
-		case ITMBasicSurfelEngine::InfiniTAM_IMAGE_ORIGINAL_RGB:
+		case BasicSurfelEngine::InfiniTAM_IMAGE_ORIGINAL_RGB:
 			out->ChangeDims(view->rgb->noDims);
 			if (settings.device_type == MEMORYDEVICE_CUDA)
 				out->SetFrom(view->rgb, MemoryCopyDirection::CUDA_TO_CPU);
 			else out->SetFrom(view->rgb, MemoryCopyDirection::CPU_TO_CPU);
 			break;
-		case ITMBasicSurfelEngine::InfiniTAM_IMAGE_ORIGINAL_DEPTH:
+		case BasicSurfelEngine::InfiniTAM_IMAGE_ORIGINAL_DEPTH:
 			out->ChangeDims(view->depth->noDims);
 			if (settings.device_type == MEMORYDEVICE_CUDA) view->depth->UpdateHostFromDevice();
 			IVisualizationEngine::DepthToUchar4(out, view->depth);
 			break;
-		case ITMBasicSurfelEngine::InfiniTAM_IMAGE_SCENERAYCAST:
-		case ITMBasicSurfelEngine::InfiniTAM_IMAGE_COLOUR_FROM_VOLUME:
-		case ITMBasicSurfelEngine::InfiniTAM_IMAGE_COLOUR_FROM_NORMAL:
-		case ITMBasicSurfelEngine::InfiniTAM_IMAGE_COLOUR_FROM_CONFIDENCE: {
+		case BasicSurfelEngine::InfiniTAM_IMAGE_SCENERAYCAST:
+		case BasicSurfelEngine::InfiniTAM_IMAGE_COLOUR_FROM_VOLUME:
+		case BasicSurfelEngine::InfiniTAM_IMAGE_COLOUR_FROM_NORMAL:
+		case BasicSurfelEngine::InfiniTAM_IMAGE_COLOUR_FROM_CONFIDENCE: {
 			const bool useRadii = true;
 			surfelVisualizationEngine->FindSurface(surfelScene, trackingState->pose_d, &view->calib.intrinsics_d,
 			                                       useRadii, USR_DONOTRENDER, surfelRenderState_live);
@@ -353,10 +353,10 @@ void ITMBasicSurfelEngine<TSurfel>::GetImage(ITMUChar4Image* out, GetImageType g
 			out->UpdateHostFromDevice();
 			break;
 		}
-		case ITMBasicSurfelEngine::InfiniTAM_IMAGE_FREECAMERA_SHADED:
-		case ITMBasicSurfelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_VOLUME:
-		case ITMBasicSurfelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_NORMAL:
-		case ITMBasicSurfelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_CONFIDENCE: {
+		case BasicSurfelEngine::InfiniTAM_IMAGE_FREECAMERA_SHADED:
+		case BasicSurfelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_VOLUME:
+		case BasicSurfelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_NORMAL:
+		case BasicSurfelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_CONFIDENCE: {
 			if (!surfelRenderState_freeview)
 				surfelRenderState_freeview = new ITMSurfelRenderState(view->depth->noDims,
 				                                                      surfelScene->GetParams().supersampling_factor);
@@ -368,7 +368,7 @@ void ITMBasicSurfelEngine<TSurfel>::GetImage(ITMUChar4Image* out, GetImageType g
 			out->UpdateHostFromDevice();
 			break;
 		}
-		case ITMMainEngine::InfiniTAM_IMAGE_UNKNOWN:
+		case MainEngine::InfiniTAM_IMAGE_UNKNOWN:
 			break;
 		case InfiniTAM_IMAGE_FREECAMERA_CANONICAL:break;
 		case InfiniTAM_IMAGE_STEP_BY_STEP:break;
@@ -376,19 +376,19 @@ void ITMBasicSurfelEngine<TSurfel>::GetImage(ITMUChar4Image* out, GetImageType g
 }
 
 template<typename TSurfel>
-void ITMBasicSurfelEngine<TSurfel>::turnOnTracking() { trackingActive = true; }
+void BasicSurfelEngine<TSurfel>::turnOnTracking() { trackingActive = true; }
 
 template<typename TSurfel>
-void ITMBasicSurfelEngine<TSurfel>::turnOffTracking() { trackingActive = false; }
+void BasicSurfelEngine<TSurfel>::turnOffTracking() { trackingActive = false; }
 
 template<typename TSurfel>
-void ITMBasicSurfelEngine<TSurfel>::turnOnIntegration() { fusionActive = true; }
+void BasicSurfelEngine<TSurfel>::turnOnIntegration() { fusionActive = true; }
 
 template<typename TSurfel>
-void ITMBasicSurfelEngine<TSurfel>::turnOffIntegration() { fusionActive = false; }
+void BasicSurfelEngine<TSurfel>::turnOffIntegration() { fusionActive = false; }
 
 template<typename TSurfel>
-void ITMBasicSurfelEngine<TSurfel>::turnOnMainProcessing() { mainProcessingActive = true; }
+void BasicSurfelEngine<TSurfel>::turnOnMainProcessing() { mainProcessingActive = true; }
 
 template<typename TSurfel>
-void ITMBasicSurfelEngine<TSurfel>::turnOffMainProcessing() { mainProcessingActive = false; }
+void BasicSurfelEngine<TSurfel>::turnOffMainProcessing() { mainProcessingActive = false; }

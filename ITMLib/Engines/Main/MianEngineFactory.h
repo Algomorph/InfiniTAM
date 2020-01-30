@@ -18,50 +18,50 @@
 
 #include "../../../ORUtils/MemoryDeviceType.h"
 #include "../../../InputSource/ImageSourceEngine.h"
-#include "ITMBasicEngine.h"
-#include "ITMMultiEngine.h"
-#include "ITMDynamicEngine.h"
-#include "ITMBasicSurfelEngine.h"
-#include "ITMMainEngine.h"
+#include "BasicEngine.h"
+#include "MultiEngine.h"
+#include "DynamicEngine.h"
+#include "BasicSurfelEngine.h"
+#include "MainEngine.h"
 
 namespace ITMLib{
 
-ITMMainEngine* BuildMainEngine(const ITMRGBDCalib& calib, Vector2i imgSize_rgb, Vector2i imgSize_d, bool fix_camera = false){
+MainEngine* BuildMainEngine(const ITMRGBDCalib& calib, Vector2i imgSize_rgb, Vector2i imgSize_d, bool fix_camera = false){
 	auto& settings = configuration::get();
 	configuration::IndexingMethod chosenIndexingMethod = settings.indexing_method;
-	ITMMainEngine* mainEngine = nullptr;
+	MainEngine* mainEngine = nullptr;
 
 	switch (settings.library_mode) {
 		case configuration::LIBMODE_BASIC:
 			switch (chosenIndexingMethod) {
 				case configuration::INDEX_HASH:
-					mainEngine = new ITMBasicEngine<ITMVoxel, VoxelBlockHash>(calib, imgSize_rgb, imgSize_d);
+					mainEngine = new BasicEngine<ITMVoxel, VoxelBlockHash>(calib, imgSize_rgb, imgSize_d);
 					break;
 				case configuration::INDEX_ARRAY:
-					mainEngine = new ITMBasicEngine<ITMVoxel, PlainVoxelArray>(calib, imgSize_rgb, imgSize_d);
+					mainEngine = new BasicEngine<ITMVoxel, PlainVoxelArray>(calib, imgSize_rgb, imgSize_d);
 					break;
 			}
 			break;
 		case configuration::LIBMODE_BASIC_SURFELS:
-			mainEngine = new ITMBasicSurfelEngine<ITMSurfelT>(calib, imgSize_rgb, imgSize_d);
+			mainEngine = new BasicSurfelEngine<ITMSurfelT>(calib, imgSize_rgb, imgSize_d);
 			break;
 		case configuration::LIBMODE_LOOPCLOSURE:
 			switch (chosenIndexingMethod) {
 				case configuration::INDEX_HASH:
-					mainEngine = new ITMMultiEngine<ITMVoxel, VoxelBlockHash>(calib, imgSize_rgb, imgSize_d);
+					mainEngine = new MultiEngine<ITMVoxel, VoxelBlockHash>(calib, imgSize_rgb, imgSize_d);
 					break;
 				case configuration::INDEX_ARRAY:
-					mainEngine = new ITMMultiEngine<ITMVoxel, PlainVoxelArray>(calib, imgSize_rgb, imgSize_d);
+					mainEngine = new MultiEngine<ITMVoxel, PlainVoxelArray>(calib, imgSize_rgb, imgSize_d);
 					break;
 			}
 			break;
 		case configuration::LIBMODE_DYNAMIC:
 			switch (chosenIndexingMethod) {
 				case configuration::INDEX_HASH:
-					mainEngine = new ITMDynamicEngine<ITMVoxel, ITMWarp, VoxelBlockHash>(calib, imgSize_rgb, imgSize_d);
+					mainEngine = new DynamicEngine<ITMVoxel, ITMWarp, VoxelBlockHash>(calib, imgSize_rgb, imgSize_d);
 					break;
 				case configuration::INDEX_ARRAY:
-					mainEngine = new ITMDynamicEngine<ITMVoxel, ITMWarp, PlainVoxelArray>(calib, imgSize_rgb, imgSize_d);
+					mainEngine = new DynamicEngine<ITMVoxel, ITMWarp, PlainVoxelArray>(calib, imgSize_rgb, imgSize_d);
 					break;
 			}
 			break;

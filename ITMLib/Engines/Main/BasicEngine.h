@@ -2,9 +2,9 @@
 
 #pragma once
 
-#include "ITMDenseMapper.h"
-#include "ITMMainEngine.h"
-#include "ITMTrackingController.h"
+#include "DenseMapper.h"
+#include "MainEngine.h"
+#include "TrackingController.h"
 #include "../LowLevel/Interface/ITMLowLevelEngine.h"
 #include "../Meshing/Interface/ITMMeshingEngine.h"
 #include "../ViewBuilding/Interface/ITMViewBuilder.h"
@@ -16,7 +16,7 @@
 namespace ITMLib
 {
 	template <typename TVoxel, typename TIndex>
-	class ITMBasicEngine : public ITMMainEngine
+	class BasicEngine : public MainEngine
 	{
 	private:
 		bool trackingActive, fusionActive, mainProcessingActive, trackingInitialised;
@@ -28,8 +28,8 @@ namespace ITMLib
 		ITMMeshingEngine<TVoxel, TIndex> *meshingEngine;
 
 		ITMViewBuilder *viewBuilder;
-		ITMDenseMapper<TVoxel, TIndex> *denseMapper;
-		ITMTrackingController *trackingController;
+		DenseMapper<TVoxel, TIndex> *denseMapper;
+		TrackingController *trackingController;
 
 		ITMVoxelVolume<TVoxel, TIndex> *scene;
 		ITMRenderState *renderState_live;
@@ -87,7 +87,7 @@ namespace ITMLib
 			Omitting a separate image size for the depth images
 			will assume same resolution as for the RGB images.
 		*/
-		ITMBasicEngine(const ITMRGBDCalib& calib, Vector2i imgSize_rgb, Vector2i imgSize_d);
-		~ITMBasicEngine();
+		BasicEngine(const ITMRGBDCalib& calib, Vector2i imgSize_rgb, Vector2i imgSize_d);
+		~BasicEngine();
 	};
 }

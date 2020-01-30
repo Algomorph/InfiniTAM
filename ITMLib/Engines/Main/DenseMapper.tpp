@@ -1,6 +1,6 @@
 // Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
 
-#include "ITMDenseMapper.h"
+#include "DenseMapper.h"
 
 #include "../Reconstruction/SceneReconstructionEngineFactory.h"
 #include "../Swapping/ITMSwappingEngineFactory.h"
@@ -8,7 +8,7 @@
 using namespace ITMLib;
 
 template<class TVoxel, class TIndex>
-ITMDenseMapper<TVoxel, TIndex>::ITMDenseMapper(const TIndex& index)
+DenseMapper<TVoxel, TIndex>::DenseMapper(const TIndex& index)
 {
 	auto& settings = configuration::get();
 	sceneRecoEngine = SceneReconstructionEngineFactory::MakeSceneReconstructionEngine<TVoxel,TIndex>(settings.device_type);
@@ -18,20 +18,20 @@ ITMDenseMapper<TVoxel, TIndex>::ITMDenseMapper(const TIndex& index)
 }
 
 template<class TVoxel, class TIndex>
-ITMDenseMapper<TVoxel,TIndex>::~ITMDenseMapper()
+DenseMapper<TVoxel,TIndex>::~DenseMapper()
 {
 	delete sceneRecoEngine;
 	delete swappingEngine;
 }
 
 template<class TVoxel, class TIndex>
-void ITMDenseMapper<TVoxel,TIndex>::ResetScene(ITMVoxelVolume<TVoxel,TIndex> *scene) const
+void DenseMapper<TVoxel,TIndex>::ResetScene(ITMVoxelVolume<TVoxel,TIndex> *scene) const
 {
 	sceneRecoEngine->ResetScene(scene);
 }
 
 template<class TVoxel, class TIndex>
-void ITMDenseMapper<TVoxel,TIndex>::ProcessFrame(const ITMView *view, const ITMTrackingState *trackingState, ITMVoxelVolume<TVoxel,TIndex> *scene, ITMRenderState *renderState)
+void DenseMapper<TVoxel,TIndex>::ProcessFrame(const ITMView *view, const ITMTrackingState *trackingState, ITMVoxelVolume<TVoxel,TIndex> *scene, ITMRenderState *renderState)
 {
 	// allocation
 	sceneRecoEngine->AllocateSceneFromDepth(scene, view, trackingState, renderState);
@@ -59,7 +59,7 @@ void ITMDenseMapper<TVoxel,TIndex>::ProcessFrame(const ITMView *view, const ITMT
 }
 
 template<class TVoxel, class TIndex>
-void ITMDenseMapper<TVoxel,TIndex>::UpdateVisibleList(const ITMView *view, const ITMTrackingState *trackingState, ITMVoxelVolume<TVoxel,TIndex> *scene, ITMRenderState *renderState, bool resetVisibleList)
+void DenseMapper<TVoxel,TIndex>::UpdateVisibleList(const ITMView *view, const ITMTrackingState *trackingState, ITMVoxelVolume<TVoxel,TIndex> *scene, ITMRenderState *renderState, bool resetVisibleList)
 {
 	sceneRecoEngine->AllocateSceneFromDepth(scene, view, trackingState, renderState, true, resetVisibleList);
 }

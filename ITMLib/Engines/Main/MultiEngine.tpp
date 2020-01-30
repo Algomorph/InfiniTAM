@@ -1,6 +1,6 @@
 // Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
 
-#include "ITMMultiEngine.h"
+#include "MultiEngine.h"
 
 #include "../LowLevel/ITMLowLevelEngineFactory.h"
 #include "../ViewBuilding/ITMViewBuilderFactory.h"
@@ -25,7 +25,7 @@ static const float F_maxdistattemptreloc = 0.05f;
 static const bool separateThreadGlobalAdjustment = true;
 
 template <typename TVoxel, typename TIndex>
-ITMMultiEngine<TVoxel, TIndex>::ITMMultiEngine(const ITMRGBDCalib& calib, Vector2i imgSize_rgb, Vector2i imgSize_d)
+MultiEngine<TVoxel, TIndex>::MultiEngine(const ITMRGBDCalib& calib, Vector2i imgSize_rgb, Vector2i imgSize_d)
 {
 	if ((imgSize_d.x == -1) || (imgSize_d.y == -1)) imgSize_d = imgSize_rgb;
 
@@ -38,13 +38,13 @@ ITMMultiEngine<TVoxel, TIndex>::ITMMultiEngine(const ITMRGBDCalib& calib, Vector
 
 	tracker = ITMCameraTrackerFactory::Instance().Make(imgSize_rgb, imgSize_d, lowLevelEngine, imuCalibrator,
 	                                                   &settings.general_voxel_volume_parameters);
-	trackingController = new ITMTrackingController(tracker);
+	trackingController = new TrackingController(tracker);
 	trackedImageSize = trackingController->GetTrackedImageSize(imgSize_rgb, imgSize_d);
 
 	mapManager = new ITMVoxelMapGraphManager<TVoxel, TIndex>(visualization_engine, denseMapper, trackedImageSize);
 	mActiveDataManager = new ITMActiveMapManager(mapManager);
 	mActiveDataManager->initiateNewLocalMap(true);
-	denseMapper = new ITMDenseMapper<TVoxel, TIndex>(mapManager->getLocalMap(0)->scene->index);
+	denseMapper = new DenseMapper<TVoxel, TIndex>(mapManager->getLocalMap(0)->scene->index);
 
 	meshingEngine = NULL;
 	if (settings.create_meshing_engine)
@@ -69,7 +69,7 @@ ITMMultiEngine<TVoxel, TIndex>::ITMMultiEngine(const ITMRGBDCalib& calib, Vector
 }
 
 template <typename TVoxel, typename TIndex>
-ITMMultiEngine<TVoxel, TIndex>::~ITMMultiEngine(void)
+MultiEngine<TVoxel, TIndex>::~MultiEngine(void)
 {
 	if (renderState_multiscene != NULL) delete renderState_multiscene;
 
@@ -98,7 +98,7 @@ ITMMultiEngine<TVoxel, TIndex>::~ITMMultiEngine(void)
 }
 
 template <typename TVoxel, typename TIndex>
-void ITMMultiEngine<TVoxel, TIndex>::changeFreeviewLocalMapIdx(ORUtils::SE3Pose *pose, int newIdx)
+void MultiEngine<TVoxel, TIndex>::changeFreeviewLocalMapIdx(ORUtils::SE3Pose *pose, int newIdx)
 {
 	//if ((newIdx < 0) || ((unsigned)newIdx >= mapManager->numLocalMaps())) return;
 
@@ -112,7 +112,7 @@ void ITMMultiEngine<TVoxel, TIndex>::changeFreeviewLocalMapIdx(ORUtils::SE3Pose 
 }
 
 template <typename TVoxel, typename TIndex>
-ITMTrackingState* ITMMultiEngine<TVoxel, TIndex>::GetTrackingState(void)
+ITMTrackingState* MultiEngine<TVoxel, TIndex>::GetTrackingState(void)
 {
 	int idx = mActiveDataManager->findPrimaryLocalMapIdx();
 	if (idx < 0) idx = 0;
@@ -142,7 +142,7 @@ struct TodoListEntry {
 };
 
 template <typename TVoxel, typename TIndex>
-ITMTrackingState::TrackingResult ITMMultiEngine<TVoxel, TIndex>::ProcessFrame(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage, ITMIMUMeasurement *imuMeasurement)
+ITMTrackingState::TrackingResult MultiEngine<TVoxel, TIndex>::ProcessFrame(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage, ITMIMUMeasurement *imuMeasurement)
 {
 	auto& settings = configuration::get();
 	std::vector<TodoListEntry> todoList;
@@ -305,7 +305,7 @@ ITMTrackingState::TrackingResult ITMMultiEngine<TVoxel, TIndex>::ProcessFrame(IT
 }
 
 template <typename TVoxel, typename TIndex>
-void ITMMultiEngine<TVoxel, TIndex>::SaveSceneToMesh(const char *modelFileName)
+void MultiEngine<TVoxel, TIndex>::SaveSceneToMesh(const char *modelFileName)
 {
 	if (meshingEngine == NULL) return;
 
@@ -318,25 +318,25 @@ void ITMMultiEngine<TVoxel, TIndex>::SaveSceneToMesh(const char *modelFileName)
 }
 
 template <typename TVoxel, typename TIndex>
-void ITMMultiEngine<TVoxel, TIndex>::SaveToFile()
+void MultiEngine<TVoxel, TIndex>::SaveToFile()
 {
 
 }
 
 template <typename TVoxel, typename TIndex>
-void ITMMultiEngine<TVoxel, TIndex>::LoadFromFile()
+void MultiEngine<TVoxel, TIndex>::LoadFromFile()
 {
 
 }
 
 template <typename TVoxel, typename TIndex>
-Vector2i ITMMultiEngine<TVoxel, TIndex>::GetImageSize(void) const
+Vector2i MultiEngine<TVoxel, TIndex>::GetImageSize(void) const
 {
 	return trackedImageSize;
 }
 
 template <typename TVoxel, typename TIndex>
-void ITMMultiEngine<TVoxel, TIndex>::GetImage(ITMUChar4Image *out, GetImageType getImageType, ORUtils::SE3Pose *pose, ITMIntrinsics *intrinsics)
+void MultiEngine<TVoxel, TIndex>::GetImage(ITMUChar4Image *out, GetImageType getImageType, ORUtils::SE3Pose *pose, ITMIntrinsics *intrinsics)
 {
 	if (view == NULL) return;
 	auto& settings = configuration::get();
@@ -345,21 +345,21 @@ void ITMMultiEngine<TVoxel, TIndex>::GetImage(ITMUChar4Image *out, GetImageType 
 
 	switch (getImageType)
 	{
-	case ITMMultiEngine::InfiniTAM_IMAGE_ORIGINAL_RGB:
+	case MultiEngine::InfiniTAM_IMAGE_ORIGINAL_RGB:
 		out->ChangeDims(view->rgb->noDims);
 		if (settings.device_type == MEMORYDEVICE_CUDA)
 			out->SetFrom(view->rgb, MemoryCopyDirection::CUDA_TO_CPU);
 		else out->SetFrom(view->rgb, MemoryCopyDirection::CPU_TO_CPU);
 		break;
-	case ITMMultiEngine::InfiniTAM_IMAGE_ORIGINAL_DEPTH:
+	case MultiEngine::InfiniTAM_IMAGE_ORIGINAL_DEPTH:
 		out->ChangeDims(view->depth->noDims);
 		if (settings.device_type == MEMORYDEVICE_CUDA) view->depth->UpdateHostFromDevice();
 		VisualizationEngine<TVoxel, TIndex>::DepthToUchar4(out, view->depth);
 		break;
-    case ITMMultiEngine::InfiniTAM_IMAGE_COLOUR_FROM_VOLUME: //TODO: add colour rendering
-	case ITMMultiEngine::InfiniTAM_IMAGE_SCENERAYCAST:
-	case ITMMultiEngine::InfiniTAM_IMAGE_COLOUR_FROM_NORMAL:
-	case ITMMultiEngine::InfiniTAM_IMAGE_COLOUR_FROM_CONFIDENCE:
+    case MultiEngine::InfiniTAM_IMAGE_COLOUR_FROM_VOLUME: //TODO: add colour rendering
+	case MultiEngine::InfiniTAM_IMAGE_SCENERAYCAST:
+	case MultiEngine::InfiniTAM_IMAGE_COLOUR_FROM_NORMAL:
+	case MultiEngine::InfiniTAM_IMAGE_COLOUR_FROM_CONFIDENCE:
 	{
 		int VisualizationLocalMapIdx = mActiveDataManager->findBestVisualizationLocalMapIdx();
 		if (VisualizationLocalMapIdx < 0) break; // TODO: clear image? what else to do when tracking is lost?
@@ -373,10 +373,10 @@ void ITMMultiEngine<TVoxel, TIndex>::GetImage(ITMUChar4Image *out, GetImageType 
 		IVisualizationEngine::RenderImageType imageType;
 		switch (getImageType)
 		{
-		case ITMMultiEngine::InfiniTAM_IMAGE_COLOUR_FROM_CONFIDENCE:
+		case MultiEngine::InfiniTAM_IMAGE_COLOUR_FROM_CONFIDENCE:
 			imageType = IVisualizationEngine::RENDER_COLOUR_FROM_CONFIDENCE;
 			break;
-		case ITMMultiEngine::InfiniTAM_IMAGE_COLOUR_FROM_NORMAL:
+		case MultiEngine::InfiniTAM_IMAGE_COLOUR_FROM_NORMAL:
 			imageType = IVisualizationEngine::RENDER_COLOUR_FROM_NORMAL;
 			break;
 		default:
@@ -392,15 +392,15 @@ void ITMMultiEngine<TVoxel, TIndex>::GetImage(ITMUChar4Image *out, GetImageType 
 		else out->SetFrom(srcImage, MemoryCopyDirection::CPU_TO_CPU);
 		break;
 	}
-	case ITMMultiEngine::InfiniTAM_IMAGE_FREECAMERA_SHADED:
-	case ITMMultiEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_VOLUME:
-	case ITMMultiEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_NORMAL:
-	case ITMMultiEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_CONFIDENCE:
+	case MultiEngine::InfiniTAM_IMAGE_FREECAMERA_SHADED:
+	case MultiEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_VOLUME:
+	case MultiEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_NORMAL:
+	case MultiEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_CONFIDENCE:
 	{
 		IVisualizationEngine::RenderImageType type = IVisualizationEngine::RENDER_SHADED_GREYSCALE;
-		if (getImageType == ITMMultiEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_VOLUME) type = IVisualizationEngine::RENDER_COLOUR_FROM_VOLUME;
-		else if (getImageType == ITMMultiEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_NORMAL) type = IVisualizationEngine::RENDER_COLOUR_FROM_NORMAL;
-		else if (getImageType == ITMMultiEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_CONFIDENCE) type = IVisualizationEngine::RENDER_COLOUR_FROM_CONFIDENCE;
+		if (getImageType == MultiEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_VOLUME) type = IVisualizationEngine::RENDER_COLOUR_FROM_VOLUME;
+		else if (getImageType == MultiEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_NORMAL) type = IVisualizationEngine::RENDER_COLOUR_FROM_NORMAL;
+		else if (getImageType == MultiEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_CONFIDENCE) type = IVisualizationEngine::RENDER_COLOUR_FROM_CONFIDENCE;
 
 		if (freeviewLocalMapIdx >= 0){
 			ITMLocalMap<TVoxel, TIndex> *activeData = mapManager->getLocalMap(freeviewLocalMapIdx);
@@ -432,42 +432,42 @@ void ITMMultiEngine<TVoxel, TIndex>::GetImage(ITMUChar4Image *out, GetImageType 
 
 		break;
 	}
-	case ITMMultiEngine::InfiniTAM_IMAGE_UNKNOWN:
+	case MultiEngine::InfiniTAM_IMAGE_UNKNOWN:
 		break;
 	};
 }
 
 template<typename TVoxel, typename TIndex>
-void ITMMultiEngine<TVoxel, TIndex>::turnOnTracking() {
+void MultiEngine<TVoxel, TIndex>::turnOnTracking() {
 	std::cerr << "Tracking on/off switch not available in " __FILE__ "." << std::endl;
 }
 
 template<typename TVoxel, typename TIndex>
-void ITMMultiEngine<TVoxel, TIndex>::turnOffTracking() {
+void MultiEngine<TVoxel, TIndex>::turnOffTracking() {
 	std::cerr << "Tracking on/off switch not available in " __FILE__ "." << std::endl;
 }
 
 template<typename TVoxel, typename TIndex>
-void ITMMultiEngine<TVoxel, TIndex>::turnOnIntegration() {
+void MultiEngine<TVoxel, TIndex>::turnOnIntegration() {
 	std::cerr << "Fusion on/off switch not available in " __FILE__ "." << std::endl;
 }
 
 template<typename TVoxel, typename TIndex>
-void ITMMultiEngine<TVoxel, TIndex>::turnOffIntegration() {
+void MultiEngine<TVoxel, TIndex>::turnOffIntegration() {
 	std::cerr << "Fusion on/off switch not available in " __FILE__ "." << std::endl;
 }
 
 template<typename TVoxel, typename TIndex>
-void ITMMultiEngine<TVoxel, TIndex>::turnOnMainProcessing() {
+void MultiEngine<TVoxel, TIndex>::turnOnMainProcessing() {
 	std::cerr << "Main processing on/off switch not available in " __FILE__ "." << std::endl;
 }
 
 template<typename TVoxel, typename TIndex>
-void ITMMultiEngine<TVoxel, TIndex>::turnOffMainProcessing() {
+void MultiEngine<TVoxel, TIndex>::turnOffMainProcessing() {
 	std::cerr << "Main processing on/off switch not available in " __FILE__ "." << std::endl;
 }
 
 template<typename TVoxel, typename TIndex>
-void ITMMultiEngine<TVoxel, TIndex>::resetAll() {
+void MultiEngine<TVoxel, TIndex>::resetAll() {
 	DIEWITHEXCEPTION_REPORTLOCATION("Not implemented");
 }

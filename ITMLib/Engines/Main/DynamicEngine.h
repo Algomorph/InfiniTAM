@@ -5,8 +5,8 @@
 
 #include <array>
 #include "DenseDynamicMapper.h"
-#include "ITMMainEngine.h"
-#include "ITMTrackingController.h"
+#include "MainEngine.h"
+#include "TrackingController.h"
 #include "../LowLevel/Interface/ITMLowLevelEngine.h"
 #include "../Meshing/Interface/ITMMeshingEngine.h"
 #include "../ViewBuilding/Interface/ITMViewBuilder.h"
@@ -20,7 +20,7 @@
 namespace ITMLib
 {
 	template <typename TVoxel, typename TWarp, typename TIndex>
-	class ITMDynamicEngine : public ITMMainEngine
+	class DynamicEngine : public MainEngine
 	{
 	public:
 
@@ -29,8 +29,8 @@ namespace ITMLib
 			Omitting a separate image size for the depth images
 			will assume same resolution as for the RGB images.
 		*/
-		ITMDynamicEngine(const ITMRGBDCalib& calib, Vector2i imgSize_rgb, Vector2i imgSize_d);
-		~ITMDynamicEngine() override;
+		DynamicEngine(const ITMRGBDCalib& calib, Vector2i imgSize_rgb, Vector2i imgSize_d);
+		~DynamicEngine() override;
 
 		ITMView* GetView() override { return view; }
 		ITMTrackingState* GetTrackingState() override { return trackingState; }
@@ -83,7 +83,7 @@ namespace ITMLib
 
 		ITMViewBuilder* viewBuilder;
 		DenseDynamicMapper<TVoxel, TWarp, TIndex>* denseMapper;
-		ITMTrackingController* cameraTrackingController;
+		TrackingController* cameraTrackingController;
 
 		ITMVoxelVolume<TVoxel, TIndex>* canonicalScene;
 		ITMVoxelVolume<TVoxel, TIndex>** liveScenes;

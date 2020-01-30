@@ -15,8 +15,8 @@
 //  ================================================================
 #include "UIEngine_BPO.h"
 #include "../../ITMLib/Utils/Analytics/ITMBenchmarkUtils.h"
-#include "../../ITMLib/Engines/Main/ITMMultiEngine.h"
-#include "../../ITMLib/Engines/Main/ITMBasicEngine.h"
+#include "../../ITMLib/Engines/Main/MultiEngine.h"
+#include "../../ITMLib/Engines/Main/BasicEngine.h"
 #include "../../ITMLib/Utils/FileIO/ITMDynamicFusionLogger.h"
 
 
@@ -86,7 +86,7 @@ void UIEngine_BPO::GlutDisplayFunction() {
 		{
 			glEnable(GL_TEXTURE_2D);
 			for (int w = 0; w < NUM_WIN; w++) {// Draw each sub window
-				if (uiEngine.outImageType[w] == ITMMainEngine::InfiniTAM_IMAGE_UNKNOWN) continue;
+				if (uiEngine.outImageType[w] == MainEngine::InfiniTAM_IMAGE_UNKNOWN) continue;
 				glBindTexture(GL_TEXTURE_2D, uiEngine.textureId[w]);
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, showImgs[w]->noDims.x, showImgs[w]->noDims.y, 0, GL_RGBA,
 				             GL_UNSIGNED_BYTE, showImgs[w]->GetData(MEMORYDEVICE_CPU));
@@ -291,13 +291,13 @@ void UIEngine_BPO::GlutKeyUpFunction(unsigned char key, int x, int y) {
 			uiEngine.currentColourMode = 0;
 			//TODO: replace this whole if/else block with a separate function, use this function during initialization as well -Greg (Github: Algomorph)
 			if (uiEngine.freeviewActive) {
-				uiEngine.outImageType[0] = ITMMainEngine::InfiniTAM_IMAGE_SCENERAYCAST;
-				uiEngine.outImageType[1] = ITMMainEngine::InfiniTAM_IMAGE_ORIGINAL_DEPTH;
+				uiEngine.outImageType[0] = MainEngine::InfiniTAM_IMAGE_SCENERAYCAST;
+				uiEngine.outImageType[1] = MainEngine::InfiniTAM_IMAGE_ORIGINAL_DEPTH;
 
 				uiEngine.freeviewActive = false;
 			} else {
-				uiEngine.outImageType[0] = ITMMainEngine::InfiniTAM_IMAGE_FREECAMERA_SHADED;
-				uiEngine.outImageType[1] = ITMMainEngine::InfiniTAM_IMAGE_SCENERAYCAST;
+				uiEngine.outImageType[0] = MainEngine::InfiniTAM_IMAGE_FREECAMERA_SHADED;
+				uiEngine.outImageType[1] = MainEngine::InfiniTAM_IMAGE_SCENERAYCAST;
 
 				uiEngine.freeviewPose.SetFrom(uiEngine.mainEngine->GetTrackingState()->pose_d);
 				if (uiEngine.mainEngine->GetView() != nullptr) {
@@ -307,7 +307,7 @@ void UIEngine_BPO::GlutKeyUpFunction(unsigned char key, int x, int y) {
 
 				switch (uiEngine.indexingMethod) {
 					case configuration::INDEX_HASH: {
-						auto* multiEngine = dynamic_cast<ITMMultiEngine<ITMVoxel, VoxelBlockHash>*>(uiEngine.mainEngine);
+						auto* multiEngine = dynamic_cast<MultiEngine<ITMVoxel, VoxelBlockHash>*>(uiEngine.mainEngine);
 						if (multiEngine != nullptr) {
 							int idx = multiEngine->findPrimaryLocalMapIdx();
 							if (idx < 0) idx = 0;
@@ -316,7 +316,7 @@ void UIEngine_BPO::GlutKeyUpFunction(unsigned char key, int x, int y) {
 					}
 						break;
 					case configuration::INDEX_ARRAY:
-						auto* multiEngine = dynamic_cast<ITMMultiEngine<ITMVoxel, PlainVoxelArray>*>(uiEngine.mainEngine);
+						auto* multiEngine = dynamic_cast<MultiEngine<ITMVoxel, PlainVoxelArray>*>(uiEngine.mainEngine);
 						if (multiEngine != nullptr) {
 							int idx = multiEngine->findPrimaryLocalMapIdx();
 							if (idx < 0) idx = 0;
@@ -390,7 +390,7 @@ void UIEngine_BPO::GlutKeyUpFunction(unsigned char key, int x, int y) {
 			break;
 		case '[':
 		case ']': {
-			auto* multiEngineVBH = dynamic_cast<ITMMultiEngine<ITMVoxel, VoxelBlockHash>*>(uiEngine.mainEngine);
+			auto* multiEngineVBH = dynamic_cast<MultiEngine<ITMVoxel, VoxelBlockHash>*>(uiEngine.mainEngine);
 			if (multiEngineVBH != nullptr) {
 				int idx = multiEngineVBH->getFreeviewLocalMapIdx();
 				if (key == '[') idx--;
@@ -398,7 +398,7 @@ void UIEngine_BPO::GlutKeyUpFunction(unsigned char key, int x, int y) {
 				multiEngineVBH->changeFreeviewLocalMapIdx(&(uiEngine.freeviewPose), idx);
 				uiEngine.needsRefresh = true;
 			}
-			auto* multiEnginePVA = dynamic_cast<ITMMultiEngine<ITMVoxel, PlainVoxelArray>*>(uiEngine.mainEngine);
+			auto* multiEnginePVA = dynamic_cast<MultiEngine<ITMVoxel, PlainVoxelArray>*>(uiEngine.mainEngine);
 			if (multiEnginePVA != nullptr) {
 				int idx = multiEnginePVA->getFreeviewLocalMapIdx();
 				if (key == '[') idx--;

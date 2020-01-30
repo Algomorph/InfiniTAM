@@ -11,8 +11,8 @@ using namespace InputSource;
 using namespace ITMLib;
 
 
-void CLIEngine::Initialise(ImageSourceEngine *imageSource, IMUSourceEngine *imuSource, ITMMainEngine *mainEngine,
-	MemoryDeviceType deviceType)
+void CLIEngine::Initialise(ImageSourceEngine *imageSource, IMUSourceEngine *imuSource, MainEngine *mainEngine,
+                           MemoryDeviceType deviceType)
 {
 	this->imageSource = imageSource;
 	this->imuSource = imuSource;

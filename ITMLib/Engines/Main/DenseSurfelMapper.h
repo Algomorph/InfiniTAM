@@ -12,7 +12,7 @@ namespace ITMLib
    * \brief An instance of an instantiation of this class template can be used to produce a dense surfel scene from a sequence of depth and RGB images.
    */
   template <typename TSurfel>
-  class ITMDenseSurfelMapper
+  class DenseSurfelMapper
   {
     //#################### PRIVATE VARIABLES ####################
   private:
@@ -27,20 +27,20 @@ namespace ITMLib
      * \param depthImageSize  The size of the depth images.
      * \param deviceType      The device on which the mapper should operate.
      */
-    ITMDenseSurfelMapper(const Vector2i& depthImageSize, MemoryDeviceType deviceType);
+    DenseSurfelMapper(const Vector2i& depthImageSize, MemoryDeviceType deviceType);
 
     //#################### DESTRUCTOR ####################
   public:
     /**
      * \brief Destroys the mapper.
      */
-    ~ITMDenseSurfelMapper();
+    ~DenseSurfelMapper();
 
     //#################### COPY CONSTRUCTOR & ASSIGNMENT OPERATOR ####################
   private:
     // Deliberately private and unimplemented.
-    ITMDenseSurfelMapper(const ITMDenseSurfelMapper&);
-    ITMDenseSurfelMapper& operator=(const ITMDenseSurfelMapper&);
+    DenseSurfelMapper(const DenseSurfelMapper&);
+    DenseSurfelMapper& operator=(const DenseSurfelMapper&);
 
     //#################### PUBLIC MEMBER FUNCTIONS ####################
   public:
