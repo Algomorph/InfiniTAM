@@ -482,10 +482,6 @@ set(ITMLIB_ENGINES_VIEWBUILDING_SHARED_HEADERS
     )
 ## ======================================== VISUALIATION ENGINES =======================================================
 ##
-set(ITMLIB_ENGINES_VISUALISATION_SOURCES
-    Engines/Visualization/ITMSurfelVisualizationEngineFactory.tpp
-    )
-
 set(ITMLIB_ENGINES_VISUALISATION_HEADERS
     Engines/Visualization/ITMMultiVisualizationEngineFactory.h
     Engines/Visualization/ITMSurfelVisualizationEngineFactory.h

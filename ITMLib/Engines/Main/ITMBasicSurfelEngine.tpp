@@ -27,8 +27,7 @@ ITMBasicSurfelEngine<TSurfel>::ITMBasicSurfelEngine(const ITMRGBDCalib& calib, V
 
 	lowLevelEngine = ITMLowLevelEngineFactory::MakeLowLevelEngine(deviceType);
 	viewBuilder = ITMViewBuilderFactory::MakeViewBuilder(calib, deviceType);
-	surfelVisualisationEngine = ITMSurfelVisualizationEngineFactory<TSurfel>::make_surfel_visualisation_engine(
-			deviceType);
+	surfelVisualisationEngine = ITMSurfelVisualizationEngineFactory::Build<TSurfel>(deviceType);
 
 	denseSurfelMapper = new ITMDenseSurfelMapper<TSurfel>(imgSize_d, deviceType);
 	this->surfelScene->Reset();
@@ -42,18 +41,18 @@ ITMBasicSurfelEngine<TSurfel>::ITMBasicSurfelEngine(const ITMRGBDCalib& calib, V
 
 	surfelRenderState_live = new ITMSurfelRenderState(trackedImageSize,
 	                                                  settings.general_surfel_volume_parameters.supersampling_factor);
-	surfelRenderState_freeview = NULL; //will be created if needed
+	surfelRenderState_freeview = nullptr; //will be created if needed
 
 	trackingState = new ITMTrackingState(trackedImageSize, memoryType);
 	tracker->UpdateInitialPose(trackingState);
 
-	view = NULL; // will be allocated by the view builder
+	view = nullptr; // will be allocated by the view builder
 
 	if (settings.behavior_on_failure == configuration::FAILUREMODE_RELOCALIZE)
 		relocaliser = new FernRelocLib::Relocaliser<float>(imgSize_d, Vector2f(settings.general_voxel_volume_parameters.near_clipping_distance,
 		                                                                       settings.general_voxel_volume_parameters.far_clipping_distance),
 		                                                   0.2f, 500, 4);
-	else relocaliser = NULL;
+	else relocaliser = nullptr;
 
 	kfRaycast = new ITMUChar4Image(imgSize_d, memoryType);
 
@@ -82,11 +81,11 @@ ITMBasicSurfelEngine<TSurfel>::~ITMBasicSurfelEngine() {
 	delete viewBuilder;
 
 	delete trackingState;
-	if (view != NULL) delete view;
+	if (view != nullptr) delete view;
 
 	delete surfelVisualisationEngine;
 
-	if (relocaliser != NULL) delete relocaliser;
+	if (relocaliser != nullptr) delete relocaliser;
 	delete kfRaycast;
 }
 
@@ -190,7 +189,7 @@ ITMBasicSurfelEngine<TSurfel>::ProcessFrame(ITMUChar4Image* rgbImage, ITMShortIm
                                             ITMIMUMeasurement* imuMeasurement) {
 	auto& settings = configuration::get();
 	// prepare image and turn it into a depth image
-	if (imuMeasurement == NULL)
+	if (imuMeasurement == nullptr)
 		viewBuilder->UpdateView(&view, rgbImage, rawDepthImage, settings.use_threshold_filter,
 		                        settings.use_bilateral_filter, false, true);
 	else
@@ -326,7 +325,7 @@ void ITMBasicSurfelEngine<TSurfel>::GetImage(ITMUChar4Image* out, GetImageType g
                                              ITMIntrinsics* intrinsics) {
 
 	auto& settings = configuration::get();
-	if (view == NULL) return;
+	if (view == nullptr) return;
 
 	out->Clear();
 
