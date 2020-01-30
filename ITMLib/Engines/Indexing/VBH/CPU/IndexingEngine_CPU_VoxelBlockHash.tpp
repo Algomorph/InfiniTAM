@@ -19,8 +19,8 @@
 #include "../../../../Objects/Scene/ITMRepresentationAccess.h"
 #include "../../../EditAndCopy/Shared/EditAndCopyEngine_Shared.h"
 #include "../../Shared/IndexingEngine_Shared.h"
+#include "../../../Common/CheckBlockVisibility.h"
 #include "../../../../Utils/Configuration.h"
-
 
 using namespace ITMLib;
 

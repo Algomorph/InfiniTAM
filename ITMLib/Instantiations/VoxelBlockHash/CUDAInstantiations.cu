@@ -17,6 +17,6 @@ namespace ITMLib
 	template class ITMMultiMeshingEngine_CUDA<ITMVoxel, VoxelBlockHash>;
 	template class SceneReconstructionEngine_CUDA<ITMVoxel, VoxelBlockHash>;
 	template class ITMSwappingEngine_CUDA<ITMVoxel, VoxelBlockHash>;
-	template class VisualizationEngine_CUDA<ITMVoxel, VoxelBlockHash>;
+
 	template class MultiVisualizationEngine_CUDA<ITMVoxel, VoxelBlockHash>;
 }

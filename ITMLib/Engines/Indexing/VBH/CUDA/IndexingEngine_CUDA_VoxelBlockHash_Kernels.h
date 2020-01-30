@@ -20,6 +20,7 @@
 #include "../../../../Objects/Scene/ITMGlobalCache.h"
 #include "../../../EditAndCopy/Shared/EditAndCopyEngine_Shared.h"
 #include "../../Shared/IndexingEngine_Shared.h"
+#include "../../../Common/CheckBlockVisibility.h"
 
 namespace {
 //CUDA kernels

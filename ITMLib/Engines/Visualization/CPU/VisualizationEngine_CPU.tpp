@@ -1,11 +1,13 @@
 // Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
 
-#include "VisualizationEngine_CPU.h"
-
-#include "../Shared/VisualizationEngine_Shared.h"
-#include "../../Reconstruction/Shared/SceneReconstructionEngine_Shared.h"
-
+//stdlib
 #include <vector>
+
+//local
+#include "VisualizationEngine_CPU.h"
+#include "../Shared/VisualizationEngine_Shared.h"
+//#include "../../Reconstruction/Shared/SceneReconstructionEngine_Shared.h"
+#include "../../Common/CheckBlockVisibility.h"
 
 using namespace ITMLib;
 

@@ -32,7 +32,7 @@ namespace ITMLib
 	template class ITMMultiEngine<ITMVoxel, VoxelBlockHash>;
 	template class ITMDenseMapper<ITMVoxel, VoxelBlockHash>;
 	template class ITMVoxelMapGraphManager<ITMVoxel, VoxelBlockHash>;
-	template class VisualizationEngine_CPU<ITMVoxel, VoxelBlockHash>;
+
 	template class ITMMeshingEngine_CPU<ITMVoxel, VoxelBlockHash>;
 	template class ITMMultiMeshingEngine_CPU<ITMVoxel, VoxelBlockHash>;
 	template class ITMSwappingEngine_CPU<ITMVoxel, VoxelBlockHash>;

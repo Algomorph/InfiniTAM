@@ -73,8 +73,10 @@ set(ITMLIB_CORE_HEADERS
 
 #======================================= COMMON TO MULTIPLE ENGINES ====================================================
 set(ITMLIB_ENGINES_COMMON_HEADERS
-    Engines/Common/ITMCommonFunctors.h
-    Engines/Common/ITMWarpEnums.h
+    Engines/Common/AllocationTempData.h
+    Engines/Common/CheckBlockVisibility.h
+    Engines/Common/CommonFunctors.h
+    Engines/Common/WarpType.h
     )
 #======================================= LOW-LEVEL ENGINES =============================================================
 ##
@@ -493,6 +495,8 @@ set(ITMLIB_ENGINES_Visualization_CPU_SOURCES
     Engines/Visualization/CPU/MultiVisualizationEngine_CPU.tpp
     Engines/Visualization/CPU/SurfelVisualizationEngine_CPU.tpp
     Engines/Visualization/CPU/VisualizationEngine_CPU.tpp
+    Engines/Visualization/CPU/VisualizationEngine_CPU_VoxelBlockHash.cpp
+    Engines/Visualization/CPU/VisualizationEngine_CPU_PlainVoxelArray.cpp
     )
 
 set(ITMLIB_ENGINES_Visualization_CPU_HEADERS
@@ -507,6 +511,8 @@ set(ITMLIB_ENGINES_Visualization_CUDA_SOURCES
     Engines/Visualization/CUDA/SurfelVisualizationEngine_CUDA.tcu
     Engines/Visualization/CUDA/VisualizationEngine_CUDA.tcu
     Engines/Visualization/CUDA/VisualizationHelpers_CUDA.cu
+    Engines/Visualization/CUDA/VisualizationEngine_CUDA_VoxelBlockHash.cu
+    Engines/Visualization/CUDA/VisualizationEngine_CUDA_PlainVoxelArray.cu
     )
 
 set(ITMLIB_ENGINES_Visualization_CUDA_HEADERS

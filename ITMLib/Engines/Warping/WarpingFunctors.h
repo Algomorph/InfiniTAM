@@ -19,12 +19,12 @@
 #include "../../../ORUtils/MemoryDeviceType.h"
 #include "../../../ORUtils/PlatformIndependence.h"
 #include "../../Utils/ITMVoxelFlags.h"
-#include "../Common/ITMWarpEnums.h"
+#include "../Common/WarpType.h"
 #include "../../Objects/Scene/ITMVoxelVolume.h"
 #include "../../Objects/Scene/ITMTrilinearInterpolation.h"
 #include "../../Utils/Configuration.h"
 #include "../../../ORUtils/PlatformIndependentAtomics.h"
-#include "../Common/ITMCommonFunctors.h"
+#include "../Common/CommonFunctors.h"
 
 namespace ITMLib {
 

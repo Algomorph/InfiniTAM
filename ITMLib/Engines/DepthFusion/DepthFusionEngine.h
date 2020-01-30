@@ -21,8 +21,8 @@
 #include "../../Objects/Scene/ITMVoxelVolume.h"
 #include "../../Objects/Tracking/ITMTrackingState.h"
 #include "../../Objects/Views/ITMView.h"
-#include "../Common/ITMCommonFunctors.h"
-#include "../Common/ITMWarpEnums.h"
+#include "../Common/CommonFunctors.h"
+#include "../Common/WarpType.h"
 
 namespace ITMLib {
 /** \brief

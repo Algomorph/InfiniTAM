@@ -21,7 +21,7 @@
 #include "../../../Objects/Views/ITMView.h"
 #include "../../../Objects/Tracking/ITMTrackingState.h"
 #include "../../../Objects/RenderStates/ITMRenderState.h"
-#include "../../Common/ITMWarpEnums.h"
+#include "../../Common/WarpType.h"
 #include "../../../../ORUtils/MemoryDeviceType.h"
 
 //ORUtils

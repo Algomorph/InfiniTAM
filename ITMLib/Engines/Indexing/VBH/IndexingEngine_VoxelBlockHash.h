@@ -15,7 +15,7 @@
 //  ================================================================
 #pragma once
 #include "../Interface/IndexingEngine.h"
-#include "../../Common/ITMWarpEnums.h"
+#include "../../Common/WarpType.h"
 
 namespace ITMLib{
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, typename TDerivedClass>

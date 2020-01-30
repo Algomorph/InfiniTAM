@@ -16,7 +16,7 @@
 #pragma once
 
 #include "DepthFusionEngine_Shared.h"
-#include "../Common/ITMWarpEnums.h"
+#include "../Common/WarpType.h"
 
 
 //TODO: refactor this to use CUDA-based traversal methods where applicable -Greg (GitHub: Algomorph)

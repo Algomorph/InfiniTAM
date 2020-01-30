@@ -7,7 +7,7 @@
 #include "../../Objects/Scene/PlainVoxelArray.h"
 #include "../EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 #include "../Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
-#include "../Common/ITMWarpEnums.h"
+#include "../Common/WarpType.h"
 
 
 namespace ITMLib {

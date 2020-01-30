@@ -17,7 +17,7 @@
 
 #include "../../../ORUtils/PlatformIndependence.h"
 #include "../../Utils/ITMMath.h"
-#include "ITMWarpEnums.h"
+#include "WarpType.h"
 
 // region ===================================== VOXEL LOOKUPS ==========================================================
 namespace ITMLib{

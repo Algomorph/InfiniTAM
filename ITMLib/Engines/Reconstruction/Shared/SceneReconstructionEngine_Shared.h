@@ -4,6 +4,8 @@
 
 #include "../../../Objects/Scene/ITMRepresentationAccess.h"
 #include "../../../Utils/ITMPixelUtils.h"
+
+
 /**
  * \brief Voxel update without confidence computation
  * \tparam TVoxel

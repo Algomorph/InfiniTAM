@@ -17,7 +17,7 @@
 
 #include "../../Interface/IndexingEngine.h"
 #include "../IndexingEngine_VoxelBlockHash.h"
-#include "../../../Common/ITMWarpEnums.h"
+#include "../../../Common/WarpType.h"
 
 namespace ITMLib {
 

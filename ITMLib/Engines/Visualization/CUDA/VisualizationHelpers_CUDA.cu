@@ -1,7 +1,7 @@
 // Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
 
 #include "VisualizationHelpers_CUDA.h"
-#include "../../Indexing/Shared/IndexingEngine_Shared.h"
+#include "../../Common/CheckBlockVisibility.h"
 
 using namespace ITMLib;
 
