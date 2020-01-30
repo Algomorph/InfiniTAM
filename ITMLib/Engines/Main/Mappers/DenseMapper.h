@@ -3,7 +3,7 @@
 #pragma once
 
 #include "../../Reconstruction/Interface/SceneReconstructionEngine.h"
-#include "../../Swapping/Interface/ITMSwappingEngine.h"
+#include "../../Swapping/Interface/SwappingEngine.h"
 #include "../../../Utils/Configuration.h"
 
 namespace ITMLib
@@ -15,7 +15,7 @@ namespace ITMLib
 	{
 	private:
 		SceneReconstructionEngine<TVoxel,TIndex> *sceneRecoEngine;
-		ITMSwappingEngine<TVoxel,TIndex> *swappingEngine;
+		SwappingEngine<TVoxel,TIndex> *swappingEngine;
 
 		configuration::SwappingMode swappingMode;
 

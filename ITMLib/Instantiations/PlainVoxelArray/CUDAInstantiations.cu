@@ -6,7 +6,7 @@
 #include "../../Engines/Meshing/CUDA/ITMMultiMeshingEngine_CUDA.tcu"
 #include "../../Engines/Reconstruction/CUDA/SceneReconstructionEngine_CUDA.tcu"
 #include "../../Engines/Reconstruction/CUDA/SurfelSceneReconstructionEngine_CUDA.tcu"
-#include "../../Engines/Swapping/CUDA/ITMSwappingEngine_CUDA.tcu"
+#include "../../Engines/Swapping/CUDA/SwappingEngine_CUDA.tcu"
 #include "../../Engines/Visualization/CUDA/VisualizationEngine_CUDA.tcu"
 #include "../../Engines/Visualization/CUDA/MultiVisualizationEngine_CUDA.tcu"
 
@@ -14,6 +14,6 @@ namespace ITMLib
 {
 	template class ITMMeshingEngine_CUDA<ITMVoxel, PlainVoxelArray>;
 	template class ITMMultiMeshingEngine_CUDA<ITMVoxel, PlainVoxelArray>;
-	template class ITMSwappingEngine_CUDA<ITMVoxel, PlainVoxelArray>;
+	template class SwappingEngine_CUDA<ITMVoxel, PlainVoxelArray>;
 
 }

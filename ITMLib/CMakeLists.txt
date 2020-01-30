@@ -82,7 +82,7 @@ set(ITMLIB_CORE_HEADERS
     Engines/Main/MultiEngine.h
     Engines/Main/TrackingController.h
     Engines/Main/DynamicSceneVoxelEngine.h
-    Engines/Main/MianEngineFactory.h
+    Engines/Main/MainEngineFactory.h
     )
 
 #======================================= COMMON TO MULTIPLE ENGINES ====================================================
@@ -430,35 +430,35 @@ set(ITMLIB_ENGINES_SCENEFILEIO_SOURCES
     )
 ## ======================================= SWAPPING ENGINES ============================================================
 set(ITMLIB_ENGINES_SWAPPING_HEADERS
-    Engines/Swapping/ITMSwappingEngineFactory.h
+    Engines/Swapping/SwappingEngineFactory.h
     )
 
 ##
 set(ITMLIB_ENGINES_SWAPPING_CPU_SOURCES
-    Engines/Swapping/CPU/ITMSwappingEngine_CPU.tpp
+    Engines/Swapping/CPU/SwappingEngine_CPU.tpp
     )
 
 set(ITMLIB_ENGINES_SWAPPING_CPU_HEADERS
-    Engines/Swapping/CPU/ITMSwappingEngine_CPU.h
+    Engines/Swapping/CPU/SwappingEngine_CPU.h
     )
 
 ##
 set(ITMLIB_ENGINES_SWAPPING_CUDA_SOURCES
-    Engines/Swapping/CUDA/ITMSwappingEngine_CUDA.tcu
+    Engines/Swapping/CUDA/SwappingEngine_CUDA.tcu
     )
 
 set(ITMLIB_ENGINES_SWAPPING_CUDA_HEADERS
-    Engines/Swapping/CUDA/ITMSwappingEngine_CUDA.h
+    Engines/Swapping/CUDA/SwappingEngine_CUDA.h
     )
 
 ##
 set(ITMLIB_ENGINES_SWAPPING_INTERFACE_HEADERS
-    Engines/Swapping/Interface/ITMSwappingEngine.h
+    Engines/Swapping/Interface/SwappingEngine.h
     )
 
 ##
 set(ITMLIB_ENGINES_SWAPPING_SHARED_HEADERS
-    Engines/Swapping/Shared/ITMSwappingEngine_Shared.h
+    Engines/Swapping/Shared/SwappingEngine_Shared.h
     )
 
 ## ======================================== VIEW-BUILDNG ENGINES =======================================================

@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "../Interface/ITMSwappingEngine.h"
+#include "../Interface/SwappingEngine.h"
 
 namespace ITMLib
 {

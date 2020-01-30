@@ -14,7 +14,7 @@
 #include "../../Engines/Reconstruction/CPU/SceneReconstructionEngine_CPU.tpp"
 #include "../../Engines/Reconstruction/CPU/SurfelSceneReconstructionEngine_CPU.tpp"
 #include "../../Engines/Reconstruction/Interface/SurfelSceneReconstructionEngine.tpp"
-#include "../../Engines/Swapping/CPU/ITMSwappingEngine_CPU.tpp"
+#include "../../Engines/Swapping/CPU/SwappingEngine_CPU.tpp"
 #include "../../Engines/Visualization/CPU/VisualizationEngine_CPU.tpp"
 #include "../../Engines/Visualization/Interface/VisualizationEngine.h"
 #include "../../CameraTrackers/ITMCameraTrackerFactory.h"
@@ -27,6 +27,6 @@ namespace ITMLib
 
 	template class ITMMeshingEngine_CPU<ITMVoxel, PlainVoxelArray>;
 	template class ITMMultiMeshingEngine_CPU<ITMVoxel, PlainVoxelArray>;
-	template class ITMSwappingEngine_CPU<ITMVoxel, PlainVoxelArray>;
+	template class SwappingEngine_CPU<ITMVoxel, PlainVoxelArray>;
 
 }

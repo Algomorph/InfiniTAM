@@ -33,7 +33,7 @@
 #include "../../ITMLib/Engines/Main/BasicSurfelEngine.h"
 #include "../../ITMLib/Engines/Main/MultiEngine.h"
 #include "../../ITMLib/Engines/Main/DynamicSceneVoxelEngine.h"
-#include "../../ITMLib/Engines/Main/MianEngineFactory.h"
+#include "../../ITMLib/Engines/Main/MainEngineFactory.h"
 
 //local
 #include "UIEngine_BPO.h"

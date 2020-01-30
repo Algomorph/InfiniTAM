@@ -14,13 +14,13 @@ namespace ITMLib
 	space.
 	*/
 	template<class TVoxel, class TIndex>
-	class ITMSwappingEngine
+	class SwappingEngine
 	{
 	public:
 		virtual void IntegrateGlobalIntoLocal(ITMVoxelVolume<TVoxel, TIndex> *scene, ITMRenderState *renderState) = 0;
 		virtual void SaveToGlobalMemory(ITMVoxelVolume<TVoxel, TIndex> *scene, ITMRenderState *renderState) = 0;
 		virtual void CleanLocalMemory(ITMVoxelVolume<TVoxel, TIndex> *scene, ITMRenderState *renderState) = 0;
 
-		virtual ~ITMSwappingEngine(void) { }
+		virtual ~SwappingEngine(void) { }
 	};
 }

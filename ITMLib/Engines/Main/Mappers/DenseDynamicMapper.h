@@ -20,7 +20,7 @@
 #include "../../DepthFusion/DepthFusionEngine.h"
 #include "../../VolumeFusion/VolumeFusionEngine.h"
 #include "../../Warping/WarpingEngine.h"
-#include "../../Swapping/Interface/ITMSwappingEngine.h"
+#include "../../Swapping/Interface/SwappingEngine.h"
 #include "../../../SurfaceTrackers/Interface/SurfaceTrackerInterface.h"
 // utils
 #include "../../../Utils/Configuration.h"
@@ -105,7 +105,7 @@ private:
 	WarpingEngineInterface<TVoxel, TWarp, TIndex>* warping_engine;
 	VolumeFusionEngineInterface<TVoxel, TWarp, TIndex>* volume_fusion_engine;
 
-	ITMSwappingEngine<TVoxel, TIndex>* swapping_engine;
+	SwappingEngine<TVoxel, TIndex>* swapping_engine;
 	SurfaceTrackerInterface<TVoxel, TWarp, TIndex>* surface_tracker;
 
 	// *** parameters ***

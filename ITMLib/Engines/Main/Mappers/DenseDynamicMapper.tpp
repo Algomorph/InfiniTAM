@@ -24,7 +24,7 @@
 #include "DenseDynamicMapper.h"
 #include "../../DepthFusion/DepthFusionEngineFactory.h"
 #include "../../Warping/WarpingEngineFactory.h"
-#include "../../Swapping/ITMSwappingEngineFactory.h"
+#include "../../Swapping/SwappingEngineFactory.h"
 #include "../../../SurfaceTrackers/SurfaceTrackerFactory.h"
 #include "../../../Utils/Analytics/ITMBenchmarkUtils.h"
 #include "../../EditAndCopy/Interface/EditAndCopyEngineInterface.h"
@@ -92,7 +92,7 @@ DenseDynamicMapper<TVoxel, TWarp, TIndex>::DenseDynamicMapper(const TIndex& inde
 		surface_tracker(
 				SurfaceTrackerFactory::MakeSceneMotionTracker<TVoxel, TWarp, TIndex>()),
 		swapping_engine(configuration::get().swapping_mode != configuration::SWAPPINGMODE_DISABLED
-		               ? ITMSwappingEngineFactory::MakeSwappingEngine<TVoxel, TIndex>(
+		               ? SwappingEngineFactory::MakeSwappingEngine<TVoxel, TIndex>(
 						configuration::get().device_type, index)
 		               : nullptr),
 		swapping_mode(configuration::get().swapping_mode),

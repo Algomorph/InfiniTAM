@@ -2,22 +2,22 @@
 
 #pragma once
 
-#include "../Interface/ITMSwappingEngine.h"
+#include "../Interface/SwappingEngine.h"
 
 namespace ITMLib
 {
 	template<class TVoxel, class TIndex>
-	class ITMSwappingEngine_CUDA : public ITMSwappingEngine < TVoxel, TIndex >
+	class SwappingEngine_CUDA : public SwappingEngine < TVoxel, TIndex >
 	{
 	public:
-		explicit ITMSwappingEngine_CUDA(const TIndex& index){};
+		explicit SwappingEngine_CUDA(const TIndex& index){};
 		void IntegrateGlobalIntoLocal(ITMVoxelVolume<TVoxel, TIndex> *scene, ITMRenderState *renderState) {}
 		void SaveToGlobalMemory(ITMVoxelVolume<TVoxel, TIndex> *scene, ITMRenderState *renderState) {}
 		void CleanLocalMemory(ITMVoxelVolume<TVoxel, TIndex> *scene, ITMRenderState *renderState) {}
 	};
 
 	template<class TVoxel>
-	class ITMSwappingEngine_CUDA<TVoxel, VoxelBlockHash> : public ITMSwappingEngine < TVoxel, VoxelBlockHash >
+	class SwappingEngine_CUDA<TVoxel, VoxelBlockHash> : public SwappingEngine < TVoxel, VoxelBlockHash >
 	{
 	private:
 		int *noNeededEntries_device, *noAllocatedVoxelEntries_device;
@@ -30,7 +30,7 @@ namespace ITMLib
 		void SaveToGlobalMemory(ITMVoxelVolume<TVoxel, VoxelBlockHash> *scene, ITMRenderState *renderState);
 		void CleanLocalMemory(ITMVoxelVolume<TVoxel, VoxelBlockHash> *scene, ITMRenderState *renderState);
 
-		explicit ITMSwappingEngine_CUDA(const VoxelBlockHash& index);
-		~ITMSwappingEngine_CUDA();
+		explicit SwappingEngine_CUDA(const VoxelBlockHash& index);
+		~SwappingEngine_CUDA();
 	};
 }

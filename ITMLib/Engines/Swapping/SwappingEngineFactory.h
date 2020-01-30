@@ -2,12 +2,12 @@
 
 #pragma once
 
-#include "CPU/ITMSwappingEngine_CPU.h"
+#include "CPU/SwappingEngine_CPU.h"
 #ifndef COMPILE_WITHOUT_CUDA
-#include "CUDA/ITMSwappingEngine_CUDA.h"
+#include "CUDA/SwappingEngine_CUDA.h"
 #endif
 #ifdef COMPILE_WITH_METAL
-#include "Metal/ITMSwappingEngine_Metal.h"
+#include "Metal/SwappingEngine_Metal.h"
 #endif
 
 namespace ITMLib
@@ -16,7 +16,7 @@ namespace ITMLib
 /**
  * \brief This struct provides functions that can be used to construct swapping engines.
  */
-struct ITMSwappingEngineFactory
+struct SwappingEngineFactory
 {
   //#################### PUBLIC STATIC MEMBER FUNCTIONS ####################
 
@@ -26,23 +26,23 @@ struct ITMSwappingEngineFactory
    * \param deviceType  The device on which the swapping engine should operate.
    */
   template <typename TVoxel, typename TIndex>
-  static ITMSwappingEngine<TVoxel,TIndex> *MakeSwappingEngine(MemoryDeviceType deviceType, const TIndex& index)
+  static SwappingEngine<TVoxel,TIndex> *MakeSwappingEngine(MemoryDeviceType deviceType, const TIndex& index)
   {
-    ITMSwappingEngine<TVoxel,TIndex> *swapping_engine = NULL;
+    SwappingEngine<TVoxel,TIndex> *swapping_engine = NULL;
 
     switch(deviceType)
     {
       case MEMORYDEVICE_CPU:
-	      swapping_engine = new ITMSwappingEngine_CPU<TVoxel,TIndex>(index);
+	      swapping_engine = new SwappingEngine_CPU<TVoxel,TIndex>(index);
         break;
       case MEMORYDEVICE_CUDA:
 #ifndef COMPILE_WITHOUT_CUDA
-        swapping_engine = new ITMSwappingEngine_CUDA<TVoxel,TIndex>(index);
+        swapping_engine = new SwappingEngine_CUDA<TVoxel,TIndex>(index);
 #endif
         break;
       case MEMORYDEVICE_METAL:
 #ifdef COMPILE_WITH_METAL
-        swapping_engine = new ITMSwappingEngine_CPU<TVoxelCanonical,TIndex>;
+        swapping_engine = new SwappingEngine_CPU<TVoxelCanonical,TIndex>;
 #endif
         break;
     }

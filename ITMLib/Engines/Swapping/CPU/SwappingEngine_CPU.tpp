@@ -1,13 +1,13 @@
 // Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
 
-#include "ITMSwappingEngine_CPU.h"
+#include "SwappingEngine_CPU.h"
 
-#include "../Shared/ITMSwappingEngine_Shared.h"
+#include "../Shared/SwappingEngine_Shared.h"
 using namespace ITMLib;
 
 
 template<class TVoxel>
-int ITMSwappingEngine_CPU<TVoxel, VoxelBlockHash>::LoadFromGlobalMemory(ITMVoxelVolume<TVoxel, VoxelBlockHash> *scene)
+int SwappingEngine_CPU<TVoxel, VoxelBlockHash>::LoadFromGlobalMemory(ITMVoxelVolume<TVoxel, VoxelBlockHash> *scene)
 {
 	ITMGlobalCache<TVoxel, VoxelBlockHash> *globalCache = scene->globalCache;
 
@@ -56,7 +56,7 @@ int ITMSwappingEngine_CPU<TVoxel, VoxelBlockHash>::LoadFromGlobalMemory(ITMVoxel
 }
 
 template<class TVoxel>
-void ITMSwappingEngine_CPU<TVoxel, VoxelBlockHash>::IntegrateGlobalIntoLocal(ITMVoxelVolume<TVoxel, VoxelBlockHash> *scene, ITMRenderState *renderState)
+void SwappingEngine_CPU<TVoxel, VoxelBlockHash>::IntegrateGlobalIntoLocal(ITMVoxelVolume<TVoxel, VoxelBlockHash> *scene, ITMRenderState *renderState)
 {
 	ITMGlobalCache<TVoxel, VoxelBlockHash> *globalCache = scene->globalCache;
 
@@ -94,7 +94,7 @@ void ITMSwappingEngine_CPU<TVoxel, VoxelBlockHash>::IntegrateGlobalIntoLocal(ITM
 }
 
 template<class TVoxel>
-void ITMSwappingEngine_CPU<TVoxel, VoxelBlockHash>::SaveToGlobalMemory(ITMVoxelVolume<TVoxel, VoxelBlockHash> *scene, ITMRenderState *renderState)
+void SwappingEngine_CPU<TVoxel, VoxelBlockHash>::SaveToGlobalMemory(ITMVoxelVolume<TVoxel, VoxelBlockHash> *scene, ITMRenderState *renderState)
 {
 	ITMGlobalCache<TVoxel, VoxelBlockHash> *globalCache = scene->globalCache;
 
@@ -166,7 +166,7 @@ void ITMSwappingEngine_CPU<TVoxel, VoxelBlockHash>::SaveToGlobalMemory(ITMVoxelV
 }
 
 template<class TVoxel>
-void ITMSwappingEngine_CPU<TVoxel, VoxelBlockHash>::CleanLocalMemory(ITMVoxelVolume<TVoxel, VoxelBlockHash> *scene, ITMRenderState *renderState)
+void SwappingEngine_CPU<TVoxel, VoxelBlockHash>::CleanLocalMemory(ITMVoxelVolume<TVoxel, VoxelBlockHash> *scene, ITMRenderState *renderState)
 {
 	ITMHashEntry *hashTable = scene->index.GetEntries();
 	HashBlockVisibility *blockVisibilityTypes = scene->index.GetBlockVisibilityTypes();
