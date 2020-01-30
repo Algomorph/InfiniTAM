@@ -39,14 +39,14 @@
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/ITMVoxelVolumeComparison_CPU.h"
 #include "../ITMLib/Utils/Analytics/SceneStatisticsCalculator/CPU/ITMSceneStatisticsCalculator_CPU.h"
 #include "../ITMLib/Engines/EditAndCopy/EditAndCopyEngineFactory.h"
-#include "../ITMLib/Engines/Reconstruction/CPU/DynamicSceneReconstructionEngine_CPU.h"
+#include "../ITMLib/Engines/DepthFusion/DynamicSceneReconstructionEngine_CPU.h"
 
 #ifndef COMPILE_WITHOUT_CUDA
 //local CUDA
-#include "../ITMLib/Engines/Reconstruction/CUDA/DynamicSceneReconstructionEngine_CUDA.h"
+#include "../ITMLib/Engines/DepthFusion/DynamicSceneReconstructionEngine_CUDA.h"
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/ITMVoxelVolumeComparison_CUDA.h"
 #include "../ITMLib/Utils/Analytics/SceneStatisticsCalculator/CUDA/ITMSceneStatisticsCalculator_CUDA.h"
-#include "../ITMLib/Engines/Reconstruction/DynamicSceneReconstructionEngineFactory.h"
+#include "../ITMLib/Engines/DepthFusion/DynamicSceneReconstructionEngineFactory.h"
 #endif
 
 

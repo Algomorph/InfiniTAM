@@ -2,7 +2,7 @@
 
 #include "SurfelSceneReconstructionEngine_CPU.h"
 
-#include "../Shared/ITMSurfelSceneReconstructionEngine_Shared.h"
+#include "../Shared/SurfelSceneReconstructionEngine_Shared.h"
 
 namespace ITMLib
 {

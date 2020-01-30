@@ -21,7 +21,7 @@
 #include "ITMWarpFieldLogger.h"
 #include "../Analytics/SceneStatisticsCalculator/CPU/ITMSceneStatisticsCalculator_CPU.h"
 #include "../Configuration.h"
-#include "../../Engines/Reconstruction/DynamicSceneReconstructionEngineFactory.h"
+#include "../../Engines/DepthFusion/DynamicSceneReconstructionEngineFactory.h"
 #include "../../Engines/Traversal/CPU/ITMSceneTraversal_CPU_PlainVoxelArray.h"
 #include "../../Engines/Traversal/CPU/ITMSceneTraversal_CPU_VoxelBlockHash.h"
 #include "../../Engines/SceneFileIO/ITMSceneFileIOEngine.h"

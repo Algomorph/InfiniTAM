@@ -17,9 +17,9 @@
 
 #include "DynamicSceneReconstructionEngine_CUDA.h"
 
-#include "../../../Objects/Scene/ITMTrilinearInterpolation.h"
-#include "../../Common/ITMCommonFunctors.h"
-#include "../../../../ORUtils/JetbrainsCUDASyntax.hpp"
+#include "../../Objects/Scene/ITMTrilinearInterpolation.h"
+#include "../Common/ITMCommonFunctors.h"
+#include "../../../ORUtils/JetbrainsCUDASyntax.hpp"
 #include "DynamicSceneReconstructionEngine_CUDA_PlainVoxelArray_Kernels.h"
 
 using namespace ITMLib;

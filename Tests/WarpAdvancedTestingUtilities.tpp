@@ -23,7 +23,7 @@
 #include "TestUtils.h"
 #include "TestUtilsForSnoopyFrames16And17.h"
 
-#include "../ITMLib/Engines/Reconstruction/DynamicSceneReconstructionEngineFactory.h"
+#include "../ITMLib/Engines/DepthFusion/DynamicSceneReconstructionEngineFactory.h"
 #include "../ITMLib/Engines/VolumeFusion/VolumeFusionEngineFactory.h"
 #include "../ITMLib/Engines/Warping/WarpingEngineFactory.h"
 #include "../ITMLib/Engines/EditAndCopy/EditAndCopyEngineFactory.h"

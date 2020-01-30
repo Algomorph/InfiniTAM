@@ -17,7 +17,7 @@
 
 // *** local ***
 // engines & trackers
-#include "../Reconstruction/Interface/DynamicSceneReconstructionEngine.h"
+#include "../DepthFusion/DynamicSceneReconstructionEngine.h"
 #include "../VolumeFusion/VolumeFusionEngine.h"
 #include "../Warping/WarpingEngine.h"
 #include "../Swapping/Interface/ITMSwappingEngine.h"

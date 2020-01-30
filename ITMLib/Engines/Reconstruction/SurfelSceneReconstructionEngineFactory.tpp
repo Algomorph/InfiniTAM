@@ -1,6 +1,6 @@
 // InfiniTAM: Surffuse. Copyright (c) Torr Vision Group and the authors of InfiniTAM, 2016.
 
-#include "ITMSurfelSceneReconstructionEngineFactory.h"
+#include "SurfelSceneReconstructionEngineFactory.h"
 
 #include "CPU/SurfelSceneReconstructionEngine_CPU.h"
 
@@ -14,7 +14,7 @@ namespace ITMLib {
 
 template<typename TSurfel>
 SurfelSceneReconstructionEngine<TSurfel>*
-ITMSurfelSceneReconstructionEngineFactory<TSurfel>::make_surfel_scene_reconstruction_engine(
+SurfelSceneReconstructionEngineFactory<TSurfel>::make_surfel_scene_reconstruction_engine(
 		const Vector2i& depthImageSize, MemoryDeviceType deviceType) {
 	SurfelSceneReconstructionEngine<TSurfel>* reconstruction_engine = NULL;
 

@@ -17,12 +17,12 @@
 
 #include <cmath>
 
-#include "../../../Objects/RenderStates/ITMRenderState.h"
-#include "../../../Objects/Scene/ITMVoxelVolume.h"
-#include "../../../Objects/Tracking/ITMTrackingState.h"
-#include "../../../Objects/Views/ITMView.h"
-#include "../../Common/ITMCommonFunctors.h"
-#include "../../Common/ITMWarpEnums.h"
+#include "../../Objects/RenderStates/ITMRenderState.h"
+#include "../../Objects/Scene/ITMVoxelVolume.h"
+#include "../../Objects/Tracking/ITMTrackingState.h"
+#include "../../Objects/Views/ITMView.h"
+#include "../Common/ITMCommonFunctors.h"
+#include "../Common/ITMWarpEnums.h"
 
 namespace ITMLib {
 /** \brief

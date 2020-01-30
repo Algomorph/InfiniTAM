@@ -15,8 +15,8 @@
 //  ================================================================
 #pragma once
 
-#include "../Shared/ITMDynamicSceneReconstructionEngine_Shared.h"
-#include "../../Common/ITMWarpEnums.h"
+#include "ITMDynamicSceneReconstructionEngine_Shared.h"
+#include "../Common/ITMWarpEnums.h"
 
 
 //TODO: refactor this to use CUDA-based traversal methods where applicable -Greg (GitHub: Algomorph)

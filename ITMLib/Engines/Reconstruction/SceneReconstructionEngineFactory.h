@@ -17,7 +17,7 @@ namespace ITMLib
 /**
  * \brief This struct provides functions that can be used to construct scene reconstruction engines.
  */
-struct ITMSceneReconstructionEngineFactory
+struct SceneReconstructionEngineFactory
 {
   //#################### PUBLIC STATIC MEMBER FUNCTIONS ####################
 

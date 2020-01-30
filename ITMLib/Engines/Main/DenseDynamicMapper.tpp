@@ -22,7 +22,7 @@
 
 //local
 #include "DenseDynamicMapper.h"
-#include "../Reconstruction/DynamicSceneReconstructionEngineFactory.h"
+#include "../DepthFusion/DynamicSceneReconstructionEngineFactory.h"
 #include "../Warping/WarpingEngineFactory.h"
 #include "../Swapping/ITMSwappingEngineFactory.h"
 #include "../../SurfaceTrackers/SurfaceTrackerFactory.h"

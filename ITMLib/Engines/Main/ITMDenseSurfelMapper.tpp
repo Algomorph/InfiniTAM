@@ -2,7 +2,7 @@
 
 #include "ITMDenseSurfelMapper.h"
 
-#include "../Reconstruction/ITMSurfelSceneReconstructionEngineFactory.h"
+#include "../Reconstruction/SurfelSceneReconstructionEngineFactory.h"
 
 namespace ITMLib
 {
@@ -11,7 +11,7 @@ namespace ITMLib
 
 template <typename TSurfel>
 ITMDenseSurfelMapper<TSurfel>::ITMDenseSurfelMapper(const Vector2i& depthImageSize, MemoryDeviceType deviceType)
-: m_reconstructionEngine(ITMSurfelSceneReconstructionEngineFactory<TSurfel>::make_surfel_scene_reconstruction_engine(depthImageSize, deviceType))
+: m_reconstructionEngine(SurfelSceneReconstructionEngineFactory<TSurfel>::make_surfel_scene_reconstruction_engine(depthImageSize, deviceType))
 {}
 
 //#################### DESTRUCTOR ####################

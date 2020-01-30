@@ -17,11 +17,11 @@
 
 #include "../../Utils/Configuration.h"
 
-#include "CPU/DynamicSceneReconstructionEngine_CPU.h"
+#include "DynamicSceneReconstructionEngine_CPU.h"
 
 #ifndef COMPILE_WITHOUT_CUDA
 
-#include "CUDA/DynamicSceneReconstructionEngine_CUDA.h"
+#include "DynamicSceneReconstructionEngine_CUDA.h"
 
 #endif
 #ifdef COMPILE_WITH_METAL

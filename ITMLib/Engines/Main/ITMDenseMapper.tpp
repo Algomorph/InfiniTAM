@@ -2,7 +2,7 @@
 
 #include "ITMDenseMapper.h"
 
-#include "../Reconstruction/ITMSceneReconstructionEngineFactory.h"
+#include "../Reconstruction/SceneReconstructionEngineFactory.h"
 #include "../Swapping/ITMSwappingEngineFactory.h"
 
 using namespace ITMLib;
@@ -11,7 +11,7 @@ template<class TVoxel, class TIndex>
 ITMDenseMapper<TVoxel, TIndex>::ITMDenseMapper(const TIndex& index)
 {
 	auto& settings = configuration::get();
-	sceneRecoEngine = ITMSceneReconstructionEngineFactory::MakeSceneReconstructionEngine<TVoxel,TIndex>(settings.device_type);
+	sceneRecoEngine = SceneReconstructionEngineFactory::MakeSceneReconstructionEngine<TVoxel,TIndex>(settings.device_type);
 	swappingEngine = settings.swapping_mode != configuration::SWAPPINGMODE_DISABLED ? ITMSwappingEngineFactory::MakeSwappingEngine<TVoxel,TIndex>(settings.device_type, index) : nullptr;
 
 	swappingMode = settings.swapping_mode;

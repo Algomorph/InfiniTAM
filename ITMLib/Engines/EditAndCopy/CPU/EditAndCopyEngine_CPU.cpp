@@ -21,7 +21,7 @@
 #include "../../../Objects/Scene/ITMVoxelVolume.h"
 #include "../../../Utils/Configuration.h"
 #include "../../Reconstruction/Interface/SceneReconstructionEngine.h"
-#include "../../Reconstruction/ITMSceneReconstructionEngineFactory.h"
+#include "../../Reconstruction/SceneReconstructionEngineFactory.h"
 
 namespace ITMLib {
 

@@ -20,7 +20,7 @@
   //#pragma GCC diagnostic warning "-Wunused-private-field"
 #endif
 
-#include "../Shared/ITMSurfelSceneReconstructionEngine_Shared.h"
+#include "../Shared/SurfelSceneReconstructionEngine_Shared.h"
 
 #define DEBUGGING 0
 

@@ -6,7 +6,7 @@
 #include "../../../Objects/Views/ITMView.h"
 
 #include "../Shared/ITMVisualisationEngine_Shared.h"
-#include "../../Reconstruction/Shared/ITMSceneReconstructionEngine_Shared.h"
+#include "../../Reconstruction/Shared/SceneReconstructionEngine_Shared.h"
 #include "../../../Utils/ITMCUDAUtils.h"
 
 namespace ITMLib {

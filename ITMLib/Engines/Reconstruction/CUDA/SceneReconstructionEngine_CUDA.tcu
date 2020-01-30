@@ -2,7 +2,7 @@
 
 #include "SceneReconstructionEngine_CUDA.h"
 
-#include "../Shared/ITMSceneReconstructionEngine_Shared.h"
+#include "../Shared/SceneReconstructionEngine_Shared.h"
 #include "../../../Utils/ITMCUDAUtils.h"
 #include "../../../../ORUtils/JetbrainsCUDASyntax.hpp"
 #include "../../Indexing/Shared/IndexingEngine_Shared.h"

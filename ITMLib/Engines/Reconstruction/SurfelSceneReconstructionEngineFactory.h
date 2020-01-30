@@ -11,7 +11,7 @@ namespace ITMLib
    * \brief An instantiation of this struct can be used to construct surfel scene reconstruction engines.
    */
   template <typename TSurfel>
-  struct ITMSurfelSceneReconstructionEngineFactory
+  struct SurfelSceneReconstructionEngineFactory
   {
     //#################### PUBLIC STATIC MEMBER FUNCTIONS ####################
 

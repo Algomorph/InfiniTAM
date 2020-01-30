@@ -15,10 +15,10 @@
 //  ================================================================
 #pragma once
 
-#include "../Interface/DynamicSceneReconstructionEngine.h"
-#include "../../../Objects/Scene/PlainVoxelArray.h"
-#include "../../EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
-#include "../../Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
+#include "DynamicSceneReconstructionEngine.h"
+#include "../../Objects/Scene/PlainVoxelArray.h"
+#include "../EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
+#include "../Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
 
 namespace ITMLib {
 template<typename TVoxel, typename TWarp, typename TIndex>

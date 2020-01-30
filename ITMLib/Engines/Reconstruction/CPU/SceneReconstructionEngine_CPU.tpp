@@ -2,7 +2,7 @@
 
 #include "SceneReconstructionEngine_CPU.h"
 
-#include "../Shared/ITMSceneReconstructionEngine_Shared.h"
+#include "../Shared/SceneReconstructionEngine_Shared.h"
 #include "../../Indexing/Shared/IndexingEngine_Shared.h"
 
 using namespace ITMLib;

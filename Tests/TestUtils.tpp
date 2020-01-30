@@ -17,7 +17,7 @@
 
 #include "TestUtils.h"
 #include "../ITMLib/Utils/Configuration.h"
-#include "../ITMLib/Engines/Reconstruction/DynamicSceneReconstructionEngineFactory.h"
+#include "../ITMLib/Engines/DepthFusion/DynamicSceneReconstructionEngineFactory.h"
 #include "../ORUtils/FileUtils.h"
 
 #ifndef COMPILE_WITHOUT_CUDA

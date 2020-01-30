@@ -24,8 +24,8 @@
 //ITMLib
 #include "TestUtilsForSnoopyFrames16And17.h"
 #include "../ITMLib/ITMLibDefines.h"
-#include "../ITMLib/Engines/Reconstruction/Interface/DynamicSceneReconstructionEngine.h"
-#include "../ITMLib/Engines/Reconstruction/DynamicSceneReconstructionEngineFactory.h"
+#include "../ITMLib/Engines/DepthFusion/DynamicSceneReconstructionEngine.h"
+#include "../ITMLib/Engines/DepthFusion/DynamicSceneReconstructionEngineFactory.h"
 #include "../ITMLib/Engines/ViewBuilding/Interface/ITMViewBuilder.h"
 #include "../ITMLib/Engines/ViewBuilding/ITMViewBuilderFactory.h"
 #include "../ITMLib/Utils/Configuration.h"

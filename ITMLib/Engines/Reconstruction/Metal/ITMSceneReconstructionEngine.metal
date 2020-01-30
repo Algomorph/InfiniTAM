@@ -4,7 +4,7 @@
 
 using namespace metal;
 
-#include "../Shared/ITMSceneReconstructionEngine_Shared.h"
+#include "../Shared/SceneReconstructionEngine_Shared.h"
 #include "ITMSceneReconstructionEngine_Metal.h"
 #include "../../../ITMLibDefines.h"
 

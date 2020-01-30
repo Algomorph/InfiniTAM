@@ -15,10 +15,10 @@
 //  ================================================================
 #pragma once
 
-#include "../../../Objects/Scene/ITMRepresentationAccess.h"
-#include "../../../Objects/Scene/ITMTrilinearInterpolation.h"
-#include "../../../Utils/ITMPixelUtils.h"
-#include "../../../Utils/ITMVoxelFlags.h"
+#include "../../Objects/Scene/ITMRepresentationAccess.h"
+#include "../../Objects/Scene/ITMTrilinearInterpolation.h"
+#include "../../Utils/ITMPixelUtils.h"
+#include "../../Utils/ITMVoxelFlags.h"
 
 
 // region ============================== UPDATE SDF/COLOR IN VOXEL USING DEPTH PIXEL ===================================

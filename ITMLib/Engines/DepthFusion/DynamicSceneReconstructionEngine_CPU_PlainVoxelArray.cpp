@@ -14,7 +14,7 @@
 //  limitations under the License.
 //  ================================================================
 #include "DynamicSceneReconstructionEngine_CPU_PlainVoxelArray.tpp"
-#include "../../../ITMLibDefines.h"
+#include "../../ITMLibDefines.h"
 
 namespace ITMLib{
 

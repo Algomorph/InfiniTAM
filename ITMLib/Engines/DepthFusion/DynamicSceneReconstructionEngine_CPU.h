@@ -2,12 +2,12 @@
 
 #pragma once
 
-#include "../../../SurfaceTrackers/Interface/SurfaceTrackerInterface.h"
-#include "../Interface/DynamicSceneReconstructionEngine.h"
-#include "../../../Objects/Scene/PlainVoxelArray.h"
-#include "../../EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
-#include "../../Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
-#include "../../Common/ITMWarpEnums.h"
+#include "../../SurfaceTrackers/Interface/SurfaceTrackerInterface.h"
+#include "DynamicSceneReconstructionEngine.h"
+#include "../../Objects/Scene/PlainVoxelArray.h"
+#include "../EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
+#include "../Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
+#include "../Common/ITMWarpEnums.h"
 
 
 namespace ITMLib {

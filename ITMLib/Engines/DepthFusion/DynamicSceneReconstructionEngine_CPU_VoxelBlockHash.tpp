@@ -2,8 +2,8 @@
 
 #include <cfloat>
 #include "DynamicSceneReconstructionEngine_CPU.h"
-#include "../Shared/ITMDynamicSceneReconstructionEngine_Shared.h"
-#include "../../Traversal/CPU/ITMSceneTraversal_CPU_VoxelBlockHash.h"
+#include "ITMDynamicSceneReconstructionEngine_Shared.h"
+#include "../Traversal/CPU/ITMSceneTraversal_CPU_VoxelBlockHash.h"
 
 using namespace ITMLib;
 
