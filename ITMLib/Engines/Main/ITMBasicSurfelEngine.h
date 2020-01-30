@@ -7,7 +7,7 @@
 #include "ITMTrackingController.h"
 #include "../LowLevel/Interface/ITMLowLevelEngine.h"
 #include "../ViewBuilding/Interface/ITMViewBuilder.h"
-#include "../Visualization/Interface/ITMSurfelVisualisationEngine.h"
+#include "../Visualization/Interface/SurfelVisualizationEngine.h"
 #include "../../Objects/Misc/ITMIMUCalibrator.h"
 
 #include "../../../FernRelocLib/Relocaliser.h"
@@ -22,7 +22,7 @@ namespace ITMLib
 		int framesProcessed, relocalisationCount;
 
 		ITMLowLevelEngine *lowLevelEngine;
-		ITMSurfelVisualisationEngine<TSurfel> *surfelVisualisationEngine;
+		SurfelVisualizationEngine<TSurfel> *surfelVisualizationEngine;
 
 		ITMViewBuilder *viewBuilder;
 		ITMDenseSurfelMapper<TSurfel> *denseSurfelMapper;
@@ -44,7 +44,7 @@ namespace ITMLib
 		/// Pointer to the current camera pose and additional tracking information
 		ITMTrackingState *trackingState;
 
-		static typename ITMSurfelVisualisationEngine<TSurfel>::RenderImageType ToSurfelImageType(GetImageType getImageType);
+		static typename SurfelVisualizationEngine<TSurfel>::RenderImageType ToSurfelImageType(GetImageType getImageType);
 
 	public:
 		ITMView* GetView(void) { return view; }

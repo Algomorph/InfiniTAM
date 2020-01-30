@@ -6,7 +6,7 @@ namespace ITMLib
 {
 
 /**
- * \brief The different types of lighting that can be used for surfel visualisation.
+ * \brief The different types of lighting that can be used for surfel Visualization.
  *
  * FIXME: This is very similar to the LightingType enum in spaint - they should be combined one day.
  */

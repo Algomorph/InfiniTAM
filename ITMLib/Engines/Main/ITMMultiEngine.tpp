@@ -4,8 +4,8 @@
 
 #include "../LowLevel/ITMLowLevelEngineFactory.h"
 #include "../ViewBuilding/ITMViewBuilderFactory.h"
-#include "../Visualization/ITMVisualizationEngineFactory.h"
-#include "../Visualization/ITMMultiVisualizationEngineFactory.h"
+#include "../Visualization/VisualizationEngineFactory.h"
+#include "../Visualization/MultiVisualizationEngineFactory.h"
 #include "../../CameraTrackers/ITMCameraTrackerFactory.h"
 
 #include "../../../MiniSlamGraphLib/QuaternionHelpers.h"
@@ -34,14 +34,14 @@ ITMMultiEngine<TVoxel, TIndex>::ITMMultiEngine(const ITMRGBDCalib& calib, Vector
 	const MemoryDeviceType deviceType = settings.device_type;
 	lowLevelEngine = ITMLowLevelEngineFactory::MakeLowLevelEngine(deviceType);
 	viewBuilder = ITMViewBuilderFactory::MakeViewBuilder(calib, deviceType);
-	visualisationEngine = ITMVisualizationEngineFactory::MakeVisualisationEngine<TVoxel, TIndex>(deviceType);
+	visualization_engine = VisualizationEngineFactory::MakeVisualizationEngine<TVoxel, TIndex>(deviceType);
 
 	tracker = ITMCameraTrackerFactory::Instance().Make(imgSize_rgb, imgSize_d, lowLevelEngine, imuCalibrator,
 	                                                   &settings.general_voxel_volume_parameters);
 	trackingController = new ITMTrackingController(tracker);
 	trackedImageSize = trackingController->GetTrackedImageSize(imgSize_rgb, imgSize_d);
 
-	mapManager = new ITMVoxelMapGraphManager<TVoxel, TIndex>(visualisationEngine, denseMapper, trackedImageSize);
+	mapManager = new ITMVoxelMapGraphManager<TVoxel, TIndex>(visualization_engine, denseMapper, trackedImageSize);
 	mActiveDataManager = new ITMActiveMapManager(mapManager);
 	mActiveDataManager->initiateNewLocalMap(true);
 	denseMapper = new ITMDenseMapper<TVoxel, TIndex>(mapManager->getLocalMap(0)->scene->index);
@@ -50,7 +50,7 @@ ITMMultiEngine<TVoxel, TIndex>::ITMMultiEngine(const ITMRGBDCalib& calib, Vector
 	if (settings.create_meshing_engine)
 		meshingEngine = ITMMultiMeshingEngineFactory::MakeMeshingEngine<TVoxel, TIndex>(deviceType, mapManager->getLocalMap(0)->scene->index);
 
-	renderState_freeview = NULL; //will be created by the visualisation engine
+	renderState_freeview = NULL; //will be created by the Visualization engine
 	imuCalibrator = new ITMIMUCalibrator_iPad();
 	freeviewLocalMapIdx = 0;
 
@@ -64,7 +64,7 @@ ITMMultiEngine<TVoxel, TIndex>::ITMMultiEngine(const ITMRGBDCalib& calib, Vector
 	mScheduleGlobalAdjustment = false;
 	if (separateThreadGlobalAdjustment) mGlobalAdjustmentEngine->startSeparateThread();
 
-	multiVisualisationEngine = ITMMultiVisualizationEngineFactory::MakeVisualisationEngine<TVoxel,TIndex>(deviceType);
+	multiVisualizationEngine = MultiVisualizationEngineFactory::MakeVisualizationEngine<TVoxel,TIndex>(deviceType);
 	renderState_multiscene = NULL;
 }
 
@@ -90,11 +90,11 @@ ITMMultiEngine<TVoxel, TIndex>::~ITMMultiEngine(void)
 
 	if (view != NULL) delete view;
 
-	delete visualisationEngine;
+	delete visualization_engine;
 
 	delete relocaliser;
 
-	delete multiVisualisationEngine;
+	delete multiVisualizationEngine;
 }
 
 template <typename TVoxel, typename TIndex>
@@ -230,7 +230,7 @@ ITMTrackingState::TrackingResult ITMMultiEngine<TVoxel, TIndex>::ProcessFrame(IT
 		if (todoList[i].preprepare)
 		{
 			denseMapper->UpdateVisibleList(view, currentLocalMap->trackingState, currentLocalMap->scene, currentLocalMap->renderState);
-			trackingController->Prepare(currentLocalMap->trackingState, currentLocalMap->scene, view, visualisationEngine, currentLocalMap->renderState);
+			trackingController->Prepare(currentLocalMap->trackingState, currentLocalMap->scene, view, visualization_engine, currentLocalMap->renderState);
 		}
 
 		if (todoList[i].track)
@@ -283,8 +283,8 @@ ITMTrackingState::TrackingResult ITMMultiEngine<TVoxel, TIndex>::ProcessFrame(IT
 		if (todoList[i].fusion) denseMapper->ProcessFrame(view, currentLocalMap->trackingState, currentLocalMap->scene, currentLocalMap->renderState);
 		else if (todoList[i].prepare) denseMapper->UpdateVisibleList(view, currentLocalMap->trackingState, currentLocalMap->scene, currentLocalMap->renderState);
 
-		// raycast to renderState_live for tracking and free visualisation
-		if (todoList[i].prepare) trackingController->Prepare(currentLocalMap->trackingState, currentLocalMap->scene, view, visualisationEngine, currentLocalMap->renderState);
+		// raycast to renderState_live for tracking and free Visualization
+		if (todoList[i].prepare) trackingController->Prepare(currentLocalMap->trackingState, currentLocalMap->scene, view, visualization_engine, currentLocalMap->renderState);
 	}
 
 	mScheduleGlobalAdjustment |= mActiveDataManager->maintainActiveData();
@@ -354,36 +354,36 @@ void ITMMultiEngine<TVoxel, TIndex>::GetImage(ITMUChar4Image *out, GetImageType 
 	case ITMMultiEngine::InfiniTAM_IMAGE_ORIGINAL_DEPTH:
 		out->ChangeDims(view->depth->noDims);
 		if (settings.device_type == MEMORYDEVICE_CUDA) view->depth->UpdateHostFromDevice();
-		ITMVisualisationEngine<TVoxel, TIndex>::DepthToUchar4(out, view->depth);
+		VisualizationEngine<TVoxel, TIndex>::DepthToUchar4(out, view->depth);
 		break;
     case ITMMultiEngine::InfiniTAM_IMAGE_COLOUR_FROM_VOLUME: //TODO: add colour rendering
 	case ITMMultiEngine::InfiniTAM_IMAGE_SCENERAYCAST:
 	case ITMMultiEngine::InfiniTAM_IMAGE_COLOUR_FROM_NORMAL:
 	case ITMMultiEngine::InfiniTAM_IMAGE_COLOUR_FROM_CONFIDENCE:
 	{
-		int visualisationLocalMapIdx = mActiveDataManager->findBestVisualisationLocalMapIdx();
-		if (visualisationLocalMapIdx < 0) break; // TODO: clear image? what else to do when tracking is lost?
+		int VisualizationLocalMapIdx = mActiveDataManager->findBestVisualizationLocalMapIdx();
+		if (VisualizationLocalMapIdx < 0) break; // TODO: clear image? what else to do when tracking is lost?
 
-		ITMLocalMap<TVoxel, TIndex> *activeLocalMap = mapManager->getLocalMap(visualisationLocalMapIdx);
+		ITMLocalMap<TVoxel, TIndex> *activeLocalMap = mapManager->getLocalMap(VisualizationLocalMapIdx);
 
-		IITMVisualisationEngine::RenderRaycastSelection raycastType;
-		if (activeLocalMap->trackingState->age_pointCloud <= 0) raycastType = IITMVisualisationEngine::RENDER_FROM_OLD_RAYCAST;
-		else raycastType = IITMVisualisationEngine::RENDER_FROM_OLD_FORWARDPROJ;
+		IVisualizationEngine::RenderRaycastSelection raycastType;
+		if (activeLocalMap->trackingState->age_pointCloud <= 0) raycastType = IVisualizationEngine::RENDER_FROM_OLD_RAYCAST;
+		else raycastType = IVisualizationEngine::RENDER_FROM_OLD_FORWARDPROJ;
 
-		IITMVisualisationEngine::RenderImageType imageType;
+		IVisualizationEngine::RenderImageType imageType;
 		switch (getImageType)
 		{
 		case ITMMultiEngine::InfiniTAM_IMAGE_COLOUR_FROM_CONFIDENCE:
-			imageType = IITMVisualisationEngine::RENDER_COLOUR_FROM_CONFIDENCE;
+			imageType = IVisualizationEngine::RENDER_COLOUR_FROM_CONFIDENCE;
 			break;
 		case ITMMultiEngine::InfiniTAM_IMAGE_COLOUR_FROM_NORMAL:
-			imageType = IITMVisualisationEngine::RENDER_COLOUR_FROM_NORMAL;
+			imageType = IVisualizationEngine::RENDER_COLOUR_FROM_NORMAL;
 			break;
 		default:
-			imageType = IITMVisualisationEngine::RENDER_SHADED_GREYSCALE_IMAGENORMALS;
+			imageType = IVisualizationEngine::RENDER_SHADED_GREYSCALE_IMAGENORMALS;
 		}
 
-		visualisationEngine->RenderImage(activeLocalMap->scene, activeLocalMap->trackingState->pose_d, &view->calib.intrinsics_d, activeLocalMap->renderState, activeLocalMap->renderState->raycastImage, imageType, raycastType);
+		visualization_engine->RenderImage(activeLocalMap->scene, activeLocalMap->trackingState->pose_d, &view->calib.intrinsics_d, activeLocalMap->renderState, activeLocalMap->renderState->raycastImage, imageType, raycastType);
 
 		ORUtils::Image<Vector4u> *srcImage = activeLocalMap->renderState->raycastImage;
 		out->ChangeDims(srcImage->noDims);
@@ -397,10 +397,10 @@ void ITMMultiEngine<TVoxel, TIndex>::GetImage(ITMUChar4Image *out, GetImageType 
 	case ITMMultiEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_NORMAL:
 	case ITMMultiEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_CONFIDENCE:
 	{
-		IITMVisualisationEngine::RenderImageType type = IITMVisualisationEngine::RENDER_SHADED_GREYSCALE;
-		if (getImageType == ITMMultiEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_VOLUME) type = IITMVisualisationEngine::RENDER_COLOUR_FROM_VOLUME;
-		else if (getImageType == ITMMultiEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_NORMAL) type = IITMVisualisationEngine::RENDER_COLOUR_FROM_NORMAL;
-		else if (getImageType == ITMMultiEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_CONFIDENCE) type = IITMVisualisationEngine::RENDER_COLOUR_FROM_CONFIDENCE;
+		IVisualizationEngine::RenderImageType type = IVisualizationEngine::RENDER_SHADED_GREYSCALE;
+		if (getImageType == ITMMultiEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_VOLUME) type = IVisualizationEngine::RENDER_COLOUR_FROM_VOLUME;
+		else if (getImageType == ITMMultiEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_NORMAL) type = IVisualizationEngine::RENDER_COLOUR_FROM_NORMAL;
+		else if (getImageType == ITMMultiEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_CONFIDENCE) type = IVisualizationEngine::RENDER_COLOUR_FROM_CONFIDENCE;
 
 		if (freeviewLocalMapIdx >= 0){
 			ITMLocalMap<TVoxel, TIndex> *activeData = mapManager->getLocalMap(freeviewLocalMapIdx);
@@ -408,9 +408,9 @@ void ITMMultiEngine<TVoxel, TIndex>::GetImage(ITMUChar4Image *out, GetImageType 
 					new ITMRenderStateMultiScene<TVoxel,TIndex>(out->noDims, activeData->scene->sceneParams->near_clipping_distance,
 					                                            activeData->scene->sceneParams->far_clipping_distance, settings.device_type);
 
-			visualisationEngine->FindVisibleBlocks(activeData->scene, pose, intrinsics, renderState_freeview);
-			visualisationEngine->CreateExpectedDepths(activeData->scene, pose, intrinsics, renderState_freeview);
-			visualisationEngine->RenderImage(activeData->scene, pose, intrinsics, renderState_freeview, renderState_freeview->raycastImage, type);
+			visualization_engine->FindVisibleBlocks(activeData->scene, pose, intrinsics, renderState_freeview);
+			visualization_engine->CreateExpectedDepths(activeData->scene, pose, intrinsics, renderState_freeview);
+			visualization_engine->RenderImage(activeData->scene, pose, intrinsics, renderState_freeview, renderState_freeview->raycastImage, type);
 
 			if (settings.device_type == MEMORYDEVICE_CUDA)
 				out->SetFrom(renderState_freeview->raycastImage, MemoryCopyDirection::CUDA_TO_CPU);
@@ -422,9 +422,9 @@ void ITMMultiEngine<TVoxel, TIndex>::GetImage(ITMUChar4Image *out, GetImageType 
 			if (renderState_multiscene == NULL) renderState_multiscene =
 						new ITMRenderStateMultiScene<TVoxel, TIndex>(out->noDims, params.near_clipping_distance,
 						                                             params.far_clipping_distance, settings.device_type);
-			multiVisualisationEngine->PrepareRenderState(*mapManager, renderState_multiscene);
-			multiVisualisationEngine->CreateExpectedDepths(*mapManager, pose, intrinsics, renderState_multiscene);
-			multiVisualisationEngine->RenderImage(pose, intrinsics, renderState_multiscene, renderState_multiscene->raycastImage, type);
+			multiVisualizationEngine->PrepareRenderState(*mapManager, renderState_multiscene);
+			multiVisualizationEngine->CreateExpectedDepths(*mapManager, pose, intrinsics, renderState_multiscene);
+			multiVisualizationEngine->RenderImage(pose, intrinsics, renderState_multiscene, renderState_multiscene->raycastImage, type);
 			if (settings.device_type == MEMORYDEVICE_CUDA)
 				out->SetFrom(renderState_multiscene->raycastImage, MemoryCopyDirection::CUDA_TO_CPU);
 			else out->SetFrom(renderState_multiscene->raycastImage, MemoryCopyDirection::CPU_TO_CPU);

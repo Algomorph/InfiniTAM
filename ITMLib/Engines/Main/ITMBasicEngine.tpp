@@ -5,7 +5,7 @@
 #include "../LowLevel/ITMLowLevelEngineFactory.h"
 #include "../Meshing/ITMMeshingEngineFactory.h"
 #include "../ViewBuilding/ITMViewBuilderFactory.h"
-#include "../Visualization/ITMVisualizationEngineFactory.h"
+#include "../Visualization/VisualizationEngineFactory.h"
 #include "../../CameraTrackers/ITMCameraTrackerFactory.h"
 
 #include "../../../ORUtils/NVTimer.h"
@@ -29,7 +29,7 @@ ITMBasicEngine<TVoxel,TIndex>::ITMBasicEngine(const ITMRGBDCalib& calib, Vector2
 
 	lowLevelEngine = ITMLowLevelEngineFactory::MakeLowLevelEngine(deviceType);
 	viewBuilder = ITMViewBuilderFactory::MakeViewBuilder(calib, deviceType);
-	visualisationEngine = ITMVisualizationEngineFactory::MakeVisualisationEngine<TVoxel,TIndex>(deviceType);
+	visualizationEngine = VisualizationEngineFactory::MakeVisualizationEngine<TVoxel,TIndex>(deviceType);
 
 	meshingEngine = nullptr;
 	if (settings.create_meshing_engine)
@@ -87,7 +87,7 @@ ITMBasicEngine<TVoxel,TIndex>::~ITMBasicEngine()
 	delete trackingState;
 	if (view != NULL) delete view;
 
-	delete visualisationEngine;
+	delete visualizationEngine;
 
 	if (relocaliser != NULL) delete relocaliser;
 	delete kfRaycast;
@@ -298,7 +298,7 @@ ITMTrackingState::TrackingResult ITMBasicEngine<TVoxel,TIndex>::ProcessFrame(ITM
 			trackingState->pose_d->SetFrom(&keyframe.pose);
 
 			denseMapper->UpdateVisibleList(view, trackingState, scene, renderState_live, true);
-			trackingController->Prepare(trackingState, scene, view, visualisationEngine, renderState_live); 
+			trackingController->Prepare(trackingState, scene, view, visualizationEngine, renderState_live);
 			trackingController->Track(trackingState, view);
 
 			trackerResult = trackingState->trackerResult;
@@ -319,8 +319,8 @@ ITMTrackingState::TrackingResult ITMBasicEngine<TVoxel,TIndex>::ProcessFrame(ITM
 	{
 		if (!didFusion) denseMapper->UpdateVisibleList(view, trackingState, scene, renderState_live);
 
-		// raycast to renderState_live for tracking and free visualisation
-		trackingController->Prepare(trackingState, scene, view, visualisationEngine, renderState_live);
+		// raycast to renderState_live for tracking and free Visualization
+		trackingController->Prepare(trackingState, scene, view, visualizationEngine, renderState_live);
 
 		if (addKeyframeIdx >= 0)
 		{
@@ -373,7 +373,7 @@ void ITMBasicEngine<TVoxel,TIndex>::GetImage(ITMUChar4Image *out, GetImageType g
 	case ITMBasicEngine::InfiniTAM_IMAGE_ORIGINAL_DEPTH:
 		out->ChangeDims(view->depth->noDims);
 		if (settings.device_type == MEMORYDEVICE_CUDA) view->depth->UpdateHostFromDevice();
-		ITMVisualisationEngine<TVoxel, TIndex>::DepthToUchar4(out, view->depth);
+		VisualizationEngine<TVoxel, TIndex>::DepthToUchar4(out, view->depth);
 
 		break;
 	case ITMBasicEngine::InfiniTAM_IMAGE_SCENERAYCAST:
@@ -382,27 +382,27 @@ void ITMBasicEngine<TVoxel,TIndex>::GetImage(ITMUChar4Image *out, GetImageType g
 	case ITMBasicEngine::InfiniTAM_IMAGE_COLOUR_FROM_CONFIDENCE:
 		{
 		// use current raycast or forward projection?
-		IITMVisualisationEngine::RenderRaycastSelection raycastType;
-		if (trackingState->age_pointCloud <= 0) raycastType = IITMVisualisationEngine::RENDER_FROM_OLD_RAYCAST;
-		else raycastType = IITMVisualisationEngine::RENDER_FROM_OLD_FORWARDPROJ;
+		IVisualizationEngine::RenderRaycastSelection raycastType;
+		if (trackingState->age_pointCloud <= 0) raycastType = IVisualizationEngine::RENDER_FROM_OLD_RAYCAST;
+		else raycastType = IVisualizationEngine::RENDER_FROM_OLD_FORWARDPROJ;
 
 		// what sort of image is it?
-		IITMVisualisationEngine::RenderImageType imageType;
+		IVisualizationEngine::RenderImageType imageType;
 		switch (getImageType) {
 		case ITMBasicEngine::InfiniTAM_IMAGE_COLOUR_FROM_CONFIDENCE:
-			imageType = IITMVisualisationEngine::RENDER_COLOUR_FROM_CONFIDENCE;
+			imageType = IVisualizationEngine::RENDER_COLOUR_FROM_CONFIDENCE;
 			break;
 		case ITMBasicEngine::InfiniTAM_IMAGE_COLOUR_FROM_NORMAL:
-			imageType = IITMVisualisationEngine::RENDER_COLOUR_FROM_NORMAL;
+			imageType = IVisualizationEngine::RENDER_COLOUR_FROM_NORMAL;
 			break;
 		case ITMBasicEngine::InfiniTAM_IMAGE_COLOUR_FROM_VOLUME:
-			imageType = IITMVisualisationEngine::RENDER_COLOUR_FROM_VOLUME;
+			imageType = IVisualizationEngine::RENDER_COLOUR_FROM_VOLUME;
 			break;
 		default:
-			imageType = IITMVisualisationEngine::RENDER_SHADED_GREYSCALE_IMAGENORMALS;
+			imageType = IVisualizationEngine::RENDER_SHADED_GREYSCALE_IMAGENORMALS;
 		}
 
-		visualisationEngine->RenderImage(scene, trackingState->pose_d, &view->calib.intrinsics_d, renderState_live, renderState_live->raycastImage, imageType, raycastType);
+		visualizationEngine->RenderImage(scene, trackingState->pose_d, &view->calib.intrinsics_d, renderState_live, renderState_live->raycastImage, imageType, raycastType);
 
 		ORUtils::Image<Vector4u> *srcImage = NULL;
 		if (relocalisationCount != 0) srcImage = kfRaycast;
@@ -420,19 +420,19 @@ void ITMBasicEngine<TVoxel,TIndex>::GetImage(ITMUChar4Image *out, GetImageType g
 	case ITMBasicEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_NORMAL:
 	case ITMBasicEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_CONFIDENCE:
 	{
-		IITMVisualisationEngine::RenderImageType type = IITMVisualisationEngine::RENDER_SHADED_GREYSCALE;
-		if (getImageType == ITMBasicEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_VOLUME) type = IITMVisualisationEngine::RENDER_COLOUR_FROM_VOLUME;
-		else if (getImageType == ITMBasicEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_NORMAL) type = IITMVisualisationEngine::RENDER_COLOUR_FROM_NORMAL;
-		else if (getImageType == ITMBasicEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_CONFIDENCE) type = IITMVisualisationEngine::RENDER_COLOUR_FROM_CONFIDENCE;
+		IVisualizationEngine::RenderImageType type = IVisualizationEngine::RENDER_SHADED_GREYSCALE;
+		if (getImageType == ITMBasicEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_VOLUME) type = IVisualizationEngine::RENDER_COLOUR_FROM_VOLUME;
+		else if (getImageType == ITMBasicEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_NORMAL) type = IVisualizationEngine::RENDER_COLOUR_FROM_NORMAL;
+		else if (getImageType == ITMBasicEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_CONFIDENCE) type = IVisualizationEngine::RENDER_COLOUR_FROM_CONFIDENCE;
 
 		if (renderState_freeview == NULL)
 		{
 			renderState_freeview = new ITMRenderState(out->noDims, scene->sceneParams->near_clipping_distance, scene->sceneParams->far_clipping_distance, settings.device_type);
 		}
 
-		visualisationEngine->FindVisibleBlocks(scene, pose, intrinsics, renderState_freeview);
-		visualisationEngine->CreateExpectedDepths(scene, pose, intrinsics, renderState_freeview);
-		visualisationEngine->RenderImage(scene, pose, intrinsics, renderState_freeview, renderState_freeview->raycastImage, type);
+		visualizationEngine->FindVisibleBlocks(scene, pose, intrinsics, renderState_freeview);
+		visualizationEngine->CreateExpectedDepths(scene, pose, intrinsics, renderState_freeview);
+		visualizationEngine->RenderImage(scene, pose, intrinsics, renderState_freeview, renderState_freeview->raycastImage, type);
 
 		if (settings.device_type == MEMORYDEVICE_CUDA)
 			out->SetFrom(renderState_freeview->raycastImage, MemoryCopyDirection::CUDA_TO_CPU);

@@ -4,14 +4,14 @@
 
 #import "MetalContext.h"
 
-#include "ITMVisualisationEngine_Metal.h"
-#include "../Shared/ITMVisualisationEngine_Shared.h"
+#include "VisualizationEngine_Metal.h"
+#include "../Shared/VisualizationEngine_Shared.h"
 
 #include <vector>
 
 using namespace ITMLib;
 
-struct VisualisationEngine_MetalBits
+struct VisualizationEngine_MetalBits
 {
     id<MTLFunction> f_genericRaycastVH_device;
     id<MTLComputePipelineState> p_genericRaycastVH_device;
@@ -22,11 +22,11 @@ struct VisualisationEngine_MetalBits
     id<MTLBuffer> paramsBuffer;
 };
 
-static VisualisationEngine_MetalBits vis_metalBits;
+static VisualizationEngine_MetalBits vis_metalBits;
 
 template<class TVoxel>
-ITMVisualisationEngine_Metal<TVoxel, ITMVoxelBlockHash>::ITMVisualisationEngine_Metal()
-: ITMVisualisationEngine_CPU<TVoxel, ITMVoxelBlockHash>()
+VisualizationEngine_Metal<TVoxel, ITMVoxelBlockHash>::VisualizationEngine_Metal()
+: VisualizationEngine_CPU<TVoxel, ITMVoxelBlockHash>()
 {
     NSError *errors;
 
@@ -98,21 +98,21 @@ static void CreateICPMaps_common_metal(const ITMScene<TVoxel,TIndex> *scene, con
 
 template<class TVoxel>
 static void RenderImage_common_metal(const ITMScene<TVoxel,ITMVoxelBlockHash> *scene, const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics,
-                               const ITMRenderState *renderState, ITMUChar4Image *outputImage, IITMVisualisationEngine::RenderImageType type, IITMVisualisationEngine::RenderRaycastSelection raycastType)
+                               const ITMRenderState *renderState, ITMUChar4Image *outputImage, IVisualizationEngine::RenderImageType type, IVisualizationEngine::RenderRaycastSelection raycastType)
 {
     Vector2i imgSize = outputImage->noDims;
     Matrix4f invM = pose->GetInvM();
 
     Vector4f *pointsRay;
-    if (raycastType == IITMVisualisationEngine::RENDER_FROM_OLD_RAYCAST)
+    if (raycastType == IVisualizationEngine::RENDER_FROM_OLD_RAYCAST)
         pointsRay = renderState->raycastResult->GetData(MEMORYDEVICE_CPU);
     else
     {
-        if (raycastType == IITMVisualisationEngine::RENDER_FROM_OLD_FORWARDPROJ)
+        if (raycastType == IVisualizationEngine::RENDER_FROM_OLD_FORWARDPROJ)
             pointsRay = renderState->forwardProjection->GetData(MEMORYDEVICE_CPU);
         else
         {
-            // this one is generally done for freeview visualisation, so
+            // this one is generally done for freeview Visualization, so
             // no, do not update the list of visible blocks
 
             const void *entriesVisibleType = NULL;
@@ -162,32 +162,32 @@ static void RenderImage_common_metal(const ITMScene<TVoxel,ITMVoxelBlockHash> *s
     const TVoxel *voxelData = scene->localVBA.GetVoxelBlocks();
     const typename ITMVoxelBlockHash::IndexData *voxelIndex = scene->index.GetIndexData();
 
-    if ((type == IITMVisualisationEngine::RENDER_COLOUR_FROM_VOLUME)&&
-        (!TVoxel::hasColorInformation)) type = IITMVisualisationEngine::RENDER_SHADED_GREYSCALE;
+    if ((type == IVisualizationEngine::RENDER_COLOUR_FROM_VOLUME)&&
+        (!TVoxel::hasColorInformation)) type = IVisualizationEngine::RENDER_SHADED_GREYSCALE;
 
     switch (type) {
-        case IITMVisualisationEngine::RENDER_COLOUR_FROM_VOLUME:
+        case IVisualizationEngine::RENDER_COLOUR_FROM_VOLUME:
             for (int locId = 0; locId < imgSize.x * imgSize.y; locId++)
             {
                 Vector4f ptRay = pointsRay[locId];
                 processPixelColour<TVoxel, ITMVoxelBlockHash>(outRendering[locId], ptRay.toVector3(), ptRay.w > 0, voxelData, voxelIndex, lightSource);
             }
             break;
-        case IITMVisualisationEngine::RENDER_COLOUR_FROM_NORMAL:
+        case IVisualizationEngine::RENDER_COLOUR_FROM_NORMAL:
             for (int locId = 0; locId < imgSize.x * imgSize.y; locId++)
             {
                 Vector4f ptRay = pointsRay[locId];
                 processPixelNormal<TVoxel, ITMVoxelBlockHash>(outRendering[locId], ptRay.toVector3(), ptRay.w > 0, voxelData, voxelIndex, lightSource);
             }
             break;
-        case IITMVisualisationEngine::RENDER_COLOUR_FROM_CONFIDENCE:
+        case IVisualizationEngine::RENDER_COLOUR_FROM_CONFIDENCE:
             for (int locId = 0; locId < imgSize.x * imgSize.y; locId++)
             {
                 Vector4f ptRay = pointsRay[locId];
                 processPixelConfidence<TVoxel, ITMVoxelBlockHash>(outRendering[locId], ptRay, ptRay.w > 0, voxelData, voxelIndex, lightSource);
             }
             break;
-        case IITMVisualisationEngine::RENDER_SHADED_GREYSCALE_IMAGENORMALS:
+        case IVisualizationEngine::RENDER_SHADED_GREYSCALE_IMAGENORMALS:
             for (int locId = 0; locId < imgSize.x * imgSize.y; locId++)
             {
                 int y = locId/imgSize.x;
@@ -195,7 +195,7 @@ static void RenderImage_common_metal(const ITMScene<TVoxel,ITMVoxelBlockHash> *s
                 processPixelGrey_ImageNormals<true, false>(outRendering, pointsRay, imgSize, x, y, scene->sceneParams->voxelSize, lightSource);
             }
             break;
-        case IITMVisualisationEngine::RENDER_SHADED_GREYSCALE:
+        case IVisualizationEngine::RENDER_SHADED_GREYSCALE:
         default:
             for (int locId = 0; locId < imgSize.x * imgSize.y; locId++)
             {
@@ -206,15 +206,15 @@ static void RenderImage_common_metal(const ITMScene<TVoxel,ITMVoxelBlockHash> *s
 }
 
 template<class TVoxel>
-void ITMVisualisationEngine_Metal<TVoxel, ITMVoxelBlockHash>::CreateICPMaps(const ITMScene<TVoxel,ITMVoxelBlockHash> *scene, const ITMView *view, ITMTrackingState *trackingState, ITMRenderState *renderState) const
+void VisualizationEngine_Metal<TVoxel, ITMVoxelBlockHash>::CreateICPMaps(const ITMScene<TVoxel,ITMVoxelBlockHash> *scene, const ITMView *view, ITMTrackingState *trackingState, ITMRenderState *renderState) const
 {
     CreateICPMaps_common_metal(scene, view, trackingState, renderState);
 }
 
 template<class TVoxel>
-void ITMVisualisationEngine_Metal<TVoxel,ITMVoxelBlockHash>::RenderImage(const ITMScene<TVoxel,ITMVoxelBlockHash> *scene, const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics,
-                                                            const ITMRenderState *renderState, ITMUChar4Image *outputImage, IITMVisualisationEngine::RenderImageType type,
-                                                            IITMVisualisationEngine::RenderRaycastSelection raycastType) const
+void VisualizationEngine_Metal<TVoxel,ITMVoxelBlockHash>::RenderImage(const ITMScene<TVoxel,ITMVoxelBlockHash> *scene, const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics,
+                                                            const ITMRenderState *renderState, ITMUChar4Image *outputImage, IVisualizationEngine::RenderImageType type,
+                                                            IVisualizationEngine::RenderRaycastSelection raycastType) const
 {
     RenderImage_common_metal(scene, pose, intrinsics, renderState, outputImage, type, raycastType);
 }

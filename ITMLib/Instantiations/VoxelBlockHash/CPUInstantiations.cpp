@@ -11,15 +11,15 @@
 #include "../../Engines/Meshing/CPU/ITMMeshingEngine_CPU.tpp"
 #include "../../Engines/Meshing/CPU/ITMMultiMeshingEngine_CPU.tpp"
 #include "../../Engines/MultiScene/ITMMapGraphManager.tpp"
-#include "../../Engines/Visualization/CPU/ITMMultiVisualizationEngine_CPU.tpp"
+#include "../../Engines/Visualization/CPU/MultiVisualizationEngine_CPU.tpp"
 #include "../../Engines/Reconstruction/CPU/SceneReconstructionEngine_CPU.tpp"
 #include "../../Engines/Reconstruction/CPU/SurfelSceneReconstructionEngine_CPU.tpp"
 #include "../../Engines/Reconstruction/Interface/SurfelSceneReconstructionEngine.tpp"
 #include "../../Engines/Swapping/CPU/ITMSwappingEngine_CPU.tpp"
-#include "../../Engines/Visualization/CPU/ITMSurfelVisualisationEngine_CPU.tpp"
-#include "../../Engines/Visualization/CPU/ITMVisualisationEngine_CPU.tpp"
-#include "../../Engines/Visualization/Interface/ITMSurfelVisualisationEngine.tpp"
-#include "../../Engines/Visualization/Interface/ITMVisualisationEngine.h"
+#include "../../Engines/Visualization/CPU/SurfelVisualizationEngine_CPU.tpp"
+#include "../../Engines/Visualization/CPU/VisualizationEngine_CPU.tpp"
+#include "../../Engines/Visualization/Interface/SurfelVisualizationEngine.tpp"
+#include "../../Engines/Visualization/Interface/VisualizationEngine.h"
 #include "../../CameraTrackers/ITMCameraTrackerFactory.h"
 
 
@@ -32,7 +32,7 @@ namespace ITMLib
 	template class ITMMultiEngine<ITMVoxel, VoxelBlockHash>;
 	template class ITMDenseMapper<ITMVoxel, VoxelBlockHash>;
 	template class ITMVoxelMapGraphManager<ITMVoxel, VoxelBlockHash>;
-	template class ITMVisualizationEngine_CPU<ITMVoxel, VoxelBlockHash>;
+	template class VisualizationEngine_CPU<ITMVoxel, VoxelBlockHash>;
 	template class ITMMeshingEngine_CPU<ITMVoxel, VoxelBlockHash>;
 	template class ITMMultiMeshingEngine_CPU<ITMVoxel, VoxelBlockHash>;
 	template class ITMSwappingEngine_CPU<ITMVoxel, VoxelBlockHash>;
@@ -40,8 +40,8 @@ namespace ITMLib
 	//surfel fusion
 	template class ITMDenseSurfelMapper<ITMSurfel_grey>;
 	template class ITMDenseSurfelMapper<ITMSurfel_rgb>;
-	template class ITMSurfelVisualisationEngine<ITMSurfel_grey>;
-	template class ITMSurfelVisualisationEngine<ITMSurfel_rgb>;
-	template class ITMSurfelVisualizationEngine_CPU<ITMSurfel_grey>;
-	template class ITMSurfelVisualizationEngine_CPU<ITMSurfel_rgb>;
+	template class SurfelVisualizationEngine<ITMSurfel_grey>;
+	template class SurfelVisualizationEngine<ITMSurfel_rgb>;
+	template class SurfelVisualizationEngine_CPU<ITMSurfel_grey>;
+	template class SurfelVisualizationEngine_CPU<ITMSurfel_rgb>;
 }

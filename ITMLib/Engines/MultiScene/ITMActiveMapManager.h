@@ -46,8 +46,8 @@ namespace ITMLib
 		int findPrimaryDataIdx(void) const;
 		int findPrimaryLocalMapIdx(void) const;
 
-		int findBestVisualisationDataIdx(void) const;
-		int findBestVisualisationLocalMapIdx(void) const;
+		int findBestVisualizationDataIdx(void) const;
+		int findBestVisualizationLocalMapIdx(void) const;
 
 		int numActiveLocalMaps(void) const { return static_cast<int>(activeData.size()); }
 		int getLocalMapIndex(int dataIdx) const { return activeData[dataIdx].localMapIndex; }

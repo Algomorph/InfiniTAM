@@ -88,15 +88,15 @@
 		A6AC2C221CBD34A7000CC89D /* ITMViewBuilder_CPU.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6AC2B741CBD34A7000CC89D /* ITMViewBuilder_CPU.cpp */; };
 		A6AC2C231CBD34A7000CC89D /* ITMViewBuilder_CUDA.cu in Resources */ = {isa = PBXBuildFile; fileRef = A6AC2B771CBD34A7000CC89D /* ITMViewBuilder_CUDA.cu */; };
 		A6AC2C241CBD34A7000CC89D /* ITMViewBuilderFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6AC2B7B1CBD34A7000CC89D /* ITMViewBuilderFactory.cpp */; };
-		A6AC2C271CBD34A7000CC89D /* ITMSurfelVisualisationEngine_CPU.tpp in Resources */ = {isa = PBXBuildFile; fileRef = A6AC2B861CBD34A7000CC89D /* ITMSurfelVisualisationEngine_CPU.tpp */; };
-		A6AC2C281CBD34A7000CC89D /* ITMVisualisationEngine_CPU.tpp in Resources */ = {isa = PBXBuildFile; fileRef = A6AC2B881CBD34A7000CC89D /* ITMVisualisationEngine_CPU.tpp */; };
-		A6AC2C291CBD34A7000CC89D /* ITMSurfelVisualisationEngine_CUDA.tcu in Resources */ = {isa = PBXBuildFile; fileRef = A6AC2B8B1CBD34A7000CC89D /* ITMSurfelVisualisationEngine_CUDA.tcu */; };
-		A6AC2C2A1CBD34A7000CC89D /* ITMVisualisationEngine_CUDA.tcu in Resources */ = {isa = PBXBuildFile; fileRef = A6AC2B8D1CBD34A7000CC89D /* ITMVisualisationEngine_CUDA.tcu */; };
-		A6AC2C2B1CBD34A7000CC89D /* ITMSurfelVisualisationEngine.tpp in Resources */ = {isa = PBXBuildFile; fileRef = A6AC2B901CBD34A7000CC89D /* ITMSurfelVisualisationEngine.tpp */; };
-		A6AC2C2C1CBD34A7000CC89D /* ITMVisualisationEngine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6AC2B911CBD34A7000CC89D /* ITMVisualisationEngine.cpp */; };
-		A6AC2C2D1CBD34A7000CC89D /* ITMSurfelVisualisationEngineFactory.tpp in Resources */ = {isa = PBXBuildFile; fileRef = A6AC2B941CBD34A7000CC89D /* ITMSurfelVisualisationEngineFactory.tpp */; };
-		A6AC2C2E1CBD34A7000CC89D /* ITMVisualisationEngine.metal in Sources */ = {isa = PBXBuildFile; fileRef = A6AC2B971CBD34A7000CC89D /* ITMVisualisationEngine.metal */; };
-		A6AC2C2F1CBD34A7000CC89D /* ITMVisualisationEngine_Metal.mm in Sources */ = {isa = PBXBuildFile; fileRef = A6AC2B991CBD34A7000CC89D /* ITMVisualisationEngine_Metal.mm */; };
+		A6AC2C271CBD34A7000CC89D /* SurfelVisualizationEngine_CPU.tpp in Resources */ = {isa = PBXBuildFile; fileRef = A6AC2B861CBD34A7000CC89D /* SurfelVisualizationEngine_CPU.tpp */; };
+		A6AC2C281CBD34A7000CC89D /* VisualizationEngine_CPU.tpp in Resources */ = {isa = PBXBuildFile; fileRef = A6AC2B881CBD34A7000CC89D /* VisualizationEngine_CPU.tpp */; };
+		A6AC2C291CBD34A7000CC89D /* SurfelVisualizationEngine_CUDA.tcu in Resources */ = {isa = PBXBuildFile; fileRef = A6AC2B8B1CBD34A7000CC89D /* SurfelVisualizationEngine_CUDA.tcu */; };
+		A6AC2C2A1CBD34A7000CC89D /* VisualizationEngine_CUDA.tcu in Resources */ = {isa = PBXBuildFile; fileRef = A6AC2B8D1CBD34A7000CC89D /* VisualizationEngine_CUDA.tcu */; };
+		A6AC2C2B1CBD34A7000CC89D /* SurfelVisualizationEngine.tpp in Resources */ = {isa = PBXBuildFile; fileRef = A6AC2B901CBD34A7000CC89D /* SurfelVisualizationEngine.tpp */; };
+		A6AC2C2C1CBD34A7000CC89D /* VisualizationEngine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6AC2B911CBD34A7000CC89D /* VisualizationEngine.cpp */; };
+		A6AC2C2D1CBD34A7000CC89D /* SurfelVisualizationEngineFactory.tpp in Resources */ = {isa = PBXBuildFile; fileRef = A6AC2B941CBD34A7000CC89D /* SurfelVisualizationEngineFactory.tpp */; };
+		A6AC2C2E1CBD34A7000CC89D /* VisualizationEngine.metal in Sources */ = {isa = PBXBuildFile; fileRef = A6AC2B971CBD34A7000CC89D /* VisualizationEngine.metal */; };
+		A6AC2C2F1CBD34A7000CC89D /* VisualizationEngine_Metal.mm in Sources */ = {isa = PBXBuildFile; fileRef = A6AC2B991CBD34A7000CC89D /* VisualizationEngine_Metal.mm */; };
 		A6AC2C301CBD34A7000CC89D /* ITMCalibIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6AC2BA11CBD34A7000CC89D /* ITMCalibIO.cpp */; };
 		A6AC2C311CBD34A7000CC89D /* ITMSurfelRenderState.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6AC2BB01CBD34A7000CC89D /* ITMSurfelRenderState.cpp */; };
 		A6AC2C321CBD34A7000CC89D /* ITMColorTracker_CPU.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6AC2BC91CBD34A7000CC89D /* ITMColorTracker_CPU.cpp */; };
@@ -276,27 +276,27 @@
 		A6AC2B7B1CBD34A7000CC89D /* ITMViewBuilderFactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ITMViewBuilderFactory.cpp; sourceTree = "<group>"; };
 		A6AC2B7C1CBD34A7000CC89D /* ITMViewBuilderFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ITMViewBuilderFactory.h; sourceTree = "<group>"; };
 		A6AC2B821CBD34A7000CC89D /* ITMViewBuilder_Shared.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ITMViewBuilder_Shared.h; sourceTree = "<group>"; };
-		A6AC2B851CBD34A7000CC89D /* ITMSurfelVisualisationEngine_CPU.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ITMSurfelVisualisationEngine_CPU.h; sourceTree = "<group>"; };
-		A6AC2B861CBD34A7000CC89D /* ITMSurfelVisualisationEngine_CPU.tpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ITMSurfelVisualisationEngine_CPU.tpp; sourceTree = "<group>"; };
-		A6AC2B871CBD34A7000CC89D /* ITMVisualisationEngine_CPU.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ITMVisualisationEngine_CPU.h; sourceTree = "<group>"; };
-		A6AC2B881CBD34A7000CC89D /* ITMVisualisationEngine_CPU.tpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; path = ITMVisualisationEngine_CPU.tpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
-		A6AC2B8A1CBD34A7000CC89D /* ITMSurfelVisualisationEngine_CUDA.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ITMSurfelVisualisationEngine_CUDA.h; sourceTree = "<group>"; };
-		A6AC2B8B1CBD34A7000CC89D /* ITMSurfelVisualisationEngine_CUDA.tcu */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ITMSurfelVisualisationEngine_CUDA.tcu; sourceTree = "<group>"; };
-		A6AC2B8C1CBD34A7000CC89D /* ITMVisualisationEngine_CUDA.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ITMVisualisationEngine_CUDA.h; sourceTree = "<group>"; };
-		A6AC2B8D1CBD34A7000CC89D /* ITMVisualisationEngine_CUDA.tcu */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ITMVisualisationEngine_CUDA.tcu; sourceTree = "<group>"; };
-		A6AC2B8F1CBD34A7000CC89D /* ITMSurfelVisualisationEngine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ITMSurfelVisualisationEngine.h; sourceTree = "<group>"; };
-		A6AC2B901CBD34A7000CC89D /* ITMSurfelVisualisationEngine.tpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ITMSurfelVisualisationEngine.tpp; sourceTree = "<group>"; };
-		A6AC2B911CBD34A7000CC89D /* ITMVisualisationEngine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ITMVisualisationEngine.cpp; sourceTree = "<group>"; };
-		A6AC2B921CBD34A7000CC89D /* ITMVisualisationEngine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ITMVisualisationEngine.h; sourceTree = "<group>"; };
-		A6AC2B931CBD34A7000CC89D /* ITMSurfelVisualisationEngineFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ITMSurfelVisualisationEngineFactory.h; sourceTree = "<group>"; };
-		A6AC2B941CBD34A7000CC89D /* ITMSurfelVisualisationEngineFactory.tpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ITMSurfelVisualisationEngineFactory.tpp; sourceTree = "<group>"; };
-		A6AC2B951CBD34A7000CC89D /* ITMVisualisationEngineFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ITMVisualisationEngineFactory.h; sourceTree = "<group>"; };
-		A6AC2B971CBD34A7000CC89D /* ITMVisualisationEngine.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = ITMVisualisationEngine.metal; sourceTree = "<group>"; };
-		A6AC2B981CBD34A7000CC89D /* ITMVisualisationEngine_Metal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ITMVisualisationEngine_Metal.h; sourceTree = "<group>"; };
-		A6AC2B991CBD34A7000CC89D /* ITMVisualisationEngine_Metal.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ITMVisualisationEngine_Metal.mm; sourceTree = "<group>"; };
-		A6AC2B9B1CBD34A7000CC89D /* ITMSurfelVisualisationEngine_Settings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ITMSurfelVisualisationEngine_Settings.h; sourceTree = "<group>"; };
-		A6AC2B9C1CBD34A7000CC89D /* ITMSurfelVisualisationEngine_Shared.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ITMSurfelVisualisationEngine_Shared.h; sourceTree = "<group>"; };
-		A6AC2B9D1CBD34A7000CC89D /* ITMVisualisationEngine_Shared.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ITMVisualisationEngine_Shared.h; sourceTree = "<group>"; };
+		A6AC2B851CBD34A7000CC89D /* SurfelVisualizationEngine_CPU.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SurfelVisualizationEngine_CPU.h; sourceTree = "<group>"; };
+		A6AC2B861CBD34A7000CC89D /* SurfelVisualizationEngine_CPU.tpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = SurfelVisualizationEngine_CPU.tpp; sourceTree = "<group>"; };
+		A6AC2B871CBD34A7000CC89D /* VisualizationEngine_CPU.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VisualizationEngine_CPU.h; sourceTree = "<group>"; };
+		A6AC2B881CBD34A7000CC89D /* VisualizationEngine_CPU.tpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; path = VisualizationEngine_CPU.tpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
+		A6AC2B8A1CBD34A7000CC89D /* SurfelVisualizationEngine_CUDA.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SurfelVisualizationEngine_CUDA.h; sourceTree = "<group>"; };
+		A6AC2B8B1CBD34A7000CC89D /* SurfelVisualizationEngine_CUDA.tcu */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = SurfelVisualizationEngine_CUDA.tcu; sourceTree = "<group>"; };
+		A6AC2B8C1CBD34A7000CC89D /* VisualizationEngine_CUDA.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VisualizationEngine_CUDA.h; sourceTree = "<group>"; };
+		A6AC2B8D1CBD34A7000CC89D /* VisualizationEngine_CUDA.tcu */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = VisualizationEngine_CUDA.tcu; sourceTree = "<group>"; };
+		A6AC2B8F1CBD34A7000CC89D /* SurfelVisualizationEngine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SurfelVisualizationEngine.h; sourceTree = "<group>"; };
+		A6AC2B901CBD34A7000CC89D /* SurfelVisualizationEngine.tpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = SurfelVisualizationEngine.tpp; sourceTree = "<group>"; };
+		A6AC2B911CBD34A7000CC89D /* VisualizationEngine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VisualizationEngine.cpp; sourceTree = "<group>"; };
+		A6AC2B921CBD34A7000CC89D /* VisualizationEngine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VisualizationEngine.h; sourceTree = "<group>"; };
+		A6AC2B931CBD34A7000CC89D /* SurfelVisualizationEngineFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SurfelVisualizationEngineFactory.h; sourceTree = "<group>"; };
+		A6AC2B941CBD34A7000CC89D /* SurfelVisualizationEngineFactory.tpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = SurfelVisualizationEngineFactory.tpp; sourceTree = "<group>"; };
+		A6AC2B951CBD34A7000CC89D /* VisualizationEngineFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VisualizationEngineFactory.h; sourceTree = "<group>"; };
+		A6AC2B971CBD34A7000CC89D /* VisualizationEngine.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = VisualizationEngine.metal; sourceTree = "<group>"; };
+		A6AC2B981CBD34A7000CC89D /* VisualizationEngine_Metal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VisualizationEngine_Metal.h; sourceTree = "<group>"; };
+		A6AC2B991CBD34A7000CC89D /* VisualizationEngine_Metal.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = VisualizationEngine_Metal.mm; sourceTree = "<group>"; };
+		A6AC2B9B1CBD34A7000CC89D /* SurfelVisualizationEngine_Settings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SurfelVisualizationEngine_Settings.h; sourceTree = "<group>"; };
+		A6AC2B9C1CBD34A7000CC89D /* SurfelVisualizationEngine_Shared.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SurfelVisualizationEngine_Shared.h; sourceTree = "<group>"; };
+		A6AC2B9D1CBD34A7000CC89D /* VisualizationEngine_Shared.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VisualizationEngine_Shared.h; sourceTree = "<group>"; };
 		A6AC2B9E1CBD34A7000CC89D /* ITMLibDefines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ITMLibDefines.h; sourceTree = "<group>"; };
 		A6AC2BA11CBD34A7000CC89D /* ITMCalibIO.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ITMCalibIO.cpp; sourceTree = "<group>"; };
 		A6AC2BA21CBD34A7000CC89D /* ITMCalibIO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ITMCalibIO.h; sourceTree = "<group>"; };
@@ -621,7 +621,7 @@
 				A6AC2B491CBD34A7000CC89D /* Reconstruction */,
 				A6AC2B621CBD34A7000CC89D /* Swapping */,
 				A6AC2B721CBD34A7000CC89D /* ViewBuilding */,
-				A6AC2B831CBD34A7000CC89D /* Visualisation */,
+				A6AC2B831CBD34A7000CC89D /* Visualization */,
 			);
 			path = Engines;
 			sourceTree = "<group>";
@@ -889,28 +889,28 @@
 			path = Shared;
 			sourceTree = "<group>";
 		};
-		A6AC2B831CBD34A7000CC89D /* Visualisation */ = {
+		A6AC2B831CBD34A7000CC89D /* Visualization */ = {
 			isa = PBXGroup;
 			children = (
 				A6AC2B841CBD34A7000CC89D /* CPU */,
 				A6AC2B891CBD34A7000CC89D /* CUDA */,
 				A6AC2B8E1CBD34A7000CC89D /* Interface */,
-				A6AC2B931CBD34A7000CC89D /* ITMSurfelVisualisationEngineFactory.h */,
-				A6AC2B941CBD34A7000CC89D /* ITMSurfelVisualisationEngineFactory.tpp */,
-				A6AC2B951CBD34A7000CC89D /* ITMVisualisationEngineFactory.h */,
+				A6AC2B931CBD34A7000CC89D /* SurfelVisualizationEngineFactory.h */,
+				A6AC2B941CBD34A7000CC89D /* SurfelVisualizationEngineFactory.tpp */,
+				A6AC2B951CBD34A7000CC89D /* VisualizationEngineFactory.h */,
 				A6AC2B961CBD34A7000CC89D /* Metal */,
 				A6AC2B9A1CBD34A7000CC89D /* Shared */,
 			);
-			path = Visualisation;
+			path = Visualization;
 			sourceTree = "<group>";
 		};
 		A6AC2B841CBD34A7000CC89D /* CPU */ = {
 			isa = PBXGroup;
 			children = (
-				A6AC2B851CBD34A7000CC89D /* ITMSurfelVisualisationEngine_CPU.h */,
-				A6AC2B861CBD34A7000CC89D /* ITMSurfelVisualisationEngine_CPU.tpp */,
-				A6AC2B871CBD34A7000CC89D /* ITMVisualisationEngine_CPU.h */,
-				A6AC2B881CBD34A7000CC89D /* ITMVisualisationEngine_CPU.tpp */,
+				A6AC2B851CBD34A7000CC89D /* SurfelVisualizationEngine_CPU.h */,
+				A6AC2B861CBD34A7000CC89D /* SurfelVisualizationEngine_CPU.tpp */,
+				A6AC2B871CBD34A7000CC89D /* VisualizationEngine_CPU.h */,
+				A6AC2B881CBD34A7000CC89D /* VisualizationEngine_CPU.tpp */,
 			);
 			path = CPU;
 			sourceTree = "<group>";
@@ -918,10 +918,10 @@
 		A6AC2B891CBD34A7000CC89D /* CUDA */ = {
 			isa = PBXGroup;
 			children = (
-				A6AC2B8A1CBD34A7000CC89D /* ITMSurfelVisualisationEngine_CUDA.h */,
-				A6AC2B8B1CBD34A7000CC89D /* ITMSurfelVisualisationEngine_CUDA.tcu */,
-				A6AC2B8C1CBD34A7000CC89D /* ITMVisualisationEngine_CUDA.h */,
-				A6AC2B8D1CBD34A7000CC89D /* ITMVisualisationEngine_CUDA.tcu */,
+				A6AC2B8A1CBD34A7000CC89D /* SurfelVisualizationEngine_CUDA.h */,
+				A6AC2B8B1CBD34A7000CC89D /* SurfelVisualizationEngine_CUDA.tcu */,
+				A6AC2B8C1CBD34A7000CC89D /* VisualizationEngine_CUDA.h */,
+				A6AC2B8D1CBD34A7000CC89D /* VisualizationEngine_CUDA.tcu */,
 			);
 			path = CUDA;
 			sourceTree = "<group>";
@@ -929,10 +929,10 @@
 		A6AC2B8E1CBD34A7000CC89D /* Interface */ = {
 			isa = PBXGroup;
 			children = (
-				A6AC2B8F1CBD34A7000CC89D /* ITMSurfelVisualisationEngine.h */,
-				A6AC2B901CBD34A7000CC89D /* ITMSurfelVisualisationEngine.tpp */,
-				A6AC2B911CBD34A7000CC89D /* ITMVisualisationEngine.cpp */,
-				A6AC2B921CBD34A7000CC89D /* ITMVisualisationEngine.h */,
+				A6AC2B8F1CBD34A7000CC89D /* SurfelVisualizationEngine.h */,
+				A6AC2B901CBD34A7000CC89D /* SurfelVisualizationEngine.tpp */,
+				A6AC2B911CBD34A7000CC89D /* VisualizationEngine.cpp */,
+				A6AC2B921CBD34A7000CC89D /* VisualizationEngine.h */,
 			);
 			path = Interface;
 			sourceTree = "<group>";
@@ -940,9 +940,9 @@
 		A6AC2B961CBD34A7000CC89D /* Metal */ = {
 			isa = PBXGroup;
 			children = (
-				A6AC2B971CBD34A7000CC89D /* ITMVisualisationEngine.metal */,
-				A6AC2B981CBD34A7000CC89D /* ITMVisualisationEngine_Metal.h */,
-				A6AC2B991CBD34A7000CC89D /* ITMVisualisationEngine_Metal.mm */,
+				A6AC2B971CBD34A7000CC89D /* VisualizationEngine.metal */,
+				A6AC2B981CBD34A7000CC89D /* VisualizationEngine_Metal.h */,
+				A6AC2B991CBD34A7000CC89D /* VisualizationEngine_Metal.mm */,
 			);
 			path = Metal;
 			sourceTree = "<group>";
@@ -950,9 +950,9 @@
 		A6AC2B9A1CBD34A7000CC89D /* Shared */ = {
 			isa = PBXGroup;
 			children = (
-				A6AC2B9B1CBD34A7000CC89D /* ITMSurfelVisualisationEngine_Settings.h */,
-				A6AC2B9C1CBD34A7000CC89D /* ITMSurfelVisualisationEngine_Shared.h */,
-				A6AC2B9D1CBD34A7000CC89D /* ITMVisualisationEngine_Shared.h */,
+				A6AC2B9B1CBD34A7000CC89D /* SurfelVisualizationEngine_Settings.h */,
+				A6AC2B9C1CBD34A7000CC89D /* SurfelVisualizationEngine_Shared.h */,
+				A6AC2B9D1CBD34A7000CC89D /* VisualizationEngine_Shared.h */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -1209,28 +1209,28 @@
 				A6AC2C191CBD34A7000CC89D /* SurfelSceneReconstructionEngine_CUDA.tcu in Resources */,
 				A6AC2C1E1CBD34A7000CC89D /* ITMSwappingEngine_CPU.tpp in Resources */,
 				A6AC2C151CBD34A7000CC89D /* ITMMeshingEngine_CUDA.tcu in Resources */,
-				A6AC2C2B1CBD34A7000CC89D /* ITMSurfelVisualisationEngine.tpp in Resources */,
+				A6AC2C2B1CBD34A7000CC89D /* SurfelVisualizationEngine.tpp in Resources */,
 				A6AC2C1F1CBD34A7000CC89D /* ITMSwappingEngine_CUDA.tcu in Resources */,
 				A6AC2C231CBD34A7000CC89D /* ITMViewBuilder_CUDA.cu in Resources */,
-				A6AC2C271CBD34A7000CC89D /* ITMSurfelVisualisationEngine_CPU.tpp in Resources */,
+				A6AC2C271CBD34A7000CC89D /* SurfelVisualizationEngine_CPU.tpp in Resources */,
 				A6AC2C031CBD34A7000CC89D /* Android.mk in Resources */,
 				A6AC2C391CBD34A7000CC89D /* ITMRenTracker_CUDA.tcu in Resources */,
 				A626D7651A0F98CF0086B8BF /* LaunchScreen.xib in Resources */,
 				A6AC2C3E1CBD34A7000CC89D /* ITMRenTracker.tpp in Resources */,
-				A6AC2C2A1CBD34A7000CC89D /* ITMVisualisationEngine_CUDA.tcu in Resources */,
+				A6AC2C2A1CBD34A7000CC89D /* VisualizationEngine_CUDA.tcu in Resources */,
 				A6AC2C141CBD34A7000CC89D /* ITMMeshingEngine_CPU.tpp in Resources */,
 				A6AC2C061CBD34A7000CC89D /* ITMDenseMapper.tpp in Resources */,
 				A6AC2AFF1CBD333D000CC89D /* CMakeLists.txt in Resources */,
 				A6AC2C101CBD34A7000CC89D /* ITMLowLevelEngine_CUDA.cu in Resources */,
 				A6AC2C181CBD34A7000CC89D /* SceneReconstructionEngine_CUDA.tcu in Resources */,
 				A6AC2C371CBD34A7000CC89D /* ITMDepthTracker_CUDA.cu in Resources */,
-				A6AC2C2D1CBD34A7000CC89D /* ITMSurfelVisualisationEngineFactory.tpp in Resources */,
+				A6AC2C2D1CBD34A7000CC89D /* SurfelVisualizationEngineFactory.tpp in Resources */,
 				A6AC2C1A1CBD34A7000CC89D /* ITMSurfelSceneReconstructionEngine.tpp in Resources */,
 				6F7C0CCD17F0EA0500692EC1 /* InfoPlist.strings in Resources */,
 				A6AC2C041CBD34A7000CC89D /* CMakeLists.txt in Resources */,
 				A6AC2C171CBD34A7000CC89D /* SurfelSceneReconstructionEngine_CPU.tpp in Resources */,
 				A6AC2C0C1CBD34A7000CC89D /* ITMMultiSceneManager.tpp in Resources */,
-				A6AC2C291CBD34A7000CC89D /* ITMSurfelVisualisationEngine_CUDA.tcu in Resources */,
+				A6AC2C291CBD34A7000CC89D /* SurfelVisualizationEngine_CUDA.tcu in Resources */,
 				A6AC2C361CBD34A7000CC89D /* ITMColorTracker_CUDA.cu in Resources */,
 				A6AC2B0E1CBD3348000CC89D /* CMakeLists.txt in Resources */,
 				A6AC2C381CBD34A7000CC89D /* ITMExtendedTracker_CUDA.cu in Resources */,
@@ -1244,7 +1244,7 @@
 				A68436821A1F9C190010E0C5 /* calib.txt in Resources */,
 				A6AC29A61CBD3323000CC89D /* CMakeLists.txt in Resources */,
 				A6AC29A51CBD3323000CC89D /* Android.mk in Resources */,
-				A6AC2C281CBD34A7000CC89D /* ITMVisualisationEngine_CPU.tpp in Resources */,
+				A6AC2C281CBD34A7000CC89D /* VisualizationEngine_CPU.tpp in Resources */,
 				6F7C0CDE17F0EA0500692EC1 /* Images.xcassets in Resources */,
 				A6AC2C071CBD34A7000CC89D /* ITMDenseSurfelMapper.tpp in Resources */,
 				A6AC2C161CBD34A7000CC89D /* SceneReconstructionEngine_CPU.tpp in Resources */,
@@ -1269,12 +1269,12 @@
 				A6AC29A71CBD3323000CC89D /* FFMPEGReader.cpp in Sources */,
 				A6AC2B111CBD3348000CC89D /* Relocaliser.cpp in Sources */,
 				A6AC29AA1CBD3323000CC89D /* IMUSourceEngine.cpp in Sources */,
-				A6AC2C2E1CBD34A7000CC89D /* ITMVisualisationEngine.metal in Sources */,
+				A6AC2C2E1CBD34A7000CC89D /* VisualizationEngine.metal in Sources */,
 				A6AC2C341CBD34A7000CC89D /* ITMExtendedTracker_CPU.cpp in Sources */,
 				A6AC2B021CBD333D000CC89D /* MetalContext.mm in Sources */,
 				A6AC29A91CBD3323000CC89D /* ImageSourceEngine.cpp in Sources */,
 				A6AC2B121CBD3348000CC89D /* RelocDatabase.cpp in Sources */,
-				A6AC2C2F1CBD34A7000CC89D /* ITMVisualisationEngine_Metal.mm in Sources */,
+				A6AC2C2F1CBD34A7000CC89D /* VisualizationEngine_Metal.mm in Sources */,
 				A6AC2C471CBD34A7000CC89D /* Configuration.cpp in Sources */,
 				A6AC2C1C1CBD34A7000CC89D /* SceneReconstructionEngine.metal in Sources */,
 				A6AC2C3A1CBD34A7000CC89D /* ITMColorTracker.cpp in Sources */,
@@ -1288,7 +1288,7 @@
 				A6AC2C491CBD3ADF000CC89D /* MetalInstantiations.mm in Sources */,
 				A6AC2C301CBD34A7000CC89D /* ITMCalibIO.cpp in Sources */,
 				A6AC2C211CBD34A7000CC89D /* ITMSwappingEngine_Metal.mm in Sources */,
-				A6AC2C2C1CBD34A7000CC89D /* ITMVisualisationEngine.cpp in Sources */,
+				A6AC2C2C1CBD34A7000CC89D /* VisualizationEngine.cpp in Sources */,
 				A67763C01CBE89E30091E5A8 /* ITMExtendedTracker.metal in Sources */,
 				A6AC2C3B1CBD34A7000CC89D /* ITMDepthTracker.cpp in Sources */,
 				A6AC2C331CBD34A7000CC89D /* ITMDepthTracker_CPU.cpp in Sources */,

@@ -8,8 +8,8 @@
 #include "../../Engines/Reconstruction/CUDA/SceneReconstructionEngine_CUDA.tcu"
 #include "../../Engines/Swapping/CUDA/ITMSwappingEngine_CUDA.tcu"
 
-#include "../../Engines/Visualization/CUDA/ITMVisualizationEngine_CUDA.tcu"
-#include "../../Engines/Visualization/CUDA/ITMMultiVisualizationEngine_CUDA.tcu"
+#include "../../Engines/Visualization/CUDA/VisualizationEngine_CUDA.tcu"
+#include "../../Engines/Visualization/CUDA/MultiVisualizationEngine_CUDA.tcu"
 
 namespace ITMLib
 {
@@ -17,6 +17,6 @@ namespace ITMLib
 	template class ITMMultiMeshingEngine_CUDA<ITMVoxel, VoxelBlockHash>;
 	template class SceneReconstructionEngine_CUDA<ITMVoxel, VoxelBlockHash>;
 	template class ITMSwappingEngine_CUDA<ITMVoxel, VoxelBlockHash>;
-	template class ITMVisualizationEngine_CUDA<ITMVoxel, VoxelBlockHash>;
-	template class ITMMultiVisualizationEngine_CUDA<ITMVoxel, VoxelBlockHash>;
+	template class VisualizationEngine_CUDA<ITMVoxel, VoxelBlockHash>;
+	template class MultiVisualizationEngine_CUDA<ITMVoxel, VoxelBlockHash>;
 }

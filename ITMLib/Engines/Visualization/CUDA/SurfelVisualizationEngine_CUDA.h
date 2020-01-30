@@ -2,19 +2,19 @@
 
 #pragma once
 
-#include "../Interface/ITMSurfelVisualisationEngine.h"
+#include "../Interface/SurfelVisualizationEngine.h"
 
 namespace ITMLib
 {
   /**
-   * \brief An instance of an instantiation of a class template deriving from this one can be used to render a surfel-based 3D scene using the CPU.
+   * \brief An instance of an instantiation of a class template deriving from this one can be used to render a surfel-based 3D scene using CUDA.
    */
   template <typename TSurfel>
-  class ITMSurfelVisualizationEngine_CPU : public ITMSurfelVisualisationEngine<TSurfel>
+  class SurfelVisualizationEngine_CUDA : public SurfelVisualizationEngine<TSurfel>
   {
     //#################### TYPEDEFS & USINGS ####################
   private:
-    typedef ITMSurfelVisualisationEngine<TSurfel> Base;
+    typedef SurfelVisualizationEngine<TSurfel> Base;
     using typename Base::RenderImageType;
 
     //#################### PUBLIC MEMBER FUNCTIONS ####################

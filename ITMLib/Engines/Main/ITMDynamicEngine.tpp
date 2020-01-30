@@ -5,7 +5,7 @@
 #include "../LowLevel/ITMLowLevelEngineFactory.h"
 #include "../Meshing/ITMMeshingEngineFactory.h"
 #include "../ViewBuilding/ITMViewBuilderFactory.h"
-#include "../Visualization/ITMVisualizationEngineFactory.h"
+#include "../Visualization/VisualizationEngineFactory.h"
 #include "../SceneFileIO/ITMSceneFileIOEngine.h"
 #include "../../CameraTrackers/ITMCameraTrackerFactory.h"
 
@@ -32,9 +32,9 @@ ITMDynamicEngine<TVoxel, TWarp, TIndex>::ITMDynamicEngine(const ITMRGBDCalib& ca
 
 	lowLevelEngine = ITMLowLevelEngineFactory::MakeLowLevelEngine(deviceType);
 	viewBuilder = ITMViewBuilderFactory::MakeViewBuilder(calib, deviceType);
-	liveVisualisationEngine = ITMVisualizationEngineFactory::MakeVisualisationEngine<TVoxel, TIndex>(deviceType);
-	canonicalVisualisationEngine =
-			ITMVisualizationEngineFactory::MakeVisualisationEngine<TVoxel, TIndex>(deviceType);
+	liveVisualizationEngine = VisualizationEngineFactory::MakeVisualizationEngine<TVoxel, TIndex>(deviceType);
+	canonicalVisualizationEngine =
+			VisualizationEngineFactory::MakeVisualizationEngine<TVoxel, TIndex>(deviceType);
 
 	meshingEngine = nullptr;
 	if (settings.create_meshing_engine)
@@ -122,8 +122,8 @@ ITMDynamicEngine<TVoxel, TWarp, TIndex>::~ITMDynamicEngine() {
 	delete trackingState;
 	if (view != nullptr) delete view;
 
-	delete liveVisualisationEngine;
-	delete canonicalVisualisationEngine;
+	delete liveVisualizationEngine;
+	delete canonicalVisualizationEngine;
 
 	if (relocaliser != nullptr) delete relocaliser;
 	delete kfRaycast;
@@ -302,8 +302,8 @@ ITMDynamicEngine<TVoxel, TWarp, TIndex>::ProcessFrame(ITMUChar4Image* rgbImage,
 	    lastTrackerResult == ITMTrackingState::TRACKING_POOR) {
 		if (!fusionSucceeded) denseMapper->UpdateVisibleList(view, trackingState, liveScenes[0], renderState_live);
 
-		// raycast to renderState_live for tracking and free visualisation
-		cameraTrackingController->Prepare(trackingState, liveScenes[0], view, liveVisualisationEngine,
+		// raycast to renderState_live for tracking and free Visualization
+		cameraTrackingController->Prepare(trackingState, liveScenes[0], view, liveVisualizationEngine,
 		                                  renderState_live);
 	} else *trackingState->pose_d = previousFramePose;
 
@@ -346,34 +346,34 @@ void ITMDynamicEngine<TVoxel, TWarp, TIndex>::GetImage(ITMUChar4Image* out, GetI
 		case ITMDynamicEngine::InfiniTAM_IMAGE_ORIGINAL_DEPTH:
 			out->ChangeDims(view->depth->noDims);
 			if (settings.device_type == MEMORYDEVICE_CUDA) view->depth->UpdateHostFromDevice();
-			ITMVisualisationEngine<TVoxel, TIndex>::DepthToUchar4(out, view->depth);
+			VisualizationEngine<TVoxel, TIndex>::DepthToUchar4(out, view->depth);
 			break;
 		case ITMDynamicEngine::InfiniTAM_IMAGE_SCENERAYCAST:
 		case ITMDynamicEngine::InfiniTAM_IMAGE_COLOUR_FROM_VOLUME:
 		case ITMDynamicEngine::InfiniTAM_IMAGE_COLOUR_FROM_NORMAL:
 		case ITMDynamicEngine::InfiniTAM_IMAGE_COLOUR_FROM_CONFIDENCE: {
 			// use current raycast or forward projection?
-			IITMVisualisationEngine::RenderRaycastSelection raycastType;
-			if (trackingState->age_pointCloud <= 0) raycastType = IITMVisualisationEngine::RENDER_FROM_OLD_RAYCAST;
-			else raycastType = IITMVisualisationEngine::RENDER_FROM_OLD_FORWARDPROJ;
+			IVisualizationEngine::RenderRaycastSelection raycastType;
+			if (trackingState->age_pointCloud <= 0) raycastType = IVisualizationEngine::RENDER_FROM_OLD_RAYCAST;
+			else raycastType = IVisualizationEngine::RENDER_FROM_OLD_FORWARDPROJ;
 
 			// what sort of image is it?
-			IITMVisualisationEngine::RenderImageType imageType;
+			IVisualizationEngine::RenderImageType imageType;
 			switch (getImageType) {
 				case ITMDynamicEngine::InfiniTAM_IMAGE_COLOUR_FROM_CONFIDENCE:
-					imageType = IITMVisualisationEngine::RENDER_COLOUR_FROM_CONFIDENCE;
+					imageType = IVisualizationEngine::RENDER_COLOUR_FROM_CONFIDENCE;
 					break;
 				case ITMDynamicEngine::InfiniTAM_IMAGE_COLOUR_FROM_NORMAL:
-					imageType = IITMVisualisationEngine::RENDER_COLOUR_FROM_NORMAL;
+					imageType = IVisualizationEngine::RENDER_COLOUR_FROM_NORMAL;
 					break;
 				case ITMDynamicEngine::InfiniTAM_IMAGE_COLOUR_FROM_VOLUME:
-					imageType = IITMVisualisationEngine::RENDER_COLOUR_FROM_VOLUME;
+					imageType = IVisualizationEngine::RENDER_COLOUR_FROM_VOLUME;
 					break;
 				default:
-					imageType = IITMVisualisationEngine::RENDER_SHADED_GREYSCALE_IMAGENORMALS;
+					imageType = IVisualizationEngine::RENDER_SHADED_GREYSCALE_IMAGENORMALS;
 			}
 
-			liveVisualisationEngine->RenderImage(liveScenes[0], trackingState->pose_d, &view->calib.intrinsics_d,
+			liveVisualizationEngine->RenderImage(liveScenes[0], trackingState->pose_d, &view->calib.intrinsics_d,
 			                                     renderState_live, renderState_live->raycastImage, imageType,
 			                                     raycastType);
 
@@ -393,13 +393,13 @@ void ITMDynamicEngine<TVoxel, TWarp, TIndex>::GetImage(ITMUChar4Image* out, GetI
 		case ITMDynamicEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_VOLUME:
 		case ITMDynamicEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_NORMAL:
 		case ITMDynamicEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_CONFIDENCE: {
-			IITMVisualisationEngine::RenderImageType type = IITMVisualisationEngine::RENDER_SHADED_GREYSCALE;
+			IVisualizationEngine::RenderImageType type = IVisualizationEngine::RENDER_SHADED_GREYSCALE;
 			if (getImageType == ITMDynamicEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_VOLUME)
-				type = IITMVisualisationEngine::RENDER_COLOUR_FROM_VOLUME;
+				type = IVisualizationEngine::RENDER_COLOUR_FROM_VOLUME;
 			else if (getImageType == ITMDynamicEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_NORMAL)
-				type = IITMVisualisationEngine::RENDER_COLOUR_FROM_NORMAL;
+				type = IVisualizationEngine::RENDER_COLOUR_FROM_NORMAL;
 			else if (getImageType == ITMDynamicEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_CONFIDENCE)
-				type = IITMVisualisationEngine::RENDER_COLOUR_FROM_CONFIDENCE;
+				type = IVisualizationEngine::RENDER_COLOUR_FROM_CONFIDENCE;
 
 			if (renderState_freeview == nullptr) {
 				renderState_freeview = new ITMRenderState(out->noDims,
@@ -408,9 +408,9 @@ void ITMDynamicEngine<TVoxel, TWarp, TIndex>::GetImage(ITMUChar4Image* out, GetI
 				                                          settings.device_type);
 			}
 
-			liveVisualisationEngine->FindVisibleBlocks(liveScenes[0], pose, intrinsics, renderState_freeview);
-			liveVisualisationEngine->CreateExpectedDepths(liveScenes[0], pose, intrinsics, renderState_freeview);
-			liveVisualisationEngine->RenderImage(liveScenes[0], pose, intrinsics, renderState_freeview,
+			liveVisualizationEngine->FindVisibleBlocks(liveScenes[0], pose, intrinsics, renderState_freeview);
+			liveVisualizationEngine->CreateExpectedDepths(liveScenes[0], pose, intrinsics, renderState_freeview);
+			liveVisualizationEngine->RenderImage(liveScenes[0], pose, intrinsics, renderState_freeview,
 			                                     renderState_freeview->raycastImage, type);
 
 			if (settings.device_type == MEMORYDEVICE_CUDA)
@@ -427,16 +427,16 @@ void ITMDynamicEngine<TVoxel, TWarp, TIndex>::GetImage(ITMUChar4Image* out, GetI
 				                                          settings.device_type);
 			}
 
-			liveVisualisationEngine->FindVisibleBlocks(liveScenes[0], pose, intrinsics, renderState_freeview);
-			liveVisualisationEngine->CreateExpectedDepths(liveScenes[0], pose, intrinsics, renderState_freeview);
-			liveVisualisationEngine->RenderImage(liveScenes[0], pose, intrinsics, renderState_freeview,
+			liveVisualizationEngine->FindVisibleBlocks(liveScenes[0], pose, intrinsics, renderState_freeview);
+			liveVisualizationEngine->CreateExpectedDepths(liveScenes[0], pose, intrinsics, renderState_freeview);
+			liveVisualizationEngine->RenderImage(liveScenes[0], pose, intrinsics, renderState_freeview,
 			                                     renderState_freeview->raycastImage,
-			                                     IITMVisualisationEngine::RENDER_SHADED_GREEN);
-			canonicalVisualisationEngine->FindVisibleBlocks(canonicalScene, pose, intrinsics, renderState_freeview);
-			canonicalVisualisationEngine->CreateExpectedDepths(canonicalScene, pose, intrinsics, renderState_freeview);
-			canonicalVisualisationEngine->RenderImage(canonicalScene, pose, intrinsics, renderState_freeview,
+			                                     IVisualizationEngine::RENDER_SHADED_GREEN);
+			canonicalVisualizationEngine->FindVisibleBlocks(canonicalScene, pose, intrinsics, renderState_freeview);
+			canonicalVisualizationEngine->CreateExpectedDepths(canonicalScene, pose, intrinsics, renderState_freeview);
+			canonicalVisualizationEngine->RenderImage(canonicalScene, pose, intrinsics, renderState_freeview,
 			                                          renderState_freeview->raycastImage,
-			                                          IITMVisualisationEngine::RENDER_SHADED_OVERLAY);
+			                                          IVisualizationEngine::RENDER_SHADED_OVERLAY);
 
 
 			if (settings.device_type == MEMORYDEVICE_CUDA)
@@ -447,7 +447,7 @@ void ITMDynamicEngine<TVoxel, TWarp, TIndex>::GetImage(ITMUChar4Image* out, GetI
 			break;
 		}
 		case ITMMainEngine::InfiniTAM_IMAGE_FREECAMERA_CANONICAL: {
-			IITMVisualisationEngine::RenderImageType type = IITMVisualisationEngine::RENDER_SHADED_GREYSCALE;
+			IVisualizationEngine::RenderImageType type = IVisualizationEngine::RENDER_SHADED_GREYSCALE;
 
 			if (renderState_freeview == nullptr) {
 				renderState_freeview = new ITMRenderState(out->noDims,
@@ -456,9 +456,9 @@ void ITMDynamicEngine<TVoxel, TWarp, TIndex>::GetImage(ITMUChar4Image* out, GetI
 				                                          settings.device_type);
 			}
 
-			canonicalVisualisationEngine->FindVisibleBlocks(canonicalScene, pose, intrinsics, renderState_freeview);
-			canonicalVisualisationEngine->CreateExpectedDepths(canonicalScene, pose, intrinsics, renderState_freeview);
-			canonicalVisualisationEngine->RenderImage(canonicalScene, pose, intrinsics, renderState_freeview,
+			canonicalVisualizationEngine->FindVisibleBlocks(canonicalScene, pose, intrinsics, renderState_freeview);
+			canonicalVisualizationEngine->CreateExpectedDepths(canonicalScene, pose, intrinsics, renderState_freeview);
+			canonicalVisualizationEngine->RenderImage(canonicalScene, pose, intrinsics, renderState_freeview,
 			                                          renderState_freeview->raycastImage, type);
 
 			if (settings.device_type == MEMORYDEVICE_CUDA)
@@ -550,7 +550,7 @@ void ITMDynamicEngine<TVoxel, TWarp, TIndex>::BeginProcessingFrame(ITMUChar4Imag
 
 					denseMapper->UpdateVisibleList(view, trackingState, liveScenes[0], renderState_live, true);
 
-					cameraTrackingController->Prepare(trackingState, liveScenes[0], view, liveVisualisationEngine,
+					cameraTrackingController->Prepare(trackingState, liveScenes[0], view, liveVisualizationEngine,
 					                                  renderState_live);
 					cameraTrackingController->Track(trackingState, view);
 

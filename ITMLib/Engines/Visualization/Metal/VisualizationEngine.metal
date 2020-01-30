@@ -3,8 +3,8 @@
 #include <metal_stdlib>
 using namespace metal;
 
-#include "../Shared/ITMVisualisationEngine_Shared.h"
-#include "ITMVisualisationEngine_Metal.h"
+#include "../Shared/VisualizationEngine_Shared.h"
+#include "VisualizationEngine_Metal.h"
 #include "../../../ITMLibDefines.h"
 
 kernel void genericRaycastVH_device(DEVICEPTR(Vector4f) *pointsRay                                  [[ buffer(0) ]],

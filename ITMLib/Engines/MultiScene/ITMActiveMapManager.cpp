@@ -177,7 +177,7 @@ int ITMActiveMapManager::findPrimaryLocalMapIdx(void) const
 	return activeData[id].localMapIndex;
 }
 
-int ITMActiveMapManager::findBestVisualisationDataIdx(void) const
+int ITMActiveMapManager::findBestVisualizationDataIdx(void) const
 {
 	int bestIdx = -1;
 	for (int i = 0; i < static_cast<int>(activeData.size()); ++i) 
@@ -194,9 +194,9 @@ int ITMActiveMapManager::findBestVisualisationDataIdx(void) const
 	return bestIdx;
 }
 
-int ITMActiveMapManager::findBestVisualisationLocalMapIdx(void) const
+int ITMActiveMapManager::findBestVisualizationLocalMapIdx(void) const
 {
-	int id = findBestVisualisationDataIdx();
+	int id = findBestVisualizationDataIdx();
 	if (id < 0) return -1;
 	return activeData[id].localMapIndex;
 }

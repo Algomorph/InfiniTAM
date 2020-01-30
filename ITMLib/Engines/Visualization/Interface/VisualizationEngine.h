@@ -9,7 +9,7 @@
 
 namespace ITMLib
 {
-	class IITMVisualisationEngine
+	class IVisualizationEngine
 	{
 	public:
 		enum RenderImageType
@@ -30,7 +30,7 @@ namespace ITMLib
 			RENDER_FROM_OLD_FORWARDPROJ
 		};
 
-		virtual ~IITMVisualisationEngine(void) {}
+		virtual ~IVisualizationEngine(void) {}
 
 		static void DepthToUchar4(ITMUChar4Image *dst, const ITMFloatImage *src);
 		static void NormalToUchar4(ITMUChar4Image* dst, const ITMFloat4Image *src);
@@ -41,7 +41,7 @@ namespace ITMLib
 	template<> struct IndexToRenderState<VoxelBlockHash> { typedef ITMRenderState type; };
 
 	/** \brief
-		Interface to engines helping with the visualisation of
+		Interface to engines helping with the Visualization of
 		the results from the rest of the library.
 
 		This is also used internally to get depth estimates for the
@@ -53,13 +53,13 @@ namespace ITMLib
 		operations.
 		*/
 	template<class TVoxel, class TIndex>
-	class ITMVisualisationEngine : public IITMVisualisationEngine
+	class VisualizationEngine : public IVisualizationEngine
 	{
 	public:
 
 		/** Given a scene, pose and intrinsics, compute the
 		visible subset of the scene and store it in an
-		appropriate visualisation state object, created
+		appropriate Visualization state object, created
 		previously using allocateInternalState().
 		*/
 		virtual void FindVisibleBlocks(ITMVoxelVolume<TVoxel,TIndex> *scene, const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics,

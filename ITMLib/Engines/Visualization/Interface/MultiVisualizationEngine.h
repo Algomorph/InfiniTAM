@@ -3,15 +3,15 @@
 #pragma once
 
 #include "../../MultiScene/ITMMapGraphManager.h"
-#include "../Interface/ITMVisualisationEngine.h"
+#include "VisualizationEngine.h"
 
 namespace ITMLib {
 
 	template<class TVoxel, class TIndex>
-	class ITMMultiVisualisationEngine
+	class MultiVisualizationEngine
 	{
 	public:
-		virtual ~ITMMultiVisualisationEngine(void) {}
+		virtual ~MultiVisualizationEngine(void) {}
 
 		virtual void PrepareRenderState(const ITMVoxelMapGraphManager<TVoxel, TIndex> & sceneManager, ITMRenderState *state) = 0;
 
@@ -19,7 +19,7 @@ namespace ITMLib {
 
 		virtual void CreateExpectedDepths(const ITMVoxelMapGraphManager<TVoxel, TIndex> & sceneManager, const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics, ITMRenderState *renderState) const = 0;
 		virtual void RenderImage(const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics, ITMRenderState *renderState,
-			ITMUChar4Image *outputImage, IITMVisualisationEngine::RenderImageType type) const = 0;
+			ITMUChar4Image *outputImage, IVisualizationEngine::RenderImageType type) const = 0;
 	};
 }
 

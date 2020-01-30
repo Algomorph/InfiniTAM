@@ -2,43 +2,43 @@
 
 #pragma once
 
-#include "../Interface/ITMMultiVisualisationEngine.h"
+#include "../Interface/MultiVisualizationEngine.h"
 
 struct RenderingBlock;
 
 namespace ITMLib {
 
 	template<class TVoxel, class TIndex>
-	class ITMMultiVisualizationEngine_CUDA : public ITMMultiVisualisationEngine<TVoxel, TIndex>
+	class MultiVisualizationEngine_CUDA : public MultiVisualizationEngine<TVoxel, TIndex>
 	{
 	private:
 
 	public:
-		ITMMultiVisualizationEngine_CUDA(void);
-		~ITMMultiVisualizationEngine_CUDA(void);
+		MultiVisualizationEngine_CUDA(void);
+		~MultiVisualizationEngine_CUDA(void);
 
 		void PrepareRenderState(const ITMVoxelMapGraphManager<TVoxel, TIndex> & sceneManager, ITMRenderState *state);
 
 		void CreateExpectedDepths(const ITMVoxelMapGraphManager<TVoxel, TIndex> & sceneManager, const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics, ITMRenderState *renderState) const;
 
-		void RenderImage(const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics, ITMRenderState *renderState, ITMUChar4Image *outputImage, IITMVisualisationEngine::RenderImageType type) const;
+		void RenderImage(const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics, ITMRenderState *renderState, ITMUChar4Image *outputImage, IVisualizationEngine::RenderImageType type) const;
 	};
 
 	template<class TVoxel>
-	class ITMMultiVisualizationEngine_CUDA<TVoxel, VoxelBlockHash> : public ITMMultiVisualisationEngine<TVoxel, VoxelBlockHash>
+	class MultiVisualizationEngine_CUDA<TVoxel, VoxelBlockHash> : public MultiVisualizationEngine<TVoxel, VoxelBlockHash>
 	{
 	private:
 		RenderingBlock *renderingBlockList_device;
 		uint *noTotalBlocks_device;
 
 	public:
-		ITMMultiVisualizationEngine_CUDA(void);
-		~ITMMultiVisualizationEngine_CUDA(void);
+		MultiVisualizationEngine_CUDA(void);
+		~MultiVisualizationEngine_CUDA(void);
 
 		void PrepareRenderState(const ITMVoxelMapGraphManager<TVoxel, VoxelBlockHash> & sceneManager, ITMRenderState *state);
 
 		void CreateExpectedDepths(const ITMVoxelMapGraphManager<TVoxel, VoxelBlockHash> & sceneManager, const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics, ITMRenderState *renderState) const;
 
-		void RenderImage(const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics, ITMRenderState *renderState, ITMUChar4Image *outputImage, IITMVisualisationEngine::RenderImageType type) const;
+		void RenderImage(const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics, ITMRenderState *renderState, ITMUChar4Image *outputImage, IVisualizationEngine::RenderImageType type) const;
 	};
 }

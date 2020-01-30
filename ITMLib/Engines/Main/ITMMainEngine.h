@@ -37,7 +37,7 @@ namespace ITMLib
 	    -# Call the method @ref ProcessFrame() to track the camera
 	       and integrate the new information into the world model
 	    -# Optionally access the rendered reconstruction or another
-	       image for visualisation using @ref GetImage()
+	       image for Visualization using @ref GetImage()
 	    -# Iterate the above three steps for each image in the
 	       sequence
 

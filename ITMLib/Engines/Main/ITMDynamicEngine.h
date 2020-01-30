@@ -10,7 +10,7 @@
 #include "../LowLevel/Interface/ITMLowLevelEngine.h"
 #include "../Meshing/Interface/ITMMeshingEngine.h"
 #include "../ViewBuilding/Interface/ITMViewBuilder.h"
-#include "../Visualization/Interface/ITMVisualisationEngine.h"
+#include "../Visualization/Interface/VisualizationEngine.h"
 #include "../../Objects/Misc/ITMIMUCalibrator.h"
 
 #include "../../../FernRelocLib/Relocaliser.h"
@@ -76,8 +76,8 @@ namespace ITMLib
 		int framesProcessed, relocalisationCount;
 
 		ITMLowLevelEngine* lowLevelEngine;
-		ITMVisualisationEngine<TVoxel, TIndex>* liveVisualisationEngine;
-		ITMVisualisationEngine<TVoxel, TIndex>* canonicalVisualisationEngine;
+		VisualizationEngine<TVoxel, TIndex>* liveVisualizationEngine;
+		VisualizationEngine<TVoxel, TIndex>* canonicalVisualizationEngine;
 
 		ITMMeshingEngine<TVoxel, TIndex>* meshingEngine;
 

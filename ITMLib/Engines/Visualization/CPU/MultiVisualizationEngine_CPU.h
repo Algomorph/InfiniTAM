@@ -2,36 +2,36 @@
 
 #pragma once
 
-#include "../Interface/ITMMultiVisualisationEngine.h"
+#include "../Interface/MultiVisualizationEngine.h"
 
 namespace ITMLib 
 {
 	template<class TVoxel, class TIndex>
-	class ITMMultiVisualizationEngine_CPU : public ITMMultiVisualisationEngine<TVoxel, TIndex>
+	class MultiVisualizationEngine_CPU : public MultiVisualizationEngine<TVoxel, TIndex>
 	{
 	public:
-		ITMMultiVisualizationEngine_CPU(void) {}
-		~ITMMultiVisualizationEngine_CPU(void) {}
+		MultiVisualizationEngine_CPU(void) {}
+		~MultiVisualizationEngine_CPU(void) {}
 
 		void PrepareRenderState(const ITMVoxelMapGraphManager<TVoxel, TIndex> & sceneManager, ITMRenderState *state);
 
 		void CreateExpectedDepths(const ITMVoxelMapGraphManager<TVoxel, TIndex> & sceneManager, const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics, ITMRenderState *renderState) const;
 
-		void RenderImage(const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics, ITMRenderState *renderState, ITMUChar4Image *outputImage, IITMVisualisationEngine::RenderImageType type) const;
+		void RenderImage(const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics, ITMRenderState *renderState, ITMUChar4Image *outputImage, IVisualizationEngine::RenderImageType type) const;
 	};
 
 template<class TVoxel>
-class ITMMultiVisualizationEngine_CPU<TVoxel,VoxelBlockHash> : public ITMMultiVisualisationEngine<TVoxel, VoxelBlockHash>
+class MultiVisualizationEngine_CPU<TVoxel,VoxelBlockHash> : public MultiVisualizationEngine<TVoxel, VoxelBlockHash>
 {
 public:
-	ITMMultiVisualizationEngine_CPU(void) {}
-	~ITMMultiVisualizationEngine_CPU(void) {}
+	MultiVisualizationEngine_CPU(void) {}
+	~MultiVisualizationEngine_CPU(void) {}
 
 	void PrepareRenderState(const ITMVoxelMapGraphManager<TVoxel, VoxelBlockHash> & sceneManager, ITMRenderState *state);
 
 	void CreateExpectedDepths(const ITMVoxelMapGraphManager<TVoxel, VoxelBlockHash> & sceneManager, const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics, ITMRenderState *renderState) const;
 
-	void RenderImage(const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics, ITMRenderState *renderState, ITMUChar4Image *outputImage, IITMVisualisationEngine::RenderImageType type) const;
+	void RenderImage(const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics, ITMRenderState *renderState, ITMUChar4Image *outputImage, IVisualizationEngine::RenderImageType type) const;
 };
 }
 

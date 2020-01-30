@@ -46,7 +46,7 @@ namespace ITMLib
 		 *
 		 * @note  This is used to handle datasets such as ICL_NUIM and other non standard inputs
 		 * 	      where one of the two focal lengths is negative: that causes the normals to point
-		 * 	      away from the camera. This causes valid points to be ignored during visualisation
+		 * 	      away from the camera. This causes valid points to be ignored during Visualization
 		 * 	      and tracking.
 		 *
 		 * 	      The problem presents itself only when computing normals as cross product of the

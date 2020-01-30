@@ -1,6 +1,6 @@
 // Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
 
-#include "ITMVisualisationEngine.h"
+#include "VisualizationEngine.h"
 
 using namespace ITMLib;
 
@@ -16,7 +16,7 @@ inline float base(float val) {
 	else return 0.0;
 }
 
-void IITMVisualisationEngine::DepthToUchar4(ITMUChar4Image *dst, const ITMFloatImage *src)
+void IVisualizationEngine::DepthToUchar4(ITMUChar4Image *dst, const ITMFloatImage *src)
 {
 	Vector4u *dest = dst->GetData(MEMORYDEVICE_CPU);
 	const float *source = src->GetData(MEMORYDEVICE_CPU);
@@ -56,7 +56,7 @@ void IITMVisualisationEngine::DepthToUchar4(ITMUChar4Image *dst, const ITMFloatI
 	}
 }
 
-void IITMVisualisationEngine::NormalToUchar4(ITMUChar4Image *dst, const ITMFloat4Image *src)
+void IVisualizationEngine::NormalToUchar4(ITMUChar4Image *dst, const ITMFloat4Image *src)
 {
 	Vector4u *dest = dst->GetData(MEMORYDEVICE_CPU);
 	const Vector4f *source = src->GetData(MEMORYDEVICE_CPU);
@@ -78,7 +78,7 @@ void IITMVisualisationEngine::NormalToUchar4(ITMUChar4Image *dst, const ITMFloat
 	}
 }
 
-void IITMVisualisationEngine::WeightToUchar4(ITMUChar4Image *dst, const ITMFloatImage *src)
+void IVisualizationEngine::WeightToUchar4(ITMUChar4Image *dst, const ITMFloatImage *src)
 {
 	Vector4u *dest = dst->GetData(MEMORYDEVICE_CPU);
 	const float *source = src->GetData(MEMORYDEVICE_CPU);

@@ -1,6 +1,6 @@
 // InfiniTAM: Surffuse. Copyright (c) Torr Vision Group and the authors of InfiniTAM, 2016.
 
-#include "ITMSurfelVisualisationEngine.h"
+#include "SurfelVisualizationEngine.h"
 
 namespace ITMLib
 {
@@ -8,14 +8,14 @@ namespace ITMLib
 //#################### DESTRUCTOR ####################
 
 template <typename TSurfel>
-ITMSurfelVisualisationEngine<TSurfel>::~ITMSurfelVisualisationEngine()
+SurfelVisualizationEngine<TSurfel>::~SurfelVisualizationEngine()
 {}
 
 //#################### PUBLIC MEMBER FUNCTIONS ####################
 
 template <typename TSurfel>
-void ITMSurfelVisualisationEngine<TSurfel>::FindSurface(const ITMSurfelScene<TSurfel> *scene, const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics,
-                                                        bool useRadii, UnstableSurfelRenderingMode unstableSurfelRenderingMode, ITMSurfelRenderState *renderState) const
+void SurfelVisualizationEngine<TSurfel>::FindSurface(const ITMSurfelScene<TSurfel> *scene, const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics,
+                                                     bool useRadii, UnstableSurfelRenderingMode unstableSurfelRenderingMode, ITMSurfelRenderState *renderState) const
 {
   MemoryDeviceType memoryType = GetMemoryType();
   MakeIndexImage(
@@ -33,8 +33,8 @@ void ITMSurfelVisualisationEngine<TSurfel>::FindSurface(const ITMSurfelScene<TSu
 }
 
 template <typename TSurfel>
-void ITMSurfelVisualisationEngine<TSurfel>::FindSurfaceSuper(const ITMSurfelScene<TSurfel> *scene, const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics,
-                                                             UnstableSurfelRenderingMode unstableSurfelRenderingMode, ITMSurfelRenderState *renderState) const
+void SurfelVisualizationEngine<TSurfel>::FindSurfaceSuper(const ITMSurfelScene<TSurfel> *scene, const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics,
+                                                          UnstableSurfelRenderingMode unstableSurfelRenderingMode, ITMSurfelRenderState *renderState) const
 {
   MemoryDeviceType memoryType = GetMemoryType();
   MakeIndexImage(

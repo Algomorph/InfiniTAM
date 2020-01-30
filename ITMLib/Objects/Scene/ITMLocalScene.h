@@ -4,7 +4,7 @@
 
 #include <map>
 
-#include "../../Engines/Visualization/Interface/ITMVisualisationEngine.h"
+#include "../../Engines/Visualization/Interface/VisualizationEngine.h"
 #include "../../Objects/RenderStates/ITMRenderState.h"
 #include "ITMVoxelVolume.h"
 #include "../../Objects/Tracking/ITMTrackingState.h"
@@ -49,11 +49,11 @@ namespace ITMLib {
 		ConstraintList relations;
 		ORUtils::SE3Pose estimatedGlobalPose;
 
-		ITMLocalMap(const ITMLibSettings *settings, const ITMVisualisationEngine<TVoxel, TIndex> *visualisationEngine, const Vector2i & trackedImageSize)
+		ITMLocalMap(const ITMLibSettings *settings, const VisualizationEngine<TVoxel, TIndex> *VisualizationEngine, const Vector2i & trackedImageSize)
 		{
 			MemoryDeviceType memoryType = settings->deviceType == ITMLibSettings::DEVICE_CUDA ? MEMORYDEVICE_CUDA : MEMORYDEVICE_CPU;
 			scene = new ITMScene<TVoxel, TIndex>(&settings->sceneParams, settings->swappingMode == ITMLibSettings::SWAPPINGMODE_ENABLED, memoryType);
-			renderState = visualisationEngine->CreateRenderState(scene, trackedImageSize);
+			renderState = VisualizationEngine->CreateRenderState(scene, trackedImageSize);
 			trackingState = new ITMTrackingState(trackedImageSize, memoryType);
 		}
 		~ITMLocalMap(void)

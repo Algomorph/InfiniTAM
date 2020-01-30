@@ -5,7 +5,7 @@
 #include "../../../Objects/Tracking/ITMTrackingState.h"
 #include "../../../Objects/Views/ITMView.h"
 
-#include "../Shared/ITMVisualisationEngine_Shared.h"
+#include "../Shared/VisualizationEngine_Shared.h"
 #include "../../Reconstruction/Shared/SceneReconstructionEngine_Shared.h"
 #include "../../../Utils/ITMCUDAUtils.h"
 

@@ -1,6 +1,6 @@
 // Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
 
-#include "ITMVisualizationHelpers_CUDA.h"
+#include "VisualizationHelpers_CUDA.h"
 #include "../../Indexing/Shared/IndexingEngine_Shared.h"
 
 using namespace ITMLib;

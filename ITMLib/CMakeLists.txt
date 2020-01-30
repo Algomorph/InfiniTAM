@@ -482,57 +482,57 @@ set(ITMLIB_ENGINES_VIEWBUILDING_SHARED_HEADERS
     )
 ## ======================================== VISUALIATION ENGINES =======================================================
 ##
-set(ITMLIB_ENGINES_VISUALISATION_HEADERS
-    Engines/Visualization/ITMMultiVisualizationEngineFactory.h
-    Engines/Visualization/ITMSurfelVisualizationEngineFactory.h
-    Engines/Visualization/ITMVisualizationEngineFactory.h
+set(ITMLIB_ENGINES_Visualization_HEADERS
+    Engines/Visualization/MultiVisualizationEngineFactory.h
+    Engines/Visualization/SurfelVisualizationEngineFactory.h
+    Engines/Visualization/VisualizationEngineFactory.h
     )
 
 ##
-set(ITMLIB_ENGINES_VISUALISATION_CPU_SOURCES
-    Engines/Visualization/CPU/ITMMultiVisualizationEngine_CPU.tpp
-    Engines/Visualization/CPU/ITMSurfelVisualisationEngine_CPU.tpp
-    Engines/Visualization/CPU/ITMVisualisationEngine_CPU.tpp
+set(ITMLIB_ENGINES_Visualization_CPU_SOURCES
+    Engines/Visualization/CPU/MultiVisualizationEngine_CPU.tpp
+    Engines/Visualization/CPU/SurfelVisualizationEngine_CPU.tpp
+    Engines/Visualization/CPU/VisualizationEngine_CPU.tpp
     )
 
-set(ITMLIB_ENGINES_VISUALISATION_CPU_HEADERS
-    Engines/Visualization/CPU/ITMMultiVisualizationEngine_CPU.h
-    Engines/Visualization/CPU/ITMSurfelVisualizationEngine_CPU.h
-    Engines/Visualization/CPU/ITMVisualizationEngine_CPU.h
-    )
-
-##
-set(ITMLIB_ENGINES_VISUALISATION_CUDA_SOURCES
-    Engines/Visualization/CUDA/ITMMultiVisualizationEngine_CUDA.tcu
-    Engines/Visualization/CUDA/ITMSurfelVisualizationEngine_CUDA.tcu
-    Engines/Visualization/CUDA/ITMVisualizationEngine_CUDA.tcu
-    Engines/Visualization/CUDA/ITMVisualizationHelpers_CUDA.cu
-    )
-
-set(ITMLIB_ENGINES_VISUALISATION_CUDA_HEADERS
-    Engines/Visualization/CUDA/ITMMultiVisualizationEngine_CUDA.h
-    Engines/Visualization/CUDA/ITMSurfelVisualizationEngine_CUDA.h
-    Engines/Visualization/CUDA/ITMVisualizationEngine_CUDA.h
-    Engines/Visualization/CUDA/ITMVisualizationHelpers_CUDA.h
+set(ITMLIB_ENGINES_Visualization_CPU_HEADERS
+    Engines/Visualization/CPU/MultiVisualizationEngine_CPU.h
+    Engines/Visualization/CPU/SurfelVisualizationEngine_CPU.h
+    Engines/Visualization/CPU/VisualizationEngine_CPU.h
     )
 
 ##
-set(ITMLIB_ENGINES_VISUALISATION_INTERFACE_SOURCES
-    Engines/Visualization/Interface/ITMSurfelVisualisationEngine.tpp
-    Engines/Visualization/Interface/ITMVisualisationEngine.cpp
+set(ITMLIB_ENGINES_Visualization_CUDA_SOURCES
+    Engines/Visualization/CUDA/MultiVisualizationEngine_CUDA.tcu
+    Engines/Visualization/CUDA/SurfelVisualizationEngine_CUDA.tcu
+    Engines/Visualization/CUDA/VisualizationEngine_CUDA.tcu
+    Engines/Visualization/CUDA/VisualizationHelpers_CUDA.cu
     )
 
-set(ITMLIB_ENGINES_VISUALISATION_INTERFACE_HEADERS
-    Engines/Visualization/Interface/ITMMultiVisualisationEngine.h
-    Engines/Visualization/Interface/ITMSurfelVisualisationEngine.h
-    Engines/Visualization/Interface/ITMVisualisationEngine.h
+set(ITMLIB_ENGINES_Visualization_CUDA_HEADERS
+    Engines/Visualization/CUDA/MultiVisualizationEngine_CUDA.h
+    Engines/Visualization/CUDA/SurfelVisualizationEngine_CUDA.h
+    Engines/Visualization/CUDA/VisualizationEngine_CUDA.h
+    Engines/Visualization/CUDA/VisualizationHelpers_CUDA.h
     )
 
 ##
-set(ITMLIB_ENGINES_VISUALISATION_SHARED_HEADERS
-    Engines/Visualization/Shared/ITMSurfelVisualisationEngine_Settings.h
-    Engines/Visualization/Shared/ITMSurfelVisualisationEngine_Shared.h
-    Engines/Visualization/Shared/ITMVisualisationEngine_Shared.h
+set(ITMLIB_ENGINES_Visualization_INTERFACE_SOURCES
+    Engines/Visualization/Interface/SurfelVisualizationEngine.tpp
+    Engines/Visualization/Interface/VisualizationEngine.cpp
+    )
+
+set(ITMLIB_ENGINES_Visualization_INTERFACE_HEADERS
+    Engines/Visualization/Interface/MultiVisualizationEngine.h
+    Engines/Visualization/Interface/SurfelVisualizationEngine.h
+    Engines/Visualization/Interface/VisualizationEngine.h
+    )
+
+##
+set(ITMLIB_ENGINES_Visualization_SHARED_HEADERS
+    Engines/Visualization/Shared/SurfelVisualizationEngine_Settings.h
+    Engines/Visualization/Shared/SurfelVisualizationEngine_Shared.h
+    Engines/Visualization/Shared/VisualizationEngine_Shared.h
     )
 
 ## ================================================== OBJECTS ==========================================================
@@ -919,10 +919,10 @@ set(sources
     ${ITMLIB_ENGINES_VIEWBUILDING_SOURCES}
     ${ITMLIB_ENGINES_VIEWBUILDING_CPU_SOURCES}
     ${ITMLIB_ENGINES_VIEWBUILDING_CUDA_SOURCES}
-    ${ITMLIB_ENGINES_VISUALISATION_SOURCES}
-    ${ITMLIB_ENGINES_VISUALISATION_CPU_SOURCES}
-    ${ITMLIB_ENGINES_VISUALISATION_CUDA_SOURCES}
-    ${ITMLIB_ENGINES_VISUALISATION_INTERFACE_SOURCES}
+    ${ITMLIB_ENGINES_Visualization_SOURCES}
+    ${ITMLIB_ENGINES_Visualization_CPU_SOURCES}
+    ${ITMLIB_ENGINES_Visualization_CUDA_SOURCES}
+    ${ITMLIB_ENGINES_Visualization_INTERFACE_SOURCES}
     ${ITMLIB_OBJECTS_CAMERA_SOURCES}
     ${ITMLIB_OBJECTS_RENDERSTATES_SOURCES}
     ${ITMLIB_CAMERA_TRACKERS_CPU_SOURCES}
@@ -984,11 +984,11 @@ set(headers
     ${ITMLIB_ENGINES_VIEWBUILDING_CUDA_HEADERS}
     ${ITMLIB_ENGINES_VIEWBUILDING_INTERFACE_HEADERS}
     ${ITMLIB_ENGINES_VIEWBUILDING_SHARED_HEADERS}
-    ${ITMLIB_ENGINES_VISUALISATION_HEADERS}
-    ${ITMLIB_ENGINES_VISUALISATION_CPU_HEADERS}
-    ${ITMLIB_ENGINES_VISUALISATION_CUDA_HEADERS}
-    ${ITMLIB_ENGINES_VISUALISATION_INTERFACE_HEADERS}
-    ${ITMLIB_ENGINES_VISUALISATION_SHARED_HEADERS}
+    ${ITMLIB_ENGINES_Visualization_HEADERS}
+    ${ITMLIB_ENGINES_Visualization_CPU_HEADERS}
+    ${ITMLIB_ENGINES_Visualization_CUDA_HEADERS}
+    ${ITMLIB_ENGINES_Visualization_INTERFACE_HEADERS}
+    ${ITMLIB_ENGINES_Visualization_SHARED_HEADERS}
     ${ITMLIB_OBJECTS_CAMERA_HEADERS}
     ${ITMLIB_OBJECTS_MESHING_HEADERS}
     ${ITMLIB_OBJECTS_MISC_HEADERS}

@@ -4,7 +4,7 @@
 
 #include <climits>
 
-#include "ITMSurfelVisualisationEngine_Settings.h"
+#include "SurfelVisualizationEngine_Settings.h"
 #include "../../../Objects/Scene/ITMRepresentationAccess.h"
 #include "../../../Objects/Camera/ITMIntrinsics.h"
 

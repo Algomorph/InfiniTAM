@@ -2,10 +2,10 @@
 
 #include "../ITMLibDefines.h"
 #include "../Engines/Reconstruction/Metal/ITMSceneReconstructionEngine_Metal.mm"
-#include "../Engines/Visualization/Metal/ITMVisualisationEngine_Metal.mm"
+#include "../Engines/Visualization/Metal/VisualizationEngine_Metal.mm"
 
 namespace ITMLib
 {
     template class ITMLib::ITMSceneReconstructionEngine_Metal<ITMVoxel, ITMVoxelIndex>;
-    template class ITMLib::ITMVisualisationEngine_Metal<ITMVoxel, ITMVoxelIndex>;
+    template class ITMLib::VisualizationEngine_Metal<ITMVoxel, ITMVoxelIndex>;
 }

@@ -7,8 +7,8 @@
 namespace ITMLib
 {
 	template<class TVoxel, class TIndex>
-	ITMVoxelMapGraphManager<TVoxel, TIndex>::ITMVoxelMapGraphManager(const ITMVisualisationEngine<TVoxel, TIndex> *_visualisationEngine, const ITMDenseMapper<TVoxel, TIndex> *_denseMapper, const Vector2i & _trackedImageSize)
-		: visualisationEngine(_visualisationEngine), denseMapper(_denseMapper), trackedImageSize(_trackedImageSize)
+	ITMVoxelMapGraphManager<TVoxel, TIndex>::ITMVoxelMapGraphManager(const VisualizationEngine<TVoxel, TIndex> *_VisualizationEngine, const ITMDenseMapper<TVoxel, TIndex> *_denseMapper, const Vector2i & _trackedImageSize)
+		: visualization_engine(_VisualizationEngine), denseMapper(_denseMapper), trackedImageSize(_trackedImageSize)
 	{
 	}
 
@@ -26,7 +26,7 @@ namespace ITMLib
 	int ITMVoxelMapGraphManager<TVoxel, TIndex>::createNewLocalMap(void)
 	{
 		int newIdx = (int)allData.size();
-		allData.push_back(new ITMLocalMap<TVoxel, TIndex>(visualisationEngine, trackedImageSize));
+		allData.push_back(new ITMLocalMap<TVoxel, TIndex>(visualization_engine, trackedImageSize));
 
 		denseMapper->ResetScene(allData[newIdx]->scene);
 		return newIdx;
@@ -107,7 +107,7 @@ namespace ITMLib
 			maxBlockId = localMap->scene->index.GetAllocatedBlockCount() - tmp - 1;
 		}
 
-		return visualisationEngine->CountVisibleBlocks(localMap->scene, localMap->renderState, minBlockId, maxBlockId);
+		return visualization_engine->CountVisibleBlocks(localMap->scene, localMap->renderState, minBlockId, maxBlockId);
 	}
 
 	struct LinkPathComparison 

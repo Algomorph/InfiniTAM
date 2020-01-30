@@ -4,17 +4,17 @@
 #include <vector>
 
 //local
-#include "ITMMultiVisualizationEngine_CPU.h"
+#include "MultiVisualizationEngine_CPU.h"
 
 #include "../../../Objects/RenderStates/ITMRenderStateMultiScene.h"
 #include "../../../Objects/Scene/ITMMultiSceneAccess.h"
 
-#include "../Shared/ITMVisualisationEngine_Shared.h"
+#include "../Shared/VisualizationEngine_Shared.h"
 
 using namespace ITMLib;
 
 template<class TVoxel, class TIndex>
-void ITMMultiVisualizationEngine_CPU<TVoxel, TIndex>::PrepareRenderState(const ITMVoxelMapGraphManager<TVoxel, TIndex> & mapManager, ITMRenderState *_state)
+void MultiVisualizationEngine_CPU<TVoxel, TIndex>::PrepareRenderState(const ITMVoxelMapGraphManager<TVoxel, TIndex> & mapManager, ITMRenderState *_state)
 {
 	ITMRenderStateMultiScene<TVoxel, TIndex> *state = (ITMRenderStateMultiScene<TVoxel, TIndex>*)_state;
 
@@ -22,19 +22,19 @@ void ITMMultiVisualizationEngine_CPU<TVoxel, TIndex>::PrepareRenderState(const I
 }
 
 template<class TVoxel>
-void ITMMultiVisualizationEngine_CPU<TVoxel, VoxelBlockHash>::PrepareRenderState(const ITMVoxelMapGraphManager<TVoxel, VoxelBlockHash> & mapManager, ITMRenderState *_state){
+void MultiVisualizationEngine_CPU<TVoxel, VoxelBlockHash>::PrepareRenderState(const ITMVoxelMapGraphManager<TVoxel, VoxelBlockHash> & mapManager, ITMRenderState *_state){
 	ITMRenderStateMultiScene<TVoxel, VoxelBlockHash> *state = (ITMRenderStateMultiScene<TVoxel, VoxelBlockHash>*)_state;
 	state->PrepareLocalMaps(mapManager);
 }
 
 
 template<class TVoxel, class TIndex>
-void ITMMultiVisualizationEngine_CPU<TVoxel, TIndex>::CreateExpectedDepths(const ITMVoxelMapGraphManager<TVoxel, TIndex> & sceneManager, const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics, ITMRenderState *_renderState) const
+void MultiVisualizationEngine_CPU<TVoxel, TIndex>::CreateExpectedDepths(const ITMVoxelMapGraphManager<TVoxel, TIndex> & sceneManager, const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics, ITMRenderState *_renderState) const
 {
 }
 
 template<class TVoxel>
-void ITMMultiVisualizationEngine_CPU<TVoxel, VoxelBlockHash>::CreateExpectedDepths(const ITMVoxelMapGraphManager<TVoxel, VoxelBlockHash> & sceneManager, const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics, ITMRenderState *_renderState) const
+void MultiVisualizationEngine_CPU<TVoxel, VoxelBlockHash>::CreateExpectedDepths(const ITMVoxelMapGraphManager<TVoxel, VoxelBlockHash> & sceneManager, const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics, ITMRenderState *_renderState) const
 {
 	ITMRenderStateMultiScene<TVoxel, VoxelBlockHash> *renderState = (ITMRenderStateMultiScene<TVoxel, VoxelBlockHash>*)_renderState;
 
@@ -100,7 +100,7 @@ void ITMMultiVisualizationEngine_CPU<TVoxel, VoxelBlockHash>::CreateExpectedDept
 }
 
 template<typename TVoxel, typename TIndex>
-static void RenderImage_common(const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics, ITMRenderState *_renderState, ITMUChar4Image *outputImage, IITMVisualisationEngine::RenderImageType type){
+static void RenderImage_common(const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics, ITMRenderState *_renderState, ITMUChar4Image *outputImage, IVisualizationEngine::RenderImageType type){
 	ITMRenderStateMultiScene<TVoxel, TIndex> *renderState = (ITMRenderStateMultiScene<TVoxel, TIndex>*)_renderState;
 
 	Vector2i imgSize = outputImage->noDims;
@@ -137,11 +137,11 @@ static void RenderImage_common(const ORUtils::SE3Pose *pose, const ITMIntrinsics
 	Vector4u *outRendering = outputImage->GetData(MEMORYDEVICE_CPU);
 	Vector4f *pointsRay = renderState->raycastResult->GetData(MEMORYDEVICE_CPU);
 
-	if ((type == IITMVisualisationEngine::RENDER_COLOUR_FROM_VOLUME) &&
-	    (!TVoxel::hasColorInformation)) type = IITMVisualisationEngine::RENDER_SHADED_GREYSCALE;
+	if ((type == IVisualizationEngine::RENDER_COLOUR_FROM_VOLUME) &&
+	    (!TVoxel::hasColorInformation)) type = IVisualizationEngine::RENDER_SHADED_GREYSCALE;
 
 	switch (type) {
-		case IITMVisualisationEngine::RENDER_COLOUR_FROM_VOLUME:
+		case IVisualizationEngine::RENDER_COLOUR_FROM_VOLUME:
 #ifdef WITH_OPENMP
 #pragma omp parallel for
 #endif
@@ -151,7 +151,7 @@ static void RenderImage_common(const ORUtils::SE3Pose *pose, const ITMIntrinsics
 				                                                                  &(renderState->indexData_host));
 			}
 			break;
-		case IITMVisualisationEngine::RENDER_COLOUR_FROM_NORMAL:
+		case IVisualizationEngine::RENDER_COLOUR_FROM_NORMAL:
 			if (intrinsics->FocalLengthSignsDiffer())
 			{
 #ifdef WITH_OPENMP
@@ -175,7 +175,7 @@ static void RenderImage_common(const ORUtils::SE3Pose *pose, const ITMIntrinsics
 				}
 			}
 			break;
-		case IITMVisualisationEngine::RENDER_COLOUR_FROM_CONFIDENCE:
+		case IVisualizationEngine::RENDER_COLOUR_FROM_CONFIDENCE:
 			if (intrinsics->FocalLengthSignsDiffer())
 			{
 #ifdef WITH_OPENMP
@@ -199,7 +199,7 @@ static void RenderImage_common(const ORUtils::SE3Pose *pose, const ITMIntrinsics
 				}
 			}
 			break;
-		case IITMVisualisationEngine::RENDER_SHADED_GREYSCALE:
+		case IVisualizationEngine::RENDER_SHADED_GREYSCALE:
 		default:
 			if (intrinsics->FocalLengthSignsDiffer())
 			{
@@ -228,13 +228,13 @@ static void RenderImage_common(const ORUtils::SE3Pose *pose, const ITMIntrinsics
 };
 
 template<class TVoxel, class TIndex>
-void ITMMultiVisualizationEngine_CPU<TVoxel, TIndex>::RenderImage(const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics, ITMRenderState *_renderState, ITMUChar4Image *outputImage, IITMVisualisationEngine::RenderImageType type) const
+void MultiVisualizationEngine_CPU<TVoxel, TIndex>::RenderImage(const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics, ITMRenderState *_renderState, ITMUChar4Image *outputImage, IVisualizationEngine::RenderImageType type) const
 {
 	RenderImage_common<TVoxel,TIndex>(pose,intrinsics,_renderState,outputImage,type);
 }
 
 template<class TVoxel>
-void ITMMultiVisualizationEngine_CPU<TVoxel, VoxelBlockHash>::RenderImage(const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics, ITMRenderState *_renderState, ITMUChar4Image *outputImage, IITMVisualisationEngine::RenderImageType type) const
+void MultiVisualizationEngine_CPU<TVoxel, VoxelBlockHash>::RenderImage(const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics, ITMRenderState *_renderState, ITMUChar4Image *outputImage, IVisualizationEngine::RenderImageType type) const
 {
 	RenderImage_common<TVoxel,VoxelBlockHash>(pose,intrinsics,_renderState,outputImage,type);
 }
