@@ -15,7 +15,7 @@
 //  ================================================================
 #pragma once
 
-#include "../../Utils/ITMMath.h"
+#include "../../Utils/Math.h"
 #include "../../../ORUtils/PlatformIndependence.h"
 #include "../../../ORUtils/PlatformIndependentAtomics.h"
 #include "ITMWarpGradientAggregates.h"

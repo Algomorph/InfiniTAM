@@ -26,8 +26,8 @@
 #include "../Shared/SurfaceTrackerDiagnosticRoutines.h"
 #include "../Shared/ITMWarpGradientAggregates.h"
 #include "../Shared/ITMWarpGradientCommon.h"
-#include "../../Utils/ITMVoxelFlags.h"
-#include "../../Utils/ITMCPrintHelpers.h"
+#include "../../Utils/VoxelFlags.h"
+#include "../../Utils/CPrintHelpers.h"
 #include "../../Engines/EditAndCopy/Shared/EditAndCopyEngine_Shared.h"
 
 

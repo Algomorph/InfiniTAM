@@ -17,7 +17,7 @@
 
 //local
 #include "../../../Objects/Volume/VoxelVolume.h"
-#include "../../../Utils/ITMHashBlockProperties.h"
+#include "../../../Utils/HashBlockProperties.h"
 #include "../../../Objects/Views/ITMView.h"
 #include "../../../Objects/Tracking/ITMTrackingState.h"
 #include "../../../Objects/RenderStates/RenderState.h"

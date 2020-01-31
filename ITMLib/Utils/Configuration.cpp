@@ -26,7 +26,7 @@
 
 //local
 #include "Configuration.h"
-#include "json_utils.h"
+#include "JsonUtilities.h"
 
 using namespace ITMLib::configuration;
 

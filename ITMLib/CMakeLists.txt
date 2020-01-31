@@ -772,10 +772,10 @@ set(ITMLIB_UTILS_SOURCES
     Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CUDA.tcu
     Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CUDA.cu
 
-    Utils/json_utils.cpp
+    Utils/JsonUtilities.cpp
 
     Utils/Configuration.cpp
-    Utils/ITMPrintHelpers.cpp
+    Utils/CPPPrintHelpers.cpp
     )
 
 set(ITMLIB_UTILS_HEADERS
@@ -794,22 +794,22 @@ set(ITMLIB_UTILS_HEADERS
     Utils/Serialization/SerializationSequenceLevel2Macros.h
     Utils/Serialization/PreprocessorNargs.h
 
-    Utils/json_utils.h
+    Utils/JsonUtilities.h
 
-    Utils/ITMCUDAUtils.h
-    Utils/ITMValuePosition.h
-    Utils/ITMImageTypes.h
-    Utils/ITMHashBlockProperties.h
-    Utils/ITMVoxelFlags.h
+    Utils/CUDAUtils.h
+    Utils/ValuePosition.h
+    Utils/ImageTypes.h
+    Utils/HashBlockProperties.h
+    Utils/VoxelFlags.h
     Utils/Configuration.h
-    Utils/ITMMath.h
-    Utils/ITMMemoryBlockTypes.h
-    Utils/ITMPixelUtils.h
-    Utils/ITMProjectionUtils.h
+    Utils/Math.h
+    Utils/MemoryBlockTypes.h
+    Utils/PixelUtils.h
+    Utils/ProjectionUtils.h
     Utils/VoxelVolumeParameters.h
     Utils/SurfelVolumeParameters.h
-    Utils/ITMPrintHelpers.h
-    Utils/ITMCPrintHelpers.h
+    Utils/CPPPrintHelpers.h
+    Utils/CPrintHelpers.h
 
     Utils/Analytics/BenchmarkUtils.h
     Utils/Analytics/AlmostEqual.h

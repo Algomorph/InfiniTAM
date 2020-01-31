@@ -31,7 +31,7 @@
 #endif
 
 //local
-#include "../ITMMath.h"
+#include "../Math.h"
 
 
 

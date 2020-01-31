@@ -14,7 +14,7 @@
 //  limitations under the License.
 //  ================================================================
 #include "EditAndCopyEngine_CPU.h"
-#include "../../../Utils/ITMMath.h"
+#include "../../../Utils/Math.h"
 #include "../../../Objects/Volume/VoxelBlockHash.h"
 #include "../../../Objects/Volume/RepresentationAccess.h"
 #include "../../../ITMLibDefines.h"

@@ -1,7 +1,7 @@
 // Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
 
 #include "DepthTracker_CUDA.h"
-#include "../../Utils/ITMCUDAUtils.h"
+#include "../../Utils/CUDAUtils.h"
 #include "../Shared/DepthTracker_Shared.h"
 #include "../../../ORUtils/CUDADefines.h"
 

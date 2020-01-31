@@ -33,8 +33,8 @@
 
 //local
 #include "VisualizationWindowManager.h"
-#include "../ITMMath.h"
-#include "../ITMPrintHelpers.h"
+#include "../Math.h"
+#include "../CPPPrintHelpers.h"
 
 
 using namespace ITMLib;

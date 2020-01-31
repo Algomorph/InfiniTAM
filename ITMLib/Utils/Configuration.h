@@ -30,7 +30,7 @@
 #include "VoxelVolumeParameters.h"
 #include "SurfelVolumeParameters.h"
 #include "../../ORUtils/MemoryDeviceType.h"
-#include "ITMMath.h"
+#include "Math.h"
 #include "../SurfaceTrackers/Interface/SurfaceTrackerInterface.h"
 #include "../SurfaceTrackers/WarpGradientFunctors/WarpGradientFunctor.h"
 #include "../Engines/Main/NonRigidTrackingParameters.h"

@@ -16,8 +16,8 @@
 #pragma once
 
 #include "../../../ORUtils/PlatformIndependence.h"
-#include "../ITMVoxelFlags.h"
-#include "../ITMMath.h"
+#include "../VoxelFlags.h"
+#include "../Math.h"
 #include "../Geometry/SpatialIndexConversions.h"
 
 // region =========================== FUNCTIONS TO DETERMINE WHETHER A VOXEL HAS BEEN ALTERED FROM DEFAULT =============

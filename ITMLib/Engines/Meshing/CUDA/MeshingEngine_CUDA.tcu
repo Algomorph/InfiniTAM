@@ -3,7 +3,7 @@
 #include "MeshingEngine_CUDA.h"
 
 #include "../Shared/MeshingEngine_Shared.h"
-#include "../../../Utils/ITMCUDAUtils.h"
+#include "../../../Utils/CUDAUtils.h"
 #include "../../../../ORUtils/CUDADefines.h"
 
 using namespace ITMLib;

@@ -34,7 +34,7 @@
 
 //Local
 #include "SceneTrackingEnergyPlotter.h"
-#include "../ITMMath.h"
+#include "../Math.h"
 
 using namespace ITMLib;
 

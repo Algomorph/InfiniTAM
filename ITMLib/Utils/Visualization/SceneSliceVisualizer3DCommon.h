@@ -21,8 +21,8 @@
 #include <vtkIntArray.h>
 
 //local
-#include "../ITMMath.h"
-#include "../ITMVoxelFlags.h"
+#include "../Math.h"
+#include "../VoxelFlags.h"
 #include "../../Objects/Volume/VoxelBlockHash.h"
 
 namespace ITMLib {

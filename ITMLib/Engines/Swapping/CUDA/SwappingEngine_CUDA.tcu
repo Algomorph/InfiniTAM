@@ -3,7 +3,7 @@
 #include "SwappingEngine_CUDA.h"
 
 #include "../Shared/SwappingEngine_Shared.h"
-#include "../../../Utils/ITMCUDAUtils.h"
+#include "../../../Utils/CUDAUtils.h"
 
 using namespace ITMLib;
 

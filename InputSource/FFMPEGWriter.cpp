@@ -69,14 +69,14 @@ int FFMPEGWriter::PrivateData::open(const char *filename, int size_x, int size_y
 	AVRational framerate;
 	int ret;
 
-	ofmt_ctx = NULL;
-	avformat_alloc_output_context2(&ofmt_ctx, NULL, NULL, filename);
+	ofmt_ctx = nullptr;
+	avformat_alloc_output_context2(&ofmt_ctx, nullptr, nullptr, filename);
 	if (!ofmt_ctx) {
 		std::cerr << "Could not create ffmpeg output context" << std::endl;
 		return -1;
 	}
 
-	out_stream = avformat_new_stream(ofmt_ctx, NULL);
+	out_stream = avformat_new_stream(ofmt_ctx, nullptr);
 	out_stream->time_base.num = 1;
 	out_stream->time_base.den = fps;
 	if (!out_stream) {
@@ -108,7 +108,7 @@ int FFMPEGWriter::PrivateData::open(const char *filename, int size_x, int size_y
 	enc_ctx->time_base.den = fps;
 
 	/* Third parameter can be used to pass settings to encoder */
-	AVDictionary *dict = NULL;
+	AVDictionary *dict = nullptr;
 	av_dict_set(&dict, "coder", "1", 0);
 	av_dict_set(&dict, "context", "0", 0);
 	av_dict_set(&dict, "level", "3", 0);
@@ -132,7 +132,7 @@ int FFMPEGWriter::PrivateData::open(const char *filename, int size_x, int size_y
 		}
 	}
 
-	ret = avformat_write_header(ofmt_ctx, NULL);
+	ret = avformat_write_header(ofmt_ctx, nullptr);
 	if (ret < 0) {
 		std::cerr << "Error occurred when opening output file" << std::endl;
 		return ret;
@@ -147,10 +147,10 @@ int FFMPEGWriter::PrivateData::init_filter(FilteringContext* fctx, AVCodecContex
 {
 	char args[512];
 	int ret = 0;
-	const AVFilter *buffersrc = NULL;
-	const AVFilter *buffersink = NULL;
-	AVFilterContext *buffersrc_ctx = NULL;
-	AVFilterContext *buffersink_ctx = NULL;
+	const AVFilter *buffersrc = nullptr;
+	const AVFilter *buffersink = nullptr;
+	AVFilterContext *buffersrc_ctx = nullptr;
+	AVFilterContext *buffersink_ctx = nullptr;
 	AVFilterInOut *outputs = avfilter_inout_alloc();
 	AVFilterInOut *inputs  = avfilter_inout_alloc();
 	AVFilterGraph *filter_graph = avfilter_graph_alloc();
@@ -174,12 +174,12 @@ int FFMPEGWriter::PrivateData::init_filter(FilteringContext* fctx, AVCodecContex
 		enc_ctx->time_base.num, enc_ctx->time_base.den,
 		enc_ctx->sample_aspect_ratio.num,
 		enc_ctx->sample_aspect_ratio.den);
-	ret = avfilter_graph_create_filter(&buffersrc_ctx, buffersrc, "in", args, NULL, filter_graph);
+	ret = avfilter_graph_create_filter(&buffersrc_ctx, buffersrc, "in", args, nullptr, filter_graph);
 	if (ret < 0) {
 		std::cerr << "Cannot create buffer source" << std::endl;
 		goto end;
 	}
-	ret = avfilter_graph_create_filter(&buffersink_ctx, buffersink, "out", NULL, NULL, filter_graph);
+	ret = avfilter_graph_create_filter(&buffersink_ctx, buffersink, "out", nullptr, nullptr, filter_graph);
 	if (ret < 0) {
 		std::cerr << "Cannot create buffer sink" << std::endl;
 		goto end;
@@ -196,17 +196,17 @@ int FFMPEGWriter::PrivateData::init_filter(FilteringContext* fctx, AVCodecContex
 	outputs->name       = av_strdup("in");
 	outputs->filter_ctx = buffersrc_ctx;
 	outputs->pad_idx    = 0;
-	outputs->next       = NULL;
+	outputs->next       = nullptr;
 	inputs->name       = av_strdup("out");
 	inputs->filter_ctx = buffersink_ctx;
 	inputs->pad_idx    = 0;
-	inputs->next       = NULL;
+	inputs->next       = nullptr;
 	if (!outputs->name || !inputs->name) {
 		ret = AVERROR(ENOMEM);
 		goto end;
 	}
-	if ((ret = avfilter_graph_parse_ptr(filter_graph, filter_spec, &inputs, &outputs, NULL)) < 0) goto end;
-	if ((ret = avfilter_graph_config(filter_graph, NULL)) < 0) goto end;
+	if ((ret = avfilter_graph_parse_ptr(filter_graph, filter_spec, &inputs, &outputs, nullptr)) < 0) goto end;
+	if ((ret = avfilter_graph_config(filter_graph, nullptr)) < 0) goto end;
 
 	/* Fill FilteringContext */
 	fctx->buffersrc_ctx = buffersrc_ctx;
@@ -222,9 +222,9 @@ int FFMPEGWriter::PrivateData::init_filters(void)
 {
 	const char *filter_spec;
 	int ret;
-	filter_ctx.buffersrc_ctx  = NULL;
-	filter_ctx.buffersink_ctx = NULL;
-	filter_ctx.filter_graph   = NULL;
+	filter_ctx.buffersrc_ctx  = nullptr;
+	filter_ctx.buffersink_ctx = nullptr;
+	filter_ctx.filter_graph   = nullptr;
 	filter_spec = "null";
         ret = init_filter(&filter_ctx, ofmt_ctx->streams[0]->codec, filter_spec);
 	return ret;
@@ -238,7 +238,7 @@ int FFMPEGWriter::PrivateData::encode_write_frame(AVFrame *filt_frame, unsigned 
 	if (!got_frame) got_frame = &got_frame_local;
 
 	/* encode filtered frame */
-	enc_pkt.data = NULL;
+	enc_pkt.data = nullptr;
 	enc_pkt.size = 0;
 	av_init_packet(&enc_pkt);
 	ret = avcodec_encode_video2(ofmt_ctx->streams[stream_index]->codec, &enc_pkt, filt_frame, got_frame);
@@ -287,7 +287,7 @@ int FFMPEGWriter::PrivateData::filter_encode_write_frame(AVFrame *frame, unsigne
 			break;
 		}
 		filt_frame->pict_type = AV_PICTURE_TYPE_NONE;
-		ret = encode_write_frame(filt_frame, stream_index, NULL);
+		ret = encode_write_frame(filt_frame, stream_index, nullptr);
 		if (ret < 0) break;
 	}
 	return ret;
@@ -300,7 +300,7 @@ int FFMPEGWriter::PrivateData::flush_encoder(unsigned int stream_index)
 	if (!(ofmt_ctx->streams[stream_index]->codec->codec->capabilities & AV_CODEC_CAP_DELAY)) return 0;
 
 	while (1) {
-		ret = encode_write_frame(NULL, stream_index, &got_frame);
+		ret = encode_write_frame(nullptr, stream_index, &got_frame);
 		if (ret < 0) break;
 		if (!got_frame) return 0;
 	}
@@ -313,7 +313,7 @@ int FFMPEGWriter::PrivateData::close(void)
         /* flush filter */
 	do {
 	        if (!filter_ctx.filter_graph) continue;
-	        ret = filter_encode_write_frame(NULL, 0);
+	        ret = filter_encode_write_frame(nullptr, 0);
 		if (ret < 0) {
 			std::cerr << "Flushing filter failed" << std::endl;
 			goto end;

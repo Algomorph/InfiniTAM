@@ -16,10 +16,10 @@
 #pragma once
 
 #include "../../Objects/Volume/RepresentationAccess.h"
-#include "../../Utils/ITMHashBlockProperties.h"
+#include "../../Utils/HashBlockProperties.h"
 #include "../../Utils/Analytics/NeighborVoxelIterationInfo.h"
-#include "../../Utils/ITMPrintHelpers.h"
-#include "../../Utils/ITMCPrintHelpers.h"
+#include "../../Utils/CPPPrintHelpers.h"
+#include "../../Utils/CPrintHelpers.h"
 #include "../../Objects/Volume/TrilinearInterpolation.h"
 #include "../../Utils/Geometry/SpatialIndexConversions.h"
 

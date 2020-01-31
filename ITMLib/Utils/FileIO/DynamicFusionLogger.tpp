@@ -26,7 +26,7 @@
 //local
 #include "DynamicFusionLogger.h"
 #include "../Analytics/BenchmarkUtils.h"
-#include "../ITMPrintHelpers.h"
+#include "../CPPPrintHelpers.h"
 #include "../Configuration.h"
 
 

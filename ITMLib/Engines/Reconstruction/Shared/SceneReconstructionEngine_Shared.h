@@ -3,7 +3,7 @@
 #pragma once
 
 #include "../../../Objects/Volume/RepresentationAccess.h"
-#include "../../../Utils/ITMPixelUtils.h"
+#include "../../../Utils/PixelUtils.h"
 
 
 /**

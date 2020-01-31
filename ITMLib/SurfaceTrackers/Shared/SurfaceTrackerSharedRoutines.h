@@ -15,10 +15,10 @@
 //  ================================================================
 #pragma once
 
-#include "../../Utils/ITMVoxelFlags.h"
+#include "../../Utils/VoxelFlags.h"
 #include "../../Objects/Volume/RepresentationAccess.h"
 #include "../../../ORUtils/PlatformIndependence.h"
-#include "../../Utils/ITMPrintHelpers.h"
+#include "../../Utils/CPPPrintHelpers.h"
 
 //_DEBUG preprocessor options
 #ifdef TRACK_LIVE_NONTRUNCATED

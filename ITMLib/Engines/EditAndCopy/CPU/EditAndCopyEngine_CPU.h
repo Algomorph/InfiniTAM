@@ -18,8 +18,8 @@
 #include "../../../Objects/Volume/VoxelVolume.h"
 #include "../../../Objects/Volume/RepresentationAccess.h"
 #include "../../../ITMLibDefines.h"
-#include "../../../Utils/ITMHashBlockProperties.h"
-#include "../../../Utils/ITMPrintHelpers.h"
+#include "../../../Utils/HashBlockProperties.h"
+#include "../../../Utils/CPPPrintHelpers.h"
 #include "../Interface/EditAndCopyEngineInterface.h"
 
 

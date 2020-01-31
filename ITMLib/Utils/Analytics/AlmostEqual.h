@@ -22,7 +22,7 @@
 //local
 #include "VoxelVolumeComparison/VoxelVolumeComparison_CPU.h"
 #include "../../Objects/Volume/VoxelTypes.h"
-#include "../ITMMath.h"
+#include "../Math.h"
 #include "../../../ORUtils/PlatformIndependence.h"
 
 //TODO: can this be possibly shortened by using overloads instead of templates for tolerance type?

@@ -20,10 +20,10 @@
 #include "../../../Objects/Volume/RepresentationAccess.h"
 #include "../../Common/CommonFunctors.h"
 #include "../../Common/AllocationTempData.h"
-#include "../../../Utils/ITMMath.h"
-#include "../../../Utils/ITMPixelUtils.h"
-#include "../../../Utils/ITMVoxelFlags.h"
-#include "../../../Utils/ITMHashBlockProperties.h"
+#include "../../../Utils/Math.h"
+#include "../../../Utils/PixelUtils.h"
+#include "../../../Utils/VoxelFlags.h"
+#include "../../../Utils/HashBlockProperties.h"
 #include "../../../Utils/Geometry/IntersectionChecks.h"
 
 #ifdef __CUDACC__

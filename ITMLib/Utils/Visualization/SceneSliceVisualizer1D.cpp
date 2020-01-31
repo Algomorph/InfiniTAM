@@ -24,7 +24,7 @@
 #include "SceneSliceVisualizer1D.tpp"
 #include "../../Objects/Volume/VoxelVolume.h"
 #include "../../Objects/Volume/RepresentationAccess.h"
-#include "../ITMPrintHelpers.h"
+#include "../CPPPrintHelpers.h"
 
 #include "../../ITMLibDefines.h"
 #include "VisualizationWindowManager.h"

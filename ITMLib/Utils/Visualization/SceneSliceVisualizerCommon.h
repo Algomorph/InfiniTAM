@@ -16,7 +16,7 @@
 #pragma once
 
 #include "../../../ORUtils/PlatformIndependence.h"
-#include "../ITMMath.h"
+#include "../Math.h"
 #include "VisualizationCommon.h"
 
 using namespace ITMLib;

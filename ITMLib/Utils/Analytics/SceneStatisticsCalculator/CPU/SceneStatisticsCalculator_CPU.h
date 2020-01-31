@@ -16,7 +16,7 @@
 #pragma once
 
 #include <vector>
-#include "../../../ITMMath.h"
+#include "../../../Math.h"
 #include "../../../../Objects/Volume/VoxelVolume.h"
 #include "../Interface/SceneStatisticsCalculatorInterface.h"
 #include "../../../../ITMLibDefines.h"

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "../../../Objects/Volume/RepresentationAccess.h"
-#include "../../../Utils/ITMPixelUtils.h"
+#include "../../../Utils/PixelUtils.h"
 
 //@formatter:off
 static const _CPU_AND_GPU_CONSTANT_ int edgeTable[256] = { 0x0, 0x109, 0x203, 0x30a, 0x406, 0x50f, 0x605, 0x70c, 0x80c, 0x905, 0xa0f, 0xb06, 0xc0a, 0xd03, 0xe09, 0xf00,

@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "../../Utils/ITMMath.h"
+#include "../../Utils/Math.h"
 
 #define DEBUG_CORRESPONDENCES 0
 

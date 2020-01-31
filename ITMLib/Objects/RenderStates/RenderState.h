@@ -4,7 +4,7 @@
 
 #ifndef __METALC__
 
-#include "../../Utils/ITMMath.h"
+#include "../../Utils/Math.h"
 #include "../../../ORUtils/Image.h"
 
 namespace ITMLib

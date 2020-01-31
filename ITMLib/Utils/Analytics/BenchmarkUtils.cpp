@@ -25,7 +25,7 @@
 // local
 #include "../../../ORUtils/PlatformIndependence.h"
 #include "BenchmarkUtils.h"
-#include "../ITMPrintHelpers.h"
+#include "../CPPPrintHelpers.h"
 #include "../Configuration.h"
 
 namespace fs = boost::filesystem;

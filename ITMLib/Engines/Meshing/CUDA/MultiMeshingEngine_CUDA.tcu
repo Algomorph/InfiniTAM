@@ -3,7 +3,7 @@
 #include "MultiMeshingEngine_CUDA.h"
 
 #include "../../../../ORUtils/CUDADefines.h"
-#include "../../../Utils/ITMCUDAUtils.h"
+#include "../../../Utils/CUDAUtils.h"
 
 #include "../Shared/MeshingEngine_Shared.h"
 #include "../Shared/MultiMeshingEngine_Shared.h"

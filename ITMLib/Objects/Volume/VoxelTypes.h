@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "../../Utils/ITMMath.h"
-#include "../../Utils/ITMVoxelFlags.h"
+#include "../../Utils/Math.h"
+#include "../../Utils/VoxelFlags.h"
 
 /** \brief
     Stores the information of a single voxel in the volume

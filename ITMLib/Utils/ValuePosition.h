@@ -15,9 +15,9 @@
 //  ================================================================
 #pragma once
 
-#include "ITMMath.h"
+#include "Math.h"
 
-struct ITMValuePosition{
+struct ValuePosition{
 	float value;
 	Vector3i position;
 };

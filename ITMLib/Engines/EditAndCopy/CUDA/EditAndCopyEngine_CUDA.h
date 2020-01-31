@@ -18,7 +18,7 @@
 #include "../../../Objects/Volume/PlainVoxelArray.h"
 #include "../../../Objects/Volume/VoxelVolume.h"
 #include "../Interface/EditAndCopyEngineInterface.h"
-#include "../../../Utils/ITMHashBlockProperties.h"
+#include "../../../Utils/HashBlockProperties.h"
 #include "../../../ITMLibDefines.h"
 
 

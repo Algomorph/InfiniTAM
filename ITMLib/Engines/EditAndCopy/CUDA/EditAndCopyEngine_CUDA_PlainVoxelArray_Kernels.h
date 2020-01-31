@@ -17,7 +17,7 @@
 #include "EditAndCopyEngine_CUDA.h"
 #include "../Shared/EditAndCopyEngine_Shared.h"
 #include "../../../../ORUtils/PlatformIndependence.h"
-#include "../../../Utils/ITMCUDAUtils.h"
+#include "../../../Utils/CUDAUtils.h"
 #include "../../../../ORUtils/JetbrainsCUDASyntax.hpp"
 #include "../../../Objects/Volume/RepresentationAccess.h"
 

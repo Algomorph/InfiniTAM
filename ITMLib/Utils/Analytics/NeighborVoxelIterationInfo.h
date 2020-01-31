@@ -16,7 +16,7 @@
 #pragma once
 
 #include <array>
-#include "../ITMMath.h"
+#include "../Math.h"
 
 namespace ITMLib{
 

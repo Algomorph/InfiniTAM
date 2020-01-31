@@ -16,7 +16,7 @@
 #pragma once
 
 #include "../../../../../ORUtils/JetbrainsCUDASyntax.hpp"
-#include "../../../../Utils/ITMCUDAUtils.h"
+#include "../../../../Utils/CUDAUtils.h"
 #include "../../../../Objects/Volume/GlobalCache.h"
 #include "../../../EditAndCopy/Shared/EditAndCopyEngine_Shared.h"
 #include "../../Shared/IndexingEngine_Shared.h"

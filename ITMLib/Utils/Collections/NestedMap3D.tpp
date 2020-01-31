@@ -16,7 +16,7 @@
 #include <fstream>
 #include <iostream>
 #include "NestedMap3D.h"
-#include "../ITMPrintHelpers.h"
+#include "../CPPPrintHelpers.h"
 
 using namespace ITMLib;
 

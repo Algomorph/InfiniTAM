@@ -17,7 +17,7 @@
 
 
 #include <iostream>
-#include "../../Utils/ITMPrintHelpers.h"
+#include "../../Utils/CPPPrintHelpers.h"
 #include "ITMWarpGradientAggregates.h"
 
 namespace ITMLib {

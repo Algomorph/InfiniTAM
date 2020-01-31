@@ -10,10 +10,10 @@
 
 #endif
 
-#include "../../Utils/ITMMath.h"
+#include "../../Utils/Math.h"
 #include "../../../ORUtils/MemoryBlock.h"
 #include "../../../ORUtils/MemoryBlockPersister.h"
-#include "../../Utils/ITMHashBlockProperties.h"
+#include "../../Utils/HashBlockProperties.h"
 #include "../../Utils/Serialization/Serialization.h"
 
 #define VOXEL_BLOCK_SIZE 8

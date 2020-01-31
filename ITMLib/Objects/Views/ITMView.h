@@ -3,7 +3,7 @@
 #pragma once
 
 #include "../Camera/CalibIO.h"
-#include "../../Utils/ITMImageTypes.h"
+#include "../../Utils/ImageTypes.h"
 
 namespace ITMLib
 {

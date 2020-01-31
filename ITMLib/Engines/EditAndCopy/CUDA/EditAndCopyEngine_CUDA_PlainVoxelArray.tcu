@@ -18,7 +18,7 @@
 #include "EditAndCopyEngine_CUDA_PlainVoxelArray_Kernels.h"
 #include "../../../../ORUtils/PlatformIndependence.h"
 #include "../../../../ORUtils/JetbrainsCUDASyntax.hpp"
-#include "../../../Utils/ITMCUDAUtils.h"
+#include "../../../Utils/CUDAUtils.h"
 #include "../../../Objects/Volume/RepresentationAccess.h"
 #include "../Shared/EditAndCopyEngine_Shared.h"
 

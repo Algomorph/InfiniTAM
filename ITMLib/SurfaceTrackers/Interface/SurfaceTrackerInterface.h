@@ -20,8 +20,8 @@
 #include "../../Engines/Reconstruction/CPU/SceneReconstructionEngine_CPU.h"
 #include "../../Utils/Visualization/SceneSliceVisualizer2D.h"
 #include "../../Utils/FileIO/SceneLogger.h"
-#include "../../Utils/ITMPrintHelpers.h"
-#include "../../Utils/ITMVoxelFlags.h"
+#include "../../Utils/CPPPrintHelpers.h"
+#include "../../Utils/VoxelFlags.h"
 #include "../Shared/SurfaceTrackerOptimizationParameters.h"
 #include "SlavchevaSufraceTracker.h"
 

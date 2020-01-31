@@ -14,7 +14,7 @@
 //  limitations under the License.
 //  ================================================================
 
-#include "ITMPrintHelpers.h"
+#include "CPPPrintHelpers.h"
 
 namespace ITMLib{
 

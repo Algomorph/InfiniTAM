@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "../../Utils/ITMPixelUtils.h"
+#include "../../Utils/PixelUtils.h"
 
 template<bool shortIteration, bool rotationOnly>
 _CPU_AND_GPU_CODE_ inline bool computePerPointGH_Depth_Ab(THREADPTR(float) *A, THREADPTR(float) &b,

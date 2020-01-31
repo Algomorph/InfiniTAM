@@ -7,7 +7,7 @@
 
 #include "../Shared/VisualizationEngine_Shared.h"
 #include "../../Reconstruction/Shared/SceneReconstructionEngine_Shared.h"
-#include "../../../Utils/ITMCUDAUtils.h"
+#include "../../../Utils/CUDAUtils.h"
 
 namespace ITMLib {
 // declaration of device functions

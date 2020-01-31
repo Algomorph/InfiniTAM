@@ -38,7 +38,7 @@
 #include "../../ORUtils/FileUtils.h"
 #include "../../InputSource/FFMPEGWriter.h"
 #include "../../ITMLib/Utils/Analytics/BenchmarkUtils.h"
-#include "../../ITMLib/Utils/ITMPrintHelpers.h"
+#include "../../ITMLib/Utils/CPPPrintHelpers.h"
 
 #ifdef WITH_OPENCV
 #include <opencv2/imgcodecs.hpp>

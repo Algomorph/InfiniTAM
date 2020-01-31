@@ -3,7 +3,7 @@
 #pragma once
 
 #include "../../../Objects/Volume/RepresentationAccess.h"
-#include "../../../Utils/ITMHashBlockProperties.h"
+#include "../../../Utils/HashBlockProperties.h"
 
 static const CONSTPTR(int) MAX_RENDERING_BLOCKS = 65536*4;
 //static const int MAX_RENDERING_BLOCKS = 16384;

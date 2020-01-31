@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "ITMMath.h"
+#include "Math.h"
 #include "../../ORUtils/Image.h"
 
 typedef ORUtils::Image<bool> ITMBoolImage;

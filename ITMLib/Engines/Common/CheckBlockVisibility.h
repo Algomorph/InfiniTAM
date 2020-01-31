@@ -16,7 +16,7 @@
 #pragma once
 
 #include "../../../ORUtils/PlatformIndependence.h"
-#include "../../Utils/ITMMath.h"
+#include "../../Utils/Math.h"
 
 
 template<bool useSwapping>

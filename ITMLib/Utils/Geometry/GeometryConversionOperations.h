@@ -20,7 +20,7 @@
 //TODO: separate out common geometry object, i.e. PVA info is the logical equivalent of a box, make a separate Box geometry class
 // (need to eliminate as much interdependence between classes in folders as possible, i.e. reduce coupling & increase cohesion)
 #include "../../Objects/Volume/PlainVoxelArray.h"
-#include "../ITMMath.h"
+#include "../Math.h"
 
 _CPU_AND_GPU_CODE_
 inline

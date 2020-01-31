@@ -18,9 +18,9 @@
 //TODO: Clean out unused versions -Greg (GitHub: Algomorph)
 
 #include <cfloat>
-#include "../../Utils/ITMPrintHelpers.h"
-#include "../../Utils/ITMCPrintHelpers.h"
-#include "../../Utils/ITMVoxelFlags.h"
+#include "../../Utils/CPPPrintHelpers.h"
+#include "../../Utils/CPrintHelpers.h"
+#include "../../Utils/VoxelFlags.h"
 #include "RepresentationAccess.h"
 
 

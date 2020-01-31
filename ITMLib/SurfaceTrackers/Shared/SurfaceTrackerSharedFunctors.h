@@ -16,7 +16,7 @@
 #pragma once
 
 
-#include "../../Utils/ITMMath.h"
+#include "../../Utils/Math.h"
 #include "../../Objects/Volume/VoxelVolume.h"
 #include "../../Utils/Configuration.h"
 #include "SurfaceTrackerSharedRoutines.h"

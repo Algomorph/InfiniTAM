@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "../ITMLib/Utils/ITMImageTypes.h"
+#include "../ITMLib/Utils/ImageTypes.h"
 
 namespace InputSource {
 

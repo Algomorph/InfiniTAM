@@ -17,8 +17,8 @@
 
 #include "../../Objects/Volume/RepresentationAccess.h"
 #include "../../Objects/Volume/TrilinearInterpolation.h"
-#include "../../Utils/ITMPixelUtils.h"
-#include "../../Utils/ITMVoxelFlags.h"
+#include "../../Utils/PixelUtils.h"
+#include "../../Utils/VoxelFlags.h"
 
 
 // region ============================== UPDATE SDF/COLOR IN VOXEL USING DEPTH PIXEL ===================================

@@ -17,7 +17,7 @@
 
 #include "../../../ORUtils/PlatformIndependence.h"
 #include "../../../ORUtils/MathUtils.h"
-#include "../ITMMath.h"
+#include "../Math.h"
 #include "GeometryConversionOperations.h"
 
 _CPU_AND_GPU_CODE_

@@ -18,7 +18,7 @@
 // local
 #include "../../../ORUtils/MemoryDeviceType.h"
 #include "../../../ORUtils/PlatformIndependence.h"
-#include "../../Utils/ITMVoxelFlags.h"
+#include "../../Utils/VoxelFlags.h"
 #include "../Common/WarpType.h"
 #include "../../Objects/Volume/VoxelVolume.h"
 #include "../../Objects/Volume/TrilinearInterpolation.h"
