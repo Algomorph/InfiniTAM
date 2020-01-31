@@ -70,7 +70,7 @@ BOOST_FIXTURE_TEST_CASE(testDataTerm_CPU_PVA, DataFixture) {
 	                                                            configuration::SWAPPINGMODE_ENABLED,
 	                                                            MEMORYDEVICE_CPU,
 	                                                            indexParameters);
-	ManipulationEngine_CPU_PVA_Warp::Inst().ResetScene(&warp_field_CPU1);
+	ManipulationEngine_CPU_PVA_Warp::Inst().ResetVolume(&warp_field_CPU1);
 
 
 	auto motionTracker_PVA_CPU = new SurfaceTracker<ITMVoxel, ITMWarp, PlainVoxelArray, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_DIAGNOSTIC>(

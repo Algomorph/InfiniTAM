@@ -39,6 +39,7 @@ private:
 public:
 	EditAndCopyEngine_CUDA();
 	~EditAndCopyEngine_CUDA();
+
 	//can be used as a singleton, but doesn't HAVE TO be
 	static EditAndCopyEngine_CUDA& Inst() {
 		static EditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray> instance; // Guaranteed to be destroyed.
@@ -46,20 +47,20 @@ public:
 		return instance;
 	}
 
-	void ResetScene(ITMVoxelVolume <TVoxel, PlainVoxelArray>* scene) override ;
-	bool SetVoxel(ITMVoxelVolume <TVoxel, PlainVoxelArray>* scene, Vector3i at, TVoxel voxel) override ;
-	TVoxel ReadVoxel(ITMVoxelVolume <TVoxel, PlainVoxelArray>* scene, Vector3i at);
-	TVoxel ReadVoxel(ITMVoxelVolume <TVoxel, PlainVoxelArray>* scene, Vector3i at,
+	void ResetVolume(ITMVoxelVolume<TVoxel, PlainVoxelArray>* volume) override;
+	bool SetVoxel(ITMVoxelVolume<TVoxel, PlainVoxelArray>* volume, Vector3i at, TVoxel voxel) override;
+	TVoxel ReadVoxel(ITMVoxelVolume<TVoxel, PlainVoxelArray>* volume, Vector3i at);
+	TVoxel ReadVoxel(ITMVoxelVolume<TVoxel, PlainVoxelArray>* volume, Vector3i at,
 	                 PlainVoxelArray::IndexCache& cache) override;
-	bool IsPointInBounds(ITMVoxelVolume <TVoxel, PlainVoxelArray>* scene, const Vector3i& at);
-	void OffsetWarps(ITMVoxelVolume <TVoxel, PlainVoxelArray>* scene, Vector3f offset) override;
-	bool CopySceneSlice(
-			ITMVoxelVolume <TVoxel, PlainVoxelArray>* destination,
-			ITMVoxelVolume <TVoxel, PlainVoxelArray>* source,
+	bool IsPointInBounds(ITMVoxelVolume<TVoxel, PlainVoxelArray>* volume, const Vector3i& at);
+	void OffsetWarps(ITMVoxelVolume<TVoxel, PlainVoxelArray>* volume, Vector3f offset) override;
+	bool CopyVolumeSlice(
+			ITMVoxelVolume<TVoxel, PlainVoxelArray>* targetVolume,
+			ITMVoxelVolume<TVoxel, PlainVoxelArray>* sourceVolume,
 			Vector6i bounds, const Vector3i& offset) override;
-	bool CopyScene(ITMVoxelVolume <TVoxel, PlainVoxelArray>* destination,
-	               ITMVoxelVolume <TVoxel, PlainVoxelArray>* source,
-	               const Vector3i& offset = Vector3i(0)) override;
+	bool CopyVolume(ITMVoxelVolume<TVoxel, PlainVoxelArray>* targetVolume,
+	                ITMVoxelVolume<TVoxel, PlainVoxelArray>* sourceVolume,
+	                const Vector3i& offset = Vector3i(0)) override;
 };
 
 
@@ -76,29 +77,32 @@ private:
 public:
 	EditAndCopyEngine_CUDA();
 	~EditAndCopyEngine_CUDA();
+
 	//can be used as a singleton, but doesn't HAVE TO be
 	static EditAndCopyEngine_CUDA& Inst() {
 		static EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash> instance; // Guaranteed to be destroyed.
 		// Instantiated on first use.
 		return instance;
 	}
-	void ResetScene(ITMVoxelVolume <TVoxel, VoxelBlockHash>* scene);
-	bool SetVoxel(ITMVoxelVolume <TVoxel, VoxelBlockHash>* scene, Vector3i at, TVoxel voxel) override;
-	TVoxel ReadVoxel(ITMVoxelVolume <TVoxel, VoxelBlockHash>* scene, Vector3i at) override;
+
+	void ResetVolume(ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume) override;
+	bool SetVoxel(ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3i at, TVoxel voxel) override;
+	TVoxel ReadVoxel(ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3i at) override;
 	TVoxel
-	ReadVoxel(ITMVoxelVolume <TVoxel, VoxelBlockHash>* scene, Vector3i at,
+	ReadVoxel(ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3i at,
 	          VoxelBlockHash::IndexCache& cache) override;
 	TVoxel
-	ReadVoxel(ITMVoxelVolume <TVoxel, VoxelBlockHash>* scene, Vector3i at, int& where,
+	ReadVoxel(ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3i at, int& where,
 	          VoxelBlockHash::IndexCache& cache);
 
-	void OffsetWarps(ITMVoxelVolume <TVoxel, VoxelBlockHash>* scene, Vector3f offset) override;
-	bool CopySceneSlice(ITMVoxelVolume <TVoxel, VoxelBlockHash>* destination, ITMVoxelVolume <TVoxel, VoxelBlockHash>* source,
-	                    Vector6i bounds, const Vector3i& offset = Vector3i(0)) override;
+	void OffsetWarps(ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3f offset) override;
+	bool CopyVolumeSlice(ITMVoxelVolume<TVoxel, VoxelBlockHash>* targetVolume,
+	                     ITMVoxelVolume<TVoxel, VoxelBlockHash>* sourceVolume,
+	                     Vector6i bounds, const Vector3i& offset = Vector3i(0)) override;
 
-	bool CopyScene(ITMVoxelVolume <TVoxel, VoxelBlockHash>* destination,
-	               ITMVoxelVolume <TVoxel, VoxelBlockHash>* source,
-	               const Vector3i& offset = Vector3i(0)) override;
+	bool CopyVolume(ITMVoxelVolume<TVoxel, VoxelBlockHash>* targetVolume,
+	                ITMVoxelVolume<TVoxel, VoxelBlockHash>* sourceVolume,
+	                const Vector3i& offset = Vector3i(0)) override;
 
 };
 

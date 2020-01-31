@@ -23,64 +23,64 @@ namespace ITMLib {
 template<typename TVoxel, typename TIndex>
 class EditAndCopyEngineInterface {
 	/**
-	 * \brief Interface to engines implementing basic scene manipulation routines for different scene types.
+	 * \brief Interface to engines implementing basic scene manipulation & copying routines for voxel volumes.
 	 */
 public:
 	EditAndCopyEngineInterface() = default;
 	virtual ~EditAndCopyEngineInterface() = default;
-	// TODO: better to make ResetScene a function of Scene (and template Scene on device type as well)
+	// TODO: better to make ResetVolume a function of Scene (and template Scene on device type as well)
 	/**
-	 * \brief Clear out scene and reset the index
-	 * \param scene
+	 * \brief Clear out volume and reset the index
+	 * \param volume
 	 */
-	virtual void ResetScene(ITMVoxelVolume <TVoxel, TIndex>* scene) = 0;
+	virtual void ResetVolume(ITMVoxelVolume <TVoxel, TIndex>* volume) = 0;
 
 	/**
 	 * \brief Set a single voxel at the desired location to the desired value
-	 * \param scene the target voxel volume
+	 * \param volume the target voxel volume
 	 * \param at the target voxel coordinate
 	 * \param voxel the target voxel value
 	 * \return true on success, false otherwise
 	 */
-	virtual bool SetVoxel(ITMVoxelVolume <TVoxel, TIndex>* scene, Vector3i at, TVoxel voxel) = 0;
+	virtual bool SetVoxel(ITMVoxelVolume <TVoxel, TIndex>* volume, Vector3i at, TVoxel voxel) = 0;
 
 	/**
 	 * \brief Read voxel at the desired location
 	 * \details Returns a default-value voxel (initialized using the basic constructor of the voxel class) if the location
 	 * does not fall within the allocated memory of the voxel volume
-	 * \param scene voxel volume to query
+	 * \param volume voxel volume to query
 	 * \param at coordinate to query
 	 * \return value of the voxel at desired location
 	 */
-	virtual TVoxel ReadVoxel(ITMVoxelVolume <TVoxel, TIndex>* scene, Vector3i at) = 0;
-	virtual TVoxel ReadVoxel(ITMVoxelVolume <TVoxel, TIndex>* scene, Vector3i at,
-			typename TIndex::IndexCache& cache) = 0;
+	virtual TVoxel ReadVoxel(ITMVoxelVolume <TVoxel, TIndex>* volume, Vector3i at) = 0;
+	virtual TVoxel ReadVoxel(ITMVoxelVolume <TVoxel, TIndex>* volume, Vector3i at,
+	                         typename TIndex::IndexCache& cache) = 0;
 
 
 	/**
 	 * \brief offset warps by a fixed amount in each direction
-	 * \param scene the scene to modify
+	 * \param volume the scene to modify
 	 * \param offset the offset vector to use
 	 */
-	virtual void OffsetWarps(ITMVoxelVolume <TVoxel, TIndex>* scene, Vector3f offset) = 0;
+	virtual void OffsetWarps(ITMVoxelVolume <TVoxel, TIndex>* volume, Vector3f offset) = 0;
 
 	/**
 	 * \brief Copies the slice (box-like window) specified by points extremum1 and extremum2 from the source scene into a
 	 * destination scene. Clears the destination scene before copying.
 	 * \tparam TVoxel type of voxel
 	 * \tparam TIndex type of voxel index
-	 * \param destination destination voxel grid (can be uninitialized)
-	 * \param source source voxel grid
+	 * \param targetVolume destination voxel grid (can be uninitialized)
+	 * \param sourceVolume source voxel grid
 	 * \param bounds minimum point in the desired slice (inclusive), i.e. minimum x, y, and z coordinates
 	 * \param maxPoint maximum point in the desired slice (inclusive), i.e. maximum x, y, and z coordinates
 	 * \return true on success (destination scene contains the slice), false on failure (there are no allocated hash blocks
 	 */
 	virtual bool
-	CopySceneSlice(ITMVoxelVolume <TVoxel, TIndex>* destination, ITMVoxelVolume <TVoxel, TIndex>* source,
-	               Vector6i bounds, const Vector3i& offset = Vector3i(0)) = 0;
-	virtual bool CopyScene(ITMVoxelVolume <TVoxel, TIndex>* destination,
-	                       ITMVoxelVolume <TVoxel, TIndex>* source,
-	                       const Vector3i& offset = Vector3i(0)) = 0;
+	CopyVolumeSlice(ITMVoxelVolume <TVoxel, TIndex>* targetVolume, ITMVoxelVolume <TVoxel, TIndex>* sourceVolume,
+	                Vector6i bounds, const Vector3i& offset = Vector3i(0)) = 0;
+	virtual bool CopyVolume(ITMVoxelVolume <TVoxel, TIndex>* targetVolume,
+	                        ITMVoxelVolume <TVoxel, TIndex>* sourceVolume,
+	                        const Vector3i& offset = Vector3i(0)) = 0;
 
 };
 

@@ -198,7 +198,7 @@ void GenerateTestData() {
 
 
 	for (auto& pair : configurationPairs) {
-		EditAndCopyEngineFactory::Instance<ITMWarp, TIndex, TMemoryDeviceType>().ResetScene(&warp_field);
+		EditAndCopyEngineFactory::Instance<ITMWarp, TIndex, TMemoryDeviceType>().ResetVolume(&warp_field);
 		warp_field.LoadFromDirectory(output_directory + framewise_warps_filename);
 		std::string filename = std::get<0>(pair);
 		SurfaceTracker<ITMVoxel, ITMWarp, TIndex, TMemoryDeviceType, TRACKER_SLAVCHEVA_DIAGNOSTIC> tracker(

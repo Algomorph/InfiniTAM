@@ -76,7 +76,7 @@ BOOST_FIXTURE_TEST_CASE(testDataTerm_CPU_VBH, DataFixture) {
 	                                                           configuration::get().swapping_mode ==
 	                                                           configuration::SWAPPINGMODE_ENABLED,
 	                                                           MEMORYDEVICE_CPU, indexParameters);
-	ManipulationEngine_CPU_VBH_Warp::Inst().ResetScene(&warp_field_CPU1);
+	ManipulationEngine_CPU_VBH_Warp::Inst().ResetVolume(&warp_field_CPU1);
 
 
 	auto motionTracker_VBH_CPU = new SurfaceTracker<ITMVoxel, ITMWarp, VoxelBlockHash, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_DIAGNOSTIC>(

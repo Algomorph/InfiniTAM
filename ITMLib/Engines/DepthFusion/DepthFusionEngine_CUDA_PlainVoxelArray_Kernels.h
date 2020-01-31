@@ -79,9 +79,9 @@ clearFields_device(TVoxel* voxelArray, const ITMLib::PlainVoxelArray::GridAligne
 
 template<typename TVoxelMulti>
 __global__ void
-copyScene_device(TVoxelMulti* sourceVoxels,
-                 TVoxelMulti* targetVoxels,
-                 const PlainVoxelArray::GridAlignedBox* arrayInfo) {
+copyVolume_device(TVoxelMulti* sourceVoxels,
+                  TVoxelMulti* targetVoxels,
+                  const PlainVoxelArray::GridAlignedBox* arrayInfo) {
 	int x = blockIdx.x * blockDim.x + threadIdx.x;
 	int y = blockIdx.y * blockDim.y + threadIdx.y;
 	int z = blockIdx.z * blockDim.z + threadIdx.z;

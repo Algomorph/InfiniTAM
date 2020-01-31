@@ -52,14 +52,14 @@ BOOST_AUTO_TEST_CASE(ExpandVolume_CPU) {
 	                                                    configuration::SWAPPINGMODE_ENABLED,
 	                                                    MEMORYDEVICE_CPU,
 	                                                    {1200, 0x20000});
-	EditAndCopyEngine_CPU<ITMVoxel, VoxelBlockHash>::Inst().ResetScene(&volume1);
+	EditAndCopyEngine_CPU<ITMVoxel, VoxelBlockHash>::Inst().ResetVolume(&volume1);
 
 	ITMVoxelVolume<ITMVoxel, VoxelBlockHash> volume2(&configuration::get().general_voxel_volume_parameters,
 	                                                    configuration::get().swapping_mode ==
 	                                                    configuration::SWAPPINGMODE_ENABLED,
 	                                                    MEMORYDEVICE_CPU,
 	                                                    {1200, 0x20000});
-	EditAndCopyEngine_CPU<ITMVoxel, VoxelBlockHash>::Inst().ResetScene(&volume2);
+	EditAndCopyEngine_CPU<ITMVoxel, VoxelBlockHash>::Inst().ResetVolume(&volume2);
 
 	int hash_code = -1;
 	Vector3s initial_block_pos(0, 0, 0);
@@ -149,13 +149,13 @@ void TestAllocateBasedOnVolumeExpanded_Generic() {
 	                                                    configuration::SWAPPINGMODE_ENABLED,
 	                                                    TMemoryDeviceType,
 	                                                    Frame16And17Fixture::InitParams<VoxelBlockHash>());
-	EditAndCopyEngineFactory::Instance<ITMVoxel, VoxelBlockHash, TMemoryDeviceType>().ResetScene(&volume1);
+	EditAndCopyEngineFactory::Instance<ITMVoxel, VoxelBlockHash, TMemoryDeviceType>().ResetVolume(&volume1);
 	ITMVoxelVolume<ITMVoxel, VoxelBlockHash> volume2(&configuration::get().general_voxel_volume_parameters,
 	                                                    configuration::get().swapping_mode ==
 	                                                    configuration::SWAPPINGMODE_ENABLED,
 	                                                    TMemoryDeviceType,
 	                                                    Frame16And17Fixture::InitParams<VoxelBlockHash>());
-	EditAndCopyEngineFactory::Instance<ITMVoxel, VoxelBlockHash, TMemoryDeviceType>().ResetScene(&volume2);
+	EditAndCopyEngineFactory::Instance<ITMVoxel, VoxelBlockHash, TMemoryDeviceType>().ResetVolume(&volume2);
 	ITMView* view = nullptr;
 	updateView(&view, "TestData/snoopy_depth_000017.png",
 	           "TestData/snoopy_color_000017.png", "TestData/snoopy_omask_000017.png",
@@ -193,14 +193,14 @@ BOOST_AUTO_TEST_CASE(ExpandVolume_CUDA) {
 	                                                    configuration::SWAPPINGMODE_ENABLED,
 	                                                    MEMORYDEVICE_CUDA,
 	                                                    {1200, 0x20000});
-	EditAndCopyEngine_CUDA<ITMVoxel, VoxelBlockHash>::Inst().ResetScene(&volume1);
+	EditAndCopyEngine_CUDA<ITMVoxel, VoxelBlockHash>::Inst().ResetVolume(&volume1);
 
 	ITMVoxelVolume<ITMVoxel, VoxelBlockHash> volume2(&configuration::get().general_voxel_volume_parameters,
 	                                                    configuration::get().swapping_mode ==
 	                                                    configuration::SWAPPINGMODE_ENABLED,
 	                                                    MEMORYDEVICE_CUDA,
 	                                                    {1200, 0x20000});
-	EditAndCopyEngine_CUDA<ITMVoxel, VoxelBlockHash>::Inst().ResetScene(&volume2);
+	EditAndCopyEngine_CUDA<ITMVoxel, VoxelBlockHash>::Inst().ResetVolume(&volume2);
 
 	int hash_code = -1;
 	Vector3s initial_block_pos(0, 0, 0);

@@ -127,16 +127,17 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_PVA_VBH_Expnaded_CPU, Frame16And17
 
 	// *** construct volumes ***
 	ITMVoxelVolume<ITMVoxel, PlainVoxelArray> volume_PVA_17(MEMORYDEVICE_CPU, InitParams<PlainVoxelArray>());
-	EditAndCopyEngineFactory::Instance<ITMVoxel, PlainVoxelArray, MEMORYDEVICE_CPU>().ResetScene(&volume_PVA_17);
+	EditAndCopyEngineFactory::Instance<ITMVoxel, PlainVoxelArray, MEMORYDEVICE_CPU>().ResetVolume(&volume_PVA_17);
 	DepthFusionEngine<ITMVoxel, ITMWarp, PlainVoxelArray>* reconstructionEngine_PVA =
 			DepthFusionEngineFactory::Build<ITMVoxel, ITMWarp, PlainVoxelArray>(MEMORYDEVICE_CPU);
 	reconstructionEngine_PVA->GenerateTsdfVolumeFromView(&volume_PVA_17, view);
 
 
 	ITMVoxelVolume<ITMVoxel, VoxelBlockHash> volume_VBH_17(MEMORYDEVICE_CPU, InitParams<VoxelBlockHash>());
-	EditAndCopyEngineFactory::Instance<ITMVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>().ResetScene(&volume_VBH_17);
+	EditAndCopyEngineFactory::Instance<ITMVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>().ResetVolume(&volume_VBH_17);
 	ITMVoxelVolume<ITMVoxel, VoxelBlockHash> volume_VBH_17_depth_allocation(MEMORYDEVICE_CPU, InitParams<VoxelBlockHash>());
-	EditAndCopyEngineFactory::Instance<ITMVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>().ResetScene(&volume_VBH_17_depth_allocation);
+	EditAndCopyEngineFactory::Instance<ITMVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>().ResetVolume(
+			&volume_VBH_17_depth_allocation);
 
 	IndexingEngine<ITMVoxel,VoxelBlockHash, MEMORYDEVICE_CPU>& indexer =
 	IndexingEngine<ITMVoxel,VoxelBlockHash, MEMORYDEVICE_CPU>::Instance();
@@ -194,7 +195,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
 	                                                    configuration::get().swapping_mode ==
 	                                                    configuration::SWAPPINGMODE_ENABLED,
 	                                                    MEMORYDEVICE_CPU, {volumeSize, volumeOffset});
-	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetScene(&scene1);
+	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetVolume(&scene1);
 	ITMTrackingState trackingState(imageSize, MEMORYDEVICE_CPU);
 
 	DepthFusionEngine<ITMVoxel, ITMWarp, PlainVoxelArray>* reconstructionEngine_PVA =
@@ -262,7 +263,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
 	                                                   configuration::get().swapping_mode ==
 	                                                   configuration::SWAPPINGMODE_ENABLED,
 	                                                   MEMORYDEVICE_CPU);
-	ManipulationEngine_CPU_VBH_Voxel::Inst().ResetScene(&scene2);
+	ManipulationEngine_CPU_VBH_Voxel::Inst().ResetVolume(&scene2);
 
 	DepthFusionEngine<ITMVoxel, ITMWarp, VoxelBlockHash>* reconstructionEngine_VBH =
 			DepthFusionEngineFactory
@@ -276,14 +277,14 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
 	                                                    configuration::get().swapping_mode ==
 	                                                    configuration::SWAPPINGMODE_ENABLED,
 	                                                    MEMORYDEVICE_CPU, {volumeSize, volumeOffset});
-	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetScene(&scene3);
+	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetVolume(&scene3);
 	reconstructionEngine_PVA->GenerateTsdfVolumeFromView(&scene3, view, &trackingState);
 	BOOST_REQUIRE(contentAlmostEqual_CPU(&scene1, &scene3, tolerance));
 	ITMVoxelVolume<ITMVoxel, VoxelBlockHash> scene4(&configuration::get().general_voxel_volume_parameters,
 	                                                   configuration::get().swapping_mode ==
 	                                                   configuration::SWAPPINGMODE_ENABLED,
 	                                                   MEMORYDEVICE_CPU, {0x800, 0x20000});
-	ManipulationEngine_CPU_VBH_Voxel::Inst().ResetScene(&scene4);
+	ManipulationEngine_CPU_VBH_Voxel::Inst().ResetVolume(&scene4);
 	reconstructionEngine_VBH->GenerateTsdfVolumeFromView(&scene4, view, &trackingState);
 	BOOST_REQUIRE(contentAlmostEqual_CPU(&scene2, &scene4, tolerance));
 
@@ -301,7 +302,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
 			&configuration::get().general_voxel_volume_parameters,
 			configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 			MEMORYDEVICE_CPU);
-	ManipulationEngine_CPU_VBH_Voxel::Inst().ResetScene(&scene5);
+	ManipulationEngine_CPU_VBH_Voxel::Inst().ResetVolume(&scene5);
 	std::string path = "TestData/test_VBH_ConstructFromImage_";
 	SceneFileIOEngine_VBH::SaveToDirectoryCompact(&scene4, path);
 	SceneFileIOEngine_VBH::LoadFromDirectoryCompact(&scene5, path);
@@ -342,7 +343,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CPU) {
 	                                                              configuration::SWAPPINGMODE_ENABLED,
 	                                                              MEMORYDEVICE_CPU, {volumeSize, volumeOffset});
 
-	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetScene(&generated_volume);
+	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetVolume(&generated_volume);
 	ITMTrackingState trackingState(imageSize, MEMORYDEVICE_CPU);
 
 	DepthFusionEngine<ITMVoxel, ITMWarp, PlainVoxelArray>* reconstructionEngine_PVA =
@@ -358,7 +359,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CPU) {
 	                                                           {volumeSize, volumeOffset});
 
 	std::string path = "TestData/test_PVA_ConstructFromImage2_";
-	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetScene(&loaded_volume);
+	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetVolume(&loaded_volume);
 	loaded_volume.LoadFromDirectory(path);
 
 	float tolerance = 1e-5;
@@ -368,7 +369,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CPU) {
 	                                                   configuration::get().swapping_mode ==
 	                                                   configuration::SWAPPINGMODE_ENABLED,
 	                                                   MEMORYDEVICE_CPU);
-	ManipulationEngine_CPU_VBH_Voxel::Inst().ResetScene(&scene3);
+	ManipulationEngine_CPU_VBH_Voxel::Inst().ResetVolume(&scene3);
 
 	DepthFusionEngine<ITMVoxel, ITMWarp, VoxelBlockHash>* reconstructionEngine_VBH =
 			DepthFusionEngineFactory

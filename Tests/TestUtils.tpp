@@ -28,7 +28,7 @@ using namespace ITMLib;
 
 template<class TVoxel, class TIndex>
 void GenerateTestScene_CPU(ITMVoxelVolume<TVoxel, TIndex>* scene) {
-	EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().ResetScene(scene);
+	EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().ResetVolume(scene);
 	const int narrowBandThicknessVoxels = 10;
 	int xOffset = 8;
 	int surfaceSizeVoxelsZ = 16;
@@ -55,7 +55,7 @@ void GenerateTestScene_CPU(ITMVoxelVolume<TVoxel, TIndex>* scene) {
 #ifndef COMPILE_WITHOUT_CUDA
 template<class TVoxel, class TIndex>
 void GenerateTestScene_CUDA(ITMVoxelVolume<TVoxel, TIndex>* scene) {
-	EditAndCopyEngine_CUDA<TVoxel, TIndex>::Inst().ResetScene(scene);
+	EditAndCopyEngine_CUDA<TVoxel, TIndex>::Inst().ResetVolume(scene);
 	const int narrowBandThicknessVoxels = 10;
 	int xOffset = 8;
 	int surfaceSizeVoxelsZ = 16;
@@ -236,7 +236,7 @@ void buildSdfVolumeFromImage(ITMVoxelVolume<TVoxel, TIndex>** volume,
 
 		case MEMORYDEVICE_CUDA:
 #ifndef COMPILE_WITHOUT_CUDA
-			EditAndCopyEngine_CUDA<TVoxel, TIndex>::Inst().ResetScene(*volume);
+			EditAndCopyEngine_CUDA<TVoxel, TIndex>::Inst().ResetVolume(*volume);
 #else
 			DIEWITHEXCEPTION_REPORTLOCATION("Trying to construct a volume in CUDA memory while code was build "
 								   "without CUDA support, aborting.");
@@ -244,7 +244,7 @@ void buildSdfVolumeFromImage(ITMVoxelVolume<TVoxel, TIndex>** volume,
 			break;
 
 		case MEMORYDEVICE_CPU:
-			EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().ResetScene(*volume);
+			EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().ResetVolume(*volume);
 			break;
 		case MEMORYDEVICE_METAL:
 			DIEWITHEXCEPTION_REPORTLOCATION("Metal framework not fully supported.");

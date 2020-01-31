@@ -47,7 +47,7 @@ BOOST_FIXTURE_TEST_CASE(testDataTerm_CUDA_VBH, DataFixture) {
 	                                                            configuration::get().swapping_mode ==
 	                                                            configuration::SWAPPINGMODE_ENABLED,
 	                                                            MEMORYDEVICE_CUDA, indexParameters);
-	ManipulationEngine_CUDA_VBH_Warp::Inst().ResetScene(&warp_field_CUDA1);
+	ManipulationEngine_CUDA_VBH_Warp::Inst().ResetVolume(&warp_field_CUDA1);
 
 
 	auto motionTracker_VBH_CUDA = new SurfaceTracker<ITMVoxel, ITMWarp, VoxelBlockHash, MEMORYDEVICE_CUDA, TRACKER_SLAVCHEVA_DIAGNOSTIC>(

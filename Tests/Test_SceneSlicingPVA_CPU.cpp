@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE(testPVASceneSlice_CPU) {
 	                                                                 configuration::get().swapping_mode ==
 	                                                                 configuration::SWAPPINGMODE_ENABLED,
 	                                                                 MEMORYDEVICE_CPU);
-	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetScene(&canonical_scene_CPU);
+	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetVolume(&canonical_scene_CPU);
 
 	const int nonTruncatedVoxelCount = 41307;
 	canonical_scene_CPU.LoadFromDirectory("TestData/snoopy_result_fr16-17_PVA/canonical");
@@ -51,12 +51,12 @@ BOOST_AUTO_TEST_CASE(testPVASceneSlice_CPU) {
 	ITMVoxelVolume<ITMVoxel, PlainVoxelArray> canonical_scene_slice_same_dimensions_CPU(
 			&configuration::get().general_voxel_volume_parameters, configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 			MEMORYDEVICE_CPU);
-	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetScene(&canonical_scene_slice_same_dimensions_CPU);
+	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetVolume(&canonical_scene_slice_same_dimensions_CPU);
 
 
 	Vector6i bounds(-64, -24, 168, 16, 72, 312);
-	ManipulationEngine_CPU_PVA_Voxel::Inst().CopySceneSlice(&canonical_scene_slice_same_dimensions_CPU,
-	                                                        &canonical_scene_CPU, bounds);
+	ManipulationEngine_CPU_PVA_Voxel::Inst().CopyVolumeSlice(&canonical_scene_slice_same_dimensions_CPU,
+	                                                         &canonical_scene_CPU, bounds);
 
 	BOOST_REQUIRE_EQUAL(SceneStatCalc_CPU_PVA_Voxel::Instance().ComputeNonTruncatedVoxelCount(
 			&canonical_scene_slice_same_dimensions_CPU), nonTruncatedVoxelCount);
@@ -73,10 +73,10 @@ BOOST_AUTO_TEST_CASE(testPVASceneSlice_CPU) {
 	ITMVoxelVolume<ITMVoxel, PlainVoxelArray> canonical_scene_slice_different_dimensions_CPU(
 			&configuration::get().general_voxel_volume_parameters, configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 			MEMORYDEVICE_CPU, {sizeSlice, offsetSlice});
-	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetScene(&canonical_scene_slice_different_dimensions_CPU);
+	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetVolume(&canonical_scene_slice_different_dimensions_CPU);
 
-	ManipulationEngine_CPU_PVA_Voxel::Inst().CopySceneSlice(&canonical_scene_slice_different_dimensions_CPU,
-	                                                        &canonical_scene_CPU, bounds);
+	ManipulationEngine_CPU_PVA_Voxel::Inst().CopyVolumeSlice(&canonical_scene_slice_different_dimensions_CPU,
+	                                                         &canonical_scene_CPU, bounds);
 	BOOST_REQUIRE_EQUAL(SceneStatCalc_CPU_PVA_Voxel::Instance().ComputeNonTruncatedVoxelCount(
 			&canonical_scene_slice_different_dimensions_CPU), nonTruncatedVoxelCount);
 	BOOST_REQUIRE_CLOSE(SceneStatCalc_CPU_PVA_Voxel::Instance().ComputeNonTruncatedVoxelAbsSdfSum(
@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE(testPVASceneSlice_CPU) {
 	ITMVoxelVolume<ITMVoxel, PlainVoxelArray> canonical_scene_slice_from_disk_CPU(
 			&configuration::get().general_voxel_volume_parameters, configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 			MEMORYDEVICE_CPU, {sizeSlice, offsetSlice});
-	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetScene(&canonical_scene_slice_from_disk_CPU);
+	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetVolume(&canonical_scene_slice_from_disk_CPU);
 
 	canonical_scene_slice_from_disk_CPU.LoadFromDirectory("TestData/snoopy_result_fr16-17_partial_PVA/canonical");
 

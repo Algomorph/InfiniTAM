@@ -176,7 +176,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CUDA) {
 	                                                    configuration::SWAPPINGMODE_ENABLED,
 	                                                    settings->device_type,
 	                                                    {volumeSize, volumeOffset});
-	ManipulationEngine_CUDA_PVA_Voxel::Inst().ResetScene(&scene1);
+	ManipulationEngine_CUDA_PVA_Voxel::Inst().ResetVolume(&scene1);
 	ITMTrackingState trackingState(imageSize, settings->device_type);
 
 	DepthFusionEngine<ITMVoxel, ITMWarp, PlainVoxelArray>* reconstructionEngine_PVA =
@@ -244,7 +244,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CUDA) {
 	                                                   configuration::get().swapping_mode ==
 	                                                   configuration::SWAPPINGMODE_ENABLED,
 	                                                   settings->device_type, {0x800, 0x20000});
-	ManipulationEngine_CUDA_VBH_Voxel::Inst().ResetScene(&scene2);
+	ManipulationEngine_CUDA_VBH_Voxel::Inst().ResetVolume(&scene2);
 
 	DepthFusionEngine<ITMVoxel, ITMWarp, VoxelBlockHash>* reconstructionEngine_VBH =
 			DepthFusionEngineFactory
@@ -261,14 +261,14 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CUDA) {
 	                                                    configuration::SWAPPINGMODE_ENABLED,
 	                                                    settings->device_type,
 	                                                    {volumeSize, volumeOffset});
-	ManipulationEngine_CUDA_PVA_Voxel::Inst().ResetScene(&scene3);
+	ManipulationEngine_CUDA_PVA_Voxel::Inst().ResetVolume(&scene3);
 	reconstructionEngine_PVA->GenerateTsdfVolumeFromView(&scene3, view, &trackingState);
 	BOOST_REQUIRE(contentAlmostEqual_CUDA(&scene1, &scene3, tolerance));
 	ITMVoxelVolume<ITMVoxel, VoxelBlockHash> scene4(&configuration::get().general_voxel_volume_parameters,
 	                                                   configuration::get().swapping_mode ==
 	                                                   configuration::SWAPPINGMODE_ENABLED,
 	                                                   settings->device_type, {0x800, 0x20000});
-	ManipulationEngine_CUDA_VBH_Voxel::Inst().ResetScene(&scene4);
+	ManipulationEngine_CUDA_VBH_Voxel::Inst().ResetVolume(&scene4);
 	reconstructionEngine_VBH->GenerateTsdfVolumeFromView(&scene4, view, &trackingState);
 	BOOST_REQUIRE(contentAlmostEqual_CUDA(&scene2, &scene4, tolerance));
 
@@ -286,7 +286,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CUDA) {
 			&configuration::get().general_voxel_volume_parameters,
 			configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 			settings->device_type, {0x800, 0x20000});
-	ManipulationEngine_CUDA_VBH_Voxel::Inst().ResetScene(&scene5);
+	ManipulationEngine_CUDA_VBH_Voxel::Inst().ResetVolume(&scene5);
 	std::string path = "TestData/test_VBH_ConstructFromImage_";
 	SceneFileIOEngine_VBH::SaveToDirectoryCompact(&scene4, path);
 	SceneFileIOEngine_VBH::LoadFromDirectoryCompact(&scene5, path);
@@ -329,7 +329,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CUDA) {
 	                                                    settings->device_type,
 	                                                    {volumeSize, volumeOffset});
 	std::string path = "TestData/test_PVA_ConstructFromImage2_";
-	ManipulationEngine_CUDA_PVA_Voxel::Inst().ResetScene(&scene2);
+	ManipulationEngine_CUDA_PVA_Voxel::Inst().ResetVolume(&scene2);
 	SceneFileIOEngine_PVA::LoadFromDirectoryCompact(&scene2, path);
 	ITMTrackingState trackingState(imageSize, settings->device_type);
 
@@ -341,7 +341,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CUDA) {
 		                                                    settings->device_type,
 		                                                    {volumeSize, volumeOffset});
 
-		ManipulationEngine_CUDA_PVA_Voxel::Inst().ResetScene(&scene1);
+		ManipulationEngine_CUDA_PVA_Voxel::Inst().ResetVolume(&scene1);
 
 
 		DepthFusionEngine<ITMVoxel, ITMWarp, PlainVoxelArray>* reconstructionEngine_PVA =
@@ -356,7 +356,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CUDA) {
 	                                                   configuration::get().swapping_mode ==
 	                                                   configuration::SWAPPINGMODE_ENABLED,
 	                                                   settings->device_type);
-	ManipulationEngine_CUDA_VBH_Voxel::Inst().ResetScene(&scene3);
+	ManipulationEngine_CUDA_VBH_Voxel::Inst().ResetVolume(&scene3);
 
 	DepthFusionEngine<ITMVoxel, ITMWarp, VoxelBlockHash>* reconstructionEngine_VBH =
 			DepthFusionEngineFactory

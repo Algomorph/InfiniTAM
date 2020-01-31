@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(testSaveSceneCompact_CPU) {
 
 	std::string path = "TestData/test_PVA_";
 	SceneFileIOEngine_PVA::SaveToDirectoryCompact(&generated_test_scene_PVA, path);
-	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetScene(&loaded_test_scene_PVA);
+	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetVolume(&loaded_test_scene_PVA);
 	SceneFileIOEngine_PVA::LoadFromDirectoryCompact(&loaded_test_scene_PVA, path);
 
 	float tolerance = 1e-8;
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(testSaveSceneCompact_CPU) {
 	GenerateTestScene_CPU(&generated_test_scene_VBH);
 	path = "TestData/test_VBH_";
 	SceneFileIOEngine_VBH::SaveToDirectoryCompact(&generated_test_scene_VBH, path);
-	ManipulationEngine_CPU_VBH_Voxel::Inst().ResetScene(&loaded_test_scene_VBH);
+	ManipulationEngine_CPU_VBH_Voxel::Inst().ResetVolume(&loaded_test_scene_VBH);
 	SceneFileIOEngine_VBH::LoadFromDirectoryCompact(&loaded_test_scene_VBH, path);
 
 	BOOST_REQUIRE_EQUAL(SceneStatCalc_CPU_VBH_Voxel::Instance().ComputeNonTruncatedVoxelCount(&loaded_test_scene_VBH), 19456);

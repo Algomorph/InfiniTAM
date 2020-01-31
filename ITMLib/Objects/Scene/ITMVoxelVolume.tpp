@@ -68,11 +68,11 @@ template<class TVoxel, class TIndex>
 void ITMVoxelVolume<TVoxel, TIndex>::Reset(){
 	switch (this->index.memoryType) {
 		case MEMORYDEVICE_CPU:
-			EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().ResetScene(this);
+			EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().ResetVolume(this);
 			break;
 #ifndef COMPILE_WITHOUT_CUDA
 		case MEMORYDEVICE_CUDA:
-			EditAndCopyEngine_CUDA<TVoxel, TIndex>::Inst().ResetScene(this);
+			EditAndCopyEngine_CUDA<TVoxel, TIndex>::Inst().ResetVolume(this);
 			break;
 #endif
 		default:

@@ -42,7 +42,7 @@ void DepthFusionEngine_CUDA<TVoxel, TWarp, VoxelBlockHash>::GenerateTsdfVolumeFr
 template<typename TVoxel, typename TWarp>
 void DepthFusionEngine_CUDA<TVoxel, TWarp, VoxelBlockHash>::GenerateTsdfVolumeFromView(
 		ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view, const Matrix4f& depth_camera_matrix) {
-	ManipulationEngine_CUDA_VBH_Voxel::Inst().ResetScene(volume);
+	ManipulationEngine_CUDA_VBH_Voxel::Inst().ResetVolume(volume);
 	IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance()
 			.AllocateFromDepth(volume, view, depth_camera_matrix, false, false);
 	this->IntegrateDepthImageIntoTsdfVolume_Helper(volume, view, depth_camera_matrix);

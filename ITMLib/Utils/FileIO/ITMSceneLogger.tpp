@@ -267,7 +267,7 @@ bool ITMSceneLogger<TVoxel, TWarp, TIndex>::LoadScenesCompact() {
 	}
 	std::cout << "Loading scenes for current frame (this might take awhile)..." << std::endl;
 	std::cout.flush();
-	EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().ResetScene(liveScene);
+	liveScene->Reset();
 	VolumeFileIOEngine<TVoxel, TIndex>::LoadFromDirectoryCompact(liveScene, livePath.string());
 	if (!activeWarpLogger->isSlice || !activeWarpLogger->sliceLoaded) {
 		activeWarpLogger->LoadCompact();

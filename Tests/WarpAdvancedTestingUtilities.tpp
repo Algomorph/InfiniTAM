@@ -97,7 +97,7 @@ GenericWarpConsistencySubtest(const SlavchevaSurfaceTracker::Switches& switches,
 	                                           configuration::SWAPPINGMODE_ENABLED,
 	                                           TMemoryDeviceType,
 	                                           Frame16And17Fixture::InitParams<TIndex>());
-	EditAndCopyEngineFactory::Instance<ITMWarp, TIndex, TMemoryDeviceType>().ResetScene(&warp_field);
+	EditAndCopyEngineFactory::Instance<ITMWarp, TIndex, TMemoryDeviceType>().ResetVolume(&warp_field);
 
 	ITMVoxelVolume<ITMVoxel, TIndex>* canonical_volume;
 	ITMVoxelVolume<ITMVoxel, TIndex>* live_volumes[2] = {
@@ -133,7 +133,7 @@ GenericWarpConsistencySubtest(const SlavchevaSurfaceTracker::Switches& switches,
 			configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 			TMemoryDeviceType, Frame16And17Fixture::InitParams<TIndex>());
 
-	EditAndCopyEngineFactory::Instance<ITMWarp, TIndex, TMemoryDeviceType>().ResetScene(
+	EditAndCopyEngineFactory::Instance<ITMWarp, TIndex, TMemoryDeviceType>().ResetVolume(
 			&ground_truth_warp_field);
 
 	DepthFusionEngine<ITMVoxel, ITMWarp, TIndex>* reconstruction_engine =
@@ -163,13 +163,13 @@ GenericWarpConsistencySubtest(const SlavchevaSurfaceTracker::Switches& switches,
 				warp_field.SaveToDirectory(std::string("../../Tests/") + path);
 				break;
 			case TEST_SUCCESSIVE_ITERATIONS:
-				EditAndCopyEngineFactory::Instance<ITMWarp, TIndex, TMemoryDeviceType>().ResetScene(
+				EditAndCopyEngineFactory::Instance<ITMWarp, TIndex, TMemoryDeviceType>().ResetVolume(
 						&ground_truth_warp_field);
 				ground_truth_warp_field.LoadFromDirectory(path);
 
 				BOOST_REQUIRE(contentAlmostEqual_Verbose(&warp_field, &ground_truth_warp_field, absolute_tolerance,
 				                                 TMemoryDeviceType));
-				EditAndCopyEngineFactory::Instance<ITMVoxel, TIndex, TMemoryDeviceType>().ResetScene(
+				EditAndCopyEngineFactory::Instance<ITMVoxel, TIndex, TMemoryDeviceType>().ResetVolume(
 						&ground_truth_sdf_volume);
 				ground_truth_sdf_volume.LoadFromDirectory(path_warped_live);
 				BOOST_REQUIRE(contentAlmostEqual_Verbose(live_volumes[target_warped_field_ix], &ground_truth_sdf_volume,
@@ -190,7 +190,7 @@ GenericWarpConsistencySubtest(const SlavchevaSurfaceTracker::Switches& switches,
 					std::string("../../Tests/") + get_path_fused(prefix, iteration_limit - 1));
 			break;
 		case TEST_FINAL_ITERATION_AND_FUSION:
-			EditAndCopyEngineFactory::Instance<ITMWarp, TIndex, TMemoryDeviceType>().ResetScene(
+			EditAndCopyEngineFactory::Instance<ITMWarp, TIndex, TMemoryDeviceType>().ResetVolume(
 					&ground_truth_warp_field);
 			ground_truth_warp_field.LoadFromDirectory(get_path_warps(prefix, iteration_limit - 1));
 			BOOST_REQUIRE(

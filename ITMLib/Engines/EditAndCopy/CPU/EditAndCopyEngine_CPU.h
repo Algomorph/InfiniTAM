@@ -45,20 +45,20 @@ public:
 		return instance;
 	}
 
-	void ResetScene(ITMVoxelVolume<TVoxel, VoxelBlockHash>* scene) override;
+	void ResetVolume(ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume) override;
 	bool SetVoxel(ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3i at, TVoxel voxel) override;
-	bool SetVoxelNoAllocation(ITMVoxelVolume<TVoxel, VoxelBlockHash>* scene, Vector3i at, TVoxel voxel);
-	TVoxel ReadVoxel(ITMVoxelVolume<TVoxel, VoxelBlockHash>* scene, Vector3i at) override;
-	TVoxel ReadVoxel(ITMVoxelVolume<TVoxel, VoxelBlockHash>* scene, Vector3i at,
+	bool SetVoxelNoAllocation(ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3i at, TVoxel voxel);
+	TVoxel ReadVoxel(ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3i at) override;
+	TVoxel ReadVoxel(ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3i at,
 	                 VoxelBlockHash::IndexCache& cache) override;
-	void OffsetWarps(ITMVoxelVolume<TVoxel, VoxelBlockHash>* scene, Vector3f offset) override;
+	void OffsetWarps(ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3f offset) override;
 	bool
-	CopySceneSlice(ITMVoxelVolume<TVoxel, VoxelBlockHash>* destination,
-	               ITMVoxelVolume<TVoxel, VoxelBlockHash>* source,
-	               Vector6i bounds, const Vector3i& offset = Vector3i(0)) override;
-	bool CopyScene(ITMVoxelVolume<TVoxel, VoxelBlockHash>* target,
-	               ITMVoxelVolume<TVoxel, VoxelBlockHash>* source,
-	               const Vector3i& offset = Vector3i(0)) override;
+	CopyVolumeSlice(ITMVoxelVolume<TVoxel, VoxelBlockHash>* targetVolume,
+	                ITMVoxelVolume<TVoxel, VoxelBlockHash>* sourceVolume,
+	                Vector6i bounds, const Vector3i& offset = Vector3i(0)) override;
+	bool CopyVolume(ITMVoxelVolume<TVoxel, VoxelBlockHash>* targetVolume,
+	                ITMVoxelVolume<TVoxel, VoxelBlockHash>* sourceVolume,
+	                const Vector3i& offset = Vector3i(0)) override;
 	virtual ~EditAndCopyEngine_CPU() = default;
 };
 
@@ -73,19 +73,19 @@ public:
 		return instance;
 	}
 
-	void ResetScene(ITMVoxelVolume<TVoxel, PlainVoxelArray>* scene) override;
-	bool SetVoxel(ITMVoxelVolume<TVoxel, PlainVoxelArray>* scene, Vector3i at, TVoxel voxel) override;
-	TVoxel ReadVoxel(ITMVoxelVolume<TVoxel, PlainVoxelArray>* scene, Vector3i at) override;
-	TVoxel ReadVoxel(ITMVoxelVolume<TVoxel, PlainVoxelArray>* scene, Vector3i at,
+	void ResetVolume(ITMVoxelVolume<TVoxel, PlainVoxelArray>* volume) override;
+	bool SetVoxel(ITMVoxelVolume<TVoxel, PlainVoxelArray>* volume, Vector3i at, TVoxel voxel) override;
+	TVoxel ReadVoxel(ITMVoxelVolume<TVoxel, PlainVoxelArray>* volume, Vector3i at) override;
+	TVoxel ReadVoxel(ITMVoxelVolume<TVoxel, PlainVoxelArray>* volume, Vector3i at,
 	                 PlainVoxelArray::IndexCache& cache) override;
-	bool IsPointInBounds(ITMVoxelVolume<TVoxel, PlainVoxelArray>* scene, const Vector3i& at);
-	void OffsetWarps(ITMVoxelVolume<TVoxel, PlainVoxelArray>* scene, Vector3f offset) override;
-	bool CopySceneSlice(ITMVoxelVolume<TVoxel, PlainVoxelArray>* destination,
-	                    ITMVoxelVolume<TVoxel, PlainVoxelArray>* source,
-	                    Vector6i bounds, const Vector3i& offset = Vector3i(0)) override;
-	bool CopyScene(ITMVoxelVolume<TVoxel, PlainVoxelArray>* destination,
-	               ITMVoxelVolume<TVoxel, PlainVoxelArray>* source,
-	               const Vector3i& offset = Vector3i(0)) override;
+	bool IsPointInBounds(ITMVoxelVolume<TVoxel, PlainVoxelArray>* volume, const Vector3i& at);
+	void OffsetWarps(ITMVoxelVolume<TVoxel, PlainVoxelArray>* volume, Vector3f offset) override;
+	bool CopyVolumeSlice(ITMVoxelVolume<TVoxel, PlainVoxelArray>* targetVolume,
+	                     ITMVoxelVolume<TVoxel, PlainVoxelArray>* sourceVolume,
+	                     Vector6i bounds, const Vector3i& offset = Vector3i(0)) override;
+	bool CopyVolume(ITMVoxelVolume<TVoxel, PlainVoxelArray>* targetVolume,
+	                ITMVoxelVolume<TVoxel, PlainVoxelArray>* sourceVolume,
+	                const Vector3i& offset = Vector3i(0)) override;
 
 };
 

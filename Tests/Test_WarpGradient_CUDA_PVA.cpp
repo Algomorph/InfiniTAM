@@ -48,7 +48,7 @@ BOOST_FIXTURE_TEST_CASE(testDataTerm_CUDA_PVA, DataFixture) {
 	                                                             configuration::get().swapping_mode ==
 	                                                             configuration::SWAPPINGMODE_ENABLED,
 	                                                             MEMORYDEVICE_CUDA, indexParameters);
-	ManipulationEngine_CUDA_PVA_Warp::Inst().ResetScene(&warp_field_CUDA1);
+	ManipulationEngine_CUDA_PVA_Warp::Inst().ResetVolume(&warp_field_CUDA1);
 
 
 	auto motionTracker_PVA_CUDA = new SurfaceTracker<ITMVoxel, ITMWarp, PlainVoxelArray, MEMORYDEVICE_CUDA , TRACKER_SLAVCHEVA_DIAGNOSTIC>(
