@@ -45,7 +45,7 @@ SlavchevaSurfaceTracker::SlavchevaSurfaceTracker(SlavchevaSurfaceTracker::Switch
 		parameters(parameters), switches(switches) {}
 
 void SlavchevaSurfaceTracker::PrintSettings() {
-	std::cout << bright_cyan << "*** Scene Motion Tracker Settings: ***" << reset << std::endl;
+	std::cout << bright_cyan << "*** Slavcheva Surface Tracker Settings: ***" << reset << std::endl;
 	std::cout << "Data term enabled: " << printBool(this->switches.enable_data_term) << std::endl;
 	std::cout << "Smoothing term enabled: " << printBool(this->switches.enable_smoothing_term) << std::endl;
 	std::cout << "Level Set term enabled: " << printBool(this->switches.enable_level_set_term) << std::endl;

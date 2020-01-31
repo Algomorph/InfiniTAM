@@ -15,8 +15,8 @@
 //  ================================================================
 #pragma once
 
-#include "../../../Objects/Scene/PlainVoxelArray.h"
-#include "../../../Objects/Scene/VoxelVolume.h"
+#include "../../../Objects/Volume/PlainVoxelArray.h"
+#include "../../../Objects/Volume/VoxelVolume.h"
 #include "../Interface/EditAndCopyEngineInterface.h"
 #include "../../../Utils/ITMHashBlockProperties.h"
 #include "../../../ITMLibDefines.h"

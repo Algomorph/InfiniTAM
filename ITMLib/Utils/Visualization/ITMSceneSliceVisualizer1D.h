@@ -19,7 +19,7 @@
 //local
 #include "ITMVisualizationCommon.h"
 #include "../ITMMath.h"
-#include "../../Objects/Scene/VoxelVolume.h"
+#include "../../Objects/Volume/VoxelVolume.h"
 #include "ITMVisualizationWindowManager.h"
 
 template<typename T>

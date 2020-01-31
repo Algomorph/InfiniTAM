@@ -25,7 +25,7 @@
 #include "../ORUtils/MemoryDeviceType.h"
 #include "../ITMLib/ITMLibDefines.h"
 #include "../ITMLib/Utils/Configuration.h"
-#include "../ITMLib/Objects/Scene/VoxelVolume.h"
+#include "../ITMLib/Objects/Volume/VoxelVolume.h"
 #include "../ITMLib/Engines/EditAndCopy/Interface/EditAndCopyEngineInterface.h"
 #include "../ITMLib/Engines/EditAndCopy/EditAndCopyEngineFactory.h"
 #include "../ITMLib/Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"

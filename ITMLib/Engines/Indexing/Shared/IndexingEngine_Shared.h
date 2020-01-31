@@ -16,8 +16,8 @@
 #pragma once
 
 #include "../../../../ORUtils/PlatformIndependence.h"
-#include "../../../Objects/Scene/VoxelBlockHash.h"
-#include "../../../Objects/Scene/RepresentationAccess.h"
+#include "../../../Objects/Volume/VoxelBlockHash.h"
+#include "../../../Objects/Volume/RepresentationAccess.h"
 #include "../../Common/CommonFunctors.h"
 #include "../../Common/AllocationTempData.h"
 #include "../../../Utils/ITMMath.h"

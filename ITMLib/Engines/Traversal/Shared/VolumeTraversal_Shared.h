@@ -16,8 +16,8 @@
 #pragma once
 
 //local
-#include "../../../Objects/Scene/PlainVoxelArray.h"
-#include "../../../Objects/Scene/RepresentationAccess.h"
+#include "../../../Objects/Volume/PlainVoxelArray.h"
+#include "../../../Objects/Volume/RepresentationAccess.h"
 
 
 // region ======================================= AUXILIARY FUNCTIONS (VOXEL HASH BLOCKS) ==============================

@@ -17,8 +17,8 @@
 
 
 #include "../../../Utils/ITMMath.h"
-#include "../../../Objects/Scene/VoxelBlockHash.h"
-#include "../../../Objects/Scene/RepresentationAccess.h"
+#include "../../../Objects/Volume/VoxelBlockHash.h"
+#include "../../../Objects/Volume/RepresentationAccess.h"
 //#ifdef __CUDACC__
 //#include "../../../Utils/ITMCUDAUtils.h"
 //#endif

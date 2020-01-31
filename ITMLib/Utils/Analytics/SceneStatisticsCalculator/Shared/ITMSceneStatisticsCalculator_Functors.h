@@ -27,7 +27,7 @@
 #include "../../../../../ORUtils/PlatformIndependentAtomics.h"
 #include "../../../../../ORUtils/PlatformIndependence.h"
 #include "../../../Configuration.h"
-#include "../../../../Objects/Scene/VoxelVolume.h"
+#include "../../../../Objects/Volume/VoxelVolume.h"
 #include "../../../../Engines/Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
 #include "../../../../Engines/Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
 

@@ -22,8 +22,8 @@
 //local
 #include "ITMSceneSliceVisualizer1D.h"
 #include "ITMSceneSliceVisualizer1D.tpp"
-#include "../../Objects/Scene/VoxelVolume.h"
-#include "../../Objects/Scene/RepresentationAccess.h"
+#include "../../Objects/Volume/VoxelVolume.h"
+#include "../../Objects/Volume/RepresentationAccess.h"
 #include "../ITMPrintHelpers.h"
 
 #include "../../ITMLibDefines.h"
@@ -42,7 +42,7 @@ ITMSceneSliceVisualizer1D::ITMSceneSliceVisualizer1D(Vector3i focusCoordinate, A
 		rangeEndVoxelIndex(focusCoordinate[axis] + (voxelRange / 2)),
 		window(ITMVisualizationWindowManager::Instance().MakeOrGetChartWindow(
 				"SceneSliceVisualizer1D_" + AxisToString(axis),
-				"Scene 1D Slice Visualizer for " + AxisToString(axis) + " Axis")){}
+				"Volume 1D Slice Visualizer for " + AxisToString(axis) + " Axis")){}
 
 //TODO: DRY violation -- same code as EnergyPlotter -- group into single class hierarchy with shared methods
 void ITMSceneSliceVisualizer1D::SaveScreenshot(std::string path) {

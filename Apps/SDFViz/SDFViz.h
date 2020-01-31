@@ -34,7 +34,7 @@
 
 //ITMLib
 #include "../../ITMLib/ITMLibDefines.h"
-#include "../../ITMLib/Objects/Scene/VoxelVolume.h"
+#include "../../ITMLib/Objects/Volume/VoxelVolume.h"
 #include "HighlightVisualization.h"
 
 using namespace ITMLib;
@@ -86,7 +86,7 @@ private:
 	// region ================= MEMBER VARIABLES ===========================
 
 
-	// *** Scene Data
+	// *** Volume Data
 	ITMSceneLogger<ITMVoxelCanonical, ITMVoxelLive, ITMVoxelIndex>* sceneLogger;
 	ITMScene<ITMVoxelCanonical, ITMVoxelIndex>* canonicalScene;
 	ITMScene<ITMVoxelLive, ITMVoxelIndex>* liveScene;

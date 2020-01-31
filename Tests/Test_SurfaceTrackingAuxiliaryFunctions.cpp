@@ -23,7 +23,7 @@
 
 //local
 #include "../ITMLib/ITMLibDefines.h"
-#include "../ITMLib/Objects/Scene/VoxelVolume.h"
+#include "../ITMLib/Objects/Volume/VoxelVolume.h"
 #include "TestUtils.h"
 #include "../ITMLib/SurfaceTrackers/Interface/SurfaceTracker.h"
 #include "../ITMLib/Utils/Analytics/SceneStatisticsCalculator/CPU/ITMSceneStatisticsCalculator_CPU.h"

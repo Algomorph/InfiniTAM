@@ -31,7 +31,7 @@
 #include "WarpAdvancedTestingUtilities.h"
 
 #include "../ITMLib/ITMLibDefines.h"
-#include "../ITMLib/Objects/Scene/VoxelVolume.h"
+#include "../ITMLib/Objects/Volume/VoxelVolume.h"
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/ITMVoxelVolumeComparison.h"
 #include "../ITMLib/SurfaceTrackers/Interface/SurfaceTracker.h"
 

@@ -34,8 +34,8 @@
 #include "../SurfaceTrackers/Interface/SurfaceTrackerInterface.h"
 #include "../SurfaceTrackers/WarpGradientFunctors/WarpGradientFunctor.h"
 #include "../Engines/Main/NonRigidTrackingParameters.h"
-#include "../Objects/Scene/VoxelBlockHash.h"
-#include "../Objects/Scene/PlainVoxelArray.h"
+#include "../Objects/Volume/VoxelBlockHash.h"
+#include "../Objects/Volume/PlainVoxelArray.h"
 
 namespace po = boost::program_options;
 namespace pt = boost::property_tree;

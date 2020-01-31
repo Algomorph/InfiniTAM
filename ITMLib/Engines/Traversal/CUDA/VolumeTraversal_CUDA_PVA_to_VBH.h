@@ -19,9 +19,9 @@
 //local
 #include "../Shared/VolumeTraversal_Shared.h"
 #include "../Interface/VolumeTraversal.h"
-#include "../../../Objects/Scene/VoxelVolume.h"
+#include "../../../Objects/Volume/VoxelVolume.h"
 #include "../../../Utils/Analytics/ITMIsAltered.h"
-#include "../../../Objects/Scene/RepresentationAccess.h"
+#include "../../../Objects/Volume/RepresentationAccess.h"
 #include "VolumeTraversal_CUDA_PVA_to_VBH_Kernels.h"
 
 namespace ITMLib {

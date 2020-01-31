@@ -7,7 +7,7 @@
 #include "MultiVisualizationEngine_CPU.h"
 
 #include "../../../Objects/RenderStates/RenderStateMultiScene.h"
-#include "../../../Objects/Scene/MultiSceneAccess.h"
+#include "../../../Objects/Volume/MultiSceneAccess.h"
 
 #include "../Shared/VisualizationEngine_Shared.h"
 

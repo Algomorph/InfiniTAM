@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "../../../Objects/Scene/RepresentationAccess.h"
+#include "../../../Objects/Volume/RepresentationAccess.h"
 #include "../../../Utils/ITMHashBlockProperties.h"
 
 static const CONSTPTR(int) MAX_RENDERING_BLOCKS = 65536*4;

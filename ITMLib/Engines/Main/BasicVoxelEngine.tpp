@@ -114,7 +114,7 @@ void BasicVoxelEngine<TVoxel, TIndex>::SaveToFile()
 	// throws error if any of the saves fail
 
 	std::string saveOutputDirectory = "State/";
-	std::string relocaliserOutputDirectory = saveOutputDirectory + "Relocaliser/", sceneOutputDirectory = saveOutputDirectory + "Scene/";
+	std::string relocaliserOutputDirectory = saveOutputDirectory + "Relocaliser/", sceneOutputDirectory = saveOutputDirectory + "Volume/";
 	
 	MakeDir(saveOutputDirectory.c_str());
 	MakeDir(relocaliserOutputDirectory.c_str());
@@ -130,7 +130,7 @@ void BasicVoxelEngine<TVoxel, TIndex>::LoadFromFile()
 {
 	auto& settings = configuration::get();
 	std::string saveInputDirectory = "State/";
-	std::string relocaliserInputDirectory = saveInputDirectory + "Relocaliser/", sceneInputDirectory = saveInputDirectory + "Scene/";
+	std::string relocaliserInputDirectory = saveInputDirectory + "Relocaliser/", sceneInputDirectory = saveInputDirectory + "Volume/";
 
 	////TODO: add factory for relocaliser and rebuild using config from relocaliserOutputDirectory + "config.txt"
 	////TODO: add proper management of case when scene load fails (keep old scene or also reset relocaliser)

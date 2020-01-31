@@ -17,7 +17,7 @@
 
 
 #include <vector>
-#include "../../../../Objects/Scene/VoxelVolume.h"
+#include "../../../../Objects/Volume/VoxelVolume.h"
 
 namespace ITMLib {
 template<typename TVoxel, typename TIndex>

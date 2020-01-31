@@ -2,10 +2,10 @@
 
 #pragma once
 
-#include "Objects/Scene/PlainVoxelArray.h"
-#include "Objects/Scene/SurfelTypes.h"
-#include "Objects/Scene/VoxelBlockHash.h"
-#include "Objects/Scene/VoxelTypes.h"
+#include "Objects/Volume/PlainVoxelArray.h"
+#include "Objects/Volume/SurfelTypes.h"
+#include "Objects/Volume/VoxelBlockHash.h"
+#include "Objects/Volume/VoxelTypes.h"
 
 /** This chooses the information stored at each surfel. At the moment, valid
     options are ITMSurfel_grey and ITMSurfel_rgb.

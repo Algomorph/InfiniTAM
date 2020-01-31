@@ -15,7 +15,7 @@
 //  ================================================================
 #pragma once
 
-#include "../../Objects/Scene/VoxelVolume.h"
+#include "../../Objects/Volume/VoxelVolume.h"
 #include "ITMSceneLogger.h"
 #include "../Visualization/ITMSceneSliceVisualizer2D.h"
 #include "../Visualization/ITMVisualizationCommon.h"

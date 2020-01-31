@@ -30,8 +30,8 @@
 
 //ITMlib
 #include "../ITMLib/ITMLibDefines.h"
-#include "../ITMLib/Objects/Scene/VoxelVolume.h"
-#include "../ITMLib/Objects/Scene/RepresentationAccess.h"
+#include "../ITMLib/Objects/Volume/VoxelVolume.h"
+#include "../ITMLib/Objects/Volume/RepresentationAccess.h"
 #include "../ITMLib/Objects/Camera/CalibIO.h"
 
 #include "../ITMLib/Utils/Configuration.h"

@@ -17,7 +17,7 @@
 
 
 #include "../../Utils/ITMMath.h"
-#include "../../Objects/Scene/VoxelVolume.h"
+#include "../../Objects/Volume/VoxelVolume.h"
 #include "../../Utils/Configuration.h"
 #include "SurfaceTrackerSharedRoutines.h"
 #include "../../../ORUtils/PlatformIndependentAtomics.h"

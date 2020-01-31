@@ -16,7 +16,7 @@
 #pragma once
 
 #include "../../Utils/ITMVoxelFlags.h"
-#include "../../Objects/Scene/RepresentationAccess.h"
+#include "../../Objects/Volume/RepresentationAccess.h"
 #include "../../../ORUtils/PlatformIndependence.h"
 #include "../../Utils/ITMPrintHelpers.h"
 

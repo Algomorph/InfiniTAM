@@ -21,7 +21,7 @@
 
 // local
 #include "../ITMMath.h"
-#include "../../Objects/Scene/ITMVoxelVolume.h"
+#include "../../Objects/Volume/ITMVoxelVolume.h"
 #include "ITMVisualizationCommon.h"
 
 namespace ITMLib {

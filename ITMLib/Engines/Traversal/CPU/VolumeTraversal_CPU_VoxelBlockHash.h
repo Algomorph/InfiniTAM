@@ -18,7 +18,7 @@
 
 //local
 #include "../Interface/VolumeTraversal.h"
-#include "../../../Objects/Scene/VoxelVolume.h"
+#include "../../../Objects/Volume/VoxelVolume.h"
 #include "../../EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 #include "../Shared/VolumeTraversal_Shared.h"
 #include "../../../Utils/Analytics/ITMIsAltered.h"

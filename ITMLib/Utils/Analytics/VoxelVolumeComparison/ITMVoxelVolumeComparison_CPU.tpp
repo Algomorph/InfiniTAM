@@ -16,8 +16,8 @@
 #pragma once
 
 #include "ITMVoxelVolumeComparison_CPU.h"
-#include "../../../Objects/Scene/PlainVoxelArray.h"
-#include "../../../Objects/Scene/VoxelBlockHash.h"
+#include "../../../Objects/Volume/PlainVoxelArray.h"
+#include "../../../Objects/Volume/VoxelBlockHash.h"
 #include "../../../../ORUtils/MemoryDeviceType.h"
 #include "../../../Engines/Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
 #include "../../../Engines/Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"

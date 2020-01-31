@@ -17,7 +17,7 @@
 
 
 #include "EditAndCopyEngine_CPU.h"
-#include "../../../Objects/Scene/RepresentationAccess.h"
+#include "../../../Objects/Volume/RepresentationAccess.h"
 #include "../../DepthFusion/DepthFusionEngineFactory.h"
 #include "../../Traversal/Shared/VolumeTraversal_Shared.h"
 #include "../Shared/EditAndCopyEngine_Shared.h"
@@ -25,7 +25,7 @@
 
 using namespace ITMLib;
 
-// region ==================================== Voxel Hash Scene EditAndCopy Engine ====================================
+// region ==================================== Voxel Hash Volume EditAndCopy Engine ====================================
 
 template<typename TVoxel>
 void EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::ResetVolume(

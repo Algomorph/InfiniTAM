@@ -18,7 +18,7 @@
 
 //Note: ".tpp" files have to be included for all explicit instantiations in order to link properly
 #include "EditAndCopyEngine_CUDA_PlainVoxelArray.tcu"
-#include "../../../Objects/Scene/VoxelVolume.h"
+#include "../../../Objects/Volume/VoxelVolume.h"
 
 namespace ITMLib {
 template

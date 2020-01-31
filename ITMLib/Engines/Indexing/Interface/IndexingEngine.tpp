@@ -16,7 +16,7 @@
 #pragma once
 
 #include "IndexingEngine.h"
-#include "../../../Objects/Scene/RepresentationAccess.h"
+#include "../../../Objects/Volume/RepresentationAccess.h"
 #include "../../EditAndCopy/Shared/EditAndCopyEngine_Shared.h"
 
 using namespace ITMLib;

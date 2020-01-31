@@ -15,7 +15,7 @@
 //  ================================================================
 //local
 #include "../../../ITMLibDefines.h"
-#include "../../../Objects/Scene/VoxelBlockHash.h"
+#include "../../../Objects/Volume/VoxelBlockHash.h"
 #include "MultiMeshingEngine_CPU.tpp"
 
 namespace ITMLib {

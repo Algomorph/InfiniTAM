@@ -16,7 +16,7 @@
 #pragma once
 
 #include "../../../Utils/ITMMath.h"
-#include "../../../Objects/Scene/VoxelVolume.h"
+#include "../../../Objects/Volume/VoxelVolume.h"
 
 namespace ITMLib {
 
@@ -28,7 +28,6 @@ class EditAndCopyEngineInterface {
 public:
 	EditAndCopyEngineInterface() = default;
 	virtual ~EditAndCopyEngineInterface() = default;
-	// TODO: better to make ResetVolume a function of Scene (and template Scene on device type as well)
 	/**
 	 * \brief Clear out volume and reset the index
 	 * \param volume

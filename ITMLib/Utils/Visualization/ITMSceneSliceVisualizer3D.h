@@ -21,7 +21,7 @@
 #include <unordered_map>
 
 //ITMLib
-#include "../../Objects/Scene/VoxelVolume.h"
+#include "../../Objects/Volume/VoxelVolume.h"
 #include "../FileIO/ITMSceneLogger.h"
 #include "ITMSceneSliceVisualizer3DCommon.h"
 #include "ITMVisualizationWindowManager.h"

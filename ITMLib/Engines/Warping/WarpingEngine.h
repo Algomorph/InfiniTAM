@@ -16,7 +16,7 @@
 #pragma once
 
 #include "../../../ORUtils/MemoryDeviceType.h"
-#include "../../Objects/Scene/VoxelVolume.h"
+#include "../../Objects/Volume/VoxelVolume.h"
 #include "../Common/WarpType.h"
 
 namespace ITMLib{

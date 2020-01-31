@@ -15,10 +15,10 @@
 //  ================================================================
 #include "EditAndCopyEngine_CPU.h"
 #include "../../../Utils/ITMMath.h"
-#include "../../../Objects/Scene/VoxelBlockHash.h"
-#include "../../../Objects/Scene/RepresentationAccess.h"
+#include "../../../Objects/Volume/VoxelBlockHash.h"
+#include "../../../Objects/Volume/RepresentationAccess.h"
 #include "../../../ITMLibDefines.h"
-#include "../../../Objects/Scene/VoxelVolume.h"
+#include "../../../Objects/Volume/VoxelVolume.h"
 #include "../../../Utils/Configuration.h"
 #include "../../Reconstruction/Interface/SceneReconstructionEngine.h"
 #include "../../Reconstruction/SceneReconstructionEngineFactory.h"

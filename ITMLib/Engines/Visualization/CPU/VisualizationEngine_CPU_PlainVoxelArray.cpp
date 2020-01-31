@@ -15,7 +15,7 @@
 //  ================================================================
 //local
 #include "../../../ITMLibDefines.h"
-#include "../../../Objects/Scene/PlainVoxelArray.h"
+#include "../../../Objects/Volume/PlainVoxelArray.h"
 #include "VisualizationEngine_CPU.tpp"
 
 namespace ITMLib {

@@ -17,7 +17,7 @@
 
 #include <vector>
 #include "../../../ITMMath.h"
-#include "../../../../Objects/Scene/VoxelVolume.h"
+#include "../../../../Objects/Volume/VoxelVolume.h"
 #include "../Interface/ITMSceneStatisticsCalculatorInterface.h"
 #include "../../../../ITMLibDefines.h"
 

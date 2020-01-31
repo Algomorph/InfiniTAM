@@ -19,7 +19,7 @@
 #include "../../../../ORUtils/PlatformIndependence.h"
 #include "../../../Utils/ITMCUDAUtils.h"
 #include "../../../../ORUtils/JetbrainsCUDASyntax.hpp"
-#include "../../../Objects/Scene/RepresentationAccess.h"
+#include "../../../Objects/Volume/RepresentationAccess.h"
 
 #include <cstring>
 #include <iostream>

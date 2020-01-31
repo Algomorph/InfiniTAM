@@ -22,7 +22,7 @@
 #include <boost/test/unit_test.hpp>
 //ITMLib
 #include "../ITMLib/ITMLibDefines.h"
-#include "../ITMLib/Objects/Scene/VoxelVolume.h"
+#include "../ITMLib/Objects/Volume/VoxelVolume.h"
 #include "../ITMLib/Utils/Configuration.h"
 #include "../ITMLib/Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
 #include "TestUtils.h"

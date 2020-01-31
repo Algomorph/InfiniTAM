@@ -15,9 +15,9 @@
 //  ================================================================
 #pragma once
 
-#include "../../Objects/Scene/VoxelBlockHash.h"
-#include "../../Objects/Scene/PlainVoxelArray.h"
-#include "../../Objects/Scene/VoxelVolume.h"
+#include "../../Objects/Volume/VoxelBlockHash.h"
+#include "../../Objects/Volume/PlainVoxelArray.h"
+#include "../../Objects/Volume/VoxelVolume.h"
 
 namespace ITMLib{
 

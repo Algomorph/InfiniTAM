@@ -25,7 +25,7 @@
 #include "../Interface/VolumeTraversal.h"
 #include "../../EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 #include "../../../Utils/Geometry/ITM3DIndexConversions.h"
-#include "../../../Objects/Scene/VoxelVolume.h"
+#include "../../../Objects/Volume/VoxelVolume.h"
 #include "../Shared/VolumeTraversal_Shared.h"
 #include "../../../Utils/Geometry/ITMGeometryBooleanOperations.h"
 

@@ -17,7 +17,7 @@
 
 #include "DepthFusionEngine_CUDA.h"
 
-#include "../../Objects/Scene/TrilinearInterpolation.h"
+#include "../../Objects/Volume/TrilinearInterpolation.h"
 #include "../Common/CommonFunctors.h"
 #include "../../../ORUtils/JetbrainsCUDASyntax.hpp"
 #include "DepthFusionEngine_CUDA_PlainVoxelArray_Kernels.h"

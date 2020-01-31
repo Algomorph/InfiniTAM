@@ -4,7 +4,7 @@
 
 #include <vector>
 
-#include "../../Objects/Scene/LocalMap.h"
+#include "../../Objects/Volume/LocalMap.h"
 #include "../Main/Mappers/DenseMapper.h"
 #include "../Visualization/Interface/VisualizationEngine.h"
 

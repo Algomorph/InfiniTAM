@@ -5,7 +5,7 @@
 #include <math.h>
 
 #include "../../../Objects/RenderStates/RenderState.h"
-#include "../../../Objects/Scene/VoxelVolume.h"
+#include "../../../Objects/Volume/VoxelVolume.h"
 #include "../../../Objects/Tracking/ITMTrackingState.h"
 #include "../../../Objects/Views/ITMView.h"
 

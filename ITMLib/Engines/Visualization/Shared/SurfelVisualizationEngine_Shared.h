@@ -5,7 +5,7 @@
 #include <climits>
 
 #include "SurfelVisualizationEngine_Settings.h"
-#include "../../../Objects/Scene/RepresentationAccess.h"
+#include "../../../Objects/Volume/RepresentationAccess.h"
 #include "../../../Objects/Camera/Intrinsics.h"
 
 namespace ITMLib {

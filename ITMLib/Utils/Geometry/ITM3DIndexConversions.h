@@ -17,7 +17,7 @@
 
 
 #include "../../../ORUtils/PlatformIndependence.h"
-#include "../../Objects/Scene/PlainVoxelArray.h"
+#include "../../Objects/Volume/PlainVoxelArray.h"
 
 _CPU_AND_GPU_CODE_
 inline static int

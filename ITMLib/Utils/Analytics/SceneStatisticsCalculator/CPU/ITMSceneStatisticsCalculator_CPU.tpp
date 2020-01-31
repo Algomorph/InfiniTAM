@@ -15,9 +15,9 @@
 //  ================================================================
 //local
 #include "ITMSceneStatisticsCalculator_CPU.h"
-#include "../../../../Objects/Scene/VoxelBlockHash.h"
+#include "../../../../Objects/Volume/VoxelBlockHash.h"
 #include "../../../../Engines/Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
-#include "../../../../Objects/Scene/VoxelTypes.h"
+#include "../../../../Objects/Volume/VoxelTypes.h"
 #include "../Shared/ITMSceneStatisticsCalculator_Functors.h"
 
 //atomic

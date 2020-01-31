@@ -3,7 +3,7 @@
 #pragma once
 
 #include "../Interface/MultiMeshingEngine.h"
-#include "../../../Objects/Scene/MultiSceneAccess.h"
+#include "../../../Objects/Volume/MultiSceneAccess.h"
 
 namespace ITMLib
 {

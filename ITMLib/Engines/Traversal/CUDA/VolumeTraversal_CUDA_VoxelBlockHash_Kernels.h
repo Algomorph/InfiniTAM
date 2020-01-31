@@ -15,7 +15,7 @@
 //  ================================================================
 #pragma once
 
-#include "../../../Objects/Scene/VoxelBlockHash.h"
+#include "../../../Objects/Volume/VoxelBlockHash.h"
 #include "../../../../ORUtils/JetbrainsCUDASyntax.hpp"
 #include "../Shared/VolumeTraversal_Shared.h"
 #include "../../../Utils/Analytics/ITMIsAltered.h"

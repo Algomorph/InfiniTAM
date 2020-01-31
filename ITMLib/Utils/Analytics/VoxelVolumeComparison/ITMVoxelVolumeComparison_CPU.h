@@ -14,7 +14,7 @@
 //  limitations under the License.
 //  ================================================================
 #pragma once
-#include "../../../Objects/Scene/VoxelVolume.h"
+#include "../../../Objects/Volume/VoxelVolume.h"
 
 namespace ITMLib{
 /**

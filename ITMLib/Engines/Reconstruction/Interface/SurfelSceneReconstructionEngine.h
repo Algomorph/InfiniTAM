@@ -3,7 +3,7 @@
 #pragma once
 
 #include "../../../Objects/RenderStates/SurfelRenderState.h"
-#include "../../../Objects/Scene/SurfelScene.h"
+#include "../../../Objects/Volume/SurfelScene.h"
 #include "../../../Objects/Tracking/ITMTrackingState.h"
 #include "../../../Objects/Views/ITMView.h"
 

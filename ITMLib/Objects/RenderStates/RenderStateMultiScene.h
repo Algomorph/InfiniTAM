@@ -3,7 +3,7 @@
 #pragma once
 
 #include "../../Engines/MultiScene/VoxelMapGraphManager.h"
-#include "../Scene/MultiSceneAccess.h"
+#include "../Volume/MultiSceneAccess.h"
 #include "RenderState.h"
 
 namespace ITMLib {

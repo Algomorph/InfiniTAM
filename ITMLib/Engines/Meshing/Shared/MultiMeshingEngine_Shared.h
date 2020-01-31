@@ -3,7 +3,7 @@
 #pragma once
 
 #include "MultiMeshingEngine_Shared.h"
-#include "../../../Objects/Scene/MultiSceneAccess.h"
+#include "../../../Objects/Volume/MultiSceneAccess.h"
 #include "../../Meshing/Shared/MeshingEngine_Shared.h"
 
 template<class TVoxel, class TIndex>

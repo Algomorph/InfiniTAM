@@ -15,7 +15,7 @@ template<class TVoxel, class TIndex>
 class VoxelVolume
 {
 public:
-	/** Scene parameters like voxel size etc. */
+	/** Volume parameters like voxel size etc. */
 	const VoxelVolumeParameters* sceneParams;
 
 	/**

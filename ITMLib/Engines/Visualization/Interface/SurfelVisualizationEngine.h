@@ -5,7 +5,7 @@
 #include "../Shared/SurfelVisualizationEngine_Settings.h"
 #include "../../../Objects/Camera/Intrinsics.h"
 #include "../../../Objects/RenderStates/SurfelRenderState.h"
-#include "../../../Objects/Scene/SurfelScene.h"
+#include "../../../Objects/Volume/SurfelScene.h"
 #include "../../../Objects/Tracking/ITMTrackingState.h"
 #include "../../../Objects/Views/ITMView.h"
 #include "../../../Utils/ITMImageTypes.h"

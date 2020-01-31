@@ -16,7 +16,7 @@
 #pragma once
 
 #include "DepthFusionEngine.h"
-#include "../../Objects/Scene/PlainVoxelArray.h"
+#include "../../Objects/Volume/PlainVoxelArray.h"
 #include "../EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
 #include "../Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
 

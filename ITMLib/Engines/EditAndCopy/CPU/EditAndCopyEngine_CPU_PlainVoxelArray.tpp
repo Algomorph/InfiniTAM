@@ -15,8 +15,8 @@
 //  ================================================================
 
 #include "EditAndCopyEngine_CPU.h"
-#include "../../../Objects/Scene/VoxelVolume.h"
-#include "../../../Objects/Scene/RepresentationAccess.h"
+#include "../../../Objects/Volume/VoxelVolume.h"
+#include "../../../Objects/Volume/RepresentationAccess.h"
 #include "../../Traversal/Shared/VolumeTraversal_Shared.h"
 #include "../Shared/EditAndCopyEngine_Shared.h"
 #include "../Shared/EditAndCopyEngine_Functors.h"
@@ -25,7 +25,7 @@
 using namespace ITMLib;
 
 
-// region ==================================== Voxel Array Scene EditAndCopy Engine ===================================
+// region ==================================== Voxel Array Volume EditAndCopy Engine ===================================
 
 template<typename TVoxel>
 void ITMLib::EditAndCopyEngine_CPU<TVoxel, PlainVoxelArray>::ResetVolume(

@@ -15,7 +15,7 @@
 //  ================================================================
 //local
 #include "../../../ITMLibDefines.h"
-#include "../../../Objects/Scene/VoxelBlockHash.h"
+#include "../../../Objects/Volume/VoxelBlockHash.h"
 #include "MeshingEngine_CUDA.tcu"
 
 namespace ITMLib {

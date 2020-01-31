@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "../Scene/VoxelBlockHash.h"
+#include "../Volume/VoxelBlockHash.h"
 #include "../../../ORUtils/Image.h"
 
 #include <stdlib.h>

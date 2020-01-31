@@ -3,7 +3,7 @@
 #pragma once
 
 #include "../../../Objects/Camera/Intrinsics.h"
-#include "../../../Objects/Scene/RepresentationAccess.h"
+#include "../../../Objects/Volume/RepresentationAccess.h"
 
 namespace ITMLib
 {

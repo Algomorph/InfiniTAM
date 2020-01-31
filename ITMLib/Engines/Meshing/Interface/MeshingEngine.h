@@ -5,7 +5,7 @@
 #include <math.h>
 
 #include "../../../Objects/Meshing/Mesh.h"
-#include "../../../Objects/Scene/VoxelVolume.h"
+#include "../../../Objects/Volume/VoxelVolume.h"
 
 namespace ITMLib
 {

@@ -28,7 +28,7 @@
 //local
 #include "ITMSceneSliceVisualizer2D.h"
 #include "ITMSceneSliceVisualizerCommon.h"
-#include "../../Objects/Scene/RepresentationAccess.h"
+#include "../../Objects/Volume/RepresentationAccess.h"
 #include "../Analytics/SceneStatisticsCalculator/CPU/ITMSceneStatisticsCalculator_CPU.h"
 #include "../../Engines/Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
 #include "../../Engines/Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"

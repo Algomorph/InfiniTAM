@@ -4,7 +4,7 @@
 
 #include "../../SurfaceTrackers/Interface/SurfaceTrackerInterface.h"
 #include "DepthFusionEngine.h"
-#include "../../Objects/Scene/PlainVoxelArray.h"
+#include "../../Objects/Volume/PlainVoxelArray.h"
 #include "../EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 #include "../Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
 #include "../Common/WarpType.h"

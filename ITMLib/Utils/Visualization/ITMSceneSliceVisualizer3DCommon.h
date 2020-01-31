@@ -23,7 +23,7 @@
 //local
 #include "../ITMMath.h"
 #include "../ITMVoxelFlags.h"
-#include "../../Objects/Scene/VoxelBlockHash.h"
+#include "../../Objects/Volume/VoxelBlockHash.h"
 
 namespace ITMLib {
 

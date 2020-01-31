@@ -600,28 +600,28 @@ set(ITMLIB_OBJECTS_RENDERSTATES_HEADERS
 
 ##
 set(ITMLIB_OBJECTS_SCENE_SOURCES
-    Objects/Scene/VoxelVolume.tpp
-    Objects/Scene/VoxelVolume.cpp
-    Objects/Scene/LocalVBA.tpp
-    Objects/Scene/LocalVBA.cpp
-    Objects/Scene/VoxelBlockHash.cpp
+    Objects/Volume/VoxelVolume.tpp
+    Objects/Volume/VoxelVolume.cpp
+    Objects/Volume/LocalVBA.tpp
+    Objects/Volume/LocalVBA.cpp
+    Objects/Volume/VoxelBlockHash.cpp
     )
 
 ##
 set(ITMLIB_OBJECTS_SCENE_HEADERS
-    Objects/Scene/GlobalCache.h
-    Objects/Scene/LocalMap.h
-    Objects/Scene/LocalVBA.h
-    Objects/Scene/MultiSceneAccess.h
-    Objects/Scene/PlainVoxelArray.h
-    Objects/Scene/RepresentationAccess.h
-    Objects/Scene/TrilinearInterpolation.h
-    Objects/Scene/TrilinearDistribution.h
-    Objects/Scene/VoxelVolume.h
-    Objects/Scene/SurfelScene.h
-    Objects/Scene/SurfelTypes.h
-    Objects/Scene/VoxelBlockHash.h
-    Objects/Scene/VoxelTypes.h
+    Objects/Volume/GlobalCache.h
+    Objects/Volume/LocalMap.h
+    Objects/Volume/LocalVBA.h
+    Objects/Volume/MultiSceneAccess.h
+    Objects/Volume/PlainVoxelArray.h
+    Objects/Volume/RepresentationAccess.h
+    Objects/Volume/TrilinearInterpolation.h
+    Objects/Volume/TrilinearDistribution.h
+    Objects/Volume/VoxelVolume.h
+    Objects/Volume/SurfelScene.h
+    Objects/Volume/SurfelTypes.h
+    Objects/Volume/VoxelBlockHash.h
+    Objects/Volume/VoxelTypes.h
     )
 
 ##

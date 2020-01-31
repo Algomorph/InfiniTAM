@@ -15,8 +15,8 @@
 //  ================================================================
 #pragma once
 
-#include "../../../Objects/Scene/VoxelBlockHash.h"
-#include "../../../Objects/Scene/PlainVoxelArray.h"
+#include "../../../Objects/Volume/VoxelBlockHash.h"
+#include "../../../Objects/Volume/PlainVoxelArray.h"
 
 namespace ITMLib {
 // region ==================================== Offset Warping Functor =====================================================

@@ -16,7 +16,7 @@
 #pragma once
 
 #include "IndexingEngine_CPU_VoxelBlockHash.h"
-#include "../../../../Objects/Scene/RepresentationAccess.h"
+#include "../../../../Objects/Volume/RepresentationAccess.h"
 #include "../../../EditAndCopy/Shared/EditAndCopyEngine_Shared.h"
 #include "../../Shared/IndexingEngine_Shared.h"
 #include "../../../Common/CheckBlockVisibility.h"

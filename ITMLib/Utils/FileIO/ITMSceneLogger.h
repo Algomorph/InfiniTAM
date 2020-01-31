@@ -20,7 +20,7 @@
 
 
 //local
-#include "../../Objects/Scene/VoxelVolume.h"
+#include "../../Objects/Volume/VoxelVolume.h"
 #include "../Collections/ITM3DNestedMapOfArrays.h"
 #include "../Analytics/ITMNeighborVoxelIterationInfo.h"
 #include "ITMWarpFieldLogger.h"

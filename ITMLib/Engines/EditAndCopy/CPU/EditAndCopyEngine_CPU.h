@@ -15,8 +15,8 @@
 //  ================================================================
 #pragma once
 
-#include "../../../Objects/Scene/VoxelVolume.h"
-#include "../../../Objects/Scene/RepresentationAccess.h"
+#include "../../../Objects/Volume/VoxelVolume.h"
+#include "../../../Objects/Volume/RepresentationAccess.h"
 #include "../../../ITMLibDefines.h"
 #include "../../../Utils/ITMHashBlockProperties.h"
 #include "../../../Utils/ITMPrintHelpers.h"

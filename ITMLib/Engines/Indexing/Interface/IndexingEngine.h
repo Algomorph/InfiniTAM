@@ -16,7 +16,7 @@
 #pragma once
 
 //local
-#include "../../../Objects/Scene/VoxelVolume.h"
+#include "../../../Objects/Volume/VoxelVolume.h"
 #include "../../../Utils/ITMHashBlockProperties.h"
 #include "../../../Objects/Views/ITMView.h"
 #include "../../../Objects/Tracking/ITMTrackingState.h"
