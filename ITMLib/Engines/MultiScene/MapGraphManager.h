@@ -13,10 +13,10 @@ namespace ITMLib
 	/* This helpful abstract interface allows you to ignore the fact that
 	scenes are templates.
 	*/
-	class ITMMapGraphManager
+	class MapGraphManager
 	{
 	public:
-		virtual ~ITMMapGraphManager(void) {}
+		virtual ~MapGraphManager(void) {}
 
 		virtual int createNewLocalMap(void) = 0;
 		virtual void removeLocalMap(int index) = 0;
@@ -38,7 +38,7 @@ namespace ITMLib
 	};
 
 	template<class TVoxel, class TIndex>
-	class ITMVoxelMapGraphManager : public ITMMapGraphManager
+	class ITMVoxelMapGraphManager : public MapGraphManager
 	{
 	private:
 		const VisualizationEngine<TVoxel, TIndex> *visualization_engine;

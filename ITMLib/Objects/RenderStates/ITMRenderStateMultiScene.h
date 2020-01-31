@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "../../Engines/MultiScene/ITMMapGraphManager.h"
+#include "../../Engines/MultiScene/MapGraphManager.h"
 #include "../Scene/ITMMultiSceneAccess.h"
 #include "../../Objects/RenderStates/ITMRenderState.h"
 

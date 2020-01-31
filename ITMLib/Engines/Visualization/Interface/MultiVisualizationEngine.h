@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "../../MultiScene/ITMMapGraphManager.h"
+#include "../../MultiScene/MapGraphManager.h"
 #include "VisualizationEngine.h"
 
 namespace ITMLib {

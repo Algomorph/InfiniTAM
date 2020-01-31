@@ -20,5 +20,5 @@
 
 namespace ITMLib {
 template
-class SwappingEngine<ITMVoxel, PlainVoxelArray>;
+class SwappingEngine_CPU<ITMVoxel, PlainVoxelArray>;
 } // namespace ITMLib

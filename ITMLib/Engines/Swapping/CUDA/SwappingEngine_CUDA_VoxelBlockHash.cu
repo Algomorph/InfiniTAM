@@ -20,5 +20,5 @@
 
 namespace ITMLib {
 template
-class SwappingEngine<ITMVoxel, VoxelBlockHash>;
+class SwappingEngine_CUDA<ITMVoxel, VoxelBlockHash>;
 } // namespace ITMLib

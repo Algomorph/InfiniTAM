@@ -1,6 +1,6 @@
 // Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
 
-#include "ITMActiveMapManager.h"
+#include "ActiveMapManager.h"
 
 using namespace ITMLib;
 
@@ -17,12 +17,12 @@ static const int N_relocsuccess = 10;
 static const int N_originalblocks = 1000;
 static const float F_originalBlocksThreshold = 0.2f; //0.4f
 
-ITMActiveMapManager::ITMActiveMapManager(ITMMapGraphManager *_localMapManager)
+ActiveMapManager::ActiveMapManager(MapGraphManager *_localMapManager)
 {
 	localMapManager = _localMapManager;
 }
 
-int ITMActiveMapManager::initiateNewLocalMap(bool isPrimaryLocalMap)
+int ActiveMapManager::initiateNewLocalMap(bool isPrimaryLocalMap)
 {
 	int newIdx = localMapManager->createNewLocalMap();
 
@@ -35,7 +35,7 @@ int ITMActiveMapManager::initiateNewLocalMap(bool isPrimaryLocalMap)
 	return newIdx;
 }
 
-int ITMActiveMapManager::initiateNewLink(int localMapId, const ORUtils::SE3Pose & pose, bool isRelocalisation)
+int ActiveMapManager::initiateNewLink(int localMapId, const ORUtils::SE3Pose & pose, bool isRelocalisation)
 {
 	static const bool ensureUniqueLinks = true;
 
@@ -57,7 +57,7 @@ int ITMActiveMapManager::initiateNewLink(int localMapId, const ORUtils::SE3Pose 
 	return (int)activeData.size() - 1;
 }
 
-float ITMActiveMapManager::visibleOriginalBlocks(int dataID) const
+float ActiveMapManager::visibleOriginalBlocks(int dataID) const
 {
 	int localMapId = activeData[dataID].localMapIndex;
 
@@ -69,7 +69,7 @@ float ITMActiveMapManager::visibleOriginalBlocks(int dataID) const
 	return (float)counted / (float)tmp;
 }
 
-bool ITMActiveMapManager::shouldStartNewArea(void) const
+bool ActiveMapManager::shouldStartNewArea(void) const
 {
 	int primaryLocalMapIdx = -1;
 	int primaryDataIdx = -1;
@@ -92,7 +92,7 @@ bool ITMActiveMapManager::shouldStartNewArea(void) const
 	return false;
 }
 
-bool ITMActiveMapManager::shouldMovePrimaryLocalMap(int newDataId, int bestDataId, int primaryDataId) const
+bool ActiveMapManager::shouldMovePrimaryLocalMap(int newDataId, int bestDataId, int primaryDataId) const
 {
 	int localMapIdx_primary = -1;
 	int localMapIdx_best = -1;
@@ -162,7 +162,7 @@ bool ITMActiveMapManager::shouldMovePrimaryLocalMap(int newDataId, int bestDataI
 	return (visibleRatio_new > visibleRatio_best);
 }
 
-int ITMActiveMapManager::findPrimaryDataIdx(void) const
+int ActiveMapManager::findPrimaryDataIdx(void) const
 {
 	for (int i = 0; i < (int)activeData.size(); ++i) 
 		if (activeData[i].type == PRIMARY_LOCAL_MAP) return i;
@@ -170,14 +170,14 @@ int ITMActiveMapManager::findPrimaryDataIdx(void) const
 	return -1;
 }
 
-int ITMActiveMapManager::findPrimaryLocalMapIdx(void) const
+int ActiveMapManager::findPrimaryLocalMapIdx(void) const
 {
 	int id = findPrimaryDataIdx();
 	if (id < 0) return -1;
 	return activeData[id].localMapIndex;
 }
 
-int ITMActiveMapManager::findBestVisualizationDataIdx(void) const
+int ActiveMapManager::findBestVisualizationDataIdx(void) const
 {
 	int bestIdx = -1;
 	for (int i = 0; i < static_cast<int>(activeData.size()); ++i) 
@@ -194,14 +194,14 @@ int ITMActiveMapManager::findBestVisualizationDataIdx(void) const
 	return bestIdx;
 }
 
-int ITMActiveMapManager::findBestVisualizationLocalMapIdx(void) const
+int ActiveMapManager::findBestVisualizationLocalMapIdx(void) const
 {
 	int id = findBestVisualizationDataIdx();
 	if (id < 0) return -1;
 	return activeData[id].localMapIndex;
 }
 
-void ITMActiveMapManager::recordTrackingResult(int dataID, ITMTrackingState::TrackingResult trackingResult, bool primaryTrackingSuccess)
+void ActiveMapManager::recordTrackingResult(int dataID, ITMTrackingState::TrackingResult trackingResult, bool primaryTrackingSuccess)
 {
 	ActiveDataDescriptor & data = activeData[dataID];
 
@@ -315,7 +315,7 @@ static ORUtils::SE3Pose estimateRelativePose(const std::vector<Matrix4f> & obser
 	return ORUtils::SE3Pose(params);
 }
 
-int ITMActiveMapManager::CheckSuccess_relocalisation(int dataID) const
+int ActiveMapManager::CheckSuccess_relocalisation(int dataID) const
 {
 	// sucessfully relocalised
 	if (activeData[dataID].constraints.size() >= N_relocsuccess) return 1;
@@ -327,7 +327,7 @@ int ITMActiveMapManager::CheckSuccess_relocalisation(int dataID) const
 	return 0;
 }
 
-int ITMActiveMapManager::CheckSuccess_newlink(int dataID, int primaryDataID, int *inliers, ORUtils::SE3Pose *inlierPose) const
+int ActiveMapManager::CheckSuccess_newlink(int dataID, int primaryDataID, int *inliers, ORUtils::SE3Pose *inlierPose) const
 {
 	const ActiveDataDescriptor & link = activeData[dataID];
 
@@ -368,7 +368,7 @@ int ITMActiveMapManager::CheckSuccess_newlink(int dataID, int primaryDataID, int
 	return 0;
 }
 
-void ITMActiveMapManager::AcceptNewLink(int fromData, int toData, const ORUtils::SE3Pose & pose, int weight)
+void ActiveMapManager::AcceptNewLink(int fromData, int toData, const ORUtils::SE3Pose & pose, int weight)
 {
 	int fromLocalMapIdx = activeData[fromData].localMapIndex;
 	int toLocalMapIdx = activeData[toData].localMapIndex;
@@ -384,7 +384,7 @@ void ITMActiveMapManager::AcceptNewLink(int fromData, int toData, const ORUtils:
 	}
 }
 
-bool ITMActiveMapManager::maintainActiveData(void)
+bool ActiveMapManager::maintainActiveData(void)
 {
 	bool localMapGraphChanged = false;
 

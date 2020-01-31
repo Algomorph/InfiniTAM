@@ -250,15 +250,15 @@ set(ITMLIB_ENGINES_MESHING_SHARED_HEADERS
 
 ##
 set(ITMLIB_ENGINES_MULTISCENE_SOURCES
-    Engines/MultiScene/ITMActiveMapManager.cpp
-    Engines/MultiScene/ITMGlobalAdjustmentEngine.cpp
-    Engines/MultiScene/ITMMapGraphManager.tpp
+    Engines/MultiScene/ActiveMapManager.cpp
+    Engines/MultiScene/GlobalAdjustmentEngine.cpp
+    Engines/MultiScene/MapGraphManager.tpp
     )
 
 set(ITMLIB_ENGINES_MULTISCENE_HEADERS
-    Engines/MultiScene/ITMActiveMapManager.h
-    Engines/MultiScene/ITMGlobalAdjustmentEngine.h
-    Engines/MultiScene/ITMMapGraphManager.h
+    Engines/MultiScene/ActiveMapManager.h
+    Engines/MultiScene/GlobalAdjustmentEngine.h
+    Engines/MultiScene/MapGraphManager.h
     )
 #====================================== INDEXING ENGINES ===============================================================
 set(ITMLIB_ENGINES_INDEXING_SOURCES

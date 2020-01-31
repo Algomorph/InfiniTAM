@@ -42,7 +42,7 @@ MultiEngine<TVoxel, TIndex>::MultiEngine(const ITMRGBDCalib& calib, Vector2i img
 	trackedImageSize = trackingController->GetTrackedImageSize(imgSize_rgb, imgSize_d);
 
 	mapManager = new ITMVoxelMapGraphManager<TVoxel, TIndex>(visualization_engine, denseMapper, trackedImageSize);
-	mActiveDataManager = new ITMActiveMapManager(mapManager);
+	mActiveDataManager = new ActiveMapManager(mapManager);
 	mActiveDataManager->initiateNewLocalMap(true);
 	denseMapper = new DenseMapper<TVoxel, TIndex>(mapManager->getLocalMap(0)->scene->index);
 
@@ -60,7 +60,7 @@ MultiEngine<TVoxel, TIndex>::MultiEngine(const ITMRGBDCalib& calib, Vector2i img
 
 	relocaliser = new FernRelocLib::Relocaliser<float>(imgSize_d, Vector2f(settings.general_voxel_volume_parameters.near_clipping_distance, settings.general_voxel_volume_parameters.far_clipping_distance), 0.1f, 1000, 4);
 
-	mGlobalAdjustmentEngine = new ITMGlobalAdjustmentEngine();
+	mGlobalAdjustmentEngine = new GlobalAdjustmentEngine();
 	mScheduleGlobalAdjustment = false;
 	if (separateThreadGlobalAdjustment) mGlobalAdjustmentEngine->startSeparateThread();
 
@@ -168,9 +168,9 @@ ITMTrackingState::TrackingResult MultiEngine<TVoxel, TIndex>::ProcessFrame(ITMUC
 	{
 		switch (mActiveDataManager->getLocalMapType(i))
 		{
-		case ITMActiveMapManager::NEW_LOCAL_MAP: todoList.push_back(TodoListEntry(i, true, true, true));
-		case ITMActiveMapManager::LOOP_CLOSURE: todoList.push_back(TodoListEntry(i, true, false, true));
-		case ITMActiveMapManager::RELOCALISATION: todoList.push_back(TodoListEntry(i, true, false, true));
+		case ActiveMapManager::NEW_LOCAL_MAP: todoList.push_back(TodoListEntry(i, true, true, true));
+		case ActiveMapManager::LOOP_CLOSURE: todoList.push_back(TodoListEntry(i, true, false, true));
+		case ActiveMapManager::RELOCALISATION: todoList.push_back(TodoListEntry(i, true, false, true));
 		default: break;
 		}
 	}
@@ -248,7 +248,7 @@ ITMTrackingState::TrackingResult MultiEngine<TVoxel, TIndex>::ProcessFrame(ITMUC
 
 			// tracking is allowed to be poor only in the primary scenes. 
 			ITMTrackingState::TrackingResult trackingResult = currentLocalMap->trackingState->trackerResult;
-			if (mActiveDataManager->getLocalMapType(dataId) != ITMActiveMapManager::PRIMARY_LOCAL_MAP)
+			if (mActiveDataManager->getLocalMapType(dataId) != ActiveMapManager::PRIMARY_LOCAL_MAP)
 				if (trackingResult == ITMTrackingState::TRACKING_POOR) trackingResult = ITMTrackingState::TRACKING_FAILED;
 
 			// actions on tracking result for all scenes TODO: incorporate behaviour on tracking failure from settings
@@ -261,7 +261,7 @@ ITMTrackingState::TrackingResult MultiEngine<TVoxel, TIndex>::ProcessFrame(ITMUC
 			}
 
 			// actions on tracking result for primary local map
-			if (mActiveDataManager->getLocalMapType(dataId) == ITMActiveMapManager::PRIMARY_LOCAL_MAP)
+			if (mActiveDataManager->getLocalMapType(dataId) == ActiveMapManager::PRIMARY_LOCAL_MAP)
 			{
 				primaryLocalMapTrackingResult = trackingResult;
 

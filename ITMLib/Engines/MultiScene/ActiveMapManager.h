@@ -2,13 +2,13 @@
 
 #pragma once
 
-#include "ITMMapGraphManager.h"
+#include "MapGraphManager.h"
 
 namespace ITMLib
 {
 	/** \brief
 	*/
-	class ITMActiveMapManager
+	class ActiveMapManager
 	{
 	public:
 		typedef enum { PRIMARY_LOCAL_MAP, NEW_LOCAL_MAP, LOOP_CLOSURE, RELOCALISATION, LOST, LOST_NEW } LocalMapActivity;
@@ -23,7 +23,7 @@ namespace ITMLib
 			int trackingAttempts;
 		};
 
-		ITMMapGraphManager *localMapManager;
+		MapGraphManager *localMapManager;
 		std::vector<ActiveDataDescriptor> activeData;
 
 		int CheckSuccess_relocalisation(int dataID) const;
@@ -53,7 +53,7 @@ namespace ITMLib
 		int getLocalMapIndex(int dataIdx) const { return activeData[dataIdx].localMapIndex; }
 		LocalMapActivity getLocalMapType(int dataIdx) const { return activeData[dataIdx].type; }
 
-		ITMActiveMapManager(ITMMapGraphManager *localMapManager);
-		~ITMActiveMapManager(void) {}
+		ActiveMapManager(MapGraphManager *localMapManager);
+		~ActiveMapManager(void) {}
 	};
 }

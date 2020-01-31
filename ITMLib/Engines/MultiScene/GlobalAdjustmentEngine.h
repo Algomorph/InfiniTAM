@@ -3,7 +3,7 @@
 #pragma once
 
 #include "../../../MiniSlamGraphLib/PoseGraph.h"
-#include "ITMMapGraphManager.h"
+#include "MapGraphManager.h"
 
 namespace ITMLib {
 
@@ -24,25 +24,25 @@ namespace ITMLib {
 		recommended. The thread will reject new data while a pose graph optimisation
 		is currently in progress, and it may go to sleep otherwise.
 	*/
-	class ITMGlobalAdjustmentEngine {
+	class GlobalAdjustmentEngine {
 	private:
 		struct PrivateData;
 
 	public:
-		ITMGlobalAdjustmentEngine(void);
-		~ITMGlobalAdjustmentEngine(void);
+		GlobalAdjustmentEngine(void);
+		~GlobalAdjustmentEngine(void);
 
 		bool hasNewEstimates(void) const;
 
 		// Check whether pose graph optimisation has converged and produced a
 		// new result. if it hasn't return false, otherwise copy them over
-		bool retrieveNewEstimates(ITMMapGraphManager & dest);
+		bool retrieveNewEstimates(MapGraphManager & dest);
 
 		bool isBusyEstimating(void) const;
 
 		// Check whether thread is busy, if it is, return false, otherwise
 		// create a copy of all new measurements and make it busy
-		bool updateMeasurements(const ITMMapGraphManager & src);
+		bool updateMeasurements(const MapGraphManager & src);
 
 		bool runGlobalAdjustment(bool blockingWait = false);
 
@@ -53,8 +53,8 @@ namespace ITMLib {
 	private:
 		void estimationThreadMain(void);
 
-		static void MultiSceneToPoseGraph(const ITMMapGraphManager & src, MiniSlamGraph::PoseGraph & dest);
-		static void PoseGraphToMultiScene(const MiniSlamGraph::PoseGraph & src, ITMMapGraphManager & dest);
+		static void MultiSceneToPoseGraph(const MapGraphManager & src, MiniSlamGraph::PoseGraph & dest);
+		static void PoseGraphToMultiScene(const MiniSlamGraph::PoseGraph & src, MapGraphManager & dest);
 
 		MiniSlamGraph::PoseGraph *workingData;
 		MiniSlamGraph::PoseGraph *processedData;

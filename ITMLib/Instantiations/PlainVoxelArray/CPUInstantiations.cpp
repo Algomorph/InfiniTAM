@@ -9,7 +9,7 @@
 #include "../../Engines/Main/Mappers/DenseSurfelMapper.tpp"
 #include "../../Engines/Meshing/CPU/ITMMeshingEngine_CPU.tpp"
 #include "../../Engines/Meshing/CPU/ITMMultiMeshingEngine_CPU.tpp"
-#include "../../Engines/MultiScene/ITMMapGraphManager.tpp"
+#include "../../Engines/MultiScene/MapGraphManager.tpp"
 #include "../../Engines/Visualization/CPU/MultiVisualizationEngine_CPU.tpp"
 #include "../../Engines/Reconstruction/CPU/SceneReconstructionEngine_CPU.tpp"
 #include "../../Engines/Reconstruction/CPU/SurfelSceneReconstructionEngine_CPU.tpp"

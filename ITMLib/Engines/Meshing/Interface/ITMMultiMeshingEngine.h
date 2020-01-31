@@ -4,7 +4,7 @@
 
 #include "ITMMeshingEngine.h"
 #include "../../../Objects/Meshing/ITMMesh.h"
-#include "../../MultiScene/ITMMapGraphManager.h"
+#include "../../MultiScene/MapGraphManager.h"
 
 namespace ITMLib
 {

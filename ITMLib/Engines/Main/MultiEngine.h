@@ -9,8 +9,8 @@
 #include "../../Objects/Misc/ITMIMUCalibrator.h"
 #include "../../../FernRelocLib/Relocaliser.h"
 
-#include "../MultiScene/ITMActiveMapManager.h"
-#include "../MultiScene/ITMGlobalAdjustmentEngine.h"
+#include "../MultiScene/ActiveMapManager.h"
+#include "../MultiScene/GlobalAdjustmentEngine.h"
 #include "../Visualization/Interface/MultiVisualizationEngine.h"
 #include "../Meshing/ITMMultiMeshingEngineFactory.h"
 #include "../../CameraTrackers/Interface/ITMCameraTracker.h"
@@ -41,8 +41,8 @@ namespace ITMLib
 		FernRelocLib::Relocaliser<float> *relocaliser;
 
 		ITMVoxelMapGraphManager<TVoxel, TIndex> *mapManager;
-		ITMActiveMapManager *mActiveDataManager;
-		ITMGlobalAdjustmentEngine *mGlobalAdjustmentEngine;
+		ActiveMapManager *mActiveDataManager;
+		GlobalAdjustmentEngine *mGlobalAdjustmentEngine;
 		bool mScheduleGlobalAdjustment;
 
 		Vector2i trackedImageSize;
