@@ -67,8 +67,8 @@ void MultiMeshingEngine_CUDA<TVoxel, VoxelBlockHash>::MeshScene(ITMMesh* mesh,
 
 	ITMMesh::Triangle* triangles = mesh->triangles->GetData(MEMORYDEVICE_CUDA);
 
-	typedef ITMMultiVoxel<TVoxel> VD;
-	typedef ITMMultiIndex<VoxelBlockHash> ID;
+	typedef MultiVoxel<TVoxel> VD;
+	typedef MultiIndex<VoxelBlockHash> ID;
 
 	int noMaxTriangles = mesh->noMaxTriangles;
 	const int hashEntryCount = sceneManager.getLocalMap(0)->scene->index.hashEntryCount;

@@ -7,14 +7,14 @@
 #define MAX_NUM_LOCALMAPS 32
 
 namespace ITMLib {
-	struct ITMMultiCache {};
+	struct MultiCache {};
 
 	template<class TIndex>
-	class ITMMultiIndex
+	class MultiIndex
 	{
 	public:
 		typedef TIndex IndexType;
-		typedef ITMMultiCache IndexCache;
+		typedef MultiCache IndexCache;
 
 		struct IndexData
 		{
@@ -27,7 +27,7 @@ namespace ITMLib {
 	};
 
 	template<class TVoxel>
-	class ITMMultiVoxel
+	class MultiVoxel
 	{
 	public:
 		typedef TVoxel VoxelType;
@@ -41,7 +41,7 @@ namespace ITMLib {
 }
 
 template<class TMultiVoxel, class TMultiIndex>
-_CPU_AND_GPU_CODE_ inline float readFromSDF_float_uninterpolated(const TMultiVoxel *voxelData, const TMultiIndex *voxelIndex, const Vector3f & point, int & vmIndex, ITMLib::ITMMultiCache & _cache)
+_CPU_AND_GPU_CODE_ inline float readFromSDF_float_uninterpolated(const TMultiVoxel *voxelData, const TMultiIndex *voxelIndex, const Vector3f & point, int & vmIndex, ITMLib::MultiCache & _cache)
 {
 	typedef typename TMultiVoxel::VoxelType TVoxel;
 	typedef typename TMultiIndex::IndexType TIndex;
@@ -67,7 +67,7 @@ _CPU_AND_GPU_CODE_ inline float readFromSDF_float_uninterpolated(const TMultiVox
 }
 
 template<class TMultiVoxel, class TMultiIndex>
-_CPU_AND_GPU_CODE_ inline float readFromSDF_float_interpolated(const TMultiVoxel *voxelData, const TMultiIndex *voxelIndex, const Vector3f & point, int & vmIndex, ITMLib::ITMMultiCache & _cache)
+_CPU_AND_GPU_CODE_ inline float readFromSDF_float_interpolated(const TMultiVoxel *voxelData, const TMultiIndex *voxelIndex, const Vector3f & point, int & vmIndex, ITMLib::MultiCache & _cache)
 {
 	typedef typename TMultiIndex::IndexType TIndex;
 
@@ -100,7 +100,7 @@ template<class TMultiVoxel, class TMultiIndex>
 _CPU_AND_GPU_CODE_ inline Vector4f readFromSDF_color4u_interpolated(const TMultiVoxel *voxelData,
                                                                     const TMultiIndex *voxelIndex,
                                                                     const Vector3f & point,
-                                                                    ITMLib::ITMMultiCache & _cache)
+                                                                    ITMLib::MultiCache & _cache)
 {
 	typedef typename TMultiIndex::IndexType TIndex;
 
@@ -121,7 +121,7 @@ _CPU_AND_GPU_CODE_ inline Vector4f readFromSDF_color4u_interpolated(const TMulti
 
 template<class TMultiVoxel, class TMultiIndex>
 _CPU_AND_GPU_CODE_ inline float readWithConfidenceFromSDF_float_interpolated(THREADPTR(float) &confidence, const CONSTPTR(TMultiVoxel) *voxelData,
-	const CONSTPTR(TMultiIndex) *voxelIndex, Vector3f point, THREADPTR(int) &vmIndex, ITMLib::ITMMultiCache & _cache)
+	const CONSTPTR(TMultiIndex) *voxelIndex, Vector3f point, THREADPTR(int) &vmIndex, ITMLib::MultiCache & _cache)
 {
 	typedef typename TMultiIndex::IndexType TIndex;
 

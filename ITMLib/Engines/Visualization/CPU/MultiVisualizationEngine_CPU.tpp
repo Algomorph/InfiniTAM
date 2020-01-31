@@ -7,7 +7,7 @@
 #include "MultiVisualizationEngine_CPU.h"
 
 #include "../../../Objects/RenderStates/ITMRenderStateMultiScene.h"
-#include "../../../Objects/Scene/ITMMultiSceneAccess.h"
+#include "../../../Objects/Scene/MultiSceneAccess.h"
 
 #include "../Shared/VisualizationEngine_Shared.h"
 
@@ -117,8 +117,8 @@ static void RenderImage_common(const ORUtils::SE3Pose *pose, const ITMIntrinsics
 		float oneOverVoxelSize = 1.0f / voxelSize;
 		Vector4f *pointsRay = renderState->raycastResult->GetData(MEMORYDEVICE_CPU);
 
-		typedef ITMMultiVoxel<TVoxel> VD;
-		typedef ITMMultiIndex<TIndex> ID;
+		typedef MultiVoxel<TVoxel> VD;
+		typedef MultiIndex<TIndex> ID;
 
 #ifdef WITH_OPENMP
 #pragma omp parallel for
@@ -147,8 +147,8 @@ static void RenderImage_common(const ORUtils::SE3Pose *pose, const ITMIntrinsics
 #endif
 			for (int locId = 0; locId < imgSize.x * imgSize.y; locId++) {
 				Vector4f ptRay = pointsRay[locId];
-				processPixelColour<ITMMultiVoxel<TVoxel>, ITMMultiIndex<TIndex> >(outRendering[locId], ptRay.toVector3(), ptRay.w > 0, &(renderState->voxelData_host),
-				                                                                  &(renderState->indexData_host));
+				processPixelColour<MultiVoxel<TVoxel>, MultiIndex<TIndex> >(outRendering[locId], ptRay.toVector3(), ptRay.w > 0, &(renderState->voxelData_host),
+				                                                            &(renderState->indexData_host));
 			}
 			break;
 		case IVisualizationEngine::RENDER_COLOUR_FROM_NORMAL:

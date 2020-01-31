@@ -13,7 +13,6 @@
 
 namespace ITMLib
 {
-	template class MeshingEngine_CUDA<ITMVoxel, VoxelBlockHash>;
-	template class MultiMeshingEngine_CUDA<ITMVoxel, VoxelBlockHash>;
+
 
 }

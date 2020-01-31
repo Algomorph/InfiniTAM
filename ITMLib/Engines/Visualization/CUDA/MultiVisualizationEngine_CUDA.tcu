@@ -3,7 +3,7 @@
 #include "MultiVisualizationEngine_CUDA.h"
 
 #include "../../../Objects/RenderStates/ITMRenderStateMultiScene.h"
-#include "../../../Objects/Scene/ITMMultiSceneAccess.h"
+#include "../../../Objects/Scene/MultiSceneAccess.h"
 
 #include "../Shared/VisualizationEngine_Shared.h"
 #include "VisualizationHelpers_CUDA.h"
@@ -129,8 +129,8 @@ static void RenderImage_common(const ORUtils::SE3Pose *pose, const ITMIntrinsics
 
 		dim3 cudaBlockSize(16, 12);
 		dim3 gridSize((int)ceil((float)imgSize.x / (float)cudaBlockSize.x), (int)ceil((float)imgSize.y / (float)cudaBlockSize.y));
-		typedef ITMMultiVoxel<TVoxel> VD;
-		typedef ITMMultiIndex<TIndex> ID;
+		typedef MultiVoxel<TVoxel> VD;
+		typedef MultiIndex<TIndex> ID;
 		genericRaycast_device<VD, ID, false> << <gridSize, cudaBlockSize >> > (
 				renderState->raycastResult->GetData(MEMORYDEVICE_CUDA),
 						NULL,

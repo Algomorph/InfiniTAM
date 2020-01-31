@@ -217,6 +217,10 @@ set(ITMLIB_ENGINES_MESHING_HEADERS
 ##
 set(ITMLIB_ENGINES_MESHING_CPU_SOURCES
     Engines/Meshing/CPU/MeshingEngine_CPU.tpp
+    Engines/Meshing/CPU/MeshingEngine_CPU_PlainVoxelArray.cpp
+    Engines/Meshing/CPU/MeshingEngine_CPU_VoxelBlockHash.cpp
+    Engines/Meshing/CPU/MultiMeshingEngine_CPU_PlainVoxelArray.cpp
+    Engines/Meshing/CPU/MultiMeshingEngine_CPU_VoxelBlockHash.cpp
     Engines/Meshing/CPU/MultiMeshingEngine_CPU.tpp
     )
 
@@ -228,7 +232,11 @@ set(ITMLIB_ENGINES_MESHING_CPU_HEADERS
 ##
 set(ITMLIB_ENGINES_MESHING_CUDA_SOURCES
     Engines/Meshing/CUDA/MeshingEngine_CUDA.tcu
+    Engines/Meshing/CUDA/MeshingEngine_CUDA_PlainVoxelArray.cu
+    Engines/Meshing/CUDA/MeshingEngine_CUDA_VoxelBlockHash.cu
     Engines/Meshing/CUDA/MultiMeshingEngine_CUDA.tcu
+    Engines/Meshing/CUDA/MultiMeshingEngine_CUDA_PlainVoxelArray.cu
+    Engines/Meshing/CUDA/MultiMeshingEngine_CUDA_VoxelBlockHash.cu
     )
 
 set(ITMLIB_ENGINES_MESHING_CUDA_HEADERS
@@ -620,7 +628,7 @@ set(ITMLIB_OBJECTS_SCENE_HEADERS
     Objects/Scene/ITMGlobalCache.h
     Objects/Scene/ITMLocalMap.h
     Objects/Scene/ITMLocalVBA.h
-    Objects/Scene/ITMMultiSceneAccess.h
+    Objects/Scene/MultiSceneAccess.h
     Objects/Scene/PlainVoxelArray.h
     Objects/Scene/ITMRepresentationAccess.h
     Objects/Scene/ITMTrilinearInterpolation.h

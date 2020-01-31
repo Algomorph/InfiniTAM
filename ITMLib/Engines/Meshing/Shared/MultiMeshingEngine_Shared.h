@@ -3,14 +3,15 @@
 #pragma once
 
 #include "MultiMeshingEngine_Shared.h"
-#include "../../../Objects/Scene/ITMMultiSceneAccess.h"
+#include "../../../Objects/Scene/MultiSceneAccess.h"
+#include "../../Meshing/Shared/MeshingEngine_Shared.h"
 
 template<class TVoxel, class TIndex>
 _CPU_AND_GPU_CODE_ inline bool findPointNeighborsMulti(THREADPTR(Vector3f) *p, THREADPTR(float) *sdf, Vector3i blockLocation, const CONSTPTR(TVoxel) *localVBA, const CONSTPTR(TIndex) *hashTables, int hashTableIdx)
 {
 	int vmIndex; Vector3i localBlockLocation;
 
-	ITMMultiCache cache;
+	ITMLib::MultiCache cache;
 
 	localBlockLocation = blockLocation + Vector3i(0, 0, 0);
 	p[0] = hashTables->posesInv[hashTableIdx] * localBlockLocation.toFloat();

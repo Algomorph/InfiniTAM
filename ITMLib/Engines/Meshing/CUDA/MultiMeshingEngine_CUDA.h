@@ -3,7 +3,7 @@
 #pragma once
 
 #include "../Interface/MultiMeshingEngine.h"
-#include "../../../Objects/Scene/ITMMultiSceneAccess.h"
+#include "../../../Objects/Scene/MultiSceneAccess.h"
 
 namespace ITMLib
 {
@@ -23,8 +23,8 @@ namespace ITMLib
 		Vector4s *visibleBlockGlobalPos_device;
 
 	public:
-		typedef typename ITMMultiIndex<VoxelBlockHash>::IndexData MultiIndexData;
-		typedef ITMMultiVoxel<TVoxel> MultiVoxelData;
+		typedef typename MultiIndex<VoxelBlockHash>::IndexData MultiIndexData;
+		typedef MultiVoxel<TVoxel> MultiVoxelData;
 		typedef VoxelMapGraphManager<TVoxel, VoxelBlockHash> MultiSceneManager;
 
 		MultiIndexData *indexData_device, indexData_host;

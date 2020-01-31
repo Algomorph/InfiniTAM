@@ -3,7 +3,7 @@
 #pragma once
 
 #include "../Interface/MultiMeshingEngine.h"
-#include "../../../Objects/Scene/ITMMultiSceneAccess.h"
+#include "../../../Objects/Scene/MultiSceneAccess.h"
 
 namespace ITMLib
 {
@@ -20,8 +20,8 @@ namespace ITMLib
 	{
 	public:
 		explicit MultiMeshingEngine_CPU(const VoxelBlockHash& index){};
-		typedef typename ITMMultiIndex<VoxelBlockHash>::IndexData MultiIndexData;
-		typedef ITMMultiVoxel<TVoxel> MultiVoxelData;
+		typedef typename MultiIndex<VoxelBlockHash>::IndexData MultiIndexData;
+		typedef MultiVoxel<TVoxel> MultiVoxelData;
 		typedef VoxelMapGraphManager<TVoxel, VoxelBlockHash> MultiSceneManager;
 		void MeshScene(ITMMesh *mesh, const MultiSceneManager & sceneManager);
 	};

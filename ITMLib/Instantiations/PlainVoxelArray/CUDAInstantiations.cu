@@ -12,7 +12,5 @@
 
 namespace ITMLib
 {
-	template class MeshingEngine_CUDA<ITMVoxel, PlainVoxelArray>;
-	template class MultiMeshingEngine_CUDA<ITMVoxel, PlainVoxelArray>;
 
 }
