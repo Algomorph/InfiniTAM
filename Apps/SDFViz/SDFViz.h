@@ -30,7 +30,7 @@
 #include <vtk-8.1/vtkOrientationMarkerWidget.h>
 
 //local
-#include "../../ITMLib/Utils/Visualization/ITMSceneSliceVisualizer3D.tpp"
+#include "../../ITMLib/Utils/Visualization/SceneSliceVisualizer3D.tpp"
 
 //ITMLib
 #include "../../ITMLib/ITMLibDefines.h"

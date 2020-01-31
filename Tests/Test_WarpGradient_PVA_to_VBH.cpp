@@ -32,12 +32,12 @@
 
 #include "../ITMLib/ITMLibDefines.h"
 #include "../ITMLib/Objects/Volume/VoxelVolume.h"
-#include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/ITMVoxelVolumeComparison.h"
+#include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison.h"
 #include "../ITMLib/SurfaceTrackers/Interface/SurfaceTracker.h"
 
 //local CPU
-#include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/ITMVoxelVolumeComparison_CPU.h"
-#include "../ITMLib/Utils/Analytics/SceneStatisticsCalculator/CPU/ITMSceneStatisticsCalculator_CPU.h"
+#include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CPU.h"
+#include "../ITMLib/Utils/Analytics/SceneStatisticsCalculator/CPU/SceneStatisticsCalculator_CPU.h"
 #include "../ITMLib/Engines/EditAndCopy/EditAndCopyEngineFactory.h"
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngine_CPU.h"
 

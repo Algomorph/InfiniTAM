@@ -14,10 +14,10 @@
 //  limitations under the License.
 //  ================================================================
 #include "UIEngine_BPO.h"
-#include "../../ITMLib/Utils/Analytics/ITMBenchmarkUtils.h"
+#include "../../ITMLib/Utils/Analytics/BenchmarkUtils.h"
 #include "../../ITMLib/Engines/Main/MultiEngine.h"
 #include "../../ITMLib/Engines/Main/BasicVoxelEngine.h"
-#include "../../ITMLib/Utils/FileIO/ITMDynamicFusionLogger.h"
+#include "../../ITMLib/Utils/FileIO/DynamicFusionLogger.h"
 
 
 //TODO: we should never have to downcast the main engine to some other engine type, architecture needs to be altered

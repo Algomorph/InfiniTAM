@@ -17,11 +17,11 @@
 
 #include "../../Objects/Volume/RepresentationAccess.h"
 #include "../../Utils/ITMHashBlockProperties.h"
-#include "../../Utils/Analytics/ITMNeighborVoxelIterationInfo.h"
+#include "../../Utils/Analytics/NeighborVoxelIterationInfo.h"
 #include "../../Utils/ITMPrintHelpers.h"
 #include "../../Utils/ITMCPrintHelpers.h"
 #include "../../Objects/Volume/TrilinearInterpolation.h"
-#include "../../Utils/Geometry/ITM3DIndexConversions.h"
+#include "../../Utils/Geometry/SpatialIndexConversions.h"
 
 using namespace ITMLib;
 
@@ -78,7 +78,7 @@ ReadVoxelAndLinearIndex(const CONSTPTR(TVoxel)* voxelData,
 
 
 template<typename TVoxelCanonical, typename TVoxelLive, typename TIndexData, typename TCache>
-inline void FindHighlightNeighborInfo(std::array<ITMLib::ITMNeighborVoxelIterationInfo, 9>& neighbors,
+inline void FindHighlightNeighborInfo(std::array<ITMLib::NeighborVoxelIterationInfo, 9>& neighbors,
                                       const CONSTPTR(Vector3i)& highlightPosition,
                                       const CONSTPTR(int)& highlightHash,
                                       const CONSTPTR(TVoxelCanonical)* canonicalVoxelData,
@@ -97,7 +97,7 @@ inline void FindHighlightNeighborInfo(std::array<ITMLib::ITMNeighborVoxelIterati
 	vmIndex = highlightHash + 1;
 	int iNeighbor = 0;
 	for (auto location : locations) {
-		ITMLib::ITMNeighborVoxelIterationInfo& info = neighbors[iNeighbor];
+		ITMLib::NeighborVoxelIterationInfo& info = neighbors[iNeighbor];
 		Vector3i neighborPosition = highlightPosition + (location);
 		TVoxelCanonical voxelCanonical = ReadVoxelAndLinearIndex(canonicalVoxelData, canonicalIndexData,
 		                                                         neighborPosition,

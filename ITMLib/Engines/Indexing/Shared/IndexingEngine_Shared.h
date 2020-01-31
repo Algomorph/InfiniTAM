@@ -24,7 +24,7 @@
 #include "../../../Utils/ITMPixelUtils.h"
 #include "../../../Utils/ITMVoxelFlags.h"
 #include "../../../Utils/ITMHashBlockProperties.h"
-#include "../../../Utils/Geometry/ITMIntersectionChecks.h"
+#include "../../../Utils/Geometry/IntersectionChecks.h"
 
 #ifdef __CUDACC__
 #include "../../../Utils/ITMCUDAUtils.h"
@@ -308,7 +308,7 @@ prepareForAllocationFromDepthAndTsdf(ITMLib::HashEntryAllocationState* hashEntry
 	// segment from start of the (truncated SDF) band, through the observed point, and to the opposite (occluded)
 	// end of the (truncated SDF) band (increased by backBandFactor), along the ray cast from the camera through the
 	// point, in camera space
-	ITMLib::ITMSegment marchSegment(currentCheckPosition_HashBlocks, endCheckPosition_HashBlocks);
+	ITMLib::Segment marchSegment(currentCheckPosition_HashBlocks, endCheckPosition_HashBlocks);
 
 	// number of steps to take along the truncated SDF band
 	stepCount = (int) std::ceil(2.0f * marchSegment.length());
@@ -420,13 +420,13 @@ buildHashAllocAndVisibleTypePP(ITMLib::HashEntryAllocationState* hashEntryStates
 	// segment from start of the (truncated SDF) band, through the observed point, and to the opposite (occluded)
 	// end of the (truncated SDF) band (increased by backBandFactor), along the ray cast from the camera through the
 	// point, in camera space
-	ITMLib::ITMSegment marchSegment(currentCheckPosition_HashBlocks, endCheckPosition_HashBlocks);
+	ITMLib::Segment march_segment(currentCheckPosition_HashBlocks, endCheckPosition_HashBlocks);
 
 	// number of steps to take along the truncated SDF band
-	stepCount = (int) std::ceil(2.0f * marchSegment.length());
+	stepCount = (int) std::ceil(2.0f * march_segment.length());
 
 	// a single stride along the sdf band segment from one step to the next
-	Vector3f strideVector = marchSegment.direction / (float) (stepCount - 1);
+	Vector3f strideVector = march_segment.direction / (float) (stepCount - 1);
 
 	Vector3s previousHashBlockPosition;
 
@@ -441,7 +441,7 @@ buildHashAllocAndVisibleTypePP(ITMLib::HashEntryAllocationState* hashEntryStates
 					if (currentHashBlockPosition.values[iDirection] != previousHashBlockPosition.values[iDirection]) {
 						Vector3s potentiallyMissedBlockPosition = previousHashBlockPosition;
 						potentiallyMissedBlockPosition.values[iDirection] = currentHashBlockPosition.values[iDirection];
-						if (SegmentIntersectsGridAlignedCube3D(marchSegment, TO_FLOAT3(potentiallyMissedBlockPosition),
+						if (SegmentIntersectsGridAlignedCube3D(march_segment, TO_FLOAT3(potentiallyMissedBlockPosition),
 						                                       1.0f)) {
 							MarkForAllocationAndSetVisibilityTypeIfNotFound(
 									hashEntryStates,
@@ -455,7 +455,7 @@ buildHashAllocAndVisibleTypePP(ITMLib::HashEntryAllocationState* hashEntryStates
 				for (int iDirection = 0; iDirection < 3; iDirection++) {
 					Vector3s potentiallyMissedBlockPosition = previousHashBlockPosition;
 					potentiallyMissedBlockPosition.values[iDirection] = currentHashBlockPosition.values[iDirection];
-					if (SegmentIntersectsGridAlignedCube3D(marchSegment, TO_FLOAT3(potentiallyMissedBlockPosition),
+					if (SegmentIntersectsGridAlignedCube3D(march_segment, TO_FLOAT3(potentiallyMissedBlockPosition),
 					                                       1.0f)) {
 						MarkForAllocationAndSetVisibilityTypeIfNotFound(
 								hashEntryStates,
@@ -464,7 +464,7 @@ buildHashAllocAndVisibleTypePP(ITMLib::HashEntryAllocationState* hashEntryStates
 					}
 					potentiallyMissedBlockPosition = currentHashBlockPosition;
 					potentiallyMissedBlockPosition.values[iDirection] = previousHashBlockPosition.values[iDirection];
-					if (SegmentIntersectsGridAlignedCube3D(marchSegment, TO_FLOAT3(potentiallyMissedBlockPosition),
+					if (SegmentIntersectsGridAlignedCube3D(march_segment, TO_FLOAT3(potentiallyMissedBlockPosition),
 					                                       1.0f)) {
 						MarkForAllocationAndSetVisibilityTypeIfNotFound(
 								hashEntryStates,

@@ -15,7 +15,7 @@
 //  ================================================================
 #include "../../Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 #include "../../Engines/Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
-#include "../../Utils/Analytics/SceneStatisticsCalculator/CPU/ITMSceneStatisticsCalculator_CPU.h"
+#include "../../Utils/Analytics/SceneStatisticsCalculator/CPU/SceneStatisticsCalculator_CPU.h"
 #include "../WarpGradientFunctors/WarpGradientFunctor_SlavchevaOptimized.h"
 #include "../WarpGradientFunctors/WarpGradientFunctor_SlavchevaDiagnostic.h"
 #include "../../ITMLibDefines.h"

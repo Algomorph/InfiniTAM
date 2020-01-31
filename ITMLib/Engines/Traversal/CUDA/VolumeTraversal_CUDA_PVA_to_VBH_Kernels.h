@@ -21,7 +21,7 @@
 #include "../../../Objects/Volume/PlainVoxelArray.h"
 #include "../../../Objects/Volume/VoxelBlockHash.h"
 #include "../Shared/VolumeTraversal_Shared.h"
-#include "../../../Utils/Analytics/ITMIsAltered.h"
+#include "../../../Utils/Analytics/IsAltered.h"
 
 namespace {
 //CUDA kernels

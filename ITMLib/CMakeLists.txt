@@ -757,20 +757,20 @@ set(ITMLIB_SCENE_MOTION_TRACKERS_SHARED_HEADERS
 # ======================================================================================================================
 # =================================================== UTILITIES (MISC) =================================================
 set(ITMLIB_UTILS_SOURCES
-    Utils/Collections/ITM3DNestedMapOfArrays.tpp
-    Utils/Collections/ITM3DNestedMapOfArrays.cpp
-    Utils/Collections/ITM3DNestedMap.tpp
-    Utils/Collections/ITM3DNestedMap.cpp
+    Utils/Collections/NestedMap3DOfArrays.tpp
+    Utils/Collections/NestedMap3DOfArrays.cpp
+    Utils/Collections/NestedMap3D.tpp
+    Utils/Collections/NestedMap3D.cpp
 
     Utils/Serialization/SerializationDetails.cpp
 
-    Utils/Analytics/ITMNeighborVoxelIterationInfo.cpp
-    Utils/Analytics/ITMBenchmarkUtils.cpp
+    Utils/Analytics/NeighborVoxelIterationInfo.cpp
+    Utils/Analytics/BenchmarkUtils.cpp
 
-    Utils/Analytics/VoxelVolumeComparison/ITMVoxelVolumeComparison_CPU.tpp
-    Utils/Analytics/VoxelVolumeComparison/ITMVoxelVolumeComparison_CPU.cpp
-    Utils/Analytics/VoxelVolumeComparison/ITMVoxelVolumeComparison_CUDA.tcu
-    Utils/Analytics/VoxelVolumeComparison/ITMVoxelVolumeComparison_CUDA.cu
+    Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CPU.tpp
+    Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CPU.cpp
+    Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CUDA.tcu
+    Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CUDA.cu
 
     Utils/json_utils.cpp
 
@@ -779,14 +779,14 @@ set(ITMLIB_UTILS_SOURCES
     )
 
 set(ITMLIB_UTILS_HEADERS
-    Utils/Collections/ITM3DNestedMapOfArrays.h
-    Utils/Collections/ITM3DNestedMap.h
+    Utils/Collections/NestedMap3DOfArrays.h
+    Utils/Collections/NestedMap3D.h
 
-    Utils/Geometry/ITMGeometryBooleanOperations.h
-    Utils/Geometry/ITMGeometryConversionOperations.h
-    Utils/Geometry/ITM3DIndexConversions.h
-    Utils/Geometry/ITMIntersectionChecks.h
-    Utils/Geometry/ITMSegment.h
+    Utils/Geometry/GeometryBooleanOperations.h
+    Utils/Geometry/GeometryConversionOperations.h
+    Utils/Geometry/SpatialIndexConversions.h
+    Utils/Geometry/IntersectionChecks.h
+    Utils/Geometry/Segment.h
 
     Utils/Serialization/Serialization.h
     Utils/Serialization/SerializationDetails.h
@@ -811,105 +811,105 @@ set(ITMLIB_UTILS_HEADERS
     Utils/ITMPrintHelpers.h
     Utils/ITMCPrintHelpers.h
 
-    Utils/Analytics/ITMBenchmarkUtils.h
-    Utils/Analytics/ITMAlmostEqual.h
-    Utils/Analytics/ITMIsAltered.h
-    Utils/Analytics/ITMNeighborVoxelIterationInfo.h
+    Utils/Analytics/BenchmarkUtils.h
+    Utils/Analytics/AlmostEqual.h
+    Utils/Analytics/IsAltered.h
+    Utils/Analytics/NeighborVoxelIterationInfo.h
 
-    Utils/Analytics/VoxelVolumeComparison/ITMVoxelVolumeComparison.h
-    Utils/Analytics/VoxelVolumeComparison/ITMVoxelVolumeComparison_CPU.h
-    Utils/Analytics/VoxelVolumeComparison/ITMVoxelVolumeComparison_CUDA.h
-    Utils/Analytics/VoxelVolumeComparison/ITMVoxelVolumeComparison_Functors.h
+    Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison.h
+    Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CPU.h
+    Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CUDA.h
+    Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_Functors.h
     )
 
 ## ================================================ UTILS - SCENE STATISTICS CALCULATOR ================================
 
 set(ITMLIB_UTILS_STATCALC_INTERFACE_HEADERS
-    Utils/Analytics/SceneStatisticsCalculator/Interface/ITMSceneStatisticsCalculatorInterface.h
+    Utils/Analytics/SceneStatisticsCalculator/Interface/SceneStatisticsCalculatorInterface.h
     )
 
 
 set(ITMLIB_UTILS_STATCALC_SHARED_HEADERS
-    Utils/Analytics/SceneStatisticsCalculator/Shared/ITMSceneStatisticsCalculator_Functors.h
+    Utils/Analytics/SceneStatisticsCalculator/Shared/SceneStatisticsCalculator_Functors.h
     )
 
 
 set(ITMLIB_UTILS_STATCALC_CPU_HEADERS
-    Utils/Analytics/SceneStatisticsCalculator/CPU/ITMSceneStatisticsCalculator_CPU.h
+    Utils/Analytics/SceneStatisticsCalculator/CPU/SceneStatisticsCalculator_CPU.h
     )
 
 set(ITMLIB_UTILS_STATCALC_CPU_SOURCES
-    Utils/Analytics/SceneStatisticsCalculator/CPU/ITMSceneStatisticsCalculator_CPU.tpp
-    Utils/Analytics/SceneStatisticsCalculator/CPU/ITMSceneStatisticsCalculator_CPU_PlainVoxelArray.cpp
-    Utils/Analytics/SceneStatisticsCalculator/CPU/ITMSceneStatisticsCalculator_CPU_VoxelBlockHash.cpp
+    Utils/Analytics/SceneStatisticsCalculator/CPU/SceneStatisticsCalculator_CPU.tpp
+    Utils/Analytics/SceneStatisticsCalculator/CPU/SceneStatisticsCalculator_CPU_PlainVoxelArray.cpp
+    Utils/Analytics/SceneStatisticsCalculator/CPU/SceneStatisticsCalculator_CPU_VoxelBlockHash.cpp
     )
 
 set(ITMLIB_UTILS_STATCALC_CUDA_HEADERS
-    Utils/Analytics/SceneStatisticsCalculator/CUDA/ITMSceneStatisticsCalculator_CUDA.h
+    Utils/Analytics/SceneStatisticsCalculator/CUDA/SceneStatisticsCalculator_CUDA.h
     )
 set(ITMLIB_UTILS_STATCALC_CUDA_SOURCES
-    Utils/Analytics/SceneStatisticsCalculator/CUDA/ITMSceneStatisticsCalculator_CUDA.tcu
-    Utils/Analytics/SceneStatisticsCalculator/CUDA/ITMSceneStatisticsCalculator_CUDA_PlainVoxelArray.cu
-    Utils/Analytics/SceneStatisticsCalculator/CUDA/ITMSceneStatisticsCalculator_CUDA_VoxelBlockHash.cu
+    Utils/Analytics/SceneStatisticsCalculator/CUDA/SceneStatisticsCalculator_CUDA.tcu
+    Utils/Analytics/SceneStatisticsCalculator/CUDA/SceneStatisticsCalculator_CUDA_PlainVoxelArray.cu
+    Utils/Analytics/SceneStatisticsCalculator/CUDA/SceneStatisticsCalculator_CUDA_VoxelBlockHash.cu
     )
 
 
 ## ================================================ UTILS - FILEIO =====================================================
 set(ITMLIB_UTILS_FILEIO_SOURCES
-    Utils/FileIO/ITMDynamicFusionLogger_PlainVoxelArray.cpp
-    Utils/FileIO/ITMDynamicFusionLogger_VoxelBlockHash.cpp
-    Utils/FileIO/ITMSceneLogger.tpp
-    Utils/FileIO/ITMSceneLogger_PlainVoxelArray.cpp
-    Utils/FileIO/ITMSceneLogger_VoxelBlockHash.cpp
-    Utils/FileIO/ITMDynamicFusionLogger.tpp
-    Utils/FileIO/ITMSceneLogger_SceneSlice.tpp
-    Utils/FileIO/ITMWarpFieldLogger.tpp
-    Utils/FileIO/ITMWarpFieldLogger_PlainVoxelArray.cpp
-    Utils/FileIO/ITMWarpFieldLogger_VoxelBlockHash.cpp
+    Utils/FileIO/DynamicFusionLogger_PlainVoxelArray.cpp
+    Utils/FileIO/DynamicFusionLogger_VoxelBlockHash.cpp
+    Utils/FileIO/SceneLogger.tpp
+    Utils/FileIO/SceneLogger_PlainVoxelArray.cpp
+    Utils/FileIO/SceneLogger_VoxelBlockHash.cpp
+    Utils/FileIO/DynamicFusionLogger.tpp
+    Utils/FileIO/SceneLogger_SceneSlice.tpp
+    Utils/FileIO/WarpFieldLogger.tpp
+    Utils/FileIO/WarpFieldLogger_PlainVoxelArray.cpp
+    Utils/FileIO/WarpFieldLogger_VoxelBlockHash.cpp
     )
 
 set(ITMLIB_UTILS_FILEIO_HEADERS
-    Utils/FileIO/ITMWriteAndReadFunctors.h
-    Utils/FileIO/ITMSceneLogger.h
-    Utils/FileIO/ITMDynamicFusionLogger.h
-    Utils/FileIO/ITMWarpFieldLogger.h)
+    Utils/FileIO/WriteAndReadFunctors.h
+    Utils/FileIO/SceneLogger.h
+    Utils/FileIO/DynamicFusionLogger.h
+    Utils/FileIO/WarpFieldLogger.h)
 ##
 
 set(ITMLIB_UTILS_VISUALIZATION_SOURCES
-    Utils/Visualization/ITMSceneSliceVisualizer2D.tpp
-    Utils/Visualization/ITMSceneSliceVisualizer2D_PlainVoxelArray.cpp
-    Utils/Visualization/ITMSceneSliceVisualizer2D_VoxelBlockHash.cpp
+    Utils/Visualization/SceneSliceVisualizer2D.tpp
+    Utils/Visualization/SceneSliceVisualizer2D_PlainVoxelArray.cpp
+    Utils/Visualization/SceneSliceVisualizer2D_VoxelBlockHash.cpp
 
-    Utils/Visualization/ITMVisualizationCommon.cpp
+    Utils/Visualization/VisualizationCommon.cpp
     )
 if (WITH_VTK)
     list(APPEND ITMLIB_UTILS_VISUALIZATION_SOURCES
-         Utils/Visualization/ITMSceneSliceVisualizer1D.cpp
-         Utils/Visualization/ITMSceneSliceVisualizer1D.tpp
-         Utils/Visualization/ITMSceneSliceVisualizer3D.tpp
-         Utils/Visualization/ITMSceneSliceVisualizer3DInteractorStyle.tpp
-         Utils/Visualization/ITMSceneSliceVisualizer3DCommon.cpp
-         Utils/Visualization/ITMSceneSliceVisualizer3D_PlainVoxelArray.cpp
-         Utils/Visualization/ITMSceneSliceVisualizer3D_VoxelBlockHash.cpp
-         Utils/Visualization/ITMSceneTrackingEnergyPlotter.cpp
-         Utils/Visualization/ITMVisualizationWindowManager.cpp
+         Utils/Visualization/SceneSliceVisualizer1D.cpp
+         Utils/Visualization/SceneSliceVisualizer1D.tpp
+         Utils/Visualization/SceneSliceVisualizer3D.tpp
+         Utils/Visualization/SceneSliceVisualizer3DInteractorStyle.tpp
+         Utils/Visualization/SceneSliceVisualizer3DCommon.cpp
+         Utils/Visualization/SceneSliceVisualizer3D_PlainVoxelArray.cpp
+         Utils/Visualization/SceneSliceVisualizer3D_VoxelBlockHash.cpp
+         Utils/Visualization/SceneTrackingEnergyPlotter.cpp
+         Utils/Visualization/VisualizationWindowManager.cpp
          )
 endif ()
 
 set(ITMLIB_UTILS_VISUALIZATION_HEADERS
-    Utils/Visualization/ITMSceneSliceVisualizerCommon.h
-    Utils/Visualization/ITMSceneSliceVisualizer2D.h
+    Utils/Visualization/SceneSliceVisualizerCommon.h
+    Utils/Visualization/SceneSliceVisualizer2D.h
 
-    Utils/Visualization/ITMVisualizationCommon.h
+    Utils/Visualization/VisualizationCommon.h
     )
 if (WITH_VTK)
     list(APPEND ITMLIB_UTILS_VISUALIZATION_HEADERS
-         Utils/Visualization/ITMSceneSliceVisualizer1D.h
-         Utils/Visualization/ITMSceneSliceVisualizer3D.h
-         Utils/Visualization/ITMSceneSliceVisualizer3DInteractorStyle.h
-         Utils/Visualization/ITMSceneSliceVisualizer3DCommon.h
-         Utils/Visualization/ITMSceneTrackingEnergyPlotter.h
-         Utils/Visualization/ITMVisualizationWindowManager.h
+         Utils/Visualization/SceneSliceVisualizer1D.h
+         Utils/Visualization/SceneSliceVisualizer3D.h
+         Utils/Visualization/SceneSliceVisualizer3DInteractorStyle.h
+         Utils/Visualization/SceneSliceVisualizer3DCommon.h
+         Utils/Visualization/SceneTrackingEnergyPlotter.h
+         Utils/Visualization/VisualizationWindowManager.h
          )
 endif ()
 #################################################################

@@ -35,9 +35,9 @@
 #include "../ITMLib/Objects/Camera/CalibIO.h"
 
 #include "../ITMLib/Utils/Configuration.h"
-#include "../ITMLib/Utils/Analytics/SceneStatisticsCalculator/CPU/ITMSceneStatisticsCalculator_CPU.h"
-#include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/ITMVoxelVolumeComparison_CUDA.h"
-#include "../ITMLib/Utils/Analytics/ITMAlmostEqual.h"
+#include "../ITMLib/Utils/Analytics/SceneStatisticsCalculator/CPU/SceneStatisticsCalculator_CPU.h"
+#include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CUDA.h"
+#include "../ITMLib/Utils/Analytics/AlmostEqual.h"
 
 #include "../ITMLib/Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 #include "../ITMLib/Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"

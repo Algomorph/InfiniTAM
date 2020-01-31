@@ -25,7 +25,7 @@
 #include "../ITMLib/ITMLibDefines.h"
 #include "../ITMLib/Objects/Volume/VoxelVolume.h"
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngine_CPU.h"
-#include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/ITMVoxelVolumeComparison_CPU.h"
+#include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CPU.h"
 #include "../ITMLib/Engines/VolumeFusion/VolumeFusionEngine.h"
 
 #ifndef COMPILE_WITHOUT_CUDA
@@ -36,7 +36,7 @@
 #include "TestUtilsForSnoopyFrames16And17.h"
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
 #include "../ITMLib/Engines/VolumeFusion/VolumeFusionEngineFactory.h"
-#include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/ITMVoxelVolumeComparison.h"
+#include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison.h"
 
 using namespace ITMLib;
 

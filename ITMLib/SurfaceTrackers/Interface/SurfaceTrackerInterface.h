@@ -18,8 +18,8 @@
 //local
 #include "../../Objects/Volume/VoxelVolume.h"
 #include "../../Engines/Reconstruction/CPU/SceneReconstructionEngine_CPU.h"
-#include "../../Utils/Visualization/ITMSceneSliceVisualizer2D.h"
-#include "../../Utils/FileIO/ITMSceneLogger.h"
+#include "../../Utils/Visualization/SceneSliceVisualizer2D.h"
+#include "../../Utils/FileIO/SceneLogger.h"
 #include "../../Utils/ITMPrintHelpers.h"
 #include "../../Utils/ITMVoxelFlags.h"
 #include "../Shared/SurfaceTrackerOptimizationParameters.h"

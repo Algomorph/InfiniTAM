@@ -20,8 +20,8 @@
 
 #include "../ITMLib/Utils/Configuration.h"
 #include "../ITMLib/Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
-#include "../ITMLib/Utils/FileIO/ITMSceneLogger.h"
-#include "../ITMLib/Utils/Analytics/SceneStatisticsCalculator/CPU/ITMSceneStatisticsCalculator_CPU.h"
+#include "../ITMLib/Utils/FileIO/SceneLogger.h"
+#include "../ITMLib/Utils/Analytics/SceneStatisticsCalculator/CPU/SceneStatisticsCalculator_CPU.h"
 #include "../ITMLib/Engines/ViewBuilding/Interface/ViewBuilder.h"
 #include "../ITMLib/Engines/ViewBuilding/ViewBuilderFactory.h"
 

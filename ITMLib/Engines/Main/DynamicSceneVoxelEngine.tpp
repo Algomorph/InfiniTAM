@@ -28,7 +28,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(const RG
 	const MemoryDeviceType deviceType = settings.device_type;
 	MemoryDeviceType memoryType = settings.device_type;
 	if ((imgSize_d.x == -1) || (imgSize_d.y == -1)) imgSize_d = imgSize_rgb;
-	ITMDynamicFusionLogger<TVoxel, TWarp, TIndex>::Instance().SetScenes(canonicalScene, liveScenes[0], warpField);
+	DynamicFusionLogger<TVoxel, TWarp, TIndex>::Instance().SetScenes(canonicalScene, liveScenes[0], warpField);
 
 	lowLevelEngine = LowLevelEngineFactory::MakeLowLevelEngine(deviceType);
 	viewBuilder = ViewBuilderFactory::MakeViewBuilder(calib, deviceType);
@@ -142,7 +142,7 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::SaveSceneToMesh(const char*
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::SaveToFile() {
-	std::string nextFrameOutputPath = ITMDynamicFusionLogger<TVoxel, TWarp, TIndex>::Instance().GetOutputDirectory();
+	std::string nextFrameOutputPath = DynamicFusionLogger<TVoxel, TWarp, TIndex>::Instance().GetOutputDirectory();
 	// throws error if any of the saves fail
 	if (relocaliser) relocaliser->SaveToDirectory(nextFrameOutputPath + "/Relocaliser/");
 	VolumeFileIOEngine<TVoxel, TIndex>::SaveToDirectoryCompact(canonicalScene, nextFrameOutputPath + "/canonical");
@@ -152,7 +152,7 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::SaveToFile() {
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::LoadFromFile() {
-	std::string nextFrameOutputPath = ITMDynamicFusionLogger<TVoxel, TWarp, TIndex>::Instance().GetOutputDirectory();
+	std::string nextFrameOutputPath = DynamicFusionLogger<TVoxel, TWarp, TIndex>::Instance().GetOutputDirectory();
 	std::string relocaliserInputDirectory = nextFrameOutputPath + "Relocaliser/";
 
 	////TODO: add factory for relocaliser and rebuild using config from relocaliserOutputDirectory + "config.txt"

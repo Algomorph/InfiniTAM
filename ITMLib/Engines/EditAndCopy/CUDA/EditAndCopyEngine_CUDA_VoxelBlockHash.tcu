@@ -20,8 +20,8 @@
 #include "../../../../ORUtils/PlatformIndependence.h"
 #include "../../../../ORUtils/JetbrainsCUDASyntax.hpp"
 #include "../../../Objects/Volume/RepresentationAccess.h"
-#include "../../../Utils/Geometry/ITMGeometryBooleanOperations.h"
-#include "../../../Utils/Analytics/SceneStatisticsCalculator/CUDA/ITMSceneStatisticsCalculator_CUDA.h"
+#include "../../../Utils/Geometry/GeometryBooleanOperations.h"
+#include "../../../Utils/Analytics/SceneStatisticsCalculator/CUDA/SceneStatisticsCalculator_CUDA.h"
 #include "EditAndCopyEngine_CUDA_VoxelBlockHash_Kernels.h"
 #include "../../Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
 

@@ -21,7 +21,7 @@
 #include "../Shared/VolumeTraversal_Shared.h"
 #include "../Interface/VolumeTraversal.h"
 #include "../../../Objects/Volume/VoxelVolume.h"
-#include "../../../Utils/Analytics/ITMIsAltered.h"
+#include "../../../Utils/Analytics/IsAltered.h"
 #include "../../../Objects/Volume/RepresentationAccess.h"
 
 namespace ITMLib {

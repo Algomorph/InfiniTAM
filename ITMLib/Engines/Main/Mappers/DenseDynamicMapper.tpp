@@ -26,13 +26,13 @@
 #include "../../Warping/WarpingEngineFactory.h"
 #include "../../Swapping/SwappingEngineFactory.h"
 #include "../../../SurfaceTrackers/SurfaceTrackerFactory.h"
-#include "../../../Utils/Analytics/ITMBenchmarkUtils.h"
+#include "../../../Utils/Analytics/BenchmarkUtils.h"
 #include "../../EditAndCopy/Interface/EditAndCopyEngineInterface.h"
-#include "../../../Utils/Analytics/SceneStatisticsCalculator/Interface/ITMSceneStatisticsCalculatorInterface.h"
+#include "../../../Utils/Analytics/SceneStatisticsCalculator/Interface/SceneStatisticsCalculatorInterface.h"
 
 //** CPU **
 #include "../../EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
-#include "../../../Utils/Analytics/SceneStatisticsCalculator/CPU/ITMSceneStatisticsCalculator_CPU.h"
+#include "../../../Utils/Analytics/SceneStatisticsCalculator/CPU/SceneStatisticsCalculator_CPU.h"
 //** CUDA **
 #ifndef COMPILE_WITHOUT_CUDA
 #include "../../EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
@@ -49,7 +49,7 @@ template<typename TVoxel, typename TWarp, typename TIndex>
 void DenseDynamicMapper<TVoxel, TWarp, TIndex>::LogVolumeStatistics(VoxelVolume<TVoxel, TIndex>* volume,
                                                                     std::string volume_description) {
 	if (this->log_volume_statistics) {
-		ITMSceneStatisticsCalculatorInterface<TVoxel, TIndex>* calculator = nullptr;
+		SceneStatisticsCalculatorInterface<TVoxel, TIndex>* calculator = nullptr;
 		switch (volume->index.memoryType) {
 			case MEMORYDEVICE_CPU:
 				calculator = &ITMSceneStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance();
@@ -154,7 +154,7 @@ DenseDynamicMapper<TVoxel, TWarp, TIndex>::ProcessFrame(const ITMView* view, con
 	LogVolumeStatistics(liveScenePair[0], "[[live TSDF before tracking]]");
 	bench::StopTimer("GenerateRawLiveAndCanonicalVolumes");
 	surface_tracker->ClearOutFramewiseWarp(warpField);
-	ITMDynamicFusionLogger<TVoxel, TWarp, TIndex>::Instance().InitializeFrameRecording();
+	DynamicFusionLogger<TVoxel, TWarp, TIndex>::Instance().InitializeFrameRecording();
 
 
 
@@ -170,7 +170,7 @@ DenseDynamicMapper<TVoxel, TWarp, TIndex>::ProcessFrame(const ITMView* view, con
 	bench::StopTimer("FuseOneTsdfVolumeIntoAnother");
 	LogVolumeStatistics(canonicalVolume, "[[canonical frame after fusion]]");
 
-	ITMDynamicFusionLogger<TVoxel, TWarp, TIndex>::Instance().FinalizeFrameRecording();
+	DynamicFusionLogger<TVoxel, TWarp, TIndex>::Instance().FinalizeFrameRecording();
 
 	//TODO: revise how swapping works for dynamic scenes
 	ProcessSwapping(canonicalVolume, renderState);
@@ -226,7 +226,7 @@ void DenseDynamicMapper<TVoxel, TWarp, TIndex>::PerformSingleOptimizationStep(
 		float& maxVectorUpdate,
 		int iteration) {
 
-	ITMDynamicFusionLogger<TVoxel, TWarp, TIndex>::Instance().SaveWarpSlices(iteration);
+	DynamicFusionLogger<TVoxel, TWarp, TIndex>::Instance().SaveWarpSlices(iteration);
 
 	if (configuration::get().verbosity_level >= configuration::VERBOSITY_PER_ITERATION) {
 		std::cout << red << "Iteration: " << iteration << reset << std::endl;
@@ -260,7 +260,7 @@ void DenseDynamicMapper<TVoxel, TWarp, TIndex>::PerformSingleOptimizationStep(
 	bench::StartTimer("TrackMotion_35_WarpLiveScene");
 	warping_engine->WarpVolume_WarpUpdates(warpField, initialLiveScene, finalLiveScene);
 	bench::StopTimer("TrackMotion_35_WarpLiveScene");
-	ITMDynamicFusionLogger<TVoxel, TWarp, TIndex>::Instance().SaveWarps();
+	DynamicFusionLogger<TVoxel, TWarp, TIndex>::Instance().SaveWarps();
 }
 
 

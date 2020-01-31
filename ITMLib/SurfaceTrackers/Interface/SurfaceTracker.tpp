@@ -22,7 +22,7 @@
 #include "../Shared/SurfaceTrackerSharedFunctors.h"
 #include "../WarpGradientFunctors/WarpGradientFunctor.h"
 #include "../../Engines/Indexing/Interface/IndexingEngine.h"
-#include "../../Utils/Analytics/SceneStatisticsCalculator/Interface/ITMSceneStatisticsCalculatorInterface.h"
+#include "../../Utils/Analytics/SceneStatisticsCalculator/Interface/SceneStatisticsCalculatorInterface.h"
 
 using namespace ITMLib;
 

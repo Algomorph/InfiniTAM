@@ -12,7 +12,7 @@
 #include "../../ITMLib/Utils/Configuration.h"
 #include "../../ORUtils/FileUtils.h"
 #include "../../ORUtils/NVTimer.h"
-#include "../../ITMLib/Utils/FileIO/ITMDynamicFusionLogger.h"
+#include "../../ITMLib/Utils/FileIO/DynamicFusionLogger.h"
 
 //stdlib
 #include <vector>

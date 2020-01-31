@@ -31,7 +31,7 @@
 #include "Test_WarpGradient_Common.h"
 #include "../ITMLib/Utils/Configuration.h"
 #include "../ITMLib/SurfaceTrackers/Interface/SurfaceTracker.h"
-#include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/ITMVoxelVolumeComparison_CPU.h"
+#include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CPU.h"
 #include "../ITMLib/Engines/Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
 
 using namespace ITMLib;

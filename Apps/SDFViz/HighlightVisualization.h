@@ -20,7 +20,7 @@
 #include <vtk-8.1/vtkActor.h>
 #include <vtk-8.1/vtkCamera.h>
 #include "../../ITMLib/Utils/ITMMath.h"
-#include "../../ITMLib/Utils/Analytics/ITMNeighborVoxelIterationInfo.h"
+#include "../../ITMLib/Utils/Analytics/NeighborVoxelIterationInfo.h"
 
 class HighlightVisualization {
 public:

@@ -28,7 +28,7 @@
 #include "../ITMLib/Objects/Volume/VoxelVolume.h"
 #include "TestUtils.h"
 #include "../ITMLib/SurfaceTrackers/Interface/SurfaceTracker.h"
-#include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/ITMVoxelVolumeComparison_CPU.h"
+#include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CPU.h"
 #include "TestUtilsForSnoopyFrames16And17.h"
 
 

@@ -37,7 +37,7 @@
 
 #include "../../ORUtils/FileUtils.h"
 #include "../../InputSource/FFMPEGWriter.h"
-#include "../../ITMLib/Utils/Analytics/ITMBenchmarkUtils.h"
+#include "../../ITMLib/Utils/Analytics/BenchmarkUtils.h"
 #include "../../ITMLib/Utils/ITMPrintHelpers.h"
 
 #ifdef WITH_OPENCV

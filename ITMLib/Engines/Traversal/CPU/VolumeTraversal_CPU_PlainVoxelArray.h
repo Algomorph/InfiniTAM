@@ -24,10 +24,10 @@
 //local
 #include "../Interface/VolumeTraversal.h"
 #include "../../EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
-#include "../../../Utils/Geometry/ITM3DIndexConversions.h"
+#include "../../../Utils/Geometry/SpatialIndexConversions.h"
 #include "../../../Objects/Volume/VoxelVolume.h"
 #include "../Shared/VolumeTraversal_Shared.h"
-#include "../../../Utils/Geometry/ITMGeometryBooleanOperations.h"
+#include "../../../Utils/Geometry/GeometryBooleanOperations.h"
 
 namespace ITMLib {
 
