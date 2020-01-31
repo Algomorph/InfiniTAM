@@ -314,7 +314,7 @@ bool almostEqual<float, unsigned int>(Matrix4f a, Matrix4f b, unsigned int toler
 template<>
 _CPU_AND_GPU_CODE_
 inline
-bool almostEqual<ITMVoxel_f, float>(const ITMVoxel_f& a, const ITMVoxel_f& b, float tolerance) {
+bool almostEqual<TSDFVoxel_f, float>(const TSDFVoxel_f& a, const TSDFVoxel_f& b, float tolerance) {
 	return almostEqual(a.sdf, b.sdf, tolerance) &&
 	       a.w_depth == b.w_depth;
 }
@@ -322,15 +322,15 @@ bool almostEqual<ITMVoxel_f, float>(const ITMVoxel_f& a, const ITMVoxel_f& b, fl
 template<>
 _CPU_AND_GPU_CODE_
 inline
-bool almostEqual<ITMVoxel_s, float>(const ITMVoxel_s& a, const ITMVoxel_s& b, float tolerance) {
-	return almostEqual(ITMVoxel_s_rgb::valueToFloat(a.sdf), ITMVoxel_s_rgb::valueToFloat(b.sdf), tolerance) &&
+bool almostEqual<TSDFVoxel_s, float>(const TSDFVoxel_s& a, const TSDFVoxel_s& b, float tolerance) {
+	return almostEqual(TSDFVoxel_s_rgb::valueToFloat(a.sdf), TSDFVoxel_s_rgb::valueToFloat(b.sdf), tolerance) &&
 	       a.w_depth == b.w_depth;
 }
 
 template<>
 _CPU_AND_GPU_CODE_
 inline
-bool almostEqual<ITMVoxel_f_rgb, float>(const ITMVoxel_f_rgb& a, const ITMVoxel_f_rgb& b, float tolerance) {
+bool almostEqual<TSDFVoxel_f_rgb, float>(const TSDFVoxel_f_rgb& a, const TSDFVoxel_f_rgb& b, float tolerance) {
 	return almostEqual(a.sdf, b.sdf, tolerance) &&
 	       a.w_depth == b.w_depth &&
 	       almostEqual(a.clr, b.clr, tolerance) &&
@@ -340,8 +340,8 @@ bool almostEqual<ITMVoxel_f_rgb, float>(const ITMVoxel_f_rgb& a, const ITMVoxel_
 template<>
 _CPU_AND_GPU_CODE_
 inline
-bool almostEqual<ITMVoxel_s_rgb, float>(const ITMVoxel_s_rgb& a, const ITMVoxel_s_rgb& b, float tolerance) {
-	return almostEqual(ITMVoxel_s_rgb::valueToFloat(a.sdf), ITMVoxel_s_rgb::valueToFloat(b.sdf), tolerance) &&
+bool almostEqual<TSDFVoxel_s_rgb, float>(const TSDFVoxel_s_rgb& a, const TSDFVoxel_s_rgb& b, float tolerance) {
+	return almostEqual(TSDFVoxel_s_rgb::valueToFloat(a.sdf), TSDFVoxel_s_rgb::valueToFloat(b.sdf), tolerance) &&
 	       a.w_depth == b.w_depth &&
 	       almostEqual(a.clr, b.clr, tolerance) &&
 	       a.w_color == b.w_color;
@@ -350,7 +350,7 @@ bool almostEqual<ITMVoxel_s_rgb, float>(const ITMVoxel_s_rgb& a, const ITMVoxel_
 template<>
 _CPU_AND_GPU_CODE_
 inline
-bool almostEqual<ITMVoxel_f_conf, float>(const ITMVoxel_f_conf& a, const ITMVoxel_f_conf& b, float tolerance) {
+bool almostEqual<TSDFVoxel_f_conf, float>(const TSDFVoxel_f_conf& a, const TSDFVoxel_f_conf& b, float tolerance) {
 	return almostEqual(a.sdf, b.sdf, tolerance) &&
 	       a.w_depth == b.w_depth &&
 	       almostEqual(a.confidence, b.confidence, tolerance);
@@ -360,8 +360,8 @@ template<>
 _CPU_AND_GPU_CODE_
 inline
 bool
-almostEqual<ITMVoxel_s_rgb_conf, float>(const ITMVoxel_s_rgb_conf& a, const ITMVoxel_s_rgb_conf& b, float tolerance) {
-	return almostEqual(ITMVoxel_s_rgb::valueToFloat(a.sdf), ITMVoxel_s_rgb::valueToFloat(b.sdf), tolerance) &&
+almostEqual<TSDFVoxel_s_rgb_conf, float>(const TSDFVoxel_s_rgb_conf& a, const TSDFVoxel_s_rgb_conf& b, float tolerance) {
+	return almostEqual(TSDFVoxel_s_rgb::valueToFloat(a.sdf), TSDFVoxel_s_rgb::valueToFloat(b.sdf), tolerance) &&
 	       a.w_depth == b.w_depth &&
 	       a.clr == b.clr &&
 	       almostEqual(a.clr, b.clr, tolerance) &&
@@ -371,7 +371,7 @@ almostEqual<ITMVoxel_s_rgb_conf, float>(const ITMVoxel_s_rgb_conf& a, const ITMV
 template<>
 _CPU_AND_GPU_CODE_
 inline
-bool almostEqual<ITMVoxel_f_warp, float>(const ITMVoxel_f_warp& a, const ITMVoxel_f_warp& b, float tolerance) {
+bool almostEqual<WarpVoxel_f_uf, float>(const WarpVoxel_f_uf& a, const WarpVoxel_f_uf& b, float tolerance) {
 	return almostEqual(a.framewise_warp, b.framewise_warp, tolerance)
 	       && almostEqual(a.gradient0, b.gradient0, tolerance)
 	       && almostEqual(a.gradient1, b.gradient1, tolerance)
@@ -408,7 +408,7 @@ void printVector3fVoxelError_Position(const Vector3f& a, const Vector3f& b, floa
 template<>
 _CPU_AND_GPU_CODE_
 inline
-bool almostEqualVerbose<ITMVoxel_f_warp, float>(const ITMVoxel_f_warp& a, const ITMVoxel_f_warp& b, float tolerance) {
+bool almostEqualVerbose<WarpVoxel_f_uf, float>(const WarpVoxel_f_uf& a, const WarpVoxel_f_uf& b, float tolerance) {
 	if(!almostEqual(a.framewise_warp, b.framewise_warp, tolerance)){
 		printVector3fVoxelError(a.framewise_warp,b.framewise_warp,tolerance,"framewise_warp");
 		return false;
@@ -428,7 +428,7 @@ bool almostEqualVerbose<ITMVoxel_f_warp, float>(const ITMVoxel_f_warp& a, const 
 template<>
 _CPU_AND_GPU_CODE_
 inline
-bool almostEqualVerbose_Position<ITMVoxel_f_warp, float>(const ITMVoxel_f_warp& a, const ITMVoxel_f_warp& b, const Vector3i& position, float tolerance) {
+bool almostEqualVerbose_Position<WarpVoxel_f_uf, float>(const WarpVoxel_f_uf& a, const WarpVoxel_f_uf& b, const Vector3i& position, float tolerance) {
 
 	if(!almostEqual(a.framewise_warp, b.framewise_warp, tolerance)){
 		printVector3fVoxelError_Position(a.framewise_warp,b.framewise_warp,tolerance,"framewise_warp", position);
@@ -448,7 +448,7 @@ bool almostEqualVerbose_Position<ITMVoxel_f_warp, float>(const ITMVoxel_f_warp& 
 template<>
 _CPU_AND_GPU_CODE_
 inline
-bool almostEqual<ITMVoxel_f_flags, float>(const ITMVoxel_f_flags& a, const ITMVoxel_f_flags& b, float tolerance) {
+bool almostEqual<TSDFVoxel_f_flags, float>(const TSDFVoxel_f_flags& a, const TSDFVoxel_f_flags& b, float tolerance) {
 	return almostEqual(a.sdf, b.sdf, tolerance) &&
 	       a.w_depth == b.w_depth &&
 	       a.flags == b.flags;
@@ -458,7 +458,7 @@ bool almostEqual<ITMVoxel_f_flags, float>(const ITMVoxel_f_flags& a, const ITMVo
 template<>
 _CPU_AND_GPU_CODE_
 inline
-bool almostEqualVerbose_Position<ITMVoxel_f_flags, float>(const ITMVoxel_f_flags& a, const ITMVoxel_f_flags& b, const Vector3i& position, float tolerance) {
+bool almostEqualVerbose_Position<TSDFVoxel_f_flags, float>(const TSDFVoxel_f_flags& a, const TSDFVoxel_f_flags& b, const Vector3i& position, float tolerance) {
 
 	if(!almostEqual(a.sdf, b.sdf, tolerance)){
 		printf("Position %d, %d, %d: mismatch between voxel:{sdf: %E, w_depth: %d, flags: %d} and voxel:{sdf: %E, w_depth: %d, flags: %d}. SDF not within tolerance %E.\n",
@@ -482,7 +482,7 @@ bool almostEqualVerbose_Position<ITMVoxel_f_flags, float>(const ITMVoxel_f_flags
 template<>
 _CPU_AND_GPU_CODE_
 inline
-bool almostEqual<ITMVoxel_f, unsigned int>(const ITMVoxel_f& a, const ITMVoxel_f& b, unsigned int tolerance) {
+bool almostEqual<TSDFVoxel_f, unsigned int>(const TSDFVoxel_f& a, const TSDFVoxel_f& b, unsigned int tolerance) {
 	const float tolerance_float = 1.0f / (10.0f * static_cast<float>(tolerance));
 	return almostEqual(a, b, tolerance_float);
 }
@@ -490,16 +490,7 @@ bool almostEqual<ITMVoxel_f, unsigned int>(const ITMVoxel_f& a, const ITMVoxel_f
 template<>
 _CPU_AND_GPU_CODE_
 inline
-bool almostEqual<ITMVoxel_s, unsigned int>(const ITMVoxel_s& a, const ITMVoxel_s& b, unsigned int tolerance) {
-	const float tolerance_float = 1.0f / (10.0f * static_cast<float>(tolerance));
-	return almostEqual(a, b, tolerance_float);
-}
-
-template<>
-_CPU_AND_GPU_CODE_
-inline
-bool
-almostEqual<ITMVoxel_f_rgb, unsigned int>(const ITMVoxel_f_rgb& a, const ITMVoxel_f_rgb& b, unsigned int tolerance) {
+bool almostEqual<TSDFVoxel_s, unsigned int>(const TSDFVoxel_s& a, const TSDFVoxel_s& b, unsigned int tolerance) {
 	const float tolerance_float = 1.0f / (10.0f * static_cast<float>(tolerance));
 	return almostEqual(a, b, tolerance_float);
 }
@@ -508,7 +499,7 @@ template<>
 _CPU_AND_GPU_CODE_
 inline
 bool
-almostEqual<ITMVoxel_s_rgb, unsigned int>(const ITMVoxel_s_rgb& a, const ITMVoxel_s_rgb& b, unsigned int tolerance) {
+almostEqual<TSDFVoxel_f_rgb, unsigned int>(const TSDFVoxel_f_rgb& a, const TSDFVoxel_f_rgb& b, unsigned int tolerance) {
 	const float tolerance_float = 1.0f / (10.0f * static_cast<float>(tolerance));
 	return almostEqual(a, b, tolerance_float);
 }
@@ -517,16 +508,7 @@ template<>
 _CPU_AND_GPU_CODE_
 inline
 bool
-almostEqual<ITMVoxel_f_conf, unsigned int>(const ITMVoxel_f_conf& a, const ITMVoxel_f_conf& b, unsigned int tolerance) {
-	const float tolerance_float = 1.0f / (10.0f * static_cast<float>(tolerance));
-	return almostEqual(a, b, tolerance_float);
-}
-
-template<>
-_CPU_AND_GPU_CODE_
-inline
-bool almostEqual<ITMVoxel_s_rgb_conf, unsigned int>(const ITMVoxel_s_rgb_conf& a, const ITMVoxel_s_rgb_conf& b,
-                                                    unsigned int tolerance) {
+almostEqual<TSDFVoxel_s_rgb, unsigned int>(const TSDFVoxel_s_rgb& a, const TSDFVoxel_s_rgb& b, unsigned int tolerance) {
 	const float tolerance_float = 1.0f / (10.0f * static_cast<float>(tolerance));
 	return almostEqual(a, b, tolerance_float);
 }
@@ -535,7 +517,25 @@ template<>
 _CPU_AND_GPU_CODE_
 inline
 bool
-almostEqual<ITMVoxel_f_warp, unsigned int>(const ITMVoxel_f_warp& a, const ITMVoxel_f_warp& b, unsigned int tolerance) {
+almostEqual<TSDFVoxel_f_conf, unsigned int>(const TSDFVoxel_f_conf& a, const TSDFVoxel_f_conf& b, unsigned int tolerance) {
+	const float tolerance_float = 1.0f / (10.0f * static_cast<float>(tolerance));
+	return almostEqual(a, b, tolerance_float);
+}
+
+template<>
+_CPU_AND_GPU_CODE_
+inline
+bool almostEqual<TSDFVoxel_s_rgb_conf, unsigned int>(const TSDFVoxel_s_rgb_conf& a, const TSDFVoxel_s_rgb_conf& b,
+                                                     unsigned int tolerance) {
+	const float tolerance_float = 1.0f / (10.0f * static_cast<float>(tolerance));
+	return almostEqual(a, b, tolerance_float);
+}
+
+template<>
+_CPU_AND_GPU_CODE_
+inline
+bool
+almostEqual<WarpVoxel_f_uf, unsigned int>(const WarpVoxel_f_uf& a, const WarpVoxel_f_uf& b, unsigned int tolerance) {
 	const float tolerance_float = 1.0f / (10.0f * static_cast<float>(tolerance));
 	return almostEqual(a, b, tolerance_float);
 }
@@ -544,8 +544,8 @@ almostEqual<ITMVoxel_f_warp, unsigned int>(const ITMVoxel_f_warp& a, const ITMVo
 template<>
 _CPU_AND_GPU_CODE_
 inline
-bool almostEqual<ITMVoxel_f_flags, unsigned int>(const ITMVoxel_f_flags& a, const ITMVoxel_f_flags& b,
-                                                 unsigned int tolerance) {
+bool almostEqual<TSDFVoxel_f_flags, unsigned int>(const TSDFVoxel_f_flags& a, const TSDFVoxel_f_flags& b,
+                                                  unsigned int tolerance) {
 	const float tolerance_float = 1.0f / (10.0f * static_cast<float>(tolerance));
 	return almostEqual(a, b, tolerance_float);
 }

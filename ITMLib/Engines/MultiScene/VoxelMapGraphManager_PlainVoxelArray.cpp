@@ -14,11 +14,11 @@
 //  limitations under the License.
 //  ================================================================
 //local
-#include "../../ITMLibDefines.h"
+#include "../../GlobalTemplateDefines.h"
 #include "../../Objects/Volume/PlainVoxelArray.h"
 #include "VoxelMapGraphManager.tpp"
 
 namespace ITMLib {
 template
-class VoxelMapGraphManager<ITMVoxel, PlainVoxelArray>;
+class VoxelMapGraphManager<TSDFVoxel, PlainVoxelArray>;
 } // namespace ITMLib

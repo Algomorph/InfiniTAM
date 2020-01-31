@@ -16,11 +16,11 @@
 #include "../Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
 #include "WarpingEngine.tpp"
 #include "../Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.tpp"
-#include "../../ITMLibDefines.h"
+#include "../../GlobalTemplateDefines.h"
 
 namespace ITMLib{
 
 template
-class WarpingEngine<ITMVoxel, ITMWarp, VoxelBlockHash, MEMORYDEVICE_CPU>;
+class WarpingEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>;
 
 } // namespace ITMLib

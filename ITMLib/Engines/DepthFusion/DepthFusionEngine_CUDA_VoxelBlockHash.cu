@@ -14,9 +14,9 @@
 //  limitations under the License.
 //  ================================================================
 #include "DepthFusionEngine_CUDA_VoxelBlockHash.tcu"
-#include "../../ITMLibDefines.h"
+#include "../../GlobalTemplateDefines.h"
 
 namespace ITMLib {
 template
-class DepthFusionEngine_CUDA<ITMVoxel, ITMWarp, VoxelBlockHash>;
+class DepthFusionEngine_CUDA<TSDFVoxel, WarpVoxel, VoxelBlockHash>;
 }

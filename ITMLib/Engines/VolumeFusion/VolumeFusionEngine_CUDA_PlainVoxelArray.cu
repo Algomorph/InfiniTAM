@@ -18,11 +18,11 @@
 #include "../Traversal/CUDA/VolumeTraversal_CUDA_PlainVoxelArray.h"
 #include "../Indexing/Interface/IndexingEngine.tpp"
 #include "VolumeFusionEngine.tpp"
-#include "../../ITMLibDefines.h"
+#include "../../GlobalTemplateDefines.h"
 
 namespace ITMLib{
 
 template
-class VolumeFusionEngine<ITMVoxel, ITMWarp, PlainVoxelArray, MEMORYDEVICE_CUDA>;
+class VolumeFusionEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA>;
 
 } // namespace ITMLib

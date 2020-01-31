@@ -17,5 +17,5 @@
 
 namespace ITMLib {
 template
-class SceneLogger<ITMVoxel, ITMWarp, VoxelBlockHash>;
+class SceneLogger<TSDFVoxel, WarpVoxel, VoxelBlockHash>;
 } // namespace ITMLib

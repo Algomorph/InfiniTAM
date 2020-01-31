@@ -8,20 +8,20 @@
 #include "Objects/Volume/VoxelTypes.h"
 
 /** This chooses the information stored at each surfel. At the moment, valid
-    options are ITMSurfel_grey and ITMSurfel_rgb.
+    options are Surfel_grey and Surfel_rgb.
 */
-typedef ITMLib::ITMSurfel_rgb ITMSurfelT;
+typedef ITMLib::Surfel_rgb SurfelT;
 
 /** This chooses the information stored at each voxel. At the moment, valid
-    options are ITMVoxel_s, ITMVoxel_f, ITMVoxel_s_rgb, ITMVoxel_f_rgb, and ITMVoxel_f_flags.
+    options are TSDFVoxel_s, TSDFVoxel_f, TSDFVoxel_s_rgb, TSDFVoxel_f_rgb, and TSDFVoxel_f_flags.
 */
-//typedef ITMVoxel_s ITMVoxel;
-typedef ITMVoxel_f_flags ITMVoxel;
-typedef ITMVoxel_f_warp ITMWarp;
+//typedef TSDFVoxel_s TSDFVoxel;
+typedef TSDFVoxel_f_flags TSDFVoxel;
+typedef WarpVoxel_f_uf WarpVoxel;
 
 
 /** This chooses the way the voxels are addressed and indexed. At the moment,
     valid options are VoxelBlockHash and PlainVoxelArray.
 */
-typedef ITMLib::VoxelBlockHash ITMVoxelIndex;
-//typedef ITMLib::PlainVoxelArray ITMVoxelIndex;
+typedef ITMLib::VoxelBlockHash VoxelIndex;
+//typedef ITMLib::PlainVoxelArray VoxelIndex;

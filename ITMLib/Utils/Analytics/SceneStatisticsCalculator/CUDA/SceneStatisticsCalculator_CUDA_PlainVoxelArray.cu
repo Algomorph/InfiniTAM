@@ -13,12 +13,12 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "../../../../ITMLibDefines.h"
+#include "../../../../GlobalTemplateDefines.h"
 #include "SceneStatisticsCalculator_CUDA.tcu"
 
 namespace ITMLib {
 template
-class ITMSceneStatisticsCalculator<ITMVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA>;
+class ITMSceneStatisticsCalculator<TSDFVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA>;
 template
-class ITMSceneStatisticsCalculator<ITMWarp, PlainVoxelArray, MEMORYDEVICE_CUDA>;
+class ITMSceneStatisticsCalculator<WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA>;
 } // namespace ITMLib

@@ -8,7 +8,7 @@
 #include "../../InputSource/OpenNIEngine.h"
 #include "../../InputSource/Kinect2Engine.h"
 
-#include "../../ITMLib/ITMLibDefines.h"
+#include "../../ITMLib/GlobalTemplateDefines.h"
 #include "../../ITMLib/Engines/Main/BasicVoxelEngine.h"
 
 using namespace InfiniTAM::Engine;
@@ -77,9 +77,9 @@ try
 		}
 	}
 
-	MainEngine *mainEngine = new BasicVoxelEngine<ITMVoxel, ITMVoxelIndex>(imageSource->getCalib(),
-	                                                                       imageSource->getRGBImageSize(),
-	                                                                       imageSource->getDepthImageSize());
+	MainEngine *mainEngine = new BasicVoxelEngine<TSDFVoxel, VoxelIndex>(imageSource->getCalib(),
+	                                                                     imageSource->getRGBImageSize(),
+	                                                                     imageSource->getDepthImageSize());
 
 	CLIEngine::Instance()->Initialise(imageSource, imuSource, mainEngine, internalSettings->device_type);
 	CLIEngine::Instance()->Run();

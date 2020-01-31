@@ -15,7 +15,7 @@
 //  ================================================================
 
 #include "../../ITMLib/Utils/Visualization/SceneSliceVisualizer3D.tpp"
-#include "../../ITMLib/ITMLibDefines.h"
+#include "../../ITMLib/GlobalTemplateDefines.h"
 
 
 template class ITMScene3DSliceVisualizer<ITMVoxel,ITMWarp, ITMVoxelIndex>;

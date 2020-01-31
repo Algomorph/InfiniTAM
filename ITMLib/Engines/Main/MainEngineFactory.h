@@ -35,33 +35,33 @@ MainEngine* BuildMainEngine(const RGBDCalib& calib, Vector2i imgSize_rgb, Vector
 		case configuration::LIBMODE_BASIC:
 			switch (chosenIndexingMethod) {
 				case configuration::INDEX_HASH:
-					mainEngine = new BasicVoxelEngine<ITMVoxel, VoxelBlockHash>(calib, imgSize_rgb, imgSize_d);
+					mainEngine = new BasicVoxelEngine<TSDFVoxel, VoxelBlockHash>(calib, imgSize_rgb, imgSize_d);
 					break;
 				case configuration::INDEX_ARRAY:
-					mainEngine = new BasicVoxelEngine<ITMVoxel, PlainVoxelArray>(calib, imgSize_rgb, imgSize_d);
+					mainEngine = new BasicVoxelEngine<TSDFVoxel, PlainVoxelArray>(calib, imgSize_rgb, imgSize_d);
 					break;
 			}
 			break;
 		case configuration::LIBMODE_BASIC_SURFELS:
-			mainEngine = new BasicSurfelEngine<ITMSurfelT>(calib, imgSize_rgb, imgSize_d);
+			mainEngine = new BasicSurfelEngine<SurfelT>(calib, imgSize_rgb, imgSize_d);
 			break;
 		case configuration::LIBMODE_LOOPCLOSURE:
 			switch (chosenIndexingMethod) {
 				case configuration::INDEX_HASH:
-					mainEngine = new MultiEngine<ITMVoxel, VoxelBlockHash>(calib, imgSize_rgb, imgSize_d);
+					mainEngine = new MultiEngine<TSDFVoxel, VoxelBlockHash>(calib, imgSize_rgb, imgSize_d);
 					break;
 				case configuration::INDEX_ARRAY:
-					mainEngine = new MultiEngine<ITMVoxel, PlainVoxelArray>(calib, imgSize_rgb, imgSize_d);
+					mainEngine = new MultiEngine<TSDFVoxel, PlainVoxelArray>(calib, imgSize_rgb, imgSize_d);
 					break;
 			}
 			break;
 		case configuration::LIBMODE_DYNAMIC:
 			switch (chosenIndexingMethod) {
 				case configuration::INDEX_HASH:
-					mainEngine = new DynamicSceneVoxelEngine<ITMVoxel, ITMWarp, VoxelBlockHash>(calib, imgSize_rgb, imgSize_d);
+					mainEngine = new DynamicSceneVoxelEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash>(calib, imgSize_rgb, imgSize_d);
 					break;
 				case configuration::INDEX_ARRAY:
-					mainEngine = new DynamicSceneVoxelEngine<ITMVoxel, ITMWarp, PlainVoxelArray>(calib, imgSize_rgb, imgSize_d);
+					mainEngine = new DynamicSceneVoxelEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray>(calib, imgSize_rgb, imgSize_d);
 					break;
 			}
 			break;

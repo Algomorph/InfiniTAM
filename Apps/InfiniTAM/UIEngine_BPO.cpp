@@ -29,7 +29,7 @@
 #endif
 
 //ITMLib
-#include "../../ITMLib/ITMLibDefines.h"
+#include "../../ITMLib/GlobalTemplateDefines.h"
 #include "../../ITMLib/Engines/Main/BasicVoxelEngine.h"
 #include "../../ITMLib/Engines/Main/BasicSurfelEngine.h"
 #include "../../ITMLib/Engines/Main/MultiEngine.h"

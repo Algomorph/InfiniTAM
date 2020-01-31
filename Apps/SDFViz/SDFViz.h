@@ -33,7 +33,7 @@
 #include "../../ITMLib/Utils/Visualization/SceneSliceVisualizer3D.tpp"
 
 //ITMLib
-#include "../../ITMLib/ITMLibDefines.h"
+#include "../../ITMLib/GlobalTemplateDefines.h"
 #include "../../ITMLib/Objects/Volume/VoxelVolume.h"
 #include "HighlightVisualization.h"
 

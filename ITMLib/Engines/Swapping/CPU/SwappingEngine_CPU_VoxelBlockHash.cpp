@@ -14,11 +14,11 @@
 //  limitations under the License.
 //  ================================================================
 //local
-#include "../../../ITMLibDefines.h"
+#include "../../../GlobalTemplateDefines.h"
 #include "../../../Objects/Volume/VoxelBlockHash.h"
 #include "SwappingEngine_CPU.tpp"
 
 namespace ITMLib {
 template
-class SwappingEngine_CPU<ITMVoxel, VoxelBlockHash>;
+class SwappingEngine_CPU<TSDFVoxel, VoxelBlockHash>;
 } // namespace ITMLib

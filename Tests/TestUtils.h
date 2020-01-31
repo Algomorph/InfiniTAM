@@ -16,7 +16,7 @@
 #pragma once
 
 #include <chrono>
-#include "../ITMLib/ITMLibDefines.h"
+#include "../ITMLib/GlobalTemplateDefines.h"
 
 #include "../ITMLib/Objects/Volume/RepresentationAccess.h"
 #include "../ITMLib/Objects/Volume/VoxelVolume.h"

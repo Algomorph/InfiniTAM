@@ -13,10 +13,10 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "../../../ITMLibDefines.h"
+#include "../../../GlobalTemplateDefines.h"
 #include "DenseMapper.tpp"
 
 namespace ITMLib {
 template
-class DenseMapper<ITMVoxel, VoxelBlockHash>;
+class DenseMapper<TSDFVoxel, VoxelBlockHash>;
 }//namespace ITMLib

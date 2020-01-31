@@ -19,7 +19,7 @@
 #include "../../../Objects/Volume/VoxelVolume.h"
 #include "../Interface/EditAndCopyEngineInterface.h"
 #include "../../../Utils/HashBlockProperties.h"
-#include "../../../ITMLibDefines.h"
+#include "../../../GlobalTemplateDefines.h"
 
 
 namespace ITMLib {
@@ -106,10 +106,10 @@ public:
 
 };
 
-typedef EditAndCopyEngine_CUDA<ITMVoxel, PlainVoxelArray> ManipulationEngine_CUDA_PVA_Voxel;
-typedef EditAndCopyEngine_CUDA<ITMVoxel, VoxelBlockHash> ManipulationEngine_CUDA_VBH_Voxel;
-typedef EditAndCopyEngine_CUDA<ITMWarp, PlainVoxelArray> ManipulationEngine_CUDA_PVA_Warp;
-typedef EditAndCopyEngine_CUDA<ITMWarp, VoxelBlockHash> ManipulationEngine_CUDA_VBH_Warp;
+typedef EditAndCopyEngine_CUDA<TSDFVoxel, PlainVoxelArray> ManipulationEngine_CUDA_PVA_Voxel;
+typedef EditAndCopyEngine_CUDA<TSDFVoxel, VoxelBlockHash> ManipulationEngine_CUDA_VBH_Voxel;
+typedef EditAndCopyEngine_CUDA<WarpVoxel, PlainVoxelArray> ManipulationEngine_CUDA_PVA_Warp;
+typedef EditAndCopyEngine_CUDA<WarpVoxel, VoxelBlockHash> ManipulationEngine_CUDA_VBH_Warp;
 
 
 }//namespace ITMLib

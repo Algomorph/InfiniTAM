@@ -13,12 +13,12 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "../../ITMLibDefines.h"
+#include "../../GlobalTemplateDefines.h"
 #include "DynamicSceneVoxelEngine.tpp"
 
 namespace ITMLib {
 template
-class DynamicSceneVoxelEngine<ITMVoxel, ITMWarp, PlainVoxelArray>;
+class DynamicSceneVoxelEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray>;
 } // namespace ITMLib
 
 

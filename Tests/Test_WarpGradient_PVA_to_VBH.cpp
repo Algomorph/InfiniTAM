@@ -30,7 +30,7 @@
 #include "TestUtilsForSnoopyFrames16And17.h"
 #include "WarpAdvancedTestingUtilities.h"
 
-#include "../ITMLib/ITMLibDefines.h"
+#include "../ITMLib/GlobalTemplateDefines.h"
 #include "../ITMLib/Objects/Volume/VoxelVolume.h"
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison.h"
 #include "../ITMLib/SurfaceTrackers/Interface/SurfaceTracker.h"
@@ -64,39 +64,39 @@ GenericWarpTest(const SlavchevaSurfaceTracker::Switches& switches, int iteration
 	GenericWarpConsistencySubtest<VoxelBlockHash, TMemoryDeviceType>(switches, iteration_limit, mode,
 	                                                                    absoluteTolerance);
 
-	VoxelVolume<ITMVoxel, PlainVoxelArray> volume_PVA(&configuration::get().general_voxel_volume_parameters,
+	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_PVA(&configuration::get().general_voxel_volume_parameters,
 	                                                        configuration::get().swapping_mode ==
 	                                                        configuration::SWAPPINGMODE_ENABLED,
-	                                                  TMemoryDeviceType,
-	                                                  Frame16And17Fixture::InitParams<PlainVoxelArray>());
-	VoxelVolume<ITMVoxel, VoxelBlockHash> volume_VBH(&configuration::get().general_voxel_volume_parameters,
+	                                                   TMemoryDeviceType,
+	                                                   Frame16And17Fixture::InitParams<PlainVoxelArray>());
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH(&configuration::get().general_voxel_volume_parameters,
 	                                                       configuration::get().swapping_mode ==
 	                                                       configuration::SWAPPINGMODE_ENABLED,
-	                                                 TMemoryDeviceType,
-	                                                 Frame16And17Fixture::InitParams<VoxelBlockHash>());
+	                                                  TMemoryDeviceType,
+	                                                  Frame16And17Fixture::InitParams<VoxelBlockHash>());
 	switch (mode) {
 		case TEST_SUCCESSIVE_ITERATIONS: {
 
-			VoxelVolume<ITMWarp, PlainVoxelArray> warp_field_PVA(&configuration::get().general_voxel_volume_parameters,
+			VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field_PVA(&configuration::get().general_voxel_volume_parameters,
 			                                                           configuration::get().swapping_mode ==
 			                                                           configuration::SWAPPINGMODE_ENABLED,
-			                                                     TMemoryDeviceType,
-			                                                     Frame16And17Fixture::InitParams<PlainVoxelArray>());
-			VoxelVolume<ITMWarp, VoxelBlockHash> warp_field_VBH(&configuration::get().general_voxel_volume_parameters,
+			                                                       TMemoryDeviceType,
+			                                                       Frame16And17Fixture::InitParams<PlainVoxelArray>());
+			VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field_VBH(&configuration::get().general_voxel_volume_parameters,
 			                                                          configuration::get().swapping_mode ==
 			                                                          configuration::SWAPPINGMODE_ENABLED,
-			                                                    TMemoryDeviceType,
-			                                                    Frame16And17Fixture::InitParams<VoxelBlockHash>());
+			                                                      TMemoryDeviceType,
+			                                                      Frame16And17Fixture::InitParams<VoxelBlockHash>());
 
 			for (int iteration = 0; iteration < iteration_limit; iteration++) {
 				std::cout << "Testing iteration " << iteration << std::endl;
 				warp_field_PVA.LoadFromDirectory(get_path_warps(prefix, iteration));
-				EditAndCopyEngineFactory::Instance<ITMWarp, VoxelBlockHash, TMemoryDeviceType>().ResetVolume(
+				EditAndCopyEngineFactory::Instance<WarpVoxel, VoxelBlockHash, TMemoryDeviceType>().ResetVolume(
 						&warp_field_VBH);
 				warp_field_VBH.LoadFromDirectory(get_path_warps(prefix, iteration));
 				BOOST_REQUIRE(allocatedContentAlmostEqual_Verbose(&warp_field_PVA, &warp_field_VBH,
 				                                                  absoluteTolerance, TMemoryDeviceType));
-				EditAndCopyEngineFactory::Instance<ITMVoxel, VoxelBlockHash, TMemoryDeviceType>().ResetVolume(
+				EditAndCopyEngineFactory::Instance<TSDFVoxel, VoxelBlockHash, TMemoryDeviceType>().ResetVolume(
 						&volume_VBH);
 				volume_PVA.LoadFromDirectory(get_path_warped_live(prefix, iteration));
 				volume_VBH.LoadFromDirectory(get_path_warped_live(prefix, iteration));
@@ -107,14 +107,14 @@ GenericWarpTest(const SlavchevaSurfaceTracker::Switches& switches, int iteration
 			break;
 		case TEST_FINAL_ITERATION_AND_FUSION: {
 			volume_PVA.LoadFromDirectory(get_path_warped_live(prefix, iteration_limit - 1));
-			EditAndCopyEngineFactory::Instance<ITMVoxel, VoxelBlockHash, TMemoryDeviceType>().ResetVolume(
+			EditAndCopyEngineFactory::Instance<TSDFVoxel, VoxelBlockHash, TMemoryDeviceType>().ResetVolume(
 					&volume_VBH);
 			volume_VBH.LoadFromDirectory(get_path_warped_live(prefix, iteration_limit - 1));
 			BOOST_REQUIRE(
 					contentForFlagsAlmostEqual(&volume_PVA, &volume_VBH, VOXEL_NONTRUNCATED, absoluteTolerance,
 					                           TMemoryDeviceType));
 			volume_PVA.LoadFromDirectory(get_path_fused(prefix, iteration_limit - 1));
-			EditAndCopyEngineFactory::Instance<ITMVoxel, VoxelBlockHash, TMemoryDeviceType>().ResetVolume(
+			EditAndCopyEngineFactory::Instance<TSDFVoxel, VoxelBlockHash, TMemoryDeviceType>().ResetVolume(
 					&volume_VBH);
 			volume_VBH.LoadFromDirectory(get_path_fused(prefix, iteration_limit - 1));
 			BOOST_REQUIRE(

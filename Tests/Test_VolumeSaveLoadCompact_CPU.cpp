@@ -21,7 +21,7 @@
 //boost
 #include <boost/test/unit_test.hpp>
 //ITMLib
-#include "../ITMLib/ITMLibDefines.h"
+#include "../ITMLib/GlobalTemplateDefines.h"
 #include "../ITMLib/Objects/Volume/VoxelVolume.h"
 #include "../ITMLib/Utils/Configuration.h"
 #include "../ITMLib/Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
@@ -32,8 +32,8 @@
 
 using namespace ITMLib;
 
-typedef VolumeFileIOEngine<ITMVoxel, PlainVoxelArray> SceneFileIOEngine_PVA;
-typedef VolumeFileIOEngine<ITMVoxel, VoxelBlockHash> SceneFileIOEngine_VBH;
+typedef VolumeFileIOEngine<TSDFVoxel, PlainVoxelArray> SceneFileIOEngine_PVA;
+typedef VolumeFileIOEngine<TSDFVoxel, VoxelBlockHash> SceneFileIOEngine_VBH;
 
 BOOST_AUTO_TEST_CASE(testSaveSceneCompact_CPU) {
 
@@ -42,11 +42,11 @@ BOOST_AUTO_TEST_CASE(testSaveSceneCompact_CPU) {
 	Vector3i volumeSize(40, 68, 20);
 	Vector3i volumeOffset(-20, 0, 0);
 
-	VoxelVolume<ITMVoxel, PlainVoxelArray> generated_test_scene_PVA(
+	VoxelVolume<TSDFVoxel, PlainVoxelArray> generated_test_scene_PVA(
 			&configuration::get().general_voxel_volume_parameters, configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 			MEMORYDEVICE_CPU, {volumeSize, volumeOffset});
 
-	VoxelVolume<ITMVoxel, PlainVoxelArray> loaded_test_scene_PVA(
+	VoxelVolume<TSDFVoxel, PlainVoxelArray> loaded_test_scene_PVA(
 			&configuration::get().general_voxel_volume_parameters, configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 			MEMORYDEVICE_CPU, {volumeSize, volumeOffset});
 
@@ -61,11 +61,11 @@ BOOST_AUTO_TEST_CASE(testSaveSceneCompact_CPU) {
 	BOOST_REQUIRE_EQUAL(SceneStatCalc_CPU_PVA_Voxel::Instance().ComputeNonTruncatedVoxelCount(&loaded_test_scene_PVA), 19456);
 	BOOST_REQUIRE(contentAlmostEqual_CPU(&generated_test_scene_PVA, &loaded_test_scene_PVA, tolerance));
 
-	VoxelVolume<ITMVoxel, VoxelBlockHash> generated_test_scene_VBH(
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> generated_test_scene_VBH(
 			&configuration::get().general_voxel_volume_parameters, configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 			MEMORYDEVICE_CPU);
 
-	VoxelVolume<ITMVoxel, VoxelBlockHash> loaded_test_scene_VBH(
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> loaded_test_scene_VBH(
 			&configuration::get().general_voxel_volume_parameters, configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 			MEMORYDEVICE_CPU);
 

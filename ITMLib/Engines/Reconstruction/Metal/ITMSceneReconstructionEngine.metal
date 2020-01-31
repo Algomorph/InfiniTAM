@@ -6,7 +6,7 @@ using namespace metal;
 
 #include "../Shared/SceneReconstructionEngine_Shared.h"
 #include "ITMSceneReconstructionEngine_Metal.h"
-#include "../../../ITMLibDefines.h"
+#include "../../../GlobalTemplateDefines.h"
 
 kernel void integrateIntoScene_vh_device(DEVICEPTR(ITMVoxel) *localVBA                          [[ buffer(0) ]],
                                          const CONSTPTR(ITMHashEntry) *hashTable                [[ buffer(1) ]],

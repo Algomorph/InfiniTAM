@@ -27,32 +27,32 @@
 
 using namespace ITMLib;
 
-template void GenerateTestScene_CPU<ITMVoxel, VoxelBlockHash>(VoxelVolume<ITMVoxel, VoxelBlockHash>* scene);
-template void GenerateTestScene_CPU<ITMVoxel, PlainVoxelArray>(VoxelVolume<ITMVoxel, PlainVoxelArray>* scene);
+template void GenerateTestScene_CPU<TSDFVoxel, VoxelBlockHash>(VoxelVolume<TSDFVoxel, VoxelBlockHash>* scene);
+template void GenerateTestScene_CPU<TSDFVoxel, PlainVoxelArray>(VoxelVolume<TSDFVoxel, PlainVoxelArray>* scene);
 #ifndef COMPILE_WITHOUT_CUDA
-template void GenerateTestScene_CUDA<ITMVoxel, VoxelBlockHash>(ITMVoxelVolume<ITMVoxel, VoxelBlockHash>* scene);
-template void GenerateTestScene_CUDA<ITMVoxel, PlainVoxelArray>(ITMVoxelVolume<ITMVoxel, PlainVoxelArray>* scene);
+template void GenerateTestScene_CUDA<TSDFVoxel, VoxelBlockHash>(ITMVoxelVolume<TSDFVoxel, VoxelBlockHash>* scene);
+template void GenerateTestScene_CUDA<TSDFVoxel, PlainVoxelArray>(ITMVoxelVolume<TSDFVoxel, PlainVoxelArray>* scene);
 #endif
 
-template void simulateVoxelAlteration<ITMVoxel>(ITMVoxel& voxel, float newSdfValue);
-template void simulateRandomVoxelAlteration<ITMVoxel>(ITMVoxel& voxel);
-template void simulateRandomVoxelAlteration<ITMWarp>(ITMWarp& voxel);
+template void simulateVoxelAlteration<TSDFVoxel>(TSDFVoxel& voxel, float newSdfValue);
+template void simulateRandomVoxelAlteration<TSDFVoxel>(TSDFVoxel& voxel);
+template void simulateRandomVoxelAlteration<WarpVoxel>(WarpVoxel& voxel);
 
 
 //have nothing to prep for PVA -- everything gets copied off the disk exactly
 template<>
-void PrepareVoxelVolumeForLoading(VoxelVolume<ITMVoxel, PlainVoxelArray>* volume) {}
+void PrepareVoxelVolumeForLoading(VoxelVolume<TSDFVoxel, PlainVoxelArray>* volume) {}
 
 template<>
-void PrepareVoxelVolumeForLoading(VoxelVolume<ITMWarp, PlainVoxelArray>* volume) {}
+void PrepareVoxelVolumeForLoading(VoxelVolume<WarpVoxel, PlainVoxelArray>* volume) {}
 
 //for VBH, the scene has to be reset before loading
 template<>
-void PrepareVoxelVolumeForLoading(VoxelVolume<ITMVoxel, VoxelBlockHash>* volume) {
+void PrepareVoxelVolumeForLoading(VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume) {
 	volume->Reset();
 }
 template<>
-void PrepareVoxelVolumeForLoading(VoxelVolume<ITMWarp, VoxelBlockHash>* volume) {
+void PrepareVoxelVolumeForLoading(VoxelVolume<WarpVoxel, VoxelBlockHash>* volume) {
 	volume->Reset();
 }
 
@@ -88,37 +88,37 @@ typename VoxelBlockHash::InitializationParameters GetStandard128IndexParameters<
 }
 
 // FIXME: see TODO in header
-//template ITMVoxelVolume<ITMVoxel, PlainVoxelArray> loadVolume<ITMVoxel, PlainVoxelArray>(
+//template ITMVoxelVolume<TSDFVoxel, PlainVoxelArray> loadVolume<TSDFVoxel, PlainVoxelArray>(
 //                                                 const std::string& path, MemoryDeviceType memoryDeviceType,
 //                                                 PlainVoxelArray::InitializationParameters initializationParameters,
 //                                                 configuration::SwappingMode swapping_mode);
-//template ITMVoxelVolume<ITMVoxel, VoxelBlockHash> loadVolume<ITMVoxel, VoxelBlockHash>(const std::string& path, MemoryDeviceType memoryDeviceType,
+//template ITMVoxelVolume<TSDFVoxel, VoxelBlockHash> loadVolume<TSDFVoxel, VoxelBlockHash>(const std::string& path, MemoryDeviceType memoryDeviceType,
 //                                                 VoxelBlockHash::InitializationParameters initializationParameters,
 //                                                 configuration::SwappingMode swapping_mode);
-//template ITMVoxelVolume<ITMWarp, PlainVoxelArray> loadVolume<ITMWarp, PlainVoxelArray>(const std::string& path, MemoryDeviceType memoryDeviceType,
+//template ITMVoxelVolume<WarpVoxel, PlainVoxelArray> loadVolume<WarpVoxel, PlainVoxelArray>(const std::string& path, MemoryDeviceType memoryDeviceType,
 //                                                          PlainVoxelArray::InitializationParameters initializationParameters,
 //                                                          configuration::SwappingMode swapping_mode);
-//template ITMVoxelVolume<ITMWarp, VoxelBlockHash> loadVolume<ITMWarp, VoxelBlockHash>(
+//template ITMVoxelVolume<WarpVoxel, VoxelBlockHash> loadVolume<WarpVoxel, VoxelBlockHash>(
 //                                                         const std::string& path, MemoryDeviceType memoryDeviceType,
 //                                                         VoxelBlockHash::InitializationParameters initializationParameters,
 //                                                         configuration::SwappingMode swapping_mode);
 
-template void loadVolume<ITMVoxel, PlainVoxelArray>(VoxelVolume<ITMVoxel, PlainVoxelArray>** volume,
+template void loadVolume<TSDFVoxel, PlainVoxelArray>(VoxelVolume<TSDFVoxel, PlainVoxelArray>** volume,
+                                                     const std::string& path, MemoryDeviceType memoryDeviceType,
+                                                     PlainVoxelArray::InitializationParameters initializationParameters,
+                                                     configuration::SwappingMode swappingMode);
+template void loadVolume<TSDFVoxel, VoxelBlockHash>(VoxelVolume<TSDFVoxel, VoxelBlockHash>** volume,
                                                     const std::string& path, MemoryDeviceType memoryDeviceType,
-                                                    PlainVoxelArray::InitializationParameters initializationParameters,
+                                                    VoxelBlockHash::InitializationParameters initializationParameters,
                                                     configuration::SwappingMode swappingMode);
-template void loadVolume<ITMVoxel, VoxelBlockHash>(VoxelVolume<ITMVoxel, VoxelBlockHash>** volume,
-                                                   const std::string& path, MemoryDeviceType memoryDeviceType,
-                                                   VoxelBlockHash::InitializationParameters initializationParameters,
-                                                   configuration::SwappingMode swappingMode);
-template void loadVolume<ITMWarp, PlainVoxelArray>(VoxelVolume<ITMWarp, PlainVoxelArray>** volume,
-                                                   const std::string& path, MemoryDeviceType memoryDeviceType,
-                                                   PlainVoxelArray::InitializationParameters initializationParameters,
-                                                   configuration::SwappingMode swappingMode);
-template void loadVolume<ITMWarp, VoxelBlockHash>(VoxelVolume<ITMWarp, VoxelBlockHash>** volume,
-                                                  const std::string& path, MemoryDeviceType memoryDeviceType,
-                                                  VoxelBlockHash::InitializationParameters initializationParameters,
-                                                  configuration::SwappingMode swappingMode);
+template void loadVolume<WarpVoxel, PlainVoxelArray>(VoxelVolume<WarpVoxel, PlainVoxelArray>** volume,
+                                                     const std::string& path, MemoryDeviceType memoryDeviceType,
+                                                     PlainVoxelArray::InitializationParameters initializationParameters,
+                                                     configuration::SwappingMode swappingMode);
+template void loadVolume<WarpVoxel, VoxelBlockHash>(VoxelVolume<WarpVoxel, VoxelBlockHash>** volume,
+                                                    const std::string& path, MemoryDeviceType memoryDeviceType,
+                                                    VoxelBlockHash::InitializationParameters initializationParameters,
+                                                    configuration::SwappingMode swappingMode);
 
 void
 updateView(ITMView** view, const std::string& depth_path, const std::string& color_path, const std::string& mask_path,
@@ -160,64 +160,64 @@ updateView(ITMView** view, const std::string& depth_path, const std::string& col
 }
 
 template
-void buildSdfVolumeFromImage<ITMVoxel, PlainVoxelArray>(VoxelVolume<ITMVoxel, PlainVoxelArray>** volume,
+void buildSdfVolumeFromImage<TSDFVoxel, PlainVoxelArray>(VoxelVolume<TSDFVoxel, PlainVoxelArray>** volume,
+                                                         ITMView** view,
+                                                         const std::string& depth_path, const std::string& color_path,
+                                                         const std::string& mask_path,
+                                                         const std::string& calibration_path,
+                                                         MemoryDeviceType memoryDevice,
+                                                         PlainVoxelArray::InitializationParameters initializationParameters,
+                                                         configuration::SwappingMode swappingMode,
+                                                         bool useBilateralFilter);
+
+template
+void buildSdfVolumeFromImage<TSDFVoxel, PlainVoxelArray>(VoxelVolume<TSDFVoxel, PlainVoxelArray>** volume,
+                                                         const std::string& depth_path, const std::string& color_path,
+                                                         const std::string& mask_path,
+                                                         const std::string& calibration_path,
+                                                         MemoryDeviceType memoryDevice,
+                                                         PlainVoxelArray::InitializationParameters initializationParameters,
+                                                         configuration::SwappingMode swappingMode,
+                                                         bool useBilateralFilter);
+
+template
+void buildSdfVolumeFromImage<TSDFVoxel, VoxelBlockHash>(VoxelVolume<TSDFVoxel, VoxelBlockHash>** volume,
                                                         ITMView** view,
                                                         const std::string& depth_path, const std::string& color_path,
                                                         const std::string& mask_path,
                                                         const std::string& calibration_path,
                                                         MemoryDeviceType memoryDevice,
-                                                        PlainVoxelArray::InitializationParameters initializationParameters,
+                                                        VoxelBlockHash::InitializationParameters initializationParameters,
                                                         configuration::SwappingMode swappingMode,
                                                         bool useBilateralFilter);
 
 template
-void buildSdfVolumeFromImage<ITMVoxel, PlainVoxelArray>(VoxelVolume<ITMVoxel, PlainVoxelArray>** volume,
+void buildSdfVolumeFromImage<TSDFVoxel, VoxelBlockHash>(VoxelVolume<TSDFVoxel, VoxelBlockHash>** volume,
                                                         const std::string& depth_path, const std::string& color_path,
                                                         const std::string& mask_path,
                                                         const std::string& calibration_path,
                                                         MemoryDeviceType memoryDevice,
-                                                        PlainVoxelArray::InitializationParameters initializationParameters,
+                                                        VoxelBlockHash::InitializationParameters initializationParameters,
                                                         configuration::SwappingMode swappingMode,
                                                         bool useBilateralFilter);
 
 template
-void buildSdfVolumeFromImage<ITMVoxel, VoxelBlockHash>(VoxelVolume<ITMVoxel, VoxelBlockHash>** volume,
-                                                       ITMView** view,
-                                                       const std::string& depth_path, const std::string& color_path,
-                                                       const std::string& mask_path,
-                                                       const std::string& calibration_path,
-                                                       MemoryDeviceType memoryDevice,
-                                                       VoxelBlockHash::InitializationParameters initializationParameters,
-                                                       configuration::SwappingMode swappingMode,
-                                                       bool useBilateralFilter);
-
-template
-void buildSdfVolumeFromImage<ITMVoxel, VoxelBlockHash>(VoxelVolume<ITMVoxel, VoxelBlockHash>** volume,
-                                                       const std::string& depth_path, const std::string& color_path,
-                                                       const std::string& mask_path,
-                                                       const std::string& calibration_path,
-                                                       MemoryDeviceType memoryDevice,
-                                                       VoxelBlockHash::InitializationParameters initializationParameters,
-                                                       configuration::SwappingMode swappingMode,
-                                                       bool useBilateralFilter);
-
-template
-void initializeVolume<ITMVoxel, VoxelBlockHash>(VoxelVolume<ITMVoxel, VoxelBlockHash>** volume,
-                                                VoxelBlockHash::InitializationParameters initializationParameters,
-                                                MemoryDeviceType memoryDevice,
-                                                configuration::SwappingMode swappingMode);
-template
-void initializeVolume<ITMVoxel, PlainVoxelArray>(VoxelVolume<ITMVoxel, PlainVoxelArray>** volume,
-                                                 PlainVoxelArray::InitializationParameters initializationParameters,
+void initializeVolume<TSDFVoxel, VoxelBlockHash>(VoxelVolume<TSDFVoxel, VoxelBlockHash>** volume,
+                                                 VoxelBlockHash::InitializationParameters initializationParameters,
                                                  MemoryDeviceType memoryDevice,
                                                  configuration::SwappingMode swappingMode);
 template
-void initializeVolume<ITMWarp, VoxelBlockHash>(VoxelVolume<ITMWarp, VoxelBlockHash>** volume,
-                                               VoxelBlockHash::InitializationParameters initializationParameters,
-                                               MemoryDeviceType memoryDevice,
-                                               configuration::SwappingMode swappingMode);
+void initializeVolume<TSDFVoxel, PlainVoxelArray>(VoxelVolume<TSDFVoxel, PlainVoxelArray>** volume,
+                                                  PlainVoxelArray::InitializationParameters initializationParameters,
+                                                  MemoryDeviceType memoryDevice,
+                                                  configuration::SwappingMode swappingMode);
 template
-void initializeVolume<ITMWarp, PlainVoxelArray>(VoxelVolume<ITMWarp, PlainVoxelArray>** volume,
-                                                PlainVoxelArray::InitializationParameters initializationParameters,
-                                                MemoryDeviceType memoryDevice,
-                                                configuration::SwappingMode swappingMode);
+void initializeVolume<WarpVoxel, VoxelBlockHash>(VoxelVolume<WarpVoxel, VoxelBlockHash>** volume,
+                                                 VoxelBlockHash::InitializationParameters initializationParameters,
+                                                 MemoryDeviceType memoryDevice,
+                                                 configuration::SwappingMode swappingMode);
+template
+void initializeVolume<WarpVoxel, PlainVoxelArray>(VoxelVolume<WarpVoxel, PlainVoxelArray>** volume,
+                                                  PlainVoxelArray::InitializationParameters initializationParameters,
+                                                  MemoryDeviceType memoryDevice,
+                                                  configuration::SwappingMode swappingMode);

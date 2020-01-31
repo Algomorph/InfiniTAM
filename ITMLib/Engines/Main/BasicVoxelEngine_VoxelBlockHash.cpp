@@ -13,10 +13,10 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "../../ITMLibDefines.h"
+#include "../../GlobalTemplateDefines.h"
 #include "BasicVoxelEngine.tpp"
 
 namespace ITMLib {
 template
-class BasicVoxelEngine<ITMVoxel, VoxelBlockHash>;
+class BasicVoxelEngine<TSDFVoxel, VoxelBlockHash>;
 } // namespace ITMLib

@@ -5,7 +5,7 @@ using namespace metal;
 
 #include "../Shared/VisualizationEngine_Shared.h"
 #include "VisualizationEngine_Metal.h"
-#include "../../../ITMLibDefines.h"
+#include "../../../GlobalTemplateDefines.h"
 
 kernel void genericRaycastVH_device(DEVICEPTR(Vector4f) *pointsRay                                  [[ buffer(0) ]],
                                     DEVICEPTR(uchar) *entriesVisibleType                            [[ buffer(1) ]],

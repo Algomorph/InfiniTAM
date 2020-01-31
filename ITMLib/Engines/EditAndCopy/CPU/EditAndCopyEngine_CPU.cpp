@@ -17,7 +17,7 @@
 #include "../../../Utils/Math.h"
 #include "../../../Objects/Volume/VoxelBlockHash.h"
 #include "../../../Objects/Volume/RepresentationAccess.h"
-#include "../../../ITMLibDefines.h"
+#include "../../../GlobalTemplateDefines.h"
 #include "../../../Objects/Volume/VoxelVolume.h"
 #include "../../../Utils/Configuration.h"
 #include "../../Reconstruction/Interface/SceneReconstructionEngine.h"

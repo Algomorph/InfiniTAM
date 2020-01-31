@@ -14,12 +14,12 @@
 //  limitations under the License.
 //  ================================================================
 //local
-#include "../../../ITMLibDefines.h"
+#include "../../../GlobalTemplateDefines.h"
 #include "SurfelSceneReconstructionEngine_CPU.tpp"
 
 namespace ITMLib {
 template
-class SurfelSceneReconstructionEngine_CPU<ITMSurfel_rgb>;
+class SurfelSceneReconstructionEngine_CPU<Surfel_rgb>;
 template
-class SurfelSceneReconstructionEngine_CPU<ITMSurfel_grey>;
+class SurfelSceneReconstructionEngine_CPU<Surfel_grey>;
 } // namespace ITMLib

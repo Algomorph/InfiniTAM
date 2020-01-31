@@ -15,7 +15,7 @@
 //  ================================================================
 
 #include "VoxelBlockHash.h"
-#include "../../ITMLibDefines.h"
+#include "../../GlobalTemplateDefines.h"
 #include "../../Engines/Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
 #include "../../Engines/Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
 
@@ -26,11 +26,11 @@ ITMHashEntry VoxelBlockHash::GetHashEntryAt(const Vector3s& pos, int& hashCode) 
 	const ITMHashEntry* entries = this->GetEntries();
 	switch (memoryType) {
 		case MEMORYDEVICE_CPU:
-			return IndexingEngine<ITMVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance()
+			return IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance()
 					.FindHashEntry(*this,pos,hashCode);
 #ifndef COMPILE_WITHOUT_CUDA
 		case MEMORYDEVICE_CUDA:
-			return IndexingEngine<ITMVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance()
+			return IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance()
 					.FindHashEntry(*this,pos, hashCode);
 #endif
 		default:

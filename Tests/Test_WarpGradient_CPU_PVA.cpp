@@ -65,15 +65,15 @@ struct AlteredFramewiseWarpCountFunctor {
 typedef WarpGradientDataFixture<MemoryDeviceType::MEMORYDEVICE_CPU, PlainVoxelArray> DataFixture;
 BOOST_FIXTURE_TEST_CASE(testDataTerm_CPU_PVA, DataFixture) {
 
-	VoxelVolume<ITMWarp, PlainVoxelArray> warp_field_CPU1(&configuration::get().general_voxel_volume_parameters,
+	VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field_CPU1(&configuration::get().general_voxel_volume_parameters,
 	                                                            configuration::get().swapping_mode ==
 	                                                            configuration::SWAPPINGMODE_ENABLED,
-	                                                      MEMORYDEVICE_CPU,
-	                                                      indexParameters);
+	                                                        MEMORYDEVICE_CPU,
+	                                                        indexParameters);
 	ManipulationEngine_CPU_PVA_Warp::Inst().ResetVolume(&warp_field_CPU1);
 
 
-	auto motionTracker_PVA_CPU = new SurfaceTracker<ITMVoxel, ITMWarp, PlainVoxelArray, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_DIAGNOSTIC>(
+	auto motionTracker_PVA_CPU = new SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_DIAGNOSTIC>(
 			SlavchevaSurfaceTracker::Switches(true, false, false, false, false));
 
 
@@ -83,8 +83,8 @@ BOOST_FIXTURE_TEST_CASE(testDataTerm_CPU_PVA, DataFixture) {
 
 	//warp_field_CPU1.SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_PVA/warp_field_0_data_");
 
-	AlteredGradientCountFunctor<ITMWarp> functor;
-	VolumeTraversalEngine<ITMWarp, PlainVoxelArray, MEMORYDEVICE_CPU>::
+	AlteredGradientCountFunctor<WarpVoxel> functor;
+	VolumeTraversalEngine<WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU>::
 	VoxelTraversal(&warp_field_CPU1, functor);
 	BOOST_REQUIRE_EQUAL(functor.count.load(), 37525);
 
@@ -93,13 +93,13 @@ BOOST_FIXTURE_TEST_CASE(testDataTerm_CPU_PVA, DataFixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testUpdateWarps_CPU_PVA, DataFixture) {
-	auto motionTracker_PVA_CPU = new SurfaceTracker<ITMVoxel, ITMWarp, PlainVoxelArray, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_DIAGNOSTIC>(
+	auto motionTracker_PVA_CPU = new SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_DIAGNOSTIC>(
 			SlavchevaSurfaceTracker::Switches(true, false, false, false, false));
-	VoxelVolume<ITMWarp, PlainVoxelArray> warp_field_copy(*warp_field_data_term,
-	                                                      MemoryDeviceType::MEMORYDEVICE_CPU);
+	VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field_copy(*warp_field_data_term,
+	                                                        MemoryDeviceType::MEMORYDEVICE_CPU);
 
-	AlteredGradientCountFunctor<ITMWarp> agcFunctor;
-	VolumeTraversalEngine<ITMWarp, PlainVoxelArray, MEMORYDEVICE_CPU>::
+	AlteredGradientCountFunctor<WarpVoxel> agcFunctor;
+	VolumeTraversalEngine<WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU>::
 	VoxelTraversal(&warp_field_copy, agcFunctor);
 	BOOST_REQUIRE_EQUAL(agcFunctor.count.load(), 37525u);
 
@@ -108,8 +108,8 @@ BOOST_FIXTURE_TEST_CASE(testUpdateWarps_CPU_PVA, DataFixture) {
 	//warp_field_copy.SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_PVA/warp_field_0_data_framewise_warps_");
 	BOOST_REQUIRE_CLOSE(maxWarp, 0.18186526f, 1e-7);
 
-	AlteredFramewiseWarpCountFunctor<ITMWarp> functor;
-	VolumeTraversalEngine<ITMWarp, PlainVoxelArray, MEMORYDEVICE_CPU>::
+	AlteredFramewiseWarpCountFunctor<WarpVoxel> functor;
+	VolumeTraversalEngine<WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU>::
 	VoxelTraversal(&warp_field_copy, functor);
 	BOOST_REQUIRE_EQUAL(functor.count.load(), 37525u);
 
@@ -118,10 +118,10 @@ BOOST_FIXTURE_TEST_CASE(testUpdateWarps_CPU_PVA, DataFixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testSmoothWarpGradient_CPU_PVA, DataFixture) {
-	VoxelVolume<ITMWarp, PlainVoxelArray> warp_field_CPU1(*warp_field_data_term, MEMORYDEVICE_CPU);
+	VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field_CPU1(*warp_field_data_term, MEMORYDEVICE_CPU);
 
 
-	auto motionTracker_PVA_CPU = new SurfaceTracker<ITMVoxel, ITMWarp, PlainVoxelArray, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_DIAGNOSTIC>(
+	auto motionTracker_PVA_CPU = new SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_DIAGNOSTIC>(
 			SlavchevaSurfaceTracker::Switches(false, false, false, false, true));
 
 	TimeIt([&]() {
@@ -134,10 +134,10 @@ BOOST_FIXTURE_TEST_CASE(testSmoothWarpGradient_CPU_PVA, DataFixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testDataAndTikhonovTerm_CPU_PVA, DataFixture) {
-	VoxelVolume<ITMWarp, PlainVoxelArray> warp_field_CPU1(*warp_field_iter0, MEMORYDEVICE_CPU);
+	VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field_CPU1(*warp_field_iter0, MEMORYDEVICE_CPU);
 
 
-	auto motionTracker_PVA_CPU = new SurfaceTracker<ITMVoxel, ITMWarp, PlainVoxelArray, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_DIAGNOSTIC>(
+	auto motionTracker_PVA_CPU = new SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_DIAGNOSTIC>(
 			SlavchevaSurfaceTracker::Switches(true, false, true, false, false)
 	);
 
@@ -148,8 +148,8 @@ BOOST_FIXTURE_TEST_CASE(testDataAndTikhonovTerm_CPU_PVA, DataFixture) {
 //	warp_field_CPU1.SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_PVA/warp_field_1_data_and_tikhonov_");
 
 
-	AlteredGradientCountFunctor<ITMWarp> functor;
-	VolumeTraversalEngine<ITMWarp, PlainVoxelArray, MEMORYDEVICE_CPU>::
+	AlteredGradientCountFunctor<WarpVoxel> functor;
+	VolumeTraversalEngine<WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU>::
 	VoxelTraversal(&warp_field_CPU1, functor);
 	BOOST_REQUIRE_EQUAL(functor.count.load(), 57416);
 
@@ -159,10 +159,10 @@ BOOST_FIXTURE_TEST_CASE(testDataAndTikhonovTerm_CPU_PVA, DataFixture) {
 
 
 BOOST_FIXTURE_TEST_CASE(testDataAndKillingTerm_CPU_PVA, DataFixture) {
-	VoxelVolume<ITMWarp, PlainVoxelArray> warp_field_CPU1(*warp_field_iter0, MEMORYDEVICE_CPU);
+	VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field_CPU1(*warp_field_iter0, MEMORYDEVICE_CPU);
 
 
-	auto motionTracker_PVA_CPU = new SurfaceTracker<ITMVoxel, ITMWarp, PlainVoxelArray, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_DIAGNOSTIC>(
+	auto motionTracker_PVA_CPU = new SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_DIAGNOSTIC>(
 			SlavchevaSurfaceTracker::Switches(true, false, true, true, false)
 	);
 
@@ -172,8 +172,8 @@ BOOST_FIXTURE_TEST_CASE(testDataAndKillingTerm_CPU_PVA, DataFixture) {
 	}, "Calculate Warping Gradient - PVA CPU data term + tikhonov term");
 	//warp_field_CPU1.SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_PVA/warp_field_1_data_and_killing_");
 
-	AlteredGradientCountFunctor<ITMWarp> functor;
-	VolumeTraversalEngine<ITMWarp, PlainVoxelArray, MEMORYDEVICE_CPU>::
+	AlteredGradientCountFunctor<WarpVoxel> functor;
+	VolumeTraversalEngine<WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU>::
 	VoxelTraversal(&warp_field_CPU1, functor);
 	BOOST_REQUIRE_EQUAL(functor.count.load(), 59093);
 
@@ -184,10 +184,10 @@ BOOST_FIXTURE_TEST_CASE(testDataAndKillingTerm_CPU_PVA, DataFixture) {
 
 BOOST_FIXTURE_TEST_CASE(testDataAndLevelSetTerm_CPU_PVA, DataFixture) {
 
-	VoxelVolume<ITMWarp, PlainVoxelArray> warp_field_CPU1(*warp_field_iter0, MEMORYDEVICE_CPU);
+	VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field_CPU1(*warp_field_iter0, MEMORYDEVICE_CPU);
 
 
-	auto motionTracker_PVA_CPU = new SurfaceTracker<ITMVoxel, ITMWarp, PlainVoxelArray, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_DIAGNOSTIC>(
+	auto motionTracker_PVA_CPU = new SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_DIAGNOSTIC>(
 			SlavchevaSurfaceTracker::Switches(true, true, false, false, false)
 	);
 
@@ -197,8 +197,8 @@ BOOST_FIXTURE_TEST_CASE(testDataAndLevelSetTerm_CPU_PVA, DataFixture) {
 	}, "Calculate Warping Gradient - PVA CPU data term + level set term");
 //	warp_field_CPU1.SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_PVA/warp_field_1_data_and_level_set_");
 
-	AlteredGradientCountFunctor<ITMWarp> functor;
-	VolumeTraversalEngine<ITMWarp, PlainVoxelArray, MEMORYDEVICE_CPU>::
+	AlteredGradientCountFunctor<WarpVoxel> functor;
+	VolumeTraversalEngine<WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU>::
 	VoxelTraversal(&warp_field_CPU1, functor);
 	BOOST_REQUIRE_EQUAL(functor.count.load(), 55369);
 

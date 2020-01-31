@@ -248,19 +248,19 @@ template<typename TVoxel, typename TIndex>
 struct MaxGradientFunctor;
 
 template<typename TIndex>
-struct MaxGradientFunctor<ITMVoxel_f_flags, TIndex> {
+struct MaxGradientFunctor<TSDFVoxel_f_flags, TIndex> {
 	static float
-	find(VoxelVolume<ITMVoxel_f_flags, TIndex>* scene, bool secondGradientField, Vector3i& maxPosition) {
+	find(VoxelVolume<TSDFVoxel_f_flags, TIndex>* scene, bool secondGradientField, Vector3i& maxPosition) {
 		DIEWITHEXCEPTION_REPORTLOCATION("Not implemented for voxels without gradients.");
 	}
 };
 
 template<typename TIndex>
-struct MaxGradientFunctor<ITMVoxel_f_warp, TIndex> {
-	static float find(VoxelVolume<ITMWarp, TIndex>* scene, bool secondGradientField, Vector3i& maxPosition) {
+struct MaxGradientFunctor<WarpVoxel_f_uf, TIndex> {
+	static float find(VoxelVolume<WarpVoxel, TIndex>* scene, bool secondGradientField, Vector3i& maxPosition) {
 		MaxGradientFunctor maxGradientFunctor;
 		maxGradientFunctor.secondGradientField = secondGradientField;
-		VolumeTraversalEngine<ITMVoxel_f_warp, TIndex, MEMORYDEVICE_CPU>::
+		VolumeTraversalEngine<WarpVoxel_f_uf, TIndex, MEMORYDEVICE_CPU>::
 		VoxelPositionTraversal(scene, maxGradientFunctor);
 		maxPosition = maxGradientFunctor.maxPosition;
 		return maxGradientFunctor.maxLength;
@@ -270,7 +270,7 @@ struct MaxGradientFunctor<ITMVoxel_f_warp, TIndex> {
 	bool secondGradientField;
 	Vector3i maxPosition = Vector3i(0);
 
-	void operator()(ITMVoxel_f_warp& voxel, Vector3i position) {
+	void operator()(WarpVoxel_f_uf& voxel, Vector3i position) {
 		float gradientLength;
 		if (secondGradientField) {
 			gradientLength = ORUtils::length(voxel.gradient1);

@@ -13,12 +13,12 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "../../ITMLibDefines.h"
+#include "../../GlobalTemplateDefines.h"
 #include "BasicSurfelEngine.tpp"
 
 namespace ITMLib {
 template
-class BasicSurfelEngine<ITMSurfel_rgb>;
+class BasicSurfelEngine<Surfel_rgb>;
 template
-class BasicSurfelEngine<ITMSurfel_grey>;
+class BasicSurfelEngine<Surfel_grey>;
 } // namespace ITMLib

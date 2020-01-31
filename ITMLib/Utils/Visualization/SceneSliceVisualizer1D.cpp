@@ -26,7 +26,7 @@
 #include "../../Objects/Volume/RepresentationAccess.h"
 #include "../CPPPrintHelpers.h"
 
-#include "../../ITMLibDefines.h"
+#include "../../GlobalTemplateDefines.h"
 #include "VisualizationWindowManager.h"
 
 

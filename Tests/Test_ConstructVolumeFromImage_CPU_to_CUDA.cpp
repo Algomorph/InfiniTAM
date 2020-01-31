@@ -23,7 +23,7 @@
 
 // *** ITMLib ***
 #include "TestUtilsForSnoopyFrames16And17.h"
-#include "../ITMLib/ITMLibDefines.h"
+#include "../ITMLib/GlobalTemplateDefines.h"
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngine.h"
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
 #include "../ITMLib/Engines/EditAndCopy/EditAndCopyEngineFactory.h"
@@ -51,30 +51,30 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_VBH_Expnaded_CPU_CUDA, Frame16And1
 
 // *** initialize volumes ***
 	// CPU
-	VoxelVolume<ITMVoxel, VoxelBlockHash> volume_VBH_17_CPU(MEMORYDEVICE_CPU, InitParams<VoxelBlockHash>());
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_17_CPU(MEMORYDEVICE_CPU, InitParams<VoxelBlockHash>());
 	volume_VBH_17_CPU.Reset();
-	VoxelVolume<ITMVoxel, VoxelBlockHash> volume_VBH_17_CPU_depth_allocation(MEMORYDEVICE_CPU,
-	                                                                         InitParams<VoxelBlockHash>());
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_17_CPU_depth_allocation(MEMORYDEVICE_CPU,
+	                                                                          InitParams<VoxelBlockHash>());
 	volume_VBH_17_CPU_depth_allocation.Reset();
 	// CUDA
-	VoxelVolume<ITMVoxel, VoxelBlockHash> volume_VBH_17_CUDA(MEMORYDEVICE_CUDA, InitParams<VoxelBlockHash>());
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_17_CUDA(MEMORYDEVICE_CUDA, InitParams<VoxelBlockHash>());
 	volume_VBH_17_CUDA.Reset();
-	VoxelVolume<ITMVoxel, VoxelBlockHash> volume_VBH_17_CUDA_depth_allocation(MEMORYDEVICE_CUDA,
-	                                                                          InitParams<VoxelBlockHash>());
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_17_CUDA_depth_allocation(MEMORYDEVICE_CUDA,
+	                                                                           InitParams<VoxelBlockHash>());
 	volume_VBH_17_CUDA_depth_allocation.Reset();
 	// comparison volume
-	VoxelVolume<ITMVoxel, VoxelBlockHash> volume_CUDA_to_CPU(MEMORYDEVICE_CPU, InitParams<VoxelBlockHash>());
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_CUDA_to_CPU(MEMORYDEVICE_CPU, InitParams<VoxelBlockHash>());
 	volume_CUDA_to_CPU.Reset();
 	
 // *** allocate hash blocks ***
 	// CPU
-	IndexingEngine<ITMVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>& indexer_CPU =
-			IndexingEngine<ITMVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance();
+	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>& indexer_CPU =
+			IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance();
 	indexer_CPU.AllocateFromDepth(&volume_VBH_17_CPU_depth_allocation, view_CPU);
 	indexer_CPU.AllocateUsingOtherVolumeAndSetVisibilityExpanded(&volume_VBH_17_CPU, &volume_VBH_17_CPU_depth_allocation, view_CPU);
 	// CUDA
-	IndexingEngine<ITMVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>& indexer_CUDA =
-			IndexingEngine<ITMVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance();
+	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>& indexer_CUDA =
+			IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance();
 	indexer_CUDA.AllocateFromDepth(&volume_VBH_17_CUDA_depth_allocation, view_CUDA);
 	indexer_CUDA.AllocateUsingOtherVolumeAndSetVisibilityExpanded(&volume_VBH_17_CUDA, &volume_VBH_17_CUDA_depth_allocation, view_CUDA);
 
@@ -86,14 +86,14 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_VBH_Expnaded_CPU_CUDA, Frame16And1
 
 // *** integrate depth ***
 	// CPU
-	DepthFusionEngine<ITMVoxel, ITMWarp, VoxelBlockHash>* reconstructionEngine_VBH_CPU =
-			DepthFusionEngineFactory::Build<ITMVoxel, ITMWarp, VoxelBlockHash>(
+	DepthFusionEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash>* reconstructionEngine_VBH_CPU =
+			DepthFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, VoxelBlockHash>(
 					MEMORYDEVICE_CPU);
 	reconstructionEngine_VBH_CPU->IntegrateDepthImageIntoTsdfVolume(&volume_VBH_17_CPU, view_CPU);
 	reconstructionEngine_VBH_CPU->IntegrateDepthImageIntoTsdfVolume(&volume_VBH_17_CPU_depth_allocation, view_CPU);
 	// CUDA
-	DepthFusionEngine<ITMVoxel, ITMWarp, VoxelBlockHash>* reconstructionEngine_VBH_CUDA =
-			DepthFusionEngineFactory::Build<ITMVoxel, ITMWarp, VoxelBlockHash>(
+	DepthFusionEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash>* reconstructionEngine_VBH_CUDA =
+			DepthFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, VoxelBlockHash>(
 					MEMORYDEVICE_CUDA);
 	reconstructionEngine_VBH_CUDA->IntegrateDepthImageIntoTsdfVolume(&volume_VBH_17_CUDA, view_CUDA);
 	reconstructionEngine_VBH_CUDA->IntegrateDepthImageIntoTsdfVolume(&volume_VBH_17_CUDA_depth_allocation, view_CUDA);

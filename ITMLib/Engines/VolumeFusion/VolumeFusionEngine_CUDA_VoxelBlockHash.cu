@@ -16,11 +16,11 @@
 #include "../Traversal/CUDA/VolumeTraversal_CUDA_VoxelBlockHash.h"
 #include "../Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.tcu"
 #include "VolumeFusionEngine.tpp"
-#include "../../ITMLibDefines.h"
+#include "../../GlobalTemplateDefines.h"
 
 namespace ITMLib{
 
 template
-class VolumeFusionEngine<ITMVoxel, ITMWarp, VoxelBlockHash, MEMORYDEVICE_CUDA>;
+class VolumeFusionEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>;
 
 } // namespace ITMLib

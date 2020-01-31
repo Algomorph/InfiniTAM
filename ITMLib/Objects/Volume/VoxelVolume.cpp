@@ -15,12 +15,12 @@
 //  ================================================================
 
 #include "VoxelVolume.tpp"
-#include "../../ITMLibDefines.h"
+#include "../../GlobalTemplateDefines.h"
 
 // Explicit template instantiations for ITMVoxelVolume
 namespace ITMLib {
-	template class VoxelVolume<ITMVoxel, PlainVoxelArray>;
-	template class VoxelVolume<ITMVoxel, VoxelBlockHash>;
-	template class VoxelVolume<ITMWarp, PlainVoxelArray>;
-	template class VoxelVolume<ITMWarp, VoxelBlockHash>;
+	template class VoxelVolume<TSDFVoxel, PlainVoxelArray>;
+	template class VoxelVolume<TSDFVoxel, VoxelBlockHash>;
+	template class VoxelVolume<WarpVoxel, PlainVoxelArray>;
+	template class VoxelVolume<WarpVoxel, VoxelBlockHash>;
 }  // namespace ITMLib

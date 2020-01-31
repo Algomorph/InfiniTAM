@@ -13,12 +13,12 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "../../ITMLibDefines.h"
+#include "../../GlobalTemplateDefines.h"
 #include "VolumeFileIOEngine.tpp"
 
 namespace ITMLib {
 template
-class VolumeFileIOEngine<ITMVoxel, PlainVoxelArray>;
+class VolumeFileIOEngine<TSDFVoxel, PlainVoxelArray>;
 template
-class VolumeFileIOEngine<ITMWarp, PlainVoxelArray>;
+class VolumeFileIOEngine<WarpVoxel, PlainVoxelArray>;
 } // namespace ITMLib

@@ -19,7 +19,7 @@
 
 namespace ITMLib{
 
-template class ITMSceneSliceVisualizer2D<ITMVoxel, ITMWarp, PlainVoxelArray>;
+template class ITMSceneSliceVisualizer2D<TSDFVoxel, WarpVoxel, PlainVoxelArray>;
 
 } // namespace ITMLib
 #endif

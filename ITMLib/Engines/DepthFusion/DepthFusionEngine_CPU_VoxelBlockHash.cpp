@@ -14,8 +14,8 @@
 //  limitations under the License.
 //  ================================================================
 #include "DepthFusionEngine_CPU_VoxelBlockHash.tpp"
-#include "../../ITMLibDefines.h"
+#include "../../GlobalTemplateDefines.h"
 
 namespace ITMLib{
-template class DepthFusionEngine_CPU<ITMVoxel, ITMWarp, VoxelBlockHash>;
+template class DepthFusionEngine_CPU<TSDFVoxel, WarpVoxel, VoxelBlockHash>;
 }

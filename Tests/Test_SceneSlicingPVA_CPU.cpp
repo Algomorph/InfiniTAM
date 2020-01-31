@@ -32,10 +32,10 @@ using namespace ITMLib;
 
 
 BOOST_AUTO_TEST_CASE(testPVASceneSlice_CPU) {
-	VoxelVolume<ITMVoxel, PlainVoxelArray> canonical_scene_CPU(&configuration::get().general_voxel_volume_parameters,
+	VoxelVolume<TSDFVoxel, PlainVoxelArray> canonical_scene_CPU(&configuration::get().general_voxel_volume_parameters,
 	                                                                 configuration::get().swapping_mode ==
 	                                                                 configuration::SWAPPINGMODE_ENABLED,
-	                                                           MEMORYDEVICE_CPU);
+	                                                            MEMORYDEVICE_CPU);
 	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetVolume(&canonical_scene_CPU);
 
 	const int nonTruncatedVoxelCount = 41307;
@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE(testPVASceneSlice_CPU) {
 	                    17063.5, 0.001);
 
 
-	VoxelVolume<ITMVoxel, PlainVoxelArray> canonical_scene_slice_same_dimensions_CPU(
+	VoxelVolume<TSDFVoxel, PlainVoxelArray> canonical_scene_slice_same_dimensions_CPU(
 			&configuration::get().general_voxel_volume_parameters, configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 			MEMORYDEVICE_CPU);
 	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetVolume(&canonical_scene_slice_same_dimensions_CPU);
@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(testPVASceneSlice_CPU) {
 	//64+16=80; -24+72=96; 312-168=300-156=304-160=144
 	Vector3i sizeSlice(bounds.max_x - bounds.min_x, bounds.max_y - bounds.min_y, bounds.max_z - bounds.min_z);
 
-	VoxelVolume<ITMVoxel, PlainVoxelArray> canonical_scene_slice_different_dimensions_CPU(
+	VoxelVolume<TSDFVoxel, PlainVoxelArray> canonical_scene_slice_different_dimensions_CPU(
 			&configuration::get().general_voxel_volume_parameters, configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 			MEMORYDEVICE_CPU, {sizeSlice, offsetSlice});
 	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetVolume(&canonical_scene_slice_different_dimensions_CPU);
@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE(testPVASceneSlice_CPU) {
 	BOOST_REQUIRE(allocatedContentAlmostEqual_CPU_Verbose(&canonical_scene_CPU,
 	                                              &canonical_scene_slice_different_dimensions_CPU, tolerance));
 
-	VoxelVolume<ITMVoxel, PlainVoxelArray> canonical_scene_slice_from_disk_CPU(
+	VoxelVolume<TSDFVoxel, PlainVoxelArray> canonical_scene_slice_from_disk_CPU(
 			&configuration::get().general_voxel_volume_parameters, configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 			MEMORYDEVICE_CPU, {sizeSlice, offsetSlice});
 	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetVolume(&canonical_scene_slice_from_disk_CPU);

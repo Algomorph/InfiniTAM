@@ -14,8 +14,8 @@
 //  limitations under the License.
 //  ================================================================
 #include "DepthFusionEngine_CUDA_PlainVoxelArray.tcu"
-#include "../../ITMLibDefines.h"
+#include "../../GlobalTemplateDefines.h"
 
 namespace ITMLib{
-template class DepthFusionEngine_CUDA<ITMVoxel, ITMWarp, PlainVoxelArray>;
+template class DepthFusionEngine_CUDA<TSDFVoxel, WarpVoxel, PlainVoxelArray>;
 } // namespace ITMLib

@@ -14,12 +14,12 @@
 //  limitations under the License.
 //  ================================================================
 
-#include "../../../ITMLibDefines.h"
+#include "../../../GlobalTemplateDefines.h"
 #include "EditAndCopyEngine_CPU_VoxelBlockHash.tpp"
 
 namespace ITMLib {
 template
-class EditAndCopyEngine_CPU<ITMVoxel, VoxelBlockHash>;
+class EditAndCopyEngine_CPU<TSDFVoxel, VoxelBlockHash>;
 template
-class EditAndCopyEngine_CPU<ITMWarp, VoxelBlockHash>;
+class EditAndCopyEngine_CPU<WarpVoxel, VoxelBlockHash>;
 } // namespace ITMLib

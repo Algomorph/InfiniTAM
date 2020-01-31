@@ -28,7 +28,7 @@
 #endif
 
 //ITMLib
-#include "../../ITMLib/ITMLibDefines.h"
+#include "../../ITMLib/GlobalTemplateDefines.h"
 #include "../../ITMLib/Engines/Main/BasicVoxelEngine.h"
 #include "../../ITMLib/Engines/Main/BasicSurfelEngine.h"
 #include "../../ITMLib/Engines/Main/MultiEngine.h"
@@ -53,10 +53,10 @@ namespace pt = boost::property_tree;
 ITMDynamicFusionLogger_Interface& GetLogger(configuration::IndexingMethod method) {
 	switch (method) {
 		case configuration::INDEX_HASH: {
-			return static_cast<ITMDynamicFusionLogger_Interface&>(DynamicFusionLogger<ITMVoxel, ITMWarp, VoxelBlockHash>::Instance());
+			return static_cast<ITMDynamicFusionLogger_Interface&>(DynamicFusionLogger<TSDFVoxel, WarpVoxel, VoxelBlockHash>::Instance());
 		}
 		case configuration::INDEX_ARRAY: {
-			return static_cast<ITMDynamicFusionLogger_Interface&>(DynamicFusionLogger<ITMVoxel, ITMWarp, PlainVoxelArray>::Instance());
+			return static_cast<ITMDynamicFusionLogger_Interface&>(DynamicFusionLogger<TSDFVoxel, WarpVoxel, PlainVoxelArray>::Instance());
 		}
 	}
 };

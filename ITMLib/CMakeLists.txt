@@ -23,7 +23,7 @@ include(${PROJECT_SOURCE_DIR}/cmake/UseBoost.cmake)
 #############################
 
 set(ITMLIB_TOPLEVEL_HEADERS
-    ITMLibDefines.h
+    GlobalTemplateDefines.h
     )
 
 ##

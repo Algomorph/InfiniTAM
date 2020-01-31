@@ -19,7 +19,7 @@
 #include "../../../Math.h"
 #include "../../../../Objects/Volume/VoxelVolume.h"
 #include "../Interface/SceneStatisticsCalculatorInterface.h"
-#include "../../../../ITMLibDefines.h"
+#include "../../../../GlobalTemplateDefines.h"
 
 namespace ITMLib {
 template<typename TVoxel, typename TIndex>
@@ -58,9 +58,9 @@ private:
 };
 
 
-typedef ITMSceneStatisticsCalculator<ITMVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA> SceneStatCalc_CUDA_VBH_Voxel;
-typedef ITMSceneStatisticsCalculator<ITMVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA> SceneStatCalc_CUDA_PVA_Voxel;
-typedef ITMSceneStatisticsCalculator<ITMWarp, VoxelBlockHash, MEMORYDEVICE_CUDA> SceneStatCalc_CUDA_VBH_Warp;
-typedef ITMSceneStatisticsCalculator<ITMWarp, PlainVoxelArray, MEMORYDEVICE_CUDA> SceneStatCalc_CUDA_PVA_Warp;
+typedef ITMSceneStatisticsCalculator<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA> SceneStatCalc_CUDA_VBH_Voxel;
+typedef ITMSceneStatisticsCalculator<TSDFVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA> SceneStatCalc_CUDA_PVA_Voxel;
+typedef ITMSceneStatisticsCalculator<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA> SceneStatCalc_CUDA_VBH_Warp;
+typedef ITMSceneStatisticsCalculator<WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA> SceneStatCalc_CUDA_PVA_Warp;
 
 } // namespace ITMLib

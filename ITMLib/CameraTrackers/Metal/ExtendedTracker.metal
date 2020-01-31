@@ -6,7 +6,7 @@ using namespace metal;
 
 #include "../Shared/ExtendedTracker_Shared.h"
 #include "ExtendedTracker_Metal.h"
-#include "../../ITMLibDefines.h"
+#include "../../GlobalTemplateDefines.h"
 #include "../../Objects/Tracking/TrackerIterationType.h"
 
 inline float rho(float r, float huber_b)

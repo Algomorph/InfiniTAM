@@ -14,11 +14,11 @@
 //  limitations under the License.
 //  ================================================================
 //local
-#include "../../../ITMLibDefines.h"
+#include "../../../GlobalTemplateDefines.h"
 #include "../../../Objects/Volume/VoxelBlockHash.h"
 #include "MultiVisualizationEngine_CPU.tpp"
 
 namespace ITMLib {
 template
-class MultiVisualizationEngine_CPU<ITMVoxel, VoxelBlockHash>;
+class MultiVisualizationEngine_CPU<TSDFVoxel, VoxelBlockHash>;
 } // namespace ITMLib

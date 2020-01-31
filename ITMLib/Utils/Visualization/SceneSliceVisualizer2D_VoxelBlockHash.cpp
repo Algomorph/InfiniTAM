@@ -17,6 +17,6 @@
 #include "../../ITMLibDefines.h"
 #include "../../Utils/Visualization/ITMSceneSliceVisualizer2D.tpp"
 namespace ITMLib{
-template class ITMSceneSliceVisualizer2D<ITMVoxel, ITMWarp, VoxelBlockHash>;
+template class ITMSceneSliceVisualizer2D<TSDFVoxel, WarpVoxel, VoxelBlockHash>;
 } // namespace ITMLib
 #endif // #ifdef WITH_OPENCV

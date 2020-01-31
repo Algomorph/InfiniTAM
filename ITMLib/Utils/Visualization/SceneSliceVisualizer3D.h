@@ -26,7 +26,7 @@
 #include "SceneSliceVisualizer3DCommon.h"
 #include "VisualizationWindowManager.h"
 #include "VisualizationCommon.h"
-#include "../../ITMLibDefines.h"
+#include "../../GlobalTemplateDefines.h"
 
 //VTK
 #include <vtkSmartPointer.h>

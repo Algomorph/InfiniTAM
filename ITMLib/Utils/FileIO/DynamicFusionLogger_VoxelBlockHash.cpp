@@ -14,7 +14,7 @@
 //  limitations under the License.
 //  ================================================================
 
-#include "../../ITMLibDefines.h"
+#include "../../GlobalTemplateDefines.h"
 #include "DynamicFusionLogger.tpp"
 
-template class DynamicFusionLogger<ITMVoxel, ITMWarp, VoxelBlockHash>;
+template class DynamicFusionLogger<TSDFVoxel, WarpVoxel, VoxelBlockHash>;

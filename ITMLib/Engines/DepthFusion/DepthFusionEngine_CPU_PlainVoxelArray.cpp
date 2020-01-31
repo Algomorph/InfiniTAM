@@ -14,10 +14,10 @@
 //  limitations under the License.
 //  ================================================================
 #include "DepthFusionEngine_CPU_PlainVoxelArray.tpp"
-#include "../../ITMLibDefines.h"
+#include "../../GlobalTemplateDefines.h"
 
 namespace ITMLib{
 
-template class DepthFusionEngine_CPU<ITMVoxel, ITMWarp, PlainVoxelArray>;
+template class DepthFusionEngine_CPU<TSDFVoxel, WarpVoxel, PlainVoxelArray>;
 
 } // namespace ITMLib

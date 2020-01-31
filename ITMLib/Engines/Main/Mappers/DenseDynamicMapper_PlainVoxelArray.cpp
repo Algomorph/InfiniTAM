@@ -13,10 +13,10 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "../../../ITMLibDefines.h"
+#include "../../../GlobalTemplateDefines.h"
 #include "DenseDynamicMapper.tpp"
 
 
 namespace ITMLib{
-template class DenseDynamicMapper<ITMVoxel, ITMWarp, PlainVoxelArray>;
+template class DenseDynamicMapper<TSDFVoxel, WarpVoxel, PlainVoxelArray>;
 }//namespace ITMLib

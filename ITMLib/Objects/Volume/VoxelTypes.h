@@ -8,7 +8,7 @@
 /** \brief
     Stores the information of a single voxel in the volume
 */
-struct ITMVoxel_f_rgb
+struct TSDFVoxel_f_rgb
 {
 	_CPU_AND_GPU_CODE_ static float SDF_initialValue() { return 1.0f; }
 	_CPU_AND_GPU_CODE_ static float valueToFloat(float x) { return x; }
@@ -33,7 +33,7 @@ struct ITMVoxel_f_rgb
 	/** Number of observations that made up @p clr. */
 	uchar w_color;
 
-	_CPU_AND_GPU_CODE_ ITMVoxel_f_rgb()
+	_CPU_AND_GPU_CODE_ TSDFVoxel_f_rgb()
 	{
 		sdf = SDF_initialValue();
 		w_depth = 0;
@@ -50,7 +50,7 @@ struct ITMVoxel_f_rgb
 /** \brief
     Stores the information of a single voxel in the volume
 */
-struct ITMVoxel_s_rgb
+struct TSDFVoxel_s_rgb
 {
 	_CPU_AND_GPU_CODE_ static short SDF_initialValue() { return 32767; }
 	_CPU_AND_GPU_CODE_ static float valueToFloat(float x) { return (float)(x) / 32767.0f; }
@@ -77,7 +77,7 @@ struct ITMVoxel_s_rgb
 	/** Number of observations that made up @p clr. */
 	uchar w_color;
 
-	_CPU_AND_GPU_CODE_ ITMVoxel_s_rgb()
+	_CPU_AND_GPU_CODE_ TSDFVoxel_s_rgb()
 	{
 		sdf = SDF_initialValue();
 		w_depth = 0;
@@ -91,7 +91,7 @@ struct ITMVoxel_s_rgb
 	}
 };
 
-struct ITMVoxel_s
+struct TSDFVoxel_s
 {
 	_CPU_AND_GPU_CODE_ static short SDF_initialValue() { return 32767; }
 	_CPU_AND_GPU_CODE_ static float valueToFloat(float x) { return (float)(x) / 32767.0f; }
@@ -113,7 +113,7 @@ struct ITMVoxel_s
 	/** Padding that may or may not improve performance on certain GPUs */
 	//uchar pad;
 
-	_CPU_AND_GPU_CODE_ ITMVoxel_s()
+	_CPU_AND_GPU_CODE_ TSDFVoxel_s()
 	{
 		sdf = SDF_initialValue();
 		w_depth = 0;
@@ -124,7 +124,7 @@ struct ITMVoxel_s
 	}
 };
 
-struct ITMVoxel_f
+struct TSDFVoxel_f
 {
 	_CPU_AND_GPU_CODE_ static float SDF_initialValue() { return 1.0f; }
 	_CPU_AND_GPU_CODE_ static float valueToFloat(float x) { return x; }
@@ -146,7 +146,7 @@ struct ITMVoxel_f
 	/** Padding that may or may not improve performance on certain GPUs */
 	//uchar pad;
 
-	_CPU_AND_GPU_CODE_ ITMVoxel_f()
+	_CPU_AND_GPU_CODE_ TSDFVoxel_f()
 	{
 		sdf = SDF_initialValue();
 		w_depth = 0;
@@ -157,7 +157,7 @@ struct ITMVoxel_f
 	}
 };
 
-struct ITMVoxel_f_conf
+struct TSDFVoxel_f_conf
 {
 	_CPU_AND_GPU_CODE_ static float SDF_initialValue() { return 1.0f; }
 	_CPU_AND_GPU_CODE_ static float valueToFloat(float x) { return x; }
@@ -180,7 +180,7 @@ struct ITMVoxel_f_conf
 	//uchar pad;
 	float confidence;
 
-	_CPU_AND_GPU_CODE_ ITMVoxel_f_conf()
+	_CPU_AND_GPU_CODE_ TSDFVoxel_f_conf()
 	{
 		sdf = SDF_initialValue();
 		w_depth = 0;
@@ -194,7 +194,7 @@ struct ITMVoxel_f_conf
 };
 
 
-struct ITMVoxel_s_rgb_conf
+struct TSDFVoxel_s_rgb_conf
 {
 	_CPU_AND_GPU_CODE_ static short SDF_initialValue() { return 32767; }
 	_CPU_AND_GPU_CODE_ static float valueToFloat(float x) { return (float)(x) / 32767.0f; }
@@ -222,7 +222,7 @@ struct ITMVoxel_s_rgb_conf
 	uchar w_color;
 	float confidence;
 
-	_CPU_AND_GPU_CODE_ ITMVoxel_s_rgb_conf()
+	_CPU_AND_GPU_CODE_ TSDFVoxel_s_rgb_conf()
 	{
 		sdf = SDF_initialValue();
 		w_depth = 0;
@@ -237,7 +237,7 @@ struct ITMVoxel_s_rgb_conf
 	}
 };
 
-struct ITMVoxel_f_rgb_conf
+struct TSDFVoxel_f_rgb_conf
 {
 	_CPU_AND_GPU_CODE_ static float SDF_initialValue() { return 1.0f; }
 	_CPU_AND_GPU_CODE_ static float valueToFloat(float x) { return x; }
@@ -265,7 +265,7 @@ struct ITMVoxel_f_rgb_conf
 	uchar w_color;
 	float confidence;
 
-	_CPU_AND_GPU_CODE_ ITMVoxel_f_rgb_conf()
+	_CPU_AND_GPU_CODE_ TSDFVoxel_f_rgb_conf()
 	{
 		sdf = SDF_initialValue();
 		w_depth = 0;
@@ -281,7 +281,7 @@ struct ITMVoxel_f_rgb_conf
 };
 
 
-struct ITMVoxel_f_warp{
+struct WarpVoxel_f_uf{
 	static const CONSTPTR(bool) hasSDFInformation = false;
 	static const CONSTPTR(bool) hasColorInformation = false;
 	static const CONSTPTR(bool) hasConfidenceInformation = false;
@@ -301,7 +301,7 @@ struct ITMVoxel_f_warp{
 	};
 	Vector3f gradient1;
 
-	_CPU_AND_GPU_CODE_ ITMVoxel_f_warp():
+	_CPU_AND_GPU_CODE_ WarpVoxel_f_uf():
 		framewise_warp(0.0f),
 		gradient0(0.0f),
 		gradient1(0.0f)
@@ -314,7 +314,7 @@ struct ITMVoxel_f_warp{
 };
 
 
-struct ITMVoxel_f_flags
+struct TSDFVoxel_f_flags
 {
 	_CPU_AND_GPU_CODE_ static float SDF_initialValue() { return 1.0f; }
 	_CPU_AND_GPU_CODE_ static float valueToFloat(float x) { return x; }
@@ -336,7 +336,7 @@ struct ITMVoxel_f_flags
 	uchar w_depth;
 	/** refer to ITMVoxelFlags for flag bit array values */
 	unsigned char flags;
-	_CPU_AND_GPU_CODE_ ITMVoxel_f_flags() :
+	_CPU_AND_GPU_CODE_ TSDFVoxel_f_flags() :
 			flags(ITMLib::VOXEL_UNKNOWN),
 			sdf(SDF_initialValue()),
 			w_depth(0){}

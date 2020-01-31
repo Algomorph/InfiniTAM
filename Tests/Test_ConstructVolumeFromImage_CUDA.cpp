@@ -23,7 +23,7 @@
 
 //ITMLib
 #include "TestUtilsForSnoopyFrames16And17.h"
-#include "../ITMLib/ITMLibDefines.h"
+#include "../ITMLib/GlobalTemplateDefines.h"
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngine.h"
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
 #include "../ITMLib/Engines/ViewBuilding/Interface/ViewBuilder.h"
@@ -40,27 +40,27 @@
 
 using namespace ITMLib;
 
-typedef VolumeFileIOEngine<ITMVoxel, PlainVoxelArray> SceneFileIOEngine_PVA;
-typedef VolumeFileIOEngine<ITMVoxel, VoxelBlockHash> SceneFileIOEngine_VBH;
+typedef VolumeFileIOEngine<TSDFVoxel, PlainVoxelArray> SceneFileIOEngine_PVA;
+typedef VolumeFileIOEngine<TSDFVoxel, VoxelBlockHash> SceneFileIOEngine_VBH;
 
 
 BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct16_PVA_VBH_CUDA, Frame16And17Fixture) {
 
-	VoxelVolume<ITMVoxel, PlainVoxelArray>* volume_PVA_16;
+	VoxelVolume<TSDFVoxel, PlainVoxelArray>* volume_PVA_16;
 	buildSdfVolumeFromImage(&volume_PVA_16, "TestData/snoopy_depth_000016.png",
 	                        "TestData/snoopy_color_000016.png", "TestData/snoopy_omask_000016.png",
 	                        "TestData/snoopy_calib.txt", MEMORYDEVICE_CUDA,
 	                        InitParams<PlainVoxelArray>());
 
-	VoxelVolume<ITMVoxel, VoxelBlockHash>* volume_VBH_16;
+	VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume_VBH_16;
 	buildSdfVolumeFromImage(&volume_VBH_16, "TestData/snoopy_depth_000016.png",
 	                        "TestData/snoopy_color_000016.png", "TestData/snoopy_omask_000016.png",
 	                        "TestData/snoopy_calib.txt", MEMORYDEVICE_CUDA,
 	                        InitParams<VoxelBlockHash>());
 //
-//	ITMVoxel voxelPVA = ManipulationEngine_CUDA_PVA_Voxel::Inst().ReadVoxel(volume_PVA_16, Vector3i(-24,63,240));
+//	TSDFVoxel voxelPVA = ManipulationEngine_CUDA_PVA_Voxel::Inst().ReadVoxel(volume_PVA_16, Vector3i(-24,63,240));
 //	voxelPVA.print_self();
-//	ITMVoxel voxelVBH = ManipulationEngine_CUDA_VBH_Voxel::Inst().ReadVoxel(volume_VBH_16, Vector3i(-24,63,240));
+//	TSDFVoxel voxelVBH = ManipulationEngine_CUDA_VBH_Voxel::Inst().ReadVoxel(volume_VBH_16, Vector3i(-24,63,240));
 //	voxelVBH.print_self();
 
 	float absoluteTolerance = 1e-7;
@@ -74,22 +74,22 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct16_PVA_VBH_CUDA, Frame16And17Fixture)
 
 BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_PVA_VBH_CUDA, Frame16And17Fixture) {
 
-	VoxelVolume<ITMVoxel, PlainVoxelArray>* volume_PVA_17;
+	VoxelVolume<TSDFVoxel, PlainVoxelArray>* volume_PVA_17;
 	buildSdfVolumeFromImage(&volume_PVA_17, "TestData/snoopy_depth_000017.png",
 	                        "TestData/snoopy_color_000017.png", "TestData/snoopy_omask_000017.png",
 	                        "TestData/snoopy_calib.txt", MEMORYDEVICE_CUDA,
 	                        InitParams<PlainVoxelArray>());
 
-	VoxelVolume<ITMVoxel, VoxelBlockHash>* volume_VBH_17;
+	VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume_VBH_17;
 	buildSdfVolumeFromImage(&volume_VBH_17, "TestData/snoopy_depth_000017.png",
 	                        "TestData/snoopy_color_000017.png", "TestData/snoopy_omask_000017.png",
 	                        "TestData/snoopy_calib.txt", MEMORYDEVICE_CUDA,
 	                        InitParams<VoxelBlockHash>());
 
 //	Vector3i voxelPosition(-24, -2, 87);
-//	ITMVoxel voxelPVA = ManipulationEngine_CUDA_PVA_Voxel::Inst().ReadVoxel(volume_PVA_17, voxelPosition);
+//	TSDFVoxel voxelPVA = ManipulationEngine_CUDA_PVA_Voxel::Inst().ReadVoxel(volume_PVA_17, voxelPosition);
 //	voxelPVA.print_self();
-//	ITMVoxel voxelVBH = ManipulationEngine_CUDA_VBH_Voxel::Inst().ReadVoxel(volume_VBH_17, voxelPosition);
+//	TSDFVoxel voxelVBH = ManipulationEngine_CUDA_VBH_Voxel::Inst().ReadVoxel(volume_VBH_17, voxelPosition);
 //	voxelVBH.print_self();
 
 	float absoluteTolerance = 1e-7;
@@ -109,25 +109,25 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_PVA_VBH_Expanded_CUDA, Frame16And1
 	           "TestData/snoopy_calib.txt", MEMORYDEVICE_CUDA);
 
 	// *** construct volumes ***
-	VoxelVolume<ITMVoxel, PlainVoxelArray> volume_PVA_17(MEMORYDEVICE_CUDA, InitParams<PlainVoxelArray>());
+	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_PVA_17(MEMORYDEVICE_CUDA, InitParams<PlainVoxelArray>());
 	volume_PVA_17.Reset();
-	DepthFusionEngine<ITMVoxel, ITMWarp, PlainVoxelArray>* reconstructionEngine_PVA =
-			DepthFusionEngineFactory::Build<ITMVoxel, ITMWarp, PlainVoxelArray>(MEMORYDEVICE_CUDA);
+	DepthFusionEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray>* reconstructionEngine_PVA =
+			DepthFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, PlainVoxelArray>(MEMORYDEVICE_CUDA);
 	reconstructionEngine_PVA->GenerateTsdfVolumeFromView(&volume_PVA_17, view);
 
 
-	VoxelVolume<ITMVoxel, VoxelBlockHash> volume_VBH_17(MEMORYDEVICE_CUDA, InitParams<VoxelBlockHash>());
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_17(MEMORYDEVICE_CUDA, InitParams<VoxelBlockHash>());
 	volume_VBH_17.Reset();
-	VoxelVolume<ITMVoxel, VoxelBlockHash> volume_VBH_17_depth_allocation(MEMORYDEVICE_CUDA, InitParams<VoxelBlockHash>());
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_17_depth_allocation(MEMORYDEVICE_CUDA, InitParams<VoxelBlockHash>());
 	volume_VBH_17_depth_allocation.Reset();
 
-	IndexingEngine<ITMVoxel,VoxelBlockHash, MEMORYDEVICE_CUDA>& indexer =
-			IndexingEngine<ITMVoxel,VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance();
+	IndexingEngine<TSDFVoxel,VoxelBlockHash, MEMORYDEVICE_CUDA>& indexer =
+			IndexingEngine<TSDFVoxel,VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance();
 	indexer.AllocateFromDepth(&volume_VBH_17_depth_allocation, view);
 	indexer.AllocateUsingOtherVolumeAndSetVisibilityExpanded(&volume_VBH_17, &volume_VBH_17_depth_allocation, view);
 
-	DepthFusionEngine<ITMVoxel, ITMWarp, VoxelBlockHash>* reconstructionEngine_VBH =
-			DepthFusionEngineFactory::Build<ITMVoxel, ITMWarp, VoxelBlockHash>(MEMORYDEVICE_CUDA);
+	DepthFusionEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash>* reconstructionEngine_VBH =
+			DepthFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, VoxelBlockHash>(MEMORYDEVICE_CUDA);
 	reconstructionEngine_VBH->IntegrateDepthImageIntoTsdfVolume(&volume_VBH_17, view);
 	reconstructionEngine_VBH->IntegrateDepthImageIntoTsdfVolume(&volume_VBH_17_depth_allocation, view);
 
@@ -171,17 +171,17 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CUDA) {
 
 	Vector3i volumeSize(1024, 32, 1024), volumeOffset(-volumeSize.x / 2, -volumeSize.y / 2, 0);
 
-	VoxelVolume<ITMVoxel, PlainVoxelArray> scene1(&configuration::get().general_voxel_volume_parameters,
+	VoxelVolume<TSDFVoxel, PlainVoxelArray> scene1(&configuration::get().general_voxel_volume_parameters,
 	                                                    configuration::get().swapping_mode ==
 	                                                    configuration::SWAPPINGMODE_ENABLED,
-	                                              settings->device_type,
-	                                              {volumeSize, volumeOffset});
+	                                               settings->device_type,
+	                                               {volumeSize, volumeOffset});
 	ManipulationEngine_CUDA_PVA_Voxel::Inst().ResetVolume(&scene1);
 	ITMTrackingState trackingState(imageSize, settings->device_type);
 
-	DepthFusionEngine<ITMVoxel, ITMWarp, PlainVoxelArray>* reconstructionEngine_PVA =
+	DepthFusionEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray>* reconstructionEngine_PVA =
 			DepthFusionEngineFactory
-			::Build<ITMVoxel, ITMWarp, PlainVoxelArray>(MEMORYDEVICE_CUDA);
+			::Build<TSDFVoxel, WarpVoxel, PlainVoxelArray>(MEMORYDEVICE_CUDA);
 	reconstructionEngine_PVA->GenerateTsdfVolumeFromView(&scene1, view, &trackingState);
 
 	const int num_stripes = 62;
@@ -221,8 +221,8 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CUDA) {
 	// check constructed scene integrity
 	for (int iCoord = 0; iCoord < zeroLevelSetCoords.size(); iCoord++) {
 		Vector3i coord = zeroLevelSetCoords[iCoord];
-		ITMVoxel voxel = ManipulationEngine_CUDA_PVA_Voxel::Inst().ReadVoxel(&scene1, coord);
-		float sdf = ITMVoxel::valueToFloat(voxel.sdf);
+		TSDFVoxel voxel = ManipulationEngine_CUDA_PVA_Voxel::Inst().ReadVoxel(&scene1, coord);
+		float sdf = TSDFVoxel::valueToFloat(voxel.sdf);
 		BOOST_REQUIRE(almostEqual(sdf, 0.0f, tolerance));
 
 		// for extremely lateral points close to the camera, the rays are highly skewed,
@@ -234,21 +234,21 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CUDA) {
 				Vector3i augmentedCoord(coord.x, coord.y, coord.z + iLevelSet);
 				float expectedSdf = -static_cast<float>(iLevelSet) * maxSdfStep;
 				voxel = ManipulationEngine_CUDA_PVA_Voxel::Inst().ReadVoxel(&scene1, augmentedCoord);
-				sdf = ITMVoxel::valueToFloat(voxel.sdf);
+				sdf = TSDFVoxel::valueToFloat(voxel.sdf);
 				BOOST_REQUIRE(almostEqual(sdf, expectedSdf, tolerance));
 			}
 		}
 	}
 
-	VoxelVolume<ITMVoxel, VoxelBlockHash> scene2(&configuration::get().general_voxel_volume_parameters,
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> scene2(&configuration::get().general_voxel_volume_parameters,
 	                                                   configuration::get().swapping_mode ==
 	                                                   configuration::SWAPPINGMODE_ENABLED,
-	                                             settings->device_type, {0x800, 0x20000});
+	                                              settings->device_type, {0x800, 0x20000});
 	ManipulationEngine_CUDA_VBH_Voxel::Inst().ResetVolume(&scene2);
 
-	DepthFusionEngine<ITMVoxel, ITMWarp, VoxelBlockHash>* reconstructionEngine_VBH =
+	DepthFusionEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash>* reconstructionEngine_VBH =
 			DepthFusionEngineFactory
-			::Build<ITMVoxel, ITMWarp, VoxelBlockHash>(MEMORYDEVICE_CUDA);
+			::Build<TSDFVoxel, WarpVoxel, VoxelBlockHash>(MEMORYDEVICE_CUDA);
 
 	RenderState renderState(imageSize, configuration::get().general_voxel_volume_parameters.near_clipping_distance,
 	                        configuration::get().general_voxel_volume_parameters.far_clipping_distance, settings->device_type);
@@ -256,25 +256,25 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CUDA) {
 
 	tolerance = 1e-5;
 	BOOST_REQUIRE(allocatedContentAlmostEqual_CUDA(&scene1, &scene2, tolerance));
-	VoxelVolume<ITMVoxel, PlainVoxelArray> scene3(&configuration::get().general_voxel_volume_parameters,
+	VoxelVolume<TSDFVoxel, PlainVoxelArray> scene3(&configuration::get().general_voxel_volume_parameters,
 	                                                    configuration::get().swapping_mode ==
 	                                                    configuration::SWAPPINGMODE_ENABLED,
-	                                              settings->device_type,
-	                                              {volumeSize, volumeOffset});
+	                                               settings->device_type,
+	                                               {volumeSize, volumeOffset});
 	ManipulationEngine_CUDA_PVA_Voxel::Inst().ResetVolume(&scene3);
 	reconstructionEngine_PVA->GenerateTsdfVolumeFromView(&scene3, view, &trackingState);
 	BOOST_REQUIRE(contentAlmostEqual_CUDA(&scene1, &scene3, tolerance));
-	VoxelVolume<ITMVoxel, VoxelBlockHash> scene4(&configuration::get().general_voxel_volume_parameters,
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> scene4(&configuration::get().general_voxel_volume_parameters,
 	                                                   configuration::get().swapping_mode ==
 	                                                   configuration::SWAPPINGMODE_ENABLED,
-	                                             settings->device_type, {0x800, 0x20000});
+	                                              settings->device_type, {0x800, 0x20000});
 	ManipulationEngine_CUDA_VBH_Voxel::Inst().ResetVolume(&scene4);
 	reconstructionEngine_VBH->GenerateTsdfVolumeFromView(&scene4, view, &trackingState);
 	BOOST_REQUIRE(contentAlmostEqual_CUDA(&scene2, &scene4, tolerance));
 
 	Vector3i coordinate = zeroLevelSetCoords[0];
-	ITMVoxel voxel = ManipulationEngine_CUDA_PVA_Voxel::Inst().ReadVoxel(&scene3, coordinate);
-	voxel.sdf = ITMVoxel::floatToValue(ITMVoxel::valueToFloat(voxel.sdf) + 0.05f);
+	TSDFVoxel voxel = ManipulationEngine_CUDA_PVA_Voxel::Inst().ReadVoxel(&scene3, coordinate);
+	voxel.sdf = TSDFVoxel::floatToValue(TSDFVoxel::valueToFloat(voxel.sdf) + 0.05f);
 	ManipulationEngine_CUDA_PVA_Voxel::Inst().SetVoxel(&scene3, coordinate, voxel);
 	ManipulationEngine_CUDA_VBH_Voxel::Inst().SetVoxel(&scene2, coordinate, voxel);
 
@@ -282,7 +282,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CUDA) {
 	BOOST_REQUIRE(!contentAlmostEqual_CUDA(&scene2, &scene4, tolerance));
 	BOOST_REQUIRE(!allocatedContentAlmostEqual_CUDA(&scene1, &scene2, tolerance));
 
-	VoxelVolume<ITMVoxel, VoxelBlockHash> scene5(
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> scene5(
 			&configuration::get().general_voxel_volume_parameters,
 			configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 			settings->device_type, {0x800, 0x20000});
@@ -323,11 +323,11 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CUDA) {
 	// endregion =======================================================================================================
 
 	Vector3i volumeSize(512, 112, 360), volumeOffset(-512, -24, 152);
-	VoxelVolume<ITMVoxel, PlainVoxelArray> scene2(&configuration::get().general_voxel_volume_parameters,
+	VoxelVolume<TSDFVoxel, PlainVoxelArray> scene2(&configuration::get().general_voxel_volume_parameters,
 	                                                    configuration::get().swapping_mode ==
 	                                                    configuration::SWAPPINGMODE_ENABLED,
-	                                              settings->device_type,
-	                                              {volumeSize, volumeOffset});
+	                                               settings->device_type,
+	                                               {volumeSize, volumeOffset});
 	std::string path = "TestData/test_PVA_ConstructFromImage2_";
 	ManipulationEngine_CUDA_PVA_Voxel::Inst().ResetVolume(&scene2);
 	SceneFileIOEngine_PVA::LoadFromDirectoryCompact(&scene2, path);
@@ -335,32 +335,32 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CUDA) {
 
 	float tolerance = 1e-5;
 	{
-		VoxelVolume<ITMVoxel, PlainVoxelArray> scene1(&configuration::get().general_voxel_volume_parameters,
+		VoxelVolume<TSDFVoxel, PlainVoxelArray> scene1(&configuration::get().general_voxel_volume_parameters,
 		                                                    configuration::get().swapping_mode ==
 		                                                    configuration::SWAPPINGMODE_ENABLED,
-		                                              settings->device_type,
-		                                              {volumeSize, volumeOffset});
+		                                               settings->device_type,
+		                                               {volumeSize, volumeOffset});
 
 		ManipulationEngine_CUDA_PVA_Voxel::Inst().ResetVolume(&scene1);
 
 
-		DepthFusionEngine<ITMVoxel, ITMWarp, PlainVoxelArray>* reconstructionEngine_PVA =
+		DepthFusionEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray>* reconstructionEngine_PVA =
 				DepthFusionEngineFactory
-				::Build<ITMVoxel, ITMWarp, PlainVoxelArray>(MEMORYDEVICE_CUDA);
+				::Build<TSDFVoxel, WarpVoxel, PlainVoxelArray>(MEMORYDEVICE_CUDA);
 		reconstructionEngine_PVA->GenerateTsdfVolumeFromView(&scene1, view, &trackingState);
 
 		BOOST_REQUIRE(contentAlmostEqual_CUDA(&scene1, &scene2, tolerance));
 	}
 
-	VoxelVolume<ITMVoxel, VoxelBlockHash> scene3(&configuration::get().general_voxel_volume_parameters,
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> scene3(&configuration::get().general_voxel_volume_parameters,
 	                                                   configuration::get().swapping_mode ==
 	                                                   configuration::SWAPPINGMODE_ENABLED,
-	                                             settings->device_type);
+	                                              settings->device_type);
 	ManipulationEngine_CUDA_VBH_Voxel::Inst().ResetVolume(&scene3);
 
-	DepthFusionEngine<ITMVoxel, ITMWarp, VoxelBlockHash>* reconstructionEngine_VBH =
+	DepthFusionEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash>* reconstructionEngine_VBH =
 			DepthFusionEngineFactory
-			::Build<ITMVoxel, ITMWarp, VoxelBlockHash>(MEMORYDEVICE_CUDA);
+			::Build<TSDFVoxel, WarpVoxel, VoxelBlockHash>(MEMORYDEVICE_CUDA);
 
 	RenderState renderState(imageSize, configuration::get().general_voxel_volume_parameters.near_clipping_distance,
 	                        configuration::get().general_voxel_volume_parameters.far_clipping_distance, settings->device_type);

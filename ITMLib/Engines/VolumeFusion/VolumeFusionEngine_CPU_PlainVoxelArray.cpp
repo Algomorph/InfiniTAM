@@ -16,10 +16,10 @@
 #include "../Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
 #include "../Indexing/Interface/IndexingEngine.tpp"
 #include "VolumeFusionEngine.tpp"
-#include "../../ITMLibDefines.h"
+#include "../../GlobalTemplateDefines.h"
 namespace ITMLib{
 
 template
-class VolumeFusionEngine<ITMVoxel, ITMWarp, PlainVoxelArray, MEMORYDEVICE_CPU>;
+class VolumeFusionEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU>;
 
 } // namespace ITMLib

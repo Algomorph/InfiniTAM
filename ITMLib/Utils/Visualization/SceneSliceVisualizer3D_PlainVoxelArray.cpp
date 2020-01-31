@@ -14,7 +14,7 @@
 //  limitations under the License.
 //  ================================================================
 
-#include "../../ITMLibDefines.h"
+#include "../../GlobalTemplateDefines.h"
 #include "SceneSliceVisualizer3D.tpp"
 #include "SceneSliceVisualizer3DInteractorStyle.tpp"
 

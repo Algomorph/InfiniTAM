@@ -14,11 +14,11 @@
 //  limitations under the License.
 //  ================================================================
 //local
-#include "../../../ITMLibDefines.h"
+#include "../../../GlobalTemplateDefines.h"
 #include "../../../Objects/Volume/PlainVoxelArray.h"
 #include "MultiMeshingEngine_CUDA.tcu"
 
 namespace ITMLib {
 template
-class MultiMeshingEngine_CUDA<ITMVoxel, PlainVoxelArray>;
+class MultiMeshingEngine_CUDA<TSDFVoxel, PlainVoxelArray>;
 } // namespace ITMLib

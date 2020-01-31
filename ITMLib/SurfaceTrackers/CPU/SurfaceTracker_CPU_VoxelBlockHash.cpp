@@ -18,12 +18,12 @@
 #include "../../Utils/Analytics/SceneStatisticsCalculator/CPU/SceneStatisticsCalculator_CPU.h"
 #include "../WarpGradientFunctors/WarpGradientFunctor_SlavchevaOptimized.h"
 #include "../WarpGradientFunctors/WarpGradientFunctor_SlavchevaDiagnostic.h"
-#include "../../ITMLibDefines.h"
+#include "../../GlobalTemplateDefines.h"
 #include "../Interface/SurfaceTracker.tpp"
 
 namespace ITMLib {
 template
-class SurfaceTracker<ITMVoxel, ITMWarp, VoxelBlockHash, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_OPTIMIZED>;
+class SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_OPTIMIZED>;
 template
-class SurfaceTracker<ITMVoxel, ITMWarp, VoxelBlockHash, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_DIAGNOSTIC>;
+class SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_DIAGNOSTIC>;
 } // namespace ITMLib

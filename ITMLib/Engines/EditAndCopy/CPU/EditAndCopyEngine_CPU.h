@@ -17,7 +17,7 @@
 
 #include "../../../Objects/Volume/VoxelVolume.h"
 #include "../../../Objects/Volume/RepresentationAccess.h"
-#include "../../../ITMLibDefines.h"
+#include "../../../GlobalTemplateDefines.h"
 #include "../../../Utils/HashBlockProperties.h"
 #include "../../../Utils/CPPPrintHelpers.h"
 #include "../Interface/EditAndCopyEngineInterface.h"
@@ -91,10 +91,10 @@ public:
 
 // endregion ================= SCENE MANIPULATION ENGINE ===============================================================
 
-typedef EditAndCopyEngine_CPU<ITMVoxel, PlainVoxelArray> ManipulationEngine_CPU_PVA_Voxel;
-typedef EditAndCopyEngine_CPU<ITMVoxel, VoxelBlockHash> ManipulationEngine_CPU_VBH_Voxel;
-typedef EditAndCopyEngine_CPU<ITMWarp, PlainVoxelArray> ManipulationEngine_CPU_PVA_Warp;
-typedef EditAndCopyEngine_CPU<ITMWarp, VoxelBlockHash> ManipulationEngine_CPU_VBH_Warp;
+typedef EditAndCopyEngine_CPU<TSDFVoxel, PlainVoxelArray> ManipulationEngine_CPU_PVA_Voxel;
+typedef EditAndCopyEngine_CPU<TSDFVoxel, VoxelBlockHash> ManipulationEngine_CPU_VBH_Voxel;
+typedef EditAndCopyEngine_CPU<WarpVoxel, PlainVoxelArray> ManipulationEngine_CPU_PVA_Warp;
+typedef EditAndCopyEngine_CPU<WarpVoxel, VoxelBlockHash> ManipulationEngine_CPU_VBH_Warp;
 
 // region ======================================== HELPER RANGE COMPUTATION / CHECK ROUTINES ===========================
 // =====================================================================================================================

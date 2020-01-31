@@ -13,12 +13,12 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "../../../ITMLibDefines.h"
+#include "../../../GlobalTemplateDefines.h"
 #include "DenseSurfelMapper.tpp"
 
 namespace ITMLib {
 template
-class DenseSurfelMapper<ITMSurfel_grey>;
+class DenseSurfelMapper<Surfel_grey>;
 template
-class DenseSurfelMapper<ITMSurfel_rgb>;
+class DenseSurfelMapper<Surfel_rgb>;
 }//namespace ITMLib

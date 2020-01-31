@@ -15,52 +15,52 @@
 //  ================================================================
 
 #include "../../Interface/IndexingEngine.tpp"
-#include "../../../../ITMLibDefines.h"
+#include "../../../../GlobalTemplateDefines.h"
 
 namespace ITMLib {
 template
-class IndexingEngine<ITMVoxel, PlainVoxelArray, MEMORYDEVICE_CPU>;
+class IndexingEngine<TSDFVoxel, PlainVoxelArray, MEMORYDEVICE_CPU>;
 template
-class IndexingEngine<ITMWarp, PlainVoxelArray, MEMORYDEVICE_CPU>;
+class IndexingEngine<WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU>;
 
 
-template void IndexingEngine<ITMVoxel,PlainVoxelArray,MEMORYDEVICE_CPU>::AllocateUsingOtherVolume(
-		ITMLib::VoxelVolume<ITMWarp, PlainVoxelArray>* targetVolume,
-		ITMLib::VoxelVolume<ITMVoxel, PlainVoxelArray>* sourceVolume);
-template void IndexingEngine<ITMVoxel,PlainVoxelArray,MEMORYDEVICE_CPU>::AllocateUsingOtherVolume(
-		ITMLib::VoxelVolume<ITMVoxel, PlainVoxelArray>* targetVolume,
-		ITMLib::VoxelVolume<ITMVoxel, PlainVoxelArray>* sourceVolume);
-template void IndexingEngine<ITMVoxel,PlainVoxelArray,MEMORYDEVICE_CPU>::AllocateUsingOtherVolumeExpanded(
-		ITMLib::VoxelVolume<ITMWarp, PlainVoxelArray>* targetVolume,
-		ITMLib::VoxelVolume<ITMVoxel, PlainVoxelArray>* sourceVolume);
-template void IndexingEngine<ITMVoxel,PlainVoxelArray,MEMORYDEVICE_CPU>::AllocateUsingOtherVolumeExpanded(
-		ITMLib::VoxelVolume<ITMVoxel, PlainVoxelArray>* targetVolume,
-		ITMLib::VoxelVolume<ITMVoxel, PlainVoxelArray>* sourceVolume);
-template void IndexingEngine<ITMVoxel,PlainVoxelArray,MEMORYDEVICE_CPU>::AllocateUsingOtherVolumeAndSetVisibilityExpanded(
-		ITMLib::VoxelVolume<ITMWarp, PlainVoxelArray>* targetVolume,
-		ITMLib::VoxelVolume<ITMVoxel, PlainVoxelArray>* sourceVolume,
+template void IndexingEngine<TSDFVoxel,PlainVoxelArray,MEMORYDEVICE_CPU>::AllocateUsingOtherVolume(
+		ITMLib::VoxelVolume<WarpVoxel, PlainVoxelArray>* targetVolume,
+		ITMLib::VoxelVolume<TSDFVoxel, PlainVoxelArray>* sourceVolume);
+template void IndexingEngine<TSDFVoxel,PlainVoxelArray,MEMORYDEVICE_CPU>::AllocateUsingOtherVolume(
+		ITMLib::VoxelVolume<TSDFVoxel, PlainVoxelArray>* targetVolume,
+		ITMLib::VoxelVolume<TSDFVoxel, PlainVoxelArray>* sourceVolume);
+template void IndexingEngine<TSDFVoxel,PlainVoxelArray,MEMORYDEVICE_CPU>::AllocateUsingOtherVolumeExpanded(
+		ITMLib::VoxelVolume<WarpVoxel, PlainVoxelArray>* targetVolume,
+		ITMLib::VoxelVolume<TSDFVoxel, PlainVoxelArray>* sourceVolume);
+template void IndexingEngine<TSDFVoxel,PlainVoxelArray,MEMORYDEVICE_CPU>::AllocateUsingOtherVolumeExpanded(
+		ITMLib::VoxelVolume<TSDFVoxel, PlainVoxelArray>* targetVolume,
+		ITMLib::VoxelVolume<TSDFVoxel, PlainVoxelArray>* sourceVolume);
+template void IndexingEngine<TSDFVoxel,PlainVoxelArray,MEMORYDEVICE_CPU>::AllocateUsingOtherVolumeAndSetVisibilityExpanded(
+		ITMLib::VoxelVolume<WarpVoxel, PlainVoxelArray>* targetVolume,
+		ITMLib::VoxelVolume<TSDFVoxel, PlainVoxelArray>* sourceVolume,
 		ITMView* view, const Matrix4f& depth_camera_matrix);
-template void IndexingEngine<ITMVoxel,PlainVoxelArray,MEMORYDEVICE_CPU>::AllocateUsingOtherVolumeAndSetVisibilityExpanded(
-		ITMLib::VoxelVolume<ITMVoxel, PlainVoxelArray>* targetVolume,
-		ITMLib::VoxelVolume<ITMVoxel, PlainVoxelArray>* sourceVolume,
+template void IndexingEngine<TSDFVoxel,PlainVoxelArray,MEMORYDEVICE_CPU>::AllocateUsingOtherVolumeAndSetVisibilityExpanded(
+		ITMLib::VoxelVolume<TSDFVoxel, PlainVoxelArray>* targetVolume,
+		ITMLib::VoxelVolume<TSDFVoxel, PlainVoxelArray>* sourceVolume,
 		ITMView* view, const Matrix4f& depth_camera_matrix);
 
-template void IndexingEngine<ITMVoxel, PlainVoxelArray, MEMORYDEVICE_CPU>::
+template void IndexingEngine<TSDFVoxel, PlainVoxelArray, MEMORYDEVICE_CPU>::
 AllocateFromWarpedVolume<WarpType::WARP_CUMULATIVE>(
-		VoxelVolume<ITMWarp, PlainVoxelArray>* warpField,
-		VoxelVolume<ITMVoxel, PlainVoxelArray>* sourceTSDF,
-		VoxelVolume<ITMVoxel, PlainVoxelArray>* targetTSDF
+		VoxelVolume<WarpVoxel, PlainVoxelArray>* warpField,
+		VoxelVolume<TSDFVoxel, PlainVoxelArray>* sourceTSDF,
+		VoxelVolume<TSDFVoxel, PlainVoxelArray>* targetTSDF
 );
-template void IndexingEngine<ITMVoxel, PlainVoxelArray, MEMORYDEVICE_CPU>::
+template void IndexingEngine<TSDFVoxel, PlainVoxelArray, MEMORYDEVICE_CPU>::
 AllocateFromWarpedVolume<WarpType::WARP_FLOW>(
-		VoxelVolume<ITMWarp, PlainVoxelArray>* warpField,
-		VoxelVolume<ITMVoxel, PlainVoxelArray>* sourceTSDF,
-		VoxelVolume<ITMVoxel, PlainVoxelArray>* targetTSDF
+		VoxelVolume<WarpVoxel, PlainVoxelArray>* warpField,
+		VoxelVolume<TSDFVoxel, PlainVoxelArray>* sourceTSDF,
+		VoxelVolume<TSDFVoxel, PlainVoxelArray>* targetTSDF
 );
-template void IndexingEngine<ITMVoxel, PlainVoxelArray, MEMORYDEVICE_CPU>::
+template void IndexingEngine<TSDFVoxel, PlainVoxelArray, MEMORYDEVICE_CPU>::
 AllocateFromWarpedVolume<WarpType::WARP_UPDATE>(
-		VoxelVolume<ITMWarp, PlainVoxelArray>* warpField,
-		VoxelVolume<ITMVoxel, PlainVoxelArray>* sourceTSDF,
-		VoxelVolume<ITMVoxel, PlainVoxelArray>* targetTSDF
+		VoxelVolume<WarpVoxel, PlainVoxelArray>* warpField,
+		VoxelVolume<TSDFVoxel, PlainVoxelArray>* sourceTSDF,
+		VoxelVolume<TSDFVoxel, PlainVoxelArray>* targetTSDF
 );
 } //namespace ITMLib

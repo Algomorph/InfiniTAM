@@ -14,8 +14,8 @@
 //  limitations under the License.
 //  ================================================================
 #include "LocalVBA.tpp"
-#include "../../ITMLibDefines.h"
+#include "../../GlobalTemplateDefines.h"
 namespace ITMLib{
-	template class LocalVBA<ITMVoxel>;
-	template class LocalVBA<ITMWarp>;
+	template class LocalVBA<TSDFVoxel>;
+	template class LocalVBA<WarpVoxel>;
 }//namespace ITMLib

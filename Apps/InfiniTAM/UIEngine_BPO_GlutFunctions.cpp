@@ -307,7 +307,7 @@ void UIEngine_BPO::GlutKeyUpFunction(unsigned char key, int x, int y) {
 
 				switch (uiEngine.indexingMethod) {
 					case configuration::INDEX_HASH: {
-						auto* multiEngine = dynamic_cast<MultiEngine<ITMVoxel, VoxelBlockHash>*>(uiEngine.mainEngine);
+						auto* multiEngine = dynamic_cast<MultiEngine<TSDFVoxel, VoxelBlockHash>*>(uiEngine.mainEngine);
 						if (multiEngine != nullptr) {
 							int idx = multiEngine->findPrimaryLocalMapIdx();
 							if (idx < 0) idx = 0;
@@ -316,7 +316,7 @@ void UIEngine_BPO::GlutKeyUpFunction(unsigned char key, int x, int y) {
 					}
 						break;
 					case configuration::INDEX_ARRAY:
-						auto* multiEngine = dynamic_cast<MultiEngine<ITMVoxel, PlainVoxelArray>*>(uiEngine.mainEngine);
+						auto* multiEngine = dynamic_cast<MultiEngine<TSDFVoxel, PlainVoxelArray>*>(uiEngine.mainEngine);
 						if (multiEngine != nullptr) {
 							int idx = multiEngine->findPrimaryLocalMapIdx();
 							if (idx < 0) idx = 0;
@@ -390,7 +390,7 @@ void UIEngine_BPO::GlutKeyUpFunction(unsigned char key, int x, int y) {
 			break;
 		case '[':
 		case ']': {
-			auto* multiEngineVBH = dynamic_cast<MultiEngine<ITMVoxel, VoxelBlockHash>*>(uiEngine.mainEngine);
+			auto* multiEngineVBH = dynamic_cast<MultiEngine<TSDFVoxel, VoxelBlockHash>*>(uiEngine.mainEngine);
 			if (multiEngineVBH != nullptr) {
 				int idx = multiEngineVBH->getFreeviewLocalMapIdx();
 				if (key == '[') idx--;
@@ -398,7 +398,7 @@ void UIEngine_BPO::GlutKeyUpFunction(unsigned char key, int x, int y) {
 				multiEngineVBH->changeFreeviewLocalMapIdx(&(uiEngine.freeviewPose), idx);
 				uiEngine.needsRefresh = true;
 			}
-			auto* multiEnginePVA = dynamic_cast<MultiEngine<ITMVoxel, PlainVoxelArray>*>(uiEngine.mainEngine);
+			auto* multiEnginePVA = dynamic_cast<MultiEngine<TSDFVoxel, PlainVoxelArray>*>(uiEngine.mainEngine);
 			if (multiEnginePVA != nullptr) {
 				int idx = multiEnginePVA->getFreeviewLocalMapIdx();
 				if (key == '[') idx--;

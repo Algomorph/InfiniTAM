@@ -14,7 +14,7 @@
 //  limitations under the License.
 //  ================================================================
 
-#include "../../../ITMLibDefines.h"
+#include "../../../GlobalTemplateDefines.h"
 
 //Note: ".tpp" files have to be included for all explicit instantiations in order to link properly
 #include "EditAndCopyEngine_CUDA_PlainVoxelArray.tcu"
@@ -22,7 +22,7 @@
 
 namespace ITMLib {
 template
-class EditAndCopyEngine_CUDA<ITMVoxel, PlainVoxelArray>;
+class EditAndCopyEngine_CUDA<TSDFVoxel, PlainVoxelArray>;
 template
-class EditAndCopyEngine_CUDA<ITMWarp, PlainVoxelArray>;
+class EditAndCopyEngine_CUDA<WarpVoxel, PlainVoxelArray>;
 } //namespace ITMLib

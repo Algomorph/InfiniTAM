@@ -21,7 +21,7 @@
 //boost
 #include <boost/test/unit_test.hpp>
 //ITMLib
-#include "../ITMLib/ITMLibDefines.h"
+#include "../ITMLib/GlobalTemplateDefines.h"
 #include "../ITMLib/Objects/Volume/VoxelVolume.h"
 #include "../ITMLib/Utils/Configuration.h"
 #include "../ITMLib/Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
@@ -32,10 +32,10 @@
 
 using namespace ITMLib;
 
-typedef VolumeFileIOEngine<ITMVoxel, PlainVoxelArray> SceneFileIOEngine_PVA;
-typedef VolumeFileIOEngine<ITMVoxel, VoxelBlockHash> SceneFileIOEngine_VBH;
-//typedef ITMSceneStatisticsCalculator_CUDA<ITMVoxel, PlainVoxelArray> SceneStatisticsCalculator_PVA;
-//typedef ITMSceneStatisticsCalculator_CUDA<ITMVoxel, VoxelBlockHash> SceneStatCalc_CPU_VBH_Voxel;
+typedef VolumeFileIOEngine<TSDFVoxel, PlainVoxelArray> SceneFileIOEngine_PVA;
+typedef VolumeFileIOEngine<TSDFVoxel, VoxelBlockHash> SceneFileIOEngine_VBH;
+//typedef ITMSceneStatisticsCalculator_CUDA<TSDFVoxel, PlainVoxelArray> SceneStatisticsCalculator_PVA;
+//typedef ITMSceneStatisticsCalculator_CUDA<TSDFVoxel, VoxelBlockHash> SceneStatCalc_CPU_VBH_Voxel;
 
 BOOST_AUTO_TEST_CASE(testSaveSceneCompact_CUDA) {
 
@@ -43,11 +43,11 @@ BOOST_AUTO_TEST_CASE(testSaveSceneCompact_CUDA) {
 	Vector3i volumeSize(40, 68, 20);
 	Vector3i volumeOffset(-20, 0, 0);
 
-	VoxelVolume<ITMVoxel, PlainVoxelArray> scene1(
+	VoxelVolume<TSDFVoxel, PlainVoxelArray> scene1(
 			&configuration::get().general_voxel_volume_parameters, configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 			MEMORYDEVICE_CUDA, {volumeSize, volumeOffset});
 
-	VoxelVolume<ITMVoxel, PlainVoxelArray> scene2(
+	VoxelVolume<TSDFVoxel, PlainVoxelArray> scene2(
 			&configuration::get().general_voxel_volume_parameters, configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 			MEMORYDEVICE_CUDA, {volumeSize, volumeOffset});
 
@@ -61,11 +61,11 @@ BOOST_AUTO_TEST_CASE(testSaveSceneCompact_CUDA) {
 	BOOST_REQUIRE_EQUAL( SceneStatCalc_CUDA_PVA_Voxel ::Instance().ComputeNonTruncatedVoxelCount(&scene2), 19456);
 	BOOST_REQUIRE(contentAlmostEqual_CUDA(&scene1, &scene2, tolerance));
 
-	VoxelVolume<ITMVoxel, VoxelBlockHash> scene3(
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> scene3(
 			&configuration::get().general_voxel_volume_parameters, configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 			MEMORYDEVICE_CUDA, {0x800, 0x20000});
 
-	VoxelVolume<ITMVoxel, VoxelBlockHash> scene4(
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> scene4(
 			&configuration::get().general_voxel_volume_parameters, configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 			MEMORYDEVICE_CUDA, {0x800, 0x20000});
 

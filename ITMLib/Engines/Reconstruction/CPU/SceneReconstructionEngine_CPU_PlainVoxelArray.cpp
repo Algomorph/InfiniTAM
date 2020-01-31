@@ -14,11 +14,11 @@
 //  limitations under the License.
 //  ================================================================
 //local
-#include "../../../ITMLibDefines.h"
+#include "../../../GlobalTemplateDefines.h"
 #include "../../../Objects/Volume/PlainVoxelArray.h"
 #include "SceneReconstructionEngine_CPU.tpp"
 
 namespace ITMLib {
 template
-class SceneReconstructionEngine_CPU<ITMVoxel, PlainVoxelArray>;
+class SceneReconstructionEngine_CPU<TSDFVoxel, PlainVoxelArray>;
 } // namespace ITMLib
