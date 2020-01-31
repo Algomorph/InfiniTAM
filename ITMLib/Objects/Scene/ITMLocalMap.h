@@ -11,10 +11,10 @@
 #include "../../Utils/Configuration.h"
 
 namespace ITMLib {
-	struct ITMPoseConstraint
+	struct PoseConstraint
 	{
 	public:
-		ITMPoseConstraint(void)
+		PoseConstraint(void)
 		{
 			accu_num = 0;
 		}
@@ -37,7 +37,7 @@ namespace ITMLib {
 		int accu_num;
 	};
 
-	typedef std::map<int, ITMPoseConstraint> ConstraintList;
+	typedef std::map<int, PoseConstraint> ConstraintList;
 
 	template<class TVoxel, class TIndex>
 	class ITMLocalMap

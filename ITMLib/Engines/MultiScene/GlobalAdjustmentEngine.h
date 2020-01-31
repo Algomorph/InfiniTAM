@@ -3,7 +3,7 @@
 #pragma once
 
 #include "../../../MiniSlamGraphLib/PoseGraph.h"
-#include "MapGraphManager.h"
+#include "VoxelMapGraphManager.h"
 
 namespace ITMLib {
 

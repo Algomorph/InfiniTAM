@@ -252,13 +252,15 @@ set(ITMLIB_ENGINES_MESHING_SHARED_HEADERS
 set(ITMLIB_ENGINES_MULTISCENE_SOURCES
     Engines/MultiScene/ActiveMapManager.cpp
     Engines/MultiScene/GlobalAdjustmentEngine.cpp
-    Engines/MultiScene/MapGraphManager.tpp
+    Engines/MultiScene/VoxelMapGraphManager.tpp
+    Engines/MultiScene/VoxelMapGraphManager_PlainVoxelArray.cpp
+    Engines/MultiScene/VoxelMapGraphManager_VoxelBlockHash.cpp
     )
 
 set(ITMLIB_ENGINES_MULTISCENE_HEADERS
     Engines/MultiScene/ActiveMapManager.h
     Engines/MultiScene/GlobalAdjustmentEngine.h
-    Engines/MultiScene/MapGraphManager.h
+    Engines/MultiScene/VoxelMapGraphManager.h
     )
 #====================================== INDEXING ENGINES ===============================================================
 set(ITMLIB_ENGINES_INDEXING_SOURCES

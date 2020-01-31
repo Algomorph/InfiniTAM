@@ -41,7 +41,7 @@ MultiEngine<TVoxel, TIndex>::MultiEngine(const ITMRGBDCalib& calib, Vector2i img
 	trackingController = new TrackingController(tracker);
 	trackedImageSize = trackingController->GetTrackedImageSize(imgSize_rgb, imgSize_d);
 
-	mapManager = new ITMVoxelMapGraphManager<TVoxel, TIndex>(visualization_engine, denseMapper, trackedImageSize);
+	mapManager = new VoxelMapGraphManager<TVoxel, TIndex>(visualization_engine, denseMapper, trackedImageSize);
 	mActiveDataManager = new ActiveMapManager(mapManager);
 	mActiveDataManager->initiateNewLocalMap(true);
 	denseMapper = new DenseMapper<TVoxel, TIndex>(mapManager->getLocalMap(0)->scene->index);

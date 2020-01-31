@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "../../Engines/MultiScene/MapGraphManager.h"
+#include "../../Engines/MultiScene/VoxelMapGraphManager.h"
 #include "../Scene/ITMMultiSceneAccess.h"
 #include "../../Objects/RenderStates/ITMRenderState.h"
 
@@ -17,7 +17,7 @@ namespace ITMLib {
 	public:
 		typedef typename ITMMultiIndex<TIndex>::IndexData MultiIndexData;
 		typedef ITMMultiVoxel<TVoxel> MultiVoxelData;
-		typedef ITMVoxelMapGraphManager<TVoxel, TIndex> MultiSceneManager;
+		typedef VoxelMapGraphManager<TVoxel, TIndex> MultiSceneManager;
 
 #ifndef COMPILE_WITHOUT_CUDA
 		MultiIndexData *indexData_device;

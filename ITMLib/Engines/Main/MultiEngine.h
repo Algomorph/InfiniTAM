@@ -40,7 +40,7 @@ namespace ITMLib
 
 		FernRelocLib::Relocaliser<float> *relocaliser;
 
-		ITMVoxelMapGraphManager<TVoxel, TIndex> *mapManager;
+		VoxelMapGraphManager<TVoxel, TIndex> *mapManager;
 		ActiveMapManager *mActiveDataManager;
 		GlobalAdjustmentEngine *mGlobalAdjustmentEngine;
 		bool mScheduleGlobalAdjustment;

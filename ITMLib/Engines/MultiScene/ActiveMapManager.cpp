@@ -336,7 +336,7 @@ int ActiveMapManager::CheckSuccess_newlink(int dataID, int primaryDataID, int *i
 	//int previousEstimate_weight = 0;
 	int primaryLocalMapIndex = -1;
 	if (primaryDataID >= 0) primaryLocalMapIndex = activeData[primaryDataID].localMapIndex;
-	const ITMPoseConstraint & previousInformation = localMapManager->getRelation_const(primaryLocalMapIndex, link.localMapIndex);
+	const PoseConstraint & previousInformation = localMapManager->getRelation_const(primaryLocalMapIndex, link.localMapIndex);
 	/* hmm... do we want the "Estimate" (i.e. the pose corrected by pose
 	   graph optimization) or the "Observations" (i.e. the accumulated
 	   poses seen in previous frames?
@@ -374,12 +374,12 @@ void ActiveMapManager::AcceptNewLink(int fromData, int toData, const ORUtils::SE
 	int toLocalMapIdx = activeData[toData].localMapIndex;
 
 	{
-		ITMPoseConstraint &c = localMapManager->getRelation(fromLocalMapIdx, toLocalMapIdx);
+		PoseConstraint &c = localMapManager->getRelation(fromLocalMapIdx, toLocalMapIdx);
 		c.AddObservation(pose, weight);
 	}
 	{
 		ORUtils::SE3Pose invPose(pose.GetInvM());
-		ITMPoseConstraint &c = localMapManager->getRelation(toLocalMapIdx, fromLocalMapIdx);
+		PoseConstraint &c = localMapManager->getRelation(toLocalMapIdx, fromLocalMapIdx);
 		c.AddObservation(invPose, weight);
 	}
 }

@@ -22,8 +22,8 @@ namespace ITMLib
 		virtual void removeLocalMap(int index) = 0;
 		virtual size_t numLocalMaps(void) const = 0;
 
-		virtual const ITMPoseConstraint & getRelation_const(int fromLocalMap, int toLocalMap) const = 0;
-		virtual ITMPoseConstraint & getRelation(int fromLocalMap, int toLocalMap) = 0;
+		virtual const PoseConstraint & getRelation_const(int fromLocalMap, int toLocalMap) const = 0;
+		virtual PoseConstraint & getRelation(int fromLocalMap, int toLocalMap) = 0;
 		virtual void eraseRelation(int fromLocalMap, int toLocalMap) = 0;
 		virtual const ConstraintList & getConstraints(int localMapId) const = 0;
 
@@ -38,7 +38,7 @@ namespace ITMLib
 	};
 
 	template<class TVoxel, class TIndex>
-	class ITMVoxelMapGraphManager : public MapGraphManager
+	class VoxelMapGraphManager : public MapGraphManager
 	{
 	private:
 		const VisualizationEngine<TVoxel, TIndex> *visualization_engine;
@@ -48,9 +48,9 @@ namespace ITMLib
 		std::vector<ITMLocalMap<TVoxel, TIndex>*> allData;
 
 	public:
-		ITMVoxelMapGraphManager(const VisualizationEngine<TVoxel, TIndex>* visualizationEngine,
-		                        const DenseMapper<TVoxel, TIndex>* denseMapper, const Vector2i& trackedImageSize);
-		~ITMVoxelMapGraphManager(void);
+		VoxelMapGraphManager(const VisualizationEngine<TVoxel, TIndex>* visualizationEngine,
+		                     const DenseMapper<TVoxel, TIndex>* denseMapper, const Vector2i& trackedImageSize);
+		~VoxelMapGraphManager(void);
 
 		int createNewLocalMap(void);
 		void removeLocalMap(int index);
@@ -60,8 +60,8 @@ namespace ITMLib
 
 		ITMLocalMap<TVoxel, TIndex>* getLocalMap(int localMapId) { return allData[localMapId]; }
 
-		const ITMPoseConstraint & getRelation_const(int fromLocalMap, int toLocalMap) const;
-		ITMPoseConstraint & getRelation(int fromLocalMap, int toLocalMap);
+		const PoseConstraint & getRelation_const(int fromLocalMap, int toLocalMap) const;
+		PoseConstraint & getRelation(int fromLocalMap, int toLocalMap);
 		void eraseRelation(int fromLocalMap, int toLocalMap);
 		const ConstraintList & getConstraints(int localMapId) const { return allData[localMapId]->relations; }
 

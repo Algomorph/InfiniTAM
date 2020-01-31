@@ -12,7 +12,7 @@ namespace ITMLib
 	{
 	public:
 		explicit ITMMultiMeshingEngine_CPU(const TIndex& index){};
-		void MeshScene(ITMMesh *mesh, const ITMVoxelMapGraphManager<TVoxel, TIndex> & sceneManager) {}
+		void MeshScene(ITMMesh *mesh, const VoxelMapGraphManager<TVoxel, TIndex> & sceneManager) {}
 	};
 
 	template<class TVoxel>
@@ -22,7 +22,7 @@ namespace ITMLib
 		explicit ITMMultiMeshingEngine_CPU(const VoxelBlockHash& index){};
 		typedef typename ITMMultiIndex<VoxelBlockHash>::IndexData MultiIndexData;
 		typedef ITMMultiVoxel<TVoxel> MultiVoxelData;
-		typedef ITMVoxelMapGraphManager<TVoxel, VoxelBlockHash> MultiSceneManager;
+		typedef VoxelMapGraphManager<TVoxel, VoxelBlockHash> MultiSceneManager;
 		void MeshScene(ITMMesh *mesh, const MultiSceneManager & sceneManager);
 	};
 }

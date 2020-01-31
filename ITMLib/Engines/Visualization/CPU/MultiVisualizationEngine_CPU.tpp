@@ -14,7 +14,7 @@
 using namespace ITMLib;
 
 template<class TVoxel, class TIndex>
-void MultiVisualizationEngine_CPU<TVoxel, TIndex>::PrepareRenderState(const ITMVoxelMapGraphManager<TVoxel, TIndex> & mapManager, ITMRenderState *_state)
+void MultiVisualizationEngine_CPU<TVoxel, TIndex>::PrepareRenderState(const VoxelMapGraphManager<TVoxel, TIndex> & mapManager, ITMRenderState *_state)
 {
 	ITMRenderStateMultiScene<TVoxel, TIndex> *state = (ITMRenderStateMultiScene<TVoxel, TIndex>*)_state;
 
@@ -22,19 +22,19 @@ void MultiVisualizationEngine_CPU<TVoxel, TIndex>::PrepareRenderState(const ITMV
 }
 
 template<class TVoxel>
-void MultiVisualizationEngine_CPU<TVoxel, VoxelBlockHash>::PrepareRenderState(const ITMVoxelMapGraphManager<TVoxel, VoxelBlockHash> & mapManager, ITMRenderState *_state){
+void MultiVisualizationEngine_CPU<TVoxel, VoxelBlockHash>::PrepareRenderState(const VoxelMapGraphManager<TVoxel, VoxelBlockHash> & mapManager, ITMRenderState *_state){
 	ITMRenderStateMultiScene<TVoxel, VoxelBlockHash> *state = (ITMRenderStateMultiScene<TVoxel, VoxelBlockHash>*)_state;
 	state->PrepareLocalMaps(mapManager);
 }
 
 
 template<class TVoxel, class TIndex>
-void MultiVisualizationEngine_CPU<TVoxel, TIndex>::CreateExpectedDepths(const ITMVoxelMapGraphManager<TVoxel, TIndex> & sceneManager, const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics, ITMRenderState *_renderState) const
+void MultiVisualizationEngine_CPU<TVoxel, TIndex>::CreateExpectedDepths(const VoxelMapGraphManager<TVoxel, TIndex> & sceneManager, const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics, ITMRenderState *_renderState) const
 {
 }
 
 template<class TVoxel>
-void MultiVisualizationEngine_CPU<TVoxel, VoxelBlockHash>::CreateExpectedDepths(const ITMVoxelMapGraphManager<TVoxel, VoxelBlockHash> & sceneManager, const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics, ITMRenderState *_renderState) const
+void MultiVisualizationEngine_CPU<TVoxel, VoxelBlockHash>::CreateExpectedDepths(const VoxelMapGraphManager<TVoxel, VoxelBlockHash> & sceneManager, const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics, ITMRenderState *_renderState) const
 {
 	ITMRenderStateMultiScene<TVoxel, VoxelBlockHash> *renderState = (ITMRenderStateMultiScene<TVoxel, VoxelBlockHash>*)_renderState;
 

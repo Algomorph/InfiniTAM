@@ -13,9 +13,9 @@ namespace ITMLib
 		MultiVisualizationEngine_CPU(void) {}
 		~MultiVisualizationEngine_CPU(void) {}
 
-		void PrepareRenderState(const ITMVoxelMapGraphManager<TVoxel, TIndex> & sceneManager, ITMRenderState *state);
+		void PrepareRenderState(const VoxelMapGraphManager<TVoxel, TIndex> & sceneManager, ITMRenderState *state);
 
-		void CreateExpectedDepths(const ITMVoxelMapGraphManager<TVoxel, TIndex> & sceneManager, const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics, ITMRenderState *renderState) const;
+		void CreateExpectedDepths(const VoxelMapGraphManager<TVoxel, TIndex> & sceneManager, const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics, ITMRenderState *renderState) const;
 
 		void RenderImage(const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics, ITMRenderState *renderState, ITMUChar4Image *outputImage, IVisualizationEngine::RenderImageType type) const;
 	};
@@ -27,9 +27,9 @@ public:
 	MultiVisualizationEngine_CPU(void) {}
 	~MultiVisualizationEngine_CPU(void) {}
 
-	void PrepareRenderState(const ITMVoxelMapGraphManager<TVoxel, VoxelBlockHash> & sceneManager, ITMRenderState *state);
+	void PrepareRenderState(const VoxelMapGraphManager<TVoxel, VoxelBlockHash> & sceneManager, ITMRenderState *state);
 
-	void CreateExpectedDepths(const ITMVoxelMapGraphManager<TVoxel, VoxelBlockHash> & sceneManager, const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics, ITMRenderState *renderState) const;
+	void CreateExpectedDepths(const VoxelMapGraphManager<TVoxel, VoxelBlockHash> & sceneManager, const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics, ITMRenderState *renderState) const;
 
 	void RenderImage(const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics, ITMRenderState *renderState, ITMUChar4Image *outputImage, IVisualizationEngine::RenderImageType type) const;
 };

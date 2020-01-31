@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "MapGraphManager.h"
+#include "VoxelMapGraphManager.h"
 
 namespace ITMLib
 {

@@ -4,7 +4,7 @@
 
 #include "ITMMeshingEngine.h"
 #include "../../../Objects/Meshing/ITMMesh.h"
-#include "../../MultiScene/MapGraphManager.h"
+#include "../../MultiScene/VoxelMapGraphManager.h"
 
 namespace ITMLib
 {
@@ -14,6 +14,6 @@ namespace ITMLib
 	public:
 		virtual ~ITMMultiMeshingEngine(void) {}
 
-		virtual void MeshScene(ITMMesh *mesh, const ITMVoxelMapGraphManager<TVoxel, TIndex> & sceneManager) = 0;
+		virtual void MeshScene(ITMMesh *mesh, const VoxelMapGraphManager<TVoxel, TIndex> & sceneManager) = 0;
 	};
 }

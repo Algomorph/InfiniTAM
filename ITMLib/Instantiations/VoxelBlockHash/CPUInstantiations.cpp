@@ -9,7 +9,7 @@
 #include "../../Engines/Main/Mappers/DenseSurfelMapper.tpp"
 #include "../../Engines/Meshing/CPU/ITMMeshingEngine_CPU.tpp"
 #include "../../Engines/Meshing/CPU/ITMMultiMeshingEngine_CPU.tpp"
-#include "../../Engines/MultiScene/MapGraphManager.tpp"
+#include "../../Engines/MultiScene/VoxelMapGraphManager.tpp"
 #include "../../Engines/Visualization/CPU/MultiVisualizationEngine_CPU.tpp"
 #include "../../Engines/Reconstruction/CPU/SceneReconstructionEngine_CPU.tpp"
 #include "../../Engines/Reconstruction/Interface/SurfelSceneReconstructionEngine.tpp"
@@ -21,8 +21,6 @@
 
 namespace ITMLib
 {
-
-	template class ITMVoxelMapGraphManager<ITMVoxel, VoxelBlockHash>;
 
 	template class ITMMeshingEngine_CPU<ITMVoxel, VoxelBlockHash>;
 	template class ITMMultiMeshingEngine_CPU<ITMVoxel, VoxelBlockHash>;
