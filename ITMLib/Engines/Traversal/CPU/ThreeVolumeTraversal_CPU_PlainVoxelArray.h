@@ -20,14 +20,14 @@
 #include "../../../Objects/Volume/VoxelVolume.h"
 #include "../../../Objects/Volume/PlainVoxelArray.h"
 
-namespace ITMLib{
+namespace ITMLib {
 
 //======================================================================================================================
 //                            CONTAINS TRAVERSAL METHODS FOR VOLUMES USING PlainVoxelArray FOR INDEXING
 //                                  (THREE VOLUMES WITH DIFFERING VOXEL TYPES)
 //======================================================================================================================
-template<typename TVoxel, typename TWarp>
-class ThreeVolumeTraversalEngine<TVoxel, TWarp, PlainVoxelArray, MEMORYDEVICE_CPU> {
+template<typename TVoxel1, typename TVoxel2, typename TVoxel3>
+class ThreeVolumeTraversalEngine<TVoxel1, TVoxel2, TVoxel3, PlainVoxelArray, MEMORYDEVICE_CPU> {
 	/**
 	 * \brief Concurrent traversal of three volumes with potentially-differing voxel types
 	 * \details All volumes must have matching dimensions
@@ -37,119 +37,124 @@ public:
 
 	template<typename TStaticFunctor>
 	inline static void
-	StaticDualVoxelTraversal(
-			VoxelVolume<TVoxel, PlainVoxelArray>* primaryScene,
-			VoxelVolume<TVoxel, PlainVoxelArray>* secondaryScene,
-			VoxelVolume<TWarp, PlainVoxelArray>* warpField) {
-		assert(primaryScene->index.GetVolumeSize() == secondaryScene->index.GetVolumeSize() &&
-		       primaryScene->index.GetVolumeSize() == warpField->index.GetVolumeSize());
+	Traverse(VoxelVolume<TVoxel1, PlainVoxelArray>* volume1,
+	         VoxelVolume<TVoxel2, PlainVoxelArray>* volume2,
+	         VoxelVolume<TVoxel3, PlainVoxelArray>* volume3) {
+		assert(volume2->index.GetVolumeSize() == volume3->index.GetVolumeSize() &&
+		       volume2->index.GetVolumeSize() == volume1->index.GetVolumeSize());
 // *** traversal vars
-		TVoxel* secondaryVoxels = secondaryScene->localVBA.GetVoxelBlocks();
-		TVoxel* primaryVoxels = primaryScene->localVBA.GetVoxelBlocks();
-		TWarp* warpVoxels = warpField->localVBA.GetVoxelBlocks();
-		//asserted to be the same
-		int voxelCount = primaryScene->index.GetVolumeSize().x * primaryScene->index.GetVolumeSize().y *
-		                 primaryScene->index.GetVolumeSize().z;
+		TVoxel1* voxels1 = volume1->localVBA.GetVoxelBlocks();
+		TVoxel2* voxels2 = volume2->localVBA.GetVoxelBlocks();
+		TVoxel3* voxels3 = volume3->localVBA.GetVoxelBlocks();
 
+		//asserted to be the same
+		int voxel_count = volume1->index.GetVolumeSize().x * volume1->index.GetVolumeSize().y *
+		                  volume1->index.GetVolumeSize().z;
 
 #ifdef WITH_OPENMP
 #pragma omp parallel for
 #endif
-		for (int linearIndex = 0; linearIndex < voxelCount; linearIndex++) {
-			TVoxel& primaryVoxel = primaryVoxels[linearIndex];
-			TVoxel& secondaryVoxel = secondaryVoxels[linearIndex];
-			TWarp& warpVoxel = warpVoxels[linearIndex];
-			TStaticFunctor::run(primaryVoxel, secondaryVoxel, warpVoxel);
+		for (int linear_index = 0; linear_index < voxel_count; linear_index++) {
+			TVoxel1& voxel1 = voxels1[linear_index];
+			TVoxel2& voxel2 = voxels2[linear_index];
+			TVoxel3& voxel3 = voxels3[linear_index];
+			TStaticFunctor::run(voxel1, voxel2, voxel3);
 		}
 	}
 // endregion
 // region ================================ DYNAMIC TWO-SCENE TRAVERSAL WITH WARPS ======================================
 
-
-
 	template<typename TFunctor>
 	inline static void
-	DualVoxelTraversal(
-			VoxelVolume<TVoxel, PlainVoxelArray>* primaryScene,
-			VoxelVolume<TVoxel, PlainVoxelArray>* secondaryScene,
-			VoxelVolume<TWarp, PlainVoxelArray>* warpField,
-			TFunctor& functor) {
+	Traverse(VoxelVolume<TVoxel1, PlainVoxelArray>* volume1,
+	         VoxelVolume<TVoxel2, PlainVoxelArray>* volume2,
+	         VoxelVolume<TVoxel3, PlainVoxelArray>* volume3,
+	         TFunctor& functor) {
 
-		assert(primaryScene->index.GetVolumeSize() == secondaryScene->index.GetVolumeSize());
+		assert(volume2->index.GetVolumeSize() == volume3->index.GetVolumeSize() &&
+		       volume2->index.GetVolumeSize() == volume1->index.GetVolumeSize());
+
 // *** traversal vars
-		TVoxel* secondaryVoxels = secondaryScene->localVBA.GetVoxelBlocks();
-		TVoxel* primaryVoxels = primaryScene->localVBA.GetVoxelBlocks();
-		TWarp* warpVoxels = warpField->localVBA.GetVoxelBlocks();
+		TVoxel1* voxels1 = volume1->localVBA.GetVoxelBlocks();
+		TVoxel2* voxels2 = volume2->localVBA.GetVoxelBlocks();
+		TVoxel3* voxels3 = volume3->localVBA.GetVoxelBlocks();
+
 		//asserted to be the same
-		int voxelCount = primaryScene->index.GetVolumeSize().x * primaryScene->index.GetVolumeSize().y *
-		                 primaryScene->index.GetVolumeSize().z;
+		int voxel_count = volume2->index.GetVolumeSize().x * volume2->index.GetVolumeSize().y *
+		                  volume2->index.GetVolumeSize().z;
 
 #ifdef WITH_OPENMP
 #pragma omp parallel for
 #endif
-		for (int linearIndex = 0; linearIndex < voxelCount; linearIndex++) {
-			TVoxel& primaryVoxel = primaryVoxels[linearIndex];
-			TVoxel& secondaryVoxel = secondaryVoxels[linearIndex];
-			TWarp& warpVoxel = warpVoxels[linearIndex];
-			functor(primaryVoxel, secondaryVoxel, warpVoxel);
+		for (int linear_index = 0; linear_index < voxel_count; linear_index++) {
+			TVoxel1& voxel1 = voxels1[linear_index];
+			TVoxel2& voxel2 = voxels2[linear_index];
+			TVoxel3& voxel3 = voxels3[linear_index];
+			functor(voxel1, voxel2, voxel3);
 		}
 	}
 
 
 	template<typename TFunctor>
 	inline static void
-	DualVoxelPositionTraversal(
-			VoxelVolume<TVoxel, PlainVoxelArray>* primaryScene,
-			VoxelVolume<TVoxel, PlainVoxelArray>* secondaryScene,
-			VoxelVolume<TWarp, PlainVoxelArray>* warpField,
-			TFunctor& functor) {
+	TraverseWithPosition(VoxelVolume<TVoxel1, PlainVoxelArray>* volume1,
+	                     VoxelVolume<TVoxel2, PlainVoxelArray>* volume2,
+	                     VoxelVolume<TVoxel3, PlainVoxelArray>* volume3,
+	                     TFunctor& functor) {
 
-		assert(primaryScene->index.GetVolumeSize() == secondaryScene->index.GetVolumeSize() &&
-		       primaryScene->index.GetVolumeSize() == warpField->index.GetVolumeSize());
+		assert(volume2->index.GetVolumeSize() == volume3->index.GetVolumeSize() &&
+		       volume2->index.GetVolumeSize() == volume1->index.GetVolumeSize());
+
 // *** traversal vars
-		TVoxel* secondaryVoxels = secondaryScene->localVBA.GetVoxelBlocks();
-		TVoxel* primaryVoxels = primaryScene->localVBA.GetVoxelBlocks();
-		TWarp* warpVoxels = warpField->localVBA.GetVoxelBlocks();
+		TVoxel1* voxels1 = volume1->localVBA.GetVoxelBlocks();
+		TVoxel2* voxels2 = volume2->localVBA.GetVoxelBlocks();
+		TVoxel3* voxels3 = volume3->localVBA.GetVoxelBlocks();
+
 		//asserted to be the same
-		int voxelCount = primaryScene->index.GetVolumeSize().x * primaryScene->index.GetVolumeSize().y *
-		                 primaryScene->index.GetVolumeSize().z;
-		const PlainVoxelArray::IndexData* indexData = primaryScene->index.GetIndexData();
+		int voxel_count = volume2->index.GetVolumeSize().x * volume2->index.GetVolumeSize().y *
+		                  volume2->index.GetVolumeSize().z;
+		const PlainVoxelArray::IndexData* indexData = volume2->index.GetIndexData();
 #ifdef WITH_OPENMP
 #pragma omp parallel for
 #endif
-		for (int linearIndex = 0; linearIndex < voxelCount; linearIndex++) {
-			Vector3i voxelPosition = ComputePositionVectorFromLinearIndex_PlainVoxelArray(indexData, linearIndex);
-			TVoxel& primaryVoxel = primaryVoxels[linearIndex];
-			TVoxel& secondaryVoxel = secondaryVoxels[linearIndex];
-			TWarp& warpVoxel = warpVoxels[linearIndex];
-			functor(primaryVoxel, secondaryVoxel, warpVoxel, voxelPosition);
+		for (int linear_index = 0; linear_index < voxel_count; linear_index++) {
+			Vector3i voxel_position = ComputePositionVectorFromLinearIndex_PlainVoxelArray(indexData, linear_index);
+			TVoxel1& voxel1 = voxels1[linear_index];
+			TVoxel2& voxel2 = voxels2[linear_index];
+			TVoxel2& voxel3 = voxels3[linear_index];
+			functor(voxel1, voxel2, voxel3, voxel_position);
 		}
 	}
 
-
+	/** Single-threaded traversal **/
 	template<typename TFunctor>
 	inline static void
-	DualVoxelPositionTraversal_SingleThreaded(
-			VoxelVolume<TVoxel, PlainVoxelArray>* primaryScene,
-			VoxelVolume<TVoxel, PlainVoxelArray>* secondaryScene,
-			VoxelVolume<TWarp, PlainVoxelArray>* warpField,
+	TraverseWithPosition_ST(
+			VoxelVolume<TVoxel1, PlainVoxelArray>* volume1,
+			VoxelVolume<TVoxel2, PlainVoxelArray>* volume2,
+			VoxelVolume<TVoxel3, PlainVoxelArray>* volume3,
 			TFunctor& functor) {
-		assert(primaryScene->index.GetVolumeSize() == secondaryScene->index.GetVolumeSize() &&
-		       warpField->index.GetVolumeSize() == secondaryScene->index.GetVolumeSize());
+
+		assert(volume2->index.GetVolumeSize() == volume3->index.GetVolumeSize() &&
+		       volume1->index.GetVolumeSize() == volume3->index.GetVolumeSize());
+
 		// *** traversal vars
-		TVoxel* secondaryVoxels = secondaryScene->localVBA.GetVoxelBlocks();
-		TVoxel* primaryVoxels = primaryScene->localVBA.GetVoxelBlocks();
-		TWarp* warpVoxels = warpField->localVBA.GetVoxelBlocks();
+		TVoxel1* voxels1 = volume1->localVBA.GetVoxelBlocks();
+		TVoxel2* voxels2 = volume2->localVBA.GetVoxelBlocks();
+		TVoxel3* voxels3 = volume3->localVBA.GetVoxelBlocks();
+
 		//asserted to be the same
-		int voxelCount = primaryScene->index.GetVolumeSize().x * primaryScene->index.GetVolumeSize().y *
-		                 primaryScene->index.GetVolumeSize().z;
-		const PlainVoxelArray::IndexData* indexData = primaryScene->index.GetIndexData();
-		for (int linearIndex = 0; linearIndex < voxelCount; linearIndex++) {
-			Vector3i voxelPosition = ComputePositionVectorFromLinearIndex_PlainVoxelArray(indexData, linearIndex);
-			TVoxel& primaryVoxel = primaryVoxels[linearIndex];
-			TVoxel& secondaryVoxel = secondaryVoxels[linearIndex];
-			TWarp& warpVoxel = warpVoxels[linearIndex];
-			functor(primaryVoxel, secondaryVoxel, warpVoxel, voxelPosition);
+		int voxel_count = volume2->index.GetVolumeSize().x * volume2->index.GetVolumeSize().y *
+		                  volume2->index.GetVolumeSize().z;
+
+		const PlainVoxelArray::IndexData* index_data = volume2->index.GetIndexData();
+
+		for (int linearIndex = 0; linearIndex < voxel_count; linearIndex++) {
+			Vector3i voxelPosition = ComputePositionVectorFromLinearIndex_PlainVoxelArray(index_data, linearIndex);
+			TVoxel1& voxel1 = voxels1[linearIndex];
+			TVoxel2& voxel2 = voxels2[linearIndex];
+			TVoxel3& voxel3 = voxels3[linearIndex];
+			functor(voxel1, voxel2, voxel3, voxelPosition);
 		}
 	}
 // endregion ===========================================================================================================

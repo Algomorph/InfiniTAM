@@ -19,7 +19,7 @@
 
 namespace ITMLib{
 
-template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TDeviceType>
+template<typename TVoxel1, typename TVoxel2, typename TVoxel3, typename TIndex, MemoryDeviceType TDeviceType>
 class ThreeVolumeTraversalEngine;
 
 } // namespace ITMLib

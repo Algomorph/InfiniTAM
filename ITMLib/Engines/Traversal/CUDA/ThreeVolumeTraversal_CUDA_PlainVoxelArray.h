@@ -32,10 +32,10 @@ public:
 
 	template<typename TStaticFunctor>
 	inline static void
-	StaticDualVoxelTraversal(
-			VoxelVolume<TVoxel, PlainVoxelArray>* primaryScene,
-			VoxelVolume<TVoxel, PlainVoxelArray>* secondaryScene,
-			VoxelVolume<TWarp, PlainVoxelArray>* warpField) {
+	Traverse(
+			ITMLib::VoxelVolume<TVoxel1, ITMLib::PlainVoxelArray>* primaryScene,
+			ITMLib::VoxelVolume<TVoxel2, ITMLib::PlainVoxelArray>* secondaryScene,
+			ITMLib::VoxelVolume<TVoxel3, ITMLib::PlainVoxelArray>* warpField) {
 		assert(primaryScene->index.GetVolumeSize() == secondaryScene->index.GetVolumeSize() &&
 		       primaryScene->index.GetVolumeSize() == warpField->index.GetVolumeSize());
 // *** traversal vars
@@ -62,10 +62,10 @@ public:
 
 	template<typename TFunctor>
 	inline static void
-	DualVoxelTraversal(
-			VoxelVolume<TVoxel, PlainVoxelArray>* primaryScene,
-			VoxelVolume<TVoxel, PlainVoxelArray>* secondaryScene,
-			VoxelVolume<TWarp, PlainVoxelArray>* warpField,
+	Traverse(
+			ITMLib::VoxelVolume<TVoxel1, ITMLib::PlainVoxelArray>* primaryScene,
+			ITMLib::VoxelVolume<TVoxel2, ITMLib::PlainVoxelArray>* secondaryScene,
+			ITMLib::VoxelVolume<TVoxel3, ITMLib::PlainVoxelArray>* warpField,
 			TFunctor& functor) {
 
 		assert(primaryScene->index.GetVolumeSize() == secondaryScene->index.GetVolumeSize() &&
@@ -93,10 +93,10 @@ public:
 
 	template<typename TFunctor>
 	inline static void
-	DualVoxelPositionTraversal(
-			VoxelVolume<TVoxel, PlainVoxelArray>* primaryScene,
-			VoxelVolume<TVoxel, PlainVoxelArray>* secondaryScene,
-			VoxelVolume<TWarp, PlainVoxelArray>* warpField,
+	TraverseWithPosition(
+			ITMLib::VoxelVolume<TVoxel1, ITMLib::PlainVoxelArray>* primaryScene,
+			ITMLib::VoxelVolume<TVoxel2, ITMLib::PlainVoxelArray>* secondaryScene,
+			ITMLib::VoxelVolume<TVoxel3, ITMLib::PlainVoxelArray>* warpField,
 			TFunctor& functor) {
 
 		assert(primaryScene->index.GetVolumeSize() == secondaryScene->index.GetVolumeSize() &&

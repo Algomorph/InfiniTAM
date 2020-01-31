@@ -32,10 +32,10 @@ public:
 
 	template<typename TFunctor>
 	inline static void
-	DualVoxelPositionTraversal(
-			VoxelVolume<TVoxel, VoxelBlockHash>* primaryScene,
-			VoxelVolume<TVoxel, VoxelBlockHash>* secondaryScene,
-			VoxelVolume<TWarp, VoxelBlockHash>* warpField,
+	TraverseWithPosition(
+			ITMLib::VoxelVolume<TVoxel1, ITMLib::PlainVoxelArray>* primaryScene,
+			ITMLib::VoxelVolume<TVoxel2, ITMLib::PlainVoxelArray>* secondaryScene,
+			ITMLib::VoxelVolume<TVoxel3, ITMLib::PlainVoxelArray>* warpField,
 			TFunctor& functor) {
 // *** traversal vars
 		TVoxel* secondaryVoxels = secondaryScene->localVBA.GetVoxelBlocks();
