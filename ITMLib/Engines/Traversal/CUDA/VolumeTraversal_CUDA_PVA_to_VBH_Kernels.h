@@ -17,7 +17,7 @@
 
 //local
 #include "../Interface/VolumeTraversal.h"
-#include "../../../Objects/Scene/ITMVoxelVolume.h"
+#include "../../../Objects/Scene/VoxelVolume.h"
 #include "../../../Objects/Scene/PlainVoxelArray.h"
 #include "../../../Objects/Scene/VoxelBlockHash.h"
 #include "../Shared/VolumeTraversal_Shared.h"

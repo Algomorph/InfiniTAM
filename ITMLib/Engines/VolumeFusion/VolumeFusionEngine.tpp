@@ -25,7 +25,7 @@ using namespace ITMLib;
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void VolumeFusionEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::FuseOneTsdfVolumeIntoAnother(
-		ITMVoxelVolume<TVoxel, TIndex>* targetVolume, ITMVoxelVolume<TVoxel, TIndex>* sourceVolume) {
+		VoxelVolume<TVoxel, TIndex>* targetVolume, VoxelVolume<TVoxel, TIndex>* sourceVolume) {
 	IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::Instance()
 			.AllocateUsingOtherVolume(targetVolume, sourceVolume);
 	TSDFFusionFunctor<TVoxel, TMemoryDeviceType> fusionFunctor(targetVolume->sceneParams->max_integration_weight);

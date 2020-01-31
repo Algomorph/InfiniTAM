@@ -7,9 +7,9 @@ using namespace ITMLib;
 
 
 template<class TVoxel>
-int SwappingEngine_CPU<TVoxel, VoxelBlockHash>::LoadFromGlobalMemory(ITMVoxelVolume<TVoxel, VoxelBlockHash> *scene)
+int SwappingEngine_CPU<TVoxel, VoxelBlockHash>::LoadFromGlobalMemory(VoxelVolume<TVoxel, VoxelBlockHash> *scene)
 {
-	ITMGlobalCache<TVoxel, VoxelBlockHash> *globalCache = scene->globalCache;
+	GlobalCache<TVoxel, VoxelBlockHash> *globalCache = scene->globalCache;
 
 	ITMHashSwapState *swapStates = globalCache->GetSwapStates(false);
 
@@ -56,9 +56,9 @@ int SwappingEngine_CPU<TVoxel, VoxelBlockHash>::LoadFromGlobalMemory(ITMVoxelVol
 }
 
 template<class TVoxel>
-void SwappingEngine_CPU<TVoxel, VoxelBlockHash>::IntegrateGlobalIntoLocal(ITMVoxelVolume<TVoxel, VoxelBlockHash> *scene, ITMRenderState *renderState)
+void SwappingEngine_CPU<TVoxel, VoxelBlockHash>::IntegrateGlobalIntoLocal(VoxelVolume<TVoxel, VoxelBlockHash> *scene, RenderState *renderState)
 {
-	ITMGlobalCache<TVoxel, VoxelBlockHash> *globalCache = scene->globalCache;
+	GlobalCache<TVoxel, VoxelBlockHash> *globalCache = scene->globalCache;
 
 	ITMHashEntry *hashTable = scene->index.GetEntries();
 
@@ -94,9 +94,9 @@ void SwappingEngine_CPU<TVoxel, VoxelBlockHash>::IntegrateGlobalIntoLocal(ITMVox
 }
 
 template<class TVoxel>
-void SwappingEngine_CPU<TVoxel, VoxelBlockHash>::SaveToGlobalMemory(ITMVoxelVolume<TVoxel, VoxelBlockHash> *scene, ITMRenderState *renderState)
+void SwappingEngine_CPU<TVoxel, VoxelBlockHash>::SaveToGlobalMemory(VoxelVolume<TVoxel, VoxelBlockHash> *scene, RenderState *renderState)
 {
-	ITMGlobalCache<TVoxel, VoxelBlockHash> *globalCache = scene->globalCache;
+	GlobalCache<TVoxel, VoxelBlockHash> *globalCache = scene->globalCache;
 
 	ITMHashSwapState *swapStates = globalCache->GetSwapStates(false);
 
@@ -166,7 +166,7 @@ void SwappingEngine_CPU<TVoxel, VoxelBlockHash>::SaveToGlobalMemory(ITMVoxelVolu
 }
 
 template<class TVoxel>
-void SwappingEngine_CPU<TVoxel, VoxelBlockHash>::CleanLocalMemory(ITMVoxelVolume<TVoxel, VoxelBlockHash> *scene, ITMRenderState *renderState)
+void SwappingEngine_CPU<TVoxel, VoxelBlockHash>::CleanLocalMemory(VoxelVolume<TVoxel, VoxelBlockHash> *scene, RenderState *renderState)
 {
 	ITMHashEntry *hashTable = scene->index.GetEntries();
 	HashBlockVisibility *blockVisibilityTypes = scene->index.GetBlockVisibilityTypes();

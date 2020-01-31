@@ -15,8 +15,8 @@
 //  ================================================================
 #pragma once
 
-#include "../../../Objects/Scene/ITMVoxelVolume.h"
-#include "../../../Objects/Scene/ITMRepresentationAccess.h"
+#include "../../../Objects/Scene/VoxelVolume.h"
+#include "../../../Objects/Scene/RepresentationAccess.h"
 #include "../../../ITMLibDefines.h"
 #include "../../../Utils/ITMHashBlockProperties.h"
 #include "../../../Utils/ITMPrintHelpers.h"
@@ -45,19 +45,19 @@ public:
 		return instance;
 	}
 
-	void ResetVolume(ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume) override;
-	bool SetVoxel(ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3i at, TVoxel voxel) override;
-	bool SetVoxelNoAllocation(ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3i at, TVoxel voxel);
-	TVoxel ReadVoxel(ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3i at) override;
-	TVoxel ReadVoxel(ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3i at,
+	void ResetVolume(VoxelVolume<TVoxel, VoxelBlockHash>* volume) override;
+	bool SetVoxel(VoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3i at, TVoxel voxel) override;
+	bool SetVoxelNoAllocation(VoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3i at, TVoxel voxel);
+	TVoxel ReadVoxel(VoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3i at) override;
+	TVoxel ReadVoxel(VoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3i at,
 	                 VoxelBlockHash::IndexCache& cache) override;
-	void OffsetWarps(ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3f offset) override;
+	void OffsetWarps(VoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3f offset) override;
 	bool
-	CopyVolumeSlice(ITMVoxelVolume<TVoxel, VoxelBlockHash>* targetVolume,
-	                ITMVoxelVolume<TVoxel, VoxelBlockHash>* sourceVolume,
+	CopyVolumeSlice(VoxelVolume<TVoxel, VoxelBlockHash>* targetVolume,
+	                VoxelVolume<TVoxel, VoxelBlockHash>* sourceVolume,
 	                Vector6i bounds, const Vector3i& offset = Vector3i(0)) override;
-	bool CopyVolume(ITMVoxelVolume<TVoxel, VoxelBlockHash>* targetVolume,
-	                ITMVoxelVolume<TVoxel, VoxelBlockHash>* sourceVolume,
+	bool CopyVolume(VoxelVolume<TVoxel, VoxelBlockHash>* targetVolume,
+	                VoxelVolume<TVoxel, VoxelBlockHash>* sourceVolume,
 	                const Vector3i& offset = Vector3i(0)) override;
 	virtual ~EditAndCopyEngine_CPU() = default;
 };
@@ -73,18 +73,18 @@ public:
 		return instance;
 	}
 
-	void ResetVolume(ITMVoxelVolume<TVoxel, PlainVoxelArray>* volume) override;
-	bool SetVoxel(ITMVoxelVolume<TVoxel, PlainVoxelArray>* volume, Vector3i at, TVoxel voxel) override;
-	TVoxel ReadVoxel(ITMVoxelVolume<TVoxel, PlainVoxelArray>* volume, Vector3i at) override;
-	TVoxel ReadVoxel(ITMVoxelVolume<TVoxel, PlainVoxelArray>* volume, Vector3i at,
+	void ResetVolume(VoxelVolume<TVoxel, PlainVoxelArray>* volume) override;
+	bool SetVoxel(VoxelVolume<TVoxel, PlainVoxelArray>* volume, Vector3i at, TVoxel voxel) override;
+	TVoxel ReadVoxel(VoxelVolume<TVoxel, PlainVoxelArray>* volume, Vector3i at) override;
+	TVoxel ReadVoxel(VoxelVolume<TVoxel, PlainVoxelArray>* volume, Vector3i at,
 	                 PlainVoxelArray::IndexCache& cache) override;
-	bool IsPointInBounds(ITMVoxelVolume<TVoxel, PlainVoxelArray>* volume, const Vector3i& at);
-	void OffsetWarps(ITMVoxelVolume<TVoxel, PlainVoxelArray>* volume, Vector3f offset) override;
-	bool CopyVolumeSlice(ITMVoxelVolume<TVoxel, PlainVoxelArray>* targetVolume,
-	                     ITMVoxelVolume<TVoxel, PlainVoxelArray>* sourceVolume,
+	bool IsPointInBounds(VoxelVolume<TVoxel, PlainVoxelArray>* volume, const Vector3i& at);
+	void OffsetWarps(VoxelVolume<TVoxel, PlainVoxelArray>* volume, Vector3f offset) override;
+	bool CopyVolumeSlice(VoxelVolume<TVoxel, PlainVoxelArray>* targetVolume,
+	                     VoxelVolume<TVoxel, PlainVoxelArray>* sourceVolume,
 	                     Vector6i bounds, const Vector3i& offset = Vector3i(0)) override;
-	bool CopyVolume(ITMVoxelVolume<TVoxel, PlainVoxelArray>* targetVolume,
-	                ITMVoxelVolume<TVoxel, PlainVoxelArray>* sourceVolume,
+	bool CopyVolume(VoxelVolume<TVoxel, PlainVoxelArray>* targetVolume,
+	                VoxelVolume<TVoxel, PlainVoxelArray>* sourceVolume,
 	                const Vector3i& offset = Vector3i(0)) override;
 
 };

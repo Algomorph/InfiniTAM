@@ -1,5 +1,5 @@
 //  ================================================================
-//  Created by Gregory Kramida on 10/8/19.
+//  Created by Gregory Kramida on 5/8/19.
 //  Copyright (c) 2019 Gregory Kramida
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -13,9 +13,14 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "ITMLocalVBA.tpp"
+
+#include "VoxelVolume.tpp"
 #include "../../ITMLibDefines.h"
-namespace ITMLib{
-	template class ITMLocalVBA<ITMVoxel>;
-	template class ITMLocalVBA<ITMWarp>;
-}//namespace ITMLib
+
+// Explicit template instantiations for ITMVoxelVolume
+namespace ITMLib {
+	template class VoxelVolume<ITMVoxel, PlainVoxelArray>;
+	template class VoxelVolume<ITMVoxel, VoxelBlockHash>;
+	template class VoxelVolume<ITMWarp, PlainVoxelArray>;
+	template class VoxelVolume<ITMWarp, VoxelBlockHash>;
+}  // namespace ITMLib

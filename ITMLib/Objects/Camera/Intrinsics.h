@@ -10,7 +10,7 @@ namespace ITMLib
 	    Represents the parameters for projection with a projective
 	    camera
 	*/
-	class ITMIntrinsics
+	class Intrinsics
 	{
 	public:
 		/** The actual intrinsic calibration parameters. */
@@ -58,7 +58,7 @@ namespace ITMLib
 			return projectionParamsSimple.fx * projectionParamsSimple.fy < 0.f;
 		}
 
-		ITMIntrinsics(void)
+		Intrinsics(void)
 		{
 			// standard calibration parameters for Kinect RGB camera. Not at all
 			// accurate, though...

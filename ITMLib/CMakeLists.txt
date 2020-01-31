@@ -563,65 +563,65 @@ set(ITMLIB_ENGINES_Visualization_SHARED_HEADERS
 
 ## ================================================== OBJECTS ==========================================================
 set(ITMLIB_OBJECTS_CAMERA_SOURCES
-    Objects/Camera/ITMCalibIO.cpp
+    Objects/Camera/CalibIO.cpp
     )
 
 set(ITMLIB_OBJECTS_CAMERA_HEADERS
-    Objects/Camera/ITMCalibIO.h
-    Objects/Camera/ITMDisparityCalib.h
-    Objects/Camera/ITMExtrinsics.h
-    Objects/Camera/ITMIntrinsics.h
-    Objects/Camera/ITMRGBDCalib.h
+    Objects/Camera/CalibIO.h
+    Objects/Camera/DisparityCalib.h
+    Objects/Camera/Extrinsics.h
+    Objects/Camera/Intrinsics.h
+    Objects/Camera/RGBDCalib.h
     )
 
 ##
 set(ITMLIB_OBJECTS_MESHING_HEADERS
-    Objects/Meshing/ITMMesh.h
+    Objects/Meshing/Mesh.h
     )
 
 ##
 set(ITMLIB_OBJECTS_MISC_HEADERS
-    Objects/Misc/ITMIMUCalibrator.h
-    Objects/Misc/ITMIMUMeasurement.h
-    Objects/Misc/ITMPointCloud.h
+    Objects/Misc/IMUCalibrator.h
+    Objects/Misc/IMUMeasurement.h
+    Objects/Misc/PointCloud.h
     )
 
 ##
 set(ITMLIB_OBJECTS_RENDERSTATES_SOURCES
-    Objects/RenderStates/ITMSurfelRenderState.cpp
+    Objects/RenderStates/SurfelRenderState.cpp
     )
 
 ##
 set(ITMLIB_OBJECTS_RENDERSTATES_HEADERS
-    Objects/RenderStates/ITMRenderState.h
-    Objects/RenderStates/ITMRenderStateMultiScene.h
-    Objects/RenderStates/ITMSurfelRenderState.h
+    Objects/RenderStates/RenderState.h
+    Objects/RenderStates/RenderStateMultiScene.h
+    Objects/RenderStates/SurfelRenderState.h
     )
 
 ##
 set(ITMLIB_OBJECTS_SCENE_SOURCES
-    Objects/Scene/ITMVoxelVolume.tpp
-    Objects/Scene/ITMVoxelVolume.cpp
-    Objects/Scene/ITMLocalVBA.tpp
-    Objects/Scene/ITMLocalVBA.cpp
+    Objects/Scene/VoxelVolume.tpp
+    Objects/Scene/VoxelVolume.cpp
+    Objects/Scene/LocalVBA.tpp
+    Objects/Scene/LocalVBA.cpp
     Objects/Scene/VoxelBlockHash.cpp
     )
 
 ##
 set(ITMLIB_OBJECTS_SCENE_HEADERS
-    Objects/Scene/ITMGlobalCache.h
-    Objects/Scene/ITMLocalMap.h
-    Objects/Scene/ITMLocalVBA.h
+    Objects/Scene/GlobalCache.h
+    Objects/Scene/LocalMap.h
+    Objects/Scene/LocalVBA.h
     Objects/Scene/MultiSceneAccess.h
     Objects/Scene/PlainVoxelArray.h
-    Objects/Scene/ITMRepresentationAccess.h
-    Objects/Scene/ITMTrilinearInterpolation.h
-    Objects/Scene/ITMTrilinearDistribution.h
-    Objects/Scene/ITMVoxelVolume.h
-    Objects/Scene/ITMSurfelScene.h
-    Objects/Scene/ITMSurfelTypes.h
+    Objects/Scene/RepresentationAccess.h
+    Objects/Scene/TrilinearInterpolation.h
+    Objects/Scene/TrilinearDistribution.h
+    Objects/Scene/VoxelVolume.h
+    Objects/Scene/SurfelScene.h
+    Objects/Scene/SurfelTypes.h
     Objects/Scene/VoxelBlockHash.h
-    Objects/Scene/ITMVoxelTypes.h
+    Objects/Scene/VoxelTypes.h
     )
 
 ##

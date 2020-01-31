@@ -18,7 +18,7 @@
 //#include
 
 #include "../../../ORUtils/MemoryDeviceType.h"
-#include "../../Objects/Scene/ITMVoxelVolume.h"
+#include "../../Objects/Scene/VoxelVolume.h"
 
 namespace ITMLib {
 
@@ -33,16 +33,16 @@ public:
 	 * \param sourceTsdfVolume the live voxel grid, a TSDF generated from a single recent depth image
 	 * \param liveSourceFieldIndex index of the sdf field to use at live scene voxels
 	 */
-	virtual void FuseOneTsdfVolumeIntoAnother(ITMVoxelVolume <TVoxel, TIndex>* targetVolume,
-	                                          ITMVoxelVolume <TVoxel, TIndex>* sourceVolume) = 0;
+	virtual void FuseOneTsdfVolumeIntoAnother(VoxelVolume <TVoxel, TIndex>* targetVolume,
+	                                          VoxelVolume <TVoxel, TIndex>* sourceVolume) = 0;
 };
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 class VolumeFusionEngine :
 		public VolumeFusionEngineInterface<TVoxel, TWarp, TIndex> {
 public:
-	void FuseOneTsdfVolumeIntoAnother(ITMVoxelVolume <TVoxel, TIndex>* targetVolume,
-	                                  ITMVoxelVolume <TVoxel, TIndex>* sourceVolume) override;
+	void FuseOneTsdfVolumeIntoAnother(VoxelVolume <TVoxel, TIndex>* targetVolume,
+	                                  VoxelVolume <TVoxel, TIndex>* sourceVolume) override;
 };
 
 } // namespace ITMLib

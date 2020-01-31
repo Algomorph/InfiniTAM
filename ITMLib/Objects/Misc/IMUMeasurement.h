@@ -6,30 +6,30 @@
 
 namespace ITMLib
 {
-	class ITMIMUMeasurement
+	class IMUMeasurement
 	{
 	public:
 		Matrix3f R;
 
-		ITMIMUMeasurement()
+		IMUMeasurement()
 		{
 			this->R.setIdentity();
 		}
 
-		ITMIMUMeasurement(const Matrix3f & R)
+		IMUMeasurement(const Matrix3f & R)
 		{
 			this->R = R;
 		}
 
-		void SetFrom(const ITMIMUMeasurement *measurement)
+		void SetFrom(const IMUMeasurement *measurement)
 		{
 			this->R = measurement->R;
 		}
 
-		~ITMIMUMeasurement(void) { }
+		~IMUMeasurement(void) { }
 
 		// Suppress the default copy constructor and assignment operator
-		ITMIMUMeasurement(const ITMIMUMeasurement&);
-		ITMIMUMeasurement& operator=(const ITMIMUMeasurement&);
+		IMUMeasurement(const IMUMeasurement&);
+		IMUMeasurement& operator=(const IMUMeasurement&);
 	};
 }

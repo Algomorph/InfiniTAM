@@ -22,7 +22,7 @@
 #include <boost/test/unit_test.hpp>
 //ITMLib
 #include "../ITMLib/ITMLibDefines.h"
-#include "../ITMLib/Objects/Scene/ITMVoxelVolume.h"
+#include "../ITMLib/Objects/Scene/VoxelVolume.h"
 #include "../ITMLib/Utils/Configuration.h"
 #include "../ITMLib/Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 #include "TestUtils.h"
@@ -42,11 +42,11 @@ BOOST_AUTO_TEST_CASE(testSaveSceneCompact_CPU) {
 	Vector3i volumeSize(40, 68, 20);
 	Vector3i volumeOffset(-20, 0, 0);
 
-	ITMVoxelVolume<ITMVoxel, PlainVoxelArray> generated_test_scene_PVA(
+	VoxelVolume<ITMVoxel, PlainVoxelArray> generated_test_scene_PVA(
 			&configuration::get().general_voxel_volume_parameters, configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 			MEMORYDEVICE_CPU, {volumeSize, volumeOffset});
 
-	ITMVoxelVolume<ITMVoxel, PlainVoxelArray> loaded_test_scene_PVA(
+	VoxelVolume<ITMVoxel, PlainVoxelArray> loaded_test_scene_PVA(
 			&configuration::get().general_voxel_volume_parameters, configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 			MEMORYDEVICE_CPU, {volumeSize, volumeOffset});
 
@@ -61,11 +61,11 @@ BOOST_AUTO_TEST_CASE(testSaveSceneCompact_CPU) {
 	BOOST_REQUIRE_EQUAL(SceneStatCalc_CPU_PVA_Voxel::Instance().ComputeNonTruncatedVoxelCount(&loaded_test_scene_PVA), 19456);
 	BOOST_REQUIRE(contentAlmostEqual_CPU(&generated_test_scene_PVA, &loaded_test_scene_PVA, tolerance));
 
-	ITMVoxelVolume<ITMVoxel, VoxelBlockHash> generated_test_scene_VBH(
+	VoxelVolume<ITMVoxel, VoxelBlockHash> generated_test_scene_VBH(
 			&configuration::get().general_voxel_volume_parameters, configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 			MEMORYDEVICE_CPU);
 
-	ITMVoxelVolume<ITMVoxel, VoxelBlockHash> loaded_test_scene_VBH(
+	VoxelVolume<ITMVoxel, VoxelBlockHash> loaded_test_scene_VBH(
 			&configuration::get().general_voxel_volume_parameters, configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 			MEMORYDEVICE_CPU);
 

@@ -25,7 +25,7 @@
 #include "../ORUtils/MemoryDeviceType.h"
 #include "../ITMLib/ITMLibDefines.h"
 #include "../ITMLib/Utils/Configuration.h"
-#include "../ITMLib/Objects/Scene/ITMVoxelVolume.h"
+#include "../ITMLib/Objects/Scene/VoxelVolume.h"
 #include "../ITMLib/Engines/EditAndCopy/Interface/EditAndCopyEngineInterface.h"
 #include "../ITMLib/Engines/EditAndCopy/EditAndCopyEngineFactory.h"
 #include "../ITMLib/Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
@@ -65,21 +65,21 @@ struct WarpGradientDataFixture {
 		settings = &configuration::get();
 
 		BOOST_TEST_MESSAGE("setup fixture");
-		auto loadSdfVolume = [&](ITMVoxelVolume<ITMVoxel, TIndex>** scene, const std::string& pathSuffix) {
-			*scene = new ITMVoxelVolume<ITMVoxel, TIndex>(&configuration::get().general_voxel_volume_parameters,
+		auto loadSdfVolume = [&](VoxelVolume<ITMVoxel, TIndex>** scene, const std::string& pathSuffix) {
+			*scene = new VoxelVolume<ITMVoxel, TIndex>(&configuration::get().general_voxel_volume_parameters,
 			                                              settings->swapping_mode ==
 			                                              configuration::SWAPPINGMODE_ENABLED,
-			                                              TMemoryType,
-			                                              indexParameters);
+			                                           TMemoryType,
+			                                           indexParameters);
 			PrepareVoxelVolumeForLoading(*scene);
 			(*scene)->LoadFromDirectory(pathToData + pathSuffix);
 		};
-		auto loadWarpVolume = [&](ITMVoxelVolume<ITMWarp, TIndex>** scene, const std::string& pathSuffix) {
-			*scene = new ITMVoxelVolume<ITMWarp, TIndex>(&configuration::get().general_voxel_volume_parameters,
+		auto loadWarpVolume = [&](VoxelVolume<ITMWarp, TIndex>** scene, const std::string& pathSuffix) {
+			*scene = new VoxelVolume<ITMWarp, TIndex>(&configuration::get().general_voxel_volume_parameters,
 			                                             settings->swapping_mode ==
 			                                             configuration::SWAPPINGMODE_ENABLED,
-			                                             TMemoryType,
-			                                             indexParameters);
+			                                          TMemoryType,
+			                                          indexParameters);
 			PrepareVoxelVolumeForLoading(*scene);
 			(*scene)->LoadFromDirectory(pathToData + pathSuffix);
 		};
@@ -109,15 +109,15 @@ struct WarpGradientDataFixture {
 	}
 
 	configuration::Configuration* settings;
-	ITMVoxelVolume<ITMWarp, TIndex>* warp_field_data_term;
-	ITMVoxelVolume<ITMWarp, TIndex>* warp_field_data_term_smoothed;
-	ITMVoxelVolume<ITMWarp, TIndex>* warp_field_iter0;
-	ITMVoxelVolume<ITMWarp, TIndex>* warp_field_tikhonov_term;
-	ITMVoxelVolume<ITMWarp, TIndex>* warp_field_data_and_tikhonov_term;
-	ITMVoxelVolume<ITMWarp, TIndex>* warp_field_data_and_killing_term;
-	ITMVoxelVolume<ITMWarp, TIndex>* warp_field_data_and_level_set_term;
-	ITMVoxelVolume<ITMVoxel, TIndex>* canonical_volume;
-	ITMVoxelVolume<ITMVoxel, TIndex>* live_volume;
+	VoxelVolume<ITMWarp, TIndex>* warp_field_data_term;
+	VoxelVolume<ITMWarp, TIndex>* warp_field_data_term_smoothed;
+	VoxelVolume<ITMWarp, TIndex>* warp_field_iter0;
+	VoxelVolume<ITMWarp, TIndex>* warp_field_tikhonov_term;
+	VoxelVolume<ITMWarp, TIndex>* warp_field_data_and_tikhonov_term;
+	VoxelVolume<ITMWarp, TIndex>* warp_field_data_and_killing_term;
+	VoxelVolume<ITMWarp, TIndex>* warp_field_data_and_level_set_term;
+	VoxelVolume<ITMVoxel, TIndex>* canonical_volume;
+	VoxelVolume<ITMVoxel, TIndex>* live_volume;
 	const std::string pathToData;
 	const typename TIndex::InitializationParameters indexParameters;
 };
@@ -140,8 +140,8 @@ void GenerateTestData() {
 	std::string output_directory =
 			sourceFolder + "Tests/TestData/snoopy_result_fr16-17_partial_" + GetIndexFolderSuffix<TIndex>() + "/";
 
-	ITMVoxelVolume<ITMVoxel, TIndex>* canonical_volume;
-	ITMVoxelVolume<ITMVoxel, TIndex>* live_volume;
+	VoxelVolume<ITMVoxel, TIndex>* canonical_volume;
+	VoxelVolume<ITMVoxel, TIndex>* live_volume;
 	loadVolume(&live_volume, output_directory + "snoopy_partial_frame_17_", TMemoryDeviceType, Frame16And17Fixture::InitParams<TIndex>());
 	loadVolume(&canonical_volume, output_directory + "snoopy_partial_frame_16_", TMemoryDeviceType,
 	           Frame16And17Fixture::InitParams<TIndex>());
@@ -166,10 +166,10 @@ void GenerateTestData() {
 	};
 
 
-	ITMVoxelVolume<ITMWarp, TIndex> warp_field(&configuration::get().general_voxel_volume_parameters,
+	VoxelVolume<ITMWarp, TIndex> warp_field(&configuration::get().general_voxel_volume_parameters,
 	                                           configuration::get().swapping_mode ==
 	                                           configuration::SWAPPINGMODE_ENABLED,
-	                                           TMemoryDeviceType, Frame16And17Fixture::InitParams<TIndex>());
+	                                        TMemoryDeviceType, Frame16And17Fixture::InitParams<TIndex>());
 	warp_field.Reset();
 
 	SurfaceTracker<ITMVoxel, ITMWarp, TIndex, TMemoryDeviceType, TRACKER_SLAVCHEVA_DIAGNOSTIC> dataOnlyMotionTracker(

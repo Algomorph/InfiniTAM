@@ -15,7 +15,7 @@
 namespace ITMLib
 {
 	template<typename TVoxel, typename TIndex>
-	class ITMGlobalCache;
+	class GlobalCache;
 
 	struct ITMHashSwapState
 	{
@@ -29,15 +29,15 @@ namespace ITMLib
 	};
 
 	template<typename TVoxel>
-	class ITMGlobalCache<TVoxel, PlainVoxelArray>{
+	class GlobalCache<TVoxel, PlainVoxelArray>{
 	public:
-		explicit ITMGlobalCache(const PlainVoxelArray& index){
+		explicit GlobalCache(const PlainVoxelArray& index){
 			DIEWITHEXCEPTION_REPORTLOCATION("Swappling / global cache not implemented for plain voxel array indexing.");
 		}
 	};
 
 	template<typename TVoxel>
-	class ITMGlobalCache<TVoxel, VoxelBlockHash>
+	class GlobalCache<TVoxel, VoxelBlockHash>
 	{
 	private:
 		bool *hasStoredData;
@@ -65,7 +65,7 @@ namespace ITMLib
 
 		const int hashEntryCount;
 
-		explicit ITMGlobalCache(const int hashEntryCount) : hashEntryCount(hashEntryCount)
+		explicit GlobalCache(const int hashEntryCount) : hashEntryCount(hashEntryCount)
 		{	
 			hasStoredData = (bool*)malloc(hashEntryCount * sizeof(bool));
 			storedVoxelBlocks = (TVoxel*)malloc(hashEntryCount * sizeof(TVoxel) * VOXEL_BLOCK_SIZE3);
@@ -93,9 +93,9 @@ namespace ITMLib
 #endif
 		}
 
-		explicit ITMGlobalCache(const VoxelBlockHash& index) : ITMGlobalCache(index.hashEntryCount){}
+		explicit GlobalCache(const VoxelBlockHash& index) : GlobalCache(index.hashEntryCount){}
 
-		explicit ITMGlobalCache(const ITMGlobalCache& other) : ITMGlobalCache(other.hashEntryCount)
+		explicit GlobalCache(const GlobalCache& other) : GlobalCache(other.hashEntryCount)
 		{
 
 #ifndef COMPILE_WITHOUT_CUDA
@@ -153,7 +153,7 @@ namespace ITMLib
 			fclose(f);
 		}
 
-		~ITMGlobalCache()
+		~GlobalCache()
 		{
 			free(hasStoredData);
 			free(storedVoxelBlocks);

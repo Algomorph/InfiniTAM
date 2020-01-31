@@ -13,13 +13,13 @@ namespace ITMLib {
 	public:
 		virtual ~MultiVisualizationEngine(void) {}
 
-		virtual void PrepareRenderState(const VoxelMapGraphManager<TVoxel, TIndex> & sceneManager, ITMRenderState *state) = 0;
+		virtual void PrepareRenderState(const VoxelMapGraphManager<TVoxel, TIndex> & sceneManager, RenderState *state) = 0;
 
 		//skip "FindVisibleBlocks"
 
-		virtual void CreateExpectedDepths(const VoxelMapGraphManager<TVoxel, TIndex> & sceneManager, const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics, ITMRenderState *renderState) const = 0;
-		virtual void RenderImage(const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics, ITMRenderState *renderState,
-			ITMUChar4Image *outputImage, IVisualizationEngine::RenderImageType type) const = 0;
+		virtual void CreateExpectedDepths(const VoxelMapGraphManager<TVoxel, TIndex> & sceneManager, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *renderState) const = 0;
+		virtual void RenderImage(const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *renderState,
+		                         ITMUChar4Image *outputImage, IVisualizationEngine::RenderImageType type) const = 0;
 	};
 }
 

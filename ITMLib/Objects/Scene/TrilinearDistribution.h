@@ -17,7 +17,7 @@
 
 
 #include "VoxelBlockHash.h"
-#include "ITMRepresentationAccess.h"
+#include "RepresentationAccess.h"
 #include "../../../ORUtils/PlatformIndependence.h"
 #include "../../Utils/ITMVoxelFlags.h"
 

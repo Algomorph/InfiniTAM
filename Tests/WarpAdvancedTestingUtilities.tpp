@@ -39,8 +39,8 @@ template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void
 GenerateRawLiveAndCanonicalVolumes(bool allocateLiveFromBothImages,
                                    bool expand_raw_live_allocation,
-                                   ITMVoxelVolume<ITMVoxel, TIndex>** canonical_volume,
-                                   ITMVoxelVolume<ITMVoxel, TIndex>** live_volumes,
+                                   VoxelVolume<ITMVoxel, TIndex>** canonical_volume,
+                                   VoxelVolume<ITMVoxel, TIndex>** live_volumes,
                                    int& live_index_to_start_from) {
 	ITMView* view = nullptr;
 	buildSdfVolumeFromImage(canonical_volume, &view,
@@ -92,25 +92,25 @@ GenericWarpConsistencySubtest(const SlavchevaSurfaceTracker::Switches& switches,
 		DIEWITHEXCEPTION_REPORTLOCATION("Iteration limit must be at least 2");
 	}
 
-	ITMVoxelVolume<ITMWarp, TIndex> warp_field(&configuration::get().general_voxel_volume_parameters,
+	VoxelVolume<ITMWarp, TIndex> warp_field(&configuration::get().general_voxel_volume_parameters,
 	                                           configuration::get().swapping_mode ==
 	                                           configuration::SWAPPINGMODE_ENABLED,
-	                                           TMemoryDeviceType,
-	                                           Frame16And17Fixture::InitParams<TIndex>());
+	                                        TMemoryDeviceType,
+	                                        Frame16And17Fixture::InitParams<TIndex>());
 	EditAndCopyEngineFactory::Instance<ITMWarp, TIndex, TMemoryDeviceType>().ResetVolume(&warp_field);
 
-	ITMVoxelVolume<ITMVoxel, TIndex>* canonical_volume;
-	ITMVoxelVolume<ITMVoxel, TIndex>* live_volumes[2] = {
-			new ITMVoxelVolume<ITMVoxel, TIndex>(&configuration::get().general_voxel_volume_parameters,
+	VoxelVolume<ITMVoxel, TIndex>* canonical_volume;
+	VoxelVolume<ITMVoxel, TIndex>* live_volumes[2] = {
+			new VoxelVolume<ITMVoxel, TIndex>(&configuration::get().general_voxel_volume_parameters,
 			                                     configuration::get().swapping_mode ==
 			                                     configuration::SWAPPINGMODE_ENABLED,
-			                                     TMemoryDeviceType,
-			                                     Frame16And17Fixture::InitParams<TIndex>()),
-			new ITMVoxelVolume<ITMVoxel, TIndex>(&configuration::get().general_voxel_volume_parameters,
+			                                  TMemoryDeviceType,
+			                                  Frame16And17Fixture::InitParams<TIndex>()),
+			new VoxelVolume<ITMVoxel, TIndex>(&configuration::get().general_voxel_volume_parameters,
 			                                     configuration::get().swapping_mode ==
 			                                     configuration::SWAPPINGMODE_ENABLED,
-			                                     TMemoryDeviceType,
-			                                     Frame16And17Fixture::InitParams<TIndex>())
+			                                  TMemoryDeviceType,
+			                                  Frame16And17Fixture::InitParams<TIndex>())
 	};
 	live_volumes[0]->Reset();
 	live_volumes[1]->Reset();
@@ -124,11 +124,11 @@ GenericWarpConsistencySubtest(const SlavchevaSurfaceTracker::Switches& switches,
 	SurfaceTracker<ITMVoxel, ITMWarp, TIndex, TMemoryDeviceType, TRACKER_SLAVCHEVA_DIAGNOSTIC>
 			motionTracker(switches);
 
-	ITMVoxelVolume<ITMWarp, TIndex> ground_truth_warp_field(
+	VoxelVolume<ITMWarp, TIndex> ground_truth_warp_field(
 			&configuration::get().general_voxel_volume_parameters,
 			configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 			TMemoryDeviceType, Frame16And17Fixture::InitParams<TIndex>());
-	ITMVoxelVolume<ITMVoxel, TIndex> ground_truth_sdf_volume(
+	VoxelVolume<ITMVoxel, TIndex> ground_truth_sdf_volume(
 			&configuration::get().general_voxel_volume_parameters,
 			configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 			TMemoryDeviceType, Frame16And17Fixture::InitParams<TIndex>());
@@ -236,8 +236,8 @@ void Warp_PVA_VBH_simple_subtest(int iteration, SlavchevaSurfaceTracker::Switche
 	float absoluteTolerance = 1e-7;
 
 	// *** initialize/load warps
-	ITMVoxelVolume<ITMWarp, PlainVoxelArray>* warps_PVA;
-	ITMVoxelVolume<ITMWarp, VoxelBlockHash>* warps_VBH;
+	VoxelVolume<ITMWarp, PlainVoxelArray>* warps_PVA;
+	VoxelVolume<ITMWarp, VoxelBlockHash>* warps_VBH;
 	if (iteration > 0) {
 		std::string path_warps = get_path_warps(prefix, iteration - 1);
 		loadVolume(&warps_PVA, path_warps, TMemoryDeviceType,
@@ -255,8 +255,8 @@ void Warp_PVA_VBH_simple_subtest(int iteration, SlavchevaSurfaceTracker::Switche
 
 
 
-	ITMVoxelVolume<ITMVoxel, PlainVoxelArray>* warped_live_PVA;
-	ITMVoxelVolume<ITMVoxel, VoxelBlockHash>* warped_live_VBH;
+	VoxelVolume<ITMVoxel, PlainVoxelArray>* warped_live_PVA;
+	VoxelVolume<ITMVoxel, VoxelBlockHash>* warped_live_VBH;
 
 	if (iteration > 0) {
 		std::string path_warped_live = get_path_warped_live(prefix, iteration - 1);
@@ -272,10 +272,10 @@ void Warp_PVA_VBH_simple_subtest(int iteration, SlavchevaSurfaceTracker::Switche
 	}
 
 	// *** load canonical volume as the two different data structures
-	ITMVoxelVolume<ITMVoxel, PlainVoxelArray>* volume_16_PVA;
+	VoxelVolume<ITMVoxel, PlainVoxelArray>* volume_16_PVA;
 	loadVolume(&volume_16_PVA, path_frame_16_PVA, TMemoryDeviceType,
 	           Frame16And17Fixture::InitParams<PlainVoxelArray>());
-	ITMVoxelVolume<ITMVoxel, VoxelBlockHash>* volume_16_VBH;
+	VoxelVolume<ITMVoxel, VoxelBlockHash>* volume_16_VBH;
 	loadVolume(&volume_16_VBH, path_frame_16_VBH, TMemoryDeviceType,
 	           Frame16And17Fixture::InitParams<VoxelBlockHash>());
 
@@ -362,8 +362,8 @@ void Warp_PVA_VBH_simple_subtest(int iteration, SlavchevaSurfaceTracker::Switche
 	delete warped_live_PVA;
 	delete warped_live_VBH;
 
-	ITMVoxelVolume<ITMWarp, PlainVoxelArray>* loaded_warps_PVA;
-	ITMVoxelVolume<ITMWarp, VoxelBlockHash>* loaded_warps_VBH;
+	VoxelVolume<ITMWarp, PlainVoxelArray>* loaded_warps_PVA;
+	VoxelVolume<ITMWarp, VoxelBlockHash>* loaded_warps_VBH;
 	std::string path_loaded_warps = get_path_warps(prefix, iteration);
 	loadVolume(&loaded_warps_PVA, path_loaded_warps, TMemoryDeviceType,
 	           Frame16And17Fixture::InitParams<PlainVoxelArray>());

@@ -14,8 +14,8 @@ SurfelVisualizationEngine<TSurfel>::~SurfelVisualizationEngine()
 //#################### PUBLIC MEMBER FUNCTIONS ####################
 
 template <typename TSurfel>
-void SurfelVisualizationEngine<TSurfel>::FindSurface(const ITMSurfelScene<TSurfel> *scene, const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics,
-                                                     bool useRadii, UnstableSurfelRenderingMode unstableSurfelRenderingMode, ITMSurfelRenderState *renderState) const
+void SurfelVisualizationEngine<TSurfel>::FindSurface(const SurfelScene<TSurfel> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics,
+                                                     bool useRadii, UnstableSurfelRenderingMode unstableSurfelRenderingMode, SurfelRenderState *renderState) const
 {
   MemoryDeviceType memoryType = GetMemoryType();
   MakeIndexImage(
@@ -33,8 +33,8 @@ void SurfelVisualizationEngine<TSurfel>::FindSurface(const ITMSurfelScene<TSurfe
 }
 
 template <typename TSurfel>
-void SurfelVisualizationEngine<TSurfel>::FindSurfaceSuper(const ITMSurfelScene<TSurfel> *scene, const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics,
-                                                          UnstableSurfelRenderingMode unstableSurfelRenderingMode, ITMSurfelRenderState *renderState) const
+void SurfelVisualizationEngine<TSurfel>::FindSurfaceSuper(const SurfelScene<TSurfel> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics,
+                                                          UnstableSurfelRenderingMode unstableSurfelRenderingMode, SurfelRenderState *renderState) const
 {
   MemoryDeviceType memoryType = GetMemoryType();
   MakeIndexImage(

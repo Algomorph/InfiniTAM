@@ -26,7 +26,7 @@ namespace ITMLib
 	int VoxelMapGraphManager<TVoxel, TIndex>::createNewLocalMap(void)
 	{
 		int newIdx = (int)allData.size();
-		allData.push_back(new ITMLocalMap<TVoxel, TIndex>(visualization_engine, trackedImageSize));
+		allData.push_back(new LocalMap<TVoxel, TIndex>(visualization_engine, trackedImageSize));
 
 		allData[newIdx]->scene->Reset();
 		return newIdx;
@@ -90,7 +90,7 @@ namespace ITMLib
 	{
 		if ((localMapId < 0) || ((unsigned)localMapId >= allData.size())) return -1;
 
-		ITMVoxelVolume<TVoxel, TIndex> *scene = allData[localMapId]->scene;
+		VoxelVolume<TVoxel, TIndex> *scene = allData[localMapId]->scene;
 		return scene->index.GetAllocatedBlockCount() - scene->localVBA.lastFreeBlockId - 1;
 	}
 
@@ -98,7 +98,7 @@ namespace ITMLib
 	int VoxelMapGraphManager<TVoxel, TIndex>::countVisibleBlocks(int localMapId, int minBlockId, int maxBlockId, bool invertIds) const
 	{
 		if ((localMapId < 0) || ((unsigned)localMapId >= allData.size())) return -1;
-		const ITMLocalMap<TVoxel, TIndex> *localMap = allData[localMapId];
+		const LocalMap<TVoxel, TIndex> *localMap = allData[localMapId];
 
 		if (invertIds) 
 		{

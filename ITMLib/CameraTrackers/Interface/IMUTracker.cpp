@@ -5,7 +5,7 @@
 #include "../../Objects/Views/ITMViewIMU.h"
 using namespace ITMLib;
 
-IMUTracker::IMUTracker(ITMIMUCalibrator *calibrator)
+IMUTracker::IMUTracker(IMUCalibrator *calibrator)
 {
 	this->calibrator = calibrator;
 }

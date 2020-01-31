@@ -8,7 +8,7 @@
 using namespace ITMLib;
 using namespace ORUtils;
 
-ViewBuilder_CPU::ViewBuilder_CPU(const ITMRGBDCalib& calib): ViewBuilder(calib) { }
+ViewBuilder_CPU::ViewBuilder_CPU(const RGBDCalib& calib): ViewBuilder(calib) { }
 ViewBuilder_CPU::~ViewBuilder_CPU(void) { }
 
 void ViewBuilder_CPU::UpdateView(ITMView** view_ptr, ITMUChar4Image* rgbImage, ITMShortImage* rawDepthImage, bool useThresholdFilter,
@@ -43,10 +43,10 @@ void ViewBuilder_CPU::UpdateView(ITMView** view_ptr, ITMUChar4Image* rgbImage, I
 
 	switch (view->calib.disparityCalib.GetType())
 	{
-	case ITMDisparityCalib::TRAFO_KINECT:
+	case DisparityCalib::TRAFO_KINECT:
 		this->ConvertDisparityToDepth(view->depth, this->shortImage, &(view->calib.intrinsics_d), view->calib.disparityCalib.GetParams());
 		break;
-	case ITMDisparityCalib::TRAFO_AFFINE:
+	case DisparityCalib::TRAFO_AFFINE:
 		this->ConvertDepthAffineToFloat(view->depth, this->shortImage, view->calib.disparityCalib.GetParams());
 		break;
 	default:
@@ -76,7 +76,7 @@ void ViewBuilder_CPU::UpdateView(ITMView** view_ptr, ITMUChar4Image* rgbImage, I
 }
 
 void ViewBuilder_CPU::UpdateView(ITMView** view_ptr, ITMUChar4Image* rgbImage, ITMShortImage* depthImage, bool useThresholdFilter,
-                                 bool useBilateralFilter, ITMIMUMeasurement* imuMeasurement, bool modelSensorNoise,
+                                 bool useBilateralFilter, IMUMeasurement* imuMeasurement, bool modelSensorNoise,
                                  bool storePreviousImage)
 {
 	if (*view_ptr == NULL)
@@ -100,7 +100,7 @@ void ViewBuilder_CPU::UpdateView(ITMView** view_ptr, ITMUChar4Image* rgbImage, I
 	this->UpdateView(view_ptr, rgbImage, depthImage, false, useBilateralFilter, modelSensorNoise, storePreviousImage);
 }
 
-void ViewBuilder_CPU::ConvertDisparityToDepth(ITMFloatImage *depth_out, const ITMShortImage *depth_in, const ITMIntrinsics *depthIntrinsics,
+void ViewBuilder_CPU::ConvertDisparityToDepth(ITMFloatImage *depth_out, const ITMShortImage *depth_in, const Intrinsics *depthIntrinsics,
                                               Vector2f disparityCalibParams)
 {
 	Vector2i imgSize = depth_in->noDims;

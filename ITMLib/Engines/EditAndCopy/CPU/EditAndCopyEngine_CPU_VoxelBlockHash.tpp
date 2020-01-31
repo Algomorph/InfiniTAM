@@ -17,7 +17,7 @@
 
 
 #include "EditAndCopyEngine_CPU.h"
-#include "../../../Objects/Scene/ITMRepresentationAccess.h"
+#include "../../../Objects/Scene/RepresentationAccess.h"
 #include "../../DepthFusion/DepthFusionEngineFactory.h"
 #include "../../Traversal/Shared/VolumeTraversal_Shared.h"
 #include "../Shared/EditAndCopyEngine_Shared.h"
@@ -29,7 +29,7 @@ using namespace ITMLib;
 
 template<typename TVoxel>
 void EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::ResetVolume(
-		ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume) {
+		VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 	int numBlocks = volume->index.GetAllocatedBlockCount();
 	int blockSize = volume->index.GetVoxelBlockSize();
 
@@ -52,7 +52,7 @@ void EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::ResetVolume(
 
 template<typename TVoxel>
 bool
-EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::SetVoxel(ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume,
+EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::SetVoxel(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
                                                         Vector3i at, TVoxel voxel) {
 
 	ITMHashEntry* hashTable = volume->index.GetEntries();
@@ -73,7 +73,7 @@ EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::SetVoxel(ITMVoxelVolume<TVoxel, V
 
 template<typename TVoxel>
 bool EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::SetVoxelNoAllocation(
-		ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume,
+		VoxelVolume<TVoxel, VoxelBlockHash>* volume,
 		Vector3i at, TVoxel voxel) {
 	ITMHashEntry* hashTable = volume->index.GetEntries();
 	TVoxel* voxels = volume->localVBA.GetVoxelBlocks();
@@ -92,7 +92,7 @@ bool EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::SetVoxelNoAllocation(
 
 template<typename TVoxel>
 TVoxel
-EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::ReadVoxel(ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume,
+EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::ReadVoxel(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
                                                          Vector3i at) {
 	TVoxel* voxels = volume->localVBA.GetVoxelBlocks();
 	ITMHashEntry* hashTable = volume->index.GetEntries();
@@ -102,7 +102,7 @@ EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::ReadVoxel(ITMVoxelVolume<TVoxel, 
 
 template<typename TVoxel>
 TVoxel
-EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::ReadVoxel(ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume,
+EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::ReadVoxel(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
                                                          Vector3i at,
                                                          VoxelBlockHash::IndexCache& cache) {
 	TVoxel* voxels = volume->localVBA.GetVoxelBlocks();
@@ -113,14 +113,14 @@ EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::ReadVoxel(ITMVoxelVolume<TVoxel, 
 
 template<typename TVoxel>
 void
-EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::OffsetWarps(ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume,
+EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::OffsetWarps(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
                                                            Vector3f offset) {
 	DIEWITHEXCEPTION_REPORTLOCATION("Not implemented!");
 }
 
 template<typename TVoxel>
 bool EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::CopyVolumeSlice(
-		ITMVoxelVolume<TVoxel, VoxelBlockHash>* targetVolume, ITMVoxelVolume<TVoxel, VoxelBlockHash>* sourceVolume,
+		VoxelVolume<TVoxel, VoxelBlockHash>* targetVolume, VoxelVolume<TVoxel, VoxelBlockHash>* sourceVolume,
 		Vector6i bounds, const Vector3i& offset) {
 
 	assert(targetVolume->index.hashEntryCount == sourceVolume->index.hashEntryCount);
@@ -244,7 +244,7 @@ bool EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::CopyVolumeSlice(
 
 template<typename TVoxel>
 bool EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::CopyVolume(
-		ITMVoxelVolume<TVoxel, VoxelBlockHash>* targetVolume, ITMVoxelVolume<TVoxel, VoxelBlockHash>* sourceVolume,
+		VoxelVolume<TVoxel, VoxelBlockHash>* targetVolume, VoxelVolume<TVoxel, VoxelBlockHash>* sourceVolume,
 		const Vector3i& offset) {
 
 	assert(targetVolume->index.hashEntryCount == sourceVolume->index.hashEntryCount);

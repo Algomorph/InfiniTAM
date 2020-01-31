@@ -20,8 +20,8 @@
 #include "../../../ORUtils/PlatformIndependence.h"
 #include "../../Utils/ITMVoxelFlags.h"
 #include "../Common/WarpType.h"
-#include "../../Objects/Scene/ITMVoxelVolume.h"
-#include "../../Objects/Scene/ITMTrilinearInterpolation.h"
+#include "../../Objects/Scene/VoxelVolume.h"
+#include "../../Objects/Scene/TrilinearInterpolation.h"
 #include "../../Utils/Configuration.h"
 #include "../../../ORUtils/PlatformIndependentAtomics.h"
 #include "../Common/CommonFunctors.h"
@@ -52,8 +52,8 @@ struct TrilinearInterpolationFunctor {
 	 * \param sourceTSDF
 	 * \param warpSourceScene
 	 */
-	TrilinearInterpolationFunctor(ITMVoxelVolume<TVoxel, TIndex>* sourceTSDF,
-	                              ITMVoxelVolume<TWarp, TIndex>* warpField) :
+	TrilinearInterpolationFunctor(VoxelVolume<TVoxel, TIndex>* sourceTSDF,
+	                              VoxelVolume<TWarp, TIndex>* warpField) :
 
 			sdfSourceScene(sourceTSDF),
 			sdfSourceVoxels(sourceTSDF->localVBA.GetVoxelBlocks()),
@@ -114,12 +114,12 @@ struct TrilinearInterpolationFunctor {
 private:
 
 
-	ITMLib::ITMVoxelVolume<TVoxel, TIndex>* sdfSourceScene;
+	ITMLib::VoxelVolume<TVoxel, TIndex>* sdfSourceScene;
 	TVoxel* sdfSourceVoxels;
 	typename TIndex::IndexData* sdfSourceIndexData;
 	typename TIndex::IndexCache sdfSourceCache;
 
-	ITMLib::ITMVoxelVolume<TWarp, TIndex>* warpSourceScene;
+	ITMLib::VoxelVolume<TWarp, TIndex>* warpSourceScene;
 	TWarp* warpSourceVoxels;
 	typename TIndex::IndexData* warpSourceHashEntries;
 	typename TIndex::IndexCache warpSourceCache;

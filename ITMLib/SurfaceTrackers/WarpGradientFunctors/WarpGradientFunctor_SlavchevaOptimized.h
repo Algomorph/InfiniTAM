@@ -32,7 +32,7 @@
 #include "../../Utils/ITMVoxelFlags.h"
 #include "../../Utils/ITMCPrintHelpers.h"
 #include "../../Engines/EditAndCopy/Shared/EditAndCopyEngine_Shared.h"
-#include "../../Objects/Scene/ITMVoxelVolume.h"
+#include "../../Objects/Scene/VoxelVolume.h"
 
 
 namespace ITMLib {
@@ -48,9 +48,9 @@ public:
 	// region ========================================= CONSTRUCTOR ====================================================
 	WarpGradientFunctor(SlavchevaSurfaceTracker::Parameters parameters,
 	                    SlavchevaSurfaceTracker::Switches switches,
-	                    ITMVoxelVolume<TVoxel,TIndex>* liveVolume,
-	                    ITMVoxelVolume<TVoxel,TIndex>* canonicalVolume,
-	                    ITMVoxelVolume<TWarp,TIndex>* warpField,
+	                    VoxelVolume<TVoxel,TIndex>* liveVolume,
+	                    VoxelVolume<TVoxel,TIndex>* canonicalVolume,
+	                    VoxelVolume<TWarp,TIndex>* warpField,
 	                    float voxelSize, float narrowBandHalfWidth) :
 			parameters(parameters), switches(switches),
 			liveVoxels(liveVolume->localVBA.GetVoxelBlocks()), liveIndexData(liveVolume->index.GetIndexData()),

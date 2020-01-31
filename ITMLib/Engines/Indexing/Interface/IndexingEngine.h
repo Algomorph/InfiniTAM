@@ -16,11 +16,11 @@
 #pragma once
 
 //local
-#include "../../../Objects/Scene/ITMVoxelVolume.h"
+#include "../../../Objects/Scene/VoxelVolume.h"
 #include "../../../Utils/ITMHashBlockProperties.h"
 #include "../../../Objects/Views/ITMView.h"
 #include "../../../Objects/Tracking/ITMTrackingState.h"
-#include "../../../Objects/RenderStates/ITMRenderState.h"
+#include "../../../Objects/RenderStates/RenderState.h"
 #include "../../Common/WarpType.h"
 #include "../../../../ORUtils/MemoryDeviceType.h"
 
@@ -48,7 +48,7 @@ class IndexingEngineInterface {
 	 * \param resetVisibleList  [in] reset visibility list prior to the rest of the operation
 	 */
 	virtual void
-	AllocateFromDepth(ITMVoxelVolume <TVoxel, TIndex>* volume, const ITMView* view,
+	AllocateFromDepth(VoxelVolume <TVoxel, TIndex>* volume, const ITMView* view,
 	                  const ITMTrackingState* trackingState,
 	                  bool onlyUpdateVisibleList, bool resetVisibleList) = 0;
 
@@ -64,7 +64,7 @@ class IndexingEngineInterface {
 	 * \param resetVisibleList  [in] reset visibility list upon completion
 	 */
 	virtual void
-	AllocateFromDepth(ITMVoxelVolume <TVoxel, TIndex>* volume, const ITMView* view,
+	AllocateFromDepth(VoxelVolume <TVoxel, TIndex>* volume, const ITMView* view,
 	                  const Matrix4f& depth_camera_matrix = Matrix4f::Identity(),
 	                  bool onlyUpdateVisibleList = false, bool resetVisibleList = false) = 0;
 
@@ -85,8 +85,8 @@ class IndexingEngineInterface {
 	 * \param resetAllocatedList  [in] reset allocated list before the operation.
 	 */
 	virtual void
-	AllocateFromDepthAndSdfSpan(ITMVoxelVolume <TVoxel, TIndex>* volume,
-	                            const ITMRenderState* sourceRenderState,
+	AllocateFromDepthAndSdfSpan(VoxelVolume <TVoxel, TIndex>* volume,
+	                            const RenderState* sourceRenderState,
 	                            const ITMView* view,
 	                            const Matrix4f& depth_camera_matrix = Matrix4f::Identity(),
 	                            bool onlyUpdateAllocatedList = false, bool resetAllocatedList = false) = 0;
@@ -108,16 +108,16 @@ public:
 	IndexingEngine(IndexingEngine const&) = delete;
 	void operator=(IndexingEngine const&) = delete;
 
-	virtual void AllocateFromDepth(ITMVoxelVolume <TVoxel, TIndex>* volume, const ITMView* view,
+	virtual void AllocateFromDepth(VoxelVolume <TVoxel, TIndex>* volume, const ITMView* view,
 	                               const ITMTrackingState* trackingState, bool onlyUpdateVisibleList,
 	                               bool resetVisibleList) override;
 
-	virtual void AllocateFromDepth(ITMVoxelVolume <TVoxel, TIndex>* volume, const ITMView* view,
+	virtual void AllocateFromDepth(VoxelVolume <TVoxel, TIndex>* volume, const ITMView* view,
 	                               const Matrix4f& depth_camera_matrix = Matrix4f::Identity(),
 	                               bool onlyUpdateVisibleList = false, bool resetVisibleList = false) override;
 
-	virtual void AllocateFromDepthAndSdfSpan(ITMVoxelVolume <TVoxel, TIndex>* targetVolume,
-	                                         const ITMRenderState* sourceRenderState,
+	virtual void AllocateFromDepthAndSdfSpan(VoxelVolume <TVoxel, TIndex>* targetVolume,
+	                                         const RenderState* sourceRenderState,
 	                                         const ITMView* view,
 	                                         const Matrix4f& depth_camera_matrix = Matrix4f::Identity(),
 	                                         bool onlyUpdateAllocatedList = false,
@@ -125,25 +125,25 @@ public:
 
 
 	template<typename TVoxelTarget, typename TVoxelSource>
-	void AllocateUsingOtherVolume(ITMVoxelVolume <TVoxelTarget, TIndex>* targetVolume,
-	                              ITMVoxelVolume <TVoxelSource, TIndex>* sourceVolume);
+	void AllocateUsingOtherVolume(VoxelVolume <TVoxelTarget, TIndex>* targetVolume,
+	                              VoxelVolume <TVoxelSource, TIndex>* sourceVolume);
 
 	template<typename TVoxelTarget, typename TVoxelSource>
-	void AllocateUsingOtherVolumeExpanded(ITMVoxelVolume <TVoxelTarget, TIndex>* targetVolume,
-	                                      ITMVoxelVolume <TVoxelSource, TIndex>* sourceVolume);
+	void AllocateUsingOtherVolumeExpanded(VoxelVolume <TVoxelTarget, TIndex>* targetVolume,
+	                                      VoxelVolume <TVoxelSource, TIndex>* sourceVolume);
 
 
 	template<typename TVoxelTarget, typename TVoxelSource>
-	void AllocateUsingOtherVolumeAndSetVisibilityExpanded(ITMVoxelVolume <TVoxelTarget, TIndex>* targetVolume,
-	                                                      ITMVoxelVolume <TVoxelSource, TIndex>* sourceVolume,
+	void AllocateUsingOtherVolumeAndSetVisibilityExpanded(VoxelVolume <TVoxelTarget, TIndex>* targetVolume,
+	                                                      VoxelVolume <TVoxelSource, TIndex>* sourceVolume,
 	                                                      ITMView* view,
 	                                                      const Matrix4f& depth_camera_matrix = Matrix4f::Identity());
 
 	template<WarpType TWarpType, typename TWarp>
 	void AllocateFromWarpedVolume(
-			ITMVoxelVolume <TWarp, TIndex>* warpField,
-			ITMVoxelVolume <TVoxel, TIndex>* sourceTSDF,
-			ITMVoxelVolume <TVoxel, TIndex>* targetTSDF);
+			VoxelVolume <TWarp, TIndex>* warpField,
+			VoxelVolume <TVoxel, TIndex>* sourceTSDF,
+			VoxelVolume <TVoxel, TIndex>* targetTSDF);
 
 };
 

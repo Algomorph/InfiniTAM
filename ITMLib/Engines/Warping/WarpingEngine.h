@@ -16,7 +16,7 @@
 #pragma once
 
 #include "../../../ORUtils/MemoryDeviceType.h"
-#include "../../Objects/Scene/ITMVoxelVolume.h"
+#include "../../Objects/Scene/VoxelVolume.h"
 #include "../Common/WarpType.h"
 
 namespace ITMLib{
@@ -42,9 +42,9 @@ public:
 	* \param sourceTSDF source (current iteration live) scene
 	* \param targetTSDF target (next iteration live) scene
 	*/
-	virtual void WarpVolume_CumulativeWarps(ITMVoxelVolume<TWarp, TIndex>* warpField,
-	                                        ITMVoxelVolume<TVoxel, TIndex>* sourceTSDF,
-	                                        ITMVoxelVolume<TVoxel, TIndex>* targetTSDF) = 0;
+	virtual void WarpVolume_CumulativeWarps(VoxelVolume<TWarp, TIndex>* warpField,
+	                                        VoxelVolume<TVoxel, TIndex>* sourceTSDF,
+	                                        VoxelVolume<TVoxel, TIndex>* targetTSDF) = 0;
 /**
 	 * \brief Uses trilinear interpolation of the target TSDF volume at [source TSDF voxel positions + warp vector]
 	 *  to generate a new live SDF grid in the target scene. Uses framewise warps as warp vectors.
@@ -64,9 +64,9 @@ public:
 	 * \param sourceTSDF source (current iteration live) scene
 	 * \param targetTSDF target (next iteration live) scene
 	 */
-	virtual void WarpVolume_FramewiseWarps(ITMVoxelVolume<TWarp, TIndex>* warpField,
-	                                       ITMVoxelVolume<TVoxel, TIndex>* sourceTSDF,
-	                                       ITMVoxelVolume<TVoxel, TIndex>* targetTSDF) = 0;
+	virtual void WarpVolume_FramewiseWarps(VoxelVolume<TWarp, TIndex>* warpField,
+	                                       VoxelVolume<TVoxel, TIndex>* sourceTSDF,
+	                                       VoxelVolume<TVoxel, TIndex>* targetTSDF) = 0;
 	/**
 	 * \brief Uses trilinear interpolation to set all locations within target TSDF volume
 	 *  to interpolated value of the source TSDF volume at [source TSDF voxel positions + warp vector]
@@ -87,30 +87,30 @@ public:
 	 * \param sourceTSDF source (current iteration live) scene
 	 * \param targetTSDF target (next iteration live) scene
 	 */
-	virtual void WarpVolume_WarpUpdates(ITMVoxelVolume<TWarp, TIndex>* warpField,
-	                                    ITMVoxelVolume<TVoxel, TIndex>* sourceTSDF,
-	                                    ITMVoxelVolume<TVoxel, TIndex>* targetTSDF) = 0;
+	virtual void WarpVolume_WarpUpdates(VoxelVolume<TWarp, TIndex>* warpField,
+	                                    VoxelVolume<TVoxel, TIndex>* sourceTSDF,
+	                                    VoxelVolume<TVoxel, TIndex>* targetTSDF) = 0;
 };
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 class WarpingEngine :
 		public WarpingEngineInterface<TVoxel, TWarp, TIndex>{
 public:
-	void WarpVolume_CumulativeWarps(ITMVoxelVolume<TWarp, TIndex>* warpField,
-	                                ITMVoxelVolume<TVoxel, TIndex>* sourceTSDF,
-	                                ITMVoxelVolume<TVoxel, TIndex>* targetTSDF) override;
+	void WarpVolume_CumulativeWarps(VoxelVolume<TWarp, TIndex>* warpField,
+	                                VoxelVolume<TVoxel, TIndex>* sourceTSDF,
+	                                VoxelVolume<TVoxel, TIndex>* targetTSDF) override;
 
-	void WarpVolume_FramewiseWarps(ITMVoxelVolume<TWarp, TIndex>* warpField,
-	                               ITMVoxelVolume<TVoxel, TIndex>* sourceTSDF,
-	                               ITMVoxelVolume<TVoxel, TIndex>* targetTSDF) override;
+	void WarpVolume_FramewiseWarps(VoxelVolume<TWarp, TIndex>* warpField,
+	                               VoxelVolume<TVoxel, TIndex>* sourceTSDF,
+	                               VoxelVolume<TVoxel, TIndex>* targetTSDF) override;
 
-	void WarpVolume_WarpUpdates(ITMVoxelVolume<TWarp, TIndex>* warpField,
-	                            ITMVoxelVolume<TVoxel, TIndex>* sourceTSDF,
-	                            ITMVoxelVolume<TVoxel, TIndex>* targetTSDF) override;
+	void WarpVolume_WarpUpdates(VoxelVolume<TWarp, TIndex>* warpField,
+	                            VoxelVolume<TVoxel, TIndex>* sourceTSDF,
+	                            VoxelVolume<TVoxel, TIndex>* targetTSDF) override;
 private:
 	template<WarpType TWarpType>
-	void WarpScene(ITMVoxelVolume<TWarp,  TIndex>* warpField,
-	               ITMVoxelVolume<TVoxel, TIndex>* sourceTSDF,
-	               ITMVoxelVolume<TVoxel, TIndex>* targetTSDF);
+	void WarpScene(VoxelVolume<TWarp,  TIndex>* warpField,
+	               VoxelVolume<TVoxel, TIndex>* sourceTSDF,
+	               VoxelVolume<TVoxel, TIndex>* targetTSDF);
 };
 } // namespace ITMLib

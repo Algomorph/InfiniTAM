@@ -10,7 +10,7 @@ using namespace ITMLib;
 
 template<class TVoxel>
 __global__ void
-meshScene_device(ITMMesh::Triangle* triangles, unsigned int* noTriangles_device, float factor, int noTotalEntries,
+meshScene_device(Mesh::Triangle* triangles, unsigned int* noTriangles_device, float factor, int noTotalEntries,
                  int noMaxTriangles, const Vector4s* visibleBlockGlobalPos, const TVoxel* localVBA,
                  const ITMHashEntry* hashTable);
 
@@ -40,9 +40,9 @@ MeshingEngine_CUDA<TVoxel, VoxelBlockHash>::~MeshingEngine_CUDA() {
 }
 
 template<class TVoxel>
-void MeshingEngine_CUDA<TVoxel, VoxelBlockHash>::MeshScene(ITMMesh* mesh,
-                                                           const ITMVoxelVolume<TVoxel, VoxelBlockHash>* scene) {
-	ITMMesh::Triangle* triangles = mesh->triangles->GetData(MEMORYDEVICE_CUDA);
+void MeshingEngine_CUDA<TVoxel, VoxelBlockHash>::MeshScene(Mesh* mesh,
+                                                           const VoxelVolume<TVoxel, VoxelBlockHash>* scene) {
+	Mesh::Triangle* triangles = mesh->triangles->GetData(MEMORYDEVICE_CUDA);
 	const TVoxel* localVBA = scene->localVBA.GetVoxelBlocks();
 	const ITMHashEntry* hashTable = scene->index.GetEntries();
 
@@ -83,13 +83,13 @@ template<class TVoxel>
 MeshingEngine_CUDA<TVoxel, PlainVoxelArray>::~MeshingEngine_CUDA(void) {}
 
 template<class TVoxel>
-void MeshingEngine_CUDA<TVoxel, PlainVoxelArray>::MeshScene(ITMMesh* mesh,
-                                                            const ITMVoxelVolume<TVoxel, PlainVoxelArray>* scene) {}
+void MeshingEngine_CUDA<TVoxel, PlainVoxelArray>::MeshScene(Mesh* mesh,
+                                                            const VoxelVolume<TVoxel, PlainVoxelArray>* scene) {}
 
 
 template<class TVoxel>
 __global__ void
-meshScene_device(ITMMesh::Triangle* triangles, unsigned int* noTriangles_device, float factor, int noTotalEntries,
+meshScene_device(Mesh::Triangle* triangles, unsigned int* noTriangles_device, float factor, int noTotalEntries,
                  int noMaxTriangles, const Vector4s* visibleBlockGlobalPos, const TVoxel* localVBA,
                  const ITMHashEntry* hashTable) {
 	const Vector4s globalPos_4s = visibleBlockGlobalPos[blockIdx.x + gridDim.x * blockIdx.y];

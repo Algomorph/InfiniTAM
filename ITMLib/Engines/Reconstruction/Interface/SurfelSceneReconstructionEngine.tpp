@@ -44,8 +44,8 @@ SurfelSceneReconstructionEngine<TSurfel>::~SurfelSceneReconstructionEngine()
 //#################### PUBLIC MEMBER FUNCTIONS ####################
 
 template <typename TSurfel>
-void SurfelSceneReconstructionEngine<TSurfel>::IntegrateIntoScene(ITMSurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState,
-                                                                  const ITMSurfelRenderState *renderState)
+void SurfelSceneReconstructionEngine<TSurfel>::IntegrateIntoScene(SurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState,
+                                                                  const SurfelRenderState *renderState)
 {
   PreprocessDepthMap(view, scene->GetParams());
   FindCorrespondingSurfels(scene, view, trackingState, renderState);
@@ -59,7 +59,7 @@ void SurfelSceneReconstructionEngine<TSurfel>::IntegrateIntoScene(ITMSurfelScene
 }
 
 template <typename TSurfel>
-void SurfelSceneReconstructionEngine<TSurfel>::ResetScene(ITMSurfelScene<TSurfel> *scene) const
+void SurfelSceneReconstructionEngine<TSurfel>::ResetScene(SurfelScene<TSurfel> *scene) const
 {
   scene->Reset();
 }

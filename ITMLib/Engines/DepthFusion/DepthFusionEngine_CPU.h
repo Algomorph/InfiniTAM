@@ -23,23 +23,23 @@ public:
 	DepthFusionEngine_CPU() = default;
 	~DepthFusionEngine_CPU() = default;
 
-	void UpdateVisibleList(ITMVoxelVolume<TVoxel, VoxelBlockHash>* scene, const ITMView* view,
-	                       const ITMTrackingState* trackingState, const ITMRenderState* renderState,
+	void UpdateVisibleList(VoxelVolume<TVoxel, VoxelBlockHash>* scene, const ITMView* view,
+	                       const ITMTrackingState* trackingState, const RenderState* renderState,
 	                       bool resetVisibleList) override;
-	void GenerateTsdfVolumeFromView(ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
+	void GenerateTsdfVolumeFromView(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
 	                                const ITMTrackingState* trackingState) override;
-	void GenerateTsdfVolumeFromView(ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
+	void GenerateTsdfVolumeFromView(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
 	                                const Matrix4f& depth_camera_matrix = Matrix4f::Identity()) override;
-	void GenerateTsdfVolumeFromViewExpanded(ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume,
-	                                        ITMVoxelVolume<TVoxel, VoxelBlockHash>* temporaryAllocationVolume,
+	void GenerateTsdfVolumeFromViewExpanded(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
+	                                        VoxelVolume<TVoxel, VoxelBlockHash>* temporaryAllocationVolume,
 	                                        const ITMView* view,
 	                                        const Matrix4f& depth_camera_matrix = Matrix4f::Identity()) override;
-	void IntegrateDepthImageIntoTsdfVolume(ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view);
-	void IntegrateDepthImageIntoTsdfVolume(ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
-	                                      const ITMTrackingState* trackingState);
+	void IntegrateDepthImageIntoTsdfVolume(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view);
+	void IntegrateDepthImageIntoTsdfVolume(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
+	                                       const ITMTrackingState* trackingState);
 private:
-	void IntegrateDepthImageIntoTsdfVolume_Helper(ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
-	                                             Matrix4f depth_camera_matrix = Matrix4f::Identity());
+	void IntegrateDepthImageIntoTsdfVolume_Helper(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
+	                                              Matrix4f depth_camera_matrix = Matrix4f::Identity());
 
 };
 
@@ -47,26 +47,26 @@ template<typename TVoxel, typename TWarp>
 class DepthFusionEngine_CPU<TVoxel, TWarp, PlainVoxelArray>
 		: public DepthFusionEngine<TVoxel, TWarp, PlainVoxelArray> {
 public:
-	void UpdateVisibleList(ITMVoxelVolume<TVoxel, PlainVoxelArray>* scene, const ITMView* view,
-	                       const ITMTrackingState* trackingState, const ITMRenderState* renderState,
+	void UpdateVisibleList(VoxelVolume<TVoxel, PlainVoxelArray>* scene, const ITMView* view,
+	                       const ITMTrackingState* trackingState, const RenderState* renderState,
 	                       bool resetVisibleList) override;
-	void GenerateTsdfVolumeFromView(ITMVoxelVolume<TVoxel, PlainVoxelArray>* volume, const ITMView* view,
+	void GenerateTsdfVolumeFromView(VoxelVolume<TVoxel, PlainVoxelArray>* volume, const ITMView* view,
 	                                const ITMTrackingState* trackingState) override;
-	void GenerateTsdfVolumeFromView(ITMVoxelVolume<TVoxel, PlainVoxelArray>* volume, const ITMView* view,
+	void GenerateTsdfVolumeFromView(VoxelVolume<TVoxel, PlainVoxelArray>* volume, const ITMView* view,
 	                                const Matrix4f& depth_camera_matrix=Matrix4f::Identity()) override;
-	void GenerateTsdfVolumeFromViewExpanded(ITMVoxelVolume<TVoxel, PlainVoxelArray>* volume,
-	                                        ITMVoxelVolume<TVoxel, PlainVoxelArray>* temporaryAllocationVolume,
+	void GenerateTsdfVolumeFromViewExpanded(VoxelVolume<TVoxel, PlainVoxelArray>* volume,
+	                                        VoxelVolume<TVoxel, PlainVoxelArray>* temporaryAllocationVolume,
 	                                        const ITMView* view,
 	                                        const Matrix4f& depth_camera_matrix = Matrix4f::Identity()) override;
-	void IntegrateDepthImageIntoTsdfVolume(ITMVoxelVolume<TVoxel, PlainVoxelArray>* volume, const ITMView* view);
-	void IntegrateDepthImageIntoTsdfVolume(ITMVoxelVolume<TVoxel, PlainVoxelArray>* volume, const ITMView* view,
-	                                      const ITMTrackingState* trackingState);
+	void IntegrateDepthImageIntoTsdfVolume(VoxelVolume<TVoxel, PlainVoxelArray>* volume, const ITMView* view);
+	void IntegrateDepthImageIntoTsdfVolume(VoxelVolume<TVoxel, PlainVoxelArray>* volume, const ITMView* view,
+	                                       const ITMTrackingState* trackingState);
 
 	DepthFusionEngine_CPU() = default;
 	~DepthFusionEngine_CPU() = default;
 private:
-	void IntegrateDepthImageIntoTsdfVolume_Helper(ITMVoxelVolume<TVoxel, PlainVoxelArray>* volume, const ITMView* view,
-	                                             Matrix4f camera_depth_matrix = Matrix4f::Identity());
+	void IntegrateDepthImageIntoTsdfVolume_Helper(VoxelVolume<TVoxel, PlainVoxelArray>* volume, const ITMView* view,
+	                                              Matrix4f camera_depth_matrix = Matrix4f::Identity());
 
 };
 } // namespace ITMLib

@@ -9,7 +9,7 @@
 #include "../Meshing/Interface/MeshingEngine.h"
 #include "../ViewBuilding/Interface/ViewBuilder.h"
 #include "../Visualization/Interface/VisualizationEngine.h"
-#include "../../Objects/Misc/ITMIMUCalibrator.h"
+#include "../../Objects/Misc/IMUCalibrator.h"
 
 #include "../../../FernRelocLib/Relocaliser.h"
 
@@ -31,12 +31,12 @@ namespace ITMLib
 		DenseMapper<TVoxel, TIndex> *denseMapper;
 		TrackingController *trackingController;
 
-		ITMVoxelVolume<TVoxel, TIndex> *scene;
-		ITMRenderState *renderState_live;
-		ITMRenderState *renderState_freeview;
+		VoxelVolume<TVoxel, TIndex> *scene;
+		RenderState *renderState_live;
+		RenderState *renderState_freeview;
 
 		CameraTracker *tracker;
-		ITMIMUCalibrator *imuCalibrator;
+		IMUCalibrator *imuCalibrator;
 
 		FernRelocLib::Relocaliser<float> *relocaliser;
 		ITMUChar4Image *kfRaycast;
@@ -52,9 +52,9 @@ namespace ITMLib
 		ITMTrackingState* GetTrackingState(void) { return trackingState; }
 
 		/// Gives access to the internal world representation
-		ITMVoxelVolume<TVoxel, TIndex>* GetScene(void) { return scene; }
+		VoxelVolume<TVoxel, TIndex>* GetScene(void) { return scene; }
 
-		ITMTrackingState::TrackingResult ProcessFrame(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage, ITMIMUMeasurement *imuMeasurement = NULL);
+		ITMTrackingState::TrackingResult ProcessFrame(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage, IMUMeasurement *imuMeasurement = NULL);
 
 		/// Extracts a mesh from the current scene and saves it to the model file specified by the file name
 		void SaveSceneToMesh(const char *fileName);
@@ -66,7 +66,7 @@ namespace ITMLib
 		/// Get a result image as output
 		Vector2i GetImageSize(void) const;
 
-		void GetImage(ITMUChar4Image *out, GetImageType getImageType, ORUtils::SE3Pose *pose = NULL, ITMIntrinsics *intrinsics = NULL);
+		void GetImage(ITMUChar4Image *out, GetImageType getImageType, ORUtils::SE3Pose *pose = NULL, Intrinsics *intrinsics = NULL);
 
 		/// switch for turning tracking on/off
 		void turnOnTracking() override;
@@ -87,7 +87,7 @@ namespace ITMLib
 			Omitting a separate image size for the depth images
 			will assume same resolution as for the RGB images.
 		*/
-		BasicVoxelEngine(const ITMRGBDCalib& calib, Vector2i imgSize_rgb, Vector2i imgSize_d);
+		BasicVoxelEngine(const RGBDCalib& calib, Vector2i imgSize_rgb, Vector2i imgSize_d);
 		~BasicVoxelEngine();
 	};
 }

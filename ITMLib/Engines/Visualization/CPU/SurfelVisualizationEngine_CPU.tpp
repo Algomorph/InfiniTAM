@@ -12,7 +12,7 @@ namespace ITMLib
 //#################### PUBLIC MEMBER FUNCTIONS ####################
 
 template <typename TSurfel>
-void SurfelVisualizationEngine_CPU<TSurfel>::CopyCorrespondencesToBuffers(const ITMSurfelScene<TSurfel> *scene, float *newPositions, float *oldPositions, float *correspondences) const
+void SurfelVisualizationEngine_CPU<TSurfel>::CopyCorrespondencesToBuffers(const SurfelScene<TSurfel> *scene, float *newPositions, float *oldPositions, float *correspondences) const
 {
   const int surfelCount = static_cast<int>(scene->GetSurfelCount());
   const TSurfel *surfels = scene->GetSurfels()->GetData(MEMORYDEVICE_CPU);
@@ -27,7 +27,7 @@ void SurfelVisualizationEngine_CPU<TSurfel>::CopyCorrespondencesToBuffers(const 
 }
 
 template <typename TSurfel>
-void SurfelVisualizationEngine_CPU<TSurfel>::CopySceneToBuffers(const ITMSurfelScene<TSurfel> *scene, float *positions, unsigned char *normals, unsigned char *colours) const
+void SurfelVisualizationEngine_CPU<TSurfel>::CopySceneToBuffers(const SurfelScene<TSurfel> *scene, float *positions, unsigned char *normals, unsigned char *colours) const
 {
   const int surfelCount = static_cast<int>(scene->GetSurfelCount());
   const TSurfel *surfels = scene->GetSurfels()->GetData(MEMORYDEVICE_CPU);
@@ -42,7 +42,7 @@ void SurfelVisualizationEngine_CPU<TSurfel>::CopySceneToBuffers(const ITMSurfelS
 }
 
 template <typename TSurfel>
-void SurfelVisualizationEngine_CPU<TSurfel>::CreateICPMaps(const ITMSurfelScene<TSurfel> *scene, const ITMSurfelRenderState *renderState, ITMTrackingState *trackingState) const
+void SurfelVisualizationEngine_CPU<TSurfel>::CreateICPMaps(const SurfelScene<TSurfel> *scene, const SurfelRenderState *renderState, ITMTrackingState *trackingState) const
 {
   const Matrix4f& invT = trackingState->pose_d->GetM();
   Vector4f *normalsMap = trackingState->pointCloud->colours->GetData(MEMORYDEVICE_CPU);
@@ -62,8 +62,8 @@ void SurfelVisualizationEngine_CPU<TSurfel>::CreateICPMaps(const ITMSurfelScene<
 }
 
 template <typename TSurfel>
-void SurfelVisualizationEngine_CPU<TSurfel>::RenderDepthImage(const ITMSurfelScene<TSurfel> *scene, const ORUtils::SE3Pose *pose,
-                                                              const ITMSurfelRenderState *renderState, ITMFloatImage *outputImage) const
+void SurfelVisualizationEngine_CPU<TSurfel>::RenderDepthImage(const SurfelScene<TSurfel> *scene, const ORUtils::SE3Pose *pose,
+                                                              const SurfelRenderState *renderState, ITMFloatImage *outputImage) const
 {
   const Vector3f cameraPosition = pose->GetT();
   float *outputImagePtr = outputImage->GetData(MEMORYDEVICE_CPU);
@@ -81,7 +81,7 @@ void SurfelVisualizationEngine_CPU<TSurfel>::RenderDepthImage(const ITMSurfelSce
 }
 
 template <typename TSurfel>
-void SurfelVisualizationEngine_CPU<TSurfel>::RenderImage(const ITMSurfelScene<TSurfel> *scene, const ORUtils::SE3Pose *pose, const ITMSurfelRenderState *renderState,
+void SurfelVisualizationEngine_CPU<TSurfel>::RenderImage(const SurfelScene<TSurfel> *scene, const ORUtils::SE3Pose *pose, const SurfelRenderState *renderState,
                                                          ITMUChar4Image *outputImage, RenderImageType type) const
 {
   // Prevent colour rendering if the surfels don't store colour information.
@@ -165,7 +165,7 @@ MemoryDeviceType SurfelVisualizationEngine_CPU<TSurfel>::GetMemoryType() const
 }
 
 template <typename TSurfel>
-void SurfelVisualizationEngine_CPU<TSurfel>::MakeIndexImage(const ITMSurfelScene<TSurfel> *scene, const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics,
+void SurfelVisualizationEngine_CPU<TSurfel>::MakeIndexImage(const SurfelScene<TSurfel> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics,
                                                             int width, int height, int scaleFactor, unsigned int *surfelIndexImage, bool useRadii,
                                                             UnstableSurfelRenderingMode unstableSurfelRenderingMode, int *depthBuffer) const
 {

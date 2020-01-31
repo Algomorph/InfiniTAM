@@ -15,13 +15,13 @@
 using namespace ITMLib;
 
 template<typename TSurfel>
-BasicSurfelEngine<TSurfel>::BasicSurfelEngine(const ITMRGBDCalib& calib, Vector2i imgSize_rgb, Vector2i imgSize_d) {
+BasicSurfelEngine<TSurfel>::BasicSurfelEngine(const RGBDCalib& calib, Vector2i imgSize_rgb, Vector2i imgSize_d) {
 	auto& settings = configuration::get();
 
 	if ((imgSize_d.x == -1) || (imgSize_d.y == -1)) imgSize_d = imgSize_rgb;
 
 	MemoryDeviceType memoryType = settings.device_type;
-	this->surfelScene = new ITMSurfelScene<TSurfel>(&settings.general_surfel_volume_parameters, memoryType);
+	this->surfelScene = new SurfelScene<TSurfel>(&settings.general_surfel_volume_parameters, memoryType);
 
 	const MemoryDeviceType deviceType = settings.device_type;
 
@@ -39,8 +39,8 @@ BasicSurfelEngine<TSurfel>::BasicSurfelEngine(const ITMRGBDCalib& calib, Vector2
 
 	Vector2i trackedImageSize = trackingController->GetTrackedImageSize(imgSize_rgb, imgSize_d);
 
-	surfelRenderState_live = new ITMSurfelRenderState(trackedImageSize,
-	                                                  settings.general_surfel_volume_parameters.supersampling_factor);
+	surfelRenderState_live = new SurfelRenderState(trackedImageSize,
+	                                               settings.general_surfel_volume_parameters.supersampling_factor);
 	surfelRenderState_freeview = nullptr; //will be created if needed
 
 	trackingState = new ITMTrackingState(trackedImageSize, memoryType);
@@ -186,7 +186,7 @@ static void QuaternionFromRotationMatrix(const double *matrix, double *q) {
 template<typename TSurfel>
 ITMTrackingState::TrackingResult
 BasicSurfelEngine<TSurfel>::ProcessFrame(ITMUChar4Image* rgbImage, ITMShortImage* rawDepthImage,
-                                         ITMIMUMeasurement* imuMeasurement) {
+                                         IMUMeasurement* imuMeasurement) {
 	auto& settings = configuration::get();
 	// prepare image and turn it into a depth image
 	if (imuMeasurement == nullptr)
@@ -322,7 +322,7 @@ BasicSurfelEngine<TSurfel>::ToSurfelImageType(GetImageType getImageType) {
 
 template<typename TSurfel>
 void BasicSurfelEngine<TSurfel>::GetImage(ITMUChar4Image* out, GetImageType getImageType, ORUtils::SE3Pose* pose,
-                                          ITMIntrinsics* intrinsics) {
+                                          Intrinsics* intrinsics) {
 
 	auto& settings = configuration::get();
 	if (view == nullptr) return;
@@ -358,8 +358,8 @@ void BasicSurfelEngine<TSurfel>::GetImage(ITMUChar4Image* out, GetImageType getI
 		case BasicSurfelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_NORMAL:
 		case BasicSurfelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_CONFIDENCE: {
 			if (!surfelRenderState_freeview)
-				surfelRenderState_freeview = new ITMSurfelRenderState(view->depth->noDims,
-				                                                      surfelScene->GetParams().supersampling_factor);
+				surfelRenderState_freeview = new SurfelRenderState(view->depth->noDims,
+				                                                   surfelScene->GetParams().supersampling_factor);
 			const bool useRadii = true;
 			surfelVisualizationEngine->FindSurface(surfelScene, pose, intrinsics, useRadii, USR_DONOTRENDER,
 			                                       surfelRenderState_freeview);

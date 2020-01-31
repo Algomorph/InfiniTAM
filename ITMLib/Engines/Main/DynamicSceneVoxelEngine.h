@@ -11,7 +11,7 @@
 #include "../Meshing/Interface/MeshingEngine.h"
 #include "../ViewBuilding/Interface/ViewBuilder.h"
 #include "../Visualization/Interface/VisualizationEngine.h"
-#include "../../Objects/Misc/ITMIMUCalibrator.h"
+#include "../../Objects/Misc/IMUCalibrator.h"
 
 #include "../../../FernRelocLib/Relocaliser.h"
 #include "../../CameraTrackers/Interface/CameraTracker.h"
@@ -29,13 +29,13 @@ namespace ITMLib
 			Omitting a separate image size for the depth images
 			will assume same resolution as for the RGB images.
 		*/
-		DynamicSceneVoxelEngine(const ITMRGBDCalib& calib, Vector2i imgSize_rgb, Vector2i imgSize_d);
+		DynamicSceneVoxelEngine(const RGBDCalib& calib, Vector2i imgSize_rgb, Vector2i imgSize_d);
 		~DynamicSceneVoxelEngine() override;
 
 		ITMView* GetView() override { return view; }
 		ITMTrackingState* GetTrackingState() override { return trackingState; }
 
-		ITMTrackingState::TrackingResult ProcessFrame(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage, ITMIMUMeasurement *imuMeasurement = nullptr) override;
+		ITMTrackingState::TrackingResult ProcessFrame(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage, IMUMeasurement *imuMeasurement = nullptr) override;
 
 		/// Extracts a mesh from the current scene and saves it to the model file specified by the file name
 		void SaveSceneToMesh(const char *fileName) override ;
@@ -48,7 +48,7 @@ namespace ITMLib
 		Vector2i GetImageSize() const override;
 
 		void GetImage(ITMUChar4Image *out, GetImageType getImageType,
-		              ORUtils::SE3Pose *pose = nullptr, ITMIntrinsics *intrinsics = nullptr) override;
+		              ORUtils::SE3Pose *pose = nullptr, Intrinsics *intrinsics = nullptr) override;
 
 		/// resets the scene and the tracker
 		void resetAll() override;
@@ -70,7 +70,7 @@ namespace ITMLib
 		void InitializeScenes();
 		static const int liveSceneCount = 2;
 		//TODO need better function separation here, "begin" is logically too arbitrary and does too many things
-		void BeginProcessingFrame(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage, ITMIMUMeasurement *imuMeasurement = nullptr);
+		void BeginProcessingFrame(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage, IMUMeasurement *imuMeasurement = nullptr);
 
 		bool trackingActive, fusionActive, mainProcessingActive, trackingInitialised;
 		int framesProcessed, relocalisationCount;
@@ -85,14 +85,14 @@ namespace ITMLib
 		DenseDynamicMapper<TVoxel, TWarp, TIndex>* denseMapper;
 		TrackingController* cameraTrackingController;
 
-		ITMVoxelVolume<TVoxel, TIndex>* canonicalScene;
-		ITMVoxelVolume<TVoxel, TIndex>** liveScenes;
-		ITMVoxelVolume<TWarp, TIndex>* warpField;
-		ITMRenderState* renderState_live;
-		ITMRenderState* renderState_freeview;
+		VoxelVolume<TVoxel, TIndex>* canonicalScene;
+		VoxelVolume<TVoxel, TIndex>** liveScenes;
+		VoxelVolume<TWarp, TIndex>* warpField;
+		RenderState* renderState_live;
+		RenderState* renderState_freeview;
 
 		CameraTracker* tracker;
-		ITMIMUCalibrator* imuCalibrator;
+		IMUCalibrator* imuCalibrator;
 
 		FernRelocLib::Relocaliser<float>* relocaliser;
 		ITMUChar4Image* kfRaycast;

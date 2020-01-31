@@ -46,7 +46,7 @@ namespace bench = ITMLib::Bench;
 // region ========================================= DEBUG PRINTING =====================================================
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DenseDynamicMapper<TVoxel, TWarp, TIndex>::LogVolumeStatistics(ITMVoxelVolume<TVoxel, TIndex>* volume,
+void DenseDynamicMapper<TVoxel, TWarp, TIndex>::LogVolumeStatistics(VoxelVolume<TVoxel, TIndex>* volume,
                                                                     std::string volume_description) {
 	if (this->log_volume_statistics) {
 		ITMSceneStatisticsCalculatorInterface<TVoxel, TIndex>* calculator = nullptr;
@@ -119,8 +119,8 @@ DenseDynamicMapper<TVoxel, TWarp, TIndex>::~DenseDynamicMapper() {
 template<typename TVoxel, typename TWarp, typename TIndex>
 void DenseDynamicMapper<TVoxel, TWarp, TIndex>::ProcessInitialFrame(
 		const ITMView* view, const ITMTrackingState* trackingState,
-		ITMVoxelVolume<TVoxel, TIndex>* canonicalScene, ITMVoxelVolume<TVoxel, TIndex>* liveScene,
-		ITMRenderState* renderState) {
+		VoxelVolume<TVoxel, TIndex>* canonicalScene, VoxelVolume<TVoxel, TIndex>* liveScene,
+		RenderState* renderState) {
 	PrintOperationStatus("Generating raw live frame from view...");
 	bench::StartTimer("GenerateRawLiveAndCanonicalVolumes");
 	reconstruction_engine->GenerateTsdfVolumeFromView(liveScene, view, trackingState);
@@ -137,10 +137,10 @@ void DenseDynamicMapper<TVoxel, TWarp, TIndex>::ProcessInitialFrame(
 template<typename TVoxel, typename TWarp, typename TIndex>
 void
 DenseDynamicMapper<TVoxel, TWarp, TIndex>::ProcessFrame(const ITMView* view, const ITMTrackingState* trackingState,
-                                                        ITMVoxelVolume<TVoxel, TIndex>* canonicalVolume,
-                                                        ITMVoxelVolume<TVoxel, TIndex>** liveScenePair,
-                                                        ITMVoxelVolume<TWarp, TIndex>* warpField,
-                                                        ITMRenderState* renderState) {
+                                                        VoxelVolume<TVoxel, TIndex>* canonicalVolume,
+                                                        VoxelVolume<TVoxel, TIndex>** liveScenePair,
+                                                        VoxelVolume<TWarp, TIndex>* warpField,
+                                                        RenderState* renderState) {
 
 
 	PrintOperationStatus("Generating raw live TSDF from view...");
@@ -159,7 +159,7 @@ DenseDynamicMapper<TVoxel, TWarp, TIndex>::ProcessFrame(const ITMView* view, con
 
 
 	bench::StartTimer("TrackMotion");
-	ITMVoxelVolume<TVoxel, TIndex>* finalWarpedLiveScene = TrackFrameMotion(canonicalVolume, liveScenePair, warpField);
+	VoxelVolume<TVoxel, TIndex>* finalWarpedLiveScene = TrackFrameMotion(canonicalVolume, liveScenePair, warpField);
 	bench::StopTimer("TrackMotion");
 	LogVolumeStatistics(finalWarpedLiveScene, "[[live TSDF after tracking]]");
 
@@ -180,7 +180,7 @@ template<typename TVoxel, typename TWarp, typename TIndex>
 void DenseDynamicMapper<TVoxel, TWarp, TIndex>::UpdateVisibleList(
 		const ITMView* view,
 		const ITMTrackingState* trackingState,
-		ITMVoxelVolume<TVoxel, TIndex>* scene, ITMRenderState* renderState,
+		VoxelVolume<TVoxel, TIndex>* scene, RenderState* renderState,
 		bool resetVisibleList) {
 	reconstruction_engine->UpdateVisibleList(scene, view, trackingState, renderState, resetVisibleList);
 }
@@ -194,10 +194,10 @@ void DenseDynamicMapper<TVoxel, TWarp, TIndex>::UpdateVisibleList(
  * \param liveScene the live voxel grid (typcially obtained by integrating a single depth image into an empty TSDF grid)
  */
 template<typename TVoxel, typename TWarp, typename TIndex>
-ITMVoxelVolume<TVoxel, TIndex>* DenseDynamicMapper<TVoxel, TWarp, TIndex>::TrackFrameMotion(
-		ITMVoxelVolume<TVoxel, TIndex>* canonicalScene,
-		ITMVoxelVolume<TVoxel, TIndex>** liveScenePair,
-		ITMVoxelVolume<TWarp, TIndex>* warpField) {
+VoxelVolume<TVoxel, TIndex>* DenseDynamicMapper<TVoxel, TWarp, TIndex>::TrackFrameMotion(
+		VoxelVolume<TVoxel, TIndex>* canonicalScene,
+		VoxelVolume<TVoxel, TIndex>** liveScenePair,
+		VoxelVolume<TWarp, TIndex>* warpField) {
 
 	float max_vector_update_length_in_voxels = std::numeric_limits<float>::infinity();
 	PrintOperationStatus("*** Optimizing warp based on difference between canonical and live SDF. ***");
@@ -219,10 +219,10 @@ ITMVoxelVolume<TVoxel, TIndex>* DenseDynamicMapper<TVoxel, TWarp, TIndex>::Track
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 void DenseDynamicMapper<TVoxel, TWarp, TIndex>::PerformSingleOptimizationStep(
-		ITMVoxelVolume<TVoxel, TIndex>* canonicalScene,
-		ITMVoxelVolume<TVoxel, TIndex>* initialLiveScene,
-		ITMVoxelVolume<TVoxel, TIndex>* finalLiveScene,
-		ITMVoxelVolume<TWarp, TIndex>* warpField,
+		VoxelVolume<TVoxel, TIndex>* canonicalScene,
+		VoxelVolume<TVoxel, TIndex>* initialLiveScene,
+		VoxelVolume<TVoxel, TIndex>* finalLiveScene,
+		VoxelVolume<TWarp, TIndex>* warpField,
 		float& maxVectorUpdate,
 		int iteration) {
 
@@ -268,7 +268,7 @@ void DenseDynamicMapper<TVoxel, TWarp, TIndex>::PerformSingleOptimizationStep(
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 void DenseDynamicMapper<TVoxel, TWarp, TIndex>::ProcessSwapping(
-		ITMVoxelVolume<TVoxel, TIndex>* canonicalScene, ITMRenderState* renderState) {
+		VoxelVolume<TVoxel, TIndex>* canonicalScene, RenderState* renderState) {
 	if (swapping_engine != nullptr) {
 		// swapping: CPU -> CUDA
 		if (swapping_mode == configuration::SWAPPINGMODE_ENABLED)

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "MeshingEngine.h"
-#include "../../../Objects/Meshing/ITMMesh.h"
+#include "../../../Objects/Meshing/Mesh.h"
 #include "../../MultiScene/VoxelMapGraphManager.h"
 
 namespace ITMLib
@@ -14,6 +14,6 @@ namespace ITMLib
 	public:
 		virtual ~MultiMeshingEngine(void) {}
 
-		virtual void MeshScene(ITMMesh *mesh, const VoxelMapGraphManager<TVoxel, TIndex> & sceneManager) = 0;
+		virtual void MeshScene(Mesh *mesh, const VoxelMapGraphManager<TVoxel, TIndex> & sceneManager) = 0;
 	};
 }

@@ -23,7 +23,7 @@
 
 //local
 #include "../ITMLib/ITMLibDefines.h"
-#include "../ITMLib/Objects/Scene/ITMVoxelVolume.h"
+#include "../ITMLib/Objects/Scene/VoxelVolume.h"
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngine_CPU.h"
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/ITMVoxelVolumeComparison_CPU.h"
 #include "../ITMLib/Engines/VolumeFusion/VolumeFusionEngine.h"
@@ -45,11 +45,11 @@ typedef VolumeFusionEngine<ITMVoxel, ITMWarp, VoxelBlockHash, MEMORYDEVICE_CPU> 
 
 BOOST_FIXTURE_TEST_CASE(Test_FuseLifeIntoCanonical_CPU_PVA, Frame16And17Fixture) {
 	const int iteration = 4;
-	ITMVoxelVolume<ITMVoxel, PlainVoxelArray>* warped_live_volume;
+	VoxelVolume<ITMVoxel, PlainVoxelArray>* warped_live_volume;
 	loadVolume(&warped_live_volume, "TestData/snoopy_result_fr16-17_warps/data_tikhonov_sobolev_iter_"
 	                                + std::to_string(iteration) + "_warped_live_",
 	           MEMORYDEVICE_CPU, InitParams<PlainVoxelArray>());
-	ITMVoxelVolume<ITMVoxel, PlainVoxelArray>* canonical_volume;
+	VoxelVolume<ITMVoxel, PlainVoxelArray>* canonical_volume;
 	loadVolume(&canonical_volume, "TestData/snoopy_result_fr16-17_partial_PVA/snoopy_partial_frame_16_",
 	           MEMORYDEVICE_CPU, InitParams<PlainVoxelArray>());
 
@@ -57,7 +57,7 @@ BOOST_FIXTURE_TEST_CASE(Test_FuseLifeIntoCanonical_CPU_PVA, Frame16And17Fixture)
 	volumeFusionEngine.FuseOneTsdfVolumeIntoAnother(canonical_volume, warped_live_volume);
 	//canonical_volume->SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_PVA/fused_canonical_");
 
-	ITMVoxelVolume<ITMVoxel, PlainVoxelArray>* fused_canonical_volume_gt;
+	VoxelVolume<ITMVoxel, PlainVoxelArray>* fused_canonical_volume_gt;
 	loadVolume(&fused_canonical_volume_gt, "TestData/snoopy_result_fr16-17_partial_PVA/fused_canonical_",
 	           MEMORYDEVICE_CPU, InitParams<PlainVoxelArray>());
 
@@ -67,12 +67,12 @@ BOOST_FIXTURE_TEST_CASE(Test_FuseLifeIntoCanonical_CPU_PVA, Frame16And17Fixture)
 }
 
 BOOST_FIXTURE_TEST_CASE(Test_FuseLifeIntoCanonical_CPU_VBH, Frame16And17Fixture) {
-	ITMVoxelVolume<ITMVoxel, VoxelBlockHash>* warped_live_volume;
+	VoxelVolume<ITMVoxel, VoxelBlockHash>* warped_live_volume;
 	const int iteration = 4;
 	loadVolume(&warped_live_volume, "TestData/snoopy_result_fr16-17_warps/data_tikhonov_sobolev_iter_"
 	                                + std::to_string(iteration) + "_warped_live_",
 	           MEMORYDEVICE_CPU, InitParams<VoxelBlockHash>());
-	ITMVoxelVolume<ITMVoxel, VoxelBlockHash>* canonical_volume;
+	VoxelVolume<ITMVoxel, VoxelBlockHash>* canonical_volume;
 	loadVolume(&canonical_volume, "TestData/snoopy_result_fr16-17_partial_VBH/snoopy_partial_frame_16_",
 	           MEMORYDEVICE_CPU, InitParams<VoxelBlockHash>());
 
@@ -80,7 +80,7 @@ BOOST_FIXTURE_TEST_CASE(Test_FuseLifeIntoCanonical_CPU_VBH, Frame16And17Fixture)
 	volume_fusion_engine.FuseOneTsdfVolumeIntoAnother(canonical_volume, warped_live_volume);
 	//canonical_volume->SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_VBH/fused_canonical_");
 
-	ITMVoxelVolume<ITMVoxel, VoxelBlockHash>* fused_canonical_volume_gt;
+	VoxelVolume<ITMVoxel, VoxelBlockHash>* fused_canonical_volume_gt;
 	loadVolume(&fused_canonical_volume_gt, "TestData/snoopy_result_fr16-17_partial_VBH/fused_canonical_",
 	           MEMORYDEVICE_CPU, InitParams<VoxelBlockHash>());
 

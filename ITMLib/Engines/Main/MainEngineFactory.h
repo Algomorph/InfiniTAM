@@ -26,7 +26,7 @@
 
 namespace ITMLib{
 
-MainEngine* BuildMainEngine(const ITMRGBDCalib& calib, Vector2i imgSize_rgb, Vector2i imgSize_d, bool fix_camera = false){
+MainEngine* BuildMainEngine(const RGBDCalib& calib, Vector2i imgSize_rgb, Vector2i imgSize_d, bool fix_camera = false){
 	auto& settings = configuration::get();
 	configuration::IndexingMethod chosenIndexingMethod = settings.indexing_method;
 	MainEngine* mainEngine = nullptr;

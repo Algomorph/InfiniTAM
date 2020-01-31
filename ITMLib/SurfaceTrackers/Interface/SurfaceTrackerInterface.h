@@ -16,7 +16,7 @@
 #pragma once
 
 //local
-#include "../../Objects/Scene/ITMVoxelVolume.h"
+#include "../../Objects/Scene/VoxelVolume.h"
 #include "../../Engines/Reconstruction/CPU/SceneReconstructionEngine_CPU.h"
 #include "../../Utils/Visualization/ITMSceneSliceVisualizer2D.h"
 #include "../../Utils/FileIO/ITMSceneLogger.h"
@@ -45,20 +45,20 @@ public:
 
 	virtual ~SurfaceTrackerInterface() = default;
 	virtual void
-	CalculateWarpGradient(ITMVoxelVolume<TVoxel, TIndex>* canonicalScene,
-	                      ITMVoxelVolume<TVoxel, TIndex>* liveScene,
-	                      ITMVoxelVolume<TWarp, TIndex>* warpField) = 0;
+	CalculateWarpGradient(VoxelVolume<TVoxel, TIndex>* canonicalScene,
+	                      VoxelVolume<TVoxel, TIndex>* liveScene,
+	                      VoxelVolume<TWarp, TIndex>* warpField) = 0;
 	virtual void SmoothWarpGradient(
-			ITMVoxelVolume<TVoxel, TIndex>* canonicalScene,
-			ITMVoxelVolume<TVoxel, TIndex>* liveScene,
-			ITMVoxelVolume<TWarp, TIndex>* warpField) = 0;
-	virtual float UpdateWarps(ITMVoxelVolume<TVoxel, TIndex>* canonicalScene,
-	                          ITMVoxelVolume<TVoxel, TIndex>* liveScene,
-	                          ITMVoxelVolume<TWarp, TIndex>* warpField) = 0;
-	virtual void ClearOutFramewiseWarp(ITMVoxelVolume<TWarp, TIndex>* warpField) = 0;
+			VoxelVolume<TVoxel, TIndex>* canonicalScene,
+			VoxelVolume<TVoxel, TIndex>* liveScene,
+			VoxelVolume<TWarp, TIndex>* warpField) = 0;
+	virtual float UpdateWarps(VoxelVolume<TVoxel, TIndex>* canonicalScene,
+	                          VoxelVolume<TVoxel, TIndex>* liveScene,
+	                          VoxelVolume<TWarp, TIndex>* warpField) = 0;
+	virtual void ClearOutFramewiseWarp(VoxelVolume<TWarp, TIndex>* warpField) = 0;
 	virtual void AddFramewiseWarpToWarp(
-			ITMVoxelVolume<TWarp, TIndex>* warpField, bool clearFramewiseWarp) = 0;
-	virtual void ResetWarps(ITMVoxelVolume<TWarp, TIndex>* warpField) = 0;
+			VoxelVolume<TWarp, TIndex>* warpField, bool clearFramewiseWarp) = 0;
+	virtual void ResetWarps(VoxelVolume<TWarp, TIndex>* warpField) = 0;
 
 
 };

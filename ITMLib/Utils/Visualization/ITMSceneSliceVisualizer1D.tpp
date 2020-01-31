@@ -33,8 +33,8 @@
 
 //local
 #include "ITMSceneSliceVisualizer1D.h"
-#include "../../Objects/Scene/ITMVoxelVolume.h"
-#include "../../Objects/Scene/ITMRepresentationAccess.h"
+#include "../../Objects/Scene/VoxelVolume.h"
+#include "../../Objects/Scene/RepresentationAccess.h"
 #include "ITMVisualizationWindowManager.h"
 #include "../../Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 

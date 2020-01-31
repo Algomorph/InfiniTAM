@@ -17,7 +17,7 @@
 
 //local
 #include "../../../Objects/Scene/PlainVoxelArray.h"
-#include "../../../Objects/Scene/ITMRepresentationAccess.h"
+#include "../../../Objects/Scene/RepresentationAccess.h"
 
 
 // region ======================================= AUXILIARY FUNCTIONS (VOXEL HASH BLOCKS) ==============================

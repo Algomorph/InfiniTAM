@@ -65,12 +65,12 @@ private:
 
 	ITMUChar4Image* inputRGBImage;
 	ITMShortImage* inputRawDepthImage;
-	ITMLib::ITMIMUMeasurement* inputIMUMeasurement;
+	ITMLib::IMUMeasurement* inputIMUMeasurement;
 
 	bool freeviewActive;
 	bool integrationActive;
 	ORUtils::SE3Pose freeviewPose;
-	ITMLib::ITMIntrinsics freeviewIntrinsics;
+	ITMLib::Intrinsics freeviewIntrinsics;
 
 	int mouseState;
 	Vector2i mouseLastClick;

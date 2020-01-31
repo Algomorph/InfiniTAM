@@ -27,7 +27,7 @@
 using namespace ITMLib;
 
 template<class TVoxel, class TIndex>
-void GenerateTestScene_CPU(ITMVoxelVolume<TVoxel, TIndex>* scene) {
+void GenerateTestScene_CPU(VoxelVolume<TVoxel, TIndex>* scene) {
 	EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().ResetVolume(scene);
 	const int narrowBandThicknessVoxels = 10;
 	int xOffset = 8;
@@ -192,29 +192,29 @@ void simulateRandomVoxelAlteration(TVoxel& voxel) {
 //};
 
 template<typename TVoxel, typename TIndex>
-void loadVolume(ITMVoxelVolume<TVoxel, TIndex>** volume, const std::string& path, MemoryDeviceType memoryDeviceType,
+void loadVolume(VoxelVolume<TVoxel, TIndex>** volume, const std::string& path, MemoryDeviceType memoryDeviceType,
                 typename TIndex::InitializationParameters initializationParameters,
                 configuration::SwappingMode swappingMode) {
 	configuration::Configuration& settings = configuration::get();
-	(*volume) = new ITMVoxelVolume<TVoxel, TIndex>(&settings.general_voxel_volume_parameters,
-	                                               swappingMode,
-	                                               memoryDeviceType, initializationParameters);
+	(*volume) = new VoxelVolume<TVoxel, TIndex>(&settings.general_voxel_volume_parameters,
+	                                            swappingMode,
+	                                            memoryDeviceType, initializationParameters);
 	PrepareVoxelVolumeForLoading(*volume);
 	(*volume)->LoadFromDirectory(path);
 }
 
 
 template<typename TVoxel, typename TIndex>
-void initializeVolume(ITMVoxelVolume<TVoxel, TIndex>** volume,
+void initializeVolume(VoxelVolume<TVoxel, TIndex>** volume,
                       typename TIndex::InitializationParameters initializationParameters, MemoryDeviceType memoryDevice,
                       configuration::SwappingMode swappingMode) {
-	(*volume) = new ITMVoxelVolume<TVoxel, TIndex>(memoryDevice, initializationParameters);
+	(*volume) = new VoxelVolume<TVoxel, TIndex>(memoryDevice, initializationParameters);
 	(*volume)->Reset();
 }
 
 
 template<typename TVoxel, typename TIndex>
-void buildSdfVolumeFromImage(ITMVoxelVolume<TVoxel, TIndex>** volume,
+void buildSdfVolumeFromImage(VoxelVolume<TVoxel, TIndex>** volume,
                              ITMView** view,
                              const std::string& depth_path,
                              const std::string& color_path,
@@ -230,8 +230,8 @@ void buildSdfVolumeFromImage(ITMVoxelVolume<TVoxel, TIndex>** volume,
 	Vector2i imageSize(640, 480);
 	updateView(view, depth_path, color_path, mask_path, calibration_path, memoryDevice);
 	initializeVolume(volume, initializationParameters, memoryDevice, swappingMode);
-	(*volume) = new ITMVoxelVolume<TVoxel, TIndex>(&configuration::get().general_voxel_volume_parameters, swappingMode,
-	                                               memoryDevice, initializationParameters);
+	(*volume) = new VoxelVolume<TVoxel, TIndex>(&configuration::get().general_voxel_volume_parameters, swappingMode,
+	                                            memoryDevice, initializationParameters);
 	switch (memoryDevice) {
 
 		case MEMORYDEVICE_CUDA:
@@ -250,8 +250,8 @@ void buildSdfVolumeFromImage(ITMVoxelVolume<TVoxel, TIndex>** volume,
 			DIEWITHEXCEPTION_REPORTLOCATION("Metal framework not fully supported.");
 			break;
 	}
-	ITMRenderState renderState(imageSize, configuration::get().general_voxel_volume_parameters.near_clipping_distance,
-	                           configuration::get().general_voxel_volume_parameters.far_clipping_distance, memoryDevice);
+	RenderState renderState(imageSize, configuration::get().general_voxel_volume_parameters.near_clipping_distance,
+	                        configuration::get().general_voxel_volume_parameters.far_clipping_distance, memoryDevice);
 	ITMTrackingState trackingState(imageSize, memoryDevice);
 
 	DepthFusionEngine<TVoxel, ITMWarp, TIndex>* reconstructionEngine =
@@ -265,7 +265,7 @@ void buildSdfVolumeFromImage(ITMVoxelVolume<TVoxel, TIndex>** volume,
 
 
 template<typename TVoxel, typename TIndex>
-void buildSdfVolumeFromImage(ITMVoxelVolume<TVoxel, TIndex>** volume,
+void buildSdfVolumeFromImage(VoxelVolume<TVoxel, TIndex>** volume,
                              const std::string& depth_path, const std::string& color_path, const std::string& mask_path,
                              const std::string& calibration_path,
                              MemoryDeviceType memoryDevice,

@@ -17,7 +17,7 @@
 
 #include <vector>
 #include "../../../ITMMath.h"
-#include "../../../../Objects/Scene/ITMVoxelVolume.h"
+#include "../../../../Objects/Scene/VoxelVolume.h"
 #include "../Interface/ITMSceneStatisticsCalculatorInterface.h"
 #include "../../../../ITMLibDefines.h"
 
@@ -34,24 +34,24 @@ public:
 	ITMSceneStatisticsCalculator(ITMSceneStatisticsCalculator const&) = delete;
 	void operator=(ITMSceneStatisticsCalculator const&) = delete;
 
-	Vector6i ComputeVoxelBounds(const ITMVoxelVolume<TVoxel, TIndex>* scene) override;
-	int ComputeAllocatedVoxelCount(ITMVoxelVolume<TVoxel, TIndex>* scene) override;
-	std::vector<int> GetFilledHashBlockIds(ITMVoxelVolume<TVoxel, TIndex>* scene) override;
-	int ComputeAllocatedHashBlockCount(ITMVoxelVolume<TVoxel, TIndex>* scene) override;
+	Vector6i ComputeVoxelBounds(const VoxelVolume<TVoxel, TIndex>* scene) override;
+	int ComputeAllocatedVoxelCount(VoxelVolume<TVoxel, TIndex>* scene) override;
+	std::vector<int> GetFilledHashBlockIds(VoxelVolume<TVoxel, TIndex>* scene) override;
+	int ComputeAllocatedHashBlockCount(VoxelVolume<TVoxel, TIndex>* scene) override;
 
-	int ComputeNonTruncatedVoxelCount(ITMVoxelVolume<TVoxel, TIndex>* scene) override;
-	unsigned int ComputeAlteredVoxelCount(ITMVoxelVolume<TVoxel, TIndex>* scene) override;
-	unsigned int CountVoxelsWithSpecificSdfValue(ITMVoxelVolume<TVoxel, TIndex>* scene, float value) override;
-	double ComputeNonTruncatedVoxelAbsSdfSum(ITMVoxelVolume<TVoxel, TIndex>* scene) override;
-	double ComputeTruncatedVoxelAbsSdfSum(ITMVoxelVolume<TVoxel, TIndex>* scene) override;
-	double ComputeFramewiseWarpMin(ITMVoxelVolume<TVoxel,TIndex>* scene) override;
-	double ComputeFramewiseWarpMax(ITMVoxelVolume<TVoxel,TIndex>* scene) override;
-	double ComputeFramewiseWarpMean(ITMVoxelVolume<TVoxel,TIndex>* scene) override;
+	int ComputeNonTruncatedVoxelCount(VoxelVolume<TVoxel, TIndex>* scene) override;
+	unsigned int ComputeAlteredVoxelCount(VoxelVolume<TVoxel, TIndex>* scene) override;
+	unsigned int CountVoxelsWithSpecificSdfValue(VoxelVolume<TVoxel, TIndex>* scene, float value) override;
+	double ComputeNonTruncatedVoxelAbsSdfSum(VoxelVolume<TVoxel, TIndex>* scene) override;
+	double ComputeTruncatedVoxelAbsSdfSum(VoxelVolume<TVoxel, TIndex>* scene) override;
+	double ComputeFramewiseWarpMin(VoxelVolume<TVoxel,TIndex>* scene) override;
+	double ComputeFramewiseWarpMax(VoxelVolume<TVoxel,TIndex>* scene) override;
+	double ComputeFramewiseWarpMean(VoxelVolume<TVoxel,TIndex>* scene) override;
 
-	Vector6i FindMinimumNonTruncatedBoundingBox(ITMVoxelVolume <TVoxel, TIndex>* scene) override;
+	Vector6i FindMinimumNonTruncatedBoundingBox(VoxelVolume <TVoxel, TIndex>* scene) override;
 
-	float FindMaxGradient0LengthAndPosition(ITMVoxelVolume<TVoxel, TIndex>* scene, Vector3i& positionOut) override;
-	float FindMaxGradient1LengthAndPosition(ITMVoxelVolume<TVoxel, TIndex>* scene, Vector3i& positionOut) override;
+	float FindMaxGradient0LengthAndPosition(VoxelVolume<TVoxel, TIndex>* scene, Vector3i& positionOut) override;
+	float FindMaxGradient1LengthAndPosition(VoxelVolume<TVoxel, TIndex>* scene, Vector3i& positionOut) override;
 private:
 	ITMSceneStatisticsCalculator() = default;
 	~ITMSceneStatisticsCalculator() = default;

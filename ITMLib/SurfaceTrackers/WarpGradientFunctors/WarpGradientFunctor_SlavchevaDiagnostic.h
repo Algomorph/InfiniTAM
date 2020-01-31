@@ -107,9 +107,9 @@ public:
 
 	WarpGradientFunctor(SlavchevaSurfaceTracker::Parameters parameters,
 	                    SlavchevaSurfaceTracker::Switches switches,
-	                    ITMVoxelVolume<TVoxel,TIndex>* liveVolume,
-	                    ITMVoxelVolume<TVoxel,TIndex>* canonicalVolume,
-	                    ITMVoxelVolume<TWarp,TIndex>* warpField,
+	                    VoxelVolume<TVoxel,TIndex>* liveVolume,
+	                    VoxelVolume<TVoxel,TIndex>* canonicalVolume,
+	                    VoxelVolume<TWarp,TIndex>* warpField,
 	                    float voxelSize, float narrowBandHalfWidth) :
 			parameters(parameters), switches(switches),
 			liveVoxels(liveVolume->localVBA.GetVoxelBlocks()), liveIndexData(liveVolume->index.GetIndexData()),

@@ -8,7 +8,7 @@
 #include "../LowLevel/Interface/LowLevelEngine.h"
 #include "../ViewBuilding/Interface/ViewBuilder.h"
 #include "../Visualization/Interface/SurfelVisualizationEngine.h"
-#include "../../Objects/Misc/ITMIMUCalibrator.h"
+#include "../../Objects/Misc/IMUCalibrator.h"
 
 #include "../../../FernRelocLib/Relocaliser.h"
 
@@ -28,12 +28,12 @@ namespace ITMLib
 		DenseSurfelMapper<TSurfel> *denseSurfelMapper;
 		TrackingController *trackingController;
 
-		ITMSurfelScene<TSurfel> *surfelScene;
-		ITMSurfelRenderState *surfelRenderState_live;
-		ITMSurfelRenderState *surfelRenderState_freeview;
+		SurfelScene<TSurfel> *surfelScene;
+		SurfelRenderState *surfelRenderState_live;
+		SurfelRenderState *surfelRenderState_freeview;
 
 		CameraTracker *tracker;
-		ITMIMUCalibrator *imuCalibrator;
+		IMUCalibrator *imuCalibrator;
 
 		FernRelocLib::Relocaliser<float> *relocaliser;
 		ITMUChar4Image *kfRaycast;
@@ -50,7 +50,7 @@ namespace ITMLib
 		ITMView* GetView(void) { return view; }
 		ITMTrackingState* GetTrackingState(void) { return trackingState; }
 
-		ITMTrackingState::TrackingResult ProcessFrame(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage, ITMIMUMeasurement *imuMeasurement = NULL);
+		ITMTrackingState::TrackingResult ProcessFrame(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage, IMUMeasurement *imuMeasurement = NULL);
 
 		/// Extracts a mesh from the current scene and saves it to the model file specified by the file name
 		void SaveSceneToMesh(const char *fileName);
@@ -62,7 +62,7 @@ namespace ITMLib
 		/// Get a result image as output
 		Vector2i GetImageSize(void) const;
 
-		void GetImage(ITMUChar4Image *out, GetImageType getImageType, ORUtils::SE3Pose *pose = NULL, ITMIntrinsics *intrinsics = NULL);
+		void GetImage(ITMUChar4Image *out, GetImageType getImageType, ORUtils::SE3Pose *pose = NULL, Intrinsics *intrinsics = NULL);
 
 		/// switch for turning tracking on/off
 		void turnOnTracking() override;
@@ -83,7 +83,7 @@ namespace ITMLib
 			Omitting a separate image size for the depth images
 			will assume same resolution as for the RGB images.
 		*/
-		BasicSurfelEngine(const ITMRGBDCalib& calib, Vector2i imgSize_rgb, Vector2i imgSize_d);
+		BasicSurfelEngine(const RGBDCalib& calib, Vector2i imgSize_rgb, Vector2i imgSize_d);
 		~BasicSurfelEngine();
 	};
 }

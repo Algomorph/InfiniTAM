@@ -7,14 +7,14 @@
 
 namespace ITMLib
 {
-	class ITMPointCloud
+	class PointCloud
 	{
 	public:
 		uint noTotalPoints;
 
 		ORUtils::Image<Vector4f> *locations, *colours;
 
-		explicit ITMPointCloud(Vector2i imgSize, MemoryDeviceType memoryType)
+		explicit PointCloud(Vector2i imgSize, MemoryDeviceType memoryType)
 		{
 			this->noTotalPoints = 0;
 
@@ -34,14 +34,14 @@ namespace ITMLib
 			this->colours->UpdateDeviceFromHost();
 		}
 
-		~ITMPointCloud()
+		~PointCloud()
 		{
 			delete locations;
 			delete colours;
 		}
 
 		// Suppress the default copy constructor and assignment operator
-		ITMPointCloud(const ITMPointCloud&);
-		ITMPointCloud& operator=(const ITMPointCloud&);
+		PointCloud(const PointCloud&);
+		PointCloud& operator=(const PointCloud&);
 	};
 }

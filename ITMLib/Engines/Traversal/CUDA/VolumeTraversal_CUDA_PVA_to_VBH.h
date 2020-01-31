@@ -19,9 +19,9 @@
 //local
 #include "../Shared/VolumeTraversal_Shared.h"
 #include "../Interface/VolumeTraversal.h"
-#include "../../../Objects/Scene/ITMVoxelVolume.h"
+#include "../../../Objects/Scene/VoxelVolume.h"
 #include "../../../Utils/Analytics/ITMIsAltered.h"
-#include "../../../Objects/Scene/ITMRepresentationAccess.h"
+#include "../../../Objects/Scene/RepresentationAccess.h"
 #include "VolumeTraversal_CUDA_PVA_to_VBH_Kernels.h"
 
 namespace ITMLib {
@@ -33,8 +33,8 @@ class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, 
 	// way as done in the the CPU version to avoid DRY violations
 	template<typename TBooleanFunctor, typename TDeviceFunction>
 	inline static bool
-	DualVoxelTraversal_AllTrue_MatchingFlags_Generic(ITMVoxelVolume<TVoxelPrimary, PlainVoxelArray>* primaryVolume,
-	                                                 ITMVoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryVolume,
+	DualVoxelTraversal_AllTrue_MatchingFlags_Generic(VoxelVolume<TVoxelPrimary, PlainVoxelArray>* primaryVolume,
+	                                                 VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryVolume,
 	                                                 VoxelFlags semanticFlags, TBooleanFunctor& functor,
 	                                                 TDeviceFunction&& deviceFunction) {
 		PlainVoxelArray::GridAlignedBox* arrayInfo = primaryVolume->index.GetIndexData();
@@ -128,8 +128,8 @@ class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, 
 	template<typename TBooleanFunctor, typename TDeviceFunction>
 	inline static bool
 	DualVoxelTraversal_AllTrue_Generic(
-			ITMVoxelVolume<TVoxelPrimary, PlainVoxelArray>* primaryVolume,
-			ITMVoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryVolume,
+			VoxelVolume<TVoxelPrimary, PlainVoxelArray>* primaryVolume,
+			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryVolume,
 			TBooleanFunctor& functor, TDeviceFunction&& deviceFunction) {
 		PlainVoxelArray::GridAlignedBox* arrayInfo = primaryVolume->index.GetIndexData();
 		int hashEntryCount = secondaryVolume->index.hashEntryCount;
@@ -220,8 +220,8 @@ class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, 
 	template<typename TBooleanFunctor, typename TDeviceFunction>
 	inline static bool
 	DualVoxelTraversal_AllTrue_AllocatedOnly_Generic(
-			ITMVoxelVolume<TVoxelPrimary, PlainVoxelArray>* primaryVolume,
-			ITMVoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryVolume,
+			VoxelVolume<TVoxelPrimary, PlainVoxelArray>* primaryVolume,
+			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryVolume,
 			TBooleanFunctor& functor, TDeviceFunction&& deviceFunction) {
 
 		int hashEntryCount = secondaryVolume->index.hashEntryCount;
@@ -274,8 +274,8 @@ public:
 	template<typename TBooleanFunctor>
 	inline static bool
 	DualVoxelTraversal_AllTrue(
-			ITMVoxelVolume<TVoxelPrimary, PlainVoxelArray>* primaryVolume,
-			ITMVoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryVolume,
+			VoxelVolume<TVoxelPrimary, PlainVoxelArray>* primaryVolume,
+			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryVolume,
 			TBooleanFunctor& functor) {
 
 		return DualVoxelTraversal_AllTrue_Generic(primaryVolume, secondaryVolume, functor, []
@@ -313,8 +313,8 @@ public:
 	template<typename TBooleanFunctor>
 	inline static bool
 	DualVoxelTraversal_AllTrue_MatchingFlags(
-			ITMVoxelVolume<TVoxelPrimary, PlainVoxelArray>* primaryVolume,
-			ITMVoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryVolume,
+			VoxelVolume<TVoxelPrimary, PlainVoxelArray>* primaryVolume,
+			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryVolume,
 			VoxelFlags semanticFlags, TBooleanFunctor& functor) {
 
 		return DualVoxelTraversal_AllTrue_MatchingFlags_Generic(primaryVolume, secondaryVolume, semanticFlags, functor,
@@ -342,8 +342,8 @@ public:
 	template<typename TBooleanFunctor>
 	inline static bool
 	DualVoxelPositionTraversal_AllTrue_MatchingFlags(
-			ITMVoxelVolume<TVoxelPrimary, PlainVoxelArray>* primaryVolume,
-			ITMVoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryVolume,
+			VoxelVolume<TVoxelPrimary, PlainVoxelArray>* primaryVolume,
+			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryVolume,
 			VoxelFlags semanticFlags, TBooleanFunctor& functor) {
 
 		return DualVoxelTraversal_AllTrue_MatchingFlags_Generic(primaryVolume, secondaryVolume, semanticFlags, functor,
@@ -384,8 +384,8 @@ public:
 	template<typename TBooleanFunctor>
 	inline static bool
 	DualVoxelPositionTraversal_AllTrue(
-			ITMVoxelVolume<TVoxelPrimary, PlainVoxelArray>* primaryVolume,
-			ITMVoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryVolume,
+			VoxelVolume<TVoxelPrimary, PlainVoxelArray>* primaryVolume,
+			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryVolume,
 			TBooleanFunctor& functor) {
 
 		return DualVoxelTraversal_AllTrue_Generic(primaryVolume, secondaryVolume, functor, []
@@ -405,8 +405,8 @@ public:
 	template<typename TBooleanFunctor>
 	inline static bool
 	DualVoxelTraversal_AllTrue_AllocatedOnly(
-			ITMVoxelVolume<TVoxelPrimary, PlainVoxelArray>* primaryVolume,
-			ITMVoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryVolume,
+			VoxelVolume<TVoxelPrimary, PlainVoxelArray>* primaryVolume,
+			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryVolume,
 			TBooleanFunctor& functor) {
 		return DualVoxelTraversal_AllTrue_AllocatedOnly_Generic(primaryVolume, secondaryVolume, functor, []
 				(dim3 gridSize_HashPerBlock, dim3 cudaBlockSize_BlockVoxelPerThread, TVoxelPrimary* arrayVoxels,
@@ -422,8 +422,8 @@ public:
 	template<typename TBooleanFunctor>
 	inline static bool
 	DualVoxelPositionTraversal_AllTrue_AllocatedOnly(
-			ITMVoxelVolume<TVoxelPrimary, PlainVoxelArray>* primaryVolume,
-			ITMVoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryVolume,
+			VoxelVolume<TVoxelPrimary, PlainVoxelArray>* primaryVolume,
+			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryVolume,
 			TBooleanFunctor& functor) {
 		return DualVoxelTraversal_AllTrue_AllocatedOnly_Generic(primaryVolume, secondaryVolume, functor, []
 				(dim3 gridSize_HashPerBlock, dim3 cudaBlockSize_BlockVoxelPerThread, TVoxelPrimary* arrayVoxels,
@@ -458,8 +458,8 @@ public:
 	template<typename TBooleanFunctor>
 	inline static bool
 	DualVoxelTraversal_AllTrue(
-			ITMVoxelVolume<TVoxelPrimary, VoxelBlockHash>* primaryVolume,
-			ITMVoxelVolume<TVoxelSecondary, PlainVoxelArray>* secondaryVolume,
+			VoxelVolume<TVoxelPrimary, VoxelBlockHash>* primaryVolume,
+			VoxelVolume<TVoxelSecondary, PlainVoxelArray>* secondaryVolume,
 			TBooleanFunctor& functor) {
 		ITMFlipArgumentBooleanFunctor<TVoxelPrimary, TVoxelSecondary, TBooleanFunctor> flipFunctor(functor);
 		return TwoVolumeTraversalEngine<TVoxelSecondary, TVoxelPrimary, PlainVoxelArray, VoxelBlockHash, MEMORYDEVICE_CUDA>::
@@ -471,8 +471,8 @@ public:
 	template<typename TBooleanFunctor>
 	inline static bool
 	DualVoxelTraversal_AllTrue_AllocatedOnly(
-			ITMVoxelVolume<TVoxelPrimary, VoxelBlockHash>* primaryVolume,
-			ITMVoxelVolume<TVoxelSecondary, PlainVoxelArray>* secondaryVolume,
+			VoxelVolume<TVoxelPrimary, VoxelBlockHash>* primaryVolume,
+			VoxelVolume<TVoxelSecondary, PlainVoxelArray>* secondaryVolume,
 			TBooleanFunctor& functor) {
 		ITMFlipArgumentBooleanFunctor<TVoxelPrimary, TVoxelSecondary, TBooleanFunctor> flipFunctor(functor);
 		return TwoVolumeTraversalEngine<TVoxelSecondary, TVoxelPrimary, PlainVoxelArray, VoxelBlockHash, MEMORYDEVICE_CUDA>::

@@ -183,7 +183,7 @@ std::string ITMWarpFieldLogger<TVoxel, TIndex>::GenerateSliceWarpFilename(const 
  * \param path path to root location of the files for the scene
  */
 template<typename TVoxel, typename TIndex>
-ITMWarpFieldLogger<TVoxel, TIndex>::ITMWarpFieldLogger(ITMVoxelVolume<TVoxel, TIndex>* scene, boost::filesystem::path path):
+ITMWarpFieldLogger<TVoxel, TIndex>::ITMWarpFieldLogger(VoxelVolume<TVoxel, TIndex>* scene, boost::filesystem::path path):
 		warpField(scene),
 		path(""),
 		isSlice(false),
@@ -215,9 +215,9 @@ ITMWarpFieldLogger<TVoxel, TIndex>::ITMWarpFieldLogger(const Vector6i& bounds, b
 	configuration::Configuration& settings = configuration::get();
 	MemoryDeviceType memoryType =
 			settings.device_type == MEMORYDEVICE_CUDA ? MEMORYDEVICE_CUDA : MEMORYDEVICE_CPU;
-	this->warpField = new ITMVoxelVolume<TVoxel, TIndex>(&settings.general_voxel_volume_parameters,
+	this->warpField = new VoxelVolume<TVoxel, TIndex>(&settings.general_voxel_volume_parameters,
 	                                                     settings.swapping_mode == configuration::SWAPPINGMODE_ENABLED,
-	                                                     memoryType);
+	                                                  memoryType);
 
 	SetPath(fullScenePath);
 }
@@ -270,7 +270,7 @@ std::string ITMWarpFieldLogger<TVoxel, TIndex>::GetSliceIdentifier() const {
 }
 
 template<typename TVoxel, typename TIndex>
-const ITMVoxelVolume<TVoxel, TIndex>* ITMWarpFieldLogger<TVoxel, TIndex>::GetScene() const {
+const VoxelVolume<TVoxel, TIndex>* ITMWarpFieldLogger<TVoxel, TIndex>::GetScene() const {
 	return this->warpField;
 }
 // endregion

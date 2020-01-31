@@ -3,9 +3,9 @@
 #pragma once
 
 #include "../Shared/SurfelVisualizationEngine_Settings.h"
-#include "../../../Objects/Camera/ITMIntrinsics.h"
-#include "../../../Objects/RenderStates/ITMSurfelRenderState.h"
-#include "../../../Objects/Scene/ITMSurfelScene.h"
+#include "../../../Objects/Camera/Intrinsics.h"
+#include "../../../Objects/RenderStates/SurfelRenderState.h"
+#include "../../../Objects/Scene/SurfelScene.h"
 #include "../../../Objects/Tracking/ITMTrackingState.h"
 #include "../../../Objects/Views/ITMView.h"
 #include "../../../Utils/ITMImageTypes.h"
@@ -51,7 +51,7 @@ namespace ITMLib
      * \param oldPositions    The buffer into which to store the "old" position of the surfels from their most recent merges.
      * \param correspondences The buffer into which to store the "new" and "old" positions of the surfels for the purpose of rendering line segments between them.
      */
-    virtual void CopyCorrespondencesToBuffers(const ITMSurfelScene<TSurfel> *scene, float *newPositions, float *oldPositions, float *correspondences) const = 0;
+    virtual void CopyCorrespondencesToBuffers(const SurfelScene<TSurfel> *scene, float *newPositions, float *oldPositions, float *correspondences) const = 0;
 
     /**
      * \brief Copies the properties of all the surfels in the scene into property-specific buffers (these can be used for rendering the scene using OpenGL).
@@ -61,7 +61,7 @@ namespace ITMLib
      * \param normals   A buffer into which to write the surfels' normals.
      * \param colours   A buffer into which to write the surfels' colours.
      */
-    virtual void CopySceneToBuffers(const ITMSurfelScene<TSurfel> *scene, float *positions, unsigned char *normals, unsigned char *colours) const = 0;
+    virtual void CopySceneToBuffers(const SurfelScene<TSurfel> *scene, float *positions, unsigned char *normals, unsigned char *colours) const = 0;
 
     /**
      * \brief Copies the positions and normals of the surfels in the index image into buffers that can be passed to the ICP tracker.
@@ -70,7 +70,7 @@ namespace ITMLib
      * \param renderState     The render state corresponding to the live camera.
      * \param trackingState   The current tracking state.
      */
-    virtual void CreateICPMaps(const ITMSurfelScene<TSurfel> *scene, const ITMSurfelRenderState *renderState, ITMTrackingState *trackingState) const = 0;
+    virtual void CreateICPMaps(const SurfelScene<TSurfel> *scene, const SurfelRenderState *renderState, ITMTrackingState *trackingState) const = 0;
 
     /**
      * \brief Renders a depth Visualization of the scene (as viewed from a particular camera) to an image.
@@ -80,7 +80,7 @@ namespace ITMLib
      * \param renderState   The render state corresponding to the camera from which to render.
      * \param outputImage   The image into which to write the result.
      */
-    virtual void RenderDepthImage(const ITMSurfelScene<TSurfel> *scene, const ORUtils::SE3Pose *pose, const ITMSurfelRenderState *renderState,
+    virtual void RenderDepthImage(const SurfelScene<TSurfel> *scene, const ORUtils::SE3Pose *pose, const SurfelRenderState *renderState,
                                   ITMFloatImage *outputImage) const = 0;
 
     /**
@@ -92,7 +92,7 @@ namespace ITMLib
      * \param outputImage   The image into which to write the result.
      * \param type          The type of Visualization to render.
      */
-    virtual void RenderImage(const ITMSurfelScene<TSurfel> *scene, const ORUtils::SE3Pose *pose, const ITMSurfelRenderState *renderState,
+    virtual void RenderImage(const SurfelScene<TSurfel> *scene, const ORUtils::SE3Pose *pose, const SurfelRenderState *renderState,
                              ITMUChar4Image *outputImage, RenderImageType type = RENDER_LAMBERTIAN) const = 0;
 
     //#################### PUBLIC MEMBER FUNCTIONS ####################
@@ -106,8 +106,8 @@ namespace ITMLib
      * \param unstableSurfelRenderingMode   Whether to always/never render unstable surfels, or render them only if there's no stable alternative.
      * \param renderState                   The render state in which to store the index image.
      */
-    void FindSurface(const ITMSurfelScene<TSurfel> *scene, const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics,
-                     bool useRadii, UnstableSurfelRenderingMode unstableSurfelRenderingMode, ITMSurfelRenderState *renderState) const;
+    void FindSurface(const SurfelScene<TSurfel> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics,
+                     bool useRadii, UnstableSurfelRenderingMode unstableSurfelRenderingMode, SurfelRenderState *renderState) const;
 
     /**
      * \brief Makes a supersampled index image in which each pixel contains the index of the surfel that projects to that point.
@@ -118,8 +118,8 @@ namespace ITMLib
      * \param unstableSurfelRenderingMode   Whether to always/never render unstable surfels, or render them only if there's no stable alternative.
      * \param renderState                   The render state in which to store the index image.
      */
-    void FindSurfaceSuper(const ITMSurfelScene<TSurfel> *scene, const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics,
-                          UnstableSurfelRenderingMode unstableSurfelRenderingMode, ITMSurfelRenderState *renderState) const;
+    void FindSurfaceSuper(const SurfelScene<TSurfel> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics,
+                          UnstableSurfelRenderingMode unstableSurfelRenderingMode, SurfelRenderState *renderState) const;
 
     //#################### PRIVATE ABSTRACT MEMBER FUNCTIONS ####################
   private:
@@ -144,7 +144,7 @@ namespace ITMLib
      * \param unstableSurfelRenderingMode   Whether to always/never render unstable surfels, or render them only if there's no stable alternative.
      * \param depthBuffer                   The depth buffer for the index image.
      */
-    virtual void MakeIndexImage(const ITMSurfelScene<TSurfel> *scene, const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics,
+    virtual void MakeIndexImage(const SurfelScene<TSurfel> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics,
                                 int width, int height, int scaleFactor, unsigned int *surfelIndexImage, bool useRadii,
                                 UnstableSurfelRenderingMode unstableSurfelRenderingMode, int *depthBuffer) const = 0;
   };

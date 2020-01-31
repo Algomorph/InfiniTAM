@@ -53,8 +53,8 @@ const std::string ITMDynamicFusionLogger<TVoxel, TWarp, TIndex>::liveSceneRaster
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 void ITMDynamicFusionLogger<TVoxel, TWarp, TIndex>::SetScenes(
-		ITMVoxelVolume<TVoxel, TIndex>* canonicalScene, ITMVoxelVolume<TVoxel, TIndex>* liveScene,
-		ITMVoxelVolume<TWarp, TIndex>* warpField) {
+		VoxelVolume<TVoxel, TIndex>* canonicalScene, VoxelVolume<TVoxel, TIndex>* liveScene,
+		VoxelVolume<TWarp, TIndex>* warpField) {
 	this->canonicalScene = canonicalScene;
 	this->liveScene = liveScene;
 	this->warpField = warpField;
@@ -367,8 +367,8 @@ void ITMDynamicFusionLogger<TVoxel, TWarp, TIndex>::InitializeFrameRecording() {
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 void ITMDynamicFusionLogger<TVoxel, TWarp, TIndex>::InitializeWarp2DSliceRecording(
-		ITMVoxelVolume<TVoxel, TIndex>* canonicalScene,
-		ITMVoxelVolume<TVoxel, TIndex>* sourceLiveScene) {
+		VoxelVolume<TVoxel, TIndex>* canonicalScene,
+		VoxelVolume<TVoxel, TIndex>* sourceLiveScene) {
 #ifdef WITH_OPENCV
 	cv::Mat canonicalImg = scene2DSliceVisualizer->DrawSceneImageAroundPoint(canonicalScene) * 255.0f;
 	cv::Mat canonicalImgOut;

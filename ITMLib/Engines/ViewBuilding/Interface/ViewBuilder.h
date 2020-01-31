@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "../../../Objects/Camera/ITMRGBDCalib.h"
+#include "../../../Objects/Camera/RGBDCalib.h"
 #include "../../../Objects/Views/ITMViewIMU.h"
 
 namespace ITMLib
@@ -12,12 +12,12 @@ namespace ITMLib
 	class ViewBuilder
 	{
 	protected:
-		const ITMRGBDCalib calib;
+		const RGBDCalib calib;
 		ITMShortImage *shortImage;
 		ITMFloatImage *floatImage;
 
 	public:
-		virtual void ConvertDisparityToDepth(ITMFloatImage *depth_out, const ITMShortImage *disp_in, const ITMIntrinsics *depthIntrinsics,
+		virtual void ConvertDisparityToDepth(ITMFloatImage *depth_out, const ITMShortImage *disp_in, const Intrinsics *depthIntrinsics,
 			Vector2f disparityCalibParams) = 0;
 		virtual void ConvertDepthAffineToFloat(ITMFloatImage *depth_out, const ITMShortImage *depth_in, Vector2f depthCalibParams) = 0;
 
@@ -34,10 +34,10 @@ namespace ITMLib
 		virtual void UpdateView(ITMView** view, ITMUChar4Image* rgbImage, ITMShortImage* rawDepthImage, bool useThresholdFilter,
 				                        bool useBilateralFilter, bool modelSensorNoise, bool storePreviousImage) = 0;
 		virtual void UpdateView(ITMView** view, ITMUChar4Image* rgbImage, ITMShortImage* depthImage, bool useThresholdFilter,
-				                        bool useBilateralFilter, ITMIMUMeasurement* imuMeasurement, bool modelSensorNoise,
-				                        bool storePreviousImage) = 0;
+		                        bool useBilateralFilter, IMUMeasurement* imuMeasurement, bool modelSensorNoise,
+		                        bool storePreviousImage) = 0;
 
-		ViewBuilder(const ITMRGBDCalib& calib_)
+		ViewBuilder(const RGBDCalib& calib_)
 		: calib(calib_)
 		{
 			this->shortImage = NULL;

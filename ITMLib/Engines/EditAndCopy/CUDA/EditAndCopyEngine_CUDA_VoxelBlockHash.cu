@@ -18,7 +18,7 @@
 
 //Note: ".tpp" files have to be included for all explicit instantiations in order to link properly
 #include "EditAndCopyEngine_CUDA_VoxelBlockHash.tcu"
-#include "../../../Objects/Scene/ITMVoxelVolume.h"
+#include "../../../Objects/Scene/VoxelVolume.h"
 
 namespace ITMLib{
 //scene manipulation functions

@@ -24,25 +24,25 @@ namespace ITMLib
     //#################### PRIVATE MEMBER FUNCTIONS ####################
   private:
     /** Override */
-    virtual void AddNewSurfels(ITMSurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState) const;
+    virtual void AddNewSurfels(SurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState) const;
 
     /** Override */
-    virtual void FindCorrespondingSurfels(const ITMSurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState,
-                                          const ITMSurfelRenderState *renderState) const;
+    virtual void FindCorrespondingSurfels(const SurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState,
+                                          const SurfelRenderState *renderState) const;
 
     /** Override */
-    virtual void FuseMatchedPoints(ITMSurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState) const;
+    virtual void FuseMatchedPoints(SurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState) const;
 
     /** Override */
-    virtual void MarkBadSurfels(ITMSurfelScene<TSurfel> *scene) const;
+    virtual void MarkBadSurfels(SurfelScene<TSurfel> *scene) const;
 
     /** Override */
-    virtual void MergeSimilarSurfels(ITMSurfelScene<TSurfel> *scene, const ITMSurfelRenderState *renderState) const;
+    virtual void MergeSimilarSurfels(SurfelScene<TSurfel> *scene, const SurfelRenderState *renderState) const;
 
     /** Override */
     virtual void PreprocessDepthMap(const ITMView *view, const SurfelVolumeParameters& sceneParams) const;
 
     /** Override */
-    virtual void RemoveMarkedSurfels(ITMSurfelScene<TSurfel> *scene) const;
+    virtual void RemoveMarkedSurfels(SurfelScene<TSurfel> *scene) const;
   };
 }

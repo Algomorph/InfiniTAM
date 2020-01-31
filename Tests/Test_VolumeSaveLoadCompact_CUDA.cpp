@@ -22,7 +22,7 @@
 #include <boost/test/unit_test.hpp>
 //ITMLib
 #include "../ITMLib/ITMLibDefines.h"
-#include "../ITMLib/Objects/Scene/ITMVoxelVolume.h"
+#include "../ITMLib/Objects/Scene/VoxelVolume.h"
 #include "../ITMLib/Utils/Configuration.h"
 #include "../ITMLib/Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
 #include "TestUtils.h"
@@ -43,11 +43,11 @@ BOOST_AUTO_TEST_CASE(testSaveSceneCompact_CUDA) {
 	Vector3i volumeSize(40, 68, 20);
 	Vector3i volumeOffset(-20, 0, 0);
 
-	ITMVoxelVolume<ITMVoxel, PlainVoxelArray> scene1(
+	VoxelVolume<ITMVoxel, PlainVoxelArray> scene1(
 			&configuration::get().general_voxel_volume_parameters, configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 			MEMORYDEVICE_CUDA, {volumeSize, volumeOffset});
 
-	ITMVoxelVolume<ITMVoxel, PlainVoxelArray> scene2(
+	VoxelVolume<ITMVoxel, PlainVoxelArray> scene2(
 			&configuration::get().general_voxel_volume_parameters, configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 			MEMORYDEVICE_CUDA, {volumeSize, volumeOffset});
 
@@ -61,11 +61,11 @@ BOOST_AUTO_TEST_CASE(testSaveSceneCompact_CUDA) {
 	BOOST_REQUIRE_EQUAL( SceneStatCalc_CUDA_PVA_Voxel ::Instance().ComputeNonTruncatedVoxelCount(&scene2), 19456);
 	BOOST_REQUIRE(contentAlmostEqual_CUDA(&scene1, &scene2, tolerance));
 
-	ITMVoxelVolume<ITMVoxel, VoxelBlockHash> scene3(
+	VoxelVolume<ITMVoxel, VoxelBlockHash> scene3(
 			&configuration::get().general_voxel_volume_parameters, configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 			MEMORYDEVICE_CUDA, {0x800, 0x20000});
 
-	ITMVoxelVolume<ITMVoxel, VoxelBlockHash> scene4(
+	VoxelVolume<ITMVoxel, VoxelBlockHash> scene4(
 			&configuration::get().general_voxel_volume_parameters, configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 			MEMORYDEVICE_CUDA, {0x800, 0x20000});
 

@@ -67,37 +67,37 @@ public:
 	* \param renderState
 	*/
 	void ProcessFrame(const ITMView* view, const ITMTrackingState* trackingState,
-	                  ITMVoxelVolume <TVoxel, TIndex>* canonicalVolume, ITMVoxelVolume <TVoxel, TIndex>** liveScenePair,
-	                  ITMVoxelVolume <TWarp, TIndex>* warpField, ITMRenderState* renderState);
+	                  VoxelVolume <TVoxel, TIndex>* canonicalVolume, VoxelVolume <TVoxel, TIndex>** liveScenePair,
+	                  VoxelVolume <TWarp, TIndex>* warpField, RenderState* renderState);
 
 	void ProcessInitialFrame(const ITMView* view, const ITMTrackingState* trackingState,
-	                         ITMVoxelVolume<TVoxel, TIndex>* canonicalScene, ITMVoxelVolume<TVoxel, TIndex>* liveScene,
-	                         ITMRenderState* renderState);
+	                         VoxelVolume<TVoxel, TIndex>* canonicalScene, VoxelVolume<TVoxel, TIndex>* liveScene,
+	                         RenderState* renderState);
 
 	/// Update the visible list (this can be called to update the visible list when fusion is turned off)
 	void UpdateVisibleList(const ITMView* view, const ITMTrackingState* trackingState,
-	                       ITMVoxelVolume<TVoxel, TIndex>* scene, ITMRenderState* renderState, bool resetVisibleList = false);
+	                       VoxelVolume<TVoxel, TIndex>* scene, RenderState* renderState, bool resetVisibleList = false);
 	// endregion
 private:
 	// region ========================================== FUNCTIONS =====================================================
 	void ProcessSwapping(
-			ITMVoxelVolume <TVoxel, TIndex>* canonicalScene, ITMRenderState* renderState);
+			VoxelVolume <TVoxel, TIndex>* canonicalScene, RenderState* renderState);
 
-	ITMVoxelVolume<TVoxel, TIndex>* TrackFrameMotion(
-			ITMVoxelVolume<TVoxel, TIndex>* canonicalScene,
-			ITMVoxelVolume<TVoxel, TIndex>** liveScenePair,
-			ITMVoxelVolume<TWarp, TIndex>* warpField);
+	VoxelVolume<TVoxel, TIndex>* TrackFrameMotion(
+			VoxelVolume<TVoxel, TIndex>* canonicalScene,
+			VoxelVolume<TVoxel, TIndex>** liveScenePair,
+			VoxelVolume<TWarp, TIndex>* warpField);
 
 	void PerformSingleOptimizationStep(
-			ITMVoxelVolume<TVoxel, TIndex>* canonicalScene,
-			ITMVoxelVolume<TVoxel, TIndex>* initialLiveScene,
-			ITMVoxelVolume<TVoxel, TIndex>* finalLiveScene,
-			ITMVoxelVolume<TWarp, TIndex>* warpField,
+			VoxelVolume<TVoxel, TIndex>* canonicalScene,
+			VoxelVolume<TVoxel, TIndex>* initialLiveScene,
+			VoxelVolume<TVoxel, TIndex>* finalLiveScene,
+			VoxelVolume<TWarp, TIndex>* warpField,
 			float& maxVectorUpdate,
 			int iteration);
 
 	void LogSettings();
-	void LogVolumeStatistics(ITMVoxelVolume<TVoxel, TIndex>* volume, std::string volume_description);
+	void LogVolumeStatistics(VoxelVolume<TVoxel, TIndex>* volume, std::string volume_description);
 	// endregion =======================================================================================================
 	// region =========================================== MEMBER VARIABLES =============================================
 	// *** engines ***

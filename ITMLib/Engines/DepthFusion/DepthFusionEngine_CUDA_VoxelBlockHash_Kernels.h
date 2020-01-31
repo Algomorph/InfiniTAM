@@ -18,7 +18,7 @@
 #include "../../../ORUtils/JetbrainsCUDASyntax.hpp"
 #include "../Reconstruction/Shared/SceneReconstructionEngine_Shared.h"
 #include "../../Utils/ITMCUDAUtils.h"
-#include "../../Objects/Scene/ITMGlobalCache.h"
+#include "../../Objects/Scene/GlobalCache.h"
 #include "DepthFusionEngine_Shared.h"
 
 namespace {

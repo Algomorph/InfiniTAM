@@ -9,7 +9,7 @@ namespace ITMLib
 	class ViewBuilder_CUDA : public ViewBuilder
 	{
 	public:
-		void ConvertDisparityToDepth(ITMFloatImage *depth_out, const ITMShortImage *depth_in, const ITMIntrinsics *depthIntrinsics, 
+		void ConvertDisparityToDepth(ITMFloatImage *depth_out, const ITMShortImage *depth_in, const Intrinsics *depthIntrinsics,
 			Vector2f disparityCalibParams);
 		void ConvertDepthAffineToFloat(ITMFloatImage *depth_out, const ITMShortImage *depth_in, Vector2f depthCalibParams);
 
@@ -20,10 +20,10 @@ namespace ITMLib
 		void UpdateView(ITMView** view, ITMUChar4Image* rgbImage, ITMShortImage* rawDepthImage, bool useThresholdFilter,
 				                bool useBilateralFilter, bool modelSensorNoise, bool storePreviousImage);
 		void UpdateView(ITMView** view, ITMUChar4Image* rgbImage, ITMShortImage* depthImage, bool useThresholdFilter,
-				                bool useBilateralFilter, ITMIMUMeasurement* imuMeasurement, bool modelSensorNoise,
-				                bool storePreviousImage);
+		                bool useBilateralFilter, IMUMeasurement* imuMeasurement, bool modelSensorNoise,
+		                bool storePreviousImage);
 
-		ViewBuilder_CUDA(const ITMRGBDCalib& calib);
+		ViewBuilder_CUDA(const RGBDCalib& calib);
 		~ViewBuilder_CUDA(void);
 	};
 }

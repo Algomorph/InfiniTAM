@@ -72,10 +72,10 @@ struct AlteredFramewiseWarpCountFunctor {
 typedef WarpGradientDataFixture<MemoryDeviceType::MEMORYDEVICE_CPU, VoxelBlockHash> DataFixture;
 BOOST_FIXTURE_TEST_CASE(testDataTerm_CPU_VBH, DataFixture) {
 
-	ITMVoxelVolume<ITMWarp, VoxelBlockHash> warp_field_CPU1(&configuration::get().general_voxel_volume_parameters,
+	VoxelVolume<ITMWarp, VoxelBlockHash> warp_field_CPU1(&configuration::get().general_voxel_volume_parameters,
 	                                                           configuration::get().swapping_mode ==
 	                                                           configuration::SWAPPINGMODE_ENABLED,
-	                                                           MEMORYDEVICE_CPU, indexParameters);
+	                                                     MEMORYDEVICE_CPU, indexParameters);
 	ManipulationEngine_CPU_VBH_Warp::Inst().ResetVolume(&warp_field_CPU1);
 
 
@@ -103,8 +103,8 @@ BOOST_FIXTURE_TEST_CASE(testUpdateWarps_CPU_VBH, DataFixture) {
 
 	auto motionTracker_VBH_CPU = new SurfaceTracker<ITMVoxel, ITMWarp, VoxelBlockHash, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_DIAGNOSTIC>(
 			SlavchevaSurfaceTracker::Switches(false, false, false, false, false));
-	ITMVoxelVolume<ITMWarp, VoxelBlockHash> warp_field_copy(*warp_field_data_term,
-	                                                           MemoryDeviceType::MEMORYDEVICE_CPU);
+	VoxelVolume<ITMWarp, VoxelBlockHash> warp_field_copy(*warp_field_data_term,
+	                                                     MemoryDeviceType::MEMORYDEVICE_CPU);
 
 	AlteredGradientCountFunctor<ITMWarp> agcFunctor;
 	VolumeTraversalEngine<ITMWarp, VoxelBlockHash, MEMORYDEVICE_CPU>::
@@ -131,7 +131,7 @@ BOOST_FIXTURE_TEST_CASE(testUpdateWarps_CPU_VBH, DataFixture) {
 
 BOOST_FIXTURE_TEST_CASE(testSmoothWarpGradient_CPU_VBH, DataFixture) {
 
-	ITMVoxelVolume<ITMWarp, VoxelBlockHash> warp_field_CPU1(*warp_field_data_term, MEMORYDEVICE_CPU);
+	VoxelVolume<ITMWarp, VoxelBlockHash> warp_field_CPU1(*warp_field_data_term, MEMORYDEVICE_CPU);
 
 
 	auto motionTracker_VBH_CPU = new SurfaceTracker<ITMVoxel, ITMWarp, VoxelBlockHash, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_DIAGNOSTIC>(
@@ -149,7 +149,7 @@ BOOST_FIXTURE_TEST_CASE(testSmoothWarpGradient_CPU_VBH, DataFixture) {
 
 BOOST_FIXTURE_TEST_CASE(testTikhonovTerm_CPU_VBH, DataFixture) {
 
-	ITMVoxelVolume<ITMWarp, VoxelBlockHash> warp_field_CPU1(*warp_field_iter0, MEMORYDEVICE_CPU);
+	VoxelVolume<ITMWarp, VoxelBlockHash> warp_field_CPU1(*warp_field_iter0, MEMORYDEVICE_CPU);
 
 
 	auto motionTracker_VBH_CPU = new SurfaceTracker<ITMVoxel, ITMWarp, VoxelBlockHash, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_DIAGNOSTIC>(
@@ -181,7 +181,7 @@ BOOST_FIXTURE_TEST_CASE(testTikhonovTerm_CPU_VBH, DataFixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testDataAndTikhonovTerm_CPU_VBH, DataFixture) {
-	ITMVoxelVolume<ITMWarp, VoxelBlockHash> warp_field_CPU1(*warp_field_iter0, MEMORYDEVICE_CPU);
+	VoxelVolume<ITMWarp, VoxelBlockHash> warp_field_CPU1(*warp_field_iter0, MEMORYDEVICE_CPU);
 
 
 	auto motionTracker_VBH_CPU = new SurfaceTracker<ITMVoxel, ITMWarp, VoxelBlockHash, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_DIAGNOSTIC>(
@@ -213,7 +213,7 @@ BOOST_FIXTURE_TEST_CASE(testDataAndTikhonovTerm_CPU_VBH, DataFixture) {
 
 BOOST_FIXTURE_TEST_CASE(testDataAndKillingTerm_CPU_VBH, DataFixture) {
 
-	ITMVoxelVolume<ITMWarp, VoxelBlockHash> warp_field_CPU1(*warp_field_iter0, MEMORYDEVICE_CPU);
+	VoxelVolume<ITMWarp, VoxelBlockHash> warp_field_CPU1(*warp_field_iter0, MEMORYDEVICE_CPU);
 
 
 	auto motionTracker_VBH_CPU = new SurfaceTracker<ITMVoxel, ITMWarp, VoxelBlockHash, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_DIAGNOSTIC>(
@@ -236,7 +236,7 @@ BOOST_FIXTURE_TEST_CASE(testDataAndKillingTerm_CPU_VBH, DataFixture) {
 
 
 BOOST_FIXTURE_TEST_CASE(testDataAndLevelSetTerm_CPU_VBH, DataFixture) {
-	ITMVoxelVolume<ITMWarp, VoxelBlockHash> warp_field_CPU1(*warp_field_iter0, MEMORYDEVICE_CPU);
+	VoxelVolume<ITMWarp, VoxelBlockHash> warp_field_CPU1(*warp_field_iter0, MEMORYDEVICE_CPU);
 
 	auto motionTracker_VBH_CPU = new SurfaceTracker<ITMVoxel, ITMWarp, VoxelBlockHash, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_DIAGNOSTIC>(
 			SlavchevaSurfaceTracker::Switches(true, true, false, false, false));

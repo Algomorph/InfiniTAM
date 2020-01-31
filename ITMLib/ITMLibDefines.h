@@ -3,9 +3,9 @@
 #pragma once
 
 #include "Objects/Scene/PlainVoxelArray.h"
-#include "Objects/Scene/ITMSurfelTypes.h"
+#include "Objects/Scene/SurfelTypes.h"
 #include "Objects/Scene/VoxelBlockHash.h"
-#include "Objects/Scene/ITMVoxelTypes.h"
+#include "Objects/Scene/VoxelTypes.h"
 
 /** This chooses the information stored at each surfel. At the moment, valid
     options are ITMSurfel_grey and ITMSurfel_rgb.

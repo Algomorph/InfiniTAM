@@ -19,7 +19,7 @@
 #include "../../../Utils/ITMCUDAUtils.h"
 #include "../../../../ORUtils/PlatformIndependence.h"
 #include "../../../../ORUtils/JetbrainsCUDASyntax.hpp"
-#include "../../../Objects/Scene/ITMRepresentationAccess.h"
+#include "../../../Objects/Scene/RepresentationAccess.h"
 #include "../../../Utils/Geometry/ITMGeometryBooleanOperations.h"
 #include "../../../Utils/Analytics/SceneStatisticsCalculator/CUDA/ITMSceneStatisticsCalculator_CUDA.h"
 #include "EditAndCopyEngine_CUDA_VoxelBlockHash_Kernels.h"
@@ -52,7 +52,7 @@ EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::~EditAndCopyEngine_CUDA() {
 template<typename TVoxel>
 void
 EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::ResetVolume(
-		ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume) {
+		VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 	int numBlocks = volume->index.GetAllocatedBlockCount();
 	int blockSize = volume->index.GetVoxelBlockSize();
 
@@ -75,7 +75,7 @@ EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::ResetVolume(
 
 template<typename TVoxel>
 bool
-EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::SetVoxel(ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume,
+EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::SetVoxel(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
                                                          Vector3i at, TVoxel voxel) {
 	ITMHashEntry* hashTable = volume->index.GetEntries();
 
@@ -109,7 +109,7 @@ EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::SetVoxel(ITMVoxelVolume<TVoxel, 
 
 template<typename TVoxel>
 TVoxel
-EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::ReadVoxel(ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume,
+EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::ReadVoxel(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
                                                           Vector3i at) {
 	TVoxel* localVBA = volume->localVBA.GetVoxelBlocks();
 	const ITMHashEntry* hashTable = volume->index.GetEntries();
@@ -132,7 +132,7 @@ EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::ReadVoxel(ITMVoxelVolume<TVoxel,
 
 template<typename TVoxel>
 TVoxel
-EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::ReadVoxel(ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume,
+EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::ReadVoxel(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
                                                           Vector3i at,
                                                           VoxelBlockHash::IndexCache& cache) {
 	TVoxel* localVBA = volume->localVBA.GetVoxelBlocks();
@@ -156,7 +156,7 @@ EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::ReadVoxel(ITMVoxelVolume<TVoxel,
 
 template<typename TVoxel>
 TVoxel
-EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::ReadVoxel(ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume,
+EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::ReadVoxel(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
                                                           Vector3i at, int& where,
                                                           VoxelBlockHash::IndexCache& cache) {
 	TVoxel* localVBA = volume->localVBA.GetVoxelBlocks();
@@ -181,14 +181,14 @@ EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::ReadVoxel(ITMVoxelVolume<TVoxel,
 
 template<typename TVoxel>
 void EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::OffsetWarps(
-		ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume,
+		VoxelVolume<TVoxel, VoxelBlockHash>* volume,
 		Vector3f offset) {
 	DIEWITHEXCEPTION_REPORTLOCATION("Not implemented");
 }
 
 template<typename TVoxel>
 bool EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::CopyVolumeSlice(
-		ITMVoxelVolume<TVoxel, VoxelBlockHash>* targetVolume, ITMVoxelVolume<TVoxel, VoxelBlockHash>* sourceVolume,
+		VoxelVolume<TVoxel, VoxelBlockHash>* targetVolume, VoxelVolume<TVoxel, VoxelBlockHash>* sourceVolume,
 		Vector6i bounds, const Vector3i& offset) {
 
 	int hashEntryCount = sourceVolume->index.hashEntryCount;
@@ -291,8 +291,8 @@ bool EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::CopyVolumeSlice(
 
 template<typename TVoxel>
 bool EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::CopyVolume(
-		ITMVoxelVolume<TVoxel, VoxelBlockHash>* targetVolume,
-		ITMVoxelVolume<TVoxel, VoxelBlockHash>* sourceVolume,
+		VoxelVolume<TVoxel, VoxelBlockHash>* targetVolume,
+		VoxelVolume<TVoxel, VoxelBlockHash>* sourceVolume,
 		const Vector3i& offset) {
 
 	int hashEntryCount = sourceVolume->index.hashEntryCount;

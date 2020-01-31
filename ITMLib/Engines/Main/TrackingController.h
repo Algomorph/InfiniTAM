@@ -28,8 +28,8 @@ namespace ITMLib
 		}
 
 		template <typename TSurfel>
-		void Prepare(ITMTrackingState *trackingState, const ITMSurfelScene<TSurfel> *scene, const ITMView *view,
-		             const SurfelVisualizationEngine<TSurfel> *VisualizationEngine, ITMSurfelRenderState *renderState)
+		void Prepare(ITMTrackingState *trackingState, const SurfelScene<TSurfel> *scene, const ITMView *view,
+		             const SurfelVisualizationEngine<TSurfel> *VisualizationEngine, SurfelRenderState *renderState)
 		{
 			if (!tracker->requiresPointCloudRendering())
 				return;
@@ -74,8 +74,8 @@ namespace ITMLib
 		 * \param renderState
 		 */
 		template <typename TVoxel, typename TIndex>
-		void Prepare(ITMTrackingState *trackingState, ITMVoxelVolume<TVoxel,TIndex> *scene, const ITMView *view,
-		             const VisualizationEngine<TVoxel,TIndex> *VisualizationEngine, ITMRenderState *renderState)
+		void Prepare(ITMTrackingState *trackingState, VoxelVolume<TVoxel,TIndex> *scene, const ITMView *view,
+		             const VisualizationEngine<TVoxel,TIndex> *VisualizationEngine, RenderState *renderState)
 		{
 			if (!tracker->requiresPointCloudRendering())
 				return;

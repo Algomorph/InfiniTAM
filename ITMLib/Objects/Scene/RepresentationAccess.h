@@ -3,7 +3,7 @@
 #pragma once
 
 #include "VoxelBlockHash.h"
-#include "ITMVoxelTypes.h"
+#include "VoxelTypes.h"
 
 template<typename T> _CPU_AND_GPU_CODE_ inline int HashCodeFromBlockPosition(const THREADPTR(T) & blockPos) {
 	return (((uint)blockPos.x * 73856093u) ^ ((uint)blockPos.y * 19349669u) ^ ((uint)blockPos.z * 83492791u)) & (uint)VOXEL_HASH_MASK;

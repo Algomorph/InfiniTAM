@@ -16,7 +16,7 @@
 #pragma once
 
 #include "../../../Utils/ITMMath.h"
-#include "../../../Objects/Scene/ITMVoxelVolume.h"
+#include "../../../Objects/Scene/VoxelVolume.h"
 
 namespace ITMLib {
 
@@ -33,7 +33,7 @@ public:
 	 * \brief Clear out volume and reset the index
 	 * \param volume
 	 */
-	virtual void ResetVolume(ITMVoxelVolume <TVoxel, TIndex>* volume) = 0;
+	virtual void ResetVolume(VoxelVolume <TVoxel, TIndex>* volume) = 0;
 
 	/**
 	 * \brief Set a single voxel at the desired location to the desired value
@@ -42,7 +42,7 @@ public:
 	 * \param voxel the target voxel value
 	 * \return true on success, false otherwise
 	 */
-	virtual bool SetVoxel(ITMVoxelVolume <TVoxel, TIndex>* volume, Vector3i at, TVoxel voxel) = 0;
+	virtual bool SetVoxel(VoxelVolume <TVoxel, TIndex>* volume, Vector3i at, TVoxel voxel) = 0;
 
 	/**
 	 * \brief Read voxel at the desired location
@@ -52,8 +52,8 @@ public:
 	 * \param at coordinate to query
 	 * \return value of the voxel at desired location
 	 */
-	virtual TVoxel ReadVoxel(ITMVoxelVolume <TVoxel, TIndex>* volume, Vector3i at) = 0;
-	virtual TVoxel ReadVoxel(ITMVoxelVolume <TVoxel, TIndex>* volume, Vector3i at,
+	virtual TVoxel ReadVoxel(VoxelVolume <TVoxel, TIndex>* volume, Vector3i at) = 0;
+	virtual TVoxel ReadVoxel(VoxelVolume <TVoxel, TIndex>* volume, Vector3i at,
 	                         typename TIndex::IndexCache& cache) = 0;
 
 
@@ -62,7 +62,7 @@ public:
 	 * \param volume the scene to modify
 	 * \param offset the offset vector to use
 	 */
-	virtual void OffsetWarps(ITMVoxelVolume <TVoxel, TIndex>* volume, Vector3f offset) = 0;
+	virtual void OffsetWarps(VoxelVolume <TVoxel, TIndex>* volume, Vector3f offset) = 0;
 
 	/**
 	 * \brief Copies the slice (box-like window) specified by points extremum1 and extremum2 from the source scene into a
@@ -76,10 +76,10 @@ public:
 	 * \return true on success (destination scene contains the slice), false on failure (there are no allocated hash blocks
 	 */
 	virtual bool
-	CopyVolumeSlice(ITMVoxelVolume <TVoxel, TIndex>* targetVolume, ITMVoxelVolume <TVoxel, TIndex>* sourceVolume,
+	CopyVolumeSlice(VoxelVolume <TVoxel, TIndex>* targetVolume, VoxelVolume <TVoxel, TIndex>* sourceVolume,
 	                Vector6i bounds, const Vector3i& offset = Vector3i(0)) = 0;
-	virtual bool CopyVolume(ITMVoxelVolume <TVoxel, TIndex>* targetVolume,
-	                        ITMVoxelVolume <TVoxel, TIndex>* sourceVolume,
+	virtual bool CopyVolume(VoxelVolume <TVoxel, TIndex>* targetVolume,
+	                        VoxelVolume <TVoxel, TIndex>* sourceVolume,
 	                        const Vector3i& offset = Vector3i(0)) = 0;
 
 };

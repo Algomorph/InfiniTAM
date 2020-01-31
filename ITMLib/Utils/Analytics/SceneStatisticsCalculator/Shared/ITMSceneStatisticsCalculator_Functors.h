@@ -27,7 +27,7 @@
 #include "../../../../../ORUtils/PlatformIndependentAtomics.h"
 #include "../../../../../ORUtils/PlatformIndependence.h"
 #include "../../../Configuration.h"
-#include "../../../../Objects/Scene/ITMVoxelVolume.h"
+#include "../../../../Objects/Scene/VoxelVolume.h"
 #include "../../../../Engines/Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
 #include "../../../../Engines/Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
 
@@ -49,7 +49,7 @@ struct ComputeFramewiseWarpLengthStatisticFunctor;
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TDeviceType, Statistic TStatistic>
 struct ComputeFramewiseWarpLengthStatisticFunctor<false, TVoxel, TIndex, TDeviceType, TStatistic> {
-	static int compute(ITMVoxelVolume<TVoxel, TIndex>* scene) {
+	static int compute(VoxelVolume<TVoxel, TIndex>* scene) {
 		DIEWITHEXCEPTION("Voxels need to have flow warp information to get flow warp statistics.");
 		return 0;
 	}
@@ -92,7 +92,7 @@ struct ComputeFramewiseWarpLengthStatisticFunctor<true, TVoxel, TIndex, TDeviceT
 		CLEAN_UP_ATOMIC(aggregate);CLEAN_UP_ATOMIC(count);
 	}
 
-	static double compute(ITMVoxelVolume<TVoxel, TIndex>* scene) {
+	static double compute(VoxelVolume<TVoxel, TIndex>* scene) {
 		ComputeFramewiseWarpLengthStatisticFunctor instance;
 		INITIALIZE_ATOMIC(double, instance.aggregate, 0.0);
 		INITIALIZE_ATOMIC(unsigned int, instance.count, 0u);
@@ -130,7 +130,7 @@ struct ComputeVoxelCountWithSpecificValue<true, TVoxel, TIndex, TMemoryDeviceTyp
 		CLEAN_UP_ATOMIC(count);
 	}
 
-	static int compute(ITMVoxelVolume<TVoxel, TIndex>* scene, float value) {
+	static int compute(VoxelVolume<TVoxel, TIndex>* scene, float value) {
 		ComputeVoxelCountWithSpecificValue instance(value);
 		VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::VoxelTraversal(scene, instance);
 		return GET_ATOMIC_VALUE_CPU(instance.count);
@@ -147,7 +147,7 @@ struct ComputeVoxelCountWithSpecificValue<true, TVoxel, TIndex, TMemoryDeviceTyp
 
 template<class TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 struct ComputeVoxelCountWithSpecificValue<false, TVoxel, TIndex, TMemoryDeviceType> {
-	static int compute(ITMVoxelVolume<TVoxel, TIndex>* scene, float value) {
+	static int compute(VoxelVolume<TVoxel, TIndex>* scene, float value) {
 		DIEWITHEXCEPTION(
 				"Voxel volume issued to count voxels with specific SDF value appears to have no sdf information. "
 				"Voxels need to have sdf information.");
@@ -164,7 +164,7 @@ struct SumSDFFunctor;
 template<class TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 struct SumSDFFunctor<false, TVoxel, TIndex, TMemoryDeviceType> {
 
-	static double compute(ITMVoxelVolume<TVoxel, TIndex>* scene, ITMLib::VoxelFlags voxelType) {
+	static double compute(VoxelVolume<TVoxel, TIndex>* scene, ITMLib::VoxelFlags voxelType) {
 		DIEWITHEXCEPTION_REPORTLOCATION(
 				"Voxels need to have semantic information to be marked as truncated or non-truncated.");
 		return 0.0;
@@ -180,7 +180,7 @@ struct SumSDFFunctor<true, TVoxel, TIndex, TMemoryDeviceType> {
 		CLEAN_UP_ATOMIC(sum);
 	}
 
-	static double compute(ITMVoxelVolume<TVoxel, TIndex>* scene, ITMLib::VoxelFlags voxelType) {
+	static double compute(VoxelVolume<TVoxel, TIndex>* scene, ITMLib::VoxelFlags voxelType) {
 		SumSDFFunctor instance(voxelType);
 		VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::VoxelTraversal(scene, instance);
 		return GET_ATOMIC_VALUE_CPU(instance.sum);
@@ -230,7 +230,7 @@ struct FlagMatchBBoxFunctor;
 template<class TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 struct FlagMatchBBoxFunctor<false, TVoxel, TIndex, TMemoryDeviceType> {
 
-	static Extent3D compute(ITMVoxelVolume<TVoxel, TIndex>* scene, ITMLib::VoxelFlags voxelType) {
+	static Extent3D compute(VoxelVolume<TVoxel, TIndex>* scene, ITMLib::VoxelFlags voxelType) {
 		DIEWITHEXCEPTION_REPORTLOCATION(
 				"Voxels need to have semantic information to be marked as truncated or non-truncated.");
 		return {};
@@ -259,7 +259,7 @@ struct FlagMatchBBoxFunctor<true, TVoxel, TIndex, TMemoryDeviceType> {
 	}
 
 
-	static Extent3D compute(ITMVoxelVolume<TVoxel, TIndex>* scene, ITMLib::VoxelFlags voxelType) {
+	static Extent3D compute(VoxelVolume<TVoxel, TIndex>* scene, ITMLib::VoxelFlags voxelType) {
 		FlagMatchBBoxFunctor instance(voxelType);
 		VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::VoxelPositionTraversal(scene, instance);
 		return {GET_ATOMIC_VALUE_CPU(instance.min_x),

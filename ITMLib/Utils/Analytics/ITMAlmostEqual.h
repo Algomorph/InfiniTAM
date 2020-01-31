@@ -21,7 +21,7 @@
 
 //local
 #include "VoxelVolumeComparison/ITMVoxelVolumeComparison_CPU.h"
-#include "../../Objects/Scene/ITMVoxelTypes.h"
+#include "../../Objects/Scene/VoxelTypes.h"
 #include "../ITMMath.h"
 #include "../../../ORUtils/PlatformIndependence.h"
 

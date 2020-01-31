@@ -12,7 +12,7 @@ using namespace ITMLib;
 
 template<class TMultiVoxel, class TMultiIndex>
 __global__ void
-meshScene_device(ITMMesh::Triangle* triangles, unsigned int* noTriangles_device, float factor,
+meshScene_device(Mesh::Triangle* triangles, unsigned int* noTriangles_device, float factor,
                  const unsigned int voxelBlockCount, int noMaxTriangles, const Vector4s* visibleBlockGlobalPos,
                  const TMultiVoxel* localVBAs, const TMultiIndex* hashTables);
 
@@ -40,7 +40,7 @@ MultiMeshingEngine_CUDA<TVoxel, VoxelBlockHash>::~MultiMeshingEngine_CUDA(void) 
 }
 
 template<class TVoxel>
-void MultiMeshingEngine_CUDA<TVoxel, VoxelBlockHash>::MeshScene(ITMMesh* mesh,
+void MultiMeshingEngine_CUDA<TVoxel, VoxelBlockHash>::MeshScene(Mesh* mesh,
                                                                 const VoxelMapGraphManager<TVoxel, VoxelBlockHash>& sceneManager) {
 	const VoxelVolumeParameters& sceneParams = *(sceneManager.getLocalMap(0)->scene->sceneParams);
 	int numLocalMaps = (int) sceneManager.numLocalMaps();
@@ -65,7 +65,7 @@ void MultiMeshingEngine_CUDA<TVoxel, VoxelBlockHash>::MeshScene(ITMMesh* mesh,
 		ORcudaSafeCall(cudaMemcpy(voxelData_device, &(voxelData_host), sizeof(MultiVoxelData), cudaMemcpyHostToDevice));
 	}
 
-	ITMMesh::Triangle* triangles = mesh->triangles->GetData(MEMORYDEVICE_CUDA);
+	Mesh::Triangle* triangles = mesh->triangles->GetData(MEMORYDEVICE_CUDA);
 
 	typedef MultiVoxel<TVoxel> VD;
 	typedef MultiIndex<VoxelBlockHash> ID;
@@ -122,7 +122,7 @@ __global__ void findAllocateBlocks(Vector4s* visibleBlockGlobalPos, const TMulti
 
 template<class TMultiVoxel, class TMultiIndex>
 __global__ void
-meshScene_device(ITMMesh::Triangle* triangles, unsigned int* noTriangles_device, float factor,
+meshScene_device(Mesh::Triangle* triangles, unsigned int* noTriangles_device, float factor,
                  const unsigned int voxelBlockCount, int noMaxTriangles, const Vector4s* visibleBlockGlobalPos,
                  const TMultiVoxel* localVBAs, const TMultiIndex* hashTables) {
 

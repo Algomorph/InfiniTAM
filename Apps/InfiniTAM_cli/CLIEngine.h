@@ -26,7 +26,7 @@ namespace InfiniTAM
 
 		private:
 			ITMUChar4Image *inputRGBImage; ITMShortImage *inputRawDepthImage;
-			ITMLib::ITMIMUMeasurement *inputIMUMeasurement;
+			ITMLib::IMUMeasurement *inputIMUMeasurement;
 
 			int currentFrameNo;
 		public:

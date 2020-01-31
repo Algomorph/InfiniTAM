@@ -7,7 +7,7 @@
 using namespace ITMLib;
 
 template<class TVoxel>
-inline void MultiMeshingEngine_CPU<TVoxel, VoxelBlockHash>::MeshScene(ITMMesh * mesh, const MultiSceneManager & sceneManager)
+inline void MultiMeshingEngine_CPU<TVoxel, VoxelBlockHash>::MeshScene(Mesh * mesh, const MultiSceneManager & sceneManager)
 {
 	int numLocalMaps = (int)sceneManager.numLocalMaps();
 	if (numLocalMaps > MAX_NUM_LOCALMAPS) numLocalMaps = MAX_NUM_LOCALMAPS;
@@ -33,7 +33,7 @@ inline void MultiMeshingEngine_CPU<TVoxel, VoxelBlockHash>::MeshScene(ITMMesh * 
 		localVBAs.voxels[localMapId] = sceneManager.getLocalMap(localMapId)->scene->localVBA.GetVoxelBlocks();
 	}
 
-	ITMMesh::Triangle *triangles = mesh->triangles->GetData(MEMORYDEVICE_CPU);
+	Mesh::Triangle *triangles = mesh->triangles->GetData(MEMORYDEVICE_CPU);
 	mesh->triangles->Clear();
 
 	int noTriangles = 0, noMaxTriangles = mesh->noMaxTriangles;

@@ -59,9 +59,9 @@ const std::string ITMSceneLogger<TVoxel, TWarp, TIndex>::continuousHighlightsPos
  */
 template<typename TVoxel, typename TWarp, typename TIndex>
 ITMSceneLogger<TVoxel, TWarp, TIndex>::ITMSceneLogger(
-		ITMVoxelVolume<TVoxel, TIndex>* canonicalScene,
-		ITMVoxelVolume<TVoxel, TIndex>* liveScene,
-		ITMVoxelVolume<TWarp, TIndex>* warpField,
+		VoxelVolume<TVoxel, TIndex>* canonicalScene,
+		VoxelVolume<TVoxel, TIndex>* liveScene,
+		VoxelVolume<TWarp, TIndex>* warpField,
 		std::string path) :
 		fullWarpLogger(new ITMWarpFieldLogger<TWarp, TIndex>(warpField, path)),
 		activeWarpLogger(fullWarpLogger),
@@ -75,7 +75,7 @@ ITMSceneLogger<TVoxel, TWarp, TIndex>::ITMSceneLogger(
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-ITMSceneLogger<TVoxel, TWarp, TIndex>::ITMSceneLogger(ITMVoxelVolume<TVoxel, TIndex>* liveScene,
+ITMSceneLogger<TVoxel, TWarp, TIndex>::ITMSceneLogger(VoxelVolume<TVoxel, TIndex>* liveScene,
                                                       std::string path):
 		fullWarpLogger(nullptr), activeWarpLogger(nullptr),
 		liveScene(liveScene), mode(SLICE) {
@@ -128,9 +128,9 @@ bool ITMSceneLogger<TVoxel, TWarp, TIndex>::GetScenesLoaded() const {
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 void ITMSceneLogger<TVoxel, TWarp, TIndex>::SetScenes(
-		ITMVoxelVolume<TVoxel, TIndex>* canonicalScene,
-		ITMVoxelVolume<TVoxel, TIndex>* liveScene,
-		ITMVoxelVolume<TWarp, TIndex>* warpField) {
+		VoxelVolume<TVoxel, TIndex>* canonicalScene,
+		VoxelVolume<TVoxel, TIndex>* liveScene,
+		VoxelVolume<TWarp, TIndex>* warpField) {
 	this->liveScene = liveScene;
 	this->canonicalScene = canonicalScene;
 	this->activeWarpLogger->warpField = warpField;
@@ -190,12 +190,12 @@ void ITMSceneLogger<TVoxel, TWarp, TIndex>::SetPath(std::string path) {
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-const ITMVoxelVolume<TWarp, TIndex>* ITMSceneLogger<TVoxel, TWarp, TIndex>::GetActiveWarpScene() const {
+const VoxelVolume<TWarp, TIndex>* ITMSceneLogger<TVoxel, TWarp, TIndex>::GetActiveWarpScene() const {
 	return this->activeWarpLogger->warpField;
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-const ITMVoxelVolume<TVoxel, TIndex>* ITMSceneLogger<TVoxel, TWarp, TIndex>::GetLiveScene() const {
+const VoxelVolume<TVoxel, TIndex>* ITMSceneLogger<TVoxel, TWarp, TIndex>::GetLiveScene() const {
 	return this->liveScene;
 }
 

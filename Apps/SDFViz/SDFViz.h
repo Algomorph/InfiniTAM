@@ -34,7 +34,7 @@
 
 //ITMLib
 #include "../../ITMLib/ITMLibDefines.h"
-#include "../../ITMLib/Objects/Scene/ITMVoxelVolume.h"
+#include "../../ITMLib/Objects/Scene/VoxelVolume.h"
 #include "HighlightVisualization.h"
 
 using namespace ITMLib;

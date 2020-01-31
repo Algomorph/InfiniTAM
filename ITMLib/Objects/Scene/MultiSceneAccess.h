@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "../../Objects/Scene/ITMRepresentationAccess.h"
+#include "RepresentationAccess.h"
 
 #define MAX_NUM_LOCALMAPS 32
 

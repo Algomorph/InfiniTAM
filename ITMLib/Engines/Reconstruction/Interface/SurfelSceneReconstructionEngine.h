@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "../../../Objects/RenderStates/ITMSurfelRenderState.h"
-#include "../../../Objects/Scene/ITMSurfelScene.h"
+#include "../../../Objects/RenderStates/SurfelRenderState.h"
+#include "../../../Objects/Scene/SurfelScene.h"
 #include "../../../Objects/Tracking/ITMTrackingState.h"
 #include "../../../Objects/Views/ITMView.h"
 
@@ -82,7 +82,7 @@ namespace ITMLib
      * \param view            The current view (containing the live input images from the current image source).
      * \param trackingState   The current tracking state.
      */
-    virtual void AddNewSurfels(ITMSurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState) const = 0;
+    virtual void AddNewSurfels(SurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState) const = 0;
 
     /**
      * \brief Finds the indices of the surfels (if any) in the scene to which different points in the live 3D depth image map correspond.
@@ -92,8 +92,8 @@ namespace ITMLib
      * \param trackingState   The current tracking state.
      * \param renderState     The render state corresponding to the camera from which the scene is being viewed.
      */
-    virtual void FindCorrespondingSurfels(const ITMSurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState,
-                                          const ITMSurfelRenderState *renderState) const = 0;
+    virtual void FindCorrespondingSurfels(const SurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState,
+                                          const SurfelRenderState *renderState) const = 0;
 
     /**
      * \brief Fuses points in the live point cloud into the surfels in the scene with which they have been matched.
@@ -102,14 +102,14 @@ namespace ITMLib
      * \param view            The current view (containing the live input images from the current image source).
      * \param trackingState   The current tracking state.
      */
-    virtual void FuseMatchedPoints(ITMSurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState) const = 0;
+    virtual void FuseMatchedPoints(SurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState) const = 0;
 
     /**
      * \brief Marks surfels that should be removed from the scene.
      *
      * \param scene The surfel scene.
      */
-    virtual void MarkBadSurfels(ITMSurfelScene<TSurfel> *scene) const = 0;
+    virtual void MarkBadSurfels(SurfelScene<TSurfel> *scene) const = 0;
 
     /**
      * \brief Merges together surfels in the current index image that have sufficiently similar positions and normals, and whose radii overlap.
@@ -119,7 +119,7 @@ namespace ITMLib
      * \param scene       The surfel scene.
      * \param renderState The render state corresponding to the camera from which the scene is being viewed.
      */
-    virtual void MergeSimilarSurfels(ITMSurfelScene<TSurfel> *scene, const ITMSurfelRenderState *renderState) const = 0;
+    virtual void MergeSimilarSurfels(SurfelScene<TSurfel> *scene, const SurfelRenderState *renderState) const = 0;
 
     /**
      * \brief Calculates the position, normal and radius of the surfel that would be constructed for each point in the live 3D depth image.
@@ -134,7 +134,7 @@ namespace ITMLib
      *
      * \param scene The surfel scene.
      */
-    virtual void RemoveMarkedSurfels(ITMSurfelScene<TSurfel> *scene) const = 0;
+    virtual void RemoveMarkedSurfels(SurfelScene<TSurfel> *scene) const = 0;
 
     //#################### PUBLIC MEMBER FUNCTIONS ####################
   public:
@@ -146,13 +146,13 @@ namespace ITMLib
      * \param trackingState The current tracking state.
      * \param renderState   The render state corresponding to the camera from which the scene is being viewed.
      */
-    void IntegrateIntoScene(ITMSurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState, const ITMSurfelRenderState *renderState);
+    void IntegrateIntoScene(SurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState, const SurfelRenderState *renderState);
 
     /**
      * \brief Resets the specified surfel-based scene.
      *
      * \param scene The scene to reset.
      */
-    void ResetScene(ITMSurfelScene<TSurfel> *scene) const;
+    void ResetScene(SurfelScene<TSurfel> *scene) const;
   };
 }

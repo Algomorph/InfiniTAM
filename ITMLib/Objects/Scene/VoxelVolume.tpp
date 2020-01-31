@@ -14,7 +14,7 @@
 //  limitations under the License.
 //  ================================================================
 
-#include "ITMVoxelVolume.h"
+#include "VoxelVolume.h"
 #include "../../Engines/VolumeFileIO/VolumeFileIOEngine.h"
 #include "../../Utils/Configuration.h"
 #include "../../Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
@@ -35,37 +35,37 @@ namespace ITMLib {
  * \param offset (optional) offset of the scene -- affects only bounded index types, such as PlainVoxelArray
  */
 template<typename TVoxel, typename TIndex>
-ITMVoxelVolume<TVoxel,TIndex>::ITMVoxelVolume(const VoxelVolumeParameters* _sceneParams, bool _useSwapping, MemoryDeviceType _memoryType,
-                                              typename TIndex::InitializationParameters indexParameters)
+VoxelVolume<TVoxel,TIndex>::VoxelVolume(const VoxelVolumeParameters* _sceneParams, bool _useSwapping, MemoryDeviceType _memoryType,
+                                        typename TIndex::InitializationParameters indexParameters)
 	: sceneParams(_sceneParams),
 		index(indexParameters, _memoryType),
 	  localVBA(_memoryType, index.GetAllocatedBlockCount(), index.GetVoxelBlockSize())
 {
-	if (_useSwapping) globalCache = new ITMGlobalCache<TVoxel,TIndex>(this->index);
+	if (_useSwapping) globalCache = new GlobalCache<TVoxel,TIndex>(this->index);
 	else globalCache = nullptr;
 }
 
 
 template<class TVoxel, class TIndex>
-ITMVoxelVolume<TVoxel, TIndex>::ITMVoxelVolume(MemoryDeviceType memoryDeviceType,
-		typename TIndex::InitializationParameters indexParameters) :
-	ITMVoxelVolume(&configuration::get().general_voxel_volume_parameters,
+VoxelVolume<TVoxel, TIndex>::VoxelVolume(MemoryDeviceType memoryDeviceType,
+                                         typename TIndex::InitializationParameters indexParameters) :
+	VoxelVolume(&configuration::get().general_voxel_volume_parameters,
 			configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
-			memoryDeviceType, indexParameters) {}
+			    memoryDeviceType, indexParameters) {}
 
 template<class TVoxel, class TIndex>
-ITMVoxelVolume<TVoxel, TIndex>::ITMVoxelVolume(const ITMVoxelVolume& other, MemoryDeviceType _memoryType)
+VoxelVolume<TVoxel, TIndex>::VoxelVolume(const VoxelVolume& other, MemoryDeviceType _memoryType)
 	: sceneParams(other.sceneParams),
 	index(other.index,_memoryType),
 	localVBA(other.localVBA, _memoryType),
     globalCache(nullptr)
 	{
     if(other.globalCache != nullptr){
-	    this->globalCache = new ITMGlobalCache<TVoxel,TIndex>(*other.globalCache);
+	    this->globalCache = new GlobalCache<TVoxel,TIndex>(*other.globalCache);
     }
 }
 template<class TVoxel, class TIndex>
-void ITMVoxelVolume<TVoxel, TIndex>::Reset(){
+void VoxelVolume<TVoxel, TIndex>::Reset(){
 	switch (this->index.memoryType) {
 		case MEMORYDEVICE_CPU:
 			EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().ResetVolume(this);
@@ -81,29 +81,29 @@ void ITMVoxelVolume<TVoxel, TIndex>::Reset(){
 }
 
 template<class TVoxel, class TIndex>
-void ITMVoxelVolume<TVoxel, TIndex>::SetFrom(const ITMVoxelVolume& other) {
+void VoxelVolume<TVoxel, TIndex>::SetFrom(const VoxelVolume& other) {
 	index.SetFrom(other.index);
 	localVBA.SetFrom(other.localVBA);
 	if(other.globalCache != nullptr){
 		delete this->globalCache;
-		globalCache = new ITMGlobalCache<TVoxel, TIndex>(*other.globalCache);
+		globalCache = new GlobalCache<TVoxel, TIndex>(*other.globalCache);
 	}else{
 		globalCache = nullptr;
 	}
 }
 
 template<class TVoxel, class TIndex>
-void ITMVoxelVolume<TVoxel, TIndex>::SaveToDirectory(const std::string& outputDirectory) const {
+void VoxelVolume<TVoxel, TIndex>::SaveToDirectory(const std::string& outputDirectory) const {
 	VolumeFileIOEngine<TVoxel,TIndex>::SaveToDirectoryCompact(this, outputDirectory);
 }
 
 template<class TVoxel, class TIndex>
-void ITMVoxelVolume<TVoxel, TIndex>::LoadFromDirectory(const std::string& outputDirectory) {
+void VoxelVolume<TVoxel, TIndex>::LoadFromDirectory(const std::string& outputDirectory) {
 	VolumeFileIOEngine<TVoxel,TIndex>::LoadFromDirectoryCompact(this, outputDirectory);
 }
 
 template<class TVoxel, class TIndex>
-TVoxel ITMVoxelVolume<TVoxel, TIndex>::GetValueAt(const Vector3i& pos) {
+TVoxel VoxelVolume<TVoxel, TIndex>::GetValueAt(const Vector3i& pos) {
 	switch (this->index.memoryType) {
 		case MEMORYDEVICE_CPU:
 			return EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().ReadVoxel(this, pos);

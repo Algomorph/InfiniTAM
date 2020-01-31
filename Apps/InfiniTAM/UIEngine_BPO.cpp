@@ -154,7 +154,7 @@ void UIEngine_BPO::Initialize(int& argc, char** argv,
 
 	inputRGBImage = new ITMUChar4Image(imageSource->getRGBImageSize(), true, allocateGPU);
 	inputRawDepthImage = new ITMShortImage(imageSource->getDepthImageSize(), true, allocateGPU);
-	inputIMUMeasurement = new ITMIMUMeasurement();
+	inputIMUMeasurement = new IMUMeasurement();
 
 	saveImage = new ITMUChar4Image(imageSource->getDepthImageSize(), true, false);
 

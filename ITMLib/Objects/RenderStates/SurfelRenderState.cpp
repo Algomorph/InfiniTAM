@@ -1,13 +1,13 @@
 // InfiniTAM: Surffuse. Copyright (c) Torr Vision Group and the authors of InfiniTAM, 2016.
 
-#include "ITMSurfelRenderState.h"
+#include "SurfelRenderState.h"
 
 namespace ITMLib
 {
 
 //#################### CONSTRUCTORS ####################
 
-ITMSurfelRenderState::ITMSurfelRenderState(const Vector2i& indexImageSize, int supersamplingFactor)
+SurfelRenderState::SurfelRenderState(const Vector2i& indexImageSize, int supersamplingFactor)
 {
   depthBuffer = new ORUtils::Image<int>(indexImageSize, true, true);
   surfelIndexImage = new ORUtils::Image<unsigned int>(indexImageSize, true, true);
@@ -19,7 +19,7 @@ ITMSurfelRenderState::ITMSurfelRenderState(const Vector2i& indexImageSize, int s
 
 //#################### DESTRUCTOR ####################
 
-ITMSurfelRenderState::~ITMSurfelRenderState()
+SurfelRenderState::~SurfelRenderState()
 {
   delete depthBuffer;
   delete depthBufferSuper;
@@ -29,42 +29,42 @@ ITMSurfelRenderState::~ITMSurfelRenderState()
 
 //#################### PUBLIC MEMBER FUNCTIONS ####################
 
-ORUtils::Image<int> *ITMSurfelRenderState::GetDepthBuffer()
+ORUtils::Image<int> *SurfelRenderState::GetDepthBuffer()
 {
   return depthBuffer;
 }
 
-const ORUtils::Image<int> *ITMSurfelRenderState::GetDepthBuffer() const
+const ORUtils::Image<int> *SurfelRenderState::GetDepthBuffer() const
 {
   return depthBuffer;
 }
 
-ORUtils::Image<int> *ITMSurfelRenderState::GetDepthBufferSuper()
+ORUtils::Image<int> *SurfelRenderState::GetDepthBufferSuper()
 {
   return depthBufferSuper;
 }
 
-const ORUtils::Image<int> *ITMSurfelRenderState::GetDepthBufferSuper() const
+const ORUtils::Image<int> *SurfelRenderState::GetDepthBufferSuper() const
 {
   return depthBufferSuper;
 }
 
-ORUtils::Image<unsigned int> *ITMSurfelRenderState::GetIndexImage()
+ORUtils::Image<unsigned int> *SurfelRenderState::GetIndexImage()
 {
   return surfelIndexImage;
 }
 
-const ORUtils::Image<unsigned int> *ITMSurfelRenderState::GetIndexImage() const
+const ORUtils::Image<unsigned int> *SurfelRenderState::GetIndexImage() const
 {
   return surfelIndexImage;
 }
 
-ORUtils::Image<unsigned int> *ITMSurfelRenderState::GetIndexImageSuper()
+ORUtils::Image<unsigned int> *SurfelRenderState::GetIndexImageSuper()
 {
   return surfelIndexImageSuper;
 }
 
-const ORUtils::Image<unsigned int> *ITMSurfelRenderState::GetIndexImageSuper() const
+const ORUtils::Image<unsigned int> *SurfelRenderState::GetIndexImageSuper() const
 {
   return surfelIndexImageSuper;
 }

@@ -26,7 +26,7 @@ struct OffsetWarpsFunctor;
 
 template<typename TVoxel>
 struct OffsetWarpsFunctor<TVoxel, VoxelBlockHash, true> {
-	static void OffsetWarps(ITMVoxelVolume <TVoxel, VoxelBlockHash>* scene, Vector3f offset) {
+	static void OffsetWarps(VoxelVolume <TVoxel, VoxelBlockHash>* scene, Vector3f offset) {
 		TVoxel* voxels = scene->localVBA.GetVoxelBlocks();
 		const ITMHashEntry* hashTable = scene->index.GetEntries();
 		int noTotalEntries = scene->index.hashEntryCount;
@@ -52,7 +52,7 @@ struct OffsetWarpsFunctor<TVoxel, VoxelBlockHash, true> {
 
 template<typename TVoxel>
 struct OffsetWarpsFunctor<TVoxel, PlainVoxelArray, true> {
-	static void OffsetWarps(ITMVoxelVolume <TVoxel, PlainVoxelArray>* scene, Vector3f offset) {
+	static void OffsetWarps(VoxelVolume <TVoxel, PlainVoxelArray>* scene, Vector3f offset) {
 		TVoxel* voxels = scene->localVBA.GetVoxelBlocks();
 #ifdef WITH_OPENMP
 #pragma omp parallel for
@@ -67,13 +67,13 @@ struct OffsetWarpsFunctor<TVoxel, PlainVoxelArray, true> {
 
 template<typename TVoxel>
 struct OffsetWarpsFunctor<TVoxel, VoxelBlockHash, false> {
-	static void OffsetWarps(ITMVoxelVolume <TVoxel, VoxelBlockHash>* scene, Vector3f offset) {
+	static void OffsetWarps(VoxelVolume <TVoxel, VoxelBlockHash>* scene, Vector3f offset) {
 		DIEWITHEXCEPTION_REPORTLOCATION("Warps not defined for scene of using this voxel type.");
 	}
 };
 template<typename TVoxel>
 struct OffsetWarpsFunctor<TVoxel, PlainVoxelArray, false> {
-	static void OffsetWarps(ITMVoxelVolume <TVoxel, PlainVoxelArray>* scene, Vector3f offset) {
+	static void OffsetWarps(VoxelVolume <TVoxel, PlainVoxelArray>* scene, Vector3f offset) {
 		DIEWITHEXCEPTION_REPORTLOCATION("Warps not defined for scene of using this voxel type.");
 	}
 };

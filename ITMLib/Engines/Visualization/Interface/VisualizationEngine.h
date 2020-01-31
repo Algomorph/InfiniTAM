@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "../../../Objects/RenderStates/ITMRenderState.h"
-#include "../../../Objects/Scene/ITMVoxelVolume.h"
+#include "../../../Objects/RenderStates/RenderState.h"
+#include "../../../Objects/Scene/VoxelVolume.h"
 #include "../../../Objects/Tracking/ITMTrackingState.h"
 #include "../../../Objects/Views/ITMView.h"
 
@@ -37,8 +37,8 @@ namespace ITMLib
 		static void WeightToUchar4(ITMUChar4Image *dst, const ITMFloatImage *src);
 	};
 
-	template<class TIndex> struct IndexToRenderState { typedef ITMRenderState type; };
-	template<> struct IndexToRenderState<VoxelBlockHash> { typedef ITMRenderState type; };
+	template<class TIndex> struct IndexToRenderState { typedef RenderState type; };
+	template<> struct IndexToRenderState<VoxelBlockHash> { typedef RenderState type; };
 
 	/** \brief
 		Interface to engines helping with the Visualization of
@@ -62,47 +62,47 @@ namespace ITMLib
 		appropriate Visualization state object, created
 		previously using allocateInternalState().
 		*/
-		virtual void FindVisibleBlocks(ITMVoxelVolume<TVoxel,TIndex> *scene, const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics,
-		                               ITMRenderState *renderState) const = 0;
+		virtual void FindVisibleBlocks(VoxelVolume<TVoxel,TIndex> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics,
+		                               RenderState *renderState) const = 0;
 
 		/** Given a render state, Count the number of visible blocks
 		with minBlockId <= blockID <= maxBlockId .
 		*/
-		virtual int CountVisibleBlocks(const ITMVoxelVolume<TVoxel,TIndex> *scene, const ITMRenderState *renderState, int minBlockId, int maxBlockId) const = 0;
+		virtual int CountVisibleBlocks(const VoxelVolume<TVoxel,TIndex> *scene, const RenderState *renderState, int minBlockId, int maxBlockId) const = 0;
 
 		/** Given scene, pose and intrinsics, create an estimate
 		of the minimum and maximum depths at each pixel of
 		an image.
 		*/
-		virtual void CreateExpectedDepths(const ITMVoxelVolume<TVoxel,TIndex> *scene, const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics,
-		                                  ITMRenderState *renderState) const = 0;
+		virtual void CreateExpectedDepths(const VoxelVolume<TVoxel,TIndex> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics,
+		                                  RenderState *renderState) const = 0;
 
 		/** This will render an image using raycasting. */
-		virtual void RenderImage(ITMVoxelVolume<TVoxel,TIndex> *scene, const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics,
-		                         const ITMRenderState *renderState, ITMUChar4Image *outputImage, RenderImageType type = RENDER_SHADED_GREYSCALE, RenderRaycastSelection raycastType = RENDER_FROM_NEW_RAYCAST) const = 0;
+		virtual void RenderImage(VoxelVolume<TVoxel,TIndex> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics,
+		                         const RenderState *renderState, ITMUChar4Image *outputImage, RenderImageType type = RENDER_SHADED_GREYSCALE, RenderRaycastSelection raycastType = RENDER_FROM_NEW_RAYCAST) const = 0;
 
 		/** Finds the scene surface using raycasting. */
-		virtual void FindSurface(ITMVoxelVolume<TVoxel,TIndex> *scene, const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics,
-		                         const ITMRenderState *renderState) const = 0;
+		virtual void FindSurface(VoxelVolume<TVoxel,TIndex> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics,
+		                         const RenderState *renderState) const = 0;
 
 		/** Create a point cloud as required by the
 		ITMLib::Engine::ITMColorTracker classes.
 		*/
-		virtual void CreatePointCloud(ITMVoxelVolume<TVoxel,TIndex> *scene, const ITMView *view, ITMTrackingState *trackingState,
-		                              ITMRenderState *renderState, bool skipPoints) const = 0;
+		virtual void CreatePointCloud(VoxelVolume<TVoxel,TIndex> *scene, const ITMView *view, ITMTrackingState *trackingState,
+		                              RenderState *renderState, bool skipPoints) const = 0;
 
 		/** Create an image of reference points and normals as
 		required by the ITMLib::Engine::ITMDepthTracker classes.
 		*/
-		virtual void CreateICPMaps(ITMVoxelVolume<TVoxel,TIndex> *scene, const ITMView *view, ITMTrackingState *trackingState,
-		                           ITMRenderState *renderState) const = 0;
+		virtual void CreateICPMaps(VoxelVolume<TVoxel,TIndex> *scene, const ITMView *view, ITMTrackingState *trackingState,
+		                           RenderState *renderState) const = 0;
 
 		/** Create an image of reference points and normals as
 		required by the ITMLib::Engine::ITMDepthTracker classes.
 
 		Incrementally previous raycast result.
 		*/
-		virtual void ForwardRender(const ITMVoxelVolume<TVoxel,TIndex> *scene, const ITMView *view, ITMTrackingState *trackingState,
-		                           ITMRenderState *renderState) const = 0;
+		virtual void ForwardRender(const VoxelVolume<TVoxel,TIndex> *scene, const ITMView *view, ITMTrackingState *trackingState,
+		                           RenderState *renderState) const = 0;
 	};
 }

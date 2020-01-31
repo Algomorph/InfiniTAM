@@ -17,30 +17,30 @@
 
 
 #include <vector>
-#include "../../../../Objects/Scene/ITMVoxelVolume.h"
+#include "../../../../Objects/Scene/VoxelVolume.h"
 
 namespace ITMLib {
 template<typename TVoxel, typename TIndex>
 class ITMSceneStatisticsCalculatorInterface {
 public:
-	virtual Vector6i ComputeVoxelBounds(const ITMVoxelVolume<TVoxel, TIndex>* scene) = 0;
-	virtual int ComputeAllocatedVoxelCount(ITMVoxelVolume<TVoxel, TIndex>* scene) = 0;
-	virtual std::vector<int> GetFilledHashBlockIds(ITMVoxelVolume<TVoxel, TIndex>* scene) = 0;
-	virtual int ComputeAllocatedHashBlockCount(ITMVoxelVolume<TVoxel, TIndex>* scene) = 0;
+	virtual Vector6i ComputeVoxelBounds(const VoxelVolume<TVoxel, TIndex>* scene) = 0;
+	virtual int ComputeAllocatedVoxelCount(VoxelVolume<TVoxel, TIndex>* scene) = 0;
+	virtual std::vector<int> GetFilledHashBlockIds(VoxelVolume<TVoxel, TIndex>* scene) = 0;
+	virtual int ComputeAllocatedHashBlockCount(VoxelVolume<TVoxel, TIndex>* scene) = 0;
 
-	virtual int ComputeNonTruncatedVoxelCount(ITMVoxelVolume<TVoxel, TIndex>* scene) = 0;
-	virtual unsigned int ComputeAlteredVoxelCount(ITMVoxelVolume<TVoxel, TIndex>* scene) = 0;
-	virtual unsigned int CountVoxelsWithSpecificSdfValue(ITMVoxelVolume<TVoxel, TIndex>* scene, float value) = 0;
-	virtual double ComputeNonTruncatedVoxelAbsSdfSum(ITMVoxelVolume<TVoxel, TIndex>* scene) = 0;
-	virtual double ComputeTruncatedVoxelAbsSdfSum(ITMVoxelVolume<TVoxel, TIndex>* scene) = 0;
-	virtual double ComputeFramewiseWarpMin(ITMVoxelVolume<TVoxel,TIndex>* scene) = 0;
-	virtual double ComputeFramewiseWarpMax(ITMVoxelVolume<TVoxel,TIndex>* scene) = 0;
-	virtual double ComputeFramewiseWarpMean(ITMVoxelVolume<TVoxel,TIndex>* scene) = 0;
+	virtual int ComputeNonTruncatedVoxelCount(VoxelVolume<TVoxel, TIndex>* scene) = 0;
+	virtual unsigned int ComputeAlteredVoxelCount(VoxelVolume<TVoxel, TIndex>* scene) = 0;
+	virtual unsigned int CountVoxelsWithSpecificSdfValue(VoxelVolume<TVoxel, TIndex>* scene, float value) = 0;
+	virtual double ComputeNonTruncatedVoxelAbsSdfSum(VoxelVolume<TVoxel, TIndex>* scene) = 0;
+	virtual double ComputeTruncatedVoxelAbsSdfSum(VoxelVolume<TVoxel, TIndex>* scene) = 0;
+	virtual double ComputeFramewiseWarpMin(VoxelVolume<TVoxel,TIndex>* scene) = 0;
+	virtual double ComputeFramewiseWarpMax(VoxelVolume<TVoxel,TIndex>* scene) = 0;
+	virtual double ComputeFramewiseWarpMean(VoxelVolume<TVoxel,TIndex>* scene) = 0;
 
-	virtual Extent3D FindMinimumNonTruncatedBoundingBox(ITMVoxelVolume <TVoxel, TIndex>* scene) = 0;
+	virtual Extent3D FindMinimumNonTruncatedBoundingBox(VoxelVolume <TVoxel, TIndex>* scene) = 0;
 
-	virtual float FindMaxGradient0LengthAndPosition(ITMVoxelVolume<TVoxel, TIndex>* scene, Vector3i& positionOut) = 0;
-	virtual float FindMaxGradient1LengthAndPosition(ITMVoxelVolume<TVoxel, TIndex>* scene, Vector3i& positionOut) = 0;
+	virtual float FindMaxGradient0LengthAndPosition(VoxelVolume<TVoxel, TIndex>* scene, Vector3i& positionOut) = 0;
+	virtual float FindMaxGradient1LengthAndPosition(VoxelVolume<TVoxel, TIndex>* scene, Vector3i& positionOut) = 0;
 };
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>

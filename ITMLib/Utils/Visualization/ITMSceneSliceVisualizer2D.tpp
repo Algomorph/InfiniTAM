@@ -28,7 +28,7 @@
 //local
 #include "ITMSceneSliceVisualizer2D.h"
 #include "ITMSceneSliceVisualizerCommon.h"
-#include "../../Objects/Scene/ITMRepresentationAccess.h"
+#include "../../Objects/Scene/RepresentationAccess.h"
 #include "../Analytics/SceneStatisticsCalculator/CPU/ITMSceneStatisticsCalculator_CPU.h"
 #include "../../Engines/Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
 #include "../../Engines/Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
@@ -129,7 +129,7 @@ private:
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 cv::Mat ITMSceneSliceVisualizer2D<TVoxel, TWarp, TIndex>::DrawSceneImageAroundPoint(
-		ITMVoxelVolume<TVoxel, TIndex>* scene) {
+		VoxelVolume<TVoxel, TIndex>* scene) {
 	//use if default voxel SDF value is 1.0
 	cv::Mat img = cv::Mat::ones(imgPixelRangeX, imgPixelRangeY, CV_32F);
 
@@ -194,8 +194,8 @@ private:
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 cv::Mat ITMSceneSliceVisualizer2D<TVoxel, TWarp, TIndex>::DrawWarpedSceneImageAroundPoint(
-		ITMVoxelVolume<TVoxel, TIndex>* scene,
-		ITMVoxelVolume<TWarp, TIndex>* warpField) {
+		VoxelVolume<TVoxel, TIndex>* scene,
+		VoxelVolume<TWarp, TIndex>* warpField) {
 #ifdef IMAGE_BLACK_BACKGROUND
 	//use if default voxel SDF value is -1.0
 	cv::Mat img = cv::Mat::zeros(imgPixelRangeX, imgPixelRangeY, CV_32F);
@@ -232,7 +232,7 @@ cv::Mat ITMSceneSliceVisualizer2D<TVoxel, TWarp, TIndex>::DrawWarpedSceneImageAr
  */
 template<typename TVoxel, typename TWarp, typename TIndex>
 void ITMSceneSliceVisualizer2D<TVoxel, TWarp, TIndex>::MarkWarpedSceneImageAroundPoint(
-		ITMVoxelVolume<TVoxel, TIndex>* scene, ITMVoxelVolume<TWarp, TIndex>* warpField, cv::Mat& imageToMarkOn,
+		VoxelVolume<TVoxel, TIndex>* scene, VoxelVolume<TWarp, TIndex>* warpField, cv::Mat& imageToMarkOn,
 		Vector3i positionOfVoxelToMark) {
 	TVoxel voxel = EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().ReadVoxel(scene, positionOfVoxelToMark);
 	TWarp warp = EditAndCopyEngine_CPU<TWarp, TIndex>::Inst().ReadVoxel(warpField, positionOfVoxelToMark);
@@ -368,7 +368,7 @@ private:
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 void
-ITMSceneSliceVisualizer2D<TVoxel, TWarp, TIndex>::RenderSceneSlices(ITMVoxelVolume<TVoxel, TIndex>* scene,
+ITMSceneSliceVisualizer2D<TVoxel, TWarp, TIndex>::RenderSceneSlices(VoxelVolume<TVoxel, TIndex>* scene,
                                                                     Axis axis,
                                                                     const std::string& outputFolder,
                                                                     bool verbose) {
@@ -427,7 +427,7 @@ ITMSceneSliceVisualizer2D<TVoxel, TWarp, TIndex>::RenderSceneSlices(ITMVoxelVolu
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 void ITMSceneSliceVisualizer2D<TVoxel, TWarp, TIndex>::SaveSceneSlicesAs2DImages_AllDirections(
-		ITMVoxelVolume<TVoxel, TIndex>* scene, std::string pathWithoutPostfix) {
+		VoxelVolume<TVoxel, TIndex>* scene, std::string pathWithoutPostfix) {
 	fs::create_directories(pathWithoutPostfix + "/X");
 	fs::create_directories(pathWithoutPostfix + "/Y");
 	fs::create_directories(pathWithoutPostfix + "/Z");
@@ -441,15 +441,15 @@ void ITMSceneSliceVisualizer2D<TVoxel, TWarp, TIndex>::SaveSceneSlicesAs2DImages
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 void ITMSceneSliceVisualizer2D<TVoxel, TWarp, TIndex>::SaveSceneSlicesAs2DImages(
-		ITMVoxelVolume<TVoxel, TIndex>* scene, Axis axis, std::string path) {
+		VoxelVolume<TVoxel, TIndex>* scene, Axis axis, std::string path) {
 	RenderSceneSlices(scene, axis, path, false);
 }
 
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 void ITMSceneSliceVisualizer2D<TVoxel, TWarp, TIndex>::MarkWarpedSceneImageAroundFocusPoint(
-		ITMVoxelVolume<TVoxel, TIndex>* scene,
-		ITMVoxelVolume<TWarp, TIndex>* warpField, cv::Mat& imageToMarkOn) {
+		VoxelVolume<TVoxel, TIndex>* scene,
+		VoxelVolume<TWarp, TIndex>* warpField, cv::Mat& imageToMarkOn) {
 	MarkWarpedSceneImageAroundPoint(scene, warpField, imageToMarkOn, focusCoordinates);
 }
 

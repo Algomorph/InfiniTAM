@@ -13,7 +13,7 @@ namespace ITMLib
 		Stores the render state used by the SceneReconstruction
 		and Visualization engines.
 		*/
-	class ITMRenderState
+	class RenderState
 	{
 	public:
 		/** @brief
@@ -44,7 +44,7 @@ namespace ITMLib
 
 		ORUtils::Image<Vector4u> *raycastImage;
 
-		ITMRenderState(const Vector2i &imgSize, float vf_min, float vf_max, MemoryDeviceType memoryType)
+		RenderState(const Vector2i &imgSize, float vf_min, float vf_max, MemoryDeviceType memoryType)
 		{
 			renderingRangeImage = new ORUtils::Image<Vector2f>(imgSize, memoryType);
 			raycastResult = new ORUtils::Image<Vector4f>(imgSize, memoryType);
@@ -70,7 +70,7 @@ namespace ITMLib
 			noFwdProjMissingPoints = 0;
 		}
 
-		virtual ~ITMRenderState()
+		virtual ~RenderState()
 		{
 			delete renderingRangeImage;
 			delete raycastResult;

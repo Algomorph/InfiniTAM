@@ -41,41 +41,41 @@ public:
 	IndexingEngine(IndexingEngine const&) = delete;
 	void operator=(IndexingEngine const&) = delete;
 
-	void AllocateFromDepth(ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
+	void AllocateFromDepth(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
 	                       const ITMTrackingState* trackingState, bool onlyUpdateVisibleList, bool resetVisibleList) override;
 
-	void AllocateFromDepth(ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
+	void AllocateFromDepth(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
 	                       const Matrix4f& depth_camera_matrix = Matrix4f::Identity(),
 	                       bool onlyUpdateVisibleList = false, bool resetVisibleList = false) override;
 
-	void AllocateFromDepthAndSdfSpan(ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume,
-	                                 const ITMRenderState* sourceRenderState,
+	void AllocateFromDepthAndSdfSpan(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
+	                                 const RenderState* sourceRenderState,
 	                                 const ITMView* view,
 	                                 const Matrix4f& depth_camera_matrix = Matrix4f::Identity(),
 	                                 bool onlyUpdateAllocatedList = false, bool resetAllocatedList = false) override;
 
-	void AllocateHashEntriesUsingLists(ITMVoxelVolume <TVoxel, VoxelBlockHash>* volume) override;
+	void AllocateHashEntriesUsingLists(VoxelVolume <TVoxel, VoxelBlockHash>* volume) override;
 
-	void AllocateHashEntriesUsingLists_SetVisibility(ITMVoxelVolume <TVoxel, VoxelBlockHash>* volume) override;
+	void AllocateHashEntriesUsingLists_SetVisibility(VoxelVolume <TVoxel, VoxelBlockHash>* volume) override;
 
-	void BuildVisibilityList(ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
+	void BuildVisibilityList(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
 	                         const Matrix4f& depth_camera_matrix = Matrix4f::Identity());
 
 	ITMHashEntry FindHashEntry(const VoxelBlockHash& index, const Vector3s& coordinates) override;
 	ITMHashEntry FindHashEntry(const VoxelBlockHash& index, const Vector3s& coordinates, int& hashCode);
-	bool AllocateHashBlockAt(ITMVoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3s at, int& hashCode) override;
+	bool AllocateHashBlockAt(VoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3s at, int& hashCode) override;
 
 	template<typename TVoxelATarget, typename TVoxelASource>
-	void AllocateUsingOtherVolume(ITMVoxelVolume <TVoxelATarget, VoxelBlockHash>* targetVolume,
-	                              ITMVoxelVolume <TVoxelASource, VoxelBlockHash>* sourceVolume);
+	void AllocateUsingOtherVolume(VoxelVolume <TVoxelATarget, VoxelBlockHash>* targetVolume,
+	                              VoxelVolume <TVoxelASource, VoxelBlockHash>* sourceVolume);
 
 	template<typename TVoxelTarget, typename TVoxelSource>
-	void AllocateUsingOtherVolumeExpanded(ITMVoxelVolume<TVoxelTarget, VoxelBlockHash>* targetVolume,
-	                                      ITMVoxelVolume<TVoxelSource, VoxelBlockHash>* sourceVolume);
+	void AllocateUsingOtherVolumeExpanded(VoxelVolume<TVoxelTarget, VoxelBlockHash>* targetVolume,
+	                                      VoxelVolume<TVoxelSource, VoxelBlockHash>* sourceVolume);
 
 	template<typename TVoxelTarget, typename TVoxelSource>
-	void AllocateUsingOtherVolumeAndSetVisibilityExpanded(ITMVoxelVolume<TVoxelTarget, VoxelBlockHash>* targetVolume,
-	                                                      ITMVoxelVolume<TVoxelSource, VoxelBlockHash>* sourceVolume,
+	void AllocateUsingOtherVolumeAndSetVisibilityExpanded(VoxelVolume<TVoxelTarget, VoxelBlockHash>* targetVolume,
+	                                                      VoxelVolume<TVoxelSource, VoxelBlockHash>* sourceVolume,
 	                                                      ITMView* view, const Matrix4f& depth_camera_matrix = Matrix4f::Identity());
 };
 } //namespace ITMLib

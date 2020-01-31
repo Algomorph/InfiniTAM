@@ -15,12 +15,12 @@
 //  ================================================================
 #pragma once
 
-#include "../../Objects/Scene/ITMRepresentationAccess.h"
+#include "../../Objects/Scene/RepresentationAccess.h"
 #include "../../Utils/ITMHashBlockProperties.h"
 #include "../../Utils/Analytics/ITMNeighborVoxelIterationInfo.h"
 #include "../../Utils/ITMPrintHelpers.h"
 #include "../../Utils/ITMCPrintHelpers.h"
-#include "../../Objects/Scene/ITMTrilinearInterpolation.h"
+#include "../../Objects/Scene/TrilinearInterpolation.h"
 #include "../../Utils/Geometry/ITM3DIndexConversions.h"
 
 using namespace ITMLib;

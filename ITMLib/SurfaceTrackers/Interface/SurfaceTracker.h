@@ -36,22 +36,22 @@ public:
 	bool const histograms_enabled = false;
 #endif
 
-	void ClearOutFramewiseWarp(ITMVoxelVolume <TWarp, TIndex>* warpField) override;
+	void ClearOutFramewiseWarp(VoxelVolume <TWarp, TIndex>* warpField) override;
 	void AddFramewiseWarpToWarp(
-			ITMVoxelVolume <TWarp, TIndex>* warpField, bool clearFramewiseWarp) override;
-	void CalculateWarpGradient(ITMVoxelVolume <TVoxel, TIndex>* canonicalScene,
-	                           ITMVoxelVolume <TVoxel, TIndex>* liveScene,
-	                           ITMVoxelVolume <TWarp, TIndex>* warpField) override;
+			VoxelVolume <TWarp, TIndex>* warpField, bool clearFramewiseWarp) override;
+	void CalculateWarpGradient(VoxelVolume <TVoxel, TIndex>* canonicalScene,
+	                           VoxelVolume <TVoxel, TIndex>* liveScene,
+	                           VoxelVolume <TWarp, TIndex>* warpField) override;
 	void SmoothWarpGradient(
-			ITMVoxelVolume <TVoxel, TIndex>* canonicalScene,
-			ITMVoxelVolume <TVoxel, TIndex>* liveScene,
-			ITMVoxelVolume <TWarp, TIndex>* warpField) override;
+			VoxelVolume <TVoxel, TIndex>* canonicalScene,
+			VoxelVolume <TVoxel, TIndex>* liveScene,
+			VoxelVolume <TWarp, TIndex>* warpField) override;
 
 	float UpdateWarps(
-			ITMVoxelVolume <TVoxel, TIndex>* canonicalScene,
-			ITMVoxelVolume <TVoxel, TIndex>* liveScene,
-			ITMVoxelVolume <TWarp, TIndex>* warpField) override;
-	void ResetWarps(ITMVoxelVolume <TWarp, TIndex>* warpField) override;
+			VoxelVolume <TVoxel, TIndex>* canonicalScene,
+			VoxelVolume <TVoxel, TIndex>* liveScene,
+			VoxelVolume <TWarp, TIndex>* warpField) override;
+	void ResetWarps(VoxelVolume <TWarp, TIndex>* warpField) override;
 };
 
 

@@ -15,7 +15,7 @@
 //  ================================================================
 #pragma once
 
-#include "../../Objects/Scene/ITMVoxelVolume.h"
+#include "../../Objects/Scene/VoxelVolume.h"
 #include "ITMSceneLogger.h"
 #include "../Visualization/ITMSceneSliceVisualizer2D.h"
 #include "../Visualization/ITMVisualizationCommon.h"
@@ -98,8 +98,8 @@ public:
 
 // region ============================= SETTERS & SWITCHES =============================================================
 
-	void SetScenes(ITMVoxelVolume<TVoxel, TIndex>* canonicalScene, ITMVoxelVolume<TVoxel, TIndex>* liveScene,
-			ITMVoxelVolume<TWarp, TIndex>* warpField);
+	void SetScenes(VoxelVolume<TVoxel, TIndex>* canonicalScene, VoxelVolume<TVoxel, TIndex>* liveScene,
+	               VoxelVolume<TWarp, TIndex>* warpField);
 	void SetOutputDirectory(std::string outputDirectory) override;
 	void SetFocusCoordinates(Vector3i focusCoordinates) override;
 	void SetPlaneFor2Dand3DSlices(Plane plane) override;
@@ -168,8 +168,8 @@ private:
 	ITMDynamicFusionLogger();
 	~ITMDynamicFusionLogger();
 
-	void InitializeWarp2DSliceRecording(ITMVoxelVolume<TVoxel, TIndex>* canonicalScene,
-	                                    ITMVoxelVolume<TVoxel, TIndex>* sourceLiveScene);
+	void InitializeWarp2DSliceRecording(VoxelVolume<TVoxel, TIndex>* canonicalScene,
+	                                    VoxelVolume<TVoxel, TIndex>* sourceLiveScene);
 	std::string GetOutputDirectoryFor2DSceneSlicesWithWarps() const;
 	std::string GetOutputDirectoryFor2DLiveSceneSliceProgression() const;
 	std::string GetOutputDirectoryPrefixForLiveSceneAsSlices() const;
@@ -188,9 +188,9 @@ private:
 	ITMSceneLogger<TVoxel, TWarp, TIndex>* scene3DLogger = nullptr;
 
 	// internal references to the scenes
-	ITMVoxelVolume<TVoxel, TIndex>* canonicalScene = nullptr;
-	ITMVoxelVolume<TVoxel, TIndex>* liveScene = nullptr;
-	ITMVoxelVolume<TWarp, TIndex>* warpField = nullptr;
+	VoxelVolume<TVoxel, TIndex>* canonicalScene = nullptr;
+	VoxelVolume<TVoxel, TIndex>* liveScene = nullptr;
+	VoxelVolume<TWarp, TIndex>* warpField = nullptr;
 
 	std::ofstream energyStatisticsFile;
 

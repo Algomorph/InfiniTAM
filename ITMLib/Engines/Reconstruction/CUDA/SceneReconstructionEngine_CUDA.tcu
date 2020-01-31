@@ -70,7 +70,7 @@ SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::~SceneReconstructionEngi
 
 template<class TVoxel>
 void SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::ResetScene(
-		ITMVoxelVolume<TVoxel, VoxelBlockHash>* scene) {
+		VoxelVolume<TVoxel, VoxelBlockHash>* scene) {
 	int numBlocks = scene->index.GetAllocatedBlockCount();
 	int blockSize = scene->index.GetVoxelBlockSize();
 
@@ -93,8 +93,8 @@ void SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::ResetScene(
 
 template<class TVoxel>
 void SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::AllocateSceneFromDepth(
-		ITMVoxelVolume<TVoxel, VoxelBlockHash>* scene, const ITMView* view,
-		const ITMTrackingState* trackingState, const ITMRenderState* renderState, bool onlyUpdateVisibleList,
+		VoxelVolume<TVoxel, VoxelBlockHash>* scene, const ITMView* view,
+		const ITMTrackingState* trackingState, const RenderState* renderState, bool onlyUpdateVisibleList,
 		bool resetVisibleList) {
 	Vector2i depthImgSize = view->depth->noDims;
 	float voxelSize = scene->sceneParams->voxel_size;
@@ -203,8 +203,8 @@ void SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::AllocateSceneFromDe
 
 template<class TVoxel>
 void SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::IntegrateIntoScene(
-		ITMVoxelVolume<TVoxel, VoxelBlockHash>* scene, const ITMView* view,
-		const ITMTrackingState* trackingState, const ITMRenderState* renderState) {
+		VoxelVolume<TVoxel, VoxelBlockHash>* scene, const ITMView* view,
+		const ITMTrackingState* trackingState, const RenderState* renderState) {
 	Vector2i rgbImgSize = view->rgb->noDims;
 	Vector2i depthImgSize = view->depth->noDims;
 	float voxelSize = scene->sceneParams->voxel_size;
@@ -251,7 +251,7 @@ void SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::IntegrateIntoScene(
 
 template<class TVoxel>
 void SceneReconstructionEngine_CUDA<TVoxel, PlainVoxelArray>::ResetScene(
-		ITMVoxelVolume<TVoxel, PlainVoxelArray>* scene) {
+		VoxelVolume<TVoxel, PlainVoxelArray>* scene) {
 	int numBlocks = scene->index.GetAllocatedBlockCount();
 	int blockSize = scene->index.GetVoxelBlockSize();
 
@@ -264,15 +264,15 @@ void SceneReconstructionEngine_CUDA<TVoxel, PlainVoxelArray>::ResetScene(
 
 template<class TVoxel>
 void SceneReconstructionEngine_CUDA<TVoxel, PlainVoxelArray>::AllocateSceneFromDepth(
-		ITMVoxelVolume<TVoxel, PlainVoxelArray>* scene, const ITMView* view,
-		const ITMTrackingState* trackingState, const ITMRenderState* renderState, bool onlyUpdateVisibleList,
+		VoxelVolume<TVoxel, PlainVoxelArray>* scene, const ITMView* view,
+		const ITMTrackingState* trackingState, const RenderState* renderState, bool onlyUpdateVisibleList,
 		bool resetVisibleList) {
 }
 
 template<class TVoxel>
 void SceneReconstructionEngine_CUDA<TVoxel, PlainVoxelArray>::IntegrateIntoScene(
-		ITMVoxelVolume<TVoxel, PlainVoxelArray>* scene, const ITMView* view,
-		const ITMTrackingState* trackingState, const ITMRenderState* renderState) {
+		VoxelVolume<TVoxel, PlainVoxelArray>* scene, const ITMView* view,
+		const ITMTrackingState* trackingState, const RenderState* renderState) {
 	Vector2i rgbImgSize = view->rgb->noDims;
 	Vector2i depthImgSize = view->depth->noDims;
 	float voxelSize = scene->sceneParams->voxel_size;

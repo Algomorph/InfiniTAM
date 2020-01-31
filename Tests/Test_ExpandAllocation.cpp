@@ -47,18 +47,18 @@ BOOST_AUTO_TEST_CASE(ExpandVolume_CPU) {
 	IndexingEngine<ITMVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>& indexing_engine
 			= IndexingEngine<ITMVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance();
 
-	ITMVoxelVolume<ITMVoxel, VoxelBlockHash> volume1(&configuration::get().general_voxel_volume_parameters,
+	VoxelVolume<ITMVoxel, VoxelBlockHash> volume1(&configuration::get().general_voxel_volume_parameters,
 	                                                    configuration::get().swapping_mode ==
 	                                                    configuration::SWAPPINGMODE_ENABLED,
-	                                                    MEMORYDEVICE_CPU,
-	                                                    {1200, 0x20000});
+	                                              MEMORYDEVICE_CPU,
+	                                              {1200, 0x20000});
 	EditAndCopyEngine_CPU<ITMVoxel, VoxelBlockHash>::Inst().ResetVolume(&volume1);
 
-	ITMVoxelVolume<ITMVoxel, VoxelBlockHash> volume2(&configuration::get().general_voxel_volume_parameters,
+	VoxelVolume<ITMVoxel, VoxelBlockHash> volume2(&configuration::get().general_voxel_volume_parameters,
 	                                                    configuration::get().swapping_mode ==
 	                                                    configuration::SWAPPINGMODE_ENABLED,
-	                                                    MEMORYDEVICE_CPU,
-	                                                    {1200, 0x20000});
+	                                              MEMORYDEVICE_CPU,
+	                                              {1200, 0x20000});
 	EditAndCopyEngine_CPU<ITMVoxel, VoxelBlockHash>::Inst().ResetVolume(&volume2);
 
 	int hash_code = -1;
@@ -144,17 +144,17 @@ BOOST_AUTO_TEST_CASE(ExpandVolume_CPU) {
 
 template<MemoryDeviceType TMemoryDeviceType>
 void TestAllocateBasedOnVolumeExpanded_Generic() {
-	ITMVoxelVolume<ITMVoxel, VoxelBlockHash> volume1(&configuration::get().general_voxel_volume_parameters,
+	VoxelVolume<ITMVoxel, VoxelBlockHash> volume1(&configuration::get().general_voxel_volume_parameters,
 	                                                    configuration::get().swapping_mode ==
 	                                                    configuration::SWAPPINGMODE_ENABLED,
-	                                                    TMemoryDeviceType,
-	                                                    Frame16And17Fixture::InitParams<VoxelBlockHash>());
+	                                              TMemoryDeviceType,
+	                                              Frame16And17Fixture::InitParams<VoxelBlockHash>());
 	EditAndCopyEngineFactory::Instance<ITMVoxel, VoxelBlockHash, TMemoryDeviceType>().ResetVolume(&volume1);
-	ITMVoxelVolume<ITMVoxel, VoxelBlockHash> volume2(&configuration::get().general_voxel_volume_parameters,
+	VoxelVolume<ITMVoxel, VoxelBlockHash> volume2(&configuration::get().general_voxel_volume_parameters,
 	                                                    configuration::get().swapping_mode ==
 	                                                    configuration::SWAPPINGMODE_ENABLED,
-	                                                    TMemoryDeviceType,
-	                                                    Frame16And17Fixture::InitParams<VoxelBlockHash>());
+	                                              TMemoryDeviceType,
+	                                              Frame16And17Fixture::InitParams<VoxelBlockHash>());
 	EditAndCopyEngineFactory::Instance<ITMVoxel, VoxelBlockHash, TMemoryDeviceType>().ResetVolume(&volume2);
 	ITMView* view = nullptr;
 	updateView(&view, "TestData/snoopy_depth_000017.png",
@@ -162,8 +162,8 @@ void TestAllocateBasedOnVolumeExpanded_Generic() {
 	           "TestData/snoopy_calib.txt", TMemoryDeviceType);
 	Vector2i imageSize(640, 480);
 	ITMTrackingState trackingState(imageSize, TMemoryDeviceType);
-	ITMRenderState renderState(imageSize, configuration::get().general_voxel_volume_parameters.near_clipping_distance,
-	                           configuration::get().general_voxel_volume_parameters.far_clipping_distance, TMemoryDeviceType);
+	RenderState renderState(imageSize, configuration::get().general_voxel_volume_parameters.near_clipping_distance,
+	                        configuration::get().general_voxel_volume_parameters.far_clipping_distance, TMemoryDeviceType);
 	IndexingEngine<ITMVoxel, VoxelBlockHash, TMemoryDeviceType>::Instance().AllocateFromDepth(
 			&volume1, view, &trackingState, false, false);
 	IndexingEngine<ITMVoxel, VoxelBlockHash, TMemoryDeviceType>::Instance()

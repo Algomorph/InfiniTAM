@@ -6,7 +6,7 @@
 #include "TrackingController.h"
 #include "../LowLevel/Interface/LowLevelEngine.h"
 #include "../ViewBuilding/Interface/ViewBuilder.h"
-#include "../../Objects/Misc/ITMIMUCalibrator.h"
+#include "../../Objects/Misc/IMUCalibrator.h"
 #include "../../../FernRelocLib/Relocaliser.h"
 
 #include "../MultiScene/ActiveMapManager.h"
@@ -35,7 +35,7 @@ namespace ITMLib
 		ViewBuilder *viewBuilder;
 		TrackingController *trackingController;
 		CameraTracker *tracker;
-		ITMIMUCalibrator *imuCalibrator;
+		IMUCalibrator *imuCalibrator;
 		DenseMapper<TVoxel, TIndex> *denseMapper;
 
 		FernRelocLib::Relocaliser<float> *relocaliser;
@@ -46,8 +46,8 @@ namespace ITMLib
 		bool mScheduleGlobalAdjustment;
 
 		Vector2i trackedImageSize;
-		ITMRenderState *renderState_freeview;
-		ITMRenderState *renderState_multiscene;
+		RenderState *renderState_freeview;
+		RenderState *renderState_multiscene;
 		int freeviewLocalMapIdx;
 
 		/// Pointer for storing the current input frame
@@ -58,12 +58,12 @@ namespace ITMLib
 		ITMTrackingState* GetTrackingState(void);
 
 		/// Process a frame with rgb and depth images and (optionally) a corresponding imu measurement
-		ITMTrackingState::TrackingResult ProcessFrame(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage, ITMIMUMeasurement *imuMeasurement = NULL);
+		ITMTrackingState::TrackingResult ProcessFrame(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage, IMUMeasurement *imuMeasurement = NULL);
 
 		/// Get a result image as output
 		Vector2i GetImageSize(void) const;
 
-		void GetImage(ITMUChar4Image *out, GetImageType getImageType, ORUtils::SE3Pose *pose = NULL, ITMIntrinsics *intrinsics = NULL);
+		void GetImage(ITMUChar4Image *out, GetImageType getImageType, ORUtils::SE3Pose *pose = NULL, Intrinsics *intrinsics = NULL);
 
 		void changeFreeviewLocalMapIdx(ORUtils::SE3Pose *pose, int newIdx);
 		void setFreeviewLocalMapIdx(int newIdx)
@@ -105,7 +105,7 @@ namespace ITMLib
 			Ommitting a separate image size for the depth images
 			will assume same resolution as for the RGB images.
 		*/
-		MultiEngine(const ITMRGBDCalib& calib, Vector2i imgSize_rgb, Vector2i imgSize_d);
+		MultiEngine(const RGBDCalib& calib, Vector2i imgSize_rgb, Vector2i imgSize_d);
 		~MultiEngine(void);
 	};
 }

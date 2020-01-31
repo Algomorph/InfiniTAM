@@ -11,7 +11,7 @@ namespace ITMLib
 	    image from the disparity image typically received from a
 	    Kinect.
 	*/
-	class ITMDisparityCalib
+	class DisparityCalib
 	{
 		//#################### ENUMERATIONS ####################
 	public:
@@ -33,7 +33,7 @@ namespace ITMLib
 
 		//#################### CONSTRUCTORS ####################
 	public:
-		ITMDisparityCalib(void)
+		DisparityCalib(void)
 		{
 			SetStandard();
 		}

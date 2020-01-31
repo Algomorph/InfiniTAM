@@ -40,7 +40,7 @@ class CameraTrackerFactory {
 private:
 	//#################### TYPEDEFS ####################
 	typedef CameraTracker* MakerFunc(const Vector2i&, const Vector2i&, MemoryDeviceType,
-	                                 const ORUtils::KeyValueConfig&, const LowLevelEngine*, ITMIMUCalibrator*,
+	                                 const ORUtils::KeyValueConfig&, const LowLevelEngine*, IMUCalibrator*,
 	                                 const VoxelVolumeParameters*);
 
 	/// Tracker types
@@ -110,7 +110,7 @@ public:
 	 */
 	CameraTracker* Make(MemoryDeviceType deviceType, const char* trackerConfig, const Vector2i& imgSize_rgb,
 	                    const Vector2i& imgSize_d, const LowLevelEngine* lowLevelEngine,
-	                    ITMIMUCalibrator* imuCalibrator, const VoxelVolumeParameters* sceneParams) const {
+	                    IMUCalibrator* imuCalibrator, const VoxelVolumeParameters* sceneParams) const {
 		ORUtils::KeyValueConfig cfg(trackerConfig);
 		int verbose = 0;
 		if (cfg.getProperty("help") != NULL) if (verbose < 10) verbose = 10;
@@ -143,7 +143,7 @@ public:
 	 * \brief Makes a tracker of the type specified in the settings.
 	 */
 	CameraTracker* Make(const Vector2i& imgSize_rgb, const Vector2i& imgSize_d, const LowLevelEngine* lowLevelEngine,
-	                    ITMIMUCalibrator* imuCalibrator, const VoxelVolumeParameters* sceneParams) const {
+	                    IMUCalibrator* imuCalibrator, const VoxelVolumeParameters* sceneParams) const {
 		auto& settings = configuration::get();
 		return Make(settings.device_type, settings.tracker_configuration.c_str(), imgSize_rgb, imgSize_d, lowLevelEngine,
 		            imuCalibrator, sceneParams);
@@ -187,7 +187,7 @@ public:
 	static CameraTracker*
 	MakeColourTracker(const Vector2i& imgSize_rgb, const Vector2i& imgSize_d, MemoryDeviceType deviceType,
 	                  const ORUtils::KeyValueConfig& cfg,
-	                  const LowLevelEngine* lowLevelEngine, ITMIMUCalibrator* imuCalibrator,
+	                  const LowLevelEngine* lowLevelEngine, IMUCalibrator* imuCalibrator,
 	                  const VoxelVolumeParameters* sceneParams) {
 		int verbose = 0;
 		if (cfg.getProperty("help") != NULL) if (verbose < 10) verbose = 10;
@@ -225,7 +225,7 @@ public:
 	static CameraTracker*
 	MakeICPTracker(const Vector2i& imgSize_rgb, const Vector2i& imgSize_d, MemoryDeviceType deviceType,
 	               const ORUtils::KeyValueConfig& cfg,
-	               const LowLevelEngine* lowLevelEngine, ITMIMUCalibrator* imuCalibrator,
+	               const LowLevelEngine* lowLevelEngine, IMUCalibrator* imuCalibrator,
 	               const VoxelVolumeParameters* sceneParams) {
 		const char* levelSetup = "rrrbb";
 		float smallStepSizeCriterion = 1e-3f;
@@ -285,7 +285,7 @@ public:
 	static CameraTracker* MakeExtendedLikeTracker(const Vector2i& imgSize_rgb, const Vector2i& imgSize_d,
 	                                              MemoryDeviceType deviceType,
 	                                              const ORUtils::KeyValueConfig& cfg,
-	                                              const LowLevelEngine* lowLevelEngine, ITMIMUCalibrator* imuCalibrator,
+	                                              const LowLevelEngine* lowLevelEngine, IMUCalibrator* imuCalibrator,
 	                                              const VoxelVolumeParameters* sceneParams) {
 
 		//ensure template arguments derive from correct types
@@ -406,7 +406,7 @@ public:
 	static CameraTracker*
 	MakeExtendedTracker(const Vector2i& imgSize_rgb, const Vector2i& imgSize_d, MemoryDeviceType deviceType,
 	                    const ORUtils::KeyValueConfig& cfg,
-	                    const LowLevelEngine* lowLevelEngine, ITMIMUCalibrator* imuCalibrator,
+	                    const LowLevelEngine* lowLevelEngine, IMUCalibrator* imuCalibrator,
 	                    const VoxelVolumeParameters* sceneParams) {
 		return
 				MakeExtendedLikeTracker<
@@ -428,7 +428,7 @@ public:
 	static CameraTracker* MakeKillingTracker(const Vector2i& imgSize_rgb, const Vector2i& imgSize_d,
 	                                         MemoryDeviceType deviceType,
 	                                         const ORUtils::KeyValueConfig& cfg,
-	                                         const LowLevelEngine* lowLevelEngine, ITMIMUCalibrator* imuCalibrator,
+	                                         const LowLevelEngine* lowLevelEngine, IMUCalibrator* imuCalibrator,
 	                                         const VoxelVolumeParameters* sceneParams) {
 		return MakeExtendedLikeTracker<
 				SDF2SDFCameraTracker_CPU
@@ -447,7 +447,7 @@ public:
 	static CameraTracker*
 	MakeIMUTracker(const Vector2i& imgSize_rgb, const Vector2i& imgSize_d, MemoryDeviceType deviceType,
 	               const ORUtils::KeyValueConfig& cfg,
-	               const LowLevelEngine* lowLevelEngine, ITMIMUCalibrator* imuCalibrator,
+	               const LowLevelEngine* lowLevelEngine, IMUCalibrator* imuCalibrator,
 	               const VoxelVolumeParameters* sceneParams) {
 		const char* levelSetup = "tb";
 		float smallStepSizeCriterion = 1e-3f;
@@ -506,7 +506,7 @@ public:
 	*/
 	static CameraTracker* MakeExtendedIMUTracker(const Vector2i& imgSize_rgb, const Vector2i& imgSize_d,
 	                                             MemoryDeviceType deviceType, const ORUtils::KeyValueConfig& cfg,
-	                                             const LowLevelEngine* lowLevelEngine, ITMIMUCalibrator* imuCalibrator,
+	                                             const LowLevelEngine* lowLevelEngine, IMUCalibrator* imuCalibrator,
 	                                             const VoxelVolumeParameters* sceneParams) {
 		CameraTracker* dTracker = MakeExtendedTracker(imgSize_rgb, imgSize_d, deviceType, cfg,
 		                                              lowLevelEngine, imuCalibrator, sceneParams);
@@ -524,7 +524,7 @@ public:
 	static CameraTracker*
 	MakeFileBasedTracker(const Vector2i& imgSize_rgb, const Vector2i& imgSize_d, MemoryDeviceType deviceType,
 	                     const ORUtils::KeyValueConfig& cfg,
-	                     const LowLevelEngine* lowLevelEngine, ITMIMUCalibrator* imuCalibrator,
+	                     const LowLevelEngine* lowLevelEngine, IMUCalibrator* imuCalibrator,
 	                     const VoxelVolumeParameters* sceneParams) {
 		int verbose = 0;
 		if (cfg.getProperty("help") && verbose < 10) verbose = 10;
@@ -541,7 +541,7 @@ public:
 	static CameraTracker*
 	MakeForceFailTracker(const Vector2i& imgSize_rgb, const Vector2i& imgSize_d, MemoryDeviceType deviceType,
 	                     const ORUtils::KeyValueConfig& cfg,
-	                     const LowLevelEngine* lowLevelEngine, ITMIMUCalibrator* imuCalibrator,
+	                     const LowLevelEngine* lowLevelEngine, IMUCalibrator* imuCalibrator,
 	                     const VoxelVolumeParameters* sceneParams) {
 		return new ForceFailTracker;
 	}

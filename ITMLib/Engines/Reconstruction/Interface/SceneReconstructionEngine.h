@@ -4,8 +4,8 @@
 
 #include <math.h>
 
-#include "../../../Objects/RenderStates/ITMRenderState.h"
-#include "../../../Objects/Scene/ITMVoxelVolume.h"
+#include "../../../Objects/RenderStates/RenderState.h"
+#include "../../../Objects/Scene/VoxelVolume.h"
 #include "../../../Objects/Tracking/ITMTrackingState.h"
 #include "../../../Objects/Views/ITMView.h"
 
@@ -26,7 +26,7 @@ namespace ITMLib
 		/** Clear and reset a scene to set up a new empty
 		    one.
 		*/
-		virtual void ResetScene(ITMVoxelVolume<TVoxel, TIndex> *scene) = 0;
+		virtual void ResetScene(VoxelVolume<TVoxel, TIndex> *scene) = 0;
 
 		/**
 		 * \brief Given a view with a new depth image, compute the
@@ -39,14 +39,14 @@ namespace ITMLib
 		 * \param onlyUpdateVisibleList [in] whether we want to allocate only the hash entry blocks currently visible
 		 * \param resetVisibleList  [in] reset visibility list upon completion
 		 */
-		virtual void AllocateSceneFromDepth(ITMVoxelVolume<TVoxel,TIndex> *scene, const ITMView *view, const ITMTrackingState *trackingState,
-		                                    const ITMRenderState *renderState, bool onlyUpdateVisibleList = false, bool resetVisibleList = false) = 0;
+		virtual void AllocateSceneFromDepth(VoxelVolume<TVoxel,TIndex> *scene, const ITMView *view, const ITMTrackingState *trackingState,
+		                                    const RenderState *renderState, bool onlyUpdateVisibleList = false, bool resetVisibleList = false) = 0;
 
 		/** Update the voxel blocks by integrating depth and
 		    possibly colour information from the given view.
 		*/
-		virtual void IntegrateIntoScene(ITMVoxelVolume<TVoxel,TIndex> *scene, const ITMView *view, const ITMTrackingState *trackingState,
-		                                const ITMRenderState *renderState) = 0;
+		virtual void IntegrateIntoScene(VoxelVolume<TVoxel,TIndex> *scene, const ITMView *view, const ITMTrackingState *trackingState,
+		                                const RenderState *renderState) = 0;
 
 		SceneReconstructionEngine(void) { }
 		virtual ~SceneReconstructionEngine(void) { }

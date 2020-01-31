@@ -40,7 +40,7 @@ namespace ITMLib {
  * \return true if scene content matches (to within specified tolerance), false otherwise
  */
 template<typename TVoxel, typename TIndexA, typename TIndexB, typename ToleranceType>
-bool contentAlmostEqual(ITMVoxelVolume<TVoxel, TIndexA>* a, ITMVoxelVolume<TVoxel, TIndexB>* b, ToleranceType tolerance,
+bool contentAlmostEqual(VoxelVolume<TVoxel, TIndexA>* a, VoxelVolume<TVoxel, TIndexB>* b, ToleranceType tolerance,
                         MemoryDeviceType memoryDeviceType) {
 	switch (memoryDeviceType) {
 		case MEMORYDEVICE_CPU:
@@ -63,8 +63,8 @@ bool contentAlmostEqual(ITMVoxelVolume<TVoxel, TIndexA>* a, ITMVoxelVolume<TVoxe
 }
 
 template<typename TVoxel, typename TIndexA, typename TIndexB, typename ToleranceType>
-bool contentAlmostEqual_Verbose(ITMVoxelVolume<TVoxel, TIndexA>* a, ITMVoxelVolume<TVoxel, TIndexB>* b,
-                                    ToleranceType tolerance, MemoryDeviceType memoryDeviceType){
+bool contentAlmostEqual_Verbose(VoxelVolume<TVoxel, TIndexA>* a, VoxelVolume<TVoxel, TIndexB>* b,
+                                ToleranceType tolerance, MemoryDeviceType memoryDeviceType){
 	switch (memoryDeviceType) {
 		case MEMORYDEVICE_CPU:
 			return contentAlmostEqual_CPU_Verbose(a, b, tolerance);
@@ -87,8 +87,8 @@ bool contentAlmostEqual_Verbose(ITMVoxelVolume<TVoxel, TIndexA>* a, ITMVoxelVolu
 
 template<typename TVoxel, typename TIndexA, typename TIndexB, typename ToleranceType>
 bool
-contentForFlagsAlmostEqual(ITMVoxelVolume<TVoxel, TIndexA>* a, ITMVoxelVolume<TVoxel, TIndexB>* b, VoxelFlags flags,
-                               ToleranceType tolerance, MemoryDeviceType memoryDeviceType){
+contentForFlagsAlmostEqual(VoxelVolume<TVoxel, TIndexA>* a, VoxelVolume<TVoxel, TIndexB>* b, VoxelFlags flags,
+                           ToleranceType tolerance, MemoryDeviceType memoryDeviceType){
 	switch (memoryDeviceType) {
 		case MEMORYDEVICE_CPU:
 			return contentForFlagsAlmostEqual_CPU(a, b, flags, tolerance);
@@ -110,8 +110,8 @@ contentForFlagsAlmostEqual(ITMVoxelVolume<TVoxel, TIndexA>* a, ITMVoxelVolume<TV
 }
 
 template<typename TVoxel, typename TIndexA, typename TIndexB, typename ToleranceType>
-bool contentForFlagsAlmostEqual_Verbose(ITMVoxelVolume<TVoxel, TIndexA>* a, ITMVoxelVolume<TVoxel, TIndexB>* b,
-                                            VoxelFlags flags, ToleranceType tolerance, MemoryDeviceType memoryDeviceType){
+bool contentForFlagsAlmostEqual_Verbose(VoxelVolume<TVoxel, TIndexA>* a, VoxelVolume<TVoxel, TIndexB>* b,
+                                        VoxelFlags flags, ToleranceType tolerance, MemoryDeviceType memoryDeviceType){
 	switch (memoryDeviceType) {
 		case MEMORYDEVICE_CPU:
 			return contentForFlagsAlmostEqual_CPU_Verbose(a, b, flags, tolerance);
@@ -150,7 +150,7 @@ bool contentForFlagsAlmostEqual_Verbose(ITMVoxelVolume<TVoxel, TIndexA>* a, ITMV
  * \return true if scene content for allocated areas in both volumes matches (to within specified tolerance), false otherwise
  */
 template<typename TVoxel, typename TIndexA, typename TIndexB, typename ToleranceType>
-bool allocatedContentAlmostEqual(ITMVoxelVolume<TVoxel, TIndexA>* a, ITMVoxelVolume<TVoxel, TIndexB>* b,
+bool allocatedContentAlmostEqual(VoxelVolume<TVoxel, TIndexA>* a, VoxelVolume<TVoxel, TIndexB>* b,
                                  ToleranceType tolerance, MemoryDeviceType memoryDeviceType){
 	switch (memoryDeviceType) {
 		case MEMORYDEVICE_CPU:
@@ -172,8 +172,8 @@ bool allocatedContentAlmostEqual(ITMVoxelVolume<TVoxel, TIndexA>* a, ITMVoxelVol
 	}
 }
 template<typename TVoxel, typename TIndexA, typename TIndexB, typename ToleranceType>
-bool allocatedContentAlmostEqual_Verbose(ITMVoxelVolume<TVoxel, TIndexA>* a, ITMVoxelVolume<TVoxel, TIndexB>* b,
-                                 ToleranceType tolerance, MemoryDeviceType memoryDeviceType){
+bool allocatedContentAlmostEqual_Verbose(VoxelVolume<TVoxel, TIndexA>* a, VoxelVolume<TVoxel, TIndexB>* b,
+                                         ToleranceType tolerance, MemoryDeviceType memoryDeviceType){
 	switch (memoryDeviceType) {
 		case MEMORYDEVICE_CPU:
 			return allocatedContentAlmostEqual_CPU_Verbose(a, b, tolerance);

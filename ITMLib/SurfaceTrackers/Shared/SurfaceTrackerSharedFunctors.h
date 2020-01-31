@@ -17,7 +17,7 @@
 
 
 #include "../../Utils/ITMMath.h"
-#include "../../Objects/Scene/ITMVoxelVolume.h"
+#include "../../Objects/Scene/VoxelVolume.h"
 #include "../../Utils/Configuration.h"
 #include "SurfaceTrackerSharedRoutines.h"
 #include "../../../ORUtils/PlatformIndependentAtomics.h"
@@ -191,7 +191,7 @@ enum TraversalDirection : int {
 
 template<typename TVoxel, typename TWarp, typename TIndex, TraversalDirection TDirection>
 struct GradientSmoothingPassFunctor {
-	GradientSmoothingPassFunctor(ITMLib::ITMVoxelVolume<TWarp, TIndex>* warpField) :
+	GradientSmoothingPassFunctor(ITMLib::VoxelVolume<TWarp, TIndex>* warpField) :
 			warpField(warpField),
 			warpVoxels(warpField->localVBA.GetVoxelBlocks()),
 			warpIndexData(warpField->index.GetIndexData()),
@@ -262,7 +262,7 @@ private:
 		}
 	}
 
-	ITMLib::ITMVoxelVolume<TWarp, TIndex>* warpField;
+	ITMLib::VoxelVolume<TWarp, TIndex>* warpField;
 	TWarp* warpVoxels;
 	typename TIndex::IndexData* warpIndexData;
 	int sourceSdfFieldIndex;
@@ -272,9 +272,9 @@ private:
 
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TDeviceType>
-void SmoothWarpGradient_common(ITMLib::ITMVoxelVolume<TVoxel, TIndex>* liveScene,
-                               ITMLib::ITMVoxelVolume<TVoxel, TIndex>* canonicalScene,
-                               ITMLib::ITMVoxelVolume<TWarp, TIndex>* warpField) {
+void SmoothWarpGradient_common(ITMLib::VoxelVolume<TVoxel, TIndex>* liveScene,
+                               ITMLib::VoxelVolume<TVoxel, TIndex>* canonicalScene,
+                               ITMLib::VoxelVolume<TWarp, TIndex>* warpField) {
 
 	GradientSmoothingPassFunctor<TVoxel, TWarp, TIndex, X> passFunctorX(warpField);
 	GradientSmoothingPassFunctor<TVoxel, TWarp, TIndex, Y> passFunctorY(warpField);
@@ -326,9 +326,9 @@ struct AddFramewiseWarpToWarpStaticFunctor<TVoxelCanonical, false> {
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TDeviceType>
 inline float UpdateWarps_common(
-		ITMLib::ITMVoxelVolume<TVoxel, TIndex>* canonicalScene,
-		ITMLib::ITMVoxelVolume<TVoxel, TIndex>* liveScene,
-		ITMLib::ITMVoxelVolume<TWarp, TIndex>* warpField,
+		ITMLib::VoxelVolume<TVoxel, TIndex>* canonicalScene,
+		ITMLib::VoxelVolume<TVoxel, TIndex>* liveScene,
+		ITMLib::VoxelVolume<TWarp, TIndex>* warpField,
 		float learning_rate,
 		bool gradeintSmoothingEnabled,
 		bool print_histogram) {
@@ -356,7 +356,7 @@ inline float UpdateWarps_common(
 
 template<typename TVoxelCanonical, typename TIndex, MemoryDeviceType TDeviceType>
 inline void
-AddFramewiseWarpToWarp_common(ITMLib::ITMVoxelVolume<TVoxelCanonical, TIndex>* canonicalScene, bool clearFramewiseWarp) {
+AddFramewiseWarpToWarp_common(ITMLib::VoxelVolume<TVoxelCanonical, TIndex>* canonicalScene, bool clearFramewiseWarp) {
 	if (clearFramewiseWarp) {
 		ITMLib::VolumeTraversalEngine<TVoxelCanonical, TIndex, TDeviceType>::
 		template StaticVoxelTraversal<

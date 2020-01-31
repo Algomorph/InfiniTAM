@@ -15,8 +15,8 @@
 //  ================================================================
 #pragma once
 
-#include "../../Objects/Scene/ITMRepresentationAccess.h"
-#include "../../Objects/Scene/ITMTrilinearInterpolation.h"
+#include "../../Objects/Scene/RepresentationAccess.h"
+#include "../../Objects/Scene/TrilinearInterpolation.h"
 #include "../../Utils/ITMPixelUtils.h"
 #include "../../Utils/ITMVoxelFlags.h"
 

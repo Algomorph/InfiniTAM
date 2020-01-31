@@ -29,7 +29,7 @@ namespace b_ios = boost::iostreams;
 
 template<typename TVoxel>
 void VolumeFileIOEngine<TVoxel, VoxelBlockHash>::SaveToDirectoryCompact(
-		const ITMVoxelVolume<TVoxel, VoxelBlockHash>* scene,
+		const VoxelVolume<TVoxel, VoxelBlockHash>* scene,
 		const std::string& outputDirectory) {
 
 
@@ -44,7 +44,7 @@ void VolumeFileIOEngine<TVoxel, VoxelBlockHash>::SaveToDirectoryCompact(
 	bool tempSceneUsed = false;
 	if (scene->localVBA.GetMemoryType() == MEMORYDEVICE_CUDA) {
 		// we cannot access CUDA blocks directly, so the easiest solution here is to make a local main-memory copy first
-		ITMVoxelVolume<TVoxel, VoxelBlockHash>* scene_cpu_copy = new ITMVoxelVolume<TVoxel, VoxelBlockHash>(
+		VoxelVolume<TVoxel, VoxelBlockHash>* scene_cpu_copy = new VoxelVolume<TVoxel, VoxelBlockHash>(
 				*scene, MEMORYDEVICE_CPU);
 		scene = scene_cpu_copy;
 		tempSceneUsed = true;
@@ -91,7 +91,7 @@ void VolumeFileIOEngine<TVoxel, VoxelBlockHash>::SaveToDirectoryCompact(
 template<typename TVoxel>
 void
 VolumeFileIOEngine<TVoxel, VoxelBlockHash>::LoadFromDirectoryCompact(
-		ITMVoxelVolume<TVoxel, VoxelBlockHash>* scene,
+		VoxelVolume<TVoxel, VoxelBlockHash>* scene,
 		const std::string& outputDirectory) {
 	std::string path = outputDirectory + "compact.dat";
 	std::ifstream ifStream = std::ifstream(path.c_str(), std::ios_base::binary | std::ios_base::in);
@@ -100,12 +100,12 @@ VolumeFileIOEngine<TVoxel, VoxelBlockHash>::LoadFromDirectoryCompact(
 	inFilter.push(b_ios::zlib_decompressor());
 	inFilter.push(ifStream);
 
-	ITMVoxelVolume<TVoxel, VoxelBlockHash>* targetScene = scene;
+	VoxelVolume<TVoxel, VoxelBlockHash>* targetScene = scene;
 	bool copyToCUDA = false;
 	if (scene->localVBA.GetMemoryType() == MEMORYDEVICE_CUDA) {
 		// we cannot access CUDA blocks directly, so the easiest solution here is to make a local main-memory copy
 		// first, read it in from disk, and then copy it over into the target
-		auto scene_cpu_copy = new ITMVoxelVolume<TVoxel, VoxelBlockHash>(*scene, MEMORYDEVICE_CPU);
+		auto scene_cpu_copy = new VoxelVolume<TVoxel, VoxelBlockHash>(*scene, MEMORYDEVICE_CPU);
 		scene = scene_cpu_copy;
 		copyToCUDA = true;
 	}
@@ -146,7 +146,7 @@ VolumeFileIOEngine<TVoxel, VoxelBlockHash>::LoadFromDirectoryCompact(
 template<typename TVoxel>
 void
 VolumeFileIOEngine<TVoxel, PlainVoxelArray>::SaveToDirectoryCompact(
-		const ITMVoxelVolume<TVoxel, PlainVoxelArray>* scene,
+		const VoxelVolume<TVoxel, PlainVoxelArray>* scene,
 		const std::string& outputDirectory) {
 	scene->localVBA.SaveToDirectory(outputDirectory);
 	scene->index.SaveToDirectory(outputDirectory);
@@ -156,7 +156,7 @@ VolumeFileIOEngine<TVoxel, PlainVoxelArray>::SaveToDirectoryCompact(
 template<typename TVoxel>
 void
 VolumeFileIOEngine<TVoxel, PlainVoxelArray>::LoadFromDirectoryCompact(
-		ITMVoxelVolume<TVoxel, PlainVoxelArray>* scene,
+		VoxelVolume<TVoxel, PlainVoxelArray>* scene,
 		const std::string& outputDirectory) {
 	scene->localVBA.LoadFromDirectory(outputDirectory);
 	scene->index.LoadFromDirectory(outputDirectory);

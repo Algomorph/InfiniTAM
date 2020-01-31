@@ -4,12 +4,12 @@
 
 #include "../../Engines/MultiScene/VoxelMapGraphManager.h"
 #include "../Scene/MultiSceneAccess.h"
-#include "../../Objects/RenderStates/ITMRenderState.h"
+#include "RenderState.h"
 
 namespace ITMLib {
 
 	template<class TVoxel, class TIndex>
-	class ITMRenderStateMultiScene : public ITMRenderState 
+	class RenderStateMultiScene : public RenderState
 	{
 	private:
 		MemoryDeviceType memoryType;
@@ -29,8 +29,8 @@ namespace ITMLib {
 		float mu;
 		float voxelSize;
 
-		ITMRenderStateMultiScene(const Vector2i &imgSize, float vf_min, float vf_max, MemoryDeviceType _memoryType)
-			: ITMRenderState(imgSize, vf_min, vf_max, _memoryType)
+		RenderStateMultiScene(const Vector2i &imgSize, float vf_min, float vf_max, MemoryDeviceType _memoryType)
+			: RenderState(imgSize, vf_min, vf_max, _memoryType)
 		{
 			memoryType = _memoryType;
 
@@ -42,7 +42,7 @@ namespace ITMLib {
 #endif
 		}
 
-		~ITMRenderStateMultiScene(void)
+		~RenderStateMultiScene(void)
 		{
 #ifndef COMPILE_WITHOUT_CUDA
 			if (memoryType == MEMORYDEVICE_CUDA) {

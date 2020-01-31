@@ -3,7 +3,7 @@
 #pragma once
 
 #include "ITMView.h"
-#include "../Misc/ITMIMUMeasurement.h"
+#include "../Misc/IMUMeasurement.h"
 
 namespace ITMLib
 {
@@ -14,12 +14,12 @@ namespace ITMLib
 	class ITMViewIMU : public ITMView
 	{
 	public:
-		ITMIMUMeasurement *imu;
+		IMUMeasurement *imu;
 
-		ITMViewIMU(const ITMRGBDCalib& calibration, Vector2i imgSize_rgb, Vector2i imgSize_d, bool useGPU)
+		ITMViewIMU(const RGBDCalib& calibration, Vector2i imgSize_rgb, Vector2i imgSize_d, bool useGPU)
 		 : ITMView(calibration, imgSize_rgb, imgSize_d, useGPU)
 		{
-			imu = new ITMIMUMeasurement();
+			imu = new IMUMeasurement();
 		}
 
 		~ITMViewIMU(void) { delete imu; }

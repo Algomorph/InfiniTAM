@@ -9,7 +9,7 @@
 
 namespace ITMLib
 {
-	class ITMMesh
+	class Mesh
 	{
 	public:
 		struct Triangle { Vector3f p0, p1, p2; };
@@ -21,7 +21,7 @@ namespace ITMLib
 
 		ORUtils::MemoryBlock<Triangle> *triangles;
 
-		explicit ITMMesh(MemoryDeviceType memoryType, uint maxTriangles)
+		explicit Mesh(MemoryDeviceType memoryType, uint maxTriangles)
 		{
 			this->memoryType = memoryType;
 			this->noTotalTriangles = 0;
@@ -111,13 +111,13 @@ namespace ITMLib
 			if (shoulDelete) delete cpu_triangles;
 		}
 
-		~ITMMesh()
+		~Mesh()
 		{
 			delete triangles;
 		}
 
 		// Suppress the default copy constructor and assignment operator
-		ITMMesh(const ITMMesh&);
-		ITMMesh& operator=(const ITMMesh&);
+		Mesh(const Mesh&);
+		Mesh& operator=(const Mesh&);
 	};
 }

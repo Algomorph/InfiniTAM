@@ -4,15 +4,15 @@
 
 #include "CameraTracker.h"
 #include "../../Engines/LowLevel/Interface/LowLevelEngine.h"
-#include "../../Objects/Misc/ITMIMUCalibrator.h"
-#include "../../Objects/Misc/ITMIMUMeasurement.h"
+#include "../../Objects/Misc/IMUCalibrator.h"
+#include "../../Objects/Misc/IMUMeasurement.h"
 
 namespace ITMLib
 {
 	class IMUTracker : public CameraTracker
 	{
 	private:
-		ITMIMUCalibrator *calibrator;
+		IMUCalibrator *calibrator;
 
 	public:
 		void TrackCamera(ITMTrackingState *trackingState, const ITMView *view);
@@ -20,7 +20,7 @@ namespace ITMLib
 		bool requiresDepthReliability() const { return false; }
 		bool requiresPointCloudRendering() const { return false; }
 
-		IMUTracker(ITMIMUCalibrator *calibrator);
+		IMUTracker(IMUCalibrator *calibrator);
 		virtual ~IMUTracker(void);
 	};
 }

@@ -31,7 +31,7 @@ using namespace ITMLib;
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, GradientFunctorType TGradientFunctorType>
 void SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorType>::ResetWarps(
-		ITMVoxelVolume<TWarp, TIndex>* warpField) {
+		VoxelVolume<TWarp, TIndex>* warpField) {
 	VolumeTraversalEngine<TWarp, TIndex, TMemoryDeviceType>::template
 	StaticVoxelTraversal<WarpClearFunctor<TWarp, TWarp::hasCumulativeWarp>>(warpField);
 };
@@ -39,7 +39,7 @@ void SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorTy
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, GradientFunctorType TGradientFunctorType>
 void SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorType>::ClearOutFramewiseWarp(
-		ITMVoxelVolume<TWarp, TIndex>* warpField) {
+		VoxelVolume<TWarp, TIndex>* warpField) {
 	VolumeTraversalEngine<TWarp, TIndex, TMemoryDeviceType>::template
 	StaticVoxelTraversal<ClearOutFramewiseWarpStaticFunctor<TWarp>>(warpField);
 }
@@ -49,7 +49,7 @@ void SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorTy
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 inline static void PrintSceneStatistics(
-		ITMVoxelVolume<TVoxel, TIndex>* scene,
+		VoxelVolume<TVoxel, TIndex>* scene,
 		std::string description) {
 	ITMSceneStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>& calculator =
 			ITMSceneStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::Instance();
@@ -69,9 +69,9 @@ inline static void PrintSceneStatistics(
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, GradientFunctorType TGradientFunctorType>
 void
 SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorType>::CalculateWarpGradient(
-		ITMVoxelVolume<TVoxel, TIndex>* canonicalScene,
-		ITMVoxelVolume<TVoxel, TIndex>* liveScene,
-		ITMVoxelVolume<TWarp, TIndex>* warpField) {
+		VoxelVolume<TVoxel, TIndex>* canonicalScene,
+		VoxelVolume<TVoxel, TIndex>* liveScene,
+		VoxelVolume<TWarp, TIndex>* warpField) {
 
 	// manage hash
 	VolumeTraversalEngine<TWarp, TIndex, TMemoryDeviceType>::template
@@ -99,9 +99,9 @@ SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorType>::
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, GradientFunctorType TGradientFunctorType>
 void SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorType>::SmoothWarpGradient(
-		ITMVoxelVolume<TVoxel, TIndex>* canonicalScene,
-		ITMVoxelVolume<TVoxel, TIndex>* liveScene,
-		ITMVoxelVolume<TWarp, TIndex>* warpField) {
+		VoxelVolume<TVoxel, TIndex>* canonicalScene,
+		VoxelVolume<TVoxel, TIndex>* liveScene,
+		VoxelVolume<TWarp, TIndex>* warpField) {
 
 	if (this->switches.enable_sobolev_gradient_smoothing) {
 		SmoothWarpGradient_common<TVoxel, TWarp, TIndex, TMemoryDeviceType>
@@ -114,9 +114,9 @@ void SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorTy
 // region ============================= UPDATE FRAMEWISE & GLOBAL (CUMULATIVE) WARPS ===================================
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, GradientFunctorType TGradientFunctorType>
 float SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorType>::UpdateWarps(
-		ITMVoxelVolume<TVoxel, TIndex>* canonicalScene,
-		ITMVoxelVolume<TVoxel, TIndex>* liveScene,
-		ITMVoxelVolume<TWarp, TIndex>* warpField) {
+		VoxelVolume<TVoxel, TIndex>* canonicalScene,
+		VoxelVolume<TVoxel, TIndex>* liveScene,
+		VoxelVolume<TWarp, TIndex>* warpField) {
 	return UpdateWarps_common<TVoxel, TWarp, TIndex, TMemoryDeviceType>(
 			canonicalScene, liveScene, warpField, this->parameters.learning_rate,
 			this->switches.enable_sobolev_gradient_smoothing,
@@ -125,7 +125,7 @@ float SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorT
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, GradientFunctorType TGradientFunctorType>
 void SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorType>::AddFramewiseWarpToWarp(
-		ITMVoxelVolume<TWarp, TIndex>* warpField, bool clearFramewiseWarp) {
+		VoxelVolume<TWarp, TIndex>* warpField, bool clearFramewiseWarp) {
 	AddFramewiseWarpToWarp_common<TWarp, TIndex, TMemoryDeviceType>(warpField, clearFramewiseWarp);
 }
 

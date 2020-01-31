@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "../Camera/ITMCalibIO.h"
+#include "../Camera/CalibIO.h"
 #include "../../Utils/ITMImageTypes.h"
 
 namespace ITMLib
@@ -15,7 +15,7 @@ namespace ITMLib
 	{
 	public:
 		/// Intrinsic calibration information for the view.
-		const ITMRGBDCalib calib;
+		const RGBDCalib calib;
 
 		/// RGB colour image for the current frame.
 		ITMUChar4Image *rgb; 
@@ -37,7 +37,7 @@ namespace ITMLib
 		// confidence based on distance from center
 		ITMFloatImage *depthConfidence;
 
-		ITMView(const ITMRGBDCalib& calibration, Vector2i imgSize_rgb, Vector2i imgSize_d, bool useGPU)
+		ITMView(const RGBDCalib& calibration, Vector2i imgSize_rgb, Vector2i imgSize_d, bool useGPU)
 		: calib(calibration)
 		{
 			this->rgb = new ITMUChar4Image(imgSize_rgb, true, useGPU);

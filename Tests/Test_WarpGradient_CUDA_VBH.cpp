@@ -43,10 +43,10 @@ using namespace ITMLib;
 typedef WarpGradientDataFixture<MemoryDeviceType::MEMORYDEVICE_CUDA, VoxelBlockHash> DataFixture;
 BOOST_FIXTURE_TEST_CASE(testDataTerm_CUDA_VBH, DataFixture) {
 
-	ITMVoxelVolume<ITMWarp, VoxelBlockHash> warp_field_CUDA1(&configuration::get().general_voxel_volume_parameters,
+	VoxelVolume<ITMWarp, VoxelBlockHash> warp_field_CUDA1(&configuration::get().general_voxel_volume_parameters,
 	                                                            configuration::get().swapping_mode ==
 	                                                            configuration::SWAPPINGMODE_ENABLED,
-	                                                            MEMORYDEVICE_CUDA, indexParameters);
+	                                                      MEMORYDEVICE_CUDA, indexParameters);
 	ManipulationEngine_CUDA_VBH_Warp::Inst().ResetVolume(&warp_field_CUDA1);
 
 
@@ -73,8 +73,8 @@ BOOST_FIXTURE_TEST_CASE(testUpdateWarps_CUDA_VBH, DataFixture) {
 
 	auto motionTracker_VBH_CUDA = new SurfaceTracker<ITMVoxel, ITMWarp, VoxelBlockHash, MEMORYDEVICE_CUDA, TRACKER_SLAVCHEVA_DIAGNOSTIC>(
 			SlavchevaSurfaceTracker::Switches(false, false, false, false, false));
-	ITMVoxelVolume<ITMWarp, VoxelBlockHash> warp_field_copy(*warp_field_data_term,
-	                                                           MemoryDeviceType::MEMORYDEVICE_CUDA);
+	VoxelVolume<ITMWarp, VoxelBlockHash> warp_field_copy(*warp_field_data_term,
+	                                                     MemoryDeviceType::MEMORYDEVICE_CUDA);
 
 	BOOST_REQUIRE_EQUAL(SceneStatCalc_CUDA_VBH_Warp::Instance().ComputeAllocatedHashBlockCount(&warp_field_copy), 589);
 
@@ -88,7 +88,7 @@ BOOST_FIXTURE_TEST_CASE(testUpdateWarps_CUDA_VBH, DataFixture) {
 
 
 BOOST_FIXTURE_TEST_CASE(testSmoothWarpGradient_CUDA_VBH, DataFixture) {
-	ITMVoxelVolume<ITMWarp, VoxelBlockHash> warp_field_CUDA1(*warp_field_data_term, MEMORYDEVICE_CUDA);
+	VoxelVolume<ITMWarp, VoxelBlockHash> warp_field_CUDA1(*warp_field_data_term, MEMORYDEVICE_CUDA);
 	auto motionTracker_VBH_CUDA = new SurfaceTracker<ITMVoxel, ITMWarp, VoxelBlockHash, MEMORYDEVICE_CUDA, TRACKER_SLAVCHEVA_DIAGNOSTIC>(
 			SlavchevaSurfaceTracker::Switches(false, false, false, false, true));
 
@@ -103,7 +103,7 @@ BOOST_FIXTURE_TEST_CASE(testSmoothWarpGradient_CUDA_VBH, DataFixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testTikhonovTerm_CUDA_VBH, DataFixture) {
-	ITMVoxelVolume<ITMWarp, VoxelBlockHash> warp_field_CUDA1(*warp_field_iter0, MEMORYDEVICE_CUDA);
+	VoxelVolume<ITMWarp, VoxelBlockHash> warp_field_CUDA1(*warp_field_iter0, MEMORYDEVICE_CUDA);
 
 	auto motionTracker_VBH_CUDA = new SurfaceTracker<ITMVoxel, ITMWarp, VoxelBlockHash, MEMORYDEVICE_CUDA, TRACKER_SLAVCHEVA_DIAGNOSTIC>(
 			SlavchevaSurfaceTracker::Switches(false, false, true, false, false));
@@ -131,7 +131,7 @@ BOOST_FIXTURE_TEST_CASE(testTikhonovTerm_CUDA_VBH, DataFixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testDataAndTikhonovTerm_CUDA_VBH, DataFixture) {
-	ITMVoxelVolume<ITMWarp, VoxelBlockHash> warp_field_CUDA1(*warp_field_iter0, MEMORYDEVICE_CUDA);
+	VoxelVolume<ITMWarp, VoxelBlockHash> warp_field_CUDA1(*warp_field_iter0, MEMORYDEVICE_CUDA);
 
 
 	auto motionTracker_VBH_CUDA = new SurfaceTracker<ITMVoxel, ITMWarp, VoxelBlockHash, MEMORYDEVICE_CUDA, TRACKER_SLAVCHEVA_DIAGNOSTIC>(
@@ -158,7 +158,7 @@ BOOST_FIXTURE_TEST_CASE(testDataAndTikhonovTerm_CUDA_VBH, DataFixture) {
 
 
 BOOST_FIXTURE_TEST_CASE(testDataAndKillingTerm_CUDA_VBH, DataFixture) {
-	ITMVoxelVolume<ITMWarp, VoxelBlockHash> warp_field_CUDA1(*warp_field_iter0, MEMORYDEVICE_CUDA);
+	VoxelVolume<ITMWarp, VoxelBlockHash> warp_field_CUDA1(*warp_field_iter0, MEMORYDEVICE_CUDA);
 
 	auto motionTracker_VBH_CUDA = new SurfaceTracker<ITMVoxel, ITMWarp, VoxelBlockHash, MEMORYDEVICE_CUDA, TRACKER_SLAVCHEVA_DIAGNOSTIC>(
 			SlavchevaSurfaceTracker::Switches(true, false, true, true, false));
@@ -175,7 +175,7 @@ BOOST_FIXTURE_TEST_CASE(testDataAndKillingTerm_CUDA_VBH, DataFixture) {
 
 
 BOOST_FIXTURE_TEST_CASE(testDataAndLevelSetTerm_CUDA_VBH, DataFixture) {
-	ITMVoxelVolume<ITMWarp, VoxelBlockHash> warp_field_CUDA1(*warp_field_iter0, MEMORYDEVICE_CUDA);
+	VoxelVolume<ITMWarp, VoxelBlockHash> warp_field_CUDA1(*warp_field_iter0, MEMORYDEVICE_CUDA);
 
 	auto motionTracker_VBH_CUDA = new SurfaceTracker<ITMVoxel, ITMWarp, VoxelBlockHash, MEMORYDEVICE_CUDA, TRACKER_SLAVCHEVA_DIAGNOSTIC>(
 			SlavchevaSurfaceTracker::Switches(true, true, false, false, false)

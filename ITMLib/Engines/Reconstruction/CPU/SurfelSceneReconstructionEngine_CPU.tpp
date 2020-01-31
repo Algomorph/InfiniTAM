@@ -17,7 +17,7 @@ SurfelSceneReconstructionEngine_CPU<TSurfel>::SurfelSceneReconstructionEngine_CP
 //#################### PRIVATE MEMBER FUNCTIONS ####################
 
 template <typename TSurfel>
-void SurfelSceneReconstructionEngine_CPU<TSurfel>::AddNewSurfels(ITMSurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState) const
+void SurfelSceneReconstructionEngine_CPU<TSurfel>::AddNewSurfels(SurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState) const
 {
   // Calculate the prefix sum of the new points mask.
   const unsigned short *newPointsMask = this->m_newPointsMaskMB->GetData(MEMORYDEVICE_CPU);
@@ -59,8 +59,8 @@ void SurfelSceneReconstructionEngine_CPU<TSurfel>::AddNewSurfels(ITMSurfelScene<
 }
 
 template <typename TSurfel>
-void SurfelSceneReconstructionEngine_CPU<TSurfel>::FindCorrespondingSurfels(const ITMSurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState,
-                                                                            const ITMSurfelRenderState *renderState) const
+void SurfelSceneReconstructionEngine_CPU<TSurfel>::FindCorrespondingSurfels(const SurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState,
+                                                                            const SurfelRenderState *renderState) const
 {
   unsigned int *correspondenceMap = this->m_correspondenceMapMB->GetData(MEMORYDEVICE_CPU);
   const float *depthMap = view->depth->GetData(MEMORYDEVICE_CPU);
@@ -83,7 +83,7 @@ void SurfelSceneReconstructionEngine_CPU<TSurfel>::FindCorrespondingSurfels(cons
 }
 
 template <typename TSurfel>
-void SurfelSceneReconstructionEngine_CPU<TSurfel>::FuseMatchedPoints(ITMSurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState) const
+void SurfelSceneReconstructionEngine_CPU<TSurfel>::FuseMatchedPoints(SurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState) const
 {
   const Vector4u *colourMap = view->rgb->GetData(MEMORYDEVICE_CPU);
   const int colourMapHeight = view->rgb->noDims.y;
@@ -115,7 +115,7 @@ void SurfelSceneReconstructionEngine_CPU<TSurfel>::FuseMatchedPoints(ITMSurfelSc
 }
 
 template <typename TSurfel>
-void SurfelSceneReconstructionEngine_CPU<TSurfel>::MarkBadSurfels(ITMSurfelScene<TSurfel> *scene) const
+void SurfelSceneReconstructionEngine_CPU<TSurfel>::MarkBadSurfels(SurfelScene<TSurfel> *scene) const
 {
   const int surfelCount = static_cast<int>(scene->GetSurfelCount());
 
@@ -153,7 +153,7 @@ void SurfelSceneReconstructionEngine_CPU<TSurfel>::MarkBadSurfels(ITMSurfelScene
 }
 
 template <typename TSurfel>
-void SurfelSceneReconstructionEngine_CPU<TSurfel>::MergeSimilarSurfels(ITMSurfelScene<TSurfel> *scene, const ITMSurfelRenderState *renderState) const
+void SurfelSceneReconstructionEngine_CPU<TSurfel>::MergeSimilarSurfels(SurfelScene<TSurfel> *scene, const SurfelRenderState *renderState) const
 {
   const unsigned int *correspondenceMap = this->m_correspondenceMapMB->GetData(MEMORYDEVICE_CPU);
   const unsigned int *indexImage = renderState->GetIndexImage()->GetData(MEMORYDEVICE_CPU);
@@ -211,7 +211,7 @@ void SurfelSceneReconstructionEngine_CPU<TSurfel>::PreprocessDepthMap(const ITMV
 {
   const float *depthMap = view->depth->GetData(MEMORYDEVICE_CPU);
   const int height = view->depth->noDims.y;
-  const ITMIntrinsics& intrinsics = view->calib.intrinsics_d;
+  const Intrinsics& intrinsics = view->calib.intrinsics_d;
   Vector3f *normalMap = this->m_normalMapMB->GetData(MEMORYDEVICE_CPU);
   const int pixelCount = static_cast<int>(view->depth->dataSize);
   float *radiusMap = this->m_radiusMapMB->GetData(MEMORYDEVICE_CPU);
@@ -247,7 +247,7 @@ void SurfelSceneReconstructionEngine_CPU<TSurfel>::PreprocessDepthMap(const ITMV
 }
 
 template <typename TSurfel>
-void SurfelSceneReconstructionEngine_CPU<TSurfel>::RemoveMarkedSurfels(ITMSurfelScene<TSurfel> *scene) const
+void SurfelSceneReconstructionEngine_CPU<TSurfel>::RemoveMarkedSurfels(SurfelScene<TSurfel> *scene) const
 {
   // Remove marked surfels from the scene.
   // TODO: This is is currently unimplemented on CPU. It's not worth implementing it at the moment,

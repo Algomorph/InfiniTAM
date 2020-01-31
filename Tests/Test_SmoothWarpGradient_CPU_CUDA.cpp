@@ -25,7 +25,7 @@
 
 //local
 #include "../ITMLib/ITMLibDefines.h"
-#include "../ITMLib/Objects/Scene/ITMVoxelVolume.h"
+#include "../ITMLib/Objects/Scene/VoxelVolume.h"
 #include "TestUtils.h"
 #include "../ITMLib/SurfaceTrackers/Interface/SurfaceTracker.h"
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/ITMVoxelVolumeComparison_CPU.h"
@@ -44,18 +44,18 @@ BOOST_FIXTURE_TEST_CASE(testSmoothWarpGradient_PVA, Frame16And17Fixture) {
 	std::string path_frame_17_VBH = "TestData/snoopy_result_fr16-17_partial_VBH/snoopy_partial_frame_17_";
 	std::string path_frame_16_VBH = "TestData/snoopy_result_fr16-17_partial_VBH/snoopy_partial_frame_16_";
 
-	ITMVoxelVolume<ITMWarp, PlainVoxelArray>* warp_field_CPU;
+	VoxelVolume<ITMWarp, PlainVoxelArray>* warp_field_CPU;
 	loadVolume(&warp_field_CPU, path_warps, MEMORYDEVICE_CPU, InitParams<PlainVoxelArray>());
-	ITMVoxelVolume<ITMVoxel, PlainVoxelArray>* canonical_volume_CPU;
+	VoxelVolume<ITMVoxel, PlainVoxelArray>* canonical_volume_CPU;
 	loadVolume(&canonical_volume_CPU, path_frame_17_PVA, MEMORYDEVICE_CPU, InitParams<PlainVoxelArray>());
-	ITMVoxelVolume<ITMVoxel, PlainVoxelArray>* live_volume_CPU;
+	VoxelVolume<ITMVoxel, PlainVoxelArray>* live_volume_CPU;
 	loadVolume(&live_volume_CPU, path_frame_16_PVA, MEMORYDEVICE_CPU, InitParams<PlainVoxelArray>());
 
-	ITMVoxelVolume<ITMWarp, PlainVoxelArray>* warp_field_CUDA;
+	VoxelVolume<ITMWarp, PlainVoxelArray>* warp_field_CUDA;
 	loadVolume(&warp_field_CUDA, path_warps, MEMORYDEVICE_CUDA, InitParams<PlainVoxelArray>());
-	ITMVoxelVolume<ITMVoxel, PlainVoxelArray>* canonical_volume_CUDA;
+	VoxelVolume<ITMVoxel, PlainVoxelArray>* canonical_volume_CUDA;
 	loadVolume(&canonical_volume_CUDA, path_frame_17_PVA, MEMORYDEVICE_CUDA, InitParams<PlainVoxelArray>());
-	ITMVoxelVolume<ITMVoxel, PlainVoxelArray>* live_volume_CUDA;
+	VoxelVolume<ITMVoxel, PlainVoxelArray>* live_volume_CUDA;
 	loadVolume(&live_volume_CUDA, path_frame_16_PVA, MEMORYDEVICE_CUDA, InitParams<PlainVoxelArray>());
 
 
@@ -68,7 +68,7 @@ BOOST_FIXTURE_TEST_CASE(testSmoothWarpGradient_PVA, Frame16And17Fixture) {
 	motionTracker_PVA_CPU->SmoothWarpGradient(canonical_volume_CPU, live_volume_CPU, warp_field_CPU);
 	motionTracker_PVA_CUDA->SmoothWarpGradient(canonical_volume_CUDA, live_volume_CUDA, warp_field_CUDA);
 
-	ITMVoxelVolume<ITMWarp, PlainVoxelArray> warp_field_CUDA_copy(*warp_field_CUDA, MEMORYDEVICE_CPU);
+	VoxelVolume<ITMWarp, PlainVoxelArray> warp_field_CUDA_copy(*warp_field_CUDA, MEMORYDEVICE_CPU);
 
 	float tolerance = 1e-6;
 	BOOST_REQUIRE(contentAlmostEqual_CPU(&warp_field_CUDA_copy, warp_field_CPU, tolerance));

@@ -20,7 +20,7 @@
 using namespace ITMLib;
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(const ITMRGBDCalib& calib, Vector2i imgSize_rgb,
+DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(const RGBDCalib& calib, Vector2i imgSize_rgb,
                                                                         Vector2i imgSize_d) {
 
 	this->InitializeScenes();
@@ -51,8 +51,8 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(const IT
 	                                                canonicalScene->sceneParams);
 	cameraTrackingController = new TrackingController(tracker);
 
-	renderState_live = new ITMRenderState(trackedImageSize, canonicalScene->sceneParams->near_clipping_distance,
-	                                      canonicalScene->sceneParams->far_clipping_distance, settings.device_type);
+	renderState_live = new RenderState(trackedImageSize, canonicalScene->sceneParams->near_clipping_distance,
+	                                   canonicalScene->sceneParams->far_clipping_distance, settings.device_type);
 	renderState_freeview = nullptr; //will be created if needed
 
 	Reset();
@@ -83,17 +83,17 @@ template<typename TVoxel, typename TWarp, typename TIndex>
 void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::InitializeScenes() {
 	configuration::Configuration& settings = configuration::get();
 	MemoryDeviceType memoryType = settings.device_type;
-	this->canonicalScene = new ITMVoxelVolume<TVoxel, TIndex>(
+	this->canonicalScene = new VoxelVolume<TVoxel, TIndex>(
 			&settings.general_voxel_volume_parameters, settings.swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 			memoryType, configuration::for_volume_role<TIndex>(configuration::VOLUME_CANONICAL));
-	this->liveScenes = new ITMVoxelVolume<TVoxel, TIndex>* [2];
+	this->liveScenes = new VoxelVolume<TVoxel, TIndex>* [2];
 	for (int iLiveScene = 0; iLiveScene < DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::liveSceneCount; iLiveScene++) {
-		this->liveScenes[iLiveScene] = new ITMVoxelVolume<TVoxel, TIndex>(
+		this->liveScenes[iLiveScene] = new VoxelVolume<TVoxel, TIndex>(
 				&settings.general_voxel_volume_parameters,
 				settings.swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 				memoryType, configuration::for_volume_role<TIndex>(configuration::VOLUME_LIVE));
 	}
-	this->warpField = new ITMVoxelVolume<TWarp, TIndex>(
+	this->warpField = new VoxelVolume<TWarp, TIndex>(
 			&settings.general_voxel_volume_parameters,
 			settings.swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 			memoryType, configuration::for_volume_role<TIndex>(configuration::VOLUME_WARP));
@@ -134,7 +134,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::~DynamicSceneVoxelEngine() {
 template<typename TVoxel, typename TWarp, typename TIndex>
 void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::SaveSceneToMesh(const char* objFileName) {
 	if (meshingEngine == nullptr) return;
-	ITMMesh* mesh = new ITMMesh(configuration::get().device_type, canonicalScene->index.GetMaxVoxelCount());
+	Mesh* mesh = new Mesh(configuration::get().device_type, canonicalScene->index.GetMaxVoxelCount());
 	meshingEngine->MeshScene(mesh, canonicalScene);
 	mesh->WriteSTL(objFileName);
 	delete mesh;
@@ -281,7 +281,7 @@ template<typename TVoxel, typename TWarp, typename TIndex>
 ITMTrackingState::TrackingResult
 DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(ITMUChar4Image* rgbImage,
                                                              ITMShortImage* rawDepthImage,
-                                                             ITMIMUMeasurement* imuMeasurement) {
+                                                             IMUMeasurement* imuMeasurement) {
 
 	BeginProcessingFrame(rgbImage, rawDepthImage, imuMeasurement);
 	if (!mainProcessingActive) return ITMTrackingState::TRACKING_FAILED;
@@ -330,7 +330,7 @@ Vector2i DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImageSize(void) cons
 template<typename TVoxel, typename TWarp, typename TIndex>
 void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(ITMUChar4Image* out, GetImageType getImageType,
                                                               ORUtils::SE3Pose* pose,
-                                                              ITMIntrinsics* intrinsics) {
+                                                              Intrinsics* intrinsics) {
 	auto& settings = configuration::get();
 	if (view == nullptr) return;
 
@@ -402,10 +402,10 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(ITMUChar4Image* ou
 				type = IVisualizationEngine::RENDER_COLOUR_FROM_CONFIDENCE;
 
 			if (renderState_freeview == nullptr) {
-				renderState_freeview = new ITMRenderState(out->noDims,
-				                                          liveScenes[0]->sceneParams->near_clipping_distance,
-				                                          liveScenes[0]->sceneParams->far_clipping_distance,
-				                                          settings.device_type);
+				renderState_freeview = new RenderState(out->noDims,
+				                                       liveScenes[0]->sceneParams->near_clipping_distance,
+				                                       liveScenes[0]->sceneParams->far_clipping_distance,
+				                                       settings.device_type);
 			}
 
 			liveVisualizationEngine->FindVisibleBlocks(liveScenes[0], pose, intrinsics, renderState_freeview);
@@ -421,10 +421,10 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(ITMUChar4Image* ou
 		case MainEngine::InfiniTAM_IMAGE_STEP_BY_STEP: {
 
 			if (renderState_freeview == nullptr) {
-				renderState_freeview = new ITMRenderState(out->noDims,
-				                                          liveScenes[0]->sceneParams->near_clipping_distance,
-				                                          liveScenes[0]->sceneParams->far_clipping_distance,
-				                                          settings.device_type);
+				renderState_freeview = new RenderState(out->noDims,
+				                                       liveScenes[0]->sceneParams->near_clipping_distance,
+				                                       liveScenes[0]->sceneParams->far_clipping_distance,
+				                                       settings.device_type);
 			}
 
 			liveVisualizationEngine->FindVisibleBlocks(liveScenes[0], pose, intrinsics, renderState_freeview);
@@ -450,10 +450,10 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(ITMUChar4Image* ou
 			IVisualizationEngine::RenderImageType type = IVisualizationEngine::RENDER_SHADED_GREYSCALE;
 
 			if (renderState_freeview == nullptr) {
-				renderState_freeview = new ITMRenderState(out->noDims,
-				                                          canonicalScene->sceneParams->near_clipping_distance,
-				                                          canonicalScene->sceneParams->far_clipping_distance,
-				                                          settings.device_type);
+				renderState_freeview = new RenderState(out->noDims,
+				                                       canonicalScene->sceneParams->near_clipping_distance,
+				                                       canonicalScene->sceneParams->far_clipping_distance,
+				                                       settings.device_type);
 			}
 
 			canonicalVisualizationEngine->FindVisibleBlocks(canonicalScene, pose, intrinsics, renderState_freeview);
@@ -496,7 +496,7 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::turnOffMainProcessing() { m
 template<typename TVoxel, typename TWarp, typename TIndex>
 void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::BeginProcessingFrame(ITMUChar4Image* rgbImage,
                                                                           ITMShortImage* rawDepthImage,
-                                                                          ITMIMUMeasurement* imuMeasurement) {
+                                                                          IMUMeasurement* imuMeasurement) {
 
 	auto& settings = configuration::get();
 

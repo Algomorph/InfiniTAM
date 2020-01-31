@@ -17,8 +17,8 @@
 
 #include <cmath>
 
-#include "../../Objects/RenderStates/ITMRenderState.h"
-#include "../../Objects/Scene/ITMVoxelVolume.h"
+#include "../../Objects/RenderStates/RenderState.h"
+#include "../../Objects/Scene/VoxelVolume.h"
 #include "../../Objects/Tracking/ITMTrackingState.h"
 #include "../../Objects/Views/ITMView.h"
 #include "../Common/CommonFunctors.h"
@@ -43,8 +43,8 @@ public:
 
 
 	virtual void
-	UpdateVisibleList(ITMVoxelVolume<TVoxel, TIndex>* scene, const ITMView* view, const ITMTrackingState* trackingState,
-	                  const ITMRenderState* renderState, bool resetVisibleList) = 0;
+	UpdateVisibleList(VoxelVolume<TVoxel, TIndex>* scene, const ITMView* view, const ITMTrackingState* trackingState,
+	                  const RenderState* renderState, bool resetVisibleList) = 0;
 	/**
 	 * \brief Clears given scene, then uses the depth image from provided live view to generate an SDF
 	 * voxel representation
@@ -52,7 +52,7 @@ public:
 	 * \param view input view
 	 * \param trackingState state of tracking
 	 */
-	virtual void GenerateTsdfVolumeFromView(ITMVoxelVolume<TVoxel, TIndex>* volume, const ITMView* view,
+	virtual void GenerateTsdfVolumeFromView(VoxelVolume<TVoxel, TIndex>* volume, const ITMView* view,
 	                                        const ITMTrackingState* trackingState) = 0;
 
 	/**
@@ -62,7 +62,7 @@ public:
 	 * \param[in] view input view
 	 * \param[in] depth_camera_matrix current transformation matrix of the camera relative to world origin
 	 */
-	virtual void GenerateTsdfVolumeFromView(ITMVoxelVolume<TVoxel, TIndex>* volume, const ITMView* view,
+	virtual void GenerateTsdfVolumeFromView(VoxelVolume<TVoxel, TIndex>* volume, const ITMView* view,
 	                                        const Matrix4f& depth_camera_matrix = Matrix4f::Identity()) = 0;
 
 	/**
@@ -75,8 +75,8 @@ public:
 	 * \param[in] view input view
 	 * \param[in] depth_camera_matrix current transformation matrix of the camera relative to world origin
 	 */
-	virtual void GenerateTsdfVolumeFromViewExpanded(ITMVoxelVolume<TVoxel, TIndex>* volume,
-	                                                ITMVoxelVolume<TVoxel, TIndex>* temporaryAllocationVolume,
+	virtual void GenerateTsdfVolumeFromViewExpanded(VoxelVolume<TVoxel, TIndex>* volume,
+	                                                VoxelVolume<TVoxel, TIndex>* temporaryAllocationVolume,
 	                                                const ITMView* view,
 	                                                const Matrix4f& depth_camera_matrix = Matrix4f::Identity()) = 0;
 
@@ -84,11 +84,11 @@ public:
 	 * \brief Update the voxel blocks by integrating depth and possibly color information from the given view. Assume
 	 * camera is at world origin.
 	 */
-	virtual void IntegrateDepthImageIntoTsdfVolume(ITMVoxelVolume<TVoxel, TIndex>* volume, const ITMView* view) = 0;
+	virtual void IntegrateDepthImageIntoTsdfVolume(VoxelVolume<TVoxel, TIndex>* volume, const ITMView* view) = 0;
 
 	/** Update the voxel blocks by integrating depth and
 	possibly colour information from the given view.*/
-	virtual void IntegrateDepthImageIntoTsdfVolume(ITMVoxelVolume<TVoxel, TIndex>* volume, const ITMView* view,
+	virtual void IntegrateDepthImageIntoTsdfVolume(VoxelVolume<TVoxel, TIndex>* volume, const ITMView* view,
 	                                               const ITMTrackingState* trackingState) = 0;
 
 };

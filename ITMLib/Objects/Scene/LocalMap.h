@@ -5,8 +5,8 @@
 #include <map>
 
 #include "../../Engines/Visualization/Interface/VisualizationEngine.h"
-#include "../../Objects/RenderStates/ITMRenderState.h"
-#include "ITMVoxelVolume.h"
+#include "../RenderStates/RenderState.h"
+#include "VoxelVolume.h"
 #include "../../Objects/Tracking/ITMTrackingState.h"
 #include "../../Utils/Configuration.h"
 
@@ -40,25 +40,25 @@ namespace ITMLib {
 	typedef std::map<int, PoseConstraint> ConstraintList;
 
 	template<class TVoxel, class TIndex>
-	class ITMLocalMap
+	class LocalMap
 	{
 	public:
-		ITMVoxelVolume<TVoxel, TIndex> *scene;
-		ITMRenderState *renderState;
+		VoxelVolume<TVoxel, TIndex> *scene;
+		RenderState *renderState;
 		ITMTrackingState *trackingState;
 		ConstraintList relations;
 		ORUtils::SE3Pose estimatedGlobalPose;
 
-		ITMLocalMap(const VisualizationEngine<TVoxel, TIndex>* VisualizationEngine, const Vector2i& trackedImageSize)
+		LocalMap(const VisualizationEngine<TVoxel, TIndex>* VisualizationEngine, const Vector2i& trackedImageSize)
 		{
 			auto& settings = configuration::get();
 			MemoryDeviceType memoryType = settings.device_type == MEMORYDEVICE_CUDA ? MEMORYDEVICE_CUDA : MEMORYDEVICE_CPU;
-			scene = new ITMVoxelVolume<TVoxel, TIndex>(&settings.general_voxel_volume_parameters, settings.swapping_mode == configuration::SWAPPINGMODE_ENABLED, memoryType);
-			renderState = new ITMRenderState(trackedImageSize, settings.general_voxel_volume_parameters.near_clipping_distance,
-			                                 settings.general_voxel_volume_parameters.far_clipping_distance, memoryType);
+			scene = new VoxelVolume<TVoxel, TIndex>(&settings.general_voxel_volume_parameters, settings.swapping_mode == configuration::SWAPPINGMODE_ENABLED, memoryType);
+			renderState = new RenderState(trackedImageSize, settings.general_voxel_volume_parameters.near_clipping_distance,
+			                              settings.general_voxel_volume_parameters.far_clipping_distance, memoryType);
 			trackingState = new ITMTrackingState(trackedImageSize, memoryType);
 		}
-		~ITMLocalMap()
+		~LocalMap()
 		{
 			delete scene;
 			delete renderState;

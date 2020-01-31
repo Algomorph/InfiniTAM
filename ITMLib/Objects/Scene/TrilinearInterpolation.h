@@ -21,7 +21,7 @@
 #include "../../Utils/ITMPrintHelpers.h"
 #include "../../Utils/ITMCPrintHelpers.h"
 #include "../../Utils/ITMVoxelFlags.h"
-#include "ITMRepresentationAccess.h"
+#include "RepresentationAccess.h"
 
 
 template<typename TVoxel, typename TCache, typename TIndexData>

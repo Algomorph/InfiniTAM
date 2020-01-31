@@ -23,7 +23,7 @@
 
 //local
 #include "../ITMLib/ITMLibDefines.h"
-#include "../ITMLib/Objects/Scene/ITMVoxelVolume.h"
+#include "../ITMLib/Objects/Scene/VoxelVolume.h"
 #include "TestUtils.h"
 #include "../ITMLib/SurfaceTrackers/Interface/SurfaceTracker.h"
 #include "../ITMLib/Utils/Analytics/SceneStatisticsCalculator/CPU/ITMSceneStatisticsCalculator_CPU.h"
@@ -36,7 +36,7 @@
 using namespace ITMLib;
 
 BOOST_FIXTURE_TEST_CASE(Test_ClearOutFramewiseWarp_CPU_PVA, Frame16And17Fixture){
-	ITMVoxelVolume<ITMWarp, PlainVoxelArray>* warps_PVA;
+	VoxelVolume<ITMWarp, PlainVoxelArray>* warps_PVA;
 	loadVolume(&warps_PVA, "TestData/snoopy_result_fr16-17_partial_PVA/warp_field_0_data_framewise_warps_", MEMORYDEVICE_CPU,
 			InitParams<PlainVoxelArray>());
 	float relativeTolerance = 0.1f;//percent
@@ -53,7 +53,7 @@ BOOST_FIXTURE_TEST_CASE(Test_ClearOutFramewiseWarp_CPU_PVA, Frame16And17Fixture)
 }
 
 BOOST_FIXTURE_TEST_CASE(Test_ClearOutFramewiseWarp_CPU_VBH, Frame16And17Fixture){
-	ITMVoxelVolume<ITMWarp, VoxelBlockHash>* warps_VBH;
+	VoxelVolume<ITMWarp, VoxelBlockHash>* warps_VBH;
 	loadVolume(&warps_VBH, "TestData/snoopy_result_fr16-17_partial_VBH/warp_field_0_data_framewise_warps_",
 			MEMORYDEVICE_CPU, InitParams<VoxelBlockHash>());
 	float relativeTolerance = 0.1f;//percent

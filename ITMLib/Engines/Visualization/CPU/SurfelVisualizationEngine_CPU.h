@@ -20,20 +20,20 @@ namespace ITMLib
     //#################### PUBLIC MEMBER FUNCTIONS ####################
   public:
     /** Override */
-    virtual void CopyCorrespondencesToBuffers(const ITMSurfelScene<TSurfel> *scene, float *newPositions, float *oldPositions, float *correspondences) const;
+    virtual void CopyCorrespondencesToBuffers(const SurfelScene<TSurfel> *scene, float *newPositions, float *oldPositions, float *correspondences) const;
 
     /** Override */
-    virtual void CopySceneToBuffers(const ITMSurfelScene<TSurfel> *scene, float *positions, unsigned char *normals, unsigned char *colours) const;
+    virtual void CopySceneToBuffers(const SurfelScene<TSurfel> *scene, float *positions, unsigned char *normals, unsigned char *colours) const;
 
     /** Override */
-    virtual void CreateICPMaps(const ITMSurfelScene<TSurfel> *scene, const ITMSurfelRenderState *renderState, ITMTrackingState *trackingState) const;
+    virtual void CreateICPMaps(const SurfelScene<TSurfel> *scene, const SurfelRenderState *renderState, ITMTrackingState *trackingState) const;
 
     /** Override */
-    virtual void RenderDepthImage(const ITMSurfelScene<TSurfel> *scene, const ORUtils::SE3Pose *pose, const ITMSurfelRenderState *renderState,
+    virtual void RenderDepthImage(const SurfelScene<TSurfel> *scene, const ORUtils::SE3Pose *pose, const SurfelRenderState *renderState,
                                   ITMFloatImage *outputImage) const;
 
     /** Override */
-    virtual void RenderImage(const ITMSurfelScene<TSurfel> *scene, const ORUtils::SE3Pose *pose, const ITMSurfelRenderState *renderState,
+    virtual void RenderImage(const SurfelScene<TSurfel> *scene, const ORUtils::SE3Pose *pose, const SurfelRenderState *renderState,
                              ITMUChar4Image *outputImage, RenderImageType type) const;
 
     //#################### PRIVATE MEMBER FUNCTIONS ####################
@@ -42,7 +42,7 @@ namespace ITMLib
     virtual MemoryDeviceType GetMemoryType() const;
 
     /** Override */
-    virtual void MakeIndexImage(const ITMSurfelScene<TSurfel> *scene, const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics,
+    virtual void MakeIndexImage(const SurfelScene<TSurfel> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics,
                                 int width, int height, int scaleFactor, unsigned int *surfelIndexImage, bool useRadii,
                                 UnstableSurfelRenderingMode unstableSurfelRenderingMode, int *depthBuffer) const;
   };

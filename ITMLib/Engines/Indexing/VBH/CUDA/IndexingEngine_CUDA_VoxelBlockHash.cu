@@ -39,45 +39,45 @@ template class IndexingEngine<ITMVoxel,VoxelBlockHash,MEMORYDEVICE_CUDA>;
 template class IndexingEngine<ITMWarp,VoxelBlockHash,MEMORYDEVICE_CUDA>;
 
 template void IndexingEngine<ITMVoxel,VoxelBlockHash,MEMORYDEVICE_CUDA>::AllocateUsingOtherVolume(
-		ITMLib::ITMVoxelVolume<ITMWarp, VoxelBlockHash>* targetVolume,
-		ITMLib::ITMVoxelVolume<ITMVoxel, VoxelBlockHash>* sourceVolume);
+		ITMLib::VoxelVolume<ITMWarp, VoxelBlockHash>* targetVolume,
+		ITMLib::VoxelVolume<ITMVoxel, VoxelBlockHash>* sourceVolume);
 template void IndexingEngine<ITMVoxel,VoxelBlockHash,MEMORYDEVICE_CUDA>::AllocateUsingOtherVolume(
-		ITMLib::ITMVoxelVolume<ITMVoxel, VoxelBlockHash>* targetVolume,
-		ITMLib::ITMVoxelVolume<ITMVoxel, VoxelBlockHash>* sourceVolume);
+		ITMLib::VoxelVolume<ITMVoxel, VoxelBlockHash>* targetVolume,
+		ITMLib::VoxelVolume<ITMVoxel, VoxelBlockHash>* sourceVolume);
 template void IndexingEngine<ITMVoxel,VoxelBlockHash,MEMORYDEVICE_CUDA>::AllocateUsingOtherVolumeExpanded(
-		ITMLib::ITMVoxelVolume<ITMWarp, VoxelBlockHash>* targetVolume,
-		ITMLib::ITMVoxelVolume<ITMVoxel, VoxelBlockHash>* sourceVolume);
+		ITMLib::VoxelVolume<ITMWarp, VoxelBlockHash>* targetVolume,
+		ITMLib::VoxelVolume<ITMVoxel, VoxelBlockHash>* sourceVolume);
 template void IndexingEngine<ITMVoxel,VoxelBlockHash,MEMORYDEVICE_CUDA>::AllocateUsingOtherVolumeExpanded(
-		ITMLib::ITMVoxelVolume<ITMVoxel, VoxelBlockHash>* targetVolume,
-		ITMLib::ITMVoxelVolume<ITMVoxel, VoxelBlockHash>* sourceVolume);
+		ITMLib::VoxelVolume<ITMVoxel, VoxelBlockHash>* targetVolume,
+		ITMLib::VoxelVolume<ITMVoxel, VoxelBlockHash>* sourceVolume);
 template void IndexingEngine<ITMVoxel,VoxelBlockHash,MEMORYDEVICE_CUDA>::AllocateUsingOtherVolumeAndSetVisibilityExpanded(
-		ITMLib::ITMVoxelVolume<ITMWarp, VoxelBlockHash>* targetVolume,
-		ITMLib::ITMVoxelVolume<ITMVoxel, VoxelBlockHash>* sourceVolume,
+		ITMLib::VoxelVolume<ITMWarp, VoxelBlockHash>* targetVolume,
+		ITMLib::VoxelVolume<ITMVoxel, VoxelBlockHash>* sourceVolume,
 		ITMView* view, const Matrix4f& depth_camera_matrix);
 template void IndexingEngine<ITMVoxel,VoxelBlockHash,MEMORYDEVICE_CUDA>::AllocateUsingOtherVolumeAndSetVisibilityExpanded(
-		ITMLib::ITMVoxelVolume<ITMVoxel, VoxelBlockHash>* targetVolume,
-		ITMLib::ITMVoxelVolume<ITMVoxel, VoxelBlockHash>* sourceVolume,
+		ITMLib::VoxelVolume<ITMVoxel, VoxelBlockHash>* targetVolume,
+		ITMLib::VoxelVolume<ITMVoxel, VoxelBlockHash>* sourceVolume,
 		ITMView* view, const Matrix4f& depth_camera_matrix);
 
 template void IndexingEngine_VoxelBlockHash<ITMVoxel, MEMORYDEVICE_CUDA,
 		IndexingEngine<ITMVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>>::
 		AllocateFromWarpedVolume<WarpType::WARP_CUMULATIVE>(
-		ITMVoxelVolume <ITMWarp, VoxelBlockHash>* warpField,
-		ITMVoxelVolume <ITMVoxel, VoxelBlockHash>* sourceTSDF,
-		ITMVoxelVolume <ITMVoxel, VoxelBlockHash>* targetTSDF
+		VoxelVolume <ITMWarp, VoxelBlockHash>* warpField,
+		VoxelVolume <ITMVoxel, VoxelBlockHash>* sourceTSDF,
+		VoxelVolume <ITMVoxel, VoxelBlockHash>* targetTSDF
 );
 template void IndexingEngine_VoxelBlockHash<ITMVoxel, MEMORYDEVICE_CUDA,
 		IndexingEngine<ITMVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>>::
 		AllocateFromWarpedVolume<WarpType::WARP_FLOW>(
-		ITMVoxelVolume <ITMWarp, VoxelBlockHash>* warpField,
-		ITMVoxelVolume <ITMVoxel, VoxelBlockHash>* sourceTSDF,
-		ITMVoxelVolume <ITMVoxel, VoxelBlockHash>* targetTSDF
+		VoxelVolume <ITMWarp, VoxelBlockHash>* warpField,
+		VoxelVolume <ITMVoxel, VoxelBlockHash>* sourceTSDF,
+		VoxelVolume <ITMVoxel, VoxelBlockHash>* targetTSDF
 );
 template void IndexingEngine_VoxelBlockHash<ITMVoxel, MEMORYDEVICE_CUDA,
 		IndexingEngine<ITMVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>>::AllocateFromWarpedVolume<WarpType::WARP_UPDATE>(
-		ITMVoxelVolume <ITMWarp, VoxelBlockHash>* warpField,
-		ITMVoxelVolume <ITMVoxel, VoxelBlockHash>* sourceTSDF,
-		ITMVoxelVolume <ITMVoxel, VoxelBlockHash>* targetTSDF
+		VoxelVolume <ITMWarp, VoxelBlockHash>* warpField,
+		VoxelVolume <ITMVoxel, VoxelBlockHash>* sourceTSDF,
+		VoxelVolume <ITMVoxel, VoxelBlockHash>* targetTSDF
 );
 
 }//namespace ITMLib

@@ -59,7 +59,7 @@ ck_calculate_normal(int pixelCount, const Vector4f* vertexMap, int width, int he
 }
 
 __global__ void
-ck_calculate_radius(int pixelCount, const float* depthMap, const Vector3f* normalMap, ITMIntrinsics intrinsics,
+ck_calculate_radius(int pixelCount, const float* depthMap, const Vector3f* normalMap, Intrinsics intrinsics,
                     float* radiusMap) {
 	int locId = threadIdx.x + blockDim.x * blockIdx.x;
 	if (locId < pixelCount) {
@@ -67,7 +67,7 @@ ck_calculate_radius(int pixelCount, const float* depthMap, const Vector3f* norma
 	}
 }
 
-__global__ void ck_calculate_vertex_position(int pixelCount, int width, ITMIntrinsics intrinsics, const float* depthMap,
+__global__ void ck_calculate_vertex_position(int pixelCount, int width, Intrinsics intrinsics, const float* depthMap,
                                              Vector4f* vertexMap) {
 	int locId = threadIdx.x + blockDim.x * blockIdx.x;
 	if (locId < pixelCount) {
@@ -177,7 +177,7 @@ SurfelSceneReconstructionEngine_CUDA<TSurfel>::SurfelSceneReconstructionEngine_C
 //#################### PRIVATE MEMBER FUNCTIONS ####################
 
 template <typename TSurfel>
-void SurfelSceneReconstructionEngine_CUDA<TSurfel>::AddNewSurfels(ITMSurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState) const
+void SurfelSceneReconstructionEngine_CUDA<TSurfel>::AddNewSurfels(SurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState) const
 {
   // Calculate the prefix sum of the new points mask.
   const unsigned short *newPointsMask = this->m_newPointsMaskMB->GetData(MEMORYDEVICE_CUDA);
@@ -229,8 +229,8 @@ void SurfelSceneReconstructionEngine_CUDA<TSurfel>::AddNewSurfels(ITMSurfelScene
 }
 
 template <typename TSurfel>
-void SurfelSceneReconstructionEngine_CUDA<TSurfel>::FindCorrespondingSurfels(const ITMSurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState,
-                                                                             const ITMSurfelRenderState *renderState) const
+void SurfelSceneReconstructionEngine_CUDA<TSurfel>::FindCorrespondingSurfels(const SurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState,
+                                                                             const SurfelRenderState *renderState) const
 {
   const int pixelCount = static_cast<int>(view->depth->dataSize);
 
@@ -258,7 +258,7 @@ void SurfelSceneReconstructionEngine_CUDA<TSurfel>::FindCorrespondingSurfels(con
 }
 
 template <typename TSurfel>
-void SurfelSceneReconstructionEngine_CUDA<TSurfel>::FuseMatchedPoints(ITMSurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState) const
+void SurfelSceneReconstructionEngine_CUDA<TSurfel>::FuseMatchedPoints(SurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState) const
 {
   const int pixelCount = static_cast<int>(view->depth->dataSize);
 
@@ -292,7 +292,7 @@ void SurfelSceneReconstructionEngine_CUDA<TSurfel>::FuseMatchedPoints(ITMSurfelS
 }
 
 template <typename TSurfel>
-void SurfelSceneReconstructionEngine_CUDA<TSurfel>::MarkBadSurfels(ITMSurfelScene<TSurfel> *scene) const
+void SurfelSceneReconstructionEngine_CUDA<TSurfel>::MarkBadSurfels(SurfelScene<TSurfel> *scene) const
 {
   const int surfelCount = static_cast<int>(scene->GetSurfelCount());
 
@@ -331,7 +331,7 @@ void SurfelSceneReconstructionEngine_CUDA<TSurfel>::MarkBadSurfels(ITMSurfelScen
 }
 
 template <typename TSurfel>
-void SurfelSceneReconstructionEngine_CUDA<TSurfel>::MergeSimilarSurfels(ITMSurfelScene<TSurfel> *scene, const ITMSurfelRenderState *renderState) const
+void SurfelSceneReconstructionEngine_CUDA<TSurfel>::MergeSimilarSurfels(SurfelScene<TSurfel> *scene, const SurfelRenderState *renderState) const
 {
   const unsigned int *correspondenceMap = this->m_correspondenceMapMB->GetData(MEMORYDEVICE_CUDA);
   const unsigned int *indexImage = renderState->GetIndexImage()->GetData(MEMORYDEVICE_CUDA);
@@ -380,7 +380,7 @@ void SurfelSceneReconstructionEngine_CUDA<TSurfel>::PreprocessDepthMap(const ITM
 {
   const float *depthMap = view->depth->GetData(MEMORYDEVICE_CUDA);
   const int height = view->depth->noDims.y;
-  const ITMIntrinsics& intrinsics = view->calib.intrinsics_d;
+  const Intrinsics& intrinsics = view->calib.intrinsics_d;
   Vector3f *normalMap = this->m_normalMapMB->GetData(MEMORYDEVICE_CUDA);
   const int pixelCount = static_cast<int>(view->depth->dataSize);
   float *radiusMap = this->m_radiusMapMB->GetData(MEMORYDEVICE_CUDA);
@@ -434,7 +434,7 @@ void SurfelSceneReconstructionEngine_CUDA<TSurfel>::PreprocessDepthMap(const ITM
 }
 
 template <typename TSurfel>
-void SurfelSceneReconstructionEngine_CUDA<TSurfel>::RemoveMarkedSurfels(ITMSurfelScene<TSurfel> *scene) const
+void SurfelSceneReconstructionEngine_CUDA<TSurfel>::RemoveMarkedSurfels(SurfelScene<TSurfel> *scene) const
 {
   const int surfelCount = static_cast<int>(scene->GetSurfelCount());
 

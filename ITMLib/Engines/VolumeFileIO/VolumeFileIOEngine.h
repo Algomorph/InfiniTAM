@@ -17,7 +17,7 @@
 
 #include "../../Objects/Scene/VoxelBlockHash.h"
 #include "../../Objects/Scene/PlainVoxelArray.h"
-#include "../../Objects/Scene/ITMVoxelVolume.h"
+#include "../../Objects/Scene/VoxelVolume.h"
 
 namespace ITMLib{
 
@@ -29,16 +29,16 @@ class VolumeFileIOEngine;
 template<typename TVoxel>
 class VolumeFileIOEngine<TVoxel,VoxelBlockHash>{
 public:
-	static void SaveToDirectoryCompact(const ITMVoxelVolume<TVoxel,VoxelBlockHash>* scene, const std::string& outputDirectory);
-	static void LoadFromDirectoryCompact(ITMVoxelVolume<TVoxel,VoxelBlockHash>* scene, const std::string& outputDirectory);
+	static void SaveToDirectoryCompact(const VoxelVolume<TVoxel,VoxelBlockHash>* scene, const std::string& outputDirectory);
+	static void LoadFromDirectoryCompact(VoxelVolume<TVoxel,VoxelBlockHash>* scene, const std::string& outputDirectory);
 };
 
 
 template<typename TVoxel>
 class VolumeFileIOEngine<TVoxel,PlainVoxelArray>{
 public:
-	static void SaveToDirectoryCompact(const ITMVoxelVolume<TVoxel,PlainVoxelArray>* scene, const std::string& outputDirectory);
-	static void LoadFromDirectoryCompact(ITMVoxelVolume<TVoxel,PlainVoxelArray>* scene, const std::string& outputDirectory);
+	static void SaveToDirectoryCompact(const VoxelVolume<TVoxel,PlainVoxelArray>* scene, const std::string& outputDirectory);
+	static void LoadFromDirectoryCompact(VoxelVolume<TVoxel,PlainVoxelArray>* scene, const std::string& outputDirectory);
 };
 
 

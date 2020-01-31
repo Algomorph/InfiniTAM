@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "ITMLocalVBA.h"
-#include "ITMGlobalCache.h"
+#include "LocalVBA.h"
+#include "GlobalCache.h"
 #include "../../Utils/VoxelVolumeParameters.h"
 
 namespace ITMLib
@@ -12,7 +12,7 @@ namespace ITMLib
 Represents the 3D world model as collection of voxel blocks, i.e. regular 3D grid
 */
 template<class TVoxel, class TIndex>
-class ITMVoxelVolume
+class VoxelVolume
 {
 public:
 	/** Scene parameters like voxel size etc. */
@@ -25,22 +25,22 @@ public:
 	TIndex index;
 
 	/** Current local content of the 8x8x8 voxel blocks -- stored host or device */
-	ITMLocalVBA<TVoxel> localVBA;
+	LocalVBA<TVoxel> localVBA;
 
 	/** "Global" content -- stored on in host memory only */
-	ITMGlobalCache<TVoxel, TIndex>* globalCache;
+	GlobalCache<TVoxel, TIndex>* globalCache;
 
-	ITMVoxelVolume(const VoxelVolumeParameters *_sceneParams, bool _useSwapping, MemoryDeviceType _memoryType,
-	               typename TIndex::InitializationParameters indexParameters = typename TIndex::InitializationParameters());
-	ITMVoxelVolume(MemoryDeviceType memoryDeviceType, typename TIndex::InitializationParameters indexParameters = typename TIndex::InitializationParameters());
-	ITMVoxelVolume(const ITMVoxelVolume& other, MemoryDeviceType _memoryType);
-	~ITMVoxelVolume()
+	VoxelVolume(const VoxelVolumeParameters *_sceneParams, bool _useSwapping, MemoryDeviceType _memoryType,
+	            typename TIndex::InitializationParameters indexParameters = typename TIndex::InitializationParameters());
+	VoxelVolume(MemoryDeviceType memoryDeviceType, typename TIndex::InitializationParameters indexParameters = typename TIndex::InitializationParameters());
+	VoxelVolume(const VoxelVolume& other, MemoryDeviceType _memoryType);
+	~VoxelVolume()
 	{
 		if (globalCache != nullptr) delete globalCache;
 	}
 
 	void Reset();
-	void SetFrom(const ITMVoxelVolume& other);
+	void SetFrom(const VoxelVolume& other);
 	void SaveToDirectory(const std::string &outputDirectory) const;
 	void LoadFromDirectory(const std::string &outputDirectory);
 	TVoxel GetValueAt(const Vector3i& pos);
@@ -55,9 +55,9 @@ public:
 	}
 
 	// Suppress the default copy constructor and assignment operator (C++11 way)
-	ITMVoxelVolume(const ITMVoxelVolume&) = delete;
+	VoxelVolume(const VoxelVolume&) = delete;
 	//ITMVoxelVolume(ITMVoxelVolume&&) noexcept = default;
-	ITMVoxelVolume& operator=(const ITMVoxelVolume&) = delete;
+	VoxelVolume& operator=(const VoxelVolume&) = delete;
 };
 
 }//end namespace ITMLib

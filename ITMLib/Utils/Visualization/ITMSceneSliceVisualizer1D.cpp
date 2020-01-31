@@ -22,8 +22,8 @@
 //local
 #include "ITMSceneSliceVisualizer1D.h"
 #include "ITMSceneSliceVisualizer1D.tpp"
-#include "../../Objects/Scene/ITMVoxelVolume.h"
-#include "../../Objects/Scene/ITMRepresentationAccess.h"
+#include "../../Objects/Scene/VoxelVolume.h"
+#include "../../Objects/Scene/RepresentationAccess.h"
 #include "../ITMPrintHelpers.h"
 
 #include "../../ITMLibDefines.h"

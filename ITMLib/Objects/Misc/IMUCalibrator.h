@@ -6,22 +6,22 @@
 
 namespace ITMLib
 {
-	class ITMIMUCalibrator
+	class IMUCalibrator
 	{
 	public:
 		virtual void RegisterMeasurement(const Matrix3f & R) = 0;
 		virtual Matrix3f GetDifferentialRotationChange() = 0;
 
-		ITMIMUCalibrator() { }
+		IMUCalibrator() { }
 
-		virtual ~ITMIMUCalibrator(void) { }
+		virtual ~IMUCalibrator(void) { }
 
 		// Suppress the default copy constructor and assignment operator
-		ITMIMUCalibrator(const ITMIMUCalibrator&);
-		ITMIMUCalibrator& operator=(const ITMIMUCalibrator&);
+		IMUCalibrator(const IMUCalibrator&);
+		IMUCalibrator& operator=(const IMUCalibrator&);
 	};
 
-	class ITMIMUCalibrator_iPad : public ITMIMUCalibrator
+	class ITMIMUCalibrator_iPad : public IMUCalibrator
 	{
 	private:
 		ORUtils::SE3Pose *imuPose_imucoords, *imuPose_cameracoords;
@@ -58,7 +58,7 @@ namespace ITMLib
 			return imuPose_cameracoords->GetR();
 		}
 
-		ITMIMUCalibrator_iPad() : ITMIMUCalibrator() 
+		ITMIMUCalibrator_iPad() : IMUCalibrator()
 		{ 
 			hasTwoFrames = false;
 

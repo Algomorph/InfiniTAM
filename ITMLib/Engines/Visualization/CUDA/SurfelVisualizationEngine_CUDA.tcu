@@ -102,7 +102,7 @@ __global__ void ck_shade_pixel_normal(int pixelCount, const unsigned int* surfel
 
 template<typename TSurfel>
 __global__ void
-ck_update_depth_buffer_for_surfel(int surfelCount, const TSurfel* surfels, Matrix4f invT, ITMIntrinsics intrinsics,
+ck_update_depth_buffer_for_surfel(int surfelCount, const TSurfel* surfels, Matrix4f invT, Intrinsics intrinsics,
                                   int indexImageWidth, int indexImageHeight, int scaleFactor, bool useRadii,
                                   UnstableSurfelRenderingMode unstableSurfelRenderingMode, float stableSurfelConfidence,
                                   int unstableSurfelZOffset, int* depthBuffer) {
@@ -118,7 +118,7 @@ ck_update_depth_buffer_for_surfel(int surfelCount, const TSurfel* surfels, Matri
 
 template<typename TSurfel>
 __global__ void
-ck_update_index_image_for_surfel(int surfelCount, const TSurfel* surfels, Matrix4f invT, ITMIntrinsics intrinsics,
+ck_update_index_image_for_surfel(int surfelCount, const TSurfel* surfels, Matrix4f invT, Intrinsics intrinsics,
                                  int indexImageWidth, int indexImageHeight, int scaleFactor, const int* depthBuffer,
                                  bool useRadii,
                                  UnstableSurfelRenderingMode unstableSurfelRenderingMode, float stableSurfelConfidence,
@@ -136,7 +136,7 @@ ck_update_index_image_for_surfel(int surfelCount, const TSurfel* surfels, Matrix
 //#################### PUBLIC MEMBER FUNCTIONS ####################
 
 template <typename TSurfel>
-void SurfelVisualizationEngine_CUDA<TSurfel>::CopyCorrespondencesToBuffers(const ITMSurfelScene<TSurfel> *scene, float *newPositions, float *oldPositions, float *correspondences) const
+void SurfelVisualizationEngine_CUDA<TSurfel>::CopyCorrespondencesToBuffers(const SurfelScene<TSurfel> *scene, float *newPositions, float *oldPositions, float *correspondences) const
 {
   const int surfelCount = static_cast<int>(scene->GetSurfelCount());
 
@@ -154,7 +154,7 @@ void SurfelVisualizationEngine_CUDA<TSurfel>::CopyCorrespondencesToBuffers(const
 }
 
 template <typename TSurfel>
-void SurfelVisualizationEngine_CUDA<TSurfel>::CopySceneToBuffers(const ITMSurfelScene<TSurfel> *scene, float *positions, unsigned char *normals, unsigned char *colours) const
+void SurfelVisualizationEngine_CUDA<TSurfel>::CopySceneToBuffers(const SurfelScene<TSurfel> *scene, float *positions, unsigned char *normals, unsigned char *colours) const
 {
   const int surfelCount = static_cast<int>(scene->GetSurfelCount());
 
@@ -172,7 +172,7 @@ void SurfelVisualizationEngine_CUDA<TSurfel>::CopySceneToBuffers(const ITMSurfel
 }
 
 template <typename TSurfel>
-void SurfelVisualizationEngine_CUDA<TSurfel>::CreateICPMaps(const ITMSurfelScene<TSurfel> *scene, const ITMSurfelRenderState *renderState, ITMTrackingState *trackingState) const
+void SurfelVisualizationEngine_CUDA<TSurfel>::CreateICPMaps(const SurfelScene<TSurfel> *scene, const SurfelRenderState *renderState, ITMTrackingState *trackingState) const
 {
   const Matrix4f& invT = trackingState->pose_d->GetM();
   const int pixelCount = static_cast<int>(renderState->GetIndexImage()->dataSize);
@@ -195,8 +195,8 @@ void SurfelVisualizationEngine_CUDA<TSurfel>::CreateICPMaps(const ITMSurfelScene
 }
 
 template <typename TSurfel>
-void SurfelVisualizationEngine_CUDA<TSurfel>::RenderDepthImage(const ITMSurfelScene<TSurfel> *scene, const ORUtils::SE3Pose *pose,
-                                                               const ITMSurfelRenderState *renderState, ITMFloatImage *outputImage) const
+void SurfelVisualizationEngine_CUDA<TSurfel>::RenderDepthImage(const SurfelScene<TSurfel> *scene, const ORUtils::SE3Pose *pose,
+                                                               const SurfelRenderState *renderState, ITMFloatImage *outputImage) const
 {
   const Vector3f cameraPosition = pose->GetT();
   float *outputImagePtr = outputImage->GetData(MEMORYDEVICE_CUDA);
@@ -218,7 +218,7 @@ void SurfelVisualizationEngine_CUDA<TSurfel>::RenderDepthImage(const ITMSurfelSc
 }
 
 template <typename TSurfel>
-void SurfelVisualizationEngine_CUDA<TSurfel>::RenderImage(const ITMSurfelScene<TSurfel> *scene, const ORUtils::SE3Pose *pose, const ITMSurfelRenderState *renderState,
+void SurfelVisualizationEngine_CUDA<TSurfel>::RenderImage(const SurfelScene<TSurfel> *scene, const ORUtils::SE3Pose *pose, const SurfelRenderState *renderState,
                                                           ITMUChar4Image *outputImage, RenderImageType type) const
 {
   // Prevent colour rendering if the surfels don't store colour information.
@@ -284,7 +284,7 @@ MemoryDeviceType SurfelVisualizationEngine_CUDA<TSurfel>::GetMemoryType() const
 }
 
 template <typename TSurfel>
-void SurfelVisualizationEngine_CUDA<TSurfel>::MakeIndexImage(const ITMSurfelScene<TSurfel> *scene, const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics,
+void SurfelVisualizationEngine_CUDA<TSurfel>::MakeIndexImage(const SurfelScene<TSurfel> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics,
                                                              int width, int height, int scaleFactor, unsigned int *surfelIndexImage, bool useRadii,
                                                              UnstableSurfelRenderingMode unstableSurfelRenderingMode, int *depthBuffer) const
 {

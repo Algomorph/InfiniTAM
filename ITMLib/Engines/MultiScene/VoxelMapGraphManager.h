@@ -4,7 +4,7 @@
 
 #include <vector>
 
-#include "../../Objects/Scene/ITMLocalMap.h"
+#include "../../Objects/Scene/LocalMap.h"
 #include "../Main/Mappers/DenseMapper.h"
 #include "../Visualization/Interface/VisualizationEngine.h"
 
@@ -45,7 +45,7 @@ namespace ITMLib
 		const DenseMapper<TVoxel, TIndex> *denseMapper;
 		Vector2i trackedImageSize;
 
-		std::vector<ITMLocalMap<TVoxel, TIndex>*> allData;
+		std::vector<LocalMap<TVoxel, TIndex>*> allData;
 
 	public:
 		VoxelMapGraphManager(const VisualizationEngine<TVoxel, TIndex>* visualizationEngine,
@@ -56,9 +56,9 @@ namespace ITMLib
 		void removeLocalMap(int index);
 		size_t numLocalMaps(void) const { return allData.size(); }
 
-		const ITMLocalMap<TVoxel, TIndex>* getLocalMap(int localMapId) const { return allData[localMapId]; }
+		const LocalMap<TVoxel, TIndex>* getLocalMap(int localMapId) const { return allData[localMapId]; }
 
-		ITMLocalMap<TVoxel, TIndex>* getLocalMap(int localMapId) { return allData[localMapId]; }
+		LocalMap<TVoxel, TIndex>* getLocalMap(int localMapId) { return allData[localMapId]; }
 
 		const PoseConstraint & getRelation_const(int fromLocalMap, int toLocalMap) const;
 		PoseConstraint & getRelation(int fromLocalMap, int toLocalMap);

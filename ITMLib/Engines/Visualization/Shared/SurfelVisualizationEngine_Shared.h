@@ -5,8 +5,8 @@
 #include <climits>
 
 #include "SurfelVisualizationEngine_Settings.h"
-#include "../../../Objects/Scene/ITMRepresentationAccess.h"
-#include "../../../Objects/Camera/ITMIntrinsics.h"
+#include "../../../Objects/Scene/RepresentationAccess.h"
+#include "../../../Objects/Camera/Intrinsics.h"
 
 namespace ITMLib {
 
@@ -50,7 +50,7 @@ inline Vector3f visualization_transform_point(const Matrix4f& T, const Vector3f&
  */
 _CPU_AND_GPU_CODE_
 inline void
-calculate_projected_surfel_bounds(int locId, int indexImageWidth, int indexImageHeight, const ITMIntrinsics& intrinsics,
+calculate_projected_surfel_bounds(int locId, int indexImageWidth, int indexImageHeight, const Intrinsics& intrinsics,
                                   float radius, float z,
                                   int& cx, int& cy, int& projectedRadiusSquared, int& minX, int& minY, int& maxX,
                                   int& maxY) {
@@ -106,7 +106,7 @@ inline Vector4u colourise_normal(const Vector3f& n) {
  */
 template<typename TSurfel>
 _CPU_AND_GPU_CODE_
-inline bool project_surfel_to_index_image(const TSurfel& surfel, const Matrix4f& invT, const ITMIntrinsics& intrinsics,
+inline bool project_surfel_to_index_image(const TSurfel& surfel, const Matrix4f& invT, const Intrinsics& intrinsics,
                                           int indexImageWidth, int indexImageHeight, int scaleFactor,
                                           int& locId, float& z, int& scaledZ) {
 	// Convert the surfel point into the coordinates of the current frame using v_i = T_i^{-1} v_i^g.
@@ -447,7 +447,7 @@ shade_pixel_normal(int locId, const unsigned int* surfelIndexImage, const TSurfe
 template<typename TSurfel>
 _CPU_AND_GPU_CODE_TEMPLATE_
 inline void update_depth_buffer_for_surfel(int surfelId, const TSurfel* surfels, const Matrix4f& invT,
-                                           const ITMIntrinsics& intrinsics,
+                                           const Intrinsics& intrinsics,
                                            int indexImageWidth, int indexImageHeight, int scaleFactor, bool useRadii,
                                            UnstableSurfelRenderingMode unstableSurfelRenderingMode,
                                            float stableSurfelConfidence,
@@ -528,7 +528,7 @@ inline void update_depth_buffer_for_surfel(int surfelId, const TSurfel* surfels,
 template<typename TSurfel>
 _CPU_AND_GPU_CODE_TEMPLATE_
 inline void update_index_image_for_surfel(int surfelId, const TSurfel* surfels, const Matrix4f& invT,
-                                          const ITMIntrinsics& intrinsics,
+                                          const Intrinsics& intrinsics,
                                           int indexImageWidth, int indexImageHeight, int scaleFactor,
                                           const int* depthBuffer, bool useRadii,
                                           UnstableSurfelRenderingMode unstableSurfelRenderingMode,

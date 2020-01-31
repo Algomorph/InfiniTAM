@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "../../../Objects/Camera/ITMIntrinsics.h"
-#include "../../../Objects/Scene/ITMRepresentationAccess.h"
+#include "../../../Objects/Camera/Intrinsics.h"
+#include "../../../Objects/Scene/RepresentationAccess.h"
 
 namespace ITMLib
 {
@@ -332,7 +332,7 @@ inline void calculate_normal(int locId, const Vector4f *vertexMap, int width, in
  * \param radiusMap   A map into which to write the radii computed for the points in the live point cloud.
  */
 _CPU_AND_GPU_CODE_
-inline void calculate_radius(int locId, const float *depthMap, const Vector3f *normalMap, const ITMIntrinsics& intrinsics, float *radiusMap)
+inline void calculate_radius(int locId, const float *depthMap, const Vector3f *normalMap, const Intrinsics& intrinsics, float *radiusMap)
 {
   float r = 0.0f;
   Vector3f n = normalMap[locId];
@@ -361,7 +361,7 @@ inline void calculate_radius(int locId, const float *depthMap, const Vector3f *n
  * \param vertexMap   A map in which to store the back-projections of the pixels in the live 2D depth image.
  */
 _CPU_AND_GPU_CODE_
-inline void calculate_vertex_position(int locId, int width, const ITMIntrinsics& intrinsics, const float *depthMap, Vector4f *vertexMap)
+inline void calculate_vertex_position(int locId, int width, const Intrinsics& intrinsics, const float *depthMap, Vector4f *vertexMap)
 {
   /*
   v(~u~) = D(~u~) K^{-1} (~u~^T,1)^T

@@ -25,43 +25,43 @@ class IndexingEngine<ITMWarp, PlainVoxelArray, MEMORYDEVICE_CUDA>;
 
 
 template void IndexingEngine<ITMVoxel,PlainVoxelArray,MEMORYDEVICE_CUDA>::AllocateUsingOtherVolume(
-		ITMLib::ITMVoxelVolume<ITMWarp, PlainVoxelArray>* targetVolume,
-		ITMLib::ITMVoxelVolume<ITMVoxel, PlainVoxelArray>* sourceVolume);
+		ITMLib::VoxelVolume<ITMWarp, PlainVoxelArray>* targetVolume,
+		ITMLib::VoxelVolume<ITMVoxel, PlainVoxelArray>* sourceVolume);
 template void IndexingEngine<ITMVoxel,PlainVoxelArray,MEMORYDEVICE_CUDA>::AllocateUsingOtherVolume(
-		ITMLib::ITMVoxelVolume<ITMVoxel, PlainVoxelArray>* targetVolume,
-		ITMLib::ITMVoxelVolume<ITMVoxel, PlainVoxelArray>* sourceVolume);
+		ITMLib::VoxelVolume<ITMVoxel, PlainVoxelArray>* targetVolume,
+		ITMLib::VoxelVolume<ITMVoxel, PlainVoxelArray>* sourceVolume);
 template void IndexingEngine<ITMVoxel,PlainVoxelArray,MEMORYDEVICE_CUDA>::AllocateUsingOtherVolumeExpanded(
-		ITMLib::ITMVoxelVolume<ITMWarp, PlainVoxelArray>* targetVolume,
-		ITMLib::ITMVoxelVolume<ITMVoxel, PlainVoxelArray>* sourceVolume);
+		ITMLib::VoxelVolume<ITMWarp, PlainVoxelArray>* targetVolume,
+		ITMLib::VoxelVolume<ITMVoxel, PlainVoxelArray>* sourceVolume);
 template void IndexingEngine<ITMVoxel,PlainVoxelArray,MEMORYDEVICE_CUDA>::AllocateUsingOtherVolumeExpanded(
-		ITMLib::ITMVoxelVolume<ITMVoxel, PlainVoxelArray>* targetVolume,
-		ITMLib::ITMVoxelVolume<ITMVoxel, PlainVoxelArray>* sourceVolume);
+		ITMLib::VoxelVolume<ITMVoxel, PlainVoxelArray>* targetVolume,
+		ITMLib::VoxelVolume<ITMVoxel, PlainVoxelArray>* sourceVolume);
 template void IndexingEngine<ITMVoxel,PlainVoxelArray,MEMORYDEVICE_CUDA>::AllocateUsingOtherVolumeAndSetVisibilityExpanded(
-		ITMLib::ITMVoxelVolume<ITMWarp, PlainVoxelArray>* targetVolume,
-		ITMLib::ITMVoxelVolume<ITMVoxel, PlainVoxelArray>* sourceVolume,
+		ITMLib::VoxelVolume<ITMWarp, PlainVoxelArray>* targetVolume,
+		ITMLib::VoxelVolume<ITMVoxel, PlainVoxelArray>* sourceVolume,
 		ITMView* view, const Matrix4f& depth_camera_matrix);
 template void IndexingEngine<ITMVoxel,PlainVoxelArray,MEMORYDEVICE_CUDA>::AllocateUsingOtherVolumeAndSetVisibilityExpanded(
-		ITMLib::ITMVoxelVolume<ITMVoxel, PlainVoxelArray>* targetVolume,
-		ITMLib::ITMVoxelVolume<ITMVoxel, PlainVoxelArray>* sourceVolume,
+		ITMLib::VoxelVolume<ITMVoxel, PlainVoxelArray>* targetVolume,
+		ITMLib::VoxelVolume<ITMVoxel, PlainVoxelArray>* sourceVolume,
 		ITMView* view, const Matrix4f& depth_camera_matrix);
 
 
 template void IndexingEngine<ITMVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA>::
 AllocateFromWarpedVolume<WarpType::WARP_CUMULATIVE>(
-		ITMVoxelVolume<ITMWarp, PlainVoxelArray>* warpField,
-		ITMVoxelVolume<ITMVoxel, PlainVoxelArray>* sourceTSDF,
-		ITMVoxelVolume<ITMVoxel, PlainVoxelArray>* targetTSDF
+		VoxelVolume<ITMWarp, PlainVoxelArray>* warpField,
+		VoxelVolume<ITMVoxel, PlainVoxelArray>* sourceTSDF,
+		VoxelVolume<ITMVoxel, PlainVoxelArray>* targetTSDF
 );
 template void IndexingEngine<ITMVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA>::
 AllocateFromWarpedVolume<WarpType::WARP_FLOW>(
-		ITMVoxelVolume<ITMWarp, PlainVoxelArray>* warpField,
-		ITMVoxelVolume<ITMVoxel, PlainVoxelArray>* sourceTSDF,
-		ITMVoxelVolume<ITMVoxel, PlainVoxelArray>* targetTSDF
+		VoxelVolume<ITMWarp, PlainVoxelArray>* warpField,
+		VoxelVolume<ITMVoxel, PlainVoxelArray>* sourceTSDF,
+		VoxelVolume<ITMVoxel, PlainVoxelArray>* targetTSDF
 );
 template void IndexingEngine<ITMVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA>::
 AllocateFromWarpedVolume<WarpType::WARP_UPDATE>(
-		ITMVoxelVolume<ITMWarp, PlainVoxelArray>* warpField,
-		ITMVoxelVolume<ITMVoxel, PlainVoxelArray>* sourceTSDF,
-		ITMVoxelVolume<ITMVoxel, PlainVoxelArray>* targetTSDF
+		VoxelVolume<ITMWarp, PlainVoxelArray>* warpField,
+		VoxelVolume<ITMVoxel, PlainVoxelArray>* sourceTSDF,
+		VoxelVolume<ITMVoxel, PlainVoxelArray>* targetTSDF
 );
 } //namespace ITMLib

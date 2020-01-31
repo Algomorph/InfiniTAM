@@ -20,7 +20,7 @@ namespace ITMLib
    * \brief An instance of an instantiation of this class template represents a surfel-based scene.
    */
   template <typename TSurfel>
-  class ITMSurfelScene
+  class SurfelScene
   {
     //#################### PRIVATE VARIABLES ####################
   private:
@@ -44,7 +44,7 @@ namespace ITMLib
      * \param params      The scene parameters.
      * \param memoryType  The type of memory in which to store the scene.
      */
-    ITMSurfelScene(const SurfelVolumeParameters *params, MemoryDeviceType memoryType)
+    SurfelScene(const SurfelVolumeParameters *params, MemoryDeviceType memoryType)
       : m_memoryType(memoryType),
         m_params(params),
         m_surfelCount(0),
@@ -56,7 +56,7 @@ namespace ITMLib
     /**
      * \brief Destroys the scene.
      */
-    ~ITMSurfelScene()
+    ~SurfelScene()
     {
       delete m_surfelsMB;
     }
@@ -64,8 +64,8 @@ namespace ITMLib
     //#################### COPY CONSTRUCTOR & ASSIGNMENT OPERATOR ####################
   private:
     // Deliberately private and unimplemented.
-    ITMSurfelScene(const ITMSurfelScene&);
-    ITMSurfelScene& operator=(const ITMSurfelScene&);
+    SurfelScene(const SurfelScene&);
+    SurfelScene& operator=(const SurfelScene&);
 
     //#################### PUBLIC MEMBER FUNCTIONS ####################
   public:

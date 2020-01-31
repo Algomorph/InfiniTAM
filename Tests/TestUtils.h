@@ -18,15 +18,15 @@
 #include <chrono>
 #include "../ITMLib/ITMLibDefines.h"
 
-#include "../ITMLib/Objects/Scene/ITMRepresentationAccess.h"
-#include "../ITMLib/Objects/Scene/ITMVoxelVolume.h"
+#include "../ITMLib/Objects/Scene/RepresentationAccess.h"
+#include "../ITMLib/Objects/Scene/VoxelVolume.h"
 #include "../ITMLib/Utils/Configuration.h"
 
 
 using namespace ITMLib;
 
 template<class TVoxel, class TIndex>
-void GenerateTestScene_CPU(ITMVoxelVolume<TVoxel, TIndex>* scene);
+void GenerateTestScene_CPU(VoxelVolume<TVoxel, TIndex>* scene);
 
 #ifndef COMPILE_WITHOUT_CUDA
 template<class TVoxel, class TIndex>
@@ -53,7 +53,7 @@ void TimeIt(std::function<void(void)> function, const std::string& description =
 
 
 template<typename TVoxel, typename TIndex>
-void PrepareVoxelVolumeForLoading(ITMVoxelVolume<TVoxel, TIndex>* volume);
+void PrepareVoxelVolumeForLoading(VoxelVolume<TVoxel, TIndex>* volume);
 
 
 template<typename TIndex>
@@ -74,7 +74,7 @@ typename TIndex::InitializationParameters GetStandard128IndexParameters();
 //		configuration::SwappingMode swapping_mode = configuration::SWAPPINGMODE_DISABLED);
 
 template<typename TVoxel, typename TIndex>
-void loadVolume(ITMVoxelVolume<TVoxel, TIndex>** volume, const std::string& path, MemoryDeviceType memoryDeviceType,
+void loadVolume(VoxelVolume<TVoxel, TIndex>** volume, const std::string& path, MemoryDeviceType memoryDeviceType,
                 typename TIndex::InitializationParameters initializationParameters = GetFrame17PartialIndexParameters<TIndex>(),
                 configuration::SwappingMode swappingMode = configuration::SWAPPINGMODE_DISABLED);
 
@@ -82,13 +82,13 @@ void
 updateView(ITMView** view, const std::string& depth_path, const std::string& color_path, const std::string& mask_path,
            const std::string& calibration_path, MemoryDeviceType memoryDevice);
 template<typename TVoxel, typename TIndex>
-void initializeVolume(ITMVoxelVolume<TVoxel, TIndex>** volume,
+void initializeVolume(VoxelVolume<TVoxel, TIndex>** volume,
                       typename TIndex::InitializationParameters initializationParameters = GetStandard512IndexParameters<TIndex>(),
                       MemoryDeviceType memoryDevice = MEMORYDEVICE_CUDA,
                       configuration::SwappingMode swappingMode = configuration::SWAPPINGMODE_DISABLED);
 
 template<typename TVoxel, typename TIndex>
-void buildSdfVolumeFromImage(ITMVoxelVolume<TVoxel, TIndex>** volume,
+void buildSdfVolumeFromImage(VoxelVolume<TVoxel, TIndex>** volume,
                              const std::string& depth_path, const std::string& color_path, const std::string& mask_path,
                              const std::string& calibration_path = "TestData/snoopy_calib.txt",
                              MemoryDeviceType memoryDevice = MEMORYDEVICE_CUDA,
@@ -97,7 +97,7 @@ void buildSdfVolumeFromImage(ITMVoxelVolume<TVoxel, TIndex>** volume,
                              bool useBilateralFilter = false);
 
 template<typename TVoxel, typename TIndex>
-void buildSdfVolumeFromImage(ITMVoxelVolume<TVoxel, TIndex>** volume,
+void buildSdfVolumeFromImage(VoxelVolume<TVoxel, TIndex>** volume,
                              ITMView** view,
                              const std::string& depth_path, const std::string& color_path, const std::string& mask_path,
                              const std::string& calibration_path = "TestData/snoopy_calib.txt",

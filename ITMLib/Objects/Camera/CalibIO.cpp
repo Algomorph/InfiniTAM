@@ -1,6 +1,6 @@
 // Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
 
-#include "ITMCalibIO.h"
+#include "CalibIO.h"
 
 #include <fstream>
 #include <sstream>
@@ -8,7 +8,7 @@
 
 using namespace ITMLib;
 
-bool ITMLib::readIntrinsics(std::istream & src, ITMIntrinsics & dest)
+bool ITMLib::readIntrinsics(std::istream & src, Intrinsics & dest)
 {
 	float sizeX, sizeY;
 	float focalLength[2], centerPoint[2];
@@ -22,13 +22,13 @@ bool ITMLib::readIntrinsics(std::istream & src, ITMIntrinsics & dest)
 	return true;
 }
 
-bool ITMLib::readIntrinsics(const char *fileName, ITMIntrinsics & dest)
+bool ITMLib::readIntrinsics(const char *fileName, Intrinsics & dest)
 {
 	std::ifstream f(fileName);
 	return ITMLib::readIntrinsics(f, dest);
 }
 
-bool ITMLib::readExtrinsics(std::istream & src, ITMExtrinsics & dest)
+bool ITMLib::readExtrinsics(std::istream & src, Extrinsics & dest)
 {
 	Matrix4f calib;
 	src >> calib.m00 >> calib.m10 >> calib.m20 >> calib.m30;
@@ -41,26 +41,26 @@ bool ITMLib::readExtrinsics(std::istream & src, ITMExtrinsics & dest)
 	return true;
 }
 
-bool ITMLib::readExtrinsics(const char *fileName, ITMExtrinsics & dest)
+bool ITMLib::readExtrinsics(const char *fileName, Extrinsics & dest)
 {
 	std::ifstream f(fileName);
 	return ITMLib::readExtrinsics(f, dest);
 }
 
-bool ITMLib::readDisparityCalib(std::istream & src, ITMDisparityCalib & dest)
+bool ITMLib::readDisparityCalib(std::istream & src, DisparityCalib & dest)
 {
 	std::string word;
 	src >> word;
 	if (src.fail()) return false;
 
-	ITMDisparityCalib::TrafoType type = ITMDisparityCalib::TRAFO_KINECT;
+	DisparityCalib::TrafoType type = DisparityCalib::TRAFO_KINECT;
 	float a,b;
 
 	if (word.compare("kinect") == 0) {
-		type = ITMDisparityCalib::TRAFO_KINECT;
+		type = DisparityCalib::TRAFO_KINECT;
 		src >> a;
 	} else if (word.compare("affine") == 0) {
-		type = ITMDisparityCalib::TRAFO_AFFINE;
+		type = DisparityCalib::TRAFO_AFFINE;
 		src >> a;
 	} else {
 		std::stringstream wordstream(word);
@@ -72,7 +72,7 @@ bool ITMLib::readDisparityCalib(std::istream & src, ITMDisparityCalib & dest)
 	if (src.fail()) return false;
 
 	if ((a == 0.0f) && (b == 0.0f)) {
-		type = ITMDisparityCalib::TRAFO_AFFINE;
+		type = DisparityCalib::TRAFO_AFFINE;
 		a = 1.0f/1000.0f; b = 0.0f;
 	}
 
@@ -80,13 +80,13 @@ bool ITMLib::readDisparityCalib(std::istream & src, ITMDisparityCalib & dest)
 	return true;
 }
 
-bool ITMLib::readDisparityCalib(const char *fileName, ITMDisparityCalib & dest)
+bool ITMLib::readDisparityCalib(const char *fileName, DisparityCalib & dest)
 {
 	std::ifstream f(fileName);
 	return ITMLib::readDisparityCalib(f, dest);
 }
 
-bool ITMLib::readRGBDCalib(std::istream & src, ITMRGBDCalib & dest)
+bool ITMLib::readRGBDCalib(std::istream & src, RGBDCalib & dest)
 {
 	if (!ITMLib::readIntrinsics(src, dest.intrinsics_rgb)) return false;
 	if (!ITMLib::readIntrinsics(src, dest.intrinsics_d)) return false;
@@ -95,13 +95,13 @@ bool ITMLib::readRGBDCalib(std::istream & src, ITMRGBDCalib & dest)
 	return true;
 }
 
-bool ITMLib::readRGBDCalib(const char *fileName, ITMRGBDCalib & dest)
+bool ITMLib::readRGBDCalib(const char *fileName, RGBDCalib & dest)
 {
 	std::ifstream f(fileName);
 	return ITMLib::readRGBDCalib(f, dest);
 }
 
-bool ITMLib::readRGBDCalib(const char *rgbIntrinsicsFile, const char *depthIntrinsicsFile, const char *disparityCalibFile, const char *extrinsicsFile, ITMRGBDCalib & dest)
+bool ITMLib::readRGBDCalib(const char *rgbIntrinsicsFile, const char *depthIntrinsicsFile, const char *disparityCalibFile, const char *extrinsicsFile, RGBDCalib & dest)
 {
 	bool ret = true;
 	ret &= ITMLib::readIntrinsics(rgbIntrinsicsFile, dest.intrinsics_rgb);
@@ -111,7 +111,7 @@ bool ITMLib::readRGBDCalib(const char *rgbIntrinsicsFile, const char *depthIntri
 	return ret;
 }
 
-void ITMLib::writeIntrinsics(std::ostream & dest, const ITMIntrinsics & src)
+void ITMLib::writeIntrinsics(std::ostream & dest, const Intrinsics & src)
 {
 	// Note: The size parameters are no longer used, but we don't want to change the calibration file format.
 	const float dummySizeX = 640, dummySizeY = 480;
@@ -121,7 +121,7 @@ void ITMLib::writeIntrinsics(std::ostream & dest, const ITMIntrinsics & src)
 	dest << src.projectionParamsSimple.px << ' ' << src.projectionParamsSimple.py << '\n';
 }
 
-void ITMLib::writeExtrinsics(std::ostream & dest, const ITMExtrinsics & src)
+void ITMLib::writeExtrinsics(std::ostream & dest, const Extrinsics & src)
 {
 	const Matrix4f& calib = src.calib;
 	dest << calib.m00 << ' ' << calib.m10 << ' ' << calib.m20 << ' ' << calib.m30 << '\n';
@@ -129,14 +129,14 @@ void ITMLib::writeExtrinsics(std::ostream & dest, const ITMExtrinsics & src)
 	dest << calib.m02 << ' ' << calib.m12 << ' ' << calib.m22 << ' ' << calib.m32 << '\n';
 }
 
-void ITMLib::writeDisparityCalib(std::ostream & dest, const ITMDisparityCalib & src)
+void ITMLib::writeDisparityCalib(std::ostream & dest, const DisparityCalib & src)
 {
 	switch(src.GetType())
 	{
-		case ITMDisparityCalib::TRAFO_AFFINE:
+		case DisparityCalib::TRAFO_AFFINE:
 			dest << "affine " << src.GetParams().x << ' ' << src.GetParams().y << '\n';
 			break;
-		case ITMDisparityCalib::TRAFO_KINECT:
+		case DisparityCalib::TRAFO_KINECT:
 			dest << src.GetParams().x << ' ' << src.GetParams().y << '\n';
 			break;
 		default:
@@ -144,7 +144,7 @@ void ITMLib::writeDisparityCalib(std::ostream & dest, const ITMDisparityCalib & 
 	}
 }
 
-void ITMLib::writeRGBDCalib(std::ostream & dest, const ITMRGBDCalib & src)
+void ITMLib::writeRGBDCalib(std::ostream & dest, const RGBDCalib & src)
 {
 	writeIntrinsics(dest, src.intrinsics_rgb);
 	dest << '\n';
@@ -155,7 +155,7 @@ void ITMLib::writeRGBDCalib(std::ostream & dest, const ITMRGBDCalib & src)
 	writeDisparityCalib(dest, src.disparityCalib);
 }
 
-void ITMLib::writeRGBDCalib(const char *fileName, const ITMRGBDCalib & src)
+void ITMLib::writeRGBDCalib(const char *fileName, const RGBDCalib & src)
 {
 	std::ofstream f(fileName);
 	writeRGBDCalib(f, src);

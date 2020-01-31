@@ -19,7 +19,7 @@
 #include <boost/filesystem.hpp>
 
 //local
-#include "../../Objects/Scene/ITMVoxelVolume.h"
+#include "../../Objects/Scene/VoxelVolume.h"
 #include "../Collections/ITM3DNestedMapOfArrays.h"
 #include "../Analytics/ITMNeighborVoxelIterationInfo.h"
 
@@ -85,7 +85,7 @@ public:
 	// endregion
 	// region ================================ CONSTRUCTORS & DESTRUCTORS ==============================================
 
-	explicit ITMWarpFieldLogger(ITMVoxelVolume <TWarp, TIndex>* warpField, boost::filesystem::path path);
+	explicit ITMWarpFieldLogger(VoxelVolume <TWarp, TIndex>* warpField, boost::filesystem::path path);
 	explicit ITMWarpFieldLogger(const Vector6i& bounds, boost::filesystem::path fullScenePath);
 	~ITMWarpFieldLogger();
 
@@ -100,7 +100,7 @@ public:
 	bool Loaded() const;
 	void Load();
 	std::string GetSliceIdentifier() const;
-	const ITMVoxelVolume <TWarp, TIndex>* GetScene() const;
+	const VoxelVolume <TWarp, TIndex>* GetScene() const;
 
 	//*** scene saving / loading ***
 	void Save();
@@ -148,7 +148,7 @@ private:
 	fs::path highlightsTextPath;
 
 	// data structures
-	ITMVoxelVolume <TWarp, TIndex>* warpField;
+	VoxelVolume <TWarp, TIndex>* warpField;
 	ITM3DNestedMapOfArrays <ITMHighlightIterationInfo> highlights;
 	int minHighlightRecurrenceCount = 0;
 

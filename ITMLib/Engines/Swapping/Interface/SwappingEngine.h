@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "../../../Objects/RenderStates/ITMRenderState.h"
-#include "../../../Objects/Scene/ITMVoxelVolume.h"
+#include "../../../Objects/RenderStates/RenderState.h"
+#include "../../../Objects/Scene/VoxelVolume.h"
 #include "../../../Objects/Views/ITMView.h"
 
 namespace ITMLib
@@ -17,8 +17,8 @@ namespace ITMLib
 	class SwappingEngine
 	{
 	public:
-		virtual void IntegrateGlobalIntoLocal(ITMVoxelVolume<TVoxel, TIndex> *scene, ITMRenderState *renderState) = 0;
-		virtual void SaveToGlobalMemory(ITMVoxelVolume<TVoxel, TIndex> *scene, ITMRenderState *renderState) = 0;
-		virtual void CleanLocalMemory(ITMVoxelVolume<TVoxel, TIndex> *scene, ITMRenderState *renderState) = 0;
+		virtual void IntegrateGlobalIntoLocal(VoxelVolume<TVoxel, TIndex> *scene, RenderState *renderState) = 0;
+		virtual void SaveToGlobalMemory(VoxelVolume<TVoxel, TIndex> *scene, RenderState *renderState) = 0;
+		virtual void CleanLocalMemory(VoxelVolume<TVoxel, TIndex> *scene, RenderState *renderState) = 0;
 	};
 }

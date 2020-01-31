@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "../../../Objects/Scene/ITMRepresentationAccess.h"
+#include "../../../Objects/Scene/RepresentationAccess.h"
 #include "../../../Utils/ITMPixelUtils.h"
 
 

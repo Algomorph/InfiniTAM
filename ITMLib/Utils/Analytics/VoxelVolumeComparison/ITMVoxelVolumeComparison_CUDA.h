@@ -15,7 +15,7 @@
 //  ================================================================
 #pragma once
 
-#include "../../../Objects/Scene/ITMVoxelVolume.h"
+#include "../../../Objects/Scene/VoxelVolume.h"
 #include "../../../Utils/ITMVoxelFlags.h"
 
 namespace ITMLib{
@@ -34,16 +34,16 @@ namespace ITMLib{
  * \return true if scene content matches (to within specified tolerance), false otherwise
  */
 template<typename TVoxel, typename TIndexA, typename TIndexB, typename ToleranceType>
-bool contentAlmostEqual_CUDA(ITMVoxelVolume<TVoxel,TIndexA>* a, ITMVoxelVolume<TVoxel,TIndexB>* b, ToleranceType tolerance);
+bool contentAlmostEqual_CUDA(VoxelVolume<TVoxel,TIndexA>* a, VoxelVolume<TVoxel,TIndexB>* b, ToleranceType tolerance);
 
 template<typename TVoxel, typename TIndexA, typename TIndexB, typename ToleranceType>
-bool contentAlmostEqual_CUDA_Verbose(ITMVoxelVolume<TVoxel,TIndexA>* a, ITMVoxelVolume<TVoxel,TIndexB>* b, ToleranceType tolerance);
+bool contentAlmostEqual_CUDA_Verbose(VoxelVolume<TVoxel,TIndexA>* a, VoxelVolume<TVoxel,TIndexB>* b, ToleranceType tolerance);
 
 template<typename TVoxel, typename TIndexA, typename TIndexB, typename ToleranceType>
-bool contentForFlagsAlmostEqual_CUDA(ITMVoxelVolume<TVoxel,TIndexA>* a, ITMVoxelVolume<TVoxel,TIndexB>* b, VoxelFlags flags, ToleranceType tolerance);
+bool contentForFlagsAlmostEqual_CUDA(VoxelVolume<TVoxel,TIndexA>* a, VoxelVolume<TVoxel,TIndexB>* b, VoxelFlags flags, ToleranceType tolerance);
 
 template<typename TVoxel, typename TIndexA, typename TIndexB, typename ToleranceType>
-bool contentForFlagsAlmostEqual_CUDA_Verbose(ITMVoxelVolume<TVoxel,TIndexA>* a, ITMVoxelVolume<TVoxel,TIndexB>* b, VoxelFlags flags, ToleranceType tolerance);
+bool contentForFlagsAlmostEqual_CUDA_Verbose(VoxelVolume<TVoxel,TIndexA>* a, VoxelVolume<TVoxel,TIndexB>* b, VoxelFlags flags, ToleranceType tolerance);
 
 /**
  * \brief Determine if every pair of corresponding voxels within the two voxel volumes is within the provided tolerance
@@ -63,10 +63,10 @@ bool contentForFlagsAlmostEqual_CUDA_Verbose(ITMVoxelVolume<TVoxel,TIndexA>* a, 
  * \return true if scene content for allocated areas in both volumes matches (to within specified tolerance), false otherwise
  */
 template<typename TVoxel, typename TIndexA, typename TIndexB, typename ToleranceType>
-bool allocatedContentAlmostEqual_CUDA(ITMVoxelVolume<TVoxel,TIndexA>* a, ITMVoxelVolume<TVoxel,TIndexB>* b, ToleranceType tolerance);
+bool allocatedContentAlmostEqual_CUDA(VoxelVolume<TVoxel,TIndexA>* a, VoxelVolume<TVoxel,TIndexB>* b, ToleranceType tolerance);
 
 template<typename TVoxel, typename TIndexA, typename TIndexB, typename ToleranceType>
-bool allocatedContentAlmostEqual_CUDA_Verbose(ITMVoxelVolume<TVoxel,TIndexA>* a, ITMVoxelVolume<TVoxel,TIndexB>* b, ToleranceType tolerance);
+bool allocatedContentAlmostEqual_CUDA_Verbose(VoxelVolume<TVoxel,TIndexA>* a, VoxelVolume<TVoxel,TIndexB>* b, ToleranceType tolerance);
 }// namespace ITMLib
 
 

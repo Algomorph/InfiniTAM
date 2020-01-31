@@ -5,8 +5,8 @@
 #include <map>
 
 #include "../../Engines/Visualization/Interface/VisualizationEngine.h"
-#include "../../Objects/RenderStates/ITMRenderState.h"
-#include "ITMVoxelVolume.h"
+#include "../RenderStates/RenderState.h"
+#include "VoxelVolume.h"
 #include "../../Objects/Tracking/ITMTrackingState.h"
 #include "../../Utils/Configuration.h"
 

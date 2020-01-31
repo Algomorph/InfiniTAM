@@ -20,7 +20,7 @@
 
 
 //local
-#include "../../Objects/Scene/ITMVoxelVolume.h"
+#include "../../Objects/Scene/VoxelVolume.h"
 #include "../Collections/ITM3DNestedMapOfArrays.h"
 #include "../Analytics/ITMNeighborVoxelIterationInfo.h"
 #include "ITMWarpFieldLogger.h"
@@ -66,11 +66,11 @@ public:
 
 //endregion
 // region === CONSTRUCTORS / DESTRUCTORS ===
-	ITMSceneLogger(ITMVoxelVolume<TVoxel, TIndex>* canonicalScene,
-	               ITMVoxelVolume<TVoxel, TIndex>* liveScene,
-	               ITMVoxelVolume<TWarp, TIndex>* warpField,
+	ITMSceneLogger(VoxelVolume<TVoxel, TIndex>* canonicalScene,
+	               VoxelVolume<TVoxel, TIndex>* liveScene,
+	               VoxelVolume<TWarp, TIndex>* warpField,
 	               std::string path = "");
-	ITMSceneLogger(ITMVoxelVolume<TVoxel, TIndex>* liveScene,
+	ITMSceneLogger(VoxelVolume<TVoxel, TIndex>* liveScene,
 	               std::string path);
 
 	ITMSceneLogger();
@@ -81,9 +81,9 @@ public:
 
 	//*** setters / preparation
 	void SetScenes(
-			ITMVoxelVolume<TVoxel, TIndex>* canonicalScene,
-			ITMVoxelVolume<TVoxel, TIndex>* liveScene,
-			ITMVoxelVolume<TWarp, TIndex>* warpScene);
+			VoxelVolume<TVoxel, TIndex>* canonicalScene,
+			VoxelVolume<TVoxel, TIndex>* liveScene,
+			VoxelVolume<TWarp, TIndex>* warpScene);
 	void SetPath(std::string path);
 
 	//*** getters
@@ -96,8 +96,8 @@ public:
 
 	ITM3DNestedMapOfArrays<ITMHighlightIterationInfo> GetHighlights() const;
 	std::vector<int> GetInterestRegionHashes() const;
-	const ITMVoxelVolume<TWarp, TIndex>* GetActiveWarpScene() const;
-	const ITMVoxelVolume<TVoxel, TIndex>* GetLiveScene() const;
+	const VoxelVolume<TWarp, TIndex>* GetActiveWarpScene() const;
+	const VoxelVolume<TVoxel, TIndex>* GetLiveScene() const;
 	bool GetIsActiveSceneASlice() const;
 	std::vector<std::string> GetSliceIds() const;
 	void GetActiveSceneBounds(Vector6i& bounds) const;
@@ -177,8 +177,8 @@ private:
 // *** scene structures ***
 	ITMWarpFieldLogger<TWarp, TIndex>* fullWarpLogger;
 	ITMWarpFieldLogger<TWarp, TIndex>* activeWarpLogger;
-	ITMVoxelVolume<TVoxel, TIndex>* liveScene;
-	ITMVoxelVolume<TVoxel, TIndex>* canonicalScene;
+	VoxelVolume<TVoxel, TIndex>* liveScene;
+	VoxelVolume<TVoxel, TIndex>* canonicalScene;
 
 // *** scene meta-information + reading/writing
 	std::map<std::string, ITMWarpFieldLogger<TWarp, TIndex>*> slices;

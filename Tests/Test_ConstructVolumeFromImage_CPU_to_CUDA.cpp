@@ -51,19 +51,19 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_VBH_Expnaded_CPU_CUDA, Frame16And1
 
 // *** initialize volumes ***
 	// CPU
-	ITMVoxelVolume<ITMVoxel, VoxelBlockHash> volume_VBH_17_CPU(MEMORYDEVICE_CPU, InitParams<VoxelBlockHash>());
+	VoxelVolume<ITMVoxel, VoxelBlockHash> volume_VBH_17_CPU(MEMORYDEVICE_CPU, InitParams<VoxelBlockHash>());
 	volume_VBH_17_CPU.Reset();
-	ITMVoxelVolume<ITMVoxel, VoxelBlockHash> volume_VBH_17_CPU_depth_allocation(MEMORYDEVICE_CPU,
-	                                                                               InitParams<VoxelBlockHash>());
+	VoxelVolume<ITMVoxel, VoxelBlockHash> volume_VBH_17_CPU_depth_allocation(MEMORYDEVICE_CPU,
+	                                                                         InitParams<VoxelBlockHash>());
 	volume_VBH_17_CPU_depth_allocation.Reset();
 	// CUDA
-	ITMVoxelVolume<ITMVoxel, VoxelBlockHash> volume_VBH_17_CUDA(MEMORYDEVICE_CUDA, InitParams<VoxelBlockHash>());
+	VoxelVolume<ITMVoxel, VoxelBlockHash> volume_VBH_17_CUDA(MEMORYDEVICE_CUDA, InitParams<VoxelBlockHash>());
 	volume_VBH_17_CUDA.Reset();
-	ITMVoxelVolume<ITMVoxel, VoxelBlockHash> volume_VBH_17_CUDA_depth_allocation(MEMORYDEVICE_CUDA,
-	                                                                               InitParams<VoxelBlockHash>());
+	VoxelVolume<ITMVoxel, VoxelBlockHash> volume_VBH_17_CUDA_depth_allocation(MEMORYDEVICE_CUDA,
+	                                                                          InitParams<VoxelBlockHash>());
 	volume_VBH_17_CUDA_depth_allocation.Reset();
 	// comparison volume
-	ITMVoxelVolume<ITMVoxel, VoxelBlockHash> volume_CUDA_to_CPU(MEMORYDEVICE_CPU, InitParams<VoxelBlockHash>());
+	VoxelVolume<ITMVoxel, VoxelBlockHash> volume_CUDA_to_CPU(MEMORYDEVICE_CPU, InitParams<VoxelBlockHash>());
 	volume_CUDA_to_CPU.Reset();
 	
 // *** allocate hash blocks ***

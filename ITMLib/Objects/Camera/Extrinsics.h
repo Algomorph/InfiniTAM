@@ -10,7 +10,7 @@ namespace ITMLib
 	    Represents the extrinsic calibration between RGB and depth
 	    cameras
 	*/
-	class ITMExtrinsics
+	class Extrinsics
 	{
 	public:
 		/** The transformation matrix representing the
@@ -37,7 +37,7 @@ namespace ITMLib
 			}
 		}
 
-		ITMExtrinsics()
+		Extrinsics()
 		{
 			Matrix4f m;
 			m.setZeros();

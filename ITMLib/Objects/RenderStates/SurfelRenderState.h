@@ -10,7 +10,7 @@ namespace ITMLib
   /**
    * \brief An instance of this class can be used to hold surfel index images.
    */
-  class ITMSurfelRenderState
+  class SurfelRenderState
   {
     //#################### PRIVATE VARIABLES ####################
   private:
@@ -34,20 +34,20 @@ namespace ITMLib
      * \param indexImageSize      The size of the normal index image.
      * \param supersamplingFactor The supersampling scaling factor (applied to each axis separately).
      */
-    ITMSurfelRenderState(const Vector2i& indexImageSize, int supersamplingFactor);
+    SurfelRenderState(const Vector2i& indexImageSize, int supersamplingFactor);
 
     //#################### DESTRUCTOR ####################
   public:
     /**
      * \brief Destroys the render state.
      */
-    ~ITMSurfelRenderState();
+    ~SurfelRenderState();
 
     //#################### COPY CONSTRUCTOR & ASSIGNMENT OPERATOR ####################
   private:
     // Deliberately private and unimplemented.
-    ITMSurfelRenderState(const ITMSurfelRenderState&);
-    ITMSurfelRenderState& operator=(const ITMSurfelRenderState&);
+    SurfelRenderState(const SurfelRenderState&);
+    SurfelRenderState& operator=(const SurfelRenderState&);
 
     //#################### PUBLIC MEMBER FUNCTIONS ####################
   public:

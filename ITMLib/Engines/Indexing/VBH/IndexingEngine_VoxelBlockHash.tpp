@@ -22,9 +22,9 @@ namespace ITMLib {
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, typename TDerivedClass>
 template<WarpType TWarpType, typename TWarp>
 void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::AllocateFromWarpedVolume(
-		ITMVoxelVolume<TWarp, VoxelBlockHash>* warpField,
-		ITMVoxelVolume<TVoxel, VoxelBlockHash>* sourceTSDF,
-		ITMVoxelVolume<TVoxel, VoxelBlockHash>* targetTSDF) {
+		VoxelVolume<TWarp, VoxelBlockHash>* warpField,
+		VoxelVolume<TVoxel, VoxelBlockHash>* sourceTSDF,
+		VoxelVolume<TVoxel, VoxelBlockHash>* targetTSDF) {
 
 	assert(warpField->index.hashEntryCount == sourceTSDF->index.hashEntryCount &&
 	       sourceTSDF->index.hashEntryCount == targetTSDF->index.hashEntryCount);
