@@ -28,7 +28,7 @@ namespace ITMLib
 		int newIdx = (int)allData.size();
 		allData.push_back(new ITMLocalMap<TVoxel, TIndex>(visualization_engine, trackedImageSize));
 
-		denseMapper->ResetScene(allData[newIdx]->scene);
+		allData[newIdx]->scene->Reset();
 		return newIdx;
 	}
 

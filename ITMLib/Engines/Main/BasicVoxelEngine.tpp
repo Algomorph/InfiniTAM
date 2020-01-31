@@ -36,7 +36,7 @@ BasicVoxelEngine<TVoxel,TIndex>::BasicVoxelEngine(const ITMRGBDCalib& calib, Vec
 		meshingEngine = MeshingEngineFactory::MakeMeshingEngine<TVoxel,TIndex>(deviceType, scene->index);
 
 	denseMapper = new DenseMapper<TVoxel, TIndex>(scene->index);
-	denseMapper->ResetScene(scene);
+	scene->Reset();
 
 	imuCalibrator = new ITMIMUCalibrator_iPad();
 	tracker = ITMCameraTrackerFactory::Instance().Make(imgSize_rgb, imgSize_d, lowLevelEngine, imuCalibrator,
@@ -157,7 +157,7 @@ void BasicVoxelEngine<TVoxel, TIndex>::LoadFromFile()
 	}
 	catch (std::runtime_error &e)
 	{
-		denseMapper->ResetScene(scene);
+		scene->Reset();
 		throw std::runtime_error("Could not load scene:" + std::string(e.what()));
 	}
 }
@@ -165,7 +165,7 @@ void BasicVoxelEngine<TVoxel, TIndex>::LoadFromFile()
 template <typename TVoxel, typename TIndex>
 void BasicVoxelEngine<TVoxel,TIndex>::resetAll()
 {
-	denseMapper->ResetScene(scene);
+	scene->Reset();
 	trackingState->Reset();
 }
 

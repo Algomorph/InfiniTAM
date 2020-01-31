@@ -20,7 +20,6 @@ namespace ITMLib
 		configuration::SwappingMode swappingMode;
 
 	public:
-		void ResetScene(ITMVoxelVolume<TVoxel,TIndex> *scene) const;
 
 		/// Process a single frame
 		void ProcessFrame(const ITMView *view, const ITMTrackingState *trackingState, ITMVoxelVolume<TVoxel,TIndex> *scene, ITMRenderState *renderState_live);

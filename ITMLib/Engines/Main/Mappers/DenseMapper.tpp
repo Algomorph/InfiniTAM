@@ -26,12 +26,6 @@ DenseMapper<TVoxel,TIndex>::~DenseMapper()
 }
 
 template<class TVoxel, class TIndex>
-void DenseMapper<TVoxel,TIndex>::ResetScene(ITMVoxelVolume<TVoxel,TIndex> *scene) const
-{
-	sceneRecoEngine->ResetScene(scene);
-}
-
-template<class TVoxel, class TIndex>
 void DenseMapper<TVoxel,TIndex>::ProcessFrame(const ITMView *view, const ITMTrackingState *trackingState, ITMVoxelVolume<TVoxel,TIndex> *scene, ITMRenderState *renderState)
 {
 	// allocation
