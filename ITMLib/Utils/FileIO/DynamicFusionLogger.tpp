@@ -69,9 +69,9 @@ void DynamicFusionLogger<TVoxel, TWarp, TIndex>::SetOutputDirectory(std::string 
 };
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicFusionLogger<TVoxel, TWarp, TIndex>::SetFocusCoordinates(Vector3i focusCoordinates) {
+void DynamicFusionLogger<TVoxel, TWarp, TIndex>::SetFocusCoordinates(Vector3i focus_coordinates) {
 	hasFocusCoordinates = true;
-	this->focusCoordinates = focusCoordinates;
+	this->focus_coordinates = focus_coordinates;
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
@@ -279,7 +279,7 @@ void DynamicFusionLogger<TVoxel, TWarp, TIndex>::InitializeFrameRecording() {
 
 		if (recordingScene1DSlicesWithUpdates) {
 #ifdef WITH_VTK
-			this->scene1DSliceVisualizer.reset(new ITMSceneSliceVisualizer1D(focus_coordinates, AXIS_X, 16));
+			this->scene1DSliceVisualizer.reset(new SceneSliceVisualizer1D(focus_coordinates, AXIS_X, 16));
 			scene1DSliceVisualizer->Plot1DSceneSlice(canonicalScene, Vector4i(97, 181, 193, 255), 3.0);
 			scene1DSliceVisualizer->Plot1DSceneSlice(liveScene, Vector4i(183, 115, 46, 255), 3.0);
 #else
@@ -314,7 +314,7 @@ void DynamicFusionLogger<TVoxel, TWarp, TIndex>::InitializeFrameRecording() {
 		if (recordingScene3DSlicesWithUpdates) {
 #ifdef WITH_VTK
 			if (!scene3DSliceVisualizer) {
-				scene3DSliceVisualizer.reset(new ITMSceneSliceVisualizer3D<TVoxel, TWarp, TIndex>
+				scene3DSliceVisualizer.reset(new SceneSliceVisualizer3D<TVoxel, TWarp, TIndex>
 													 (canonicalScene, liveScene, warpField, focus_coordinates,
 													  planeFor2Dand3DSlices, _3dSliceInPlaneRadius,
 													  _3dSliceOutOfPlaneRadius));
@@ -448,14 +448,14 @@ void DynamicFusionLogger<TVoxel, TWarp, TIndex>::FinalizeFrameRecording() {
 	if (recording3DSceneAndWarpProgression) {
 		scene3DLogger->StopSavingWarpState();
 		if (hasFocusCoordinates) {
-			Vector3i sliceMinPoint(focusCoordinates[0] - focusSliceRadius,
-			                       focusCoordinates[1] - focusSliceRadius,
-			                       focusCoordinates[2] - focusSliceRadius);
-			Vector3i sliceMaxPoint(focusCoordinates[0] + focusSliceRadius,
-			                       focusCoordinates[1] + focusSliceRadius,
-			                       focusCoordinates[2] + focusSliceRadius);
+			Vector3i sliceMinPoint(focus_coordinates[0] - focusSliceRadius,
+			                       focus_coordinates[1] - focusSliceRadius,
+			                       focus_coordinates[2] - focusSliceRadius);
+			Vector3i sliceMaxPoint(focus_coordinates[0] + focusSliceRadius,
+			                       focus_coordinates[1] + focusSliceRadius,
+			                       focus_coordinates[2] + focusSliceRadius);
 
-			std::cout << "Making slice around voxel " << green << focusCoordinates << reset << " with l_0 radius of "
+			std::cout << "Making slice around voxel " << green << focus_coordinates << reset << " with l_0 radius of "
 			          << focusSliceRadius << "...";
 			std::string sliceId;
 			scene3DLogger->MakeSlice(sliceMinPoint, sliceMaxPoint, sliceId);

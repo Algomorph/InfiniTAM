@@ -44,8 +44,8 @@
 #ifndef COMPILE_WITHOUT_CUDA
 //local CUDA
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngine_CUDA.h"
-#include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/ITMVoxelVolumeComparison_CUDA.h"
-#include "../ITMLib/Utils/Analytics/SceneStatisticsCalculator/CUDA/ITMSceneStatisticsCalculator_CUDA.h"
+#include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CUDA.h"
+#include "../ITMLib/Utils/Analytics/SceneStatisticsCalculator/CUDA/SceneStatisticsCalculator_CUDA.h"
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
 #endif
 

@@ -158,7 +158,7 @@ static void RenderImage_common(const ORUtils::SE3Pose *pose, const Intrinsics *i
 
 	switch (type) {
 		case IVisualizationEngine::RENDER_COLOUR_FROM_VOLUME:
-			renderColour_device<ITMMultiVoxel<TVoxel>, ITMMultiIndex<TIndex> > << <gridSize, cudaBlockSize >> >(outRendering, pointsRay, renderState->voxelData_device,
+			renderColour_device<MultiVoxel<TVoxel>, MultiIndex<TIndex> > << <gridSize, cudaBlockSize >> >(outRendering, pointsRay, renderState->voxelData_device,
 					renderState->indexData_device, imgSize);
 			ORcudaKernelCheck;
 			break;

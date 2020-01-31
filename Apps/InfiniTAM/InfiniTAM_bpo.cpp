@@ -24,7 +24,7 @@
 #include <vtkContextScene.h>
 
 //ITMLib/VTK
-#include "../../ITMLib/Utils/Visualization/ITMVisualizationWindowManager.h"
+#include "../../ITMLib/Utils/Visualization/VisualizationWindowManager.h"
 #endif
 
 //ITMLib
@@ -50,13 +50,13 @@ namespace po = boost::program_options;
 namespace pt = boost::property_tree;
 
 
-ITMDynamicFusionLogger_Interface& GetLogger(configuration::IndexingMethod method) {
+DynamicFusionLogger_Interface& GetLogger(configuration::IndexingMethod method) {
 	switch (method) {
 		case configuration::INDEX_HASH: {
-			return static_cast<ITMDynamicFusionLogger_Interface&>(DynamicFusionLogger<TSDFVoxel, WarpVoxel, VoxelBlockHash>::Instance());
+			return static_cast<DynamicFusionLogger_Interface&>(DynamicFusionLogger<TSDFVoxel, WarpVoxel, VoxelBlockHash>::Instance());
 		}
 		case configuration::INDEX_ARRAY: {
-			return static_cast<ITMDynamicFusionLogger_Interface&>(DynamicFusionLogger<TSDFVoxel, WarpVoxel, PlainVoxelArray>::Instance());
+			return static_cast<DynamicFusionLogger_Interface&>(DynamicFusionLogger<TSDFVoxel, WarpVoxel, PlainVoxelArray>::Instance());
 		}
 	}
 };
@@ -128,7 +128,7 @@ int main(int argc, char** argv) {
 
 // region ================================ BUILD MAIN ENGINE ========================================================
 		configuration::IndexingMethod chosenIndexingMethod = configuration.indexing_method;
-		ITMDynamicFusionLogger_Interface& logger = GetLogger(chosenIndexingMethod);
+		DynamicFusionLogger_Interface& logger = GetLogger(chosenIndexingMethod);
 		MainEngine* mainEngine = BuildMainEngine(imageSource->getCalib(),
 		                                         imageSource->getRGBImageSize(),
 		                                         imageSource->getDepthImageSize(),
@@ -166,7 +166,7 @@ int main(int argc, char** argv) {
 
 // endregion ===========================================================================================================
 
-		//ITMVisualizationWindowManager::get().Run();
+		//VisualizationWindowManager::get().Run();
 		UIEngine_BPO::Instance().Run();
 		UIEngine_BPO::Instance().Shutdown();
 
@@ -176,7 +176,7 @@ int main(int argc, char** argv) {
 		delete imageSource;
 		delete imuSource;
 
-		//ITMVisualizationWindowManager::get().ShutDown();
+		//VisualizationWindowManager::get().ShutDown();
 // endregion ===========================================================================================================
 		return EXIT_SUCCESS;
 	} catch (std::exception& e) {

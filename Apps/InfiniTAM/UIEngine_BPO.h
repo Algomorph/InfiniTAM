@@ -106,12 +106,12 @@ public:
 	bool allocateGPU;
 	bool shutdownRequested = false;
 	ITMUChar4Image* saveImage;
-	ITMLib::ITMDynamicFusionLogger_Interface* logger;
+	ITMLib::DynamicFusionLogger_Interface* logger;
 	ITMLib::configuration::IndexingMethod indexingMethod;
 
 	void Initialize(int& argc, char** argv, InputSource::ImageSourceEngine* imageSource, InputSource::IMUSourceEngine* imuSource,
 	                ITMLib::MainEngine* mainEngine, const ITMLib::configuration::Configuration& configuration,
-	                ITMLib::ITMDynamicFusionLogger_Interface* logger);
+	                ITMLib::DynamicFusionLogger_Interface* logger);
 	void Shutdown();
 
 	void Run();

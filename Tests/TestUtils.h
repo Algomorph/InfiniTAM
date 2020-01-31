@@ -26,14 +26,13 @@
 using namespace ITMLib;
 
 template<class TVoxel, class TIndex>
-void GenerateTestScene_CPU(VoxelVolume<TVoxel, TIndex>* scene);
+void GenerateTestVolume_CPU(VoxelVolume<TVoxel, TIndex>* volume);
 
 #ifndef COMPILE_WITHOUT_CUDA
 template<class TVoxel, class TIndex>
-void GenerateTestScene_CUDA(ITMVoxelVolume<TVoxel, TIndex>* scene);
+void GenerateTestVolume_CUDA(VoxelVolume<TVoxel, TIndex>* volume);
 #endif
 
-void GenerateAndLogKillingScene01();
 
 template<typename TVoxel>
 void simulateVoxelAlteration(TVoxel& voxel, float newSdfValue);

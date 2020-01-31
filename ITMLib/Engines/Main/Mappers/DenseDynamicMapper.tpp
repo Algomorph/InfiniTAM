@@ -36,7 +36,7 @@
 //** CUDA **
 #ifndef COMPILE_WITHOUT_CUDA
 #include "../../EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
-#include "../../../Utils/Analytics/SceneStatisticsCalculator/CUDA/ITMSceneStatisticsCalculator_CUDA.h"
+#include "../../../Utils/Analytics/SceneStatisticsCalculator/CUDA/SceneStatisticsCalculator_CUDA.h"
 #endif
 
 using namespace ITMLib;

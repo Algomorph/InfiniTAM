@@ -49,13 +49,13 @@ template<typename TVoxel, typename TWarp, typename TIndex>
 class ThreadInteropCommand;
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-class ITMSceneSliceVisualizer3DInteractorStyle;
+class SceneSliceVisualizer3DInteractorStyle;
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-class ITMSceneSliceVisualizer3D {
+class SceneSliceVisualizer3D {
 
 	friend class ThreadInteropCommand<TVoxel, TWarp, TIndex>;
-	friend class ITMSceneSliceVisualizer3DInteractorStyle<TVoxel, TWarp, TIndex>;
+	friend class SceneSliceVisualizer3DInteractorStyle<TVoxel, TWarp, TIndex>;
 
 public:
 	//================= CONSTANTS ================
@@ -64,12 +64,12 @@ public:
 	static const char* scaleUnknownsVisibleAttributeName;
 
 	// ====================== CONSTRUCTORS / DESTRUCTORS ==================
-	ITMSceneSliceVisualizer3D(ITMVoxelVolume<TVoxel, TIndex>* canonicalScene,
-	                          ITMVoxelVolume<TVoxel, TIndex>* liveScene,
-	                          ITMVoxelVolume<TWarp, TIndex>* warpField,
-	                          Vector3i focusCoordinates, Plane plane = PLANE_XY,
-	                          int radiusInPlane = 10, int radiusOutOfPlane = 0);
-	virtual ~ITMSceneSliceVisualizer3D();
+	SceneSliceVisualizer3D(VoxelVolume<TVoxel, TIndex>* canonicalScene,
+	                       VoxelVolume<TVoxel, TIndex>* liveScene,
+	                       VoxelVolume<TWarp, TIndex>* warpField,
+	                       Vector3i focusCoordinates, Plane plane = PLANE_XY,
+	                       int radiusInPlane = 10, int radiusOutOfPlane = 0);
+	virtual ~SceneSliceVisualizer3D();
 
 	// ====================== MEMBER FUNCTIONS ===========================
 	VoxelScaleMode GetCurrentScaleMode();
@@ -101,13 +101,13 @@ protected:
 	VoxelScaleMode scaleMode;
 
 	//** highlights **
-	ITM3DNestedMapOfArrays<ITMHighlightIterationInfo> highlights;
+	NestedMap3DOfArrays<ITMHighlightIterationInfo> highlights;
 
 	// scene limits/boundaries/extent
 	Vector6i bounds;
 	Vector3i focusCoordinates;
 
-	ITM3DWindow* window;
+	Window3D* window;
 
 
 private:
@@ -138,7 +138,7 @@ private:
 	// region ============== MEMBER FUNCTIONS ===========================
 	void InitializeVoxels();
 	void BuildVoxelAndHashBlockPolyDataFromScene(
-			ITMVoxelVolume <TVoxel, TIndex>* scene, SceneSlice& sceneSlice);
+			VoxelVolume <TVoxel, TIndex>* scene, SceneSlice& sceneSlice);
 	void BuildInitialSlices();
 	void RebuildSlices();
 	void InitializeWarps();
@@ -155,9 +155,9 @@ private:
 	// ===================== MEMBER VARIABLES ============================
 
 
-	ITMVoxelVolume<TVoxel, TIndex>* canonicalScene;
-	ITMVoxelVolume<TVoxel, TIndex>* liveScene;
-	ITMVoxelVolume<TWarp, TIndex>* warpField;
+	VoxelVolume<TVoxel, TIndex>* canonicalScene;
+	VoxelVolume<TVoxel, TIndex>* liveScene;
+	VoxelVolume<TWarp, TIndex>* warpField;
 
 	// ** visualization modes / states **
 	VisibilityMode visibilityMode;

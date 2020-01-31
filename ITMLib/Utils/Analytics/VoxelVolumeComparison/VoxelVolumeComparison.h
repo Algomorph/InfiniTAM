@@ -19,9 +19,7 @@
 #include "VoxelVolumeComparison_CPU.h"
 
 #ifndef COMPILE_WITHOUT_CUDA
-
-#include "ITMVoxelVolumeComparison_CUDA.h"
-
+#include "VoxelVolumeComparison_CUDA.h"
 #endif
 
 namespace ITMLib {

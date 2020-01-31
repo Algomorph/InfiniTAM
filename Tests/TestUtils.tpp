@@ -27,8 +27,8 @@
 using namespace ITMLib;
 
 template<class TVoxel, class TIndex>
-void GenerateTestScene_CPU(VoxelVolume<TVoxel, TIndex>* scene) {
-	EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().ResetVolume(scene);
+void GenerateTestVolume_CPU(VoxelVolume<TVoxel, TIndex>* volume) {
+	EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().ResetVolume(volume);
 	const int narrowBandThicknessVoxels = 10;
 	int xOffset = 8;
 	int surfaceSizeVoxelsZ = 16;
@@ -44,8 +44,8 @@ void GenerateTestScene_CPU(VoxelVolume<TVoxel, TIndex>* scene) {
 
 		for (int z = 0; z < surfaceSizeVoxelsZ; z++) {
 			for (int y = 0; y < surfaceSizeVoxelsY; y++) {
-				EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().SetVoxel(scene, Vector3i(xPos, y, z), voxelPos);
-				EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().SetVoxel(scene, Vector3i(xNeg, y, z), voxelNeg);
+				EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().SetVoxel(volume, Vector3i(xPos, y, z), voxelPos);
+				EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().SetVoxel(volume, Vector3i(xNeg, y, z), voxelNeg);
 			}
 		}
 	}
@@ -54,8 +54,8 @@ void GenerateTestScene_CPU(VoxelVolume<TVoxel, TIndex>* scene) {
 
 #ifndef COMPILE_WITHOUT_CUDA
 template<class TVoxel, class TIndex>
-void GenerateTestScene_CUDA(ITMVoxelVolume<TVoxel, TIndex>* scene) {
-	EditAndCopyEngine_CUDA<TVoxel, TIndex>::Inst().ResetVolume(scene);
+void GenerateTestVolume_CUDA(VoxelVolume<TVoxel, TIndex>* volume) {
+	EditAndCopyEngine_CUDA<TVoxel, TIndex>::Inst().ResetVolume(volume);
 	const int narrowBandThicknessVoxels = 10;
 	int xOffset = 8;
 	int surfaceSizeVoxelsZ = 16;
@@ -71,8 +71,8 @@ void GenerateTestScene_CUDA(ITMVoxelVolume<TVoxel, TIndex>* scene) {
 
 		for (int z = 0; z < surfaceSizeVoxelsZ; z++) {
 			for (int y = 0; y < surfaceSizeVoxelsY; y++) {
-				EditAndCopyEngine_CUDA<TVoxel, TIndex>::Inst().SetVoxel(scene, Vector3i(xPos, y, z), voxelPos);
-				EditAndCopyEngine_CUDA<TVoxel, TIndex>::Inst().SetVoxel(scene, Vector3i(xNeg, y, z), voxelNeg);
+				EditAndCopyEngine_CUDA<TVoxel, TIndex>::Inst().SetVoxel(volume, Vector3i(xPos, y, z), voxelPos);
+				EditAndCopyEngine_CUDA<TVoxel, TIndex>::Inst().SetVoxel(volume, Vector3i(xNeg, y, z), voxelNeg);
 			}
 		}
 	}

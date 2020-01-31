@@ -28,26 +28,26 @@ class vtkChartXY;
 
 
 namespace ITMLib{
-class ITMSceneSliceVisualizer1D {
+class SceneSliceVisualizer1D {
 public:
-	ITMSceneSliceVisualizer1D(Vector3i focusCoordinate, Axis axis, unsigned int voxelRange);
-	~ITMSceneSliceVisualizer1D() = default;
+	SceneSliceVisualizer1D(Vector3i focusCoordinate, Axis axis, unsigned int voxelRange);
+	~SceneSliceVisualizer1D() = default;
 
 
 	template<typename TVoxel, typename TIndex>
-	void Plot1DSceneSlice(ITMVoxelVolume <TVoxel, TIndex>* scene, Vector4i color, double width);
+	void Plot1DSceneSlice(VoxelVolume <TVoxel, TIndex>* scene, Vector4i color, double width);
 	template<typename TVoxel, typename TWarp, typename TIndex>
 	void Draw1DWarpUpdateVector(
-			ITMVoxelVolume <TVoxel, TIndex>* TSDF,
-			ITMVoxelVolume<TWarp, TIndex>* warp, Vector4i color);
+			VoxelVolume <TVoxel, TIndex>* TSDF,
+			VoxelVolume<TWarp, TIndex>* warp, Vector4i color);
 	void SaveScreenshot(std::string path);
 
 
 private:
 	template<typename TVoxel, typename TIndex, typename TGetSDFFunctor>
-	void Plot1DSceneSliceHelper(ITMVoxelVolume <TVoxel, TIndex>* scene, Vector4i color, double width);
+	void Plot1DSceneSliceHelper(VoxelVolume <TVoxel, TIndex>* scene, Vector4i color, double width);
 
-	ITMChartWindow* window;
+	ChartWindow* window;
 
 	const Vector3i focusCoordinates;
 	const Axis axis;

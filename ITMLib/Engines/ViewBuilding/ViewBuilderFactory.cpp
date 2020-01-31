@@ -4,7 +4,7 @@
 
 #include "CPU/ViewBuilder_CPU.h"
 #ifndef COMPILE_WITHOUT_CUDA
-#include "CUDA/ITMViewBuilder_CUDA.h"
+#include "CUDA/ViewBuilder_CUDA.h"
 #endif
 
 namespace ITMLib
@@ -23,12 +23,12 @@ ViewBuilder *ViewBuilderFactory::MakeViewBuilder(const RGBDCalib& calib, MemoryD
       break;
     case MEMORYDEVICE_CUDA:
 #ifndef COMPILE_WITHOUT_CUDA
-      viewBuilder = new ITMViewBuilder_CUDA(calib);
+      viewBuilder = new ViewBuilder_CUDA(calib);
 #endif
       break;
     case MEMORYDEVICE_METAL:
 #ifdef COMPILE_WITH_METAL
-      viewBuilder = new ITMViewBuilder_CPU(calib);
+      viewBuilder = new ViewBuilder_CPU(calib);
 #endif
       break;
   }
@@ -50,12 +50,12 @@ ViewBuilder *ViewBuilderFactory::MakeViewBuilder(const std::string& calibration_
 			break;
 		case MEMORYDEVICE_CUDA:
 #ifndef COMPILE_WITHOUT_CUDA
-			viewBuilder = new ITMViewBuilder_CUDA(calibrationData);
+			viewBuilder = new ViewBuilder_CUDA(calibrationData);
 #endif
 			break;
 		case MEMORYDEVICE_METAL:
 #ifdef COMPILE_WITH_METAL
-			viewBuilder = new ITMViewBuilder_CPU(calibrationData);
+			viewBuilder = new ViewBuilder_CPU(calibrationData);
 #endif
 			break;
 	}

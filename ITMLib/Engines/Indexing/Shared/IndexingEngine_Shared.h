@@ -27,7 +27,7 @@
 #include "../../../Utils/Geometry/IntersectionChecks.h"
 
 #ifdef __CUDACC__
-#include "../../../Utils/ITMCUDAUtils.h"
+#include "../../../Utils/CUDAUtils.h"
 #include "../../Traversal/CUDA/VolumeTraversal_CUDA_VoxelBlockHash.h"
 #endif
 

@@ -37,10 +37,10 @@
 
 namespace ITMLib {
 
-class ITMChartWindow {
+class ChartWindow {
 public:
-	ITMChartWindow(const std::string& name, const std::string& title, int width, int height);
-	~ITMChartWindow();
+	ChartWindow(const std::string& name, const std::string& title, int width, int height);
+	~ChartWindow();
 	vtkSmartPointer<vtkChartXY> GetChart();
 	vtkSmartPointer<vtkRenderWindow> GetRenderWindow();
 	void Update();
@@ -54,10 +54,10 @@ private:
 
 };
 
-class ITM3DWindow {
+class Window3D {
 public:
-	ITM3DWindow(const std::string& name, const std::string& title, int width, int height);
-	~ITM3DWindow();
+	Window3D(const std::string& name, const std::string& title, int width, int height);
+	~Window3D();
 	void Update();
 	vtkSmartPointer<vtkRenderWindow> GetRenderWindow();
 	void ResetCamera();
@@ -84,29 +84,29 @@ private:
 
 };
 
-class ITMVisualizationWindowManager {
+class VisualizationWindowManager {
 public:
-	static ITMVisualizationWindowManager& Instance() {
-		static ITMVisualizationWindowManager instance;
+	static VisualizationWindowManager& Instance() {
+		static VisualizationWindowManager instance;
 		return instance;
 	}
 
-	ITMChartWindow* MakeOrGetChartWindow(const std::string& name,
+	ChartWindow* MakeOrGetChartWindow(const std::string& name,
 	                                     const std::string& title = "VTK Window",
 	                                     int width = 1024, int height = 768);
 
-	ITM3DWindow* MakeOrGet3DWindow(const std::string& name,
+	Window3D* MakeOrGet3DWindow(const std::string& name,
 	                               const std::string& title = "VTK Window",
 	                               int width = -1, int height = -1);
 	void CloseAndDelete3DWindow(const std::string& name);
 
-	ITMVisualizationWindowManager(ITMVisualizationWindowManager const&) = delete;
-	void operator=(ITMVisualizationWindowManager const&)  = delete;
+	VisualizationWindowManager(VisualizationWindowManager const&) = delete;
+	void operator=(VisualizationWindowManager const&)  = delete;
 private:
-	std::unordered_map<std::string, ITMChartWindow> chartWindows;
-	std::unordered_map<std::string, ITM3DWindow> _3dWindows;
+	std::unordered_map<std::string, ChartWindow> chartWindows;
+	std::unordered_map<std::string, Window3D> _3dWindows;
 
-	ITMVisualizationWindowManager() = default;
-	~ITMVisualizationWindowManager() = default;
+	VisualizationWindowManager() = default;
+	~VisualizationWindowManager() = default;
 };
 }//namespace ITMLib

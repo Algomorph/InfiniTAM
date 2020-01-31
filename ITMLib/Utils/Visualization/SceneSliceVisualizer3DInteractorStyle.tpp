@@ -31,22 +31,22 @@ using namespace ITMLib;
 
 // Can't use vtkStandardNewMacro on a templated class.
 template<typename TVoxelCanonical, typename TVoxelLive, typename TIndex>
-ITMSceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>*
-ITMSceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>::New() {
-	ITMSceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>* result = new ITMSceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>();
+SceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>*
+SceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>::New() {
+	SceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>* result = new SceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>();
 	result->InitializeObjectBase();
 	return result;
 };
 
 
 template<typename TVoxelCanonical, typename TVoxelLive, typename TIndex>
-ITMSceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>::
-ITMSceneSliceVisualizer3DInteractorStyle() : bindingMap(createBindingMap()) {
+SceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>::
+SceneSliceVisualizer3DInteractorStyle() : bindingMap(createBindingMap()) {
 
 }
 
 template<typename TVoxelCanonical, typename TVoxelLive, typename TIndex>
-void ITMSceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>::OnKeyPress() {
+void SceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>::OnKeyPress() {
 	// Get the keypress
 	vtkRenderWindowInteractor* rwi = this->Interactor;
 	std::string key = rwi->GetKeySym();
@@ -68,8 +68,8 @@ void ITMSceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TInde
 }
 
 template<typename TVoxelCanonical, typename TVoxelLive, typename TIndex>
-void ITMSceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>::SetParent(
-		ITMSceneSliceVisualizer3D<TVoxelCanonical, TVoxelLive, TIndex>* parent) {
+void SceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>::SetParent(
+		SceneSliceVisualizer3D<TVoxelCanonical, TVoxelLive, TIndex>* parent) {
 	this->parent = parent;
 	this->keyBindingLayerIndex = this->parent->window->GetLayerCount();
 	this->parent->window->AddLayer();
@@ -90,74 +90,74 @@ void ITMSceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TInde
 }
 
 template<typename TVoxelCanonical, typename TVoxelLive, typename TIndex>
-std::map<std::string, typename ITMLib::ITMSceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>::UserAction>
-ITMSceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>::createBindingMap() {
+std::map<std::string, typename ITMLib::SceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>::UserAction>
+SceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>::createBindingMap() {
 	std::map<std::string, UserAction> map;
 	// CREATE NEW KEY BINDINGS HERE!
 	// Example keys: "F1","Ctrl+a", "Alt+b", "Ctrl+Alt+k", "Alt+Shift+b", "Ctrl+Shift+c", "Ctrl+Alt+Shift+grave"
 	map.insert(std::make_pair(
 			"F7",
 			UserAction{"Test action, prints \"MIAU!\" to stdout",
-			           &ITMSceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>::PrintMIAU}));
+			           &SceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>::PrintMIAU}));
 	map.insert(std::make_pair(
 			"F8",
 			UserAction{"Test action, prints \"Haha\" to stdout",
-			           &ITMSceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>::PrintHaha}));
+			           &SceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>::PrintHaha}));
 	map.insert(std::make_pair(
 			"grave",
 			UserAction{"Toggle key-binding overlay",
-			           &ITMSceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>::ToggleKeyBindingOverlay}));
+			           &SceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>::ToggleKeyBindingOverlay}));
 	map.insert(std::make_pair(
 			"q",
 			UserAction{"Request shutdown of the whole application",
-			           &ITMSceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>::RequestShutdown}));
+			           &SceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>::RequestShutdown}));
 	map.insert(std::make_pair(
 			"a",
 			UserAction{"Set visibility to canonical voxel grid slice with updates",
-			           &ITMSceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>
+			           &SceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>
 			                   ::SetVisibilityToCanonicalWithUpdates}));
 	map.insert(std::make_pair(
 			"s",
 			UserAction{"Set visibility to live voxel grid slice",
-			           &ITMSceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>
+			           &SceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>
 			           ::SetVisibilityToLive}));
 	map.insert(std::make_pair(
 			"d",
 			UserAction{"Set visibility to both live and canonical voxel grid slices, with update vectors",
-			           &ITMSceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>
+			           &SceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>
 			           ::SetVisibilityToLiveAndCanonicalWithUpdates}));
 	map.insert(std::make_pair(
 			"f",
 			UserAction{"Set visibility to canonical voxel grid slice *after* fusion",
-			           &ITMSceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>
+			           &SceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>
 			           ::SetVisibilityToFusedCanonical}));
 	map.insert(std::make_pair(
 			"bracketright",
 			UserAction{"Advance the live slice visualization by a single optimization step.",
-			           &ITMSceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>
+			           &SceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>
 			           ::AdvanceVisibleOptimizationStep}));
 	map.insert(std::make_pair(
 			"bracketleft",
 			UserAction{"Retreat the live slice visualization by a single optimization step.",
-			           &ITMSceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>
+			           &SceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>
 			           ::RetreatVisibleOptimizationStep}));
 	return map;
 }
 
 template<typename TVoxelCanonical, typename TVoxelLive, typename TIndex>
-void ITMSceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>::PrintMIAU() {
+void SceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>::PrintMIAU() {
 	debug_print("MIAU!");
 }
 
 
 template<typename TVoxelCanonical, typename TVoxelLive, typename TIndex>
-void ITMSceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>::PrintHaha() {
+void SceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>::PrintHaha() {
 	debug_print("Haha");
 }
 
 
 template<typename TVoxelCanonical, typename TVoxelLive, typename TIndex>
-void ITMSceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>::ToggleKeyBindingOverlay() {
+void SceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>::ToggleKeyBindingOverlay() {
 	if (this->bindingLayerShowing) {
 		this->parent->window->HideLayer(this->keyBindingLayerIndex);
 		this->bindingLayerShowing = false;
@@ -168,39 +168,39 @@ void ITMSceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TInde
 }
 
 template<typename TVoxelCanonical, typename TVoxelLive, typename TIndex>
-void ITMSceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>::RequestShutdown() {
-	ITMDynamicFusionLogger<TVoxelCanonical, TVoxelLive, TIndex>::Instance().RequestAppShutdown();
+void SceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>::RequestShutdown() {
+	DynamicFusionLogger<TVoxelCanonical, TVoxelLive, TIndex>::Instance().RequestAppShutdown();
 }
 
 template<typename TVoxelCanonical, typename TVoxelLive, typename TIndex>
 void
-ITMSceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>::SetVisibilityToCanonicalWithUpdates() {
+SceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>::SetVisibilityToCanonicalWithUpdates() {
 	this->parent->SetVisibilityMode(VISIBILITY_CANONICAL_WITH_UPDATES);
 }
 
 template<typename TVoxelCanonical, typename TVoxelLive, typename TIndex>
-void ITMSceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>::SetVisibilityToLive() {
+void SceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>::SetVisibilityToLive() {
 	this->parent->SetVisibilityMode(VISIBILITY_LIVE);
 }
 
 template<typename TVoxelCanonical, typename TVoxelLive, typename TIndex>
 void
-ITMSceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>::SetVisibilityToLiveAndCanonicalWithUpdates() {
+SceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>::SetVisibilityToLiveAndCanonicalWithUpdates() {
 	this->parent->SetVisibilityMode(VISIBILITY_LIVE_AND_CANONICAL_WITH_UPDATES);
 }
 
 template<typename TVoxelCanonical, typename TVoxelLive, typename TIndex>
-void ITMSceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>::SetVisibilityToFusedCanonical() {
+void SceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>::SetVisibilityToFusedCanonical() {
 	this->parent->SetVisibilityMode(VISIBILITY_FUSED_CANONICAL);
 }
 
 template<typename TVoxelCanonical, typename TVoxelLive, typename TIndex>
-void ITMSceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>::AdvanceVisibleOptimizationStep() {
+void SceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>::AdvanceVisibleOptimizationStep() {
 	this->parent->AdvanceLiveStateVizualization();
 }
 
 template<typename TVoxelCanonical, typename TVoxelLive, typename TIndex>
-void ITMSceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>::RetreatVisibleOptimizationStep() {
+void SceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>::RetreatVisibleOptimizationStep() {
 	this->parent->RetreatLiveStateVizualization();
 }
 

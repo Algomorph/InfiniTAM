@@ -4,7 +4,7 @@
 
 #include "CPU/LowLevelEngine_CPU.h"
 #ifndef COMPILE_WITHOUT_CUDA
-#include "CUDA/ITMLowLevelEngine_CUDA.h"
+#include "CUDA/LowLevelEngine_CUDA.h"
 #endif
 
 namespace ITMLib
@@ -23,12 +23,12 @@ LowLevelEngine *LowLevelEngineFactory::MakeLowLevelEngine(MemoryDeviceType devic
       break;
     case MEMORYDEVICE_CUDA:
 #ifndef COMPILE_WITHOUT_CUDA
-      lowLevelEngine = new ITMLowLevelEngine_CUDA();
+      lowLevelEngine = new LowLevelEngine_CUDA();
 #endif
       break;
     case MEMORYDEVICE_METAL:
 #ifdef COMPILE_WITH_METAL
-      lowLevelEngine = new ITMLowLevelEngine_CPU();
+      lowLevelEngine = new LowLevelEngine_CPU();
 #endif
       break;
   }

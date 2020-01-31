@@ -27,7 +27,7 @@
 #include "../../Engines/Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
 
 #ifdef __CUDACC__
-#include "../../Utils/ITMCUDAUtils.h"
+#include "../../Utils/CUDAUtils.h"
 #include "../../Engines/Traversal/CUDA/VolumeTraversal_CUDA_PlainVoxelArray.h"
 #include "../../Engines/Traversal/CUDA/VolumeTraversal_CUDA_VoxelBlockHash.h"
 #endif

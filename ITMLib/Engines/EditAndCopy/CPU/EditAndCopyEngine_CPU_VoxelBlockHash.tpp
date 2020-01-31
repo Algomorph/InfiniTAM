@@ -289,7 +289,7 @@ bool EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::CopyVolume(
 		}
 	} else {
 #ifdef WITH_OPENMP
-#pragma omp parallel for default(none) shared(sourceHashTable,sourceVoxels,voxelsWereCopied,offset,target)
+#pragma omp parallel for default(none) shared(sourceHashTable,sourceVoxels,voxelsWereCopied,offset,targetVolume)
 #endif
 		// traverse source hash blocks
 		for (int sourceHash = 0; sourceHash < hashEntryCount; sourceHash++) {

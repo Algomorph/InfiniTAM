@@ -18,9 +18,9 @@
 
 #ifndef COMPILE_WITHOUT_CUDA
 
-#include "CUDA/ITMColorTracker_CUDA.h"
-#include "CUDA/ITMDepthTracker_CUDA.h"
-#include "CUDA/ITMExtendedTracker_CUDA.h"
+#include "CUDA/ColorTracker_CUDA.h"
+#include "CUDA/DepthTracker_CUDA.h"
+#include "CUDA/ExtendedTracker_CUDA.h"
 
 #endif
 
@@ -204,13 +204,13 @@ public:
 				break;
 			case MEMORYDEVICE_CUDA:
 #ifndef COMPILE_WITHOUT_CUDA
-				ret = new ITMColorTracker_CUDA(imgSize_rgb, &(levels[0]), static_cast<int>(levels.size()),
+				ret = new ColorTracker_CUDA(imgSize_rgb, &(levels[0]), static_cast<int>(levels.size()),
 				                               lowLevelEngine);
 #endif
 				break;
 			case MEMORYDEVICE_METAL:
 #ifdef COMPILE_WITH_METAL
-				ret = new ITMColorTracker_CPU(imgSize_rgb, &(levels[0]), static_cast<int>(levels.size()), lowLevelEngine);
+				ret = new ColorTracker_CPU(imgSize_rgb, &(levels[0]), static_cast<int>(levels.size()), lowLevelEngine);
 #endif
 				break;
 		}
@@ -256,13 +256,13 @@ public:
 				break;
 			case MEMORYDEVICE_CUDA:
 #ifndef COMPILE_WITHOUT_CUDA
-				ret = new ITMDepthTracker_CUDA(imgSize_d, &(levels[0]), static_cast<int>(levels.size()),
+				ret = new DepthTracker_CUDA(imgSize_d, &(levels[0]), static_cast<int>(levels.size()),
 				                               smallStepSizeCriterion, failureDetectorThd, lowLevelEngine);
 #endif
 				break;
 			case MEMORYDEVICE_METAL:
 #ifdef COMPILE_WITH_METAL
-				ret = new ITMDepthTracker_CPU(imgSize_d, &(levels[0]), static_cast<int>(levels.size()), smallStepSizeCriterion, failureDetectorThd, lowLevelEngine);
+				ret = new DepthTracker_CPU(imgSize_d, &(levels[0]), static_cast<int>(levels.size()), smallStepSizeCriterion, failureDetectorThd, lowLevelEngine);
 #endif
 				break;
 		}
@@ -292,7 +292,7 @@ public:
 		static_assert(std::is_base_of<ExtendedTracker_CPU, TTracker_CPU>::value,
 		              "TTracker_CPU must be derived from ITMExtendedTracker_CPU");
 #ifndef COMPILE_WITHOUT_CUDA
-		static_assert(std::is_base_of<ITMExtendedTracker_CUDA, TTracker_CUDA>::value,
+		static_assert(std::is_base_of<ExtendedTracker_CUDA, TTracker_CUDA>::value,
 		              "TTracker_CUDA must be derived from ITMExtendedTracker_CUDA");
 #endif
 #ifdef COMPILE_WITH_METAL
@@ -412,10 +412,10 @@ public:
 				MakeExtendedLikeTracker<
 						ExtendedTracker_CPU
 #ifndef COMPILE_WITHOUT_CUDA
-						, ITMExtendedTracker_CUDA
+						, ExtendedTracker_CUDA
 #endif
 #ifdef COMPILE_WITH_METAL
-						,ITMExtendedTracker_Metal
+						, ExtendedTracker_Metal
 #endif
 				>(imgSize_rgb, imgSize_d, deviceType, cfg, lowLevelEngine, imuCalibrator, sceneParams);
 
@@ -433,10 +433,10 @@ public:
 		return MakeExtendedLikeTracker<
 				SDF2SDFCameraTracker_CPU
 #ifndef COMPILE_WITHOUT_CUDA
-				, ITMDynamicCameraTracker_CUDA
+				, DynamicCameraTracker_CUDA
 #endif
 #ifdef COMPILE_WITH_METAL
-				, ITMKillingTracker_Metal //TODO
+				, KillingTracker_Metal //TODO
 #endif
 		>(imgSize_rgb, imgSize_d, deviceType, cfg, lowLevelEngine, imuCalibrator, sceneParams);
 	}
@@ -478,13 +478,13 @@ public:
 				break;
 			case MEMORYDEVICE_CUDA:
 #ifndef COMPILE_WITHOUT_CUDA
-				dTracker = new ITMDepthTracker_CUDA(imgSize_d, &(levels[0]), static_cast<int>(levels.size()),
+				dTracker = new DepthTracker_CUDA(imgSize_d, &(levels[0]), static_cast<int>(levels.size()),
 				                                    smallStepSizeCriterion, failureDetectorThd, lowLevelEngine);
 #endif
 				break;
 			case MEMORYDEVICE_METAL:
 #ifdef COMPILE_WITH_METAL
-				dTracker = new ITMDepthTracker_CPU(imgSize_d, &(levels[0]), static_cast<int>(levels.size()), smallStepSizeCriterion, failureDetectorThd, lowLevelEngine);
+				dTracker = new DepthTracker_CPU(imgSize_d, &(levels[0]), static_cast<int>(levels.size()), smallStepSizeCriterion, failureDetectorThd, lowLevelEngine);
 #endif
 				break;
 			default:

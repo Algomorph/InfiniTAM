@@ -20,7 +20,7 @@
 #include "../../../Objects/Volume/VoxelBlockHash.h"
 #include "../../../Objects/Volume/RepresentationAccess.h"
 //#ifdef __CUDACC__
-//#include "../../../Utils/ITMCUDAUtils.h"
+//#include "../../../Utils/CUDAUtils.h"
 //#endif
 
 

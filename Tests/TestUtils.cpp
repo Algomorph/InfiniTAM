@@ -27,11 +27,11 @@
 
 using namespace ITMLib;
 
-template void GenerateTestScene_CPU<TSDFVoxel, VoxelBlockHash>(VoxelVolume<TSDFVoxel, VoxelBlockHash>* scene);
-template void GenerateTestScene_CPU<TSDFVoxel, PlainVoxelArray>(VoxelVolume<TSDFVoxel, PlainVoxelArray>* scene);
+template void GenerateTestVolume_CPU<TSDFVoxel, VoxelBlockHash>(VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume);
+template void GenerateTestVolume_CPU<TSDFVoxel, PlainVoxelArray>(VoxelVolume<TSDFVoxel, PlainVoxelArray>* volume);
 #ifndef COMPILE_WITHOUT_CUDA
-template void GenerateTestScene_CUDA<TSDFVoxel, VoxelBlockHash>(ITMVoxelVolume<TSDFVoxel, VoxelBlockHash>* scene);
-template void GenerateTestScene_CUDA<TSDFVoxel, PlainVoxelArray>(ITMVoxelVolume<TSDFVoxel, PlainVoxelArray>* scene);
+template void GenerateTestVolume_CUDA<TSDFVoxel, VoxelBlockHash>(VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume);
+template void GenerateTestVolume_CUDA<TSDFVoxel, PlainVoxelArray>(VoxelVolume<TSDFVoxel, PlainVoxelArray>* volume);
 #endif
 
 template void simulateVoxelAlteration<TSDFVoxel>(TSDFVoxel& voxel, float newSdfValue);
@@ -135,7 +135,7 @@ updateView(ITMView** view, const std::string& depth_path, const std::string& col
 		case MEMORYDEVICE_CUDA:
 #ifndef COMPILE_WITHOUT_CUDA
 			if (viewBuilder_CUDA == nullptr)
-				viewBuilder_CUDA = ITMViewBuilderFactory::MakeViewBuilder(calibration_path, memoryDevice);
+				viewBuilder_CUDA = ViewBuilderFactory::MakeViewBuilder(calibration_path, memoryDevice);
 			viewBuilderToUse = viewBuilder_CUDA;
 #else
 			DIEWITHEXCEPTION_REPORTLOCATION("Attmpted to update CUDA view while build without CUDA support, aborting.");

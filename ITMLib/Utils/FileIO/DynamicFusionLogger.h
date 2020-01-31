@@ -20,9 +20,9 @@
 #include "../Visualization/SceneSliceVisualizer2D.h"
 #include "../Visualization/VisualizationCommon.h"
 #ifdef WITH_VTK
-#include "../Visualization/ITMSceneSliceVisualizer1D.h"
-#include "../Visualization/ITMSceneSliceVisualizer3D.h"
-#include "../Visualization/ITMSceneTrackingEnergyPlotter.h"
+#include "../Visualization/SceneSliceVisualizer1D.h"
+#include "../Visualization/SceneSliceVisualizer3D.h"
+#include "../Visualization/SceneTrackingEnergyPlotter.h"
 #endif
 
 
@@ -31,7 +31,7 @@ namespace ITMLib {
 //TODO: adapt to record warpField properly (+test)
 //TODO: adapt to live-scene-pair structure; the live scene is now split into two that are being ping-ponged (+test)
 
-class ITMDynamicFusionLogger_Interface{
+class DynamicFusionLogger_Interface{
 public:
 
 // region ============================= SETTERS & SWITCHES =============================================================
@@ -83,7 +83,7 @@ public:
 };
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-class DynamicFusionLogger : public ITMDynamicFusionLogger_Interface {
+class DynamicFusionLogger : public DynamicFusionLogger_Interface {
 public:
 // where to save the images within the output directory
 	static const std::string iterationFramesFolderName;
@@ -181,8 +181,8 @@ private:
 	std::unique_ptr<ITMSceneSliceVisualizer2D<TVoxel, TWarp, TIndex>> scene2DSliceVisualizer;
 #endif
 #ifdef WITH_VTK
-	std::unique_ptr<ITMSceneSliceVisualizer1D> scene1DSliceVisualizer;
-	std::unique_ptr<ITMSceneSliceVisualizer3D<TVoxel, TWarp, TIndex>> scene3DSliceVisualizer;
+	std::unique_ptr<SceneSliceVisualizer1D> scene1DSliceVisualizer;
+	std::unique_ptr<SceneSliceVisualizer3D<TVoxel, TWarp, TIndex>> scene3DSliceVisualizer;
 	std::unique_ptr<ITMSceneTrackingEnergyPlotter> energyPlotter;
 #endif
 	SceneLogger<TVoxel, TWarp, TIndex>* scene3DLogger = nullptr;
@@ -215,7 +215,7 @@ private:
 	// configuration
 	Plane planeFor2Dand3DSlices = PLANE_XY;
 	std::string outputDirectory;
-	Vector3i focusCoordinates;
+	Vector3i focus_coordinates;
 	int _3dSliceInPlaneRadius;
 	unsigned int _3dSliceOutOfPlaneRadius;
 	const int focusSliceRadius;

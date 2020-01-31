@@ -188,14 +188,14 @@ BOOST_AUTO_TEST_CASE(ExpandVolume_CUDA) {
 	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>& indexing_engine
 			= IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance();
 
-	ITMVoxelVolume<TSDFVoxel, VoxelBlockHash> volume1(&configuration::get().general_voxel_volume_parameters,
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume1(&configuration::get().general_voxel_volume_parameters,
 	                                                    configuration::get().swapping_mode ==
 	                                                    configuration::SWAPPINGMODE_ENABLED,
 	                                                    MEMORYDEVICE_CUDA,
 	                                                    {1200, 0x20000});
 	EditAndCopyEngine_CUDA<TSDFVoxel, VoxelBlockHash>::Inst().ResetVolume(&volume1);
 
-	ITMVoxelVolume<TSDFVoxel, VoxelBlockHash> volume2(&configuration::get().general_voxel_volume_parameters,
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume2(&configuration::get().general_voxel_volume_parameters,
 	                                                    configuration::get().swapping_mode ==
 	                                                    configuration::SWAPPINGMODE_ENABLED,
 	                                                    MEMORYDEVICE_CUDA,

@@ -47,7 +47,7 @@ private:
 	
 	
 
-	ITMChartWindow* window;
+	ChartWindow* window;
 
 };
 

@@ -77,7 +77,7 @@ void UIEngine_BPO::Initialize(int& argc, char** argv,
                               ITMLib::MainEngine* mainEngine,
 
                               const configuration::Configuration& configuration,
-                              ITMLib::ITMDynamicFusionLogger_Interface* logger) {
+                              ITMLib::DynamicFusionLogger_Interface* logger) {
 
 	//TODO: somehow incorporate the following "constant" settings into Configuration struct, Configuration.h in ITMLib
 	const bool fix_camera = false;

@@ -43,7 +43,7 @@ using namespace ITMLib;
 
 
 
-ITMChartWindow::ITMChartWindow(const std::string& name, const std::string& title, int width, int height) :
+ChartWindow::ChartWindow(const std::string& name, const std::string& title, int width, int height) :
 		view(vtkSmartPointer<vtkContextView>::New()),
 		chart(vtkSmartPointer<vtkChartXY>::New()),
 		name(name) {
@@ -57,52 +57,52 @@ ITMChartWindow::ITMChartWindow(const std::string& name, const std::string& title
 }
 
 
-vtkSmartPointer<vtkChartXY> ITMChartWindow::GetChart() {
+vtkSmartPointer<vtkChartXY> ChartWindow::GetChart() {
 	return chart;
 }
 
-void ITMChartWindow::Update() {
+void ChartWindow::Update() {
 	renderWindow->Render();
 }
 
-ITMChartWindow::~ITMChartWindow() {
+ChartWindow::~ChartWindow() {
 	interactor->TerminateApp();
 }
 
-vtkSmartPointer<vtkRenderWindow> ITMChartWindow::GetRenderWindow() {
+vtkSmartPointer<vtkRenderWindow> ChartWindow::GetRenderWindow() {
 	return this->renderWindow;
 }
 
-ITMChartWindow*
-ITMVisualizationWindowManager::MakeOrGetChartWindow(const std::string& name, const std::string& title, int width,
+ChartWindow*
+VisualizationWindowManager::MakeOrGetChartWindow(const std::string& name, const std::string& title, int width,
                                                     int height) {
 	auto it = chartWindows.find(name);
 	if (it == chartWindows.end()) {
-		ITMChartWindow window(name, title, width, height);
+		ChartWindow window(name, title, width, height);
 		chartWindows.emplace(name, window);
 		it = chartWindows.find(name);
 	}
 	return it == chartWindows.end() ? nullptr : &(chartWindows.find(name)->second);
 }
 
-ITM3DWindow*
-ITMVisualizationWindowManager::MakeOrGet3DWindow(const std::string& name, const std::string& title, int width,
+Window3D*
+VisualizationWindowManager::MakeOrGet3DWindow(const std::string& name, const std::string& title, int width,
                                                  int height) {
 	auto it = _3dWindows.find(name);
 	if (it == _3dWindows.end()) {
-		ITM3DWindow window(name, title, width, height);
+		Window3D window(name, title, width, height);
 		_3dWindows.emplace(name, window);
 		it = _3dWindows.find(name);
 	}
 	return it == _3dWindows.end() ? nullptr : &(_3dWindows.find(name)->second);
 }
 
-void ITMVisualizationWindowManager::CloseAndDelete3DWindow(const std::string& name) {
+void VisualizationWindowManager::CloseAndDelete3DWindow(const std::string& name) {
 	_3dWindows.erase(name);
 }
 
 
-ITM3DWindow::ITM3DWindow(const std::string& name, const std::string& title, int width, int height) :
+Window3D::Window3D(const std::string& name, const std::string& title, int width, int height) :
 		renderWindow(vtkSmartPointer<vtkRenderWindow>::New()),
 		interactor(vtkSmartPointer<vtkRenderWindowInteractor>::New()) {
 	renderWindow->SetWindowName(title.c_str());
@@ -139,16 +139,16 @@ ITM3DWindow::ITM3DWindow(const std::string& name, const std::string& title, int 
 	interactor->Initialize();
 }
 
-ITM3DWindow::~ITM3DWindow() {
+Window3D::~Window3D() {
 	this->interactor->TerminateApp();
 }
 
-void ITM3DWindow::Update() {
+void Window3D::Update() {
 	renderWindow->Render();
 }
 
 
-void ITM3DWindow::AddLayer(const Vector4d& backgroundColor) {
+void Window3D::AddLayer(const Vector4d& backgroundColor) {
 	vtkSmartPointer<vtkRenderer> newRenderer = vtkSmartPointer<vtkRenderer>::New();
 	newRenderer->SetBackground(backgroundColor.r, backgroundColor.g, backgroundColor.b);
 	newRenderer->SetBackgroundAlpha(backgroundColor.a);
@@ -162,29 +162,29 @@ void ITM3DWindow::AddLayer(const Vector4d& backgroundColor) {
 }
 
 
-void ITM3DWindow::AddActorToLayer(vtkSmartPointer<vtkActor> actor, int layer) {
+void Window3D::AddActorToLayer(vtkSmartPointer<vtkActor> actor, int layer) {
 	if (layer < 0 || layer >= renderWindow->GetNumberOfLayers()) {
 		DIEWITHEXCEPTION_REPORTLOCATION("Layer " + std::to_string(layer) + " out of bounds.");
 	}
 	layerRenderers[layer]->AddActor(actor);
 }
 
-void ITM3DWindow::AddActor2DToLayer(vtkSmartPointer<vtkActor2D> actor, int layer) {
+void Window3D::AddActor2DToLayer(vtkSmartPointer<vtkActor2D> actor, int layer) {
 	if (layer < 0 || layer >= renderWindow->GetNumberOfLayers()) {
 		DIEWITHEXCEPTION_REPORTLOCATION("Layer " + std::to_string(layer) + " out of bounds.");
 	}
 	layerRenderers[layer]->AddActor2D(actor);
 }
 
-void ITM3DWindow::AddActorToFirstLayer(vtkSmartPointer<vtkActor> actor) {
+void Window3D::AddActorToFirstLayer(vtkSmartPointer<vtkActor> actor) {
 	renderWindow->GetRenderers()->GetFirstRenderer()->AddActor(actor);
 }
 
-vtkSmartPointer<vtkRenderWindow> ITM3DWindow::GetRenderWindow() {
+vtkSmartPointer<vtkRenderWindow> Window3D::GetRenderWindow() {
 	return this->renderWindow;
 }
 
-void ITM3DWindow::ResetCamera() {
+void Window3D::ResetCamera() {
 	vtkRenderer* renderer = renderWindow->GetRenderers()->GetFirstRenderer();
 	renderer->ResetCamera();
 	vtkCamera* camera = renderer->GetActiveCamera();
@@ -199,35 +199,35 @@ void ITM3DWindow::ResetCamera() {
 	camera->SetClippingRange(1.0,1500.0);
 }
 
-void ITM3DWindow::RunInteractor() {
+void Window3D::RunInteractor() {
 	interactor->Start();
 }
 
-void ITM3DWindow::AddLoopCallback(vtkSmartPointer<vtkCommand> callback) {
+void Window3D::AddLoopCallback(vtkSmartPointer<vtkCommand> callback) {
 	interactor->CreateRepeatingTimer(1);
 	interactor->AddObserver(vtkCommand::TimerEvent,callback);
 }
 
-void ITM3DWindow::SetInteractorStyle(vtkSmartPointer<vtkInteractorStyle> style) {
+void Window3D::SetInteractorStyle(vtkSmartPointer<vtkInteractorStyle> style) {
 	interactor->SetInteractorStyle(style);
 }
 
-void ITM3DWindow::HideLayer(int layer) {
+void Window3D::HideLayer(int layer) {
 	layerRenderers[layer]->Clear();
 	layerRenderers[layer]->DrawOff();
 	renderWindow->Render();
 }
 
-void ITM3DWindow::ShowLayer(int layer) {
+void Window3D::ShowLayer(int layer) {
 	layerRenderers[layer]->DrawOn();
 	renderWindow->Render();
 }
 
-int ITM3DWindow::GetLayerCount() const {
+int Window3D::GetLayerCount() const {
 	return static_cast<int>(this->layerRenderers.size());
 }
 
-std::string ITM3DWindow::GetName() const {
+std::string Window3D::GetName() const {
 	return this->name;
 }
 

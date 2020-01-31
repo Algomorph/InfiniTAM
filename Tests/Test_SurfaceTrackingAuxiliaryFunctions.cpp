@@ -30,7 +30,7 @@
 #include "TestUtilsForSnoopyFrames16And17.h"
 
 #ifndef COMPILE_WITHOUT_CUDA
-#include "../ITMLib/Utils/Analytics/SceneStatisticsCalculator/CUDA/ITMSceneStatisticsCalculator_CUDA.h"
+#include "../ITMLib/Utils/Analytics/SceneStatisticsCalculator/CUDA/SceneStatisticsCalculator_CUDA.h"
 #endif
 
 using namespace ITMLib;
@@ -72,7 +72,7 @@ BOOST_FIXTURE_TEST_CASE(Test_ClearOutFramewiseWarp_CPU_VBH, Frame16And17Fixture)
 #ifndef COMPILE_WITHOUT_CUDA
 
 BOOST_FIXTURE_TEST_CASE(Test_ClearOutFramewiseWarp_CUDA_PVA, Frame16And17Fixture){
-	ITMVoxelVolume<WarpVoxel, PlainVoxelArray>* warps_PVA;
+	VoxelVolume<WarpVoxel, PlainVoxelArray>* warps_PVA;
 	loadVolume(&warps_PVA, "TestData/snoopy_result_fr16-17_partial_PVA/warp_field_0_data_framewise_warps_",
 	           MEMORYDEVICE_CUDA, InitParams<PlainVoxelArray>());
 	float relativeTolerance = 0.1f;//percent
@@ -89,7 +89,7 @@ BOOST_FIXTURE_TEST_CASE(Test_ClearOutFramewiseWarp_CUDA_PVA, Frame16And17Fixture
 }
 
 BOOST_FIXTURE_TEST_CASE(Test_ClearOutFramewiseWarp_CUDA_VBH, Frame16And17Fixture){
-	ITMVoxelVolume<WarpVoxel, VoxelBlockHash>* warps_VBH;
+	VoxelVolume<WarpVoxel, VoxelBlockHash>* warps_VBH;
 	loadVolume(&warps_VBH, "TestData/snoopy_result_fr16-17_partial_VBH/warp_field_0_data_framewise_warps_",
 	           MEMORYDEVICE_CUDA, InitParams<VoxelBlockHash>());
 	float relativeTolerance = 0.1f;//percent

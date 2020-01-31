@@ -56,7 +56,7 @@ struct TGetIndexedSDFFunctor{
 
 
 template<typename TVoxel, typename TIndex, typename TGetSDFFunctor>
-void ITMSceneSliceVisualizer1D::Plot1DSceneSliceHelper(ITMVoxelVolume<TVoxel, TIndex>* scene, Vector4i color, double width) {
+void SceneSliceVisualizer1D::Plot1DSceneSliceHelper(VoxelVolume<TVoxel, TIndex>* scene, Vector4i color, double width) {
 
 	// set up table & columns
 	vtkSmartPointer<vtkFloatArray> horizontalAxisPoints = vtkSmartPointer<vtkFloatArray>::New();
@@ -104,15 +104,15 @@ void ITMSceneSliceVisualizer1D::Plot1DSceneSliceHelper(ITMVoxelVolume<TVoxel, TI
 
 
 template<typename TVoxel, typename TIndex>
-void ITMSceneSliceVisualizer1D::Plot1DSceneSlice(ITMVoxelVolume<TVoxel, TIndex>* scene, Vector4i color, double width) {
+void SceneSliceVisualizer1D::Plot1DSceneSlice(VoxelVolume<TVoxel, TIndex>* scene, Vector4i color, double width) {
 	Plot1DSceneSliceHelper<TVoxel,TIndex, TGetRegularSDFFunctor<TVoxel>>(scene, color, width);
 }
 
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void ITMSceneSliceVisualizer1D::Draw1DWarpUpdateVector(
-		ITMVoxelVolume<TVoxel, TIndex>* TSDF,
-		ITMVoxelVolume<TWarp, TIndex>* warpField,
+void SceneSliceVisualizer1D::Draw1DWarpUpdateVector(
+		VoxelVolume<TVoxel, TIndex>* TSDF,
+		VoxelVolume<TWarp, TIndex>* warpField,
 		Vector4i color) {
 	// scene access variables
 
