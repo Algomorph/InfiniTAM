@@ -19,7 +19,7 @@
 #include <boost/iostreams/filter/zlib.hpp>
 
 //local
-#include "ITMSceneFileIOEngine.h"
+#include "VolumeFileIOEngine.h"
 
 using namespace ITMLib;
 namespace b_ios = boost::iostreams;
@@ -28,7 +28,7 @@ namespace b_ios = boost::iostreams;
 
 
 template<typename TVoxel>
-void ITMSceneFileIOEngine<TVoxel, VoxelBlockHash>::SaveToDirectoryCompact(
+void VolumeFileIOEngine<TVoxel, VoxelBlockHash>::SaveToDirectoryCompact(
 		const ITMVoxelVolume<TVoxel, VoxelBlockHash>* scene,
 		const std::string& outputDirectory) {
 
@@ -90,7 +90,7 @@ void ITMSceneFileIOEngine<TVoxel, VoxelBlockHash>::SaveToDirectoryCompact(
 
 template<typename TVoxel>
 void
-ITMSceneFileIOEngine<TVoxel, VoxelBlockHash>::LoadFromDirectoryCompact(
+VolumeFileIOEngine<TVoxel, VoxelBlockHash>::LoadFromDirectoryCompact(
 		ITMVoxelVolume<TVoxel, VoxelBlockHash>* scene,
 		const std::string& outputDirectory) {
 	std::string path = outputDirectory + "compact.dat";
@@ -145,7 +145,7 @@ ITMSceneFileIOEngine<TVoxel, VoxelBlockHash>::LoadFromDirectoryCompact(
 
 template<typename TVoxel>
 void
-ITMSceneFileIOEngine<TVoxel, PlainVoxelArray>::SaveToDirectoryCompact(
+VolumeFileIOEngine<TVoxel, PlainVoxelArray>::SaveToDirectoryCompact(
 		const ITMVoxelVolume<TVoxel, PlainVoxelArray>* scene,
 		const std::string& outputDirectory) {
 	scene->localVBA.SaveToDirectory(outputDirectory);
@@ -155,7 +155,7 @@ ITMSceneFileIOEngine<TVoxel, PlainVoxelArray>::SaveToDirectoryCompact(
 
 template<typename TVoxel>
 void
-ITMSceneFileIOEngine<TVoxel, PlainVoxelArray>::LoadFromDirectoryCompact(
+VolumeFileIOEngine<TVoxel, PlainVoxelArray>::LoadFromDirectoryCompact(
 		ITMVoxelVolume<TVoxel, PlainVoxelArray>* scene,
 		const std::string& outputDirectory) {
 	scene->localVBA.LoadFromDirectory(outputDirectory);

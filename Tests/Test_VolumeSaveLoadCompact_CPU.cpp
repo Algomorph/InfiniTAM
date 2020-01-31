@@ -26,14 +26,14 @@
 #include "../ITMLib/Utils/Configuration.h"
 #include "../ITMLib/Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 #include "TestUtils.h"
-#include "../ITMLib/Engines/SceneFileIO/ITMSceneFileIOEngine.h"
+#include "../ITMLib/Engines/VolumeFileIO/VolumeFileIOEngine.h"
 #include "../ITMLib/Utils/Analytics/SceneStatisticsCalculator/CPU/ITMSceneStatisticsCalculator_CPU.h"
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/ITMVoxelVolumeComparison_CPU.h"
 
 using namespace ITMLib;
 
-typedef ITMSceneFileIOEngine<ITMVoxel, PlainVoxelArray> SceneFileIOEngine_PVA;
-typedef ITMSceneFileIOEngine<ITMVoxel, VoxelBlockHash> SceneFileIOEngine_VBH;
+typedef VolumeFileIOEngine<ITMVoxel, PlainVoxelArray> SceneFileIOEngine_PVA;
+typedef VolumeFileIOEngine<ITMVoxel, VoxelBlockHash> SceneFileIOEngine_VBH;
 
 BOOST_AUTO_TEST_CASE(testSaveSceneCompact_CPU) {
 

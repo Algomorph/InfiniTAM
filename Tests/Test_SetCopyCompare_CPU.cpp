@@ -41,7 +41,7 @@
 #include "../ITMLib/Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 #include "../ITMLib/Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
 #include "../ITMLib/Engines/ViewBuilding/ITMViewBuilderFactory.h"
-#include "../ITMLib/Engines/SceneFileIO/ITMSceneFileIOEngine.h"
+#include "../ITMLib/Engines/VolumeFileIO/VolumeFileIOEngine.h"
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngine.h"
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
 

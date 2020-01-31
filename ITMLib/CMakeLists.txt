@@ -422,13 +422,13 @@ set(ITMLIB_ENGINES_WARP_VOLUME_HEADERS
 
 ## ======================================= SCENE FILE IO ENGINES =======================================================
 set(ITMLIB_ENGINES_SCENEFILEIO_HEADERS
-    Engines/SceneFileIO/ITMSceneFileIOEngine.h
+    Engines/VolumeFileIO/VolumeFileIOEngine.h
     )
 set(ITMLIB_ENGINES_SCENEFILEIO_SOURCES
-    Engines/SceneFileIO/ITMSceneFileIOEngine.tpp
-    Engines/SceneFileIO/ITMSceneFileIOEngine.cpp
-    Engines/SceneFileIO/ITMSceneFileIOEngine_PlainVoxelArray.cpp
-    Engines/SceneFileIO/ITMSceneFileIOEngine_VoxelBlockHash.cpp
+    Engines/VolumeFileIO/VolumeFileIOEngine.tpp
+    Engines/VolumeFileIO/VolumeFileIOEngine.cpp
+    Engines/VolumeFileIO/VolumeFileIOEngine_PlainVoxelArray.cpp
+    Engines/VolumeFileIO/VolumeFileIOEngine_VoxelBlockHash.cpp
     )
 ## ======================================= SWAPPING ENGINES ============================================================
 set(ITMLIB_ENGINES_SWAPPING_HEADERS

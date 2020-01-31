@@ -23,7 +23,7 @@
 //local
 #include "ITMSceneLogger_SceneSlice.tpp"
 #include "../../Engines/DepthFusion/DepthFusionEngineFactory.h"
-#include "../../Engines/SceneFileIO/ITMSceneFileIOEngine.h"
+#include "../../Engines/VolumeFileIO/VolumeFileIOEngine.h"
 #include "../Analytics/SceneStatisticsCalculator/CPU/ITMSceneStatisticsCalculator_CPU.h"
 
 
@@ -254,7 +254,7 @@ bool ITMSceneLogger<TVoxel, TWarp, TIndex>::SaveScenesCompact() {
 	}
 	std::cout << "Saving scenes for current frame (this might take awhile)..." << std::endl;
 	std::cout.flush();
-	ITMSceneFileIOEngine<TVoxel, TIndex>::SaveToDirectoryCompact(liveScene, livePath.string());
+	VolumeFileIOEngine<TVoxel, TIndex>::SaveToDirectoryCompact(liveScene, livePath.string());
 	activeWarpLogger->SaveCompact();
 	std::cout << "Scenes saved." << std::endl;
 	return true;
@@ -268,7 +268,7 @@ bool ITMSceneLogger<TVoxel, TWarp, TIndex>::LoadScenesCompact() {
 	std::cout << "Loading scenes for current frame (this might take awhile)..." << std::endl;
 	std::cout.flush();
 	EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().ResetScene(liveScene);
-	ITMSceneFileIOEngine<TVoxel, TIndex>::LoadFromDirectoryCompact(liveScene, livePath.string());
+	VolumeFileIOEngine<TVoxel, TIndex>::LoadFromDirectoryCompact(liveScene, livePath.string());
 	if (!activeWarpLogger->isSlice || !activeWarpLogger->sliceLoaded) {
 		activeWarpLogger->LoadCompact();
 	}

@@ -1,5 +1,5 @@
 //  ================================================================
-//  Created by Gregory Kramida on 8/27/19.
+//  Created by Gregory Kramida on 9/5/19.
 //  Copyright (c) 2019 Gregory Kramida
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -13,13 +13,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "../../ITMLibDefines.h"
-#include "ITMSceneFileIOEngine.tpp"
+#include "VolumeFileIOEngine.h"
 
-namespace ITMLib {
-
-template
-class ITMSceneFileIOEngine<ITMVoxel, VoxelBlockHash>;
-template
-class ITMSceneFileIOEngine<ITMWarp, VoxelBlockHash>;
+namespace ITMLib{
+	//const std::string compactFilePostfixAndExtension = "compact.dat";
 } // namespace ITMLib

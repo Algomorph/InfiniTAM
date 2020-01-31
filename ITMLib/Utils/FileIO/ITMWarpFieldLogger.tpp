@@ -24,7 +24,7 @@
 #include "../../Engines/DepthFusion/DepthFusionEngineFactory.h"
 #include "../../Engines/Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
 #include "../../Engines/Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
-#include "../../Engines/SceneFileIO/ITMSceneFileIOEngine.h"
+#include "../../Engines/VolumeFileIO/VolumeFileIOEngine.h"
 #include "ITMWriteAndReadFunctors.h"
 
 
@@ -290,14 +290,14 @@ void ITMWarpFieldLogger<TVoxel, TIndex>::Save() {
 
 template<typename TVoxel, typename TIndex>
 void ITMWarpFieldLogger<TVoxel, TIndex>::SaveCompact() {
-	ITMSceneFileIOEngine<TVoxel,TIndex>::SaveToDirectoryCompact(warpField, scenePath.string());
+	VolumeFileIOEngine<TVoxel,TIndex>::SaveToDirectoryCompact(warpField, scenePath.string());
 	this->voxelCount = ITMSceneStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().ComputeAllocatedVoxelCount(warpField);
 }
 
 template<typename TVoxel, typename TIndex>
 void ITMWarpFieldLogger<TVoxel, TIndex>::LoadCompact() {
 	EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().ResetScene(warpField);
-	ITMSceneFileIOEngine<TVoxel,TIndex>::LoadFromDirectoryCompact(warpField, scenePath.string());
+	VolumeFileIOEngine<TVoxel,TIndex>::LoadFromDirectoryCompact(warpField, scenePath.string());
 	this->voxelCount = ITMSceneStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().ComputeAllocatedVoxelCount(warpField);
 }
 //endregion

@@ -15,7 +15,7 @@
 //  ================================================================
 
 #include "ITMVoxelVolume.h"
-#include "../../Engines/SceneFileIO/ITMSceneFileIOEngine.h"
+#include "../../Engines/VolumeFileIO/VolumeFileIOEngine.h"
 #include "../../Utils/Configuration.h"
 #include "../../Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 #ifndef COMPILE_WITHOUT_CUDA
@@ -94,12 +94,12 @@ void ITMVoxelVolume<TVoxel, TIndex>::SetFrom(const ITMVoxelVolume& other) {
 
 template<class TVoxel, class TIndex>
 void ITMVoxelVolume<TVoxel, TIndex>::SaveToDirectory(const std::string& outputDirectory) const {
-	ITMSceneFileIOEngine<TVoxel,TIndex>::SaveToDirectoryCompact(this, outputDirectory);
+	VolumeFileIOEngine<TVoxel,TIndex>::SaveToDirectoryCompact(this, outputDirectory);
 }
 
 template<class TVoxel, class TIndex>
 void ITMVoxelVolume<TVoxel, TIndex>::LoadFromDirectory(const std::string& outputDirectory) {
-	ITMSceneFileIOEngine<TVoxel,TIndex>::LoadFromDirectoryCompact(this, outputDirectory);
+	VolumeFileIOEngine<TVoxel,TIndex>::LoadFromDirectoryCompact(this, outputDirectory);
 }
 
 template<class TVoxel, class TIndex>

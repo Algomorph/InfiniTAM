@@ -26,14 +26,14 @@
 #include "../ITMLib/Utils/Configuration.h"
 #include "../ITMLib/Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
 #include "TestUtils.h"
-#include "../ITMLib/Engines/SceneFileIO/ITMSceneFileIOEngine.h"
+#include "../ITMLib/Engines/VolumeFileIO/VolumeFileIOEngine.h"
 #include "../ITMLib/Utils/Analytics/SceneStatisticsCalculator/CUDA/ITMSceneStatisticsCalculator_CUDA.h"
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/ITMVoxelVolumeComparison_CUDA.h"
 
 using namespace ITMLib;
 
-typedef ITMSceneFileIOEngine<ITMVoxel, PlainVoxelArray> SceneFileIOEngine_PVA;
-typedef ITMSceneFileIOEngine<ITMVoxel, VoxelBlockHash> SceneFileIOEngine_VBH;
+typedef VolumeFileIOEngine<ITMVoxel, PlainVoxelArray> SceneFileIOEngine_PVA;
+typedef VolumeFileIOEngine<ITMVoxel, VoxelBlockHash> SceneFileIOEngine_VBH;
 //typedef ITMSceneStatisticsCalculator_CUDA<ITMVoxel, PlainVoxelArray> SceneStatisticsCalculator_PVA;
 //typedef ITMSceneStatisticsCalculator_CUDA<ITMVoxel, VoxelBlockHash> SceneStatCalc_CPU_VBH_Voxel;
 

@@ -6,7 +6,7 @@
 #include "../Meshing/ITMMeshingEngineFactory.h"
 #include "../ViewBuilding/ITMViewBuilderFactory.h"
 #include "../Visualization/VisualizationEngineFactory.h"
-#include "../SceneFileIO/ITMSceneFileIOEngine.h"
+#include "../VolumeFileIO/VolumeFileIOEngine.h"
 #include "../../CameraTrackers/ITMCameraTrackerFactory.h"
 
 #include "../../../ORUtils/NVTimer.h"
@@ -145,8 +145,8 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::SaveToFile() {
 	std::string nextFrameOutputPath = ITMDynamicFusionLogger<TVoxel, TWarp, TIndex>::Instance().GetOutputDirectory();
 	// throws error if any of the saves fail
 	if (relocaliser) relocaliser->SaveToDirectory(nextFrameOutputPath + "/Relocaliser/");
-	ITMSceneFileIOEngine<TVoxel, TIndex>::SaveToDirectoryCompact(canonicalScene, nextFrameOutputPath + "/canonical");
-	ITMSceneFileIOEngine<TVoxel, TIndex>::SaveToDirectoryCompact(liveScenes[0], nextFrameOutputPath + "/live");
+	VolumeFileIOEngine<TVoxel, TIndex>::SaveToDirectoryCompact(canonicalScene, nextFrameOutputPath + "/canonical");
+	VolumeFileIOEngine<TVoxel, TIndex>::SaveToDirectoryCompact(liveScenes[0], nextFrameOutputPath + "/live");
 	std::cout << "Saving scenes in a compact way to '" << nextFrameOutputPath << "'." << std::endl;
 }
 
@@ -184,9 +184,9 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::LoadFromFile() {
 	try // load scene
 	{
 		std::cout << "Loading scenes from '" << nextFrameOutputPath << "'." << std::endl;
-		ITMSceneFileIOEngine<TVoxel, TIndex>::LoadFromDirectoryCompact(canonicalScene,
+		VolumeFileIOEngine<TVoxel, TIndex>::LoadFromDirectoryCompact(canonicalScene,
 		                                                               nextFrameOutputPath + "/canonical");
-		ITMSceneFileIOEngine<TVoxel, TIndex>::LoadFromDirectoryCompact(liveScenes[0],
+		VolumeFileIOEngine<TVoxel, TIndex>::LoadFromDirectoryCompact(liveScenes[0],
 		                                                               nextFrameOutputPath + "/live");
 		if (framesProcessed == 0) {
 			framesProcessed = 1; //to skip initialization

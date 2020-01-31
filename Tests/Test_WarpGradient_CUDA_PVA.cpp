@@ -32,7 +32,7 @@
 #include "TestUtils.h"
 #include "Test_WarpGradient_Common.h"
 #include "../ITMLib/Utils/Configuration.h"
-#include "../ITMLib/Engines/SceneFileIO/ITMSceneFileIOEngine.h"
+#include "../ITMLib/Engines/VolumeFileIO/VolumeFileIOEngine.h"
 #include "../ITMLib/Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
 #include "../ITMLib/SurfaceTrackers/Interface/SurfaceTrackerInterface.h"
 #include "../ITMLib/SurfaceTrackers/Interface/SurfaceTracker.h"

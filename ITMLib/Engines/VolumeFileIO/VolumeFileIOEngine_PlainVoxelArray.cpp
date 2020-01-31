@@ -14,11 +14,11 @@
 //  limitations under the License.
 //  ================================================================
 #include "../../ITMLibDefines.h"
-#include "ITMSceneFileIOEngine.tpp"
+#include "VolumeFileIOEngine.tpp"
 
 namespace ITMLib {
 template
-class ITMSceneFileIOEngine<ITMVoxel, PlainVoxelArray>;
+class VolumeFileIOEngine<ITMVoxel, PlainVoxelArray>;
 template
-class ITMSceneFileIOEngine<ITMWarp, PlainVoxelArray>;
+class VolumeFileIOEngine<ITMWarp, PlainVoxelArray>;
 } // namespace ITMLib
