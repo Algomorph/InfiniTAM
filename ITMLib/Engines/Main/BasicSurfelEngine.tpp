@@ -5,7 +5,7 @@
 #include "../LowLevel/ITMLowLevelEngineFactory.h"
 #include "../ViewBuilding/ITMViewBuilderFactory.h"
 #include "../Visualization/SurfelVisualizationEngineFactory.h"
-#include "../../CameraTrackers/ITMCameraTrackerFactory.h"
+#include "../../CameraTrackers/CameraTrackerFactory.h"
 
 #include "../../../ORUtils/NVTimer.h"
 #include "../../../ORUtils/FileUtils.h"
@@ -33,8 +33,8 @@ BasicSurfelEngine<TSurfel>::BasicSurfelEngine(const ITMRGBDCalib& calib, Vector2
 	this->surfelScene->Reset();
 
 	imuCalibrator = new ITMIMUCalibrator_iPad();
-	tracker = ITMCameraTrackerFactory::Instance().Make(imgSize_rgb, imgSize_d, lowLevelEngine, imuCalibrator,
-	                                                   &settings.general_voxel_volume_parameters);
+	tracker = CameraTrackerFactory::Instance().Make(imgSize_rgb, imgSize_d, lowLevelEngine, imuCalibrator,
+	                                                &settings.general_voxel_volume_parameters);
 	trackingController = new TrackingController(tracker);
 
 	Vector2i trackedImageSize = trackingController->GetTrackedImageSize(imgSize_rgb, imgSize_d);

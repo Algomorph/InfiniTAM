@@ -6,9 +6,9 @@
 
 #include "../Visualization/Interface/SurfelVisualizationEngine.h"
 #include "../Visualization/Interface/VisualizationEngine.h"
-#include "../../CameraTrackers/Interface/ITMCameraTracker.h"
+#include "../../CameraTrackers/Interface/CameraTracker.h"
 #include "../../Utils/Configuration.h"
-#include "../../CameraTrackers/Interface/ITMCameraTracker.h"
+#include "../../CameraTrackers/Interface/CameraTracker.h"
 
 namespace ITMLib
 {
@@ -18,7 +18,7 @@ namespace ITMLib
 	{
 	private:
 		const configuration::Configuration *settings;
-		ITMCameraTracker *tracker;
+		CameraTracker *tracker;
 
 	public:
 		void Track(ITMTrackingState *trackingState, const ITMView *view)
@@ -110,7 +110,7 @@ namespace ITMLib
 			}
 		}
 
-		TrackingController(ITMCameraTracker* tracker)
+		TrackingController(CameraTracker* tracker)
 		{
 			this->settings = &configuration::get();
 			this->tracker = tracker;

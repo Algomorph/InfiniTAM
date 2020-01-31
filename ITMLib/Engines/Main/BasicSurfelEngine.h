@@ -32,7 +32,7 @@ namespace ITMLib
 		ITMSurfelRenderState *surfelRenderState_live;
 		ITMSurfelRenderState *surfelRenderState_freeview;
 
-		ITMCameraTracker *tracker;
+		CameraTracker *tracker;
 		ITMIMUCalibrator *imuCalibrator;
 
 		FernRelocLib::Relocaliser<float> *relocaliser;

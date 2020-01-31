@@ -14,7 +14,7 @@
 #include "../../Objects/Misc/ITMIMUCalibrator.h"
 
 #include "../../../FernRelocLib/Relocaliser.h"
-#include "../../CameraTrackers/Interface/ITMCameraTracker.h"
+#include "../../CameraTrackers/Interface/CameraTracker.h"
 
 
 namespace ITMLib
@@ -91,7 +91,7 @@ namespace ITMLib
 		ITMRenderState* renderState_live;
 		ITMRenderState* renderState_freeview;
 
-		ITMCameraTracker* tracker;
+		CameraTracker* tracker;
 		ITMIMUCalibrator* imuCalibrator;
 
 		FernRelocLib::Relocaliser<float>* relocaliser;

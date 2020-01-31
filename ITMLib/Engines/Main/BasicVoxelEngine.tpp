@@ -6,7 +6,7 @@
 #include "../Meshing/MeshingEngineFactory.h"
 #include "../ViewBuilding/ITMViewBuilderFactory.h"
 #include "../Visualization/VisualizationEngineFactory.h"
-#include "../../CameraTrackers/ITMCameraTrackerFactory.h"
+#include "../../CameraTrackers/CameraTrackerFactory.h"
 
 #include "../../../ORUtils/NVTimer.h"
 #include "../../../ORUtils/FileUtils.h"
@@ -39,8 +39,8 @@ BasicVoxelEngine<TVoxel,TIndex>::BasicVoxelEngine(const ITMRGBDCalib& calib, Vec
 	scene->Reset();
 
 	imuCalibrator = new ITMIMUCalibrator_iPad();
-	tracker = ITMCameraTrackerFactory::Instance().Make(imgSize_rgb, imgSize_d, lowLevelEngine, imuCalibrator,
-	                                                   scene->sceneParams);
+	tracker = CameraTrackerFactory::Instance().Make(imgSize_rgb, imgSize_d, lowLevelEngine, imuCalibrator,
+	                                                scene->sceneParams);
 	trackingController = new TrackingController(tracker);
 
 	Vector2i trackedImageSize = trackingController->GetTrackedImageSize(imgSize_rgb, imgSize_d);

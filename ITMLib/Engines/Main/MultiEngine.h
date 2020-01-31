@@ -13,7 +13,7 @@
 #include "../MultiScene/GlobalAdjustmentEngine.h"
 #include "../Visualization/Interface/MultiVisualizationEngine.h"
 #include "../Meshing/MultiMeshingEngineFactory.h"
-#include "../../CameraTrackers/Interface/ITMCameraTracker.h"
+#include "../../CameraTrackers/Interface/CameraTracker.h"
 
 #include <vector>
 
@@ -34,7 +34,7 @@ namespace ITMLib
 
 		ITMViewBuilder *viewBuilder;
 		TrackingController *trackingController;
-		ITMCameraTracker *tracker;
+		CameraTracker *tracker;
 		ITMIMUCalibrator *imuCalibrator;
 		DenseMapper<TVoxel, TIndex> *denseMapper;
 

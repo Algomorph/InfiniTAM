@@ -35,7 +35,7 @@ namespace ITMLib
 		ITMRenderState *renderState_live;
 		ITMRenderState *renderState_freeview;
 
-		ITMCameraTracker *tracker;
+		CameraTracker *tracker;
 		ITMIMUCalibrator *imuCalibrator;
 
 		FernRelocLib::Relocaliser<float> *relocaliser;

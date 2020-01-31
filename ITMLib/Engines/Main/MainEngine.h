@@ -3,7 +3,7 @@
 #pragma once
 
 #include "../../Objects/Misc/ITMIMUMeasurement.h"
-#include "../../CameraTrackers/Interface/ITMCameraTracker.h"
+#include "../../CameraTrackers/Interface/CameraTracker.h"
 #include "../../Utils/Configuration.h"
 
 /** \mainpage

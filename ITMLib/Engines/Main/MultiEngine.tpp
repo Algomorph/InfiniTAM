@@ -6,7 +6,7 @@
 #include "../ViewBuilding/ITMViewBuilderFactory.h"
 #include "../Visualization/VisualizationEngineFactory.h"
 #include "../Visualization/MultiVisualizationEngineFactory.h"
-#include "../../CameraTrackers/ITMCameraTrackerFactory.h"
+#include "../../CameraTrackers/CameraTrackerFactory.h"
 
 #include "../../../MiniSlamGraphLib/QuaternionHelpers.h"
 #include "../../Objects/RenderStates/ITMRenderStateMultiScene.h"
@@ -36,8 +36,8 @@ MultiEngine<TVoxel, TIndex>::MultiEngine(const ITMRGBDCalib& calib, Vector2i img
 	viewBuilder = ITMViewBuilderFactory::MakeViewBuilder(calib, deviceType);
 	visualization_engine = VisualizationEngineFactory::MakeVisualizationEngine<TVoxel, TIndex>(deviceType);
 
-	tracker = ITMCameraTrackerFactory::Instance().Make(imgSize_rgb, imgSize_d, lowLevelEngine, imuCalibrator,
-	                                                   &settings.general_voxel_volume_parameters);
+	tracker = CameraTrackerFactory::Instance().Make(imgSize_rgb, imgSize_d, lowLevelEngine, imuCalibrator,
+	                                                &settings.general_voxel_volume_parameters);
 	trackingController = new TrackingController(tracker);
 	trackedImageSize = trackingController->GetTrackedImageSize(imgSize_rgb, imgSize_d);
 

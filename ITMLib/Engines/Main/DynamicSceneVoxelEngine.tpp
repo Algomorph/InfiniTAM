@@ -7,7 +7,7 @@
 #include "../ViewBuilding/ITMViewBuilderFactory.h"
 #include "../Visualization/VisualizationEngineFactory.h"
 #include "../VolumeFileIO/VolumeFileIOEngine.h"
-#include "../../CameraTrackers/ITMCameraTrackerFactory.h"
+#include "../../CameraTrackers/CameraTrackerFactory.h"
 
 #include "../../../ORUtils/NVTimer.h"
 #include "../../../ORUtils/FileUtils.h"
@@ -47,8 +47,8 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(const IT
 
 
 	imuCalibrator = new ITMIMUCalibrator_iPad();
-	tracker = ITMCameraTrackerFactory::Instance().Make(imgSize_rgb, imgSize_d, lowLevelEngine, imuCalibrator,
-	                                                   canonicalScene->sceneParams);
+	tracker = CameraTrackerFactory::Instance().Make(imgSize_rgb, imgSize_d, lowLevelEngine, imuCalibrator,
+	                                                canonicalScene->sceneParams);
 	cameraTrackingController = new TrackingController(tracker);
 
 	renderState_live = new ITMRenderState(trackedImageSize, canonicalScene->sceneParams->near_clipping_distance,

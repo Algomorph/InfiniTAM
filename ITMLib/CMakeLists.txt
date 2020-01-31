@@ -645,66 +645,66 @@ set(ITMLIB_OBJECTS_VIEWS_HEADERS
 
 #===================================================== CAMERA TRACKERS =================================================
 set(ITMLIB_CAMERA_TRACKERS_HEADERS
-    CameraTrackers/ITMCameraTrackerFactory.h
+    CameraTrackers/CameraTrackerFactory.h
     )
 ##
 set(ITMLIB_CAMERA_TRACKERS_CPU_SOURCES
-    CameraTrackers/CPU/ITMColorTracker_CPU.cpp
-    CameraTrackers/CPU/ITMDepthTracker_CPU.cpp
-    CameraTrackers/CPU/ITMExtendedTracker_CPU.cpp
-    CameraTrackers/CPU/ITMDynamicCameraTracker_CPU.cpp
+    CameraTrackers/CPU/ColorTracker_CPU.cpp
+    CameraTrackers/CPU/DepthTracker_CPU.cpp
+    CameraTrackers/CPU/ExtendedTracker_CPU.cpp
+    CameraTrackers/CPU/SDF2SDFCameraTracker_CPU.cpp
     )
 
 set(ITMLIB_CAMERA_TRACKERS_CPU_HEADERS
-    CameraTrackers/CPU/ITMColorTracker_CPU.h
-    CameraTrackers/CPU/ITMDepthTracker_CPU.h
-    CameraTrackers/CPU/ITMExtendedTracker_CPU.h
-    CameraTrackers/CPU/ITMDynamicCameraTracker_CPU.h
+    CameraTrackers/CPU/ColorTracker_CPU.h
+    CameraTrackers/CPU/DepthTracker_CPU.h
+    CameraTrackers/CPU/ExtendedTracker_CPU.h
+    CameraTrackers/CPU/SDF2SDFCameraTracker_CPU.h
     )
 
 ##
 set(ITMLIB_CAMERA_TRACKERS_CUDA_SOURCES
-    CameraTrackers/CUDA/ITMColorTracker_CUDA.cu
-    CameraTrackers/CUDA/ITMDepthTracker_CUDA.cu
-    CameraTrackers/CUDA/ITMExtendedTracker_CUDA.cu
-    CameraTrackers/CUDA/ITMDynamicCameraTracker_CUDA.cu
+    CameraTrackers/CUDA/ColorTracker_CUDA.cu
+    CameraTrackers/CUDA/DepthTracker_CUDA.cu
+    CameraTrackers/CUDA/ExtendedTracker_CUDA.cu
+    CameraTrackers/CUDA/DynamicCameraTracker_CUDA.cu
     )
 
 set(ITMLIB_CAMERA_TRACKERS_CUDA_HEADERS
-    CameraTrackers/CUDA/ITMColorTracker_CUDA.h
-    CameraTrackers/CUDA/ITMDepthTracker_CUDA.h
-    CameraTrackers/CUDA/ITMExtendedTracker_CUDA.h
-    CameraTrackers/CUDA/ITMDynamicCameraTracker_CUDA.h
+    CameraTrackers/CUDA/ColorTracker_CUDA.h
+    CameraTrackers/CUDA/DepthTracker_CUDA.h
+    CameraTrackers/CUDA/ExtendedTracker_CUDA.h
+    CameraTrackers/CUDA/DynamicCameraTracker_CUDA.h
     )
 
 ##
 set(ITMLIB_CAMERA_TRACKERS_INTERFACE_SOURCES
-    CameraTrackers/Interface/ITMColorTracker.cpp
-    CameraTrackers/Interface/ITMDepthTracker.cpp
-    CameraTrackers/Interface/ITMExtendedTracker.cpp
-    CameraTrackers/Interface/ITMFileBasedTracker.cpp
-    CameraTrackers/Interface/ITMForceFailTracker.cpp
-    CameraTrackers/Interface/ITMIMUTracker.cpp
-    CameraTrackers/Interface/ITMDynamicCameraTracker.cpp
+    CameraTrackers/Interface/ColorTracker.cpp
+    CameraTrackers/Interface/DepthTracker.cpp
+    CameraTrackers/Interface/ExtendedTracker.cpp
+    CameraTrackers/Interface/FileBasedTracker.cpp
+    CameraTrackers/Interface/ForceFailTracker.cpp
+    CameraTrackers/Interface/IMUTracker.cpp
+    CameraTrackers/Interface/DynamicCameraTracker.cpp
     )
 
 set(ITMLIB_CAMERA_TRACKERS_INTERFACE_HEADERS
-    CameraTrackers/Interface/ITMColorTracker.h
-    CameraTrackers/Interface/ITMCompositeTracker.h
-    CameraTrackers/Interface/ITMDepthTracker.h
-    CameraTrackers/Interface/ITMExtendedTracker.h
-    CameraTrackers/Interface/ITMFileBasedTracker.h
-    CameraTrackers/Interface/ITMForceFailTracker.h
-    CameraTrackers/Interface/ITMIMUTracker.h
-    CameraTrackers/Interface/ITMCameraTracker.h
-    CameraTrackers/Interface/ITMDynamicCameraTracker.h
+    CameraTrackers/Interface/ColorTracker.h
+    CameraTrackers/Interface/CompositeTracker.h
+    CameraTrackers/Interface/DepthTracker.h
+    CameraTrackers/Interface/ExtendedTracker.h
+    CameraTrackers/Interface/FileBasedTracker.h
+    CameraTrackers/Interface/ForceFailTracker.h
+    CameraTrackers/Interface/IMUTracker.h
+    CameraTrackers/Interface/CameraTracker.h
+    CameraTrackers/Interface/DynamicCameraTracker.h
     )
 
 ##
 set(ITMLIB_CAMERA_TRACKERS_SHARED_HEADERS
-    CameraTrackers/Shared/ITMColorTracker_Shared.h
-    CameraTrackers/Shared/ITMDepthTracker_Shared.h
-    CameraTrackers/Shared/ITMExtendedTracker_Shared.h
+    CameraTrackers/Shared/ColorTracker_Shared.h
+    CameraTrackers/Shared/DepthTracker_Shared.h
+    CameraTrackers/Shared/ExtendedTracker_Shared.h
     )
 # ============================================== SCENE MOTION TRACKERS =================================================
 set(ITMLIB_SCENE_MOTION_TRACKERS_HEADERS
