@@ -210,42 +210,42 @@ set(ITMLIB_ENGINES_MANIPULATION_CUDA_HEADERS
 #====================================== MESHING ENGINES ================================================================
 ##
 set(ITMLIB_ENGINES_MESHING_HEADERS
-    Engines/Meshing/ITMMeshingEngineFactory.h
-    Engines/Meshing/ITMMultiMeshingEngineFactory.h
+    Engines/Meshing/MeshingEngineFactory.h
+    Engines/Meshing/MultiMeshingEngineFactory.h
     )
 
 ##
 set(ITMLIB_ENGINES_MESHING_CPU_SOURCES
-    Engines/Meshing/CPU/ITMMeshingEngine_CPU.tpp
-    Engines/Meshing/CPU/ITMMultiMeshingEngine_CPU.tpp
+    Engines/Meshing/CPU/MeshingEngine_CPU.tpp
+    Engines/Meshing/CPU/MultiMeshingEngine_CPU.tpp
     )
 
 set(ITMLIB_ENGINES_MESHING_CPU_HEADERS
-    Engines/Meshing/CPU/ITMMeshingEngine_CPU.h
-    Engines/Meshing/CPU/ITMMultiMeshingEngine_CPU.h
+    Engines/Meshing/CPU/MeshingEngine_CPU.h
+    Engines/Meshing/CPU/MultiMeshingEngine_CPU.h
     )
 
 ##
 set(ITMLIB_ENGINES_MESHING_CUDA_SOURCES
-    Engines/Meshing/CUDA/ITMMeshingEngine_CUDA.tcu
-    Engines/Meshing/CUDA/ITMMultiMeshingEngine_CUDA.tcu
+    Engines/Meshing/CUDA/MeshingEngine_CUDA.tcu
+    Engines/Meshing/CUDA/MultiMeshingEngine_CUDA.tcu
     )
 
 set(ITMLIB_ENGINES_MESHING_CUDA_HEADERS
-    Engines/Meshing/CUDA/ITMMeshingEngine_CUDA.h
-    Engines/Meshing/CUDA/ITMMultiMeshingEngine_CUDA.h
+    Engines/Meshing/CUDA/MeshingEngine_CUDA.h
+    Engines/Meshing/CUDA/MultiMeshingEngine_CUDA.h
     )
 
 ##
 set(ITMLIB_ENGINES_MESHING_INTERFACE_HEADERS
-    Engines/Meshing/Interface/ITMMeshingEngine.h
-    Engines/Meshing/Interface/ITMMultiMeshingEngine.h
+    Engines/Meshing/Interface/MeshingEngine.h
+    Engines/Meshing/Interface/MultiMeshingEngine.h
     )
 
 ##
 set(ITMLIB_ENGINES_MESHING_SHARED_HEADERS
-    Engines/Meshing/Shared/ITMMeshingEngine_Shared.h
-    Engines/Meshing/Shared/ITMMultiMeshingEngine_Shared.h
+    Engines/Meshing/Shared/MeshingEngine_Shared.h
+    Engines/Meshing/Shared/MultiMeshingEngine_Shared.h
     )
 
 ##

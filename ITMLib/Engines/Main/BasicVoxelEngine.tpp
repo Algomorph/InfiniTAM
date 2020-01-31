@@ -3,7 +3,7 @@
 #include "BasicVoxelEngine.h"
 
 #include "../LowLevel/ITMLowLevelEngineFactory.h"
-#include "../Meshing/ITMMeshingEngineFactory.h"
+#include "../Meshing/MeshingEngineFactory.h"
 #include "../ViewBuilding/ITMViewBuilderFactory.h"
 #include "../Visualization/VisualizationEngineFactory.h"
 #include "../../CameraTrackers/ITMCameraTrackerFactory.h"
@@ -33,7 +33,7 @@ BasicVoxelEngine<TVoxel,TIndex>::BasicVoxelEngine(const ITMRGBDCalib& calib, Vec
 
 	meshingEngine = nullptr;
 	if (settings.create_meshing_engine)
-		meshingEngine = ITMMeshingEngineFactory::MakeMeshingEngine<TVoxel,TIndex>(deviceType, scene->index);
+		meshingEngine = MeshingEngineFactory::MakeMeshingEngine<TVoxel,TIndex>(deviceType, scene->index);
 
 	denseMapper = new DenseMapper<TVoxel, TIndex>(scene->index);
 	denseMapper->ResetScene(scene);

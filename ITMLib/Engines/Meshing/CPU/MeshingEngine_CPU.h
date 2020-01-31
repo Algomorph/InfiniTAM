@@ -2,16 +2,16 @@
 
 #pragma once
 
-#include "../Interface/ITMMeshingEngine.h"
+#include "../Interface/MeshingEngine.h"
 #include "../../../Objects/Scene/PlainVoxelArray.h"
 
 namespace ITMLib
 {
 	template<class TVoxel, class TIndex>
-	class ITMMeshingEngine_CPU : public ITMMeshingEngine < TVoxel, TIndex >
+	class MeshingEngine_CPU : public MeshingEngine < TVoxel, TIndex >
 	{
 	public:
-		explicit ITMMeshingEngine_CPU(const TIndex& index) : ITMMeshingEngine<TVoxel,TIndex>(index){};
+		explicit MeshingEngine_CPU(const TIndex& index) : MeshingEngine<TVoxel,TIndex>(index){};
 		//TODO: implement meshing for PVA (for completeness / consistency)
 		void MeshScene(ITMMesh *mesh, const ITMVoxelVolume<TVoxel, TIndex> *scene) {
 			DIEWITHEXCEPTION_REPORTLOCATION("Not implemented");
@@ -19,13 +19,13 @@ namespace ITMLib
 	};
 
 	template<class TVoxel>
-	class ITMMeshingEngine_CPU<TVoxel, VoxelBlockHash> : public ITMMeshingEngine < TVoxel, VoxelBlockHash >
+	class MeshingEngine_CPU<TVoxel, VoxelBlockHash> : public MeshingEngine < TVoxel, VoxelBlockHash >
 	{
 	public:
 		void MeshScene(ITMMesh *mesh, const ITMVoxelVolume<TVoxel, VoxelBlockHash> *scene);
 
-		explicit ITMMeshingEngine_CPU(const VoxelBlockHash& index) :
-			ITMMeshingEngine<TVoxel,VoxelBlockHash>(index) { }
-		~ITMMeshingEngine_CPU() = default;
+		explicit MeshingEngine_CPU(const VoxelBlockHash& index) :
+				MeshingEngine<TVoxel,VoxelBlockHash>(index) { }
+		~MeshingEngine_CPU() = default;
 	};
 }

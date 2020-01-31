@@ -2,16 +2,16 @@
 
 #pragma once
 
-#include "../Interface/ITMMeshingEngine.h"
+#include "../Interface/MeshingEngine.h"
 #include "../../../Objects/Scene/PlainVoxelArray.h"
 
 namespace ITMLib
 {
 	template<class TVoxel, class TIndex>
-	class ITMMeshingEngine_CUDA : public ITMMeshingEngine < TVoxel, TIndex >{};
+	class MeshingEngine_CUDA : public MeshingEngine < TVoxel, TIndex >{};
 
 	template<class TVoxel>
-	class ITMMeshingEngine_CUDA<TVoxel, VoxelBlockHash> : public ITMMeshingEngine < TVoxel, VoxelBlockHash >
+	class MeshingEngine_CUDA<TVoxel, VoxelBlockHash> : public MeshingEngine < TVoxel, VoxelBlockHash >
 	{
 	private:
 		unsigned int  *noTriangles_device;
@@ -20,17 +20,17 @@ namespace ITMLib
 	public:
 		void MeshScene(ITMMesh *mesh, const ITMVoxelVolume<TVoxel, VoxelBlockHash> *scene) override;
 
-		explicit ITMMeshingEngine_CUDA(const VoxelBlockHash& index);
-		~ITMMeshingEngine_CUDA();
+		explicit MeshingEngine_CUDA(const VoxelBlockHash& index);
+		~MeshingEngine_CUDA();
 	};
 
 	template<class TVoxel>
-	class ITMMeshingEngine_CUDA<TVoxel, PlainVoxelArray> : public ITMMeshingEngine < TVoxel, PlainVoxelArray >
+	class MeshingEngine_CUDA<TVoxel, PlainVoxelArray> : public MeshingEngine < TVoxel, PlainVoxelArray >
 	{
 	public:
 		void MeshScene(ITMMesh *mesh, const ITMVoxelVolume<TVoxel, PlainVoxelArray> *scene) override;
 
-		explicit ITMMeshingEngine_CUDA(const PlainVoxelArray& index);
-		~ITMMeshingEngine_CUDA();
+		explicit MeshingEngine_CUDA(const PlainVoxelArray& index);
+		~MeshingEngine_CUDA();
 	};
 }

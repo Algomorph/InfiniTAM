@@ -1,12 +1,12 @@
 // Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
 
-#include "ITMMeshingEngine_CPU.h"
-#include "../Shared/ITMMeshingEngine_Shared.h"
+#include "MeshingEngine_CPU.h"
+#include "../Shared/MeshingEngine_Shared.h"
 
 using namespace ITMLib;
 
 template<class TVoxel>
-void ITMMeshingEngine_CPU<TVoxel, VoxelBlockHash>::MeshScene(ITMMesh *mesh, const ITMVoxelVolume<TVoxel, VoxelBlockHash> *scene)
+void MeshingEngine_CPU<TVoxel, VoxelBlockHash>::MeshScene(ITMMesh *mesh, const ITMVoxelVolume<TVoxel, VoxelBlockHash> *scene)
 {
 	ITMMesh::Triangle *triangles = mesh->triangles->GetData(MEMORYDEVICE_CPU);
 	const TVoxel *localVBA = scene->localVBA.GetVoxelBlocks();

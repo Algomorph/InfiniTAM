@@ -1,12 +1,12 @@
 // Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
 
-#include "ITMMultiMeshingEngine_CUDA.h"
+#include "MultiMeshingEngine_CUDA.h"
 
 #include "../../../../ORUtils/CUDADefines.h"
 #include "../../../Utils/ITMCUDAUtils.h"
 
-#include "../Shared/ITMMeshingEngine_Shared.h"
-#include "../Shared/ITMMultiMeshingEngine_Shared.h"
+#include "../Shared/MeshingEngine_Shared.h"
+#include "../Shared/MultiMeshingEngine_Shared.h"
 
 using namespace ITMLib;
 
@@ -21,7 +21,7 @@ __global__ void findAllocateBlocks(Vector4s* visibleBlockGlobalPos, const TMulti
                                    const int noTotalEntries, const unsigned int hashEntryCount);
 
 template<class TVoxel>
-ITMMultiMeshingEngine_CUDA<TVoxel, VoxelBlockHash>::ITMMultiMeshingEngine_CUDA(const VoxelBlockHash& index) {
+MultiMeshingEngine_CUDA<TVoxel, VoxelBlockHash>::MultiMeshingEngine_CUDA(const VoxelBlockHash& index) {
 	ORcudaSafeCall(cudaMalloc((void**) &visibleBlockGlobalPos_device,
 	                          index.voxelBlockCount * sizeof(Vector4s) * MAX_NUM_LOCALMAPS));
 	ORcudaSafeCall(cudaMalloc((void**) &noTriangles_device, sizeof(unsigned int)));
@@ -31,7 +31,7 @@ ITMMultiMeshingEngine_CUDA<TVoxel, VoxelBlockHash>::ITMMultiMeshingEngine_CUDA(c
 }
 
 template<class TVoxel>
-ITMMultiMeshingEngine_CUDA<TVoxel, VoxelBlockHash>::~ITMMultiMeshingEngine_CUDA(void) {
+MultiMeshingEngine_CUDA<TVoxel, VoxelBlockHash>::~MultiMeshingEngine_CUDA(void) {
 	ORcudaSafeCall(cudaFree(visibleBlockGlobalPos_device));
 	ORcudaSafeCall(cudaFree(noTriangles_device));
 
@@ -40,8 +40,8 @@ ITMMultiMeshingEngine_CUDA<TVoxel, VoxelBlockHash>::~ITMMultiMeshingEngine_CUDA(
 }
 
 template<class TVoxel>
-void ITMMultiMeshingEngine_CUDA<TVoxel, VoxelBlockHash>::MeshScene(ITMMesh* mesh,
-                                                                      const VoxelMapGraphManager<TVoxel, VoxelBlockHash>& sceneManager) {
+void MultiMeshingEngine_CUDA<TVoxel, VoxelBlockHash>::MeshScene(ITMMesh* mesh,
+                                                                const VoxelMapGraphManager<TVoxel, VoxelBlockHash>& sceneManager) {
 	const VoxelVolumeParameters& sceneParams = *(sceneManager.getLocalMap(0)->scene->sceneParams);
 	int numLocalMaps = (int) sceneManager.numLocalMaps();
 

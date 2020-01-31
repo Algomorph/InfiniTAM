@@ -1,13 +1,13 @@
 // Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
 
-#include "ITMMultiMeshingEngine_CPU.h"
+#include "MultiMeshingEngine_CPU.h"
 
-#include "../Shared/ITMMultiMeshingEngine_Shared.h"
+#include "../Shared/MultiMeshingEngine_Shared.h"
 
 using namespace ITMLib;
 
 template<class TVoxel>
-inline void ITMMultiMeshingEngine_CPU<TVoxel, VoxelBlockHash>::MeshScene(ITMMesh * mesh, const MultiSceneManager & sceneManager)
+inline void MultiMeshingEngine_CPU<TVoxel, VoxelBlockHash>::MeshScene(ITMMesh * mesh, const MultiSceneManager & sceneManager)
 {
 	int numLocalMaps = (int)sceneManager.numLocalMaps();
 	if (numLocalMaps > MAX_NUM_LOCALMAPS) numLocalMaps = MAX_NUM_LOCALMAPS;

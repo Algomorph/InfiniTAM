@@ -12,7 +12,7 @@
 #include "../MultiScene/ActiveMapManager.h"
 #include "../MultiScene/GlobalAdjustmentEngine.h"
 #include "../Visualization/Interface/MultiVisualizationEngine.h"
-#include "../Meshing/ITMMultiMeshingEngineFactory.h"
+#include "../Meshing/MultiMeshingEngineFactory.h"
 #include "../../CameraTrackers/Interface/ITMCameraTracker.h"
 
 #include <vector>
@@ -30,7 +30,7 @@ namespace ITMLib
 		VisualizationEngine<TVoxel, TIndex>* visualization_engine;
 		MultiVisualizationEngine<TVoxel, TIndex> *multiVisualizationEngine;
 
-		ITMMultiMeshingEngine<TVoxel, TIndex> *meshingEngine;
+		MultiMeshingEngine<TVoxel, TIndex> *meshingEngine;
 
 		ITMViewBuilder *viewBuilder;
 		TrackingController *trackingController;

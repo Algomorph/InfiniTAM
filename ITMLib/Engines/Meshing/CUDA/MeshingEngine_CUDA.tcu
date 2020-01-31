@@ -1,8 +1,8 @@
 // Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
 
-#include "ITMMeshingEngine_CUDA.h"
+#include "MeshingEngine_CUDA.h"
 
-#include "../Shared/ITMMeshingEngine_Shared.h"
+#include "../Shared/MeshingEngine_Shared.h"
 #include "../../../Utils/ITMCUDAUtils.h"
 #include "../../../../ORUtils/CUDADefines.h"
 
@@ -27,21 +27,21 @@ __global__ void findAllocateBlocks(Vector4s* visibleBlockGlobalPos, const ITMHas
 }
 
 template<class TVoxel>
-ITMMeshingEngine_CUDA<TVoxel, VoxelBlockHash>::ITMMeshingEngine_CUDA(const VoxelBlockHash& index)
-		: ITMMeshingEngine<TVoxel, VoxelBlockHash>(index) {
+MeshingEngine_CUDA<TVoxel, VoxelBlockHash>::MeshingEngine_CUDA(const VoxelBlockHash& index)
+		: MeshingEngine<TVoxel, VoxelBlockHash>(index) {
 	ORcudaSafeCall(cudaMalloc((void**) &visibleBlockGlobalPos_device, index.voxelBlockCount * sizeof(Vector4s)));
 	ORcudaSafeCall(cudaMalloc((void**) &noTriangles_device, sizeof(unsigned int)));
 }
 
 template<class TVoxel>
-ITMMeshingEngine_CUDA<TVoxel, VoxelBlockHash>::~ITMMeshingEngine_CUDA() {
+MeshingEngine_CUDA<TVoxel, VoxelBlockHash>::~MeshingEngine_CUDA() {
 	ORcudaSafeCall(cudaFree(visibleBlockGlobalPos_device));
 	ORcudaSafeCall(cudaFree(noTriangles_device));
 }
 
 template<class TVoxel>
-void ITMMeshingEngine_CUDA<TVoxel, VoxelBlockHash>::MeshScene(ITMMesh* mesh,
-                                                                 const ITMVoxelVolume<TVoxel, VoxelBlockHash>* scene) {
+void MeshingEngine_CUDA<TVoxel, VoxelBlockHash>::MeshScene(ITMMesh* mesh,
+                                                           const ITMVoxelVolume<TVoxel, VoxelBlockHash>* scene) {
 	ITMMesh::Triangle* triangles = mesh->triangles->GetData(MEMORYDEVICE_CUDA);
 	const TVoxel* localVBA = scene->localVBA.GetVoxelBlocks();
 	const ITMHashEntry* hashTable = scene->index.GetEntries();
@@ -76,15 +76,15 @@ void ITMMeshingEngine_CUDA<TVoxel, VoxelBlockHash>::MeshScene(ITMMesh* mesh,
 }
 
 template<class TVoxel>
-ITMMeshingEngine_CUDA<TVoxel, PlainVoxelArray>::ITMMeshingEngine_CUDA(const PlainVoxelArray& index):
-		ITMMeshingEngine<TVoxel, PlainVoxelArray>(index) {}
+MeshingEngine_CUDA<TVoxel, PlainVoxelArray>::MeshingEngine_CUDA(const PlainVoxelArray& index):
+		MeshingEngine<TVoxel, PlainVoxelArray>(index) {}
 
 template<class TVoxel>
-ITMMeshingEngine_CUDA<TVoxel, PlainVoxelArray>::~ITMMeshingEngine_CUDA(void) {}
+MeshingEngine_CUDA<TVoxel, PlainVoxelArray>::~MeshingEngine_CUDA(void) {}
 
 template<class TVoxel>
-void ITMMeshingEngine_CUDA<TVoxel, PlainVoxelArray>::MeshScene(ITMMesh* mesh,
-                                                                  const ITMVoxelVolume<TVoxel, PlainVoxelArray>* scene) {}
+void MeshingEngine_CUDA<TVoxel, PlainVoxelArray>::MeshScene(ITMMesh* mesh,
+                                                            const ITMVoxelVolume<TVoxel, PlainVoxelArray>* scene) {}
 
 
 template<class TVoxel>

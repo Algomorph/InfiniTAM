@@ -6,7 +6,7 @@
 #include "MainEngine.h"
 #include "TrackingController.h"
 #include "../LowLevel/Interface/ITMLowLevelEngine.h"
-#include "../Meshing/Interface/ITMMeshingEngine.h"
+#include "../Meshing/Interface/MeshingEngine.h"
 #include "../ViewBuilding/Interface/ITMViewBuilder.h"
 #include "../Visualization/Interface/VisualizationEngine.h"
 #include "../../Objects/Misc/ITMIMUCalibrator.h"
@@ -25,7 +25,7 @@ namespace ITMLib
 		ITMLowLevelEngine *lowLevelEngine;
 		VisualizationEngine<TVoxel, TIndex> *visualizationEngine;
 
-		ITMMeshingEngine<TVoxel, TIndex> *meshingEngine;
+		MeshingEngine<TVoxel, TIndex> *meshingEngine;
 
 		ITMViewBuilder *viewBuilder;
 		DenseMapper<TVoxel, TIndex> *denseMapper;

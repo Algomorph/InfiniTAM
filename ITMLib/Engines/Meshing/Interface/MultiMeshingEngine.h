@@ -2,17 +2,17 @@
 
 #pragma once
 
-#include "ITMMeshingEngine.h"
+#include "MeshingEngine.h"
 #include "../../../Objects/Meshing/ITMMesh.h"
 #include "../../MultiScene/VoxelMapGraphManager.h"
 
 namespace ITMLib
 {
 	template<class TVoxel, class TIndex>
-	class ITMMultiMeshingEngine
+	class MultiMeshingEngine
 	{
 	public:
-		virtual ~ITMMultiMeshingEngine(void) {}
+		virtual ~MultiMeshingEngine(void) {}
 
 		virtual void MeshScene(ITMMesh *mesh, const VoxelMapGraphManager<TVoxel, TIndex> & sceneManager) = 0;
 	};

@@ -3,7 +3,7 @@
 #include "DynamicSceneVoxelEngine.h"
 
 #include "../LowLevel/ITMLowLevelEngineFactory.h"
-#include "../Meshing/ITMMeshingEngineFactory.h"
+#include "../Meshing/MeshingEngineFactory.h"
 #include "../ViewBuilding/ITMViewBuilderFactory.h"
 #include "../Visualization/VisualizationEngineFactory.h"
 #include "../VolumeFileIO/VolumeFileIOEngine.h"
@@ -38,7 +38,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(const IT
 
 	meshingEngine = nullptr;
 	if (settings.create_meshing_engine)
-		meshingEngine = ITMMeshingEngineFactory::MakeMeshingEngine<TVoxel, TIndex>(deviceType, canonicalScene->index);
+		meshingEngine = MeshingEngineFactory::MakeMeshingEngine<TVoxel, TIndex>(deviceType, canonicalScene->index);
 
 	denseMapper = new DenseDynamicMapper<TVoxel, TWarp, TIndex>(canonicalScene->index);
 	Vector2i trackedImageSize = cameraTrackingController->GetTrackedImageSize(imgSize_rgb, imgSize_d);

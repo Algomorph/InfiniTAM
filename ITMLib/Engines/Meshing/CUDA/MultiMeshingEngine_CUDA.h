@@ -2,27 +2,38 @@
 
 #pragma once
 
-#include "../Interface/ITMMultiMeshingEngine.h"
+#include "../Interface/MultiMeshingEngine.h"
 #include "../../../Objects/Scene/ITMMultiSceneAccess.h"
 
 namespace ITMLib
 {
 	template<class TVoxel, class TIndex>
-	class ITMMultiMeshingEngine_CPU : public ITMMultiMeshingEngine<TVoxel, TIndex>
+	class MultiMeshingEngine_CUDA : public MultiMeshingEngine<TVoxel, TIndex>
 	{
 	public:
-		explicit ITMMultiMeshingEngine_CPU(const TIndex& index){};
+		explicit MultiMeshingEngine_CUDA(const TIndex& index){};
 		void MeshScene(ITMMesh *mesh, const VoxelMapGraphManager<TVoxel, TIndex> & sceneManager) {}
 	};
 
 	template<class TVoxel>
-	class ITMMultiMeshingEngine_CPU<TVoxel, VoxelBlockHash> : public ITMMultiMeshingEngine < TVoxel, VoxelBlockHash >
+	class MultiMeshingEngine_CUDA<TVoxel, VoxelBlockHash> : public MultiMeshingEngine < TVoxel, VoxelBlockHash >
 	{
+	private:
+		unsigned int  *noTriangles_device;
+		Vector4s *visibleBlockGlobalPos_device;
+
 	public:
-		explicit ITMMultiMeshingEngine_CPU(const VoxelBlockHash& index){};
 		typedef typename ITMMultiIndex<VoxelBlockHash>::IndexData MultiIndexData;
 		typedef ITMMultiVoxel<TVoxel> MultiVoxelData;
 		typedef VoxelMapGraphManager<TVoxel, VoxelBlockHash> MultiSceneManager;
+
+		MultiIndexData *indexData_device, indexData_host;
+		MultiVoxelData *voxelData_device, voxelData_host;
+
 		void MeshScene(ITMMesh *mesh, const MultiSceneManager & sceneManager);
+
+		explicit MultiMeshingEngine_CUDA(const VoxelBlockHash& index);
+		~MultiMeshingEngine_CUDA();
 	};
 }
+

@@ -16,7 +16,7 @@ namespace ITMLib
  * \tparam TIndex type of indexing structure used to access the voxels in the voxel grid / scene
  */
 	template<class TVoxel, class TIndex>
-	class ITMMeshingEngine
+	class MeshingEngine
 	{
 	public:
 		/**
@@ -26,7 +26,7 @@ namespace ITMLib
 		 */
 		virtual void MeshScene(ITMMesh *mesh, const ITMVoxelVolume<TVoxel,TIndex> *scene) = 0;
 
-		explicit ITMMeshingEngine(const TIndex& index){}
-		virtual ~ITMMeshingEngine() = default;
+		explicit MeshingEngine(const TIndex& index){}
+		virtual ~MeshingEngine() = default;
 	};
 }

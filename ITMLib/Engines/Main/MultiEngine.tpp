@@ -48,7 +48,7 @@ MultiEngine<TVoxel, TIndex>::MultiEngine(const ITMRGBDCalib& calib, Vector2i img
 
 	meshingEngine = NULL;
 	if (settings.create_meshing_engine)
-		meshingEngine = ITMMultiMeshingEngineFactory::MakeMeshingEngine<TVoxel, TIndex>(deviceType, mapManager->getLocalMap(0)->scene->index);
+		meshingEngine = MultiMeshingEngineFactory::MakeMeshingEngine<TVoxel, TIndex>(deviceType, mapManager->getLocalMap(0)->scene->index);
 
 	renderState_freeview = NULL; //will be created by the Visualization engine
 	imuCalibrator = new ITMIMUCalibrator_iPad();
