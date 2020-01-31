@@ -22,22 +22,6 @@ include(${PROJECT_SOURCE_DIR}/cmake/UseBoost.cmake)
 # Specify the project files #
 #############################
 
-##
-set(ITMLIB_TOPLEVEL_CPU_SOURCES
-    ## VBH - CPU
-    Instantiations/VoxelBlockHash/CPUInstantiations.cpp
-    ## PVA - CPU
-    Instantiations/PlainVoxelArray/CPUInstantiations.cpp
-    )
-
-set(ITMLIB_TOPLEVEL_CUDA_SOURCES
-    ## VBH - CUDA
-    Instantiations/VoxelBlockHash/CUDAInstantiations.cu
-    Instantiations/VoxelBlockHash/SurfelCUDAInstantiations.cu
-    ## PVA - CUDA
-    Instantiations/PlainVoxelArray/CUDAInstantiations.cu
-    )
-
 set(ITMLIB_TOPLEVEL_HEADERS
     ITMLibDefines.h
     )
@@ -934,8 +918,6 @@ endif ()
 
 set(sources
     ${ITMLIB_OBJECTS_SCENE_SOURCES}
-    ${ITMLIB_TOPLEVEL_CPU_SOURCES}
-    ${ITMLIB_TOPLEVEL_CUDA_SOURCES}
     ${ITMLIB_CORE_SOURCES}
     ${ITMLIB_ENGINES_LOWLEVEL_SOURCES}
     ${ITMLIB_ENGINES_LOWLEVEL_CPU_SOURCES}
