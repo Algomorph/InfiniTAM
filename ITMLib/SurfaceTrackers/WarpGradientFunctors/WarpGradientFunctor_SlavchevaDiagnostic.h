@@ -28,6 +28,7 @@
 #include "../Shared/ITMWarpGradientCommon.h"
 #include "../../Utils/VoxelFlags.h"
 #include "../../Utils/CPrintHelpers.h"
+#include "../../Utils/Configuration.h"
 #include "../../Engines/EditAndCopy/Shared/EditAndCopyEngine_Shared.h"
 
 

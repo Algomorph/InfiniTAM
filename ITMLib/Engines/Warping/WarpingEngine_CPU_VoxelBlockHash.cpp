@@ -14,8 +14,9 @@
 //  limitations under the License.
 //  ================================================================
 #include "../Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
-#include "WarpingEngine.tpp"
+#include "../Traversal/CPU/TwoVolumeTraversal_CPU_VoxelBlockHash.h"
 #include "../Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.tpp"
+#include "WarpingEngine.tpp"
 #include "../../GlobalTemplateDefines.h"
 
 namespace ITMLib{

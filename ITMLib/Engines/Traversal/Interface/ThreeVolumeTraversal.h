@@ -1,5 +1,5 @@
 //  ================================================================
-//  Created by Gregory Kramida on 1/29/20.
+//  Created by Gregory Kramida on 1/31/20.
 //  Copyright (c) 2020 Gregory Kramida
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -13,13 +13,15 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "../Traversal/CPU/TwoVolumeTraversal_CPU_PlainVoxelArray.h"
-#include "../Indexing/Interface/IndexingEngine.tpp"
-#include "VolumeFusionEngine.tpp"
-#include "../../GlobalTemplateDefines.h"
+#pragma once
+
+#include "../../../../ORUtils/MemoryDeviceType.h"
+
 namespace ITMLib{
 
-template
-class VolumeFusionEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU>;
+template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TDeviceType>
+class ThreeVolumeTraversalEngine;
 
 } // namespace ITMLib
+
+

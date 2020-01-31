@@ -13,6 +13,10 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
+
+#include "../../../Engines/Traversal/CUDA/TwoVolumeTraversal_CUDA_PlainVoxelArray.h"
+#include "../../../Engines/Traversal/CUDA/TwoVolumeTraversal_CUDA_VoxelBlockHash.h"
+#include "../../../Engines/Traversal/CUDA/TwoVolumeTraversal_CUDA_PVA_to_VBH.h"
 #include "VoxelVolumeComparison_CUDA.tcu"
 #include "../../../GlobalTemplateDefines.h"
 

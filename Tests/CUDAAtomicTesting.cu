@@ -22,7 +22,6 @@
 
 //local
 #include "CUDAAtomicTesting.h"
-#include "../ORUtils/JetbrainsCUDASyntax.hpp"
 #include "../ORUtils/CUDADefines.h"
 #include "../ORUtils/MemoryBlock.h"
 #include "../ITMLib/Utils/CUDAUtils.h"

@@ -14,6 +14,7 @@
 //  limitations under the License.
 //  ================================================================
 #include "../../Engines/Traversal/CUDA/VolumeTraversal_CUDA_PlainVoxelArray.h"
+#include "../../Engines/Traversal/CUDA/ThreeVolumeTraversal_CUDA_PlainVoxelArray.h"
 #include "../../Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
 #include "../../Utils/Analytics/SceneStatisticsCalculator/CUDA/SceneStatisticsCalculator_CUDA.h"
 #include "../WarpGradientFunctors/WarpGradientFunctor_SlavchevaOptimized.h"

@@ -19,7 +19,7 @@
 #include "VolumeFusionEngine.h"
 #include "../Indexing/Interface/IndexingEngine.h"
 #include "VolumeFusionFunctors.h"
-#include "../Traversal/Interface/VolumeTraversal.h"
+#include "../Traversal/Interface/TwoVolumeTraversal.h"
 
 using namespace ITMLib;
 

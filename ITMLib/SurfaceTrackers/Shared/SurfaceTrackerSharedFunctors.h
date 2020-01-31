@@ -15,21 +15,16 @@
 //  ================================================================
 #pragma once
 
-
 #include "../../Utils/Math.h"
 #include "../../Objects/Volume/VoxelVolume.h"
 #include "../../Utils/Configuration.h"
 #include "SurfaceTrackerSharedRoutines.h"
 #include "../../../ORUtils/PlatformIndependentAtomics.h"
-
-
-#include "../../Engines/Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
-#include "../../Engines/Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
+#include "../../Engines/Traversal/Interface/VolumeTraversal.h"
+#include "../../Engines/Traversal/Interface/ThreeVolumeTraversal.h"
 
 #ifdef __CUDACC__
 #include "../../Utils/CUDAUtils.h"
-#include "../../Engines/Traversal/CUDA/VolumeTraversal_CUDA_PlainVoxelArray.h"
-#include "../../Engines/Traversal/CUDA/VolumeTraversal_CUDA_VoxelBlockHash.h"
 #endif
 
 
@@ -270,24 +265,6 @@ private:
 
 };
 
-
-template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TDeviceType>
-void SmoothWarpGradient_common(ITMLib::VoxelVolume<TVoxel, TIndex>* liveScene,
-                               ITMLib::VoxelVolume<TVoxel, TIndex>* canonicalScene,
-                               ITMLib::VoxelVolume<TWarp, TIndex>* warpField) {
-
-	GradientSmoothingPassFunctor<TVoxel, TWarp, TIndex, X> passFunctorX(warpField);
-	GradientSmoothingPassFunctor<TVoxel, TWarp, TIndex, Y> passFunctorY(warpField);
-	GradientSmoothingPassFunctor<TVoxel, TWarp, TIndex, Z> passFunctorZ(warpField);
-
-	ITMLib::ThreeVolumeTraversalEngine<TVoxel, TWarp, TIndex, TDeviceType>::
-	template DualVoxelPositionTraversal(liveScene, canonicalScene, warpField, passFunctorX);
-	ITMLib::ThreeVolumeTraversalEngine<TVoxel, TWarp, TIndex, TDeviceType>::
-	template DualVoxelPositionTraversal(liveScene, canonicalScene, warpField, passFunctorY);
-	ITMLib::ThreeVolumeTraversalEngine<TVoxel, TWarp, TIndex, TDeviceType>::
-	template DualVoxelPositionTraversal(liveScene, canonicalScene, warpField, passFunctorZ);
-}
-
 template<typename TWarp, bool hasCumulativeWarp>
 struct AddFramewiseWarpToWarpWithClearStaticFunctor;
 
@@ -321,51 +298,5 @@ template<typename TVoxelCanonical>
 struct AddFramewiseWarpToWarpStaticFunctor<TVoxelCanonical, false> {
 	_CPU_AND_GPU_CODE_
 	static inline void run(TVoxelCanonical& voxel) {
-	}
-};
-
-template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TDeviceType>
-inline float UpdateWarps_common(
-		ITMLib::VoxelVolume<TVoxel, TIndex>* canonicalScene,
-		ITMLib::VoxelVolume<TVoxel, TIndex>* liveScene,
-		ITMLib::VoxelVolume<TWarp, TIndex>* warpField,
-		float learning_rate,
-		bool gradeintSmoothingEnabled,
-		bool print_histogram) {
-	WarpUpdateFunctor<TVoxel, TWarp, TDeviceType>
-			warpUpdateFunctor(learning_rate, ITMLib::configuration::get().non_rigid_tracking_parameters.momentum_weight, gradeintSmoothingEnabled);
-
-	ITMLib::ThreeVolumeTraversalEngine<TVoxel, TWarp, TIndex, TDeviceType>::
-	DualVoxelPositionTraversal(liveScene, canonicalScene, warpField, warpUpdateFunctor);
-
-	//TODO: move histogram printing / logging to a separate function
-	//don't compute histogram in CUDA version
-#ifndef __CUDACC__
-	if(print_histogram){
-		WarpHistogramFunctor<TVoxel, TWarp>
-				warpHistogramFunctor(warpUpdateFunctor.maxFramewiseWarpLength, warpUpdateFunctor.maxWarpUpdateLength);
-		ITMLib::ThreeVolumeTraversalEngine<TVoxel, TWarp, TIndex, TDeviceType>::
-		DualVoxelTraversal(liveScene, canonicalScene, warpField, warpHistogramFunctor);
-		warpHistogramFunctor.PrintHistogram();
-		warpUpdateFunctor.PrintWarp();
-	}
-#endif
-	//return warpUpdateFunctor.maxWarpUpdateLength;
-	return GET_ATOMIC_VALUE_CPU(warpUpdateFunctor.maxFramewiseWarpLength);
-}
-
-template<typename TVoxelCanonical, typename TIndex, MemoryDeviceType TDeviceType>
-inline void
-AddFramewiseWarpToWarp_common(ITMLib::VoxelVolume<TVoxelCanonical, TIndex>* canonicalScene, bool clearFramewiseWarp) {
-	if (clearFramewiseWarp) {
-		ITMLib::VolumeTraversalEngine<TVoxelCanonical, TIndex, TDeviceType>::
-		template StaticVoxelTraversal<
-				AddFramewiseWarpToWarpWithClearStaticFunctor<TVoxelCanonical, TVoxelCanonical::hasCumulativeWarp>>
-		(canonicalScene);
-	} else {
-		ITMLib::VolumeTraversalEngine<TVoxelCanonical, TIndex, TDeviceType>::
-		template StaticVoxelTraversal<
-				AddFramewiseWarpToWarpStaticFunctor<TVoxelCanonical, TVoxelCanonical::hasCumulativeWarp>>
-		(canonicalScene);
 	}
 };

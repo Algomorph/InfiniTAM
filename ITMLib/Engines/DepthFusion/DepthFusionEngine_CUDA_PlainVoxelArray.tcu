@@ -19,7 +19,6 @@
 
 #include "../../Objects/Volume/TrilinearInterpolation.h"
 #include "../Common/CommonFunctors.h"
-#include "../../../ORUtils/JetbrainsCUDASyntax.hpp"
 #include "DepthFusionEngine_CUDA_PlainVoxelArray_Kernels.h"
 
 using namespace ITMLib;

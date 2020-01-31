@@ -19,9 +19,7 @@
 #include "../../../Objects/Volume/PlainVoxelArray.h"
 #include "../../../Objects/Volume/VoxelBlockHash.h"
 #include "../../../../ORUtils/MemoryDeviceType.h"
-#include "../../../Engines/Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
-#include "../../../Engines/Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
-#include "../../../Engines/Traversal/CPU/VolumeTraversal_CPU_PVA_to_VBH.h"
+#include "../../../Engines/Traversal/Interface/TwoVolumeTraversal.h"
 #include "VoxelVolumeComparison_Functors.h"
 
 

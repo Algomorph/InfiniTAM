@@ -18,6 +18,7 @@
 //local
 #include "WarpingEngine.h"
 #include "../Traversal/Interface/VolumeTraversal.h"
+#include "../Traversal/Interface/TwoVolumeTraversal.h"
 #include "../Indexing/Interface/IndexingEngine.h"
 #include "WarpingFunctors.h"
 
@@ -35,8 +36,8 @@ void WarpingEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::WarpScene(
 	VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::VoxelTraversal(targetTSDF, flagClearFunctor);
 
 	// Allocate new blocks where necessary, filter based on flags from source
-	IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::Instance().template AllocateFromWarpedVolume<TWarpType>(
-			warpField, sourceTSDF, targetTSDF);
+	IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::Instance().
+			template AllocateFromWarpedVolume<TWarpType>(warpField, sourceTSDF, targetTSDF);
 
 	TrilinearInterpolationFunctor<TVoxel, TWarp, TIndex, TWarpType, TMemoryDeviceType>
 			trilinearInterpolationFunctor(sourceTSDF, warpField);

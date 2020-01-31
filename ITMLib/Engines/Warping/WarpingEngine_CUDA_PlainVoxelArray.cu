@@ -16,6 +16,7 @@
 
 //local
 #include "../Traversal/CUDA/VolumeTraversal_CUDA_PlainVoxelArray.h"
+#include "../Traversal/CUDA/TwoVolumeTraversal_CUDA_PlainVoxelArray.h"
 #include "../Indexing/Interface/IndexingEngine.tpp"
 #include "WarpingEngine.tpp"
 #include "../../GlobalTemplateDefines.h"

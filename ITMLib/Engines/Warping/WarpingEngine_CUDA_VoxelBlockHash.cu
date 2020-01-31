@@ -14,6 +14,7 @@
 //  limitations under the License.
 //  ================================================================
 #include "../Traversal/CUDA/VolumeTraversal_CUDA_VoxelBlockHash.h"
+#include "../Traversal/CUDA/TwoVolumeTraversal_CUDA_VoxelBlockHash.h"
 #include "../Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.tcu"
 #include "WarpingEngine.tpp"
 #include "../../GlobalTemplateDefines.h"

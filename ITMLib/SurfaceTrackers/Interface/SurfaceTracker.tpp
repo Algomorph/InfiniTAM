@@ -18,11 +18,12 @@
 
 //local
 #include "SurfaceTracker.h"
-
-#include "../Shared/SurfaceTrackerSharedFunctors.h"
 #include "../WarpGradientFunctors/WarpGradientFunctor.h"
 #include "../../Engines/Indexing/Interface/IndexingEngine.h"
 #include "../../Utils/Analytics/SceneStatisticsCalculator/Interface/SceneStatisticsCalculatorInterface.h"
+#include "../Shared/SurfaceTrackerSharedFunctors.h"
+#include "../../Engines/Traversal/Interface/VolumeTraversal.h"
+#include "../../Engines/Traversal/Interface/ThreeVolumeTraversal.h"
 
 using namespace ITMLib;
 
@@ -104,8 +105,16 @@ void SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorTy
 		VoxelVolume<TWarp, TIndex>* warpField) {
 
 	if (this->switches.enable_sobolev_gradient_smoothing) {
-		SmoothWarpGradient_common<TVoxel, TWarp, TIndex, TMemoryDeviceType>
-				(liveScene, canonicalScene, warpField);
+		GradientSmoothingPassFunctor<TVoxel, TWarp, TIndex, X> passFunctorX(warpField);
+		GradientSmoothingPassFunctor<TVoxel, TWarp, TIndex, Y> passFunctorY(warpField);
+		GradientSmoothingPassFunctor<TVoxel, TWarp, TIndex, Z> passFunctorZ(warpField);
+
+		ITMLib::ThreeVolumeTraversalEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::
+		template DualVoxelPositionTraversal(liveScene, canonicalScene, warpField, passFunctorX);
+		ITMLib::ThreeVolumeTraversalEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::
+		template DualVoxelPositionTraversal(liveScene, canonicalScene, warpField, passFunctorY);
+		ITMLib::ThreeVolumeTraversalEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::
+		template DualVoxelPositionTraversal(liveScene, canonicalScene, warpField, passFunctorZ);
 	}
 }
 
@@ -117,16 +126,43 @@ float SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorT
 		VoxelVolume<TVoxel, TIndex>* canonicalScene,
 		VoxelVolume<TVoxel, TIndex>* liveScene,
 		VoxelVolume<TWarp, TIndex>* warpField) {
-	return UpdateWarps_common<TVoxel, TWarp, TIndex, TMemoryDeviceType>(
-			canonicalScene, liveScene, warpField, this->parameters.learning_rate,
-			this->switches.enable_sobolev_gradient_smoothing,
-			this->histograms_enabled);
+
+	WarpUpdateFunctor<TVoxel, TWarp, TMemoryDeviceType>
+			warpUpdateFunctor(this->parameters.learning_rate,
+					ITMLib::configuration::get().non_rigid_tracking_parameters.momentum_weight,
+					this->switches.enable_sobolev_gradient_smoothing);
+
+	ITMLib::ThreeVolumeTraversalEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::
+	DualVoxelPositionTraversal(liveScene, canonicalScene, warpField, warpUpdateFunctor);
+
+	//TODO: move histogram printing / logging to a separate function
+	//don't compute histogram in CUDA version
+#ifndef __CUDACC__
+	if(histograms_enabled){
+		WarpHistogramFunctor<TVoxel, TWarp>
+				warpHistogramFunctor(warpUpdateFunctor.maxFramewiseWarpLength, warpUpdateFunctor.maxWarpUpdateLength);
+		ITMLib::ThreeVolumeTraversalEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::
+		DualVoxelTraversal(liveScene, canonicalScene, warpField, warpHistogramFunctor);
+		warpHistogramFunctor.PrintHistogram();
+		warpUpdateFunctor.PrintWarp();
+	}
+#endif
+	//return warpUpdateFunctor.maxWarpUpdateLength;
+	return GET_ATOMIC_VALUE_CPU(warpUpdateFunctor.maxFramewiseWarpLength);
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, GradientFunctorType TGradientFunctorType>
 void SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorType>::AddFramewiseWarpToWarp(
 		VoxelVolume<TWarp, TIndex>* warpField, bool clearFramewiseWarp) {
-	AddFramewiseWarpToWarp_common<TWarp, TIndex, TMemoryDeviceType>(warpField, clearFramewiseWarp);
+	if (clearFramewiseWarp) {
+		ITMLib::VolumeTraversalEngine<TWarp, TIndex, TMemoryDeviceType>::
+		template StaticVoxelTraversal<
+				AddFramewiseWarpToWarpWithClearStaticFunctor<TWarp, TWarp::hasCumulativeWarp>>(warpField);
+	} else {
+		ITMLib::VolumeTraversalEngine<TWarp, TIndex, TMemoryDeviceType>::
+		template StaticVoxelTraversal<
+				AddFramewiseWarpToWarpStaticFunctor<TWarp, TWarp::hasCumulativeWarp>>(warpField);
+	}
 }
 
 //endregion ============================================================================================================

@@ -17,9 +17,7 @@
 
 #include "VoxelVolumeComparison_CUDA.h"
 #include "../../../../ORUtils/PlatformIndependence.h"
-#include "../../../Engines/Traversal/CUDA/VolumeTraversal_CUDA_PlainVoxelArray.h"
-#include "../../../Engines/Traversal/CUDA/VolumeTraversal_CUDA_VoxelBlockHash.h"
-#include "../../../Engines/Traversal/CUDA/VolumeTraversal_CUDA_PVA_to_VBH.h"
+#include "../../../Engines/Traversal/Interface/TwoVolumeTraversal.h"
 #include "VoxelVolumeComparison_Functors.h"
 
 

@@ -13,8 +13,9 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "../../Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 #include "../../Engines/Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
+#include "../../Engines/Traversal/CPU/ThreeVolumeTraversal_CPU_VoxelBlockHash.h"
+#include "../../Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 #include "../../Utils/Analytics/SceneStatisticsCalculator/CPU/SceneStatisticsCalculator_CPU.h"
 #include "../WarpGradientFunctors/WarpGradientFunctor_SlavchevaOptimized.h"
 #include "../WarpGradientFunctors/WarpGradientFunctor_SlavchevaDiagnostic.h"

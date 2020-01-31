@@ -15,22 +15,11 @@
 //  ================================================================
 #pragma once
 
-#include "../../../Utils/Configuration.h"
+#include "../../../../ORUtils/MemoryDeviceType.h"
 
 namespace ITMLib{
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TDeviceType>
 class VolumeTraversalEngine;
 
-
-template<typename TVoxelPrimary, typename TVoxelSecondary, typename TIndexPrimary, typename TIndexSecondary,
-        MemoryDeviceType TDeviceType>
-class TwoVolumeTraversalEngine;
-
-template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TDeviceType>
-class ThreeVolumeTraversalEngine;
-
-
-}//namespace ITMLib
-
-
+} // namespace ITMLib

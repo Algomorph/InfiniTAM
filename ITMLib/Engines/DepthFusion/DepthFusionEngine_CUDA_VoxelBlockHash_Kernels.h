@@ -15,7 +15,6 @@
 //  ================================================================
 #pragma once
 
-#include "../../../ORUtils/JetbrainsCUDASyntax.hpp"
 #include "../Reconstruction/Shared/SceneReconstructionEngine_Shared.h"
 #include "../../Utils/CUDAUtils.h"
 #include "../../Objects/Volume/GlobalCache.h"

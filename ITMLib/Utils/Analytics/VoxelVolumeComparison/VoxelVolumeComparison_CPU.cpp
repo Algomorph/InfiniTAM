@@ -14,6 +14,9 @@
 //  limitations under the License.
 //  ================================================================
 #include "../../../GlobalTemplateDefines.h"
+#include "../../../Engines/Traversal/CPU/TwoVolumeTraversal_CPU_PVA_to_VBH.h"
+#include "../../../Engines/Traversal/CPU/TwoVolumeTraversal_CPU_PlainVoxelArray.h"
+#include "../../../Engines/Traversal/CPU/TwoVolumeTraversal_CPU_VoxelBlockHash.h"
 #include "VoxelVolumeComparison_CPU.tpp"
 
 namespace ITMLib {
