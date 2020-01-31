@@ -2,8 +2,8 @@
 
 #include "MultiEngine.h"
 
-#include "../LowLevel/ITMLowLevelEngineFactory.h"
-#include "../ViewBuilding/ITMViewBuilderFactory.h"
+#include "../LowLevel/LowLevelEngineFactory.h"
+#include "../ViewBuilding/ViewBuilderFactory.h"
 #include "../Visualization/VisualizationEngineFactory.h"
 #include "../Visualization/MultiVisualizationEngineFactory.h"
 #include "../../CameraTrackers/CameraTrackerFactory.h"
@@ -32,8 +32,8 @@ MultiEngine<TVoxel, TIndex>::MultiEngine(const ITMRGBDCalib& calib, Vector2i img
 	auto& settings = configuration::get();
 
 	const MemoryDeviceType deviceType = settings.device_type;
-	lowLevelEngine = ITMLowLevelEngineFactory::MakeLowLevelEngine(deviceType);
-	viewBuilder = ITMViewBuilderFactory::MakeViewBuilder(calib, deviceType);
+	lowLevelEngine = LowLevelEngineFactory::MakeLowLevelEngine(deviceType);
+	viewBuilder = ViewBuilderFactory::MakeViewBuilder(calib, deviceType);
 	visualization_engine = VisualizationEngineFactory::MakeVisualizationEngine<TVoxel, TIndex>(deviceType);
 
 	tracker = CameraTrackerFactory::Instance().Make(imgSize_rgb, imgSize_d, lowLevelEngine, imuCalibrator,

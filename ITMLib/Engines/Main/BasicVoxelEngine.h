@@ -5,9 +5,9 @@
 #include "Mappers/DenseMapper.h"
 #include "MainEngine.h"
 #include "TrackingController.h"
-#include "../LowLevel/Interface/ITMLowLevelEngine.h"
+#include "../LowLevel/Interface/LowLevelEngine.h"
 #include "../Meshing/Interface/MeshingEngine.h"
-#include "../ViewBuilding/Interface/ITMViewBuilder.h"
+#include "../ViewBuilding/Interface/ViewBuilder.h"
 #include "../Visualization/Interface/VisualizationEngine.h"
 #include "../../Objects/Misc/ITMIMUCalibrator.h"
 
@@ -22,12 +22,12 @@ namespace ITMLib
 		bool trackingActive, fusionActive, mainProcessingActive, trackingInitialised;
 		int framesProcessed, relocalisationCount;
 
-		ITMLowLevelEngine *lowLevelEngine;
+		LowLevelEngine *lowLevelEngine;
 		VisualizationEngine<TVoxel, TIndex> *visualizationEngine;
 
 		MeshingEngine<TVoxel, TIndex> *meshingEngine;
 
-		ITMViewBuilder *viewBuilder;
+		ViewBuilder *viewBuilder;
 		DenseMapper<TVoxel, TIndex> *denseMapper;
 		TrackingController *trackingController;
 

@@ -2,9 +2,9 @@
 
 #include "BasicVoxelEngine.h"
 
-#include "../LowLevel/ITMLowLevelEngineFactory.h"
+#include "../LowLevel/LowLevelEngineFactory.h"
 #include "../Meshing/MeshingEngineFactory.h"
-#include "../ViewBuilding/ITMViewBuilderFactory.h"
+#include "../ViewBuilding/ViewBuilderFactory.h"
 #include "../Visualization/VisualizationEngineFactory.h"
 #include "../../CameraTrackers/CameraTrackerFactory.h"
 
@@ -27,8 +27,8 @@ BasicVoxelEngine<TVoxel,TIndex>::BasicVoxelEngine(const ITMRGBDCalib& calib, Vec
 
 	const MemoryDeviceType deviceType = settings.device_type;
 
-	lowLevelEngine = ITMLowLevelEngineFactory::MakeLowLevelEngine(deviceType);
-	viewBuilder = ITMViewBuilderFactory::MakeViewBuilder(calib, deviceType);
+	lowLevelEngine = LowLevelEngineFactory::MakeLowLevelEngine(deviceType);
+	viewBuilder = ViewBuilderFactory::MakeViewBuilder(calib, deviceType);
 	visualizationEngine = VisualizationEngineFactory::MakeVisualizationEngine<TVoxel,TIndex>(deviceType);
 
 	meshingEngine = nullptr;

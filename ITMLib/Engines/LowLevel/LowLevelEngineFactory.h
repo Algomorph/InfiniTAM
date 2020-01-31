@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Interface/ITMLowLevelEngine.h"
+#include "Interface/LowLevelEngine.h"
 #include "../../Utils/Configuration.h"
 #include "../../../ORUtils/MemoryDeviceType.h"
 
@@ -12,7 +12,7 @@ namespace ITMLib
 /**
  * \brief This struct provides functions that can be used to construct low-level engines.
  */
-struct ITMLowLevelEngineFactory
+struct LowLevelEngineFactory
 {
   //#################### PUBLIC STATIC MEMBER FUNCTIONS ####################
 
@@ -21,7 +21,7 @@ struct ITMLowLevelEngineFactory
    *
    * \param deviceType  The device on which the low-level engine should operate.
    */
-  static ITMLowLevelEngine *MakeLowLevelEngine(MemoryDeviceType deviceType);
+  static LowLevelEngine *MakeLowLevelEngine(MemoryDeviceType deviceType);
 };
 
 }

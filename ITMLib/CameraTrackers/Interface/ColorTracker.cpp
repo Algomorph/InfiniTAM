@@ -10,7 +10,7 @@ using namespace ITMLib;
 static inline bool minimizeLM(const ColorTracker & tracker, ORUtils::SE3Pose & initialization);
 
 ColorTracker::ColorTracker(Vector2i imgSize, TrackerIterationType *trackingRegime, int noHierarchyLevels,
-                           const ITMLowLevelEngine *lowLevelEngine, MemoryDeviceType memoryType)
+                           const LowLevelEngine *lowLevelEngine, MemoryDeviceType memoryType)
 {
 	viewHierarchy = new ITMImageHierarchy<ITMViewHierarchyLevel>(imgSize, trackingRegime, noHierarchyLevels, memoryType);
 

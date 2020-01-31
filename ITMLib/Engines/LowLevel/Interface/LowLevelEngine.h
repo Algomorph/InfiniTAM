@@ -7,7 +7,7 @@
 namespace ITMLib
 {
 	/// Interface to low level image processing engines.
-	class ITMLowLevelEngine
+	class LowLevelEngine
 	{
 	public:
 		virtual void CopyImage(ITMUChar4Image *image_out, const ITMUChar4Image *image_in) const = 0;
@@ -29,7 +29,7 @@ namespace ITMLib
 
 		virtual int CountValidDepths(const ITMFloatImage *image_in) const = 0;
 
-		ITMLowLevelEngine(void) { }
-		virtual ~ITMLowLevelEngine(void) { }
+		LowLevelEngine(void) { }
+		virtual ~LowLevelEngine(void) { }
 	};
 }

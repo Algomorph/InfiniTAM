@@ -23,7 +23,7 @@ DynamicCameraTracker::DynamicCameraTracker(const Vector2i& imgSize_d, const Vect
                                            int noHierarchyLevels, float terminationThreshold, float failureDetectorThreshold,
                                            float viewFrustum_min, float viewFrustum_max, float minColourGradient,
                                            float tukeyCutOff, int framesToSkip, int framesToWeight,
-                                           const ITMLowLevelEngine* lowLevelEngine, MemoryDeviceType memoryType)
+                                           const LowLevelEngine* lowLevelEngine, MemoryDeviceType memoryType)
 		: ExtendedTracker(imgSize_d, imgSize_rgb, useDepth, useColour, colourWeight, trackingRegime,
 		                  noHierarchyLevels, terminationThreshold, failureDetectorThreshold, viewFrustum_min,
 		                  viewFrustum_max, minColourGradient, tukeyCutOff, framesToSkip, framesToWeight,

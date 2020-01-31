@@ -9,7 +9,7 @@ namespace ITMLib
 {
 	/** \brief
 	*/
-	class ITMViewBuilder
+	class ViewBuilder
 	{
 	protected:
 		const ITMRGBDCalib calib;
@@ -37,14 +37,14 @@ namespace ITMLib
 				                        bool useBilateralFilter, ITMIMUMeasurement* imuMeasurement, bool modelSensorNoise,
 				                        bool storePreviousImage) = 0;
 
-		ITMViewBuilder(const ITMRGBDCalib& calib_)
+		ViewBuilder(const ITMRGBDCalib& calib_)
 		: calib(calib_)
 		{
 			this->shortImage = NULL;
 			this->floatImage = NULL;
 		}
 
-		virtual ~ITMViewBuilder()
+		virtual ~ViewBuilder()
 		{
 			if (this->shortImage != NULL) delete this->shortImage;
 			if (this->floatImage != NULL) delete this->floatImage;

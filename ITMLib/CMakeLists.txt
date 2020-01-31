@@ -79,39 +79,39 @@ set(ITMLIB_ENGINES_COMMON_HEADERS
 #======================================= LOW-LEVEL ENGINES =============================================================
 ##
 set(ITMLIB_ENGINES_LOWLEVEL_SOURCES
-    Engines/LowLevel/ITMLowLevelEngineFactory.cpp
+    Engines/LowLevel/LowLevelEngineFactory.cpp
     )
 
 set(ITMLIB_ENGINES_LOWLEVEL_HEADERS
-    Engines/LowLevel/ITMLowLevelEngineFactory.h
+    Engines/LowLevel/LowLevelEngineFactory.h
     )
 
 ##
 set(ITMLIB_ENGINES_LOWLEVEL_CPU_SOURCES
-    Engines/LowLevel/CPU/ITMLowLevelEngine_CPU.cpp
+    Engines/LowLevel/CPU/LowLevelEngine_CPU.cpp
     )
 
 set(ITMLIB_ENGINES_LOWLEVEL_CPU_HEADERS
-    Engines/LowLevel/CPU/ITMLowLevelEngine_CPU.h
+    Engines/LowLevel/CPU/LowLevelEngine_CPU.h
     )
 
 ##
 set(ITMLIB_ENGINES_LOWLEVEL_CUDA_SOURCES
-    Engines/LowLevel/CUDA/ITMLowLevelEngine_CUDA.cu
+    Engines/LowLevel/CUDA/LowLevelEngine_CUDA.cu
     )
 
 set(ITMLIB_ENGINES_LOWLEVEL_CUDA_HEADERS
-    Engines/LowLevel/CUDA/ITMLowLevelEngine_CUDA.h
+    Engines/LowLevel/CUDA/LowLevelEngine_CUDA.h
     )
 
 ##
 set(ITMLIB_ENGINES_LOWLEVEL_INTERFACE_HEADERS
-    Engines/LowLevel/Interface/ITMLowLevelEngine.h
+    Engines/LowLevel/Interface/LowLevelEngine.h
     )
 
 ##
 set(ITMLIB_ENGINES_LOWLEVEL_SHARED_HEADERS
-    Engines/LowLevel/Shared/ITMLowLevelEngine_Shared.h
+    Engines/LowLevel/Shared/LowLevelEngine_Shared.h
     )
 
 #====================================== SCENE TRAVERSAL ENGINES ======================================================
@@ -461,39 +461,39 @@ set(ITMLIB_ENGINES_SWAPPING_SHARED_HEADERS
 
 ## ======================================== VIEW-BUILDNG ENGINES =======================================================
 set(ITMLIB_ENGINES_VIEWBUILDING_SOURCES
-    Engines/ViewBuilding/ITMViewBuilderFactory.cpp
+    Engines/ViewBuilding/ViewBuilderFactory.cpp
     )
 
 set(ITMLIB_ENGINES_VIEWBUILDING_HEADERS
-    Engines/ViewBuilding/ITMViewBuilderFactory.h
+    Engines/ViewBuilding/ViewBuilderFactory.h
     )
 
 ##
 set(ITMLIB_ENGINES_VIEWBUILDING_CPU_SOURCES
-    Engines/ViewBuilding/CPU/ITMViewBuilder_CPU.cpp
+    Engines/ViewBuilding/CPU/ViewBuilder_CPU.cpp
     )
 
 set(ITMLIB_ENGINES_VIEWBUILDING_CPU_HEADERS
-    Engines/ViewBuilding/CPU/ITMViewBuilder_CPU.h
+    Engines/ViewBuilding/CPU/ViewBuilder_CPU.h
     )
 
 ##
 set(ITMLIB_ENGINES_VIEWBUILDING_CUDA_SOURCES
-    Engines/ViewBuilding/CUDA/ITMViewBuilder_CUDA.cu
+    Engines/ViewBuilding/CUDA/ViewBuilder_CUDA.cu
     )
 
 set(ITMLIB_ENGINES_VIEWBUILDING_CUDA_HEADERS
-    Engines/ViewBuilding/CUDA/ITMViewBuilder_CUDA.h
+    Engines/ViewBuilding/CUDA/ViewBuilder_CUDA.h
     )
 
 ##
 set(ITMLIB_ENGINES_VIEWBUILDING_INTERFACE_HEADERS
-    Engines/ViewBuilding/Interface/ITMViewBuilder.h
+    Engines/ViewBuilding/Interface/ViewBuilder.h
     )
 
 ##
 set(ITMLIB_ENGINES_VIEWBUILDING_SHARED_HEADERS
-    Engines/ViewBuilding/Shared/ITMViewBuilder_Shared.h
+    Engines/ViewBuilding/Shared/ViewBuilder_Shared.h
     )
 ## ======================================== VISUALIATION ENGINES =======================================================
 ##

@@ -2,9 +2,9 @@
 
 #include "DynamicSceneVoxelEngine.h"
 
-#include "../LowLevel/ITMLowLevelEngineFactory.h"
+#include "../LowLevel/LowLevelEngineFactory.h"
 #include "../Meshing/MeshingEngineFactory.h"
-#include "../ViewBuilding/ITMViewBuilderFactory.h"
+#include "../ViewBuilding/ViewBuilderFactory.h"
 #include "../Visualization/VisualizationEngineFactory.h"
 #include "../VolumeFileIO/VolumeFileIOEngine.h"
 #include "../../CameraTrackers/CameraTrackerFactory.h"
@@ -30,8 +30,8 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(const IT
 	if ((imgSize_d.x == -1) || (imgSize_d.y == -1)) imgSize_d = imgSize_rgb;
 	ITMDynamicFusionLogger<TVoxel, TWarp, TIndex>::Instance().SetScenes(canonicalScene, liveScenes[0], warpField);
 
-	lowLevelEngine = ITMLowLevelEngineFactory::MakeLowLevelEngine(deviceType);
-	viewBuilder = ITMViewBuilderFactory::MakeViewBuilder(calib, deviceType);
+	lowLevelEngine = LowLevelEngineFactory::MakeLowLevelEngine(deviceType);
+	viewBuilder = ViewBuilderFactory::MakeViewBuilder(calib, deviceType);
 	liveVisualizationEngine = VisualizationEngineFactory::MakeVisualizationEngine<TVoxel, TIndex>(deviceType);
 	canonicalVisualizationEngine =
 			VisualizationEngineFactory::MakeVisualizationEngine<TVoxel, TIndex>(deviceType);

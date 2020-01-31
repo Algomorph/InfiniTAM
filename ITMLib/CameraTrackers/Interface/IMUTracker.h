@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CameraTracker.h"
-#include "../../Engines/LowLevel/Interface/ITMLowLevelEngine.h"
+#include "../../Engines/LowLevel/Interface/LowLevelEngine.h"
 #include "../../Objects/Misc/ITMIMUCalibrator.h"
 #include "../../Objects/Misc/ITMIMUMeasurement.h"
 

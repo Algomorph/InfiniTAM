@@ -34,7 +34,7 @@ __global__ void depthTrackerOneLevel_g_rt_device(ITMDepthTracker_KernelParameter
 // host methods
 
 DepthTracker_CUDA::DepthTracker_CUDA(Vector2i imgSize, TrackerIterationType *trackingRegime, int noHierarchyLevels,
-                                     float terminationThreshold, float failureDetectorThreshold, const ITMLowLevelEngine *lowLevelEngine)
+                                     float terminationThreshold, float failureDetectorThreshold, const LowLevelEngine *lowLevelEngine)
  : DepthTracker(imgSize, trackingRegime, noHierarchyLevels, terminationThreshold, failureDetectorThreshold, lowLevelEngine, MEMORYDEVICE_CUDA)
 {
 	ORcudaSafeCall(cudaMallocHost((void**)&accu_host, sizeof(AccuCell)));

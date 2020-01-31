@@ -5,7 +5,7 @@
 
 using namespace ITMLib;
 
-ColorTracker_CPU::ColorTracker_CPU(Vector2i imgSize, TrackerIterationType *trackingRegime, int noHierarchyLevels, const ITMLowLevelEngine *lowLevelEngine)
+ColorTracker_CPU::ColorTracker_CPU(Vector2i imgSize, TrackerIterationType *trackingRegime, int noHierarchyLevels, const LowLevelEngine *lowLevelEngine)
 	: ColorTracker(imgSize, trackingRegime, noHierarchyLevels, lowLevelEngine, MEMORYDEVICE_CPU) {  }
 
 ColorTracker_CPU::~ColorTracker_CPU(void) { }

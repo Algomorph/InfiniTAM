@@ -36,7 +36,7 @@ namespace ITMLib
 		                    float tukeyCutOff,
 		                    int framesToSkip,
 		                    int framesToWeight,
-		                    const ITMLowLevelEngine *lowLevelEngine);
+		                    const LowLevelEngine *lowLevelEngine);
 		~ExtendedTracker_CPU(void);
 	};
 }

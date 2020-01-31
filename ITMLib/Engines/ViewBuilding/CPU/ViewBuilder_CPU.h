@@ -2,11 +2,11 @@
 
 #pragma once
 
-#include "../Interface/ITMViewBuilder.h"
+#include "../Interface/ViewBuilder.h"
 
 namespace ITMLib
 {
-	class ITMViewBuilder_CPU : public ITMViewBuilder
+	class ViewBuilder_CPU : public ViewBuilder
 	{
 	public:
 		void ConvertDisparityToDepth(ITMFloatImage *depth_out, const ITMShortImage *disp_in, const ITMIntrinsics *depthIntrinsics, 
@@ -23,8 +23,8 @@ namespace ITMLib
 				                bool useBilateralFilter, ITMIMUMeasurement* imuMeasurement, bool modelSensorNoise,
 				                bool storePreviousImage);
 
-		ITMViewBuilder_CPU(const ITMRGBDCalib& calib);
-		~ITMViewBuilder_CPU(void);
+		ViewBuilder_CPU(const ITMRGBDCalib& calib);
+		~ViewBuilder_CPU(void);
 	};
 }
 

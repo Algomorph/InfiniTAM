@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Interface/ITMViewBuilder.h"
+#include "Interface/ViewBuilder.h"
 #include "../../Utils/Configuration.h"
 
 namespace ITMLib
@@ -11,7 +11,7 @@ namespace ITMLib
 /**
  * \brief This struct provides functions that can be used to construct view builders.
  */
-struct ITMViewBuilderFactory
+struct ViewBuilderFactory
 {
   //#################### PUBLIC STATIC MEMBER FUNCTIONS ####################
 
@@ -21,8 +21,8 @@ struct ITMViewBuilderFactory
    * \param calib       The joint RGBD calibration parameters.
    * \param deviceType  The device on which the view builder should operate.
    */
-  static ITMViewBuilder *MakeViewBuilder(const ITMRGBDCalib& calib, MemoryDeviceType deviceType);
-  static ITMViewBuilder *MakeViewBuilder(const std::string& calibration_path, MemoryDeviceType deviceType);
+  static ViewBuilder *MakeViewBuilder(const ITMRGBDCalib& calib, MemoryDeviceType deviceType);
+  static ViewBuilder *MakeViewBuilder(const std::string& calibration_path, MemoryDeviceType deviceType);
 };
 
 }

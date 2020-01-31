@@ -20,7 +20,7 @@ ExtendedTracker_CPU::ExtendedTracker_CPU(Vector2i imgSize_d,
                                          float tukeyCutOff,
                                          int framesToSkip,
                                          int framesToWeight,
-                                         const ITMLowLevelEngine *lowLevelEngine)
+                                         const LowLevelEngine *lowLevelEngine)
 	: ExtendedTracker(imgSize_d,
 	                  imgSize_rgb,
 	                  useDepth,

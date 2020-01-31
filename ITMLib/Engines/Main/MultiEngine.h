@@ -4,8 +4,8 @@
 
 #include "MainEngine.h"
 #include "TrackingController.h"
-#include "../LowLevel/Interface/ITMLowLevelEngine.h"
-#include "../ViewBuilding/Interface/ITMViewBuilder.h"
+#include "../LowLevel/Interface/LowLevelEngine.h"
+#include "../ViewBuilding/Interface/ViewBuilder.h"
 #include "../../Objects/Misc/ITMIMUCalibrator.h"
 #include "../../../FernRelocLib/Relocaliser.h"
 
@@ -26,13 +26,13 @@ namespace ITMLib
 	{
 	private:
 
-		ITMLowLevelEngine *lowLevelEngine;
+		LowLevelEngine *lowLevelEngine;
 		VisualizationEngine<TVoxel, TIndex>* visualization_engine;
 		MultiVisualizationEngine<TVoxel, TIndex> *multiVisualizationEngine;
 
 		MultiMeshingEngine<TVoxel, TIndex> *meshingEngine;
 
-		ITMViewBuilder *viewBuilder;
+		ViewBuilder *viewBuilder;
 		TrackingController *trackingController;
 		CameraTracker *tracker;
 		ITMIMUCalibrator *imuCalibrator;

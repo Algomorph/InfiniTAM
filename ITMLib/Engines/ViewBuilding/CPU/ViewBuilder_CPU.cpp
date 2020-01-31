@@ -1,18 +1,18 @@
 // Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
 
-#include "ITMViewBuilder_CPU.h"
+#include "ViewBuilder_CPU.h"
 
-#include "../Shared/ITMViewBuilder_Shared.h"
+#include "../Shared/ViewBuilder_Shared.h"
 #include "../../../../ORUtils/MetalContext.h"
 
 using namespace ITMLib;
 using namespace ORUtils;
 
-ITMViewBuilder_CPU::ITMViewBuilder_CPU(const ITMRGBDCalib& calib):ITMViewBuilder(calib) { }
-ITMViewBuilder_CPU::~ITMViewBuilder_CPU(void) { }
+ViewBuilder_CPU::ViewBuilder_CPU(const ITMRGBDCalib& calib): ViewBuilder(calib) { }
+ViewBuilder_CPU::~ViewBuilder_CPU(void) { }
 
-void ITMViewBuilder_CPU::UpdateView(ITMView** view_ptr, ITMUChar4Image* rgbImage, ITMShortImage* rawDepthImage, bool useThresholdFilter,
-                                    bool useBilateralFilter, bool modelSensorNoise, bool storePreviousImage)
+void ViewBuilder_CPU::UpdateView(ITMView** view_ptr, ITMUChar4Image* rgbImage, ITMShortImage* rawDepthImage, bool useThresholdFilter,
+                                 bool useBilateralFilter, bool modelSensorNoise, bool storePreviousImage)
 {
 	if (*view_ptr == NULL)
 	{
@@ -75,9 +75,9 @@ void ITMViewBuilder_CPU::UpdateView(ITMView** view_ptr, ITMUChar4Image* rgbImage
 	}
 }
 
-void ITMViewBuilder_CPU::UpdateView(ITMView** view_ptr, ITMUChar4Image* rgbImage, ITMShortImage* depthImage, bool useThresholdFilter,
-                                    bool useBilateralFilter, ITMIMUMeasurement* imuMeasurement, bool modelSensorNoise,
-                                    bool storePreviousImage)
+void ViewBuilder_CPU::UpdateView(ITMView** view_ptr, ITMUChar4Image* rgbImage, ITMShortImage* depthImage, bool useThresholdFilter,
+                                 bool useBilateralFilter, ITMIMUMeasurement* imuMeasurement, bool modelSensorNoise,
+                                 bool storePreviousImage)
 {
 	if (*view_ptr == NULL)
 	{
@@ -100,8 +100,8 @@ void ITMViewBuilder_CPU::UpdateView(ITMView** view_ptr, ITMUChar4Image* rgbImage
 	this->UpdateView(view_ptr, rgbImage, depthImage, false, useBilateralFilter, modelSensorNoise, storePreviousImage);
 }
 
-void ITMViewBuilder_CPU::ConvertDisparityToDepth(ITMFloatImage *depth_out, const ITMShortImage *depth_in, const ITMIntrinsics *depthIntrinsics,
-	Vector2f disparityCalibParams)
+void ViewBuilder_CPU::ConvertDisparityToDepth(ITMFloatImage *depth_out, const ITMShortImage *depth_in, const ITMIntrinsics *depthIntrinsics,
+                                              Vector2f disparityCalibParams)
 {
 	Vector2i imgSize = depth_in->noDims;
 
@@ -114,7 +114,7 @@ void ITMViewBuilder_CPU::ConvertDisparityToDepth(ITMFloatImage *depth_out, const
 		convertDisparityToDepth(d_out, x, y, d_in, disparityCalibParams, fx_depth, imgSize);
 }
 
-void ITMViewBuilder_CPU::ConvertDepthAffineToFloat(ITMFloatImage *depth_out, const ITMShortImage *depth_in, const Vector2f depthCalibParams)
+void ViewBuilder_CPU::ConvertDepthAffineToFloat(ITMFloatImage *depth_out, const ITMShortImage *depth_in, const Vector2f depthCalibParams)
 {
 	Vector2i imgSize = depth_in->noDims;
 
@@ -128,7 +128,7 @@ void ITMViewBuilder_CPU::ConvertDepthAffineToFloat(ITMFloatImage *depth_out, con
 	}
 }
 
-void ITMViewBuilder_CPU::DepthFiltering(ITMFloatImage *image_out, const ITMFloatImage *image_in)
+void ViewBuilder_CPU::DepthFiltering(ITMFloatImage *image_out, const ITMFloatImage *image_in)
 {
 	Vector2i imgSize = image_in->noDims;
 
@@ -141,7 +141,7 @@ void ITMViewBuilder_CPU::DepthFiltering(ITMFloatImage *image_out, const ITMFloat
 		filterDepth(imout, imin, x, y, imgSize);
 }
 
-void ITMViewBuilder_CPU::ComputeNormalAndWeights(ITMFloat4Image *normal_out, ITMFloatImage *sigmaZ_out, const ITMFloatImage *depth_in, Vector4f intrinsic)
+void ViewBuilder_CPU::ComputeNormalAndWeights(ITMFloat4Image *normal_out, ITMFloatImage *sigmaZ_out, const ITMFloatImage *depth_in, Vector4f intrinsic)
 {
 	Vector2i imgDims = depth_in->noDims;
 
@@ -154,7 +154,7 @@ void ITMViewBuilder_CPU::ComputeNormalAndWeights(ITMFloat4Image *normal_out, ITM
 		computeNormalAndWeight(depthData_in, normalData_out, sigmaZData_out, x, y, imgDims, intrinsic);
 }
 
-void ITMViewBuilder_CPU::ThresholdFiltering(ITMFloatImage* image_out, const ITMFloatImage* image_in) {
+void ViewBuilder_CPU::ThresholdFiltering(ITMFloatImage* image_out, const ITMFloatImage* image_in) {
 	Vector2i imgSize = image_in->noDims;
 
 	image_out->Clear();

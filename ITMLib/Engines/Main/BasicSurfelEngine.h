@@ -5,8 +5,8 @@
 #include "Mappers/DenseSurfelMapper.h"
 #include "MainEngine.h"
 #include "TrackingController.h"
-#include "../LowLevel/Interface/ITMLowLevelEngine.h"
-#include "../ViewBuilding/Interface/ITMViewBuilder.h"
+#include "../LowLevel/Interface/LowLevelEngine.h"
+#include "../ViewBuilding/Interface/ViewBuilder.h"
 #include "../Visualization/Interface/SurfelVisualizationEngine.h"
 #include "../../Objects/Misc/ITMIMUCalibrator.h"
 
@@ -21,10 +21,10 @@ namespace ITMLib
 		bool trackingActive, fusionActive, mainProcessingActive, trackingInitialised;
 		int framesProcessed, relocalisationCount;
 
-		ITMLowLevelEngine *lowLevelEngine;
+		LowLevelEngine *lowLevelEngine;
 		SurfelVisualizationEngine<TSurfel> *surfelVisualizationEngine;
 
-		ITMViewBuilder *viewBuilder;
+		ViewBuilder *viewBuilder;
 		DenseSurfelMapper<TSurfel> *denseSurfelMapper;
 		TrackingController *trackingController;
 

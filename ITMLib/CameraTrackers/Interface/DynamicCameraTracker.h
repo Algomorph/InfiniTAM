@@ -27,7 +27,7 @@ namespace ITMLib{
 		                     float colourWeight, TrackerIterationType* trackingRegime, int noHierarchyLevels,
 		                     float terminationThreshold, float failureDetectorThreshold, float viewFrustum_min,
 		                     float viewFrustum_max, float minColourGradient, float tukeyCutOff, int framesToSkip,
-		                     int framesToWeight, const ITMLowLevelEngine* lowLevelEngine, MemoryDeviceType memoryType);
+		                     int framesToWeight, const LowLevelEngine* lowLevelEngine, MemoryDeviceType memoryType);
 
 		void TrackCamera(ITMTrackingState *trackingState, const ITMView *view) override;
 

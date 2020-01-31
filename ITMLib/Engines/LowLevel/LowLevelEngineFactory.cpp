@@ -1,8 +1,8 @@
 // Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
 
-#include "ITMLowLevelEngineFactory.h"
+#include "LowLevelEngineFactory.h"
 
-#include "CPU/ITMLowLevelEngine_CPU.h"
+#include "CPU/LowLevelEngine_CPU.h"
 #ifndef COMPILE_WITHOUT_CUDA
 #include "CUDA/ITMLowLevelEngine_CUDA.h"
 #endif
@@ -12,14 +12,14 @@ namespace ITMLib
 
 //#################### PUBLIC STATIC MEMBER FUNCTIONS ####################
 
-ITMLowLevelEngine *ITMLowLevelEngineFactory::MakeLowLevelEngine(MemoryDeviceType deviceType)
+LowLevelEngine *LowLevelEngineFactory::MakeLowLevelEngine(MemoryDeviceType deviceType)
 {
-  ITMLowLevelEngine *lowLevelEngine = NULL;
+  LowLevelEngine *lowLevelEngine = NULL;
 
   switch(deviceType)
   {
     case MEMORYDEVICE_CPU:
-      lowLevelEngine = new ITMLowLevelEngine_CPU();
+      lowLevelEngine = new LowLevelEngine_CPU();
       break;
     case MEMORYDEVICE_CUDA:
 #ifndef COMPILE_WITHOUT_CUDA

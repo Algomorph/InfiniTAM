@@ -1,16 +1,16 @@
 // Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
 
-#include "ITMViewBuilder_CUDA.h"
+#include "ViewBuilder_CUDA.h"
 
-#include "../Shared/ITMViewBuilder_Shared.h"
+#include "../Shared/ViewBuilder_Shared.h"
 #include "../../../../ORUtils/CUDADefines.h"
 #include "../../../../ORUtils/MemoryBlock.h"
 
 using namespace ITMLib;
 using namespace ORUtils;
 
-ITMViewBuilder_CUDA::ITMViewBuilder_CUDA(const ITMRGBDCalib& calib):ITMViewBuilder(calib) { }
-ITMViewBuilder_CUDA::~ITMViewBuilder_CUDA(void) { }
+ViewBuilder_CUDA::ViewBuilder_CUDA(const ITMRGBDCalib& calib): ViewBuilder(calib) { }
+ViewBuilder_CUDA::~ViewBuilder_CUDA(void) { }
 
 //---------------------------------------------------------------------------
 //
@@ -31,8 +31,8 @@ __global__ void ComputeNormalAndWeight_device(const float* depth_in, Vector4f* n
 //
 //---------------------------------------------------------------------------
 
-void ITMViewBuilder_CUDA::UpdateView(ITMView** view_ptr, ITMUChar4Image* rgbImage, ITMShortImage* rawDepthImage, bool useThresholdFilter,
-                                     bool useBilateralFilter, bool modelSensorNoise, bool storePreviousImage)
+void ViewBuilder_CUDA::UpdateView(ITMView** view_ptr, ITMUChar4Image* rgbImage, ITMShortImage* rawDepthImage, bool useThresholdFilter,
+                                  bool useBilateralFilter, bool modelSensorNoise, bool storePreviousImage)
 {
 	if (*view_ptr == NULL)
 	{
@@ -89,9 +89,9 @@ void ITMViewBuilder_CUDA::UpdateView(ITMView** view_ptr, ITMUChar4Image* rgbImag
 	}
 }
 
-void ITMViewBuilder_CUDA::UpdateView(ITMView** view_ptr, ITMUChar4Image* rgbImage, ITMShortImage* depthImage, bool useThresholdFilter,
-                                     bool useBilateralFilter, ITMIMUMeasurement* imuMeasurement, bool modelSensorNoise,
-                                     bool storePreviousImage)
+void ViewBuilder_CUDA::UpdateView(ITMView** view_ptr, ITMUChar4Image* rgbImage, ITMShortImage* depthImage, bool useThresholdFilter,
+                                  bool useBilateralFilter, ITMIMUMeasurement* imuMeasurement, bool modelSensorNoise,
+                                  bool storePreviousImage)
 {
 	if (*view_ptr == NULL) 
 	{
@@ -114,8 +114,8 @@ void ITMViewBuilder_CUDA::UpdateView(ITMView** view_ptr, ITMUChar4Image* rgbImag
 	this->UpdateView(view_ptr, rgbImage, depthImage, false, useBilateralFilter, modelSensorNoise, storePreviousImage);
 }
 
-void ITMViewBuilder_CUDA::ConvertDisparityToDepth(ITMFloatImage *depth_out, const ITMShortImage *depth_in, const ITMIntrinsics *depthIntrinsics,
-	Vector2f disparityCalibParams)
+void ViewBuilder_CUDA::ConvertDisparityToDepth(ITMFloatImage *depth_out, const ITMShortImage *depth_in, const ITMIntrinsics *depthIntrinsics,
+                                               Vector2f disparityCalibParams)
 {
 	Vector2i imgSize = depth_in->noDims;
 
@@ -131,7 +131,7 @@ void ITMViewBuilder_CUDA::ConvertDisparityToDepth(ITMFloatImage *depth_out, cons
 	ORcudaKernelCheck;
 }
 
-void ITMViewBuilder_CUDA::ConvertDepthAffineToFloat(ITMFloatImage *depth_out, const ITMShortImage *depth_in, Vector2f depthCalibParams)
+void ViewBuilder_CUDA::ConvertDepthAffineToFloat(ITMFloatImage *depth_out, const ITMShortImage *depth_in, Vector2f depthCalibParams)
 {
 	Vector2i imgSize = depth_in->noDims;
 
@@ -145,7 +145,7 @@ void ITMViewBuilder_CUDA::ConvertDepthAffineToFloat(ITMFloatImage *depth_out, co
 	ORcudaKernelCheck;
 }
 
-void ITMViewBuilder_CUDA::DepthFiltering(ITMFloatImage *image_out, const ITMFloatImage *image_in)
+void ViewBuilder_CUDA::DepthFiltering(ITMFloatImage *image_out, const ITMFloatImage *image_in)
 {
 	Vector2i imgDims = image_in->noDims;
 
@@ -159,7 +159,7 @@ void ITMViewBuilder_CUDA::DepthFiltering(ITMFloatImage *image_out, const ITMFloa
 	ORcudaKernelCheck;
 }
 
-void ITMViewBuilder_CUDA::ComputeNormalAndWeights(ITMFloat4Image *normal_out, ITMFloatImage *sigmaZ_out, const ITMFloatImage *depth_in, Vector4f intrinsic)
+void ViewBuilder_CUDA::ComputeNormalAndWeights(ITMFloat4Image *normal_out, ITMFloatImage *sigmaZ_out, const ITMFloatImage *depth_in, Vector4f intrinsic)
 {
 	Vector2i imgDims = depth_in->noDims;
 
@@ -175,7 +175,7 @@ void ITMViewBuilder_CUDA::ComputeNormalAndWeights(ITMFloat4Image *normal_out, IT
 	ORcudaKernelCheck;
 }
 
-void ITMViewBuilder_CUDA::ThresholdFiltering(ITMFloatImage* image_out, const ITMFloatImage* image_in) {
+void ViewBuilder_CUDA::ThresholdFiltering(ITMFloatImage* image_out, const ITMFloatImage* image_in) {
 	Vector2i imgDims = image_in->noDims;
 
 	const float *imageData_in = image_in->GetData(MEMORYDEVICE_CUDA);

@@ -2,8 +2,8 @@
 
 #include "BasicSurfelEngine.h"
 
-#include "../LowLevel/ITMLowLevelEngineFactory.h"
-#include "../ViewBuilding/ITMViewBuilderFactory.h"
+#include "../LowLevel/LowLevelEngineFactory.h"
+#include "../ViewBuilding/ViewBuilderFactory.h"
 #include "../Visualization/SurfelVisualizationEngineFactory.h"
 #include "../../CameraTrackers/CameraTrackerFactory.h"
 
@@ -25,8 +25,8 @@ BasicSurfelEngine<TSurfel>::BasicSurfelEngine(const ITMRGBDCalib& calib, Vector2
 
 	const MemoryDeviceType deviceType = settings.device_type;
 
-	lowLevelEngine = ITMLowLevelEngineFactory::MakeLowLevelEngine(deviceType);
-	viewBuilder = ITMViewBuilderFactory::MakeViewBuilder(calib, deviceType);
+	lowLevelEngine = LowLevelEngineFactory::MakeLowLevelEngine(deviceType);
+	viewBuilder = ViewBuilderFactory::MakeViewBuilder(calib, deviceType);
 	surfelVisualizationEngine = SurfelVisualizationEngineFactory::Build<TSurfel>(deviceType);
 
 	denseSurfelMapper = new DenseSurfelMapper<TSurfel>(imgSize_d, deviceType);

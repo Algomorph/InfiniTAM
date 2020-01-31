@@ -22,8 +22,8 @@
 #include "../ITMLib/Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 #include "../ITMLib/Utils/FileIO/ITMSceneLogger.h"
 #include "../ITMLib/Utils/Analytics/SceneStatisticsCalculator/CPU/ITMSceneStatisticsCalculator_CPU.h"
-#include "../ITMLib/Engines/ViewBuilding/Interface/ITMViewBuilder.h"
-#include "../ITMLib/Engines/ViewBuilding/ITMViewBuilderFactory.h"
+#include "../ITMLib/Engines/ViewBuilding/Interface/ViewBuilder.h"
+#include "../ITMLib/Engines/ViewBuilding/ViewBuilderFactory.h"
 
 using namespace ITMLib;
 
@@ -123,13 +123,13 @@ template void loadVolume<ITMWarp, VoxelBlockHash>(ITMVoxelVolume<ITMWarp, VoxelB
 void
 updateView(ITMView** view, const std::string& depth_path, const std::string& color_path, const std::string& mask_path,
            const std::string& calibration_path, MemoryDeviceType memoryDevice) {
-	static ITMViewBuilder* viewBuilder_CPU = nullptr;
-	static ITMViewBuilder* viewBuilder_CUDA = nullptr;
-	ITMViewBuilder* viewBuilderToUse;
+	static ViewBuilder* viewBuilder_CPU = nullptr;
+	static ViewBuilder* viewBuilder_CUDA = nullptr;
+	ViewBuilder* viewBuilderToUse;
 	switch (memoryDevice) {
 		case MEMORYDEVICE_CPU:
 			if (viewBuilder_CPU == nullptr)
-				viewBuilder_CPU = ITMViewBuilderFactory::MakeViewBuilder(calibration_path, memoryDevice);
+				viewBuilder_CPU = ViewBuilderFactory::MakeViewBuilder(calibration_path, memoryDevice);
 			viewBuilderToUse = viewBuilder_CPU;
 			break;
 		case MEMORYDEVICE_CUDA:
