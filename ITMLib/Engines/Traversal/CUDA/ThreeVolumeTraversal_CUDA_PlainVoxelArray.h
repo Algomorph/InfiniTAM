@@ -17,12 +17,15 @@
 
 //local
 #include "../Interface/ThreeVolumeTraversal.h"
+#include "../../../Objects/Volume/PlainVoxelArray.h"
+#include "../../../Objects/Volume/VoxelVolume.h"
+#include "../../../../ORUtils/MemoryDeviceType.h"
 #include "ThreeVolumeTraversal_CUDA_PlainVoxelArray_Kernels.h"
 
-namespace ITMLib{
+namespace ITMLib {
 
-template<typename TVoxel, typename TWarp>
-class ThreeVolumeTraversalEngine<TVoxel, TWarp, PlainVoxelArray, MEMORYDEVICE_CUDA> {
+template<typename TVoxel1, typename TVoxel2, typename TVoxel3>
+class ThreeVolumeTraversalEngine<TVoxel1, TVoxel2, TVoxel3, PlainVoxelArray, MEMORYDEVICE_CUDA> {
 	/**
 	 * \brief Concurrent traversal of three volumes with potentially different voxel types
 	 * \details All volumes must have matching dimensions
@@ -32,29 +35,28 @@ public:
 
 	template<typename TStaticFunctor>
 	inline static void
-	Traverse(
-			ITMLib::VoxelVolume<TVoxel1, ITMLib::PlainVoxelArray>* primaryScene,
-			ITMLib::VoxelVolume<TVoxel2, ITMLib::PlainVoxelArray>* secondaryScene,
-			ITMLib::VoxelVolume<TVoxel3, ITMLib::PlainVoxelArray>* warpField) {
-		assert(primaryScene->index.GetVolumeSize() == secondaryScene->index.GetVolumeSize() &&
-		       primaryScene->index.GetVolumeSize() == warpField->index.GetVolumeSize());
+	Traverse(VoxelVolume <TVoxel1, ITMLib::PlainVoxelArray>* volume1,
+	         VoxelVolume <TVoxel2, ITMLib::PlainVoxelArray>* volume2,
+	         VoxelVolume <TVoxel3, ITMLib::PlainVoxelArray>* volume3) {
+		assert(volume2->index.GetVolumeSize() == volume3->index.GetVolumeSize() &&
+		       volume2->index.GetVolumeSize() == volume1->index.GetVolumeSize());
 // *** traversal vars
-		TVoxel* secondaryVoxels = secondaryScene->localVBA.GetVoxelBlocks();
-		TVoxel* primaryVoxels = primaryScene->localVBA.GetVoxelBlocks();
-		TWarp* warpVoxels = warpField->localVBA.GetVoxelBlocks();
+		TVoxel1* voxels1 = volume1->localVBA.GetVoxelBlocks();
+		TVoxel2* voxels2 = volume2->localVBA.GetVoxelBlocks();
+		TVoxel3* voxels3 = volume3->localVBA.GetVoxelBlocks();
 
-		const PlainVoxelArray::GridAlignedBox* arrayInfo = primaryScene->index.GetIndexData();
+		const PlainVoxelArray::GridAlignedBox* arrayInfo = volume1->index.GetIndexData();
 
 		dim3 cudaBlockSize(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
 		dim3 gridSize(
-				static_cast<int>(ceil(static_cast<float>(primaryScene->index.GetVolumeSize().x) / cudaBlockSize.x)),
-				static_cast<int>(ceil(static_cast<float>(primaryScene->index.GetVolumeSize().y) / cudaBlockSize.y)),
-				static_cast<int>(ceil(static_cast<float>(primaryScene->index.GetVolumeSize().z) / cudaBlockSize.z))
+				static_cast<int>(ceil(static_cast<float>(volume1->index.GetVolumeSize().x) / cudaBlockSize.x)),
+				static_cast<int>(ceil(static_cast<float>(volume1->index.GetVolumeSize().y) / cudaBlockSize.y)),
+				static_cast<int>(ceil(static_cast<float>(volume1->index.GetVolumeSize().z) / cudaBlockSize.z))
 		);
 
-		staticDualVoxelWarpTraversal_device<TStaticFunctor, TVoxel>
+		staticThreeVolumeTraversal_device < TStaticFunctor, TVoxel1, TVoxel2, TVoxel3 >
 		<< < gridSize, cudaBlockSize >> >
-		(primaryVoxels, secondaryVoxels, warpVoxels, arrayInfo);
+		(voxels1, voxels2, voxels3, arrayInfo);
 		ORcudaKernelCheck;
 	}
 // endregion
@@ -63,30 +65,30 @@ public:
 	template<typename TFunctor>
 	inline static void
 	Traverse(
-			ITMLib::VoxelVolume<TVoxel1, ITMLib::PlainVoxelArray>* primaryScene,
-			ITMLib::VoxelVolume<TVoxel2, ITMLib::PlainVoxelArray>* secondaryScene,
-			ITMLib::VoxelVolume<TVoxel3, ITMLib::PlainVoxelArray>* warpField,
+			ITMLib::VoxelVolume<TVoxel1, ITMLib::PlainVoxelArray>* volume1,
+			ITMLib::VoxelVolume<TVoxel2, ITMLib::PlainVoxelArray>* volume2,
+			ITMLib::VoxelVolume<TVoxel3, ITMLib::PlainVoxelArray>* volume3,
 			TFunctor& functor) {
 
-		assert(primaryScene->index.GetVolumeSize() == secondaryScene->index.GetVolumeSize() &&
-		       primaryScene->index.GetVolumeSize() == warpField->index.GetVolumeSize());
+		assert(volume2->index.GetVolumeSize() == volume3->index.GetVolumeSize() &&
+		       volume2->index.GetVolumeSize() == volume1->index.GetVolumeSize());
 // *** traversal vars
-		TVoxel* secondaryVoxels = secondaryScene->localVBA.GetVoxelBlocks();
-		TVoxel* primaryVoxels = primaryScene->localVBA.GetVoxelBlocks();
-		TWarp* warpVoxels = warpField->localVBA.GetVoxelBlocks();
+		TVoxel3* voxels1 = volume1->localVBA.GetVoxelBlocks();
+		TVoxel2* voxels2 = volume2->localVBA.GetVoxelBlocks();
+		TVoxel1* voxels3 = volume3->localVBA.GetVoxelBlocks();
 
-		const PlainVoxelArray::GridAlignedBox* arrayInfo = primaryScene->index.GetIndexData();
+		const PlainVoxelArray::GridAlignedBox* arrayInfo = volume2->index.GetIndexData();
 
 		dim3 cudaBlockSize(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
 		dim3 gridSize(
-				static_cast<int>(ceil(static_cast<float>(primaryScene->index.GetVolumeSize().x) / cudaBlockSize.x)),
-				static_cast<int>(ceil(static_cast<float>(primaryScene->index.GetVolumeSize().y) / cudaBlockSize.y)),
-				static_cast<int>(ceil(static_cast<float>(primaryScene->index.GetVolumeSize().z) / cudaBlockSize.z))
+				static_cast<int>(ceil(static_cast<float>(volume1->index.GetVolumeSize().x) / cudaBlockSize.x)),
+				static_cast<int>(ceil(static_cast<float>(volume1->index.GetVolumeSize().y) / cudaBlockSize.y)),
+				static_cast<int>(ceil(static_cast<float>(volume1->index.GetVolumeSize().z) / cudaBlockSize.z))
 		);
 
-		dualVoxelWarpTraversal_device<TFunctor, TVoxel>
+		dualVoxelWarpTraversal_device<TFunctor, TVoxel2>
 				<< < gridSize, cudaBlockSize >> >
-		                       (primaryVoxels, secondaryVoxels, warpVoxels, arrayInfo, functor);
+		                       (voxels2, voxels3, voxels1, arrayInfo, functor);
 		ORcudaKernelCheck;
 	}
 
@@ -94,13 +96,13 @@ public:
 	template<typename TFunctor>
 	inline static void
 	TraverseWithPosition(
-			ITMLib::VoxelVolume<TVoxel1, ITMLib::PlainVoxelArray>* primaryScene,
-			ITMLib::VoxelVolume<TVoxel2, ITMLib::PlainVoxelArray>* secondaryScene,
-			ITMLib::VoxelVolume<TVoxel3, ITMLib::PlainVoxelArray>* warpField,
+			ITMLib::VoxelVolume<TVoxel1, ITMLib::PlainVoxelArray>* volume2,
+			ITMLib::VoxelVolume<TVoxel2, ITMLib::PlainVoxelArray>* volume3,
+			ITMLib::VoxelVolume<TVoxel3, ITMLib::PlainVoxelArray>* volume1,
 			TFunctor& functor) {
 
-		assert(primaryScene->index.GetVolumeSize() == secondaryScene->index.GetVolumeSize() &&
-		       primaryScene->index.GetVolumeSize() == warpField->index.GetVolumeSize());
+		assert(volume2->index.GetVolumeSize() == volume3->index.GetVolumeSize() &&
+		       volume2->index.GetVolumeSize() == volume1->index.GetVolumeSize());
 
 		// transfer functor from RAM to VRAM
 		TFunctor* functor_device = nullptr;
@@ -108,22 +110,22 @@ public:
 		ORcudaSafeCall(cudaMemcpy(functor_device, &functor, sizeof(TFunctor), cudaMemcpyHostToDevice));
 
 // *** traversal vars
-		TVoxel* secondaryVoxels = secondaryScene->localVBA.GetVoxelBlocks();
-		TVoxel* primaryVoxels = primaryScene->localVBA.GetVoxelBlocks();
-		TWarp* warpVoxels = warpField->localVBA.GetVoxelBlocks();
+		TVoxel2* voxels3 = volume3->localVBA.GetVoxelBlocks();
+		TVoxel2* voxels2 = volume2->localVBA.GetVoxelBlocks();
+		TVoxel3* voxels1 = volume1->localVBA.GetVoxelBlocks();
 
-		const PlainVoxelArray::GridAlignedBox* arrayInfo = primaryScene->index.GetIndexData();
+		const PlainVoxelArray::GridAlignedBox* arrayInfo = volume2->index.GetIndexData();
 
 		dim3 cudaBlockSize(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
 		dim3 gridSize(
-				static_cast<int>(ceil(static_cast<float>(primaryScene->index.GetVolumeSize().x) / cudaBlockSize.x)),
-				static_cast<int>(ceil(static_cast<float>(primaryScene->index.GetVolumeSize().y) / cudaBlockSize.y)),
-				static_cast<int>(ceil(static_cast<float>(primaryScene->index.GetVolumeSize().z) / cudaBlockSize.z))
+				static_cast<int>(ceil(static_cast<float>(volume2->index.GetVolumeSize().x) / cudaBlockSize.x)),
+				static_cast<int>(ceil(static_cast<float>(volume2->index.GetVolumeSize().y) / cudaBlockSize.y)),
+				static_cast<int>(ceil(static_cast<float>(volume2->index.GetVolumeSize().z) / cudaBlockSize.z))
 		);
 
-		dualVoxelWarpPositionTraversal_device<TFunctor, TVoxel>
+		dualVoxelWarpPositionTraversal_device<TFunctor, TVoxel2>
 				<< < gridSize, cudaBlockSize >> >
-		                       (primaryVoxels, secondaryVoxels, warpVoxels, arrayInfo, functor_device);
+		                       (voxels2, voxels3, voxels1, arrayInfo, functor_device);
 		// transfer functor from VRAM back to RAM
 		ORcudaSafeCall(cudaMemcpy(&functor, functor_device, sizeof(TFunctor), cudaMemcpyDeviceToHost));
 		ORcudaSafeCall(cudaFree(functor_device));

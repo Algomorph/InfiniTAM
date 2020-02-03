@@ -17,15 +17,35 @@
 
 #include "../../../../ORUtils/PlatformIndependence.h"
 #include "../../../../ORUtils/PlatformIndependentAtomics.h"
+#include "../../../Utils/Math.h"
 
 namespace { // CUDA kernels
 
 
-
-template<typename TStaticFunctor, typename TVoxelPrimary, typename TVoxelSecondary, typename TWarp>
+template<typename TStaticFunctor, typename TVoxel1, typename TVoxel2, typename TVoxel3>
 __global__ void
-staticDualVoxelWarpPositionTraversal_device(TVoxelPrimary* primaryVoxels, TVoxelSecondary* secondaryVoxels,
-                                            TWarp* warpVoxels,
+staticThreeVolumeTraversal_device(TVoxel1* voxels1, TVoxel2* voxels2,
+                                  TVoxel3* voxels3, const ITMLib::PlainVoxelArray::GridAlignedBox* arrayInfo) {
+	int x = blockIdx.x * blockDim.x + threadIdx.x;
+	int y = blockIdx.y * blockDim.y + threadIdx.y;
+	int z = blockIdx.z * blockDim.z + threadIdx.z;
+
+	if (x >= arrayInfo->size.x || y >= arrayInfo->size.y || z >= arrayInfo->size.z) return;
+
+	int locId = x + y * arrayInfo->size.x + z * arrayInfo->size.x * arrayInfo->size.y;
+
+	TVoxel1& voxel1 = voxels1[locId];
+	TVoxel2& voxel2 = voxels2[locId];
+	TVoxel3& voxel3 = voxels3[locId];
+
+
+	TStaticFunctor::run(voxel1, voxel2, voxel3);
+}
+
+template<typename TStaticFunctor, typename TVoxel1, typename TVoxel2, typename TVoxel3>
+__global__ void
+staticDualVoxelWarpPositionTraversal_device(TVoxel1* voxels1, TVoxel2* voxels2,
+                                            TVoxel3* voxels3,
                                             const ITMLib::PlainVoxelArray::GridAlignedBox* arrayInfo) {
 	int x = blockIdx.x * blockDim.x + threadIdx.x;
 	int y = blockIdx.y * blockDim.y + threadIdx.y;
@@ -41,19 +61,19 @@ staticDualVoxelWarpPositionTraversal_device(TVoxelPrimary* primaryVoxels, TVoxel
 	voxelPosition.y = y + arrayInfo->offset.y;
 	voxelPosition.z = z + arrayInfo->offset.z;
 
-	TVoxelPrimary& voxelPrimary = primaryVoxels[locId];
-	TVoxelSecondary& voxelSecondary = secondaryVoxels[locId];
-	TWarp& warp = warpVoxels[locId];
+	TVoxel1& voxel1 = voxels1[locId];
+	TVoxel2& voxel2 = voxels2[locId];
+	TVoxel3& voxel3 = voxels3[locId];
 
-	TStaticFunctor::run(voxelPrimary, voxelSecondary, warp, voxelPosition);
+	TStaticFunctor::run(voxel1, voxel2, voxel3, voxelPosition);
 
 }
 
 
-template<typename TFunctor, typename TVoxelPrimary, typename TVoxelSecondary, typename TWarp>
+template<typename TFunctor, typename TVoxel1, typename TVoxel2, typename TVoxel3>
 __global__ void
-dualVoxelWarpTraversal_device(TVoxelPrimary* primaryVoxels, TVoxelSecondary* secondaryVoxels,
-                              TWarp* warpVoxels, const ITMLib::PlainVoxelArray::GridAlignedBox* arrayInfo,
+dualVoxelWarpTraversal_device(TVoxel1* voxels1, TVoxel2* voxels2,
+                              TVoxel3* voxels3, const ITMLib::PlainVoxelArray::GridAlignedBox* arrayInfo,
                               TFunctor& functor) {
 	int x = blockIdx.x * blockDim.x + threadIdx.x;
 	int y = blockIdx.y * blockDim.y + threadIdx.y;
@@ -61,18 +81,18 @@ dualVoxelWarpTraversal_device(TVoxelPrimary* primaryVoxels, TVoxelSecondary* sec
 
 	int locId = x + y * arrayInfo->size.x + z * arrayInfo->size.x * arrayInfo->size.y;
 
-	TVoxelPrimary& voxelPrimary = primaryVoxels[locId];
-	TVoxelSecondary& voxelSecondary = secondaryVoxels[locId];
-	TWarp& warp = warpVoxels[locId];
+	TVoxel1& voxel1 = voxels1[locId];
+	TVoxel2& voxel2 = voxels2[locId];
+	TVoxel3& voxel3 = voxels3[locId];
 
-	functor(voxelPrimary, voxelSecondary, warp);
+	functor(voxel1, voxel2, voxel3);
 
 }
 
-template<typename TFunctor, typename TVoxelPrimary, typename TVoxelSecondary, typename TWarp>
+template<typename TFunctor, typename TVoxel1, typename TVoxel2, typename TVoxel3>
 __global__ void
-dualVoxelWarpPositionTraversal_device(TVoxelPrimary* primaryVoxels, TVoxelSecondary* secondaryVoxels,
-                                      TWarp* warpVoxels, const ITMLib::PlainVoxelArray::GridAlignedBox* arrayInfo,
+dualVoxelWarpPositionTraversal_device(TVoxel1* voxels1, TVoxel2* voxels2,
+                                      TVoxel3* voxels3, const ITMLib::PlainVoxelArray::GridAlignedBox* arrayInfo,
                                       TFunctor* functor) {
 	int x = blockIdx.x * blockDim.x + threadIdx.x;
 	int y = blockIdx.y * blockDim.y + threadIdx.y;
@@ -88,11 +108,11 @@ dualVoxelWarpPositionTraversal_device(TVoxelPrimary* primaryVoxels, TVoxelSecond
 	voxelPosition.y = y + arrayInfo->offset.y;
 	voxelPosition.z = z + arrayInfo->offset.z;
 
-	TVoxelPrimary& voxelPrimary = primaryVoxels[locId];
-	TVoxelSecondary& voxelSecondary = secondaryVoxels[locId];
-	TWarp& warp = warpVoxels[locId];
+	TVoxel1& voxel1 = voxels1[locId];
+	TVoxel2& voxel2 = voxels2[locId];
+	TVoxel3& voxel3 = voxels3[locId];
 
-	(*functor)(voxelPrimary, voxelSecondary, warp, voxelPosition);
+	(*functor)(voxel1, voxel2, voxel3, voxelPosition);
 
 }
 

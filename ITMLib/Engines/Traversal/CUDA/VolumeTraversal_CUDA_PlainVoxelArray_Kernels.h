@@ -71,40 +71,8 @@ voxelPositionTraversal_device(TVoxel* voxels, const ITMLib::PlainVoxelArray::Gri
 	(*functor)(voxel, voxelPosition);
 }
 
-template<typename TStaticFunctor, typename TVoxelPrimary, typename TVoxelSecondary>
-__global__ void
-staticDualVoxelTraversal_device(TVoxelPrimary* primaryVoxels, TVoxelSecondary* secondaryVoxels,
-                                const ITMLib::PlainVoxelArray::GridAlignedBox* arrayInfo) {
-	int x = blockIdx.x * blockDim.x + threadIdx.x;
-	int y = blockIdx.y * blockDim.y + threadIdx.y;
-	int z = blockIdx.z * blockDim.z + threadIdx.z;
-
-	int locId = x + y * arrayInfo->size.x + z * arrayInfo->size.x * arrayInfo->size.y;
-	TVoxelPrimary& voxelPrimary = primaryVoxels[locId];
-	TVoxelSecondary& voxelSecondary = secondaryVoxels[locId];
-	TStaticFunctor::run(voxelPrimary, voxelSecondary);
-}
 
 
-
-template<typename TStaticFunctor, typename TVoxelPrimary, typename TVoxelSecondary, typename TWarp>
-__global__ void
-staticDualVoxelWarpTraversal_device(TVoxelPrimary* primaryVoxels, TVoxelSecondary* secondaryVoxels,
-                                    TWarp* warpVoxels, const ITMLib::PlainVoxelArray::GridAlignedBox* arrayInfo) {
-	int x = blockIdx.x * blockDim.x + threadIdx.x;
-	int y = blockIdx.y * blockDim.y + threadIdx.y;
-	int z = blockIdx.z * blockDim.z + threadIdx.z;
-
-	if (x >= arrayInfo->size.x || y >= arrayInfo->size.y || z >= arrayInfo->size.z) return;
-
-	int locId = x + y * arrayInfo->size.x + z * arrayInfo->size.x * arrayInfo->size.y;
-
-	TVoxelPrimary& voxelPrimary = primaryVoxels[locId];
-	TVoxelSecondary& voxelSecondary = secondaryVoxels[locId];
-	TWarp& warp = warpVoxels[locId];
-
-	TStaticFunctor::run(voxelPrimary, voxelSecondary, warp);
-}
 
 
 }// end anonymous namespace (CUDA kernels)

@@ -24,6 +24,20 @@
 namespace {
 // CUDA kernels
 
+template<typename TStaticFunctor, typename TVoxelPrimary, typename TVoxelSecondary>
+__global__ void
+staticDualVoxelTraversal_device(TVoxelPrimary* primaryVoxels, TVoxelSecondary* secondaryVoxels,
+                                const ITMLib::PlainVoxelArray::GridAlignedBox* arrayInfo) {
+	int x = blockIdx.x * blockDim.x + threadIdx.x;
+	int y = blockIdx.y * blockDim.y + threadIdx.y;
+	int z = blockIdx.z * blockDim.z + threadIdx.z;
+
+	int locId = x + y * arrayInfo->size.x + z * arrayInfo->size.x * arrayInfo->size.y;
+	TVoxelPrimary& voxelPrimary = primaryVoxels[locId];
+	TVoxelSecondary& voxelSecondary = secondaryVoxels[locId];
+	TStaticFunctor::run(voxelPrimary, voxelSecondary);
+}
+
 template<typename TStaticBooleanFunctor, typename TVoxelPrimary, typename TVoxelSecondary>
 __global__ void
 staticDualVoxelTraversal_AllTrue_device(TVoxelPrimary* primaryVoxels, TVoxelSecondary* secondaryVoxels,
