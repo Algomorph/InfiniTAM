@@ -26,7 +26,7 @@ void VisualizationEngine_CPU<TVoxel, VoxelBlockHash>::FindVisibleBlocks(
 		VoxelVolume<TVoxel, VoxelBlockHash>* scene, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics,
 		RenderState* renderState) const
 {
-	const ITMHashEntry *hashTable = scene->index.GetEntries();
+	const HashEntry *hashTable = scene->index.GetEntries();
 	int hashEntryCount = scene->index.hashEntryCount;
 	float voxelSize = scene->sceneParams->voxel_size;
 	Vector2i imgSize = renderState->renderingRangeImage->noDims;
@@ -41,7 +41,7 @@ void VisualizationEngine_CPU<TVoxel, VoxelBlockHash>::FindVisibleBlocks(
 	for (int targetIdx = 0; targetIdx < hashEntryCount; targetIdx++)
 	{
 		unsigned char hashVisibleType = 0;// = blockVisibilityTypes[targetIdx];
-		const ITMHashEntry &hashEntry = hashTable[targetIdx];
+		const HashEntry &hashEntry = hashTable[targetIdx];
 
 		if (hashEntry.ptr >= 0)
 		{
@@ -119,7 +119,7 @@ void VisualizationEngine_CPU<TVoxel,VoxelBlockHash>::CreateExpectedDepths(const 
 
 	//go through list of visible 8x8x8 blocks
 	for (int blockNo = 0; blockNo < visibleEntryCount; ++blockNo) {
-		const ITMHashEntry & blockData(scene->index.GetEntries()[visibleBlockHashCodes[blockNo]]);
+		const HashEntry & blockData(scene->index.GetEntries()[visibleBlockHashCodes[blockNo]]);
 
 		Vector2i upperLeft, lowerRight;
 		Vector2f zRange;

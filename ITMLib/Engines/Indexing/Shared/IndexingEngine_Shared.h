@@ -53,9 +53,9 @@ _CPU_AND_GPU_CODE_
 inline bool MarkAsNeedingAllocationIfNotFound(ITMLib::HashEntryAllocationState* hashEntryStates,
                                               Vector3s* hashBlockCoordinates, int& hashCode,
                                               const CONSTPTR(Vector3s)& desiredHashBlockPosition,
-                                              const CONSTPTR(ITMHashEntry)* hashTable, bool& collisionDetected) {
+                                              const CONSTPTR(HashEntry)* hashTable, bool& collisionDetected) {
 
-	ITMHashEntry hashEntry = hashTable[hashCode];
+	HashEntry hashEntry = hashTable[hashCode];
 	//check if hash table contains entry
 
 	if (!(IS_EQUAL3(hashEntry.pos, desiredHashBlockPosition) && hashEntry.ptr >= -1)) {
@@ -121,11 +121,11 @@ MarkForAllocationAndSetVisibilityTypeIfNotFound(ITMLib::HashEntryAllocationState
                                                 Vector3s* hashBlockCoordinates,
                                                 HashBlockVisibility* blockVisibilityTypes,
                                                 Vector3s desiredHashBlockPosition,
-                                                const CONSTPTR(ITMHashEntry)* hashTable, bool& collisionDetected) {
+                                                const CONSTPTR(HashEntry)* hashTable, bool& collisionDetected) {
 
 	int hashCode = HashCodeFromBlockPosition(desiredHashBlockPosition);
 
-	ITMHashEntry hashEntry = hashTable[hashCode];
+	HashEntry hashEntry = hashTable[hashCode];
 
 	//check if hash table contains entry
 	if (IS_EQUAL3(hashEntry.pos, desiredHashBlockPosition) && hashEntry.ptr >= -1) {
@@ -239,12 +239,12 @@ private:
 
 	VoxelVolume<TVoxel, VoxelBlockHash>* targetTSDFScene;
 	TVoxel* targetTSDFVoxels;
-	ITMHashEntry* targetTSDFHashEntries;
+	HashEntry* targetTSDFHashEntries;
 	VoxelBlockHash::IndexCache targetTSDFCache;
 
 	VoxelVolume<TVoxel, VoxelBlockHash>* sourceTSDFScene;
 	TVoxel* sourceTSDFVoxels;
-	ITMHashEntry* sourceTSDFHashEntries;
+	HashEntry* sourceTSDFHashEntries;
 	VoxelBlockHash::IndexCache sourceTSDFCache;
 
 	Vector3s* allocationBlockCoords;
@@ -265,7 +265,7 @@ prepareForAllocationFromDepthAndTsdf(ITMLib::HashEntryAllocationState* hashEntry
                                      Vector3s* blockCoords, const CONSTPTR(float)* depth, Matrix4f invertedCameraPose,
                                      Vector4f invertedCameraProjectionParameters, float surface_distance_cutoff,
                                      Vector2i imgSize, float oneOverVoxelBlockSize_Meters,
-                                     const CONSTPTR(ITMHashEntry)* hashTable, float viewFrustum_min,
+                                     const CONSTPTR(HashEntry)* hashTable, float viewFrustum_min,
                                      float viewFrustum_max,
                                      bool& collisionDetected) {
 	float depth_measure;
@@ -378,7 +378,7 @@ buildHashAllocAndVisibleTypePP(ITMLib::HashEntryAllocationState* hashEntryStates
                                Vector3s* blockCoords, const CONSTPTR(float)* depth, Matrix4f invertedCameraPose,
                                Vector4f invertedCameraProjectionParameters, float surface_distance_cutoff,
                                Vector2i imgSize, float oneOverVoxelBlockSize_Meters,
-                               const CONSTPTR(ITMHashEntry)* hashTable, float viewFrustum_min, float viewFrustum_max,
+                               const CONSTPTR(HashEntry)* hashTable, float viewFrustum_min, float viewFrustum_max,
                                bool& collisionDetected) {
 	float depth_measure;
 	int stepCount;
@@ -489,11 +489,11 @@ buildHashAllocAndVisibleTypePP(ITMLib::HashEntryAllocationState* hashEntryStates
 
 _CPU_AND_GPU_CODE_
 inline
-bool FindOrAllocateHashEntry(const Vector3s& hashEntryPosition, ITMHashEntry* hashTable, ITMHashEntry*& resultEntry,
+bool FindOrAllocateHashEntry(const Vector3s& hashEntryPosition, HashEntry* hashTable, HashEntry*& resultEntry,
                              int& lastFreeVoxelBlockId, int& lastFreeExcessListId, const int* voxelAllocationList,
                              const int* excessAllocationList, int& hashCode) {
 	hashCode = HashCodeFromBlockPosition(hashEntryPosition);
-	ITMHashEntry hashEntry = hashTable[hashCode];
+	HashEntry hashEntry = hashTable[hashCode];
 	if (!IS_EQUAL3(hashEntry.pos, hashEntryPosition) || hashEntry.ptr < -1) {
 		bool isExcess = false;
 		//search excess list only if there is no room in ordered part
@@ -512,7 +512,7 @@ bool FindOrAllocateHashEntry(const Vector3s& hashEntryPosition, ITMHashEntry* ha
 		//still not found, allocate
 		if (isExcess && lastFreeVoxelBlockId >= 0 && lastFreeExcessListId >= 0) {
 			//there is room in the voxel block array and excess list
-			ITMHashEntry newHashEntry;
+			HashEntry newHashEntry;
 			newHashEntry.pos = hashEntryPosition;
 			newHashEntry.ptr = voxelAllocationList[lastFreeVoxelBlockId];
 			newHashEntry.offset = 0;
@@ -526,7 +526,7 @@ bool FindOrAllocateHashEntry(const Vector3s& hashEntryPosition, ITMHashEntry* ha
 			return true;
 		} else if (lastFreeVoxelBlockId >= 0) {
 			//there is room in the voxel block array
-			ITMHashEntry newHashEntry;
+			HashEntry newHashEntry;
 			newHashEntry.pos = hashEntryPosition;
 			newHashEntry.ptr = voxelAllocationList[lastFreeVoxelBlockId];
 			newHashEntry.offset = 0;

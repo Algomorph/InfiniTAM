@@ -48,7 +48,7 @@ _CPU_AND_GPU_CODE_ inline int findVoxel(const CONSTPTR(ITMLib::VoxelBlockHash::I
 
 	while (true)
 	{
-		ITMHashEntry hashEntry = voxelIndex[hashIdx];
+		HashEntry hashEntry = voxelIndex[hashIdx];
 
 		if (IS_EQUAL3(hashEntry.pos, blockPos) && hashEntry.ptr >= 0)
 		{
@@ -99,7 +99,7 @@ _CPU_AND_GPU_CODE_ inline TVoxel readVoxel(const CONSTPTR(TVoxel) *voxelData, co
 
 	while (true)
 	{
-		ITMHashEntry hashEntry = voxelIndex[hashIdx];
+		HashEntry hashEntry = voxelIndex[hashIdx];
 
 		if (IS_EQUAL3(hashEntry.pos, blockPos) && hashEntry.ptr >= 0)
 		{

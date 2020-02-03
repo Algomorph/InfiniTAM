@@ -14,27 +14,27 @@ namespace
 
 	template<class TVoxel>
 	__global__ void integrateOldIntoActiveData_device(TVoxel *localVBA, ITMHashSwapState *swapStates, TVoxel *syncedVoxelBlocks_local,
-		int *neededEntryIDs_local, ITMHashEntry *hashTable, int maxW);
+	                                                  int *neededEntryIDs_local, HashEntry *hashTable, int maxW);
 
 	__global__ void buildListToSwapOut_device(int *neededEntryIDs, int *noNeededEntries, ITMHashSwapState *swapStates,
-		ITMHashEntry *hashTable, HashBlockVisibility* entriesVisibleType, int noTotalEntries);
+	                                          HashEntry *hashTable, HashBlockVisibility* entriesVisibleType, int noTotalEntries);
 
-	__global__ void buildListToClean_device(int *neededEntryIDs, int *noNeededEntries, ITMHashEntry *hashTable, HashBlockVisibility* blockVisibilityTypes, int noTotalEntries);
+	__global__ void buildListToClean_device(int *neededEntryIDs, int *noNeededEntries, HashEntry *hashTable, HashBlockVisibility* blockVisibilityTypes, int noTotalEntries);
 
 	template<class TVoxel>
 	__global__ void cleanMemory_device(int *voxelAllocationList, int *noAllocatedVoxelEntries, ITMHashSwapState *swapStates,
-		ITMHashEntry *hashTable, TVoxel *localVBA, int *neededEntryIDs_local, int neededEntryCount, const int voxelBlockCount);
+	                                   HashEntry *hashTable, TVoxel *localVBA, int *neededEntryIDs_local, int neededEntryCount, const int voxelBlockCount);
 
 	template<class TVoxel>
 	__global__ void cleanMemory_device(int *voxelAllocationList, int *noAllocatedVoxelEntries,
-		ITMHashEntry *hashTable, TVoxel *localVBA, int *neededEntryIDs_local, int neededEntryCount, const int voxelBlockCount);
+	                                   HashEntry *hashTable, TVoxel *localVBA, int *neededEntryIDs_local, int neededEntryCount, const int voxelBlockCount);
 
 	template<class TVoxel>
-	__global__ void cleanVBA(int *neededEntryIDs_local, ITMHashEntry *hashTable, TVoxel *localVBA);
+	__global__ void cleanVBA(int *neededEntryIDs_local, HashEntry *hashTable, TVoxel *localVBA);
 
 	template<class TVoxel>
 	__global__ void moveActiveDataToTransferBuffer_device(TVoxel *syncedVoxelBlocks_local, bool *hasSyncedData_local,
-		int *neededEntryIDs_local, ITMHashEntry *hashTable, TVoxel *localVBA);
+	                                                      int *neededEntryIDs_local, HashEntry *hashTable, TVoxel *localVBA);
 
 }
 
@@ -111,7 +111,7 @@ void SwappingEngine_CUDA<TVoxel, VoxelBlockHash>::IntegrateGlobalIntoLocal(Voxel
 {
 	GlobalCache<TVoxel, VoxelBlockHash>* globalCache = scene->globalCache;
 
-	ITMHashEntry *hashTable = scene->index.GetEntries();
+	HashEntry *hashTable = scene->index.GetEntries();
 
 	ITMHashSwapState *swapStates = globalCache->GetSwapStates(true);
 
@@ -141,7 +141,7 @@ void SwappingEngine_CUDA<TVoxel, VoxelBlockHash>::SaveToGlobalMemory(VoxelVolume
 
 	ITMHashSwapState *swapStates = globalCache->GetSwapStates(true);
 
-	ITMHashEntry *hashTable = scene->index.GetEntries();
+	HashEntry *hashTable = scene->index.GetEntries();
 	HashBlockVisibility* blockVisibilityTypes = scene->index.GetBlockVisibilityTypes();
 
 	TVoxel *syncedVoxelBlocks_local = globalCache->GetSyncedVoxelBlocks(true);
@@ -215,7 +215,7 @@ void SwappingEngine_CUDA<TVoxel, VoxelBlockHash>::SaveToGlobalMemory(VoxelVolume
 template<class TVoxel>
 void SwappingEngine_CUDA<TVoxel, VoxelBlockHash>::CleanLocalMemory(VoxelVolume<TVoxel, VoxelBlockHash> *scene, RenderState *renderState)
 {
-	ITMHashEntry *hashTable = scene->index.GetEntries();
+	HashEntry *hashTable = scene->index.GetEntries();
 	HashBlockVisibility* blockVisibilityTypes = scene->index.GetBlockVisibilityTypes();
 
 	TVoxel *localVBA = scene->localVBA.GetVoxelBlocks();
@@ -285,7 +285,7 @@ namespace
 	}
 
 	__global__ void buildListToSwapOut_device(int *neededEntryIDs, int *noNeededEntries, ITMHashSwapState *swapStates,
-	                                          ITMHashEntry *hashTable, HashBlockVisibility* blockVisibilityTypes,
+	                                          HashEntry *hashTable, HashBlockVisibility* blockVisibilityTypes,
 	                                          int hashEntryCount)
 	{
 		int targetIdx = threadIdx.x + blockIdx.x * blockDim.x;
@@ -313,7 +313,7 @@ namespace
 
 	template<class TVoxel>
 	__global__ void cleanMemory_device(int *voxelAllocationList, int *noAllocatedVoxelEntries, ITMHashSwapState *swapStates,
-	                                   ITMHashEntry *hashTable, TVoxel *localVBA, int *neededEntryIDs_local,
+	                                   HashEntry *hashTable, TVoxel *localVBA, int *neededEntryIDs_local,
 	                                   int neededEntryCount, const int voxelBlockCount)
 	{
 		int locId = threadIdx.x + blockIdx.x * blockDim.x;
@@ -332,7 +332,7 @@ namespace
 		}
 	}
 
-	__global__ void buildListToClean_device(int *neededEntryIDs, int *noNeededEntries, ITMHashEntry *hashTable, HashBlockVisibility* blockVisibilityTypes, int noTotalEntries)
+	__global__ void buildListToClean_device(int *neededEntryIDs, int *noNeededEntries, HashEntry *hashTable, HashBlockVisibility* blockVisibilityTypes, int noTotalEntries)
 	{
 		int targetIdx = threadIdx.x + blockIdx.x * blockDim.x;
 		if (targetIdx > noTotalEntries - 1) return;
@@ -356,7 +356,7 @@ namespace
 
 	template<class TVoxel>
 	__global__ void cleanMemory_device(int *voxelAllocationList, int *noAllocatedVoxelEntries,
-	                                   ITMHashEntry *hashTable, TVoxel *localVBA, int *neededEntryIDs_local,
+	                                   HashEntry *hashTable, TVoxel *localVBA, int *neededEntryIDs_local,
 	                                   int neededEntryCount, const int voxelBlockCount)
 	{
 		int locId = threadIdx.x + blockIdx.x * blockDim.x;
@@ -374,11 +374,11 @@ namespace
 	}
 
 	template<class TVoxel>
-	__global__ void cleanVBA(int *neededEntryIDs_local, ITMHashEntry *hashTable, TVoxel *localVBA)
+	__global__ void cleanVBA(int *neededEntryIDs_local, HashEntry *hashTable, TVoxel *localVBA)
 	{
 		int entryDestId = neededEntryIDs_local[blockIdx.x];
 
-		ITMHashEntry &hashEntry = hashTable[entryDestId];
+		HashEntry &hashEntry = hashTable[entryDestId];
 
 		TVoxel *srcVB = localVBA + hashEntry.ptr * VOXEL_BLOCK_SIZE3;
 
@@ -388,11 +388,11 @@ namespace
 
 	template<class TVoxel>
 	__global__ void moveActiveDataToTransferBuffer_device(TVoxel *syncedVoxelBlocks_local, bool *hasSyncedData_local,
-		int *neededEntryIDs_local, ITMHashEntry *hashTable, TVoxel *localVBA)
+	                                                      int *neededEntryIDs_local, HashEntry *hashTable, TVoxel *localVBA)
 	{
 		int entryDestId = neededEntryIDs_local[blockIdx.x];
 
-		ITMHashEntry &hashEntry = hashTable[entryDestId];
+		HashEntry &hashEntry = hashTable[entryDestId];
 
 		TVoxel *dstVB = syncedVoxelBlocks_local + blockIdx.x * VOXEL_BLOCK_SIZE3;
 		TVoxel *srcVB = localVBA + hashEntry.ptr * VOXEL_BLOCK_SIZE3;
@@ -406,7 +406,7 @@ namespace
 
 	template<class TVoxel>
 	__global__ void integrateOldIntoActiveData_device(TVoxel *localVBA, ITMHashSwapState *swapStates, TVoxel *syncedVoxelBlocks_local,
-		int *neededEntryIDs_local, ITMHashEntry *hashTable, int maxW)
+	                                                  int *neededEntryIDs_local, HashEntry *hashTable, int maxW)
 	{
 		int entryDestId = neededEntryIDs_local[blockIdx.x];
 

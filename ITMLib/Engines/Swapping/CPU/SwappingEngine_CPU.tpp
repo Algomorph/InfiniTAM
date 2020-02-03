@@ -60,7 +60,7 @@ void SwappingEngine_CPU<TVoxel, VoxelBlockHash>::IntegrateGlobalIntoLocal(VoxelV
 {
 	GlobalCache<TVoxel, VoxelBlockHash> *globalCache = scene->globalCache;
 
-	ITMHashEntry *hashTable = scene->index.GetEntries();
+	HashEntry *hashTable = scene->index.GetEntries();
 
 	ITMHashSwapState *swapStates = globalCache->GetSwapStates(false);
 
@@ -100,7 +100,7 @@ void SwappingEngine_CPU<TVoxel, VoxelBlockHash>::SaveToGlobalMemory(VoxelVolume<
 
 	ITMHashSwapState *swapStates = globalCache->GetSwapStates(false);
 
-	ITMHashEntry *hashTable = scene->index.GetEntries();
+	HashEntry *hashTable = scene->index.GetEntries();
 	HashBlockVisibility *blockVisibilityTypes = scene->index.GetBlockVisibilityTypes();
 
 	TVoxel *syncedVoxelBlocks_local = globalCache->GetSyncedVoxelBlocks(false);
@@ -168,7 +168,7 @@ void SwappingEngine_CPU<TVoxel, VoxelBlockHash>::SaveToGlobalMemory(VoxelVolume<
 template<class TVoxel>
 void SwappingEngine_CPU<TVoxel, VoxelBlockHash>::CleanLocalMemory(VoxelVolume<TVoxel, VoxelBlockHash> *scene, RenderState *renderState)
 {
-	ITMHashEntry *hashTable = scene->index.GetEntries();
+	HashEntry *hashTable = scene->index.GetEntries();
 	HashBlockVisibility *blockVisibilityTypes = scene->index.GetBlockVisibilityTypes();
 
 	TVoxel *localVBA = scene->localVBA.GetVoxelBlocks();

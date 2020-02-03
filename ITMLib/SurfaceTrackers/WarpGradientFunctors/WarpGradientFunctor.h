@@ -26,7 +26,7 @@ namespace ITMLib {
 
 DECLARE_SERIALIZABLE_ENUM(GRADIENT_FUNCTOR_TYPE_ENUM_DESCRIPTION)
 
-template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, GradientFunctorType TGradientFunctorType>
+template< typename TTSDFVoxel, typename TWarpVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType, GradientFunctorType TGradientFunctorType>
 struct WarpGradientFunctor;
 } // namespace ITMLib
 

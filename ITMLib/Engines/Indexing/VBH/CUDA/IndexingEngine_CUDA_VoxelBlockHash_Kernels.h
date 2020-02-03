@@ -38,7 +38,7 @@ __global__
 void allocateHashedVoxelBlocksUsingLists_SetVisibility_device(
 		int* voxelAllocationList, int* excessAllocationList,
 		AllocationTempData* allocData,
-		ITMHashEntry* hashTable, int noTotalEntries,
+		HashEntry* hashTable, int noTotalEntries,
 		const ITMLib::HashEntryAllocationState* hashEntryStates, Vector3s* blockCoords,
 		HashBlockVisibility* blockVisibilityTypes) {
 	int hashCode = threadIdx.x + blockIdx.x * blockDim.x;
@@ -51,7 +51,7 @@ void allocateHashedVoxelBlocksUsingLists_SetVisibility_device(
 
 			if (vbaIdx >= 0) //there is room in the voxel block array
 			{
-				ITMHashEntry hashEntry;
+				HashEntry hashEntry;
 				hashEntry.pos = blockCoords[hashCode];
 				hashEntry.ptr = voxelAllocationList[vbaIdx];
 				hashEntry.offset = 0;
@@ -69,7 +69,7 @@ void allocateHashedVoxelBlocksUsingLists_SetVisibility_device(
 
 			if (vbaIdx >= 0 && exlIdx >= 0) //there is room in the voxel block array and excess list
 			{
-				ITMHashEntry hashEntry;
+				HashEntry hashEntry;
 				hashEntry.pos = blockCoords[hashCode];
 				hashEntry.ptr = voxelAllocationList[vbaIdx];
 				hashEntry.offset = 0;
@@ -95,7 +95,7 @@ __global__
 void allocateHashedVoxelBlocksUsingLists_device(
 		int* voxelAllocationList, int* excessAllocationList,
 		AllocationTempData* allocData,
-		ITMHashEntry* hashTable, const int hashEntryCount,
+		HashEntry* hashTable, const int hashEntryCount,
 		const ITMLib::HashEntryAllocationState* hashEntryStates, Vector3s* blockCoords) {
 	int hashCode = threadIdx.x + blockIdx.x * blockDim.x;
 	if (hashCode >= hashEntryCount) return;
@@ -107,7 +107,7 @@ void allocateHashedVoxelBlocksUsingLists_device(
 			voxelBlockIndex = atomicSub(&allocData->noAllocatedVoxelEntries, 1);
 			if (voxelBlockIndex >= 0) //there is room in the voxel block array
 			{
-				ITMHashEntry hashEntry;
+				HashEntry hashEntry;
 				hashEntry.pos = blockCoords[hashCode];
 				hashEntry.ptr = voxelAllocationList[voxelBlockIndex];
 				hashEntry.offset = 0;
@@ -124,7 +124,7 @@ void allocateHashedVoxelBlocksUsingLists_device(
 
 			if (voxelBlockIndex >= 0 && exlIdx >= 0) //there is room in the voxel block array and excess list
 			{
-				ITMHashEntry hashEntry;
+				HashEntry hashEntry;
 				hashEntry.pos = blockCoords[hashCode];
 				hashEntry.ptr = voxelAllocationList[voxelBlockIndex];
 				hashEntry.offset = 0;
@@ -147,12 +147,12 @@ void allocateHashedVoxelBlocksUsingLists_device(
 __global__
 void buildHashAllocationTypeList_VolumeToVolume(ITMLib::HashEntryAllocationState* hashEntryStates,
                                                 Vector3s* blockCoordinates,
-                                                ITMHashEntry* targetHashTable, const ITMHashEntry* sourceHashTable,
+                                                HashEntry* targetHashTable, const HashEntry* sourceHashTable,
                                                 int hashEntryCount,
                                                 bool* collisionDetected) {
 	int hashCode = threadIdx.x + blockIdx.x * blockDim.x;
 	if (hashCode >= hashEntryCount) return;
-	const ITMHashEntry& sourceHashEntry = sourceHashTable[hashCode];
+	const HashEntry& sourceHashEntry = sourceHashTable[hashCode];
 	if (sourceHashEntry.ptr < 0) return;
 	Vector3s sourceBlockCoordinates = sourceHashEntry.pos;
 	int targetHash = HashCodeFromBlockPosition(sourceBlockCoordinates);
@@ -169,7 +169,7 @@ __global__ void buildHashAllocAndVisibleType_device(ITMLib::HashEntryAllocationS
                                                     Matrix4f invertedCameraTransform, Vector4f projParams_d,
                                                     float surface_cutoff_distance,
                                                     Vector2i _imgSize, float oneOverHashBlockSizeMeters,
-                                                    ITMHashEntry* hashTable, float near_clipping_distance,
+                                                    HashEntry* hashTable, float near_clipping_distance,
                                                     float far_clipping_distance, bool* collisionDetected) {
 	int x = threadIdx.x + blockIdx.x * blockDim.x, y = threadIdx.y + blockIdx.y * blockDim.y;
 
@@ -184,7 +184,7 @@ __global__ void buildHashAllocAndVisibleType_device(ITMLib::HashEntryAllocationS
 
 template<bool useSwapping>
 __global__ void
-buildVisibilityList_device(ITMHashEntry* hashTable, ITMLib::ITMHashSwapState* swapStates, int hashEntryCount,
+buildVisibilityList_device(HashEntry* hashTable, ITMLib::ITMHashSwapState* swapStates, int hashEntryCount,
                            int* visibleEntryIDs, int* visibleBlockCount, HashBlockVisibility* blockVisibilityTypes,
                            Matrix4f M_d, Vector4f projParams_d, Vector2i depthImgSize, float voxelSize) {
 	int hashCode = threadIdx.x + blockIdx.x * blockDim.x;
@@ -195,7 +195,7 @@ buildVisibilityList_device(ITMHashEntry* hashTable, ITMLib::ITMHashSwapState* sw
 	__syncthreads();
 
 	HashBlockVisibility hashVisibleType = blockVisibilityTypes[hashCode];
-	const ITMHashEntry& hashEntry = hashTable[hashCode];
+	const HashEntry& hashEntry = hashTable[hashCode];
 
 	if (hashVisibleType == VISIBLE_AT_PREVIOUS_FRAME_AND_UNSTREAMED) {
 		bool isVisibleEnlarged, isVisible;
@@ -229,7 +229,7 @@ buildVisibilityList_device(ITMHashEntry* hashTable, ITMLib::ITMHashSwapState* sw
 }
 
 __global__ void
-reAllocateSwappedOutVoxelBlocks_device(int* voxelAllocationList, ITMHashEntry* hashTable, int hashEntryCount,
+reAllocateSwappedOutVoxelBlocks_device(int* voxelAllocationList, HashEntry* hashTable, int hashEntryCount,
                                        AllocationTempData* allocData, /*int *countOfAllocatedOrderedEntries,*/
                                        HashBlockVisibility* blockVisibilityTypes) {
 	int hashCode = threadIdx.x + blockIdx.x * blockDim.x;
@@ -247,11 +247,11 @@ reAllocateSwappedOutVoxelBlocks_device(int* voxelAllocationList, ITMHashEntry* h
 	}
 }
 
-__global__ void findHashEntry_device(ITMHashEntry* entry, const ITMHashEntry* hashTable, Vector3s pos, int* hashCode) {
+__global__ void findHashEntry_device(HashEntry* entry, const HashEntry* hashTable, Vector3s pos, int* hashCode) {
 
 	*hashCode = FindHashCodeAt(hashTable, pos);
 	if (*hashCode != -1) {
-		const ITMHashEntry& targetEntry = hashTable[*hashCode];
+		const HashEntry& targetEntry = hashTable[*hashCode];
 		entry->offset = targetEntry.offset;
 		entry->ptr = targetEntry.ptr;
 		entry->pos = targetEntry.pos;
@@ -261,14 +261,14 @@ __global__ void findHashEntry_device(ITMHashEntry* entry, const ITMHashEntry* ha
 
 __global__ void markForAllocationBasedOnOneRingAroundAnotherAllocation_device(
 		ITMLib::HashEntryAllocationState* hashEntryStates, Vector3s* blockCoordinates,
-		const ITMHashEntry* sourceHashTable, const ITMHashEntry* targetHashTable, int hashEntryCount,
+		const HashEntry* sourceHashTable, const HashEntry* targetHashTable, int hashEntryCount,
 		bool* collisionDetected) {
 
 	if (*collisionDetected) return;
 	int hashCode = blockIdx.x;
 
 	if (hashCode >= hashEntryCount) return;
-	const ITMHashEntry& sourceHashEntry = sourceHashTable[hashCode];
+	const HashEntry& sourceHashEntry = sourceHashTable[hashCode];
 	if (sourceHashEntry.ptr < 0) return;
 
 	Vector3s targetBlockCoordinates = sourceHashEntry.pos + Vector3s(threadIdx.x - 1, threadIdx.y - 1, threadIdx.z - 1);
@@ -281,14 +281,14 @@ __global__ void markForAllocationBasedOnOneRingAroundAnotherAllocation_device(
 __global__ void markForAllocationAndSetVisibilityBasedOnOneRingAroundAnotherAllocation_device(
 		ITMLib::HashEntryAllocationState* hashEntryStates, Vector3s* blockCoordinates,
 		HashBlockVisibility* hashBlockVisibilityTypes,
-		const ITMHashEntry* sourceHashTable, const ITMHashEntry* targetHashTable, int hashEntryCount,
+		const HashEntry* sourceHashTable, const HashEntry* targetHashTable, int hashEntryCount,
 		bool* collisionDetected) {
 
 	if (*collisionDetected) return;
 	int hashCode = blockIdx.x;
 
 	if (hashCode >= hashEntryCount) return;
-	const ITMHashEntry& sourceHashEntry = sourceHashTable[hashCode];
+	const HashEntry& sourceHashEntry = sourceHashTable[hashCode];
 	if (sourceHashEntry.ptr < 0) return;
 
 	Vector3s targetBlockCoordinates = sourceHashEntry.pos + Vector3s(threadIdx.x - 1, threadIdx.y - 1, threadIdx.z - 1);
@@ -304,9 +304,9 @@ struct SingleHashAllocationData {
 };
 
 __global__ void allocateHashEntry_device(SingleHashAllocationData* data,
-                                         const Vector3s at, ITMHashEntry* hashTable,
+                                         const Vector3s at, HashEntry* hashTable,
                                          const int* voxelAllocationList, const int* excessAllocationList) {
-	ITMHashEntry* entry;
+	HashEntry* entry;
 	data->success = FindOrAllocateHashEntry(at, hashTable, entry, data->lastFreeVoxelBlockId,
 	                                        data->lastFreeExcessListId, voxelAllocationList, excessAllocationList,
 	                                        data->hashCode);

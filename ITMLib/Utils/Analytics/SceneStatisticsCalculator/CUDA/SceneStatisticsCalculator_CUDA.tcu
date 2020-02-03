@@ -26,8 +26,8 @@ using namespace ITMLib;
 namespace {
 //CUDA kernel declaration
 
-__global__ void computeVoxelBounds(const ITMHashEntry* hashTable, Vector6i* bounds, int noTotalEntries);
-__global__ void computeHashBlockCount(const ITMHashEntry* hashTable, int noTotalEntries, int* count);
+__global__ void computeVoxelBounds(const HashEntry* hashTable, Vector6i* bounds, int noTotalEntries);
+__global__ void computeHashBlockCount(const HashEntry* hashTable, int noTotalEntries, int* count);
 
 } // end anonymous namespace
 
@@ -40,7 +40,7 @@ struct ComputeVoxelBoundsFunctor<TVoxel, VoxelBlockHash> {
 
 		Vector6i bounds = Vector6i(0);
 		const TVoxel* voxelBlocks = scene->localVBA.GetVoxelBlocks();
-		const ITMHashEntry* hashTable = scene->index.GetEntries();
+		const HashEntry* hashTable = scene->index.GetEntries();
 		int noTotalEntries = scene->index.hashEntryCount;
 
 		dim3 cudaBlockSize(256, 1);
@@ -267,11 +267,11 @@ Extent3D ITMSceneStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CUDA>::FindMi
 namespace {
 // CUDA kernel implementations
 
-__global__ void computeVoxelBounds(const ITMHashEntry* hashTable, Vector6i* bounds, int noTotalEntries) {
+__global__ void computeVoxelBounds(const HashEntry* hashTable, Vector6i* bounds, int noTotalEntries) {
 	int hash = threadIdx.x + blockIdx.x * blockDim.x;
 	if (hash >= noTotalEntries) return;
 
-	const ITMHashEntry& hashEntry = hashTable[hash];
+	const HashEntry& hashEntry = hashTable[hash];
 	if (hashEntry.ptr < 0) return;
 
 	Vector3i hashEntryPosVoxels = hashEntry.pos.toInt() * VOXEL_BLOCK_SIZE;
@@ -284,11 +284,11 @@ __global__ void computeVoxelBounds(const ITMHashEntry* hashTable, Vector6i* boun
 	atomicMax(&(bounds->max_z), hashEntryPosVoxels.z + VOXEL_BLOCK_SIZE);
 }
 
-__global__ void computeHashBlockCount(const ITMHashEntry* hashTable, int noTotalEntries, int* count) {
+__global__ void computeHashBlockCount(const HashEntry* hashTable, int noTotalEntries, int* count) {
 	int hash = threadIdx.x + blockIdx.x * blockDim.x;
 	if (hash >= noTotalEntries) return;
 
-	const ITMHashEntry& hashEntry = hashTable[hash];
+	const HashEntry& hashEntry = hashTable[hash];
 	if (hashEntry.ptr < 0) return;
 
 	atomicAdd(count, 1);

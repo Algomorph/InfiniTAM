@@ -33,7 +33,7 @@ DepthFusionEngine_CPU<TVoxel, TWarp, VoxelBlockHash>::IntegrateDepthImageIntoTsd
 	float* confidence = view->depthConfidence->GetData(MEMORYDEVICE_CPU);
 	Vector4u* rgb = view->rgb->GetData(MEMORYDEVICE_CPU);
 	TVoxel* localVBA = volume->localVBA.GetVoxelBlocks();
-	ITMHashEntry* hashTable = volume->index.GetEntries();
+	HashEntry* hashTable = volume->index.GetEntries();
 
 	int* visibleEntryHashCodes = volume->index.GetUtilizedBlockHashCodes();
 	int visibleEntryCount = volume->index.GetUtilizedHashBlockCount();
@@ -46,7 +46,7 @@ DepthFusionEngine_CPU<TVoxel, TWarp, VoxelBlockHash>::IntegrateDepthImageIntoTsd
 		Vector3i globalPos;
 		int hash = visibleEntryHashCodes[visibleHash];
 
-		const ITMHashEntry& currentHashEntry = hashTable[hash];
+		const HashEntry& currentHashEntry = hashTable[hash];
 
 		if (currentHashEntry.ptr < 0) continue;
 

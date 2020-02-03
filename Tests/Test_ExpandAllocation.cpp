@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(ExpandVolume_CPU) {
 	BOOST_REQUIRE(indexing_engine.AllocateHashBlockAt(&volume1, initial_block_pos, hash_code));
 
 	int search_hash_code = -2;
-	ITMHashEntry entry = indexing_engine.FindHashEntry(volume1.index, initial_block_pos, search_hash_code);
+	HashEntry entry = indexing_engine.FindHashEntry(volume1.index, initial_block_pos, search_hash_code);
 	BOOST_REQUIRE_EQUAL(initial_block_pos, entry.pos);
 	BOOST_REQUIRE_EQUAL(hash_code, search_hash_code);
 
@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE(ExpandVolume_CPU) {
 		for (short yOffset = -1; yOffset < 2; yOffset++) {
 			for (short xOffset = -1; xOffset < 2; xOffset++) {
 				Vector3s neighbor_position(xOffset, yOffset, zOffset);
-				ITMHashEntry entry = indexing_engine.FindHashEntry(volume2.index, neighbor_position, search_hash_code);
+				HashEntry entry = indexing_engine.FindHashEntry(volume2.index, neighbor_position, search_hash_code);
 				BOOST_REQUIRE_EQUAL(entry.pos, neighbor_position);
 				BOOST_REQUIRE(search_hash_code != -1);
 			}
@@ -88,8 +88,8 @@ BOOST_AUTO_TEST_CASE(ExpandVolume_CPU) {
 			for (short x = -2; x < 3; x++) {
 				if (x < -1 || x > 1 || y < -1 || y > 1 || z < -1 || z > 1) {
 					Vector3s neighbor_position(x, y, z);
-					ITMHashEntry entry = indexing_engine.FindHashEntry(volume2.index, neighbor_position,
-					                                                   search_hash_code);
+					HashEntry entry = indexing_engine.FindHashEntry(volume2.index, neighbor_position,
+					                                                search_hash_code);
 					BOOST_REQUIRE_EQUAL(search_hash_code, -1);
 				}
 			}
@@ -106,7 +106,7 @@ BOOST_AUTO_TEST_CASE(ExpandVolume_CPU) {
 		for (short yOffset = -2; yOffset < 3; yOffset++) {
 			for (short xOffset = -2; xOffset < 3; xOffset++) {
 				Vector3s neighbor_position(xOffset, yOffset, zOffset);
-				ITMHashEntry entry = indexing_engine.FindHashEntry(volume1.index, neighbor_position, search_hash_code);
+				HashEntry entry = indexing_engine.FindHashEntry(volume1.index, neighbor_position, search_hash_code);
 				BOOST_REQUIRE_EQUAL(entry.pos, neighbor_position);
 				BOOST_REQUIRE(search_hash_code != -1);
 			}
@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE(ExpandVolume_CPU) {
 		for (short yOffset = 2; yOffset < 4; yOffset++) {
 			for (short xOffset = 2; xOffset < 4; xOffset++) {
 				Vector3s neighbor_position(xOffset, yOffset, zOffset);
-				ITMHashEntry entry = indexing_engine.FindHashEntry(volume1.index, neighbor_position, search_hash_code);
+				HashEntry entry = indexing_engine.FindHashEntry(volume1.index, neighbor_position, search_hash_code);
 				BOOST_REQUIRE_EQUAL(entry.pos, neighbor_position);
 				BOOST_REQUIRE(search_hash_code != -1);
 			}
@@ -129,8 +129,8 @@ BOOST_AUTO_TEST_CASE(ExpandVolume_CPU) {
 			for (short x = -2; x < 3; x++) {
 				if (x < -1 || x > 3 || y < -1 || y > 3 || z < -1 || z > 3) {
 					Vector3s neighbor_position(x, y, z);
-					ITMHashEntry entry = indexing_engine.FindHashEntry(volume2.index, neighbor_position,
-					                                                   search_hash_code);
+					HashEntry entry = indexing_engine.FindHashEntry(volume2.index, neighbor_position,
+					                                                search_hash_code);
 					BOOST_REQUIRE_EQUAL(search_hash_code, -1);
 				}
 			}
@@ -207,7 +207,7 @@ BOOST_AUTO_TEST_CASE(ExpandVolume_CUDA) {
 	BOOST_REQUIRE(indexing_engine.AllocateHashBlockAt(&volume1, initial_block_pos, hash_code));
 
 	int search_hash_code = -2;
-	ITMHashEntry entry = indexing_engine.FindHashEntry(volume1.index, initial_block_pos, search_hash_code);
+	HashEntry entry = indexing_engine.FindHashEntry(volume1.index, initial_block_pos, search_hash_code);
 	BOOST_REQUIRE_EQUAL(initial_block_pos, entry.pos);
 	BOOST_REQUIRE_EQUAL(hash_code, search_hash_code);
 
@@ -217,7 +217,7 @@ BOOST_AUTO_TEST_CASE(ExpandVolume_CUDA) {
 		for (short yOffset = -1; yOffset < 2; yOffset++) {
 			for (short xOffset = -1; xOffset < 2; xOffset++) {
 				Vector3s neighbor_position(xOffset, yOffset, zOffset);
-				ITMHashEntry entry = indexing_engine.FindHashEntry(volume2.index, neighbor_position, search_hash_code);
+				HashEntry entry = indexing_engine.FindHashEntry(volume2.index, neighbor_position, search_hash_code);
 				BOOST_REQUIRE(search_hash_code != -1);
 				BOOST_REQUIRE_EQUAL(entry.pos, neighbor_position);
 			}
@@ -229,8 +229,8 @@ BOOST_AUTO_TEST_CASE(ExpandVolume_CUDA) {
 			for (short x = -2; x < 3; x++) {
 				if (x < -1 || x > 1 || y < -1 || y > 1 || z < -1 || z > 1) {
 					Vector3s neighbor_position(x, y, z);
-					ITMHashEntry entry = indexing_engine.FindHashEntry(volume2.index, neighbor_position,
-					                                                   search_hash_code);
+					HashEntry entry = indexing_engine.FindHashEntry(volume2.index, neighbor_position,
+					                                                search_hash_code);
 					BOOST_REQUIRE_EQUAL(search_hash_code, -1);
 				}
 			}
@@ -247,7 +247,7 @@ BOOST_AUTO_TEST_CASE(ExpandVolume_CUDA) {
 		for (short yOffset = -2; yOffset < 3; yOffset++) {
 			for (short xOffset = -2; xOffset < 3; xOffset++) {
 				Vector3s neighbor_position(xOffset, yOffset, zOffset);
-				ITMHashEntry entry = indexing_engine.FindHashEntry(volume1.index, neighbor_position, search_hash_code);
+				HashEntry entry = indexing_engine.FindHashEntry(volume1.index, neighbor_position, search_hash_code);
 				BOOST_REQUIRE_EQUAL(entry.pos, neighbor_position);
 				BOOST_REQUIRE(search_hash_code != -1);
 			}
@@ -258,7 +258,7 @@ BOOST_AUTO_TEST_CASE(ExpandVolume_CUDA) {
 		for (short yOffset = 2; yOffset < 4; yOffset++) {
 			for (short xOffset = 2; xOffset < 4; xOffset++) {
 				Vector3s neighbor_position(xOffset, yOffset, zOffset);
-				ITMHashEntry entry = indexing_engine.FindHashEntry(volume1.index, neighbor_position, search_hash_code);
+				HashEntry entry = indexing_engine.FindHashEntry(volume1.index, neighbor_position, search_hash_code);
 				BOOST_REQUIRE_EQUAL(entry.pos, neighbor_position);
 				BOOST_REQUIRE(search_hash_code != -1);
 			}
@@ -270,8 +270,8 @@ BOOST_AUTO_TEST_CASE(ExpandVolume_CUDA) {
 			for (short x = -2; x < 3; x++) {
 				if (x < -1 || x > 3 || y < -1 || y > 3 || z < -1 || z > 3) {
 					Vector3s neighbor_position(x, y, z);
-					ITMHashEntry entry = indexing_engine.FindHashEntry(volume2.index, neighbor_position,
-					                                                   search_hash_code);
+					HashEntry entry = indexing_engine.FindHashEntry(volume2.index, neighbor_position,
+					                                                search_hash_code);
 					BOOST_REQUIRE_EQUAL(search_hash_code, -1);
 				}
 			}

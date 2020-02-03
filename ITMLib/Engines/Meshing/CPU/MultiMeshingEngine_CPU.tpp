@@ -43,12 +43,12 @@ inline void MultiMeshingEngine_CPU<TVoxel, VoxelBlockHash>::MeshScene(Mesh * mes
 	// very dumb rendering -- likely to generate lots of duplicates
 	for (int localMapId = 0; localMapId < numLocalMaps; ++localMapId)
 	{
-		ITMHashEntry *hashTable = hashTables.index[localMapId];
+		HashEntry *hashTable = hashTables.index[localMapId];
 
 		for (int entryId = 0; entryId < noTotalEntriesPerLocalMap; entryId++)
 		{
 			Vector3i globalPos;
-			const ITMHashEntry &currentHashEntry = hashTable[entryId];
+			const HashEntry &currentHashEntry = hashTable[entryId];
 
 			if (currentHashEntry.ptr < 0) continue;
 

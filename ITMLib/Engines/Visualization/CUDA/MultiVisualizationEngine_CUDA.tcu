@@ -92,7 +92,7 @@ void MultiVisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::CreateExpectedDepths
 		//go through list of visible 8x8x8 blocks
 
 		float voxelSize = renderState->voxelSize;
-		const ITMHashEntry *indexData = renderState->indexData_host.index[localMapId];
+		const HashEntry *indexData = renderState->indexData_host.index[localMapId];
 		Matrix4f localPose = pose->GetM() * renderState->indexData_host.posesInv[localMapId];
 		dim3 blockSize(256);
 		dim3 gridSize((int)ceil((float)hashEntryCount / (float)blockSize.x));

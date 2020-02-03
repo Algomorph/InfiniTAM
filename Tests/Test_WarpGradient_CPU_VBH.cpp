@@ -84,7 +84,7 @@ BOOST_FIXTURE_TEST_CASE(testDataTerm_CPU_VBH, DataFixture) {
 
 
 	TimeIt([&]() {
-		motionTracker_VBH_CPU->CalculateWarpGradient(canonical_volume, live_volume, &warp_field_CPU1);
+		motionTracker_VBH_CPU->CalculateWarpGradient(&warp_field_CPU1, canonical_volume, live_volume);
 	}, "Calculate Warping Gradient - VBH CPU data term");
 
 	BOOST_REQUIRE_EQUAL(SceneStatCalc_CPU_VBH_Warp::Instance().ComputeAllocatedHashBlockCount(&warp_field_CPU1), 589);
@@ -114,8 +114,7 @@ BOOST_FIXTURE_TEST_CASE(testUpdateWarps_CPU_VBH, DataFixture) {
 
 	IndexingEngine<TSDFVoxel,VoxelBlockHash,MEMORYDEVICE_CPU>::Instance().AllocateUsingOtherVolume(canonical_volume, live_volume);
 
-	float maxWarp = motionTracker_VBH_CPU->UpdateWarps(canonical_volume, live_volume, &warp_field_copy);
-//	warp_field_copy.SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_VBH/warp_iter0");
+	float maxWarp = motionTracker_VBH_CPU->UpdateWarps(&warp_field_copy, canonical_volume, live_volume);
 	BOOST_REQUIRE_CLOSE(maxWarp, 0.18186526f, 1e-7f);
 
 
@@ -139,9 +138,8 @@ BOOST_FIXTURE_TEST_CASE(testSmoothWarpGradient_CPU_VBH, DataFixture) {
 	);
 
 	TimeIt([&]() {
-		motionTracker_VBH_CPU->SmoothWarpGradient(canonical_volume, live_volume, &warp_field_CPU1);
+		motionTracker_VBH_CPU->SmoothWarpGradient(&warp_field_CPU1, canonical_volume, live_volume);
 	}, "Smooth Warping Gradient - VBH CPU");
-//	warp_field_CPU1.SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_VBH/warp_field_0_smoothed_");
 
 	float tolerance = 1e-8;
 	BOOST_REQUIRE(contentAlmostEqual_CPU(&warp_field_CPU1, warp_field_data_term_smoothed, tolerance));
@@ -158,11 +156,9 @@ BOOST_FIXTURE_TEST_CASE(testTikhonovTerm_CPU_VBH, DataFixture) {
 	Vector3i testPosition(-40, 60, 200);
 
 	TimeIt([&]() {
-		motionTracker_VBH_CPU->CalculateWarpGradient(canonical_volume, live_volume, &warp_field_CPU1);
+		motionTracker_VBH_CPU->CalculateWarpGradient(&warp_field_CPU1, canonical_volume, live_volume);
 	}, "Calculate Warping Gradient - VBH CPU data term + tikhonov term");
 	BOOST_REQUIRE_EQUAL(SceneStatCalc_CPU_VBH_Warp::Instance().ComputeAllocatedHashBlockCount(&warp_field_CPU1), 589);
-	//warp_field_CPU1.SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_VBH/warp_field_1_tikhonov_");
-
 
 	AlteredGradientCountFunctor<WarpVoxel> functor;
 	VolumeTraversalEngine<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::
@@ -188,11 +184,9 @@ BOOST_FIXTURE_TEST_CASE(testDataAndTikhonovTerm_CPU_VBH, DataFixture) {
 			SlavchevaSurfaceTracker::Switches(true, false, true, false, false));
 
 	TimeIt([&]() {
-		motionTracker_VBH_CPU->CalculateWarpGradient(canonical_volume, live_volume, &warp_field_CPU1);
+		motionTracker_VBH_CPU->CalculateWarpGradient(&warp_field_CPU1, canonical_volume, live_volume);
 	}, "Calculate Warping Gradient - VBH CPU data term + tikhonov term");
 	BOOST_REQUIRE_EQUAL(SceneStatCalc_CPU_VBH_Warp::Instance().ComputeAllocatedHashBlockCount(&warp_field_CPU1), 589);
-//	warp_field_CPU1.SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_VBH/gradient0_tikhonov_");
-
 
 	AlteredGradientCountFunctor<WarpVoxel> functor;
 	VolumeTraversalEngine<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::
@@ -221,9 +215,8 @@ BOOST_FIXTURE_TEST_CASE(testDataAndKillingTerm_CPU_VBH, DataFixture) {
 
 
 	TimeIt([&]() {
-		motionTracker_VBH_CPU->CalculateWarpGradient(canonical_volume, live_volume, &warp_field_CPU1);
+		motionTracker_VBH_CPU->CalculateWarpGradient(&warp_field_CPU1, canonical_volume, live_volume);
 	}, "Calculate Warping Gradient - VBH CPU data term + tikhonov term");
-//	warp_field_CPU1.SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_VBH/gradient0_killing_");
 
 	AlteredGradientCountFunctor<WarpVoxel> functor;
 	VolumeTraversalEngine<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::
@@ -241,11 +234,9 @@ BOOST_FIXTURE_TEST_CASE(testDataAndLevelSetTerm_CPU_VBH, DataFixture) {
 	auto motionTracker_VBH_CPU = new SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_DIAGNOSTIC>(
 			SlavchevaSurfaceTracker::Switches(true, true, false, false, false));
 
-
 	TimeIt([&]() {
-		motionTracker_VBH_CPU->CalculateWarpGradient(canonical_volume, live_volume, &warp_field_CPU1);
+		motionTracker_VBH_CPU->CalculateWarpGradient(&warp_field_CPU1, canonical_volume, live_volume);
 	}, "Calculate Warping Gradient - VBH CPU data term + level set term");
-//	warp_field_CPU1.SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_VBH/gradient0_level_set_");
 
 	AlteredGradientCountFunctor<WarpVoxel> functor;
 	VolumeTraversalEngine<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::

@@ -38,8 +38,8 @@
 namespace ITMLib {
 
 
-template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-struct WarpGradientFunctor<TVoxel, TWarp, TIndex, TMemoryDeviceType, TRACKER_SLAVCHEVA_OPTIMIZED>{
+template<typename TTSDFVoxel, typename TWarpVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+struct WarpGradientFunctor<TTSDFVoxel, TWarpVoxel, TIndex, TMemoryDeviceType, TRACKER_SLAVCHEVA_OPTIMIZED>{
 private:
 
 
@@ -48,28 +48,28 @@ public:
 	// region ========================================= CONSTRUCTOR ====================================================
 	WarpGradientFunctor(SlavchevaSurfaceTracker::Parameters parameters,
 	                    SlavchevaSurfaceTracker::Switches switches,
-	                    VoxelVolume<TVoxel,TIndex>* liveVolume,
-	                    VoxelVolume<TVoxel,TIndex>* canonicalVolume,
-	                    VoxelVolume<TWarp,TIndex>* warpField,
+	                    VoxelVolume<TWarpVoxel,TIndex>* warp_field,
+	                    VoxelVolume<TTSDFVoxel,TIndex>* canonical_volume,
+	                    VoxelVolume<TTSDFVoxel,TIndex>* live_volume,
 	                    float voxelSize, float narrowBandHalfWidth) :
 			parameters(parameters), switches(switches),
-			liveVoxels(liveVolume->localVBA.GetVoxelBlocks()), liveIndexData(liveVolume->index.GetIndexData()),
-			warps(warpField->localVBA.GetVoxelBlocks()), warpIndexData(warpField->index.GetIndexData()),
-			canonicalVoxels(canonicalVolume->localVBA.GetVoxelBlocks()), canonicalIndexData(canonicalVolume->index.GetIndexData()),
-			liveCache(), canonicalCache(),
-			sdfUnity(voxelSize/narrowBandHalfWidth){}
+			live_voxels(live_volume->localVBA.GetVoxelBlocks()), live_index_data(live_volume->index.GetIndexData()),
+			warp_voxels(warp_field->localVBA.GetVoxelBlocks()), warp_index_data(warp_field->index.GetIndexData()),
+			canonical_voxels(canonical_volume->localVBA.GetVoxelBlocks()), canonical_index_data(canonical_volume->index.GetIndexData()),
+			live_cache(), canonical_cache(),
+			sdf_unity(voxelSize / narrowBandHalfWidth){}
 
 	// endregion =======================================================================================================
 
 	_DEVICE_WHEN_AVAILABLE_
-	void operator()(TVoxel& voxelLive, TVoxel& voxelCanonical, TWarp& warp, Vector3i voxelPosition) {
+	void operator()(TWarpVoxel& warp_voxel, TTSDFVoxel& canonical_voxel, TTSDFVoxel& live_voxel, Vector3i voxelPosition) {
 
-		if (!VoxelIsConsideredForTracking(voxelCanonical, voxelLive)) return;
-		bool computeDataAndLevelSetTerms = VoxelIsConsideredForDataTerm(voxelCanonical, voxelLive);
+		if (!VoxelIsConsideredForTracking(canonical_voxel, live_voxel)) return;
+		bool computeDataAndLevelSetTerms = VoxelIsConsideredForDataTerm(canonical_voxel, live_voxel);
 
-		Vector3f& framewiseWarp = warp.framewise_warp;
-		float liveSdf = TVoxel::valueToFloat(voxelLive.sdf);
-		float canonicalSdf = TVoxel::valueToFloat(voxelCanonical.sdf);
+		Vector3f& framewiseWarp = warp_voxel.framewise_warp;
+		float liveSdf = TTSDFVoxel::valueToFloat(live_voxel.sdf);
+		float canonicalSdf = TTSDFVoxel::valueToFloat(canonical_voxel.sdf);
 
 		// region =============================== DECLARATIONS & DEFAULTS FOR ALL TERMS ====================
 
@@ -81,7 +81,7 @@ public:
 
 			Vector3f liveSdfJacobian;
 			ComputeLiveJacobian_CentralDifferences(
-					liveSdfJacobian, voxelPosition, liveVoxels, liveIndexData, liveCache);
+					liveSdfJacobian, voxelPosition, live_voxels, live_index_data, live_cache);
 			if (switches.enable_data_term) {
 
 				// Compute data term error / energy
@@ -98,10 +98,10 @@ public:
 
 			if (switches.enable_level_set_term) {
 				Matrix3f liveSdfHessian;
-				ComputeSdfHessian(liveSdfHessian, voxelPosition, liveSdf, liveVoxels, liveIndexData, liveCache);
+				ComputeSdfHessian(liveSdfHessian, voxelPosition, liveSdf, live_voxels, live_index_data, live_cache);
 
 				float sdfJacobianNorm = ORUtils::length(liveSdfJacobian);
-				float sdfJacobianNormMinusUnity = sdfJacobianNorm - sdfUnity;
+				float sdfJacobianNormMinusUnity = sdfJacobianNorm - sdf_unity;
 				localLevelSetEnergyGradient = parameters.weight_level_set_term * sdfJacobianNormMinusUnity *
 				                              (liveSdfHessian * liveSdfJacobian) /
 				                              (sdfJacobianNorm + parameters.epsilon);
@@ -122,7 +122,7 @@ public:
 			//(-1,0,0) (0,-1,0) (0,0,-1)   (1, 0, 0) (0, 1, 0) (0, 0, 1)   (1, 1, 0) (0, 1, 1) (1, 0, 1)
 			findPoint2ndDerivativeNeighborhoodFramewiseWarp(
 					neighborFramewiseWarps/*x9*/, neighborKnown, neighborTruncated, neighborAllocated, voxelPosition,
-					warps, warpIndexData, warpCache, canonicalVoxels, canonicalIndexData, canonicalCache);
+					warp_voxels, warp_index_data, warp_cache, canonical_voxels, canonical_index_data, canonical_cache);
 
 			for (int iNeighbor = 0; iNeighbor < neighborhoodSize; iNeighbor++) {
 				if (!neighborAllocated[iNeighbor]) {
@@ -194,7 +194,7 @@ public:
 				localLevelSetEnergyGradient +
 				localSmoothingEnergyGradient;
 
-		warp.gradient0 = localEnergyGradient;
+		warp_voxel.gradient0 = localEnergyGradient;
 	}
 
 
@@ -205,20 +205,20 @@ public:
 
 private:
 
-	const float sdfUnity;
+	const float sdf_unity;
 
 	// *** data structure accessors
-	const TVoxel* liveVoxels;
-	const typename TIndex::IndexData* liveIndexData;
-	typename TIndex::IndexCache liveCache;
+	const TTSDFVoxel* live_voxels;
+	const typename TIndex::IndexData* live_index_data;
+	typename TIndex::IndexCache live_cache;
 
-	const TVoxel* canonicalVoxels;
-	const typename TIndex::IndexData* canonicalIndexData;
-	typename TIndex::IndexCache canonicalCache;
+	const TTSDFVoxel* canonical_voxels;
+	const typename TIndex::IndexData* canonical_index_data;
+	typename TIndex::IndexCache canonical_cache;
 
-	TWarp* warps;
-	const typename TIndex::IndexData* warpIndexData;
-	typename TIndex::IndexCache warpCache;
+	TWarpVoxel* warp_voxels;
+	const typename TIndex::IndexData* warp_index_data;
+	typename TIndex::IndexCache warp_cache;
 
 
 	const SlavchevaSurfaceTracker::Parameters parameters;

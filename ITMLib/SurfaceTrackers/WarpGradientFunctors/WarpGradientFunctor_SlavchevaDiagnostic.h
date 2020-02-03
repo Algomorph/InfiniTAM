@@ -73,17 +73,17 @@ struct SetGradientFunctor<TWarp, true> {
 };
 
 
-template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-struct WarpGradientFunctor<TVoxel, TWarp, TIndex, TMemoryDeviceType, TRACKER_SLAVCHEVA_DIAGNOSTIC> {
+template<typename TTSDFVoxel, typename TWarpVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+struct WarpGradientFunctor<TTSDFVoxel, TWarpVoxel, TIndex, TMemoryDeviceType, TRACKER_SLAVCHEVA_DIAGNOSTIC> {
 private:
 
 	_CPU_AND_GPU_CODE_
-	void SetUpFocusVoxelPrinting(bool& printVoxelResult, const Vector3i& voxelPosition,
-	                             const Vector3f& voxelWarp, const TVoxel& canonicalVoxel, const TVoxel& liveVoxel,
+	void SetUpFocusVoxelPrinting(bool& print_voxel_result, const Vector3i& voxelPosition,
+	                             const Vector3f& voxelWarp, const TTSDFVoxel& canonicalVoxel, const TTSDFVoxel& liveVoxel,
 	                             bool computeDataTerm) {
-		if (useFocusCoordinates && voxelPosition == focusCoordinates) {
+		if (use_focus_coordinates && voxelPosition == focus_coordinates) {
 			int x = 0, y = 0, z = 0, vmIndex = 0, locId = 0;
-			GetVoxelHashLocals(vmIndex, locId, x, y, z, liveIndexData, liveCache, voxelPosition);
+			GetVoxelHashLocals(vmIndex, locId, x, y, z, live_index_data, live_cache, voxelPosition);
 
 			printf("\n%s *** Printing gradient computation data for voxel at (%d, %d, %d) ***%s\n", c_bright_cyan,
 			       voxelPosition.x, voxelPosition.y, voxelPosition.z, c_reset);
@@ -97,7 +97,7 @@ private:
 			printf("Warping: %s%f, %f, %f%s\n", c_green, voxelWarp.x, voxelWarp.y, voxelWarp.z, c_reset);
 			printf("Warping length: %s%f%s\n", c_green, ORUtils::length(voxelWarp), c_reset);
 
-			printVoxelResult = true;
+			print_voxel_result = true;
 		}
 	}
 
@@ -108,39 +108,39 @@ public:
 
 	WarpGradientFunctor(SlavchevaSurfaceTracker::Parameters parameters,
 	                    SlavchevaSurfaceTracker::Switches switches,
-	                    VoxelVolume<TVoxel,TIndex>* liveVolume,
-	                    VoxelVolume<TVoxel,TIndex>* canonicalVolume,
-	                    VoxelVolume<TWarp,TIndex>* warpField,
-	                    float voxelSize, float narrowBandHalfWidth) :
+	                    VoxelVolume<TWarpVoxel,TIndex>* warp_field,
+	                    VoxelVolume<TTSDFVoxel,TIndex>* canonical_volume,
+	                    VoxelVolume<TTSDFVoxel,TIndex>* live_volume,
+	                    float voxel_size, float narrow_band_half_width) :
 			parameters(parameters), switches(switches),
-			liveVoxels(liveVolume->localVBA.GetVoxelBlocks()), liveIndexData(liveVolume->index.GetIndexData()),
-			warps(warpField->localVBA.GetVoxelBlocks()), warpIndexData(warpField->index.GetIndexData()),
-			canonicalVoxels(canonicalVolume->localVBA.GetVoxelBlocks()), canonicalIndexData(canonicalVolume->index.GetIndexData()),
-			liveCache(), canonicalCache(),
-			useFocusCoordinates(configuration::get().verbosity_level >= configuration::VERBOSITY_FOCUS_SPOTS),
-			focusCoordinates(configuration::get().telemetry_settings.focus_coordinates),
-			sdfUnity(voxelSize/narrowBandHalfWidth),
+			live_voxels(live_volume->localVBA.GetVoxelBlocks()), live_index_data(live_volume->index.GetIndexData()),
+			warp_voxels(warp_field->localVBA.GetVoxelBlocks()), warp_index_data(warp_field->index.GetIndexData()),
+			canonical_voxels(canonical_volume->localVBA.GetVoxelBlocks()), canonical_index_data(canonical_volume->index.GetIndexData()),
+			live_cache(), canonical_cache(),
+			use_focus_coordinates(configuration::get().verbosity_level >= configuration::VERBOSITY_FOCUS_SPOTS),
+			focus_coordinates(configuration::get().telemetry_settings.focus_coordinates),
+			sdf_unity(voxel_size / narrow_band_half_width),
 			verbosity_level(configuration::get().verbosity_level)
 			{}
 
 	// endregion =======================================================================================================
 
 	_DEVICE_WHEN_AVAILABLE_
-	void operator()(TVoxel& voxelLive, TVoxel& voxelCanonical, TWarp& warp, const Vector3i& voxelPosition) {
+	void operator()(TWarpVoxel& warp_voxel, TTSDFVoxel& canonical_voxel, TTSDFVoxel& live_voxel, const Vector3i& voxel_position) {
 
 
 		bool printVoxelResult = false;
-		Vector3f& framewiseWarp = warp.framewise_warp;
-		bool computeDataAndLevelSetTerms = VoxelIsConsideredForDataTerm(voxelCanonical, voxelLive);
-		this->SetUpFocusVoxelPrinting(printVoxelResult, voxelPosition, framewiseWarp, voxelCanonical, voxelLive, computeDataAndLevelSetTerms);
+		Vector3f& framewiseWarp = warp_voxel.framewise_warp;
+		bool computeDataAndLevelSetTerms = VoxelIsConsideredForDataTerm(canonical_voxel, live_voxel);
+		this->SetUpFocusVoxelPrinting(printVoxelResult, voxel_position, framewiseWarp, canonical_voxel, live_voxel, computeDataAndLevelSetTerms);
 		if (printVoxelResult) {
 			printf("%sLive 6-connected neighbor information:%s\n", c_blue, c_reset);
-			print6ConnectedNeighborInfo(voxelPosition, liveVoxels, liveIndexData, liveCache);
+			print6ConnectedNeighborInfo(voxel_position, live_voxels, live_index_data, live_cache);
 		}
-		if (!VoxelIsConsideredForTracking(voxelCanonical, voxelLive)) return;
+		if (!VoxelIsConsideredForTracking(canonical_voxel, live_voxel)) return;
 
-		float liveSdf = TVoxel::valueToFloat(voxelLive.sdf);
-		float canonicalSdf = TVoxel::valueToFloat(voxelCanonical.sdf);
+		float liveSdf = TTSDFVoxel::valueToFloat(live_voxel.sdf);
+		float canonicalSdf = TTSDFVoxel::valueToFloat(canonical_voxel.sdf);
 
 		// term gradient results are stored here before being added up
 		Vector3f localSmoothingEnergyGradient(0.0f), localDataEnergyGradient(0.0f), localLevelSetEnergyGradient(0.0f);
@@ -151,7 +151,7 @@ public:
 		if (computeDataAndLevelSetTerms) {
 			Vector3f liveSdfJacobian;
 			ComputeLiveJacobian_CentralDifferences(
-					liveSdfJacobian, voxelPosition, liveVoxels, liveIndexData, liveCache);
+					liveSdfJacobian, voxel_position, live_voxels, live_index_data, live_cache);
 			if (switches.enable_data_term) {
 
 				// Compute data term error / energy
@@ -184,10 +184,10 @@ public:
 
 			if (switches.enable_level_set_term) {
 				Matrix3f liveSdfHessian;
-				ComputeSdfHessian(liveSdfHessian, voxelPosition, liveSdf, liveVoxels, liveIndexData, liveCache);
+				ComputeSdfHessian(liveSdfHessian, voxel_position, liveSdf, live_voxels, live_index_data, live_cache);
 
 				float sdfJacobianNorm = ORUtils::length(liveSdfJacobian);
-				float sdfJacobianNormMinusUnity = sdfJacobianNorm - sdfUnity;
+				float sdfJacobianNormMinusUnity = sdfJacobianNorm - sdf_unity;
 				localLevelSetEnergyGradient = parameters.weight_level_set_term * sdfJacobianNormMinusUnity *
 				                              (liveSdfHessian * liveSdfJacobian) /
 				                              (sdfJacobianNorm + parameters.epsilon);
@@ -214,8 +214,8 @@ public:
 			//    0        1        2          3         4         5           6         7         8
 			//(-1,0,0) (0,-1,0) (0,0,-1)   (1, 0, 0) (0, 1, 0) (0, 0, 1)   (1, 1, 0) (0, 1, 1) (1, 0, 1)
 			findPoint2ndDerivativeNeighborhoodFramewiseWarp(
-					neighborFramewiseWarps/*x9*/, neighborKnown, neighborTruncated, neighborAllocated, voxelPosition,
-					warps, warpIndexData, warpCache, canonicalVoxels, canonicalIndexData, canonicalCache);
+					neighborFramewiseWarps/*x9*/, neighborKnown, neighborTruncated, neighborAllocated, voxel_position,
+					warp_voxels, warp_index_data, warp_cache, canonical_voxels, canonical_index_data, canonical_cache);
 
 			for (int iNeighbor = 0; iNeighbor < neighborhoodSize; iNeighbor++) {
 				if (!neighborKnown[iNeighbor]) {
@@ -302,14 +302,14 @@ public:
 		}
 		// endregion
 		// region =============================== COMPUTE ENERGY GRADIENT ==================================
-		SetGradientFunctor<TWarp, TWarp::hasDebugInformation>::SetGradient(
-				warp, localDataEnergyGradient, localLevelSetEnergyGradient, localSmoothingEnergyGradient);
+		SetGradientFunctor<TWarpVoxel, TWarpVoxel::hasDebugInformation>::SetGradient(
+				warp_voxel, localDataEnergyGradient, localLevelSetEnergyGradient, localSmoothingEnergyGradient);
 
 		// endregion
 		// region =============================== AGGREGATE VOXEL STATISTICS ===============================
 
 
-		float warpLength = ORUtils::length(warp.framewise_warp);
+		float warpLength = ORUtils::length(warp_voxel.framewise_warp);
 
 		ATOMIC_ADD(aggregates.cumulativeCanonicalSdf, canonicalSdf);
 		ATOMIC_ADD(aggregates.cumulativeLiveSdf, liveSdf);
@@ -320,9 +320,9 @@ public:
 		// region ======================== FINALIZE RESULT PRINTING / RECORDING ========================================
 
 		if (printVoxelResult) {
-			float energyGradientLength = ORUtils::length(warp.gradient0);
+			float energyGradientLength = ORUtils::length(warp_voxel.gradient0);
 			_DEBUG_printLocalEnergyGradients(localDataEnergyGradient, localLevelSetEnergyGradient,
-			                                 localSmoothingEnergyGradient, warp.gradient0, energyGradientLength);
+			                                 localSmoothingEnergyGradient, warp_voxel.gradient0, energyGradientLength);
 		}
 		// endregion ===================================================================================================
 	}
@@ -341,27 +341,27 @@ public:
 
 private:
 
-	const float sdfUnity;
+	const float sdf_unity;
 
 	// *** data structure accessors
-	const TVoxel* liveVoxels;
-	const typename TIndex::IndexData* liveIndexData;
-	typename TIndex::IndexCache liveCache;
+	const TTSDFVoxel* live_voxels;
+	const typename TIndex::IndexData* live_index_data;
+	typename TIndex::IndexCache live_cache;
 
-	const TVoxel* canonicalVoxels;
-	const typename TIndex::IndexData* canonicalIndexData;
-	typename TIndex::IndexCache canonicalCache;
+	const TTSDFVoxel* canonical_voxels;
+	const typename TIndex::IndexData* canonical_index_data;
+	typename TIndex::IndexCache canonical_cache;
 
-	TWarp* warps;
-	const typename TIndex::IndexData* warpIndexData;
-	typename TIndex::IndexCache warpCache;
+	TWarpVoxel* warp_voxels;
+	const typename TIndex::IndexData* warp_index_data;
+	typename TIndex::IndexCache warp_cache;
 
 	AdditionalGradientAggregates<TMemoryDeviceType> aggregates;
 	ComponentEnergies<TMemoryDeviceType> energies;
 
 	// *** debugging / analysis variables
-	bool useFocusCoordinates{};
-	Vector3i focusCoordinates;
+	bool use_focus_coordinates{};
+	Vector3i focus_coordinates;
 
 	const SlavchevaSurfaceTracker::Parameters parameters;
 	const SlavchevaSurfaceTracker::Switches switches;

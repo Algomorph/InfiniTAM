@@ -24,13 +24,13 @@ namespace {
 //CUDA kernels
 
 template<class TVoxel>
-__global__ void integrateIntoScene_device(TVoxel *localVBA, const ITMHashEntry *hashTable, int *visibleEntryIDs,
+__global__ void integrateIntoScene_device(TVoxel *localVBA, const HashEntry *hashTable, int *visibleEntryIDs,
                                           const Vector4u *rgb, Vector2i rgbImgSize, const float *depth, const float *confidence, Vector2i depthImgSize, Matrix4f M_d, Matrix4f M_rgb, Vector4f projParams_d,
                                           Vector4f projParams_rgb, float _voxelSize, float mu, int maxW) {
 	Vector3i globalPos;
 	int entryId = visibleEntryIDs[blockIdx.x];
 
-	const ITMHashEntry& currentHashEntry = hashTable[entryId];
+	const HashEntry& currentHashEntry = hashTable[entryId];
 
 	if (currentHashEntry.ptr < 0) return;
 

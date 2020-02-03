@@ -25,7 +25,7 @@
 #include "../Shared/SurfaceTrackerOptimizationParameters.h"
 #include "SlavchevaSufraceTracker.h"
 
-namespace  ITMLib{
+namespace ITMLib {
 /**
  * \brief Class responsible for tracking motion of rigid or dynamic surfaces within the scene
  * \tparam TVoxel TSDF voxel type
@@ -37,24 +37,18 @@ class SurfaceTrackerInterface {
 
 public:
 
-
-
-//TODO: reorder argument lists in both classes for consistency with reconstruction engine: warp field should come first,
-//  canonical (as the "target") should come last
-
-
 	virtual ~SurfaceTrackerInterface() = default;
 	virtual void
-	CalculateWarpGradient(VoxelVolume<TVoxel, TIndex>* canonicalScene,
-	                      VoxelVolume<TVoxel, TIndex>* liveScene,
-	                      VoxelVolume<TWarp, TIndex>* warpField) = 0;
+	CalculateWarpGradient(VoxelVolume<TWarp, TIndex>* warpField,
+	                      VoxelVolume<TVoxel, TIndex>* canonicalScene,
+	                      VoxelVolume<TVoxel, TIndex>* liveScene) = 0;
 	virtual void SmoothWarpGradient(
+			VoxelVolume<TWarp, TIndex>* warpField,
 			VoxelVolume<TVoxel, TIndex>* canonicalScene,
-			VoxelVolume<TVoxel, TIndex>* liveScene,
-			VoxelVolume<TWarp, TIndex>* warpField) = 0;
-	virtual float UpdateWarps(VoxelVolume<TVoxel, TIndex>* canonicalScene,
-	                          VoxelVolume<TVoxel, TIndex>* liveScene,
-	                          VoxelVolume<TWarp, TIndex>* warpField) = 0;
+			VoxelVolume<TVoxel, TIndex>* liveScene) = 0;
+	virtual float UpdateWarps(VoxelVolume<TWarp, TIndex>* warpField,
+	                          VoxelVolume<TVoxel, TIndex>* canonicalScene,
+	                          VoxelVolume<TVoxel, TIndex>* liveScene) = 0;
 	virtual void ClearOutFramewiseWarp(VoxelVolume<TWarp, TIndex>* warpField) = 0;
 	virtual void AddFramewiseWarpToWarp(
 			VoxelVolume<TWarp, TIndex>* warpField, bool clearFramewiseWarp) = 0;
@@ -62,7 +56,6 @@ public:
 
 
 };
-
 
 
 }//namespace ITMLib

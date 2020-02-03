@@ -47,7 +47,7 @@ private:
 
 
 		const int hashEntryCount = hashVolume->index.hashEntryCount;
-		ITMHashEntry* hashTable = hashVolume->index.GetIndexData();
+		HashEntry* hashTable = hashVolume->index.GetIndexData();
 
 		TArrayVoxel* arrayVoxels = arrayVolume->localVBA.GetVoxelBlocks();
 		THashVoxel* hashVoxels = hashVolume->localVBA.GetVoxelBlocks();
@@ -65,7 +65,7 @@ private:
 #endif
 		for (int hashCode = 0; hashCode < hashEntryCount; hashCode++) {
 			if (mismatchFound) continue;
-			ITMHashEntry& hashEntry = hashTable[hashCode];
+			HashEntry& hashEntry = hashTable[hashCode];
 			if (hashEntry.ptr < 0) {
 				continue;
 			}
@@ -271,7 +271,7 @@ private:
 #endif
 		for (int hash = 0; hash < totalHashEntryCount; hash++) {
 			if (foundMismatch) continue;
-			ITMHashEntry secondaryHashEntry = hashTable[hash];
+			HashEntry secondaryHashEntry = hashTable[hash];
 			if (secondaryHashEntry.ptr < 0) continue;
 			Vector3i voxelBlockMinPoint = secondaryHashEntry.pos.toInt() * VOXEL_BLOCK_SIZE;
 			Vector3i hashEntryMaxPoint = voxelBlockMinPoint + Vector3i(VOXEL_BLOCK_SIZE);

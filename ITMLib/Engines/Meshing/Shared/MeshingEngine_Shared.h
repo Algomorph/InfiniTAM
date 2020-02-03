@@ -154,7 +154,7 @@ static const _CPU_AND_GPU_CONSTANT_ int triangleTable[256][16] = { { -1, -1, -1,
 template<class TVoxel>
 _CPU_AND_GPU_CODE_ inline bool findPointNeighbors(THREADPTR(Vector3f)* p, THREADPTR(float)* sdf, Vector3i blockLocation,
                                                   const CONSTPTR(TVoxel)* localVBA,
-                                                  const CONSTPTR(ITMHashEntry)* hashTable) {
+                                                  const CONSTPTR(HashEntry)* hashTable) {
 	int vmIndex;
 	Vector3i localBlockLocation;
 
@@ -215,7 +215,7 @@ interpolateSdf(const THREADPTR(Vector3f)& point1, const THREADPTR(Vector3f)& poi
 template<class TVoxel>
 _CPU_AND_GPU_CODE_ inline int
 buildVertexList(THREADPTR(Vector3f)* vertexList, Vector3i hashBlockCornerVoxelPosition, Vector3i voxelPositionWithinBlock,
-                const CONSTPTR(TVoxel)* localVBA, const CONSTPTR(ITMHashEntry)* hashTable) {
+                const CONSTPTR(TVoxel)* localVBA, const CONSTPTR(HashEntry)* hashTable) {
 	// cube corner positions
 	Vector3f points[8];
 	// sdf values at corner positions

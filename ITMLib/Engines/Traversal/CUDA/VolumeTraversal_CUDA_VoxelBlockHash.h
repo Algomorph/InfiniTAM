@@ -37,7 +37,7 @@ private:
 	inline static void
 	VoxelTraversal_Generic(VoxelVolume<TVoxel, VoxelBlockHash>* scene, TFunctor& functor, TDeviceFunction&& deviceFunction) {
 		TVoxel* voxelArray = scene->localVBA.GetVoxelBlocks();
-		const ITMHashEntry* hashTable = scene->index.GetIndexData();
+		const HashEntry* hashTable = scene->index.GetIndexData();
 		int hashEntryCount = scene->index.hashEntryCount;
 
 		dim3 cudaBlockSize_BlockVoxelPerThread(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
@@ -62,7 +62,7 @@ public:
 	template<typename TStaticFunctor>
 	inline static void StaticVoxelTraversal(VoxelVolume<TVoxel, VoxelBlockHash>* scene) {
 		TVoxel* voxelArray = scene->localVBA.GetVoxelBlocks();
-		const ITMHashEntry* hashTable = scene->index.GetIndexData();
+		const HashEntry* hashTable = scene->index.GetIndexData();
 		int hashEntryCount = scene->index.hashEntryCount;
 
 		dim3 cudaBlockSize_BlockVoxelPerThread(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
@@ -79,7 +79,7 @@ public:
 	inline static void
 	VoxelTraversal(VoxelVolume<TVoxel, VoxelBlockHash>* scene, TFunctor& functor) {
 		VoxelTraversal_Generic(scene, functor, [](dim3 gridSize_HashPerBlock, dim3 cudaBlockSize_BlockVoxelPerThread,
-				TVoxel* voxelArray, const ITMHashEntry* hashTable, TFunctor* functor_device){
+		                                          TVoxel* voxelArray, const HashEntry* hashTable, TFunctor* functor_device){
 			voxelTraversal_device<TFunctor, TVoxel>
 					<< < gridSize_HashPerBlock, cudaBlockSize_BlockVoxelPerThread >> >
 			                                    (voxelArray, hashTable, functor_device);
@@ -89,7 +89,7 @@ public:
 	inline static void
 	VoxelPositionTraversal(VoxelVolume<TVoxel, VoxelBlockHash>* scene, TFunctor& functor) {
 		VoxelTraversal_Generic(scene, functor, [](dim3 gridSize_HashPerBlock, dim3 cudaBlockSize_BlockVoxelPerThread,
-		                                          TVoxel* voxelArray, const ITMHashEntry* hashTable, TFunctor* functor_device){
+		                                          TVoxel* voxelArray, const HashEntry* hashTable, TFunctor* functor_device){
 			voxelPositionTraversal_device<TFunctor, TVoxel>
 					<< < gridSize_HashPerBlock, cudaBlockSize_BlockVoxelPerThread >> >
 			                                    (voxelArray, hashTable, functor_device);
@@ -99,7 +99,7 @@ public:
 	inline static void
 	VoxelAndHashBlockPositionTraversal(VoxelVolume<TVoxel, VoxelBlockHash>* scene, TFunctor& functor) {
 		VoxelTraversal_Generic(scene, functor, [](dim3 gridSize_HashPerBlock, dim3 cudaBlockSize_BlockVoxelPerThread,
-		                                          TVoxel* voxelArray, const ITMHashEntry* hashTable, TFunctor* functor_device){
+		                                          TVoxel* voxelArray, const HashEntry* hashTable, TFunctor* functor_device){
 			voxelAndHashBlockPositionTraversal_device<TFunctor, TVoxel>
 					<< < gridSize_HashPerBlock, cudaBlockSize_BlockVoxelPerThread >> >
 			                                    (voxelArray, hashTable, functor_device);

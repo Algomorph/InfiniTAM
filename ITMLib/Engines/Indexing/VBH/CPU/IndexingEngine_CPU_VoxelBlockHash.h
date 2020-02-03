@@ -62,8 +62,8 @@ public:
 
 	void AllocateHashEntriesUsingLists_SetVisibility(VoxelVolume<TVoxel, VoxelBlockHash>* volume) override;
 
-	ITMHashEntry FindHashEntry(const VoxelBlockHash& index, const Vector3s& coordinates) override;
-	ITMHashEntry FindHashEntry(const VoxelBlockHash& index, const Vector3s& coordinates, int& hashCode);
+	HashEntry FindHashEntry(const VoxelBlockHash& index, const Vector3s& coordinates) override;
+	HashEntry FindHashEntry(const VoxelBlockHash& index, const Vector3s& coordinates, int& hashCode);
 
 
 	bool AllocateHashBlockAt(VoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3s at, int& hashCode) override;

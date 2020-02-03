@@ -28,13 +28,13 @@ template<typename TVoxel>
 struct OffsetWarpsFunctor<TVoxel, VoxelBlockHash, true> {
 	static void OffsetWarps(VoxelVolume <TVoxel, VoxelBlockHash>* scene, Vector3f offset) {
 		TVoxel* voxels = scene->localVBA.GetVoxelBlocks();
-		const ITMHashEntry* hashTable = scene->index.GetEntries();
+		const HashEntry* hashTable = scene->index.GetEntries();
 		int noTotalEntries = scene->index.hashEntryCount;
 #ifdef WITH_OPENMP
 #pragma omp parallel for
 #endif
 		for (int entryId = 0; entryId < noTotalEntries; entryId++) {
-			const ITMHashEntry& currentHashEntry = hashTable[entryId];
+			const HashEntry& currentHashEntry = hashTable[entryId];
 			if (currentHashEntry.ptr < 0) continue;
 			TVoxel* localVoxelBlock = &(voxels[currentHashEntry.ptr * (VOXEL_BLOCK_SIZE3)]);
 			for (int z = 0; z < VOXEL_BLOCK_SIZE; z++) {

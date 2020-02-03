@@ -62,17 +62,17 @@ public:
 	* \tparam TIndex type of index used by the voxel grid
 	* \param view view with the new (incoming) depth/color data
 	* \param trackingState best estimate of the camera tracking from previous to new frame so far
-	* \param canonicalVolume - canonical/reference 3D scene where all data is fused/aggregated
+	* \param canonical_volume - canonical/reference 3D scene where all data is fused/aggregated
 	* \param liveScene - live/target 3D scene generated from the incoming single frame of the video
-	* \param renderState
+	* \param canonical_render_state
 	*/
 	void ProcessFrame(const ITMView* view, const ITMTrackingState* trackingState,
-	                  VoxelVolume <TVoxel, TIndex>* canonicalVolume, VoxelVolume <TVoxel, TIndex>** liveScenePair,
-	                  VoxelVolume <TWarp, TIndex>* warpField, RenderState* renderState);
+	                  VoxelVolume <TVoxel, TIndex>* canonical_volume, VoxelVolume <TVoxel, TIndex>** live_volume_pair,
+	                  VoxelVolume <TWarp, TIndex>* warp_field, RenderState* canonical_render_state);
 
 	void ProcessInitialFrame(const ITMView* view, const ITMTrackingState* trackingState,
-	                         VoxelVolume<TVoxel, TIndex>* canonicalScene, VoxelVolume<TVoxel, TIndex>* liveScene,
-	                         RenderState* renderState);
+	                         VoxelVolume<TVoxel, TIndex>* canonical_volume, VoxelVolume<TVoxel, TIndex>* live_volume,
+	                         RenderState* canonical_render_state);
 
 	/// Update the visible list (this can be called to update the visible list when fusion is turned off)
 	void UpdateVisibleList(const ITMView* view, const ITMTrackingState* trackingState,
@@ -84,16 +84,16 @@ private:
 			VoxelVolume <TVoxel, TIndex>* canonicalScene, RenderState* renderState);
 
 	VoxelVolume<TVoxel, TIndex>* TrackFrameMotion(
-			VoxelVolume<TVoxel, TIndex>* canonicalScene,
-			VoxelVolume<TVoxel, TIndex>** liveScenePair,
-			VoxelVolume<TWarp, TIndex>* warpField);
+			VoxelVolume<TVoxel, TIndex>* canonical_volume,
+			VoxelVolume<TVoxel, TIndex>** live_volume_pair,
+			VoxelVolume<TWarp, TIndex>* warp_field);
 
 	void PerformSingleOptimizationStep(
-			VoxelVolume<TVoxel, TIndex>* canonicalScene,
-			VoxelVolume<TVoxel, TIndex>* initialLiveScene,
-			VoxelVolume<TVoxel, TIndex>* finalLiveScene,
-			VoxelVolume<TWarp, TIndex>* warpField,
-			float& maxVectorUpdate,
+			VoxelVolume<TVoxel, TIndex>* canonical_volume,
+			VoxelVolume<TVoxel, TIndex>* source_live_volume,
+			VoxelVolume<TVoxel, TIndex>* target_live_volume,
+			VoxelVolume<TWarp, TIndex>* warp_field,
+			float& max_update_vector_length,
 			int iteration);
 
 	void LogSettings();

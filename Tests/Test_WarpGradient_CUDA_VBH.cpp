@@ -55,7 +55,7 @@ BOOST_FIXTURE_TEST_CASE(testDataTerm_CUDA_VBH, DataFixture) {
 
 
 	TimeIt([&]() {
-		motionTracker_VBH_CUDA->CalculateWarpGradient(canonical_volume, live_volume, &warp_field_CUDA1);
+		motionTracker_VBH_CUDA->CalculateWarpGradient(&warp_field_CUDA1, canonical_volume, live_volume);
 	}, "Calculate Warping Gradient - VBH CUDA data term");
 
 	BOOST_REQUIRE_EQUAL(SceneStatCalc_CUDA_VBH_Warp::Instance().ComputeAllocatedHashBlockCount(&warp_field_CUDA1), 589);
@@ -78,7 +78,7 @@ BOOST_FIXTURE_TEST_CASE(testUpdateWarps_CUDA_VBH, DataFixture) {
 
 	BOOST_REQUIRE_EQUAL(SceneStatCalc_CUDA_VBH_Warp::Instance().ComputeAllocatedHashBlockCount(&warp_field_copy), 589);
 
-	float maxWarp = motionTracker_VBH_CUDA->UpdateWarps(canonical_volume, live_volume, &warp_field_copy);
+	float maxWarp = motionTracker_VBH_CUDA->UpdateWarps(&warp_field_copy, canonical_volume, live_volume);
 	//warp_field_copy.SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_VBH/warp_iter0");
 	BOOST_REQUIRE_CLOSE(maxWarp, 0.18186526f, 1e-7f);
 
@@ -94,7 +94,7 @@ BOOST_FIXTURE_TEST_CASE(testSmoothWarpGradient_CUDA_VBH, DataFixture) {
 
 
 	TimeIt([&]() {
-		motionTracker_VBH_CUDA->SmoothWarpGradient(canonical_volume, live_volume, &warp_field_CUDA1);
+		motionTracker_VBH_CUDA->SmoothWarpGradient(&warp_field_CUDA1, canonical_volume, live_volume);
 	}, "Smooth Warping Gradient - VBH CUDA");
 //	warp_field_CUDA1.SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_VBH/warp_field_0_smoothed_");
 
@@ -113,7 +113,7 @@ BOOST_FIXTURE_TEST_CASE(testTikhonovTerm_CUDA_VBH, DataFixture) {
 	//settings->SetFocusCoordinates(testPosition);
 
 	TimeIt([&]() {
-		motionTracker_VBH_CUDA->CalculateWarpGradient(canonical_volume, live_volume, &warp_field_CUDA1);
+		motionTracker_VBH_CUDA->CalculateWarpGradient(&warp_field_CUDA1, canonical_volume, live_volume);
 	}, "Calculate Warping Gradient - VBH CUDA tikhonov term");
 	BOOST_REQUIRE_EQUAL(SceneStatCalc_CUDA_VBH_Warp::Instance().ComputeAllocatedHashBlockCount(&warp_field_CUDA1), 589);
 	//warp_field_CUDA1.SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_VBH/warp_field_1_tikhonov_");
@@ -141,7 +141,7 @@ BOOST_FIXTURE_TEST_CASE(testDataAndTikhonovTerm_CUDA_VBH, DataFixture) {
 	//settings->SetFocusCoordinates(testPosition);
 
 	TimeIt([&]() {
-		motionTracker_VBH_CUDA->CalculateWarpGradient(canonical_volume, live_volume, &warp_field_CUDA1);
+		motionTracker_VBH_CUDA->CalculateWarpGradient(&warp_field_CUDA1, canonical_volume, live_volume);
 	}, "Calculate Warping Gradient - VBH CUDA data term + tikhonov term");
 	BOOST_REQUIRE_EQUAL(SceneStatCalc_CUDA_VBH_Warp::Instance().ComputeAllocatedHashBlockCount(&warp_field_CUDA1), 589);
 	//warp_field_CUDA1.SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_VBH/gradient0_tikhonov_");
@@ -165,7 +165,7 @@ BOOST_FIXTURE_TEST_CASE(testDataAndKillingTerm_CUDA_VBH, DataFixture) {
 
 
 	TimeIt([&]() {
-		motionTracker_VBH_CUDA->CalculateWarpGradient(canonical_volume, live_volume, &warp_field_CUDA1);
+		motionTracker_VBH_CUDA->CalculateWarpGradient(&warp_field_CUDA1, canonical_volume, live_volume);
 	}, "Calculate Warping Gradient - VBH CUDA data term + killing term");
 	//warp_field_CUDA1.SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_VBH/gradient0_killing_");
 
@@ -182,7 +182,7 @@ BOOST_FIXTURE_TEST_CASE(testDataAndLevelSetTerm_CUDA_VBH, DataFixture) {
 			);
 
 	TimeIt([&]() {
-		motionTracker_VBH_CUDA->CalculateWarpGradient(canonical_volume, live_volume, &warp_field_CUDA1);
+		motionTracker_VBH_CUDA->CalculateWarpGradient(&warp_field_CUDA1, canonical_volume, live_volume);
 	}, "Calculate Warping Gradient - VBH CUDA data term + level set term");
 	//warp_field_CUDA1.SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_VBH/gradient0_level_set_");
 

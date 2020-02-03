@@ -174,26 +174,26 @@ void GenerateTestData() {
 
 	SurfaceTracker<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, TRACKER_SLAVCHEVA_DIAGNOSTIC> dataOnlyMotionTracker(
 			data_only_switches);
-	dataOnlyMotionTracker.CalculateWarpGradient(canonical_volume, live_volume, &warp_field);
+	dataOnlyMotionTracker.CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
 	warp_field.SaveToDirectory(output_directory + data_only_filename);
 
 	SurfaceTracker<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, TRACKER_SLAVCHEVA_DIAGNOSTIC> dataSmoothedMotionTracker(
 			data_smoothed_switches);
-	dataSmoothedMotionTracker.SmoothWarpGradient(canonical_volume, live_volume, &warp_field);
+	dataSmoothedMotionTracker.SmoothWarpGradient(&warp_field, canonical_volume, live_volume);
 	warp_field.SaveToDirectory(output_directory + data_smoothed_filename);
 
 	warp_field.Reset();
 	SurfaceTracker<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, TRACKER_SLAVCHEVA_DIAGNOSTIC> completeMotionTracker(
 			warp_complete_switches);
-	completeMotionTracker.CalculateWarpGradient(canonical_volume, live_volume, &warp_field);
-	completeMotionTracker.SmoothWarpGradient(canonical_volume, live_volume, &warp_field);
-	completeMotionTracker.UpdateWarps(canonical_volume, live_volume, &warp_field);
+	completeMotionTracker.CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
+	completeMotionTracker.SmoothWarpGradient(&warp_field, canonical_volume, live_volume);
+	completeMotionTracker.UpdateWarps(&warp_field, canonical_volume, live_volume);
 	warp_field.SaveToDirectory(output_directory + warp_complete_filename);
 
 	warp_field.Reset();
 	warp_field.LoadFromDirectory(output_directory + data_only_filename);
 
-	dataOnlyMotionTracker.UpdateWarps(canonical_volume, live_volume, &warp_field);
+	dataOnlyMotionTracker.UpdateWarps(&warp_field, canonical_volume, live_volume);
 	warp_field.SaveToDirectory(output_directory + framewise_warps_filename);
 
 
@@ -203,7 +203,7 @@ void GenerateTestData() {
 		std::string filename = std::get<0>(pair);
 		SurfaceTracker<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, TRACKER_SLAVCHEVA_DIAGNOSTIC> tracker(
 				std::get<1>(pair));
-		tracker.CalculateWarpGradient(canonical_volume, live_volume, &warp_field);
+		tracker.CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
 		warp_field.SaveToDirectory(output_directory + filename);
 	}
 

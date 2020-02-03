@@ -33,8 +33,8 @@ private:
 			TFunctor& functor, TDeviceTraversalFunction&& deviceTraversalFunction) {
 		TVoxelPrimary* primaryVoxels = primaryScene->localVBA.GetVoxelBlocks();
 		TVoxelSecondary* secondaryVoxels = secondaryScene->localVBA.GetVoxelBlocks();
-		const ITMHashEntry* primaryHashTable = primaryScene->index.GetIndexData();
-		const ITMHashEntry* secondaryHashTable = secondaryScene->index.GetIndexData();
+		const HashEntry* primaryHashTable = primaryScene->index.GetIndexData();
+		const HashEntry* secondaryHashTable = secondaryScene->index.GetIndexData();
 		int hashEntryCount = primaryScene->index.hashEntryCount;
 
 		// transfer functor from RAM to VRAM
@@ -79,8 +79,8 @@ private:
 		// these will be needed for various matching & traversal operations
 		TVoxelPrimary* primaryVoxels = primaryScene->localVBA.GetVoxelBlocks();
 		TVoxelSecondary* secondaryVoxels = secondaryScene->localVBA.GetVoxelBlocks();
-		const ITMHashEntry* primaryHashTable = primaryScene->index.GetIndexData();
-		const ITMHashEntry* secondaryHashTable = secondaryScene->index.GetIndexData();
+		const HashEntry* primaryHashTable = primaryScene->index.GetIndexData();
+		const HashEntry* secondaryHashTable = secondaryScene->index.GetIndexData();
 
 		dim3 cudaBlockSize_HashPerThread(256, 1);
 		dim3 gridSize_MultipleHashBlocks(static_cast<int>(ceil(static_cast<float>(hashEntryCount) /
@@ -154,7 +154,7 @@ public:
 				primaryScene, secondaryScene, functor,
 				[&](const dim3& gridSize, const dim3& cudaBlockSize,
 				    TVoxelPrimary* primaryVoxels, TVoxelSecondary* secondaryVoxels,
-				    const ITMHashEntry* primaryHashTable_device, const ITMHashEntry* secondaryHashTable_device,
+				    const HashEntry* primaryHashTable_device, const HashEntry* secondaryHashTable_device,
 				    const HashPair* matchedHashes_device, const HashMatchInfo* matchInfo_device, TBooleanFunctor* functor_device,
 				    bool* falseEncountered) {
 					checkIfMatchingHashBlockVoxelsYieldTrue<TBooleanFunctor, TVoxelPrimary, TVoxelSecondary>
@@ -177,7 +177,7 @@ public:
 				primaryScene, secondaryScene, functor,
 				[&](const dim3& gridSize, const dim3& cudaBlockSize,
 				    TVoxelPrimary* primaryVoxels, TVoxelSecondary* secondaryVoxels,
-				    const ITMHashEntry* primaryHashTable_device, const ITMHashEntry* secondaryHashTable_device,
+				    const HashEntry* primaryHashTable_device, const HashEntry* secondaryHashTable_device,
 				    const HashPair* matchedHashes_device, const HashMatchInfo* matchInfo_device, TBooleanFunctor* functor_device,
 				    bool* falseEncountered) {
 					checkIfMatchingHashBlockVoxelsYieldTrue_Position<TBooleanFunctor, TVoxelPrimary, TVoxelSecondary>
@@ -197,8 +197,8 @@ public:
 			TFunctor& functor) {
 		DualVoxelTraversal_Generic(primaryScene,secondaryScene,functor, [](
 				dim3 gridSize_HashPerBlock, dim3 cudaBlockSize_BlockVoxelPerThread,
-				TVoxelPrimary* primaryVoxels, TVoxelSecondary* secondaryVoxels, const ITMHashEntry* primaryHashTable,
-				const ITMHashEntry* secondaryHashTable, TFunctor* functor_device){
+				TVoxelPrimary* primaryVoxels, TVoxelSecondary* secondaryVoxels, const HashEntry* primaryHashTable,
+				const HashEntry* secondaryHashTable, TFunctor* functor_device){
 			dualVoxelTraversal_device<TFunctor, TVoxelPrimary, TVoxelSecondary>
 			<< < gridSize_HashPerBlock, cudaBlockSize_BlockVoxelPerThread >> >
 			(primaryVoxels, secondaryVoxels, primaryHashTable,
@@ -214,8 +214,8 @@ public:
 			TFunctor& functor) {
 		DualVoxelTraversal_Generic(primaryScene,secondaryScene,functor, [](
 				dim3 gridSize_HashPerBlock, dim3 cudaBlockSize_BlockVoxelPerThread,
-				TVoxelPrimary* primaryVoxels, TVoxelSecondary* secondaryVoxels, const ITMHashEntry* primaryHashTable,
-				const ITMHashEntry* secondaryHashTable, TFunctor* functor_device){
+				TVoxelPrimary* primaryVoxels, TVoxelSecondary* secondaryVoxels, const HashEntry* primaryHashTable,
+				const HashEntry* secondaryHashTable, TFunctor* functor_device){
 			dualVoxelPositionTraversal_device<TFunctor, TVoxelPrimary, TVoxelSecondary>
 			<< < gridSize_HashPerBlock, cudaBlockSize_BlockVoxelPerThread >> >
 			(primaryVoxels, secondaryVoxels, primaryHashTable,

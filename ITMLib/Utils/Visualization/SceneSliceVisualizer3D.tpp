@@ -223,7 +223,7 @@ public:
 		voxelCount++;
 	}
 
-	void processHashEntry(const ITMHashEntry& hashEntry) {
+	void processHashEntry(const HashEntry& hashEntry) {
 		Vector3i currentBlockPositionVoxels = hashEntry.pos.toInt() * VOXEL_BLOCK_SIZE;
 		const double centerOffset = -0.5;
 		//draw hash block

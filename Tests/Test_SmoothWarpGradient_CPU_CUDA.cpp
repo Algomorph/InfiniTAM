@@ -65,8 +65,8 @@ BOOST_FIXTURE_TEST_CASE(testSmoothWarpGradient_PVA, Frame16And17Fixture) {
 			SlavchevaSurfaceTracker::Switches(false, false, false, false, true)
 	);
 
-	motionTracker_PVA_CPU->SmoothWarpGradient(canonical_volume_CPU, live_volume_CPU, warp_field_CPU);
-	motionTracker_PVA_CUDA->SmoothWarpGradient(canonical_volume_CUDA, live_volume_CUDA, warp_field_CUDA);
+	motionTracker_PVA_CPU->SmoothWarpGradient(warp_field_CPU, canonical_volume_CPU, live_volume_CPU);
+	motionTracker_PVA_CUDA->SmoothWarpGradient(warp_field_CUDA, canonical_volume_CUDA, live_volume_CUDA);
 
 	VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field_CUDA_copy(*warp_field_CUDA, MEMORYDEVICE_CPU);
 

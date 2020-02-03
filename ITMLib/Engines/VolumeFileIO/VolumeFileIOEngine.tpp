@@ -51,7 +51,7 @@ void VolumeFileIOEngine<TVoxel, VoxelBlockHash>::SaveToDirectoryCompact(
 	}
 
 	const TVoxel* voxels = scene->localVBA.GetVoxelBlocks();
-	const ITMHashEntry* hashTable = scene->index.GetEntries();
+	const HashEntry* hashTable = scene->index.GetEntries();
 	int noTotalEntries = scene->index.hashEntryCount;
 
 	int lastExcessListId = scene->index.GetLastFreeExcessListId();
@@ -66,7 +66,7 @@ void VolumeFileIOEngine<TVoxel, VoxelBlockHash>::SaveToDirectoryCompact(
 #pragma omp parallel for reduction(+:allocatedHashEntryCount)
 #endif
 	for (int entryId = 0; entryId < noTotalEntries; entryId++) {
-		const ITMHashEntry& currentHashEntry = hashTable[entryId];
+		const HashEntry& currentHashEntry = hashTable[entryId];
 		//skip unfilled hash
 		if (currentHashEntry.ptr < 0) continue;
 		allocatedHashEntryCount++;
@@ -74,11 +74,11 @@ void VolumeFileIOEngine<TVoxel, VoxelBlockHash>::SaveToDirectoryCompact(
 
 	outFilter.write(reinterpret_cast<const char* >(&allocatedHashEntryCount), sizeof(int));
 	for (int entryId = 0; entryId < noTotalEntries; entryId++) {
-		const ITMHashEntry& currentHashEntry = hashTable[entryId];
+		const HashEntry& currentHashEntry = hashTable[entryId];
 		//skip unfilled hash
 		if (currentHashEntry.ptr < 0) continue;
 		outFilter.write(reinterpret_cast<const char* >(&entryId), sizeof(int));
-		outFilter.write(reinterpret_cast<const char* >(&currentHashEntry), sizeof(ITMHashEntry));
+		outFilter.write(reinterpret_cast<const char* >(&currentHashEntry), sizeof(HashEntry));
 		const TVoxel* localVoxelBlock = &(voxels[currentHashEntry.ptr * (VOXEL_BLOCK_SIZE3)]);
 		outFilter.write(reinterpret_cast<const char* >(localVoxelBlock), sizeof(TVoxel) * VOXEL_BLOCK_SIZE3);
 	}
@@ -111,7 +111,7 @@ VolumeFileIOEngine<TVoxel, VoxelBlockHash>::LoadFromDirectoryCompact(
 	}
 
 	TVoxel* voxelBlocks = scene->localVBA.GetVoxelBlocks();
-	ITMHashEntry* hashTable = scene->index.GetEntries();
+	HashEntry* hashTable = scene->index.GetEntries();
 	int lastExcessListId;
 	int lastOrderedListId;
 	int visibleHashBlockCount;
@@ -130,8 +130,8 @@ VolumeFileIOEngine<TVoxel, VoxelBlockHash>::LoadFromDirectoryCompact(
 	for (int iEntry = 0; iEntry < allocatedHashEntryCount; iEntry++) {
 		int entryId;
 		inFilter.read(reinterpret_cast<char* >(&entryId), sizeof(int));
-		ITMHashEntry& currentHashEntry = hashTable[entryId];
-		inFilter.read(reinterpret_cast<char* >(&currentHashEntry), sizeof(ITMHashEntry));
+		HashEntry& currentHashEntry = hashTable[entryId];
+		inFilter.read(reinterpret_cast<char* >(&currentHashEntry), sizeof(HashEntry));
 		TVoxel* localVoxelBlock = &(voxelBlocks[currentHashEntry.ptr * (VOXEL_BLOCK_SIZE3)]);
 		inFilter.read(reinterpret_cast<char* >(localVoxelBlock), sizeof(TVoxel) * VOXEL_BLOCK_SIZE3);
 	}

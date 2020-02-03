@@ -28,11 +28,11 @@ namespace {
 
 __global__ void findBlocksNotSpannedByArray(
 		const ITMLib::PlainVoxelArray::GridAlignedBox* arrayInfo,
-		const ITMHashEntry* hashTable, int hashEntryCount,
+		const HashEntry* hashTable, int hashEntryCount,
 		int* hashCodesNotSpanned, int* countBlocksNotSpanned) {
 	int hashCode = static_cast<int>(blockIdx.x * blockDim.x + threadIdx.x);
 	if (hashCode > hashEntryCount) return;
-	const ITMHashEntry& hashEntry = hashTable[hashCode];
+	const HashEntry& hashEntry = hashTable[hashCode];
 	if (hashEntry.ptr < 0)
 		return;
 	Vector3i blockMinVoxels = hashEntry.pos.toInt() * VOXEL_BLOCK_SIZE;
@@ -51,7 +51,7 @@ __global__ void findBlocksNotSpannedByArray(
 
 template<typename TVoxel>
 __global__ void
-checkIfHashVoxelBlocksHaveAlteredVoxelsWithSpecificFlags(const TVoxel* voxels, const ITMHashEntry* hashTable,
+checkIfHashVoxelBlocksHaveAlteredVoxelsWithSpecificFlags(const TVoxel* voxels, const HashEntry* hashTable,
                                                          int* hashesToCheck, int countHashesToCheck,
                                                          bool* alteredBlockEncountered,
                                                          ITMLib::VoxelFlags flags) {
@@ -59,7 +59,7 @@ checkIfHashVoxelBlocksHaveAlteredVoxelsWithSpecificFlags(const TVoxel* voxels, c
 	int hashToCheckIdx = static_cast<int>(blockIdx.x);
 	if (hashToCheckIdx > countHashesToCheck) return;
 	int hash = hashesToCheck[hashToCheckIdx];
-	const ITMHashEntry& hashEntry = hashTable[hash];
+	const HashEntry& hashEntry = hashTable[hash];
 	int x = threadIdx.x, y = threadIdx.y, z = threadIdx.z;
 	int locId = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
 	const TVoxel& voxel = voxels[hashEntry.ptr * VOXEL_BLOCK_SIZE3 + locId];
@@ -70,13 +70,13 @@ checkIfHashVoxelBlocksHaveAlteredVoxelsWithSpecificFlags(const TVoxel* voxels, c
 
 template<typename TVoxel>
 __global__ void
-checkIfHashVoxelBlocksAreAltered(const TVoxel* voxels, const ITMHashEntry* hashTable, int* hashesToCheck,
+checkIfHashVoxelBlocksAreAltered(const TVoxel* voxels, const HashEntry* hashTable, int* hashesToCheck,
                                  int countHashesToCheck, bool* alteredBlockEncountered) {
 	if (*alteredBlockEncountered) return;
 	int hashToCheckIdx = static_cast<int>(blockIdx.x);
 	if (hashToCheckIdx > countHashesToCheck) return;
 	int hash = hashesToCheck[hashToCheckIdx];
-	const ITMHashEntry& hashEntry = hashTable[hash];
+	const HashEntry& hashEntry = hashTable[hash];
 	int x = threadIdx.x, y = threadIdx.y, z = threadIdx.z;
 	int locId = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
 	if (isAltered(voxels[hashEntry.ptr * VOXEL_BLOCK_SIZE3 + locId])) {
@@ -89,7 +89,7 @@ template<typename TBooleanFunctor, typename TVoxelArray, typename TVoxelHash>
 __global__ void checkIfArrayContentIsUnalteredOrYieldsTrue(
 		TVoxelArray* arrayVoxels,
 		const ITMLib::PlainVoxelArray::GridAlignedBox* arrayInfo,
-		TVoxelHash* hashVoxels, const ITMHashEntry* hashTable,
+		TVoxelHash* hashVoxels, const HashEntry* hashTable,
 		const Vector3i minArrayCoord,
 		const Vector3i maxArrayCoord, const Vector3s minBlockPos,
 		TBooleanFunctor* functor, bool* falseOrAlteredEncountered) {
@@ -142,7 +142,7 @@ template<typename TBooleanFunctor, typename TVoxelArray, typename TVoxelHash>
 __global__ void checkIfArrayContentIsUnalteredOrYieldsTrue_Position_Verbose(
 		TVoxelArray* arrayVoxels,
 		const ITMLib::PlainVoxelArray::GridAlignedBox* arrayInfo,
-		TVoxelHash* hashVoxels, const ITMHashEntry* hashTable,
+		TVoxelHash* hashVoxels, const HashEntry* hashTable,
 		const Vector3i minArrayCoord,
 		const Vector3i maxArrayCoord, const Vector3s minBlockPos,
 		TBooleanFunctor* functor, bool* falseOrAlteredEncountered) {
@@ -199,7 +199,7 @@ template<typename TBooleanFunctor, typename TVoxelArray, typename TVoxelHash>
 __global__ void checkIfArrayContentIsUnalteredOrYieldsTrue_SemanticFlags(
 		TVoxelArray* arrayVoxels,
 		const ITMLib::PlainVoxelArray::GridAlignedBox* arrayInfo,
-		TVoxelHash* hashVoxels, const ITMHashEntry* hashTable,
+		TVoxelHash* hashVoxels, const HashEntry* hashTable,
 		const Vector3i minArrayCoord,
 		const Vector3i maxArrayCoord, const Vector3s minBlockPos,
 		TBooleanFunctor* functor, ITMLib::VoxelFlags semanticFlags,
@@ -259,7 +259,7 @@ template<typename TBooleanFunctor, typename TVoxelArray, typename TVoxelHash>
 __global__ void checkIfArrayContentIsUnalteredOrYieldsTrue_SemanticFlags_Position_Verbose(
 		TVoxelArray* arrayVoxels,
 		const ITMLib::PlainVoxelArray::GridAlignedBox* arrayInfo,
-		TVoxelHash* hashVoxels, const ITMHashEntry* hashTable,
+		TVoxelHash* hashVoxels, const HashEntry* hashTable,
 		const Vector3i minArrayCoord,
 		const Vector3i maxArrayCoord, const Vector3s minBlockPos,
 		TBooleanFunctor* functor, ITMLib::VoxelFlags semanticFlags,
@@ -320,13 +320,13 @@ __global__ void checkIfArrayContentIsUnalteredOrYieldsTrue_SemanticFlags_Positio
 
 template<typename TBooleanFunctor, typename TVoxelArray, typename TVoxelHash>
 __global__ void checkIfAllocatedHashBlocksYieldTrue(
-		TVoxelArray* arrayVoxels, TVoxelHash* hashVoxels, const ITMHashEntry* hashTable,
+		TVoxelArray* arrayVoxels, TVoxelHash* hashVoxels, const HashEntry* hashTable,
 		int hashEntryCount, Vector6i arrayBounds, Vector3i arraySize,
 		TBooleanFunctor* functor, bool* falseEncountered) {
 
 	if (*falseEncountered || blockIdx.x > hashEntryCount || hashTable[blockIdx.x].ptr < 0) return;
 
-	const ITMHashEntry& hashEntry = hashTable[blockIdx.x];
+	const HashEntry& hashEntry = hashTable[blockIdx.x];
 
 	//local (block) coords;
 	int x = threadIdx.x, y = threadIdx.y, z = threadIdx.z;
@@ -357,13 +357,13 @@ __global__ void checkIfAllocatedHashBlocksYieldTrue(
 
 template<typename TBooleanFunctor, typename TVoxelArray, typename TVoxelHash>
 __global__ void checkIfAllocatedHashBlocksYieldTrue_Position(
-		TVoxelArray* arrayVoxels, TVoxelHash* hashVoxels, const ITMHashEntry* hashTable,
+		TVoxelArray* arrayVoxels, TVoxelHash* hashVoxels, const HashEntry* hashTable,
 		int hashEntryCount, Vector6i arrayBounds, Vector3i arraySize,
 		TBooleanFunctor* functor, bool* falseEncountered) {
 
 	if (*falseEncountered || blockIdx.x > hashEntryCount || hashTable[blockIdx.x].ptr < 0) return;
 
-	const ITMHashEntry& hashEntry = hashTable[blockIdx.x];
+	const HashEntry& hashEntry = hashTable[blockIdx.x];
 
 	//local (block) coords;
 	int x = threadIdx.x, y = threadIdx.y, z = threadIdx.z;

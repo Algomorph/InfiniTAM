@@ -22,8 +22,8 @@
 namespace ITMLib {
 
 
-ITMHashEntry VoxelBlockHash::GetHashEntryAt(const Vector3s& pos, int& hashCode) const {
-	const ITMHashEntry* entries = this->GetEntries();
+HashEntry VoxelBlockHash::GetHashEntryAt(const Vector3s& pos, int& hashCode) const {
+	const HashEntry* entries = this->GetEntries();
 	switch (memoryType) {
 		case MEMORYDEVICE_CPU:
 			return IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance()
@@ -35,10 +35,10 @@ ITMHashEntry VoxelBlockHash::GetHashEntryAt(const Vector3s& pos, int& hashCode) 
 #endif
 		default:
 			DIEWITHEXCEPTION_REPORTLOCATION("Unsupported device type.");
-			return ITMHashEntry();
+			return HashEntry();
 	}
 }
-ITMHashEntry VoxelBlockHash::GetHashEntryAt(const Vector3s& pos) const {
+HashEntry VoxelBlockHash::GetHashEntryAt(const Vector3s& pos) const {
 	int hashCode = 0;
 	return GetHashEntryAt(pos, hashCode);
 }

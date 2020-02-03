@@ -49,7 +49,7 @@ void VisualizationEngine_CUDA<TVoxel, TIndex>::FindVisibleBlocks(VoxelVolume<TVo
 template<class TVoxel>
 void VisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::FindVisibleBlocks(VoxelVolume<TVoxel,VoxelBlockHash> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *renderState) const
 {
-	const ITMHashEntry *hashTable = scene->index.GetEntries();
+	const HashEntry *hashTable = scene->index.GetEntries();
 	int hashEntryCount = scene->index.hashEntryCount;
 	float voxelSize = scene->sceneParams->voxel_size;
 	Vector2i imgSize = renderState->renderingRangeImage->noDims;
@@ -94,7 +94,7 @@ int VisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::CountVisibleBlocks(const V
 	dim3 blockSize(256);
 	dim3 gridSize((int)ceil((float)visibleEntryCount / (float)blockSize.x));
 
-	const ITMHashEntry *hashTable_device = scene->index.GetEntries();
+	const HashEntry *hashTable_device = scene->index.GetEntries();
 	countVisibleBlocks_device<<<gridSize,blockSize>>>(visibleEntryIDs_device, visibleEntryCount, hashTable_device, noTotalBlocks_device, minBlockId, maxBlockId);
 	ORcudaKernelCheck;
 
@@ -131,7 +131,7 @@ void VisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::CreateExpectedDepths(cons
 
 	//go through list of visible 8x8x8 blocks
 	{
-		const ITMHashEntry *hash_entries = scene->index.GetEntries();
+		const HashEntry *hash_entries = scene->index.GetEntries();
 		const int *visibleEntryIDs = scene->index.GetUtilizedBlockHashCodes();
 		int visibleEntryCount = scene->index.GetUtilizedHashBlockCount();
 		if (visibleEntryCount == 0) return;

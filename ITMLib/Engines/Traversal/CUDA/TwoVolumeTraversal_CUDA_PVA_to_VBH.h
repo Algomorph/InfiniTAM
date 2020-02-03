@@ -39,7 +39,7 @@ class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, 
 	                                                 TDeviceFunction&& deviceFunction) {
 		PlainVoxelArray::GridAlignedBox* arrayInfo = primaryVolume->index.GetIndexData();
 		int hashEntryCount = secondaryVolume->index.hashEntryCount;
-		ITMHashEntry* hashTable = secondaryVolume->index.GetIndexData();
+		HashEntry* hashTable = secondaryVolume->index.GetIndexData();
 
 		ORUtils::MemoryBlock<int> hashesNotSpanned(hashEntryCount, true, true);
 		ORUtils::MemoryBlock<int> countHashesNotSpanned(1, true, true);
@@ -133,7 +133,7 @@ class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, 
 			TBooleanFunctor& functor, TDeviceFunction&& deviceFunction) {
 		PlainVoxelArray::GridAlignedBox* arrayInfo = primaryVolume->index.GetIndexData();
 		int hashEntryCount = secondaryVolume->index.hashEntryCount;
-		ITMHashEntry* hashTable = secondaryVolume->index.GetIndexData();
+		HashEntry* hashTable = secondaryVolume->index.GetIndexData();
 
 		ORUtils::MemoryBlock<int> hashCodesNotSpanned(hashEntryCount, true, true);
 		ORUtils::MemoryBlock<int> countBlocksNotSpanned(1, true, true);
@@ -281,7 +281,7 @@ public:
 		return DualVoxelTraversal_AllTrue_Generic(primaryVolume, secondaryVolume, functor, []
 				(dim3 gridSize_ArrayBlockEnvelope, dim3 cudaBlockSize_BlockVoxelPerThread,
 				 TVoxelPrimary* voxelsArray, PlainVoxelArray::GridAlignedBox* arrayInfo,
-				 TVoxelSecondary* voxelsHash, ITMHashEntry* hashTable, Vector3i minArrayCoord,
+				 TVoxelSecondary* voxelsHash, HashEntry* hashTable, Vector3i minArrayCoord,
 				 Vector3i maxArrayCoord, Vector3s minBlockPos, TBooleanFunctor* functor_device,
 				 bool* falseOrAlteredEncountered_device) {
 			checkIfArrayContentIsUnalteredOrYieldsTrue
@@ -324,7 +324,7 @@ public:
 				                                                         TVoxelPrimary* voxelsArray,
 				                                                         PlainVoxelArray::GridAlignedBox* arrayInfo,
 				                                                         TVoxelSecondary* voxelsHash,
-				                                                         ITMHashEntry* hashTable,
+				                                                         HashEntry* hashTable,
 				                                                         Vector3i minArrayCoord,
 				                                                         Vector3i maxArrayCoord, Vector3s minBlockPos,
 				                                                         TBooleanFunctor* functor_device,
@@ -353,7 +353,7 @@ public:
 				                                                         TVoxelPrimary* voxelsArray,
 				                                                         PlainVoxelArray::GridAlignedBox* arrayInfo,
 				                                                         TVoxelSecondary* voxelsHash,
-				                                                         ITMHashEntry* hashTable,
+				                                                         HashEntry* hashTable,
 				                                                         Vector3i minArrayCoord,
 				                                                         Vector3i maxArrayCoord, Vector3s minBlockPos,
 				                                                         TBooleanFunctor* functor_device,
@@ -391,7 +391,7 @@ public:
 		return DualVoxelTraversal_AllTrue_Generic(primaryVolume, secondaryVolume, functor, []
 				(dim3 gridSize_ArrayBlockEnvelope, dim3 cudaBlockSize_BlockVoxelPerThread,
 				 TVoxelPrimary* voxelsArray, PlainVoxelArray::GridAlignedBox* arrayInfo,
-				 TVoxelSecondary* voxelsHash, ITMHashEntry* hashTable, Vector3i minArrayCoord,
+				 TVoxelSecondary* voxelsHash, HashEntry* hashTable, Vector3i minArrayCoord,
 				 Vector3i maxArrayCoord, Vector3s minBlockPos, TBooleanFunctor* functor_device,
 				 bool* falseOrAlteredEncountered_device) {
 			checkIfArrayContentIsUnalteredOrYieldsTrue_Position_Verbose
@@ -410,7 +410,7 @@ public:
 			TBooleanFunctor& functor) {
 		return DualVoxelTraversal_AllTrue_AllocatedOnly_Generic(primaryVolume, secondaryVolume, functor, []
 				(dim3 gridSize_HashPerBlock, dim3 cudaBlockSize_BlockVoxelPerThread, TVoxelPrimary* arrayVoxels,
-				 TVoxelSecondary* hashVoxels, const ITMHashEntry* hashTable,
+				 TVoxelSecondary* hashVoxels, const HashEntry* hashTable,
 				 int hashEntryCount, Vector6i arrayBounds, Vector3i arraySize,
 				 TBooleanFunctor* functor_device, bool* falseEncountered_device) {
 			checkIfAllocatedHashBlocksYieldTrue << < gridSize_HashPerBlock, cudaBlockSize_BlockVoxelPerThread >> >
@@ -427,7 +427,7 @@ public:
 			TBooleanFunctor& functor) {
 		return DualVoxelTraversal_AllTrue_AllocatedOnly_Generic(primaryVolume, secondaryVolume, functor, []
 				(dim3 gridSize_HashPerBlock, dim3 cudaBlockSize_BlockVoxelPerThread, TVoxelPrimary* arrayVoxels,
-				 TVoxelSecondary* hashVoxels, const ITMHashEntry* hashTable,
+				 TVoxelSecondary* hashVoxels, const HashEntry* hashTable,
 				 int hashEntryCount, Vector6i arrayBounds, Vector3i arraySize,
 				 TBooleanFunctor* functor_device, bool* falseEncountered_device) {
 			checkIfAllocatedHashBlocksYieldTrue_Position << < gridSize_HashPerBlock,

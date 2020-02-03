@@ -18,11 +18,12 @@
 //local
 #include "../Interface/ThreeVolumeTraversal.h"
 #include "ThreeVolumeTraversal_CUDA_VoxelBlockHash_Kernels.h"
+#include "../../../Objects/Volume/VoxelVolume.h"
 
 namespace ITMLib{
 
-template<typename TVoxel, typename TWarp>
-class ThreeVolumeTraversalEngine<TVoxel, TWarp, VoxelBlockHash, MEMORYDEVICE_CUDA> {
+template<typename TVoxel1, typename TVoxel2, typename TVoxel3>
+class ThreeVolumeTraversalEngine<TVoxel1, TVoxel2, TVoxel3, VoxelBlockHash, MEMORYDEVICE_CUDA> {
 	/**
 	 * \brief Concurrent traversal of three volumes with potentially different voxel types
 	 * \details All volumes must be indexed with hash tables of the same size
@@ -33,21 +34,21 @@ public:
 	template<typename TFunctor>
 	inline static void
 	TraverseWithPosition(
-			ITMLib::VoxelVolume<TVoxel1, ITMLib::PlainVoxelArray>* primaryScene,
-			ITMLib::VoxelVolume<TVoxel2, ITMLib::PlainVoxelArray>* secondaryScene,
-			ITMLib::VoxelVolume<TVoxel3, ITMLib::PlainVoxelArray>* warpField,
+			VoxelVolume<TVoxel1, VoxelBlockHash>* volume1,
+			VoxelVolume<TVoxel2, VoxelBlockHash>* volume2,
+			VoxelVolume<TVoxel3, VoxelBlockHash>* volume3,
 			TFunctor& functor) {
 // *** traversal vars
-		TVoxel* secondaryVoxels = secondaryScene->localVBA.GetVoxelBlocks();
-		ITMHashEntry* secondaryHashTable = secondaryScene->index.GetEntries();
+		TVoxel1* voxels1 = volume1->localVBA.GetVoxelBlocks();
+		HashEntry* hash_table1 = volume1->index.GetEntries();
 
-		TVoxel* primaryVoxels = primaryScene->localVBA.GetVoxelBlocks();
-		ITMHashEntry* primaryHashTable = primaryScene->index.GetEntries();
+		TVoxel2* voxels2 = volume2->localVBA.GetVoxelBlocks();
+		HashEntry* hash_table2 = volume2->index.GetEntries();
 
-		TWarp* warpVoxels = warpField->localVBA.GetVoxelBlocks();
-		ITMHashEntry* warpHashTable = warpField->index.GetEntries();
+		TVoxel3* voxels3 = volume3->localVBA.GetVoxelBlocks();
+		HashEntry* hash_table3 = volume3->index.GetEntries();
 
-		int hashEntryCount = warpField->index.hashEntryCount;
+		int hash_entry_count = volume3->index.hashEntryCount;
 
 		// transfer functor from RAM to VRAM
 		TFunctor* functor_device = nullptr;
@@ -55,12 +56,12 @@ public:
 		ORcudaSafeCall(cudaMemcpy(functor_device, &functor, sizeof(TFunctor), cudaMemcpyHostToDevice));
 
 		dim3 cudaBlockSize_BlockVoxelPerThread(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
-		dim3 gridSize_HashPerBlock(hashEntryCount);
+		dim3 gridSize_HashPerBlock(hash_entry_count);
 
-		dualVoxelWarpPositionTraversal_device<TFunctor, TVoxel, TVoxel, TWarp>
+		threeVolumeTraversalWithPosition_device<TFunctor, TVoxel1, TVoxel2, TVoxel3>
 				<< < gridSize_HashPerBlock, cudaBlockSize_BlockVoxelPerThread >> >
-		                                    (primaryVoxels, secondaryVoxels, warpVoxels,
-				                                    primaryHashTable, secondaryHashTable, warpHashTable, functor_device);
+		                                    (voxels1, voxels2, voxels3,
+				                                    hash_table1, hash_table2, hash_table3, functor_device);
 		ORcudaKernelCheck;
 
 		// transfer functor from VRAM back to RAM

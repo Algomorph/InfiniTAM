@@ -13,20 +13,20 @@ namespace ITMLib {
 // declaration of device functions
 
 __global__ void buildCompleteVisibleList_device(
-		const ITMHashEntry* hashTable, /*ITMHashCacheState *cacheStates, bool useSwapping,*/ int hashBlockCount,
+		const HashEntry* hashTable, /*ITMHashCacheState *cacheStates, bool useSwapping,*/ int hashBlockCount,
 		int* visibleBlockHashCodes, int* visibleBlockCount, HashBlockVisibility* blockVisibilityTypes, Matrix4f M,
 		Vector4f projParams, Vector2i imgSize, float voxelSize);
 
 __global__ void
-countVisibleBlocks_device(const int* visibleEntryIDs, int visibleBlockCount, const ITMHashEntry* hashTable,
+countVisibleBlocks_device(const int* visibleEntryIDs, int visibleBlockCount, const HashEntry* hashTable,
                           uint* noBlocks, int minBlockId, int maxBlockId);
 
 __global__ void
-projectAndSplitBlocks_device(const ITMHashEntry* hashEntries, const int* visibleEntryIDs, int visibleBlockCount,
+projectAndSplitBlocks_device(const HashEntry* hashEntries, const int* visibleEntryIDs, int visibleBlockCount,
                              const Matrix4f pose_M, const Vector4f intrinsics, const Vector2i imgSize, float voxelSize,
                              RenderingBlock* renderingBlocks, uint* noTotalBlocks);
 
-__global__ void checkProjectAndSplitBlocks_device(const ITMHashEntry* hashEntries, int noHashEntries,
+__global__ void checkProjectAndSplitBlocks_device(const HashEntry* hashEntries, int noHashEntries,
                                                   const Matrix4f pose_M, const Vector4f intrinsics,
                                                   const Vector2i imgSize, float voxelSize,
                                                   RenderingBlock* renderingBlocks,

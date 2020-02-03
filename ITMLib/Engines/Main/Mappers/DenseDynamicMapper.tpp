@@ -119,61 +119,61 @@ DenseDynamicMapper<TVoxel, TWarp, TIndex>::~DenseDynamicMapper() {
 template<typename TVoxel, typename TWarp, typename TIndex>
 void DenseDynamicMapper<TVoxel, TWarp, TIndex>::ProcessInitialFrame(
 		const ITMView* view, const ITMTrackingState* trackingState,
-		VoxelVolume<TVoxel, TIndex>* canonicalScene, VoxelVolume<TVoxel, TIndex>* liveScene,
-		RenderState* renderState) {
+		VoxelVolume<TVoxel, TIndex>* canonical_volume, VoxelVolume<TVoxel, TIndex>* live_volume,
+		RenderState* canonical_render_state) {
 	PrintOperationStatus("Generating raw live frame from view...");
 	bench::StartTimer("GenerateRawLiveAndCanonicalVolumes");
-	reconstruction_engine->GenerateTsdfVolumeFromView(liveScene, view, trackingState);
+	reconstruction_engine->GenerateTsdfVolumeFromView(live_volume, view, trackingState);
 	bench::StopTimer("GenerateRawLiveAndCanonicalVolumes");
 	//** prepare canonical for new frame
 	PrintOperationStatus("Fusing data from live frame into canonical frame...");
 	//** fuse the live into canonical directly
 	bench::StartTimer("FuseOneTsdfVolumeIntoAnother");
-	volume_fusion_engine->FuseOneTsdfVolumeIntoAnother(canonicalScene, liveScene);
+	volume_fusion_engine->FuseOneTsdfVolumeIntoAnother(canonical_volume, live_volume);
 	bench::StopTimer("FuseOneTsdfVolumeIntoAnother");
-	ProcessSwapping(canonicalScene, renderState);
+	ProcessSwapping(canonical_volume, canonical_render_state);
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 void
 DenseDynamicMapper<TVoxel, TWarp, TIndex>::ProcessFrame(const ITMView* view, const ITMTrackingState* trackingState,
-                                                        VoxelVolume<TVoxel, TIndex>* canonicalVolume,
-                                                        VoxelVolume<TVoxel, TIndex>** liveScenePair,
-                                                        VoxelVolume<TWarp, TIndex>* warpField,
-                                                        RenderState* renderState) {
+                                                        VoxelVolume<TVoxel, TIndex>* canonical_volume,
+                                                        VoxelVolume<TVoxel, TIndex>** live_volume_pair,
+                                                        VoxelVolume<TWarp, TIndex>* warp_field,
+                                                        RenderState* canonical_render_state) {
 
 
 	PrintOperationStatus("Generating raw live TSDF from view...");
 	bench::StartTimer("GenerateRawLiveAndCanonicalVolumes");
 	if (this->use_expanded_allocation_during_TSDF_construction) {
-		reconstruction_engine->GenerateTsdfVolumeFromViewExpanded(liveScenePair[0], liveScenePair[1], view,
+		reconstruction_engine->GenerateTsdfVolumeFromViewExpanded(live_volume_pair[0], live_volume_pair[1], view,
 		                                                          trackingState->pose_d->GetM());
 	} else {
-		reconstruction_engine->GenerateTsdfVolumeFromView(liveScenePair[0], view, trackingState->pose_d->GetM());
+		reconstruction_engine->GenerateTsdfVolumeFromView(live_volume_pair[0], view, trackingState->pose_d->GetM());
 	}
-	LogVolumeStatistics(liveScenePair[0], "[[live TSDF before tracking]]");
+	LogVolumeStatistics(live_volume_pair[0], "[[live TSDF before tracking]]");
 	bench::StopTimer("GenerateRawLiveAndCanonicalVolumes");
-	surface_tracker->ClearOutFramewiseWarp(warpField);
+	surface_tracker->ClearOutFramewiseWarp(warp_field);
 	DynamicFusionLogger<TVoxel, TWarp, TIndex>::Instance().InitializeFrameRecording();
 
 
 
 	bench::StartTimer("TrackMotion");
-	VoxelVolume<TVoxel, TIndex>* finalWarpedLiveScene = TrackFrameMotion(canonicalVolume, liveScenePair, warpField);
+	VoxelVolume<TVoxel, TIndex>* target_warped_live_volume = TrackFrameMotion(canonical_volume, live_volume_pair, warp_field);
 	bench::StopTimer("TrackMotion");
-	LogVolumeStatistics(finalWarpedLiveScene, "[[live TSDF after tracking]]");
+	LogVolumeStatistics(target_warped_live_volume, "[[live TSDF after tracking]]");
 
 
 	//fuse warped live into canonical
 	bench::StartTimer("FuseOneTsdfVolumeIntoAnother");
-	volume_fusion_engine->FuseOneTsdfVolumeIntoAnother(canonicalVolume, finalWarpedLiveScene);
+	volume_fusion_engine->FuseOneTsdfVolumeIntoAnother(canonical_volume, target_warped_live_volume);
 	bench::StopTimer("FuseOneTsdfVolumeIntoAnother");
-	LogVolumeStatistics(canonicalVolume, "[[canonical frame after fusion]]");
+	LogVolumeStatistics(canonical_volume, "[[canonical TSDF after fusion]]");
 
 	DynamicFusionLogger<TVoxel, TWarp, TIndex>::Instance().FinalizeFrameRecording();
 
 	//TODO: revise how swapping works for dynamic scenes
-	ProcessSwapping(canonicalVolume, renderState);
+	ProcessSwapping(canonical_volume, canonical_render_state);
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
@@ -190,40 +190,40 @@ void DenseDynamicMapper<TVoxel, TWarp, TIndex>::UpdateVisibleList(
  * \brief Tracks motion of voxels from canonical frame to live frame.
  * \details The warp field representing motion of voxels in the canonical frame is updated such that the live frame maps
  * as closely as possible back to the canonical using the warp.
- * \param canonicalScene the canonical voxel grid
+ * \param canonical_volume the canonical voxel grid
  * \param liveScene the live voxel grid (typcially obtained by integrating a single depth image into an empty TSDF grid)
  */
 template<typename TVoxel, typename TWarp, typename TIndex>
 VoxelVolume<TVoxel, TIndex>* DenseDynamicMapper<TVoxel, TWarp, TIndex>::TrackFrameMotion(
-		VoxelVolume<TVoxel, TIndex>* canonicalScene,
-		VoxelVolume<TVoxel, TIndex>** liveScenePair,
-		VoxelVolume<TWarp, TIndex>* warpField) {
+		VoxelVolume<TVoxel, TIndex>* canonical_volume,
+		VoxelVolume<TVoxel, TIndex>** live_volume_pair,
+		VoxelVolume<TWarp, TIndex>* warp_field) {
 
 	float max_vector_update_length_in_voxels = std::numeric_limits<float>::infinity();
 	PrintOperationStatus("*** Optimizing warp based on difference between canonical and live SDF. ***");
 	bench::StartTimer("TrackMotion_3_Optimization");
-	int sourceLiveSceneIndex = 0;
-	int targetLiveSceneIndex = 0;
+	int source_live_volume_index = 0;
+	int target_live_volume_index = 0;
 	for (int iteration = 0; max_vector_update_length_in_voxels > this->max_vector_update_threshold_in_voxels
 	                        && iteration < parameters.max_iteration_threshold; iteration++) {
-		sourceLiveSceneIndex = iteration % 2;
-		targetLiveSceneIndex = (iteration + 1) % 2;
-		PerformSingleOptimizationStep(canonicalScene, liveScenePair[sourceLiveSceneIndex],
-		                              liveScenePair[targetLiveSceneIndex], warpField,
+		source_live_volume_index = iteration % 2;
+		target_live_volume_index = (iteration + 1) % 2;
+		PerformSingleOptimizationStep(canonical_volume, live_volume_pair[source_live_volume_index],
+		                              live_volume_pair[target_live_volume_index], warp_field,
 		                              max_vector_update_length_in_voxels, iteration);
 	}
 	bench::StopTimer("TrackMotion_3_Optimization");
 	PrintOperationStatus("*** Warping optimization finished for current frame. ***");
-	return liveScenePair[targetLiveSceneIndex];
+	return live_volume_pair[target_live_volume_index];
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 void DenseDynamicMapper<TVoxel, TWarp, TIndex>::PerformSingleOptimizationStep(
-		VoxelVolume<TVoxel, TIndex>* canonicalScene,
-		VoxelVolume<TVoxel, TIndex>* initialLiveScene,
-		VoxelVolume<TVoxel, TIndex>* finalLiveScene,
-		VoxelVolume<TWarp, TIndex>* warpField,
-		float& maxVectorUpdate,
+		VoxelVolume<TVoxel, TIndex>* canonical_volume,
+		VoxelVolume<TVoxel, TIndex>* source_live_volume,
+		VoxelVolume<TVoxel, TIndex>* target_live_volume,
+		VoxelVolume<TWarp, TIndex>* warp_field,
+		float& max_update_vector_length,
 		int iteration) {
 
 	DynamicFusionLogger<TVoxel, TWarp, TIndex>::Instance().SaveWarpSlices(iteration);
@@ -235,7 +235,7 @@ void DenseDynamicMapper<TVoxel, TWarp, TIndex>::PerformSingleOptimizationStep(
 	}
 
 	bench::StartTimer("TrackMotion_31_CalculateWarpUpdate");
-	surface_tracker->CalculateWarpGradient(canonicalScene, initialLiveScene, warpField);
+	surface_tracker->CalculateWarpGradient(warp_field, canonical_volume, source_live_volume);
 	bench::StopTimer("TrackMotion_31_CalculateWarpUpdate");
 
 	if (configuration::get().verbosity_level >= configuration::VERBOSITY_PER_ITERATION) {
@@ -243,14 +243,14 @@ void DenseDynamicMapper<TVoxel, TWarp, TIndex>::PerformSingleOptimizationStep(
 	}
 
 	bench::StartTimer("TrackMotion_32_ApplySmoothingToGradient");
-	surface_tracker->SmoothWarpGradient(canonicalScene, initialLiveScene, warpField);
+	surface_tracker->SmoothWarpGradient(warp_field, canonical_volume, source_live_volume);
 	bench::StopTimer("TrackMotion_32_ApplySmoothingToGradient");
 
 	if (verbosity_level >= configuration::VERBOSITY_PER_ITERATION) {
 		PrintOperationStatus("Applying warp update (based on energy gradient) to the cumulative warp...");
 	}
 	bench::StartTimer("TrackMotion_33_UpdateWarps");
-	maxVectorUpdate = surface_tracker->UpdateWarps(canonicalScene, initialLiveScene, warpField);
+	max_update_vector_length = surface_tracker->UpdateWarps(warp_field, canonical_volume, source_live_volume);
 	bench::StopTimer("TrackMotion_33_UpdateWarps");
 
 	if (verbosity_level >= configuration::VERBOSITY_PER_ITERATION) {
@@ -258,7 +258,7 @@ void DenseDynamicMapper<TVoxel, TWarp, TIndex>::PerformSingleOptimizationStep(
 				"Updating live frame SDF by mapping from raw live SDF to new warped SDF based on latest warp...");
 	}
 	bench::StartTimer("TrackMotion_35_WarpLiveScene");
-	warping_engine->WarpVolume_WarpUpdates(warpField, initialLiveScene, finalLiveScene);
+	warping_engine->WarpVolume_WarpUpdates(warp_field, source_live_volume, target_live_volume);
 	bench::StopTimer("TrackMotion_35_WarpLiveScene");
 	DynamicFusionLogger<TVoxel, TWarp, TIndex>::Instance().SaveWarps();
 }

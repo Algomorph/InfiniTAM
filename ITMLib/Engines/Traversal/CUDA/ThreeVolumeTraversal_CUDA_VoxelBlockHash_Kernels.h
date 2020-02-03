@@ -15,41 +15,44 @@
 //  ================================================================
 #pragma once
 
+//local
+#include "../../../Objects/Volume/VoxelBlockHash.h"
 #include "../../../../ORUtils/PlatformIndependence.h"
 #include "../../../../ORUtils/PlatformIndependentAtomics.h"
+#include "../Shared/VolumeTraversal_Shared.h"
 
 namespace { // CUDA kernels
 
 
-template<typename TFunctor, typename TVoxelPrimary, typename TVoxelSecondary, typename TWarp>
+template<typename TFunctor, typename TVoxel1, typename TVoxel2, typename TVoxel3>
 __global__ void
-dualVoxelWarpPositionTraversal_device(TVoxelPrimary* primaryVoxels, TVoxelSecondary* secondaryVoxels, TWarp* warpVoxels,
-                                      const ITMHashEntry* primaryHashTable, const ITMHashEntry* secondaryHashTable,
-                                      const ITMHashEntry* warpHashTable, TFunctor* functor) {
-	int hashCode = blockIdx.x;
+threeVolumeTraversalWithPosition_device(TVoxel1* voxels1, TVoxel2* voxels2, TVoxel3* voxels3,
+                                        const HashEntry* hash_table1, const HashEntry* hash_table2,
+                                        const HashEntry* hash_table3, TFunctor* functor) {
+	int hash_code1 = blockIdx.x;
 
-	const ITMHashEntry& primaryHashEntry = primaryHashTable[hashCode];
-	if (primaryHashEntry.ptr < 0) return;
-	ITMHashEntry secondaryHashEntry = secondaryHashTable[hashCode];
-	ITMHashEntry warpHashEntry = warpHashTable[hashCode];
+	const HashEntry& hash_entry1 = hash_table1[hash_code1];
+	if (hash_entry1.ptr < 0) return;
+	HashEntry hash_entry2 = hash_table2[hash_code1];
+	HashEntry hash_entry3 = hash_table3[hash_code1];
 
-	if (secondaryHashEntry.pos != primaryHashEntry.pos) {
-		int secondaryHashCode = 0;
-		if(!FindHashAtPosition(secondaryHashCode, primaryHashEntry.pos, secondaryHashTable)){
-			printf("Attempted traversal of primary hash block %d at %d %d %d, but this block is absent from secondary volume.\n",
-			       hashCode, primaryHashEntry.pos.x, primaryHashEntry.pos.y, primaryHashEntry.pos.z);
-			DIEWITHEXCEPTION_REPORTLOCATION("No hash block with corresponding position found in secondary hash table.");
+	if (hash_entry2.pos != hash_entry1.pos) {
+		int hash_code2 = 0;
+		if(!FindHashAtPosition(hash_code2, hash_entry1.pos, hash_table2)){
+			printf("Attempted traversal of volume1 hash block %d at %d %d %d, but this block is absent from volume 2.\n",
+			       hash_code1, hash_entry1.pos.x, hash_entry1.pos.y, hash_entry1.pos.z);
+			DIEWITHEXCEPTION_REPORTLOCATION("No hash block with corresponding position found in hash table 2.");
 		}
-		secondaryHashEntry = secondaryHashTable[secondaryHashCode];
+		hash_entry2 = hash_table2[hash_code2];
 	}
-	if (warpHashEntry.pos != primaryHashEntry.pos) {
-		int warpHashCode = 0;
-		if(!FindHashAtPosition(warpHashCode, primaryHashEntry.pos, warpHashTable)){
-			printf("Attempted traversal of primary hash block %d at %d %d %d, but this block is absent from warp volume.\n",
-			       hashCode, primaryHashEntry.pos.x, primaryHashEntry.pos.y, primaryHashEntry.pos.z);
-			DIEWITHEXCEPTION_REPORTLOCATION("No hash block with corresponding position found in warp hash table.");
+	if (hash_entry3.pos != hash_entry1.pos) {
+		int hash_code3 = 0;
+		if(!FindHashAtPosition(hash_code3, hash_entry1.pos, hash_table3)){
+			printf("Attempted traversal of volume1 hash block %d at %d %d %d, but this block is absent from volume 3.\n",
+			       hash_code1, hash_entry1.pos.x, hash_entry1.pos.y, hash_entry1.pos.z);
+			DIEWITHEXCEPTION_REPORTLOCATION("No hash block with corresponding position found in hash table 3.");
 		}
-		warpHashEntry = warpHashTable[warpHashCode];
+		hash_entry3 = hash_table3[hash_code3];
 	}
 
 
@@ -59,11 +62,11 @@ dualVoxelWarpPositionTraversal_device(TVoxelPrimary* primaryVoxels, TVoxelSecond
 	int linearIndexInBlock = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
 
 	// position of the current voxel in 3D space in voxel units
-	Vector3i voxelPosition = primaryHashEntry.pos.toInt() * VOXEL_BLOCK_SIZE + Vector3i(x, y, z);
-	TVoxelPrimary& voxelPrimary = primaryVoxels[primaryHashEntry.ptr * (VOXEL_BLOCK_SIZE3) + linearIndexInBlock];
-	TVoxelSecondary& voxelSecondary = secondaryVoxels[secondaryHashEntry.ptr * (VOXEL_BLOCK_SIZE3) + linearIndexInBlock];
-	TWarp& warp = warpVoxels[warpHashEntry.ptr *(VOXEL_BLOCK_SIZE3) + linearIndexInBlock];
-	(*functor)(voxelPrimary, voxelSecondary, warp, voxelPosition);
+	Vector3i voxelPosition = hash_entry1.pos.toInt() * VOXEL_BLOCK_SIZE + Vector3i(x, y, z);
+	TVoxel1& voxel1 = voxels1[hash_entry1.ptr * (VOXEL_BLOCK_SIZE3) + linearIndexInBlock];
+	TVoxel2& voxel2 = voxels2[hash_entry2.ptr * (VOXEL_BLOCK_SIZE3) + linearIndexInBlock];
+	TVoxel3& voxel3 = voxels3[hash_entry3.ptr * (VOXEL_BLOCK_SIZE3) + linearIndexInBlock];
+	(*functor)(voxel1, voxel2, voxel3, voxelPosition);
 }
 
 } // end anonymous namespace (CUDA kernels)

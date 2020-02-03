@@ -91,7 +91,7 @@ void DepthFusionEngine_CUDA<TVoxel, TWarp, VoxelBlockHash>::IntegrateDepthImageI
 	float* confidence = view->depthConfidence->GetData(MEMORYDEVICE_CUDA);
 	Vector4u* rgb = view->rgb->GetData(MEMORYDEVICE_CUDA);
 	TVoxel* localVBA = volume->localVBA.GetVoxelBlocks();
-	ITMHashEntry* hashTable = volume->index.GetEntries();
+	HashEntry* hashTable = volume->index.GetEntries();
 
 	int* visibleEntryHashCodes = volume->index.GetUtilizedBlockHashCodes();
 

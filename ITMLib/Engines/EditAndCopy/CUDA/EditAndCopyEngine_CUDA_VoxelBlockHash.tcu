@@ -62,11 +62,11 @@ EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::ResetVolume(
 	fillArrayKernel<int>(vbaAllocationList_ptr, numBlocks);
 	volume->localVBA.lastFreeBlockId = numBlocks - 1;
 
-	ITMHashEntry tmpEntry;
-	memset(&tmpEntry, 0, sizeof(ITMHashEntry));
+	HashEntry tmpEntry;
+	memset(&tmpEntry, 0, sizeof(HashEntry));
 	tmpEntry.ptr = -2;
-	ITMHashEntry* hashEntry_ptr = volume->index.GetEntries();
-	memsetKernel<ITMHashEntry>(hashEntry_ptr, tmpEntry, volume->index.hashEntryCount);
+	HashEntry* hashEntry_ptr = volume->index.GetEntries();
+	memsetKernel<HashEntry>(hashEntry_ptr, tmpEntry, volume->index.hashEntryCount);
 	int* excessList_ptr = volume->index.GetExcessAllocationList();
 	fillArrayKernel<int>(excessList_ptr, volume->index.excessListSize);
 
@@ -77,7 +77,7 @@ template<typename TVoxel>
 bool
 EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::SetVoxel(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
                                                          Vector3i at, TVoxel voxel) {
-	ITMHashEntry* hashTable = volume->index.GetEntries();
+	HashEntry* hashTable = volume->index.GetEntries();
 
 	TVoxel* voxels = volume->localVBA.GetVoxelBlocks();
 	int* voxelAllocationList = volume->localVBA.GetAllocationList();
@@ -112,7 +112,7 @@ TVoxel
 EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::ReadVoxel(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
                                                           Vector3i at) {
 	TVoxel* localVBA = volume->localVBA.GetVoxelBlocks();
-	const ITMHashEntry* hashTable = volume->index.GetEntries();
+	const HashEntry* hashTable = volume->index.GetEntries();
 
 	readVoxel_device<TVoxel> << < 1, 1 >> >
 	                                 (localVBA, hashTable, at, (ReadVoxelResult<TVoxel>*) readVoxelResult_device);
@@ -136,7 +136,7 @@ EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::ReadVoxel(VoxelVolume<TVoxel, Vo
                                                           Vector3i at,
                                                           VoxelBlockHash::IndexCache& cache) {
 	TVoxel* localVBA = volume->localVBA.GetVoxelBlocks();
-	const ITMHashEntry* hashTable = volume->index.GetEntries();
+	const HashEntry* hashTable = volume->index.GetEntries();
 
 	readVoxel_device<TVoxel> << < 1, 1 >> >
 	                                 (localVBA, hashTable, at, (ReadVoxelResult<TVoxel>*) readVoxelResult_device, &cache);
@@ -160,7 +160,7 @@ EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::ReadVoxel(VoxelVolume<TVoxel, Vo
                                                           Vector3i at, int& where,
                                                           VoxelBlockHash::IndexCache& cache) {
 	TVoxel* localVBA = volume->localVBA.GetVoxelBlocks();
-	const ITMHashEntry* hashTable = volume->index.GetEntries();
+	const HashEntry* hashTable = volume->index.GetEntries();
 
 	readVoxel_device<TVoxel> << < 1, 1 >> >
 	                                 (localVBA, hashTable, at, (ReadVoxelResult<TVoxel>*) readVoxelResult_device, &cache);
@@ -195,9 +195,9 @@ bool EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::CopyVolumeSlice(
 
 
 	TVoxel* sourceVoxels = sourceVolume->localVBA.GetVoxelBlocks();
-	const ITMHashEntry* sourceHashTable = sourceVolume->index.GetEntries();
+	const HashEntry* sourceHashTable = sourceVolume->index.GetEntries();
 
-	ITMHashEntry* destinationHashTable = targetVolume->index.GetEntries();
+	HashEntry* destinationHashTable = targetVolume->index.GetEntries();
 	TVoxel* destinationVoxels = targetVolume->localVBA.GetVoxelBlocks();
 
 	CopyAllocationTempData* tempData = (CopyAllocationTempData*) allocationTempData_host;
@@ -299,9 +299,9 @@ bool EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::CopyVolume(
 
 
 	TVoxel* sourceVoxels = sourceVolume->localVBA.GetVoxelBlocks();
-	const ITMHashEntry* sourceHashTable = sourceVolume->index.GetEntries();
+	const HashEntry* sourceHashTable = sourceVolume->index.GetEntries();
 
-	ITMHashEntry* destinationHashTable = targetVolume->index.GetEntries();
+	HashEntry* destinationHashTable = targetVolume->index.GetEntries();
 	TVoxel* destinationVoxels = targetVolume->localVBA.GetVoxelBlocks();
 
 	CopyAllocationTempData* tempData = (CopyAllocationTempData*) allocationTempData_host;

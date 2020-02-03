@@ -44,9 +44,9 @@ staticThreeVolumeTraversal_device(TVoxel1* voxels1, TVoxel2* voxels2,
 
 template<typename TStaticFunctor, typename TVoxel1, typename TVoxel2, typename TVoxel3>
 __global__ void
-staticDualVoxelWarpPositionTraversal_device(TVoxel1* voxels1, TVoxel2* voxels2,
-                                            TVoxel3* voxels3,
-                                            const ITMLib::PlainVoxelArray::GridAlignedBox* arrayInfo) {
+staticThreeVolumeTraversalWithPosition_device(TVoxel1* voxels1, TVoxel2* voxels2,
+                                              TVoxel3* voxels3,
+                                              const ITMLib::PlainVoxelArray::GridAlignedBox* arrayInfo) {
 	int x = blockIdx.x * blockDim.x + threadIdx.x;
 	int y = blockIdx.y * blockDim.y + threadIdx.y;
 	int z = blockIdx.z * blockDim.z + threadIdx.z;
@@ -72,9 +72,9 @@ staticDualVoxelWarpPositionTraversal_device(TVoxel1* voxels1, TVoxel2* voxels2,
 
 template<typename TFunctor, typename TVoxel1, typename TVoxel2, typename TVoxel3>
 __global__ void
-dualVoxelWarpTraversal_device(TVoxel1* voxels1, TVoxel2* voxels2,
-                              TVoxel3* voxels3, const ITMLib::PlainVoxelArray::GridAlignedBox* arrayInfo,
-                              TFunctor& functor) {
+threeVolumeTraversal_device(TVoxel1* voxels1, TVoxel2* voxels2, TVoxel3* voxels3,
+                            const ITMLib::PlainVoxelArray::GridAlignedBox* arrayInfo,
+                            TFunctor& functor) {
 	int x = blockIdx.x * blockDim.x + threadIdx.x;
 	int y = blockIdx.y * blockDim.y + threadIdx.y;
 	int z = blockIdx.z * blockDim.z + threadIdx.z;
@@ -91,9 +91,9 @@ dualVoxelWarpTraversal_device(TVoxel1* voxels1, TVoxel2* voxels2,
 
 template<typename TFunctor, typename TVoxel1, typename TVoxel2, typename TVoxel3>
 __global__ void
-dualVoxelWarpPositionTraversal_device(TVoxel1* voxels1, TVoxel2* voxels2,
-                                      TVoxel3* voxels3, const ITMLib::PlainVoxelArray::GridAlignedBox* arrayInfo,
-                                      TFunctor* functor) {
+threeVolumeTraversalWithPosition_device(TVoxel1* voxels1, TVoxel2* voxels2, TVoxel3* voxels3,
+                                        const ITMLib::PlainVoxelArray::GridAlignedBox* arrayInfo,
+                                        TFunctor* functor) {
 	int x = blockIdx.x * blockDim.x + threadIdx.x;
 	int y = blockIdx.y * blockDim.y + threadIdx.y;
 	int z = blockIdx.z * blockDim.z + threadIdx.z;

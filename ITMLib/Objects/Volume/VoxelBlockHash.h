@@ -40,7 +40,7 @@
 /** \brief
 	A single entry in the hash table.
 */
-struct ITMHashEntry {
+struct HashEntry {
 	/** Position of the corner of the 8x8x8 volume, that identifies the entry. */
 	Vector3s pos;
 	/** Offset in the excess list. */
@@ -70,7 +70,7 @@ public:
 
 	GENERATE_PATHLESS_SERIALIZABLE_STRUCT(VOXEL_BLOCK_HASH_PARAMETERS_STRUCT_DESCRIPTION);
 	typedef VoxelBlockHashParameters InitializationParameters;
-	typedef ITMHashEntry IndexData;
+	typedef HashEntry IndexData;
 
 	struct IndexCache {
 		Vector3i blockPos;
@@ -89,7 +89,7 @@ private:
 	int utilizedHashBlockCount;
 
 	/** The actual hash entries in the hash table, ordered by their hash codes. */
-	ORUtils::MemoryBlock<ITMHashEntry> hashEntries;
+	ORUtils::MemoryBlock<HashEntry> hashEntries;
 	/** States of hash entries during allocation procedures */
 	ORUtils::MemoryBlock<HashEntryAllocationState> hashEntryAllocationStates;
 	/** Voxel coordinates assigned to new hash blocks during allocation procedures */
@@ -130,28 +130,28 @@ public:
 	~VoxelBlockHash() = default;
 
 	/** Get the list of actual entries in the hash table. */
-	const ITMHashEntry* GetEntries() const { return hashEntries.GetData(memoryType); }
+	const HashEntry* GetEntries() const { return hashEntries.GetData(memoryType); }
 
-	ITMHashEntry* GetEntries() { return hashEntries.GetData(memoryType); }
+	HashEntry* GetEntries() { return hashEntries.GetData(memoryType); }
 
 	/** Get the list of actual entries in the hash table (alternative to GetEntries). */
 	const IndexData* GetIndexData() const { return hashEntries.GetData(memoryType); }
 
 	IndexData* GetIndexData() { return hashEntries.GetData(memoryType); }
 
-	ITMHashEntry GetHashEntry(int hashCode) const {
+	HashEntry GetHashEntry(int hashCode) const {
 		return hashEntries.GetElement(hashCode, memoryType);
 	}
 
-	ITMHashEntry GetHashEntryAt(const Vector3s& pos) const;
-	ITMHashEntry GetHashEntryAt(const Vector3s& pos, int& hashCode) const;
+	HashEntry GetHashEntryAt(const Vector3s& pos) const;
+	HashEntry GetHashEntryAt(const Vector3s& pos, int& hashCode) const;
 
-	ITMHashEntry GetHashEntryAt(int x, int y, int z) const {
+	HashEntry GetHashEntryAt(int x, int y, int z) const {
 		Vector3s coord(x, y, z);
 		return GetHashEntryAt(coord);
 	}
 
-	ITMHashEntry GetHashEntryAt(int x, int y, int z, int& hashCode) const {
+	HashEntry GetHashEntryAt(int x, int y, int z, int& hashCode) const {
 		Vector3s coord(x, y, z);
 		return GetHashEntryAt(coord, hashCode);
 	}

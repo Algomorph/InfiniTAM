@@ -10,7 +10,7 @@ void MeshingEngine_CPU<TVoxel, VoxelBlockHash>::MeshScene(Mesh *mesh, const Voxe
 {
 	Mesh::Triangle *triangles = mesh->triangles->GetData(MEMORYDEVICE_CPU);
 	const TVoxel *localVBA = scene->localVBA.GetVoxelBlocks();
-	const ITMHashEntry *hashTable = scene->index.GetEntries();
+	const HashEntry *hashTable = scene->index.GetEntries();
 
 	int noTriangles = 0, noMaxTriangles = mesh->noMaxTriangles, noTotalEntries = scene->index.hashEntryCount;
 	float factor = scene->sceneParams->voxel_size;
@@ -20,7 +20,7 @@ void MeshingEngine_CPU<TVoxel, VoxelBlockHash>::MeshScene(Mesh *mesh, const Voxe
 	for (int entryId = 0; entryId < noTotalEntries; entryId++)
 	{
 		Vector3i hashBlockCornerPosition;
-		const ITMHashEntry &currentHashEntry = hashTable[entryId];
+		const HashEntry &currentHashEntry = hashTable[entryId];
 
 		if (currentHashEntry.ptr < 0) continue;
 

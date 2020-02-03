@@ -16,7 +16,7 @@ using namespace ITMLib;
 namespace {
 
 template<class TVoxel, bool stopMaxW>
-__global__ void integrateIntoScene_device(TVoxel* localVBA, const ITMHashEntry* hashTable, int* noVisibleEntryIDs,
+__global__ void integrateIntoScene_device(TVoxel* localVBA, const HashEntry* hashTable, int* noVisibleEntryIDs,
                                           const Vector4u* rgb, Vector2i rgbImgSize, const float* depth,
                                           const float* confidence, Vector2i imgSize, Matrix4f M_d, Matrix4f M_rgb,
                                           Vector4f projParams_d, Vector4f projParams_rgb, float _voxelSize, float mu,
@@ -32,22 +32,22 @@ __global__ void integrateIntoScene_device(TVoxel* voxelArray, const PlainVoxelAr
 __global__ void buildHashAllocAndVisibleType_device(
 		ITMLib::HashEntryAllocationState* hashEntryStates, HashBlockVisibility* blockVisibilityTypes,
 		Vector3s* blockCoords, const float* depth, Matrix4f invM_d, Vector4f projParams_d, float surface_cutoff_distance, Vector2i _imgSize,
-		float oneOverHashBlockSize_Meters, ITMHashEntry* hashTable, float near_clipping_distance, float far_clipping_distance);
+		float oneOverHashBlockSize_Meters, HashEntry* hashTable, float near_clipping_distance, float far_clipping_distance);
 
 __global__ void allocateVoxelBlocksList_device(int* voxelAllocationList, int* excessAllocationList,
-                                               ITMHashEntry* hashTable, const int hashEntryCount,
+                                               HashEntry* hashTable, const int hashEntryCount,
                                                AllocationTempData* allocData, HashEntryAllocationState* hashEntryStates,
                                                HashBlockVisibility* blockVisibilityTypes, Vector3s* blockCoordinates);
 
 __global__ void
-reAllocateSwappedOutVoxelBlocks_device(int* voxelAllocationList, ITMHashEntry* hashTable, int hashEntryCount,
+reAllocateSwappedOutVoxelBlocks_device(int* voxelAllocationList, HashEntry* hashTable, int hashEntryCount,
                                        AllocationTempData* allocData, HashBlockVisibility* blockVisibilityTypes);
 
 __global__ void setVisibleEntriesToVisibleAtPreviousFrameAndUnstreamed(HashBlockVisibility* blockVisibilityTypes,
                                                                        const int* visibleBlockHashCodes, int noVisibleEntries);
 
 template<bool useSwapping>
-__global__ void buildVisibleList_device(ITMHashEntry* hashTable, ITMHashSwapState* swapStates, int hashEntryCount,
+__global__ void buildVisibleList_device(HashEntry* hashTable, ITMHashSwapState* swapStates, int hashEntryCount,
                                         int* visibleEntryIDs, AllocationTempData* allocData,
                                         HashBlockVisibility* entriesVisibleType,
                                         Matrix4f M_d, Vector4f projParams_d, Vector2i depthImgSize, float voxelSize);
@@ -80,11 +80,11 @@ void SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::ResetScene(
 	fillArrayKernel<int>(vbaAllocationList_ptr, numBlocks);
 	scene->localVBA.lastFreeBlockId = numBlocks - 1;
 
-	ITMHashEntry tmpEntry;
-	memset(&tmpEntry, 0, sizeof(ITMHashEntry));
+	HashEntry tmpEntry;
+	memset(&tmpEntry, 0, sizeof(HashEntry));
 	tmpEntry.ptr = -2;
-	ITMHashEntry* hashEntry_ptr = scene->index.GetEntries();
-	memsetKernel<ITMHashEntry>(hashEntry_ptr, tmpEntry, scene->index.hashEntryCount);
+	HashEntry* hashEntry_ptr = scene->index.GetEntries();
+	memsetKernel<HashEntry>(hashEntry_ptr, tmpEntry, scene->index.hashEntryCount);
 	int* excessList_ptr = scene->index.GetExcessAllocationList();
 	fillArrayKernel<int>(excessList_ptr, scene->index.excessListSize);
 
@@ -117,7 +117,7 @@ void SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::AllocateSceneFromDe
 	float* depth = view->depth->GetData(MEMORYDEVICE_CUDA);
 	int* voxelAllocationList = scene->localVBA.GetAllocationList();
 	int* excessAllocationList = scene->index.GetExcessAllocationList();
-	ITMHashEntry* hashTable = scene->index.GetEntries();
+	HashEntry* hashTable = scene->index.GetEntries();
 	ITMHashSwapState* swapStates = scene->Swapping() ? scene->globalCache->GetSwapStates(true) : 0;
 
 	const int hashEntryCount = scene->index.hashEntryCount;
@@ -228,7 +228,7 @@ void SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::IntegrateIntoScene(
 	float* confidence = view->depthConfidence->GetData(MEMORYDEVICE_CUDA);
 	Vector4u* rgb = view->rgb->GetData(MEMORYDEVICE_CUDA);
 	TVoxel* localVBA = scene->localVBA.GetVoxelBlocks();
-	ITMHashEntry* hashTable = scene->index.GetEntries();
+	HashEntry* hashTable = scene->index.GetEntries();
 
 	int* visibleBlockHashCodes = scene->index.GetUtilizedBlockHashCodes();
 
@@ -343,7 +343,7 @@ __global__ void integrateIntoScene_device(TVoxel* voxelArray, const PlainVoxelAr
 }
 
 template<class TVoxel, bool stopMaxW>
-__global__ void integrateIntoScene_device(TVoxel* localVBA, const ITMHashEntry* hashTable, int* visibleEntryIDs,
+__global__ void integrateIntoScene_device(TVoxel* localVBA, const HashEntry* hashTable, int* visibleEntryIDs,
                                           const Vector4u* rgb, Vector2i rgbImgSize, const float* depth,
                                           const float* confidence, Vector2i depthImgSize, Matrix4f M_d, Matrix4f M_rgb,
                                           Vector4f projParams_d,
@@ -351,7 +351,7 @@ __global__ void integrateIntoScene_device(TVoxel* localVBA, const ITMHashEntry* 
 	Vector3i globalPos;
 	int entryId = visibleEntryIDs[blockIdx.x];
 
-	const ITMHashEntry& currentHashEntry = hashTable[entryId];
+	const HashEntry& currentHashEntry = hashTable[entryId];
 
 	if (currentHashEntry.ptr < 0) return;
 
@@ -381,7 +381,7 @@ __global__ void buildHashAllocAndVisibleType_device(
 		ITMLib::HashEntryAllocationState* hashEntryStates, HashBlockVisibility* blockVisibilityTypes, Vector3s* blockCoords,
 		const float* depth,
 		Matrix4f invM_d, Vector4f projParams_d, float surface_cutoff_distance, Vector2i _imgSize, float oneOverHashBlockSize_Meters,
-		ITMHashEntry* hashTable,
+		HashEntry* hashTable,
 		float near_clipping_distance, float far_clipping_distance) {
 	int x = threadIdx.x + blockIdx.x * blockDim.x, y = threadIdx.y + blockIdx.y * blockDim.y;
 
@@ -402,7 +402,7 @@ __global__ void setVisibleEntriesToVisibleAtPreviousFrameAndUnstreamed(HashBlock
 
 __global__ void allocateVoxelBlocksList_device(
 		int* voxelAllocationList, int* excessAllocationList,
-		ITMHashEntry* hashTable, const int hashEntryCount,
+		HashEntry* hashTable, const int hashEntryCount,
 		AllocationTempData* allocData, HashEntryAllocationState* hashEntryStates,
 		HashBlockVisibility* blockVisibilityTypes,
 		Vector3s* blockCoordinates) {
@@ -417,7 +417,7 @@ __global__ void allocateVoxelBlocksList_device(
 
 			if (vbaIdx >= 0) //there is room in the voxel block array
 			{
-				ITMHashEntry hashEntry;
+				HashEntry hashEntry;
 				hashEntry.pos = blockCoordinates[targetIdx];
 				hashEntry.ptr = voxelAllocationList[vbaIdx];
 				hashEntry.offset = 0;
@@ -438,7 +438,7 @@ __global__ void allocateVoxelBlocksList_device(
 
 			if (vbaIdx >= 0 && exlIdx >= 0) //there is room in the voxel block array and excess list
 			{
-				ITMHashEntry hashEntry;
+				HashEntry hashEntry;
 				hashEntry.pos = blockCoordinates[targetIdx];
 				hashEntry.ptr = voxelAllocationList[vbaIdx];
 				hashEntry.offset = 0;
@@ -462,7 +462,7 @@ __global__ void allocateVoxelBlocksList_device(
 }
 
 __global__ void
-reAllocateSwappedOutVoxelBlocks_device(int* voxelAllocationList, ITMHashEntry* hashTable, int hashEntryCount,
+reAllocateSwappedOutVoxelBlocks_device(int* voxelAllocationList, HashEntry* hashTable, int hashEntryCount,
                                        AllocationTempData* allocData, /*int *countOfAllocatedOrderedEntries,*/
                                        HashBlockVisibility* blockVisibilityTypes) {
 	int targetIdx = threadIdx.x + blockIdx.x * blockDim.x;
@@ -481,7 +481,7 @@ reAllocateSwappedOutVoxelBlocks_device(int* voxelAllocationList, ITMHashEntry* h
 }
 
 template<bool useSwapping>
-__global__ void buildVisibleList_device(ITMHashEntry* hashTable, ITMHashSwapState* swapStates, int hashEntryCount,
+__global__ void buildVisibleList_device(HashEntry* hashTable, ITMHashSwapState* swapStates, int hashEntryCount,
                                         int* visibleEntryIDs, AllocationTempData* allocData,
                                         HashBlockVisibility* entriesVisibleType, Matrix4f M_d, Vector4f projParams_d,
                                         Vector2i depthImgSize, float voxelSize) {
@@ -493,7 +493,7 @@ __global__ void buildVisibleList_device(ITMHashEntry* hashTable, ITMHashSwapStat
 	__syncthreads();
 
 	HashBlockVisibility hashVisibleType = entriesVisibleType[hashCode];
-	const ITMHashEntry& hashEntry = hashTable[hashCode];
+	const HashEntry& hashEntry = hashTable[hashCode];
 
 	if (hashVisibleType == 3) {
 		bool isVisibleEnlarged, isVisible;

@@ -44,13 +44,13 @@ namespace {
 template<typename TFunctor, typename TVoxelPrimary, typename TVoxelSecondary>
 __global__ void
 dualVoxelTraversal_device(TVoxelPrimary* primaryVoxels, TVoxelSecondary* secondaryVoxels,
-                          const ITMHashEntry* primaryHashTable, const ITMHashEntry* secondaryHashTable,
+                          const HashEntry* primaryHashTable, const HashEntry* secondaryHashTable,
                           TFunctor* functor) {
 	int hashCode = blockIdx.x;
 
-	const ITMHashEntry& primaryHashEntry = primaryHashTable[hashCode];
+	const HashEntry& primaryHashEntry = primaryHashTable[hashCode];
 	if (primaryHashEntry.ptr < 0) return;
-	ITMHashEntry secondaryHashEntry = secondaryHashTable[hashCode];
+	HashEntry secondaryHashEntry = secondaryHashTable[hashCode];
 
 	if (secondaryHashEntry.pos != primaryHashEntry.pos) {
 		int secondaryHashCode = 0;
@@ -74,13 +74,13 @@ dualVoxelTraversal_device(TVoxelPrimary* primaryVoxels, TVoxelSecondary* seconda
 template<typename TFunctor, typename TVoxelPrimary, typename TVoxelSecondary>
 __global__ void
 dualVoxelPositionTraversal_device(TVoxelPrimary* primaryVoxels, TVoxelSecondary* secondaryVoxels,
-                                  const ITMHashEntry* primaryHashTable, const ITMHashEntry* secondaryHashTable,
+                                  const HashEntry* primaryHashTable, const HashEntry* secondaryHashTable,
                                   TFunctor* functor) {
 	int hashCode = blockIdx.x;
 
-	const ITMHashEntry& primaryHashEntry = primaryHashTable[hashCode];
+	const HashEntry& primaryHashEntry = primaryHashTable[hashCode];
 	if (primaryHashEntry.ptr < 0) return;
-	ITMHashEntry secondaryHashEntry = secondaryHashTable[hashCode];
+	HashEntry secondaryHashEntry = secondaryHashTable[hashCode];
 
 	if (secondaryHashEntry.pos != primaryHashEntry.pos) {
 		int secondaryHashCode = 0;
@@ -104,8 +104,8 @@ dualVoxelPositionTraversal_device(TVoxelPrimary* primaryVoxels, TVoxelSecondary*
 }
 
 
-__global__ void matchUpHashEntriesByPosition(const ITMHashEntry* primaryHashTable,
-                                             const ITMHashEntry* secondaryHashTable,
+__global__ void matchUpHashEntriesByPosition(const HashEntry* primaryHashTable,
+                                             const HashEntry* secondaryHashTable,
                                              int hashEntryCount,
                                              HashPair* matchedHashPairs,
                                              UnmatchedHash* unmatchedHashes,
@@ -114,8 +114,8 @@ __global__ void matchUpHashEntriesByPosition(const ITMHashEntry* primaryHashTabl
 	int hash = blockIdx.x * blockDim.x + threadIdx.x;
 	if (hash > hashEntryCount) return;
 
-	const ITMHashEntry& primaryHashEntry = primaryHashTable[hash];
-	const ITMHashEntry secondaryHashEntry = secondaryHashTable[hash];
+	const HashEntry& primaryHashEntry = primaryHashTable[hash];
+	const HashEntry secondaryHashEntry = secondaryHashTable[hash];
 	int secondaryHash = hash;
 	if (primaryHashEntry.ptr < 0) {
 		if (secondaryHashEntry.ptr < 0) {
@@ -168,7 +168,7 @@ __global__ void matchUpHashEntriesByPosition(const ITMHashEntry* primaryHashTabl
 template<typename TVoxelPrimary, typename TVoxelSecondary>
 __global__ void checkIfUnmatchedVoxelBlocksAreAltered(
 		const TVoxelPrimary* primaryVoxels, const TVoxelSecondary* secondaryVoxels,
-		const ITMHashEntry* primaryHashTable, const ITMHashEntry* secondaryHashTable,
+		const HashEntry* primaryHashTable, const HashEntry* secondaryHashTable,
 		const UnmatchedHash* unmatchedHashes, const HashMatchInfo* hashMatchInfo,
 		bool* alteredVoxelEncountered) {
 
@@ -195,7 +195,7 @@ __global__ void checkIfUnmatchedVoxelBlocksAreAltered(
 template<typename TBooleanFunctor, typename TVoxelPrimary, typename TVoxelSecondary>
 __global__ void checkIfMatchingHashBlockVoxelsYieldTrue(
 		TVoxelPrimary* primaryVoxels, TVoxelSecondary* secondaryVoxels,
-		const ITMHashEntry* primaryHashTable, const ITMHashEntry* secondaryHashTable,
+		const HashEntry* primaryHashTable, const HashEntry* secondaryHashTable,
 		const HashPair* matchedHashes, const HashMatchInfo* matchInfo, TBooleanFunctor* functor,
 		bool* falseEncountered) {
 	if (*falseEncountered) return;
@@ -218,7 +218,7 @@ __global__ void checkIfMatchingHashBlockVoxelsYieldTrue(
 template<typename TBooleanFunctor, typename TVoxelPrimary, typename TVoxelSecondary>
 __global__ void checkIfMatchingHashBlockVoxelsYieldTrue_Position(
 		TVoxelPrimary* primaryVoxels, TVoxelSecondary* secondaryVoxels,
-		const ITMHashEntry* primaryHashTable, const ITMHashEntry* secondaryHashTable,
+		const HashEntry* primaryHashTable, const HashEntry* secondaryHashTable,
 		const HashPair* matchedHashes, const HashMatchInfo* matchInfo, TBooleanFunctor* functor,
 		bool* falseEncountered) {
 	if (*falseEncountered) return;
@@ -231,7 +231,7 @@ __global__ void checkIfMatchingHashBlockVoxelsYieldTrue_Position(
 	int x = threadIdx.x, y = threadIdx.y, z = threadIdx.z;
 	int locId = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
 
-	const ITMHashEntry& primaryHashEntry = primaryHashTable[primaryHash];
+	const HashEntry& primaryHashEntry = primaryHashTable[primaryHash];
 	// position of the current entry in 3D space in voxel units
 	Vector3i hashBlockPosition = primaryHashEntry.pos.toInt() * VOXEL_BLOCK_SIZE;
 	Vector3i voxelPosition = hashBlockPosition + Vector3i(x,y,z);

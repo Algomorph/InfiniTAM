@@ -61,8 +61,8 @@ public:
 	void BuildVisibilityList(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
 	                         const Matrix4f& depth_camera_matrix = Matrix4f::Identity());
 
-	ITMHashEntry FindHashEntry(const VoxelBlockHash& index, const Vector3s& coordinates) override;
-	ITMHashEntry FindHashEntry(const VoxelBlockHash& index, const Vector3s& coordinates, int& hashCode);
+	HashEntry FindHashEntry(const VoxelBlockHash& index, const Vector3s& coordinates) override;
+	HashEntry FindHashEntry(const VoxelBlockHash& index, const Vector3s& coordinates, int& hashCode);
 	bool AllocateHashBlockAt(VoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3s at, int& hashCode) override;
 
 	template<typename TVoxelATarget, typename TVoxelASource>

@@ -109,9 +109,9 @@ __global__ void findAllocateBlocks(Vector4s* visibleBlockGlobalPos, const TMulti
 	int entryId = threadIdx.x + blockIdx.x * blockDim.x;
 	if (entryId >= hashEntryCount) return;
 
-	ITMHashEntry* hashTable = hashTables->index[blockIdx.y];
+	HashEntry* hashTable = hashTables->index[blockIdx.y];
 
-	const ITMHashEntry& currentHashEntry = hashTable[entryId];
+	const HashEntry& currentHashEntry = hashTable[entryId];
 
 	if (currentHashEntry.ptr >= 0)
 		visibleBlockGlobalPos[currentHashEntry.ptr + blockIdx.y * voxelBlockCount] = Vector4s(currentHashEntry.pos.x,

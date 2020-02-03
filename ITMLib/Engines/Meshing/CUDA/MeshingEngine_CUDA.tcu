@@ -12,14 +12,14 @@ template<class TVoxel>
 __global__ void
 meshScene_device(Mesh::Triangle* triangles, unsigned int* noTriangles_device, float factor, int noTotalEntries,
                  int noMaxTriangles, const Vector4s* visibleBlockGlobalPos, const TVoxel* localVBA,
-                 const ITMHashEntry* hashTable);
+                 const HashEntry* hashTable);
 
 template<int dummy>
-__global__ void findAllocateBlocks(Vector4s* visibleBlockGlobalPos, const ITMHashEntry* hashTable, int noTotalEntries) {
+__global__ void findAllocateBlocks(Vector4s* visibleBlockGlobalPos, const HashEntry* hashTable, int noTotalEntries) {
 	int entryId = threadIdx.x + blockIdx.x * blockDim.x;
 	if (entryId > noTotalEntries - 1) return;
 
-	const ITMHashEntry& currentHashEntry = hashTable[entryId];
+	const HashEntry& currentHashEntry = hashTable[entryId];
 
 	if (currentHashEntry.ptr >= 0)
 		visibleBlockGlobalPos[currentHashEntry.ptr] = Vector4s(currentHashEntry.pos.x, currentHashEntry.pos.y,
@@ -44,7 +44,7 @@ void MeshingEngine_CUDA<TVoxel, VoxelBlockHash>::MeshScene(Mesh* mesh,
                                                            const VoxelVolume<TVoxel, VoxelBlockHash>* scene) {
 	Mesh::Triangle* triangles = mesh->triangles->GetData(MEMORYDEVICE_CUDA);
 	const TVoxel* localVBA = scene->localVBA.GetVoxelBlocks();
-	const ITMHashEntry* hashTable = scene->index.GetEntries();
+	const HashEntry* hashTable = scene->index.GetEntries();
 
 	int noMaxTriangles = mesh->noMaxTriangles, noTotalEntries = scene->index.hashEntryCount;
 	float factor = scene->sceneParams->voxel_size;
@@ -91,7 +91,7 @@ template<class TVoxel>
 __global__ void
 meshScene_device(Mesh::Triangle* triangles, unsigned int* noTriangles_device, float factor, int noTotalEntries,
                  int noMaxTriangles, const Vector4s* visibleBlockGlobalPos, const TVoxel* localVBA,
-                 const ITMHashEntry* hashTable) {
+                 const HashEntry* hashTable) {
 	const Vector4s globalPos_4s = visibleBlockGlobalPos[blockIdx.x + gridDim.x * blockIdx.y];
 
 	if (globalPos_4s.w == 0) return;

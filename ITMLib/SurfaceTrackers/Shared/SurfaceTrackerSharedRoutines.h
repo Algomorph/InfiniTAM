@@ -98,7 +98,7 @@ inline void findPoint2ndDerivativeNeighborhoodFramewiseWarp(THREADPTR(Vector3f)*
 
 	auto process_voxel = [&](Vector3i location, int index){
 #if !defined(__CUDACC__) && !defined(WITH_OPENMP)
-		warp = readVoxel(warps, warpIndexData, voxelPosition + (location), vmIndex, warpCache);
+		warp = readVoxel(warps, warp_index_data, voxelPosition + (location), vmIndex, warp_cache);
 	    voxel = readVoxel(voxels, voxelIndexData, voxelPosition + (location), vmIndex, voxelCache);
 #else //don't use cache for multithreading
 		warp = readVoxel(warps, warpIndexData, voxelPosition + (location), vmIndex);

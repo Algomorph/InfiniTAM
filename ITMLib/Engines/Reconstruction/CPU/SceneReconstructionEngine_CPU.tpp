@@ -20,10 +20,10 @@ void SceneReconstructionEngine_CPU<TVoxel,VoxelBlockHash>::ResetScene(VoxelVolum
 	for (int i = 0; i < numBlocks; ++i) vbaAllocationList_ptr[i] = i;
 	scene->localVBA.lastFreeBlockId = numBlocks - 1;
 
-	ITMHashEntry tmpEntry;
-	memset(&tmpEntry, 0, sizeof(ITMHashEntry));
+	HashEntry tmpEntry;
+	memset(&tmpEntry, 0, sizeof(HashEntry));
 	tmpEntry.ptr = -2;
-	ITMHashEntry *hashEntry_ptr = scene->index.GetEntries();
+	HashEntry *hashEntry_ptr = scene->index.GetEntries();
 	for (int i = 0; i < scene->index.hashEntryCount; ++i) hashEntry_ptr[i] = tmpEntry;
 	int *excessList_ptr = scene->index.GetExcessAllocationList();
 	for (int i = 0; i < scene->index.excessListSize; ++i) excessList_ptr[i] = i;
@@ -54,7 +54,7 @@ void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::IntegrateIntoScene(V
 	float *confidence = view->depthConfidence->GetData(MEMORYDEVICE_CPU);
 	Vector4u *rgb = view->rgb->GetData(MEMORYDEVICE_CPU);
 	TVoxel *localVBA = scene->localVBA.GetVoxelBlocks();
-	ITMHashEntry *hashTable = scene->index.GetEntries();
+	HashEntry *hashTable = scene->index.GetEntries();
 
 	int *visibleBlockHashCodes = scene->index.GetUtilizedBlockHashCodes();
 	int visibleHashBlockCount = scene->index.GetUtilizedHashBlockCount();
@@ -69,7 +69,7 @@ void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::IntegrateIntoScene(V
 		Vector3i globalPos;
 		int hash = visibleBlockHashCodes[visibleHash];
 
-		const ITMHashEntry &currentHashEntry = hashTable[hash];
+		const HashEntry &currentHashEntry = hashTable[hash];
 
 		if (currentHashEntry.ptr < 0) continue;
 
@@ -127,7 +127,7 @@ void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::AllocateSceneFromDep
 	float *depth = view->depth->GetData(MEMORYDEVICE_CPU);
 	int *voxelAllocationList = scene->localVBA.GetAllocationList();
 	int *excessAllocationList = scene->index.GetExcessAllocationList();
-	ITMHashEntry *hashTable = scene->index.GetEntries();
+	HashEntry *hashTable = scene->index.GetEntries();
 	ITMHashSwapState *swapStates = scene->Swapping() ? scene->globalCache->GetSwapStates(false) : 0;
 	int* visibleBlockHashCodes = scene->index.GetUtilizedBlockHashCodes();
 	HashBlockVisibility* hashBlockVisibilityTypes = scene->index.GetBlockVisibilityTypes();
@@ -183,7 +183,7 @@ void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::AllocateSceneFromDep
 
 				if (vbaIdx >= 0) //there is room in the voxel block array
 				{
-					ITMHashEntry hashEntry;
+					HashEntry hashEntry;
 					hashEntry.pos = blockCoords_device[targetIdx];
 					hashEntry.ptr = voxelAllocationList[vbaIdx];
 					hashEntry.offset = 0;
@@ -206,7 +206,7 @@ void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::AllocateSceneFromDep
 
 				if (vbaIdx >= 0 && exlIdx >= 0) //there is room in the voxel block array and excess list
 				{
-					ITMHashEntry hashEntry;
+					HashEntry hashEntry;
 					hashEntry.pos = blockCoords_device[targetIdx];
 					hashEntry.ptr = voxelAllocationList[vbaIdx];
 					hashEntry.offset = 0;
@@ -236,7 +236,7 @@ void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::AllocateSceneFromDep
 	for (int targetIdx = 0; targetIdx < hashEntryCount; targetIdx++)
 	{
 		HashBlockVisibility hashVisibleType = hashBlockVisibilityTypes[targetIdx];
-		const ITMHashEntry &hashEntry = hashTable[targetIdx];
+		const HashEntry &hashEntry = hashTable[targetIdx];
 
 		if (hashVisibleType == 3)
 		{
@@ -272,7 +272,7 @@ void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::AllocateSceneFromDep
 		for (int targetIdx = 0; targetIdx < hashEntryCount; targetIdx++)
 		{
 			int vbaIdx;
-			ITMHashEntry hashEntry = hashTable[targetIdx];
+			HashEntry hashEntry = hashTable[targetIdx];
 
 			if (hashBlockVisibilityTypes[targetIdx] > 0 && hashEntry.ptr == -1)
 			{

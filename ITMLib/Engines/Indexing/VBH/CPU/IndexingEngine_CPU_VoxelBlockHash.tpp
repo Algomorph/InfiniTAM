@@ -47,7 +47,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateFromDepth
 
 	float* depth = view->depth->GetData(MEMORYDEVICE_CPU);
 	int* voxelAllocationList = volume->localVBA.GetAllocationList();
-	ITMHashEntry* hashTable = volume->index.GetEntries();
+	HashEntry* hashTable = volume->index.GetEntries();
 	HashBlockVisibility* hashBlockVisibilityTypes = volume->index.GetBlockVisibilityTypes();
 	int hashEntryCount = volume->index.hashEntryCount;
 	int* visibleEntryHashCodes = volume->index.GetUtilizedBlockHashCodes();
@@ -148,7 +148,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateFromDepth
 
 	float* depth = view->depth->GetData(MEMORYDEVICE_CPU);
 	int* voxelAllocationList = volume->localVBA.GetAllocationList();
-	ITMHashEntry* hashTable = volume->index.GetEntries();
+	HashEntry* hashTable = volume->index.GetEntries();
 	HashBlockVisibility* hashBlockVisibilityTypes = volume->index.GetBlockVisibilityTypes();
 	int hashEntryCount = volume->index.hashEntryCount;
 	int* visibleEntryHashCodes = volume->index.GetUtilizedBlockHashCodes();
@@ -225,8 +225,8 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateUsingOthe
 
 	HashEntryAllocationState* hashEntryStates_device = targetVolume->index.GetHashEntryAllocationStates();
 	Vector3s* blockCoordinates_device = targetVolume->index.GetAllocationBlockCoordinates();
-	ITMHashEntry* targetHashEntries = targetVolume->index.GetEntries();
-	ITMHashEntry* sourceHashEntries = sourceVolume->index.GetEntries();
+	HashEntry* targetHashEntries = targetVolume->index.GetEntries();
+	HashEntry* sourceHashEntries = sourceVolume->index.GetEntries();
 
 	bool collisionDetected;
 
@@ -240,7 +240,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateUsingOthe
 #endif
 		for (int sourceHash = 0; sourceHash < hashEntryCount; sourceHash++) {
 
-			const ITMHashEntry& currentSourceHashBlock = sourceHashEntries[sourceHash];
+			const HashEntry& currentSourceHashBlock = sourceHashEntries[sourceHash];
 			//skip unfilled live blocks
 			if (currentSourceHashBlock.ptr < 0) {
 				continue;
@@ -282,8 +282,8 @@ void AllocateUsingOtherVolumeExpanded_Generic(VoxelVolume<TVoxelTarget, VoxelBlo
 	assert(sourceVolume->index.hashEntryCount == targetVolume->index.hashEntryCount);
 
 	int hashEntryCount = targetVolume->index.hashEntryCount;
-	ITMHashEntry* targetHashTable = targetVolume->index.GetEntries();
-	ITMHashEntry* sourceHashTable = sourceVolume->index.GetEntries();
+	HashEntry* targetHashTable = targetVolume->index.GetEntries();
+	HashEntry* sourceHashTable = sourceVolume->index.GetEntries();
 
 	HashEntryAllocationState* hashEntryStates_device = targetVolume->index.GetHashEntryAllocationStates();
 	Vector3s* blockCoordinates_device = targetVolume->index.GetAllocationBlockCoordinates();
@@ -296,7 +296,7 @@ void AllocateUsingOtherVolumeExpanded_Generic(VoxelVolume<TVoxelTarget, VoxelBlo
 #pragma omp parallel for default(shared)
 #endif
 		for (int hashCode = 0; hashCode < hashEntryCount; hashCode++) {
-			const ITMHashEntry& hashEntry = sourceHashTable[hashCode];
+			const HashEntry& hashEntry = sourceHashTable[hashCode];
 			// skip empty blocks
 			if (hashEntry.ptr < 0) continue;
 			for (auto& neighborOffset : neighborOffsets) {
@@ -317,7 +317,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateUsingOthe
 		VoxelVolume<TVoxelTarget, VoxelBlockHash>* targetVolume,
 		VoxelVolume<TVoxelSource, VoxelBlockHash>* sourceVolume) {
 
-	ITMHashEntry* targetHashTable = targetVolume->index.GetEntries();
+	HashEntry* targetHashTable = targetVolume->index.GetEntries();
 
 	HashEntryAllocationState* hashEntryStates_device = targetVolume->index.GetHashEntryAllocationStates();
 	Vector3s* blockCoordinates_device = targetVolume->index.GetAllocationBlockCoordinates();
@@ -342,7 +342,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateUsingOthe
 		VoxelVolume<TVoxelSource, VoxelBlockHash>* sourceVolume,
 		ITMView* view, const Matrix4f& depth_camera_matrix) {
 
-	ITMHashEntry* targetHashTable = targetVolume->index.GetEntries();
+	HashEntry* targetHashTable = targetVolume->index.GetEntries();
 	int* visibleEntryHashCodes = targetVolume->index.GetUtilizedBlockHashCodes();
 	HashBlockVisibility* hashBlockVisibilityTypes_device = targetVolume->index.GetBlockVisibilityTypes();
 
@@ -381,7 +381,7 @@ AllocateHashEntriesUsingLists(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 	int lastFreeExcessListId = volume->index.GetLastFreeExcessListId();
 	int* voxelAllocationList = volume->localVBA.GetAllocationList();
 	int* excessAllocationList = volume->index.GetExcessAllocationList();
-	ITMHashEntry* hashTable = volume->index.GetEntries();
+	HashEntry* hashTable = volume->index.GetEntries();
 
 	for (int hashCode = 0; hashCode < hashEntryCount; hashCode++) {
 		const HashEntryAllocationState& hashEntryState = hashEntryStates_device[hashCode];
@@ -390,7 +390,7 @@ AllocateHashEntriesUsingLists(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 
 				if (lastFreeVoxelBlockId >= 0) //there is room in the voxel block array
 				{
-					ITMHashEntry hashEntry;
+					HashEntry hashEntry;
 					hashEntry.pos = blockCoordinates_device[hashCode];
 					hashEntry.ptr = voxelAllocationList[lastFreeVoxelBlockId];
 					hashEntry.offset = 0;
@@ -409,7 +409,7 @@ AllocateHashEntriesUsingLists(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 				if (lastFreeVoxelBlockId >= 0 &&
 				    lastFreeExcessListId >= 0) //there is room in the voxel block array and excess list
 				{
-					ITMHashEntry hashEntry;
+					HashEntry hashEntry;
 					hashEntry.pos = blockCoordinates_device[hashCode];
 					hashEntry.ptr = voxelAllocationList[lastFreeVoxelBlockId];
 					hashEntry.offset = 0;
@@ -447,7 +447,7 @@ AllocateHashEntriesUsingLists_SetVisibility(VoxelVolume<TVoxel, VoxelBlockHash>*
 	int lastFreeExcessListId = volume->index.GetLastFreeExcessListId();
 	int* voxelAllocationList = volume->localVBA.GetAllocationList();
 	int* excessAllocationList = volume->index.GetExcessAllocationList();
-	ITMHashEntry* hashTable = volume->index.GetEntries();
+	HashEntry* hashTable = volume->index.GetEntries();
 
 	for (int hash = 0; hash < entryCount; hash++) {
 		const HashEntryAllocationState& hashEntryState = hashEntryAllocationStates_device[hash];
@@ -456,7 +456,7 @@ AllocateHashEntriesUsingLists_SetVisibility(VoxelVolume<TVoxel, VoxelBlockHash>*
 
 				if (lastFreeVoxelBlockId >= 0) //there is room in the voxel block array
 				{
-					ITMHashEntry hashEntry;
+					HashEntry hashEntry;
 					hashEntry.pos = allocationBlockCoordinates_device[hash];
 					hashEntry.ptr = voxelAllocationList[lastFreeVoxelBlockId];
 					hashEntry.offset = 0;
@@ -472,7 +472,7 @@ AllocateHashEntriesUsingLists_SetVisibility(VoxelVolume<TVoxel, VoxelBlockHash>*
 				if (lastFreeVoxelBlockId >= 0 &&
 				    lastFreeExcessListId >= 0) //there is room in the voxel block array and excess list
 				{
-					ITMHashEntry hashEntry;
+					HashEntry hashEntry;
 					hashEntry.pos = allocationBlockCoordinates_device[hash];
 					hashEntry.ptr = voxelAllocationList[lastFreeVoxelBlockId];
 					hashEntry.offset = 0;
@@ -502,7 +502,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::BuildVisibilityLi
 	const int hashEntryCount = volume->index.hashEntryCount;
 	HashBlockVisibility* hashBlockVisibilityTypes = volume->index.GetBlockVisibilityTypes();
 	int* visibleEntryHashCodes = volume->index.GetUtilizedBlockHashCodes();
-	ITMHashEntry* hashTable = volume->index.GetEntries();
+	HashEntry* hashTable = volume->index.GetEntries();
 	bool useSwapping = volume->globalCache != nullptr;
 	ITMHashSwapState* swapStates = volume->Swapping() ? volume->globalCache->GetSwapStates(false) : 0;
 
@@ -515,7 +515,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::BuildVisibilityLi
 	//build visible list
 	for (int hashCode = 0; hashCode < hashEntryCount; hashCode++) {
 		HashBlockVisibility hashVisibleType = hashBlockVisibilityTypes[hashCode];
-		const ITMHashEntry& hashEntry = hashTable[hashCode];
+		const HashEntry& hashEntry = hashTable[hashCode];
 
 		if (hashVisibleType == 3) {
 			bool isVisibleEnlarged, isVisible;
@@ -555,10 +555,10 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::SetVisibilityToVi
 }
 
 template<typename TVoxel>
-ITMHashEntry
+HashEntry
 IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::FindHashEntry(const VoxelBlockHash& index,
                                                                            const Vector3s& coordinates) {
-	const ITMHashEntry* entries = index.GetEntries();
+	const HashEntry* entries = index.GetEntries();
 	int hashCode = FindHashCodeAt(entries, coordinates);
 	if (hashCode == -1) {
 		return {Vector3s(0, 0, 0), 0, -2};
@@ -568,11 +568,11 @@ IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::FindHashEntry(const Vo
 }
 
 template<typename TVoxel>
-ITMHashEntry
+HashEntry
 IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::FindHashEntry(const VoxelBlockHash& index,
                                                                            const Vector3s& coordinates,
                                                                            int& hashCode) {
-	const ITMHashEntry* entries = index.GetEntries();
+	const HashEntry* entries = index.GetEntries();
 	hashCode = FindHashCodeAt(entries, coordinates);
 	if (hashCode == -1) {
 		return {Vector3s(0, 0, 0), 0, -2};
@@ -585,12 +585,12 @@ template<typename TVoxel>
 bool IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateHashBlockAt(
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3s at, int& hashCode) {
 
-	ITMHashEntry* hashTable = volume->index.GetEntries();
+	HashEntry* hashTable = volume->index.GetEntries();
 	int lastFreeVoxelBlockId = volume->localVBA.lastFreeBlockId;
 	int lastFreeExcessListId = volume->index.GetLastFreeExcessListId();
 	int* voxelAllocationList = volume->localVBA.GetAllocationList();
 	int* excessAllocationList = volume->index.GetExcessAllocationList();
-	ITMHashEntry* entry = nullptr;
+	HashEntry* entry = nullptr;
 	hashCode = -1;
 	if (!FindOrAllocateHashEntry(at, hashTable, entry, lastFreeVoxelBlockId, lastFreeExcessListId,
 	                             voxelAllocationList, excessAllocationList, hashCode)) {

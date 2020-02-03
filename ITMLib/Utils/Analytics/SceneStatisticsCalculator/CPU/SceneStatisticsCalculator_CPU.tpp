@@ -36,13 +36,13 @@ struct ComputeVoxelBoundsFunctor<TVoxel, VoxelBlockHash> {
 		Vector6i bounds = Vector6i(0);
 
 		const TVoxel* voxelBlocks = scene->localVBA.GetVoxelBlocks();
-		const ITMHashEntry* hashTable = scene->index.GetEntries();
+		const HashEntry* hashTable = scene->index.GetEntries();
 		int noTotalEntries = scene->index.hashEntryCount;
 
 		//TODO: if OpenMP standard is 3.1 or above, use OpenMP parallel for reduction clause with (max:maxVoxelPointX,...) -Greg (GitHub: Algomorph)
 		for (int entryId = 0; entryId < noTotalEntries; entryId++) {
 
-			const ITMHashEntry& currentHashEntry = hashTable[entryId];
+			const HashEntry& currentHashEntry = hashTable[entryId];
 
 			if (currentHashEntry.ptr < 0) continue;
 
@@ -99,13 +99,13 @@ struct ComputeAllocatedVoxelCountFunctor<TVoxel, VoxelBlockHash> {
 	static int Compute(VoxelVolume<TVoxel, VoxelBlockHash>* scene) {
 		int count = 0;
 
-		const ITMHashEntry* canonicalHashTable = scene->index.GetEntries();
+		const HashEntry* canonicalHashTable = scene->index.GetEntries();
 		int noTotalEntries = scene->index.hashEntryCount;
 #ifdef WITH_OPENMP
 #pragma omp parallel for reduction(+:count)
 #endif
 		for (int entryId = 0; entryId < noTotalEntries; entryId++) {
-			const ITMHashEntry& currentHashEntry = canonicalHashTable[entryId];
+			const HashEntry& currentHashEntry = canonicalHashTable[entryId];
 			if (currentHashEntry.ptr < 0) continue;
 			count += VOXEL_BLOCK_SIZE3;
 		}
@@ -197,10 +197,10 @@ template<typename TVoxel>
 struct HashOnlyStatisticsFunctor<TVoxel, VoxelBlockHash> {
 	static std::vector<int> GetFilledHashBlockIds(VoxelVolume<TVoxel, VoxelBlockHash>* scene) {
 		std::vector<int> ids;
-		const ITMHashEntry* canonicalHashTable = scene->index.GetEntries();
+		const HashEntry* canonicalHashTable = scene->index.GetEntries();
 		int noTotalEntries = scene->index.hashEntryCount;
 		for (int entryId = 0; entryId < noTotalEntries; entryId++) {
-			const ITMHashEntry& currentHashEntry = canonicalHashTable[entryId];
+			const HashEntry& currentHashEntry = canonicalHashTable[entryId];
 			if (currentHashEntry.ptr < 0) continue;
 			ids.push_back(entryId);
 		}
@@ -209,10 +209,10 @@ struct HashOnlyStatisticsFunctor<TVoxel, VoxelBlockHash> {
 
 	static int ComputeAllocatedHashBlockCount(VoxelVolume<TVoxel, VoxelBlockHash>* scene) {
 		int count = 0;
-		const ITMHashEntry* canonicalHashTable = scene->index.GetEntries();
+		const HashEntry* canonicalHashTable = scene->index.GetEntries();
 		int noTotalEntries = scene->index.hashEntryCount;
 		for (int entryId = 0; entryId < noTotalEntries; entryId++) {
-			const ITMHashEntry& currentHashEntry = canonicalHashTable[entryId];
+			const HashEntry& currentHashEntry = canonicalHashTable[entryId];
 			if (currentHashEntry.ptr >= 0) count++;
 		}
 		return count;

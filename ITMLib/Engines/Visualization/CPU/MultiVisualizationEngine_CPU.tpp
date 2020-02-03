@@ -53,7 +53,7 @@ void MultiVisualizationEngine_CPU<TVoxel, VoxelBlockHash>::CreateExpectedDepths(
 	for (int localMapId = 0; localMapId < renderState->indexData_host.numLocalMaps; ++localMapId) 
 	{
 		float voxelSize = renderState->voxelSize;
-		const ITMHashEntry *hash_entries = renderState->indexData_host.index[localMapId];
+		const HashEntry *hash_entries = renderState->indexData_host.index[localMapId];
 		int hashEntryCount = sceneManager.getLocalMap(0)->scene->index.hashEntryCount;
 
 		std::vector<RenderingBlock> renderingBlocks(MAX_RENDERING_BLOCKS);
@@ -61,7 +61,7 @@ void MultiVisualizationEngine_CPU<TVoxel, VoxelBlockHash>::CreateExpectedDepths(
 
 		Matrix4f localPose = pose->GetM() * renderState->indexData_host.posesInv[localMapId];
 		for (int blockNo = 0; blockNo < hashEntryCount; ++blockNo) {
-			const ITMHashEntry & blockData(hash_entries[blockNo]);
+			const HashEntry & blockData(hash_entries[blockNo]);
 
 			Vector2i upperLeft, lowerRight;
 			Vector2f zRange;

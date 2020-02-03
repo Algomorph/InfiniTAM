@@ -37,7 +37,7 @@ ReadVoxelRef(THREADPTR(TVoxel)* voxelData, const CONSTPTR(ITMLib::VoxelBlockHash
 	int hashIdx = HashCodeFromBlockPosition(blockPos);
 
 	while (true) {
-		ITMHashEntry hashEntry = voxelIndex[hashIdx];
+		HashEntry hashEntry = voxelIndex[hashIdx];
 
 		if (IS_EQUAL3(hashEntry.pos, blockPos) && hashEntry.ptr >= 0) {
 			cache.blockPos = blockPos;
@@ -60,7 +60,7 @@ ReadVoxelRef(THREADPTR(TVoxel)* voxelData, const CONSTPTR(ITMLib::VoxelBlockHash
 template<class TVoxel, typename TCache>
 _CPU_AND_GPU_CODE_
 inline void DistributeTrilinearly(THREADPTR(TVoxel)* voxels,
-                                  const CONSTPTR(ITMHashEntry)* hashEntries,
+                                  const CONSTPTR(HashEntry)* hashEntries,
                                   THREADPTR(TCache)& cache,
                                   const CONSTPTR(Vector3f)& point,
                                   const CONSTPTR(float)& sdfValue) {

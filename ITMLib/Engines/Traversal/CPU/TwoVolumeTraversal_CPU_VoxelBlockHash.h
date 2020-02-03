@@ -45,19 +45,19 @@ public:
 
 // *** traversal vars
 		TVoxelSecondary* secondaryVoxels = secondaryScene->localVBA.GetVoxelBlocks();
-		ITMHashEntry* secondaryHashTable = secondaryScene->index.GetEntries();
+		HashEntry* secondaryHashTable = secondaryScene->index.GetEntries();
 
 		TVoxelPrimary* primaryVoxels = primaryScene->localVBA.GetVoxelBlocks();
-		ITMHashEntry* primaryHashTable = primaryScene->index.GetEntries();
+		HashEntry* primaryHashTable = primaryScene->index.GetEntries();
 		int noTotalEntries = primaryScene->index.hashEntryCount;
 
 #ifdef WITH_OPENMP
 #pragma omp parallel for
 #endif
 		for (int hash = 0; hash < noTotalEntries; hash++) {
-			const ITMHashEntry& currentLiveHashEntry = primaryHashTable[hash];
+			const HashEntry& currentLiveHashEntry = primaryHashTable[hash];
 			if (currentLiveHashEntry.ptr < 0) continue;
-			ITMHashEntry currentCanonicalHashEntry = secondaryHashTable[hash];
+			HashEntry currentCanonicalHashEntry = secondaryHashTable[hash];
 
 			// the rare case where we have different positions for primary & secondary voxel block with the same index:
 			// we have a hash bucket miss, find the secondary voxel with the matching coordinates
@@ -98,19 +98,19 @@ public:
 
 // *** traversal vars
 		TVoxelSecondary* secondaryVoxels = secondaryScene->localVBA.GetVoxelBlocks();
-		ITMHashEntry* secondaryHashTable = secondaryScene->index.GetEntries();
+		HashEntry* secondaryHashTable = secondaryScene->index.GetEntries();
 
 		TVoxelPrimary* primaryVoxels = primaryScene->localVBA.GetVoxelBlocks();
-		ITMHashEntry* primaryHashTable = primaryScene->index.GetEntries();
+		HashEntry* primaryHashTable = primaryScene->index.GetEntries();
 		int totalHashEntryCount = primaryScene->index.hashEntryCount;
 
 #ifdef WITH_OPENMP
 #pragma omp parallel for
 #endif
 		for (int hash = 0; hash < totalHashEntryCount; hash++) {
-			const ITMHashEntry& currentPrimaryHashEntry = primaryHashTable[hash];
+			const HashEntry& currentPrimaryHashEntry = primaryHashTable[hash];
 			if (currentPrimaryHashEntry.ptr < 0) continue;
-			ITMHashEntry currentSecondaryHashEntry = secondaryHashTable[hash];
+			HashEntry currentSecondaryHashEntry = secondaryHashTable[hash];
 
 			// the rare case where we have different positions for primary & secondary voxel block with the same index:
 			// we have a hash bucket miss, find the secondary voxel with the matching coordinates
@@ -156,11 +156,11 @@ public:
 
 // *** traversal vars
 		TVoxelSecondary* secondaryVoxels = secondaryScene->localVBA.GetVoxelBlocks();
-		ITMHashEntry* secondaryHashTable = secondaryScene->index.GetEntries();
+		HashEntry* secondaryHashTable = secondaryScene->index.GetEntries();
 
 
 		TVoxelPrimary* primaryVoxels = primaryScene->localVBA.GetVoxelBlocks();
-		ITMHashEntry* primaryHashTable = primaryScene->index.GetEntries();
+		HashEntry* primaryHashTable = primaryScene->index.GetEntries();
 		int noTotalEntries = primaryScene->index.hashEntryCount;
 
 #ifdef WITH_OPENMP
@@ -168,9 +168,9 @@ public:
 #endif
 		for (int hash = 0; hash < noTotalEntries; hash++) {
 
-			const ITMHashEntry& currentLiveHashEntry = primaryHashTable[hash];
+			const HashEntry& currentLiveHashEntry = primaryHashTable[hash];
 			if (currentLiveHashEntry.ptr < 0) continue;
-			ITMHashEntry currentCanonicalHashEntry = secondaryHashTable[hash];
+			HashEntry currentCanonicalHashEntry = secondaryHashTable[hash];
 
 			// the rare case where we have different positions for primary & secondary voxel block with the same index:
 			// we have a hash bucket miss, find the secondary voxel with the matching coordinates
@@ -212,11 +212,11 @@ public:
 
 // *** traversal vars
 		TVoxelSecondary* secondaryVoxels = secondaryScene->localVBA.GetVoxelBlocks();
-		ITMHashEntry* secondaryHashTable = secondaryScene->index.GetEntries();
+		HashEntry* secondaryHashTable = secondaryScene->index.GetEntries();
 
 
 		TVoxelPrimary* primaryVoxels = primaryScene->localVBA.GetVoxelBlocks();
-		ITMHashEntry* primaryHashTable = primaryScene->index.GetEntries();
+		HashEntry* primaryHashTable = primaryScene->index.GetEntries();
 		int hashEntryCount = primaryScene->index.hashEntryCount;
 
 		bool mismatchFound = false;
@@ -226,8 +226,8 @@ public:
 #endif
 		for (int hashCode = 0; hashCode < hashEntryCount; hashCode++) {
 			if (mismatchFound) continue;
-			const ITMHashEntry& primaryHashEntry = primaryHashTable[hashCode];
-			ITMHashEntry secondaryHashEntry = secondaryHashTable[hashCode];
+			const HashEntry& primaryHashEntry = primaryHashTable[hashCode];
+			HashEntry secondaryHashEntry = secondaryHashTable[hashCode];
 
 			auto secondaryHashEntryHasMatchingPrimary = [&](int secondaryHashCode) {
 				int alternativePrimaryHash;
@@ -318,19 +318,19 @@ public:
 
 // *** traversal vars
 		TVoxelSecondary* secondaryVoxels = secondaryScene->localVBA.GetVoxelBlocks();
-		ITMHashEntry* secondaryHashTable = secondaryScene->index.GetEntries();
+		HashEntry* secondaryHashTable = secondaryScene->index.GetEntries();
 
 		TVoxelPrimary* primaryVoxels = primaryScene->localVBA.GetVoxelBlocks();
-		ITMHashEntry* primaryHashTable = primaryScene->index.GetEntries();
+		HashEntry* primaryHashTable = primaryScene->index.GetEntries();
 		int noTotalEntries = primaryScene->index.hashEntryCount;
 
 #ifdef WITH_OPENMP
 #pragma omp parallel for
 #endif
 		for (int hash = 0; hash < noTotalEntries; hash++) {
-			const ITMHashEntry& primaryHashEntry = primaryHashTable[hash];
+			const HashEntry& primaryHashEntry = primaryHashTable[hash];
 			if (primaryHashEntry.ptr < 0) continue;
-			ITMHashEntry secondaryHashEntry = secondaryHashTable[hash];
+			HashEntry secondaryHashEntry = secondaryHashTable[hash];
 
 			// the rare case where we have different positions for primary & secondary voxel block with the same index:
 			// we have a hash bucket miss, find the secondary voxel with the matching coordinates
@@ -375,11 +375,11 @@ public:
 
 // *** traversal vars
 		TVoxelSecondary* secondaryVoxels = secondaryScene->localVBA.GetVoxelBlocks();
-		ITMHashEntry* secondaryHashTable = secondaryScene->index.GetEntries();
+		HashEntry* secondaryHashTable = secondaryScene->index.GetEntries();
 
 
 		TVoxelPrimary* primaryVoxels = primaryScene->localVBA.GetVoxelBlocks();
-		ITMHashEntry* primaryHashTable = primaryScene->index.GetEntries();
+		HashEntry* primaryHashTable = primaryScene->index.GetEntries();
 		int hashEntryCount = primaryScene->index.hashEntryCount;
 
 		bool mismatchFound = false;
@@ -389,8 +389,8 @@ public:
 #endif
 		for (int hashCode = 0; hashCode < hashEntryCount; hashCode++) {
 			if (mismatchFound) continue;
-			const ITMHashEntry& primaryHashEntry = primaryHashTable[hashCode];
-			ITMHashEntry secondaryHashEntry = secondaryHashTable[hashCode];
+			const HashEntry& primaryHashEntry = primaryHashTable[hashCode];
+			HashEntry secondaryHashEntry = secondaryHashTable[hashCode];
 
 			auto secondaryHashEntryHasMatchingPrimary = [&](int secondaryHashCode) {
 				int alternativePrimaryHash;
@@ -484,19 +484,19 @@ public:
 
 // *** traversal vars
 		TVoxelSecondary* secondaryVoxels = secondaryScene->localVBA.GetVoxelBlocks();
-		ITMHashEntry* secondaryHashTable = secondaryScene->index.GetEntries();
+		HashEntry* secondaryHashTable = secondaryScene->index.GetEntries();
 
 		TVoxelPrimary* primaryVoxels = primaryScene->localVBA.GetVoxelBlocks();
-		ITMHashEntry* primaryHashTable = primaryScene->index.GetEntries();
+		HashEntry* primaryHashTable = primaryScene->index.GetEntries();
 		int totalHashEntryCount = primaryScene->index.hashEntryCount;
 
 #ifdef WITH_OPENMP
 #pragma omp parallel for
 #endif
 		for (int hash = 0; hash < totalHashEntryCount; hash++) {
-			const ITMHashEntry& primaryHashEntry = primaryHashTable[hash];
+			const HashEntry& primaryHashEntry = primaryHashTable[hash];
 			if (primaryHashEntry.ptr < 0) continue;
-			ITMHashEntry secondaryHashEntry = secondaryHashTable[hash];
+			HashEntry secondaryHashEntry = secondaryHashTable[hash];
 
 			// the rare case where we have different positions for primary & secondary voxel block with the same index:
 			// we have a hash bucket miss, find the secondary voxel with the matching coordinates
@@ -551,19 +551,19 @@ public:
 
 // *** traversal vars
 		TVoxelSecondary* secondaryVoxels = secondaryScene->localVBA.GetVoxelBlocks();
-		ITMHashEntry* secondaryHashTable = secondaryScene->index.GetEntries();
+		HashEntry* secondaryHashTable = secondaryScene->index.GetEntries();
 
 		TVoxelPrimary* primaryVoxels = primaryScene->localVBA.GetVoxelBlocks();
-		ITMHashEntry* primaryHashTable = primaryScene->index.GetEntries();
+		HashEntry* primaryHashTable = primaryScene->index.GetEntries();
 		int noTotalEntries = primaryScene->index.hashEntryCount;
 
 #ifdef WITH_OPENMP
 #pragma omp parallel for
 #endif
 		for (int hash = 0; hash < noTotalEntries; hash++) {
-			const ITMHashEntry& currentLiveHashEntry = primaryHashTable[hash];
+			const HashEntry& currentLiveHashEntry = primaryHashTable[hash];
 			if (currentLiveHashEntry.ptr < 0) continue;
-			ITMHashEntry currentCanonicalHashEntry = secondaryHashTable[hash];
+			HashEntry currentCanonicalHashEntry = secondaryHashTable[hash];
 
 			// the rare case where we have different positions for primary & secondary voxel block with the same index:
 			// we have a hash bucket miss, find the secondary voxel with the matching coordinates
@@ -618,16 +618,16 @@ public:
 
 // *** traversal vars
 		TVoxelSecondary* secondaryVoxels = secondaryScene->localVBA.GetVoxelBlocks();
-		ITMHashEntry* secondaryHashTable = secondaryScene->index.GetEntries();
+		HashEntry* secondaryHashTable = secondaryScene->index.GetEntries();
 
 		TVoxelPrimary* primaryVoxels = primaryScene->localVBA.GetVoxelBlocks();
-		ITMHashEntry* primaryHashTable = primaryScene->index.GetEntries();
+		HashEntry* primaryHashTable = primaryScene->index.GetEntries();
 		int noTotalEntries = primaryScene->index.hashEntryCount;
 
 		for (int hash = 0; hash < noTotalEntries; hash++) {
-			const ITMHashEntry& currentLiveHashEntry = primaryHashTable[hash];
+			const HashEntry& currentLiveHashEntry = primaryHashTable[hash];
 			if (currentLiveHashEntry.ptr < 0) continue;
-			ITMHashEntry currentCanonicalHashEntry = secondaryHashTable[hash];
+			HashEntry currentCanonicalHashEntry = secondaryHashTable[hash];
 
 			// the rare case where we have different positions for primary & secondary voxel block with the same index:
 			// we have a hash bucket miss, find the secondary voxel with the matching coordinates

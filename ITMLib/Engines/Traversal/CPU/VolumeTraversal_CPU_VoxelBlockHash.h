@@ -40,13 +40,13 @@ public:
 	inline static void
 	VoxelTraversal(VoxelVolume<TVoxel, VoxelBlockHash>* scene, TFunctor& functor) {
 		TVoxel* const voxels = scene->localVBA.GetVoxelBlocks();
-		const ITMHashEntry* const hashTable = scene->index.GetEntries();
+		const HashEntry* const hashTable = scene->index.GetEntries();
 		const int noTotalEntries = scene->index.hashEntryCount;
 #ifdef WITH_OPENMP
 #pragma omp parallel for default(none) shared(functor)
 #endif
 		for (int entryId = 0; entryId < noTotalEntries; entryId++) {
-			const ITMHashEntry& currentHashEntry = hashTable[entryId];
+			const HashEntry& currentHashEntry = hashTable[entryId];
 			if (currentHashEntry.ptr < 0) continue;
 			TVoxel* localVoxelBlock = &(voxels[currentHashEntry.ptr * (VOXEL_BLOCK_SIZE3)]);
 			for (int z = 0; z < VOXEL_BLOCK_SIZE; z++) {
@@ -65,10 +65,10 @@ public:
 	inline static void
 	VoxelTraversal_SingleThreaded(VoxelVolume<TVoxel, VoxelBlockHash>* scene, TFunctor& functor) {
 		TVoxel* voxels = scene->localVBA.GetVoxelBlocks();
-		const ITMHashEntry* hashTable = scene->index.GetEntries();
+		const HashEntry* hashTable = scene->index.GetEntries();
 		int noTotalEntries = scene->index.hashEntryCount;
 		for (int entryId = 0; entryId < noTotalEntries; entryId++) {
-			const ITMHashEntry& currentHashEntry = hashTable[entryId];
+			const HashEntry& currentHashEntry = hashTable[entryId];
 			if (currentHashEntry.ptr < 0) continue;
 			TVoxel* localVoxelBlock = &(voxels[currentHashEntry.ptr * (VOXEL_BLOCK_SIZE3)]);
 			for (int z = 0; z < VOXEL_BLOCK_SIZE; z++) {
@@ -87,13 +87,13 @@ public:
 	inline static void
 	VoxelPositionTraversal(VoxelVolume<TVoxel, VoxelBlockHash>* scene, TFunctor& functor) {
 		TVoxel* const voxels = scene->localVBA.GetVoxelBlocks();
-		const ITMHashEntry* const hashTable = scene->index.GetEntries();
+		const HashEntry* const hashTable = scene->index.GetEntries();
 		const int noTotalEntries = scene->index.hashEntryCount;
 #ifdef WITH_OPENMP
 #pragma omp parallel for default(none) shared(functor)
 #endif
 		for (int entryId = 0; entryId < noTotalEntries; entryId++) {
-			const ITMHashEntry& currentHashEntry = hashTable[entryId];
+			const HashEntry& currentHashEntry = hashTable[entryId];
 			if (currentHashEntry.ptr < 0) continue;
 			TVoxel* localVoxelBlock = &(voxels[currentHashEntry.ptr * (VOXEL_BLOCK_SIZE3)]);
 			//position of the current entry in 3D space (in voxel units)
@@ -115,13 +115,13 @@ public:
 	inline static void
 	VoxelAndHashBlockPositionTraversal(VoxelVolume<TVoxel, VoxelBlockHash>* scene, TFunctor& functor) {
 		TVoxel* const voxels = scene->localVBA.GetVoxelBlocks();
-		const ITMHashEntry* const hashTable = scene->index.GetEntries();
+		const HashEntry* const hashTable = scene->index.GetEntries();
 		const int hashEntryCount = scene->index.hashEntryCount;
 #ifdef WITH_OPENMP
 #pragma omp parallel for default(none) shared(functor)
 #endif
 		for (int entryId = 0; entryId < hashEntryCount; entryId++) {
-			const ITMHashEntry& currentHashEntry = hashTable[entryId];
+			const HashEntry& currentHashEntry = hashTable[entryId];
 			if (currentHashEntry.ptr < 0) continue;
 			TVoxel* localVoxelBlock = &(voxels[currentHashEntry.ptr * (VOXEL_BLOCK_SIZE3)]);
 			//position of the current entry in 3D space (in voxel units)
@@ -144,13 +144,13 @@ public:
 	VoxelTraversalWithinBounds(VoxelVolume<TVoxel, VoxelBlockHash>* scene, TFunctor& functor,
 	                           const Vector6i& bounds) {
 		TVoxel* const voxels = scene->localVBA.GetVoxelBlocks();
-		const ITMHashEntry* const hashTable = scene->index.GetEntries();
+		const HashEntry* const hashTable = scene->index.GetEntries();
 		const int noTotalEntries = scene->index.hashEntryCount;
 #ifdef WITH_OPENMP
 #pragma omp parallel for default(none) shared(functor, bounds)
 #endif
 		for (int entryId = 0; entryId < noTotalEntries; entryId++) {
-			const ITMHashEntry& currentHashEntry = hashTable[entryId];
+			const HashEntry& currentHashEntry = hashTable[entryId];
 			if (currentHashEntry.ptr < 0) continue;
 			Vector3i hashEntryMinPoint = currentHashEntry.pos.toInt() * VOXEL_BLOCK_SIZE;
 			Vector3i hashEntryMaxPoint = hashEntryMinPoint + Vector3i(VOXEL_BLOCK_SIZE);
@@ -177,13 +177,13 @@ public:
 	VoxelPositionTraversalWithinBounds(VoxelVolume<TVoxel, VoxelBlockHash>* scene, TFunctor& functor,
 	                                   Vector6i bounds) {
 		TVoxel* voxels = scene->localVBA.GetVoxelBlocks();
-		const ITMHashEntry* hashTable = scene->index.GetEntries();
+		const HashEntry* hashTable = scene->index.GetEntries();
 		int noTotalEntries = scene->index.hashEntryCount;
 #ifdef WITH_OPENMP
 #pragma omp parallel for
 #endif
 		for (int entryId = 0; entryId < noTotalEntries; entryId++) {
-			const ITMHashEntry& currentHashEntry = hashTable[entryId];
+			const HashEntry& currentHashEntry = hashTable[entryId];
 			if (currentHashEntry.ptr < 0) continue;
 			Vector3i hashEntryMinPoint = currentHashEntry.pos.toInt() * VOXEL_BLOCK_SIZE;
 			Vector3i hashEntryMaxPoint = hashEntryMinPoint + Vector3i(VOXEL_BLOCK_SIZE);
@@ -213,13 +213,13 @@ public:
 	VoxelPositionAndHashEntryTraversalWithinBounds(VoxelVolume<TVoxel, VoxelBlockHash>* scene, TFunctor& functor,
 	                                               Vector6i bounds) {
 		TVoxel* voxels = scene->localVBA.GetVoxelBlocks();
-		const ITMHashEntry* hashTable = scene->index.GetEntries();
+		const HashEntry* hashTable = scene->index.GetEntries();
 		int noTotalEntries = scene->index.hashEntryCount;
 #ifdef WITH_OPENMP
 #pragma omp parallel for
 #endif
 		for (int entryId = 0; entryId < noTotalEntries; entryId++) {
-			const ITMHashEntry& currentHashEntry = hashTable[entryId];
+			const HashEntry& currentHashEntry = hashTable[entryId];
 			if (currentHashEntry.ptr < 0) continue;
 			Vector3i hashEntryMinPoint = currentHashEntry.pos.toInt() * VOXEL_BLOCK_SIZE;
 			Vector3i hashEntryMaxPoint = hashEntryMinPoint + Vector3i(VOXEL_BLOCK_SIZE);
@@ -252,13 +252,13 @@ public:
 	template<typename TStaticFunctor>
 	inline static void StaticVoxelTraversal(VoxelVolume<TVoxel, VoxelBlockHash>* scene) {
 		TVoxel* voxels = scene->localVBA.GetVoxelBlocks();
-		const ITMHashEntry* hashTable = scene->index.GetEntries();
+		const HashEntry* hashTable = scene->index.GetEntries();
 		int noTotalEntries = scene->index.hashEntryCount;
 #ifdef WITH_OPENMP
 #pragma omp parallel for
 #endif
 		for (int entryId = 0; entryId < noTotalEntries; entryId++) {
-			const ITMHashEntry& currentHashEntry = hashTable[entryId];
+			const HashEntry& currentHashEntry = hashTable[entryId];
 			if (currentHashEntry.ptr < 0) continue;
 			TVoxel* localVoxelBlock = &(voxels[currentHashEntry.ptr * (VOXEL_BLOCK_SIZE3)]);
 			for (int z = 0; z < VOXEL_BLOCK_SIZE; z++) {
@@ -276,13 +276,13 @@ public:
 	template<typename TStaticFunctor>
 	inline static void StaticVoxelPositionTraversal(VoxelVolume<TVoxel, VoxelBlockHash>* scene) {
 		TVoxel* voxels = scene->localVBA.GetVoxelBlocks();
-		const ITMHashEntry* hashTable = scene->index.GetEntries();
+		const HashEntry* hashTable = scene->index.GetEntries();
 		int noTotalEntries = scene->index.hashEntryCount;
 #ifdef WITH_OPENMP
 #pragma omp parallel for
 #endif
 		for (int entryId = 0; entryId < noTotalEntries; entryId++) {
-			const ITMHashEntry& currentHashEntry = hashTable[entryId];
+			const HashEntry& currentHashEntry = hashTable[entryId];
 			if (currentHashEntry.ptr < 0) continue;
 			TVoxel* localVoxelBlock = &(voxels[currentHashEntry.ptr * (VOXEL_BLOCK_SIZE3)]);
 			//position of the current entry in 3D space (in voxel units)

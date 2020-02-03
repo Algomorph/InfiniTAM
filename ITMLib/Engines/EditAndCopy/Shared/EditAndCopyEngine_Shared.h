@@ -89,7 +89,7 @@ inline int
 FindHashCodeAt(const CONSTPTR(ITMLib::VoxelBlockHash::IndexData)* voxelIndex, const THREADPTR(Vector3s)& at) {
 	int hash = HashCodeFromBlockPosition(at);
 	while (true) {
-		ITMHashEntry hashEntry = voxelIndex[hash];
+		HashEntry hashEntry = voxelIndex[hash];
 
 		if (IS_EQUAL3(hashEntry.pos, at) && hashEntry.ptr >= 0) {
 			return hash;
@@ -238,7 +238,7 @@ void GetVoxelHashLocals(int& vmIndex, int& locId, int& xInBlock, int& yInBlock, 
 	int hashIdx = HashCodeFromBlockPosition(blockPos);
 
 	while (true) {
-		ITMHashEntry hashEntry = hashEntries[hashIdx];
+		HashEntry hashEntry = hashEntries[hashIdx];
 
 		if (IS_EQUAL3(hashEntry.pos, blockPos) && hashEntry.ptr >= 0) {
 			cache.blockPos = blockPos;

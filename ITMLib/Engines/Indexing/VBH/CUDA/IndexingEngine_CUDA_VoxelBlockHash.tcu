@@ -51,7 +51,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::AllocateFromDept
 	float* depth = view->depth->GetData(MEMORYDEVICE_CUDA);
 	int* voxelAllocationList = volume->localVBA.GetAllocationList();
 	int* excessAllocationList = volume->index.GetExcessAllocationList();
-	ITMHashEntry* hashTable = volume->index.GetEntries();
+	HashEntry* hashTable = volume->index.GetEntries();
 	ITMHashSwapState* swapStates = volume->Swapping() ? volume->globalCache->GetSwapStates(true) : 0;
 
 	ITMLib::HashEntryAllocationState* hashEntryStates_device = volume->index.GetHashEntryAllocationStates();
@@ -150,8 +150,8 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::AllocateUsingOth
 
 	assert(targetVolume->index.hashEntryCount == sourceVolume->index.hashEntryCount);
 
-	ITMHashEntry* targetHashTable = targetVolume->index.GetIndexData();
-	ITMHashEntry* sourceHashTable = sourceVolume->index.GetIndexData();
+	HashEntry* targetHashTable = targetVolume->index.GetIndexData();
+	HashEntry* sourceHashTable = sourceVolume->index.GetIndexData();
 	int hashEntryCount = targetVolume->index.hashEntryCount;
 
 	HashEntryAllocationState* hashEntryStates_device = targetVolume->index.GetHashEntryAllocationStates();
@@ -191,7 +191,7 @@ AllocateHashEntriesUsingLists(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 	const int hashEntryCount = volume->index.hashEntryCount;
 	int* voxelAllocationList = volume->localVBA.GetAllocationList();
 	int* excessAllocationList = volume->index.GetExcessAllocationList();
-	ITMHashEntry* hashTable = volume->index.GetIndexData();
+	HashEntry* hashTable = volume->index.GetIndexData();
 
 	ORUtils::MemoryBlock<AllocationTempData> allocationTempData(1, true, true);
 	AllocationTempData* allocationTempData_host = allocationTempData.GetData(MEMORYDEVICE_CPU);
@@ -225,7 +225,7 @@ AllocateHashEntriesUsingLists_SetVisibility(VoxelVolume<TVoxel, VoxelBlockHash>*
 
 	int* voxelAllocationList = volume->localVBA.GetAllocationList();
 	int* excessAllocationList = volume->index.GetExcessAllocationList();
-	ITMHashEntry* hashTable = volume->index.GetIndexData();
+	HashEntry* hashTable = volume->index.GetIndexData();
 
 	ORUtils::MemoryBlock<AllocationTempData> allocationTempData(1, true, true);
 	AllocationTempData* allocationTempData_host = allocationTempData.GetData(MEMORYDEVICE_CPU);
@@ -255,7 +255,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::BuildVisibilityL
 	const int hashEntryCount = volume->index.hashEntryCount;
 	HashBlockVisibility* hashBlockVisibilityTypes_device = volume->index.GetBlockVisibilityTypes();
 	int* visibleBlockHashCodes_device = volume->index.GetUtilizedBlockHashCodes();
-	ITMHashEntry* hashTable = volume->index.GetEntries();
+	HashEntry* hashTable = volume->index.GetEntries();
 	bool useSwapping = volume->globalCache != nullptr;
 	ITMHashSwapState* swapStates = volume->Swapping() ? volume->globalCache->GetSwapStates(false) : 0;
 
@@ -302,12 +302,12 @@ IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::SetVisibilityToVisibl
 }
 
 template<typename TVoxel>
-ITMHashEntry
+HashEntry
 IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::FindHashEntry(const VoxelBlockHash& index,
                                                                                const Vector3s& coordinates) {
-	const ITMHashEntry* entries = index.GetEntries();
+	const HashEntry* entries = index.GetEntries();
 	ORUtils::MemoryBlock<int> hashCode(1, true, true);
-	ORUtils::MemoryBlock<ITMHashEntry> hashEntry(1, true, true);
+	ORUtils::MemoryBlock<HashEntry> hashEntry(1, true, true);
 	findHashEntry_device << < 1, 1 >> > (hashEntry.GetData(MEMORYDEVICE_CUDA), entries, coordinates, hashCode.GetData(
 			MEMORYDEVICE_CUDA));
 	hashEntry.UpdateHostFromDevice();
@@ -316,20 +316,20 @@ IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::FindHashEntry(const V
 	if (hashCode_CPU == -1) {
 		return {Vector3s(0, 0, 0), 0, -2};
 	} else {
-		ITMHashEntry entry = *hashEntry.GetData(MEMORYDEVICE_CPU);
+		HashEntry entry = *hashEntry.GetData(MEMORYDEVICE_CPU);
 		return entry;
 	}
 }
 
 
 template<typename TVoxel>
-ITMHashEntry
+HashEntry
 IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::FindHashEntry(const VoxelBlockHash& index,
                                                                                const Vector3s& coordinates,
                                                                                int& hashCode_CPU) {
-	const ITMHashEntry* entries = index.GetEntries();
+	const HashEntry* entries = index.GetEntries();
 	ORUtils::MemoryBlock<int> hashCode(1, true, true);
-	ORUtils::MemoryBlock<ITMHashEntry> hashEntry(1, true, true);
+	ORUtils::MemoryBlock<HashEntry> hashEntry(1, true, true);
 	findHashEntry_device << < 1, 1 >> > (hashEntry.GetData(MEMORYDEVICE_CUDA), entries, coordinates, hashCode.GetData(
 			MEMORYDEVICE_CUDA));
 	ORcudaKernelCheck;
@@ -339,7 +339,7 @@ IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::FindHashEntry(const V
 	if (hashCode_CPU == -1) {
 		return {Vector3s(0, 0, 0), 0, -2};
 	} else {
-		ITMHashEntry entry = *hashEntry.GetData(MEMORYDEVICE_CPU);
+		HashEntry entry = *hashEntry.GetData(MEMORYDEVICE_CPU);
 		return entry;
 	}
 }
@@ -352,8 +352,8 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::AllocateUsingOth
 	assert(sourceVolume->index.hashEntryCount == targetVolume->index.hashEntryCount);
 
 	int hashEntryCount = targetVolume->index.hashEntryCount;
-	ITMHashEntry* targetHashTable = targetVolume->index.GetEntries();
-	ITMHashEntry* sourceHashTable = sourceVolume->index.GetEntries();
+	HashEntry* targetHashTable = targetVolume->index.GetEntries();
+	HashEntry* sourceHashTable = sourceVolume->index.GetEntries();
 
 	HashEntryAllocationState* hashEntryStates_device = targetVolume->index.GetHashEntryAllocationStates();
 	Vector3s* blockCoordinates_device = targetVolume->index.GetAllocationBlockCoordinates();
@@ -387,8 +387,8 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::AllocateUsingOth
 	assert(sourceVolume->index.hashEntryCount == targetVolume->index.hashEntryCount);
 
 	int hashEntryCount = targetVolume->index.hashEntryCount;
-	ITMHashEntry* targetHashTable = targetVolume->index.GetEntries();
-	ITMHashEntry* sourceHashTable = sourceVolume->index.GetEntries();
+	HashEntry* targetHashTable = targetVolume->index.GetEntries();
+	HashEntry* sourceHashTable = sourceVolume->index.GetEntries();
 
 	HashEntryAllocationState* hashEntryStates_device = targetVolume->index.GetHashEntryAllocationStates();
 	Vector3s* blockCoordinates_device = targetVolume->index.GetAllocationBlockCoordinates();
@@ -423,7 +423,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::AllocateUsingOth
 template<typename TVoxel>
 bool IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::AllocateHashBlockAt(
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3s at, int& hashCode) {
-	ITMHashEntry* hashTable = volume->index.GetEntries();
+	HashEntry* hashTable = volume->index.GetEntries();
 
 	ORUtils::MemoryBlock<SingleHashAllocationData> data(1, true, true);
 

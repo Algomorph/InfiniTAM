@@ -127,22 +127,4 @@ computeDataTerm(ComponentEnergies& energies, AdditionalGradientAggregates& aggre
 	ATOMIC_ADD(aggregates.cumulativeSdfDiff, std::abs(sdfDifferenceBetweenLiveAndCanonical));
 	return dataTermGradient;
 }
-// TODO
-//_CPU_AND_GPU_CODE_
-//template<typename TVoxelA, typename TIndexData, typename TCache>
-//inline Vector3f
-//computeLevelSetTerm(){
-//	Matrix3f liveSdfHessian;Vector3f liveSdfJacobian;
-//	ComputeLiveJacobian_CentralDifferences(
-//			liveSdfJacobian, voxelPosition, liveVoxels, liveIndexData, liveCache);
-//
-//	ComputeSdfHessian(liveSdfHessian, voxelPosition, liveSdf, liveVoxels, liveIndexData, liveCache);
-//
-//	float sdfJacobianNorm = ORUtils::length(liveSdfJacobian);
-//	float sdfJacobianNormMinusUnity = sdfJacobianNorm - parameters.unity;
-//	localLevelSetEnergyGradient = sdfJacobianNormMinusUnity * (liveSdfHessian * liveSdfJacobian) /
-//	                              (sdfJacobianNorm + parameters.epsilon);
-//	ATOMIC_ADD(aggregates.dataVoxelCount, 1u);
-//	localLevelSetEnergy =
-//			0.5f * (sdfJacobianNormMinusUnity * sdfJacobianNormMinusUnity);
-//}
+
