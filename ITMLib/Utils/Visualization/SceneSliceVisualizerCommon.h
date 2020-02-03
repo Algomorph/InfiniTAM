@@ -17,7 +17,7 @@
 
 #include "../../../ORUtils/PlatformIndependence.h"
 #include "../Math.h"
-#include "VisualizationCommon.h"
+#include "../Geometry/CardinalAxesAndPlanes.h"
 
 using namespace ITMLib;
 

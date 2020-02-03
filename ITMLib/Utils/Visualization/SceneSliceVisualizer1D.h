@@ -17,7 +17,7 @@
 
 
 //local
-#include "VisualizationCommon.h"
+#include "../Geometry/CardinalAxesAndPlanes.h"
 #include "../Math.h"
 #include "../../Objects/Volume/VoxelVolume.h"
 #include "VisualizationWindowManager.h"

@@ -18,7 +18,7 @@
 #include "../../Objects/Volume/VoxelVolume.h"
 #include "SceneLogger.h"
 #include "../Visualization/SceneSliceVisualizer2D.h"
-#include "../Visualization/VisualizationCommon.h"
+#include "../Geometry/CardinalAxesAndPlanes.h"
 #ifdef WITH_VTK
 #include "../Visualization/SceneSliceVisualizer1D.h"
 #include "../Visualization/SceneSliceVisualizer3D.h"

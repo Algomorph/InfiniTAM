@@ -16,7 +16,7 @@
 
 
 #include <iostream>
-#include "VisualizationCommon.h"
+#include "CardinalAxesAndPlanes.h"
 
 
 namespace ITMLib{

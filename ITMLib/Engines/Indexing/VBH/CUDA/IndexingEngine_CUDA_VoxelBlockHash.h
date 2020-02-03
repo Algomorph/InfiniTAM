@@ -49,9 +49,10 @@ public:
 	                       bool onlyUpdateVisibleList = false, bool resetVisibleList = false) override;
 
 	void AllocateFromDepthAndSdfSpan(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
-	                                 const RenderState* sourceRenderState,
+	                                 const RenderState* source_render_state,
 	                                 const ITMView* view,
 	                                 const Matrix4f& depth_camera_matrix = Matrix4f::Identity(),
+	                                 const float expand_camera_frustum_by = (PI * 3)/180,
 	                                 bool onlyUpdateAllocatedList = false, bool resetAllocatedList = false) override;
 
 	void AllocateHashEntriesUsingLists(VoxelVolume <TVoxel, VoxelBlockHash>* volume) override;

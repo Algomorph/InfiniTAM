@@ -122,14 +122,12 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateFromDepth
 template<typename TVoxel>
 void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateFromDepthAndSdfSpan(
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume,
-		const RenderState* sourceRenderState,
+		const RenderState* source_render_state,
 		const ITMView* view,
 		const Matrix4f& depth_camera_matrix,
+		const float expand_camera_frustum_by,
 		bool onlyUpdateAllocatedList, bool resetAllocatedList){
 
-	DIEWITHEXCEPTION_REPORTLOCATION("NOT IMPLEMENTED");
-
-	//TODO
 	Vector2i depthImgSize = view->depth->noDims;
 	float voxelSize = volume->sceneParams->voxel_size;
 

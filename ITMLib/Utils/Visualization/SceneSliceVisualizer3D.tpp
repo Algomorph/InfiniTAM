@@ -39,7 +39,7 @@
 #include "SceneSliceVisualizer3D.h"
 #include "SceneSliceVisualizer3DCommon.h"
 #include "SceneSliceVisualizerCommon.h"
-#include "VisualizationCommon.h"
+#include "../Geometry/CardinalAxesAndPlanes.h"
 #include "SceneSliceVisualizer3DInteractorStyle.h"
 #include "../../Engines/Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
 #include "../../Engines/Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"

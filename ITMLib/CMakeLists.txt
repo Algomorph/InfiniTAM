@@ -773,6 +773,9 @@ set(ITMLIB_UTILS_SOURCES
     Utils/Collections/NestedMap3D.tpp
     Utils/Collections/NestedMap3D.cpp
 
+
+    Utils/Geometry/CardinalAxesAndPlanes.cpp
+
     Utils/Serialization/SerializationDetails.cpp
 
     Utils/Analytics/NeighborVoxelIterationInfo.cpp
@@ -793,11 +796,13 @@ set(ITMLIB_UTILS_HEADERS
     Utils/Collections/NestedMap3DOfArrays.h
     Utils/Collections/NestedMap3D.h
 
+    Utils/Geometry/FrustumTrigonometry.h
     Utils/Geometry/GeometryBooleanOperations.h
     Utils/Geometry/GeometryConversionOperations.h
     Utils/Geometry/SpatialIndexConversions.h
     Utils/Geometry/IntersectionChecks.h
     Utils/Geometry/Segment.h
+    Utils/Geometry/CardinalAxesAndPlanes.h
 
     Utils/Serialization/Serialization.h
     Utils/Serialization/SerializationDetails.h
@@ -891,7 +896,6 @@ set(ITMLIB_UTILS_VISUALIZATION_SOURCES
     Utils/Visualization/SceneSliceVisualizer2D_PlainVoxelArray.cpp
     Utils/Visualization/SceneSliceVisualizer2D_VoxelBlockHash.cpp
 
-    Utils/Visualization/VisualizationCommon.cpp
     )
 if (WITH_VTK)
     list(APPEND ITMLIB_UTILS_VISUALIZATION_SOURCES
@@ -910,8 +914,6 @@ endif ()
 set(ITMLIB_UTILS_VISUALIZATION_HEADERS
     Utils/Visualization/SceneSliceVisualizerCommon.h
     Utils/Visualization/SceneSliceVisualizer2D.h
-
-    Utils/Visualization/VisualizationCommon.h
     )
 if (WITH_VTK)
     list(APPEND ITMLIB_UTILS_VISUALIZATION_HEADERS

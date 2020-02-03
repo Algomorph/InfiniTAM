@@ -44,6 +44,7 @@ void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateFromDepthAndSdfS
 		const RenderState* sourceRenderState,
 		const ITMView* view,
 		const Matrix4f& depth_camera_matrix,
+		const float expand_camera_frustum_by,
 		bool onlyUpdateAllocatedList, bool resetAllocatedList) {}
 
 

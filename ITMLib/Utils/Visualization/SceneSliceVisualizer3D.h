@@ -25,7 +25,7 @@
 #include "../FileIO/SceneLogger.h"
 #include "SceneSliceVisualizer3DCommon.h"
 #include "VisualizationWindowManager.h"
-#include "VisualizationCommon.h"
+#include "../Geometry/CardinalAxesAndPlanes.h"
 #include "../../GlobalTemplateDefines.h"
 
 //VTK
