@@ -38,7 +38,7 @@ namespace ITMLib
 		int initiateNewLocalMap(bool isPrimaryLocalMap = false);
 		int initiateNewLink(int sceneID, const ORUtils::SE3Pose & pose, bool isRelocalisation);
 
-		void recordTrackingResult(int dataID, ITMTrackingState::TrackingResult trackingResult, bool primaryTrackingSuccess);
+		void recordTrackingResult(int dataID, CameraTrackingState::TrackingResult trackingResult, bool primaryTrackingSuccess);
 		
 		// return whether or not the local map graph has changed
 		bool maintainActiveData(void);

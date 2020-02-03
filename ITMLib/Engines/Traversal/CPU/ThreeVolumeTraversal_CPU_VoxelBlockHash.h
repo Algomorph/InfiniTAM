@@ -33,6 +33,8 @@ class ThreeVolumeTraversalEngine<TVoxel1, TVoxel2, TVoxel3, VoxelBlockHash, MEMO
 	 * \details All volumes must have matching hash table size
 	 */
 private:
+// region =================================== HELPER FUNCTIONS =========================================================
+
 	// the rare case where we have different positions for slave volume & master volume voxel blocks with the same index:
 	// we have a hash bucket miss, try to find the slave block with the matching coordinates
 	inline static void
@@ -97,7 +99,7 @@ private:
 			}
 		}
 	}
-
+// endregion ===========================================================================================================
 public:
 // region ================================ STATIC THREE-SCENE TRAVERSAL ================================================
 

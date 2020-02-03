@@ -14,7 +14,7 @@ IMUTracker::~IMUTracker(void)
 {
 }
 
-void IMUTracker::TrackCamera(ITMTrackingState *trackingState, const ITMView *view)
+void IMUTracker::TrackCamera(CameraTrackingState *trackingState, const ITMView *view)
 {
 	calibrator->RegisterMeasurement(((ITMViewIMU*)view)->imu->R);
 

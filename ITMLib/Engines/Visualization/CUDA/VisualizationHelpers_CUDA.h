@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "../../../Objects/Tracking/ITMTrackingState.h"
+#include "../../../Objects/Tracking/CameraTrackingState.h"
 #include "../../../Objects/Views/ITMView.h"
 
 #include "../Shared/VisualizationEngine_Shared.h"

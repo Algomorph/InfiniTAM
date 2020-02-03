@@ -33,7 +33,7 @@ namespace ITMLib
 		ITMImageHierarchy<ITMTemplatedHierarchyLevel<ITMFloat4Image> > *reprojectedPointsHierarchy;
 		ITMImageHierarchy<ITMTemplatedHierarchyLevel<ITMFloatImage> > *projectedIntensityHierarchy;
 
-		ITMTrackingState *trackingState;
+		CameraTrackingState *trackingState;
 		const ITMView *view;
 
 		int *noIterationsPerLevel;
@@ -49,7 +49,7 @@ namespace ITMLib
 		void ApplyDelta(const Matrix4f & para_old, const float *delta, Matrix4f & para_new) const;
 		bool HasConverged(float *step) const;
 
-		void SetEvaluationData(ITMTrackingState *trackingState, const ITMView *view);
+		void SetEvaluationData(CameraTrackingState *trackingState, const ITMView *view);
 
 		void UpdatePoseQuality(int noValidPoints_old, float *hessian_good, float f_old);
 
@@ -91,7 +91,7 @@ namespace ITMLib
 												  const Matrix4f &scenePose) = 0;
 
 	public:
-		void TrackCamera(ITMTrackingState *trackingState, const ITMView *view);
+		void TrackCamera(CameraTrackingState *trackingState, const ITMView *view);
 
 		bool requiresColourRendering() const { return false; }
 		bool requiresDepthReliability() const { return true; }

@@ -52,6 +52,6 @@ namespace ITMLib
      * \param scene           The surfel scene.
      * \param liveRenderState The render state for the live camera.
      */
-    void ProcessFrame(const ITMView *view, const ITMTrackingState *trackingState, SurfelScene<TSurfel> *scene, SurfelRenderState *liveRenderState) const;
+    void ProcessFrame(const ITMView *view, const CameraTrackingState *trackingState, SurfelScene<TSurfel> *scene, SurfelRenderState *liveRenderState) const;
   };
 }

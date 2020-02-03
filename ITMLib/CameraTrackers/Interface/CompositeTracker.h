@@ -75,9 +75,9 @@ namespace ITMLib
 			}
 		}
 
-		void TrackCamera(ITMTrackingState *trackingState, const ITMView *view)
+		void TrackCamera(CameraTrackingState *trackingState, const ITMView *view)
 		{
-			trackingState->trackerResult = ITMTrackingState::TRACKING_FAILED;
+			trackingState->trackerResult = CameraTrackingState::TRACKING_FAILED;
 
 			for (size_t i = 0, size = trackers.size(); i < size; ++i)
 			{
@@ -86,14 +86,14 @@ namespace ITMLib
 				trackers[i]->TrackCamera(trackingState, view);
 
 				if (trackingPolicy == POLICY_SEQUENTIAL ||
-				    (trackingPolicy == POLICY_STOP_ON_FIRST_SUCCESS && trackingState->trackerResult == ITMTrackingState::TRACKING_GOOD))
+				    (trackingPolicy == POLICY_STOP_ON_FIRST_SUCCESS && trackingState->trackerResult == CameraTrackingState::TRACKING_GOOD))
 				{
 					break;
 				}
 			}
 		}
 
-		void UpdateInitialPose(ITMTrackingState *trackingState)
+		void UpdateInitialPose(CameraTrackingState *trackingState)
 		{
 			for (size_t i = 0, size = trackers.size(); i < size; ++i)
 			{

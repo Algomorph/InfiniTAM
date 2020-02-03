@@ -25,7 +25,7 @@ using namespace ITMLib;
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateFromDepth(VoxelVolume<TVoxel, TIndex>* volume,
                                                                           const ITMView* view,
-                                                                          const ITMTrackingState* trackingState,
+                                                                          const CameraTrackingState* trackingState,
                                                                           bool onlyUpdateVisibleList,
                                                                           bool resetVisibleList) {}
 

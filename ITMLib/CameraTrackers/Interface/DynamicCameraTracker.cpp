@@ -29,19 +29,19 @@ DynamicCameraTracker::DynamicCameraTracker(const Vector2i& imgSize_d, const Vect
 		                  viewFrustum_max, minColourGradient, tukeyCutOff, framesToSkip, framesToWeight,
 		                  lowLevelEngine, memoryType) {}
 
-void ITMLib::DynamicCameraTracker::TrackCamera(ITMLib::ITMTrackingState* trackingState, const ITMLib::ITMView* view) {
+void ITMLib::DynamicCameraTracker::TrackCamera(ITMLib::CameraTrackingState* trackingState, const ITMLib::ITMView* view) {
 	//obtain initial camera alignment
 	ExtendedTracker::TrackCamera(trackingState, view);
 	switch (trackingState->trackerResult){
-		case ITMTrackingState::TrackingResult::TRACKING_FAILED:
+		case CameraTrackingState::TrackingResult::TRACKING_FAILED:
 			std::cout << "Tracking failed" << std::endl;
 			std::cout << *(trackingState->pose_d) << std::endl;
 			break;
-		case ITMTrackingState::TrackingResult::TRACKING_GOOD:
+		case CameraTrackingState::TrackingResult::TRACKING_GOOD:
 			std::cout << "Tracking good" << std::endl;
 			std::cout << *(trackingState->pose_d) << std::endl;
 			break;
-		case ITMTrackingState::TrackingResult::TRACKING_POOR:
+		case CameraTrackingState::TrackingResult::TRACKING_POOR:
 			std::cout << "Tracking poor" << std::endl;
 			std::cout << *(trackingState->pose_d) << std::endl;
 			break;

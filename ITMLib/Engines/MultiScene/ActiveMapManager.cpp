@@ -201,7 +201,7 @@ int ActiveMapManager::findBestVisualizationLocalMapIdx(void) const
 	return activeData[id].localMapIndex;
 }
 
-void ActiveMapManager::recordTrackingResult(int dataID, ITMTrackingState::TrackingResult trackingResult, bool primaryTrackingSuccess)
+void ActiveMapManager::recordTrackingResult(int dataID, CameraTrackingState::TrackingResult trackingResult, bool primaryTrackingSuccess)
 {
 	ActiveDataDescriptor & data = activeData[dataID];
 
@@ -209,7 +209,7 @@ void ActiveMapManager::recordTrackingResult(int dataID, ITMTrackingState::Tracki
 	int localMapId = data.localMapIndex;
 	data.trackingAttempts++;
 
-	if (trackingResult == ITMTrackingState::TRACKING_GOOD)
+	if (trackingResult == CameraTrackingState::TRACKING_GOOD)
 	{
 		if (data.type == RELOCALISATION) data.constraints.push_back(localMapManager->getTrackingPose(dataID)->GetM());
 		else if (((data.type == NEW_LOCAL_MAP) || (data.type == LOOP_CLOSURE)) && primaryTrackingSuccess)
@@ -221,7 +221,7 @@ void ActiveMapManager::recordTrackingResult(int dataID, ITMTrackingState::Tracki
 			data.constraints.push_back(Told_to_new);
 		}
 	}
-	else if (trackingResult == ITMTrackingState::TRACKING_FAILED)
+	else if (trackingResult == CameraTrackingState::TRACKING_FAILED)
 	{
 		if (data.type == PRIMARY_LOCAL_MAP)
 		{

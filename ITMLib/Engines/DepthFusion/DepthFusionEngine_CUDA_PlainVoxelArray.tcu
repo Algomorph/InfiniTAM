@@ -21,12 +21,14 @@
 #include "../Common/CommonFunctors.h"
 #include "DepthFusionEngine_CUDA_PlainVoxelArray_Kernels.h"
 
+#include "../Traversal/CUDA/VolumeTraversal_CUDA_PlainVoxelArray.h"
+
 using namespace ITMLib;
 
 
 template<typename TVoxel, typename TWarp>
 void DepthFusionEngine_CUDA<TVoxel, TWarp, PlainVoxelArray>::UpdateVisibleList(
-		VoxelVolume<TVoxel, PlainVoxelArray>* volume, const ITMView* view, const ITMTrackingState* trackingState,
+		VoxelVolume<TVoxel, PlainVoxelArray>* volume, const ITMView* view, const CameraTrackingState* trackingState,
 		const RenderState* renderState, bool resetVisibleList) {
 	//do nothing
 }
@@ -35,7 +37,7 @@ template<typename TVoxel, typename TWarp>
 void
 DepthFusionEngine_CUDA<TVoxel, TWarp, PlainVoxelArray>::GenerateTsdfVolumeFromView(
 		VoxelVolume<TVoxel, PlainVoxelArray>* volume, const ITMView* view,
-		const ITMTrackingState* trackingState) {
+		const CameraTrackingState* trackingState) {
 	GenerateTsdfVolumeFromView(volume, view, trackingState->pose_d->GetM());
 }
 
@@ -58,42 +60,18 @@ void DepthFusionEngine_CUDA<TVoxel, TWarp, PlainVoxelArray>::GenerateTsdfVolumeF
 template<typename TVoxel, typename TWarp>
 void DepthFusionEngine_CUDA<TVoxel, TWarp, PlainVoxelArray>::IntegrateDepthImageIntoTsdfVolume_Helper(
 		VoxelVolume<TVoxel, PlainVoxelArray>* volume, const ITMView* view, Matrix4f depth_camera_matrix) {
-
-	Vector2i rgbImgSize = view->rgb->noDims;
-	Vector2i depthImgSize = view->depth->noDims;
-	float voxelSize = volume->sceneParams->voxel_size;
-
-	Matrix4f rgb_camera_matrix;
-	Vector4f projParams_d, projParams_rgb;
-
-	if (TVoxel::hasColorInformation) rgb_camera_matrix = view->calib.trafo_rgb_to_depth.calib_inv * depth_camera_matrix;
-
-	projParams_d = view->calib.intrinsics_d.projectionParamsSimple.all;
-	projParams_rgb = view->calib.intrinsics_rgb.projectionParamsSimple.all;
-
-	float mu = volume->sceneParams->narrow_band_half_width;
-	int maxW = volume->sceneParams->max_integration_weight;
-
-	float* depth = view->depth->GetData(MEMORYDEVICE_CUDA);
-	float* confidence = view->depthConfidence->GetData(MEMORYDEVICE_CUDA);
-	Vector4u* rgb = view->rgb->GetData(MEMORYDEVICE_CUDA);
-	TVoxel* localVBA = volume->localVBA.GetVoxelBlocks();
-	const PlainVoxelArray::GridAlignedBox* arrayInfo = volume->index.GetIndexData();
-
-	dim3 cudaBlockSize(8, 8, 8);
-	dim3 gridSize(volume->index.GetVolumeSize().x / cudaBlockSize.x,
-	              volume->index.GetVolumeSize().y / cudaBlockSize.y,
-	              volume->index.GetVolumeSize().z / cudaBlockSize.z);
-
-	integrateIntoScene_device<TVoxel> << < gridSize, cudaBlockSize >> > (localVBA, arrayInfo,
-			rgb, rgbImgSize, depth, confidence, depthImgSize, depth_camera_matrix, rgb_camera_matrix, projParams_d, projParams_rgb, voxelSize, mu, maxW);
-	ORcudaKernelCheck;
-
+	if(volume->sceneParams->stop_integration_at_max_weight){
+		VoxelDepthIntegrationFunctor<TVoxel, MEMORYDEVICE_CUDA, true> integration_functor(volume, view, depth_camera_matrix);
+		VolumeTraversalEngine<TVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA>::VoxelPositionTraversal(volume, integration_functor);
+	}else{
+		VoxelDepthIntegrationFunctor<TVoxel, MEMORYDEVICE_CUDA, false> integration_functor(volume, view, depth_camera_matrix);
+		VolumeTraversalEngine<TVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA>::VoxelPositionTraversal(volume, integration_functor);
+	}
 }
 
 template<typename TVoxel, typename TWarp>
 void DepthFusionEngine_CUDA<TVoxel, TWarp, PlainVoxelArray>::IntegrateDepthImageIntoTsdfVolume(
-		VoxelVolume<TVoxel, PlainVoxelArray>* volume, const ITMView* view, const ITMTrackingState* trackingState) {
+		VoxelVolume<TVoxel, PlainVoxelArray>* volume, const ITMView* view, const CameraTrackingState* trackingState) {
 	IntegrateDepthImageIntoTsdfVolume_Helper(volume, view, trackingState->pose_d->GetM());
 }
 

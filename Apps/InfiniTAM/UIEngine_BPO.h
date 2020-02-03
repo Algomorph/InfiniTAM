@@ -8,7 +8,7 @@
 #include "../../InputSource/IMUSourceEngine.h"
 #include "../../InputSource/FFMPEGWriter.h"
 #include "../../ITMLib/Engines/Main/MainEngine.h"
-#include "../../ITMLib/Objects/Tracking/ITMTrackingState.h"
+#include "../../ITMLib/Objects/Tracking/CameraTrackingState.h"
 #include "../../ITMLib/Utils/Configuration.h"
 #include "../../ORUtils/FileUtils.h"
 #include "../../ORUtils/NVTimer.h"
@@ -99,7 +99,7 @@ public:
 
 	float processedTime;
 	int processedFrameNo;
-	ITMLib::ITMTrackingState::TrackingResult trackingResult;
+	ITMLib::CameraTrackingState::TrackingResult trackingResult;
 	std::string output_path;
 	bool needsRefresh;
 

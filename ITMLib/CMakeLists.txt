@@ -64,7 +64,7 @@ set(ITMLIB_CORE_HEADERS
 
     Engines/Main/MainEngine.h
     Engines/Main/MultiEngine.h
-    Engines/Main/TrackingController.h
+    Engines/Main/CameraTrackingController.h
     Engines/Main/DynamicSceneVoxelEngine.h
     Engines/Main/MainEngineFactory.h
     )
@@ -649,7 +649,7 @@ set(ITMLIB_OBJECTS_TRACKING_HEADERS
     Objects/Tracking/ITMRGBHierarchyLevel.h
     Objects/Tracking/ITMSceneHierarchyLevel.h
     Objects/Tracking/ITMTemplatedHierarchyLevel.h
-    Objects/Tracking/ITMTrackingState.h
+    Objects/Tracking/CameraTrackingState.h
     Objects/Tracking/ITMViewHierarchyLevel.h
     Objects/Tracking/TrackerIterationType.h
     )

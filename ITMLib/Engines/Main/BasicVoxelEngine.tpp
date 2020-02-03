@@ -41,14 +41,14 @@ BasicVoxelEngine<TVoxel,TIndex>::BasicVoxelEngine(const RGBDCalib& calib, Vector
 	imuCalibrator = new ITMIMUCalibrator_iPad();
 	tracker = CameraTrackerFactory::Instance().Make(imgSize_rgb, imgSize_d, lowLevelEngine, imuCalibrator,
 	                                                scene->sceneParams);
-	trackingController = new TrackingController(tracker);
+	trackingController = new CameraTrackingController(tracker);
 
 	Vector2i trackedImageSize = trackingController->GetTrackedImageSize(imgSize_rgb, imgSize_d);
 
 	renderState_live =  new RenderState(imgSize_d, scene->sceneParams->near_clipping_distance, scene->sceneParams->far_clipping_distance, memoryType);
 	renderState_freeview = nullptr; //will be created if needed
 
-	trackingState = new ITMTrackingState(trackedImageSize, memoryType);
+	trackingState = new CameraTrackingState(trackedImageSize, memoryType);
 	tracker->UpdateInitialPose(trackingState);
 
 	view = nullptr; // will be allocated by the view builder
@@ -243,7 +243,7 @@ static void QuaternionFromRotationMatrix(const double *matrix, double *q) {
 #endif
 
 template <typename TVoxel, typename TIndex>
-ITMTrackingState::TrackingResult BasicVoxelEngine<TVoxel,TIndex>::ProcessFrame(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage, IMUMeasurement *imuMeasurement)
+CameraTrackingState::TrackingResult BasicVoxelEngine<TVoxel,TIndex>::ProcessFrame(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage, IMUMeasurement *imuMeasurement)
 {
 	auto& settings = configuration::get();
 	// prepare image and turn it into a depth image
@@ -254,21 +254,21 @@ ITMTrackingState::TrackingResult BasicVoxelEngine<TVoxel,TIndex>::ProcessFrame(I
 		viewBuilder->UpdateView(&view, rgbImage, rawDepthImage, settings.use_threshold_filter,
 		                        settings.use_bilateral_filter, imuMeasurement, false, true);
 
-	if (!mainProcessingActive) return ITMTrackingState::TRACKING_FAILED;
+	if (!mainProcessingActive) return CameraTrackingState::TRACKING_FAILED;
 
 	// tracking
 	ORUtils::SE3Pose oldPose(*(trackingState->pose_d));
 	if (trackingActive) trackingController->Track(trackingState, view);
 
-	ITMTrackingState::TrackingResult trackerResult = ITMTrackingState::TRACKING_GOOD;
+	CameraTrackingState::TrackingResult trackerResult = CameraTrackingState::TRACKING_GOOD;
 	switch (settings.behavior_on_failure) {
 	case configuration::FAILUREMODE_RELOCALIZE:
 		trackerResult = trackingState->trackerResult;
 		break;
 	case configuration::FAILUREMODE_STOP_INTEGRATION:
-		if (trackingState->trackerResult != ITMTrackingState::TRACKING_FAILED)
+		if (trackingState->trackerResult != CameraTrackingState::TRACKING_FAILED)
 			trackerResult = trackingState->trackerResult;
-		else trackerResult = ITMTrackingState::TRACKING_POOR;
+		else trackerResult = CameraTrackingState::TRACKING_POOR;
 		break;
 	default:
 		break;
@@ -278,16 +278,16 @@ ITMTrackingState::TrackingResult BasicVoxelEngine<TVoxel,TIndex>::ProcessFrame(I
 	int addKeyframeIdx = -1;
 	if (settings.behavior_on_failure == configuration::FAILUREMODE_RELOCALIZE)
 	{
-		if (trackerResult == ITMTrackingState::TRACKING_GOOD && relocalisationCount > 0) relocalisationCount--;
+		if (trackerResult == CameraTrackingState::TRACKING_GOOD && relocalisationCount > 0) relocalisationCount--;
 
 		int NN; float distances;
 		view->depth->UpdateHostFromDevice();
 
 		//find and add keyframe, if necessary
-		bool hasAddedKeyframe = relocaliser->ProcessFrame(view->depth, trackingState->pose_d, 0, 1, &NN, &distances, trackerResult == ITMTrackingState::TRACKING_GOOD && relocalisationCount == 0);
+		bool hasAddedKeyframe = relocaliser->ProcessFrame(view->depth, trackingState->pose_d, 0, 1, &NN, &distances, trackerResult == CameraTrackingState::TRACKING_GOOD && relocalisationCount == 0);
 
 		//frame not added and tracking failed -> we need to relocalise
-		if (!hasAddedKeyframe && trackerResult == ITMTrackingState::TRACKING_FAILED)
+		if (!hasAddedKeyframe && trackerResult == CameraTrackingState::TRACKING_FAILED)
 		{
 			relocalisationCount = 10;
 
@@ -306,7 +306,7 @@ ITMTrackingState::TrackingResult BasicVoxelEngine<TVoxel,TIndex>::ProcessFrame(I
 	}
 
 	bool didFusion = false;
-	if ((trackerResult == ITMTrackingState::TRACKING_GOOD || !trackingInitialised) && (fusionActive) && (relocalisationCount == 0)) {
+	if ((trackerResult == CameraTrackingState::TRACKING_GOOD || !trackingInitialised) && (fusionActive) && (relocalisationCount == 0)) {
 		// fusion
 		denseMapper->ProcessFrame(view, trackingState, scene, renderState_live);
 		didFusion = true;
@@ -315,11 +315,11 @@ ITMTrackingState::TrackingResult BasicVoxelEngine<TVoxel,TIndex>::ProcessFrame(I
 		framesProcessed++;
 	}
 
-	if (trackerResult == ITMTrackingState::TRACKING_GOOD || trackerResult == ITMTrackingState::TRACKING_POOR)
+	if (trackerResult == CameraTrackingState::TRACKING_GOOD || trackerResult == CameraTrackingState::TRACKING_POOR)
 	{
 		if (!didFusion) denseMapper->UpdateVisibleList(view, trackingState, scene, renderState_live);
 
-		// raycast to renderState_live for tracking and free Visualization
+		// raycast to renderState_canonical for tracking and free Visualization
 		trackingController->Prepare(trackingState, scene, view, visualizationEngine, renderState_live);
 
 		if (addKeyframeIdx >= 0)
@@ -383,7 +383,7 @@ void BasicVoxelEngine<TVoxel,TIndex>::GetImage(ITMUChar4Image *out, GetImageType
 		{
 		// use current raycast or forward projection?
 		IVisualizationEngine::RenderRaycastSelection raycastType;
-		if (trackingState->age_pointCloud <= 0) raycastType = IVisualizationEngine::RENDER_FROM_OLD_RAYCAST;
+		if (trackingState->point_cloud_age <= 0) raycastType = IVisualizationEngine::RENDER_FROM_OLD_RAYCAST;
 		else raycastType = IVisualizationEngine::RENDER_FROM_OLD_FORWARDPROJ;
 
 		// what sort of image is it?

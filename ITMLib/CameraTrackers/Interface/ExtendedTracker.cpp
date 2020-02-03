@@ -165,7 +165,7 @@ void ExtendedTracker::SetupLevels(int numIterCoarse, int numIterFine, float spac
 	}
 }
 
-void ExtendedTracker::SetEvaluationData(ITMTrackingState *trackingState, const ITMView *view)
+void ExtendedTracker::SetEvaluationData(CameraTrackingState *trackingState, const ITMView *view)
 {
 	this->trackingState = trackingState;
 	this->view = view;
@@ -362,7 +362,7 @@ void ExtendedTracker::UpdatePoseQuality(int noValidPoints_old, float *hessian_go
 	if (!useDepth)
 	{
 		// Currently we cannot handle colour only tracking
-		trackingState->trackerResult = ITMTrackingState::TRACKING_GOOD;
+		trackingState->trackerResult = CameraTrackingState::TRACKING_GOOD;
 		return;
 	}
 
@@ -400,7 +400,7 @@ void ExtendedTracker::UpdatePoseQuality(int noValidPoints_old, float *hessian_go
 	float finalResidual_v2 = sqrt(((float)noValidPoints_old * f_old + (float)(noValidPointsMax - noValidPoints_old) * spaceThresh[0]) / (float)noValidPointsMax);
 	float percentageInliers_v2 = (float)noValidPoints_old / (float)noValidPointsMax;
 
-	trackingState->trackerResult = ITMTrackingState::TRACKING_FAILED;
+	trackingState->trackerResult = CameraTrackingState::TRACKING_FAILED;
 
 	if (noValidPointsMax != 0 && noTotalPoints != 0 && det_norm_v1 > 0 && det_norm_v2 > 0) {
 		Vector4f inputVector(log(det_norm_v1), log(det_norm_v2), finalResidual_v2, percentageInliers_v2);
@@ -412,15 +412,15 @@ void ExtendedTracker::UpdatePoseQuality(int noValidPoints_old, float *hessian_go
 
 		float score = svmClassifier->Classify(mapped);
 
-		if (score > 0) trackingState->trackerResult = ITMTrackingState::TRACKING_GOOD;
-		else if (score > -10.0f) trackingState->trackerResult = ITMTrackingState::TRACKING_POOR;
+		if (score > 0) trackingState->trackerResult = CameraTrackingState::TRACKING_GOOD;
+		else if (score > -10.0f) trackingState->trackerResult = CameraTrackingState::TRACKING_POOR;
 	}
 }
 
-void ExtendedTracker::TrackCamera(ITMTrackingState *trackingState, const ITMView *view)
+void ExtendedTracker::TrackCamera(CameraTrackingState *trackingState, const ITMView *view)
 {
 	// bookkeeping
-	if (trackingState->age_pointCloud >= 0) trackingState->framesProcessed++;
+	if (trackingState->point_cloud_age >= 0) trackingState->framesProcessed++;
 	else trackingState->framesProcessed = 0;
 
 	// populate view-related instance members, initialize base level of image hiararchies,

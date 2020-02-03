@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "../../Objects/Tracking/ITMTrackingState.h"
+#include "../../Objects/Tracking/CameraTrackingState.h"
 #include "../../Objects/Views/ITMView.h"
 
 namespace ITMLib
@@ -23,13 +23,13 @@ namespace ITMLib
 		/** Localize a View in the given scene. The result is
 		    currently stored as an attribute in trackingState.
 		*/
-		virtual void TrackCamera(ITMTrackingState *trackingState, const ITMView *view) = 0;
+		virtual void TrackCamera(CameraTrackingState *trackingState, const ITMView *view) = 0;
 
 		/** Updates the initial pose of the depth camera in the scene.
 		    This can be used to make the scene up vector correspond
 		    to the real world's up direction.
 		*/
-		virtual void UpdateInitialPose(ITMTrackingState *trackingState) {}
+		virtual void UpdateInitialPose(CameraTrackingState *trackingState) {}
 
 		virtual bool requiresColourRendering() const = 0;
 		virtual bool requiresDepthReliability() const = 0;

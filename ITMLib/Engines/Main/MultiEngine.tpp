@@ -38,7 +38,7 @@ MultiEngine<TVoxel, TIndex>::MultiEngine(const RGBDCalib& calib, Vector2i imgSiz
 
 	tracker = CameraTrackerFactory::Instance().Make(imgSize_rgb, imgSize_d, lowLevelEngine, imuCalibrator,
 	                                                &settings.general_voxel_volume_parameters);
-	trackingController = new TrackingController(tracker);
+	trackingController = new CameraTrackingController(tracker);
 	trackedImageSize = trackingController->GetTrackedImageSize(imgSize_rgb, imgSize_d);
 
 	mapManager = new VoxelMapGraphManager<TVoxel, TIndex>(visualization_engine, denseMapper, trackedImageSize);
@@ -112,7 +112,7 @@ void MultiEngine<TVoxel, TIndex>::changeFreeviewLocalMapIdx(ORUtils::SE3Pose *po
 }
 
 template <typename TVoxel, typename TIndex>
-ITMTrackingState* MultiEngine<TVoxel, TIndex>::GetTrackingState(void)
+CameraTrackingState* MultiEngine<TVoxel, TIndex>::GetTrackingState(void)
 {
 	int idx = mActiveDataManager->findPrimaryLocalMapIdx();
 	if (idx < 0) idx = 0;
@@ -142,11 +142,11 @@ struct TodoListEntry {
 };
 
 template <typename TVoxel, typename TIndex>
-ITMTrackingState::TrackingResult MultiEngine<TVoxel, TIndex>::ProcessFrame(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage, IMUMeasurement *imuMeasurement)
+CameraTrackingState::TrackingResult MultiEngine<TVoxel, TIndex>::ProcessFrame(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage, IMUMeasurement *imuMeasurement)
 {
 	auto& settings = configuration::get();
 	std::vector<TodoListEntry> todoList;
-	ITMTrackingState::TrackingResult primaryLocalMapTrackingResult = ITMTrackingState::TrackingResult::TRACKING_FAILED;
+	CameraTrackingState::TrackingResult primaryLocalMapTrackingResult = CameraTrackingState::TrackingResult::TRACKING_FAILED;
 
 	// prepare image and turn it into a depth image
 	if (imuMeasurement == NULL)
@@ -247,14 +247,14 @@ ITMTrackingState::TrackingResult MultiEngine<TVoxel, TIndex>::ProcessFrame(ITMUC
 			trackingController->Track(currentLocalMap->trackingState, view);
 
 			// tracking is allowed to be poor only in the primary scenes. 
-			ITMTrackingState::TrackingResult trackingResult = currentLocalMap->trackingState->trackerResult;
+			CameraTrackingState::TrackingResult trackingResult = currentLocalMap->trackingState->trackerResult;
 			if (mActiveDataManager->getLocalMapType(dataId) != ActiveMapManager::PRIMARY_LOCAL_MAP)
-				if (trackingResult == ITMTrackingState::TRACKING_POOR) trackingResult = ITMTrackingState::TRACKING_FAILED;
+				if (trackingResult == CameraTrackingState::TRACKING_POOR) trackingResult = CameraTrackingState::TRACKING_FAILED;
 
 			// actions on tracking result for all scenes TODO: incorporate behaviour on tracking failure from settings
-			if (trackingResult != ITMTrackingState::TRACKING_GOOD) todoList[i].fusion = false;
+			if (trackingResult != CameraTrackingState::TRACKING_GOOD) todoList[i].fusion = false;
 
-			if (trackingResult == ITMTrackingState::TRACKING_FAILED)
+			if (trackingResult == CameraTrackingState::TRACKING_FAILED)
 			{
 				todoList[i].prepare = false;
 				*(currentLocalMap->trackingState->pose_d) = oldPose;
@@ -265,10 +265,10 @@ ITMTrackingState::TrackingResult MultiEngine<TVoxel, TIndex>::ProcessFrame(ITMUC
 			{
 				primaryLocalMapTrackingResult = trackingResult;
 
-				if (trackingResult == ITMTrackingState::TRACKING_GOOD) primaryTrackingSuccess = true;
+				if (trackingResult == CameraTrackingState::TRACKING_GOOD) primaryTrackingSuccess = true;
 
 				// we need to relocalise in the primary local map
-				else if (trackingResult == ITMTrackingState::TRACKING_FAILED)
+				else if (trackingResult == CameraTrackingState::TRACKING_FAILED)
 				{
 					primaryDataIdx = -1;
 					todoList.resize(i + 1);
@@ -283,7 +283,7 @@ ITMTrackingState::TrackingResult MultiEngine<TVoxel, TIndex>::ProcessFrame(ITMUC
 		if (todoList[i].fusion) denseMapper->ProcessFrame(view, currentLocalMap->trackingState, currentLocalMap->scene, currentLocalMap->renderState);
 		else if (todoList[i].prepare) denseMapper->UpdateVisibleList(view, currentLocalMap->trackingState, currentLocalMap->scene, currentLocalMap->renderState);
 
-		// raycast to renderState_live for tracking and free Visualization
+		// raycast to renderState_canonical for tracking and free Visualization
 		if (todoList[i].prepare) trackingController->Prepare(currentLocalMap->trackingState, currentLocalMap->scene, view, visualization_engine, currentLocalMap->renderState);
 	}
 

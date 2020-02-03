@@ -22,7 +22,7 @@ ColorTracker::~ColorTracker(void)
 	delete viewHierarchy;
 }
 
-void ColorTracker::TrackCamera(ITMTrackingState *trackingState, const ITMView *view)
+void ColorTracker::TrackCamera(CameraTrackingState *trackingState, const ITMView *view)
 {
 	this->view = view; this->trackingState = trackingState;
 

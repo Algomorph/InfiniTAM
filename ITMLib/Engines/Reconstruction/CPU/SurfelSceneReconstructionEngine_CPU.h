@@ -24,14 +24,14 @@ namespace ITMLib
     //#################### PRIVATE MEMBER FUNCTIONS ####################
   private:
     /** Override */
-    virtual void AddNewSurfels(SurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState) const;
+    virtual void AddNewSurfels(SurfelScene<TSurfel> *scene, const ITMView *view, const CameraTrackingState *trackingState) const;
 
     /** Override */
-    virtual void FindCorrespondingSurfels(const SurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState,
+    virtual void FindCorrespondingSurfels(const SurfelScene<TSurfel> *scene, const ITMView *view, const CameraTrackingState *trackingState,
                                           const SurfelRenderState *renderState) const;
 
     /** Override */
-    virtual void FuseMatchedPoints(SurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState) const;
+    virtual void FuseMatchedPoints(SurfelScene<TSurfel> *scene, const ITMView *view, const CameraTrackingState *trackingState) const;
 
     /** Override */
     virtual void MarkBadSurfels(SurfelScene<TSurfel> *scene) const;

@@ -19,7 +19,7 @@
 #include "../../../Objects/Volume/VoxelVolume.h"
 #include "../../../Utils/HashBlockProperties.h"
 #include "../../../Objects/Views/ITMView.h"
-#include "../../../Objects/Tracking/ITMTrackingState.h"
+#include "../../../Objects/Tracking/CameraTrackingState.h"
 #include "../../../Objects/RenderStates/RenderState.h"
 #include "../../Common/WarpType.h"
 #include "../../../../ORUtils/MemoryDeviceType.h"
@@ -49,7 +49,7 @@ class IndexingEngineInterface {
 	 */
 	virtual void
 	AllocateFromDepth(VoxelVolume <TVoxel, TIndex>* volume, const ITMView* view,
-	                  const ITMTrackingState* trackingState,
+	                  const CameraTrackingState* trackingState,
 	                  bool onlyUpdateVisibleList, bool resetVisibleList) = 0;
 
 	/**
@@ -109,7 +109,7 @@ public:
 	void operator=(IndexingEngine const&) = delete;
 
 	virtual void AllocateFromDepth(VoxelVolume <TVoxel, TIndex>* volume, const ITMView* view,
-	                               const ITMTrackingState* trackingState, bool onlyUpdateVisibleList,
+	                               const CameraTrackingState* trackingState, bool onlyUpdateVisibleList,
 	                               bool resetVisibleList) override;
 
 	virtual void AllocateFromDepth(VoxelVolume <TVoxel, TIndex>* volume, const ITMView* view,

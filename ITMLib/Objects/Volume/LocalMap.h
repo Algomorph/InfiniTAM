@@ -7,7 +7,7 @@
 #include "../../Engines/Visualization/Interface/VisualizationEngine.h"
 #include "../RenderStates/RenderState.h"
 #include "VoxelVolume.h"
-#include "../../Objects/Tracking/ITMTrackingState.h"
+#include "../Tracking/CameraTrackingState.h"
 #include "../../Utils/Configuration.h"
 
 namespace ITMLib {
@@ -45,7 +45,7 @@ namespace ITMLib {
 	public:
 		VoxelVolume<TVoxel, TIndex> *scene;
 		RenderState *renderState;
-		ITMTrackingState *trackingState;
+		CameraTrackingState *trackingState;
 		ConstraintList relations;
 		ORUtils::SE3Pose estimatedGlobalPose;
 
@@ -56,7 +56,7 @@ namespace ITMLib {
 			scene = new VoxelVolume<TVoxel, TIndex>(&settings.general_voxel_volume_parameters, settings.swapping_mode == configuration::SWAPPINGMODE_ENABLED, memoryType);
 			renderState = new RenderState(trackedImageSize, settings.general_voxel_volume_parameters.near_clipping_distance,
 			                              settings.general_voxel_volume_parameters.far_clipping_distance, memoryType);
-			trackingState = new ITMTrackingState(trackedImageSize, memoryType);
+			trackingState = new CameraTrackingState(trackedImageSize, memoryType);
 		}
 		~LocalMap()
 		{

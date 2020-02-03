@@ -21,11 +21,11 @@ namespace ITMLib
 	public:
 		void ResetScene(VoxelVolume<TVoxel, VoxelBlockHash> *scene);
 
-		void AllocateSceneFromDepth(VoxelVolume<TVoxel, VoxelBlockHash> *scene, const ITMView *view, const ITMTrackingState *trackingState,
+		void AllocateSceneFromDepth(VoxelVolume<TVoxel, VoxelBlockHash> *scene, const ITMView *view, const CameraTrackingState *trackingState,
 		                            const RenderState *renderState, bool onlyUpdateVisibleList = false, bool resetVisibleList = false);
 
-		void IntegrateIntoScene(VoxelVolume<TVoxel, VoxelBlockHash> *scene, const ITMView *view, const ITMTrackingState *trackingState,
-		                        const RenderState *renderState);
+		void IntegrateIntoScene(VoxelVolume<TVoxel, VoxelBlockHash> *volume, const ITMView *view, const CameraTrackingState *tracking_state,
+		                        const RenderState *render_state);
 
 		SceneReconstructionEngine_CUDA(void);
 		~SceneReconstructionEngine_CUDA(void);
@@ -37,10 +37,10 @@ namespace ITMLib
 	public:
 		void ResetScene(VoxelVolume<TVoxel, PlainVoxelArray> *scene);
 
-		void AllocateSceneFromDepth(VoxelVolume<TVoxel, PlainVoxelArray> *scene, const ITMView *view, const ITMTrackingState *trackingState,
+		void AllocateSceneFromDepth(VoxelVolume<TVoxel, PlainVoxelArray> *scene, const ITMView *view, const CameraTrackingState *trackingState,
 		                            const RenderState *renderState, bool onlyUpdateVisibleList = false, bool resetVisibleList = false);
 
-		void IntegrateIntoScene(VoxelVolume<TVoxel, PlainVoxelArray> *scene, const ITMView *view, const ITMTrackingState *trackingState,
+		void IntegrateIntoScene(VoxelVolume<TVoxel, PlainVoxelArray> *scene, const ITMView *view, const CameraTrackingState *trackingState,
 		                        const RenderState *renderState);
 	};
 }

@@ -28,7 +28,7 @@ public:
 
 	/** Override */
 	virtual void CreateICPMaps(const SurfelScene <TSurfel>* scene, const SurfelRenderState* renderState,
-	                           ITMTrackingState* trackingState) const;
+	                           CameraTrackingState* trackingState) const;
 
 	/** Override */
 	virtual void RenderDepthImage(const SurfelScene <TSurfel>* scene, const ORUtils::SE3Pose* pose,

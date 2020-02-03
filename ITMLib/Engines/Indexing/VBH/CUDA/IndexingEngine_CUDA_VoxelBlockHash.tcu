@@ -126,7 +126,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::AllocateFromDept
 
 template<typename TVoxel>
 void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::AllocateFromDepth(
-		VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view, const ITMTrackingState* trackingState,
+		VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view, const CameraTrackingState* trackingState,
 		bool onlyUpdateVisibleList, bool resetVisibleList) {
 	AllocateFromDepth(volume, view, trackingState->pose_d->GetM(), onlyUpdateVisibleList, resetVisibleList);
 }

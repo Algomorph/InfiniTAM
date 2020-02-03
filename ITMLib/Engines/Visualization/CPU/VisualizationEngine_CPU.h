@@ -20,9 +20,9 @@ namespace ITMLib
 		                 ITMUChar4Image *outputImage, IVisualizationEngine::RenderImageType type = IVisualizationEngine::RENDER_SHADED_GREYSCALE,
 		                 IVisualizationEngine::RenderRaycastSelection raycastType = IVisualizationEngine::RENDER_FROM_NEW_RAYCAST) const;
 		void FindSurface(VoxelVolume<TVoxel,TIndex> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, const RenderState *renderState) const;
-		void CreatePointCloud(VoxelVolume<TVoxel,TIndex> *scene, const ITMView *view, ITMTrackingState *trackingState, RenderState *renderState, bool skipPoints) const;
-		void CreateICPMaps(VoxelVolume<TVoxel,TIndex> *scene, const ITMView *view, ITMTrackingState *trackingState, RenderState *renderState) const;
-		void ForwardRender(const VoxelVolume<TVoxel,TIndex> *scene, const ITMView *view, ITMTrackingState *trackingState, RenderState *renderState) const;
+		void CreatePointCloud(VoxelVolume<TVoxel,TIndex> *scene, const ITMView *view, CameraTrackingState *trackingState, RenderState *renderState, bool skipPoints) const;
+		void CreateICPMaps(VoxelVolume<TVoxel,TIndex> *scene, const ITMView *view, CameraTrackingState *trackingState, RenderState *renderState) const;
+		void ForwardRender(const VoxelVolume<TVoxel,TIndex> *scene, const ITMView *view, CameraTrackingState *trackingState, RenderState *renderState) const;
 	};
 
 	template<class TVoxel>
@@ -39,8 +39,8 @@ namespace ITMLib
 		                 ITMUChar4Image *outputImage, IVisualizationEngine::RenderImageType type = IVisualizationEngine::RENDER_SHADED_GREYSCALE,
 		                 IVisualizationEngine::RenderRaycastSelection raycastType = IVisualizationEngine::RENDER_FROM_NEW_RAYCAST) const;
 		void FindSurface(VoxelVolume<TVoxel,VoxelBlockHash> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, const RenderState *renderState) const;
-		void CreatePointCloud(VoxelVolume<TVoxel,VoxelBlockHash> *scene, const ITMView *view, ITMTrackingState *trackingState, RenderState *renderState, bool skipPoints) const;
-		void CreateICPMaps(VoxelVolume<TVoxel,VoxelBlockHash> *scene, const ITMView *view, ITMTrackingState *trackingState, RenderState *renderState) const;
-		void ForwardRender(const VoxelVolume<TVoxel,VoxelBlockHash> *scene, const ITMView *view, ITMTrackingState *trackingState, RenderState *renderState) const;
+		void CreatePointCloud(VoxelVolume<TVoxel,VoxelBlockHash> *scene, const ITMView *view, CameraTrackingState *trackingState, RenderState *renderState, bool skipPoints) const;
+		void CreateICPMaps(VoxelVolume<TVoxel,VoxelBlockHash> *scene, const ITMView *view, CameraTrackingState *trackingState, RenderState *renderState) const;
+		void ForwardRender(const VoxelVolume<TVoxel,VoxelBlockHash> *scene, const ITMView *view, CameraTrackingState *trackingState, RenderState *renderState) const;
 	};
 }

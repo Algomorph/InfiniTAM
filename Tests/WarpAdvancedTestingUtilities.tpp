@@ -69,7 +69,7 @@ GenerateRawLiveAndCanonicalVolumes(bool allocateLiveFromBothImages,
 		IndexingEngine<TSDFVoxel, TIndex, TMemoryDeviceType>::Instance().AllocateUsingOtherVolumeAndSetVisibilityExpanded(
 				live_volumes[0], live_volumes[1], view);
 	}
-	DepthFusionEngine<TSDFVoxel, WarpVoxel, TIndex>* reconstructionEngine =
+	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, TIndex>* reconstructionEngine =
 			DepthFusionEngineFactory
 			::Build<TSDFVoxel, WarpVoxel, TIndex>(TMemoryDeviceType);
 	reconstructionEngine->IntegrateDepthImageIntoTsdfVolume(live_volumes[live_index_to_start_from], view);
@@ -136,7 +136,7 @@ GenericWarpConsistencySubtest(const SlavchevaSurfaceTracker::Switches& switches,
 	EditAndCopyEngineFactory::Instance<WarpVoxel, TIndex, TMemoryDeviceType>().ResetVolume(
 			&ground_truth_warp_field);
 
-	DepthFusionEngine<TSDFVoxel, WarpVoxel, TIndex>* reconstruction_engine =
+	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, TIndex>* reconstruction_engine =
 			DepthFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, TIndex>(
 					TMemoryDeviceType);
 	WarpingEngineInterface<TSDFVoxel, WarpVoxel, TIndex>* warping_engine =

@@ -111,7 +111,7 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_PVA_VBH_Expanded_CUDA, Frame16And1
 	// *** construct volumes ***
 	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_PVA_17(MEMORYDEVICE_CUDA, InitParams<PlainVoxelArray>());
 	volume_PVA_17.Reset();
-	DepthFusionEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray>* reconstructionEngine_PVA =
+	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, PlainVoxelArray>* reconstructionEngine_PVA =
 			DepthFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, PlainVoxelArray>(MEMORYDEVICE_CUDA);
 	reconstructionEngine_PVA->GenerateTsdfVolumeFromView(&volume_PVA_17, view);
 
@@ -126,7 +126,7 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_PVA_VBH_Expanded_CUDA, Frame16And1
 	indexer.AllocateFromDepth(&volume_VBH_17_depth_allocation, view);
 	indexer.AllocateUsingOtherVolumeAndSetVisibilityExpanded(&volume_VBH_17, &volume_VBH_17_depth_allocation, view);
 
-	DepthFusionEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash>* reconstructionEngine_VBH =
+	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, VoxelBlockHash>* reconstructionEngine_VBH =
 			DepthFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, VoxelBlockHash>(MEMORYDEVICE_CUDA);
 	reconstructionEngine_VBH->IntegrateDepthImageIntoTsdfVolume(&volume_VBH_17, view);
 	reconstructionEngine_VBH->IntegrateDepthImageIntoTsdfVolume(&volume_VBH_17_depth_allocation, view);
@@ -177,9 +177,9 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CUDA) {
 	                                               settings->device_type,
 	                                               {volumeSize, volumeOffset});
 	ManipulationEngine_CUDA_PVA_Voxel::Inst().ResetVolume(&scene1);
-	ITMTrackingState trackingState(imageSize, settings->device_type);
+	CameraTrackingState trackingState(imageSize, settings->device_type);
 
-	DepthFusionEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray>* reconstructionEngine_PVA =
+	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, PlainVoxelArray>* reconstructionEngine_PVA =
 			DepthFusionEngineFactory
 			::Build<TSDFVoxel, WarpVoxel, PlainVoxelArray>(MEMORYDEVICE_CUDA);
 	reconstructionEngine_PVA->GenerateTsdfVolumeFromView(&scene1, view, &trackingState);
@@ -246,7 +246,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CUDA) {
 	                                              settings->device_type, {0x800, 0x20000});
 	ManipulationEngine_CUDA_VBH_Voxel::Inst().ResetVolume(&scene2);
 
-	DepthFusionEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash>* reconstructionEngine_VBH =
+	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, VoxelBlockHash>* reconstructionEngine_VBH =
 			DepthFusionEngineFactory
 			::Build<TSDFVoxel, WarpVoxel, VoxelBlockHash>(MEMORYDEVICE_CUDA);
 
@@ -331,7 +331,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CUDA) {
 	std::string path = "TestData/test_PVA_ConstructFromImage2_";
 	ManipulationEngine_CUDA_PVA_Voxel::Inst().ResetVolume(&scene2);
 	SceneFileIOEngine_PVA::LoadFromDirectoryCompact(&scene2, path);
-	ITMTrackingState trackingState(imageSize, settings->device_type);
+	CameraTrackingState trackingState(imageSize, settings->device_type);
 
 	float tolerance = 1e-5;
 	{
@@ -344,7 +344,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CUDA) {
 		ManipulationEngine_CUDA_PVA_Voxel::Inst().ResetVolume(&scene1);
 
 
-		DepthFusionEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray>* reconstructionEngine_PVA =
+		DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, PlainVoxelArray>* reconstructionEngine_PVA =
 				DepthFusionEngineFactory
 				::Build<TSDFVoxel, WarpVoxel, PlainVoxelArray>(MEMORYDEVICE_CUDA);
 		reconstructionEngine_PVA->GenerateTsdfVolumeFromView(&scene1, view, &trackingState);
@@ -358,7 +358,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CUDA) {
 	                                              settings->device_type);
 	ManipulationEngine_CUDA_VBH_Voxel::Inst().ResetVolume(&scene3);
 
-	DepthFusionEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash>* reconstructionEngine_VBH =
+	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, VoxelBlockHash>* reconstructionEngine_VBH =
 			DepthFusionEngineFactory
 			::Build<TSDFVoxel, WarpVoxel, VoxelBlockHash>(MEMORYDEVICE_CUDA);
 

@@ -17,7 +17,7 @@ SurfelSceneReconstructionEngine_CPU<TSurfel>::SurfelSceneReconstructionEngine_CP
 //#################### PRIVATE MEMBER FUNCTIONS ####################
 
 template <typename TSurfel>
-void SurfelSceneReconstructionEngine_CPU<TSurfel>::AddNewSurfels(SurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState) const
+void SurfelSceneReconstructionEngine_CPU<TSurfel>::AddNewSurfels(SurfelScene<TSurfel> *scene, const ITMView *view, const CameraTrackingState *trackingState) const
 {
   // Calculate the prefix sum of the new points mask.
   const unsigned short *newPointsMask = this->m_newPointsMaskMB->GetData(MEMORYDEVICE_CPU);
@@ -59,7 +59,7 @@ void SurfelSceneReconstructionEngine_CPU<TSurfel>::AddNewSurfels(SurfelScene<TSu
 }
 
 template <typename TSurfel>
-void SurfelSceneReconstructionEngine_CPU<TSurfel>::FindCorrespondingSurfels(const SurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState,
+void SurfelSceneReconstructionEngine_CPU<TSurfel>::FindCorrespondingSurfels(const SurfelScene<TSurfel> *scene, const ITMView *view, const CameraTrackingState *trackingState,
                                                                             const SurfelRenderState *renderState) const
 {
   unsigned int *correspondenceMap = this->m_correspondenceMapMB->GetData(MEMORYDEVICE_CPU);
@@ -83,7 +83,7 @@ void SurfelSceneReconstructionEngine_CPU<TSurfel>::FindCorrespondingSurfels(cons
 }
 
 template <typename TSurfel>
-void SurfelSceneReconstructionEngine_CPU<TSurfel>::FuseMatchedPoints(SurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState) const
+void SurfelSceneReconstructionEngine_CPU<TSurfel>::FuseMatchedPoints(SurfelScene<TSurfel> *scene, const ITMView *view, const CameraTrackingState *trackingState) const
 {
   const Vector4u *colourMap = view->rgb->GetData(MEMORYDEVICE_CPU);
   const int colourMapHeight = view->rgb->noDims.y;

@@ -15,7 +15,7 @@ namespace ITMLib
 		IMUCalibrator *calibrator;
 
 	public:
-		void TrackCamera(ITMTrackingState *trackingState, const ITMView *view);
+		void TrackCamera(CameraTrackingState *trackingState, const ITMView *view);
 		bool requiresColourRendering() const { return false; }
 		bool requiresDepthReliability() const { return false; }
 		bool requiresPointCloudRendering() const { return false; }

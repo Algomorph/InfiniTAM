@@ -252,9 +252,9 @@ void buildSdfVolumeFromImage(VoxelVolume<TVoxel, TIndex>** volume,
 	}
 	RenderState renderState(imageSize, configuration::get().general_voxel_volume_parameters.near_clipping_distance,
 	                        configuration::get().general_voxel_volume_parameters.far_clipping_distance, memoryDevice);
-	ITMTrackingState trackingState(imageSize, memoryDevice);
+	CameraTrackingState trackingState(imageSize, memoryDevice);
 
-	DepthFusionEngine<TVoxel, WarpVoxel, TIndex>* reconstructionEngine =
+	DepthFusionEngineInterface<TVoxel, WarpVoxel, TIndex>* reconstructionEngine =
 			DepthFusionEngineFactory
 			::Build<TVoxel, WarpVoxel, TIndex>(memoryDevice);
 

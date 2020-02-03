@@ -42,7 +42,7 @@ public:
 	void operator=(IndexingEngine const&) = delete;
 
 	void AllocateFromDepth(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
-	                       const ITMTrackingState* trackingState, bool onlyUpdateVisibleList, bool resetVisibleList) override;
+	                       const CameraTrackingState* trackingState, bool onlyUpdateVisibleList, bool resetVisibleList) override;
 
 	void AllocateFromDepth(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
 	                       const Matrix4f& depth_camera_matrix = Matrix4f::Identity(),

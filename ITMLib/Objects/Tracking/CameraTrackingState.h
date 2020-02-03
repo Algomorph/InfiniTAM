@@ -11,7 +11,7 @@ namespace ITMLib
 	    Stores some internal variables about the current tracking
 	    state, most importantly the camera pose
 	*/
-	class ITMTrackingState
+	class CameraTrackingState
 	{
 	public:
 		/** @brief
@@ -30,7 +30,7 @@ namespace ITMLib
 		/// Used as weight in the extended tracker 
 		int framesProcessed;
 
-		int age_pointCloud;
+		int point_cloud_age;
 
 		/// Current pose of the depth camera.
 		ORUtils::SE3Pose *pose_d;
@@ -46,9 +46,9 @@ namespace ITMLib
 		bool TrackerFarFromPointCloud(void) const
 		{
 			// if no point cloud exists, yet
-			if (age_pointCloud < 0) return true;
+			if (point_cloud_age < 0) return true;
 			// if the point cloud is older than n frames
-			if (age_pointCloud > 5) return true;
+			if (point_cloud_age > 5) return true;
 
 			Vector3f cameraCenter_pc = -1.0f * (pose_pointCloud->GetR().t() * pose_pointCloud->GetT());
 			Vector3f cameraCenter_live = -1.0f * (pose_d->GetR().t() * pose_d->GetT());
@@ -63,7 +63,7 @@ namespace ITMLib
 			return false;
 		}
 
-		ITMTrackingState(Vector2i imgSize, MemoryDeviceType memoryType)
+		CameraTrackingState(Vector2i imgSize, MemoryDeviceType memoryType)
 		: pointCloud(new PointCloud(imgSize, memoryType)),
 			pose_pointCloud(new ORUtils::SE3Pose),
 			pose_d(new ORUtils::SE3Pose)
@@ -71,7 +71,7 @@ namespace ITMLib
 			Reset();
 		}
 
-		~ITMTrackingState(void)
+		~CameraTrackingState(void)
 		{
 			delete pointCloud;
 			delete pose_d;
@@ -80,14 +80,14 @@ namespace ITMLib
 
 		void Reset()
 		{
-			this->age_pointCloud = -1;
+			this->point_cloud_age = -1;
 			this->pose_d->SetFrom(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 			this->pose_pointCloud->SetFrom(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 			this->trackerResult = TRACKING_GOOD;
 		}
 
 		// Suppress the default copy constructor and assignment operator
-		ITMTrackingState(const ITMTrackingState&);
-		ITMTrackingState& operator=(const ITMTrackingState&);
+		CameraTrackingState(const CameraTrackingState&);
+		CameraTrackingState& operator=(const CameraTrackingState&);
 	};
 }

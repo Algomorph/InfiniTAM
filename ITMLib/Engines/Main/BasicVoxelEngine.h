@@ -4,7 +4,7 @@
 
 #include "Mappers/DenseMapper.h"
 #include "MainEngine.h"
-#include "TrackingController.h"
+#include "CameraTrackingController.h"
 #include "../LowLevel/Interface/LowLevelEngine.h"
 #include "../Meshing/Interface/MeshingEngine.h"
 #include "../ViewBuilding/Interface/ViewBuilder.h"
@@ -29,7 +29,7 @@ namespace ITMLib
 
 		ViewBuilder *viewBuilder;
 		DenseMapper<TVoxel, TIndex> *denseMapper;
-		TrackingController *trackingController;
+		CameraTrackingController *trackingController;
 
 		VoxelVolume<TVoxel, TIndex> *scene;
 		RenderState *renderState_live;
@@ -45,16 +45,16 @@ namespace ITMLib
 		ITMView *view;
 
 		/// Pointer to the current camera pose and additional tracking information
-		ITMTrackingState *trackingState;
+		CameraTrackingState *trackingState;
 
 	public:
 		ITMView* GetView(void) { return view; }
-		ITMTrackingState* GetTrackingState(void) { return trackingState; }
+		CameraTrackingState* GetTrackingState(void) { return trackingState; }
 
 		/// Gives access to the internal world representation
 		VoxelVolume<TVoxel, TIndex>* GetScene(void) { return scene; }
 
-		ITMTrackingState::TrackingResult ProcessFrame(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage, IMUMeasurement *imuMeasurement = NULL);
+		CameraTrackingState::TrackingResult ProcessFrame(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage, IMUMeasurement *imuMeasurement = NULL);
 
 		/// Extracts a mesh from the current scene and saves it to the model file specified by the file name
 		void SaveSceneToMesh(const char *fileName);

@@ -128,7 +128,7 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_PVA_VBH_Expnaded_CPU, Frame16And17
 	// *** construct volumes ***
 	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_PVA_17(MEMORYDEVICE_CPU, InitParams<PlainVoxelArray>());
 	EditAndCopyEngineFactory::Instance<TSDFVoxel, PlainVoxelArray, MEMORYDEVICE_CPU>().ResetVolume(&volume_PVA_17);
-	DepthFusionEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray>* reconstructionEngine_PVA =
+	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, PlainVoxelArray>* reconstructionEngine_PVA =
 			DepthFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, PlainVoxelArray>(MEMORYDEVICE_CPU);
 	reconstructionEngine_PVA->GenerateTsdfVolumeFromView(&volume_PVA_17, view);
 
@@ -144,7 +144,7 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_PVA_VBH_Expnaded_CPU, Frame16And17
 	indexer.AllocateFromDepth(&volume_VBH_17_depth_allocation, view);
 	indexer.AllocateUsingOtherVolumeAndSetVisibilityExpanded(&volume_VBH_17, &volume_VBH_17_depth_allocation, view);
 
-	DepthFusionEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash>* reconstructionEngine_VBH =
+	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, VoxelBlockHash>* reconstructionEngine_VBH =
 			DepthFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, VoxelBlockHash>(MEMORYDEVICE_CPU);
 	reconstructionEngine_VBH->IntegrateDepthImageIntoTsdfVolume(&volume_VBH_17, view);
 	reconstructionEngine_VBH->IntegrateDepthImageIntoTsdfVolume(&volume_VBH_17_depth_allocation, view);
@@ -196,9 +196,9 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
 	                                                    configuration::SWAPPINGMODE_ENABLED,
 	                                               MEMORYDEVICE_CPU, {volumeSize, volumeOffset});
 	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetVolume(&scene1);
-	ITMTrackingState trackingState(imageSize, MEMORYDEVICE_CPU);
+	CameraTrackingState trackingState(imageSize, MEMORYDEVICE_CPU);
 
-	DepthFusionEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray>* reconstructionEngine_PVA =
+	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, PlainVoxelArray>* reconstructionEngine_PVA =
 			DepthFusionEngineFactory
 			::Build<TSDFVoxel, WarpVoxel, PlainVoxelArray>(MEMORYDEVICE_CPU);
 	reconstructionEngine_PVA->GenerateTsdfVolumeFromView(&scene1, view, &trackingState);
@@ -265,7 +265,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
 	                                              MEMORYDEVICE_CPU);
 	ManipulationEngine_CPU_VBH_Voxel::Inst().ResetVolume(&scene2);
 
-	DepthFusionEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash>* reconstructionEngine_VBH =
+	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, VoxelBlockHash>* reconstructionEngine_VBH =
 			DepthFusionEngineFactory
 			::Build<TSDFVoxel, WarpVoxel, VoxelBlockHash>(MEMORYDEVICE_CPU);
 
@@ -344,9 +344,9 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CPU) {
 	                                                         MEMORYDEVICE_CPU, {volumeSize, volumeOffset});
 
 	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetVolume(&generated_volume);
-	ITMTrackingState trackingState(imageSize, MEMORYDEVICE_CPU);
+	CameraTrackingState trackingState(imageSize, MEMORYDEVICE_CPU);
 
-	DepthFusionEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray>* reconstructionEngine_PVA =
+	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, PlainVoxelArray>* reconstructionEngine_PVA =
 			DepthFusionEngineFactory
 			::Build<TSDFVoxel, WarpVoxel, PlainVoxelArray>(MEMORYDEVICE_CPU);
 	reconstructionEngine_PVA->GenerateTsdfVolumeFromView(&generated_volume, view, &trackingState);
@@ -371,7 +371,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CPU) {
 	                                              MEMORYDEVICE_CPU);
 	ManipulationEngine_CPU_VBH_Voxel::Inst().ResetVolume(&scene3);
 
-	DepthFusionEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash>* reconstructionEngine_VBH =
+	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, VoxelBlockHash>* reconstructionEngine_VBH =
 			DepthFusionEngineFactory
 			::Build<TSDFVoxel, WarpVoxel, VoxelBlockHash>(MEMORYDEVICE_CPU);
 

@@ -52,14 +52,14 @@ public:
 // region ================================ DYNAMIC SINGLE-SCENE TRAVERSAL ==============================================
 	template<typename TFunctor>
 	inline static void
-	VoxelTraversal(VoxelVolume<TVoxel, PlainVoxelArray>* scene, TFunctor& functor) {
-		TVoxel* voxelArray = scene->localVBA.GetVoxelBlocks();
-		const PlainVoxelArray::GridAlignedBox* arrayInfo = scene->index.GetIndexData();
+	VoxelTraversal(VoxelVolume<TVoxel, PlainVoxelArray>* volume, TFunctor& functor) {
+		TVoxel* voxelArray = volume->localVBA.GetVoxelBlocks();
+		const PlainVoxelArray::GridAlignedBox* arrayInfo = volume->index.GetIndexData();
 
 		dim3 cudaBlockSize(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
-		dim3 gridSize(scene->index.GetVolumeSize().x / cudaBlockSize.x,
-		              scene->index.GetVolumeSize().y / cudaBlockSize.y,
-		              scene->index.GetVolumeSize().z / cudaBlockSize.z);
+		dim3 gridSize(volume->index.GetVolumeSize().x / cudaBlockSize.x,
+		              volume->index.GetVolumeSize().y / cudaBlockSize.y,
+		              volume->index.GetVolumeSize().z / cudaBlockSize.z);
 
 		// transfer functor from RAM to VRAM
 		TFunctor* functor_device = nullptr;
@@ -77,14 +77,14 @@ public:
 
 	template<typename TFunctor>
 	inline static void
-	VoxelPositionTraversal(VoxelVolume<TVoxel, PlainVoxelArray>* scene, TFunctor& functor) {
-		TVoxel* voxelArray = scene->localVBA.GetVoxelBlocks();
-		const PlainVoxelArray::GridAlignedBox* arrayInfo = scene->index.GetIndexData();
+	VoxelPositionTraversal(VoxelVolume<TVoxel, PlainVoxelArray>* volume, TFunctor& functor) {
+		TVoxel* voxelArray = volume->localVBA.GetVoxelBlocks();
+		const PlainVoxelArray::GridAlignedBox* arrayInfo = volume->index.GetIndexData();
 
 		dim3 cudaBlockSize(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
-		dim3 gridSize(scene->index.GetVolumeSize().x / cudaBlockSize.x,
-		              scene->index.GetVolumeSize().y / cudaBlockSize.y,
-		              scene->index.GetVolumeSize().z / cudaBlockSize.z);
+		dim3 gridSize(volume->index.GetVolumeSize().x / cudaBlockSize.x,
+		              volume->index.GetVolumeSize().y / cudaBlockSize.y,
+		              volume->index.GetVolumeSize().z / cudaBlockSize.z);
 
 		// transfer functor from RAM to VRAM
 		TFunctor* functor_device = nullptr;

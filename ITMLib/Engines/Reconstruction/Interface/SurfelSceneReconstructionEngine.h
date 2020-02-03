@@ -4,7 +4,7 @@
 
 #include "../../../Objects/RenderStates/SurfelRenderState.h"
 #include "../../../Objects/Volume/SurfelScene.h"
-#include "../../../Objects/Tracking/ITMTrackingState.h"
+#include "../../../Objects/Tracking/CameraTrackingState.h"
 #include "../../../Objects/Views/ITMView.h"
 
 namespace ITMLib
@@ -82,7 +82,7 @@ namespace ITMLib
      * \param view            The current view (containing the live input images from the current image source).
      * \param trackingState   The current tracking state.
      */
-    virtual void AddNewSurfels(SurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState) const = 0;
+    virtual void AddNewSurfels(SurfelScene<TSurfel> *scene, const ITMView *view, const CameraTrackingState *trackingState) const = 0;
 
     /**
      * \brief Finds the indices of the surfels (if any) in the scene to which different points in the live 3D depth image map correspond.
@@ -92,7 +92,7 @@ namespace ITMLib
      * \param trackingState   The current tracking state.
      * \param renderState     The render state corresponding to the camera from which the scene is being viewed.
      */
-    virtual void FindCorrespondingSurfels(const SurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState,
+    virtual void FindCorrespondingSurfels(const SurfelScene<TSurfel> *scene, const ITMView *view, const CameraTrackingState *trackingState,
                                           const SurfelRenderState *renderState) const = 0;
 
     /**
@@ -102,7 +102,7 @@ namespace ITMLib
      * \param view            The current view (containing the live input images from the current image source).
      * \param trackingState   The current tracking state.
      */
-    virtual void FuseMatchedPoints(SurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState) const = 0;
+    virtual void FuseMatchedPoints(SurfelScene<TSurfel> *scene, const ITMView *view, const CameraTrackingState *trackingState) const = 0;
 
     /**
      * \brief Marks surfels that should be removed from the scene.
@@ -146,7 +146,7 @@ namespace ITMLib
      * \param trackingState The current tracking state.
      * \param renderState   The render state corresponding to the camera from which the scene is being viewed.
      */
-    void IntegrateIntoScene(SurfelScene<TSurfel> *scene, const ITMView *view, const ITMTrackingState *trackingState, const SurfelRenderState *renderState);
+    void IntegrateIntoScene(SurfelScene<TSurfel> *scene, const ITMView *view, const CameraTrackingState *trackingState, const SurfelRenderState *renderState);
 
     /**
      * \brief Resets the specified surfel-based scene.

@@ -18,9 +18,9 @@ bool FileBasedTracker::CanKeepTracking() const
 	return poseFile.is_open();
 }
 
-void FileBasedTracker::TrackCamera(ITMTrackingState *trackingState, const ITMView *view)
+void FileBasedTracker::TrackCamera(CameraTrackingState *trackingState, const ITMView *view)
 {
-	trackingState->trackerResult = ITMTrackingState::TRACKING_FAILED;
+	trackingState->trackerResult = CameraTrackingState::TRACKING_FAILED;
 
 	// Try to open the file
 	std::ifstream poseFile(GetCurrentFilename().c_str());
@@ -46,7 +46,7 @@ void FileBasedTracker::TrackCamera(ITMTrackingState *trackingState, const ITMVie
 	if (poseFile)
 	{
 		// No read errors, tracking is assumed good
-		trackingState->trackerResult = ITMTrackingState::TRACKING_GOOD;
+		trackingState->trackerResult = CameraTrackingState::TRACKING_GOOD;
 		trackingState->pose_d->SetInvM(invPose);
 	}
 }

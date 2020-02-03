@@ -66,16 +66,16 @@ public:
 	* \param liveScene - live/target 3D scene generated from the incoming single frame of the video
 	* \param canonical_render_state
 	*/
-	void ProcessFrame(const ITMView* view, const ITMTrackingState* trackingState,
+	void ProcessFrame(const ITMView* view, const CameraTrackingState* trackingState,
 	                  VoxelVolume <TVoxel, TIndex>* canonical_volume, VoxelVolume <TVoxel, TIndex>** live_volume_pair,
 	                  VoxelVolume <TWarp, TIndex>* warp_field, RenderState* canonical_render_state);
 
-	void ProcessInitialFrame(const ITMView* view, const ITMTrackingState* trackingState,
+	void ProcessInitialFrame(const ITMView* view, const CameraTrackingState* trackingState,
 	                         VoxelVolume<TVoxel, TIndex>* canonical_volume, VoxelVolume<TVoxel, TIndex>* live_volume,
 	                         RenderState* canonical_render_state);
 
 	/// Update the visible list (this can be called to update the visible list when fusion is turned off)
-	void UpdateVisibleList(const ITMView* view, const ITMTrackingState* trackingState,
+	void UpdateVisibleList(const ITMView* view, const CameraTrackingState* trackingState,
 	                       VoxelVolume<TVoxel, TIndex>* scene, RenderState* renderState, bool resetVisibleList = false);
 	// endregion
 private:
@@ -101,7 +101,7 @@ private:
 	// endregion =======================================================================================================
 	// region =========================================== MEMBER VARIABLES =============================================
 	// *** engines ***
-	DepthFusionEngine<TVoxel, TWarp, TIndex>* reconstruction_engine;
+	DepthFusionEngineInterface<TVoxel, TWarp, TIndex>* depth_fusion_engine;
 	WarpingEngineInterface<TVoxel, TWarp, TIndex>* warping_engine;
 	VolumeFusionEngineInterface<TVoxel, TWarp, TIndex>* volume_fusion_engine;
 

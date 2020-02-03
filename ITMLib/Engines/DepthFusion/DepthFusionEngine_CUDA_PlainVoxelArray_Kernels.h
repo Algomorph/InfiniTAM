@@ -53,18 +53,6 @@ __global__ void integrateIntoScene_device(TVoxel* voxelArray, const ITMLib::Plai
 }
 
 template<typename TVoxel>
-__global__ void fuseSdf2Sdf_device(TVoxel* voxelArrayLive, TVoxel* voxelArrayCanonical,
-                                   const ITMLib::PlainVoxelArray::GridAlignedBox* arrayInfo, int maximumWeight) {
-	int x = blockIdx.x * blockDim.x + threadIdx.x;
-	int y = blockIdx.y * blockDim.y + threadIdx.y;
-	int z = blockIdx.z * blockDim.z + threadIdx.z;
-
-	int locId = x + y * arrayInfo->size.x + z * arrayInfo->size.x * arrayInfo->size.y;
-
-	fuseLiveVoxelIntoCanonical(voxelArrayLive[locId], maximumWeight, voxelArrayCanonical[locId]);
-}
-
-template<typename TVoxel>
 __global__ void
 clearFields_device(TVoxel* voxelArray, const ITMLib::PlainVoxelArray::GridAlignedBox* arrayInfo) {
 	int x = blockIdx.x * blockDim.x + threadIdx.x;

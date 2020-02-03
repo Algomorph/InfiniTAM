@@ -25,7 +25,7 @@ DenseSurfelMapper<TSurfel>::~DenseSurfelMapper()
 //#################### PUBLIC MEMBER FUNCTIONS ####################
 
 template <typename TSurfel>
-void DenseSurfelMapper<TSurfel>::ProcessFrame(const ITMView *view, const ITMTrackingState *trackingState, SurfelScene<TSurfel> *scene, SurfelRenderState *liveRenderState) const
+void DenseSurfelMapper<TSurfel>::ProcessFrame(const ITMView *view, const CameraTrackingState *trackingState, SurfelScene<TSurfel> *scene, SurfelRenderState *liveRenderState) const
 {
   m_reconstructionEngine->IntegrateIntoScene(scene, view, trackingState, liveRenderState);
 }

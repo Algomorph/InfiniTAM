@@ -85,7 +85,7 @@ inline static void PrintOperationStatus(const char* status) {
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 DenseDynamicMapper<TVoxel, TWarp, TIndex>::DenseDynamicMapper(const TIndex& index) :
-		reconstruction_engine(
+		depth_fusion_engine(
 				DepthFusionEngineFactory::Build<TVoxel, TWarp, TIndex>
 						(configuration::get().device_type)),
 		warping_engine(WarpingEngineFactory::MakeWarpingEngine<TVoxel, TWarp, TIndex>()),
@@ -109,7 +109,7 @@ DenseDynamicMapper<TVoxel, TWarp, TIndex>::DenseDynamicMapper(const TIndex& inde
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 DenseDynamicMapper<TVoxel, TWarp, TIndex>::~DenseDynamicMapper() {
-	delete reconstruction_engine;
+	delete depth_fusion_engine;
 	delete warping_engine;
 	delete swapping_engine;
 	delete surface_tracker;
@@ -118,12 +118,12 @@ DenseDynamicMapper<TVoxel, TWarp, TIndex>::~DenseDynamicMapper() {
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 void DenseDynamicMapper<TVoxel, TWarp, TIndex>::ProcessInitialFrame(
-		const ITMView* view, const ITMTrackingState* trackingState,
+		const ITMView* view, const CameraTrackingState* trackingState,
 		VoxelVolume<TVoxel, TIndex>* canonical_volume, VoxelVolume<TVoxel, TIndex>* live_volume,
 		RenderState* canonical_render_state) {
 	PrintOperationStatus("Generating raw live frame from view...");
 	bench::StartTimer("GenerateRawLiveAndCanonicalVolumes");
-	reconstruction_engine->GenerateTsdfVolumeFromView(live_volume, view, trackingState);
+	depth_fusion_engine->GenerateTsdfVolumeFromView(live_volume, view, trackingState);
 	bench::StopTimer("GenerateRawLiveAndCanonicalVolumes");
 	//** prepare canonical for new frame
 	PrintOperationStatus("Fusing data from live frame into canonical frame...");
@@ -136,7 +136,7 @@ void DenseDynamicMapper<TVoxel, TWarp, TIndex>::ProcessInitialFrame(
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 void
-DenseDynamicMapper<TVoxel, TWarp, TIndex>::ProcessFrame(const ITMView* view, const ITMTrackingState* trackingState,
+DenseDynamicMapper<TVoxel, TWarp, TIndex>::ProcessFrame(const ITMView* view, const CameraTrackingState* trackingState,
                                                         VoxelVolume<TVoxel, TIndex>* canonical_volume,
                                                         VoxelVolume<TVoxel, TIndex>** live_volume_pair,
                                                         VoxelVolume<TWarp, TIndex>* warp_field,
@@ -146,10 +146,10 @@ DenseDynamicMapper<TVoxel, TWarp, TIndex>::ProcessFrame(const ITMView* view, con
 	PrintOperationStatus("Generating raw live TSDF from view...");
 	bench::StartTimer("GenerateRawLiveAndCanonicalVolumes");
 	if (this->use_expanded_allocation_during_TSDF_construction) {
-		reconstruction_engine->GenerateTsdfVolumeFromViewExpanded(live_volume_pair[0], live_volume_pair[1], view,
-		                                                          trackingState->pose_d->GetM());
+		depth_fusion_engine->GenerateTsdfVolumeFromViewExpanded(live_volume_pair[0], live_volume_pair[1], view,
+		                                                        trackingState->pose_d->GetM());
 	} else {
-		reconstruction_engine->GenerateTsdfVolumeFromView(live_volume_pair[0], view, trackingState->pose_d->GetM());
+		depth_fusion_engine->GenerateTsdfVolumeFromView(live_volume_pair[0], view, trackingState->pose_d->GetM());
 	}
 	LogVolumeStatistics(live_volume_pair[0], "[[live TSDF before tracking]]");
 	bench::StopTimer("GenerateRawLiveAndCanonicalVolumes");
@@ -179,10 +179,10 @@ DenseDynamicMapper<TVoxel, TWarp, TIndex>::ProcessFrame(const ITMView* view, con
 template<typename TVoxel, typename TWarp, typename TIndex>
 void DenseDynamicMapper<TVoxel, TWarp, TIndex>::UpdateVisibleList(
 		const ITMView* view,
-		const ITMTrackingState* trackingState,
+		const CameraTrackingState* trackingState,
 		VoxelVolume<TVoxel, TIndex>* scene, RenderState* renderState,
 		bool resetVisibleList) {
-	reconstruction_engine->UpdateVisibleList(scene, view, trackingState, renderState, resetVisibleList);
+	depth_fusion_engine->UpdateVisibleList(scene, view, trackingState, renderState, resetVisibleList);
 }
 
 // region =========================================== MOTION TRACKING ==================================================

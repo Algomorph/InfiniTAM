@@ -4,7 +4,7 @@
 
 #include "Mappers/DenseSurfelMapper.h"
 #include "MainEngine.h"
-#include "TrackingController.h"
+#include "CameraTrackingController.h"
 #include "../LowLevel/Interface/LowLevelEngine.h"
 #include "../ViewBuilding/Interface/ViewBuilder.h"
 #include "../Visualization/Interface/SurfelVisualizationEngine.h"
@@ -26,7 +26,7 @@ namespace ITMLib
 
 		ViewBuilder *viewBuilder;
 		DenseSurfelMapper<TSurfel> *denseSurfelMapper;
-		TrackingController *trackingController;
+		CameraTrackingController *trackingController;
 
 		SurfelScene<TSurfel> *surfelScene;
 		SurfelRenderState *surfelRenderState_live;
@@ -42,15 +42,15 @@ namespace ITMLib
 		ITMView *view;
 
 		/// Pointer to the current camera pose and additional tracking information
-		ITMTrackingState *trackingState;
+		CameraTrackingState *trackingState;
 
 		static typename SurfelVisualizationEngine<TSurfel>::RenderImageType ToSurfelImageType(GetImageType getImageType);
 
 	public:
 		ITMView* GetView(void) { return view; }
-		ITMTrackingState* GetTrackingState(void) { return trackingState; }
+		CameraTrackingState* GetTrackingState(void) { return trackingState; }
 
-		ITMTrackingState::TrackingResult ProcessFrame(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage, IMUMeasurement *imuMeasurement = NULL);
+		CameraTrackingState::TrackingResult ProcessFrame(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage, IMUMeasurement *imuMeasurement = NULL);
 
 		/// Extracts a mesh from the current scene and saves it to the model file specified by the file name
 		void SaveSceneToMesh(const char *fileName);

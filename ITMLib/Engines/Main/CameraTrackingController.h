@@ -14,21 +14,21 @@ namespace ITMLib
 {
 	/** \brief
 	*/
-	class TrackingController
+	class CameraTrackingController
 	{
 	private:
 		const configuration::Configuration *settings;
 		CameraTracker *tracker;
 
 	public:
-		void Track(ITMTrackingState *trackingState, const ITMView *view)
+		void Track(CameraTrackingState *trackingState, const ITMView *view)
 		{
-			if (!tracker->requiresPointCloudRendering() || trackingState->age_pointCloud != -1)
+			if (!tracker->requiresPointCloudRendering() || trackingState->point_cloud_age != -1)
 				tracker->TrackCamera(trackingState, view);
 		}
 
 		template <typename TSurfel>
-		void Prepare(ITMTrackingState *trackingState, const SurfelScene<TSurfel> *scene, const ITMView *view,
+		void Prepare(CameraTrackingState *trackingState, const SurfelScene<TSurfel> *scene, const ITMView *view,
 		             const SurfelVisualizationEngine<TSurfel> *VisualizationEngine, SurfelRenderState *renderState)
 		{
 			if (!tracker->requiresPointCloudRendering())
@@ -53,12 +53,12 @@ namespace ITMLib
 				{
 					VisualizationEngine->CreateICPMaps(scene, renderState, trackingState);
 					trackingState->pose_pointCloud->SetFrom(trackingState->pose_d);
-					if (trackingState->age_pointCloud==-1) trackingState->age_pointCloud=-2;
-					else trackingState->age_pointCloud = 0;
+					if (trackingState->point_cloud_age == -1) trackingState->point_cloud_age=-2;
+					else trackingState->point_cloud_age = 0;
 				}
 				else
 				{
-					trackingState->age_pointCloud++;
+					trackingState->point_cloud_age++;
 				}
 			}
 		}
@@ -67,50 +67,50 @@ namespace ITMLib
 		 * \brief Do whatever the hell this does, great job on the docs and procedure naming / coupling, InfiniTAM team
 		 * \tparam TVoxel
 		 * \tparam TIndex
-		 * \param trackingState
-		 * \param scene
+		 * \param tracking_state
+		 * \param volume
 		 * \param view
-		 * \param VisualizationEngine
-		 * \param renderState
+		 * \param visualization_engine
+		 * \param render_state
 		 */
 		template <typename TVoxel, typename TIndex>
-		void Prepare(ITMTrackingState *trackingState, VoxelVolume<TVoxel,TIndex> *scene, const ITMView *view,
-		             const VisualizationEngine<TVoxel,TIndex> *VisualizationEngine, RenderState *renderState)
+		void Prepare(CameraTrackingState *tracking_state, VoxelVolume<TVoxel,TIndex> *volume, const ITMView *view,
+		             const VisualizationEngine<TVoxel,TIndex> *visualization_engine, RenderState *render_state)
 		{
 			if (!tracker->requiresPointCloudRendering())
 				return;
 
 			//render for tracking
 			bool requiresColourRendering = tracker->requiresColourRendering();
-			bool requiresFullRendering = trackingState->TrackerFarFromPointCloud() || !settings->use_approximate_raycast;
+			bool requiresFullRendering = tracking_state->TrackerFarFromPointCloud() || !settings->use_approximate_raycast;
 
 			if (requiresColourRendering)
 			{
-				ORUtils::SE3Pose pose_rgb(view->calib.trafo_rgb_to_depth.calib_inv * trackingState->pose_d->GetM());
-				VisualizationEngine->CreateExpectedDepths(scene, &pose_rgb, &(view->calib.intrinsics_rgb), renderState);
-				VisualizationEngine->CreatePointCloud(scene, view, trackingState, renderState, settings->skip_points);
-				trackingState->age_pointCloud = 0;
+				ORUtils::SE3Pose pose_rgb(view->calib.trafo_rgb_to_depth.calib_inv * tracking_state->pose_d->GetM());
+				visualization_engine->CreateExpectedDepths(volume, &pose_rgb, &(view->calib.intrinsics_rgb), render_state);
+				visualization_engine->CreatePointCloud(volume, view, tracking_state, render_state, settings->skip_points);
+				tracking_state->point_cloud_age = 0;
 			}
 			else
 			{
-				VisualizationEngine->CreateExpectedDepths(scene, trackingState->pose_d, &(view->calib.intrinsics_d), renderState);
+				visualization_engine->CreateExpectedDepths(volume, tracking_state->pose_d, &(view->calib.intrinsics_d), render_state);
 
 				if (requiresFullRendering)
 				{
-					VisualizationEngine->CreateICPMaps(scene, view, trackingState, renderState);
-					trackingState->pose_pointCloud->SetFrom(trackingState->pose_d);
-					if (trackingState->age_pointCloud==-1) trackingState->age_pointCloud=-2;
-					else trackingState->age_pointCloud = 0;
+					visualization_engine->CreateICPMaps(volume, view, tracking_state, render_state);
+					tracking_state->pose_pointCloud->SetFrom(tracking_state->pose_d);
+					if (tracking_state->point_cloud_age == -1) tracking_state->point_cloud_age=-2;
+					else tracking_state->point_cloud_age = 0;
 				}
 				else
 				{
-					VisualizationEngine->ForwardRender(scene, view, trackingState, renderState);
-					trackingState->age_pointCloud++;
+					visualization_engine->ForwardRender(volume, view, tracking_state, render_state);
+					tracking_state->point_cloud_age++;
 				}
 			}
 		}
 
-		TrackingController(CameraTracker* tracker)
+		CameraTrackingController(CameraTracker* tracker)
 		{
 			this->settings = &configuration::get();
 			this->tracker = tracker;
@@ -122,7 +122,7 @@ namespace ITMLib
 		}
 
 		// Suppress the default copy constructor and assignment operator
-		TrackingController(const TrackingController&);
-		TrackingController& operator=(const TrackingController&);
+		CameraTrackingController(const CameraTrackingController&);
+		CameraTrackingController& operator=(const CameraTrackingController&);
 	};
 }

@@ -6,7 +6,7 @@
 #include "../../../Objects/Camera/Intrinsics.h"
 #include "../../../Objects/RenderStates/SurfelRenderState.h"
 #include "../../../Objects/Volume/SurfelScene.h"
-#include "../../../Objects/Tracking/ITMTrackingState.h"
+#include "../../../Objects/Tracking/CameraTrackingState.h"
 #include "../../../Objects/Views/ITMView.h"
 #include "../../../Utils/ImageTypes.h"
 #include "../../../../ORUtils/SE3Pose.h"
@@ -70,7 +70,7 @@ namespace ITMLib
      * \param renderState     The render state corresponding to the live camera.
      * \param trackingState   The current tracking state.
      */
-    virtual void CreateICPMaps(const SurfelScene<TSurfel> *scene, const SurfelRenderState *renderState, ITMTrackingState *trackingState) const = 0;
+    virtual void CreateICPMaps(const SurfelScene<TSurfel> *scene, const SurfelRenderState *renderState, CameraTrackingState *trackingState) const = 0;
 
     /**
      * \brief Renders a depth Visualization of the scene (as viewed from a particular camera) to an image.

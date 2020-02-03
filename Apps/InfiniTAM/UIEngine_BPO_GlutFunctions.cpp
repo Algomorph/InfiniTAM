@@ -113,13 +113,13 @@ void UIEngine_BPO::GlutDisplayFunction() {
 	glPopMatrix();
 
 	switch (uiEngine.trackingResult) {
-		case ITMLib::ITMTrackingState::TrackingResult::TRACKING_FAILED:
+		case ITMLib::CameraTrackingState::TrackingResult::TRACKING_FAILED:
 			glColor3f(1.0f, 0.0f, 0.0f);
 			break; // failure
-		case ITMLib::ITMTrackingState::TrackingResult::TRACKING_POOR:
+		case ITMLib::CameraTrackingState::TrackingResult::TRACKING_POOR:
 			glColor3f(1.0f, 1.0f, 0.0f);
 			break; // poor
-		case ITMLib::ITMTrackingState::TrackingResult::TRACKING_GOOD:
+		case ITMLib::CameraTrackingState::TrackingResult::TRACKING_GOOD:
 			glColor3f(0.0f, 1.0f, 0.0f);
 			break; // good
 		default:

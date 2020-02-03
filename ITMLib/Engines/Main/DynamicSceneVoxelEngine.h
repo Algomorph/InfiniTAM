@@ -6,7 +6,7 @@
 #include <array>
 #include "Mappers/DenseDynamicMapper.h"
 #include "MainEngine.h"
-#include "TrackingController.h"
+#include "CameraTrackingController.h"
 #include "../LowLevel/Interface/LowLevelEngine.h"
 #include "../Meshing/Interface/MeshingEngine.h"
 #include "../ViewBuilding/Interface/ViewBuilder.h"
@@ -33,9 +33,9 @@ namespace ITMLib
 		~DynamicSceneVoxelEngine() override;
 
 		ITMView* GetView() override { return view; }
-		ITMTrackingState* GetTrackingState() override { return trackingState; }
+		CameraTrackingState* GetTrackingState() override { return tracking_state; }
 
-		ITMTrackingState::TrackingResult ProcessFrame(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage, IMUMeasurement *imuMeasurement = nullptr) override;
+		CameraTrackingState::TrackingResult ProcessFrame(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage, IMUMeasurement *imuMeasurement = nullptr) override;
 
 		/// Extracts a mesh from the current scene and saves it to the model file specified by the file name
 		void SaveSceneToMesh(const char *fileName) override ;
@@ -68,28 +68,30 @@ namespace ITMLib
 	private:
 		void Reset();
 		void InitializeScenes();
-		static const int liveSceneCount = 2;
+		static const int live_scene_count = 2;
 		//TODO need better function separation here, "begin" is logically too arbitrary and does too many things
-		void BeginProcessingFrame(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage, IMUMeasurement *imuMeasurement = nullptr);
+		void HandlePotentialCameraTrackingFailure();
 
 		bool trackingActive, fusionActive, mainProcessingActive, trackingInitialised;
 		int framesProcessed, relocalisationCount;
 
-		LowLevelEngine* lowLevelEngine;
-		VisualizationEngine<TVoxel, TIndex>* liveVisualizationEngine;
-		VisualizationEngine<TVoxel, TIndex>* canonicalVisualizationEngine;
+		configuration::Configuration settings;
 
-		MeshingEngine<TVoxel, TIndex>* meshingEngine;
+		LowLevelEngine* low_level_engine;
+		VisualizationEngine<TVoxel, TIndex>* visualization_engine;
 
-		ViewBuilder* viewBuilder;
+		MeshingEngine<TVoxel, TIndex>* meshing_engine;
+
+		ViewBuilder* view_builder;
 		DenseDynamicMapper<TVoxel, TWarp, TIndex>* denseMapper;
-		TrackingController* cameraTrackingController;
+		CameraTrackingController* camera_tracking_controller;
 
-		VoxelVolume<TVoxel, TIndex>* canonicalScene;
-		VoxelVolume<TVoxel, TIndex>** liveScenes;
-		VoxelVolume<TWarp, TIndex>* warpField;
-		RenderState* renderState_live;
-		RenderState* renderState_freeview;
+		VoxelVolume<TVoxel, TIndex>* canonical_volume;
+		VoxelVolume<TVoxel, TIndex>** live_volumes;
+		VoxelVolume<TWarp, TIndex>* warp_field;
+		RenderState* canonical_render_state;
+		RenderState* live_render_state;
+		RenderState* freeview_render_state;
 
 		CameraTracker* tracker;
 		IMUCalibrator* imuCalibrator;
@@ -101,9 +103,9 @@ namespace ITMLib
 		ITMView* view;
 
 		/// Pointer to the current camera pose and additional tracking information
-		ITMTrackingState* trackingState;
-		ITMTrackingState::TrackingResult lastTrackerResult;
-		bool fusionSucceeded;
+		CameraTrackingState* tracking_state;
+		CameraTrackingState::TrackingResult last_tracking_result;
+		bool fusion_succeeded;
 		ORUtils::SE3Pose previousFramePose;
 	};
 }

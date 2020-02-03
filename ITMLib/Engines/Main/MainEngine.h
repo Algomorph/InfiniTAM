@@ -60,7 +60,6 @@ namespace ITMLib
 			InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_VOLUME,
 			InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_NORMAL,
 			InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_CONFIDENCE,
-			InfiniTAM_IMAGE_STEP_BY_STEP,
 			InfiniTAM_IMAGE_UNKNOWN
 		};
 
@@ -68,10 +67,10 @@ namespace ITMLib
 		virtual ITMView* GetView(void) = 0;
 
 		/// Gives access to the current camera pose and additional tracking information
-		virtual ITMTrackingState* GetTrackingState(void) = 0;
+		virtual CameraTrackingState* GetTrackingState(void) = 0;
 
 		/// Process a frame with rgb and depth images and optionally a corresponding imu measurement
-        virtual ITMTrackingState::TrackingResult ProcessFrame(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage, IMUMeasurement *imuMeasurement = NULL) = 0;
+        virtual CameraTrackingState::TrackingResult ProcessFrame(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage, IMUMeasurement *imuMeasurement = NULL) = 0;
 
 		/// Get a result image as output
 		virtual Vector2i GetImageSize(void) const = 0;

@@ -42,9 +42,9 @@ struct DepthFusionEngineFactory {
 	 * \param deviceType  The device on which the scene reconstruction engine should operate.
 	 */
 	template<typename TVoxel, typename TWarp, typename TIndex>
-	static DepthFusionEngine<TVoxel, TWarp, TIndex>*
+	static DepthFusionEngineInterface<TVoxel, TWarp, TIndex>*
 	Build(MemoryDeviceType deviceType) {
-		DepthFusionEngine<TVoxel, TWarp, TIndex>* depth_fusion_engine = nullptr;
+		DepthFusionEngineInterface<TVoxel, TWarp, TIndex>* depth_fusion_engine = nullptr;
 
 		switch (deviceType) {
 			case MEMORYDEVICE_CPU:

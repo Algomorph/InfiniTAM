@@ -35,7 +35,7 @@ BasicSurfelEngine<TSurfel>::BasicSurfelEngine(const RGBDCalib& calib, Vector2i i
 	imuCalibrator = new ITMIMUCalibrator_iPad();
 	tracker = CameraTrackerFactory::Instance().Make(imgSize_rgb, imgSize_d, lowLevelEngine, imuCalibrator,
 	                                                &settings.general_voxel_volume_parameters);
-	trackingController = new TrackingController(tracker);
+	trackingController = new CameraTrackingController(tracker);
 
 	Vector2i trackedImageSize = trackingController->GetTrackedImageSize(imgSize_rgb, imgSize_d);
 
@@ -43,7 +43,7 @@ BasicSurfelEngine<TSurfel>::BasicSurfelEngine(const RGBDCalib& calib, Vector2i i
 	                                               settings.general_surfel_volume_parameters.supersampling_factor);
 	surfelRenderState_freeview = nullptr; //will be created if needed
 
-	trackingState = new ITMTrackingState(trackedImageSize, memoryType);
+	trackingState = new CameraTrackingState(trackedImageSize, memoryType);
 	tracker->UpdateInitialPose(trackingState);
 
 	view = nullptr; // will be allocated by the view builder
@@ -184,7 +184,7 @@ static void QuaternionFromRotationMatrix(const double *matrix, double *q) {
 #endif
 
 template<typename TSurfel>
-ITMTrackingState::TrackingResult
+CameraTrackingState::TrackingResult
 BasicSurfelEngine<TSurfel>::ProcessFrame(ITMUChar4Image* rgbImage, ITMShortImage* rawDepthImage,
                                          IMUMeasurement* imuMeasurement) {
 	auto& settings = configuration::get();
@@ -196,21 +196,21 @@ BasicSurfelEngine<TSurfel>::ProcessFrame(ITMUChar4Image* rgbImage, ITMShortImage
 		viewBuilder->UpdateView(&view, rgbImage, rawDepthImage, settings.use_threshold_filter,
 		                        settings.use_bilateral_filter, imuMeasurement, false, true);
 
-	if (!mainProcessingActive) return ITMTrackingState::TRACKING_FAILED;
+	if (!mainProcessingActive) return CameraTrackingState::TRACKING_FAILED;
 
 	// tracking
 	ORUtils::SE3Pose oldPose(*(trackingState->pose_d));
 	if (trackingActive) trackingController->Track(trackingState, view);
 
-	ITMTrackingState::TrackingResult trackerResult = ITMTrackingState::TRACKING_GOOD;
+	CameraTrackingState::TrackingResult trackerResult = CameraTrackingState::TRACKING_GOOD;
 	switch (settings.behavior_on_failure) {
 		case configuration::FAILUREMODE_RELOCALIZE:
 			trackerResult = trackingState->trackerResult;
 			break;
 		case configuration::FAILUREMODE_STOP_INTEGRATION:
-			if (trackingState->trackerResult != ITMTrackingState::TRACKING_FAILED)
+			if (trackingState->trackerResult != CameraTrackingState::TRACKING_FAILED)
 				trackerResult = trackingState->trackerResult;
-			else trackerResult = ITMTrackingState::TRACKING_POOR;
+			else trackerResult = CameraTrackingState::TRACKING_POOR;
 			break;
 		default:
 			break;
@@ -222,7 +222,7 @@ BasicSurfelEngine<TSurfel>::ProcessFrame(ITMUChar4Image* rgbImage, ITMShortImage
 	int addKeyframeIdx = -1;
 #endif
 	if (settings.behavior_on_failure == configuration::FAILUREMODE_RELOCALIZE) {
-		if (trackerResult == ITMTrackingState::TRACKING_GOOD && relocalisationCount > 0) relocalisationCount--;
+		if (trackerResult == CameraTrackingState::TRACKING_GOOD && relocalisationCount > 0) relocalisationCount--;
 
 		int NN;
 		float distances;
@@ -230,11 +230,11 @@ BasicSurfelEngine<TSurfel>::ProcessFrame(ITMUChar4Image* rgbImage, ITMShortImage
 
 		//find and add keyframe, if necessary
 		bool hasAddedKeyframe = relocaliser->ProcessFrame(view->depth, trackingState->pose_d, 0, 1, &NN, &distances,
-		                                                  trackerResult == ITMTrackingState::TRACKING_GOOD &&
+		                                                  trackerResult == CameraTrackingState::TRACKING_GOOD &&
 		                                                  relocalisationCount == 0);
 
 		//frame not added and tracking failed -> we need to relocalise
-		if (!hasAddedKeyframe && trackerResult == ITMTrackingState::TRACKING_FAILED) {
+		if (!hasAddedKeyframe && trackerResult == CameraTrackingState::TRACKING_FAILED) {
 			relocalisationCount = 10;
 
 			// Reset previous rgb frame since the rgb image is likely different than the one acquired when setting the keyframe
@@ -254,7 +254,7 @@ BasicSurfelEngine<TSurfel>::ProcessFrame(ITMUChar4Image* rgbImage, ITMShortImage
 	}
 
 	//bool didFusion = false; //TODO: set but not used. Remove? --Greg(github:Algomorph)
-	if ((trackerResult == ITMTrackingState::TRACKING_GOOD || !trackingInitialised) && (fusionActive) &&
+	if ((trackerResult == CameraTrackingState::TRACKING_GOOD || !trackingInitialised) && (fusionActive) &&
 	    (relocalisationCount == 0)) {
 		// fusion
 		denseSurfelMapper->ProcessFrame(view, trackingState, surfelScene, surfelRenderState_live);
@@ -264,8 +264,8 @@ BasicSurfelEngine<TSurfel>::ProcessFrame(ITMUChar4Image* rgbImage, ITMShortImage
 		framesProcessed++;
 	}
 
-	if (trackerResult == ITMTrackingState::TRACKING_GOOD || trackerResult == ITMTrackingState::TRACKING_POOR) {
-		// raycast to renderState_live for tracking and free Visualization
+	if (trackerResult == CameraTrackingState::TRACKING_GOOD || trackerResult == CameraTrackingState::TRACKING_POOR) {
+		// raycast to renderState_canonical for tracking and free Visualization
 		trackingController->Prepare(trackingState, surfelScene, view, surfelVisualizationEngine,
 		                            surfelRenderState_live);
 		surfelVisualizationEngine->FindSurfaceSuper(surfelScene, trackingState->pose_d, &view->calib.intrinsics_d,
@@ -277,7 +277,7 @@ BasicSurfelEngine<TSurfel>::ProcessFrame(ITMUChar4Image* rgbImage, ITMShortImage
 			ORUtils::MemoryBlock<Vector4u>::MemoryCopyDirection memoryCopyDirection =
 				settings.device_type == MEMORYDEVICE_CUDA ? ORUtils::MemoryBlock<Vector4u>::CUDA_TO_CUDA : ORUtils::MemoryBlock<Vector4u>::CPU_TO_CPU;
 
-			kfRaycast->SetFrom(renderState_live->raycastImage, memoryCopyDirection);
+			kfRaycast->SetFrom(renderState_canonical->raycastImage, memoryCopyDirection);
 		}
 #endif
 	} else *trackingState->pose_d = oldPose;

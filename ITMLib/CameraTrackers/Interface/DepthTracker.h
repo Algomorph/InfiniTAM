@@ -25,7 +25,7 @@ namespace ITMLib
 		ITMImageHierarchy<ITMSceneHierarchyLevel> *sceneHierarchy;
 		ITMImageHierarchy<ITMTemplatedHierarchyLevel<ITMFloatImage> > *viewHierarchy;
 
-		ITMTrackingState *trackingState; const ITMView *view;
+		CameraTrackingState *trackingState; const ITMView *view;
 
 		int *noIterationsPerLevel;
 
@@ -38,7 +38,7 @@ namespace ITMLib
 		void ApplyDelta(const Matrix4f & para_old, const float *delta, Matrix4f & para_new) const;
 		bool HasConverged(float *step) const;
 
-		void SetEvaluationData(ITMTrackingState *trackingState, const ITMView *view);
+		void SetEvaluationData(CameraTrackingState *trackingState, const ITMView *view);
 
 		void UpdatePoseQuality(int noValidPoints_old, float *hessian_good, float f_old);
 
@@ -58,7 +58,7 @@ namespace ITMLib
 		virtual int ComputeGandH(float &f, float *nabla, float *hessian, Matrix4f approxInvPose) = 0;
 
 	public:
-		void TrackCamera(ITMTrackingState *trackingState, const ITMView *view);
+		void TrackCamera(CameraTrackingState *trackingState, const ITMView *view);
 
 		bool requiresColourRendering() const { return false; }
 		bool requiresDepthReliability() const { return false; }

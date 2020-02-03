@@ -80,7 +80,7 @@ void DepthFusionEngine_CPU<TVoxel, TWarp, PlainVoxelArray>::IntegrateDepthImageI
 template<typename TVoxel, typename TWarp>
 void DepthFusionEngine_CPU<TVoxel, TWarp, PlainVoxelArray>::IntegrateDepthImageIntoTsdfVolume(
 		VoxelVolume<TVoxel, PlainVoxelArray>* volume, const ITMView* view,
-		const ITMTrackingState* trackingState) {
+		const CameraTrackingState* trackingState) {
 	IntegrateDepthImageIntoTsdfVolume_Helper(volume, view, trackingState->pose_d->GetM());
 }
 
@@ -94,7 +94,7 @@ template<typename TVoxel, typename TWarp>
 void
 DepthFusionEngine_CPU<TVoxel, TWarp, PlainVoxelArray>::GenerateTsdfVolumeFromView(
 		VoxelVolume<TVoxel, PlainVoxelArray>* volume, const ITMView* view,
-		const ITMTrackingState* trackingState) {
+		const CameraTrackingState* trackingState) {
 	GenerateTsdfVolumeFromView(volume, view, trackingState->pose_d->GetM());
 }
 
@@ -117,7 +117,7 @@ void DepthFusionEngine_CPU<TVoxel, TWarp, PlainVoxelArray>::GenerateTsdfVolumeFr
 template<typename TVoxel, typename TWarp>
 void DepthFusionEngine_CPU<TVoxel, TWarp, PlainVoxelArray>::UpdateVisibleList(
 		VoxelVolume<TVoxel, PlainVoxelArray>* scene, const ITMView* view,
-		const ITMTrackingState* trackingState,
+		const CameraTrackingState* trackingState,
 		const RenderState* renderState, bool resetVisibleList) {
 	//do nothing
 }

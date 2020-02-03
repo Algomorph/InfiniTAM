@@ -74,7 +74,7 @@ void DepthTracker::SetupLevels(int numIterCoarse, int numIterFine, float distThr
 	}
 }
 
-void DepthTracker::SetEvaluationData(ITMTrackingState *trackingState, const ITMView *view)
+void DepthTracker::SetEvaluationData(CameraTrackingState *trackingState, const ITMView *view)
 {
 	this->trackingState = trackingState;
 	this->view = view;
@@ -212,7 +212,7 @@ void DepthTracker::UpdatePoseQuality(int noValidPoints_old, float *hessian_good,
 	float finalResidual_v2 = sqrt(((float)noValidPoints_old * f_old + (float)(noValidPointsMax - noValidPoints_old) * distThresh[0]) / (float)noValidPointsMax);
 	float percentageInliers_v2 = (float)noValidPoints_old / (float)noValidPointsMax;
 
-	trackingState->trackerResult = ITMTrackingState::TRACKING_FAILED;
+	trackingState->trackerResult = CameraTrackingState::TRACKING_FAILED;
 
 	if (noValidPointsMax != 0 && noTotalPoints != 0 && det_norm_v1 > 0 && det_norm_v2 > 0) {
 		Vector4f inputVector(log(det_norm_v1), log(det_norm_v2), finalResidual_v2, percentageInliers_v2);
@@ -224,12 +224,12 @@ void DepthTracker::UpdatePoseQuality(int noValidPoints_old, float *hessian_good,
 
 		float score = svmClassifier->Classify(mapped);
 
-		if (score > 0) trackingState->trackerResult = ITMTrackingState::TRACKING_GOOD;
-		else if (score > -10.0f) trackingState->trackerResult = ITMTrackingState::TRACKING_POOR;
+		if (score > 0) trackingState->trackerResult = CameraTrackingState::TRACKING_GOOD;
+		else if (score > -10.0f) trackingState->trackerResult = CameraTrackingState::TRACKING_POOR;
 	}
 }
 
-void DepthTracker::TrackCamera(ITMTrackingState *trackingState, const ITMView *view)
+void DepthTracker::TrackCamera(CameraTrackingState *trackingState, const ITMView *view)
 {
 	this->SetEvaluationData(trackingState, view);
 	this->PrepareForEvaluation();

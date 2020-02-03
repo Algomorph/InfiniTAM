@@ -33,7 +33,7 @@ void SceneReconstructionEngine_CPU<TVoxel,VoxelBlockHash>::ResetScene(VoxelVolum
 
 template<class TVoxel>
 void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::IntegrateIntoScene(VoxelVolume<TVoxel, VoxelBlockHash> *scene, const ITMView *view,
-                                                                               const ITMTrackingState *trackingState, const RenderState *renderState)
+                                                                               const CameraTrackingState *trackingState, const RenderState *renderState)
 {
 	Vector2i rgbImgSize = view->rgb->noDims;
 	Vector2i depthImgSize = view->depth->noDims;
@@ -105,7 +105,7 @@ void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::IntegrateIntoScene(V
 
 template<class TVoxel>
 void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::AllocateSceneFromDepth(VoxelVolume<TVoxel, VoxelBlockHash> *scene, const ITMView *view,
-                                                                                   const ITMTrackingState *trackingState, const RenderState *renderState, bool onlyUpdateVisibleList, bool resetVisibleList)
+                                                                                   const CameraTrackingState *trackingState, const RenderState *renderState, bool onlyUpdateVisibleList, bool resetVisibleList)
 {
 	Vector2i depthImgSize = view->depth->noDims;
 	float voxelSize = scene->sceneParams->voxel_size;
@@ -311,12 +311,12 @@ void SceneReconstructionEngine_CPU<TVoxel,PlainVoxelArray>::ResetScene(VoxelVolu
 
 template<class TVoxel>
 void SceneReconstructionEngine_CPU<TVoxel, PlainVoxelArray>::AllocateSceneFromDepth(VoxelVolume<TVoxel, PlainVoxelArray> *scene, const ITMView *view,
-                                                                                    const ITMTrackingState *trackingState, const RenderState *renderState, bool onlyUpdateVisibleList, bool resetVisibleList)
+                                                                                    const CameraTrackingState *trackingState, const RenderState *renderState, bool onlyUpdateVisibleList, bool resetVisibleList)
 {}
 
 template<class TVoxel>
 void SceneReconstructionEngine_CPU<TVoxel, PlainVoxelArray>::IntegrateIntoScene(VoxelVolume<TVoxel, PlainVoxelArray> *scene, const ITMView *view,
-                                                                                const ITMTrackingState *trackingState, const RenderState *renderState)
+                                                                                const CameraTrackingState *trackingState, const RenderState *renderState)
 {
 	Vector2i rgbImgSize = view->rgb->noDims;
 	Vector2i depthImgSize = view->depth->noDims;

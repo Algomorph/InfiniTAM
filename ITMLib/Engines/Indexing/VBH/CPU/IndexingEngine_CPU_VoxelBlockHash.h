@@ -41,7 +41,7 @@ public:
 	void operator=(IndexingEngine const&) = delete;
 
 	void AllocateFromDepth(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
-	                       const ITMTrackingState* trackingState, bool onlyUpdateVisibleList,
+	                       const CameraTrackingState* trackingState, bool onlyUpdateVisibleList,
 	                       bool resetVisibleList) override;
 
 	void AllocateFromDepth(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,

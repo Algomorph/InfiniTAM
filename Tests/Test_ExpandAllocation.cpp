@@ -161,7 +161,7 @@ void TestAllocateBasedOnVolumeExpanded_Generic() {
 	           "TestData/snoopy_color_000017.png", "TestData/snoopy_omask_000017.png",
 	           "TestData/snoopy_calib.txt", TMemoryDeviceType);
 	Vector2i imageSize(640, 480);
-	ITMTrackingState trackingState(imageSize, TMemoryDeviceType);
+	CameraTrackingState trackingState(imageSize, TMemoryDeviceType);
 	RenderState renderState(imageSize, configuration::get().general_voxel_volume_parameters.near_clipping_distance,
 	                        configuration::get().general_voxel_volume_parameters.far_clipping_distance, TMemoryDeviceType);
 	IndexingEngine<TSDFVoxel, VoxelBlockHash, TMemoryDeviceType>::Instance().AllocateFromDepth(

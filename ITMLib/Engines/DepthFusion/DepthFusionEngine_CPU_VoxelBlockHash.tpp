@@ -85,7 +85,7 @@ DepthFusionEngine_CPU<TVoxel, TWarp, VoxelBlockHash>::IntegrateDepthImageIntoTsd
 template<typename TVoxel, typename TWarp>
 void DepthFusionEngine_CPU<TVoxel, TWarp, VoxelBlockHash>::IntegrateDepthImageIntoTsdfVolume(
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
-		const ITMTrackingState* trackingState) {
+		const CameraTrackingState* trackingState) {
 	IntegrateDepthImageIntoTsdfVolume_Helper(volume, view, trackingState->pose_d->GetM());
 }
 
@@ -102,7 +102,7 @@ template<typename TVoxel, typename TWarp>
 void
 DepthFusionEngine_CPU<TVoxel, TWarp, VoxelBlockHash>::GenerateTsdfVolumeFromView(
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
-		const ITMTrackingState* trackingState) {
+		const CameraTrackingState* trackingState) {
 	GenerateTsdfVolumeFromView(volume, view, trackingState->pose_d->GetM());
 }
 
@@ -137,7 +137,7 @@ void DepthFusionEngine_CPU<TVoxel, TWarp, VoxelBlockHash>::GenerateTsdfVolumeFro
 
 template<typename TVoxel, typename TWarp>
 void DepthFusionEngine_CPU<TVoxel, TWarp, VoxelBlockHash>::UpdateVisibleList(
-		VoxelVolume<TVoxel, VoxelBlockHash>* scene, const ITMView* view, const ITMTrackingState* trackingState,
+		VoxelVolume<TVoxel, VoxelBlockHash>* scene, const ITMView* view, const CameraTrackingState* trackingState,
 		const RenderState* renderState, bool resetVisibleList) {
 	IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance()
 			.AllocateFromDepth(scene, view, trackingState, true, resetVisibleList);

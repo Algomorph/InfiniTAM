@@ -224,7 +224,7 @@ struct ComputeUpdatedLiveVoxelInfo;
 DEVICEPTR(TVoxel) & voxel, const THREADPTR(Vector4f) & pt_model,\
 const CONSTPTR(Matrix4f) & M_d, const CONSTPTR(Vector4f) & projParams_d,\
 const CONSTPTR(Matrix4f) & M_rgb, const CONSTPTR(Vector4f) & projParams_rgb,\
-float mu, int maxW,\
+const float mu, const int maxW,\
 const CONSTPTR(float) *depth, const CONSTPTR(float) *confidence, const CONSTPTR(Vector2i) & imgSize_d,\
 const CONSTPTR(Vector4u) *rgb, const CONSTPTR(Vector2i) & imgSize_rgb
 
@@ -297,3 +297,59 @@ struct ComputeUpdatedLiveVoxelInfo<true, true, true, TVoxel> {
 
 #undef COMPUTE_VOXEL_UPDATE_PARAMETERS
 // endregion ===========================================================================================================
+// region ======================================== VOXEL UPDATE FUNCTOR ================================================
+
+template<typename TTSDFVoxel, MemoryDeviceType TMemoryDeviceType, bool TStopIntegrationAtMaxIntegrationWeight>
+struct VoxelDepthIntegrationFunctor {
+public:
+	VoxelDepthIntegrationFunctor(const ITMLib::VoxelVolumeParameters& volume_parameters, const ITMLib::ITMView* view, Matrix4f depth_camera_extrinsic_matrix) :
+			depth_image_size(view->depth->noDims),
+			depth_camera_projection_parameters(view->calib.intrinsics_d.projectionParamsSimple.all),
+			depth_camera_extrinsic_matrix(depth_camera_extrinsic_matrix),
+			rgb_image_size(view->rgb->noDims),
+			rgb_camera_projection_parameters(view->calib.intrinsics_rgb.projectionParamsSimple.all),
+			rgb_camera_extrinsic_matrix(TTSDFVoxel::hasColorInformation ?  view->calib.trafo_rgb_to_depth.calib_inv * depth_camera_extrinsic_matrix : Matrix4f()),
+
+			narrow_band_half_width(volume_parameters.narrow_band_half_width),
+			max_integration_weight(volume_parameters.max_integration_weight),
+			voxel_size(volume_parameters.voxel_size),
+
+			depth(view->depth->GetData(TMemoryDeviceType)),
+			rgb(view->rgb->GetData(TMemoryDeviceType)),
+			confidence(view->depthConfidence->GetData(TMemoryDeviceType))
+			{}
+
+	_CPU_AND_GPU_CODE_
+	inline void operator()(TTSDFVoxel& voxel, const Vector3i& voxel_position) {
+		if (TStopIntegrationAtMaxIntegrationWeight) if (voxel.w_depth == max_integration_weight) return;
+		Vector4f pt_model;
+		pt_model.x = static_cast<float>(voxel_position.x * voxel_size);
+		pt_model.y = static_cast<float>(voxel_position.y * voxel_size);
+		pt_model.z = static_cast<float>(voxel_position.z * voxel_size);
+		pt_model.w = 1.0f;
+		ComputeUpdatedLiveVoxelInfo<TTSDFVoxel::hasColorInformation, TTSDFVoxel::hasConfidenceInformation, TTSDFVoxel::hasSemanticInformation, TTSDFVoxel>::compute(
+				voxel, pt_model, depth_camera_extrinsic_matrix,
+				depth_camera_projection_parameters, rgb_camera_extrinsic_matrix, rgb_camera_projection_parameters, narrow_band_half_width, max_integration_weight, depth, confidence,
+				depth_image_size, rgb, rgb_image_size);
+	}
+
+private:
+	const Vector2i depth_image_size;
+	Vector4f depth_camera_projection_parameters;
+	Matrix4f depth_camera_extrinsic_matrix;
+	Vector2i rgb_image_size;
+	Vector4f rgb_camera_projection_parameters;
+	Matrix4f rgb_camera_extrinsic_matrix;
+
+	float narrow_band_half_width;
+	int max_integration_weight;
+	float voxel_size;
+
+	float* depth;
+	Vector4u* rgb;
+	float* confidence;
+
+
+};
+
+// endregion

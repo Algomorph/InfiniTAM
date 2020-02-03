@@ -3,7 +3,7 @@
 #pragma once
 
 #include "MainEngine.h"
-#include "TrackingController.h"
+#include "CameraTrackingController.h"
 #include "../LowLevel/Interface/LowLevelEngine.h"
 #include "../ViewBuilding/Interface/ViewBuilder.h"
 #include "../../Objects/Misc/IMUCalibrator.h"
@@ -33,7 +33,7 @@ namespace ITMLib
 		MultiMeshingEngine<TVoxel, TIndex> *meshingEngine;
 
 		ViewBuilder *viewBuilder;
-		TrackingController *trackingController;
+		CameraTrackingController *trackingController;
 		CameraTracker *tracker;
 		IMUCalibrator *imuCalibrator;
 		DenseMapper<TVoxel, TIndex> *denseMapper;
@@ -55,10 +55,10 @@ namespace ITMLib
 	public:
 		ITMView* GetView() { return view; }
 
-		ITMTrackingState* GetTrackingState(void);
+		CameraTrackingState* GetTrackingState(void);
 
 		/// Process a frame with rgb and depth images and (optionally) a corresponding imu measurement
-		ITMTrackingState::TrackingResult ProcessFrame(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage, IMUMeasurement *imuMeasurement = NULL);
+		CameraTrackingState::TrackingResult ProcessFrame(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage, IMUMeasurement *imuMeasurement = NULL);
 
 		/// Get a result image as output
 		Vector2i GetImageSize(void) const;

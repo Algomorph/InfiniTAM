@@ -172,7 +172,7 @@ void SurfelVisualizationEngine_CUDA<TSurfel>::CopySceneToBuffers(const SurfelSce
 }
 
 template <typename TSurfel>
-void SurfelVisualizationEngine_CUDA<TSurfel>::CreateICPMaps(const SurfelScene<TSurfel> *scene, const SurfelRenderState *renderState, ITMTrackingState *trackingState) const
+void SurfelVisualizationEngine_CUDA<TSurfel>::CreateICPMaps(const SurfelScene<TSurfel> *scene, const SurfelRenderState *renderState, CameraTrackingState *trackingState) const
 {
   const Matrix4f& invT = trackingState->pose_d->GetM();
   const int pixelCount = static_cast<int>(renderState->GetIndexImage()->dataSize);

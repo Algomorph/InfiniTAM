@@ -42,7 +42,7 @@ void SurfelVisualizationEngine_CPU<TSurfel>::CopySceneToBuffers(const SurfelScen
 }
 
 template <typename TSurfel>
-void SurfelVisualizationEngine_CPU<TSurfel>::CreateICPMaps(const SurfelScene<TSurfel> *scene, const SurfelRenderState *renderState, ITMTrackingState *trackingState) const
+void SurfelVisualizationEngine_CPU<TSurfel>::CreateICPMaps(const SurfelScene<TSurfel> *scene, const SurfelRenderState *renderState, CameraTrackingState *trackingState) const
 {
   const Matrix4f& invT = trackingState->pose_d->GetM();
   Vector4f *normalsMap = trackingState->pointCloud->colours->GetData(MEMORYDEVICE_CPU);
