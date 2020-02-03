@@ -21,6 +21,7 @@
 #include "../../DepthFusion/DepthFusionEngineFactory.h"
 #include "../../Traversal/Shared/VolumeTraversal_Shared.h"
 #include "../Shared/EditAndCopyEngine_Shared.h"
+#include "../../Indexing/Interface/IndexingEngine.h"
 #include "../../Indexing/Shared/IndexingEngine_Shared.h"
 
 using namespace ITMLib;

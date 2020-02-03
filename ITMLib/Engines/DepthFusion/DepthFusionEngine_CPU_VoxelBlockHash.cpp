@@ -13,9 +13,12 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "DepthFusionEngine_CPU_VoxelBlockHash.tpp"
+#include "../Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
+#include "../Indexing/Interface/IndexingEngine.tpp"
+#include "DepthFusionEngine.tpp"
 #include "../../GlobalTemplateDefines.h"
 
-namespace ITMLib{
-template class DepthFusionEngine_CPU<TSDFVoxel, WarpVoxel, VoxelBlockHash>;
+namespace ITMLib {
+template
+class DepthFusionEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>;
 }

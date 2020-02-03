@@ -38,8 +38,7 @@ private:
 				: name(_name), type(_type) {}
 	};
 	std::vector<UIColourMode> colourModes_main, colourModes_freeview;
-	UIColourMode colourMode_stepByStep = UIColourMode("step_by_step",
-	                                                  ITMLib::MainEngine::InfiniTAM_IMAGE_STEP_BY_STEP);
+
 	int currentColourMode;
 
 	int autoIntervalFrameStart;

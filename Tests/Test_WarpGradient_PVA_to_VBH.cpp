@@ -35,18 +35,17 @@
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison.h"
 #include "../ITMLib/SurfaceTrackers/Interface/SurfaceTracker.h"
 
+#include "../ITMLib/Engines/EditAndCopy/EditAndCopyEngineFactory.h"
+#include "../ITMLib/Engines/DepthFusion/DepthFusionEngine.h"
+#include "../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
+
 //local CPU
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CPU.h"
 #include "../ITMLib/Utils/Analytics/SceneStatisticsCalculator/CPU/SceneStatisticsCalculator_CPU.h"
-#include "../ITMLib/Engines/EditAndCopy/EditAndCopyEngineFactory.h"
-#include "../ITMLib/Engines/DepthFusion/DepthFusionEngine_CPU.h"
-
 #ifndef COMPILE_WITHOUT_CUDA
 //local CUDA
-#include "../ITMLib/Engines/DepthFusion/DepthFusionEngine_CUDA.h"
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CUDA.h"
 #include "../ITMLib/Utils/Analytics/SceneStatisticsCalculator/CUDA/SceneStatisticsCalculator_CUDA.h"
-#include "../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
 #endif
 
 

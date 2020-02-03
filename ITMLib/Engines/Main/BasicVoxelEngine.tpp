@@ -442,7 +442,6 @@ void BasicVoxelEngine<TVoxel,TIndex>::GetImage(ITMUChar4Image *out, GetImageType
 	case MainEngine::InfiniTAM_IMAGE_UNKNOWN:
 		break;
 		case InfiniTAM_IMAGE_FREECAMERA_CANONICAL:break;
-		case InfiniTAM_IMAGE_STEP_BY_STEP:break;
 	};
 }
 

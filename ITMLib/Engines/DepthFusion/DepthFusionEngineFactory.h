@@ -17,16 +17,7 @@
 
 #include "../../Utils/Configuration.h"
 
-#include "DepthFusionEngine_CPU.h"
-
-#ifndef COMPILE_WITHOUT_CUDA
-
-#include "DepthFusionEngine_CUDA.h"
-
-#endif
-#ifdef COMPILE_WITH_METAL
-#error "NOT CURRENTLY SUPPORTED"
-#endif
+#include "DepthFusionEngine.h"
 
 namespace ITMLib {
 
@@ -48,18 +39,18 @@ struct DepthFusionEngineFactory {
 
 		switch (deviceType) {
 			case MEMORYDEVICE_CPU:
-				depth_fusion_engine = new DepthFusionEngine_CPU<TVoxel, TWarp, TIndex>;
+				depth_fusion_engine = new DepthFusionEngine<TVoxel, TWarp, TIndex, MEMORYDEVICE_CPU>;
 				break;
 			case MEMORYDEVICE_CUDA:
 #ifdef COMPILE_WITHOUT_CUDA
 				DIEWITHEXCEPTION_REPORTLOCATION("Requested instantiation of a CUDA-based specialization, but code was compiled without CUDA. Aborting.");
 #else
-				depth_fusion_engine = new DepthFusionEngine_CUDA<TVoxel, TWarp, TIndex>;
+				depth_fusion_engine = new DepthFusionEngine<TVoxel, TWarp, TIndex, MEMORYDEVICE_CUDA>;
 #endif
 				break;
 			case MEMORYDEVICE_METAL:
 #ifdef COMPILE_WITH_METAL
-				depth_fusion_engine = new ITMSceneReconstructionEngine_Metal<TVoxelA,TIndex>;
+				depth_fusion_engine = new DepthFusionEngine_Metal<TVoxelA,TIndex>;
 #endif
 				break;
 		}

@@ -25,7 +25,7 @@
 //local
 #include "../ITMLib/GlobalTemplateDefines.h"
 #include "../ITMLib/Objects/Volume/VoxelVolume.h"
-#include "../ITMLib/Engines/DepthFusion/DepthFusionEngine_CPU.h"
+#include "../ITMLib/Engines/DepthFusion/DepthFusionEngine.h"
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CPU.h"
 #include "../ITMLib/Engines/Warping/WarpingEngine.h"
 #ifndef COMPILE_WITHOUT_CUDA

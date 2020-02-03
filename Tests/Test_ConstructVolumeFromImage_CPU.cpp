@@ -29,6 +29,7 @@
 #include "../ITMLib/Engines/ViewBuilding/Interface/ViewBuilder.h"
 #include "../ITMLib/Engines/ViewBuilding/ViewBuilderFactory.h"
 #include "../ITMLib/Engines/EditAndCopy/EditAndCopyEngineFactory.h"
+#include "../ITMLib/Engines/Indexing/Interface/IndexingEngine.h"
 #include "../ITMLib/Utils/Configuration.h"
 #include "../ITMLib/Utils/Analytics/AlmostEqual.h"
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CPU.h"

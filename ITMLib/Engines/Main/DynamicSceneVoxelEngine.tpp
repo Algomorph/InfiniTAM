@@ -519,8 +519,7 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::HandlePotentialCameraTracki
 
 					denseMapper->UpdateVisibleList(view, tracking_state, live_volumes[0], canonical_render_state, true);
 
-					camera_tracking_controller->Prepare(tracking_state, live_volumes[0], view, visualizationEngine2,
-					                                    canonical_render_state);
+					camera_tracking_controller->Prepare(tracking_state, live_volumes[0], view, visualization_engine, canonical_render_state);
 					camera_tracking_controller->Track(tracking_state, view);
 
 					last_tracking_result = tracking_state->trackerResult;

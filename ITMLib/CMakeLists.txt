@@ -381,13 +381,10 @@ set(
 ## ======================================= DEPTH FUSION ENGINE =========================================================
 # (replaces former "reconstruction" engine for dynamic-scene fusion)
 set(ITMLIB_ENGINES_DEPTH_FUSION_SOURCES
-    Engines/DepthFusion/DepthFusionEngine_CPU_VoxelBlockHash.tpp
+    Engines/DepthFusion/DepthFusionEngine.tpp
     Engines/DepthFusion/DepthFusionEngine_CPU_VoxelBlockHash.cpp
-    Engines/DepthFusion/DepthFusionEngine_CPU_PlainVoxelArray.tpp
     Engines/DepthFusion/DepthFusionEngine_CPU_PlainVoxelArray.cpp
-    Engines/DepthFusion/DepthFusionEngine_CUDA_PlainVoxelArray.tcu
     Engines/DepthFusion/DepthFusionEngine_CUDA_PlainVoxelArray.cu
-    Engines/DepthFusion/DepthFusionEngine_CUDA_VoxelBlockHash.tcu
     Engines/DepthFusion/DepthFusionEngine_CUDA_VoxelBlockHash.cu
     )
 
@@ -395,9 +392,6 @@ set(ITMLIB_ENGINES_DEPTH_FUSION_HEADERS
     Engines/DepthFusion/DepthFusionEngineFactory.h
     Engines/DepthFusion/DepthFusionEngine_Shared.h
     Engines/DepthFusion/DepthFusionEngine.h
-    Engines/DepthFusion/DepthFusionEngine_CUDA.h
-    Engines/DepthFusion/DepthFusionEngine_CUDA_VoxelBlockHash_Kernels.h
-    Engines/DepthFusion/DepthFusionEngine_CPU.h
     )
 
 ## ======================================= VOLUME FUSION ENGINE ========================================================

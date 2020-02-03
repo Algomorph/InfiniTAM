@@ -367,7 +367,7 @@ void MultiEngine<TVoxel, TIndex>::GetImage(ITMUChar4Image *out, GetImageType get
 		LocalMap<TVoxel, TIndex> *activeLocalMap = mapManager->getLocalMap(VisualizationLocalMapIdx);
 
 		IVisualizationEngine::RenderRaycastSelection raycastType;
-		if (activeLocalMap->trackingState->age_pointCloud <= 0) raycastType = IVisualizationEngine::RENDER_FROM_OLD_RAYCAST;
+		if (activeLocalMap->trackingState->point_cloud_age <= 0) raycastType = IVisualizationEngine::RENDER_FROM_OLD_RAYCAST;
 		else raycastType = IVisualizationEngine::RENDER_FROM_OLD_FORWARDPROJ;
 
 		IVisualizationEngine::RenderImageType imageType;

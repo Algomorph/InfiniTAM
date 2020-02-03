@@ -81,7 +81,7 @@ namespace ITMLib
 	{
 		if ((localMapId < 0) || ((unsigned)localMapId >= allData.size())) return false;
 		allData[localMapId]->trackingState->pose_d->SetFrom(&pose);
-		allData[localMapId]->trackingState->age_pointCloud = -1;
+		allData[localMapId]->trackingState->point_cloud_age = -1;
 		return true;
 	}
 
