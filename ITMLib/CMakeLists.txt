@@ -118,6 +118,7 @@ set(ITMLIB_ENGINES_LOWLEVEL_SHARED_HEADERS
 
 ##
 set(ITMLIB_ENGINES_TRAVERSAL_INTERFACE_HEADERS
+    Engines/Traversal/Interface/ImageTraversal.h
     Engines/Traversal/Interface/VolumeTraversal.h
     Engines/Traversal/Interface/TwoVolumeTraversal.h
     Engines/Traversal/Interface/ThreeVolumeTraversal.h
@@ -132,6 +133,8 @@ set(ITMLIB_ENGINES_TRAVERSAL_CPU_SOURCES
     )
 
 set(ITMLIB_ENGINES_TRAVERSAL_CPU_HEADERS
+    Engines/Traversal/CPU/ImageTraversal_CPU.h
+    
     Engines/Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h
     Engines/Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h
 
@@ -140,14 +143,14 @@ set(ITMLIB_ENGINES_TRAVERSAL_CPU_HEADERS
     Engines/Traversal/CPU/TwoVolumeTraversal_CPU_PVA_to_VBH.h
 
     Engines/Traversal/CPU/ThreeVolumeTraversal_CPU_PlainVoxelArray.h
-    Engines/Traversal/CPU/ThreeVolumeTraversal_CPU_VoxelBlockHash.h
-    )
-
+    Engines/Traversal/CPU/ThreeVolumeTraversal_CPU_VoxelBlockHash.h)
 ##
 set(ITMLIB_ENGINES_TRAVERSAL_CUDA_SOURCES
     )
 
 set(ITMLIB_ENGINES_TRAVERSAL_CUDA_HEADERS
+    Engines/Traversal/CUDA/ImageTraversal_CUDA.h
+    
     Engines/Traversal/CUDA/VolumeTraversal_CUDA_PlainVoxelArray.h
     Engines/Traversal/CUDA/VolumeTraversal_CUDA_PlainVoxelArray_Kernels.h
     Engines/Traversal/CUDA/VolumeTraversal_CUDA_VoxelBlockHash.h
