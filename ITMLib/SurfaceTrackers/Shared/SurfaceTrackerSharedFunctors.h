@@ -216,7 +216,7 @@ struct GradientSmoothingPassFunctor {
 
 		for (int iVoxel = 0; iVoxel < sobolev_filter_size; iVoxel++, receptive_voxel_position[directionIndex]++) {
 #if !defined(__CUDACC__) && !defined(WITH_OPENMP)
-			const TWarpVoxel& receptiveVoxel = readVoxel(warp_voxels, warpIndexData,
+			const TWarpVoxel& receptiveVoxel = readVoxel(warp_voxels, warp_index_data,
 			                                        receptive_voxel_position, vmIndex, warp_field_cache);
 #else
 			const TWarpVoxel& receptiveVoxel = readVoxel(warp_voxels, warp_index_data,

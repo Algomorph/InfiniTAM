@@ -89,6 +89,7 @@ class IndexingEngineInterface {
 	                            const RenderState* sourceRenderState,
 	                            const ITMView* view,
 	                            const Matrix4f& depth_camera_matrix = Matrix4f::Identity(),
+	                            float expand_camera_frustum_by = (PI * 3)/180,
 	                            bool onlyUpdateAllocatedList = false, bool resetAllocatedList = false) = 0;
 
 };
@@ -120,7 +121,7 @@ public:
 	                                         const RenderState* source_render_state,
 	                                         const ITMView* view,
 	                                         const Matrix4f& depth_camera_matrix = Matrix4f::Identity(),
-	                                         const float expand_camera_frustum_by = (PI * 3)/180,
+	                                         const float camera_frustum_expansion_margin_angle = (PI * 3) / 180,
 	                                         bool onlyUpdateAllocatedList = false,
 	                                         bool resetAllocatedList = false) override;
 

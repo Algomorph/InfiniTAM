@@ -68,28 +68,28 @@ bool VoxelIsConsideredForDataTerm(const TVoxel& canonicalVoxel, const TVoxel& li
  *	(-1,0,0) (0,-1,0) (0,0,-1)   (1, 0, 0) (0, 1, 0) (0, 0, 1)   (1, 1, 0) (0, 1, 1) (1, 0, 1)
  * \tparam TVoxel
  * \tparam TCache
- * \param[out] neighborFramewiseWarps
- * \param[out] neighborKnown - current behavior is:
+ * \param[out] neighbor_framewise_warps
+ * \param[out] neighbor_known - current behavior is:
  * 1) record unallocated voxels as non-found
  * 2) truncated voxels marked unknown or known as found
  * 3) everything else (non-truncated), of course, as found
- * \param[in] voxelPosition exact position of voxel in the scene.
+ * \param[in] voxel_position exact position of voxel in the scene.
  * \param[in] warps
  * \param[in] indexData
  * \param[in] cache
  */
 template<typename TVoxel, typename TWarp, typename TIndexData, typename TCache>
 _CPU_AND_GPU_CODE_
-inline void findPoint2ndDerivativeNeighborhoodFramewiseWarp(THREADPTR(Vector3f)* neighborFramewiseWarps, //x9, out
-                                                            THREADPTR(bool)* neighborKnown, //x9, out
-                                                            THREADPTR(bool)* neighborTruncated, //x9, out
-                                                            THREADPTR(bool)* neighborAllocated, //x9, out
-                                                            const CONSTPTR(Vector3i)& voxelPosition,
+inline void findPoint2ndDerivativeNeighborhoodFramewiseWarp(THREADPTR(Vector3f)* neighbor_framewise_warps, //x9, out
+                                                            THREADPTR(bool)* neighbor_known, //x9, out
+                                                            THREADPTR(bool)* neighbor_truncated, //x9, out
+                                                            THREADPTR(bool)* neighbor_allocated, //x9, out
+                                                            const CONSTPTR(Vector3i)& voxel_position,
                                                             const CONSTPTR(TWarp)* warps,
-                                                            const CONSTPTR(TIndexData)* warpIndexData,
-                                                            THREADPTR(TCache)& warpCache,
+                                                            const CONSTPTR(TIndexData)* warp_index_data,
+                                                            THREADPTR(TCache)& warp_cache,
                                                             const CONSTPTR(TVoxel)* voxels,
-                                                            const CONSTPTR(TIndexData)* voxelIndexData,
+                                                            const CONSTPTR(TIndexData)* voxel_index_data,
                                                             THREADPTR(TCache)& voxelCache) {
 	int vmIndex = 0;
 
@@ -98,16 +98,16 @@ inline void findPoint2ndDerivativeNeighborhoodFramewiseWarp(THREADPTR(Vector3f)*
 
 	auto process_voxel = [&](Vector3i location, int index){
 #if !defined(__CUDACC__) && !defined(WITH_OPENMP)
-		warp = readVoxel(warps, warp_index_data, voxelPosition + (location), vmIndex, warp_cache);
-	    voxel = readVoxel(voxels, voxelIndexData, voxelPosition + (location), vmIndex, voxelCache);
+		warp = readVoxel(warps, warp_index_data, voxel_position + (location), vmIndex, warp_cache);
+	    voxel = readVoxel(voxels, voxel_index_data, voxel_position + (location), vmIndex, voxelCache);
 #else //don't use cache for multithreading
-		warp = readVoxel(warps, warpIndexData, voxelPosition + (location), vmIndex);
-	    voxel = readVoxel(voxels, voxelIndexData, voxelPosition + (location), vmIndex);
+		warp = readVoxel(warps, warp_index_data, voxel_position + (location), vmIndex);
+	    voxel = readVoxel(voxels, voxel_index_data, voxel_position + (location), vmIndex);
 #endif
-	    neighborFramewiseWarps[index] = warp.framewise_warp;
-	    neighborAllocated[index] = vmIndex != 0;
-	    neighborKnown[index] = voxel.flags != ITMLib::VOXEL_UNKNOWN;
-	    neighborTruncated[index] = voxel.flags == ITMLib::VOXEL_TRUNCATED;
+		neighbor_framewise_warps[index] = warp.framewise_warp;
+		neighbor_allocated[index] = vmIndex != 0;
+		neighbor_known[index] = voxel.flags != ITMLib::VOXEL_UNKNOWN;
+		neighbor_truncated[index] = voxel.flags == ITMLib::VOXEL_TRUNCATED;
 	};
 	//necessary for 2nd derivatives in same direction, e.g. xx and zz
 	process_voxel(Vector3i(-1, 0, 0), 0);

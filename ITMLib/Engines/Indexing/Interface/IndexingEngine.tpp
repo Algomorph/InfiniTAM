@@ -15,9 +15,11 @@
 //  ================================================================
 #pragma once
 
+//local
 #include "IndexingEngine.h"
 #include "../../../Objects/Volume/RepresentationAccess.h"
 #include "../../EditAndCopy/Shared/EditAndCopyEngine_Shared.h"
+#include "../../../Utils/Geometry/FrustumTrigonometry.h"
 
 using namespace ITMLib;
 
@@ -44,8 +46,10 @@ void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateFromDepthAndSdfS
 		const RenderState* sourceRenderState,
 		const ITMView* view,
 		const Matrix4f& depth_camera_matrix,
-		const float expand_camera_frustum_by,
-		bool onlyUpdateAllocatedList, bool resetAllocatedList) {}
+		const float camera_frustum_expansion_margin_angle,
+		bool onlyUpdateAllocatedList, bool resetAllocatedList) {
+
+}
 
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
