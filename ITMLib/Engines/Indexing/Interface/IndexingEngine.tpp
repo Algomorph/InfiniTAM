@@ -45,7 +45,6 @@ void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateFromDepthAndSdfS
 		VoxelVolume<TVoxel, TIndex>* targetVolume,
 		const CameraTrackingState* tracking_state,
 		const ITMView* view,
-		const float camera_frustum_expansion_margin_angle,
 		bool onlyUpdateAllocatedList, bool resetAllocatedList) {}
 
 

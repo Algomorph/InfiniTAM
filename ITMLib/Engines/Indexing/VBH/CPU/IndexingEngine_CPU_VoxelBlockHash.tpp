@@ -123,11 +123,8 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateFromDepth
 
 template<typename TVoxel>
 void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateFromDepthAndSdfSpan(
-		VoxelVolume<TVoxel, VoxelBlockHash>* volume,
-		const CameraTrackingState* tracking_state,
-		const ITMView* view,
-		const float expand_camera_frustum_by,
-		bool only_update_utilized_list, bool reset_utilized_list) {
+		VoxelVolume<TVoxel, VoxelBlockHash>* volume, const CameraTrackingState* tracking_state,
+		const ITMView* view, bool only_update_utilized_list, bool reset_utilized_list) {
 
 	if (reset_utilized_list) volume->index.SetUtilizedHashBlockCount(0);
 
@@ -140,11 +137,6 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateFromDepth
 
 	Vector4f depth_camera_projection_parameters = view->calib.intrinsics_d.projectionParamsSimple.all;
 
-	Vector4f expanded_depth_camera_projection_parameters;
-	Vector2i expanded_depth_camera_resolution;
-	expandCameraFrustumByAngle(expanded_depth_camera_projection_parameters, expanded_depth_camera_resolution,
-	                           offset_to_depth_image, depth_camera_projection_parameters, depth_image_resolution,
-	                           expand_camera_frustum_by);
 
 	//Vector4f inverted_projection_parameters = expanded_depth_camera_projection_parameters;
 	Vector4f inverted_projection_parameters = depth_camera_projection_parameters;
@@ -182,7 +174,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateFromDepth
 #ifdef WITH_OPENMP
 #pragma omp parallel for default(none) shared(depth_image_resolution, collision_detected, volume, surface_cutoff_distance, \
 		hashTable, hash_block_size_reciprocal, inverted_projection_parameters, inverted_depth_camera_matrix, \
-		depth, allocation_block_coordinates, hashBlockVisibilityTypes, hash_entry_states)
+		depth, surface_points, allocation_block_coordinates, hashBlockVisibilityTypes, hash_entry_states)
 #endif
 		for (int locId = 0; locId < depth_image_resolution.x * depth_image_resolution.y; locId++) {
 			int y = locId / depth_image_resolution.x;
@@ -195,7 +187,6 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateFromDepth
 			                                                  hash_block_size_reciprocal,
 			                                                  inverted_depth_camera_matrix,
 			                                                  inverted_projection_parameters,
-			                                                  offset_to_depth_image,
 			                                                  depth_image_resolution,
 			                                                  volume->sceneParams->near_clipping_distance,
 			                                                  volume->sceneParams->far_clipping_distance,

@@ -218,12 +218,12 @@ struct WarpBasedAllocationMarkerFunctor {
 		int vmIndex;
 #if !defined(__CUDACC__) && !defined(WITH_OPENMP)
 		const TVoxel& sourceTSDFVoxelAtWarp = readVoxel(sourceTSDFVoxels, sourceTSDFHashEntries,
-		                                                warpedPositionTruncated,
-		                                                vmIndex, sourceTSDFCache);
+														warpedPositionTruncated,
+														vmIndex, sourceTSDFCache);
 #else //don't use cache when multithreading!
 		const TVoxel& sourceTSDFVoxelAtWarp = readVoxel(sourceTSDFVoxels, sourceTSDFHashEntries,
-														warpedPositionTruncated,
-														vmIndex);
+		                                                warpedPositionTruncated,
+		                                                vmIndex);
 #endif
 
 		int targetBlockHash = HashCodeFromBlockPosition(hashBlockPosition);
@@ -364,9 +364,7 @@ inline ITMLib::Segment findHashBlockSegmentAlongCameraRayWithinRangeFromPoint(
 		const float one_over_hash_block_size) {
 
 	// distance to the point along camera ray
-	float norm = sqrtf(
-			point_in_camera_space.x * point_in_camera_space.x + point_in_camera_space.y * point_in_camera_space.y +
-			point_in_camera_space.z * point_in_camera_space.z);
+	float norm = ORUtils::length(point_in_camera_space);
 
 	Vector4f endpoint_in_camera_space;
 
@@ -386,6 +384,41 @@ inline ITMLib::Segment findHashBlockSegmentAlongCameraRayWithinRangeFromPoint(
 	// point, in camera space
 	ITMLib::Segment segment(start_point_in_hash_blocks, end_point_in_hash_blocks);
 	return segment;
+}
+
+_CPU_AND_GPU_CODE_
+inline ITMLib::Segment findHashBlockSegmentAlongCameraRayWithinRangeFromAndBetweenTwoPoints(
+		const float range,
+		const Vector4f& point1_in_camera_space,
+		const Vector4f& point2_in_camera_space,
+		const Matrix4f& inverted_camera_pose,
+		const float one_over_hash_block_size) {
+
+	Vector4f endpoint_in_camera_space;
+	float norm;
+	if (point2_in_camera_space.z > point1_in_camera_space.z) {
+		norm = ORUtils::length(point1_in_camera_space);
+		endpoint_in_camera_space = point1_in_camera_space * (1.0f - range / norm);
+		endpoint_in_camera_space.w = 1.0f;
+		Vector3f start_point_in_hash_blocks = cameraVoxelSpaceToWorldHashBlockSpace(
+				endpoint_in_camera_space, inverted_camera_pose, one_over_hash_block_size);
+		norm = ORUtils::length(point2_in_camera_space);
+		endpoint_in_camera_space = point2_in_camera_space * (1.0f + range / norm);
+		Vector3f end_point_in_hash_blocks = cameraVoxelSpaceToWorldHashBlockSpace(
+				endpoint_in_camera_space, inverted_camera_pose, one_over_hash_block_size);
+		return ITMLib::Segment(start_point_in_hash_blocks, end_point_in_hash_blocks);
+	} else {
+		norm = ORUtils::length(point2_in_camera_space);
+		endpoint_in_camera_space = point2_in_camera_space * (1.0f - range / norm);
+		endpoint_in_camera_space.w = 1.0f;
+		Vector3f start_point_in_hash_blocks = cameraVoxelSpaceToWorldHashBlockSpace(
+				endpoint_in_camera_space, inverted_camera_pose, one_over_hash_block_size);
+		norm = ORUtils::length(point1_in_camera_space);
+		endpoint_in_camera_space = point1_in_camera_space * (1.0f + range / norm);
+		Vector3f end_point_in_hash_blocks = cameraVoxelSpaceToWorldHashBlockSpace(
+				endpoint_in_camera_space, inverted_camera_pose, one_over_hash_block_size);
+		return ITMLib::Segment(start_point_in_hash_blocks, end_point_in_hash_blocks);
+	}
 }
 
 _CPU_AND_GPU_CODE_
@@ -418,29 +451,45 @@ findVoxelHashBlocksOnRayNearAndBetweenTwoSurfaces(ITMLib::HashEntryAllocationSta
                                                   const CONSTPTR(HashEntry)* hash_table, int x, int y,
                                                   const CONSTPTR(float)* surface1_depth_image,
                                                   const CONSTPTR(Vector4f)* surface2_points,
-                                                  float surface_distance_cutoff, float one_over_block_size,
+                                                  float surface_distance_cutoff, float one_over_hash_block_size,
                                                   const Matrix4f inverted_camera_pose,
                                                   const Vector4f inverted_camera_projection_parameters,
-                                                  const Vector2i offset_to_depth_image,
-                                                  const Vector2i depth_image_size,
+                                                  const Vector2i image_size,
                                                   float near_clipping_distance, float far_clipping_distance,
                                                   bool& collisionDetected) {
 
 	bool has_surface1 = false, has_surface2 = false;
-	float surface1_depth = 0.0f;
-	if (x >= offset_to_depth_image.x && y >= offset_to_depth_image.y &&
-	    x < offset_to_depth_image.x + depth_image_size.x &&
-	    y < offset_to_depth_image.y + depth_image_size.y) {
 
-		surface1_depth =
-				surface1_depth_image[x - offset_to_depth_image.x + (y - offset_to_depth_image.y) * depth_image_size.x];
-		if (!(surface1_depth <= 0 || (surface1_depth - surface_distance_cutoff) < 0 ||
-		      (surface1_depth - surface_distance_cutoff) < near_clipping_distance ||
-		      (surface1_depth + surface_distance_cutoff) > far_clipping_distance))
-			has_surface1 = true;
+	float surface1_depth = surface1_depth_image[x + y * image_size.x];
+	if (!(surface1_depth <= 0 || (surface1_depth - surface_distance_cutoff) < 0 ||
+	      (surface1_depth - surface_distance_cutoff) < near_clipping_distance ||
+	      (surface1_depth + surface_distance_cutoff) > far_clipping_distance))
+		has_surface1 = true;
+	Vector4f surface2_point = surface2_points[x + y * image_size.x];
+
+	if (surface2_point.x > 0.0f) has_surface2 = true;
+
+	ITMLib::Segment march_segment;
+
+	if (has_surface1 && has_surface2) {
+		Vector4f surface1_point = imageSpacePointToCameraSpace(surface1_depth, x, y,
+		                                                       inverted_camera_projection_parameters);
+		march_segment = findHashBlockSegmentAlongCameraRayWithinRangeFromAndBetweenTwoPoints(
+				surface_distance_cutoff, surface1_point, surface2_point, inverted_camera_pose,
+				one_over_hash_block_size);
+	} else {
+		if (has_surface1) {
+			march_segment = findHashBlockSegmentAlongCameraRayWithinRangeFromDepth(
+					surface_distance_cutoff, surface1_depth, x, y, inverted_camera_pose,
+					inverted_camera_projection_parameters, one_over_hash_block_size);
+		} else if (has_surface2) {
+			march_segment = findHashBlockSegmentAlongCameraRayWithinRangeFromPoint(
+					surface_distance_cutoff, surface2_point, inverted_camera_pose, one_over_hash_block_size);
+		} else {
+			return; // neither surface is defined at this point, nothing to do.
+		}
 	}
-	Vector4f surface2_point = surface2_points[]
-	if(sur)
+
 	findVoxelHashBlocksAlongSegment(hash_entry_allocation_states, hash_block_coordinates, hash_block_visibility_types,
 	                                hash_table, march_segment, collisionDetected);
 

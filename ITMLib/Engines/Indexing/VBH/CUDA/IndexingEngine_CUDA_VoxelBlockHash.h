@@ -51,7 +51,6 @@ public:
 	void AllocateFromDepthAndSdfSpan(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
 	                                 const CameraTrackingState* tracking_state,
 	                                 const ITMView* view,
-	                                 float camera_frustum_expansion_margin_angle = (PI * 3) / 180,
 	                                 bool only_update_utilized_list = false, bool reset_utilized_list = false) override;
 
 	void AllocateHashEntriesUsingLists(VoxelVolume <TVoxel, VoxelBlockHash>* volume) override;

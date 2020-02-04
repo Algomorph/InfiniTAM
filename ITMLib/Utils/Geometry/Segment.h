@@ -22,6 +22,12 @@ namespace ITMLib {
 class Segment {
 public:
 	_CPU_AND_GPU_CODE_
+	Segment() :
+			origin(0.0f), direction(0.0f),
+			inverseDirection(0.0f),
+			sign{(inverseDirection.x < 0),(inverseDirection.y < 0),(inverseDirection.z < 0)}
+	{}
+	_CPU_AND_GPU_CODE_
 	Segment(const Vector3f& startPoint, const Vector3f& endPoint) :
 			origin(startPoint), direction(endPoint - startPoint),
 			inverseDirection(Vector3f(1.0) / direction),

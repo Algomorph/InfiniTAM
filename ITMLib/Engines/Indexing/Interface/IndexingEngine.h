@@ -88,7 +88,6 @@ class IndexingEngineInterface {
 	AllocateFromDepthAndSdfSpan(VoxelVolume <TVoxel, TIndex>* volume,
 	                            const CameraTrackingState* tracking_state,
 	                            const ITMView* view,
-	                            float expand_camera_frustum_by = (PI * 3)/180,
 	                            bool onlyUpdateAllocatedList = false, bool resetAllocatedList = false) = 0;
 
 };
@@ -119,7 +118,6 @@ public:
 	virtual void AllocateFromDepthAndSdfSpan(VoxelVolume <TVoxel, TIndex>* targetVolume,
 	                                         const CameraTrackingState* tracking_state,
 	                                         const ITMView* view,
-	                                         float camera_frustum_expansion_margin_angle = (PI * 3) / 180,
 	                                         bool only_update_utilized_list = false,
 	                                         bool reset_utilized_list = false) override;
 
