@@ -327,7 +327,8 @@ findVoxelHashBlocksAlongSegment(ITMLib::HashEntryAllocationState* hash_entry_all
 		}
 		MarkForAllocationAndSetVisibilityTypeIfNotFound(hash_entry_allocation_states,
 		                                                hash_block_coordinates,
-		                                                hash_block_visibility_types, currentHashBlockPosition, hash_table,
+		                                                hash_block_visibility_types, currentHashBlockPosition,
+		                                                hash_table,
 		                                                collision_detected);
 
 		check_position += strideVector;
@@ -335,86 +336,127 @@ findVoxelHashBlocksAlongSegment(ITMLib::HashEntryAllocationState* hash_entry_all
 	}
 }
 
-//TODO: function to find segment in narrow band around point along ray
-//_CPU_AND_GPU_CODE_ inline void 
+
+_CPU_AND_GPU_CODE_
+inline Vector3f cameraVoxelSpaceToWorldHashBlockSpace(const Vector4f& point_camera_space_voxels,
+                                                      const Matrix4f& inverted_camera_pose,
+                                                      const float one_over_hash_block_size) {
+	// account for the fact that voxel coordinates represent the voxel center, and we need the extreme corner position of
+	// the hash block, i.e. 0.5 voxel (1/16 block) offset from the position along the ray
+	return (TO_VECTOR3(inverted_camera_pose * point_camera_space_voxels)) * one_over_hash_block_size
+	       + Vector3f(1.0f / (2.0f * VOXEL_BLOCK_SIZE));
+}
+
+/**
+ * \brief compute the segment formed by tracing the camera-space point a fixed distance forward and backward along
+ * the ray; note: the starting & ending points of the returned segment are in voxel block coordinates
+ * \param distance_from_point distance to trace backward and forward along the ray
+ * \param point_in_camera_space point to trace from
+ * \param inverted_camera_pose
+ * \param one_over_hash_block_size
+ * \return resulting segment in voxel block coordinates
+ */
+_CPU_AND_GPU_CODE_
+inline ITMLib::Segment findHashBlockSegmentAlongCameraRayWithinRangeFromPoint(
+		const float distance_from_point,
+		const Vector4f& point_in_camera_space,
+		const Matrix4f& inverted_camera_pose,
+		const float one_over_hash_block_size) {
+
+	// distance to the point along camera ray
+	float norm = sqrtf(
+			point_in_camera_space.x * point_in_camera_space.x + point_in_camera_space.y * point_in_camera_space.y +
+			point_in_camera_space.z * point_in_camera_space.z);
+
+	Vector4f endpoint_in_camera_space;
+
+	endpoint_in_camera_space = point_in_camera_space * (1.0f - distance_from_point / norm);
+	endpoint_in_camera_space.w = 1.0f;
+	//start position along ray in hash blocks
+	Vector3f start_point_in_hash_blocks = cameraVoxelSpaceToWorldHashBlockSpace(
+			endpoint_in_camera_space, inverted_camera_pose, one_over_hash_block_size);
+
+	endpoint_in_camera_space = point_in_camera_space * (1.0f + distance_from_point / norm);
+	//end position of the segment to march along the ray
+	Vector3f end_point_in_hash_blocks = cameraVoxelSpaceToWorldHashBlockSpace(
+			endpoint_in_camera_space, inverted_camera_pose, one_over_hash_block_size);
+
+	// segment from start of the (truncated SDF) band, through the observed point, and to the opposite (occluded)
+	// end of the (truncated SDF) band (increased by backBandFactor), along the ray cast from the camera through the
+	// point, in camera space
+	ITMLib::Segment segment(start_point_in_hash_blocks, end_point_in_hash_blocks);
+	return segment;
+}
+
+_CPU_AND_GPU_CODE_
+inline Vector4f imageSpacePointToCameraSpace(const float depth, const int x, const int y,
+                                             const Vector4f& inverted_camera_projection_parameters) {
+	return {depth *
+	        ((float(x) - inverted_camera_projection_parameters.z) * inverted_camera_projection_parameters.x),
+	        depth *
+	        ((float(y) - inverted_camera_projection_parameters.w) * inverted_camera_projection_parameters.y),
+	        depth, 1.0f};
+}
+
+_CPU_AND_GPU_CODE_
+inline ITMLib::Segment
+findHashBlockSegmentAlongCameraRayWithinRangeFromDepth(const float distance_from_point, const float depth_measure,
+                                                       const int x, const int y, const Matrix4f& inverted_camera_pose,
+                                                       const Vector4f& inverted_camera_projection_parameters,
+                                                       const float one_over_hash_block_size) {
+
+	Vector4f point_in_camera_space = imageSpacePointToCameraSpace(depth_measure, x, y,
+	                                                              inverted_camera_projection_parameters);
+	return findHashBlockSegmentAlongCameraRayWithinRangeFromPoint(distance_from_point, point_in_camera_space,
+	                                                              inverted_camera_pose, one_over_hash_block_size);
+}
 
 _CPU_AND_GPU_CODE_ inline void
 findVoxelHashBlocksOnRayNearAndBetweenTwoSurfaces(ITMLib::HashEntryAllocationState* hash_entry_allocation_states,
                                                   Vector3s* hash_block_coordinates,
                                                   HashBlockVisibility* hash_block_visibility_types,
                                                   const CONSTPTR(HashEntry)* hash_table, int x, int y,
-                                                  const CONSTPTR(float)* surface_1_depth,
-                                                  const CONSTPTR(Vector4f)* surface_2_points,
+                                                  const CONSTPTR(float)* surface1_depth_image,
+                                                  const CONSTPTR(Vector4f)* surface2_points,
                                                   float surface_distance_cutoff, float one_over_block_size,
-                                                  Matrix4f inverted_camera_pose,
-                                                  Vector4f inverted_camera_projection_parameters,
-                                                  Vector2i offset_to_depth_image, Vector2i depth_image_size,
+                                                  const Matrix4f inverted_camera_pose,
+                                                  const Vector4f inverted_camera_projection_parameters,
+                                                  const Vector2i offset_to_depth_image,
+                                                  const Vector2i depth_image_size,
                                                   float near_clipping_distance, float far_clipping_distance,
                                                   bool& collisionDetected) {
 
-	if(x >= offset_to_depth_image.x && y >= offset_to_depth_image.y && x < offset_to_depth_image.x + depth_image_size.x &&
-		y < offset_to_depth_image.y + depth_image_size.y){
+	bool has_surface1 = false, has_surface2 = false;
+	float surface1_depth = 0.0f;
+	if (x >= offset_to_depth_image.x && y >= offset_to_depth_image.y &&
+	    x < offset_to_depth_image.x + depth_image_size.x &&
+	    y < offset_to_depth_image.y + depth_image_size.y) {
 
-		float depth_measure = surface_1_depth[x + y * depth_image_size.x];
-		if (depth_measure <= 0 || (depth_measure - surface_distance_cutoff) < 0 ||
-		    (depth_measure - surface_distance_cutoff) < near_clipping_distance ||
-		    (depth_measure + surface_distance_cutoff) > far_clipping_distance)
-			return;
-
-		Vector4f surface1_point_in_camera_space;
-		surface1_point_in_camera_space.z = depth_measure; // (orthogonal) distance to the point from the image plane (meters)
-		surface1_point_in_camera_space.x = surface1_point_in_camera_space.z *
-		                                   ((float(x) - inverted_camera_projection_parameters.z) * inverted_camera_projection_parameters.x);
-		surface1_point_in_camera_space.y = surface1_point_in_camera_space.z *
-		                                   ((float(y) - inverted_camera_projection_parameters.w) * inverted_camera_projection_parameters.y);
-
+		surface1_depth =
+				surface1_depth_image[x - offset_to_depth_image.x + (y - offset_to_depth_image.y) * depth_image_size.x];
+		if (!(surface1_depth <= 0 || (surface1_depth - surface_distance_cutoff) < 0 ||
+		      (surface1_depth - surface_distance_cutoff) < near_clipping_distance ||
+		      (surface1_depth + surface_distance_cutoff) > far_clipping_distance))
+			has_surface1 = true;
 	}
-
-
-	Vector4f pt_camera_f;
-	pt_camera_f.z = depth_measure; // (orthogonal) distance to the point from the image plane (meters)
-	pt_camera_f.x =
-			pt_camera_f.z * ((float(x) - inverted_camera_projection_parameters.z) * inverted_camera_projection_parameters.x);
-	pt_camera_f.y =
-			pt_camera_f.z * ((float(y) - inverted_camera_projection_parameters.w) * inverted_camera_projection_parameters.y);
-
-	// distance to the point along camera ray
-	float norm = sqrtf(pt_camera_f.x * pt_camera_f.x + pt_camera_f.y * pt_camera_f.y + pt_camera_f.z * pt_camera_f.z);
-
-	Vector4f pt_buff;
-
-	//Vector3f offset(-halfVoxelSize);
-	pt_buff = pt_camera_f * (1.0f - surface_distance_cutoff / norm);
-	pt_buff.w = 1.0f;
-	//position along segment to march along ray in hash blocks (here -- starting point)
-	// account for the fact that voxel coordinates represent the voxel center, and we need the extreme corner position of
-	// the hash block, i.e. 0.5 voxel (1/16 block) offset from the position along the ray
-	Vector3f march_segment_origin_in_hash_blocks = (TO_VECTOR3(inverted_camera_pose * pt_buff)) * one_over_block_size
-	                                               + Vector3f(1.0f / (2.0f * VOXEL_BLOCK_SIZE));
-
-	pt_buff = pt_camera_f * (1.0f + surface_distance_cutoff / norm);
-	pt_buff.w = 1.0f;
-	//end position of the segment to march along the ray
-	Vector3f march_segment_end_in_hash_blocks = (TO_VECTOR3(inverted_camera_pose * pt_buff)) * one_over_block_size
-	                                            + Vector3f(1.0f / (2.0f * VOXEL_BLOCK_SIZE));
-
-	// segment from start of the (truncated SDF) band, through the observed point, and to the opposite (occluded)
-	// end of the (truncated SDF) band (increased by backBandFactor), along the ray cast from the camera through the
-	// point, in camera space
-	ITMLib::Segment march_segment(march_segment_origin_in_hash_blocks, march_segment_end_in_hash_blocks);
-
+	Vector4f surface2_point = surface2_points[]
+	if(sur)
 	findVoxelHashBlocksAlongSegment(hash_entry_allocation_states, hash_block_coordinates, hash_block_visibility_types,
 	                                hash_table, march_segment, collisionDetected);
 
 }
 
 _CPU_AND_GPU_CODE_ inline void
-findVoxelBlocksForRayNearSurface(ITMLib::HashEntryAllocationState* hash_entry_allocation_states, Vector3s* hash_block_coordinates,
-                                 HashBlockVisibility* hash_block_visibility_types, const CONSTPTR(HashEntry)* hash_table,
-                                 int x, int y, const CONSTPTR(float)* depth, float surface_distance_cutoff,
-                                 Matrix4f inverted_camera_pose, Vector4f inverted_camera_projection_parameters,
-                                 float one_over_hash_block_size, Vector2i depth_image_size,
-                                 float near_clipping_distance, float far_clipping_distance, bool& collision_detected) {
+findVoxelBlocksForRayNearSurface(ITMLib::HashEntryAllocationState* hash_entry_allocation_states,
+                                 Vector3s* hash_block_coordinates,
+                                 HashBlockVisibility* hash_block_visibility_types,
+                                 const CONSTPTR(HashEntry)* hash_table,
+                                 const int x, const int y, const CONSTPTR(float)* depth, float surface_distance_cutoff,
+                                 const Matrix4f inverted_camera_pose,
+                                 const Vector4f inverted_camera_projection_parameters,
+                                 const float one_over_hash_block_size, const Vector2i depth_image_size,
+                                 const float near_clipping_distance, const float far_clipping_distance,
+                                 bool& collision_detected) {
 
 	float depth_measure = depth[x + y * depth_image_size.x];
 	if (depth_measure <= 0 || (depth_measure - surface_distance_cutoff) < 0 ||
@@ -422,37 +464,15 @@ findVoxelBlocksForRayNearSurface(ITMLib::HashEntryAllocationState* hash_entry_al
 	    (depth_measure + surface_distance_cutoff) > far_clipping_distance)
 		return;
 
-	Vector4f pt_camera_f;
-	pt_camera_f.z = depth_measure; // (orthogonal) distance to the point from the image plane (meters)
-	pt_camera_f.x =
-			pt_camera_f.z * ((float(x) - inverted_camera_projection_parameters.z) * inverted_camera_projection_parameters.x);
-	pt_camera_f.y =
-			pt_camera_f.z * ((float(y) - inverted_camera_projection_parameters.w) * inverted_camera_projection_parameters.y);
-
-	// distance to the point along camera ray
-	float norm = sqrtf(pt_camera_f.x * pt_camera_f.x + pt_camera_f.y * pt_camera_f.y + pt_camera_f.z * pt_camera_f.z);
-
-	Vector4f pt_buff;
-
-	//Vector3f offset(-halfVoxelSize);
-	pt_buff = pt_camera_f * (1.0f - surface_distance_cutoff / norm);
-	pt_buff.w = 1.0f;
-	//position along segment to march along ray in hash blocks (here -- starting point)
-	// account for the fact that voxel coordinates represent the voxel center, and we need the extreme corner position of
-	// the hash block, i.e. 0.5 voxel (1/16 block) offset from the position along the ray
-	Vector3f currentCheckPosition_HashBlocks = (TO_VECTOR3(inverted_camera_pose * pt_buff)) * one_over_hash_block_size
-	                                           + Vector3f(1.0f / (2.0f * VOXEL_BLOCK_SIZE));
-
-	pt_buff = pt_camera_f * (1.0f + surface_distance_cutoff / norm);
-	pt_buff.w = 1.0f;
-	//end position of the segment to march along the ray
-	Vector3f endCheckPosition_HashBlocks = (TO_VECTOR3(inverted_camera_pose * pt_buff)) * one_over_hash_block_size
-	                                       + Vector3f(1.0f / (2.0f * VOXEL_BLOCK_SIZE));
-
 	// segment from start of the (truncated SDF) band, through the observed point, and to the opposite (occluded)
 	// end of the (truncated SDF) band (increased by backBandFactor), along the ray cast from the camera through the
 	// point, in camera space
-	ITMLib::Segment march_segment(currentCheckPosition_HashBlocks, endCheckPosition_HashBlocks);
+	ITMLib::Segment march_segment = findHashBlockSegmentAlongCameraRayWithinRangeFromDepth(surface_distance_cutoff,
+	                                                                                       depth_measure,
+	                                                                                       x, y, inverted_camera_pose,
+	                                                                                       inverted_camera_projection_parameters,
+	                                                                                       one_over_hash_block_size);
+
 
 	findVoxelHashBlocksAlongSegment(hash_entry_allocation_states, hash_block_coordinates, hash_block_visibility_types,
 	                                hash_table, march_segment, collision_detected);

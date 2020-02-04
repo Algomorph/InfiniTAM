@@ -141,13 +141,13 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateFromDepth
 	Vector4f depth_camera_projection_parameters = view->calib.intrinsics_d.projectionParamsSimple.all;
 
 	Vector4f expanded_depth_camera_projection_parameters;
-	Vector2i expanded_depth_camera_resolution, offset_to_depth_image;
-
+	Vector2i expanded_depth_camera_resolution;
 	expandCameraFrustumByAngle(expanded_depth_camera_projection_parameters, expanded_depth_camera_resolution,
 	                           offset_to_depth_image, depth_camera_projection_parameters, depth_image_resolution,
 	                           expand_camera_frustum_by);
 
-	Vector4f inverted_projection_parameters = expanded_depth_camera_projection_parameters;
+	//Vector4f inverted_projection_parameters = expanded_depth_camera_projection_parameters;
+	Vector4f inverted_projection_parameters = depth_camera_projection_parameters;
 	inverted_projection_parameters.fx = 1.0f / inverted_projection_parameters.fx;
 	inverted_projection_parameters.fy = 1.0f / inverted_projection_parameters.fy;
 
