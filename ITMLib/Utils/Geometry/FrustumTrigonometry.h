@@ -52,8 +52,23 @@ float pixelsRequiredToExpandFrustumByAngle(const Vector4f& projection_parameters
 	       leg_along_image;
 }
 
-inline void expandCameraFrustumByAngle(Vector4f& expanded_projection_parameters, Vector2i& expanded_resolution,
-                                       const Vector4f& projection_parameters, const Vector2i& resolution, float angle) {
+/**
+ * \brief Expands the frustum by the specified angle in each of the four directions.
+ * \details a right rectangular frustum is a parallel section of a pyramid with a rectangular crossection.
+ * This function expands the two angles to the apex of the said pyramid by twice the input angle, keeping the sectioning
+ * otherwise constant. Likewise, the angles are properly expanded if the optical center is shifted, i.e. the frustum is
+ * not a right frustum but rather a section of one.
+ * \param expanded_projection_parameters[out] new projection parameters, i.e. center might be shifted
+ * \param expanded_resolution[out] new resolution / image plane bounds, i.e. the base of the frustum will grow, and
+ *  so will the image plane
+ * \param offset[out] the offset of the new image plane bounds to the input image plane bounds.
+ * \param projection_parameters[in] input frustum projection parameters
+ * \param resolution[in] input frustum base dimensions, i.e. resolution of the input image
+ * \param angle[in] angle to expand by for each of the four directions
+ */
+inline void
+expandCameraFrustumByAngle(Vector4f& expanded_projection_parameters, Vector2i& expanded_resolution, Vector2i& offset,
+                           const Vector4f& projection_parameters, const Vector2i& resolution, float angle) {
 	int margin_negative_x = static_cast<int>(std::ceil(
 			pixelsRequiredToExpandFrustumByAngle(projection_parameters, resolution, angle,
 			                                     true, AXIS_X)));
@@ -66,7 +81,9 @@ inline void expandCameraFrustumByAngle(Vector4f& expanded_projection_parameters,
 	int margin_positive_y = static_cast<int>(std::ceil(
 			pixelsRequiredToExpandFrustumByAngle(projection_parameters, resolution, angle,
 			                                     false, AXIS_Y)));
-	
+
+	offset.x = margin_negative_x;
+	offset.y = margin_negative_y;
 	expanded_resolution.x = resolution.x + margin_negative_x + margin_positive_x;
 	expanded_resolution.y = resolution.y + margin_negative_y + margin_positive_y;
 
@@ -74,6 +91,13 @@ inline void expandCameraFrustumByAngle(Vector4f& expanded_projection_parameters,
 	expanded_projection_parameters.fy = projection_parameters.fy;
 	expanded_projection_parameters.cx = projection_parameters.cx + static_cast<float>(margin_negative_x);
 	expanded_projection_parameters.cy = projection_parameters.cy + static_cast<float>(margin_negative_y);
+}
+
+inline void expandCameraFrustumByAngle(Vector4f& expanded_projection_parameters, Vector2i& expanded_resolution,
+                                       const Vector4f& projection_parameters, const Vector2i& resolution, float angle) {
+	Vector2i offset;
+	expandCameraFrustumByAngle(expanded_projection_parameters, expanded_resolution, offset,
+	                           projection_parameters, resolution, angle);
 }
 
 } // namespace ITMLib

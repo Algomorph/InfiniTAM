@@ -161,10 +161,13 @@ void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::AllocateSceneFromDep
 		int y = locId / depthImgSize.x;
 		int x = locId - y * depthImgSize.x;
 		bool collisionDetected = false;
-		buildHashAllocAndVisibleTypePP(hashEntryStates_device, hashBlockVisibilityTypes, x, y, blockCoords_device, depth, invM_d,
-		                               invProjParams_d, surface_cutoff_distance, depthImgSize, oneOverHashEntrySize,
-		                               hashTable, scene->sceneParams->near_clipping_distance,
-		                               scene->sceneParams->far_clipping_distance, collisionDetected);
+		findVoxelBlocksForRayNearSurface(hashEntryStates_device,
+		                                 blockCoords_device, hashBlockVisibilityTypes,
+		                                 hashTable, x, y,
+		                                 depth, surface_cutoff_distance, invM_d,
+		                                 invProjParams_d,
+		                                 oneOverHashEntrySize, depthImgSize, scene->sceneParams->near_clipping_distance,
+		                                 scene->sceneParams->far_clipping_distance, collisionDetected);
 	}
 
 	if (onlyUpdateVisibleList) useSwapping = false;
@@ -192,7 +195,7 @@ void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::AllocateSceneFromDep
 				}
 				else
 				{
-					// Mark entry as not visible since we couldn't allocate it but buildHashAllocAndVisibleTypePP changed its state.
+					// Mark entry as not visible since we couldn't allocate it but findVoxelBlocksForRayNearSurface changed its state.
 					hashBlockVisibilityTypes[targetIdx] = INVISIBLE;
 
 					// Restore previous value to avoid leaks.
@@ -221,7 +224,7 @@ void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::AllocateSceneFromDep
 				}
 				else
 				{
-					// No need to mark the entry as not visible since buildHashAllocAndVisibleTypePP did not mark it.
+					// No need to mark the entry as not visible since findVoxelBlocksForRayNearSurface did not mark it.
 					// Restore previous value to avoid leaks.
 					lastFreeVoxelBlockId++;
 					lastFreeExcessListId++;

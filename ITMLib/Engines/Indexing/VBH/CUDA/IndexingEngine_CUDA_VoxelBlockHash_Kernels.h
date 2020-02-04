@@ -175,10 +175,12 @@ __global__ void buildHashAllocAndVisibleType_device(ITMLib::HashEntryAllocationS
 
 	if (x > _imgSize.x - 1 || y > _imgSize.y - 1) return;
 
-	buildHashAllocAndVisibleTypePP(hashEntryStates, blockVisibilityTypes, x, y, blockCoords, depth,
-	                               invertedCameraTransform, projParams_d,
-	                               surface_cutoff_distance, _imgSize, oneOverHashBlockSizeMeters,
-	                               hashTable, near_clipping_distance, far_clipping_distance, *collisionDetected);
+	findVoxelBlocksForRayNearSurface(hashEntryStates, blockCoords, blockVisibilityTypes,
+	                                 hashTable, x, y, depth,
+	                                 surface_cutoff_distance,
+	                                 invertedCameraTransform, projParams_d, oneOverHashBlockSizeMeters, _imgSize,
+	                                 near_clipping_distance, far_clipping_distance,
+	                                 *collisionDetected);
 }
 
 

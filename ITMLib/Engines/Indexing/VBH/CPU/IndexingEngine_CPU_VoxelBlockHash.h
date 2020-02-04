@@ -41,7 +41,7 @@ public:
 	void operator=(IndexingEngine const&) = delete;
 
 	void AllocateFromDepth(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
-	                       const CameraTrackingState* trackingState, bool onlyUpdateVisibleList,
+	                       const CameraTrackingState* tracking_state, bool onlyUpdateVisibleList,
 	                       bool resetVisibleList) override;
 
 	void AllocateFromDepth(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
@@ -49,11 +49,10 @@ public:
 	                       bool onlyUpdateVisibleList = false, bool resetVisibleList = false) override;
 
 	void AllocateFromDepthAndSdfSpan(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
-	                                 const RenderState* source_render_state,
+	                                 const CameraTrackingState* tracking_state,
 	                                 const ITMView* view,
-	                                 const Matrix4f& depth_camera_matrix = Matrix4f::Identity(),
 	                                 float camera_frustum_expansion_margin_angle = (PI * 3) / 180,
-	                                 bool onlyUpdateAllocatedList = false, bool resetAllocatedList = false) override;
+	                                 bool only_update_utilized_list = false, bool reset_utilized_list = false) override;
 
 
 	void BuildVisibilityList(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,

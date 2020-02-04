@@ -218,12 +218,12 @@ struct WarpBasedAllocationMarkerFunctor {
 		int vmIndex;
 #if !defined(__CUDACC__) && !defined(WITH_OPENMP)
 		const TVoxel& sourceTSDFVoxelAtWarp = readVoxel(sourceTSDFVoxels, sourceTSDFHashEntries,
-														warpedPositionTruncated,
-														vmIndex, sourceTSDFCache);
+		                                                warpedPositionTruncated,
+		                                                vmIndex, sourceTSDFCache);
 #else //don't use cache when multithreading!
 		const TVoxel& sourceTSDFVoxelAtWarp = readVoxel(sourceTSDFVoxels, sourceTSDFHashEntries,
-		                                                warpedPositionTruncated,
-		                                                vmIndex);
+														warpedPositionTruncated,
+														vmIndex);
 #endif
 
 		int targetBlockHash = HashCodeFromBlockPosition(hashBlockPosition);
@@ -258,70 +258,27 @@ _CPU_AND_GPU_CODE_ inline int getIncrementCount(Vector3s coord1, Vector3s coord2
 	       static_cast<int>(coord1.z != coord2.z);
 }
 
-
 _CPU_AND_GPU_CODE_ inline void
-prepareForAllocationFromDepthAndTsdf(ITMLib::HashEntryAllocationState* hashEntryStates,
-                                     HashBlockVisibility* blockVisibilityTypes, int x, int y,
-                                     Vector3s* blockCoords, const CONSTPTR(float)* depth, Matrix4f invertedCameraPose,
-                                     Vector4f invertedCameraProjectionParameters, float surface_distance_cutoff,
-                                     Vector2i imgSize, float oneOverVoxelBlockSize_Meters,
-                                     const CONSTPTR(HashEntry)* hashTable, float viewFrustum_min,
-                                     float viewFrustum_max,
-                                     bool& collisionDetected) {
-	float depth_measure;
-	int stepCount;
-	Vector4f pt_camera_f;
-
-	depth_measure = depth[x + y * imgSize.x];
-	if (depth_measure <= 0 || (depth_measure - surface_distance_cutoff) < 0 ||
-	    (depth_measure - surface_distance_cutoff) < viewFrustum_min ||
-	    (depth_measure + surface_distance_cutoff) > viewFrustum_max)
-		return;
-
-
-	pt_camera_f.z = depth_measure; // (orthogonal) distance to the point from the image plane (meters)
-	pt_camera_f.x =
-			pt_camera_f.z * ((float(x) - invertedCameraProjectionParameters.z) * invertedCameraProjectionParameters.x);
-	pt_camera_f.y =
-			pt_camera_f.z * ((float(y) - invertedCameraProjectionParameters.w) * invertedCameraProjectionParameters.y);
-
-	// distance to the point along camera ray
-	float norm = sqrtf(pt_camera_f.x * pt_camera_f.x + pt_camera_f.y * pt_camera_f.y + pt_camera_f.z * pt_camera_f.z);
-
-	Vector4f pt_buff;
-
-	//Vector3f offset(-halfVoxelSize);
-	pt_buff = pt_camera_f * (1.0f - surface_distance_cutoff / norm);
-	pt_buff.w = 1.0f;
-	//position along segment to march along ray in hash blocks (here -- starting point)
-	// account for the fact that voxel coordinates represent the voxel center, and we need the extreme corner position of
-	// the hash block, i.e. 0.5 voxel (1/16 block) offset from the position along the ray
-	Vector3f currentCheckPosition_HashBlocks = (TO_VECTOR3(invertedCameraPose * pt_buff)) * oneOverVoxelBlockSize_Meters
-	                                           + Vector3f(1.0f / (2.0f * VOXEL_BLOCK_SIZE));
-
-	pt_buff = pt_camera_f * (1.0f + surface_distance_cutoff / norm);
-	pt_buff.w = 1.0f;
-	//end position of the segment to march along the ray
-	Vector3f endCheckPosition_HashBlocks = (TO_VECTOR3(invertedCameraPose * pt_buff)) * oneOverVoxelBlockSize_Meters
-	                                       + Vector3f(1.0f / (2.0f * VOXEL_BLOCK_SIZE));
-
-	// segment from start of the (truncated SDF) band, through the observed point, and to the opposite (occluded)
-	// end of the (truncated SDF) band (increased by backBandFactor), along the ray cast from the camera through the
-	// point, in camera space
-	ITMLib::Segment marchSegment(currentCheckPosition_HashBlocks, endCheckPosition_HashBlocks);
+findVoxelHashBlocksAlongSegment(ITMLib::HashEntryAllocationState* hash_entry_allocation_states,
+                                Vector3s* hash_block_coordinates,
+                                HashBlockVisibility* hash_block_visibility_types,
+                                const CONSTPTR(HashEntry)* hash_table,
+                                const ITMLib::Segment& segment_in_hash_blocks,
+                                bool& collision_detected) {
 
 	// number of steps to take along the truncated SDF band
-	stepCount = (int) std::ceil(2.0f * marchSegment.length());
+	int step_count = (int) std::ceil(2.0f * segment_in_hash_blocks.length());
 
 	// a single stride along the sdf band segment from one step to the next
-	Vector3f strideVector = marchSegment.direction / (float) (stepCount - 1);
+	Vector3f strideVector = segment_in_hash_blocks.direction / (float) (step_count - 1);
 
 	Vector3s previousHashBlockPosition;
+	Vector3f check_position = segment_in_hash_blocks.origin;
 
 	//add neighbouring blocks
-	for (int i = 0; i < stepCount; i++) {
+	for (int i = 0; i < step_count; i++) {
 		//find block position at current step
-		Vector3s currentHashBlockPosition = TO_SHORT_FLOOR3(currentCheckPosition_HashBlocks);
+		Vector3s currentHashBlockPosition = TO_SHORT_FLOOR3(check_position);
 		int incrementCount;
 		if (i > 0 && (incrementCount = getIncrementCount(currentHashBlockPosition, previousHashBlockPosition)) > 1) {
 			if (incrementCount == 2) {
@@ -329,12 +286,14 @@ prepareForAllocationFromDepthAndTsdf(ITMLib::HashEntryAllocationState* hashEntry
 					if (currentHashBlockPosition.values[iDirection] != previousHashBlockPosition.values[iDirection]) {
 						Vector3s potentiallyMissedBlockPosition = previousHashBlockPosition;
 						potentiallyMissedBlockPosition.values[iDirection] = currentHashBlockPosition.values[iDirection];
-						if (SegmentIntersectsGridAlignedCube3D(marchSegment, TO_FLOAT3(potentiallyMissedBlockPosition),
+						if (SegmentIntersectsGridAlignedCube3D(segment_in_hash_blocks,
+						                                       TO_FLOAT3(potentiallyMissedBlockPosition),
 						                                       1.0f)) {
 							MarkForAllocationAndSetVisibilityTypeIfNotFound(
-									hashEntryStates,
-									blockCoords, blockVisibilityTypes, potentiallyMissedBlockPosition, hashTable,
-									collisionDetected);
+									hash_entry_allocation_states,
+									hash_block_coordinates, hash_block_visibility_types, potentiallyMissedBlockPosition,
+									hash_table,
+									collision_detected);
 						}
 					}
 				}
@@ -343,59 +302,81 @@ prepareForAllocationFromDepthAndTsdf(ITMLib::HashEntryAllocationState* hashEntry
 				for (int iDirection = 0; iDirection < 3; iDirection++) {
 					Vector3s potentiallyMissedBlockPosition = previousHashBlockPosition;
 					potentiallyMissedBlockPosition.values[iDirection] = currentHashBlockPosition.values[iDirection];
-					if (SegmentIntersectsGridAlignedCube3D(marchSegment, TO_FLOAT3(potentiallyMissedBlockPosition),
+					if (SegmentIntersectsGridAlignedCube3D(segment_in_hash_blocks,
+					                                       TO_FLOAT3(potentiallyMissedBlockPosition),
 					                                       1.0f)) {
 						MarkForAllocationAndSetVisibilityTypeIfNotFound(
-								hashEntryStates,
-								blockCoords, blockVisibilityTypes, potentiallyMissedBlockPosition, hashTable,
-								collisionDetected);
+								hash_entry_allocation_states,
+								hash_block_coordinates, hash_block_visibility_types, potentiallyMissedBlockPosition,
+								hash_table,
+								collision_detected);
 					}
 					potentiallyMissedBlockPosition = currentHashBlockPosition;
 					potentiallyMissedBlockPosition.values[iDirection] = previousHashBlockPosition.values[iDirection];
-					if (SegmentIntersectsGridAlignedCube3D(marchSegment, TO_FLOAT3(potentiallyMissedBlockPosition),
+					if (SegmentIntersectsGridAlignedCube3D(segment_in_hash_blocks,
+					                                       TO_FLOAT3(potentiallyMissedBlockPosition),
 					                                       1.0f)) {
 						MarkForAllocationAndSetVisibilityTypeIfNotFound(
-								hashEntryStates,
-								blockCoords, blockVisibilityTypes, potentiallyMissedBlockPosition, hashTable,
-								collisionDetected);
+								hash_entry_allocation_states,
+								hash_block_coordinates, hash_block_visibility_types, potentiallyMissedBlockPosition,
+								hash_table,
+								collision_detected);
 					}
 				}
 			}
 		}
-		MarkForAllocationAndSetVisibilityTypeIfNotFound(hashEntryStates,
-		                                                blockCoords,
-		                                                blockVisibilityTypes, currentHashBlockPosition, hashTable,
-		                                                collisionDetected);
+		MarkForAllocationAndSetVisibilityTypeIfNotFound(hash_entry_allocation_states,
+		                                                hash_block_coordinates,
+		                                                hash_block_visibility_types, currentHashBlockPosition, hash_table,
+		                                                collision_detected);
 
-		currentCheckPosition_HashBlocks += strideVector;
+		check_position += strideVector;
 		previousHashBlockPosition = currentHashBlockPosition;
 	}
 }
 
+//TODO: function to find segment in narrow band around point along ray
+//_CPU_AND_GPU_CODE_ inline void 
+
 _CPU_AND_GPU_CODE_ inline void
-buildHashAllocAndVisibleTypePP(ITMLib::HashEntryAllocationState* hashEntryStates,
-                               HashBlockVisibility* blockVisibilityTypes, int x, int y,
-                               Vector3s* blockCoords, const CONSTPTR(float)* depth, Matrix4f invertedCameraPose,
-                               Vector4f invertedCameraProjectionParameters, float surface_distance_cutoff,
-                               Vector2i imgSize, float oneOverVoxelBlockSize_Meters,
-                               const CONSTPTR(HashEntry)* hashTable, float viewFrustum_min, float viewFrustum_max,
-                               bool& collisionDetected) {
-	float depth_measure;
-	int stepCount;
+findVoxelHashBlocksOnRayNearAndBetweenTwoSurfaces(ITMLib::HashEntryAllocationState* hash_entry_allocation_states,
+                                                  Vector3s* hash_block_coordinates,
+                                                  HashBlockVisibility* hash_block_visibility_types,
+                                                  const CONSTPTR(HashEntry)* hash_table, int x, int y,
+                                                  const CONSTPTR(float)* surface_1_depth,
+                                                  const CONSTPTR(Vector4f)* surface_2_points,
+                                                  float surface_distance_cutoff, float one_over_block_size,
+                                                  Matrix4f inverted_camera_pose,
+                                                  Vector4f inverted_camera_projection_parameters,
+                                                  Vector2i offset_to_depth_image, Vector2i depth_image_size,
+                                                  float near_clipping_distance, float far_clipping_distance,
+                                                  bool& collisionDetected) {
+
+	if(x >= offset_to_depth_image.x && y >= offset_to_depth_image.y && x < offset_to_depth_image.x + depth_image_size.x &&
+		y < offset_to_depth_image.y + depth_image_size.y){
+
+		float depth_measure = surface_1_depth[x + y * depth_image_size.x];
+		if (depth_measure <= 0 || (depth_measure - surface_distance_cutoff) < 0 ||
+		    (depth_measure - surface_distance_cutoff) < near_clipping_distance ||
+		    (depth_measure + surface_distance_cutoff) > far_clipping_distance)
+			return;
+
+		Vector4f surface1_point_in_camera_space;
+		surface1_point_in_camera_space.z = depth_measure; // (orthogonal) distance to the point from the image plane (meters)
+		surface1_point_in_camera_space.x = surface1_point_in_camera_space.z *
+		                                   ((float(x) - inverted_camera_projection_parameters.z) * inverted_camera_projection_parameters.x);
+		surface1_point_in_camera_space.y = surface1_point_in_camera_space.z *
+		                                   ((float(y) - inverted_camera_projection_parameters.w) * inverted_camera_projection_parameters.y);
+
+	}
+
+
 	Vector4f pt_camera_f;
-
-	depth_measure = depth[x + y * imgSize.x];
-	if (depth_measure <= 0 || (depth_measure - surface_distance_cutoff) < 0 ||
-	    (depth_measure - surface_distance_cutoff) < viewFrustum_min ||
-	    (depth_measure + surface_distance_cutoff) > viewFrustum_max)
-		return;
-
-
 	pt_camera_f.z = depth_measure; // (orthogonal) distance to the point from the image plane (meters)
 	pt_camera_f.x =
-			pt_camera_f.z * ((float(x) - invertedCameraProjectionParameters.z) * invertedCameraProjectionParameters.x);
+			pt_camera_f.z * ((float(x) - inverted_camera_projection_parameters.z) * inverted_camera_projection_parameters.x);
 	pt_camera_f.y =
-			pt_camera_f.z * ((float(y) - invertedCameraProjectionParameters.w) * invertedCameraProjectionParameters.y);
+			pt_camera_f.z * ((float(y) - inverted_camera_projection_parameters.w) * inverted_camera_projection_parameters.y);
 
 	// distance to the point along camera ray
 	float norm = sqrtf(pt_camera_f.x * pt_camera_f.x + pt_camera_f.y * pt_camera_f.y + pt_camera_f.z * pt_camera_f.z);
@@ -408,13 +389,64 @@ buildHashAllocAndVisibleTypePP(ITMLib::HashEntryAllocationState* hashEntryStates
 	//position along segment to march along ray in hash blocks (here -- starting point)
 	// account for the fact that voxel coordinates represent the voxel center, and we need the extreme corner position of
 	// the hash block, i.e. 0.5 voxel (1/16 block) offset from the position along the ray
-	Vector3f currentCheckPosition_HashBlocks = (TO_VECTOR3(invertedCameraPose * pt_buff)) * oneOverVoxelBlockSize_Meters
+	Vector3f march_segment_origin_in_hash_blocks = (TO_VECTOR3(inverted_camera_pose * pt_buff)) * one_over_block_size
+	                                               + Vector3f(1.0f / (2.0f * VOXEL_BLOCK_SIZE));
+
+	pt_buff = pt_camera_f * (1.0f + surface_distance_cutoff / norm);
+	pt_buff.w = 1.0f;
+	//end position of the segment to march along the ray
+	Vector3f march_segment_end_in_hash_blocks = (TO_VECTOR3(inverted_camera_pose * pt_buff)) * one_over_block_size
+	                                            + Vector3f(1.0f / (2.0f * VOXEL_BLOCK_SIZE));
+
+	// segment from start of the (truncated SDF) band, through the observed point, and to the opposite (occluded)
+	// end of the (truncated SDF) band (increased by backBandFactor), along the ray cast from the camera through the
+	// point, in camera space
+	ITMLib::Segment march_segment(march_segment_origin_in_hash_blocks, march_segment_end_in_hash_blocks);
+
+	findVoxelHashBlocksAlongSegment(hash_entry_allocation_states, hash_block_coordinates, hash_block_visibility_types,
+	                                hash_table, march_segment, collisionDetected);
+
+}
+
+_CPU_AND_GPU_CODE_ inline void
+findVoxelBlocksForRayNearSurface(ITMLib::HashEntryAllocationState* hash_entry_allocation_states, Vector3s* hash_block_coordinates,
+                                 HashBlockVisibility* hash_block_visibility_types, const CONSTPTR(HashEntry)* hash_table,
+                                 int x, int y, const CONSTPTR(float)* depth, float surface_distance_cutoff,
+                                 Matrix4f inverted_camera_pose, Vector4f inverted_camera_projection_parameters,
+                                 float one_over_hash_block_size, Vector2i depth_image_size,
+                                 float near_clipping_distance, float far_clipping_distance, bool& collision_detected) {
+
+	float depth_measure = depth[x + y * depth_image_size.x];
+	if (depth_measure <= 0 || (depth_measure - surface_distance_cutoff) < 0 ||
+	    (depth_measure - surface_distance_cutoff) < near_clipping_distance ||
+	    (depth_measure + surface_distance_cutoff) > far_clipping_distance)
+		return;
+
+	Vector4f pt_camera_f;
+	pt_camera_f.z = depth_measure; // (orthogonal) distance to the point from the image plane (meters)
+	pt_camera_f.x =
+			pt_camera_f.z * ((float(x) - inverted_camera_projection_parameters.z) * inverted_camera_projection_parameters.x);
+	pt_camera_f.y =
+			pt_camera_f.z * ((float(y) - inverted_camera_projection_parameters.w) * inverted_camera_projection_parameters.y);
+
+	// distance to the point along camera ray
+	float norm = sqrtf(pt_camera_f.x * pt_camera_f.x + pt_camera_f.y * pt_camera_f.y + pt_camera_f.z * pt_camera_f.z);
+
+	Vector4f pt_buff;
+
+	//Vector3f offset(-halfVoxelSize);
+	pt_buff = pt_camera_f * (1.0f - surface_distance_cutoff / norm);
+	pt_buff.w = 1.0f;
+	//position along segment to march along ray in hash blocks (here -- starting point)
+	// account for the fact that voxel coordinates represent the voxel center, and we need the extreme corner position of
+	// the hash block, i.e. 0.5 voxel (1/16 block) offset from the position along the ray
+	Vector3f currentCheckPosition_HashBlocks = (TO_VECTOR3(inverted_camera_pose * pt_buff)) * one_over_hash_block_size
 	                                           + Vector3f(1.0f / (2.0f * VOXEL_BLOCK_SIZE));
 
 	pt_buff = pt_camera_f * (1.0f + surface_distance_cutoff / norm);
 	pt_buff.w = 1.0f;
 	//end position of the segment to march along the ray
-	Vector3f endCheckPosition_HashBlocks = (TO_VECTOR3(invertedCameraPose * pt_buff)) * oneOverVoxelBlockSize_Meters
+	Vector3f endCheckPosition_HashBlocks = (TO_VECTOR3(inverted_camera_pose * pt_buff)) * one_over_hash_block_size
 	                                       + Vector3f(1.0f / (2.0f * VOXEL_BLOCK_SIZE));
 
 	// segment from start of the (truncated SDF) band, through the observed point, and to the opposite (occluded)
@@ -422,69 +454,9 @@ buildHashAllocAndVisibleTypePP(ITMLib::HashEntryAllocationState* hashEntryStates
 	// point, in camera space
 	ITMLib::Segment march_segment(currentCheckPosition_HashBlocks, endCheckPosition_HashBlocks);
 
-	// number of steps to take along the truncated SDF band
-	stepCount = (int) std::ceil(2.0f * march_segment.length());
-
-	// a single stride along the sdf band segment from one step to the next
-	Vector3f strideVector = march_segment.direction / (float) (stepCount - 1);
-
-	Vector3s previousHashBlockPosition;
-
-	//add neighbouring blocks
-	for (int i = 0; i < stepCount; i++) {
-		//find block position at current step
-		Vector3s currentHashBlockPosition = TO_SHORT_FLOOR3(currentCheckPosition_HashBlocks);
-		int incrementCount;
-		if (i > 0 && (incrementCount = getIncrementCount(currentHashBlockPosition, previousHashBlockPosition)) > 1) {
-			if (incrementCount == 2) {
-				for (int iDirection = 0; iDirection < 3; iDirection++) {
-					if (currentHashBlockPosition.values[iDirection] != previousHashBlockPosition.values[iDirection]) {
-						Vector3s potentiallyMissedBlockPosition = previousHashBlockPosition;
-						potentiallyMissedBlockPosition.values[iDirection] = currentHashBlockPosition.values[iDirection];
-						if (SegmentIntersectsGridAlignedCube3D(march_segment, TO_FLOAT3(potentiallyMissedBlockPosition),
-						                                       1.0f)) {
-							MarkForAllocationAndSetVisibilityTypeIfNotFound(
-									hashEntryStates,
-									blockCoords, blockVisibilityTypes, potentiallyMissedBlockPosition, hashTable,
-									collisionDetected);
-						}
-					}
-				}
-			} else {
-				//incrementCount == 3
-				for (int iDirection = 0; iDirection < 3; iDirection++) {
-					Vector3s potentiallyMissedBlockPosition = previousHashBlockPosition;
-					potentiallyMissedBlockPosition.values[iDirection] = currentHashBlockPosition.values[iDirection];
-					if (SegmentIntersectsGridAlignedCube3D(march_segment, TO_FLOAT3(potentiallyMissedBlockPosition),
-					                                       1.0f)) {
-						MarkForAllocationAndSetVisibilityTypeIfNotFound(
-								hashEntryStates,
-								blockCoords, blockVisibilityTypes, potentiallyMissedBlockPosition, hashTable,
-								collisionDetected);
-					}
-					potentiallyMissedBlockPosition = currentHashBlockPosition;
-					potentiallyMissedBlockPosition.values[iDirection] = previousHashBlockPosition.values[iDirection];
-					if (SegmentIntersectsGridAlignedCube3D(march_segment, TO_FLOAT3(potentiallyMissedBlockPosition),
-					                                       1.0f)) {
-						MarkForAllocationAndSetVisibilityTypeIfNotFound(
-								hashEntryStates,
-								blockCoords, blockVisibilityTypes, potentiallyMissedBlockPosition, hashTable,
-								collisionDetected);
-					}
-				}
-			}
-		}
-		MarkForAllocationAndSetVisibilityTypeIfNotFound(hashEntryStates,
-		                                                blockCoords,
-		                                                blockVisibilityTypes, currentHashBlockPosition, hashTable,
-		                                                collisionDetected);
-
-		currentCheckPosition_HashBlocks += strideVector;
-		previousHashBlockPosition = currentHashBlockPosition;
-	}
+	findVoxelHashBlocksAlongSegment(hash_entry_allocation_states, hash_block_coordinates, hash_block_visibility_types,
+	                                hash_table, march_segment, collision_detected);
 }
-
-
 
 
 _CPU_AND_GPU_CODE_

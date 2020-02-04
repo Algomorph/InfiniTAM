@@ -43,14 +43,14 @@ class IndexingEngineInterface {
 	    so that the new image data can be integrated.
 	 * \param volume [out] the volume whose hash needs additional allocations
 	 * \param view [in] a view with a new depth image
-	 * \param trackingState [in] tracking state that corresponds to the given view
-	 * \param onlyUpdateVisibleList [in] whether we want to allocate only the hash entry blocks currently visible
-	 * \param resetVisibleList  [in] reset visibility list prior to the rest of the operation
+	 * \param tracking_state [in] tracking state that corresponds to the given view
+	 * \param only_update_utilized_block_list [in] whether we want to allocate only the hash entry blocks currently visible
+	 * \param reset_utilized_block_list  [in] reset visibility list prior to the rest of the operation
 	 */
 	virtual void
 	AllocateFromDepth(VoxelVolume <TVoxel, TIndex>* volume, const ITMView* view,
-	                  const CameraTrackingState* trackingState,
-	                  bool onlyUpdateVisibleList, bool resetVisibleList) = 0;
+	                  const CameraTrackingState* tracking_state,
+	                  bool only_update_utilized_block_list, bool reset_utilized_block_list) = 0;
 
 	/**
 	 * \brief Given a view with a new depth image, compute the
@@ -60,13 +60,13 @@ class IndexingEngineInterface {
 	 * \param view [in] a view with a new depth image
 	 * \param depth_camera_matrix [in] transformation of the camera from world origin (initial position) to
 	 * where the camera was at the given view's frame
-	 * \param onlyUpdateVisibleList [in] whether we want to allocate only the hash entry blocks currently visible
-	 * \param resetVisibleList  [in] reset visibility list upon completion
+	 * \param only_update_utilized_block_list [in] whether we want to allocate only the hash entry blocks currently visible
+	 * \param reset_utilized_block_list  [in] reset visibility list upon completion
 	 */
 	virtual void
 	AllocateFromDepth(VoxelVolume <TVoxel, TIndex>* volume, const ITMView* view,
 	                  const Matrix4f& depth_camera_matrix = Matrix4f::Identity(),
-	                  bool onlyUpdateVisibleList = false, bool resetVisibleList = false) = 0;
+	                  bool only_update_utilized_block_list = false, bool reset_utilized_block_list = false) = 0;
 
 
 	/**
@@ -86,9 +86,8 @@ class IndexingEngineInterface {
 	 */
 	virtual void
 	AllocateFromDepthAndSdfSpan(VoxelVolume <TVoxel, TIndex>* volume,
-	                            const RenderState* sourceRenderState,
+	                            const CameraTrackingState* tracking_state,
 	                            const ITMView* view,
-	                            const Matrix4f& depth_camera_matrix = Matrix4f::Identity(),
 	                            float expand_camera_frustum_by = (PI * 3)/180,
 	                            bool onlyUpdateAllocatedList = false, bool resetAllocatedList = false) = 0;
 
@@ -110,7 +109,7 @@ public:
 	void operator=(IndexingEngine const&) = delete;
 
 	virtual void AllocateFromDepth(VoxelVolume <TVoxel, TIndex>* volume, const ITMView* view,
-	                               const CameraTrackingState* trackingState, bool onlyUpdateVisibleList,
+	                               const CameraTrackingState* tracking_state, bool onlyUpdateVisibleList,
 	                               bool resetVisibleList) override;
 
 	virtual void AllocateFromDepth(VoxelVolume <TVoxel, TIndex>* volume, const ITMView* view,
@@ -118,12 +117,11 @@ public:
 	                               bool onlyUpdateVisibleList = false, bool resetVisibleList = false) override;
 
 	virtual void AllocateFromDepthAndSdfSpan(VoxelVolume <TVoxel, TIndex>* targetVolume,
-	                                         const RenderState* source_render_state,
+	                                         const CameraTrackingState* tracking_state,
 	                                         const ITMView* view,
-	                                         const Matrix4f& depth_camera_matrix = Matrix4f::Identity(),
-	                                         const float camera_frustum_expansion_margin_angle = (PI * 3) / 180,
-	                                         bool onlyUpdateAllocatedList = false,
-	                                         bool resetAllocatedList = false) override;
+	                                         float camera_frustum_expansion_margin_angle = (PI * 3) / 180,
+	                                         bool only_update_utilized_list = false,
+	                                         bool reset_utilized_list = false) override;
 
 
 	template<typename TVoxelTarget, typename TVoxelSource>

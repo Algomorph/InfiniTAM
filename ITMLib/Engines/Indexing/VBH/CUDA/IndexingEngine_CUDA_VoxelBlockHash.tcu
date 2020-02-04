@@ -134,9 +134,8 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::AllocateFromDept
 template<typename TVoxel>
 void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::AllocateFromDepthAndSdfSpan(
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume,
-		const RenderState* sourceRenderState,
+		const CameraTrackingState* tracking_state,
 		const ITMView* view,
-		const Matrix4f& depth_camera_matrix,
 		const float expand_camera_frustum_by,
 		bool onlyUpdateAllocatedList, bool resetAllocatedList){
 	DIEWITHEXCEPTION_REPORTLOCATION("not implemented");

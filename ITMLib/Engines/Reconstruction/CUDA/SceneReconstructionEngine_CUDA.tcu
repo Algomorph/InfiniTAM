@@ -388,9 +388,12 @@ __global__ void buildHashAllocAndVisibleType_device(
 	if (x > _imgSize.x - 1 || y > _imgSize.y - 1) return;
 
 	bool collisionDetected = false;
-	buildHashAllocAndVisibleTypePP(hashEntryStates, blockVisibilityTypes, x, y, blockCoords, depth, invM_d, projParams_d,
-	                               surface_cutoff_distance, _imgSize, oneOverHashBlockSize_Meters,
-	                               hashTable, near_clipping_distance, far_clipping_distance, collisionDetected);
+	findVoxelBlocksForRayNearSurface(hashEntryStates, blockCoords, blockVisibilityTypes,
+	                                 hashTable, x, y, depth,
+	                                 surface_cutoff_distance, invM_d,
+	                                 projParams_d, oneOverHashBlockSize_Meters, _imgSize, near_clipping_distance,
+	                                 far_clipping_distance,
+	                                 collisionDetected);
 }
 
 __global__ void setVisibleEntriesToVisibleAtPreviousFrameAndUnstreamed(HashBlockVisibility* blockVisibilityTypes,
@@ -424,7 +427,7 @@ __global__ void allocateVoxelBlocksList_device(
 
 				hashTable[targetIdx] = hashEntry;
 			} else {
-				// Mark entry as not visible since we couldn't allocate it but buildHashAllocAndVisibleTypePP changed its state.
+				// Mark entry as not visible since we couldn't allocate it but findVoxelBlocksForRayNearSurface changed its state.
 				blockVisibilityTypes[targetIdx] = INVISIBLE;
 
 				// Restore the previous value to avoid leaks.
@@ -451,7 +454,7 @@ __global__ void allocateVoxelBlocksList_device(
 
 				blockVisibilityTypes[ORDERED_LIST_SIZE + exlOffset] = IN_MEMORY_AND_VISIBLE; //make child visible
 			} else {
-				// No need to mark the entry as not visible since buildHashAllocAndVisibleTypePP did not mark it.
+				// No need to mark the entry as not visible since findVoxelBlocksForRayNearSurface did not mark it.
 				// Restore the previous values to avoid leaks.
 				atomicAdd(&allocData->noAllocatedVoxelEntries, 1);
 				atomicAdd(&allocData->noAllocatedExcessEntries, 1);

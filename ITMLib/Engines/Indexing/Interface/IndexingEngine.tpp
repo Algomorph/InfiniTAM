@@ -27,7 +27,7 @@ using namespace ITMLib;
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateFromDepth(VoxelVolume<TVoxel, TIndex>* volume,
                                                                           const ITMView* view,
-                                                                          const CameraTrackingState* trackingState,
+                                                                          const CameraTrackingState* tracking_state,
                                                                           bool onlyUpdateVisibleList,
                                                                           bool resetVisibleList) {}
 
@@ -43,13 +43,10 @@ void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateFromDepth(VoxelV
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateFromDepthAndSdfSpan(
 		VoxelVolume<TVoxel, TIndex>* targetVolume,
-		const RenderState* sourceRenderState,
+		const CameraTrackingState* tracking_state,
 		const ITMView* view,
-		const Matrix4f& depth_camera_matrix,
 		const float camera_frustum_expansion_margin_angle,
-		bool onlyUpdateAllocatedList, bool resetAllocatedList) {
-
-}
+		bool onlyUpdateAllocatedList, bool resetAllocatedList) {}
 
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>

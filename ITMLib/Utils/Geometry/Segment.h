@@ -28,7 +28,7 @@ public:
 			sign{(inverseDirection.x < 0),(inverseDirection.y < 0),(inverseDirection.z < 0)}
 			{}
 	_CPU_AND_GPU_CODE_
-	float length(){
+	float length() const{
 		return sqrtf(direction.x * direction.x + direction.y * direction.y +
 		             direction.z * direction.z);
 	}
