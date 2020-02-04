@@ -13,33 +13,20 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-//local
-#include "../Interface/ImageTraversal.h"
+#pragma once
+
 #include "../../../Utils/Math.h"
-#include "../../../../ORUtils/Image.h"
 
-namespace ITMLib {
-
-template<typename TImageElement>
-class ImageTraversalEngine<TImageElement, MEMORYDEVICE_CPU> {
-	template<typename TFunctor>
-	inline static void
-	TraverseWithPosition(ORUtils::Image<TImageElement>* image, TFunctor& functor){
-		const Vector2i resolution = image->noDims;
-		const int element_count = resolution.x * resolution.y;
-		TImageElement* image_data = image->GetData(MEMORYDEVICE_CPU);
-#ifdef WITH_OPENMP
-	#pragma omp parallel for default(none)
-#endif
-		for (int i_element = 0; i_element < element_count; i_element++){
-			int y = i_element / resolution.x;
-			int x = i_element - y * resolution.x;
-			functor(image_data[i_element], x, y);
-		}
-	}
-};
-
-} // namespace ITMLib
+namespace {
+// CUDA global kernels
+template <typename TImageElement, typename TFunctor >
+inline
+__global__ void imageTraversal_device (const TImageElement* image_data, const Vector2i resolution, TFunctor* functor_device){
+	int x = threadIdx.x + blockIdx.x * blockDim.x, y = threadIdx.y + blockIdx.y * blockDim.y;
+	if (x > resolution.x - 1 || y > resolution.y - 1) return;
 
 
-// TODO
+
+}
+
+} // end anonymous namespace (CUDA global kernels)

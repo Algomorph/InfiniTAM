@@ -15,12 +15,14 @@
 //  ================================================================
 #pragma once
 
+//local
 #include "IndexingEngine_CUDA_VoxelBlockHash.h"
 #include "../../Shared/IndexingEngine_Shared.h"
 #include "IndexingEngine_CUDA_VoxelBlockHash_Kernels.h"
 #include "../../Interface/IndexingEngine.h"
 #include "../../../../Utils/Configuration.h"
 #include "../CPU/IndexingEngine_CPU_VoxelBlockHash.h"
+#include "../../../../../ORUtils/PlatformIndependence.h"
 
 
 using namespace ITMLib;
@@ -137,7 +139,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::AllocateFromDept
 		const CameraTrackingState* tracking_state,
 		const ITMView* view,
 		bool onlyUpdateAllocatedList, bool resetAllocatedList){
-	DIEWITHEXCEPTION_REPORTLOCATION("not implemented");
+
 }
 
 

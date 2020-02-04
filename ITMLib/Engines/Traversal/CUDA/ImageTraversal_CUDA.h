@@ -14,6 +14,39 @@
 //  limitations under the License.
 //  ================================================================
 //local
+#include "ImageTraversal_CUDA_Kernels.h"
 #include "../Interface/ImageTraversal.h"
+#include "../../../Utils/Math.h"
+#include "../../../../ORUtils/Image.h"
 
-// TODO
+namespace ITMLib {
+
+template<typename TImageElement>
+class ImageTraversalEngine<TImageElement, MEMORYDEVICE_CUDA> {
+	template<typename TFunctor>
+	inline static void
+	TraverseWithPosition(ORUtils::Image<TImageElement>* image, TFunctor& functor) {
+		const Vector2i resolution = image->noDims;
+		const int element_count = resolution.x * resolution.y;
+		TImageElement* image_data = image->GetData(MEMORYDEVICE_CPU);
+
+		TFunctor* functor_device = nullptr;
+
+		dim3 cudaBlockSize(16, 16);
+		dim3 gridSize((int) ceil((float) resolution.x / (float) cudaBlockSize.x),
+		              (int) ceil((float) resolution.y / (float) cudaBlockSize.y));
+
+		ORcudaSafeCall(cudaMalloc((void**) &functor_device, sizeof(TFunctor)));
+		ORcudaSafeCall(cudaMemcpy(functor_device, &functor, sizeof(TFunctor), cudaMemcpyHostToDevice));
+
+		imageTraversal_device<TImageElement, TFunctor>
+				<< < gridSize, cudaBlockSize >> >
+		                       (image_data, resolution, functor_device);
+		ORcudaKernelCheck;
+
+		ORcudaSafeCall(cudaMemcpy(&functor, functor_device, sizeof(TFunctor), cudaMemcpyDeviceToHost));
+		ORcudaSafeCall(cudaFree(functor_device));
+	}
+};
+
+} // namespace ITMLib

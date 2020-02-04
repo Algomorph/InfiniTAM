@@ -19,5 +19,5 @@
 
 namespace ITMLib {
 template<typename TImageElement, MemoryDeviceType TDeviceType>
-class VolumeTraversalEngine;
+class ImageTraversalEngine;
 } // namespace ITMLib

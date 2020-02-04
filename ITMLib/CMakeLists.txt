@@ -150,6 +150,7 @@ set(ITMLIB_ENGINES_TRAVERSAL_CUDA_SOURCES
 
 set(ITMLIB_ENGINES_TRAVERSAL_CUDA_HEADERS
     Engines/Traversal/CUDA/ImageTraversal_CUDA.h
+    Engines/Traversal/CUDA/ImageTraversal_CUDA_Kernels.h
     
     Engines/Traversal/CUDA/VolumeTraversal_CUDA_PlainVoxelArray.h
     Engines/Traversal/CUDA/VolumeTraversal_CUDA_PlainVoxelArray_Kernels.h
