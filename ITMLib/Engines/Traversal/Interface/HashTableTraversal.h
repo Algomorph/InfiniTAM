@@ -1,5 +1,5 @@
 //  ================================================================
-//  Created by Gregory Kramida on 2/4/20.
+//  Created by Gregory Kramida on 2/5/20.
 //  Copyright (c) 2020 Gregory Kramida
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -15,16 +15,10 @@
 //  ================================================================
 #pragma once
 
-#include "../../../Utils/Math.h"
+#include "../../../../ORUtils/MemoryDeviceType.h"
 
-namespace {
+namespace ITMLib {
+template<MemoryDeviceType TDeviceType>
+class HashTableTraversalEngine;
+} // namespace ITMLib
 
-// CUDA global kernels
-template <typename TImageElement, typename TFunctor >
-__global__ void imageTraversalWithPosition_device (const TImageElement* image_data, const Vector2i resolution, TFunctor* functor_device){
-	int x = threadIdx.x + blockIdx.x * blockDim.x, y = threadIdx.y + blockIdx.y * blockDim.y;
-	if (x > resolution.x - 1 || y > resolution.y - 1) return;
-	functor_device(image_data[x + y * resolution.x], x, y);
-}
-
-} // end anonymous namespace (CUDA global kernels)

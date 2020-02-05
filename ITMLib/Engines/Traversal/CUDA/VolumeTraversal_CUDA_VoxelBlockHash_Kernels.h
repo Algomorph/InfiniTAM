@@ -16,7 +16,6 @@
 #pragma once
 
 #include "../../../Objects/Volume/VoxelBlockHash.h"
-#include "../../../../ORUtils/JetbrainsCUDASyntax.hpp"
 #include "../Shared/VolumeTraversal_Shared.h"
 #include "../../../Utils/Analytics/IsAltered.h"
 

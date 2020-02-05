@@ -35,7 +35,7 @@ private:
 		TVoxelSecondary* secondaryVoxels = secondaryScene->localVBA.GetVoxelBlocks();
 		const HashEntry* primaryHashTable = primaryScene->index.GetIndexData();
 		const HashEntry* secondaryHashTable = secondaryScene->index.GetIndexData();
-		int hashEntryCount = primaryScene->index.hashEntryCount;
+		int hash_entry_count = primaryScene->index.hashEntryCount;
 
 		// transfer functor from RAM to VRAM
 		TFunctor* functor_device = nullptr;
@@ -43,7 +43,7 @@ private:
 		ORcudaSafeCall(cudaMemcpy(functor_device, &functor, sizeof(TFunctor), cudaMemcpyHostToDevice));
 
 		dim3 cudaBlockSize_BlockVoxelPerThread(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
-		dim3 gridSize_HashPerBlock(hashEntryCount);
+		dim3 gridSize_HashPerBlock(hash_entry_count);
 
 		std::forward<TDeviceTraversalFunction>(deviceTraversalFunction)(
 				gridSize_HashPerBlock, cudaBlockSize_BlockVoxelPerThread,

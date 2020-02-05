@@ -14,40 +14,40 @@
 //  limitations under the License.
 //  ================================================================
 //local
-#include "ImageTraversal_CUDA_Kernels.h"
-#include "../Interface/ImageTraversal.h"
-#include "../../../Utils/Math.h"
-#include "../../../../ORUtils/Image.h"
+#include "../Interface/HashTableTraversal.h"
+#include "../../../Objects/Volume/VoxelBlockHash.h"
+#include "HashTableTraversal_CUDA_Kernels.h"
 
 namespace ITMLib {
 
-template<typename TImageElement>
-class ImageTraversalEngine<TImageElement, MEMORYDEVICE_CUDA> {
+template<>
+class HashTableTraversalEngine<MEMORYDEVICE_CPU> {
 public:
 	template<typename TFunctor>
 	inline static void
-	TraverseWithPosition(ORUtils::Image<TImageElement>* image, TFunctor& functor) {
-		const Vector2i resolution = image->noDims;
-		const int element_count = resolution.x * resolution.y;
-		const TImageElement* image_data = image->GetData(MEMORYDEVICE_CPU);
-
+	TraverseWithHashCode(VoxelBlockHash* index, TFunctor& functor) {
+		HashEntry* hash_table = index->GetEntries();
+		int hash_entry_count = index->hashEntryCount;
 		TFunctor* functor_device = nullptr;
 
-		dim3 cuda_block_size(16, 16);
-		dim3 cuda_grid_size((int) ceil((float) resolution.x / (float) cuda_block_size.x),
-		                    (int) ceil((float) resolution.y / (float) cuda_block_size.y));
+		dim3 cuda_block_size(256, 1);
+		dim3 cuda_grid_size((int) ceil((float) hash_entry_count / (float) cuda_block_size.x));
 
 		ORcudaSafeCall(cudaMalloc((void**) &functor_device, sizeof(TFunctor)));
 		ORcudaSafeCall(cudaMemcpy(functor_device, &functor, sizeof(TFunctor), cudaMemcpyHostToDevice));
 
-		imageTraversalWithPosition_device<TImageElement, TFunctor>
-				<< < cuda_grid_size, cuda_block_size >> >
-		                             (image_data, resolution, functor_device);
+		hashTableTraversalWithHashCode_device < TFunctor >
+		<< <cuda_grid_size, cuda_block_size >> >
+		(hash_table, hash_entry_count, functor_device);
 		ORcudaKernelCheck;
 
 		ORcudaSafeCall(cudaMemcpy(&functor, functor_device, sizeof(TFunctor), cudaMemcpyDeviceToHost));
 		ORcudaSafeCall(cudaFree(functor_device));
+
 	}
 };
 
 } // namespace ITMLib
+
+
+// TODO

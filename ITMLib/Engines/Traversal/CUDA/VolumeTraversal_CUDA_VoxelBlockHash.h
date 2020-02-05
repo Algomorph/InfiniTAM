@@ -16,7 +16,6 @@
 #pragma once
 
 #include "../../../Objects/Volume/VoxelBlockHash.h"
-#include "../../../../ORUtils/JetbrainsCUDASyntax.hpp"
 #include "VolumeTraversal_CUDA_VoxelBlockHash_Kernels.h"
 #include "../Interface/VolumeTraversal.h"
 #include "../../../Objects/Volume/PlainVoxelArray.h"

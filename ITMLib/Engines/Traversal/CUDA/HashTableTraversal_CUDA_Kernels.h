@@ -16,15 +16,16 @@
 #pragma once
 
 #include "../../../Utils/Math.h"
+#include "../../../Objects/Volume/VoxelBlockHash.h"
 
 namespace {
-
 // CUDA global kernels
-template <typename TImageElement, typename TFunctor >
-__global__ void imageTraversalWithPosition_device (const TImageElement* image_data, const Vector2i resolution, TFunctor* functor_device){
-	int x = threadIdx.x + blockIdx.x * blockDim.x, y = threadIdx.y + blockIdx.y * blockDim.y;
-	if (x > resolution.x - 1 || y > resolution.y - 1) return;
-	functor_device(image_data[x + y * resolution.x], x, y);
+
+template <typename TFunctor>
+__global__ void hashTableTraversalWithHashCode_device (HashEntry* hash_table, const int hash_entry_count, TFunctor* functor_device){
+	int hash_code = threadIdx.x + blockIdx.x * blockDim.x;
+	if (hash_code >= hash_entry_count) return;
+	functor_device(hash_table[hash_code], hash_code);
 }
 
 } // end anonymous namespace (CUDA global kernels)

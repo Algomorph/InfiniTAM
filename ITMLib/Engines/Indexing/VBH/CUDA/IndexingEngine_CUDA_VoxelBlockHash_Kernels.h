@@ -15,7 +15,6 @@
 //  ================================================================
 #pragma once
 
-#include "../../../../../ORUtils/JetbrainsCUDASyntax.hpp"
 #include "../../../../Utils/CUDAUtils.h"
 #include "../../../../Objects/Volume/GlobalCache.h"
 #include "../../../EditAndCopy/Shared/EditAndCopyEngine_Shared.h"

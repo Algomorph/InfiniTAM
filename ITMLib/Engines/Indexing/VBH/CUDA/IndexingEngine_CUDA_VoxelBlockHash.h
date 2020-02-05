@@ -46,7 +46,7 @@ public:
 
 	void AllocateFromDepth(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
 	                       const Matrix4f& depth_camera_matrix = Matrix4f::Identity(),
-	                       bool onlyUpdateVisibleList = false, bool resetVisibleList = false) override;
+	                       bool only_update_visible_list = false, bool resetVisibleList = false) override;
 
 	void AllocateFromDepthAndSdfSpan(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
 	                                 const CameraTrackingState* tracking_state,

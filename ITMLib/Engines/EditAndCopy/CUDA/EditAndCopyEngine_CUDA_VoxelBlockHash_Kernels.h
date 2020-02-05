@@ -15,7 +15,6 @@
 //  ================================================================
 #pragma once
 
-#include "../../../../ORUtils/JetbrainsCUDASyntax.hpp"
 #include "../../Indexing/Shared/IndexingEngine_Shared.h"
 #include "../Shared/EditAndCopyEngine_Shared.h"
 #include "../../../Utils/HashBlockProperties.h"

@@ -18,7 +18,6 @@
 #include "../Shared/EditAndCopyEngine_Shared.h"
 #include "../../../../ORUtils/PlatformIndependence.h"
 #include "../../../Utils/CUDAUtils.h"
-#include "../../../../ORUtils/JetbrainsCUDASyntax.hpp"
 #include "../../../Objects/Volume/RepresentationAccess.h"
 
 #include <cstring>

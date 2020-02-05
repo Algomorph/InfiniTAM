@@ -4,7 +4,6 @@
 
 #include "../Shared/SceneReconstructionEngine_Shared.h"
 #include "../../../Utils/CUDAUtils.h"
-#include "../../../../ORUtils/JetbrainsCUDASyntax.hpp"
 #include "../../Common/CheckBlockVisibility.h"
 #include "../../Common/AllocationTempData.h"
 #include "../../Indexing/Shared/IndexingEngine_Shared.h"

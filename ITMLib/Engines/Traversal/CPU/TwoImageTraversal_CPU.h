@@ -14,28 +14,31 @@
 //  limitations under the License.
 //  ================================================================
 //local
-#include "../Interface/ImageTraversal.h"
+#include "../Interface/TwoImageTraversal.h"
 #include "../../../Utils/Math.h"
 #include "../../../../ORUtils/Image.h"
 
 namespace ITMLib {
 
-template<typename TImageElement>
-class ImageTraversalEngine<TImageElement, MEMORYDEVICE_CPU> {
+template<typename TImage1Element, typename TImage2Element>
+class TwoImageTraversalEngine<TImage1Element, TImage2Element, MEMORYDEVICE_CPU> {
 public:
 	template<typename TFunctor>
 	inline static void
-	TraverseWithPosition(ORUtils::Image<TImageElement>* image, TFunctor& functor){
-		const Vector2i resolution = image->noDims;
+	TraverseWithPosition(ORUtils::Image<TImage1Element>* image1, ORUtils::Image<TImage2Element>* image2, TFunctor& functor){
+
+		const Vector2i resolution = image1->noDims;
 		const int element_count = resolution.x * resolution.y;
-		const TImageElement* image_data = image->GetData(MEMORYDEVICE_CPU);
+
+		const TImage1Element* image1_data = image1->GetData(MEMORYDEVICE_CPU);
+		const TImage2Element* image2_data = image1->GetData(MEMORYDEVICE_CPU);
 #ifdef WITH_OPENMP
 	#pragma omp parallel for default(none) shared(functor, image_data)
 #endif
 		for (int i_element = 0; i_element < element_count; i_element++){
 			int y = i_element / resolution.x;
 			int x = i_element - y * resolution.x;
-			functor(image_data[i_element], x, y);
+			functor(image1_data[i_element], image2_data, x, y);
 		}
 	}
 };

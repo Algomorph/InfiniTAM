@@ -14,28 +14,24 @@
 //  limitations under the License.
 //  ================================================================
 //local
-#include "../Interface/ImageTraversal.h"
-#include "../../../Utils/Math.h"
-#include "../../../../ORUtils/Image.h"
+#include "../Interface/HashTableTraversal.h"
+#include "../../../Objects/Volume/VoxelBlockHash.h"
 
 namespace ITMLib {
 
-template<typename TImageElement>
-class ImageTraversalEngine<TImageElement, MEMORYDEVICE_CPU> {
+template<>
+class HashTableTraversalEngine<MEMORYDEVICE_CPU> {
 public:
 	template<typename TFunctor>
 	inline static void
-	TraverseWithPosition(ORUtils::Image<TImageElement>* image, TFunctor& functor){
-		const Vector2i resolution = image->noDims;
-		const int element_count = resolution.x * resolution.y;
-		const TImageElement* image_data = image->GetData(MEMORYDEVICE_CPU);
+	TraverseWithHashCode(VoxelBlockHash* index, TFunctor& functor){
+		HashEntry* hash_table = index->GetEntries();
+		int hash_entry_count = index->hashEntryCount;
 #ifdef WITH_OPENMP
-	#pragma omp parallel for default(none) shared(functor, image_data)
+	#pragma omp parallel for default(none) shared(functor, hash_table)
 #endif
-		for (int i_element = 0; i_element < element_count; i_element++){
-			int y = i_element / resolution.x;
-			int x = i_element - y * resolution.x;
-			functor(image_data[i_element], x, y);
+		for (int hash_code = 0; hash_code < hash_entry_count; hash_code++){
+			functor(hash_table[hash_code], hash_code);
 		}
 	}
 };

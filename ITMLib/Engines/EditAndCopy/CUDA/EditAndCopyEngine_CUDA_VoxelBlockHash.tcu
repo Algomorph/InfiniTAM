@@ -18,7 +18,6 @@
 #include "../Shared/EditAndCopyEngine_Shared.h"
 #include "../../../Utils/CUDAUtils.h"
 #include "../../../../ORUtils/PlatformIndependence.h"
-#include "../../../../ORUtils/JetbrainsCUDASyntax.hpp"
 #include "../../../Objects/Volume/RepresentationAccess.h"
 #include "../../../Utils/Geometry/GeometryBooleanOperations.h"
 #include "../../../Utils/Analytics/SceneStatisticsCalculator/CUDA/SceneStatisticsCalculator_CUDA.h"

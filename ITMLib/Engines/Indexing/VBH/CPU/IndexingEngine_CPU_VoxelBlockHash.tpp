@@ -22,97 +22,66 @@
 #include "../../../Common/CheckBlockVisibility.h"
 #include "../../../../Utils/Configuration.h"
 #include "../../../../Utils/Geometry/FrustumTrigonometry.h"
+#include "../../../Traversal/CPU/ImageTraversal_CPU.h"
+#include "../../../Traversal/CPU/TwoImageTraversal_CPU.h"
+#include "../../../Traversal/CPU/HashTableTraversal_CPU.h"
 
 using namespace ITMLib;
 
 template<typename TVoxel>
 void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateFromDepth(
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
-		const Matrix4f& depth_camera_matrix, bool onlyUpdateVisibleList, bool resetVisibleList) {
-
-	Vector2i depthImgSize = view->depth->noDims;
-	float voxelSize = volume->sceneParams->voxel_size;
-
-	Matrix4f inverted_depth_camera_matrix;
-	Vector4f depthCameraProjectionParameters, invertedDepthCameraProjectionParameters;
+		const Matrix4f& depth_camera_matrix, bool only_update_visible_list, bool resetVisibleList) {
 
 	if (resetVisibleList) volume->index.SetUtilizedHashBlockCount(0);
-	depth_camera_matrix.inv(inverted_depth_camera_matrix);
 
-	depthCameraProjectionParameters = view->calib.intrinsics_d.projectionParamsSimple.all;
-	invertedDepthCameraProjectionParameters = depthCameraProjectionParameters;
-	invertedDepthCameraProjectionParameters.x = 1.0f / invertedDepthCameraProjectionParameters.x;
-	invertedDepthCameraProjectionParameters.y = 1.0f / invertedDepthCameraProjectionParameters.y;
-
-	float mu = volume->sceneParams->narrow_band_half_width;
-
-	float* depth = view->depth->GetData(MEMORYDEVICE_CPU);
-	int* voxelAllocationList = volume->localVBA.GetAllocationList();
-	HashEntry* hashTable = volume->index.GetEntries();
-	HashBlockVisibility* hashBlockVisibilityTypes = volume->index.GetBlockVisibilityTypes();
-	int hashEntryCount = volume->index.hashEntryCount;
-	int* visibleEntryHashCodes = volume->index.GetUtilizedBlockHashCodes();
-
-	HashEntryAllocationState* hashEntryStates_device = volume->index.GetHashEntryAllocationStates();
-	Vector3s* allocationBlockCoordinates = volume->index.GetAllocationBlockCoordinates();
-
-	float oneOverHashBlockSize = 1.0f / (voxelSize * VOXEL_BLOCK_SIZE);//m
 	float band_factor = configuration::get().general_voxel_volume_parameters.block_allocation_band_factor;
-	float surface_cutoff_distance = band_factor * mu;
-	bool collisionDetected;
+	float surface_distance_cutoff = band_factor * volume->sceneParams->narrow_band_half_width;
+	HashBlockVisibility* hash_block_visibility_types = volume->index.GetBlockVisibilityTypes();
+	HashEntry* hash_table = volume->index.GetEntries();
+	int* block_allocation_list = volume->localVBA.GetAllocationList();
+	int* visible_entry_hash_codes = volume->index.GetUtilizedBlockHashCodes();
+	int hash_entry_count = volume->index.hash_entry_count;
+	bool use_swapping = volume->globalCache != nullptr;
 
-	bool useSwapping = volume->globalCache != nullptr;
+	DepthBasedAllocationFunctor<MEMORYDEVICE_CPU> depth_based_allocator(volume->index, volume->sceneParams, view, depth_camera_matrix, surface_distance_cutoff);
 
 	//reset visibility of formerly "visible" entries, if any
-	SetVisibilityToVisibleAtPreviousFrameAndUnstreamed(hashBlockVisibilityTypes, visibleEntryHashCodes,
+	SetVisibilityToVisibleAtPreviousFrameAndUnstreamed(hash_block_visibility_types, visible_entry_hash_codes,
 	                                                   volume->index.GetUtilizedHashBlockCount());
 	do {
 		volume->index.ClearHashEntryAllocationStates();
-		collisionDetected = false;
-#ifdef WITH_OPENMP
-#pragma omp parallel for default(none) shared(depthImgSize, collisionDetected, volume, surface_cutoff_distance, \
-		hashTable, oneOverHashBlockSize, invertedDepthCameraProjectionParameters, inverted_depth_camera_matrix, \
-		depth, allocationBlockCoordinates, hashBlockVisibilityTypes, hashEntryStates_device)
-#endif
-		for (int locId = 0; locId < depthImgSize.x * depthImgSize.y; locId++) {
-			int y = locId / depthImgSize.x;
-			int x = locId - y * depthImgSize.x;
+		depth_based_allocator.collision_detected = false;
 
-			findVoxelBlocksForRayNearSurface(hashEntryStates_device,
-			                                 allocationBlockCoordinates, hashBlockVisibilityTypes,
-			                                 hashTable, x, y, depth, surface_cutoff_distance,
-			                                 inverted_depth_camera_matrix,
-			                                 invertedDepthCameraProjectionParameters,
-			                                 oneOverHashBlockSize,
-			                                 depthImgSize, volume->sceneParams->near_clipping_distance,
-			                                 volume->sceneParams->far_clipping_distance, collisionDetected);
-		}
+		ImageTraversalEngine<float, MEMORYDEVICE_CPU>::TraverseWithPosition(view->depth, depth_based_allocator);
 
-		if (onlyUpdateVisibleList) {
-			useSwapping = false;
-			collisionDetected = false;
+		if (only_update_visible_list) {
+			use_swapping = false;
+			depth_based_allocator.collision_detected = false;
 		} else {
 			AllocateHashEntriesUsingLists_SetVisibility(volume);
 		}
-	} while (collisionDetected);
+	} while (depth_based_allocator.collision_detected);
 
 	BuildVisibilityList(volume, view, depth_camera_matrix);
 
-	int lastFreeVoxelBlockId = volume->localVBA.lastFreeBlockId;
+	int last_free_voxel_block_id = volume->localVBA.lastFreeBlockId;
 
 	//reallocate deleted hash blocks from previous swap operation
-	if (useSwapping) {
-		for (int hashCode = 0; hashCode < hashEntryCount; hashCode++) {
-			if (hashBlockVisibilityTypes[hashCode] > 0 && hashTable[hashCode].ptr == -1) {
-				if (lastFreeVoxelBlockId >= 0) {
-					hashTable[lastFreeVoxelBlockId].ptr = voxelAllocationList[lastFreeVoxelBlockId];
-					lastFreeVoxelBlockId--;
+	if (use_swapping) {
+		for (int hash_code = 0; hash_code < hash_entry_count; hash_code++) {
+			if (hash_block_visibility_types[hash_code] > 0 && hash_table[hash_code].ptr == -1) {
+				if (last_free_voxel_block_id >= 0) {
+					hash_table[last_free_voxel_block_id].ptr = block_allocation_list[last_free_voxel_block_id];
+					last_free_voxel_block_id--;
 				}
 			}
 		}
 	}
-	volume->localVBA.lastFreeBlockId = lastFreeVoxelBlockId;
+	volume->localVBA.lastFreeBlockId = last_free_voxel_block_id;
 }
+
+
 
 template<typename TVoxel>
 void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateFromDepth(
@@ -128,62 +97,32 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateFromDepth
 
 	if (reset_utilized_list) volume->index.SetUtilizedHashBlockCount(0);
 
-	Vector2i depth_image_resolution = view->depth->noDims;
-	float voxelSize = volume->sceneParams->voxel_size;
-
-	Matrix4f depth_camera_matrix = tracking_state->pose_d->GetM();
-	Matrix4f inverted_depth_camera_matrix;
-	depth_camera_matrix.inv(inverted_depth_camera_matrix);
-
-	Vector4f depth_camera_projection_parameters = view->calib.intrinsics_d.projectionParamsSimple.all;
-
-
-	//Vector4f inverted_projection_parameters = expanded_depth_camera_projection_parameters;
-	Vector4f inverted_projection_parameters = depth_camera_projection_parameters;
-	inverted_projection_parameters.fx = 1.0f / inverted_projection_parameters.fx;
-	inverted_projection_parameters.fy = 1.0f / inverted_projection_parameters.fy;
-
-	const float mu = volume->sceneParams->narrow_band_half_width;
-
-	const float* depth = view->depth->GetData(MEMORYDEVICE_CPU);
-	const Vector4f* surface_points = tracking_state->pointCloud->locations->GetData(MEMORYDEVICE_CPU);
-	int* block_allocation_list = volume->localVBA.GetAllocationList();
-
-	HashEntry* hashTable = volume->index.GetEntries();
-	HashBlockVisibility* hashBlockVisibilityTypes = volume->index.GetBlockVisibilityTypes();
-	int hashEntryCount = volume->index.hashEntryCount;
-
-	int* utilized_entry_hash_codes = volume->index.GetUtilizedBlockHashCodes();
-	HashEntryAllocationState* hash_entry_states = volume->index.GetHashEntryAllocationStates();
-	Vector3s* allocation_block_coordinates = volume->index.GetAllocationBlockCoordinates();
-
-	float hash_block_size_reciprocal = 1.0f / (voxelSize * VOXEL_BLOCK_SIZE);//m
 	float band_factor = configuration::get().general_voxel_volume_parameters.block_allocation_band_factor;
-	float surface_cutoff_distance = band_factor * mu;
-	bool collision_detected;
+	float surface_distance_cutoff = band_factor * volume->sceneParams->narrow_band_half_width;
+	HashBlockVisibility* hash_block_visibility_types = volume->index.GetBlockVisibilityTypes();
+	HashEntry* hash_table = volume->index.GetEntries();
+	int* block_allocation_list = volume->localVBA.GetAllocationList();
+	int hash_entry_count = volume->index.hashEntryCount;
 
 
 	bool use_swapping = volume->globalCache != nullptr;
 
-	//reset visibility of formerly "visible" entries, if any
-	SetVisibilityToVisibleAtPreviousFrameAndUnstreamed(hashBlockVisibilityTypes, utilized_entry_hash_codes,
-	                                                   volume->index.GetUtilizedHashBlockCount());
 	do {
 		volume->index.ClearHashEntryAllocationStates();
 		collision_detected = false;
 #ifdef WITH_OPENMP
-#pragma omp parallel for default(none) shared(depth_image_resolution, collision_detected, volume, surface_cutoff_distance, \
-		hashTable, hash_block_size_reciprocal, inverted_projection_parameters, inverted_depth_camera_matrix, \
-		depth, surface_points, allocation_block_coordinates, hashBlockVisibilityTypes, hash_entry_states)
+#pragma omp parallel for default(none) shared(depth_image_resolution, collision_detected, volume, surface_distance_cutoff, \
+		hash_table, hash_block_size_reciprocal, inverted_projection_parameters, inverted_depth_camera_matrix, \
+		depth, surface_points, allocation_block_coordinates, hash_block_visibility_types, hash_entry_allocation_states)
 #endif
 		for (int locId = 0; locId < depth_image_resolution.x * depth_image_resolution.y; locId++) {
 			int y = locId / depth_image_resolution.x;
 			int x = locId - y * depth_image_resolution.x;
 
-			findVoxelHashBlocksOnRayNearAndBetweenTwoSurfaces(hash_entry_states, allocation_block_coordinates,
-			                                                  hashBlockVisibilityTypes, hashTable,
+			findVoxelHashBlocksOnRayNearAndBetweenTwoSurfaces(hash_entry_allocation_states, allocation_block_coordinates,
+			                                                  hash_block_visibility_types, hash_table,
 			                                                  x, y, depth, surface_points,
-			                                                  surface_cutoff_distance,
+			                                                  surface_distance_cutoff,
 			                                                  hash_block_size_reciprocal,
 			                                                  inverted_depth_camera_matrix,
 			                                                  inverted_projection_parameters,
@@ -207,10 +146,10 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateFromDepth
 
 	//reallocate deleted hash blocks from previous swap operation
 	if (use_swapping) {
-		for (int hashCode = 0; hashCode < hashEntryCount; hashCode++) {
-			if (hashBlockVisibilityTypes[hashCode] > 0 && hashTable[hashCode].ptr == -1) {
+		for (int hashCode = 0; hashCode < hash_entry_count; hashCode++) {
+			if (hash_block_visibility_types[hashCode] > 0 && hash_table[hashCode].ptr == -1) {
 				if (lastFreeVoxelBlockId >= 0) {
-					hashTable[lastFreeVoxelBlockId].ptr = block_allocation_list[lastFreeVoxelBlockId];
+					hash_table[lastFreeVoxelBlockId].ptr = block_allocation_list[lastFreeVoxelBlockId];
 					lastFreeVoxelBlockId--;
 				}
 			}
