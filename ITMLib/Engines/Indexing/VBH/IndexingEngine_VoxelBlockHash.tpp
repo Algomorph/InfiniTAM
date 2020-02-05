@@ -15,7 +15,7 @@
 //  ================================================================
 #pragma once
 
-#include "../../Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
+#include "../../Traversal/Interface/VolumeTraversal.h"
 
 namespace ITMLib {
 

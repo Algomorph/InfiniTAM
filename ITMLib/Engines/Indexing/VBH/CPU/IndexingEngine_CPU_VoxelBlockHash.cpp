@@ -14,6 +14,8 @@
 //  limitations under the License.
 //  ================================================================
 
+//local
+#include "../../../Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
 #include "IndexingEngine_CPU_VoxelBlockHash.tpp"
 #include "../IndexingEngine_VoxelBlockHash.tpp"
 #include "../../../../GlobalTemplateDefines.h"

@@ -137,10 +137,7 @@ template<typename TVoxel>
 void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::AllocateFromDepthAndSdfSpan(
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume,
 		const CameraTrackingState* tracking_state,
-		const ITMView* view,
-		bool onlyUpdateAllocatedList, bool resetAllocatedList){
-
-}
+		const ITMView* view){}
 
 
 template<typename TVoxel>
@@ -455,4 +452,5 @@ bool IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::AllocateHashBloc
 	volume->index.SetLastFreeExcessListId(data_CPU->lastFreeExcessListId);
 	return true;
 }
+
 

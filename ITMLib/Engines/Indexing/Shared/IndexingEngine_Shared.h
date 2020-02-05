@@ -18,6 +18,8 @@
 #include "../../../../ORUtils/PlatformIndependence.h"
 #include "../../../Objects/Volume/VoxelBlockHash.h"
 #include "../../../Objects/Volume/RepresentationAccess.h"
+#include "../../../Objects/Views/ITMView.h"
+#include "../../../Objects/Tracking/CameraTrackingState.h"
 #include "../../Common/CommonFunctors.h"
 #include "../../Common/AllocationTempData.h"
 #include "../../../Utils/Math.h"
@@ -26,9 +28,9 @@
 #include "../../../Utils/HashBlockProperties.h"
 #include "../../../Utils/Geometry/IntersectionChecks.h"
 
+
 #ifdef __CUDACC__
 #include "../../../Utils/CUDAUtils.h"
-#include "../../Traversal/CUDA/VolumeTraversal_CUDA_VoxelBlockHash.h"
 #endif
 
 using namespace ITMLib;
@@ -495,7 +497,6 @@ findVoxelHashBlocksOnRayNearAndBetweenTwoSurfaces(ITMLib::HashEntryAllocationSta
 
 }
 
-
 _CPU_AND_GPU_CODE_ inline void
 findVoxelBlocksForRayNearSurface(ITMLib::HashEntryAllocationState* hash_entry_allocation_states,
                                  Vector3s* hash_block_coordinates,
@@ -533,14 +534,21 @@ template<MemoryDeviceType TMemoryDeviceType>
 struct DepthBasedAllocationFunctor {
 public:
 	DepthBasedAllocationFunctor(VoxelBlockHash& index,
-	                            const VoxelVolumeParameters& volume_parameters, const ITMView* view,
+	                            const VoxelVolumeParameters* volume_parameters, const ITMLib::ITMView* view,
 	                            Matrix4f depth_camera_pose, float surface_distance_cutoff) :
-			surface_distance_cutoff(surface_distance_cutoff),
-			near_clipping_distance(volume_parameters.near_clipping_distance),
-			far_clipping_distance(volume_parameters.far_clipping_distance),
+
+			near_clipping_distance(volume_parameters->near_clipping_distance),
+			far_clipping_distance(volume_parameters->far_clipping_distance),
 			inverted_projection_parameters(view->calib.intrinsics_d.projectionParamsSimple.all),
-			hash_block_size_reciprocal(1.0f / (volume_parameters.voxel_size * VOXEL_BLOCK_SIZE)),
+
+			surface_distance_cutoff(surface_distance_cutoff),
+
+			hash_block_size_reciprocal(1.0f / (volume_parameters->voxel_size * VOXEL_BLOCK_SIZE)),
+			hash_entry_allocation_states(index.GetHashEntryAllocationStates()),
+			hash_block_coordinates(index.GetAllocationBlockCoordinates()),
 			hash_block_visibility_types(index.GetBlockVisibilityTypes()),
+			hash_table(index.GetEntries()),
+
 			collision_detected(false) {
 		depth_camera_pose.inv(inverted_camera_pose);
 		inverted_projection_parameters.fx = 1.0f / inverted_projection_parameters.fx;
@@ -548,7 +556,7 @@ public:
 	}
 
 	_CPU_AND_GPU_CODE_
-	void operator()(float depth_measure, int x, int y) {
+	void operator()(const float& depth_measure, int x, int y) {
 		if (depth_measure <= 0 || (depth_measure - surface_distance_cutoff) < 0 ||
 		    (depth_measure - surface_distance_cutoff) < near_clipping_distance ||
 		    (depth_measure + surface_distance_cutoff) > far_clipping_distance)
@@ -593,12 +601,12 @@ struct TwoSurfaceBasedAllocationFunctor
 		: public DepthBasedAllocationFunctor<TMemoryDeviceType> {
 public:
 	TwoSurfaceBasedAllocationFunctor(VoxelBlockHash& index,
-	                                 const VoxelVolumeParameters& volume_parameters, const ITMView* view,
+	                                 const VoxelVolumeParameters* volume_parameters, const ITMLib::ITMView* view,
 	                                 const CameraTrackingState* tracking_state, float surface_distance_cutoff) :
 			DepthBasedAllocationFunctor<TMemoryDeviceType>(index, volume_parameters, view, tracking_state->pose_d->GetM(), surface_distance_cutoff) {}
 
 	_CPU_AND_GPU_CODE_
-	void operator()(float surface1_depth, Vector4f surface2_point, int x, int y) {
+	void operator()(const float& surface1_depth, const Vector4f& surface2_point, int x, int y) {
 		bool has_surface1 = false, has_surface2 = false;
 
 		if (!(surface1_depth <= 0 || (surface1_depth - surface_distance_cutoff) < 0 ||

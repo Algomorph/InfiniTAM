@@ -16,6 +16,7 @@
 //local
 #include "../../../GlobalTemplateDefines.h"
 #include "../../../Objects/Volume/VoxelBlockHash.h"
+#include "../../Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
 #include "SceneReconstructionEngine_CPU.tpp"
 
 namespace ITMLib {

@@ -27,9 +27,7 @@ class IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU> :
 private:
 	IndexingEngine() = default;
 
-	void SetVisibilityToVisibleAtPreviousFrameAndUnstreamed(HashBlockVisibility* hashBlockVisibilityTypes,
-	                                                        const int* visibleBlockHashCodes,
-	                                                        int visibleHashBlockCount);
+
 public:
 	static IndexingEngine& Instance() {
 		static IndexingEngine instance; // Guaranteed to be destroyed.
@@ -39,6 +37,10 @@ public:
 
 	IndexingEngine(IndexingEngine const&) = delete;
 	void operator=(IndexingEngine const&) = delete;
+
+	void SetVisibilityToVisibleAtPreviousFrameAndUnstreamed(VoxelVolume<TVoxel, VoxelBlockHash>* volume);
+
+	void ReallocateDeletedHashBlocksFromPreviousSwapOperation(VoxelVolume<TVoxel, VoxelBlockHash>* volume);
 
 	void AllocateFromDepth(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
 	                       const CameraTrackingState* tracking_state, bool onlyUpdateVisibleList,
@@ -50,8 +52,7 @@ public:
 
 	void AllocateFromDepthAndSdfSpan(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
 	                                 const CameraTrackingState* tracking_state,
-	                                 const ITMView* view,
-	                                 bool only_update_utilized_list = false, bool reset_utilized_list = false) override;
+	                                 const ITMView* view) override;
 
 
 	void BuildVisibilityList(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,

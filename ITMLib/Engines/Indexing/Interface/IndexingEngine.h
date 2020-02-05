@@ -87,8 +87,7 @@ class IndexingEngineInterface {
 	virtual void
 	AllocateFromDepthAndSdfSpan(VoxelVolume <TVoxel, TIndex>* volume,
 	                            const CameraTrackingState* tracking_state,
-	                            const ITMView* view,
-	                            bool onlyUpdateAllocatedList = false, bool resetAllocatedList = false) = 0;
+	                            const ITMView* view) = 0;
 
 };
 
@@ -117,9 +116,7 @@ public:
 
 	virtual void AllocateFromDepthAndSdfSpan(VoxelVolume <TVoxel, TIndex>* targetVolume,
 	                                         const CameraTrackingState* tracking_state,
-	                                         const ITMView* view,
-	                                         bool only_update_utilized_list = false,
-	                                         bool reset_utilized_list = false) override;
+	                                         const ITMView* view) override;
 
 
 	template<typename TVoxelTarget, typename TVoxelSource>

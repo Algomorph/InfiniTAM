@@ -16,6 +16,7 @@
 //local
 #include "../../../GlobalTemplateDefines.h"
 #include "../../../Objects/Volume/VoxelBlockHash.h"
+#include "../../Traversal/CUDA/VolumeTraversal_CUDA_VoxelBlockHash.h"
 #include "SceneReconstructionEngine_CUDA.tcu"
 
 namespace ITMLib {

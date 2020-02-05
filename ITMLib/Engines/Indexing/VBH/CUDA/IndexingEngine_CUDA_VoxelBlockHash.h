@@ -50,8 +50,7 @@ public:
 
 	void AllocateFromDepthAndSdfSpan(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
 	                                 const CameraTrackingState* tracking_state,
-	                                 const ITMView* view,
-	                                 bool only_update_utilized_list = false, bool reset_utilized_list = false) override;
+	                                 const ITMView* view) override;
 
 	void AllocateHashEntriesUsingLists(VoxelVolume <TVoxel, VoxelBlockHash>* volume) override;
 

@@ -25,20 +25,20 @@ class TwoImageTraversalEngine<TImage1Element, TImage2Element, MEMORYDEVICE_CPU> 
 public:
 	template<typename TFunctor>
 	inline static void
-	TraverseWithPosition(ORUtils::Image<TImage1Element>* image1, ORUtils::Image<TImage2Element>* image2, TFunctor& functor){
+	TraverseWithPosition(const ORUtils::Image<TImage1Element>* image1, const ORUtils::Image<TImage2Element>* image2, TFunctor& functor){
 
 		const Vector2i resolution = image1->noDims;
 		const int element_count = resolution.x * resolution.y;
 
 		const TImage1Element* image1_data = image1->GetData(MEMORYDEVICE_CPU);
-		const TImage2Element* image2_data = image1->GetData(MEMORYDEVICE_CPU);
+		const TImage2Element* image2_data = image2->GetData(MEMORYDEVICE_CPU);
 #ifdef WITH_OPENMP
-	#pragma omp parallel for default(none) shared(functor, image_data)
+	#pragma omp parallel for default(none) shared(functor, image1_data, image2_data)
 #endif
 		for (int i_element = 0; i_element < element_count; i_element++){
 			int y = i_element / resolution.x;
 			int x = i_element - y * resolution.x;
-			functor(image1_data[i_element], image2_data, x, y);
+			functor(image1_data[i_element], image2_data[i_element], x, y);
 		}
 	}
 };

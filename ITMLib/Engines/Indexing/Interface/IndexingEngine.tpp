@@ -44,8 +44,7 @@ template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateFromDepthAndSdfSpan(
 		VoxelVolume<TVoxel, TIndex>* targetVolume,
 		const CameraTrackingState* tracking_state,
-		const ITMView* view,
-		bool onlyUpdateAllocatedList, bool resetAllocatedList) {}
+		const ITMView* view) {}
 
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
