@@ -55,14 +55,14 @@ GenerateRawLiveAndCanonicalVolumes(bool allocateLiveFromBothImages,
 	Vector2i imageSize(640, 480);
 
 	if (allocateLiveFromBothImages) {
-		IndexingEngine<TSDFVoxel, TIndex, TMemoryDeviceType>::Instance().AllocateFromDepth(
+		IndexingEngine<TSDFVoxel, TIndex, TMemoryDeviceType>::Instance().AllocateNearSurface(
 				live_volumes[1], view);
 	}
 
 	updateView(&view, "TestData/snoopy_depth_000017.png",
 	           "TestData/snoopy_color_000017.png", "TestData/snoopy_omask_000017.png",
 	           "TestData/snoopy_calib.txt", TMemoryDeviceType);
-	IndexingEngine<TSDFVoxel, TIndex, TMemoryDeviceType>::Instance().AllocateFromDepth(
+	IndexingEngine<TSDFVoxel, TIndex, TMemoryDeviceType>::Instance().AllocateNearSurface(
 			live_volumes[1], view);
 
 	live_index_to_start_from = expand_raw_live_allocation ? 0 : 1;

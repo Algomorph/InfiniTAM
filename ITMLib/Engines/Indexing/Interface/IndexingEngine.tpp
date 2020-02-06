@@ -25,23 +25,23 @@ using namespace ITMLib;
 
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateFromDepth(VoxelVolume<TVoxel, TIndex>* volume,
-                                                                          const ITMView* view,
-                                                                          const CameraTrackingState* tracking_state,
-                                                                          bool onlyUpdateVisibleList,
-                                                                          bool resetVisibleList) {}
+void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateNearSurface(VoxelVolume<TVoxel, TIndex>* volume,
+                                                                            const ITMView* view,
+                                                                            const CameraTrackingState* tracking_state,
+                                                                            bool onlyUpdateVisibleList,
+                                                                            bool resetVisibleList) {}
 
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateFromDepth(VoxelVolume<TVoxel, TIndex>* scene,
-                                                                          const ITMView* view,
-                                                                          const Matrix4f& depth_camera_matrix,
-                                                                          bool onlyUpdateVisibleList,
-                                                                          bool resetVisibleList) {}
+void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateNearSurface(VoxelVolume<TVoxel, TIndex>* scene,
+                                                                            const ITMView* view,
+                                                                            const Matrix4f& depth_camera_matrix,
+                                                                            bool onlyUpdateVisibleList,
+                                                                            bool resetVisibleList) {}
 
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateFromDepthAndSdfSpan(
+void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateNearAndBetweenTwoSurfaces(
 		VoxelVolume<TVoxel, TIndex>* targetVolume,
 		const CameraTrackingState* tracking_state,
 		const ITMView* view) {}

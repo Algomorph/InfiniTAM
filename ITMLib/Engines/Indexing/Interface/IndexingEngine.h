@@ -48,9 +48,9 @@ class IndexingEngineInterface {
 	 * \param reset_utilized_block_list  [in] reset visibility list prior to the rest of the operation
 	 */
 	virtual void
-	AllocateFromDepth(VoxelVolume <TVoxel, TIndex>* volume, const ITMView* view,
-	                  const CameraTrackingState* tracking_state,
-	                  bool only_update_utilized_block_list, bool reset_utilized_block_list) = 0;
+	AllocateNearSurface(VoxelVolume <TVoxel, TIndex>* volume, const ITMView* view,
+	                    const CameraTrackingState* tracking_state,
+	                    bool only_update_utilized_block_list, bool reset_utilized_block_list) = 0;
 
 	/**
 	 * \brief Given a view with a new depth image, compute the
@@ -64,9 +64,9 @@ class IndexingEngineInterface {
 	 * \param reset_utilized_block_list  [in] reset visibility list upon completion
 	 */
 	virtual void
-	AllocateFromDepth(VoxelVolume <TVoxel, TIndex>* volume, const ITMView* view,
-	                  const Matrix4f& depth_camera_matrix = Matrix4f::Identity(),
-	                  bool only_update_utilized_block_list = false, bool reset_utilized_block_list = false) = 0;
+	AllocateNearSurface(VoxelVolume <TVoxel, TIndex>* volume, const ITMView* view,
+	                    const Matrix4f& depth_camera_matrix = Matrix4f::Identity(),
+	                    bool only_update_utilized_block_list = false, bool reset_utilized_block_list = false) = 0;
 
 
 	/**
@@ -85,9 +85,9 @@ class IndexingEngineInterface {
 	 * \param resetAllocatedList  [in] reset allocated list before the operation.
 	 */
 	virtual void
-	AllocateFromDepthAndSdfSpan(VoxelVolume <TVoxel, TIndex>* volume,
-	                            const CameraTrackingState* tracking_state,
-	                            const ITMView* view) = 0;
+	AllocateNearAndBetweenTwoSurfaces(VoxelVolume <TVoxel, TIndex>* volume,
+	                                  const CameraTrackingState* tracking_state,
+	                                  const ITMView* view) = 0;
 
 };
 
@@ -106,17 +106,17 @@ public:
 	IndexingEngine(IndexingEngine const&) = delete;
 	void operator=(IndexingEngine const&) = delete;
 
-	virtual void AllocateFromDepth(VoxelVolume <TVoxel, TIndex>* volume, const ITMView* view,
-	                               const CameraTrackingState* tracking_state, bool onlyUpdateVisibleList,
-	                               bool resetVisibleList) override;
+	virtual void AllocateNearSurface(VoxelVolume <TVoxel, TIndex>* volume, const ITMView* view,
+	                                 const CameraTrackingState* tracking_state, bool onlyUpdateVisibleList,
+	                                 bool resetVisibleList) override;
 
-	virtual void AllocateFromDepth(VoxelVolume <TVoxel, TIndex>* volume, const ITMView* view,
-	                               const Matrix4f& depth_camera_matrix = Matrix4f::Identity(),
-	                               bool only_update_visible_list = false, bool resetVisibleList = false) override;
+	virtual void AllocateNearSurface(VoxelVolume <TVoxel, TIndex>* volume, const ITMView* view,
+	                                 const Matrix4f& depth_camera_matrix = Matrix4f::Identity(),
+	                                 bool only_update_visible_list = false, bool resetVisibleList = false) override;
 
-	virtual void AllocateFromDepthAndSdfSpan(VoxelVolume <TVoxel, TIndex>* targetVolume,
-	                                         const CameraTrackingState* tracking_state,
-	                                         const ITMView* view) override;
+	virtual void AllocateNearAndBetweenTwoSurfaces(VoxelVolume <TVoxel, TIndex>* targetVolume,
+	                                               const CameraTrackingState* tracking_state,
+	                                               const ITMView* view) override;
 
 
 	template<typename TVoxelTarget, typename TVoxelSource>

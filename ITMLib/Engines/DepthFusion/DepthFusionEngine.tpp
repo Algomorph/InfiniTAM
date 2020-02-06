@@ -25,7 +25,7 @@ void DepthFusionEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::UpdateVisibleL
 		VoxelVolume<TVoxel, TIndex>* scene, const ITMView* view, const CameraTrackingState* trackingState,
 		const RenderState* renderState, bool resetVisibleList) {
 	IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::Instance()
-			.AllocateFromDepth(scene, view, trackingState, true, resetVisibleList);
+			.AllocateNearSurface(scene, view, trackingState, true, resetVisibleList);
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
@@ -40,7 +40,7 @@ void DepthFusionEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::GenerateTsdfVo
 		VoxelVolume<TVoxel, TIndex>* volume, const ITMView* view, const Matrix4f& depth_camera_matrix) {
 	volume->Reset();
 	IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::Instance()
-			.AllocateFromDepth(volume, view, depth_camera_matrix, false, false);
+			.AllocateNearSurface(volume, view, depth_camera_matrix, false, false);
 	this->IntegrateDepthImageIntoTsdfVolume_Helper(volume, view, depth_camera_matrix);
 }
 
@@ -55,7 +55,7 @@ void DepthFusionEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::GenerateTsdfVo
 	IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>& indexer =
 			IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::Instance();
 	// Allocate blocks based on depth
-	indexer.AllocateFromDepth(temporaryAllocationVolume, view, depth_camera_matrix, false, false);
+	indexer.AllocateNearSurface(temporaryAllocationVolume, view, depth_camera_matrix, false, false);
 	// Expand allocation by 1-ring of blocks
 	indexer.AllocateUsingOtherVolumeExpanded(volume, temporaryAllocationVolume);
 	this->IntegrateDepthImageIntoTsdfVolume_Helper(volume, view, depth_camera_matrix);

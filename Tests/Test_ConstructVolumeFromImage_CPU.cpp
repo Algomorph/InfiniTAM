@@ -142,7 +142,7 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_PVA_VBH_Expnaded_CPU, Frame16And17
 
 	IndexingEngine<TSDFVoxel,VoxelBlockHash, MEMORYDEVICE_CPU>& indexer =
 	IndexingEngine<TSDFVoxel,VoxelBlockHash, MEMORYDEVICE_CPU>::Instance();
-	indexer.AllocateFromDepth(&volume_VBH_17_depth_allocation, view);
+	indexer.AllocateNearSurface(&volume_VBH_17_depth_allocation, view);
 	indexer.AllocateUsingOtherVolumeAndSetVisibilityExpanded(&volume_VBH_17, &volume_VBH_17_depth_allocation, view);
 
 	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, VoxelBlockHash>* reconstructionEngine_VBH =
