@@ -21,7 +21,7 @@
 namespace ITMLib {
 
 template<>
-class HashTableTraversalEngine<MEMORYDEVICE_CPU> {
+class HashTableTraversalEngine<MEMORYDEVICE_CUDA> {
 public:
 	template<typename TFunctor>
 	inline static void

@@ -25,11 +25,14 @@ template<typename TVoxel>
 class IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA> :
 		public IndexingEngine_VoxelBlockHash<TVoxel, MEMORYDEVICE_CUDA,
 		IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA> > {
+
+	friend IndexingEngine_VoxelBlockHash<TVoxel, MEMORYDEVICE_CPU,
+			IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>>;
+
 private:
 	IndexingEngine() = default;
 
-	void SetVisibilityToVisibleAtPreviousFrameAndUnstreamed(
-			VoxelVolume <TVoxel, VoxelBlockHash>* volume);
+
 public:
 	static IndexingEngine& Instance() {
 		static IndexingEngine instance; // Guaranteed to be destroyed.
@@ -40,23 +43,15 @@ public:
 	IndexingEngine(IndexingEngine const&) = delete;
 	void operator=(IndexingEngine const&) = delete;
 
-	void AllocateFromDepth(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
-	                       const CameraTrackingState* tracking_state, bool onlyUpdateVisibleList, bool resetVisibleList) override;
-
-	void AllocateFromDepth(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
-	                       const Matrix4f& depth_camera_matrix = Matrix4f::Identity(),
-	                       bool only_update_visible_list = false, bool resetVisibleList = false) override;
-
-	void AllocateFromDepthAndSdfSpan(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
-	                                 const CameraTrackingState* tracking_state,
-	                                 const ITMView* view) override;
-
 	void AllocateHashEntriesUsingLists(VoxelVolume <TVoxel, VoxelBlockHash>* volume) override;
 
 	void AllocateHashEntriesUsingLists_SetVisibility(VoxelVolume <TVoxel, VoxelBlockHash>* volume) override;
 
 	void BuildUtilizedBlockListBasedOnVisibility(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
 	                                             const Matrix4f& depth_camera_matrix = Matrix4f::Identity());
+
+	void SetVisibilityToVisibleAtPreviousFrameAndUnstreamed(
+			VoxelVolume <TVoxel, VoxelBlockHash>* volume);
 
 	HashEntry FindHashEntry(const VoxelBlockHash& index, const Vector3s& coordinates) override;
 	HashEntry FindHashEntry(const VoxelBlockHash& index, const Vector3s& coordinates, int& hashCode);

@@ -23,8 +23,8 @@ namespace {
 template <typename TImageElement, typename TFunctor >
 __global__ void imageTraversalWithPosition_device (const TImageElement* image_data, const Vector2i resolution, TFunctor* functor_device){
 	int x = threadIdx.x + blockIdx.x * blockDim.x, y = threadIdx.y + blockIdx.y * blockDim.y;
-	if (x > resolution.x - 1 || y > resolution.y - 1) return;
-	functor_device(image_data[x + y * resolution.x], x, y);
+	if (x >= resolution.x || y >= resolution.y) return;
+	(*functor_device)(image_data[x + y * resolution.x], x, y);
 }
 
 } // end anonymous namespace (CUDA global kernels)

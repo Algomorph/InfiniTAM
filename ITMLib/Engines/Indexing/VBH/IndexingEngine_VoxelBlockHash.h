@@ -14,12 +14,13 @@
 //  limitations under the License.
 //  ================================================================
 #pragma once
+
 #include "../Interface/IndexingEngine.h"
 #include "../../Common/WarpType.h"
 
-namespace ITMLib{
+namespace ITMLib {
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, typename TDerivedClass>
-class IndexingEngine_VoxelBlockHash:
+class IndexingEngine_VoxelBlockHash :
 		public IndexingEngineInterface<TVoxel, VoxelBlockHash> {
 
 public:
@@ -41,9 +42,25 @@ public:
  */
 	template<WarpType TWarpType, typename TWarp>
 	void AllocateFromWarpedVolume(
-			VoxelVolume <TWarp, VoxelBlockHash>* warpField,
-			VoxelVolume <TVoxel, VoxelBlockHash>* sourceTSDF,
-			VoxelVolume <TVoxel, VoxelBlockHash>* targetTSDF);
+			VoxelVolume<TWarp, VoxelBlockHash>* warpField,
+			VoxelVolume<TVoxel, VoxelBlockHash>* sourceTSDF,
+			VoxelVolume<TVoxel, VoxelBlockHash>* targetTSDF);
+
+	void AllocateFromDepth(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
+	                       const Matrix4f& depth_camera_matrix = Matrix4f::Identity(),
+	                       bool only_update_visible_list = false, bool resetVisibleList = false) override;
+
+	void AllocateFromDepth(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
+	                       const CameraTrackingState* tracking_state, bool onlyUpdateVisibleList,
+	                       bool resetVisibleList) override;
+
+	void AllocateFromDepthAndSdfSpan(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
+	                                 const CameraTrackingState* tracking_state,
+	                                 const ITMView* view) override;
+
+private:
+	void ReallocateDeletedHashBlocks(VoxelVolume<TVoxel, VoxelBlockHash>* volume);
+
 };
 
 }// namespace ITMLib

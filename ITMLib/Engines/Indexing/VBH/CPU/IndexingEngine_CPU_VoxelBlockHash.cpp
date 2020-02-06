@@ -15,6 +15,9 @@
 //  ================================================================
 
 //local
+#include "../../../Traversal/CPU/ImageTraversal_CPU.h"
+#include "../../../Traversal/CPU/TwoImageTraversal_CPU.h"
+#include "../../../Traversal/CPU/HashTableTraversal_CPU.h"
 #include "../../../Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
 #include "IndexingEngine_CPU_VoxelBlockHash.tpp"
 #include "../IndexingEngine_VoxelBlockHash.tpp"

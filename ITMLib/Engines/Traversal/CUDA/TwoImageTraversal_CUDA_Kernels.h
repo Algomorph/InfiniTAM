@@ -21,10 +21,10 @@ namespace {
 
 // CUDA global kernels
 template <typename TImage1Element, typename TImage2Element, typename TFunctor >
-__global__ void twoImageTraversalWithPosition_device (const TImage1Element* image1_data, const TImage1Element* image2_data, const Vector2i resolution, TFunctor* functor_device){
+__global__ void twoImageTraversalWithPosition_device (const TImage1Element* image1_data, const TImage2Element* image2_data, const Vector2i resolution, TFunctor* functor_device){
 	int x = threadIdx.x + blockIdx.x * blockDim.x, y = threadIdx.y + blockIdx.y * blockDim.y;
 	if (x > resolution.x - 1 || y > resolution.y - 1) return;
-	functor_device(image1_data[x + y * resolution.x], image2_data[x + y * resolution.x], x, y);
+	(*functor_device)(image1_data[x + y * resolution.x], image2_data[x + y * resolution.x], x, y);
 }
 
 } // end anonymous namespace (CUDA global kernels)

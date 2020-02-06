@@ -18,9 +18,78 @@
 //local
 #include "IndexingEngine_Shared.h"
 #include "../../Common/CheckBlockVisibility.h"
-#ifdef __CUDACC__
-#include "IndexingEngine_Kernels.h"
+
+
+
+
+
+template<typename TWarp, typename TVoxel, WarpType TWarpType>
+struct WarpBasedAllocationMarkerFunctor {
+	WarpBasedAllocationMarkerFunctor(
+			VoxelVolume<TVoxel, VoxelBlockHash>* sourceVolume,
+			VoxelVolume<TVoxel, VoxelBlockHash>* volumeToAllocate,
+			Vector3s* allocationBlockCoords,
+			HashEntryAllocationState* warpedEntryAllocationStates) :
+
+			collisionDetected(false),
+
+			targetTSDFScene(volumeToAllocate),
+			targetTSDFVoxels(volumeToAllocate->localVBA.GetVoxelBlocks()),
+			targetTSDFHashEntries(volumeToAllocate->index.GetEntries()),
+			targetTSDFCache(),
+
+			sourceTSDFScene(sourceVolume),
+			sourceTSDFVoxels(sourceVolume->localVBA.GetVoxelBlocks()),
+			sourceTSDFHashEntries(sourceVolume->index.GetEntries()),
+			sourceTSDFCache(),
+
+			allocationBlockCoords(allocationBlockCoords),
+			warpedEntryAllocationStates(warpedEntryAllocationStates) {}
+
+	_CPU_AND_GPU_CODE_
+	inline
+	void operator()(TWarp& warpVoxel, Vector3i voxelPosition, Vector3s hashBlockPosition) {
+
+		Vector3f warpVector = ITMLib::WarpVoxelStaticFunctor<TWarp, TWarpType>::GetWarp(warpVoxel);
+		Vector3f warpedPosition = warpVector + TO_FLOAT3(voxelPosition);
+		Vector3i warpedPositionTruncated = warpedPosition.toInt();
+
+		// perform lookup in source volume
+		int vmIndex;
+#if !defined(__CUDACC__) && !defined(WITH_OPENMP)
+		const TVoxel& sourceTSDFVoxelAtWarp = readVoxel(sourceTSDFVoxels, sourceTSDFHashEntries,
+		                                                warpedPositionTruncated,
+		                                                vmIndex, sourceTSDFCache);
+#else //don't use cache when multithreading!
+		const TVoxel& sourceTSDFVoxelAtWarp = readVoxel(sourceTSDFVoxels, sourceTSDFHashEntries,
+														warpedPositionTruncated,
+														vmIndex);
 #endif
+
+		int targetBlockHash = HashCodeFromBlockPosition(hashBlockPosition);
+
+		MarkAsNeedingAllocationIfNotFound(warpedEntryAllocationStates, allocationBlockCoords, targetBlockHash,
+		                                  hashBlockPosition, targetTSDFHashEntries, collisionDetected);
+	}
+
+	bool collisionDetected;
+
+private:
+
+
+	VoxelVolume<TVoxel, VoxelBlockHash>* targetTSDFScene;
+	TVoxel* targetTSDFVoxels;
+	HashEntry* targetTSDFHashEntries;
+	VoxelBlockHash::IndexCache targetTSDFCache;
+
+	VoxelVolume<TVoxel, VoxelBlockHash>* sourceTSDFScene;
+	TVoxel* sourceTSDFVoxels;
+	HashEntry* sourceTSDFHashEntries;
+	VoxelBlockHash::IndexCache sourceTSDFCache;
+
+	Vector3s* allocationBlockCoords;
+	HashEntryAllocationState* warpedEntryAllocationStates;
+};
 
 
 template<MemoryDeviceType TMemoryDeviceType>
@@ -174,128 +243,3 @@ private:
 	HashBlockVisibility* hash_block_visibility_types;
 	int* block_allocation_list;
 };
-
-template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
-struct SpecializedAllocationFunctionsEngine;
-
-template<typename TVoxel>
-struct SpecializedAllocationFunctionsEngine<TVoxel, MEMORYDEVICE_CPU>{
-	static void SetVisibilityToVisibleAtPreviousFrameAndUnstreamed(VoxelVolume<TVoxel, VoxelBlockHash>* volume){
-		HashBlockVisibility* utilized_block_visibility_types = volume->index.GetBlockVisibilityTypes();
-		const int* utilized_block_hash_codes = volume->index.GetUtilizedBlockHashCodes();
-		const int utilized_block_count = volume->index.GetUtilizedHashBlockCount();
-#if WITH_OPENMP
-#pragma omp parallel for default(none) shared(utilized_block_hash_codes, utilized_block_visibility_types)
-#endif
-		for (int i_visible_block = 0; i_visible_block < utilized_block_count; i_visible_block++) {
-			utilized_block_visibility_types[utilized_block_hash_codes[i_visible_block]] =
-					HashBlockVisibility::VISIBLE_AT_PREVIOUS_FRAME_AND_UNSTREAMED;
-		}
-	}
-	static void BuildUtilizedBlockListBasedOnVisibility(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
-	                                                         const Matrix4f& depth_camera_matrix){
-// ** scene data **
-		const int hash_entry_count = volume->index.hashEntryCount;
-		HashBlockVisibility* hash_block_visibility_types = volume->index.GetBlockVisibilityTypes();
-		int* visibleEntryHashCodes = volume->index.GetUtilizedBlockHashCodes();
-		HashEntry* hash_table = volume->index.GetEntries();
-		bool useSwapping = volume->globalCache != nullptr;
-		ITMHashSwapState* swapStates = volume->Swapping() ? volume->globalCache->GetSwapStates(false) : 0;
-
-		// ** view data **
-		Vector4f depthCameraProjectionParameters = view->calib.intrinsics_d.projectionParamsSimple.all;
-		Vector2i depthImgSize = view->depth->noDims;
-		float voxelSize = volume->sceneParams->voxel_size;
-
-		int visibleEntryCount = 0;
-		//build visible list
-		for (int hash_code = 0; hash_code < hash_entry_count; hash_code++) {
-			HashBlockVisibility hash_block_visibility_type = hash_block_visibility_types[hash_code];
-			const HashEntry& hash_entry = hash_table[hash_code];
-
-			if (hash_block_visibility_type == 3) {
-				bool is_visible_enlarged, is_visible;
-
-				if (useSwapping) {
-					checkBlockVisibility<true>(is_visible, is_visible_enlarged, hash_entry.pos, depth_camera_matrix,
-					                           depthCameraProjectionParameters,
-					                           voxelSize, depthImgSize);
-					if (!is_visible_enlarged) hash_block_visibility_type = INVISIBLE;
-				} else {
-					checkBlockVisibility<false>(is_visible, is_visible_enlarged, hash_entry.pos, depth_camera_matrix,
-					                            depthCameraProjectionParameters,
-					                            voxelSize, depthImgSize);
-					if (!is_visible) { hash_block_visibility_type = INVISIBLE; }
-				}
-				hash_block_visibility_types[hash_code] = hash_block_visibility_type;
-			}
-
-			if (useSwapping) {
-				if (hash_block_visibility_type > 0 && swapStates[hash_code].state != 2) swapStates[hash_code].state = 1;
-			}
-
-			if (hash_block_visibility_type > 0) {
-				visibleEntryHashCodes[visibleEntryCount] = hash_code;
-				visibleEntryCount++;
-			}
-		}
-		volume->index.SetUtilizedHashBlockCount(visibleEntryCount);
-	}
-};
-
-#define __CUDACC__
-template<typename TVoxel>
-struct SpecializedAllocationFunctionsEngine<TVoxel, MEMORYDEVICE_CUDA>{
-	static void SetVisibilityToVisibleAtPreviousFrameAndUnstreamed(VoxelVolume<TVoxel, VoxelBlockHash>* volume){
-		HashBlockVisibility* utilized_block_visibility_types = volume->index.GetBlockVisibilityTypes();
-		const int* utilized_block_hash_codes = volume->index.GetUtilizedBlockHashCodes();
-		const int utilized_block_count = volume->index.GetUtilizedHashBlockCount();
-		dim3 cudaBlockSizeVS(256, 1);
-		dim3 gridSizeVS((int) ceil((float) utilized_block_count / (float) cudaBlockSizeVS.x));
-		if (gridSizeVS.x > 0) {
-			setVisibleEntriesToVisibleAtPreviousFrameAndUnstreamed << < gridSizeVS, cudaBlockSizeVS >> >
-			                                                                        (utilized_block_visibility_types,
-					                                                                        utilized_block_hash_codes, utilized_block_count);
-			ORcudaKernelCheck;
-		}
-	}
-	static void BuildUtilizedBlockListBasedOnVisibility(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
-	                                                         const Matrix4f& depth_camera_matrix){
-
-		// ** volume data **
-		const int hashEntryCount = volume->index.hashEntryCount;
-		HashBlockVisibility* hashBlockVisibilityTypes_device = volume->index.GetBlockVisibilityTypes();
-		int* visibleBlockHashCodes_device = volume->index.GetUtilizedBlockHashCodes();
-		HashEntry* hashTable = volume->index.GetEntries();
-		bool useSwapping = volume->globalCache != nullptr;
-		ITMHashSwapState* swapStates = volume->Swapping() ? volume->globalCache->GetSwapStates(false) : 0;
-
-		// ** view data **
-		Vector4f depthCameraProjectionParameters = view->calib.intrinsics_d.projectionParamsSimple.all;
-		Vector2i depthImgSize = view->depth->noDims;
-		float voxelSize = volume->sceneParams->voxel_size;
-
-
-		// ** CUDA data **
-		ORUtils::MemoryBlock<int> visibleBlockCount(1, true, true);
-		dim3 cudaBlockSizeAL(256, 1);
-		dim3 gridSizeAL((int) ceil((float) hashEntryCount / (float) cudaBlockSizeAL.x));
-
-		if (useSwapping) {
-			buildVisibilityList_device<true> << < gridSizeAL, cudaBlockSizeAL >> >
-			(hashTable, swapStates, hashEntryCount, visibleBlockHashCodes_device,
-					visibleBlockCount.GetData(
-							MEMORYDEVICE_CUDA), hashBlockVisibilityTypes_device, depth_camera_matrix, depthCameraProjectionParameters, depthImgSize, voxelSize);
-			ORcudaKernelCheck;
-		} else {
-			buildVisibilityList_device<false> << < gridSizeAL, cudaBlockSizeAL >> >
-			(hashTable, swapStates, hashEntryCount, visibleBlockHashCodes_device,
-					visibleBlockCount.GetData(
-							MEMORYDEVICE_CUDA), hashBlockVisibilityTypes_device, depth_camera_matrix, depthCameraProjectionParameters, depthImgSize, voxelSize);
-			ORcudaKernelCheck;
-		}
-		visibleBlockCount.UpdateHostFromDevice();
-		volume->index.SetUtilizedHashBlockCount(*visibleBlockCount.GetData(MEMORYDEVICE_CPU));
-	}
-};
-#endif

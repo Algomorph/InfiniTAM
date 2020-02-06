@@ -25,7 +25,7 @@ template <typename TFunctor>
 __global__ void hashTableTraversalWithHashCode_device (HashEntry* hash_table, const int hash_entry_count, TFunctor* functor_device){
 	int hash_code = threadIdx.x + blockIdx.x * blockDim.x;
 	if (hash_code >= hash_entry_count) return;
-	functor_device(hash_table[hash_code], hash_code);
+	(*functor_device)(hash_table[hash_code], hash_code);
 }
 
 } // end anonymous namespace (CUDA global kernels)

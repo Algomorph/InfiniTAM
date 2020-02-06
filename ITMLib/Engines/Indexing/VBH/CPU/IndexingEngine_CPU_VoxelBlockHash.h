@@ -24,6 +24,10 @@ template<typename TVoxel>
 class IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU> :
 		public IndexingEngine_VoxelBlockHash<TVoxel, MEMORYDEVICE_CPU,
 				IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>> {
+
+	friend IndexingEngine_VoxelBlockHash<TVoxel, MEMORYDEVICE_CPU,
+			IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>>;
+
 private:
 	IndexingEngine() = default;
 
@@ -39,20 +43,6 @@ public:
 	void operator=(IndexingEngine const&) = delete;
 
 	void SetVisibilityToVisibleAtPreviousFrameAndUnstreamed(VoxelVolume<TVoxel, VoxelBlockHash>* volume);
-
-	void ReallocateDeletedHashBlocks(VoxelVolume<TVoxel, VoxelBlockHash>* volume);
-
-	void AllocateFromDepth(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
-	                       const CameraTrackingState* tracking_state, bool onlyUpdateVisibleList,
-	                       bool resetVisibleList) override;
-
-	void AllocateFromDepth(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
-	                       const Matrix4f& depth_camera_matrix = Matrix4f::Identity(),
-	                       bool only_update_visible_list = false, bool resetVisibleList = false) override;
-
-	void AllocateFromDepthAndSdfSpan(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
-	                                 const CameraTrackingState* tracking_state,
-	                                 const ITMView* view) override;
 
 
 	void BuildUtilizedBlockListBasedOnVisibility(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,

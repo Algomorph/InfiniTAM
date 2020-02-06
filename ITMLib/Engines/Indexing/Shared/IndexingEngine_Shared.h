@@ -186,75 +186,6 @@ MarkForAllocationAndSetVisibilityTypeIfNotFound(ITMLib::HashEntryAllocationState
 }
 
 
-template<typename TWarp, typename TVoxel, WarpType TWarpType>
-struct WarpBasedAllocationMarkerFunctor {
-	WarpBasedAllocationMarkerFunctor(
-			VoxelVolume<TVoxel, VoxelBlockHash>* sourceVolume,
-			VoxelVolume<TVoxel, VoxelBlockHash>* volumeToAllocate,
-			Vector3s* allocationBlockCoords,
-			HashEntryAllocationState* warpedEntryAllocationStates) :
-
-			collisionDetected(false),
-
-			targetTSDFScene(volumeToAllocate),
-			targetTSDFVoxels(volumeToAllocate->localVBA.GetVoxelBlocks()),
-			targetTSDFHashEntries(volumeToAllocate->index.GetEntries()),
-			targetTSDFCache(),
-
-			sourceTSDFScene(sourceVolume),
-			sourceTSDFVoxels(sourceVolume->localVBA.GetVoxelBlocks()),
-			sourceTSDFHashEntries(sourceVolume->index.GetEntries()),
-			sourceTSDFCache(),
-
-			allocationBlockCoords(allocationBlockCoords),
-			warpedEntryAllocationStates(warpedEntryAllocationStates) {}
-
-	_CPU_AND_GPU_CODE_
-	inline
-	void operator()(TWarp& warpVoxel, Vector3i voxelPosition, Vector3s hashBlockPosition) {
-
-		Vector3f warpVector = ITMLib::WarpVoxelStaticFunctor<TWarp, TWarpType>::GetWarp(warpVoxel);
-		Vector3f warpedPosition = warpVector + TO_FLOAT3(voxelPosition);
-		Vector3i warpedPositionTruncated = warpedPosition.toInt();
-
-		// perform lookup in source volume
-		int vmIndex;
-#if !defined(__CUDACC__) && !defined(WITH_OPENMP)
-		const TVoxel& sourceTSDFVoxelAtWarp = readVoxel(sourceTSDFVoxels, sourceTSDFHashEntries,
-		                                                warpedPositionTruncated,
-		                                                vmIndex, sourceTSDFCache);
-#else //don't use cache when multithreading!
-		const TVoxel& sourceTSDFVoxelAtWarp = readVoxel(sourceTSDFVoxels, sourceTSDFHashEntries,
-														warpedPositionTruncated,
-														vmIndex);
-#endif
-
-		int targetBlockHash = HashCodeFromBlockPosition(hashBlockPosition);
-
-		MarkAsNeedingAllocationIfNotFound(warpedEntryAllocationStates, allocationBlockCoords, targetBlockHash,
-		                                  hashBlockPosition, targetTSDFHashEntries, collisionDetected);
-	}
-
-	bool collisionDetected;
-
-private:
-
-
-	VoxelVolume<TVoxel, VoxelBlockHash>* targetTSDFScene;
-	TVoxel* targetTSDFVoxels;
-	HashEntry* targetTSDFHashEntries;
-	VoxelBlockHash::IndexCache targetTSDFCache;
-
-	VoxelVolume<TVoxel, VoxelBlockHash>* sourceTSDFScene;
-	TVoxel* sourceTSDFVoxels;
-	HashEntry* sourceTSDFHashEntries;
-	VoxelBlockHash::IndexCache sourceTSDFCache;
-
-	Vector3s* allocationBlockCoords;
-	HashEntryAllocationState* warpedEntryAllocationStates;
-};
-
-
 _CPU_AND_GPU_CODE_ inline int getIncrementCount(Vector3s coord1, Vector3s coord2) {
 	return static_cast<int>(coord1.x != coord2.x) +
 	       static_cast<int>(coord1.y != coord2.y) +
@@ -447,56 +378,6 @@ findHashBlockSegmentAlongCameraRayWithinRangeFromDepth(const float distance_from
 	                                                              inverted_camera_pose, one_over_hash_block_size);
 }
 
-_CPU_AND_GPU_CODE_ inline void
-findVoxelHashBlocksOnRayNearAndBetweenTwoSurfaces(ITMLib::HashEntryAllocationState* hash_entry_allocation_states,
-                                                  Vector3s* hash_block_coordinates,
-                                                  HashBlockVisibility* hash_block_visibility_types,
-                                                  const CONSTPTR(HashEntry)* hash_table, int x, int y,
-                                                  const CONSTPTR(float)* surface1_depth_image,
-                                                  const CONSTPTR(Vector4f)* surface2_points,
-                                                  float surface_distance_cutoff, float one_over_hash_block_size,
-                                                  const Matrix4f inverted_camera_pose,
-                                                  const Vector4f inverted_camera_projection_parameters,
-                                                  const Vector2i image_size,
-                                                  float near_clipping_distance, float far_clipping_distance,
-                                                  bool& collisionDetected) {
-
-	bool has_surface1 = false, has_surface2 = false;
-
-	float surface1_depth = surface1_depth_image[x + y * image_size.x];
-	if (!(surface1_depth <= 0 || (surface1_depth - surface_distance_cutoff) < 0 ||
-	      (surface1_depth - surface_distance_cutoff) < near_clipping_distance ||
-	      (surface1_depth + surface_distance_cutoff) > far_clipping_distance))
-		has_surface1 = true;
-	Vector4f surface2_point = surface2_points[x + y * image_size.x];
-
-	if (surface2_point.x > 0.0f) has_surface2 = true;
-
-	ITMLib::Segment march_segment;
-
-	if (has_surface1 && has_surface2) {
-		Vector4f surface1_point = imageSpacePointToCameraSpace(surface1_depth, x, y,
-		                                                       inverted_camera_projection_parameters);
-		march_segment = findHashBlockSegmentAlongCameraRayWithinRangeFromAndBetweenTwoPoints(
-				surface_distance_cutoff, surface1_point, surface2_point, inverted_camera_pose,
-				one_over_hash_block_size);
-	} else {
-		if (has_surface1) {
-			march_segment = findHashBlockSegmentAlongCameraRayWithinRangeFromDepth(
-					surface_distance_cutoff, surface1_depth, x, y, inverted_camera_pose,
-					inverted_camera_projection_parameters, one_over_hash_block_size);
-		} else if (has_surface2) {
-			march_segment = findHashBlockSegmentAlongCameraRayWithinRangeFromPoint(
-					surface_distance_cutoff, surface2_point, inverted_camera_pose, one_over_hash_block_size);
-		} else {
-			return; // neither surface is defined at this point, nothing to do.
-		}
-	}
-
-	findVoxelHashBlocksAlongSegment(hash_entry_allocation_states, hash_block_coordinates, hash_block_visibility_types,
-	                                hash_table, march_segment, collisionDetected);
-
-}
 
 _CPU_AND_GPU_CODE_ inline void
 findVoxelBlocksForRayNearSurface(ITMLib::HashEntryAllocationState* hash_entry_allocation_states,

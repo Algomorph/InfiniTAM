@@ -15,6 +15,9 @@
 //  ================================================================
 
 //local
+#include "../../../Traversal/CUDA/ImageTraversal_CUDA.h"
+#include "../../../Traversal/CUDA/TwoImageTraversal_CUDA.h"
+#include "../../../Traversal/CUDA/HashTableTraversal_CUDA.h"
 #include "../../../Traversal/CUDA/VolumeTraversal_CUDA_VoxelBlockHash.h"
 #include "IndexingEngine_CUDA_VoxelBlockHash.tcu"
 #include "../IndexingEngine_VoxelBlockHash.tpp"
