@@ -139,7 +139,7 @@ set(ITMLIB_ENGINES_TRAVERSAL_CPU_HEADERS
     Engines/Traversal/CPU/TwoImageTraversal_CPU.h
 
     Engines/Traversal/CPU/HashTableTraversal_CPU.h
-    
+
     Engines/Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h
     Engines/Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h
 
@@ -162,7 +162,7 @@ set(ITMLIB_ENGINES_TRAVERSAL_CUDA_HEADERS
     Engines/Traversal/CUDA/HashTableTraversal_CUDA.h
     Engines/Traversal/CUDA/HashTableTraversal_CUDA_Kernels.h
 
-    
+
     Engines/Traversal/CUDA/VolumeTraversal_CUDA_PlainVoxelArray.h
     Engines/Traversal/CUDA/VolumeTraversal_CUDA_PlainVoxelArray_Kernels.h
     Engines/Traversal/CUDA/VolumeTraversal_CUDA_VoxelBlockHash.h
@@ -288,11 +288,11 @@ set(ITMLIB_ENGINES_MULTISCENE_HEADERS
     Engines/MultiScene/VoxelMapGraphManager.h
     )
 #====================================== INDEXING ENGINES ===============================================================
-set(ITMLIB_ENGINES_INDEXING_SOURCES
+set(ITMLIB_ENGINES_INDEXING_VBH_SOURCES
     Engines/Indexing/VBH/IndexingEngine_VoxelBlockHash.tpp
     )
 
-set(ITMLIB_ENGINES_INDEXING_HEADERS
+set(ITMLIB_ENGINES_INDEXING_VBH_HEADERS
     Engines/Indexing/VBH/IndexingEngine_VoxelBlockHash.h
     )
 
@@ -330,6 +330,41 @@ set(ITMLIB_ENGINES_INDEXING_SHARED_HEADERS
     Engines/Indexing/Shared/IndexingEngine_Shared.h
     Engines/Indexing/Shared/IndexingEngine_Functors.h
     )
+##
+set(
+        ITMLIB_ENGINES_INDEXING_AUX_SOURCES
+
+        Engines/Indexing/AtomicArrayThreadGuard/AtomicArrayThreadGuard_CUDA.tcu
+        Engines/Indexing/AtomicArrayThreadGuard/AtomicArrayThreadGuard_CUDA.cu
+        Engines/Indexing/AtomicArrayThreadGuard/AtomicArrayThreadGuard_CPU.tpp
+        Engines/Indexing/AtomicArrayThreadGuard/AtomicArrayThreadGuard_CPU.cpp
+)
+set(
+        ITMLIB_ENGINES_INDEXING_AUX_HEADERS
+
+        Engines/Indexing/AtomicArrayThreadGuard/AtomicArrayThreadGuard.h
+)
+##
+set(
+        ITMLIB_ENGINES_INDEXING_SOURCES
+
+        ${ITMLIB_ENGINES_INDEXING_VBH_SOURCES}
+        ${ITMLIB_ENGINES_INDEXING_CPU_SOURCES}
+        ${ITMLIB_ENGINES_INDEXING_CUDA_SOURCES}
+        ${ITMLIB_ENGINES_INDEXING_INTERFACE_SOURCES}
+        ${ITMLIB_ENGINES_INDEXING_AUX_SOURCES}
+)
+
+set(
+        ITMLIB_ENGINES_INDEXING_HEADERS
+
+        ${ITMLIB_ENGINES_INDEXING_VBH_HEADERS}
+        ${ITMLIB_ENGINES_INDEXING_CPU_HEADERS}
+        ${ITMLIB_ENGINES_INDEXING_CUDA_HEADERS}
+        ${ITMLIB_ENGINES_INDEXING_INTERFACE_HEADERS}
+        ${ITMLIB_ENGINES_INDEXING_SHARED_HEADERS}
+        ${ITMLIB_ENGINES_INDEXING_AUX_HEADERS}
+)
 
 
 #====================================== RECONSTRUCTION (SDF GENERATION) ENGINES ========================================
@@ -959,9 +994,6 @@ set(sources
     ${ITMLIB_ENGINES_MESHING_CUDA_SOURCES}
     ${ITMLIB_ENGINES_MULTISCENE_SOURCES}
     ${ITMLIB_ENGINES_INDEXING_SOURCES}
-    ${ITMLIB_ENGINES_INDEXING_CPU_SOURCES}
-    ${ITMLIB_ENGINES_INDEXING_CUDA_SOURCES}
-    ${ITMLIB_ENGINES_INDEXING_INTERFACE_SOURCES}
     ${ITMLIB_ENGINES_RECONSTRUCTION_SOURCES}
     ${ITMLIB_ENGINES_DEPTH_FUSION_SOURCES}
     ${ITMLIB_ENGINES_VOLUME_FUSION_SOURCES}
@@ -1018,10 +1050,6 @@ set(headers
     ${ITMLIB_ENGINES_MESHING_SHARED_HEADERS}
     ${ITMLIB_ENGINES_MULTISCENE_HEADERS}
     ${ITMLIB_ENGINES_INDEXING_HEADERS}
-    ${ITMLIB_ENGINES_INDEXING_CPU_HEADERS}
-    ${ITMLIB_ENGINES_INDEXING_CUDA_HEADERS}
-    ${ITMLIB_ENGINES_INDEXING_INTERFACE_HEADERS}
-    ${ITMLIB_ENGINES_INDEXING_SHARED_HEADERS}
     ${ITMLIB_ENGINES_RECONSTRUCTION_HEADERS}
     ${ITMLIB_ENGINES_DEPTH_FUSION_HEADERS}
     ${ITMLIB_ENGINES_VOLUME_FUSION_HEADERS}

@@ -289,9 +289,9 @@ void DynamicFusionLogger<TVoxel, TWarp, TIndex>::InitializeFrameRecording() {
 		}
 #ifdef WITH_OPENCV
 		scene2DSliceVisualizer.reset(
-				new ITMSceneSliceVisualizer2D<TVoxel, TWarp, TIndex>(focus_coordinates, 100,
-				                                                     16.0,
-				                                                     planeFor2Dand3DSlices));
+				new SceneSliceVisualizer2D<TVoxel, TWarp, TIndex>(focus_coordinates, 100,
+				                                                  16.0,
+				                                                  planeFor2Dand3DSlices));
 
 		MakeOrClearOutputDirectoriesFor2DSceneSlices();
 		if (recordingCanonicalSceneAs2DSlices) {

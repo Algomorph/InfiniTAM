@@ -108,12 +108,14 @@ initializeAtomic_CPU< type > (var, value)
 #endif
 
 #if defined(__CUDACC__)
-#define ATOMIC_ADD(name, value) atomicAdd( name , value )
+#define ATOMIC_ADD(name, value) atomicAdd( name, value )
+#define ATOMIC_SUB(name, value) atomicSub( name, value )
 #define ATOMIC_MAX(name, value) atomicMax( name, value )
 #define ATOMIC_MIN(name, value) atomicMin( name, value )
 #define _DEVICE_WHEN_AVAILABLE_ __device__
 #else
 #define ATOMIC_ADD(name, value) atomicAdd_CPU( name, value )
+#define ATOMIC_SUB(name, value) atomicAdd_CPU( name, -value)
 #define ATOMIC_MAX(name, value) atomicMax_CPU( name, value )
 #define ATOMIC_MIN(name, value) atomicMin_CPU( name, value )
 #define _DEVICE_WHEN_AVAILABLE_

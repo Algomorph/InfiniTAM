@@ -14,12 +14,14 @@
 //  limitations under the License.
 //  ================================================================
 #ifdef WITH_OPENCV
-#include "../../ITMLibDefines.h"
-#include "../../Utils/Visualization/ITMSceneSliceVisualizer2D.tpp"
+#include "../../Engines/Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
+#include "../../Engines/Traversal/CPU/TwoVolumeTraversal_CPU_PlainVoxelArray.h"
+#include "../../Utils/Visualization/SceneSliceVisualizer2D.tpp"
+#include "../../GlobalTemplateDefines.h"
 
 namespace ITMLib{
 
-template class ITMSceneSliceVisualizer2D<TSDFVoxel, WarpVoxel, PlainVoxelArray>;
+template class SceneSliceVisualizer2D<TSDFVoxel, WarpVoxel, PlainVoxelArray>;
 
 } // namespace ITMLib
 #endif

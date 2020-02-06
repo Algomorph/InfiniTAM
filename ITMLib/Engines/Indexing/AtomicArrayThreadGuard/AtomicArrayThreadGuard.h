@@ -1,6 +1,6 @@
 //  ================================================================
-//  Created by Gregory Kramida on 8/27/19.
-//  Copyright (c) 2019 Gregory Kramida
+//  Created by Gregory Kramida on 2/6/20.
+//  Copyright (c)  2020 Gregory Kramida
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
 //  You may obtain a copy of the License at
@@ -13,13 +13,19 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#ifdef WITH_OPENCV
-#include "../../Engines/Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
-#include "../../Engines/Traversal/CPU/TwoVolumeTraversal_CPU_VoxelBlockHash.h"
-#include "../../Utils/Visualization/SceneSliceVisualizer2D.tpp"
-#include "../../GlobalTemplateDefines.h"
+
+#pragma once
+
+//local
+#include "../../../../ORUtils/MemoryDeviceType.h"
 
 namespace ITMLib{
-template class SceneSliceVisualizer2D<TSDFVoxel, WarpVoxel, VoxelBlockHash>;
-} // namespace ITMLib
-#endif // #ifdef WITH_OPENCV
+
+/**
+ * \brief A simplistic and not very safe protection mechanism for multiple threads working on a fixed number of shared items.
+ * \details Assumes the same thread will always lock & release on the same item index. The locks use optimistic retrys and are not re-entrant.
+ * \tparam TMemoryDeviceType - CPU or CUDA currently supported.
+ */
+template<MemoryDeviceType TMemoryDeviceType>
+class AtomicArrayThreadGuard;
+}

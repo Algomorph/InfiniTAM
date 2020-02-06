@@ -28,6 +28,7 @@
 #include "../../../Utils/VoxelFlags.h"
 #include "../../../Utils/HashBlockProperties.h"
 #include "../../../Utils/Geometry/IntersectionChecks.h"
+#include "../AtomicArrayThreadGuard/AtomicArrayThreadGuard.h"
 
 
 #ifdef __CUDACC__
@@ -37,43 +38,106 @@
 using namespace ITMLib;
 
 
+template<MemoryDeviceType TMemoryDeviceType>
+_DEVICE_WHEN_AVAILABLE_
+inline int AllocateBlock(const CONSTPTR(Vector3s)& desired_block_position,
+                         HashEntry* hash_table,
+                         AtomicArrayThreadGuard<TMemoryDeviceType>& guard,
+                         ATOMIC_ARGUMENT(int) allocated_blocks,
+                         ATOMIC_ARGUMENT(int) allocated_excess_entries,
+                         int* block_allocation_list, int* excess_allocation_list) {
 
+	int hash_code = HashCodeFromBlockPosition(desired_block_position);
+	guard.lock(hash_code);
+	HashEntry hash_entry = hash_table[hash_code];
+	//check if hash table contains entry
+	if (!(IS_EQUAL3(hash_entry.pos, desired_block_position) && hash_entry.ptr >= -1)) {
+		if (hash_entry.ptr >= -1) {
+			//search excess list only if there is no room in ordered part
+			while (hash_entry.offset >= 1) {
+				int new_hash_code = ORDERED_LIST_SIZE + hash_entry.offset - 1;
+				guard.lock(new_hash_code);
+				guard.release(hash_code);
+				hash_code = new_hash_code;
+
+				hash_entry = hash_table[hash_code];
+				if (IS_EQUAL3(hash_entry.pos, desired_block_position) && hash_entry.ptr >= -1) {
+					guard.release(hash_code);
+					return hash_code;
+				}
+			}
+			int block_index = ATOMIC_SUB(allocated_blocks, 1);
+			int excess_list_index = ATOMIC_SUB(allocated_excess_entries, 1);
+			if (block_index >= 0 && excess_list_index >= 0) {
+				int excess_list_offset = excess_allocation_list[excess_list_index];
+				hash_table[hash_code].offset = excess_list_offset + 1;
+				HashEntry& new_hash_entry = hash_table[ORDERED_LIST_SIZE + excess_list_offset];
+				new_hash_entry.pos = desired_block_position;
+				new_hash_entry.ptr = block_allocation_list[block_index];
+				new_hash_entry.offset = 0;
+			} else {
+				ATOMIC_ADD(allocated_blocks, 1);
+				ATOMIC_ADD(allocated_excess_entries, 1);
+				guard.release(hash_code);
+				return 0;
+			}
+			guard.release(hash_code);
+			return hash_code;
+		}
+		int ordered_index = ATOMIC_SUB(allocated_blocks, 1);
+
+		if (ordered_index >= 0) {
+			HashEntry& new_hash_entry = hash_table[hash_code];
+			new_hash_entry.pos = desired_block_position;
+			new_hash_entry.ptr = block_allocation_list[ordered_index];
+			new_hash_entry.offset = 0;
+		} else {
+			ATOMIC_ADD(allocated_blocks, 1);
+			guard.release(hash_code);
+			return 0;
+		}
+		return hash_code;
+	}
+	guard.release(hash_code);
+	// already have hash block, no allocation needed
+	return hash_code;
+}
 
 /**
  * \brief Determines whether the hash block at the specified block position needs it's voxels to be allocated, as well
  * as whether they should be allocated in the excess list or the ordered list of the hash table.
  * If any of these are true, marks the corresponding entry in \param hashEntryStates
  * \param[in,out] hashEntryStates  array where to set the allocation type at final hashIdx index
- * \param[in,out] hashBlockCoordinates  array block coordinates for the new hash blocks at final hashIdx index
- * \param[in,out] hashCode  takes in original index assuming coords, i.e. \refitem HashCodeFromBlockPosition(\param desiredHashBlockPosition),
+ * \param[in,out] hash_block_coordinates  array block coordinates for the new hash blocks at final hashIdx index
+ * \param[in,out] hash_code  takes in original index assuming coords, i.e. \refitem HashCodeFromBlockPosition(\param desired_hash_block_position),
  * returns final index of the hash block to be allocated (may be updated based on hash closed chaining)
- * \param[in] desiredHashBlockPosition  position of the hash block to check / allocate
- * \param[in] hashTable  hash table with existing blocks
+ * \param[in] desired_hash_block_position  position of the hash block to check / allocate
+ * \param[in] hash_table  hash table with existing blocks
  * \param[in] collisionDetected set to true if a block with the same hashcode has already been marked for allocation ( a collision occured )
  * \return true if the block needs allocation, false otherwise
  */
 _CPU_AND_GPU_CODE_
 inline bool MarkAsNeedingAllocationIfNotFound(ITMLib::HashEntryAllocationState* hashEntryStates,
-                                              Vector3s* hashBlockCoordinates, int& hashCode,
-                                              const CONSTPTR(Vector3s)& desiredHashBlockPosition,
-                                              const CONSTPTR(HashEntry)* hashTable, bool& collisionDetected) {
+                                              Vector3s* hash_block_coordinates, int& hash_code,
+                                              const CONSTPTR(Vector3s)& desired_hash_block_position,
+                                              const CONSTPTR(HashEntry)* hash_table, bool& collisionDetected) {
 
-	HashEntry hashEntry = hashTable[hashCode];
+	HashEntry hash_entry = hash_table[hash_code];
 	//check if hash table contains entry
 
-	if (!(IS_EQUAL3(hashEntry.pos, desiredHashBlockPosition) && hashEntry.ptr >= -1)) {
+	if (!(IS_EQUAL3(hash_entry.pos, desired_hash_block_position) && hash_entry.ptr >= -1)) {
 
 		auto setHashEntryState = [&](HashEntryAllocationState state) {
 #if defined(__CUDACC__) && defined(__CUDA_ARCH__)
-			if (atomicCAS((char*) hashEntryStates + hashCode,
+			if (atomicCAS((char*) hashEntryStates + hash_code,
 					  (char) ITMLib::NEEDS_NO_CHANGE,
 					  (char) state) != ITMLib::NEEDS_NO_CHANGE){
-			if (IS_EQUAL3(hashBlockCoordinates[hashCode], desiredHashBlockPosition)) return false;
+			if (IS_EQUAL3(hash_block_coordinates[hash_code], desired_hash_block_position)) return false;
 			//hash code already marked for allocation, but at different coordinates, cannot allocate
 			collisionDetected = true;
 			return false;
 		} else {
-			hashBlockCoordinates[hashCode] = desiredHashBlockPosition;
+			hash_block_coordinates[hash_code] = desired_hash_block_position;
 			return true;
 		}
 #else
@@ -84,28 +148,28 @@ inline bool MarkAsNeedingAllocationIfNotFound(ITMLib::HashEntryAllocationState* 
 #endif
 			{
 				//single-threaded version
-				if (hashEntryStates[hashCode] != ITMLib::NEEDS_NO_CHANGE) {
-					if (!IS_EQUAL3(hashBlockCoordinates[hashCode], desiredHashBlockPosition)) {
+				if (hashEntryStates[hash_code] != ITMLib::NEEDS_NO_CHANGE) {
+					if (!IS_EQUAL3(hash_block_coordinates[hash_code], desired_hash_block_position)) {
 						//hash code already marked for allocation, but at different coordinates, cannot allocate
 						collisionDetected = true;
 					}
 					success = false;
 				} else {
-					hashEntryStates[hashCode] = state;
-					hashBlockCoordinates[hashCode] = desiredHashBlockPosition;
+					hashEntryStates[hash_code] = state;
+					hash_block_coordinates[hash_code] = desired_hash_block_position;
 					success = true;
 				}
 			}
 			return success;
 #endif
 		};
-		if (hashEntry.ptr >= -1) {
+		if (hash_entry.ptr >= -1) {
 			//search excess list only if there is no room in ordered part
-			while (hashEntry.offset >= 1) {
-				hashCode = ORDERED_LIST_SIZE + hashEntry.offset - 1;
-				hashEntry = hashTable[hashCode];
+			while (hash_entry.offset >= 1) {
+				hash_code = ORDERED_LIST_SIZE + hash_entry.offset - 1;
+				hash_entry = hash_table[hash_code];
 
-				if (IS_EQUAL3(hashEntry.pos, desiredHashBlockPosition) && hashEntry.ptr >= -1) {
+				if (IS_EQUAL3(hash_entry.pos, desired_hash_block_position) && hash_entry.ptr >= -1) {
 					return false;
 				}
 			}

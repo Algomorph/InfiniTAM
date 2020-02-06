@@ -178,7 +178,7 @@ private:
 
 	// various loggers & visualizers
 #ifdef WITH_OPENCV
-	std::unique_ptr<ITMSceneSliceVisualizer2D<TVoxel, TWarp, TIndex>> scene2DSliceVisualizer;
+	std::unique_ptr<SceneSliceVisualizer2D<TVoxel, TWarp, TIndex>> scene2DSliceVisualizer;
 #endif
 #ifdef WITH_VTK
 	std::unique_ptr<SceneSliceVisualizer1D> scene1DSliceVisualizer;
