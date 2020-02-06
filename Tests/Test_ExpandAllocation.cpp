@@ -164,7 +164,7 @@ void TestAllocateBasedOnVolumeExpanded_Generic() {
 	CameraTrackingState trackingState(imageSize, TMemoryDeviceType);
 	RenderState renderState(imageSize, configuration::get().general_voxel_volume_parameters.near_clipping_distance,
 	                        configuration::get().general_voxel_volume_parameters.far_clipping_distance, TMemoryDeviceType);
-	IndexingEngine<TSDFVoxel, VoxelBlockHash, TMemoryDeviceType>::Instance().AllocateFromDepth(
+	IndexingEngine<TSDFVoxel, VoxelBlockHash, TMemoryDeviceType>::Instance().AllocateNearSurface(
 			&volume1, view, &trackingState, false, false);
 	IndexingEngine<TSDFVoxel, VoxelBlockHash, TMemoryDeviceType>::Instance()
 			.AllocateUsingOtherVolumeExpanded(&volume2, &volume1);
