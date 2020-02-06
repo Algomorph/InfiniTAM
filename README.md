@@ -14,8 +14,8 @@ This is an ongoing project that aims to integrate voxel hashing techniques for r
 
 1. You need to be somewhat well-versed in using CMake. 3rd-party requirements are all open-source, and you can glean what you're missing by running the CMake generator. The one mandatory requirement that I've added is Boost, which should be [compiled with zlib](https://stackoverflow.com/questions/23107703/compiling-boost-with-zlib-on-windows) if you're building on windows.
 2. Linux currently is the only officially supported OS, but I've recently fixed & tested the Windows build. All of the required CMake packages and this code in theory should work on any major platform, so you can try on MacOS at your own risk. Let me know if you'd like to fix things that are not working on your platform.
-3. Build without OpenMP (use CMake to disable it) since it's buggy at the time of writing! I also recommend building with FFMPEG, since that will enable visual debugging/video recording.
-4. To obtain the result shown above, download the [original Snoopy sequence](http://campar.in.tum.de/personal/slavcheva/deformable-dataset/index.html), modify Files/infinitam_snoopy_config.json with proper paths for input_and_output_settings_paths, and run like this (modify the path to point to infinitam_snoopy_config.json):
+3. I recommend building with FFMPEG, since that will enable visual debugging/video recording.
+4. To get some test data and try the code on it, download the [original Snoopy sequence](http://campar.in.tum.de/personal/slavcheva/deformable-dataset/index.html), modify Files/infinitam_snoopy_config.json with proper paths for input_and_output_settings_paths, and run like this (modify the path to point to infinitam_snoopy_config.json):
 
 <build_folder>/Apps/InfiniTAM/InfiniTAM --config=Files/infinitam_snoopy_config.json
 
