@@ -16,6 +16,7 @@
 #pragma once
 
 #include "../../../../ORUtils/PlatformIndependence.h"
+#include "../../../../ORUtils/PlatformIndependentAtomics.h"
 #include "../../../Objects/Volume/VoxelBlockHash.h"
 #include "../../../Objects/Volume/RepresentationAccess.h"
 #include "../../../Objects/Views/ITMView.h"
@@ -528,133 +529,6 @@ findVoxelBlocksForRayNearSurface(ITMLib::HashEntryAllocationState* hash_entry_al
 	findVoxelHashBlocksAlongSegment(hash_entry_allocation_states, hash_block_coordinates, hash_block_visibility_types,
 	                                hash_table, march_segment, collision_detected);
 }
-
-
-template<MemoryDeviceType TMemoryDeviceType>
-struct DepthBasedAllocationFunctor {
-public:
-	DepthBasedAllocationFunctor(VoxelBlockHash& index,
-	                            const VoxelVolumeParameters* volume_parameters, const ITMLib::ITMView* view,
-	                            Matrix4f depth_camera_pose, float surface_distance_cutoff) :
-
-			near_clipping_distance(volume_parameters->near_clipping_distance),
-			far_clipping_distance(volume_parameters->far_clipping_distance),
-			inverted_projection_parameters(view->calib.intrinsics_d.projectionParamsSimple.all),
-
-			surface_distance_cutoff(surface_distance_cutoff),
-
-			hash_block_size_reciprocal(1.0f / (volume_parameters->voxel_size * VOXEL_BLOCK_SIZE)),
-			hash_entry_allocation_states(index.GetHashEntryAllocationStates()),
-			hash_block_coordinates(index.GetAllocationBlockCoordinates()),
-			hash_block_visibility_types(index.GetBlockVisibilityTypes()),
-			hash_table(index.GetEntries()),
-
-			collision_detected(false) {
-		depth_camera_pose.inv(inverted_camera_pose);
-		inverted_projection_parameters.fx = 1.0f / inverted_projection_parameters.fx;
-		inverted_projection_parameters.fy = 1.0f / inverted_projection_parameters.fy;
-	}
-
-	_CPU_AND_GPU_CODE_
-	void operator()(const float& depth_measure, int x, int y) {
-		if (depth_measure <= 0 || (depth_measure - surface_distance_cutoff) < 0 ||
-		    (depth_measure - surface_distance_cutoff) < near_clipping_distance ||
-		    (depth_measure + surface_distance_cutoff) > far_clipping_distance)
-			return;
-
-		// segment from start of the (truncated SDF) band, through the observed point, and to the opposite (occluded)
-		// end of the (truncated SDF) band (increased by backBandFactor), along the ray cast from the camera through the
-		// point, in camera space
-		ITMLib::Segment march_segment = findHashBlockSegmentAlongCameraRayWithinRangeFromDepth(surface_distance_cutoff,
-		                                                                                       depth_measure,
-		                                                                                       x, y,
-		                                                                                       inverted_camera_pose,
-		                                                                                       inverted_projection_parameters,
-		                                                                                       hash_block_size_reciprocal);
-
-
-		findVoxelHashBlocksAlongSegment(hash_entry_allocation_states, hash_block_coordinates,
-		                                hash_block_visibility_types,
-		                                hash_table, march_segment, collision_detected);
-	}
-
-	bool collision_detected;
-
-protected:
-
-	float near_clipping_distance;
-	float far_clipping_distance;
-	Matrix4f inverted_camera_pose;
-	Vector4f inverted_projection_parameters;
-
-	float surface_distance_cutoff;
-
-	float hash_block_size_reciprocal;
-	HashEntryAllocationState* hash_entry_allocation_states;
-	Vector3s* hash_block_coordinates;
-	HashBlockVisibility* hash_block_visibility_types;
-	HashEntry* hash_table;
-};
-
-template<MemoryDeviceType TMemoryDeviceType>
-struct TwoSurfaceBasedAllocationFunctor
-		: public DepthBasedAllocationFunctor<TMemoryDeviceType> {
-public:
-	TwoSurfaceBasedAllocationFunctor(VoxelBlockHash& index,
-	                                 const VoxelVolumeParameters* volume_parameters, const ITMLib::ITMView* view,
-	                                 const CameraTrackingState* tracking_state, float surface_distance_cutoff) :
-			DepthBasedAllocationFunctor<TMemoryDeviceType>(index, volume_parameters, view, tracking_state->pose_d->GetM(), surface_distance_cutoff) {}
-
-	_CPU_AND_GPU_CODE_
-	void operator()(const float& surface1_depth, const Vector4f& surface2_point, int x, int y) {
-		bool has_surface1 = false, has_surface2 = false;
-
-		if (!(surface1_depth <= 0 || (surface1_depth - surface_distance_cutoff) < 0 ||
-		      (surface1_depth - surface_distance_cutoff) < near_clipping_distance ||
-		      (surface1_depth + surface_distance_cutoff) > far_clipping_distance))
-			has_surface1 = true;
-
-		if (surface2_point.x > 0.0f) has_surface2 = true;
-
-		ITMLib::Segment march_segment;
-
-		if (has_surface1 && has_surface2) {
-			Vector4f surface1_point = imageSpacePointToCameraSpace(surface1_depth, x, y,
-			                                                       inverted_projection_parameters);
-			march_segment = findHashBlockSegmentAlongCameraRayWithinRangeFromAndBetweenTwoPoints(
-					surface_distance_cutoff, surface1_point, surface2_point, inverted_camera_pose,
-					hash_block_size_reciprocal);
-		} else {
-			if (has_surface1) {
-				march_segment = findHashBlockSegmentAlongCameraRayWithinRangeFromDepth(
-						surface_distance_cutoff, surface1_depth, x, y, inverted_camera_pose,
-						inverted_projection_parameters, hash_block_size_reciprocal);
-			} else if (has_surface2) {
-				march_segment = findHashBlockSegmentAlongCameraRayWithinRangeFromPoint(
-						surface_distance_cutoff, surface2_point, inverted_camera_pose, hash_block_size_reciprocal);
-			} else {
-				return; // neither surface is defined at this point, nothing to do.
-			}
-		}
-
-		findVoxelHashBlocksAlongSegment(hash_entry_allocation_states, hash_block_coordinates, hash_block_visibility_types,
-		                                hash_table, march_segment, collision_detected);
-	}
-	using DepthBasedAllocationFunctor<TMemoryDeviceType>::collision_detected;
-protected:
-	using DepthBasedAllocationFunctor<TMemoryDeviceType>::near_clipping_distance;
-	using DepthBasedAllocationFunctor<TMemoryDeviceType>::far_clipping_distance;
-	using DepthBasedAllocationFunctor<TMemoryDeviceType>::inverted_camera_pose;
-	using DepthBasedAllocationFunctor<TMemoryDeviceType>::inverted_projection_parameters;
-
-	using DepthBasedAllocationFunctor<TMemoryDeviceType>::surface_distance_cutoff;
-
-	using DepthBasedAllocationFunctor<TMemoryDeviceType>::hash_block_size_reciprocal;
-	using DepthBasedAllocationFunctor<TMemoryDeviceType>::hash_entry_allocation_states;
-	using DepthBasedAllocationFunctor<TMemoryDeviceType>::hash_block_coordinates;
-	using DepthBasedAllocationFunctor<TMemoryDeviceType>::hash_block_visibility_types;
-	using DepthBasedAllocationFunctor<TMemoryDeviceType>::hash_table;
-};
 
 
 _CPU_AND_GPU_CODE_

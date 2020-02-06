@@ -42,8 +42,8 @@ __global__ void
 reAllocateSwappedOutVoxelBlocks_device(int* voxelAllocationList, HashEntry* hashTable, int hashEntryCount,
                                        AllocationTempData* allocData, HashBlockVisibility* blockVisibilityTypes);
 
-__global__ void setVisibleEntriesToVisibleAtPreviousFrameAndUnstreamed(HashBlockVisibility* blockVisibilityTypes,
-                                                                       const int* visibleBlockHashCodes, int noVisibleEntries);
+__global__ void setVisibleEntriesToVisibleAtPreviousFrameAndUnstreamed(HashBlockVisibility* hash_block_visibility_types,
+                                                                       const int* utilized_block_hash_codes, int utilized_entry_count);
 
 template<bool useSwapping>
 __global__ void buildVisibleList_device(HashEntry* hashTable, ITMHashSwapState* swapStates, int hashEntryCount,

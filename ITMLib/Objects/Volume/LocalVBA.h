@@ -22,9 +22,9 @@ namespace ITMLib
 		MemoryDeviceType memoryType;
 
 	public:
-		inline TVoxel *GetVoxelBlocks(void) { return voxelBlocks->GetData(memoryType); }
-		inline const TVoxel *GetVoxelBlocks(void) const { return voxelBlocks->GetData(memoryType); }
-		int *GetAllocationList(void) { return allocationList->GetData(memoryType); }
+		inline TVoxel *GetVoxelBlocks() { return voxelBlocks->GetData(memoryType); }
+		inline const TVoxel *GetVoxelBlocks() const { return voxelBlocks->GetData(memoryType); }
+		int *GetAllocationList() { return allocationList->GetData(memoryType); }
 
 #ifdef COMPILE_WITH_METAL
 		const void* GetVoxelBlocks_MB() const { return voxelBlocks->GetMetalBuffer(); }

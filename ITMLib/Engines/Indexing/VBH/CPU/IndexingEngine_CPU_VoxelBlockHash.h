@@ -40,7 +40,7 @@ public:
 
 	void SetVisibilityToVisibleAtPreviousFrameAndUnstreamed(VoxelVolume<TVoxel, VoxelBlockHash>* volume);
 
-	void ReallocateDeletedHashBlocksFromPreviousSwapOperation(VoxelVolume<TVoxel, VoxelBlockHash>* volume);
+	void ReallocateDeletedHashBlocks(VoxelVolume<TVoxel, VoxelBlockHash>* volume);
 
 	void AllocateFromDepth(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
 	                       const CameraTrackingState* tracking_state, bool onlyUpdateVisibleList,
@@ -55,8 +55,8 @@ public:
 	                                 const ITMView* view) override;
 
 
-	void BuildVisibilityList(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
-	                         const Matrix4f& depth_camera_matrix = Matrix4f::Identity());
+	void BuildUtilizedBlockListBasedOnVisibility(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
+	                                             const Matrix4f& depth_camera_matrix = Matrix4f::Identity());
 
 	void AllocateHashEntriesUsingLists(VoxelVolume<TVoxel, VoxelBlockHash>* volume) override;
 

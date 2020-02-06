@@ -28,9 +28,8 @@ class IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA> :
 private:
 	IndexingEngine() = default;
 
-	void SetVisibilityToVisibleAtPreviousFrameAndUnstreamed(HashBlockVisibility* hashBlockVisibilityTypes,
-	                                                        const int* visibleBlockHashCodes,
-	                                                        int visibleHashBlockCount);
+	void SetVisibilityToVisibleAtPreviousFrameAndUnstreamed(
+			VoxelVolume <TVoxel, VoxelBlockHash>* volume);
 public:
 	static IndexingEngine& Instance() {
 		static IndexingEngine instance; // Guaranteed to be destroyed.
@@ -56,8 +55,8 @@ public:
 
 	void AllocateHashEntriesUsingLists_SetVisibility(VoxelVolume <TVoxel, VoxelBlockHash>* volume) override;
 
-	void BuildVisibilityList(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
-	                         const Matrix4f& depth_camera_matrix = Matrix4f::Identity());
+	void BuildUtilizedBlockListBasedOnVisibility(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
+	                                             const Matrix4f& depth_camera_matrix = Matrix4f::Identity());
 
 	HashEntry FindHashEntry(const VoxelBlockHash& index, const Vector3s& coordinates) override;
 	HashEntry FindHashEntry(const VoxelBlockHash& index, const Vector3s& coordinates, int& hashCode);

@@ -25,9 +25,9 @@ class HashTableTraversalEngine<MEMORYDEVICE_CPU> {
 public:
 	template<typename TFunctor>
 	inline static void
-	TraverseWithHashCode(VoxelBlockHash* index, TFunctor& functor) {
-		HashEntry* hash_table = index->GetEntries();
-		int hash_entry_count = index->hashEntryCount;
+	TraverseWithHashCode(VoxelBlockHash& index, TFunctor& functor) {
+		HashEntry* hash_table = index.GetEntries();
+		const int hash_entry_count = index.hashEntryCount;
 		TFunctor* functor_device = nullptr;
 
 		dim3 cuda_block_size(256, 1);

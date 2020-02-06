@@ -24,9 +24,9 @@ class HashTableTraversalEngine<MEMORYDEVICE_CPU> {
 public:
 	template<typename TFunctor>
 	inline static void
-	TraverseWithHashCode(VoxelBlockHash* index, TFunctor& functor){
-		HashEntry* hash_table = index->GetEntries();
-		int hash_entry_count = index->hashEntryCount;
+	TraverseWithHashCode(VoxelBlockHash& index, TFunctor& functor){
+		HashEntry* hash_table = index.GetEntries();
+		const int hash_entry_count = index.hashEntryCount;
 #ifdef WITH_OPENMP
 	#pragma omp parallel for default(none) shared(functor, hash_table)
 #endif

@@ -24,14 +24,6 @@
 namespace {
 //CUDA kernels
 
-//TODO: provide a better nomenclature for hash block visibility, i.e. an enum inheriting from unsigned char
-__global__ void setVisibleEntriesToVisibleAtPreviousFrameAndUnstreamed(HashBlockVisibility* entriesVisibleType,
-                                                                       const int* visibleBlockHashCodes,
-                                                                       int visibleEntryCount) {
-	int entryId = threadIdx.x + blockIdx.x * blockDim.x;
-	if (entryId > visibleEntryCount - 1) return;
-	entriesVisibleType[visibleBlockHashCodes[entryId]] = VISIBLE_AT_PREVIOUS_FRAME_AND_UNSTREAMED;
-}
 
 __global__
 void allocateHashedVoxelBlocksUsingLists_SetVisibility_device(
@@ -182,52 +174,6 @@ __global__ void buildHashAllocAndVisibleType_device(ITMLib::HashEntryAllocationS
 	                                 *collisionDetected);
 }
 
-
-template<bool useSwapping>
-__global__ void
-buildVisibilityList_device(HashEntry* hashTable, ITMLib::ITMHashSwapState* swapStates, int hashEntryCount,
-                           int* visibleEntryIDs, int* visibleBlockCount, HashBlockVisibility* blockVisibilityTypes,
-                           Matrix4f M_d, Vector4f projParams_d, Vector2i depthImgSize, float voxelSize) {
-	int hashCode = threadIdx.x + blockIdx.x * blockDim.x;
-	if (hashCode >= hashEntryCount) return;
-
-	__shared__ bool shouldPrefix;
-	shouldPrefix = false;
-	__syncthreads();
-
-	HashBlockVisibility hashVisibleType = blockVisibilityTypes[hashCode];
-	const HashEntry& hashEntry = hashTable[hashCode];
-
-	if (hashVisibleType == VISIBLE_AT_PREVIOUS_FRAME_AND_UNSTREAMED) {
-		bool isVisibleEnlarged, isVisible;
-
-		if (useSwapping) {
-			checkBlockVisibility<true>(isVisible, isVisibleEnlarged, hashEntry.pos, M_d, projParams_d, voxelSize,
-			                           depthImgSize);
-			if (!isVisibleEnlarged) hashVisibleType = INVISIBLE;
-		} else {
-			checkBlockVisibility<false>(isVisible, isVisibleEnlarged, hashEntry.pos, M_d, projParams_d, voxelSize,
-			                            depthImgSize);
-			if (!isVisible) hashVisibleType = INVISIBLE;
-		}
-		blockVisibilityTypes[hashCode] = hashVisibleType;
-	}
-
-	if (hashVisibleType > 0) shouldPrefix = true;
-
-	if (useSwapping) {
-		if (hashVisibleType > 0 && swapStates[hashCode].state != 2) swapStates[hashCode].state = 1;
-	}
-
-	__syncthreads();
-
-	if (shouldPrefix) {
-		int offset = computePrefixSum_device<int>(hashVisibleType > 0, visibleBlockCount,
-		                                          blockDim.x * blockDim.y, threadIdx.x);
-		if (offset != -1) visibleEntryIDs[offset] = hashCode;
-	}
-
-}
 
 __global__ void
 reAllocateSwappedOutVoxelBlocks_device(int* voxelAllocationList, HashEntry* hashTable, int hashEntryCount,

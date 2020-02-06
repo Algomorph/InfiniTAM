@@ -328,6 +328,7 @@ set(ITMLIB_ENGINES_INDEXING_INTERFACE_SOURCES
 
 set(ITMLIB_ENGINES_INDEXING_SHARED_HEADERS
     Engines/Indexing/Shared/IndexingEngine_Shared.h
+    Engines/Indexing/Shared/IndexingEngine_Functors.h
     )
 
 

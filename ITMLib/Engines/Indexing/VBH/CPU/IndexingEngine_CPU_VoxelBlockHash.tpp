@@ -18,7 +18,7 @@
 #include "IndexingEngine_CPU_VoxelBlockHash.h"
 #include "../../../../Objects/Volume/RepresentationAccess.h"
 #include "../../../EditAndCopy/Shared/EditAndCopyEngine_Shared.h"
-#include "../../Shared/IndexingEngine_Shared.h"
+#include "../../Shared/IndexingEngine_Functors.h"
 #include "../../../Common/CheckBlockVisibility.h"
 #include "../../../../Utils/Configuration.h"
 #include "../../../../Utils/Geometry/FrustumTrigonometry.h"
@@ -30,24 +30,12 @@ using namespace ITMLib;
 
 
 template<typename TVoxel>
-void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::ReallocateDeletedHashBlocksFromPreviousSwapOperation(
+void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::ReallocateDeletedHashBlocks(
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
-	HashBlockVisibility* hash_block_visibility_types = volume->index.GetBlockVisibilityTypes();
-	HashEntry* hash_table = volume->index.GetEntries();
-	int* block_allocation_list = volume->localVBA.GetAllocationList();
 
-	int last_free_voxel_block_id = volume->localVBA.lastFreeBlockId;
-	int hash_entry_count = volume->index.hashEntryCount;
-
-	for (int hash_code = 0; hash_code < hash_entry_count; hash_code++) {
-		if (hash_block_visibility_types[hash_code] > 0 && hash_table[hash_code].ptr == -1) {
-			if (last_free_voxel_block_id >= 0) {
-				hash_table[last_free_voxel_block_id].ptr = block_allocation_list[last_free_voxel_block_id];
-				last_free_voxel_block_id--;
-			}
-		}
-	}
-	volume->localVBA.lastFreeBlockId = last_free_voxel_block_id;
+	ReallocateDeletedHashBlocksFunctor<TVoxel, MEMORYDEVICE_CPU> reallocationFunctor(volume);
+	HashTableTraversalEngine<MEMORYDEVICE_CPU>::TraverseWithHashCode(volume->index,reallocationFunctor);
+	volume->localVBA.lastFreeBlockId = GET_ATOMIC_VALUE_CPU(reallocationFunctor.last_free_voxel_block_id);
 }
 
 template<typename TVoxel>
@@ -81,8 +69,8 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateFromDepth
 		}
 	} while (depth_based_allocator.collision_detected);
 
-	BuildVisibilityList(volume, view, depth_camera_matrix);
-	if (use_swapping) ReallocateDeletedHashBlocksFromPreviousSwapOperation(volume);
+	BuildUtilizedBlockListBasedOnVisibility(volume, view, depth_camera_matrix);
+	if (use_swapping) ReallocateDeletedHashBlocks(volume);
 }
 
 
@@ -264,9 +252,10 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateUsingOthe
 	};
 	AllocateUsingOtherVolumeExpanded_Generic(targetVolume, sourceVolume, hashBlockMarkProcedure, allocationProcedure);
 
-	IndexingEngine<TVoxelTarget, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance().BuildVisibilityList(targetVolume,
-	                                                                                               view,
-	                                                                                               depth_camera_matrix);
+	IndexingEngine<TVoxelTarget, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance().BuildUtilizedBlockListBasedOnVisibility(
+			targetVolume,
+			view,
+			depth_camera_matrix);
 }
 
 // #define EXCEPT_ON_OUT_OF_SPACE
@@ -396,68 +385,15 @@ AllocateHashEntriesUsingLists_SetVisibility(VoxelVolume<TVoxel, VoxelBlockHash>*
 
 
 template<typename TVoxel>
-void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::BuildVisibilityList(
+void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::BuildUtilizedBlockListBasedOnVisibility(
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view, const Matrix4f& depth_camera_matrix) {
-
-	// ** scene data **
-	const int hashEntryCount = volume->index.hashEntryCount;
-	HashBlockVisibility* hashBlockVisibilityTypes = volume->index.GetBlockVisibilityTypes();
-	int* visibleEntryHashCodes = volume->index.GetUtilizedBlockHashCodes();
-	HashEntry* hashTable = volume->index.GetEntries();
-	bool useSwapping = volume->globalCache != nullptr;
-	ITMHashSwapState* swapStates = volume->Swapping() ? volume->globalCache->GetSwapStates(false) : 0;
-
-	// ** view data **
-	Vector4f depthCameraProjectionParameters = view->calib.intrinsics_d.projectionParamsSimple.all;
-	Vector2i depthImgSize = view->depth->noDims;
-	float voxelSize = volume->sceneParams->voxel_size;
-
-	int visibleEntryCount = 0;
-	//build visible list
-	for (int hashCode = 0; hashCode < hashEntryCount; hashCode++) {
-		HashBlockVisibility hashVisibleType = hashBlockVisibilityTypes[hashCode];
-		const HashEntry& hashEntry = hashTable[hashCode];
-
-		if (hashVisibleType == 3) {
-			bool isVisibleEnlarged, isVisible;
-
-			if (useSwapping) {
-				checkBlockVisibility<true>(isVisible, isVisibleEnlarged, hashEntry.pos, depth_camera_matrix,
-				                           depthCameraProjectionParameters,
-				                           voxelSize, depthImgSize);
-				if (!isVisibleEnlarged) hashVisibleType = INVISIBLE;
-			} else {
-				checkBlockVisibility<false>(isVisible, isVisibleEnlarged, hashEntry.pos, depth_camera_matrix,
-				                            depthCameraProjectionParameters,
-				                            voxelSize, depthImgSize);
-				if (!isVisible) { hashVisibleType = INVISIBLE; }
-			}
-			hashBlockVisibilityTypes[hashCode] = hashVisibleType;
-		}
-
-		if (useSwapping) {
-			if (hashVisibleType > 0 && swapStates[hashCode].state != 2) swapStates[hashCode].state = 1;
-		}
-
-		if (hashVisibleType > 0) {
-			visibleEntryHashCodes[visibleEntryCount] = hashCode;
-			visibleEntryCount++;
-		}
-	}
-	volume->index.SetUtilizedHashBlockCount(visibleEntryCount);
+	SpecializedAllocationFunctionsEngine<TVoxel, MEMORYDEVICE_CPU>::BuildUtilizedBlockListBasedOnVisibility(volume, view, depth_camera_matrix);
 }
 
 template<typename TVoxel>
 void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::SetVisibilityToVisibleAtPreviousFrameAndUnstreamed(
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
-
-	HashBlockVisibility* utilized_block_visibility_types = volume->index.GetBlockVisibilityTypes();
-	const int* utilized_block_hash_codes = volume->index.GetUtilizedBlockHashCodes();
-	int utilized_block_count = volume->index.GetUtilizedHashBlockCount();
-	for (int i_visible_block = 0; i_visible_block < utilized_block_count; i_visible_block++) {
-		utilized_block_visibility_types[utilized_block_hash_codes[i_visible_block]] =
-				HashBlockVisibility::VISIBLE_AT_PREVIOUS_FRAME_AND_UNSTREAMED;
-	}
+	SpecializedAllocationFunctionsEngine<TVoxel, MEMORYDEVICE_CPU>::SetVisibilityToVisibleAtPreviousFrameAndUnstreamed(volume);
 }
 
 template<typename TVoxel>
