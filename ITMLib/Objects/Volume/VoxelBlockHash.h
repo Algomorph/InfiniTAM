@@ -22,7 +22,7 @@
 
 // Number of Hash Buckets, should be 2^n and bigger than DEFAULT_VOXEL_BLOCK_NUM, VOXEL_HASH_MASK = ORDERED_LIST_SIZE - 1
 #define ORDERED_LIST_SIZE 0x100000
-// Used for get hashing value of the bucket index,  VOXEL_HASH_MASK = ORDERED_LIST_SIZE - 1
+// Used to compute the hash of a bucket from a 3D location,  VOXEL_HASH_MASK = ORDERED_LIST_SIZE - 1
 #define VOXEL_HASH_MASK 0xfffff
 
 
