@@ -42,15 +42,13 @@ public:
 	IndexingEngine(IndexingEngine const&) = delete;
 	void operator=(IndexingEngine const&) = delete;
 
-	void SetVisibilityToVisibleAtPreviousFrameAndUnstreamed(VoxelVolume<TVoxel, VoxelBlockHash>* volume);
-
-
-	void BuildUtilizedBlockListBasedOnVisibility(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
-	                                             const Matrix4f& depth_camera_matrix = Matrix4f::Identity());
-
 	void AllocateHashEntriesUsingLists(VoxelVolume<TVoxel, VoxelBlockHash>* volume) override;
 
 	void AllocateHashEntriesUsingLists_SetVisibility(VoxelVolume<TVoxel, VoxelBlockHash>* volume) override;
+
+	void AllocateBlockList(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
+	                       ORUtils::MemoryBlock<Vector3s> block_coordinates,
+	                       int new_block_count) override;
 
 	HashEntry FindHashEntry(const VoxelBlockHash& index, const Vector3s& coordinates) override;
 	HashEntry FindHashEntry(const VoxelBlockHash& index, const Vector3s& coordinates, int& hashCode);
@@ -61,6 +59,11 @@ public:
 	template<typename TVoxelTarget, typename TVoxelSource>
 	void AllocateUsingOtherVolume(VoxelVolume<TVoxelTarget, VoxelBlockHash>* targetVolume,
 	                              VoxelVolume<TVoxelSource, VoxelBlockHash>* sourceVolume);
+
+	void BuildUtilizedBlockListBasedOnVisibility(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
+	                                             const Matrix4f& depth_camera_matrix = Matrix4f::Identity());
+
+	void SetVisibilityToVisibleAtPreviousFrameAndUnstreamed(VoxelVolume<TVoxel, VoxelBlockHash>* volume);
 	/**
 	 * \brief Allocate the same blocks in the target volume as are allocated in the source volume, plus an additional
 	 * one-ring of blocks around them. Does not modify previously-existing allocation in the target volume.
@@ -91,5 +94,12 @@ public:
 	                                                      ITMView* view,
 	                                                      const Matrix4f& depth_camera_matrix = Matrix4f::Identity());
 
+
 };
+
+extern template
+class IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>;
+extern template
+class IndexingEngine<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>;
+
 } //namespace ITMLib

@@ -42,16 +42,17 @@ void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateNearSurface(Voxe
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateNearAndBetweenTwoSurfaces(
-		VoxelVolume<TVoxel, TIndex>* targetVolume,
-		const CameraTrackingState* tracking_state,
-		const ITMView* view) {}
+		VoxelVolume<TVoxel, TIndex>* targetVolume, const CameraTrackingState* tracking_state, const ITMView* view) {}
+
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateBlockList(
+		VoxelVolume<TVoxel, TIndex>* volume, ORUtils::MemoryBlock<Vector3s> block_coordinates, int new_block_count) {}
 
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 template<typename TVoxelTarget, typename TVoxelSource>
 void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateUsingOtherVolume(
-		VoxelVolume<TVoxelTarget, TIndex>* targetVolume,
-		VoxelVolume<TVoxelSource, TIndex>* sourceVolume) {}
+		VoxelVolume<TVoxelTarget, TIndex>* targetVolume, VoxelVolume<TVoxelSource, TIndex>* sourceVolume) {}
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 template<WarpType TWarpType, typename TWarp>
@@ -71,4 +72,6 @@ void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateUsingOtherVolume
 		VoxelVolume<TVoxelTarget, TIndex>* targetVolume,
 		VoxelVolume<TVoxelSource, TIndex>* sourceVolume,
 		ITMView* view, const Matrix4f& depth_camera_matrix) {}
+
+
 

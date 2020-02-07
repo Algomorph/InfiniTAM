@@ -21,7 +21,6 @@
 
 namespace ITMLib {
 
-
 HashEntry VoxelBlockHash::GetHashEntryAt(const Vector3s& pos, int& hashCode) const {
 	const HashEntry* entries = this->GetEntries();
 	switch (memoryType) {

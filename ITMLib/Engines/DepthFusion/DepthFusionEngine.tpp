@@ -17,6 +17,7 @@
 #include "../Indexing/Interface/IndexingEngine.h"
 #include "../Traversal/Interface/VolumeTraversal.h"
 #include "DepthFusionEngine_Shared.h"
+#include "../../GlobalTemplateDefines.h"
 
 using namespace ITMLib;
 
@@ -88,4 +89,3 @@ void DepthFusionEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::IntegrateDepth
 		VoxelVolume<TVoxel, TIndex>* volume, const ITMView* view) {
 	IntegrateDepthImageIntoTsdfVolume_Helper(volume, view);
 }
-

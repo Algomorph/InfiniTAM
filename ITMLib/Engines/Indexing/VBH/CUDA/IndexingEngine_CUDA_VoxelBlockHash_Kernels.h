@@ -92,7 +92,7 @@ void allocateHashedVoxelBlocksUsingLists_SetVisibility_device(
 
 	switch (hashEntryStates[hashCode]) {
 		case ITMLib::NEEDS_ALLOCATION_IN_ORDERED_LIST: //needs allocation, fits in the ordered list
-			vbaIdx = atomicSub(&allocData->noAllocatedVoxelEntries, 1);
+			vbaIdx = atomicSub(&allocData->last_free_voxel_block_id, 1);
 
 			if (vbaIdx >= 0) //there is room in the voxel block array
 			{
@@ -104,13 +104,13 @@ void allocateHashedVoxelBlocksUsingLists_SetVisibility_device(
 			} else {
 				blockVisibilityTypes[hashCode] = INVISIBLE;
 				// Restore the previous value to avoid leaks.
-				atomicAdd(&allocData->noAllocatedVoxelEntries, 1);
+				atomicAdd(&allocData->last_free_voxel_block_id, 1);
 			}
 			break;
 
 		case ITMLib::NEEDS_ALLOCATION_IN_EXCESS_LIST: //needs allocation in the excess list
-			vbaIdx = atomicSub(&allocData->noAllocatedVoxelEntries, 1);
-			exlIdx = atomicSub(&allocData->noAllocatedExcessEntries, 1);
+			vbaIdx = atomicSub(&allocData->last_free_voxel_block_id, 1);
+			exlIdx = atomicSub(&allocData->last_free_excess_list_id, 1);
 
 			if (vbaIdx >= 0 && exlIdx >= 0) //there is room in the voxel block array and excess list
 			{
@@ -127,8 +127,8 @@ void allocateHashedVoxelBlocksUsingLists_SetVisibility_device(
 				blockVisibilityTypes[ORDERED_LIST_SIZE + exlOffset] = IN_MEMORY_AND_VISIBLE;
 			} else {
 				// Restore the previous values to avoid leaks.
-				atomicAdd(&allocData->noAllocatedVoxelEntries, 1);
-				atomicAdd(&allocData->noAllocatedExcessEntries, 1);
+				atomicAdd(&allocData->last_free_voxel_block_id, 1);
+				atomicAdd(&allocData->last_free_excess_list_id, 1);
 			}
 
 			break;
@@ -149,7 +149,7 @@ void allocateHashedVoxelBlocksUsingLists_device(
 
 	switch (hashEntryStates[hashCode]) {
 		case ITMLib::NEEDS_ALLOCATION_IN_ORDERED_LIST: //needs allocation, fits in the ordered list
-			voxelBlockIndex = atomicSub(&allocData->noAllocatedVoxelEntries, 1);
+			voxelBlockIndex = atomicSub(&allocData->last_free_voxel_block_id, 1);
 			if (voxelBlockIndex >= 0) //there is room in the voxel block array
 			{
 				HashEntry hashEntry;
@@ -159,13 +159,13 @@ void allocateHashedVoxelBlocksUsingLists_device(
 				hashTable[hashCode] = hashEntry;
 			} else {
 				// Restore the previous value to avoid leaks.
-				atomicAdd(&allocData->noAllocatedVoxelEntries, 1);
+				atomicAdd(&allocData->last_free_voxel_block_id, 1);
 			}
 			break;
 
 		case ITMLib::NEEDS_ALLOCATION_IN_EXCESS_LIST: //needs allocation in the excess list
-			voxelBlockIndex = atomicSub(&allocData->noAllocatedVoxelEntries, 1);
-			exlIdx = atomicSub(&allocData->noAllocatedExcessEntries, 1);
+			voxelBlockIndex = atomicSub(&allocData->last_free_voxel_block_id, 1);
+			exlIdx = atomicSub(&allocData->last_free_excess_list_id, 1);
 
 			if (voxelBlockIndex >= 0 && exlIdx >= 0) //there is room in the voxel block array and excess list
 			{
@@ -181,8 +181,8 @@ void allocateHashedVoxelBlocksUsingLists_device(
 				hashTable[ORDERED_LIST_SIZE + exlOffset] = hashEntry; //add child to the excess list
 			} else {
 				// Restore the previous values to avoid leaks.
-				atomicAdd(&allocData->noAllocatedVoxelEntries, 1);
-				atomicAdd(&allocData->noAllocatedExcessEntries, 1);
+				atomicAdd(&allocData->last_free_voxel_block_id, 1);
+				atomicAdd(&allocData->last_free_excess_list_id, 1);
 			}
 
 			break;
@@ -242,9 +242,9 @@ reAllocateSwappedOutVoxelBlocks_device(int* voxelAllocationList, HashEntry* hash
 	if (blockVisibilityTypes[hashCode] > 0 &&
 	    hashEntry_ptr == -1) //it is visible and has been previously allocated inside the hash, but deallocated from VBA
 	{
-		vbaIdx = atomicSub(&allocData->noAllocatedVoxelEntries, 1);
+		vbaIdx = atomicSub(&allocData->last_free_voxel_block_id, 1);
 		if (vbaIdx >= 0) hashTable[hashCode].ptr = voxelAllocationList[vbaIdx];
-		else atomicAdd(&allocData->noAllocatedVoxelEntries, 1);
+		else atomicAdd(&allocData->last_free_voxel_block_id, 1);
 	}
 }
 
@@ -312,5 +312,13 @@ __global__ void allocateHashEntry_device(SingleHashAllocationData* data,
 	                                        data->lastFreeExcessListId, voxelAllocationList, excessAllocationList,
 	                                        data->hashCode);
 };
+
+__global__ void allocateBlock_device(
+		Vector3s* new_block_positions, HashEntry* hash_table, AtomicArrayThreadGuard<MEMORYDEVICE_CUDA>* guard,
+		AllocationCounters<MEMORYDEVICE_CUDA>* counters, int* block_allocation_list, int* excess_allocation_list) {
+	int new_block_index = threadIdx.x + blockIdx.x * blockDim.x;
+	AllocateBlock(new_block_positions[new_block_index], hash_table, *guard, counters->last_free_voxel_block_id,
+	              counters->last_free_excess_list_id, block_allocation_list, excess_allocation_list);
+}
 
 } // end anonymous namespace (CUDA kernels)

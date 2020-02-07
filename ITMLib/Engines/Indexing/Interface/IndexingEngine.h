@@ -23,10 +23,14 @@
 #include "../../../Objects/RenderStates/RenderState.h"
 #include "../../Common/WarpType.h"
 #include "../../../../ORUtils/MemoryDeviceType.h"
+#include "../../../GlobalTemplateDefines.h"
+#include "../../../Objects/Volume/VoxelBlockHash.h"
+
 
 //ORUtils
 
 namespace ITMLib {
+
 /**
  * \brief A utility for allocating additional space within or around a voxel volume (expanding it) based on various inputs
  * \details Note: if a volume index has strict bounds, as in the case of plain voxel array, does not grow or shrink those bounds.
@@ -48,7 +52,7 @@ class IndexingEngineInterface {
 	 * \param reset_utilized_block_list  [in] reset visibility list prior to the rest of the operation
 	 */
 	virtual void
-	AllocateNearSurface(VoxelVolume <TVoxel, TIndex>* volume, const ITMView* view,
+	AllocateNearSurface(VoxelVolume<TVoxel, TIndex>* volume, const ITMView* view,
 	                    const CameraTrackingState* tracking_state,
 	                    bool only_update_utilized_block_list, bool reset_utilized_block_list) = 0;
 
@@ -64,7 +68,7 @@ class IndexingEngineInterface {
 	 * \param reset_utilized_block_list  [in] reset visibility list upon completion
 	 */
 	virtual void
-	AllocateNearSurface(VoxelVolume <TVoxel, TIndex>* volume, const ITMView* view,
+	AllocateNearSurface(VoxelVolume<TVoxel, TIndex>* volume, const ITMView* view,
 	                    const Matrix4f& depth_camera_matrix = Matrix4f::Identity(),
 	                    bool only_update_utilized_block_list = false, bool reset_utilized_block_list = false) = 0;
 
@@ -85,9 +89,16 @@ class IndexingEngineInterface {
 	 * \param resetAllocatedList  [in] reset allocated list before the operation.
 	 */
 	virtual void
-	AllocateNearAndBetweenTwoSurfaces(VoxelVolume <TVoxel, TIndex>* volume,
+	AllocateNearAndBetweenTwoSurfaces(VoxelVolume<TVoxel, TIndex>* volume,
 	                                  const CameraTrackingState* tracking_state,
 	                                  const ITMView* view) = 0;
+	/**
+	 * \brief Allocate all hash blocks at given coordinates
+	 * \param volume - volume, where to allocate
+	 * \param block_coordinates coordinates of blocks to allocate (in blocks, not voxels)
+	 */
+	virtual void
+	AllocateBlockList(VoxelVolume<TVoxel, TIndex>* volume, ORUtils::MemoryBlock<Vector3s> block_coordinates, int new_block_count) = 0;
 
 };
 
@@ -106,42 +117,43 @@ public:
 	IndexingEngine(IndexingEngine const&) = delete;
 	void operator=(IndexingEngine const&) = delete;
 
-	virtual void AllocateNearSurface(VoxelVolume <TVoxel, TIndex>* volume, const ITMView* view,
+	virtual void AllocateNearSurface(VoxelVolume<TVoxel, TIndex>* volume, const ITMView* view,
 	                                 const CameraTrackingState* tracking_state, bool onlyUpdateVisibleList,
 	                                 bool resetVisibleList) override;
 
-	virtual void AllocateNearSurface(VoxelVolume <TVoxel, TIndex>* volume, const ITMView* view,
+	virtual void AllocateNearSurface(VoxelVolume<TVoxel, TIndex>* volume, const ITMView* view,
 	                                 const Matrix4f& depth_camera_matrix = Matrix4f::Identity(),
-	                                 bool only_update_visible_list = false, bool resetVisibleList = false) override;
+	                                 bool only_update_visible_list = false, bool reset_visible_list = false) override;
 
-	virtual void AllocateNearAndBetweenTwoSurfaces(VoxelVolume <TVoxel, TIndex>* targetVolume,
+	virtual void AllocateNearAndBetweenTwoSurfaces(VoxelVolume<TVoxel, TIndex>* targetVolume,
 	                                               const CameraTrackingState* tracking_state,
 	                                               const ITMView* view) override;
 
-
-	template<typename TVoxelTarget, typename TVoxelSource>
-	void AllocateUsingOtherVolume(VoxelVolume <TVoxelTarget, TIndex>* targetVolume,
-	                              VoxelVolume <TVoxelSource, TIndex>* sourceVolume);
-
-	template<typename TVoxelTarget, typename TVoxelSource>
-	void AllocateUsingOtherVolumeExpanded(VoxelVolume <TVoxelTarget, TIndex>* targetVolume,
-	                                      VoxelVolume <TVoxelSource, TIndex>* sourceVolume);
+	void
+	AllocateBlockList(VoxelVolume<TVoxel, TIndex>* volume, ORUtils::MemoryBlock<Vector3s> block_coordinates, int new_block_count) override;
 
 
 	template<typename TVoxelTarget, typename TVoxelSource>
-	void AllocateUsingOtherVolumeAndSetVisibilityExpanded(VoxelVolume <TVoxelTarget, TIndex>* targetVolume,
-	                                                      VoxelVolume <TVoxelSource, TIndex>* sourceVolume,
+	void AllocateUsingOtherVolume(VoxelVolume<TVoxelTarget, TIndex>* targetVolume,
+	                              VoxelVolume<TVoxelSource, TIndex>* sourceVolume);
+
+	template<typename TVoxelTarget, typename TVoxelSource>
+	void AllocateUsingOtherVolumeExpanded(VoxelVolume<TVoxelTarget, TIndex>* targetVolume,
+	                                      VoxelVolume<TVoxelSource, TIndex>* sourceVolume);
+
+
+	template<typename TVoxelTarget, typename TVoxelSource>
+	void AllocateUsingOtherVolumeAndSetVisibilityExpanded(VoxelVolume<TVoxelTarget, TIndex>* targetVolume,
+	                                                      VoxelVolume<TVoxelSource, TIndex>* sourceVolume,
 	                                                      ITMView* view,
 	                                                      const Matrix4f& depth_camera_matrix = Matrix4f::Identity());
 
 	template<WarpType TWarpType, typename TWarp>
 	void AllocateFromWarpedVolume(
-			VoxelVolume <TWarp, TIndex>* warpField,
-			VoxelVolume <TVoxel, TIndex>* sourceTSDF,
-			VoxelVolume <TVoxel, TIndex>* targetTSDF);
-
+			VoxelVolume<TWarp, TIndex>* warpField,
+			VoxelVolume<TVoxel, TIndex>* sourceTSDF,
+			VoxelVolume<TVoxel, TIndex>* targetTSDF);
 };
-
 
 }//namespace ITMLib
 

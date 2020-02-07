@@ -138,9 +138,9 @@ void SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::AllocateSceneFromDe
 	float surface_cutoff_distance = configuration::get().general_voxel_volume_parameters.block_allocation_band_factor * mu;
 
 	AllocationTempData* tempData = (AllocationTempData*) allocationTempData_host;
-	tempData->noAllocatedVoxelEntries = scene->localVBA.lastFreeBlockId;
-	tempData->noAllocatedExcessEntries = scene->index.GetLastFreeExcessListId();
-	tempData->visibleBlockCount = 0;
+	tempData->last_free_voxel_block_id = scene->localVBA.lastFreeBlockId;
+	tempData->last_free_excess_list_id = scene->index.GetLastFreeExcessListId();
+	tempData->utilized_block_count = 0;
 	ORcudaSafeCall(
 			cudaMemcpyAsync(allocationTempData_device, tempData, sizeof(AllocationTempData), cudaMemcpyHostToDevice));
 
@@ -194,9 +194,9 @@ void SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::AllocateSceneFromDe
 	}
 
 	ORcudaSafeCall(cudaMemcpy(tempData, allocationTempData_device, sizeof(AllocationTempData), cudaMemcpyDeviceToHost));
-	scene->index.SetUtilizedHashBlockCount(tempData->visibleBlockCount);
-	scene->localVBA.lastFreeBlockId = tempData->noAllocatedVoxelEntries;
-	scene->index.SetLastFreeExcessListId(tempData->noAllocatedExcessEntries);
+	scene->index.SetUtilizedHashBlockCount(tempData->utilized_block_count);
+	scene->localVBA.lastFreeBlockId = tempData->last_free_voxel_block_id;
+	scene->index.SetLastFreeExcessListId(tempData->last_free_excess_list_id);
 
 }
 
@@ -415,7 +415,7 @@ __global__ void allocateVoxelBlocksList_device(
 
 	switch (hashEntryStates[targetIdx]) {
 		case ITMLib::NEEDS_ALLOCATION_IN_ORDERED_LIST: //needs allocation, fits in the ordered list
-			vbaIdx = atomicSub(&allocData->noAllocatedVoxelEntries, 1);
+			vbaIdx = atomicSub(&allocData->last_free_voxel_block_id, 1);
 
 			if (vbaIdx >= 0) //there is room in the voxel block array
 			{
@@ -430,13 +430,13 @@ __global__ void allocateVoxelBlocksList_device(
 				blockVisibilityTypes[targetIdx] = INVISIBLE;
 
 				// Restore the previous value to avoid leaks.
-				atomicAdd(&allocData->noAllocatedVoxelEntries, 1);
+				atomicAdd(&allocData->last_free_voxel_block_id, 1);
 			}
 			break;
 
 		case ITMLib::NEEDS_ALLOCATION_IN_EXCESS_LIST: //needs allocation in the excess list
-			vbaIdx = atomicSub(&allocData->noAllocatedVoxelEntries, 1);
-			exlIdx = atomicSub(&allocData->noAllocatedExcessEntries, 1);
+			vbaIdx = atomicSub(&allocData->last_free_voxel_block_id, 1);
+			exlIdx = atomicSub(&allocData->last_free_excess_list_id, 1);
 
 			if (vbaIdx >= 0 && exlIdx >= 0) //there is room in the voxel block array and excess list
 			{
@@ -455,8 +455,8 @@ __global__ void allocateVoxelBlocksList_device(
 			} else {
 				// No need to mark the entry as not visible since findVoxelBlocksForRayNearSurface did not mark it.
 				// Restore the previous values to avoid leaks.
-				atomicAdd(&allocData->noAllocatedVoxelEntries, 1);
-				atomicAdd(&allocData->noAllocatedExcessEntries, 1);
+				atomicAdd(&allocData->last_free_voxel_block_id, 1);
+				atomicAdd(&allocData->last_free_excess_list_id, 1);
 			}
 
 			break;
@@ -476,9 +476,9 @@ reAllocateSwappedOutVoxelBlocks_device(int* voxelAllocationList, HashEntry* hash
 	if (blockVisibilityTypes[targetIdx] > 0 &&
 	    hashEntry_ptr == -1) //it is visible and has been previously allocated inside the hash, but deallocated from VBA
 	{
-		vbaIdx = atomicSub(&allocData->noAllocatedVoxelEntries, 1);
+		vbaIdx = atomicSub(&allocData->last_free_voxel_block_id, 1);
 		if (vbaIdx >= 0) hashTable[targetIdx].ptr = voxelAllocationList[vbaIdx];
-		else atomicAdd(&allocData->noAllocatedVoxelEntries, 1);
+		else atomicAdd(&allocData->last_free_voxel_block_id, 1);
 	}
 }
 
@@ -521,7 +521,7 @@ __global__ void buildVisibleList_device(HashEntry* hashTable, ITMHashSwapState* 
 	__syncthreads();
 
 	if (shouldPrefix) {
-		int offset = computePrefixSum_device<int>(hashVisibleType > 0, &allocData->visibleBlockCount,
+		int offset = computePrefixSum_device<int>(hashVisibleType > 0, &allocData->utilized_block_count,
 		                                          blockDim.x * blockDim.y, threadIdx.x);
 		if (offset != -1) visibleEntryIDs[offset] = hashCode;
 	}

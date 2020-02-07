@@ -19,6 +19,8 @@
 #include "../../Common/WarpType.h"
 
 namespace ITMLib {
+
+
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, typename TDerivedClass>
 class IndexingEngine_VoxelBlockHash :
 		public IndexingEngineInterface<TVoxel, VoxelBlockHash> {
@@ -57,6 +59,8 @@ public:
 	void AllocateNearAndBetweenTwoSurfaces(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
 	                                       const CameraTrackingState* tracking_state,
 	                                       const ITMView* view) override;
+
+
 
 private:
 	void ReallocateDeletedHashBlocks(VoxelVolume<TVoxel, VoxelBlockHash>* volume);

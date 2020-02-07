@@ -15,13 +15,18 @@
 //  ================================================================
 #pragma once
 
-#include "../../Traversal/Interface/VolumeTraversal.h"
+//local
 #include "IndexingEngine_VoxelBlockHash.h"
 #include "../../Traversal/Interface/ImageTraversal.h"
 #include "../../Traversal/Interface/TwoImageTraversal.h"
-
+#include "../../Traversal/Interface/HashTableTraversal.h"
+#include "../../Traversal/Interface/VolumeTraversal.h"
+#include "../Shared/IndexingEngine_Functors.h"
+#include "../../../Utils/Configuration.h"
 
 namespace ITMLib {
+
+
 
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, typename TDerivedClass>
 template<WarpType TWarpType, typename TWarp>
@@ -117,6 +122,7 @@ void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::Al
 }
 
 
+
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, typename TDerivedClass>
 void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::ReallocateDeletedHashBlocks(
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
@@ -125,6 +131,7 @@ void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::Re
 	HashTableTraversalEngine<TMemoryDeviceType>::TraverseWithHashCode(volume->index,reallocationFunctor);
 	volume->localVBA.lastFreeBlockId = GET_ATOMIC_VALUE_CPU(reallocationFunctor.last_free_voxel_block_id);
 }
+
 
 
 } //namespace ITMLib

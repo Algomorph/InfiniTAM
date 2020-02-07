@@ -27,6 +27,7 @@
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngine.h"
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CPU.h"
 #include "../ITMLib/Engines/VolumeFusion/VolumeFusionEngine.h"
+#include "../ITMLib/Engines/Indexing/Interface/IndexingEngine.h"
 
 #ifndef COMPILE_WITHOUT_CUDA
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CUDA.h"

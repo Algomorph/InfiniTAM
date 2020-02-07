@@ -37,14 +37,28 @@
 
 using namespace ITMLib;
 
+template<MemoryDeviceType TMemoryDeviceType>
+struct AllocationCounters{
+	AllocationCounters(int _last_free_voxel_block_id, int _last_free_excess_list_id){
+		INITIALIZE_ATOMIC(int, last_free_voxel_block_id, _last_free_voxel_block_id);
+		INITIALIZE_ATOMIC(int, last_free_excess_list_id, _last_free_excess_list_id);
+	}
+	DECLARE_ATOMIC(int, last_free_voxel_block_id);
+	DECLARE_ATOMIC(int, last_free_excess_list_id);
+	~AllocationCounters(){
+		CLEAN_UP_ATOMIC(last_free_voxel_block_id);
+		CLEAN_UP_ATOMIC(last_free_excess_list_id);
+	}
+
+};
 
 template<MemoryDeviceType TMemoryDeviceType>
 _DEVICE_WHEN_AVAILABLE_
 inline int AllocateBlock(const CONSTPTR(Vector3s)& desired_block_position,
                          HashEntry* hash_table,
                          AtomicArrayThreadGuard<TMemoryDeviceType>& guard,
-                         ATOMIC_ARGUMENT(int) allocated_blocks,
-                         ATOMIC_ARGUMENT(int) allocated_excess_entries,
+                         ATOMIC_ARGUMENT(int) last_free_voxel_block_id,
+                         ATOMIC_ARGUMENT(int) last_free_excess_list_id,
                          int* block_allocation_list, int* excess_allocation_list) {
 
 	int hash_code = HashCodeFromBlockPosition(desired_block_position);
@@ -66,8 +80,8 @@ inline int AllocateBlock(const CONSTPTR(Vector3s)& desired_block_position,
 					return hash_code;
 				}
 			}
-			int block_index = ATOMIC_SUB(allocated_blocks, 1);
-			int excess_list_index = ATOMIC_SUB(allocated_excess_entries, 1);
+			int block_index = ATOMIC_SUB(last_free_voxel_block_id, 1);
+			int excess_list_index = ATOMIC_SUB(last_free_excess_list_id, 1);
 			if (block_index >= 0 && excess_list_index >= 0) {
 				int excess_list_offset = excess_allocation_list[excess_list_index];
 				hash_table[hash_code].offset = excess_list_offset + 1;
@@ -76,15 +90,15 @@ inline int AllocateBlock(const CONSTPTR(Vector3s)& desired_block_position,
 				new_hash_entry.ptr = block_allocation_list[block_index];
 				new_hash_entry.offset = 0;
 			} else {
-				ATOMIC_ADD(allocated_blocks, 1);
-				ATOMIC_ADD(allocated_excess_entries, 1);
+				ATOMIC_ADD(last_free_voxel_block_id, 1);
+				ATOMIC_ADD(last_free_excess_list_id, 1);
 				guard.release(hash_code);
 				return 0;
 			}
 			guard.release(hash_code);
 			return hash_code;
 		}
-		int ordered_index = ATOMIC_SUB(allocated_blocks, 1);
+		int ordered_index = ATOMIC_SUB(last_free_voxel_block_id, 1);
 
 		if (ordered_index >= 0) {
 			HashEntry& new_hash_entry = hash_table[hash_code];
@@ -92,7 +106,7 @@ inline int AllocateBlock(const CONSTPTR(Vector3s)& desired_block_position,
 			new_hash_entry.ptr = block_allocation_list[ordered_index];
 			new_hash_entry.offset = 0;
 		} else {
-			ATOMIC_ADD(allocated_blocks, 1);
+			ATOMIC_ADD(last_free_voxel_block_id, 1);
 			guard.release(hash_code);
 			return 0;
 		}

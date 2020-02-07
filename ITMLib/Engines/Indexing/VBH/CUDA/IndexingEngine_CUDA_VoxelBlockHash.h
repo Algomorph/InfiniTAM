@@ -18,13 +18,14 @@
 #include "../../Interface/IndexingEngine.h"
 #include "../IndexingEngine_VoxelBlockHash.h"
 #include "../../../Common/WarpType.h"
+#include "../../../../GlobalTemplateDefines.h"
 
 namespace ITMLib {
 
 template<typename TVoxel>
 class IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA> :
 		public IndexingEngine_VoxelBlockHash<TVoxel, MEMORYDEVICE_CUDA,
-		IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA> > {
+				IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA> > {
 
 	friend IndexingEngine_VoxelBlockHash<TVoxel, MEMORYDEVICE_CPU,
 			IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>>;
@@ -47,7 +48,11 @@ public:
 
 	void AllocateHashEntriesUsingLists_SetVisibility(VoxelVolume <TVoxel, VoxelBlockHash>* volume) override;
 
-	void BuildUtilizedBlockListBasedOnVisibility(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
+	void AllocateBlockList(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
+	                       ORUtils::MemoryBlock<Vector3s> block_coordinates,
+	                       int new_block_count) override;
+
+	void BuildUtilizedBlockListBasedOnVisibility(VoxelVolume <TVoxel, VoxelBlockHash>* volume, const ITMView* view,
 	                                             const Matrix4f& depth_camera_matrix = Matrix4f::Identity());
 
 	void SetVisibilityToVisibleAtPreviousFrameAndUnstreamed(
@@ -55,20 +60,27 @@ public:
 
 	HashEntry FindHashEntry(const VoxelBlockHash& index, const Vector3s& coordinates) override;
 	HashEntry FindHashEntry(const VoxelBlockHash& index, const Vector3s& coordinates, int& hashCode);
-	bool AllocateHashBlockAt(VoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3s at, int& hashCode) override;
+	bool AllocateHashBlockAt(VoxelVolume <TVoxel, VoxelBlockHash>* volume, Vector3s at, int& hashCode) override;
 
 	template<typename TVoxelATarget, typename TVoxelASource>
 	void AllocateUsingOtherVolume(VoxelVolume <TVoxelATarget, VoxelBlockHash>* targetVolume,
 	                              VoxelVolume <TVoxelASource, VoxelBlockHash>* sourceVolume);
 
 	template<typename TVoxelTarget, typename TVoxelSource>
-	void AllocateUsingOtherVolumeExpanded(VoxelVolume<TVoxelTarget, VoxelBlockHash>* targetVolume,
-	                                      VoxelVolume<TVoxelSource, VoxelBlockHash>* sourceVolume);
+	void AllocateUsingOtherVolumeExpanded(VoxelVolume <TVoxelTarget, VoxelBlockHash>* targetVolume,
+	                                      VoxelVolume <TVoxelSource, VoxelBlockHash>* sourceVolume);
 
 	template<typename TVoxelTarget, typename TVoxelSource>
-	void AllocateUsingOtherVolumeAndSetVisibilityExpanded(VoxelVolume<TVoxelTarget, VoxelBlockHash>* targetVolume,
-	                                                      VoxelVolume<TVoxelSource, VoxelBlockHash>* sourceVolume,
-	                                                      ITMView* view, const Matrix4f& depth_camera_matrix = Matrix4f::Identity());
+	void AllocateUsingOtherVolumeAndSetVisibilityExpanded(VoxelVolume <TVoxelTarget, VoxelBlockHash>* targetVolume,
+	                                                      VoxelVolume <TVoxelSource, VoxelBlockHash>* sourceVolume,
+	                                                      ITMView* view,
+	                                                      const Matrix4f& depth_camera_matrix = Matrix4f::Identity());
 };
+
+extern template
+class IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>;
+extern template
+class IndexingEngine<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>;
+
 } //namespace ITMLib
 

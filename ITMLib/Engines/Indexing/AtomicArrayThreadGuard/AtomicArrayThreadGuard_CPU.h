@@ -25,7 +25,7 @@ namespace ITMLib {
 template<>
 class AtomicArrayThreadGuard<MEMORYDEVICE_CPU> {
 public:
-	explicit AtomicArrayThreadGuard(int item_count) : lock_array(new std::atomic<int>[item_count]) {
+	explicit AtomicArrayThreadGuard(const int item_count) : lock_array(new std::atomic<int>[item_count]) {
 #ifdef WITH_OPENMP
 #pragma omp parallel for default(none)
 #endif

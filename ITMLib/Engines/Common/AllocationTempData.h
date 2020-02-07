@@ -16,9 +16,9 @@
 #pragma once
 
 struct AllocationTempData {
-	int noAllocatedVoxelEntries;
-	int noAllocatedExcessEntries;
-	int visibleBlockCount;
+	int last_free_voxel_block_id;
+	int last_free_excess_list_id;
+	int utilized_block_count;
 };
 
 

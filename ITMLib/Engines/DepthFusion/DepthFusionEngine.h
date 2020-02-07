@@ -25,6 +25,7 @@
 #include "../Common/WarpType.h"
 
 namespace ITMLib {
+
 /** \brief
 	Interface to engines implementing the main KinectFusion
 	depth integration process in dynamic fusion settings that involve 2 different SDFs with different voxel types.

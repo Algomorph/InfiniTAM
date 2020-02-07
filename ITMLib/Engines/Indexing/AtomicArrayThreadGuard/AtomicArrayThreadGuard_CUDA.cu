@@ -15,7 +15,7 @@
 //  ================================================================
 
 //local
-#include "AtomicArrayThreadGuard_CUDA.tcu"
+#include "AtomicArrayThreadGuard_CUDA.h"
 namespace ITMLib{
 template
 class AtomicArrayThreadGuard<MEMORYDEVICE_CUDA>;

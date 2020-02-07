@@ -15,7 +15,7 @@
 //  ================================================================
 
 //local
-#include "AtomicArrayThreadGuard_CPU.tpp"
+#include "AtomicArrayThreadGuard_CPU.h"
 namespace ITMLib{
 template
 class AtomicArrayThreadGuard<MEMORYDEVICE_CPU>;

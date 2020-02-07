@@ -28,4 +28,5 @@ namespace ITMLib{
  */
 template<MemoryDeviceType TMemoryDeviceType>
 class AtomicArrayThreadGuard;
+
 }

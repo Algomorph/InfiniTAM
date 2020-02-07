@@ -30,6 +30,7 @@
 #include "../ITMLib/Engines/ViewBuilding/ViewBuilderFactory.h"
 #include "../ITMLib/Engines/EditAndCopy/EditAndCopyEngineFactory.h"
 #include "../ITMLib/Engines/Indexing/Interface/IndexingEngine.h"
+#include "../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
 #include "../ITMLib/Utils/Configuration.h"
 #include "../ITMLib/Utils/Analytics/AlmostEqual.h"
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CPU.h"
@@ -136,12 +137,13 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_PVA_VBH_Expnaded_CPU, Frame16And17
 
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_17(MEMORYDEVICE_CPU, InitParams<VoxelBlockHash>());
 	EditAndCopyEngineFactory::Instance<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>().ResetVolume(&volume_VBH_17);
-	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_17_depth_allocation(MEMORYDEVICE_CPU, InitParams<VoxelBlockHash>());
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_17_depth_allocation(MEMORYDEVICE_CPU,
+	                                                                      InitParams<VoxelBlockHash>());
 	EditAndCopyEngineFactory::Instance<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>().ResetVolume(
 			&volume_VBH_17_depth_allocation);
 
-	IndexingEngine<TSDFVoxel,VoxelBlockHash, MEMORYDEVICE_CPU>& indexer =
-	IndexingEngine<TSDFVoxel,VoxelBlockHash, MEMORYDEVICE_CPU>::Instance();
+	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>& indexer =
+			IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance();
 	indexer.AllocateNearSurface(&volume_VBH_17_depth_allocation, view);
 	indexer.AllocateUsingOtherVolumeAndSetVisibilityExpanded(&volume_VBH_17, &volume_VBH_17_depth_allocation, view);
 
@@ -152,8 +154,10 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_PVA_VBH_Expnaded_CPU, Frame16And17
 
 
 	float absoluteTolerance = 1e-7;
-	BOOST_REQUIRE(allocatedContentAlmostEqual_CPU_Verbose(&volume_PVA_17, &volume_VBH_17_depth_allocation, absoluteTolerance));
-	BOOST_REQUIRE(contentForFlagsAlmostEqual_CPU_Verbose(&volume_PVA_17, &volume_VBH_17_depth_allocation, VoxelFlags::VOXEL_NONTRUNCATED,
+	BOOST_REQUIRE(allocatedContentAlmostEqual_CPU_Verbose(&volume_PVA_17, &volume_VBH_17_depth_allocation,
+	                                                      absoluteTolerance));
+	BOOST_REQUIRE(contentForFlagsAlmostEqual_CPU_Verbose(&volume_PVA_17, &volume_VBH_17_depth_allocation,
+	                                                     VoxelFlags::VOXEL_NONTRUNCATED,
 	                                                     absoluteTolerance));
 
 #ifdef SAVE_TEST_DATA
@@ -163,7 +167,7 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_PVA_VBH_Expnaded_CPU, Frame16And17
 
 	BOOST_REQUIRE(allocatedContentAlmostEqual_CPU_Verbose(&volume_PVA_17, &volume_VBH_17, absoluteTolerance));
 	BOOST_REQUIRE(contentForFlagsAlmostEqual_CPU_Verbose(&volume_PVA_17, &volume_VBH_17, VoxelFlags::VOXEL_NONTRUNCATED,
-	                                             absoluteTolerance));
+	                                                     absoluteTolerance));
 
 	delete reconstructionEngine_PVA;
 	delete reconstructionEngine_VBH;
@@ -193,8 +197,8 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
 	Vector3i volumeSize(1024, 32, 1024), volumeOffset(-volumeSize.x / 2, -volumeSize.y / 2, 0);
 
 	VoxelVolume<TSDFVoxel, PlainVoxelArray> scene1(&configuration::get().general_voxel_volume_parameters,
-	                                                    configuration::get().swapping_mode ==
-	                                                    configuration::SWAPPINGMODE_ENABLED,
+	                                               configuration::get().swapping_mode ==
+	                                               configuration::SWAPPINGMODE_ENABLED,
 	                                               MEMORYDEVICE_CPU, {volumeSize, volumeOffset});
 	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetVolume(&scene1);
 	CameraTrackingState trackingState(imageSize, MEMORYDEVICE_CPU);
@@ -230,7 +234,8 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
 				0.0f,
 				static_cast<float>(zero_level_set_voxel_z_coords_mm[iVoxel]) / 1000.0f
 		);
-		zeroLevelSetCoords.push_back(getVoxelCoord(coordinateMeters, configuration::get().general_voxel_volume_parameters.voxel_size));
+		zeroLevelSetCoords.push_back(
+				getVoxelCoord(coordinateMeters, configuration::get().general_voxel_volume_parameters.voxel_size));
 	}
 
 	float tolerance = 1e-4;
@@ -261,8 +266,8 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
 	}
 
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> scene2(&configuration::get().general_voxel_volume_parameters,
-	                                                   configuration::get().swapping_mode ==
-	                                                   configuration::SWAPPINGMODE_ENABLED,
+	                                              configuration::get().swapping_mode ==
+	                                              configuration::SWAPPINGMODE_ENABLED,
 	                                              MEMORYDEVICE_CPU);
 	ManipulationEngine_CPU_VBH_Voxel::Inst().ResetVolume(&scene2);
 
@@ -275,15 +280,15 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
 	tolerance = 1e-5;
 	BOOST_REQUIRE(allocatedContentAlmostEqual_CPU(&scene1, &scene2, tolerance));
 	VoxelVolume<TSDFVoxel, PlainVoxelArray> scene3(&configuration::get().general_voxel_volume_parameters,
-	                                                    configuration::get().swapping_mode ==
-	                                                    configuration::SWAPPINGMODE_ENABLED,
+	                                               configuration::get().swapping_mode ==
+	                                               configuration::SWAPPINGMODE_ENABLED,
 	                                               MEMORYDEVICE_CPU, {volumeSize, volumeOffset});
 	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetVolume(&scene3);
 	reconstructionEngine_PVA->GenerateTsdfVolumeFromView(&scene3, view, &trackingState);
 	BOOST_REQUIRE(contentAlmostEqual_CPU(&scene1, &scene3, tolerance));
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> scene4(&configuration::get().general_voxel_volume_parameters,
-	                                                   configuration::get().swapping_mode ==
-	                                                   configuration::SWAPPINGMODE_ENABLED,
+	                                              configuration::get().swapping_mode ==
+	                                              configuration::SWAPPINGMODE_ENABLED,
 	                                              MEMORYDEVICE_CPU, {0x800, 0x20000});
 	ManipulationEngine_CPU_VBH_Voxel::Inst().ResetVolume(&scene4);
 	reconstructionEngine_VBH->GenerateTsdfVolumeFromView(&scene4, view, &trackingState);
@@ -340,8 +345,8 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CPU) {
 	//Vector3i volumeSize(512, 512, 512), volumeOffset(-volumeSize.x / 2, -volumeSize.y / 2, 0);
 	Vector3i volumeSize(512, 112, 360), volumeOffset(-512, -24, 152);
 	VoxelVolume<TSDFVoxel, PlainVoxelArray> generated_volume(&configuration::get().general_voxel_volume_parameters,
-	                                                              configuration::get().swapping_mode ==
-	                                                              configuration::SWAPPINGMODE_ENABLED,
+	                                                         configuration::get().swapping_mode ==
+	                                                         configuration::SWAPPINGMODE_ENABLED,
 	                                                         MEMORYDEVICE_CPU, {volumeSize, volumeOffset});
 
 	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetVolume(&generated_volume);
@@ -354,8 +359,8 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CPU) {
 	//generated_volume.SaveToDirectory("../../Tests/TestData/test_PVA_ConstructFromImage2_");
 
 	VoxelVolume<TSDFVoxel, PlainVoxelArray> loaded_volume(&configuration::get().general_voxel_volume_parameters,
-	                                                           configuration::get().swapping_mode ==
-	                                                           configuration::SWAPPINGMODE_ENABLED,
+	                                                      configuration::get().swapping_mode ==
+	                                                      configuration::SWAPPINGMODE_ENABLED,
 	                                                      MEMORYDEVICE_CPU,
 	                                                      {volumeSize, volumeOffset});
 
@@ -367,8 +372,8 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CPU) {
 	BOOST_REQUIRE(contentAlmostEqual_CPU_Verbose(&generated_volume, &loaded_volume, tolerance));
 
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> scene3(&configuration::get().general_voxel_volume_parameters,
-	                                                   configuration::get().swapping_mode ==
-	                                                   configuration::SWAPPINGMODE_ENABLED,
+	                                              configuration::get().swapping_mode ==
+	                                              configuration::SWAPPINGMODE_ENABLED,
 	                                              MEMORYDEVICE_CPU);
 	ManipulationEngine_CPU_VBH_Voxel::Inst().ResetVolume(&scene3);
 
