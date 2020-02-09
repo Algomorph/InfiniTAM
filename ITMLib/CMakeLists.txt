@@ -837,7 +837,8 @@ set(ITMLIB_UTILS_SOURCES
     Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CUDA.tcu
     Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CUDA.cu
 
-    Utils/JsonUtilities.cpp
+    Utils/FileIO/JSON_Utilities.cpp
+    Utils/FileIO/CSV_Utilities.cpp
 
     Utils/Configuration.cpp
     Utils/CPPPrintHelpers.cpp
@@ -861,7 +862,8 @@ set(ITMLIB_UTILS_HEADERS
     Utils/Serialization/SerializationSequenceLevel2Macros.h
     Utils/Serialization/PreprocessorNargs.h
 
-    Utils/JsonUtilities.h
+    Utils/FileIO/JSON_Utilities.h
+    Utils/FileIO/CSV_Utilities.h
 
     Utils/CUDAUtils.h
     Utils/ValuePosition.h

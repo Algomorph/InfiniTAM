@@ -49,7 +49,7 @@ public:
 	void AllocateHashEntriesUsingLists_SetVisibility(VoxelVolume <TVoxel, VoxelBlockHash>* volume) override;
 
 	void AllocateBlockList(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
-	                       ORUtils::MemoryBlock<Vector3s> block_coordinates,
+	                       const ORUtils::MemoryBlock<Vector3s>& block_coordinates,
 	                       int new_block_count) override;
 
 	void BuildUtilizedBlockListBasedOnVisibility(VoxelVolume <TVoxel, VoxelBlockHash>* volume, const ITMView* view,

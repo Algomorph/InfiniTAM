@@ -103,6 +103,7 @@ if (BUILD_TESTS)
                  WarpAdvancedTestingUtilities.h WarpAdvancedTestingUtilities.tpp WarpAdvancedTestingUtilities.cpp)
     itm_add_test(NAME Configuration SOURCES Test_Configuration.cpp)
     itm_add_test(NAME GeometryUtilities SOURCES Test_GeometryUtilities.cpp)
+    itm_add_test(NAME HashAllocation SOURCES Test_HashAllocation.cpp)
     itm_add_test(NAME ExpandAllocation SOURCES Test_ExpandAllocation.cpp)
     itm_add_test(NAME Serialization SOURCES Test_Serialization.cpp)
 
@@ -125,6 +126,7 @@ if (BUILD_TESTS)
     #######################################################
 
     file(GLOB_RECURSE TEST_DATA_FILES
+         "${CMAKE_CURRENT_SOURCE_DIR}/TestData/*.csv"
          "${CMAKE_CURRENT_SOURCE_DIR}/TestData/*.png"
          "${CMAKE_CURRENT_SOURCE_DIR}/TestData/*.pnm"
          "${CMAKE_CURRENT_SOURCE_DIR}/TestData/*.txt"

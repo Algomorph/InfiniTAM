@@ -13,12 +13,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "../Traversal/CUDA/ImageTraversal_CUDA.h"
-#include "../Traversal/CUDA/TwoImageTraversal_CUDA.h"
-#include "../Traversal/CUDA/HashTableTraversal_CUDA.h"
 #include "../Traversal/CUDA/VolumeTraversal_CUDA_VoxelBlockHash.h"
-#include "../Indexing/VBH/IndexingEngine_VoxelBlockHash.tpp"
-#include "../Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.tcu"
+#include "../Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
 #include "DepthFusionEngine.tpp"
 #include "../../GlobalTemplateDefines.h"
 

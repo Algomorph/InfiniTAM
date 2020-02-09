@@ -314,7 +314,7 @@ __global__ void allocateHashEntry_device(SingleHashAllocationData* data,
 };
 
 __global__ void allocateBlock_device(
-		Vector3s* new_block_positions, HashEntry* hash_table, AtomicArrayThreadGuard<MEMORYDEVICE_CUDA>* guard,
+		const Vector3s* new_block_positions, HashEntry* hash_table, AtomicArrayThreadGuard<MEMORYDEVICE_CUDA>* guard,
 		AllocationCounters<MEMORYDEVICE_CUDA>* counters, int* block_allocation_list, int* excess_allocation_list) {
 	int new_block_index = threadIdx.x + blockIdx.x * blockDim.x;
 	AllocateBlock(new_block_positions[new_block_index], hash_table, *guard, counters->last_free_voxel_block_id,

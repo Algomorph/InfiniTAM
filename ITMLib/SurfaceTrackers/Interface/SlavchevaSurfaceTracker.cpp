@@ -21,7 +21,7 @@
 //local
 #include "SlavchevaSufraceTracker.h"
 #include "../../Utils/Configuration.h"
-#include "../../Utils/JsonUtilities.h"
+#include "../../Utils/FileIO/JSON_Utilities.h"
 
 namespace ITMLib{
 

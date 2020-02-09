@@ -14,12 +14,7 @@
 //  limitations under the License.
 //  ================================================================
 
-#include "../Traversal/CPU/ImageTraversal_CPU.h"
-#include "../Traversal/CPU/TwoImageTraversal_CPU.h"
-#include "../Traversal/CPU/HashTableTraversal_CPU.h"
-#include "../Indexing/VBH/IndexingEngine_VoxelBlockHash.tpp"
-#include "../Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.tpp"
-
+#include "../Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
 #include "../Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
 #include "DepthFusionEngine.tpp"
 #include "../../GlobalTemplateDefines.h"

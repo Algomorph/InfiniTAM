@@ -136,7 +136,7 @@ AllocateHashEntriesUsingLists_SetVisibility(VoxelVolume<TVoxel, VoxelBlockHash>*
 
 template<typename TVoxel>
 void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::AllocateBlockList(
-		VoxelVolume<TVoxel, VoxelBlockHash>* volume, ORUtils::MemoryBlock<Vector3s> block_coordinates,
+		VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ORUtils::MemoryBlock<Vector3s>& block_coordinates,
 		const int new_block_count) {
 	int entry_count = volume->index.hashEntryCount;
 
@@ -158,7 +158,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::AllocateBlockLis
 
 
 	HashEntry* hash_table = volume->index.GetEntries();
-	Vector3s* block_coordinates_device = block_coordinates.GetData(MEMORYDEVICE_CUDA);
+	const Vector3s* block_coordinates_device = block_coordinates.GetData(MEMORYDEVICE_CUDA);
 
 	dim3 cuda_block_size(256);
 	dim3 cuda_grid_size(

@@ -98,7 +98,7 @@ class IndexingEngineInterface {
 	 * \param block_coordinates coordinates of blocks to allocate (in blocks, not voxels)
 	 */
 	virtual void
-	AllocateBlockList(VoxelVolume<TVoxel, TIndex>* volume, ORUtils::MemoryBlock<Vector3s> block_coordinates, int new_block_count) = 0;
+	AllocateBlockList(VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::MemoryBlock<Vector3s>& block_coordinates, int new_block_count) = 0;
 
 };
 
@@ -130,7 +130,7 @@ public:
 	                                               const ITMView* view) override;
 
 	void
-	AllocateBlockList(VoxelVolume<TVoxel, TIndex>* volume, ORUtils::MemoryBlock<Vector3s> block_coordinates, int new_block_count) override;
+	AllocateBlockList(VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::MemoryBlock<Vector3s>& block_coordinates, int new_block_count) override;
 
 
 	template<typename TVoxelTarget, typename TVoxelSource>

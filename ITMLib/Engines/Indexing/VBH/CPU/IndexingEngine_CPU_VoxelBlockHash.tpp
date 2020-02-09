@@ -308,9 +308,81 @@ AllocateHashEntriesUsingLists_SetVisibility(VoxelVolume<TVoxel, VoxelBlockHash>*
 }
 
 
+template<MemoryDeviceType TMemoryDeviceType>
+_DEVICE_WHEN_AVAILABLE_
+inline int AllocateBlock_DEBUG(const CONSTPTR(Vector3s)& desired_block_position,
+                               HashEntry* hash_table,
+                               AtomicArrayThreadGuard<TMemoryDeviceType>& guard,
+                               ATOMIC_ARGUMENT(int) last_free_voxel_block_id,
+                               ATOMIC_ARGUMENT(int) last_free_excess_list_id,
+                               int* block_allocation_list, int* excess_allocation_list) {
+
+	int hash_code = HashCodeFromBlockPosition(desired_block_position);
+	guard.lock(hash_code);
+	HashEntry hash_entry = hash_table[hash_code];
+	//check if hash table contains entry
+	if (!(IS_EQUAL3(hash_entry.pos, desired_block_position) && hash_entry.ptr >= -1)) {
+		if (hash_entry.ptr >= -1) {
+			//search excess list only if there is no room in ordered part
+			while (hash_entry.offset >= 1) {
+				int new_hash_code = ORDERED_LIST_SIZE + hash_entry.offset - 1;
+				guard.lock(new_hash_code);
+				guard.release(hash_code);
+				hash_code = new_hash_code;
+
+				hash_entry = hash_table[hash_code];
+				if (IS_EQUAL3(hash_entry.pos, desired_block_position) && hash_entry.ptr >= -1) {
+					guard.release(hash_code);
+					return hash_code;
+				}
+			}
+			int block_index = ATOMIC_SUB(last_free_voxel_block_id, 1);
+			int excess_list_index = ATOMIC_SUB(last_free_excess_list_id, 1);
+			if (block_index >= 0 && excess_list_index >= 0) {
+				int excess_list_offset = excess_allocation_list[excess_list_index];
+				hash_table[hash_code].offset = excess_list_offset + 1;
+				HashEntry& new_hash_entry = hash_table[ORDERED_LIST_SIZE + excess_list_offset];
+				new_hash_entry.pos = desired_block_position;
+				new_hash_entry.ptr = block_allocation_list[block_index];
+				new_hash_entry.offset = 0;
+			} else {
+				if(block_index < 0){
+					DIEWITHEXCEPTION_REPORTLOCATION("Out of block space...");
+				}
+				if(excess_list_index < 0){
+					DIEWITHEXCEPTION_REPORTLOCATION("Out of excess list space...");
+				}
+				ATOMIC_ADD(last_free_voxel_block_id, 1);
+				ATOMIC_ADD(last_free_excess_list_id, 1);
+				guard.release(hash_code);
+				return 0;
+			}
+			guard.release(hash_code);
+			return hash_code;
+		}
+		int ordered_index = ATOMIC_SUB(last_free_voxel_block_id, 1);
+
+		if (ordered_index >= 0) {
+			HashEntry& new_hash_entry = hash_table[hash_code];
+			new_hash_entry.pos = desired_block_position;
+			new_hash_entry.ptr = block_allocation_list[ordered_index];
+			new_hash_entry.offset = 0;
+		} else {
+			DIEWITHEXCEPTION_REPORTLOCATION("Out of block space...");
+			ATOMIC_ADD(last_free_voxel_block_id, 1);
+			guard.release(hash_code);
+			return 0;
+		}
+		return hash_code;
+	}
+	guard.release(hash_code);
+	// already have hash block, no allocation needed
+	return hash_code;
+}
+
 template<typename TVoxel>
 void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateBlockList(
-		VoxelVolume<TVoxel, VoxelBlockHash>* volume, ORUtils::MemoryBlock<Vector3s> block_coordinates,
+		VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ORUtils::MemoryBlock<Vector3s>& block_coordinates,
 		const int new_block_count) {
 
 	int entry_count = volume->index.hashEntryCount;
@@ -321,15 +393,15 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateBlockList
 	AtomicArrayThreadGuard<MEMORYDEVICE_CPU> guard(entry_count);
 
 	HashEntry* hash_table = volume->index.GetEntries();
-	Vector3s* block_coordinates_device = block_coordinates.GetData(MEMORYDEVICE_CPU);
+	const Vector3s* block_coordinates_device = block_coordinates.GetData(MEMORYDEVICE_CPU);
 
 #if WITH_OPENMP
 #pragma parallel for default(none) shared(block_coordinates_device, last_free_voxel_block_id, \
                                           last_free_excess_list_id, block_allocation_list, excess_allocation_list)
 #endif
 	for (int i_new_block = 0; i_new_block < new_block_count; i_new_block++) {
-		AllocateBlock(block_coordinates_device[i_new_block], hash_table, guard, counters.last_free_voxel_block_id,
-		              counters.last_free_excess_list_id, block_allocation_list, excess_allocation_list);
+		AllocateBlock_DEBUG(block_coordinates_device[i_new_block], hash_table, guard, counters.last_free_voxel_block_id,
+		                    counters.last_free_excess_list_id, block_allocation_list, excess_allocation_list);
 	}
 	volume->localVBA.lastFreeBlockId = GET_ATOMIC_VALUE(counters.last_free_voxel_block_id);
 	volume->index.SetLastFreeExcessListId(GET_ATOMIC_VALUE(counters.last_free_excess_list_id));
