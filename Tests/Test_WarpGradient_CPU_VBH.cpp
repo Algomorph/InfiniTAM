@@ -36,7 +36,7 @@
 #include "../ITMLib/SurfaceTrackers/Interface/SurfaceTrackerInterface.h"
 #include "../ITMLib/SurfaceTrackers/Interface/SurfaceTracker.h"
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CPU.h"
-#include "../ITMLib/Utils/Analytics/SceneStatisticsCalculator/CPU/SceneStatisticsCalculator_CPU.h"
+#include "../ITMLib/Utils/Analytics/VolumeStatisticsCalculator/CPU/VolumeStatisticsCalculator_CPU.h"
 #include "../ITMLib/Engines/Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
 #include "../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
 
@@ -87,7 +87,7 @@ BOOST_FIXTURE_TEST_CASE(testDataTerm_CPU_VBH, DataFixture) {
 		motionTracker_VBH_CPU->CalculateWarpGradient(&warp_field_CPU1, canonical_volume, live_volume);
 	}, "Calculate Warping Gradient - VBH CPU data term");
 
-	BOOST_REQUIRE_EQUAL(SceneStatCalc_CPU_VBH_Warp::Instance().ComputeAllocatedHashBlockCount(&warp_field_CPU1), 589);
+	BOOST_REQUIRE_EQUAL(StatCalc_CPU_VBH_Warp::Instance().ComputeAllocatedHashBlockCount(&warp_field_CPU1), 589);
 
 	AlteredGradientCountFunctor<WarpVoxel> functor;
 	VolumeTraversalEngine<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::
@@ -110,7 +110,7 @@ BOOST_FIXTURE_TEST_CASE(testUpdateWarps_CPU_VBH, DataFixture) {
 	VolumeTraversalEngine<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::
 	VoxelTraversal(&warp_field_copy, agcFunctor);
 	BOOST_REQUIRE_EQUAL(agcFunctor.count.load(), 37525u);
-	BOOST_REQUIRE_EQUAL(SceneStatCalc_CPU_VBH_Warp::Instance().ComputeAllocatedHashBlockCount(&warp_field_copy), 589);
+	BOOST_REQUIRE_EQUAL(StatCalc_CPU_VBH_Warp::Instance().ComputeAllocatedHashBlockCount(&warp_field_copy), 589);
 
 	IndexingEngine<TSDFVoxel,VoxelBlockHash,MEMORYDEVICE_CPU>::Instance().AllocateUsingOtherVolume(canonical_volume, live_volume);
 
@@ -158,7 +158,7 @@ BOOST_FIXTURE_TEST_CASE(testTikhonovTerm_CPU_VBH, DataFixture) {
 	TimeIt([&]() {
 		motionTracker_VBH_CPU->CalculateWarpGradient(&warp_field_CPU1, canonical_volume, live_volume);
 	}, "Calculate Warping Gradient - VBH CPU data term + tikhonov term");
-	BOOST_REQUIRE_EQUAL(SceneStatCalc_CPU_VBH_Warp::Instance().ComputeAllocatedHashBlockCount(&warp_field_CPU1), 589);
+	BOOST_REQUIRE_EQUAL(StatCalc_CPU_VBH_Warp::Instance().ComputeAllocatedHashBlockCount(&warp_field_CPU1), 589);
 
 	AlteredGradientCountFunctor<WarpVoxel> functor;
 	VolumeTraversalEngine<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::
@@ -186,7 +186,7 @@ BOOST_FIXTURE_TEST_CASE(testDataAndTikhonovTerm_CPU_VBH, DataFixture) {
 	TimeIt([&]() {
 		motionTracker_VBH_CPU->CalculateWarpGradient(&warp_field_CPU1, canonical_volume, live_volume);
 	}, "Calculate Warping Gradient - VBH CPU data term + tikhonov term");
-	BOOST_REQUIRE_EQUAL(SceneStatCalc_CPU_VBH_Warp::Instance().ComputeAllocatedHashBlockCount(&warp_field_CPU1), 589);
+	BOOST_REQUIRE_EQUAL(StatCalc_CPU_VBH_Warp::Instance().ComputeAllocatedHashBlockCount(&warp_field_CPU1), 589);
 
 	AlteredGradientCountFunctor<WarpVoxel> functor;
 	VolumeTraversalEngine<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::

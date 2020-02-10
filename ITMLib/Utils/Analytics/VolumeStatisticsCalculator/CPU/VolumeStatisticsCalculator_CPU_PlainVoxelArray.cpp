@@ -15,11 +15,11 @@
 //  ================================================================
 #include "../../../../GlobalTemplateDefines.h"
 #include "../../../../Engines/Traversal/CPU/HashTableTraversal_CPU.h"
-#include "SceneStatisticsCalculator_CPU.tpp"
+#include "VolumeStatisticsCalculator_CPU.tpp"
 
 namespace ITMLib {
 template
-class ITMSceneStatisticsCalculator<TSDFVoxel, PlainVoxelArray, MEMORYDEVICE_CPU>;
+class VolumeStatisticsCalculator<TSDFVoxel, PlainVoxelArray, MEMORYDEVICE_CPU>;
 template
-class ITMSceneStatisticsCalculator<WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU>;
+class VolumeStatisticsCalculator<WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU>;
 } // namespace ITMLib

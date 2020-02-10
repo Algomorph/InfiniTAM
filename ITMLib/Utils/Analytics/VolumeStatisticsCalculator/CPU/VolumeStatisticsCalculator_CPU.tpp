@@ -14,11 +14,11 @@
 //  limitations under the License.
 //  ================================================================
 //local
-#include "SceneStatisticsCalculator_CPU.h"
+#include "VolumeStatisticsCalculator_CPU.h"
 #include "../../../../Objects/Volume/VoxelBlockHash.h"
 #include "../../../../Engines/Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
 #include "../../../../Objects/Volume/VoxelTypes.h"
-#include "../Shared/SceneStatisticsCalculator_Functors.h"
+#include "../Shared/VolumeStatisticsCalculator_Functors.h"
 
 
 //atomic
@@ -32,13 +32,13 @@ struct ComputeVoxelBoundsFunctor;
 
 template<typename TVoxel>
 struct ComputeVoxelBoundsFunctor<TVoxel, VoxelBlockHash> {
-	static Vector6i Compute(const VoxelVolume<TVoxel, VoxelBlockHash>* scene) {
+	static Vector6i Compute(const VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 
 		Vector6i bounds = Vector6i(0);
 
-		const TVoxel* voxelBlocks = scene->localVBA.GetVoxelBlocks();
-		const HashEntry* hashTable = scene->index.GetEntries();
-		int noTotalEntries = scene->index.hashEntryCount;
+		const TVoxel* voxelBlocks = volume->localVBA.GetVoxelBlocks();
+		const HashEntry* hashTable = volume->index.GetEntries();
+		int noTotalEntries = volume->index.hashEntryCount;
 
 		//TODO: if OpenMP standard is 3.1 or above, use OpenMP parallel for reduction clause with (max:maxVoxelPointX,...) -Greg (GitHub: Algomorph)
 		for (int entryId = 0; entryId < noTotalEntries; entryId++) {
@@ -77,9 +77,9 @@ struct ComputeVoxelBoundsFunctor<TVoxel, VoxelBlockHash> {
 
 template<typename TVoxel>
 struct ComputeVoxelBoundsFunctor<TVoxel, PlainVoxelArray> {
-	static Vector6i Compute(const VoxelVolume<TVoxel, PlainVoxelArray>* scene) {
-		Vector3i offset = scene->index.GetVolumeOffset();
-		Vector3i size = scene->index.GetVolumeSize();
+	static Vector6i Compute(const VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
+		Vector3i offset = volume->index.GetVolumeOffset();
+		Vector3i size = volume->index.GetVolumeSize();
 		return {offset.x, offset.y, offset.z,
 		        offset.x + size.x, offset.y + size.y, offset.z + size.z};
 	}
@@ -87,15 +87,15 @@ struct ComputeVoxelBoundsFunctor<TVoxel, PlainVoxelArray> {
 
 template<typename TVoxel, typename TIndex>
 Vector6i
-ITMSceneStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeVoxelBounds(const VoxelVolume<TVoxel, TIndex>* scene) {
-	return ComputeVoxelBoundsFunctor<TVoxel, TIndex>::Compute(scene);
+VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeVoxelBounds(const VoxelVolume<TVoxel, TIndex>* volume) {
+	return ComputeVoxelBoundsFunctor<TVoxel, TIndex>::Compute(volume);
 }
 
 //============================================== COUNT VOXELS ==========================================================
 template<typename TVoxel, typename TIndex>
 int
-ITMSceneStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeAllocatedVoxelCount(VoxelVolume<TVoxel, TIndex>* scene) {
-	return ComputeAllocatedVoxelCountFunctor<TVoxel, TIndex, MEMORYDEVICE_CPU>::compute(scene);
+VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeAllocatedVoxelCount(VoxelVolume<TVoxel, TIndex>* volume) {
+	return ComputeAllocatedVoxelCountFunctor<TVoxel, TIndex, MEMORYDEVICE_CPU>::compute(volume);
 }
 
 template<bool hasSemanticInformation, typename TVoxel, typename TIndex>
@@ -103,15 +103,15 @@ struct ComputeNonTruncatedVoxelCountFunctor;
 
 template<class TVoxel, typename TIndex>
 struct ComputeNonTruncatedVoxelCountFunctor<false, TVoxel, TIndex> {
-	static int compute(VoxelVolume<TVoxel, TIndex>* scene) {
+	static int compute(VoxelVolume<TVoxel, TIndex>* volume) {
 		DIEWITHEXCEPTION("Voxels need to have semantic information to be marked as truncated or non-truncated.");
 	}
 };
 template<class TVoxel, typename TIndex>
 struct ComputeNonTruncatedVoxelCountFunctor<true, TVoxel, TIndex> {
-	static int compute(VoxelVolume<TVoxel, TIndex>* scene) {
+	static int compute(VoxelVolume<TVoxel, TIndex>* volume) {
 		ComputeNonTruncatedVoxelCountFunctor instance;
-		VolumeTraversalEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>::VoxelTraversal_SingleThreaded(scene,
+		VolumeTraversalEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>::VoxelTraversal_SingleThreaded(volume,
 		                                                                                       instance);
 		return instance.count;
 	}
@@ -126,26 +126,26 @@ struct ComputeNonTruncatedVoxelCountFunctor<true, TVoxel, TIndex> {
 
 template<typename TVoxel, typename TIndex>
 int
-ITMSceneStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeNonTruncatedVoxelCount(VoxelVolume<TVoxel, TIndex>* scene) {
-	return ComputeNonTruncatedVoxelCountFunctor<TVoxel::hasSemanticInformation, TVoxel, TIndex>::compute(scene);
+VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeNonTruncatedVoxelCount(VoxelVolume<TVoxel, TIndex>* volume) {
+	return ComputeNonTruncatedVoxelCountFunctor<TVoxel::hasSemanticInformation, TVoxel, TIndex>::compute(volume);
 }
 
 
 template<typename TVoxel, typename TIndex>
 double
-ITMSceneStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeNonTruncatedVoxelAbsSdfSum(
-		VoxelVolume<TVoxel, TIndex>* scene) {
+VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeNonTruncatedVoxelAbsSdfSum(
+		VoxelVolume<TVoxel, TIndex>* volume) {
 	return SumSDFFunctor<TVoxel::hasSemanticInformation, TVoxel, TIndex, MEMORYDEVICE_CPU>::compute(
-			scene, VoxelFlags::VOXEL_NONTRUNCATED);
+			volume, VoxelFlags::VOXEL_NONTRUNCATED);
 
 }
 
 template<typename TVoxel, typename TIndex>
 double
-ITMSceneStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeTruncatedVoxelAbsSdfSum(
-		VoxelVolume<TVoxel, TIndex>* scene) {
+VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeTruncatedVoxelAbsSdfSum(
+		VoxelVolume<TVoxel, TIndex>* volume) {
 	return SumSDFFunctor<TVoxel::hasSemanticInformation, TVoxel, TIndex, MEMORYDEVICE_CPU>::
-	compute(scene, VoxelFlags::VOXEL_TRUNCATED);
+	compute(volume, VoxelFlags::VOXEL_TRUNCATED);
 }
 
 //======================================================================================================================
@@ -156,13 +156,13 @@ ITMSceneStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeTruncated
 
 template<typename TVoxel, typename TIndex>
 std::vector<int>
-ITMSceneStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::GetAllocatedHashCodes(VoxelVolume<TVoxel, TIndex>* volume) {
+VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::GetAllocatedHashCodes(VoxelVolume<TVoxel, TIndex>* volume) {
 	return HashOnlyStatisticsFunctor<TVoxel, TIndex, MEMORYDEVICE_CPU>::GetAllocatedHashCodes(volume);
 }
 
 template<typename TVoxel, typename TIndex>
 int
-ITMSceneStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeAllocatedHashBlockCount(
+VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeAllocatedHashBlockCount(
 		VoxelVolume<TVoxel, TIndex>* volume) {
 	return HashOnlyStatisticsFunctor<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeAllocatedHashBlockCount(volume);
 }
@@ -170,10 +170,10 @@ ITMSceneStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeAllocated
 
 template<typename TVoxel, typename TIndex>
 unsigned int
-ITMSceneStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::CountVoxelsWithSpecificSdfValue(VoxelVolume<TVoxel, TIndex>* scene,
-                                                                                                float value) {
+VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::CountVoxelsWithSpecificSdfValue(VoxelVolume<TVoxel, TIndex>* volume,
+                                                                                              float value) {
 	return ComputeVoxelCountWithSpecificValue<TVoxel::hasSDFInformation, TVoxel, TIndex, MEMORYDEVICE_CPU>::compute(
-			scene, value);
+			volume, value);
 }
 
 // region ================================ VOXEL GRADIENTS =============================================================
@@ -184,18 +184,18 @@ struct MaxGradientFunctor;
 template<typename TIndex>
 struct MaxGradientFunctor<TSDFVoxel_f_flags, TIndex> {
 	static float
-	find(VoxelVolume<TSDFVoxel_f_flags, TIndex>* scene, bool secondGradientField, Vector3i& maxPosition) {
+	find(VoxelVolume<TSDFVoxel_f_flags, TIndex>* volume, bool secondGradientField, Vector3i& maxPosition) {
 		DIEWITHEXCEPTION_REPORTLOCATION("Not implemented for voxels without gradients.");
 	}
 };
 
 template<typename TIndex>
 struct MaxGradientFunctor<WarpVoxel_f_uf, TIndex> {
-	static float find(VoxelVolume<WarpVoxel, TIndex>* scene, bool secondGradientField, Vector3i& maxPosition) {
+	static float find(VoxelVolume<WarpVoxel, TIndex>* volume, bool secondGradientField, Vector3i& maxPosition) {
 		MaxGradientFunctor maxGradientFunctor;
 		maxGradientFunctor.secondGradientField = secondGradientField;
 		VolumeTraversalEngine<WarpVoxel_f_uf, TIndex, MEMORYDEVICE_CPU>::
-		VoxelPositionTraversal(scene, maxGradientFunctor);
+		VoxelPositionTraversal(volume, maxGradientFunctor);
 		maxPosition = maxGradientFunctor.maxPosition;
 		return maxGradientFunctor.maxLength;
 	}
@@ -221,52 +221,52 @@ struct MaxGradientFunctor<WarpVoxel_f_uf, TIndex> {
 
 template<typename TVoxel, typename TIndex>
 float
-ITMSceneStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::FindMaxGradient0LengthAndPosition(
-		VoxelVolume<TVoxel, TIndex>* scene,
+VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::FindMaxGradient0LengthAndPosition(
+		VoxelVolume<TVoxel, TIndex>* volume,
 		Vector3i& positionOut) {
-	return MaxGradientFunctor<TVoxel, TIndex>::find(scene, false, positionOut);
+	return MaxGradientFunctor<TVoxel, TIndex>::find(volume, false, positionOut);
 }
 
 template<typename TVoxel, typename TIndex>
 float
-ITMSceneStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::FindMaxGradient1LengthAndPosition(
-		VoxelVolume<TVoxel, TIndex>* scene,
+VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::FindMaxGradient1LengthAndPosition(
+		VoxelVolume<TVoxel, TIndex>* volume,
 		Vector3i& positionOut) {
-	return MaxGradientFunctor<TVoxel, TIndex>::find(scene, true, positionOut);
+	return MaxGradientFunctor<TVoxel, TIndex>::find(volume, true, positionOut);
 }
 
 
 template<typename TVoxel, typename TIndex>
 unsigned int
-ITMSceneStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeAlteredVoxelCount(VoxelVolume<TVoxel, TIndex>* scene) {
+VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeAlteredVoxelCount(VoxelVolume<TVoxel, TIndex>* volume) {
 	IsAlteredCountFunctor<TVoxel> functor;
-	VolumeTraversalEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>::VoxelTraversal(scene, functor);
+	VolumeTraversalEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>::VoxelTraversal(volume, functor);
 	return functor.GetCount();
 }
 
 template<typename TVoxel, typename TIndex>
-double ITMSceneStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeFramewiseWarpMin(VoxelVolume<TVoxel, TIndex>* scene) {
+double VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeFramewiseWarpMin(VoxelVolume<TVoxel, TIndex>* volume) {
 	return ComputeFramewiseWarpLengthStatisticFunctor<TVoxel::hasFramewiseWarp, TVoxel, TIndex, MEMORYDEVICE_CPU, MINIMUM>::compute(
-			scene);
+			volume);
 }
 
 template<typename TVoxel, typename TIndex>
-double ITMSceneStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeFramewiseWarpMax(VoxelVolume<TVoxel, TIndex>* scene) {
+double VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeFramewiseWarpMax(VoxelVolume<TVoxel, TIndex>* volume) {
 	return ComputeFramewiseWarpLengthStatisticFunctor<TVoxel::hasFramewiseWarp, TVoxel, TIndex, MEMORYDEVICE_CPU, MAXIMUM>::compute(
-			scene);
+			volume);
 }
 
 template<typename TVoxel, typename TIndex>
-double ITMSceneStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeFramewiseWarpMean(VoxelVolume<TVoxel, TIndex>* scene) {
+double VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeFramewiseWarpMean(VoxelVolume<TVoxel, TIndex>* volume) {
 	return ComputeFramewiseWarpLengthStatisticFunctor<TVoxel::hasFramewiseWarp, TVoxel, TIndex, MEMORYDEVICE_CPU, MEAN>::compute(
-			scene);
+			volume);
 }
 
 template<typename TVoxel, typename TIndex>
-Vector6i ITMSceneStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::FindMinimumNonTruncatedBoundingBox(
-		VoxelVolume<TVoxel, TIndex>* scene) {
+Vector6i VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::FindMinimumNonTruncatedBoundingBox(
+		VoxelVolume<TVoxel, TIndex>* volume) {
 	return FlagMatchBBoxFunctor<TVoxel::hasSemanticInformation, TVoxel, TIndex, MEMORYDEVICE_CPU>::
-	        compute(scene, VoxelFlags::VOXEL_NONTRUNCATED);
+	        compute(volume, VoxelFlags::VOXEL_NONTRUNCATED);
 }
 
 // endregion ===========================================================================================================

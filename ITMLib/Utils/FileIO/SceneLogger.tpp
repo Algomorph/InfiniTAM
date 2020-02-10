@@ -24,7 +24,7 @@
 #include "SceneLogger_SceneSlice.tpp"
 #include "../../Engines/DepthFusion/DepthFusionEngineFactory.h"
 #include "../../Engines/VolumeFileIO/VolumeFileIOEngine.h"
-#include "../Analytics/SceneStatisticsCalculator/CPU/SceneStatisticsCalculator_CPU.h"
+#include "../Analytics/VolumeStatisticsCalculator/CPU/VolumeStatisticsCalculator_CPU.h"
 
 
 
@@ -115,7 +115,7 @@ void SceneLogger<TVoxel, TWarp, TIndex>::GetActiveSceneBounds(Vector6i& bounds) 
 		if (this->activeWarpLogger->isSlice) {
 			bounds = activeWarpLogger->bounds;
 		} else {
-			ITMSceneStatisticsCalculator<TWarp, TIndex, MEMORYDEVICE_CPU>::Instance().ComputeVoxelBounds(
+			VolumeStatisticsCalculator<TWarp, TIndex, MEMORYDEVICE_CPU>::Instance().ComputeVoxelBounds(
 					this->activeWarpLogger->warpField);
 		}
 	}

@@ -894,32 +894,32 @@ set(ITMLIB_UTILS_HEADERS
 ## ================================================ UTILS - SCENE STATISTICS CALCULATOR ================================
 
 set(ITMLIB_UTILS_STATCALC_INTERFACE_HEADERS
-    Utils/Analytics/SceneStatisticsCalculator/Interface/SceneStatisticsCalculatorInterface.h
+    Utils/Analytics/VolumeStatisticsCalculator/Interface/VolumeStatisticsCalculatorInterface.h
     )
 
 
 set(ITMLIB_UTILS_STATCALC_SHARED_HEADERS
-    Utils/Analytics/SceneStatisticsCalculator/Shared/SceneStatisticsCalculator_Functors.h
+    Utils/Analytics/VolumeStatisticsCalculator/Shared/VolumeStatisticsCalculator_Functors.h
     )
 
 
 set(ITMLIB_UTILS_STATCALC_CPU_HEADERS
-    Utils/Analytics/SceneStatisticsCalculator/CPU/SceneStatisticsCalculator_CPU.h
+    Utils/Analytics/VolumeStatisticsCalculator/CPU/VolumeStatisticsCalculator_CPU.h
     )
 
 set(ITMLIB_UTILS_STATCALC_CPU_SOURCES
-    Utils/Analytics/SceneStatisticsCalculator/CPU/SceneStatisticsCalculator_CPU.tpp
-    Utils/Analytics/SceneStatisticsCalculator/CPU/SceneStatisticsCalculator_CPU_PlainVoxelArray.cpp
-    Utils/Analytics/SceneStatisticsCalculator/CPU/SceneStatisticsCalculator_CPU_VoxelBlockHash.cpp
+    Utils/Analytics/VolumeStatisticsCalculator/CPU/VolumeStatisticsCalculator_CPU.tpp
+    Utils/Analytics/VolumeStatisticsCalculator/CPU/VolumeStatisticsCalculator_CPU_PlainVoxelArray.cpp
+    Utils/Analytics/VolumeStatisticsCalculator/CPU/VolumeStatisticsCalculator_CPU_VoxelBlockHash.cpp
     )
 
 set(ITMLIB_UTILS_STATCALC_CUDA_HEADERS
-    Utils/Analytics/SceneStatisticsCalculator/CUDA/SceneStatisticsCalculator_CUDA.h
+    Utils/Analytics/VolumeStatisticsCalculator/CUDA/VolumeStatisticsCalculator_CUDA.h
     )
 set(ITMLIB_UTILS_STATCALC_CUDA_SOURCES
-    Utils/Analytics/SceneStatisticsCalculator/CUDA/SceneStatisticsCalculator_CUDA.tcu
-    Utils/Analytics/SceneStatisticsCalculator/CUDA/SceneStatisticsCalculator_CUDA_PlainVoxelArray.cu
-    Utils/Analytics/SceneStatisticsCalculator/CUDA/SceneStatisticsCalculator_CUDA_VoxelBlockHash.cu
+    Utils/Analytics/VolumeStatisticsCalculator/CUDA/VolumeStatisticsCalculator_CUDA.tcu
+    Utils/Analytics/VolumeStatisticsCalculator/CUDA/VolumeStatisticsCalculator_CUDA_PlainVoxelArray.cu
+    Utils/Analytics/VolumeStatisticsCalculator/CUDA/VolumeStatisticsCalculator_CUDA_VoxelBlockHash.cu
     )
 
 

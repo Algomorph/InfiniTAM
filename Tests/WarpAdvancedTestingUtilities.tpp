@@ -31,9 +31,9 @@
 #include "../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison.h"
 
-#include "../ITMLib/Utils/Analytics/SceneStatisticsCalculator/CPU/SceneStatisticsCalculator_CPU.h"
+#include "../ITMLib/Utils/Analytics/VolumeStatisticsCalculator/CPU/VolumeStatisticsCalculator_CPU.h"
 #ifndef COMPILE_WITHOUT_CUDA
-#include "../ITMLib/Utils/Analytics/SceneStatisticsCalculator/CUDA/SceneStatisticsCalculator_CUDA.h"
+#include "../ITMLib/Utils/Analytics/VolumeStatisticsCalculator/CUDA/VolumeStatisticsCalculator_CUDA.h"
 #include "../ITMLib/Engines/Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
 #endif
 
@@ -76,8 +76,8 @@ GenerateRawLiveAndCanonicalVolumes(bool allocateLiveFromBothImages,
 			DepthFusionEngineFactory
 			::Build<TSDFVoxel, WarpVoxel, TIndex>(TMemoryDeviceType);
 	reconstructionEngine->IntegrateDepthImageIntoTsdfVolume(live_volumes[live_index_to_start_from], view);
-	ITMSceneStatisticsCalculator<TSDFVoxel,TIndex,TMemoryDeviceType>& calculator =
-			ITMSceneStatisticsCalculator<TSDFVoxel,TIndex,TMemoryDeviceType>::Instance();
+	VolumeStatisticsCalculator<TSDFVoxel,TIndex,TMemoryDeviceType>& calculator =
+			VolumeStatisticsCalculator<TSDFVoxel,TIndex,TMemoryDeviceType>::Instance();
 }
 
 

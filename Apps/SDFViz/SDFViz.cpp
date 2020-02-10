@@ -59,7 +59,7 @@
 //ITMLib
 #include "../../ITMLib/Utils/FileIO/SceneLogger.h"
 #include "../../ITMLib/Utils/Configuration.h"
-#include "../../ITMLib/Utils/Analytics/SceneStatisticsCalculator/CPU/SceneStatisticsCalculator_CPU.h"
+#include "../../ITMLib/Utils/Analytics/VolumeStatisticsCalculator/CPU/VolumeStatisticsCalculator_CPU.h"
 #include "SDFVizGlobalDefines.h"
 #include "../../ITMLib/Utils/Visualization/SceneSliceVisualizer3DCommon.h"
 //TODO: organize regions -Greg (GitHub: Algomorph)

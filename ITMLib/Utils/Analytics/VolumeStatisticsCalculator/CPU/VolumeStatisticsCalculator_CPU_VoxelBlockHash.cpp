@@ -13,13 +13,13 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "../../../../Engines/Traversal/CUDA/HashTableTraversal_CUDA.h"
+#include "../../../../Engines/Traversal/CPU/HashTableTraversal_CPU.h"
 #include "../../../../GlobalTemplateDefines.h"
-#include "SceneStatisticsCalculator_CUDA.tcu"
+#include "VolumeStatisticsCalculator_CPU.tpp"
 
 namespace ITMLib {
 template
-class ITMSceneStatisticsCalculator<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>;
+class VolumeStatisticsCalculator<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>;
 template
-class ITMSceneStatisticsCalculator<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>;
+class VolumeStatisticsCalculator<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>;
 } // namespace ITMLib

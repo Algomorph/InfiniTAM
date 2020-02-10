@@ -36,7 +36,7 @@
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CPU.h"
 #include "../ORUtils/FileUtils.h"
 #include "../ITMLib/Engines/VolumeFileIO/VolumeFileIOEngine.h"
-#include "../ITMLib/Utils/Analytics/SceneStatisticsCalculator/CPU/SceneStatisticsCalculator_CPU.h"
+#include "../ITMLib/Utils/Analytics/VolumeStatisticsCalculator/CPU/VolumeStatisticsCalculator_CPU.h"
 #include "TestUtils.h"
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
 

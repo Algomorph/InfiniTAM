@@ -37,7 +37,7 @@
 
 #include "../ORUtils/FileUtils.h"
 #include "../ITMLib/Engines/VolumeFileIO/VolumeFileIOEngine.h"
-#include "../ITMLib/Utils/Analytics/SceneStatisticsCalculator/CUDA/SceneStatisticsCalculator_CUDA.h"
+#include "../ITMLib/Utils/Analytics/VolumeStatisticsCalculator/CUDA/VolumeStatisticsCalculator_CUDA.h"
 #include "TestUtils.h"
 #include "../ITMLib/Engines/EditAndCopy/EditAndCopyEngineFactory.h"
 

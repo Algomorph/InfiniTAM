@@ -28,15 +28,15 @@
 #include "../../../SurfaceTrackers/SurfaceTrackerFactory.h"
 #include "../../../Utils/Analytics/BenchmarkUtils.h"
 #include "../../EditAndCopy/Interface/EditAndCopyEngineInterface.h"
-#include "../../../Utils/Analytics/SceneStatisticsCalculator/Interface/SceneStatisticsCalculatorInterface.h"
+#include "../../../Utils/Analytics/VolumeStatisticsCalculator/Interface/VolumeStatisticsCalculatorInterface.h"
 
 //** CPU **
 #include "../../EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
-#include "../../../Utils/Analytics/SceneStatisticsCalculator/CPU/SceneStatisticsCalculator_CPU.h"
+#include "../../../Utils/Analytics/VolumeStatisticsCalculator/CPU/VolumeStatisticsCalculator_CPU.h"
 //** CUDA **
 #ifndef COMPILE_WITHOUT_CUDA
 #include "../../EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
-#include "../../../Utils/Analytics/SceneStatisticsCalculator/CUDA/SceneStatisticsCalculator_CUDA.h"
+#include "../../../Utils/Analytics/VolumeStatisticsCalculator/CUDA/VolumeStatisticsCalculator_CUDA.h"
 #endif
 
 using namespace ITMLib;
@@ -49,14 +49,14 @@ template<typename TVoxel, typename TWarp, typename TIndex>
 void DenseDynamicMapper<TVoxel, TWarp, TIndex>::LogVolumeStatistics(VoxelVolume<TVoxel, TIndex>* volume,
                                                                     std::string volume_description) {
 	if (this->log_volume_statistics) {
-		SceneStatisticsCalculatorInterface<TVoxel, TIndex>* calculator = nullptr;
+		VolumeStatisticsCalculatorInterface<TVoxel, TIndex>* calculator = nullptr;
 		switch (volume->index.memoryType) {
 			case MEMORYDEVICE_CPU:
-				calculator = &ITMSceneStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance();
+				calculator = &VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance();
 				break;
 			case MEMORYDEVICE_CUDA:
 #ifndef COMPILE_WITHOUT_CUDA
-				calculator = &ITMSceneStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CUDA>::Instance();
+				calculator = &VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CUDA>::Instance();
 #else
 				DIEWITHEXCEPTION_REPORTLOCATION("Built without CUDA support, aborting.");
 #endif

@@ -27,10 +27,10 @@
 #include "../ITMLib/Utils/Math.h"
 #include "../ITMLib/Objects/Volume/VoxelVolume.h"
 #include "../ITMLib/GlobalTemplateDefines.h"
-#include "../ITMLib/Utils/Analytics/SceneStatisticsCalculator/Interface/SceneStatisticsCalculatorInterface.h"
+#include "../ITMLib/Utils/Analytics/VolumeStatisticsCalculator/Interface/VolumeStatisticsCalculatorInterface.h"
 //(CPU)
 #include "../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
-#include "../ITMLib/Utils/Analytics/SceneStatisticsCalculator/CPU/SceneStatisticsCalculator_CPU.h"
+#include "../ITMLib/Utils/Analytics/VolumeStatisticsCalculator/CPU/VolumeStatisticsCalculator_CPU.h"
 
 using namespace ITMLib;
 
@@ -104,7 +104,9 @@ BOOST_FIXTURE_TEST_CASE(TestAllocateHashBlockList_CPU, CollisionHashFixture) {
 	IndexingEngine<TSDFVoxel,VoxelBlockHash,MEMORYDEVICE_CPU>& indexer = IndexingEngine<TSDFVoxel,VoxelBlockHash,MEMORYDEVICE_CPU>::Instance();
 	ORUtils::MemoryBlock<Vector3s> hash_position_memory_block = std_vector_to_ORUtils_MemoryBlock(block_positions, MEMORYDEVICE_CPU);
 	indexer.AllocateBlockList(&volume, hash_position_memory_block, hash_position_memory_block.dataSize);
-	int allocated_blocks = SceneStatCalc_CPU_VBH_Voxel::Instance().ComputeAllocatedHashBlockCount(&volume);
+	int allocated_blocks = StatCalc_CPU_VBH_Voxel::Instance().ComputeAllocatedHashBlockCount(&volume);
+
+	//vector<int>
 	std::cout << allocated_blocks << std::endl;
 	std::cout << block_positions.size() << std::endl;
 	std::cout << seed << std::endl;

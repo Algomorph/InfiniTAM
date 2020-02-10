@@ -27,15 +27,13 @@
 #include "../ITMLib/Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
 #include "TestUtils.h"
 #include "../ITMLib/Engines/VolumeFileIO/VolumeFileIOEngine.h"
-#include "../ITMLib/Utils/Analytics/SceneStatisticsCalculator/CUDA/SceneStatisticsCalculator_CUDA.h"
+#include "../ITMLib/Utils/Analytics/VolumeStatisticsCalculator/CUDA/VolumeStatisticsCalculator_CUDA.h"
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CUDA.h"
 
 using namespace ITMLib;
 
 typedef VolumeFileIOEngine<TSDFVoxel, PlainVoxelArray> SceneFileIOEngine_PVA;
 typedef VolumeFileIOEngine<TSDFVoxel, VoxelBlockHash> SceneFileIOEngine_VBH;
-//typedef ITMSceneStatisticsCalculator_CUDA<TSDFVoxel, PlainVoxelArray> SceneStatisticsCalculator_PVA;
-//typedef ITMSceneStatisticsCalculator_CUDA<TSDFVoxel, VoxelBlockHash> SceneStatCalc_CPU_VBH_Voxel;
 
 BOOST_AUTO_TEST_CASE(testSaveSceneCompact_CUDA) {
 
@@ -58,7 +56,7 @@ BOOST_AUTO_TEST_CASE(testSaveSceneCompact_CUDA) {
 	SceneFileIOEngine_PVA::LoadFromDirectoryCompact(&scene2, path);
 
 	float tolerance = 1e-8;
-	BOOST_REQUIRE_EQUAL( SceneStatCalc_CUDA_PVA_Voxel ::Instance().ComputeNonTruncatedVoxelCount(&scene2), 19456);
+	BOOST_REQUIRE_EQUAL(StatCalc_CUDA_PVA_Voxel ::Instance().ComputeNonTruncatedVoxelCount(&scene2), 19456);
 	BOOST_REQUIRE(contentAlmostEqual_CUDA(&scene1, &scene2, tolerance));
 
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> scene3(
@@ -75,7 +73,7 @@ BOOST_AUTO_TEST_CASE(testSaveSceneCompact_CUDA) {
 	ManipulationEngine_CUDA_VBH_Voxel::Inst().ResetVolume(&scene4);
 	SceneFileIOEngine_VBH::LoadFromDirectoryCompact(&scene4, path);
 
-	BOOST_REQUIRE_EQUAL( SceneStatCalc_CUDA_VBH_Voxel::Instance().ComputeNonTruncatedVoxelCount(&scene4), 19456);
+	BOOST_REQUIRE_EQUAL(StatCalc_CUDA_VBH_Voxel::Instance().ComputeNonTruncatedVoxelCount(&scene4), 19456);
 	BOOST_REQUIRE(contentAlmostEqual_CUDA(&scene3, &scene4, tolerance));
 	BOOST_REQUIRE(contentAlmostEqual_CUDA(&scene1, &scene4, tolerance));
 }

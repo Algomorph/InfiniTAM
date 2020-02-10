@@ -29,7 +29,7 @@
 //local - CPU
 #include "../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
 #include "../ITMLib/Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
-#include "../ITMLib/Utils/Analytics/SceneStatisticsCalculator/CPU/SceneStatisticsCalculator_CPU.h"
+#include "../ITMLib/Utils/Analytics/VolumeStatisticsCalculator/CPU/VolumeStatisticsCalculator_CPU.h"
 //local - CUDA
 #ifndef COMPLIE_WITHOUT_CUDA
 #include "../ITMLib/Engines/Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
@@ -37,7 +37,7 @@
 #include "CUDAAtomicTesting.h"
 #include "../ITMLib/Engines/EditAndCopy/EditAndCopyEngineFactory.h"
 #include "TestUtils.h"
-#include "../ITMLib/Utils/Analytics/SceneStatisticsCalculator/CUDA/SceneStatisticsCalculator_CUDA.h"
+#include "../ITMLib/Utils/Analytics/VolumeStatisticsCalculator/CUDA/VolumeStatisticsCalculator_CUDA.h"
 #endif
 
 
@@ -169,7 +169,7 @@ void TestAllocateBasedOnVolumeExpanded_Generic() {
 	IndexingEngine<TSDFVoxel, VoxelBlockHash, TMemoryDeviceType>::Instance()
 			.AllocateUsingOtherVolumeExpanded(&volume2, &volume1);
 
-	BOOST_REQUIRE_EQUAL((ITMSceneStatisticsCalculator<TSDFVoxel, VoxelBlockHash, TMemoryDeviceType>::Instance()
+	BOOST_REQUIRE_EQUAL((VolumeStatisticsCalculator<TSDFVoxel, VoxelBlockHash, TMemoryDeviceType>::Instance()
 			.ComputeAllocatedHashBlockCount(&volume2)), 1625);
 
 }

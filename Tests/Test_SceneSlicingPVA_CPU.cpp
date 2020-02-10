@@ -26,7 +26,7 @@
 #include "../ITMLib/Utils/Configuration.h"
 #include "../ITMLib/Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CPU.h"
-#include "../ITMLib/Utils/Analytics/SceneStatisticsCalculator/CPU/SceneStatisticsCalculator_CPU.h"
+#include "../ITMLib/Utils/Analytics/VolumeStatisticsCalculator/CPU/VolumeStatisticsCalculator_CPU.h"
 
 using namespace ITMLib;
 
@@ -41,10 +41,10 @@ BOOST_AUTO_TEST_CASE(testPVASceneSlice_CPU) {
 	const int nonTruncatedVoxelCount = 41307;
 	canonical_scene_CPU.LoadFromDirectory("TestData/snoopy_result_fr16-17_PVA/canonical");
 
-	BOOST_REQUIRE_EQUAL(SceneStatCalc_CPU_PVA_Voxel::Instance().ComputeNonTruncatedVoxelCount(&canonical_scene_CPU),
+	BOOST_REQUIRE_EQUAL(StatCalc_CPU_PVA_Voxel::Instance().ComputeNonTruncatedVoxelCount(&canonical_scene_CPU),
 	                    nonTruncatedVoxelCount);
 
-	BOOST_REQUIRE_CLOSE(SceneStatCalc_CPU_PVA_Voxel::Instance().ComputeNonTruncatedVoxelAbsSdfSum(&canonical_scene_CPU),
+	BOOST_REQUIRE_CLOSE(StatCalc_CPU_PVA_Voxel::Instance().ComputeNonTruncatedVoxelAbsSdfSum(&canonical_scene_CPU),
 	                    17063.5, 0.001);
 
 
@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(testPVASceneSlice_CPU) {
 	ManipulationEngine_CPU_PVA_Voxel::Inst().CopyVolumeSlice(&canonical_scene_slice_same_dimensions_CPU,
 	                                                         &canonical_scene_CPU, bounds);
 
-	BOOST_REQUIRE_EQUAL(SceneStatCalc_CPU_PVA_Voxel::Instance().ComputeNonTruncatedVoxelCount(
+	BOOST_REQUIRE_EQUAL(StatCalc_CPU_PVA_Voxel::Instance().ComputeNonTruncatedVoxelCount(
 			&canonical_scene_slice_same_dimensions_CPU), nonTruncatedVoxelCount);
 
 	float tolerance = 1e-8;
@@ -77,11 +77,11 @@ BOOST_AUTO_TEST_CASE(testPVASceneSlice_CPU) {
 
 	ManipulationEngine_CPU_PVA_Voxel::Inst().CopyVolumeSlice(&canonical_scene_slice_different_dimensions_CPU,
 	                                                         &canonical_scene_CPU, bounds);
-	BOOST_REQUIRE_EQUAL(SceneStatCalc_CPU_PVA_Voxel::Instance().ComputeNonTruncatedVoxelCount(
+	BOOST_REQUIRE_EQUAL(StatCalc_CPU_PVA_Voxel::Instance().ComputeNonTruncatedVoxelCount(
 			&canonical_scene_slice_different_dimensions_CPU), nonTruncatedVoxelCount);
-	BOOST_REQUIRE_CLOSE(SceneStatCalc_CPU_PVA_Voxel::Instance().ComputeNonTruncatedVoxelAbsSdfSum(
+	BOOST_REQUIRE_CLOSE(StatCalc_CPU_PVA_Voxel::Instance().ComputeNonTruncatedVoxelAbsSdfSum(
 			&canonical_scene_slice_different_dimensions_CPU), 17063.5, 0.001);
-	BOOST_REQUIRE_CLOSE(SceneStatCalc_CPU_PVA_Voxel::Instance().ComputeNonTruncatedVoxelAbsSdfSum(
+	BOOST_REQUIRE_CLOSE(StatCalc_CPU_PVA_Voxel::Instance().ComputeNonTruncatedVoxelAbsSdfSum(
 			&canonical_scene_CPU), 17063.5, 0.001);
 	BOOST_REQUIRE(allocatedContentAlmostEqual_CPU_Verbose(&canonical_scene_CPU,
 	                                              &canonical_scene_slice_different_dimensions_CPU, tolerance));

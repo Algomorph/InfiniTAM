@@ -19,7 +19,7 @@
 
 //local
 #include "WarpFieldLogger.h"
-#include "../Analytics/SceneStatisticsCalculator/CPU/SceneStatisticsCalculator_CPU.h"
+#include "../Analytics/VolumeStatisticsCalculator/CPU/VolumeStatisticsCalculator_CPU.h"
 #include "../Configuration.h"
 #include "../../Engines/DepthFusion/DepthFusionEngineFactory.h"
 #include "../../Engines/Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
@@ -279,26 +279,26 @@ const VoxelVolume<TVoxel, TIndex>* WarpFieldLogger<TVoxel, TIndex>::GetScene() c
 template<typename TVoxel, typename TIndex>
 void WarpFieldLogger<TVoxel, TIndex>::Load() {
 	warpField->LoadFromDirectory(scenePath.string());
-	voxelCount = ITMSceneStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().ComputeAllocatedVoxelCount(warpField);
+	voxelCount = VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().ComputeAllocatedVoxelCount(warpField);
 }
 
 template<typename TVoxel, typename TIndex>
 void WarpFieldLogger<TVoxel, TIndex>::Save() {
 	warpField->SaveToDirectory(scenePath.string());
-	this->voxelCount = ITMSceneStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().ComputeAllocatedVoxelCount(warpField);
+	this->voxelCount = VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().ComputeAllocatedVoxelCount(warpField);
 }
 
 template<typename TVoxel, typename TIndex>
 void WarpFieldLogger<TVoxel, TIndex>::SaveCompact() {
 	VolumeFileIOEngine<TVoxel,TIndex>::SaveToDirectoryCompact(warpField, scenePath.string());
-	this->voxelCount = ITMSceneStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().ComputeAllocatedVoxelCount(warpField);
+	this->voxelCount = VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().ComputeAllocatedVoxelCount(warpField);
 }
 
 template<typename TVoxel, typename TIndex>
 void WarpFieldLogger<TVoxel, TIndex>::LoadCompact() {
 	warpField->Reset();
 	VolumeFileIOEngine<TVoxel,TIndex>::LoadFromDirectoryCompact(warpField, scenePath.string());
-	this->voxelCount = ITMSceneStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().ComputeAllocatedVoxelCount(warpField);
+	this->voxelCount = VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().ComputeAllocatedVoxelCount(warpField);
 }
 //endregion
 // region ======================================== LOAD / SAVE HIGHLIGHTS ==============================================
