@@ -168,15 +168,17 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::AllocateBlockLis
 			<< < cuda_grid_size, cuda_block_size >> >
 	                             (block_coordinates.GetData(
 			                             MEMORYDEVICE_CUDA), hash_table, guard_device, counters_device,
-			                             block_allocation_list, excess_allocation_list);
+			                             block_allocation_list, excess_allocation_list, new_block_count);
 
 	ORcudaKernelCheck;
+
+	ORcudaSafeCall(cudaFree(guard_device));
 	ORcudaSafeCall(cudaMemcpy(&counters, counters_device, sizeof(AllocationCounters<MEMORYDEVICE_CUDA>),
 	                          cudaMemcpyDeviceToHost));
 	ORcudaSafeCall(cudaFree(counters_device));
 
-	volume->localVBA.lastFreeBlockId = GET_ATOMIC_VALUE(counters.last_free_voxel_block_id);
-	volume->index.SetLastFreeExcessListId(GET_ATOMIC_VALUE(counters.last_free_excess_list_id));
+	volume->localVBA.lastFreeBlockId = counters.GetLastFreeVoxelBlockId();
+	volume->index.SetLastFreeExcessListId(counters.GetLastFreeExcesListId());
 }
 
 

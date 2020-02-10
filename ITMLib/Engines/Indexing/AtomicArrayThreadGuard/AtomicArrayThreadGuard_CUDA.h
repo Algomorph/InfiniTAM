@@ -23,28 +23,47 @@
 #include "../../../Utils/CUDAUtils.h"
 #include "../../../../ORUtils/PlatformIndependentAtomics.h"
 
-namespace ITMLib{
+namespace ITMLib {
+
+struct CUDA_Semaphore {
+	__device__ volatile char sem = 0;
+
+	__device__ void acquire_semaphore() {
+		while (atomicCAS((char*) &sem, 0, 1) != 0);
+	}
+
+	__device__ void release_semaphore() {
+		sem = 0;
+		__threadfence();
+	}
+};
+
 template<>
-class AtomicArrayThreadGuard<MEMORYDEVICE_CUDA>{
+class AtomicArrayThreadGuard<MEMORYDEVICE_CUDA> {
 public:
-	explicit AtomicArrayThreadGuard(int item_count) : lock_array_wrapper(item_count * sizeof(char), false, true)
-	{
-		lock_array_wrapper.Clear();
-		lock_array = lock_array_wrapper.GetData(MEMORYDEVICE_CUDA);
+	explicit AtomicArrayThreadGuard(int item_count) {
+		ORcudaSafeCall(cudaMalloc((void**) &semaphores, sizeof(CUDA_Semaphore) * item_count));
+		ORcudaSafeCall(cudaMemset(semaphores, 0, sizeof(CUDA_Semaphore) * item_count));
 	}
 
-	_DEVICE_WHEN_AVAILABLE_
-	void lock(int item_number){
-		while(atomicCAS(lock_array + item_number, (char)0, (char)1) != 0){};
+	~AtomicArrayThreadGuard() {
+		ORcudaSafeCall(cudaFree(semaphores));
 	}
 
-	_DEVICE_WHEN_AVAILABLE_
-	void release(int item_number){
+	__device__
+	void lock(int item_number) {
+		extern __shared__ char lock_array[];
+		while (atomicCAS(lock_array + item_number, (char) 0, (char) 1) != 0) {};
+	}
+
+	__device__
+	void release(int item_number) {
+		extern __shared__ char lock_array[];
 		lock_array[item_number] = 0;
 	}
+
 private:
-	ORUtils::MemoryBlock<char> lock_array_wrapper;
-	char* lock_array;
+	CUDA_Semaphore* semaphores;
 };
 } // namespace ITMLib
 

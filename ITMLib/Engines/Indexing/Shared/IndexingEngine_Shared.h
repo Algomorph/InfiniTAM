@@ -43,13 +43,20 @@ struct AllocationCounters{
 		INITIALIZE_ATOMIC(int, last_free_voxel_block_id, _last_free_voxel_block_id);
 		INITIALIZE_ATOMIC(int, last_free_excess_list_id, _last_free_excess_list_id);
 	}
-	DECLARE_ATOMIC(int, last_free_voxel_block_id);
-	DECLARE_ATOMIC(int, last_free_excess_list_id);
+	int GetLastFreeVoxelBlockId(){
+		return GET_ATOMIC_VALUE_CPU(last_free_voxel_block_id);
+	}
+	int GetLastFreeExcesListId(){
+		return GET_ATOMIC_VALUE_CPU(last_free_excess_list_id);
+	}
+
 	~AllocationCounters(){
 		CLEAN_UP_ATOMIC(last_free_voxel_block_id);
 		CLEAN_UP_ATOMIC(last_free_excess_list_id);
 	}
 
+	DECLARE_ATOMIC(int, last_free_voxel_block_id);
+	DECLARE_ATOMIC(int, last_free_excess_list_id);
 };
 
 template<MemoryDeviceType TMemoryDeviceType>

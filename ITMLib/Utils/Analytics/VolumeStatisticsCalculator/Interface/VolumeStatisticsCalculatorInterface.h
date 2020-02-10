@@ -25,8 +25,10 @@ class VolumeStatisticsCalculatorInterface {
 public:
 	virtual Vector6i ComputeVoxelBounds(const VoxelVolume<TVoxel, TIndex>* volume) = 0;
 	virtual int ComputeAllocatedVoxelCount(VoxelVolume<TVoxel, TIndex>* volume) = 0;
-	virtual std::vector<int> GetAllocatedHashCodes(VoxelVolume<TVoxel, TIndex>* volume) = 0;
 	virtual int ComputeAllocatedHashBlockCount(VoxelVolume<TVoxel, TIndex>* volume) = 0;
+	virtual std::vector<int> GetAllocatedHashCodes(VoxelVolume<TVoxel, TIndex>* volume) = 0;
+	virtual std::vector<Vector3s> GetAllocatedHashBlockPositions(VoxelVolume<TVoxel, TIndex>* volume) = 0;
+
 
 	virtual int ComputeNonTruncatedVoxelCount(VoxelVolume<TVoxel, TIndex>* volume) = 0;
 	virtual unsigned int ComputeAlteredVoxelCount(VoxelVolume<TVoxel, TIndex>* volume) = 0;

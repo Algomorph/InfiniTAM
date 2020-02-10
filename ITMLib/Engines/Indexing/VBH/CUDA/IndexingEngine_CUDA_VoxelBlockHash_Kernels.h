@@ -22,6 +22,7 @@
 #include "../../../Common/CheckBlockVisibility.h"
 
 namespace {
+
 //CUDA kernels
 
 __global__ void setVisibleEntriesToVisibleAtPreviousFrameAndUnstreamed(HashBlockVisibility* hash_block_visibility_types,
@@ -313,11 +314,78 @@ __global__ void allocateHashEntry_device(SingleHashAllocationData* data,
 	                                        data->hashCode);
 };
 
+template<MemoryDeviceType TMemoryDeviceType>
+_DEVICE_WHEN_AVAILABLE_
+inline int AllocateBlock_DEBUG(const CONSTPTR(Vector3s)& desired_block_position,
+                               HashEntry* hash_table,
+                               AtomicArrayThreadGuard<TMemoryDeviceType>& guard,
+                               ATOMIC_ARGUMENT(int) last_free_voxel_block_id,
+                               ATOMIC_ARGUMENT(int) last_free_excess_list_id,
+                               int* block_allocation_list, int* excess_allocation_list) {
+
+	int hash_code = HashCodeFromBlockPosition(desired_block_position);
+	guard.lock(hash_code);
+	HashEntry hash_entry = hash_table[hash_code];
+	//check if hash table contains entry
+	if (!(IS_EQUAL3(hash_entry.pos, desired_block_position) && hash_entry.ptr >= -1)) {
+		if (hash_entry.ptr >= -1) {
+			//search excess list only if there is no room in ordered part
+			while (hash_entry.offset >= 1) {
+				int new_hash_code = ORDERED_LIST_SIZE + hash_entry.offset - 1;
+				guard.lock(new_hash_code);
+				guard.release(hash_code);
+				hash_code = new_hash_code;
+
+				hash_entry = hash_table[hash_code];
+				if (IS_EQUAL3(hash_entry.pos, desired_block_position) && hash_entry.ptr >= -1) {
+					guard.release(hash_code);
+					return hash_code;
+				}
+			}
+			int block_index = ATOMIC_SUB(last_free_voxel_block_id, 1);
+			int excess_list_index = ATOMIC_SUB(last_free_excess_list_id, 1);
+			if (block_index >= 0 && excess_list_index >= 0) {
+				int excess_list_offset = excess_allocation_list[excess_list_index];
+				hash_table[hash_code].offset = excess_list_offset + 1;
+				HashEntry& new_hash_entry = hash_table[ORDERED_LIST_SIZE + excess_list_offset];
+				new_hash_entry.pos = desired_block_position;
+				new_hash_entry.ptr = block_allocation_list[block_index];
+				new_hash_entry.offset = 0;
+			} else {
+				ATOMIC_ADD(last_free_voxel_block_id, 1);
+				ATOMIC_ADD(last_free_excess_list_id, 1);
+				guard.release(hash_code);
+				return 0;
+			}
+			guard.release(hash_code);
+			return hash_code;
+		}
+		int ordered_index = ATOMIC_SUB(last_free_voxel_block_id, 1);
+
+		if (ordered_index >= 0) {
+			HashEntry& new_hash_entry = hash_table[hash_code];
+			new_hash_entry.pos = desired_block_position;
+			new_hash_entry.ptr = block_allocation_list[ordered_index];
+			new_hash_entry.offset = 0;
+		} else {
+			ATOMIC_ADD(last_free_voxel_block_id, 1);
+			guard.release(hash_code);
+			return 0;
+		}
+		guard.release(hash_code);
+		return hash_code;
+	}
+	guard.release(hash_code);
+	// already have hash block, no allocation needed
+	return hash_code;
+}
+
 __global__ void allocateBlock_device(
 		const Vector3s* new_block_positions, HashEntry* hash_table, AtomicArrayThreadGuard<MEMORYDEVICE_CUDA>* guard,
-		AllocationCounters<MEMORYDEVICE_CUDA>* counters, int* block_allocation_list, int* excess_allocation_list) {
+		AllocationCounters<MEMORYDEVICE_CUDA>* counters, int* block_allocation_list, int* excess_allocation_list, const int new_block_count) {
 	int new_block_index = threadIdx.x + blockIdx.x * blockDim.x;
-	AllocateBlock(new_block_positions[new_block_index], hash_table, *guard, counters->last_free_voxel_block_id,
+	if(new_block_index >= new_block_count) return;
+	AllocateBlock_DEBUG<MEMORYDEVICE_CUDA>(new_block_positions[new_block_index], hash_table, *guard, counters->last_free_voxel_block_id,
 	              counters->last_free_excess_list_id, block_allocation_list, excess_allocation_list);
 }
 

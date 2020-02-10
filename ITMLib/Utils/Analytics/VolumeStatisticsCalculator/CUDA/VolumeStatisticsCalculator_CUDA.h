@@ -36,8 +36,10 @@ public:
 
 	Vector6i ComputeVoxelBounds(const VoxelVolume<TVoxel, TIndex>* volume) override;
 	int ComputeAllocatedVoxelCount(VoxelVolume<TVoxel, TIndex>* volume) override;
-	std::vector<int> GetAllocatedHashCodes(VoxelVolume<TVoxel, TIndex>* volume) override;
 	int ComputeAllocatedHashBlockCount(VoxelVolume<TVoxel, TIndex>* volume) override;
+	std::vector<int> GetAllocatedHashCodes(VoxelVolume<TVoxel, TIndex>* volume) override;
+	std::vector<Vector3s> GetAllocatedHashBlockPositions(VoxelVolume<TVoxel, TIndex>* volume) override;
+
 
 	int ComputeNonTruncatedVoxelCount(VoxelVolume<TVoxel, TIndex>* volume) override;
 	unsigned int ComputeAlteredVoxelCount(VoxelVolume<TVoxel, TIndex>* volume) override;

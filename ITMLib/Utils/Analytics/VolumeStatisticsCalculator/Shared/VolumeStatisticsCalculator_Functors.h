@@ -369,12 +369,50 @@ private:
 	DECLARE_ATOMIC(int, current_fill_index);
 };
 
+
+template<MemoryDeviceType TMemoryDeviceType>
+struct AllocatedBlockPositionAggregationFunctor {
+	AllocatedBlockPositionAggregationFunctor(int allocated_block_count) : block_positions(allocated_block_count,
+	                                                                                      TMemoryDeviceType) {
+		INITIALIZE_ATOMIC(int, current_fill_index, 0);
+		block_positions_device = block_positions.GetData(TMemoryDeviceType);
+	}
+
+
+	~AllocatedBlockPositionAggregationFunctor() {
+		CLEAN_UP_ATOMIC(current_fill_index);
+	}
+
+
+	_DEVICE_WHEN_AVAILABLE_
+	void operator()(HashEntry& entry, int hash_code) {
+		if (entry.ptr >= 0) {
+			int index = ATOMIC_ADD(current_fill_index, 1);
+			block_positions_device[index] = entry.pos;
+		}
+	}
+
+	std::vector<Vector3s> data() {
+		return ORUtils_MemoryBlock_to_std_vector(block_positions, TMemoryDeviceType);
+	}
+
+private:
+	Vector3s* block_positions_device;
+	ORUtils::MemoryBlock<Vector3s> block_positions;
+	DECLARE_ATOMIC(int, current_fill_index);
+};
+
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 struct HashOnlyStatisticsFunctor;
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
 struct HashOnlyStatisticsFunctor<TVoxel, PlainVoxelArray, TMemoryDeviceType> {
 	static std::vector<int> GetAllocatedHashCodes(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
 		return std::vector<int>();
+	}
+
+	static std::vector<Vector3s> GetAllocatedBlockPositions(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
+		std::vector<Vector3s> pos_vector = {TO_SHORT3(volume->index.GetVolumeOffset())};
+		return pos_vector;
 	}
 
 	static int ComputeAllocatedHashBlockCount(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
@@ -386,6 +424,13 @@ struct HashOnlyStatisticsFunctor<TVoxel, VoxelBlockHash, TMemoryDeviceType> {
 	static std::vector<int> GetAllocatedHashCodes(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 		int allocated_count = ComputeAllocatedHashBlockCount(volume);
 		AllocatedHashesAggregationFunctor<TMemoryDeviceType> aggregator_functor(allocated_count);
+		HashTableTraversalEngine<TMemoryDeviceType>::TraverseWithHashCode(volume->index, aggregator_functor);
+		return aggregator_functor.data();
+	}
+
+	static std::vector<Vector3s> GetAllocatedBlockPositions(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
+		int allocated_count = ComputeAllocatedHashBlockCount(volume);
+		AllocatedBlockPositionAggregationFunctor<TMemoryDeviceType> aggregator_functor(allocated_count);
 		HashTableTraversalEngine<TMemoryDeviceType>::TraverseWithHashCode(volume->index, aggregator_functor);
 		return aggregator_functor.data();
 	}
