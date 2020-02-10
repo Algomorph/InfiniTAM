@@ -47,7 +47,7 @@ public:
 	void AllocateHashEntriesUsingLists_SetVisibility(VoxelVolume<TVoxel, VoxelBlockHash>* volume) override;
 
 	void AllocateBlockList(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
-	                       const ORUtils::MemoryBlock<Vector3s>& block_coordinates,
+	                       const ORUtils::MemoryBlock<Vector3s>& new_block_positions,
 	                       int new_block_count) override;
 
 	HashEntry FindHashEntry(const VoxelBlockHash& index, const Vector3s& coordinates) override;

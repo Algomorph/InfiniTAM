@@ -209,22 +209,22 @@ void buildHashAllocationTypeList_VolumeToVolume(ITMLib::HashEntryAllocationState
 }
 
 
-__global__ void buildHashAllocAndVisibleType_device(ITMLib::HashEntryAllocationState* hashEntryStates,
-                                                    HashBlockVisibility* blockVisibilityTypes,
-                                                    Vector3s* blockCoords, const float* depth,
-                                                    Matrix4f invertedCameraTransform, Vector4f projParams_d,
+__global__ void buildHashAllocAndVisibleType_device(ITMLib::HashEntryAllocationState* hash_entry_states,
+                                                    HashBlockVisibility* block_visibility_type,
+                                                    Vector3s* block_coords, const float* depth,
+                                                    Matrix4f inverted_camera_pose, Vector4f projParams_d,
                                                     float surface_cutoff_distance,
-                                                    Vector2i _imgSize, float oneOverHashBlockSizeMeters,
+                                                    Vector2i depth_image_size, float oneOverHashBlockSizeMeters,
                                                     HashEntry* hashTable, float near_clipping_distance,
                                                     float far_clipping_distance, bool* collisionDetected) {
 	int x = threadIdx.x + blockIdx.x * blockDim.x, y = threadIdx.y + blockIdx.y * blockDim.y;
 
-	if (x > _imgSize.x - 1 || y > _imgSize.y - 1) return;
+	if (x > depth_image_size.x - 1 || y > depth_image_size.y - 1) return;
 
-	findVoxelBlocksForRayNearSurface(hashEntryStates, blockCoords, blockVisibilityTypes,
+	findVoxelBlocksForRayNearSurface(hash_entry_states, block_coords, block_visibility_type,
 	                                 hashTable, x, y, depth,
 	                                 surface_cutoff_distance,
-	                                 invertedCameraTransform, projParams_d, oneOverHashBlockSizeMeters, _imgSize,
+	                                 inverted_camera_pose, projParams_d, oneOverHashBlockSizeMeters, depth_image_size,
 	                                 near_clipping_distance, far_clipping_distance,
 	                                 *collisionDetected);
 }
@@ -266,7 +266,6 @@ __global__ void markForAllocationBasedOnOneRingAroundAnotherAllocation_device(
 		const HashEntry* sourceHashTable, const HashEntry* targetHashTable, int hashEntryCount,
 		bool* collisionDetected) {
 
-	if (*collisionDetected) return;
 	int hashCode = blockIdx.x;
 
 	if (hashCode >= hashEntryCount) return;
@@ -286,7 +285,6 @@ __global__ void markForAllocationAndSetVisibilityBasedOnOneRingAroundAnotherAllo
 		const HashEntry* sourceHashTable, const HashEntry* targetHashTable, int hashEntryCount,
 		bool* collisionDetected) {
 
-	if (*collisionDetected) return;
 	int hashCode = blockIdx.x;
 
 	if (hashCode >= hashEntryCount) return;
@@ -314,79 +312,26 @@ __global__ void allocateHashEntry_device(SingleHashAllocationData* data,
 	                                        data->hashCode);
 };
 
-template<MemoryDeviceType TMemoryDeviceType>
-_DEVICE_WHEN_AVAILABLE_
-inline int AllocateBlock_DEBUG(const CONSTPTR(Vector3s)& desired_block_position,
-                               HashEntry* hash_table,
-                               AtomicArrayThreadGuard<TMemoryDeviceType>& guard,
-                               ATOMIC_ARGUMENT(int) last_free_voxel_block_id,
-                               ATOMIC_ARGUMENT(int) last_free_excess_list_id,
-                               int* block_allocation_list, int* excess_allocation_list) {
+//ITMLib::HashEntryAllocationState* hash_entry_states,
+//		Vector3s* hash_block_coordinates, int& hash_code,
+//const CONSTPTR(Vector3s)& desired_hash_block_position,
+//const CONSTPTR(HashEntry)* hash_table,
+//		THREADPTR(Vector3s)* colliding_block_positions,
+//THREADPTR(int*) colliding_block_hashes,
+//ATOMIC_ARGUMENT(int) colliding_block_count
 
-	int hash_code = HashCodeFromBlockPosition(desired_block_position);
-	guard.lock(hash_code);
-	HashEntry hash_entry = hash_table[hash_code];
-	//check if hash table contains entry
-	if (!(IS_EQUAL3(hash_entry.pos, desired_block_position) && hash_entry.ptr >= -1)) {
-		if (hash_entry.ptr >= -1) {
-			//search excess list only if there is no room in ordered part
-			while (hash_entry.offset >= 1) {
-				int new_hash_code = ORDERED_LIST_SIZE + hash_entry.offset - 1;
-				guard.lock(new_hash_code);
-				guard.release(hash_code);
-				hash_code = new_hash_code;
+__global__ void buildHashAllocationTypeList_BlockList_device(
+		const Vector3s* new_block_positions, HashEntryAllocationState* hash_entry_states, Vector3s* block_coordinates,
+		HashEntry* hash_table, const int new_block_count, Vector3s* colliding_block_positions, int* colliding_block_count) {
 
-				hash_entry = hash_table[hash_code];
-				if (IS_EQUAL3(hash_entry.pos, desired_block_position) && hash_entry.ptr >= -1) {
-					guard.release(hash_code);
-					return hash_code;
-				}
-			}
-			int block_index = ATOMIC_SUB(last_free_voxel_block_id, 1);
-			int excess_list_index = ATOMIC_SUB(last_free_excess_list_id, 1);
-			if (block_index >= 0 && excess_list_index >= 0) {
-				int excess_list_offset = excess_allocation_list[excess_list_index];
-				hash_table[hash_code].offset = excess_list_offset + 1;
-				HashEntry& new_hash_entry = hash_table[ORDERED_LIST_SIZE + excess_list_offset];
-				new_hash_entry.pos = desired_block_position;
-				new_hash_entry.ptr = block_allocation_list[block_index];
-				new_hash_entry.offset = 0;
-			} else {
-				ATOMIC_ADD(last_free_voxel_block_id, 1);
-				ATOMIC_ADD(last_free_excess_list_id, 1);
-				guard.release(hash_code);
-				return 0;
-			}
-			guard.release(hash_code);
-			return hash_code;
-		}
-		int ordered_index = ATOMIC_SUB(last_free_voxel_block_id, 1);
-
-		if (ordered_index >= 0) {
-			HashEntry& new_hash_entry = hash_table[hash_code];
-			new_hash_entry.pos = desired_block_position;
-			new_hash_entry.ptr = block_allocation_list[ordered_index];
-			new_hash_entry.offset = 0;
-		} else {
-			ATOMIC_ADD(last_free_voxel_block_id, 1);
-			guard.release(hash_code);
-			return 0;
-		}
-		guard.release(hash_code);
-		return hash_code;
-	}
-	guard.release(hash_code);
-	// already have hash block, no allocation needed
-	return hash_code;
-}
-
-__global__ void allocateBlock_device(
-		const Vector3s* new_block_positions, HashEntry* hash_table, AtomicArrayThreadGuard<MEMORYDEVICE_CUDA>* guard,
-		AllocationCounters<MEMORYDEVICE_CUDA>* counters, int* block_allocation_list, int* excess_allocation_list, const int new_block_count) {
 	int new_block_index = threadIdx.x + blockIdx.x * blockDim.x;
 	if(new_block_index >= new_block_count) return;
-	AllocateBlock_DEBUG<MEMORYDEVICE_CUDA>(new_block_positions[new_block_index], hash_table, *guard, counters->last_free_voxel_block_id,
-	              counters->last_free_excess_list_id, block_allocation_list, excess_allocation_list);
+
+	Vector3s desired_block_position = new_block_positions[new_block_index];
+	int hash_code = HashCodeFromBlockPosition(desired_block_position);
+
+	MarkAsNeedingAllocationIfNotFound(hash_entry_states, block_coordinates, hash_code,
+			desired_block_position, hash_table, colliding_block_positions, colliding_block_count);
 }
 
 } // end anonymous namespace (CUDA kernels)

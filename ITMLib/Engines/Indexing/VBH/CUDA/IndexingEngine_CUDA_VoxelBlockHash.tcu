@@ -23,7 +23,6 @@
 #include "../CPU/IndexingEngine_CPU_VoxelBlockHash.h"
 #include "../../../../../ORUtils/PlatformIndependence.h"
 #include "../../Shared/IndexingEngine_Functors.h"
-#include "../../AtomicArrayThreadGuard/AtomicArrayThreadGuard_CUDA.h"
 
 
 using namespace ITMLib;
@@ -104,7 +103,7 @@ template<typename TVoxel>
 void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::
 AllocateHashEntriesUsingLists_SetVisibility(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 
-	const HashEntryAllocationState* hashEntryAllocationStates_device = volume->index.GetHashEntryAllocationStates();
+	const HashEntryAllocationState* hash_entry_allocation_states_device = volume->index.GetHashEntryAllocationStates();
 	Vector3s* allocationBlockCoordinates_device = volume->index.GetAllocationBlockCoordinates();
 	HashBlockVisibility* hashBlockVisibilityTypes_device = volume->index.GetBlockVisibilityTypes();
 
@@ -125,7 +124,7 @@ AllocateHashEntriesUsingLists_SetVisibility(VoxelVolume<TVoxel, VoxelBlockHash>*
 
 	allocateHashedVoxelBlocksUsingLists_SetVisibility_device << < gridSizeAL, cudaBlockSizeAL >> > (
 			voxelAllocationList, excessAllocationList, allocationTempData.GetData(MEMORYDEVICE_CUDA),
-					hashTable, hashEntryCount, hashEntryAllocationStates_device,
+					hashTable, hashEntryCount, hash_entry_allocation_states_device,
 					allocationBlockCoordinates_device, hashBlockVisibilityTypes_device);
 	ORcudaKernelCheck;
 	allocationTempData.UpdateHostFromDevice();
@@ -136,49 +135,47 @@ AllocateHashEntriesUsingLists_SetVisibility(VoxelVolume<TVoxel, VoxelBlockHash>*
 
 template<typename TVoxel>
 void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::AllocateBlockList(
-		VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ORUtils::MemoryBlock<Vector3s>& block_coordinates,
-		const int new_block_count) {
-	int entry_count = volume->index.hashEntryCount;
+		VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ORUtils::MemoryBlock<Vector3s>& new_block_positions,
+		int new_block_count) {
+	if (new_block_count == 0) return;
 
-	AllocationCounters<MEMORYDEVICE_CUDA> counters(volume->localVBA.lastFreeBlockId,
-	                                               volume->index.GetLastFreeExcessListId());
-	AllocationCounters<MEMORYDEVICE_CUDA>* counters_device;
-	ORcudaSafeCall(cudaMalloc((void**) &counters_device, sizeof(AllocationCounters<MEMORYDEVICE_CUDA>)));
-	ORcudaSafeCall(cudaMemcpy(counters_device, &counters, sizeof(AllocationCounters<MEMORYDEVICE_CUDA>),
-	                          cudaMemcpyHostToDevice));
+	ORUtils::MemoryBlock<Vector3s> new_positions_local(new_block_count, MEMORYDEVICE_CUDA);
+	new_positions_local.SetFrom(&new_block_positions, MemoryCopyDirection::CUDA_TO_CUDA);
+	ORUtils::MemoryBlock<Vector3s> colliding_positions_local(new_block_count, MEMORYDEVICE_CUDA);
+	ORUtils::MemoryBlock<int> colliding_block_count(1, true, true);
 
-	int* block_allocation_list = volume->localVBA.GetAllocationList();
-	int* excess_allocation_list = volume->index.GetExcessAllocationList();
-
-	AtomicArrayThreadGuard<MEMORYDEVICE_CUDA> guard(entry_count);
-	AtomicArrayThreadGuard<MEMORYDEVICE_CUDA>* guard_device;
-	ORcudaSafeCall(cudaMalloc((void**) &guard_device, sizeof(AtomicArrayThreadGuard<MEMORYDEVICE_CUDA>)));
-	ORcudaSafeCall(cudaMemcpy(guard_device, &guard, sizeof(AtomicArrayThreadGuard<MEMORYDEVICE_CUDA>),
-	                          cudaMemcpyHostToDevice));
-
+	ORUtils::MemoryBlock<Vector3s>* new_positions = &new_positions_local;
+	ORUtils::MemoryBlock<Vector3s>* colliding_positions = &colliding_positions_local;
 
 	HashEntry* hash_table = volume->index.GetEntries();
-	const Vector3s* block_coordinates_device = block_coordinates.GetData(MEMORYDEVICE_CUDA);
+	HashEntryAllocationState* hash_entry_states = volume->index.GetHashEntryAllocationStates();
+	Vector3s* allocation_block_coordinates = volume->index.GetAllocationBlockCoordinates();
 
-	dim3 cuda_block_size(256);
-	dim3 cuda_grid_size(
-			static_cast<int>(ceil(static_cast<float>(new_block_count) / static_cast<float>(cuda_block_size.x))));
+	while (new_block_count > 0) {
+		*colliding_block_count.GetData(MEMORYDEVICE_CPU) = 0;
+		colliding_block_count.UpdateDeviceFromHost();
 
-	allocateBlock_device
-			<< < cuda_grid_size, cuda_block_size >> >
-	                             (block_coordinates.GetData(
-			                             MEMORYDEVICE_CUDA), hash_table, guard_device, counters_device,
-			                             block_allocation_list, excess_allocation_list, new_block_count);
+		volume->index.ClearHashEntryAllocationStates();
 
-	ORcudaKernelCheck;
+		dim3 cuda_block_size(256);
+		dim3 cuda_grid_size(
+				static_cast<int>(ceil(static_cast<float>(new_block_count) / static_cast<float>(cuda_block_size.x))));
 
-	ORcudaSafeCall(cudaFree(guard_device));
-	ORcudaSafeCall(cudaMemcpy(&counters, counters_device, sizeof(AllocationCounters<MEMORYDEVICE_CUDA>),
-	                          cudaMemcpyDeviceToHost));
-	ORcudaSafeCall(cudaFree(counters_device));
+		buildHashAllocationTypeList_BlockList_device
+				<< < cuda_grid_size, cuda_block_size >> >
+		                             (new_positions->GetData(MEMORYDEVICE_CUDA), hash_entry_states,
+				                             allocation_block_coordinates, hash_table, new_block_count,
+				                             colliding_positions->GetData(MEMORYDEVICE_CUDA),
+				                             colliding_block_count.GetData(MEMORYDEVICE_CUDA));
 
-	volume->localVBA.lastFreeBlockId = counters.GetLastFreeVoxelBlockId();
-	volume->index.SetLastFreeExcessListId(counters.GetLastFreeExcesListId());
+		ORcudaKernelCheck;
+
+		AllocateHashEntriesUsingLists(volume);
+
+		colliding_block_count.UpdateHostFromDevice();
+		new_block_count = *colliding_block_count.GetData(MEMORYDEVICE_CPU);
+		std::swap(new_positions,colliding_positions);
+	}
 }
 
 
@@ -188,7 +185,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::BuildUtilizedBlo
 		const Matrix4f& depth_camera_matrix) {
 
 	// ** volume data **
-	const int hashEntryCount = volume->index.hashEntryCount;
+	const int hash_entry_count = volume->index.hashEntryCount;
 	HashBlockVisibility* hashBlockVisibilityTypes_device = volume->index.GetBlockVisibilityTypes();
 	int* visibleBlockHashCodes_device = volume->index.GetUtilizedBlockHashCodes();
 	HashEntry* hashTable = volume->index.GetEntries();
@@ -204,17 +201,17 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::BuildUtilizedBlo
 	// ** CUDA data **
 	ORUtils::MemoryBlock<int> visibleBlockCount(1, true, true);
 	dim3 cudaBlockSizeAL(256, 1);
-	dim3 gridSizeAL((int) ceil((float) hashEntryCount / (float) cudaBlockSizeAL.x));
+	dim3 gridSizeAL((int) ceil((float) hash_entry_count / (float) cudaBlockSizeAL.x));
 
 	if (useSwapping) {
 		buildVisibilityList_device<true> << < gridSizeAL, cudaBlockSizeAL >> >
-		                                                  (hashTable, swapStates, hashEntryCount, visibleBlockHashCodes_device,
+		                                                  (hashTable, swapStates, hash_entry_count, visibleBlockHashCodes_device,
 				                                                  visibleBlockCount.GetData(
 						                                                  MEMORYDEVICE_CUDA), hashBlockVisibilityTypes_device, depth_camera_matrix, depthCameraProjectionParameters, depthImgSize, voxelSize);
 		ORcudaKernelCheck;
 	} else {
 		buildVisibilityList_device<false> << < gridSizeAL, cudaBlockSizeAL >> >
-		                                                   (hashTable, swapStates, hashEntryCount, visibleBlockHashCodes_device,
+		                                                   (hashTable, swapStates, hash_entry_count, visibleBlockHashCodes_device,
 				                                                   visibleBlockCount.GetData(
 						                                                   MEMORYDEVICE_CUDA), hashBlockVisibilityTypes_device, depth_camera_matrix, depthCameraProjectionParameters, depthImgSize, voxelSize);
 		ORcudaKernelCheck;

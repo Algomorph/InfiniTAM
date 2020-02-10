@@ -334,8 +334,6 @@ set(ITMLIB_ENGINES_INDEXING_SHARED_HEADERS
 set(
         ITMLIB_ENGINES_INDEXING_AUX_SOURCES
 
-        Engines/Indexing/AtomicArrayThreadGuard/AtomicArrayThreadGuard_CUDA.h
-        Engines/Indexing/AtomicArrayThreadGuard/AtomicArrayThreadGuard_CUDA.cu
         Engines/Indexing/AtomicArrayThreadGuard/AtomicArrayThreadGuard_CPU.h
         Engines/Indexing/AtomicArrayThreadGuard/AtomicArrayThreadGuard_CPU.cpp
 )
