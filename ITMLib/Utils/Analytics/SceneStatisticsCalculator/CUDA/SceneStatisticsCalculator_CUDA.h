@@ -35,9 +35,9 @@ public:
 	void operator=(ITMSceneStatisticsCalculator const&) = delete;
 
 	Vector6i ComputeVoxelBounds(const VoxelVolume<TVoxel, TIndex>* scene) override;
-	int ComputeAllocatedVoxelCount(VoxelVolume<TVoxel, TIndex>* scene) override;
-	std::vector<int> GetFilledHashBlockIds(VoxelVolume<TVoxel, TIndex>* scene) override;
-	int ComputeAllocatedHashBlockCount(VoxelVolume<TVoxel, TIndex>* scene) override;
+	int ComputeAllocatedVoxelCount(VoxelVolume<TVoxel, TIndex>* volume) override;
+	std::vector<int> GetAllocatedHashCodes(VoxelVolume<TVoxel, TIndex>* volume) override;
+	int ComputeAllocatedHashBlockCount(VoxelVolume<TVoxel, TIndex>* volume) override;
 
 	int ComputeNonTruncatedVoxelCount(VoxelVolume<TVoxel, TIndex>* scene) override;
 	unsigned int ComputeAlteredVoxelCount(VoxelVolume<TVoxel, TIndex>* scene) override;

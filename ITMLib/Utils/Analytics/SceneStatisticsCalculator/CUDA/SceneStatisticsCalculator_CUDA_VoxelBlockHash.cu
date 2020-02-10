@@ -13,6 +13,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
+#include "../../../../Engines/Traversal/CUDA/HashTableTraversal_CUDA.h"
 #include "../../../../GlobalTemplateDefines.h"
 #include "SceneStatisticsCalculator_CUDA.tcu"
 

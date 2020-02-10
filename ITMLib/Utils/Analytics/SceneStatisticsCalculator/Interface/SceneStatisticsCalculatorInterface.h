@@ -25,7 +25,7 @@ class SceneStatisticsCalculatorInterface {
 public:
 	virtual Vector6i ComputeVoxelBounds(const VoxelVolume<TVoxel, TIndex>* scene) = 0;
 	virtual int ComputeAllocatedVoxelCount(VoxelVolume<TVoxel, TIndex>* scene) = 0;
-	virtual std::vector<int> GetFilledHashBlockIds(VoxelVolume<TVoxel, TIndex>* scene) = 0;
+	virtual std::vector<int> GetAllocatedHashCodes(VoxelVolume<TVoxel, TIndex>* scene) = 0;
 	virtual int ComputeAllocatedHashBlockCount(VoxelVolume<TVoxel, TIndex>* scene) = 0;
 
 	virtual int ComputeNonTruncatedVoxelCount(VoxelVolume<TVoxel, TIndex>* scene) = 0;

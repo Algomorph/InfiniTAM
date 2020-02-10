@@ -226,6 +226,9 @@ struct ReallocateDeletedHashBlocksFunctor{
 	{
 		INITIALIZE_ATOMIC(int, last_free_voxel_block_id, volume->localVBA.lastFreeBlockId);
 	}
+	~ReallocateDeletedHashBlocksFunctor(){
+		CLEAN_UP_ATOMIC(last_free_voxel_block_id);
+	}
 
 	_DEVICE_WHEN_AVAILABLE_
 	void operator()(HashEntry& entry, int hash_code){

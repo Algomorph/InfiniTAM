@@ -127,9 +127,9 @@ template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, typename TDerivedC
 void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::ReallocateDeletedHashBlocks(
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 
-	ReallocateDeletedHashBlocksFunctor<TVoxel, TMemoryDeviceType> reallocationFunctor(volume);
-	HashTableTraversalEngine<TMemoryDeviceType>::TraverseWithHashCode(volume->index,reallocationFunctor);
-	volume->localVBA.lastFreeBlockId = GET_ATOMIC_VALUE_CPU(reallocationFunctor.last_free_voxel_block_id);
+	ReallocateDeletedHashBlocksFunctor<TVoxel, TMemoryDeviceType> reallocation_functor(volume);
+	HashTableTraversalEngine<TMemoryDeviceType>::TraverseWithHashCode(volume->index, reallocation_functor);
+	volume->localVBA.lastFreeBlockId = GET_ATOMIC_VALUE_CPU(reallocation_functor.last_free_voxel_block_id);
 }
 
 

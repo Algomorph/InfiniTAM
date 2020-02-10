@@ -400,7 +400,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateBlockList
                                           last_free_excess_list_id, block_allocation_list, excess_allocation_list)
 #endif
 	for (int i_new_block = 0; i_new_block < new_block_count; i_new_block++) {
-		AllocateBlock_DEBUG(block_coordinates_device[i_new_block], hash_table, guard, counters.last_free_voxel_block_id,
+		AllocateBlock(block_coordinates_device[i_new_block], hash_table, guard, counters.last_free_voxel_block_id,
 		                    counters.last_free_excess_list_id, block_allocation_list, excess_allocation_list);
 	}
 	volume->localVBA.lastFreeBlockId = GET_ATOMIC_VALUE(counters.last_free_voxel_block_id);

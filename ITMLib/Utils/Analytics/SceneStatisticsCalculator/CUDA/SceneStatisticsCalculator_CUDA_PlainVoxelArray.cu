@@ -14,6 +14,7 @@
 //  limitations under the License.
 //  ================================================================
 #include "../../../../GlobalTemplateDefines.h"
+#include "../../../../Engines/Traversal/CUDA/HashTableTraversal_CUDA.h"
 #include "SceneStatisticsCalculator_CUDA.tcu"
 
 namespace ITMLib {

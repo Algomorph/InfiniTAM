@@ -14,6 +14,7 @@
 //  limitations under the License.
 //  ================================================================
 #include "../../../../GlobalTemplateDefines.h"
+#include "../../../../Engines/Traversal/CPU/HashTableTraversal_CPU.h"
 #include "SceneStatisticsCalculator_CPU.tpp"
 
 namespace ITMLib {

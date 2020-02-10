@@ -40,16 +40,21 @@ static ORUtils::MemoryBlock<T> std_vector_to_ORUtils_MemoryBlock(std::vector<T> 
 	ORUtils::MemoryBlock<T> block(vector.size(), memoryDeviceType == MEMORYDEVICE_CPU, memoryDeviceType == MEMORYDEVICE_CUDA);
 	switch (memoryDeviceType){
 		case MEMORYDEVICE_CUDA:
+#ifndef COMPILE_WITHOUT_CUDA
 			ORcudaSafeCall(cudaMemcpy(block.GetData(MEMORYDEVICE_CUDA), vector.data(), vector.size() * sizeof(T), cudaMemcpyHostToDevice));
+#else
+			DIEWITHEXCEPTION_REPORTLOCATION("Not supported without compilation with CUDA.");
+#endif
 			break;
 		case MEMORYDEVICE_CPU:
-			ORcudaSafeCall(cudaMemcpy(block.GetData(MEMORYDEVICE_CPU), vector.data(), vector.size() * sizeof(T), cudaMemcpyHostToHost));
+			memcpy(block.GetData(MEMORYDEVICE_CPU), vector.data(), vector.size() * sizeof(T));
 			break;
 		default:
 			DIEWITHEXCEPTION_REPORTLOCATION("Device type not supported by operation.");
 	}
 	return block;
 }
+
 
 class CollisionHashFixture {
 public:
@@ -75,7 +80,9 @@ public:
 		}
 
 		std::random_device rd;
-		seed = rd();
+		//seed = rd();
+		//_DEBUG
+		seed = 2684291675;
 		std::mt19937 gen(seed);
 		std::shuffle(block_positions.begin(), block_positions.end(), gen);
 
@@ -101,4 +108,5 @@ BOOST_FIXTURE_TEST_CASE(TestAllocateHashBlockList_CPU, CollisionHashFixture) {
 	std::cout << allocated_blocks << std::endl;
 	std::cout << block_positions.size() << std::endl;
 	std::cout << seed << std::endl;
+
 }

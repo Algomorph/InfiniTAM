@@ -20,6 +20,7 @@
 #include "../../../../Objects/Volume/VoxelTypes.h"
 #include "../Shared/SceneStatisticsCalculator_Functors.h"
 
+
 //atomic
 #include <atomic>
 
@@ -92,38 +93,9 @@ ITMSceneStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeVoxelBoun
 
 //============================================== COUNT VOXELS ==========================================================
 template<typename TVoxel, typename TIndex>
-struct ComputeAllocatedVoxelCountFunctor;
-
-template<typename TVoxel>
-struct ComputeAllocatedVoxelCountFunctor<TVoxel, VoxelBlockHash> {
-	static int Compute(VoxelVolume<TVoxel, VoxelBlockHash>* scene) {
-		int count = 0;
-
-		const HashEntry* canonicalHashTable = scene->index.GetEntries();
-		int noTotalEntries = scene->index.hashEntryCount;
-#ifdef WITH_OPENMP
-#pragma omp parallel for reduction(+:count)
-#endif
-		for (int entryId = 0; entryId < noTotalEntries; entryId++) {
-			const HashEntry& currentHashEntry = canonicalHashTable[entryId];
-			if (currentHashEntry.ptr < 0) continue;
-			count += VOXEL_BLOCK_SIZE3;
-		}
-		return count;
-	}
-};
-
-template<typename TVoxel>
-struct ComputeAllocatedVoxelCountFunctor<TVoxel, PlainVoxelArray> {
-	static int Compute(VoxelVolume<TVoxel, PlainVoxelArray>* scene) {
-		return scene->index.GetVolumeSize().x * scene->index.GetVolumeSize().y * scene->index.GetVolumeSize().z;
-	}
-};
-
-template<typename TVoxel, typename TIndex>
 int
 ITMSceneStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeAllocatedVoxelCount(VoxelVolume<TVoxel, TIndex>* scene) {
-	return ComputeAllocatedVoxelCountFunctor<TVoxel, TIndex>::Compute(scene);
+	return ComputeAllocatedVoxelCountFunctor<TVoxel, TIndex, MEMORYDEVICE_CPU>::compute(scene);
 }
 
 template<bool hasSemanticInformation, typename TVoxel, typename TIndex>
@@ -181,56 +153,18 @@ ITMSceneStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeTruncated
 
 
 
-template<typename TVoxel, typename TIndex>
-struct HashOnlyStatisticsFunctor;
-template<typename TVoxel>
-struct HashOnlyStatisticsFunctor<TVoxel, PlainVoxelArray> {
-	static std::vector<int> GetFilledHashBlockIds(VoxelVolume<TVoxel, PlainVoxelArray>* scene) {
-		return std::vector<int>();
-	}
-
-	static int ComputeAllocatedHashBlockCount(VoxelVolume<TVoxel, PlainVoxelArray>* scene) {
-		return 0;
-	}
-};
-template<typename TVoxel>
-struct HashOnlyStatisticsFunctor<TVoxel, VoxelBlockHash> {
-	static std::vector<int> GetFilledHashBlockIds(VoxelVolume<TVoxel, VoxelBlockHash>* scene) {
-		std::vector<int> ids;
-		const HashEntry* canonicalHashTable = scene->index.GetEntries();
-		int noTotalEntries = scene->index.hashEntryCount;
-		for (int entryId = 0; entryId < noTotalEntries; entryId++) {
-			const HashEntry& currentHashEntry = canonicalHashTable[entryId];
-			if (currentHashEntry.ptr < 0) continue;
-			ids.push_back(entryId);
-		}
-		return ids;
-	}
-
-	static int ComputeAllocatedHashBlockCount(VoxelVolume<TVoxel, VoxelBlockHash>* scene) {
-		int count = 0;
-		const HashEntry* canonicalHashTable = scene->index.GetEntries();
-		int noTotalEntries = scene->index.hashEntryCount;
-		for (int entryId = 0; entryId < noTotalEntries; entryId++) {
-			const HashEntry& currentHashEntry = canonicalHashTable[entryId];
-			if (currentHashEntry.ptr >= 0) count++;
-		}
-		return count;
-	}
-};
 
 template<typename TVoxel, typename TIndex>
 std::vector<int>
-ITMSceneStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::GetFilledHashBlockIds(VoxelVolume<TVoxel, TIndex>* scene) {
-	HashOnlyStatisticsFunctor<TVoxel, TIndex>::GetFilledHashBlockIds(scene);
-	DIEWITHEXCEPTION("Not implemented");
+ITMSceneStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::GetAllocatedHashCodes(VoxelVolume<TVoxel, TIndex>* volume) {
+	return HashOnlyStatisticsFunctor<TVoxel, TIndex, MEMORYDEVICE_CPU>::GetAllocatedHashCodes(volume);
 }
 
 template<typename TVoxel, typename TIndex>
 int
 ITMSceneStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeAllocatedHashBlockCount(
-		VoxelVolume<TVoxel, TIndex>* scene) {
-	return HashOnlyStatisticsFunctor<TVoxel, TIndex>::ComputeAllocatedHashBlockCount(scene);
+		VoxelVolume<TVoxel, TIndex>* volume) {
+	return HashOnlyStatisticsFunctor<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeAllocatedHashBlockCount(volume);
 }
 
 

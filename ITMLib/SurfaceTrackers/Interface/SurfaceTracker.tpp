@@ -58,7 +58,7 @@ inline static void PrintVolumeStatistics(
 	std::cout << "    Total voxel count: " << calculator.ComputeAllocatedVoxelCount(volume) << std::endl;
 	std::cout << "    NonTruncated voxel count: " << calculator.ComputeNonTruncatedVoxelCount(volume) << std::endl;
 	std::cout << "    +1.0 voxel count: " << calculator.CountVoxelsWithSpecificSdfValue(volume, 1.0f) << std::endl;
-	std::vector<int> allocatedHashes = calculator.GetFilledHashBlockIds(volume);
+	std::vector<int> allocatedHashes = calculator.GetAllocatedHashCodes(volume);
 	std::cout << "    Allocated hash count: " << allocatedHashes.size() << std::endl;
 	std::cout << "    NonTruncated SDF sum: " << calculator.ComputeNonTruncatedVoxelAbsSdfSum(volume) << std::endl;
 	std::cout << "    Truncated SDF sum: " << calculator.ComputeTruncatedVoxelAbsSdfSum(volume) << std::endl;
