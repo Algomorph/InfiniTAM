@@ -15,7 +15,7 @@
 //  ================================================================
 #include "../Traversal/CUDA/VolumeTraversal_CUDA_VoxelBlockHash.h"
 #include "../Traversal/CUDA/TwoVolumeTraversal_CUDA_VoxelBlockHash.h"
-#include "../Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.tcu"
+#include "../Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
 #include "WarpingEngine.tpp"
 #include "../../GlobalTemplateDefines.h"
 

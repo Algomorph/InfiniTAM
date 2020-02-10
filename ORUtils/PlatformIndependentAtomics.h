@@ -42,10 +42,24 @@ T atomicAdd_CPU(std::atomic<T>& variable, T addend) {
 	return current;
 }
 
+template<typename T>
+inline
+T atomicSub_CPU(std::atomic<T>& variable, T subtracted) {
+	auto current = variable.load();
+	while (!variable.compare_exchange_weak(current, current - subtracted, std::memory_order_relaxed, std::memory_order_relaxed));
+	return current;
+}
+
 template<>
 inline
 int atomicAdd_CPU<int>(std::atomic<int>& variable, int addend){
 	return variable.fetch_add(addend, std::memory_order_relaxed);
+}
+
+template<>
+inline
+int atomicSub_CPU<int>(std::atomic<int>& variable, int subtracted){
+	return variable.fetch_sub(subtracted, std::memory_order_relaxed);
 }
 
 template <typename T>
@@ -115,7 +129,7 @@ initializeAtomic_CPU< type > (var, value)
 #define _DEVICE_WHEN_AVAILABLE_ __device__
 #else
 #define ATOMIC_ADD(name, value) atomicAdd_CPU( name, value )
-#define ATOMIC_SUB(name, value) atomicAdd_CPU( name, -value)
+#define ATOMIC_SUB(name, value) atomicSub_CPU( name, value )
 #define ATOMIC_MAX(name, value) atomicMax_CPU( name, value )
 #define ATOMIC_MIN(name, value) atomicMin_CPU( name, value )
 #define _DEVICE_WHEN_AVAILABLE_

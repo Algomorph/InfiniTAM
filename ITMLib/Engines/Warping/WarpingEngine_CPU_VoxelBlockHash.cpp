@@ -15,7 +15,7 @@
 //  ================================================================
 #include "../Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
 #include "../Traversal/CPU/TwoVolumeTraversal_CPU_VoxelBlockHash.h"
-#include "../Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.tpp"
+#include "../Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
 #include "WarpingEngine.tpp"
 #include "../../GlobalTemplateDefines.h"
 

@@ -28,8 +28,6 @@
 #include "../../../Utils/VoxelFlags.h"
 #include "../../../Utils/HashBlockProperties.h"
 #include "../../../Utils/Geometry/IntersectionChecks.h"
-#include "../AtomicArrayThreadGuard/AtomicArrayThreadGuard.h"
-#include "../AtomicArrayThreadGuard/AtomicArrayThreadGuard_CPU.h"
 
 
 #ifdef __CUDACC__
@@ -59,6 +57,7 @@ struct AllocationCounters {
 
 	DECLARE_ATOMIC(int, last_free_voxel_block_id);
 	DECLARE_ATOMIC(int, last_free_excess_list_id);
+	DECLARE_ATOMIC(int, utilized_block_count);
 };
 
 

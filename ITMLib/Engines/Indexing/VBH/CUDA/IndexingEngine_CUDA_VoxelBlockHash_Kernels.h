@@ -139,51 +139,58 @@ void allocateHashedVoxelBlocksUsingLists_SetVisibility_device(
 
 __global__
 void allocateHashedVoxelBlocksUsingLists_device(
-		int* voxelAllocationList, int* excessAllocationList,
-		AllocationTempData* allocData,
-		HashEntry* hashTable, const int hashEntryCount,
-		const ITMLib::HashEntryAllocationState* hashEntryStates, Vector3s* blockCoords) {
-	int hashCode = threadIdx.x + blockIdx.x * blockDim.x;
-	if (hashCode >= hashEntryCount) return;
+		int* block_allocation_list, int* excess_allocation_list,
+		AllocationTempData* temporary_allocation_data,
+		HashEntry* hash_table, const int hash_entry_count,
+		const ITMLib::HashEntryAllocationState* hash_entry_states, Vector3s* block_coordinates, int* utilized_block_hash_codes) {
+	int hash_code = threadIdx.x + blockIdx.x * blockDim.x;
+	if (hash_code >= hash_entry_count) return;
 
-	int voxelBlockIndex, exlIdx;
+	int voxel_block_index, excess_list_index;
 
-	switch (hashEntryStates[hashCode]) {
+	auto updateUtilizedHashCodes = [&temporary_allocation_data, &utilized_block_hash_codes, &hash_code](){
+		int utilized_index = atomicAdd(&temporary_allocation_data->utilized_block_count,1);
+		utilized_block_hash_codes[utilized_index] = hash_code;
+	};
+
+	switch (hash_entry_states[hash_code]) {
 		case ITMLib::NEEDS_ALLOCATION_IN_ORDERED_LIST: //needs allocation, fits in the ordered list
-			voxelBlockIndex = atomicSub(&allocData->last_free_voxel_block_id, 1);
-			if (voxelBlockIndex >= 0) //there is room in the voxel block array
+			voxel_block_index = atomicSub(&temporary_allocation_data->last_free_voxel_block_id, 1);
+			if (voxel_block_index >= 0) //there is room in the voxel block array
 			{
-				HashEntry hashEntry;
-				hashEntry.pos = blockCoords[hashCode];
-				hashEntry.ptr = voxelAllocationList[voxelBlockIndex];
-				hashEntry.offset = 0;
-				hashTable[hashCode] = hashEntry;
+				HashEntry hash_entry;
+				hash_entry.pos = block_coordinates[hash_code];
+				hash_entry.ptr = block_allocation_list[voxel_block_index];
+				hash_entry.offset = 0;
+				hash_table[hash_code] = hash_entry;
+				updateUtilizedHashCodes();
 			} else {
 				// Restore the previous value to avoid leaks.
-				atomicAdd(&allocData->last_free_voxel_block_id, 1);
+				atomicAdd(&temporary_allocation_data->last_free_voxel_block_id, 1);
 			}
 			break;
 
 		case ITMLib::NEEDS_ALLOCATION_IN_EXCESS_LIST: //needs allocation in the excess list
-			voxelBlockIndex = atomicSub(&allocData->last_free_voxel_block_id, 1);
-			exlIdx = atomicSub(&allocData->last_free_excess_list_id, 1);
+			voxel_block_index = atomicSub(&temporary_allocation_data->last_free_voxel_block_id, 1);
+			excess_list_index = atomicSub(&temporary_allocation_data->last_free_excess_list_id, 1);
 
-			if (voxelBlockIndex >= 0 && exlIdx >= 0) //there is room in the voxel block array and excess list
+			if (voxel_block_index >= 0 && excess_list_index >= 0) //there is room in the voxel block array and excess list
 			{
-				HashEntry hashEntry;
-				hashEntry.pos = blockCoords[hashCode];
-				hashEntry.ptr = voxelAllocationList[voxelBlockIndex];
-				hashEntry.offset = 0;
+				HashEntry hash_entry;
+				hash_entry.pos = block_coordinates[hash_code];
+				hash_entry.ptr = block_allocation_list[voxel_block_index];
+				hash_entry.offset = 0;
 
-				int exlOffset = excessAllocationList[exlIdx];
+				int excess_list_offset = excess_allocation_list[excess_list_index];
 
-				hashTable[hashCode].offset = exlOffset + 1; //connect to child
+				hash_table[hash_code].offset = excess_list_offset + 1; //connect to child
 
-				hashTable[ORDERED_LIST_SIZE + exlOffset] = hashEntry; //add child to the excess list
+				hash_table[ORDERED_LIST_SIZE + excess_list_offset] = hash_entry; //add child to the excess list
+				updateUtilizedHashCodes();
 			} else {
 				// Restore the previous values to avoid leaks.
-				atomicAdd(&allocData->last_free_voxel_block_id, 1);
-				atomicAdd(&allocData->last_free_excess_list_id, 1);
+				atomicAdd(&temporary_allocation_data->last_free_voxel_block_id, 1);
+				atomicAdd(&temporary_allocation_data->last_free_excess_list_id, 1);
 			}
 
 			break;

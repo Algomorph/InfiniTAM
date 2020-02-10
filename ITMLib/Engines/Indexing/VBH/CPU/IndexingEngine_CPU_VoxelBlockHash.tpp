@@ -22,76 +22,9 @@
 #include "../../../Common/CheckBlockVisibility.h"
 #include "../../../../Utils/Configuration.h"
 #include "../../../../Utils/Geometry/FrustumTrigonometry.h"
-#include "../../AtomicArrayThreadGuard/AtomicArrayThreadGuard_CPU.h"
 
 
 using namespace ITMLib;
-
-
-inline int AllocateBlock_CPU(const CONSTPTR(Vector3s)& desired_block_position,
-                             HashEntry* hash_table,
-                             AtomicArrayThreadGuard<MEMORYDEVICE_CPU>& guard,
-                             ATOMIC_ARGUMENT(int) last_free_voxel_block_id,
-                             ATOMIC_ARGUMENT(int) last_free_excess_list_id,
-                             int* block_allocation_list, int* excess_allocation_list) {
-
-	int hash_code = HashCodeFromBlockPosition(desired_block_position);
-	guard.lock(hash_code);
-	HashEntry hash_entry = hash_table[hash_code];
-	//check if hash table contains entry
-	if (!(IS_EQUAL3(hash_entry.pos, desired_block_position) && hash_entry.ptr >= -1)) {
-		if (hash_entry.ptr >= -1) {
-			//search excess list only if there is no room in ordered part
-			while (hash_entry.offset >= 1) {
-				int new_hash_code = ORDERED_LIST_SIZE + hash_entry.offset - 1;
-				guard.lock(new_hash_code);
-				guard.release(hash_code);
-				hash_code = new_hash_code;
-
-				hash_entry = hash_table[hash_code];
-				if (IS_EQUAL3(hash_entry.pos, desired_block_position) && hash_entry.ptr >= -1) {
-					guard.release(hash_code);
-					return hash_code;
-				}
-			}
-			int block_index = ATOMIC_SUB(last_free_voxel_block_id, 1);
-			int excess_list_index = ATOMIC_SUB(last_free_excess_list_id, 1);
-			if (block_index >= 0 && excess_list_index >= 0) {
-				int excess_list_offset = excess_allocation_list[excess_list_index];
-				hash_table[hash_code].offset = excess_list_offset + 1;
-				HashEntry& new_hash_entry = hash_table[ORDERED_LIST_SIZE + excess_list_offset];
-				new_hash_entry.pos = desired_block_position;
-				new_hash_entry.ptr = block_allocation_list[block_index];
-				new_hash_entry.offset = 0;
-			} else {
-				ATOMIC_ADD(last_free_voxel_block_id, 1);
-				ATOMIC_ADD(last_free_excess_list_id, 1);
-				guard.release(hash_code);
-				return 0;
-			}
-			guard.release(hash_code);
-			return hash_code;
-		}
-		int ordered_index = ATOMIC_SUB(last_free_voxel_block_id, 1);
-
-		if (ordered_index >= 0) {
-			HashEntry& new_hash_entry = hash_table[hash_code];
-			new_hash_entry.pos = desired_block_position;
-			new_hash_entry.ptr = block_allocation_list[ordered_index];
-			new_hash_entry.offset = 0;
-		} else {
-			ATOMIC_ADD(last_free_voxel_block_id, 1);
-			guard.release(hash_code);
-			return 0;
-		}
-		guard.release(hash_code);
-		return hash_code;
-	}
-	guard.release(hash_code);
-	// already have hash block, no allocation needed
-	return hash_code;
-}
-
 
 template<typename TVoxel>
 template<typename TVoxelTarget, typename TVoxelSource>
@@ -248,69 +181,81 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateUsingOthe
 			depth_camera_matrix);
 }
 
-// #define EXCEPT_ON_OUT_OF_SPACE
 template<typename TVoxel>
 void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::
 AllocateHashEntriesUsingLists(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 
-	const HashEntryAllocationState* hashEntryStates_device = volume->index.GetHashEntryAllocationStates();
-	Vector3s* blockCoordinates_device = volume->index.GetAllocationBlockCoordinates();
+	const HashEntryAllocationState* hash_entry_states = volume->index.GetHashEntryAllocationStates();
+	Vector3s* block_coordinates = volume->index.GetAllocationBlockCoordinates();
 
-	const int hashEntryCount = volume->index.hashEntryCount;
-	int lastFreeVoxelBlockId = volume->localVBA.lastFreeBlockId;
-	int lastFreeExcessListId = volume->index.GetLastFreeExcessListId();
-	int* voxelAllocationList = volume->localVBA.GetAllocationList();
-	int* excessAllocationList = volume->index.GetExcessAllocationList();
-	HashEntry* hashTable = volume->index.GetEntries();
+	const int hash_entry_count = volume->index.hashEntryCount;
+	std::atomic<int> last_free_voxel_block_id(volume->localVBA.lastFreeBlockId);
+	std::atomic<int> last_free_excess_list_id(volume->index.GetLastFreeExcessListId());
+	std::atomic<int> utilized_block_count(volume->index.GetUtilizedHashBlockCount());
 
-	for (int hashCode = 0; hashCode < hashEntryCount; hashCode++) {
-		const HashEntryAllocationState& hashEntryState = hashEntryStates_device[hashCode];
-		switch (hashEntryState) {
-			case ITMLib::NEEDS_ALLOCATION_IN_ORDERED_LIST:
+	int* block_allocation_list = volume->localVBA.GetAllocationList();
+	int* excess_allocation_list = volume->index.GetExcessAllocationList();
+	int* utilized_block_hash_codes = volume->index.GetUtilizedBlockHashCodes();
 
-				if (lastFreeVoxelBlockId >= 0) //there is room in the voxel block array
-				{
-					HashEntry hashEntry;
-					hashEntry.pos = blockCoordinates_device[hashCode];
-					hashEntry.ptr = voxelAllocationList[lastFreeVoxelBlockId];
-					hashEntry.offset = 0;
-					hashTable[hashCode] = hashEntry;
-					lastFreeVoxelBlockId--;
-				}
-#ifdef EXCEPT_ON_OUT_OF_SPACE
-			else {
-				DIEWITHEXCEPTION_REPORTLOCATION("Not enough space in ordered list.");
-			}
+	HashEntry* hash_table = volume->index.GetEntries();
+
+	auto updateUtilizedHashCodes = [&utilized_block_count, &utilized_block_hash_codes](int hash_code){
+		int utilized_index = atomicAdd_CPU(utilized_block_count,1);
+		utilized_block_hash_codes[utilized_index] = hash_code;
+	};
+
+#ifdef WITH_OPENMP
+#pragma omp parallel for default(shared)
 #endif
+	for (int hash_code = 0; hash_code < hash_entry_count; hash_code++) {
+		int voxel_block_index, excess_list_index;
 
-				break;
-			case NEEDS_ALLOCATION_IN_EXCESS_LIST:
-
-				if (lastFreeVoxelBlockId >= 0 &&
-				    lastFreeExcessListId >= 0) //there is room in the voxel block array and excess list
+		switch (hash_entry_states[hash_code]) {
+			case ITMLib::NEEDS_ALLOCATION_IN_ORDERED_LIST: //needs allocation, fits in the ordered list
+				voxel_block_index = atomicSub_CPU(last_free_voxel_block_id, 1);
+				if (voxel_block_index >= 0) //there is room in the voxel block array
 				{
-					HashEntry hashEntry;
-					hashEntry.pos = blockCoordinates_device[hashCode];
-					hashEntry.ptr = voxelAllocationList[lastFreeVoxelBlockId];
-					hashEntry.offset = 0;
-					int exlOffset = excessAllocationList[lastFreeExcessListId];
-					hashTable[hashCode].offset = exlOffset + 1; //connect to child
-					hashTable[ORDERED_LIST_SIZE + exlOffset] = hashEntry; //add child to the excess list
-					lastFreeVoxelBlockId--;
-					lastFreeExcessListId--;
+					HashEntry hash_entry;
+					hash_entry.pos = block_coordinates[hash_code];
+					hash_entry.ptr = block_allocation_list[voxel_block_index];
+					hash_entry.offset = 0;
+					hash_table[hash_code] = hash_entry;
+					updateUtilizedHashCodes(hash_code);
+				} else {
+					// Restore the previous value to avoid leaks.
+					atomicAdd_CPU(last_free_voxel_block_id, 1);
 				}
-#ifdef EXCEPT_ON_OUT_OF_SPACE
-			else {
-				DIEWITHEXCEPTION_REPORTLOCATION("Not enough space in excess list.");
-			}
-#endif
 				break;
-			default:
+
+			case ITMLib::NEEDS_ALLOCATION_IN_EXCESS_LIST: //needs allocation in the excess list
+				voxel_block_index = atomicSub_CPU(last_free_voxel_block_id, 1);
+				excess_list_index = atomicSub_CPU(last_free_excess_list_id, 1);
+
+				if (voxel_block_index >= 0 && excess_list_index >= 0) //there is room in the voxel block array and excess list
+				{
+					HashEntry hash_entry;
+					hash_entry.pos = block_coordinates[hash_code];
+					hash_entry.ptr = block_allocation_list[voxel_block_index];
+					hash_entry.offset = 0;
+
+					int excess_list_offset = excess_allocation_list[excess_list_index];
+
+					hash_table[hash_code].offset = excess_list_offset + 1; //connect to child
+
+					hash_table[ORDERED_LIST_SIZE + excess_list_offset] = hash_entry; //add child to the excess list
+					updateUtilizedHashCodes(hash_code);
+				} else {
+					// Restore the previous values to avoid leaks.
+					atomicAdd_CPU(last_free_voxel_block_id, 1);
+					atomicAdd_CPU(last_free_excess_list_id, 1);
+				}
+
 				break;
 		}
 	}
-	volume->localVBA.lastFreeBlockId = lastFreeVoxelBlockId;
-	volume->index.SetLastFreeExcessListId(lastFreeExcessListId);
+	volume->localVBA.lastFreeBlockId = last_free_voxel_block_id;
+	volume->index.SetLastFreeExcessListId(last_free_excess_list_id);
+	volume->index.SetUtilizedHashBlockCount(utilized_block_count);
 }
 
 template<typename TVoxel>
@@ -375,30 +320,41 @@ AllocateHashEntriesUsingLists_SetVisibility(VoxelVolume<TVoxel, VoxelBlockHash>*
 
 template<typename TVoxel>
 void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateBlockList(
-		VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ORUtils::MemoryBlock<Vector3s>& block_coordinates,
-		const int new_block_count) {
+		VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ORUtils::MemoryBlock<Vector3s>& new_block_positions,
+		int new_block_count) {
+	if (new_block_count == 0) return;
 
-	int entry_count = volume->index.hashEntryCount;
-	AllocationCounters<MEMORYDEVICE_CPU> counters(volume->localVBA.lastFreeBlockId,
-	                                              volume->index.GetLastFreeExcessListId());
-	int* block_allocation_list = volume->localVBA.GetAllocationList();
-	int* excess_allocation_list = volume->index.GetExcessAllocationList();
-	AtomicArrayThreadGuard<MEMORYDEVICE_CPU> guard(entry_count);
+	ORUtils::MemoryBlock<Vector3s> new_positions_local(new_block_count, MEMORYDEVICE_CPU);
+	new_positions_local.SetFrom(&new_block_positions, MemoryCopyDirection::CPU_TO_CPU);
+	ORUtils::MemoryBlock<Vector3s> colliding_positions_local(new_block_count, MEMORYDEVICE_CPU);
+	std::atomic<int> colliding_block_count;
+
+	Vector3s* new_positions_device = new_positions_local.GetData(MEMORYDEVICE_CPU);
+	Vector3s* colliding_positions_device = colliding_positions_local.GetData(MEMORYDEVICE_CPU);
 
 	HashEntry* hash_table = volume->index.GetEntries();
-	const Vector3s* block_coordinates_device = block_coordinates.GetData(MEMORYDEVICE_CPU);
+	HashEntryAllocationState* hash_entry_states = volume->index.GetHashEntryAllocationStates();
+	Vector3s* allocation_block_coordinates = volume->index.GetAllocationBlockCoordinates();
 
-#if WITH_OPENMP
-#pragma parallel for default(none) shared(block_coordinates_device, last_free_voxel_block_id, \
-                                          last_free_excess_list_id, block_allocation_list, excess_allocation_list)
-#endif
-	for (int i_new_block = 0; i_new_block < new_block_count; i_new_block++) {
-		AllocateBlock_CPU(block_coordinates_device[i_new_block], hash_table, guard, counters.last_free_voxel_block_id,
-		                  counters.last_free_excess_list_id, block_allocation_list, excess_allocation_list);
+	while (new_block_count > 0) {
+		colliding_block_count.store(0);
+
+		volume->index.ClearHashEntryAllocationStates();
+
+		for(int new_block_index = 0; new_block_index < new_block_count; new_block_index++){
+			Vector3s desired_block_position = new_positions_device[new_block_index];
+			int hash_code = HashCodeFromBlockPosition(desired_block_position);
+
+			MarkAsNeedingAllocationIfNotFound(hash_entry_states, allocation_block_coordinates, hash_code,
+			                                  desired_block_position, hash_table, colliding_positions_device, colliding_block_count);
+
+		}
+
+		AllocateHashEntriesUsingLists(volume);
+
+		new_block_count = colliding_block_count.load();
+		std::swap(new_positions_device,colliding_positions_device);
 	}
-
-	volume->localVBA.lastFreeBlockId = counters.GetLastFreeVoxelBlockId();
-	volume->index.SetLastFreeExcessListId(counters.GetLastFreeExcesListId());
 }
 
 
