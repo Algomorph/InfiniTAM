@@ -70,9 +70,10 @@ struct TestData {
 		                               configuration::get().general_voxel_volume_parameters.near_clipping_distance,
 		                               configuration::get().general_voxel_volume_parameters.far_clipping_distance,
 		                               TMemoryDeviceType);
-
 		delete rgb;
 		delete depth;
+
+		GenerateGroundTruthPositions();
 	}
 
 	~TestData() {
@@ -93,6 +94,47 @@ struct TestData {
 	ITMView* view_square_2 = nullptr;
 	CameraTrackingState* tracking_state;
 	RenderState* render_state;
+	std::unordered_set<Vector3s> ground_truth_block_positions;
+
+private:
+	void GenerateGroundTruthPositions(const VoxelVolumeParameters& volume_parameters = configuration::get().general_voxel_volume_parameters, const float distance_to_first_square = 2.0f, const float distance_to_second_square = 2.096f, const float square_size_px = 40){
+		
+
+		auto voxel_block_size = static_cast<float>(volume_parameters.voxel_size * VOXEL_BLOCK_SIZE);
+		auto first_line_of_blocks_z = static_cast<int>(std::ceil((distance_to_first_square -
+		                                                          volume_parameters.narrow_band_half_width *
+		                                                          volume_parameters.block_allocation_band_factor) /
+		                                                         voxel_block_size));
+		auto last_line_of_blocks_z = static_cast<int>(std::floor((distance_to_second_square +
+		                                                          volume_parameters.narrow_band_half_width *
+		                                                          volume_parameters.block_allocation_band_factor) /
+		                                                         voxel_block_size));
+		auto horizontal_block_span = static_cast<int>(std::ceil(((square_size_px / 2.0f) * distance_to_first_square /
+		                                                         view_square_1->calib.intrinsics_d.projectionParamsSimple.fx) /
+		                                                        voxel_block_size)) * 2;
+		auto vertical_block_span = static_cast<int>(std::ceil(((square_size_px / 2.0f) * distance_to_first_square /
+		                                                       view_square_1->calib.intrinsics_d.projectionParamsSimple.fy) /
+		                                                      voxel_block_size)) * 2;
+		auto depth_block_span = last_line_of_blocks_z + 1 - first_line_of_blocks_z;
+
+
+
+		int start_x = -horizontal_block_span / 2;
+		int end_x = start_x + horizontal_block_span;
+		int start_y = -vertical_block_span / 2;
+		int end_y = start_y + vertical_block_span;
+		int end_z = first_line_of_blocks_z + depth_block_span;
+
+		
+		for (int x = start_x; x < end_x; x++){
+			for(int y = start_y; y < end_y; y++){
+				for(int z = first_line_of_blocks_z; z < end_z; z++){
+					Vector3s position(x,y,z);
+					ground_truth_block_positions.insert(position);
+				}
+			}
+		}
+	}
 
 };
 
@@ -125,47 +167,9 @@ BOOST_FIXTURE_TEST_CASE(Test_TwoSurfaceAllocation_CPU, TestData_CPU) {
 	std::unordered_set<Vector3s> hash_block_positions_span_set(hash_block_positions_span.begin(),
 	                                                           hash_block_positions_span.end());
 
-
-	const float distance_to_first_square = 2.0f;
-	const float distance_to_second_square = 2.096f;
-	const float square_size_px = 40;
-
-	auto voxel_block_size = static_cast<float>(span_volume.sceneParams->voxel_size * VOXEL_BLOCK_SIZE);
-	auto first_line_of_blocks_z = static_cast<int>(std::ceil((distance_to_first_square -
-	                                                          span_volume.sceneParams->narrow_band_half_width *
-	                                                          span_volume.sceneParams->block_allocation_band_factor) /
-	                                                         voxel_block_size));
-	auto last_line_of_blocks_z = static_cast<int>(std::floor((distance_to_second_square +
-	                                                          span_volume.sceneParams->narrow_band_half_width *
-	                                                          span_volume.sceneParams->block_allocation_band_factor) /
-	                                                         voxel_block_size));
-	auto horizontal_block_span = static_cast<int>(std::ceil(((square_size_px / 2.0f) * distance_to_first_square /
-	                                                         view_square_1->calib.intrinsics_d.projectionParamsSimple.fx) /
-	                                                        voxel_block_size)) * 2;
-	auto vertical_block_span = static_cast<int>(std::ceil(((square_size_px / 2.0f) * distance_to_first_square /
-	                                                       view_square_1->calib.intrinsics_d.projectionParamsSimple.fy) /
-	                                                      voxel_block_size)) * 2;
-	auto depth_block_span = last_line_of_blocks_z + 1 - first_line_of_blocks_z;
-
 	int test_volume_block_count = StatCalc_CPU_VBH_Voxel::Instance().ComputeAllocatedHashBlockCount(&span_volume);
 
-	BOOST_REQUIRE_EQUAL(test_volume_block_count, horizontal_block_span * vertical_block_span * depth_block_span);
-
-	int start_x = -horizontal_block_span / 2;
-	int end_x = start_x + horizontal_block_span;
-	int start_y = -vertical_block_span / 2;
-	int end_y = start_y + vertical_block_span;
-	int end_z = first_line_of_blocks_z + depth_block_span;
-
-	std::unordered_set<Vector3s> ground_truth_block_positions;
-	for (int x = start_x; x < end_x; x++){
-		for(int y = start_y; y < end_y; y++){
-			for(int z = first_line_of_blocks_z; z < end_z; z++){
-				Vector3s position(x,y,z);
-				ground_truth_block_positions.insert(position);
-			}
-		}
-	}
+	BOOST_REQUIRE_EQUAL(test_volume_block_count, ground_truth_block_positions.size());
 
 	bool bad_block_detected = false;
 	Vector3s bad_block(-1);
@@ -186,3 +190,58 @@ BOOST_FIXTURE_TEST_CASE(Test_TwoSurfaceAllocation_CPU, TestData_CPU) {
 
 	delete visualization_engine;
 }
+
+#ifndef COMPILE_WITHOUT_CUDA
+typedef TestData<MEMORYDEVICE_CUDA> TestData_CUDA;
+
+BOOST_FIXTURE_TEST_CASE(Test_TwoSurfaceAllocation_CUDA, TestData_CUDA) {
+
+
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> square_1_volume(MEMORYDEVICE_CUDA, {0x8000, 0x20000});
+	square_1_volume.Reset();
+	DepthFusionEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA> depth_fusion_engine;
+
+	depth_fusion_engine.GenerateTsdfVolumeFromView(&square_1_volume, view_square_1, tracking_state);
+
+	VisualizationEngine<TSDFVoxel, VoxelBlockHash>* visualization_engine = VisualizationEngineFactory::MakeVisualizationEngine<TSDFVoxel, VoxelBlockHash>(
+			MEMORYDEVICE_CUDA);
+
+	// builds the point cloud
+	visualization_engine->CreateICPMaps(&square_1_volume, view_square_1, tracking_state, render_state);
+
+	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>& indexer = IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance();
+
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> span_volume(MEMORYDEVICE_CUDA, {0x8000, 0x20000});
+	span_volume.Reset();
+	indexer.AllocateNearAndBetweenTwoSurfaces(&span_volume, tracking_state, view_square_2);
+
+	std::vector<Vector3s> hash_block_positions_span = StatCalc_CUDA_VBH_Voxel::Instance().GetAllocatedHashBlockPositions(
+			&span_volume);
+	std::unordered_set<Vector3s> hash_block_positions_span_set(hash_block_positions_span.begin(),
+	                                                           hash_block_positions_span.end());
+
+	int test_volume_block_count = StatCalc_CUDA_VBH_Voxel::Instance().ComputeAllocatedHashBlockCount(&span_volume);
+
+	BOOST_REQUIRE_EQUAL(test_volume_block_count, ground_truth_block_positions.size());
+
+	bool bad_block_detected = false;
+	Vector3s bad_block(-1);
+	for(auto block_position : hash_block_positions_span){
+		if(ground_truth_block_positions.find(block_position) == ground_truth_block_positions.end()){
+			bad_block = block_position;
+			bad_block_detected = true;
+		}
+	}
+	BOOST_REQUIRE_MESSAGE(!bad_block_detected, "Detected incorrect block allocated at " << bad_block << ".");
+	for(auto block_position : ground_truth_block_positions){
+		if(hash_block_positions_span_set.find(block_position) == hash_block_positions_span_set.end()){
+			bad_block = block_position;
+			bad_block_detected = true;
+		}
+	}
+	BOOST_REQUIRE_MESSAGE(!bad_block_detected, "Missing block at " << bad_block << ".");
+
+	delete visualization_engine;
+}
+
+#endif
