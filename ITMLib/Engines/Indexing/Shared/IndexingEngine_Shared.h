@@ -91,8 +91,8 @@ inline bool MarkAsNeedingAllocationIfNotFound(ITMLib::HashEntryAllocationState* 
 		auto setHashEntryState = [&](HashEntryAllocationState state) {
 #if defined(__CUDACC__) && defined(__CUDA_ARCH__)
 			if (atomicCAS((char*) hash_entry_states + hash_code,
-			              (char) ITMLib::NEEDS_NO_CHANGE,
-			              (char) state) != ITMLib::NEEDS_NO_CHANGE) {
+						  (char) ITMLib::NEEDS_NO_CHANGE,
+						  (char) state) != ITMLib::NEEDS_NO_CHANGE) {
 				if (IS_EQUAL3(hash_block_coordinates[hash_code], desired_hash_block_position)) return false;
 				//hash code already marked for allocation, but at different coordinates, cannot allocate
 				int collision_index = ATOMIC_ADD(colliding_block_count, 1);
@@ -142,6 +142,19 @@ inline bool MarkAsNeedingAllocationIfNotFound(ITMLib::HashEntryAllocationState* 
 	return false;
 
 };
+
+_DEVICE_WHEN_AVAILABLE_
+inline bool MarkAsNeedingAllocationIfNotFound(ITMLib::HashEntryAllocationState* hash_entry_states,
+                                              Vector3s* hash_block_coordinates,
+                                              const CONSTPTR(Vector3s)& desired_hash_block_position,
+                                              const CONSTPTR(HashEntry)* hash_table,
+                                              THREADPTR(Vector3s)* colliding_block_positions,
+                                              ATOMIC_ARGUMENT(int) colliding_block_count) {
+	int hash_code = HashCodeFromBlockPosition(desired_hash_block_position);
+	return MarkAsNeedingAllocationIfNotFound(hash_entry_states, hash_block_coordinates, hash_code,
+	                                         desired_hash_block_position, hash_table, colliding_block_positions,
+	                                         colliding_block_count);
+}
 
 /**
  * \brief Determines whether the hash block at the specified block position needs it's voxels to be allocated, as well
@@ -289,20 +302,20 @@ MarkForAllocationAndSetVisibilityTypeIfNotFound(ITMLib::HashEntryAllocationState
 #endif
 }
 
-
-_CPU_AND_GPU_CODE_ inline int getIncrementCount(Vector3s coord1, Vector3s coord2) {
+/**Get number of differing vector components**/
+_CPU_AND_GPU_CODE_ inline int get_differing_component_count(Vector3s coord1, Vector3s coord2) {
 	return static_cast<int>(coord1.x != coord2.x) +
 	       static_cast<int>(coord1.y != coord2.y) +
 	       static_cast<int>(coord1.z != coord2.z);
 }
 
-_CPU_AND_GPU_CODE_ inline void
+_DEVICE_WHEN_AVAILABLE_ inline void
 findVoxelHashBlocksAlongSegment(ITMLib::HashEntryAllocationState* hash_entry_allocation_states,
                                 Vector3s* hash_block_coordinates,
-                                HashBlockVisibility* hash_block_visibility_types,
                                 const CONSTPTR(HashEntry)* hash_table,
                                 const ITMLib::Segment& segment_in_hash_blocks,
-                                bool& collision_detected) {
+                                THREADPTR(Vector3s)* colliding_block_positions,
+                                ATOMIC_ARGUMENT(int) colliding_block_count) {
 
 	// number of steps to take along the truncated SDF band
 	int step_count = (int) std::ceil(2.0f * segment_in_hash_blocks.length());
@@ -310,67 +323,64 @@ findVoxelHashBlocksAlongSegment(ITMLib::HashEntryAllocationState* hash_entry_all
 	// a single stride along the sdf band segment from one step to the next
 	Vector3f strideVector = segment_in_hash_blocks.direction / (float) (step_count - 1);
 
-	Vector3s previousHashBlockPosition;
+	Vector3s previous_block_position;
 	Vector3f check_position = segment_in_hash_blocks.origin;
 
 	//add neighbouring blocks
 	for (int i = 0; i < step_count; i++) {
 		//find block position at current step
-		Vector3s currentHashBlockPosition = TO_SHORT_FLOOR3(check_position);
-		int incrementCount;
-		if (i > 0 && (incrementCount = getIncrementCount(currentHashBlockPosition, previousHashBlockPosition)) > 1) {
-			if (incrementCount == 2) {
-				for (int iDirection = 0; iDirection < 3; iDirection++) {
-					if (currentHashBlockPosition.values[iDirection] != previousHashBlockPosition.values[iDirection]) {
-						Vector3s potentiallyMissedBlockPosition = previousHashBlockPosition;
-						potentiallyMissedBlockPosition.values[iDirection] = currentHashBlockPosition.values[iDirection];
+		Vector3s current_block_position = TO_SHORT_FLOOR3(check_position);
+		int directional_increment_count;
+		if (i > 0 && (directional_increment_count = get_differing_component_count(current_block_position,
+		                                                                          previous_block_position)) > 1) {
+			if (directional_increment_count == 2) {
+				for (int i_direction = 0; i_direction < 3; i_direction++) {
+					if (current_block_position.values[i_direction] != previous_block_position.values[i_direction]) {
+						Vector3s potentially_missed_block_position = previous_block_position;
+						potentially_missed_block_position.values[i_direction] = current_block_position.values[i_direction];
 						if (SegmentIntersectsGridAlignedCube3D(segment_in_hash_blocks,
-						                                       TO_FLOAT3(potentiallyMissedBlockPosition),
+						                                       TO_FLOAT3(potentially_missed_block_position),
 						                                       1.0f)) {
-							MarkForAllocationAndSetVisibilityTypeIfNotFound(
+							MarkAsNeedingAllocationIfNotFound(
 									hash_entry_allocation_states,
-									hash_block_coordinates, hash_block_visibility_types, potentiallyMissedBlockPosition,
-									hash_table,
-									collision_detected);
+									hash_block_coordinates, potentially_missed_block_position,
+									hash_table, colliding_block_positions, colliding_block_count);
 						}
 					}
 				}
 			} else {
-				//incrementCount == 3
+				//directional_increment_count == 3
 				for (int iDirection = 0; iDirection < 3; iDirection++) {
-					Vector3s potentiallyMissedBlockPosition = previousHashBlockPosition;
-					potentiallyMissedBlockPosition.values[iDirection] = currentHashBlockPosition.values[iDirection];
+					Vector3s potentially_missed_block_position = previous_block_position;
+					potentially_missed_block_position.values[iDirection] = current_block_position.values[iDirection];
 					if (SegmentIntersectsGridAlignedCube3D(segment_in_hash_blocks,
-					                                       TO_FLOAT3(potentiallyMissedBlockPosition),
+					                                       TO_FLOAT3(potentially_missed_block_position),
 					                                       1.0f)) {
-						MarkForAllocationAndSetVisibilityTypeIfNotFound(
+						MarkAsNeedingAllocationIfNotFound(
 								hash_entry_allocation_states,
-								hash_block_coordinates, hash_block_visibility_types, potentiallyMissedBlockPosition,
-								hash_table,
-								collision_detected);
+								hash_block_coordinates, potentially_missed_block_position,
+								hash_table, colliding_block_positions, colliding_block_count);
 					}
-					potentiallyMissedBlockPosition = currentHashBlockPosition;
-					potentiallyMissedBlockPosition.values[iDirection] = previousHashBlockPosition.values[iDirection];
+					potentially_missed_block_position = current_block_position;
+					potentially_missed_block_position.values[iDirection] = previous_block_position.values[iDirection];
 					if (SegmentIntersectsGridAlignedCube3D(segment_in_hash_blocks,
-					                                       TO_FLOAT3(potentiallyMissedBlockPosition),
+					                                       TO_FLOAT3(potentially_missed_block_position),
 					                                       1.0f)) {
-						MarkForAllocationAndSetVisibilityTypeIfNotFound(
+						MarkAsNeedingAllocationIfNotFound(
 								hash_entry_allocation_states,
-								hash_block_coordinates, hash_block_visibility_types, potentiallyMissedBlockPosition,
-								hash_table,
-								collision_detected);
+								hash_block_coordinates, potentially_missed_block_position,
+								hash_table, colliding_block_positions, colliding_block_count);
 					}
 				}
 			}
 		}
-		MarkForAllocationAndSetVisibilityTypeIfNotFound(hash_entry_allocation_states,
-		                                                hash_block_coordinates,
-		                                                hash_block_visibility_types, currentHashBlockPosition,
-		                                                hash_table,
-		                                                collision_detected);
+		MarkAsNeedingAllocationIfNotFound(
+				hash_entry_allocation_states,
+				hash_block_coordinates, current_block_position,
+				hash_table, colliding_block_positions, colliding_block_count);
 
 		check_position += strideVector;
-		previousHashBlockPosition = currentHashBlockPosition;
+		previous_block_position = current_block_position;
 	}
 }
 
@@ -478,22 +488,24 @@ findHashBlockSegmentAlongCameraRayWithinRangeFromDepth(const float distance_from
 
 	Vector4f point_in_camera_space = imageSpacePointToCameraSpace(depth_measure, x, y,
 	                                                              inverted_camera_projection_parameters);
-	return findHashBlockSegmentAlongCameraRayWithinRangeFromPoint(distance_from_point, point_in_camera_space,
-	                                                              inverted_camera_pose, one_over_hash_block_size);
+	return findHashBlockSegmentAlongCameraRayWithinRangeFromPoint(distance_from_point,
+	                                                                              point_in_camera_space,
+	                                                                              inverted_camera_pose,
+	                                                                              one_over_hash_block_size);
 }
 
 
-_CPU_AND_GPU_CODE_ inline void
+_DEVICE_WHEN_AVAILABLE_ inline void
 findVoxelBlocksForRayNearSurface(ITMLib::HashEntryAllocationState* hash_entry_allocation_states,
                                  Vector3s* hash_block_coordinates,
-                                 HashBlockVisibility* hash_block_visibility_types,
                                  const CONSTPTR(HashEntry)* hash_table,
                                  const int x, const int y, const CONSTPTR(float)* depth, float surface_distance_cutoff,
                                  const Matrix4f inverted_camera_pose,
                                  const Vector4f inverted_projection_parameters,
                                  const float one_over_hash_block_size, const Vector2i depth_image_size,
                                  const float near_clipping_distance, const float far_clipping_distance,
-                                 bool& collision_detected) {
+                                 THREADPTR(Vector3s)* colliding_block_positions,
+                                 ATOMIC_ARGUMENT(int) colliding_block_count) {
 
 	float depth_measure = depth[x + y * depth_image_size.x];
 	if (depth_measure <= 0 || (depth_measure - surface_distance_cutoff) < 0 ||
@@ -511,8 +523,8 @@ findVoxelBlocksForRayNearSurface(ITMLib::HashEntryAllocationState* hash_entry_al
 	                                                                                       one_over_hash_block_size);
 
 
-	findVoxelHashBlocksAlongSegment(hash_entry_allocation_states, hash_block_coordinates, hash_block_visibility_types,
-	                                hash_table, march_segment, collision_detected);
+	findVoxelHashBlocksAlongSegment(hash_entry_allocation_states, hash_block_coordinates,
+	                                hash_table, march_segment, colliding_block_positions, colliding_block_count);
 }
 
 

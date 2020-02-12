@@ -142,14 +142,15 @@ void allocateHashedVoxelBlocksUsingLists_device(
 		int* block_allocation_list, int* excess_allocation_list,
 		AllocationTempData* temporary_allocation_data,
 		HashEntry* hash_table, const int hash_entry_count,
-		const ITMLib::HashEntryAllocationState* hash_entry_states, Vector3s* block_coordinates, int* utilized_block_hash_codes) {
+		const ITMLib::HashEntryAllocationState* hash_entry_states, Vector3s* block_coordinates,
+		int* utilized_block_hash_codes) {
 	int hash_code = threadIdx.x + blockIdx.x * blockDim.x;
 	if (hash_code >= hash_entry_count) return;
 
 	int voxel_block_index, excess_list_index;
 
-	auto updateUtilizedHashCodes = [&temporary_allocation_data, &utilized_block_hash_codes, &hash_code](){
-		int utilized_index = atomicAdd(&temporary_allocation_data->utilized_block_count,1);
+	auto updateUtilizedHashCodes = [&temporary_allocation_data, &utilized_block_hash_codes, &hash_code]() {
+		int utilized_index = atomicAdd(&temporary_allocation_data->utilized_block_count, 1);
 		utilized_block_hash_codes[utilized_index] = hash_code;
 	};
 
@@ -174,7 +175,8 @@ void allocateHashedVoxelBlocksUsingLists_device(
 			voxel_block_index = atomicSub(&temporary_allocation_data->last_free_voxel_block_id, 1);
 			excess_list_index = atomicSub(&temporary_allocation_data->last_free_excess_list_id, 1);
 
-			if (voxel_block_index >= 0 && excess_list_index >= 0) //there is room in the voxel block array and excess list
+			if (voxel_block_index >= 0 &&
+			    excess_list_index >= 0) //there is room in the voxel block array and excess list
 			{
 				HashEntry hash_entry;
 				hash_entry.pos = block_coordinates[hash_code];
@@ -217,23 +219,22 @@ void buildHashAllocationTypeList_VolumeToVolume(ITMLib::HashEntryAllocationState
 
 
 __global__ void buildHashAllocAndVisibleType_device(ITMLib::HashEntryAllocationState* hash_entry_states,
-                                                    HashBlockVisibility* block_visibility_type,
                                                     Vector3s* block_coords, const float* depth,
-                                                    Matrix4f inverted_camera_pose, Vector4f projParams_d,
-                                                    float surface_cutoff_distance,
-                                                    Vector2i depth_image_size, float oneOverHashBlockSizeMeters,
-                                                    HashEntry* hashTable, float near_clipping_distance,
-                                                    float far_clipping_distance, bool* collisionDetected) {
+                                                    Matrix4f inverted_camera_pose,
+                                                    Vector4f inverted_camera_projection_parameters,
+                                                    float surface_cutoff_distance, Vector2i depth_image_size,
+                                                    float reciprocal_hash_block_size, HashEntry* hash_table,
+                                                    float near_clipping_distance, float far_clipping_distance,
+                                                    Vector3s* colliding_block_positions, int* colliding_block_count) {
 	int x = threadIdx.x + blockIdx.x * blockDim.x, y = threadIdx.y + blockIdx.y * blockDim.y;
 
 	if (x > depth_image_size.x - 1 || y > depth_image_size.y - 1) return;
 
-	findVoxelBlocksForRayNearSurface(hash_entry_states, block_coords, block_visibility_type,
-	                                 hashTable, x, y, depth,
-	                                 surface_cutoff_distance,
-	                                 inverted_camera_pose, projParams_d, oneOverHashBlockSizeMeters, depth_image_size,
-	                                 near_clipping_distance, far_clipping_distance,
-	                                 *collisionDetected);
+	findVoxelBlocksForRayNearSurface(hash_entry_states, block_coords, hash_table, x, y, depth,
+	                                 surface_cutoff_distance, inverted_camera_pose,
+	                                 inverted_camera_projection_parameters, reciprocal_hash_block_size,
+	                                 depth_image_size, near_clipping_distance, far_clipping_distance,
+	                                 colliding_block_positions, colliding_block_count);
 }
 
 
@@ -329,16 +330,18 @@ __global__ void allocateHashEntry_device(SingleHashAllocationData* data,
 
 __global__ void buildHashAllocationTypeList_BlockList_device(
 		const Vector3s* new_block_positions, HashEntryAllocationState* hash_entry_states, Vector3s* block_coordinates,
-		HashEntry* hash_table, const int new_block_count, Vector3s* colliding_block_positions, int* colliding_block_count) {
+		HashEntry* hash_table, const int new_block_count, Vector3s* colliding_block_positions,
+		int* colliding_block_count) {
 
 	int new_block_index = threadIdx.x + blockIdx.x * blockDim.x;
-	if(new_block_index >= new_block_count) return;
+	if (new_block_index >= new_block_count) return;
 
 	Vector3s desired_block_position = new_block_positions[new_block_index];
 	int hash_code = HashCodeFromBlockPosition(desired_block_position);
 
 	MarkAsNeedingAllocationIfNotFound(hash_entry_states, block_coordinates, hash_code,
-			desired_block_position, hash_table, colliding_block_positions, colliding_block_count);
+	                                  desired_block_position, hash_table, colliding_block_positions,
+	                                  colliding_block_count);
 }
 
 } // end anonymous namespace (CUDA kernels)

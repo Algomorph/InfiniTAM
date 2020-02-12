@@ -100,7 +100,7 @@ private:
 	overflow. */
 	ORUtils::MemoryBlock<int> excessAllocationList;
 	/** A list of hash codes for "visible entries" */
-	ORUtils::MemoryBlock<int> visibleBlockHashCodes;
+	ORUtils::MemoryBlock<int> utilized_block_hash_codes;
 	/** Visibility types of "visible entries", ordered by hashCode */
 	ORUtils::MemoryBlock<HashBlockVisibility> blockVisibilityTypes;
 
@@ -170,9 +170,9 @@ public:
 	/** Get a temporary list for coordinates of voxel blocks to be soon allocated**/
 	Vector3s* GetAllocationBlockCoordinates() { return allocationBlockCoordinates.GetData(memoryType); }
 
-	const int* GetUtilizedBlockHashCodes() const { return visibleBlockHashCodes.GetData(memoryType); }
+	const int* GetUtilizedBlockHashCodes() const { return utilized_block_hash_codes.GetData(memoryType); }
 
-	int* GetUtilizedBlockHashCodes() { return visibleBlockHashCodes.GetData(memoryType); }
+	int* GetUtilizedBlockHashCodes() { return utilized_block_hash_codes.GetData(memoryType); }
 
 	HashBlockVisibility* GetBlockVisibilityTypes() { return blockVisibilityTypes.GetData(memoryType); }
 

@@ -357,7 +357,7 @@ static void CreatePointCloud_common(VoxelVolume<TVoxel,TIndex> *scene, const ITM
 template<class TVoxel, class TIndex>
 static void CreateICPMaps_common(VoxelVolume<TVoxel,TIndex> *scene, const ITMView *view, CameraTrackingState *trackingState, RenderState *renderState)
 {
-	Vector2i imgSize = renderState->raycastResult->noDims;
+	const Vector2i imgSize = renderState->raycastResult->noDims;
 	Matrix4f invM = trackingState->pose_d->GetInvM();
 
 	// this one is generally done for the ICP tracker, so yes, update
@@ -365,14 +365,14 @@ static void CreateICPMaps_common(VoxelVolume<TVoxel,TIndex> *scene, const ITMVie
 	GenericRaycast(scene, imgSize, invM, view->calib.intrinsics_d.projectionParamsSimple.all, renderState, true);
 	trackingState->pose_pointCloud->SetFrom(trackingState->pose_d);
 
-	Vector3f lightSource = -Vector3f(invM.getColumn(2));
+	const Vector3f lightSource = -Vector3f(invM.getColumn(2));
 	Vector4f *normalsMap = trackingState->pointCloud->colours->GetData(MEMORYDEVICE_CPU);
 	Vector4f *pointsMap = trackingState->pointCloud->locations->GetData(MEMORYDEVICE_CPU);
 	Vector4f *pointsRay = renderState->raycastResult->GetData(MEMORYDEVICE_CPU);
-	float voxelSize = scene->sceneParams->voxel_size;
+	const float voxelSize = scene->sceneParams->voxel_size;
 
 #ifdef WITH_OPENMP
-	#pragma omp parallel for
+	#pragma omp parallel for default(none) shared(pointsMap, normalsMap, pointsRay, view)
 #endif
 	for (int y = 0; y < imgSize.y; y++) for (int x = 0; x < imgSize.x; x++)
 	{

@@ -13,7 +13,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#define BOOST_TEST_MODULE HashAllocation
+#define BOOST_TEST_MODULE HashAllocationThreadSafety
 #ifndef WIN32
 #define BOOST_TEST_DYN_LINK
 #endif
@@ -37,10 +37,8 @@
 #include "../ITMLib/Utils/Analytics/VolumeStatisticsCalculator/CPU/VolumeStatisticsCalculator_CPU.h"
 //(CUDA)
 #ifndef COMPILE_WITH_CUDA
-
 #include "../ITMLib/Engines/Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
 #include "../ITMLib/Utils/Analytics/VolumeStatisticsCalculator/CUDA/VolumeStatisticsCalculator_CUDA.h"
-
 #endif
 
 using namespace ITMLib;
@@ -50,15 +48,11 @@ namespace std {
 template<>
 struct hash<Vector3s> {
 	size_t operator()(const Vector3s& vector) const {
-//			size_t v1 = std::hash<short>()(vector.x);
-//			size_t v2 = std::hash<short>()(vector.y);
-//			size_t v3 = std::hash<short>()(vector.z);
-//			return v1 << 42u | (v2 << 21u & 0x3ffffe00000ul) | (v3 & 0x001ffffful);
 		return std::hash<size_t>()(static_cast<size_t>(vector.x) << 16u | static_cast<size_t>(vector.y) << 8u |
 		                           static_cast<size_t>(vector.z));
 	}
 };
-}
+} // namespace std
 
 template<typename T>
 static ORUtils::MemoryBlock<T>

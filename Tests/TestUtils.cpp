@@ -160,46 +160,46 @@ updateView(ITMView** view, const std::string& depth_path, const std::string& col
 }
 
 template
-void buildSdfVolumeFromImage<TSDFVoxel, PlainVoxelArray>(VoxelVolume<TSDFVoxel, PlainVoxelArray>** volume,
-                                                         ITMView** view,
-                                                         const std::string& depth_path, const std::string& color_path,
-                                                         const std::string& mask_path,
-                                                         const std::string& calibration_path,
-                                                         MemoryDeviceType memoryDevice,
-                                                         PlainVoxelArray::InitializationParameters initializationParameters,
-                                                         configuration::SwappingMode swappingMode,
-                                                         bool useBilateralFilter);
+void buildSdfVolumeFromImage_NearSurfaceAllocation<TSDFVoxel, PlainVoxelArray>(VoxelVolume<TSDFVoxel, PlainVoxelArray>** volume,
+                                                                               ITMView** view,
+                                                                               const std::string& depth_path, const std::string& color_path,
+                                                                               const std::string& mask_path,
+                                                                               const std::string& calibration_path,
+                                                                               MemoryDeviceType memoryDevice,
+                                                                               PlainVoxelArray::InitializationParameters initializationParameters,
+                                                                               configuration::SwappingMode swappingMode,
+                                                                               bool useBilateralFilter);
 
 template
-void buildSdfVolumeFromImage<TSDFVoxel, PlainVoxelArray>(VoxelVolume<TSDFVoxel, PlainVoxelArray>** volume,
-                                                         const std::string& depth_path, const std::string& color_path,
-                                                         const std::string& mask_path,
-                                                         const std::string& calibration_path,
-                                                         MemoryDeviceType memoryDevice,
-                                                         PlainVoxelArray::InitializationParameters initializationParameters,
-                                                         configuration::SwappingMode swappingMode,
-                                                         bool useBilateralFilter);
+void buildSdfVolumeFromImage_NearSurfaceAllocation<TSDFVoxel, PlainVoxelArray>(VoxelVolume<TSDFVoxel, PlainVoxelArray>** volume,
+                                                                               const std::string& depth_path, const std::string& color_path,
+                                                                               const std::string& mask_path,
+                                                                               const std::string& calibration_path,
+                                                                               MemoryDeviceType memoryDevice,
+                                                                               PlainVoxelArray::InitializationParameters initializationParameters,
+                                                                               configuration::SwappingMode swappingMode,
+                                                                               bool useBilateralFilter);
 
 template
-void buildSdfVolumeFromImage<TSDFVoxel, VoxelBlockHash>(VoxelVolume<TSDFVoxel, VoxelBlockHash>** volume,
-                                                        ITMView** view,
-                                                        const std::string& depth_path, const std::string& color_path,
-                                                        const std::string& mask_path,
-                                                        const std::string& calibration_path,
-                                                        MemoryDeviceType memoryDevice,
-                                                        VoxelBlockHash::InitializationParameters initializationParameters,
-                                                        configuration::SwappingMode swappingMode,
-                                                        bool useBilateralFilter);
+void buildSdfVolumeFromImage_NearSurfaceAllocation<TSDFVoxel, VoxelBlockHash>(VoxelVolume<TSDFVoxel, VoxelBlockHash>** volume,
+                                                                              ITMView** view,
+                                                                              const std::string& depth_path, const std::string& color_path,
+                                                                              const std::string& mask_path,
+                                                                              const std::string& calibration_path,
+                                                                              MemoryDeviceType memoryDevice,
+                                                                              VoxelBlockHash::InitializationParameters initializationParameters,
+                                                                              configuration::SwappingMode swappingMode,
+                                                                              bool useBilateralFilter);
 
 template
-void buildSdfVolumeFromImage<TSDFVoxel, VoxelBlockHash>(VoxelVolume<TSDFVoxel, VoxelBlockHash>** volume,
-                                                        const std::string& depth_path, const std::string& color_path,
-                                                        const std::string& mask_path,
-                                                        const std::string& calibration_path,
-                                                        MemoryDeviceType memoryDevice,
-                                                        VoxelBlockHash::InitializationParameters initializationParameters,
-                                                        configuration::SwappingMode swappingMode,
-                                                        bool useBilateralFilter);
+void buildSdfVolumeFromImage_NearSurfaceAllocation<TSDFVoxel, VoxelBlockHash>(VoxelVolume<TSDFVoxel, VoxelBlockHash>** volume,
+                                                                              const std::string& depth_path, const std::string& color_path,
+                                                                              const std::string& mask_path,
+                                                                              const std::string& calibration_path,
+                                                                              MemoryDeviceType memoryDevice,
+                                                                              VoxelBlockHash::InitializationParameters initializationParameters,
+                                                                              configuration::SwappingMode swappingMode,
+                                                                              bool useBilateralFilter);
 
 template
 void initializeVolume<TSDFVoxel, VoxelBlockHash>(VoxelVolume<TSDFVoxel, VoxelBlockHash>** volume,

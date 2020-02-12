@@ -214,16 +214,16 @@ void initializeVolume(VoxelVolume<TVoxel, TIndex>** volume,
 
 
 template<typename TVoxel, typename TIndex>
-void buildSdfVolumeFromImage(VoxelVolume<TVoxel, TIndex>** volume,
-                             ITMView** view,
-                             const std::string& depth_path,
-                             const std::string& color_path,
-                             const std::string& mask_path,
-                             const std::string& calibration_path,
-                             MemoryDeviceType memoryDevice,
-                             typename TIndex::InitializationParameters initializationParameters,
-                             configuration::SwappingMode swappingMode,
-                             bool useBilateralFilter
+void buildSdfVolumeFromImage_NearSurfaceAllocation(VoxelVolume<TVoxel, TIndex>** volume,
+                                                   ITMView** view,
+                                                   const std::string& depth_path,
+                                                   const std::string& color_path,
+                                                   const std::string& mask_path,
+                                                   const std::string& calibration_path,
+                                                   MemoryDeviceType memoryDevice,
+                                                   typename TIndex::InitializationParameters initializationParameters,
+                                                   configuration::SwappingMode swappingMode,
+                                                   bool useBilateralFilter
 ) {
 
 	// region ================================= CONSTRUCT VIEW =========================================================
@@ -265,23 +265,23 @@ void buildSdfVolumeFromImage(VoxelVolume<TVoxel, TIndex>** volume,
 
 
 template<typename TVoxel, typename TIndex>
-void buildSdfVolumeFromImage(VoxelVolume<TVoxel, TIndex>** volume,
-                             const std::string& depth_path, const std::string& color_path, const std::string& mask_path,
-                             const std::string& calibration_path,
-                             MemoryDeviceType memoryDevice,
-                             typename TIndex::InitializationParameters initializationParameters,
-                             configuration::SwappingMode swappingMode,
-                             bool useBilateralFilter) {
+void buildSdfVolumeFromImage_NearSurfaceAllocation(VoxelVolume<TVoxel, TIndex>** volume,
+                                                   const std::string& depth_path, const std::string& color_path, const std::string& mask_path,
+                                                   const std::string& calibration_path,
+                                                   MemoryDeviceType memoryDevice,
+                                                   typename TIndex::InitializationParameters initializationParameters,
+                                                   configuration::SwappingMode swappingMode,
+                                                   bool useBilateralFilter) {
 
 	// region ================================= CONSTRUCT VIEW =========================================================
 
 	ITMView* view = nullptr;
-	buildSdfVolumeFromImage(volume, &view,
-	                        depth_path,
-	                        color_path,
-	                        mask_path,
-	                        calibration_path,
-	                        memoryDevice,
-	                        initializationParameters, swappingMode, useBilateralFilter);
+	buildSdfVolumeFromImage_NearSurfaceAllocation(volume, &view,
+	                                              depth_path,
+	                                              color_path,
+	                                              mask_path,
+	                                              calibration_path,
+	                                              memoryDevice,
+	                                              initializationParameters, swappingMode, useBilateralFilter);
 	delete view;
 }

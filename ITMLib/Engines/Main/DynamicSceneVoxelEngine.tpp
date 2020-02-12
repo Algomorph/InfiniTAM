@@ -284,7 +284,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(ITMUChar4Image* rgb
                                                              ITMShortImage* rawDepthImage,
                                                              IMUMeasurement* imuMeasurement) {
 
-	// prepare image and turn it into a depth image
+	// prepare image and turn it into a "view"
 	if (imuMeasurement == nullptr)
 		view_builder->UpdateView(&view, rgbImage, rawDepthImage, settings.use_threshold_filter,
 		                         settings.use_bilateral_filter, false, true);
@@ -317,7 +317,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(ITMUChar4Image* rgb
 		framesProcessed++;
 	}
 
-	//
+	//preparation for next-frame tracking
 	if (last_tracking_result == CameraTrackingState::TRACKING_GOOD ||
 	    last_tracking_result == CameraTrackingState::TRACKING_POOR) {
 		if (!fusion_succeeded) denseMapper->UpdateVisibleList(view, tracking_state, canonical_volume, canonical_render_state);

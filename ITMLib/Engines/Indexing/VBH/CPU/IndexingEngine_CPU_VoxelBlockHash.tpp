@@ -205,7 +205,8 @@ AllocateHashEntriesUsingLists(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 	};
 
 #ifdef WITH_OPENMP
-#pragma omp parallel for default(shared)
+#pragma omp parallel for default(none) shared(updateUtilizedHashCodes, hash_entry_states, block_coordinates, \
+	last_free_voxel_block_id, last_free_excess_list_id, block_allocation_list, excess_allocation_list, hash_table)
 #endif
 	for (int hash_code = 0; hash_code < hash_entry_count; hash_code++) {
 		int voxel_block_index, excess_list_index;

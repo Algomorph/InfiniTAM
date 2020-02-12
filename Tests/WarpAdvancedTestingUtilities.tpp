@@ -46,13 +46,13 @@ GenerateRawLiveAndCanonicalVolumes(bool allocateLiveFromBothImages,
                                    VoxelVolume<TSDFVoxel, TIndex>** live_volumes,
                                    int& live_index_to_start_from) {
 	ITMView* view = nullptr;
-	buildSdfVolumeFromImage(canonical_volume, &view,
-	                        "TestData/snoopy_depth_000016.png",
-	                        "TestData/snoopy_color_000016.png",
-	                        "TestData/snoopy_omask_000016.png",
-	                        "TestData/snoopy_calib.txt",
-	                        TMemoryDeviceType,
-	                        Frame16And17Fixture::InitParams<TIndex>());
+	buildSdfVolumeFromImage_NearSurfaceAllocation(canonical_volume, &view,
+	                                              "TestData/snoopy_depth_000016.png",
+	                                              "TestData/snoopy_color_000016.png",
+	                                              "TestData/snoopy_omask_000016.png",
+	                                              "TestData/snoopy_calib.txt",
+	                                              TMemoryDeviceType,
+	                                              Frame16And17Fixture::InitParams<TIndex>());
 
 	Vector2i imageSize(640, 480);
 

@@ -74,19 +74,12 @@ void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::Al
 
 	//reset visibility of formerly "visible" entries, if any
 	static_cast<TDerivedClass*>(this)->SetVisibilityToVisibleAtPreviousFrameAndUnstreamed(volume);
-	do {
-		volume->index.ClearHashEntryAllocationStates();
-		depth_based_allocator.collision_detected = false;
 
-		ImageTraversalEngine<float, TMemoryDeviceType>::TraverseWithPosition(view->depth, depth_based_allocator);
+	volume->index.ClearHashEntryAllocationStates();
 
-		if (only_update_visible_list) {
-			use_swapping = false;
-			depth_based_allocator.collision_detected = false;
-		} else {
-			static_cast<TDerivedClass*>(this)->AllocateHashEntriesUsingLists_SetVisibility(volume);
-		}
-	} while (depth_based_allocator.collision_detected);
+	ImageTraversalEngine<float, TMemoryDeviceType>::TraverseWithPosition(view->depth, depth_based_allocator);
+	static_cast<TDerivedClass*>(this)->AllocateHashEntriesUsingLists(volume);
+	static_cast<TDerivedClass*>(this)->AllocateBlockList(volume, depth_based_allocator.colliding_block_positions, depth_based_allocator.get_colliding_block_count());
 
 	static_cast<TDerivedClass*>(this)->BuildUtilizedBlockListBasedOnVisibility(volume, view, depth_camera_matrix);
 	if (use_swapping) ReallocateDeletedHashBlocks(volume);
@@ -105,20 +98,20 @@ void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::Al
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume, const CameraTrackingState* tracking_state,
 		const ITMView* view) {
 
+	volume->index.SetUtilizedHashBlockCount(0);
+
 	float band_factor = configuration::get().general_voxel_volume_parameters.block_allocation_band_factor;
 	float surface_distance_cutoff = band_factor * volume->sceneParams->narrow_band_half_width;
 
 	TwoSurfaceBasedAllocationFunctor<TMemoryDeviceType> depth_based_allocator(
 			volume->index, volume->sceneParams, view, tracking_state, surface_distance_cutoff);
-	do {
-		volume->index.ClearHashEntryAllocationStates();
-		depth_based_allocator.collision_detected = false;
+	volume->index.ClearHashEntryAllocationStates();
 
-		TwoImageTraversalEngine<float, Vector4f, TMemoryDeviceType>::TraverseWithPosition(
-				view->depth, tracking_state->pointCloud->locations, depth_based_allocator);
-		AllocateHashEntriesUsingLists_SetVisibility(volume);
+	TwoImageTraversalEngine<float, Vector4f, TMemoryDeviceType>::TraverseWithPosition(
+			view->depth, tracking_state->pointCloud->locations, depth_based_allocator);
+	static_cast<TDerivedClass*>(this)->AllocateHashEntriesUsingLists(volume);
 
-	} while (depth_based_allocator.collision_detected);
+	static_cast<TDerivedClass*>(this)->AllocateBlockList(volume, depth_based_allocator.colliding_block_positions, depth_based_allocator.get_colliding_block_count());
 }
 
 

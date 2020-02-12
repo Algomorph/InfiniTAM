@@ -49,7 +49,7 @@ VoxelBlockHash::VoxelBlockHash(VoxelBlockHashParameters parameters, MemoryDevice
 		lastFreeExcessListId(parameters.excess_list_size - 1),
 		hashEntryAllocationStates(ORDERED_LIST_SIZE + parameters.excess_list_size, memoryType),
 		allocationBlockCoordinates(ORDERED_LIST_SIZE + parameters.excess_list_size, memoryType),
-		visibleBlockHashCodes(parameters.voxel_block_count, memoryType),
+		utilized_block_hash_codes(parameters.voxel_block_count, memoryType),
 		blockVisibilityTypes(ORDERED_LIST_SIZE + parameters.excess_list_size, memoryType),
 		memoryType(memoryType),
 		hashEntries(hashEntryCount, memoryType),

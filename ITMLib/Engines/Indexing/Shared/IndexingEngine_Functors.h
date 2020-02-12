@@ -20,9 +20,6 @@
 #include "../../Common/CheckBlockVisibility.h"
 
 
-
-
-
 template<typename TWarp, typename TVoxel, WarpType TWarpType>
 struct WarpBasedAllocationMarkerFunctor {
 	WarpBasedAllocationMarkerFunctor(
@@ -58,12 +55,12 @@ struct WarpBasedAllocationMarkerFunctor {
 		int vmIndex;
 #if !defined(__CUDACC__) && !defined(WITH_OPENMP)
 		const TVoxel& sourceTSDFVoxelAtWarp = readVoxel(sourceTSDFVoxels, sourceTSDFHashEntries,
-		                                                warpedPositionTruncated,
-		                                                vmIndex, sourceTSDFCache);
+														warpedPositionTruncated,
+														vmIndex, sourceTSDFCache);
 #else //don't use cache when multithreading!
 		const TVoxel& sourceTSDFVoxelAtWarp = readVoxel(sourceTSDFVoxels, sourceTSDFHashEntries,
-														warpedPositionTruncated,
-														vmIndex);
+		                                                warpedPositionTruncated,
+		                                                vmIndex);
 #endif
 
 		int targetBlockHash = HashCodeFromBlockPosition(hashBlockPosition);
@@ -108,16 +105,17 @@ public:
 			hash_block_size_reciprocal(1.0f / (volume_parameters->voxel_size * VOXEL_BLOCK_SIZE)),
 			hash_entry_allocation_states(index.GetHashEntryAllocationStates()),
 			hash_block_coordinates(index.GetAllocationBlockCoordinates()),
-			hash_block_visibility_types(index.GetBlockVisibilityTypes()),
 			hash_table(index.GetEntries()),
 
-			collision_detected(false) {
+			colliding_block_positions(index.hashEntryCount, TMemoryDeviceType) {
+		colliding_block_positions_device = colliding_block_positions.GetData(TMemoryDeviceType);
+		INITIALIZE_ATOMIC(int, colliding_block_count, 0);
 		depth_camera_pose.inv(inverted_camera_pose);
 		inverted_projection_parameters.fx = 1.0f / inverted_projection_parameters.fx;
 		inverted_projection_parameters.fy = 1.0f / inverted_projection_parameters.fy;
 	}
 
-	_CPU_AND_GPU_CODE_
+	_DEVICE_WHEN_AVAILABLE_
 	void operator()(const float& depth_measure, int x, int y) {
 		if (depth_measure <= 0 || (depth_measure - surface_distance_cutoff) < 0 ||
 		    (depth_measure - surface_distance_cutoff) < near_clipping_distance ||
@@ -136,11 +134,15 @@ public:
 
 
 		findVoxelHashBlocksAlongSegment(hash_entry_allocation_states, hash_block_coordinates,
-		                                hash_block_visibility_types,
-		                                hash_table, march_segment, collision_detected);
+		                                hash_table, march_segment, colliding_block_positions_device,
+		                                colliding_block_count);
 	}
 
-	bool collision_detected;
+	ORUtils::MemoryBlock<Vector3s> colliding_block_positions;
+
+	int get_colliding_block_count() {
+		return GET_ATOMIC_VALUE_CPU(colliding_block_count);
+	}
 
 protected:
 
@@ -154,8 +156,10 @@ protected:
 	float hash_block_size_reciprocal;
 	HashEntryAllocationState* hash_entry_allocation_states;
 	Vector3s* hash_block_coordinates;
-	HashBlockVisibility* hash_block_visibility_types;
 	HashEntry* hash_table;
+
+	Vector3s* colliding_block_positions_device;
+	DECLARE_ATOMIC(int, colliding_block_count);
 };
 
 template<MemoryDeviceType TMemoryDeviceType>
@@ -165,7 +169,8 @@ public:
 	TwoSurfaceBasedAllocationFunctor(VoxelBlockHash& index,
 	                                 const VoxelVolumeParameters* volume_parameters, const ITMLib::ITMView* view,
 	                                 const CameraTrackingState* tracking_state, float surface_distance_cutoff) :
-			DepthBasedAllocationFunctor<TMemoryDeviceType>(index, volume_parameters, view, tracking_state->pose_d->GetM(), surface_distance_cutoff) {}
+			DepthBasedAllocationFunctor<TMemoryDeviceType>(index, volume_parameters, view,
+			                                               tracking_state->pose_d->GetM(), surface_distance_cutoff) {}
 
 	_DEVICE_WHEN_AVAILABLE_
 	void operator()(const float& surface1_depth, const Vector4f& surface2_point, int x, int y) {
@@ -199,10 +204,11 @@ public:
 			}
 		}
 
-		findVoxelHashBlocksAlongSegment(hash_entry_allocation_states, hash_block_coordinates, hash_block_visibility_types,
-		                                hash_table, march_segment, collision_detected);
+		findVoxelHashBlocksAlongSegment(hash_entry_allocation_states, hash_block_coordinates, hash_table, march_segment,
+		                                colliding_block_positions_device, colliding_block_count);
 	}
-	using DepthBasedAllocationFunctor<TMemoryDeviceType>::collision_detected;
+
+	using DepthBasedAllocationFunctor<TMemoryDeviceType>::colliding_block_positions;
 protected:
 	using DepthBasedAllocationFunctor<TMemoryDeviceType>::near_clipping_distance;
 	using DepthBasedAllocationFunctor<TMemoryDeviceType>::far_clipping_distance;
@@ -214,33 +220,36 @@ protected:
 	using DepthBasedAllocationFunctor<TMemoryDeviceType>::hash_block_size_reciprocal;
 	using DepthBasedAllocationFunctor<TMemoryDeviceType>::hash_entry_allocation_states;
 	using DepthBasedAllocationFunctor<TMemoryDeviceType>::hash_block_coordinates;
-	using DepthBasedAllocationFunctor<TMemoryDeviceType>::hash_block_visibility_types;
 	using DepthBasedAllocationFunctor<TMemoryDeviceType>::hash_table;
+
+	using DepthBasedAllocationFunctor<TMemoryDeviceType>::colliding_block_positions_device;
+	using DepthBasedAllocationFunctor<TMemoryDeviceType>::colliding_block_count;
 };
 
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
-struct ReallocateDeletedHashBlocksFunctor{
+struct ReallocateDeletedHashBlocksFunctor {
 	ReallocateDeletedHashBlocksFunctor(VoxelVolume<TVoxel, VoxelBlockHash>* volume) :
 			hash_block_visibility_types(volume->index.GetBlockVisibilityTypes()),
-			block_allocation_list(volume->localVBA.GetAllocationList())
-	{
+			block_allocation_list(volume->localVBA.GetAllocationList()) {
 		INITIALIZE_ATOMIC(int, last_free_voxel_block_id, volume->localVBA.lastFreeBlockId);
 	}
-	~ReallocateDeletedHashBlocksFunctor(){
+
+	~ReallocateDeletedHashBlocksFunctor() {
 		CLEAN_UP_ATOMIC(last_free_voxel_block_id);
 	}
 
 	_DEVICE_WHEN_AVAILABLE_
-	void operator()(HashEntry& entry, int hash_code){
+	void operator()(HashEntry& entry, int hash_code) {
 		if (hash_block_visibility_types[hash_code] > 0 && entry.ptr == -1) {
 			int current_last_id = ATOMIC_ADD(last_free_voxel_block_id, -1);
 			if (current_last_id >= 0) {
 				entry.ptr = block_allocation_list[current_last_id];
-			}else{
+			} else {
 				ATOMIC_ADD(last_free_voxel_block_id, 1);
 			}
 		}
 	}
+
 	DECLARE_ATOMIC(int, last_free_voxel_block_id);
 private:
 	HashBlockVisibility* hash_block_visibility_types;

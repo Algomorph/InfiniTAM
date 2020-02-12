@@ -387,7 +387,7 @@ __global__ void buildHashAllocAndVisibleType_device(
 	if (x > _imgSize.x - 1 || y > _imgSize.y - 1) return;
 
 	bool collisionDetected = false;
-	findVoxelBlocksForRayNearSurface(hashEntryStates, blockCoords, blockVisibilityTypes,
+	findVoxelBlocksForRayNearSurfaceLegacy_Algomorph(hashEntryStates, blockCoords, blockVisibilityTypes,
 	                                 hashTable, x, y, depth,
 	                                 surface_cutoff_distance, invM_d,
 	                                 projParams_d, oneOverHashBlockSize_Meters, _imgSize, near_clipping_distance,

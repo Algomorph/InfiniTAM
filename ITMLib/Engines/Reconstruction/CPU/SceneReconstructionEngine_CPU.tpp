@@ -3,7 +3,6 @@
 //local
 #include "SceneReconstructionEngine_CPU.h"
 #include "../Shared/SceneReconstructionEngine_Shared.h"
-#include "../../Indexing/Shared/IndexingEngine_Shared.h"
 #include "../../Common/CheckBlockVisibility.h"
 #include "../../../Utils/Configuration.h"
 
@@ -161,7 +160,7 @@ void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::AllocateSceneFromDep
 		int y = locId / depthImgSize.x;
 		int x = locId - y * depthImgSize.x;
 		bool collisionDetected = false;
-		findVoxelBlocksForRayNearSurface(hashEntryStates_device,
+		findVoxelBlocksForRayNearSurfaceLegacy_Algomorph(hashEntryStates_device,
 		                                 blockCoords_device, hashBlockVisibilityTypes,
 		                                 hashTable, x, y,
 		                                 depth, surface_cutoff_distance, invM_d,
