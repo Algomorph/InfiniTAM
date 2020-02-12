@@ -229,7 +229,7 @@ bool EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::CopyVolumeSlice(
 				           cudaMemcpyDeviceToHost));
 		if (tempData->countOfBlocksToCopy == 0) return false; //source volume empty in bounds or destination hash full
 		IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance()
-				.AllocateHashEntriesUsingLists(targetVolume);
+				.AllocateHashEntriesUsingAllocationStateList(targetVolume);
 
 
 		dim3 cudaBlockSizeCP(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
@@ -274,7 +274,7 @@ bool EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::CopyVolumeSlice(
 		dim3 gridSizeAL((int) ceil((float) hashEntryCount / (float) cudaBlockSizeAL.x));
 
 		IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance()
-				.AllocateHashEntriesUsingLists(targetVolume);
+				.AllocateHashEntriesUsingAllocationStateList(targetVolume);
 
 
 		dim3 cudaBlockSizeCP(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
@@ -327,7 +327,7 @@ bool EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::CopyVolume(
 		ORcudaKernelCheck;
 		// allocate the necessary voxel blocks in the destination structure.
 		IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance()
-				.AllocateHashEntriesUsingLists(targetVolume);
+				.AllocateHashEntriesUsingAllocationStateList(targetVolume);
 
 
 		dim3 cudaBlockSizeCP(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);

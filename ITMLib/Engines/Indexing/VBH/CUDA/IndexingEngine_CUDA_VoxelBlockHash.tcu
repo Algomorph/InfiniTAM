@@ -60,7 +60,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::AllocateUsingOth
 		ORcudaKernelCheck;
 
 		IndexingEngine<TVoxelTarget, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance()
-				.AllocateHashEntriesUsingLists(targetVolume);
+				.AllocateHashEntriesUsingAllocationStateList(targetVolume);
 
 
 		collisionDetected.UpdateHostFromDevice();
@@ -69,7 +69,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::AllocateUsingOth
 
 template<typename TVoxel>
 void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::
-AllocateHashEntriesUsingLists(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
+AllocateHashEntriesUsingAllocationStateList(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 
 	const HashEntryAllocationState* hash_entry_allocation_states = volume->index.GetHashEntryAllocationStates();
 	Vector3s* allocation_block_coordinates = volume->index.GetAllocationBlockCoordinates();
@@ -104,7 +104,7 @@ AllocateHashEntriesUsingLists(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 
 template<typename TVoxel>
 void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::
-AllocateHashEntriesUsingLists_SetVisibility(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
+AllocateHashEntriesUsingAllocationStateList_SetVisibility(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 
 	const HashEntryAllocationState* hash_entry_allocation_states_device = volume->index.GetHashEntryAllocationStates();
 	Vector3s* allocationBlockCoordinates_device = volume->index.GetAllocationBlockCoordinates();
@@ -173,7 +173,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::AllocateBlockLis
 
 		ORcudaKernelCheck;
 
-		AllocateHashEntriesUsingLists(volume);
+		AllocateHashEntriesUsingAllocationStateList(volume);
 
 		colliding_block_count.UpdateHostFromDevice();
 		new_block_count = *colliding_block_count.GetData(MEMORYDEVICE_CPU);
@@ -312,7 +312,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::AllocateUsingOth
 		ORcudaKernelCheck;
 		collision_detected.UpdateHostFromDevice();
 		IndexingEngine<TVoxelTarget, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance()
-				.AllocateHashEntriesUsingLists(targetVolume);
+				.AllocateHashEntriesUsingAllocationStateList(targetVolume);
 	} while (*collision_detected.GetData(MEMORYDEVICE_CPU));
 }
 
@@ -350,7 +350,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::AllocateUsingOth
 		ORcudaKernelCheck;
 		collision_detected.UpdateHostFromDevice();
 		IndexingEngine<TVoxelTarget, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance()
-				.AllocateHashEntriesUsingLists(targetVolume);
+				.AllocateHashEntriesUsingAllocationStateList(targetVolume);
 	} while (*collision_detected.GetData(MEMORYDEVICE_CPU));
 
 	IndexingEngine<TVoxelTarget, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance().BuildUtilizedBlockListBasedOnVisibility(

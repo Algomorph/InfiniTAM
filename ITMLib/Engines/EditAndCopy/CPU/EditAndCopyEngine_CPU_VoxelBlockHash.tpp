@@ -159,7 +159,7 @@ bool EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::CopyVolumeSlice(
 		}
 
 		IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance().
-				AllocateHashEntriesUsingLists(targetVolume);
+				AllocateHashEntriesUsingAllocationStateList(targetVolume);
 
 		//iterate over source hash blocks & fill in the target hash blocks
 		for (int sourceHash = 0; sourceHash < hashEntryCount; sourceHash++) {
@@ -221,7 +221,7 @@ bool EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::CopyVolumeSlice(
 		}
 
 		IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance().
-				AllocateHashEntriesUsingLists(targetVolume);
+				AllocateHashEntriesUsingAllocationStateList(targetVolume);
 		VoxelBlockHash::IndexCache source_cache;
 
 		for (int source_z = bounds.min_z; source_z < bounds.max_z; source_z++) {

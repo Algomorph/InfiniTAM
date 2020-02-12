@@ -26,8 +26,8 @@ class IndexingEngine_VoxelBlockHash :
 		public IndexingEngineInterface<TVoxel, VoxelBlockHash> {
 
 public:
-	virtual void AllocateHashEntriesUsingLists(VoxelVolume<TVoxel, VoxelBlockHash>* volume) = 0;
-	virtual void AllocateHashEntriesUsingLists_SetVisibility(VoxelVolume<TVoxel, VoxelBlockHash>* volume) = 0;
+	virtual void AllocateHashEntriesUsingAllocationStateList(VoxelVolume<TVoxel, VoxelBlockHash>* volume) = 0;
+	virtual void AllocateHashEntriesUsingAllocationStateList_SetVisibility(VoxelVolume<TVoxel, VoxelBlockHash>* volume) = 0;
 	virtual HashEntry FindHashEntry(const VoxelBlockHash& index, const Vector3s& coordinates) = 0;
 	virtual bool AllocateHashBlockAt(VoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3s at, int& hashCode) = 0;
 

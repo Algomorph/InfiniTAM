@@ -310,7 +310,7 @@ _CPU_AND_GPU_CODE_ inline int get_differing_component_count(Vector3s coord1, Vec
 }
 
 _DEVICE_WHEN_AVAILABLE_ inline void
-findVoxelHashBlocksAlongSegment(ITMLib::HashEntryAllocationState* hash_entry_allocation_states,
+markVoxelHashBlocksAlongSegment(ITMLib::HashEntryAllocationState* hash_entry_allocation_states,
                                 Vector3s* hash_block_coordinates,
                                 const CONSTPTR(HashEntry)* hash_table,
                                 const ITMLib::Segment& segment_in_hash_blocks,
@@ -523,7 +523,7 @@ findVoxelBlocksForRayNearSurface(ITMLib::HashEntryAllocationState* hash_entry_al
 	                                                                                       one_over_hash_block_size);
 
 
-	findVoxelHashBlocksAlongSegment(hash_entry_allocation_states, hash_block_coordinates,
+	markVoxelHashBlocksAlongSegment(hash_entry_allocation_states, hash_block_coordinates,
 	                                hash_table, march_segment, colliding_block_positions, colliding_block_count);
 }
 

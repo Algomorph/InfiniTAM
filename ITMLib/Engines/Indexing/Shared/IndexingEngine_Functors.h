@@ -90,11 +90,11 @@ private:
 
 
 template<MemoryDeviceType TMemoryDeviceType>
-struct DepthBasedAllocationFunctor {
+struct DepthBasedAllocationStateMarkerFunctor {
 public:
-	DepthBasedAllocationFunctor(VoxelBlockHash& index,
-	                            const VoxelVolumeParameters* volume_parameters, const ITMLib::ITMView* view,
-	                            Matrix4f depth_camera_pose, float surface_distance_cutoff) :
+	DepthBasedAllocationStateMarkerFunctor(VoxelBlockHash& index,
+	                                       const VoxelVolumeParameters* volume_parameters, const ITMLib::ITMView* view,
+	                                       Matrix4f depth_camera_pose, float surface_distance_cutoff) :
 
 			near_clipping_distance(volume_parameters->near_clipping_distance),
 			far_clipping_distance(volume_parameters->far_clipping_distance),
@@ -133,7 +133,7 @@ public:
 		                                                                                       hash_block_size_reciprocal);
 
 
-		findVoxelHashBlocksAlongSegment(hash_entry_allocation_states, hash_block_coordinates,
+		markVoxelHashBlocksAlongSegment(hash_entry_allocation_states, hash_block_coordinates,
 		                                hash_table, march_segment, colliding_block_positions_device,
 		                                colliding_block_count);
 	}
@@ -163,14 +163,14 @@ protected:
 };
 
 template<MemoryDeviceType TMemoryDeviceType>
-struct TwoSurfaceBasedAllocationFunctor
-		: public DepthBasedAllocationFunctor<TMemoryDeviceType> {
+struct TwoSurfaceBasedAllocationStateMarkerFunctor
+		: public DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType> {
 public:
-	TwoSurfaceBasedAllocationFunctor(VoxelBlockHash& index,
-	                                 const VoxelVolumeParameters* volume_parameters, const ITMLib::ITMView* view,
-	                                 const CameraTrackingState* tracking_state, float surface_distance_cutoff) :
-			DepthBasedAllocationFunctor<TMemoryDeviceType>(index, volume_parameters, view,
-			                                               tracking_state->pose_d->GetM(), surface_distance_cutoff) {}
+	TwoSurfaceBasedAllocationStateMarkerFunctor(VoxelBlockHash& index,
+	                                            const VoxelVolumeParameters* volume_parameters, const ITMLib::ITMView* view,
+	                                            const CameraTrackingState* tracking_state, float surface_distance_cutoff) :
+			DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType>(index, volume_parameters, view,
+			                                                          tracking_state->pose_d->GetM(), surface_distance_cutoff) {}
 
 	_DEVICE_WHEN_AVAILABLE_
 	void operator()(const float& surface1_depth, const Vector4f& surface2_point, int x, int y) {
@@ -181,7 +181,7 @@ public:
 		      (surface1_depth + surface_distance_cutoff) > far_clipping_distance))
 			has_surface1 = true;
 
-		if (surface2_point.x > 0.0f) has_surface2 = true;
+		if (surface2_point.z > 0.0f) has_surface2 = true;
 
 		ITMLib::Segment march_segment;
 
@@ -204,26 +204,26 @@ public:
 			}
 		}
 
-		findVoxelHashBlocksAlongSegment(hash_entry_allocation_states, hash_block_coordinates, hash_table, march_segment,
+		markVoxelHashBlocksAlongSegment(hash_entry_allocation_states, hash_block_coordinates, hash_table, march_segment,
 		                                colliding_block_positions_device, colliding_block_count);
 	}
 
-	using DepthBasedAllocationFunctor<TMemoryDeviceType>::colliding_block_positions;
+	using DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::colliding_block_positions;
 protected:
-	using DepthBasedAllocationFunctor<TMemoryDeviceType>::near_clipping_distance;
-	using DepthBasedAllocationFunctor<TMemoryDeviceType>::far_clipping_distance;
-	using DepthBasedAllocationFunctor<TMemoryDeviceType>::inverted_camera_pose;
-	using DepthBasedAllocationFunctor<TMemoryDeviceType>::inverted_projection_parameters;
+	using DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::near_clipping_distance;
+	using DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::far_clipping_distance;
+	using DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::inverted_camera_pose;
+	using DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::inverted_projection_parameters;
 
-	using DepthBasedAllocationFunctor<TMemoryDeviceType>::surface_distance_cutoff;
+	using DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::surface_distance_cutoff;
 
-	using DepthBasedAllocationFunctor<TMemoryDeviceType>::hash_block_size_reciprocal;
-	using DepthBasedAllocationFunctor<TMemoryDeviceType>::hash_entry_allocation_states;
-	using DepthBasedAllocationFunctor<TMemoryDeviceType>::hash_block_coordinates;
-	using DepthBasedAllocationFunctor<TMemoryDeviceType>::hash_table;
+	using DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::hash_block_size_reciprocal;
+	using DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::hash_entry_allocation_states;
+	using DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::hash_block_coordinates;
+	using DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::hash_table;
 
-	using DepthBasedAllocationFunctor<TMemoryDeviceType>::colliding_block_positions_device;
-	using DepthBasedAllocationFunctor<TMemoryDeviceType>::colliding_block_count;
+	using DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::colliding_block_positions_device;
+	using DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::colliding_block_count;
 };
 
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>

@@ -36,7 +36,7 @@
 #include "../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
 #include "../ITMLib/Utils/Analytics/VolumeStatisticsCalculator/CPU/VolumeStatisticsCalculator_CPU.h"
 //(CUDA)
-#ifndef COMPILE_WITH_CUDA
+#ifndef COMPILE_WITHOUT_CUDA
 #include "../ITMLib/Engines/Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
 #include "../ITMLib/Utils/Analytics/VolumeStatisticsCalculator/CUDA/VolumeStatisticsCalculator_CUDA.h"
 #endif
@@ -107,8 +107,6 @@ BOOST_FIXTURE_TEST_CASE(Test_TwoSurfaceAllocation_CPU, TestData_CPU) {
 
 	depth_fusion_engine.GenerateTsdfVolumeFromView(&square_1_volume, view_square_1, tracking_state);
 
-	std::cout << StatCalc_CPU_VBH_Voxel::Instance().ComputeAllocatedHashBlockCount(&square_1_volume) << std::endl;
-
 	VisualizationEngine<TSDFVoxel, VoxelBlockHash>* visualization_engine = VisualizationEngineFactory::MakeVisualizationEngine<TSDFVoxel, VoxelBlockHash>(
 			MEMORYDEVICE_CPU);
 
@@ -121,26 +119,70 @@ BOOST_FIXTURE_TEST_CASE(Test_TwoSurfaceAllocation_CPU, TestData_CPU) {
 	span_volume.Reset();
 	indexer.AllocateNearAndBetweenTwoSurfaces(&span_volume, tracking_state, view_square_2);
 
+
+	std::vector<Vector3s> hash_block_positions_span = StatCalc_CPU_VBH_Voxel::Instance().GetAllocatedHashBlockPositions(
+			&span_volume);
+	std::unordered_set<Vector3s> hash_block_positions_span_set(hash_block_positions_span.begin(),
+	                                                           hash_block_positions_span.end());
+
+
 	const float distance_to_first_square = 2.0f;
-	const float distance_to_second_square = 2.08f;
+	const float distance_to_second_square = 2.096f;
+	const float square_size_px = 40;
 
-	int voxel_block_size = span_volume.sceneParams->voxel_size * VOXEL_BLOCK_SIZE;
-	short first_line_of_blocks_z = static_cast<short>(std::floor(distance_to_first_square / voxel_block_size));
+	auto voxel_block_size = static_cast<float>(span_volume.sceneParams->voxel_size * VOXEL_BLOCK_SIZE);
+	auto first_line_of_blocks_z = static_cast<int>(std::ceil((distance_to_first_square -
+	                                                          span_volume.sceneParams->narrow_band_half_width *
+	                                                          span_volume.sceneParams->block_allocation_band_factor) /
+	                                                         voxel_block_size));
+	auto last_line_of_blocks_z = static_cast<int>(std::floor((distance_to_second_square +
+	                                                          span_volume.sceneParams->narrow_band_half_width *
+	                                                          span_volume.sceneParams->block_allocation_band_factor) /
+	                                                         voxel_block_size));
+	auto horizontal_block_span = static_cast<int>(std::ceil(((square_size_px / 2.0f) * distance_to_first_square /
+	                                                         view_square_1->calib.intrinsics_d.projectionParamsSimple.fx) /
+	                                                        voxel_block_size)) * 2;
+	auto vertical_block_span = static_cast<int>(std::ceil(((square_size_px / 2.0f) * distance_to_first_square /
+	                                                       view_square_1->calib.intrinsics_d.projectionParamsSimple.fy) /
+	                                                      voxel_block_size)) * 2;
+	auto depth_block_span = last_line_of_blocks_z + 1 - first_line_of_blocks_z;
 
-	std::vector<Vector3s> hash_block_positions_square1 = StatCalc_CPU_VBH_Voxel::Instance().GetAllocatedHashBlockPositions(&square_1_volume);
-	std::unordered_set<Vector3s> hash_block_positions_square1_set(hash_block_positions_square1.begin(), hash_block_positions_square1.end());
-	std::vector<Vector3s> hash_block_positions_span = StatCalc_CPU_VBH_Voxel::Instance().GetAllocatedHashBlockPositions(&span_volume);
-	std::unordered_set<Vector3s> hash_block_positions_span_set(hash_block_positions_span.begin(), hash_block_positions_span.end());
+	int test_volume_block_count = StatCalc_CPU_VBH_Voxel::Instance().ComputeAllocatedHashBlockCount(&span_volume);
 
-	bool all_present = true;
-	for(auto position : hash_block_positions_square1){
-		if(hash_block_positions_span_set.find(position) == hash_block_positions_span_set.end()){
-			all_present = false;
+	BOOST_REQUIRE_EQUAL(test_volume_block_count, horizontal_block_span * vertical_block_span * depth_block_span);
+
+	int start_x = -horizontal_block_span / 2;
+	int end_x = start_x + horizontal_block_span;
+	int start_y = -vertical_block_span / 2;
+	int end_y = start_y + vertical_block_span;
+	int end_z = first_line_of_blocks_z + depth_block_span;
+
+	std::unordered_set<Vector3s> ground_truth_block_positions;
+	for (int x = start_x; x < end_x; x++){
+		for(int y = start_y; y < end_y; y++){
+			for(int z = first_line_of_blocks_z; z < end_z; z++){
+				Vector3s position(x,y,z);
+				ground_truth_block_positions.insert(position);
+			}
 		}
 	}
-	std::cout << (all_present ? "all there" : "not all there") << std::endl;
 
-	std::cout << StatCalc_CPU_VBH_Voxel::Instance().ComputeAllocatedHashBlockCount(&span_volume) << std::endl;
+	bool bad_block_detected = false;
+	Vector3s bad_block(-1);
+	for(auto block_position : hash_block_positions_span){
+		if(ground_truth_block_positions.find(block_position) == ground_truth_block_positions.end()){
+			bad_block = block_position;
+			bad_block_detected = true;
+		}
+	}
+	BOOST_REQUIRE_MESSAGE(!bad_block_detected, "Detected incorrect block allocated at " << bad_block << ".");
+	for(auto block_position : ground_truth_block_positions){
+		if(hash_block_positions_span_set.find(block_position) == hash_block_positions_span_set.end()){
+			bad_block = block_position;
+			bad_block_detected = true;
+		}
+	}
+	BOOST_REQUIRE_MESSAGE(!bad_block_detected, "Missing block at " << bad_block << ".");
 
 	delete visualization_engine;
 }

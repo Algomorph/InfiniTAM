@@ -36,7 +36,7 @@
 #include "../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
 #include "../ITMLib/Utils/Analytics/VolumeStatisticsCalculator/CPU/VolumeStatisticsCalculator_CPU.h"
 //(CUDA)
-#ifndef COMPILE_WITH_CUDA
+#ifndef COMPILE_WITHOUT_CUDA
 #include "../ITMLib/Engines/Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
 #include "../ITMLib/Utils/Analytics/VolumeStatisticsCalculator/CUDA/VolumeStatisticsCalculator_CUDA.h"
 #endif
@@ -209,7 +209,7 @@ BOOST_FIXTURE_TEST_CASE(TestAllocateHashBlockList_CPU, CollisionHashFixture) {
 	                      "Bucket code " << bad_hash_code << " was not allocated in the spatial hash. Seed: " << seed);
 }
 
-#ifndef COMPILE_WITH_CUDA
+#ifndef COMPILE_WITHOUT_CUDA
 BOOST_FIXTURE_TEST_CASE(TestAllocateHashBlockList_CUDA, CollisionHashFixture) {
 	const int excess_list_size = 0x6FFFF;
 	BOOST_TEST_CONTEXT("Seed: " << seed) {

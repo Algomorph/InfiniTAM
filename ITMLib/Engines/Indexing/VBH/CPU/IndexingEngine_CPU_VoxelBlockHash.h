@@ -42,9 +42,9 @@ public:
 	IndexingEngine(IndexingEngine const&) = delete;
 	void operator=(IndexingEngine const&) = delete;
 
-	void AllocateHashEntriesUsingLists(VoxelVolume<TVoxel, VoxelBlockHash>* volume) override;
+	void AllocateHashEntriesUsingAllocationStateList(VoxelVolume<TVoxel, VoxelBlockHash>* volume) override;
 
-	void AllocateHashEntriesUsingLists_SetVisibility(VoxelVolume<TVoxel, VoxelBlockHash>* volume) override;
+	void AllocateHashEntriesUsingAllocationStateList_SetVisibility(VoxelVolume<TVoxel, VoxelBlockHash>* volume) override;
 
 	void AllocateBlockList(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
 	                       const ORUtils::MemoryBlock<Vector3s>& new_block_positions,

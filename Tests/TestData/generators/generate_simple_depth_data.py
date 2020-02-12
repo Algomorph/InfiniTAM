@@ -124,10 +124,10 @@ def depth_to_color_cividis(depth_image, cam):
 
 def generate_squares():
     cam = Camera()
-    square_side = 100
+    square_side = 40
 
-    depth_1 = 2000
-    depth_2 = 2080
+    depth_1 = 2000  # mm
+    depth_2 = 2096
 
     square1_depth = draw_centered_square_depth(depth_1, square_side, cam)
     square2_depth = draw_centered_square_depth(depth_2, square_side, cam)
@@ -135,18 +135,19 @@ def generate_squares():
     square1_color = depth_to_color_cividis(square1_depth, cam)
     square2_color = depth_to_color_cividis(square2_depth, cam)
 
-    cv2.imwrite("square1_depth.png", square1_depth)
-    cv2.imwrite("square2_depth.png", square2_depth)
-    cv2.imwrite("square1_color.png", square1_color)
-    cv2.imwrite("square2_color.png", square2_color)
+    cv2.imwrite("../square1_depth.png", square1_depth)
+    cv2.imwrite("../square2_depth.png", square2_depth)
+    cv2.imwrite("../square1_color.png", square1_color)
+    cv2.imwrite("../square2_color.png", square2_color)
 
 
 def main():
     # generate_stripes()
 
     # generate_squares()
-    print(image_parallel_distance_at_depth(2.00, 100) / 0.004)
-    print(image_parallel_distance_at_depth(2.08, 100) / 0.004)
+    print(image_parallel_distance_at_depth(2.000, 40) / 0.004)
+    print(image_parallel_distance_at_depth(2.096, 40) / 0.004)
+    print(0.096 / 0.004)
 
     return 0
 

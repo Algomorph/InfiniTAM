@@ -69,7 +69,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateUsingOthe
 		}
 
 		IndexingEngine<TVoxelTarget, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance()
-				.AllocateHashEntriesUsingLists(targetVolume);
+				.AllocateHashEntriesUsingAllocationStateList(targetVolume);
 	} while (collisionDetected);
 
 }
@@ -142,7 +142,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateUsingOthe
 	};
 	auto allocationProcedure = [&]() {
 		IndexingEngine<TVoxelTarget, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance()
-				.AllocateHashEntriesUsingLists(targetVolume);
+				.AllocateHashEntriesUsingAllocationStateList(targetVolume);
 	};
 	AllocateUsingOtherVolumeExpanded_Generic(targetVolume, sourceVolume, hashBlockMarkProcedure, allocationProcedure);
 }
@@ -171,7 +171,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateUsingOthe
 	};
 	auto allocationProcedure = [&]() {
 		IndexingEngine<TVoxelTarget, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance()
-				.AllocateHashEntriesUsingLists_SetVisibility(targetVolume);
+				.AllocateHashEntriesUsingAllocationStateList_SetVisibility(targetVolume);
 	};
 	AllocateUsingOtherVolumeExpanded_Generic(targetVolume, sourceVolume, hashBlockMarkProcedure, allocationProcedure);
 
@@ -183,7 +183,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateUsingOthe
 
 template<typename TVoxel>
 void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::
-AllocateHashEntriesUsingLists(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
+AllocateHashEntriesUsingAllocationStateList(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 
 	const HashEntryAllocationState* hash_entry_states = volume->index.GetHashEntryAllocationStates();
 	Vector3s* block_coordinates = volume->index.GetAllocationBlockCoordinates();
@@ -261,7 +261,7 @@ AllocateHashEntriesUsingLists(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 
 template<typename TVoxel>
 void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::
-AllocateHashEntriesUsingLists_SetVisibility(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
+AllocateHashEntriesUsingAllocationStateList_SetVisibility(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 
 	const HashEntryAllocationState* hash_entry_allocation_states_device = volume->index.GetHashEntryAllocationStates();
 	Vector3s* allocation_block_coordinates_device = volume->index.GetAllocationBlockCoordinates();
@@ -351,7 +351,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateBlockList
 
 		}
 
-		AllocateHashEntriesUsingLists(volume);
+		AllocateHashEntriesUsingAllocationStateList(volume);
 
 		new_block_count = colliding_block_count.load();
 		std::swap(new_positions_device,colliding_positions_device);
