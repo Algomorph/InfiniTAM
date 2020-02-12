@@ -140,36 +140,9 @@ private:
 
 typedef TestData<MEMORYDEVICE_CPU> TestData_CPU;
 
-BOOST_FIXTURE_TEST_CASE(Test_TwoSurfaceAllocation_CPU, TestData_CPU) {
-
-
-	VoxelVolume<TSDFVoxel, VoxelBlockHash> square_1_volume(MEMORYDEVICE_CPU, {0x8000, 0x20000});
-	square_1_volume.Reset();
-	DepthFusionEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU> depth_fusion_engine;
-
-	depth_fusion_engine.GenerateTsdfVolumeFromView(&square_1_volume, view_square_1, tracking_state);
-
-	VisualizationEngine<TSDFVoxel, VoxelBlockHash>* visualization_engine = VisualizationEngineFactory::MakeVisualizationEngine<TSDFVoxel, VoxelBlockHash>(
-			MEMORYDEVICE_CPU);
-
-	// builds the point cloud
-	visualization_engine->CreateICPMaps(&square_1_volume, view_square_1, tracking_state, render_state);
-
-	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>& indexer = IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance();
-
-	VoxelVolume<TSDFVoxel, VoxelBlockHash> span_volume(MEMORYDEVICE_CPU, {0x8000, 0x20000});
-	span_volume.Reset();
-	indexer.AllocateNearAndBetweenTwoSurfaces(&span_volume, tracking_state, view_square_2);
-
-
-	std::vector<Vector3s> hash_block_positions_span = StatCalc_CPU_VBH_Voxel::Instance().GetAllocatedHashBlockPositions(
-			&span_volume);
-	std::unordered_set<Vector3s> hash_block_positions_span_set(hash_block_positions_span.begin(),
-	                                                           hash_block_positions_span.end());
-
-	int test_volume_block_count = StatCalc_CPU_VBH_Voxel::Instance().ComputeAllocatedHashBlockCount(&span_volume);
-
-	BOOST_REQUIRE_EQUAL(test_volume_block_count, ground_truth_block_positions.size());
+static void check_positions(const std::unordered_set<Vector3s>& ground_truth_block_positions,
+		const std::unordered_set<Vector3s>& hash_block_positions_span_set,
+		const std::vector<Vector3s> hash_block_positions_span){
 
 	bool bad_block_detected = false;
 	Vector3s bad_block(-1);
@@ -187,6 +160,57 @@ BOOST_FIXTURE_TEST_CASE(Test_TwoSurfaceAllocation_CPU, TestData_CPU) {
 		}
 	}
 	BOOST_REQUIRE_MESSAGE(!bad_block_detected, "Missing block at " << bad_block << ".");
+}
+
+BOOST_FIXTURE_TEST_CASE(Test_TwoSurfaceAllocation_CPU, TestData_CPU) {
+
+
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> square_volume(MEMORYDEVICE_CPU, {0x8000, 0x20000});
+	square_volume.Reset();
+	DepthFusionEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU> depth_fusion_engine;
+
+	depth_fusion_engine.GenerateTsdfVolumeFromView(&square_volume, view_square_1, tracking_state);
+
+	VisualizationEngine<TSDFVoxel, VoxelBlockHash>* visualization_engine = VisualizationEngineFactory::MakeVisualizationEngine<TSDFVoxel, VoxelBlockHash>(
+			MEMORYDEVICE_CPU);
+
+	// builds the point cloud
+	visualization_engine->CreateICPMaps(&square_volume, view_square_1, tracking_state, render_state);
+
+	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>& indexer = IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance();
+
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> span_volume(MEMORYDEVICE_CPU, {0x8000, 0x20000});
+	span_volume.Reset();
+	indexer.AllocateNearAndBetweenTwoSurfaces(&span_volume, tracking_state, view_square_2);
+
+	std::vector<Vector3s> hash_block_positions_span = StatCalc_CPU_VBH_Voxel::Instance().GetAllocatedHashBlockPositions(
+			&span_volume);
+	std::unordered_set<Vector3s> hash_block_positions_span_set(hash_block_positions_span.begin(),
+	                                                           hash_block_positions_span.end());
+	int test_volume_block_count = StatCalc_CPU_VBH_Voxel::Instance().ComputeAllocatedHashBlockCount(&span_volume);
+
+	BOOST_REQUIRE_EQUAL(test_volume_block_count, ground_truth_block_positions.size());
+
+	check_positions(ground_truth_block_positions, hash_block_positions_span_set, hash_block_positions_span);
+
+	//reverse square order
+	square_volume.Reset();
+	span_volume.Reset();
+	tracking_state->Reset();
+
+	depth_fusion_engine.GenerateTsdfVolumeFromView(&square_volume, view_square_2, tracking_state);
+	visualization_engine->CreateICPMaps(&square_volume, view_square_2, tracking_state, render_state);
+	indexer.AllocateNearAndBetweenTwoSurfaces(&span_volume, tracking_state, view_square_1);
+
+	hash_block_positions_span = StatCalc_CPU_VBH_Voxel::Instance().GetAllocatedHashBlockPositions(
+			&span_volume);
+	hash_block_positions_span_set = std::unordered_set<Vector3s>(hash_block_positions_span.begin(),
+	                                                           hash_block_positions_span.end());
+	test_volume_block_count = StatCalc_CPU_VBH_Voxel::Instance().ComputeAllocatedHashBlockCount(&span_volume);
+
+	BOOST_REQUIRE_EQUAL(test_volume_block_count, ground_truth_block_positions.size());
+
+	check_positions(ground_truth_block_positions, hash_block_positions_span_set, hash_block_positions_span);
 
 	delete visualization_engine;
 }
@@ -197,17 +221,17 @@ typedef TestData<MEMORYDEVICE_CUDA> TestData_CUDA;
 BOOST_FIXTURE_TEST_CASE(Test_TwoSurfaceAllocation_CUDA, TestData_CUDA) {
 
 
-	VoxelVolume<TSDFVoxel, VoxelBlockHash> square_1_volume(MEMORYDEVICE_CUDA, {0x8000, 0x20000});
-	square_1_volume.Reset();
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> square_volume(MEMORYDEVICE_CUDA, {0x8000, 0x20000});
+	square_volume.Reset();
 	DepthFusionEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA> depth_fusion_engine;
 
-	depth_fusion_engine.GenerateTsdfVolumeFromView(&square_1_volume, view_square_1, tracking_state);
+	depth_fusion_engine.GenerateTsdfVolumeFromView(&square_volume, view_square_1, tracking_state);
 
 	VisualizationEngine<TSDFVoxel, VoxelBlockHash>* visualization_engine = VisualizationEngineFactory::MakeVisualizationEngine<TSDFVoxel, VoxelBlockHash>(
 			MEMORYDEVICE_CUDA);
 
 	// builds the point cloud
-	visualization_engine->CreateICPMaps(&square_1_volume, view_square_1, tracking_state, render_state);
+	visualization_engine->CreateICPMaps(&square_volume, view_square_1, tracking_state, render_state);
 
 	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>& indexer = IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance();
 
@@ -224,22 +248,26 @@ BOOST_FIXTURE_TEST_CASE(Test_TwoSurfaceAllocation_CUDA, TestData_CUDA) {
 
 	BOOST_REQUIRE_EQUAL(test_volume_block_count, ground_truth_block_positions.size());
 
-	bool bad_block_detected = false;
-	Vector3s bad_block(-1);
-	for(auto block_position : hash_block_positions_span){
-		if(ground_truth_block_positions.find(block_position) == ground_truth_block_positions.end()){
-			bad_block = block_position;
-			bad_block_detected = true;
-		}
-	}
-	BOOST_REQUIRE_MESSAGE(!bad_block_detected, "Detected incorrect block allocated at " << bad_block << ".");
-	for(auto block_position : ground_truth_block_positions){
-		if(hash_block_positions_span_set.find(block_position) == hash_block_positions_span_set.end()){
-			bad_block = block_position;
-			bad_block_detected = true;
-		}
-	}
-	BOOST_REQUIRE_MESSAGE(!bad_block_detected, "Missing block at " << bad_block << ".");
+	check_positions(ground_truth_block_positions, hash_block_positions_span_set, hash_block_positions_span);
+
+	//reverse square order
+	square_volume.Reset();
+	span_volume.Reset();
+	tracking_state->Reset();
+
+	depth_fusion_engine.GenerateTsdfVolumeFromView(&square_volume, view_square_2, tracking_state);
+	visualization_engine->CreateICPMaps(&square_volume, view_square_2, tracking_state, render_state);
+	indexer.AllocateNearAndBetweenTwoSurfaces(&span_volume, tracking_state, view_square_1);
+
+	hash_block_positions_span = StatCalc_CUDA_VBH_Voxel::Instance().GetAllocatedHashBlockPositions(
+			&span_volume);
+	hash_block_positions_span_set = std::unordered_set<Vector3s>(hash_block_positions_span.begin(),
+	                                                             hash_block_positions_span.end());
+	test_volume_block_count = StatCalc_CUDA_VBH_Voxel::Instance().ComputeAllocatedHashBlockCount(&span_volume);
+
+	BOOST_REQUIRE_EQUAL(test_volume_block_count, ground_truth_block_positions.size());
+
+	check_positions(ground_truth_block_positions, hash_block_positions_span_set, hash_block_positions_span);
 
 	delete visualization_engine;
 }
