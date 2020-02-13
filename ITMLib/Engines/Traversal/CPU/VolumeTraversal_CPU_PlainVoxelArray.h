@@ -155,6 +155,28 @@ public:
 
 	template<typename TFunctor>
 	inline static void
+	TraverseAllWithinBoundsWithPositionAndHashEntry(VoxelVolume<TVoxel, PlainVoxelArray>* volume, TFunctor& functor,
+	                                    Vector6i bounds) {
+		TVoxel* voxels = volume->localVBA.GetVoxelBlocks();
+		int vmIndex = 0;
+		const PlainVoxelArray::IndexData* indexData = volume->index.GetIndexData();
+#ifdef WITH_OPENMP
+#pragma omp parallel for
+#endif
+		for (int z = bounds.min_z; z < bounds.max_z; z++) {
+			for (int y = bounds.min_y; y < bounds.max_y; y++) {
+				for (int x = bounds.min_x; x < bounds.max_x; x++) {
+					Vector3i position(x, y, z);
+					int linearIndex = findVoxel(indexData, Vector3i(x, y, z), vmIndex);
+					TVoxel& voxel = voxels[linearIndex];
+					functor(voxel, position);
+				}
+			}
+		}
+	}
+
+	template<typename TFunctor>
+	inline static void
 	TraverseUtilizedWithinBoundsWithPosition(VoxelVolume<TVoxel, PlainVoxelArray>* volume, TFunctor& functor,
 	                                    Vector6i bounds) {
 		TraverseAllWithinBoundsWithPosition(volume, functor, bounds);

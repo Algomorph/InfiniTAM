@@ -77,9 +77,10 @@ inline void TraverseHashBlockWithinBoundsWithPosition_CPU(TVoxel* voxel_block, c
 	for (int z = local_bounds.min_z; z < local_bounds.max_z; z++) {
 		for (int y = local_bounds.min_y; y < local_bounds.max_y; y++) {
 			for (int x = local_bounds.min_x; x < local_bounds.max_x; x++) {
-				int locId = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
-				TVoxel& voxel = voxel_block[locId];
-				functor(voxel);
+				int voxel_index_within_block = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
+				Vector3i voxel_position = block_position_voxels + Vector3i(x, y, z);
+				TVoxel& voxel = voxel_block[voxel_index_within_block];
+				functor(voxel, voxel_position);
 			}
 		}
 	}
