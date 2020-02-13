@@ -22,17 +22,13 @@ void
 GenericWarpConsistencySubtest<PlainVoxelArray, MEMORYDEVICE_CPU>(const SlavchevaSurfaceTracker::Switches& switches,
                                                                     int iteration_limit,
                                                                     GenericWarpTestMode mode,
-                                                                    float absolute_tolerance,
-                                                                    bool allocateLiveFromBothImages,
-                                                                    bool expand_raw_live_allocation);
+                                                                    float absolute_tolerance);
 template
 void
 GenericWarpConsistencySubtest<VoxelBlockHash, MEMORYDEVICE_CPU>(const SlavchevaSurfaceTracker::Switches& switches,
                                                                    int iteration_limit,
                                                                    GenericWarpTestMode mode,
-                                                                   float absolute_tolerance,
-                                                                   bool allocateLiveFromBothImages,
-                                                                   bool expand_raw_live_allocation);
+                                                                   float absolute_tolerance);
 template
 void Warp_PVA_VBH_simple_subtest<MEMORYDEVICE_CPU>(int iteration, SlavchevaSurfaceTracker::Switches trackerSwitches,
                                                    bool expanded_allocation);
@@ -43,18 +39,14 @@ void
 GenericWarpConsistencySubtest<PlainVoxelArray, MEMORYDEVICE_CUDA>(const SlavchevaSurfaceTracker::Switches& switches,
                                                                      int iteration_limit,
                                                                      GenericWarpTestMode mode,
-                                                                     float absolute_tolerance,
-                                                                     bool allocateLiveFromBothImages,
-                                                                     bool expand_raw_live_allocation);
+                                                                     float absolute_tolerance);
 
 template
 void
 GenericWarpConsistencySubtest<VoxelBlockHash, MEMORYDEVICE_CUDA>(const SlavchevaSurfaceTracker::Switches& switches,
                                                                     int iteration_limit,
                                                                     GenericWarpTestMode mode,
-                                                                    float absolute_tolerance,
-                                                                    bool allocateLiveFromBothImages,
-                                                                    bool expand_raw_live_allocation);
+                                                                    float absolute_tolerance);
 
 template
 void Warp_PVA_VBH_simple_subtest<MEMORYDEVICE_CUDA>(int iteration, SlavchevaSurfaceTracker::Switches trackerSwitches,

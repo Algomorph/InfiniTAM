@@ -88,9 +88,7 @@ void
 GenericWarpConsistencySubtest(const SlavchevaSurfaceTracker::Switches& switches,
                               int iteration_limit,
                               GenericWarpTestMode mode,
-                              float absolute_tolerance,
-                              bool allocateLiveFromBothImages,
-                              bool expand_raw_live_allocation) {
+                              float absolute_tolerance) {
 
 	std::string prefix = switches_to_prefix(switches);
 	if (iteration_limit < 2) {
