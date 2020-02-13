@@ -40,7 +40,7 @@ staticDualVoxelTraversal_device(TVoxelPrimary* primaryVoxels, TVoxelSecondary* s
 
 template<typename TStaticBooleanFunctor, typename TVoxelPrimary, typename TVoxelSecondary>
 __global__ void
-staticDualVoxelTraversal_AllTrue_device(TVoxelPrimary* primaryVoxels, TVoxelSecondary* secondaryVoxels,
+staticTraverseAndCompareAll_device(TVoxelPrimary* primaryVoxels, TVoxelSecondary* secondaryVoxels,
                                         const ITMLib::PlainVoxelArray::GridAlignedBox* arrayInfo,
                                         bool* falseEncountered) {
 
@@ -106,7 +106,7 @@ dualVoxelTraversal_device(TVoxelPrimary* primaryVoxels, TVoxelSecondary* seconda
 
 template<typename TFunctor, typename TVoxelPrimary, typename TVoxelSecondary>
 __global__ void
-dualVoxelTraversal_AllTrue_device(TVoxelPrimary* primaryVoxels, TVoxelSecondary* secondaryVoxels,
+TraverseAndCompareAll_device(TVoxelPrimary* primaryVoxels, TVoxelSecondary* secondaryVoxels,
                                   const ITMLib::PlainVoxelArray::GridAlignedBox* arrayInfo,
                                   TFunctor* functor, bool* falseEncountered) {
 	if (*falseEncountered) return;
@@ -128,7 +128,7 @@ dualVoxelTraversal_AllTrue_device(TVoxelPrimary* primaryVoxels, TVoxelSecondary*
 
 template<typename TFunctor, typename TVoxelPrimary, typename TVoxelSecondary>
 __global__ void
-dualVoxelPositionTraversal_AllTrue_device(TVoxelPrimary* primaryVoxels, TVoxelSecondary* secondaryVoxels,
+TraverseAndCompareAllWithPosition_device(TVoxelPrimary* primaryVoxels, TVoxelSecondary* secondaryVoxels,
                                           const ITMLib::PlainVoxelArray::GridAlignedBox* arrayInfo,
                                           TFunctor* functor, bool* falseEncountered) {
 	if (*falseEncountered) return;

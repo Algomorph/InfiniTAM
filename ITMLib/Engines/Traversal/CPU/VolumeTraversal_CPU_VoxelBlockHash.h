@@ -38,7 +38,7 @@ public:
 
 	template<typename TFunctor>
 	inline static void
-	VoxelTraversal(VoxelVolume<TVoxel, VoxelBlockHash>* scene, TFunctor& functor) {
+	TraverseAll(VoxelVolume<TVoxel, VoxelBlockHash>* scene, TFunctor& functor) {
 		TVoxel* const voxels = scene->localVBA.GetVoxelBlocks();
 		const HashEntry* const hashTable = scene->index.GetEntries();
 		const int noTotalEntries = scene->index.hashEntryCount;
@@ -63,7 +63,7 @@ public:
 
 	template<typename TFunctor>
 	inline static void
-	VoxelTraversal_SingleThreaded(VoxelVolume<TVoxel, VoxelBlockHash>* scene, TFunctor& functor) {
+	TraverseAll_ST(VoxelVolume<TVoxel, VoxelBlockHash>* scene, TFunctor& functor) {
 		TVoxel* voxels = scene->localVBA.GetVoxelBlocks();
 		const HashEntry* hashTable = scene->index.GetEntries();
 		int noTotalEntries = scene->index.hashEntryCount;
@@ -85,7 +85,7 @@ public:
 
 	template<typename TFunctor>
 	inline static void
-	VoxelPositionTraversal(VoxelVolume<TVoxel, VoxelBlockHash>* scene, TFunctor& functor) {
+	TraverseAllWithPosition(VoxelVolume<TVoxel, VoxelBlockHash>* scene, TFunctor& functor) {
 		TVoxel* const voxels = scene->localVBA.GetVoxelBlocks();
 		const HashEntry* const hashTable = scene->index.GetEntries();
 		const int noTotalEntries = scene->index.hashEntryCount;
@@ -113,7 +113,7 @@ public:
 
 	template<typename TFunctor>
 	inline static void
-	VoxelAndHashBlockPositionTraversal(VoxelVolume<TVoxel, VoxelBlockHash>* scene, TFunctor& functor) {
+	TraverseAllWithPositionAndBlockPosition(VoxelVolume<TVoxel, VoxelBlockHash>* scene, TFunctor& functor) {
 		TVoxel* const voxels = scene->localVBA.GetVoxelBlocks();
 		const HashEntry* const hashTable = scene->index.GetEntries();
 		const int hashEntryCount = scene->index.hashEntryCount;
@@ -141,8 +141,8 @@ public:
 
 	template<typename TFunctor>
 	inline static void
-	VoxelTraversalWithinBounds(VoxelVolume<TVoxel, VoxelBlockHash>* scene, TFunctor& functor,
-	                           const Vector6i& bounds) {
+	TraverseAllWithinBounds(VoxelVolume<TVoxel, VoxelBlockHash>* scene, TFunctor& functor,
+	                        const Vector6i& bounds) {
 		TVoxel* const voxels = scene->localVBA.GetVoxelBlocks();
 		const HashEntry* const hashTable = scene->index.GetEntries();
 		const int noTotalEntries = scene->index.hashEntryCount;
@@ -174,8 +174,8 @@ public:
 
 	template<typename TFunctor>
 	inline static void
-	VoxelPositionTraversalWithinBounds(VoxelVolume<TVoxel, VoxelBlockHash>* scene, TFunctor& functor,
-	                                   Vector6i bounds) {
+	TraverseAllWithinBoundsWithPosition(VoxelVolume<TVoxel, VoxelBlockHash>* scene, TFunctor& functor,
+	                                    Vector6i bounds) {
 		TVoxel* voxels = scene->localVBA.GetVoxelBlocks();
 		const HashEntry* hashTable = scene->index.GetEntries();
 		int noTotalEntries = scene->index.hashEntryCount;
@@ -210,8 +210,8 @@ public:
 
 	template<typename TFunctor>
 	inline static void
-	VoxelPositionAndHashEntryTraversalWithinBounds(VoxelVolume<TVoxel, VoxelBlockHash>* scene, TFunctor& functor,
-	                                               Vector6i bounds) {
+	TraverseAllWithinBoundsWithPositionAndHashEntry(VoxelVolume<TVoxel, VoxelBlockHash>* scene, TFunctor& functor,
+	                                                Vector6i bounds) {
 		TVoxel* voxels = scene->localVBA.GetVoxelBlocks();
 		const HashEntry* hashTable = scene->index.GetEntries();
 		int noTotalEntries = scene->index.hashEntryCount;
@@ -250,7 +250,7 @@ public:
 // endregion ===========================================================================================================
 // region ================================ STATIC SINGLE-SCENE TRAVERSAL ===============================================
 	template<typename TStaticFunctor>
-	inline static void StaticVoxelTraversal(VoxelVolume<TVoxel, VoxelBlockHash>* scene) {
+	inline static void StaticTraverseAll(VoxelVolume<TVoxel, VoxelBlockHash>* scene) {
 		TVoxel* voxels = scene->localVBA.GetVoxelBlocks();
 		const HashEntry* hashTable = scene->index.GetEntries();
 		int noTotalEntries = scene->index.hashEntryCount;
@@ -274,7 +274,7 @@ public:
 	}
 
 	template<typename TStaticFunctor>
-	inline static void StaticVoxelPositionTraversal(VoxelVolume<TVoxel, VoxelBlockHash>* scene) {
+	inline static void StaticTraverseAllWithPositon(VoxelVolume<TVoxel, VoxelBlockHash>* scene) {
 		TVoxel* voxels = scene->localVBA.GetVoxelBlocks();
 		const HashEntry* hashTable = scene->index.GetEntries();
 		int noTotalEntries = scene->index.hashEntryCount;

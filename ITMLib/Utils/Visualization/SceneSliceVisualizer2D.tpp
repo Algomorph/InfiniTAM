@@ -139,7 +139,7 @@ cv::Mat SceneSliceVisualizer2D<TVoxel, TWarp, TIndex>::DrawSceneImageAroundPoint
 			imgPixelRangeY, imgPixelRangeZ, bounds, plane,
 			this->pixelsPerVoxel, absFillingStrategy, img);
 	VolumeTraversalEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>::
-	        VoxelPositionTraversalWithinBounds(scene,drawSceneVoxelFunctor, bounds);
+	TraverseAllWithinBoundsWithPosition(scene, drawSceneVoxelFunctor, bounds);
 	return img;
 }
 
@@ -216,7 +216,7 @@ cv::Mat SceneSliceVisualizer2D<TVoxel, TWarp, TIndex>::DrawWarpedSceneImageAroun
 			imgPixelRangeY, imgPixelRangeZ, bounds, plane,
 			this->pixelsPerVoxel, absFillingStrategy, img);
 	TwoVolumeTraversalEngine<TVoxel, TWarp, TIndex, TIndex, MEMORYDEVICE_CPU>::
-	        template DualVoxelPositionTraversalWithinBounds(scene, warpField, drawSceneVoxelFunctor, expandedBounds);
+	template TraverseAllWithinBoundsWithPosition(scene, warpField, drawSceneVoxelFunctor, expandedBounds);
 	return img;
 }
 
@@ -413,7 +413,7 @@ SceneSliceVisualizer2D<TVoxel, TWarp, TIndex>::RenderSceneSlices(VoxelVolume<TVo
 	DrawSingleVoxelForSliceFunctor<TVoxel> drawSingleVoxelForSliceFunctor(images, axis, focus_coordinates, minPoint,
 	                                                                      absFillingStrategy);
 	VolumeTraversalEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>::
-	VoxelPositionTraversal(scene, drawSingleVoxelForSliceFunctor);
+	TraverseAllWithPosition(scene, drawSingleVoxelForSliceFunctor);
 
 	for (int iImage = 0; iImage < imageCount; iImage++) {
 		std::stringstream ss;

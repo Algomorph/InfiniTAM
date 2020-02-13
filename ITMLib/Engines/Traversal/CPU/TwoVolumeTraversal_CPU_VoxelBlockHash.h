@@ -30,8 +30,8 @@ namespace ITMLib{
 //                                  (TWO VOLUMES WITH DIFFERING VOXEL TYPES)
 //======================================================================================================================
 
-template<typename TVoxelPrimary, typename TVoxelSecondary>
-class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, VoxelBlockHash, VoxelBlockHash, MEMORYDEVICE_CPU> {
+template<typename TVoxel1, typename TVoxel2>
+class TwoVolumeTraversalEngine<TVoxel1, TVoxel2, VoxelBlockHash, VoxelBlockHash, MEMORYDEVICE_CPU> {
 	/**
 	 * \brief Concurrent traversal of two volumes with potentially-differing voxel types
 	 * \details The two volumes must have matching hash table size
@@ -39,50 +39,50 @@ class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, VoxelBlockHash, V
 public:
 // region ================================ STATIC TWO-VOLUME TRAVERSAL =================================================
 	template<typename TStaticFunctor>
-	inline static void StaticDualVoxelTraversal(
-			VoxelVolume<TVoxelPrimary, VoxelBlockHash>* primaryScene,
-			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryScene) {
+	inline static void StaticTraverseAll(
+			VoxelVolume<TVoxel1, VoxelBlockHash>* volume1,
+			VoxelVolume<TVoxel2, VoxelBlockHash>* volume2) {
 
 // *** traversal vars
-		TVoxelSecondary* secondaryVoxels = secondaryScene->localVBA.GetVoxelBlocks();
-		HashEntry* secondaryHashTable = secondaryScene->index.GetEntries();
+		TVoxel2* voxels2 = volume2->localVBA.GetVoxelBlocks();
+		HashEntry* hash_table2 = volume2->index.GetEntries();
 
-		TVoxelPrimary* primaryVoxels = primaryScene->localVBA.GetVoxelBlocks();
-		HashEntry* primaryHashTable = primaryScene->index.GetEntries();
-		int noTotalEntries = primaryScene->index.hashEntryCount;
+		TVoxel1* voxels1 = volume1->localVBA.GetVoxelBlocks();
+		HashEntry* hash_table1 = volume1->index.GetEntries();
+		int hash_entry_count = volume1->index.hashEntryCount;
 
 #ifdef WITH_OPENMP
 #pragma omp parallel for
 #endif
-		for (int hash = 0; hash < noTotalEntries; hash++) {
-			const HashEntry& currentLiveHashEntry = primaryHashTable[hash];
-			if (currentLiveHashEntry.ptr < 0) continue;
-			HashEntry currentCanonicalHashEntry = secondaryHashTable[hash];
+		for (int hash_code = 0; hash_code < hash_entry_count; hash_code++) {
+			const HashEntry& hash_entry1 = hash_table1[hash_code];
+			if (hash_entry1.ptr < 0) continue;
+			HashEntry hash_entry2 = hash_table2[hash_code];
 
 			// the rare case where we have different positions for primary & secondary voxel block with the same index:
 			// we have a hash bucket miss, find the secondary voxel with the matching coordinates
-			if (currentCanonicalHashEntry.pos != currentLiveHashEntry.pos) {
-				int secondaryHash;
-				if (!FindHashAtPosition(secondaryHash, currentLiveHashEntry.pos, secondaryHashTable)) {
+			if (hash_entry2.pos != hash_entry1.pos) {
+				int hash_code2;
+				if (!FindHashAtPosition(hash_code2, hash_entry1.pos, hash_table2)) {
 					std::stringstream stream;
 					stream << "Could not find corresponding secondary scene block at postion "
-					       << currentLiveHashEntry.pos
+					       << hash_entry1.pos
 					       << ". " << __FILE__ << ": " << __LINE__;
 					DIEWITHEXCEPTION(stream.str());
 				} else {
-					currentCanonicalHashEntry = secondaryHashTable[secondaryHash];
+					hash_entry2 = hash_table2[hash_code2];
 				}
 			}
-			TVoxelPrimary* localPrimaryVoxelBlock = &(primaryVoxels[currentLiveHashEntry.ptr * (VOXEL_BLOCK_SIZE3)]);
-			TVoxelSecondary* localSecondaryVoxelBlock = &(secondaryVoxels[currentCanonicalHashEntry.ptr *
+			TVoxel1* localPrimaryVoxelBlock = &(voxels1[hash_entry1.ptr * (VOXEL_BLOCK_SIZE3)]);
+			TVoxel2* localSecondaryVoxelBlock = &(voxels2[hash_entry2.ptr *
 			                                                              (VOXEL_BLOCK_SIZE3)]);
 			for (int z = 0; z < VOXEL_BLOCK_SIZE; z++) {
 				for (int y = 0; y < VOXEL_BLOCK_SIZE; y++) {
 					for (int x = 0; x < VOXEL_BLOCK_SIZE; x++) {
 						int locId = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
-						TVoxelPrimary& primaryVoxel = localPrimaryVoxelBlock[locId];
-						TVoxelSecondary& secondaryVoxel = localSecondaryVoxelBlock[locId];
-						TStaticFunctor::run(primaryVoxel, secondaryVoxel);
+						TVoxel1& voxel1 = localPrimaryVoxelBlock[locId];
+						TVoxel2& voxel2 = localSecondaryVoxelBlock[locId];
+						TStaticFunctor::run(voxel1, voxel2);
 					}
 				}
 			}
@@ -92,53 +92,53 @@ public:
 	// endregion
 	// region ================================ STATIC TWO-VOLUME TRAVERSAL WITH VOXEL POSITION =========================
 	template<typename TStaticFunctor>
-	inline static void StaticDualVoxelPositionTraversal(
-			VoxelVolume<TVoxelPrimary, VoxelBlockHash>* primaryScene,
-			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryScene) {
+	inline static void StaticTraverseAllWithPosition(
+			VoxelVolume<TVoxel1, VoxelBlockHash>* volume1,
+			VoxelVolume<TVoxel2, VoxelBlockHash>* volume2) {
 
 // *** traversal vars
-		TVoxelSecondary* secondaryVoxels = secondaryScene->localVBA.GetVoxelBlocks();
-		HashEntry* secondaryHashTable = secondaryScene->index.GetEntries();
+		TVoxel2* voxels2 = volume2->localVBA.GetVoxelBlocks();
+		HashEntry* hash_table2 = volume2->index.GetEntries();
 
-		TVoxelPrimary* primaryVoxels = primaryScene->localVBA.GetVoxelBlocks();
-		HashEntry* primaryHashTable = primaryScene->index.GetEntries();
-		int totalHashEntryCount = primaryScene->index.hashEntryCount;
+		TVoxel1* voxels1 = volume1->localVBA.GetVoxelBlocks();
+		HashEntry* hash_table1 = volume1->index.GetEntries();
+		int totalHashEntryCount = volume1->index.hashEntryCount;
 
 #ifdef WITH_OPENMP
 #pragma omp parallel for
 #endif
-		for (int hash = 0; hash < totalHashEntryCount; hash++) {
-			const HashEntry& currentPrimaryHashEntry = primaryHashTable[hash];
-			if (currentPrimaryHashEntry.ptr < 0) continue;
-			HashEntry currentSecondaryHashEntry = secondaryHashTable[hash];
+		for (int hash_code = 0; hash_code < totalHashEntryCount; hash_code++) {
+			const HashEntry& hash_entry1 = hash_table1[hash_code];
+			if (hash_entry1.ptr < 0) continue;
+			HashEntry hash_entry2 = hash_table2[hash_code];
 
 			// the rare case where we have different positions for primary & secondary voxel block with the same index:
 			// we have a hash bucket miss, find the secondary voxel with the matching coordinates
-			if (currentSecondaryHashEntry.pos != currentPrimaryHashEntry.pos) {
-				int secondaryHash;
-				if (!FindHashAtPosition(secondaryHash, currentPrimaryHashEntry.pos, secondaryHashTable)) {
+			if (hash_entry2.pos != hash_entry1.pos) {
+				int hash_code2;
+				if (!FindHashAtPosition(hash_code2, hash_entry1.pos, hash_table2)) {
 					std::stringstream stream;
 					stream << "Could not find corresponding secondary scene block at postion "
-					       << currentPrimaryHashEntry.pos
+					       << hash_entry1.pos
 					       << ". " << __FILE__ << ": " << __LINE__;
 					DIEWITHEXCEPTION(stream.str());
 				} else {
-					currentSecondaryHashEntry = secondaryHashTable[secondaryHash];
+					hash_entry2 = hash_table2[hash_code2];
 				}
 			}
 			// position of the current entry in 3D space in voxel units
-			Vector3i hashBlockPosition = currentPrimaryHashEntry.pos.toInt() * VOXEL_BLOCK_SIZE;
-			TVoxelPrimary* localLiveVoxelBlock = &(primaryVoxels[currentPrimaryHashEntry.ptr * (VOXEL_BLOCK_SIZE3)]);
-			TVoxelSecondary* localCanonicalVoxelBlock = &(secondaryVoxels[currentSecondaryHashEntry.ptr *
+			Vector3i hash_block_positon = hash_entry1.pos.toInt() * VOXEL_BLOCK_SIZE;
+			TVoxel1* voxel_block1 = &(voxels1[hash_entry1.ptr * (VOXEL_BLOCK_SIZE3)]);
+			TVoxel2* voxel_block2 = &(voxels2[hash_entry2.ptr *
 			                                                              (VOXEL_BLOCK_SIZE3)]);
 			for (int z = 0; z < VOXEL_BLOCK_SIZE; z++) {
 				for (int y = 0; y < VOXEL_BLOCK_SIZE; y++) {
 					for (int x = 0; x < VOXEL_BLOCK_SIZE; x++) {
 						int locId = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
-						Vector3i voxelPosition = hashBlockPosition + Vector3i(x, y, z);
-						TVoxelPrimary& primaryVoxel = localLiveVoxelBlock[locId];
-						TVoxelSecondary& secondaryVoxel = localCanonicalVoxelBlock[locId];
-						TStaticFunctor::run(primaryVoxel, secondaryVoxel, voxelPosition);
+						Vector3i voxel_position = hash_block_positon + Vector3i(x, y, z);
+						TVoxel1& voxel1 = voxel_block1[locId];
+						TVoxel2& voxel2 = voxel_block2[locId];
+						TStaticFunctor::run(voxel1, voxel2, voxel_position);
 					}
 				}
 			}
@@ -149,53 +149,53 @@ public:
 // region ================================ DYNAMIC TWO-VOLUME TRAVERSAL =================================================
 	template<typename TFunctor>
 	inline static void
-	DualVoxelTraversal(
-			VoxelVolume<TVoxelPrimary, VoxelBlockHash>* primaryScene,
-			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryScene,
+	TraverseAll(
+			VoxelVolume<TVoxel1, VoxelBlockHash>* volume1,
+			VoxelVolume<TVoxel2, VoxelBlockHash>* volume2,
 			TFunctor& functor) {
 
 // *** traversal vars
-		TVoxelSecondary* secondaryVoxels = secondaryScene->localVBA.GetVoxelBlocks();
-		HashEntry* secondaryHashTable = secondaryScene->index.GetEntries();
+		TVoxel2* voxels2 = volume2->localVBA.GetVoxelBlocks();
+		HashEntry* hash_table2 = volume2->index.GetEntries();
 
 
-		TVoxelPrimary* primaryVoxels = primaryScene->localVBA.GetVoxelBlocks();
-		HashEntry* primaryHashTable = primaryScene->index.GetEntries();
-		int noTotalEntries = primaryScene->index.hashEntryCount;
+		TVoxel1* voxels1 = volume1->localVBA.GetVoxelBlocks();
+		HashEntry* hash_table1 = volume1->index.GetEntries();
+		int hash_entry_count = volume1->index.hashEntryCount;
 
 #ifdef WITH_OPENMP
 #pragma omp parallel for
 #endif
-		for (int hash = 0; hash < noTotalEntries; hash++) {
+		for (int hash_code = 0; hash_code < hash_entry_count; hash_code++) {
 
-			const HashEntry& currentLiveHashEntry = primaryHashTable[hash];
-			if (currentLiveHashEntry.ptr < 0) continue;
-			HashEntry currentCanonicalHashEntry = secondaryHashTable[hash];
+			const HashEntry& hash_entry1 = hash_table1[hash_code];
+			if (hash_entry1.ptr < 0) continue;
+			HashEntry hash_entry2 = hash_table2[hash_code];
 
 			// the rare case where we have different positions for primary & secondary voxel block with the same index:
 			// we have a hash bucket miss, find the secondary voxel with the matching coordinates
-			if (currentCanonicalHashEntry.pos != currentLiveHashEntry.pos) {
-				int secondaryHash;
-				if (!FindHashAtPosition(secondaryHash, currentLiveHashEntry.pos, secondaryHashTable)) {
+			if (hash_entry2.pos != hash_entry1.pos) {
+				int hash_code2;
+				if (!FindHashAtPosition(hash_code2, hash_entry1.pos, hash_table2)) {
 					std::stringstream stream;
 					stream << "Could not find corresponding secondary scene block at postion "
-					       << currentLiveHashEntry.pos
+					       << hash_entry1.pos
 					       << ". " << __FILE__ << ": " << __LINE__;
 					DIEWITHEXCEPTION(stream.str());
 				} else {
-					currentCanonicalHashEntry = secondaryHashTable[secondaryHash];
+					hash_entry2 = hash_table2[hash_code2];
 				}
 			}
-			TVoxelPrimary* localLiveVoxelBlock = &(primaryVoxels[currentLiveHashEntry.ptr * (VOXEL_BLOCK_SIZE3)]);
-			TVoxelSecondary* localCanonicalVoxelBlock = &(secondaryVoxels[currentCanonicalHashEntry.ptr *
+			TVoxel1* voxel_block1 = &(voxels1[hash_entry1.ptr * (VOXEL_BLOCK_SIZE3)]);
+			TVoxel2* voxel_block2 = &(voxels2[hash_entry2.ptr *
 			                                                              (VOXEL_BLOCK_SIZE3)]);
 			for (int z = 0; z < VOXEL_BLOCK_SIZE; z++) {
 				for (int y = 0; y < VOXEL_BLOCK_SIZE; y++) {
 					for (int x = 0; x < VOXEL_BLOCK_SIZE; x++) {
 						int locId = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
-						TVoxelPrimary& primaryVoxel = localLiveVoxelBlock[locId];
-						TVoxelSecondary& secondaryVoxel = localCanonicalVoxelBlock[locId];
-						functor(primaryVoxel, secondaryVoxel);
+						TVoxel1& voxel1 = voxel_block1[locId];
+						TVoxel2& voxel2 = voxel_block2[locId];
+						functor(voxel1, voxel2);
 					}
 				}
 			}
@@ -205,41 +205,41 @@ public:
 
 	template<typename TFunctor>
 	inline static bool
-	DualVoxelTraversal_AllTrue(
-			VoxelVolume<TVoxelPrimary, VoxelBlockHash>* primaryScene,
-			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryScene,
+	TraverseAndCompareAll(
+			VoxelVolume<TVoxel1, VoxelBlockHash>* volume1,
+			VoxelVolume<TVoxel2, VoxelBlockHash>* volume2,
 			TFunctor& functor, bool verbose) {
 
 // *** traversal vars
-		TVoxelSecondary* secondaryVoxels = secondaryScene->localVBA.GetVoxelBlocks();
-		HashEntry* secondaryHashTable = secondaryScene->index.GetEntries();
+		TVoxel2* voxels2 = volume2->localVBA.GetVoxelBlocks();
+		HashEntry* hash_table2 = volume2->index.GetEntries();
 
 
-		TVoxelPrimary* primaryVoxels = primaryScene->localVBA.GetVoxelBlocks();
-		HashEntry* primaryHashTable = primaryScene->index.GetEntries();
-		int hashEntryCount = primaryScene->index.hashEntryCount;
+		TVoxel1* voxels1 = volume1->localVBA.GetVoxelBlocks();
+		HashEntry* hash_table1 = volume1->index.GetEntries();
+		int hash_entry_count = volume1->index.hashEntryCount;
 
-		bool mismatchFound = false;
+		bool mismatch_found = false;
 
 #ifdef WITH_OPENMP
 #pragma omp parallel for
 #endif
-		for (int hashCode = 0; hashCode < hashEntryCount; hashCode++) {
-			if (mismatchFound) continue;
-			const HashEntry& primaryHashEntry = primaryHashTable[hashCode];
-			HashEntry secondaryHashEntry = secondaryHashTable[hashCode];
+		for (int hash_code = 0; hash_code < hash_entry_count; hash_code++) {
+			if (mismatch_found) continue;
+			const HashEntry& hash_entry1 = hash_table1[hash_code];
+			HashEntry hash_entry2 = hash_table2[hash_code];
 
-			auto secondaryHashEntryHasMatchingPrimary = [&](int secondaryHashCode) {
-				int alternativePrimaryHash;
-				if (!FindHashAtPosition(alternativePrimaryHash, secondaryHashEntry.pos, primaryHashTable)) {
+			auto block2HasMatchingBlock1 = [&](int hash_code2) {
+				int alternative_hash_code1;
+				if (!FindHashAtPosition(alternative_hash_code1, hash_entry2.pos, hash_table1)) {
 					// could not find primary block corresponding to the secondary hash
-					TVoxelSecondary* secondaryVoxelBlock = &(secondaryVoxels[secondaryHashEntry.ptr *
-					                                                         (VOXEL_BLOCK_SIZE3)]);
+					TVoxel2* voxel_block2 = &(voxels2[hash_entry2.ptr *
+					                                  (VOXEL_BLOCK_SIZE3)]);
 					// if the secondary block is unaltered anyway, so no need to match and we're good, so return "true"
 					if(verbose){
-						return !isVoxelBlockAltered(secondaryVoxelBlock, true, "Second-hash voxel unmatched in first hash: ", secondaryHashEntry.pos, secondaryHashCode);
+						return !isVoxelBlockAltered(voxel_block2, true, "Second-hash voxel unmatched in first hash: ", hash_entry2.pos, hash_code2);
 					}else{
-						return !isVoxelBlockAltered(secondaryVoxelBlock);
+						return !isVoxelBlockAltered(voxel_block2);
 					}
 				} else {
 					// alternative primary hash found, skip this primary hash since the corresponding secondary
@@ -248,12 +248,12 @@ public:
 				}
 			};
 
-			if (primaryHashEntry.ptr < 0) {
-				if (secondaryHashEntry.ptr < 0) {
+			if (hash_entry1.ptr < 0) {
+				if (hash_entry2.ptr < 0) {
 					continue;
 				} else {
-					if (!secondaryHashEntryHasMatchingPrimary(hashCode)) {
-						mismatchFound = true;
+					if (!block2HasMatchingBlock1(hash_code)) {
+						mismatch_found = true;
 						continue;
 					} else {
 						continue;
@@ -263,103 +263,103 @@ public:
 
 			// the rare case where we have different positions for primary & secondary voxel block with the same index:
 			// we have a hash bucket miss, find the secondary voxel block with the matching coordinates
-			if (secondaryHashEntry.pos != primaryHashEntry.pos) {
-				if (secondaryHashEntry.ptr >= 0) {
-					if (!secondaryHashEntryHasMatchingPrimary(hashCode)) {
-						mismatchFound = true;
+			if (hash_entry2.pos != hash_entry1.pos) {
+				if (hash_entry2.ptr >= 0) {
+					if (!block2HasMatchingBlock1(hash_code)) {
+						mismatch_found = true;
 						continue;
 					}
 				}
 
-				int secondaryHash;
-				if (!FindHashAtPosition(secondaryHash, primaryHashEntry.pos, secondaryHashTable)) {
+				int hash_code2;
+				if (!FindHashAtPosition(hash_code2, hash_entry1.pos, hash_table2)) {
 					// If we cannot find this block, we check whether the primary voxel block has been altered, and
 					// return "false" if it is -- i.e. the secondary voxel volume does not have a match.
 					// If the primary voxel block has not been altered, we assume the allocation mismatch is benign and
 					// continue to the next hash block.
-					TVoxelPrimary* primaryVoxelBlock = &(primaryVoxels[primaryHashEntry.ptr *
-					                                                   (VOXEL_BLOCK_SIZE3)]);
-					if (isVoxelBlockAltered(primaryVoxelBlock)) {
-						mismatchFound = true;
+					TVoxel1* voxel_block1 = &(voxels1[hash_entry1.ptr *
+					                                  (VOXEL_BLOCK_SIZE3)]);
+					if (isVoxelBlockAltered(voxel_block1)) {
+						mismatch_found = true;
 						continue;
 					} else {
 						continue;
 					}
 				} else {
-					secondaryHashEntry = secondaryHashTable[secondaryHash];
+					hash_entry2 = hash_table2[hash_code2];
 				}
 			}
-			TVoxelPrimary* primaryVoxelBlock = &(primaryVoxels[primaryHashEntry.ptr * (VOXEL_BLOCK_SIZE3)]);
-			TVoxelSecondary* secondaryVoxelBlock = &(secondaryVoxels[secondaryHashEntry.ptr *
-			                                                         (VOXEL_BLOCK_SIZE3)]);
+			TVoxel1* voxel_block1 = &(voxels1[hash_entry1.ptr * (VOXEL_BLOCK_SIZE3)]);
+			TVoxel2* voxel_block2 = &(voxels2[hash_entry2.ptr *
+			                                  (VOXEL_BLOCK_SIZE3)]);
 			for (int z = 0; z < VOXEL_BLOCK_SIZE; z++) {
 				for (int y = 0; y < VOXEL_BLOCK_SIZE; y++) {
 					for (int x = 0; x < VOXEL_BLOCK_SIZE; x++) {
 						int locId = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
-						TVoxelPrimary& primaryVoxel = primaryVoxelBlock[locId];
-						TVoxelSecondary& secondaryVoxel = secondaryVoxelBlock[locId];
-						if (!functor(primaryVoxel, secondaryVoxel)) {
-							mismatchFound = true;
+						TVoxel1& voxel1 = voxel_block1[locId];
+						TVoxel2& voxel2 = voxel_block2[locId];
+						if (!functor(voxel1, voxel2)) {
+							mismatch_found = true;
 						}
 					}
 				}
 			}
 		}
-		return !mismatchFound;
+		return !mismatch_found;
 	}
 
 // ========================== DYNAMIC TWO-VOLUME TRAVERSAL WITH VOXEL POSITION =========================================
 	template<typename TFunctor>
 	inline static void
-	DualVoxelPositionTraversal(
-			VoxelVolume<TVoxelPrimary, VoxelBlockHash>* primaryScene,
-			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryScene,
+	TraverseAllWithPosition(
+			VoxelVolume<TVoxel1, VoxelBlockHash>* volume1,
+			VoxelVolume<TVoxel2, VoxelBlockHash>* volume2,
 			TFunctor& functor) {
 
 // *** traversal vars
-		TVoxelSecondary* secondaryVoxels = secondaryScene->localVBA.GetVoxelBlocks();
-		HashEntry* secondaryHashTable = secondaryScene->index.GetEntries();
+		TVoxel2* voxels2 = volume2->localVBA.GetVoxelBlocks();
+		HashEntry* hash_table2 = volume2->index.GetEntries();
 
-		TVoxelPrimary* primaryVoxels = primaryScene->localVBA.GetVoxelBlocks();
-		HashEntry* primaryHashTable = primaryScene->index.GetEntries();
-		int noTotalEntries = primaryScene->index.hashEntryCount;
+		TVoxel1* voxels1 = volume1->localVBA.GetVoxelBlocks();
+		HashEntry* hash_table1 = volume1->index.GetEntries();
+		int hash_entry_count = volume1->index.hashEntryCount;
 
 #ifdef WITH_OPENMP
 #pragma omp parallel for
 #endif
-		for (int hash = 0; hash < noTotalEntries; hash++) {
-			const HashEntry& primaryHashEntry = primaryHashTable[hash];
-			if (primaryHashEntry.ptr < 0) continue;
-			HashEntry secondaryHashEntry = secondaryHashTable[hash];
+		for (int hash_code = 0; hash_code < hash_entry_count; hash_code++) {
+			const HashEntry& hash_entry1 = hash_table1[hash_code];
+			if (hash_entry1.ptr < 0) continue;
+			HashEntry hash_entry2 = hash_table2[hash_code];
 
 			// the rare case where we have different positions for primary & secondary voxel block with the same index:
 			// we have a hash bucket miss, find the secondary voxel with the matching coordinates
-			if (secondaryHashEntry.pos != primaryHashEntry.pos) {
-				int secondaryHash;
+			if (hash_entry2.pos != hash_entry1.pos) {
+				int hash_code2;
 
-				if (!FindHashAtPosition(secondaryHash, primaryHashEntry.pos, secondaryHashTable)) {
+				if (!FindHashAtPosition(hash_code2, hash_entry1.pos, hash_table2)) {
 					std::stringstream stream;
 					stream << "Could not find corresponding secondary scene block at postion "
-					       << primaryHashEntry.pos
+					       << hash_entry1.pos
 					       << ". " << __FILE__ << ": " << __LINE__;
 					DIEWITHEXCEPTION(stream.str());
 				} else {
-					secondaryHashEntry = secondaryHashTable[secondaryHash];
+					hash_entry2 = hash_table2[hash_code2];
 				}
 			}
 			// position of the current entry in 3D space in voxel units
-			Vector3i hashBlockPosition = primaryHashEntry.pos.toInt() * VOXEL_BLOCK_SIZE;
+			Vector3i hash_block_positon = hash_entry1.pos.toInt() * VOXEL_BLOCK_SIZE;
 
-			TVoxelPrimary* primaryVoxelBlock = &(primaryVoxels[primaryHashEntry.ptr * (VOXEL_BLOCK_SIZE3)]);
-			TVoxelSecondary* secondaryVoxelBlock = &(secondaryVoxels[secondaryHashEntry.ptr * (VOXEL_BLOCK_SIZE3)]);
+			TVoxel1* voxel_block1 = &(voxels1[hash_entry1.ptr * (VOXEL_BLOCK_SIZE3)]);
+			TVoxel2* voxel_block2 = &(voxels2[hash_entry2.ptr * (VOXEL_BLOCK_SIZE3)]);
 			for (int z = 0; z < VOXEL_BLOCK_SIZE; z++) {
 				for (int y = 0; y < VOXEL_BLOCK_SIZE; y++) {
 					for (int x = 0; x < VOXEL_BLOCK_SIZE; x++) {
 						int linearIndexInBlock = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
-						Vector3i voxelPosition = hashBlockPosition + Vector3i(x, y, z);
-						TVoxelPrimary& primaryVoxel = primaryVoxelBlock[linearIndexInBlock];
-						TVoxelSecondary& secondaryVoxel = secondaryVoxelBlock[linearIndexInBlock];
-						functor(primaryVoxel, secondaryVoxel, voxelPosition);
+						Vector3i voxel_position = hash_block_positon + Vector3i(x, y, z);
+						TVoxel1& voxel1 = voxel_block1[linearIndexInBlock];
+						TVoxel2& voxel2 = voxel_block2[linearIndexInBlock];
+						functor(voxel1, voxel2, voxel_position);
 					}
 				}
 			}
@@ -368,41 +368,41 @@ public:
 
 	template<typename TFunctor>
 	inline static bool
-	DualVoxelPositionTraversal_AllTrue(
-			VoxelVolume<TVoxelPrimary, VoxelBlockHash>* primaryScene,
-			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryScene,
+	TraverseAndCompareAllWithPosition(
+			VoxelVolume<TVoxel1, VoxelBlockHash>* volume1,
+			VoxelVolume<TVoxel2, VoxelBlockHash>* volume2,
 			TFunctor& functor, bool verbose) {
 
 // *** traversal vars
-		TVoxelSecondary* secondaryVoxels = secondaryScene->localVBA.GetVoxelBlocks();
-		HashEntry* secondaryHashTable = secondaryScene->index.GetEntries();
+		TVoxel2* voxels2 = volume2->localVBA.GetVoxelBlocks();
+		HashEntry* hash_table2 = volume2->index.GetEntries();
 
 
-		TVoxelPrimary* primaryVoxels = primaryScene->localVBA.GetVoxelBlocks();
-		HashEntry* primaryHashTable = primaryScene->index.GetEntries();
-		int hashEntryCount = primaryScene->index.hashEntryCount;
+		TVoxel1* voxels1 = volume1->localVBA.GetVoxelBlocks();
+		HashEntry* hash_table1 = volume1->index.GetEntries();
+		int hash_entry_count = volume1->index.hashEntryCount;
 
-		bool mismatchFound = false;
+		bool mismatch_found = false;
 
 #ifdef WITH_OPENMP
 #pragma omp parallel for
 #endif
-		for (int hashCode = 0; hashCode < hashEntryCount; hashCode++) {
-			if (mismatchFound) continue;
-			const HashEntry& primaryHashEntry = primaryHashTable[hashCode];
-			HashEntry secondaryHashEntry = secondaryHashTable[hashCode];
+		for (int hashCode = 0; hashCode < hash_entry_count; hashCode++) {
+			if (mismatch_found) continue;
+			const HashEntry& hash_entry1 = hash_table1[hashCode];
+			HashEntry hash_entry2 = hash_table2[hashCode];
 
-			auto secondaryHashEntryHasMatchingPrimary = [&](int secondaryHashCode) {
+			auto block2HasMatchingBlock1 = [&](int hash_code2Code) {
 				int alternativePrimaryHash;
-				if (!FindHashAtPosition(alternativePrimaryHash, secondaryHashEntry.pos, primaryHashTable)) {
+				if (!FindHashAtPosition(alternativePrimaryHash, hash_entry2.pos, hash_table1)) {
 					// could not find primary block corresponding to the secondary hash
-					TVoxelSecondary* secondaryVoxelBlock = &(secondaryVoxels[secondaryHashEntry.ptr *
-					                                                         (VOXEL_BLOCK_SIZE3)]);
+					TVoxel2* voxel_block2 = &(voxels2[hash_entry2.ptr *
+					                                  (VOXEL_BLOCK_SIZE3)]);
 					// if the secondary block is unaltered anyway, so no need to match and we're good, so return "true"
 					if(verbose){
-						return !isVoxelBlockAltered(secondaryVoxelBlock, true, "Second-hash voxel unmatched in first hash: ", secondaryHashEntry.pos, secondaryHashCode);
+						return !isVoxelBlockAltered(voxel_block2, true, "Second-hash voxel unmatched in first hash: ", hash_entry2.pos, hash_code2Code);
 					}else{
-						return !isVoxelBlockAltered(secondaryVoxelBlock);
+						return !isVoxelBlockAltered(voxel_block2);
 					}
 				} else {
 					// alternative primary hash found, skip this primary hash since the corresponding secondary
@@ -411,12 +411,12 @@ public:
 				}
 			};
 
-			if (primaryHashEntry.ptr < 0) {
-				if (secondaryHashEntry.ptr < 0) {
+			if (hash_entry1.ptr < 0) {
+				if (hash_entry2.ptr < 0) {
 					continue;
 				} else {
-					if (!secondaryHashEntryHasMatchingPrimary(hashCode)) {
-						mismatchFound = true;
+					if (!block2HasMatchingBlock1(hashCode)) {
+						mismatch_found = true;
 						continue;
 					} else {
 						continue;
@@ -426,91 +426,91 @@ public:
 
 			// the rare case where we have different positions for primary & secondary voxel block with the same index:
 			// we have a hash bucket miss, find the secondary voxel block with the matching coordinates
-			if (secondaryHashEntry.pos != primaryHashEntry.pos) {
-				if (secondaryHashEntry.ptr >= 0) {
-					if (!secondaryHashEntryHasMatchingPrimary(hashCode)) {
-						mismatchFound = true;
+			if (hash_entry2.pos != hash_entry1.pos) {
+				if (hash_entry2.ptr >= 0) {
+					if (!block2HasMatchingBlock1(hashCode)) {
+						mismatch_found = true;
 						continue;
 					}
 				}
 
-				int secondaryHash;
-				if (!FindHashAtPosition(secondaryHash, primaryHashEntry.pos, secondaryHashTable)) {
+				int hash_code2;
+				if (!FindHashAtPosition(hash_code2, hash_entry1.pos, hash_table2)) {
 					// If we cannot find this block, we check whether the primary voxel block has been altered, and
 					// return "false" if it is -- i.e. the secondary voxel volume does not have a match.
 					// If the primary voxel block has not been altered, we assume the allocation mismatch is benign and
 					// continue to the next hash block.
-					TVoxelPrimary* primaryVoxelBlock = &(primaryVoxels[primaryHashEntry.ptr *
-					                                                   (VOXEL_BLOCK_SIZE3)]);
-					if (isVoxelBlockAltered(primaryVoxelBlock)) {
-						mismatchFound = true;
+					TVoxel1* voxel_block1 = &(voxels1[hash_entry1.ptr *
+					                                 (VOXEL_BLOCK_SIZE3)]);
+					if (isVoxelBlockAltered(voxel_block1)) {
+						mismatch_found = true;
 						continue;
 					} else {
 						continue;
 					}
 				} else {
-					secondaryHashEntry = secondaryHashTable[secondaryHash];
+					hash_entry2 = hash_table2[hash_code2];
 				}
 			}
-			TVoxelPrimary* primaryVoxelBlock = &(primaryVoxels[primaryHashEntry.ptr * (VOXEL_BLOCK_SIZE3)]);
-			TVoxelSecondary* secondaryVoxelBlock = &(secondaryVoxels[secondaryHashEntry.ptr *
-			                                                         (VOXEL_BLOCK_SIZE3)]);
+			TVoxel1* voxel_block1 = &(voxels1[hash_entry1.ptr * (VOXEL_BLOCK_SIZE3)]);
+			TVoxel2* voxel_block2 = &(voxels2[hash_entry2.ptr *
+			                                 (VOXEL_BLOCK_SIZE3)]);
 			// position of the current entry in 3D space in voxel units
-			Vector3i hashBlockPosition = primaryHashEntry.pos.toInt() * VOXEL_BLOCK_SIZE;
-			for (int z = 0; z < VOXEL_BLOCK_SIZE && !mismatchFound; z++) {
+			Vector3i hash_block_positon = hash_entry1.pos.toInt() * VOXEL_BLOCK_SIZE;
+			for (int z = 0; z < VOXEL_BLOCK_SIZE && !mismatch_found; z++) {
 				for (int y = 0; y < VOXEL_BLOCK_SIZE; y++) {
 					for (int x = 0; x < VOXEL_BLOCK_SIZE; x++) {
 						int locId = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
-						Vector3i voxelPosition = hashBlockPosition + Vector3i(x, y, z);
-						TVoxelPrimary& primaryVoxel = primaryVoxelBlock[locId];
-						TVoxelSecondary& secondaryVoxel = secondaryVoxelBlock[locId];
-						if (!functor(primaryVoxel, secondaryVoxel, voxelPosition)) {
-							mismatchFound = true;
+						Vector3i voxel_position = hash_block_positon + Vector3i(x, y, z);
+						TVoxel1& voxel1 = voxel_block1[locId];
+						TVoxel2& voxel2 = voxel_block2[locId];
+						if (!functor(voxel1, voxel2, voxel_position)) {
+							mismatch_found = true;
 						}
 					}
 				}
 			}
 		}
-		return !mismatchFound;
+		return !mismatch_found;
 	}
 
 
 	template<typename TFunctor>
 	inline static void
-	DualVoxelPositionTraversalWithinBounds(
-			VoxelVolume<TVoxelPrimary, VoxelBlockHash>* primaryScene,
-			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryScene,
+	TraverseAllWithinBoundsWithPosition(
+			VoxelVolume<TVoxel1, VoxelBlockHash>* volume1,
+			VoxelVolume<TVoxel2, VoxelBlockHash>* volume2,
 			TFunctor& functor, Vector6i bounds) {
 
 // *** traversal vars
-		TVoxelSecondary* secondaryVoxels = secondaryScene->localVBA.GetVoxelBlocks();
-		HashEntry* secondaryHashTable = secondaryScene->index.GetEntries();
+		TVoxel2* voxels2 = volume2->localVBA.GetVoxelBlocks();
+		HashEntry* hash_table2 = volume2->index.GetEntries();
 
-		TVoxelPrimary* primaryVoxels = primaryScene->localVBA.GetVoxelBlocks();
-		HashEntry* primaryHashTable = primaryScene->index.GetEntries();
-		int totalHashEntryCount = primaryScene->index.hashEntryCount;
+		TVoxel1* voxels1 = volume1->localVBA.GetVoxelBlocks();
+		HashEntry* hash_table1 = volume1->index.GetEntries();
+		int totalHashEntryCount = volume1->index.hashEntryCount;
 
 #ifdef WITH_OPENMP
 #pragma omp parallel for
 #endif
 		for (int hash = 0; hash < totalHashEntryCount; hash++) {
-			const HashEntry& primaryHashEntry = primaryHashTable[hash];
+			const HashEntry& primaryHashEntry = hash_table1[hash];
 			if (primaryHashEntry.ptr < 0) continue;
-			HashEntry secondaryHashEntry = secondaryHashTable[hash];
+			HashEntry hash_code2Entry = hash_table2[hash];
 
 			// the rare case where we have different positions for primary & secondary voxel block with the same index:
 			// we have a hash bucket miss, find the secondary voxel with the matching coordinates
-			if (secondaryHashEntry.pos != primaryHashEntry.pos) {
-				int secondaryHash;
+			if (hash_code2Entry.pos != primaryHashEntry.pos) {
+				int hash_code2;
 
-				if (!FindHashAtPosition(secondaryHash, primaryHashEntry.pos, secondaryHashTable)) {
+				if (!FindHashAtPosition(hash_code2, primaryHashEntry.pos, hash_table2)) {
 					std::stringstream stream;
 					stream << "Could not find corresponding secondary scene block at postion "
 					       << primaryHashEntry.pos
 					       << ". " << __FILE__ << ": " << __LINE__;
 					DIEWITHEXCEPTION(stream.str());
 				} else {
-					secondaryHashEntry = secondaryHashTable[secondaryHash];
+					hash_code2Entry = hash_table2[hash_code2];
 				}
 			}
 			Vector3i hashEntryMinPoint = primaryHashEntry.pos.toInt() * VOXEL_BLOCK_SIZE;
@@ -520,10 +520,10 @@ public:
 			}
 
 			// position of the current entry in 3D space in voxel units
-			Vector3i hashBlockPosition = primaryHashEntry.pos.toInt() * VOXEL_BLOCK_SIZE;
+			Vector3i hash_block_positon = primaryHashEntry.pos.toInt() * VOXEL_BLOCK_SIZE;
 
-			TVoxelPrimary* primaryVoxelBlock = &(primaryVoxels[primaryHashEntry.ptr * (VOXEL_BLOCK_SIZE3)]);
-			TVoxelSecondary* secondaryVoxelBlock = &(secondaryVoxels[secondaryHashEntry.ptr * (VOXEL_BLOCK_SIZE3)]);
+			TVoxel1* voxel_block1 = &(voxels1[primaryHashEntry.ptr * (VOXEL_BLOCK_SIZE3)]);
+			TVoxel2* voxel_block2 = &(voxels2[hash_code2Entry.ptr * (VOXEL_BLOCK_SIZE3)]);
 
 			Vector6i localBounds = computeLocalBounds(hashEntryMinPoint, hashEntryMaxPoint, bounds);
 
@@ -531,10 +531,10 @@ public:
 				for (int y = localBounds.min_y; y < localBounds.max_y; y++) {
 					for (int x = localBounds.min_x; x < localBounds.max_x; x++) {
 						int locId = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
-						Vector3i voxelPosition = hashBlockPosition + Vector3i(x, y, z);
-						TVoxelPrimary& primaryVoxel = primaryVoxelBlock[locId];
-						TVoxelSecondary& secondaryVoxel = secondaryVoxelBlock[locId];
-						functor(primaryVoxel, secondaryVoxel, voxelPosition);
+						Vector3i voxel_position = hash_block_positon + Vector3i(x, y, z);
+						TVoxel1& voxel1 = voxel_block1[locId];
+						TVoxel2& voxel2 = voxel_block2[locId];
+						functor(voxel1, voxel2, voxel_position);
 					}
 				}
 			}
@@ -544,119 +544,52 @@ public:
 
 	template<typename TFunctor>
 	inline static void
-	DualVoxelPositionTraversal_DefaultForMissingSecondary(
-			VoxelVolume<TVoxelPrimary, VoxelBlockHash>* primaryScene,
-			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryScene,
+	TraverseAllWithPosition_ST(
+			VoxelVolume<TVoxel1, VoxelBlockHash>* volume1,
+			VoxelVolume<TVoxel2, VoxelBlockHash>* volume2,
 			TFunctor& functor) {
 
 // *** traversal vars
-		TVoxelSecondary* secondaryVoxels = secondaryScene->localVBA.GetVoxelBlocks();
-		HashEntry* secondaryHashTable = secondaryScene->index.GetEntries();
+		TVoxel2* voxels2 = volume2->localVBA.GetVoxelBlocks();
+		HashEntry* hash_table2 = volume2->index.GetEntries();
 
-		TVoxelPrimary* primaryVoxels = primaryScene->localVBA.GetVoxelBlocks();
-		HashEntry* primaryHashTable = primaryScene->index.GetEntries();
-		int noTotalEntries = primaryScene->index.hashEntryCount;
+		TVoxel1* voxels1 = volume1->localVBA.GetVoxelBlocks();
+		HashEntry* hash_table1 = volume1->index.GetEntries();
+		int hash_entry_count = volume1->index.hashEntryCount;
 
-#ifdef WITH_OPENMP
-#pragma omp parallel for
-#endif
-		for (int hash = 0; hash < noTotalEntries; hash++) {
-			const HashEntry& currentLiveHashEntry = primaryHashTable[hash];
-			if (currentLiveHashEntry.ptr < 0) continue;
-			HashEntry currentCanonicalHashEntry = secondaryHashTable[hash];
+		for (int hash = 0; hash < hash_entry_count; hash++) {
+			const HashEntry& hash_entry1 = hash_table1[hash];
+			if (hash_entry1.ptr < 0) continue;
+			HashEntry hash_entry2 = hash_table2[hash];
 
 			// the rare case where we have different positions for primary & secondary voxel block with the same index:
 			// we have a hash bucket miss, find the secondary voxel with the matching coordinates
-			if (currentCanonicalHashEntry.pos != currentLiveHashEntry.pos) {
-				int secondaryHash;
-				if (!FindHashAtPosition(secondaryHash, currentLiveHashEntry.pos, secondaryHashTable)) {
-					TVoxelPrimary* localLiveVoxelBlock = &(primaryVoxels[currentLiveHashEntry.ptr * (VOXEL_BLOCK_SIZE3)]);
-					Vector3i hashBlockPosition = currentLiveHashEntry.pos.toInt() * VOXEL_BLOCK_SIZE;
-					TVoxelSecondary secondaryVoxel;
-					for (int z = 0; z < VOXEL_BLOCK_SIZE; z++) {
-						for (int y = 0; y < VOXEL_BLOCK_SIZE; y++) {
-							for (int x = 0; x < VOXEL_BLOCK_SIZE; x++) {
-								int locId = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
-								Vector3i voxelPosition = hashBlockPosition + Vector3i(x, y, z);
-								TVoxelPrimary& primaryVoxel = localLiveVoxelBlock[locId];
-								functor(primaryVoxel, secondaryVoxel, voxelPosition);
-							}
-						}
-					}
-					continue;
-				} else {
-					currentCanonicalHashEntry = secondaryHashTable[secondaryHash];
-				}
-			}
-			// position of the current entry in 3D space in voxel units
-			Vector3i hashBlockPosition = currentLiveHashEntry.pos.toInt() * VOXEL_BLOCK_SIZE;
-
-			TVoxelPrimary* localLiveVoxelBlock = &(primaryVoxels[currentLiveHashEntry.ptr * (VOXEL_BLOCK_SIZE3)]);
-			TVoxelSecondary* localCanonicalVoxelBlock = &(secondaryVoxels[currentCanonicalHashEntry.ptr *
-			                                                              (VOXEL_BLOCK_SIZE3)]);
-			for (int z = 0; z < VOXEL_BLOCK_SIZE; z++) {
-				for (int y = 0; y < VOXEL_BLOCK_SIZE; y++) {
-					for (int x = 0; x < VOXEL_BLOCK_SIZE; x++) {
-						int locId = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
-						Vector3i voxelPosition = hashBlockPosition + Vector3i(x, y, z);
-						TVoxelPrimary& primaryVoxel = localLiveVoxelBlock[locId];
-						TVoxelSecondary& secondaryVoxel = localCanonicalVoxelBlock[locId];
-						functor(primaryVoxel, secondaryVoxel, voxelPosition);
-					}
-				}
-			}
-		}
-	}
-
-
-	template<typename TFunctor>
-	inline static void
-	DualVoxelPositionTraversal_SingleThreaded(
-			VoxelVolume<TVoxelPrimary, VoxelBlockHash>* primaryScene,
-			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryScene,
-			TFunctor& functor) {
-
-// *** traversal vars
-		TVoxelSecondary* secondaryVoxels = secondaryScene->localVBA.GetVoxelBlocks();
-		HashEntry* secondaryHashTable = secondaryScene->index.GetEntries();
-
-		TVoxelPrimary* primaryVoxels = primaryScene->localVBA.GetVoxelBlocks();
-		HashEntry* primaryHashTable = primaryScene->index.GetEntries();
-		int noTotalEntries = primaryScene->index.hashEntryCount;
-
-		for (int hash = 0; hash < noTotalEntries; hash++) {
-			const HashEntry& currentLiveHashEntry = primaryHashTable[hash];
-			if (currentLiveHashEntry.ptr < 0) continue;
-			HashEntry currentCanonicalHashEntry = secondaryHashTable[hash];
-
-			// the rare case where we have different positions for primary & secondary voxel block with the same index:
-			// we have a hash bucket miss, find the secondary voxel with the matching coordinates
-			if (currentCanonicalHashEntry.pos != currentLiveHashEntry.pos) {
-				int secondaryHash;
-				if (!FindHashAtPosition(secondaryHash, currentLiveHashEntry.pos, secondaryHashTable)) {
+			if (hash_entry2.pos != hash_entry1.pos) {
+				int hash_code2;
+				if (!FindHashAtPosition(hash_code2, hash_entry1.pos, hash_table2)) {
 					std::stringstream stream;
 					stream << "Could not find corresponding secondary scene block at postion "
-					       << currentLiveHashEntry.pos
+					       << hash_entry1.pos
 					       << ". " << __FILE__ << ": " << __LINE__;
 					DIEWITHEXCEPTION(stream.str());
 				} else {
-					currentCanonicalHashEntry = secondaryHashTable[secondaryHash];
+					hash_entry2 = hash_table2[hash_code2];
 				}
 			}
 			// position of the current entry in 3D space in voxel units
-			Vector3i hashBlockPosition = currentLiveHashEntry.pos.toInt() * VOXEL_BLOCK_SIZE;
+			Vector3i hash_block_positon = hash_entry1.pos.toInt() * VOXEL_BLOCK_SIZE;
 
-			TVoxelPrimary* localLiveVoxelBlock = &(primaryVoxels[currentLiveHashEntry.ptr * (VOXEL_BLOCK_SIZE3)]);
-			TVoxelSecondary* localCanonicalVoxelBlock = &(secondaryVoxels[currentCanonicalHashEntry.ptr *
+			TVoxel1* voxel_block1 = &(voxels1[hash_entry1.ptr * (VOXEL_BLOCK_SIZE3)]);
+			TVoxel2* voxel_block2 = &(voxels2[hash_entry2.ptr *
 			                                                              (VOXEL_BLOCK_SIZE3)]);
 			for (int z = 0; z < VOXEL_BLOCK_SIZE; z++) {
 				for (int y = 0; y < VOXEL_BLOCK_SIZE; y++) {
 					for (int x = 0; x < VOXEL_BLOCK_SIZE; x++) {
 						int locId = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
-						Vector3i voxelPosition = hashBlockPosition + Vector3i(x, y, z);
-						TVoxelPrimary& primaryVoxel = localLiveVoxelBlock[locId];
-						TVoxelSecondary& secondaryVoxel = localCanonicalVoxelBlock[locId];
-						functor(primaryVoxel, secondaryVoxel, voxelPosition);
+						Vector3i voxel_position = hash_block_positon + Vector3i(x, y, z);
+						TVoxel1& voxel1 = voxel_block1[locId];
+						TVoxel2& voxel2 = voxel_block2[locId];
+						functor(voxel1, voxel2, voxel_position);
 					}
 				}
 			}

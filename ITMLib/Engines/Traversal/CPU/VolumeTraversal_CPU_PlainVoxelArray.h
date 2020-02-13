@@ -42,7 +42,7 @@ public:
 // region ================================ DYNAMIC SINGLE-SCENE TRAVERSAL ==============================================
 	template<typename TFunctor>
 	inline static void
-	VoxelTraversal(VoxelVolume<TVoxel, PlainVoxelArray>* scene, TFunctor& functor) {
+	TraverseAll(VoxelVolume<TVoxel, PlainVoxelArray>* scene, TFunctor& functor) {
 		TVoxel* voxels = scene->localVBA.GetVoxelBlocks();
 		int voxelCount =
 				scene->index.GetVolumeSize().x * scene->index.GetVolumeSize().y * scene->index.GetVolumeSize().z;
@@ -58,7 +58,7 @@ public:
 
 	template<typename TFunctor>
 	inline static void
-	VoxelTraversal_SingleThreaded(VoxelVolume<TVoxel, PlainVoxelArray>* scene, TFunctor& functor) {
+	TraverseAll_ST(VoxelVolume<TVoxel, PlainVoxelArray>* scene, TFunctor& functor) {
 		TVoxel* voxels = scene->localVBA.GetVoxelBlocks();
 		int voxelCount =
 				scene->index.GetVolumeSize().x * scene->index.GetVolumeSize().y * scene->index.GetVolumeSize().z;
@@ -71,7 +71,7 @@ public:
 
 	template<typename TFunctor>
 	inline static void
-	VoxelPositionTraversal(VoxelVolume<TVoxel, PlainVoxelArray>* scene, TFunctor& functor) {
+	TraverseAllWithPosition(VoxelVolume<TVoxel, PlainVoxelArray>* scene, TFunctor& functor) {
 		TVoxel* voxels = scene->localVBA.GetVoxelBlocks();
 		int voxelCount =
 				scene->index.GetVolumeSize().x * scene->index.GetVolumeSize().y * scene->index.GetVolumeSize().z;
@@ -89,7 +89,7 @@ public:
 
 	template<typename TFunctor>
 	inline static void
-	VoxelTraversalWithinBounds(VoxelVolume<TVoxel, PlainVoxelArray>* scene, TFunctor& functor, Vector6i bounds) {
+	TraverseAllWithinBounds(VoxelVolume<TVoxel, PlainVoxelArray>* scene, TFunctor& functor, Vector6i bounds) {
 		TVoxel* voxels = scene->localVBA.GetVoxelBlocks();
 		int vmIndex = 0;
 		const PlainVoxelArray::IndexData* indexData = scene->index.GetIndexData();
@@ -110,8 +110,8 @@ public:
 
 	template<typename TFunctor>
 	inline static void
-	VoxelPositionTraversalWithinBounds(VoxelVolume<TVoxel, PlainVoxelArray>* scene, TFunctor& functor,
-	                                   Vector6i bounds) {
+	TraverseAllWithinBoundsWithPosition(VoxelVolume<TVoxel, PlainVoxelArray>* scene, TFunctor& functor,
+	                                    Vector6i bounds) {
 		TVoxel* voxels = scene->localVBA.GetVoxelBlocks();
 		int vmIndex = 0;
 		const PlainVoxelArray::IndexData* indexData = scene->index.GetIndexData();
@@ -132,8 +132,8 @@ public:
 
 	template<typename TFunctor>
 	inline static void
-	VoxelPositionAndHashEntryTraversalWithinBounds(VoxelVolume<TVoxel, PlainVoxelArray>* scene, TFunctor& functor,
-	                                               Vector6i bounds) {
+	TraverseAllWithinBoundsWithPositionAndHashEntry(VoxelVolume<TVoxel, PlainVoxelArray>* scene, TFunctor& functor,
+	                                                Vector6i bounds) {
 		TVoxel* voxels = scene->localVBA.GetVoxelBlocks();
 		int vmIndex = 0;
 		const PlainVoxelArray::IndexData* indexData = scene->index.GetIndexData();
@@ -156,7 +156,7 @@ public:
 
 // region ================================ STATIC SINGLE-SCENE TRAVERSAL ===============================================
 	template<typename TStaticFunctor>
-	inline static void StaticVoxelTraversal(VoxelVolume<TVoxel, PlainVoxelArray>* scene) {
+	inline static void StaticTraverseAll(VoxelVolume<TVoxel, PlainVoxelArray>* scene) {
 		TVoxel* voxels = scene->localVBA.GetVoxelBlocks();
 		int voxelCount =
 				scene->index.GetVolumeSize().x * scene->index.GetVolumeSize().y * scene->index.GetVolumeSize().z;
@@ -171,7 +171,7 @@ public:
 	}
 
 	template<typename TStaticFunctor>
-	inline static void StaticVoxelPositionTraversal(VoxelVolume<TVoxel, PlainVoxelArray>* scene) {
+	inline static void StaticTraverseAllWithPosition(VoxelVolume<TVoxel, PlainVoxelArray>* scene) {
 		TVoxel* voxels = scene->localVBA.GetVoxelBlocks();
 		int voxelCount =
 				scene->index.GetVolumeSize().x * scene->index.GetVolumeSize().y * scene->index.GetVolumeSize().z;

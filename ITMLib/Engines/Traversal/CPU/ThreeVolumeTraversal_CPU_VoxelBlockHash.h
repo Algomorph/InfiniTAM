@@ -104,7 +104,7 @@ public:
 // region ================================ STATIC THREE-SCENE TRAVERSAL ================================================
 
 	template<typename TStaticFunctor>
-	inline static void Traverse(
+	inline static void TraverseAll(
 			VoxelVolume<TVoxel1, VoxelBlockHash>* volume1,
 			VoxelVolume<TVoxel2, VoxelBlockHash>* volume2,
 			VoxelVolume<TVoxel3, VoxelBlockHash>* volume3) {
@@ -146,7 +146,7 @@ public:
 
 	template<typename TFunctor>
 	inline static void
-	Traverse(
+	TraverseAll(
 			VoxelVolume<TVoxel1, VoxelBlockHash>* volume1,
 			VoxelVolume<TVoxel2, VoxelBlockHash>* volume2,
 			VoxelVolume<TVoxel3, VoxelBlockHash>* volume3,
@@ -186,7 +186,7 @@ public:
 
 	template<typename TFunctor>
 	inline static void
-	TraverseWithPosition(
+	TraverseAllWithPosition(
 			VoxelVolume<TVoxel1, VoxelBlockHash>* volume1,
 			VoxelVolume<TVoxel2, VoxelBlockHash>* volume2,
 			VoxelVolume<TVoxel3, VoxelBlockHash>* volume3,

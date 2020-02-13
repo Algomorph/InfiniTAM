@@ -33,7 +33,7 @@ public:
 
 	template<typename TFunctor>
 	inline static void
-	TraverseWithPosition(
+	TraverseAllWithPosition(
 			VoxelVolume<TVoxel1, VoxelBlockHash>* volume1,
 			VoxelVolume<TVoxel2, VoxelBlockHash>* volume2,
 			VoxelVolume<TVoxel3, VoxelBlockHash>* volume3,

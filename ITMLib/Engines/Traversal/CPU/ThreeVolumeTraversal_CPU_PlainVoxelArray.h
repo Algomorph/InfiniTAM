@@ -37,9 +37,9 @@ public:
 
 	template<typename TStaticFunctor>
 	inline static void
-	Traverse(VoxelVolume<TVoxel1, PlainVoxelArray>* volume1,
-	         VoxelVolume<TVoxel2, PlainVoxelArray>* volume2,
-	         VoxelVolume<TVoxel3, PlainVoxelArray>* volume3) {
+	TraverseAll(VoxelVolume<TVoxel1, PlainVoxelArray>* volume1,
+	            VoxelVolume<TVoxel2, PlainVoxelArray>* volume2,
+	            VoxelVolume<TVoxel3, PlainVoxelArray>* volume3) {
 		assert(volume2->index.GetVolumeSize() == volume3->index.GetVolumeSize() &&
 		       volume2->index.GetVolumeSize() == volume1->index.GetVolumeSize());
 // *** traversal vars
@@ -66,10 +66,10 @@ public:
 
 	template<typename TFunctor>
 	inline static void
-	Traverse(VoxelVolume<TVoxel1, PlainVoxelArray>* volume1,
-	         VoxelVolume<TVoxel2, PlainVoxelArray>* volume2,
-	         VoxelVolume<TVoxel3, PlainVoxelArray>* volume3,
-	         TFunctor& functor) {
+	TraverseAll(VoxelVolume<TVoxel1, PlainVoxelArray>* volume1,
+	            VoxelVolume<TVoxel2, PlainVoxelArray>* volume2,
+	            VoxelVolume<TVoxel3, PlainVoxelArray>* volume3,
+	            TFunctor& functor) {
 
 		assert(volume2->index.GetVolumeSize() == volume3->index.GetVolumeSize() &&
 		       volume2->index.GetVolumeSize() == volume1->index.GetVolumeSize());
@@ -97,10 +97,10 @@ public:
 
 	template<typename TFunctor>
 	inline static void
-	TraverseWithPosition(VoxelVolume<TVoxel1, PlainVoxelArray>* volume1,
-	                     VoxelVolume<TVoxel2, PlainVoxelArray>* volume2,
-	                     VoxelVolume<TVoxel3, PlainVoxelArray>* volume3,
-	                     TFunctor& functor) {
+	TraverseAllWithPosition(VoxelVolume<TVoxel1, PlainVoxelArray>* volume1,
+	                        VoxelVolume<TVoxel2, PlainVoxelArray>* volume2,
+	                        VoxelVolume<TVoxel3, PlainVoxelArray>* volume3,
+	                        TFunctor& functor) {
 
 		assert(volume2->index.GetVolumeSize() == volume3->index.GetVolumeSize() &&
 		       volume2->index.GetVolumeSize() == volume1->index.GetVolumeSize());
@@ -129,7 +129,7 @@ public:
 	/** Single-threaded traversal **/
 	template<typename TFunctor>
 	inline static void
-	TraverseWithPosition_ST(
+	TraverseAllWithPosition_ST(
 			VoxelVolume<TVoxel1, PlainVoxelArray>* volume1,
 			VoxelVolume<TVoxel2, PlainVoxelArray>* volume2,
 			VoxelVolume<TVoxel3, PlainVoxelArray>* volume3,

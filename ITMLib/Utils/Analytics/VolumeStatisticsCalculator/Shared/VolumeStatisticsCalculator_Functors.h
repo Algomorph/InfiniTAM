@@ -98,7 +98,7 @@ struct ComputeFramewiseWarpLengthStatisticFunctor<true, TVoxel, TIndex, TDeviceT
 		ComputeFramewiseWarpLengthStatisticFunctor instance;
 		INITIALIZE_ATOMIC(double, instance.aggregate, 0.0);
 		INITIALIZE_ATOMIC(unsigned int, instance.count, 0u);
-		VolumeTraversalEngine<TVoxel, TIndex, TDeviceType>::VoxelTraversal(scene, instance);
+		VolumeTraversalEngine<TVoxel, TIndex, TDeviceType>::TraverseAll(scene, instance);
 		double aggregate = GET_ATOMIC_VALUE_CPU(instance.aggregate);
 		unsigned int count = GET_ATOMIC_VALUE_CPU(instance.count);
 		if (TStatistic == MEAN) {
@@ -134,7 +134,7 @@ struct ComputeVoxelCountWithSpecificValue<true, TVoxel, TIndex, TMemoryDeviceTyp
 
 	static int compute(VoxelVolume<TVoxel, TIndex>* scene, float value) {
 		ComputeVoxelCountWithSpecificValue instance(value);
-		VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::VoxelTraversal(scene, instance);
+		VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseAll(scene, instance);
 		return GET_ATOMIC_VALUE_CPU(instance.count);
 	}
 
@@ -184,7 +184,7 @@ struct SumSDFFunctor<true, TVoxel, TIndex, TMemoryDeviceType> {
 
 	static double compute(VoxelVolume<TVoxel, TIndex>* scene, ITMLib::VoxelFlags voxelType) {
 		SumSDFFunctor instance(voxelType);
-		VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::VoxelTraversal(scene, instance);
+		VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseAll(scene, instance);
 		return GET_ATOMIC_VALUE_CPU(instance.sum);
 	}
 
@@ -263,7 +263,7 @@ struct FlagMatchBBoxFunctor<true, TVoxel, TIndex, TMemoryDeviceType> {
 
 	static Extent3D compute(VoxelVolume<TVoxel, TIndex>* scene, ITMLib::VoxelFlags voxelType) {
 		FlagMatchBBoxFunctor instance(voxelType);
-		VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::VoxelPositionTraversal(scene, instance);
+		VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseAllWithPosition(scene, instance);
 		return {GET_ATOMIC_VALUE_CPU(instance.min_x),
 		        GET_ATOMIC_VALUE_CPU(instance.min_y),
 		        GET_ATOMIC_VALUE_CPU(instance.min_z),

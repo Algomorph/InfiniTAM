@@ -29,14 +29,14 @@ namespace ITMLib {
 
 template<typename TVoxelPrimary, typename TVoxelSecondary>
 class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, VoxelBlockHash, MEMORYDEVICE_CUDA> {
-	//TODO: combine DualVoxelTraversal_AllTrue_MatchingFlags_Generic with DualVoxelTraversal_AllTrue_Generic the same
+	//TODO: combine TraverseAndCompareMatchingFlags_Generic with TraversalAndCompareAll_Generic the same
 	// way as done in the the CPU version to avoid DRY violations
 	template<typename TBooleanFunctor, typename TDeviceFunction>
 	inline static bool
-	DualVoxelTraversal_AllTrue_MatchingFlags_Generic(VoxelVolume<TVoxelPrimary, PlainVoxelArray>* primaryVolume,
-	                                                 VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryVolume,
-	                                                 VoxelFlags semanticFlags, TBooleanFunctor& functor,
-	                                                 TDeviceFunction&& deviceFunction) {
+	TraverseAndCompareMatchingFlags_Generic(VoxelVolume<TVoxelPrimary, PlainVoxelArray>* primaryVolume,
+	                                        VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryVolume,
+	                                        VoxelFlags semanticFlags, TBooleanFunctor& functor,
+	                                        TDeviceFunction&& deviceFunction) {
 		PlainVoxelArray::GridAlignedBox* arrayInfo = primaryVolume->index.GetIndexData();
 		int hashEntryCount = secondaryVolume->index.hashEntryCount;
 		HashEntry* hashTable = secondaryVolume->index.GetIndexData();
@@ -127,7 +127,7 @@ class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, 
 
 	template<typename TBooleanFunctor, typename TDeviceFunction>
 	inline static bool
-	DualVoxelTraversal_AllTrue_Generic(
+	TraverseAndCompareAll_Generic(
 			VoxelVolume<TVoxelPrimary, PlainVoxelArray>* primaryVolume,
 			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryVolume,
 			TBooleanFunctor& functor, TDeviceFunction&& deviceFunction) {
@@ -219,7 +219,7 @@ class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, 
 
 	template<typename TBooleanFunctor, typename TDeviceFunction>
 	inline static bool
-	DualVoxelTraversal_AllTrue_AllocatedOnly_Generic(
+	TravereAndCompareAllocated_Generic(
 			VoxelVolume<TVoxelPrimary, PlainVoxelArray>* primaryVolume,
 			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryVolume,
 			TBooleanFunctor& functor, TDeviceFunction&& deviceFunction) {
@@ -273,12 +273,12 @@ public:
 	 */
 	template<typename TBooleanFunctor>
 	inline static bool
-	DualVoxelTraversal_AllTrue(
+	TraverseAndCompareAll(
 			VoxelVolume<TVoxelPrimary, PlainVoxelArray>* primaryVolume,
 			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryVolume,
 			TBooleanFunctor& functor) {
 
-		return DualVoxelTraversal_AllTrue_Generic(primaryVolume, secondaryVolume, functor, []
+		return TraverseAndCompareAll_Generic(primaryVolume, secondaryVolume, functor, []
 				(dim3 gridSize_ArrayBlockEnvelope, dim3 cudaBlockSize_BlockVoxelPerThread,
 				 TVoxelPrimary* voxelsArray, PlainVoxelArray::GridAlignedBox* arrayInfo,
 				 TVoxelSecondary* voxelsHash, HashEntry* hashTable, Vector3i minArrayCoord,
@@ -312,60 +312,60 @@ public:
 	 */
 	template<typename TBooleanFunctor>
 	inline static bool
-	DualVoxelTraversal_AllTrue_MatchingFlags(
+	TraverseAndCompareMatchingFlags(
 			VoxelVolume<TVoxelPrimary, PlainVoxelArray>* primaryVolume,
 			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryVolume,
 			VoxelFlags semanticFlags, TBooleanFunctor& functor) {
 
-		return DualVoxelTraversal_AllTrue_MatchingFlags_Generic(primaryVolume, secondaryVolume, semanticFlags, functor,
-		                                                        []
-				                                                        (dim3 gridSize_ArrayBlockEnvelope,
-				                                                         dim3 cudaBlockSize_BlockVoxelPerThread,
-				                                                         TVoxelPrimary* voxelsArray,
-				                                                         PlainVoxelArray::GridAlignedBox* arrayInfo,
-				                                                         TVoxelSecondary* voxelsHash,
-				                                                         HashEntry* hashTable,
-				                                                         Vector3i minArrayCoord,
-				                                                         Vector3i maxArrayCoord, Vector3s minBlockPos,
-				                                                         TBooleanFunctor* functor_device,
-				                                                         VoxelFlags semanticFlags,
-				                                                         bool* falseOrAlteredEncountered_device) {
-			                                                        checkIfArrayContentIsUnalteredOrYieldsTrue_SemanticFlags
-					                                                        << < gridSize_ArrayBlockEnvelope,
-					                                                        cudaBlockSize_BlockVoxelPerThread >> >
-					                                                        (voxelsArray, arrayInfo, voxelsHash, hashTable,
-							                                                        minArrayCoord, maxArrayCoord, minBlockPos, functor_device,
-							                                                        semanticFlags, falseOrAlteredEncountered_device);
-		                                                        });
+		return TraverseAndCompareMatchingFlags_Generic(primaryVolume, secondaryVolume, semanticFlags, functor,
+		                                               []
+				                                               (dim3 gridSize_ArrayBlockEnvelope,
+				                                                dim3 cudaBlockSize_BlockVoxelPerThread,
+				                                                TVoxelPrimary* voxelsArray,
+				                                                PlainVoxelArray::GridAlignedBox* arrayInfo,
+				                                                TVoxelSecondary* voxelsHash,
+				                                                HashEntry* hashTable,
+				                                                Vector3i minArrayCoord,
+				                                                Vector3i maxArrayCoord, Vector3s minBlockPos,
+				                                                TBooleanFunctor* functor_device,
+				                                                VoxelFlags semanticFlags,
+				                                                bool* falseOrAlteredEncountered_device) {
+			                                               checkIfArrayContentIsUnalteredOrYieldsTrue_SemanticFlags
+					                                               << < gridSize_ArrayBlockEnvelope,
+					                                               cudaBlockSize_BlockVoxelPerThread >> >
+					                                               (voxelsArray, arrayInfo, voxelsHash, hashTable,
+							                                               minArrayCoord, maxArrayCoord, minBlockPos, functor_device,
+							                                               semanticFlags, falseOrAlteredEncountered_device);
+		                                               });
 	}
 
 	template<typename TBooleanFunctor>
 	inline static bool
-	DualVoxelPositionTraversal_AllTrue_MatchingFlags(
+	TraverseAndCompareMatchingFlagsWithPosition(
 			VoxelVolume<TVoxelPrimary, PlainVoxelArray>* primaryVolume,
 			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryVolume,
 			VoxelFlags semanticFlags, TBooleanFunctor& functor) {
 
-		return DualVoxelTraversal_AllTrue_MatchingFlags_Generic(primaryVolume, secondaryVolume, semanticFlags, functor,
-		                                                        []
-				                                                        (dim3 gridSize_ArrayBlockEnvelope,
-				                                                         dim3 cudaBlockSize_BlockVoxelPerThread,
-				                                                         TVoxelPrimary* voxelsArray,
-				                                                         PlainVoxelArray::GridAlignedBox* arrayInfo,
-				                                                         TVoxelSecondary* voxelsHash,
-				                                                         HashEntry* hashTable,
-				                                                         Vector3i minArrayCoord,
-				                                                         Vector3i maxArrayCoord, Vector3s minBlockPos,
-				                                                         TBooleanFunctor* functor_device,
-				                                                         VoxelFlags semanticFlags,
-				                                                         bool* falseOrAlteredEncountered_device) {
-			                                                        checkIfArrayContentIsUnalteredOrYieldsTrue_SemanticFlags_Position_Verbose
-					                                                        << < gridSize_ArrayBlockEnvelope,
-					                                                        cudaBlockSize_BlockVoxelPerThread >> >
-					                                                        (voxelsArray, arrayInfo, voxelsHash, hashTable,
-							                                                        minArrayCoord, maxArrayCoord, minBlockPos, functor_device,
-							                                                        semanticFlags, falseOrAlteredEncountered_device);
-		                                                        });
+		return TraverseAndCompareMatchingFlags_Generic(primaryVolume, secondaryVolume, semanticFlags, functor,
+		                                               []
+				                                               (dim3 gridSize_ArrayBlockEnvelope,
+				                                                dim3 cudaBlockSize_BlockVoxelPerThread,
+				                                                TVoxelPrimary* voxelsArray,
+				                                                PlainVoxelArray::GridAlignedBox* arrayInfo,
+				                                                TVoxelSecondary* voxelsHash,
+				                                                HashEntry* hashTable,
+				                                                Vector3i minArrayCoord,
+				                                                Vector3i maxArrayCoord, Vector3s minBlockPos,
+				                                                TBooleanFunctor* functor_device,
+				                                                VoxelFlags semanticFlags,
+				                                                bool* falseOrAlteredEncountered_device) {
+			                                               checkIfArrayContentIsUnalteredOrYieldsTrue_SemanticFlags_Position_Verbose
+					                                               << < gridSize_ArrayBlockEnvelope,
+					                                               cudaBlockSize_BlockVoxelPerThread >> >
+					                                               (voxelsArray, arrayInfo, voxelsHash, hashTable,
+							                                               minArrayCoord, maxArrayCoord, minBlockPos, functor_device,
+							                                               semanticFlags, falseOrAlteredEncountered_device);
+		                                               });
 	}
 
 	/**
@@ -383,12 +383,12 @@ public:
 	 */
 	template<typename TBooleanFunctor>
 	inline static bool
-	DualVoxelPositionTraversal_AllTrue(
+	TraverseAndCompareAllWithPosition(
 			VoxelVolume<TVoxelPrimary, PlainVoxelArray>* primaryVolume,
 			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryVolume,
 			TBooleanFunctor& functor) {
 
-		return DualVoxelTraversal_AllTrue_Generic(primaryVolume, secondaryVolume, functor, []
+		return TraverseAndCompareAll_Generic(primaryVolume, secondaryVolume, functor, []
 				(dim3 gridSize_ArrayBlockEnvelope, dim3 cudaBlockSize_BlockVoxelPerThread,
 				 TVoxelPrimary* voxelsArray, PlainVoxelArray::GridAlignedBox* arrayInfo,
 				 TVoxelSecondary* voxelsHash, HashEntry* hashTable, Vector3i minArrayCoord,
@@ -404,11 +404,11 @@ public:
 
 	template<typename TBooleanFunctor>
 	inline static bool
-	DualVoxelTraversal_AllTrue_AllocatedOnly(
+	TraverseAndCompareAllocated(
 			VoxelVolume<TVoxelPrimary, PlainVoxelArray>* primaryVolume,
 			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryVolume,
 			TBooleanFunctor& functor) {
-		return DualVoxelTraversal_AllTrue_AllocatedOnly_Generic(primaryVolume, secondaryVolume, functor, []
+		return TravereAndCompareAllocated_Generic(primaryVolume, secondaryVolume, functor, []
 				(dim3 gridSize_HashPerBlock, dim3 cudaBlockSize_BlockVoxelPerThread, TVoxelPrimary* arrayVoxels,
 				 TVoxelSecondary* hashVoxels, const HashEntry* hashTable,
 				 int hashEntryCount, Vector6i arrayBounds, Vector3i arraySize,
@@ -421,11 +421,11 @@ public:
 
 	template<typename TBooleanFunctor>
 	inline static bool
-	DualVoxelPositionTraversal_AllTrue_AllocatedOnly(
+	TraverseAndCompareAllocatedWithPosition(
 			VoxelVolume<TVoxelPrimary, PlainVoxelArray>* primaryVolume,
 			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryVolume,
 			TBooleanFunctor& functor) {
-		return DualVoxelTraversal_AllTrue_AllocatedOnly_Generic(primaryVolume, secondaryVolume, functor, []
+		return TravereAndCompareAllocated_Generic(primaryVolume, secondaryVolume, functor, []
 				(dim3 gridSize_HashPerBlock, dim3 cudaBlockSize_BlockVoxelPerThread, TVoxelPrimary* arrayVoxels,
 				 TVoxelSecondary* hashVoxels, const HashEntry* hashTable,
 				 int hashEntryCount, Vector6i arrayBounds, Vector3i arraySize,
@@ -457,26 +457,26 @@ public:
 	 */
 	template<typename TBooleanFunctor>
 	inline static bool
-	DualVoxelTraversal_AllTrue(
+	TraverseAndCompareAll(
 			VoxelVolume<TVoxelPrimary, VoxelBlockHash>* primaryVolume,
 			VoxelVolume<TVoxelSecondary, PlainVoxelArray>* secondaryVolume,
 			TBooleanFunctor& functor) {
 		ITMFlipArgumentBooleanFunctor<TVoxelPrimary, TVoxelSecondary, TBooleanFunctor> flipFunctor(functor);
 		return TwoVolumeTraversalEngine<TVoxelSecondary, TVoxelPrimary, PlainVoxelArray, VoxelBlockHash, MEMORYDEVICE_CUDA>::
-		DualVoxelTraversal_AllTrue(secondaryVolume, primaryVolume, flipFunctor);
+		TraverseAndCompareAll(secondaryVolume, primaryVolume, flipFunctor);
 
 	}
 
 
 	template<typename TBooleanFunctor>
 	inline static bool
-	DualVoxelTraversal_AllTrue_AllocatedOnly(
+	TraverseAndCompareAllocated(
 			VoxelVolume<TVoxelPrimary, VoxelBlockHash>* primaryVolume,
 			VoxelVolume<TVoxelSecondary, PlainVoxelArray>* secondaryVolume,
 			TBooleanFunctor& functor) {
 		ITMFlipArgumentBooleanFunctor<TVoxelPrimary, TVoxelSecondary, TBooleanFunctor> flipFunctor(functor);
 		return TwoVolumeTraversalEngine<TVoxelSecondary, TVoxelPrimary, PlainVoxelArray, VoxelBlockHash, MEMORYDEVICE_CUDA>::
-		DualVoxelTraversal_AllTrue_AllocatedOnly(secondaryVolume, primaryVolume, flipFunctor);
+		TraverseAndCompareAllocated(secondaryVolume, primaryVolume, flipFunctor);
 
 	}
 };

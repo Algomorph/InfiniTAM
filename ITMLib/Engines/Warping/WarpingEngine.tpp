@@ -33,14 +33,14 @@ void WarpingEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::WarpScene(
 
 	// Clear out the flags at target volume
 	FieldClearFunctor<TVoxel, TMemoryDeviceType> flagClearFunctor;
-	VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::VoxelTraversal(targetTSDF, flagClearFunctor);
+	VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseAll(targetTSDF, flagClearFunctor);
 
 	TrilinearInterpolationFunctor<TVoxel, TWarp, TIndex, TWarpType, TMemoryDeviceType>
 			trilinearInterpolationFunctor(sourceTSDF, warpField);
 
 	// Interpolate to obtain the new live frame values (at target index)
 	TwoVolumeTraversalEngine<TVoxel, TWarp, TIndex, TIndex, TMemoryDeviceType>::
-	DualVoxelPositionTraversal(targetTSDF, warpField, trilinearInterpolationFunctor);
+	TraverseAllWithPosition(targetTSDF, warpField, trilinearInterpolationFunctor);
 }
 
 

@@ -35,92 +35,92 @@ private:
 	template<typename TTwoVoxelBooleanFunctor, typename TTwoVoxelAndPositionPredicate,
 			typename TArrayVoxelPredicate, typename THashVoxelPredicate>
 	inline static bool
-	DualVoxelTraversal_AllTrue_Generic(
-			VoxelVolume <TArrayVoxel, PlainVoxelArray>* arrayVolume,
-			VoxelVolume <THashVoxel, VoxelBlockHash>* hashVolume,
-			TTwoVoxelBooleanFunctor& twoVoxelBooleanFunctor,
-			TTwoVoxelAndPositionPredicate&& twoVoxelAndPositionPredicate,
-			TArrayVoxelPredicate&& arrayVoxelAlteredCheckPredicate,
-			THashVoxelPredicate&& hashVoxelAlteredCheckPredicate,
+	TraversalAndCompareAll_Generic(
+			VoxelVolume <TArrayVoxel, PlainVoxelArray>* array_volume,
+			VoxelVolume <THashVoxel, VoxelBlockHash>* hash_volume,
+			TTwoVoxelBooleanFunctor& two_voxel_boolean_functor,
+			TTwoVoxelAndPositionPredicate&& two_voxel_and_positon_predicate,
+			TArrayVoxelPredicate&& array_voxel_altered_check_predicate,
+			THashVoxelPredicate&& hash_voxel_altered_check_predicate,
 			bool verbose
 	) {
 
 
-		const int hashEntryCount = hashVolume->index.hashEntryCount;
-		HashEntry* hashTable = hashVolume->index.GetIndexData();
+		const int hash_entry_count = hash_volume->index.hashEntryCount;
+		HashEntry* hash_table = hash_volume->index.GetIndexData();
 
-		TArrayVoxel* arrayVoxels = arrayVolume->localVBA.GetVoxelBlocks();
-		THashVoxel* hashVoxels = hashVolume->localVBA.GetVoxelBlocks();
+		TArrayVoxel* array_voxels = array_volume->localVBA.GetVoxelBlocks();
+		THashVoxel* hash_voxels = hash_volume->localVBA.GetVoxelBlocks();
 
-		PlainVoxelArray::GridAlignedBox* arrayInfo = arrayVolume->index.GetIndexData();
-		Vector3i arrayMinVoxels = arrayInfo->offset;
-		Vector3i arrayMaxVoxels = arrayInfo->offset + arrayInfo->size;
+		PlainVoxelArray::GridAlignedBox* array_info = array_volume->index.GetIndexData();
+		Vector3i array_min_voxels = array_info->offset;
+		Vector3i array_max_voxels = array_info->offset + array_info->size;
 
-		volatile bool mismatchFound = false;
+		volatile bool mismatch_found = false;
 
 		// *** find voxel blocks in hash not spanned by array and inspect if any are altered ***
 		// *** also find blocks partially overlapping array, and inspect if those outside array are altered and those inside match ***
 #ifdef WITH_OPENMP
-#pragma omp parallel for //default(none), shared(mismatchFound, hashTable, arrayMinVoxels, arrayMaxVoxels, verbose)
+#pragma omp parallel for //default(none), shared(mismatch_found, hash_table, array_min_voxels, array_max_voxels, verbose)
 #endif
-		for (int hashCode = 0; hashCode < hashEntryCount; hashCode++) {
-			if (mismatchFound) continue;
-			HashEntry& hashEntry = hashTable[hashCode];
+		for (int hashCode = 0; hashCode < hash_entry_count; hashCode++) {
+			if (mismatch_found) continue;
+			HashEntry& hashEntry = hash_table[hashCode];
 			if (hashEntry.ptr < 0) {
 				continue;
 			}
-			Vector3i blockMinVoxels = hashEntry.pos.toInt() * VOXEL_BLOCK_SIZE;
-			Vector3i blockMaxVoxels = blockMinVoxels + Vector3i(VOXEL_BLOCK_SIZE);
-			if (blockMaxVoxels.x < arrayMinVoxels.x || blockMinVoxels.x > arrayMaxVoxels.x ||
-			    blockMaxVoxels.y < arrayMinVoxels.y || blockMinVoxels.y > arrayMaxVoxels.y ||
-			    blockMaxVoxels.z < arrayMinVoxels.z || blockMinVoxels.z > arrayMaxVoxels.z) {
+			Vector3i block_min_voxels = hashEntry.pos.toInt() * VOXEL_BLOCK_SIZE;
+			Vector3i block_max_voxels = block_min_voxels + Vector3i(VOXEL_BLOCK_SIZE);
+			if (block_max_voxels.x < array_min_voxels.x || block_min_voxels.x > array_max_voxels.x ||
+			    block_max_voxels.y < array_min_voxels.y || block_min_voxels.y > array_max_voxels.y ||
+			    block_max_voxels.z < array_min_voxels.z || block_min_voxels.z > array_max_voxels.z) {
 				if (verbose) {
-					if (isVoxelBlockAlteredPredicate(hashVoxels + hashEntry.ptr * VOXEL_BLOCK_SIZE3,
-					                                 arrayVoxelAlteredCheckPredicate, true,
+					if (isVoxelBlockAlteredPredicate(hash_voxels + hashEntry.ptr * VOXEL_BLOCK_SIZE3,
+					                                 array_voxel_altered_check_predicate, true,
 					                                 "Hash voxel unmatched in array: ", hashEntry.pos, hashCode)) {
-						mismatchFound = true;
+						mismatch_found = true;
 					}
 				} else {
-					if (isVoxelBlockAlteredPredicate(hashVoxels + hashEntry.ptr * VOXEL_BLOCK_SIZE3,
-					                                 arrayVoxelAlteredCheckPredicate)) {
-						mismatchFound = true;
+					if (isVoxelBlockAlteredPredicate(hash_voxels + hashEntry.ptr * VOXEL_BLOCK_SIZE3,
+					                                 array_voxel_altered_check_predicate)) {
+						mismatch_found = true;
 					}
 				}
-			} else if (blockMaxVoxels.x > arrayMaxVoxels.x || blockMinVoxels.x < arrayMinVoxels.x ||
-			           blockMaxVoxels.y > arrayMaxVoxels.y || blockMinVoxels.y < arrayMinVoxels.y ||
-			           blockMaxVoxels.z > arrayMaxVoxels.z || blockMinVoxels.z < arrayMinVoxels.z
+			} else if (block_max_voxels.x > array_max_voxels.x || block_min_voxels.x < array_min_voxels.x ||
+			           block_max_voxels.y > array_max_voxels.y || block_min_voxels.y < array_min_voxels.y ||
+			           block_max_voxels.z > array_max_voxels.z || block_min_voxels.z < array_min_voxels.z
 					) {
-				THashVoxel* voxelBlock = hashVoxels + hashEntry.ptr * VOXEL_BLOCK_SIZE3;
-				for (int linearIndexInBlock = 0; linearIndexInBlock < VOXEL_BLOCK_SIZE3; linearIndexInBlock++) {
-					THashVoxel& hashVoxel = voxelBlock[linearIndexInBlock];
-					if (std::forward<THashVoxelPredicate>(hashVoxelAlteredCheckPredicate)(hashVoxel) &&
-					    isAltered(hashVoxel)) {
-						Vector3i voxelPosition =
-								ComputePositionVectorFromLinearIndex_VoxelBlockHash(hashEntry.pos, linearIndexInBlock);
-						if (IsPointInBounds(voxelPosition, *arrayInfo)) {
-							int linearIndexInArray = ComputeLinearIndexFromPosition_PlainVoxelArray(arrayInfo,
-							                                                                        voxelPosition);
-							TArrayVoxel& arrayVoxel = arrayVoxels[linearIndexInArray];
-							if (!std::forward<TTwoVoxelAndPositionPredicate>(twoVoxelAndPositionPredicate)(
-									twoVoxelBooleanFunctor, arrayVoxel, hashVoxel,
-									voxelPosition)) {
-								mismatchFound = true;
+				THashVoxel* hash_voxel_block = hash_voxels + hashEntry.ptr * VOXEL_BLOCK_SIZE3;
+				for (int linear_index_in_block = 0; linear_index_in_block < VOXEL_BLOCK_SIZE3; linear_index_in_block++) {
+					THashVoxel& hash_voxel = hash_voxel_block[linear_index_in_block];
+					if (std::forward<THashVoxelPredicate>(hash_voxel_altered_check_predicate)(hash_voxel) &&
+					    isAltered(hash_voxel)) {
+						Vector3i voxel_position =
+								ComputePositionVectorFromLinearIndex_VoxelBlockHash(hashEntry.pos, linear_index_in_block);
+						if (IsPointInBounds(voxel_position, *array_info)) {
+							int linearIndexInArray = ComputeLinearIndexFromPosition_PlainVoxelArray(array_info,
+							                                                                        voxel_position);
+							TArrayVoxel& array_voxel = array_voxels[linearIndexInArray];
+							if (!std::forward<TTwoVoxelAndPositionPredicate>(two_voxel_and_positon_predicate)(
+									two_voxel_boolean_functor, array_voxel, hash_voxel,
+									voxel_position)) {
+								mismatch_found = true;
 							}
 						} else {
 							if (verbose) {
-								isAltered_VerbosePositionHash(hashVoxel, voxelPosition, hashCode, hashEntry.pos,
+								isAltered_VerbosePositionHash(hash_voxel, voxel_position, hashCode, hashEntry.pos,
 								                              "Hash voxel unmatched in array: ");
 							}
-							mismatchFound = true;
+							mismatch_found = true;
 						}
 					}
 				}
 			}
 		}
-		if (mismatchFound) return false;
+		if (mismatch_found) return false;
 
 
-		int voxelCount = arrayVolume->index.GetVoxelBlockSize();
+		int voxelCount = array_volume->index.GetVoxelBlockSize();
 #ifndef WITH_OPENMP
 		VoxelBlockHash::IndexCache cache;
 #endif
@@ -131,75 +131,75 @@ private:
 #pragma omp parallel for default(shared)
 #endif
 			for (int z = extent.min_z; z < extent.max_z; z++) {
-				if (mismatchFound) continue;
+				if (mismatch_found) continue;
 				for (int y = extent.min_y; y < extent.max_y; y++) {
 					for (int x = extent.min_x; x < extent.max_x; x++) {
 						Vector3i position(x, y, z);
-						int linearArrayIndex = ComputeLinearIndexFromPosition_PlainVoxelArray(arrayInfo, position);
-						int vmIndex;
+						int linear_array_index = ComputeLinearIndexFromPosition_PlainVoxelArray(array_info, position);
+						int vm_index;
 #ifndef WITH_OPENMP
-						int hashVoxelIndex = findVoxel(hashTable, position, vmIndex, cache);
+						int hash_voxel_index = findVoxel(hash_table, position, vm_index, cache);
 #else
-						int hashVoxelIndex = findVoxel(hashTable, position, vmIndex);
+						int hash_voxel_index = findVoxel(hash_table, position, vm_index);
 #endif
 						// no hash block intersecting array at this point, yet voxel is altered: fail
-						TArrayVoxel& arrayVoxel = arrayVoxels[linearArrayIndex];
+						TArrayVoxel& array_voxel = array_voxels[linear_array_index];
 						if (verbose) {
-							if (hashVoxelIndex == -1
-							    && std::forward<TArrayVoxelPredicate>(arrayVoxelAlteredCheckPredicate)(arrayVoxel)
-							    && isAltered_VerbosePosition(arrayVoxel, position, "Array voxel not matched in hash: ")) {
-								mismatchFound = true;
+							if (hash_voxel_index == -1
+							    && std::forward<TArrayVoxelPredicate>(array_voxel_altered_check_predicate)(array_voxel)
+							    && isAltered_VerbosePosition(array_voxel, position, "Array voxel not matched in hash: ")) {
+								mismatch_found = true;
 							}
 						} else {
-							if (hashVoxelIndex == -1
-							    && std::forward<TArrayVoxelPredicate>(arrayVoxelAlteredCheckPredicate)(arrayVoxel)
-							    && isAltered(arrayVoxel)) {
-								mismatchFound = true;
+							if (hash_voxel_index == -1
+							    && std::forward<TArrayVoxelPredicate>(array_voxel_altered_check_predicate)(array_voxel)
+							    && isAltered(array_voxel)) {
+								mismatch_found = true;
 							}
 						}
 					}
 				}
 			}
-			return mismatchFound;
+			return mismatch_found;
 		};
 
 		// *** checks all voxels inside array, return false if one's altered but unallocated in the hash or if
-		// the twoVoxelBooleanFunctor on it and the corresponding one from the hash-block volume returns false ***
+		// the two_voxel_boolean_functor on it and the corresponding one from the hash-block volume returns false ***
 
 		auto centralExtentHasMismatch = [&](const Extent3D& extent) {
-			Extent3D hashBlockExtent = extent / VOXEL_BLOCK_SIZE;
+			Extent3D hash_block_extent = extent / VOXEL_BLOCK_SIZE;
 #ifdef WITH_OPENMP
 #pragma omp parallel for default(shared)
 #endif
-			for (int zBlock = hashBlockExtent.min_z; zBlock < hashBlockExtent.max_z; zBlock++) {
-				if (mismatchFound) continue;
-				int zVoxelStart = zBlock * VOXEL_BLOCK_SIZE, zVoxelEnd = zVoxelStart + VOXEL_BLOCK_SIZE;
-				for (int yBlock = hashBlockExtent.min_y; yBlock < hashBlockExtent.max_y; yBlock++) {
-					if (mismatchFound) continue;
-					int yVoxelStart = yBlock * VOXEL_BLOCK_SIZE, yVoxelEnd = yVoxelStart + VOXEL_BLOCK_SIZE;
-					for (int xBlock = hashBlockExtent.min_x; xBlock < hashBlockExtent.max_x; xBlock++) {
-						if (mismatchFound) continue;
-						int xVoxelStart = xBlock * VOXEL_BLOCK_SIZE, xVoxelEnd = xVoxelStart + VOXEL_BLOCK_SIZE;
-						Vector3s voxelBlockCoords(xBlock, yBlock, zBlock);
+			for (int z_block = hash_block_extent.min_z; z_block < hash_block_extent.max_z; z_block++) {
+				if (mismatch_found) continue;
+				int z_voxel_start = z_block * VOXEL_BLOCK_SIZE, z_voxel_end = z_voxel_start + VOXEL_BLOCK_SIZE;
+				for (int y_block = hash_block_extent.min_y; y_block < hash_block_extent.max_y; y_block++) {
+					if (mismatch_found) continue;
+					int y_voxel_start = y_block * VOXEL_BLOCK_SIZE, y_voxel_end = y_voxel_start + VOXEL_BLOCK_SIZE;
+					for (int x_block = hash_block_extent.min_x; x_block < hash_block_extent.max_x; x_block++) {
+						if (mismatch_found) continue;
+						int x_voxel_start = x_block * VOXEL_BLOCK_SIZE, x_voxel_end = x_voxel_start + VOXEL_BLOCK_SIZE;
+						Vector3s voxel_block_position(x_block, y_block, z_block);
 						int hash;
-						TArrayVoxel* hashBlockVoxels = nullptr;
-						if (FindHashAtPosition(hash, voxelBlockCoords, hashTable)) {
-							hashBlockVoxels = hashVoxels + hashTable[hash].ptr * VOXEL_BLOCK_SIZE3;
+						TArrayVoxel* hash_block_voxels = nullptr;
+						if (FindHashAtPosition(hash, voxel_block_position, hash_table)) {
+							hash_block_voxels = hash_voxels + hash_table[hash].ptr * VOXEL_BLOCK_SIZE3;
 							// traverse the current voxel block volume to see if PVA volume's voxels satisfy the
-							// boolean predicate twoVoxelBooleanFunctor when matched with corresponding voxels from the VBH volume.
+							// boolean predicate two_voxel_boolean_functor when matched with corresponding voxels from the VBH volume.
 							int idWithinBlock = 0;
-							for (int zAbsolute = zVoxelStart; zAbsolute < zVoxelEnd; zAbsolute++) {
-								for (int yAbsolute = yVoxelStart; yAbsolute < yVoxelEnd; yAbsolute++) {
-									for (int xAbsolute = xVoxelStart;
-									     xAbsolute < xVoxelEnd; xAbsolute++, idWithinBlock++) {
-										Vector3i positionAbsolute(xAbsolute, yAbsolute, zAbsolute);
-										int linearArrayIndex =
-												ComputeLinearIndexFromPosition_PlainVoxelArray(arrayInfo, positionAbsolute);
-										TArrayVoxel& arrayVoxel = arrayVoxels[linearArrayIndex];
-										THashVoxel& hashVoxel = hashBlockVoxels[idWithinBlock];
-										if (!std::forward<TTwoVoxelAndPositionPredicate>(twoVoxelAndPositionPredicate)(
-												twoVoxelBooleanFunctor, arrayVoxel, hashVoxel, positionAbsolute)) {
-											mismatchFound = true;
+							for (int z_absolute = z_voxel_start; z_absolute < z_voxel_end; z_absolute++) {
+								for (int y_absolute = y_voxel_start; y_absolute < y_voxel_end; y_absolute++) {
+									for (int x_absolute = x_voxel_start;
+									     x_absolute < x_voxel_end; x_absolute++, idWithinBlock++) {
+										Vector3i positionAbsolute(x_absolute, y_absolute, z_absolute);
+										int linear_array_index =
+												ComputeLinearIndexFromPosition_PlainVoxelArray(array_info, positionAbsolute);
+										TArrayVoxel& array_voxel = array_voxels[linear_array_index];
+										THashVoxel& hash_voxel = hash_block_voxels[idWithinBlock];
+										if (!std::forward<TTwoVoxelAndPositionPredicate>(two_voxel_and_positon_predicate)(
+												two_voxel_boolean_functor, array_voxel, hash_voxel, positionAbsolute)) {
+											mismatch_found = true;
 										}
 									}
 								}
@@ -207,26 +207,26 @@ private:
 						} else {
 							// If the block is not allocated in the VBH volume at all but the PVA voxel is modified,
 							// short-circuit to "false"
-							for (int zAbsolute = zVoxelStart; zAbsolute < zVoxelEnd; zAbsolute++) {
-								for (int yAbsolute = yVoxelStart; yAbsolute < yVoxelEnd; yAbsolute++) {
-									for (int xAbsolute = xVoxelStart; xAbsolute < xVoxelEnd; xAbsolute++) {
-										Vector3i positionAbsolute(xAbsolute, yAbsolute, zAbsolute);
-										int linearArrayIndex = ComputeLinearIndexFromPosition_PlainVoxelArray(arrayInfo,
+							for (int z_absolute = z_voxel_start; z_absolute < z_voxel_end; z_absolute++) {
+								for (int y_absolute = y_voxel_start; y_absolute < y_voxel_end; y_absolute++) {
+									for (int x_absolute = x_voxel_start; x_absolute < x_voxel_end; x_absolute++) {
+										Vector3i positionAbsolute(x_absolute, y_absolute, z_absolute);
+										int linear_array_index = ComputeLinearIndexFromPosition_PlainVoxelArray(array_info,
 										                                                                      positionAbsolute);
-										int vmIndex;
+										int vm_index;
 										// no hash block intersecting array at this point, yet voxel is altered: fail
-										TArrayVoxel& arrayVoxel = arrayVoxels[linearArrayIndex];
+										TArrayVoxel& array_voxel = array_voxels[linear_array_index];
 										if (verbose) {
-											if (std::forward<TArrayVoxelPredicate>(arrayVoxelAlteredCheckPredicate)(
-													arrayVoxel)
-											    && isAltered_VerbosePosition(arrayVoxel, positionAbsolute,
+											if (std::forward<TArrayVoxelPredicate>(array_voxel_altered_check_predicate)(
+													array_voxel)
+											    && isAltered_VerbosePosition(array_voxel, positionAbsolute,
 											                                 "Array voxel not matched in hash: ")) {
-												mismatchFound = true;
+												mismatch_found = true;
 											}
 										} else {
-											if (std::forward<TArrayVoxelPredicate>(arrayVoxelAlteredCheckPredicate)(
-													arrayVoxel) && isAltered(arrayVoxel)) {
-												mismatchFound = true;
+											if (std::forward<TArrayVoxelPredicate>(array_voxel_altered_check_predicate)(
+													array_voxel) && isAltered(array_voxel)) {
+												mismatch_found = true;
 											}
 										}
 									}
@@ -236,72 +236,72 @@ private:
 					}
 				}
 			}
-			return mismatchFound;
+			return mismatch_found;
 		};
 
 		// *** compute extents ***
-		Extent3D centralExtent;
-		std::vector<Extent3D> borderExtents = ComputeBoxSetOfHashAlignedCenterAndNonHashBlockAlignedArrayMargins(
-				*arrayInfo, centralExtent);
-		for (auto& extent : borderExtents) {
+		Extent3D central_extent;
+		std::vector<Extent3D> border_extents = ComputeBoxSetOfHashAlignedCenterAndNonHashBlockAlignedArrayMargins(
+				*array_info, central_extent);
+		for (auto& extent : border_extents) {
 			if (marginExtentHasMismatch(extent)) return false;
 		}
-		return !centralExtentHasMismatch(centralExtent);
+		return !centralExtentHasMismatch(central_extent);
 	}
 
 	template<typename TFunctor, typename TFunctionCall>
 	inline static bool
-	DualVoxelTraversal_AllTrue_AllocatedOnly_Generic(
-			VoxelVolume <TArrayVoxel, PlainVoxelArray>* primaryVolume,
-			VoxelVolume <THashVoxel, VoxelBlockHash>* secondaryVolume,
+	TravereAndCompareAllocated_Generic(
+			VoxelVolume <TArrayVoxel, PlainVoxelArray>* array_volume,
+			VoxelVolume <THashVoxel, VoxelBlockHash>* hash_volume,
 			TFunctor& functor, TFunctionCall&& functionCall) {
-		volatile bool foundMismatch = false;
-		int totalHashEntryCount = secondaryVolume->index.hashEntryCount;
-		THashVoxel* secondaryVoxels = secondaryVolume->localVBA.GetVoxelBlocks();
-		TArrayVoxel* primaryVoxels = primaryVolume->localVBA.GetVoxelBlocks();
-		const VoxelBlockHash::IndexData* hashTable = secondaryVolume->index.GetIndexData();
-		const PlainVoxelArray::IndexData* pvaIndexData = primaryVolume->index.GetIndexData();
-		Vector3i startVoxel = pvaIndexData->offset;
-		Vector3i pvaSize = pvaIndexData->size;
-		Vector3i endVoxel = startVoxel + pvaSize; // open last traversal bound (this voxel doesn't get processed)
-		Vector6i pvaBounds(startVoxel.x, startVoxel.y, startVoxel.z, endVoxel.x, endVoxel.y, endVoxel.z);
+		volatile bool mismatch_found = false;
+		int hash_entry_count = hash_volume->index.hashEntryCount;
+		THashVoxel* hash_voxels = hash_volume->localVBA.GetVoxelBlocks();
+		TArrayVoxel* array_voxels = array_volume->localVBA.GetVoxelBlocks();
+		const VoxelBlockHash::IndexData* hash_table = hash_volume->index.GetIndexData();
+		const PlainVoxelArray::IndexData* array_info = array_volume->index.GetIndexData();
+		Vector3i start_voxel = array_info->offset;
+		Vector3i array_size = array_info->size;
+		Vector3i end_voxel = start_voxel + array_size; // open last traversal bound (this voxel doesn't get processed)
+		Vector6i array_bounds(start_voxel.x, start_voxel.y, start_voxel.z, end_voxel.x, end_voxel.y, end_voxel.z);
 
 #ifdef WITH_OPENMP
 #pragma omp parallel for default(shared)
 #endif
-		for (int hash = 0; hash < totalHashEntryCount; hash++) {
-			if (foundMismatch) continue;
-			HashEntry secondaryHashEntry = hashTable[hash];
-			if (secondaryHashEntry.ptr < 0) continue;
-			Vector3i voxelBlockMinPoint = secondaryHashEntry.pos.toInt() * VOXEL_BLOCK_SIZE;
-			Vector3i hashEntryMaxPoint = voxelBlockMinPoint + Vector3i(VOXEL_BLOCK_SIZE);
-			if (HashBlockDoesNotIntersectBounds(voxelBlockMinPoint, hashEntryMaxPoint, pvaBounds)) {
+		for (int hash = 0; hash < hash_entry_count; hash++) {
+			if (mismatch_found) continue;
+			HashEntry hash_entry = hash_table[hash];
+			if (hash_entry.ptr < 0) continue;
+			Vector3i voxel_block_min_point = hash_entry.pos.toInt() * VOXEL_BLOCK_SIZE;
+			Vector3i hash_entry_max_point = voxel_block_min_point + Vector3i(VOXEL_BLOCK_SIZE);
+			if (HashBlockDoesNotIntersectBounds(voxel_block_min_point, hash_entry_max_point, array_bounds)) {
 				continue;
 			}
-			THashVoxel* secondaryVoxelBlock = &(secondaryVoxels[secondaryHashEntry.ptr * (VOXEL_BLOCK_SIZE3)]);
-			Vector6i localBounds = computeLocalBounds(voxelBlockMinPoint, hashEntryMaxPoint, pvaBounds);
-			for (int z = localBounds.min_z; z < localBounds.max_z; z++) {
-				for (int y = localBounds.min_y; y < localBounds.max_y; y++) {
-					for (int x = localBounds.min_x; x < localBounds.max_x; x++) {
+			THashVoxel* hash_voxel_block = &(hash_voxels[hash_entry.ptr * (VOXEL_BLOCK_SIZE3)]);
+			Vector6i local_bounds = computeLocalBounds(voxel_block_min_point, hash_entry_max_point, array_bounds);
+			for (int z = local_bounds.min_z; z < local_bounds.max_z; z++) {
+				for (int y = local_bounds.min_y; y < local_bounds.max_y; y++) {
+					for (int x = local_bounds.min_x; x < local_bounds.max_x; x++) {
 						int locId = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
-						Vector3i voxelCoordinateWithinBlock = Vector3i(x, y, z);
-						Vector3i voxelAbsolutePosition = voxelBlockMinPoint + voxelCoordinateWithinBlock;
-						Vector3i voxelPositionSansOffset = voxelAbsolutePosition - startVoxel;
-						int linearIndex = voxelPositionSansOffset.x + voxelPositionSansOffset.y * pvaSize.x +
-						                  voxelPositionSansOffset.z * pvaSize.x * pvaSize.y;
-						THashVoxel& secondaryVoxel = secondaryVoxelBlock[locId];
-						TArrayVoxel& primaryVoxel = primaryVoxels[linearIndex];
+						Vector3i voxel_coordinate_within_block = Vector3i(x, y, z);
+						Vector3i voxel_absolute_position = voxel_block_min_point + voxel_coordinate_within_block;
+						Vector3i voxel_positionSansOffset = voxel_absolute_position - start_voxel;
+						int linear_index = voxel_positionSansOffset.x + voxel_positionSansOffset.y * array_size.x +
+						                  voxel_positionSansOffset.z * array_size.x * array_size.y;
+						THashVoxel& hash_voxel = hash_voxel_block[locId];
+						TArrayVoxel& array_voxel = array_voxels[linear_index];
 
-						if (!std::forward<TFunctionCall>(functionCall)(functor, primaryVoxel, secondaryVoxel,
-						                                               voxelAbsolutePosition)) {
-							foundMismatch = true;
+						if (!std::forward<TFunctionCall>(functionCall)(functor, array_voxel, hash_voxel,
+						                                               voxel_absolute_position)) {
+							mismatch_found = true;
 							break;
 						}
 					}
 				}
 			}
 		}
-		return !foundMismatch;
+		return !mismatch_found;
 
 	}
 
@@ -310,46 +310,46 @@ public:
 	static inline
 	std::vector<Extent3D>
 	ComputeBoxSetOfHashAlignedCenterAndNonHashBlockAlignedArrayMargins(
-			const ITMLib::PlainVoxelArray::GridAlignedBox& arrayInfo, Extent3D& centerExtent) {
+			const ITMLib::PlainVoxelArray::GridAlignedBox& array_info, Extent3D& center_extent) {
 
 		//TODO: code can probably be condensed throughout to act on a per-dimension basis using Vector indexing, 
 		// but not sure if code clarity will be preserved
 
-		Vector3i arrayExtentMin = arrayInfo.offset;
+		Vector3i array_bounds_min = array_info.offset;
 
 		// compute how many voxels on each side of the array extend past the first hash block fully inside the array.
 		// these are the margin thicknesses, in voxels
-		int margin_near_z = -arrayExtentMin.z % VOXEL_BLOCK_SIZE + (arrayExtentMin.z <= 0 ? 0 : VOXEL_BLOCK_SIZE);
-		int margin_near_y = -arrayExtentMin.y % VOXEL_BLOCK_SIZE + (arrayExtentMin.y <= 0 ? 0 : VOXEL_BLOCK_SIZE);
-		int margin_near_x = -arrayExtentMin.x % VOXEL_BLOCK_SIZE + (arrayExtentMin.x <= 0 ? 0 : VOXEL_BLOCK_SIZE);
-		Vector3i arrayExtentMax = arrayExtentMin + arrayInfo.size;
-		int margin_far_z = arrayExtentMax.z % VOXEL_BLOCK_SIZE + (arrayExtentMax.z <= 0 ? VOXEL_BLOCK_SIZE : 0);
-		int margin_far_y = arrayExtentMax.y % VOXEL_BLOCK_SIZE + (arrayExtentMax.y <= 0 ? VOXEL_BLOCK_SIZE : 0);
-		int margin_far_x = arrayExtentMax.x % VOXEL_BLOCK_SIZE + (arrayExtentMax.x <= 0 ? VOXEL_BLOCK_SIZE : 0);
+		int margin_near_z = -array_bounds_min.z % VOXEL_BLOCK_SIZE + (array_bounds_min.z <= 0 ? 0 : VOXEL_BLOCK_SIZE);
+		int margin_near_y = -array_bounds_min.y % VOXEL_BLOCK_SIZE + (array_bounds_min.y <= 0 ? 0 : VOXEL_BLOCK_SIZE);
+		int margin_near_x = -array_bounds_min.x % VOXEL_BLOCK_SIZE + (array_bounds_min.x <= 0 ? 0 : VOXEL_BLOCK_SIZE);
+		Vector3i array_bounds_max = array_bounds_min + array_info.size;
+		int margin_far_z = array_bounds_max.z % VOXEL_BLOCK_SIZE + (array_bounds_max.z <= 0 ? VOXEL_BLOCK_SIZE : 0);
+		int margin_far_y = array_bounds_max.y % VOXEL_BLOCK_SIZE + (array_bounds_max.y <= 0 ? VOXEL_BLOCK_SIZE : 0);
+		int margin_far_x = array_bounds_max.x % VOXEL_BLOCK_SIZE + (array_bounds_max.x <= 0 ? VOXEL_BLOCK_SIZE : 0);
 
 		// use the margin thicknesses to construct the 6 blocks, one for each face. The boxes should not overlap.
-		int margin_near_x_end = arrayExtentMin.x + margin_near_x;
-		int margin_far_x_start = arrayExtentMax.x - margin_far_x;
-		int margin_near_y_end = arrayExtentMin.y + margin_near_y;
-		int margin_far_y_start = arrayExtentMax.y - margin_near_y;
-		int margin_near_z_end = arrayExtentMin.z + margin_near_z;
-		int margin_far_z_start = arrayExtentMax.z - margin_near_z;
+		int margin_near_x_end = array_bounds_min.x + margin_near_x;
+		int margin_far_x_start = array_bounds_max.x - margin_far_x;
+		int margin_near_y_end = array_bounds_min.y + margin_near_y;
+		int margin_far_y_start = array_bounds_max.y - margin_near_y;
+		int margin_near_z_end = array_bounds_min.z + margin_near_z;
+		int margin_far_z_start = array_bounds_max.z - margin_near_z;
 
 		std::vector<Extent3D> allExtents = {
-				Extent3D{arrayExtentMin.x, arrayExtentMin.y, arrayExtentMin.z,
-				         margin_near_x_end, arrayExtentMax.y, arrayExtentMax.z},
-				Extent3D{margin_far_x_start, arrayExtentMin.y, arrayExtentMin.z,
-				         arrayExtentMax.x, arrayExtentMax.y, arrayExtentMax.z},
+				Extent3D{array_bounds_min.x, array_bounds_min.y, array_bounds_min.z,
+				         margin_near_x_end, array_bounds_max.y, array_bounds_max.z},
+				Extent3D{margin_far_x_start, array_bounds_min.y, array_bounds_min.z,
+				         array_bounds_max.x, array_bounds_max.y, array_bounds_max.z},
 
-				Extent3D{margin_near_x_end, arrayExtentMin.y, arrayExtentMin.z,
-				         margin_far_x_start, margin_near_y_end, arrayExtentMax.z},
-				Extent3D{margin_near_x_end, margin_far_y_start, arrayExtentMin.z,
-				         margin_far_x_start, arrayExtentMax.y, arrayExtentMax.z},
+				Extent3D{margin_near_x_end, array_bounds_min.y, array_bounds_min.z,
+				         margin_far_x_start, margin_near_y_end, array_bounds_max.z},
+				Extent3D{margin_near_x_end, margin_far_y_start, array_bounds_min.z,
+				         margin_far_x_start, array_bounds_max.y, array_bounds_max.z},
 
-				Extent3D{margin_near_x_end, margin_near_y_end, arrayExtentMin.z,
+				Extent3D{margin_near_x_end, margin_near_y_end, array_bounds_min.z,
 				         margin_far_x_start, margin_far_z_start, margin_near_z_end},
 				Extent3D{margin_near_x_end, margin_near_y_end, margin_far_z_start,
-				         margin_far_x_start, margin_far_z_start, arrayExtentMax.z},
+				         margin_far_x_start, margin_far_z_start, array_bounds_max.z},
 		};
 
 		std::array<int, 6> margins = {
@@ -358,14 +358,14 @@ public:
 				margin_near_z, margin_far_z
 		};
 
-		std::vector<Extent3D> nonZeroExtents;
+		std::vector<Extent3D> non_zero_extents;
 		for (int i_margin = 0; i_margin < margins.size(); i_margin++) {
-			if (margins[i_margin] > 0) nonZeroExtents.push_back(allExtents[i_margin]);
+			if (margins[i_margin] > 0) non_zero_extents.push_back(allExtents[i_margin]);
 		}
 		// add central extent
-		centerExtent = {margin_near_x_end, margin_near_y_end, margin_near_z_end,
-		                margin_far_x_start, margin_far_y_start, margin_far_z_start};
-		return nonZeroExtents;
+		center_extent = {margin_near_x_end, margin_near_y_end, margin_near_z_end,
+		                 margin_far_x_start, margin_far_y_start, margin_far_z_start};
+		return non_zero_extents;
 	}
 
 	/**
@@ -375,71 +375,71 @@ public:
 	 * voxel volume are ignored if the voxel hash block at this location at the secondary voxel volume has not been
 	 * allocated.
 	 * \tparam TFunctor type of the function object (see parameter description)
-	 * \param arrayVolume the primary volume -- indexed using plain voxel array (PVA)
-	 * \param hashVolume the secondary volume -- indexed using voxel block hash table (VBH)
+	 * \param array_volume the primary volume -- indexed using plain voxel array (PVA)
+	 * \param hash_volume the secondary volume -- indexed using voxel block hash table (VBH)
 	 * \param functor a function object accepting two voxels by reference as arguments and returning true/false
 	 * \return true if the matching functor returns "true" for all allocated voxels, false otherwise.
 	 */
 	template<typename TFunctor>
 	inline static bool
-	DualVoxelTraversal_AllTrue(
-			VoxelVolume <TArrayVoxel, PlainVoxelArray>* arrayVolume,
-			VoxelVolume <THashVoxel, VoxelBlockHash>* hashVolume,
+	TraverseAndCompareAll(
+			VoxelVolume <TArrayVoxel, PlainVoxelArray>* array_volume,
+			VoxelVolume <THashVoxel, VoxelBlockHash>* hash_volume,
 			TFunctor& functor, bool verbose) {
-		return DualVoxelTraversal_AllTrue_Generic(arrayVolume, hashVolume, functor, []
-				(TFunctor& functor1, TArrayVoxel& voxelArray,
-				 THashVoxel& voxelHash, const Vector3i& voxelPosition) {
-			return functor1(voxelArray, voxelHash);
-		}, [](TArrayVoxel& arrayVoxel) { return true; }, [](THashVoxel& hashVoxel) { return true; }, verbose);
+		return TraversalAndCompareAll_Generic(array_volume, hash_volume, functor, []
+				(TFunctor& functor1, TArrayVoxel& array_voxel,
+				 THashVoxel& hash_voxel, const Vector3i& voxel_position) {
+			return functor1(array_voxel, hash_voxel);
+		}, [](TArrayVoxel& array_voxel) { return true; }, [](THashVoxel& hash_voxel) { return true; }, verbose);
 	}
 
 
 	template<typename TFunctor>
 	inline static bool
-	DualVoxelPositionTraversal_AllTrue(
-			VoxelVolume <TArrayVoxel, PlainVoxelArray>* primaryVolume,
-			VoxelVolume <THashVoxel, VoxelBlockHash>* secondaryVolume,
+	TraverseAndCompareAllWithPosition(
+			VoxelVolume <TArrayVoxel, PlainVoxelArray>* array_volume,
+			VoxelVolume <THashVoxel, VoxelBlockHash>* hash_volume,
 			TFunctor& functor, bool verbose) {
-		return DualVoxelTraversal_AllTrue_Generic(primaryVolume, secondaryVolume, functor, []
-				(TFunctor& functor, TArrayVoxel& voxelPrimary, THashVoxel& voxelSecondary,
-				 const Vector3i& voxelPosition) {
-			return functor(voxelPrimary, voxelSecondary, voxelPosition);
-		}, [](TArrayVoxel& arrayVoxel) { return true; }, [](THashVoxel& hashVoxel) { return true; }, verbose);
+		return TraversalAndCompareAll_Generic(array_volume, hash_volume, functor, []
+				(TFunctor& functor, TArrayVoxel& array_voxel, THashVoxel& hash_voxel,
+				 const Vector3i& voxel_position) {
+			return functor(array_voxel, hash_voxel, voxel_position);
+		}, [](TArrayVoxel& array_voxel) { return true; }, [](THashVoxel& hash_voxel) { return true; }, verbose);
 	}
 
 	template<typename TFunctor>
 	inline static bool
-	DualVoxelTraversal_AllTrue_MatchingFlags(
-			VoxelVolume <TArrayVoxel, PlainVoxelArray>* arrayVolume,
-			VoxelVolume <THashVoxel, VoxelBlockHash>* hashVolume,
+	TraverseAndCompareMatchingFlags(
+			VoxelVolume <TArrayVoxel, PlainVoxelArray>* array_volume,
+			VoxelVolume <THashVoxel, VoxelBlockHash>* hash_volume,
 			VoxelFlags flags,
 			TFunctor& functor, bool verbose) {
-		return DualVoxelTraversal_AllTrue_Generic(
-				arrayVolume, hashVolume, functor,
+		return TraversalAndCompareAll_Generic(
+				array_volume, hash_volume, functor,
 				[&flags](TFunctor& functor1,
-				         TArrayVoxel& voxelArray, THashVoxel& hashVoxel, const Vector3i& voxelPosition) {
-					return (voxelArray.flags != flags && hashVoxel.flags != flags) || functor1(voxelArray, hashVoxel);
+				         TArrayVoxel& voxelArray, THashVoxel& hash_voxel, const Vector3i& voxel_position) {
+					return (voxelArray.flags != flags && hash_voxel.flags != flags) || functor1(voxelArray, hash_voxel);
 				},
-				[&flags](TArrayVoxel& arrayVoxel) { return arrayVoxel.flags == flags; },
-				[&flags](THashVoxel& hashVoxel) { return hashVoxel.flags == flags; }, verbose);
+				[&flags](TArrayVoxel& array_voxel) { return array_voxel.flags == flags; },
+				[&flags](THashVoxel& hash_voxel) { return hash_voxel.flags == flags; }, verbose);
 	}
 
 
 	template<typename TFunctor>
 	inline static bool
-	DualVoxelPositionTraversal_AllTrue_MatchingFlags(
-			VoxelVolume <TArrayVoxel, PlainVoxelArray>* primaryVolume,
-			VoxelVolume <THashVoxel, VoxelBlockHash>* secondaryVolume,
+	TraverseAndCompareMatchingFlagsWithPosition(
+			VoxelVolume <TArrayVoxel, PlainVoxelArray>* array_volume,
+			VoxelVolume <THashVoxel, VoxelBlockHash>* hash_volume,
 			VoxelFlags flags, TFunctor& functor, bool verbose) {
-		return DualVoxelTraversal_AllTrue_Generic(
-				primaryVolume, secondaryVolume, functor,
+		return TraversalAndCompareAll_Generic(
+				array_volume, hash_volume, functor,
 				[&flags](TFunctor& functor,
-				         TArrayVoxel& arrayVoxel, THashVoxel& hashVoxel, const Vector3i& voxelPosition) {
-					return (arrayVoxel.flags != flags && hashVoxel.flags != flags) ||
-					       functor(arrayVoxel, hashVoxel, voxelPosition);
+				         TArrayVoxel& array_voxel, THashVoxel& hash_voxel, const Vector3i& voxel_position) {
+					return (array_voxel.flags != flags && hash_voxel.flags != flags) ||
+					       functor(array_voxel, hash_voxel, voxel_position);
 				},
-				[&flags](TArrayVoxel& arrayVoxel) { return arrayVoxel.flags == flags; },
-				[&flags](THashVoxel& hashVoxel) { return hashVoxel.flags == flags; }, verbose);
+				[&flags](TArrayVoxel& array_voxel) { return array_voxel.flags == flags; },
+				[&flags](THashVoxel& hash_voxel) { return hash_voxel.flags == flags; }, verbose);
 	}
 
 	/**
@@ -450,20 +450,20 @@ public:
 	 * allocated. Areas where either or both of the scenes don't have allocated voxels are
 	 * ignored, even if only one of the volumes does, in fact, have potentially-altered voxels there.
 	 * \tparam TFunctor type of the function object (see parameter description)
-	 * \param primaryVolume the primary volume -- indexed using plain voxel array (PVA)
-	 * \param secondaryVolume the secondary volume -- indexed using voxel block hash table (VBH)
+	 * \param array_volume the primary volume -- indexed using plain voxel array (PVA)
+	 * \param hash_volume the secondary volume -- indexed using voxel block hash table (VBH)
 	 * \param functor a function object accepting two voxels by reference as arguments and returning true/false
 	 * \return true if the matching functor returns "true" for all allocated voxels, false otherwise.
 	 */
 	template<typename TFunctor>
 	inline static bool
-	DualVoxelTraversal_AllTrue_AllocatedOnly(
-			VoxelVolume <TArrayVoxel, PlainVoxelArray>* primaryVolume,
-			VoxelVolume <THashVoxel, VoxelBlockHash>* secondaryVolume,
+	TraverseAndCompareAllocated(
+			VoxelVolume <TArrayVoxel, PlainVoxelArray>* array_volume,
+			VoxelVolume <THashVoxel, VoxelBlockHash>* hash_volume,
 			TFunctor& functor) {
-		return DualVoxelTraversal_AllTrue_AllocatedOnly_Generic(primaryVolume, secondaryVolume, functor, []
+		return TravereAndCompareAllocated_Generic(array_volume, hash_volume, functor, []
 				(TFunctor& functor, TArrayVoxel& voxelPrimary, THashVoxel& voxelSecondary,
-				 const Vector3i& voxelPosition) {
+				 const Vector3i& voxel_position) {
 			return functor(voxelPrimary, voxelSecondary);
 		});
 	}
@@ -476,22 +476,22 @@ public:
 	 * allocated. Areas where either or both of the scenes don't have allocated voxels are
 	 * ignored, even if only one of the volumes does, in fact, have potentially-altered voxels there.
 	 * \tparam TFunctor type of the function object (see parameter description)
-	 * \param primaryVolume the primary volume -- indexed using plain voxel array (PVA)
-	 * \param secondaryVolume the secondary volume -- indexed using voxel block hash table (VBH)
+	 * \param array_volume the primary volume -- indexed using plain voxel array (PVA)
+	 * \param hash_volume the secondary volume -- indexed using voxel block hash table (VBH)
 	 * \param functor a function object accepting two voxels and their mutually shared position by reference as arguments
 	 * and returning true/false
 	 * \return true if the matching functor returns "true" for all allocated voxels, false otherwise.
 	 */
 	template<typename TFunctor>
 	inline static bool
-	DualVoxelPositionTraversal_AllTrue_AllocatedOnly(
-			VoxelVolume <TArrayVoxel, PlainVoxelArray>* primaryVolume,
-			VoxelVolume <THashVoxel, VoxelBlockHash>* secondaryVolume,
+	TraverseAndCompareAllocatedWithPosition(
+			VoxelVolume <TArrayVoxel, PlainVoxelArray>* array_volume,
+			VoxelVolume <THashVoxel, VoxelBlockHash>* hash_volume,
 			TFunctor& functor) {
-		return DualVoxelTraversal_AllTrue_AllocatedOnly_Generic(primaryVolume, secondaryVolume, functor, []
+		return TravereAndCompareAllocated_Generic(array_volume, hash_volume, functor, []
 				(TFunctor& functor, TArrayVoxel& voxelPrimary, THashVoxel& voxelSecondary,
-				 Vector3i& voxelPosition) {
-			return functor(voxelPrimary, voxelSecondary, voxelPosition);
+				 Vector3i& voxel_position) {
+			return functor(voxelPrimary, voxelSecondary, voxel_position);
 		});
 	}
 
@@ -509,33 +509,33 @@ public:
 	 * voxel volume are ignored if the voxel hash block at this location at the secondary voxel volume has not been
 	 * allocated.
 	 * \tparam TFunctor type of the function object (see parameter description)
-	 * \param primaryVolume the primary volume -- indexed using plain voxel array (PVA)
-	 * \param secondaryVolume the secondary volume -- indexed using voxel block hash table (VBH)
+	 * \param hash_volume the primary volume -- indexed using voxel block hash table (VBH)
+	 * \param array_volume the secondary volume -- indexed using plain voxel array (PVA)
 	 * \param functor a function object accepting two voxels by reference as arguments and returning true/false
 	 * \return true if the matching functor returns "true" for all allocated voxels, false otherwise.
 	 */
 	template<typename TFunctor>
 	inline static bool
-	DualVoxelTraversal_AllTrue(
-			VoxelVolume <TVoxelPrimary, VoxelBlockHash>* primaryVolume,
-			VoxelVolume <TVoxelSecondary, PlainVoxelArray>* secondaryVolume,
+	TraverseAndCompareAll(
+			VoxelVolume <TVoxelPrimary, VoxelBlockHash>* hash_volume,
+			VoxelVolume <TVoxelSecondary, PlainVoxelArray>* array_volume,
 			TFunctor& functor, bool verbose) {
-		ITMFlipArgumentBooleanFunctor<TVoxelPrimary, TVoxelSecondary, TFunctor> flipFunctor(functor);
+		ITMFlipArgumentBooleanFunctor<TVoxelPrimary, TVoxelSecondary, TFunctor> flip_functor(functor);
 		return TwoVolumeTraversalEngine<TVoxelSecondary, TVoxelPrimary, PlainVoxelArray, VoxelBlockHash, MEMORYDEVICE_CPU>::
-		DualVoxelTraversal_AllTrue(secondaryVolume, primaryVolume, flipFunctor, verbose);
+		TraverseAndCompareAll(array_volume, hash_volume, flip_functor, verbose);
 
 	}
 
 
 	template<typename TFunctor>
 	inline static bool
-	DualVoxelTraversal_AllTrue_AllocatedOnly(
-			VoxelVolume <TVoxelPrimary, VoxelBlockHash>* primaryVolume,
-			VoxelVolume <TVoxelSecondary, PlainVoxelArray>* secondaryVolume,
+	TraverseAndCompareAllocated(
+			VoxelVolume <TVoxelPrimary, VoxelBlockHash>* hash_volume,
+			VoxelVolume <TVoxelSecondary, PlainVoxelArray>* array_volume,
 			TFunctor& functor) {
-		ITMFlipArgumentBooleanFunctor<TVoxelPrimary, TVoxelSecondary, TFunctor> flipFunctor(functor);
+		ITMFlipArgumentBooleanFunctor<TVoxelPrimary, TVoxelSecondary, TFunctor> flip_functor(functor);
 		return TwoVolumeTraversalEngine<TVoxelSecondary, TVoxelPrimary, PlainVoxelArray, VoxelBlockHash, MEMORYDEVICE_CPU>::
-		DualVoxelTraversal_AllTrue_AllocatedOnly(secondaryVolume, primaryVolume, flipFunctor);
+		TraverseAndCompareAllocated(array_volume, hash_volume, flip_functor);
 	}
 };
 } // namespace ITMLib

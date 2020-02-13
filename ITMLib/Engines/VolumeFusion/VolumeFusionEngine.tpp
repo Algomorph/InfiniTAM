@@ -30,5 +30,5 @@ void VolumeFusionEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::FuseOneTsdfVo
 			.AllocateUsingOtherVolume(targetVolume, sourceVolume);
 	TSDFFusionFunctor<TVoxel, TMemoryDeviceType> fusionFunctor(targetVolume->sceneParams->max_integration_weight);
 	TwoVolumeTraversalEngine<TVoxel, TVoxel, TIndex, TIndex, TMemoryDeviceType>::
-	DualVoxelTraversal(sourceVolume, targetVolume, fusionFunctor);
+	TraverseAll(sourceVolume, targetVolume, fusionFunctor);
 }

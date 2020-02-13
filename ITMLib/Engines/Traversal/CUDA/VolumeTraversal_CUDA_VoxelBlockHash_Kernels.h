@@ -24,7 +24,7 @@ namespace {
 
 template<typename TStaticFunctor, typename TVoxel>
 __global__ void
-staticVoxelTraversal_device(TVoxel* voxels, const HashEntry* hashTable) {
+StaticTraverseAll_device(TVoxel* voxels, const HashEntry* hashTable) {
 	int hash = blockIdx.x;
 	const HashEntry& hashEntry = hashTable[hash];
 	if (hashEntry.ptr < 0) return;

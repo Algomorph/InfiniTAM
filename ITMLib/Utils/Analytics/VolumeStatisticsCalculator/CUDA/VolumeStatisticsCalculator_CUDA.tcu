@@ -122,7 +122,7 @@ struct ComputeNonTruncatedVoxelCountFunctor<true, TVoxel, TIndex, MEMORYDEVICE_C
 		ComputeNonTruncatedVoxelCountFunctor instance;
 
 		VolumeTraversalEngine<TVoxel, TIndex, MEMORYDEVICE_CUDA>::
-		VoxelTraversal(volume, instance);
+		TraverseAll(volume, instance);
 		int count = 0;
 		cudaMemcpy(&count, instance.count_device, sizeof(int), cudaMemcpyDeviceToHost);
 		return count;
@@ -189,7 +189,7 @@ template<typename TVoxel, typename TIndex>
 unsigned int
 VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CUDA>::ComputeAlteredVoxelCount(VoxelVolume<TVoxel, TIndex>* volume) {
 	IsAlteredCountFunctor<TVoxel> functor;
-	VolumeTraversalEngine<TVoxel, TIndex, MEMORYDEVICE_CUDA>::VoxelTraversal(volume, functor);
+	VolumeTraversalEngine<TVoxel, TIndex, MEMORYDEVICE_CUDA>::TraverseAll(volume, functor);
 	return functor.GetCount();
 }
 

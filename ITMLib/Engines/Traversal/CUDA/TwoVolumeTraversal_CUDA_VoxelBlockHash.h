@@ -18,36 +18,36 @@
 #include "../Interface/TwoVolumeTraversal.h"
 #include "TwoVolumeTraversal_CUDA_VoxelBlockHash_Kernels.h"
 
-namespace ITMLib{
+namespace ITMLib {
 
 
-template<typename TVoxelPrimary, typename TVoxelSecondary>
-class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, VoxelBlockHash, VoxelBlockHash, MEMORYDEVICE_CUDA> {
+template<typename TVoxel1, typename TVoxel2>
+class TwoVolumeTraversalEngine<TVoxel1, TVoxel2, VoxelBlockHash, VoxelBlockHash, MEMORYDEVICE_CUDA> {
 private:
 
 	template<typename TFunctor, typename TDeviceTraversalFunction>
 	inline static void
-	DualVoxelTraversal_Generic(
-			VoxelVolume<TVoxelPrimary, VoxelBlockHash>* primaryScene,
-			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryScene,
+	TraverseAll_Generic(
+			VoxelVolume<TVoxel1, VoxelBlockHash>* volume1,
+			VoxelVolume<TVoxel2, VoxelBlockHash>* volume2,
 			TFunctor& functor, TDeviceTraversalFunction&& deviceTraversalFunction) {
-		TVoxelPrimary* primaryVoxels = primaryScene->localVBA.GetVoxelBlocks();
-		TVoxelSecondary* secondaryVoxels = secondaryScene->localVBA.GetVoxelBlocks();
-		const HashEntry* primaryHashTable = primaryScene->index.GetIndexData();
-		const HashEntry* secondaryHashTable = secondaryScene->index.GetIndexData();
-		int hash_entry_count = primaryScene->index.hashEntryCount;
+		TVoxel1* voxels1 = volume1->localVBA.GetVoxelBlocks();
+		TVoxel2* voxels2 = volume2->localVBA.GetVoxelBlocks();
+		const HashEntry* hash_table1 = volume1->index.GetIndexData();
+		const HashEntry* hash_table2 = volume2->index.GetIndexData();
+		int hash_entry_count = volume1->index.hashEntryCount;
 
 		// transfer functor from RAM to VRAM
 		TFunctor* functor_device = nullptr;
 		ORcudaSafeCall(cudaMalloc((void**) &functor_device, sizeof(TFunctor)));
 		ORcudaSafeCall(cudaMemcpy(functor_device, &functor, sizeof(TFunctor), cudaMemcpyHostToDevice));
 
-		dim3 cudaBlockSize_BlockVoxelPerThread(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
-		dim3 gridSize_HashPerBlock(hash_entry_count);
+		dim3 block_voxel_per_thread_block_size(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
+		dim3 hash_per_block_grid_size(hash_entry_count);
 
 		std::forward<TDeviceTraversalFunction>(deviceTraversalFunction)(
-				gridSize_HashPerBlock, cudaBlockSize_BlockVoxelPerThread,
-				primaryVoxels, secondaryVoxels, primaryHashTable, secondaryHashTable, functor_device);
+				hash_per_block_grid_size, block_voxel_per_thread_block_size,
+				voxels1, voxels2, hash_table1, hash_table2, functor_device);
 		ORcudaKernelCheck;
 
 		// transfer functor from VRAM back to RAM
@@ -57,63 +57,63 @@ private:
 
 	template<typename TBooleanFunctor, typename TDeviceTraversalFunction>
 	inline static bool
-	DualVoxelTraversal_AllTrue_Generic(
-			VoxelVolume<TVoxelPrimary, VoxelBlockHash>* primaryScene,
-			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryScene,
+	TraverseAndCompareAll_Generic(
+			VoxelVolume<TVoxel1, VoxelBlockHash>* volume1,
+			VoxelVolume<TVoxel2, VoxelBlockHash>* volume2,
 			TBooleanFunctor& functor, TDeviceTraversalFunction&& deviceTraversalFunction) {
 		// assumes functor is allocated in main memory
 
-		int hashEntryCount = primaryScene->index.hashEntryCount;
+		int hash_entry_count = volume1->index.hashEntryCount;
 
 		// allocate intermediate-result buffers for use on the CUDA in subsequent routine calls
-		ORUtils::MemoryBlock<bool> badResultEncountered_device(1, true, true);
-		*badResultEncountered_device.GetData(MEMORYDEVICE_CPU) = false;
-		badResultEncountered_device.UpdateDeviceFromHost();
-		ORUtils::MemoryBlock<HashMatchInfo> hashMatchInfo(1, true, true);
-		hashMatchInfo.GetData(MEMORYDEVICE_CPU)->matchedHashCount = 0;
-		hashMatchInfo.GetData(MEMORYDEVICE_CPU)->unmatchedHashCount = 0;
-		hashMatchInfo.UpdateDeviceFromHost();
-		ORUtils::MemoryBlock<HashPair> matchedHashPairs(hashEntryCount, true, true);
-		ORUtils::MemoryBlock<UnmatchedHash> unmatchedHashes(hashEntryCount, true, true);
+		ORUtils::MemoryBlock<bool> mismatch_encountered(1, true, true);
+		*mismatch_encountered.GetData(MEMORYDEVICE_CPU) = false;
+		mismatch_encountered.UpdateDeviceFromHost();
+		ORUtils::MemoryBlock<HashMatchInfo> hash_match_info(1, true, true);
+		hash_match_info.GetData(MEMORYDEVICE_CPU)->matchedHashCount = 0;
+		hash_match_info.GetData(MEMORYDEVICE_CPU)->unmatchedHashCount = 0;
+		hash_match_info.UpdateDeviceFromHost();
+		ORUtils::MemoryBlock<HashPair> matched_hash_code_pairs(hash_entry_count, true, true);
+		ORUtils::MemoryBlock<UnmatchedHash> unmatchedHashes(hash_entry_count, true, true);
 
 		// these will be needed for various matching & traversal operations
-		TVoxelPrimary* primaryVoxels = primaryScene->localVBA.GetVoxelBlocks();
-		TVoxelSecondary* secondaryVoxels = secondaryScene->localVBA.GetVoxelBlocks();
-		const HashEntry* primaryHashTable = primaryScene->index.GetIndexData();
-		const HashEntry* secondaryHashTable = secondaryScene->index.GetIndexData();
+		TVoxel1* voxels1 = volume1->localVBA.GetVoxelBlocks();
+		TVoxel2* voxels2 = volume2->localVBA.GetVoxelBlocks();
+		const HashEntry* hash_table1 = volume1->index.GetIndexData();
+		const HashEntry* hash_table2 = volume2->index.GetIndexData();
 
 		dim3 cudaBlockSize_HashPerThread(256, 1);
-		dim3 gridSize_MultipleHashBlocks(static_cast<int>(ceil(static_cast<float>(hashEntryCount) /
+		dim3 gridSize_MultipleHashBlocks(static_cast<int>(ceil(static_cast<float>(hash_entry_count) /
 		                                                       static_cast<float>(cudaBlockSize_HashPerThread.x))));
 		matchUpHashEntriesByPosition
 				<< < gridSize_MultipleHashBlocks, cudaBlockSize_HashPerThread >> >
-		                                          (primaryHashTable, secondaryHashTable, hashEntryCount,
-				                                          matchedHashPairs.GetData(MEMORYDEVICE_CUDA),
+		                                          (hash_table1, hash_table2, hash_entry_count,
+				                                          matched_hash_code_pairs.GetData(MEMORYDEVICE_CUDA),
 				                                          unmatchedHashes.GetData(MEMORYDEVICE_CUDA),
-				                                          hashMatchInfo.GetData(MEMORYDEVICE_CUDA));
+				                                          hash_match_info.GetData(MEMORYDEVICE_CUDA));
 		ORcudaKernelCheck;
 
 		// check unmatched hashes
-		hashMatchInfo.UpdateHostFromDevice();
-		dim3 cudaBlockSize_BlockVoxelPerThread(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
-		int unmatchedHashCount = hashMatchInfo.GetData(MEMORYDEVICE_CPU)->unmatchedHashCount;
+		hash_match_info.UpdateHostFromDevice();
+		dim3 block_voxel_per_thread_block_size(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
+		int unmatchedHashCount = hash_match_info.GetData(MEMORYDEVICE_CPU)->unmatchedHashCount;
 		if (unmatchedHashCount > 0) {
 			dim3 gridSize_UnmatchedBlocks(unmatchedHashCount);
 			checkIfUnmatchedVoxelBlocksAreAltered
-					<< < gridSize_UnmatchedBlocks, cudaBlockSize_BlockVoxelPerThread >> >
-			                                       (primaryVoxels, secondaryVoxels,
-					                                       primaryHashTable, secondaryHashTable,
+					<< < gridSize_UnmatchedBlocks, block_voxel_per_thread_block_size >> >
+			                                       (voxels1, voxels2,
+					                                       hash_table1, hash_table2,
 					                                       unmatchedHashes.GetData(MEMORYDEVICE_CUDA),
-					                                       hashMatchInfo.GetData(MEMORYDEVICE_CUDA),
-					                                       badResultEncountered_device.GetData(MEMORYDEVICE_CUDA));
+					                                       hash_match_info.GetData(MEMORYDEVICE_CUDA),
+					                                       mismatch_encountered.GetData(MEMORYDEVICE_CUDA));
 			ORcudaKernelCheck;
 		}
 
 		// if an unmatched block in either volume was altered, return false
-		badResultEncountered_device.UpdateHostFromDevice();
-		if (*badResultEncountered_device.GetData(MEMORYDEVICE_CPU)) return false;
+		mismatch_encountered.UpdateHostFromDevice();
+		if (*mismatch_encountered.GetData(MEMORYDEVICE_CPU)) return false;
 
-		int matchedHashCount = hashMatchInfo.GetData(MEMORYDEVICE_CPU)->matchedHashCount;
+		int matchedHashCount = hash_match_info.GetData(MEMORYDEVICE_CPU)->matchedHashCount;
 
 		if (matchedHashCount == 0) return true;
 
@@ -126,11 +126,11 @@ private:
 		dim3 gridSize_MatchedBlocks(matchedHashCount);
 
 		std::forward<TDeviceTraversalFunction>(deviceTraversalFunction)(
-				gridSize_MatchedBlocks, cudaBlockSize_BlockVoxelPerThread,
-				primaryVoxels, secondaryVoxels, primaryHashTable, secondaryHashTable,
-				matchedHashPairs.GetData(MEMORYDEVICE_CUDA),
-				hashMatchInfo.GetData(MEMORYDEVICE_CUDA),
-				functor_device,	badResultEncountered_device.GetData(MEMORYDEVICE_CUDA));
+				gridSize_MatchedBlocks, block_voxel_per_thread_block_size,
+				voxels1, voxels2, hash_table1, hash_table2,
+				matched_hash_code_pairs.GetData(MEMORYDEVICE_CUDA),
+				hash_match_info.GetData(MEMORYDEVICE_CUDA),
+				functor_device, mismatch_encountered.GetData(MEMORYDEVICE_CUDA));
 
 		ORcudaKernelCheck;
 
@@ -138,29 +138,30 @@ private:
 		ORcudaSafeCall(cudaMemcpy(&functor, functor_device, sizeof(TBooleanFunctor), cudaMemcpyDeviceToHost));
 		ORcudaSafeCall(cudaFree(functor_device));
 
-		badResultEncountered_device.UpdateHostFromDevice();
-		return !(*badResultEncountered_device.GetData(MEMORYDEVICE_CPU));
+		mismatch_encountered.UpdateHostFromDevice();
+		return !(*mismatch_encountered.GetData(MEMORYDEVICE_CPU));
 	}
 
 public:
 	template<typename TBooleanFunctor>
 	inline static bool
-	DualVoxelTraversal_AllTrue(
-			VoxelVolume<TVoxelPrimary, VoxelBlockHash>* primaryScene,
-			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryScene,
+	TraverseAndCompareAll(
+			VoxelVolume<TVoxel1, VoxelBlockHash>* volume1,
+			VoxelVolume<TVoxel2, VoxelBlockHash>* volume2,
 			TBooleanFunctor& functor) {
 
-		return DualVoxelTraversal_AllTrue_Generic(
-				primaryScene, secondaryScene, functor,
+		return TraverseAndCompareAll_Generic(
+				volume1, volume2, functor,
 				[&](const dim3& gridSize, const dim3& cudaBlockSize,
-				    TVoxelPrimary* primaryVoxels, TVoxelSecondary* secondaryVoxels,
-				    const HashEntry* primaryHashTable_device, const HashEntry* secondaryHashTable_device,
-				    const HashPair* matchedHashes_device, const HashMatchInfo* matchInfo_device, TBooleanFunctor* functor_device,
+				    TVoxel1* voxels1, TVoxel2* voxels2,
+				    const HashEntry* hash_table1_device, const HashEntry* hash_table2_device,
+				    const HashPair* matchedHashes_device, const HashMatchInfo* matchInfo_device,
+				    TBooleanFunctor* functor_device,
 				    bool* falseEncountered) {
-					checkIfMatchingHashBlockVoxelsYieldTrue<TBooleanFunctor, TVoxelPrimary, TVoxelSecondary>
-					<< < gridSize, cudaBlockSize >> >
-					(primaryVoxels, secondaryVoxels, primaryHashTable_device, secondaryHashTable_device,
-							matchedHashes_device,matchInfo_device,functor_device,falseEncountered);
+					checkIfMatchingHashBlockVoxelsYieldTrue<TBooleanFunctor, TVoxel1, TVoxel2>
+							<< < gridSize, cudaBlockSize >> >
+					                       (voxels1, voxels2, hash_table1_device, hash_table2_device,
+							                       matchedHashes_device, matchInfo_device, functor_device, falseEncountered);
 
 				}
 		);
@@ -168,22 +169,23 @@ public:
 
 	template<typename TBooleanFunctor>
 	inline static bool
-	DualVoxelPositionTraversal_AllTrue(
-			VoxelVolume<TVoxelPrimary, VoxelBlockHash>* primaryScene,
-			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryScene,
+	TraverseAndCompareAllWithPosition(
+			VoxelVolume<TVoxel1, VoxelBlockHash>* volume1,
+			VoxelVolume<TVoxel2, VoxelBlockHash>* volume2,
 			TBooleanFunctor& functor) {
 
-		return DualVoxelTraversal_AllTrue_Generic(
-				primaryScene, secondaryScene, functor,
+		return TraverseAndCompareAll_Generic(
+				volume1, volume2, functor,
 				[&](const dim3& gridSize, const dim3& cudaBlockSize,
-				    TVoxelPrimary* primaryVoxels, TVoxelSecondary* secondaryVoxels,
-				    const HashEntry* primaryHashTable_device, const HashEntry* secondaryHashTable_device,
-				    const HashPair* matchedHashes_device, const HashMatchInfo* matchInfo_device, TBooleanFunctor* functor_device,
+				    TVoxel1* voxels1, TVoxel2* voxels2,
+				    const HashEntry* hash_table1, const HashEntry* hash_table2,
+				    const HashPair* matched_hash_codes, const HashMatchInfo* match_info,
+				    TBooleanFunctor* functor_device,
 				    bool* falseEncountered) {
-					checkIfMatchingHashBlockVoxelsYieldTrue_Position<TBooleanFunctor, TVoxelPrimary, TVoxelSecondary>
-					<< < gridSize, cudaBlockSize >> >
-					(primaryVoxels, secondaryVoxels, primaryHashTable_device, secondaryHashTable_device,
-							matchedHashes_device,matchInfo_device,functor_device,falseEncountered);
+					checkIfMatchingHashBlockVoxelsYieldTrue_Position<TBooleanFunctor, TVoxel1, TVoxel2>
+							<< < gridSize, cudaBlockSize >> >
+					                       (voxels1, voxels2, hash_table1, hash_table2,
+							                       matched_hash_codes, match_info, functor_device, falseEncountered);
 
 				}
 		);
@@ -191,35 +193,31 @@ public:
 
 	template<typename TFunctor>
 	inline static void
-	DualVoxelTraversal(
-			VoxelVolume<TVoxelPrimary, VoxelBlockHash>* primaryScene,
-			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryScene,
-			TFunctor& functor) {
-		DualVoxelTraversal_Generic(primaryScene,secondaryScene,functor, [](
-				dim3 gridSize_HashPerBlock, dim3 cudaBlockSize_BlockVoxelPerThread,
-				TVoxelPrimary* primaryVoxels, TVoxelSecondary* secondaryVoxels, const HashEntry* primaryHashTable,
-				const HashEntry* secondaryHashTable, TFunctor* functor_device){
-			dualVoxelTraversal_device<TFunctor, TVoxelPrimary, TVoxelSecondary>
-			<< < gridSize_HashPerBlock, cudaBlockSize_BlockVoxelPerThread >> >
-			(primaryVoxels, secondaryVoxels, primaryHashTable,
-					secondaryHashTable, functor_device);
+	TraverseAll(VoxelVolume<TVoxel1, VoxelBlockHash>* volume1,
+	            VoxelVolume<TVoxel2, VoxelBlockHash>* volume2,
+	            TFunctor& functor) {
+		TraverseAll_Generic(volume1, volume2, functor, [](
+				dim3 hash_per_block_grid_size, dim3 block_voxel_per_thread_block_size,
+				TVoxel1* voxels1, TVoxel2* voxels2, const HashEntry* hash_table1,
+				const HashEntry* hash_table2, TFunctor* functor_device) {
+			dualVoxelTraversal_device<TFunctor, TVoxel1, TVoxel2>
+					<< < hash_per_block_grid_size, block_voxel_per_thread_block_size >> >
+			                                       (voxels1, voxels2, hash_table1, hash_table2, functor_device);
 		});
 	}
 
 	template<typename TFunctor>
 	inline static void
-	DualVoxelPositionTraversal(
-			VoxelVolume<TVoxelPrimary, VoxelBlockHash>* primaryScene,
-			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryScene,
-			TFunctor& functor) {
-		DualVoxelTraversal_Generic(primaryScene,secondaryScene,functor, [](
-				dim3 gridSize_HashPerBlock, dim3 cudaBlockSize_BlockVoxelPerThread,
-				TVoxelPrimary* primaryVoxels, TVoxelSecondary* secondaryVoxels, const HashEntry* primaryHashTable,
-				const HashEntry* secondaryHashTable, TFunctor* functor_device){
-			dualVoxelPositionTraversal_device<TFunctor, TVoxelPrimary, TVoxelSecondary>
-			<< < gridSize_HashPerBlock, cudaBlockSize_BlockVoxelPerThread >> >
-			(primaryVoxels, secondaryVoxels, primaryHashTable,
-					secondaryHashTable, functor_device);
+	TraverseAllWithPosition(VoxelVolume<TVoxel1, VoxelBlockHash>* volume1,
+	                        VoxelVolume<TVoxel2, VoxelBlockHash>* volume2,
+	                        TFunctor& functor) {
+		TraverseAll_Generic(volume1, volume2, functor, [](
+				dim3 hash_per_block_grid_size, dim3 block_voxel_per_thread_block_size,
+				TVoxel1* voxels1, TVoxel2* voxels2, const HashEntry* hash_table1,
+				const HashEntry* hash_table2, TFunctor* functor_device) {
+			dualVoxelPositionTraversal_device<TFunctor, TVoxel1, TVoxel2>
+					<< < hash_per_block_grid_size, block_voxel_per_thread_block_size >> >
+			                                       (voxels1, voxels2, hash_table1, hash_table2, functor_device);
 		});
 	}
 

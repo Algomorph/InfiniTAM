@@ -35,7 +35,7 @@ class VolumeTraversalEngine<TVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA> {
 public:
 // region ================================ STATIC SINGLE-SCENE TRAVERSAL ===============================================
 	template<typename TStaticFunctor>
-	inline static void StaticVoxelTraversal(VoxelVolume<TVoxel, PlainVoxelArray>* scene) {
+	inline static void StaticTraverseAll(VoxelVolume<TVoxel, PlainVoxelArray>* scene) {
 		TVoxel* voxelArray = scene->localVBA.GetVoxelBlocks();
 		const PlainVoxelArray::GridAlignedBox* arrayInfo = scene->index.GetIndexData();
 
@@ -44,7 +44,7 @@ public:
 		              scene->index.GetVolumeSize().y / cudaBlockSize.y,
 		              scene->index.GetVolumeSize().z / cudaBlockSize.z);
 
-		staticVoxelTraversal_device<TStaticFunctor, TVoxel> << < gridSize, cudaBlockSize >> > (voxelArray, arrayInfo);
+		StaticTraverseAll_device<TStaticFunctor, TVoxel> << < gridSize, cudaBlockSize >> > (voxelArray, arrayInfo);
 		ORcudaKernelCheck;
 	}
 
@@ -52,7 +52,7 @@ public:
 // region ================================ DYNAMIC SINGLE-SCENE TRAVERSAL ==============================================
 	template<typename TFunctor>
 	inline static void
-	VoxelTraversal(VoxelVolume<TVoxel, PlainVoxelArray>* volume, TFunctor& functor) {
+	TraverseAll(VoxelVolume<TVoxel, PlainVoxelArray>* volume, TFunctor& functor) {
 		TVoxel* voxelArray = volume->localVBA.GetVoxelBlocks();
 		const PlainVoxelArray::GridAlignedBox* arrayInfo = volume->index.GetIndexData();
 
@@ -77,7 +77,7 @@ public:
 
 	template<typename TFunctor>
 	inline static void
-	VoxelPositionTraversal(VoxelVolume<TVoxel, PlainVoxelArray>* volume, TFunctor& functor) {
+	TraverseAllWithPosition(VoxelVolume<TVoxel, PlainVoxelArray>* volume, TFunctor& functor) {
 		TVoxel* voxelArray = volume->localVBA.GetVoxelBlocks();
 		const PlainVoxelArray::GridAlignedBox* arrayInfo = volume->index.GetIndexData();
 

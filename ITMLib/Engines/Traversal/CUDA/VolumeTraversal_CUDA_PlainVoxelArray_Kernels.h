@@ -24,7 +24,7 @@ namespace {
 //CUDA device functions
 template<typename TStaticFunctor, typename TVoxel>
 __global__ void
-staticVoxelTraversal_device(TVoxel* voxels, const ITMLib::PlainVoxelArray::GridAlignedBox* arrayInfo) {
+StaticTraverseAll_device(TVoxel* voxels, const ITMLib::PlainVoxelArray::GridAlignedBox* arrayInfo) {
 	int x = blockIdx.x * blockDim.x + threadIdx.x;
 	int y = blockIdx.y * blockDim.y + threadIdx.y;
 	int z = blockIdx.z * blockDim.z + threadIdx.z;

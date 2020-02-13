@@ -35,9 +35,9 @@ public:
 
 	template<typename TStaticFunctor>
 	inline static void
-	Traverse(VoxelVolume <TVoxel1, ITMLib::PlainVoxelArray>* volume1,
-	         VoxelVolume <TVoxel2, ITMLib::PlainVoxelArray>* volume2,
-	         VoxelVolume <TVoxel3, ITMLib::PlainVoxelArray>* volume3) {
+	TraverseAll(VoxelVolume <TVoxel1, ITMLib::PlainVoxelArray>* volume1,
+	            VoxelVolume <TVoxel2, ITMLib::PlainVoxelArray>* volume2,
+	            VoxelVolume <TVoxel3, ITMLib::PlainVoxelArray>* volume3) {
 		assert(volume2->index.GetVolumeSize() == volume3->index.GetVolumeSize() &&
 		       volume2->index.GetVolumeSize() == volume1->index.GetVolumeSize());
 // *** traversal vars
@@ -64,7 +64,7 @@ public:
 
 	template<typename TFunctor>
 	inline static void
-	Traverse(
+	TraverseAll(
 			ITMLib::VoxelVolume<TVoxel1, ITMLib::PlainVoxelArray>* volume1,
 			ITMLib::VoxelVolume<TVoxel2, ITMLib::PlainVoxelArray>* volume2,
 			ITMLib::VoxelVolume<TVoxel3, ITMLib::PlainVoxelArray>* volume3,
@@ -95,7 +95,7 @@ public:
 
 	template<typename TFunctor>
 	inline static void
-	TraverseWithPosition(
+	TraverseAllWithPosition(
 			ITMLib::VoxelVolume<TVoxel1, ITMLib::PlainVoxelArray>* volume1,
 			ITMLib::VoxelVolume<TVoxel2, ITMLib::PlainVoxelArray>* volume2,
 			ITMLib::VoxelVolume<TVoxel3, ITMLib::PlainVoxelArray>* volume3,

@@ -111,8 +111,8 @@ template<class TVoxel, typename TIndex>
 struct ComputeNonTruncatedVoxelCountFunctor<true, TVoxel, TIndex> {
 	static int compute(VoxelVolume<TVoxel, TIndex>* volume) {
 		ComputeNonTruncatedVoxelCountFunctor instance;
-		VolumeTraversalEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>::VoxelTraversal_SingleThreaded(volume,
-		                                                                                       instance);
+		VolumeTraversalEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>::TraverseAll_ST(volume,
+		                                                                        instance);
 		return instance.count;
 	}
 
@@ -197,7 +197,7 @@ struct MaxGradientFunctor<WarpVoxel_f_uf, TIndex> {
 		MaxGradientFunctor maxGradientFunctor;
 		maxGradientFunctor.secondGradientField = secondGradientField;
 		VolumeTraversalEngine<WarpVoxel_f_uf, TIndex, MEMORYDEVICE_CPU>::
-		VoxelPositionTraversal(volume, maxGradientFunctor);
+		TraverseAllWithPosition(volume, maxGradientFunctor);
 		maxPosition = maxGradientFunctor.maxPosition;
 		return maxGradientFunctor.maxLength;
 	}
@@ -242,7 +242,7 @@ template<typename TVoxel, typename TIndex>
 unsigned int
 VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeAlteredVoxelCount(VoxelVolume<TVoxel, TIndex>* volume) {
 	IsAlteredCountFunctor<TVoxel> functor;
-	VolumeTraversalEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>::VoxelTraversal(volume, functor);
+	VolumeTraversalEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>::TraverseAll(volume, functor);
 	return functor.GetCount();
 }
 

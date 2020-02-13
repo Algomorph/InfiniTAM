@@ -404,7 +404,7 @@ bool WarpFieldLogger<TVoxel, TIndex>::SaveCurrentWarpState() {
 	warpOFStream.write(reinterpret_cast<const char* >(&this->iterationCursor), sizeof(iterationCursor));
 	WarpAndUpdateWriteFunctor<TVoxel>
 			warpAndUpdateWriteFunctor(&this->warpOFStream, this->warpByteSize, this->updateByteSize);
-	VolumeTraversalEngine<TVoxel,TIndex,MEMORYDEVICE_CPU>::VoxelTraversal(warpField, warpAndUpdateWriteFunctor);
+	VolumeTraversalEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>::TraverseAll(warpField, warpAndUpdateWriteFunctor);
 	std::cout << "Written warp updates for iteration " << iterationCursor << " to disk." << std::endl;
 	iterationCursor++;
 	return true;
@@ -482,7 +482,7 @@ bool WarpFieldLogger<TVoxel, TIndex>::LoadCurrentWarpState() {
 
 	WarpAndUpdateReadFunctor<TVoxel>
 			warpAndUpdateReadFunctor(&this->warpIFStream, this->warpByteSize, this->updateByteSize);
-	VolumeTraversalEngine<TVoxel,TIndex,MEMORYDEVICE_CPU>::VoxelTraversal(warpField, warpAndUpdateReadFunctor);
+	VolumeTraversalEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>::TraverseAll(warpField, warpAndUpdateReadFunctor);
 	return true;
 }
 
@@ -501,7 +501,7 @@ bool WarpFieldLogger<TVoxel, TIndex>::LoadPreviousWarpState() {
 	}
 	WarpAndUpdateReadFunctor<TVoxel>
 			warpAndUpdateReadFunctor(&this->warpIFStream, this->warpByteSize, this->updateByteSize);
-	VolumeTraversalEngine<TVoxel,TIndex,MEMORYDEVICE_CPU>::VoxelTraversal(warpField, warpAndUpdateReadFunctor);
+	VolumeTraversalEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>::TraverseAll(warpField, warpAndUpdateReadFunctor);
 	return true;
 }
 

@@ -264,8 +264,8 @@ void SceneSliceVisualizer3D<TVoxel, TWarp, TIndex>::BuildVoxelAndHashBlockPolyDa
 
 	AddVoxelPointFunctor<TVoxel> addVoxelPointFunctor(
 			scaleAttribute, alternativeScaleAttribute, colorAttribute, voxelPoints, hashBlockPoints, focusCoordinates);
-	VolumeTraversalEngine<TVoxel,TIndex,MEMORYDEVICE_CPU>::
-	        VoxelPositionAndHashEntryTraversalWithinBounds(scene, addVoxelPointFunctor, bounds);
+	VolumeTraversalEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>::
+	TraverseAllWithinBoundsWithPositionAndHashEntry(scene, addVoxelPointFunctor, bounds);
 	sceneSlice.voxelCount = addVoxelPointFunctor.voxelCount;
 
 	vtkSmartPointer<vtkPolyData> voxelVizData = sceneSlice.voxelVizData;
@@ -603,8 +603,8 @@ struct DrawWarpUpdateFunctor<TWarp, TIndex, false> {
 
 		TransferWarpUpdatesToVtkStructuresFunctor<TWarp> transferWarpUpdatesToVtkStructuresFunctor(
 				updatesData, currentZebraIndex);
-		VolumeTraversalEngine<TWarp,TIndex,MEMORYDEVICE_CPU>::
-		        VoxelPositionTraversalWithinBounds(warpField, transferWarpUpdatesToVtkStructuresFunctor, bounds);
+		VolumeTraversalEngine<TWarp, TIndex, MEMORYDEVICE_CPU>::
+		TraverseAllWithinBoundsWithPosition(warpField, transferWarpUpdatesToVtkStructuresFunctor, bounds);
 		updatesData->Modified();
 	}
 };
@@ -620,8 +620,8 @@ struct DrawWarpUpdateFunctor<TWarp, TIndex, true> {
 		TransferWarpUpdatesToVtkStructuresFunctor_WithComponents<TSDFVoxel>
 				transferSmoothingVectorsToVtkStructuresFunctor(
 				updatesData, dataTermData, smoothingTermData, componentHedgehogEndpoints, currentZebraIndex);
-		VolumeTraversalEngine<TWarp,TIndex,MEMORYDEVICE_CPU>::
-		        VoxelPositionTraversalWithinBounds(warpField, transferSmoothingVectorsToVtkStructuresFunctor, bounds);
+		VolumeTraversalEngine<TWarp, TIndex, MEMORYDEVICE_CPU>::
+		TraverseAllWithinBoundsWithPosition(warpField, transferSmoothingVectorsToVtkStructuresFunctor, bounds);
 		updatesData->Modified();
 		dataTermData->Modified();
 		smoothingTermData->Modified();
