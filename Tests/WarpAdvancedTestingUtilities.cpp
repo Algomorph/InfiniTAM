@@ -96,3 +96,15 @@ std::string getIndexString<PlainVoxelArray>() { return "PVA"; }
 
 template<>
 std::string getIndexString<VoxelBlockHash>() { return "VBH"; }
+
+
+template void GenerateRawLiveAndCanonicalVolumes<VoxelBlockHash, MEMORYDEVICE_CPU>(VoxelVolume<TSDFVoxel, VoxelBlockHash>** canonical_volume,
+                                                                                    VoxelVolume<TSDFVoxel, VoxelBlockHash>** live_volume);
+template void GenerateRawLiveAndCanonicalVolumes<PlainVoxelArray, MEMORYDEVICE_CPU>(VoxelVolume<TSDFVoxel, PlainVoxelArray>** canonical_volume,
+                                                                                    VoxelVolume<TSDFVoxel, PlainVoxelArray>** live_volume);
+#ifndef COMPILE_WITHOUT_CUDA
+template void GenerateRawLiveAndCanonicalVolumes<VoxelBlockHash, MEMORYDEVICE_CUDA>(VoxelVolume<TSDFVoxel, VoxelBlockHash>** canonical_volume,
+                                                                                    VoxelVolume<TSDFVoxel, VoxelBlockHash>** live_volume);
+template void GenerateRawLiveAndCanonicalVolumes<PlainVoxelArray, MEMORYDEVICE_CUDA>(VoxelVolume<TSDFVoxel, PlainVoxelArray>** canonical_volume,
+                                                                                    VoxelVolume<TSDFVoxel, PlainVoxelArray>** live_volume);
+#endif

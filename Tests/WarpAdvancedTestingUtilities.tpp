@@ -100,7 +100,7 @@ GenericWarpConsistencySubtest(const SlavchevaSurfaceTracker::Switches& switches,
 	                                          configuration::SWAPPINGMODE_ENABLED,
 	                                          TMemoryDeviceType,
 	                                          Frame16And17Fixture::InitParams<TIndex>());
-	EditAndCopyEngineFactory::Instance<WarpVoxel, TIndex, TMemoryDeviceType>().ResetVolume(&warp_field);
+	warp_field.Reset();
 
 	VoxelVolume<TSDFVoxel, TIndex>* canonical_volume;
 	VoxelVolume<TSDFVoxel, TIndex>* live_volumes[2] = {
@@ -122,7 +122,7 @@ GenericWarpConsistencySubtest(const SlavchevaSurfaceTracker::Switches& switches,
 	GenerateRawLiveAndCanonicalVolumes<TIndex, TMemoryDeviceType>(&canonical_volume, &live_volumes[live_index_to_start_from]);
 
 	SurfaceTracker<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, TRACKER_SLAVCHEVA_DIAGNOSTIC>
-			motionTracker(switches);
+			motion_tracker(switches);
 
 	VoxelVolume<WarpVoxel, TIndex> ground_truth_warp_field(
 			&configuration::get().general_voxel_volume_parameters,
@@ -133,8 +133,7 @@ GenericWarpConsistencySubtest(const SlavchevaSurfaceTracker::Switches& switches,
 			configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 			TMemoryDeviceType, Frame16And17Fixture::InitParams<TIndex>());
 
-	EditAndCopyEngineFactory::Instance<WarpVoxel, TIndex, TMemoryDeviceType>().ResetVolume(
-			&ground_truth_warp_field);
+	ground_truth_warp_field.Reset();
 
 	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, TIndex>* reconstruction_engine =
 			DepthFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, TIndex>(
@@ -151,9 +150,9 @@ GenericWarpConsistencySubtest(const SlavchevaSurfaceTracker::Switches& switches,
 	for (int iteration = 0; iteration < iteration_limit; iteration++) {
 		std::swap(source_warped_field_ix, target_warped_field_ix);
 		std::cout << "Subtest " << getIndexString<TIndex>() << " iteration " << std::to_string(iteration) << std::endl;
-		motionTracker.CalculateWarpGradient(&warp_field, canonical_volume, live_volumes[source_warped_field_ix]);
-		motionTracker.SmoothWarpGradient(&warp_field, canonical_volume, live_volumes[source_warped_field_ix]);
-		motionTracker.UpdateWarps(&warp_field, canonical_volume, live_volumes[source_warped_field_ix]);
+		motion_tracker.CalculateWarpGradient(&warp_field, canonical_volume, live_volumes[source_warped_field_ix]);
+		motion_tracker.SmoothWarpGradient(&warp_field, canonical_volume, live_volumes[source_warped_field_ix]);
+		motion_tracker.UpdateWarps(&warp_field, canonical_volume, live_volumes[source_warped_field_ix]);
 		warping_engine->WarpVolume_WarpUpdates(&warp_field, live_volumes[source_warped_field_ix],
 		                                       live_volumes[target_warped_field_ix]);
 		std::string path = get_path_warps(prefix, iteration);

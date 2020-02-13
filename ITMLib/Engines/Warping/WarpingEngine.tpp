@@ -27,20 +27,20 @@ using namespace ITMLib;
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 template<WarpType TWarpType>
 void WarpingEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::WarpScene(
-		VoxelVolume<TWarp, TIndex>* warpField,
-		VoxelVolume<TVoxel, TIndex>* sourceTSDF,
-		VoxelVolume<TVoxel, TIndex>* targetTSDF) {
+		VoxelVolume<TWarp, TIndex>* warp_field,
+		VoxelVolume<TVoxel, TIndex>* source_volume,
+		VoxelVolume<TVoxel, TIndex>* target_volume) {
 
 	// Clear out the flags at target volume
 	FieldClearFunctor<TVoxel, TMemoryDeviceType> flagClearFunctor;
-	VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseAll(targetTSDF, flagClearFunctor);
+	VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseAll(target_volume, flagClearFunctor);
 
 	TrilinearInterpolationFunctor<TVoxel, TWarp, TIndex, TWarpType, TMemoryDeviceType>
-			trilinearInterpolationFunctor(sourceTSDF, warpField);
+			trilinearInterpolationFunctor(source_volume, warp_field);
 
 	// Interpolate to obtain the new live frame values (at target index)
 	TwoVolumeTraversalEngine<TVoxel, TWarp, TIndex, TIndex, TMemoryDeviceType>::
-	TraverseAllWithPosition(targetTSDF, warpField, trilinearInterpolationFunctor);
+	TraverseAllWithPosition(target_volume, warp_field, trilinearInterpolationFunctor);
 }
 
 

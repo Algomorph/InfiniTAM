@@ -99,8 +99,8 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateUsingOthe
 
 #ifdef WITH_OPENMP
 #pragma omp parallel for default(none) shared(min_point_block, max_point_block, hash_entry_allocation_states, \
-										      hash_block_coordinates, colliding_block_positions_device, \
-										      colliding_block_count, target_hash_table)
+											  hash_block_coordinates, colliding_block_positions_device, \
+											  colliding_block_count, target_hash_table)
 #endif
 	for (int block_z = min_point_block.z; block_z < max_point_block.z; block_z++) {
 		for (int block_y = min_point_block.y; block_y < max_point_block.y; block_y++) {
@@ -157,7 +157,7 @@ AllocateHashEntriesUsingAllocationStateList(VoxelVolume<TVoxel, VoxelBlockHash>*
 
 #ifdef WITH_OPENMP
 #pragma omp parallel for default(none) shared(updateUtilizedHashCodes, hash_entry_states, block_coordinates, \
-    last_free_voxel_block_id, last_free_excess_list_id, block_allocation_list, excess_allocation_list, hash_table)
+	last_free_voxel_block_id, last_free_excess_list_id, block_allocation_list, excess_allocation_list, hash_table)
 #endif
 	for (int hash_code = 0; hash_code < hash_entry_count; hash_code++) {
 		int voxel_block_index, excess_list_index;
@@ -191,12 +191,13 @@ AllocateHashEntriesUsingAllocationStateList(VoxelVolume<TVoxel, VoxelBlockHash>*
 					hash_entry.ptr = block_allocation_list[voxel_block_index];
 					hash_entry.offset = 0;
 
-					int excess_list_offset = excess_allocation_list[excess_list_index];
+					const int excess_list_offset = excess_allocation_list[excess_list_index];
 
 					hash_table[hash_code].offset = excess_list_offset + 1; //connect to child
 
-					hash_table[ORDERED_LIST_SIZE + excess_list_offset] = hash_entry; //add child to the excess list
-					updateUtilizedHashCodes(hash_code);
+					const int new_hash_code = ORDERED_LIST_SIZE + excess_list_offset;
+					hash_table[new_hash_code] = hash_entry; //add child to the excess list
+					updateUtilizedHashCodes(new_hash_code);
 				} else {
 					// Restore the previous values to avoid leaks.
 					atomicAdd_CPU(last_free_voxel_block_id, 1);
@@ -208,7 +209,7 @@ AllocateHashEntriesUsingAllocationStateList(VoxelVolume<TVoxel, VoxelBlockHash>*
 	}
 	volume->localVBA.lastFreeBlockId = last_free_voxel_block_id;
 	volume->index.SetLastFreeExcessListId(last_free_excess_list_id);
-	volume->index.SetUtilizedHashBlockCount(utilized_block_count);
+	volume->index.SetUtilizedHashBlockCount(utilized_block_count.load());
 }
 
 template<typename TVoxel>

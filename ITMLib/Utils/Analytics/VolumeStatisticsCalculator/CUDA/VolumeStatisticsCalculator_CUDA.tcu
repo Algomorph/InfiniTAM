@@ -107,15 +107,15 @@ VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CUDA>::GetAllocatedHashB
 template<bool hasSemanticInformation, typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 struct ComputeNonTruncatedVoxelCountFunctor;
 
-template<class TVoxel, typename TIndex>
-struct ComputeNonTruncatedVoxelCountFunctor<false, TVoxel, TIndex> {
+template<class TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+struct ComputeNonTruncatedVoxelCountFunctor<false, TVoxel, TIndex, TMemoryDeviceType> {
 	static int compute(VoxelVolume<TVoxel, TIndex>* volume) {
 		DIEWITHEXCEPTION("Voxels need to have semantic information to be marked as truncated or non-truncated.");
 		return 0;
 	}
 };
-template<class TVoxel, typename TIndex>
-struct ComputeNonTruncatedVoxelCountFunctor<true, TVoxel, TIndex, MEMORYDEVICE_CUDA> {
+template<class TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+struct ComputeNonTruncatedVoxelCountFunctor<true, TVoxel, TIndex, TMemoryDeviceType> {
 	//not an optimal way (reduction would be much faster), but works -- we don't need this uber-fast
 	__host__
 	static int compute(VoxelVolume<TVoxel, TIndex>* volume) {
@@ -147,7 +147,7 @@ struct ComputeNonTruncatedVoxelCountFunctor<true, TVoxel, TIndex, MEMORYDEVICE_C
 template<typename TVoxel, typename TIndex>
 int VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CUDA>::ComputeNonTruncatedVoxelCount(
 		VoxelVolume<TVoxel, TIndex>* volume) {
-	return ComputeNonTruncatedVoxelCountFunctor<TVoxel::hasSemanticInformation, TVoxel, TIndex>::compute(volume);
+	return ComputeNonTruncatedVoxelCountFunctor<TVoxel::hasSemanticInformation, TVoxel, TIndex, MEMORYDEVICE_CUDA>::compute(volume);
 }
 
 template<typename TVoxel, typename TIndex>

@@ -109,8 +109,8 @@ public:
 	                            VoxelVolume<TVoxel, TIndex>* targetTSDF) override;
 private:
 	template<WarpType TWarpType>
-	void WarpScene(VoxelVolume<TWarp,  TIndex>* warpField,
-	               VoxelVolume<TVoxel, TIndex>* sourceTSDF,
-	               VoxelVolume<TVoxel, TIndex>* targetTSDF);
+	void WarpScene(VoxelVolume<TWarp,  TIndex>* warp_field,
+	               VoxelVolume<TVoxel, TIndex>* source_volume,
+	               VoxelVolume<TVoxel, TIndex>* target_volume);
 };
 } // namespace ITMLib

@@ -149,7 +149,7 @@ void allocateHashedVoxelBlocksUsingLists_device(
 
 	int voxel_block_index, excess_list_index;
 
-	auto updateUtilizedHashCodes = [&temporary_allocation_data, &utilized_block_hash_codes, &hash_code]() {
+	auto updateUtilizedHashCodes = [&temporary_allocation_data, &utilized_block_hash_codes](int hash_code) {
 		int utilized_index = atomicAdd(&temporary_allocation_data->utilized_block_count, 1);
 		utilized_block_hash_codes[utilized_index] = hash_code;
 	};
@@ -164,7 +164,7 @@ void allocateHashedVoxelBlocksUsingLists_device(
 				hash_entry.ptr = block_allocation_list[voxel_block_index];
 				hash_entry.offset = 0;
 				hash_table[hash_code] = hash_entry;
-				updateUtilizedHashCodes();
+				updateUtilizedHashCodes(hash_code);
 			} else {
 				// Restore the previous value to avoid leaks.
 				atomicAdd(&temporary_allocation_data->last_free_voxel_block_id, 1);
@@ -183,12 +183,13 @@ void allocateHashedVoxelBlocksUsingLists_device(
 				hash_entry.ptr = block_allocation_list[voxel_block_index];
 				hash_entry.offset = 0;
 
-				int excess_list_offset = excess_allocation_list[excess_list_index];
+				const int excess_list_offset = excess_allocation_list[excess_list_index];
 
 				hash_table[hash_code].offset = excess_list_offset + 1; //connect to child
 
-				hash_table[ORDERED_LIST_SIZE + excess_list_offset] = hash_entry; //add child to the excess list
-				updateUtilizedHashCodes();
+				const int new_hash_code = ORDERED_LIST_SIZE + excess_list_offset;
+				hash_table[new_hash_code] = hash_entry; //add child to the excess list
+				updateUtilizedHashCodes(new_hash_code);
 			} else {
 				// Restore the previous values to avoid leaks.
 				atomicAdd(&temporary_allocation_data->last_free_voxel_block_id, 1);

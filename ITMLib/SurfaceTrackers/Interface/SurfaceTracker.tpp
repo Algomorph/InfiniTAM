@@ -78,11 +78,6 @@ SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorType>::
 	VolumeTraversalEngine<TWarp, TIndex, TMemoryDeviceType>::template
 	StaticTraverseAll<ClearOutGradientStaticFunctor<TWarp>>(warp_field);
 
-	IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::Instance().AllocateUsingOtherVolume(canonical_volume,
-	                                                                                       live_volume);
-
-	IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::Instance().AllocateUsingOtherVolume(warp_field, live_volume);
-
 	WarpGradientFunctor<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorType>
 			calculateGradientFunctor(this->parameters, this->switches, warp_field, canonical_volume, live_volume,
 			                         canonical_volume->sceneParams->voxel_size,

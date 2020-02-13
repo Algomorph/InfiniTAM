@@ -42,6 +42,11 @@ std::string getIndexString();
 
 template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void
+GenerateRawLiveAndCanonicalVolumes(VoxelVolume<TSDFVoxel, TIndex>** canonical_volume,
+                                   VoxelVolume<TSDFVoxel, TIndex>** live_volume);
+
+template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
+void
 GenericWarpConsistencySubtest(const SlavchevaSurfaceTracker::Switches& switches,
                               int iteration_limit = 10,
                               GenericWarpTestMode mode = TEST_SUCCESSIVE_ITERATIONS,
