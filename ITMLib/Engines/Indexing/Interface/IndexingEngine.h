@@ -98,7 +98,8 @@ class IndexingEngineInterface {
 	 * \param block_coordinates coordinates of blocks to allocate (in blocks, not voxels)
 	 */
 	virtual void
-	AllocateBlockList(VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::MemoryBlock<Vector3s>& block_coordinates, int new_block_count) = 0;
+	AllocateBlockList(VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::MemoryBlock<Vector3s>& block_coordinates,
+	                  int new_block_count) = 0;
 
 };
 
@@ -129,24 +130,23 @@ public:
 	                                               const CameraTrackingState* tracking_state,
 	                                               const ITMView* view) override;
 
-	void
-	AllocateBlockList(VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::MemoryBlock<Vector3s>& new_block_positions, int new_block_count) override;
+	void AllocateBlockList(VoxelVolume<TVoxel, TIndex>* volume,
+	                       const ORUtils::MemoryBlock<Vector3s>& new_block_positions, int new_block_count) override;
 
 
 	template<typename TVoxelTarget, typename TVoxelSource>
-	void AllocateUsingOtherVolume(VoxelVolume<TVoxelTarget, TIndex>* targetVolume,
-	                              VoxelVolume<TVoxelSource, TIndex>* sourceVolume);
+	void AllocateUsingOtherVolume(VoxelVolume<TVoxelTarget, TIndex>* target_volume,
+	                              VoxelVolume<TVoxelSource, TIndex>* source_volume);
 
 	template<typename TVoxelTarget, typename TVoxelSource>
-	void AllocateUsingOtherVolumeExpanded(VoxelVolume<TVoxelTarget, TIndex>* targetVolume,
-	                                      VoxelVolume<TVoxelSource, TIndex>* sourceVolume);
-
+	void AllocateUsingOtherVolume_Bounded(VoxelVolume<TVoxelTarget, TIndex>* target_volume,
+	                                      VoxelVolume<TVoxelSource, TIndex>* source_volume,
+	                                      const Extent3D& bounds);
 
 	template<typename TVoxelTarget, typename TVoxelSource>
-	void AllocateUsingOtherVolumeAndSetVisibilityExpanded(VoxelVolume<TVoxelTarget, TIndex>* targetVolume,
-	                                                      VoxelVolume<TVoxelSource, TIndex>* sourceVolume,
-	                                                      ITMView* view,
-	                                                      const Matrix4f& depth_camera_matrix = Matrix4f::Identity());
+	void AllocateUsingOtherVolume_OffsetAndBounded(VoxelVolume<TVoxelTarget, TIndex>* target_volume,
+	                                               VoxelVolume<TVoxelSource, TIndex>* source_volume,
+	                                               const Extent3D& source_bounds, const Vector3i& target_offset);
 
 	template<WarpType TWarpType, typename TWarp>
 	void AllocateFromWarpedVolume(

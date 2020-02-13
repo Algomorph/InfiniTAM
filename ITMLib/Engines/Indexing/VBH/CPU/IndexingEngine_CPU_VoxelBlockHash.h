@@ -30,7 +30,9 @@ class IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU> :
 
 private:
 	IndexingEngine() = default;
-
+	template<typename TVoxelTarget, typename TVoxelSource, typename TMarkerFunctor>
+	void AllocateUsingOtherVolume_Generic(VoxelVolume<TVoxelTarget, VoxelBlockHash>* target_volume,
+	                              VoxelVolume<TVoxelSource, VoxelBlockHash>* source_volume, TMarkerFunctor& marker_functor);
 
 public:
 	static IndexingEngine& Instance() {
@@ -44,7 +46,8 @@ public:
 
 	void AllocateHashEntriesUsingAllocationStateList(VoxelVolume<TVoxel, VoxelBlockHash>* volume) override;
 
-	void AllocateHashEntriesUsingAllocationStateList_SetVisibility(VoxelVolume<TVoxel, VoxelBlockHash>* volume) override;
+	void
+	AllocateHashEntriesUsingAllocationStateList_SetVisibility(VoxelVolume<TVoxel, VoxelBlockHash>* volume) override;
 
 	void AllocateBlockList(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
 	                       const ORUtils::MemoryBlock<Vector3s>& new_block_positions,
@@ -54,47 +57,25 @@ public:
 	HashEntry FindHashEntry(const VoxelBlockHash& index, const Vector3s& coordinates, int& hashCode);
 
 
-	bool AllocateHashBlockAt(VoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3s at, int& hashCode) override;
+	bool AllocateHashBlockAt(VoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3s at, int& hash_code) override;
 
 	template<typename TVoxelTarget, typename TVoxelSource>
-	void AllocateUsingOtherVolume(VoxelVolume<TVoxelTarget, VoxelBlockHash>* targetVolume,
-	                              VoxelVolume<TVoxelSource, VoxelBlockHash>* sourceVolume);
+	void AllocateUsingOtherVolume(VoxelVolume<TVoxelTarget, VoxelBlockHash>* target_volume,
+	                              VoxelVolume<TVoxelSource, VoxelBlockHash>* source_volume);
+
+	template<typename TVoxelTarget, typename TVoxelSource>
+	void AllocateUsingOtherVolume_Bounded(VoxelVolume<TVoxelTarget, VoxelBlockHash>* target_volume,
+	                                      VoxelVolume<TVoxelSource, VoxelBlockHash>* source_volume,
+	                                      const Extent3D& bounds);
+	template<typename TVoxelTarget, typename TVoxelSource>
+	void AllocateUsingOtherVolume_OffsetAndBounded(VoxelVolume<TVoxelTarget, VoxelBlockHash>* target_volume,
+	                                     VoxelVolume<TVoxelSource, VoxelBlockHash>* source_volume,
+	                                     const Extent3D& source_bounds, const Vector3i& target_offset);
 
 	void BuildUtilizedBlockListBasedOnVisibility(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
 	                                             const Matrix4f& depth_camera_matrix = Matrix4f::Identity());
 
 	void SetVisibilityToVisibleAtPreviousFrameAndUnstreamed(VoxelVolume<TVoxel, VoxelBlockHash>* volume);
-	/**
-	 * \brief Allocate the same blocks in the target volume as are allocated in the source volume, plus an additional
-	 * one-ring of blocks around them. Does not modify previously-existing allocation in the target volume.
-	 * \tparam TVoxelTarget voxel type of the target volume
-	 * \tparam TVoxelSource voxel type of the source volume
-	 * \param targetVolume target volume
-	 * \param sourceVolume source volume
-	 */
-	template<typename TVoxelTarget, typename TVoxelSource>
-	void AllocateUsingOtherVolumeExpanded(VoxelVolume<TVoxelTarget, VoxelBlockHash>* targetVolume,
-	                                      VoxelVolume<TVoxelSource, VoxelBlockHash>* sourceVolume);
-
-	/**
-	 * \brief Allocate the same blocks in the target volume as are allocated in the source volume, plus an additional
-	 * one-ring of blocks around them, and set their visibility relative to the provided view assuming the provided
-	 * depth camera matrix. Does not modify previously-existing allocation in the target volume.
-	 * \tparam TVoxelTarget voxel type of the target volume
-	 * \tparam TVoxelSource voxel type of the source volume
-	 * \param targetVolume target volume
-	 * \param sourceVolume source volume
-	 * \param view the view (assumed to be the view that was used to allocate blocks in the source volume)
-	 * \param depth_camera_matrix transformation of the camera from world origin to it's position that corresponds to
-	 * the provided view
-	 */
-	template<typename TVoxelTarget, typename TVoxelSource>
-	void AllocateUsingOtherVolumeAndSetVisibilityExpanded(VoxelVolume<TVoxelTarget, VoxelBlockHash>* targetVolume,
-	                                                      VoxelVolume<TVoxelSource, VoxelBlockHash>* sourceVolume,
-	                                                      ITMView* view,
-	                                                      const Matrix4f& depth_camera_matrix = Matrix4f::Identity());
-
-
 };
 
 extern template

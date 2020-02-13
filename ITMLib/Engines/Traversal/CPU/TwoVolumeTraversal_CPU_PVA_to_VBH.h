@@ -97,7 +97,7 @@ private:
 					    isAltered(hashVoxel)) {
 						Vector3i voxelPosition =
 								ComputePositionVectorFromLinearIndex_VoxelBlockHash(hashEntry.pos, linearIndexInBlock);
-						if (isPointInBounds(voxelPosition, *arrayInfo)) {
+						if (IsPointInBounds(voxelPosition, *arrayInfo)) {
 							int linearIndexInArray = ComputeLinearIndexFromPosition_PlainVoxelArray(arrayInfo,
 							                                                                        voxelPosition);
 							TArrayVoxel& arrayVoxel = arrayVoxels[linearIndexInArray];

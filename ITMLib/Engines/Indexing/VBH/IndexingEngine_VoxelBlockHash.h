@@ -31,23 +31,6 @@ public:
 	virtual HashEntry FindHashEntry(const VoxelBlockHash& index, const Vector3s& coordinates) = 0;
 	virtual bool AllocateHashBlockAt(VoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3s at, int& hashCode) = 0;
 
-/**
- * \brief method which looks at voxel grid with warps and an SDF voxel grid and allocates all hash blocks in the
- * SDF grid where warp vectors are pointing to (if not already allocated).
- * \details scans each (allocated) voxel in the SDF voxel grid, checks the warp vector at the corresponding location,
- * finds the voxel where the warp vector is pointing to, and, if the hash block for that voxel is not yet allocated,
- * allocates it.
- * \param warpField voxel grid where each voxel has a .warp Vector3f field defined
- * \param sourceTsdf sdf grid whose hash blocks to allocate if needed
- * \param sourceSdfIndex index of the sdf / flag field to use in the sdfScene
- * \tparam TVoxelBType the type of warp vector to use
- */
-	template<WarpType TWarpType, typename TWarp>
-	void AllocateFromWarpedVolume(
-			VoxelVolume<TWarp, VoxelBlockHash>* warpField,
-			VoxelVolume<TVoxel, VoxelBlockHash>* sourceTSDF,
-			VoxelVolume<TVoxel, VoxelBlockHash>* targetTSDF);
-
 	void AllocateNearSurface(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
 	                         const Matrix4f& depth_camera_matrix = Matrix4f::Identity(),
 	                         bool only_update_visible_list = false, bool resetVisibleList = false) override;

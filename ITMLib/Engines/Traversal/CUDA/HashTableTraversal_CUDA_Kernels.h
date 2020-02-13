@@ -22,9 +22,17 @@ namespace {
 // CUDA global kernels
 
 template <typename TFunctor>
-__global__ void hashTableTraversalWithHashCode_device (HashEntry* hash_table, const int hash_entry_count, TFunctor* functor_device){
+__global__ void hashTableAllEntryTraversalWithHashCode_device (HashEntry* hash_table, const int hash_entry_count, TFunctor* functor_device){
 	int hash_code = threadIdx.x + blockIdx.x * blockDim.x;
 	if (hash_code >= hash_entry_count) return;
+	(*functor_device)(hash_table[hash_code], hash_code);
+}
+
+template <typename TFunctor>
+__global__ void hashTableUtilizedEntryTraversalWithHashCode_device (HashEntry* hash_table, int* utilized_hash_codes, const int utilized_entry_count, TFunctor* functor_device){
+	int hash_code_index = threadIdx.x + blockIdx.x * blockDim.x;
+	if (hash_code_index >= utilized_entry_count) return;
+	int hash_code = utilized_hash_codes[hash_code_index];
 	(*functor_device)(hash_table[hash_code], hash_code);
 }
 

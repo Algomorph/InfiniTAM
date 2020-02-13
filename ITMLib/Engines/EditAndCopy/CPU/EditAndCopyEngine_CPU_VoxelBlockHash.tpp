@@ -22,7 +22,7 @@
 #include "../../Traversal/Shared/VolumeTraversal_Shared.h"
 #include "../Shared/EditAndCopyEngine_Shared.h"
 #include "../../Indexing/Interface/IndexingEngine.h"
-#include "../../Indexing/Shared/IndexingEngine_Shared.h"
+#include "../../../Utils/Geometry/GeometryBooleanOperations.h"
 
 using namespace ITMLib;
 
@@ -49,6 +49,7 @@ void EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::ResetVolume(
 	for (int i = 0; i < volume->index.GetExcessListSize(); ++i) excessList_ptr[i] = i;
 
 	volume->index.SetLastFreeExcessListId(volume->index.GetExcessListSize() - 1);
+	volume->index.SetUtilizedHashBlockCount(0);
 }
 
 template<typename TVoxel>
@@ -121,107 +122,74 @@ EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::OffsetWarps(VoxelVolume<TVoxel, V
 
 template<typename TVoxel>
 bool EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::CopyVolumeSlice(
-		VoxelVolume<TVoxel, VoxelBlockHash>* targetVolume, VoxelVolume<TVoxel, VoxelBlockHash>* sourceVolume,
+		VoxelVolume<TVoxel, VoxelBlockHash>* target_volume, VoxelVolume<TVoxel, VoxelBlockHash>* source_volume,
 		Vector6i bounds, const Vector3i& offset) {
 
-	assert(targetVolume->index.hashEntryCount == sourceVolume->index.hashEntryCount);
+	assert(target_volume->index.hashEntryCount == source_volume->index.hashEntryCount);
 
 	//temporary stuff
-	const int hashEntryCount = sourceVolume->index.hashEntryCount;
-	ORUtils::MemoryBlock<HashEntryAllocationState> hashEntryStates(hashEntryCount, MEMORYDEVICE_CPU);
+	const int hash_entry_count = source_volume->index.hashEntryCount;
+	ORUtils::MemoryBlock<HashEntryAllocationState> hashEntryStates(hash_entry_count, MEMORYDEVICE_CPU);
 	HashEntryAllocationState* hashEntryStates_device = hashEntryStates.GetData(MEMORYDEVICE_CPU);
-	ORUtils::MemoryBlock<Vector3s> blockCoords(hashEntryCount, MEMORYDEVICE_CPU);
+	ORUtils::MemoryBlock<Vector3s> blockCoords(hash_entry_count, MEMORYDEVICE_CPU);
 	Vector3s* blockCoords_device = blockCoords.GetData(MEMORYDEVICE_CPU);
 
-	TVoxel* sourceVoxels = sourceVolume->localVBA.GetVoxelBlocks();
-	const HashEntry* sourceHashTable = sourceVolume->index.GetEntries();
+	TVoxel* source_voxels = source_volume->localVBA.GetVoxelBlocks();
+	const HashEntry* source_hash_table = source_volume->index.GetEntries();
 
-	HashEntry* destinationHashTable = targetVolume->index.GetEntries();
-	TVoxel* destinationVoxels = targetVolume->localVBA.GetVoxelBlocks();
+	HashEntry* destination_hash_table = target_volume->index.GetEntries();
+	TVoxel* destination_voxels = target_volume->localVBA.GetVoxelBlocks();
 
-	bool voxelsWereCopied = false;
+	bool voxels_were_copied = false;
 
 	if (offset == Vector3i(0)) {
 		// *** allocate missing entries in target hash table
 		// traverse source hash blocks, see which ones are at least partially inside the specified bounds
-		//TODO: move this functionality to indexing engine and call that instead
-		for (int sourceHash = 0; sourceHash < hashEntryCount; sourceHash++) {
-			const HashEntry& currentSourceHashEntry = sourceHashTable[sourceHash];
-			if (currentSourceHashEntry.ptr < 0) continue;
-			Vector3i originalHashBlockPosition = currentSourceHashEntry.pos.toInt() * VOXEL_BLOCK_SIZE;
-			if (IsHashBlockFullyInRange(originalHashBlockPosition, bounds) ||
-			    IsHashBlockPartiallyInRange(originalHashBlockPosition, bounds)) {
-				int destinationHash = HashCodeFromBlockPosition(currentSourceHashEntry.pos);
-				bool collisionDetected = false;
-				MarkAsNeedingAllocationIfNotFound(hashEntryStates_device, blockCoords_device, destinationHash,
-				                                  currentSourceHashEntry.pos, destinationHashTable, collisionDetected);
-			}
-		}
 
-		IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance().
-				AllocateHashEntriesUsingAllocationStateList(targetVolume);
+		IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance().AllocateUsingOtherVolume_Bounded(
+				target_volume, source_volume, bounds);
 
 		//iterate over source hash blocks & fill in the target hash blocks
-		for (int sourceHash = 0; sourceHash < hashEntryCount; sourceHash++) {
-			const HashEntry& sourceHashEntry = sourceHashTable[sourceHash];
+		for (int source_hash_code = 0; source_hash_code < hash_entry_count; source_hash_code++) {
+			const HashEntry& source_hash_entry = source_hash_table[source_hash_code];
 
-			if (sourceHashEntry.ptr < 0) continue;
-			int destinationHash;
-			FindHashAtPosition(destinationHash, sourceHashEntry.pos, destinationHashTable);
-			const HashEntry& destinationHashEntry = destinationHashTable[destinationHash];
+			if (source_hash_entry.ptr < 0) continue;
+			int destination_hash;
+			FindHashAtPosition(destination_hash, source_hash_entry.pos, destination_hash_table);
+			const HashEntry& destinationHashEntry = destination_hash_table[destination_hash];
 
 			//position of the current entry in 3D space (in voxel units)
-			Vector3i sourceHashBlockPositionVoxels = sourceHashEntry.pos.toInt() * VOXEL_BLOCK_SIZE;
-			TVoxel* localSourceVoxelBlock = &(sourceVoxels[sourceHashEntry.ptr * (VOXEL_BLOCK_SIZE3)]);
-			TVoxel* localDestinationVoxelBlock = &(destinationVoxels[destinationHashEntry.ptr * (VOXEL_BLOCK_SIZE3)]);
-			if (IsHashBlockFullyInRange(sourceHashBlockPositionVoxels, bounds)) {
+			Vector3i source_block_position_voxels = source_hash_entry.pos.toInt() * VOXEL_BLOCK_SIZE;
+			TVoxel* local_source_voxel_block = &(source_voxels[source_hash_entry.ptr * (VOXEL_BLOCK_SIZE3)]);
+			TVoxel* local_destination_voxel_block = &(destination_voxels[destinationHashEntry.ptr *
+			                                                             (VOXEL_BLOCK_SIZE3)]);
+			if (IsHashBlockFullyInBounds(source_block_position_voxels, bounds)) {
 				//we can safely copy the whole block
-				memcpy(localDestinationVoxelBlock, localSourceVoxelBlock, sizeof(TVoxel) * VOXEL_BLOCK_SIZE3);
-				voxelsWereCopied = true;
-			} else if (IsHashBlockPartiallyInRange(sourceHashBlockPositionVoxels, bounds)) {
+				memcpy(local_destination_voxel_block, local_source_voxel_block, sizeof(TVoxel) * VOXEL_BLOCK_SIZE3);
+				voxels_were_copied = true;
+			} else if (IsHashBlockPartiallyInBounds(source_block_position_voxels, bounds)) {
 				//we have to copy only parts of the scene that are within bounds
 				int zRangeStart, zRangeEnd, yRangeStart, yRangeEnd, xRangeStart, xRangeEnd;
 				ComputeCopyRanges(xRangeStart, xRangeEnd, yRangeStart, yRangeEnd, zRangeStart, zRangeEnd,
-				                  sourceHashBlockPositionVoxels, bounds);
+				                  source_block_position_voxels, bounds);
 				for (int z = zRangeStart; z < zRangeEnd; z++) {
 					for (int y = yRangeStart; y < yRangeEnd; y++) {
 						for (int x = xRangeStart; x < xRangeEnd; x++) {
 							int locId = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
-							memcpy(&localDestinationVoxelBlock[locId], &localSourceVoxelBlock[locId], sizeof(TVoxel));
+							memcpy(&local_destination_voxel_block[locId], &local_source_voxel_block[locId],
+							       sizeof(TVoxel));
 						}
 					}
 				}
-				voxelsWereCopied = true;
+				voxels_were_copied = true;
 			}
 
 		}
 	} else {
 		//non-zero-offset case
+		IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance()
+				.AllocateUsingOtherVolume_OffsetAndBounded(target_volume, source_volume, bounds, offset);
 
-		//We need to allocated needed blocks in the destination hash
-		//This can be done by using the destination bounds
-		Vector6i destination_bounds(bounds.min_x + offset.x, bounds.min_y + offset.y, bounds.min_z + offset.z,
-		                            bounds.max_x + offset.x, bounds.max_y + offset.y, bounds.max_z + offset.z);
-
-		Vector3i destinationMinPoint(destination_bounds.min_x, destination_bounds.min_y, destination_bounds.min_z);
-		Vector3i destinationMaxPoint(destination_bounds.max_x, destination_bounds.max_y, destination_bounds.max_z);
-		Vector3i minPointBlock, maxPointBlock;
-		pointToVoxelBlockPos(destinationMinPoint, minPointBlock);
-		pointToVoxelBlockPos(destinationMaxPoint, maxPointBlock);
-		for (int block_z = minPointBlock.z; block_z < maxPointBlock.z; block_z++) {
-			for (int block_y = minPointBlock.y; block_y < maxPointBlock.y; block_y++) {
-				for (int block_x = minPointBlock.x; block_x < maxPointBlock.x; block_x++) {
-					Vector3i blockPos(block_x, block_y, block_x);
-					int destinationHash = HashCodeFromBlockPosition(blockPos);
-					bool collisionDetected = false;
-					MarkAsNeedingAllocationIfNotFound(hashEntryStates_device, blockCoords_device, destinationHash,
-					                                  blockPos.toShortFloor(), destinationHashTable, collisionDetected);
-				}
-			}
-		}
-
-		IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance().
-				AllocateHashEntriesUsingAllocationStateList(targetVolume);
 		VoxelBlockHash::IndexCache source_cache;
 
 		for (int source_z = bounds.min_z; source_z < bounds.max_z; source_z++) {
@@ -231,70 +199,65 @@ bool EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::CopyVolumeSlice(
 					Vector3i destination_point = source_point + offset;
 					TVoxel source_voxel =
 							EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::
-							ReadVoxel(sourceVolume, source_point, source_cache);
+							ReadVoxel(source_volume, source_point, source_cache);
 					EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::
-					SetVoxelNoAllocation(targetVolume, destination_point, source_voxel);
-					voxelsWereCopied = true;
+					SetVoxelNoAllocation(target_volume, destination_point, source_voxel);
+					voxels_were_copied = true;
 				}
 			}
 		}
 	}
 
-	return voxelsWereCopied;
+	return voxels_were_copied;
 }
 
 template<typename TVoxel>
 bool EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::CopyVolume(
-		VoxelVolume<TVoxel, VoxelBlockHash>* targetVolume, VoxelVolume<TVoxel, VoxelBlockHash>* sourceVolume,
+		VoxelVolume<TVoxel, VoxelBlockHash>* target_volume, VoxelVolume<TVoxel, VoxelBlockHash>* source_volume,
 		const Vector3i& offset) {
 
-	assert(targetVolume->index.hashEntryCount == sourceVolume->index.hashEntryCount);
+	assert(target_volume->index.hashEntryCount == source_volume->index.hashEntryCount);
 
 	//reset destination scene
-	EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::ResetVolume(targetVolume);
+	EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::ResetVolume(target_volume);
 
-	const int hashEntryCount = sourceVolume->index.hashEntryCount;
+	const int hash_entry_count = source_volume->index.hashEntryCount;
 
-	//temporary stuff
-	ORUtils::MemoryBlock<HashEntryAllocationState> hashEntryStates(hashEntryCount, MEMORYDEVICE_CPU);
-	ORUtils::MemoryBlock<Vector3s> blockCoordinates(hashEntryCount, MEMORYDEVICE_CPU);
-	HashEntryAllocationState* hashEntryStates_device = hashEntryStates.GetData(MEMORYDEVICE_CPU);
-	Vector3s* blockCoordinates_device = blockCoordinates.GetData(MEMORYDEVICE_CPU);
+	TVoxel* source_voxels = source_volume->localVBA.GetVoxelBlocks();
+	const HashEntry* source_hash_table = source_volume->index.GetEntries();
 
-	TVoxel* sourceVoxels = sourceVolume->localVBA.GetVoxelBlocks();
-	const HashEntry* sourceHashTable = sourceVolume->index.GetEntries();
+	HashEntry* destination_hash_table = target_volume->index.GetEntries();
+	TVoxel* destination_voxels = target_volume->localVBA.GetVoxelBlocks();
 
-	HashEntry* destinationHashTable = targetVolume->index.GetEntries();
-	TVoxel* destinationVoxels = targetVolume->localVBA.GetVoxelBlocks();
-
-	bool voxelsWereCopied = false;
+	bool voxels_were_copied = false;
 
 	if (offset == Vector3i(0)) {
-		IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance().AllocateUsingOtherVolume(targetVolume, sourceVolume);
+		IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance().AllocateUsingOtherVolume(target_volume,
+		                                                                                              source_volume);
 #ifdef WITH_OPENMP
-#pragma omp parallel for default(none) shared(sourceHashTable,destinationHashTable,sourceVoxels,destinationVoxels,voxelsWereCopied)
+#pragma omp parallel for default(none) shared(source_hash_table, destination_hash_table, source_voxels, destination_voxels, voxels_were_copied)
 #endif
-		for (int sourceHash = 0; sourceHash < hashEntryCount; sourceHash++) {
-			const HashEntry& sourceHashEntry = sourceHashTable[sourceHash];
+		for (int sourceHash = 0; sourceHash < hash_entry_count; sourceHash++) {
+			const HashEntry& sourceHashEntry = source_hash_table[sourceHash];
 
 			if (sourceHashEntry.ptr < 0) continue;
 			int destinationHash;
-			FindHashAtPosition(destinationHash, sourceHashEntry.pos, destinationHashTable);
-			const HashEntry& destinationHashEntry = destinationHashTable[destinationHash];
+			FindHashAtPosition(destinationHash, sourceHashEntry.pos, destination_hash_table);
+			const HashEntry& destinationHashEntry = destination_hash_table[destinationHash];
 			//position of the current entry in 3D space (in voxel units)
-			TVoxel* localSourceVoxelBlock = &(sourceVoxels[sourceHashEntry.ptr * (VOXEL_BLOCK_SIZE3)]);
-			TVoxel* localDestinationVoxelBlock = &(destinationVoxels[destinationHashEntry.ptr * (VOXEL_BLOCK_SIZE3)]);
+			TVoxel* localSourceVoxelBlock = &(source_voxels[sourceHashEntry.ptr * (VOXEL_BLOCK_SIZE3)]);
+			TVoxel* localDestinationVoxelBlock = &(destination_voxels[destinationHashEntry.ptr * (VOXEL_BLOCK_SIZE3)]);
 			//we can safely copy the whole block
 			memcpy(localDestinationVoxelBlock, localSourceVoxelBlock, sizeof(TVoxel) * VOXEL_BLOCK_SIZE3);
-			voxelsWereCopied = true;
+			voxels_were_copied = true;
 		}
 	} else {
 #ifdef WITH_OPENMP
-#pragma omp parallel for default(none) shared(sourceHashTable,sourceVoxels,voxelsWereCopied,offset,targetVolume)
+#pragma omp parallel for default(none) shared(source_hash_table, source_voxels, voxels_were_copied, offset, target_volume)
 #endif
 		// traverse source hash blocks
-		for (int sourceHash = 0; sourceHash < hashEntryCount; sourceHash++) {
-			const HashEntry& currentSourceHashEntry = sourceHashTable[sourceHash];
+		for (int sourceHash = 0; sourceHash < hash_entry_count; sourceHash++) {
+			const HashEntry& currentSourceHashEntry = source_hash_table[sourceHash];
 			if (currentSourceHashEntry.ptr < 0) continue;
 
 			Vector3i sourceBlockPos;
@@ -303,25 +266,25 @@ bool EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::CopyVolume(
 			sourceBlockPos.z = currentSourceHashEntry.pos.z;
 			sourceBlockPos *= VOXEL_BLOCK_SIZE;
 
-			TVoxel* localSourceVoxelBlock = &(sourceVoxels[currentSourceHashEntry.ptr * (VOXEL_BLOCK_SIZE3)]);
+			TVoxel* localSourceVoxelBlock = &(source_voxels[currentSourceHashEntry.ptr * (VOXEL_BLOCK_SIZE3)]);
 
 			for (int z = 0; z < VOXEL_BLOCK_SIZE; z++) {
 				for (int y = 0; y < VOXEL_BLOCK_SIZE; y++) {
 					for (int x = 0; x < VOXEL_BLOCK_SIZE; x++) {
 						int locId;
-						Vector3i sourcePoint(sourceBlockPos.x + x, sourceBlockPos.y + y, sourceBlockPos.z + z);
-						Vector3i destinationPoint = sourcePoint + offset;
+						Vector3i source_point(sourceBlockPos.x + x, sourceBlockPos.y + y, sourceBlockPos.z + z);
+						Vector3i destination_point = source_point + offset;
 						locId = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
-						TVoxel sourceVoxel = localSourceVoxelBlock[locId];
+						TVoxel source_voxel = localSourceVoxelBlock[locId];
 						EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::
-						SetVoxel(targetVolume, destinationPoint, sourceVoxel);
-						voxelsWereCopied = true;
+						SetVoxel(target_volume, destination_point, source_voxel);
+						voxels_were_copied = true;
 					}
 				}
 			}
 		}
 	}
-	return voxelsWereCopied;
+	return voxels_were_copied;
 }
 
 // endregion ===========================================================================================================

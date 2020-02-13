@@ -51,39 +51,20 @@ public:
 	 * voxel representation
 	 * \param volume output scene
 	 * \param view input view
-	 * \param trackingState state of tracking
+	 * \param tracking_state state of tracking
 	 */
-	virtual void GenerateTsdfVolumeFromView(VoxelVolume<TVoxel, TIndex>* volume, const ITMView* view,
-	                                        const CameraTrackingState* trackingState) = 0;
+	virtual void GenerateTsdfVolumeFromTwoSurfaces(VoxelVolume<TVoxel, TIndex>* volume, const ITMView* view,
+	                                               const CameraTrackingState* tracking_state) = 0;
 
 	/**
-	 * \brief Clears given volume, then uses the depth image from provided live view to generate an SDF
+	 * \brief Clears given scene, then uses the depth image from provided live view to generate an SDF
 	 * voxel representation
-	 * \param[out] volume output volume
-	 * \param[in] view input view
-	 * \param[in] depth_camera_matrix current transformation matrix of the camera relative to world origin
+	 * \param volume output scene
+	 * \param view input view
+	 * \param tracking_state state of tracking
 	 */
-	virtual void GenerateTsdfVolumeFromView(VoxelVolume<TVoxel, TIndex>* volume, const ITMView* view,
-	                                        const Matrix4f& depth_camera_matrix = Matrix4f::Identity()) = 0;
-
-	/**
-	 * \brief Clears given scene, then uses the depth image from provided live view to generate a TSDF
-	 * voxel representation. Allocation (if any is necessary by the data structure holding the TSDF) is done by
-	 * expanding allocation required for just simple depth-image-based allocation by some kind of "sleeve", e.g.
-	 * 1-ring of voxel blocks in the case of voxel hash blocks.
-	 * \param[out] volume output volume
-	 * \param temporaryAllocationVolume used for temporary allocation, may also be reset on being passed in
-	 * \param[in] view input view
-	 * \param[in] depth_camera_matrix current transformation matrix of the camera relative to world origin
-	 */
-	virtual void GenerateTsdfVolumeFromViewExpanded(VoxelVolume<TVoxel, TIndex>* volume,
-	                                                VoxelVolume<TVoxel, TIndex>* temporaryAllocationVolume,
-	                                                const ITMView* view,
-	                                                const Matrix4f& depth_camera_matrix = Matrix4f::Identity()) = 0;
-
-//	virtual void GenerateTsdfVolumeFromView(VoxelVolume<TVoxel, TIndex>* volume, const ITMView* view, const RenderState* renderState,
-//			const Matrix4f& depth_camera_matrix = Matrix4f::Identity()) = 0;
-
+	virtual void GenerateTsdfVolumeFromSurface(VoxelVolume<TVoxel, TIndex>* volume, const ITMView* view,
+	                                               const CameraTrackingState* tracking_state) = 0;
 	/**
 	 * \brief Update the voxel blocks by integrating depth and possibly color information from the given view. Assume
 	 * camera is at world origin.
@@ -108,14 +89,11 @@ public:
 	void UpdateVisibleList(VoxelVolume<TVoxel, TIndex>* scene, const ITMView* view,
 	                       const CameraTrackingState* trackingState, const RenderState* renderState,
 	                       bool resetVisibleList) override;
-	void GenerateTsdfVolumeFromView(VoxelVolume<TVoxel, TIndex>* volume, const ITMView* view,
-	                                const CameraTrackingState* trackingState) override;
-	void GenerateTsdfVolumeFromView(VoxelVolume<TVoxel, TIndex>* volume, const ITMView* view,
-	                                const Matrix4f& depth_camera_matrix = Matrix4f::Identity()) override;
-	void GenerateTsdfVolumeFromViewExpanded(VoxelVolume<TVoxel, TIndex>* volume,
-	                                        VoxelVolume<TVoxel, TIndex>* temporaryAllocationVolume,
-	                                        const ITMView* view,
-	                                        const Matrix4f& depth_camera_matrix = Matrix4f::Identity()) override;
+	void GenerateTsdfVolumeFromTwoSurfaces(VoxelVolume<TVoxel, TIndex>* volume, const ITMView* view,
+	                                       const CameraTrackingState* tracking_state) override;
+	void GenerateTsdfVolumeFromSurface(VoxelVolume<TVoxel, TIndex>* volume, const ITMView* view,
+	                                           const CameraTrackingState* tracking_state) override;
+
 	void IntegrateDepthImageIntoTsdfVolume(VoxelVolume<TVoxel, TIndex>* volume, const ITMView* view);
 	void IntegrateDepthImageIntoTsdfVolume(VoxelVolume<TVoxel, TIndex>* volume, const ITMView* view,
 	                                       const CameraTrackingState* trackingState);

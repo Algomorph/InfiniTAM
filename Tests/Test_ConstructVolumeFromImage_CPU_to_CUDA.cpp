@@ -30,6 +30,7 @@
 #include "../ITMLib/Engines/Indexing/Interface/IndexingEngine.h"
 #include "../ITMLib/Utils/Analytics/AlmostEqual.h"
 #include "TestUtils.h"
+#include "../ITMLib/Objects/Tracking/CameraTrackingState.h"
 //(cpu)
 #include "../ITMLib/Utils/Analytics/VolumeStatisticsCalculator/CPU/VolumeStatisticsCalculator_CPU.h"
 #include "../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
@@ -42,7 +43,7 @@
 
 using namespace ITMLib;
 
-BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_VBH_Expnaded_CPU_CUDA, Frame16And17Fixture) {
+BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_VBH_CPU_CUDA, Frame16And17Fixture) {
 
 	ITMView* view_CPU = nullptr;
 	updateView(&view_CPU, "TestData/snoopy_depth_000017.png",
@@ -59,33 +60,28 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_VBH_Expnaded_CPU_CUDA, Frame16And1
 	// CPU
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_17_CPU(MEMORYDEVICE_CPU, InitParams<VoxelBlockHash>());
 	volume_VBH_17_CPU.Reset();
-	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_17_CPU_depth_allocation(MEMORYDEVICE_CPU,
-	                                                                          InitParams<VoxelBlockHash>());
-	volume_VBH_17_CPU_depth_allocation.Reset();
 	// CUDA
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_17_CUDA(MEMORYDEVICE_CUDA, InitParams<VoxelBlockHash>());
 	volume_VBH_17_CUDA.Reset();
-	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_17_CUDA_depth_allocation(MEMORYDEVICE_CUDA,
-	                                                                           InitParams<VoxelBlockHash>());
-	volume_VBH_17_CUDA_depth_allocation.Reset();
 	// comparison volume
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_CUDA_to_CPU(MEMORYDEVICE_CPU, InitParams<VoxelBlockHash>());
 	volume_CUDA_to_CPU.Reset();
-	
+
+	CameraTrackingState tracking_state_CPU(view_CPU->depth->noDims,MEMORYDEVICE_CPU);
+	CameraTrackingState tracking_state_CUDA(view_CUDA->depth->noDims,MEMORYDEVICE_CUDA);
 // *** allocate hash blocks ***
 	// CPU
 	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>& indexer_CPU =
 			IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance();
-	indexer_CPU.AllocateNearSurface(&volume_VBH_17_CPU_depth_allocation, view_CPU);
-	indexer_CPU.AllocateUsingOtherVolumeAndSetVisibilityExpanded(&volume_VBH_17_CPU, &volume_VBH_17_CPU_depth_allocation, view_CPU);
+	indexer_CPU.AllocateNearSurface(&volume_VBH_17_CPU, view_CPU);
+
 	// CUDA
 	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>& indexer_CUDA =
 			IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance();
-	indexer_CUDA.AllocateNearSurface(&volume_VBH_17_CUDA_depth_allocation, view_CUDA);
-	indexer_CUDA.AllocateUsingOtherVolumeAndSetVisibilityExpanded(&volume_VBH_17_CUDA, &volume_VBH_17_CUDA_depth_allocation, view_CUDA);
+	indexer_CUDA.AllocateNearSurface(&volume_VBH_17_CUDA, view_CUDA);
 
 
-// *** compare before depth integration ***
+// *** compare allocation consistency before depth integration ***
 	volume_CUDA_to_CPU.SetFrom(volume_VBH_17_CUDA);
 	float absoluteTolerance = 1e-7;
 	BOOST_REQUIRE(contentAlmostEqual_CPU_Verbose(&volume_CUDA_to_CPU, &volume_VBH_17_CPU, absoluteTolerance));
@@ -96,13 +92,11 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_VBH_Expnaded_CPU_CUDA, Frame16And1
 			DepthFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, VoxelBlockHash>(
 					MEMORYDEVICE_CPU);
 	reconstructionEngine_VBH_CPU->IntegrateDepthImageIntoTsdfVolume(&volume_VBH_17_CPU, view_CPU);
-	reconstructionEngine_VBH_CPU->IntegrateDepthImageIntoTsdfVolume(&volume_VBH_17_CPU_depth_allocation, view_CPU);
 	// CUDA
 	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, VoxelBlockHash>* reconstructionEngine_VBH_CUDA =
 			DepthFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, VoxelBlockHash>(
 					MEMORYDEVICE_CUDA);
 	reconstructionEngine_VBH_CUDA->IntegrateDepthImageIntoTsdfVolume(&volume_VBH_17_CUDA, view_CUDA);
-	reconstructionEngine_VBH_CUDA->IntegrateDepthImageIntoTsdfVolume(&volume_VBH_17_CUDA_depth_allocation, view_CUDA);
 
 // *** compare after depth integration ***
 	volume_CUDA_to_CPU.SetFrom(volume_VBH_17_CUDA);

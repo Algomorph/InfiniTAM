@@ -55,23 +55,17 @@ void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateUsingOtherVolume
 		VoxelVolume<TVoxelTarget, TIndex>* targetVolume, VoxelVolume<TVoxelSource, TIndex>* sourceVolume) {}
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-template<WarpType TWarpType, typename TWarp>
-void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateFromWarpedVolume(
-		VoxelVolume<TWarp, TIndex>* warpField,
-		VoxelVolume<TVoxel, TIndex>* sourceTSDF,
-		VoxelVolume<TVoxel, TIndex>* targetTSDF) {}
+template<typename TVoxelTarget, typename TVoxelSource>
+void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateUsingOtherVolume_Bounded(
+		VoxelVolume<TVoxelTarget, TIndex>* targetVolume, VoxelVolume<TVoxelSource, TIndex>* sourceVolume,
+		const Extent3D& bounds) {}
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 template<typename TVoxelTarget, typename TVoxelSource>
-void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateUsingOtherVolumeExpanded(
-		VoxelVolume<TVoxelTarget, TIndex>* targetVolume, VoxelVolume<TVoxelSource, TIndex>* sourceVolume) {}
+void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateUsingOtherVolume_OffsetAndBounded(
+		VoxelVolume<TVoxelTarget, TIndex>* targetVolume, VoxelVolume<TVoxelSource, TIndex>* sourceVolume,
+		const Extent3D& source_bounds, const Vector3i& target_offset) {}
 
-template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-template<typename TVoxelTarget, typename TVoxelSource>
-void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateUsingOtherVolumeAndSetVisibilityExpanded(
-		VoxelVolume<TVoxelTarget, TIndex>* targetVolume,
-		VoxelVolume<TVoxelSource, TIndex>* sourceVolume,
-		ITMView* view, const Matrix4f& depth_camera_matrix) {}
 
 
 

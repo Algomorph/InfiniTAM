@@ -131,41 +131,32 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_PVA_VBH_Expnaded_CPU, Frame16And17
 	           "TestData/snoopy_color_000017.png", "TestData/snoopy_omask_000017.png",
 	           "TestData/snoopy_calib.txt", MEMORYDEVICE_CPU);
 
+	CameraTrackingState tracking_state(view->depth->noDims, MEMORYDEVICE_CUDA);
+
 	// *** construct volumes ***
 	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_PVA_17(MEMORYDEVICE_CPU, InitParams<PlainVoxelArray>());
 	EditAndCopyEngineFactory::Instance<TSDFVoxel, PlainVoxelArray, MEMORYDEVICE_CPU>().ResetVolume(&volume_PVA_17);
 	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, PlainVoxelArray>* reconstructionEngine_PVA =
 			DepthFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, PlainVoxelArray>(MEMORYDEVICE_CPU);
-	reconstructionEngine_PVA->GenerateTsdfVolumeFromView(&volume_PVA_17, view);
+	reconstructionEngine_PVA->GenerateTsdfVolumeFromTwoSurfaces(&volume_PVA_17, view, &tracking_state);
 
 
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_17(MEMORYDEVICE_CPU, InitParams<VoxelBlockHash>());
-	EditAndCopyEngineFactory::Instance<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>().ResetVolume(&volume_VBH_17);
-	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_17_depth_allocation(MEMORYDEVICE_CPU,
-	                                                                      InitParams<VoxelBlockHash>());
-	EditAndCopyEngineFactory::Instance<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>().ResetVolume(
-			&volume_VBH_17_depth_allocation);
+	volume_VBH_17.Reset();
 
 	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>& indexer =
 			IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance();
-	indexer.AllocateNearSurface(&volume_VBH_17_depth_allocation, view);
-	indexer.AllocateUsingOtherVolumeAndSetVisibilityExpanded(&volume_VBH_17, &volume_VBH_17_depth_allocation, view);
+	indexer.AllocateNearAndBetweenTwoSurfaces(&volume_VBH_17, &tracking_state, view);
 
 	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, VoxelBlockHash>* reconstructionEngine_VBH =
 			DepthFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, VoxelBlockHash>(MEMORYDEVICE_CPU);
 	reconstructionEngine_VBH->IntegrateDepthImageIntoTsdfVolume(&volume_VBH_17, view);
-	reconstructionEngine_VBH->IntegrateDepthImageIntoTsdfVolume(&volume_VBH_17_depth_allocation, view);
 
 
 	float absoluteTolerance = 1e-7;
-	BOOST_REQUIRE(allocatedContentAlmostEqual_CPU_Verbose(&volume_PVA_17, &volume_VBH_17_depth_allocation,
-	                                                      absoluteTolerance));
-	BOOST_REQUIRE(contentForFlagsAlmostEqual_CPU_Verbose(&volume_PVA_17, &volume_VBH_17_depth_allocation,
-	                                                     VoxelFlags::VOXEL_NONTRUNCATED,
-	                                                     absoluteTolerance));
 
 #ifdef SAVE_TEST_DATA
-	std::string path_VBH = "TestData/snoopy_result_fr16-17_partial_VBH/snoopy_partial_frame_17_expanded_";
+	std::string path_VBH = "TestData/snoopy_result_fr16-17_partial_VBH/snoopy_partial_frame_17_span_";
 	volume_VBH_17.SaveToDirectory(std::string("../../Tests/") + path_VBH);
 #endif
 
@@ -210,7 +201,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
 	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, PlainVoxelArray>* reconstructionEngine_PVA =
 			DepthFusionEngineFactory
 			::Build<TSDFVoxel, WarpVoxel, PlainVoxelArray>(MEMORYDEVICE_CPU);
-	reconstructionEngine_PVA->GenerateTsdfVolumeFromView(&scene1, view, &trackingState);
+	reconstructionEngine_PVA->GenerateTsdfVolumeFromTwoSurfaces(&scene1, view, &trackingState);
 
 	const int num_stripes = 62;
 
@@ -279,7 +270,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
 			DepthFusionEngineFactory
 			::Build<TSDFVoxel, WarpVoxel, VoxelBlockHash>(MEMORYDEVICE_CPU);
 
-	reconstructionEngine_VBH->GenerateTsdfVolumeFromView(&scene2, view, &trackingState);
+	reconstructionEngine_VBH->GenerateTsdfVolumeFromTwoSurfaces(&scene2, view, &trackingState);
 
 	tolerance = 1e-5;
 	BOOST_REQUIRE(allocatedContentAlmostEqual_CPU(&scene1, &scene2, tolerance));
@@ -288,14 +279,14 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
 	                                               configuration::SWAPPINGMODE_ENABLED,
 	                                               MEMORYDEVICE_CPU, {volumeSize, volumeOffset});
 	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetVolume(&scene3);
-	reconstructionEngine_PVA->GenerateTsdfVolumeFromView(&scene3, view, &trackingState);
+	reconstructionEngine_PVA->GenerateTsdfVolumeFromTwoSurfaces(&scene3, view, &trackingState);
 	BOOST_REQUIRE(contentAlmostEqual_CPU(&scene1, &scene3, tolerance));
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> scene4(&configuration::get().general_voxel_volume_parameters,
 	                                              configuration::get().swapping_mode ==
 	                                              configuration::SWAPPINGMODE_ENABLED,
 	                                              MEMORYDEVICE_CPU, {0x800, 0x20000});
 	ManipulationEngine_CPU_VBH_Voxel::Inst().ResetVolume(&scene4);
-	reconstructionEngine_VBH->GenerateTsdfVolumeFromView(&scene4, view, &trackingState);
+	reconstructionEngine_VBH->GenerateTsdfVolumeFromTwoSurfaces(&scene4, view, &trackingState);
 	BOOST_REQUIRE(contentAlmostEqual_CPU(&scene2, &scene4, tolerance));
 
 	Vector3i coordinate = zeroLevelSetCoords[0];
@@ -359,7 +350,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CPU) {
 	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, PlainVoxelArray>* reconstructionEngine_PVA =
 			DepthFusionEngineFactory
 			::Build<TSDFVoxel, WarpVoxel, PlainVoxelArray>(MEMORYDEVICE_CPU);
-	reconstructionEngine_PVA->GenerateTsdfVolumeFromView(&generated_volume, view, &trackingState);
+	reconstructionEngine_PVA->GenerateTsdfVolumeFromTwoSurfaces(&generated_volume, view, &trackingState);
 	//generated_volume.SaveToDirectory("../../Tests/TestData/test_PVA_ConstructFromImage2_");
 
 	VoxelVolume<TSDFVoxel, PlainVoxelArray> loaded_volume(&configuration::get().general_voxel_volume_parameters,
@@ -385,7 +376,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CPU) {
 			DepthFusionEngineFactory
 			::Build<TSDFVoxel, WarpVoxel, VoxelBlockHash>(MEMORYDEVICE_CPU);
 
-	reconstructionEngine_VBH->GenerateTsdfVolumeFromView(&scene3, view, &trackingState);
+	reconstructionEngine_VBH->GenerateTsdfVolumeFromTwoSurfaces(&scene3, view, &trackingState);
 
 	BOOST_REQUIRE(allocatedContentAlmostEqual_CPU(&loaded_volume, &scene3, tolerance));
 	delete depth;

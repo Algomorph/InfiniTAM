@@ -143,6 +143,25 @@ inline bool MarkAsNeedingAllocationIfNotFound(ITMLib::HashEntryAllocationState* 
 
 };
 
+_CPU_AND_GPU_CODE_
+inline bool
+HashBlockAllocatedAtOffset(const CONSTPTR(ITMLib::VoxelBlockHash::IndexData)* target_index,
+                           const THREADPTR(Vector3s)& block_position,
+                           const CONSTPTR(Vector6i)& offset_block_range) {
+
+	bool allocated = false;
+	for (int z = block_position.z + offset_block_range.min_z; z < block_position.z + offset_block_range.max_z; z++) {
+		for (int y = block_position.y + offset_block_range.min_y; y < block_position.y + offset_block_range.max_y; y++) {
+			for (int x = block_position.x + offset_block_range.min_x; x < block_position.x + offset_block_range.max_x; x++) {
+				if (FindHashCodeAt(target_index, Vector3s(x, y, z)) != -1) {
+					allocated = true;
+				}
+			}
+		}
+	}
+	return allocated;
+}
+
 _DEVICE_WHEN_AVAILABLE_
 inline bool MarkAsNeedingAllocationIfNotFound(ITMLib::HashEntryAllocationState* hash_entry_states,
                                               Vector3s* hash_block_coordinates,
@@ -156,151 +175,7 @@ inline bool MarkAsNeedingAllocationIfNotFound(ITMLib::HashEntryAllocationState* 
 	                                         colliding_block_count);
 }
 
-/**
- * \brief Determines whether the hash block at the specified block position needs it's voxels to be allocated, as well
- * as whether they should be allocated in the excess list or the ordered list of the hash table.
- * If any of these are true, marks the corresponding entry in \param hashEntryStates
- * \param[in,out] hashEntryStates  array where to set the allocation type at final hashIdx index
- * \param[in,out] hash_block_coordinates  array block coordinates for the new hash blocks at final hashIdx index
- * \param[in,out] hash_code  takes in original index assuming coords, i.e. \refitem HashCodeFromBlockPosition(\param desired_hash_block_position),
- * returns final index of the hash block to be allocated (may be updated based on hash closed chaining)
- * \param[in] desired_hash_block_position  position of the hash block to check / allocate
- * \param[in] hash_table  hash table with existing blocks
- * \param[in] collisionDetected set to true if a block with the same hashcode has already been marked for allocation ( a collision occured )
- * \return true if the block needs allocation, false otherwise
- */
-_CPU_AND_GPU_CODE_
-inline bool MarkAsNeedingAllocationIfNotFound(ITMLib::HashEntryAllocationState* hashEntryStates,
-                                              Vector3s* hash_block_coordinates, int& hash_code,
-                                              const CONSTPTR(Vector3s)& desired_hash_block_position,
-                                              const CONSTPTR(HashEntry)* hash_table, bool& collisionDetected) {
 
-	HashEntry hash_entry = hash_table[hash_code];
-	//check if hash table contains entry
-
-	if (!(IS_EQUAL3(hash_entry.pos, desired_hash_block_position) && hash_entry.ptr >= -1)) {
-
-		auto setHashEntryState = [&](HashEntryAllocationState state) {
-#if defined(__CUDACC__) && defined(__CUDA_ARCH__)
-			if (atomicCAS((char*) hashEntryStates + hash_code,
-					  (char) ITMLib::NEEDS_NO_CHANGE,
-					  (char) state) != ITMLib::NEEDS_NO_CHANGE){
-			if (IS_EQUAL3(hash_block_coordinates[hash_code], desired_hash_block_position)) return false;
-			//hash code already marked for allocation, but at different coordinates, cannot allocate
-			collisionDetected = true;
-			return false;
-		} else {
-			hash_block_coordinates[hash_code] = desired_hash_block_position;
-			return true;
-		}
-#else
-
-			bool success = false;
-#ifdef WITH_OPENMP
-#pragma omp critical
-#endif
-			{
-				//single-threaded version
-				if (hashEntryStates[hash_code] != ITMLib::NEEDS_NO_CHANGE) {
-					if (!IS_EQUAL3(hash_block_coordinates[hash_code], desired_hash_block_position)) {
-						//hash code already marked for allocation, but at different coordinates, cannot allocate
-						collisionDetected = true;
-					}
-					success = false;
-				} else {
-					hashEntryStates[hash_code] = state;
-					hash_block_coordinates[hash_code] = desired_hash_block_position;
-					success = true;
-				}
-			}
-			return success;
-#endif
-		};
-		if (hash_entry.ptr >= -1) {
-			//search excess list only if there is no room in ordered part
-			while (hash_entry.offset >= 1) {
-				hash_code = ORDERED_LIST_SIZE + hash_entry.offset - 1;
-				hash_entry = hash_table[hash_code];
-
-				if (IS_EQUAL3(hash_entry.pos, desired_hash_block_position) && hash_entry.ptr >= -1) {
-					return false;
-				}
-			}
-			return setHashEntryState(ITMLib::NEEDS_ALLOCATION_IN_EXCESS_LIST);
-		}
-		return setHashEntryState(ITMLib::NEEDS_ALLOCATION_IN_ORDERED_LIST);
-	}
-	// already have hash block, no allocation needed
-	return false;
-
-};
-
-
-_CPU_AND_GPU_CODE_ inline void
-MarkForAllocationAndSetVisibilityTypeIfNotFound(ITMLib::HashEntryAllocationState* hashEntryStates,
-                                                Vector3s* hashBlockCoordinates,
-                                                HashBlockVisibility* blockVisibilityTypes,
-                                                Vector3s desiredHashBlockPosition,
-                                                const CONSTPTR(HashEntry)* hashTable, bool& collisionDetected) {
-
-	int hashCode = HashCodeFromBlockPosition(desiredHashBlockPosition);
-
-	HashEntry hashEntry = hashTable[hashCode];
-
-	//check if hash table contains entry
-	if (IS_EQUAL3(hashEntry.pos, desiredHashBlockPosition) && hashEntry.ptr >= -1) {
-		//entry has been streamed out but is visible or in memory and visible
-		blockVisibilityTypes[hashCode] = (hashEntry.ptr == -1) ? STREAMED_OUT_AND_VISIBLE
-		                                                       : IN_MEMORY_AND_VISIBLE;
-		return;
-	}
-
-	HashEntryAllocationState allocationState = NEEDS_ALLOCATION_IN_ORDERED_LIST;
-	if (hashEntry.ptr >= -1) //search excess list only if there is no room in ordered part
-	{
-		while (hashEntry.offset >= 1) {
-			hashCode = ORDERED_LIST_SIZE + hashEntry.offset - 1;
-			hashEntry = hashTable[hashCode];
-
-			if (IS_EQUAL3(hashEntry.pos, desiredHashBlockPosition) && hashEntry.ptr >= -1) {
-				//entry has been streamed out but is visible or in memory and visible
-				blockVisibilityTypes[hashCode] = (hashEntry.ptr == -1) ? STREAMED_OUT_AND_VISIBLE
-				                                                       : IN_MEMORY_AND_VISIBLE;
-				return;
-			}
-		}
-		allocationState = NEEDS_ALLOCATION_IN_EXCESS_LIST;
-	}
-
-#if defined(__CUDACC__) && defined(__CUDA_ARCH__)
-	if (atomicCAS((char*) hashEntryStates + hashCode,
-				  (char) ITMLib::NEEDS_NO_CHANGE,
-				  (char) allocationState) != ITMLib::NEEDS_NO_CHANGE) {
-		if (IS_EQUAL3(hashBlockCoordinates[hashCode], desiredHashBlockPosition)) return;
-		collisionDetected = true;
-	} else {
-		//needs allocation
-		if (allocationState == NEEDS_ALLOCATION_IN_ORDERED_LIST)
-			blockVisibilityTypes[hashCode] = HashBlockVisibility::IN_MEMORY_AND_VISIBLE; //new entry is visible
-		hashBlockCoordinates[hashCode] = desiredHashBlockPosition;
-	}
-#else
-#if defined(WITH_OPENMP)
-#pragma omp critical
-#endif
-	{
-		if (hashEntryStates[hashCode] != ITMLib::NEEDS_NO_CHANGE) {
-			collisionDetected = true;
-		} else {
-			//needs allocation
-			hashEntryStates[hashCode] = allocationState;
-			if (allocationState == NEEDS_ALLOCATION_IN_ORDERED_LIST)
-				blockVisibilityTypes[hashCode] = HashBlockVisibility::IN_MEMORY_AND_VISIBLE; //new entry is visible
-			hashBlockCoordinates[hashCode] = desiredHashBlockPosition;
-		}
-	}
-#endif
-}
 
 /**Get number of differing vector components**/
 _CPU_AND_GPU_CODE_ inline int get_differing_component_count(Vector3s coord1, Vector3s coord2) {
@@ -530,20 +405,20 @@ findVoxelBlocksForRayNearSurface(ITMLib::HashEntryAllocationState* hash_entry_al
 
 _CPU_AND_GPU_CODE_
 inline
-bool FindOrAllocateHashEntry(const Vector3s& hashEntryPosition, HashEntry* hashTable, HashEntry*& resultEntry,
-                             int& lastFreeVoxelBlockId, int& lastFreeExcessListId, const int* voxelAllocationList,
-                             const int* excessAllocationList, int& hashCode) {
-	hashCode = HashCodeFromBlockPosition(hashEntryPosition);
-	HashEntry hashEntry = hashTable[hashCode];
-	if (!IS_EQUAL3(hashEntry.pos, hashEntryPosition) || hashEntry.ptr < -1) {
+bool FindOrAllocateHashEntry(const Vector3s& hash_entry_position, HashEntry* hash_table, HashEntry*& result_entry,
+                             int& last_free_voxel_block_id, int& last_free_excess_list_id, const int* voxel_allocation_list,
+                             const int* excess_allocation_list, int& hash_code) {
+	hash_code = HashCodeFromBlockPosition(hash_entry_position);
+	HashEntry hash_entry = hash_table[hash_code];
+	if (!IS_EQUAL3(hash_entry.pos, hash_entry_position) || hash_entry.ptr < -1) {
 		bool isExcess = false;
 		//search excess list only if there is no room in ordered part
-		if (hashEntry.ptr >= -1) {
-			while (hashEntry.offset >= 1) {
-				hashCode = ORDERED_LIST_SIZE + hashEntry.offset - 1;
-				hashEntry = hashTable[hashCode];
-				if (IS_EQUAL3(hashEntry.pos, hashEntryPosition) && hashEntry.ptr >= -1) {
-					resultEntry = &hashTable[hashCode];
+		if (hash_entry.ptr >= -1) {
+			while (hash_entry.offset >= 1) {
+				hash_code = ORDERED_LIST_SIZE + hash_entry.offset - 1;
+				hash_entry = hash_table[hash_code];
+				if (IS_EQUAL3(hash_entry.pos, hash_entry_position) && hash_entry.ptr >= -1) {
+					result_entry = &hash_table[hash_code];
 					return true;
 				}
 			}
@@ -551,36 +426,84 @@ bool FindOrAllocateHashEntry(const Vector3s& hashEntryPosition, HashEntry* hashT
 
 		}
 		//still not found, allocate
-		if (isExcess && lastFreeVoxelBlockId >= 0 && lastFreeExcessListId >= 0) {
+		if (isExcess && last_free_voxel_block_id >= 0 && last_free_excess_list_id >= 0) {
 			//there is room in the voxel block array and excess list
 			HashEntry newHashEntry;
-			newHashEntry.pos = hashEntryPosition;
-			newHashEntry.ptr = voxelAllocationList[lastFreeVoxelBlockId];
+			newHashEntry.pos = hash_entry_position;
+			newHashEntry.ptr = voxel_allocation_list[last_free_voxel_block_id];
 			newHashEntry.offset = 0;
-			int exlOffset = excessAllocationList[lastFreeExcessListId];
-			hashTable[hashCode].offset = exlOffset + 1; //connect to child
-			hashCode = ORDERED_LIST_SIZE + exlOffset;
-			hashTable[hashCode] = newHashEntry; //add child to the excess list
-			resultEntry = &hashTable[hashCode];
-			lastFreeVoxelBlockId--;
-			lastFreeExcessListId--;
+			int excess_list_offset = excess_allocation_list[last_free_excess_list_id];
+			hash_table[hash_code].offset = excess_list_offset + 1; //connect to child
+			hash_code = ORDERED_LIST_SIZE + excess_list_offset;
+			hash_table[hash_code] = newHashEntry; //add child to the excess list
+			result_entry = &hash_table[hash_code];
+			last_free_voxel_block_id--;
+			last_free_excess_list_id--;
 			return true;
-		} else if (lastFreeVoxelBlockId >= 0) {
+		} else if (last_free_voxel_block_id >= 0) {
 			//there is room in the voxel block array
-			HashEntry newHashEntry;
-			newHashEntry.pos = hashEntryPosition;
-			newHashEntry.ptr = voxelAllocationList[lastFreeVoxelBlockId];
-			newHashEntry.offset = 0;
-			hashTable[hashCode] = newHashEntry;
-			resultEntry = &hashTable[hashCode];
-			lastFreeVoxelBlockId--;
+			HashEntry new_hash_entry;
+			new_hash_entry.pos = hash_entry_position;
+			new_hash_entry.ptr = voxel_allocation_list[last_free_voxel_block_id];
+			new_hash_entry.offset = 0;
+			hash_table[hash_code] = new_hash_entry;
+			result_entry = &hash_table[hash_code];
+			last_free_voxel_block_id--;
 			return true;
 		} else {
 			return false;
 		}
 	} else {
 		//HashEntry already exists, return the pointer to it
-		resultEntry = &hashTable[hashCode];
+		result_entry = &hash_table[hash_code];
 		return true;
 	}
 }
+
+// region ================================= OFFSET COPYING =============================================================
+
+struct OffsetCopyHashBlockInfo {
+	int target_bash;
+	bool fully_in_bounds;
+};
+
+_CPU_AND_GPU_CODE_
+inline void
+ComputeVoxelBlockOffsetRange(const CONSTPTR(Vector3i)& offset,
+                             THREADPTR(Vector6i)& offsetRange) {
+#define  ITM_CMP(a, b)    (((a) > (b)) - ((a) < (b)))
+#define  ITM_SIGN(a)     ITM_CMP((a),0)
+
+	int xA = offset.x / VOXEL_BLOCK_SIZE;
+	int xB = xA + ITM_SIGN(offset.x % VOXEL_BLOCK_SIZE);
+	int yA = offset.y / VOXEL_BLOCK_SIZE;
+	int yB = yA + ITM_SIGN(offset.y % VOXEL_BLOCK_SIZE);
+	int zA = offset.z / VOXEL_BLOCK_SIZE;
+	int zB = zA + ITM_SIGN(offset.z % VOXEL_BLOCK_SIZE);
+	int tmp;
+	if (xA > xB) {
+		tmp = xA;
+		xA = xB;
+		xB = tmp;
+	}
+	if (yA > yB) {
+		tmp = yA;
+		yA = yB;
+		yB = tmp;
+	}
+	if (zA > zB) {
+		tmp = zA;
+		zA = zB;
+		zB = tmp;
+	}
+	offsetRange.min_x = xA;
+	offsetRange.min_y = yA;
+	offsetRange.min_z = zA;
+	offsetRange.max_x = xB + 1;
+	offsetRange.max_y = yB + 1;
+	offsetRange.max_z = zB + 1;
+#undef ITM_CMP
+#undef ITM_SIGN
+}
+
+//endregion

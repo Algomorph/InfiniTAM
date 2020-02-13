@@ -27,36 +27,6 @@
 namespace ITMLib {
 
 
-
-template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, typename TDerivedClass>
-template<WarpType TWarpType, typename TWarp>
-void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::AllocateFromWarpedVolume(
-		VoxelVolume<TWarp, VoxelBlockHash>* warpField,
-		VoxelVolume<TVoxel, VoxelBlockHash>* sourceTSDF,
-		VoxelVolume<TVoxel, VoxelBlockHash>* targetTSDF) {
-
-	assert(warpField->index.hashEntryCount == sourceTSDF->index.hashEntryCount &&
-	       sourceTSDF->index.hashEntryCount == targetTSDF->index.hashEntryCount);
-
-	HashEntryAllocationState* hashEntryStates_device = targetTSDF->index.GetHashEntryAllocationStates();
-	Vector3s* blockCoordinates_device = targetTSDF->index.GetAllocationBlockCoordinates();
-
-	//Mark up hash entries in the target scene that will need allocation
-	WarpBasedAllocationMarkerFunctor<TWarp, TVoxel, TWarpType>
-			hashMarkerFunctor(sourceTSDF, targetTSDF, blockCoordinates_device, hashEntryStates_device);
-
-	do {
-		//reset allocation flags
-		targetTSDF->index.ClearHashEntryAllocationStates();
-		hashMarkerFunctor.collisionDetected = false;
-		VolumeTraversalEngine<TWarp, VoxelBlockHash, TMemoryDeviceType>::VoxelAndHashBlockPositionTraversal(
-				warpField, hashMarkerFunctor);
-
-		//Allocate the hash entries that will potentially have any data
-		static_cast<TDerivedClass*>(this)->AllocateHashEntriesUsingAllocationStateList(targetTSDF);
-	} while (hashMarkerFunctor.collisionDetected);
-}
-
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, typename TDerivedClass>
 void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::AllocateNearSurface(
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view, const Matrix4f& depth_camera_matrix,
@@ -110,7 +80,6 @@ void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::Al
 	TwoImageTraversalEngine<float, Vector4f, TMemoryDeviceType>::TraverseWithPosition(
 			view->depth, tracking_state->pointCloud->locations, depth_based_allocator);
 	static_cast<TDerivedClass*>(this)->AllocateHashEntriesUsingAllocationStateList(volume);
-
 	static_cast<TDerivedClass*>(this)->AllocateBlockList(volume, depth_based_allocator.colliding_block_positions, depth_based_allocator.get_colliding_block_count());
 }
 
@@ -121,7 +90,7 @@ void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::Re
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 
 	ReallocateDeletedHashBlocksFunctor<TVoxel, TMemoryDeviceType> reallocation_functor(volume);
-	HashTableTraversalEngine<TMemoryDeviceType>::TraverseWithHashCode(volume->index, reallocation_functor);
+	HashTableTraversalEngine<TMemoryDeviceType>::TraverseAllWithHashCode(volume->index, reallocation_functor);
 	volume->localVBA.lastFreeBlockId = GET_ATOMIC_VALUE_CPU(reallocation_functor.last_free_voxel_block_id);
 }
 

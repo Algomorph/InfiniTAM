@@ -51,7 +51,7 @@ private:
 		TVoxelPrimary* primaryVoxels = primaryVolume->localVBA.GetVoxelBlocks();
 		const PlainVoxelArray::IndexData* primaryVolumeBox = primaryVolume->index.GetIndexData();
 
-		const Extent3D boundingExtent = maximumExtent(*primaryVolumeBox, *secondaryVolumeBox);
+		const Extent3D boundingExtent = MaximumExtent(*primaryVolumeBox, *secondaryVolumeBox);
 
 		volatile bool mismatchFound = false;
 #ifdef WITH_OPENMP
@@ -63,11 +63,11 @@ private:
 				if (mismatchFound) continue;
 				for (int x = boundingExtent.min_x; x < boundingExtent.max_x; x++) {
 					Vector3i position(x, y, z);
-					if (isPointInBounds(position, *primaryVolumeBox)) {
+					if (IsPointInBounds(position, *primaryVolumeBox)) {
 						int primaryLinearIndex = ComputeLinearIndexFromPosition_PlainVoxelArray(primaryVolumeBox,
 						                                                                        position);
 						TVoxelPrimary& primaryVoxel = primaryVoxels[primaryLinearIndex];
-						if (isPointInBounds(position, *secondaryVolumeBox)) {
+						if (IsPointInBounds(position, *secondaryVolumeBox)) {
 							int secondaryLinearIndex = ComputeLinearIndexFromPosition_PlainVoxelArray(
 									secondaryVolumeBox, position);
 							TVoxelSecondary& secondaryVoxel = secondaryVoxels[secondaryLinearIndex];
@@ -80,7 +80,7 @@ private:
 							}
 						}
 					} else {
-						if (isPointInBounds(position, *secondaryVolumeBox)) {
+						if (IsPointInBounds(position, *secondaryVolumeBox)) {
 							int secondaryLinearIndex = ComputeLinearIndexFromPosition_PlainVoxelArray(
 									secondaryVolumeBox, position);
 							TVoxelSecondary& secondaryVoxel = secondaryVoxels[secondaryLinearIndex];

@@ -15,7 +15,6 @@
 //  ================================================================
 #pragma once
 
-#include "../../Indexing/Shared/IndexingEngine_Shared.h"
 #include "../Shared/EditAndCopyEngine_Shared.h"
 #include "../../../Utils/HashBlockProperties.h"
 #include "../../../Utils/Geometry/GeometryBooleanOperations.h"
@@ -25,88 +24,76 @@ using namespace ITMLib;
 namespace {
 
 template<class TVoxel>
-__global__ void noOffsetCopy_device(TVoxel* destinationVoxels, const TVoxel* sourceVoxels,
-                                    const HashEntry* destinationHashTable,
-                                    const HashEntry* sourceHashTable,
-                                    int totalBlocksToCopy,
-                                    const CopyHashBlockPairInfo* copyHashIdBuffer,
+__global__ void noOffsetCopy_device(TVoxel* target_voxels, const TVoxel* source_voxels,
+                                    const HashEntry* target_hash_table,
+                                    const HashEntry* source_hash_table,
+                                    int first_utilized_block_index,
+                                    const int* target_utilized_block_hash_codes,
+                                    int total_blocks_to_copy,
                                     const Vector6i bounds) {
 
-	if (blockIdx.x > totalBlocksToCopy - 1) return;
-	const CopyHashBlockPairInfo& hashBlockPairInfo = copyHashIdBuffer[blockIdx.x];
-	int sourceHash = hashBlockPairInfo.sourceHash;
-	int destinationHash = hashBlockPairInfo.destinationHash;
+	if (blockIdx.x >= total_blocks_to_copy) return;
+	int utilized_entry_index = blockIdx.x + first_utilized_block_index;
+	int target_hash_code = target_utilized_block_hash_codes[utilized_entry_index];
+	const HashEntry& target_entry = target_hash_table[target_hash_code];
+	int source_hash_code = FindHashCodeAt(source_hash_table, target_entry.pos);
+	const HashEntry& source_entry = source_hash_table[source_hash_code];
+	Vector3i hash_position_voxels = target_entry.pos.toInt() * VOXEL_BLOCK_SIZE;
 
-	const HashEntry& destinationHashEntry = destinationHashTable[destinationHash];
-	if (destinationHashEntry.ptr < 0) return;
-	const HashEntry& sourceHashEntry = sourceHashTable[sourceHash];
-
-	TVoxel* destinationVoxelBlock = &(destinationVoxels[destinationHashEntry.ptr * VOXEL_BLOCK_SIZE3]);
-	const TVoxel* sourceVoxelBlock = &(sourceVoxels[sourceHashEntry.ptr * VOXEL_BLOCK_SIZE3]);
+	TVoxel * target_voxel_block = &(target_voxels[target_entry.ptr * VOXEL_BLOCK_SIZE3]);
+	const TVoxel* source_voxel_block = &(source_voxels[source_entry.ptr * VOXEL_BLOCK_SIZE3]);
 
 	int x = threadIdx.x, y = threadIdx.y, z = threadIdx.z;
 	int locId = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
 
-	Vector3i globalPos = destinationHashEntry.pos.toInt() * VOXEL_BLOCK_SIZE;
+	Vector3i globalPos = target_entry.pos.toInt() * VOXEL_BLOCK_SIZE;
 	globalPos.x += x;
 	globalPos.y += y;
 	globalPos.z += z;
 
-	if (hashBlockPairInfo.fullyInBounds || isPointInBounds(globalPos, bounds)) {
-		destinationVoxelBlock[locId] = sourceVoxelBlock[locId];
+	if (IsHashBlockFullyInBounds(hash_position_voxels, bounds) || IsPointInBounds(globalPos, bounds)) {
+		target_voxel_block[locId] = source_voxel_block[locId];
 	}
 }
 
 template<class TVoxel>
-__global__ void offsetCopy_device(TVoxel* destinationVoxels, const TVoxel* sourceVoxels,
+__global__ void offsetCopy_device(TVoxel* destinationVoxels, const TVoxel* source_voxels,
                                   const HashEntry* destinationHashTable,
                                   const HashEntry* sourceHashTable,
-                                  int totalBlocksToCopy,
-                                  const OffsetCopyHashBlockInfo* copyHashIdBuffer,
+                                  int first_utilized_block_index,
+                                  const int* target_utilized_block_hash_codes,
+                                  int total_blocks_to_copy,
                                   const Vector3i offset,
                                   const Vector6i bounds) {
 	// assume grid is one-dimensional, blockIdx corresponds to the destination block to copy
-	if (blockIdx.x > totalBlocksToCopy - 1) return;
-	const OffsetCopyHashBlockInfo& copyHashBlockInfo = copyHashIdBuffer[blockIdx.x];
-	const HashEntry& destinationHashEntry = destinationHashTable[copyHashBlockInfo.destinationHash];
-	if (destinationHashEntry.ptr < 0) return;
+	if (blockIdx.x >= total_blocks_to_copy) return;
+	int utilized_entry_index = blockIdx.x + first_utilized_block_index;
+	int target_hash_code = target_utilized_block_hash_codes[utilized_entry_index];
+	const HashEntry& target_hash_entry = destinationHashTable[target_hash_code];
 
-	TVoxel* destinationVoxelBlock = &(destinationVoxels[destinationHashEntry.ptr * VOXEL_BLOCK_SIZE3]);
+	TVoxel* target_hash_block = &(destinationVoxels[target_hash_entry.ptr * VOXEL_BLOCK_SIZE3]);
 
 	int x = threadIdx.x, y = threadIdx.y, z = threadIdx.z;
-	int locId = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
-	Vector3i sourcePoint = destinationHashEntry.pos.toInt() * VOXEL_BLOCK_SIZE - offset;
-	sourcePoint.x += x;
-	sourcePoint.y += y;
-	sourcePoint.z += z;
+	int target_voxel_index = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
+	Vector3i source_point = target_hash_entry.pos.toInt() * VOXEL_BLOCK_SIZE - offset;
+	source_point.x += x;
+	source_point.y += y;
+	source_point.z += z;
 
 	int vmIndex;
-	int sourceVoxelIx = findVoxel(sourceHashTable, sourcePoint, vmIndex);
+	int source_voxel_index = findVoxel(sourceHashTable, source_point, vmIndex);
 	if (!vmIndex) return;
 
-	if (copyHashBlockInfo.fullyInBounds || isPointInBounds(sourcePoint, bounds)) {
-		destinationVoxelBlock[locId] = sourceVoxels[sourceVoxelIx];
+	if (IsPointInBounds(source_point, bounds)) {
+		target_hash_block[target_voxel_index] = source_voxels[source_voxel_index];
 	}
 }
 
 template<typename TVoxel>
-__global__ void setVoxel_device(TVoxel* voxelArray, HashEntry* hashTable,
-                                const Vector3i at, TVoxel value, CopyAllocationTempData* setVoxelTempData,
-                                const int* voxelAllocationList, const int* excessAllocationList, int voxelIndexInBlock,
-                                const Vector3s blockPos) {
-
-	HashEntry* entry = nullptr;
-	int hash;
-	if (FindOrAllocateHashEntry(blockPos, hashTable, entry,
-	                            setVoxelTempData->countOfAllocatedOrderedEntries,
-	                            setVoxelTempData->countOfAllocatedExcessEntries, voxelAllocationList, excessAllocationList,
-	                            hash)) {
-		TVoxel* localVoxelBlock = &(voxelArray[entry->ptr * (VOXEL_BLOCK_SIZE3)]);
-		localVoxelBlock[voxelIndexInBlock] = value;
-		setVoxelTempData->success = true;
-	} else {
-		setVoxelTempData->success = false;
-	}
+__global__ void setVoxel_device(TVoxel* voxels, HashEntry* hash_table, const int hash_code,
+                                int voxel_index_in_block, TVoxel value) {
+	TVoxel* localVoxelBlock = &(voxels[hash_table[hash_code].ptr * (VOXEL_BLOCK_SIZE3)]);
+	localVoxelBlock[voxel_index_in_block] = value;
 }
 
 template<class TVoxel>
@@ -138,119 +125,5 @@ __global__ void readVoxel_device(TVoxel* voxelArray, const HashEntry* hashTable,
 	}
 }
 
-
-// Modifies copyHashIdBuffer, entriesAllocType, allocationBlockCoords, and allocData
-// Finds which blocks in the destination volume need to be copied, and also which need to be
-// allocated before copying can be done. Sets the corresponding entries in entriesAllocType and allocationBlockCoords
-// to the bocks that need to be allocated.
-// The copyHashIdBuffer is filled with <source,destination> hash pairs for the copying, accompanied by a flag that
-// indicates whether the hash block is fully within the bounds specified for copying (alternative being -- partially in bounds).
-__global__ void determineDestinationAllocationForNoOffsetCopy_device(
-		HashEntry* destinationHashTable,
-		const HashEntry* sourceHashTable,
-		int noTotalEntries,
-		ITMLib::HashEntryAllocationState* entriesAllocType,
-		Vector3s* allocationBlockCoords,
-		CopyAllocationTempData* allocData,
-		CopyHashBlockPairInfo* copyHashIdBuffer,
-		const Vector6i bounds) {
-	int sourceHash = threadIdx.x + blockIdx.x * blockDim.x;
-	if (sourceHash > noTotalEntries - 1) return;
-
-	const HashEntry& currentSourceHashEntry = sourceHashTable[sourceHash];
-	if (currentSourceHashEntry.ptr < 0) return;
-	Vector3i originalHashBlockPosition = currentSourceHashEntry.pos.toInt() * VOXEL_BLOCK_SIZE;
-	bool isFullyInRange = IsHashBlockFullyInRange(originalHashBlockPosition, bounds);
-	bool isPartiallyInRange = false;
-	if (!isFullyInRange) {
-		isPartiallyInRange = IsHashBlockPartiallyInRange(originalHashBlockPosition, bounds);
-		if (!isPartiallyInRange) return;
-	}
-	int destinationHash = HashCodeFromBlockPosition(currentSourceHashEntry.pos);
-	bool collisionDetected = false;
-	// see if the block in the destination hash structure needs allocation. If so, mark it as such in entriesAllocType
-	// and record its spatial coordinates (in blocks) in allocationBlockCoords.
-	MarkAsNeedingAllocationIfNotFound(entriesAllocType, allocationBlockCoords, destinationHash,
-	                                  currentSourceHashEntry.pos, destinationHashTable, collisionDetected);
-	//report operation success, as we know some voxels will be copied here
-	allocData->success = true;
-	//mark which hash to copy from and which to copy to
-	int bufferIdx = atomicAdd(&allocData->countOfBlocksToCopy, 1);
-	copyHashIdBuffer[bufferIdx].sourceHash = sourceHash;
-	copyHashIdBuffer[bufferIdx].destinationHash = destinationHash;
-	copyHashIdBuffer[bufferIdx].fullyInBounds = isFullyInRange;
-
-}
-
-// same as above without bounds checks -- intended for whole-scene copying
-__global__ void determineDestinationAllocationForNoOffsetCopy_device(
-		HashEntry* destinationHashTable,
-		const HashEntry* sourceHashTable,
-		const int noTotalEntries,
-		ITMLib::HashEntryAllocationState* entriesAllocType,
-		Vector3s* allocationBlockCoords,
-		CopyAllocationTempData* allocData,
-		CopyHashBlockPairInfo* copyHashIdBuffer) {
-	int sourceHash = threadIdx.x + blockIdx.x * blockDim.x;
-	if (sourceHash > noTotalEntries - 1) return;
-
-	const HashEntry& currentSourceHashEntry = sourceHashTable[sourceHash];
-	if (currentSourceHashEntry.ptr < 0) return;
-	int destinationHash = HashCodeFromBlockPosition(currentSourceHashEntry.pos);
-	bool collisionDetected = false;
-	// see if the block in the destination hash structure needs allocation. If so, mark it as such in entriesAllocType
-	// and record its spatial coordinates (in blocks) in allocationBlockCoords.
-	MarkAsNeedingAllocationIfNotFound(entriesAllocType, allocationBlockCoords, destinationHash,
-	                                  currentSourceHashEntry.pos, destinationHashTable, collisionDetected);
-	// report operation success, as we know some voxels will be copied here
-	allocData->success = true;
-	// mark which hash to copy from and which to copy to
-	int bufferIdx = atomicAdd(&allocData->countOfBlocksToCopy, 1);
-	copyHashIdBuffer[bufferIdx].sourceHash = sourceHash;
-	copyHashIdBuffer[bufferIdx].destinationHash = destinationHash;
-	copyHashIdBuffer[bufferIdx].fullyInBounds = true;
-
-}
-
-__global__ void determineDestinationAllocationForOffsetCopy_device(
-		HashEntry* destinationHashTable,
-		const HashEntry* sourceHashTable,
-		ITMLib::HashEntryAllocationState* entriesAllocType,
-		Vector3s* allocationBlockCoords,
-		CopyAllocationTempData* allocData,
-		OffsetCopyHashBlockInfo* copyHashIdBuffer,
-		const Vector6i destinationBounds,
-		const Vector6i inverseOffsetBlockRange,
-		const Vector3i destinationBlockRange,
-		const Vector3i minDestinationBlockCoord) {
-
-	int blockX = threadIdx.x + blockIdx.x * blockDim.x;
-	int blockY = threadIdx.y + blockIdx.y * blockDim.y;
-	int blockZ = threadIdx.z + blockIdx.z * blockDim.z;
-	if (blockX > destinationBlockRange.x || blockY > destinationBlockRange.y || blockZ > destinationBlockRange.z)
-		return;
-	blockX += minDestinationBlockCoord.x;
-	blockY += minDestinationBlockCoord.y;
-	blockZ += minDestinationBlockCoord.z;
-	Vector3s destinationBlockPos = Vector3s(blockX, blockY, blockZ);
-
-	if (!HashBlockAllocatedAtOffset(sourceHashTable, destinationBlockPos, inverseOffsetBlockRange)) {
-		return;
-	}
-
-	int destinationHash = HashCodeFromBlockPosition(destinationBlockPos);
-	bool collisionDetected = false;
-	bool needs_alloc = MarkAsNeedingAllocationIfNotFound(entriesAllocType, allocationBlockCoords, destinationHash,
-	                                  destinationBlockPos, destinationHashTable, collisionDetected);
-
-	//report operation success, as we know some voxels will be copied here
-	allocData->success = true;
-	//mark which hash to copy from and which to copy to
-	int bufferIdx = atomicAdd(&allocData->countOfBlocksToCopy, 1);
-	copyHashIdBuffer[bufferIdx].destinationHash = destinationHash;
-	copyHashIdBuffer[bufferIdx].fullyInBounds =
-			IsHashBlockFullyInRange(destinationBlockPos.toInt() * VOXEL_BLOCK_SIZE, destinationBounds);
-
-}
 
 } // end anonymous namespace (CUDA kernels)

@@ -18,6 +18,7 @@
 #include "IndexingEngine_CPU_VoxelBlockHash.h"
 #include "../../../../Objects/Volume/RepresentationAccess.h"
 #include "../../../EditAndCopy/Shared/EditAndCopyEngine_Shared.h"
+#include "../../../Traversal/Interface/HashTableTraversal.h"
 #include "../../Shared/IndexingEngine_Functors.h"
 #include "../../../Common/CheckBlockVisibility.h"
 #include "../../../../Utils/Configuration.h"
@@ -27,51 +28,95 @@
 using namespace ITMLib;
 
 template<typename TVoxel>
+template<typename TVoxelTarget, typename TVoxelSource, typename TMarkerFunctor>
+void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateUsingOtherVolume_Generic(
+		VoxelVolume<TVoxelTarget, VoxelBlockHash>* target_volume,
+		VoxelVolume<TVoxelSource, VoxelBlockHash>* source_volume,
+		TMarkerFunctor& marker_functor) {
+
+	assert(target_volume->index.hashEntryCount == source_volume->index.hashEntryCount);
+
+	target_volume->index.ClearHashEntryAllocationStates();
+	HashTableTraversalEngine<MEMORYDEVICE_CPU>::TraverseUtilizedWithHashCode(
+			source_volume->index, marker_functor);
+
+	IndexingEngine<TVoxelTarget, VoxelBlockHash, MEMORYDEVICE_CPU>& indexer =
+			IndexingEngine<TVoxelTarget, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance();
+
+	indexer.AllocateHashEntriesUsingAllocationStateList(target_volume);
+	indexer.AllocateBlockList(target_volume, marker_functor.colliding_block_positions,
+	                          marker_functor.get_colliding_block_count());
+}
+
+template<typename TVoxel>
 template<typename TVoxelTarget, typename TVoxelSource>
 void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateUsingOtherVolume(
-		VoxelVolume<TVoxelTarget, VoxelBlockHash>* targetVolume,
-		VoxelVolume<TVoxelSource, VoxelBlockHash>* sourceVolume) {
+		VoxelVolume<TVoxelTarget, VoxelBlockHash>* target_volume,
+		VoxelVolume<TVoxelSource, VoxelBlockHash>* source_volume) {
+	VolumeBasedAllocationStateMarkerFunctor<MEMORYDEVICE_CPU>
+			volume_based_allocation_state_marker(target_volume->index);
+	AllocateUsingOtherVolume_Generic(target_volume, source_volume, volume_based_allocation_state_marker);
+}
 
-	assert(targetVolume->index.hashEntryCount == sourceVolume->index.hashEntryCount);
+template<typename TVoxel>
+template<typename TVoxelTarget, typename TVoxelSource>
+void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateUsingOtherVolume_Bounded(
+		VoxelVolume<TVoxelTarget, VoxelBlockHash>* target_volume,
+		VoxelVolume<TVoxelSource, VoxelBlockHash>* source_volume,
+		const Extent3D& bounds) {
+	VolumeBasedBoundedAllocationStateMarkerFunctor<MEMORYDEVICE_CPU> volume_based_allocation_state_marker(
+			target_volume->index, bounds);
+	AllocateUsingOtherVolume_Generic(target_volume, source_volume, volume_based_allocation_state_marker);
+}
 
-	const int hashEntryCount = targetVolume->index.hashEntryCount;
+template<typename TVoxel>
+template<typename TVoxelTarget, typename TVoxelSource>
+void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateUsingOtherVolume_OffsetAndBounded(
+		VoxelVolume<TVoxelTarget, VoxelBlockHash>* target_volume,
+		VoxelVolume<TVoxelSource, VoxelBlockHash>* source_volume,
+		const Extent3D& source_bounds, const Vector3i& target_offset) {
 
-	HashEntryAllocationState* hashEntryStates_device = targetVolume->index.GetHashEntryAllocationStates();
-	Vector3s* blockCoordinates_device = targetVolume->index.GetAllocationBlockCoordinates();
-	HashEntry* targetHashEntries = targetVolume->index.GetEntries();
-	HashEntry* sourceHashEntries = sourceVolume->index.GetEntries();
+	Vector6i target_bounds(source_bounds.min_x + target_offset.x,
+	                       source_bounds.min_y + target_offset.y,
+	                       source_bounds.min_z + target_offset.z,
+	                       source_bounds.max_x + target_offset.x,
+	                       source_bounds.max_y + target_offset.y,
+	                       source_bounds.max_z + target_offset.z);
+	Vector3i target_min_point(target_bounds.min_x, target_bounds.min_y, target_bounds.min_z);
+	Vector3i target_max_point(target_bounds.max_x, target_bounds.max_y, target_bounds.max_z);
+	Vector3i min_point_block, max_point_block;
+	pointToVoxelBlockPos(target_min_point, min_point_block);
+	pointToVoxelBlockPos(target_max_point, max_point_block);
 
-	bool collisionDetected;
+	HashEntry* target_hash_table = target_volume->index.GetEntries();
 
-	do {
-		collisionDetected = false;
-		//reset target allocation states
-		targetVolume->index.ClearHashEntryAllocationStates();
+	HashEntryAllocationState* hash_entry_allocation_states = target_volume->index.GetHashEntryAllocationStates();
+	Vector3s* hash_block_coordinates = target_volume->index.GetAllocationBlockCoordinates();
+
+	ORUtils::MemoryBlock<Vector3s> colliding_block_positions(target_volume->index.hashEntryCount, MEMORYDEVICE_CPU);
+	Vector3s* colliding_block_positions_device = colliding_block_positions.GetData(MEMORYDEVICE_CPU);
+	std::atomic<int> colliding_block_count(0);
+
 #ifdef WITH_OPENMP
-#pragma omp parallel for default(none) shared(sourceHashEntries, hashEntryStates_device, blockCoordinates_device, \
-        targetHashEntries, collisionDetected)
+#pragma omp parallel for default(none) shared(min_point_block, max_point_block, hash_entry_allocation_states, \
+										      hash_block_coordinates, colliding_block_positions_device, \
+										      colliding_block_count, target_hash_table)
 #endif
-		for (int sourceHash = 0; sourceHash < hashEntryCount; sourceHash++) {
-
-			const HashEntry& currentSourceHashBlock = sourceHashEntries[sourceHash];
-			//skip unfilled live blocks
-			if (currentSourceHashBlock.ptr < 0) {
-				continue;
+	for (int block_z = min_point_block.z; block_z < max_point_block.z; block_z++) {
+		for (int block_y = min_point_block.y; block_y < max_point_block.y; block_y++) {
+			for (int block_x = min_point_block.x; block_x < max_point_block.x; block_x++) {
+				Vector3s new_block_position(block_x, block_y, block_x);
+				MarkAsNeedingAllocationIfNotFound(
+						hash_entry_allocation_states, hash_block_coordinates, new_block_position,
+						target_hash_table, colliding_block_positions_device, colliding_block_count);
 			}
-			Vector3s sourceHashBlockCoords = currentSourceHashBlock.pos;
-
-			//try to find a corresponding canonical block, and mark it for allocation if not found
-			int targetHash = HashCodeFromBlockPosition(sourceHashBlockCoords);
-
-			MarkAsNeedingAllocationIfNotFound(hashEntryStates_device, blockCoordinates_device,
-			                                  targetHash, sourceHashBlockCoords, targetHashEntries,
-			                                  collisionDetected);
 		}
+	}
 
-		IndexingEngine<TVoxelTarget, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance()
-				.AllocateHashEntriesUsingAllocationStateList(targetVolume);
-	} while (collisionDetected);
-
+	IndexingEngine<TVoxelTarget, VoxelBlockHash, MEMORYDEVICE_CPU>& indexer =
+			IndexingEngine<TVoxelTarget, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance();
+	indexer.AllocateHashEntriesUsingAllocationStateList(target_volume);
+	indexer.AllocateBlockList(target_volume, colliding_block_positions, colliding_block_count.load());
 }
 
 static std::vector<Vector3s> neighborOffsets = [] { // NOLINT(cert-err58-cpp)
@@ -86,100 +131,6 @@ static std::vector<Vector3s> neighborOffsets = [] { // NOLINT(cert-err58-cpp)
 	}
 	return offsets;
 }();
-
-template<typename TVoxelTarget, typename TVoxelSource, typename THashBlockMarkProcedure, typename TAllocationProcedure>
-void AllocateUsingOtherVolumeExpanded_Generic(VoxelVolume<TVoxelTarget, VoxelBlockHash>* targetVolume,
-                                              VoxelVolume<TVoxelSource, VoxelBlockHash>* sourceVolume,
-                                              THashBlockMarkProcedure&& hashBlockMarkProcedure,
-                                              TAllocationProcedure&& allocationProcedure) {
-	assert(sourceVolume->index.hashEntryCount == targetVolume->index.hashEntryCount);
-
-	int hashEntryCount = targetVolume->index.hashEntryCount;
-	HashEntry* targetHashTable = targetVolume->index.GetEntries();
-	HashEntry* sourceHashTable = sourceVolume->index.GetEntries();
-
-	HashEntryAllocationState* hashEntryStates_device = targetVolume->index.GetHashEntryAllocationStates();
-	Vector3s* blockCoordinates_device = targetVolume->index.GetAllocationBlockCoordinates();
-
-	bool collision_detected;
-	do {
-		collision_detected = false;
-		targetVolume->index.ClearHashEntryAllocationStates();
-#ifdef WITH_OPENMP
-#pragma omp parallel for default(shared)
-#endif
-		for (int hashCode = 0; hashCode < hashEntryCount; hashCode++) {
-			const HashEntry& hashEntry = sourceHashTable[hashCode];
-			// skip empty blocks
-			if (hashEntry.ptr < 0) continue;
-			for (auto& neighborOffset : neighborOffsets) {
-				Vector3s neighborBlockCoordinates = hashEntry.pos + neighborOffset;
-				// try to find a corresponding canonical block, and mark it for allocation if not found
-				int targetHash = HashCodeFromBlockPosition(neighborBlockCoordinates);
-				std::forward<THashBlockMarkProcedure>(hashBlockMarkProcedure)(neighborBlockCoordinates, targetHash,
-				                                                              collision_detected);
-			}
-		}
-		std::forward<TAllocationProcedure>(allocationProcedure)();
-	} while (collision_detected);
-}
-
-template<typename TVoxel>
-template<typename TVoxelTarget, typename TVoxelSource>
-void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateUsingOtherVolumeExpanded(
-		VoxelVolume<TVoxelTarget, VoxelBlockHash>* targetVolume,
-		VoxelVolume<TVoxelSource, VoxelBlockHash>* sourceVolume) {
-
-	HashEntry* targetHashTable = targetVolume->index.GetEntries();
-
-	HashEntryAllocationState* hashEntryStates_device = targetVolume->index.GetHashEntryAllocationStates();
-	Vector3s* blockCoordinates_device = targetVolume->index.GetAllocationBlockCoordinates();
-
-	auto hashBlockMarkProcedure = [&](Vector3s neighborBlockCoordinates, int& targetHash, bool& collision_detected) {
-		MarkAsNeedingAllocationIfNotFound(hashEntryStates_device, blockCoordinates_device,
-		                                  targetHash, neighborBlockCoordinates, targetHashTable,
-		                                  collision_detected);
-	};
-	auto allocationProcedure = [&]() {
-		IndexingEngine<TVoxelTarget, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance()
-				.AllocateHashEntriesUsingAllocationStateList(targetVolume);
-	};
-	AllocateUsingOtherVolumeExpanded_Generic(targetVolume, sourceVolume, hashBlockMarkProcedure, allocationProcedure);
-}
-
-
-template<typename TVoxel>
-template<typename TVoxelTarget, typename TVoxelSource>
-void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateUsingOtherVolumeAndSetVisibilityExpanded(
-		VoxelVolume<TVoxelTarget, VoxelBlockHash>* targetVolume,
-		VoxelVolume<TVoxelSource, VoxelBlockHash>* sourceVolume,
-		ITMView* view, const Matrix4f& depth_camera_matrix) {
-
-	HashEntry* targetHashTable = targetVolume->index.GetEntries();
-	HashBlockVisibility* hashBlockVisibilityTypes_device = targetVolume->index.GetBlockVisibilityTypes();
-
-	HashEntryAllocationState* hashEntryStates_device = targetVolume->index.GetHashEntryAllocationStates();
-	Vector3s* blockCoordinates_device = targetVolume->index.GetAllocationBlockCoordinates();
-
-	IndexingEngine<TVoxelTarget, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance().SetVisibilityToVisibleAtPreviousFrameAndUnstreamed(
-			targetVolume);
-
-	auto hashBlockMarkProcedure = [&](Vector3s neighborBlockCoordinates, int& targetHash, bool& collision_detected) {
-		MarkForAllocationAndSetVisibilityTypeIfNotFound(
-				hashEntryStates_device, blockCoordinates_device, hashBlockVisibilityTypes_device,
-				neighborBlockCoordinates, targetHashTable, collision_detected);
-	};
-	auto allocationProcedure = [&]() {
-		IndexingEngine<TVoxelTarget, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance()
-				.AllocateHashEntriesUsingAllocationStateList_SetVisibility(targetVolume);
-	};
-	AllocateUsingOtherVolumeExpanded_Generic(targetVolume, sourceVolume, hashBlockMarkProcedure, allocationProcedure);
-
-	IndexingEngine<TVoxelTarget, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance().BuildUtilizedBlockListBasedOnVisibility(
-			targetVolume,
-			view,
-			depth_camera_matrix);
-}
 
 template<typename TVoxel>
 void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::
@@ -199,14 +150,14 @@ AllocateHashEntriesUsingAllocationStateList(VoxelVolume<TVoxel, VoxelBlockHash>*
 
 	HashEntry* hash_table = volume->index.GetEntries();
 
-	auto updateUtilizedHashCodes = [&utilized_block_count, &utilized_block_hash_codes](int hash_code){
-		int utilized_index = atomicAdd_CPU(utilized_block_count,1);
+	auto updateUtilizedHashCodes = [&utilized_block_count, &utilized_block_hash_codes](int hash_code) {
+		int utilized_index = atomicAdd_CPU(utilized_block_count, 1);
 		utilized_block_hash_codes[utilized_index] = hash_code;
 	};
 
 #ifdef WITH_OPENMP
 #pragma omp parallel for default(none) shared(updateUtilizedHashCodes, hash_entry_states, block_coordinates, \
-	last_free_voxel_block_id, last_free_excess_list_id, block_allocation_list, excess_allocation_list, hash_table)
+    last_free_voxel_block_id, last_free_excess_list_id, block_allocation_list, excess_allocation_list, hash_table)
 #endif
 	for (int hash_code = 0; hash_code < hash_entry_count; hash_code++) {
 		int voxel_block_index, excess_list_index;
@@ -232,7 +183,8 @@ AllocateHashEntriesUsingAllocationStateList(VoxelVolume<TVoxel, VoxelBlockHash>*
 				voxel_block_index = atomicSub_CPU(last_free_voxel_block_id, 1);
 				excess_list_index = atomicSub_CPU(last_free_excess_list_id, 1);
 
-				if (voxel_block_index >= 0 && excess_list_index >= 0) //there is room in the voxel block array and excess list
+				if (voxel_block_index >= 0 &&
+				    excess_list_index >= 0) //there is room in the voxel block array and excess list
 				{
 					HashEntry hash_entry;
 					hash_entry.pos = block_coordinates[hash_code];
@@ -342,19 +294,20 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateBlockList
 
 		volume->index.ClearHashEntryAllocationStates();
 
-		for(int new_block_index = 0; new_block_index < new_block_count; new_block_index++){
+		for (int new_block_index = 0; new_block_index < new_block_count; new_block_index++) {
 			Vector3s desired_block_position = new_positions_device[new_block_index];
 			int hash_code = HashCodeFromBlockPosition(desired_block_position);
 
 			MarkAsNeedingAllocationIfNotFound(hash_entry_states, allocation_block_coordinates, hash_code,
-			                                  desired_block_position, hash_table, colliding_positions_device, colliding_block_count);
+			                                  desired_block_position, hash_table, colliding_positions_device,
+			                                  colliding_block_count);
 
 		}
 
 		AllocateHashEntriesUsingAllocationStateList(volume);
 
 		new_block_count = colliding_block_count.load();
-		std::swap(new_positions_device,colliding_positions_device);
+		std::swap(new_positions_device, colliding_positions_device);
 	}
 }
 

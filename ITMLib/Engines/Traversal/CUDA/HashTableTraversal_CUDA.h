@@ -25,7 +25,7 @@ class HashTableTraversalEngine<MEMORYDEVICE_CUDA> {
 public:
 	template<typename TFunctor>
 	inline static void
-	TraverseWithHashCode(VoxelBlockHash& index, TFunctor& functor) {
+	TraverseAllWithHashCode(VoxelBlockHash& index, TFunctor& functor) {
 		HashEntry* hash_table = index.GetEntries();
 		const int hash_entry_count = index.hashEntryCount;
 		TFunctor* functor_device = nullptr;
@@ -36,14 +36,36 @@ public:
 		ORcudaSafeCall(cudaMalloc((void**) &functor_device, sizeof(TFunctor)));
 		ORcudaSafeCall(cudaMemcpy(functor_device, &functor, sizeof(TFunctor), cudaMemcpyHostToDevice));
 
-		hashTableTraversalWithHashCode_device < TFunctor >
-		<< <cuda_grid_size, cuda_block_size >> >
+		hashTableAllEntryTraversalWithHashCode_device < TFunctor >
+		<< < cuda_grid_size, cuda_block_size >> >
 		(hash_table, hash_entry_count, functor_device);
 		ORcudaKernelCheck;
 
 		ORcudaSafeCall(cudaMemcpy(&functor, functor_device, sizeof(TFunctor), cudaMemcpyDeviceToHost));
 		ORcudaSafeCall(cudaFree(functor_device));
+	}
 
+	template<typename TFunctor>
+	inline static void
+	TraverseUtilizedWithHashCode(VoxelBlockHash& index, TFunctor& functor){
+		HashEntry* hash_table = index.GetEntries();
+		const int utilized_entry_count = index.GetUtilizedHashBlockCount();
+		int* utilized_entry_codes = index.GetUtilizedBlockHashCodes();
+		TFunctor* functor_device = nullptr;
+
+		dim3 cuda_block_size(256, 1);
+		dim3 cuda_grid_size((int) ceil((float) utilized_entry_count / (float) cuda_block_size.x));
+
+		ORcudaSafeCall(cudaMalloc((void**) &functor_device, sizeof(TFunctor)));
+		ORcudaSafeCall(cudaMemcpy(functor_device, &functor, sizeof(TFunctor), cudaMemcpyHostToDevice));
+
+		hashTableUtilizedEntryTraversalWithHashCode_device < TFunctor >
+				<< < cuda_grid_size, cuda_block_size >> >
+		                             (hash_table, utilized_entry_codes, utilized_entry_count, functor_device);
+		ORcudaKernelCheck;
+
+		ORcudaSafeCall(cudaMemcpy(&functor, functor_device, sizeof(TFunctor), cudaMemcpyDeviceToHost));
+		ORcudaSafeCall(cudaFree(functor_device));
 	}
 };
 

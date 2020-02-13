@@ -53,11 +53,11 @@ public:
 	                 VoxelBlockHash::IndexCache& cache) override;
 	void OffsetWarps(VoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3f offset) override;
 	bool
-	CopyVolumeSlice(VoxelVolume<TVoxel, VoxelBlockHash>* targetVolume,
-	                VoxelVolume<TVoxel, VoxelBlockHash>* sourceVolume,
+	CopyVolumeSlice(VoxelVolume<TVoxel, VoxelBlockHash>* target_volume,
+	                VoxelVolume<TVoxel, VoxelBlockHash>* source_volume,
 	                Vector6i bounds, const Vector3i& offset = Vector3i(0)) override;
-	bool CopyVolume(VoxelVolume<TVoxel, VoxelBlockHash>* targetVolume,
-	                VoxelVolume<TVoxel, VoxelBlockHash>* sourceVolume,
+	bool CopyVolume(VoxelVolume<TVoxel, VoxelBlockHash>* target_volume,
+	                VoxelVolume<TVoxel, VoxelBlockHash>* source_volume,
 	                const Vector3i& offset = Vector3i(0)) override;
 	virtual ~EditAndCopyEngine_CPU() = default;
 };

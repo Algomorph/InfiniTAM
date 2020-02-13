@@ -32,7 +32,9 @@ class IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA> :
 
 private:
 	IndexingEngine() = default;
-
+	template<typename TVoxelTarget, typename TVoxelSource, typename TMarkerFunctor>
+	void AllocateUsingOtherVolume_Generic(VoxelVolume<TVoxelTarget, VoxelBlockHash>* target_volume,
+	                                      VoxelVolume<TVoxelSource, VoxelBlockHash>* source_volume, TMarkerFunctor& marker_functor);
 
 public:
 	static IndexingEngine& Instance() {
@@ -60,21 +62,22 @@ public:
 
 	HashEntry FindHashEntry(const VoxelBlockHash& index, const Vector3s& coordinates) override;
 	HashEntry FindHashEntry(const VoxelBlockHash& index, const Vector3s& coordinates, int& hashCode);
-	bool AllocateHashBlockAt(VoxelVolume <TVoxel, VoxelBlockHash>* volume, Vector3s at, int& hashCode) override;
+	bool AllocateHashBlockAt(VoxelVolume <TVoxel, VoxelBlockHash>* volume, Vector3s at, int& hash_code) override;
 
 	template<typename TVoxelATarget, typename TVoxelASource>
-	void AllocateUsingOtherVolume(VoxelVolume <TVoxelATarget, VoxelBlockHash>* targetVolume,
-	                              VoxelVolume <TVoxelASource, VoxelBlockHash>* sourceVolume);
+	void AllocateUsingOtherVolume(VoxelVolume <TVoxelATarget, VoxelBlockHash>* target_volume,
+	                              VoxelVolume <TVoxelASource, VoxelBlockHash>* source_volume);
 
 	template<typename TVoxelTarget, typename TVoxelSource>
-	void AllocateUsingOtherVolumeExpanded(VoxelVolume <TVoxelTarget, VoxelBlockHash>* targetVolume,
-	                                      VoxelVolume <TVoxelSource, VoxelBlockHash>* sourceVolume);
+	void AllocateUsingOtherVolume_Bounded(VoxelVolume<TVoxelTarget, VoxelBlockHash>* target_volume,
+	                                      VoxelVolume<TVoxelSource, VoxelBlockHash>* source_volume,
+	                                      const Extent3D& bounds);
 
 	template<typename TVoxelTarget, typename TVoxelSource>
-	void AllocateUsingOtherVolumeAndSetVisibilityExpanded(VoxelVolume <TVoxelTarget, VoxelBlockHash>* targetVolume,
-	                                                      VoxelVolume <TVoxelSource, VoxelBlockHash>* sourceVolume,
-	                                                      ITMView* view,
-	                                                      const Matrix4f& depth_camera_matrix = Matrix4f::Identity());
+	void AllocateUsingOtherVolume_OffsetAndBounded(VoxelVolume<TVoxelTarget, VoxelBlockHash>* target_volume,
+	                                      VoxelVolume<TVoxelSource, VoxelBlockHash>* source_volume,
+                                           const Extent3D& source_bounds, const Vector3i& target_offset);
+
 };
 
 extern template

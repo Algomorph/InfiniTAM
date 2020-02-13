@@ -35,16 +35,11 @@ void WarpingEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::WarpScene(
 	FieldClearFunctor<TVoxel, TMemoryDeviceType> flagClearFunctor;
 	VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::VoxelTraversal(targetTSDF, flagClearFunctor);
 
-	// Allocate new blocks where necessary, filter based on flags from source
-	IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::Instance().
-			template AllocateFromWarpedVolume<TWarpType>(warpField, sourceTSDF, targetTSDF);
-
 	TrilinearInterpolationFunctor<TVoxel, TWarp, TIndex, TWarpType, TMemoryDeviceType>
 			trilinearInterpolationFunctor(sourceTSDF, warpField);
 
 	// Interpolate to obtain the new live frame values (at target index)
 	TwoVolumeTraversalEngine<TVoxel, TWarp, TIndex, TIndex, TMemoryDeviceType>::
-	//DualVoxelPositionTraversal_DefaultForMissingSecondary(targetTSDF, warpField, trilinearInterpolationFunctor);
 	DualVoxelPositionTraversal(targetTSDF, warpField, trilinearInterpolationFunctor);
 }
 

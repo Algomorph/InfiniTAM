@@ -424,20 +424,20 @@ struct HashOnlyStatisticsFunctor<TVoxel, VoxelBlockHash, TMemoryDeviceType> {
 	static std::vector<int> GetAllocatedHashCodes(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 		int allocated_count = ComputeAllocatedHashBlockCount(volume);
 		AllocatedHashesAggregationFunctor<TMemoryDeviceType> aggregator_functor(allocated_count);
-		HashTableTraversalEngine<TMemoryDeviceType>::TraverseWithHashCode(volume->index, aggregator_functor);
+		HashTableTraversalEngine<TMemoryDeviceType>::TraverseAllWithHashCode(volume->index, aggregator_functor);
 		return aggregator_functor.data();
 	}
 
 	static std::vector<Vector3s> GetAllocatedBlockPositions(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 		int allocated_count = ComputeAllocatedHashBlockCount(volume);
 		AllocatedBlockPositionAggregationFunctor<TMemoryDeviceType> aggregator_functor(allocated_count);
-		HashTableTraversalEngine<TMemoryDeviceType>::TraverseWithHashCode(volume->index, aggregator_functor);
+		HashTableTraversalEngine<TMemoryDeviceType>::TraverseAllWithHashCode(volume->index, aggregator_functor);
 		return aggregator_functor.data();
 	}
 
 	static int ComputeAllocatedHashBlockCount(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 		AllocatedHashBlockCountFunctor<TMemoryDeviceType> count_functor;
-		HashTableTraversalEngine<TMemoryDeviceType>::TraverseWithHashCode(volume->index, count_functor);
+		HashTableTraversalEngine<TMemoryDeviceType>::TraverseAllWithHashCode(volume->index, count_functor);
 		return count_functor.get_count();
 	}
 };

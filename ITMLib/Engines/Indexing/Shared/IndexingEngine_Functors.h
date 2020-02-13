@@ -18,75 +18,7 @@
 //local
 #include "IndexingEngine_Shared.h"
 #include "../../Common/CheckBlockVisibility.h"
-
-
-template<typename TWarp, typename TVoxel, WarpType TWarpType>
-struct WarpBasedAllocationMarkerFunctor {
-	WarpBasedAllocationMarkerFunctor(
-			VoxelVolume<TVoxel, VoxelBlockHash>* sourceVolume,
-			VoxelVolume<TVoxel, VoxelBlockHash>* volumeToAllocate,
-			Vector3s* allocationBlockCoords,
-			HashEntryAllocationState* warpedEntryAllocationStates) :
-
-			collisionDetected(false),
-
-			targetTSDFScene(volumeToAllocate),
-			targetTSDFVoxels(volumeToAllocate->localVBA.GetVoxelBlocks()),
-			targetTSDFHashEntries(volumeToAllocate->index.GetEntries()),
-			targetTSDFCache(),
-
-			sourceTSDFScene(sourceVolume),
-			sourceTSDFVoxels(sourceVolume->localVBA.GetVoxelBlocks()),
-			sourceTSDFHashEntries(sourceVolume->index.GetEntries()),
-			sourceTSDFCache(),
-
-			allocationBlockCoords(allocationBlockCoords),
-			warpedEntryAllocationStates(warpedEntryAllocationStates) {}
-
-	_CPU_AND_GPU_CODE_
-	inline
-	void operator()(TWarp& warpVoxel, Vector3i voxelPosition, Vector3s hashBlockPosition) {
-
-		Vector3f warpVector = ITMLib::WarpVoxelStaticFunctor<TWarp, TWarpType>::GetWarp(warpVoxel);
-		Vector3f warpedPosition = warpVector + TO_FLOAT3(voxelPosition);
-		Vector3i warpedPositionTruncated = warpedPosition.toInt();
-
-		// perform lookup in source volume
-		int vmIndex;
-#if !defined(__CUDACC__) && !defined(WITH_OPENMP)
-		const TVoxel& sourceTSDFVoxelAtWarp = readVoxel(sourceTSDFVoxels, sourceTSDFHashEntries,
-														warpedPositionTruncated,
-														vmIndex, sourceTSDFCache);
-#else //don't use cache when multithreading!
-		const TVoxel& sourceTSDFVoxelAtWarp = readVoxel(sourceTSDFVoxels, sourceTSDFHashEntries,
-		                                                warpedPositionTruncated,
-		                                                vmIndex);
-#endif
-
-		int targetBlockHash = HashCodeFromBlockPosition(hashBlockPosition);
-
-		MarkAsNeedingAllocationIfNotFound(warpedEntryAllocationStates, allocationBlockCoords, targetBlockHash,
-		                                  hashBlockPosition, targetTSDFHashEntries, collisionDetected);
-	}
-
-	bool collisionDetected;
-
-private:
-
-
-	VoxelVolume<TVoxel, VoxelBlockHash>* targetTSDFScene;
-	TVoxel* targetTSDFVoxels;
-	HashEntry* targetTSDFHashEntries;
-	VoxelBlockHash::IndexCache targetTSDFCache;
-
-	VoxelVolume<TVoxel, VoxelBlockHash>* sourceTSDFScene;
-	TVoxel* sourceTSDFVoxels;
-	HashEntry* sourceTSDFHashEntries;
-	VoxelBlockHash::IndexCache sourceTSDFCache;
-
-	Vector3s* allocationBlockCoords;
-	HashEntryAllocationState* warpedEntryAllocationStates;
-};
+#include "../../../Utils/Geometry/GeometryBooleanOperations.h"
 
 
 template<MemoryDeviceType TMemoryDeviceType>
@@ -167,10 +99,13 @@ struct TwoSurfaceBasedAllocationStateMarkerFunctor
 		: public DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType> {
 public:
 	TwoSurfaceBasedAllocationStateMarkerFunctor(VoxelBlockHash& index,
-	                                            const VoxelVolumeParameters* volume_parameters, const ITMLib::ITMView* view,
-	                                            const CameraTrackingState* tracking_state, float surface_distance_cutoff) :
+	                                            const VoxelVolumeParameters* volume_parameters,
+	                                            const ITMLib::ITMView* view,
+	                                            const CameraTrackingState* tracking_state,
+	                                            float surface_distance_cutoff) :
 			DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType>(index, volume_parameters, view,
-			                                                          tracking_state->pose_d->GetM(), surface_distance_cutoff) {}
+			                                                          tracking_state->pose_d->GetM(),
+			                                                          surface_distance_cutoff) {}
 
 	_DEVICE_WHEN_AVAILABLE_
 	void operator()(const float& surface1_depth, const Vector4f& surface2_point, int x, int y) {
@@ -254,4 +189,70 @@ struct ReallocateDeletedHashBlocksFunctor {
 private:
 	HashBlockVisibility* hash_block_visibility_types;
 	int* block_allocation_list;
+};
+
+template<MemoryDeviceType TMemoryDeviceType>
+struct VolumeBasedAllocationStateMarkerFunctor {
+public:
+	VolumeBasedAllocationStateMarkerFunctor(VoxelBlockHash& target_index) :
+			colliding_block_positions(target_index.hashEntryCount, TMemoryDeviceType),
+			hash_entry_allocation_states(target_index.GetHashEntryAllocationStates()),
+			hash_block_coordinates(target_index.GetAllocationBlockCoordinates()),
+			target_hash_table(target_index.GetEntries()){
+		colliding_block_positions_device = colliding_block_positions.GetData(TMemoryDeviceType);
+		INITIALIZE_ATOMIC(int, colliding_block_count, 0);
+	}
+
+	_DEVICE_WHEN_AVAILABLE_
+	void operator()(const HashEntry& source_hash_entry, const int& source_hash_code) {
+		MarkAsNeedingAllocationIfNotFound(
+				hash_entry_allocation_states,
+				hash_block_coordinates, source_hash_entry.pos,
+				target_hash_table, colliding_block_positions_device, colliding_block_count);
+	}
+
+	ORUtils::MemoryBlock<Vector3s> colliding_block_positions;
+
+	int get_colliding_block_count() {
+		return GET_ATOMIC_VALUE_CPU(colliding_block_count);
+	}
+
+protected:
+	Vector3s* colliding_block_positions_device;
+	DECLARE_ATOMIC(int, colliding_block_count);
+	HashEntryAllocationState* hash_entry_allocation_states;
+	Vector3s* hash_block_coordinates;
+	HashEntry* target_hash_table;
+};
+
+template<MemoryDeviceType TMemoryDeviceType>
+struct VolumeBasedBoundedAllocationStateMarkerFunctor :
+		public VolumeBasedAllocationStateMarkerFunctor<TMemoryDeviceType> {
+public:
+	VolumeBasedBoundedAllocationStateMarkerFunctor(VoxelBlockHash& target_index, const Extent3D& bounds) :
+		VolumeBasedAllocationStateMarkerFunctor<TMemoryDeviceType>(target_index), bounds(bounds) {}
+
+	_DEVICE_WHEN_AVAILABLE_
+	void operator()(const HashEntry& source_hash_entry, const int& source_hash_code) {
+		Vector3i block_position_voxels = source_hash_entry.pos.toInt() * VOXEL_BLOCK_SIZE;
+		if (IsHashBlockFullyInBounds(block_position_voxels, bounds) ||
+		    IsHashBlockPartiallyInBounds(block_position_voxels, bounds)) {
+			MarkAsNeedingAllocationIfNotFound(
+					hash_entry_allocation_states,
+					hash_block_coordinates, source_hash_entry.pos,
+					target_hash_table, colliding_block_positions_device, colliding_block_count);
+		}
+	}
+
+	using VolumeBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::colliding_block_positions;
+	using VolumeBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::get_colliding_block_count;
+
+protected:
+	const Extent3D bounds;
+
+	using VolumeBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::colliding_block_positions_device;
+	using VolumeBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::colliding_block_count;
+	using VolumeBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::hash_entry_allocation_states;
+	using VolumeBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::hash_block_coordinates;
+	using VolumeBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::target_hash_table;
 };

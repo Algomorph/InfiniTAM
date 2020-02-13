@@ -15,7 +15,8 @@
 //  ================================================================
 
 #include "../../../GlobalTemplateDefines.h"
-#include "../../Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.tpp"
+#include "../../Traversal/CPU/HashTableTraversal_CPU.h"
+#include "../../Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
 #include "EditAndCopyEngine_CPU_VoxelBlockHash.tpp"
 
 namespace ITMLib {

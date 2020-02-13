@@ -123,7 +123,7 @@ void DenseDynamicMapper<TVoxel, TWarp, TIndex>::ProcessInitialFrame(
 		RenderState* canonical_render_state) {
 	PrintOperationStatus("Generating raw live frame from view...");
 	bench::StartTimer("GenerateRawLiveAndCanonicalVolumes");
-	depth_fusion_engine->GenerateTsdfVolumeFromView(live_volume, view, trackingState);
+	depth_fusion_engine->GenerateTsdfVolumeFromTwoSurfaces(live_volume, view, trackingState);
 	bench::StopTimer("GenerateRawLiveAndCanonicalVolumes");
 	//** prepare canonical for new frame
 	PrintOperationStatus("Fusing data from live frame into canonical frame...");
@@ -144,15 +144,10 @@ DenseDynamicMapper<TVoxel, TWarp, TIndex>::ProcessFrame(const ITMView* view, con
 
 
 	PrintOperationStatus("Generating raw live TSDF from view...");
-	bench::StartTimer("GenerateRawLiveAndCanonicalVolumes");
-	if (this->use_expanded_allocation_during_TSDF_construction) {
-		depth_fusion_engine->GenerateTsdfVolumeFromViewExpanded(live_volume_pair[0], live_volume_pair[1], view,
-		                                                        trackingState->pose_d->GetM());
-	} else {
-		depth_fusion_engine->GenerateTsdfVolumeFromView(live_volume_pair[0], view, trackingState->pose_d->GetM());
-	}
+	bench::StartTimer("GenerateRawLiveVolume");
+	depth_fusion_engine->GenerateTsdfVolumeFromTwoSurfaces(live_volume_pair[0], view, trackingState);
 	LogVolumeStatistics(live_volume_pair[0], "[[live TSDF before tracking]]");
-	bench::StopTimer("GenerateRawLiveAndCanonicalVolumes");
+	bench::StopTimer("GenerateRawLiveVolume");
 	surface_tracker->ClearOutFramewiseWarp(warp_field);
 	DynamicFusionLogger<TVoxel, TWarp, TIndex>::Instance().InitializeFrameRecording();
 

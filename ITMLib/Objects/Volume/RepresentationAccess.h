@@ -9,6 +9,29 @@ template<typename T> _CPU_AND_GPU_CODE_ inline int HashCodeFromBlockPosition(con
 	return (((uint)blockPos.x * 73856093u) ^ ((uint)blockPos.y * 19349669u) ^ ((uint)blockPos.z * 83492791u)) & (uint)VOXEL_HASH_MASK;
 }
 
+/**
+ * \brief find the hash block at the specified spatial coordinates (in blocks, not voxels!) and return its hash
+ * \param hash_table
+ * \param at
+ * \return -1 if hash block is not found, hash code of the block otherwise
+ */
+_CPU_AND_GPU_CODE_
+inline int
+FindHashCodeAt(const CONSTPTR(ITMLib::VoxelBlockHash::IndexData)* hash_table, const THREADPTR(Vector3s)& at) {
+	int hash = HashCodeFromBlockPosition(at);
+	while (true) {
+		HashEntry hashEntry = hash_table[hash];
+
+		if (IS_EQUAL3(hashEntry.pos, at) && hashEntry.ptr >= 0) {
+			return hash;
+		}
+
+		if (hashEntry.offset < 1) break;
+		hash = ORDERED_LIST_SIZE + hashEntry.offset - 1;
+	}
+	return -1;
+}
+
 
 _CPU_AND_GPU_CODE_ inline int pointToVoxelBlockPos(const THREADPTR(Vector3i) & point, THREADPTR(Vector3i) &blockPos) {
 	blockPos.x = ((point.x < 0) ? point.x - VOXEL_BLOCK_SIZE + 1 : point.x) / VOXEL_BLOCK_SIZE;

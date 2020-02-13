@@ -199,25 +199,6 @@ void allocateHashedVoxelBlocksUsingLists_device(
 	}
 }
 
-__global__
-void buildHashAllocationTypeList_VolumeToVolume(ITMLib::HashEntryAllocationState* hashEntryStates,
-                                                Vector3s* blockCoordinates,
-                                                HashEntry* targetHashTable, const HashEntry* sourceHashTable,
-                                                int hashEntryCount,
-                                                bool* collisionDetected) {
-	int hashCode = threadIdx.x + blockIdx.x * blockDim.x;
-	if (hashCode >= hashEntryCount) return;
-	const HashEntry& sourceHashEntry = sourceHashTable[hashCode];
-	if (sourceHashEntry.ptr < 0) return;
-	Vector3s sourceBlockCoordinates = sourceHashEntry.pos;
-	int targetHash = HashCodeFromBlockPosition(sourceBlockCoordinates);
-
-	MarkAsNeedingAllocationIfNotFound(hashEntryStates, blockCoordinates,
-	                                  targetHash, sourceBlockCoordinates, targetHashTable,
-	                                  *collisionDetected);
-}
-
-
 __global__ void buildHashAllocAndVisibleType_device(ITMLib::HashEntryAllocationState* hash_entry_states,
                                                     Vector3s* block_coords, const float* depth,
                                                     Matrix4f inverted_camera_pose,
@@ -269,41 +250,6 @@ __global__ void findHashEntry_device(HashEntry* entry, const HashEntry* hashTabl
 }
 
 
-__global__ void markForAllocationBasedOnOneRingAroundAnotherAllocation_device(
-		ITMLib::HashEntryAllocationState* hashEntryStates, Vector3s* blockCoordinates,
-		const HashEntry* sourceHashTable, const HashEntry* targetHashTable, int hashEntryCount,
-		bool* collisionDetected) {
-
-	int hashCode = blockIdx.x;
-
-	if (hashCode >= hashEntryCount) return;
-	const HashEntry& sourceHashEntry = sourceHashTable[hashCode];
-	if (sourceHashEntry.ptr < 0) return;
-
-	Vector3s targetBlockCoordinates = sourceHashEntry.pos + Vector3s(threadIdx.x - 1, threadIdx.y - 1, threadIdx.z - 1);
-
-	int targetHash = HashCodeFromBlockPosition(targetBlockCoordinates);
-	MarkAsNeedingAllocationIfNotFound(hashEntryStates, blockCoordinates, targetHash, targetBlockCoordinates,
-	                                  targetHashTable, *collisionDetected);
-}
-
-__global__ void markForAllocationAndSetVisibilityBasedOnOneRingAroundAnotherAllocation_device(
-		ITMLib::HashEntryAllocationState* hashEntryStates, Vector3s* blockCoordinates,
-		HashBlockVisibility* hashBlockVisibilityTypes,
-		const HashEntry* sourceHashTable, const HashEntry* targetHashTable, int hashEntryCount,
-		bool* collisionDetected) {
-
-	int hashCode = blockIdx.x;
-
-	if (hashCode >= hashEntryCount) return;
-	const HashEntry& sourceHashEntry = sourceHashTable[hashCode];
-	if (sourceHashEntry.ptr < 0) return;
-
-	Vector3s targetBlockCoordinates = sourceHashEntry.pos + Vector3s(threadIdx.x - 1, threadIdx.y - 1, threadIdx.z - 1);
-	MarkForAllocationAndSetVisibilityTypeIfNotFound(hashEntryStates, blockCoordinates, hashBlockVisibilityTypes,
-	                                                targetBlockCoordinates, targetHashTable, *collisionDetected);
-}
-
 struct SingleHashAllocationData {
 	int lastFreeVoxelBlockId;
 	int lastFreeExcessListId;
@@ -320,14 +266,6 @@ __global__ void allocateHashEntry_device(SingleHashAllocationData* data,
 	                                        data->hashCode);
 };
 
-//ITMLib::HashEntryAllocationState* hash_entry_states,
-//		Vector3s* hash_block_coordinates, int& hash_code,
-//const CONSTPTR(Vector3s)& desired_hash_block_position,
-//const CONSTPTR(HashEntry)* hash_table,
-//		THREADPTR(Vector3s)* colliding_block_positions,
-//THREADPTR(int*) colliding_block_hashes,
-//ATOMIC_ARGUMENT(int) colliding_block_count
-
 __global__ void buildHashAllocationTypeList_BlockList_device(
 		const Vector3s* new_block_positions, HashEntryAllocationState* hash_entry_states, Vector3s* block_coordinates,
 		HashEntry* hash_table, const int new_block_count, Vector3s* colliding_block_positions,
@@ -337,11 +275,46 @@ __global__ void buildHashAllocationTypeList_BlockList_device(
 	if (new_block_index >= new_block_count) return;
 
 	Vector3s desired_block_position = new_block_positions[new_block_index];
-	int hash_code = HashCodeFromBlockPosition(desired_block_position);
 
-	MarkAsNeedingAllocationIfNotFound(hash_entry_states, block_coordinates, hash_code,
+	MarkAsNeedingAllocationIfNotFound(hash_entry_states, block_coordinates,
 	                                  desired_block_position, hash_table, colliding_block_positions,
 	                                  colliding_block_count);
+}
+
+
+
+__global__ void determineTargetAllocationForOffsetCopy_device(
+		HashEntry* target_hash_table,
+		const HashEntry* source_hash_table,
+		ITMLib::HashEntryAllocationState* hash_entry_states,
+		Vector3s* block_coordinates,
+		const Vector6i target_bounds,
+		const Vector6i inverse_offset_block_range,
+		const Vector3i target_block_range,
+		const Vector3i min_target_block_coordinate,
+		Vector3s* colliding_block_positions,
+		int* colliding_block_count) {
+
+	int block_x = threadIdx.x + blockIdx.x * blockDim.x;
+	int block_y = threadIdx.y + blockIdx.y * blockDim.y;
+	int block_z = threadIdx.z + blockIdx.z * blockDim.z;
+	if (block_x > target_block_range.x || block_y > target_block_range.y || block_z > target_block_range.z)
+		return;
+
+	block_x += min_target_block_coordinate.x;
+	block_y += min_target_block_coordinate.y;
+	block_z += min_target_block_coordinate.z;
+	Vector3s target_block_position = Vector3s(block_x, block_y, block_z);
+
+	if (!HashBlockAllocatedAtOffset(source_hash_table, target_block_position, inverse_offset_block_range)) {
+		return;
+	}
+
+	MarkAsNeedingAllocationIfNotFound(hash_entry_states, block_coordinates,
+	                                  target_block_position, target_hash_table, colliding_block_positions,
+	                                  colliding_block_count);
+
+
 }
 
 } // end anonymous namespace (CUDA kernels)

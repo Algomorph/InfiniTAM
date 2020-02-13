@@ -232,24 +232,7 @@ void buildSdfVolumeFromImage_NearSurfaceAllocation(VoxelVolume<TVoxel, TIndex>**
 	initializeVolume(volume, initializationParameters, memoryDevice, swappingMode);
 	(*volume) = new VoxelVolume<TVoxel, TIndex>(&configuration::get().general_voxel_volume_parameters, swappingMode,
 	                                            memoryDevice, initializationParameters);
-	switch (memoryDevice) {
-
-		case MEMORYDEVICE_CUDA:
-#ifndef COMPILE_WITHOUT_CUDA
-			EditAndCopyEngine_CUDA<TVoxel, TIndex>::Inst().ResetVolume(*volume);
-#else
-			DIEWITHEXCEPTION_REPORTLOCATION("Trying to construct a volume in CUDA memory while code was build "
-								   "without CUDA support, aborting.");
-#endif
-			break;
-
-		case MEMORYDEVICE_CPU:
-			EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().ResetVolume(*volume);
-			break;
-		case MEMORYDEVICE_METAL:
-			DIEWITHEXCEPTION_REPORTLOCATION("Metal framework not fully supported.");
-			break;
-	}
+	(*volume) ->Reset();
 	RenderState renderState(imageSize, configuration::get().general_voxel_volume_parameters.near_clipping_distance,
 	                        configuration::get().general_voxel_volume_parameters.far_clipping_distance, memoryDevice);
 	CameraTrackingState trackingState(imageSize, memoryDevice);
@@ -258,7 +241,7 @@ void buildSdfVolumeFromImage_NearSurfaceAllocation(VoxelVolume<TVoxel, TIndex>**
 			DepthFusionEngineFactory
 			::Build<TVoxel, WarpVoxel, TIndex>(memoryDevice);
 
-	depth_fusion_engine->GenerateTsdfVolumeFromView(*volume, *view, &trackingState);
+	depth_fusion_engine->GenerateTsdfVolumeFromSurface(*volume, *view, &trackingState);
 
 	delete depth_fusion_engine;
 }

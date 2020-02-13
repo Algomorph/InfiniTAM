@@ -14,13 +14,11 @@
 //  limitations under the License.
 //  ================================================================
 #include "../Traversal/CUDA/TwoVolumeTraversal_CUDA_VoxelBlockHash.h"
-#include "../Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.tcu"
+#include "../Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
 #include "VolumeFusionEngine.tpp"
 #include "../../GlobalTemplateDefines.h"
 
 namespace ITMLib{
-
 template
 class VolumeFusionEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>;
-
 } // namespace ITMLib
