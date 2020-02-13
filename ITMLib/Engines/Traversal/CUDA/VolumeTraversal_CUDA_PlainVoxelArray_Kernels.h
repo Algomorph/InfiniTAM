@@ -38,8 +38,8 @@ StaticTraverseAll_device(TVoxel* voxels, const ITMLib::PlainVoxelArray::GridAlig
 
 template<typename TFunctor, typename TVoxel>
 __global__ void
-voxelTraversal_device(TVoxel* voxels, const ITMLib::PlainVoxelArray::GridAlignedBox* arrayInfo,
-                      TFunctor* functor) {
+traverseAll_device(TVoxel* voxels, const ITMLib::PlainVoxelArray::GridAlignedBox* arrayInfo,
+                   TFunctor* functor) {
 	int x = blockIdx.x * blockDim.x + threadIdx.x;
 	int y = blockIdx.y * blockDim.y + threadIdx.y;
 	int z = blockIdx.z * blockDim.z + threadIdx.z;
@@ -53,8 +53,8 @@ voxelTraversal_device(TVoxel* voxels, const ITMLib::PlainVoxelArray::GridAligned
 
 template<typename TFunctor, typename TVoxel>
 __global__ void
-voxelPositionTraversal_device(TVoxel* voxels, const ITMLib::PlainVoxelArray::GridAlignedBox* arrayInfo,
-                      TFunctor* functor) {
+traverseAllWithPosition_device(TVoxel* voxels, const ITMLib::PlainVoxelArray::GridAlignedBox* arrayInfo,
+                               TFunctor* functor) {
 	int x = blockIdx.x * blockDim.x + threadIdx.x;
 	int y = blockIdx.y * blockDim.y + threadIdx.y;
 	int z = blockIdx.z * blockDim.z + threadIdx.z;

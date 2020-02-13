@@ -35,17 +35,22 @@ class VolumeTraversalEngine<TVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA> {
 public:
 // region ================================ STATIC SINGLE-SCENE TRAVERSAL ===============================================
 	template<typename TStaticFunctor>
-	inline static void StaticTraverseAll(VoxelVolume<TVoxel, PlainVoxelArray>* scene) {
-		TVoxel* voxelArray = scene->localVBA.GetVoxelBlocks();
-		const PlainVoxelArray::GridAlignedBox* arrayInfo = scene->index.GetIndexData();
+	inline static void StaticTraverseAll(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
+		TVoxel* voxels = volume->localVBA.GetVoxelBlocks();
+		const PlainVoxelArray::GridAlignedBox* array_info = volume->index.GetIndexData();
 
-		dim3 cudaBlockSize(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
-		dim3 gridSize(scene->index.GetVolumeSize().x / cudaBlockSize.x,
-		              scene->index.GetVolumeSize().y / cudaBlockSize.y,
-		              scene->index.GetVolumeSize().z / cudaBlockSize.z);
+		dim3 cuda_block_size(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
+		dim3 cuda_grid_size(volume->index.GetVolumeSize().x / cuda_block_size.x,
+		              volume->index.GetVolumeSize().y / cuda_block_size.y,
+		              volume->index.GetVolumeSize().z / cuda_block_size.z);
 
-		StaticTraverseAll_device<TStaticFunctor, TVoxel> << < gridSize, cudaBlockSize >> > (voxelArray, arrayInfo);
+		StaticTraverseAll_device<TStaticFunctor, TVoxel> << < cuda_grid_size, cuda_block_size >> > (voxels, array_info);
 		ORcudaKernelCheck;
+	}
+
+	template<typename TStaticFunctor>
+	inline static void StaticTraverseUtilized(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
+		StaticTraverseAll<TStaticFunctor>(volume);
 	}
 
 // endregion ===========================================================================================================
@@ -53,21 +58,21 @@ public:
 	template<typename TFunctor>
 	inline static void
 	TraverseAll(VoxelVolume<TVoxel, PlainVoxelArray>* volume, TFunctor& functor) {
-		TVoxel* voxelArray = volume->localVBA.GetVoxelBlocks();
-		const PlainVoxelArray::GridAlignedBox* arrayInfo = volume->index.GetIndexData();
+		TVoxel* voxels = volume->localVBA.GetVoxelBlocks();
+		const PlainVoxelArray::GridAlignedBox* array_info = volume->index.GetIndexData();
 
-		dim3 cudaBlockSize(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
-		dim3 gridSize(volume->index.GetVolumeSize().x / cudaBlockSize.x,
-		              volume->index.GetVolumeSize().y / cudaBlockSize.y,
-		              volume->index.GetVolumeSize().z / cudaBlockSize.z);
+		dim3 cuda_block_size(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
+		dim3 cuda_grid_size(volume->index.GetVolumeSize().x / cuda_block_size.x,
+		              volume->index.GetVolumeSize().y / cuda_block_size.y,
+		              volume->index.GetVolumeSize().z / cuda_block_size.z);
 
 		// transfer functor from RAM to VRAM
 		TFunctor* functor_device = nullptr;
 		ORcudaSafeCall(cudaMalloc((void**) &functor_device, sizeof(TFunctor)));
 		ORcudaSafeCall(cudaMemcpy(functor_device, &functor, sizeof(TFunctor), cudaMemcpyHostToDevice));
 
-		voxelTraversal_device<TFunctor, TVoxel> << < gridSize, cudaBlockSize >> >
-		                                                       (voxelArray, arrayInfo, functor_device);
+		traverseAll_device < TFunctor, TVoxel > << < cuda_grid_size, cuda_block_size >> >
+		                                                    (voxels, array_info, functor_device);
 		ORcudaKernelCheck;
 
 		// transfer functor from VRAM back to RAM
@@ -77,27 +82,39 @@ public:
 
 	template<typename TFunctor>
 	inline static void
-	TraverseAllWithPosition(VoxelVolume<TVoxel, PlainVoxelArray>* volume, TFunctor& functor) {
-		TVoxel* voxelArray = volume->localVBA.GetVoxelBlocks();
-		const PlainVoxelArray::GridAlignedBox* arrayInfo = volume->index.GetIndexData();
+	TraverseUtilized(VoxelVolume<TVoxel, PlainVoxelArray>* volume, TFunctor& functor) {
+		TraverseAll(volume, functor);
+	}
 
-		dim3 cudaBlockSize(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
-		dim3 gridSize(volume->index.GetVolumeSize().x / cudaBlockSize.x,
-		              volume->index.GetVolumeSize().y / cudaBlockSize.y,
-		              volume->index.GetVolumeSize().z / cudaBlockSize.z);
+	template<typename TFunctor>
+	inline static void
+	TraverseAllWithPosition(VoxelVolume<TVoxel, PlainVoxelArray>* volume, TFunctor& functor) {
+		TVoxel* voxels = volume->localVBA.GetVoxelBlocks();
+		const PlainVoxelArray::GridAlignedBox* array_info = volume->index.GetIndexData();
+
+		dim3 cuda_block_size(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
+		dim3 cuda_grid_size(volume->index.GetVolumeSize().x / cuda_block_size.x,
+		              volume->index.GetVolumeSize().y / cuda_block_size.y,
+		              volume->index.GetVolumeSize().z / cuda_block_size.z);
 
 		// transfer functor from RAM to VRAM
 		TFunctor* functor_device = nullptr;
 		ORcudaSafeCall(cudaMalloc((void**) &functor_device, sizeof(TFunctor)));
 		ORcudaSafeCall(cudaMemcpy(functor_device, &functor, sizeof(TFunctor), cudaMemcpyHostToDevice));
 
-		voxelPositionTraversal_device<TFunctor, TVoxel> << < gridSize, cudaBlockSize >> >
-		                                                       (voxelArray, arrayInfo, functor_device);
+		traverseAllWithPosition_device < TFunctor, TVoxel > << < cuda_grid_size, cuda_block_size >> >
+		                                                                (voxels, array_info, functor_device);
 		ORcudaKernelCheck;
 
 		// transfer functor from VRAM back to RAM
 		ORcudaSafeCall(cudaMemcpy(&functor, functor_device, sizeof(TFunctor), cudaMemcpyDeviceToHost));
 		ORcudaSafeCall(cudaFree(functor_device));
+	}
+
+	template<typename TFunctor>
+	inline static void
+	TraverseUtilizedWithPosition(VoxelVolume<TVoxel, PlainVoxelArray>* volume, TFunctor& functor) {
+		TraverseAllWithPosition(volume, functor);
 	}
 // endregion ===========================================================================================================
 };

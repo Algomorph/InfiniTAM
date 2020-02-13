@@ -42,10 +42,10 @@ public:
 // region ================================ DYNAMIC SINGLE-SCENE TRAVERSAL ==============================================
 	template<typename TFunctor>
 	inline static void
-	TraverseAll(VoxelVolume<TVoxel, PlainVoxelArray>* scene, TFunctor& functor) {
-		TVoxel* voxels = scene->localVBA.GetVoxelBlocks();
+	TraverseAll(VoxelVolume<TVoxel, PlainVoxelArray>* volume, TFunctor& functor) {
+		TVoxel* voxels = volume->localVBA.GetVoxelBlocks();
 		int voxelCount =
-				scene->index.GetVolumeSize().x * scene->index.GetVolumeSize().y * scene->index.GetVolumeSize().z;
+				volume->index.GetVolumeSize().x * volume->index.GetVolumeSize().y * volume->index.GetVolumeSize().z;
 
 #ifdef WITH_OPENMP
 #pragma omp parallel for
@@ -58,24 +58,36 @@ public:
 
 	template<typename TFunctor>
 	inline static void
-	TraverseAll_ST(VoxelVolume<TVoxel, PlainVoxelArray>* scene, TFunctor& functor) {
-		TVoxel* voxels = scene->localVBA.GetVoxelBlocks();
+	TraverseUtilized(VoxelVolume<TVoxel, PlainVoxelArray>* volume, TFunctor& functor) {
+		TraverseAll(volume, functor);
+	}
+
+	template<typename TFunctor>
+	inline static void
+	TraverseAll_ST(VoxelVolume<TVoxel, PlainVoxelArray>* volume, TFunctor& functor) {
+		TVoxel* voxels = volume->localVBA.GetVoxelBlocks();
 		int voxelCount =
-				scene->index.GetVolumeSize().x * scene->index.GetVolumeSize().y * scene->index.GetVolumeSize().z;
+				volume->index.GetVolumeSize().x * volume->index.GetVolumeSize().y * volume->index.GetVolumeSize().z;
 		for (int linearIndex = 0; linearIndex < voxelCount; linearIndex++) {
 			TVoxel& voxel = voxels[linearIndex];
 			functor(voxel);
 		}
 	}
 
+	template<typename TFunctor>
+	inline static void
+	TraverseUtilized_ST(VoxelVolume<TVoxel, PlainVoxelArray>* volume, TFunctor& functor) {
+		TraverseAll_ST(volume, functor);
+	}
+
 
 	template<typename TFunctor>
 	inline static void
-	TraverseAllWithPosition(VoxelVolume<TVoxel, PlainVoxelArray>* scene, TFunctor& functor) {
-		TVoxel* voxels = scene->localVBA.GetVoxelBlocks();
+	TraverseAllWithPosition(VoxelVolume<TVoxel, PlainVoxelArray>* volume, TFunctor& functor) {
+		TVoxel* voxels = volume->localVBA.GetVoxelBlocks();
 		int voxelCount =
-				scene->index.GetVolumeSize().x * scene->index.GetVolumeSize().y * scene->index.GetVolumeSize().z;
-		const PlainVoxelArray::IndexData* indexData = scene->index.GetIndexData();
+				volume->index.GetVolumeSize().x * volume->index.GetVolumeSize().y * volume->index.GetVolumeSize().z;
+		const PlainVoxelArray::IndexData* indexData = volume->index.GetIndexData();
 #ifdef WITH_OPENMP
 #pragma omp parallel for
 #endif
@@ -86,13 +98,19 @@ public:
 		}
 	}
 
+	template<typename TFunctor>
+	inline static void
+	TraverseUtilizedWithPosition(VoxelVolume<TVoxel, PlainVoxelArray>* volume, TFunctor& functor) {
+		TraverseAllWithPosition(volume,functor);
+	}
+
 
 	template<typename TFunctor>
 	inline static void
-	TraverseAllWithinBounds(VoxelVolume<TVoxel, PlainVoxelArray>* scene, TFunctor& functor, Vector6i bounds) {
-		TVoxel* voxels = scene->localVBA.GetVoxelBlocks();
+	TraverseAllWithinBounds(VoxelVolume<TVoxel, PlainVoxelArray>* volume, TFunctor& functor, Vector6i bounds) {
+		TVoxel* voxels = volume->localVBA.GetVoxelBlocks();
 		int vmIndex = 0;
-		const PlainVoxelArray::IndexData* indexData = scene->index.GetIndexData();
+		const PlainVoxelArray::IndexData* indexData = volume->index.GetIndexData();
 #ifdef WITH_OPENMP
 #pragma omp parallel for
 #endif
@@ -105,16 +123,21 @@ public:
 				}
 			}
 		}
-
 	}
 
 	template<typename TFunctor>
 	inline static void
-	TraverseAllWithinBoundsWithPosition(VoxelVolume<TVoxel, PlainVoxelArray>* scene, TFunctor& functor,
+	TraverseUtilizedWithinBounds(VoxelVolume<TVoxel, PlainVoxelArray>* volume, TFunctor& functor, Vector6i bounds) {
+		TraverseAllWithinBounds(volume, functor, bounds);
+	}
+
+	template<typename TFunctor>
+	inline static void
+	TraverseAllWithinBoundsWithPosition(VoxelVolume<TVoxel, PlainVoxelArray>* volume, TFunctor& functor,
 	                                    Vector6i bounds) {
-		TVoxel* voxels = scene->localVBA.GetVoxelBlocks();
+		TVoxel* voxels = volume->localVBA.GetVoxelBlocks();
 		int vmIndex = 0;
-		const PlainVoxelArray::IndexData* indexData = scene->index.GetIndexData();
+		const PlainVoxelArray::IndexData* indexData = volume->index.GetIndexData();
 #ifdef WITH_OPENMP
 #pragma omp parallel for
 #endif
@@ -132,34 +155,19 @@ public:
 
 	template<typename TFunctor>
 	inline static void
-	TraverseAllWithinBoundsWithPositionAndHashEntry(VoxelVolume<TVoxel, PlainVoxelArray>* scene, TFunctor& functor,
-	                                                Vector6i bounds) {
-		TVoxel* voxels = scene->localVBA.GetVoxelBlocks();
-		int vmIndex = 0;
-		const PlainVoxelArray::IndexData* indexData = scene->index.GetIndexData();
-#ifdef WITH_OPENMP
-#pragma omp parallel for
-#endif
-		for (int z = bounds.min_z; z < bounds.max_z; z++) {
-			for (int y = bounds.min_y; y < bounds.max_y; y++) {
-				for (int x = bounds.min_x; x < bounds.max_x; x++) {
-					Vector3i position(x, y, z);
-					int linearIndex = findVoxel(indexData, Vector3i(x, y, z), vmIndex);
-					TVoxel& voxel = voxels[linearIndex];
-					functor(voxel, position);
-				}
-			}
-		}
+	TraverseUtilizedWithinBoundsWithPosition(VoxelVolume<TVoxel, PlainVoxelArray>* volume, TFunctor& functor,
+	                                    Vector6i bounds) {
+		TraverseAllWithinBoundsWithPosition(volume, functor, bounds);
 	}
 
 // endregion ===========================================================================================================
 
 // region ================================ STATIC SINGLE-SCENE TRAVERSAL ===============================================
 	template<typename TStaticFunctor>
-	inline static void StaticTraverseAll(VoxelVolume<TVoxel, PlainVoxelArray>* scene) {
-		TVoxel* voxels = scene->localVBA.GetVoxelBlocks();
+	inline static void StaticTraverseAll(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
+		TVoxel* voxels = volume->localVBA.GetVoxelBlocks();
 		int voxelCount =
-				scene->index.GetVolumeSize().x * scene->index.GetVolumeSize().y * scene->index.GetVolumeSize().z;
+				volume->index.GetVolumeSize().x * volume->index.GetVolumeSize().y * volume->index.GetVolumeSize().z;
 #ifdef WITH_OPENMP
 #pragma omp parallel for
 #endif
@@ -171,18 +179,28 @@ public:
 	}
 
 	template<typename TStaticFunctor>
-	inline static void StaticTraverseAllWithPosition(VoxelVolume<TVoxel, PlainVoxelArray>* scene) {
-		TVoxel* voxels = scene->localVBA.GetVoxelBlocks();
+	inline static void StaticTraverseUtilized(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
+		StaticTraverseAll<TStaticFunctor>(volume);
+	}
+
+	template<typename TStaticFunctor>
+	inline static void StaticTraverseAllWithPosition(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
+		TVoxel* voxels = volume->localVBA.GetVoxelBlocks();
 		int voxelCount =
-				scene->index.GetVolumeSize().x * scene->index.GetVolumeSize().y * scene->index.GetVolumeSize().z;
+				volume->index.GetVolumeSize().x * volume->index.GetVolumeSize().y * volume->index.GetVolumeSize().z;
 #ifdef WITH_OPENMP
 #pragma omp parallel for
 #endif
 		for (int linearIndex = 0; linearIndex < voxelCount; linearIndex++) {
-			Vector3i voxelPosition = ComputePositionVectorFromLinearIndex_PlainVoxelArray(scene, linearIndex);
+			Vector3i voxelPosition = ComputePositionVectorFromLinearIndex_PlainVoxelArray(volume, linearIndex);
 			TVoxel& voxel = voxels[linearIndex];
 			TStaticFunctor::run(voxel, voxelPosition);
 		}
+	}
+
+	template<typename TStaticFunctor>
+	inline static void StaticTraverseUtilizedWithPosition(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
+		StaticTraverseAllWithPosition(volume);
 	}
 // endregion
 
