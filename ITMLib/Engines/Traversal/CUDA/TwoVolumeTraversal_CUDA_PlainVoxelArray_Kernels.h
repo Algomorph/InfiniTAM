@@ -40,7 +40,7 @@ staticDualVoxelTraversal_device(TVoxelPrimary* primaryVoxels, TVoxelSecondary* s
 
 template<typename TStaticBooleanFunctor, typename TVoxelPrimary, typename TVoxelSecondary>
 __global__ void
-staticTraverseAndCompareAll_device(TVoxelPrimary* primaryVoxels, TVoxelSecondary* secondaryVoxels,
+TraverseAndCompareAll_device(TVoxelPrimary* primaryVoxels, TVoxelSecondary* secondaryVoxels,
                                         const ITMLib::PlainVoxelArray::GridAlignedBox* arrayInfo,
                                         bool* falseEncountered) {
 

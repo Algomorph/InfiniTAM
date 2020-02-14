@@ -62,7 +62,7 @@ public:
 	// endregion =======================================================================================================
 
 	_DEVICE_WHEN_AVAILABLE_
-	void operator()(TWarpVoxel& warp_voxel, TTSDFVoxel& canonical_voxel, TTSDFVoxel& live_voxel, Vector3i voxelPosition) {
+	void operator()(TWarpVoxel& warp_voxel, TTSDFVoxel& canonical_voxel, TTSDFVoxel& live_voxel, const Vector3i& voxel_position) {
 
 		if (!VoxelIsConsideredForTracking(canonical_voxel, live_voxel)) return;
 		bool computeDataAndLevelSetTerms = VoxelIsConsideredForDataTerm(canonical_voxel, live_voxel);
@@ -81,7 +81,7 @@ public:
 
 			Vector3f liveSdfJacobian;
 			ComputeLiveJacobian_CentralDifferences(
-					liveSdfJacobian, voxelPosition, live_voxels, live_index_data, live_cache);
+					liveSdfJacobian, voxel_position, live_voxels, live_index_data, live_cache);
 			if (switches.enable_data_term) {
 
 				// Compute data term error / energy
@@ -98,7 +98,7 @@ public:
 
 			if (switches.enable_level_set_term) {
 				Matrix3f liveSdfHessian;
-				ComputeSdfHessian(liveSdfHessian, voxelPosition, liveSdf, live_voxels, live_index_data, live_cache);
+				ComputeSdfHessian(liveSdfHessian, voxel_position, liveSdf, live_voxels, live_index_data, live_cache);
 
 				float sdfJacobianNorm = ORUtils::length(liveSdfJacobian);
 				float sdfJacobianNormMinusUnity = sdfJacobianNorm - sdf_unity;
@@ -121,7 +121,7 @@ public:
 			//    0        1        2          3         4         5           6         7         8
 			//(-1,0,0) (0,-1,0) (0,0,-1)   (1, 0, 0) (0, 1, 0) (0, 0, 1)   (1, 1, 0) (0, 1, 1) (1, 0, 1)
 			findPoint2ndDerivativeNeighborhoodFramewiseWarp(
-					neighborFramewiseWarps/*x9*/, neighborKnown, neighborTruncated, neighborAllocated, voxelPosition,
+					neighborFramewiseWarps/*x9*/, neighborKnown, neighborTruncated, neighborAllocated, voxel_position,
 					warp_voxels, warp_index_data, warp_cache, canonical_voxels, canonical_index_data, canonical_cache);
 
 			for (int iNeighbor = 0; iNeighbor < neighborhoodSize; iNeighbor++) {

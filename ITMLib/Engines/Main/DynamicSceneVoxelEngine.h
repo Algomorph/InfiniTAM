@@ -29,7 +29,7 @@ namespace ITMLib
 			Omitting a separate image size for the depth images
 			will assume same resolution as for the RGB images.
 		*/
-		DynamicSceneVoxelEngine(const RGBDCalib& calib, Vector2i imgSize_rgb, Vector2i imgSize_d);
+		DynamicSceneVoxelEngine(const RGBDCalib& calibration_info, Vector2i rgb_image_size, Vector2i depth_image_size);
 		~DynamicSceneVoxelEngine() override;
 
 		ITMView* GetView() override { return view; }

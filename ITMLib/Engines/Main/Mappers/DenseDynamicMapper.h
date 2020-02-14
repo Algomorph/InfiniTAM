@@ -17,6 +17,7 @@
 
 // *** local ***
 // engines & trackers
+#include "../../Indexing/Interface/IndexingEngine.h"
 #include "../../DepthFusion/DepthFusionEngine.h"
 #include "../../VolumeFusion/VolumeFusionEngine.h"
 #include "../../Warping/WarpingEngine.h"
@@ -70,7 +71,7 @@ public:
 	                  VoxelVolume <TVoxel, TIndex>* canonical_volume, VoxelVolume <TVoxel, TIndex>** live_volume_pair,
 	                  VoxelVolume <TWarp, TIndex>* warp_field, RenderState* canonical_render_state);
 
-	void ProcessInitialFrame(const ITMView* view, const CameraTrackingState* trackingState,
+	void ProcessInitialFrame(const ITMView* view, const CameraTrackingState* tracking_state,
 	                         VoxelVolume<TVoxel, TIndex>* canonical_volume, VoxelVolume<TVoxel, TIndex>* live_volume,
 	                         RenderState* canonical_render_state);
 
@@ -101,9 +102,10 @@ private:
 	// endregion =======================================================================================================
 	// region =========================================== MEMBER VARIABLES =============================================
 	// *** engines ***
+	IndexingEngineInterface<TVoxel,TIndex>* indexing_engine;
 	DepthFusionEngineInterface<TVoxel, TWarp, TIndex>* depth_fusion_engine;
 	WarpingEngineInterface<TVoxel, TWarp, TIndex>* warping_engine;
-	VolumeFusionEngineInterface<TVoxel, TWarp, TIndex>* volume_fusion_engine;
+	VolumeFusionEngineInterface<TVoxel, TIndex>* volume_fusion_engine;
 
 	SwappingEngine<TVoxel, TIndex>* swapping_engine;
 	SurfaceTrackerInterface<TVoxel, TWarp, TIndex>* surface_tracker;

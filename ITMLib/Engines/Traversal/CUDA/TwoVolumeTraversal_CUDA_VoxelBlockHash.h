@@ -35,7 +35,7 @@ private:
 		TVoxel2* voxels2 = volume2->localVBA.GetVoxelBlocks();
 		const HashEntry* hash_table1 = volume1->index.GetIndexData();
 		const HashEntry* hash_table2 = volume2->index.GetIndexData();
-		int hash_entry_count = volume1->index.hashEntryCount;
+		const int hash_entry_count = volume1->index.hashEntryCount;
 
 		// transfer functor from RAM to VRAM
 		TFunctor* functor_device = nullptr;
@@ -48,6 +48,37 @@ private:
 		std::forward<TDeviceTraversalFunction>(deviceTraversalFunction)(
 				hash_per_block_grid_size, block_voxel_per_thread_block_size,
 				voxels1, voxels2, hash_table1, hash_table2, functor_device);
+		ORcudaKernelCheck;
+
+		// transfer functor from VRAM back to RAM
+		ORcudaSafeCall(cudaMemcpy(&functor, functor_device, sizeof(TFunctor), cudaMemcpyDeviceToHost));
+		ORcudaSafeCall(cudaFree(functor_device));
+	}
+
+	template<typename TFunctor, typename TDeviceTraversalFunction>
+	inline static void
+	TraverseUtilized_Generic(
+			VoxelVolume<TVoxel1, VoxelBlockHash>* volume1,
+			VoxelVolume<TVoxel2, VoxelBlockHash>* volume2,
+			TFunctor& functor, TDeviceTraversalFunction&& deviceTraversalFunction) {
+		TVoxel1* voxels1 = volume1->localVBA.GetVoxelBlocks();
+		TVoxel2* voxels2 = volume2->localVBA.GetVoxelBlocks();
+		const HashEntry* hash_table1 = volume1->index.GetIndexData();
+		const HashEntry* hash_table2 = volume2->index.GetIndexData();
+		const int utilized_entry_count = volume1->index.GetUtilizedHashBlockCount();
+		const int* utilized_hash_codes = volume1->index.GetUtilizedBlockHashCodes();
+
+		// transfer functor from RAM to VRAM
+		TFunctor* functor_device = nullptr;
+		ORcudaSafeCall(cudaMalloc((void**) &functor_device, sizeof(TFunctor)));
+		ORcudaSafeCall(cudaMemcpy(functor_device, &functor, sizeof(TFunctor), cudaMemcpyHostToDevice));
+
+		dim3 block_voxel_per_thread_block_size(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
+		dim3 hash_per_block_grid_size(utilized_entry_count);
+
+		std::forward<TDeviceTraversalFunction>(deviceTraversalFunction)(
+				hash_per_block_grid_size, block_voxel_per_thread_block_size,
+				voxels1, voxels2, hash_table1, hash_table2, utilized_hash_codes, functor_device);
 		ORcudaKernelCheck;
 
 		// transfer functor from VRAM back to RAM
@@ -200,9 +231,24 @@ public:
 				dim3 hash_per_block_grid_size, dim3 block_voxel_per_thread_block_size,
 				TVoxel1* voxels1, TVoxel2* voxels2, const HashEntry* hash_table1,
 				const HashEntry* hash_table2, TFunctor* functor_device) {
-			dualVoxelTraversal_device<TFunctor, TVoxel1, TVoxel2>
+			traverseAll_device<TFunctor, TVoxel1, TVoxel2>
 					<< < hash_per_block_grid_size, block_voxel_per_thread_block_size >> >
 			                                       (voxels1, voxels2, hash_table1, hash_table2, functor_device);
+		});
+	}
+
+	template<typename TFunctor>
+	inline static void
+	TraverseUtilized(VoxelVolume<TVoxel1, VoxelBlockHash>* volume1,
+	                 VoxelVolume<TVoxel2, VoxelBlockHash>* volume2,
+	                 TFunctor& functor) {
+		TraverseUtilized_Generic(volume1, volume2, functor, [](
+				dim3 hash_per_block_grid_size, dim3 block_voxel_per_thread_block_size,
+				TVoxel1* voxels1, TVoxel2* voxels2, const HashEntry* hash_table1,
+				const HashEntry* hash_table2, const int* utilized_hash_codes, TFunctor* functor_device) {
+			traverseUtilized_device<TFunctor, TVoxel1, TVoxel2>
+					<< < hash_per_block_grid_size, block_voxel_per_thread_block_size >> >
+			                                       (voxels1, voxels2, hash_table1, hash_table2, utilized_hash_codes, functor_device);
 		});
 	}
 
@@ -215,9 +261,25 @@ public:
 				dim3 hash_per_block_grid_size, dim3 block_voxel_per_thread_block_size,
 				TVoxel1* voxels1, TVoxel2* voxels2, const HashEntry* hash_table1,
 				const HashEntry* hash_table2, TFunctor* functor_device) {
-			dualVoxelPositionTraversal_device<TFunctor, TVoxel1, TVoxel2>
+			traverseAllWithPosition_device<TFunctor, TVoxel1, TVoxel2>
 					<< < hash_per_block_grid_size, block_voxel_per_thread_block_size >> >
 			                                       (voxels1, voxels2, hash_table1, hash_table2, functor_device);
+		});
+	}
+
+	template<typename TFunctor>
+	inline static void
+	TraverseUtilizedWithPosition(VoxelVolume<TVoxel1, VoxelBlockHash>* volume1,
+	                 VoxelVolume<TVoxel2, VoxelBlockHash>* volume2,
+	                 TFunctor& functor) {
+		TraverseUtilized_Generic(volume1, volume2, functor, [](
+				dim3 hash_per_block_grid_size, dim3 block_voxel_per_thread_block_size,
+				TVoxel1* voxels1, TVoxel2* voxels2, const HashEntry* hash_table1,
+				const HashEntry* hash_table2, const int* utilized_hash_codes,
+				TFunctor* functor_device) {
+			traverseUtilizedWithPosition_device<TFunctor, TVoxel1, TVoxel2>
+					<< < hash_per_block_grid_size, block_voxel_per_thread_block_size >> >
+			                                       (voxels1, voxels2, hash_table1, hash_table2, utilized_hash_codes, functor_device);
 		});
 	}
 

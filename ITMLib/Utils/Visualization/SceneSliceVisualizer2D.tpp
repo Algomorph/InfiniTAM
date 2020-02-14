@@ -97,14 +97,14 @@ Vector2i GetVoxelImageCoordinates(float pixelsPerVoxel, const Vector3i& coordina
 
 
 template<typename TVoxel>
-struct DrawSceneVoxelAtOriginalPositionFunctor {
-	DrawSceneVoxelAtOriginalPositionFunctor(int imageRangeY, int imageRangeZ, const Vector6i& bounds, Plane plane,
-	                                        float pixelsPerVoxel,
-	                                        bool absFillingStrategy, cv::Mat& img) :
+struct DrawVoxelAtOriginalPositionFunctor {
+	DrawVoxelAtOriginalPositionFunctor(int imageRangeY, int imageRangeZ, const Vector6i& bounds, Plane plane,
+	                                   float pixelsPerVoxel,
+	                                   bool absFillingStrategy, cv::Mat& img) :
 			imageRangeY(imageRangeY), imageRangeZ(imageRangeZ), bounds(bounds), plane(plane),
 			pixelsPerVoxel(pixelsPerVoxel), absFillingStrategy(absFillingStrategy), img(img) {}
 
-	void operator()(TVoxel& voxel, Vector3i& position) {
+	void operator()(TVoxel& voxel, const Vector3i& position) {
 		Vector2i imgCoords = GetVoxelImageCoordinates(pixelsPerVoxel, position, bounds, plane, imageRangeY,
 		                                              imageRangeZ);
 		const int voxelOnImageSize = static_cast<int>(pixelsPerVoxel);
@@ -135,11 +135,11 @@ cv::Mat SceneSliceVisualizer2D<TVoxel, TWarp, TIndex>::DrawSceneImageAroundPoint
 	cv::Mat img = cv::Mat::ones(imgPixelRangeX, imgPixelRangeY, CV_32F);
 
 	std::unordered_set<float> valueSet = {};
-	DrawSceneVoxelAtOriginalPositionFunctor<TVoxel> drawSceneVoxelFunctor(
+	DrawVoxelAtOriginalPositionFunctor<TVoxel> draw_voxel_functor(
 			imgPixelRangeY, imgPixelRangeZ, bounds, plane,
 			this->pixelsPerVoxel, absFillingStrategy, img);
 	VolumeTraversalEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>::
-	TraverseAllWithinBoundsWithPosition(scene, drawSceneVoxelFunctor, bounds);
+	TraverseAllWithinBoundsWithPosition(scene, draw_voxel_functor, bounds);
 	return img;
 }
 

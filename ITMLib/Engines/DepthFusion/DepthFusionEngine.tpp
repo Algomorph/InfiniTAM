@@ -35,7 +35,7 @@ void DepthFusionEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::GenerateTsdfVo
 		const CameraTrackingState* tracking_state) {
 	volume->Reset();
 	IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::Instance()
-			.AllocateNearAndBetweenTwoSurfaces(volume, tracking_state, view);
+			.AllocateNearAndBetweenTwoSurfaces(volume, view, tracking_state);
 	this->IntegrateDepthImageIntoTsdfVolume_Helper(volume, view, tracking_state->pose_d->GetM());
 }
 

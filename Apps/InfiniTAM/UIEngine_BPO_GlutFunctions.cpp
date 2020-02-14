@@ -166,8 +166,8 @@ void UIEngine_BPO::GlutDisplayFunction() {
 	        "i: %d frames \t d: one step \t p: pause \t v: write video %s \t w: log 3D warps %s \t Alt+w: log 2D warps %s",
 	        uiEngine.number_of_frames_to_process_after_launch,
 	        uiEngine.depthVideoWriter != nullptr ? "off" : "on",
-	        uiEngine.logger->IsRecording3DSceneAndWarpProgression() ? "off" : "on",
-	        uiEngine.logger->IsRecordingScene2DSlicesWithUpdates() ? "off" : "on");
+	        uiEngine.logger != nullptr && uiEngine.logger->IsRecording3DSceneAndWarpProgression() ? "off" : "on",
+	        uiEngine.logger != nullptr && uiEngine.logger->IsRecordingScene2DSlicesWithUpdates() ? "off" : "on");
 	Safe_GlutBitmapString(GLUT_BITMAP_HELVETICA_12, (const char*) str);
 
 	glutSwapBuffers();
@@ -345,7 +345,7 @@ void UIEngine_BPO::GlutKeyUpFunction(unsigned char key, int x, int y) {
 		}
 			break;
 		case 'w': {
-			if (modifiers && GLUT_ACTIVE_ALT) {
+			if (modifiers && GLUT_ACTIVE_ALT && uiEngine.logger != nullptr) {
 				uiEngine.logger->ToggleRecording3DSceneAndWarpProgression();
 			} else {
 				uiEngine.logger->ToggleRecordingScene2DSlicesWithUpdates();

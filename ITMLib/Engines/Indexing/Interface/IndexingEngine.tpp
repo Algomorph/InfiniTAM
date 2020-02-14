@@ -42,7 +42,7 @@ void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateNearSurface(Voxe
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateNearAndBetweenTwoSurfaces(
-		VoxelVolume<TVoxel, TIndex>* targetVolume, const CameraTrackingState* tracking_state, const ITMView* view) {}
+		VoxelVolume<TVoxel, TIndex>* targetVolume, const ITMView* view, const CameraTrackingState* tracking_state) {}
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateBlockList(

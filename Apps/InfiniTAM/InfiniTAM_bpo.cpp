@@ -128,7 +128,7 @@ int main(int argc, char** argv) {
 
 // region ================================ BUILD MAIN ENGINE ========================================================
 		configuration::IndexingMethod chosenIndexingMethod = configuration.indexing_method;
-		DynamicFusionLogger_Interface& logger = GetLogger(chosenIndexingMethod);
+		//DynamicFusionLogger_Interface& logger = GetLogger(chosenIndexingMethod);
 		MainEngine* mainEngine = BuildMainEngine(imageSource->getCalib(),
 		                                         imageSource->getRGBImageSize(),
 		                                         imageSource->getDepthImageSize(),
@@ -161,7 +161,7 @@ int main(int argc, char** argv) {
 #if !defined(WIN32) && defined(WITH_VTK)
 		XInitThreads();
 #endif
-		UIEngine_BPO::Instance().Initialize(argc, argv, imageSource, imuSource, mainEngine, configuration, &logger);
+		UIEngine_BPO::Instance().Initialize(argc, argv, imageSource, imuSource, mainEngine, configuration, nullptr);
 
 
 // endregion ===========================================================================================================

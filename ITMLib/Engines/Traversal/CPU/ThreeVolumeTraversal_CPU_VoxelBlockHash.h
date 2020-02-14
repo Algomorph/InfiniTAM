@@ -55,14 +55,8 @@ private:
 	}
 
 	template<typename TFunction>
-	inline static void TraverseBlocks(TVoxel1* voxels1, TVoxel2* voxels2, TVoxel3* voxels3,
-	                                  const HashEntry& hash_entry1,
-	                                  const HashEntry& hash_entry2,
-	                                  const HashEntry& hash_entry3,
+	inline static void TraverseBlocks(TVoxel1* voxel_block1, TVoxel2* voxel_block2, TVoxel3* voxel_block3,
 	                                  TFunction&& function) {
-		TVoxel1* voxel_block1 = &(voxels1[hash_entry1.ptr * VOXEL_BLOCK_SIZE3]);
-		TVoxel2* voxel_block2 = &(voxels2[hash_entry2.ptr * VOXEL_BLOCK_SIZE3]);
-		TVoxel3* voxel_block3 = &(voxels3[hash_entry3.ptr * VOXEL_BLOCK_SIZE3]);
 		for (int z = 0; z < VOXEL_BLOCK_SIZE; z++) {
 			for (int y = 0; y < VOXEL_BLOCK_SIZE; y++) {
 				for (int x = 0; x < VOXEL_BLOCK_SIZE; x++) {
@@ -77,15 +71,10 @@ private:
 	}
 
 	template<typename TFunction>
-	inline static void TraverseBlocksWithPosition(TVoxel1* voxels1, TVoxel2* voxels2, TVoxel3* voxels3,
-	                                  const HashEntry& hash_entry1,
-	                                  const HashEntry& hash_entry2,
-	                                  const HashEntry& hash_entry3,
-	                                  TFunction&& function) {
+	inline static void TraverseBlocksWithPosition(TVoxel1* voxel_block1, TVoxel2* voxel_block2, TVoxel3* voxel_block3,
+	                                              const HashEntry& hash_entry1, TFunction&& function) {
 		Vector3i hash_block_position = hash_entry1.pos.toInt() * VOXEL_BLOCK_SIZE;
-		TVoxel1* voxel_block1 = &(voxels1[hash_entry1.ptr * VOXEL_BLOCK_SIZE3]);
-		TVoxel2* voxel_block2 = &(voxels2[hash_entry2.ptr * VOXEL_BLOCK_SIZE3]);
-		TVoxel3* voxel_block3 = &(voxels3[hash_entry3.ptr * VOXEL_BLOCK_SIZE3]);
+
 		for (int z = 0; z < VOXEL_BLOCK_SIZE; z++) {
 			for (int y = 0; y < VOXEL_BLOCK_SIZE; y++) {
 				for (int x = 0; x < VOXEL_BLOCK_SIZE; x++) {
@@ -94,76 +83,29 @@ private:
 					TVoxel2& voxel2 = voxel_block2[incex_within_block];
 					TVoxel3& voxel3 = voxel_block3[incex_within_block];
 					TVoxel1& voxel1 = voxel_block1[incex_within_block];
-					std::forward<TFunction>(function)(voxel1, voxel2, voxel3,voxel_position);
+					std::forward<TFunction>(function)(voxel1, voxel2, voxel3, voxel_position);
 				}
 			}
 		}
 	}
-// endregion ===========================================================================================================
-public:
-// region ================================ STATIC THREE-SCENE TRAVERSAL ================================================
 
-	template<typename TStaticFunctor>
-	inline static void TraverseAll(
-			VoxelVolume<TVoxel1, VoxelBlockHash>* volume1,
-			VoxelVolume<TVoxel2, VoxelBlockHash>* volume2,
-			VoxelVolume<TVoxel3, VoxelBlockHash>* volume3) {
-
-// *** traversal vars
-		TVoxel1* voxels1 = volume1->localVBA.GetVoxelBlocks();
-		HashEntry* hash_table1 = volume1->index.GetEntries();
-
-		TVoxel2* voxels2 = volume2->localVBA.GetVoxelBlocks();
-		HashEntry* hash_table2 = volume2->index.GetEntries();
-
-		TVoxel3* voxels3 = volume3->localVBA.GetVoxelBlocks();
-		HashEntry* hash_table3 = volume3->index.GetEntries();
-
-		int hash_entry_count = volume1->index.hashEntryCount;
-
-#ifdef WITH_OPENMP
-#pragma omp parallel for
-#endif
-		for (int hash = 0; hash < hash_entry_count; hash++) {
-			const HashEntry& hash_entry1 = hash_table1[hash];
-			if (hash_entry1.ptr < 0) continue;
-
-			HashEntry hash_entry2 = hash_table2[hash];
-			HashEntry hash_entry3 = hash_table3[hash];
-
-			CheckSlaveVolumeBlock(hash_entry2, hash_entry1, hash_table2, "volume 2");
-			CheckSlaveVolumeBlock(hash_entry3, hash_entry1, hash_table3, "volume 3");
-
-			auto function = [](TVoxel1& voxel1, TVoxel2& voxel2, TVoxel3& voxel3){
-				TStaticFunctor::run(voxel1, voxel2, voxel3);
-			};
-			TraverseBlocks(voxels1, voxels2, voxels3, hash_entry1, hash_entry2, hash_entry3, function);
-		}
-	}
-
-//endregion ============================================================================================================
-// region ================================ DYNAMIC THREE-SCENE TRAVERSAL ===============================================
-
-	template<typename TFunctor>
+	template<typename TBlockTraversalFunction>
 	inline static void
-	TraverseAll(
+	TraverseAll_Generic(
 			VoxelVolume<TVoxel1, VoxelBlockHash>* volume1,
 			VoxelVolume<TVoxel2, VoxelBlockHash>* volume2,
 			VoxelVolume<TVoxel3, VoxelBlockHash>* volume3,
-			TFunctor& functor) {
+			TBlockTraversalFunction&& block_traverser) {
 
 // *** traversal vars
 		TVoxel1* voxels1 = volume1->localVBA.GetVoxelBlocks();
 		HashEntry* hash_table1 = volume1->index.GetEntries();
-
 		TVoxel2* voxels2 = volume2->localVBA.GetVoxelBlocks();
 		HashEntry* hash_table2 = volume2->index.GetEntries();
-
 		TVoxel3* voxels3 = volume3->localVBA.GetVoxelBlocks();
 		HashEntry* hash_table3 = volume3->index.GetEntries();
 
-		int hash_entry_count = volume1->index.hashEntryCount;
-
+		const int hash_entry_count = volume1->index.hashEntryCount;
 #ifdef WITH_OPENMP
 #pragma omp parallel for
 #endif
@@ -176,11 +118,134 @@ public:
 			CheckSlaveVolumeBlock(hash_entry2, hash_entry1, hash_table2, "volume 2");
 			CheckSlaveVolumeBlock(hash_entry3, hash_entry1, hash_table3, "volume 3");
 
-			auto function = [&functor](TVoxel1& voxel1, TVoxel2& voxel2, TVoxel3& voxel3){
-				functor(voxel1, voxel2, voxel3);
-			};
-			TraverseBlocks(voxels1, voxels2, voxels3, hash_entry1, hash_entry2, hash_entry3, function);
+			TVoxel1* voxel_block1 = &(voxels1[hash_entry1.ptr * VOXEL_BLOCK_SIZE3]);
+			TVoxel2* voxel_block2 = &(voxels2[hash_entry2.ptr * VOXEL_BLOCK_SIZE3]);
+			TVoxel3* voxel_block3 = &(voxels3[hash_entry3.ptr * VOXEL_BLOCK_SIZE3]);
+
+			std::forward<TBlockTraversalFunction>(block_traverser)(voxel_block1, voxel_block2, voxel_block3, hash_entry1);
 		}
+	}
+
+	template<typename TBlockTraversalFunction>
+	inline static void
+	TraverseUtilized_Generic(
+			VoxelVolume<TVoxel1, VoxelBlockHash>* volume1,
+			VoxelVolume<TVoxel2, VoxelBlockHash>* volume2,
+			VoxelVolume<TVoxel3, VoxelBlockHash>* volume3,
+			TBlockTraversalFunction&& block_traverser) {
+
+// *** traversal vars
+		TVoxel1* voxels1 = volume1->localVBA.GetVoxelBlocks();
+		HashEntry* hash_table1 = volume1->index.GetEntries();
+		TVoxel2* voxels2 = volume2->localVBA.GetVoxelBlocks();
+		HashEntry* hash_table2 = volume2->index.GetEntries();
+		TVoxel3* voxels3 = volume3->localVBA.GetVoxelBlocks();
+		HashEntry* hash_table3 = volume3->index.GetEntries();
+
+		const int utilized_entry_count = volume1->index.GetUtilizedHashBlockCount();
+		const int* utilized_hash_codes = volume1->index.GetUtilizedBlockHashCodes();
+#ifdef WITH_OPENMP
+#pragma omp parallel for
+#endif
+		for (int hash_code_index = 0; hash_code_index < utilized_entry_count; hash_code_index++) {
+			int hash_code1 = utilized_hash_codes[hash_code_index];
+			const HashEntry& hash_entry1 = hash_table1[hash_code1];
+			if (hash_entry1.ptr < 0) continue;
+			HashEntry hash_entry2 = hash_table2[hash_code1];
+			HashEntry hash_entry3 = hash_table3[hash_code1];
+
+			CheckSlaveVolumeBlock(hash_entry2, hash_entry1, hash_table2, "volume 2");
+			CheckSlaveVolumeBlock(hash_entry3, hash_entry1, hash_table3, "volume 3");
+
+			TVoxel1* voxel_block1 = &(voxels1[hash_entry1.ptr * VOXEL_BLOCK_SIZE3]);
+			TVoxel2* voxel_block2 = &(voxels2[hash_entry2.ptr * VOXEL_BLOCK_SIZE3]);
+			TVoxel3* voxel_block3 = &(voxels3[hash_entry3.ptr * VOXEL_BLOCK_SIZE3]);
+
+			std::forward<TBlockTraversalFunction>(block_traverser)(voxel_block1, voxel_block2, voxel_block3, hash_entry1);
+		}
+	}
+
+// endregion ===========================================================================================================
+public:
+// region ================================ STATIC THREE-SCENE TRAVERSAL ================================================
+
+	template<typename TStaticFunctor>
+	inline static void TraverseAll(
+			VoxelVolume<TVoxel1, VoxelBlockHash>* volume1,
+			VoxelVolume<TVoxel2, VoxelBlockHash>* volume2,
+			VoxelVolume<TVoxel3, VoxelBlockHash>* volume3) {
+		TraverseAll_Generic(
+				volume1, volume2, volume3,
+				[](TVoxel1* voxel_block1, TVoxel2* voxel_block2, TVoxel3* voxel_block3, const HashEntry& hash_entry1){
+					TraverseBlocks(
+							voxel_block1, voxel_block2, voxel_block3, hash_entry1,
+							[](TVoxel1& voxel1, TVoxel2& voxel2, TVoxel3& voxel3) {
+								TStaticFunctor::run(voxel1, voxel2, voxel3);
+							}
+					);
+				}
+		);
+	}
+
+	template<typename TStaticFunctor>
+	inline static void TraverseUtilized(
+			VoxelVolume<TVoxel1, VoxelBlockHash>* volume1,
+			VoxelVolume<TVoxel2, VoxelBlockHash>* volume2,
+			VoxelVolume<TVoxel3, VoxelBlockHash>* volume3) {
+		TraverseUtilized_Generic(
+				volume1, volume2, volume3,
+				[](TVoxel1* voxel_block1, TVoxel2* voxel_block2, TVoxel3* voxel_block3, const HashEntry& hash_entry1){
+					TraverseBlocks(
+							voxel_block1, voxel_block2, voxel_block3, hash_entry1,
+							[](TVoxel1& voxel1, TVoxel2& voxel2, TVoxel3& voxel3) {
+								TStaticFunctor::run(voxel1, voxel2, voxel3);
+							}
+					);
+				}
+		);
+	}
+
+//endregion ============================================================================================================
+// region ================================ DYNAMIC THREE-SCENE TRAVERSAL ===============================================
+
+	template<typename TFunctor>
+	inline static void
+	TraverseAll(
+			VoxelVolume<TVoxel1, VoxelBlockHash>* volume1,
+			VoxelVolume<TVoxel2, VoxelBlockHash>* volume2,
+			VoxelVolume<TVoxel3, VoxelBlockHash>* volume3,
+			TFunctor& functor) {
+		TraverseAll_Generic(
+				volume1, volume2, volume3,
+				[&functor](TVoxel1* voxel_block1, TVoxel2* voxel_block2, TVoxel3* voxel_block3, const HashEntry& hash_entry1){
+					TraverseBlocks(
+							voxel_block1, voxel_block2, voxel_block3,
+							[&functor](TVoxel1& voxel1, TVoxel2& voxel2, TVoxel3& voxel3) {
+								functor(voxel1, voxel2, voxel3);
+							}
+					);
+				}
+		);
+	}
+
+	template<typename TFunctor>
+	inline static void
+	TraverseUtilized(
+			VoxelVolume<TVoxel1, VoxelBlockHash>* volume1,
+			VoxelVolume<TVoxel2, VoxelBlockHash>* volume2,
+			VoxelVolume<TVoxel3, VoxelBlockHash>* volume3,
+			TFunctor& functor) {
+		TraverseUtilized_Generic(
+				volume1, volume2, volume3,
+				[&functor](TVoxel1* voxel_block1, TVoxel2* voxel_block2, TVoxel3* voxel_block3, const HashEntry& hash_entry1){
+					TraverseBlocks(
+							voxel_block1, voxel_block2, voxel_block3,
+							[&functor](TVoxel1& voxel1, TVoxel2& voxel2, TVoxel3& voxel3) {
+								functor(voxel1, voxel2, voxel3);
+							}
+					);
+				}
+		);
 	}
 
 
@@ -191,32 +256,37 @@ public:
 			VoxelVolume<TVoxel2, VoxelBlockHash>* volume2,
 			VoxelVolume<TVoxel3, VoxelBlockHash>* volume3,
 			TFunctor& functor) {
-// *** traversal vars
-		TVoxel1* voxels1 = volume1->localVBA.GetVoxelBlocks();
-		HashEntry* hash_table1 = volume1->index.GetEntries();
+		TraverseAll_Generic(
+				volume1, volume2, volume3,
+				[&functor](TVoxel1* voxel_block1, TVoxel2* voxel_block2, TVoxel3* voxel_block3, const HashEntry& hash_entry1){
+					TraverseBlocksWithPosition(
+							voxel_block1, voxel_block2, voxel_block3, hash_entry1,
+							[&functor](TVoxel1& voxel1, TVoxel2& voxel2, TVoxel3& voxel3, const Vector3i& voxel_position) {
+								functor(voxel1, voxel2, voxel3, voxel_position);
+							}
+					);
+				}
+		);
+	}
 
-		TVoxel2* voxels2 = volume2->localVBA.GetVoxelBlocks();
-		HashEntry* hash_table2 = volume2->index.GetEntries();
-
-		TVoxel3* voxels3 = volume3->localVBA.GetVoxelBlocks();
-		HashEntry* hash_table3 = volume3->index.GetEntries();
-
-		int hashEntryCount = volume1->index.hashEntryCount;
-#ifdef WITH_OPENMP
-#pragma omp parallel for
-#endif
-		for (int hash_code1 = 0; hash_code1 < hashEntryCount; hash_code1++) {
-			const HashEntry& hash_entry1 = hash_table1[hash_code1];
-			HashEntry hash_entry2 = hash_table2[hash_code1];
-			HashEntry hash_entry3 = hash_table3[hash_code1];
-			if (hash_entry1.ptr < 0) continue;
-			CheckSlaveVolumeBlock(hash_entry2, hash_entry1, hash_table2, "volume 2");
-			CheckSlaveVolumeBlock(hash_entry3, hash_entry1, hash_table3, "volume 3");
-			auto function = [&functor](TVoxel1& voxel1, TVoxel2& voxel2, TVoxel3& voxel3, const Vector3i& voxel_position){
-				functor(voxel1, voxel2, voxel3, voxel_position);
-			};
-			TraverseBlocksWithPosition(voxels1, voxels2, voxels3, hash_entry1, hash_entry2, hash_entry3, function);
-		}
+	template<typename TFunctor>
+	inline static void
+	TraverseUtilizedWithPosition(
+			VoxelVolume<TVoxel1, VoxelBlockHash>* volume1,
+			VoxelVolume<TVoxel2, VoxelBlockHash>* volume2,
+			VoxelVolume<TVoxel3, VoxelBlockHash>* volume3,
+			TFunctor& functor) {
+		TraverseUtilized_Generic(
+				volume1, volume2, volume3,
+				[&functor](TVoxel1* voxel_block1, TVoxel2* voxel_block2, TVoxel3* voxel_block3, const HashEntry& hash_entry1){
+					TraverseBlocksWithPosition(
+							voxel_block1, voxel_block2, voxel_block3, hash_entry1,
+							[&functor](TVoxel1& voxel1, TVoxel2& voxel2, TVoxel3& voxel3, const Vector3i& voxel_position) {
+								functor(voxel1, voxel2, voxel3, voxel_position);
+							}
+					);
+				}
+		);
 	}
 
 // endregion ===========================================================================================================

@@ -20,6 +20,6 @@
 namespace ITMLib{
 
 template
-class VolumeFusionEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU>;
+class VolumeFusionEngine<TSDFVoxel, PlainVoxelArray, MEMORYDEVICE_CPU>;
 
 } // namespace ITMLib

@@ -108,8 +108,13 @@ struct WarpUpdateFunctor {
 #endif
 	}
 
-	DECLARE_ATOMIC_FLOAT(max_framewise_warp_length);
-	DECLARE_ATOMIC_FLOAT(max_warp_update_length);
+	float GetMaxFramewiseWarpLength(){
+		return GET_ATOMIC_VALUE_CPU(max_framewise_warp_length);
+	}
+	float GetMaxWarpUpdateLength(){
+		return GET_ATOMIC_VALUE_CPU(max_warp_update_length);
+	}
+
 	Vector3i max_framewise_warp_position;
 	Vector3i max_warp_update_position;
 
@@ -126,6 +131,8 @@ struct WarpUpdateFunctor {
 
 
 private:
+	DECLARE_ATOMIC_FLOAT(max_framewise_warp_length);
+	DECLARE_ATOMIC_FLOAT(max_warp_update_length);
 	const float gradient_weight;
 	const float momentum_weight;
 	const bool gradient_smoothing_enabled;
@@ -134,17 +141,17 @@ private:
 
 template<typename TVoxel, typename TWarp>
 struct WarpHistogramFunctor {
-	WarpHistogramFunctor(float maxWarpLength, float maxWarpUpdateLength) :
-			maxWarpLength(maxWarpLength), maxWarpUpdateLength(maxWarpUpdateLength) {
+	WarpHistogramFunctor(float max_warp_length, float max_warp_update_length) :
+			maxWarpLength(max_warp_length), maxWarpUpdateLength(max_warp_update_length) {
 	}
 
-	static const int histBinCount = 10;
+	static const int histogram_bin_count = 10;
 
 	void operator()( TWarp& warp, TVoxel& canonicalVoxel, TVoxel& liveVoxel) {
 		if (!VoxelIsConsideredForTracking(canonicalVoxel, liveVoxel)) return;
 		float framewiseWarpLength = ORUtils::length(warp.framewise_warp);
 		float warpUpdateLength = ORUtils::length(warp.gradient0);
-		const int histBinCount = WarpHistogramFunctor<TVoxel, TWarp>::histBinCount;
+		const int histBinCount = WarpHistogramFunctor<TVoxel, TWarp>::histogram_bin_count;
 		int binIdx = 0;
 		if (maxWarpLength > 0) {
 			binIdx = ORUTILS_MIN(histBinCount - 1, (int) (framewiseWarpLength * histBinCount / maxWarpLength));
@@ -159,12 +166,12 @@ struct WarpHistogramFunctor {
 
 	void PrintHistogram() {
 		std::cout << "FW warp length histogram: ";
-		for (int iBin = 0; iBin < histBinCount; iBin++) {
+		for (int iBin = 0; iBin < histogram_bin_count; iBin++) {
 			std::cout << std::setfill(' ') << std::setw(7) << warpBins[iBin] << "  ";
 		}
 		std::cout << std::endl;
 		std::cout << "Update length histogram: ";
-		for (int iBin = 0; iBin < histBinCount; iBin++) {
+		for (int iBin = 0; iBin < histogram_bin_count; iBin++) {
 			std::cout << std::setfill(' ') << std::setw(7) << updateBins[iBin] << "  ";
 		}
 		std::cout << std::endl;
@@ -176,8 +183,8 @@ private:
 	const float maxWarpUpdateLength;
 
 	// <20%, 40%, 60%, 80%, 100%
-	int warpBins[histBinCount] = {0};
-	int updateBins[histBinCount] = {0};
+	int warpBins[histogram_bin_count] = {0};
+	int updateBins[histogram_bin_count] = {0};
 };
 
 enum TraversalDirection : int {

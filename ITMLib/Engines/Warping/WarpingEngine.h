@@ -23,6 +23,7 @@ namespace ITMLib{
 template<typename TVoxel, typename TWarp, typename TIndex>
 class WarpingEngineInterface{
 public:
+	virtual ~WarpingEngineInterface() = default;
 	/**
 	* \brief Uses trilinear interpolation of the target TSDF volume at [source TSDF voxel positions + warp vector]
 	*  to generate a new live SDF grid in the target scene. Uses cumulative / multi-frame warps as warp vectors.
@@ -109,8 +110,8 @@ public:
 	                            VoxelVolume<TVoxel, TIndex>* targetTSDF) override;
 private:
 	template<WarpType TWarpType>
-	void WarpScene(VoxelVolume<TWarp,  TIndex>* warp_field,
-	               VoxelVolume<TVoxel, TIndex>* source_volume,
-	               VoxelVolume<TVoxel, TIndex>* target_volume);
+	void WarpVolume(VoxelVolume<TWarp,  TIndex>* warp_field,
+	                VoxelVolume<TVoxel, TIndex>* source_volume,
+	                VoxelVolume<TVoxel, TIndex>* target_volume);
 };
 } // namespace ITMLib

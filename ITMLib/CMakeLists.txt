@@ -334,9 +334,13 @@ set(ITMLIB_ENGINES_INDEXING_SHARED_HEADERS
 set(
         ITMLIB_ENGINES_INDEXING_AUX_SOURCES
 
+
+
 )
 set(
         ITMLIB_ENGINES_INDEXING_AUX_HEADERS
+
+        Engines/Indexing/IndexingEngineFactory.h
 )
 ##
 set(

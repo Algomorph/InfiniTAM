@@ -141,7 +141,7 @@ GenericWarpConsistencySubtest(const SlavchevaSurfaceTracker::Switches& switches,
 	WarpingEngineInterface<TSDFVoxel, WarpVoxel, TIndex>* warping_engine =
 			WarpingEngineFactory::MakeWarpingEngine<TSDFVoxel, WarpVoxel, TIndex>(TMemoryDeviceType);
 	VolumeFusionEngineInterface<TSDFVoxel, WarpVoxel, TIndex>* volume_fusion_engine =
-			VolumeFusionEngineFactory::MakeVolumeFusionEngine<TSDFVoxel, WarpVoxel, TIndex>(TMemoryDeviceType);
+			VolumeFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, TIndex>(TMemoryDeviceType);
 
 	//note: will be swapped before first iteration
 

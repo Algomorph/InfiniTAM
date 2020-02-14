@@ -23,12 +23,14 @@
 
 using namespace ITMLib;
 
-template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-void VolumeFusionEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::FuseOneTsdfVolumeIntoAnother(
-		VoxelVolume<TVoxel, TIndex>* targetVolume, VoxelVolume<TVoxel, TIndex>* sourceVolume) {
-	IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::Instance()
-			.AllocateUsingOtherVolume(targetVolume, sourceVolume);
-	TSDFFusionFunctor<TVoxel, TMemoryDeviceType> fusionFunctor(targetVolume->sceneParams->max_integration_weight);
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+void VolumeFusionEngine<TVoxel, TIndex, TMemoryDeviceType>::FuseOneTsdfVolumeIntoAnother(
+		VoxelVolume<TVoxel, TIndex>* target_volume, VoxelVolume<TVoxel, TIndex>* source_volume) {
+	TSDFFusionFunctor<TVoxel, TMemoryDeviceType> fusion_functor(target_volume->sceneParams->max_integration_weight);
 	TwoVolumeTraversalEngine<TVoxel, TVoxel, TIndex, TIndex, TMemoryDeviceType>::
-	TraverseAll(sourceVolume, targetVolume, fusionFunctor);
+#ifdef TRAVERSE_ALL_HASH_BLOCKS
+	TraverseAll(source_volume, target_volume, fusion_functor);
+#else
+	TraverseUtilized(source_volume, target_volume, fusion_functor);
+#endif
 }

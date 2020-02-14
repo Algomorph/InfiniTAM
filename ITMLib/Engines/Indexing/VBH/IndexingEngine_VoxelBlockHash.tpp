@@ -37,13 +37,13 @@ void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::Al
 	float band_factor = configuration::get().general_voxel_volume_parameters.block_allocation_band_factor;
 	float surface_distance_cutoff = band_factor * volume->sceneParams->narrow_band_half_width;
 
-	bool use_swapping = volume->globalCache != nullptr;
+	//bool use_swapping = volume->globalCache != nullptr;
 
 	DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType> depth_based_allocator(
 			volume->index, volume->sceneParams, view, depth_camera_matrix, surface_distance_cutoff);
 
 	//reset visibility of formerly "visible" entries, if any
-	static_cast<TDerivedClass*>(this)->SetVisibilityToVisibleAtPreviousFrameAndUnstreamed(volume);
+	//static_cast<TDerivedClass*>(this)->SetVisibilityToVisibleAtPreviousFrameAndUnstreamed(volume);
 
 	volume->index.ClearHashEntryAllocationStates();
 
@@ -51,8 +51,8 @@ void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::Al
 	static_cast<TDerivedClass*>(this)->AllocateHashEntriesUsingAllocationStateList(volume);
 	static_cast<TDerivedClass*>(this)->AllocateBlockList(volume, depth_based_allocator.colliding_block_positions, depth_based_allocator.get_colliding_block_count());
 
-	static_cast<TDerivedClass*>(this)->BuildUtilizedBlockListBasedOnVisibility(volume, view, depth_camera_matrix);
-	if (use_swapping) ReallocateDeletedHashBlocks(volume);
+	//static_cast<TDerivedClass*>(this)->BuildUtilizedBlockListBasedOnVisibility(volume, view, depth_camera_matrix);
+	//if (use_swapping) ReallocateDeletedHashBlocks(volume);
 }
 
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, typename TDerivedClass>
@@ -65,8 +65,7 @@ void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::Al
 
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, typename TDerivedClass>
 void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::AllocateNearAndBetweenTwoSurfaces(
-		VoxelVolume<TVoxel, VoxelBlockHash>* volume, const CameraTrackingState* tracking_state,
-		const ITMView* view) {
+		VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view, const CameraTrackingState* tracking_state) {
 
 	volume->index.SetUtilizedHashBlockCount(0);
 

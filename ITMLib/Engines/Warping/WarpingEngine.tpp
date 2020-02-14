@@ -26,21 +26,31 @@ using namespace ITMLib;
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 template<WarpType TWarpType>
-void WarpingEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::WarpScene(
+void WarpingEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::WarpVolume(
 		VoxelVolume<TWarp, TIndex>* warp_field,
 		VoxelVolume<TVoxel, TIndex>* source_volume,
 		VoxelVolume<TVoxel, TIndex>* target_volume) {
 
 	// Clear out the flags at target volume
 	FieldClearFunctor<TVoxel, TMemoryDeviceType> flagClearFunctor;
-	VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseAll(target_volume, flagClearFunctor);
+	VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::
+#ifdef TRAVERSE_ALL_HASH_BLOCKS
+	TraverseAll(target_volume, flagClearFunctor);
+#else
+	TraverseUtilized(target_volume, flagClearFunctor);
+#endif
+
 
 	TrilinearInterpolationFunctor<TVoxel, TWarp, TIndex, TWarpType, TMemoryDeviceType>
 			trilinearInterpolationFunctor(source_volume, warp_field);
 
 	// Interpolate to obtain the new live frame values (at target index)
 	TwoVolumeTraversalEngine<TVoxel, TWarp, TIndex, TIndex, TMemoryDeviceType>::
+#ifdef TRAVERSE_ALL_HASH_BLOCKS
 	TraverseAllWithPosition(target_volume, warp_field, trilinearInterpolationFunctor);
+#else
+	TraverseUtilizedWithPosition(target_volume, warp_field, trilinearInterpolationFunctor);
+#endif
 }
 
 
@@ -49,7 +59,7 @@ void WarpingEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::WarpVolume_Cumulat
 		VoxelVolume<TWarp, TIndex>* warpField,
 		VoxelVolume<TVoxel, TIndex>* sourceTSDF,
 		VoxelVolume<TVoxel, TIndex>* targetTSDF) {
-	this->template WarpScene<WARP_CUMULATIVE>(warpField, sourceTSDF, targetTSDF);
+	this->template WarpVolume<WARP_CUMULATIVE>(warpField, sourceTSDF, targetTSDF);
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
@@ -57,7 +67,7 @@ void WarpingEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::WarpVolume_Framewi
 		VoxelVolume<TWarp, TIndex>* warpField,
 		VoxelVolume<TVoxel, TIndex>* sourceTSDF,
 		VoxelVolume<TVoxel, TIndex>* targetTSDF) {
-	this->template WarpScene<WARP_FLOW>(warpField, sourceTSDF, targetTSDF);
+	this->template WarpVolume<WARP_FLOW>(warpField, sourceTSDF, targetTSDF);
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
@@ -65,6 +75,6 @@ void WarpingEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::WarpVolume_WarpUpd
 		VoxelVolume<TWarp, TIndex>* warpField,
 		VoxelVolume<TVoxel, TIndex>* sourceTSDF,
 		VoxelVolume<TVoxel, TIndex>* targetTSDF) {
-	this->template WarpScene<WARP_UPDATE>(warpField, sourceTSDF, targetTSDF);
+	this->template WarpVolume<WARP_UPDATE>(warpField, sourceTSDF, targetTSDF);
 }
 

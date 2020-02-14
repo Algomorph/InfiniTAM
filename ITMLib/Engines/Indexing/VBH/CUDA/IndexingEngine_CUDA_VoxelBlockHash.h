@@ -22,11 +22,12 @@
 
 namespace ITMLib {
 
+struct IndexingEngineFactory;
 template<typename TVoxel>
 class IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA> :
 		public IndexingEngine_VoxelBlockHash<TVoxel, MEMORYDEVICE_CUDA,
 				IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA> > {
-
+	friend IndexingEngineFactory;
 	friend IndexingEngine_VoxelBlockHash<TVoxel, MEMORYDEVICE_CPU,
 			IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>>;
 
@@ -63,6 +64,16 @@ public:
 	HashEntry FindHashEntry(const VoxelBlockHash& index, const Vector3s& coordinates) override;
 	HashEntry FindHashEntry(const VoxelBlockHash& index, const Vector3s& coordinates, int& hashCode);
 	bool AllocateHashBlockAt(VoxelVolume <TVoxel, VoxelBlockHash>* volume, Vector3s at, int& hash_code) override;
+
+	void AllocateFromOtherVolume(VoxelVolume<TVoxel, VoxelBlockHash>* target_volume,
+	                             VoxelVolume<TVoxel, VoxelBlockHash>* source_volume) override {
+		AllocateUsingOtherVolume<TVoxel,TVoxel>(target_volume, source_volume);
+	}
+
+	void AllocateWarpVolumeFromOtherVolume(VoxelVolume<WarpVoxel, VoxelBlockHash>* target_volume,
+	                                       VoxelVolume<TVoxel, VoxelBlockHash>* source_volume) override {
+		AllocateUsingOtherVolume<WarpVoxel,TVoxel>(target_volume, source_volume);
+	}
 
 	template<typename TVoxelATarget, typename TVoxelASource>
 	void AllocateUsingOtherVolume(VoxelVolume <TVoxelATarget, VoxelBlockHash>* target_volume,

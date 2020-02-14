@@ -22,9 +22,10 @@
 
 namespace ITMLib {
 
-template<typename TVoxel, typename TWarp, typename TIndex>
+template<typename TVoxel, typename TIndex>
 class VolumeFusionEngineInterface {
 public:
+	virtual ~VolumeFusionEngineInterface() = default;
 	/**
 	 * \brief Fuses the live scene into the canonical scene
 	 * \details Operation happens after the motion is tracked, at this point sourceTsdfVolume should be as close to the canonical
@@ -37,12 +38,12 @@ public:
 	                                          VoxelVolume <TVoxel, TIndex>* sourceVolume) = 0;
 };
 
-template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 class VolumeFusionEngine :
-		public VolumeFusionEngineInterface<TVoxel, TWarp, TIndex> {
+		public VolumeFusionEngineInterface<TVoxel, TIndex> {
 public:
-	void FuseOneTsdfVolumeIntoAnother(VoxelVolume <TVoxel, TIndex>* targetVolume,
-	                                  VoxelVolume <TVoxel, TIndex>* sourceVolume) override;
+	void FuseOneTsdfVolumeIntoAnother(VoxelVolume <TVoxel, TIndex>* target_volume,
+	                                  VoxelVolume <TVoxel, TIndex>* source_volume) override;
 };
 
 } // namespace ITMLib

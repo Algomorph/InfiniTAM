@@ -148,9 +148,9 @@ updateView(ITMView** view, const std::string& depth_path, const std::string& col
 	auto* rgb = new ITMUChar4Image(true, false);
 	auto* depth = new ITMShortImage(true, false);
 	auto* mask = new ITMUCharImage(true, false);
-	BOOST_REQUIRE(ReadImageFromFile(rgb, color_path.c_str()));
-	BOOST_REQUIRE(ReadImageFromFile(depth, depth_path.c_str()));
-	BOOST_REQUIRE(ReadImageFromFile(mask, mask_path.c_str()));
+	ReadImageFromFile(rgb, color_path.c_str());
+	ReadImageFromFile(depth, depth_path.c_str());
+	ReadImageFromFile(mask, mask_path.c_str());
 	rgb->ApplyMask(*mask, Vector4u((unsigned char) 0));
 	depth->ApplyMask(*mask, 0);
 	viewBuilderToUse->UpdateView(view, rgb, depth, false, false, false, true);

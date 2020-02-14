@@ -24,9 +24,21 @@ namespace {
 
 template<typename TStaticFunctor, typename TVoxel>
 __global__ void
-StaticTraverseAll_device(TVoxel* voxels, const HashEntry* hash_table) {
-	int hash = blockIdx.x;
-	const HashEntry& hash_entry = hash_table[hash];
+traverseAll_StaticFunctor_device(TVoxel* voxels, const HashEntry* hash_table) {
+	int hash_code = blockIdx.x;
+	const HashEntry& hash_entry = hash_table[hash_code];
+	if (hash_entry.ptr < 0) return;
+	int x = threadIdx.x, y = threadIdx.y, z = threadIdx.z;
+	int locId = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
+	TVoxel& voxel = voxels[hash_entry.ptr * VOXEL_BLOCK_SIZE3 + locId];
+	TStaticFunctor::run(voxel);
+}
+
+template<typename TStaticFunctor, typename TVoxel>
+__global__ void
+traverseUtilized_StaticFunctor_device(TVoxel* voxels, const HashEntry* hash_table, const int* utilized_hash_codes) {
+	int hash_code = utilized_hash_codes[blockIdx.x];
+	const HashEntry& hash_entry = hash_table[hash_code];
 	if (hash_entry.ptr < 0) return;
 	int x = threadIdx.x, y = threadIdx.y, z = threadIdx.z;
 	int locId = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;

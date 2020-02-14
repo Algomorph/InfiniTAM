@@ -20,18 +20,18 @@
 using namespace ITMLib;
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(const RGBDCalib& calib, Vector2i imgSize_rgb,
-                                                                        Vector2i imgSize_d) : settings(configuration::get()) {
+DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(const RGBDCalib& calibration_info, Vector2i rgb_image_size,
+                                                                        Vector2i depth_image_size) : settings(configuration::get()) {
 
 	this->InitializeScenes();
 
 	const MemoryDeviceType deviceType = settings.device_type;
 	MemoryDeviceType memoryType = settings.device_type;
-	if ((imgSize_d.x == -1) || (imgSize_d.y == -1)) imgSize_d = imgSize_rgb;
+	if ((depth_image_size.x == -1) || (depth_image_size.y == -1)) depth_image_size = rgb_image_size;
 	DynamicFusionLogger<TVoxel, TWarp, TIndex>::Instance().SetScenes(canonical_volume, live_volumes[0], warp_field);
 
 	low_level_engine = LowLevelEngineFactory::MakeLowLevelEngine(deviceType);
-	view_builder = ViewBuilderFactory::MakeViewBuilder(calib, deviceType);
+	view_builder = ViewBuilderFactory::MakeViewBuilder(calibration_info, deviceType);
 	visualization_engine = VisualizationEngineFactory::MakeVisualizationEngine<TVoxel, TIndex>(deviceType);
 
 	meshing_engine = nullptr;
@@ -39,15 +39,14 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(const RG
 		meshing_engine = MeshingEngineFactory::MakeMeshingEngine<TVoxel, TIndex>(deviceType, canonical_volume->index);
 
 	denseMapper = new DenseDynamicMapper<TVoxel, TWarp, TIndex>(canonical_volume->index);
-	Vector2i trackedImageSize = camera_tracking_controller->GetTrackedImageSize(imgSize_rgb, imgSize_d);
-
-	tracking_state = new CameraTrackingState(trackedImageSize, memoryType);
-
 
 	imuCalibrator = new ITMIMUCalibrator_iPad();
-	tracker = CameraTrackerFactory::Instance().Make(imgSize_rgb, imgSize_d, low_level_engine, imuCalibrator,
+	tracker = CameraTrackerFactory::Instance().Make(rgb_image_size, depth_image_size, low_level_engine, imuCalibrator,
 	                                                canonical_volume->sceneParams);
 	camera_tracking_controller = new CameraTrackingController(tracker);
+	Vector2i trackedImageSize = camera_tracking_controller->GetTrackedImageSize(rgb_image_size, depth_image_size);
+	tracking_state = new CameraTrackingState(trackedImageSize, memoryType);
+
 
 	canonical_render_state = new RenderState(trackedImageSize, canonical_volume->sceneParams->near_clipping_distance,
 	                                         canonical_volume->sceneParams->far_clipping_distance, settings.device_type);
@@ -62,14 +61,14 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(const RG
 	view = nullptr; // will be allocated by the view builder
 
 	if (settings.behavior_on_failure == configuration::FAILUREMODE_RELOCALIZE)
-		relocaliser = new FernRelocLib::Relocaliser<float>(imgSize_d,
+		relocaliser = new FernRelocLib::Relocaliser<float>(depth_image_size,
 		                                                   Vector2f(
 				                                                   settings.general_voxel_volume_parameters.near_clipping_distance,
 				                                                   settings.general_voxel_volume_parameters.far_clipping_distance),
 		                                                   0.2f, 500, 4);
 	else relocaliser = nullptr;
 
-	kfRaycast = new ITMUChar4Image(imgSize_d, memoryType);
+	kfRaycast = new ITMUChar4Image(depth_image_size, memoryType);
 
 	trackingActive = true;
 	fusionActive = true;
@@ -103,7 +102,6 @@ template<typename TVoxel, typename TWarp, typename TIndex>
 DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::~DynamicSceneVoxelEngine() {
 	delete canonical_render_state;
 	delete live_render_state;
-	delete freeview_render_state;
 	if (freeview_render_state != nullptr) delete freeview_render_state;
 
 	for (int iScene = 0; iScene < DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::live_scene_count; iScene++) {
@@ -320,7 +318,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(ITMUChar4Image* rgb
 	//preparation for next-frame tracking
 	if (last_tracking_result == CameraTrackingState::TRACKING_GOOD ||
 	    last_tracking_result == CameraTrackingState::TRACKING_POOR) {
-		if (!fusion_succeeded) denseMapper->UpdateVisibleList(view, tracking_state, canonical_volume, canonical_render_state);
+		//if (!fusion_succeeded) denseMapper->UpdateVisibleList(view, tracking_state, canonical_volume, canonical_render_state);
 
 		// raycast to renderState_canonical for tracking and free Visualization
 		camera_tracking_controller->Prepare(tracking_state, canonical_volume, view, visualization_engine, canonical_render_state);

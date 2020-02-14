@@ -41,71 +41,123 @@ struct HashMatchInfo {
 namespace {
 // CUDA kernels
 
-template<typename TFunctor, typename TVoxelPrimary, typename TVoxelSecondary>
-__global__ void
-dualVoxelTraversal_device(TVoxelPrimary* primaryVoxels, TVoxelSecondary* secondaryVoxels,
-                          const HashEntry* primaryHashTable, const HashEntry* secondaryHashTable,
-                          TFunctor* functor) {
-	int hashCode = blockIdx.x;
+__device__ inline void
+getVoxelIndexesFromHashBlock(int& voxel1_index, int& voxel2_index,
+                             const int hash_code1, const HashEntry* hash_table1, const HashEntry* hash_table2) {
+	const HashEntry& hash_entry1 = hash_table1[hash_code1];
+	if (hash_entry1.ptr < 0) return;
+	HashEntry hash_entry2 = hash_table2[hash_code1];
 
-	const HashEntry& primaryHashEntry = primaryHashTable[hashCode];
-	if (primaryHashEntry.ptr < 0) return;
-	HashEntry secondaryHashEntry = secondaryHashTable[hashCode];
-
-	if (secondaryHashEntry.pos != primaryHashEntry.pos) {
-		int secondaryHashCode = 0;
-		if(!FindHashAtPosition(secondaryHashCode, primaryHashEntry.pos, secondaryHashTable)){
+	if (hash_entry2.pos != hash_entry1.pos) {
+		int hash_code2 = 0;
+		if (!FindHashAtPosition(hash_code2, hash_entry1.pos, hash_table2)) {
 			DIEWITHEXCEPTION_REPORTLOCATION("No hash block with corresponding position found in hash table.");
 		}
-		secondaryHashEntry = secondaryHashTable[secondaryHashCode];
+		hash_entry2 = hash_table2[hash_code2];
 	}
 
 	int x = threadIdx.x;
 	int y = threadIdx.y;
 	int z = threadIdx.z;
-	int linearIndexInBlock = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
+	int linear_index_in_block = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
 
-	TVoxelPrimary& voxelPrimary = primaryVoxels[primaryHashEntry.ptr * (VOXEL_BLOCK_SIZE3) + linearIndexInBlock];
-	TVoxelSecondary& voxelSecondary = secondaryVoxels[secondaryHashEntry.ptr * (VOXEL_BLOCK_SIZE3) + linearIndexInBlock];
-
-	(*functor)(voxelPrimary, voxelSecondary);
+	voxel1_index = hash_entry1.ptr * (VOXEL_BLOCK_SIZE3) + linear_index_in_block;
+	voxel2_index = hash_entry2.ptr * (VOXEL_BLOCK_SIZE3) + linear_index_in_block;
 }
 
-template<typename TFunctor, typename TVoxelPrimary, typename TVoxelSecondary>
-__global__ void
-dualVoxelPositionTraversal_device(TVoxelPrimary* primaryVoxels, TVoxelSecondary* secondaryVoxels,
-                                  const HashEntry* primaryHashTable, const HashEntry* secondaryHashTable,
-                                  TFunctor* functor) {
-	int hashCode = blockIdx.x;
+__device__ inline void
+getVoxelIndexesAndPositionFromHashBlock(int& voxel1_index, int& voxel2_index, Vector3i& voxel_position,
+                                        const int hash_code1, const HashEntry* hash_table1, const HashEntry* hash_table2) {
+	const HashEntry& hash_entry1 = hash_table1[hash_code1];
+	if (hash_entry1.ptr < 0) return;
+	HashEntry hash_entry2 = hash_table2[hash_code1];
 
-	const HashEntry& primaryHashEntry = primaryHashTable[hashCode];
-	if (primaryHashEntry.ptr < 0) return;
-	HashEntry secondaryHashEntry = secondaryHashTable[hashCode];
-
-	if (secondaryHashEntry.pos != primaryHashEntry.pos) {
-		int secondaryHashCode = 0;
-		if(!FindHashAtPosition(secondaryHashCode, primaryHashEntry.pos, secondaryHashTable)){
+	if (hash_entry2.pos != hash_entry1.pos) {
+		int hash_code2 = 0;
+		if (!FindHashAtPosition(hash_code2, hash_entry1.pos, hash_table2)) {
 			DIEWITHEXCEPTION_REPORTLOCATION("No hash block with corresponding position found in hash table.");
 		}
-		secondaryHashEntry = secondaryHashTable[secondaryHashCode];
+		hash_entry2 = hash_table2[hash_code2];
 	}
 
 	int x = threadIdx.x;
 	int y = threadIdx.y;
 	int z = threadIdx.z;
-	int linearIndexInBlock = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
+	int linear_index_in_block = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
 
-	// position of the current voxel in 3D space in voxel units
-	Vector3i voxelPosition = primaryHashEntry.pos.toInt() * VOXEL_BLOCK_SIZE + Vector3i(x, y, z);
-	TVoxelPrimary& voxelPrimary = primaryVoxels[primaryHashEntry.ptr * (VOXEL_BLOCK_SIZE3) + linearIndexInBlock];
-	TVoxelSecondary& voxelSecondary = secondaryVoxels[secondaryHashEntry.ptr * (VOXEL_BLOCK_SIZE3) + linearIndexInBlock];
+	voxel_position = hash_entry1.pos.toInt() * VOXEL_BLOCK_SIZE + Vector3i(x, y, z);
+	voxel1_index = hash_entry1.ptr * (VOXEL_BLOCK_SIZE3) + linear_index_in_block;
+	voxel2_index = hash_entry2.ptr * (VOXEL_BLOCK_SIZE3) + linear_index_in_block;
+}
 
-	(*functor)(voxelPrimary, voxelSecondary, voxelPosition);
+template<typename TFunctor, typename TVoxel1, typename TVoxel2>
+__global__ void
+traverseAll_device(TVoxel1* voxels1, TVoxel2* voxels2,
+                   const HashEntry* hash_table1, const HashEntry* hash_table2,
+                   TFunctor* functor) {
+	int hash_code1 = blockIdx.x;
+	int voxel1_index, voxel2_index;
+	getVoxelIndexesFromHashBlock(voxel1_index, voxel2_index, hash_code1, hash_table1, hash_table2);
+
+	TVoxel1& voxel1 = voxels1[voxel1_index];
+	TVoxel2& voxel2 = voxels2[voxel2_index];
+
+	(*functor)(voxel1, voxel2);
+}
+
+template<typename TFunctor, typename TVoxel1, typename TVoxel2>
+__global__ void
+traverseUtilized_device(TVoxel1* voxels1, TVoxel2* voxels2,
+                        const HashEntry* hash_table1, const HashEntry* hash_table2,
+                        const int* utilized_hash_codes, TFunctor* functor) {
+	int hash_code1 = utilized_hash_codes[blockIdx.x];
+	int voxel1_index, voxel2_index;
+	getVoxelIndexesFromHashBlock(voxel1_index, voxel2_index, hash_code1, hash_table1, hash_table2);
+
+	TVoxel1& voxel1 = voxels1[voxel1_index];
+	TVoxel2& voxel2 = voxels2[voxel2_index];
+
+	(*functor)(voxel1, voxel2);
 }
 
 
-__global__ void matchUpHashEntriesByPosition(const HashEntry* primaryHashTable,
-                                             const HashEntry* secondaryHashTable,
+template<typename TFunctor, typename TVoxel1, typename TVoxel2>
+__global__ void
+traverseAllWithPosition_device(TVoxel1* voxels1, TVoxel2* voxels2,
+                               const HashEntry* hash_table1, const HashEntry* hash_table2,
+                               TFunctor* functor) {
+	int hash_code1 = blockIdx.x;
+	int voxel1_index, voxel2_index;
+	Vector3i voxel_position;
+	getVoxelIndexesAndPositionFromHashBlock(voxel1_index, voxel2_index, voxel_position, hash_code1, hash_table1,
+	                                        hash_table2);
+
+	TVoxel1& voxel1 = voxels1[voxel1_index];
+	TVoxel2& voxel2 = voxels2[voxel2_index];
+
+	(*functor)(voxel1, voxel2, voxel_position);
+}
+
+template<typename TFunctor, typename TVoxel1, typename TVoxel2>
+__global__ void
+traverseUtilizedWithPosition_device(TVoxel1* voxels1, TVoxel2* voxels2,
+                                    const HashEntry* hash_table1, const HashEntry* hash_table2,
+                                    const int* utilized_hash_codes, TFunctor* functor) {
+	int hash_code1 = utilized_hash_codes[blockIdx.x];
+	int voxel1_index, voxel2_index;
+	Vector3i voxel_position;
+	getVoxelIndexesAndPositionFromHashBlock(voxel1_index, voxel2_index, voxel_position, hash_code1, hash_table1,
+	                                        hash_table2);
+
+	TVoxel1& voxel1 = voxels1[voxel1_index];
+	TVoxel2& voxel2 = voxels2[voxel2_index];
+
+	(*functor)(voxel1, voxel2, voxel_position);
+}
+
+
+__global__ void matchUpHashEntriesByPosition(const HashEntry* hash_table1,
+                                             const HashEntry* hash_table2,
                                              int hashEntryCount,
                                              HashPair* matchedHashPairs,
                                              UnmatchedHash* unmatchedHashes,
@@ -114,17 +166,17 @@ __global__ void matchUpHashEntriesByPosition(const HashEntry* primaryHashTable,
 	int hash = blockIdx.x * blockDim.x + threadIdx.x;
 	if (hash > hashEntryCount) return;
 
-	const HashEntry& primaryHashEntry = primaryHashTable[hash];
-	const HashEntry secondaryHashEntry = secondaryHashTable[hash];
+	const HashEntry& hash_entry1 = hash_table1[hash];
+	const HashEntry hash_entry2 = hash_table2[hash];
 	int secondaryHash = hash;
-	if (primaryHashEntry.ptr < 0) {
-		if (secondaryHashEntry.ptr < 0) {
+	if (hash_entry1.ptr < 0) {
+		if (hash_entry2.ptr < 0) {
 			// neither primary nor secondary hash blocks allocated for this hash
 			return;
 		} else {
 			int alternativePrimaryHash;
 			// found no primary at hash index, but did find secondary. Ensure we have a matching primary.
-			if (!FindHashAtPosition(alternativePrimaryHash, secondaryHashEntry.pos, primaryHashTable)) {
+			if (!FindHashAtPosition(alternativePrimaryHash, hash_entry2.pos, hash_table1)) {
 				int unmatchedHashIdx = atomicAdd(&hashMatchInfo->unmatchedHashCount, 1);
 				unmatchedHashes[unmatchedHashIdx].hash = hash;
 				unmatchedHashes[unmatchedHashIdx].primary = false;
@@ -138,10 +190,10 @@ __global__ void matchUpHashEntriesByPosition(const HashEntry* primaryHashTable,
 
 	// the rare case where we have different positions for primary & secondary voxel block with the same index:
 	// we have a hash bucket miss, find the secondary voxel block with the matching coordinates
-	if (secondaryHashEntry.pos != primaryHashEntry.pos) {
-		if (secondaryHashEntry.ptr >= 0) {
+	if (hash_entry2.pos != hash_entry1.pos) {
+		if (hash_entry2.ptr >= 0) {
 			int alternativePrimaryHash;
-			if (!FindHashAtPosition(alternativePrimaryHash, secondaryHashEntry.pos, primaryHashTable)) {
+			if (!FindHashAtPosition(alternativePrimaryHash, hash_entry2.pos, hash_table1)) {
 				int unmatchedHashIdx = atomicAdd(&hashMatchInfo->unmatchedHashCount, 1);
 				unmatchedHashes[unmatchedHashIdx].hash = hash;
 				unmatchedHashes[unmatchedHashIdx].primary = false;
@@ -149,7 +201,7 @@ __global__ void matchUpHashEntriesByPosition(const HashEntry* primaryHashTable,
 			}
 		}
 
-		if (!FindHashAtPosition(secondaryHash, primaryHashEntry.pos, secondaryHashTable)) {
+		if (!FindHashAtPosition(secondaryHash, hash_entry1.pos, hash_table2)) {
 			// If we cannot find the matching secondary hash, we will check whether the primary voxel block has been altered later
 			int unmatchedHashIdx = atomicAdd(&hashMatchInfo->unmatchedHashCount, 1);
 			unmatchedHashes[unmatchedHashIdx].hash = hash;
@@ -165,10 +217,10 @@ __global__ void matchUpHashEntriesByPosition(const HashEntry* primaryHashTable,
 
 // region ========================= ALL-TRUE CHECK KERNELS =============================================================
 
-template<typename TVoxelPrimary, typename TVoxelSecondary>
+template<typename TVoxel1, typename TVoxel2>
 __global__ void checkIfUnmatchedVoxelBlocksAreAltered(
-		const TVoxelPrimary* primaryVoxels, const TVoxelSecondary* secondaryVoxels,
-		const HashEntry* primaryHashTable, const HashEntry* secondaryHashTable,
+		const TVoxel1* voxels1, const TVoxel2* voxels2,
+		const HashEntry* hash_table1, const HashEntry* hash_table2,
 		const UnmatchedHash* unmatchedHashes, const HashMatchInfo* hashMatchInfo,
 		bool* alteredVoxelEncountered) {
 
@@ -184,18 +236,18 @@ __global__ void checkIfUnmatchedVoxelBlocksAreAltered(
 
 	bool voxelAltered;
 	if (unmatchedHashes[hashIdx].primary) {
-		voxelAltered = isAltered(primaryVoxels[primaryHashTable[hash].ptr * VOXEL_BLOCK_SIZE3 + locId]);
+		voxelAltered = isAltered(voxels1[hash_table1[hash].ptr * VOXEL_BLOCK_SIZE3 + locId]);
 	} else {
-		voxelAltered = isAltered(secondaryVoxels[secondaryHashTable[hash].ptr * VOXEL_BLOCK_SIZE3 + locId]);
+		voxelAltered = isAltered(voxels2[hash_table2[hash].ptr * VOXEL_BLOCK_SIZE3 + locId]);
 	}
 	if (voxelAltered) *alteredVoxelEncountered = true;
 }
 
 
-template<typename TBooleanFunctor, typename TVoxelPrimary, typename TVoxelSecondary>
+template<typename TBooleanFunctor, typename TVoxel1, typename TVoxel2>
 __global__ void checkIfMatchingHashBlockVoxelsYieldTrue(
-		TVoxelPrimary* primaryVoxels, TVoxelSecondary* secondaryVoxels,
-		const HashEntry* primaryHashTable, const HashEntry* secondaryHashTable,
+		TVoxel1* voxels1, TVoxel2* voxels2,
+		const HashEntry* hash_table1, const HashEntry* hash_table2,
 		const HashPair* matchedHashes, const HashMatchInfo* matchInfo, TBooleanFunctor* functor,
 		bool* falseEncountered) {
 	if (*falseEncountered) return;
@@ -208,17 +260,17 @@ __global__ void checkIfMatchingHashBlockVoxelsYieldTrue(
 	int x = threadIdx.x, y = threadIdx.y, z = threadIdx.z;
 	int locId = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
 
-	if (!(*functor)(primaryVoxels[primaryHashTable[primaryHash].ptr * VOXEL_BLOCK_SIZE3 + locId],
-	                secondaryVoxels[secondaryHashTable[secondaryHash].ptr * VOXEL_BLOCK_SIZE3 + locId])) {
+	if (!(*functor)(voxels1[hash_table1[primaryHash].ptr * VOXEL_BLOCK_SIZE3 + locId],
+	                voxels2[hash_table2[secondaryHash].ptr * VOXEL_BLOCK_SIZE3 + locId])) {
 		*falseEncountered = true;
 	}
 }
 
 
-template<typename TBooleanFunctor, typename TVoxelPrimary, typename TVoxelSecondary>
+template<typename TBooleanFunctor, typename TVoxel1, typename TVoxel2>
 __global__ void checkIfMatchingHashBlockVoxelsYieldTrue_Position(
-		TVoxelPrimary* primaryVoxels, TVoxelSecondary* secondaryVoxels,
-		const HashEntry* primaryHashTable, const HashEntry* secondaryHashTable,
+		TVoxel1* voxels1, TVoxel2* voxels2,
+		const HashEntry* hash_table1, const HashEntry* hash_table2,
 		const HashPair* matchedHashes, const HashMatchInfo* matchInfo, TBooleanFunctor* functor,
 		bool* falseEncountered) {
 	if (*falseEncountered) return;
@@ -231,14 +283,14 @@ __global__ void checkIfMatchingHashBlockVoxelsYieldTrue_Position(
 	int x = threadIdx.x, y = threadIdx.y, z = threadIdx.z;
 	int locId = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
 
-	const HashEntry& primaryHashEntry = primaryHashTable[primaryHash];
+	const HashEntry& hash_entry1 = hash_table1[primaryHash];
 	// position of the current entry in 3D space in voxel units
-	Vector3i hashBlockPosition = primaryHashEntry.pos.toInt() * VOXEL_BLOCK_SIZE;
-	Vector3i voxelPosition = hashBlockPosition + Vector3i(x,y,z);
+	Vector3i hashBlockPosition = hash_entry1.pos.toInt() * VOXEL_BLOCK_SIZE;
+	Vector3i voxel_position = hashBlockPosition + Vector3i(x, y, z);
 
-	if (!(*functor)(primaryVoxels[primaryHashEntry.ptr * VOXEL_BLOCK_SIZE3 + locId],
-	                secondaryVoxels[secondaryHashTable[secondaryHash].ptr * VOXEL_BLOCK_SIZE3 + locId],
-	                voxelPosition)) {
+	if (!(*functor)(voxels1[hash_entry1.ptr * VOXEL_BLOCK_SIZE3 + locId],
+	                voxels2[hash_table2[secondaryHash].ptr * VOXEL_BLOCK_SIZE3 + locId],
+	                voxel_position)) {
 		*falseEncountered = true;
 	}
 }

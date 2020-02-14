@@ -88,17 +88,33 @@ private:
 
 public:
 // region ================================ STATIC SINGLE-SCENE TRAVERSAL ===============================================
+
 	template<typename TStaticFunctor>
-	inline static void StaticTraverseAll(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
-		TVoxel* voxelArray = volume->localVBA.GetVoxelBlocks();
-		const HashEntry* hashTable = volume->index.GetIndexData();
-		int hashEntryCount = volume->index.hashEntryCount;
+	inline static void TraverseAll(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
+		TVoxel* voxels = volume->localVBA.GetVoxelBlocks();
+		const HashEntry* hash_table = volume->index.GetIndexData();
+		int hash_entry_count = volume->index.hashEntryCount;
 
-		dim3 cudaBlockSize_BlockVoxelPerThread(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
-		dim3 gridSize_HashPerBlock(hashEntryCount);
+		dim3 voxel_per_thread_cuda_block_size(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
+		dim3 hash_per_block_cuda_grid_size(hash_entry_count);
 
-		StaticTraverseAll_device<TStaticFunctor, TVoxel>
-				<< < gridSize_HashPerBlock, cudaBlockSize_BlockVoxelPerThread >> > (voxelArray, hashTable);
+		traverseAll_StaticFunctor_device<TStaticFunctor, TVoxel>
+				<< < hash_per_block_cuda_grid_size, voxel_per_thread_cuda_block_size >> > (voxels, hash_table);
+		ORcudaKernelCheck;
+	}
+
+	template<typename TStaticFunctor>
+	inline static void TraverseUtilized(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
+		TVoxel* voxels = volume->localVBA.GetVoxelBlocks();
+		const HashEntry* hash_table = volume->index.GetIndexData();
+		const int utilized_block_count = volume->index.GetUtilizedHashBlockCount();
+		const int* utilized_hash_codes = volume->index.GetUtilizedBlockHashCodes();
+
+		dim3 voxel_per_thread_cuda_block_size(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
+		dim3 hash_per_block_cuda_grid_size(utilized_block_count);
+
+		traverseUtilized_StaticFunctor_device<TStaticFunctor, TVoxel>
+				<< < hash_per_block_cuda_grid_size, voxel_per_thread_cuda_block_size >> > (voxels, hash_table, utilized_hash_codes);
 		ORcudaKernelCheck;
 	}
 

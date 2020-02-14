@@ -92,6 +92,16 @@ public:
 		ORcudaKernelCheck;
 	}
 
+	template<typename TFunctor>
+	inline static void
+	TraverseUtilized(
+			ITMLib::VoxelVolume<TVoxel1, ITMLib::PlainVoxelArray>* volume1,
+			ITMLib::VoxelVolume<TVoxel2, ITMLib::PlainVoxelArray>* volume2,
+			ITMLib::VoxelVolume<TVoxel3, ITMLib::PlainVoxelArray>* volume3,
+			TFunctor& functor) {
+		TraverseAll(volume1,volume2,volume3, functor);
+	}
+
 
 	template<typename TFunctor>
 	inline static void
@@ -130,6 +140,16 @@ public:
 		ORcudaSafeCall(cudaMemcpy(&functor, functor_device, sizeof(TFunctor), cudaMemcpyDeviceToHost));
 		ORcudaSafeCall(cudaFree(functor_device));
 		ORcudaKernelCheck;
+	}
+
+	template<typename TFunctor>
+	inline static void
+	TraverseUtilizedWithPosition(
+			ITMLib::VoxelVolume<TVoxel1, ITMLib::PlainVoxelArray>* volume1,
+			ITMLib::VoxelVolume<TVoxel2, ITMLib::PlainVoxelArray>* volume2,
+			ITMLib::VoxelVolume<TVoxel3, ITMLib::PlainVoxelArray>* volume3,
+			TFunctor& functor){
+		TraverseAllWithPosition(volume1,volume2,volume3, functor);
 	}
 // endregion ===========================================================================================================
 };

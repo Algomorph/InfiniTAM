@@ -139,7 +139,7 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_PVA_VBH_Span_CUDA, Frame16And17Fix
 
 	IndexingEngine<TSDFVoxel,VoxelBlockHash, MEMORYDEVICE_CUDA>& indexer =
 			IndexingEngine<TSDFVoxel,VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance();
-	indexer.AllocateNearAndBetweenTwoSurfaces(&volume_VBH_17, &tracking_state, view_17);
+	indexer.AllocateNearAndBetweenTwoSurfaces(&volume_VBH_17, view_17, &tracking_state);
 
 	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, VoxelBlockHash>* reconstructionEngine_VBH =
 			DepthFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, VoxelBlockHash>(MEMORYDEVICE_CUDA);

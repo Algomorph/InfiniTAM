@@ -40,10 +40,8 @@ public:
 	                         bool resetVisibleList) override;
 
 	void AllocateNearAndBetweenTwoSurfaces(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
-	                                       const CameraTrackingState* tracking_state,
-	                                       const ITMView* view) override;
-
-
+	                                       const ITMView* view,
+	                                       const CameraTrackingState* tracking_state) override;
 
 private:
 	void ReallocateDeletedHashBlocks(VoxelVolume<TVoxel, VoxelBlockHash>* volume);

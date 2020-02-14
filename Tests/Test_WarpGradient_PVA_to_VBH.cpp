@@ -347,7 +347,7 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CPU) {
 	WarpingEngineInterface<TSDFVoxel, WarpVoxel, VoxelBlockHash>* warping_engine =
 			WarpingEngineFactory::MakeWarpingEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash>(MEMORYDEVICE_CPU);
 	VolumeFusionEngineInterface<TSDFVoxel, WarpVoxel, VoxelBlockHash>* volume_fusion_engine =
-			VolumeFusionEngineFactory::MakeVolumeFusionEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash>(MEMORYDEVICE_CPU);
+			VolumeFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, VoxelBlockHash>(MEMORYDEVICE_CPU);
 
 	VolumeStatisticsCalculator<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>& warp_calculator =
 			VolumeStatisticsCalculator<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance();
@@ -453,29 +453,13 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CUDA) {
 	VolumeStatisticsCalculator<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>& tsdf_calculator =
 			VolumeStatisticsCalculator<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance();
 
-	PrintVolumeStatistics<TSDFVoxel,VoxelBlockHash,MEMORYDEVICE_CUDA>(live_volumes[live_index_to_start_from], "[initial source live]");
-
-	std::cout << "Utilized (initial source) hash count: " << live_volumes[live_index_to_start_from]->index.GetUtilizedHashBlockCount() << std::endl;
-
 	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance().AllocateUsingOtherVolume(live_volumes[(live_index_to_start_from + 1) % 2],
 	                                                                                       live_volumes[live_index_to_start_from]);
-
-	std::vector<int> hash_codes_1 = tsdf_calculator.GetAllocatedHashCodes(live_volumes[0]);
-	std::vector<int> hash_codes_2 = tsdf_calculator.GetAllocatedHashCodes(live_volumes[1]);
-	std::unordered_set<int> hash_codes_1_set(hash_codes_1.begin(), hash_codes_1.end());
-	std::unordered_set<int> hash_codes_2_set(hash_codes_2.begin(), hash_codes_2.end());
-	for(auto code : hash_codes_1){
-		if(hash_codes_2_set.find(code) == hash_codes_2_set.end()){
-			std::cout << "Missing block at hash code " << code << " from the second volume." << std::endl;
-		}
-	}
 
 	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance().AllocateUsingOtherVolume(canonical_volume,
 	                                                                                                  live_volumes[live_index_to_start_from]);
 	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance().AllocateUsingOtherVolume(&warp_field,
 	                                                                                                  live_volumes[live_index_to_start_from]);
-
-
 
 	SlavchevaSurfaceTracker::Switches switches(true, false, true, false, true);
 
@@ -483,7 +467,7 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CUDA) {
 	WarpingEngineInterface<TSDFVoxel, WarpVoxel, VoxelBlockHash>* warping_engine =
 			WarpingEngineFactory::MakeWarpingEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash>(MEMORYDEVICE_CUDA);
 	VolumeFusionEngineInterface<TSDFVoxel, WarpVoxel, VoxelBlockHash>* volume_fusion_engine =
-			VolumeFusionEngineFactory::MakeVolumeFusionEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash>(MEMORYDEVICE_CUDA);
+			VolumeFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, VoxelBlockHash>(MEMORYDEVICE_CUDA);
 
 	VolumeStatisticsCalculator<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>& warp_calculator =
 			VolumeStatisticsCalculator<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance();
@@ -491,11 +475,11 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CUDA) {
 	const int iteration_limit = 300;
 	int source_warped_field_ix = (live_index_to_start_from + 1) % 2;
 	int target_warped_field_ix = live_index_to_start_from;
+
 	for (int iteration = 0; iteration < iteration_limit; iteration++) {
 		std::swap(source_warped_field_ix, target_warped_field_ix);
 		Bench::StartTimer("1_CalculateWarpGradient");
 		motion_tracker.CalculateWarpGradient(&warp_field, canonical_volume, live_volumes[source_warped_field_ix]);
-		std::cout << "Warp allocated hash count: " << warp_calculator.ComputeAllocatedHashBlockCount(&warp_field) << std::endl;
 		Bench::StopTimer("1_CalculateWarpGradient");
 		Bench::StartTimer("2_SmoothWarpGradient");
 		motion_tracker.SmoothWarpGradient(&warp_field, canonical_volume, live_volumes[source_warped_field_ix]);
@@ -504,14 +488,8 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CUDA) {
 		motion_tracker.UpdateWarps(&warp_field, canonical_volume, live_volumes[source_warped_field_ix]);
 		Bench::StopTimer("3_UpdateWarps");
 		Bench::StartTimer("4_WarpVolume");
-		motion_tracker.CalculateWarpGradient(&warp_field, canonical_volume, live_volumes[source_warped_field_ix]);
-		std::cout << "Warp allocated hash count (2): " << warp_calculator.ComputeAllocatedHashBlockCount(&warp_field) << std::endl;
-		PrintVolumeStatistics<TSDFVoxel,VoxelBlockHash,MEMORYDEVICE_CUDA>(live_volumes[target_warped_field_ix], "[target live before warp]");
-		std::cout << "Utilized (target) hash count: " << live_volumes[target_warped_field_ix]->index.GetUtilizedHashBlockCount() << std::endl;
 		warping_engine->WarpVolume_WarpUpdates(&warp_field, live_volumes[source_warped_field_ix],
 		                                       live_volumes[target_warped_field_ix]);
-		PrintVolumeStatistics<TSDFVoxel,VoxelBlockHash,MEMORYDEVICE_CUDA>(live_volumes[target_warped_field_ix], "[target live after warp]");
-		std::cout << "Utilized (target) hash count: " << live_volumes[target_warped_field_ix]->index.GetUtilizedHashBlockCount() << std::endl;
 		Bench::StopTimer("4_WarpVolume");
 	}
 

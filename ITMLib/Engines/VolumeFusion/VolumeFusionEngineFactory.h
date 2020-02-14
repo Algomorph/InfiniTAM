@@ -26,19 +26,19 @@
 namespace ITMLib{
 class VolumeFusionEngineFactory{
 public:
-	template<typename TVoxel, typename TWarp, typename TIndex>
-	static VolumeFusionEngineInterface<TVoxel, TWarp, TIndex>*
-	MakeVolumeFusionEngine(MemoryDeviceType memoryDeviceType = configuration::get().device_type){
-		VolumeFusionEngineInterface<TVoxel, TWarp, TIndex>* volume_fusion_engine = nullptr;
+	template<typename TVoxel, typename TIndex>
+	static VolumeFusionEngineInterface<TVoxel, TIndex>*
+	Build(MemoryDeviceType memoryDeviceType = configuration::get().device_type){
+		VolumeFusionEngineInterface<TVoxel, TIndex>* volume_fusion_engine = nullptr;
 		switch (memoryDeviceType) {
 			case MEMORYDEVICE_CPU:
-				volume_fusion_engine = new VolumeFusionEngine<TVoxel, TWarp, TIndex, MEMORYDEVICE_CPU>();
+				volume_fusion_engine = new VolumeFusionEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>();
 				break;
 			case MEMORYDEVICE_CUDA:
 #ifdef COMPILE_WITHOUT_CUDA
 				DIEWITHEXCEPTION_REPORTLOCATION("Not built with CUDA but CUDA type requested, aborting!");
 #else
-				volume_fusion_engine = new VolumeFusionEngine<TVoxel, TWarp, TIndex, MEMORYDEVICE_CUDA>();
+				volume_fusion_engine = new VolumeFusionEngine<TVoxel, TIndex, MEMORYDEVICE_CUDA>();
 #endif
 
 				break;

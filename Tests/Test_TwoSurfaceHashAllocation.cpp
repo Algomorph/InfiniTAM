@@ -37,8 +37,10 @@
 #include "../ITMLib/Utils/Analytics/VolumeStatisticsCalculator/CPU/VolumeStatisticsCalculator_CPU.h"
 //(CUDA)
 #ifndef COMPILE_WITHOUT_CUDA
+
 #include "../ITMLib/Engines/Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
 #include "../ITMLib/Utils/Analytics/VolumeStatisticsCalculator/CUDA/VolumeStatisticsCalculator_CUDA.h"
+
 #endif
 
 using namespace ITMLib;
@@ -97,8 +99,11 @@ struct TestData {
 	std::unordered_set<Vector3s> ground_truth_block_positions;
 
 private:
-	void GenerateGroundTruthPositions(const VoxelVolumeParameters& volume_parameters = configuration::get().general_voxel_volume_parameters, const float distance_to_first_square = 2.0f, const float distance_to_second_square = 2.096f, const float square_size_px = 40){
-		
+	void GenerateGroundTruthPositions(
+			const VoxelVolumeParameters& volume_parameters = configuration::get().general_voxel_volume_parameters,
+			const float distance_to_first_square = 2.0f, const float distance_to_second_square = 2.096f,
+			const float square_size_px = 40) {
+
 
 		auto voxel_block_size = static_cast<float>(volume_parameters.voxel_size * VOXEL_BLOCK_SIZE);
 		auto first_line_of_blocks_z = static_cast<int>(std::ceil((distance_to_first_square -
@@ -118,18 +123,17 @@ private:
 		auto depth_block_span = last_line_of_blocks_z + 1 - first_line_of_blocks_z;
 
 
-
 		int start_x = -horizontal_block_span / 2;
 		int end_x = start_x + horizontal_block_span;
 		int start_y = -vertical_block_span / 2;
 		int end_y = start_y + vertical_block_span;
 		int end_z = first_line_of_blocks_z + depth_block_span;
 
-		
-		for (int x = start_x; x < end_x; x++){
-			for(int y = start_y; y < end_y; y++){
-				for(int z = first_line_of_blocks_z; z < end_z; z++){
-					Vector3s position(x,y,z);
+
+		for (int x = start_x; x < end_x; x++) {
+			for (int y = start_y; y < end_y; y++) {
+				for (int z = first_line_of_blocks_z; z < end_z; z++) {
+					Vector3s position(x, y, z);
 					ground_truth_block_positions.insert(position);
 				}
 			}
@@ -141,20 +145,20 @@ private:
 typedef TestData<MEMORYDEVICE_CPU> TestData_CPU;
 
 static void check_positions(const std::unordered_set<Vector3s>& ground_truth_block_positions,
-		const std::unordered_set<Vector3s>& hash_block_positions_span_set,
-		const std::vector<Vector3s> hash_block_positions_span){
+                            const std::unordered_set<Vector3s>& hash_block_positions_span_set,
+                            const std::vector<Vector3s> hash_block_positions_span) {
 
 	bool bad_block_detected = false;
 	Vector3s bad_block(-1);
-	for(auto block_position : hash_block_positions_span){
-		if(ground_truth_block_positions.find(block_position) == ground_truth_block_positions.end()){
+	for (auto block_position : hash_block_positions_span) {
+		if (ground_truth_block_positions.find(block_position) == ground_truth_block_positions.end()) {
 			bad_block = block_position;
 			bad_block_detected = true;
 		}
 	}
 	BOOST_REQUIRE_MESSAGE(!bad_block_detected, "Detected incorrect block allocated at " << bad_block << ".");
-	for(auto block_position : ground_truth_block_positions){
-		if(hash_block_positions_span_set.find(block_position) == hash_block_positions_span_set.end()){
+	for (auto block_position : ground_truth_block_positions) {
+		if (hash_block_positions_span_set.find(block_position) == hash_block_positions_span_set.end()) {
 			bad_block = block_position;
 			bad_block_detected = true;
 		}
@@ -181,7 +185,7 @@ BOOST_FIXTURE_TEST_CASE(Test_TwoSurfaceAllocation_CPU, TestData_CPU) {
 
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> span_volume(MEMORYDEVICE_CPU, {0x8000, 0x20000});
 	span_volume.Reset();
-	indexer.AllocateNearAndBetweenTwoSurfaces(&span_volume, tracking_state, view_square_2);
+	indexer.AllocateNearAndBetweenTwoSurfaces(&span_volume, view_square_2, tracking_state);
 
 	std::vector<Vector3s> hash_block_positions_span = StatCalc_CPU_VBH_Voxel::Instance().GetAllocatedHashBlockPositions(
 			&span_volume);
@@ -200,12 +204,12 @@ BOOST_FIXTURE_TEST_CASE(Test_TwoSurfaceAllocation_CPU, TestData_CPU) {
 
 	depth_fusion_engine.GenerateTsdfVolumeFromTwoSurfaces(&square_volume, view_square_2, tracking_state);
 	visualization_engine->CreateICPMaps(&square_volume, view_square_2, tracking_state, render_state);
-	indexer.AllocateNearAndBetweenTwoSurfaces(&span_volume, tracking_state, view_square_1);
+	indexer.AllocateNearAndBetweenTwoSurfaces(&span_volume, view_square_1, tracking_state);
 
 	hash_block_positions_span = StatCalc_CPU_VBH_Voxel::Instance().GetAllocatedHashBlockPositions(
 			&span_volume);
 	hash_block_positions_span_set = std::unordered_set<Vector3s>(hash_block_positions_span.begin(),
-	                                                           hash_block_positions_span.end());
+	                                                             hash_block_positions_span.end());
 	test_volume_block_count = StatCalc_CPU_VBH_Voxel::Instance().ComputeAllocatedHashBlockCount(&span_volume);
 
 	BOOST_REQUIRE_EQUAL(test_volume_block_count, ground_truth_block_positions.size());

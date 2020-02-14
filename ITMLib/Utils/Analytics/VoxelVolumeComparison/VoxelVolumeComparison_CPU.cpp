@@ -79,6 +79,7 @@ bool allocatedContentAlmostEqual_CPU_Verbose<TSDFVoxel, PlainVoxelArray, PlainVo
 		VoxelVolume<TSDFVoxel, PlainVoxelArray>* a, VoxelVolume<TSDFVoxel, PlainVoxelArray>* b,
 		float tolerance);
 
+
 template
 bool allocatedContentAlmostEqual_CPU<TSDFVoxel, PlainVoxelArray, VoxelBlockHash, float>(
 		VoxelVolume<TSDFVoxel, PlainVoxelArray>* a, VoxelVolume<TSDFVoxel, VoxelBlockHash>* b,

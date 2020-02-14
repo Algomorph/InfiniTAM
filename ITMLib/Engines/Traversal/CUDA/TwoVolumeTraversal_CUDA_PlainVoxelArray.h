@@ -19,7 +19,7 @@
 #include "../Interface/TwoVolumeTraversal.h"
 #include "TwoVolumeTraversal_CUDA_PlainVoxelArray_Kernels.h"
 
-namespace ITMLib{
+namespace ITMLib {
 
 template<typename TVoxelPrimary, typename TVoxelSecondary>
 class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, PlainVoxelArray, MEMORYDEVICE_CUDA> {
@@ -64,7 +64,8 @@ private:
 		ORcudaSafeCall(cudaFree(functor_device));
 
 		bool mismatch_encountered;
-		ORcudaSafeCall(cudaMemcpy(&mismatch_encountered, mismatch_encountered_device, sizeof(bool), cudaMemcpyDeviceToHost));
+		ORcudaSafeCall(
+				cudaMemcpy(&mismatch_encountered, mismatch_encountered_device, sizeof(bool), cudaMemcpyDeviceToHost));
 		ORcudaSafeCall(cudaFree(mismatch_encountered_device));
 
 		return !mismatch_encountered;
@@ -74,7 +75,7 @@ public:
 // region ============================== DUAL-SCENE STATIC TRAVERSAL ===================================================
 
 	template<typename TStaticBooleanFunctor>
-	inline static bool StaticTraverseAndCompareAll(
+	inline static bool TraverseAndCompareAll(
 			VoxelVolume<TVoxelPrimary, PlainVoxelArray>* volume1,
 			VoxelVolume<TVoxelSecondary, PlainVoxelArray>* volume2) {
 
@@ -93,13 +94,14 @@ public:
 				static_cast<int>(ceil(static_cast<float>(volume1->index.GetVolumeSize().z) / cuda_block_size.z))
 		);
 
-		staticTraverseAndCompareAll_device<TStaticBooleanFunctor, TVoxelPrimary, TVoxelSecondary>
-		<< < cuda_grid_size, cuda_block_size >> >
-		(voxels1, voxels2, array_info, mismatch_encountered_device);
+		TraverseAndCompareAll_device<TStaticBooleanFunctor, TVoxelPrimary, TVoxelSecondary>
+				<< < cuda_grid_size, cuda_block_size >> >
+		                             (voxels1, voxels2, array_info, mismatch_encountered_device);
 		ORcudaKernelCheck;
 
 		bool mismatch_encountered;
-		ORcudaSafeCall(cudaMemcpy(&mismatch_encountered, mismatch_encountered_device, sizeof(bool), cudaMemcpyDeviceToHost));
+		ORcudaSafeCall(
+				cudaMemcpy(&mismatch_encountered, mismatch_encountered_device, sizeof(bool), cudaMemcpyDeviceToHost));
 		ORcudaSafeCall(cudaFree(mismatch_encountered_device));
 
 		return !mismatch_encountered;
@@ -110,83 +112,9 @@ public:
 
 	template<typename TFunctor>
 	inline static void
-	TraverseAllWithPosition(
-			VoxelVolume<TVoxelPrimary, PlainVoxelArray>* volume1,
-			VoxelVolume<TVoxelSecondary, PlainVoxelArray>* volume2,
-			TFunctor& functor) {
-
-		assert(volume1->index.GetVolumeSize() == volume2->index.GetVolumeSize());
-
-		// transfer functor from RAM to VRAM
-		TFunctor* functor_device = nullptr;
-		ORcudaSafeCall(cudaMalloc((void**) &functor_device, sizeof(TFunctor)));
-		ORcudaSafeCall(cudaMemcpy(functor_device, &functor, sizeof(TFunctor), cudaMemcpyHostToDevice));
-
-		// perform traversal on the CUDA
-		TVoxelPrimary* voxels1 = volume1->localVBA.GetVoxelBlocks();
-		TVoxelSecondary* voxels2 = volume2->localVBA.GetVoxelBlocks();
-		const PlainVoxelArray::GridAlignedBox* array_info = volume1->index.GetIndexData();
-		dim3 cuda_block_size(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
-		dim3 cuda_cuda_grid_size(
-				static_cast<int>(ceil(static_cast<float>(volume1->index.GetVolumeSize().x) / cuda_block_size.x)),
-				static_cast<int>(ceil(static_cast<float>(volume1->index.GetVolumeSize().y) / cuda_block_size.y)),
-				static_cast<int>(ceil(static_cast<float>(volume1->index.GetVolumeSize().z) / cuda_block_size.z))
-		);
-		dualVoxelPositionTraversal_device<TFunctor, TVoxelPrimary, TVoxelSecondary>
-		<< < cuda_cuda_grid_size, cuda_block_size >> >
-		                     (voxels1, voxels2, array_info, functor_device);
-		ORcudaKernelCheck;
-
-		// transfer functor from VRAM back to RAM
-		ORcudaSafeCall(cudaMemcpy(&functor, functor_device, sizeof(TFunctor), cudaMemcpyDeviceToHost));
-		ORcudaSafeCall(cudaFree(functor_device));
-
-	}
-
-	template<typename TBooleanFunctor>
-	inline static bool
-	TraverseAndCompareAll(
-			VoxelVolume<TVoxelPrimary, PlainVoxelArray>* volume1,
-			VoxelVolume<TVoxelSecondary, PlainVoxelArray>* volume2,
-			TBooleanFunctor& functor) {
-		return TraverseAndCompareAll_Generic(
-				volume1, volume2, functor,
-				[&](const dim3& cuda_grid_size, const dim3& cuda_block_size,
-				    TVoxelPrimary* voxels1, TVoxelSecondary* voxels2,
-				    const PlainVoxelArray::GridAlignedBox* array_info,
-				    TBooleanFunctor* functor_device, bool* mismatch_encountered_device) {
-					TraverseAndCompareAll_device<TBooleanFunctor, TVoxelPrimary, TVoxelSecondary>
-							<< < cuda_grid_size, cuda_block_size >> >
-					                       (voxels1, voxels2, array_info, functor_device, mismatch_encountered_device);
-				}
-		);
-	}
-
-	template<typename TBooleanFunctor>
-	inline static bool
-	TraverseAndCompareAllWithPosition(
-			VoxelVolume<TVoxelPrimary, PlainVoxelArray>* volume1,
-			VoxelVolume<TVoxelSecondary, PlainVoxelArray>* volume2,
-			TBooleanFunctor& functor) {
-		return TraverseAndCompareAll_Generic(
-				volume1, volume2, functor,
-				[&](const dim3& cuda_grid_size, const dim3& cuda_block_size,
-				    TVoxelPrimary* voxels1, TVoxelSecondary* voxels2,
-				    const PlainVoxelArray::GridAlignedBox* array_info,
-				    TBooleanFunctor* functor_device, bool* mismatch_encountered_device) {
-					TraverseAndCompareAllWithPosition_device<TBooleanFunctor, TVoxelPrimary, TVoxelSecondary>
-							<< < cuda_grid_size, cuda_block_size >> >
-					                       (voxels1, voxels2, array_info, functor_device, mismatch_encountered_device);
-				}
-		);
-	}
-
-	template<typename TFunctor>
-	inline static void
-	TraverseAll(
-			VoxelVolume<TVoxelPrimary, PlainVoxelArray>* volume1,
-			VoxelVolume<TVoxelSecondary, PlainVoxelArray>* volume2,
-			TFunctor& functor) {
+	TraverseAll(VoxelVolume<TVoxelPrimary, PlainVoxelArray>* volume1,
+	            VoxelVolume<TVoxelSecondary, PlainVoxelArray>* volume2,
+	            TFunctor& functor) {
 
 		assert(volume1->index.GetVolumeSize() == volume2->index.GetVolumeSize());
 
@@ -207,14 +135,103 @@ public:
 		);
 
 		dualVoxelTraversal_device<TFunctor, TVoxelPrimary, TVoxelSecondary>
-		<< < cuda_grid_size, cuda_block_size >> >
-		(voxels1, voxels2, array_info, functor_device);
+				<< < cuda_grid_size, cuda_block_size >> >
+		                             (voxels1, voxels2, array_info, functor_device);
 		ORcudaKernelCheck;
 
 		// transfer functor from VRAM back to RAM
 		ORcudaSafeCall(cudaMemcpy(&functor, functor_device, sizeof(TFunctor), cudaMemcpyDeviceToHost));
 		ORcudaSafeCall(cudaFree(functor_device));
 	}
+
+	template<typename TFunctor>
+	inline static void
+	TraverseUtilized(VoxelVolume<TVoxelPrimary, PlainVoxelArray>* volume1,
+	            VoxelVolume<TVoxelSecondary, PlainVoxelArray>* volume2,
+	            TFunctor& functor) {
+		TraverseAll(volume1, volume2, functor);
+	}
+
+	template<typename TFunctor>
+	inline static void
+	TraverseAllWithPosition(VoxelVolume<TVoxelPrimary, PlainVoxelArray>* volume1,
+	                        VoxelVolume<TVoxelSecondary, PlainVoxelArray>* volume2,
+	                        TFunctor& functor) {
+
+		assert(volume1->index.GetVolumeSize() == volume2->index.GetVolumeSize());
+
+		// transfer functor from RAM to VRAM
+		TFunctor* functor_device = nullptr;
+		ORcudaSafeCall(cudaMalloc((void**) &functor_device, sizeof(TFunctor)));
+		ORcudaSafeCall(cudaMemcpy(functor_device, &functor, sizeof(TFunctor), cudaMemcpyHostToDevice));
+
+		// perform traversal on the CUDA
+		TVoxelPrimary* voxels1 = volume1->localVBA.GetVoxelBlocks();
+		TVoxelSecondary* voxels2 = volume2->localVBA.GetVoxelBlocks();
+		const PlainVoxelArray::GridAlignedBox* array_info = volume1->index.GetIndexData();
+		dim3 cuda_block_size(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
+		dim3 cuda_cuda_grid_size(
+				static_cast<int>(ceil(static_cast<float>(volume1->index.GetVolumeSize().x) / cuda_block_size.x)),
+				static_cast<int>(ceil(static_cast<float>(volume1->index.GetVolumeSize().y) / cuda_block_size.y)),
+				static_cast<int>(ceil(static_cast<float>(volume1->index.GetVolumeSize().z) / cuda_block_size.z))
+		);
+		dualVoxelPositionTraversal_device<TFunctor, TVoxelPrimary, TVoxelSecondary>
+				<< < cuda_cuda_grid_size, cuda_block_size >> >
+		                                  (voxels1, voxels2, array_info, functor_device);
+		ORcudaKernelCheck;
+
+		// transfer functor from VRAM back to RAM
+		ORcudaSafeCall(cudaMemcpy(&functor, functor_device, sizeof(TFunctor), cudaMemcpyDeviceToHost));
+		ORcudaSafeCall(cudaFree(functor_device));
+
+	}
+
+	template<typename TFunctor>
+	inline static void
+	TraverseUtilizedWithPosition(VoxelVolume<TVoxelPrimary, PlainVoxelArray>* volume1,
+	                 VoxelVolume<TVoxelSecondary, PlainVoxelArray>* volume2,
+	                 TFunctor& functor) {
+		TraverseAllWithPosition(volume1, volume2, functor);
+	}
+
+	template<typename TBooleanFunctor>
+	inline static bool
+	TraverseAndCompareAll(
+			VoxelVolume<TVoxelPrimary, PlainVoxelArray>* volume1,
+			VoxelVolume<TVoxelSecondary, PlainVoxelArray>* volume2,
+			TBooleanFunctor& functor) {
+		return TraverseAndCompareAll_Generic(
+				volume1, volume2, functor,
+				[&](const dim3& cuda_grid_size, const dim3& cuda_block_size,
+				    TVoxelPrimary* voxels1, TVoxelSecondary* voxels2,
+				    const PlainVoxelArray::GridAlignedBox* array_info,
+				    TBooleanFunctor* functor_device, bool* mismatch_encountered_device) {
+					TraverseAndCompareAll_device<TBooleanFunctor, TVoxelPrimary, TVoxelSecondary>
+							<< < cuda_grid_size, cuda_block_size >> >
+					                             (voxels1, voxels2, array_info, functor_device, mismatch_encountered_device);
+				}
+		);
+	}
+
+	template<typename TBooleanFunctor>
+	inline static bool
+	TraverseAndCompareAllWithPosition(
+			VoxelVolume<TVoxelPrimary, PlainVoxelArray>* volume1,
+			VoxelVolume<TVoxelSecondary, PlainVoxelArray>* volume2,
+			TBooleanFunctor& functor) {
+		return TraverseAndCompareAll_Generic(
+				volume1, volume2, functor,
+				[&](const dim3& cuda_grid_size, const dim3& cuda_block_size,
+				    TVoxelPrimary* voxels1, TVoxelSecondary* voxels2,
+				    const PlainVoxelArray::GridAlignedBox* array_info,
+				    TBooleanFunctor* functor_device, bool* mismatch_encountered_device) {
+					TraverseAndCompareAllWithPosition_device<TBooleanFunctor, TVoxelPrimary, TVoxelSecondary>
+							<< < cuda_grid_size, cuda_block_size >> >
+					                             (voxels1, voxels2, array_info, functor_device, mismatch_encountered_device);
+				}
+		);
+	}
+
 
 // endregion ===========================================================================================================
 

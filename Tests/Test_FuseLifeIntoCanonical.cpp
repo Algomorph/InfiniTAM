@@ -161,9 +161,9 @@ void Generic_Fusion_PVA_to_VBH_test(int iteration){
 	           TMemoryDeviceType, Frame16And17Fixture::InitParams<VoxelBlockHash>());
 
 	VolumeFusionEngineInterface<TSDFVoxel, WarpVoxel, PlainVoxelArray>* volume_fusion_engine_PVA =
-			VolumeFusionEngineFactory::MakeVolumeFusionEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray>(TMemoryDeviceType);
+			VolumeFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, PlainVoxelArray>(TMemoryDeviceType);
 	VolumeFusionEngineInterface<TSDFVoxel, WarpVoxel, VoxelBlockHash>* volume_fusion_engine_VBH =
-			VolumeFusionEngineFactory::MakeVolumeFusionEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash>(TMemoryDeviceType);
+			VolumeFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, VoxelBlockHash>(TMemoryDeviceType);
 
 	volume_fusion_engine_PVA->FuseOneTsdfVolumeIntoAnother(canonical_volume_PVA, warped_live_volume_PVA);
 	volume_fusion_engine_VBH->FuseOneTsdfVolumeIntoAnother(canonical_volume_VBH, warped_live_volume_VBH);

@@ -39,7 +39,7 @@ namespace ITMLib {
  */
 template<typename TVoxel, typename TIndex>
 class IndexingEngineInterface {
-
+public:
 	/**
 	 * \brief Given a view with a new depth image, compute the
 		visible blocks, allocate them and update the hash
@@ -90,8 +90,8 @@ class IndexingEngineInterface {
 	 */
 	virtual void
 	AllocateNearAndBetweenTwoSurfaces(VoxelVolume<TVoxel, TIndex>* volume,
-	                                  const CameraTrackingState* tracking_state,
-	                                  const ITMView* view) = 0;
+	                                  const ITMView* view,
+	                                  const CameraTrackingState* tracking_state) = 0;
 	/**
 	 * \brief Allocate all hash blocks at given coordinates
 	 * \param volume - volume, where to allocate
@@ -101,11 +101,21 @@ class IndexingEngineInterface {
 	AllocateBlockList(VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::MemoryBlock<Vector3s>& block_coordinates,
 	                  int new_block_count) = 0;
 
+
+	virtual void AllocateFromOtherVolume(VoxelVolume<TVoxel, TIndex>* target_volume,
+	                                     VoxelVolume<TVoxel, TIndex>* source_volume) = 0;
+
+	virtual void AllocateWarpVolumeFromOtherVolume(VoxelVolume<WarpVoxel, TIndex>* target_volume,
+	                                               VoxelVolume<TVoxel, TIndex>* source_volume) = 0;
+
 };
 
+
+struct IndexingEngineFactory;
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 class IndexingEngine :
 		public IndexingEngineInterface<TVoxel, TIndex> {
+	friend IndexingEngineFactory;
 private:
 	IndexingEngine() = default;
 public:
@@ -127,12 +137,22 @@ public:
 	                                 bool only_update_visible_list = false, bool reset_visible_list = false) override;
 
 	virtual void AllocateNearAndBetweenTwoSurfaces(VoxelVolume<TVoxel, TIndex>* targetVolume,
-	                                               const CameraTrackingState* tracking_state,
-	                                               const ITMView* view) override;
+	                                               const ITMView* view,
+	                                               const CameraTrackingState* tracking_state) override;
 
 	void AllocateBlockList(VoxelVolume<TVoxel, TIndex>* volume,
 	                       const ORUtils::MemoryBlock<Vector3s>& new_block_positions, int new_block_count) override;
 
+
+	void AllocateFromOtherVolume(VoxelVolume<TVoxel, TIndex>* target_volume,
+	                             VoxelVolume<TVoxel, TIndex>* source_volume) override {
+		AllocateUsingOtherVolume<TVoxel, TVoxel>(target_volume, source_volume);
+	}
+
+	void AllocateWarpVolumeFromOtherVolume(VoxelVolume<WarpVoxel, TIndex>* target_volume,
+	                                       VoxelVolume<TVoxel, TIndex>* source_volume) override {
+		AllocateUsingOtherVolume<WarpVoxel, TVoxel>(target_volume, source_volume);
+	}
 
 	template<typename TVoxelTarget, typename TVoxelSource>
 	void AllocateUsingOtherVolume(VoxelVolume<TVoxelTarget, TIndex>* target_volume,
@@ -148,11 +168,6 @@ public:
 	                                               VoxelVolume<TVoxelSource, TIndex>* source_volume,
 	                                               const Extent3D& source_bounds, const Vector3i& target_offset);
 
-	template<WarpType TWarpType, typename TWarp>
-	void AllocateFromWarpedVolume(
-			VoxelVolume<TWarp, TIndex>* warpField,
-			VoxelVolume<TVoxel, TIndex>* sourceTSDF,
-			VoxelVolume<TVoxel, TIndex>* targetTSDF);
 };
 
 }//namespace ITMLib

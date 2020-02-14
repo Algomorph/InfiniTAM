@@ -193,15 +193,14 @@ void UIEngine_BPO::Initialize(int& argc, char** argv,
 	}
 
 	if (load_volume_before_automatic_run) {
-		if(logger->NeedsFramewiseOutputFolder()){
+		if(logger != nullptr && logger->NeedsFramewiseOutputFolder()){
 			logger->SetOutputDirectory(
 					this->GenerateCurrentFrameOutputDirectory());
 		}
 		mainEngine->LoadFromFile();
 		SkipFrames(1);
 	}
-	logger->SetShutdownRequestedFlagLocation(
-			&this->shutdownRequested);
+	if(logger != nullptr) logger->SetShutdownRequestedFlagLocation(&this->shutdownRequested);
 	printf("initialised.\n");
 }
 
@@ -224,7 +223,8 @@ void UIEngine_BPO::SkipFrames(int numberOfFramesToSkip) {
 
 
 void UIEngine_BPO::ProcessFrame() {
-	if (logger->IsRecording3DSceneAndWarpProgression()) {
+
+	if (logger != nullptr && logger->IsRecording3DSceneAndWarpProgression()) {
 		std::cout << yellow << "***" << bright_cyan << "PROCESSING FRAME " << GetCurrentFrameIndex()
 		          << " (WITH RECORDING 3D SCENES ON)" << yellow << "***" << reset << std::endl;
 	} else {
@@ -239,10 +239,12 @@ void UIEngine_BPO::ProcessFrame() {
 		if (!imuSource->hasMoreMeasurements()) return;
 		else imuSource->getMeasurement(inputIMUMeasurement);
 	}
-	if(logger->NeedsFramewiseOutputFolder()){
+
+	if(logger != nullptr && logger->NeedsFramewiseOutputFolder()){
 		logger->SetOutputDirectory(
 				this->GenerateCurrentFrameOutputDirectory());
 	}
+
 	RecordDepthAndRGBInputToImages();
 	RecordDepthAndRGBInputToVideo();
 
@@ -250,7 +252,7 @@ void UIEngine_BPO::ProcessFrame() {
 	sdkStartTimer(&timer_instant);
 	sdkStartTimer(&timer_average);
 
-	//actual processing on the mailEngine
+	//actual processing on the mainEngine
 	if (imuSource != nullptr)
 		this->trackingResult = mainEngine->ProcessFrame(inputRGBImage, inputRawDepthImage, inputIMUMeasurement);
 	else trackingResult = mainEngine->ProcessFrame(inputRGBImage, inputRawDepthImage);
@@ -373,10 +375,10 @@ void UIEngine_BPO::RecordDepthAndRGBInputToImages() {
 
 void UIEngine_BPO::PrintProcessingFrameHeader() const {
 	std::cout << bright_cyan << "PROCESSING FRAME " << GetCurrentFrameIndex() + 1;
-	if (logger->IsRecording3DSceneAndWarpProgression()) {
+	if (logger != nullptr && logger->IsRecording3DSceneAndWarpProgression()) {
 		std::cout << " [3D SCENE AND WARP UPDATE RECORDING: ON]";
 	}
-	if (logger->IsRecordingScene2DSlicesWithUpdates()) {
+	if (logger != nullptr && logger->IsRecordingScene2DSlicesWithUpdates()) {
 		std::cout << " [2D SCENE SLICE & WARP UPDATE RECORDING: ON]";
 	}
 	std::cout << reset << std::endl;

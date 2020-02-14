@@ -186,7 +186,7 @@ public:
 
 // region ================================ STATIC SINGLE-SCENE TRAVERSAL ===============================================
 	template<typename TStaticFunctor>
-	inline static void StaticTraverseAll(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
+	inline static void TraverseAll(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
 		TVoxel* voxels = volume->localVBA.GetVoxelBlocks();
 		int voxelCount =
 				volume->index.GetVolumeSize().x * volume->index.GetVolumeSize().y * volume->index.GetVolumeSize().z;
@@ -201,12 +201,12 @@ public:
 	}
 
 	template<typename TStaticFunctor>
-	inline static void StaticTraverseUtilized(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
-		StaticTraverseAll<TStaticFunctor>(volume);
+	inline static void TraverseUtilized(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
+		TraverseAll<TStaticFunctor>(volume);
 	}
 
 	template<typename TStaticFunctor>
-	inline static void StaticTraverseAllWithPosition(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
+	inline static void TraverseAllWithPosition(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
 		TVoxel* voxels = volume->localVBA.GetVoxelBlocks();
 		int voxelCount =
 				volume->index.GetVolumeSize().x * volume->index.GetVolumeSize().y * volume->index.GetVolumeSize().z;
@@ -221,8 +221,8 @@ public:
 	}
 
 	template<typename TStaticFunctor>
-	inline static void StaticTraverseUtilizedWithPosition(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
-		StaticTraverseAllWithPosition(volume);
+	inline static void TraverseUtilizedWithPosition(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
+		TraverseAllWithPosition(volume);
 	}
 // endregion
 

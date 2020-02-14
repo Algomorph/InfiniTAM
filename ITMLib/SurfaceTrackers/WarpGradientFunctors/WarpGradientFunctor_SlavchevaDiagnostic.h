@@ -78,24 +78,24 @@ struct WarpGradientFunctor<TTSDFVoxel, TWarpVoxel, TIndex, TMemoryDeviceType, TR
 private:
 
 	_CPU_AND_GPU_CODE_
-	void SetUpFocusVoxelPrinting(bool& print_voxel_result, const Vector3i& voxelPosition,
-	                             const Vector3f& voxelWarp, const TTSDFVoxel& canonicalVoxel, const TTSDFVoxel& liveVoxel,
-	                             bool computeDataTerm) {
-		if (use_focus_coordinates && voxelPosition == focus_coordinates) {
+	void SetUpFocusVoxelPrinting(bool& print_voxel_result, const Vector3i& voxel_position,
+	                             const Vector3f& framewise_warp, const TTSDFVoxel& canonical_voxel, const TTSDFVoxel& live_voxel,
+	                             bool compute_data_term) {
+		if (use_focus_coordinates && voxel_position == focus_coordinates) {
 			int x = 0, y = 0, z = 0, vmIndex = 0, locId = 0;
-			GetVoxelHashLocals(vmIndex, locId, x, y, z, live_index_data, live_cache, voxelPosition);
+			GetVoxelHashLocals(vmIndex, locId, x, y, z, live_index_data, live_cache, voxel_position);
 
 			printf("\n%s *** Printing gradient computation data for voxel at (%d, %d, %d) ***%s\n", c_bright_cyan,
-			       voxelPosition.x, voxelPosition.y, voxelPosition.z, c_reset);
-			printf("Computing data term: %s\n", (computeDataTerm ? "true" : "false"));
+			       voxel_position.x, voxel_position.y, voxel_position.z, c_reset);
+			printf("Computing data term: %s\n", (compute_data_term ? "true" : "false"));
 			printf("Position within block (x,y,z): (%d, %d, %d)\n", x, y, z);
 			printf("Canonical vs. Live: \n");
-			printf("TSDF: %f vs %f.\n", canonicalVoxel.sdf, liveVoxel.sdf);
-			printf("Flags: %s vs. %s\n", VoxelFlagsAsCString(static_cast<VoxelFlags>(canonicalVoxel.flags)),
-			       VoxelFlagsAsCString(static_cast<VoxelFlags>(liveVoxel.flags)));
+			printf("TSDF: %f vs %f.\n", canonical_voxel.sdf, live_voxel.sdf);
+			printf("Flags: %s vs. %s\n", VoxelFlagsAsCString(static_cast<VoxelFlags>(canonical_voxel.flags)),
+			       VoxelFlagsAsCString(static_cast<VoxelFlags>(live_voxel.flags)));
 			printf("===================\n");
-			printf("Warping: %s%f, %f, %f%s\n", c_green, voxelWarp.x, voxelWarp.y, voxelWarp.z, c_reset);
-			printf("Warping length: %s%f%s\n", c_green, ORUtils::length(voxelWarp), c_reset);
+			printf("Warping: %s%f, %f, %f%s\n", c_green, framewise_warp.x, framewise_warp.y, framewise_warp.z, c_reset);
+			printf("Warping length: %s%f%s\n", c_green, ORUtils::length(framewise_warp), c_reset);
 
 			print_voxel_result = true;
 		}

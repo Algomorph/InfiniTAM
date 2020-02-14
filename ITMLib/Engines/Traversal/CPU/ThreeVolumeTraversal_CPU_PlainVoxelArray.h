@@ -32,14 +32,13 @@ class ThreeVolumeTraversalEngine<TVoxel1, TVoxel2, TVoxel3, PlainVoxelArray, MEM
 	 * \brief Concurrent traversal of three volumes with potentially-differing voxel types
 	 * \details All volumes must have matching dimensions
 	 */
-public:
-// region ================================ STATIC TWO-SCENE TRAVERSAL WITH WARPS =======================================
-
-	template<typename TStaticFunctor>
-	inline static void
-	TraverseAll(VoxelVolume<TVoxel1, PlainVoxelArray>* volume1,
-	            VoxelVolume<TVoxel2, PlainVoxelArray>* volume2,
-	            VoxelVolume<TVoxel3, PlainVoxelArray>* volume3) {
+private:
+	template<typename TProcessingFunction>
+	inline static void TraverseAll_Generic(
+			VoxelVolume<TVoxel1, PlainVoxelArray>* volume1,
+			VoxelVolume<TVoxel2, PlainVoxelArray>* volume2,
+			VoxelVolume<TVoxel3, PlainVoxelArray>* volume3,
+			TProcessingFunction&& processing_function) {
 		assert(volume2->index.GetVolumeSize() == volume3->index.GetVolumeSize() &&
 		       volume2->index.GetVolumeSize() == volume1->index.GetVolumeSize());
 // *** traversal vars
@@ -58,8 +57,24 @@ public:
 			TVoxel1& voxel1 = voxels1[linear_index];
 			TVoxel2& voxel2 = voxels2[linear_index];
 			TVoxel3& voxel3 = voxels3[linear_index];
-			TStaticFunctor::run(voxel1, voxel2, voxel3);
+			std::forward<TProcessingFunction>(processing_function)(voxel1, voxel2, voxel3, linear_index);
 		}
+	}
+
+public:
+// region ================================ STATIC TWO-SCENE TRAVERSAL WITH WARPS =======================================
+
+	template<typename TStaticFunctor>
+	inline static void
+	TraverseAll(VoxelVolume<TVoxel1, PlainVoxelArray>* volume1,
+	            VoxelVolume<TVoxel2, PlainVoxelArray>* volume2,
+	            VoxelVolume<TVoxel3, PlainVoxelArray>* volume3) {
+		TraverseAll_Generic(
+				volume1, volume2, volume3,
+				[](TVoxel1& voxel1, TVoxel2& voxel2, TVoxel3& voxel3, const int& linear_index) {
+					TStaticFunctor::run(voxel1, voxel2, voxel3);
+				}
+		);
 	}
 // endregion
 // region ================================ DYNAMIC TWO-SCENE TRAVERSAL WITH WARPS ======================================
@@ -70,30 +85,22 @@ public:
 	            VoxelVolume<TVoxel2, PlainVoxelArray>* volume2,
 	            VoxelVolume<TVoxel3, PlainVoxelArray>* volume3,
 	            TFunctor& functor) {
-
-		assert(volume2->index.GetVolumeSize() == volume3->index.GetVolumeSize() &&
-		       volume2->index.GetVolumeSize() == volume1->index.GetVolumeSize());
-
-// *** traversal vars
-		TVoxel1* voxels1 = volume1->localVBA.GetVoxelBlocks();
-		TVoxel2* voxels2 = volume2->localVBA.GetVoxelBlocks();
-		TVoxel3* voxels3 = volume3->localVBA.GetVoxelBlocks();
-
-		//asserted to be the same
-		int voxel_count = volume2->index.GetVolumeSize().x * volume2->index.GetVolumeSize().y *
-		                  volume2->index.GetVolumeSize().z;
-
-#ifdef WITH_OPENMP
-#pragma omp parallel for
-#endif
-		for (int linear_index = 0; linear_index < voxel_count; linear_index++) {
-			TVoxel1& voxel1 = voxels1[linear_index];
-			TVoxel2& voxel2 = voxels2[linear_index];
-			TVoxel3& voxel3 = voxels3[linear_index];
-			functor(voxel1, voxel2, voxel3);
-		}
+		TraverseAll_Generic(
+				volume1, volume2, volume3,
+				[&functor](TVoxel1& voxel1, TVoxel2& voxel2, TVoxel3& voxel3, const int& linear_index) {
+					functor(voxel1, voxel2, voxel3);
+				}
+		);
 	}
 
+	template<typename TFunctor>
+	inline static void
+	TraverseUtilized(VoxelVolume<TVoxel1, PlainVoxelArray>* volume1,
+	                             VoxelVolume<TVoxel2, PlainVoxelArray>* volume2,
+	                             VoxelVolume<TVoxel3, PlainVoxelArray>* volume3,
+	                             TFunctor& functor) {
+		TraverseAll(volume1,volume2,volume3, functor);
+	}
 
 	template<typename TFunctor>
 	inline static void
@@ -101,29 +108,23 @@ public:
 	                        VoxelVolume<TVoxel2, PlainVoxelArray>* volume2,
 	                        VoxelVolume<TVoxel3, PlainVoxelArray>* volume3,
 	                        TFunctor& functor) {
+		const ITMLib::PlainVoxelArray::IndexData* index_data = volume1->index.GetIndexData();
+		TraverseAll_Generic(
+				volume1, volume2, volume3,
+				[&functor,&index_data](TVoxel1& voxel1, TVoxel2& voxel2, TVoxel3& voxel3, const int& linear_index) {
+					Vector3i voxel_position = ComputePositionVectorFromLinearIndex_PlainVoxelArray(index_data, linear_index);
+					functor(voxel1, voxel2, voxel3, voxel_position);
+				}
+		);
+	}
 
-		assert(volume2->index.GetVolumeSize() == volume3->index.GetVolumeSize() &&
-		       volume2->index.GetVolumeSize() == volume1->index.GetVolumeSize());
-
-// *** traversal vars
-		TVoxel1* voxels1 = volume1->localVBA.GetVoxelBlocks();
-		TVoxel2* voxels2 = volume2->localVBA.GetVoxelBlocks();
-		TVoxel3* voxels3 = volume3->localVBA.GetVoxelBlocks();
-
-		//asserted to be the same
-		int voxel_count = volume2->index.GetVolumeSize().x * volume2->index.GetVolumeSize().y *
-		                  volume2->index.GetVolumeSize().z;
-		const PlainVoxelArray::IndexData* indexData = volume2->index.GetIndexData();
-#ifdef WITH_OPENMP
-#pragma omp parallel for
-#endif
-		for (int linear_index = 0; linear_index < voxel_count; linear_index++) {
-			Vector3i voxel_position = ComputePositionVectorFromLinearIndex_PlainVoxelArray(indexData, linear_index);
-			TVoxel1& voxel1 = voxels1[linear_index];
-			TVoxel2& voxel2 = voxels2[linear_index];
-			TVoxel2& voxel3 = voxels3[linear_index];
-			functor(voxel1, voxel2, voxel3, voxel_position);
-		}
+	template<typename TFunctor>
+	inline static void
+	TraverseUtilizedWithPosition(VoxelVolume<TVoxel1, PlainVoxelArray>* volume1,
+	                        VoxelVolume<TVoxel2, PlainVoxelArray>* volume2,
+	                        VoxelVolume<TVoxel3, PlainVoxelArray>* volume3,
+	                        TFunctor& functor) {
+		TraverseAllWithPosition(volume1,volume2,volume3, functor);
 	}
 
 	/** Single-threaded traversal **/
