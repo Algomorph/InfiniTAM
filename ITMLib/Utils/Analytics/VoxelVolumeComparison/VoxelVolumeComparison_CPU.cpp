@@ -59,6 +59,17 @@ bool contentAlmostEqual_CPU<TSDFVoxel, VoxelBlockHash, PlainVoxelArray, float>(
 		float tolerance);
 
 template
+bool contentForFlagsAlmostEqual_CPU<TSDFVoxel, VoxelBlockHash, VoxelBlockHash, float>(
+		VoxelVolume<TSDFVoxel, VoxelBlockHash>* a, VoxelVolume<TSDFVoxel, VoxelBlockHash>* b,
+		VoxelFlags flags, float tolerance);
+
+template
+bool contentForFlagsAlmostEqual_CPU_Verbose<TSDFVoxel, VoxelBlockHash, VoxelBlockHash, float>(
+		VoxelVolume<TSDFVoxel, VoxelBlockHash>* a, VoxelVolume<TSDFVoxel, VoxelBlockHash>* b,
+		VoxelFlags flags, float tolerance);
+
+
+template
 bool contentForFlagsAlmostEqual_CPU<TSDFVoxel, PlainVoxelArray, VoxelBlockHash, float>(
 		VoxelVolume<TSDFVoxel, PlainVoxelArray>* a, VoxelVolume<TSDFVoxel, VoxelBlockHash>* b,
 		VoxelFlags flags, float tolerance);

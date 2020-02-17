@@ -29,116 +29,125 @@ namespace b_ios = boost::iostreams;
 
 template<typename TVoxel>
 void VolumeFileIOEngine<TVoxel, VoxelBlockHash>::SaveToDirectoryCompact(
-		const VoxelVolume<TVoxel, VoxelBlockHash>* scene,
-		const std::string& outputDirectory) {
+		const VoxelVolume<TVoxel, VoxelBlockHash>* volume,
+		const std::string& output_directory) {
 
 
-	std::string path = outputDirectory + compactFilePostfixAndExtension;
+	std::string path = output_directory + compactFilePostfixAndExtension;
 	std::ofstream ofStream = std::ofstream(path.c_str(), std::ios_base::binary | std::ios_base::out);
 	if (!ofStream) throw std::runtime_error("Could not open '" + path + "' for writing.");
 
-	b_ios::filtering_ostream outFilter;
-	outFilter.push(b_ios::zlib_compressor());
-	outFilter.push(ofStream);
+	b_ios::filtering_ostream out_filter;
+	out_filter.push(b_ios::zlib_compressor());
+	out_filter.push(ofStream);
 
-	bool tempSceneUsed = false;
-	if (scene->localVBA.GetMemoryType() == MEMORYDEVICE_CUDA) {
+	bool temporary_volume_used = false;
+	if (volume->localVBA.GetMemoryType() == MEMORYDEVICE_CUDA) {
 		// we cannot access CUDA blocks directly, so the easiest solution here is to make a local main-memory copy first
-		VoxelVolume<TVoxel, VoxelBlockHash>* scene_cpu_copy = new VoxelVolume<TVoxel, VoxelBlockHash>(
-				*scene, MEMORYDEVICE_CPU);
-		scene = scene_cpu_copy;
-		tempSceneUsed = true;
+		VoxelVolume<TVoxel, VoxelBlockHash>* volume_cpu_copy = new VoxelVolume<TVoxel, VoxelBlockHash>(
+				*volume, MEMORYDEVICE_CPU);
+		volume = volume_cpu_copy;
+		temporary_volume_used = true;
 	}
 
-	const TVoxel* voxels = scene->localVBA.GetVoxelBlocks();
-	const HashEntry* hashTable = scene->index.GetEntries();
-	int noTotalEntries = scene->index.hashEntryCount;
+	const TVoxel* voxels = volume->localVBA.GetVoxelBlocks();
+	const HashEntry* hash_table = volume->index.GetEntries();
+	int hash_entry_count = volume->index.hashEntryCount;
 
-	int lastExcessListId = scene->index.GetLastFreeExcessListId();
-	int visibleHashBlockCount = scene->index.GetUtilizedHashBlockCount();
-	outFilter.write(reinterpret_cast<const char* >(&scene->localVBA.lastFreeBlockId), sizeof(int));
-	outFilter.write(reinterpret_cast<const char* >(&scene->localVBA.allocatedSize), sizeof(int));
-	outFilter.write(reinterpret_cast<const char* >(&lastExcessListId), sizeof(int));
-	outFilter.write(reinterpret_cast<const char* >(&visibleHashBlockCount), sizeof(int));
+	int last_excess_list_id = volume->index.GetLastFreeExcessListId();
+	int utilized_block_count = volume->index.GetUtilizedHashBlockCount();
+	out_filter.write(reinterpret_cast<const char* >(&volume->localVBA.lastFreeBlockId), sizeof(int));
+	out_filter.write(reinterpret_cast<const char* >(&volume->localVBA.allocatedSize), sizeof(int));
+	out_filter.write(reinterpret_cast<const char* >(&last_excess_list_id), sizeof(int));
+	out_filter.write(reinterpret_cast<const char* >(&utilized_block_count), sizeof(int));
 	//count filled entries
-	int allocatedHashEntryCount = 0;
+	int allocated_hash_entry_count = 0;
 #ifdef WITH_OPENMP
-#pragma omp parallel for reduction(+:allocatedHashEntryCount)
+#pragma omp parallel for reduction(+:allocated_hash_entry_count)
 #endif
-	for (int entryId = 0; entryId < noTotalEntries; entryId++) {
-		const HashEntry& currentHashEntry = hashTable[entryId];
+	for (int hash_code = 0; hash_code < hash_entry_count; hash_code++) {
+		const HashEntry& hash_entry = hash_table[hash_code];
 		//skip unfilled hash
-		if (currentHashEntry.ptr < 0) continue;
-		allocatedHashEntryCount++;
+		if (hash_entry.ptr < 0) continue;
+		allocated_hash_entry_count++;
 	}
 
-	outFilter.write(reinterpret_cast<const char* >(&allocatedHashEntryCount), sizeof(int));
-	for (int entryId = 0; entryId < noTotalEntries; entryId++) {
-		const HashEntry& currentHashEntry = hashTable[entryId];
+	out_filter.write(reinterpret_cast<const char* >(&allocated_hash_entry_count), sizeof(int));
+	for (int hash_code = 0; hash_code < hash_entry_count; hash_code++) {
+		const HashEntry& hash_entry = hash_table[hash_code];
 		//skip unfilled hash
-		if (currentHashEntry.ptr < 0) continue;
-		outFilter.write(reinterpret_cast<const char* >(&entryId), sizeof(int));
-		outFilter.write(reinterpret_cast<const char* >(&currentHashEntry), sizeof(HashEntry));
-		const TVoxel* localVoxelBlock = &(voxels[currentHashEntry.ptr * (VOXEL_BLOCK_SIZE3)]);
-		outFilter.write(reinterpret_cast<const char* >(localVoxelBlock), sizeof(TVoxel) * VOXEL_BLOCK_SIZE3);
+		if (hash_entry.ptr < 0) continue;
+		out_filter.write(reinterpret_cast<const char* >(&hash_code), sizeof(int));
+		out_filter.write(reinterpret_cast<const char* >(&hash_entry), sizeof(HashEntry));
+		const TVoxel* voxel_block = &(voxels[hash_entry.ptr * (VOXEL_BLOCK_SIZE3)]);
+		out_filter.write(reinterpret_cast<const char* >(voxel_block), sizeof(TVoxel) * VOXEL_BLOCK_SIZE3);
+	}
+	const int* utilized_hash_codes = volume->index.GetUtilizedBlockHashCodes();
+	for (int i_utilized_hash_code = 0; i_utilized_hash_code < utilized_block_count; i_utilized_hash_code++){
+		out_filter.write(reinterpret_cast<const char* >(utilized_hash_codes + i_utilized_hash_code), sizeof(int));
 	}
 
-	if (tempSceneUsed) {
-		delete scene;
+
+	if (temporary_volume_used) {
+		delete volume;
 	}
 }
 
 template<typename TVoxel>
 void
 VolumeFileIOEngine<TVoxel, VoxelBlockHash>::LoadFromDirectoryCompact(
-		VoxelVolume<TVoxel, VoxelBlockHash>* scene,
-		const std::string& outputDirectory) {
-	std::string path = outputDirectory + "compact.dat";
+		VoxelVolume<TVoxel, VoxelBlockHash>* volume,
+		const std::string& output_directory) {
+	std::string path = output_directory + "compact.dat";
 	std::ifstream ifStream = std::ifstream(path.c_str(), std::ios_base::binary | std::ios_base::in);
 	if (!ifStream) throw std::runtime_error("Could not open '" + path + "' for reading.");
-	b_ios::filtering_istream inFilter;
-	inFilter.push(b_ios::zlib_decompressor());
-	inFilter.push(ifStream);
+	b_ios::filtering_istream in_filter;
+	in_filter.push(b_ios::zlib_decompressor());
+	in_filter.push(ifStream);
 
-	VoxelVolume<TVoxel, VoxelBlockHash>* targetScene = scene;
+	VoxelVolume<TVoxel, VoxelBlockHash>* targetScene = volume;
 	bool copyToCUDA = false;
-	if (scene->localVBA.GetMemoryType() == MEMORYDEVICE_CUDA) {
+	if (volume->localVBA.GetMemoryType() == MEMORYDEVICE_CUDA) {
 		// we cannot access CUDA blocks directly, so the easiest solution here is to make a local main-memory copy
 		// first, read it in from disk, and then copy it over into the target
-		auto scene_cpu_copy = new VoxelVolume<TVoxel, VoxelBlockHash>(*scene, MEMORYDEVICE_CPU);
-		scene = scene_cpu_copy;
+		auto scene_cpu_copy = new VoxelVolume<TVoxel, VoxelBlockHash>(*volume, MEMORYDEVICE_CPU);
+		volume = scene_cpu_copy;
 		copyToCUDA = true;
 	}
 
-	TVoxel* voxelBlocks = scene->localVBA.GetVoxelBlocks();
-	HashEntry* hashTable = scene->index.GetEntries();
-	int lastExcessListId;
-	int lastOrderedListId;
-	int visibleHashBlockCount;
-	inFilter.read(reinterpret_cast<char* >(&lastOrderedListId), sizeof(int));
-	inFilter.read(reinterpret_cast<char* >(&scene->localVBA.allocatedSize), sizeof(int));
-	inFilter.read(reinterpret_cast<char* >(&lastExcessListId), sizeof(int));
-	inFilter.read(reinterpret_cast<char* >(&visibleHashBlockCount), sizeof(int));
-	scene->index.SetLastFreeExcessListId(lastExcessListId);
-	scene->index.SetUtilizedHashBlockCount(visibleHashBlockCount);
-	scene->localVBA.lastFreeBlockId = lastOrderedListId;
+	TVoxel* voxel_blocks = volume->localVBA.GetVoxelBlocks();
+	HashEntry* hash_table = volume->index.GetEntries();
+	int last_free_excess_list_id;
+	int last_free_voxel_block_id;
+	int utilized_block_count;
+	in_filter.read(reinterpret_cast<char* >(&last_free_voxel_block_id), sizeof(int));
+	in_filter.read(reinterpret_cast<char* >(&volume->localVBA.allocatedSize), sizeof(int));
+	in_filter.read(reinterpret_cast<char* >(&last_free_excess_list_id), sizeof(int));
+	in_filter.read(reinterpret_cast<char* >(&utilized_block_count), sizeof(int));
+	volume->index.SetLastFreeExcessListId(last_free_excess_list_id);
+	volume->index.SetUtilizedHashBlockCount(utilized_block_count);
+	volume->localVBA.lastFreeBlockId = last_free_voxel_block_id;
 
 
 	//count filled entries
-	int allocatedHashEntryCount;
-	inFilter.read(reinterpret_cast<char* >(&allocatedHashEntryCount), sizeof(int));
-	for (int iEntry = 0; iEntry < allocatedHashEntryCount; iEntry++) {
-		int entryId;
-		inFilter.read(reinterpret_cast<char* >(&entryId), sizeof(int));
-		HashEntry& currentHashEntry = hashTable[entryId];
-		inFilter.read(reinterpret_cast<char* >(&currentHashEntry), sizeof(HashEntry));
-		TVoxel* localVoxelBlock = &(voxelBlocks[currentHashEntry.ptr * (VOXEL_BLOCK_SIZE3)]);
-		inFilter.read(reinterpret_cast<char* >(localVoxelBlock), sizeof(TVoxel) * VOXEL_BLOCK_SIZE3);
+	int allocated_hash_entry_count;
+	in_filter.read(reinterpret_cast<char* >(&allocated_hash_entry_count), sizeof(int));
+	for (int i_block = 0; i_block < allocated_hash_entry_count; i_block++) {
+		int hash_code;
+		in_filter.read(reinterpret_cast<char* >(&hash_code), sizeof(int));
+		HashEntry& hash_entry = hash_table[hash_code];
+		in_filter.read(reinterpret_cast<char* >(&hash_entry), sizeof(HashEntry));
+		TVoxel* voxel_block = &(voxel_blocks[hash_entry.ptr * (VOXEL_BLOCK_SIZE3)]);
+		in_filter.read(reinterpret_cast<char* >(voxel_block), sizeof(TVoxel) * VOXEL_BLOCK_SIZE3);
+	}
+	int* utilized_hash_codes = volume->index.GetUtilizedBlockHashCodes();
+	for (int i_utilized_hash_code = 0; i_utilized_hash_code < utilized_block_count; i_utilized_hash_code++){
+		in_filter.read(reinterpret_cast<char* >(utilized_hash_codes + i_utilized_hash_code), sizeof(int));
 	}
 
 	if (copyToCUDA) {
-		targetScene->SetFrom(*scene);
-		delete scene;
+		targetScene->SetFrom(*volume);
+		delete volume;
 	}
 }
 

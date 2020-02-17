@@ -20,6 +20,7 @@
 #include "../../../Objects/Volume/VoxelVolume.h"
 #include "../../../Objects/Volume/VoxelBlockHash.h"
 #include "../Shared/VolumeTraversal_Shared.h"
+#include "../../../Utils/Analytics/IsAltered.h"
 
 //TODO: work on reducing DRY violations
 
@@ -38,6 +39,8 @@ class TwoVolumeTraversalEngine<TVoxel1, TVoxel2, VoxelBlockHash, VoxelBlockHash,
 	 */
 
 private:
+
+
 	template<typename TBlockTraversalFunction>
 	inline static void TraverseUtilized_Generic(VoxelVolume<TVoxel1, VoxelBlockHash>* volume1,
 	                                            VoxelVolume<TVoxel2, VoxelBlockHash>* volume2,
@@ -149,12 +152,15 @@ private:
 		}
 	}
 
-	template<typename TProcessBlockFunctor>
+	template<typename TProcessMatchedBlocksFunction, typename TProcessUnmatchedBlock1Function, typename TProcessUnmatchedBlock2Function>
 	inline static bool
 	TraverseAndCompareAll_Generic(
 			VoxelVolume<TVoxel1, VoxelBlockHash>* volume1,
 			VoxelVolume<TVoxel2, VoxelBlockHash>* volume2,
-			TProcessBlockFunctor&& traverse_block_function, bool verbose) {
+			TProcessMatchedBlocksFunction&& traverse_matched_block_function,
+			TProcessUnmatchedBlock1Function&& traverse_unmatched_block1_function,
+			TProcessUnmatchedBlock2Function&& traverse_unmatched_block2_function,
+			bool verbose) {
 
 // *** traversal vars
 		TVoxel2* voxels2 = volume2->localVBA.GetVoxelBlocks();
@@ -170,10 +176,10 @@ private:
 #ifdef WITH_OPENMP
 #pragma omp parallel for
 #endif
-		for (int hashCode = 0; hashCode < hash_entry_count; hashCode++) {
+		for (int hash_code1 = 0; hash_code1 < hash_entry_count; hash_code1++) {
 			if (mismatch_found) continue;
-			const HashEntry& hash_entry1 = hash_table1[hashCode];
-			HashEntry hash_entry2 = hash_table2[hashCode];
+			const HashEntry& hash_entry1 = hash_table1[hash_code1];
+			HashEntry hash_entry2 = hash_table2[hash_code1];
 
 			auto block2HasMatchingBlock1 = [&](int hash_code2) {
 				int alternative_hash_code1;
@@ -182,12 +188,9 @@ private:
 					TVoxel2* voxel_block2 = &(voxels2[hash_entry2.ptr *
 					                                  (VOXEL_BLOCK_SIZE3)]);
 					// if the secondary block is unaltered anyway, so no need to match and we're good, so return "true"
-					if (verbose) {
-						return !isVoxelBlockAltered(voxel_block2, true, "Second-hash voxel unmatched in first hash: ",
-						                            hash_entry2.pos, hash_code2);
-					} else {
-						return !isVoxelBlockAltered(voxel_block2);
-					}
+					!std::forward<TProcessUnmatchedBlock2Function>(traverse_unmatched_block2_function)
+							(voxel_block2, verbose, "Second-hash voxel block unmatched in first hash: ",
+							 hash_entry2.pos, hash_code2);
 				} else {
 					// alternative primary hash found, skip this primary hash since the corresponding secondary
 					// block will be (or has been) processed with the alternative primary hash.
@@ -199,7 +202,7 @@ private:
 				if (hash_entry2.ptr < 0) {
 					continue;
 				} else {
-					if (!block2HasMatchingBlock1(hashCode)) {
+					if (!block2HasMatchingBlock1(hash_code1)) {
 						mismatch_found = true;
 						continue;
 					} else {
@@ -212,7 +215,7 @@ private:
 			// we have a hash bucket miss, find the secondary voxel block with the matching coordinates
 			if (hash_entry2.pos != hash_entry1.pos) {
 				if (hash_entry2.ptr >= 0) {
-					if (!block2HasMatchingBlock1(hashCode)) {
+					if (!block2HasMatchingBlock1(hash_code1)) {
 						mismatch_found = true;
 						continue;
 					}
@@ -226,7 +229,11 @@ private:
 					// continue to the next hash block.
 					TVoxel1* voxel_block1 = &(voxels1[hash_entry1.ptr *
 					                                  (VOXEL_BLOCK_SIZE3)]);
-					if (isVoxelBlockAltered(voxel_block1)) {
+
+
+					if (std::forward<TProcessUnmatchedBlock1Function>(traverse_unmatched_block1_function)
+							(voxel_block1, verbose, "First-hash voxel block unmatched in second hash table: ",
+							 hash_entry1.pos, hash_code1)) {
 						mismatch_found = true;
 						continue;
 					} else {
@@ -240,11 +247,12 @@ private:
 			TVoxel2* voxel_block2 = &(voxels2[hash_entry2.ptr *
 			                                  (VOXEL_BLOCK_SIZE3)]);
 
-			std::forward<TProcessBlockFunctor>(traverse_block_function)(voxel_block1, voxel_block2, hash_entry1,
-			                                                            mismatch_found);
+			std::forward<TProcessMatchedBlocksFunction>(traverse_matched_block_function)
+					(voxel_block1, voxel_block2, hash_entry1, mismatch_found);
 		}
 		return !mismatch_found;
 	}
+
 
 public:
 // region ================================ STATIC TWO-VOLUME TRAVERSAL =================================================
@@ -396,6 +404,8 @@ public:
 							}
 					);
 				},
+				isVoxelBlockAltered<TVoxel1>,
+				isVoxelBlockAltered<TVoxel2>,
 				verbose
 		);
 	}
@@ -420,6 +430,91 @@ public:
 								}
 							}
 					);
+				},
+				isVoxelBlockAltered<TVoxel1>,
+				isVoxelBlockAltered<TVoxel2>,
+				verbose
+		);
+	}
+
+	template<typename TFunctor>
+	inline static bool
+	TraverseAndCompareMatchingFlags(
+			VoxelVolume<TVoxel1, VoxelBlockHash>* volume1,
+			VoxelVolume<TVoxel2, VoxelBlockHash>* volume2,
+			VoxelFlags flags,
+			TFunctor& functor, bool verbose) {
+		return TraverseAndCompareAll_Generic(
+				volume1, volume2,
+				[&functor, &flags](TVoxel1* voxel_block1, TVoxel2* voxel_block2, const HashEntry& hash_entry1,
+				                   bool& mismatch_found) {
+					Traverse2Blocks(
+							voxel_block1, voxel_block2,
+							[&functor, &mismatch_found, &flags](TVoxel1& voxel1, TVoxel2& voxel2) {
+								if ((voxel1.flags == flags || voxel2.flags == flags) &&
+								    (!functor(voxel1, voxel2) || voxel2.flags != voxel2.flags)) {
+									mismatch_found = true;
+								}
+							}
+					);
+				},
+				[&flags](TVoxel1* voxel_block, bool verbose = false,
+				         std::string message = "",
+				         Vector3s block_spatial_position = Vector3s((short) 0),
+				         int hash_code = 0) {
+					return isVoxelBlockAlteredPredicate(voxel_block,
+					                             [&flags](TVoxel1& voxel) { return voxel.flags == flags; }, verbose,
+					                             message, block_spatial_position, hash_code);
+				},
+				[&flags](TVoxel2* voxel_block, bool verbose = false,
+				         std::string message = "",
+				         Vector3s block_spatial_position = Vector3s((short) 0),
+				         int hash_code = 0) {
+					return isVoxelBlockAlteredPredicate(voxel_block,
+					                             [&flags](TVoxel2& voxel) { return voxel.flags == flags; }, verbose,
+					                             message, block_spatial_position, hash_code);
+				},
+				verbose
+		);
+	}
+
+	template<typename TFunctor>
+	inline static bool
+	TraverseAndCompareMatchingFlagsWithPosition(
+			VoxelVolume<TVoxel1, VoxelBlockHash>* volume1,
+			VoxelVolume<TVoxel2, VoxelBlockHash>* volume2,
+			VoxelFlags flags,
+			TFunctor& functor, bool verbose) {
+		return TraverseAndCompareAll_Generic(
+				volume1, volume2,
+				[&functor, &flags](TVoxel1* voxel_block1, TVoxel2* voxel_block2, const HashEntry& hash_entry1,
+				                   bool& mismatch_found) {
+					Traverse2BlocksWithPosition(
+							voxel_block1, voxel_block2, hash_entry1,
+							[&functor, &mismatch_found, &flags](TVoxel1& voxel1, TVoxel2& voxel2,
+							                                    const Vector3i& voxel_position) {
+								if ((voxel1.flags == flags || voxel2.flags == flags) &&
+								    (!functor(voxel1, voxel2, voxel_position) || voxel2.flags != voxel2.flags)) {
+									mismatch_found = true;
+								}
+							}
+					);
+				},
+				[&flags](TVoxel1* voxel_block, bool verbose = false,
+				         std::string message = "",
+				         Vector3s block_spatial_position = Vector3s((short) 0),
+				         int hash_code = 0) {
+					return isVoxelBlockAlteredPredicate(voxel_block,
+					                             [&flags](TVoxel1& voxel) { return voxel.flags == flags; }, verbose,
+					                             message, block_spatial_position, hash_code);
+				},
+				[&flags](TVoxel2* voxel_block, bool verbose = false,
+				         std::string message = "",
+				         Vector3s block_spatial_position = Vector3s((short) 0),
+				         int hash_code = 0) {
+					return isVoxelBlockAlteredPredicate(voxel_block,
+					                             [&flags](TVoxel2& voxel) { return voxel.flags == flags; }, verbose,
+					                             message, block_spatial_position, hash_code);
 				},
 				verbose
 		);

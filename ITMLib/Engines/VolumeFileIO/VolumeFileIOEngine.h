@@ -29,8 +29,8 @@ class VolumeFileIOEngine;
 template<typename TVoxel>
 class VolumeFileIOEngine<TVoxel,VoxelBlockHash>{
 public:
-	static void SaveToDirectoryCompact(const VoxelVolume<TVoxel,VoxelBlockHash>* scene, const std::string& outputDirectory);
-	static void LoadFromDirectoryCompact(VoxelVolume<TVoxel,VoxelBlockHash>* scene, const std::string& outputDirectory);
+	static void SaveToDirectoryCompact(const VoxelVolume<TVoxel,VoxelBlockHash>* volume, const std::string& output_directory);
+	static void LoadFromDirectoryCompact(VoxelVolume<TVoxel,VoxelBlockHash>* volume, const std::string& output_directory);
 };
 
 
