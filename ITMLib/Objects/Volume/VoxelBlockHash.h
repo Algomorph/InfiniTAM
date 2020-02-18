@@ -85,27 +85,27 @@ public:
 	const CONSTPTR(int) voxelBlockSize = VOXEL_BLOCK_SIZE3;
 
 private:
-	int lastFreeExcessListId;
-	int utilizedHashBlockCount;
+	int last_free_excess_list_id;
+	int utilized_hash_block_count;
 
 	/** The actual hash entries in the hash table, ordered by their hash codes. */
-	ORUtils::MemoryBlock<HashEntry> hashEntries;
+	ORUtils::MemoryBlock<HashEntry> hash_entries;
 	/** States of hash entries during allocation procedures */
-	ORUtils::MemoryBlock<HashEntryAllocationState> hashEntryAllocationStates;
+	ORUtils::MemoryBlock<HashEntryAllocationState> hash_entry_allocation_states;
 	/** Voxel coordinates assigned to new hash blocks during allocation procedures */
 	ORUtils::MemoryBlock<Vector3s> allocationBlockCoordinates;
 	/** Identifies which entries of the overflow
 	list are allocated. This is used if too
 	many hash collisions caused the buckets to
 	overflow. */
-	ORUtils::MemoryBlock<int> excessAllocationList;
+	ORUtils::MemoryBlock<int> excess_allocation_list;
 	/** A list of hash codes for "visible entries" */
 	ORUtils::MemoryBlock<int> utilized_block_hash_codes;
 	/** Visibility types of "visible entries", ordered by hashCode */
 	ORUtils::MemoryBlock<HashBlockVisibility> blockVisibilityTypes;
 
 public:
-	const MemoryDeviceType memoryType;
+	const MemoryDeviceType memory_type;
 
 
 	VoxelBlockHash(VoxelBlockHashParameters parameters, MemoryDeviceType memoryType);
@@ -119,28 +119,29 @@ public:
 	}
 
 	void SetFrom(const VoxelBlockHash& other) {
-		MemoryCopyDirection memoryCopyDirection = determineMemoryCopyDirection(this->memoryType, other.memoryType);
-		this->hashEntryAllocationStates.SetFrom(&other.hashEntryAllocationStates, memoryCopyDirection);
-		this->hashEntries.SetFrom(&other.hashEntries, memoryCopyDirection);
-		this->excessAllocationList.SetFrom(&other.excessAllocationList, memoryCopyDirection);
-		this->lastFreeExcessListId = other.lastFreeExcessListId;
-		this->utilizedHashBlockCount = other.utilizedHashBlockCount;
+		MemoryCopyDirection memory_copy_direction = determineMemoryCopyDirection(this->memory_type, other.memory_type);
+		this->hash_entry_allocation_states.SetFrom(&other.hash_entry_allocation_states, memory_copy_direction);
+		this->hash_entries.SetFrom(&other.hash_entries, memory_copy_direction);
+		this->excess_allocation_list.SetFrom(&other.excess_allocation_list, memory_copy_direction);
+		this->utilized_block_hash_codes.SetFrom(&other.utilized_block_hash_codes, memory_copy_direction);
+		this->last_free_excess_list_id = other.last_free_excess_list_id;
+		this->utilized_hash_block_count = other.utilized_hash_block_count;
 	}
 
 	~VoxelBlockHash() = default;
 
 	/** Get the list of actual entries in the hash table. */
-	const HashEntry* GetEntries() const { return hashEntries.GetData(memoryType); }
+	const HashEntry* GetEntries() const { return hash_entries.GetData(memory_type); }
 
-	HashEntry* GetEntries() { return hashEntries.GetData(memoryType); }
+	HashEntry* GetEntries() { return hash_entries.GetData(memory_type); }
 
 	/** Get the list of actual entries in the hash table (alternative to GetEntries). */
-	const IndexData* GetIndexData() const { return hashEntries.GetData(memoryType); }
+	const IndexData* GetIndexData() const { return hash_entries.GetData(memory_type); }
 
-	IndexData* GetIndexData() { return hashEntries.GetData(memoryType); }
+	IndexData* GetIndexData() { return hash_entries.GetData(memory_type); }
 
 	HashEntry GetHashEntry(int hashCode) const {
-		return hashEntries.GetElement(hashCode, memoryType);
+		return hash_entries.GetElement(hashCode, memory_type);
 	}
 
 	HashEntry GetHashEntryAt(const Vector3s& pos) const;
@@ -158,41 +159,41 @@ public:
 
 	/** Get a list of temporary hash entry state flags**/
 	const HashEntryAllocationState* GetHashEntryAllocationStates() const {
-		return hashEntryAllocationStates.GetData(memoryType);
+		return hash_entry_allocation_states.GetData(memory_type);
 	}
 
-	HashEntryAllocationState* GetHashEntryAllocationStates() { return hashEntryAllocationStates.GetData(memoryType); }
+	HashEntryAllocationState* GetHashEntryAllocationStates() { return hash_entry_allocation_states.GetData(memory_type); }
 
-	void ClearHashEntryAllocationStates() { hashEntryAllocationStates.Clear(NEEDS_NO_CHANGE); }
+	void ClearHashEntryAllocationStates() { hash_entry_allocation_states.Clear(NEEDS_NO_CHANGE); }
 
-	const Vector3s* GetAllocationBlockCoordinates() const { return allocationBlockCoordinates.GetData(memoryType); }
+	const Vector3s* GetAllocationBlockCoordinates() const { return allocationBlockCoordinates.GetData(memory_type); }
 
 	/** Get a temporary list for coordinates of voxel blocks to be soon allocated**/
-	Vector3s* GetAllocationBlockCoordinates() { return allocationBlockCoordinates.GetData(memoryType); }
+	Vector3s* GetAllocationBlockCoordinates() { return allocationBlockCoordinates.GetData(memory_type); }
 
-	const int* GetUtilizedBlockHashCodes() const { return utilized_block_hash_codes.GetData(memoryType); }
+	const int* GetUtilizedBlockHashCodes() const { return utilized_block_hash_codes.GetData(memory_type); }
 
-	int* GetUtilizedBlockHashCodes() { return utilized_block_hash_codes.GetData(memoryType); }
+	int* GetUtilizedBlockHashCodes() { return utilized_block_hash_codes.GetData(memory_type); }
 
-	HashBlockVisibility* GetBlockVisibilityTypes() { return blockVisibilityTypes.GetData(memoryType); }
+	HashBlockVisibility* GetBlockVisibilityTypes() { return blockVisibilityTypes.GetData(memory_type); }
 
-	const HashBlockVisibility* GetBlockVisibilityTypes() const { return blockVisibilityTypes.GetData(memoryType); }
+	const HashBlockVisibility* GetBlockVisibilityTypes() const { return blockVisibilityTypes.GetData(memory_type); }
 
 	/** Get the list that identifies which entries of the
 	overflow list are allocated. This is used if too
 	many hash collisions caused the buckets to overflow.
 	*/
-	const int* GetExcessAllocationList() const { return excessAllocationList.GetData(memoryType); }
+	const int* GetExcessAllocationList() const { return excess_allocation_list.GetData(memory_type); }
 
-	int* GetExcessAllocationList() { return excessAllocationList.GetData(memoryType); }
+	int* GetExcessAllocationList() { return excess_allocation_list.GetData(memory_type); }
 
-	int GetLastFreeExcessListId() const { return lastFreeExcessListId; }
+	int GetLastFreeExcessListId() const { return last_free_excess_list_id; }
 
-	void SetLastFreeExcessListId(int newLastFreeExcessListId) { this->lastFreeExcessListId = newLastFreeExcessListId; }
+	void SetLastFreeExcessListId(int newLastFreeExcessListId) { this->last_free_excess_list_id = newLastFreeExcessListId; }
 
-	int GetUtilizedHashBlockCount() const { return this->utilizedHashBlockCount; }
+	int GetUtilizedHashBlockCount() const { return this->utilized_hash_block_count; }
 
-	void SetUtilizedHashBlockCount(int utilizedHashBlockCount) { this->utilizedHashBlockCount = utilizedHashBlockCount; }
+	void SetUtilizedHashBlockCount(int utilizedHashBlockCount) { this->utilized_hash_block_count = utilizedHashBlockCount; }
 
 	/*VBH-specific*/
 	int GetExcessListSize() const { return this->excessListSize; }

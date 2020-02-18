@@ -54,7 +54,7 @@ void DenseDynamicMapper<TVoxel, TWarp, TIndex>::LogVolumeStatistics(VoxelVolume<
                                                                     std::string volume_description) {
 	if (this->log_volume_statistics) {
 		VolumeStatisticsCalculatorInterface<TVoxel, TIndex>* calculator = nullptr;
-		switch (volume->index.memoryType) {
+		switch (volume->index.memory_type) {
 			case MEMORYDEVICE_CPU:
 				calculator = &VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance();
 				break;

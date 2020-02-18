@@ -73,7 +73,7 @@ BOOST_FIXTURE_TEST_CASE(testUpdateWarps_CUDA_PVA, DataFixture) {
 
 	float maxWarp = motionTracker_PVA_CUDA->UpdateWarps(&warp_field_copy, canonical_volume, live_volume);
 	//warp_field_copy.SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_PVA/warp_field_0_data_framewise_warps_");
-	BOOST_REQUIRE_CLOSE(maxWarp, 0.18186526f, 1e-7);
+	BOOST_REQUIRE_CLOSE(maxWarp, 0.121243507f, 1e-7);
 
 	float tolerance = 1e-8;
 	BOOST_REQUIRE(contentAlmostEqual_CUDA(&warp_field_copy, warp_field_iter0, tolerance));
@@ -105,14 +105,13 @@ BOOST_FIXTURE_TEST_CASE(testTikhonovTerm_CUDA_PVA, DataFixture) {
 	TimeIt([&]() {
 		motionTracker_PVA_CUDA->CalculateWarpGradient(&warp_field_CUDA1, canonical_volume, live_volume);
 	}, "Calculate Warping Gradient - PVA CUDA tikhonov term");
-//	warp_field_CUDA1.SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_PVA/warp_field_1_tikhonov_");
 
 	BOOST_REQUIRE(true);
 
-	WarpVoxel warp1 = ManipulationEngine_CUDA_PVA_Warp::Inst().ReadVoxel(&warp_field_CUDA1, Vector3i(-29, 17, 195));
-	WarpVoxel warp2 = ManipulationEngine_CUDA_PVA_Warp::Inst().ReadVoxel(warp_field_tikhonov_term,
-	                                                                     Vector3i(-29, 17, 195));
-	float tolerance = 1e-7;
+	Vector3i test_voxel_position(-29, 17, 195);
+	WarpVoxel warp1 = warp_field_CUDA1.GetValueAt(test_voxel_position);
+	WarpVoxel warp2 = warp_field_tikhonov_term->GetValueAt(test_voxel_position);
+	float tolerance = 1e-6;
 	BOOST_REQUIRE_CLOSE(warp1.gradient0.x, warp2.gradient0.x, tolerance);
 	BOOST_REQUIRE_CLOSE(warp1.gradient0.y, warp2.gradient0.y, tolerance);
 	BOOST_REQUIRE_CLOSE(warp1.gradient0.z, warp2.gradient0.z, tolerance);

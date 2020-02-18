@@ -66,7 +66,7 @@ VoxelVolume<TVoxel, TIndex>::VoxelVolume(const VoxelVolume& other, MemoryDeviceT
 }
 template<class TVoxel, class TIndex>
 void VoxelVolume<TVoxel, TIndex>::Reset(){
-	switch (this->index.memoryType) {
+	switch (this->index.memory_type) {
 		case MEMORYDEVICE_CPU:
 			EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().ResetVolume(this);
 			break;
@@ -104,7 +104,7 @@ void VoxelVolume<TVoxel, TIndex>::LoadFromDirectory(const std::string& outputDir
 
 template<class TVoxel, class TIndex>
 TVoxel VoxelVolume<TVoxel, TIndex>::GetValueAt(const Vector3i& pos) {
-	switch (this->index.memoryType) {
+	switch (this->index.memory_type) {
 		case MEMORYDEVICE_CPU:
 			return EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().ReadVoxel(this, pos);
 #ifndef COMPILE_WITHOUT_CUDA

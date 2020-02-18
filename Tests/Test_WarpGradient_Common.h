@@ -60,7 +60,8 @@ struct WarpGradientDataFixture {
 			settings(nullptr),
 			warp_field_data_term(nullptr), canonical_volume(nullptr), live_volume(nullptr),
 			pathToData("TestData/snoopy_result_fr16-17_partial_" + getIndexSuffix<TIndex>() + "/"),
-			indexParameters(Frame16And17Fixture::InitParams<TIndex>()) {
+			indexParameters(Frame16And17Fixture::InitParams<TIndex>()),
+			indexing_engine(IndexingEngine<TSDFVoxel, TIndex, TMemoryType>::Instance()){
 		configuration::load_default();
 		settings = &configuration::get();
 
@@ -120,6 +121,7 @@ struct WarpGradientDataFixture {
 	VoxelVolume<TSDFVoxel, TIndex>* live_volume;
 	const std::string pathToData;
 	const typename TIndex::InitializationParameters indexParameters;
+	IndexingEngine<TSDFVoxel, TIndex, TMemoryType>& indexing_engine;
 };
 
 
@@ -171,6 +173,8 @@ void GenerateTestData() {
 	                                           configuration::SWAPPINGMODE_ENABLED,
 	                                          TMemoryDeviceType, Frame16And17Fixture::InitParams<TIndex>());
 	warp_field.Reset();
+	IndexingEngine<TSDFVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().AllocateWarpVolumeFromOtherVolume(&warp_field, live_volume);
+	IndexingEngine<TSDFVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().AllocateFromOtherVolume(canonical_volume, live_volume);
 
 	SurfaceTracker<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, TRACKER_SLAVCHEVA_DIAGNOSTIC> dataOnlyMotionTracker(
 			data_only_switches);

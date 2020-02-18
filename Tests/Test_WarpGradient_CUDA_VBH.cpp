@@ -43,11 +43,14 @@ using namespace ITMLib;
 typedef WarpGradientDataFixture<MemoryDeviceType::MEMORYDEVICE_CUDA, VoxelBlockHash> DataFixture;
 BOOST_FIXTURE_TEST_CASE(testDataTerm_CUDA_VBH, DataFixture) {
 
-	VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field_CUDA1(&configuration::get().general_voxel_volume_parameters,
+	VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field(&configuration::get().general_voxel_volume_parameters,
 	                                                            configuration::get().swapping_mode ==
 	                                                            configuration::SWAPPINGMODE_ENABLED,
-	                                                        MEMORYDEVICE_CUDA, indexParameters);
-	ManipulationEngine_CUDA_VBH_Warp::Inst().ResetVolume(&warp_field_CUDA1);
+	                                                  MEMORYDEVICE_CUDA, indexParameters);
+	ManipulationEngine_CUDA_VBH_Warp::Inst().ResetVolume(&warp_field);
+
+	indexing_engine.AllocateWarpVolumeFromOtherVolume(&warp_field, live_volume);
+	indexing_engine.AllocateUsingOtherVolume(canonical_volume, live_volume);
 
 
 	auto motionTracker_VBH_CUDA = new SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA, TRACKER_SLAVCHEVA_DIAGNOSTIC>(
@@ -55,32 +58,29 @@ BOOST_FIXTURE_TEST_CASE(testDataTerm_CUDA_VBH, DataFixture) {
 
 
 	TimeIt([&]() {
-		motionTracker_VBH_CUDA->CalculateWarpGradient(&warp_field_CUDA1, canonical_volume, live_volume);
+		motionTracker_VBH_CUDA->CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
 	}, "Calculate Warping Gradient - VBH CUDA data term");
 
-	BOOST_REQUIRE_EQUAL(StatCalc_CUDA_VBH_Warp::Instance().ComputeAllocatedHashBlockCount(&warp_field_CUDA1), 589);
-//
-//	TSDFVoxel voxel = ManipulationEngine_CUDA_VBH_Voxel::Inst().ReadVoxel(live_volume, Vector3i(-21, -5, 189));
-//	std::cout << "SDF (-21, -5, 189): " << voxel.sdf << std::endl;
-
-	//warp_field_CUDA1.SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_VBH/gradient0_data_");
+	BOOST_REQUIRE_EQUAL(StatCalc_CUDA_VBH_Warp::Instance().ComputeAllocatedHashBlockCount(&warp_field), 498);
 
 	float tolerance = 1e-7;
-	BOOST_REQUIRE(contentAlmostEqual_CUDA_Verbose(&warp_field_CUDA1, warp_field_data_term, tolerance));
+	BOOST_REQUIRE(contentAlmostEqual_CUDA_Verbose(&warp_field, warp_field_data_term, tolerance));
 }
 
 BOOST_FIXTURE_TEST_CASE(testUpdateWarps_CUDA_VBH, DataFixture) {
-
 	auto motionTracker_VBH_CUDA = new SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA, TRACKER_SLAVCHEVA_DIAGNOSTIC>(
 			SlavchevaSurfaceTracker::Switches(false, false, false, false, false));
 	VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field_copy(*warp_field_data_term,
 	                                                       MemoryDeviceType::MEMORYDEVICE_CUDA);
+	indexing_engine.AllocateUsingOtherVolume(canonical_volume, live_volume);
 
-	BOOST_REQUIRE_EQUAL(StatCalc_CUDA_VBH_Warp::Instance().ComputeAllocatedHashBlockCount(&warp_field_copy), 589);
+	BOOST_REQUIRE_EQUAL(StatCalc_CUDA_VBH_Warp::Instance().ComputeAllocatedHashBlockCount(&warp_field_copy), 498);
 
-	float maxWarp = motionTracker_VBH_CUDA->UpdateWarps(&warp_field_copy, canonical_volume, live_volume);
+	IndexingEngine<TSDFVoxel,VoxelBlockHash,MEMORYDEVICE_CUDA>::Instance().AllocateUsingOtherVolume(canonical_volume, live_volume);
+
+	float max_warp = motionTracker_VBH_CUDA->UpdateWarps(&warp_field_copy, canonical_volume, live_volume);
 	//warp_field_copy.SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_VBH/warp_iter0");
-	BOOST_REQUIRE_CLOSE(maxWarp, 0.18186526f, 1e-7f);
+	BOOST_REQUIRE_CLOSE(max_warp, 0.121243507f, 1e-7f);
 
 	float tolerance = 1e-8;
 	BOOST_REQUIRE(contentAlmostEqual_CUDA(&warp_field_copy, warp_field_iter0, tolerance));
@@ -88,37 +88,37 @@ BOOST_FIXTURE_TEST_CASE(testUpdateWarps_CUDA_VBH, DataFixture) {
 
 
 BOOST_FIXTURE_TEST_CASE(testSmoothWarpGradient_CUDA_VBH, DataFixture) {
-	VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field_CUDA1(*warp_field_data_term, MEMORYDEVICE_CUDA);
+	VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field(*warp_field_data_term, MEMORYDEVICE_CUDA);
+	indexing_engine.AllocateWarpVolumeFromOtherVolume(&warp_field, live_volume);
+	indexing_engine.AllocateUsingOtherVolume(canonical_volume, live_volume);
 	auto motionTracker_VBH_CUDA = new SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA, TRACKER_SLAVCHEVA_DIAGNOSTIC>(
 			SlavchevaSurfaceTracker::Switches(false, false, false, false, true));
 
 
 	TimeIt([&]() {
-		motionTracker_VBH_CUDA->SmoothWarpGradient(&warp_field_CUDA1, canonical_volume, live_volume);
+		motionTracker_VBH_CUDA->SmoothWarpGradient(&warp_field, canonical_volume, live_volume);
 	}, "Smooth Warping Gradient - VBH CUDA");
-//	warp_field_CUDA1.SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_VBH/warp_field_0_smoothed_");
 
 	float tolerance = 1e-8;
-	BOOST_REQUIRE(contentAlmostEqual_CUDA(&warp_field_CUDA1, warp_field_data_term_smoothed, tolerance));
+	BOOST_REQUIRE(contentAlmostEqual_CUDA(&warp_field, warp_field_data_term_smoothed, tolerance));
 }
 
 BOOST_FIXTURE_TEST_CASE(testTikhonovTerm_CUDA_VBH, DataFixture) {
-	VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field_CUDA1(*warp_field_iter0, MEMORYDEVICE_CUDA);
+	VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field(*warp_field_iter0, MEMORYDEVICE_CUDA);
+
+	indexing_engine.AllocateUsingOtherVolume(canonical_volume, live_volume);
 
 	auto motionTracker_VBH_CUDA = new SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA, TRACKER_SLAVCHEVA_DIAGNOSTIC>(
 			SlavchevaSurfaceTracker::Switches(false, false, true, false, false));
 
-
 	Vector3i testPosition(-40, 60, 200);
-	//settings->SetFocusCoordinates(testPosition);
 
 	TimeIt([&]() {
-		motionTracker_VBH_CUDA->CalculateWarpGradient(&warp_field_CUDA1, canonical_volume, live_volume);
+		motionTracker_VBH_CUDA->CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
 	}, "Calculate Warping Gradient - VBH CUDA tikhonov term");
-	BOOST_REQUIRE_EQUAL(StatCalc_CUDA_VBH_Warp::Instance().ComputeAllocatedHashBlockCount(&warp_field_CUDA1), 589);
-	//warp_field_CUDA1.SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_VBH/warp_field_1_tikhonov_");
+	BOOST_REQUIRE_EQUAL(StatCalc_CUDA_VBH_Warp::Instance().ComputeAllocatedHashBlockCount(&warp_field), 498);
 
-	WarpVoxel warp1 = ManipulationEngine_CUDA_VBH_Warp::Inst().ReadVoxel(&warp_field_CUDA1, testPosition);
+	WarpVoxel warp1 = ManipulationEngine_CUDA_VBH_Warp::Inst().ReadVoxel(&warp_field, testPosition);
 	WarpVoxel warp2 = ManipulationEngine_CUDA_VBH_Warp::Inst().ReadVoxel(warp_field_tikhonov_term, testPosition);
 
 	float relativeTolerance = 1.0f; //percent
@@ -126,69 +126,69 @@ BOOST_FIXTURE_TEST_CASE(testTikhonovTerm_CUDA_VBH, DataFixture) {
 	BOOST_REQUIRE_CLOSE(warp1.gradient0.y, warp2.gradient0.y, relativeTolerance);
 	BOOST_REQUIRE_CLOSE(warp1.gradient0.z, warp2.gradient0.z, relativeTolerance);
 
-	float absoluteTolerance = 1e-7;
-	BOOST_REQUIRE(contentAlmostEqual_CUDA(&warp_field_CUDA1, warp_field_tikhonov_term, absoluteTolerance));
+	float absoluteTolerance = 1e-6;
+	BOOST_REQUIRE(contentAlmostEqual_CUDA(&warp_field, warp_field_tikhonov_term, absoluteTolerance));
 }
 
 BOOST_FIXTURE_TEST_CASE(testDataAndTikhonovTerm_CUDA_VBH, DataFixture) {
-	VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field_CUDA1(*warp_field_iter0, MEMORYDEVICE_CUDA);
+	VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field(*warp_field_iter0, MEMORYDEVICE_CUDA);
 
+	indexing_engine.AllocateUsingOtherVolume(canonical_volume, live_volume);
 
 	auto motionTracker_VBH_CUDA = new SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA, TRACKER_SLAVCHEVA_DIAGNOSTIC>(
 			SlavchevaSurfaceTracker::Switches(true, false, true, false, false));
 
 	Vector3i testPosition(-40, 60, 200);
-	//settings->SetFocusCoordinates(testPosition);
 
 	TimeIt([&]() {
-		motionTracker_VBH_CUDA->CalculateWarpGradient(&warp_field_CUDA1, canonical_volume, live_volume);
+		motionTracker_VBH_CUDA->CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
 	}, "Calculate Warping Gradient - VBH CUDA data term + tikhonov term");
-	BOOST_REQUIRE_EQUAL(StatCalc_CUDA_VBH_Warp::Instance().ComputeAllocatedHashBlockCount(&warp_field_CUDA1), 589);
-	//warp_field_CUDA1.SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_VBH/gradient0_tikhonov_");
+	BOOST_REQUIRE_EQUAL(StatCalc_CUDA_VBH_Warp::Instance().ComputeAllocatedHashBlockCount(&warp_field), 498);
 
-	WarpVoxel warp1 = ManipulationEngine_CUDA_VBH_Warp::Inst().ReadVoxel(&warp_field_CUDA1, testPosition);
+	WarpVoxel warp1 = ManipulationEngine_CUDA_VBH_Warp::Inst().ReadVoxel(&warp_field, testPosition);
 	WarpVoxel warp2 = ManipulationEngine_CUDA_VBH_Warp::Inst().ReadVoxel(warp_field_data_and_tikhonov_term, testPosition);
 	float tolerance = 1e-6;
 	BOOST_REQUIRE_CLOSE(warp1.gradient0.x, warp2.gradient0.x, tolerance);
 	BOOST_REQUIRE_CLOSE(warp1.gradient0.y, warp2.gradient0.y, tolerance);
 	BOOST_REQUIRE_CLOSE(warp1.gradient0.z, warp2.gradient0.z, tolerance);
 
-	BOOST_REQUIRE(contentAlmostEqual_CUDA_Verbose(&warp_field_CUDA1, warp_field_data_and_tikhonov_term, tolerance));
+	BOOST_REQUIRE(contentAlmostEqual_CUDA_Verbose(&warp_field, warp_field_data_and_tikhonov_term, tolerance));
 }
 
 
 BOOST_FIXTURE_TEST_CASE(testDataAndKillingTerm_CUDA_VBH, DataFixture) {
-	VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field_CUDA1(*warp_field_iter0, MEMORYDEVICE_CUDA);
+	VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field(*warp_field_iter0, MEMORYDEVICE_CUDA);
+
+	indexing_engine.AllocateUsingOtherVolume(canonical_volume, live_volume);
 
 	auto motionTracker_VBH_CUDA = new SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA, TRACKER_SLAVCHEVA_DIAGNOSTIC>(
 			SlavchevaSurfaceTracker::Switches(true, false, true, true, false));
 
-
 	TimeIt([&]() {
-		motionTracker_VBH_CUDA->CalculateWarpGradient(&warp_field_CUDA1, canonical_volume, live_volume);
+		motionTracker_VBH_CUDA->CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
 	}, "Calculate Warping Gradient - VBH CUDA data term + killing term");
-	//warp_field_CUDA1.SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_VBH/gradient0_killing_");
 
 	float tolerance = 1e-6;
-	BOOST_REQUIRE(contentAlmostEqual_CUDA(&warp_field_CUDA1, warp_field_data_and_killing_term, tolerance));
+	BOOST_REQUIRE(contentAlmostEqual_CUDA(&warp_field, warp_field_data_and_killing_term, tolerance));
 }
 
 
 BOOST_FIXTURE_TEST_CASE(testDataAndLevelSetTerm_CUDA_VBH, DataFixture) {
-	VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field_CUDA1(*warp_field_iter0, MEMORYDEVICE_CUDA);
+	VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field(*warp_field_iter0, MEMORYDEVICE_CUDA);
+
+	indexing_engine.AllocateUsingOtherVolume(canonical_volume, live_volume);
 
 	auto motionTracker_VBH_CUDA = new SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA, TRACKER_SLAVCHEVA_DIAGNOSTIC>(
 			SlavchevaSurfaceTracker::Switches(true, true, false, false, false)
 			);
 
 	TimeIt([&]() {
-		motionTracker_VBH_CUDA->CalculateWarpGradient(&warp_field_CUDA1, canonical_volume, live_volume);
+		motionTracker_VBH_CUDA->CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
 	}, "Calculate Warping Gradient - VBH CUDA data term + level set term");
-	//warp_field_CUDA1.SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_VBH/gradient0_level_set_");
 
 
 	float tolerance = 1e-6;
-	BOOST_REQUIRE(contentAlmostEqual_CUDA(&warp_field_CUDA1, warp_field_data_and_level_set_term, tolerance));
+	BOOST_REQUIRE(contentAlmostEqual_CUDA(&warp_field, warp_field_data_and_level_set_term, tolerance));
 }
 
 #ifdef GENERATE_DATA

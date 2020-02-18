@@ -1189,7 +1189,7 @@ inline float InterpolateTrilinearly_TruncatedCopySign(const CONSTPTR(TVoxel)* vo
 template<class TVoxel, typename TCache, typename TIndexData>
 _CPU_AND_GPU_CODE_
 inline float InterpolateTrilinearly_StruckKnown(const CONSTPTR(TVoxel)* voxelData,
-                                                const CONSTPTR(TIndexData)* indexData,
+                                                const CONSTPTR(TIndexData)* index_data,
 	                                             const CONSTPTR(Vector3f)& point,
 	                                             THREADPTR(TCache)& cache,
 	                                             THREADPTR(bool)& struckKnown) {
@@ -1199,11 +1199,11 @@ inline float InterpolateTrilinearly_StruckKnown(const CONSTPTR(TVoxel)* voxelDat
 	Vector3i pos;
 	struckKnown = false;
 	TO_INT_FLOOR3(pos, coeff, point);
-	auto process_voxel = [&voxelData, &indexData, &pos, &vmIndex, &cache, &struckKnown](float& sdfV, const Vector3i& coord){
+	auto process_voxel = [&voxelData, &index_data, &pos, &vmIndex, &cache, &struckKnown](float& sdfV, const Vector3i& coord){
 #if !defined(__CUDACC__) && !defined(WITH_OPENMP)
-		const TVoxel& v = readVoxel(voxelData, indexData, pos + coord, vmIndex, cache);
+		const TVoxel& v = readVoxel(voxelData, index_data, pos + coord, vmIndex, cache);
 #else
-		const TVoxel& v = readVoxel(voxelData, indexData, pos + coord, vmIndex);
+		const TVoxel& v = readVoxel(voxelData, index_data, pos + coord, vmIndex);
 #endif
 	    sdfV = TVoxel::valueToFloat(v.sdf);
         struckKnown |= (v.flags != ITMLib::VoxelFlags::VOXEL_UNKNOWN);

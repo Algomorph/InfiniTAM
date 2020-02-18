@@ -311,16 +311,16 @@ _CPU_AND_GPU_CODE_
 void ComputeLiveJacobian_CentralDifferences(THREADPTR(Vector3f)& jacobian,
                                             const CONSTPTR(Vector3i)& voxelPosition,
                                             const CONSTPTR(TVoxel)* voxels,
-                                            const CONSTPTR(TIndexData)* indexData,
+                                            const CONSTPTR(TIndexData)* index_data,
                                             THREADPTR(TCache)& cache) {
 
 
 	int vmIndex = 0;
     auto sdf_at = [&](Vector3i offset) {
 #if !defined(__CUDACC__) && !defined(WITH_OPENMP)
-	    return TVoxel::valueToFloat(readVoxel(voxels, indexData, voxelPosition + (offset), vmIndex, cache).sdf);
+	    return TVoxel::valueToFloat(readVoxel(voxels, index_data, voxelPosition + (offset), vmIndex, cache).sdf);
 #else
-	    return TVoxel::valueToFloat(readVoxel(voxels, indexData, voxelPosition + (offset), vmIndex).sdf);
+	    return TVoxel::valueToFloat(readVoxel(voxels, index_data, voxelPosition + (offset), vmIndex).sdf);
 #endif
     };
 
@@ -369,15 +369,15 @@ inline void ComputeSdfHessian(THREADPTR(Matrix3f)& hessian,
                               const CONSTPTR(float)& sdfAtPosition,
 		//const CONSTPTR(Vector3f&) jacobianAtPosition,
 		                      const CONSTPTR(TVoxel)* voxels,
-		                      const CONSTPTR(TIndexData)* indexData,
+		                      const CONSTPTR(TIndexData)* index_data,
 		                      THREADPTR(TCache)& cache) {
 	int vmIndex = 0;
 
 	auto sdf_at = [&](Vector3i offset){
 #if !defined(__CUDACC__) && !defined(WITH_OPENMP)
-		return TVoxel::valueToFloat(readVoxel(voxels, indexData, position + (offset), vmIndex, cache).sdf);
+		return TVoxel::valueToFloat(readVoxel(voxels, index_data, position + (offset), vmIndex, cache).sdf);
 #else //don't use cache when multithreading
-		return TVoxel::valueToFloat(readVoxel(voxels, indexData, position + (offset), vmIndex).sdf);
+		return TVoxel::valueToFloat(readVoxel(voxels, index_data, position + (offset), vmIndex).sdf);
 #endif
 	};
 

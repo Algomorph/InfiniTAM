@@ -23,7 +23,7 @@ namespace ITMLib {
 
 HashEntry VoxelBlockHash::GetHashEntryAt(const Vector3s& pos, int& hashCode) const {
 	const HashEntry* entries = this->GetEntries();
-	switch (memoryType) {
+	switch (memory_type) {
 		case MEMORYDEVICE_CPU:
 			return IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance()
 					.FindHashEntry(*this,pos,hashCode);
@@ -46,17 +46,17 @@ VoxelBlockHash::VoxelBlockHash(VoxelBlockHashParameters parameters, MemoryDevice
 		voxelBlockCount(parameters.voxel_block_count),
 		excessListSize(parameters.excess_list_size),
 		hashEntryCount(ORDERED_LIST_SIZE + parameters.excess_list_size),
-		lastFreeExcessListId(parameters.excess_list_size - 1),
-		hashEntryAllocationStates(ORDERED_LIST_SIZE + parameters.excess_list_size, memoryType),
+		last_free_excess_list_id(parameters.excess_list_size - 1),
+		hash_entry_allocation_states(ORDERED_LIST_SIZE + parameters.excess_list_size, memoryType),
 		allocationBlockCoordinates(ORDERED_LIST_SIZE + parameters.excess_list_size, memoryType),
 		utilized_block_hash_codes(parameters.voxel_block_count, memoryType),
 		blockVisibilityTypes(ORDERED_LIST_SIZE + parameters.excess_list_size, memoryType),
-		memoryType(memoryType),
-		hashEntries(hashEntryCount, memoryType),
-		excessAllocationList(excessListSize, memoryType),
-		utilizedHashBlockCount(0)
+		memory_type(memoryType),
+		hash_entries(hashEntryCount, memoryType),
+		excess_allocation_list(excessListSize, memoryType),
+		utilized_hash_block_count(0)
 		{
-	hashEntryAllocationStates.Clear(NEEDS_NO_CHANGE);
+	hash_entry_allocation_states.Clear(NEEDS_NO_CHANGE);
 
 }
 
@@ -68,9 +68,9 @@ void VoxelBlockHash::SaveToDirectory(const std::string& outputDirectory) const {
 	std::ofstream ofs(lastFreeExcessListIdFileName.c_str());
 	if (!ofs) throw std::runtime_error("Could not open " + lastFreeExcessListIdFileName + " for writing");
 
-	ofs << lastFreeExcessListId;
-	ORUtils::MemoryBlockPersister::SaveMemoryBlock(hashEntriesFileName, hashEntries, memoryType);
-	ORUtils::MemoryBlockPersister::SaveMemoryBlock(excessAllocationListFileName, excessAllocationList, memoryType);
+	ofs << last_free_excess_list_id;
+	ORUtils::MemoryBlockPersister::SaveMemoryBlock(hashEntriesFileName, hash_entries, memory_type);
+	ORUtils::MemoryBlockPersister::SaveMemoryBlock(excessAllocationListFileName, excess_allocation_list, memory_type);
 }
 
 void VoxelBlockHash::LoadFromDirectory(const std::string& inputDirectory) {
@@ -81,10 +81,10 @@ void VoxelBlockHash::LoadFromDirectory(const std::string& inputDirectory) {
 	std::ifstream ifs(lastFreeExcessListIdFileName.c_str());
 	if (!ifs) throw std::runtime_error("Count not open " + lastFreeExcessListIdFileName + " for reading");
 
-	ifs >> this->lastFreeExcessListId;
-	ORUtils::MemoryBlockPersister::LoadMemoryBlock(hashEntriesFileName, hashEntries, memoryType);
-	ORUtils::MemoryBlockPersister::LoadMemoryBlock(excessAllocationListFileName, excessAllocationList,
-	                                               memoryType);
+	ifs >> this->last_free_excess_list_id;
+	ORUtils::MemoryBlockPersister::LoadMemoryBlock(hashEntriesFileName, hash_entries, memory_type);
+	ORUtils::MemoryBlockPersister::LoadMemoryBlock(excessAllocationListFileName, excess_allocation_list,
+	                                               memory_type);
 }
 
 }// namespace ITMLib
