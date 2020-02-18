@@ -30,8 +30,7 @@ GenericWarpConsistencySubtest<VoxelBlockHash, MEMORYDEVICE_CPU>(const SlavchevaS
                                                                    GenericWarpTestMode mode,
                                                                    float absolute_tolerance);
 template
-void Warp_PVA_VBH_simple_subtest<MEMORYDEVICE_CPU>(int iteration, SlavchevaSurfaceTracker::Switches trackerSwitches,
-                                                   bool expanded_allocation);
+void Warp_PVA_VBH_simple_subtest<MEMORYDEVICE_CPU>(int iteration, SlavchevaSurfaceTracker::Switches trackerSwitches);
 
 #ifndef COMPILE_WITHOUT_CUDA
 template
@@ -49,8 +48,7 @@ GenericWarpConsistencySubtest<VoxelBlockHash, MEMORYDEVICE_CUDA>(const Slavcheva
                                                                     float absolute_tolerance);
 
 template
-void Warp_PVA_VBH_simple_subtest<MEMORYDEVICE_CUDA>(int iteration, SlavchevaSurfaceTracker::Switches trackerSwitches,
-                                                    bool expanded_allocation);
+void Warp_PVA_VBH_simple_subtest<MEMORYDEVICE_CUDA>(int iteration, SlavchevaSurfaceTracker::Switches trackerSwitches);
 #endif
 
 std::string get_path_warps(std::string prefix, int iteration) {

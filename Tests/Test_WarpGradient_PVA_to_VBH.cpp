@@ -196,30 +196,25 @@ BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_DataAndTikhonovAndSobolevSmoothing_Fusion
 
 #endif
 
-BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_simple_CPU_data_only_basic) {
+BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_simple_CPU_data_only) {
 	SlavchevaSurfaceTracker::Switches switches(true, false, false, false, false);
-	Warp_PVA_VBH_simple_subtest<MEMORYDEVICE_CPU>(0, switches, false);
+	Warp_PVA_VBH_simple_subtest<MEMORYDEVICE_CPU>(0, switches);
 }
 
-BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_simple_CPU_data_only_expanded) {
-	SlavchevaSurfaceTracker::Switches switches(true, false, false, false, false);
-	Warp_PVA_VBH_simple_subtest<MEMORYDEVICE_CPU>(0, switches, true);
-}
-
-BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_simple_CPU_data_and_tikhonov_expanded) {
+BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_simple_CPU_data_and_tikhonov) {
 	SlavchevaSurfaceTracker::Switches switches(true, false, true, false, false);
-	Warp_PVA_VBH_simple_subtest<MEMORYDEVICE_CPU>(0, switches, true);
+	Warp_PVA_VBH_simple_subtest<MEMORYDEVICE_CPU>(1, switches);
 }
 
 #ifndef COMPILE_WITHOUT_CUDA
-BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_simple_CUDA_data_only_expanded) {
+BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_simple_CUDA_data_only) {
 	SlavchevaSurfaceTracker::Switches switches(true, false, false, false, false);
-	Warp_PVA_VBH_simple_subtest<MEMORYDEVICE_CUDA>(0, switches, true);
+	Warp_PVA_VBH_simple_subtest<MEMORYDEVICE_CUDA>(0, switches);
 }
 
-BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_simple_CUDA_data_and_tikhonov_expanded) {
+BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_simple_CUDA_data_and_tikhonov) {
 	SlavchevaSurfaceTracker::Switches switches(true, false, true, false, false);
-	Warp_PVA_VBH_simple_subtest<MEMORYDEVICE_CUDA>(0, switches, true);
+	Warp_PVA_VBH_simple_subtest<MEMORYDEVICE_CUDA>(0, switches);
 }
 
 #endif
@@ -241,6 +236,7 @@ inline static void PrintVolumeStatistics(
 	std::cout << "    Truncated SDF sum: " << calculator.ComputeTruncatedVoxelAbsSdfSum(volume) << std::endl;
 };
 
+#ifdef TEST_PERFORMANCE
 BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CPU) {
 	VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field(&configuration::get().general_voxel_volume_parameters,
 	                                                  configuration::get().swapping_mode ==
@@ -346,8 +342,8 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CPU) {
 	SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_OPTIMIZED> motion_tracker(switches);
 	WarpingEngineInterface<TSDFVoxel, WarpVoxel, VoxelBlockHash>* warping_engine =
 			WarpingEngineFactory::MakeWarpingEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash>(MEMORYDEVICE_CPU);
-	VolumeFusionEngineInterface<TSDFVoxel, WarpVoxel, VoxelBlockHash>* volume_fusion_engine =
-			VolumeFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, VoxelBlockHash>(MEMORYDEVICE_CPU);
+	VolumeFusionEngineInterface<TSDFVoxel, VoxelBlockHash>* volume_fusion_engine =
+			VolumeFusionEngineFactory::Build<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CPU);
 
 	VolumeStatisticsCalculator<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>& warp_calculator =
 			VolumeStatisticsCalculator<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance();
@@ -389,8 +385,9 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CPU) {
 	delete warping_engine;
 	delete volume_fusion_engine;
 }
+#endif
 
-#ifndef COMPILE_WITHOUT_CUDA
+#if !defined(COMPILE_WITHOUT_CUDA) && defined(TEST_PERFORMANCE)
 BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CUDA) {
 	VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field(&configuration::get().general_voxel_volume_parameters,
 	                                                  configuration::get().swapping_mode ==
@@ -466,8 +463,8 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CUDA) {
 	SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA, TRACKER_SLAVCHEVA_OPTIMIZED> motion_tracker(switches);
 	WarpingEngineInterface<TSDFVoxel, WarpVoxel, VoxelBlockHash>* warping_engine =
 			WarpingEngineFactory::MakeWarpingEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash>(MEMORYDEVICE_CUDA);
-	VolumeFusionEngineInterface<TSDFVoxel, WarpVoxel, VoxelBlockHash>* volume_fusion_engine =
-			VolumeFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, VoxelBlockHash>(MEMORYDEVICE_CUDA);
+	VolumeFusionEngineInterface<TSDFVoxel, VoxelBlockHash>* volume_fusion_engine =
+			VolumeFusionEngineFactory::Build<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CUDA);
 
 	VolumeStatisticsCalculator<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>& warp_calculator =
 			VolumeStatisticsCalculator<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance();

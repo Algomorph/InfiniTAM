@@ -53,5 +53,4 @@ GenericWarpConsistencySubtest(const SlavchevaSurfaceTracker::Switches& switches,
                               float absolute_tolerance = 1e-7);
 
 template<MemoryDeviceType TMemoryDeviceType>
-void Warp_PVA_VBH_simple_subtest(int iteration, SlavchevaSurfaceTracker::Switches trackerSwitches,
-		bool expanded_allocation = true);
+void Warp_PVA_VBH_simple_subtest(int iteration, SlavchevaSurfaceTracker::Switches trackerSwitches);
