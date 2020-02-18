@@ -90,17 +90,34 @@ template<typename TVoxel, typename TIndex>
 void buildSdfVolumeFromImage_NearSurfaceAllocation(VoxelVolume<TVoxel, TIndex>** volume,
                                                    const std::string& depth_path, const std::string& color_path, const std::string& mask_path,
                                                    const std::string& calibration_path = "TestData/snoopy_calib.txt",
-                                                   MemoryDeviceType memoryDevice = MEMORYDEVICE_CUDA,
-                                                   typename TIndex::InitializationParameters initializationParameters = GetStandard512IndexParameters<TIndex>(),
-                                                   configuration::SwappingMode swappingMode = configuration::SWAPPINGMODE_DISABLED,
-                                                   bool useBilateralFilter = false);
+                                                   MemoryDeviceType memory_device = MEMORYDEVICE_CUDA,
+                                                   typename TIndex::InitializationParameters initialization_parameters = GetStandard512IndexParameters<TIndex>(),
+                                                   configuration::SwappingMode swapping_mode = configuration::SWAPPINGMODE_DISABLED);
 
 template<typename TVoxel, typename TIndex>
 void buildSdfVolumeFromImage_NearSurfaceAllocation(VoxelVolume<TVoxel, TIndex>** volume,
                                                    ITMView** view,
                                                    const std::string& depth_path, const std::string& color_path, const std::string& mask_path,
                                                    const std::string& calibration_path = "TestData/snoopy_calib.txt",
+                                                   MemoryDeviceType memory_device = MEMORYDEVICE_CUDA,
+                                                   typename TIndex::InitializationParameters initializationParameters = GetStandard512IndexParameters<TIndex>(),
+                                                   configuration::SwappingMode swappingMode = configuration::SWAPPINGMODE_DISABLED);
+template<typename TVoxel, typename TIndex>
+void buildSdfVolumeFromImage_SurfaceSpanAllocation(VoxelVolume<TVoxel, TIndex>** volume1,
+                                                   VoxelVolume<TVoxel, TIndex>** volume2,
+                                                   ITMView** view,
+                                                   const std::string& depth1_path, const std::string& color1_path, const std::string& mask1_path,
+                                                   const std::string& depth2_path, const std::string& color2_path, const std::string& mask2_path,
+                                                   const std::string& calibration_path = "TestData/snoopy_calib.txt",
+                                                   MemoryDeviceType memoryDevice = MEMORYDEVICE_CUDA,
+                                                   typename TIndex::InitializationParameters initialization_parameters = GetStandard512IndexParameters<TIndex>(),
+                                                   configuration::SwappingMode swapping_mode = configuration::SWAPPINGMODE_DISABLED);
+template<typename TVoxel, typename TIndex>
+void buildSdfVolumeFromImage_SurfaceSpanAllocation(VoxelVolume<TVoxel, TIndex>** volume1,
+                                                   VoxelVolume<TVoxel, TIndex>** volume2,
+                                                   const std::string& depth1_path, const std::string& color1_path, const std::string& mask1_path,
+                                                   const std::string& depth2_path, const std::string& color2_path, const std::string& mask2_path,
+                                                   const std::string& calibration_path = "TestData/snoopy_calib.txt",
                                                    MemoryDeviceType memoryDevice = MEMORYDEVICE_CUDA,
                                                    typename TIndex::InitializationParameters initializationParameters = GetStandard512IndexParameters<TIndex>(),
-                                                   configuration::SwappingMode swappingMode = configuration::SWAPPINGMODE_DISABLED,
-                                                   bool useBilateralFilter = false);
+                                                   configuration::SwappingMode swapping_mode = configuration::SWAPPINGMODE_DISABLED);

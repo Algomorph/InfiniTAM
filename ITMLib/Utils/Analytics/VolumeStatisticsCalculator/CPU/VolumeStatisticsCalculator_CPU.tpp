@@ -27,68 +27,17 @@
 using namespace ITMLib;
 
 
-template<typename TVoxel, typename TIndex>
-struct ComputeVoxelBoundsFunctor;
-
-template<typename TVoxel>
-struct ComputeVoxelBoundsFunctor<TVoxel, VoxelBlockHash> {
-	static Vector6i Compute(const VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
-
-		Vector6i bounds = Vector6i(0);
-
-		const TVoxel* voxelBlocks = volume->localVBA.GetVoxelBlocks();
-		const HashEntry* hashTable = volume->index.GetEntries();
-		int noTotalEntries = volume->index.hashEntryCount;
-
-		//TODO: if OpenMP standard is 3.1 or above, use OpenMP parallel for reduction clause with (max:maxVoxelPointX,...) -Greg (GitHub: Algomorph)
-		for (int entryId = 0; entryId < noTotalEntries; entryId++) {
-
-			const HashEntry& currentHashEntry = hashTable[entryId];
-
-			if (currentHashEntry.ptr < 0) continue;
-
-			//position of the current entry in 3D space
-			Vector3i currentHashBlockPositionVoxels = currentHashEntry.pos.toInt() * VOXEL_BLOCK_SIZE;
-			Vector3i hashBlockLimitPositionVoxels =
-					(currentHashEntry.pos.toInt() + Vector3i(1, 1, 1)) * VOXEL_BLOCK_SIZE;
-
-			if (bounds.min_x > currentHashBlockPositionVoxels.x) {
-				bounds.min_x = currentHashBlockPositionVoxels.x;
-			}
-			if (bounds.max_x < hashBlockLimitPositionVoxels.x) {
-				bounds.max_x = hashBlockLimitPositionVoxels.x;
-			}
-			if (bounds.min_y > currentHashBlockPositionVoxels.y) {
-				bounds.min_y = currentHashBlockPositionVoxels.y;
-			}
-			if (bounds.max_y < hashBlockLimitPositionVoxels.y) {
-				bounds.max_y = hashBlockLimitPositionVoxels.y;
-			}
-			if (bounds.min_z > currentHashBlockPositionVoxels.z) {
-				bounds.min_z = currentHashBlockPositionVoxels.z;
-			}
-			if (bounds.max_z < hashBlockLimitPositionVoxels.z) {
-				bounds.max_z = hashBlockLimitPositionVoxels.z;
-			}
-		}
-		return bounds;
-	}
-};
-
-template<typename TVoxel>
-struct ComputeVoxelBoundsFunctor<TVoxel, PlainVoxelArray> {
-	static Vector6i Compute(const VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
-		Vector3i offset = volume->index.GetVolumeOffset();
-		Vector3i size = volume->index.GetVolumeSize();
-		return {offset.x, offset.y, offset.z,
-		        offset.x + size.x, offset.y + size.y, offset.z + size.z};
-	}
-};
 
 template<typename TVoxel, typename TIndex>
 Vector6i
 VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeVoxelBounds(const VoxelVolume<TVoxel, TIndex>* volume) {
-	return ComputeVoxelBoundsFunctor<TVoxel, TIndex>::Compute(volume);
+	return ComputeVoxelBoundsFunctor<TVoxel, TIndex, MEMORYDEVICE_CPU>::Compute(volume);
+}
+
+template<typename TVoxel, typename TIndex>
+Vector6i VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeAlteredVoxelBounds(
+		const VoxelVolume<TVoxel, TIndex>* volume) {
+	ComputeConditionalVoxelBoundsFunctor([](TVoxel& voxel){return isAltered(voxel);});
 }
 
 //============================================== COUNT VOXELS ==========================================================

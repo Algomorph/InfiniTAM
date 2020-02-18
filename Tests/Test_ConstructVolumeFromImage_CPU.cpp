@@ -83,6 +83,8 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct16_PVA_VBH_Near_CPU, Frame16And17Fixt
 	BOOST_REQUIRE(allocatedContentAlmostEqual_CPU(volume_PVA_16, volume_VBH_16, absoluteTolerance));
 	BOOST_REQUIRE(contentForFlagsAlmostEqual_CPU(volume_PVA_16, volume_VBH_16, VoxelFlags::VOXEL_NONTRUNCATED,
 	                                             absoluteTolerance));
+	BOOST_REQUIRE(contentForFlagsAlmostEqual_CPU_Verbose(volume_PVA_16, volume_VBH_16, VoxelFlags::VOXEL_TRUNCATED,
+	                                                     absoluteTolerance));
 
 	delete volume_VBH_16;
 	delete volume_PVA_16;
@@ -116,8 +118,8 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_PVA_VBH_Near_CPU, Frame16And17Fixt
 }
 
 static void SetUpTrackingState16(CameraTrackingState& tracking_state,
-		IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>& indexer_VBH,
-		DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, VoxelBlockHash>* depth_fusion_engine_VBH){
+                                 IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>& indexer_VBH,
+                                 DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, VoxelBlockHash>* depth_fusion_engine_VBH) {
 	ITMView* view_16 = nullptr;
 	updateView(&view_16, "TestData/snoopy_depth_000016.png",
 	           "TestData/snoopy_color_000016.png", "TestData/snoopy_omask_000016.png",
@@ -126,13 +128,14 @@ static void SetUpTrackingState16(CameraTrackingState& tracking_state,
 	                         configuration::get().general_voxel_volume_parameters.near_clipping_distance,
 	                         configuration::get().general_voxel_volume_parameters.far_clipping_distance,
 	                         MEMORYDEVICE_CPU);
-	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_16(MEMORYDEVICE_CPU, Frame16And17Fixture::InitParams<VoxelBlockHash>());
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_16(MEMORYDEVICE_CPU,
+	                                                     Frame16And17Fixture::InitParams<VoxelBlockHash>());
 	volume_VBH_16.Reset();
 	indexer_VBH.AllocateNearSurface(&volume_VBH_16, view_16);
-	depth_fusion_engine_VBH->IntegrateDepthImageIntoTsdfVolume(&volume_VBH_16,view_16);
+	depth_fusion_engine_VBH->IntegrateDepthImageIntoTsdfVolume(&volume_VBH_16, view_16);
 	VisualizationEngine<TSDFVoxel, VoxelBlockHash>* visualization_engine =
 			VisualizationEngineFactory::MakeVisualizationEngine<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CPU);
-	visualization_engine->CreateICPMaps(&volume_VBH_16,view_16,&tracking_state,&render_state);
+	visualization_engine->CreateICPMaps(&volume_VBH_16, view_16, &tracking_state, &render_state);
 	delete visualization_engine;
 	delete view_16;
 }
@@ -143,7 +146,7 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_VBH_CPU_NearVsSpan, Frame16And17Fi
 			IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance();
 	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, VoxelBlockHash>* depth_fusion_engine_VBH =
 			DepthFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, VoxelBlockHash>(MEMORYDEVICE_CPU);
-	Vector2i resolution(640,480);
+	Vector2i resolution(640, 480);
 	CameraTrackingState tracking_state(resolution, MEMORYDEVICE_CPU);
 
 	SetUpTrackingState16(tracking_state, indexer, depth_fusion_engine_VBH);
@@ -180,7 +183,9 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_VBH_CPU_NearVsSpan, Frame16And17Fi
 	BOOST_REQUIRE_EQUAL(span_nontruncated_voxel_count, near_nontruncated_voxel_count);
 
 	float absolute_tolerance = 1e-7;
-	BOOST_REQUIRE(contentForFlagsAlmostEqual_CPU(&volume_VBH_17_Span, &volume_VBH_17_Near, VoxelFlags::VOXEL_NONTRUNCATED, absolute_tolerance));
+	BOOST_REQUIRE(
+			contentForFlagsAlmostEqual_CPU(&volume_VBH_17_Span, &volume_VBH_17_Near, VoxelFlags::VOXEL_NONTRUNCATED,
+			                               absolute_tolerance));
 
 	delete view_17;
 	delete depth_fusion_engine_VBH;
@@ -195,7 +200,7 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_PVA_VBH_Span_CPU, Frame16And17Fixt
 			DepthFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, VoxelBlockHash>(MEMORYDEVICE_CPU);
 	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, PlainVoxelArray>* depth_fusion_engine_PVA =
 			DepthFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, PlainVoxelArray>(MEMORYDEVICE_CPU);
-	Vector2i resolution(640,480);
+	Vector2i resolution(640, 480);
 	CameraTrackingState tracking_state(resolution, MEMORYDEVICE_CPU);
 	SetUpTrackingState16(tracking_state, indexer_VBH, depth_fusion_engine_VBH);
 
@@ -222,9 +227,9 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_PVA_VBH_Span_CPU, Frame16And17Fixt
 
 #ifdef SAVE_TEST_DATA
 	std::string path_PVA = "TestData/snoopy_result_fr16-17_partial_PVA/snoopy_partial_frame_17_";
-	volume_PVA_17.SaveToDirectory(std::string("../../Tests/") +path_PVA);
+	volume_PVA_17.SaveToDirectory(std::string("../../Tests/") + path_PVA);
 	std::string path_VBH = "TestData/snoopy_result_fr16-17_partial_VBH/snoopy_partial_frame_17_";
-	volume_VBH_17_Span.SaveToDirectory(std::string("../../Tests/") +path_VBH);
+	volume_VBH_17_Span.SaveToDirectory(std::string("../../Tests/") + path_VBH);
 #endif
 
 	int span_nontruncated_voxel_count =
@@ -238,8 +243,6 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_PVA_VBH_Span_CPU, Frame16And17Fixt
 	BOOST_REQUIRE(contentForFlagsAlmostEqual_CPU(&volume_PVA_17, &volume_VBH_17_Span, VoxelFlags::VOXEL_NONTRUNCATED,
 	                                             absolute_tolerance));
 }
-
-
 
 
 BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
@@ -317,11 +320,11 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
 	int i_bad_level_set;
 
 	for (int i_coordinate = 0; i_coordinate < zero_level_set_coordinates.size(); i_coordinate++) {
-		if(unexpected_sdf_at_level_set) break;
+		if (unexpected_sdf_at_level_set) break;
 		Vector3i coord = zero_level_set_coordinates[i_coordinate];
 		TSDFVoxel voxel = ManipulationEngine_CPU_PVA_Voxel::Inst().ReadVoxel(&scene1, coord);
 		float sdf = TSDFVoxel::valueToFloat(voxel.sdf);
-		if(!almostEqual(sdf, 0.0f, tolerance)){
+		if (!almostEqual(sdf, 0.0f, tolerance)) {
 			unexpected_sdf_at_level_set = true;
 			i_bad_level_set = 0;
 			bad_sdf = sdf;
@@ -335,12 +338,13 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
 		if (i_coordinate > 17) {
 			// don't go into low negative sdf values, since those will be overwritten by positive values
 			// during sdf construction in certain cases
-			for (int i_level_set = -narrow_band_half_width_voxels; i_level_set < (narrow_band_half_width_voxels / 2); i_level_set++) {
+			for (int i_level_set = -narrow_band_half_width_voxels;
+			     i_level_set < (narrow_band_half_width_voxels / 2); i_level_set++) {
 				Vector3i augmented_coord(coord.x, coord.y, coord.z + i_level_set);
 				float expected_sdf = -static_cast<float>(i_level_set) * max_SDF_step;
 				voxel = ManipulationEngine_CPU_PVA_Voxel::Inst().ReadVoxel(&scene1, augmented_coord);
 				sdf = TSDFVoxel::valueToFloat(voxel.sdf);
-				if(!almostEqual(sdf, expected_sdf, tolerance)){
+				if (!almostEqual(sdf, expected_sdf, tolerance)) {
 					unexpected_sdf_at_level_set = true;
 					i_bad_level_set = i_level_set;
 					bad_coordinate = augmented_coord;
@@ -352,7 +356,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
 		}
 	}
 	BOOST_REQUIRE_MESSAGE(!unexpected_sdf_at_level_set, "Expected sdf " << bad_expected_sdf << " for voxel " \
-	<< bad_coordinate << " at level set " << i_bad_level_set << ", got: " << bad_sdf);
+ << bad_coordinate << " at level set " << i_bad_level_set << ", got: " << bad_sdf);
 
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> scene2(&configuration::get().general_voxel_volume_parameters,
 	                                              configuration::get().swapping_mode ==
@@ -476,3 +480,76 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CPU) {
 	delete depth;
 	delete rgb;
 }
+
+//#define GENERATE_TEST_DATA
+#ifdef GENERATE_TEST_DATA
+BOOST_FIXTURE_TEST_CASE(GenerateTestData, Frame16And17Fixture) {
+
+	VoxelVolume<TSDFVoxel, PlainVoxelArray>* volume_PVA_16;
+	VoxelVolume<TSDFVoxel, PlainVoxelArray>* volume_PVA_17;
+	buildSdfVolumeFromImage_SurfaceSpanAllocation(&volume_PVA_16,
+	                                              &volume_PVA_17,
+	                                              "TestData/snoopy_depth_000016.png",
+	                                              "TestData/snoopy_color_000016.png",
+	                                              "TestData/snoopy_omask_000016.png",
+	                                              "TestData/snoopy_depth_000017.png",
+	                                              "TestData/snoopy_color_000017.png",
+	                                              "TestData/snoopy_omask_000017.png",
+	                                              "TestData/snoopy_calib.txt", MEMORYDEVICE_CPU,
+	                                              InitParams<PlainVoxelArray>());
+
+	VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume_VBH_16;
+	VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume_VBH_17;
+	buildSdfVolumeFromImage_SurfaceSpanAllocation(&volume_VBH_16,
+	                                              &volume_VBH_17,
+	                                              "TestData/snoopy_depth_000016.png",
+	                                              "TestData/snoopy_color_000016.png",
+	                                              "TestData/snoopy_omask_000016.png",
+	                                              "TestData/snoopy_depth_000017.png",
+	                                              "TestData/snoopy_color_000017.png",
+	                                              "TestData/snoopy_omask_000017.png",
+	                                              "TestData/snoopy_calib.txt", MEMORYDEVICE_CPU,
+	                                              InitParams<VoxelBlockHash>());
+
+	std::string path_PVA = "TestData/snoopy_result_fr16-17_partial_PVA/snoopy_partial_frame_16_";
+	volume_PVA_16->SaveToDirectory(std::string("../../Tests/") + path_PVA);
+	std::string path_VBH = "TestData/snoopy_result_fr16-17_partial_VBH/snoopy_partial_frame_16_";
+	volume_VBH_16->SaveToDirectory(std::string("../../Tests/") + path_VBH);
+	path_PVA = "TestData/snoopy_result_fr16-17_partial_PVA/snoopy_partial_frame_17_";
+	volume_PVA_17->SaveToDirectory(std::string("../../Tests/") + path_PVA);
+	path_VBH = "TestData/snoopy_result_fr16-17_partial_VBH/snoopy_partial_frame_17_";
+	volume_VBH_17->SaveToDirectory(std::string("../../Tests/") + path_VBH);
+
+	delete volume_VBH_16;
+	delete volume_PVA_16;
+
+	buildSdfVolumeFromImage_SurfaceSpanAllocation(&volume_PVA_16,
+	                                              &volume_PVA_17,
+	                                              "TestData/snoopy_depth_000016.png",
+	                                              "TestData/snoopy_color_000016.png",
+	                                              "TestData/snoopy_omask_000016.png",
+	                                              "TestData/snoopy_depth_000017.png",
+	                                              "TestData/snoopy_color_000017.png",
+	                                              "TestData/snoopy_omask_000017.png",
+	                                              "TestData/snoopy_calib.txt", MEMORYDEVICE_CPU);
+
+	buildSdfVolumeFromImage_SurfaceSpanAllocation(&volume_VBH_16,
+	                                              &volume_VBH_17,
+	                                              "TestData/snoopy_depth_000016.png",
+	                                              "TestData/snoopy_color_000016.png",
+	                                              "TestData/snoopy_omask_000016.png",
+	                                              "TestData/snoopy_depth_000017.png",
+	                                              "TestData/snoopy_color_000017.png",
+	                                              "TestData/snoopy_omask_000017.png",
+	                                              "TestData/snoopy_calib.txt", MEMORYDEVICE_CPU);
+
+	path_PVA = "TestData/snoopy_result_fr16-17_full/snoopy_full_frame_16_";
+	volume_PVA_16->SaveToDirectory(std::string("../../Tests/") + path_PVA);
+	path_VBH = "TestData/snoopy_result_fr16-17_full/snoopy_full_frame_16_";
+	volume_VBH_16->SaveToDirectory(std::string("../../Tests/") + path_VBH);
+	path_PVA = "TestData/snoopy_result_fr16-17_full/snoopy_full_frame_17_";
+	volume_PVA_17->SaveToDirectory(std::string("../../Tests/") + path_PVA);
+	path_VBH = "TestData/snoopy_result_fr16-17_full/snoopy_full_frame_17_";
+	volume_VBH_17->SaveToDirectory(std::string("../../Tests/") + path_VBH);
+}
+#endif

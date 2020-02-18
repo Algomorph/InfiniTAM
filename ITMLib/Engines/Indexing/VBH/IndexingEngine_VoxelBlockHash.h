@@ -31,6 +31,8 @@ public:
 	virtual HashEntry FindHashEntry(const VoxelBlockHash& index, const Vector3s& coordinates) = 0;
 	virtual bool AllocateHashBlockAt(VoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3s at, int& hashCode) = 0;
 
+	virtual void ResetUtilizedBlockList(VoxelVolume<TVoxel, VoxelBlockHash>* volume) override;
+
 	void AllocateNearSurface(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
 	                         const Matrix4f& depth_camera_matrix = Matrix4f::Identity(),
 	                         bool only_update_visible_list = false, bool resetVisibleList = false) override;

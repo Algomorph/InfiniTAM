@@ -24,6 +24,8 @@ template<typename TVoxel, typename TIndex>
 class VolumeStatisticsCalculatorInterface {
 public:
 	virtual Vector6i ComputeVoxelBounds(const VoxelVolume<TVoxel, TIndex>* volume) = 0;
+	virtual Vector6i ComputeAlteredVoxelBounds(const VoxelVolume<TVoxel, TIndex>* volume) = 0;
+
 	virtual int ComputeAllocatedVoxelCount(VoxelVolume<TVoxel, TIndex>* volume) = 0;
 	virtual int ComputeAllocatedHashBlockCount(VoxelVolume<TVoxel, TIndex>* volume) = 0;
 	virtual std::vector<int> GetAllocatedHashCodes(VoxelVolume<TVoxel, TIndex>* volume) = 0;

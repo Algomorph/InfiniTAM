@@ -35,6 +35,7 @@ public:
 	void operator=(VolumeStatisticsCalculator const&) = delete;
 
 	Vector6i ComputeVoxelBounds(const VoxelVolume<TVoxel, TIndex>* volume) override;
+	Vector6i ComputeAlteredVoxelBounds(const VoxelVolume<TVoxel, TIndex>* volume) override;
 	int ComputeAllocatedVoxelCount(VoxelVolume<TVoxel, TIndex>* volume) override;
 	int ComputeAllocatedHashBlockCount(VoxelVolume<TVoxel, TIndex>* volume) override;
 	std::vector<int> GetAllocatedHashCodes(VoxelVolume<TVoxel, TIndex>* volume) override;

@@ -6,7 +6,6 @@
 #include "../../../Utils/CUDAUtils.h"
 #include "../../Common/CheckBlockVisibility.h"
 #include "../../Common/AllocationTempData.h"
-#include "../../Indexing/Shared/IndexingEngine_Shared.h"
 #include "../../../Utils/Configuration.h"
 
 

@@ -28,6 +28,12 @@ namespace ITMLib {
 
 
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, typename TDerivedClass>
+void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::ResetUtilizedBlockList(
+		VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
+	volume->index.SetUtilizedHashBlockCount(0);
+}
+
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, typename TDerivedClass>
 void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::AllocateNearSurface(
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view, const Matrix4f& depth_camera_matrix,
 		bool only_update_visible_list, bool resetVisibleList) {

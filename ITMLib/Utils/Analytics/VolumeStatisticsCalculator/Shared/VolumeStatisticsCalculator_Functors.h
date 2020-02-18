@@ -461,3 +461,198 @@ struct ComputeAllocatedVoxelCountFunctor<TVoxel, VoxelBlockHash, TMemoryDeviceTy
 		return HashOnlyStatisticsFunctor<TVoxel, VoxelBlockHash, TMemoryDeviceType>::ComputeAllocatedHashBlockCount(volume) * VOXEL_BLOCK_SIZE3;
 	}
 };
+
+//============================== VOLUME BOUNDS COMPUTATION =============================================================
+
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+struct ComputeVoxelBoundsFunctor;
+
+template<typename TVoxel>
+struct ComputeVoxelBoundsFunctor<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU> {
+	static Vector6i Compute(const VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
+
+		Vector6i bounds = Vector6i(0);
+		bounds.min_x = std::numeric_limits<int>::max();
+		bounds.min_y = std::numeric_limits<int>::max();
+		bounds.min_z = std::numeric_limits<int>::max();
+
+		const TVoxel* voxel_blocks = volume->localVBA.GetVoxelBlocks();
+		const HashEntry* hash_table = volume->index.GetEntries();
+		int hash_entry_count = volume->index.hashEntryCount;
+
+		//TODO: if OpenMP standard is 3.1 or above, use OpenMP parallel for reduction clause with (max:maxVoxelPointX,...) -Greg (GitHub: Algomorph)
+		for (int hash_code = 0; hash_code < hash_entry_count; hash_code++) {
+
+			const HashEntry& hash_entry = hash_table[hash_code];
+
+			if (hash_entry.ptr < 0) continue;
+
+			//position of the current entry in 3D space
+			Vector3i hash_block_min_voxels = hash_entry.pos.toInt() * VOXEL_BLOCK_SIZE;
+			Vector3i hash_block_max_voxels =
+					(hash_entry.pos.toInt() + Vector3i(1, 1, 1)) * VOXEL_BLOCK_SIZE;
+
+			if (bounds.min_x > hash_block_min_voxels.x) {
+				bounds.min_x = hash_block_min_voxels.x;
+			}
+			if (bounds.max_x < hash_block_max_voxels.x) {
+				bounds.max_x = hash_block_max_voxels.x;
+			}
+			if (bounds.min_y > hash_block_min_voxels.y) {
+				bounds.min_y = hash_block_min_voxels.y;
+			}
+			if (bounds.max_y < hash_block_max_voxels.y) {
+				bounds.max_y = hash_block_max_voxels.y;
+			}
+			if (bounds.min_z > hash_block_min_voxels.z) {
+				bounds.min_z = hash_block_min_voxels.z;
+			}
+			if (bounds.max_z < hash_block_max_voxels.z) {
+				bounds.max_z = hash_block_max_voxels.z;
+			}
+		}
+		return bounds;
+	}
+};
+template<typename TVoxel>
+struct ComputeVoxelBoundsFunctor<TVoxel, PlainVoxelArray, MEMORYDEVICE_CPU> {
+	static Vector6i Compute(const VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
+		Vector3i offset = volume->index.GetVolumeOffset();
+		Vector3i size = volume->index.GetVolumeSize();
+		return {offset.x, offset.y, offset.z,
+		        offset.x + size.x, offset.y + size.y, offset.z + size.z};
+	}
+};
+#ifdef __CUDACC__
+namespace {
+// CUDA kernel implementations
+
+__global__ void computeVoxelBounds(const HashEntry* hash_table, Vector6i* bounds, int hash_entry_count) {
+	int hash = threadIdx.x + blockIdx.x * blockDim.x;
+	if (hash >= hash_entry_count) return;
+
+	const HashEntry& hashEntry = hash_table[hash];
+	if (hashEntry.ptr < 0) return;
+
+	Vector3i hashEntryPosVoxels = hashEntry.pos.toInt() * VOXEL_BLOCK_SIZE;
+
+	atomicMin(&(bounds->min_x), hashEntryPosVoxels.x);
+	atomicMin(&(bounds->min_y), hashEntryPosVoxels.y);
+	atomicMin(&(bounds->min_z), hashEntryPosVoxels.z);
+	atomicMax(&(bounds->max_x), hashEntryPosVoxels.x + VOXEL_BLOCK_SIZE);
+	atomicMax(&(bounds->max_y), hashEntryPosVoxels.y + VOXEL_BLOCK_SIZE);
+	atomicMax(&(bounds->max_z), hashEntryPosVoxels.z + VOXEL_BLOCK_SIZE);
+}
+} // end anonymous namespace
+
+
+template<typename TVoxel>
+struct ComputeVoxelBoundsFunctor<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA> {
+	static Vector6i Compute(const VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
+
+		Vector6i bounds = Vector6i(0);
+		bounds.min_x = std::numeric_limits<int>::max();
+		bounds.min_y = std::numeric_limits<int>::max();
+		bounds.min_z = std::numeric_limits<int>::max();
+
+		const TVoxel* voxelBlocks = volume->localVBA.GetVoxelBlocks();
+		const HashEntry* hashTable = volume->index.GetEntries();
+		int noTotalEntries = volume->index.hashEntryCount;
+
+		dim3 cudaBlockSize(256, 1);
+		dim3 cudaGridSize((int) ceil((float) noTotalEntries / (float) cudaBlockSize.x));
+
+		Vector6i* boundsCuda = nullptr;
+
+		ORcudaSafeCall(cudaMalloc((void**) &boundsCuda, sizeof(Vector6i)));
+		ORcudaSafeCall(cudaMemcpy(boundsCuda, (void*) &bounds, sizeof(Vector6i), cudaMemcpyHostToDevice));
+
+		computeVoxelBounds << < cudaGridSize, cudaBlockSize >> > (hashTable, boundsCuda, noTotalEntries);
+		ORcudaKernelCheck;
+
+		ORcudaSafeCall(cudaMemcpy((void*) &bounds, boundsCuda, sizeof(Vector6i), cudaMemcpyDeviceToHost));
+		ORcudaSafeCall(cudaFree(boundsCuda));
+		return bounds;
+	}
+};
+
+template<typename TVoxel>
+struct ComputeVoxelBoundsFunctor<TVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA> {
+	static Vector6i Compute(const VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
+		const PlainVoxelArray::IndexData* indexData = volume->index.GetIndexData();
+		return Vector6i(indexData->offset.x, indexData->offset.y, indexData->offset.z,
+		                indexData->offset.x + indexData->size.x, indexData->offset.y + indexData->size.y,
+		                indexData->offset.z + indexData->size.z);
+	}
+};
+
+#endif
+
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
+struct ComputeConditionalVoxelBoundsFunctorInterface{
+	_DEVICE_WHEN_AVAILABLE_
+	inline void operator()(TVoxel& voxel, const Vector3i& voxel_position){};
+};
+
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, typename TPredicate>
+struct ComputeConditionalVoxelBoundsFunctor : public ComputeConditionalVoxelBoundsFunctorInterface<TVoxel, TMemoryDeviceType>{
+	ComputeConditionalVoxelBoundsFunctor(TPredicate&& predicate): predicate(predicate){
+		INITIALIZE_ATOMIC(int, min_x, INT_MAX);
+		INITIALIZE_ATOMIC(int, min_y, INT_MAX);
+		INITIALIZE_ATOMIC(int, min_z, INT_MAX);
+		INITIALIZE_ATOMIC(int, max_x, INT_MIN);
+		INITIALIZE_ATOMIC(int, max_y, INT_MIN);
+		INITIALIZE_ATOMIC(int, max_z, INT_MIN);
+	}
+
+	_DEVICE_WHEN_AVAILABLE_
+	inline void operator()(TVoxel& voxel, const Vector3i& voxel_position){
+		if(predicate(voxel)){
+			ATOMIC_MIN(min_x, voxel_position.x);
+			ATOMIC_MIN(min_y, voxel_position.y);
+			ATOMIC_MIN(min_z, voxel_position.z);
+			ATOMIC_MIN(max_x, voxel_position.x);
+			ATOMIC_MIN(max_y, voxel_position.y);
+			ATOMIC_MIN(max_z, voxel_position.z);
+		}
+	}
+
+	~ComputeConditionalVoxelBoundsFunctor(){
+		CLEAN_UP_ATOMIC(min_x);
+		CLEAN_UP_ATOMIC(min_y);
+		CLEAN_UP_ATOMIC(min_z);
+		CLEAN_UP_ATOMIC(max_x);
+		CLEAN_UP_ATOMIC(max_y);
+		CLEAN_UP_ATOMIC(max_z);
+	}
+
+	Extent3D GetBounds(){
+		return {
+				GET_ATOMIC_VALUE_CPU(min_x),
+				GET_ATOMIC_VALUE_CPU(min_y),
+				GET_ATOMIC_VALUE_CPU(min_z),
+				GET_ATOMIC_VALUE_CPU(max_x),
+				GET_ATOMIC_VALUE_CPU(max_y),
+				GET_ATOMIC_VALUE_CPU(max_z)
+		};
+	}
+
+private:
+
+	TPredicate&& predicate;
+	DECLARE_ATOMIC(int, min_x);
+	DECLARE_ATOMIC(int, min_y);
+	DECLARE_ATOMIC(int, min_z);
+	DECLARE_ATOMIC(int, max_x);
+	DECLARE_ATOMIC(int, max_y);
+	DECLARE_ATOMIC(int, max_z);
+};
+
+struct ComputeConditionalVoxelBoundsFunctorFactory{
+
+	template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, typename TPredicate>
+	static
+	ComputeConditionalVoxelBoundsInterface<TVoxel, TMemoryDeviceType> Build(TPredicate&& predicate){
+
+	}
+};

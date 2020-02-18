@@ -287,7 +287,7 @@ inline ITMLib::Segment findHashBlockSegmentAlongCameraRayWithinRangeFromPoint(
 		const float one_over_hash_block_size) {
 
 	// distance to the point along camera ray
-	float norm = ORUtils::length(point_in_camera_space);
+	float norm = sqrt(point_in_camera_space.x * point_in_camera_space.x + point_in_camera_space.y + point_in_camera_space.y + point_in_camera_space.z * point_in_camera_space.z);
 
 	Vector4f endpoint_in_camera_space;
 
@@ -298,6 +298,7 @@ inline ITMLib::Segment findHashBlockSegmentAlongCameraRayWithinRangeFromPoint(
 			endpoint_in_camera_space, inverted_camera_pose, one_over_hash_block_size);
 
 	endpoint_in_camera_space = point_in_camera_space * (1.0f + distance_from_point / norm);
+	endpoint_in_camera_space.w = 1.0f;
 	//end position of the segment to march along the ray
 	Vector3f end_point_in_hash_blocks = cameraVoxelSpaceToWorldHashBlockSpace(
 			endpoint_in_camera_space, inverted_camera_pose, one_over_hash_block_size);
@@ -351,6 +352,16 @@ inline Vector4f imageSpacePointToCameraSpace(const float depth, const int x, con
 	        ((float(x) - inverted_camera_projection_parameters.z) * inverted_camera_projection_parameters.x),
 	        depth *
 	        ((float(y) - inverted_camera_projection_parameters.w) * inverted_camera_projection_parameters.y),
+	        depth, 1.0f};
+}
+
+_CPU_AND_GPU_CODE_
+inline Vector4f imageSpacePointToCameraSpace(const float depth, const float x, const float y,
+                                             const Vector4f& inverted_camera_projection_parameters) {
+	return {depth *
+	        ((x - inverted_camera_projection_parameters.z) * inverted_camera_projection_parameters.x),
+	        depth *
+	        ((y - inverted_camera_projection_parameters.w) * inverted_camera_projection_parameters.y),
 	        depth, 1.0f};
 }
 

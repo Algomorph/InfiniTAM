@@ -49,12 +49,14 @@ public:
 	 * \param view [in] a view with a new depth image
 	 * \param tracking_state [in] tracking state that corresponds to the given view
 	 * \param only_update_utilized_block_list [in] whether we want to allocate only the hash entry blocks currently visible
-	 * \param reset_utilized_block_list  [in] reset visibility list prior to the rest of the operation
+	 * \param reset_utilized_block_list  [in] reset utilized block list before the rest of the operation
 	 */
 	virtual void
 	AllocateNearSurface(VoxelVolume<TVoxel, TIndex>* volume, const ITMView* view,
 	                    const CameraTrackingState* tracking_state,
 	                    bool only_update_utilized_block_list, bool reset_utilized_block_list) = 0;
+
+	virtual void ResetUtilizedBlockList(VoxelVolume<TVoxel, TIndex>* volume) = 0;
 
 	/**
 	 * \brief Given a view with a new depth image, compute the
@@ -127,6 +129,8 @@ public:
 
 	IndexingEngine(IndexingEngine const&) = delete;
 	void operator=(IndexingEngine const&) = delete;
+
+	virtual void ResetUtilizedBlockList(VoxelVolume<TVoxel, TIndex>* volume) override;
 
 	virtual void AllocateNearSurface(VoxelVolume<TVoxel, TIndex>* volume, const ITMView* view,
 	                                 const CameraTrackingState* tracking_state, bool onlyUpdateVisibleList,

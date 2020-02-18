@@ -35,7 +35,7 @@ std::string Frame16And17Fixture::partial_frame_17_path<VoxelBlockHash>(bool expa
 
 template<>
 PlainVoxelArray::InitializationParameters Frame16And17Fixture::InitParams<PlainVoxelArray>() {
-	return {Vector3i(80, 96, 248), Vector3i(-64, -24, 64)};
+	return {Vector3i(88, 96, 160), Vector3i(-72, -24, 160)};
 }
 
 template<>
