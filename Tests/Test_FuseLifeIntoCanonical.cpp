@@ -40,8 +40,8 @@
 
 using namespace ITMLib;
 
-typedef VolumeFusionEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU> VolumeFusionEngine_CPU_PVA;
-typedef VolumeFusionEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU> VolumeFusionEngine_CPU_VBH;
+typedef VolumeFusionEngine<TSDFVoxel, PlainVoxelArray, MEMORYDEVICE_CPU> VolumeFusionEngine_CPU_PVA;
+typedef VolumeFusionEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU> VolumeFusionEngine_CPU_VBH;
 
 BOOST_FIXTURE_TEST_CASE(Test_FuseLifeIntoCanonical_CPU_PVA, Frame16And17Fixture) {
 	const int iteration = 4;
@@ -90,8 +90,8 @@ BOOST_FIXTURE_TEST_CASE(Test_FuseLifeIntoCanonical_CPU_VBH, Frame16And17Fixture)
 }
 
 #ifndef COMPILE_WITHOUT_CUDA
-typedef VolumeFusionEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA> VolumeFusionEngine_CUDA_PVA;
-typedef VolumeFusionEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA> VolumeFusionEngine_CUDA_VBH;
+typedef VolumeFusionEngine<TSDFVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA> VolumeFusionEngine_CUDA_PVA;
+typedef VolumeFusionEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA> VolumeFusionEngine_CUDA_VBH;
 BOOST_FIXTURE_TEST_CASE(Test_FuseLifeIntoCanonical_CUDA_PVA, Frame16And17Fixture) {
 	const int iteration = 4;
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* warped_live_volume;
@@ -160,10 +160,10 @@ void Generic_Fusion_PVA_to_VBH_test(int iteration){
 	loadVolume(&canonical_volume_VBH, "TestData/snoopy_result_fr16-17_partial_VBH/snoopy_partial_frame_16_",
 	           TMemoryDeviceType, Frame16And17Fixture::InitParams<VoxelBlockHash>());
 
-	VolumeFusionEngineInterface<TSDFVoxel, WarpVoxel, PlainVoxelArray>* volume_fusion_engine_PVA =
-			VolumeFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, PlainVoxelArray>(TMemoryDeviceType);
-	VolumeFusionEngineInterface<TSDFVoxel, WarpVoxel, VoxelBlockHash>* volume_fusion_engine_VBH =
-			VolumeFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, VoxelBlockHash>(TMemoryDeviceType);
+	VolumeFusionEngineInterface<TSDFVoxel, PlainVoxelArray>* volume_fusion_engine_PVA =
+			VolumeFusionEngineFactory::Build<TSDFVoxel, PlainVoxelArray>(TMemoryDeviceType);
+	VolumeFusionEngineInterface<TSDFVoxel, VoxelBlockHash>* volume_fusion_engine_VBH =
+			VolumeFusionEngineFactory::Build<TSDFVoxel, VoxelBlockHash>(TMemoryDeviceType);
 
 	volume_fusion_engine_PVA->FuseOneTsdfVolumeIntoAnother(canonical_volume_PVA, warped_live_volume_PVA);
 	volume_fusion_engine_VBH->FuseOneTsdfVolumeIntoAnother(canonical_volume_VBH, warped_live_volume_VBH);

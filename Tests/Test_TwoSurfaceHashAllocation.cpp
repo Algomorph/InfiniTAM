@@ -241,7 +241,7 @@ BOOST_FIXTURE_TEST_CASE(Test_TwoSurfaceAllocation_CUDA, TestData_CUDA) {
 
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> span_volume(MEMORYDEVICE_CUDA, {0x8000, 0x20000});
 	span_volume.Reset();
-	indexer.AllocateNearAndBetweenTwoSurfaces(&span_volume, tracking_state, view_square_2);
+	indexer.AllocateNearAndBetweenTwoSurfaces(&span_volume, view_square_2, tracking_state);
 
 	std::vector<Vector3s> hash_block_positions_span = StatCalc_CUDA_VBH_Voxel::Instance().GetAllocatedHashBlockPositions(
 			&span_volume);
@@ -261,7 +261,7 @@ BOOST_FIXTURE_TEST_CASE(Test_TwoSurfaceAllocation_CUDA, TestData_CUDA) {
 
 	depth_fusion_engine.GenerateTsdfVolumeFromTwoSurfaces(&square_volume, view_square_2, tracking_state);
 	visualization_engine->CreateICPMaps(&square_volume, view_square_2, tracking_state, render_state);
-	indexer.AllocateNearAndBetweenTwoSurfaces(&span_volume, tracking_state, view_square_1);
+	indexer.AllocateNearAndBetweenTwoSurfaces(&span_volume, view_square_1, tracking_state);
 
 	hash_block_positions_span = StatCalc_CUDA_VBH_Voxel::Instance().GetAllocatedHashBlockPositions(
 			&span_volume);
