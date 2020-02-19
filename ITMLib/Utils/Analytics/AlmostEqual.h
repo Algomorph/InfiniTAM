@@ -360,7 +360,8 @@ template<>
 _CPU_AND_GPU_CODE_
 inline
 bool
-almostEqual<TSDFVoxel_s_rgb_conf, float>(const TSDFVoxel_s_rgb_conf& a, const TSDFVoxel_s_rgb_conf& b, float tolerance) {
+almostEqual<TSDFVoxel_s_rgb_conf, float>(const TSDFVoxel_s_rgb_conf& a, const TSDFVoxel_s_rgb_conf& b,
+                                         float tolerance) {
 	return almostEqual(TSDFVoxel_s_rgb::valueToFloat(a.sdf), TSDFVoxel_s_rgb::valueToFloat(b.sdf), tolerance) &&
 	       a.w_depth == b.w_depth &&
 	       a.clr == b.clr &&
@@ -374,13 +375,13 @@ inline
 bool almostEqual<WarpVoxel_f_uf, float>(const WarpVoxel_f_uf& a, const WarpVoxel_f_uf& b, float tolerance) {
 	return almostEqual(a.framewise_warp, b.framewise_warp, tolerance)
 	       && almostEqual(a.gradient0, b.gradient0, tolerance)
-	       && almostEqual(a.gradient1, b.gradient1, tolerance)
-	       ;
+	       && almostEqual(a.gradient1, b.gradient1, tolerance);
 }
 
 _CPU_AND_GPU_CODE_
 inline
-void getNonMatchingComponents(bool& xMismatch, bool& yMismatch, bool& zMismatch, const Vector3f& a, const Vector3f& b, float tolerance){
+void getNonMatchingComponents(bool& xMismatch, bool& yMismatch, bool& zMismatch, const Vector3f& a, const Vector3f& b,
+                              float tolerance) {
 	xMismatch = !almostEqual(a.x, b.x, tolerance);
 	yMismatch = !almostEqual(a.y, b.y, tolerance);
 	zMismatch = !almostEqual(a.z, b.z, tolerance);
@@ -388,20 +389,21 @@ void getNonMatchingComponents(bool& xMismatch, bool& yMismatch, bool& zMismatch,
 
 _CPU_AND_GPU_CODE_
 inline
-void printVector3fVoxelError(const Vector3f& a, const Vector3f& b, float tolerance, const char* description){
+void printVector3fVoxelError(const Vector3f& a, const Vector3f& b, float tolerance, const char* description) {
 	bool xMismatch, yMismatch, zMismatch;
-	getNonMatchingComponents(xMismatch,yMismatch,zMismatch, a, b, tolerance);
+	getNonMatchingComponents(xMismatch, yMismatch, zMismatch, a, b, tolerance);
 	printf("(Showing first error only) %s not within %E: (%E, %E, %E) vs (%E, %E, %E)\n", description, tolerance,
-			a.x, a.y, a.z, b.x, b.y, b.z);
+	       a.x, a.y, a.z, b.x, b.y, b.z);
 }
 
 _CPU_AND_GPU_CODE_
 inline
-void printVector3fVoxelError_Position(const Vector3f& a, const Vector3f& b, float tolerance, const char* description, const Vector3i& position){
+void printVector3fVoxelError_Position(const Vector3f& a, const Vector3f& b, float tolerance, const char* description,
+                                      const Vector3i& position) {
 	bool xMismatch, yMismatch, zMismatch;
-	getNonMatchingComponents(xMismatch,yMismatch,zMismatch, a, b, tolerance);
+	getNonMatchingComponents(xMismatch, yMismatch, zMismatch, a, b, tolerance);
 	printf("Position %d, %d, %d:(Showing first error only) %s not within %E: (%E, %E, %E) vs (%E, %E, %E)\n",
-			position.x, position.y, position.z, description, tolerance,
+	       position.x, position.y, position.z, description, tolerance,
 	       a.x, a.y, a.z, b.x, b.y, b.z);
 }
 
@@ -409,16 +411,16 @@ template<>
 _CPU_AND_GPU_CODE_
 inline
 bool almostEqualVerbose<WarpVoxel_f_uf, float>(const WarpVoxel_f_uf& a, const WarpVoxel_f_uf& b, float tolerance) {
-	if(!almostEqual(a.framewise_warp, b.framewise_warp, tolerance)){
-		printVector3fVoxelError(a.framewise_warp,b.framewise_warp,tolerance,"framewise_warp");
+	if (!almostEqual(a.framewise_warp, b.framewise_warp, tolerance)) {
+		printVector3fVoxelError(a.framewise_warp, b.framewise_warp, tolerance, "framewise_warp");
 		return false;
 	}
-	if(!almostEqual(a.gradient0, b.gradient0, tolerance)){
-		printVector3fVoxelError(a.gradient0,b.gradient0,tolerance,"gradient0");
+	if (!almostEqual(a.gradient0, b.gradient0, tolerance)) {
+		printVector3fVoxelError(a.gradient0, b.gradient0, tolerance, "gradient0");
 		return false;
 	}
-	if(!almostEqual(a.gradient1, b.gradient1, tolerance)){
-		printVector3fVoxelError(a.gradient1,b.gradient1,tolerance,"gradient1");
+	if (!almostEqual(a.gradient1, b.gradient1, tolerance)) {
+		printVector3fVoxelError(a.gradient1, b.gradient1, tolerance, "gradient1");
 		return false;
 	}
 	return true;
@@ -428,18 +430,19 @@ bool almostEqualVerbose<WarpVoxel_f_uf, float>(const WarpVoxel_f_uf& a, const Wa
 template<>
 _CPU_AND_GPU_CODE_
 inline
-bool almostEqualVerbose_Position<WarpVoxel_f_uf, float>(const WarpVoxel_f_uf& a, const WarpVoxel_f_uf& b, const Vector3i& position, float tolerance) {
+bool almostEqualVerbose_Position<WarpVoxel_f_uf, float>(const WarpVoxel_f_uf& a, const WarpVoxel_f_uf& b,
+                                                        const Vector3i& position, float tolerance) {
 
-	if(!almostEqual(a.framewise_warp, b.framewise_warp, tolerance)){
-		printVector3fVoxelError_Position(a.framewise_warp,b.framewise_warp,tolerance,"framewise_warp", position);
+	if (!almostEqual(a.framewise_warp, b.framewise_warp, tolerance)) {
+		printVector3fVoxelError_Position(a.framewise_warp, b.framewise_warp, tolerance, "framewise_warp", position);
 		return false;
 	}
-	if(!almostEqual(a.gradient0, b.gradient0, tolerance)){
-		printVector3fVoxelError_Position(a.gradient0,b.gradient0,tolerance,"gradient0", position);
+	if (!almostEqual(a.gradient0, b.gradient0, tolerance)) {
+		printVector3fVoxelError_Position(a.gradient0, b.gradient0, tolerance, "gradient0", position);
 		return false;
 	}
-	if(!almostEqual(a.gradient1, b.gradient1, tolerance)){
-		printVector3fVoxelError_Position(a.gradient1,b.gradient1,tolerance,"gradient1", position);
+	if (!almostEqual(a.gradient1, b.gradient1, tolerance)) {
+		printVector3fVoxelError_Position(a.gradient1, b.gradient1, tolerance, "gradient1", position);
 		return false;
 	}
 	return true;
@@ -458,22 +461,24 @@ bool almostEqual<TSDFVoxel_f_flags, float>(const TSDFVoxel_f_flags& a, const TSD
 template<>
 _CPU_AND_GPU_CODE_
 inline
-bool almostEqualVerbose_Position<TSDFVoxel_f_flags, float>(const TSDFVoxel_f_flags& a, const TSDFVoxel_f_flags& b, const Vector3i& position, float tolerance) {
-
-	if(!almostEqual(a.sdf, b.sdf, tolerance)){
-		printf("Position %d, %d, %d: mismatch between voxel:{sdf: %E, w_depth: %d, flags: %d} and voxel:{sdf: %E, w_depth: %d, flags: %d}. SDF not within tolerance %E.\n",
-		       position.x, position.y, position.z, a.sdf, a.w_depth, a.flags, b.sdf, b.w_depth, b.flags, tolerance);
-		return false;
-	}
-	if(a.w_depth != b.w_depth){
-		printf("Position %d, %d, %d: mismatch between voxel:{sdf: %E, w_depth: %d, flags: %d} and voxel:{sdf: %E, w_depth: %d, flags: %d}. The w_depth values are different.\n",
-		       position.x, position.y, position.z, a.sdf, a.w_depth, a.flags, b.sdf, b.w_depth, b.flags);
-		return false;
-	}
-	if(a.flags != b.flags) {
-		printf("Position %d, %d, %d: mismatch between voxel:{sdf: %E, w_depth: %d, flags: %d} and voxel:{sdf: %E, w_depth: %d, flags: %d}. The flags are different.\n",
-		       position.x, position.y, position.z, a.sdf, a.w_depth, a.flags, b.sdf, b.w_depth, b.flags);
-		return false;
+bool almostEqualVerbose_Position<TSDFVoxel_f_flags, float>(const TSDFVoxel_f_flags& a, const TSDFVoxel_f_flags& b,
+                                                           const Vector3i& position, float tolerance) {
+	if (!(a.flags == VoxelFlags::VOXEL_UNKNOWN && b.flags == VoxelFlags::VOXEL_UNKNOWN)) {
+		if (!almostEqual(a.sdf, b.sdf, tolerance)) {
+			printf("Position %d, %d, %d: mismatch between voxel:{sdf: %E, w_depth: %d, flags: %d} and voxel:{sdf: %E, w_depth: %d, flags: %d}. SDF not within tolerance %E.\n",
+			       position.x, position.y, position.z, a.sdf, a.w_depth, a.flags, b.sdf, b.w_depth, b.flags, tolerance);
+			return false;
+		}
+		if (a.w_depth != b.w_depth) {
+			printf("Position %d, %d, %d: mismatch between voxel:{sdf: %E, w_depth: %d, flags: %d} and voxel:{sdf: %E, w_depth: %d, flags: %d}. The w_depth values are different.\n",
+			       position.x, position.y, position.z, a.sdf, a.w_depth, a.flags, b.sdf, b.w_depth, b.flags);
+			return false;
+		}
+		if (a.flags != b.flags) {
+			printf("Position %d, %d, %d: mismatch between voxel:{sdf: %E, w_depth: %d, flags: %d} and voxel:{sdf: %E, w_depth: %d, flags: %d}. The flags are different.\n",
+			       position.x, position.y, position.z, a.sdf, a.w_depth, a.flags, b.sdf, b.w_depth, b.flags);
+			return false;
+		}
 	}
 	return true;
 }
@@ -517,7 +522,8 @@ template<>
 _CPU_AND_GPU_CODE_
 inline
 bool
-almostEqual<TSDFVoxel_f_conf, unsigned int>(const TSDFVoxel_f_conf& a, const TSDFVoxel_f_conf& b, unsigned int tolerance) {
+almostEqual<TSDFVoxel_f_conf, unsigned int>(const TSDFVoxel_f_conf& a, const TSDFVoxel_f_conf& b,
+                                            unsigned int tolerance) {
 	const float tolerance_float = 1.0f / (10.0f * static_cast<float>(tolerance));
 	return almostEqual(a, b, tolerance_float);
 }

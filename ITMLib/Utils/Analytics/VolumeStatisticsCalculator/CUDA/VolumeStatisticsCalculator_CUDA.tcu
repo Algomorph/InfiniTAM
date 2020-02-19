@@ -37,20 +37,24 @@ __global__ void computeVoxelBounds(const HashEntry* hash_table, Vector6i* bounds
 
 template<typename TVoxel, typename TIndex>
 Vector6i
-VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CUDA>::ComputeVoxelBounds(const VoxelVolume<TVoxel, TIndex>* volume) {
+VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CUDA>::ComputeVoxelBounds(
+		const VoxelVolume<TVoxel, TIndex>* volume) {
 	return ComputeVoxelBoundsFunctor<TVoxel, TIndex, MEMORYDEVICE_CUDA>::Compute(volume);
 }
 
 
 template<typename TVoxel, typename TIndex>
 Vector6i VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CUDA>::ComputeAlteredVoxelBounds(
-		const VoxelVolume<TVoxel, TIndex>* volume) {
-	return Vector6i();
+		VoxelVolume<TVoxel, TIndex>* volume) {
+	ComputeConditionalVoxelBoundsFunctor<TVoxel, MEMORYDEVICE_CUDA, IsAlteredStaticFunctor<TVoxel>> bounds_functor;
+	VolumeTraversalEngine<TVoxel, TIndex, MEMORYDEVICE_CUDA>::TraverseAllWithPosition(volume, bounds_functor);
+	return bounds_functor.GetBounds();
 }
 
 template<typename TVoxel, typename TIndex>
 int
-VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CUDA>::ComputeAllocatedVoxelCount(VoxelVolume<TVoxel, TIndex>* volume) {
+VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CUDA>::ComputeAllocatedVoxelCount(
+		VoxelVolume<TVoxel, TIndex>* volume) {
 	return ComputeAllocatedVoxelCountFunctor<TVoxel, TIndex, MEMORYDEVICE_CUDA>::compute(volume);
 }
 
@@ -63,13 +67,15 @@ int VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CUDA>::ComputeAlloca
 
 template<typename TVoxel, typename TIndex>
 std::vector<int>
-VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CUDA>::GetAllocatedHashCodes(VoxelVolume<TVoxel, TIndex>* volume) {
+VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CUDA>::GetAllocatedHashCodes(
+		VoxelVolume<TVoxel, TIndex>* volume) {
 	return HashOnlyStatisticsFunctor<TVoxel, TIndex, MEMORYDEVICE_CUDA>::GetAllocatedHashCodes(volume);
 }
 
 template<typename TVoxel, typename TIndex>
 std::vector<Vector3s>
-VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CUDA>::GetAllocatedHashBlockPositions(VoxelVolume<TVoxel, TIndex>* volume) {
+VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CUDA>::GetAllocatedHashBlockPositions(
+		VoxelVolume<TVoxel, TIndex>* volume) {
 	return HashOnlyStatisticsFunctor<TVoxel, TIndex, MEMORYDEVICE_CUDA>::GetAllocatedBlockPositions(volume);
 }
 
@@ -117,7 +123,8 @@ struct ComputeNonTruncatedVoxelCountFunctor<true, TVoxel, TIndex, TMemoryDeviceT
 template<typename TVoxel, typename TIndex>
 int VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CUDA>::ComputeNonTruncatedVoxelCount(
 		VoxelVolume<TVoxel, TIndex>* volume) {
-	return ComputeNonTruncatedVoxelCountFunctor<TVoxel::hasSemanticInformation, TVoxel, TIndex, MEMORYDEVICE_CUDA>::compute(volume);
+	return ComputeNonTruncatedVoxelCountFunctor<TVoxel::hasSemanticInformation, TVoxel, TIndex, MEMORYDEVICE_CUDA>::compute(
+			volume);
 }
 
 template<typename TVoxel, typename TIndex>
@@ -131,13 +138,14 @@ template<typename TVoxel, typename TIndex>
 double VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CUDA>::ComputeNonTruncatedVoxelAbsSdfSum(
 		VoxelVolume<TVoxel, TIndex>* volume) {
 	return SumSDFFunctor<TVoxel::hasSemanticInformation, TVoxel, TIndex, MEMORYDEVICE_CUDA>::compute(volume,
-	                                                                              VoxelFlags::VOXEL_NONTRUNCATED);
+	                                                                                                 VoxelFlags::VOXEL_NONTRUNCATED);
 }
 
 template<typename TVoxel, typename TIndex>
 double VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CUDA>::ComputeTruncatedVoxelAbsSdfSum(
 		VoxelVolume<TVoxel, TIndex>* volume) {
-	return SumSDFFunctor<TVoxel::hasSemanticInformation, TVoxel, TIndex, MEMORYDEVICE_CUDA>::compute(volume, VoxelFlags::VOXEL_TRUNCATED);
+	return SumSDFFunctor<TVoxel::hasSemanticInformation, TVoxel, TIndex, MEMORYDEVICE_CUDA>::compute(volume,
+	                                                                                                 VoxelFlags::VOXEL_TRUNCATED);
 }
 
 
@@ -157,27 +165,31 @@ float VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CUDA>::FindMaxGrad
 
 template<typename TVoxel, typename TIndex>
 unsigned int
-VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CUDA>::ComputeAlteredVoxelCount(VoxelVolume<TVoxel, TIndex>* volume) {
+VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CUDA>::ComputeAlteredVoxelCount(
+		VoxelVolume<TVoxel, TIndex>* volume) {
 	IsAlteredCountFunctor<TVoxel> functor;
 	VolumeTraversalEngine<TVoxel, TIndex, MEMORYDEVICE_CUDA>::TraverseAll(volume, functor);
 	return functor.GetCount();
 }
 
 template<typename TVoxel, typename TIndex>
-double VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CUDA>::ComputeFramewiseWarpMin(VoxelVolume<TVoxel, TIndex>* volume) {
+double VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CUDA>::ComputeFramewiseWarpMin(
+		VoxelVolume<TVoxel, TIndex>* volume) {
 	return ComputeFramewiseWarpLengthStatisticFunctor<TVoxel::hasFramewiseWarp, TVoxel, TIndex, MEMORYDEVICE_CUDA, MINIMUM>::compute(
 			volume);
 }
 
 
 template<typename TVoxel, typename TIndex>
-double VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CUDA>::ComputeFramewiseWarpMax(VoxelVolume<TVoxel, TIndex>* volume) {
+double VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CUDA>::ComputeFramewiseWarpMax(
+		VoxelVolume<TVoxel, TIndex>* volume) {
 	return ComputeFramewiseWarpLengthStatisticFunctor<TVoxel::hasFramewiseWarp, TVoxel, TIndex, MEMORYDEVICE_CUDA, MAXIMUM>::compute(
 			volume);
 }
 
 template<typename TVoxel, typename TIndex>
-double VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CUDA>::ComputeFramewiseWarpMean(VoxelVolume<TVoxel, TIndex>* volume) {
+double VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CUDA>::ComputeFramewiseWarpMean(
+		VoxelVolume<TVoxel, TIndex>* volume) {
 	return ComputeFramewiseWarpLengthStatisticFunctor<TVoxel::hasFramewiseWarp, TVoxel, TIndex, MEMORYDEVICE_CUDA, MEAN>::compute(
 			volume);
 }

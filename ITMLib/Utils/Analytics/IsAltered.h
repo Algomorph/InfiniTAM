@@ -138,6 +138,14 @@ struct IsAlteredFunctor {
 };
 
 template<typename TVoxel>
+struct IsAlteredStaticFunctor {
+	_CPU_AND_GPU_CODE_
+	static bool isSatisfiedBy(const TVoxel& voxel) {
+		return isAltered(voxel);
+	}
+};
+
+template<typename TVoxel>
 struct IsAlteredPositionFunctor {
 	_CPU_AND_GPU_CODE_
 	bool operator()(const TVoxel& voxel, const Vector3i& position) {

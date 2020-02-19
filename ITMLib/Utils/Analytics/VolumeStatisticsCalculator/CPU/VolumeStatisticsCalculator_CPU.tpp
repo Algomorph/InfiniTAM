@@ -27,23 +27,26 @@
 using namespace ITMLib;
 
 
-
 template<typename TVoxel, typename TIndex>
 Vector6i
-VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeVoxelBounds(const VoxelVolume<TVoxel, TIndex>* volume) {
+VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeVoxelBounds(
+		const VoxelVolume<TVoxel, TIndex>* volume) {
 	return ComputeVoxelBoundsFunctor<TVoxel, TIndex, MEMORYDEVICE_CPU>::Compute(volume);
 }
 
 template<typename TVoxel, typename TIndex>
 Vector6i VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeAlteredVoxelBounds(
-		const VoxelVolume<TVoxel, TIndex>* volume) {
-	ComputeConditionalVoxelBoundsFunctor([](TVoxel& voxel){return isAltered(voxel);});
+		VoxelVolume<TVoxel, TIndex>* volume) {
+	ComputeConditionalVoxelBoundsFunctor<TVoxel, MEMORYDEVICE_CPU, IsAlteredStaticFunctor<TVoxel>> bounds_functor;
+	VolumeTraversalEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>::TraverseAllWithPosition(volume, bounds_functor);
+	return bounds_functor.GetBounds();
 }
 
 //============================================== COUNT VOXELS ==========================================================
 template<typename TVoxel, typename TIndex>
 int
-VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeAllocatedVoxelCount(VoxelVolume<TVoxel, TIndex>* volume) {
+VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeAllocatedVoxelCount(
+		VoxelVolume<TVoxel, TIndex>* volume) {
 	return ComputeAllocatedVoxelCountFunctor<TVoxel, TIndex, MEMORYDEVICE_CPU>::compute(volume);
 }
 
@@ -75,7 +78,8 @@ struct ComputeNonTruncatedVoxelCountFunctor<true, TVoxel, TIndex> {
 
 template<typename TVoxel, typename TIndex>
 int
-VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeNonTruncatedVoxelCount(VoxelVolume<TVoxel, TIndex>* volume) {
+VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeNonTruncatedVoxelCount(
+		VoxelVolume<TVoxel, TIndex>* volume) {
 	return ComputeNonTruncatedVoxelCountFunctor<TVoxel::hasSemanticInformation, TVoxel, TIndex>::compute(volume);
 }
 
@@ -109,20 +113,23 @@ VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeAllocatedHa
 
 template<typename TVoxel, typename TIndex>
 std::vector<int>
-VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::GetAllocatedHashCodes(VoxelVolume<TVoxel, TIndex>* volume) {
+VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::GetAllocatedHashCodes(
+		VoxelVolume<TVoxel, TIndex>* volume) {
 	return HashOnlyStatisticsFunctor<TVoxel, TIndex, MEMORYDEVICE_CPU>::GetAllocatedHashCodes(volume);
 }
 
 template<typename TVoxel, typename TIndex>
 std::vector<Vector3s>
-VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::GetAllocatedHashBlockPositions(VoxelVolume<TVoxel, TIndex>* volume) {
+VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::GetAllocatedHashBlockPositions(
+		VoxelVolume<TVoxel, TIndex>* volume) {
 	return HashOnlyStatisticsFunctor<TVoxel, TIndex, MEMORYDEVICE_CPU>::GetAllocatedBlockPositions(volume);
 }
 
 template<typename TVoxel, typename TIndex>
 unsigned int
-VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::CountVoxelsWithSpecificSdfValue(VoxelVolume<TVoxel, TIndex>* volume,
-                                                                                              float value) {
+VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::CountVoxelsWithSpecificSdfValue(
+		VoxelVolume<TVoxel, TIndex>* volume,
+		float value) {
 	return ComputeVoxelCountWithSpecificValue<TVoxel::hasSDFInformation, TVoxel, TIndex, MEMORYDEVICE_CPU>::compute(
 			volume, value);
 }
@@ -189,26 +196,30 @@ VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::FindMaxGradient1Le
 
 template<typename TVoxel, typename TIndex>
 unsigned int
-VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeAlteredVoxelCount(VoxelVolume<TVoxel, TIndex>* volume) {
+VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeAlteredVoxelCount(
+		VoxelVolume<TVoxel, TIndex>* volume) {
 	IsAlteredCountFunctor<TVoxel> functor;
 	VolumeTraversalEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>::TraverseAll(volume, functor);
 	return functor.GetCount();
 }
 
 template<typename TVoxel, typename TIndex>
-double VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeFramewiseWarpMin(VoxelVolume<TVoxel, TIndex>* volume) {
+double VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeFramewiseWarpMin(
+		VoxelVolume<TVoxel, TIndex>* volume) {
 	return ComputeFramewiseWarpLengthStatisticFunctor<TVoxel::hasFramewiseWarp, TVoxel, TIndex, MEMORYDEVICE_CPU, MINIMUM>::compute(
 			volume);
 }
 
 template<typename TVoxel, typename TIndex>
-double VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeFramewiseWarpMax(VoxelVolume<TVoxel, TIndex>* volume) {
+double VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeFramewiseWarpMax(
+		VoxelVolume<TVoxel, TIndex>* volume) {
 	return ComputeFramewiseWarpLengthStatisticFunctor<TVoxel::hasFramewiseWarp, TVoxel, TIndex, MEMORYDEVICE_CPU, MAXIMUM>::compute(
 			volume);
 }
 
 template<typename TVoxel, typename TIndex>
-double VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeFramewiseWarpMean(VoxelVolume<TVoxel, TIndex>* volume) {
+double VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::ComputeFramewiseWarpMean(
+		VoxelVolume<TVoxel, TIndex>* volume) {
 	return ComputeFramewiseWarpLengthStatisticFunctor<TVoxel::hasFramewiseWarp, TVoxel, TIndex, MEMORYDEVICE_CPU, MEAN>::compute(
 			volume);
 }
@@ -217,7 +228,7 @@ template<typename TVoxel, typename TIndex>
 Vector6i VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::FindMinimumNonTruncatedBoundingBox(
 		VoxelVolume<TVoxel, TIndex>* volume) {
 	return FlagMatchBBoxFunctor<TVoxel::hasSemanticInformation, TVoxel, TIndex, MEMORYDEVICE_CPU>::
-	        compute(volume, VoxelFlags::VOXEL_NONTRUNCATED);
+	compute(volume, VoxelFlags::VOXEL_NONTRUNCATED);
 }
 
 // endregion ===========================================================================================================

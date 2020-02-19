@@ -29,81 +29,90 @@
 #include "../ITMLib/Utils/Analytics/VolumeStatisticsCalculator/CPU/VolumeStatisticsCalculator_CPU.h"
 
 
+#ifndef COMPILE_WITHOUT_CUDA
+#include "../ITMLib/Utils/Analytics/VolumeStatisticsCalculator/CUDA/VolumeStatisticsCalculator_CUDA.h"
+#endif
+
 using namespace ITMLib;
 
-//#define GET_SCENE_BOUNDS
+#define GET_SCENE_BOUNDS
 #ifdef GET_SCENE_BOUNDS
 BOOST_AUTO_TEST_CASE(GetSceneBounds){
-	VoxelVolume<TSDFVoxel, VoxelBlockHash> canonical_scene_vbh_CPU(MEMORYDEVICE_CPU);
-	canonical_scene_vbh_CPU.Reset();
-	canonical_scene_vbh_CPU.LoadFromDirectory("TestData/snoopy_result_fr16-17_full/snoopy_full_frame_16_");
-	std::cout << "BOUNDS(16):  " << StatCalc_CPU_VBH_Voxel::Instance().ComputeVoxelBounds(&canonical_scene_vbh_CPU) << std::endl;
-	canonical_scene_vbh_CPU.Reset();
-	canonical_scene_vbh_CPU.LoadFromDirectory("TestData/snoopy_result_fr16-17_full/snoopy_full_frame_17_");
-	std::cout << "BOUNDS(17):  " << StatCalc_CPU_VBH_Voxel::Instance().ComputeVoxelBounds(&canonical_scene_vbh_CPU) << std::endl;
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_vbh_CPU(MEMORYDEVICE_CPU);
+	volume_vbh_CPU.Reset();
+	volume_vbh_CPU.LoadFromDirectory("TestData/snoopy_result_fr16-17_full/snoopy_full_frame_16_");
+	std::cout << "BOUNDS(16/VBH):  " << StatCalc_CPU_VBH_Voxel::Instance().ComputeVoxelBounds(&volume_vbh_CPU) << std::endl;
+	volume_vbh_CPU.Reset();
+	volume_vbh_CPU.LoadFromDirectory("TestData/snoopy_result_fr16-17_full/snoopy_full_frame_17_");
+	std::cout << "BOUNDS(17/VBH):  " << StatCalc_CPU_VBH_Voxel::Instance().ComputeVoxelBounds(&volume_vbh_CPU) << std::endl;
+	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_pva_CUDA(MEMORYDEVICE_CUDA);
+	volume_pva_CUDA.Reset();
+	volume_pva_CUDA.LoadFromDirectory("TestData/snoopy_result_fr16-17_full/snoopy_full_frame_16_");
+	std::cout << "ALTERED BOUNDS(16/PVA)" << StatCalc_CUDA_PVA_Voxel::Instance().ComputeAlteredVoxelBounds(&volume_pva_CUDA) << std::endl;
 }
 #endif
 
 BOOST_AUTO_TEST_CASE(testPVASceneSlice_CPU) {
-	VoxelVolume<TSDFVoxel, PlainVoxelArray> canonical_scene_CPU(MEMORYDEVICE_CPU);
-	canonical_scene_CPU.Reset();
+	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_CPU(MEMORYDEVICE_CPU);
+	volume_CPU.Reset();
 
 	const int expected_non_truncated_voxel_count = 58368;
-	canonical_scene_CPU.LoadFromDirectory("TestData/snoopy_result_fr16-17_full/snoopy_full_frame_16_");
+	volume_CPU.LoadFromDirectory("TestData/snoopy_result_fr16-17_full/snoopy_full_frame_16_");
 
-	BOOST_REQUIRE_EQUAL(StatCalc_CPU_PVA_Voxel::Instance().ComputeNonTruncatedVoxelCount(&canonical_scene_CPU),
+	BOOST_REQUIRE_EQUAL(StatCalc_CPU_PVA_Voxel::Instance().ComputeNonTruncatedVoxelCount(&volume_CPU),
 	                    expected_non_truncated_voxel_count);
 
-	BOOST_REQUIRE_CLOSE(StatCalc_CPU_PVA_Voxel::Instance().ComputeNonTruncatedVoxelAbsSdfSum(&canonical_scene_CPU),
+	BOOST_REQUIRE_CLOSE(StatCalc_CPU_PVA_Voxel::Instance().ComputeNonTruncatedVoxelAbsSdfSum(&volume_CPU),
 	                    28887.87700, 0.001);
 
-	VoxelVolume<TSDFVoxel, PlainVoxelArray> canonical_scene_slice_same_dimensions_CPU(
+	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_slice_same_dimensions_CPU(
 			&configuration::get().general_voxel_volume_parameters,
 			configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 			MEMORYDEVICE_CPU);
-	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetVolume(&canonical_scene_slice_same_dimensions_CPU);
+	volume_slice_same_dimensions_CPU.Reset();
 
-
-	Vector6i bounds(-85, -30, 159, 25, 85, 320);
-	ManipulationEngine_CPU_PVA_Voxel::Inst().CopyVolumeSlice(&canonical_scene_slice_same_dimensions_CPU,
-	                                                         &canonical_scene_CPU, bounds);
+	Vector6i bounds(-66, -25, 159, 15, 72, 311);
+	ManipulationEngine_CPU_PVA_Voxel::Inst().CopyVolumeSlice(&volume_slice_same_dimensions_CPU,
+	                                                         &volume_CPU, bounds);
 
 	BOOST_REQUIRE_EQUAL(StatCalc_CPU_PVA_Voxel::Instance().ComputeNonTruncatedVoxelCount(
-			&canonical_scene_slice_same_dimensions_CPU), expected_non_truncated_voxel_count);
+			&volume_slice_same_dimensions_CPU), expected_non_truncated_voxel_count);
 
 	float tolerance = 1e-8;
 	BOOST_REQUIRE(allocatedContentAlmostEqual_CPU_Verbose(
-			&canonical_scene_CPU, &canonical_scene_slice_same_dimensions_CPU, tolerance));
+			&volume_CPU, &volume_slice_same_dimensions_CPU, tolerance));
 
 	bounds = Vector6i(-72, -24, 160, 16, 72, 320);
 	Vector3i offsetSlice(bounds.min_x, bounds.min_y, bounds.min_z);
 	Vector3i sizeSlice(bounds.max_x - bounds.min_x, bounds.max_y - bounds.min_y, bounds.max_z - bounds.min_z);
 
-	VoxelVolume<TSDFVoxel, PlainVoxelArray> canonical_scene_slice_different_dimensions_CPU(
+	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_slice_different_dimensions_CPU(
 			&configuration::get().general_voxel_volume_parameters,
 			configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 			MEMORYDEVICE_CPU, {sizeSlice, offsetSlice});
-	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetVolume(&canonical_scene_slice_different_dimensions_CPU);
+	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetVolume(&volume_slice_different_dimensions_CPU);
 
-	ManipulationEngine_CPU_PVA_Voxel::Inst().CopyVolumeSlice(&canonical_scene_slice_different_dimensions_CPU,
-	                                                         &canonical_scene_CPU, bounds);
+	ManipulationEngine_CPU_PVA_Voxel::Inst().CopyVolumeSlice(&volume_slice_different_dimensions_CPU,
+	                                                         &volume_CPU, bounds);
 	BOOST_REQUIRE_EQUAL(StatCalc_CPU_PVA_Voxel::Instance().ComputeNonTruncatedVoxelCount(
-			&canonical_scene_slice_different_dimensions_CPU), expected_non_truncated_voxel_count);
+			&volume_slice_different_dimensions_CPU), expected_non_truncated_voxel_count);
 	BOOST_REQUIRE_CLOSE(StatCalc_CPU_PVA_Voxel::Instance().ComputeNonTruncatedVoxelAbsSdfSum(
-			&canonical_scene_slice_different_dimensions_CPU), 17063.5, 0.001);
+			&volume_slice_different_dimensions_CPU), 28887.877, 0.001);
 	BOOST_REQUIRE_CLOSE(StatCalc_CPU_PVA_Voxel::Instance().ComputeNonTruncatedVoxelAbsSdfSum(
-			&canonical_scene_CPU), 17063.5, 0.001);
-	BOOST_REQUIRE(allocatedContentAlmostEqual_CPU_Verbose(&canonical_scene_CPU,
-	                                                      &canonical_scene_slice_different_dimensions_CPU, tolerance));
+			&volume_CPU), 28887.877, 0.001);
+	BOOST_REQUIRE(allocatedContentAlmostEqual_CPU_Verbose(&volume_CPU,
+	                                                      &volume_slice_different_dimensions_CPU, tolerance));
 
-	VoxelVolume<TSDFVoxel, PlainVoxelArray> canonical_scene_slice_from_disk_CPU(
+	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_slice_from_disk_CPU(
 			&configuration::get().general_voxel_volume_parameters,
 			configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 			MEMORYDEVICE_CPU, {sizeSlice, offsetSlice});
-	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetVolume(&canonical_scene_slice_from_disk_CPU);
+	volume_slice_from_disk_CPU.Reset();
 
-	canonical_scene_slice_from_disk_CPU.LoadFromDirectory("TestData/snoopy_result_fr16-17_partial_PVA/canonical");
+	volume_slice_from_disk_CPU.LoadFromDirectory("TestData/snoopy_result_fr16-17_partial_PVA/snoopy_partial_frame_16_");
 
-	BOOST_REQUIRE(contentAlmostEqual_CPU(&canonical_scene_slice_different_dimensions_CPU,
-	                                     &canonical_scene_slice_from_disk_CPU, tolerance));
+	BOOST_REQUIRE(contentAlmostEqual_CPU(&volume_slice_different_dimensions_CPU,
+	                                     &volume_slice_from_disk_CPU, tolerance));
+
+
 }

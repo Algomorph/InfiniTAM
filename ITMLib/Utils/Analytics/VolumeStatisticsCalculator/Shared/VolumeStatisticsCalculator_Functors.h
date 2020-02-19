@@ -588,15 +588,9 @@ struct ComputeVoxelBoundsFunctor<TVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA> {
 
 #endif
 
-template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
-struct ComputeConditionalVoxelBoundsFunctorInterface{
-	_DEVICE_WHEN_AVAILABLE_
-	inline void operator()(TVoxel& voxel, const Vector3i& voxel_position){};
-};
-
-template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, typename TPredicate>
-struct ComputeConditionalVoxelBoundsFunctor : public ComputeConditionalVoxelBoundsFunctorInterface<TVoxel, TMemoryDeviceType>{
-	ComputeConditionalVoxelBoundsFunctor(TPredicate&& predicate): predicate(predicate){
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, typename TStaticPredicateFunctor>
+struct ComputeConditionalVoxelBoundsFunctor {
+	ComputeConditionalVoxelBoundsFunctor(){
 		INITIALIZE_ATOMIC(int, min_x, INT_MAX);
 		INITIALIZE_ATOMIC(int, min_y, INT_MAX);
 		INITIALIZE_ATOMIC(int, min_z, INT_MAX);
@@ -606,14 +600,14 @@ struct ComputeConditionalVoxelBoundsFunctor : public ComputeConditionalVoxelBoun
 	}
 
 	_DEVICE_WHEN_AVAILABLE_
-	inline void operator()(TVoxel& voxel, const Vector3i& voxel_position){
-		if(predicate(voxel)){
+	inline void operator()(const TVoxel& voxel, const Vector3i& voxel_position){
+		if(TStaticPredicateFunctor::isSatisfiedBy(voxel)){
 			ATOMIC_MIN(min_x, voxel_position.x);
 			ATOMIC_MIN(min_y, voxel_position.y);
 			ATOMIC_MIN(min_z, voxel_position.z);
-			ATOMIC_MIN(max_x, voxel_position.x);
-			ATOMIC_MIN(max_y, voxel_position.y);
-			ATOMIC_MIN(max_z, voxel_position.z);
+			ATOMIC_MAX(max_x, voxel_position.x);
+			ATOMIC_MAX(max_y, voxel_position.y);
+			ATOMIC_MAX(max_z, voxel_position.z);
 		}
 	}
 
@@ -631,28 +625,18 @@ struct ComputeConditionalVoxelBoundsFunctor : public ComputeConditionalVoxelBoun
 				GET_ATOMIC_VALUE_CPU(min_x),
 				GET_ATOMIC_VALUE_CPU(min_y),
 				GET_ATOMIC_VALUE_CPU(min_z),
-				GET_ATOMIC_VALUE_CPU(max_x),
-				GET_ATOMIC_VALUE_CPU(max_y),
-				GET_ATOMIC_VALUE_CPU(max_z)
+				GET_ATOMIC_VALUE_CPU(max_x) + 1,
+				GET_ATOMIC_VALUE_CPU(max_y) + 1,
+				GET_ATOMIC_VALUE_CPU(max_z) + 1
 		};
 	}
 
 private:
 
-	TPredicate&& predicate;
 	DECLARE_ATOMIC(int, min_x);
 	DECLARE_ATOMIC(int, min_y);
 	DECLARE_ATOMIC(int, min_z);
 	DECLARE_ATOMIC(int, max_x);
 	DECLARE_ATOMIC(int, max_y);
 	DECLARE_ATOMIC(int, max_z);
-};
-
-struct ComputeConditionalVoxelBoundsFunctorFactory{
-
-	template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, typename TPredicate>
-	static
-	ComputeConditionalVoxelBoundsInterface<TVoxel, TMemoryDeviceType> Build(TPredicate&& predicate){
-
-	}
 };
