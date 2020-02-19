@@ -24,6 +24,7 @@
 #ifndef COMPILE_WITHOUT_CUDA
 
 #include "../ITMLib/Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
+#include "../ITMLib/Engines/Visualization/VisualizationEngineFactory.h"
 
 #endif
 
@@ -312,6 +313,10 @@ void buildSdfVolumeFromImage_SurfaceSpanAllocation(VoxelVolume<TVoxel, TIndex>**
 
 	indexing_engine->AllocateNearSurface(*volume1,*view,&tracking_state, false, false);
 	depth_fusion_engine->IntegrateDepthImageIntoTsdfVolume(*volume1, *view, &tracking_state);
+
+	VisualizationEngine<TSDFVoxel, TIndex>* visualization_engine =
+			VisualizationEngineFactory::MakeVisualizationEngine<TSDFVoxel, TIndex>(memory_device);
+	visualization_engine->CreateICPMaps(*volume1, *view, &tracking_state, &render_state);
 
 	updateView(view, depth2_path, color2_path, mask2_path, calibration_path, memory_device);
 

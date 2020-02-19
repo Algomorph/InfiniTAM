@@ -520,6 +520,8 @@ BOOST_FIXTURE_TEST_CASE(GenerateTestData, Frame16And17Fixture) {
 	path_VBH = "TestData/snoopy_result_fr16-17_partial_VBH/snoopy_partial_frame_17_";
 	volume_VBH_17->SaveToDirectory(std::string("../../Tests/") + path_VBH);
 
+	volume_VBH_16->index.GetUtilizedHashBlockCount();
+
 	delete volume_VBH_16;
 	delete volume_PVA_16;
 

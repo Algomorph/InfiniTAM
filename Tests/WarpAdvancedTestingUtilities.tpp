@@ -79,6 +79,7 @@ void GenerateRawLiveAndCanonicalVolumes(VoxelVolume<TSDFVoxel, TIndex>** canonic
 			.AllocateNearAndBetweenTwoSurfaces(*live_volume, view, &tracking_state);
 	depth_fusion_engine->IntegrateDepthImageIntoTsdfVolume(*live_volume, view);
 
+
 	delete visualization_engine;
 	delete view;
 }
@@ -124,8 +125,11 @@ void GenericWarpConsistencySubtest(const SlavchevaSurfaceTracker::Switches& swit
 			                         live_volumes[live_index_to_start_from]);
 	IndexingEngine<TSDFVoxel, TIndex, TMemoryDeviceType>::Instance()
 			.AllocateWarpVolumeFromOtherVolume(&warp_field,live_volumes[live_index_to_start_from]);
+
 	IndexingEngine<TSDFVoxel, TIndex, TMemoryDeviceType>::Instance()
 			.AllocateFromOtherVolume(canonical_volume,live_volumes[live_index_to_start_from]);
+
+
 
 	SurfaceTracker<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, TRACKER_SLAVCHEVA_DIAGNOSTIC>
 			motion_tracker(switches);
@@ -201,9 +205,8 @@ void GenericWarpConsistencySubtest(const SlavchevaSurfaceTracker::Switches& swit
 			ground_truth_warp_field.LoadFromDirectory(get_path_warps(prefix, iteration_limit - 1));
 			BOOST_REQUIRE(
 					contentAlmostEqual(&warp_field, &ground_truth_warp_field, absolute_tolerance, TMemoryDeviceType));
-			ground_truth_sdf_volume.LoadFromDirectory(
-					get_path_warped_live(prefix, iteration_limit - 1));
-			BOOST_REQUIRE(contentAlmostEqual(live_volumes[target_warped_field_ix], &ground_truth_sdf_volume,
+			ground_truth_sdf_volume.LoadFromDirectory(get_path_warped_live(prefix, iteration_limit - 1));
+			BOOST_REQUIRE(contentAlmostEqual_Verbose(live_volumes[target_warped_field_ix], &ground_truth_sdf_volume,
 			                                 absolute_tolerance, TMemoryDeviceType));
 			volume_fusion_engine->FuseOneTsdfVolumeIntoAnother(canonical_volume, live_volumes[target_warped_field_ix]);
 			ground_truth_sdf_volume.LoadFromDirectory(get_path_fused(prefix, iteration_limit - 1));
@@ -285,30 +288,32 @@ void Warp_PVA_VBH_simple_subtest(int iteration, SlavchevaSurfaceTracker::Switche
 	IndexingEngine<TSDFVoxel,VoxelBlockHash,TMemoryDeviceType>::Instance()
 			.AllocateFromOtherVolume(volume_16_VBH, warped_live_VBH);
 
+
+
 	//_DEBUG
-	Vector3i test_pos(-56, -9, 200);
-	Vector3s voxel_block_pos = TO_SHORT_FLOOR3(test_pos.toFloat() / VOXEL_BLOCK_SIZE);
-	configuration::get().verbosity_level = configuration::VERBOSITY_FOCUS_SPOTS;
-	configuration::get().telemetry_settings.focus_coordinates = test_pos;
+//	Vector3i test_pos(-56, -9, 200);
+//	Vector3s voxel_block_pos = TO_SHORT_FLOOR3(test_pos.toFloat() / VOXEL_BLOCK_SIZE);
+//	configuration::get().verbosity_level = configuration::VERBOSITY_FOCUS_SPOTS;
+//	configuration::get().telemetry_settings.focus_coordinates = test_pos;
 //
 //	int hashCode;
 //	HashEntry entry = volume_16_VBH->index.GetHashEntryAt(voxel_block_pos, hashCode);
 //	printf("Entry %d %d %d: %d\n", voxel_block_pos.x, voxel_block_pos.y, voxel_block_pos.z, hashCode);
 //
-	test_pos = Vector3i(-56, -8, 200);
-	TSDFVoxel voxelPVA_canonical = volume_16_PVA->GetValueAt(test_pos);
-	std::cout << "PVA canonical voxel of interest: ";
-	voxelPVA_canonical.print_self();
-	TSDFVoxel voxelVBH_canonical = volume_16_VBH->GetValueAt(test_pos);
-	std::cout << "VBH canonical voxel of interest: ";
-	voxelVBH_canonical.print_self();
+//	test_pos = Vector3i(-56, -8, 200);
+//	TSDFVoxel voxelPVA_canonical = volume_16_PVA->GetValueAt(test_pos);
+//	std::cout << "PVA canonical voxel of interest: ";
+//	voxelPVA_canonical.print_self();
+//	TSDFVoxel voxelVBH_canonical = volume_16_VBH->GetValueAt(test_pos);
+//	std::cout << "VBH canonical voxel of interest: ";
+//	voxelVBH_canonical.print_self();
 //
-	TSDFVoxel voxelPVA = warped_live_PVA->GetValueAt(test_pos);
-	std::cout << "PVA live voxel of interest: ";
-	voxelPVA.print_self();
-	TSDFVoxel voxelVBH = warped_live_VBH->GetValueAt(test_pos);
-	std::cout << "VBH live voxel of interest: ";
-	voxelVBH.print_self();
+//	TSDFVoxel voxelPVA = warped_live_PVA->GetValueAt(test_pos);
+//	std::cout << "PVA live voxel of interest: ";
+//	voxelPVA.print_self();
+//	TSDFVoxel voxelVBH = warped_live_VBH->GetValueAt(test_pos);
+//	std::cout << "VBH live voxel of interest: ";
+//	voxelVBH.print_self();
 
 
 //	voxelVBH_canonical = volume_16_VBH->GetValueAt(test_pos);
@@ -355,6 +360,8 @@ void Warp_PVA_VBH_simple_subtest(int iteration, SlavchevaSurfaceTracker::Switche
 
 	BOOST_REQUIRE(allocatedContentAlmostEqual_Verbose(warps_PVA, warps_VBH, absoluteTolerance, TMemoryDeviceType));
 
+
+
 	delete volume_16_PVA;
 	delete volume_16_VBH;
 	delete warped_live_PVA;
@@ -367,6 +374,7 @@ void Warp_PVA_VBH_simple_subtest(int iteration, SlavchevaSurfaceTracker::Switche
 	           Frame16And17Fixture::InitParams<PlainVoxelArray>());
 	loadVolume(&loaded_warps_VBH, path_loaded_warps, TMemoryDeviceType,
 	           Frame16And17Fixture::InitParams<VoxelBlockHash>());
+
 
 	BOOST_REQUIRE(contentAlmostEqual_Verbose(warps_PVA, loaded_warps_PVA, absoluteTolerance, TMemoryDeviceType));
 	BOOST_REQUIRE(contentAlmostEqual_Verbose(warps_VBH, loaded_warps_VBH, absoluteTolerance, TMemoryDeviceType));

@@ -35,7 +35,7 @@
 
 using namespace ITMLib;
 
-#define GET_SCENE_BOUNDS
+//#define GET_SCENE_BOUNDS
 #ifdef GET_SCENE_BOUNDS
 BOOST_AUTO_TEST_CASE(GetSceneBounds){
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_vbh_CPU(MEMORYDEVICE_CPU);
@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(testPVASceneSlice_CPU) {
 			MEMORYDEVICE_CPU);
 	volume_slice_same_dimensions_CPU.Reset();
 
-	Vector6i bounds(-66, -25, 159, 15, 72, 311);
+	Vector6i bounds(-66, -24, 159, 15, 72, 311);
 	ManipulationEngine_CPU_PVA_Voxel::Inst().CopyVolumeSlice(&volume_slice_same_dimensions_CPU,
 	                                                         &volume_CPU, bounds);
 
@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE(testPVASceneSlice_CPU) {
 	BOOST_REQUIRE(allocatedContentAlmostEqual_CPU_Verbose(
 			&volume_CPU, &volume_slice_same_dimensions_CPU, tolerance));
 
-	bounds = Vector6i(-72, -24, 160, 16, 72, 320);
+	bounds = Vector6i(-72, -24, 160, 16, 80, 320);
 	Vector3i offsetSlice(bounds.min_x, bounds.min_y, bounds.min_z);
 	Vector3i sizeSlice(bounds.max_x - bounds.min_x, bounds.max_y - bounds.min_y, bounds.max_z - bounds.min_z);
 

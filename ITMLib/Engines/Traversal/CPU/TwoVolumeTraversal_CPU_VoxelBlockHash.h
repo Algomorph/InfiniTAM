@@ -188,14 +188,15 @@ private:
 					TVoxel2* voxel_block2 = &(voxels2[hash_entry2.ptr *
 					                                  (VOXEL_BLOCK_SIZE3)]);
 					// if the secondary block is unaltered anyway, so no need to match and we're good, so return "true"
-					!std::forward<TProcessUnmatchedBlock2Function>(traverse_unmatched_block2_function)
+					if(std::forward<TProcessUnmatchedBlock2Function>(traverse_unmatched_block2_function)
 							(voxel_block2, verbose, "Second-hash voxel block unmatched in first hash: ",
-							 hash_entry2.pos, hash_code2);
-				} else {
-					// alternative primary hash found, skip this primary hash since the corresponding secondary
-					// block will be (or has been) processed with the alternative primary hash.
-					return true;
+							 hash_entry2.pos, hash_code2)){
+						return false;
+					}
 				}
+				// alternative primary hash found, skip this primary hash since the corresponding secondary
+				// block will be (or has been) processed with the alternative primary hash.
+				return true;
 			};
 
 			if (hash_entry1.ptr < 0) {
