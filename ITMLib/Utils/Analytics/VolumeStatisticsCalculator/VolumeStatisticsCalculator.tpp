@@ -39,6 +39,13 @@ Vector6i VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::ComputeA
 //============================================== COUNT VOXELS ==========================================================
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+int
+VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::ComputeAllocatedVoxelCount(
+		VoxelVolume<TVoxel, TIndex>* volume) {
+	return ComputeAllocatedVoxelCountFunctor<TVoxel, TIndex, MEMORYDEVICE_CUDA>::compute(volume);
+}
+
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 unsigned int
 VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::ComputeVoxelWithFlagsCount(VoxelVolume<TVoxel,TIndex>* volume,
                                                                                           VoxelFlags flags) {
