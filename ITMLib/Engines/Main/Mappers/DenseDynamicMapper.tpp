@@ -99,8 +99,6 @@ DenseDynamicMapper<TVoxel, TWarp, TIndex>::DenseDynamicMapper(const TIndex& inde
 		                : nullptr),
 		swapping_mode(configuration::get().swapping_mode),
 		parameters(configuration::get().non_rigid_tracking_parameters),
-		use_expanded_allocation_during_TSDF_construction(
-				configuration::get().general_voxel_volume_parameters.add_extra_block_ring_during_allocation),
 		max_vector_update_threshold_in_voxels(parameters.max_update_length_threshold /
 		                                      configuration::get().general_voxel_volume_parameters.voxel_size),
 		has_focus_coordinates(configuration::get().verbosity_level >= configuration::VERBOSITY_FOCUS_SPOTS),

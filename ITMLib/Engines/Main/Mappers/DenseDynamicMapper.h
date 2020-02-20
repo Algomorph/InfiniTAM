@@ -118,7 +118,6 @@ private:
 	const Vector3i focus_coordinates;
 	// algorithm operation
 	const configuration::SwappingMode swapping_mode;
-	const bool use_expanded_allocation_during_TSDF_construction = false;
 	const NonRigidTrackingParameters parameters;
 	// needs to be declared after "parameters", derives value from it during initialization
 	const float max_vector_update_threshold_in_voxels;

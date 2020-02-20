@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(ConfigurationTest) {
 	configuration::Configuration default_configuration;
 
 	configuration::Configuration configuration1(
-			VoxelVolumeParameters(0.005, 0.12, 4.12, 0.05, 200, true, true, 1.2f),
+			VoxelVolumeParameters(0.005, 0.12, 4.12, 0.05, 200, true, 1.2f),
 			SurfelVolumeParameters(0.4f, 0.5f, static_cast<float>(22 * M_PI / 180), 0.008f, 0.0003f, 3.4f, 26.0f, 5,
 			                       1.1f, 4.5f, 21, 300, false, false),
 			SpecificVolumeParameters(
@@ -131,7 +131,7 @@ BOOST_AUTO_TEST_CASE(ConfigurationTest) {
 
 configuration::Configuration generate_default_snoopy_configuration(){
 	configuration::Configuration default_snoopy_configuration(
-			VoxelVolumeParameters(0.004, 0.2, 3.0, 0.04, 100, true, false, 1.0f),
+			VoxelVolumeParameters(0.004, 0.2, 3.0, 0.04, 100, false, 1.0f),
 			SurfelVolumeParameters(),
 			SpecificVolumeParameters(
 					ArrayVolumeParameters(),

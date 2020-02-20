@@ -6,7 +6,6 @@
         "narrow_band_half_width": 0.0399999991,
         "max_integration_weight": 100,
         "stop_integration_at_max_weight": false,
-        "add_extra_block_ring_during_allocation": false,
         "block_allocation_band_factor": 2
     },
     "general_surfel_volume_parameters": {
