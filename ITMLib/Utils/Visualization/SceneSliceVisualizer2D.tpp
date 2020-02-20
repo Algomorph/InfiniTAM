@@ -29,7 +29,7 @@
 #include "SceneSliceVisualizer2D.h"
 #include "SceneSliceVisualizerCommon.h"
 #include "../../Objects/Volume/RepresentationAccess.h"
-#include "../Analytics/VolumeStatisticsCalculator/CPU/VolumeStatisticsCalculator_CPU.h"
+#include "../Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator.h"
 #include "../../Engines/Traversal/Interface/VolumeTraversal.h"
 #include "../../Engines/Traversal/Interface/TwoVolumeTraversal.h"
 #include "../../Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"

@@ -135,7 +135,7 @@ struct WarpVoxelStaticFunctor<TWarp, WarpType::WARP_CUMULATIVE>{
 };
 
 template<typename TWarp>
-struct WarpVoxelStaticFunctor<TWarp, WarpType::WARP_FLOW>{
+struct WarpVoxelStaticFunctor<TWarp, WarpType::WARP_FRAMEWISE>{
 	_CPU_AND_GPU_CODE_
 	static inline Vector3f GetWarpedPosition(const TWarp& warp, const Vector3i& position){
 		return SpecializedWarpLookups::LookupBasedOnFramewiseWarpStaticFunctor<TWarp, TWarp::hasFramewiseWarp>::GetWarpedPosition(warp, position);

@@ -29,15 +29,15 @@
 #include "../../../SurfaceTrackers/SurfaceTrackerFactory.h"
 #include "../../../Utils/Analytics/BenchmarkUtils.h"
 #include "../../EditAndCopy/Interface/EditAndCopyEngineInterface.h"
-#include "../../../Utils/Analytics/VolumeStatisticsCalculator/Interface/VolumeStatisticsCalculatorInterface.h"
+#include "../../../Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculatorInterface.h"
 #include "../../Indexing/IndexingEngineFactory.h"
 //** CPU **
 #include "../../EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
-#include "../../../Utils/Analytics/VolumeStatisticsCalculator/CPU/VolumeStatisticsCalculator_CPU.h"
+#include "../../../Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator.h"
 //** CUDA **
 #ifndef COMPILE_WITHOUT_CUDA
 #include "../../EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
-#include "../../../Utils/Analytics/VolumeStatisticsCalculator/CUDA/VolumeStatisticsCalculator_CUDA.h"
+#include "../../../Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator.h"
 #endif
 
 using namespace ITMLib;

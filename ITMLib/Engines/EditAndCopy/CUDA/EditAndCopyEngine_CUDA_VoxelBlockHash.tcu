@@ -20,7 +20,7 @@
 #include "../../../../ORUtils/PlatformIndependence.h"
 #include "../../../Objects/Volume/RepresentationAccess.h"
 #include "../../../Utils/Geometry/GeometryBooleanOperations.h"
-#include "../../../Utils/Analytics/VolumeStatisticsCalculator/CUDA/VolumeStatisticsCalculator_CUDA.h"
+#include "../../../Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator.h"
 #include "EditAndCopyEngine_CUDA_VoxelBlockHash_Kernels.h"
 #include "../../Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
 

@@ -17,7 +17,9 @@
 
 
 #include <vector>
-#include "../../../../Objects/Volume/VoxelVolume.h"
+#include "../../../Objects/Volume/VoxelVolume.h"
+#include "../../../Engines/Common/WarpType.h"
+#include "../../VoxelFlags.h"
 
 namespace ITMLib {
 template<typename TVoxel, typename TIndex>
@@ -32,7 +34,8 @@ public:
 	virtual std::vector<Vector3s> GetAllocatedHashBlockPositions(VoxelVolume<TVoxel, TIndex>* volume) = 0;
 
 
-	virtual int ComputeNonTruncatedVoxelCount(VoxelVolume<TVoxel, TIndex>* volume) = 0;
+	virtual unsigned int ComputeVoxelWithFlagsCount(VoxelVolume<TVoxel, TIndex>* volume, VoxelFlags flags) = 0;
+	virtual unsigned int ComputeNonTruncatedVoxelCount(VoxelVolume<TVoxel, TIndex>* volume) = 0;
 	virtual unsigned int ComputeAlteredVoxelCount(VoxelVolume<TVoxel, TIndex>* volume) = 0;
 	virtual unsigned int CountVoxelsWithSpecificSdfValue(VoxelVolume<TVoxel, TIndex>* volume, float value) = 0;
 	virtual double ComputeNonTruncatedVoxelAbsSdfSum(VoxelVolume<TVoxel, TIndex>* volume) = 0;
@@ -42,9 +45,6 @@ public:
 	virtual double ComputeFramewiseWarpMean(VoxelVolume<TVoxel,TIndex>* volume) = 0;
 
 	virtual Extent3D FindMinimumNonTruncatedBoundingBox(VoxelVolume <TVoxel, TIndex>* volume) = 0;
-
-	virtual float FindMaxGradient0LengthAndPosition(VoxelVolume<TVoxel, TIndex>* volume, Vector3i& positionOut) = 0;
-	virtual float FindMaxGradient1LengthAndPosition(VoxelVolume<TVoxel, TIndex>* volume, Vector3i& positionOut) = 0;
 };
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>

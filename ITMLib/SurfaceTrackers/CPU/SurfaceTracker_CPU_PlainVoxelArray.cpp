@@ -16,7 +16,7 @@
 #include "../../Engines/Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
 #include "../../Engines/Traversal/CPU/ThreeVolumeTraversal_CPU_PlainVoxelArray.h"
 #include "../../Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
-#include "../../Utils/Analytics/VolumeStatisticsCalculator/CPU/VolumeStatisticsCalculator_CPU.h"
+#include "../../Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator.h"
 #include "../WarpGradientFunctors/WarpGradientFunctor_SlavchevaOptimized.h"
 #include "../WarpGradientFunctors/WarpGradientFunctor_SlavchevaDiagnostic.h"
 #include "../../GlobalTemplateDefines.h"

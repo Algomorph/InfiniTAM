@@ -18,7 +18,9 @@
 namespace ITMLib{
 enum WarpType{
 	WARP_CUMULATIVE = 0,
-	WARP_FLOW = 1,
-	WARP_UPDATE = 2
+	WARP_FRAMEWISE = 1,
+	WARP_UPDATE = 2,
+	WARP_GRADIENT0 = 3,
+	WARP_GRADIENT1 = 4
 };
 } // end namespace ITMLib

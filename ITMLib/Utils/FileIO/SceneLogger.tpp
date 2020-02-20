@@ -24,7 +24,7 @@
 #include "SceneLogger_SceneSlice.tpp"
 #include "../../Engines/DepthFusion/DepthFusionEngineFactory.h"
 #include "../../Engines/VolumeFileIO/VolumeFileIOEngine.h"
-#include "../Analytics/VolumeStatisticsCalculator/CPU/VolumeStatisticsCalculator_CPU.h"
+#include "../Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator.h"
 
 
 

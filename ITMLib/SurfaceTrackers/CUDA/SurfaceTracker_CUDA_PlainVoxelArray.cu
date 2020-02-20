@@ -16,7 +16,7 @@
 #include "../../Engines/Traversal/CUDA/VolumeTraversal_CUDA_PlainVoxelArray.h"
 #include "../../Engines/Traversal/CUDA/ThreeVolumeTraversal_CUDA_PlainVoxelArray.h"
 #include "../../Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
-#include "../../Utils/Analytics/VolumeStatisticsCalculator/CUDA/VolumeStatisticsCalculator_CUDA.h"
+#include "../../Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator.h"
 #include "../WarpGradientFunctors/WarpGradientFunctor_SlavchevaOptimized.h"
 #include "../WarpGradientFunctors/WarpGradientFunctor_SlavchevaDiagnostic.h"
 #include "../../GlobalTemplateDefines.h"

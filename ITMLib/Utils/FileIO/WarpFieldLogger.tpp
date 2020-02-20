@@ -19,7 +19,7 @@
 
 //local
 #include "WarpFieldLogger.h"
-#include "../Analytics/VolumeStatisticsCalculator/CPU/VolumeStatisticsCalculator_CPU.h"
+#include "../Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator.h"
 #include "../Configuration.h"
 #include "../../Engines/DepthFusion/DepthFusionEngineFactory.h"
 #include "../../Engines/Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"

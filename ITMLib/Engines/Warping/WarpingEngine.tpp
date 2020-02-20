@@ -67,7 +67,7 @@ void WarpingEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::WarpVolume_Framewi
 		VoxelVolume<TWarp, TIndex>* warpField,
 		VoxelVolume<TVoxel, TIndex>* sourceTSDF,
 		VoxelVolume<TVoxel, TIndex>* targetTSDF) {
-	this->template WarpVolume<WARP_FLOW>(warpField, sourceTSDF, targetTSDF);
+	this->template WarpVolume<WARP_FRAMEWISE>(warpField, sourceTSDF, targetTSDF);
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
