@@ -19,14 +19,12 @@
 #include "../ITMLib/Utils/Configuration.h"
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
 #include "../ITMLib/Engines/Indexing/IndexingEngineFactory.h"
-#include "../ORUtils/FileUtils.h"
-
-#ifndef COMPILE_WITHOUT_CUDA
-
-#include "../ITMLib/Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
 #include "../ITMLib/Engines/Visualization/VisualizationEngineFactory.h"
-
+#include "../ORUtils/FileUtils.h"
+#ifndef COMPILE_WITHOUT_CUDA
+#include "../ITMLib/Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
 #endif
+
 
 using namespace ITMLib;
 
@@ -60,7 +58,7 @@ void GenerateTestVolume_CPU(VoxelVolume<TVoxel, TIndex>* volume) {
 
 template<class TVoxel, class TIndex>
 void GenerateTestVolume_CUDA(VoxelVolume<TVoxel, TIndex>* volume) {
-	EditAndCopyEngine_CUDA<TVoxel, TIndex>::Inst().ResetVolume(volume);
+	volume->Reset();
 	const int narrowBandThicknessVoxels = 10;
 	int xOffset = 8;
 	int surfaceSizeVoxelsZ = 16;

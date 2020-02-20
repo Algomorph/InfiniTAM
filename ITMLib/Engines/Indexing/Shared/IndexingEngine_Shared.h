@@ -270,6 +270,10 @@ inline Vector3f cameraVoxelSpaceToWorldHashBlockSpace(const Vector4f& point_came
 	       + Vector3f(1.0f / (2.0f * VOXEL_BLOCK_SIZE));
 }
 
+_CPU_AND_GPU_CODE_
+inline float normOfFirst3Components(const Vector4f& vec){
+	return sqrt(vec.x * vec.x + vec.y + vec.y + vec.z * vec.z);
+}
 /**
  * \brief compute the segment formed by tracing the camera-space point a fixed distance forward and backward along
  * the ray; note: the starting & ending points of the returned segment are in voxel block coordinates
@@ -287,7 +291,7 @@ inline ITMLib::Segment findHashBlockSegmentAlongCameraRayWithinRangeFromPoint(
 		const float one_over_hash_block_size) {
 
 	// distance to the point along camera ray
-	float norm = sqrt(point_in_camera_space.x * point_in_camera_space.x + point_in_camera_space.y + point_in_camera_space.y + point_in_camera_space.z * point_in_camera_space.z);
+	float norm = normOfFirst3Components(point_in_camera_space);
 
 	Vector4f endpoint_in_camera_space;
 
@@ -321,23 +325,23 @@ inline ITMLib::Segment findHashBlockSegmentAlongCameraRayWithinRangeFromAndBetwe
 	Vector4f endpoint_in_camera_space;
 	float norm;
 	if (point2_in_camera_space.z > point1_in_camera_space.z) {
-		norm = ORUtils::length(point1_in_camera_space);
+		norm = normOfFirst3Components(point1_in_camera_space);
 		endpoint_in_camera_space = point1_in_camera_space * (1.0f - range / norm);
 		endpoint_in_camera_space.w = 1.0f;
 		Vector3f start_point_in_hash_blocks = cameraVoxelSpaceToWorldHashBlockSpace(
 				endpoint_in_camera_space, inverted_camera_pose, one_over_hash_block_size);
-		norm = ORUtils::length(point2_in_camera_space);
+		norm = normOfFirst3Components(point2_in_camera_space);
 		endpoint_in_camera_space = point2_in_camera_space * (1.0f + range / norm);
 		Vector3f end_point_in_hash_blocks = cameraVoxelSpaceToWorldHashBlockSpace(
 				endpoint_in_camera_space, inverted_camera_pose, one_over_hash_block_size);
 		return ITMLib::Segment(start_point_in_hash_blocks, end_point_in_hash_blocks);
 	} else {
-		norm = ORUtils::length(point2_in_camera_space);
+		norm = normOfFirst3Components(point2_in_camera_space);
 		endpoint_in_camera_space = point2_in_camera_space * (1.0f - range / norm);
 		endpoint_in_camera_space.w = 1.0f;
 		Vector3f start_point_in_hash_blocks = cameraVoxelSpaceToWorldHashBlockSpace(
 				endpoint_in_camera_space, inverted_camera_pose, one_over_hash_block_size);
-		norm = ORUtils::length(point1_in_camera_space);
+		norm = normOfFirst3Components(point1_in_camera_space);
 		endpoint_in_camera_space = point1_in_camera_space * (1.0f + range / norm);
 		Vector3f end_point_in_hash_blocks = cameraVoxelSpaceToWorldHashBlockSpace(
 				endpoint_in_camera_space, inverted_camera_pose, one_over_hash_block_size);

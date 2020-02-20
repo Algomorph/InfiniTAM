@@ -40,7 +40,7 @@ BOOST_FIXTURE_TEST_CASE(Test_ClearOutFramewiseWarp_CPU_PVA, Frame16And17Fixture)
 	loadVolume(&warps_PVA, "TestData/snoopy_result_fr16-17_partial_PVA/warp_field_0_data_framewise_warps_", MEMORYDEVICE_CPU,
 			InitParams<PlainVoxelArray>());
 	float relativeTolerance = 0.1f;//percent
-	BOOST_REQUIRE_CLOSE(StatCalc_CPU_PVA_Warp::Instance().ComputeFramewiseWarpMax(warps_PVA), 0.18186526000499725f, relativeTolerance);
+	BOOST_REQUIRE_CLOSE(StatCalc_CPU_PVA_Warp::Instance().ComputeFramewiseWarpMax(warps_PVA), 1.0911915302276611f, relativeTolerance);
 	BOOST_REQUIRE_CLOSE(StatCalc_CPU_PVA_Warp::Instance().ComputeFramewiseWarpMin(warps_PVA), 0.0f, relativeTolerance);
 
 	auto motionTracker_PVA_CPU = new SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_DIAGNOSTIC>();
@@ -57,7 +57,7 @@ BOOST_FIXTURE_TEST_CASE(Test_ClearOutFramewiseWarp_CPU_VBH, Frame16And17Fixture)
 	loadVolume(&warps_VBH, "TestData/snoopy_result_fr16-17_partial_VBH/warp_field_0_data_framewise_warps_",
 			MEMORYDEVICE_CPU, InitParams<VoxelBlockHash>());
 	float relativeTolerance = 0.1f;//percent
-	BOOST_REQUIRE_CLOSE(StatCalc_CPU_VBH_Warp::Instance().ComputeFramewiseWarpMax(warps_VBH), 0.18186526000499725f, relativeTolerance);
+	BOOST_REQUIRE_CLOSE(StatCalc_CPU_VBH_Warp::Instance().ComputeFramewiseWarpMax(warps_VBH), 1.0911915302276611f, relativeTolerance);
 	BOOST_REQUIRE_CLOSE(StatCalc_CPU_VBH_Warp::Instance().ComputeFramewiseWarpMin(warps_VBH), 0.0f, relativeTolerance);
 
 	auto motionTracker_VBH_CPU = new SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_DIAGNOSTIC>();
@@ -76,7 +76,7 @@ BOOST_FIXTURE_TEST_CASE(Test_ClearOutFramewiseWarp_CUDA_PVA, Frame16And17Fixture
 	loadVolume(&warps_PVA, "TestData/snoopy_result_fr16-17_partial_PVA/warp_field_0_data_framewise_warps_",
 	           MEMORYDEVICE_CUDA, InitParams<PlainVoxelArray>());
 	float relativeTolerance = 0.1f;//percent
-	BOOST_REQUIRE_CLOSE(StatCalc_CUDA_PVA_Warp::Instance().ComputeFramewiseWarpMax(warps_PVA), 0.18186526000499725f, relativeTolerance);
+	BOOST_REQUIRE_CLOSE(StatCalc_CUDA_PVA_Warp::Instance().ComputeFramewiseWarpMax(warps_PVA), 1.0911915302276611f, relativeTolerance);
 	BOOST_REQUIRE_CLOSE(StatCalc_CUDA_PVA_Warp::Instance().ComputeFramewiseWarpMin(warps_PVA), 0.0f, relativeTolerance);
 
 	auto motionTracker_PVA_CUDA = new SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA, TRACKER_SLAVCHEVA_DIAGNOSTIC>();
@@ -93,7 +93,7 @@ BOOST_FIXTURE_TEST_CASE(Test_ClearOutFramewiseWarp_CUDA_VBH, Frame16And17Fixture
 	loadVolume(&warps_VBH, "TestData/snoopy_result_fr16-17_partial_VBH/warp_field_0_data_framewise_warps_",
 	           MEMORYDEVICE_CUDA, InitParams<VoxelBlockHash>());
 	float relativeTolerance = 0.1f;//percent
-	BOOST_REQUIRE_CLOSE(StatCalc_CUDA_VBH_Warp::Instance().ComputeFramewiseWarpMax(warps_VBH), 0.18186526000499725f, relativeTolerance);
+	BOOST_REQUIRE_CLOSE(StatCalc_CUDA_VBH_Warp::Instance().ComputeFramewiseWarpMax(warps_VBH), 1.0911915302276611f, relativeTolerance);
 	BOOST_REQUIRE_CLOSE(StatCalc_CUDA_VBH_Warp::Instance().ComputeFramewiseWarpMin(warps_VBH), 0.0f, relativeTolerance);
 
 	auto motionTracker_VBH_CUDA = new SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA, TRACKER_SLAVCHEVA_DIAGNOSTIC>();

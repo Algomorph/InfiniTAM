@@ -83,8 +83,6 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct16_PVA_VBH_Near_CPU, Frame16And17Fixt
 	BOOST_REQUIRE(allocatedContentAlmostEqual_CPU(volume_PVA_16, volume_VBH_16, absoluteTolerance));
 	BOOST_REQUIRE(contentForFlagsAlmostEqual_CPU(volume_PVA_16, volume_VBH_16, VoxelFlags::VOXEL_NONTRUNCATED,
 	                                             absoluteTolerance));
-	BOOST_REQUIRE(contentForFlagsAlmostEqual_CPU_Verbose(volume_PVA_16, volume_VBH_16, VoxelFlags::VOXEL_TRUNCATED,
-	                                                     absoluteTolerance));
 
 	delete volume_VBH_16;
 	delete volume_PVA_16;
@@ -191,7 +189,7 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_VBH_CPU_NearVsSpan, Frame16And17Fi
 	delete depth_fusion_engine_VBH;
 }
 
-#define SAVE_TEST_DATA
+//#define SAVE_TEST_DATA
 BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_PVA_VBH_Span_CPU, Frame16And17Fixture) {
 
 	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>& indexer_VBH =

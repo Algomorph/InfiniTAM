@@ -110,7 +110,7 @@ private:
 		                                                          volume_parameters.narrow_band_half_width *
 		                                                          volume_parameters.block_allocation_band_factor) /
 		                                                         voxel_block_size));
-		auto last_line_of_blocks_z = static_cast<int>(std::floor((distance_to_second_square +
+		auto last_line_of_blocks_z = static_cast<int>(std::ceil((distance_to_second_square +
 		                                                          volume_parameters.narrow_band_half_width *
 		                                                          volume_parameters.block_allocation_band_factor) /
 		                                                         voxel_block_size));
@@ -173,15 +173,15 @@ BOOST_FIXTURE_TEST_CASE(Test_TwoSurfaceAllocation_CPU, TestData_CPU) {
 	square_volume.Reset();
 	DepthFusionEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU> depth_fusion_engine;
 
-	depth_fusion_engine.GenerateTsdfVolumeFromTwoSurfaces(&square_volume, view_square_1, tracking_state);
+	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>& indexer = IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance();
+	indexer.AllocateNearSurface(&square_volume, view_square_1, tracking_state, false, false);
+	depth_fusion_engine.IntegrateDepthImageIntoTsdfVolume(&square_volume, view_square_1, tracking_state);
 
 	VisualizationEngine<TSDFVoxel, VoxelBlockHash>* visualization_engine = VisualizationEngineFactory::MakeVisualizationEngine<TSDFVoxel, VoxelBlockHash>(
 			MEMORYDEVICE_CPU);
 
 	// builds the point cloud
 	visualization_engine->CreateICPMaps(&square_volume, view_square_1, tracking_state, render_state);
-
-	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>& indexer = IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance();
 
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> span_volume(MEMORYDEVICE_CPU, {0x8000, 0x20000});
 	span_volume.Reset();
@@ -229,15 +229,15 @@ BOOST_FIXTURE_TEST_CASE(Test_TwoSurfaceAllocation_CUDA, TestData_CUDA) {
 	square_volume.Reset();
 	DepthFusionEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA> depth_fusion_engine;
 
-	depth_fusion_engine.GenerateTsdfVolumeFromTwoSurfaces(&square_volume, view_square_1, tracking_state);
+	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>& indexer = IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance();
+	indexer.AllocateNearSurface(&square_volume, view_square_1, tracking_state, false, false);
+	depth_fusion_engine.IntegrateDepthImageIntoTsdfVolume(&square_volume, view_square_1, tracking_state);
 
 	VisualizationEngine<TSDFVoxel, VoxelBlockHash>* visualization_engine = VisualizationEngineFactory::MakeVisualizationEngine<TSDFVoxel, VoxelBlockHash>(
 			MEMORYDEVICE_CUDA);
 
 	// builds the point cloud
 	visualization_engine->CreateICPMaps(&square_volume, view_square_1, tracking_state, render_state);
-
-	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>& indexer = IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance();
 
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> span_volume(MEMORYDEVICE_CUDA, {0x8000, 0x20000});
 	span_volume.Reset();

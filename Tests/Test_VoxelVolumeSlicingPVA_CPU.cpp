@@ -45,10 +45,17 @@ BOOST_AUTO_TEST_CASE(GetSceneBounds){
 	volume_vbh_CPU.Reset();
 	volume_vbh_CPU.LoadFromDirectory("TestData/snoopy_result_fr16-17_full/snoopy_full_frame_17_");
 	std::cout << "BOUNDS(17/VBH):  " << StatCalc_CPU_VBH_Voxel::Instance().ComputeVoxelBounds(&volume_vbh_CPU) << std::endl;
+	#ifndef COMPILE_WITHOUT_CUDA
 	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_pva_CUDA(MEMORYDEVICE_CUDA);
 	volume_pva_CUDA.Reset();
 	volume_pva_CUDA.LoadFromDirectory("TestData/snoopy_result_fr16-17_full/snoopy_full_frame_16_");
-	std::cout << "ALTERED BOUNDS(16/PVA)" << StatCalc_CUDA_PVA_Voxel::Instance().ComputeAlteredVoxelBounds(&volume_pva_CUDA) << std::endl;
+	std::cout << "ALTERED BOUNDS(16/PVA): " << StatCalc_CUDA_PVA_Voxel::Instance().ComputeAlteredVoxelBounds(&volume_pva_CUDA) << std::endl;
+	#else
+	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_pva_CPU(MEMORYDEVICE_CPU);
+	volume_pva_CPU.Reset();
+	volume_pva_CPU.LoadFromDirectory("TestData/snoopy_result_fr16-17_full/snoopy_full_frame_16_");
+	std::cout << "ALTERED BOUNDS(16/PVA): " << StatCalc_CPU_PVA_Voxel::Instance().ComputeAlteredVoxelBounds(&volume_pva_CPU) << std::endl;
+	#endif
 }
 #endif
 

@@ -60,6 +60,12 @@ bool contentAlmostEqual_CUDA<TSDFVoxel, VoxelBlockHash, PlainVoxelArray, float>(
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>* a, VoxelVolume<TSDFVoxel, PlainVoxelArray>* b,
 		float tolerance);
 
+//TODO (traversal)
+//template
+//bool contentForFlagsAlmostEqual_CUDA<TSDFVoxel, VoxelBlockHash, VoxelBlockHash, float>(
+//		VoxelVolume<TSDFVoxel, VoxelBlockHash>* a, VoxelVolume<TSDFVoxel, VoxelBlockHash>* b,
+//		VoxelFlags flags, float tolerance);
+
 template
 bool contentForFlagsAlmostEqual_CUDA<TSDFVoxel, PlainVoxelArray, VoxelBlockHash, float>(
 		VoxelVolume<TSDFVoxel, PlainVoxelArray>* a, VoxelVolume<TSDFVoxel, VoxelBlockHash>* b,

@@ -178,6 +178,7 @@ void GenerateTestData() {
 
 	SurfaceTracker<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, TRACKER_SLAVCHEVA_DIAGNOSTIC> dataOnlyMotionTracker(
 			data_only_switches);
+
 	dataOnlyMotionTracker.CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
 	warp_field.SaveToDirectory(output_directory + data_only_filename);
 
@@ -187,6 +188,7 @@ void GenerateTestData() {
 	warp_field.SaveToDirectory(output_directory + data_smoothed_filename);
 
 	warp_field.Reset();
+	IndexingEngine<TSDFVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().AllocateWarpVolumeFromOtherVolume(&warp_field, live_volume);
 	SurfaceTracker<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, TRACKER_SLAVCHEVA_DIAGNOSTIC> completeMotionTracker(
 			warp_complete_switches);
 	completeMotionTracker.CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
@@ -195,6 +197,7 @@ void GenerateTestData() {
 	warp_field.SaveToDirectory(output_directory + warp_complete_filename);
 
 	warp_field.Reset();
+	IndexingEngine<TSDFVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().AllocateWarpVolumeFromOtherVolume(&warp_field, live_volume);
 	warp_field.LoadFromDirectory(output_directory + data_only_filename);
 
 	dataOnlyMotionTracker.UpdateWarps(&warp_field, canonical_volume, live_volume);

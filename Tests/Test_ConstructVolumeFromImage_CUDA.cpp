@@ -40,6 +40,7 @@
 #include "../ITMLib/Utils/Analytics/VolumeStatisticsCalculator/CUDA/VolumeStatisticsCalculator_CUDA.h"
 #include "TestUtils.h"
 #include "../ITMLib/Engines/EditAndCopy/EditAndCopyEngineFactory.h"
+#include "../ITMLib/Engines/Visualization/VisualizationEngineFactory.h"
 
 using namespace ITMLib;
 
@@ -47,7 +48,7 @@ typedef VolumeFileIOEngine<TSDFVoxel, PlainVoxelArray> SceneFileIOEngine_PVA;
 typedef VolumeFileIOEngine<TSDFVoxel, VoxelBlockHash> SceneFileIOEngine_VBH;
 
 
-BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct16_PVA_VBH_CUDA, Frame16And17Fixture) {
+BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct16_PVA_VBH_Near_CUDA, Frame16And17Fixture) {
 
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* volume_PVA_16;
 	buildSdfVolumeFromImage_NearSurfaceAllocation(&volume_PVA_16, "TestData/snoopy_depth_000016.png",
@@ -77,7 +78,7 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct16_PVA_VBH_CUDA, Frame16And17Fixture)
 	delete volume_PVA_16;
 }
 
-BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_PVA_VBH_CUDA, Frame16And17Fixture) {
+BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_PVA_VBH_Near_CUDA, Frame16And17Fixture) {
 
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* volume_PVA_17;
 	buildSdfVolumeFromImage_NearSurfaceAllocation(&volume_PVA_17, "TestData/snoopy_depth_000017.png",
@@ -108,57 +109,6 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_PVA_VBH_CUDA, Frame16And17Fixture)
 	delete volume_PVA_17;
 }
 
-BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_PVA_VBH_Span_CUDA, Frame16And17Fixture) {
-	// *** generate views and tracking state ***
-	ITMView* view_16 = nullptr;
-
-	updateView(&view_16, "TestData/snoopy_depth_000017.png",
-	           "TestData/snoopy_color_000017.png", "TestData/snoopy_omask_000017.png",
-	           "TestData/snoopy_calib.txt", MEMORYDEVICE_CUDA);
-	CameraTrackingState tracking_state(view_16->depth->noDims, MEMORYDEVICE_CUDA);
-
-
-	ITMView* view_17 = nullptr;
-	updateView(&view_17, "TestData/snoopy_depth_000017.png",
-	           "TestData/snoopy_color_000017.png", "TestData/snoopy_omask_000017.png",
-	           "TestData/snoopy_calib.txt", MEMORYDEVICE_CUDA);
-
-
-	// *** construct volumes ***
-	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_PVA_17(MEMORYDEVICE_CUDA, InitParams<PlainVoxelArray>());
-	volume_PVA_17.Reset();
-	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, PlainVoxelArray>* reconstructionEngine_PVA =
-			DepthFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, PlainVoxelArray>(MEMORYDEVICE_CUDA);
-	reconstructionEngine_PVA->GenerateTsdfVolumeFromTwoSurfaces(&volume_PVA_17, view_17, &tracking_state);
-
-
-	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_17(MEMORYDEVICE_CUDA, InitParams<VoxelBlockHash>());
-	volume_VBH_17.Reset();
-	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_17_depth_allocation(MEMORYDEVICE_CUDA, InitParams<VoxelBlockHash>());
-	volume_VBH_17_depth_allocation.Reset();
-
-	IndexingEngine<TSDFVoxel,VoxelBlockHash, MEMORYDEVICE_CUDA>& indexer =
-			IndexingEngine<TSDFVoxel,VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance();
-	indexer.AllocateNearAndBetweenTwoSurfaces(&volume_VBH_17, view_17, &tracking_state);
-
-	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, VoxelBlockHash>* reconstructionEngine_VBH =
-			DepthFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, VoxelBlockHash>(MEMORYDEVICE_CUDA);
-	reconstructionEngine_VBH->IntegrateDepthImageIntoTsdfVolume(&volume_VBH_17, view_17);
-
-	float absoluteTolerance = 1e-7;
-	BOOST_REQUIRE(allocatedContentAlmostEqual_CUDA_Verbose(&volume_PVA_17, &volume_VBH_17_depth_allocation, absoluteTolerance));
-	BOOST_REQUIRE(contentForFlagsAlmostEqual_CUDA_Verbose(&volume_PVA_17, &volume_VBH_17_depth_allocation, VoxelFlags::VOXEL_NONTRUNCATED,
-	                                                     absoluteTolerance));
-
-	BOOST_REQUIRE(allocatedContentAlmostEqual_CUDA_Verbose(&volume_PVA_17, &volume_VBH_17, absoluteTolerance));
-	BOOST_REQUIRE(contentForFlagsAlmostEqual_CUDA_Verbose(&volume_PVA_17, &volume_VBH_17, VoxelFlags::VOXEL_NONTRUNCATED,
-	                                                     absoluteTolerance));
-
-	delete reconstructionEngine_PVA;
-	delete reconstructionEngine_VBH;
-	delete view_17;
-	delete view_16;
-}
 
 BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CUDA) {
 	configuration::Configuration* settings = &configuration::get();
@@ -214,7 +164,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CUDA) {
 	                                          2000, 2040, 2080, 2120, 2160, 2200, 2240, 2280, 2320, 2360, 2400,
 	                                          2440, 2480, 2520, 2560, 2600, 2640, 2680};
 
-	std::vector<Vector3i> zeroLevelSetCoords;
+	std::vector<Vector3i> zero_level_set_coordinates;
 	auto getVoxelCoord = [](Vector3f coordinateMeters, float voxelSize) {
 		return TO_INT_ROUND3(coordinateMeters / voxelSize);
 	};
@@ -224,35 +174,58 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CUDA) {
 				0.0f,
 				static_cast<float>(zero_level_set_voxel_z_coords_mm[iVoxel]) / 1000.0f
 		);
-		zeroLevelSetCoords.push_back(getVoxelCoord(coordinateMeters, settings->general_voxel_volume_parameters.voxel_size));
+		zero_level_set_coordinates.push_back(getVoxelCoord(coordinateMeters, settings->general_voxel_volume_parameters.voxel_size));
 	}
 
 	float tolerance = 1e-4;
-	int narrowBandHalfwidthVoxels = static_cast<int>(std::round(
+	int narrow_band_half_width_voxels = static_cast<int>(std::round(
 			scene1.sceneParams->narrow_band_half_width / scene1.sceneParams->voxel_size));
-	float maxSdfStep = 1.0f / narrowBandHalfwidthVoxels;
+	float max_SDF_step = 1.0f / narrow_band_half_width_voxels;
 
 	// check constructed scene integrity
-	for (int iCoord = 0; iCoord < zeroLevelSetCoords.size(); iCoord++) {
-		Vector3i coord = zeroLevelSetCoords[iCoord];
+	Vector3i bad_coordinate;
+	float bad_sdf, bad_expected_sdf;
+	bool unexpected_sdf_at_level_set = false;
+	int i_bad_level_set;
+
+	for (int i_coordinate = 0; i_coordinate < zero_level_set_coordinates.size(); i_coordinate++) {
+		if (unexpected_sdf_at_level_set) break;
+		Vector3i coord = zero_level_set_coordinates[i_coordinate];
 		TSDFVoxel voxel = ManipulationEngine_CUDA_PVA_Voxel::Inst().ReadVoxel(&scene1, coord);
 		float sdf = TSDFVoxel::valueToFloat(voxel.sdf);
-		BOOST_REQUIRE(almostEqual(sdf, 0.0f, tolerance));
+		if (!almostEqual(sdf, 0.0f, tolerance)) {
+			unexpected_sdf_at_level_set = true;
+			i_bad_level_set = 0;
+			bad_sdf = sdf;
+			bad_expected_sdf = 0.0f;
+			bad_coordinate = coord;
+			break;
+		}
 
 		// for extremely lateral points close to the camera, the rays are highly skewed,
 		// so the value progression won't hold. Skip those.
-		if (iCoord > 17) {
+		if (i_coordinate > 17) {
 			// don't go into low negative sdf values, since those will be overwritten by positive values
 			// during sdf construction in certain cases
-			for (int iLevelSet = -narrowBandHalfwidthVoxels; iLevelSet < (narrowBandHalfwidthVoxels / 2); iLevelSet++) {
-				Vector3i augmentedCoord(coord.x, coord.y, coord.z + iLevelSet);
-				float expectedSdf = -static_cast<float>(iLevelSet) * maxSdfStep;
-				voxel = ManipulationEngine_CUDA_PVA_Voxel::Inst().ReadVoxel(&scene1, augmentedCoord);
+			for (int i_level_set = -narrow_band_half_width_voxels;
+			     i_level_set < (narrow_band_half_width_voxels / 2); i_level_set++) {
+				Vector3i augmented_coord(coord.x, coord.y, coord.z + i_level_set);
+				float expected_sdf = -static_cast<float>(i_level_set) * max_SDF_step;
+				voxel = ManipulationEngine_CUDA_PVA_Voxel::Inst().ReadVoxel(&scene1, augmented_coord);
 				sdf = TSDFVoxel::valueToFloat(voxel.sdf);
-				BOOST_REQUIRE(almostEqual(sdf, expectedSdf, tolerance));
+				if (!almostEqual(sdf, expected_sdf, tolerance)) {
+					unexpected_sdf_at_level_set = true;
+					i_bad_level_set = i_level_set;
+					bad_coordinate = augmented_coord;
+					bad_sdf = sdf;
+					bad_expected_sdf = expected_sdf;
+					break;
+				}
 			}
 		}
 	}
+	BOOST_REQUIRE_MESSAGE(!unexpected_sdf_at_level_set, "Expected sdf " << bad_expected_sdf << " for voxel " \
+ << bad_coordinate << " at level set " << i_bad_level_set << ", got: " << bad_sdf);
 
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> scene2(&configuration::get().general_voxel_volume_parameters,
 	                                                   configuration::get().swapping_mode ==
@@ -286,7 +259,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CUDA) {
 	reconstructionEngine_VBH->GenerateTsdfVolumeFromTwoSurfaces(&scene4, view, &trackingState);
 	BOOST_REQUIRE(contentAlmostEqual_CUDA(&scene2, &scene4, tolerance));
 
-	Vector3i coordinate = zeroLevelSetCoords[0];
+	Vector3i coordinate = zero_level_set_coordinates[0];
 	TSDFVoxel voxel = ManipulationEngine_CUDA_PVA_Voxel::Inst().ReadVoxel(&scene3, coordinate);
 	voxel.sdf = TSDFVoxel::floatToValue(TSDFVoxel::valueToFloat(voxel.sdf) + 0.05f);
 	ManipulationEngine_CUDA_PVA_Voxel::Inst().SetVoxel(&scene3, coordinate, voxel);
