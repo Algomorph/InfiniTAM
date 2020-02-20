@@ -42,7 +42,7 @@ template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 int
 VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::ComputeAllocatedVoxelCount(
 		VoxelVolume<TVoxel, TIndex>* volume) {
-	return ComputeAllocatedVoxelCountFunctor<TVoxel, TIndex, MEMORYDEVICE_CUDA>::compute(volume);
+	return ComputeAllocatedVoxelCountFunctor<TVoxel, TIndex, TMemoryDeviceType>::compute(volume);
 }
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
