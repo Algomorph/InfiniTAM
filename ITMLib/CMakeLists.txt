@@ -74,7 +74,7 @@ set(ITMLIB_ENGINES_COMMON_HEADERS
     Engines/Common/AllocationTempData.h
     Engines/Common/CheckBlockVisibility.h
     Engines/Common/CommonFunctors.h
-    Engines/Common/WarpType.h
+    Utils/WarpType.h
     )
 #======================================= LOW-LEVEL ENGINES =============================================================
 ##
@@ -882,6 +882,7 @@ set(ITMLIB_UTILS_HEADERS
     Utils/Analytics/AlmostEqual.h
     Utils/Analytics/IsAltered.h
     Utils/Analytics/NeighborVoxelIterationInfo.h
+    Utils/Analytics/Statistics.h
 
     Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison.h
     Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CPU.h
@@ -889,36 +890,34 @@ set(ITMLIB_UTILS_HEADERS
     Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_Functors.h
     )
 
-## ================================================ UTILS - SCENE STATISTICS CALCULATOR ================================
+## ================================================ UTILS - VOLUME STATISTICS CALCULATOR ================================
 
-set(ITMLIB_UTILS_STATCALC_INTERFACE_HEADERS
+set(ITMLIB_UTILS_STATCALC_HEADERS
+    Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculatorFactory.h
+    Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator.h
     Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculatorInterface.h
-    )
-
-
-set(ITMLIB_UTILS_STATCALC_SHARED_HEADERS
     Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator_Functors.h
     )
 
-
-set(ITMLIB_UTILS_STATCALC_CPU_HEADERS
-    Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator.h
-    )
-
-set(ITMLIB_UTILS_STATCALC_CPU_SOURCES
+set(ITMLIB_UTILS_STATCALC_SOURCES
     Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator.tpp
     Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator_CPU_PlainVoxelArray.cpp
     Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator_CPU_VoxelBlockHash.cpp
-    )
-
-set(ITMLIB_UTILS_STATCALC_CUDA_HEADERS
-    Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator.h
-    )
-set(ITMLIB_UTILS_STATCALC_CUDA_SOURCES
     Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator_CUDA_PlainVoxelArray.cu
     Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator_CUDA_VoxelBlockHash.cu
     )
 
+## ================================================ UTILS - VOLUME REDUCTION STATISTICS CALCULATOR =====================
+
+set(ITMLIB_UTILS_REDUCTION_STATCALC_HEADERS
+    Utils/Analytics/VolumeReductionStatisticsCalculator/VolumeReductionStatisticsCalculator.h
+    Utils/Analytics/VolumeReductionStatisticsCalculator/VolumeReductionStatisticsCalculator_CUDA_VBH.h
+    Utils/Analytics/VolumeReductionStatisticsCalculator/VolumeReductionStatisticsCalculator_CUDA_VBH_Kernels.h
+    )
+set(ITMLIB_UTILS_REDUCTION_STATCALC_SOURCES
+    Utils/Analytics/VolumeReductionStatisticsCalculator/VolumeReductionStatisticsCalculator_CUDA_VBH.tpp
+    Utils/Analytics/VolumeReductionStatisticsCalculator/VolumeReductionStatisticsCalculator_CUDA_VBH.cu
+    )
 
 ## ================================================ UTILS - FILEIO =====================================================
 set(ITMLIB_UTILS_FILEIO_SOURCES
@@ -1018,8 +1017,8 @@ set(sources
     ${ITMLIB_SCENE_MOTION_TRACKERS_INTERFACE_SOURCES}
     ${ITMLIB_SCENE_MOTION_TRACKERS_SHARED_SOURCES}
     ${ITMLIB_UTILS_SOURCES}
-    ${ITMLIB_UTILS_STATCALC_CPU_SOURCES}
-    ${ITMLIB_UTILS_STATCALC_CUDA_SOURCES}
+    ${ITMLIB_UTILS_STATCALC_SOURCES}
+    ${ITMLIB_UTILS_REDUCTION_STATCALC_SOURCES}
     ${ITMLIB_UTILS_FILEIO_SOURCES}
     ${ITMLIB_UTILS_VISUALIZATION_SOURCES}
     )
@@ -1088,10 +1087,8 @@ set(headers
     ${ITMLIB_SCENE_MOTION_TRACKERS_INTERFACE_HEADERS}
     ${ITMLIB_SCENE_MOTION_TRACKERS_SHARED_HEADERS}
     ${ITMLIB_UTILS_HEADERS}
-    ${ITMLIB_UTILS_STATCALC_INTERFACE_HEADERS}
-    ${ITMLIB_UTILS_STATCALC_SHARED_HEADERS}
-    ${ITMLIB_UTILS_STATCALC_CPU_HEADERS}
-    ${ITMLIB_UTILS_STATCALC_CUDA_HEADERS}
+    ${ITMLIB_UTILS_STATCALC_HEADERS}
+    ${ITMLIB_UTILS_REDUCTION_STATCALC_HEADERS}
     ${ITMLIB_UTILS_FILEIO_HEADERS}
     ${ITMLIB_UTILS_VISUALIZATION_HEADERS}
     )

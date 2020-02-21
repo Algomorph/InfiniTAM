@@ -17,7 +17,7 @@
 
 #include "../../../ORUtils/PlatformIndependence.h"
 #include "../../Utils/Math.h"
-#include "WarpType.h"
+#include "../../Utils/WarpType.h"
 
 // region ===================================== VOXEL LOOKUPS ==========================================================
 namespace ITMLib{
@@ -119,42 +119,42 @@ struct LookupBasedOnWarpUpdateStaticFunctor<TWarp, false> {
 
 }//namespace SpecializedWarpLookups
 
-template<typename TWarp, WarpType TWarpType>
+template<typename TWarpVoxel, WarpType TWarpType>
 struct WarpVoxelStaticFunctor;
 
-template<typename TWarp>
-struct WarpVoxelStaticFunctor<TWarp, WarpType::WARP_CUMULATIVE>{
+template<typename TWarpVoxel>
+struct WarpVoxelStaticFunctor<TWarpVoxel, WarpType::WARP_CUMULATIVE>{
 	_CPU_AND_GPU_CODE_
-	static inline Vector3f GetWarpedPosition(const TWarp& voxel, const Vector3i& position){
-		return SpecializedWarpLookups::LookupBasedOnCumulativeWarpStaticFunctor<TWarp, TWarp::hasCumulativeWarp>::GetWarpedPosition(voxel, position);
+	static inline Vector3f GetWarpedPosition(const TWarpVoxel& voxel, const Vector3i& position){
+		return SpecializedWarpLookups::LookupBasedOnCumulativeWarpStaticFunctor<TWarpVoxel, TWarpVoxel::hasCumulativeWarp>::GetWarpedPosition(voxel, position);
 	}
 	_CPU_AND_GPU_CODE_
-	static inline Vector3f GetWarp(const TWarp& voxel) {
-		return SpecializedWarpLookups::LookupBasedOnCumulativeWarpStaticFunctor<TWarp, TWarp::hasCumulativeWarp>::GetWarp(voxel);
-	}
-};
-
-template<typename TWarp>
-struct WarpVoxelStaticFunctor<TWarp, WarpType::WARP_FRAMEWISE>{
-	_CPU_AND_GPU_CODE_
-	static inline Vector3f GetWarpedPosition(const TWarp& warp, const Vector3i& position){
-		return SpecializedWarpLookups::LookupBasedOnFramewiseWarpStaticFunctor<TWarp, TWarp::hasFramewiseWarp>::GetWarpedPosition(warp, position);
-	}
-	_CPU_AND_GPU_CODE_
-	static inline Vector3f GetWarp(const TWarp& voxel) {
-		return SpecializedWarpLookups::LookupBasedOnFramewiseWarpStaticFunctor<TWarp, TWarp::hasFramewiseWarp>::GetWarp(voxel);
+	static inline Vector3f GetWarp(const TWarpVoxel& voxel) {
+		return SpecializedWarpLookups::LookupBasedOnCumulativeWarpStaticFunctor<TWarpVoxel, TWarpVoxel::hasCumulativeWarp>::GetWarp(voxel);
 	}
 };
 
-template<typename TWarp>
-struct WarpVoxelStaticFunctor<TWarp, WarpType::WARP_UPDATE>{
+template<typename TWarpVoxel>
+struct WarpVoxelStaticFunctor<TWarpVoxel, WarpType::WARP_FRAMEWISE>{
 	_CPU_AND_GPU_CODE_
-	static inline Vector3f GetWarpedPosition(const TWarp& voxel, const Vector3i& position){
-		return SpecializedWarpLookups::LookupBasedOnWarpUpdateStaticFunctor<TWarp, TWarp::hasWarpUpdate>::GetWarpedPosition(voxel, position);
+	static inline Vector3f GetWarpedPosition(const TWarpVoxel& warp, const Vector3i& position){
+		return SpecializedWarpLookups::LookupBasedOnFramewiseWarpStaticFunctor<TWarpVoxel, TWarpVoxel::hasFramewiseWarp>::GetWarpedPosition(warp, position);
 	}
 	_CPU_AND_GPU_CODE_
-	static inline Vector3f GetWarp(const TWarp& voxel) {
-		return SpecializedWarpLookups::LookupBasedOnWarpUpdateStaticFunctor<TWarp, TWarp::hasWarpUpdate>::GetWarp(voxel);
+	static inline Vector3f GetWarp(const TWarpVoxel& voxel) {
+		return SpecializedWarpLookups::LookupBasedOnFramewiseWarpStaticFunctor<TWarpVoxel, TWarpVoxel::hasFramewiseWarp>::GetWarp(voxel);
+	}
+};
+
+template<typename TWarpVoxel>
+struct WarpVoxelStaticFunctor<TWarpVoxel, WarpType::WARP_UPDATE>{
+	_CPU_AND_GPU_CODE_
+	static inline Vector3f GetWarpedPosition(const TWarpVoxel& voxel, const Vector3i& position){
+		return SpecializedWarpLookups::LookupBasedOnWarpUpdateStaticFunctor<TWarpVoxel, TWarpVoxel::hasWarpUpdate>::GetWarpedPosition(voxel, position);
+	}
+	_CPU_AND_GPU_CODE_
+	static inline Vector3f GetWarp(const TWarpVoxel& voxel) {
+		return SpecializedWarpLookups::LookupBasedOnWarpUpdateStaticFunctor<TWarpVoxel, TWarpVoxel::hasWarpUpdate>::GetWarp(voxel);
 	}
 };
 

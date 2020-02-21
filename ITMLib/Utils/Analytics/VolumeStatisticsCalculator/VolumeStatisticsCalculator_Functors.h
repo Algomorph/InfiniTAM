@@ -32,20 +32,15 @@
 #include "../../../Objects/Volume/VoxelVolume.h"
 #include "../../../Engines/Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
 #include "../../../Engines/Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
-#include "../../../Engines/Common/WarpType.h"
+#include "../../WarpType.h"
+#include "../Statistics.h"
 
 
 using namespace ITMLib;
 
-namespace ITMLib {
-enum Statistic {
-	MINIMUM,
-	MAXIMUM,
-	MEAN
-};
-}
 
-// region =========================================== VECTOR/GRADIENT FIELDS ===========================================
+
+// region =========================================== VECTOR/GRADIENT FIELD MIN/MEAN/MAX ===============================
 
 template<typename TVoxel, Statistic TStatistic, WarpType TWarpType>
 struct HandleVectorLengthAggregate;
@@ -201,6 +196,10 @@ struct ComputeWarpLengthStatisticFunctor<true, TVoxel, TIndex, TDeviceType, TSta
 };
 
 //endregion
+
+// region =========================================== VECTOR/GRADIENT FIELD REDUCTION MIN/MAX ==========================
+
+// endregion
 //region ============================================ COUNT VOXELS WITH SPECIFIC SDF VALUE =============================
 
 template<bool hasSDFInformation, typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>

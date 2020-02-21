@@ -16,7 +16,7 @@
 #pragma once
 
 #include "../Interface/IndexingEngine.h"
-#include "../../Common/WarpType.h"
+#include "../../../Utils/WarpType.h"
 
 namespace ITMLib {
 

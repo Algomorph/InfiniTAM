@@ -21,7 +21,7 @@
 #include "../../../Objects/Views/ITMView.h"
 #include "../../../Objects/Tracking/CameraTrackingState.h"
 #include "../../../Objects/RenderStates/RenderState.h"
-#include "../../Common/WarpType.h"
+#include "../../../Utils/WarpType.h"
 #include "../../../../ORUtils/MemoryDeviceType.h"
 #include "../../../GlobalTemplateDefines.h"
 #include "../../../Objects/Volume/VoxelBlockHash.h"

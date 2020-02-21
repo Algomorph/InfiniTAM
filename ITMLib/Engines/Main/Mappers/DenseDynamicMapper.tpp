@@ -30,6 +30,7 @@
 #include "../../../Utils/Analytics/BenchmarkUtils.h"
 #include "../../EditAndCopy/Interface/EditAndCopyEngineInterface.h"
 #include "../../../Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculatorInterface.h"
+#include "../../../Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculatorFactory.h"
 #include "../../Indexing/IndexingEngineFactory.h"
 //** CPU **
 #include "../../EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
@@ -209,17 +210,23 @@ VoxelVolume<TVoxel, TIndex>* DenseDynamicMapper<TVoxel, TWarp, TIndex>::TrackFra
 	PrintOperationStatus("*** Optimizing warp based on difference between canonical and live SDF. ***");
 	bench::StartTimer("TrackMotion_3_Optimization");
 	int source_live_volume_index = 0;
-	int target_live_volume_index = 0;
+	int target_live_volume_index = 1;
 	for (int iteration = 0; max_vector_update_length_in_voxels > this->max_vector_update_threshold_in_voxels
 	                        && iteration < parameters.max_iteration_threshold; iteration++) {
-		source_live_volume_index = iteration % 2;
-		target_live_volume_index = (iteration + 1) % 2;
 		PerformSingleOptimizationStep(canonical_volume, live_volume_pair[source_live_volume_index],
 		                              live_volume_pair[target_live_volume_index], warp_field,
 		                              max_vector_update_length_in_voxels, iteration);
-		//_DEBUG
-		live_volume_pair[target_live_volume_index];
 
+		if(configuration::get().telemetry_settings.log_volume_statistics && verbosity_level >= configuration::VERBOSITY_PER_ITERATION){
+			std::cout << green << "*** Per-Iteration Volume Statistics ***" << reset << std::endl;
+			std::cout << "   Warp update minimum: " << StatCalc_Accessor::Get<TWarp,TIndex>().ComputeFramewiseWarpMin(warp_field) << std::endl;
+			std::cout << "   Warp update mean: " << StatCalc_Accessor::Get<TWarp,TIndex>().ComputeFramewiseWarpMean(warp_field) << std::endl;
+			std::cout << "   Warp update maximum: " << StatCalc_Accessor::Get<TWarp,TIndex>().ComputeFramewiseWarpMax(warp_field) << std::endl;
+			std::cout << "   Source live non-truncated voxel count: " << StatCalc_Accessor::Get<TVoxel,TIndex>().ComputeNonTruncatedVoxelCount(live_volume_pair[source_live_volume_index]) << std::endl;
+			std::cout << "   Target live non-truncated voxel count: " << StatCalc_Accessor::Get<TVoxel,TIndex>().ComputeNonTruncatedVoxelCount(live_volume_pair[target_live_volume_index]) << std::endl;
+		}
+
+		std::swap(source_live_volume_index,target_live_volume_index);
 	}
 	bench::StopTimer("TrackMotion_3_Optimization");
 	PrintOperationStatus("*** Warping optimization finished for current frame. ***");

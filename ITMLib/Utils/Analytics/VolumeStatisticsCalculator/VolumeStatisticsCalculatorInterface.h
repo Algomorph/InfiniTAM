@@ -18,7 +18,7 @@
 
 #include <vector>
 #include "../../../Objects/Volume/VoxelVolume.h"
-#include "../../../Engines/Common/WarpType.h"
+#include "../../WarpType.h"
 #include "../../VoxelFlags.h"
 
 namespace ITMLib {
