@@ -25,7 +25,7 @@
 
 //local
 #include "SceneSliceVisualizer3DInteractorStyle.h"
-#include "../FileIO/DynamicFusionLogger.h"
+#include "../FileIO/TelemetryRecorder.h"
 
 using namespace ITMLib;
 
@@ -169,7 +169,7 @@ void SceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>:
 
 template<typename TVoxelCanonical, typename TVoxelLive, typename TIndex>
 void SceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>::RequestShutdown() {
-	DynamicFusionLogger<TVoxelCanonical, TVoxelLive, TIndex>::Instance().RequestAppShutdown();
+	TelemetryRecorder<TVoxelCanonical, TVoxelLive, TIndex>::Instance().RequestAppShutdown();
 }
 
 template<typename TVoxelCanonical, typename TVoxelLive, typename TIndex>

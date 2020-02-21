@@ -922,23 +922,23 @@ set(ITMLIB_UTILS_STATCALC_CUDA_SOURCES
 
 ## ================================================ UTILS - FILEIO =====================================================
 set(ITMLIB_UTILS_FILEIO_SOURCES
-    Utils/FileIO/DynamicFusionLogger_PlainVoxelArray.cpp
-    Utils/FileIO/DynamicFusionLogger_VoxelBlockHash.cpp
+    Utils/FileIO/TelemetryRecorder_PlainVoxelArray.cpp
+    Utils/FileIO/TelemetryRecorder_VoxelBlockHash.cpp
     Utils/FileIO/SceneLogger.tpp
     Utils/FileIO/SceneLogger_PlainVoxelArray.cpp
     Utils/FileIO/SceneLogger_VoxelBlockHash.cpp
-    Utils/FileIO/DynamicFusionLogger.tpp
+    Utils/FileIO/TelemetryRecorder.tpp
     Utils/FileIO/SceneLogger_SceneSlice.tpp
-    Utils/FileIO/WarpFieldLogger.tpp
-    Utils/FileIO/WarpFieldLogger_PlainVoxelArray.cpp
-    Utils/FileIO/WarpFieldLogger_VoxelBlockHash.cpp
+    Utils/FileIO/WarpFieldSequenceRecorder.tpp
+    Utils/FileIO/WarpFieldSequenceRecorder_PlainVoxelArray.cpp
+    Utils/FileIO/WarpFieldSequenceRecorder_VoxelBlockHash.cpp
     )
 
 set(ITMLIB_UTILS_FILEIO_HEADERS
     Utils/FileIO/WriteAndReadFunctors.h
-    Utils/FileIO/SceneLogger.h
-    Utils/FileIO/DynamicFusionLogger.h
-    Utils/FileIO/WarpFieldLogger.h)
+    Utils/FileIO/VolumeSequenceRecorder.h
+    Utils/FileIO/TelemetryRecorder.h
+    Utils/FileIO/WarpFieldSequenceRecorder.h)
 ##
 
 set(ITMLIB_UTILS_VISUALIZATION_SOURCES

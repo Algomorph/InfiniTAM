@@ -16,7 +16,7 @@
 #pragma once
 
 #include "../../Objects/Volume/VoxelVolume.h"
-#include "SceneLogger.h"
+#include "VolumeSequenceRecorder.h"
 #include "../Visualization/SceneSliceVisualizer2D.h"
 #include "../Geometry/CardinalAxesAndPlanes.h"
 #ifdef WITH_VTK
@@ -31,7 +31,7 @@ namespace ITMLib {
 //TODO: adapt to record warpField properly (+test)
 //TODO: adapt to live-scene-pair structure; the live scene is now split into two that are being ping-ponged (+test)
 
-class DynamicFusionLogger_Interface{
+class TelemetryRecorder_Interface{
 public:
 
 // region ============================= SETTERS & SWITCHES =============================================================
@@ -83,7 +83,7 @@ public:
 };
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-class DynamicFusionLogger : public DynamicFusionLogger_Interface {
+class TelemetryRecorder : public TelemetryRecorder_Interface {
 public:
 // where to save the images within the output directory
 	static const std::string iterationFramesFolderName;
@@ -91,8 +91,8 @@ public:
 	static const std::string canonicalSceneRasterizedFolderName;
 	static const std::string liveSceneRasterizedFolderName;
 
-	static DynamicFusionLogger& Instance(){
-		static DynamicFusionLogger instance;
+	static TelemetryRecorder& Instance(){
+		static TelemetryRecorder instance;
 		return instance;
 	}
 
@@ -160,13 +160,13 @@ public:
 	bool IsRecordingWarps();
 	void LogHighlight(int hash, int locId, ITMHighlightIterationInfo info);
 
-	DynamicFusionLogger(DynamicFusionLogger const&) = delete;
-	void operator=(DynamicFusionLogger const&) = delete;
+	TelemetryRecorder(TelemetryRecorder const&) = delete;
+	void operator=(TelemetryRecorder const&) = delete;
 
 
 private:
-	DynamicFusionLogger();
-	~DynamicFusionLogger();
+	TelemetryRecorder();
+	~TelemetryRecorder();
 
 	void InitializeWarp2DSliceRecording(VoxelVolume<TVoxel, TIndex>* canonicalScene,
 	                                    VoxelVolume<TVoxel, TIndex>* sourceLiveScene);
@@ -185,7 +185,7 @@ private:
 	std::unique_ptr<SceneSliceVisualizer3D<TVoxel, TWarp, TIndex>> scene3DSliceVisualizer;
 	std::unique_ptr<ITMSceneTrackingEnergyPlotter> energyPlotter;
 #endif
-	SceneLogger<TVoxel, TWarp, TIndex>* scene3DLogger = nullptr;
+	VolumeSequenceRecorder<TVoxel, TWarp, TIndex>* scene3DLogger = nullptr;
 
 	// internal references to the scenes
 	VoxelVolume<TVoxel, TIndex>* canonicalScene = nullptr;

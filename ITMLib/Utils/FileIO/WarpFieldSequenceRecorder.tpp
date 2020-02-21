@@ -18,7 +18,7 @@
 #include <regex>
 
 //local
-#include "WarpFieldLogger.h"
+#include "WarpFieldSequenceRecorder.h"
 #include "../Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator.h"
 #include "../Configuration.h"
 #include "../../Engines/DepthFusion/DepthFusionEngineFactory.h"
@@ -37,62 +37,62 @@ using namespace ITMLib;
 // region ======================================== STATIC CONSTANTS ====================================================
 
 template<typename TWarp, typename TIndex>
-const size_t WarpFieldLogger<TWarp, TIndex>::warpByteSize = sizeof(TWarp::framewise_warp);
+const size_t WarpFieldSequenceRecorder<TWarp, TIndex>::warpByteSize = sizeof(TWarp::framewise_warp);
 
 template<typename TVoxel, typename TIndex>
-const size_t WarpFieldLogger<TVoxel, TIndex>::warpFloatSize =
-		WarpFieldLogger<TVoxel, TIndex>::warpByteSize / sizeof(float);
+const size_t WarpFieldSequenceRecorder<TVoxel, TIndex>::warpFloatSize =
+		WarpFieldSequenceRecorder<TVoxel, TIndex>::warpByteSize / sizeof(float);
 
 //TODO: bytesize for gradient of live frame
 template<typename TVoxel, typename TIndex>
-const size_t WarpFieldLogger<TVoxel, TIndex>::updateByteSize = 0;
+const size_t WarpFieldSequenceRecorder<TVoxel, TIndex>::updateByteSize = 0;
 
 template<typename TVoxel, typename TIndex>
-const size_t WarpFieldLogger<TVoxel, TIndex>::updateFloatSize =
-		WarpFieldLogger<TVoxel, TIndex>::updateByteSize / sizeof(float);
+const size_t WarpFieldSequenceRecorder<TVoxel, TIndex>::updateFloatSize =
+		WarpFieldSequenceRecorder<TVoxel, TIndex>::updateByteSize / sizeof(float);
 
 template<typename TVoxel, typename TIndex>
-const size_t WarpFieldLogger<TVoxel, TIndex>::warpAndUpdateByteSize =
-		WarpFieldLogger<TVoxel, TIndex>::warpByteSize + WarpFieldLogger<TVoxel, TIndex>::updateByteSize;
+const size_t WarpFieldSequenceRecorder<TVoxel, TIndex>::warpAndUpdateByteSize =
+		WarpFieldSequenceRecorder<TVoxel, TIndex>::warpByteSize + WarpFieldSequenceRecorder<TVoxel, TIndex>::updateByteSize;
 
 template<typename TVoxel, typename TIndex>
-const size_t WarpFieldLogger<TVoxel, TIndex>::warpAndUpdateFloatSize =
-		WarpFieldLogger<TVoxel, TIndex>::warpAndUpdateByteSize / sizeof(float);;
+const size_t WarpFieldSequenceRecorder<TVoxel, TIndex>::warpAndUpdateFloatSize =
+		WarpFieldSequenceRecorder<TVoxel, TIndex>::warpAndUpdateByteSize / sizeof(float);;
 
 template<typename TVoxel, typename TIndex>
-const std::string WarpFieldLogger<TVoxel, TIndex>::fullSceneSliceIdentifier = "full_scene";
+const std::string WarpFieldSequenceRecorder<TVoxel, TIndex>::fullSceneSliceIdentifier = "full_scene";
 
 template<typename TVoxel, typename TIndex>
-const std::string WarpFieldLogger<TVoxel, TIndex>::binaryFileExtension = ".dat";
+const std::string WarpFieldSequenceRecorder<TVoxel, TIndex>::binaryFileExtension = ".dat";
 template<typename TVoxel, typename TIndex>
-const std::string WarpFieldLogger<TVoxel, TIndex>::textFileExtension = ".txt";
+const std::string WarpFieldSequenceRecorder<TVoxel, TIndex>::textFileExtension = ".txt";
 // private
 template<typename TVoxel, typename TIndex>
-const std::string WarpFieldLogger<TVoxel, TIndex>::highlightFilterInfoFilename = "highlight_filter_info.txt";
+const std::string WarpFieldSequenceRecorder<TVoxel, TIndex>::highlightFilterInfoFilename = "highlight_filter_info.txt";
 
 template<typename TVoxel, typename TIndex>
-const std::string WarpFieldLogger<TVoxel, TIndex>::warpUpdatesFilename = "warp_updates";
+const std::string WarpFieldSequenceRecorder<TVoxel, TIndex>::warpUpdatesFilename = "warp_updates";
 
 template<typename TVoxel, typename TIndex>
-const std::string WarpFieldLogger<TVoxel, TIndex>::minRecurrenceHighlightFilterName = "min_recurrence_count_filter:";
+const std::string WarpFieldSequenceRecorder<TVoxel, TIndex>::minRecurrenceHighlightFilterName = "min_recurrence_count_filter:";
 
 template<typename TVoxel, typename TIndex>
-const std::string WarpFieldLogger<TVoxel, TIndex>::canonicalName = "canonical";
+const std::string WarpFieldSequenceRecorder<TVoxel, TIndex>::canonicalName = "canonical";
 
 template<typename TVoxel, typename TIndex>
-const std::string WarpFieldLogger<TVoxel, TIndex>::sliceFolderPrefix = "slice_";
+const std::string WarpFieldSequenceRecorder<TVoxel, TIndex>::sliceFolderPrefix = "slice_";
 
 template<typename TVoxel, typename TIndex>
-const std::string WarpFieldLogger<TVoxel, TIndex>::sliceScenePrefix = "scene_";
+const std::string WarpFieldSequenceRecorder<TVoxel, TIndex>::sliceScenePrefix = "scene_";
 
 template<typename TVoxel, typename TIndex>
-const std::string WarpFieldLogger<TVoxel, TIndex>::continuousHighlightsPostfix = "continuous";
+const std::string WarpFieldSequenceRecorder<TVoxel, TIndex>::continuousHighlightsPostfix = "continuous";
 
 // endregion
 // region ======================================== STATIC METHODS : PATH GENERATION ====================================
 
 template<typename TVoxel, typename TIndex>
-std::string WarpFieldLogger<TVoxel, TIndex>::GenerateSliceStringIdentifier(const Vector6i& bounds) {
+std::string WarpFieldSequenceRecorder<TVoxel, TIndex>::GenerateSliceStringIdentifier(const Vector6i& bounds) {
 	return int_to_padded_string(bounds.min_x, 3)
 	       + "_" + int_to_padded_string(bounds.min_y, 3)
 	       + "_" + int_to_padded_string(bounds.min_z, 3)
@@ -103,7 +103,7 @@ std::string WarpFieldLogger<TVoxel, TIndex>::GenerateSliceStringIdentifier(const
 
 
 template<typename TVoxel, typename TIndex>
-void WarpFieldLogger<TVoxel, TIndex>::ExtractBoundsFromSliceStringIdentifier(
+void WarpFieldSequenceRecorder<TVoxel, TIndex>::ExtractBoundsFromSliceStringIdentifier(
 		const std::string& stringContainingIdentifier, Vector6i& bounds) {
 	const int coordCount = 6;
 	int coordinates[coordCount];
@@ -125,52 +125,52 @@ void WarpFieldLogger<TVoxel, TIndex>::ExtractBoundsFromSliceStringIdentifier(
 
 template<typename TVoxel, typename TIndex>
 boost::filesystem::path
-WarpFieldLogger<TVoxel, TIndex>::GenerateSliceFolderPath(const fs::path& fullScenePath, const Vector6i& bounds) {
+WarpFieldSequenceRecorder<TVoxel, TIndex>::GenerateSliceFolderPath(const fs::path& fullScenePath, const Vector6i& bounds) {
 	return fullScenePath / (sliceFolderPrefix+ GenerateSliceStringIdentifier(bounds));
 }
 
 template<typename TVoxel, typename TIndex>
 boost::filesystem::path
-WarpFieldLogger<TVoxel, TIndex>::GenerateSliceFolderPath(const fs::path& fullScenePath,
-                                                         const std::string& sliceIdentifier) {
+WarpFieldSequenceRecorder<TVoxel, TIndex>::GenerateSliceFolderPath(const fs::path& fullScenePath,
+                                                                   const std::string& sliceIdentifier) {
 	return fullScenePath / (sliceFolderPrefix + sliceIdentifier);
 };
 
 template<typename TVoxel, typename TIndex>
-std::string WarpFieldLogger<TVoxel, TIndex>::GenerateSliceSceneFilename_UpToPostfix(const fs::path& fullScenePath,
-                                                                                    const Vector6i& bounds) {
+std::string WarpFieldSequenceRecorder<TVoxel, TIndex>::GenerateSliceSceneFilename_UpToPostfix(const fs::path& fullScenePath,
+                                                                                              const Vector6i& bounds) {
 	return (GenerateSliceFolderPath(fullScenePath, bounds) / sliceScenePrefix).string();
 }
 
 template<typename TVoxel, typename TIndex>
-std::string WarpFieldLogger<TVoxel, TIndex>::GenerateSliceSceneFilename_UpToPostfix(const fs::path& fullScenePath,
-                                                                                    const std::string& sliceIdentifier) {
+std::string WarpFieldSequenceRecorder<TVoxel, TIndex>::GenerateSliceSceneFilename_UpToPostfix(const fs::path& fullScenePath,
+                                                                                              const std::string& sliceIdentifier) {
 	return (GenerateSliceFolderPath(fullScenePath, sliceIdentifier) / sliceScenePrefix).string();
 }
 
 template<typename TVoxel, typename TIndex>
-std::string WarpFieldLogger<TVoxel, TIndex>::GenerateSliceSceneFilename_Full(const fs::path& fullScenePath,
-                                                                             const Vector6i& bounds) {
+std::string WarpFieldSequenceRecorder<TVoxel, TIndex>::GenerateSliceSceneFilename_Full(const fs::path& fullScenePath,
+                                                                                       const Vector6i& bounds) {
 	return GenerateSliceSceneFilename_UpToPostfix(fullScenePath, bounds) + compactFilePostfixAndExtension;
 }
 
 template<typename TVoxel, typename TIndex>
 std::string
-WarpFieldLogger<TVoxel, TIndex>::GenerateSliceSceneFilename_Full(const fs::path& fullScenePath,
-                                                                 const std::string& sliceIdentifier) {
+WarpFieldSequenceRecorder<TVoxel, TIndex>::GenerateSliceSceneFilename_Full(const fs::path& fullScenePath,
+                                                                           const std::string& sliceIdentifier) {
 	return GenerateSliceSceneFilename_UpToPostfix(fullScenePath, sliceIdentifier) + compactFilePostfixAndExtension;
 }
 
 template<typename TVoxel, typename TIndex>
 std::string
-WarpFieldLogger<TVoxel, TIndex>::GenerateSliceWarpFilename(const fs::path& rootScenePath, const Vector6i& bounds) {
+WarpFieldSequenceRecorder<TVoxel, TIndex>::GenerateSliceWarpFilename(const fs::path& rootScenePath, const Vector6i& bounds) {
 	return (GenerateSliceFolderPath(rootScenePath, bounds) /
 	        (warpUpdatesFilename + binaryFileExtension)).string();
 };
 
 template<typename TVoxel, typename TIndex>
-std::string WarpFieldLogger<TVoxel, TIndex>::GenerateSliceWarpFilename(const fs::path& rootScenePath,
-                                                                       const std::string& sliceIdentifier) {
+std::string WarpFieldSequenceRecorder<TVoxel, TIndex>::GenerateSliceWarpFilename(const fs::path& rootScenePath,
+                                                                                 const std::string& sliceIdentifier) {
 	return (GenerateSliceFolderPath(rootScenePath, sliceIdentifier) /
 	        (warpUpdatesFilename + binaryFileExtension)).string();
 };
@@ -183,7 +183,7 @@ std::string WarpFieldLogger<TVoxel, TIndex>::GenerateSliceWarpFilename(const fs:
  * \param path path to root location of the files for the scene
  */
 template<typename TVoxel, typename TIndex>
-WarpFieldLogger<TVoxel, TIndex>::WarpFieldLogger(VoxelVolume<TVoxel, TIndex>* scene, boost::filesystem::path path):
+WarpFieldSequenceRecorder<TVoxel, TIndex>::WarpFieldSequenceRecorder(VoxelVolume<TVoxel, TIndex>* scene, boost::filesystem::path path):
 		warpField(scene),
 		path(""),
 		isSlice(false),
@@ -204,7 +204,7 @@ WarpFieldLogger<TVoxel, TIndex>::WarpFieldLogger(VoxelVolume<TVoxel, TIndex>* sc
  * \param fullScenePath to the root location of the files for the full scene encompassing the slice
  */
 template<typename TVoxel, typename TIndex>
-WarpFieldLogger<TVoxel, TIndex>::WarpFieldLogger(const Vector6i& bounds, boost::filesystem::path fullScenePath):
+WarpFieldSequenceRecorder<TVoxel, TIndex>::WarpFieldSequenceRecorder(const Vector6i& bounds, boost::filesystem::path fullScenePath):
 		warpField(nullptr),
 		path(""),
 		isSlice(true),
@@ -223,7 +223,7 @@ WarpFieldLogger<TVoxel, TIndex>::WarpFieldLogger(const Vector6i& bounds, boost::
 }
 
 template<typename TVoxel, typename TIndex>
-WarpFieldLogger<TVoxel, TIndex>::~WarpFieldLogger() {
+WarpFieldSequenceRecorder<TVoxel, TIndex>::~WarpFieldSequenceRecorder() {
 	if (isSlice) {
 		delete warpField;
 	}
@@ -233,13 +233,13 @@ WarpFieldLogger<TVoxel, TIndex>::~WarpFieldLogger() {
 // region ======================================== GETTERS =============================================================
 
 template<typename TVoxel, typename TIndex>
-unsigned int WarpFieldLogger<TVoxel, TIndex>::GetIterationCursor() const {
+unsigned int WarpFieldSequenceRecorder<TVoxel, TIndex>::GetIterationCursor() const {
 	return iterationCursor;
 }
 
 
 template<typename TVoxel, typename TIndex>
-bool WarpFieldLogger<TVoxel, TIndex>::SetIterationCursor(unsigned int iterationIndex) {
+bool WarpFieldSequenceRecorder<TVoxel, TIndex>::SetIterationCursor(unsigned int iterationIndex) {
 	size_t headerSize = sizeof(int);
 	warpIFStream.seekg(headerSize + iterationIndex * (voxelCount * warpAndUpdateByteSize + sizeof(iterationCursor)),
 	                   std::ios::beg);
@@ -252,50 +252,50 @@ bool WarpFieldLogger<TVoxel, TIndex>::SetIterationCursor(unsigned int iterationI
 }
 
 template<typename TVoxel, typename TIndex>
-bool WarpFieldLogger<TVoxel, TIndex>::Empty() const {
+bool WarpFieldSequenceRecorder<TVoxel, TIndex>::Empty() const {
 	return warpField == nullptr;
 }
 
 template<typename TVoxel, typename TIndex>
-bool WarpFieldLogger<TVoxel, TIndex>::Loaded() const {
+bool WarpFieldSequenceRecorder<TVoxel, TIndex>::Loaded() const {
 	return voxelCount != -1;
 }
 
 template<typename TVoxel, typename TIndex>
-std::string WarpFieldLogger<TVoxel, TIndex>::GetSliceIdentifier() const {
+std::string WarpFieldSequenceRecorder<TVoxel, TIndex>::GetSliceIdentifier() const {
 	if (!isSlice) {
 		return fullSceneSliceIdentifier;
 	}
-	return WarpFieldLogger<TVoxel, TIndex>::GenerateSliceStringIdentifier(this->bounds);
+	return WarpFieldSequenceRecorder<TVoxel, TIndex>::GenerateSliceStringIdentifier(this->bounds);
 }
 
 template<typename TVoxel, typename TIndex>
-const VoxelVolume<TVoxel, TIndex>* WarpFieldLogger<TVoxel, TIndex>::GetScene() const {
+const VoxelVolume<TVoxel, TIndex>* WarpFieldSequenceRecorder<TVoxel, TIndex>::GetScene() const {
 	return this->warpField;
 }
 // endregion
 // region ======================================== LOAD / SAVE SCENE ===================================================
 
 template<typename TVoxel, typename TIndex>
-void WarpFieldLogger<TVoxel, TIndex>::Load() {
+void WarpFieldSequenceRecorder<TVoxel, TIndex>::Load() {
 	warpField->LoadFromDirectory(scenePath.string());
 	voxelCount = VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().ComputeAllocatedVoxelCount(warpField);
 }
 
 template<typename TVoxel, typename TIndex>
-void WarpFieldLogger<TVoxel, TIndex>::Save() {
+void WarpFieldSequenceRecorder<TVoxel, TIndex>::Save() {
 	warpField->SaveToDirectory(scenePath.string());
 	this->voxelCount = VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().ComputeAllocatedVoxelCount(warpField);
 }
 
 template<typename TVoxel, typename TIndex>
-void WarpFieldLogger<TVoxel, TIndex>::SaveCompact() {
+void WarpFieldSequenceRecorder<TVoxel, TIndex>::SaveCompact() {
 	VolumeFileIOEngine<TVoxel,TIndex>::SaveToDirectoryCompact(warpField, scenePath.string());
 	this->voxelCount = VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().ComputeAllocatedVoxelCount(warpField);
 }
 
 template<typename TVoxel, typename TIndex>
-void WarpFieldLogger<TVoxel, TIndex>::LoadCompact() {
+void WarpFieldSequenceRecorder<TVoxel, TIndex>::LoadCompact() {
 	warpField->Reset();
 	VolumeFileIOEngine<TVoxel,TIndex>::LoadFromDirectoryCompact(warpField, scenePath.string());
 	this->voxelCount = VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().ComputeAllocatedVoxelCount(warpField);
@@ -304,7 +304,7 @@ void WarpFieldLogger<TVoxel, TIndex>::LoadCompact() {
 // region ======================================== LOAD / SAVE HIGHLIGHTS ==============================================
 
 template<typename TVoxel, typename TIndex>
-bool WarpFieldLogger<TVoxel, TIndex>::SaveHighlights(std::string filePostfix) {
+bool WarpFieldSequenceRecorder<TVoxel, TIndex>::SaveHighlights(std::string filePostfix) {
 	fs::path rootPath = fs::path(warpPath).parent_path();
 	highlightsBinaryPath = rootPath / ("highlights" + filePostfix + binaryFileExtension);
 	if (!this->highlights.SaveToFile(highlightsBinaryPath.string())) {
@@ -324,7 +324,7 @@ bool WarpFieldLogger<TVoxel, TIndex>::SaveHighlights(std::string filePostfix) {
 
 
 template<typename TVoxel, typename TIndex>
-bool WarpFieldLogger<TVoxel, TIndex>::LoadHighlights(bool applyFilters, std::string filePostfix) {
+bool WarpFieldSequenceRecorder<TVoxel, TIndex>::LoadHighlights(bool applyFilters, std::string filePostfix) {
 	fs::path rootPath = fs::path(warpPath).parent_path();
 	highlightsBinaryPath = rootPath / ("highlights" + filePostfix + binaryFileExtension);
 	if (!this->highlights.LoadFromFile(highlightsBinaryPath.string())) {
@@ -350,7 +350,7 @@ bool WarpFieldLogger<TVoxel, TIndex>::LoadHighlights(bool applyFilters, std::str
 }
 
 template<typename TVoxel, typename TIndex>
-void WarpFieldLogger<TVoxel, TIndex>::FilterHighlights(int anomalyFrameCountMinimum) {
+void WarpFieldSequenceRecorder<TVoxel, TIndex>::FilterHighlights(int anomalyFrameCountMinimum) {
 	fs::path rootPath = fs::path(warpPath).parent_path();
 	//(std::max) in parenthesis because of some <insert descripitive curseword> Microsoft compiler quirk concerning min/max macros
 	minHighlightRecurrenceCount = (std::max)(minHighlightRecurrenceCount, anomalyFrameCountMinimum);
@@ -365,7 +365,7 @@ void WarpFieldLogger<TVoxel, TIndex>::FilterHighlights(int anomalyFrameCountMini
 
 template<typename TVoxel, typename TIndex>
 bool
-WarpFieldLogger<TVoxel, TIndex>::StartSavingWarpState() {
+WarpFieldSequenceRecorder<TVoxel, TIndex>::StartSavingWarpState() {
 
 	//TODO remove frameIdx recording and its dependencies
 	std::string rootPath = fs::path(warpPath).parent_path().string();
@@ -384,7 +384,7 @@ WarpFieldLogger<TVoxel, TIndex>::StartSavingWarpState() {
 }
 
 template<typename TVoxel, typename TIndex>
-void WarpFieldLogger<TVoxel, TIndex>::StopSavingWarpState() {
+void WarpFieldSequenceRecorder<TVoxel, TIndex>::StopSavingWarpState() {
 	warpOFStream.close();
 }
 
@@ -395,7 +395,7 @@ void WarpFieldLogger<TVoxel, TIndex>::StopSavingWarpState() {
 
 
 template<typename TVoxel, typename TIndex>
-bool WarpFieldLogger<TVoxel, TIndex>::SaveCurrentWarpState() {
+bool WarpFieldSequenceRecorder<TVoxel, TIndex>::SaveCurrentWarpState() {
 
 	if (!warpOFStream) {
 		std::cerr << "Current warp-update OFStream cannot be saved to for whatever reason." << std::endl;
@@ -411,7 +411,7 @@ bool WarpFieldLogger<TVoxel, TIndex>::SaveCurrentWarpState() {
 }
 
 template<typename TVoxel, typename TIndex>
-bool WarpFieldLogger<TVoxel, TIndex>::StartLoadingWarpState() {
+bool WarpFieldSequenceRecorder<TVoxel, TIndex>::StartLoadingWarpState() {
 	if (this->voxelCount == -1) {
 		std::cerr << "Hashed voxel count has not been obtained. Have the scenes been loaded successfully?" << std::endl;
 		return false;
@@ -433,7 +433,7 @@ bool WarpFieldLogger<TVoxel, TIndex>::StartLoadingWarpState() {
 }
 
 template<typename TVoxel, typename TIndex>
-bool WarpFieldLogger<TVoxel, TIndex>::StartLoadingWarpState(unsigned int& frameIx) {
+bool WarpFieldSequenceRecorder<TVoxel, TIndex>::StartLoadingWarpState(unsigned int& frameIx) {
 	if (this->voxelCount == -1) {
 		std::cerr << "Hashed voxel count has not been obtained. Have the scenes been loaded successfully?" << std::endl;
 		return false;
@@ -458,7 +458,7 @@ bool WarpFieldLogger<TVoxel, TIndex>::StartLoadingWarpState(unsigned int& frameI
 
 
 template<typename TVoxel, typename TIndex>
-void WarpFieldLogger<TVoxel, TIndex>::StopLoadingWarpState() {
+void WarpFieldSequenceRecorder<TVoxel, TIndex>::StopLoadingWarpState() {
 	warpIFStream.close();
 }
 
@@ -469,7 +469,7 @@ void WarpFieldLogger<TVoxel, TIndex>::StopLoadingWarpState() {
  * \return True on success, false on failure
  */
 template<typename TVoxel, typename TIndex>
-bool WarpFieldLogger<TVoxel, TIndex>::LoadCurrentWarpState() {
+bool WarpFieldSequenceRecorder<TVoxel, TIndex>::LoadCurrentWarpState() {
 	if (!warpIFStream) {
 		std::cout << "Attempted to read warp state with IFStream being in a bad state."
 		             " Was 'StartLoadingWarpState()' called?" << std::endl;
@@ -488,7 +488,7 @@ bool WarpFieldLogger<TVoxel, TIndex>::LoadCurrentWarpState() {
 
 
 template<typename TVoxel, typename TIndex>
-bool WarpFieldLogger<TVoxel, TIndex>::LoadPreviousWarpState() {
+bool WarpFieldSequenceRecorder<TVoxel, TIndex>::LoadPreviousWarpState() {
 	if (iterationCursor < 1) {
 		return false;
 	}
@@ -510,19 +510,19 @@ bool WarpFieldLogger<TVoxel, TIndex>::LoadPreviousWarpState() {
  * \return True if warp state ifstream is open, false otherwise
  */
 template<typename TVoxel, typename TIndex>
-bool WarpFieldLogger<TVoxel, TIndex>::IsLoadingWarpState() {
+bool WarpFieldSequenceRecorder<TVoxel, TIndex>::IsLoadingWarpState() {
 	return this->warpIFStream.is_open();
 }
 
 template<typename TVoxel, typename TIndex>
-int WarpFieldLogger<TVoxel, TIndex>::GetVoxelCount() const {
+int WarpFieldSequenceRecorder<TVoxel, TIndex>::GetVoxelCount() const {
 	if (voxelCount == -1) return 0;
 	return voxelCount;
 }
 
 template<typename TVoxel, typename TIndex>
 bool
-WarpFieldLogger<TVoxel, TIndex>::BufferCurrentWarpState(void* externalBuffer) {
+WarpFieldSequenceRecorder<TVoxel, TIndex>::BufferCurrentWarpState(void* externalBuffer) {
 	if (!warpIFStream) {
 		std::cout << "Attempted to read warp state with IFStream being in a bad state."
 		             " Was 'StartLoadingWarpState()' called?" << std::endl;
@@ -550,7 +550,7 @@ WarpFieldLogger<TVoxel, TIndex>::BufferCurrentWarpState(void* externalBuffer) {
 
 template<typename TVoxel, typename TIndex>
 bool
-WarpFieldLogger<TVoxel, TIndex>::BufferPreviousWarpState(void* externalBuffer) {
+WarpFieldSequenceRecorder<TVoxel, TIndex>::BufferPreviousWarpState(void* externalBuffer) {
 	if (iterationCursor < 1) {
 		return false;
 	}
@@ -571,8 +571,8 @@ WarpFieldLogger<TVoxel, TIndex>::BufferPreviousWarpState(void* externalBuffer) {
 }
 
 template<typename TVoxel, typename TIndex>
-bool WarpFieldLogger<TVoxel, TIndex>::BufferWarpStateAt(void* externalBuffer,
-                                                        unsigned int iterationIndex) {
+bool WarpFieldSequenceRecorder<TVoxel, TIndex>::BufferWarpStateAt(void* externalBuffer,
+                                                                  unsigned int iterationIndex) {
 	if (!SetIterationCursor(iterationIndex)) {
 		return false;
 	}
@@ -589,7 +589,7 @@ bool WarpFieldLogger<TVoxel, TIndex>::BufferWarpStateAt(void* externalBuffer,
 }
 
 template<typename TVoxel, typename TIndex>
-void WarpFieldLogger<TVoxel, TIndex>::SetPath(boost::filesystem::path fullScenePath) {
+void WarpFieldSequenceRecorder<TVoxel, TIndex>::SetPath(boost::filesystem::path fullScenePath) {
 	if (fullScenePath != "") {
 		StopLoadingWarpState();
 	}

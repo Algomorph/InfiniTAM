@@ -23,7 +23,7 @@
 #include <boost/range/iterator_range_core.hpp>
 
 //ITMLib
-#include "SceneLogger.h"
+#include "VolumeSequenceRecorder.h"
 #include "../Configuration.h"
 #include "../../Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 #include "../../Engines/Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
@@ -59,17 +59,17 @@ using namespace ITMLib;
  */
 template<typename TVoxel, typename TWarp, typename TIndex>
 bool
-SceneLogger<TVoxel, TWarp, TIndex>::MakeSlice(const Vector3i& extremum1, const Vector3i& extremum2,
-                                              std::string& identifier) {
+VolumeSequenceRecorder<TVoxel, TWarp, TIndex>::MakeSlice(const Vector3i& extremum1, const Vector3i& extremum2,
+                                                         std::string& identifier) {
 
 	Vector6i bounds;
 	BoundsFromExtrema(bounds, extremum1, extremum2);
-	identifier = WarpFieldLogger<TWarp, TIndex>::GenerateSliceStringIdentifier(bounds);
+	identifier = WarpFieldSequenceRecorder<TWarp, TIndex>::GenerateSliceStringIdentifier(bounds);
 
 	if (slices.find(identifier) != slices.end()) {
 		return false;
 	}
-	auto logger = new WarpFieldLogger<TWarp, TIndex>(bounds, this->path);
+	auto logger = new WarpFieldSequenceRecorder<TWarp, TIndex>(bounds, this->path);
 	if (!EditAndCopyEngine_CPU<TWarp, TIndex>::Inst().CopyVolumeSlice(
 			logger->warpField, fullWarpLogger->warpField, bounds)) {
 		return false;
@@ -86,14 +86,14 @@ SceneLogger<TVoxel, TWarp, TIndex>::MakeSlice(const Vector3i& extremum1, const V
 	logger->SaveCompact();
 	logger->sliceLoaded = true;
 	logger->highlights = MakeSliceHighlights(bounds);
-	logger->SaveHighlights(WarpFieldLogger<TWarp,TIndex>::continuousHighlightsPostfix);
+	logger->SaveHighlights(WarpFieldSequenceRecorder<TWarp,TIndex>::continuousHighlightsPostfix);
 	slices[identifier] = logger;
 	return true;
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 bool
-SceneLogger<TVoxel, TWarp, TIndex>::MakeSlice(const Vector3i& extremum1, const Vector3i& extremum2) {
+VolumeSequenceRecorder<TVoxel, TWarp, TIndex>::MakeSlice(const Vector3i& extremum1, const Vector3i& extremum2) {
 	std::string identifier;
 	return MakeSlice(extremum1, extremum2, identifier);
 };
@@ -102,8 +102,8 @@ SceneLogger<TVoxel, TWarp, TIndex>::MakeSlice(const Vector3i& extremum1, const V
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 void
-SceneLogger<TVoxel, TWarp, TIndex>::SaveSliceWarp(const Vector6i& voxelRange,
-                                                  const boost::filesystem::path& path) {
+VolumeSequenceRecorder<TVoxel, TWarp, TIndex>::SaveSliceWarp(const Vector6i& voxelRange,
+                                                             const boost::filesystem::path& path) {
 
 	std::ofstream sliceWarpOfstream(path.c_str(), std::ofstream::binary | std::ofstream::out);
 	if (!sliceWarpOfstream){
@@ -139,7 +139,7 @@ SceneLogger<TVoxel, TWarp, TIndex>::SaveSliceWarp(const Vector6i& voxelRange,
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 NestedMap3DOfArrays<ITMHighlightIterationInfo>
-SceneLogger<TVoxel, TWarp, TIndex>::MakeSliceHighlights(const Vector6i& bounds) {
+VolumeSequenceRecorder<TVoxel, TWarp, TIndex>::MakeSliceHighlights(const Vector6i& bounds) {
 	NestedMap3DOfArrays<ITMHighlightIterationInfo> sliceHighlights;
 	std::vector<std::vector<ITMHighlightIterationInfo>> highlightArrays = fullWarpLogger->highlights.GetArrays();
 	auto VoxelInRange = [&bounds](Vector3i voxelPosition) {
@@ -169,13 +169,13 @@ SceneLogger<TVoxel, TWarp, TIndex>::MakeSliceHighlights(const Vector6i& bounds) 
  * \return true if all files corresponding to the slice exist, false otherwise.
  */
 template<typename TVoxel, typename TWarp, typename TIndex>
-bool SceneLogger<TVoxel, TWarp, TIndex>::SliceExistsOnDisk(const std::string& sliceIdentifier) const {
+bool VolumeSequenceRecorder<TVoxel, TWarp, TIndex>::SliceExistsOnDisk(const std::string& sliceIdentifier) const {
 	fs::path sliceFolderPath =
-			WarpFieldLogger<TWarp, TIndex>::GenerateSliceFolderPath(path, sliceIdentifier);
+			WarpFieldSequenceRecorder<TWarp, TIndex>::GenerateSliceFolderPath(path, sliceIdentifier);
 	fs::path sliceScenePath =
-			WarpFieldLogger<TWarp, TIndex>::GenerateSliceSceneFilename_Full(path, sliceIdentifier);
+			WarpFieldSequenceRecorder<TWarp, TIndex>::GenerateSliceSceneFilename_Full(path, sliceIdentifier);
 	fs::path sliceWarpPath =
-			WarpFieldLogger<TWarp, TIndex>::GenerateSliceWarpFilename(path, sliceIdentifier);
+			WarpFieldSequenceRecorder<TWarp, TIndex>::GenerateSliceWarpFilename(path, sliceIdentifier);
 	return fs::is_directory(sliceFolderPath) && fs::is_regular_file(sliceScenePath) &&
 	       fs::is_regular_file(sliceWarpPath);
 }
@@ -187,16 +187,16 @@ bool SceneLogger<TVoxel, TWarp, TIndex>::SliceExistsOnDisk(const std::string& sl
  * \return true if all files corresponding to the slice exist, false otherwise.
  */
 template<typename TVoxel, typename TWarp, typename TIndex>
-bool SceneLogger<TVoxel, TWarp, TIndex>::SliceExistsOnDisk(const Vector3i& extremum1,
-                                                           const Vector3i& extremum2) const {
+bool VolumeSequenceRecorder<TVoxel, TWarp, TIndex>::SliceExistsOnDisk(const Vector3i& extremum1,
+                                                                      const Vector3i& extremum2) const {
 	Vector6i bounds;
 	BoundsFromExtrema(bounds, extremum1,extremum2);
 	fs::path sliceFolderPath =
-			WarpFieldLogger<TWarp, TIndex>::GenerateSliceFolderPath(path, bounds);
+			WarpFieldSequenceRecorder<TWarp, TIndex>::GenerateSliceFolderPath(path, bounds);
 	fs::path sliceScenePath =
-			WarpFieldLogger<TWarp, TIndex>::GenerateSliceSceneFilename_Full(path, bounds);
+			WarpFieldSequenceRecorder<TWarp, TIndex>::GenerateSliceSceneFilename_Full(path, bounds);
 	fs::path sliceWarpPath =
-			WarpFieldLogger<TWarp, TIndex>::GenerateSliceWarpFilename(path, bounds);
+			WarpFieldSequenceRecorder<TWarp, TIndex>::GenerateSliceWarpFilename(path, bounds);
 	return fs::is_directory(sliceFolderPath) && fs::is_regular_file(sliceScenePath) &&
 	       fs::is_regular_file(sliceWarpPath);
 }
@@ -208,7 +208,7 @@ bool SceneLogger<TVoxel, TWarp, TIndex>::SliceExistsOnDisk(const Vector3i& extre
  */
 template<typename TVoxel, typename TWarp, typename TIndex>
 bool
-SceneLogger<TVoxel, TWarp, TIndex>::SliceExistsInMemory(const std::string& sliceIdentifier) const {
+VolumeSequenceRecorder<TVoxel, TWarp, TIndex>::SliceExistsInMemory(const std::string& sliceIdentifier) const {
 	return this->slices.find(sliceIdentifier) != slices.end();
 }
 
@@ -219,14 +219,14 @@ SceneLogger<TVoxel, TWarp, TIndex>::SliceExistsInMemory(const std::string& slice
  * \return true on success, false on failure
  */
 template<typename TVoxel, typename TWarp, typename TIndex>
-bool SceneLogger<TVoxel, TWarp, TIndex>::LoadSlice(const std::string& sliceIdentifier) {
+bool VolumeSequenceRecorder<TVoxel, TWarp, TIndex>::LoadSlice(const std::string& sliceIdentifier) {
 	if (!SliceExistsOnDisk(sliceIdentifier)) {
 		return false;
 	}
 	Vector6i bounds;
-	WarpFieldLogger<TWarp, TIndex>::ExtractBoundsFromSliceStringIdentifier(sliceIdentifier, bounds);
-	WarpFieldLogger<TWarp, TIndex>* logger =
-			new WarpFieldLogger<TWarp, TIndex>(bounds, path);
+	WarpFieldSequenceRecorder<TWarp, TIndex>::ExtractBoundsFromSliceStringIdentifier(sliceIdentifier, bounds);
+	WarpFieldSequenceRecorder<TWarp, TIndex>* logger =
+			new WarpFieldSequenceRecorder<TWarp, TIndex>(bounds, path);
 	logger->LoadCompact();
 	logger->sliceLoaded = true;
 	slices[sliceIdentifier] = logger;
@@ -239,11 +239,11 @@ bool SceneLogger<TVoxel, TWarp, TIndex>::LoadSlice(const std::string& sliceIdent
  * \return true on success, false on failure
  */
 template<typename TVoxel, typename TWarp, typename TIndex>
-bool SceneLogger<TVoxel, TWarp, TIndex>::SwitchActiveScene(std::string sliceIdentifier) {
+bool VolumeSequenceRecorder<TVoxel, TWarp, TIndex>::SwitchActiveScene(std::string sliceIdentifier) {
 	bool isLoadingWarps = activeWarpLogger->IsLoadingWarpState();
 	int iterationCursor = static_cast<int>(activeWarpLogger->GetIterationCursor());
 
-	if (sliceIdentifier == WarpFieldLogger<TWarp, TIndex>::fullSceneSliceIdentifier) {
+	if (sliceIdentifier == WarpFieldSequenceRecorder<TWarp, TIndex>::fullSceneSliceIdentifier) {
 		if (fullWarpLogger != nullptr) {
 			mode = FULL_SCENE;
 			activeWarpLogger->StopLoadingWarpState();
@@ -275,7 +275,7 @@ bool SceneLogger<TVoxel, TWarp, TIndex>::SwitchActiveScene(std::string sliceIden
  * \return A vector of slice string identifiers for all slices that were discovered.
  */
 template<typename TVoxel, typename TWarp, typename TIndex>
-std::vector<std::string> SceneLogger<TVoxel, TWarp, TIndex>::LoadAllSlices() {
+std::vector<std::string> VolumeSequenceRecorder<TVoxel, TWarp, TIndex>::LoadAllSlices() {
 	std::vector<std::string> identifiers;
 	if (!CheckPath()) {
 		return identifiers;
@@ -302,10 +302,10 @@ std::vector<std::string> SceneLogger<TVoxel, TWarp, TIndex>::LoadAllSlices() {
 
 	for (auto& directoryNameAndWriteTime : sliceDirectoryNamesAndWriteTimes){
 		Vector6i bounds;
-		WarpFieldLogger<TWarp, TIndex>::ExtractBoundsFromSliceStringIdentifier(
+		WarpFieldSequenceRecorder<TWarp, TIndex>::ExtractBoundsFromSliceStringIdentifier(
 				std::get<0>(directoryNameAndWriteTime), bounds);
 		std::string sliceIdentifier =
-				WarpFieldLogger<TWarp, TIndex>::GenerateSliceStringIdentifier(bounds);
+				WarpFieldSequenceRecorder<TWarp, TIndex>::GenerateSliceStringIdentifier(bounds);
 		if (LoadSlice(sliceIdentifier)) {
 			identifiers.push_back(sliceIdentifier);
 		}

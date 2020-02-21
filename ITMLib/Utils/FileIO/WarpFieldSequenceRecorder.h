@@ -28,7 +28,7 @@ namespace fs = boost::filesystem;
 namespace ITMLib {
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-class SceneLogger;
+class VolumeSequenceRecorder;
 
 /**
  * \brief An internal wrapper logger for a scene consistent of dynamic voxels with warps.
@@ -39,10 +39,10 @@ class SceneLogger;
  * \tparam TIndex Type of voxel index.
  */
 template<typename TWarp, typename TIndex>
-class WarpFieldLogger {
+class WarpFieldSequenceRecorder {
 	template<typename TVoxelLogger, typename TWarpLogger, typename TIndexLogger>
 	friend
-	class SceneLogger;
+	class VolumeSequenceRecorder;
 public:
 	// region ================================ STATIC CONSTANTS ========================================================
 	static const size_t warpByteSize;
@@ -85,9 +85,9 @@ public:
 	// endregion
 	// region ================================ CONSTRUCTORS & DESTRUCTORS ==============================================
 
-	explicit WarpFieldLogger(VoxelVolume <TWarp, TIndex>* warpField, boost::filesystem::path path);
-	explicit WarpFieldLogger(const Vector6i& bounds, boost::filesystem::path fullScenePath);
-	~WarpFieldLogger();
+	explicit WarpFieldSequenceRecorder(VoxelVolume <TWarp, TIndex>* warpField, boost::filesystem::path path);
+	explicit WarpFieldSequenceRecorder(const Vector6i& bounds, boost::filesystem::path fullScenePath);
+	~WarpFieldSequenceRecorder();
 
 	// endregion
 	// region ================================ MEMBER FUNCTIONS ========================================================

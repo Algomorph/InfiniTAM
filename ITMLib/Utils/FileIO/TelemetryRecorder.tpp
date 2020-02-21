@@ -24,7 +24,7 @@
 #endif
 
 //local
-#include "DynamicFusionLogger.h"
+#include "TelemetryRecorder.h"
 #include "../Analytics/BenchmarkUtils.h"
 #include "../CPPPrintHelpers.h"
 #include "../Configuration.h"
@@ -37,69 +37,69 @@ namespace bench = ITMLib::Bench;
 
 // region ============================== DEFINE CONSTANTS ==============================================================
 template<typename TVoxel, typename TWarp, typename TIndex>
-const std::string DynamicFusionLogger<TVoxel, TWarp, TIndex>::iterationFramesFolderName =
+const std::string TelemetryRecorder<TVoxel, TWarp, TIndex>::iterationFramesFolderName =
 		"bucket_interest_region_2D_iteration_slices";
 template<typename TVoxel, typename TWarp, typename TIndex>
-const std::string DynamicFusionLogger<TVoxel, TWarp, TIndex>::liveIterationFramesFolderName =
+const std::string TelemetryRecorder<TVoxel, TWarp, TIndex>::liveIterationFramesFolderName =
 		"bucket_interest_region_live_slices";
 template<typename TVoxel, typename TWarp, typename TIndex>
-const std::string DynamicFusionLogger<TVoxel, TWarp, TIndex>::canonicalSceneRasterizedFolderName =
+const std::string TelemetryRecorder<TVoxel, TWarp, TIndex>::canonicalSceneRasterizedFolderName =
 		"canonical_rasterized";
 template<typename TVoxel, typename TWarp, typename TIndex>
-const std::string DynamicFusionLogger<TVoxel, TWarp, TIndex>::liveSceneRasterizedFolderName =
+const std::string TelemetryRecorder<TVoxel, TWarp, TIndex>::liveSceneRasterizedFolderName =
 		"live_rasterized";
 // endregion ================================== END CONSTANT DEFINITIONS ===============================================
 // region ======================================= SETTERS ==============================================================
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicFusionLogger<TVoxel, TWarp, TIndex>::SetScenes(
+void TelemetryRecorder<TVoxel, TWarp, TIndex>::SetScenes(
 		VoxelVolume<TVoxel, TIndex>* canonicalScene, VoxelVolume<TVoxel, TIndex>* liveScene,
 		VoxelVolume<TWarp, TIndex>* warpField) {
 	this->canonicalScene = canonicalScene;
 	this->liveScene = liveScene;
 	this->warpField = warpField;
-	this->scene3DLogger = new SceneLogger<TVoxel, TWarp, TIndex>(canonicalScene, liveScene, warpField,
-	                                                             outputDirectory);
+	this->scene3DLogger = new VolumeSequenceRecorder<TVoxel, TWarp, TIndex>(canonicalScene, liveScene, warpField,
+	                                                                        outputDirectory);
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicFusionLogger<TVoxel, TWarp, TIndex>::SetOutputDirectory(std::string outputDirectory) {
+void TelemetryRecorder<TVoxel, TWarp, TIndex>::SetOutputDirectory(std::string outputDirectory) {
 	this->scene3DLogger->SetPath(outputDirectory);
 	this->outputDirectory = outputDirectory;
 };
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicFusionLogger<TVoxel, TWarp, TIndex>::SetFocusCoordinates(Vector3i focus_coordinates) {
+void TelemetryRecorder<TVoxel, TWarp, TIndex>::SetFocusCoordinates(Vector3i focus_coordinates) {
 	hasFocusCoordinates = true;
 	this->focus_coordinates = focus_coordinates;
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicFusionLogger<TVoxel, TWarp, TIndex>::SetPlaneFor2Dand3DSlices(Plane plane) {
+void TelemetryRecorder<TVoxel, TWarp, TIndex>::SetPlaneFor2Dand3DSlices(Plane plane) {
 	this->planeFor2Dand3DSlices = plane;
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicFusionLogger<TVoxel, TWarp, TIndex>::Set3DSliceInPlaneRadius(
+void TelemetryRecorder<TVoxel, TWarp, TIndex>::Set3DSliceInPlaneRadius(
 		unsigned int _3dSliceInPlaneRadius) {
 	this->_3dSliceInPlaneRadius = _3dSliceInPlaneRadius;
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicFusionLogger<TVoxel, TWarp, TIndex>::Set3DSliceOutOfPlaneRadius(
+void TelemetryRecorder<TVoxel, TWarp, TIndex>::Set3DSliceOutOfPlaneRadius(
 		unsigned int _3dSliceOutOfPlaneRadius) {
 	this->_3dSliceOutOfPlaneRadius = _3dSliceOutOfPlaneRadius;
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicFusionLogger<TVoxel, TWarp, TIndex>::SetShutdownRequestedFlagLocation(bool* flag) {
+void TelemetryRecorder<TVoxel, TWarp, TIndex>::SetShutdownRequestedFlagLocation(bool* flag) {
 	this->shutdownRequestedFlag = flag;
 }
 
 // endregion ===========================================================================================================
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicFusionLogger<TVoxel, TWarp, TIndex>::RequestAppShutdown() {
+void TelemetryRecorder<TVoxel, TWarp, TIndex>::RequestAppShutdown() {
 	if (shutdownRequestedFlag) {
 		*shutdownRequestedFlag = true;
 	}
@@ -108,97 +108,97 @@ void DynamicFusionLogger<TVoxel, TWarp, TIndex>::RequestAppShutdown() {
 // region ============================================== SWITCHES ======================================================
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicFusionLogger<TVoxel, TWarp, TIndex>::TurnRecordingLiveSceneAs2DSlicesOn() {
+void TelemetryRecorder<TVoxel, TWarp, TIndex>::TurnRecordingLiveSceneAs2DSlicesOn() {
 	this->recordingLiveSceneAs2DSlices = true;
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicFusionLogger<TVoxel, TWarp, TIndex>::TurnRecordingLiveSceneAs2DSlicesOff() {
+void TelemetryRecorder<TVoxel, TWarp, TIndex>::TurnRecordingLiveSceneAs2DSlicesOff() {
 	this->recordingLiveSceneAs2DSlices = false;
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicFusionLogger<TVoxel, TWarp, TIndex>::ToggleRecordingLiveSceneAs2DSlices() {
+void TelemetryRecorder<TVoxel, TWarp, TIndex>::ToggleRecordingLiveSceneAs2DSlices() {
 	this->recordingLiveSceneAs2DSlices = !this->recordingLiveSceneAs2DSlices;
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicFusionLogger<TVoxel, TWarp, TIndex>::TurnRecordingCanonicalSceneAs2DSlicesOn() {
+void TelemetryRecorder<TVoxel, TWarp, TIndex>::TurnRecordingCanonicalSceneAs2DSlicesOn() {
 	this->recordingCanonicalSceneAs2DSlices = true;
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicFusionLogger<TVoxel, TWarp, TIndex>::TurnRecordingCanonicalSceneAs2DSlicesOff() {
+void TelemetryRecorder<TVoxel, TWarp, TIndex>::TurnRecordingCanonicalSceneAs2DSlicesOff() {
 	this->recordingCanonicalSceneAs2DSlices = false;
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicFusionLogger<TVoxel, TWarp, TIndex>::TurnRecordingScene1DSlicesWithUpdatesOn() {
+void TelemetryRecorder<TVoxel, TWarp, TIndex>::TurnRecordingScene1DSlicesWithUpdatesOn() {
 	this->recordingScene1DSlicesWithUpdates = true;
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicFusionLogger<TVoxel, TWarp, TIndex>::TurnRecordingScene1DSlicesWithUpdatesOff() {
+void TelemetryRecorder<TVoxel, TWarp, TIndex>::TurnRecordingScene1DSlicesWithUpdatesOff() {
 	this->recordingScene1DSlicesWithUpdates = false;
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicFusionLogger<TVoxel, TWarp, TIndex>::TurnRecordingScene2DSlicesWithUpdatesOn() {
+void TelemetryRecorder<TVoxel, TWarp, TIndex>::TurnRecordingScene2DSlicesWithUpdatesOn() {
 	this->recordingScene2DSlicesWithUpdates = true;
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicFusionLogger<TVoxel, TWarp, TIndex>::TurnRecordingScene2DSlicesWithUpdatesOff() {
+void TelemetryRecorder<TVoxel, TWarp, TIndex>::TurnRecordingScene2DSlicesWithUpdatesOff() {
 	this->recordingScene2DSlicesWithUpdates = false;
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicFusionLogger<TVoxel, TWarp, TIndex>::TurnRecordingScene3DSlicesWithUpdatesOn() {
+void TelemetryRecorder<TVoxel, TWarp, TIndex>::TurnRecordingScene3DSlicesWithUpdatesOn() {
 	this->recordingScene3DSlicesWithUpdates = true;
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicFusionLogger<TVoxel, TWarp, TIndex>::TurnRecordingScene3DSlicesWithUpdatesOff() {
+void TelemetryRecorder<TVoxel, TWarp, TIndex>::TurnRecordingScene3DSlicesWithUpdatesOff() {
 	this->recordingScene3DSlicesWithUpdates = false;
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicFusionLogger<TVoxel, TWarp, TIndex>::ToggleRecordingScene2DSlicesWithUpdates() {
+void TelemetryRecorder<TVoxel, TWarp, TIndex>::ToggleRecordingScene2DSlicesWithUpdates() {
 	this->recordingScene2DSlicesWithUpdates = !this->recordingScene2DSlicesWithUpdates;
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicFusionLogger<TVoxel, TWarp, TIndex>::TurnRecording3DSceneAndWarpProgressionOn() {
+void TelemetryRecorder<TVoxel, TWarp, TIndex>::TurnRecording3DSceneAndWarpProgressionOn() {
 	this->recording3DSceneAndWarpProgression = true;
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicFusionLogger<TVoxel, TWarp, TIndex>::TurnRecording3DSceneAndWarpProgressionOff() {
+void TelemetryRecorder<TVoxel, TWarp, TIndex>::TurnRecording3DSceneAndWarpProgressionOff() {
 	this->recording3DSceneAndWarpProgression = false;
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicFusionLogger<TVoxel, TWarp, TIndex>::ToggleRecording3DSceneAndWarpProgression() {
+void TelemetryRecorder<TVoxel, TWarp, TIndex>::ToggleRecording3DSceneAndWarpProgression() {
 	this->recording3DSceneAndWarpProgression = !this->recording3DSceneAndWarpProgression;
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicFusionLogger<TVoxel, TWarp, TIndex>::TurnRecordingEnergiesToFilesOn() {
+void TelemetryRecorder<TVoxel, TWarp, TIndex>::TurnRecordingEnergiesToFilesOn() {
 	this->recordingEnergiesToFile = true;
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicFusionLogger<TVoxel, TWarp, TIndex>::TurnRecordingEnergiesToFilesOff() {
+void TelemetryRecorder<TVoxel, TWarp, TIndex>::TurnRecordingEnergiesToFilesOff() {
 	this->recordingEnergiesToFile = false;
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicFusionLogger<TVoxel, TWarp, TIndex>::TurnPlottingEnergiesOn() {
+void TelemetryRecorder<TVoxel, TWarp, TIndex>::TurnPlottingEnergiesOn() {
 	this->plottingEnergies = true;
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicFusionLogger<TVoxel, TWarp, TIndex>::TurnPlottingEnergiesOff() {
+void TelemetryRecorder<TVoxel, TWarp, TIndex>::TurnPlottingEnergiesOff() {
 	this->plottingEnergies = false;
 }
 
@@ -206,52 +206,52 @@ void DynamicFusionLogger<TVoxel, TWarp, TIndex>::TurnPlottingEnergiesOff() {
 // region ========================================= GETTERS ============================================================
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-std::string DynamicFusionLogger<TVoxel, TWarp, TIndex>::GetOutputDirectory() const {
+std::string TelemetryRecorder<TVoxel, TWarp, TIndex>::GetOutputDirectory() const {
 	return this->outputDirectory;
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-bool DynamicFusionLogger<TVoxel, TWarp, TIndex>::IsRecordingLiveSceneAs2DSlices() const {
+bool TelemetryRecorder<TVoxel, TWarp, TIndex>::IsRecordingLiveSceneAs2DSlices() const {
 	return this->recordingLiveSceneAs2DSlices;
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-bool DynamicFusionLogger<TVoxel, TWarp, TIndex>::IsRecordingCanonicalSceneAs2DSlices() const {
+bool TelemetryRecorder<TVoxel, TWarp, TIndex>::IsRecordingCanonicalSceneAs2DSlices() const {
 	return this->recordingCanonicalSceneAs2DSlices;
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-bool DynamicFusionLogger<TVoxel, TWarp, TIndex>::IsRecordingScene1DSlicesWithUpdates() const {
+bool TelemetryRecorder<TVoxel, TWarp, TIndex>::IsRecordingScene1DSlicesWithUpdates() const {
 	return this->recordingScene1DSlicesWithUpdates;
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-bool DynamicFusionLogger<TVoxel, TWarp, TIndex>::IsRecordingScene2DSlicesWithUpdates() const {
+bool TelemetryRecorder<TVoxel, TWarp, TIndex>::IsRecordingScene2DSlicesWithUpdates() const {
 	return this->recordingScene2DSlicesWithUpdates;
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-bool DynamicFusionLogger<TVoxel, TWarp, TIndex>::IsRecordingScene3DSlicesWithUpdates() const {
+bool TelemetryRecorder<TVoxel, TWarp, TIndex>::IsRecordingScene3DSlicesWithUpdates() const {
 	return this->recordingScene3DSlicesWithUpdates;
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-bool DynamicFusionLogger<TVoxel, TWarp, TIndex>::IsRecording3DSceneAndWarpProgression() const {
+bool TelemetryRecorder<TVoxel, TWarp, TIndex>::IsRecording3DSceneAndWarpProgression() const {
 	return this->recording3DSceneAndWarpProgression;
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-bool DynamicFusionLogger<TVoxel, TWarp, TIndex>::IsRecordingEnergiesToFile() const {
+bool TelemetryRecorder<TVoxel, TWarp, TIndex>::IsRecordingEnergiesToFile() const {
 	return this->recordingEnergiesToFile;
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-bool DynamicFusionLogger<TVoxel, TWarp, TIndex>::IsPlottingEnergies() const {
+bool TelemetryRecorder<TVoxel, TWarp, TIndex>::IsPlottingEnergies() const {
 	return this->plottingEnergies;
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-bool DynamicFusionLogger<TVoxel, TWarp, TIndex>::NeedsFramewiseOutputFolder() const {
+bool TelemetryRecorder<TVoxel, TWarp, TIndex>::NeedsFramewiseOutputFolder() const {
 	return (this->recording3DSceneAndWarpProgression || this->recordingScene2DSlicesWithUpdates ||
 	        this->recordingScene1DSlicesWithUpdates || this->recordingCanonicalSceneAs2DSlices ||
 	        this->recordingLiveSceneAs2DSlices || this->recordingScene3DSlicesWithUpdates) && this->hasFocusCoordinates;
@@ -260,7 +260,7 @@ bool DynamicFusionLogger<TVoxel, TWarp, TIndex>::NeedsFramewiseOutputFolder() co
 // endregion ===========================================================================================================
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-DynamicFusionLogger<TVoxel, TWarp, TIndex>::DynamicFusionLogger() :
+TelemetryRecorder<TVoxel, TWarp, TIndex>::TelemetryRecorder() :
 		focusSliceRadius(3)
 #ifdef WITH_OPENCV
         , scene2DSliceVisualizer()
@@ -268,7 +268,7 @@ DynamicFusionLogger<TVoxel, TWarp, TIndex>::DynamicFusionLogger() :
 		{}
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicFusionLogger<TVoxel, TWarp, TIndex>::InitializeFrameRecording() {
+void TelemetryRecorder<TVoxel, TWarp, TIndex>::InitializeFrameRecording() {
 
 	//TODO: make all visualizer/logger classes re-usable, i.e. just change the path & build them in the constructor (don't use pointers) -Greg (GitHub:Algomorph)
 
@@ -366,7 +366,7 @@ void DynamicFusionLogger<TVoxel, TWarp, TIndex>::InitializeFrameRecording() {
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicFusionLogger<TVoxel, TWarp, TIndex>::InitializeWarp2DSliceRecording(
+void TelemetryRecorder<TVoxel, TWarp, TIndex>::InitializeWarp2DSliceRecording(
 		VoxelVolume<TVoxel, TIndex>* canonicalScene,
 		VoxelVolume<TVoxel, TIndex>* sourceLiveScene) {
 #ifdef WITH_OPENCV
@@ -387,7 +387,7 @@ void DynamicFusionLogger<TVoxel, TWarp, TIndex>::InitializeWarp2DSliceRecording(
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicFusionLogger<TVoxel, TWarp, TIndex>::SaveWarpSlices(int iteration) {
+void TelemetryRecorder<TVoxel, TWarp, TIndex>::SaveWarpSlices(int iteration) {
 	if (hasFocusCoordinates) {
 		if (recordingScene2DSlicesWithUpdates) {
 #ifdef WITH_OPENCV
@@ -444,7 +444,7 @@ void DynamicFusionLogger<TVoxel, TWarp, TIndex>::SaveWarpSlices(int iteration) {
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicFusionLogger<TVoxel, TWarp, TIndex>::FinalizeFrameRecording() {
+void TelemetryRecorder<TVoxel, TWarp, TIndex>::FinalizeFrameRecording() {
 	if (recording3DSceneAndWarpProgression) {
 		scene3DLogger->StopSavingWarpState();
 		if (hasFocusCoordinates) {
@@ -492,18 +492,18 @@ void DynamicFusionLogger<TVoxel, TWarp, TIndex>::FinalizeFrameRecording() {
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicFusionLogger<TVoxel, TWarp, TIndex>::SaveWarps() {
+void TelemetryRecorder<TVoxel, TWarp, TIndex>::SaveWarps() {
 	if (recording3DSceneAndWarpProgression) {
 		this->scene3DLogger->SaveCurrentWarpState();
 	}
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicFusionLogger<TVoxel, TWarp, TIndex>::RecordAndPlotEnergies(double totalDataEnergy,
-                                                                       double totalLevelSetEnergy,
-                                                                       double totalKillingEnergy,
-                                                                       double totalSmoothnessEnergy,
-                                                                       double totalEnergy) {
+void TelemetryRecorder<TVoxel, TWarp, TIndex>::RecordAndPlotEnergies(double totalDataEnergy,
+                                                                     double totalLevelSetEnergy,
+                                                                     double totalKillingEnergy,
+                                                                     double totalSmoothnessEnergy,
+                                                                     double totalEnergy) {
 	if (this->recordingEnergiesToFile) {
 		energyStatisticsFile << totalDataEnergy << ", " << totalLevelSetEnergy << ", " << totalKillingEnergy << ", "
 		                     << totalSmoothnessEnergy << ", " << totalEnergy << std::endl;
@@ -522,23 +522,23 @@ void DynamicFusionLogger<TVoxel, TWarp, TIndex>::RecordAndPlotEnergies(double to
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-bool DynamicFusionLogger<TVoxel, TWarp, TIndex>::IsRecordingWarp2DSlices() {
+bool TelemetryRecorder<TVoxel, TWarp, TIndex>::IsRecordingWarp2DSlices() {
 	return this->recordingScene2DSlicesWithUpdates;
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-bool DynamicFusionLogger<TVoxel, TWarp, TIndex>::IsRecordingWarps() {
+bool TelemetryRecorder<TVoxel, TWarp, TIndex>::IsRecordingWarps() {
 	return this->recording3DSceneAndWarpProgression;
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicFusionLogger<TVoxel, TWarp, TIndex>::LogHighlight(int hash, int locId,
-                                                              ITMHighlightIterationInfo info) {
+void TelemetryRecorder<TVoxel, TWarp, TIndex>::LogHighlight(int hash, int locId,
+                                                            ITMHighlightIterationInfo info) {
 	scene3DLogger->LogHighlight(hash, locId, 0, info);
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-DynamicFusionLogger<TVoxel, TWarp, TIndex>::~DynamicFusionLogger() {
+TelemetryRecorder<TVoxel, TWarp, TIndex>::~TelemetryRecorder() {
 	delete this->scene3DLogger;
 }
 
@@ -548,7 +548,7 @@ DynamicFusionLogger<TVoxel, TWarp, TIndex>::~DynamicFusionLogger() {
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 std::string
-DynamicFusionLogger<TVoxel, TWarp, TIndex>::GetOutputDirectoryFor2DSceneSlicesWithWarps() const {
+TelemetryRecorder<TVoxel, TWarp, TIndex>::GetOutputDirectoryFor2DSceneSlicesWithWarps() const {
 #ifdef WITH_OPENCV
 	fs::path path(fs::path(this->outputDirectory) / (iterationFramesFolderName + "_" +
 	                                                 PlaneToString(this->scene2DSliceVisualizer->GetPlane())));
@@ -560,7 +560,7 @@ DynamicFusionLogger<TVoxel, TWarp, TIndex>::GetOutputDirectoryFor2DSceneSlicesWi
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 std::string
-DynamicFusionLogger<TVoxel, TWarp, TIndex>::GetOutputDirectoryFor2DLiveSceneSliceProgression() const {
+TelemetryRecorder<TVoxel, TWarp, TIndex>::GetOutputDirectoryFor2DLiveSceneSliceProgression() const {
 #ifdef WITH_OPENCV
 	fs::path path(fs::path(this->outputDirectory) / (liveIterationFramesFolderName + "_" +
 	                                                 PlaneToString(this->scene2DSliceVisualizer->GetPlane())));
@@ -572,14 +572,14 @@ DynamicFusionLogger<TVoxel, TWarp, TIndex>::GetOutputDirectoryFor2DLiveSceneSlic
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 std::string
-DynamicFusionLogger<TVoxel, TWarp, TIndex>::GetOutputDirectoryPrefixForLiveSceneAsSlices() const {
+TelemetryRecorder<TVoxel, TWarp, TIndex>::GetOutputDirectoryPrefixForLiveSceneAsSlices() const {
 	fs::path path(fs::path(this->outputDirectory) / liveSceneRasterizedFolderName);
 	return path.string();
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 std::string
-DynamicFusionLogger<TVoxel, TWarp, TIndex>::GetOutputDirectoryPrefixForCanonicalSceneAsSlices() const {
+TelemetryRecorder<TVoxel, TWarp, TIndex>::GetOutputDirectoryPrefixForCanonicalSceneAsSlices() const {
 	fs::path path(fs::path(this->outputDirectory) / canonicalSceneRasterizedFolderName);
 	return path.string();
 }
@@ -592,7 +592,7 @@ static void ClearDirectory(const fs::path& path) {
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicFusionLogger<TVoxel, TWarp, TIndex>::MakeOrClearOutputDirectoriesFor2DSceneSlices() const {
+void TelemetryRecorder<TVoxel, TWarp, TIndex>::MakeOrClearOutputDirectoriesFor2DSceneSlices() const {
 	auto ClearIfExistsMakeIfDoesnt = [&](std::string pathString) {
 		fs::path path = pathString;
 		if (!fs::exists(path)) {

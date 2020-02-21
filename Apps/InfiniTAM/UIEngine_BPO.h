@@ -12,7 +12,7 @@
 #include "../../ITMLib/Utils/Configuration.h"
 #include "../../ORUtils/FileUtils.h"
 #include "../../ORUtils/NVTimer.h"
-#include "../../ITMLib/Utils/FileIO/DynamicFusionLogger.h"
+#include "../../ITMLib/Utils/FileIO/TelemetryRecorder.h"
 
 //stdlib
 #include <vector>
@@ -105,12 +105,12 @@ public:
 	bool allocateGPU;
 	bool shutdownRequested = false;
 	ITMUChar4Image* saveImage;
-	ITMLib::DynamicFusionLogger_Interface* logger;
+	ITMLib::TelemetryRecorder_Interface* logger;
 	ITMLib::configuration::IndexingMethod indexingMethod;
 
 	void Initialize(int& argc, char** argv, InputSource::ImageSourceEngine* imageSource, InputSource::IMUSourceEngine* imuSource,
 	                ITMLib::MainEngine* mainEngine, const ITMLib::configuration::Configuration& configuration,
-	                ITMLib::DynamicFusionLogger_Interface* logger);
+	                ITMLib::TelemetryRecorder_Interface* logger);
 	void Shutdown();
 
 	void Run();

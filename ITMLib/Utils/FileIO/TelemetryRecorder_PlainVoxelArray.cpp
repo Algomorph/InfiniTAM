@@ -15,8 +15,9 @@
 //  ================================================================
 
 #include "../../GlobalTemplateDefines.h"
-#include "DynamicFusionLogger.tpp"
+#include "TelemetryRecorder.tpp"
 
-namespace ITMLib{
-template class DynamicFusionLogger<TSDFVoxel, WarpVoxel, PlainVoxelArray>;
+namespace ITMLib {
+template
+class TelemetryRecorder<TSDFVoxel, WarpVoxel, PlainVoxelArray>;
 } // namespace ITMLib

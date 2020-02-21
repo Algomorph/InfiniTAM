@@ -23,7 +23,7 @@
 #include "../../Objects/Volume/VoxelVolume.h"
 #include "../Collections/NestedMap3DOfArrays.h"
 #include "../Analytics/NeighborVoxelIterationInfo.h"
-#include "WarpFieldLogger.h"
+#include "WarpFieldSequenceRecorder.h"
 #include "../../Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 
 //boost
@@ -34,6 +34,7 @@ namespace fs = boost::filesystem;
 namespace ITMLib {
 
 
+//TODO: probably doesn't work, not tested, and needs complete overhaul, both logic and refactoring. Do that some time this century...
 /**
  * \brief Wraps the functionality of saving canonical/live scenes or scene slices for dynamic fusion along
  * with warp changes during optimization between frames.
@@ -42,7 +43,7 @@ namespace ITMLib {
  * \tparam TIndex Type of index used for the voxel scenes
  */
 template<typename TVoxel, typename TWarp, typename TIndex>
-class SceneLogger {
+class VolumeSequenceRecorder {
 
 
 public:
@@ -66,15 +67,15 @@ public:
 
 //endregion
 // region === CONSTRUCTORS / DESTRUCTORS ===
-	SceneLogger(VoxelVolume<TVoxel, TIndex>* canonicalScene,
-	            VoxelVolume<TVoxel, TIndex>* liveScene,
-	            VoxelVolume<TWarp, TIndex>* warpField,
-	            std::string path = "");
-	SceneLogger(VoxelVolume<TVoxel, TIndex>* liveScene,
-	            std::string path);
+	VolumeSequenceRecorder(VoxelVolume<TVoxel, TIndex>* canonicalScene,
+	                       VoxelVolume<TVoxel, TIndex>* liveScene,
+	                       VoxelVolume<TWarp, TIndex>* warpField,
+	                       std::string path = "");
+	VolumeSequenceRecorder(VoxelVolume<TVoxel, TIndex>* liveScene,
+	                       std::string path);
 
-	SceneLogger();
-	virtual ~SceneLogger();
+	VolumeSequenceRecorder();
+	virtual ~VolumeSequenceRecorder();
 
 // endregion
 // region === MEMBER FUNCTIONS ===
@@ -152,7 +153,7 @@ public:
 	bool SliceExistsOnDisk(const std::string& sliceIdentifier) const;
 	bool LoadSlice(const std::string& sliceIdentifier);
 	bool SwitchActiveScene(
-			std::string sliceIdentifier = WarpFieldLogger<TVoxel, TIndex>::fullSceneSliceIdentifier);
+			std::string sliceIdentifier = WarpFieldSequenceRecorder<TVoxel, TIndex>::fullSceneSliceIdentifier);
 
 
 //endregion
@@ -175,13 +176,13 @@ private:
 	fs::path livePath;
 
 // *** scene structures ***
-	WarpFieldLogger<TWarp, TIndex>* fullWarpLogger;
-	WarpFieldLogger<TWarp, TIndex>* activeWarpLogger;
+	WarpFieldSequenceRecorder<TWarp, TIndex>* fullWarpLogger;
+	WarpFieldSequenceRecorder<TWarp, TIndex>* activeWarpLogger;
 	VoxelVolume<TVoxel, TIndex>* liveScene;
 	VoxelVolume<TVoxel, TIndex>* canonicalScene;
 
 // *** scene meta-information + reading/writing
-	std::map<std::string, WarpFieldLogger<TWarp, TIndex>*> slices;
+	std::map<std::string, WarpFieldSequenceRecorder<TWarp, TIndex>*> slices;
 
 // *** state ***
 	Mode mode;

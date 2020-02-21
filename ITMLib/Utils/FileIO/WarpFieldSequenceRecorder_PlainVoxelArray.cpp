@@ -13,9 +13,9 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "WarpFieldLogger.tpp"
+#include "WarpFieldSequenceRecorder.tpp"
 
 namespace ITMLib {
 template
-class WarpFieldLogger<WarpVoxel, PlainVoxelArray>;
+class WarpFieldSequenceRecorder<WarpVoxel, PlainVoxelArray>;
 } // namespace ITMLib

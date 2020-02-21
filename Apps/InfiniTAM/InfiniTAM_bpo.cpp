@@ -50,13 +50,13 @@ namespace po = boost::program_options;
 namespace pt = boost::property_tree;
 
 
-DynamicFusionLogger_Interface& GetLogger(configuration::IndexingMethod method) {
+TelemetryRecorder_Interface& GetLogger(configuration::IndexingMethod method) {
 	switch (method) {
 		case configuration::INDEX_HASH: {
-			return static_cast<DynamicFusionLogger_Interface&>(DynamicFusionLogger<TSDFVoxel, WarpVoxel, VoxelBlockHash>::Instance());
+			return static_cast<TelemetryRecorder_Interface&>(TelemetryRecorder<TSDFVoxel, WarpVoxel, VoxelBlockHash>::Instance());
 		}
 		case configuration::INDEX_ARRAY: {
-			return static_cast<DynamicFusionLogger_Interface&>(DynamicFusionLogger<TSDFVoxel, WarpVoxel, PlainVoxelArray>::Instance());
+			return static_cast<TelemetryRecorder_Interface&>(TelemetryRecorder<TSDFVoxel, WarpVoxel, PlainVoxelArray>::Instance());
 		}
 	}
 };
@@ -128,7 +128,7 @@ int main(int argc, char** argv) {
 
 // region ================================ BUILD MAIN ENGINE ========================================================
 		configuration::IndexingMethod chosenIndexingMethod = configuration.indexing_method;
-		//DynamicFusionLogger_Interface& logger = GetLogger(chosenIndexingMethod);
+		//TelemetryRecorder_Interface& logger = GetLogger(chosenIndexingMethod);
 		MainEngine* mainEngine = BuildMainEngine(imageSource->getCalib(),
 		                                         imageSource->getRGBImageSize(),
 		                                         imageSource->getDepthImageSize(),

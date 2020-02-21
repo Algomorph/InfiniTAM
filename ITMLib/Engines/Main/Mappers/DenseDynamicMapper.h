@@ -25,7 +25,7 @@
 #include "../../../SurfaceTrackers/Interface/SurfaceTrackerInterface.h"
 // utils
 #include "../../../Utils/Configuration.h"
-#include "../../../Utils/FileIO/DynamicFusionLogger.h"
+#include "../../../Utils/FileIO/TelemetryRecorder.h"
 // misc
 #include "../NonRigidTrackingParameters.h"
 
