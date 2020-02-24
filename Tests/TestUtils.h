@@ -51,7 +51,7 @@ void TimeIt(std::function<void(void)> function, const std::string& description =
 		std::chrono::duration<double> elapsed = finish - start;
 		cumulative += elapsed.count();
 	}
-	std::cout << "Elapsed average time for " << run_count << " runs: " << cumulative / run_count << " s\n";
+	std::cout << "Elapsed average time for " << run_count << " runs: " << cumulative / run_count << " s" << std::endl;
 }
 
 

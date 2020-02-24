@@ -40,8 +40,10 @@ VolumeReductionStatisticsCalculator<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::
 	dim3 cuda_block_size(VOXEL_BLOCK_SIZE3 / 2);
 	dim3 cuda_grid_size(utilized_entry_count);
 
-	computeVoxelHashReduction
-			<TVoxel, TRetreiveWarpLengthFunctor<TVoxel, WARP_UPDATE>, TReduceWarpLengthStatisticFunctor<TVoxel, WARP_UPDATE, MAXIMUM>, float>
+	const auto computeMaxWarpUpdateAndItsPositionForEachBlock = computeVoxelHashReduction
+			<TVoxel, TRetreiveWarpLengthFunctor<TVoxel, WARP_UPDATE>, TReduceWarpLengthStatisticFunctor<TVoxel, WARP_UPDATE, MAXIMUM>, float>;
+
+	computeMaxWarpUpdateAndItsPositionForEachBlock
 			<< < cuda_grid_size, cuda_block_size >> >
 	                             (block_results.GetData(MEMORYDEVICE_CUDA), voxels, hash_entries, utilized_hash_codes);
 
@@ -53,9 +55,9 @@ VolumeReductionStatisticsCalculator<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::
 	 * */
 	max = 0.0f;
 	int max_utilized_entry_index = 0;
-	for (int i_utilized_entry = 0; i_utilized_entry < utilized_entry_count; i_utilized_entry++){
+	for (int i_utilized_entry = 0; i_utilized_entry < utilized_entry_count; i_utilized_entry++) {
 		ValueAndIndex<float>& block_result = block_results_CPU[i_utilized_entry];
-		if(block_result.value > max){
+		if (block_result.value > max) {
 			max = block_result.value;
 			max_utilized_entry_index = i_utilized_entry;
 		}
@@ -63,6 +65,6 @@ VolumeReductionStatisticsCalculator<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::
 	HashEntry entry_with_max = volume->index.GetUtilizedHashEntryAtIndex(max_utilized_entry_index);
 
 	position = ComputePositionVectorFromLinearIndex_VoxelBlockHash(entry_with_max.pos,
-			static_cast<int> (block_results_CPU[max_utilized_entry_index].index_within_block));
+	                                                               static_cast<int> (block_results_CPU[max_utilized_entry_index].index_within_block));
 
 }

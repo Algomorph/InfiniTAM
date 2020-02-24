@@ -33,7 +33,7 @@
 
 using namespace ITMLib;
 
-BOOST_FIXTURE_TEST_CASE(Test_CUDASpatialHashReduction, Frame16And17Fixture){
+BOOST_FIXTURE_TEST_CASE(Test_CUDASpatialHashReduction, Frame16And17Fixture) {
 	const int iteration = 1;
 
 	std::string prefix = "data_tikhonov_sobolev";
@@ -44,7 +44,8 @@ BOOST_FIXTURE_TEST_CASE(Test_CUDASpatialHashReduction, Frame16And17Fixture){
 	VoxelVolume<WarpVoxel, VoxelBlockHash>* warps;
 	loadVolume(&warps, path_warps, MEMORYDEVICE_CUDA, InitParams<VoxelBlockHash>());
 
-	float value_gt = VolumeStatisticsCalculator<WarpVoxel,VoxelBlockHash,MEMORYDEVICE_CUDA>::Instance().ComputeWarpUpdateMax(warps);
+	float value_gt = VolumeStatisticsCalculator<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance().ComputeWarpUpdateMax(
+			warps);
 
 	float max_value;
 	Vector3i position;
@@ -56,6 +57,22 @@ BOOST_FIXTURE_TEST_CASE(Test_CUDASpatialHashReduction, Frame16And17Fixture){
 	WarpVoxel voxel = warps->GetValueAt(position);
 
 	BOOST_REQUIRE_EQUAL(ORUtils::length(voxel.warp_update), max_value);
+
+#ifdef TEST_PERFORMANCE
+	TimeIt(
+			[&]() {
+				VolumeStatisticsCalculator<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance().ComputeWarpUpdateMax(
+						warps);
+			}, "Warp Update Max (Atomics)", 10
+	);
+
+	TimeIt(
+			[&]() {
+				VolumeStatisticsCalculator<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance().ComputeWarpUpdateMax(
+						warps);
+			}, "Warp Update Max (Reduciton)", 10
+	);
+#endif
 
 	delete warps;
 }
