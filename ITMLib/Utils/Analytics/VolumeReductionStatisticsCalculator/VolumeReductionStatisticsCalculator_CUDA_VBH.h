@@ -17,13 +17,28 @@
 //local
 #include "VolumeReductionStatisticsCalculator.h"
 #include "../../../Objects/Volume/VoxelBlockHash.h"
+#include "../../../GlobalTemplateDefines.h"
 
 namespace ITMLib{
 
 template<typename TVoxel>
 class VolumeReductionStatisticsCalculator<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA> :
 		public VolumeReductionStatisticsCalculatorInterface<TVoxel, VoxelBlockHash> {
-	void ComputeWarpUpdateLengthMax(float& max, Vector3i& position, VoxelVolume<TVoxel,VoxelBlockHash>* volume) override;
+public:
+	static VolumeReductionStatisticsCalculator& Instance() {
+		static VolumeReductionStatisticsCalculator instance;
+		return instance;
+	}
+
+	VolumeReductionStatisticsCalculator(VolumeReductionStatisticsCalculator const&) = delete;
+	void operator=(VolumeReductionStatisticsCalculator const&) = delete;
+
+	void ComputeWarpUpdateMax(float& max, Vector3i& position, VoxelVolume<TVoxel,VoxelBlockHash>* volume) override;
+private:
+	VolumeReductionStatisticsCalculator() = default;
+	~VolumeReductionStatisticsCalculator() = default;
 };
+
+extern template class VolumeReductionStatisticsCalculator<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>;
 
 } // namespace ITMLib

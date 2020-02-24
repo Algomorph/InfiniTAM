@@ -24,7 +24,8 @@ namespace ITMLib{
 
 template <typename TVoxel, typename TIndex>
 class VolumeReductionStatisticsCalculatorInterface{
-	virtual void ComputeWarpUpdateLengthMax(float& max, Vector3i& position, VoxelVolume<TVoxel,TIndex>* volume) = 0;
+public:
+	virtual void ComputeWarpUpdateMax(float& max, Vector3i& position, VoxelVolume<TVoxel,TIndex>* volume) = 0;
 };
 
 template  <typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>

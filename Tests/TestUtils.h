@@ -41,13 +41,17 @@ template<typename TVoxel>
 void simulateRandomVoxelAlteration(TVoxel& voxel);
 
 inline
-void TimeIt(std::function<void(void)> function, const std::string& description = "Timed Operation") {
+void TimeIt(std::function<void(void)> function, const std::string& description = "Timed Operation", int run_count = 0) {
 	std::cout << description << std::endl;
-	auto start = std::chrono::high_resolution_clock::now();
-	function();
-	auto finish = std::chrono::high_resolution_clock::now();
-	std::chrono::duration<double> elapsed = finish - start;
-	std::cout << "Elapsed time: " << elapsed.count() << " s\n";
+	double cumulative = 0.0;
+	for(int i_run = 0; i_run < run_count; i_run++){
+		auto start = std::chrono::high_resolution_clock::now();
+		function();
+		auto finish = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> elapsed = finish - start;
+		cumulative += elapsed.count();
+	}
+	std::cout << "Elapsed average time for " << run_count << " runs: " << cumulative / run_count << " s\n";
 }
 
 

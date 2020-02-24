@@ -110,8 +110,6 @@ VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::CountVoxelsWithSp
 			volume, value);
 }
 
-// region ================================ VOXEL GRADIENTS =============================================================
-
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 unsigned int
 VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::ComputeAlteredVoxelCount(
@@ -120,6 +118,31 @@ VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::ComputeAlteredVox
 	VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseAll(volume, functor);
 	return functor.GetCount();
 }
+
+// region ================================ VOXEL GRADIENT / WARP STATISTICS ============================================
+
+
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+double VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::ComputeWarpUpdateMin(
+		VoxelVolume<TVoxel, TIndex>* volume) {
+	return ComputeWarpLengthStatisticFunctor<TVoxel::hasWarpUpdate, TVoxel, TIndex, TMemoryDeviceType, MINIMUM, WARP_UPDATE>::compute(
+			volume);
+}
+
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+double VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::ComputeWarpUpdateMax(
+		VoxelVolume<TVoxel, TIndex>* volume) {
+	return ComputeWarpLengthStatisticFunctor<TVoxel::hasWarpUpdate, TVoxel, TIndex, TMemoryDeviceType, MAXIMUM, WARP_UPDATE>::compute(
+			volume);
+}
+
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+double VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::ComputeWarpUpdateMean(
+		VoxelVolume<TVoxel, TIndex>* volume) {
+	return ComputeWarpLengthStatisticFunctor<TVoxel::hasWarpUpdate, TVoxel, TIndex, TMemoryDeviceType, MEAN, WARP_UPDATE>::compute(
+			volume);
+}
+
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 double VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::ComputeFramewiseWarpMin(
@@ -142,12 +165,13 @@ double VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::ComputeFra
 			volume);
 }
 
+
+
+// endregion ===========================================================================================================
+
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 Vector6i VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::FindMinimumNonTruncatedBoundingBox(
 		VoxelVolume<TVoxel, TIndex>* volume) {
 	return FlagMatchBBoxFunctor<TVoxel::hasSemanticInformation, TVoxel, TIndex, TMemoryDeviceType>::
 	compute(volume, VoxelFlags::VOXEL_NONTRUNCATED);
 }
-
-// endregion ===========================================================================================================
-

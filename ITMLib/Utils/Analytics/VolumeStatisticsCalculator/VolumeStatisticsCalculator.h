@@ -47,6 +47,11 @@ public:
 	unsigned int CountVoxelsWithSpecificSdfValue(VoxelVolume <TVoxel, TIndex>* volume, float value) override;
 	double ComputeNonTruncatedVoxelAbsSdfSum(VoxelVolume <TVoxel, TIndex>* volume) override;
 	double ComputeTruncatedVoxelAbsSdfSum(VoxelVolume <TVoxel, TIndex>* volume) override;
+
+	double ComputeWarpUpdateMin(VoxelVolume <TVoxel, TIndex>* volume) override;
+	double ComputeWarpUpdateMax(VoxelVolume <TVoxel, TIndex>* volume) override;
+	double ComputeWarpUpdateMean(VoxelVolume <TVoxel, TIndex>* volume) override;
+	
 	double ComputeFramewiseWarpMin(VoxelVolume <TVoxel, TIndex>* volume) override;
 	double ComputeFramewiseWarpMax(VoxelVolume <TVoxel, TIndex>* volume) override;
 	double ComputeFramewiseWarpMean(VoxelVolume <TVoxel, TIndex>* volume) override;

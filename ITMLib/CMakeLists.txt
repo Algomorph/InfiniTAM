@@ -805,13 +805,13 @@ set(ITMLIB_SCENE_MOTION_TRACKERS_SHARED_HEADERS
     SurfaceTrackers/WarpGradientFunctors/WarpGradientFunctor_SlavchevaDiagnostic.h
     SurfaceTrackers/WarpGradientFunctors/WarpGradientFunctor_SlavchevaOptimized.h
 
-    SurfaceTrackers/Shared/ITMWarpGradientCommon.h
+    SurfaceTrackers/Shared/WarpGradientCommon.h
     SurfaceTrackers/Shared/SurfaceTrackerSharedRoutines.h
     SurfaceTrackers/Shared/SurfaceTrackerDiagnosticRoutines.h
     SurfaceTrackers/Shared/SurfaceTrackerSharedFunctors.h
     SurfaceTrackers/Shared/SurfaceTrackerOptimizationParameters.h
-    SurfaceTrackers/Shared/ITMWarpGradientRoutines.h
-    SurfaceTrackers/Shared/ITMWarpGradientAggregates.h
+    SurfaceTrackers/Shared/WarpGradientRoutines.h
+    SurfaceTrackers/Shared/WarpGradientAggregates.h
     )
 
 # ======================================================================================================================
@@ -877,6 +877,7 @@ set(ITMLIB_UTILS_HEADERS
     Utils/SurfelVolumeParameters.h
     Utils/CPPPrintHelpers.h
     Utils/CPrintHelpers.h
+    Utils/CLionCudaSyntax.h
 
     Utils/Analytics/BenchmarkUtils.h
     Utils/Analytics/AlmostEqual.h

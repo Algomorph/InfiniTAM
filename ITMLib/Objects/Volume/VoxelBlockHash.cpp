@@ -21,16 +21,16 @@
 
 namespace ITMLib {
 
-HashEntry VoxelBlockHash::GetHashEntryAt(const Vector3s& pos, int& hashCode) const {
+HashEntry VoxelBlockHash::GetHashEntryAt(const Vector3s& pos, int& hash_code) const {
 	const HashEntry* entries = this->GetEntries();
 	switch (memory_type) {
 		case MEMORYDEVICE_CPU:
 			return IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance()
-					.FindHashEntry(*this,pos,hashCode);
+					.FindHashEntry(*this, pos, hash_code);
 #ifndef COMPILE_WITHOUT_CUDA
 		case MEMORYDEVICE_CUDA:
 			return IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance()
-					.FindHashEntry(*this,pos, hashCode);
+					.FindHashEntry(*this,pos, hash_code);
 #endif
 		default:
 			DIEWITHEXCEPTION_REPORTLOCATION("Unsupported device type.");
@@ -40,6 +40,23 @@ HashEntry VoxelBlockHash::GetHashEntryAt(const Vector3s& pos, int& hashCode) con
 HashEntry VoxelBlockHash::GetHashEntryAt(const Vector3s& pos) const {
 	int hashCode = 0;
 	return GetHashEntryAt(pos, hashCode);
+}
+
+HashEntry VoxelBlockHash::GetHashEntryAt(int x, int y, int z, int& hash_code) const {
+	Vector3s coord(x, y, z);
+	return GetHashEntryAt(coord, hash_code);
+}
+HashEntry VoxelBlockHash::GetHashEntryAt(int x, int y, int z) const {
+	Vector3s coord(x, y, z);
+	return GetHashEntryAt(coord);
+}
+HashEntry VoxelBlockHash::GetUtilizedHashEntryAtIndex(int index, int& hash_code) const {
+	hash_code = utilized_block_hash_codes.GetElement(index, memory_type);
+	return GetHashEntry(hash_code);
+}
+HashEntry VoxelBlockHash::GetUtilizedHashEntryAtIndex(int index) const {
+	int hash_code = 0;
+	return GetUtilizedHashEntryAtIndex(index, hash_code);
 }
 
 VoxelBlockHash::VoxelBlockHash(VoxelBlockHashParameters parameters, MemoryDeviceType memoryType) :
@@ -86,5 +103,7 @@ void VoxelBlockHash::LoadFromDirectory(const std::string& inputDirectory) {
 	ORUtils::MemoryBlockPersister::LoadMemoryBlock(excessAllocationListFileName, excess_allocation_list,
 	                                               memory_type);
 }
+
+
 
 }// namespace ITMLib

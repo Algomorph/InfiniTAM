@@ -15,6 +15,7 @@
 //  ================================================================
 #pragma once
 
+#include "../../CLionCudaSyntax.h"
 #include "../../Math.h"
 #include "../../../Objects/Volume/VoxelBlockHash.h"
 #include "../../WarpType.h"
@@ -57,11 +58,12 @@ public:
 
 namespace { // (CUDA global kernels)
 
+
 template<typename TVoxel, typename TRetrieveSingleFunctor, typename TReduceFunctor, typename TOutput>
-void
+__global__ void
 computeVoxelHashReduction(ValueAndIndex<TOutput>* block_results, const TVoxel* voxels, const HashEntry* hash_entries,
                           const int* utilized_hash_codes) {
-	extern __shared__ ValueAndIndex<TOutput> shared_data[];
+	__shared__ ValueAndIndex<TOutput> shared_data[VOXEL_BLOCK_SIZE3 / 2];
 	unsigned int thread_id = threadIdx.x;
 	unsigned int i_utilized_hash_block = blockIdx.x;
 	int hash_code = utilized_hash_codes[i_utilized_hash_block];

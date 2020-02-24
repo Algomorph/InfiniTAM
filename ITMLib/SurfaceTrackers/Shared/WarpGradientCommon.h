@@ -18,7 +18,7 @@
 
 #include <iostream>
 #include "../../Utils/CPPPrintHelpers.h"
-#include "ITMWarpGradientAggregates.h"
+#include "WarpGradientAggregates.h"
 
 namespace ITMLib {
 // region ==================================== STATIC PRINTING / STATISTICS FUNCTIONS ==================================

@@ -30,39 +30,39 @@ ComputeLinearIndexFromPosition_PlainVoxelArray(const ITMLib::PlainVoxelArray::In
 _CPU_AND_GPU_CODE_
 inline static void
 ComputePositionFromLinearIndex_PlainVoxelArray(int& x, int& y, int& z,
-                                               const ITMLib::PlainVoxelArray::IndexData* indexData,
-                                               int linearIndex) {
+                                               const ITMLib::PlainVoxelArray::IndexData* array_parameters,
+                                               int linear_index_in_array) {
 
-	z = linearIndex / (indexData->size.x * indexData->size.y);
-	int tmp = linearIndex - z * indexData->size.x * indexData->size.y;
-	y = tmp / indexData->size.x;
-	x = tmp - y * indexData->size.x;
-	x += indexData->offset.x;
-	y += indexData->offset.y;
-	z += indexData->offset.z;
+	z = linear_index_in_array / (array_parameters->size.x * array_parameters->size.y);
+	int tmp = linear_index_in_array - z * array_parameters->size.x * array_parameters->size.y;
+	y = tmp / array_parameters->size.x;
+	x = tmp - y * array_parameters->size.x;
+	x += array_parameters->offset.x;
+	y += array_parameters->offset.y;
+	z += array_parameters->offset.z;
 }
 
 _CPU_AND_GPU_CODE_
 inline static Vector3i
-ComputePositionVectorFromLinearIndex_PlainVoxelArray(const ITMLib::PlainVoxelArray::IndexData* indexData,
-                                                     int linearIndex) {
-	int z = linearIndex / (indexData->size.x * indexData->size.y);
-	int tmp = linearIndex - z * indexData->size.x * indexData->size.y;
-	int y = tmp / indexData->size.x;
-	int x = tmp - y * indexData->size.x;
-	return {x + indexData->offset.x, y + indexData->offset.y, z + indexData->offset.z};
+ComputePositionVectorFromLinearIndex_PlainVoxelArray(const ITMLib::PlainVoxelArray::IndexData* array_parameters,
+                                                     int linear_index_in_array) {
+	int z = linear_index_in_array / (array_parameters->size.x * array_parameters->size.y);
+	int tmp = linear_index_in_array - z * array_parameters->size.x * array_parameters->size.y;
+	int y = tmp / array_parameters->size.x;
+	int x = tmp - y * array_parameters->size.x;
+	return {x + array_parameters->offset.x, y + array_parameters->offset.y, z + array_parameters->offset.z};
 }
 
 _CPU_AND_GPU_CODE_
 inline static Vector3i
-ComputePositionVectorFromLinearIndex_VoxelBlockHash( Vector3s blockPosition_Blocks,
-                                                     int linearIndex) {
-	int z = linearIndex / (VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE);
-	int tmp = linearIndex - z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
+ComputePositionVectorFromLinearIndex_VoxelBlockHash( Vector3s block_position_in_blocks,
+                                                     int linear_index_in_block) {
+	int z = linear_index_in_block / (VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE);
+	int tmp = linear_index_in_block - z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
 	int y = tmp / VOXEL_BLOCK_SIZE;
 	int x = tmp - y * VOXEL_BLOCK_SIZE;
-	return {x + blockPosition_Blocks.x * VOXEL_BLOCK_SIZE,
-		 y + blockPosition_Blocks.y * VOXEL_BLOCK_SIZE,
-		 z + blockPosition_Blocks.z * VOXEL_BLOCK_SIZE};
+	return {x + block_position_in_blocks.x * VOXEL_BLOCK_SIZE,
+	        y + block_position_in_blocks.y * VOXEL_BLOCK_SIZE,
+	        z + block_position_in_blocks.z * VOXEL_BLOCK_SIZE};
 }
 

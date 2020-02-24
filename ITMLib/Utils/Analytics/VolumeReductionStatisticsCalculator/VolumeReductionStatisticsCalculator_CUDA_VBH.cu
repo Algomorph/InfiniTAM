@@ -17,6 +17,7 @@
 //local
 #include "VolumeReductionStatisticsCalculator_CUDA_VBH.tpp"
 
-namespace ITMLib{
-
+namespace ITMLib {
+template
+class VolumeReductionStatisticsCalculator<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>;
 } // namespace ITMLib

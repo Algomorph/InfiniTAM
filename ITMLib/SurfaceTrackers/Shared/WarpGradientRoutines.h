@@ -18,7 +18,7 @@
 #include "../../Utils/Math.h"
 #include "../../../ORUtils/PlatformIndependence.h"
 #include "../../../ORUtils/PlatformIndependentAtomics.h"
-#include "ITMWarpGradientAggregates.h"
+#include "WarpGradientAggregates.h"
 
 _CPU_AND_GPU_CODE_
 template<typename TVoxel, typename TIndexData, typename TCache>

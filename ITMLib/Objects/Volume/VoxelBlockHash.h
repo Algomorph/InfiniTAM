@@ -140,22 +140,16 @@ public:
 
 	IndexData* GetIndexData() { return hash_entries.GetData(memory_type); }
 
-	HashEntry GetHashEntry(int hashCode) const {
-		return hash_entries.GetElement(hashCode, memory_type);
+	HashEntry GetHashEntry(int hash_code) const {
+		return hash_entries.GetElement(hash_code, memory_type);
 	}
 
 	HashEntry GetHashEntryAt(const Vector3s& pos) const;
-	HashEntry GetHashEntryAt(const Vector3s& pos, int& hashCode) const;
-
-	HashEntry GetHashEntryAt(int x, int y, int z) const {
-		Vector3s coord(x, y, z);
-		return GetHashEntryAt(coord);
-	}
-
-	HashEntry GetHashEntryAt(int x, int y, int z, int& hashCode) const {
-		Vector3s coord(x, y, z);
-		return GetHashEntryAt(coord, hashCode);
-	}
+	HashEntry GetHashEntryAt(const Vector3s& pos, int& hash_code) const;
+	HashEntry GetHashEntryAt(int x, int y, int z) const;
+	HashEntry GetHashEntryAt(int x, int y, int z, int& hash_code) const;
+	HashEntry GetUtilizedHashEntryAtIndex(int index, int& hash_code) const;
+	HashEntry GetUtilizedHashEntryAtIndex(int index) const;
 
 	/** Get a list of temporary hash entry state flags**/
 	const HashEntryAllocationState* GetHashEntryAllocationStates() const {

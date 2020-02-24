@@ -40,6 +40,11 @@ public:
 	virtual unsigned int CountVoxelsWithSpecificSdfValue(VoxelVolume<TVoxel, TIndex>* volume, float value) = 0;
 	virtual double ComputeNonTruncatedVoxelAbsSdfSum(VoxelVolume<TVoxel, TIndex>* volume) = 0;
 	virtual double ComputeTruncatedVoxelAbsSdfSum(VoxelVolume<TVoxel, TIndex>* volume) = 0;
+
+	virtual double ComputeWarpUpdateMin(VoxelVolume<TVoxel,TIndex>* volume) = 0;
+	virtual double ComputeWarpUpdateMax(VoxelVolume<TVoxel,TIndex>* volume) = 0;
+	virtual double ComputeWarpUpdateMean(VoxelVolume<TVoxel,TIndex>* volume) = 0;
+	
 	virtual double ComputeFramewiseWarpMin(VoxelVolume<TVoxel,TIndex>* volume) = 0;
 	virtual double ComputeFramewiseWarpMax(VoxelVolume<TVoxel,TIndex>* volume) = 0;
 	virtual double ComputeFramewiseWarpMean(VoxelVolume<TVoxel,TIndex>* volume) = 0;
