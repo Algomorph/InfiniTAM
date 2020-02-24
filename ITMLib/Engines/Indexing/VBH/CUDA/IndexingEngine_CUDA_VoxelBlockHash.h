@@ -55,7 +55,7 @@ public:
 	                       const ORUtils::MemoryBlock<Vector3s>& new_block_positions,
 	                       int new_block_count) override;
 
-	void BuildUtilizedBlockListBasedOnVisibility(VoxelVolume <TVoxel, VoxelBlockHash>* volume, const ITMView* view,
+	void BuildUtilizedBlockListBasedOnVisibility(VoxelVolume <TVoxel, VoxelBlockHash>* volume, const View* view,
 	                                             const Matrix4f& depth_camera_matrix = Matrix4f::Identity());
 
 	void SetVisibilityToVisibleAtPreviousFrameAndUnstreamed(

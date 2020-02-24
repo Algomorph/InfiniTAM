@@ -175,7 +175,7 @@ struct ComputeWarpLengthStatisticFunctor<true, TVoxel, TIndex, TDeviceType, TSta
 		ComputeWarpLengthStatisticFunctor instance;
 		INITIALIZE_ATOMIC(double, instance.aggregate, 0.0);
 		INITIALIZE_ATOMIC(unsigned int, instance.count, 0u);
-		VolumeTraversalEngine<TVoxel, TIndex, TDeviceType>::TraverseAll(scene, instance);
+		VolumeTraversalEngine<TVoxel, TIndex, TDeviceType>::TraverseUtilized(scene, instance);
 		double aggregate = GET_ATOMIC_VALUE_CPU(instance.aggregate);
 		unsigned int count = GET_ATOMIC_VALUE_CPU(instance.count);
 		if (TStatistic == MEAN) {

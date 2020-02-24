@@ -29,7 +29,7 @@ DynamicCameraTracker::DynamicCameraTracker(const Vector2i& imgSize_d, const Vect
 		                  viewFrustum_max, minColourGradient, tukeyCutOff, framesToSkip, framesToWeight,
 		                  lowLevelEngine, memoryType) {}
 
-void ITMLib::DynamicCameraTracker::TrackCamera(ITMLib::CameraTrackingState* trackingState, const ITMLib::ITMView* view) {
+void ITMLib::DynamicCameraTracker::TrackCamera(ITMLib::CameraTrackingState* trackingState, const ITMLib::View* view) {
 	//obtain initial camera alignment
 	ExtendedTracker::TrackCamera(trackingState, view);
 	switch (trackingState->trackerResult){

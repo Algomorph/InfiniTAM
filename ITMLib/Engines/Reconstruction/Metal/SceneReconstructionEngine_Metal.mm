@@ -38,7 +38,7 @@ ITMSceneReconstructionEngine_Metal<TVoxel,ITMVoxelBlockHash>::ITMSceneReconstruc
 }
 
 template<class TVoxel>
-void ITMSceneReconstructionEngine_Metal<TVoxel,ITMVoxelBlockHash>::IntegrateIntoScene(ITMScene<TVoxel, ITMVoxelBlockHash> *scene, const ITMView *view,
+void ITMSceneReconstructionEngine_Metal<TVoxel,ITMVoxelBlockHash>::IntegrateIntoScene(ITMScene<TVoxel, ITMVoxelBlockHash> *scene, const View *view,
                                                                                       const ITMTrackingState *trackingState, const ITMRenderState *renderState)
 {
     id<MTLCommandBuffer> commandBuffer = [[[MetalContext instance]commandQueue]commandBuffer];
@@ -77,7 +77,7 @@ void ITMSceneReconstructionEngine_Metal<TVoxel,ITMVoxelBlockHash>::IntegrateInto
 }
 
 template<class TVoxel>
-void ITMSceneReconstructionEngine_Metal<TVoxel,ITMVoxelBlockHash>::BuildAllocAndVisibleType(ITMScene<TVoxel, ITMVoxelBlockHash> *scene, const ITMView *view,
+void ITMSceneReconstructionEngine_Metal<TVoxel,ITMVoxelBlockHash>::BuildAllocAndVisibleType(ITMScene<TVoxel, ITMVoxelBlockHash> *scene, const View *view,
                                                                                             const ITMTrackingState *trackingState, const ITMRenderState *renderState)
 {
     id<MTLCommandBuffer> commandBuffer = [[[MetalContext instance]commandQueue]commandBuffer];
@@ -131,7 +131,7 @@ void ITMSceneReconstructionEngine_Metal<TVoxel,ITMVoxelBlockHash>::BuildAllocAnd
 }
 
 template<class TVoxel>
-void ITMSceneReconstructionEngine_Metal<TVoxel, ITMVoxelBlockHash>::AllocateSceneFromDepth(ITMScene<TVoxel, ITMVoxelBlockHash> *scene, const ITMView *view,
+void ITMSceneReconstructionEngine_Metal<TVoxel, ITMVoxelBlockHash>::AllocateSceneFromDepth(ITMScene<TVoxel, ITMVoxelBlockHash> *scene, const View *view,
                                                                                            const ITMTrackingState *trackingState, const ITMRenderState *renderState,
                                                                                            bool onlyUpdateVisibleList, bool resetVisibleList)
 {

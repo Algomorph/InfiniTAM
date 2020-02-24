@@ -29,7 +29,7 @@ namespace ITMLib{
 		                     float viewFrustum_max, float minColourGradient, float tukeyCutOff, int framesToSkip,
 		                     int framesToWeight, const LowLevelEngine* lowLevelEngine, MemoryDeviceType memoryType);
 
-		void TrackCamera(CameraTrackingState *trackingState, const ITMView *view) override;
+		void TrackCamera(CameraTrackingState *trackingState, const View *view) override;
 
 	};
 }//namespace ITMLib

@@ -42,13 +42,13 @@ namespace ITMLib
 		ITMUChar4Image *kfRaycast;
 
 		/// Pointer for storing the current input frame
-		ITMView *view;
+		View *view;
 
 		/// Pointer to the current camera pose and additional tracking information
 		CameraTrackingState *trackingState;
 
 	public:
-		ITMView* GetView(void) { return view; }
+		View* GetView(void) { return view; }
 		CameraTrackingState* GetTrackingState(void) { return trackingState; }
 
 		/// Gives access to the internal world representation

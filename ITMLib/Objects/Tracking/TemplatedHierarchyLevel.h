@@ -9,7 +9,7 @@
 namespace ITMLib
 {
 	template <class ImageType>
-	class ITMTemplatedHierarchyLevel
+	class TemplatedHierarchyLevel
 	{
 	public:
 		int levelId;
@@ -21,8 +21,8 @@ namespace ITMLib
 		Vector4f intrinsics;
 		bool manageData;
 
-		ITMTemplatedHierarchyLevel(Vector2i imgSize, int levelId, TrackerIterationType iterationType, 
-			MemoryDeviceType memoryType, bool skipAllocation = false)
+		TemplatedHierarchyLevel(Vector2i imgSize, int levelId, TrackerIterationType iterationType,
+		                        MemoryDeviceType memoryType, bool skipAllocation = false)
 		{
 			this->manageData = !skipAllocation;
 			this->levelId = levelId;
@@ -41,13 +41,13 @@ namespace ITMLib
 			this->data->UpdateDeviceFromHost();
 		}
 
-		~ITMTemplatedHierarchyLevel(void)
+		~TemplatedHierarchyLevel(void)
 		{
 			if (manageData) delete data;
 		}
 
 		// Suppress the default copy constructor and assignment operator
-		ITMTemplatedHierarchyLevel(const ITMTemplatedHierarchyLevel&);
-		ITMTemplatedHierarchyLevel& operator=(const ITMTemplatedHierarchyLevel&);
+		TemplatedHierarchyLevel(const TemplatedHierarchyLevel&);
+		TemplatedHierarchyLevel& operator=(const TemplatedHierarchyLevel&);
 	};
 }

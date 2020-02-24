@@ -35,7 +35,7 @@ void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::Re
 
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, typename TDerivedClass>
 void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::AllocateNearSurface(
-		VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view, const Matrix4f& depth_camera_matrix,
+		VoxelVolume<TVoxel, VoxelBlockHash>* volume, const View* view, const Matrix4f& depth_camera_matrix,
 		bool only_update_visible_list, bool resetVisibleList) {
 
 	if (resetVisibleList) volume->index.SetUtilizedHashBlockCount(0);
@@ -63,7 +63,7 @@ void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::Al
 
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, typename TDerivedClass>
 void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::AllocateNearSurface(
-		VoxelVolume<TVoxel, VoxelBlockHash>* scene, const ITMView* view, const CameraTrackingState* trackingState,
+		VoxelVolume<TVoxel, VoxelBlockHash>* scene, const View* view, const CameraTrackingState* trackingState,
 		bool onlyUpdateVisibleList, bool resetVisibleList) {
 	AllocateNearSurface(scene, view, trackingState->pose_d->GetM(), onlyUpdateVisibleList, resetVisibleList);
 }
@@ -71,7 +71,7 @@ void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::Al
 
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, typename TDerivedClass>
 void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::AllocateNearAndBetweenTwoSurfaces(
-		VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view, const CameraTrackingState* tracking_state) {
+		VoxelVolume<TVoxel, VoxelBlockHash>* volume, const View* view, const CameraTrackingState* tracking_state) {
 
 	volume->index.SetUtilizedHashBlockCount(0);
 

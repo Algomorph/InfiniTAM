@@ -219,7 +219,7 @@ void initializeVolume(VoxelVolume<TVoxel, TIndex>** volume,
 
 template<typename TVoxel, typename TIndex>
 void buildSdfVolumeFromImage_NearSurfaceAllocation(VoxelVolume<TVoxel, TIndex>** volume,
-                                                   ITMView** view,
+                                                   View** view,
                                                    const std::string& depth_path,
                                                    const std::string& color_path,
                                                    const std::string& mask_path,
@@ -264,7 +264,7 @@ void buildSdfVolumeFromImage_NearSurfaceAllocation(VoxelVolume<TVoxel, TIndex>**
 
 	// region ================================= CONSTRUCT VIEW =========================================================
 
-	ITMView* view = nullptr;
+	View* view = nullptr;
 	buildSdfVolumeFromImage_NearSurfaceAllocation(volume, &view,
 	                                              depth_path,
 	                                              color_path,
@@ -278,7 +278,7 @@ void buildSdfVolumeFromImage_NearSurfaceAllocation(VoxelVolume<TVoxel, TIndex>**
 template<typename TVoxel, typename TIndex>
 void buildSdfVolumeFromImage_SurfaceSpanAllocation(VoxelVolume<TVoxel, TIndex>** volume1,
                                                    VoxelVolume<TVoxel, TIndex>** volume2,
-                                                   ITMView** view,
+                                                   View** view,
                                                    const std::string& depth1_path,
                                                    const std::string& color1_path,
                                                    const std::string& mask1_path,
@@ -340,7 +340,7 @@ void buildSdfVolumeFromImage_SurfaceSpanAllocation(VoxelVolume<TVoxel, TIndex>**
                                                    typename TIndex::InitializationParameters initialization_parameters,
                                                    configuration::SwappingMode swapping_mode)
 {
-	ITMView* view = nullptr;
+	View* view = nullptr;
 	buildSdfVolumeFromImage_SurfaceSpanAllocation(volume1, volume2, &view,
 	                                              depth1_path,
 	                                              color1_path,

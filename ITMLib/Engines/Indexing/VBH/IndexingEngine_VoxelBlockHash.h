@@ -33,16 +33,16 @@ public:
 
 	virtual void ResetUtilizedBlockList(VoxelVolume<TVoxel, VoxelBlockHash>* volume) override;
 
-	void AllocateNearSurface(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
+	void AllocateNearSurface(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const View* view,
 	                         const Matrix4f& depth_camera_matrix = Matrix4f::Identity(),
 	                         bool only_update_visible_list = false, bool resetVisibleList = false) override;
 
-	void AllocateNearSurface(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
+	void AllocateNearSurface(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const View* view,
 	                         const CameraTrackingState* tracking_state, bool onlyUpdateVisibleList,
 	                         bool resetVisibleList) override;
 
 	void AllocateNearAndBetweenTwoSurfaces(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
-	                                       const ITMView* view,
+	                                       const View* view,
 	                                       const CameraTrackingState* tracking_state) override;
 
 private:

@@ -686,21 +686,21 @@ set(ITMLIB_OBJECTS_SCENE_HEADERS
 
 ##
 set(ITMLIB_OBJECTS_TRACKING_HEADERS
-    Objects/Tracking/ITMDepthHierarchyLevel.h
-    Objects/Tracking/ITMImageHierarchy.h
-    Objects/Tracking/ITMIntensityHierarchyLevel.h
-    Objects/Tracking/ITMRGBHierarchyLevel.h
-    Objects/Tracking/ITMSceneHierarchyLevel.h
-    Objects/Tracking/ITMTemplatedHierarchyLevel.h
+    Objects/Tracking/DepthHierarchyLevel.h
+    Objects/Tracking/ImageHierarchy.h
+    Objects/Tracking/IntensityHierarchyLevel.h
+    Objects/Tracking/RGBHierarchyLevel.h
+    Objects/Tracking/VolumeHierarchyLevel.h
+    Objects/Tracking/TemplatedHierarchyLevel.h
     Objects/Tracking/CameraTrackingState.h
-    Objects/Tracking/ITMViewHierarchyLevel.h
+    Objects/Tracking/ViewHierarchyLevel.h
     Objects/Tracking/TrackerIterationType.h
     )
 
 ##
 set(ITMLIB_OBJECTS_VIEWS_HEADERS
-    Objects/Views/ITMView.h
-    Objects/Views/ITMViewIMU.h
+    Objects/Views/View.h
+    Objects/Views/ViewIMU.h
     )
 
 #===================================================== CAMERA TRACKERS =================================================

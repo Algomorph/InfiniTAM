@@ -4,8 +4,8 @@
 
 #include "CameraTracker.h"
 #include "../../Engines/LowLevel/Interface/LowLevelEngine.h"
-#include "../../Objects/Tracking/ITMImageHierarchy.h"
-#include "../../Objects/Tracking/ITMViewHierarchyLevel.h"
+#include "../../Objects/Tracking/ImageHierarchy.h"
+#include "../../Objects/Tracking/ViewHierarchyLevel.h"
 #include "../../Objects/Tracking/TrackerIterationType.h"
 
 namespace ITMLib
@@ -20,12 +20,12 @@ namespace ITMLib
 	private:
 		const LowLevelEngine *lowLevelEngine;
 
-		void PrepareForEvaluation(const ITMView *view);
+		void PrepareForEvaluation(const View *view);
 
 	protected: 
 		TrackerIterationType iterationType;
-		CameraTrackingState *trackingState; const ITMView *view;
-		ITMImageHierarchy<ITMViewHierarchyLevel> *viewHierarchy;
+		CameraTrackingState *trackingState; const View *view;
+		ImageHierarchy<ViewHierarchyLevel> *viewHierarchy;
 		int levelId;
 
 		int countedPoints_valid;
@@ -73,7 +73,7 @@ namespace ITMLib
 
 		void ApplyDelta(const ORUtils::SE3Pose & para_old, const float *delta, ORUtils::SE3Pose & para_new) const;
 
-		void TrackCamera(CameraTrackingState *trackingState, const ITMView *view);
+		void TrackCamera(CameraTrackingState *trackingState, const View *view);
 
 		bool requiresColourRendering() const { return true; }
 		bool requiresDepthReliability() const { return false; }

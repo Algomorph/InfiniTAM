@@ -67,7 +67,7 @@ public:
 		if (!VoxelIsConsideredForTracking(canonical_voxel, live_voxel)) return;
 		bool computeDataAndLevelSetTerms = VoxelIsConsideredForDataTerm(canonical_voxel, live_voxel);
 
-		Vector3f& framewiseWarp = warp_voxel.framewise_warp;
+		Vector3f& warp_update = warp_voxel.warp_update;
 		float liveSdf = TTSDFVoxel::valueToFloat(live_voxel.sdf);
 		float canonicalSdf = TTSDFVoxel::valueToFloat(canonical_voxel.sdf);
 
@@ -114,38 +114,38 @@ public:
 		if (switches.enable_smoothing_term) {
 			// region ============================== RETRIEVE NEIGHBOR'S WARPS =========================================
 
-			const int neighborhoodSize = 9;
-			Vector3f neighborFramewiseWarps[neighborhoodSize];
-			bool neighborKnown[neighborhoodSize], neighborTruncated[neighborhoodSize], neighborAllocated[neighborhoodSize];
+			const int neighborhood_size = 9;
+			Vector3f neighbor_warp_updates[neighborhood_size];
+			bool neighbors_known[neighborhood_size], neighbors_truncated[neighborhood_size], neighbors_allocated[neighborhood_size];
 
 			//    0        1        2          3         4         5           6         7         8
 			//(-1,0,0) (0,-1,0) (0,0,-1)   (1, 0, 0) (0, 1, 0) (0, 0, 1)   (1, 1, 0) (0, 1, 1) (1, 0, 1)
 			findPoint2ndDerivativeNeighborhoodFramewiseWarp(
-					neighborFramewiseWarps/*x9*/, neighborKnown, neighborTruncated, neighborAllocated, voxel_position,
+					neighbor_warp_updates/*x9*/, neighbors_known, neighbors_truncated, neighbors_allocated, voxel_position,
 					warp_voxels, warp_index_data, warp_cache, canonical_voxels, canonical_index_data, canonical_cache);
 
-			for (int iNeighbor = 0; iNeighbor < neighborhoodSize; iNeighbor++) {
-				if (!neighborAllocated[iNeighbor]) {
+			for (int iNeighbor = 0; iNeighbor < neighborhood_size; iNeighbor++) {
+				if (!neighbors_allocated[iNeighbor]) {
 					//assign current warp to neighbor warp if the neighbor is not allocated
-					neighborFramewiseWarps[iNeighbor] = framewiseWarp;
+					neighbor_warp_updates[iNeighbor] = warp_update;
 				}
 			}
 			//endregion=================================================================================================
 
 			if (switches.enable_killing_rigidity_enforcement_term) {
-				Matrix3f framewiseWarpJacobian(0.0f);
-				Matrix3f framewiseWarpHessian[3] = {Matrix3f(0.0f), Matrix3f(0.0f), Matrix3f(0.0f)};
-				ComputePerVoxelWarpJacobianAndHessian(framewiseWarp, neighborFramewiseWarps, framewiseWarpJacobian,
-				                                      framewiseWarpHessian);
+				Matrix3f warp_updateJacobian(0.0f);
+				Matrix3f warp_updateHessian[3] = {Matrix3f(0.0f), Matrix3f(0.0f), Matrix3f(0.0f)};
+				ComputePerVoxelWarpJacobianAndHessian(warp_update, neighbor_warp_updates, warp_updateJacobian,
+				                                      warp_updateHessian);
 
 				float gamma = parameters.rigidity_enforcement_factor;
 				float onePlusGamma = 1.0f + gamma;
 				// |0, 3, 6|     |m00, m10, m20|      |u_xx, u_xy, u_xz|
 				// |1, 4, 7|     |m01, m11, m21|      |u_xy, u_yy, u_yz|
 				// |2, 5, 8|     |m02, m12, m22|      |u_xz, u_yz, u_zz|
-				Matrix3f& H_u = framewiseWarpHessian[0];
-				Matrix3f& H_v = framewiseWarpHessian[1];
-				Matrix3f& H_w = framewiseWarpHessian[2];
+				Matrix3f& H_u = warp_updateHessian[0];
+				Matrix3f& H_v = warp_updateHessian[1];
+				Matrix3f& H_w = warp_updateHessian[2];
 
 
 				float KillingDeltaEu = -2.0f *
@@ -162,29 +162,29 @@ public:
 						parameters.weight_smoothing_term * Vector3f(KillingDeltaEu, KillingDeltaEv, KillingDeltaEw);
 				//=================================== ENERGY ===============================================
 				// KillingTerm Energy
-				Matrix3f warpJacobianTranspose = framewiseWarpJacobian.t();
+				Matrix3f warpJacobianTranspose = warp_updateJacobian.t();
 
 				float localTikhonovEnergy = parameters.weight_smoothing_term *
-				                            dot(framewiseWarpJacobian.getColumn(0),
-				                                framewiseWarpJacobian.getColumn(0)) +
-				                            dot(framewiseWarpJacobian.getColumn(1),
-				                                framewiseWarpJacobian.getColumn(1)) +
-				                            dot(framewiseWarpJacobian.getColumn(2), framewiseWarpJacobian.getColumn(2));
+				                            dot(warp_updateJacobian.getColumn(0),
+				                                warp_updateJacobian.getColumn(0)) +
+				                            dot(warp_updateJacobian.getColumn(1),
+				                                warp_updateJacobian.getColumn(1)) +
+				                            dot(warp_updateJacobian.getColumn(2), warp_updateJacobian.getColumn(2));
 
 				float localRigidityEnergy = gamma * parameters.weight_smoothing_term *
 				                            (dot(warpJacobianTranspose.getColumn(0),
-				                                 framewiseWarpJacobian.getColumn(0)) +
+				                                 warp_updateJacobian.getColumn(0)) +
 				                             dot(warpJacobianTranspose.getColumn(1),
-				                                 framewiseWarpJacobian.getColumn(1)) +
+				                                 warp_updateJacobian.getColumn(1)) +
 				                             dot(warpJacobianTranspose.getColumn(2),
-				                                 framewiseWarpJacobian.getColumn(2)));
+				                                 warp_updateJacobian.getColumn(2)));
 			} else {
-				Matrix3f framewiseWarpJacobian(0.0f);
-				Vector3f framewiseWarpLaplacian;
-				ComputeWarpLaplacianAndJacobian(framewiseWarpLaplacian, framewiseWarpJacobian, framewiseWarp,
-				                                neighborFramewiseWarps);
+				Matrix3f warp_updateJacobian(0.0f);
+				Vector3f warp_updateLaplacian;
+				ComputeWarpLaplacianAndJacobian(warp_updateLaplacian, warp_updateJacobian, warp_update,
+				                                neighbor_warp_updates);
 				//∇E_{reg}(Ψ) = −[∆U ∆V ∆W]' ,
-				localSmoothingEnergyGradient = -parameters.weight_smoothing_term * framewiseWarpLaplacian;
+				localSmoothingEnergyGradient = -parameters.weight_smoothing_term * warp_updateLaplacian;
 			}
 		}
 		// endregion

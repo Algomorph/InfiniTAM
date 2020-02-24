@@ -302,7 +302,7 @@ struct ComputeUpdatedLiveVoxelInfo<true, true, true, TVoxel> {
 template<typename TTSDFVoxel, MemoryDeviceType TMemoryDeviceType, bool TStopIntegrationAtMaxIntegrationWeight>
 struct VoxelDepthIntegrationFunctor {
 public:
-	VoxelDepthIntegrationFunctor(const ITMLib::VoxelVolumeParameters& volume_parameters, const ITMLib::ITMView* view, Matrix4f depth_camera_extrinsic_matrix) :
+	VoxelDepthIntegrationFunctor(const ITMLib::VoxelVolumeParameters& volume_parameters, const ITMLib::View* view, Matrix4f depth_camera_extrinsic_matrix) :
 			depth_image_size(view->depth->noDims),
 			depth_camera_projection_parameters(view->calib.intrinsics_d.projectionParamsSimple.all),
 			depth_camera_extrinsic_matrix(depth_camera_extrinsic_matrix),

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "../../../Objects/Tracking/CameraTrackingState.h"
-#include "../../../Objects/Views/ITMView.h"
+#include "../../../Objects/Views/View.h"
 
 #include "../Shared/VisualizationEngine_Shared.h"
 #include "../../Reconstruction/Shared/SceneReconstructionEngine_Shared.h"

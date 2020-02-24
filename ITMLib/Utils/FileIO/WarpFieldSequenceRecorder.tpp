@@ -36,8 +36,9 @@ using namespace ITMLib;
 
 // region ======================================== STATIC CONSTANTS ====================================================
 
+//TODO fix this shait
 template<typename TWarp, typename TIndex>
-const size_t WarpFieldSequenceRecorder<TWarp, TIndex>::warpByteSize = sizeof(TWarp::framewise_warp);
+const size_t WarpFieldSequenceRecorder<TWarp, TIndex>::warpByteSize = 0;//sizeof(TWarp::framewise_warp);
 
 template<typename TVoxel, typename TIndex>
 const size_t WarpFieldSequenceRecorder<TVoxel, TIndex>::warpFloatSize =
@@ -402,7 +403,7 @@ bool WarpFieldSequenceRecorder<TVoxel, TIndex>::SaveCurrentWarpState() {
 		return false;
 	}
 	warpOFStream.write(reinterpret_cast<const char* >(&this->iterationCursor), sizeof(iterationCursor));
-	WarpAndUpdateWriteFunctor<TVoxel>
+	WarpVoxelWriteFunctor<TVoxel, TVoxel::hasFramewiseWarp, TVoxel::hasWarpUpdate>
 			warpAndUpdateWriteFunctor(&this->warpOFStream, this->warpByteSize, this->updateByteSize);
 	VolumeTraversalEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>::TraverseAll(warpField, warpAndUpdateWriteFunctor);
 	std::cout << "Written warp updates for iteration " << iterationCursor << " to disk." << std::endl;
@@ -480,7 +481,7 @@ bool WarpFieldSequenceRecorder<TVoxel, TIndex>::LoadCurrentWarpState() {
 		return false;
 	}
 
-	WarpAndUpdateReadFunctor<TVoxel>
+	WarpAndUpdateReadFunctor<TVoxel, TVoxel::hasFramewiseWarp, TVoxel::hasWarpUpdate>
 			warpAndUpdateReadFunctor(&this->warpIFStream, this->warpByteSize, this->updateByteSize);
 	VolumeTraversalEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>::TraverseAll(warpField, warpAndUpdateReadFunctor);
 	return true;
@@ -499,7 +500,7 @@ bool WarpFieldSequenceRecorder<TVoxel, TIndex>::LoadPreviousWarpState() {
 		std::cout << "Read warp state attempt failed." << std::endl;
 		return false;
 	}
-	WarpAndUpdateReadFunctor<TVoxel>
+	WarpAndUpdateReadFunctor<TVoxel, TVoxel::hasFramewiseWarp, TVoxel::hasWarpUpdate>
 			warpAndUpdateReadFunctor(&this->warpIFStream, this->warpByteSize, this->updateByteSize);
 	VolumeTraversalEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>::TraverseAll(warpField, warpAndUpdateReadFunctor);
 	return true;

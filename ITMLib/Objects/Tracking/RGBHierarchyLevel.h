@@ -8,7 +8,7 @@
 
 namespace ITMLib
 {
-	class ITMRGBHierarchyLevel
+	class RGBHierarchyLevel
 	{
 	public:
 		int levelId;
@@ -23,8 +23,8 @@ namespace ITMLib
 
 		bool manageData;
 
-		ITMRGBHierarchyLevel(Vector2i imgSize, int levelId, TrackerIterationType iterationType,
-			MemoryDeviceType memoryType, bool skipAllocation = false)
+		RGBHierarchyLevel(Vector2i imgSize, int levelId, TrackerIterationType iterationType,
+		                  MemoryDeviceType memoryType, bool skipAllocation = false)
 		{
 			this->manageData = !skipAllocation;
 			this->levelId = levelId;
@@ -56,7 +56,7 @@ namespace ITMLib
 			this->gY->UpdateDeviceFromHost();
 		}
 
-		~ITMRGBHierarchyLevel(void)
+		~RGBHierarchyLevel(void)
 		{
 			if (manageData)
 			{
@@ -69,7 +69,7 @@ namespace ITMLib
 		}
 
 		// Suppress the default copy constructor and assignment operator
-		ITMRGBHierarchyLevel(const ITMRGBHierarchyLevel&);
-		ITMRGBHierarchyLevel& operator=(const ITMRGBHierarchyLevel&);
+		RGBHierarchyLevel(const RGBHierarchyLevel&);
+		RGBHierarchyLevel& operator=(const RGBHierarchyLevel&);
 	};
 }

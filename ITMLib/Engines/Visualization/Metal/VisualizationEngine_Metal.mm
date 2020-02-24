@@ -40,7 +40,7 @@ VisualizationEngine_Metal<TVoxel, ITMVoxelBlockHash>::VisualizationEngine_Metal(
 }
 
 template<class TVoxel, class TIndex>
-static void CreateICPMaps_common_metal(const ITMScene<TVoxel,TIndex> *scene, const ITMView *view, ITMTrackingState *trackingState, ITMRenderState *renderState)
+static void CreateICPMaps_common_metal(const ITMScene<TVoxel,TIndex> *scene, const View *view, ITMTrackingState *trackingState, ITMRenderState *renderState)
 {
     const void *entriesVisibleType = NULL;
     if ((dynamic_cast<const ITMRenderState_VH*>(renderState)!=NULL))
@@ -206,7 +206,7 @@ static void RenderImage_common_metal(const ITMScene<TVoxel,ITMVoxelBlockHash> *s
 }
 
 template<class TVoxel>
-void VisualizationEngine_Metal<TVoxel, ITMVoxelBlockHash>::CreateICPMaps(const ITMScene<TVoxel,ITMVoxelBlockHash> *scene, const ITMView *view, ITMTrackingState *trackingState, ITMRenderState *renderState) const
+void VisualizationEngine_Metal<TVoxel, ITMVoxelBlockHash>::CreateICPMaps(const ITMScene<TVoxel,ITMVoxelBlockHash> *scene, const View *view, ITMTrackingState *trackingState, ITMRenderState *renderState) const
 {
     CreateICPMaps_common_metal(scene, view, trackingState, renderState);
 }

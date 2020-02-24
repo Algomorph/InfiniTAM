@@ -4,7 +4,7 @@
 
 #include "../../../Objects/RenderStates/RenderState.h"
 #include "../../../Objects/Volume/VoxelVolume.h"
-#include "../../../Objects/Views/ITMView.h"
+#include "../../../Objects/Views/View.h"
 
 namespace ITMLib
 {

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "../../../Objects/Camera/RGBDCalib.h"
-#include "../../../Objects/Views/ITMViewIMU.h"
+#include "../../../Objects/Views/ViewIMU.h"
 
 namespace ITMLib
 {
@@ -31,9 +31,9 @@ namespace ITMLib
 		virtual void DepthFiltering(ITMFloatImage *image_out, const ITMFloatImage *image_in) = 0;
 		virtual void ComputeNormalAndWeights(ITMFloat4Image *normal_out, ITMFloatImage *sigmaZ_out, const ITMFloatImage *depth_in, Vector4f intrinsic) = 0;
 
-		virtual void UpdateView(ITMView** view, ITMUChar4Image* rgbImage, ITMShortImage* rawDepthImage, bool useThresholdFilter,
-				                        bool useBilateralFilter, bool modelSensorNoise, bool storePreviousImage) = 0;
-		virtual void UpdateView(ITMView** view, ITMUChar4Image* rgbImage, ITMShortImage* depthImage, bool useThresholdFilter,
+		virtual void UpdateView(View** view, ITMUChar4Image* rgbImage, ITMShortImage* rawDepthImage, bool useThresholdFilter,
+		                        bool useBilateralFilter, bool modelSensorNoise, bool storePreviousImage) = 0;
+		virtual void UpdateView(View** view, ITMUChar4Image* rgbImage, ITMShortImage* depthImage, bool useThresholdFilter,
 		                        bool useBilateralFilter, IMUMeasurement* imuMeasurement, bool modelSensorNoise,
 		                        bool storePreviousImage) = 0;
 

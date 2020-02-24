@@ -8,15 +8,15 @@
 
 namespace ITMLib
 {
-	template <class T> class ITMImageHierarchy
+	template <class T> class ImageHierarchy
 	{
 	private:
 		int noLevels;
 		T **levels;
 
 	public:
-		ITMImageHierarchy(Vector2i imgSize, TrackerIterationType *trackingRegime, int noHierarchyLevels, 
-			MemoryDeviceType memoryType, bool skipAllocationForLevel0 = false)
+		ImageHierarchy(Vector2i imgSize, TrackerIterationType *trackingRegime, int noHierarchyLevels,
+		               MemoryDeviceType memoryType, bool skipAllocationForLevel0 = false)
 		{
 			this->noLevels = noHierarchyLevels;
 
@@ -39,14 +39,14 @@ namespace ITMLib
 			return level >= 0 && level < noLevels ? levels[level] : NULL;
 		}
 
-		~ITMImageHierarchy(void)
+		~ImageHierarchy(void)
 		{
 			for (int i = 0; i < noLevels; i++) delete levels[i];
 			delete [] levels;
 		}
 
 		// Suppress the default copy constructor and assignment operator
-		ITMImageHierarchy(const ITMImageHierarchy&);
-		ITMImageHierarchy& operator=(const ITMImageHierarchy&);
+		ImageHierarchy(const ImageHierarchy&);
+		ImageHierarchy& operator=(const ImageHierarchy&);
 	};
 }

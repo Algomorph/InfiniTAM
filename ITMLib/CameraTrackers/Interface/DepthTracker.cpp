@@ -10,8 +10,8 @@ using namespace ITMLib;
 DepthTracker::DepthTracker(Vector2i imgSize, TrackerIterationType *trackingRegime, int noHierarchyLevels,
                            float terminationThreshold, float failureDetectorThreshold, const LowLevelEngine *lowLevelEngine, MemoryDeviceType memoryType)
 {
-	viewHierarchy = new ITMImageHierarchy<ITMTemplatedHierarchyLevel<ITMFloatImage> >(imgSize, trackingRegime, noHierarchyLevels, memoryType, true);
-	sceneHierarchy = new ITMImageHierarchy<ITMSceneHierarchyLevel>(imgSize, trackingRegime, noHierarchyLevels, memoryType, true);
+	viewHierarchy = new ImageHierarchy<TemplatedHierarchyLevel<ITMFloatImage> >(imgSize, trackingRegime, noHierarchyLevels, memoryType, true);
+	sceneHierarchy = new ImageHierarchy<VolumeHierarchyLevel>(imgSize, trackingRegime, noHierarchyLevels, memoryType, true);
 
 	this->noIterationsPerLevel = new int[noHierarchyLevels];
 	this->distThresh = new float[noHierarchyLevels];
@@ -74,7 +74,7 @@ void DepthTracker::SetupLevels(int numIterCoarse, int numIterFine, float distThr
 	}
 }
 
-void DepthTracker::SetEvaluationData(CameraTrackingState *trackingState, const ITMView *view)
+void DepthTracker::SetEvaluationData(CameraTrackingState *trackingState, const View *view)
 {
 	this->trackingState = trackingState;
 	this->view = view;
@@ -94,13 +94,13 @@ void DepthTracker::PrepareForEvaluation()
 {
 	for (int i = 1; i < viewHierarchy->GetNoLevels(); i++)
 	{
-		ITMTemplatedHierarchyLevel<ITMFloatImage> *currentLevelView = viewHierarchy->GetLevel(i);
-		ITMTemplatedHierarchyLevel<ITMFloatImage> *previousLevelView = viewHierarchy->GetLevel(i - 1);
+		TemplatedHierarchyLevel<ITMFloatImage> *currentLevelView = viewHierarchy->GetLevel(i);
+		TemplatedHierarchyLevel<ITMFloatImage> *previousLevelView = viewHierarchy->GetLevel(i - 1);
 		lowLevelEngine->FilterSubsampleWithHoles(currentLevelView->data, previousLevelView->data);
 		currentLevelView->intrinsics = previousLevelView->intrinsics * 0.5f;
 
-		ITMSceneHierarchyLevel *currentLevelScene = sceneHierarchy->GetLevel(i);
-		ITMSceneHierarchyLevel *previousLevelScene = sceneHierarchy->GetLevel(i - 1);
+		VolumeHierarchyLevel *currentLevelScene = sceneHierarchy->GetLevel(i);
+		VolumeHierarchyLevel *previousLevelScene = sceneHierarchy->GetLevel(i - 1);
 		//lowLevelEngine->FilterSubsampleWithHoles(currentLevelScene->pointsMap, previousLevelScene->pointsMap);
 		//lowLevelEngine->FilterSubsampleWithHoles(currentLevelScene->normalsMap, previousLevelScene->normalsMap);
 		currentLevelScene->intrinsics = previousLevelScene->intrinsics * 0.5f;
@@ -229,7 +229,7 @@ void DepthTracker::UpdatePoseQuality(int noValidPoints_old, float *hessian_good,
 	}
 }
 
-void DepthTracker::TrackCamera(CameraTrackingState *trackingState, const ITMView *view)
+void DepthTracker::TrackCamera(CameraTrackingState *trackingState, const View *view)
 {
 	this->SetEvaluationData(trackingState, view);
 	this->PrepareForEvaluation();

@@ -8,7 +8,7 @@
 
 namespace ITMLib
 {
-	class ITMIntensityHierarchyLevel
+	class IntensityHierarchyLevel
 	{
 	public:
 		int levelId;
@@ -22,8 +22,8 @@ namespace ITMLib
 
 		bool manageData;
 
-		ITMIntensityHierarchyLevel(Vector2i imgSize, int levelId, TrackerIterationType iterationType,
-			MemoryDeviceType memoryType, bool skipAllocation = false)
+		IntensityHierarchyLevel(Vector2i imgSize, int levelId, TrackerIterationType iterationType,
+		                        MemoryDeviceType memoryType, bool skipAllocation = false)
 		{
 			this->manageData = !skipAllocation;
 			this->levelId = levelId;
@@ -46,7 +46,7 @@ namespace ITMLib
 		void UpdateHostFromDevice()
 		{ 
 			if (!this->intensity_current || !this->intensity_prev)
-				throw std::runtime_error("ITMIntensityHierarchyLevel: did not set intensity images.");
+				throw std::runtime_error("IntensityHierarchyLevel: did not set intensity images.");
 
 			this->intensity_current->UpdateHostFromDevice();
 			this->intensity_prev->UpdateHostFromDevice();
@@ -56,14 +56,14 @@ namespace ITMLib
 		void UpdateDeviceFromHost()
 		{ 
 			if (!this->intensity_current || !this->intensity_prev)
-				throw std::runtime_error("ITMIntensityHierarchyLevel: did not set intensity images.");
+				throw std::runtime_error("IntensityHierarchyLevel: did not set intensity images.");
 
 			this->intensity_current->UpdateDeviceFromHost();
 			this->intensity_prev->UpdateDeviceFromHost();
 			this->gradients->UpdateDeviceFromHost();
 		}
 
-		~ITMIntensityHierarchyLevel(void)
+		~IntensityHierarchyLevel(void)
 		{
 			if (manageData)
 			{
@@ -75,7 +75,7 @@ namespace ITMLib
 		}
 
 		// Suppress the default copy constructor and assignment operator
-		ITMIntensityHierarchyLevel(const ITMIntensityHierarchyLevel&);
-		ITMIntensityHierarchyLevel& operator=(const ITMIntensityHierarchyLevel&);
+		IntensityHierarchyLevel(const IntensityHierarchyLevel&);
+		IntensityHierarchyLevel& operator=(const IntensityHierarchyLevel&);
 	};
 }

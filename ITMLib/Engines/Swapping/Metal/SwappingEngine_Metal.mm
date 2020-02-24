@@ -17,19 +17,19 @@
 //}
 //
 //template<class TVoxel>
-//int ITMSwappingEngine_Metal<TVoxel,ITMVoxelBlockHash>::DownloadFromGlobalMemory(ITMScene<TVoxel,ITMVoxelBlockHash> *scene, ITMView *view)
+//int ITMSwappingEngine_Metal<TVoxel,ITMVoxelBlockHash>::DownloadFromGlobalMemory(ITMScene<TVoxel,ITMVoxelBlockHash> *scene, View *view)
 //{
 //	return 0;
 //}
 //
 //template<class TVoxel>
-//void ITMSwappingEngine_Metal<TVoxel,ITMVoxelBlockHash>::IntegrateGlobalIntoLocal(ITMScene<TVoxel,ITMVoxelBlockHash> *scene, ITMView *view)
+//void ITMSwappingEngine_Metal<TVoxel,ITMVoxelBlockHash>::IntegrateGlobalIntoLocal(ITMScene<TVoxel,ITMVoxelBlockHash> *scene, View *view)
 //{
 //
 //}
 //
 //template<class TVoxel>
-//void ITMSwappingEngine_Metal<TVoxel,ITMVoxelBlockHash>::SaveToGlobalMemory(ITMScene<TVoxel,ITMVoxelBlockHash> *scene, ITMView *view)
+//void ITMSwappingEngine_Metal<TVoxel,ITMVoxelBlockHash>::SaveToGlobalMemory(ITMScene<TVoxel,ITMVoxelBlockHash> *scene, View *view)
 //{
 //
 //}

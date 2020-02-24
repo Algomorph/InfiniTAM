@@ -25,6 +25,8 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(const RG
 
 	this->InitializeScenes();
 
+	trackingActive = settings.enable_rigid_tracking;
+
 	const MemoryDeviceType deviceType = settings.device_type;
 	MemoryDeviceType memoryType = settings.device_type;
 	if ((depth_image_size.x == -1) || (depth_image_size.y == -1)) depth_image_size = rgb_image_size;
@@ -54,6 +56,8 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(const RG
 	                                         canonical_volume->sceneParams->far_clipping_distance, settings.device_type);
 	freeview_render_state = nullptr; //will be created if needed
 
+
+
 	Reset();
 
 	tracker->UpdateInitialPose(tracking_state);
@@ -70,7 +74,6 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(const RG
 
 	kfRaycast = new ITMUChar4Image(depth_image_size, memoryType);
 
-	trackingActive = true;
 	fusionActive = true;
 	mainProcessingActive = true;
 	trackingInitialised = false;

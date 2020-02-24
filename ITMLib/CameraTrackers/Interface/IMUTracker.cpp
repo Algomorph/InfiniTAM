@@ -2,7 +2,7 @@
 
 #include "IMUTracker.h"
 
-#include "../../Objects/Views/ITMViewIMU.h"
+#include "../../Objects/Views/ViewIMU.h"
 using namespace ITMLib;
 
 IMUTracker::IMUTracker(IMUCalibrator *calibrator)
@@ -14,9 +14,9 @@ IMUTracker::~IMUTracker(void)
 {
 }
 
-void IMUTracker::TrackCamera(CameraTrackingState *trackingState, const ITMView *view)
+void IMUTracker::TrackCamera(CameraTrackingState *trackingState, const View *view)
 {
-	calibrator->RegisterMeasurement(((ITMViewIMU*)view)->imu->R);
+	calibrator->RegisterMeasurement(((ViewIMU*)view)->imu->R);
 
 	trackingState->pose_d->SetR(calibrator->GetDifferentialRotationChange() * trackingState->pose_d->GetR());
 }

@@ -49,6 +49,20 @@ struct AlteredGradientCountFunctor {
 	std::atomic<unsigned int> count;
 };
 
+
+template<typename TVoxel>
+struct AlteredWarpUpdateCountFunctor {
+	AlteredWarpUpdateCountFunctor() : count(0) {};
+
+	void operator()(const TVoxel& voxel) {
+		if (voxel.warp_update != Vector3f(0.0f)) {
+			count.fetch_add(1u);
+		}
+	}
+
+	std::atomic<unsigned int> count;
+};
+
 template<typename TVoxel>
 struct AlteredFramewiseWarpCountFunctor {
 	AlteredFramewiseWarpCountFunctor() : count(0) {};
@@ -61,6 +75,8 @@ struct AlteredFramewiseWarpCountFunctor {
 
 	std::atomic<unsigned int> count;
 };
+
+
 
 typedef WarpGradientDataFixture<MemoryDeviceType::MEMORYDEVICE_CPU, PlainVoxelArray> DataFixture;
 BOOST_FIXTURE_TEST_CASE(testDataTerm_CPU_PVA, DataFixture) {
@@ -102,7 +118,7 @@ BOOST_FIXTURE_TEST_CASE(testUpdateWarps_CPU_PVA, DataFixture) {
 	float maxWarp = motionTracker_PVA_CPU->UpdateWarps(&warp_field_copy, canonical_volume, live_volume);
 	BOOST_REQUIRE_CLOSE(maxWarp, 0.121243507f, 1e-7);
 
-	AlteredFramewiseWarpCountFunctor<WarpVoxel> functor;
+	AlteredWarpUpdateCountFunctor<WarpVoxel> functor;
 	VolumeTraversalEngine<WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU>::
 	TraverseAll(&warp_field_copy, functor);
 	BOOST_REQUIRE_EQUAL(functor.count.load(), 37525u);

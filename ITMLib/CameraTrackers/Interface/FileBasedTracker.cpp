@@ -18,7 +18,7 @@ bool FileBasedTracker::CanKeepTracking() const
 	return poseFile.is_open();
 }
 
-void FileBasedTracker::TrackCamera(CameraTrackingState *trackingState, const ITMView *view)
+void FileBasedTracker::TrackCamera(CameraTrackingState *trackingState, const View *view)
 {
 	trackingState->trackerResult = CameraTrackingState::TRACKING_FAILED;
 

@@ -20,7 +20,7 @@
 #include "../../Objects/RenderStates/RenderState.h"
 #include "../../Objects/Volume/VoxelVolume.h"
 #include "../../Objects/Tracking/CameraTrackingState.h"
-#include "../../Objects/Views/ITMView.h"
+#include "../../Objects/Views/View.h"
 #include "../Common/CommonFunctors.h"
 #include "../../Utils/WarpType.h"
 
@@ -44,7 +44,7 @@ public:
 
 
 	virtual void
-	UpdateVisibleList(VoxelVolume<TVoxel, TIndex>* scene, const ITMView* view, const CameraTrackingState* trackingState,
+	UpdateVisibleList(VoxelVolume<TVoxel, TIndex>* scene, const View* view, const CameraTrackingState* trackingState,
 	                  const RenderState* renderState, bool resetVisibleList) = 0;
 	/**
 	 * \brief Clears given scene, then uses the depth image from provided live view to generate an SDF
@@ -53,7 +53,7 @@ public:
 	 * \param view input view
 	 * \param tracking_state state of tracking
 	 */
-	virtual void GenerateTsdfVolumeFromTwoSurfaces(VoxelVolume<TVoxel, TIndex>* volume, const ITMView* view,
+	virtual void GenerateTsdfVolumeFromTwoSurfaces(VoxelVolume<TVoxel, TIndex>* volume, const View* view,
 	                                               const CameraTrackingState* tracking_state) = 0;
 
 	/**
@@ -63,17 +63,17 @@ public:
 	 * \param view input view
 	 * \param tracking_state state of tracking
 	 */
-	virtual void GenerateTsdfVolumeFromSurface(VoxelVolume<TVoxel, TIndex>* volume, const ITMView* view,
+	virtual void GenerateTsdfVolumeFromSurface(VoxelVolume<TVoxel, TIndex>* volume, const View* view,
 	                                               const CameraTrackingState* tracking_state) = 0;
 	/**
 	 * \brief Update the voxel blocks by integrating depth and possibly color information from the given view. Assume
 	 * camera is at world origin.
 	 */
-	virtual void IntegrateDepthImageIntoTsdfVolume(VoxelVolume<TVoxel, TIndex>* volume, const ITMView* view) = 0;
+	virtual void IntegrateDepthImageIntoTsdfVolume(VoxelVolume<TVoxel, TIndex>* volume, const View* view) = 0;
 
 	/** Update the voxel blocks by integrating depth and
 	possibly colour information from the given view.*/
-	virtual void IntegrateDepthImageIntoTsdfVolume(VoxelVolume<TVoxel, TIndex>* volume, const ITMView* view,
+	virtual void IntegrateDepthImageIntoTsdfVolume(VoxelVolume<TVoxel, TIndex>* volume, const View* view,
 	                                               const CameraTrackingState* trackingState) = 0;
 
 };
@@ -86,19 +86,19 @@ public:
 	DepthFusionEngine() = default;
 	~DepthFusionEngine() = default;
 
-	void UpdateVisibleList(VoxelVolume<TVoxel, TIndex>* scene, const ITMView* view,
+	void UpdateVisibleList(VoxelVolume<TVoxel, TIndex>* scene, const View* view,
 	                       const CameraTrackingState* trackingState, const RenderState* renderState,
 	                       bool resetVisibleList) override;
-	void GenerateTsdfVolumeFromTwoSurfaces(VoxelVolume<TVoxel, TIndex>* volume, const ITMView* view,
+	void GenerateTsdfVolumeFromTwoSurfaces(VoxelVolume<TVoxel, TIndex>* volume, const View* view,
 	                                       const CameraTrackingState* tracking_state) override;
-	void GenerateTsdfVolumeFromSurface(VoxelVolume<TVoxel, TIndex>* volume, const ITMView* view,
+	void GenerateTsdfVolumeFromSurface(VoxelVolume<TVoxel, TIndex>* volume, const View* view,
 	                                           const CameraTrackingState* tracking_state) override;
 
-	void IntegrateDepthImageIntoTsdfVolume(VoxelVolume<TVoxel, TIndex>* volume, const ITMView* view);
-	void IntegrateDepthImageIntoTsdfVolume(VoxelVolume<TVoxel, TIndex>* volume, const ITMView* view,
+	void IntegrateDepthImageIntoTsdfVolume(VoxelVolume<TVoxel, TIndex>* volume, const View* view);
+	void IntegrateDepthImageIntoTsdfVolume(VoxelVolume<TVoxel, TIndex>* volume, const View* view,
 	                                       const CameraTrackingState* trackingState);
 private:
-	void IntegrateDepthImageIntoTsdfVolume_Helper(VoxelVolume<TVoxel, TIndex>* volume, const ITMView* view,
+	void IntegrateDepthImageIntoTsdfVolume_Helper(VoxelVolume<TVoxel, TIndex>* volume, const View* view,
 	                                              Matrix4f depth_camera_matrix = Matrix4f::Identity());
 
 };

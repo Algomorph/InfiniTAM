@@ -19,7 +19,7 @@
 #include "../../../../ORUtils/PlatformIndependentAtomics.h"
 #include "../../../Objects/Volume/VoxelBlockHash.h"
 #include "../../../Objects/Volume/RepresentationAccess.h"
-#include "../../../Objects/Views/ITMView.h"
+#include "../../../Objects/Views/View.h"
 #include "../../../Objects/Tracking/CameraTrackingState.h"
 #include "../../Common/CommonFunctors.h"
 #include "../../Common/AllocationTempData.h"

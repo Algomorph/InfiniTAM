@@ -16,7 +16,7 @@ namespace ITMLib
     class VisualizationEngine_Metal<TVoxel, ITMVoxelBlockHash> : public VisualizationEngine_CPU < TVoxel, ITMVoxelBlockHash >
     {
     public:
-        void CreateICPMaps(const ITMScene<TVoxel,ITMVoxelBlockHash> *scene, const ITMView *view, ITMTrackingState *trackingState, ITMRenderState *renderState) const;
+        void CreateICPMaps(const ITMScene<TVoxel,ITMVoxelBlockHash> *scene, const View *view, ITMTrackingState *trackingState, ITMRenderState *renderState) const;
         void RenderImage(const ITMScene<TVoxel,ITMVoxelBlockHash> *scene, const ORUtils::SE3Pose *pose, const ITMIntrinsics *intrinsics, const ITMRenderState *renderState,
                          ITMUChar4Image *outputImage, IVisualizationEngine::RenderImageType type = IVisualizationEngine::RENDER_SHADED_GREYSCALE,
                          IVisualizationEngine::RenderRaycastSelection raycastType = IVisualizationEngine::RENDER_FROM_NEW_RAYCAST) const;

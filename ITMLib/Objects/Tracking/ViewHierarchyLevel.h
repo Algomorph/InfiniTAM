@@ -8,7 +8,7 @@
 
 namespace ITMLib
 {
-	class ITMViewHierarchyLevel
+	class ViewHierarchyLevel
 	{
 	public:
 		int levelId;
@@ -21,7 +21,7 @@ namespace ITMLib
 
 		bool manageData;
 
-		ITMViewHierarchyLevel(Vector2i imgSize, int levelId, TrackerIterationType iterationType, MemoryDeviceType memoryType, bool skipAllocation)
+		ViewHierarchyLevel(Vector2i imgSize, int levelId, TrackerIterationType iterationType, MemoryDeviceType memoryType, bool skipAllocation)
 		{
 			this->manageData = !skipAllocation;
 			this->levelId = levelId;
@@ -51,7 +51,7 @@ namespace ITMLib
 			this->gradientY_rgb->UpdateDeviceFromHost();
 		}
 
-		~ITMViewHierarchyLevel(void)
+		~ViewHierarchyLevel(void)
 		{
 			if (manageData) {
 				delete rgb;
@@ -61,7 +61,7 @@ namespace ITMLib
 		}
 
 		// Suppress the default copy constructor and assignment operator
-		ITMViewHierarchyLevel(const ITMViewHierarchyLevel&);
-		ITMViewHierarchyLevel& operator=(const ITMViewHierarchyLevel&);
+		ViewHierarchyLevel(const ViewHierarchyLevel&);
+		ViewHierarchyLevel& operator=(const ViewHierarchyLevel&);
 	};
 }

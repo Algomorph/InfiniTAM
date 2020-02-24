@@ -32,7 +32,7 @@ namespace ITMLib
 		DynamicSceneVoxelEngine(const RGBDCalib& calibration_info, Vector2i rgb_image_size, Vector2i depth_image_size);
 		~DynamicSceneVoxelEngine() override;
 
-		ITMView* GetView() override { return view; }
+		View* GetView() override { return view; }
 		CameraTrackingState* GetTrackingState() override { return tracking_state; }
 
 		CameraTrackingState::TrackingResult ProcessFrame(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage, IMUMeasurement *imuMeasurement = nullptr) override;
@@ -100,7 +100,7 @@ namespace ITMLib
 		ITMUChar4Image* kfRaycast;
 
 		/// Pointer for storing the current input frame
-		ITMView* view;
+		View* view;
 
 		/// Pointer to the current camera pose and additional tracking information
 		CameraTrackingState* tracking_state;

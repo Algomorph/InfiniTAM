@@ -68,7 +68,7 @@ bool VoxelIsConsideredForDataTerm(const TVoxel& canonicalVoxel, const TVoxel& li
  *	(-1,0,0) (0,-1,0) (0,0,-1)   (1, 0, 0) (0, 1, 0) (0, 0, 1)   (1, 1, 0) (0, 1, 1) (1, 0, 1)
  * \tparam TVoxel
  * \tparam TCache
- * \param[out] neighbor_framewise_warps
+ * \param[out] neighbor_warp_updates
  * \param[out] neighbor_known - current behavior is:
  * 1) record unallocated voxels as non-found
  * 2) truncated voxels marked unknown or known as found
@@ -80,7 +80,7 @@ bool VoxelIsConsideredForDataTerm(const TVoxel& canonicalVoxel, const TVoxel& li
  */
 template<typename TVoxel, typename TWarp, typename TIndexData, typename TCache>
 _CPU_AND_GPU_CODE_
-inline void findPoint2ndDerivativeNeighborhoodFramewiseWarp(THREADPTR(Vector3f)* neighbor_framewise_warps, //x9, out
+inline void findPoint2ndDerivativeNeighborhoodFramewiseWarp(THREADPTR(Vector3f)* neighbor_warp_updates, //x9, out
                                                             THREADPTR(bool)* neighbor_known, //x9, out
                                                             THREADPTR(bool)* neighbor_truncated, //x9, out
                                                             THREADPTR(bool)* neighbor_allocated, //x9, out
@@ -104,7 +104,7 @@ inline void findPoint2ndDerivativeNeighborhoodFramewiseWarp(THREADPTR(Vector3f)*
 		warp = readVoxel(warps, warp_index_data, voxel_position + (location), vmIndex);
 	    voxel = readVoxel(voxels, voxel_index_data, voxel_position + (location), vmIndex);
 #endif
-		neighbor_framewise_warps[index] = warp.framewise_warp;
+		neighbor_warp_updates[index] = warp.warp_update;
 		neighbor_allocated[index] = vmIndex != 0;
 		neighbor_known[index] = voxel.flags != ITMLib::VOXEL_UNKNOWN;
 		neighbor_truncated[index] = voxel.flags == ITMLib::VOXEL_TRUNCATED;

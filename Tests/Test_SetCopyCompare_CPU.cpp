@@ -308,7 +308,7 @@ BOOST_AUTO_TEST_CASE(testCompareVoxelVolumes_CPU_ITMWarp) {
 	auto singleVoxelTests = [&]() {
 		std::uniform_int_distribution<int> coordinate_distribution2(volumeOffset.x, 0);
 		WarpVoxel warp;
-		warp.framewise_warp = Vector3f(-0.1);
+		warp.warp_update = Vector3f(-0.1);
 
 		Vector3i coordinate(coordinate_distribution2(generator), coordinate_distribution2(generator), 0);
 
@@ -348,7 +348,7 @@ BOOST_AUTO_TEST_CASE(testCompareVoxelVolumes_CPU_ITMWarp) {
 	for (int iWarp = 0; iWarp < modifiedWarpCount; iWarp++) {
 		WarpVoxel warp;
 		Vector3f framewise_warp(warp_distribution(generator), warp_distribution(generator), warp_distribution(generator));
-		warp.framewise_warp = framewise_warp;
+		warp.warp_update = framewise_warp;
 
 		Vector3i coordinate(coordinate_distribution(generator),
 		                    coordinate_distribution(generator),

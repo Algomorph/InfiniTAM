@@ -17,7 +17,7 @@ namespace ITMLib
 
 	public:
 		bool CanKeepTracking() const;
-		void TrackCamera(CameraTrackingState *trackingState, const ITMView *view);
+		void TrackCamera(CameraTrackingState *trackingState, const View *view);
 
 		bool requiresColourRendering() const { return false; }
 		bool requiresDepthReliability() const { return false; }

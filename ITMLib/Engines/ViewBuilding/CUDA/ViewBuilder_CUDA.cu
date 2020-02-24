@@ -31,12 +31,12 @@ __global__ void ComputeNormalAndWeight_device(const float* depth_in, Vector4f* n
 //
 //---------------------------------------------------------------------------
 
-void ViewBuilder_CUDA::UpdateView(ITMView** view_ptr, ITMUChar4Image* rgbImage, ITMShortImage* rawDepthImage, bool useThresholdFilter,
+void ViewBuilder_CUDA::UpdateView(View** view_ptr, ITMUChar4Image* rgbImage, ITMShortImage* rawDepthImage, bool useThresholdFilter,
                                   bool useBilateralFilter, bool modelSensorNoise, bool storePreviousImage)
 {
 	if (*view_ptr == NULL)
 	{
-		*view_ptr = new ITMView(calib, rgbImage->noDims, rawDepthImage->noDims, true);
+		*view_ptr = new View(calib, rgbImage->noDims, rawDepthImage->noDims, true);
 		if (this->shortImage != NULL) delete this->shortImage;
 		this->shortImage = new ITMShortImage(rawDepthImage->noDims, true, true);
 		if (this->floatImage != NULL) delete this->floatImage;
@@ -49,7 +49,7 @@ void ViewBuilder_CUDA::UpdateView(ITMView** view_ptr, ITMUChar4Image* rgbImage, 
 		}
 	}
 
-	ITMView *view = *view_ptr;
+	View *view = *view_ptr;
 
 	if (storePreviousImage)
 	{
@@ -89,13 +89,13 @@ void ViewBuilder_CUDA::UpdateView(ITMView** view_ptr, ITMUChar4Image* rgbImage, 
 	}
 }
 
-void ViewBuilder_CUDA::UpdateView(ITMView** view_ptr, ITMUChar4Image* rgbImage, ITMShortImage* depthImage, bool useThresholdFilter,
+void ViewBuilder_CUDA::UpdateView(View** view_ptr, ITMUChar4Image* rgbImage, ITMShortImage* depthImage, bool useThresholdFilter,
                                   bool useBilateralFilter, IMUMeasurement* imuMeasurement, bool modelSensorNoise,
                                   bool storePreviousImage)
 {
 	if (*view_ptr == NULL) 
 	{
-		*view_ptr = new ITMViewIMU(calib, rgbImage->noDims, depthImage->noDims, true);
+		*view_ptr = new ViewIMU(calib, rgbImage->noDims, depthImage->noDims, true);
 		if (this->shortImage != NULL) delete this->shortImage;
 		this->shortImage = new ITMShortImage(depthImage->noDims, true, true);
 		if (this->floatImage != NULL) delete this->floatImage;
@@ -108,7 +108,7 @@ void ViewBuilder_CUDA::UpdateView(ITMView** view_ptr, ITMUChar4Image* rgbImage, 
 		}
 	}
 
-	ITMViewIMU* imuView = (ITMViewIMU*)(*view_ptr);
+	ViewIMU* imuView = (ViewIMU*)(*view_ptr);
 	imuView->imu->SetFrom(imuMeasurement);
 
 	this->UpdateView(view_ptr, rgbImage, depthImage, false, useBilateralFilter, modelSensorNoise, storePreviousImage);

@@ -4,9 +4,9 @@
 
 #include "CameraTracker.h"
 #include "../../Engines/LowLevel/Interface/LowLevelEngine.h"
-#include "../../Objects/Tracking/ITMImageHierarchy.h"
-#include "../../Objects/Tracking/ITMTemplatedHierarchyLevel.h"
-#include "../../Objects/Tracking/ITMSceneHierarchyLevel.h"
+#include "../../Objects/Tracking/ImageHierarchy.h"
+#include "../../Objects/Tracking/TemplatedHierarchyLevel.h"
+#include "../../Objects/Tracking/VolumeHierarchyLevel.h"
 #include "../../Objects/Tracking/TrackerIterationType.h"
 
 #include "../../../ORUtils/HomkerMap.h"
@@ -22,10 +22,10 @@ namespace ITMLib
 	{
 	private:
 		const LowLevelEngine *lowLevelEngine;
-		ITMImageHierarchy<ITMSceneHierarchyLevel> *sceneHierarchy;
-		ITMImageHierarchy<ITMTemplatedHierarchyLevel<ITMFloatImage> > *viewHierarchy;
+		ImageHierarchy<VolumeHierarchyLevel> *sceneHierarchy;
+		ImageHierarchy<TemplatedHierarchyLevel<ITMFloatImage> > *viewHierarchy;
 
-		CameraTrackingState *trackingState; const ITMView *view;
+		CameraTrackingState *trackingState; const View *view;
 
 		int *noIterationsPerLevel;
 
@@ -38,7 +38,7 @@ namespace ITMLib
 		void ApplyDelta(const Matrix4f & para_old, const float *delta, Matrix4f & para_new) const;
 		bool HasConverged(float *step) const;
 
-		void SetEvaluationData(CameraTrackingState *trackingState, const ITMView *view);
+		void SetEvaluationData(CameraTrackingState *trackingState, const View *view);
 
 		void UpdatePoseQuality(int noValidPoints_old, float *hessian_good, float f_old);
 
@@ -52,13 +52,13 @@ namespace ITMLib
 		TrackerIterationType iterationType;
 
 		Matrix4f scenePose;
-		ITMSceneHierarchyLevel *sceneHierarchyLevel;
-		ITMTemplatedHierarchyLevel<ITMFloatImage> *viewHierarchyLevel;
+		VolumeHierarchyLevel *sceneHierarchyLevel;
+		TemplatedHierarchyLevel<ITMFloatImage> *viewHierarchyLevel;
 
 		virtual int ComputeGandH(float &f, float *nabla, float *hessian, Matrix4f approxInvPose) = 0;
 
 	public:
-		void TrackCamera(CameraTrackingState *trackingState, const ITMView *view);
+		void TrackCamera(CameraTrackingState *trackingState, const View *view);
 
 		bool requiresColourRendering() const { return false; }
 		bool requiresDepthReliability() const { return false; }

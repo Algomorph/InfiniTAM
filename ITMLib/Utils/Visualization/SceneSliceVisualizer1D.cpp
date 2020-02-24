@@ -34,12 +34,13 @@ using namespace ITMLib;
 
 // region ==================================== CONSTRUCTORS / DESTRUCTORS ==============================================
 
-SceneSliceVisualizer1D::SceneSliceVisualizer1D(Vector3i focusCoordinate, Axis axis, unsigned int voxelRange) :
-		focusCoordinates(focusCoordinate),
+SceneSliceVisualizer1D::SceneSliceVisualizer1D(Vector3i focus_coordinate, Axis axis, unsigned int voxel_range) :
+		focus_coordinates(focus_coordinate),
 		axis(axis),
-		voxelRange(voxelRange),
-		rangeStartVoxelIndex(focusCoordinate[axis] - ((voxelRange + 1) / 2)),
-		rangeEndVoxelIndex(focusCoordinate[axis] + (voxelRange / 2)),
+		voxelRange(voxel_range),
+		rangeStartVoxelIndex(focus_coordinate[axis] - ((voxel_range + 1) / 2)),
+		rangeEndVoxelIndex(focus_coordinate[axis] + (voxel_range / 2)),
+		previous_point(focus_coordinate[axis]),
 		window(VisualizationWindowManager::Instance().MakeOrGetChartWindow(
 				"SceneSliceVisualizer1D_" + AxisToString(axis),
 				"Volume 1D Slice Visualizer for " + AxisToString(axis) + " Axis")){}
@@ -69,7 +70,7 @@ SceneSliceVisualizer1D::Plot1DSceneSlice<TSDFVoxel, PlainVoxelArray>(
 template void
 SceneSliceVisualizer1D::Draw1DWarpUpdateVector<TSDFVoxel, WarpVoxel, PlainVoxelArray>(
 		VoxelVolume<TSDFVoxel, PlainVoxelArray>* TSDF,
-		VoxelVolume<WarpVoxel, PlainVoxelArray>* warpField,
+		VoxelVolume<WarpVoxel, PlainVoxelArray>* warp_field,
 		Vector4i color);
 
 
@@ -80,7 +81,7 @@ SceneSliceVisualizer1D::Plot1DSceneSlice<TSDFVoxel, VoxelBlockHash>(
 template void
 SceneSliceVisualizer1D::Draw1DWarpUpdateVector<TSDFVoxel, WarpVoxel, VoxelBlockHash>(
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>* TSDF,
-		VoxelVolume<WarpVoxel, VoxelBlockHash>* warpField,
+		VoxelVolume<WarpVoxel, VoxelBlockHash>* warp_field,
 		Vector4i color);
 
 //======================================================================================================================

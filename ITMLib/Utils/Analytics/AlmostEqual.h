@@ -372,8 +372,8 @@ almostEqual<TSDFVoxel_s_rgb_conf, float>(const TSDFVoxel_s_rgb_conf& a, const TS
 template<>
 _CPU_AND_GPU_CODE_
 inline
-bool almostEqual<WarpVoxel_f_uf, float>(const WarpVoxel_f_uf& a, const WarpVoxel_f_uf& b, float tolerance) {
-	return almostEqual(a.framewise_warp, b.framewise_warp, tolerance)
+bool almostEqual<WarpVoxel_f_update, float>(const WarpVoxel_f_update& a, const WarpVoxel_f_update& b, float tolerance) {
+	return almostEqual(a.warp_update, b.warp_update, tolerance)
 	       && almostEqual(a.gradient0, b.gradient0, tolerance)
 	       && almostEqual(a.gradient1, b.gradient1, tolerance);
 }
@@ -410,9 +410,9 @@ void printVector3fVoxelError_Position(const Vector3f& a, const Vector3f& b, floa
 template<>
 _CPU_AND_GPU_CODE_
 inline
-bool almostEqualVerbose<WarpVoxel_f_uf, float>(const WarpVoxel_f_uf& a, const WarpVoxel_f_uf& b, float tolerance) {
-	if (!almostEqual(a.framewise_warp, b.framewise_warp, tolerance)) {
-		printVector3fVoxelError(a.framewise_warp, b.framewise_warp, tolerance, "framewise_warp");
+bool almostEqualVerbose<WarpVoxel_f_update, float>(const WarpVoxel_f_update& a, const WarpVoxel_f_update& b, float tolerance) {
+	if (!almostEqual(a.warp_update, b.warp_update, tolerance)) {
+		printVector3fVoxelError(a.warp_update, b.warp_update, tolerance, "warp_update");
 		return false;
 	}
 	if (!almostEqual(a.gradient0, b.gradient0, tolerance)) {
@@ -430,11 +430,11 @@ bool almostEqualVerbose<WarpVoxel_f_uf, float>(const WarpVoxel_f_uf& a, const Wa
 template<>
 _CPU_AND_GPU_CODE_
 inline
-bool almostEqualVerbose_Position<WarpVoxel_f_uf, float>(const WarpVoxel_f_uf& a, const WarpVoxel_f_uf& b,
-                                                        const Vector3i& position, float tolerance) {
+bool almostEqualVerbose_Position<WarpVoxel_f_update, float>(const WarpVoxel_f_update& a, const WarpVoxel_f_update& b,
+                                                            const Vector3i& position, float tolerance) {
 
-	if (!almostEqual(a.framewise_warp, b.framewise_warp, tolerance)) {
-		printVector3fVoxelError_Position(a.framewise_warp, b.framewise_warp, tolerance, "framewise_warp", position);
+	if (!almostEqual(a.warp_update, b.warp_update, tolerance)) {
+		printVector3fVoxelError_Position(a.warp_update, b.warp_update, tolerance, "warp_update", position);
 		return false;
 	}
 	if (!almostEqual(a.gradient0, b.gradient0, tolerance)) {
@@ -541,7 +541,7 @@ template<>
 _CPU_AND_GPU_CODE_
 inline
 bool
-almostEqual<WarpVoxel_f_uf, unsigned int>(const WarpVoxel_f_uf& a, const WarpVoxel_f_uf& b, unsigned int tolerance) {
+almostEqual<WarpVoxel_f_update, unsigned int>(const WarpVoxel_f_update& a, const WarpVoxel_f_update& b, unsigned int tolerance) {
 	const float tolerance_float = 1.0f / (10.0f * static_cast<float>(tolerance));
 	return almostEqual(a, b, tolerance_float);
 }

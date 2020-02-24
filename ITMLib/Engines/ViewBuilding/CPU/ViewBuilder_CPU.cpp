@@ -11,14 +11,14 @@ using namespace ORUtils;
 ViewBuilder_CPU::ViewBuilder_CPU(const RGBDCalib& calib): ViewBuilder(calib) { }
 ViewBuilder_CPU::~ViewBuilder_CPU(void) { }
 
-void ViewBuilder_CPU::UpdateView(ITMView** view_ptr, ITMUChar4Image* rgbImage, ITMShortImage* rawDepthImage, bool useThresholdFilter,
+void ViewBuilder_CPU::UpdateView(View** view_ptr, ITMUChar4Image* rgbImage, ITMShortImage* rawDepthImage, bool useThresholdFilter,
                                  bool useBilateralFilter, bool modelSensorNoise, bool storePreviousImage)
 {
 	if (*view_ptr == NULL)
 	{
-		*view_ptr = new ITMView(calib, rgbImage->noDims, rawDepthImage->noDims, false);
+		*view_ptr = new View(calib, rgbImage->noDims, rawDepthImage->noDims, false);
 		//TODO: This is very bad coding practice, assumes that there's ever only one ViewBuilder updating a single view... \
-		// Most likely, these "shortImage" and "floatImage" should be a part of ITMView itself, while this class should have no state but parameters
+		// Most likely, these "shortImage" and "floatImage" should be a part of View itself, while this class should have no state but parameters
 		if (this->shortImage != NULL) delete this->shortImage;
 		this->shortImage = new ITMShortImage(rawDepthImage->noDims, true, false);
 		if (this->floatImage != NULL) delete this->floatImage;
@@ -30,7 +30,7 @@ void ViewBuilder_CPU::UpdateView(ITMView** view_ptr, ITMUChar4Image* rgbImage, I
 			(*view_ptr)->depthUncertainty = new ITMFloatImage(rawDepthImage->noDims, true, false);
 		}
 	}
-	ITMView *view = *view_ptr;
+	View *view = *view_ptr;
 
 	if (storePreviousImage)
 	{
@@ -75,13 +75,13 @@ void ViewBuilder_CPU::UpdateView(ITMView** view_ptr, ITMUChar4Image* rgbImage, I
 	}
 }
 
-void ViewBuilder_CPU::UpdateView(ITMView** view_ptr, ITMUChar4Image* rgbImage, ITMShortImage* depthImage, bool useThresholdFilter,
+void ViewBuilder_CPU::UpdateView(View** view_ptr, ITMUChar4Image* rgbImage, ITMShortImage* depthImage, bool useThresholdFilter,
                                  bool useBilateralFilter, IMUMeasurement* imuMeasurement, bool modelSensorNoise,
                                  bool storePreviousImage)
 {
 	if (*view_ptr == NULL)
 	{
-		*view_ptr = new ITMViewIMU(calib, rgbImage->noDims, depthImage->noDims, false);
+		*view_ptr = new ViewIMU(calib, rgbImage->noDims, depthImage->noDims, false);
 		if (this->shortImage != NULL) delete this->shortImage;
 		this->shortImage = new ITMShortImage(depthImage->noDims, true, false);
 		if (this->floatImage != NULL) delete this->floatImage;
@@ -94,7 +94,7 @@ void ViewBuilder_CPU::UpdateView(ITMView** view_ptr, ITMUChar4Image* rgbImage, I
 		}
 	}
 
-	ITMViewIMU* imuView = (ITMViewIMU*)(*view_ptr);
+	ViewIMU* imuView = (ViewIMU*)(*view_ptr);
 	imuView->imu->SetFrom(imuMeasurement);
 
 	this->UpdateView(view_ptr, rgbImage, depthImage, false, useBilateralFilter, modelSensorNoise, storePreviousImage);

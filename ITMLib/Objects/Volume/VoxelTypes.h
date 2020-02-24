@@ -281,7 +281,7 @@ struct TSDFVoxel_f_rgb_conf
 };
 
 
-struct WarpVoxel_f_uf{
+struct WarpVoxel_f_UF{
 	static const CONSTPTR(bool) hasSDFInformation = false;
 	static const CONSTPTR(bool) hasColorInformation = false;
 	static const CONSTPTR(bool) hasConfidenceInformation = false;
@@ -301,14 +301,45 @@ struct WarpVoxel_f_uf{
 	};
 	Vector3f gradient1;
 
-	_CPU_AND_GPU_CODE_ WarpVoxel_f_uf():
-		framewise_warp(0.0f),
-		gradient0(0.0f),
-		gradient1(0.0f)
-		{}
+	_CPU_AND_GPU_CODE_ WarpVoxel_f_UF():
+			framewise_warp(0.0f),
+			gradient0(0.0f),
+			gradient1(0.0f)
+	{}
 	_CPU_AND_GPU_CODE_ void print_self(){
 		printf("warp:{framewise_warp: [%f, %f, %f], gradient0: [%f, %f, %f], gradient1: [%f, %f, %f]}\n",
 		       framewise_warp.x, framewise_warp.y, framewise_warp.z, gradient0.x, gradient0.y, gradient0.z,
+		       gradient1.x, gradient1.y, gradient1.z);
+	}
+};
+
+struct WarpVoxel_f_update{
+	static const CONSTPTR(bool) hasSDFInformation = false;
+	static const CONSTPTR(bool) hasColorInformation = false;
+	static const CONSTPTR(bool) hasConfidenceInformation = false;
+	static const CONSTPTR(bool) hasSemanticInformation = false;
+	static const CONSTPTR(bool) hasWeightInformation = false;
+	static const CONSTPTR(bool) hasCumulativeWarp = false;
+	static const CONSTPTR(bool) hasFramewiseWarp = false;
+	static const CONSTPTR(bool) hasWarpUpdate = true;
+	static const CONSTPTR(bool) hasDebugInformation = false;
+	/** vector translating the current point to a different location **/
+	Vector3f warp_update;
+	/** intermediate results for computing the gradient & the points motion**/
+	union{
+		Vector3f gradient0;
+		Vector3f gradient;
+	};
+	Vector3f gradient1;
+
+	_CPU_AND_GPU_CODE_ WarpVoxel_f_update():
+			warp_update(0.0f),
+			gradient0(0.0f),
+			gradient1(0.0f)
+		{}
+	_CPU_AND_GPU_CODE_ void print_self(){
+		printf("warp:{warp_update: [%f, %f, %f], gradient0: [%f, %f, %f], gradient1: [%f, %f, %f]}\n",
+		       warp_update.x, warp_update.y, warp_update.z, gradient0.x, gradient0.y, gradient0.z,
 		       gradient1.x, gradient1.y, gradient1.z);
 	}
 };

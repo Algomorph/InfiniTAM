@@ -65,6 +65,16 @@ struct IsAlteredUtility<false, false, true, true, TVoxel> {
 		return voxel.framewise_warp != Vector3f(0.0f) || voxel.warp_update != Vector3f(0.0f);
 	}
 };
+
+
+template<typename TVoxel>
+struct IsAlteredUtility<false, false, false, true, TVoxel> {
+	_CPU_AND_GPU_CODE_
+	static inline
+	bool evaluate(const TVoxel& voxel) {
+		return voxel.warp_update != Vector3f(0.0f);
+	}
+};
 // endregion
 
 /**

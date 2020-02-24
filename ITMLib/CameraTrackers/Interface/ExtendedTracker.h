@@ -4,11 +4,11 @@
 
 #include "CameraTracker.h"
 #include "../../Engines/LowLevel/Interface/LowLevelEngine.h"
-#include "../../Objects/Tracking/ITMImageHierarchy.h"
-#include "../../Objects/Tracking/ITMDepthHierarchyLevel.h"
-#include "../../Objects/Tracking/ITMIntensityHierarchyLevel.h"
-#include "../../Objects/Tracking/ITMSceneHierarchyLevel.h"
-#include "../../Objects/Tracking/ITMTemplatedHierarchyLevel.h"
+#include "../../Objects/Tracking/ImageHierarchy.h"
+#include "../../Objects/Tracking/DepthHierarchyLevel.h"
+#include "../../Objects/Tracking/IntensityHierarchyLevel.h"
+#include "../../Objects/Tracking/VolumeHierarchyLevel.h"
+#include "../../Objects/Tracking/TemplatedHierarchyLevel.h"
 #include "../../Objects/Tracking/TrackerIterationType.h"
 
 #include "../../../ORUtils/HomkerMap.h"
@@ -27,14 +27,14 @@ namespace ITMLib
 		static const int MIN_VALID_POINTS_RGB;
 
 		const LowLevelEngine *lowLevelEngine;
-		ITMImageHierarchy<ITMSceneHierarchyLevel> *sceneHierarchy;
-		ITMImageHierarchy<ITMDepthHierarchyLevel> *viewHierarchy_Depth;
-		ITMImageHierarchy<ITMIntensityHierarchyLevel> *viewHierarchy_Intensity;
-		ITMImageHierarchy<ITMTemplatedHierarchyLevel<ITMFloat4Image> > *reprojectedPointsHierarchy;
-		ITMImageHierarchy<ITMTemplatedHierarchyLevel<ITMFloatImage> > *projectedIntensityHierarchy;
+		ImageHierarchy<VolumeHierarchyLevel> *sceneHierarchy;
+		ImageHierarchy<DepthHierarchyLevel> *viewHierarchy_Depth;
+		ImageHierarchy<IntensityHierarchyLevel> *viewHierarchy_Intensity;
+		ImageHierarchy<TemplatedHierarchyLevel<ITMFloat4Image> > *reprojectedPointsHierarchy;
+		ImageHierarchy<TemplatedHierarchyLevel<ITMFloatImage> > *projectedIntensityHierarchy;
 
 		CameraTrackingState *trackingState;
-		const ITMView *view;
+		const View *view;
 
 		int *noIterationsPerLevel;
 
@@ -49,7 +49,7 @@ namespace ITMLib
 		void ApplyDelta(const Matrix4f & para_old, const float *delta, Matrix4f & para_new) const;
 		bool HasConverged(float *step) const;
 
-		void SetEvaluationData(CameraTrackingState *trackingState, const ITMView *view);
+		void SetEvaluationData(CameraTrackingState *trackingState, const View *view);
 
 		void UpdatePoseQuality(int noValidPoints_old, float *hessian_good, float f_old);
 
@@ -65,11 +65,11 @@ namespace ITMLib
 
 		Matrix4f scenePose;
 		Matrix4f depthToRGBTransform;
-		ITMSceneHierarchyLevel *sceneHierarchyLevel_Depth;
-		ITMDepthHierarchyLevel *viewHierarchyLevel_Depth;
-		ITMIntensityHierarchyLevel *viewHierarchyLevel_Intensity;
-		ITMTemplatedHierarchyLevel<ITMFloat4Image> *reprojectedPointsLevel;
-		ITMTemplatedHierarchyLevel<ITMFloatImage > *projectedIntensityLevel;
+		VolumeHierarchyLevel *sceneHierarchyLevel_Depth;
+		DepthHierarchyLevel *viewHierarchyLevel_Depth;
+		IntensityHierarchyLevel *viewHierarchyLevel_Intensity;
+		TemplatedHierarchyLevel<ITMFloat4Image> *reprojectedPointsLevel;
+		TemplatedHierarchyLevel<ITMFloatImage > *projectedIntensityLevel;
 
 		bool useColour;
 		bool useDepth;
@@ -91,7 +91,7 @@ namespace ITMLib
 												  const Matrix4f &scenePose) = 0;
 
 	public:
-		void TrackCamera(CameraTrackingState *trackingState, const ITMView *view);
+		void TrackCamera(CameraTrackingState *trackingState, const View *view);
 
 		bool requiresColourRendering() const { return false; }
 		bool requiresDepthReliability() const { return true; }

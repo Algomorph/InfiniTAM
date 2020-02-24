@@ -177,7 +177,7 @@ SurfelSceneReconstructionEngine_CUDA<TSurfel>::SurfelSceneReconstructionEngine_C
 //#################### PRIVATE MEMBER FUNCTIONS ####################
 
 template <typename TSurfel>
-void SurfelSceneReconstructionEngine_CUDA<TSurfel>::AddNewSurfels(SurfelScene<TSurfel> *scene, const ITMView *view, const CameraTrackingState *trackingState) const
+void SurfelSceneReconstructionEngine_CUDA<TSurfel>::AddNewSurfels(SurfelScene<TSurfel> *scene, const View *view, const CameraTrackingState *trackingState) const
 {
   // Calculate the prefix sum of the new points mask.
   const unsigned short *newPointsMask = this->m_newPointsMaskMB->GetData(MEMORYDEVICE_CUDA);
@@ -229,7 +229,7 @@ void SurfelSceneReconstructionEngine_CUDA<TSurfel>::AddNewSurfels(SurfelScene<TS
 }
 
 template <typename TSurfel>
-void SurfelSceneReconstructionEngine_CUDA<TSurfel>::FindCorrespondingSurfels(const SurfelScene<TSurfel> *scene, const ITMView *view, const CameraTrackingState *trackingState,
+void SurfelSceneReconstructionEngine_CUDA<TSurfel>::FindCorrespondingSurfels(const SurfelScene<TSurfel> *scene, const View *view, const CameraTrackingState *trackingState,
                                                                              const SurfelRenderState *renderState) const
 {
   const int pixelCount = static_cast<int>(view->depth->dataSize);
@@ -258,7 +258,7 @@ void SurfelSceneReconstructionEngine_CUDA<TSurfel>::FindCorrespondingSurfels(con
 }
 
 template <typename TSurfel>
-void SurfelSceneReconstructionEngine_CUDA<TSurfel>::FuseMatchedPoints(SurfelScene<TSurfel> *scene, const ITMView *view, const CameraTrackingState *trackingState) const
+void SurfelSceneReconstructionEngine_CUDA<TSurfel>::FuseMatchedPoints(SurfelScene<TSurfel> *scene, const View *view, const CameraTrackingState *trackingState) const
 {
   const int pixelCount = static_cast<int>(view->depth->dataSize);
 
@@ -376,7 +376,7 @@ void SurfelSceneReconstructionEngine_CUDA<TSurfel>::MergeSimilarSurfels(SurfelSc
 }
 
 template <typename TSurfel>
-void SurfelSceneReconstructionEngine_CUDA<TSurfel>::PreprocessDepthMap(const ITMView *view, const SurfelVolumeParameters& sceneParams) const
+void SurfelSceneReconstructionEngine_CUDA<TSurfel>::PreprocessDepthMap(const View *view, const SurfelVolumeParameters& sceneParams) const
 {
   const float *depthMap = view->depth->GetData(MEMORYDEVICE_CUDA);
   const int height = view->depth->noDims.y;

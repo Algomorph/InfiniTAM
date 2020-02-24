@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "ITMView.h"
+#include "View.h"
 #include "../Misc/IMUMeasurement.h"
 
 namespace ITMLib
@@ -11,21 +11,21 @@ namespace ITMLib
 	    Represents a single "view", i.e. RGB and depth images along
 	    with all intrinsic and relative calibration information
 	*/
-	class ITMViewIMU : public ITMView
+	class ViewIMU : public View
 	{
 	public:
 		IMUMeasurement *imu;
 
-		ITMViewIMU(const RGBDCalib& calibration, Vector2i imgSize_rgb, Vector2i imgSize_d, bool useGPU)
-		 : ITMView(calibration, imgSize_rgb, imgSize_d, useGPU)
+		ViewIMU(const RGBDCalib& calibration, Vector2i imgSize_rgb, Vector2i imgSize_d, bool useGPU)
+		 : View(calibration, imgSize_rgb, imgSize_d, useGPU)
 		{
 			imu = new IMUMeasurement();
 		}
 
-		~ITMViewIMU(void) { delete imu; }
+		~ViewIMU(void) { delete imu; }
 
 		// Suppress the default copy constructor and assignment operator
-		ITMViewIMU(const ITMViewIMU&);
-		ITMViewIMU& operator=(const ITMViewIMU&);
+		ViewIMU(const ViewIMU&);
+		ViewIMU& operator=(const ViewIMU&);
 	};
 }

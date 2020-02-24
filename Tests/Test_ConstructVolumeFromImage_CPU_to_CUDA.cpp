@@ -49,12 +49,12 @@ using namespace ITMLib;
 BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_VBH_CPU_CUDA_NearSurface, Frame16And17Fixture) {
 	
 		
-	ITMView* view_17_CPU = nullptr;
+	View* view_17_CPU = nullptr;
 	updateView(&view_17_CPU, "TestData/snoopy_depth_000017.png",
 	           "TestData/snoopy_color_000017.png", "TestData/snoopy_omask_000017.png",
 	           "TestData/snoopy_calib.txt", MEMORYDEVICE_CPU);
 
-	ITMView* view_17_CUDA = nullptr;
+	View* view_17_CUDA = nullptr;
 	updateView(&view_17_CUDA, "TestData/snoopy_depth_000017.png",
 	           "TestData/snoopy_color_000017.png", "TestData/snoopy_omask_000017.png",
 	           "TestData/snoopy_calib.txt", MEMORYDEVICE_CUDA);
@@ -115,12 +115,12 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_VBH_CPU_CUDA_NearSurface, Frame16A
 
 BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_VBH_CPU_CUDA_SurfaceSpan, Frame16And17Fixture) {
 
-	ITMView* view_16_CPU = nullptr;
+	View* view_16_CPU = nullptr;
 	updateView(&view_16_CPU, "TestData/snoopy_depth_000016.png",
 	           "TestData/snoopy_color_000016.png", "TestData/snoopy_omask_000016.png",
 	           "TestData/snoopy_calib.txt", MEMORYDEVICE_CPU);
 
-	ITMView* view_16_CUDA = nullptr;
+	View* view_16_CUDA = nullptr;
 	updateView(&view_16_CUDA, "TestData/snoopy_depth_000016.png",
 	           "TestData/snoopy_color_000016.png", "TestData/snoopy_omask_000016.png",
 	           "TestData/snoopy_calib.txt", MEMORYDEVICE_CUDA);
@@ -173,12 +173,12 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_VBH_CPU_CUDA_SurfaceSpan, Frame16A
 	}
 
 
-	ITMView* view_17_CPU = nullptr;
+	View* view_17_CPU = nullptr;
 	updateView(&view_17_CPU, "TestData/snoopy_depth_000017.png",
 	           "TestData/snoopy_color_000017.png", "TestData/snoopy_omask_000017.png",
 	           "TestData/snoopy_calib.txt", MEMORYDEVICE_CPU);
 
-	ITMView* view_17_CUDA = nullptr;
+	View* view_17_CUDA = nullptr;
 	updateView(&view_17_CUDA, "TestData/snoopy_depth_000017.png",
 	           "TestData/snoopy_color_000017.png", "TestData/snoopy_omask_000017.png",
 	           "TestData/snoopy_calib.txt", MEMORYDEVICE_CUDA);

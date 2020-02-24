@@ -262,7 +262,7 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CPU) {
 	live_volumes[1]->Reset();
 
 
-	ITMView* view = nullptr;
+	View* view = nullptr;
 	buildSdfVolumeFromImage_NearSurfaceAllocation(&canonical_volume, &view,
 	                                              "TestData/snoopy_depth_000016.png",
 	                                              "TestData/snoopy_color_000016.png",
@@ -413,7 +413,7 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CUDA) {
 	live_volumes[1]->Reset();
 
 
-	ITMView* view = nullptr;
+	View* view = nullptr;
 	buildSdfVolumeFromImage_NearSurfaceAllocation(&canonical_volume, &view,
 	                                              "TestData/snoopy_depth_000016.png",
 	                                              "TestData/snoopy_color_000016.png",

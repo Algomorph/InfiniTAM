@@ -30,7 +30,7 @@ class vtkChartXY;
 namespace ITMLib{
 class SceneSliceVisualizer1D {
 public:
-	SceneSliceVisualizer1D(Vector3i focusCoordinate, Axis axis, unsigned int voxelRange);
+	SceneSliceVisualizer1D(Vector3i focus_coordinate, Axis axis, unsigned int voxel_range);
 	~SceneSliceVisualizer1D() = default;
 
 
@@ -39,21 +39,22 @@ public:
 	template<typename TVoxel, typename TWarp, typename TIndex>
 	void Draw1DWarpUpdateVector(
 			VoxelVolume <TVoxel, TIndex>* TSDF,
-			VoxelVolume<TWarp, TIndex>* warp, Vector4i color);
+			VoxelVolume<TWarp, TIndex>* warp_field, Vector4i color);
 	void SaveScreenshot(std::string path);
 
 
 private:
 	template<typename TVoxel, typename TIndex, typename TGetSDFFunctor>
-	void Plot1DSceneSliceHelper(VoxelVolume <TVoxel, TIndex>* scene, Vector4i color, double width);
+	void Plot1DSceneSliceHelper(VoxelVolume <TVoxel, TIndex>* volume, Vector4i color, double width);
 
 	ChartWindow* window;
 
-	const Vector3i focusCoordinates;
+	const Vector3i focus_coordinates;
 	const Axis axis;
 	const int rangeStartVoxelIndex;
 	const int rangeEndVoxelIndex;
 	const unsigned int voxelRange;
+	float previous_point = 0.0;
 
 
 };

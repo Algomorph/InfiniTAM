@@ -75,7 +75,7 @@ namespace ITMLib
 			}
 		}
 
-		void TrackCamera(CameraTrackingState *trackingState, const ITMView *view)
+		void TrackCamera(CameraTrackingState *trackingState, const View *view)
 		{
 			trackingState->trackerResult = CameraTrackingState::TRACKING_FAILED;
 

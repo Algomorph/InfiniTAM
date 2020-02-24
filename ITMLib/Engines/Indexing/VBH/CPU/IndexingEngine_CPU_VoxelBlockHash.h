@@ -84,7 +84,7 @@ public:
 	                                     VoxelVolume<TVoxelSource, VoxelBlockHash>* source_volume,
 	                                     const Extent3D& source_bounds, const Vector3i& target_offset);
 
-	void BuildUtilizedBlockListBasedOnVisibility(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
+	void BuildUtilizedBlockListBasedOnVisibility(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const View* view,
 	                                             const Matrix4f& depth_camera_matrix = Matrix4f::Identity());
 
 	void SetVisibilityToVisibleAtPreviousFrameAndUnstreamed(VoxelVolume<TVoxel, VoxelBlockHash>* volume);

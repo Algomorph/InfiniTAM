@@ -29,15 +29,15 @@ using namespace ITMLib;
 
 // region ===================================== HOUSEKEEPING ===========================================================
 
-
+#define TRAVERSE_ALL_HASH_BLOCKS
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, GradientFunctorType TGradientFunctorType>
 void SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorType>::ResetWarps(
 		VoxelVolume<TWarp, TIndex>* warp_field) {
 	VolumeTraversalEngine<TWarp, TIndex, TMemoryDeviceType>::
 #ifdef TRAVERSE_ALL_HASH_BLOCKS
-	template TraverseAll<WarpClearFunctor<TWarp, TWarp::hasCumulativeWarp>>(warp_field);
+	template TraverseAll<ClearOutCumulativeWarpStaticFunctor<TWarp, TWarp::hasCumulativeWarp>>(warp_field);
 #else
-	template TraverseUtilized<WarpClearFunctor<TWarp, TWarp::hasCumulativeWarp>>(warp_field);
+	template TraverseUtilized<ClearOutCumulativeWarpStaticFunctor<TWarp, TWarp::hasCumulativeWarp>>(warp_field);
 #endif
 };
 
@@ -48,9 +48,9 @@ void SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorTy
 
 	VolumeTraversalEngine<TWarp, TIndex, TMemoryDeviceType>::
 #ifdef TRAVERSE_ALL_HASH_BLOCKS
-	template TraverseAll<ClearOutFramewiseWarpStaticFunctor<TWarp>>(warp_field);
+	template TraverseAll<ClearOutFramewiseWarpStaticFunctor<TWarp, TWarp::hasFramewiseWarp>>(warp_field);
 #else
-	template TraverseUtilized<ClearOutFramewiseWarpStaticFunctor<TWarp>>(warp_field);
+	template TraverseUtilized<ClearOutFramewiseWarpStaticFunctor<TWarp, TWarp::hasFramewiseWarp>>(warp_field);
 #endif
 }
 
@@ -167,7 +167,7 @@ float SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorT
 #ifndef __CUDACC__
 	if (histograms_enabled) {
 		WarpHistogramFunctor<TVoxel, TWarp>
-				warp_histogram_functor(warp_update_functor.GetMaxFramewiseWarpLength(),
+				warp_histogram_functor(/*warp_update_functor.GetMaxFramewiseWarpLength(),*/
 				                       warp_update_functor.GetMaxWarpUpdateLength());
 		ThreeVolumeTraversalEngine<TWarp, TVoxel, TVoxel, TIndex, TMemoryDeviceType>::
 #ifdef TRAVERSE_ALL_HASH_BLOCKS

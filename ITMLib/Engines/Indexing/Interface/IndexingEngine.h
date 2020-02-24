@@ -18,7 +18,7 @@
 //local
 #include "../../../Objects/Volume/VoxelVolume.h"
 #include "../../../Utils/HashBlockProperties.h"
-#include "../../../Objects/Views/ITMView.h"
+#include "../../../Objects/Views/View.h"
 #include "../../../Objects/Tracking/CameraTrackingState.h"
 #include "../../../Objects/RenderStates/RenderState.h"
 #include "../../../Utils/WarpType.h"
@@ -52,7 +52,7 @@ public:
 	 * \param reset_utilized_block_list  [in] reset utilized block list before the rest of the operation
 	 */
 	virtual void
-	AllocateNearSurface(VoxelVolume<TVoxel, TIndex>* volume, const ITMView* view,
+	AllocateNearSurface(VoxelVolume<TVoxel, TIndex>* volume, const View* view,
 	                    const CameraTrackingState* tracking_state,
 	                    bool only_update_utilized_block_list, bool reset_utilized_block_list) = 0;
 
@@ -70,7 +70,7 @@ public:
 	 * \param reset_utilized_block_list  [in] reset visibility list upon completion
 	 */
 	virtual void
-	AllocateNearSurface(VoxelVolume<TVoxel, TIndex>* volume, const ITMView* view,
+	AllocateNearSurface(VoxelVolume<TVoxel, TIndex>* volume, const View* view,
 	                    const Matrix4f& depth_camera_matrix = Matrix4f::Identity(),
 	                    bool only_update_utilized_block_list = false, bool reset_utilized_block_list = false) = 0;
 
@@ -92,7 +92,7 @@ public:
 	 */
 	virtual void
 	AllocateNearAndBetweenTwoSurfaces(VoxelVolume<TVoxel, TIndex>* volume,
-	                                  const ITMView* view,
+	                                  const View* view,
 	                                  const CameraTrackingState* tracking_state) = 0;
 	/**
 	 * \brief Allocate all hash blocks at given coordinates
@@ -132,16 +132,16 @@ public:
 
 	virtual void ResetUtilizedBlockList(VoxelVolume<TVoxel, TIndex>* volume) override;
 
-	virtual void AllocateNearSurface(VoxelVolume<TVoxel, TIndex>* volume, const ITMView* view,
+	virtual void AllocateNearSurface(VoxelVolume<TVoxel, TIndex>* volume, const View* view,
 	                                 const CameraTrackingState* tracking_state, bool onlyUpdateVisibleList,
 	                                 bool resetVisibleList) override;
 
-	virtual void AllocateNearSurface(VoxelVolume<TVoxel, TIndex>* volume, const ITMView* view,
+	virtual void AllocateNearSurface(VoxelVolume<TVoxel, TIndex>* volume, const View* view,
 	                                 const Matrix4f& depth_camera_matrix = Matrix4f::Identity(),
 	                                 bool only_update_visible_list = false, bool reset_visible_list = false) override;
 
 	virtual void AllocateNearAndBetweenTwoSurfaces(VoxelVolume<TVoxel, TIndex>* targetVolume,
-	                                               const ITMView* view,
+	                                               const View* view,
 	                                               const CameraTrackingState* tracking_state) override;
 
 	void AllocateBlockList(VoxelVolume<TVoxel, TIndex>* volume,

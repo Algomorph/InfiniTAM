@@ -185,6 +185,7 @@ DECLARE_SERIALIZABLE_STRUCT(SPECIFIC_VOLUME_PARAMETERS_STRUCT_DESCRIPTION);
     (bool, use_approximate_raycast, false, PRIMITIVE, "Enables or disables approximate raycast."),\
     (bool, use_threshold_filter, false, PRIMITIVE, "Enables or disables threshold filtering, i.e. filtering out pixels whose difference from their neighbors exceeds a certain threshold"),\
     (bool, use_bilateral_filter, false, PRIMITIVE, "Enables or disables bilateral filtering on depth input images."),\
+    (bool, enable_rigid_tracking, true, PRIMITIVE, "Enables or disables rigid tracking."),\
     (FailureMode, behavior_on_failure, FAILUREMODE_IGNORE, ENUM, "What to do on tracker failure: ignore, relocalize or stop integration - not supported in loop closure or dynamic libmode"),\
     (SwappingMode, swapping_mode, SWAPPINGMODE_DISABLED, ENUM, "Determines how swapping works: disabled, fully enabled (still with dragons) and delete what's not visible - not supported in loop closure version"),\
     (LibMode, library_mode, LIBMODE_DYNAMIC, ENUM, "Switch between various library modes - basic, with loop closure, etc."),\

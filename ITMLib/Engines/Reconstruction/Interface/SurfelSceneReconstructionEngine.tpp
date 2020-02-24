@@ -44,7 +44,7 @@ SurfelSceneReconstructionEngine<TSurfel>::~SurfelSceneReconstructionEngine()
 //#################### PUBLIC MEMBER FUNCTIONS ####################
 
 template <typename TSurfel>
-void SurfelSceneReconstructionEngine<TSurfel>::IntegrateIntoScene(SurfelScene<TSurfel> *scene, const ITMView *view, const CameraTrackingState *trackingState,
+void SurfelSceneReconstructionEngine<TSurfel>::IntegrateIntoScene(SurfelScene<TSurfel> *scene, const View *view, const CameraTrackingState *trackingState,
                                                                   const SurfelRenderState *renderState)
 {
   PreprocessDepthMap(view, scene->GetParams());

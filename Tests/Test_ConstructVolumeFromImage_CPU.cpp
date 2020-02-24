@@ -120,7 +120,7 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_PVA_VBH_Near_CPU, Frame16And17Fixt
 static void SetUpTrackingState16(CameraTrackingState& tracking_state,
                                  IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>& indexer_VBH,
                                  DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, VoxelBlockHash>* depth_fusion_engine_VBH) {
-	ITMView* view_16 = nullptr;
+	View* view_16 = nullptr;
 	updateView(&view_16, "TestData/snoopy_depth_000016.png",
 	           "TestData/snoopy_color_000016.png", "TestData/snoopy_omask_000016.png",
 	           "TestData/snoopy_calib.txt", MEMORYDEVICE_CPU);
@@ -151,7 +151,7 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_VBH_CPU_NearVsSpan, Frame16And17Fi
 
 	SetUpTrackingState16(tracking_state, indexer, depth_fusion_engine_VBH);
 
-	ITMView* view_17 = nullptr;
+	View* view_17 = nullptr;
 	updateView(&view_17, "TestData/snoopy_depth_000017.png",
 	           "TestData/snoopy_color_000017.png", "TestData/snoopy_omask_000017.png",
 	           "TestData/snoopy_calib.txt", MEMORYDEVICE_CPU);
@@ -204,7 +204,7 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_PVA_VBH_Span_CPU, Frame16And17Fixt
 	CameraTrackingState tracking_state(resolution, MEMORYDEVICE_CPU);
 	SetUpTrackingState16(tracking_state, indexer_VBH, depth_fusion_engine_VBH);
 
-	ITMView* view_17 = nullptr;
+	View* view_17 = nullptr;
 	updateView(&view_17, "TestData/snoopy_depth_000017.png",
 	           "TestData/snoopy_color_000017.png", "TestData/snoopy_omask_000017.png",
 	           "TestData/snoopy_calib.txt", MEMORYDEVICE_CPU);
@@ -253,7 +253,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
 
 	ViewBuilder* viewBuilder = ViewBuilderFactory::MakeViewBuilder(calibrationData, MEMORYDEVICE_CPU);
 	Vector2i imageSize(640, 480);
-	ITMView* view = nullptr;
+	View* view = nullptr;
 
 	auto* rgb = new ITMUChar4Image(true, false);
 	auto* depth = new ITMShortImage(true, false);
@@ -424,7 +424,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CPU) {
 
 	ViewBuilder* viewBuilder = ViewBuilderFactory::MakeViewBuilder(calibrationData, MEMORYDEVICE_CPU);
 	Vector2i imageSize(640, 480);
-	ITMView* view = nullptr;
+	View* view = nullptr;
 
 	auto* rgb = new ITMUChar4Image(true, false);
 	auto* depth = new ITMShortImage(true, false);

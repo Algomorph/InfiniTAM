@@ -44,7 +44,7 @@
 template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void GenerateRawLiveAndCanonicalVolumes(VoxelVolume<TSDFVoxel, TIndex>** canonical_volume,
                                         VoxelVolume<TSDFVoxel, TIndex>** live_volume) {
-	ITMView* view = nullptr;
+	View* view = nullptr;
 	buildSdfVolumeFromImage_NearSurfaceAllocation(canonical_volume, &view,
 	                                              "TestData/snoopy_depth_000016.png",
 	                                              "TestData/snoopy_color_000016.png",

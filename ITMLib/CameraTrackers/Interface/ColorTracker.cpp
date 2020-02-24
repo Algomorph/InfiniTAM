@@ -12,7 +12,7 @@ static inline bool minimizeLM(const ColorTracker & tracker, ORUtils::SE3Pose & i
 ColorTracker::ColorTracker(Vector2i imgSize, TrackerIterationType *trackingRegime, int noHierarchyLevels,
                            const LowLevelEngine *lowLevelEngine, MemoryDeviceType memoryType)
 {
-	viewHierarchy = new ITMImageHierarchy<ITMViewHierarchyLevel>(imgSize, trackingRegime, noHierarchyLevels, memoryType);
+	viewHierarchy = new ImageHierarchy<ViewHierarchyLevel>(imgSize, trackingRegime, noHierarchyLevels, memoryType);
 
 	this->lowLevelEngine = lowLevelEngine;
 }
@@ -22,7 +22,7 @@ ColorTracker::~ColorTracker(void)
 	delete viewHierarchy;
 }
 
-void ColorTracker::TrackCamera(CameraTrackingState *trackingState, const ITMView *view)
+void ColorTracker::TrackCamera(CameraTrackingState *trackingState, const View *view)
 {
 	this->view = view; this->trackingState = trackingState;
 
@@ -47,21 +47,21 @@ void ColorTracker::TrackCamera(CameraTrackingState *trackingState, const ITMView
 	//	scene->pose->params.each.tx, scene->pose->params.each.ty, scene->pose->params.each.tz);
 }
 
-void ColorTracker::PrepareForEvaluation(const ITMView *view)
+void ColorTracker::PrepareForEvaluation(const View *view)
 {
 	lowLevelEngine->CopyImage(viewHierarchy->GetLevel(0)->rgb, view->rgb);
 
-	ITMImageHierarchy<ITMViewHierarchyLevel> *hierarchy = viewHierarchy;
+	ImageHierarchy<ViewHierarchyLevel> *hierarchy = viewHierarchy;
 
 	for (int i = 1; i < hierarchy->GetNoLevels(); i++)
 	{
-		ITMViewHierarchyLevel *currentLevel = hierarchy->GetLevel(i), *previousLevel = hierarchy->GetLevel(i - 1);
+		ViewHierarchyLevel *currentLevel = hierarchy->GetLevel(i), *previousLevel = hierarchy->GetLevel(i - 1);
 		lowLevelEngine->FilterSubsample(currentLevel->rgb, previousLevel->rgb);
 	}
 
 	for (int i = 0; i < hierarchy->GetNoLevels(); i++)
 	{
-		ITMViewHierarchyLevel *currentLevel = hierarchy->GetLevel(i);
+		ViewHierarchyLevel *currentLevel = hierarchy->GetLevel(i);
 
 		lowLevelEngine->GradientX(currentLevel->gradientX_rgb, currentLevel->rgb);
 		lowLevelEngine->GradientY(currentLevel->gradientY_rgb, currentLevel->rgb);

@@ -120,7 +120,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CUDA) {
 
 	ViewBuilder* viewBuilder = ViewBuilderFactory::MakeViewBuilder(calibrationData, MEMORYDEVICE_CUDA);
 	Vector2i imageSize(640, 480);
-	ITMView* view = nullptr;
+	View* view = nullptr;
 
 	auto* rgb = new ITMUChar4Image(true, true);
 	auto* depth = new ITMShortImage(true, true);
@@ -298,7 +298,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CUDA) {
 
 	ViewBuilder* viewBuilder = ViewBuilderFactory::MakeViewBuilder(calibrationData, MEMORYDEVICE_CUDA);
 	Vector2i imageSize(640, 480);
-	ITMView* view = nullptr;
+	View* view = nullptr;
 
 	auto* rgb = new ITMUChar4Image(true, false);
 	auto* depth = new ITMShortImage(true, false);

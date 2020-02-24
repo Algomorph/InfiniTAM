@@ -41,22 +41,22 @@
 using namespace ITMLib;
 
 template<typename TVoxel>
-struct TGetRegularSDFFunctor{
-	static inline float GetSdf(TVoxel& voxel){
+struct TGetRegularSDFFunctor {
+	static inline float GetSdf(TVoxel& voxel) {
 		return TVoxel::valueToFloat(voxel.sdf);
 	}
 };
 
 template<typename TVoxel, int TFieldIndex>
-struct TGetIndexedSDFFunctor{
-	static inline float GetSdf(TVoxel& voxel){
+struct TGetIndexedSDFFunctor {
+	static inline float GetSdf(TVoxel& voxel) {
 		return TVoxel::valueToFloat(voxel.sdf_values[TFieldIndex]);
 	}
 };
 
 
 template<typename TVoxel, typename TIndex, typename TGetSDFFunctor>
-void SceneSliceVisualizer1D::Plot1DSceneSliceHelper(VoxelVolume<TVoxel, TIndex>* scene, Vector4i color, double width) {
+void SceneSliceVisualizer1D::Plot1DSceneSliceHelper(VoxelVolume<TVoxel, TIndex>* volume, Vector4i color, double width) {
 
 	// set up table & columns
 	vtkSmartPointer<vtkFloatArray> horizontalAxisPoints = vtkSmartPointer<vtkFloatArray>::New();
@@ -68,16 +68,16 @@ void SceneSliceVisualizer1D::Plot1DSceneSliceHelper(VoxelVolume<TVoxel, TIndex>*
 	table->AddColumn(sdfValues);
 	table->SetNumberOfRows(voxelRange);
 
-	// scene access variables
+	// volume access variables
 	typename TIndex::IndexCache cache;
 
-	Vector3i currentVoxelPosition = focusCoordinates;
+	Vector3i currentVoxelPosition = focus_coordinates;
 	currentVoxelPosition[axis] = rangeStartVoxelIndex;
 
 	// fill table
-	for(int iValue = 0; iValue < voxelRange; iValue++,currentVoxelPosition[axis]++){
+	for (int iValue = 0; iValue < voxelRange; iValue++, currentVoxelPosition[axis]++) {
 		int vmIndex = 0;
-		TVoxel voxel = EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().ReadVoxel(scene, focusCoordinates, cache);
+		TVoxel voxel = EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().ReadVoxel(volume, focus_coordinates, cache);
 		table->SetValue(iValue, 0, currentVoxelPosition[axis]);
 		table->SetValue(iValue, 1, TGetSDFFunctor::GetSdf(voxel));
 	}
@@ -88,7 +88,7 @@ void SceneSliceVisualizer1D::Plot1DSceneSliceHelper(VoxelVolume<TVoxel, TIndex>*
 	chart->AutoAxesOff();
 	chart->DrawAxesAtOriginOn();
 
-	chart->GetAxis(0)->SetRange(-1.05,1.05);
+	chart->GetAxis(0)->SetRange(-1.05, 1.05);
 	chart->GetAxis(0)->SetBehavior(vtkAxis::FIXED);
 	chart->GetAxis(0)->SetTitle("SDF Value");
 
@@ -105,24 +105,51 @@ void SceneSliceVisualizer1D::Plot1DSceneSliceHelper(VoxelVolume<TVoxel, TIndex>*
 
 template<typename TVoxel, typename TIndex>
 void SceneSliceVisualizer1D::Plot1DSceneSlice(VoxelVolume<TVoxel, TIndex>* scene, Vector4i color, double width) {
-	Plot1DSceneSliceHelper<TVoxel,TIndex, TGetRegularSDFFunctor<TVoxel>>(scene, color, width);
+	Plot1DSceneSliceHelper<TVoxel, TIndex, TGetRegularSDFFunctor<TVoxel>>(scene, color, width);
 }
 
+
+template<typename TWarp, bool hasFramewiseWarp, bool hasWarpUpdate>
+struct DetermineEndpointsStaticFunctor;
+
+template<typename TWarp>
+struct DetermineEndpointsStaticFunctor<TWarp, true, true> {
+	static inline void
+	get(float& start_point, float& end_point, float& previous_point, const TWarp& warp, const Axis& axis,
+	    const Vector3i& focus_coordinates) {
+		float warp1D = warp.framewise_warp[axis];
+		float warpUpdate1D = warp.warp_update[axis];
+		start_point = static_cast<float>(focus_coordinates[axis]) + warp1D - warpUpdate1D;
+		end_point = static_cast<float>(focus_coordinates[axis]) + warp1D;
+	}
+};
+
+template<typename TWarp>
+struct DetermineEndpointsStaticFunctor<TWarp, false, true> {
+	static inline void
+	get(float& start_point, float& end_point, float& previous_point, const TWarp& warp, const Axis& axis,
+	    const Vector3i& focus_coordinates) {
+		float warpUpdate1D = warp.warp_update[axis];
+
+		start_point = previous_point;
+		end_point = previous_point + warpUpdate1D;
+	}
+};
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 void SceneSliceVisualizer1D::Draw1DWarpUpdateVector(
 		VoxelVolume<TVoxel, TIndex>* TSDF,
-		VoxelVolume<TWarp, TIndex>* warpField,
+		VoxelVolume<TWarp, TIndex>* warp_field,
 		Vector4i color) {
 	// scene access variables
 
-	TWarp warp = EditAndCopyEngine_CPU<TWarp, TIndex>::Inst().ReadVoxel(warpField, focusCoordinates);
-	TVoxel voxel = EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().ReadVoxel(TSDF, focusCoordinates);
+	TWarp warp = EditAndCopyEngine_CPU<TWarp, TIndex>::Inst().ReadVoxel(warp_field, focus_coordinates);
+	TVoxel voxel = EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().ReadVoxel(TSDF, focus_coordinates);
 
-	float warp1D = warp.framewise_warp[axis];
-	float warpUpdate1D = warp.gradient0[axis];
-	float startPoint = static_cast<float>(focusCoordinates[axis]) + warp1D - warpUpdate1D;
-	float endPoint = static_cast<float>(focusCoordinates[axis]) + warp1D;
+	float start_point, end_point;
+	DetermineEndpointsStaticFunctor<TWarp, TWarp::hasFramewiseWarp, TWarp::hasWarpUpdate>
+	        ::get(start_point, end_point, this->previous_point, warp, axis, focus_coordinates);
+
 	float sdfValue = TVoxel::valueToFloat(voxel.sdf);
 
 	vtkSmartPointer<vtkFloatArray> horizontalAxisPoints = vtkSmartPointer<vtkFloatArray>::New();
@@ -133,10 +160,10 @@ void SceneSliceVisualizer1D::Draw1DWarpUpdateVector(
 	table->AddColumn(horizontalAxisPoints);
 	table->AddColumn(verticalAxisPoints);
 	table->SetNumberOfRows(2);
-	table->SetValue(0,0,startPoint);
-	table->SetValue(1,0,endPoint);
-	table->SetValue(0,1,sdfValue);
-	table->SetValue(1,1,sdfValue);
+	table->SetValue(0, 0, start_point);
+	table->SetValue(1, 0, end_point);
+	table->SetValue(0, 1, sdfValue);
+	table->SetValue(1, 1, sdfValue);
 
 
 	vtkSmartPointer<vtkChartXY> chart = window->GetChart();

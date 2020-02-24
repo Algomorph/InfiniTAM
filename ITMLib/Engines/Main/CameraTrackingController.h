@@ -21,14 +21,14 @@ namespace ITMLib
 		CameraTracker *tracker;
 
 	public:
-		void Track(CameraTrackingState *trackingState, const ITMView *view)
+		void Track(CameraTrackingState *trackingState, const View *view)
 		{
 			if (!tracker->requiresPointCloudRendering() || trackingState->point_cloud_age != -1)
 				tracker->TrackCamera(trackingState, view);
 		}
 
 		template <typename TSurfel>
-		void Prepare(CameraTrackingState *trackingState, const SurfelScene<TSurfel> *scene, const ITMView *view,
+		void Prepare(CameraTrackingState *trackingState, const SurfelScene<TSurfel> *scene, const View *view,
 		             const SurfelVisualizationEngine<TSurfel> *VisualizationEngine, SurfelRenderState *renderState)
 		{
 			if (!tracker->requiresPointCloudRendering())
@@ -74,7 +74,7 @@ namespace ITMLib
 		 * \param render_state
 		 */
 		template <typename TVoxel, typename TIndex>
-		void Prepare(CameraTrackingState *tracking_state, VoxelVolume<TVoxel,TIndex> *volume, const ITMView *view,
+		void Prepare(CameraTrackingState *tracking_state, VoxelVolume<TVoxel,TIndex> *volume, const View *view,
 		             const VisualizationEngine<TVoxel,TIndex> *visualization_engine, RenderState *render_state)
 		{
 			if (!tracker->requiresPointCloudRendering())

@@ -17,7 +17,7 @@ typedef ITMLib::Surfel_rgb SurfelT;
 */
 //typedef TSDFVoxel_s TSDFVoxel;
 typedef TSDFVoxel_f_flags TSDFVoxel;
-typedef WarpVoxel_f_uf WarpVoxel;
+typedef WarpVoxel_f_update WarpVoxel;
 
 
 /** This chooses the way the voxels are addressed and indexed. At the moment,

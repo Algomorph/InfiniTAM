@@ -15,13 +15,13 @@ namespace ITMLib
     class ITMSceneReconstructionEngine_Metal<TVoxel,ITMVoxelBlockHash> : public ITMSceneReconstructionEngine_CPU<TVoxel,ITMVoxelBlockHash>
     {
     private:
-        void BuildAllocAndVisibleType(ITMScene<TVoxel, ITMVoxelBlockHash> *scene, const ITMView *view,
+        void BuildAllocAndVisibleType(ITMScene<TVoxel, ITMVoxelBlockHash> *scene, const View *view,
                                       const ITMTrackingState *trackingState, const ITMRenderState *renderState);
     public:
-        void IntegrateIntoScene(ITMScene<TVoxel, ITMVoxelBlockHash> *scene, const ITMView *view, const ITMTrackingState *trackingState,
+        void IntegrateIntoScene(ITMScene<TVoxel, ITMVoxelBlockHash> *scene, const View *view, const ITMTrackingState *trackingState,
                                 const ITMRenderState *renderState);
         
-        void AllocateSceneFromDepth(ITMScene<TVoxel, ITMVoxelBlockHash> *scene, const ITMView *view,
+        void AllocateSceneFromDepth(ITMScene<TVoxel, ITMVoxelBlockHash> *scene, const View *view,
                                     const ITMTrackingState *trackingState, const ITMRenderState *renderState,
                                     bool onlyUpdateVisibleList = false, bool resetVisibleList = false);
         

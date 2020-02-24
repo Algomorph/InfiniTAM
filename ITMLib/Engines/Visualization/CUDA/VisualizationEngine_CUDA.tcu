@@ -270,7 +270,7 @@ static void RenderImage_common(VoxelVolume<TVoxel, TIndex> *scene, const ORUtils
 }
 
 template<class TVoxel, class TIndex>
-static void CreatePointCloud_common(VoxelVolume<TVoxel, TIndex> *scene, const ITMView *view, CameraTrackingState *trackingState, RenderState *renderState,
+static void CreatePointCloud_common(VoxelVolume<TVoxel, TIndex> *scene, const View *view, CameraTrackingState *trackingState, RenderState *renderState,
                                     bool skipPoints, uint *noTotalPoints_device)
 {
 	Vector2i imgSize = renderState->raycastResult->noDims;
@@ -296,7 +296,7 @@ static void CreatePointCloud_common(VoxelVolume<TVoxel, TIndex> *scene, const IT
 }
 
 template<class TVoxel, class TIndex>
-void CreateICPMaps_common(VoxelVolume<TVoxel, TIndex> *scene, const ITMView *view, CameraTrackingState *trackingState, RenderState *renderState)
+void CreateICPMaps_common(VoxelVolume<TVoxel, TIndex> *scene, const View *view, CameraTrackingState *trackingState, RenderState *renderState)
 {
 	Vector2i imgSize = renderState->raycastResult->noDims;
 	Matrix4f invM = trackingState->pose_d->GetInvM();
@@ -326,7 +326,7 @@ void CreateICPMaps_common(VoxelVolume<TVoxel, TIndex> *scene, const ITMView *vie
 }
 
 template<class TVoxel, class TIndex>
-static void ForwardRender_common(const VoxelVolume<TVoxel, TIndex> *scene, const ITMView *view, CameraTrackingState *trackingState, RenderState *renderState,
+static void ForwardRender_common(const VoxelVolume<TVoxel, TIndex> *scene, const View *view, CameraTrackingState *trackingState, RenderState *renderState,
                                  uint *noTotalPoints_device)
 {
 	Vector2i imgSize = renderState->raycastResult->noDims;
@@ -409,42 +409,42 @@ void VisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::FindSurface(VoxelVolume<T
 }
 
 template<class TVoxel, class TIndex>
-void VisualizationEngine_CUDA<TVoxel, TIndex>::CreatePointCloud(VoxelVolume<TVoxel,TIndex> *scene, const ITMView *view, CameraTrackingState *trackingState, RenderState *renderState,
+void VisualizationEngine_CUDA<TVoxel, TIndex>::CreatePointCloud(VoxelVolume<TVoxel,TIndex> *scene, const View *view, CameraTrackingState *trackingState, RenderState *renderState,
                                                                 bool skipPoints) const
 {
 	CreatePointCloud_common(scene, view, trackingState, renderState, skipPoints, noTotalPoints_device);
 }
 
 template<class TVoxel>
-void VisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::CreatePointCloud(VoxelVolume<TVoxel,VoxelBlockHash> *scene, const ITMView *view, CameraTrackingState *trackingState,
+void VisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::CreatePointCloud(VoxelVolume<TVoxel,VoxelBlockHash> *scene, const View *view, CameraTrackingState *trackingState,
                                                                         RenderState *renderState, bool skipPoints) const
 {
 	CreatePointCloud_common(scene, view, trackingState, renderState, skipPoints, noTotalPoints_device);
 }
 
 template<class TVoxel, class TIndex>
-void VisualizationEngine_CUDA<TVoxel, TIndex>::CreateICPMaps(VoxelVolume<TVoxel,TIndex> *scene, const ITMView *view, CameraTrackingState *trackingState,
+void VisualizationEngine_CUDA<TVoxel, TIndex>::CreateICPMaps(VoxelVolume<TVoxel,TIndex> *scene, const View *view, CameraTrackingState *trackingState,
                                                              RenderState *renderState) const
 {
 	CreateICPMaps_common(scene, view, trackingState, renderState);
 }
 
 template<class TVoxel>
-void VisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::CreateICPMaps(VoxelVolume<TVoxel,VoxelBlockHash> *scene, const ITMView *view, CameraTrackingState *trackingState,
+void VisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::CreateICPMaps(VoxelVolume<TVoxel,VoxelBlockHash> *scene, const View *view, CameraTrackingState *trackingState,
                                                                      RenderState *renderState) const
 {
 	CreateICPMaps_common(scene, view, trackingState, renderState);
 }
 
 template<class TVoxel, class TIndex>
-void VisualizationEngine_CUDA<TVoxel, TIndex>::ForwardRender(const VoxelVolume<TVoxel,TIndex> *scene, const ITMView *view, CameraTrackingState *trackingState,
+void VisualizationEngine_CUDA<TVoxel, TIndex>::ForwardRender(const VoxelVolume<TVoxel,TIndex> *scene, const View *view, CameraTrackingState *trackingState,
                                                              RenderState *renderState) const
 {
 	ForwardRender_common(scene, view, trackingState, renderState, this->noTotalPoints_device);
 }
 
 template<class TVoxel>
-void VisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::ForwardRender(const VoxelVolume<TVoxel,VoxelBlockHash> *scene, const ITMView *view, CameraTrackingState *trackingState,
+void VisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::ForwardRender(const VoxelVolume<TVoxel,VoxelBlockHash> *scene, const View *view, CameraTrackingState *trackingState,
                                                                      RenderState *renderState) const
 {
 	ForwardRender_common(scene, view, trackingState, renderState, this->noTotalPoints_device);

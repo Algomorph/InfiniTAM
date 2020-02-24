@@ -25,7 +25,7 @@ template<MemoryDeviceType TMemoryDeviceType>
 struct DepthBasedAllocationStateMarkerFunctor {
 public:
 	DepthBasedAllocationStateMarkerFunctor(VoxelBlockHash& index,
-	                                       const VoxelVolumeParameters* volume_parameters, const ITMLib::ITMView* view,
+	                                       const VoxelVolumeParameters* volume_parameters, const ITMLib::View* view,
 	                                       Matrix4f depth_camera_pose, float surface_distance_cutoff) :
 
 			near_clipping_distance(volume_parameters->near_clipping_distance),
@@ -100,7 +100,7 @@ struct TwoSurfaceBasedAllocationStateMarkerFunctor
 public:
 	TwoSurfaceBasedAllocationStateMarkerFunctor(VoxelBlockHash& index,
 	                                            const VoxelVolumeParameters* volume_parameters,
-	                                            const ITMLib::ITMView* view,
+	                                            const ITMLib::View* view,
 	                                            const CameraTrackingState* tracking_state,
 	                                            float surface_distance_cutoff) :
 			DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType>(index, volume_parameters, view,

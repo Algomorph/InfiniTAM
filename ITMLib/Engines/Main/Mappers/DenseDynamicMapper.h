@@ -67,16 +67,16 @@ public:
 	* \param liveScene - live/target 3D scene generated from the incoming single frame of the video
 	* \param canonical_render_state
 	*/
-	void ProcessFrame(const ITMView* view, const CameraTrackingState* trackingState,
+	void ProcessFrame(const View* view, const CameraTrackingState* trackingState,
 	                  VoxelVolume <TVoxel, TIndex>* canonical_volume, VoxelVolume <TVoxel, TIndex>** live_volume_pair,
 	                  VoxelVolume <TWarp, TIndex>* warp_field, RenderState* canonical_render_state);
 
-	void ProcessInitialFrame(const ITMView* view, const CameraTrackingState* tracking_state,
+	void ProcessInitialFrame(const View* view, const CameraTrackingState* tracking_state,
 	                         VoxelVolume<TVoxel, TIndex>* canonical_volume, VoxelVolume<TVoxel, TIndex>* live_volume,
 	                         RenderState* canonical_render_state);
 
 	/// Update the visible list (this can be called to update the visible list when fusion is turned off)
-	void UpdateVisibleList(const ITMView* view, const CameraTrackingState* trackingState,
+	void UpdateVisibleList(const View* view, const CameraTrackingState* trackingState,
 	                       VoxelVolume<TVoxel, TIndex>* scene, RenderState* renderState, bool resetVisibleList = false);
 	// endregion
 private:

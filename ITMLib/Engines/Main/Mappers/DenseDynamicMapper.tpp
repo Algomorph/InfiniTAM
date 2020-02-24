@@ -119,7 +119,7 @@ DenseDynamicMapper<TVoxel, TWarp, TIndex>::~DenseDynamicMapper() {
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 void DenseDynamicMapper<TVoxel, TWarp, TIndex>::ProcessInitialFrame(
-		const ITMView* view, const CameraTrackingState* tracking_state,
+		const View* view, const CameraTrackingState* tracking_state,
 		VoxelVolume<TVoxel, TIndex>* canonical_volume, VoxelVolume<TVoxel, TIndex>* live_volume,
 		RenderState* canonical_render_state) {
 	PrintOperationStatus("Generating raw live frame from view...");
@@ -140,7 +140,7 @@ void DenseDynamicMapper<TVoxel, TWarp, TIndex>::ProcessInitialFrame(
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 void
-DenseDynamicMapper<TVoxel, TWarp, TIndex>::ProcessFrame(const ITMView* view, const CameraTrackingState* trackingState,
+DenseDynamicMapper<TVoxel, TWarp, TIndex>::ProcessFrame(const View* view, const CameraTrackingState* trackingState,
                                                         VoxelVolume<TVoxel, TIndex>* canonical_volume,
                                                         VoxelVolume<TVoxel, TIndex>** live_volume_pair,
                                                         VoxelVolume<TWarp, TIndex>* warp_field,
@@ -161,7 +161,6 @@ DenseDynamicMapper<TVoxel, TWarp, TIndex>::ProcessFrame(const ITMView* view, con
 
 	LogVolumeStatistics(live_volume_pair[0], "[[live TSDF before tracking]]");
 	bench::StopTimer("GenerateRawLiveVolume");
-	surface_tracker->ClearOutFramewiseWarp(warp_field);
 	//TelemetryRecorder<TVoxel, TWarp, TIndex>::Instance().InitializeFrameRecording();
 
 	bench::StartTimer("TrackMotion");
@@ -180,12 +179,12 @@ DenseDynamicMapper<TVoxel, TWarp, TIndex>::ProcessFrame(const ITMView* view, con
 	//TelemetryRecorder<TVoxel, TWarp, TIndex>::Instance().FinalizeFrameRecording();
 
 	//TODO: revise how swapping works for dynamic scenes
-	ProcessSwapping(canonical_volume, canonical_render_state);
+	//ProcessSwapping(canonical_volume, canonical_render_state);
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 void DenseDynamicMapper<TVoxel, TWarp, TIndex>::UpdateVisibleList(
-		const ITMView* view,
+		const View* view,
 		const CameraTrackingState* trackingState,
 		VoxelVolume<TVoxel, TIndex>* scene, RenderState* renderState,
 		bool resetVisibleList) {
@@ -219,9 +218,9 @@ VoxelVolume<TVoxel, TIndex>* DenseDynamicMapper<TVoxel, TWarp, TIndex>::TrackFra
 
 		if(configuration::get().telemetry_settings.log_volume_statistics && verbosity_level >= configuration::VERBOSITY_PER_ITERATION){
 			std::cout << green << "*** Per-Iteration Volume Statistics ***" << reset << std::endl;
-			std::cout << "   Warp update minimum: " << StatCalc_Accessor::Get<TWarp,TIndex>().ComputeFramewiseWarpMin(warp_field) << std::endl;
-			std::cout << "   Warp update mean: " << StatCalc_Accessor::Get<TWarp,TIndex>().ComputeFramewiseWarpMean(warp_field) << std::endl;
-			std::cout << "   Warp update maximum: " << StatCalc_Accessor::Get<TWarp,TIndex>().ComputeFramewiseWarpMax(warp_field) << std::endl;
+			std::cout << "   Warp update minimum: " << StatCalc_Accessor::Get<TWarp,TIndex>().ComputeWarpUpdateMin(warp_field) << std::endl;
+			std::cout << "   Warp update mean: " << StatCalc_Accessor::Get<TWarp,TIndex>().ComputeWarpUpdateMean(warp_field) << std::endl;
+			std::cout << "   Warp update maximum: " << StatCalc_Accessor::Get<TWarp,TIndex>().ComputeWarpUpdateMax(warp_field) << std::endl;
 			std::cout << "   Source live non-truncated voxel count: " << StatCalc_Accessor::Get<TVoxel,TIndex>().ComputeNonTruncatedVoxelCount(live_volume_pair[source_live_volume_index]) << std::endl;
 			std::cout << "   Target live non-truncated voxel count: " << StatCalc_Accessor::Get<TVoxel,TIndex>().ComputeNonTruncatedVoxelCount(live_volume_pair[target_live_volume_index]) << std::endl;
 		}

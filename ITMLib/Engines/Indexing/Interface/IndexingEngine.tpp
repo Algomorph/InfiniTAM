@@ -26,7 +26,7 @@ using namespace ITMLib;
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateNearSurface(VoxelVolume<TVoxel, TIndex>* volume,
-                                                                            const ITMView* view,
+                                                                            const View* view,
                                                                             const CameraTrackingState* tracking_state,
                                                                             bool onlyUpdateVisibleList,
                                                                             bool resetVisibleList) {}
@@ -34,7 +34,7 @@ void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateNearSurface(Voxe
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateNearSurface(VoxelVolume<TVoxel, TIndex>* scene,
-                                                                            const ITMView* view,
+                                                                            const View* view,
                                                                             const Matrix4f& depth_camera_matrix,
                                                                             bool onlyUpdateVisibleList,
                                                                             bool resetVisibleList) {}
@@ -42,7 +42,7 @@ void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateNearSurface(Voxe
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateNearAndBetweenTwoSurfaces(
-		VoxelVolume<TVoxel, TIndex>* targetVolume, const ITMView* view, const CameraTrackingState* tracking_state) {}
+		VoxelVolume<TVoxel, TIndex>* targetVolume, const View* view, const CameraTrackingState* tracking_state) {}
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::ResetUtilizedBlockList(VoxelVolume<TVoxel, TIndex>* volume) {}

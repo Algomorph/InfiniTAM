@@ -7,7 +7,7 @@ namespace ITMLib
 
 //#################### PUBLIC MEMBER FUNCTIONS ####################
 
-void ForceFailTracker::TrackCamera(CameraTrackingState *trackingState, const ITMView *view)
+void ForceFailTracker::TrackCamera(CameraTrackingState *trackingState, const View *view)
 {
 	trackingState->trackerResult = CameraTrackingState::TRACKING_FAILED;
 }

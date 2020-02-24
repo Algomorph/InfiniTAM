@@ -45,19 +45,19 @@ ExtendedTracker::ExtendedTracker(Vector2i imgSize_d,
 	}
 
 	// We always need the current depth image pyramid
-	viewHierarchy_Depth = new ITMImageHierarchy<ITMDepthHierarchyLevel>(imgSize_d, trackingRegime,
-																		noHierarchyLevels, memoryType, true);
+	viewHierarchy_Depth = new ImageHierarchy<DepthHierarchyLevel>(imgSize_d, trackingRegime,
+	                                                              noHierarchyLevels, memoryType, true);
 
 	// We need the colour pyramid only when colour is used for tracking.
 	if (useColour)
 	{
 		// Do NOT skip allocation for level 0 since intensity images are only used in the tracker
-		viewHierarchy_Intensity = new ITMImageHierarchy<ITMIntensityHierarchyLevel>(imgSize_rgb, trackingRegime,
-																					noHierarchyLevels, memoryType,
-																					false);
+		viewHierarchy_Intensity = new ImageHierarchy<IntensityHierarchyLevel>(imgSize_rgb, trackingRegime,
+		                                                                      noHierarchyLevels, memoryType,
+		                                                                      false);
 
-		reprojectedPointsHierarchy = new ITMImageHierarchy<ITMTemplatedHierarchyLevel<ITMFloat4Image> >(imgSize_d, trackingRegime, noHierarchyLevels, memoryType, false);
-		projectedIntensityHierarchy = new ITMImageHierarchy<ITMTemplatedHierarchyLevel<ITMFloatImage> >(imgSize_d, trackingRegime, noHierarchyLevels, memoryType, false);
+		reprojectedPointsHierarchy = new ImageHierarchy<TemplatedHierarchyLevel<ITMFloat4Image> >(imgSize_d, trackingRegime, noHierarchyLevels, memoryType, false);
+		projectedIntensityHierarchy = new ImageHierarchy<TemplatedHierarchyLevel<ITMFloatImage> >(imgSize_d, trackingRegime, noHierarchyLevels, memoryType, false);
 	}
 	else
 	{
@@ -69,7 +69,7 @@ ExtendedTracker::ExtendedTracker(Vector2i imgSize_d,
 	// We need the scene hierarchy (ICP and Normal raycasts) only if depth is used for tracking.
 	if (useDepth)
 	{
-		sceneHierarchy = new ITMImageHierarchy<ITMSceneHierarchyLevel>(imgSize_d, trackingRegime, noHierarchyLevels, memoryType, true);
+		sceneHierarchy = new ImageHierarchy<VolumeHierarchyLevel>(imgSize_d, trackingRegime, noHierarchyLevels, memoryType, true);
 	}
 
 	this->noIterationsPerLevel = new int[noHierarchyLevels];
@@ -165,7 +165,7 @@ void ExtendedTracker::SetupLevels(int numIterCoarse, int numIterFine, float spac
 	}
 }
 
-void ExtendedTracker::SetEvaluationData(CameraTrackingState *trackingState, const ITMView *view)
+void ExtendedTracker::SetEvaluationData(CameraTrackingState *trackingState, const View *view)
 {
 	this->trackingState = trackingState;
 	this->view = view;
@@ -209,8 +209,8 @@ void ExtendedTracker::PrepareForEvaluation()
 	// Create depth pyramid
 	for (int i = 1; i < viewHierarchy_Depth->GetNoLevels(); i++)
 	{
-		ITMDepthHierarchyLevel *currentLevel = viewHierarchy_Depth->GetLevel(i);
-		ITMDepthHierarchyLevel *previousLevel = viewHierarchy_Depth->GetLevel(i - 1);
+		DepthHierarchyLevel *currentLevel = viewHierarchy_Depth->GetLevel(i);
+		DepthHierarchyLevel *previousLevel = viewHierarchy_Depth->GetLevel(i - 1);
 
 		lowLevelEngine->FilterSubsampleWithHoles(currentLevel->depth, previousLevel->depth);
 
@@ -222,8 +222,8 @@ void ExtendedTracker::PrepareForEvaluation()
 	{
 		for (int i = 1; i < viewHierarchy_Intensity->GetNoLevels(); i++)
 		{
-			ITMIntensityHierarchyLevel *currentLevel = viewHierarchy_Intensity->GetLevel(i);
-			ITMIntensityHierarchyLevel *previousLevel = viewHierarchy_Intensity->GetLevel(i - 1);
+			IntensityHierarchyLevel *currentLevel = viewHierarchy_Intensity->GetLevel(i);
+			IntensityHierarchyLevel *previousLevel = viewHierarchy_Intensity->GetLevel(i - 1);
 
 			lowLevelEngine->FilterSubsample(currentLevel->intensity_current, previousLevel->intensity_current);
 			lowLevelEngine->FilterSubsample(currentLevel->intensity_prev, previousLevel->intensity_prev);
@@ -237,11 +237,11 @@ void ExtendedTracker::PrepareForEvaluation()
 		// Project RGB image according to the depth->rgb transform and cache it to speed up the energy computation
 		for (int i = 0; i < viewHierarchy_Intensity->GetNoLevels(); ++i)
 		{
-			ITMTemplatedHierarchyLevel<ITMFloat4Image> *pointsOut = reprojectedPointsHierarchy->GetLevel(i);
-			ITMTemplatedHierarchyLevel<ITMFloatImage> *intensityOut = projectedIntensityHierarchy->GetLevel(i);
+			TemplatedHierarchyLevel<ITMFloat4Image> *pointsOut = reprojectedPointsHierarchy->GetLevel(i);
+			TemplatedHierarchyLevel<ITMFloatImage> *intensityOut = projectedIntensityHierarchy->GetLevel(i);
 
-			const ITMIntensityHierarchyLevel *intensityIn = viewHierarchy_Intensity->GetLevel(i);
-			const ITMDepthHierarchyLevel *depthIn = viewHierarchy_Depth->GetLevel(i);
+			const IntensityHierarchyLevel *intensityIn = viewHierarchy_Intensity->GetLevel(i);
+			const DepthHierarchyLevel *depthIn = viewHierarchy_Depth->GetLevel(i);
 
 			Vector4f intrinsics_rgb = intensityIn->intrinsics;
 			Vector4f intrinsics_depth = depthIn->intrinsics;
@@ -258,8 +258,8 @@ void ExtendedTracker::PrepareForEvaluation()
 	{
 		for (int i = 1; i < sceneHierarchy->GetNoLevels(); i++)
 		{
-			ITMSceneHierarchyLevel *currentLevel = sceneHierarchy->GetLevel(i);
-			ITMSceneHierarchyLevel *previousLevel = sceneHierarchy->GetLevel(i - 1);
+			VolumeHierarchyLevel *currentLevel = sceneHierarchy->GetLevel(i);
+			VolumeHierarchyLevel *previousLevel = sceneHierarchy->GetLevel(i - 1);
 
 			lowLevelEngine->FilterSubsampleWithHoles(currentLevel->pointsMap, previousLevel->pointsMap);
 			lowLevelEngine->FilterSubsampleWithHoles(currentLevel->normalsMap, previousLevel->normalsMap);
@@ -417,7 +417,7 @@ void ExtendedTracker::UpdatePoseQuality(int noValidPoints_old, float *hessian_go
 	}
 }
 
-void ExtendedTracker::TrackCamera(CameraTrackingState *trackingState, const ITMView *view)
+void ExtendedTracker::TrackCamera(CameraTrackingState *trackingState, const View *view)
 {
 	// bookkeeping
 	if (trackingState->point_cloud_age >= 0) trackingState->framesProcessed++;

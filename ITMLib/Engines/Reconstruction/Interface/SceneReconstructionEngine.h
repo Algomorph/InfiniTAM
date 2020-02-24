@@ -7,7 +7,7 @@
 #include "../../../Objects/RenderStates/RenderState.h"
 #include "../../../Objects/Volume/VoxelVolume.h"
 #include "../../../Objects/Tracking/CameraTrackingState.h"
-#include "../../../Objects/Views/ITMView.h"
+#include "../../../Objects/Views/View.h"
 
 namespace ITMLib
 {
@@ -39,13 +39,13 @@ namespace ITMLib
 		 * \param onlyUpdateVisibleList [in] whether we want to allocate only the hash entry blocks currently visible
 		 * \param resetVisibleList  [in] reset visibility list upon completion
 		 */
-		virtual void AllocateSceneFromDepth(VoxelVolume<TVoxel,TIndex> *scene, const ITMView *view, const CameraTrackingState *trackingState,
+		virtual void AllocateSceneFromDepth(VoxelVolume<TVoxel,TIndex> *scene, const View *view, const CameraTrackingState *trackingState,
 		                                    const RenderState *renderState, bool onlyUpdateVisibleList = false, bool resetVisibleList = false) = 0;
 
 		/** Update the voxel blocks by integrating depth and
 		    possibly colour information from the given view.
 		*/
-		virtual void IntegrateIntoScene(VoxelVolume<TVoxel,TIndex> *scene, const ITMView *view, const CameraTrackingState *trackingState,
+		virtual void IntegrateIntoScene(VoxelVolume<TVoxel,TIndex> *scene, const View *view, const CameraTrackingState *trackingState,
 		                                const RenderState *renderState) = 0;
 
 		SceneReconstructionEngine(void) { }

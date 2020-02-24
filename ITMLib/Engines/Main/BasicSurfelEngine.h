@@ -39,7 +39,7 @@ namespace ITMLib
 		ITMUChar4Image *kfRaycast;
 
 		/// Pointer for storing the current input frame
-		ITMView *view;
+		View *view;
 
 		/// Pointer to the current camera pose and additional tracking information
 		CameraTrackingState *trackingState;
@@ -47,7 +47,7 @@ namespace ITMLib
 		static typename SurfelVisualizationEngine<TSurfel>::RenderImageType ToSurfelImageType(GetImageType getImageType);
 
 	public:
-		ITMView* GetView(void) { return view; }
+		View* GetView(void) { return view; }
 		CameraTrackingState* GetTrackingState(void) { return trackingState; }
 
 		CameraTrackingState::TrackingResult ProcessFrame(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage, IMUMeasurement *imuMeasurement = NULL);

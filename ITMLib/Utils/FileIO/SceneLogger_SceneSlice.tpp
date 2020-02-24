@@ -120,15 +120,14 @@ VolumeSequenceRecorder<TVoxel, TWarp, TIndex>::SaveSliceWarp(const Vector6i& vox
 	fullWarpLogger->StartLoadingWarpState();
 	int zRangeStart, zRangeEnd, yRangeStart, yRangeEnd, xRangeStart, xRangeEnd;
 
-	WarpAndUpdateWriteFunctor<TWarp> warpAndUpdateWriteFunctor(&sliceWarpOfstream, sizeof(Vector3f),sizeof(Vector3f));
+	WarpVoxelWriteFunctor<TWarp, TWarp::hasFramewiseWarp, TWarp::hasWarpUpdate> warp_writer(&sliceWarpOfstream, sizeof(Vector3f), sizeof(Vector3f));
 
 	while (fullWarpLogger->LoadCurrentWarpState()) {
 		unsigned int sliceIterationCursor = fullWarpLogger->GetIterationCursor();
 		sliceWarpOfstream.write(reinterpret_cast<const char* >(&sliceIterationCursor), sizeof(sliceIterationCursor));
 
 		VolumeTraversalEngine<TWarp, TIndex, MEMORYDEVICE_CPU>::TraverseAllWithinBounds(fullWarpLogger->warpField,
-		                                                                                warpAndUpdateWriteFunctor,
-		                                                                                voxelRange);
+		                                                                                warp_writer,voxelRange);
 	}
 	sliceWarpOfstream.close();
 	fullWarpLogger->StopLoadingWarpState();

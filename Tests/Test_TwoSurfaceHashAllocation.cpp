@@ -92,8 +92,8 @@ struct TestData {
 	const std::string square_1_color_path = "TestData/square1_color.png";
 	const std::string square_2_color_path = "TestData/square2_color.png";
 	ViewBuilder* view_builder;
-	ITMView* view_square_1 = nullptr;
-	ITMView* view_square_2 = nullptr;
+	View* view_square_1 = nullptr;
+	View* view_square_2 = nullptr;
 	CameraTrackingState* tracking_state;
 	RenderState* render_state;
 	std::unordered_set<Vector3s> ground_truth_block_positions;

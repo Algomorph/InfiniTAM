@@ -54,6 +54,18 @@ struct AlteredGradientCountFunctor {
 
 	std::atomic<unsigned int> count;
 };
+template<typename TVoxel>
+struct AlteredWarpUpdateCountFunctor {
+	AlteredWarpUpdateCountFunctor() : count(0) {};
+
+	void operator()(const TVoxel& voxel) {
+		if (voxel.warp_update != Vector3f(0.0f)) {
+			count.fetch_add(1u);
+		}
+	}
+
+	std::atomic<unsigned int> count;
+};
 
 template<typename TVoxel>
 struct AlteredFramewiseWarpCountFunctor {
@@ -120,7 +132,7 @@ BOOST_FIXTURE_TEST_CASE(testUpdateWarps_CPU_VBH, DataFixture) {
 	BOOST_REQUIRE_CLOSE(max_warp, 0.121243507f, 1e-7f);
 
 
-	AlteredFramewiseWarpCountFunctor<WarpVoxel> functor;
+	AlteredWarpUpdateCountFunctor<WarpVoxel> functor;
 	VolumeTraversalEngine<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::
 	TraverseAll(&warp_field_copy, functor);
 	BOOST_REQUIRE_EQUAL(functor.count.load(), 37525u);

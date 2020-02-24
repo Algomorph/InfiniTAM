@@ -64,7 +64,7 @@ namespace ITMLib
 		};
 
 		/// Gives access to the current input frame
-		virtual ITMView* GetView(void) = 0;
+		virtual View* GetView(void) = 0;
 
 		/// Gives access to the current camera pose and additional tracking information
 		virtual CameraTrackingState* GetTrackingState(void) = 0;

@@ -22,10 +22,10 @@ namespace ITMLib
 	public:
 
 		/// Process a single frame
-		void ProcessFrame(const ITMView *view, const CameraTrackingState *trackingState, VoxelVolume<TVoxel,TIndex> *scene, RenderState *renderState_live);
+		void ProcessFrame(const View *view, const CameraTrackingState *trackingState, VoxelVolume<TVoxel,TIndex> *scene, RenderState *renderState_live);
 
 		/// Update the visible list (this can be called to update the visible list when fusion is turned off)
-		void UpdateVisibleList(const ITMView *view, const CameraTrackingState *trackingState, VoxelVolume<TVoxel, TIndex> *scene, RenderState *renderState, bool resetVisibleList = false);
+		void UpdateVisibleList(const View *view, const CameraTrackingState *trackingState, VoxelVolume<TVoxel, TIndex> *scene, RenderState *renderState, bool resetVisibleList = false);
 
 		/** \brief Constructor
 		    Ommitting a separate image size for the depth images

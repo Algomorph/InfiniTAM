@@ -29,10 +29,10 @@
 
 
 template<typename TVoxel, bool hasCumulativeWarp>
-struct WarpClearFunctor;
+struct ClearOutCumulativeWarpStaticFunctor;
 
 template<typename TWarp>
-struct WarpClearFunctor<TWarp, true> {
+struct ClearOutCumulativeWarpStaticFunctor<TWarp, true> {
 	_CPU_AND_GPU_CODE_
 	static inline void run(TWarp& voxel) {
 		voxel.warp = Vector3f(0.0f);
@@ -40,17 +40,26 @@ struct WarpClearFunctor<TWarp, true> {
 };
 
 template<typename TWarp>
-struct WarpClearFunctor<TWarp, false> {
+struct ClearOutCumulativeWarpStaticFunctor<TWarp, false> {
 	_CPU_AND_GPU_CODE_
 	static inline void run(TWarp& voxel) {}
 };
 
+template<typename TWarp, bool hasFramewiseWarp>
+struct ClearOutFramewiseWarpStaticFunctor;
+
 template<typename TWarp>
-struct ClearOutFramewiseWarpStaticFunctor {
+struct ClearOutFramewiseWarpStaticFunctor<TWarp, true> {
 	_CPU_AND_GPU_CODE_
 	static inline void run(TWarp& voxel) {
 		voxel.framewise_warp = Vector3f(0.0f);
 	}
+};
+
+template<typename TWarp>
+struct ClearOutFramewiseWarpStaticFunctor<TWarp, false> {
+	_CPU_AND_GPU_CODE_
+	static inline void run(TWarp& voxel) {}
 };
 
 
@@ -69,7 +78,7 @@ struct WarpUpdateFunctor {
 	WarpUpdateFunctor(float learningRate, float momentumWeight, bool gradientSmoothingEnabled) :
 			gradient_weight(learningRate * (1.0f - momentumWeight)), momentum_weight(momentumWeight),
 			gradient_smoothing_enabled(gradientSmoothingEnabled),
-			max_framewise_warp_position(0),
+			//max_framewise_warp_position(0),
 			max_warp_update_position(0) {
 		INITIALIZE_ATOMIC(float, max_framewise_warp_length, 0.0f);
 		INITIALIZE_ATOMIC(float, max_warp_update_length, 0.0f);
@@ -86,36 +95,36 @@ struct WarpUpdateFunctor {
 		                                           warp_voxel.gradient1 : warp_voxel.gradient0);
 
 		warp_voxel.warp_update = warp_update + momentum_weight * warp_voxel.warp_update;
-		warp_voxel.framewise_warp += warp_voxel.warp_update;
+		//warp_voxel.framewise_warp += warp_voxel.warp_update;
 
 		// update stats
-		float framewise_warp_length = ORUtils::length(warp_voxel.framewise_warp);
+		//float framewise_warp_length = ORUtils::length(warp_voxel.framewise_warp);
 		float warp_update_length = ORUtils::length(warp_update);
 
 #if !defined(__CUDACC__) && !defined(WITH_OPENMP)
 		//single-threaded CPU version (for debugging max warp_voxel position)
-		if (framewise_warp_length > max_framewise_warp_length.load()) {
-			max_framewise_warp_length.store(framewise_warp_length);
-			max_framewise_warp_position = position;
-		}
+//		if (framewise_warp_length > max_framewise_warp_length.load()) {
+//			max_framewise_warp_length.store(framewise_warp_length);
+//			max_framewise_warp_position = position;
+//		}
 		if (warp_update_length > max_warp_update_length.load()) {
 			max_warp_update_length.store(warp_update_length);
 			max_warp_update_position = position;
 		}
 #else
-		ATOMIC_MAX(max_framewise_warp_length, framewise_warp_length);
+		//ATOMIC_MAX(max_framewise_warp_length, framewise_warp_length);
 		ATOMIC_MAX(max_warp_update_length, warp_update_length);
 #endif
 	}
 
-	float GetMaxFramewiseWarpLength(){
-		return GET_ATOMIC_VALUE_CPU(max_framewise_warp_length);
-	}
+//	float GetMaxFramewiseWarpLength(){
+//		return GET_ATOMIC_VALUE_CPU(max_framewise_warp_length);
+//	}
 	float GetMaxWarpUpdateLength(){
 		return GET_ATOMIC_VALUE_CPU(max_warp_update_length);
 	}
 
-	Vector3i max_framewise_warp_position;
+//	Vector3i max_framewise_warp_position;
 	Vector3i max_warp_update_position;
 
 	_DEVICE_WHEN_AVAILABLE_
@@ -139,52 +148,54 @@ private:
 };
 
 
+//TODO: clean out dead code, potentially make versions for warps w/ framewise warp separately
+
 template<typename TVoxel, typename TWarp>
 struct WarpHistogramFunctor {
-	WarpHistogramFunctor(float max_warp_length, float max_warp_update_length) :
-			maxWarpLength(max_warp_length), maxWarpUpdateLength(max_warp_update_length) {
+	WarpHistogramFunctor(/*float max_framewise_warp_length, */float max_warp_update_length) :
+			/*maxFramewiseWarpLength(max_framewise_warp_length),*/ max_warp_update_length(max_warp_update_length) {
 	}
 
 	static const int histogram_bin_count = 10;
 
 	void operator()( TWarp& warp, TVoxel& canonicalVoxel, TVoxel& liveVoxel) {
 		if (!VoxelIsConsideredForTracking(canonicalVoxel, liveVoxel)) return;
-		float framewiseWarpLength = ORUtils::length(warp.framewise_warp);
-		float warpUpdateLength = ORUtils::length(warp.gradient0);
-		const int histBinCount = WarpHistogramFunctor<TVoxel, TWarp>::histogram_bin_count;
-		int binIdx = 0;
-		if (maxWarpLength > 0) {
-			binIdx = ORUTILS_MIN(histBinCount - 1, (int) (framewiseWarpLength * histBinCount / maxWarpLength));
+//		float framewiseWarpLength = ORUtils::length(warp.framewise_warp);
+		float warp_update_length = ORUtils::length(warp.warp_update);
+		const int histogram_bin_count = WarpHistogramFunctor<TVoxel, TWarp>::histogram_bin_count;
+		int bin_index = 0;
+//		if (maxFramewiseWarpLength > 0) {
+//			bin_index = ORUTILS_MIN(histogram_bin_count - 1, (int) (framewiseWarpLength * histogram_bin_count / maxFramewiseWarpLength));
+//		}
+//		framewiseWarpBins[bin_index]++;
+		if (max_warp_update_length > 0) {
+			bin_index = ORUTILS_MIN(histogram_bin_count - 1,
+			                        (int) (warp_update_length * histogram_bin_count / max_warp_update_length));
 		}
-		warpBins[binIdx]++;
-		if (maxWarpUpdateLength > 0) {
-			binIdx = ORUTILS_MIN(histBinCount - 1,
-			                     (int) (warpUpdateLength * histBinCount / maxWarpUpdateLength));
-		}
-		updateBins[binIdx]++;
+		warp_update_bins[bin_index]++;
 	}
 
 	void PrintHistogram() {
-		std::cout << "FW warp length histogram: ";
-		for (int iBin = 0; iBin < histogram_bin_count; iBin++) {
-			std::cout << std::setfill(' ') << std::setw(7) << warpBins[iBin] << "  ";
-		}
-		std::cout << std::endl;
+//		std::cout << "FW warp length histogram: ";
+//		for (int iBin = 0; iBin < histogram_bin_count; iBin++) {
+//			std::cout << std::setfill(' ') << std::setw(7) << framewiseWarpBins[iBin] << "  ";
+//		}
+//		std::cout << std::endl;
 		std::cout << "Update length histogram: ";
 		for (int iBin = 0; iBin < histogram_bin_count; iBin++) {
-			std::cout << std::setfill(' ') << std::setw(7) << updateBins[iBin] << "  ";
+			std::cout << std::setfill(' ') << std::setw(7) << warp_update_bins[iBin] << "  ";
 		}
 		std::cout << std::endl;
 	}
 
 
 private:
-	const float maxWarpLength;
-	const float maxWarpUpdateLength;
+//	const float maxFramewiseWarpLength;
+	const float max_warp_update_length;
 
 	// <20%, 40%, 60%, 80%, 100%
-	int warpBins[histogram_bin_count] = {0};
-	int updateBins[histogram_bin_count] = {0};
+//	int framewiseWarpBins[histogram_bin_count] = {0};
+	int warp_update_bins[histogram_bin_count] = {0};
 };
 
 enum TraversalDirection : int {

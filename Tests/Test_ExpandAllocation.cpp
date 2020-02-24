@@ -156,7 +156,7 @@ void TestAllocateBasedOnVolumeExpanded_Generic() {
 	                                               TMemoryDeviceType,
 	                                               Frame16And17Fixture::InitParams<VoxelBlockHash>());
 	EditAndCopyEngineFactory::Instance<TSDFVoxel, VoxelBlockHash, TMemoryDeviceType>().ResetVolume(&volume2);
-	ITMView* view = nullptr;
+	View* view = nullptr;
 	updateView(&view, "TestData/snoopy_depth_000017.png",
 	           "TestData/snoopy_color_000017.png", "TestData/snoopy_omask_000017.png",
 	           "TestData/snoopy_calib.txt", TMemoryDeviceType);

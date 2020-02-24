@@ -5,7 +5,7 @@
 using namespace metal;
 
 #include "../Shared/SceneReconstructionEngine_Shared.h"
-#include "ITMSceneReconstructionEngine_Metal.h"
+#include "SceneReconstructionEngine_Metal.h"
 #include "../../../GlobalTemplateDefines.h"
 
 kernel void integrateIntoScene_vh_device(DEVICEPTR(ITMVoxel) *localVBA                          [[ buffer(0) ]],

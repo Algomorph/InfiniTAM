@@ -15,7 +15,7 @@ namespace ITMLib
 		//#################### PUBLIC MEMBER FUNCTIONS ####################
 	public:
 		/** Override */
-		virtual void TrackCamera(CameraTrackingState *trackingState, const ITMView *view);
+		virtual void TrackCamera(CameraTrackingState *trackingState, const View *view);
 
 		/** Override */
 		virtual bool requiresColourRendering() const;

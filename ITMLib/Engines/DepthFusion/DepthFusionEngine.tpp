@@ -23,7 +23,7 @@ using namespace ITMLib;
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void DepthFusionEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::UpdateVisibleList(
-		VoxelVolume<TVoxel, TIndex>* scene, const ITMView* view, const CameraTrackingState* trackingState,
+		VoxelVolume<TVoxel, TIndex>* scene, const View* view, const CameraTrackingState* trackingState,
 		const RenderState* renderState, bool resetVisibleList) {
 	IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::Instance()
 			.AllocateNearSurface(scene, view, trackingState, true, resetVisibleList);
@@ -31,7 +31,7 @@ void DepthFusionEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::UpdateVisibleL
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void DepthFusionEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::GenerateTsdfVolumeFromTwoSurfaces(
-		VoxelVolume<TVoxel, TIndex>* volume, const ITMView* view,
+		VoxelVolume<TVoxel, TIndex>* volume, const View* view,
 		const CameraTrackingState* tracking_state) {
 	volume->Reset();
 	IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::Instance()
@@ -42,7 +42,7 @@ void DepthFusionEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::GenerateTsdfVo
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void DepthFusionEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::GenerateTsdfVolumeFromSurface(
-		VoxelVolume<TVoxel, TIndex>* volume, const ITMView* view, const CameraTrackingState* tracking_state) {
+		VoxelVolume<TVoxel, TIndex>* volume, const View* view, const CameraTrackingState* tracking_state) {
 	volume->Reset();
 	IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::Instance()
 			.AllocateNearSurface(volume, view, tracking_state, false, false);
@@ -52,7 +52,7 @@ void DepthFusionEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::GenerateTsdfVo
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void DepthFusionEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::IntegrateDepthImageIntoTsdfVolume_Helper(
-		VoxelVolume<TVoxel, TIndex>* volume, const ITMView* view, Matrix4f depth_camera_matrix) {
+		VoxelVolume<TVoxel, TIndex>* volume, const View* view, Matrix4f depth_camera_matrix) {
 	if (volume->sceneParams->stop_integration_at_max_weight) {
 		VoxelDepthIntegrationFunctor<TVoxel, TMemoryDeviceType, true> integration_functor(*(volume->sceneParams), view,
 		                                                                                  depth_camera_matrix);
@@ -67,13 +67,13 @@ void DepthFusionEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::IntegrateDepth
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void DepthFusionEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::IntegrateDepthImageIntoTsdfVolume(
-		VoxelVolume<TVoxel, TIndex>* volume, const ITMView* view, const CameraTrackingState* trackingState) {
+		VoxelVolume<TVoxel, TIndex>* volume, const View* view, const CameraTrackingState* trackingState) {
 	IntegrateDepthImageIntoTsdfVolume_Helper(volume, view, trackingState->pose_d->GetM());
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void DepthFusionEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::IntegrateDepthImageIntoTsdfVolume(
-		VoxelVolume<TVoxel, TIndex>* volume, const ITMView* view) {
+		VoxelVolume<TVoxel, TIndex>* volume, const View* view) {
 	IntegrateDepthImageIntoTsdfVolume_Helper(volume, view);
 }
 

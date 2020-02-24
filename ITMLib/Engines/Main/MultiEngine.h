@@ -51,9 +51,9 @@ namespace ITMLib
 		int freeviewLocalMapIdx;
 
 		/// Pointer for storing the current input frame
-		ITMView *view;
+		View *view;
 	public:
-		ITMView* GetView() { return view; }
+		View* GetView() { return view; }
 
 		CameraTrackingState* GetTrackingState(void);
 

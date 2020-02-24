@@ -5,7 +5,7 @@
 #include "../../../Objects/RenderStates/RenderState.h"
 #include "../../../Objects/Volume/VoxelVolume.h"
 #include "../../../Objects/Tracking/CameraTrackingState.h"
-#include "../../../Objects/Views/ITMView.h"
+#include "../../../Objects/Views/View.h"
 
 namespace ITMLib
 {
@@ -88,13 +88,13 @@ namespace ITMLib
 		/** Create a point cloud as required by the
 		ITMLib::Engine::ITMColorTracker classes.
 		*/
-		virtual void CreatePointCloud(VoxelVolume<TVoxel,TIndex> *scene, const ITMView *view, CameraTrackingState *trackingState,
+		virtual void CreatePointCloud(VoxelVolume<TVoxel,TIndex> *scene, const View *view, CameraTrackingState *trackingState,
 		                              RenderState *renderState, bool skipPoints) const = 0;
 
 		/** Create an image of reference points and normals as
 		required by the ITMLib::Engine::ITMDepthTracker classes.
 		*/
-		virtual void CreateICPMaps(VoxelVolume<TVoxel,TIndex> *scene, const ITMView *view, CameraTrackingState *trackingState,
+		virtual void CreateICPMaps(VoxelVolume<TVoxel,TIndex> *scene, const View *view, CameraTrackingState *trackingState,
 		                           RenderState *renderState) const = 0;
 
 		/** Create an image of reference points and normals as
@@ -102,7 +102,7 @@ namespace ITMLib
 
 		Incrementally previous raycast result.
 		*/
-		virtual void ForwardRender(const VoxelVolume<TVoxel,TIndex> *scene, const ITMView *view, CameraTrackingState *trackingState,
+		virtual void ForwardRender(const VoxelVolume<TVoxel,TIndex> *scene, const View *view, CameraTrackingState *trackingState,
 		                           RenderState *renderState) const = 0;
 	};
 }

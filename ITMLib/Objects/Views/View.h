@@ -11,7 +11,7 @@ namespace ITMLib
 	    Represents a single "view", i.e. RGB and depth images along
 	    with all intrinsic and relative calibration information
 	*/
-	class ITMView
+	class View
 	{
 	public:
 		/// Intrinsic calibration information for the view.
@@ -37,7 +37,7 @@ namespace ITMLib
 		// confidence based on distance from center
 		ITMFloatImage *depthConfidence;
 
-		ITMView(const RGBDCalib& calibration, Vector2i imgSize_rgb, Vector2i imgSize_d, bool useGPU)
+		View(const RGBDCalib& calibration, Vector2i imgSize_rgb, Vector2i imgSize_d, bool useGPU)
 		: calib(calibration)
 		{
 			this->rgb = new ITMUChar4Image(imgSize_rgb, true, useGPU);
@@ -48,7 +48,7 @@ namespace ITMLib
 			this->depthConfidence = new ITMFloatImage(imgSize_d, true, useGPU);
 		}
 
-		virtual ~ITMView(void)
+		virtual ~View(void)
 		{
 			delete rgb;
 			delete rgb_prev;
@@ -61,7 +61,7 @@ namespace ITMLib
 		}
 
 		// Suppress the default copy constructor and assignment operator
-		ITMView(const ITMView&);
-		ITMView& operator=(const ITMView&);
+		View(const View&);
+		View& operator=(const View&);
 	};
 }

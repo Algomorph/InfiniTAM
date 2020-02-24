@@ -498,10 +498,11 @@ public:
 			currentZebraIndex(currentZebraIndex) {}
 
 	void operator()(const TWarp& warp, const Vector3i& position) {
+//TODO: fixme
+		//Vector3f updateStartPoint = position.toFloat() + warp.framewise_warp - warp.warp_update;
 
-		Vector3f updateStartPoint = position.toFloat() + warp.framewise_warp - warp.warp_update;
 		Vector3f updateVector = warp.warp_update;
-		updatePoints->InsertNextPoint(updateStartPoint.x, updateStartPoint.y, updateStartPoint.z);
+		//updatePoints->InsertNextPoint(updateStartPoint.x, updateStartPoint.y, updateStartPoint.z);
 		updateVectors->InsertNextTuple(updateVector.values);
 		updateColors->InsertNextValue(currentZebraIndex);
 

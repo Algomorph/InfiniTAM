@@ -122,7 +122,7 @@ template void loadVolume<WarpVoxel, VoxelBlockHash>(VoxelVolume<WarpVoxel, Voxel
                                                     configuration::SwappingMode swappingMode);
 
 void
-updateView(ITMView** view, const std::string& depth_path, const std::string& color_path, const std::string& mask_path,
+updateView(View** view, const std::string& depth_path, const std::string& color_path, const std::string& mask_path,
            const std::string& calibration_path, MemoryDeviceType memoryDevice) {
 	static ViewBuilder* viewBuilder_CPU = nullptr;
 	static ViewBuilder* viewBuilder_CUDA = nullptr;
@@ -163,8 +163,8 @@ updateView(ITMView** view, const std::string& depth_path, const std::string& col
 template
 void buildSdfVolumeFromImage_NearSurfaceAllocation<TSDFVoxel, PlainVoxelArray>(
 		VoxelVolume<TSDFVoxel, PlainVoxelArray>** volume,
-		ITMView** view,
-		const std::string& depth_path,const std::string& color_path,const std::string& mask_path,
+		View** view,
+		const std::string& depth_path, const std::string& color_path, const std::string& mask_path,
 		const std::string& calibration_path,
 		MemoryDeviceType memory_device,
 		PlainVoxelArray::InitializationParameters initialization_parameters,
@@ -182,8 +182,8 @@ void buildSdfVolumeFromImage_NearSurfaceAllocation<TSDFVoxel, PlainVoxelArray>(
 template
 void buildSdfVolumeFromImage_NearSurfaceAllocation<TSDFVoxel, VoxelBlockHash>(
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>** volume,
-		ITMView** view,
-		const std::string& depth_path,const std::string& color_path,const std::string& mask_path,
+		View** view,
+		const std::string& depth_path, const std::string& color_path, const std::string& mask_path,
 		const std::string& calibration_path,
 		MemoryDeviceType memory_device,
 		VoxelBlockHash::InitializationParameters initialization_parameters,
@@ -203,9 +203,9 @@ template
 void buildSdfVolumeFromImage_SurfaceSpanAllocation<TSDFVoxel, PlainVoxelArray>(
 		VoxelVolume<TSDFVoxel, PlainVoxelArray>** volume1,
 		VoxelVolume<TSDFVoxel, PlainVoxelArray>** volume2,
-		ITMView** view,
-		const std::string& depth1_path,const std::string& color1_path,const std::string& mask1_path,
-		const std::string& depth2_path,const std::string& color2_path,const std::string& mask2_path,
+		View** view,
+		const std::string& depth1_path, const std::string& color1_path, const std::string& mask1_path,
+		const std::string& depth2_path, const std::string& color2_path, const std::string& mask2_path,
 		const std::string& calibration_path,
 		MemoryDeviceType memory_device,
 		PlainVoxelArray::InitializationParameters initialization_parameters,
@@ -224,9 +224,9 @@ template
 void buildSdfVolumeFromImage_SurfaceSpanAllocation<TSDFVoxel, VoxelBlockHash>(
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>** volume1,
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>** volume2,
-		ITMView** view,
-		const std::string& depth1_path,const std::string& color1_path,const std::string& mask1_path,
-		const std::string& depth2_path,const std::string& color2_path,const std::string& mask2_path,
+		View** view,
+		const std::string& depth1_path, const std::string& color1_path, const std::string& mask1_path,
+		const std::string& depth2_path, const std::string& color2_path, const std::string& mask2_path,
 		const std::string& calibration_path,
 		MemoryDeviceType memory_device,
 		VoxelBlockHash::InitializationParameters initialization_parameters,

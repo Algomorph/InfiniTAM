@@ -7,7 +7,7 @@
 #include "../../../Objects/RenderStates/SurfelRenderState.h"
 #include "../../../Objects/Volume/SurfelScene.h"
 #include "../../../Objects/Tracking/CameraTrackingState.h"
-#include "../../../Objects/Views/ITMView.h"
+#include "../../../Objects/Views/View.h"
 #include "../../../Utils/ImageTypes.h"
 #include "../../../../ORUtils/SE3Pose.h"
 

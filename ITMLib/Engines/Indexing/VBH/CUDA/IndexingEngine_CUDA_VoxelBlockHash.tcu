@@ -245,7 +245,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::AllocateBlockLis
 
 template<typename TVoxel>
 void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::BuildUtilizedBlockListBasedOnVisibility(
-		VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ITMView* view,
+		VoxelVolume<TVoxel, VoxelBlockHash>* volume, const View* view,
 		const Matrix4f& depth_camera_matrix) {
 
 	// ** volume data **

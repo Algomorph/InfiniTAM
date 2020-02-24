@@ -26,7 +26,7 @@ DenseMapper<TVoxel,TIndex>::~DenseMapper()
 }
 
 template<class TVoxel, class TIndex>
-void DenseMapper<TVoxel,TIndex>::ProcessFrame(const ITMView *view, const CameraTrackingState *trackingState, VoxelVolume<TVoxel,TIndex> *scene, RenderState *renderState)
+void DenseMapper<TVoxel,TIndex>::ProcessFrame(const View *view, const CameraTrackingState *trackingState, VoxelVolume<TVoxel,TIndex> *scene, RenderState *renderState)
 {
 	// allocation
 	sceneRecoEngine->AllocateSceneFromDepth(scene, view, trackingState, renderState);
@@ -54,7 +54,7 @@ void DenseMapper<TVoxel,TIndex>::ProcessFrame(const ITMView *view, const CameraT
 }
 
 template<class TVoxel, class TIndex>
-void DenseMapper<TVoxel,TIndex>::UpdateVisibleList(const ITMView *view, const CameraTrackingState *trackingState, VoxelVolume<TVoxel,TIndex> *scene, RenderState *renderState, bool resetVisibleList)
+void DenseMapper<TVoxel,TIndex>::UpdateVisibleList(const View *view, const CameraTrackingState *trackingState, VoxelVolume<TVoxel,TIndex> *scene, RenderState *renderState, bool resetVisibleList)
 {
 	sceneRecoEngine->AllocateSceneFromDepth(scene, view, trackingState, renderState, true, resetVisibleList);
 }

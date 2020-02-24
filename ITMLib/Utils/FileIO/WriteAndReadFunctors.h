@@ -18,11 +18,15 @@
 #include <iostream>
 
 namespace ITMLib{
+
+template<typename TVoxel, bool hasFramewiseWarp, bool hasWarpUpdate>
+struct WarpVoxelWriteFunctor;
+
 template<typename TVoxel>
-struct WarpAndUpdateWriteFunctor {
-	WarpAndUpdateWriteFunctor(std::ofstream* warpOFStream,
-	                          size_t warpByteSize,
-	                          size_t updateByteSize) : warpOFStream(warpOFStream),
+struct WarpVoxelWriteFunctor<TVoxel, true, true> {
+	WarpVoxelWriteFunctor(std::ofstream* warp_output_file_stream,
+	                      size_t warpByteSize,
+	                      size_t updateByteSize) : warpOFStream(warp_output_file_stream),
 	                                                   warpByteSize(warpByteSize),
 	                                                   updateByteSize(updateByteSize) {}
 
@@ -37,23 +41,32 @@ private:
 	const size_t updateByteSize;
 };
 
-//TODO: experimental replacement candidate -Greg
+
+
 template<typename TVoxel>
-struct WarpAndUpdateWriteFunctor_Experimental {
-	WarpAndUpdateWriteFunctor_Experimental(std::ofstream* warpOFStream) : warpOFStream(warpOFStream) {}
+struct WarpVoxelWriteFunctor<TVoxel, false, true> {
+	WarpVoxelWriteFunctor(std::ofstream* warp_output_file_stream,
+	                      size_t warpByteSize,
+	                      size_t updateByteSize) : warpOFStream(warp_output_file_stream),
+	                                               warpByteSize(warpByteSize),
+	                                               updateByteSize(updateByteSize) {}
 
 	void operator()(TVoxel& voxel) {
-		warpOFStream->write(reinterpret_cast<const char* >(&voxel.warp), sizeof(voxel.warp));
-		warpOFStream->write(reinterpret_cast<const char* >(&voxel.warp_update), sizeof(voxel.warp_update));
+		warpOFStream->write(reinterpret_cast<const char* >(&voxel.warp_update), updateByteSize);
 	}
 
 private:
 	std::ofstream* warpOFStream;
+	const size_t warpByteSize;
+	const size_t updateByteSize;
 };
 
 
+template<typename TVoxel, bool hasFramewiseWarp, bool hasWarpUpdate>
+struct WarpAndUpdateReadFunctor;
+
 template<typename TVoxel>
-struct WarpAndUpdateReadFunctor {
+struct WarpAndUpdateReadFunctor<TVoxel, true, true> {
 	WarpAndUpdateReadFunctor(std::ifstream* warpIFStream,
 	                         size_t warpByteSize,
 	                         size_t updateByteSize) : warpIFStream(warpIFStream),
@@ -71,5 +84,23 @@ private:
 	const size_t updateByteSize;
 };
 
+
+template<typename TVoxel>
+struct WarpAndUpdateReadFunctor<TVoxel, false, true> {
+	WarpAndUpdateReadFunctor(std::ifstream* warpIFStream,
+	                         size_t warpByteSize,
+	                         size_t updateByteSize) : warpIFStream(warpIFStream),
+	                                                  warpByteSize(warpByteSize),
+	                                                  updateByteSize(updateByteSize) {}
+
+	void operator()(TVoxel& voxel) {
+		warpIFStream->read(reinterpret_cast<char*>(&voxel.warp_update), updateByteSize);
+	}
+
+private:
+	std::ifstream* warpIFStream;
+	const size_t warpByteSize;
+	const size_t updateByteSize;
+};
 
 } // namespace ITMLib

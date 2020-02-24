@@ -8,7 +8,7 @@
 
 namespace ITMLib
 {
-	class ITMDepthHierarchyLevel
+	class DepthHierarchyLevel
 	{
 	public:
 		int levelId;
@@ -20,8 +20,8 @@ namespace ITMLib
 		Vector4f intrinsics;
 		bool manageData;
 
-		ITMDepthHierarchyLevel(Vector2i imgSize, int levelId, TrackerIterationType iterationType,
-			MemoryDeviceType memoryType, bool skipAllocation = false)
+		DepthHierarchyLevel(Vector2i imgSize, int levelId, TrackerIterationType iterationType,
+		                    MemoryDeviceType memoryType, bool skipAllocation = false)
 		{
 			this->manageData = !skipAllocation;
 			this->levelId = levelId;
@@ -43,7 +43,7 @@ namespace ITMLib
 			this->depth->UpdateDeviceFromHost();
 		}
 
-		~ITMDepthHierarchyLevel(void)
+		~DepthHierarchyLevel(void)
 		{
 			if (manageData)
 			{
@@ -52,7 +52,7 @@ namespace ITMLib
 		}
 
 		// Suppress the default copy constructor and assignment operator
-		ITMDepthHierarchyLevel(const ITMDepthHierarchyLevel&);
-		ITMDepthHierarchyLevel& operator=(const ITMDepthHierarchyLevel&);
+		DepthHierarchyLevel(const DepthHierarchyLevel&);
+		DepthHierarchyLevel& operator=(const DepthHierarchyLevel&);
 	};
 }

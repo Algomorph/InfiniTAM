@@ -82,7 +82,7 @@ void loadVolume(VoxelVolume<TVoxel, TIndex>** volume, const std::string& path, M
                 configuration::SwappingMode swappingMode = configuration::SWAPPINGMODE_DISABLED);
 
 void
-updateView(ITMView** view, const std::string& depth_path, const std::string& color_path, const std::string& mask_path,
+updateView(View** view, const std::string& depth_path, const std::string& color_path, const std::string& mask_path,
            const std::string& calibration_path, MemoryDeviceType memoryDevice);
 template<typename TVoxel, typename TIndex>
 void initializeVolume(VoxelVolume<TVoxel, TIndex>** volume,
@@ -100,7 +100,7 @@ void buildSdfVolumeFromImage_NearSurfaceAllocation(VoxelVolume<TVoxel, TIndex>**
 
 template<typename TVoxel, typename TIndex>
 void buildSdfVolumeFromImage_NearSurfaceAllocation(VoxelVolume<TVoxel, TIndex>** volume,
-                                                   ITMView** view,
+                                                   View** view,
                                                    const std::string& depth_path, const std::string& color_path, const std::string& mask_path,
                                                    const std::string& calibration_path = "TestData/snoopy_calib.txt",
                                                    MemoryDeviceType memory_device = MEMORYDEVICE_CUDA,
@@ -109,7 +109,7 @@ void buildSdfVolumeFromImage_NearSurfaceAllocation(VoxelVolume<TVoxel, TIndex>**
 template<typename TVoxel, typename TIndex>
 void buildSdfVolumeFromImage_SurfaceSpanAllocation(VoxelVolume<TVoxel, TIndex>** volume1,
                                                    VoxelVolume<TVoxel, TIndex>** volume2,
-                                                   ITMView** view,
+                                                   View** view,
                                                    const std::string& depth1_path, const std::string& color1_path, const std::string& mask1_path,
                                                    const std::string& depth2_path, const std::string& color2_path, const std::string& mask2_path,
                                                    const std::string& calibration_path = "TestData/snoopy_calib.txt",
