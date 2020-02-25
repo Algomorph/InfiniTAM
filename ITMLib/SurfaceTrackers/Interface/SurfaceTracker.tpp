@@ -29,7 +29,7 @@ using namespace ITMLib;
 
 // region ===================================== HOUSEKEEPING ===========================================================
 
-#define TRAVERSE_ALL_HASH_BLOCKS
+//#define TRAVERSE_ALL_HASH_BLOCKS
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, GradientFunctorType TGradientFunctorType>
 void SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorType>::ResetWarps(
 		VoxelVolume<TWarp, TIndex>* warp_field) {
@@ -98,9 +98,9 @@ SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorType>::
 
 	ThreeVolumeTraversalEngine<TWarp, TVoxel, TVoxel, TIndex, TMemoryDeviceType>::
 #ifdef TRAVERSE_ALL_HASH_BLOCKS
-	TraverseAllWithPosition(warp_field, live_volume, canonical_volume, calculate_gradient_functor);
+	TraverseAllWithPosition(warp_field, canonical_volume, live_volume, calculate_gradient_functor);
 #else
-	TraverseUtilizedWithPosition(warp_field, live_volume, canonical_volume, calculate_gradient_functor);
+	TraverseUtilizedWithPosition(warp_field,  canonical_volume, live_volume, calculate_gradient_functor);
 #endif
 	calculate_gradient_functor.PrintStatistics();
 }

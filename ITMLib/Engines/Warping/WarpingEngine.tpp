@@ -24,7 +24,7 @@
 
 using namespace ITMLib;
 
-#define TRAVERSE_ALL_HASH_BLOCKS
+//#define TRAVERSE_ALL_HASH_BLOCKS
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 template<WarpType TWarpType>
 void WarpingEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::WarpVolume(

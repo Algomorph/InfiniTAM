@@ -23,7 +23,7 @@
 
 using namespace ITMLib;
 
-#define TRAVERSE_ALL_HASH_BLOCKS
+//#define TRAVERSE_ALL_HASH_BLOCKS
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void VolumeFusionEngine<TVoxel, TIndex, TMemoryDeviceType>::FuseOneTsdfVolumeIntoAnother(
 		VoxelVolume<TVoxel, TIndex>* target_volume, VoxelVolume<TVoxel, TIndex>* source_volume) {
