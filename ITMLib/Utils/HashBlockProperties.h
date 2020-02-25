@@ -21,10 +21,11 @@ enum HashBlockVisibility : unsigned char {
 	IN_MEMORY_AND_VISIBLE = 1,
 	INVISIBLE = 0
 };
-enum HashEntryAllocationState : unsigned char {
+enum HashEntryAllocationState : char {
 	NEEDS_NO_CHANGE = 0,
 	NEEDS_ALLOCATION_IN_ORDERED_LIST = 1,
 	NEEDS_ALLOCATION_IN_EXCESS_LIST = 2,
+	BEING_MODIFIED = 3,
 };
 enum HashBlockPtrFlag : int {
 	ENTRY_REMOVED = -1,

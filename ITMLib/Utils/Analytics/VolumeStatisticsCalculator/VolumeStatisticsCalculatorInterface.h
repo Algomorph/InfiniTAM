@@ -32,7 +32,8 @@ public:
 	virtual int ComputeAllocatedHashBlockCount(VoxelVolume<TVoxel, TIndex>* volume) = 0;
 	virtual std::vector<int> GetAllocatedHashCodes(VoxelVolume<TVoxel, TIndex>* volume) = 0;
 	virtual std::vector<Vector3s> GetAllocatedHashBlockPositions(VoxelVolume<TVoxel, TIndex>* volume) = 0;
-
+	virtual std::vector<int> GetUtilizedHashCodes(VoxelVolume <TVoxel, TIndex>* volume) = 0;
+	virtual std::vector<Vector3s> GetUtilizedHashBlockPositions(VoxelVolume <TVoxel, TIndex>* volume) = 0;
 
 	virtual unsigned int ComputeVoxelWithFlagsCount(VoxelVolume<TVoxel, TIndex>* volume, VoxelFlags flags) = 0;
 	virtual unsigned int ComputeNonTruncatedVoxelCount(VoxelVolume<TVoxel, TIndex>* volume) = 0;

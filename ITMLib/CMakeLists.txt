@@ -74,7 +74,7 @@ set(ITMLIB_ENGINES_COMMON_HEADERS
     Engines/Common/AllocationTempData.h
     Engines/Common/CheckBlockVisibility.h
     Engines/Common/CommonFunctors.h
-    Utils/WarpType.h
+
     )
 #======================================= LOW-LEVEL ENGINES =============================================================
 ##
@@ -868,8 +868,10 @@ set(ITMLIB_UTILS_HEADERS
     Utils/ImageTypes.h
     Utils/HashBlockProperties.h
     Utils/VoxelFlags.h
+    Utils/WarpType.h
     Utils/Configuration.h
     Utils/Math.h
+    Utils/MemoryBlock_StdVector_Converter.h
     Utils/MemoryBlockTypes.h
     Utils/PixelUtils.h
     Utils/ProjectionUtils.h

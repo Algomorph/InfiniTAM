@@ -102,6 +102,20 @@ VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::GetAllocatedHashB
 }
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+std::vector<int>
+VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::GetUtilizedHashCodes(
+		VoxelVolume<TVoxel, TIndex>* volume) {
+	return HashOnlyStatisticsFunctor<TVoxel, TIndex, TMemoryDeviceType>::GetUtilizedHashCodes(volume);
+}
+
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+std::vector<Vector3s>
+VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::GetUtilizedHashBlockPositions(
+		VoxelVolume<TVoxel, TIndex>* volume) {
+	return HashOnlyStatisticsFunctor<TVoxel, TIndex, TMemoryDeviceType>::GetUtilizedBlockPositions(volume);
+}
+
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 unsigned int
 VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::CountVoxelsWithSpecificSdfValue(
 		VoxelVolume<TVoxel, TIndex>* volume,

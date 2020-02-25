@@ -25,9 +25,22 @@
 #include "../../Shared/IndexingEngine_Functors.h"
 #include "../../../Traversal/Interface/HashTableTraversal.h"
 
+//_DEBUG
+#include "../../../../Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator.h"
+#include "../../../../Utils/MemoryBlock_StdVector_Converter.h"
+#include <unordered_set>
 
 using namespace ITMLib;
 
+namespace std {
+template<>
+struct hash<Vector3s> {
+	size_t operator()(const Vector3s& vector) const {
+		return std::hash<size_t>()(static_cast<size_t>(vector.x) << 16u | static_cast<size_t>(vector.y) << 8u |
+		                           static_cast<size_t>(vector.z));
+	}
+};
+} // namespace std
 
 template<typename TVoxel>
 template<typename TVoxelTarget, typename TVoxelSource, typename TMarkerFunctor>
@@ -44,9 +57,47 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::AllocateUsingOth
 
 	IndexingEngine<TVoxelTarget, VoxelBlockHash, MEMORYDEVICE_CUDA>& indexer =
 			IndexingEngine<TVoxelTarget, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance();
+
+	//_DEBUG
+//	std::cout << "(1) target " << target_volume->index.GetUtilizedHashBlockCount() << " vs source "
+//	          << source_volume->index.GetUtilizedHashBlockCount() << std::endl;
+
 	indexer.AllocateHashEntriesUsingAllocationStateList(target_volume);
+
+	//_DEBUG
+//	std::cout << "(2) target " << target_volume->index.GetUtilizedHashBlockCount() << " vs source "
+//	          << source_volume->index.GetUtilizedHashBlockCount() << ", target + colliding count: " << target_volume->index.GetUtilizedHashBlockCount() + marker_functor.get_colliding_block_count() << std::endl;
+
 	indexer.AllocateBlockList(target_volume, marker_functor.colliding_block_positions,
 	                          marker_functor.get_colliding_block_count());
+	//_DEBUG
+//	std::cout << "(3) target " << target_volume->index.GetUtilizedHashBlockCount() << " vs source "
+//	          << source_volume->index.GetUtilizedHashBlockCount() << std::endl;
+//
+//	std::vector<Vector3s> source_positions = VolumeStatisticsCalculator<TVoxelSource,VoxelBlockHash,MEMORYDEVICE_CUDA>::Instance().GetUtilizedHashBlockPositions(source_volume);
+//	std::unordered_set<Vector3s> source_position_set;
+//	for(auto pos : source_positions){
+//		if(source_position_set.find(pos) != source_position_set.end()){
+//			DIEWITHEXCEPTION_REPORTLOCATION("DUPLICATE POSITION");
+//		}else{
+//			source_position_set.insert(pos);
+//		}
+//	}
+//	std::vector<Vector3s> target_positions = VolumeStatisticsCalculator<TVoxelTarget,VoxelBlockHash,MEMORYDEVICE_CUDA>::Instance().GetUtilizedHashBlockPositions(target_volume);
+//	std::unordered_set<Vector3s> target_position_set(target_positions.begin(),target_positions.end());
+//	for(auto pos : source_positions){
+//		if(target_position_set.find(pos) == target_position_set.end()){
+//			std::cout << "Missing block pos: " << pos << std::endl;
+//			std::vector<Vector3s> colliding_positions = ORUtils_MemoryBlock_to_std_vector(marker_functor.colliding_block_positions, MEMORYDEVICE_CUDA);
+//			std::unordered_set<Vector3s> colliding_position_set(colliding_positions.begin(),colliding_positions.end());
+//			HashEntry entry = target_volume->index.GetHashEntryAt(pos);
+//			std::cout << "Entry when retrieved: " << entry << std::endl;
+//			if(colliding_position_set.find(pos) == colliding_position_set.end()){
+//				std::cout <<"Missing block NOT in collision set." << std::endl;
+//			}
+//			DIEWITHEXCEPTION_REPORTLOCATION("MISSING SOURCE BLOCK");
+//		}
+//	}
 }
 
 template<typename TVoxel>

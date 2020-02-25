@@ -138,6 +138,28 @@ void DenseDynamicMapper<TVoxel, TWarp, TIndex>::ProcessInitialFrame(
 	ProcessSwapping(canonical_volume, canonical_render_state);
 }
 
+
+//_DEBUG
+template<typename TVoxel, typename TWarp, typename TIndex>
+struct print_DEBUG_struct;
+
+template<typename TVoxel, typename TWarp>
+struct print_DEBUG_struct<TVoxel, TWarp, PlainVoxelArray>{
+	inline static void print(VoxelVolume<TVoxel, PlainVoxelArray>* canonical_volume, VoxelVolume<TVoxel, PlainVoxelArray>* live_volume1, VoxelVolume<TVoxel, PlainVoxelArray>* live_volume2, VoxelVolume<TWarp, PlainVoxelArray>* warp_field){
+
+	}
+};
+
+template<typename TVoxel, typename TWarp>
+struct print_DEBUG_struct<TVoxel, TWarp, VoxelBlockHash>{
+	inline static void print(VoxelVolume<TVoxel, VoxelBlockHash>* canonical_volume, VoxelVolume<TVoxel, VoxelBlockHash>* live_volume1, VoxelVolume<TVoxel, VoxelBlockHash>* live_volume2, VoxelVolume<TWarp, VoxelBlockHash>* warp_field){
+//		std::cout << canonical_volume->index.GetUtilizedHashBlockCount() << std::endl;
+//		std::cout << live_volume1->index.GetUtilizedHashBlockCount() << std::endl;
+//		std::cout << live_volume2->index.GetUtilizedHashBlockCount() << std::endl;
+//		std::cout << warp_field->index.GetUtilizedHashBlockCount() << std::endl;
+	}
+};
+
 template<typename TVoxel, typename TWarp, typename TIndex>
 void
 DenseDynamicMapper<TVoxel, TWarp, TIndex>::ProcessFrame(const View* view, const CameraTrackingState* trackingState,
@@ -158,6 +180,8 @@ DenseDynamicMapper<TVoxel, TWarp, TIndex>::ProcessFrame(const View* view, const 
 	indexing_engine->AllocateFromOtherVolume(canonical_volume, live_volume_pair[0]);
 	indexing_engine->AllocateWarpVolumeFromOtherVolume(warp_field, live_volume_pair[0]);
 	depth_fusion_engine->IntegrateDepthImageIntoTsdfVolume(live_volume_pair[0], view, trackingState);
+
+	print_DEBUG_struct<TVoxel,TWarp,TIndex>::print(canonical_volume, live_volume_pair[0], live_volume_pair[1], warp_field);
 
 	LogVolumeStatistics(live_volume_pair[0], "[[live TSDF before tracking]]");
 	bench::StopTimer("GenerateRawLiveVolume");

@@ -198,17 +198,24 @@ public:
 			colliding_block_positions(target_index.hashEntryCount, TMemoryDeviceType),
 			hash_entry_allocation_states(target_index.GetHashEntryAllocationStates()),
 			hash_block_coordinates(target_index.GetAllocationBlockCoordinates()),
-			target_hash_table(target_index.GetEntries()){
+			target_hash_table(target_index.GetEntries()) {
 		colliding_block_positions_device = colliding_block_positions.GetData(TMemoryDeviceType);
 		INITIALIZE_ATOMIC(int, colliding_block_count, 0);
 	}
 
 	_DEVICE_WHEN_AVAILABLE_
 	void operator()(const HashEntry& source_hash_entry, const int& source_hash_code) {
-		MarkAsNeedingAllocationIfNotFound(
+		AllocationStatus status = MarkAsNeedingAllocationIfNotFound(
 				hash_entry_allocation_states,
 				hash_block_coordinates, source_hash_entry.pos,
 				target_hash_table, colliding_block_positions_device, colliding_block_count);
+
+		//_DEBUG
+//		int hash_code = HashCodeFromBlockPosition(source_hash_entry.pos);
+//		printf("Pos: %d, %d, %d | bucket index: %d | will allocate: %s\n",
+//				source_hash_entry.pos.x, source_hash_entry.pos.y,
+//		       source_hash_entry.pos.z, hash_code, AllocationStatusToString(status));
+
 	}
 
 	ORUtils::MemoryBlock<Vector3s> colliding_block_positions;
@@ -230,7 +237,7 @@ struct VolumeBasedBoundedAllocationStateMarkerFunctor :
 		public VolumeBasedAllocationStateMarkerFunctor<TMemoryDeviceType> {
 public:
 	VolumeBasedBoundedAllocationStateMarkerFunctor(VoxelBlockHash& target_index, const Extent3D& bounds) :
-		VolumeBasedAllocationStateMarkerFunctor<TMemoryDeviceType>(target_index), bounds(bounds) {}
+			VolumeBasedAllocationStateMarkerFunctor<TMemoryDeviceType>(target_index), bounds(bounds) {}
 
 	_DEVICE_WHEN_AVAILABLE_
 	void operator()(const HashEntry& source_hash_entry, const int& source_hash_code) {

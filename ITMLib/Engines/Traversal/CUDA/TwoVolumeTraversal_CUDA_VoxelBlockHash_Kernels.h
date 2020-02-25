@@ -41,6 +41,19 @@ struct HashMatchInfo {
 namespace {
 // CUDA kernels
 
+
+__device__ inline void checkOtherHashHasMatchingEntry(HashEntry& hash_entry2, const HashEntry* hash_table2, const HashEntry& hash_entry1, const int hash_code1){
+	if (hash_entry2.pos != hash_entry1.pos) {
+		int hash_code2 = 0;
+		if (!FindHashAtPosition(hash_code2, hash_entry1.pos, hash_table2)) {
+			printf("Attempted traversal of volume 1 hash block %d at (%d, %d, %d), but this block is absent from volume 2.\n",
+			       hash_code1, hash_entry1.pos.x, hash_entry1.pos.y, hash_entry1.pos.z);
+			DIEWITHEXCEPTION_REPORTLOCATION("No hash block with corresponding position found in hash table.");
+		}
+		hash_entry2 = hash_table2[hash_code2];
+	}
+}
+
 __device__ inline bool
 getVoxelIndexesFromHashBlock(int& voxel1_index, int& voxel2_index,
                              const int hash_code1, const HashEntry* hash_table1, const HashEntry* hash_table2) {
@@ -48,13 +61,7 @@ getVoxelIndexesFromHashBlock(int& voxel1_index, int& voxel2_index,
 	if (hash_entry1.ptr < 0) return false;
 	HashEntry hash_entry2 = hash_table2[hash_code1];
 
-	if (hash_entry2.pos != hash_entry1.pos) {
-		int hash_code2 = 0;
-		if (!FindHashAtPosition(hash_code2, hash_entry1.pos, hash_table2)) {
-			DIEWITHEXCEPTION_REPORTLOCATION("No hash block with corresponding position found in hash table.");
-		}
-		hash_entry2 = hash_table2[hash_code2];
-	}
+	checkOtherHashHasMatchingEntry(hash_entry2, hash_table2, hash_entry1, hash_code1);
 
 	int x = threadIdx.x;
 	int y = threadIdx.y;
@@ -74,13 +81,7 @@ getVoxelIndexesAndPositionFromHashBlock(int& voxel1_index, int& voxel2_index, Ve
 	if (hash_entry1.ptr < 0) return false;
 	HashEntry hash_entry2 = hash_table2[hash_code1];
 
-	if (hash_entry2.pos != hash_entry1.pos) {
-		int hash_code2 = 0;
-		if (!FindHashAtPosition(hash_code2, hash_entry1.pos, hash_table2)) {
-			DIEWITHEXCEPTION_REPORTLOCATION("No hash block with corresponding position found in hash table.");
-		}
-		hash_entry2 = hash_table2[hash_code2];
-	}
+	checkOtherHashHasMatchingEntry(hash_entry2, hash_table2, hash_entry1, hash_code1);
 
 	int x = threadIdx.x;
 	int y = threadIdx.y;

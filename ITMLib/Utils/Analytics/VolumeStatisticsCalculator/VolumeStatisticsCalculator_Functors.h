@@ -34,6 +34,7 @@
 #include "../../../Engines/Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
 #include "../../WarpType.h"
 #include "../Statistics.h"
+#include "../../MemoryBlock_StdVector_Converter.h"
 
 
 using namespace ITMLib;
@@ -447,23 +448,6 @@ private:
 	DECLARE_ATOMIC(int, allocated_hash_block_count);
 };
 
-
-template<typename T>
-inline std::vector<T> ORUtils_MemoryBlock_to_std_vector(const ORUtils::MemoryBlock<T>& block, MemoryDeviceType device_type) {
-	std::vector<T> vector(block.dataSize);
-	if (device_type == MEMORYDEVICE_CPU) {
-		memcpy(vector.data(), block.GetData(MEMORYDEVICE_CPU), vector.size() * sizeof(T));
-	} else {
-#ifndef COMPILE_WITHOUT_CUDA
-		ORcudaSafeCall(cudaMemcpy(vector.data(), block.GetData(MEMORYDEVICE_CUDA), vector.size() * sizeof(T),
-		                          cudaMemcpyDeviceToHost));
-#else
-		DIEWITHEXCEPTION_REPORTLOCATION("Not supported without compilation with CUDA.");
-#endif
-	}
-	return vector;
-}
-
 template<MemoryDeviceType TMemoryDeviceType>
 struct AllocatedHashesAggregationFunctor {
 	AllocatedHashesAggregationFunctor(int allocated_block_count) : hash_codes(allocated_block_count,
@@ -498,15 +482,15 @@ private:
 
 
 template<MemoryDeviceType TMemoryDeviceType>
-struct AllocatedBlockPositionAggregationFunctor {
-	AllocatedBlockPositionAggregationFunctor(int allocated_block_count) : block_positions(allocated_block_count,
-	                                                                                      TMemoryDeviceType) {
+struct BlockPositionAggregationFunctor {
+	BlockPositionAggregationFunctor(int block_count) : block_positions(block_count,
+	                                                                   TMemoryDeviceType) {
 		INITIALIZE_ATOMIC(int, current_fill_index, 0);
 		block_positions_device = block_positions.GetData(TMemoryDeviceType);
 	}
 
 
-	~AllocatedBlockPositionAggregationFunctor() {
+	~BlockPositionAggregationFunctor() {
 		CLEAN_UP_ATOMIC(current_fill_index);
 	}
 
@@ -537,7 +521,17 @@ struct HashOnlyStatisticsFunctor<TVoxel, PlainVoxelArray, TMemoryDeviceType> {
 		return std::vector<int>();
 	}
 
+	static std::vector<int> GetUtilizedHashCodes(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
+		return std::vector<int>();
+	}
+
+
 	static std::vector<Vector3s> GetAllocatedBlockPositions(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
+		std::vector<Vector3s> pos_vector = {TO_SHORT3(volume->index.GetVolumeOffset())};
+		return pos_vector;
+	}
+
+	static std::vector<Vector3s> GetUtilizedBlockPositions(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
 		std::vector<Vector3s> pos_vector = {TO_SHORT3(volume->index.GetVolumeOffset())};
 		return pos_vector;
 	}
@@ -557,8 +551,20 @@ struct HashOnlyStatisticsFunctor<TVoxel, VoxelBlockHash, TMemoryDeviceType> {
 
 	static std::vector<Vector3s> GetAllocatedBlockPositions(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 		int allocated_count = ComputeAllocatedHashBlockCount(volume);
-		AllocatedBlockPositionAggregationFunctor<TMemoryDeviceType> aggregator_functor(allocated_count);
+		BlockPositionAggregationFunctor<TMemoryDeviceType> aggregator_functor(allocated_count);
 		HashTableTraversalEngine<TMemoryDeviceType>::TraverseAllWithHashCode(volume->index, aggregator_functor);
+		return aggregator_functor.data();
+	}
+
+	static std::vector<int> GetUtilizedHashCodes(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
+		const int* codes = volume->index.GetUtilizedBlockHashCodes();
+		return raw_block_to_std_vector(codes, TMemoryDeviceType, volume->index.GetUtilizedHashBlockCount());
+	}
+
+	static std::vector<Vector3s> GetUtilizedBlockPositions(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
+		int allocated_count = volume->index.GetUtilizedHashBlockCount();
+		BlockPositionAggregationFunctor<TMemoryDeviceType> aggregator_functor(allocated_count);
+		HashTableTraversalEngine<TMemoryDeviceType>::TraverseUtilizedWithHashCode(volume->index, aggregator_functor);
 		return aggregator_functor.data();
 	}
 
