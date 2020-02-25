@@ -18,5 +18,5 @@
 #include "ITMSceneSliceVisualizer3D.tpp"
 #include "ITMSceneSliceVisualizer3DInteractorStyle.tpp"
 
-template class ITMSceneSliceVisualizer3D<ITMVoxel, ITMWarp, ITMVoxelBlockHash>;
-template class ITMSceneSliceVisualizer3DInteractorStyle<ITMVoxel, ITMWarp, ITMVoxelBlockHash>;
+template class ITMSceneSliceVisualizer3D<ITMVoxel, ITMWarp, VoxelBlockHash>;
+template class ITMSceneSliceVisualizer3DInteractorStyle<ITMVoxel, ITMWarp, VoxelBlockHash>;

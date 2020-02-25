@@ -63,24 +63,24 @@ void ITMSceneSliceVisualizer1D::SaveScreenshot(std::string path) {
 // region ==================================== EXPLICIT INSTANTIATIONS =================================================
 
 template void
-ITMSceneSliceVisualizer1D::Plot1DSceneSlice<ITMVoxel, ITMPlainVoxelArray>(
-		ITMVoxelVolume<ITMVoxel, ITMPlainVoxelArray>* scene, Vector4i color, double width);
+ITMSceneSliceVisualizer1D::Plot1DSceneSlice<ITMVoxel, PlainVoxelArray>(
+		ITMVoxelVolume<ITMVoxel, PlainVoxelArray>* scene, Vector4i color, double width);
 
 template void
-ITMSceneSliceVisualizer1D::Draw1DWarpUpdateVector<ITMVoxel, ITMWarp, ITMPlainVoxelArray>(
-		ITMVoxelVolume<ITMVoxel, ITMPlainVoxelArray>* TSDF,
-		ITMVoxelVolume<ITMWarp, ITMPlainVoxelArray>* warpField,
+ITMSceneSliceVisualizer1D::Draw1DWarpUpdateVector<ITMVoxel, ITMWarp, PlainVoxelArray>(
+		ITMVoxelVolume<ITMVoxel, PlainVoxelArray>* TSDF,
+		ITMVoxelVolume<ITMWarp, PlainVoxelArray>* warpField,
 		Vector4i color);
 
 
 template void
-ITMSceneSliceVisualizer1D::Plot1DSceneSlice<ITMVoxel, ITMVoxelBlockHash>(
-		ITMVoxelVolume<ITMVoxel, ITMVoxelBlockHash>* scene, Vector4i color, double width);
+ITMSceneSliceVisualizer1D::Plot1DSceneSlice<ITMVoxel, VoxelBlockHash>(
+		ITMVoxelVolume<ITMVoxel, VoxelBlockHash>* scene, Vector4i color, double width);
 
 template void
-ITMSceneSliceVisualizer1D::Draw1DWarpUpdateVector<ITMVoxel, ITMWarp, ITMVoxelBlockHash>(
-		ITMVoxelVolume<ITMVoxel, ITMVoxelBlockHash>* TSDF,
-		ITMVoxelVolume<ITMWarp, ITMVoxelBlockHash>* warpField,
+ITMSceneSliceVisualizer1D::Draw1DWarpUpdateVector<ITMVoxel, ITMWarp, VoxelBlockHash>(
+		ITMVoxelVolume<ITMVoxel, VoxelBlockHash>* TSDF,
+		ITMVoxelVolume<ITMWarp, VoxelBlockHash>* warpField,
 		Vector4i color);
 
 //======================================================================================================================
