@@ -215,15 +215,15 @@ VoxelVolume<TVoxel, TIndex>* DenseDynamicMapper<TVoxel, TWarp, TIndex>::TrackFra
 		PerformSingleOptimizationStep(canonical_volume, live_volume_pair[source_live_volume_index],
 		                              live_volume_pair[target_live_volume_index], warp_field,
 		                              max_vector_update_length_in_voxels, iteration);
-
-		if(configuration::get().telemetry_settings.log_volume_statistics && verbosity_level >= configuration::VERBOSITY_PER_ITERATION){
-			std::cout << green << "*** Per-Iteration Volume Statistics ***" << reset << std::endl;
-			std::cout << "   Warp update minimum: " << StatCalc_Accessor::Get<TWarp,TIndex>().ComputeWarpUpdateMin(warp_field) << std::endl;
-			std::cout << "   Warp update mean: " << StatCalc_Accessor::Get<TWarp,TIndex>().ComputeWarpUpdateMean(warp_field) << std::endl;
-			std::cout << "   Warp update maximum: " << StatCalc_Accessor::Get<TWarp,TIndex>().ComputeWarpUpdateMax(warp_field) << std::endl;
-			std::cout << "   Source live non-truncated voxel count: " << StatCalc_Accessor::Get<TVoxel,TIndex>().ComputeNonTruncatedVoxelCount(live_volume_pair[source_live_volume_index]) << std::endl;
-			std::cout << "   Target live non-truncated voxel count: " << StatCalc_Accessor::Get<TVoxel,TIndex>().ComputeNonTruncatedVoxelCount(live_volume_pair[target_live_volume_index]) << std::endl;
-		}
+		//_DEBUG
+//		if(configuration::get().telemetry_settings.log_volume_statistics && verbosity_level >= configuration::VERBOSITY_PER_ITERATION){
+//			std::cout << green << "*** Per-Iteration Volume Statistics ***" << reset << std::endl;
+//			std::cout << "   Warp update minimum: " << StatCalc_Accessor::Get<TWarp,TIndex>().ComputeWarpUpdateMin(warp_field) << std::endl;
+//			std::cout << "   Warp update mean: " << StatCalc_Accessor::Get<TWarp,TIndex>().ComputeWarpUpdateMean(warp_field) << std::endl;
+//			std::cout << "   Warp update maximum: " << StatCalc_Accessor::Get<TWarp,TIndex>().ComputeWarpUpdateMax(warp_field) << std::endl;
+//			std::cout << "   Source live non-truncated voxel count: " << StatCalc_Accessor::Get<TVoxel,TIndex>().ComputeNonTruncatedVoxelCount(live_volume_pair[source_live_volume_index]) << std::endl;
+//			std::cout << "   Target live non-truncated voxel count: " << StatCalc_Accessor::Get<TVoxel,TIndex>().ComputeNonTruncatedVoxelCount(live_volume_pair[target_live_volume_index]) << std::endl;
+//		}
 
 		std::swap(source_live_volume_index,target_live_volume_index);
 	}
@@ -231,30 +231,6 @@ VoxelVolume<TVoxel, TIndex>* DenseDynamicMapper<TVoxel, TWarp, TIndex>::TrackFra
 	PrintOperationStatus("*** Warping optimization finished for current frame. ***");
 	return live_volume_pair[target_live_volume_index];
 }
-
-//_DEBUG
-template<typename TVoxel, typename TWarp, typename TIndex>
-struct print_DEBUG_struct;
-
-template<typename TVoxel, typename TWarp>
-struct print_DEBUG_struct<TVoxel, TWarp, PlainVoxelArray>{
-	inline static void print(VoxelVolume<TVoxel, PlainVoxelArray>* canonical_volume, VoxelVolume<TVoxel, PlainVoxelArray>* live_volume, VoxelVolume<TWarp, PlainVoxelArray>* warp_field){
-
-	}
-};
-
-template<typename TVoxel, typename TWarp>
-struct print_DEBUG_struct<TVoxel, TWarp, VoxelBlockHash>{
-	inline static void print(VoxelVolume<TVoxel, VoxelBlockHash>* canonical_volume, VoxelVolume<TVoxel, VoxelBlockHash>* live_volume, VoxelVolume<TWarp, VoxelBlockHash>* warp_field){
-		const int code_to_check = 38;
-		HashEntry canonical_entry = canonical_volume->index.GetHashEntry(code_to_check);
-		HashEntry live_entry = live_volume->index.GetHashEntry(code_to_check);
-		HashEntry warp_field_entry = warp_field->index.GetHashEntry(code_to_check);
-		std::cout << canonical_entry << std::endl;
-		std::cout << live_entry << std::endl;
-		std::cout << warp_field_entry << std::endl;
-	}
-};
 
 
 template<typename TVoxel, typename TWarp, typename TIndex>
@@ -273,9 +249,6 @@ void DenseDynamicMapper<TVoxel, TWarp, TIndex>::PerformSingleOptimizationStep(
 		//** warp update gradient computation
 		PrintOperationStatus("Calculating warp energy gradient...");
 	}
-
-	print_DEBUG_struct<TVoxel,TWarp,TIndex>::print(canonical_volume, source_live_volume, warp_field);
-
 
 	bench::StartTimer("TrackMotion_31_CalculateWarpUpdate");
 	surface_tracker->CalculateWarpGradient(warp_field, canonical_volume, source_live_volume);
