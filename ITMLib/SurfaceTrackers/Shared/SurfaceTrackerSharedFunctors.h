@@ -91,7 +91,7 @@ struct WarpUpdateFunctor {
 		                                         warp.gradient1 : warp.gradient0);
 
 		warp.warp_update = warpUpdate;
-		warp.framewise_warp = warpUpdate + momentumWeight * warpUpdate;
+		warp.framewise_warp = warpUpdate + momentumWeight * warp.framewise_warp ;
 
 		// update stats
 		float framewiseWarpLength = ORUtils::length(warp.framewise_warp);
