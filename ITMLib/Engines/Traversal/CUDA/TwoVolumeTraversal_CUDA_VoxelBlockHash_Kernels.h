@@ -41,11 +41,11 @@ struct HashMatchInfo {
 namespace {
 // CUDA kernels
 
-__device__ inline void
+__device__ inline bool
 getVoxelIndexesFromHashBlock(int& voxel1_index, int& voxel2_index,
                              const int hash_code1, const HashEntry* hash_table1, const HashEntry* hash_table2) {
 	const HashEntry& hash_entry1 = hash_table1[hash_code1];
-	if (hash_entry1.ptr < 0) return;
+	if (hash_entry1.ptr < 0) return false;
 	HashEntry hash_entry2 = hash_table2[hash_code1];
 
 	if (hash_entry2.pos != hash_entry1.pos) {
@@ -63,13 +63,15 @@ getVoxelIndexesFromHashBlock(int& voxel1_index, int& voxel2_index,
 
 	voxel1_index = hash_entry1.ptr * (VOXEL_BLOCK_SIZE3) + linear_index_in_block;
 	voxel2_index = hash_entry2.ptr * (VOXEL_BLOCK_SIZE3) + linear_index_in_block;
+	return true;
 }
 
-__device__ inline void
+__device__ inline bool
 getVoxelIndexesAndPositionFromHashBlock(int& voxel1_index, int& voxel2_index, Vector3i& voxel_position,
-                                        const int hash_code1, const HashEntry* hash_table1, const HashEntry* hash_table2) {
+                                        const int hash_code1, const HashEntry* hash_table1,
+                                        const HashEntry* hash_table2) {
 	const HashEntry& hash_entry1 = hash_table1[hash_code1];
-	if (hash_entry1.ptr < 0) return;
+	if (hash_entry1.ptr < 0) return false;
 	HashEntry hash_entry2 = hash_table2[hash_code1];
 
 	if (hash_entry2.pos != hash_entry1.pos) {
@@ -88,6 +90,8 @@ getVoxelIndexesAndPositionFromHashBlock(int& voxel1_index, int& voxel2_index, Ve
 	voxel_position = hash_entry1.pos.toInt() * VOXEL_BLOCK_SIZE + Vector3i(x, y, z);
 	voxel1_index = hash_entry1.ptr * (VOXEL_BLOCK_SIZE3) + linear_index_in_block;
 	voxel2_index = hash_entry2.ptr * (VOXEL_BLOCK_SIZE3) + linear_index_in_block;
+
+	return true;
 }
 
 template<typename TFunctor, typename TVoxel1, typename TVoxel2>
@@ -97,7 +101,7 @@ traverseAll_device(TVoxel1* voxels1, TVoxel2* voxels2,
                    TFunctor* functor) {
 	int hash_code1 = blockIdx.x;
 	int voxel1_index, voxel2_index;
-	getVoxelIndexesFromHashBlock(voxel1_index, voxel2_index, hash_code1, hash_table1, hash_table2);
+	if (!getVoxelIndexesFromHashBlock(voxel1_index, voxel2_index, hash_code1, hash_table1, hash_table2)) return;
 
 	TVoxel1& voxel1 = voxels1[voxel1_index];
 	TVoxel2& voxel2 = voxels2[voxel2_index];
@@ -129,9 +133,10 @@ traverseAllWithPosition_device(TVoxel1* voxels1, TVoxel2* voxels2,
 	int hash_code1 = blockIdx.x;
 	int voxel1_index, voxel2_index;
 	Vector3i voxel_position;
-	getVoxelIndexesAndPositionFromHashBlock(voxel1_index, voxel2_index, voxel_position, hash_code1, hash_table1,
-	                                        hash_table2);
-
+	if (!getVoxelIndexesAndPositionFromHashBlock(voxel1_index, voxel2_index, voxel_position, hash_code1, hash_table1,
+	                                             hash_table2)){
+		return;
+	}
 	TVoxel1& voxel1 = voxels1[voxel1_index];
 	TVoxel2& voxel2 = voxels2[voxel2_index];
 

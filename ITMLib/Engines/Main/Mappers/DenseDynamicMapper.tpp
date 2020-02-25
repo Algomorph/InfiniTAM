@@ -232,6 +232,31 @@ VoxelVolume<TVoxel, TIndex>* DenseDynamicMapper<TVoxel, TWarp, TIndex>::TrackFra
 	return live_volume_pair[target_live_volume_index];
 }
 
+//_DEBUG
+template<typename TVoxel, typename TWarp, typename TIndex>
+struct print_DEBUG_struct;
+
+template<typename TVoxel, typename TWarp>
+struct print_DEBUG_struct<TVoxel, TWarp, PlainVoxelArray>{
+	inline static void print(VoxelVolume<TVoxel, PlainVoxelArray>* canonical_volume, VoxelVolume<TVoxel, PlainVoxelArray>* live_volume, VoxelVolume<TWarp, PlainVoxelArray>* warp_field){
+
+	}
+};
+
+template<typename TVoxel, typename TWarp>
+struct print_DEBUG_struct<TVoxel, TWarp, VoxelBlockHash>{
+	inline static void print(VoxelVolume<TVoxel, VoxelBlockHash>* canonical_volume, VoxelVolume<TVoxel, VoxelBlockHash>* live_volume, VoxelVolume<TWarp, VoxelBlockHash>* warp_field){
+		const int code_to_check = 38;
+		HashEntry canonical_entry = canonical_volume->index.GetHashEntry(code_to_check);
+		HashEntry live_entry = live_volume->index.GetHashEntry(code_to_check);
+		HashEntry warp_field_entry = warp_field->index.GetHashEntry(code_to_check);
+		std::cout << canonical_entry << std::endl;
+		std::cout << live_entry << std::endl;
+		std::cout << warp_field_entry << std::endl;
+	}
+};
+
+
 template<typename TVoxel, typename TWarp, typename TIndex>
 void DenseDynamicMapper<TVoxel, TWarp, TIndex>::PerformSingleOptimizationStep(
 		VoxelVolume<TVoxel, TIndex>* canonical_volume,
@@ -248,6 +273,9 @@ void DenseDynamicMapper<TVoxel, TWarp, TIndex>::PerformSingleOptimizationStep(
 		//** warp update gradient computation
 		PrintOperationStatus("Calculating warp energy gradient...");
 	}
+
+	print_DEBUG_struct<TVoxel,TWarp,TIndex>::print(canonical_volume, source_live_volume, warp_field);
+
 
 	bench::StartTimer("TrackMotion_31_CalculateWarpUpdate");
 	surface_tracker->CalculateWarpGradient(warp_field, canonical_volume, source_live_volume);

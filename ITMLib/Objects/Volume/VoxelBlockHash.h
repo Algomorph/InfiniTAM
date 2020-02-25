@@ -51,6 +51,11 @@ struct HashEntry {
 		- <-1 identifies an unallocated block
 	*/
 	int ptr;
+
+	friend std::ostream& operator<<(std::ostream& os, const HashEntry& entry){
+		os << entry.pos << " | " << entry.offset << " [" << entry.ptr << "]";
+		return os;
+	}
 };
 
 namespace ITMLib {

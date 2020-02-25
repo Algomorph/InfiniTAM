@@ -39,14 +39,16 @@ checkOtherHashHasMatchingEntry(HashEntry& slave_hash_entry, const HashEntry* sla
 	}
 }
 
-__device__ inline void
+__device__ inline bool
 getVoxelIndicesAndPositionInHashTables(
 		int& voxel1_index, int& voxel2_index, int& voxel3_index, Vector3i& voxel_position,
 		const int hash_code1,
 		const HashEntry* hash_table1, const HashEntry* hash_table2, const HashEntry* hash_table3) {
 
 	const HashEntry& hash_entry1 = hash_table1[hash_code1];
-	if (hash_entry1.ptr < 0) return;
+	if (hash_entry1.ptr < 0){
+		return false;
+	}
 	HashEntry hash_entry2 = hash_table2[hash_code1];
 	HashEntry hash_entry3 = hash_table3[hash_code1];
 
@@ -64,6 +66,7 @@ getVoxelIndicesAndPositionInHashTables(
 	voxel1_index = hash_entry1.ptr * (VOXEL_BLOCK_SIZE3) + linear_index_in_block;
 	voxel2_index = hash_entry2.ptr * (VOXEL_BLOCK_SIZE3) + linear_index_in_block;
 	voxel3_index = hash_entry3.ptr * (VOXEL_BLOCK_SIZE3) + linear_index_in_block;
+	return true;
 }
 
 template<typename TFunctor, typename TVoxel1, typename TVoxel2, typename TVoxel3>
@@ -74,8 +77,8 @@ traverseAllWithPosition_device(TVoxel1* voxels1, TVoxel2* voxels2, TVoxel3* voxe
 	int hash_code1 = blockIdx.x;
 	int voxel1_index, voxel2_index, voxel3_index;
 	Vector3i voxel_position;
-	getVoxelIndicesAndPositionInHashTables(voxel1_index, voxel2_index, voxel3_index, voxel_position, hash_code1,
-	                                       hash_table1, hash_table2, hash_table3);
+	if (!getVoxelIndicesAndPositionInHashTables(voxel1_index, voxel2_index, voxel3_index, voxel_position, hash_code1,
+	                                       hash_table1, hash_table2, hash_table3)) return;
 
 	TVoxel1& voxel1 = voxels1[voxel1_index];
 	TVoxel2& voxel2 = voxels2[voxel2_index];
