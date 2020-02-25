@@ -42,7 +42,9 @@ namespace ITMLib
 
 		/// save and load the full scene and relocaliser (if any) to/from file
 		void SaveToFile() override;
+		void SaveToFile(const std::string& path) override;
 		void LoadFromFile() override;
+		void LoadFromFile(const std::string& path) override;
 
 		/// Get a result image as output
 		Vector2i GetImageSize() const override;

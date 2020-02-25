@@ -28,6 +28,7 @@
 #include "../../../Utils/VoxelFlags.h"
 #include "../../../Utils/HashBlockProperties.h"
 #include "../../../Utils/Geometry/IntersectionChecks.h"
+#include "../../../Utils/CLionCudaSyntax.h"
 
 
 #ifdef __CUDACC__
@@ -61,7 +62,7 @@ struct AllocationCounters {
 };
 
 // mostly for debugging purposes
-enum AllocationStatus{
+enum AllocationStatus {
 	ALREADY_IN_ORDERED_LIST,
 	ALREADY_IN_EXCESS_LIST,
 	MARK_FOR_ALLOCATION_IN_ORDERED_LIST,
@@ -70,14 +71,20 @@ enum AllocationStatus{
 	LOGGED_HASH_COLLISION
 };
 _DEVICE_WHEN_AVAILABLE_
-inline const char* AllocationStatusToString(const AllocationStatus& status){
-	switch (status){
-		case ALREADY_IN_ORDERED_LIST: return "ALREADY_IN_ORDERED_LIST";
-		case ALREADY_IN_EXCESS_LIST: return "ALREADY_IN_EXCESS_LIST";
-		case MARK_FOR_ALLOCATION_IN_ORDERED_LIST: return "MARK_FOR_ALLOCATION_IN_ORDERED_LIST";
-		case MARK_FOR_ALLOCATION_IN_EXCESS_LIST: return "MARK_FOR_ALLOCATION_IN_EXCESS_LIST";
-		case SET_TO_BE_ALLOCATED_BY_ANOTHER_THREAD: return "SET_TO_BE_ALLOCATED_BY_ANOTHER_THREAD";
-		case LOGGED_HASH_COLLISION: return "LOGGED_HASH_COLLISION";
+inline const char* AllocationStatusToString(const AllocationStatus& status) {
+	switch (status) {
+		case ALREADY_IN_ORDERED_LIST:
+			return "ALREADY_IN_ORDERED_LIST";
+		case ALREADY_IN_EXCESS_LIST:
+			return "ALREADY_IN_EXCESS_LIST";
+		case MARK_FOR_ALLOCATION_IN_ORDERED_LIST:
+			return "MARK_FOR_ALLOCATION_IN_ORDERED_LIST";
+		case MARK_FOR_ALLOCATION_IN_EXCESS_LIST:
+			return "MARK_FOR_ALLOCATION_IN_EXCESS_LIST";
+		case SET_TO_BE_ALLOCATED_BY_ANOTHER_THREAD:
+			return "SET_TO_BE_ALLOCATED_BY_ANOTHER_THREAD";
+		case LOGGED_HASH_COLLISION:
+			return "LOGGED_HASH_COLLISION";
 		default:
 			return "";
 	}
@@ -98,11 +105,11 @@ inline const char* AllocationStatusToString(const AllocationStatus& status){
  */
 _DEVICE_WHEN_AVAILABLE_
 inline AllocationStatus MarkAsNeedingAllocationIfNotFound(ITMLib::HashEntryAllocationState* hash_entry_states,
-                                              Vector3s* hash_block_coordinates, int& hash_code,
-                                              const CONSTPTR(Vector3s)& desired_hash_block_position,
-                                              const CONSTPTR(HashEntry)* hash_table,
-                                              THREADPTR(Vector3s)* colliding_block_positions,
-                                              ATOMIC_ARGUMENT(int) colliding_block_count) {
+                                                          Vector3s* hash_block_coordinates, int& hash_code,
+                                                          const CONSTPTR(Vector3s)& desired_hash_block_position,
+                                                          const CONSTPTR(HashEntry)* hash_table,
+                                                          THREADPTR(Vector3s)* colliding_block_positions,
+                                                          ATOMIC_ARGUMENT(int) colliding_block_count) {
 
 	HashEntry hash_entry = hash_table[hash_code];
 	//check if hash table contains entry
@@ -122,21 +129,43 @@ inline AllocationStatus MarkAsNeedingAllocationIfNotFound(ITMLib::HashEntryAlloc
 		} else {
 			state = ITMLib::NEEDS_ALLOCATION_IN_ORDERED_LIST;
 		}
-	}else{
+	} else {
 		return ALREADY_IN_ORDERED_LIST;
 	}
 
+//#define __CUDA_ARCH__
+
 #if defined(__CUDACC__) && defined(__CUDA_ARCH__)
-	if (atomicCAS((char*) (hash_entry_states + hash_code),
-						  (char) ITMLib::BEING_MODIFIED,
-						  (char) state) != (char) ITMLib::NEEDS_NO_CHANGE) {
+//	if (atomicCAS((char*) (hash_entry_states + hash_code), (char) ITMLib::NEEDS_NO_CHANGE, (char) state) != (char) ITMLib::NEEDS_NO_CHANGE) {
+//		int collision_index = ATOMIC_ADD(colliding_block_count, 1);
+//		colliding_block_positions[collision_index] = desired_hash_block_position;
+//		return LOGGED_HASH_COLLISION;
+//	} else {
+//		hash_block_coordinates[hash_code] = desired_hash_block_position;
+//		return (state == NEEDS_ALLOCATION_IN_EXCESS_LIST) ? MARK_FOR_ALLOCATION_IN_EXCESS_LIST : MARK_FOR_ALLOCATION_IN_ORDERED_LIST;
+//	}
+
+	volatile HashEntryAllocationState current_state;
+	if ((current_state = (HashEntryAllocationState) atomicCAS((char*) (hash_entry_states + hash_code),
+						  (char) ITMLib::NEEDS_NO_CHANGE,
+						  (char) ITMLib::BEING_MODIFIED)) != ITMLib::NEEDS_NO_CHANGE) {
 		//hash code already marked for allocation, possibly at different coordinates, cannot allocate
-		int collision_index = ATOMIC_ADD(colliding_block_count, 1);
-		colliding_block_positions[collision_index] = desired_hash_block_position;
-		return LOGGED_HASH_COLLISION;
+//		while(current_state == ITMLib::BEING_MODIFIED){
+//			current_state = hash_entry_states[hash_code];
+//			__threadfence_system();
+//		}
+		if(current_state != ITMLib::BEING_MODIFIED && IS_EQUAL3(hash_block_coordinates[hash_code], desired_hash_block_position)){
+			return SET_TO_BE_ALLOCATED_BY_ANOTHER_THREAD;
+		} else {
+			int collision_index = ATOMIC_ADD(colliding_block_count, 1);
+			colliding_block_positions[collision_index] = desired_hash_block_position;
+			return LOGGED_HASH_COLLISION;
+		}
 	} else {
 		hash_block_coordinates[hash_code] = desired_hash_block_position;
+//		__threadfence_system();
 		hash_entry_states[hash_code] = state;
+//		__threadfence_system();
 		return (state == NEEDS_ALLOCATION_IN_EXCESS_LIST) ? MARK_FOR_ALLOCATION_IN_EXCESS_LIST : MARK_FOR_ALLOCATION_IN_ORDERED_LIST;
 	}
 #else
@@ -155,7 +184,8 @@ inline AllocationStatus MarkAsNeedingAllocationIfNotFound(ITMLib::HashEntryAlloc
 		} else {
 			hash_entry_states[hash_code] = state;
 			hash_block_coordinates[hash_code] = desired_hash_block_position;
-			status = (state == NEEDS_ALLOCATION_IN_EXCESS_LIST) ? MARK_FOR_ALLOCATION_IN_EXCESS_LIST : MARK_FOR_ALLOCATION_IN_ORDERED_LIST;
+			status = (state == NEEDS_ALLOCATION_IN_EXCESS_LIST) ? MARK_FOR_ALLOCATION_IN_EXCESS_LIST
+			                                                    : MARK_FOR_ALLOCATION_IN_ORDERED_LIST;
 		}
 	}
 	return status;
@@ -187,11 +217,11 @@ HashBlockAllocatedAtOffset(const CONSTPTR(ITMLib::VoxelBlockHash::IndexData)* ta
 
 _DEVICE_WHEN_AVAILABLE_
 inline AllocationStatus MarkAsNeedingAllocationIfNotFound(ITMLib::HashEntryAllocationState* hash_entry_states,
-                                              Vector3s* hash_block_coordinates,
-                                              const CONSTPTR(Vector3s)& desired_hash_block_position,
-                                              const CONSTPTR(HashEntry)* hash_table,
-                                              THREADPTR(Vector3s)* colliding_block_positions,
-                                              ATOMIC_ARGUMENT(int) colliding_block_count) {
+                                                          Vector3s* hash_block_coordinates,
+                                                          const CONSTPTR(Vector3s)& desired_hash_block_position,
+                                                          const CONSTPTR(HashEntry)* hash_table,
+                                                          THREADPTR(Vector3s)* colliding_block_positions,
+                                                          ATOMIC_ARGUMENT(int) colliding_block_count) {
 	int hash_code = HashCodeFromBlockPosition(desired_hash_block_position);
 	return MarkAsNeedingAllocationIfNotFound(hash_entry_states, hash_block_coordinates, hash_code,
 	                                         desired_hash_block_position, hash_table, colliding_block_positions,

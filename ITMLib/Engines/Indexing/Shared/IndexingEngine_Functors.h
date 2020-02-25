@@ -212,7 +212,7 @@ public:
 
 		//_DEBUG
 //		int hash_code = HashCodeFromBlockPosition(source_hash_entry.pos);
-//		printf("Pos: %d, %d, %d | bucket index: %d | will allocate: %s\n",
+//		printf("Pos: %d, %d, %d | bucket index: %d | allocation status: %s\n",
 //				source_hash_entry.pos.x, source_hash_entry.pos.y,
 //		       source_hash_entry.pos.z, hash_code, AllocationStatusToString(status));
 

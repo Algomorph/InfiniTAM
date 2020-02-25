@@ -26,6 +26,7 @@
 //VTK
 #include <vtkCommand.h>
 #include <vtkRenderWindowInteractor.h>
+
 #endif
 
 //ITMLib
@@ -63,7 +64,7 @@ namespace bench = ITMLib::Bench;
  * \param argv number of arguments to the main function
  * \param imageSource source for images
  * \param imuSource source for IMU data
- * \param mainEngine main engine to process the frames
+ * \param main_engine main engine to process the frames
  * \param outFolder output folder for saving results
  * \param deviceType type of device to use for some tasks
  * \param number_of_frames_to_process_after_launch automatically process this number of frames after launching the UIEngine,
@@ -72,23 +73,16 @@ namespace bench = ITMLib::Bench;
  * set interval to this number of frames
  */
 void UIEngine_BPO::Initialize(int& argc, char** argv,
-							  InputSource::ImageSourceEngine* imageSource,
+                              InputSource::ImageSourceEngine* imageSource,
                               InputSource::IMUSourceEngine* imuSource,
-                              ITMLib::MainEngine* mainEngine,
+                              ITMLib::MainEngine* main_engine,
 
                               const configuration::Configuration& configuration,
                               ITMLib::TelemetryRecorder_Interface* logger) {
-
-	//TODO: somehow incorporate the following "constant" settings into Configuration struct, Configuration.h in ITMLib
-	const bool fix_camera = false;
-	const bool load_volume_before_automatic_run = false;
-	const bool save_volume_after_automatic_run = false;
-
-
 	this->logger = logger;
 	this->indexingMethod = configuration.indexing_method;
 
-	this->save_after_automatic_run = save_volume_after_automatic_run;
+	this->save_after_automatic_run = configuration.automatic_run_settings.save_volumes_after_processing;
 	this->exit_after_automatic_run = configuration.automatic_run_settings.exit_after_automatic_processing;
 
 	this->freeviewActive = true;
@@ -112,7 +106,7 @@ void UIEngine_BPO::Initialize(int& argc, char** argv,
 
 	this->imageSource = imageSource;
 	this->imuSource = imuSource;
-	this->mainEngine = mainEngine;
+	this->mainEngine = main_engine;
 	this->output_path = configuration.paths.output_path;
 
 	int textHeight = 60; // Height of text area, 2 lines
@@ -125,7 +119,7 @@ void UIEngine_BPO::Initialize(int& argc, char** argv,
 	winReg[2] = Vector4f(0.665f, h1, 1.0f, h2);     // Side sub window 2
 
 	this->isRecordingImages = false;
-	this->currentFrameNo = 0;
+	this->processed_frame_count = 0;
 	this->rgbVideoWriter = nullptr;
 	this->depthVideoWriter = nullptr;
 
@@ -192,15 +186,12 @@ void UIEngine_BPO::Initialize(int& argc, char** argv,
 		this->reconstructionVideoWriter = new FFMPEGWriter();
 	}
 
-	if (load_volume_before_automatic_run) {
-		if(logger != nullptr && logger->NeedsFramewiseOutputFolder()){
-			logger->SetOutputDirectory(
-					this->GenerateCurrentFrameOutputDirectory());
-		}
-		mainEngine->LoadFromFile();
+	if (configuration.automatic_run_settings.load_volume_before_processing) {
+		std::string frame_path = this->GenerateCurrentFrameOutputPath();
+		main_engine->LoadFromFile(frame_path);
 		SkipFrames(1);
 	}
-	if(logger != nullptr) logger->SetShutdownRequestedFlagLocation(&this->shutdownRequested);
+	if (logger != nullptr) logger->SetShutdownRequestedFlagLocation(&this->shutdownRequested);
 	printf("initialised.\n");
 }
 
@@ -214,11 +205,11 @@ void UIEngine_BPO::GetScreenshot(ITMUChar4Image* dest) const {
 	glReadPixels(0, 0, dest->noDims.x, dest->noDims.y, GL_RGBA, GL_UNSIGNED_BYTE, dest->GetData(MEMORYDEVICE_CPU));
 }
 
-void UIEngine_BPO::SkipFrames(int numberOfFramesToSkip) {
-	for (int iFrame = 0; iFrame < numberOfFramesToSkip && imageSource->hasMoreImages(); iFrame++) {
+void UIEngine_BPO::SkipFrames(int number_of_frames_to_skip) {
+	for (int iFrame = 0; iFrame < number_of_frames_to_skip && imageSource->hasMoreImages(); iFrame++) {
 		imageSource->getImages(inputRGBImage, inputRawDepthImage);
 	}
-	this->startedProcessingFromFrameIx += numberOfFramesToSkip;
+	this->start_frame_index += number_of_frames_to_skip;
 }
 
 
@@ -240,9 +231,9 @@ void UIEngine_BPO::ProcessFrame() {
 		else imuSource->getMeasurement(inputIMUMeasurement);
 	}
 
-	if(logger != nullptr && logger->NeedsFramewiseOutputFolder()){
+	if (logger != nullptr && logger->NeedsFramewiseOutputFolder()) {
 		logger->SetOutputDirectory(
-				this->GenerateCurrentFrameOutputDirectory());
+				this->GenerateCurrentFrameOutputPath());
 	}
 
 	RecordDepthAndRGBInputToImages();
@@ -268,11 +259,11 @@ void UIEngine_BPO::ProcessFrame() {
 
 	RecordCurrentReconstructionFrameToVideo();
 
-	currentFrameNo++;
+	processed_frame_count++;
 }
 
 int UIEngine_BPO::GetCurrentFrameIndex() const {
-	return startedProcessingFromFrameIx + currentFrameNo;
+	return start_frame_index + processed_frame_count;
 }
 
 void UIEngine_BPO::Run() { glutMainLoop(); }
@@ -306,8 +297,16 @@ std::string UIEngine_BPO::GenerateNextFrameOutputPath() const {
 	return path.string();
 }
 
-std::string UIEngine_BPO::GenerateCurrentFrameOutputDirectory() const {
+std::string UIEngine_BPO::GenerateCurrentFrameOutputPath() const {
 	fs::path path(std::string(this->output_path) + "/Frame_" + std::to_string(GetCurrentFrameIndex()));
+	if (!fs::exists(path)) {
+		fs::create_directories(path);
+	}
+	return path.string();
+}
+
+std::string UIEngine_BPO::GeneratePreviousFrameOutputPath() const {
+	fs::path path(std::string(this->output_path) + "/Frame_" + std::to_string(GetCurrentFrameIndex() - 1));
 	if (!fs::exists(path)) {
 		fs::create_directories(path);
 	}
@@ -331,7 +330,7 @@ void UIEngine_BPO::RecordCurrentReconstructionFrameToVideo() {
 			SaveImageToFile(outImage[0], fileName.c_str());
 			cv::Mat img = cv::imread(fileName, cv::IMREAD_UNCHANGED);
 			cv::putText(img, std::to_string(GetCurrentFrameIndex()), cv::Size(10, 50), cv::FONT_HERSHEY_SIMPLEX,
-			            1, cv::Scalar(128, 255, 128), 1, cv::LINE_AA);
+						1, cv::Scalar(128, 255, 128), 1, cv::LINE_AA);
 			cv::imwrite(fileName, img);
 			ITMUChar4Image* imageWithText = new ITMUChar4Image(imageSource->getDepthImageSize(), true, allocateGPU);
 			ReadImageFromFile(imageWithText, fileName.c_str());
@@ -363,11 +362,11 @@ void UIEngine_BPO::RecordDepthAndRGBInputToImages() {
 	if (isRecordingImages) {
 		char str[250];
 
-		sprintf(str, "%s/%04d.pgm", output_path.c_str(), currentFrameNo);
+		sprintf(str, "%s/%04d.pgm", output_path.c_str(), processed_frame_count);
 		SaveImageToFile(inputRawDepthImage, str);
 
 		if (inputRGBImage->noDims != Vector2i(0, 0)) {
-			sprintf(str, "%s/%04d.ppm", output_path.c_str(), currentFrameNo);
+			sprintf(str, "%s/%04d.ppm", output_path.c_str(), processed_frame_count);
 			SaveImageToFile(inputRGBImage, str);
 		}
 	}

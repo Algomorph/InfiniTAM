@@ -131,7 +131,7 @@ void UIEngine_BPO::GlutDisplayFunction() {
 	char str[200];
 
 	//print previous frame index
-	int lastFrameIx = uiEngine.startedProcessingFromFrameIx + uiEngine.processedFrameNo - 1;
+	int lastFrameIx = uiEngine.start_frame_index + uiEngine.processedFrameNo - 1;
 	if (lastFrameIx >= 0) {
 		glRasterPos2f(0.775f, -0.900f);
 		sprintf(str, "Frame %5d", lastFrameIx);
@@ -203,7 +203,7 @@ void UIEngine_BPO::GlutIdleFunction() {
 			    uiEngine.number_of_frames_to_process_after_launch) {
 				uiEngine.mainLoopAction = uiEngine.exit_after_automatic_run ? EXIT : PROCESS_PAUSED;
 				if (uiEngine.save_after_automatic_run) {
-					uiEngine.mainEngine->SaveToFile();
+					uiEngine.mainEngine->SaveToFile(uiEngine.GeneratePreviousFrameOutputPath());
 				}
 				bench::PrintAllCumulativeTimes();
 				if (configuration::get().telemetry_settings.save_benchmarks_to_disk) {
@@ -253,7 +253,7 @@ void UIEngine_BPO::GlutKeyUpFunction(unsigned char key, int x, int y) {
 				uiEngine.isRecordingImages = false;
 			} else {
 				printf("started recoding to disk ...\n");
-				uiEngine.currentFrameNo = 0;
+				uiEngine.processed_frame_count = 0;
 				uiEngine.isRecordingImages = true;
 			}
 			break;
@@ -377,7 +377,7 @@ void UIEngine_BPO::GlutKeyUpFunction(unsigned char key, int x, int y) {
 			printf("loading scene from disk ... ");
 
 			try {
-				uiEngine.mainEngine->LoadFromFile();
+				uiEngine.mainEngine->LoadFromFile(uiEngine.GenerateCurrentFrameOutputPath());
 				printf("done\n");
 			}
 			catch (const std::runtime_error& e) {

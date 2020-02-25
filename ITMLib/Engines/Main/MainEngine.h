@@ -82,7 +82,9 @@ namespace ITMLib
 
 		/// save and load the full scene and relocaliser (if any) to/from file
 		virtual void SaveToFile() { };
+		virtual void SaveToFile(const std::string& path) { };
 		virtual void LoadFromFile() { };
+		virtual void LoadFromFile(const std::string& path) { };
 
 		/// resets the scene and the tracker
 		virtual void resetAll() = 0;

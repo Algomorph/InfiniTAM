@@ -549,4 +549,53 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::Reset() {
 	tracking_state->Reset();
 }
 
+template<typename TVoxel, typename TWarp, typename TIndex>
+void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::LoadFromFile(const std::string& path) {
+	std::string relocaliser_input_path = path + "Relocaliser/";
+	if (view != nullptr) {
+		try // load relocaliser
+		{
+			auto& settings = configuration::get();
+			FernRelocLib::Relocaliser<float>* relocaliser_temp =
+					new FernRelocLib::Relocaliser<float>(view->depth->noDims,
+					                                     Vector2f(
+							                                     settings.general_voxel_volume_parameters.near_clipping_distance,
+							                                     settings.general_voxel_volume_parameters.far_clipping_distance),
+					                                     0.2f, 500, 4);
+
+			relocaliser_temp->LoadFromDirectory(relocaliser_input_path);
+
+			delete relocaliser;
+			relocaliser = relocaliser_temp;
+		}
+		catch (std::runtime_error& e) {
+			throw std::runtime_error("Could not load relocaliser: " + std::string(e.what()));
+		}
+	}
+
+	try // load scene
+	{
+		std::cout << "Loading canonical volume from '" << path << "'." << std::endl;
+		canonical_volume->LoadFromDirectory(path + "/canonical");
+
+		if (framesProcessed == 0) {
+			framesProcessed = 1; //to skip initialization
+		}
+	}
+	catch (std::runtime_error& e) {
+		canonical_volume->Reset();
+		throw std::runtime_error("Could not load volume:" + std::string(e.what()));
+	}
+}
+
+template<typename TVoxel, typename TWarp, typename TIndex>
+void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::SaveToFile(const std::string& path) {
+	std::string relocalizer_output_path = path + "Relocaliser/";
+	// throws error if any of the saves fail
+	if (relocaliser) relocaliser->SaveToDirectory(relocalizer_output_path);
+	VolumeFileIOEngine<TVoxel, TIndex>::SaveToDirectoryCompact(canonical_volume, path + "/canonical");
+	VolumeFileIOEngine<TVoxel, TIndex>::SaveToDirectoryCompact(live_volumes[0], path + "/live");
+	std::cout << "Saving scenes in a compact way to '" << path << "'." << std::endl;
+}
+
 // endregion ===========================================================================================================
