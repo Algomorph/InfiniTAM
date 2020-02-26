@@ -55,19 +55,19 @@ static void CreateICPMaps_common_metal(const ITMScene<TVoxel,TIndex> *scene, con
 
     CreateICPMaps_Params *params = (CreateICPMaps_Params*)[vis_metalBits.paramsBuffer contents];
     params->imgSize.x = view->depth->noDims.x; params->imgSize.y = view->depth->noDims.y; params->imgSize.z = 0; params->imgSize.w = 1;
-    params->voxelSizes.x = scene->sceneParams->voxelSize;
-    params->voxelSizes.y = 1.0f / scene->sceneParams->voxelSize;
+    params->voxelSizes.x = scene->parameters->voxelSize;
+    params->voxelSizes.y = 1.0f / scene->parameters->voxelSize;
     params->invM = trackingState->pose_d->GetInvM();
     params->invProjParams = InvertProjectionParams(view->calib.intrinsics_d.projectionParamsSimple.all);
     params->lightSource.x = -Vector3f(params->invM.getColumn(2)).x;
     params->lightSource.y = -Vector3f(params->invM.getColumn(2)).y;
     params->lightSource.z = -Vector3f(params->invM.getColumn(2)).z;
-    params->lightSource.w = scene->sceneParams->mu;
+    params->lightSource.w = scene->parameters->mu;
 
     [commandEncoder setComputePipelineState:vis_metalBits.p_genericRaycastVH_device];
     [commandEncoder setBuffer:(__bridge id<MTLBuffer>) renderState->raycastResult->GetMetalBuffer()             offset:0 atIndex:0];
     [commandEncoder setBuffer:(__bridge id<MTLBuffer>) entriesVisibleType                                       offset:0 atIndex:1];
-    [commandEncoder setBuffer:(__bridge id<MTLBuffer>) scene->localVBA.GetVoxelBlocks_MB()                      offset:0 atIndex:2];
+    [commandEncoder setBuffer:(__bridge id<MTLBuffer>) scene->voxels.GetVoxelBlocks_MB()                      offset:0 atIndex:2];
     [commandEncoder setBuffer:(__bridge id<MTLBuffer>) scene->index.getIndexData_MB()                           offset:0 atIndex:3];
     [commandEncoder setBuffer:(__bridge id<MTLBuffer>) renderState->renderingRangeImage->GetMetalBuffer()       offset:0 atIndex:4];
     [commandEncoder setBuffer:vis_metalBits.paramsBuffer                                                        offset:0 atIndex:5];
@@ -126,19 +126,19 @@ static void RenderImage_common_metal(const ITMScene<TVoxel,ITMVoxelBlockHash> *s
 
             CreateICPMaps_Params *params = (CreateICPMaps_Params*)[vis_metalBits.paramsBuffer contents];
             params->imgSize.x = outputImage->noDims.x; params->imgSize.y = outputImage->noDims.y; params->imgSize.z = 0; params->imgSize.w = 0;
-            params->voxelSizes.x = scene->sceneParams->voxelSize;
-            params->voxelSizes.y = 1.0f / scene->sceneParams->voxelSize;
+            params->voxelSizes.x = scene->parameters->voxelSize;
+            params->voxelSizes.y = 1.0f / scene->parameters->voxelSize;
             params->invM = pose->GetInvM();
             params->invProjParams = InvertProjectionParams(intrinsics->projectionParamsSimple.all);
             params->lightSource.x = -Vector3f(params->invM.getColumn(2)).x;
             params->lightSource.y = -Vector3f(params->invM.getColumn(2)).y;
             params->lightSource.z = -Vector3f(params->invM.getColumn(2)).z;
-            params->lightSource.w = scene->sceneParams->mu;
+            params->lightSource.w = scene->parameters->mu;
 
             [commandEncoder setComputePipelineState:vis_metalBits.p_genericRaycastVH_device];
             [commandEncoder setBuffer:(__bridge id<MTLBuffer>) renderState->raycastResult->GetMetalBuffer()             offset:0 atIndex:0];
             [commandEncoder setBuffer:(__bridge id<MTLBuffer>) entriesVisibleType                                       offset:0 atIndex:1];
-            [commandEncoder setBuffer:(__bridge id<MTLBuffer>) scene->localVBA.GetVoxelBlocks_MB()                      offset:0 atIndex:2];
+            [commandEncoder setBuffer:(__bridge id<MTLBuffer>) scene->voxels.GetVoxelBlocks_MB()                      offset:0 atIndex:2];
             [commandEncoder setBuffer:(__bridge id<MTLBuffer>) scene->index.getIndexData_MB()                           offset:0 atIndex:3];
             [commandEncoder setBuffer:(__bridge id<MTLBuffer>) renderState->renderingRangeImage->GetMetalBuffer()       offset:0 atIndex:4];
             [commandEncoder setBuffer:vis_metalBits.paramsBuffer                                                        offset:0 atIndex:5];
@@ -159,7 +159,7 @@ static void RenderImage_common_metal(const ITMScene<TVoxel,ITMVoxelBlockHash> *s
 
     Vector3f lightSource = -Vector3f(invM.getColumn(2));
     Vector4u *outRendering = outputImage->GetData(MEMORYDEVICE_CPU);
-    const TVoxel *voxelData = scene->localVBA.GetVoxelBlocks();
+    const TVoxel *voxelData = scene->voxels.GetVoxelBlocks();
     const typename ITMVoxelBlockHash::IndexData *voxelIndex = scene->index.GetIndexData();
 
     if ((type == IVisualizationEngine::RENDER_COLOUR_FROM_VOLUME)&&
@@ -192,7 +192,7 @@ static void RenderImage_common_metal(const ITMScene<TVoxel,ITMVoxelBlockHash> *s
             {
                 int y = locId/imgSize.x;
                 int x = locId - y*imgSize.x;
-                processPixelGrey_ImageNormals<true, false>(outRendering, pointsRay, imgSize, x, y, scene->sceneParams->voxelSize, lightSource);
+                processPixelGrey_ImageNormals<true, false>(outRendering, pointsRay, imgSize, x, y, scene->parameters->voxelSize, lightSource);
             }
             break;
         case IVisualizationEngine::RENDER_SHADED_GREYSCALE:

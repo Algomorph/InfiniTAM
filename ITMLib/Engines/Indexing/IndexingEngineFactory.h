@@ -22,7 +22,9 @@
 #include "VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
 
 #ifndef COMPILE_WITHOUT_CUDA
+
 #include "VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
+
 #endif
 
 namespace ITMLib {
@@ -56,12 +58,35 @@ struct IndexingEngineFactory {
 				break;
 			case MEMORYDEVICE_METAL:
 #ifdef COMPILE_WITH_METAL
-				indexing_engine = new IndexingEngine_Metal<TVoxelA,TIndex>;
+				indexing_engine = new IndexingEngine<TVoxel, TIndex, MEMORYDEVICE_METAL>();
 #endif
 				break;
 		}
 
 		return indexing_engine;
+	}
+
+	template<typename TVoxel, typename TIndex>
+	static IndexingEngineInterface<TVoxel, TIndex>&
+	Get(MemoryDeviceType deviceType) {
+
+		switch (deviceType) {
+			case MEMORYDEVICE_CPU:
+				return IndexingEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance();
+				break;
+			case MEMORYDEVICE_CUDA:
+#ifdef COMPILE_WITHOUT_CUDA
+				DIEWITHEXCEPTION_REPORTLOCATION("Requested instantiation of a CUDA-based specialization, but code was compiled without CUDA. Aborting.");
+#else
+				return IndexingEngine<TVoxel, TIndex, MEMORYDEVICE_CUDA>::Instance();
+#endif
+				break;
+			case MEMORYDEVICE_METAL:
+#ifdef COMPILE_WITH_METAL
+				return IndexingEngine<TVoxel, TIndex, MEMORYDEVICE_METAL>::Instance();
+#endif
+				break;
+		}
 	}
 };
 

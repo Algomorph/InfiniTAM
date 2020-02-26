@@ -64,7 +64,7 @@ class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, 
 		*falseOrAlteredUnmatchedEncountered.GetData(MEMORYDEVICE_CPU) = false;
 		falseOrAlteredUnmatchedEncountered.UpdateDeviceFromHost();
 		dim3 cudaBlockSize_BlockVoxelPerThread(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
-		TVoxelSecondary* voxelsHash = secondaryVolume->localVBA.GetVoxelBlocks();
+		TVoxelSecondary* voxelsHash = secondaryVolume->voxels.GetVoxelBlocks();
 
 		if (countHashesNotSpanned_host > 0) {
 			// if there are any blocks in the hash that are not spanned by the array volume, we must check
@@ -85,7 +85,7 @@ class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, 
 			return false;
 		}
 
-		TVoxelPrimary* voxelsArray = primaryVolume->localVBA.GetVoxelBlocks();
+		TVoxelPrimary* voxelsArray = primaryVolume->voxels.GetVoxelBlocks();
 		Vector3i arrayOffset = primaryVolume->index.GetVolumeOffset();
 		Vector3i arraySize = primaryVolume->index.GetVolumeSize();
 
@@ -157,7 +157,7 @@ class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, 
 		*falseOrAlteredEncountered.GetData(MEMORYDEVICE_CPU) = false;
 		falseOrAlteredEncountered.UpdateDeviceFromHost();
 		dim3 cudaBlockSize_BlockVoxelPerThread(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
-		TVoxelSecondary* voxelsHash = secondaryVolume->localVBA.GetVoxelBlocks();
+		TVoxelSecondary* voxelsHash = secondaryVolume->voxels.GetVoxelBlocks();
 
 		if (countHashesNotSpanned_host > 0) {
 			// if there are any blocks in the hash that are not spanned by the array volume, we must check
@@ -178,7 +178,7 @@ class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, 
 			return false;
 		}
 
-		TVoxelPrimary* voxelsArray = primaryVolume->localVBA.GetVoxelBlocks();
+		TVoxelPrimary* voxelsArray = primaryVolume->voxels.GetVoxelBlocks();
 		Vector3i arrayOffset = primaryVolume->index.GetVolumeOffset();
 		Vector3i arraySize = primaryVolume->index.GetVolumeSize();
 
@@ -225,8 +225,8 @@ class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, 
 			TBooleanFunctor& functor, TDeviceFunction&& deviceFunction) {
 
 		int hashEntryCount = secondaryVolume->index.hashEntryCount;
-		TVoxelSecondary* hashVoxels = secondaryVolume->localVBA.GetVoxelBlocks();
-		TVoxelPrimary* arrayVoxels = primaryVolume->localVBA.GetVoxelBlocks();
+		TVoxelSecondary* hashVoxels = secondaryVolume->voxels.GetVoxelBlocks();
+		TVoxelPrimary* arrayVoxels = primaryVolume->voxels.GetVoxelBlocks();
 		const VoxelBlockHash::IndexData* hashTable = secondaryVolume->index.GetIndexData();
 		const PlainVoxelArray::IndexData* arrayInfo = primaryVolume->index.GetIndexData();
 		Vector3i startVoxel = primaryVolume->index.GetVolumeOffset();

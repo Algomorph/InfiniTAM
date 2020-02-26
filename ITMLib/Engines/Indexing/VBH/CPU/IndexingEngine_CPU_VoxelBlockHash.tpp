@@ -153,11 +153,11 @@ AllocateHashEntriesUsingAllocationStateList(VoxelVolume<TVoxel, VoxelBlockHash>*
 	Vector3s* block_coordinates = volume->index.GetAllocationBlockCoordinates();
 
 	const int hash_entry_count = volume->index.hashEntryCount;
-	std::atomic<int> last_free_voxel_block_id(volume->localVBA.lastFreeBlockId);
+	std::atomic<int> last_free_voxel_block_id(volume->voxels.lastFreeBlockId);
 	std::atomic<int> last_free_excess_list_id(volume->index.GetLastFreeExcessListId());
 	std::atomic<int> utilized_block_count(volume->index.GetUtilizedHashBlockCount());
 
-	int* block_allocation_list = volume->localVBA.GetAllocationList();
+	int* block_allocation_list = volume->voxels.GetAllocationList();
 	int* excess_allocation_list = volume->index.GetExcessAllocationList();
 	int* utilized_block_hash_codes = volume->index.GetUtilizedBlockHashCodes();
 
@@ -220,7 +220,7 @@ AllocateHashEntriesUsingAllocationStateList(VoxelVolume<TVoxel, VoxelBlockHash>*
 				break;
 		}
 	}
-	volume->localVBA.lastFreeBlockId = last_free_voxel_block_id;
+	volume->voxels.lastFreeBlockId = last_free_voxel_block_id;
 	volume->index.SetLastFreeExcessListId(last_free_excess_list_id);
 	volume->index.SetUtilizedHashBlockCount(utilized_block_count.load());
 }
@@ -234,9 +234,9 @@ AllocateHashEntriesUsingAllocationStateList_SetVisibility(VoxelVolume<TVoxel, Vo
 	HashBlockVisibility* hash_block_visibility_types_device = volume->index.GetBlockVisibilityTypes();
 
 	int entry_count = volume->index.hashEntryCount;
-	int last_free_voxel_block_id = volume->localVBA.lastFreeBlockId;
+	int last_free_voxel_block_id = volume->voxels.lastFreeBlockId;
 	int last_free_excess_list_id = volume->index.GetLastFreeExcessListId();
-	int* voxel_allocation_list = volume->localVBA.GetAllocationList();
+	int* voxel_allocation_list = volume->voxels.GetAllocationList();
 	int* excess_allocation_list = volume->index.GetExcessAllocationList();
 	HashEntry* hash_table = volume->index.GetEntries();
 
@@ -280,7 +280,7 @@ AllocateHashEntriesUsingAllocationStateList_SetVisibility(VoxelVolume<TVoxel, Vo
 				break;
 		}
 	}
-	volume->localVBA.lastFreeBlockId = last_free_voxel_block_id;
+	volume->voxels.lastFreeBlockId = last_free_voxel_block_id;
 	volume->index.SetLastFreeExcessListId(last_free_excess_list_id);
 }
 
@@ -333,13 +333,13 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::BuildUtilizedBloc
 	HashBlockVisibility* hash_block_visibility_types = volume->index.GetBlockVisibilityTypes();
 	int* visible_hash_entry_codes = volume->index.GetUtilizedBlockHashCodes();
 	HashEntry* hash_table = volume->index.GetEntries();
-	bool useSwapping = volume->globalCache != nullptr;
-	ITMHashSwapState* swapStates = volume->Swapping() ? volume->globalCache->GetSwapStates(false) : 0;
+	bool useSwapping = volume->global_cache != nullptr;
+	ITMHashSwapState* swapStates = volume->Swapping() ? volume->global_cache->GetSwapStates(false) : 0;
 
 	// ** view data **
 	Vector4f depthCameraProjectionParameters = view->calib.intrinsics_d.projectionParamsSimple.all;
 	Vector2i depthImgSize = view->depth->noDims;
-	float voxelSize = volume->sceneParams->voxel_size;
+	float voxelSize = volume->parameters->voxel_size;
 
 	int visibleEntryCount = 0;
 	//build visible list
@@ -423,9 +423,9 @@ bool IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateHashBlock
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3s at, int& hashCode) {
 
 	HashEntry* hashTable = volume->index.GetEntries();
-	int lastFreeVoxelBlockId = volume->localVBA.lastFreeBlockId;
+	int lastFreeVoxelBlockId = volume->voxels.lastFreeBlockId;
 	int lastFreeExcessListId = volume->index.GetLastFreeExcessListId();
-	int* voxelAllocationList = volume->localVBA.GetAllocationList();
+	int* voxelAllocationList = volume->voxels.GetAllocationList();
 	int* excessAllocationList = volume->index.GetExcessAllocationList();
 	HashEntry* entry = nullptr;
 	hashCode = -1;
@@ -433,7 +433,7 @@ bool IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateHashBlock
 	                             voxelAllocationList, excessAllocationList, hashCode)) {
 		return false;
 	}
-	volume->localVBA.lastFreeBlockId = lastFreeVoxelBlockId;
+	volume->voxels.lastFreeBlockId = lastFreeVoxelBlockId;
 	volume->index.SetLastFreeExcessListId(lastFreeExcessListId);
 	return true;
 }

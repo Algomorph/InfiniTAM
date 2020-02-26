@@ -98,11 +98,11 @@ private:
 			TBlockTraversalFunction&& block_traverser) {
 
 // *** traversal vars
-		TVoxel1* voxels1 = volume1->localVBA.GetVoxelBlocks();
+		TVoxel1* voxels1 = volume1->voxels.GetVoxelBlocks();
 		HashEntry* hash_table1 = volume1->index.GetEntries();
-		TVoxel2* voxels2 = volume2->localVBA.GetVoxelBlocks();
+		TVoxel2* voxels2 = volume2->voxels.GetVoxelBlocks();
 		HashEntry* hash_table2 = volume2->index.GetEntries();
-		TVoxel3* voxels3 = volume3->localVBA.GetVoxelBlocks();
+		TVoxel3* voxels3 = volume3->voxels.GetVoxelBlocks();
 		HashEntry* hash_table3 = volume3->index.GetEntries();
 
 		const int hash_entry_count = volume1->index.hashEntryCount;
@@ -135,11 +135,11 @@ private:
 			TBlockTraversalFunction&& block_traverser) {
 
 // *** traversal vars
-		TVoxel1* voxels1 = volume1->localVBA.GetVoxelBlocks();
+		TVoxel1* voxels1 = volume1->voxels.GetVoxelBlocks();
 		HashEntry* hash_table1 = volume1->index.GetEntries();
-		TVoxel2* voxels2 = volume2->localVBA.GetVoxelBlocks();
+		TVoxel2* voxels2 = volume2->voxels.GetVoxelBlocks();
 		HashEntry* hash_table2 = volume2->index.GetEntries();
-		TVoxel3* voxels3 = volume3->localVBA.GetVoxelBlocks();
+		TVoxel3* voxels3 = volume3->voxels.GetVoxelBlocks();
 		HashEntry* hash_table3 = volume3->index.GetEntries();
 
 		const int utilized_entry_count = volume1->index.GetUtilizedHashBlockCount();

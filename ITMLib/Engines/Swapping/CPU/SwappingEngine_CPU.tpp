@@ -9,7 +9,7 @@ using namespace ITMLib;
 template<class TVoxel>
 int SwappingEngine_CPU<TVoxel, VoxelBlockHash>::LoadFromGlobalMemory(VoxelVolume<TVoxel, VoxelBlockHash> *scene)
 {
-	GlobalCache<TVoxel, VoxelBlockHash> *globalCache = scene->globalCache;
+	GlobalCache<TVoxel, VoxelBlockHash> *globalCache = scene->global_cache;
 
 	ITMHashSwapState *swapStates = globalCache->GetSwapStates(false);
 
@@ -58,7 +58,7 @@ int SwappingEngine_CPU<TVoxel, VoxelBlockHash>::LoadFromGlobalMemory(VoxelVolume
 template<class TVoxel>
 void SwappingEngine_CPU<TVoxel, VoxelBlockHash>::IntegrateGlobalIntoLocal(VoxelVolume<TVoxel, VoxelBlockHash> *scene, RenderState *renderState)
 {
-	GlobalCache<TVoxel, VoxelBlockHash> *globalCache = scene->globalCache;
+	GlobalCache<TVoxel, VoxelBlockHash> *globalCache = scene->global_cache;
 
 	HashEntry *hashTable = scene->index.GetEntries();
 
@@ -68,11 +68,11 @@ void SwappingEngine_CPU<TVoxel, VoxelBlockHash>::IntegrateGlobalIntoLocal(VoxelV
 	bool *hasSyncedData_local = globalCache->GetHasSyncedData(false);
 	int *neededEntryIDs_local = globalCache->GetNeededEntryIDs(false);
 
-	TVoxel *localVBA = scene->localVBA.GetVoxelBlocks();
+	TVoxel *localVBA = scene->voxels.GetVoxelBlocks();
 
 	int noNeededEntries = this->LoadFromGlobalMemory(scene);
 
-	int maxW = scene->sceneParams->max_integration_weight;
+	int maxW = scene->parameters->max_integration_weight;
 
 	for (int i = 0; i < noNeededEntries; i++)
 	{
@@ -96,7 +96,7 @@ void SwappingEngine_CPU<TVoxel, VoxelBlockHash>::IntegrateGlobalIntoLocal(VoxelV
 template<class TVoxel>
 void SwappingEngine_CPU<TVoxel, VoxelBlockHash>::SaveToGlobalMemory(VoxelVolume<TVoxel, VoxelBlockHash> *scene, RenderState *renderState)
 {
-	GlobalCache<TVoxel, VoxelBlockHash> *globalCache = scene->globalCache;
+	GlobalCache<TVoxel, VoxelBlockHash> *globalCache = scene->global_cache;
 
 	ITMHashSwapState *swapStates = globalCache->GetSwapStates(false);
 
@@ -111,13 +111,13 @@ void SwappingEngine_CPU<TVoxel, VoxelBlockHash>::SaveToGlobalMemory(VoxelVolume<
 	bool *hasSyncedData_global = globalCache->GetHasSyncedData(false);
 	int *neededEntryIDs_global = globalCache->GetNeededEntryIDs(false);
 
-	TVoxel *localVBA = scene->localVBA.GetVoxelBlocks();
-	int *voxelAllocationList = scene->localVBA.GetAllocationList();
+	TVoxel *localVBA = scene->voxels.GetVoxelBlocks();
+	int *voxelAllocationList = scene->voxels.GetAllocationList();
 
 	int hashEntryCount = globalCache->hashEntryCount;
 	
 	int neededEntryCount = 0; // needed for what?
-	int allocatedEntryCount = scene->localVBA.lastFreeBlockId;
+	int allocatedEntryCount = scene->voxels.lastFreeBlockId;
 
 	for (int entryDestId = 0; entryDestId < hashEntryCount; entryDestId++)
 	{
@@ -151,7 +151,7 @@ void SwappingEngine_CPU<TVoxel, VoxelBlockHash>::SaveToGlobalMemory(VoxelVolume<
 		}
 	}
 
-	scene->localVBA.lastFreeBlockId = allocatedEntryCount;
+	scene->voxels.lastFreeBlockId = allocatedEntryCount;
 
 	// would copy neededEntryIDs_local, hasSyncedData_local and syncedVoxelBlocks_local into *_global here
 
@@ -171,13 +171,13 @@ void SwappingEngine_CPU<TVoxel, VoxelBlockHash>::CleanLocalMemory(VoxelVolume<TV
 	HashEntry *hashTable = scene->index.GetEntries();
 	HashBlockVisibility *blockVisibilityTypes = scene->index.GetBlockVisibilityTypes();
 
-	TVoxel *localVBA = scene->localVBA.GetVoxelBlocks();
-	int *voxelAllocationList = scene->localVBA.GetAllocationList();
+	TVoxel *localVBA = scene->voxels.GetVoxelBlocks();
+	int *voxelAllocationList = scene->voxels.GetAllocationList();
 
 	int noTotalEntries = scene->index.hashEntryCount;
 
 	int noNeededEntries = 0;
-	int noAllocatedVoxelEntries = scene->localVBA.lastFreeBlockId;
+	int noAllocatedVoxelEntries = scene->voxels.lastFreeBlockId;
 
 	for (int entryDestId = 0; entryDestId < noTotalEntries; entryDestId++)
 	{
@@ -203,5 +203,5 @@ void SwappingEngine_CPU<TVoxel, VoxelBlockHash>::CleanLocalMemory(VoxelVolume<TV
 		}
 	}
 
-	scene->localVBA.lastFreeBlockId = noAllocatedVoxelEntries;
+	scene->voxels.lastFreeBlockId = noAllocatedVoxelEntries;
 }

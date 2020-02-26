@@ -16,7 +16,7 @@ class VoxelVolume
 {
 public:
 	/** Volume parameters like voxel size etc. */
-	const VoxelVolumeParameters* sceneParams;
+	const VoxelVolumeParameters* parameters;
 
 	/**
 	 * \brief An indexing method for access to the volume's voxels.
@@ -25,10 +25,10 @@ public:
 	TIndex index;
 
 	/** Current local content of the 8x8x8 voxel blocks -- stored host or device */
-	LocalVBA<TVoxel> localVBA;
+	LocalVBA<TVoxel> voxels;
 
 	/** "Global" content -- stored on in host memory only */
-	GlobalCache<TVoxel, TIndex>* globalCache;
+	GlobalCache<TVoxel, TIndex>* global_cache;
 
 	VoxelVolume(const VoxelVolumeParameters *_sceneParams, bool _useSwapping, MemoryDeviceType _memoryType,
 	            typename TIndex::InitializationParameters indexParameters = typename TIndex::InitializationParameters());
@@ -36,7 +36,7 @@ public:
 	VoxelVolume(const VoxelVolume& other, MemoryDeviceType _memoryType);
 	~VoxelVolume()
 	{
-		if (globalCache != nullptr) delete globalCache;
+		if (global_cache != nullptr) delete global_cache;
 	}
 
 	void Reset();
@@ -51,7 +51,7 @@ public:
 
 	/** Return whether this scene is using swapping mechanism or not. **/
 	bool Swapping() const{
-		return this->globalCache != nullptr;
+		return this->global_cache != nullptr;
 	}
 
 	// Suppress the default copy constructor and assignment operator (C++11 way)

@@ -182,6 +182,76 @@ set(ITMLIB_ENGINES_TRAVERSAL_CUDA_HEADERS
     )
 
 
+set (
+        ITMLIB_ENGINES_TRAVERSAL_HEADERS
+
+        ${ITMLIB_ENGINES_TRAVERSAL_INTERFACE_HEADERS}
+        ${ITMLIB_ENGINES_TRAVERSAL_SHARED_HEADERS}
+        ${ITMLIB_ENGINES_TRAVERSAL_CPU_HEADERS}
+        ${ITMLIB_ENGINES_TRAVERSAL_CUDA_HEADERS}
+)
+
+set (
+        ITMLIB_ENGINES_TRAVERSAL_SOURCES
+
+        ${ITMLIB_ENGINES_TRAVERSAL_CPU_SOURCES}
+        ${ITMLIB_ENGINES_TRAVERSAL_CUDA_SOURCES}
+)
+
+#====================================== SCENE REDUCTION ENGINES ======================================================
+
+##
+set(ITMLIB_ENGINES_REDUCTION_INTERFACE_HEADERS
+    Engines/Reduction/Interface/VolumeReduction.h
+    )
+##
+set(ITMLIB_ENGINES_REDUCTION_SHARED_HEADERS
+    Engines/Reduction/Shared/ValueAndIndex.h
+    )
+
+##
+set(ITMLIB_ENGINES_REDUCTION_CPU_SOURCES
+    Engines/Reduction/CPU/VolumeReduction_CPU_PlainVoxelArray.tpp
+    Engines/Reduction/CPU/VolumeReduction_CPU_PlainVoxelArray.cpp
+    Engines/Reduction/CPU/VolumeReduction_CPU_VoxelBlockHash.tpp
+    Engines/Reduction/CPU/VolumeReduction_CPU_VoxelBlockHash.cpp
+    )
+
+set(ITMLIB_ENGINES_REDUCTION_CPU_HEADERS
+    Engines/Reduction/CPU/VolumeReduction_CPU_PlainVoxelArray.h
+    Engines/Reduction/CPU/VolumeReduction_CPU_VoxelBlockHash.h
+    )
+##
+set(ITMLIB_ENGINES_REDUCTION_CUDA_SOURCES
+    Engines/Reduction/CUDA/VolumeReduction_CUDA_PlainVoxelArray.tcu
+    Engines/Reduction/CUDA/VolumeReduction_CUDA_PlainVoxelArray.cu
+    Engines/Reduction/CUDA/VolumeReduction_CUDA_VoxelBlockHash.tcu
+    Engines/Reduction/CUDA/VolumeReduction_CUDA_VoxelBlockHash.cu
+    )
+
+set(ITMLIB_ENGINES_REDUCTION_CUDA_HEADERS
+    Engines/Reduction/CUDA/VolumeReduction_CUDA_PlainVoxelArray.h
+    Engines/Reduction/CUDA/VolumeReduction_CUDA_PlainVoxelArray_Kernels.h
+    Engines/Reduction/CUDA/VolumeReduction_CUDA_VoxelBlockHash.h
+    Engines/Reduction/CUDA/VolumeReduction_CUDA_VoxelBlockHash_Kernels.h
+    )
+
+set (
+        ITMLIB_ENGINES_REDUCTION_HEADERS
+
+        ${ITMLIB_ENGINES_REDUCTION_INTERFACE_HEADERS}
+        ${ITMLIB_ENGINES_REDUCTION_SHARED_HEADERS}
+        ${ITMLIB_ENGINES_REDUCTION_CPU_HEADERS}
+        ${ITMLIB_ENGINES_REDUCTION_CUDA_HEADERS}
+)
+
+set (
+        ITMLIB_ENGINES_REDUCTION_SOURCES
+
+        ${ITMLIB_ENGINES_REDUCTION_CPU_SOURCES}
+        ${ITMLIB_ENGINES_REDUCTION_CUDA_SOURCES}
+)
+
 #====================================== SCENE MANIPULATION ENGINES =====================================================
 set(ITMLIB_ENGINES_MANIPULATION_HEADERS
     Engines/EditAndCopy/EditAndCopyEngineFactory.h
@@ -555,7 +625,7 @@ set(ITMLIB_ENGINES_VIEWBUILDING_INTERFACE_HEADERS
 set(ITMLIB_ENGINES_VIEWBUILDING_SHARED_HEADERS
     Engines/ViewBuilding/Shared/ViewBuilder_Shared.h
     )
-## ======================================== VISUALIATION ENGINES =======================================================
+## ======================================== VISUALIZATION ENGINES ======================================================
 ##
 set(ITMLIB_ENGINES_Visualization_HEADERS
     Engines/Visualization/MultiVisualizationEngineFactory.h
@@ -946,9 +1016,8 @@ set(ITMLIB_UTILS_FILEIO_HEADERS
 set(ITMLIB_UTILS_VISUALIZATION_SOURCES
     Utils/Visualization/SceneSliceVisualizer2D.tpp
     Utils/Visualization/SceneSliceVisualizer2D_PlainVoxelArray.cpp
-    Utils/Visualization/SceneSliceVisualizer2D_VoxelBlockHash.cpp
+    Utils/Visualization/SceneSliceVisualizer2D_VoxelBlockHash.cpp)
 
-    )
 if (WITH_VTK)
     list(APPEND ITMLIB_UTILS_VISUALIZATION_SOURCES
          Utils/Visualization/SceneSliceVisualizer1D.cpp
@@ -989,8 +1058,8 @@ set(sources
     ${ITMLIB_ENGINES_LOWLEVEL_CUDA_SOURCES}
     ${ITMLIB_ENGINES_MANIPULATION_CPU_SOURCES}
     ${ITMLIB_ENGINES_MANIPULATION_CUDA_SOURCES}
-    ${ITMLIB_ENGINES_TRAVERSAL_CPU_SOURCES}
-    ${ITMLIB_ENGINES_TRAVERSAL_CUDA_SOURCES}
+    ${ITMLIB_ENGINES_TRAVERSAL_SOURCES}
+    ${ITMLIB_ENGINES_REDUCTION_SOURCES}
     ${ITMLIB_ENGINES_MESHING_CPU_SOURCES}
     ${ITMLIB_ENGINES_MESHING_CUDA_SOURCES}
     ${ITMLIB_ENGINES_MULTISCENE_SOURCES}
@@ -1038,10 +1107,8 @@ set(headers
     ${ITMLIB_ENGINES_MANIPULATION_SHARED_HEADERS}
     ${ITMLIB_ENGINES_MANIPULATION_CPU_HEADERS}
     ${ITMLIB_ENGINES_MANIPULATION_CUDA_HEADERS}
-    ${ITMLIB_ENGINES_TRAVERSAL_INTERFACE_HEADERS}
-    ${ITMLIB_ENGINES_TRAVERSAL_SHARED_HEADERS}
-    ${ITMLIB_ENGINES_TRAVERSAL_CPU_HEADERS}
-    ${ITMLIB_ENGINES_TRAVERSAL_CUDA_HEADERS}
+    ${ITMLIB_ENGINES_TRAVERSAL_HEADERS}
+    ${ITMLIB_ENGINES_REDUCTION_HEADERS}
     ${ITMLIB_ENGINES_LOWLEVEL_INTERFACE_HEADERS}
     ${ITMLIB_ENGINES_LOWLEVEL_SHARED_HEADERS}
     ${ITMLIB_ENGINES_MESHING_HEADERS}

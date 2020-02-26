@@ -49,8 +49,8 @@ private:
 		const int hash_entry_count = hash_volume->index.hashEntryCount;
 		HashEntry* hash_table = hash_volume->index.GetIndexData();
 
-		TArrayVoxel* array_voxels = array_volume->localVBA.GetVoxelBlocks();
-		THashVoxel* hash_voxels = hash_volume->localVBA.GetVoxelBlocks();
+		TArrayVoxel* array_voxels = array_volume->voxels.GetVoxelBlocks();
+		THashVoxel* hash_voxels = hash_volume->voxels.GetVoxelBlocks();
 
 		PlainVoxelArray::GridAlignedBox* array_info = array_volume->index.GetIndexData();
 		Vector3i array_min_voxels = array_info->offset;
@@ -257,8 +257,8 @@ private:
 			TFunctor& functor, TFunctionCall&& functionCall) {
 		volatile bool mismatch_found = false;
 		int hash_entry_count = hash_volume->index.hashEntryCount;
-		THashVoxel* hash_voxels = hash_volume->localVBA.GetVoxelBlocks();
-		TArrayVoxel* array_voxels = array_volume->localVBA.GetVoxelBlocks();
+		THashVoxel* hash_voxels = hash_volume->voxels.GetVoxelBlocks();
+		TArrayVoxel* array_voxels = array_volume->voxels.GetVoxelBlocks();
 		const VoxelBlockHash::IndexData* hash_table = hash_volume->index.GetIndexData();
 		const PlainVoxelArray::IndexData* array_info = array_volume->index.GetIndexData();
 		Vector3i start_voxel = array_info->offset;

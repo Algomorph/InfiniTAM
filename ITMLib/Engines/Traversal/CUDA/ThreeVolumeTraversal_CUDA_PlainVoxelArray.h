@@ -41,9 +41,9 @@ public:
 		assert(volume2->index.GetVolumeSize() == volume3->index.GetVolumeSize() &&
 		       volume2->index.GetVolumeSize() == volume1->index.GetVolumeSize());
 // *** traversal vars
-		TVoxel1* voxels1 = volume1->localVBA.GetVoxelBlocks();
-		TVoxel2* voxels2 = volume2->localVBA.GetVoxelBlocks();
-		TVoxel3* voxels3 = volume3->localVBA.GetVoxelBlocks();
+		TVoxel1* voxels1 = volume1->voxels.GetVoxelBlocks();
+		TVoxel2* voxels2 = volume2->voxels.GetVoxelBlocks();
+		TVoxel3* voxels3 = volume3->voxels.GetVoxelBlocks();
 
 		const PlainVoxelArray::GridAlignedBox* arrayInfo = volume1->index.GetIndexData();
 
@@ -73,9 +73,9 @@ public:
 		assert(volume2->index.GetVolumeSize() == volume3->index.GetVolumeSize() &&
 		       volume2->index.GetVolumeSize() == volume1->index.GetVolumeSize());
 // *** traversal vars
-		TVoxel1* voxels1 = volume1->localVBA.GetVoxelBlocks();
-		TVoxel2* voxels2 = volume2->localVBA.GetVoxelBlocks();
-		TVoxel3* voxels3 = volume3->localVBA.GetVoxelBlocks();
+		TVoxel1* voxels1 = volume1->voxels.GetVoxelBlocks();
+		TVoxel2* voxels2 = volume2->voxels.GetVoxelBlocks();
+		TVoxel3* voxels3 = volume3->voxels.GetVoxelBlocks();
 
 		const PlainVoxelArray::GridAlignedBox* arrayInfo = volume2->index.GetIndexData();
 
@@ -120,9 +120,9 @@ public:
 		ORcudaSafeCall(cudaMemcpy(functor_device, &functor, sizeof(TFunctor), cudaMemcpyHostToDevice));
 
 // *** traversal vars
-		TVoxel1* voxels1 = volume1->localVBA.GetVoxelBlocks();		
-		TVoxel2* voxels2 = volume2->localVBA.GetVoxelBlocks();
-		TVoxel3* voxels3 = volume3->localVBA.GetVoxelBlocks();
+		TVoxel1* voxels1 = volume1->voxels.GetVoxelBlocks();
+		TVoxel2* voxels2 = volume2->voxels.GetVoxelBlocks();
+		TVoxel3* voxels3 = volume3->voxels.GetVoxelBlocks();
 
 		const PlainVoxelArray::GridAlignedBox* arrayInfo = volume2->index.GetIndexData();
 

@@ -36,7 +36,7 @@ public:
 // region ================================ STATIC SINGLE-SCENE TRAVERSAL ===============================================
 	template<typename TStaticFunctor>
 	inline static void TraverseAll(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
-		TVoxel* voxels = volume->localVBA.GetVoxelBlocks();
+		TVoxel* voxels = volume->voxels.GetVoxelBlocks();
 		const PlainVoxelArray::GridAlignedBox* array_info = volume->index.GetIndexData();
 
 		dim3 cuda_block_size(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
@@ -58,7 +58,7 @@ public:
 	template<typename TFunctor>
 	inline static void
 	TraverseAll(VoxelVolume<TVoxel, PlainVoxelArray>* volume, TFunctor& functor) {
-		TVoxel* voxels = volume->localVBA.GetVoxelBlocks();
+		TVoxel* voxels = volume->voxels.GetVoxelBlocks();
 		const PlainVoxelArray::GridAlignedBox* array_info = volume->index.GetIndexData();
 
 		dim3 cuda_block_size(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
@@ -89,7 +89,7 @@ public:
 	template<typename TFunctor>
 	inline static void
 	TraverseAllWithPosition(VoxelVolume<TVoxel, PlainVoxelArray>* volume, TFunctor& functor) {
-		TVoxel* voxels = volume->localVBA.GetVoxelBlocks();
+		TVoxel* voxels = volume->voxels.GetVoxelBlocks();
 		const PlainVoxelArray::GridAlignedBox* array_info = volume->index.GetIndexData();
 
 		dim3 cuda_block_size(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);

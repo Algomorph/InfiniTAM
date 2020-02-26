@@ -44,16 +44,16 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(const RG
 
 	imuCalibrator = new ITMIMUCalibrator_iPad();
 	tracker = CameraTrackerFactory::Instance().Make(rgb_image_size, depth_image_size, low_level_engine, imuCalibrator,
-	                                                canonical_volume->sceneParams);
+	                                                canonical_volume->parameters);
 	camera_tracking_controller = new CameraTrackingController(tracker);
 	Vector2i trackedImageSize = camera_tracking_controller->GetTrackedImageSize(rgb_image_size, depth_image_size);
 	tracking_state = new CameraTrackingState(trackedImageSize, memoryType);
 
 
-	canonical_render_state = new RenderState(trackedImageSize, canonical_volume->sceneParams->near_clipping_distance,
-	                                         canonical_volume->sceneParams->far_clipping_distance, settings.device_type);
-	live_render_state = new RenderState(trackedImageSize, canonical_volume->sceneParams->near_clipping_distance,
-	                                         canonical_volume->sceneParams->far_clipping_distance, settings.device_type);
+	canonical_render_state = new RenderState(trackedImageSize, canonical_volume->parameters->near_clipping_distance,
+	                                         canonical_volume->parameters->far_clipping_distance, settings.device_type);
+	live_render_state = new RenderState(trackedImageSize, canonical_volume->parameters->near_clipping_distance,
+	                                    canonical_volume->parameters->far_clipping_distance, settings.device_type);
 	freeview_render_state = nullptr; //will be created if needed
 
 
@@ -423,8 +423,8 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(ITMUChar4Image* ou
 
 			if (freeview_render_state == nullptr) {
 				freeview_render_state = new RenderState(out->noDims,
-				                                        live_volumes[0]->sceneParams->near_clipping_distance,
-				                                        live_volumes[0]->sceneParams->far_clipping_distance,
+				                                        live_volumes[0]->parameters->near_clipping_distance,
+				                                        live_volumes[0]->parameters->far_clipping_distance,
 				                                        settings.device_type);
 			}
 
@@ -442,8 +442,8 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(ITMUChar4Image* ou
 
 			if (freeview_render_state == nullptr) {
 				freeview_render_state = new RenderState(out->noDims,
-				                                        canonical_volume->sceneParams->near_clipping_distance,
-				                                        canonical_volume->sceneParams->far_clipping_distance,
+				                                        canonical_volume->parameters->near_clipping_distance,
+				                                        canonical_volume->parameters->far_clipping_distance,
 				                                        settings.device_type);
 			}
 

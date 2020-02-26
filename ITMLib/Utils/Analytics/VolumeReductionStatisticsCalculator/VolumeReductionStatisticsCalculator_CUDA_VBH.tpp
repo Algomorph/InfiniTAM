@@ -33,7 +33,7 @@ VolumeReductionStatisticsCalculator<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::
 	const int utilized_entry_count = volume->index.GetUtilizedHashBlockCount();
 	const int* utilized_hash_codes = volume->index.GetUtilizedBlockHashCodes();
 	const HashEntry* hash_entries = volume->index.GetEntries();
-	TVoxel* voxels = volume->localVBA.GetVoxelBlocks();
+	TVoxel* voxels = volume->voxels.GetVoxelBlocks();
 
 	ORUtils::MemoryBlock<ValueAndIndex<float>> block_results(utilized_entry_count, true, true);
 

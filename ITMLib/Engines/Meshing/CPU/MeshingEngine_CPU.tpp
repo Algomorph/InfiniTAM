@@ -9,11 +9,11 @@ template<class TVoxel>
 void MeshingEngine_CPU<TVoxel, VoxelBlockHash>::MeshScene(Mesh *mesh, const VoxelVolume<TVoxel, VoxelBlockHash> *scene)
 {
 	Mesh::Triangle *triangles = mesh->triangles->GetData(MEMORYDEVICE_CPU);
-	const TVoxel *localVBA = scene->localVBA.GetVoxelBlocks();
+	const TVoxel *localVBA = scene->voxels.GetVoxelBlocks();
 	const HashEntry *hashTable = scene->index.GetEntries();
 
 	int noTriangles = 0, noMaxTriangles = mesh->noMaxTriangles, noTotalEntries = scene->index.hashEntryCount;
-	float factor = scene->sceneParams->voxel_size;
+	float factor = scene->parameters->voxel_size;
 
 	mesh->triangles->Clear();
 

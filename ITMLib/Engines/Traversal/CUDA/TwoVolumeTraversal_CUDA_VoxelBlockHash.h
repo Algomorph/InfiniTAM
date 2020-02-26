@@ -31,8 +31,8 @@ private:
 			VoxelVolume<TVoxel1, VoxelBlockHash>* volume1,
 			VoxelVolume<TVoxel2, VoxelBlockHash>* volume2,
 			TFunctor& functor, TDeviceTraversalFunction&& deviceTraversalFunction) {
-		TVoxel1* voxels1 = volume1->localVBA.GetVoxelBlocks();
-		TVoxel2* voxels2 = volume2->localVBA.GetVoxelBlocks();
+		TVoxel1* voxels1 = volume1->voxels.GetVoxelBlocks();
+		TVoxel2* voxels2 = volume2->voxels.GetVoxelBlocks();
 		const HashEntry* hash_table1 = volume1->index.GetIndexData();
 		const HashEntry* hash_table2 = volume2->index.GetIndexData();
 		const int hash_entry_count = volume1->index.hashEntryCount;
@@ -61,8 +61,8 @@ private:
 			VoxelVolume<TVoxel1, VoxelBlockHash>* volume1,
 			VoxelVolume<TVoxel2, VoxelBlockHash>* volume2,
 			TFunctor& functor, TDeviceTraversalFunction&& deviceTraversalFunction) {
-		TVoxel1* voxels1 = volume1->localVBA.GetVoxelBlocks();
-		TVoxel2* voxels2 = volume2->localVBA.GetVoxelBlocks();
+		TVoxel1* voxels1 = volume1->voxels.GetVoxelBlocks();
+		TVoxel2* voxels2 = volume2->voxels.GetVoxelBlocks();
 		const HashEntry* hash_table1 = volume1->index.GetIndexData();
 		const HashEntry* hash_table2 = volume2->index.GetIndexData();
 		const int utilized_entry_count = volume1->index.GetUtilizedHashBlockCount();
@@ -108,8 +108,8 @@ private:
 		ORUtils::MemoryBlock<UnmatchedHash> unmatchedHashes(hash_entry_count, true, true);
 
 		// these will be needed for various matching & traversal operations
-		TVoxel1* voxels1 = volume1->localVBA.GetVoxelBlocks();
-		TVoxel2* voxels2 = volume2->localVBA.GetVoxelBlocks();
+		TVoxel1* voxels1 = volume1->voxels.GetVoxelBlocks();
+		TVoxel2* voxels2 = volume2->voxels.GetVoxelBlocks();
 		const HashEntry* hash_table1 = volume1->index.GetIndexData();
 		const HashEntry* hash_table2 = volume2->index.GetIndexData();
 

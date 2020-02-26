@@ -37,12 +37,12 @@ namespace ITMLib {
 template<typename TVoxel, typename TIndex>
 VoxelVolume<TVoxel,TIndex>::VoxelVolume(const VoxelVolumeParameters* _sceneParams, bool _useSwapping, MemoryDeviceType _memoryType,
                                         typename TIndex::InitializationParameters indexParameters)
-	: sceneParams(_sceneParams),
-		index(indexParameters, _memoryType),
-	  localVBA(_memoryType, index.GetAllocatedBlockCount(), index.GetVoxelBlockSize())
+	: parameters(_sceneParams),
+	  index(indexParameters, _memoryType),
+	  voxels(_memoryType, index.GetAllocatedBlockCount(), index.GetVoxelBlockSize())
 {
-	if (_useSwapping) globalCache = new GlobalCache<TVoxel,TIndex>(this->index);
-	else globalCache = nullptr;
+	if (_useSwapping) global_cache = new GlobalCache<TVoxel,TIndex>(this->index);
+	else global_cache = nullptr;
 }
 
 
@@ -55,13 +55,13 @@ VoxelVolume<TVoxel, TIndex>::VoxelVolume(MemoryDeviceType memoryDeviceType,
 
 template<class TVoxel, class TIndex>
 VoxelVolume<TVoxel, TIndex>::VoxelVolume(const VoxelVolume& other, MemoryDeviceType _memoryType)
-	: sceneParams(other.sceneParams),
-	index(other.index,_memoryType),
-	localVBA(other.localVBA, _memoryType),
-    globalCache(nullptr)
+	: parameters(other.parameters),
+	  index(other.index,_memoryType),
+	  voxels(other.voxels, _memoryType),
+	  global_cache(nullptr)
 	{
-    if(other.globalCache != nullptr){
-	    this->globalCache = new GlobalCache<TVoxel,TIndex>(*other.globalCache);
+    if(other.global_cache != nullptr){
+	    this->global_cache = new GlobalCache<TVoxel,TIndex>(*other.global_cache);
     }
 }
 template<class TVoxel, class TIndex>
@@ -83,12 +83,12 @@ void VoxelVolume<TVoxel, TIndex>::Reset(){
 template<class TVoxel, class TIndex>
 void VoxelVolume<TVoxel, TIndex>::SetFrom(const VoxelVolume& other) {
 	index.SetFrom(other.index);
-	localVBA.SetFrom(other.localVBA);
-	if(other.globalCache != nullptr){
-		delete this->globalCache;
-		globalCache = new GlobalCache<TVoxel, TIndex>(*other.globalCache);
+	voxels.SetFrom(other.voxels);
+	if(other.global_cache != nullptr){
+		delete this->global_cache;
+		global_cache = new GlobalCache<TVoxel, TIndex>(*other.global_cache);
 	}else{
-		globalCache = nullptr;
+		global_cache = nullptr;
 	}
 }
 

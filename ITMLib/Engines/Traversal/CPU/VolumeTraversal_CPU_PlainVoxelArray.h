@@ -43,7 +43,7 @@ public:
 	template<typename TFunctor>
 	inline static void
 	TraverseAll(VoxelVolume<TVoxel, PlainVoxelArray>* volume, TFunctor& functor) {
-		TVoxel* voxels = volume->localVBA.GetVoxelBlocks();
+		TVoxel* voxels = volume->voxels.GetVoxelBlocks();
 		int voxelCount =
 				volume->index.GetVolumeSize().x * volume->index.GetVolumeSize().y * volume->index.GetVolumeSize().z;
 
@@ -65,7 +65,7 @@ public:
 	template<typename TFunctor>
 	inline static void
 	TraverseAll_ST(VoxelVolume<TVoxel, PlainVoxelArray>* volume, TFunctor& functor) {
-		TVoxel* voxels = volume->localVBA.GetVoxelBlocks();
+		TVoxel* voxels = volume->voxels.GetVoxelBlocks();
 		int voxelCount =
 				volume->index.GetVolumeSize().x * volume->index.GetVolumeSize().y * volume->index.GetVolumeSize().z;
 		for (int linearIndex = 0; linearIndex < voxelCount; linearIndex++) {
@@ -84,7 +84,7 @@ public:
 	template<typename TFunctor>
 	inline static void
 	TraverseAllWithPosition(VoxelVolume<TVoxel, PlainVoxelArray>* volume, TFunctor& functor) {
-		TVoxel* voxels = volume->localVBA.GetVoxelBlocks();
+		TVoxel* voxels = volume->voxels.GetVoxelBlocks();
 		int voxelCount =
 				volume->index.GetVolumeSize().x * volume->index.GetVolumeSize().y * volume->index.GetVolumeSize().z;
 		const PlainVoxelArray::IndexData* indexData = volume->index.GetIndexData();
@@ -108,7 +108,7 @@ public:
 	template<typename TFunctor>
 	inline static void
 	TraverseAllWithinBounds(VoxelVolume<TVoxel, PlainVoxelArray>* volume, TFunctor& functor, Vector6i bounds) {
-		TVoxel* voxels = volume->localVBA.GetVoxelBlocks();
+		TVoxel* voxels = volume->voxels.GetVoxelBlocks();
 		int vmIndex = 0;
 		const PlainVoxelArray::IndexData* indexData = volume->index.GetIndexData();
 #ifdef WITH_OPENMP
@@ -135,7 +135,7 @@ public:
 	inline static void
 	TraverseAllWithinBoundsWithPosition(VoxelVolume<TVoxel, PlainVoxelArray>* volume, TFunctor& functor,
 	                                    Vector6i bounds) {
-		TVoxel* voxels = volume->localVBA.GetVoxelBlocks();
+		TVoxel* voxels = volume->voxels.GetVoxelBlocks();
 		int vmIndex = 0;
 		const PlainVoxelArray::IndexData* indexData = volume->index.GetIndexData();
 #ifdef WITH_OPENMP
@@ -157,7 +157,7 @@ public:
 	inline static void
 	TraverseAllWithinBoundsWithPositionAndHashEntry(VoxelVolume<TVoxel, PlainVoxelArray>* volume, TFunctor& functor,
 	                                    Vector6i bounds) {
-		TVoxel* voxels = volume->localVBA.GetVoxelBlocks();
+		TVoxel* voxels = volume->voxels.GetVoxelBlocks();
 		int vmIndex = 0;
 		const PlainVoxelArray::IndexData* indexData = volume->index.GetIndexData();
 #ifdef WITH_OPENMP
@@ -187,7 +187,7 @@ public:
 // region ================================ STATIC SINGLE-SCENE TRAVERSAL ===============================================
 	template<typename TStaticFunctor>
 	inline static void TraverseAll(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
-		TVoxel* voxels = volume->localVBA.GetVoxelBlocks();
+		TVoxel* voxels = volume->voxels.GetVoxelBlocks();
 		int voxelCount =
 				volume->index.GetVolumeSize().x * volume->index.GetVolumeSize().y * volume->index.GetVolumeSize().z;
 #ifdef WITH_OPENMP
@@ -207,7 +207,7 @@ public:
 
 	template<typename TStaticFunctor>
 	inline static void TraverseAllWithPosition(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
-		TVoxel* voxels = volume->localVBA.GetVoxelBlocks();
+		TVoxel* voxels = volume->voxels.GetVoxelBlocks();
 		int voxelCount =
 				volume->index.GetVolumeSize().x * volume->index.GetVolumeSize().y * volume->index.GetVolumeSize().z;
 #ifdef WITH_OPENMP

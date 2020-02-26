@@ -33,11 +33,11 @@ void ITMLib::EditAndCopyEngine_CPU<TVoxel, PlainVoxelArray>::ResetVolume(
 	int numBlocks = volume->index.GetAllocatedBlockCount();
 	int blockSize = volume->index.GetVoxelBlockSize();
 
-	TVoxel *voxelBlocks_ptr = volume->localVBA.GetVoxelBlocks();
+	TVoxel *voxelBlocks_ptr = volume->voxels.GetVoxelBlocks();
 	for (int i = 0; i < numBlocks * blockSize; ++i) voxelBlocks_ptr[i] = TVoxel();
-	int *vbaAllocationList_ptr = volume->localVBA.GetAllocationList();
+	int *vbaAllocationList_ptr = volume->voxels.GetAllocationList();
 	for (int i = 0; i < numBlocks; ++i) vbaAllocationList_ptr[i] = i;
-	volume->localVBA.lastFreeBlockId = numBlocks - 1;
+	volume->voxels.lastFreeBlockId = numBlocks - 1;
 }
 
 template<typename TVoxel>
@@ -47,7 +47,7 @@ EditAndCopyEngine_CPU<TVoxel, PlainVoxelArray>::SetVoxel(VoxelVolume<TVoxel, Pla
 	int vmIndex = 0;
 	int arrayIndex = findVoxel(volume->index.GetIndexData(), at, vmIndex);
 	if (vmIndex) {
-		volume->localVBA.GetVoxelBlocks()[arrayIndex] = voxel;
+		volume->voxels.GetVoxelBlocks()[arrayIndex] = voxel;
 		return true;
 	} else {
 		return false;
@@ -65,7 +65,7 @@ EditAndCopyEngine_CPU<TVoxel, PlainVoxelArray>::ReadVoxel(VoxelVolume<TVoxel, Pl
 		TVoxel voxel;
 		return voxel;
 	}
-	return volume->localVBA.GetVoxelBlocks()[arrayIndex];
+	return volume->voxels.GetVoxelBlocks()[arrayIndex];
 }
 
 template<typename TVoxel>
@@ -79,7 +79,7 @@ EditAndCopyEngine_CPU<TVoxel, PlainVoxelArray>::ReadVoxel(VoxelVolume<TVoxel, Pl
 		TVoxel voxel;
 		return voxel;
 	}
-	return volume->localVBA.GetVoxelBlocks()[arrayIndex];
+	return volume->voxels.GetVoxelBlocks()[arrayIndex];
 }
 
 template<typename TVoxel>
@@ -135,8 +135,8 @@ bool EditAndCopyEngine_CPU<TVoxel, PlainVoxelArray>::CopyVolumeSlice(
 		DIEWITHEXCEPTION_REPORTLOCATION(
 				"Targeted volume is at least partially out of bounds of the destination scene.");
 	}
-	TVoxel* sourceVoxels = sourceVolume->localVBA.GetVoxelBlocks();
-	TVoxel* destinationVoxels = targetVolume->localVBA.GetVoxelBlocks();
+	TVoxel* sourceVoxels = sourceVolume->voxels.GetVoxelBlocks();
+	TVoxel* destinationVoxels = targetVolume->voxels.GetVoxelBlocks();
 	if (offset == Vector3i(0)) {
 		const PlainVoxelArray::IndexData* sourceIndexData = sourceVolume->index.GetIndexData();
 		const PlainVoxelArray::IndexData* destinationIndexData = targetVolume->index.GetIndexData();

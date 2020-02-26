@@ -238,7 +238,7 @@ CameraTrackingState::TrackingResult MultiEngine<TVoxel, TIndex>::ProcessFrame(IT
 			int dataId = todoList[i].dataId;
 
 #ifdef DEBUG_MULTISCENE
-			int blocksInUse = currentLocalMap->scene->index.GetAllocatedBlockCount() - currentLocalMap->scene->localVBA.lastFreeBlockId - 1;
+			int blocksInUse = currentLocalMap->scene->index.GetAllocatedBlockCount() - currentLocalMap->scene->voxels.lastFreeBlockId - 1;
 			fprintf(stderr, " %i%s (%i)", currentLocalMapIdx, (todoList[i].dataId == primaryDataIdx) ? "*" : "", blocksInUse);
 #endif
 
@@ -405,8 +405,8 @@ void MultiEngine<TVoxel, TIndex>::GetImage(ITMUChar4Image *out, GetImageType get
 		if (freeviewLocalMapIdx >= 0){
 			LocalMap<TVoxel, TIndex> *activeData = mapManager->getLocalMap(freeviewLocalMapIdx);
 			if (renderState_freeview == NULL) renderState_freeview =
-					new RenderStateMultiScene<TVoxel,TIndex>(out->noDims, activeData->scene->sceneParams->near_clipping_distance,
-					                                         activeData->scene->sceneParams->far_clipping_distance, settings.device_type);
+					new RenderStateMultiScene<TVoxel,TIndex>(out->noDims, activeData->scene->parameters->near_clipping_distance,
+					                                         activeData->scene->parameters->far_clipping_distance, settings.device_type);
 
 			visualization_engine->FindVisibleBlocks(activeData->scene, pose, intrinsics, renderState_freeview);
 			visualization_engine->CreateExpectedDepths(activeData->scene, pose, intrinsics, renderState_freeview);
@@ -418,7 +418,7 @@ void MultiEngine<TVoxel, TIndex>::GetImage(ITMUChar4Image *out, GetImageType get
 		}
 		else
 		{
-			const VoxelVolumeParameters& params = *mapManager->getLocalMap(0)->scene->sceneParams;
+			const VoxelVolumeParameters& params = *mapManager->getLocalMap(0)->scene->parameters;
 			if (renderState_multiscene == NULL) renderState_multiscene =
 						new RenderStateMultiScene<TVoxel, TIndex>(out->noDims, params.near_clipping_distance,
 						                                          params.far_clipping_distance, settings.device_type);

@@ -15,7 +15,7 @@ inline void MultiMeshingEngine_CPU<TVoxel, VoxelBlockHash>::MeshScene(Mesh * mes
 	MultiIndexData hashTables;
 	MultiVoxelData localVBAs;
 
-	const VoxelVolumeParameters & sceneParams = *(sceneManager.getLocalMap(0)->scene->sceneParams);
+	const VoxelVolumeParameters & sceneParams = *(sceneManager.getLocalMap(0)->scene->parameters);
 	hashTables.numLocalMaps = numLocalMaps;
 	for (int localMapId = 0; localMapId < numLocalMaps; ++localMapId)
 	{
@@ -30,7 +30,7 @@ inline void MultiMeshingEngine_CPU<TVoxel, VoxelBlockHash>::MeshScene(Mesh * mes
 		hashTables.posesInv[localMapId].m32 /= sceneParams.voxel_size;
 
 		hashTables.index[localMapId] = sceneManager.getLocalMap(localMapId)->scene->index.GetIndexData();
-		localVBAs.voxels[localMapId] = sceneManager.getLocalMap(localMapId)->scene->localVBA.GetVoxelBlocks();
+		localVBAs.voxels[localMapId] = sceneManager.getLocalMap(localMapId)->scene->voxels.GetVoxelBlocks();
 	}
 
 	Mesh::Triangle *triangles = mesh->triangles->GetData(MEMORYDEVICE_CPU);

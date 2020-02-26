@@ -40,12 +40,12 @@ BasicVoxelEngine<TVoxel,TIndex>::BasicVoxelEngine(const RGBDCalib& calib, Vector
 
 	imuCalibrator = new ITMIMUCalibrator_iPad();
 	tracker = CameraTrackerFactory::Instance().Make(imgSize_rgb, imgSize_d, lowLevelEngine, imuCalibrator,
-	                                                scene->sceneParams);
+	                                                scene->parameters);
 	trackingController = new CameraTrackingController(tracker);
 
 	Vector2i trackedImageSize = trackingController->GetTrackedImageSize(imgSize_rgb, imgSize_d);
 
-	renderState_live =  new RenderState(imgSize_d, scene->sceneParams->near_clipping_distance, scene->sceneParams->far_clipping_distance, memoryType);
+	renderState_live =  new RenderState(imgSize_d, scene->parameters->near_clipping_distance, scene->parameters->far_clipping_distance, memoryType);
 	renderState_freeview = nullptr; //will be created if needed
 
 	trackingState = new CameraTrackingState(trackedImageSize, memoryType);
@@ -427,7 +427,7 @@ void BasicVoxelEngine<TVoxel,TIndex>::GetImage(ITMUChar4Image *out, GetImageType
 
 		if (renderState_freeview == NULL)
 		{
-			renderState_freeview = new RenderState(out->noDims, scene->sceneParams->near_clipping_distance, scene->sceneParams->far_clipping_distance, settings.device_type);
+			renderState_freeview = new RenderState(out->noDims, scene->parameters->near_clipping_distance, scene->parameters->far_clipping_distance, settings.device_type);
 		}
 
 		visualizationEngine->FindVisibleBlocks(scene, pose, intrinsics, renderState_freeview);

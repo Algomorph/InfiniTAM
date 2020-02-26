@@ -72,11 +72,11 @@ void SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::ResetScene(
 	int numBlocks = scene->index.GetAllocatedBlockCount();
 	int blockSize = scene->index.GetVoxelBlockSize();
 
-	TVoxel* voxelBlocks_ptr = scene->localVBA.GetVoxelBlocks();
+	TVoxel* voxelBlocks_ptr = scene->voxels.GetVoxelBlocks();
 	memsetKernel<TVoxel>(voxelBlocks_ptr, TVoxel(), numBlocks * blockSize);
-	int* vbaAllocationList_ptr = scene->localVBA.GetAllocationList();
+	int* vbaAllocationList_ptr = scene->voxels.GetAllocationList();
 	fillArrayKernel<int>(vbaAllocationList_ptr, numBlocks);
-	scene->localVBA.lastFreeBlockId = numBlocks - 1;
+	scene->voxels.lastFreeBlockId = numBlocks - 1;
 
 	HashEntry tmpEntry;
 	memset(&tmpEntry, 0, sizeof(HashEntry));
@@ -95,7 +95,7 @@ void SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::AllocateSceneFromDe
 		const CameraTrackingState* trackingState, const RenderState* renderState, bool onlyUpdateVisibleList,
 		bool resetVisibleList) {
 	Vector2i depthImgSize = view->depth->noDims;
-	float voxelSize = scene->sceneParams->voxel_size;
+	float voxelSize = scene->parameters->voxel_size;
 
 	Matrix4f M_d, invM_d;
 	Vector4f projParams_d, invProjParams_d;
@@ -110,13 +110,13 @@ void SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::AllocateSceneFromDe
 	invProjParams_d.x = 1.0f / invProjParams_d.x;
 	invProjParams_d.y = 1.0f / invProjParams_d.y;
 
-	float mu = scene->sceneParams->narrow_band_half_width;
+	float mu = scene->parameters->narrow_band_half_width;
 
 	float* depth = view->depth->GetData(MEMORYDEVICE_CUDA);
-	int* voxelAllocationList = scene->localVBA.GetAllocationList();
+	int* voxelAllocationList = scene->voxels.GetAllocationList();
 	int* excessAllocationList = scene->index.GetExcessAllocationList();
 	HashEntry* hashTable = scene->index.GetEntries();
-	ITMHashSwapState* swapStates = scene->Swapping() ? scene->globalCache->GetSwapStates(true) : 0;
+	ITMHashSwapState* swapStates = scene->Swapping() ? scene->global_cache->GetSwapStates(true) : 0;
 
 	const int hashEntryCount = scene->index.hashEntryCount;
 
@@ -137,7 +137,7 @@ void SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::AllocateSceneFromDe
 	float surface_cutoff_distance = configuration::get().general_voxel_volume_parameters.block_allocation_band_factor * mu;
 
 	AllocationTempData* tempData = (AllocationTempData*) allocationTempData_host;
-	tempData->last_free_voxel_block_id = scene->localVBA.lastFreeBlockId;
+	tempData->last_free_voxel_block_id = scene->voxels.lastFreeBlockId;
 	tempData->last_free_excess_list_id = scene->index.GetLastFreeExcessListId();
 	tempData->utilized_block_count = 0;
 	ORcudaSafeCall(
@@ -156,7 +156,7 @@ void SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::AllocateSceneFromDe
 	buildHashAllocAndVisibleType_device << < gridSizeHV, cudaBlockSizeHV >> >
 	                                                     (hashEntryStates_device, blockVisibilityTypes,
 			                                                     blockCoordinates_device, depth, invM_d, invProjParams_d, surface_cutoff_distance, depthImgSize, oneOverHashBlockSize, hashTable,
-			                                                     scene->sceneParams->near_clipping_distance, scene->sceneParams->far_clipping_distance);
+			                                                     scene->parameters->near_clipping_distance, scene->parameters->far_clipping_distance);
 	ORcudaKernelCheck;
 
 	bool useSwapping = scene->Swapping();
@@ -194,7 +194,7 @@ void SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::AllocateSceneFromDe
 
 	ORcudaSafeCall(cudaMemcpy(tempData, allocationTempData_device, sizeof(AllocationTempData), cudaMemcpyDeviceToHost));
 	scene->index.SetUtilizedHashBlockCount(tempData->utilized_block_count);
-	scene->localVBA.lastFreeBlockId = tempData->last_free_voxel_block_id;
+	scene->voxels.lastFreeBlockId = tempData->last_free_voxel_block_id;
 	scene->index.SetLastFreeExcessListId(tempData->last_free_excess_list_id);
 
 }
@@ -205,7 +205,7 @@ void SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::IntegrateIntoScene(
 		const CameraTrackingState* tracking_state, const RenderState* render_state) {
 	Vector2i rgb_image_size = view->rgb->noDims;
 	Vector2i depth_image_size = view->depth->noDims;
-	float voxel_size = volume->sceneParams->voxel_size;
+	float voxel_size = volume->parameters->voxel_size;
 
 	Matrix4f depth_camera_extrinsic_matrix, rgb_camera_extrinsic_matrix;
 	Vector4f depth_camera_projection_parameters, rgb_camera_projection_parameters;
@@ -219,13 +219,13 @@ void SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::IntegrateIntoScene(
 	depth_camera_projection_parameters = view->calib.intrinsics_d.projectionParamsSimple.all;
 	rgb_camera_projection_parameters = view->calib.intrinsics_rgb.projectionParamsSimple.all;
 
-	float mu = volume->sceneParams->narrow_band_half_width;
-	int maxW = volume->sceneParams->max_integration_weight;
+	float mu = volume->parameters->narrow_band_half_width;
+	int maxW = volume->parameters->max_integration_weight;
 
 	float* depth = view->depth->GetData(MEMORYDEVICE_CUDA);
 	float* confidence = view->depthConfidence->GetData(MEMORYDEVICE_CUDA);
 	Vector4u* rgb = view->rgb->GetData(MEMORYDEVICE_CUDA);
-	TVoxel* localVBA = volume->localVBA.GetVoxelBlocks();
+	TVoxel* localVBA = volume->voxels.GetVoxelBlocks();
 	HashEntry* hash_table = volume->index.GetEntries();
 
 	int* visibleBlockHashCodes = volume->index.GetUtilizedBlockHashCodes();
@@ -233,7 +233,7 @@ void SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::IntegrateIntoScene(
 	dim3 cudaBlockSize(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
 	dim3 gridSize(volume->index.GetUtilizedHashBlockCount());
 
-	if (volume->sceneParams->stop_integration_at_max_weight) {
+	if (volume->parameters->stop_integration_at_max_weight) {
 		integrateIntoScene_device<TVoxel, true> << < gridSize, cudaBlockSize >> > (localVBA, hash_table, visibleBlockHashCodes,
 				rgb, rgb_image_size, depth, confidence, depth_image_size, depth_camera_extrinsic_matrix, rgb_camera_extrinsic_matrix, depth_camera_projection_parameters, rgb_camera_projection_parameters, voxel_size, mu, maxW);
 		ORcudaKernelCheck;
@@ -253,11 +253,11 @@ void SceneReconstructionEngine_CUDA<TVoxel, PlainVoxelArray>::ResetScene(
 	int numBlocks = scene->index.GetAllocatedBlockCount();
 	int blockSize = scene->index.GetVoxelBlockSize();
 
-	TVoxel* voxelBlocks_ptr = scene->localVBA.GetVoxelBlocks();
+	TVoxel* voxelBlocks_ptr = scene->voxels.GetVoxelBlocks();
 	memsetKernel<TVoxel>(voxelBlocks_ptr, TVoxel(), numBlocks * blockSize);
-	int* vbaAllocationList_ptr = scene->localVBA.GetAllocationList();
+	int* vbaAllocationList_ptr = scene->voxels.GetAllocationList();
 	fillArrayKernel<int>(vbaAllocationList_ptr, numBlocks);
-	scene->localVBA.lastFreeBlockId = numBlocks - 1;
+	scene->voxels.lastFreeBlockId = numBlocks - 1;
 }
 
 template<class TVoxel>
@@ -273,7 +273,7 @@ void SceneReconstructionEngine_CUDA<TVoxel, PlainVoxelArray>::IntegrateIntoScene
 		const CameraTrackingState* trackingState, const RenderState* renderState) {
 	Vector2i rgbImgSize = view->rgb->noDims;
 	Vector2i depthImgSize = view->depth->noDims;
-	float voxelSize = scene->sceneParams->voxel_size;
+	float voxelSize = scene->parameters->voxel_size;
 
 	Matrix4f M_d, M_rgb;
 	Vector4f projParams_d, projParams_rgb;
@@ -284,20 +284,20 @@ void SceneReconstructionEngine_CUDA<TVoxel, PlainVoxelArray>::IntegrateIntoScene
 	projParams_d = view->calib.intrinsics_d.projectionParamsSimple.all;
 	projParams_rgb = view->calib.intrinsics_rgb.projectionParamsSimple.all;
 
-	float mu = scene->sceneParams->narrow_band_half_width;
-	int maxW = scene->sceneParams->max_integration_weight;
+	float mu = scene->parameters->narrow_band_half_width;
+	int maxW = scene->parameters->max_integration_weight;
 
 	float* depth = view->depth->GetData(MEMORYDEVICE_CUDA);
 	float* confidence = view->depthConfidence->GetData(MEMORYDEVICE_CUDA);
 	Vector4u* rgb = view->rgb->GetData(MEMORYDEVICE_CUDA);
-	TVoxel* localVBA = scene->localVBA.GetVoxelBlocks();
+	TVoxel* localVBA = scene->voxels.GetVoxelBlocks();
 	const PlainVoxelArray::GridAlignedBox* arrayInfo = scene->index.GetIndexData();
 
 	dim3 cudaBlockSize(8, 8, 8);
 	dim3 gridSize(scene->index.GetVolumeSize().x / cudaBlockSize.x, scene->index.GetVolumeSize().y / cudaBlockSize.y,
 	              scene->index.GetVolumeSize().z / cudaBlockSize.z);
 
-	if (scene->sceneParams->stop_integration_at_max_weight) {
+	if (scene->parameters->stop_integration_at_max_weight) {
 		integrateIntoScene_device<TVoxel, true> << < gridSize, cudaBlockSize >> > (localVBA, arrayInfo,
 				rgb, rgbImgSize, depth, confidence, depthImgSize, M_d, M_rgb, projParams_d, projParams_rgb, voxelSize, mu, maxW);
 		ORcudaKernelCheck;

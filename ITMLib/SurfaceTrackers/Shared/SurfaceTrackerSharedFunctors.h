@@ -167,7 +167,7 @@ template<typename TTSDFVoxel, typename TWarpVoxel, typename TIndex, TraversalDir
 struct GradientSmoothingPassFunctor {
 	GradientSmoothingPassFunctor(ITMLib::VoxelVolume<TWarpVoxel, TIndex>* warp_field) :
 			warp_field(warp_field),
-			warp_voxels(warp_field->localVBA.GetVoxelBlocks()),
+			warp_voxels(warp_field->voxels.GetVoxelBlocks()),
 			warp_index_data(warp_field->index.GetIndexData()),
 			warp_field_cache() {}
 

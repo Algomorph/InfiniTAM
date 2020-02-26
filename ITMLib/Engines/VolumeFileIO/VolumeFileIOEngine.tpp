@@ -42,7 +42,7 @@ void VolumeFileIOEngine<TVoxel, VoxelBlockHash>::SaveToDirectoryCompact(
 	out_filter.push(ofStream);
 
 	bool temporary_volume_used = false;
-	if (volume->localVBA.GetMemoryType() == MEMORYDEVICE_CUDA) {
+	if (volume->voxels.GetMemoryType() == MEMORYDEVICE_CUDA) {
 		// we cannot access CUDA blocks directly, so the easiest solution here is to make a local main-memory copy first
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume_cpu_copy = new VoxelVolume<TVoxel, VoxelBlockHash>(
 				*volume, MEMORYDEVICE_CPU);
@@ -50,14 +50,14 @@ void VolumeFileIOEngine<TVoxel, VoxelBlockHash>::SaveToDirectoryCompact(
 		temporary_volume_used = true;
 	}
 
-	const TVoxel* voxels = volume->localVBA.GetVoxelBlocks();
+	const TVoxel* voxels = volume->voxels.GetVoxelBlocks();
 	const HashEntry* hash_table = volume->index.GetEntries();
 	int hash_entry_count = volume->index.hashEntryCount;
 
 	int last_excess_list_id = volume->index.GetLastFreeExcessListId();
 	int utilized_block_count = volume->index.GetUtilizedHashBlockCount();
-	out_filter.write(reinterpret_cast<const char* >(&volume->localVBA.lastFreeBlockId), sizeof(int));
-	out_filter.write(reinterpret_cast<const char* >(&volume->localVBA.allocatedSize), sizeof(int));
+	out_filter.write(reinterpret_cast<const char* >(&volume->voxels.lastFreeBlockId), sizeof(int));
+	out_filter.write(reinterpret_cast<const char* >(&volume->voxels.allocatedSize), sizeof(int));
 	out_filter.write(reinterpret_cast<const char* >(&last_excess_list_id), sizeof(int));
 	out_filter.write(reinterpret_cast<const char* >(&utilized_block_count), sizeof(int));
 	//count filled entries
@@ -107,7 +107,7 @@ VolumeFileIOEngine<TVoxel, VoxelBlockHash>::LoadFromDirectoryCompact(
 
 	VoxelVolume<TVoxel, VoxelBlockHash>* targetScene = volume;
 	bool copyToCUDA = false;
-	if (volume->localVBA.GetMemoryType() == MEMORYDEVICE_CUDA) {
+	if (volume->voxels.GetMemoryType() == MEMORYDEVICE_CUDA) {
 		// we cannot access CUDA blocks directly, so the easiest solution here is to make a local main-memory copy
 		// first, read it in from disk, and then copy it over into the target
 		auto scene_cpu_copy = new VoxelVolume<TVoxel, VoxelBlockHash>(*volume, MEMORYDEVICE_CPU);
@@ -115,18 +115,18 @@ VolumeFileIOEngine<TVoxel, VoxelBlockHash>::LoadFromDirectoryCompact(
 		copyToCUDA = true;
 	}
 
-	TVoxel* voxel_blocks = volume->localVBA.GetVoxelBlocks();
+	TVoxel* voxel_blocks = volume->voxels.GetVoxelBlocks();
 	HashEntry* hash_table = volume->index.GetEntries();
 	int last_free_excess_list_id;
 	int last_free_voxel_block_id;
 	int utilized_block_count;
 	in_filter.read(reinterpret_cast<char* >(&last_free_voxel_block_id), sizeof(int));
-	in_filter.read(reinterpret_cast<char* >(&volume->localVBA.allocatedSize), sizeof(int));
+	in_filter.read(reinterpret_cast<char* >(&volume->voxels.allocatedSize), sizeof(int));
 	in_filter.read(reinterpret_cast<char* >(&last_free_excess_list_id), sizeof(int));
 	in_filter.read(reinterpret_cast<char* >(&utilized_block_count), sizeof(int));
 	volume->index.SetLastFreeExcessListId(last_free_excess_list_id);
 	volume->index.SetUtilizedHashBlockCount(utilized_block_count);
-	volume->localVBA.lastFreeBlockId = last_free_voxel_block_id;
+	volume->voxels.lastFreeBlockId = last_free_voxel_block_id;
 
 
 	//count filled entries
@@ -157,7 +157,7 @@ void
 VolumeFileIOEngine<TVoxel, PlainVoxelArray>::SaveToDirectoryCompact(
 		const VoxelVolume<TVoxel, PlainVoxelArray>* scene,
 		const std::string& outputDirectory) {
-	scene->localVBA.SaveToDirectory(outputDirectory);
+	scene->voxels.SaveToDirectory(outputDirectory);
 	scene->index.SaveToDirectory(outputDirectory);
 }
 
@@ -167,6 +167,6 @@ void
 VolumeFileIOEngine<TVoxel, PlainVoxelArray>::LoadFromDirectoryCompact(
 		VoxelVolume<TVoxel, PlainVoxelArray>* scene,
 		const std::string& outputDirectory) {
-	scene->localVBA.LoadFromDirectory(outputDirectory);
+	scene->voxels.LoadFromDirectory(outputDirectory);
 	scene->index.LoadFromDirectory(outputDirectory);
 }

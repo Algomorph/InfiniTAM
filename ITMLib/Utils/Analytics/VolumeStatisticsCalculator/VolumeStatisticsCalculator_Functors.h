@@ -611,7 +611,7 @@ struct ComputeVoxelBoundsFunctor<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU> {
 		bounds.min_y = std::numeric_limits<int>::max();
 		bounds.min_z = std::numeric_limits<int>::max();
 
-		const TVoxel* voxel_blocks = volume->localVBA.GetVoxelBlocks();
+		const TVoxel* voxel_blocks = volume->voxels.GetVoxelBlocks();
 		const HashEntry* hash_table = volume->index.GetEntries();
 		int hash_entry_count = volume->index.hashEntryCount;
 
@@ -690,7 +690,7 @@ struct ComputeVoxelBoundsFunctor<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA> {
 		bounds.min_y = std::numeric_limits<int>::max();
 		bounds.min_z = std::numeric_limits<int>::max();
 
-		const TVoxel* voxelBlocks = volume->localVBA.GetVoxelBlocks();
+		const TVoxel* voxelBlocks = volume->voxels.GetVoxelBlocks();
 		const HashEntry* hashTable = volume->index.GetEntries();
 		int noTotalEntries = volume->index.hashEntryCount;
 

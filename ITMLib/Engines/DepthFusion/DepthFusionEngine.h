@@ -46,25 +46,7 @@ public:
 	virtual void
 	UpdateVisibleList(VoxelVolume<TVoxel, TIndex>* scene, const View* view, const CameraTrackingState* trackingState,
 	                  const RenderState* renderState, bool resetVisibleList) = 0;
-	/**
-	 * \brief Clears given scene, then uses the depth image from provided live view to generate an SDF
-	 * voxel representation
-	 * \param volume output scene
-	 * \param view input view
-	 * \param tracking_state state of tracking
-	 */
-	virtual void GenerateTsdfVolumeFromTwoSurfaces(VoxelVolume<TVoxel, TIndex>* volume, const View* view,
-	                                               const CameraTrackingState* tracking_state) = 0;
 
-	/**
-	 * \brief Clears given scene, then uses the depth image from provided live view to generate an SDF
-	 * voxel representation
-	 * \param volume output scene
-	 * \param view input view
-	 * \param tracking_state state of tracking
-	 */
-	virtual void GenerateTsdfVolumeFromSurface(VoxelVolume<TVoxel, TIndex>* volume, const View* view,
-	                                               const CameraTrackingState* tracking_state) = 0;
 	/**
 	 * \brief Update the voxel blocks by integrating depth and possibly color information from the given view. Assume
 	 * camera is at world origin.
@@ -89,10 +71,6 @@ public:
 	void UpdateVisibleList(VoxelVolume<TVoxel, TIndex>* scene, const View* view,
 	                       const CameraTrackingState* trackingState, const RenderState* renderState,
 	                       bool resetVisibleList) override;
-	void GenerateTsdfVolumeFromTwoSurfaces(VoxelVolume<TVoxel, TIndex>* volume, const View* view,
-	                                       const CameraTrackingState* tracking_state) override;
-	void GenerateTsdfVolumeFromSurface(VoxelVolume<TVoxel, TIndex>* volume, const View* view,
-	                                           const CameraTrackingState* tracking_state) override;
 
 	void IntegrateDepthImageIntoTsdfVolume(VoxelVolume<TVoxel, TIndex>* volume, const View* view);
 	void IntegrateDepthImageIntoTsdfVolume(VoxelVolume<TVoxel, TIndex>* volume, const View* view,

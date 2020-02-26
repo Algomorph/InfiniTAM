@@ -27,7 +27,7 @@ using namespace ITMLib;
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void VolumeFusionEngine<TVoxel, TIndex, TMemoryDeviceType>::FuseOneTsdfVolumeIntoAnother(
 		VoxelVolume<TVoxel, TIndex>* target_volume, VoxelVolume<TVoxel, TIndex>* source_volume) {
-	TSDFFusionFunctor<TVoxel, TMemoryDeviceType> fusion_functor(target_volume->sceneParams->max_integration_weight);
+	TSDFFusionFunctor<TVoxel, TMemoryDeviceType> fusion_functor(target_volume->parameters->max_integration_weight);
 	TwoVolumeTraversalEngine<TVoxel, TVoxel, TIndex, TIndex, TMemoryDeviceType>::
 #ifdef TRAVERSE_ALL_HASH_BLOCKS
 	TraverseAll(source_volume, target_volume, fusion_functor);

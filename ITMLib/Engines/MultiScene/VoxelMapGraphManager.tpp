@@ -91,7 +91,7 @@ namespace ITMLib
 		if ((localMapId < 0) || ((unsigned)localMapId >= allData.size())) return -1;
 
 		VoxelVolume<TVoxel, TIndex> *scene = allData[localMapId]->scene;
-		return scene->index.GetAllocatedBlockCount() - scene->localVBA.lastFreeBlockId - 1;
+		return scene->index.GetAllocatedBlockCount() - scene->voxels.lastFreeBlockId - 1;
 	}
 
 	template<class TVoxel, class TIndex>

@@ -42,7 +42,7 @@ MultiMeshingEngine_CUDA<TVoxel, VoxelBlockHash>::~MultiMeshingEngine_CUDA(void) 
 template<class TVoxel>
 void MultiMeshingEngine_CUDA<TVoxel, VoxelBlockHash>::MeshScene(Mesh* mesh,
                                                                 const VoxelMapGraphManager<TVoxel, VoxelBlockHash>& sceneManager) {
-	const VoxelVolumeParameters& sceneParams = *(sceneManager.getLocalMap(0)->scene->sceneParams);
+	const VoxelVolumeParameters& sceneParams = *(sceneManager.getLocalMap(0)->scene->parameters);
 	int numLocalMaps = (int) sceneManager.numLocalMaps();
 
 	{ // prepare MultiIndex etc.
@@ -58,7 +58,7 @@ void MultiMeshingEngine_CUDA<TVoxel, VoxelBlockHash>::MeshScene(Mesh* mesh,
 			indexData_host.posesInv[localMapId].m31 /= sceneParams.voxel_size;
 			indexData_host.posesInv[localMapId].m32 /= sceneParams.voxel_size;
 			indexData_host.index[localMapId] = sceneManager.getLocalMap(localMapId)->scene->index.GetIndexData();
-			voxelData_host.voxels[localMapId] = sceneManager.getLocalMap(localMapId)->scene->localVBA.GetVoxelBlocks();
+			voxelData_host.voxels[localMapId] = sceneManager.getLocalMap(localMapId)->scene->voxels.GetVoxelBlocks();
 		}
 
 		ORcudaSafeCall(cudaMemcpy(indexData_device, &(indexData_host), sizeof(MultiIndexData), cudaMemcpyHostToDevice));

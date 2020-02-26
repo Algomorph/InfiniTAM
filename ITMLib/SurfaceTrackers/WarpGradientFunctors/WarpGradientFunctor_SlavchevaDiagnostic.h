@@ -113,9 +113,9 @@ public:
 	                    VoxelVolume<TTSDFVoxel,TIndex>* live_volume,
 	                    float voxel_size, float narrow_band_half_width) :
 			parameters(parameters), switches(switches),
-			live_voxels(live_volume->localVBA.GetVoxelBlocks()), live_index_data(live_volume->index.GetIndexData()),
-			warp_voxels(warp_field->localVBA.GetVoxelBlocks()), warp_index_data(warp_field->index.GetIndexData()),
-			canonical_voxels(canonical_volume->localVBA.GetVoxelBlocks()), canonical_index_data(canonical_volume->index.GetIndexData()),
+			live_voxels(live_volume->voxels.GetVoxelBlocks()), live_index_data(live_volume->index.GetIndexData()),
+			warp_voxels(warp_field->voxels.GetVoxelBlocks()), warp_index_data(warp_field->index.GetIndexData()),
+			canonical_voxels(canonical_volume->voxels.GetVoxelBlocks()), canonical_index_data(canonical_volume->index.GetIndexData()),
 			live_cache(), canonical_cache(),
 			use_focus_coordinates(configuration::get().verbosity_level >= configuration::VERBOSITY_FOCUS_SPOTS),
 			focus_coordinates(configuration::get().telemetry_settings.focus_coordinates),
