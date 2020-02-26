@@ -30,11 +30,11 @@
 #include <vtk-8.1/vtkOrientationMarkerWidget.h>
 
 //local
-#include "../../ITMLib/Utils/Visualization/ITMSceneSliceVisualizer3D.tpp"
+#include "../../ITMLib/Utils/Visualization/SceneSliceVisualizer3D.tpp"
 
 //ITMLib
-#include "../../ITMLib/ITMLibDefines.h"
-#include "../../ITMLib/Objects/Scene/ITMVoxelVolume.h"
+#include "../../ITMLib/GlobalTemplateDefines.h"
+#include "../../ITMLib/Objects/Volume/VoxelVolume.h"
 #include "HighlightVisualization.h"
 
 using namespace ITMLib;
@@ -86,7 +86,7 @@ private:
 	// region ================= MEMBER VARIABLES ===========================
 
 
-	// *** Scene Data
+	// *** Volume Data
 	ITMSceneLogger<ITMVoxelCanonical, ITMVoxelLive, ITMVoxelIndex>* sceneLogger;
 	ITMScene<ITMVoxelCanonical, ITMVoxelIndex>* canonicalScene;
 	ITMScene<ITMVoxelLive, ITMVoxelIndex>* liveScene;

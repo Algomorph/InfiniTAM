@@ -8,8 +8,8 @@
 #include "../../InputSource/OpenNIEngine.h"
 #include "../../InputSource/Kinect2Engine.h"
 
-#include "../../ITMLib/ITMLibDefines.h"
-#include "../../ITMLib/Engines/Main/ITMBasicEngine.h"
+#include "../../ITMLib/GlobalTemplateDefines.h"
+#include "../../ITMLib/Engines/Main/BasicVoxelEngine.h"
 
 using namespace InfiniTAM::Engine;
 using namespace InputSource;
@@ -77,9 +77,9 @@ try
 		}
 	}
 
-	ITMMainEngine *mainEngine = new ITMBasicEngine<ITMVoxel, ITMVoxelIndex>(imageSource->getCalib(),
-	                                                                        imageSource->getRGBImageSize(),
-	                                                                        imageSource->getDepthImageSize());
+	MainEngine *mainEngine = new BasicVoxelEngine<TSDFVoxel, VoxelIndex>(imageSource->getCalib(),
+	                                                                     imageSource->getRGBImageSize(),
+	                                                                     imageSource->getDepthImageSize());
 
 	CLIEngine::Instance()->Initialise(imageSource, imuSource, mainEngine, internalSettings->device_type);
 	CLIEngine::Instance()->Run();

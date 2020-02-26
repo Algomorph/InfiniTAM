@@ -46,9 +46,6 @@ namespace ITMLib {
         "Beyond that a sliding average is computed."), \
         (bool, stop_integration_at_max_weight, false, PRIMITIVE, \
         "Whether to stop integration for a given voxel when its max_integration_weight is reached."), \
-        (bool, add_extra_block_ring_during_allocation, false, PRIMITIVE, \
-        "(Voxel block hash indexing only) allocates an extra 1-ring of hash blocks around " \
-        "the depth-based ones."), \
         (float, block_allocation_band_factor, 2.0f, PRIMITIVE, \
         "(Voxel block hash indexing only) factor of narrow band width that will be " \
         "considered for depth-based allocation. For instance, a factor of 2 will make " \

@@ -15,13 +15,13 @@
 //  ================================================================
 #pragma once
 
-#include "../../Objects/Scene/ITMRepresentationAccess.h"
-#include "../../Utils/ITMHashBlockProperties.h"
-#include "../../Utils/Analytics/ITMNeighborVoxelIterationInfo.h"
-#include "../../Utils/ITMPrintHelpers.h"
-#include "../../Utils/ITMCPrintHelpers.h"
-#include "../../Objects/Scene/ITMTrilinearInterpolation.h"
-#include "../../Utils/Geometry/ITM3DIndexConversions.h"
+#include "../../Objects/Volume/RepresentationAccess.h"
+#include "../../Utils/HashBlockProperties.h"
+#include "../../Utils/Analytics/NeighborVoxelIterationInfo.h"
+#include "../../Utils/CPPPrintHelpers.h"
+#include "../../Utils/CPrintHelpers.h"
+#include "../../Objects/Volume/TrilinearInterpolation.h"
+#include "../../Utils/Geometry/SpatialIndexConversions.h"
 
 using namespace ITMLib;
 
@@ -45,7 +45,7 @@ ReadVoxelAndLinearIndex(const CONSTPTR(TVoxel)* voxelData,
 	int hashIdx = HashCodeFromBlockPosition(blockPos);
 
 	while (true) {
-		ITMHashEntry hashEntry = voxelIndex[hashIdx];
+		HashEntry hashEntry = voxelIndex[hashIdx];
 
 		if (IS_EQUAL3(hashEntry.pos, blockPos) && hashEntry.ptr >= 0) {
 			cache.blockPos = blockPos;
@@ -78,7 +78,7 @@ ReadVoxelAndLinearIndex(const CONSTPTR(TVoxel)* voxelData,
 
 
 template<typename TVoxelCanonical, typename TVoxelLive, typename TIndexData, typename TCache>
-inline void FindHighlightNeighborInfo(std::array<ITMLib::ITMNeighborVoxelIterationInfo, 9>& neighbors,
+inline void FindHighlightNeighborInfo(std::array<ITMLib::NeighborVoxelIterationInfo, 9>& neighbors,
                                       const CONSTPTR(Vector3i)& highlightPosition,
                                       const CONSTPTR(int)& highlightHash,
                                       const CONSTPTR(TVoxelCanonical)* canonicalVoxelData,
@@ -97,7 +97,7 @@ inline void FindHighlightNeighborInfo(std::array<ITMLib::ITMNeighborVoxelIterati
 	vmIndex = highlightHash + 1;
 	int iNeighbor = 0;
 	for (auto location : locations) {
-		ITMLib::ITMNeighborVoxelIterationInfo& info = neighbors[iNeighbor];
+		ITMLib::NeighborVoxelIterationInfo& info = neighbors[iNeighbor];
 		Vector3i neighborPosition = highlightPosition + (location);
 		TVoxelCanonical voxelCanonical = ReadVoxelAndLinearIndex(canonicalVoxelData, canonicalIndexData,
 		                                                         neighborPosition,
@@ -295,7 +295,7 @@ _CPU_AND_GPU_CODE_
 void ComputeLiveJacobian_CentralDifferences_NontruncatedOnly(Vector3f& jacobian,
                                                              const Vector3i& voxelPosition,
                                                              const TVoxel* voxels,
-                                                             const ITMHashEntry* hashEntries,
+                                                             const HashEntry* hashEntries,
                                                              TCache cache) {
 	int vmIndex;
 	TVoxel voxel;
@@ -337,7 +337,7 @@ _CPU_AND_GPU_CODE_
 void ComputeLiveJacobian_ForwardDifferences_NontruncatedOnly_IndexedFields(Vector3f& jacobian,
                                                                            const Vector3i& voxelPosition,
                                                                            const TVoxel* voxels,
-                                                                           const ITMHashEntry* hashEntries,
+                                                                           const HashEntry* hashEntries,
                                                                            THREADPTR(TCache) cache,
                                                                            int fieldIndex) {
 	int vmIndex;
@@ -370,7 +370,7 @@ _CPU_AND_GPU_CODE_
 void ComputeLiveJacobian_CentralDifferences_NontruncatedOnly_IndexedFields(Vector3f& jacobian,
                                                                            const Vector3i& voxelPosition,
                                                                            const TVoxel* voxels,
-                                                                           const ITMHashEntry* hashEntries,
+                                                                           const HashEntry* hashEntries,
                                                                            THREADPTR(TCache) cache,
                                                                            int fieldIndex) {
 	int vmIndex;
@@ -413,7 +413,7 @@ _CPU_AND_GPU_CODE_
 void ComputeLiveJacobian_CentralDifferences_SmallDifferences_IndexedFields(Vector3f& jacobian,
                                                                            const Vector3i& voxelPosition,
                                                                            const TVoxel* voxels,
-                                                                           const ITMHashEntry* hashEntries,
+                                                                           const HashEntry* hashEntries,
                                                                            THREADPTR(TCache) cache,
                                                                            int fieldIndex) {
 	int vmIndex;
@@ -450,7 +450,7 @@ _CPU_AND_GPU_CODE_
 void ComputeLiveJacobian_CentralDifferences_IgnoreUnknown_IndexedFields(Vector3f& jacobian,
                                                                         const Vector3i& voxelPosition,
                                                                         const TVoxel* voxels,
-                                                                        const ITMHashEntry* hashEntries,
+                                                                        const HashEntry* hashEntries,
                                                                         THREADPTR(TCache) cache,
                                                                         int fieldIndex) {
 	int vmIndex;
@@ -493,7 +493,7 @@ _CPU_AND_GPU_CODE_
 void ComputeLiveJacobian_CentralDifferences_IgnoreUnknown_IndexedFields_BorderTreatment(Vector3f& jacobian,
                                                                                         const Vector3i& voxelPosition,
                                                                                         const TVoxel* voxels,
-                                                                                        const ITMHashEntry* hashEntries,
+                                                                                        const HashEntry* hashEntries,
                                                                                         THREADPTR(TCache) cache,
                                                                                         float liveSdf,
                                                                                         int fieldIndex) {
@@ -507,23 +507,23 @@ void ComputeLiveJacobian_CentralDifferences_IgnoreUnknown_IndexedFields_BorderTr
 	DIEWITHEXCEPTION_REPORTLOCATION("NOT YET IMPLEMENTED");
 //	float sdfAtXplusOne = TVoxelA::valueToFloat(voxel.sdf_values[fieldIndex]);
 //
-//	voxel = readVoxel(voxels, hashEntries, voxelPosition + Vector3i(0, 1, 0), vmIndex, cache);
+//	voxel = readVoxel(voxels, hash_entries, voxelPosition + Vector3i(0, 1, 0), vmIndex, cache);
 //	yValid &= voxel.flags != ITMLib::VOXEL_UNKNOWN;
 //	float sdfAtYplusOne = TVoxelA::valueToFloat(voxel.sdf_values[fieldIndex]);
 //
-//	voxel = readVoxel(voxels, hashEntries, voxelPosition + Vector3i(0, 0, 1), vmIndex, cache);
+//	voxel = readVoxel(voxels, hash_entries, voxelPosition + Vector3i(0, 0, 1), vmIndex, cache);
 //	zValid &= voxel.flags != ITMLib::VOXEL_UNKNOWN;
 //	float sdfAtZplusOne = TVoxelA::valueToFloat(voxel.sdf_values[fieldIndex]);
 //
-//	voxel = readVoxel(voxels, hashEntries, voxelPosition + Vector3i(-1, 0, 0), vmIndex, cache);
+//	voxel = readVoxel(voxels, hash_entries, voxelPosition + Vector3i(-1, 0, 0), vmIndex, cache);
 //	xValid &= voxel.flags != ITMLib::VOXEL_UNKNOWN;
 //	float sdfAtXminusOne = TVoxelA::valueToFloat(voxel.sdf_values[fieldIndex]);
 //
-//	voxel = readVoxel(voxels, hashEntries, voxelPosition + Vector3i(0, -1, 0), vmIndex, cache);
+//	voxel = readVoxel(voxels, hash_entries, voxelPosition + Vector3i(0, -1, 0), vmIndex, cache);
 //	yValid &= voxel.flags != ITMLib::VOXEL_UNKNOWN;
 //	float sdfAtYminusOne = TVoxelA::valueToFloat(voxel.sdf_values[fieldIndex]);
 //
-//	voxel = readVoxel(voxels, hashEntries, voxelPosition + Vector3i(0, 0, -1), vmIndex, cache);
+//	voxel = readVoxel(voxels, hash_entries, voxelPosition + Vector3i(0, 0, -1), vmIndex, cache);
 //	zValid &= voxel.flags != ITMLib::VOXEL_UNKNOWN;
 //	float sdfAtZminusOne = TVoxelA::valueToFloat(voxel.sdf_values[fieldIndex]);
 //
@@ -538,7 +538,7 @@ _CPU_AND_GPU_CODE_
 void ComputeLiveJacobian_CentralDifferences_IndexedFields_TruncationSignInference(Vector3f& jacobian,
                                                                                   const Vector3i& voxelPosition,
                                                                                   const TVoxel* voxels,
-                                                                                  const ITMHashEntry* hashEntries,
+                                                                                  const HashEntry* hashEntries,
                                                                                   THREADPTR(TCache) cache,
                                                                                   float value,
                                                                                   int fieldIndex) {
@@ -580,7 +580,7 @@ _CPU_AND_GPU_CODE_
 void ComputeLiveJacobian_CentralDifferences_IgnoreUnknown_IndexedFields_TruncationSignInference(Vector3f& jacobian,
                                                                                                 const Vector3i& voxelPosition,
                                                                                                 const TVoxel* voxels,
-                                                                                                const ITMHashEntry* hashEntries,
+                                                                                                const HashEntry* hashEntries,
                                                                                                 THREADPTR(TCache) cache,
                                                                                                 float value,
                                                                                                 int fieldIndex) {
@@ -630,7 +630,7 @@ _CPU_AND_GPU_CODE_
 void ComputeLiveJacobian_CentralDifferences_AllocatedOnly(Vector3f& jacobian,
                                                           const Vector3i& voxelPosition,
                                                           const TVoxel* voxels,
-                                                          const ITMHashEntry* hashEntries,
+                                                          const HashEntry* hashEntries,
                                                           TCache cache) {
 	int vmIndex;
 	TVoxel voxel;
@@ -672,7 +672,7 @@ _CPU_AND_GPU_CODE_
 void ComputeLiveJacobian_CentralDifferences_SuperHackyVersion_LiveSdf(Vector3f& jacobian,
                                                                       const Vector3i& voxelPosition,
                                                                       const TVoxel* voxels,
-                                                                      const ITMHashEntry* hashEntries,
+                                                                      const HashEntry* hashEntries,
                                                                       THREADPTR(TCache) cache,
                                                                       int fieldIndex) {
 
@@ -715,7 +715,7 @@ _CPU_AND_GPU_CODE_
 void ComputeLiveJacobian_CentralDifferences_SuperHackyVersion_CanonicalSdf(Vector3f& jacobian,
                                                                            const Vector3i& voxelPosition,
                                                                            const TVoxel* voxels,
-                                                                           const ITMHashEntry* hashEntries,
+                                                                           const HashEntry* hashEntries,
                                                                            THREADPTR(TCache) cache,
                                                                            int fieldIndex,
                                                                            const float canonicalSdf) {
@@ -756,7 +756,7 @@ _CPU_AND_GPU_CODE_
 void ComputeLiveJacobian_CentralDifferences_ChangeTruncatedsSignToCanonicals(Vector3f& jacobian,
                                                                              const Vector3i& voxelPosition,
                                                                              const TVoxel* voxels,
-                                                                             const ITMHashEntry* hashEntries,
+                                                                             const HashEntry* hashEntries,
                                                                              THREADPTR(TCache) cache,
                                                                              int fieldIndex,
                                                                              const float canonicalSdf) {
@@ -795,7 +795,7 @@ _CPU_AND_GPU_CODE_
 void ComputeLiveJacobian_CentralDifferences_SuperHackyVersion_CanonicalSdf2(Vector3f& jacobian,
                                                                             const Vector3i& voxelPosition,
                                                                             const TVoxel* voxels,
-                                                                            const ITMHashEntry* hashEntries,
+                                                                            const HashEntry* hashEntries,
                                                                             THREADPTR(TCache) cache,
                                                                             int fieldIndex,
                                                                             const float canonicalSdf) {

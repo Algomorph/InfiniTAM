@@ -27,19 +27,19 @@
 #include "../../../ORUtils/PlatformIndependentAtomics.h"
 #include "../Shared/SurfaceTrackerSharedRoutines.h"
 #include "../Shared/SurfaceTrackerDiagnosticRoutines.h"
-#include "../Shared/ITMWarpGradientAggregates.h"
-#include "../Shared/ITMWarpGradientCommon.h"
-#include "../../Utils/ITMVoxelFlags.h"
-#include "../../Utils/ITMCPrintHelpers.h"
-#include "../../Engines/VolumeEditAndCopy/Shared/VolumeEditAndCopyEngine_Shared.h"
-#include "../../Objects/Scene/ITMVoxelVolume.h"
+#include "../Shared/WarpGradientAggregates.h"
+#include "../Shared/WarpGradientCommon.h"
+#include "../../Utils/VoxelFlags.h"
+#include "../../Utils/CPrintHelpers.h"
+#include "../../Engines/EditAndCopy/Shared/EditAndCopyEngine_Shared.h"
+#include "../../Objects/Volume/VoxelVolume.h"
 
 
 namespace ITMLib {
 
 
-template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-struct WarpGradientFunctor<TVoxel, TWarp, TIndex, TMemoryDeviceType, TRACKER_SLAVCHEVA_OPTIMIZED>{
+template<typename TTSDFVoxel, typename TWarpVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+struct WarpGradientFunctor<TTSDFVoxel, TWarpVoxel, TIndex, TMemoryDeviceType, TRACKER_SLAVCHEVA_OPTIMIZED>{
 private:
 
 
@@ -48,28 +48,28 @@ public:
 	// region ========================================= CONSTRUCTOR ====================================================
 	WarpGradientFunctor(SlavchevaSurfaceTracker::Parameters parameters,
 	                    SlavchevaSurfaceTracker::Switches switches,
-	                    ITMVoxelVolume<TVoxel,TIndex>* liveVolume,
-	                    ITMVoxelVolume<TVoxel,TIndex>* canonicalVolume,
-	                    ITMVoxelVolume<TWarp,TIndex>* warpField,
+	                    VoxelVolume<TWarpVoxel,TIndex>* warp_field,
+	                    VoxelVolume<TTSDFVoxel,TIndex>* canonical_volume,
+	                    VoxelVolume<TTSDFVoxel,TIndex>* live_volume,
 	                    float voxelSize, float narrowBandHalfWidth) :
 			parameters(parameters), switches(switches),
-			liveVoxels(liveVolume->localVBA.GetVoxelBlocks()), liveIndexData(liveVolume->index.GetIndexData()),
-			warps(warpField->localVBA.GetVoxelBlocks()), warpIndexData(warpField->index.GetIndexData()),
-			canonicalVoxels(canonicalVolume->localVBA.GetVoxelBlocks()), canonicalIndexData(canonicalVolume->index.GetIndexData()),
-			liveCache(), canonicalCache(),
-			sdfUnity(voxelSize/narrowBandHalfWidth){}
+			live_voxels(live_volume->localVBA.GetVoxelBlocks()), live_index_data(live_volume->index.GetIndexData()),
+			warp_voxels(warp_field->localVBA.GetVoxelBlocks()), warp_index_data(warp_field->index.GetIndexData()),
+			canonical_voxels(canonical_volume->localVBA.GetVoxelBlocks()), canonical_index_data(canonical_volume->index.GetIndexData()),
+			live_cache(), canonical_cache(),
+			sdf_unity(voxelSize / narrowBandHalfWidth){}
 
 	// endregion =======================================================================================================
 
 	_DEVICE_WHEN_AVAILABLE_
-	void operator()(TVoxel& voxelLive, TVoxel& voxelCanonical, TWarp& warp, Vector3i voxelPosition) {
+	void operator()(TWarpVoxel& warp_voxel, TTSDFVoxel& canonical_voxel, TTSDFVoxel& live_voxel, const Vector3i& voxel_position) {
 
-		if (!VoxelIsConsideredForTracking(voxelCanonical, voxelLive)) return;
-		bool computeDataAndLevelSetTerms = VoxelIsConsideredForDataTerm(voxelCanonical, voxelLive);
+		if (!VoxelIsConsideredForTracking(canonical_voxel, live_voxel)) return;
+		bool computeDataAndLevelSetTerms = VoxelIsConsideredForDataTerm(canonical_voxel, live_voxel);
 
-		Vector3f& framewiseWarp = warp.framewise_warp;
-		float liveSdf = TVoxel::valueToFloat(voxelLive.sdf);
-		float canonicalSdf = TVoxel::valueToFloat(voxelCanonical.sdf);
+		Vector3f& warp_update = warp_voxel.warp_update;
+		float liveSdf = TTSDFVoxel::valueToFloat(live_voxel.sdf);
+		float canonicalSdf = TTSDFVoxel::valueToFloat(canonical_voxel.sdf);
 
 		// region =============================== DECLARATIONS & DEFAULTS FOR ALL TERMS ====================
 
@@ -81,7 +81,7 @@ public:
 
 			Vector3f liveSdfJacobian;
 			ComputeLiveJacobian_CentralDifferences(
-					liveSdfJacobian, voxelPosition, liveVoxels, liveIndexData, liveCache);
+					liveSdfJacobian, voxel_position, live_voxels, live_index_data, live_cache);
 			if (switches.enable_data_term) {
 
 				// Compute data term error / energy
@@ -98,10 +98,10 @@ public:
 
 			if (switches.enable_level_set_term) {
 				Matrix3f liveSdfHessian;
-				ComputeSdfHessian(liveSdfHessian, voxelPosition, liveSdf, liveVoxels, liveIndexData, liveCache);
+				ComputeSdfHessian(liveSdfHessian, voxel_position, liveSdf, live_voxels, live_index_data, live_cache);
 
 				float sdfJacobianNorm = ORUtils::length(liveSdfJacobian);
-				float sdfJacobianNormMinusUnity = sdfJacobianNorm - sdfUnity;
+				float sdfJacobianNormMinusUnity = sdfJacobianNorm - sdf_unity;
 				localLevelSetEnergyGradient = parameters.weight_level_set_term * sdfJacobianNormMinusUnity *
 				                              (liveSdfHessian * liveSdfJacobian) /
 				                              (sdfJacobianNorm + parameters.epsilon);
@@ -114,38 +114,38 @@ public:
 		if (switches.enable_smoothing_term) {
 			// region ============================== RETRIEVE NEIGHBOR'S WARPS =========================================
 
-			const int neighborhoodSize = 9;
-			Vector3f neighborFramewiseWarps[neighborhoodSize];
-			bool neighborKnown[neighborhoodSize], neighborTruncated[neighborhoodSize], neighborAllocated[neighborhoodSize];
+			const int neighborhood_size = 9;
+			Vector3f neighbor_warp_updates[neighborhood_size];
+			bool neighbors_known[neighborhood_size], neighbors_truncated[neighborhood_size], neighbors_allocated[neighborhood_size];
 
 			//    0        1        2          3         4         5           6         7         8
 			//(-1,0,0) (0,-1,0) (0,0,-1)   (1, 0, 0) (0, 1, 0) (0, 0, 1)   (1, 1, 0) (0, 1, 1) (1, 0, 1)
 			findPoint2ndDerivativeNeighborhoodFramewiseWarp(
-					neighborFramewiseWarps/*x9*/, neighborKnown, neighborTruncated, neighborAllocated, voxelPosition,
-					warps, warpIndexData, warpCache, canonicalVoxels, canonicalIndexData, canonicalCache);
+					neighbor_warp_updates/*x9*/, neighbors_known, neighbors_truncated, neighbors_allocated, voxel_position,
+					warp_voxels, warp_index_data, warp_cache, canonical_voxels, canonical_index_data, canonical_cache);
 
-			for (int iNeighbor = 0; iNeighbor < neighborhoodSize; iNeighbor++) {
-				if (!neighborAllocated[iNeighbor]) {
+			for (int iNeighbor = 0; iNeighbor < neighborhood_size; iNeighbor++) {
+				if (!neighbors_allocated[iNeighbor]) {
 					//assign current warp to neighbor warp if the neighbor is not allocated
-					neighborFramewiseWarps[iNeighbor] = framewiseWarp;
+					neighbor_warp_updates[iNeighbor] = warp_update;
 				}
 			}
 			//endregion=================================================================================================
 
 			if (switches.enable_killing_rigidity_enforcement_term) {
-				Matrix3f framewiseWarpJacobian(0.0f);
-				Matrix3f framewiseWarpHessian[3] = {Matrix3f(0.0f), Matrix3f(0.0f), Matrix3f(0.0f)};
-				ComputePerVoxelWarpJacobianAndHessian(framewiseWarp, neighborFramewiseWarps, framewiseWarpJacobian,
-				                                      framewiseWarpHessian);
+				Matrix3f warp_updateJacobian(0.0f);
+				Matrix3f warp_updateHessian[3] = {Matrix3f(0.0f), Matrix3f(0.0f), Matrix3f(0.0f)};
+				ComputePerVoxelWarpJacobianAndHessian(warp_update, neighbor_warp_updates, warp_updateJacobian,
+				                                      warp_updateHessian);
 
 				float gamma = parameters.rigidity_enforcement_factor;
 				float onePlusGamma = 1.0f + gamma;
 				// |0, 3, 6|     |m00, m10, m20|      |u_xx, u_xy, u_xz|
 				// |1, 4, 7|     |m01, m11, m21|      |u_xy, u_yy, u_yz|
 				// |2, 5, 8|     |m02, m12, m22|      |u_xz, u_yz, u_zz|
-				Matrix3f& H_u = framewiseWarpHessian[0];
-				Matrix3f& H_v = framewiseWarpHessian[1];
-				Matrix3f& H_w = framewiseWarpHessian[2];
+				Matrix3f& H_u = warp_updateHessian[0];
+				Matrix3f& H_v = warp_updateHessian[1];
+				Matrix3f& H_w = warp_updateHessian[2];
 
 
 				float KillingDeltaEu = -2.0f *
@@ -162,29 +162,29 @@ public:
 						parameters.weight_smoothing_term * Vector3f(KillingDeltaEu, KillingDeltaEv, KillingDeltaEw);
 				//=================================== ENERGY ===============================================
 				// KillingTerm Energy
-				Matrix3f warpJacobianTranspose = framewiseWarpJacobian.t();
+				Matrix3f warpJacobianTranspose = warp_updateJacobian.t();
 
 				float localTikhonovEnergy = parameters.weight_smoothing_term *
-				                            dot(framewiseWarpJacobian.getColumn(0),
-				                                framewiseWarpJacobian.getColumn(0)) +
-				                            dot(framewiseWarpJacobian.getColumn(1),
-				                                framewiseWarpJacobian.getColumn(1)) +
-				                            dot(framewiseWarpJacobian.getColumn(2), framewiseWarpJacobian.getColumn(2));
+				                            dot(warp_updateJacobian.getColumn(0),
+				                                warp_updateJacobian.getColumn(0)) +
+				                            dot(warp_updateJacobian.getColumn(1),
+				                                warp_updateJacobian.getColumn(1)) +
+				                            dot(warp_updateJacobian.getColumn(2), warp_updateJacobian.getColumn(2));
 
 				float localRigidityEnergy = gamma * parameters.weight_smoothing_term *
 				                            (dot(warpJacobianTranspose.getColumn(0),
-				                                 framewiseWarpJacobian.getColumn(0)) +
+				                                 warp_updateJacobian.getColumn(0)) +
 				                             dot(warpJacobianTranspose.getColumn(1),
-				                                 framewiseWarpJacobian.getColumn(1)) +
+				                                 warp_updateJacobian.getColumn(1)) +
 				                             dot(warpJacobianTranspose.getColumn(2),
-				                                 framewiseWarpJacobian.getColumn(2)));
+				                                 warp_updateJacobian.getColumn(2)));
 			} else {
-				Matrix3f framewiseWarpJacobian(0.0f);
-				Vector3f framewiseWarpLaplacian;
-				ComputeWarpLaplacianAndJacobian(framewiseWarpLaplacian, framewiseWarpJacobian, framewiseWarp,
-				                                neighborFramewiseWarps);
+				Matrix3f warp_updateJacobian(0.0f);
+				Vector3f warp_updateLaplacian;
+				ComputeWarpLaplacianAndJacobian(warp_updateLaplacian, warp_updateJacobian, warp_update,
+				                                neighbor_warp_updates);
 				//∇E_{reg}(Ψ) = −[∆U ∆V ∆W]' ,
-				localSmoothingEnergyGradient = -parameters.weight_smoothing_term * framewiseWarpLaplacian;
+				localSmoothingEnergyGradient = -parameters.weight_smoothing_term * warp_updateLaplacian;
 			}
 		}
 		// endregion
@@ -194,7 +194,7 @@ public:
 				localLevelSetEnergyGradient +
 				localSmoothingEnergyGradient;
 
-		warp.gradient0 = localEnergyGradient;
+		warp_voxel.gradient0 = localEnergyGradient;
 	}
 
 
@@ -205,20 +205,20 @@ public:
 
 private:
 
-	const float sdfUnity;
+	const float sdf_unity;
 
 	// *** data structure accessors
-	const TVoxel* liveVoxels;
-	const typename TIndex::IndexData* liveIndexData;
-	typename TIndex::IndexCache liveCache;
+	const TTSDFVoxel* live_voxels;
+	const typename TIndex::IndexData* live_index_data;
+	typename TIndex::IndexCache live_cache;
 
-	const TVoxel* canonicalVoxels;
-	const typename TIndex::IndexData* canonicalIndexData;
-	typename TIndex::IndexCache canonicalCache;
+	const TTSDFVoxel* canonical_voxels;
+	const typename TIndex::IndexData* canonical_index_data;
+	typename TIndex::IndexCache canonical_cache;
 
-	TWarp* warps;
-	const typename TIndex::IndexData* warpIndexData;
-	typename TIndex::IndexCache warpCache;
+	TWarpVoxel* warp_voxels;
+	const typename TIndex::IndexData* warp_index_data;
+	typename TIndex::IndexCache warp_cache;
 
 
 	const SlavchevaSurfaceTracker::Parameters parameters;

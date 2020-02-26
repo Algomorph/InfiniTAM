@@ -23,8 +23,8 @@
 #include <iostream>
 
 //local
-#include "../ITMLib/Utils/Geometry/ITMIntersectionChecks.h"
-#include "../ITMLib/Objects/Scene/VoxelBlockHash.h"
+#include "../ITMLib/Utils/Geometry/IntersectionChecks.h"
+#include "../ITMLib/Objects/Volume/VoxelBlockHash.h"
 
 
 using namespace ITMLib;
@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE(Segment_AABB_IntersectionCheck){
 	// add offset, like in the algorithm
 	segmentStart_VoxelBlocks += Vector3f(1.0f / (2.0f * VOXEL_BLOCK_SIZE));
 	segmentEnd_VoxelBlocks += Vector3f(1.0f / (2.0f * VOXEL_BLOCK_SIZE));
-	ITMSegment segment(segmentStart_VoxelBlocks, segmentEnd_VoxelBlocks);
+	Segment segment(segmentStart_VoxelBlocks, segmentEnd_VoxelBlocks);
 	Vector3f blockMinima[] = {
 			Vector3f(-6.f, 7.0f,25.0f),
 			Vector3f(-6.f, 7.0f,26.0f),
@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE(Segment_AABB_IntersectionCheck){
 	Vector3f depthRayStart(0.0f,0.0f,0.0f);
 	Vector3f depthRayEnd(-0.183568671, 0.256334633, 0.855000019);
 	depthRayEnd *= 2.0f;
-	ITMSegment depthSegment(depthRayStart,depthRayEnd);
+	Segment depthSegment(depthRayStart, depthRayEnd);
 
 	Vector3f voxelMinimumMeters(-0.192000002, 0.268000007, 0.896000028);
 	voxelMinimumMeters -= Vector3f(0.002);

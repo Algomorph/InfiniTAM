@@ -2,7 +2,7 @@
 
 #include "ImageSourceEngine.h"
 
-#include "../ITMLib/Objects/Camera/ITMCalibIO.h"
+#include "../ITMLib/Objects/Camera/CalibIO.h"
 #include "../ORUtils/FileUtils.h"
 
 #include <stdexcept>
@@ -23,7 +23,7 @@ BaseImageSourceEngine::BaseImageSourceEngine(const char *calibFilename)
 		DIEWITHEXCEPTION("error: path to the calibration file was specified but data could not be read");
 }
 
-ITMLib::ITMRGBDCalib BaseImageSourceEngine::getCalib() const
+ITMLib::RGBDCalib BaseImageSourceEngine::getCalib() const
 {
   return calib;
 }
@@ -207,7 +207,7 @@ CalibSource::CalibSource(const char *calibFilename, Vector2i setImageSize, float
 	this->ResizeIntrinsics(calib.intrinsics_rgb, ratio);
 }
 
-void CalibSource::ResizeIntrinsics(ITMIntrinsics &intrinsics, float ratio)
+void CalibSource::ResizeIntrinsics(Intrinsics &intrinsics, float ratio)
 {
 	intrinsics.projectionParamsSimple.fx *= ratio;
 	intrinsics.projectionParamsSimple.fy *= ratio;
@@ -233,7 +233,7 @@ RawFileReader::RawFileReader(const char *calibFilename, const char *rgbImageMask
 	cached_depth = NULL;
 }
 
-void RawFileReader::ResizeIntrinsics(ITMIntrinsics &intrinsics, float ratio)
+void RawFileReader::ResizeIntrinsics(Intrinsics &intrinsics, float ratio)
 {
 	intrinsics.projectionParamsSimple.fx *= ratio;
 	intrinsics.projectionParamsSimple.fy *= ratio;

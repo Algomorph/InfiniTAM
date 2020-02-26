@@ -168,7 +168,7 @@ void SDFVizInteractorStyle::OnKeyPress() {
 			std::cout << "Key symbol & code printing: " << (keySymbolPrinting ? "ON" : "OFF") << std::endl;
 		} else if (key == "KP_Multiply" && mode == VIEW) {
 			parent->canonicalScenePipe.ToggleWarpEnabled();
-			std::cout << "Warp display: " << (parent->canonicalScenePipe.GetWarpEnabled() ? "ON" : "OFF") << std::endl;
+			std::cout << "Warping display: " << (parent->canonicalScenePipe.GetWarpEnabled() ? "ON" : "OFF") << std::endl;
 			parent->renderWindow->Render();
 		} else if (key == "Return" || key == "KP_Enter") {
 			if (sliceSelected) {

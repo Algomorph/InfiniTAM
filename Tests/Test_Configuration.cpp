@@ -32,7 +32,7 @@ using namespace ITMLib::configuration;
 
 configuration::Configuration generate_default_snoopy_configuration();
 
-//#define SAVE_TEST_DATA
+//#define GENERATE_TEST_DATA
 #ifdef _MSC_VER
 #define SOURCE_DIRECTORY "../../../"
 #else
@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(ConfigurationTest) {
 	configuration::Configuration default_configuration;
 
 	configuration::Configuration configuration1(
-			VoxelVolumeParameters(0.005, 0.12, 4.12, 0.05, 200, true, true, 1.2f),
+			VoxelVolumeParameters(0.005, 0.12, 4.12, 0.05, 200, true, 1.2f),
 			SurfelVolumeParameters(0.4f, 0.5f, static_cast<float>(22 * M_PI / 180), 0.008f, 0.0003f, 3.4f, 26.0f, 5,
 			                       1.1f, 4.5f, 21, 300, false, false),
 			SpecificVolumeParameters(
@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(ConfigurationTest) {
 			      "TestData/frame_depth_%%06i.png",
 			      "TestData/frame_mask_%%06i.png",
 			      ""),
-			AutomaticRunSettings(50, 16, true),
+			AutomaticRunSettings(50, 16, true, true, true),
 			NonRigidTrackingParameters(ITMLib::TRACKER_SLAVCHEVA_DIAGNOSTIC, 300, 0.0002f, 0.4f),
 			true,
 			false,
@@ -70,6 +70,7 @@ BOOST_AUTO_TEST_CASE(ConfigurationTest) {
 			true,
 			true,
 			true,
+			false,
 			configuration::FAILUREMODE_RELOCALIZE,
 			configuration::SWAPPINGMODE_ENABLED,
 			configuration::LIBMODE_BASIC,
@@ -77,7 +78,7 @@ BOOST_AUTO_TEST_CASE(ConfigurationTest) {
 			configuration::VERBOSITY_SILENT,
 			"type=rgb,levels=rrbb"
 	);
-#ifdef SAVE_TEST_DATA
+#ifdef GENERATE_TEST_DATA
 	std::cout << "Saving test data..." << std::endl;
 	configuration::Configuration default_snoopy_configuration = generate_default_snoopy_configuration();
 	configuration::save_configuration_to_json_file(SOURCE_DIRECTORY "Files/infinitam_snoopy_config.json", default_snoopy_configuration);
@@ -131,7 +132,7 @@ BOOST_AUTO_TEST_CASE(ConfigurationTest) {
 
 configuration::Configuration generate_default_snoopy_configuration(){
 	configuration::Configuration default_snoopy_configuration(
-			VoxelVolumeParameters(0.004, 0.2, 3.0, 0.04, 100, true, false, 1.0f),
+			VoxelVolumeParameters(0.004, 0.2, 3.0, 0.04, 100, false, 1.0f),
 			SurfelVolumeParameters(),
 			SpecificVolumeParameters(
 					ArrayVolumeParameters(),
@@ -156,7 +157,7 @@ configuration::Configuration generate_default_snoopy_configuration(){
 			      "<CONFIGURATION_DIRECTORY>/frames/depth_%06i.png",
 			      "<CONFIGURATION_DIRECTORY>/frames/omask_%06i.png",
 			      ""),
-			AutomaticRunSettings(50, 16, false),
+			AutomaticRunSettings(50, 16, false, false, false),
 			NonRigidTrackingParameters(
 					ITMLib::TRACKER_SLAVCHEVA_OPTIMIZED,
 					300,
@@ -168,6 +169,7 @@ configuration::Configuration generate_default_snoopy_configuration(){
 			false,
 			false,
 			false,
+			true,
 			configuration::FAILUREMODE_IGNORE,
 			configuration::SWAPPINGMODE_DISABLED,
 			configuration::LIBMODE_DYNAMIC,

@@ -99,14 +99,14 @@ public class InfiniTAMMainScreen extends Activity
 	{
 		super.onResume();
 		mGLView.onResume();
-		processor.attachVisualisation(mGLView, mFPSDisplay);
+		processor.attachVisualization(mGLView, mFPSDisplay);
 //		processor.resume();
 	}
 
 	@Override
 	protected void onPause() 
 	{
-		processor.detachVisualisation(mGLView, mFPSDisplay);
+		processor.detachVisualization(mGLView, mFPSDisplay);
 		super.onPause();
 		mGLView.onPause();
 //		processor.pause();

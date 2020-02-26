@@ -13,14 +13,18 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-
-#include "../../ITMLibDefines.h"
+#include "../../Engines/Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
+#include "../../Engines/Traversal/CPU/ThreeVolumeTraversal_CPU_PlainVoxelArray.h"
+#include "../../Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
+#include "../../Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator.h"
+#include "../WarpGradientFunctors/WarpGradientFunctor_SlavchevaOptimized.h"
+#include "../WarpGradientFunctors/WarpGradientFunctor_SlavchevaDiagnostic.h"
+#include "../../GlobalTemplateDefines.h"
 #include "../Interface/SurfaceTracker.tpp"
-
 
 namespace ITMLib {
 template
-class SurfaceTracker<ITMVoxel, ITMWarp, PlainVoxelArray, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_OPTIMIZED>;
+class SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_OPTIMIZED>;
 template
-class SurfaceTracker<ITMVoxel, ITMWarp, PlainVoxelArray, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_DIAGNOSTIC>;
+class SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_DIAGNOSTIC>;
 } // namespace ITMLib

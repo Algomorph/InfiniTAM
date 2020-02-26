@@ -17,18 +17,20 @@
 
 #include "TestUtils.h"
 #include "../ITMLib/Utils/Configuration.h"
-#include "../ITMLib/Engines/Reconstruction/ITMDynamicSceneReconstructionEngineFactory.h"
+#include "../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
+#include "../ITMLib/Engines/Indexing/IndexingEngineFactory.h"
+#include "../ITMLib/Engines/Visualization/VisualizationEngineFactory.h"
 #include "../ORUtils/FileUtils.h"
-
 #ifndef COMPILE_WITHOUT_CUDA
-#include "../ITMLib/Engines/VolumeEditAndCopy/CUDA/VolumeEditAndCopyEngine_CUDA.h"
+#include "../ITMLib/Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
 #endif
+
 
 using namespace ITMLib;
 
 template<class TVoxel, class TIndex>
-void GenerateTestScene_CPU(ITMVoxelVolume<TVoxel, TIndex>* scene) {
-	VolumeEditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().ResetScene(scene);
+void GenerateTestVolume_CPU(VoxelVolume<TVoxel, TIndex>* volume) {
+	EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().ResetVolume(volume);
 	const int narrowBandThicknessVoxels = 10;
 	int xOffset = 8;
 	int surfaceSizeVoxelsZ = 16;
@@ -44,8 +46,8 @@ void GenerateTestScene_CPU(ITMVoxelVolume<TVoxel, TIndex>* scene) {
 
 		for (int z = 0; z < surfaceSizeVoxelsZ; z++) {
 			for (int y = 0; y < surfaceSizeVoxelsY; y++) {
-				VolumeEditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().SetVoxel(scene, Vector3i(xPos, y, z), voxelPos);
-				VolumeEditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().SetVoxel(scene, Vector3i(xNeg, y, z), voxelNeg);
+				EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().SetVoxel(volume, Vector3i(xPos, y, z), voxelPos);
+				EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().SetVoxel(volume, Vector3i(xNeg, y, z), voxelNeg);
 			}
 		}
 	}
@@ -53,9 +55,10 @@ void GenerateTestScene_CPU(ITMVoxelVolume<TVoxel, TIndex>* scene) {
 }
 
 #ifndef COMPILE_WITHOUT_CUDA
+
 template<class TVoxel, class TIndex>
-void GenerateTestScene_CUDA(ITMVoxelVolume<TVoxel, TIndex>* scene) {
-	VolumeEditAndCopyEngine_CUDA<TVoxel, TIndex>::Inst().ResetScene(scene);
+void GenerateTestVolume_CUDA(VoxelVolume<TVoxel, TIndex>* volume) {
+	volume->Reset();
 	const int narrowBandThicknessVoxels = 10;
 	int xOffset = 8;
 	int surfaceSizeVoxelsZ = 16;
@@ -71,13 +74,14 @@ void GenerateTestScene_CUDA(ITMVoxelVolume<TVoxel, TIndex>* scene) {
 
 		for (int z = 0; z < surfaceSizeVoxelsZ; z++) {
 			for (int y = 0; y < surfaceSizeVoxelsY; y++) {
-				VolumeEditAndCopyEngine_CUDA<TVoxel, TIndex>::Inst().SetVoxel(scene, Vector3i(xPos, y, z), voxelPos);
-				VolumeEditAndCopyEngine_CUDA<TVoxel, TIndex>::Inst().SetVoxel(scene, Vector3i(xNeg, y, z), voxelNeg);
+				EditAndCopyEngine_CUDA<TVoxel, TIndex>::Inst().SetVoxel(volume, Vector3i(xPos, y, z), voxelPos);
+				EditAndCopyEngine_CUDA<TVoxel, TIndex>::Inst().SetVoxel(volume, Vector3i(xNeg, y, z), voxelNeg);
 			}
 		}
 	}
 
 }
+
 #endif
 
 template<bool hasSemanticInformation, typename TVoxel>
@@ -192,96 +196,159 @@ void simulateRandomVoxelAlteration(TVoxel& voxel) {
 //};
 
 template<typename TVoxel, typename TIndex>
-void loadVolume(ITMVoxelVolume<TVoxel, TIndex>** volume, const std::string& path, MemoryDeviceType memoryDeviceType,
+void loadVolume(VoxelVolume<TVoxel, TIndex>** volume, const std::string& path, MemoryDeviceType memoryDeviceType,
                 typename TIndex::InitializationParameters initializationParameters,
                 configuration::SwappingMode swappingMode) {
 	configuration::Configuration& settings = configuration::get();
-	(*volume) = new ITMVoxelVolume<TVoxel, TIndex>(&settings.general_voxel_volume_parameters,
-	                                               swappingMode,
-	                                               memoryDeviceType, initializationParameters);
+	(*volume) = new VoxelVolume<TVoxel, TIndex>(&settings.general_voxel_volume_parameters,
+	                                            swappingMode,
+	                                            memoryDeviceType, initializationParameters);
 	PrepareVoxelVolumeForLoading(*volume);
 	(*volume)->LoadFromDirectory(path);
 }
 
 
 template<typename TVoxel, typename TIndex>
-void initializeVolume(ITMVoxelVolume<TVoxel, TIndex>** volume,
+void initializeVolume(VoxelVolume<TVoxel, TIndex>** volume,
                       typename TIndex::InitializationParameters initializationParameters, MemoryDeviceType memoryDevice,
                       configuration::SwappingMode swappingMode) {
-	(*volume) = new ITMVoxelVolume<TVoxel, TIndex>(memoryDevice, initializationParameters);
+	(*volume) = new VoxelVolume<TVoxel, TIndex>(memoryDevice, initializationParameters);
 	(*volume)->Reset();
 }
 
 
 template<typename TVoxel, typename TIndex>
-void buildSdfVolumeFromImage(ITMVoxelVolume<TVoxel, TIndex>** volume,
-                             ITMView** view,
-                             const std::string& depth_path,
-                             const std::string& color_path,
-                             const std::string& mask_path,
-                             const std::string& calibration_path,
-                             MemoryDeviceType memoryDevice,
-                             typename TIndex::InitializationParameters initializationParameters,
-                             configuration::SwappingMode swappingMode,
-                             bool useBilateralFilter
+void buildSdfVolumeFromImage_NearSurfaceAllocation(VoxelVolume<TVoxel, TIndex>** volume,
+                                                   View** view,
+                                                   const std::string& depth_path,
+                                                   const std::string& color_path,
+                                                   const std::string& mask_path,
+                                                   const std::string& calibration_path,
+                                                   MemoryDeviceType memory_device,
+                                                   typename TIndex::InitializationParameters initializationParameters,
+                                                   configuration::SwappingMode swappingMode
 ) {
 
 	// region ================================= CONSTRUCT VIEW =========================================================
 	Vector2i imageSize(640, 480);
-	updateView(view, depth_path, color_path, mask_path, calibration_path, memoryDevice);
-	initializeVolume(volume, initializationParameters, memoryDevice, swappingMode);
-	(*volume) = new ITMVoxelVolume<TVoxel, TIndex>(&configuration::get().general_voxel_volume_parameters, swappingMode,
-	                                               memoryDevice, initializationParameters);
-	switch (memoryDevice) {
+	updateView(view, depth_path, color_path, mask_path, calibration_path, memory_device);
+	initializeVolume(volume, initializationParameters, memory_device, swappingMode);
+	(*volume) = new VoxelVolume<TVoxel, TIndex>(&configuration::get().general_voxel_volume_parameters, swappingMode,
+	                                            memory_device, initializationParameters);
+	(*volume)->Reset();
+	RenderState renderState(imageSize, configuration::get().general_voxel_volume_parameters.near_clipping_distance,
+	                        configuration::get().general_voxel_volume_parameters.far_clipping_distance, memory_device);
+	CameraTrackingState tracking_state(imageSize, memory_device);
 
-		case MEMORYDEVICE_CUDA:
-#ifndef COMPILE_WITHOUT_CUDA
-			VolumeEditAndCopyEngine_CUDA<TVoxel, TIndex>::Inst().ResetScene(*volume);
-#else
-			DIEWITHEXCEPTION_REPORTLOCATION("Trying to construct a volume in CUDA memory while code was build "
-								   "without CUDA support, aborting.");
-#endif
-			break;
+	DepthFusionEngineInterface<TVoxel, WarpVoxel, TIndex>* depth_fusion_engine =
+			DepthFusionEngineFactory
+			::Build<TVoxel, WarpVoxel, TIndex>(memory_device);
 
-		case MEMORYDEVICE_CPU:
-			VolumeEditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().ResetScene(*volume);
-			break;
-		case MEMORYDEVICE_METAL:
-			DIEWITHEXCEPTION_REPORTLOCATION("Metal framework not fully supported.");
-			break;
-	}
-	ITMRenderState renderState(imageSize, configuration::get().general_voxel_volume_parameters.near_clipping_distance,
-	                           configuration::get().general_voxel_volume_parameters.far_clipping_distance, memoryDevice);
-	ITMTrackingState trackingState(imageSize, memoryDevice);
+	IndexingEngineInterface<TSDFVoxel, TIndex>* indexing_engine = IndexingEngineFactory::Build<TVoxel, TIndex>(
+			memory_device);
+	indexing_engine->AllocateNearSurface(*volume, *view, &tracking_state);
+	depth_fusion_engine->GenerateTsdfVolumeFromSurface(*volume, *view, &tracking_state);
 
-	ITMDynamicSceneReconstructionEngine<TVoxel, ITMWarp, TIndex>* reconstructionEngine =
-			ITMDynamicSceneReconstructionEngineFactory
-			::MakeSceneReconstructionEngine<TVoxel, ITMWarp, TIndex>(memoryDevice);
+	delete depth_fusion_engine;
+	delete indexing_engine;
+}
 
-	reconstructionEngine->GenerateTsdfVolumeFromView(*volume, *view, &trackingState);
+template<typename TVoxel, typename TIndex>
+void buildSdfVolumeFromImage_NearSurfaceAllocation(VoxelVolume<TVoxel, TIndex>** volume,
+                                                   const std::string& depth_path, const std::string& color_path,
+                                                   const std::string& mask_path,
+                                                   const std::string& calibration_path,
+                                                   MemoryDeviceType memory_device,
+                                                   typename TIndex::InitializationParameters initialization_parameters,
+                                                   configuration::SwappingMode swapping_mode) {
 
-	delete reconstructionEngine;
+	// region ================================= CONSTRUCT VIEW =========================================================
+
+	View* view = nullptr;
+	buildSdfVolumeFromImage_NearSurfaceAllocation(volume, &view,
+	                                              depth_path,
+	                                              color_path,
+	                                              mask_path,
+	                                              calibration_path,
+	                                              memory_device,
+	                                              initialization_parameters, swapping_mode);
+	delete view;
+}
+
+template<typename TVoxel, typename TIndex>
+void buildSdfVolumeFromImage_SurfaceSpanAllocation(VoxelVolume<TVoxel, TIndex>** volume1,
+                                                   VoxelVolume<TVoxel, TIndex>** volume2,
+                                                   View** view,
+                                                   const std::string& depth1_path,
+                                                   const std::string& color1_path,
+                                                   const std::string& mask1_path,
+                                                   const std::string& depth2_path,
+                                                   const std::string& color2_path,
+                                                   const std::string& mask2_path,
+                                                   const std::string& calibration_path,
+                                                   MemoryDeviceType memory_device,
+                                                   typename TIndex::InitializationParameters initialization_parameters,
+                                                   configuration::SwappingMode swapping_mode
+) {
+
+	// region ================================= CONSTRUCT VIEW =========================================================
+	updateView(view, depth1_path, color1_path, mask1_path, calibration_path, memory_device);
+	initializeVolume(volume1, initialization_parameters, memory_device, swapping_mode);
+	(*volume1) = new VoxelVolume<TVoxel, TIndex>(memory_device, initialization_parameters);
+	(*volume1)->Reset();
+	(*volume2) = new VoxelVolume<TVoxel, TIndex>(memory_device, initialization_parameters);
+	(*volume2)->Reset();
+
+	RenderState render_state((*view)->depth->noDims,
+	                         configuration::get().general_voxel_volume_parameters.near_clipping_distance,
+	                         configuration::get().general_voxel_volume_parameters.far_clipping_distance, memory_device);
+	CameraTrackingState tracking_state((*view)->depth->noDims, memory_device);
+	IndexingEngineInterface<TSDFVoxel, TIndex>* indexing_engine = IndexingEngineFactory::Build<TVoxel, TIndex>(
+			memory_device);
+	DepthFusionEngineInterface<TVoxel, WarpVoxel, TIndex>* depth_fusion_engine =
+			DepthFusionEngineFactory
+			::Build<TVoxel, WarpVoxel, TIndex>(memory_device);
+
+	indexing_engine->AllocateNearSurface(*volume1, *view, &tracking_state);
+	depth_fusion_engine->IntegrateDepthImageIntoTsdfVolume(*volume1, *view, &tracking_state);
+
+	VisualizationEngine<TSDFVoxel, TIndex>* visualization_engine =
+			VisualizationEngineFactory::MakeVisualizationEngine<TSDFVoxel, TIndex>(memory_device);
+	visualization_engine->CreateICPMaps(*volume1, *view, &tracking_state, &render_state);
+
+	updateView(view, depth2_path, color2_path, mask2_path, calibration_path, memory_device);
+
+	indexing_engine->AllocateNearAndBetweenTwoSurfaces(*volume2, *view, &tracking_state);
+	depth_fusion_engine->IntegrateDepthImageIntoTsdfVolume(*volume2, *view, &tracking_state);
+
+	delete indexing_engine;
+	delete depth_fusion_engine;
 }
 
 
 template<typename TVoxel, typename TIndex>
-void buildSdfVolumeFromImage(ITMVoxelVolume<TVoxel, TIndex>** volume,
-                             const std::string& depth_path, const std::string& color_path, const std::string& mask_path,
-                             const std::string& calibration_path,
-                             MemoryDeviceType memoryDevice,
-                             typename TIndex::InitializationParameters initializationParameters,
-                             configuration::SwappingMode swappingMode,
-                             bool useBilateralFilter) {
-
-	// region ================================= CONSTRUCT VIEW =========================================================
-
-	ITMView* view = nullptr;
-	buildSdfVolumeFromImage(volume, &view,
-	                        depth_path,
-	                        color_path,
-	                        mask_path,
-	                        calibration_path,
-	                        memoryDevice,
-	                        initializationParameters, swappingMode, useBilateralFilter);
-	delete view;
+void buildSdfVolumeFromImage_SurfaceSpanAllocation(VoxelVolume<TVoxel, TIndex>** volume1,
+                                                   VoxelVolume<TVoxel, TIndex>** volume2,
+                                                   const std::string& depth1_path,
+                                                   const std::string& color1_path,
+                                                   const std::string& mask1_path,
+                                                   const std::string& depth2_path,
+                                                   const std::string& color2_path,
+                                                   const std::string& mask2_path,
+                                                   const std::string& calibration_path,
+                                                   MemoryDeviceType memory_device,
+                                                   typename TIndex::InitializationParameters initialization_parameters,
+                                                   configuration::SwappingMode swapping_mode)
+{
+	View* view = nullptr;
+	buildSdfVolumeFromImage_SurfaceSpanAllocation(volume1, volume2, &view,
+	                                              depth1_path,
+	                                              color1_path,
+	                                              mask1_path,
+	                                              depth2_path,
+	                                              color2_path,
+	                                              mask2_path,
+	                                              calibration_path,
+	                                              memory_device,
+	                                              initialization_parameters, swapping_mode);
 }

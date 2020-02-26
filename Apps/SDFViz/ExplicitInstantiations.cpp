@@ -14,8 +14,8 @@
 //  limitations under the License.
 //  ================================================================
 
-#include "../../ITMLib/Utils/Visualization/ITMSceneSliceVisualizer3D.tpp"
-#include "../../ITMLib/ITMLibDefines.h"
+#include "../../ITMLib/Utils/Visualization/SceneSliceVisualizer3D.tpp"
+#include "../../ITMLib/GlobalTemplateDefines.h"
 
 
 template class ITMScene3DSliceVisualizer<ITMVoxel,ITMWarp, ITMVoxelIndex>;

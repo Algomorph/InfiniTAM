@@ -24,16 +24,16 @@
 #include <vtkContextScene.h>
 
 //ITMLib/VTK
-#include "../../ITMLib/Utils/Visualization/ITMVisualizationWindowManager.h"
+#include "../../ITMLib/Utils/Visualization/VisualizationWindowManager.h"
 #endif
 
 //ITMLib
-#include "../../ITMLib/ITMLibDefines.h"
-#include "../../ITMLib/Engines/Main/ITMBasicEngine.h"
-#include "../../ITMLib/Engines/Main/ITMBasicSurfelEngine.h"
-#include "../../ITMLib/Engines/Main/ITMMultiEngine.h"
-#include "../../ITMLib/Engines/Main/ITMDynamicEngine.h"
-#include "../../ITMLib/Engines/Main/MianEngineFactory.h"
+#include "../../ITMLib/GlobalTemplateDefines.h"
+#include "../../ITMLib/Engines/Main/BasicVoxelEngine.h"
+#include "../../ITMLib/Engines/Main/BasicSurfelEngine.h"
+#include "../../ITMLib/Engines/Main/MultiEngine.h"
+#include "../../ITMLib/Engines/Main/DynamicSceneVoxelEngine.h"
+#include "../../ITMLib/Engines/Main/MainEngineFactory.h"
 
 //local
 #include "UIEngine_BPO.h"
@@ -50,13 +50,13 @@ namespace po = boost::program_options;
 namespace pt = boost::property_tree;
 
 
-ITMDynamicFusionLogger_Interface& GetLogger(configuration::IndexingMethod method) {
+TelemetryRecorder_Interface& GetLogger(configuration::IndexingMethod method) {
 	switch (method) {
 		case configuration::INDEX_HASH: {
-			return static_cast<ITMDynamicFusionLogger_Interface&>(ITMDynamicFusionLogger<ITMVoxel, ITMWarp, VoxelBlockHash>::Instance());
+			return static_cast<TelemetryRecorder_Interface&>(TelemetryRecorder<TSDFVoxel, WarpVoxel, VoxelBlockHash>::Instance());
 		}
 		case configuration::INDEX_ARRAY: {
-			return static_cast<ITMDynamicFusionLogger_Interface&>(ITMDynamicFusionLogger<ITMVoxel, ITMWarp, PlainVoxelArray>::Instance());
+			return static_cast<TelemetryRecorder_Interface&>(TelemetryRecorder<TSDFVoxel, WarpVoxel, PlainVoxelArray>::Instance());
 		}
 	}
 };
@@ -128,11 +128,11 @@ int main(int argc, char** argv) {
 
 // region ================================ BUILD MAIN ENGINE ========================================================
 		configuration::IndexingMethod chosenIndexingMethod = configuration.indexing_method;
-		ITMDynamicFusionLogger_Interface& logger = GetLogger(chosenIndexingMethod);
-		ITMMainEngine* mainEngine = BuildMainEngine(imageSource->getCalib(),
-		                                            imageSource->getRGBImageSize(),
-		                                            imageSource->getDepthImageSize(),
-		                                            false);
+		//TelemetryRecorder_Interface& logger = GetLogger(chosenIndexingMethod);
+		MainEngine* mainEngine = BuildMainEngine(imageSource->getCalib(),
+		                                         imageSource->getRGBImageSize(),
+		                                         imageSource->getDepthImageSize(),
+		                                         false);
 
 // endregion ===========================================================================================================
 // region =========================== SET LOGGER / VISUALIZERS WITH CLI ARGUMENTS ======================================
@@ -161,12 +161,12 @@ int main(int argc, char** argv) {
 #if !defined(WIN32) && defined(WITH_VTK)
 		XInitThreads();
 #endif
-		UIEngine_BPO::Instance().Initialize(argc, argv, imageSource, imuSource, mainEngine, configuration, &logger);
+		UIEngine_BPO::Instance().Initialize(argc, argv, imageSource, imuSource, mainEngine, configuration, nullptr);
 
 
 // endregion ===========================================================================================================
 
-		//ITMVisualizationWindowManager::get().Run();
+		//VisualizationWindowManager::get().Run();
 		UIEngine_BPO::Instance().Run();
 		UIEngine_BPO::Instance().Shutdown();
 
@@ -176,7 +176,7 @@ int main(int argc, char** argv) {
 		delete imageSource;
 		delete imuSource;
 
-		//ITMVisualizationWindowManager::get().ShutDown();
+		//VisualizationWindowManager::get().ShutDown();
 // endregion ===========================================================================================================
 		return EXIT_SUCCESS;
 	} catch (std::exception& e) {

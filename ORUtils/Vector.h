@@ -38,6 +38,7 @@ namespace ORUtils {
 			struct { T x, y, z, w; }; // standard names for components
 			struct { T r, g, b, a; }; // standard names for components
 			struct { T s, t, p, q; }; // standard names for components
+			struct { T fx, fy, cx, cy; }; // camera frustum names for components
 			T values[4];
 		};
 	};

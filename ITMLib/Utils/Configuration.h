@@ -30,12 +30,12 @@
 #include "VoxelVolumeParameters.h"
 #include "SurfelVolumeParameters.h"
 #include "../../ORUtils/MemoryDeviceType.h"
-#include "ITMMath.h"
+#include "Math.h"
 #include "../SurfaceTrackers/Interface/SurfaceTrackerInterface.h"
 #include "../SurfaceTrackers/WarpGradientFunctors/WarpGradientFunctor.h"
 #include "../Engines/Main/NonRigidTrackingParameters.h"
-#include "../Objects/Scene/VoxelBlockHash.h"
-#include "../Objects/Scene/PlainVoxelArray.h"
+#include "../Objects/Volume/VoxelBlockHash.h"
+#include "../Objects/Volume/PlainVoxelArray.h"
 
 namespace po = boost::program_options;
 namespace pt = boost::property_tree;
@@ -124,6 +124,8 @@ DECLARE_SERIALIZABLE_STRUCT(TELEMETRY_SETTINGS_STRUCT_DESCRIPTION);
 #define AUTOMATIC_RUN_SETTINGS_STRUCT_DESCRIPTION AutomaticRunSettings, \
     (int, number_of_frames_to_process, 0, PRIMITIVE, "This number of frames will be processed automatically after the program is launched (launches automatic run)."), \
     (int, index_of_frame_to_start_at, 0, PRIMITIVE, "Index of the first frame (or frame set) to read from disk (or, how many frames to skip). The remaining frames will be read in order."), \
+    (bool, load_volume_before_processing, false, PRIMITIVE, "When this is set to true, the program will attempt to load the volume for the index_of_frame_to_start_with from the corresponding subfolder within output_folder."), \
+    (bool, save_volumes_after_processing, false, PRIMITIVE, "Whether to save volume(s) after automatic processing"), \
     (bool, exit_after_automatic_processing, false, PRIMITIVE, "Whether to exit the program after the automatic run.")
 
 DECLARE_SERIALIZABLE_STRUCT(AUTOMATIC_RUN_SETTINGS_STRUCT_DESCRIPTION);
@@ -185,6 +187,7 @@ DECLARE_SERIALIZABLE_STRUCT(SPECIFIC_VOLUME_PARAMETERS_STRUCT_DESCRIPTION);
     (bool, use_approximate_raycast, false, PRIMITIVE, "Enables or disables approximate raycast."),\
     (bool, use_threshold_filter, false, PRIMITIVE, "Enables or disables threshold filtering, i.e. filtering out pixels whose difference from their neighbors exceeds a certain threshold"),\
     (bool, use_bilateral_filter, false, PRIMITIVE, "Enables or disables bilateral filtering on depth input images."),\
+    (bool, enable_rigid_tracking, true, PRIMITIVE, "Enables or disables rigid tracking."),\
     (FailureMode, behavior_on_failure, FAILUREMODE_IGNORE, ENUM, "What to do on tracker failure: ignore, relocalize or stop integration - not supported in loop closure or dynamic libmode"),\
     (SwappingMode, swapping_mode, SWAPPINGMODE_DISABLED, ENUM, "Determines how swapping works: disabled, fully enabled (still with dragons) and delete what's not visible - not supported in loop closure version"),\
     (LibMode, library_mode, LIBMODE_DYNAMIC, ENUM, "Switch between various library modes - basic, with loop closure, etc."),\

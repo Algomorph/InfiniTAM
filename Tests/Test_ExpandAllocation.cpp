@@ -23,50 +23,50 @@
 #include <iostream>
 
 //local
-#include "../ITMLib/ITMLibDefines.h"
+#include "../ITMLib/GlobalTemplateDefines.h"
 #include "../ITMLib/Utils/Configuration.h"
 #include "TestUtilsForSnoopyFrames16And17.h"
 //local - CPU
-#include "../ITMLib/Engines/Indexing/VBH/CPU/ITMIndexingEngine_CPU_VoxelBlockHash.h"
-#include "../ITMLib/Engines/VolumeEditAndCopy/CPU/VolumeEditAndCopyEngine_CPU.h"
-#include "../ITMLib/Utils/Analytics/SceneStatisticsCalculator/CPU/ITMSceneStatisticsCalculator_CPU.h"
+#include "../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
+#include "../ITMLib/Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
+#include "../ITMLib/Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator.h"
 //local - CUDA
 #ifndef COMPLIE_WITHOUT_CUDA
-#include "../ITMLib/Engines/Indexing/VBH/CUDA/ITMIndexingEngine_CUDA_VoxelBlockHash.h"
-#include "../ITMLib/Engines/VolumeEditAndCopy/CUDA/VolumeEditAndCopyEngine_CUDA.h"
+#include "../ITMLib/Engines/Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
+#include "../ITMLib/Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
 #include "CUDAAtomicTesting.h"
-#include "../ITMLib/Engines/VolumeEditAndCopy/VolumeEditAndCopyEngineFactory.h"
+#include "../ITMLib/Engines/EditAndCopy/EditAndCopyEngineFactory.h"
 #include "TestUtils.h"
-#include "../ITMLib/Utils/Analytics/SceneStatisticsCalculator/CUDA/ITMSceneStatisticsCalculator_CUDA.h"
+#include "../ITMLib/Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator.h"
 #endif
 
 
 using namespace ITMLib;
 
 BOOST_AUTO_TEST_CASE(ExpandVolume_CPU) {
-	ITMIndexingEngine<ITMVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>& indexing_engine
-			= ITMIndexingEngine<ITMVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance();
+	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>& indexing_engine
+			= IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance();
 
-	ITMVoxelVolume<ITMVoxel, VoxelBlockHash> volume1(&configuration::get().general_voxel_volume_parameters,
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume1(&configuration::get().general_voxel_volume_parameters,
 	                                                    configuration::get().swapping_mode ==
 	                                                    configuration::SWAPPINGMODE_ENABLED,
-	                                                    MEMORYDEVICE_CPU,
-	                                                    {1200, 0x20000});
-	VolumeEditAndCopyEngine_CPU<ITMVoxel, VoxelBlockHash>::Inst().ResetScene(&volume1);
+	                                               MEMORYDEVICE_CPU,
+	                                               {1200, 0x20000});
+	EditAndCopyEngine_CPU<TSDFVoxel, VoxelBlockHash>::Inst().ResetVolume(&volume1);
 
-	ITMVoxelVolume<ITMVoxel, VoxelBlockHash> volume2(&configuration::get().general_voxel_volume_parameters,
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume2(&configuration::get().general_voxel_volume_parameters,
 	                                                    configuration::get().swapping_mode ==
 	                                                    configuration::SWAPPINGMODE_ENABLED,
-	                                                    MEMORYDEVICE_CPU,
-	                                                    {1200, 0x20000});
-	VolumeEditAndCopyEngine_CPU<ITMVoxel, VoxelBlockHash>::Inst().ResetScene(&volume2);
+	                                               MEMORYDEVICE_CPU,
+	                                               {1200, 0x20000});
+	EditAndCopyEngine_CPU<TSDFVoxel, VoxelBlockHash>::Inst().ResetVolume(&volume2);
 
 	int hash_code = -1;
 	Vector3s initial_block_pos(0, 0, 0);
 	BOOST_REQUIRE(indexing_engine.AllocateHashBlockAt(&volume1, initial_block_pos, hash_code));
 
 	int search_hash_code = -2;
-	ITMHashEntry entry = indexing_engine.FindHashEntry(volume1.index, initial_block_pos, search_hash_code);
+	HashEntry entry = indexing_engine.FindHashEntry(volume1.index, initial_block_pos, search_hash_code);
 	BOOST_REQUIRE_EQUAL(initial_block_pos, entry.pos);
 	BOOST_REQUIRE_EQUAL(hash_code, search_hash_code);
 
@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE(ExpandVolume_CPU) {
 		for (short yOffset = -1; yOffset < 2; yOffset++) {
 			for (short xOffset = -1; xOffset < 2; xOffset++) {
 				Vector3s neighbor_position(xOffset, yOffset, zOffset);
-				ITMHashEntry entry = indexing_engine.FindHashEntry(volume2.index, neighbor_position, search_hash_code);
+				HashEntry entry = indexing_engine.FindHashEntry(volume2.index, neighbor_position, search_hash_code);
 				BOOST_REQUIRE_EQUAL(entry.pos, neighbor_position);
 				BOOST_REQUIRE(search_hash_code != -1);
 			}
@@ -88,8 +88,8 @@ BOOST_AUTO_TEST_CASE(ExpandVolume_CPU) {
 			for (short x = -2; x < 3; x++) {
 				if (x < -1 || x > 1 || y < -1 || y > 1 || z < -1 || z > 1) {
 					Vector3s neighbor_position(x, y, z);
-					ITMHashEntry entry = indexing_engine.FindHashEntry(volume2.index, neighbor_position,
-					                                                   search_hash_code);
+					HashEntry entry = indexing_engine.FindHashEntry(volume2.index, neighbor_position,
+					                                                search_hash_code);
 					BOOST_REQUIRE_EQUAL(search_hash_code, -1);
 				}
 			}
@@ -106,7 +106,7 @@ BOOST_AUTO_TEST_CASE(ExpandVolume_CPU) {
 		for (short yOffset = -2; yOffset < 3; yOffset++) {
 			for (short xOffset = -2; xOffset < 3; xOffset++) {
 				Vector3s neighbor_position(xOffset, yOffset, zOffset);
-				ITMHashEntry entry = indexing_engine.FindHashEntry(volume1.index, neighbor_position, search_hash_code);
+				HashEntry entry = indexing_engine.FindHashEntry(volume1.index, neighbor_position, search_hash_code);
 				BOOST_REQUIRE_EQUAL(entry.pos, neighbor_position);
 				BOOST_REQUIRE(search_hash_code != -1);
 			}
@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE(ExpandVolume_CPU) {
 		for (short yOffset = 2; yOffset < 4; yOffset++) {
 			for (short xOffset = 2; xOffset < 4; xOffset++) {
 				Vector3s neighbor_position(xOffset, yOffset, zOffset);
-				ITMHashEntry entry = indexing_engine.FindHashEntry(volume1.index, neighbor_position, search_hash_code);
+				HashEntry entry = indexing_engine.FindHashEntry(volume1.index, neighbor_position, search_hash_code);
 				BOOST_REQUIRE_EQUAL(entry.pos, neighbor_position);
 				BOOST_REQUIRE(search_hash_code != -1);
 			}
@@ -129,8 +129,8 @@ BOOST_AUTO_TEST_CASE(ExpandVolume_CPU) {
 			for (short x = -2; x < 3; x++) {
 				if (x < -1 || x > 3 || y < -1 || y > 3 || z < -1 || z > 3) {
 					Vector3s neighbor_position(x, y, z);
-					ITMHashEntry entry = indexing_engine.FindHashEntry(volume2.index, neighbor_position,
-					                                                   search_hash_code);
+					HashEntry entry = indexing_engine.FindHashEntry(volume2.index, neighbor_position,
+					                                                search_hash_code);
 					BOOST_REQUIRE_EQUAL(search_hash_code, -1);
 				}
 			}
@@ -144,32 +144,32 @@ BOOST_AUTO_TEST_CASE(ExpandVolume_CPU) {
 
 template<MemoryDeviceType TMemoryDeviceType>
 void TestAllocateBasedOnVolumeExpanded_Generic() {
-	ITMVoxelVolume<ITMVoxel, VoxelBlockHash> volume1(&configuration::get().general_voxel_volume_parameters,
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume1(&configuration::get().general_voxel_volume_parameters,
 	                                                    configuration::get().swapping_mode ==
 	                                                    configuration::SWAPPINGMODE_ENABLED,
-	                                                    TMemoryDeviceType,
-	                                                    Frame16And17Fixture::InitParams<VoxelBlockHash>());
-	VolumeEditAndCopyEngineFactory::Instance<ITMVoxel, VoxelBlockHash, TMemoryDeviceType>().ResetScene(&volume1);
-	ITMVoxelVolume<ITMVoxel, VoxelBlockHash> volume2(&configuration::get().general_voxel_volume_parameters,
+	                                               TMemoryDeviceType,
+	                                               Frame16And17Fixture::InitParams<VoxelBlockHash>());
+	EditAndCopyEngineFactory::Instance<TSDFVoxel, VoxelBlockHash, TMemoryDeviceType>().ResetVolume(&volume1);
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume2(&configuration::get().general_voxel_volume_parameters,
 	                                                    configuration::get().swapping_mode ==
 	                                                    configuration::SWAPPINGMODE_ENABLED,
-	                                                    TMemoryDeviceType,
-	                                                    Frame16And17Fixture::InitParams<VoxelBlockHash>());
-	VolumeEditAndCopyEngineFactory::Instance<ITMVoxel, VoxelBlockHash, TMemoryDeviceType>().ResetScene(&volume2);
-	ITMView* view = nullptr;
+	                                               TMemoryDeviceType,
+	                                               Frame16And17Fixture::InitParams<VoxelBlockHash>());
+	EditAndCopyEngineFactory::Instance<TSDFVoxel, VoxelBlockHash, TMemoryDeviceType>().ResetVolume(&volume2);
+	View* view = nullptr;
 	updateView(&view, "TestData/snoopy_depth_000017.png",
 	           "TestData/snoopy_color_000017.png", "TestData/snoopy_omask_000017.png",
 	           "TestData/snoopy_calib.txt", TMemoryDeviceType);
 	Vector2i imageSize(640, 480);
-	ITMTrackingState trackingState(imageSize, TMemoryDeviceType);
-	ITMRenderState renderState(imageSize, configuration::get().general_voxel_volume_parameters.near_clipping_distance,
-	                           configuration::get().general_voxel_volume_parameters.far_clipping_distance, TMemoryDeviceType);
-	ITMIndexingEngine<ITMVoxel, VoxelBlockHash, TMemoryDeviceType>::Instance().AllocateFromDepth(
+	CameraTrackingState trackingState(imageSize, TMemoryDeviceType);
+	RenderState renderState(imageSize, configuration::get().general_voxel_volume_parameters.near_clipping_distance,
+	                        configuration::get().general_voxel_volume_parameters.far_clipping_distance, TMemoryDeviceType);
+	IndexingEngine<TSDFVoxel, VoxelBlockHash, TMemoryDeviceType>::Instance().AllocateNearSurface(
 			&volume1, view, &trackingState, false, false);
-	ITMIndexingEngine<ITMVoxel, VoxelBlockHash, TMemoryDeviceType>::Instance()
+	IndexingEngine<TSDFVoxel, VoxelBlockHash, TMemoryDeviceType>::Instance()
 			.AllocateUsingOtherVolumeExpanded(&volume2, &volume1);
 
-	BOOST_REQUIRE_EQUAL((ITMSceneStatisticsCalculator<ITMVoxel, VoxelBlockHash, TMemoryDeviceType>::Instance()
+	BOOST_REQUIRE_EQUAL((VolumeStatisticsCalculator<TSDFVoxel, VoxelBlockHash, TMemoryDeviceType>::Instance()
 			.ComputeAllocatedHashBlockCount(&volume2)), 1625);
 
 }
@@ -185,29 +185,29 @@ BOOST_AUTO_TEST_CASE(TestAllocateBasedOnVolumeExpanded_CUDA) {
 }
 
 BOOST_AUTO_TEST_CASE(ExpandVolume_CUDA) {
-	ITMIndexingEngine<ITMVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>& indexing_engine
-			= ITMIndexingEngine<ITMVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance();
+	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>& indexing_engine
+			= IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance();
 
-	ITMVoxelVolume<ITMVoxel, VoxelBlockHash> volume1(&configuration::get().general_voxel_volume_parameters,
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume1(&configuration::get().general_voxel_volume_parameters,
 	                                                    configuration::get().swapping_mode ==
 	                                                    configuration::SWAPPINGMODE_ENABLED,
 	                                                    MEMORYDEVICE_CUDA,
 	                                                    {1200, 0x20000});
-	VolumeEditAndCopyEngine_CUDA<ITMVoxel, VoxelBlockHash>::Inst().ResetScene(&volume1);
+	EditAndCopyEngine_CUDA<TSDFVoxel, VoxelBlockHash>::Inst().ResetVolume(&volume1);
 
-	ITMVoxelVolume<ITMVoxel, VoxelBlockHash> volume2(&configuration::get().general_voxel_volume_parameters,
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume2(&configuration::get().general_voxel_volume_parameters,
 	                                                    configuration::get().swapping_mode ==
 	                                                    configuration::SWAPPINGMODE_ENABLED,
 	                                                    MEMORYDEVICE_CUDA,
 	                                                    {1200, 0x20000});
-	VolumeEditAndCopyEngine_CUDA<ITMVoxel, VoxelBlockHash>::Inst().ResetScene(&volume2);
+	EditAndCopyEngine_CUDA<TSDFVoxel, VoxelBlockHash>::Inst().ResetVolume(&volume2);
 
 	int hash_code = -1;
 	Vector3s initial_block_pos(0, 0, 0);
 	BOOST_REQUIRE(indexing_engine.AllocateHashBlockAt(&volume1, initial_block_pos, hash_code));
 
 	int search_hash_code = -2;
-	ITMHashEntry entry = indexing_engine.FindHashEntry(volume1.index, initial_block_pos, search_hash_code);
+	HashEntry entry = indexing_engine.FindHashEntry(volume1.index, initial_block_pos, search_hash_code);
 	BOOST_REQUIRE_EQUAL(initial_block_pos, entry.pos);
 	BOOST_REQUIRE_EQUAL(hash_code, search_hash_code);
 
@@ -217,7 +217,7 @@ BOOST_AUTO_TEST_CASE(ExpandVolume_CUDA) {
 		for (short yOffset = -1; yOffset < 2; yOffset++) {
 			for (short xOffset = -1; xOffset < 2; xOffset++) {
 				Vector3s neighbor_position(xOffset, yOffset, zOffset);
-				ITMHashEntry entry = indexing_engine.FindHashEntry(volume2.index, neighbor_position, search_hash_code);
+				HashEntry entry = indexing_engine.FindHashEntry(volume2.index, neighbor_position, search_hash_code);
 				BOOST_REQUIRE(search_hash_code != -1);
 				BOOST_REQUIRE_EQUAL(entry.pos, neighbor_position);
 			}
@@ -229,8 +229,8 @@ BOOST_AUTO_TEST_CASE(ExpandVolume_CUDA) {
 			for (short x = -2; x < 3; x++) {
 				if (x < -1 || x > 1 || y < -1 || y > 1 || z < -1 || z > 1) {
 					Vector3s neighbor_position(x, y, z);
-					ITMHashEntry entry = indexing_engine.FindHashEntry(volume2.index, neighbor_position,
-					                                                   search_hash_code);
+					HashEntry entry = indexing_engine.FindHashEntry(volume2.index, neighbor_position,
+					                                                search_hash_code);
 					BOOST_REQUIRE_EQUAL(search_hash_code, -1);
 				}
 			}
@@ -247,7 +247,7 @@ BOOST_AUTO_TEST_CASE(ExpandVolume_CUDA) {
 		for (short yOffset = -2; yOffset < 3; yOffset++) {
 			for (short xOffset = -2; xOffset < 3; xOffset++) {
 				Vector3s neighbor_position(xOffset, yOffset, zOffset);
-				ITMHashEntry entry = indexing_engine.FindHashEntry(volume1.index, neighbor_position, search_hash_code);
+				HashEntry entry = indexing_engine.FindHashEntry(volume1.index, neighbor_position, search_hash_code);
 				BOOST_REQUIRE_EQUAL(entry.pos, neighbor_position);
 				BOOST_REQUIRE(search_hash_code != -1);
 			}
@@ -258,7 +258,7 @@ BOOST_AUTO_TEST_CASE(ExpandVolume_CUDA) {
 		for (short yOffset = 2; yOffset < 4; yOffset++) {
 			for (short xOffset = 2; xOffset < 4; xOffset++) {
 				Vector3s neighbor_position(xOffset, yOffset, zOffset);
-				ITMHashEntry entry = indexing_engine.FindHashEntry(volume1.index, neighbor_position, search_hash_code);
+				HashEntry entry = indexing_engine.FindHashEntry(volume1.index, neighbor_position, search_hash_code);
 				BOOST_REQUIRE_EQUAL(entry.pos, neighbor_position);
 				BOOST_REQUIRE(search_hash_code != -1);
 			}
@@ -270,8 +270,8 @@ BOOST_AUTO_TEST_CASE(ExpandVolume_CUDA) {
 			for (short x = -2; x < 3; x++) {
 				if (x < -1 || x > 3 || y < -1 || y > 3 || z < -1 || z > 3) {
 					Vector3s neighbor_position(x, y, z);
-					ITMHashEntry entry = indexing_engine.FindHashEntry(volume2.index, neighbor_position,
-					                                                   search_hash_code);
+					HashEntry entry = indexing_engine.FindHashEntry(volume2.index, neighbor_position,
+					                                                search_hash_code);
 					BOOST_REQUIRE_EQUAL(search_hash_code, -1);
 				}
 			}

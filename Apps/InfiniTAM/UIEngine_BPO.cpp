@@ -26,19 +26,20 @@
 //VTK
 #include <vtkCommand.h>
 #include <vtkRenderWindowInteractor.h>
+
 #endif
 
 //ITMLib
-#include "../../ITMLib/ITMLibDefines.h"
-#include "../../ITMLib/Engines/Main/ITMBasicEngine.h"
-#include "../../ITMLib/Engines/Main/ITMBasicSurfelEngine.h"
-#include "../../ITMLib/Engines/Main/ITMMultiEngine.h"
-#include "../../ITMLib/Engines/Main/ITMDynamicEngine.h"
+#include "../../ITMLib/GlobalTemplateDefines.h"
+#include "../../ITMLib/Engines/Main/BasicVoxelEngine.h"
+#include "../../ITMLib/Engines/Main/BasicSurfelEngine.h"
+#include "../../ITMLib/Engines/Main/MultiEngine.h"
+#include "../../ITMLib/Engines/Main/DynamicSceneVoxelEngine.h"
 
 #include "../../ORUtils/FileUtils.h"
 #include "../../InputSource/FFMPEGWriter.h"
-#include "../../ITMLib/Utils/Analytics/ITMBenchmarkUtils.h"
-#include "../../ITMLib/Utils/ITMPrintHelpers.h"
+#include "../../ITMLib/Utils/Analytics/BenchmarkUtils.h"
+#include "../../ITMLib/Utils/CPPPrintHelpers.h"
 
 #ifdef WITH_OPENCV
 #include <opencv2/imgcodecs.hpp>
@@ -63,7 +64,7 @@ namespace bench = ITMLib::Bench;
  * \param argv number of arguments to the main function
  * \param imageSource source for images
  * \param imuSource source for IMU data
- * \param mainEngine main engine to process the frames
+ * \param main_engine main engine to process the frames
  * \param outFolder output folder for saving results
  * \param deviceType type of device to use for some tasks
  * \param number_of_frames_to_process_after_launch automatically process this number of frames after launching the UIEngine,
@@ -72,25 +73,16 @@ namespace bench = ITMLib::Bench;
  * set interval to this number of frames
  */
 void UIEngine_BPO::Initialize(int& argc, char** argv,
-							  InputSource::ImageSourceEngine* imageSource,
+                              InputSource::ImageSourceEngine* imageSource,
                               InputSource::IMUSourceEngine* imuSource,
-                              ITMLib::ITMMainEngine* mainEngine,
+                              ITMLib::MainEngine* main_engine,
 
                               const configuration::Configuration& configuration,
-                              ITMLib::ITMDynamicFusionLogger_Interface* logger) {
-
-	//TODO: somehow incorporate the following "constant" settings into Configuration struct, Configuration.h in ITMLib
-	const bool fix_camera = false;
-	const bool load_volume_before_automatic_run = false;
-	const bool save_volume_after_automatic_run = false;
-	const bool start_in_step_by_step_mode = false;
-
-
+                              ITMLib::TelemetryRecorder_Interface* logger) {
 	this->logger = logger;
 	this->indexingMethod = configuration.indexing_method;
 
-	this->inStepByStepMode = false;
-	this->save_after_automatic_run = save_volume_after_automatic_run;
+	this->save_after_automatic_run = configuration.automatic_run_settings.save_volumes_after_processing;
 	this->exit_after_automatic_run = configuration.automatic_run_settings.exit_after_automatic_processing;
 
 	this->freeviewActive = true;
@@ -98,23 +90,23 @@ void UIEngine_BPO::Initialize(int& argc, char** argv,
 	this->currentColourMode = 0;
 	this->number_of_frames_to_process_after_launch = configuration.automatic_run_settings.number_of_frames_to_process;
 
-	this->colourModes_main.emplace_back("shaded greyscale", ITMMainEngine::InfiniTAM_IMAGE_SCENERAYCAST);
-	this->colourModes_main.emplace_back("integrated colours", ITMMainEngine::InfiniTAM_IMAGE_COLOUR_FROM_VOLUME);
-	this->colourModes_main.emplace_back("surface normals", ITMMainEngine::InfiniTAM_IMAGE_COLOUR_FROM_NORMAL);
-	this->colourModes_main.emplace_back("confidence", ITMMainEngine::InfiniTAM_IMAGE_COLOUR_FROM_CONFIDENCE);
+	this->colourModes_main.emplace_back("shaded greyscale", MainEngine::InfiniTAM_IMAGE_SCENERAYCAST);
+	this->colourModes_main.emplace_back("integrated colours", MainEngine::InfiniTAM_IMAGE_COLOUR_FROM_VOLUME);
+	this->colourModes_main.emplace_back("surface normals", MainEngine::InfiniTAM_IMAGE_COLOUR_FROM_NORMAL);
+	this->colourModes_main.emplace_back("confidence", MainEngine::InfiniTAM_IMAGE_COLOUR_FROM_CONFIDENCE);
 
-	this->colourModes_freeview.emplace_back("canonical", ITMMainEngine::InfiniTAM_IMAGE_FREECAMERA_CANONICAL);
-	this->colourModes_freeview.emplace_back("shaded greyscale", ITMMainEngine::InfiniTAM_IMAGE_FREECAMERA_SHADED);
+	this->colourModes_freeview.emplace_back("canonical", MainEngine::InfiniTAM_IMAGE_FREECAMERA_CANONICAL);
+	this->colourModes_freeview.emplace_back("shaded greyscale", MainEngine::InfiniTAM_IMAGE_FREECAMERA_SHADED);
 	this->colourModes_freeview.emplace_back("integrated colours",
-	                                        ITMMainEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_VOLUME);
+	                                        MainEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_VOLUME);
 	this->colourModes_freeview.emplace_back("surface normals",
-	                                        ITMMainEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_NORMAL);
+	                                        MainEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_NORMAL);
 	this->colourModes_freeview.emplace_back("confidence",
-	                                        ITMMainEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_CONFIDENCE);
+	                                        MainEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_CONFIDENCE);
 
 	this->imageSource = imageSource;
 	this->imuSource = imuSource;
-	this->mainEngine = mainEngine;
+	this->mainEngine = main_engine;
 	this->output_path = configuration.paths.output_path;
 
 	int textHeight = 60; // Height of text area, 2 lines
@@ -127,7 +119,7 @@ void UIEngine_BPO::Initialize(int& argc, char** argv,
 	winReg[2] = Vector4f(0.665f, h1, 1.0f, h2);     // Side sub window 2
 
 	this->isRecordingImages = false;
-	this->currentFrameNo = 0;
+	this->processed_frame_count = 0;
 	this->rgbVideoWriter = nullptr;
 	this->depthVideoWriter = nullptr;
 
@@ -156,14 +148,14 @@ void UIEngine_BPO::Initialize(int& argc, char** argv,
 
 	inputRGBImage = new ITMUChar4Image(imageSource->getRGBImageSize(), true, allocateGPU);
 	inputRawDepthImage = new ITMShortImage(imageSource->getDepthImageSize(), true, allocateGPU);
-	inputIMUMeasurement = new ITMIMUMeasurement();
+	inputIMUMeasurement = new IMUMeasurement();
 
 	saveImage = new ITMUChar4Image(imageSource->getDepthImageSize(), true, false);
 
 
-	outImageType[1] = ITMMainEngine::InfiniTAM_IMAGE_ORIGINAL_DEPTH;
-	outImageType[2] = ITMMainEngine::InfiniTAM_IMAGE_ORIGINAL_RGB;
-	if (inputRGBImage->noDims == Vector2i(0, 0)) outImageType[2] = ITMMainEngine::InfiniTAM_IMAGE_UNKNOWN;
+	outImageType[1] = MainEngine::InfiniTAM_IMAGE_ORIGINAL_DEPTH;
+	outImageType[2] = MainEngine::InfiniTAM_IMAGE_ORIGINAL_RGB;
+	if (inputRGBImage->noDims == Vector2i(0, 0)) outImageType[2] = MainEngine::InfiniTAM_IMAGE_UNKNOWN;
 
 
 	autoIntervalFrameStart = 0;
@@ -186,29 +178,20 @@ void UIEngine_BPO::Initialize(int& argc, char** argv,
 		SkipFrames(configuration.automatic_run_settings.index_of_frame_to_start_at);
 	}
 
-	if (start_in_step_by_step_mode) {
-		mainLoopAction = number_of_frames_to_process_after_launch ? PROCESS_STEPS_CONTINUOUS : PROCESS_SINGLE_STEP;
-		outImageType[0] = this->colourMode_stepByStep.type;
-	} else {
-		mainLoopAction = number_of_frames_to_process_after_launch ? PROCESS_N_FRAMES : PROCESS_PAUSED;
-		outImageType[0] = this->freeviewActive ? this->colourModes_freeview[this->currentColourMode].type
-		                                       : this->colourModes_main[this->currentColourMode].type;
-	}
+	mainLoopAction = number_of_frames_to_process_after_launch ? PROCESS_N_FRAMES : PROCESS_PAUSED;
+	outImageType[0] = this->freeviewActive ? this->colourModes_freeview[this->currentColourMode].type
+	                                       : this->colourModes_main[this->currentColourMode].type;
 
 	if (configuration.telemetry_settings.record_reconstruction_video) {
 		this->reconstructionVideoWriter = new FFMPEGWriter();
 	}
 
-	if (load_volume_before_automatic_run) {
-		if(logger->NeedsFramewiseOutputFolder()){
-			logger->SetOutputDirectory(
-					this->GenerateCurrentFrameOutputDirectory());
-		}
-		mainEngine->LoadFromFile();
+	if (configuration.automatic_run_settings.load_volume_before_processing) {
+		std::string frame_path = this->GenerateCurrentFrameOutputPath();
+		main_engine->LoadFromFile(frame_path);
 		SkipFrames(1);
 	}
-	logger->SetShutdownRequestedFlagLocation(
-			&this->shutdownRequested);
+	if (logger != nullptr) logger->SetShutdownRequestedFlagLocation(&this->shutdownRequested);
 	printf("initialised.\n");
 }
 
@@ -222,16 +205,17 @@ void UIEngine_BPO::GetScreenshot(ITMUChar4Image* dest) const {
 	glReadPixels(0, 0, dest->noDims.x, dest->noDims.y, GL_RGBA, GL_UNSIGNED_BYTE, dest->GetData(MEMORYDEVICE_CPU));
 }
 
-void UIEngine_BPO::SkipFrames(int numberOfFramesToSkip) {
-	for (int iFrame = 0; iFrame < numberOfFramesToSkip && imageSource->hasMoreImages(); iFrame++) {
+void UIEngine_BPO::SkipFrames(int number_of_frames_to_skip) {
+	for (int iFrame = 0; iFrame < number_of_frames_to_skip && imageSource->hasMoreImages(); iFrame++) {
 		imageSource->getImages(inputRGBImage, inputRawDepthImage);
 	}
-	this->startedProcessingFromFrameIx += numberOfFramesToSkip;
+	this->start_frame_index += number_of_frames_to_skip;
 }
 
 
 void UIEngine_BPO::ProcessFrame() {
-	if (logger->IsRecording3DSceneAndWarpProgression()) {
+
+	if (logger != nullptr && logger->IsRecording3DSceneAndWarpProgression()) {
 		std::cout << yellow << "***" << bright_cyan << "PROCESSING FRAME " << GetCurrentFrameIndex()
 		          << " (WITH RECORDING 3D SCENES ON)" << yellow << "***" << reset << std::endl;
 	} else {
@@ -246,10 +230,12 @@ void UIEngine_BPO::ProcessFrame() {
 		if (!imuSource->hasMoreMeasurements()) return;
 		else imuSource->getMeasurement(inputIMUMeasurement);
 	}
-	if(logger->NeedsFramewiseOutputFolder()){
+
+	if (logger != nullptr && logger->NeedsFramewiseOutputFolder()) {
 		logger->SetOutputDirectory(
-				this->GenerateCurrentFrameOutputDirectory());
+				this->GenerateCurrentFrameOutputPath());
 	}
+
 	RecordDepthAndRGBInputToImages();
 	RecordDepthAndRGBInputToVideo();
 
@@ -257,7 +243,7 @@ void UIEngine_BPO::ProcessFrame() {
 	sdkStartTimer(&timer_instant);
 	sdkStartTimer(&timer_average);
 
-	//actual processing on the mailEngine
+	//actual processing on the mainEngine
 	if (imuSource != nullptr)
 		this->trackingResult = mainEngine->ProcessFrame(inputRGBImage, inputRawDepthImage, inputIMUMeasurement);
 	else trackingResult = mainEngine->ProcessFrame(inputRGBImage, inputRawDepthImage);
@@ -273,11 +259,11 @@ void UIEngine_BPO::ProcessFrame() {
 
 	RecordCurrentReconstructionFrameToVideo();
 
-	currentFrameNo++;
+	processed_frame_count++;
 }
 
 int UIEngine_BPO::GetCurrentFrameIndex() const {
-	return startedProcessingFromFrameIx + currentFrameNo;
+	return start_frame_index + processed_frame_count;
 }
 
 void UIEngine_BPO::Run() { glutMainLoop(); }
@@ -302,58 +288,6 @@ void UIEngine_BPO::Shutdown() {
 	delete saveImage;
 }
 
-bool UIEngine_BPO::BeginStepByStepMode() {
-	if (!imageSource->hasMoreImages()) return false;
-
-	switch (indexingMethod) {
-		case configuration::INDEX_HASH: {
-			auto* dynamicEngine = dynamic_cast<ITMDynamicEngine<ITMVoxel, ITMWarp, VoxelBlockHash>*>(mainEngine);
-			if (dynamicEngine == nullptr) return false;
-		}
-			break;
-		case configuration::INDEX_ARRAY: {
-			auto* dynamicEngine = dynamic_cast<ITMDynamicEngine<ITMVoxel, ITMWarp, PlainVoxelArray>*>(mainEngine);
-			if (dynamicEngine == nullptr) return false;
-		}
-			break;
-	}
-
-
-	imageSource->getImages(inputRGBImage, inputRawDepthImage);
-
-	if (imuSource != nullptr) {
-		if (!imuSource->hasMoreMeasurements()) return false;
-		else imuSource->getMeasurement(inputIMUMeasurement);
-	}
-	if(logger->NeedsFramewiseOutputFolder()){
-		logger->SetOutputDirectory(
-				this->GenerateCurrentFrameOutputDirectory());
-	}
-	RecordDepthAndRGBInputToImages();
-	RecordDepthAndRGBInputToVideo();
-
-	//actual processing on the mailEngine
-	switch (indexingMethod) {
-		case configuration::INDEX_HASH: {
-			auto* dynamicEngine = dynamic_cast<ITMDynamicEngine<ITMVoxel, ITMWarp, VoxelBlockHash>*>(mainEngine);
-			if (imuSource != nullptr)
-				dynamicEngine->BeginProcessingFrameInStepByStepMode(inputRGBImage, inputRawDepthImage,
-				                                                    inputIMUMeasurement);
-			else dynamicEngine->BeginProcessingFrameInStepByStepMode(inputRGBImage, inputRawDepthImage);
-		}
-			break;
-		case configuration::INDEX_ARRAY: {
-			auto* dynamicEngine = dynamic_cast<ITMDynamicEngine<ITMVoxel, ITMWarp, PlainVoxelArray>*>(mainEngine);
-			if (imuSource != nullptr)
-				dynamicEngine->BeginProcessingFrameInStepByStepMode(inputRGBImage, inputRawDepthImage,
-				                                                    inputIMUMeasurement);
-			else dynamicEngine->BeginProcessingFrameInStepByStepMode(inputRGBImage, inputRawDepthImage);
-		}
-			break;
-	}
-	this->inStepByStepMode = true;
-	return true;
-}
 
 std::string UIEngine_BPO::GenerateNextFrameOutputPath() const {
 	fs::path path(std::string(this->output_path) + "/Frame_" + std::to_string(GetCurrentFrameIndex() + 1));
@@ -363,7 +297,7 @@ std::string UIEngine_BPO::GenerateNextFrameOutputPath() const {
 	return path.string();
 }
 
-std::string UIEngine_BPO::GenerateCurrentFrameOutputDirectory() const {
+std::string UIEngine_BPO::GenerateCurrentFrameOutputPath() const {
 	fs::path path(std::string(this->output_path) + "/Frame_" + std::to_string(GetCurrentFrameIndex()));
 	if (!fs::exists(path)) {
 		fs::create_directories(path);
@@ -371,42 +305,12 @@ std::string UIEngine_BPO::GenerateCurrentFrameOutputDirectory() const {
 	return path.string();
 }
 
-bool UIEngine_BPO::ContinueStepByStepModeForFrame() {
-	bool keepProcessingFrame = false;
-	switch (indexingMethod) {
-		case configuration::INDEX_HASH: {
-			auto* dynamicEngine = dynamic_cast<ITMDynamicEngine<ITMVoxel, ITMWarp, VoxelBlockHash>*>(mainEngine);
-			if (dynamicEngine == nullptr) return false;
-			keepProcessingFrame = dynamicEngine->UpdateCurrentFrameSingleStep();
-			if (!keepProcessingFrame) {
-				trackingResult = dynamicEngine->GetStepByStepTrackingResult();
-#ifndef COMPILE_WITHOUT_CUDA
-				ORcudaSafeCall(cudaDeviceSynchronize());
-#endif
-				currentFrameNo++;
-			} else {
-				RecordCurrentReconstructionFrameToVideo();
-			}
-		}
-			break;
-		case configuration::INDEX_ARRAY: {
-			auto* dynamicEngine = dynamic_cast<ITMDynamicEngine<ITMVoxel, ITMWarp, PlainVoxelArray>*>(mainEngine);
-			if (dynamicEngine == nullptr) return false;
-			keepProcessingFrame = dynamicEngine->UpdateCurrentFrameSingleStep();
-			if (!keepProcessingFrame) {
-				trackingResult = dynamicEngine->GetStepByStepTrackingResult();
-#ifndef COMPILE_WITHOUT_CUDA
-				ORcudaSafeCall(cudaDeviceSynchronize());
-#endif
-				currentFrameNo++;
-			} else {
-				RecordCurrentReconstructionFrameToVideo();
-			}
-		}
-			break;
+std::string UIEngine_BPO::GeneratePreviousFrameOutputPath() const {
+	fs::path path(std::string(this->output_path) + "/Frame_" + std::to_string(GetCurrentFrameIndex() - 1));
+	if (!fs::exists(path)) {
+		fs::create_directories(path);
 	}
-	inStepByStepMode = keepProcessingFrame;
-	return keepProcessingFrame;
+	return path.string();
 }
 
 //TODO: Group all recording & make it toggleable with a single keystroke / command flag
@@ -426,7 +330,7 @@ void UIEngine_BPO::RecordCurrentReconstructionFrameToVideo() {
 			SaveImageToFile(outImage[0], fileName.c_str());
 			cv::Mat img = cv::imread(fileName, cv::IMREAD_UNCHANGED);
 			cv::putText(img, std::to_string(GetCurrentFrameIndex()), cv::Size(10, 50), cv::FONT_HERSHEY_SIMPLEX,
-			            1, cv::Scalar(128, 255, 128), 1, cv::LINE_AA);
+						1, cv::Scalar(128, 255, 128), 1, cv::LINE_AA);
 			cv::imwrite(fileName, img);
 			ITMUChar4Image* imageWithText = new ITMUChar4Image(imageSource->getDepthImageSize(), true, allocateGPU);
 			ReadImageFromFile(imageWithText, fileName.c_str());
@@ -458,11 +362,11 @@ void UIEngine_BPO::RecordDepthAndRGBInputToImages() {
 	if (isRecordingImages) {
 		char str[250];
 
-		sprintf(str, "%s/%04d.pgm", output_path.c_str(), currentFrameNo);
+		sprintf(str, "%s/%04d.pgm", output_path.c_str(), processed_frame_count);
 		SaveImageToFile(inputRawDepthImage, str);
 
 		if (inputRGBImage->noDims != Vector2i(0, 0)) {
-			sprintf(str, "%s/%04d.ppm", output_path.c_str(), currentFrameNo);
+			sprintf(str, "%s/%04d.ppm", output_path.c_str(), processed_frame_count);
 			SaveImageToFile(inputRGBImage, str);
 		}
 	}
@@ -470,10 +374,10 @@ void UIEngine_BPO::RecordDepthAndRGBInputToImages() {
 
 void UIEngine_BPO::PrintProcessingFrameHeader() const {
 	std::cout << bright_cyan << "PROCESSING FRAME " << GetCurrentFrameIndex() + 1;
-	if (logger->IsRecording3DSceneAndWarpProgression()) {
+	if (logger != nullptr && logger->IsRecording3DSceneAndWarpProgression()) {
 		std::cout << " [3D SCENE AND WARP UPDATE RECORDING: ON]";
 	}
-	if (logger->IsRecordingScene2DSlicesWithUpdates()) {
+	if (logger != nullptr && logger->IsRecordingScene2DSlicesWithUpdates()) {
 		std::cout << " [2D SCENE SLICE & WARP UPDATE RECORDING: ON]";
 	}
 	std::cout << reset << std::endl;
