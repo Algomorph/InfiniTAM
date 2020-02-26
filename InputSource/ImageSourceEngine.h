@@ -4,8 +4,8 @@
 
 #include <vector>
 
-#include "../ITMLib/Objects/Camera/ITMRGBDCalib.h"
-#include "../ITMLib/Utils/ITMImageTypes.h"
+#include "../ITMLib/Objects/Camera/RGBDCalib.h"
+#include "../ITMLib/Utils/ImageTypes.h"
 
 namespace InputSource {
 
@@ -20,7 +20,7 @@ namespace InputSource {
 		 * \pre     hasMoreImages()
 		 * \return  The calibration parameters associated with the next RGB-D image (if any), or the default calibration parameters otherwise.
 		 */
-		virtual ITMLib::ITMRGBDCalib getCalib() const = 0;
+		virtual ITMLib::RGBDCalib getCalib() const = 0;
 
 		/**
 		 * \brief Gets the size of the next depth image (if any).
@@ -70,13 +70,13 @@ namespace InputSource {
 	class BaseImageSourceEngine : public ImageSourceEngine
 	{
 	protected:
-		ITMLib::ITMRGBDCalib calib;
+		ITMLib::RGBDCalib calib;
 
 	public:
 		explicit BaseImageSourceEngine(const char *calibFilename);
 
 		/** Override */
-		virtual ITMLib::ITMRGBDCalib getCalib() const;
+		virtual ITMLib::RGBDCalib getCalib() const;
 	};
 
 	class ImageMaskPathGenerator
@@ -146,7 +146,7 @@ namespace InputSource {
 	{
 	private:
 		Vector2i imgSize;
-		void ResizeIntrinsics(ITMLib::ITMIntrinsics &intrinsics, float ratio);
+		void ResizeIntrinsics(ITMLib::Intrinsics &intrinsics, float ratio);
 
 	public:
 		CalibSource(const char *calibFilename, Vector2i setImageSize, float ratio);
@@ -173,7 +173,7 @@ namespace InputSource {
 		int currentFrameNo;
 
 		Vector2i imgSize;
-		void ResizeIntrinsics(ITMLib::ITMIntrinsics &intrinsics, float ratio);
+		void ResizeIntrinsics(ITMLib::Intrinsics &intrinsics, float ratio);
 
 	public:
 		RawFileReader(const char *calibFilename, const char *rgbImageMask, const char *depthImageMask, Vector2i setImageSize, float ratio);

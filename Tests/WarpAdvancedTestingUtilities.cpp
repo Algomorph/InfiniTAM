@@ -22,20 +22,15 @@ void
 GenericWarpConsistencySubtest<PlainVoxelArray, MEMORYDEVICE_CPU>(const SlavchevaSurfaceTracker::Switches& switches,
                                                                     int iteration_limit,
                                                                     GenericWarpTestMode mode,
-                                                                    float absolute_tolerance,
-                                                                    bool allocateLiveFromBothImages,
-                                                                    bool expand_raw_live_allocation);
+                                                                    float absolute_tolerance);
 template
 void
 GenericWarpConsistencySubtest<VoxelBlockHash, MEMORYDEVICE_CPU>(const SlavchevaSurfaceTracker::Switches& switches,
                                                                    int iteration_limit,
                                                                    GenericWarpTestMode mode,
-                                                                   float absolute_tolerance,
-                                                                   bool allocateLiveFromBothImages,
-                                                                   bool expand_raw_live_allocation);
+                                                                   float absolute_tolerance);
 template
-void Warp_PVA_VBH_simple_subtest<MEMORYDEVICE_CPU>(int iteration, SlavchevaSurfaceTracker::Switches trackerSwitches,
-                                                   bool expanded_allocation);
+void Warp_PVA_VBH_simple_subtest<MEMORYDEVICE_CPU>(int iteration, SlavchevaSurfaceTracker::Switches trackerSwitches);
 
 #ifndef COMPILE_WITHOUT_CUDA
 template
@@ -43,22 +38,17 @@ void
 GenericWarpConsistencySubtest<PlainVoxelArray, MEMORYDEVICE_CUDA>(const SlavchevaSurfaceTracker::Switches& switches,
                                                                      int iteration_limit,
                                                                      GenericWarpTestMode mode,
-                                                                     float absolute_tolerance,
-                                                                     bool allocateLiveFromBothImages,
-                                                                     bool expand_raw_live_allocation);
+                                                                     float absolute_tolerance);
 
 template
 void
 GenericWarpConsistencySubtest<VoxelBlockHash, MEMORYDEVICE_CUDA>(const SlavchevaSurfaceTracker::Switches& switches,
                                                                     int iteration_limit,
                                                                     GenericWarpTestMode mode,
-                                                                    float absolute_tolerance,
-                                                                    bool allocateLiveFromBothImages,
-                                                                    bool expand_raw_live_allocation);
+                                                                    float absolute_tolerance);
 
 template
-void Warp_PVA_VBH_simple_subtest<MEMORYDEVICE_CUDA>(int iteration, SlavchevaSurfaceTracker::Switches trackerSwitches,
-                                                    bool expanded_allocation);
+void Warp_PVA_VBH_simple_subtest<MEMORYDEVICE_CUDA>(int iteration, SlavchevaSurfaceTracker::Switches trackerSwitches);
 #endif
 
 std::string get_path_warps(std::string prefix, int iteration) {
@@ -104,3 +94,15 @@ std::string getIndexString<PlainVoxelArray>() { return "PVA"; }
 
 template<>
 std::string getIndexString<VoxelBlockHash>() { return "VBH"; }
+
+
+template void GenerateRawLiveAndCanonicalVolumes<VoxelBlockHash, MEMORYDEVICE_CPU>(VoxelVolume<TSDFVoxel, VoxelBlockHash>** canonical_volume,
+                                                                                    VoxelVolume<TSDFVoxel, VoxelBlockHash>** live_volume);
+template void GenerateRawLiveAndCanonicalVolumes<PlainVoxelArray, MEMORYDEVICE_CPU>(VoxelVolume<TSDFVoxel, PlainVoxelArray>** canonical_volume,
+                                                                                    VoxelVolume<TSDFVoxel, PlainVoxelArray>** live_volume);
+#ifndef COMPILE_WITHOUT_CUDA
+template void GenerateRawLiveAndCanonicalVolumes<VoxelBlockHash, MEMORYDEVICE_CUDA>(VoxelVolume<TSDFVoxel, VoxelBlockHash>** canonical_volume,
+                                                                                    VoxelVolume<TSDFVoxel, VoxelBlockHash>** live_volume);
+template void GenerateRawLiveAndCanonicalVolumes<PlainVoxelArray, MEMORYDEVICE_CUDA>(VoxelVolume<TSDFVoxel, PlainVoxelArray>** canonical_volume,
+                                                                                    VoxelVolume<TSDFVoxel, PlainVoxelArray>** live_volume);
+#endif

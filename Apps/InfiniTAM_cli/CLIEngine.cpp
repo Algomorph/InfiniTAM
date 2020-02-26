@@ -11,8 +11,8 @@ using namespace InputSource;
 using namespace ITMLib;
 
 
-void CLIEngine::Initialise(ImageSourceEngine *imageSource, IMUSourceEngine *imuSource, ITMMainEngine *mainEngine,
-	MemoryDeviceType deviceType)
+void CLIEngine::Initialise(ImageSourceEngine *imageSource, IMUSourceEngine *imuSource, MainEngine *mainEngine,
+                           MemoryDeviceType deviceType)
 {
 	this->imageSource = imageSource;
 	this->imuSource = imuSource;
@@ -25,7 +25,7 @@ void CLIEngine::Initialise(ImageSourceEngine *imageSource, IMUSourceEngine *imuS
 
 	inputRGBImage = new ITMUChar4Image(imageSource->getRGBImageSize(), true, allocateGPU);
 	inputRawDepthImage = new ITMShortImage(imageSource->getDepthImageSize(), true, allocateGPU);
-	inputIMUMeasurement = new ITMIMUMeasurement();
+	inputIMUMeasurement = new IMUMeasurement();
 
 #ifndef COMPILE_WITHOUT_CUDA
 	ORcudaSafeCall(cudaDeviceSynchronize());

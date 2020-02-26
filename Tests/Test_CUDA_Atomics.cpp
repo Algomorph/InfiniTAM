@@ -40,6 +40,6 @@ BOOST_AUTO_TEST_CASE(TestAtomicAddShort){
 }
 
 BOOST_AUTO_TEST_CASE(TestAtomicCASChar){
-	std::cout << "*** Atomic add test on short ***" << std::endl << std::endl;
+	std::cout << "*** Atomic CAS test on char ***" << std::endl << std::endl;
 	BOOST_REQUIRE(AtomicCASCharTest());
 }

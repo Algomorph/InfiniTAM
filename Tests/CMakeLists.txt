@@ -95,15 +95,17 @@ if (BUILD_TESTS)
     itm_add_test(NAME ImageMaskReader SOURCES Test_ImageMaskReader.cpp)
     itm_add_test(NAME WarpGradient_CPU_PVA SOURCES Test_WarpGradient_CPU_PVA.cpp Test_WarpGradient_Common.h)
     itm_add_test(NAME WarpGradient_CPU_VBH SOURCES Test_WarpGradient_CPU_VBH.cpp Test_WarpGradient_Common.h)
-    itm_add_test(NAME SceneSlicingPVA_CPU SOURCES Test_SceneSlicingPVA_CPU.cpp)
+    itm_add_test(NAME SceneSlicingPVA_CPU SOURCES Test_VoxelVolumeSlicingPVA_CPU.cpp)
     itm_add_test(NAME SurfaceTrackingAuxiliaryFunctions SOURCES Test_SurfaceTrackingAuxiliaryFunctions.cpp)
-    itm_add_test(NAME WarpScene SOURCES Test_WarpScene.cpp )
+    itm_add_test(NAME WarpVolume SOURCES Test_WarpVolume.cpp)
     itm_add_test(NAME FuseLifeIntoCanonical SOURCES Test_FuseLifeIntoCanonical.cpp)
     itm_add_test(NAME WarpGradient_PVA_to_VBH SOURCES Test_WarpGradient_PVA_to_VBH.cpp
                  WarpAdvancedTestingUtilities.h WarpAdvancedTestingUtilities.tpp WarpAdvancedTestingUtilities.cpp)
     itm_add_test(NAME Configuration SOURCES Test_Configuration.cpp)
     itm_add_test(NAME GeometryUtilities SOURCES Test_GeometryUtilities.cpp)
-    itm_add_test(NAME ExpandAllocation SOURCES Test_ExpandAllocation.cpp)
+    itm_add_test(NAME HashAllocationThreadSafety SOURCES Test_HashAllocationThreadSafety.cpp)
+    itm_add_test(NAME TwoSurfaceHashAllocation SOURCES Test_TwoSurfaceHashAllocation.cpp)
+    # itm_add_test(NAME ExpandedAllocation SOURCES Test_ExpandAllocation.cpp)
     itm_add_test(NAME Serialization SOURCES Test_Serialization.cpp)
 
     # *** tests that require CUDA
@@ -118,6 +120,7 @@ if (BUILD_TESTS)
         itm_add_test(NAME CUDA_Atomics SOURCES Test_CUDA_Atomics.cpp CUDAAtomicTesting.h
                      CUDAAtomicTesting.cu TemporaryCUDA_Atomics.h)
         itm_add_test(NAME SmoothWarpGradient SOURCES Test_SmoothWarpGradient_CPU_CUDA.cpp)
+        itm_add_test(NAME CUDASpatialHashReduction SOURCES Test_CUDASpatialHashReduction.cpp)
     endif()
 
     #######################################################
@@ -125,6 +128,7 @@ if (BUILD_TESTS)
     #######################################################
 
     file(GLOB_RECURSE TEST_DATA_FILES
+         "${CMAKE_CURRENT_SOURCE_DIR}/TestData/*.csv"
          "${CMAKE_CURRENT_SOURCE_DIR}/TestData/*.png"
          "${CMAKE_CURRENT_SOURCE_DIR}/TestData/*.pnm"
          "${CMAKE_CURRENT_SOURCE_DIR}/TestData/*.txt"

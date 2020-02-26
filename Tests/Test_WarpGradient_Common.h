@@ -23,19 +23,19 @@
 #include "TestUtils.h"
 
 #include "../ORUtils/MemoryDeviceType.h"
-#include "../ITMLib/ITMLibDefines.h"
+#include "../ITMLib/GlobalTemplateDefines.h"
 #include "../ITMLib/Utils/Configuration.h"
-#include "../ITMLib/Objects/Scene/ITMVoxelVolume.h"
-#include "../ITMLib/Engines/VolumeEditAndCopy/Interface/VolumeEditAndCopyEngineInterface.h"
-#include "../ITMLib/Engines/VolumeEditAndCopy/VolumeEditAndCopyEngineFactory.h"
-#include "../ITMLib/Engines/VolumeEditAndCopy/CPU/VolumeEditAndCopyEngine_CPU.h"
+#include "../ITMLib/Objects/Volume/VoxelVolume.h"
+#include "../ITMLib/Engines/EditAndCopy/Interface/EditAndCopyEngineInterface.h"
+#include "../ITMLib/Engines/EditAndCopy/EditAndCopyEngineFactory.h"
+#include "../ITMLib/Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 #include "../ITMLib/SurfaceTrackers/Interface/SurfaceTracker.h"
-#include "../ITMLib/Engines/Indexing/VBH/CPU/ITMIndexingEngine_CPU_VoxelBlockHash.h"
+#include "../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
 
 #ifndef COMPILE_WITHOUT_CUDA
-#include "../ITMLib/Engines/Indexing/VBH/CUDA/ITMIndexingEngine_CUDA_VoxelBlockHash.h"
-#include "../ITMLib/Engines/Indexing/Interface/ITMIndexingEngine.h"
-#include "../ITMLib/Engines/VolumeEditAndCopy/CUDA/VolumeEditAndCopyEngine_CUDA.h"
+#include "../ITMLib/Engines/Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
+#include "../ITMLib/Engines/Indexing/Interface/IndexingEngine.h"
+#include "../ITMLib/Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
 #endif
 
 using namespace ITMLib;
@@ -60,32 +60,33 @@ struct WarpGradientDataFixture {
 			settings(nullptr),
 			warp_field_data_term(nullptr), canonical_volume(nullptr), live_volume(nullptr),
 			pathToData("TestData/snoopy_result_fr16-17_partial_" + getIndexSuffix<TIndex>() + "/"),
-			indexParameters(Frame16And17Fixture::InitParams<TIndex>()) {
+			indexParameters(Frame16And17Fixture::InitParams<TIndex>()),
+			indexing_engine(IndexingEngine<TSDFVoxel, TIndex, TMemoryType>::Instance()){
 		configuration::load_default();
 		settings = &configuration::get();
 
 		BOOST_TEST_MESSAGE("setup fixture");
-		auto loadSdfVolume = [&](ITMVoxelVolume<ITMVoxel, TIndex>** scene, const std::string& pathSuffix) {
-			*scene = new ITMVoxelVolume<ITMVoxel, TIndex>(&configuration::get().general_voxel_volume_parameters,
+		auto loadSdfVolume = [&](VoxelVolume<TSDFVoxel, TIndex>** scene, const std::string& pathSuffix) {
+			*scene = new VoxelVolume<TSDFVoxel, TIndex>(&configuration::get().general_voxel_volume_parameters,
 			                                              settings->swapping_mode ==
 			                                              configuration::SWAPPINGMODE_ENABLED,
-			                                              TMemoryType,
-			                                              indexParameters);
+			                                            TMemoryType,
+			                                            indexParameters);
 			PrepareVoxelVolumeForLoading(*scene);
 			(*scene)->LoadFromDirectory(pathToData + pathSuffix);
 		};
-		auto loadWarpVolume = [&](ITMVoxelVolume<ITMWarp, TIndex>** scene, const std::string& pathSuffix) {
-			*scene = new ITMVoxelVolume<ITMWarp, TIndex>(&configuration::get().general_voxel_volume_parameters,
+		auto loadWarpVolume = [&](VoxelVolume<WarpVoxel, TIndex>** scene, const std::string& pathSuffix) {
+			*scene = new VoxelVolume<WarpVoxel, TIndex>(&configuration::get().general_voxel_volume_parameters,
 			                                             settings->swapping_mode ==
 			                                             configuration::SWAPPINGMODE_ENABLED,
-			                                             TMemoryType,
-			                                             indexParameters);
+			                                            TMemoryType,
+			                                            indexParameters);
 			PrepareVoxelVolumeForLoading(*scene);
 			(*scene)->LoadFromDirectory(pathToData + pathSuffix);
 		};
 		loadSdfVolume(&live_volume, "snoopy_partial_frame_17_");
 		loadSdfVolume(&canonical_volume, "snoopy_partial_frame_16_");
-		ITMIndexingEngine<ITMVoxel,TIndex,TMemoryType>::Instance().AllocateUsingOtherVolume(canonical_volume, live_volume);
+		IndexingEngine<TSDFVoxel,TIndex,TMemoryType>::Instance().AllocateUsingOtherVolume(canonical_volume, live_volume);
 		loadWarpVolume(&warp_field_data_term, "warp_field_0_data_");
 		loadWarpVolume(&warp_field_iter0, "warp_field_0_data_framewise_warps_");
 		loadWarpVolume(&warp_field_data_term_smoothed, "warp_field_0_smoothed_");
@@ -109,17 +110,18 @@ struct WarpGradientDataFixture {
 	}
 
 	configuration::Configuration* settings;
-	ITMVoxelVolume<ITMWarp, TIndex>* warp_field_data_term;
-	ITMVoxelVolume<ITMWarp, TIndex>* warp_field_data_term_smoothed;
-	ITMVoxelVolume<ITMWarp, TIndex>* warp_field_iter0;
-	ITMVoxelVolume<ITMWarp, TIndex>* warp_field_tikhonov_term;
-	ITMVoxelVolume<ITMWarp, TIndex>* warp_field_data_and_tikhonov_term;
-	ITMVoxelVolume<ITMWarp, TIndex>* warp_field_data_and_killing_term;
-	ITMVoxelVolume<ITMWarp, TIndex>* warp_field_data_and_level_set_term;
-	ITMVoxelVolume<ITMVoxel, TIndex>* canonical_volume;
-	ITMVoxelVolume<ITMVoxel, TIndex>* live_volume;
+	VoxelVolume<WarpVoxel, TIndex>* warp_field_data_term;
+	VoxelVolume<WarpVoxel, TIndex>* warp_field_data_term_smoothed;
+	VoxelVolume<WarpVoxel, TIndex>* warp_field_iter0;
+	VoxelVolume<WarpVoxel, TIndex>* warp_field_tikhonov_term;
+	VoxelVolume<WarpVoxel, TIndex>* warp_field_data_and_tikhonov_term;
+	VoxelVolume<WarpVoxel, TIndex>* warp_field_data_and_killing_term;
+	VoxelVolume<WarpVoxel, TIndex>* warp_field_data_and_level_set_term;
+	VoxelVolume<TSDFVoxel, TIndex>* canonical_volume;
+	VoxelVolume<TSDFVoxel, TIndex>* live_volume;
 	const std::string pathToData;
 	const typename TIndex::InitializationParameters indexParameters;
+	IndexingEngine<TSDFVoxel, TIndex, TMemoryType>& indexing_engine;
 };
 
 
@@ -140,8 +142,8 @@ void GenerateTestData() {
 	std::string output_directory =
 			sourceFolder + "Tests/TestData/snoopy_result_fr16-17_partial_" + GetIndexFolderSuffix<TIndex>() + "/";
 
-	ITMVoxelVolume<ITMVoxel, TIndex>* canonical_volume;
-	ITMVoxelVolume<ITMVoxel, TIndex>* live_volume;
+	VoxelVolume<TSDFVoxel, TIndex>* canonical_volume;
+	VoxelVolume<TSDFVoxel, TIndex>* live_volume;
 	loadVolume(&live_volume, output_directory + "snoopy_partial_frame_17_", TMemoryDeviceType, Frame16And17Fixture::InitParams<TIndex>());
 	loadVolume(&canonical_volume, output_directory + "snoopy_partial_frame_16_", TMemoryDeviceType,
 	           Frame16And17Fixture::InitParams<TIndex>());
@@ -166,44 +168,49 @@ void GenerateTestData() {
 	};
 
 
-	ITMVoxelVolume<ITMWarp, TIndex> warp_field(&configuration::get().general_voxel_volume_parameters,
+	VoxelVolume<WarpVoxel, TIndex> warp_field(&configuration::get().general_voxel_volume_parameters,
 	                                           configuration::get().swapping_mode ==
 	                                           configuration::SWAPPINGMODE_ENABLED,
-	                                           TMemoryDeviceType, Frame16And17Fixture::InitParams<TIndex>());
+	                                          TMemoryDeviceType, Frame16And17Fixture::InitParams<TIndex>());
 	warp_field.Reset();
+	IndexingEngine<TSDFVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().AllocateWarpVolumeFromOtherVolume(&warp_field, live_volume);
+	IndexingEngine<TSDFVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().AllocateFromOtherVolume(canonical_volume, live_volume);
 
-	SurfaceTracker<ITMVoxel, ITMWarp, TIndex, TMemoryDeviceType, TRACKER_SLAVCHEVA_DIAGNOSTIC> dataOnlyMotionTracker(
+	SurfaceTracker<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, TRACKER_SLAVCHEVA_DIAGNOSTIC> dataOnlyMotionTracker(
 			data_only_switches);
-	dataOnlyMotionTracker.CalculateWarpGradient(canonical_volume, live_volume, &warp_field);
+
+	dataOnlyMotionTracker.CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
 	warp_field.SaveToDirectory(output_directory + data_only_filename);
 
-	SurfaceTracker<ITMVoxel, ITMWarp, TIndex, TMemoryDeviceType, TRACKER_SLAVCHEVA_DIAGNOSTIC> dataSmoothedMotionTracker(
+	SurfaceTracker<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, TRACKER_SLAVCHEVA_DIAGNOSTIC> dataSmoothedMotionTracker(
 			data_smoothed_switches);
-	dataSmoothedMotionTracker.SmoothWarpGradient(canonical_volume, live_volume, &warp_field);
+	dataSmoothedMotionTracker.SmoothWarpGradient(&warp_field, canonical_volume, live_volume);
 	warp_field.SaveToDirectory(output_directory + data_smoothed_filename);
 
 	warp_field.Reset();
-	SurfaceTracker<ITMVoxel, ITMWarp, TIndex, TMemoryDeviceType, TRACKER_SLAVCHEVA_DIAGNOSTIC> completeMotionTracker(
+	IndexingEngine<TSDFVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().AllocateWarpVolumeFromOtherVolume(&warp_field, live_volume);
+	SurfaceTracker<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, TRACKER_SLAVCHEVA_DIAGNOSTIC> completeMotionTracker(
 			warp_complete_switches);
-	completeMotionTracker.CalculateWarpGradient(canonical_volume, live_volume, &warp_field);
-	completeMotionTracker.SmoothWarpGradient(canonical_volume, live_volume, &warp_field);
-	completeMotionTracker.UpdateWarps(canonical_volume, live_volume, &warp_field);
+	completeMotionTracker.CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
+	completeMotionTracker.SmoothWarpGradient(&warp_field, canonical_volume, live_volume);
+	completeMotionTracker.UpdateWarps(&warp_field, canonical_volume, live_volume);
 	warp_field.SaveToDirectory(output_directory + warp_complete_filename);
 
 	warp_field.Reset();
+	IndexingEngine<TSDFVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().AllocateWarpVolumeFromOtherVolume(&warp_field, live_volume);
 	warp_field.LoadFromDirectory(output_directory + data_only_filename);
 
-	dataOnlyMotionTracker.UpdateWarps(canonical_volume, live_volume, &warp_field);
+	dataOnlyMotionTracker.UpdateWarps(&warp_field, canonical_volume, live_volume);
 	warp_field.SaveToDirectory(output_directory + framewise_warps_filename);
 
 
 	for (auto& pair : configurationPairs) {
-		VolumeEditAndCopyEngineFactory::Instance<ITMWarp, TIndex, TMemoryDeviceType>().ResetScene(&warp_field);
+		EditAndCopyEngineFactory::Instance<WarpVoxel, TIndex, TMemoryDeviceType>().ResetVolume(&warp_field);
 		warp_field.LoadFromDirectory(output_directory + framewise_warps_filename);
 		std::string filename = std::get<0>(pair);
-		SurfaceTracker<ITMVoxel, ITMWarp, TIndex, TMemoryDeviceType, TRACKER_SLAVCHEVA_DIAGNOSTIC> tracker(
+		SurfaceTracker<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, TRACKER_SLAVCHEVA_DIAGNOSTIC> tracker(
 				std::get<1>(pair));
-		tracker.CalculateWarpGradient(canonical_volume, live_volume, &warp_field);
+		tracker.CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
 		warp_field.SaveToDirectory(output_directory + filename);
 	}
 

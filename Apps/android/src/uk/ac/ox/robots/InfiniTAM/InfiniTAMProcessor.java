@@ -44,13 +44,13 @@ class InfiniTAMProcessor implements Runnable
 		stopRequested = false;
 	}
 
-	public void attachVisualisation(InfiniTAMGLView _view, UpdatableTextView _fpsDisplay)
+	public void attachVisualization(InfiniTAMGLView _view, UpdatableTextView _fpsDisplay)
 	{
 		mView = _view;
 		mFPSDisplay = _fpsDisplay;
 	}
 
-	public void detachVisualisation(InfiniTAMGLView _view, UpdatableTextView _fpsDisplay)
+	public void detachVisualization(InfiniTAMGLView _view, UpdatableTextView _fpsDisplay)
 	{
 		mView = null;
 		mFPSDisplay = null;

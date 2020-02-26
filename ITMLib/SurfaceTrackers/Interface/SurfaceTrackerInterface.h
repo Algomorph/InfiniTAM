@@ -16,20 +16,20 @@
 #pragma once
 
 //local
-#include "../../Objects/Scene/ITMVoxelVolume.h"
-#include "../../Engines/Reconstruction/CPU/ITMSceneReconstructionEngine_CPU.h"
-#include "../../Utils/Visualization/ITMSceneSliceVisualizer2D.h"
-#include "../../Utils/FileIO/ITMSceneLogger.h"
-#include "../../Utils/ITMPrintHelpers.h"
-#include "../../Utils/ITMVoxelFlags.h"
+#include "../../Objects/Volume/VoxelVolume.h"
+#include "../../Engines/Reconstruction/CPU/SceneReconstructionEngine_CPU.h"
+#include "../../Utils/Visualization/SceneSliceVisualizer2D.h"
+#include "../../Utils/FileIO/VolumeSequenceRecorder.h"
+#include "../../Utils/CPPPrintHelpers.h"
+#include "../../Utils/VoxelFlags.h"
 #include "../Shared/SurfaceTrackerOptimizationParameters.h"
 #include "SlavchevaSufraceTracker.h"
 
-namespace  ITMLib{
+namespace ITMLib {
 /**
  * \brief Class responsible for tracking motion of rigid or dynamic surfaces within the scene
  * \tparam TVoxel TSDF voxel type
- * \tparam TWarp Warp vector voxel type
+ * \tparam TWarp Warping vector voxel type
  * \tparam TIndex Indexing structure type used for voxel volumes
  */
 template<typename TVoxel, typename TWarp, typename TIndex>
@@ -37,32 +37,27 @@ class SurfaceTrackerInterface {
 
 public:
 
-
-
-//TODO: reorder argument lists in both classes for consistency with reconstruction engine: warp field should come first,
-//  canonical (as the "target") should come last
-
-
 	virtual ~SurfaceTrackerInterface() = default;
 	virtual void
-	CalculateWarpGradient(ITMVoxelVolume<TVoxel, TIndex>* canonicalScene,
-	                      ITMVoxelVolume<TVoxel, TIndex>* liveScene,
-	                      ITMVoxelVolume<TWarp, TIndex>* warpField) = 0;
+	CalculateWarpGradient(VoxelVolume<TWarp, TIndex>* warpField,
+	                      VoxelVolume<TVoxel, TIndex>* canonicalScene,
+	                      VoxelVolume<TVoxel, TIndex>* liveScene) = 0;
 	virtual void SmoothWarpGradient(
-			ITMVoxelVolume<TVoxel, TIndex>* canonicalScene,
-			ITMVoxelVolume<TVoxel, TIndex>* liveScene,
-			ITMVoxelVolume<TWarp, TIndex>* warpField) = 0;
-	virtual float UpdateWarps(ITMVoxelVolume<TVoxel, TIndex>* canonicalScene,
-	                          ITMVoxelVolume<TVoxel, TIndex>* liveScene,
-	                          ITMVoxelVolume<TWarp, TIndex>* warpField) = 0;
-	virtual void ClearOutFramewiseWarp(ITMVoxelVolume<TWarp, TIndex>* warpField) = 0;
+			VoxelVolume<TWarp, TIndex>* warpField,
+			VoxelVolume<TVoxel, TIndex>* canonicalScene,
+			VoxelVolume<TVoxel, TIndex>* liveScene) = 0;
+	virtual float UpdateWarps(VoxelVolume<TWarp, TIndex>* warpField,
+	                          VoxelVolume<TVoxel, TIndex>* canonicalScene,
+	                          VoxelVolume<TVoxel, TIndex>* liveScene) = 0;
+	virtual void ClearOutFramewiseWarps(VoxelVolume<TWarp, TIndex>* warpField) = 0;
+	virtual void ClearOutCumulativeWarps(VoxelVolume<TWarp, TIndex>* warpField) = 0;
+	virtual void ClearOutWarpUpdates(VoxelVolume<TWarp, TIndex>* warpField) = 0;
 	virtual void AddFramewiseWarpToWarp(
-			ITMVoxelVolume<TWarp, TIndex>* warpField, bool clearFramewiseWarp) = 0;
-	virtual void ResetWarps(ITMVoxelVolume<TWarp, TIndex>* warpField) = 0;
+			VoxelVolume<TWarp, TIndex>* warpField, bool clearFramewiseWarp) = 0;
+
 
 
 };
-
 
 
 }//namespace ITMLib

@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "../ITMLib/Objects/Misc/ITMIMUMeasurement.h"
+#include "../ITMLib/Objects/Misc/IMUMeasurement.h"
 
 namespace InputSource {
 
@@ -12,7 +12,7 @@ private:
 	static const int BUF_SIZE = 2048;
 	char imuMask[BUF_SIZE];
 
-	ITMLib::ITMIMUMeasurement *cached_imu;
+	ITMLib::IMUMeasurement *cached_imu;
 
 	void loadIMUIntoCache();
 	int cachedFrameNo;
@@ -23,7 +23,7 @@ public:
 	~IMUSourceEngine() { }
 
 	bool hasMoreMeasurements(void);
-	void getMeasurement(ITMLib::ITMIMUMeasurement *imu);
+	void getMeasurement(ITMLib::IMUMeasurement *imu);
 };
 
 }

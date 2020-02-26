@@ -1,0 +1,451 @@
+// Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
+
+#include "VisualizationEngine_CUDA.h"
+#include "VisualizationHelpers_CUDA.h"
+
+using namespace ITMLib;
+
+inline dim3 getGridSize(dim3 taskSize, dim3 blockSize)
+{
+	return dim3((taskSize.x + blockSize.x - 1) / blockSize.x, (taskSize.y + blockSize.y - 1) / blockSize.y, (taskSize.z + blockSize.z - 1) / blockSize.z);
+}
+
+inline dim3 getGridSize(Vector2i taskSize, dim3 blockSize) { return getGridSize(dim3(taskSize.x, taskSize.y), blockSize); }
+
+template<class TVoxel, class TIndex>
+VisualizationEngine_CUDA<TVoxel, TIndex>::VisualizationEngine_CUDA()
+{
+	ORcudaSafeCall(cudaMalloc((void**)&noTotalPoints_device, sizeof(uint)));
+}
+
+template<class TVoxel, class TIndex>
+VisualizationEngine_CUDA<TVoxel, TIndex>::~VisualizationEngine_CUDA()
+{
+	ORcudaSafeCall(cudaFree(noTotalPoints_device));
+}
+
+template<class TVoxel>
+VisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::VisualizationEngine_CUDA()
+{
+	ORcudaSafeCall(cudaMalloc((void**)&renderingBlockList_device, sizeof(RenderingBlock) * MAX_RENDERING_BLOCKS));
+	ORcudaSafeCall(cudaMalloc((void**)&noTotalBlocks_device, sizeof(uint)));
+	ORcudaSafeCall(cudaMalloc((void**)&noTotalPoints_device, sizeof(uint)));
+	ORcudaSafeCall(cudaMalloc((void**)&visibleEntryCount_device, sizeof(uint)));
+}
+
+template<class TVoxel>
+VisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::~VisualizationEngine_CUDA() {
+	ORcudaSafeCall(cudaFree(noTotalPoints_device));
+	ORcudaSafeCall(cudaFree(noTotalBlocks_device));
+	ORcudaSafeCall(cudaFree(renderingBlockList_device));
+	ORcudaSafeCall(cudaFree(visibleEntryCount_device));
+}
+
+template<class TVoxel, class TIndex>
+void VisualizationEngine_CUDA<TVoxel, TIndex>::FindVisibleBlocks(VoxelVolume<TVoxel,TIndex> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *renderState) const
+{
+}
+
+template<class TVoxel>
+void VisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::FindVisibleBlocks(VoxelVolume<TVoxel,VoxelBlockHash> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *renderState) const
+{
+	const HashEntry *hashTable = scene->index.GetEntries();
+	int hashEntryCount = scene->index.hashEntryCount;
+	float voxelSize = scene->sceneParams->voxel_size;
+	Vector2i imgSize = renderState->renderingRangeImage->noDims;
+
+	Matrix4f M = pose->GetM();
+	Vector4f projParams = intrinsics->projectionParamsSimple.all;
+
+	ORcudaSafeCall(cudaMemset(visibleEntryCount_device, 0, sizeof(int)));
+
+	dim3 cudaBlockSizeAL(256, 1);
+	dim3 gridSizeAL((int)ceil((float)hashEntryCount / (float)cudaBlockSizeAL.x));
+	buildCompleteVisibleList_device << <gridSizeAL, cudaBlockSizeAL >> >(
+			hashTable, /*cacheStates, this->scene->useSwapping,*/ hashEntryCount,
+					scene->index.GetUtilizedBlockHashCodes(), visibleEntryCount_device, scene->index.GetBlockVisibilityTypes(), M, projParams,
+		imgSize, voxelSize);
+	ORcudaKernelCheck;
+
+	/*	if (this->scene->useSwapping)
+			{
+			reAllocateSwappedOutVoxelBlocks_device << <gridSizeAL, cudaBlockSizeAL >> >(voxelAllocationList, hashTable, hashEntryCount,
+			noAllocatedVoxelEntries_device, blockVisibilityTypes);
+			}*/
+	int visibleHashBlockCount_CPU;
+	ORcudaSafeCall(cudaMemcpy(&visibleHashBlockCount_CPU, visibleEntryCount_device, sizeof(int), cudaMemcpyDeviceToHost));
+	scene->index.SetUtilizedHashBlockCount(visibleHashBlockCount_CPU);
+}
+
+template<class TVoxel, class TIndex>
+int VisualizationEngine_CUDA<TVoxel, TIndex>::CountVisibleBlocks(const VoxelVolume<TVoxel,TIndex> *scene, const RenderState *renderState, int minBlockId, int maxBlockId) const
+{
+	return 1;
+}
+
+template<class TVoxel>
+int VisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::CountVisibleBlocks(const VoxelVolume<TVoxel,VoxelBlockHash> *scene, const RenderState *renderState, int minBlockId, int maxBlockId) const
+{
+	int visibleEntryCount = scene->index.GetUtilizedHashBlockCount();
+	const int *visibleEntryIDs_device = scene->index.GetUtilizedBlockHashCodes();
+
+	ORcudaSafeCall(cudaMemset(noTotalBlocks_device, 0, sizeof(uint)));
+
+	dim3 blockSize(256);
+	dim3 gridSize((int)ceil((float)visibleEntryCount / (float)blockSize.x));
+
+	const HashEntry *hashTable_device = scene->index.GetEntries();
+	countVisibleBlocks_device<<<gridSize,blockSize>>>(visibleEntryIDs_device, visibleEntryCount, hashTable_device, noTotalBlocks_device, minBlockId, maxBlockId);
+	ORcudaKernelCheck;
+
+	uint noTotalBlocks;
+	ORcudaSafeCall(cudaMemcpy(&noTotalBlocks, noTotalBlocks_device, sizeof(uint), cudaMemcpyDeviceToHost));
+
+	return noTotalBlocks;
+}
+
+template<class TVoxel, class TIndex>
+void VisualizationEngine_CUDA<TVoxel, TIndex>::CreateExpectedDepths(const VoxelVolume<TVoxel,TIndex> *scene, const ORUtils::SE3Pose *pose,
+                                                                    const Intrinsics *intrinsics, RenderState *renderState) const
+{
+	Vector2f *minmaxData = renderState->renderingRangeImage->GetData(MEMORYDEVICE_CUDA);
+
+	Vector2f init;
+	//TODO : this could be improved a bit...
+	init.x = 0.2f; init.y = 3.0f;
+	memsetKernel<Vector2f>(minmaxData, init, renderState->renderingRangeImage->dataSize);
+}
+
+template<class TVoxel>
+void VisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::CreateExpectedDepths(const VoxelVolume<TVoxel,VoxelBlockHash> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics,
+                                                                            RenderState *renderState) const
+{
+	float voxelSize = scene->sceneParams->voxel_size;
+
+	Vector2i imgSize = renderState->renderingRangeImage->noDims;
+	Vector2f *minmaxData = renderState->renderingRangeImage->GetData(MEMORYDEVICE_CUDA);
+
+	Vector2f init;
+	init.x = FAR_AWAY; init.y = VERY_CLOSE;
+	memsetKernel<Vector2f>(minmaxData, init, renderState->renderingRangeImage->dataSize);
+
+	//go through list of visible 8x8x8 blocks
+	{
+		const HashEntry *hash_entries = scene->index.GetEntries();
+		const int *visibleEntryIDs = scene->index.GetUtilizedBlockHashCodes();
+		int visibleEntryCount = scene->index.GetUtilizedHashBlockCount();
+		if (visibleEntryCount == 0) return;
+
+		dim3 blockSize(256);
+		dim3 gridSize((int)ceil((float)visibleEntryCount / (float)blockSize.x));
+		ORcudaSafeCall(cudaMemset(noTotalBlocks_device, 0, sizeof(uint)));
+		projectAndSplitBlocks_device << <gridSize, blockSize >> >(hash_entries, visibleEntryIDs, visibleEntryCount, pose->GetM(),
+			intrinsics->projectionParamsSimple.all, imgSize, voxelSize, renderingBlockList_device, noTotalBlocks_device);
+		ORcudaKernelCheck;
+	}
+
+	uint totalBlockCount;
+	ORcudaSafeCall(cudaMemcpy(&totalBlockCount, noTotalBlocks_device, sizeof(uint), cudaMemcpyDeviceToHost));
+	if (totalBlockCount == 0) return;
+	if (totalBlockCount > (unsigned)MAX_RENDERING_BLOCKS) totalBlockCount = MAX_RENDERING_BLOCKS;
+
+	// go through rendering blocks
+	{
+		// fill minmaxData
+		dim3 blockSize(16, 16);
+		dim3 gridSize((unsigned int)ceil((float)totalBlockCount / 4.0f), 4);
+		fillBlocks_device << <gridSize, blockSize >> >(totalBlockCount, renderingBlockList_device, imgSize, minmaxData);
+		ORcudaKernelCheck;
+	}
+}
+
+template<typename TIndex> static inline HashBlockVisibility* GetBlockVisibilityTypes(TIndex& index);
+template<> inline HashBlockVisibility* GetBlockVisibilityTypes<VoxelBlockHash>(VoxelBlockHash& index){
+	return index.GetBlockVisibilityTypes();
+}
+template<> inline HashBlockVisibility* GetBlockVisibilityTypes<PlainVoxelArray>(PlainVoxelArray& index){
+	return nullptr;
+}
+
+template <class TVoxel, class TIndex>
+static void GenericRaycast(VoxelVolume<TVoxel, TIndex> *scene, const Vector2i& imgSize, const Matrix4f& invM, const Vector4f& projParams, const RenderState *renderState, bool updateVisibleList)
+{
+	float voxelSize = scene->sceneParams->voxel_size;
+	float oneOverVoxelSize = 1.0f / voxelSize;
+
+	HashBlockVisibility* blockVisibilityTypes = GetBlockVisibilityTypes(scene->index);
+
+	dim3 cudaBlockSize(16, 12);
+	dim3 gridSize((int)ceil((float)imgSize.x / (float)cudaBlockSize.x), (int)ceil((float)imgSize.y / (float)cudaBlockSize.y));
+	if (blockVisibilityTypes != nullptr) genericRaycast_device<TVoxel, TIndex, true> << < gridSize, cudaBlockSize >> > (
+			renderState->raycastResult->GetData(MEMORYDEVICE_CUDA),
+			blockVisibilityTypes,
+			scene->localVBA.GetVoxelBlocks(),
+			scene->index.GetIndexData(),
+			imgSize,
+			invM,
+			InvertProjectionParams(projParams),
+			oneOverVoxelSize,
+			renderState->renderingRangeImage->GetData(MEMORYDEVICE_CUDA),
+			scene->sceneParams->narrow_band_half_width
+		);
+	else genericRaycast_device<TVoxel, TIndex, false> << <gridSize, cudaBlockSize >> >(
+			renderState->raycastResult->GetData(MEMORYDEVICE_CUDA),
+					nullptr,
+			scene->localVBA.GetVoxelBlocks(),
+			scene->index.GetIndexData(),
+			imgSize,
+			invM,
+			InvertProjectionParams(projParams),
+			oneOverVoxelSize,
+			renderState->renderingRangeImage->GetData(MEMORYDEVICE_CUDA),
+			scene->sceneParams->narrow_band_half_width
+		);
+	ORcudaKernelCheck;
+}
+
+template<class TVoxel, class TIndex>
+static void RenderImage_common(VoxelVolume<TVoxel, TIndex> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, const RenderState *renderState,
+                               ITMUChar4Image *outputImage, IVisualizationEngine::RenderImageType type, IVisualizationEngine::RenderRaycastSelection raycastType)
+{
+	Vector2i imgSize = outputImage->noDims;
+	Matrix4f invM = pose->GetInvM();
+
+	Vector4f *pointsRay;
+	if (raycastType == IVisualizationEngine::RENDER_FROM_OLD_RAYCAST) {
+		pointsRay = renderState->raycastResult->GetData(MEMORYDEVICE_CUDA);
+	} else if (raycastType == IVisualizationEngine::RENDER_FROM_OLD_FORWARDPROJ) {
+		pointsRay = renderState->forwardProjection->GetData(MEMORYDEVICE_CUDA);
+	} else {
+		GenericRaycast(scene, imgSize, invM, intrinsics->projectionParamsSimple.all, renderState, false);
+		pointsRay = renderState->raycastResult->GetData(MEMORYDEVICE_CUDA);
+	}
+
+	Vector3f lightSource = -Vector3f(invM.getColumn(2));
+
+	Vector4u *outRendering = outputImage->GetData(MEMORYDEVICE_CUDA);
+
+	dim3 cudaBlockSize(8, 8);
+	dim3 gridSize((int)ceil((float)imgSize.x / (float)cudaBlockSize.x), (int)ceil((float)imgSize.y / (float)cudaBlockSize.y));
+
+	if ((type == IVisualizationEngine::RENDER_COLOUR_FROM_VOLUME)&&
+	    (!TVoxel::hasColorInformation)) type = IVisualizationEngine::RENDER_SHADED_GREYSCALE;
+
+	switch (type) {
+	case IVisualizationEngine::RENDER_COLOUR_FROM_VOLUME:
+		renderColour_device<TVoxel, TIndex> <<<gridSize, cudaBlockSize>>>(outRendering, pointsRay, scene->localVBA.GetVoxelBlocks(),
+			scene->index.GetIndexData(), imgSize);
+		ORcudaKernelCheck;
+		break;
+	case IVisualizationEngine::RENDER_COLOUR_FROM_NORMAL:
+		renderColourFromNormal_device<TVoxel, TIndex> <<<gridSize, cudaBlockSize>>>(outRendering, pointsRay, scene->localVBA.GetVoxelBlocks(),
+			scene->index.GetIndexData(), imgSize, lightSource);
+		ORcudaKernelCheck;
+		break;
+	case IVisualizationEngine::RENDER_COLOUR_FROM_CONFIDENCE:
+		renderColourFromConfidence_device<TVoxel, TIndex> <<<gridSize, cudaBlockSize>>>(outRendering, pointsRay, scene->localVBA.GetVoxelBlocks(),
+			scene->index.GetIndexData(), imgSize, lightSource);
+		ORcudaKernelCheck;
+		break;
+	case IVisualizationEngine::RENDER_SHADED_GREYSCALE_IMAGENORMALS:
+		if (intrinsics->FocalLengthSignsDiffer())
+		{
+			renderGrey_ImageNormals_device<true> <<<gridSize, cudaBlockSize>>>(outRendering, pointsRay, scene->sceneParams->voxel_size,
+				imgSize, lightSource);
+		}
+		else
+		{
+			renderGrey_ImageNormals_device<false> <<<gridSize, cudaBlockSize>>>(outRendering, pointsRay, scene->sceneParams->voxel_size,
+				imgSize, lightSource);
+		}
+		ORcudaKernelCheck;
+		break;
+	case IVisualizationEngine::RENDER_SHADED_GREYSCALE:
+	default:
+		renderGrey_device<TVoxel, TIndex> <<<gridSize, cudaBlockSize>>>(outRendering, pointsRay, scene->localVBA.GetVoxelBlocks(),
+			scene->index.GetIndexData(), imgSize, lightSource);
+		ORcudaKernelCheck;
+		break;
+	}
+}
+
+template<class TVoxel, class TIndex>
+static void CreatePointCloud_common(VoxelVolume<TVoxel, TIndex> *scene, const View *view, CameraTrackingState *trackingState, RenderState *renderState,
+                                    bool skipPoints, uint *noTotalPoints_device)
+{
+	Vector2i imgSize = renderState->raycastResult->noDims;
+	Matrix4f invM = trackingState->pose_d->GetInvM() * view->calib.trafo_rgb_to_depth.calib;
+
+	GenericRaycast(scene, imgSize, invM, view->calib.intrinsics_rgb.projectionParamsSimple.all, renderState, true);
+	trackingState->pose_pointCloud->SetFrom(trackingState->pose_d);
+
+	ORcudaSafeCall(cudaMemsetAsync(noTotalPoints_device, 0, sizeof(uint)));
+
+	Vector3f lightSource = -Vector3f(invM.getColumn(2));
+	Vector4f *locations = trackingState->pointCloud->locations->GetData(MEMORYDEVICE_CUDA);
+	Vector4f *colours = trackingState->pointCloud->colours->GetData(MEMORYDEVICE_CUDA);
+	Vector4f *pointsRay = renderState->raycastResult->GetData(MEMORYDEVICE_CUDA);
+
+	dim3 cudaBlockSize(16, 16);
+	dim3 gridSize = getGridSize(imgSize, cudaBlockSize);
+	renderPointCloud_device<TVoxel, TIndex> << <gridSize, cudaBlockSize >> >(locations, colours, noTotalPoints_device,
+		pointsRay, scene->localVBA.GetVoxelBlocks(), scene->index.GetIndexData(), skipPoints, scene->sceneParams->voxel_size, imgSize, lightSource);
+	ORcudaKernelCheck;
+
+	ORcudaSafeCall(cudaMemcpy(&trackingState->pointCloud->noTotalPoints, noTotalPoints_device, sizeof(uint), cudaMemcpyDeviceToHost));
+}
+
+template<class TVoxel, class TIndex>
+void CreateICPMaps_common(VoxelVolume<TVoxel, TIndex> *scene, const View *view, CameraTrackingState *trackingState, RenderState *renderState)
+{
+	Vector2i imgSize = renderState->raycastResult->noDims;
+	Matrix4f invM = trackingState->pose_d->GetInvM();
+
+	GenericRaycast(scene, imgSize, invM, view->calib.intrinsics_d.projectionParamsSimple.all, renderState, true);
+	trackingState->pose_pointCloud->SetFrom(trackingState->pose_d);
+
+	Vector4f *pointsMap = trackingState->pointCloud->locations->GetData(MEMORYDEVICE_CUDA);
+	Vector4f *normalsMap = trackingState->pointCloud->colours->GetData(MEMORYDEVICE_CUDA);
+	Vector4f *pointsRay = renderState->raycastResult->GetData(MEMORYDEVICE_CUDA);
+	Vector3f lightSource = -Vector3f(invM.getColumn(2));
+
+	dim3 cudaBlockSize(16, 12);
+	dim3 gridSize((int)ceil((float)imgSize.x / (float)cudaBlockSize.x), (int)ceil((float)imgSize.y / (float)cudaBlockSize.y));
+
+	if (view->calib.intrinsics_d.FocalLengthSignsDiffer())
+	{
+		renderICP_device<true> <<<gridSize, cudaBlockSize>>>(pointsMap, normalsMap, pointsRay,
+			scene->sceneParams->voxel_size, imgSize, lightSource);
+	}
+	else
+	{
+		renderICP_device<false> <<<gridSize, cudaBlockSize>>>(pointsMap, normalsMap, pointsRay,
+			scene->sceneParams->voxel_size, imgSize, lightSource);
+	}
+	ORcudaKernelCheck;
+}
+
+template<class TVoxel, class TIndex>
+static void ForwardRender_common(const VoxelVolume<TVoxel, TIndex> *scene, const View *view, CameraTrackingState *trackingState, RenderState *renderState,
+                                 uint *noTotalPoints_device)
+{
+	Vector2i imgSize = renderState->raycastResult->noDims;
+	Matrix4f M = trackingState->pose_d->GetM();
+	Matrix4f invM = trackingState->pose_d->GetInvM();
+	const Vector4f& projParams = view->calib.intrinsics_d.projectionParamsSimple.all;
+
+	const Vector4f *pointsRay = renderState->raycastResult->GetData(MEMORYDEVICE_CUDA);
+	float *currentDepth = view->depth->GetData(MEMORYDEVICE_CUDA);
+	Vector4f *forwardProjection = renderState->forwardProjection->GetData(MEMORYDEVICE_CUDA);
+	int *fwdProjMissingPoints = renderState->fwdProjMissingPoints->GetData(MEMORYDEVICE_CUDA);
+	const Vector2f *minmaximg = renderState->renderingRangeImage->GetData(MEMORYDEVICE_CUDA);
+	float oneOverVoxelSize = 1.0f / scene->sceneParams->voxel_size;
+	float voxelSize = scene->sceneParams->voxel_size;
+	const TVoxel *voxelData = scene->localVBA.GetVoxelBlocks();
+	const typename TIndex::IndexData *voxelIndex = scene->index.GetIndexData();
+
+	renderState->forwardProjection->Clear();
+
+	dim3 blockSize, gridSize;
+
+	{ // forward projection
+		blockSize = dim3(16, 16);
+		gridSize = dim3((int)ceil((float)imgSize.x / (float)blockSize.x), (int)ceil((float)imgSize.y / (float)blockSize.y));
+
+		forwardProject_device << <gridSize, blockSize >> >(forwardProjection, pointsRay, imgSize, M, projParams, voxelSize);
+		ORcudaKernelCheck;
+	}
+
+	ORcudaSafeCall(cudaMemset(noTotalPoints_device, 0, sizeof(uint)));
+
+	{ // find missing points
+		blockSize = dim3(16, 16);
+		gridSize = dim3((int)ceil((float)imgSize.x / (float)blockSize.x), (int)ceil((float)imgSize.y / (float)blockSize.y));
+
+		findMissingPoints_device << <gridSize, blockSize >> >(fwdProjMissingPoints, noTotalPoints_device, minmaximg, 
+			forwardProjection, currentDepth, imgSize);
+		ORcudaKernelCheck;
+	}
+
+	ORcudaSafeCall(cudaMemcpy(&renderState->noFwdProjMissingPoints, noTotalPoints_device, sizeof(uint), cudaMemcpyDeviceToHost));
+
+	{ // render missing points
+		blockSize = dim3(256);
+		gridSize = dim3((int)ceil((float)renderState->noFwdProjMissingPoints / blockSize.x));
+
+		genericRaycastMissingPoints_device<TVoxel, TIndex, false> << <gridSize, blockSize >> >(forwardProjection, NULL, voxelData, voxelIndex, imgSize, invM,
+			InvertProjectionParams(projParams), oneOverVoxelSize, fwdProjMissingPoints, renderState->noFwdProjMissingPoints, minmaximg, scene->sceneParams->narrow_band_half_width);
+		ORcudaKernelCheck;
+	}
+}
+
+template<class TVoxel, class TIndex>
+void VisualizationEngine_CUDA<TVoxel, TIndex>::RenderImage(VoxelVolume<TVoxel,TIndex> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, const RenderState *renderState,
+                                                           ITMUChar4Image *outputImage, IVisualizationEngine::RenderImageType type,
+                                                           IVisualizationEngine::RenderRaycastSelection raycastType) const
+{
+	RenderImage_common(scene, pose, intrinsics, renderState, outputImage, type, raycastType);
+}
+
+template<class TVoxel>
+void VisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::RenderImage(VoxelVolume<TVoxel,VoxelBlockHash> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics,
+                                                                   const RenderState *renderState, ITMUChar4Image *outputImage, IVisualizationEngine::RenderImageType type,
+                                                                   IVisualizationEngine::RenderRaycastSelection raycastType) const
+{
+	RenderImage_common(scene, pose, intrinsics, renderState, outputImage, type, raycastType);
+}
+
+template<class TVoxel, class TIndex>
+void VisualizationEngine_CUDA<TVoxel, TIndex>::FindSurface(VoxelVolume<TVoxel,TIndex> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, const RenderState *renderState) const
+{
+	GenericRaycast(scene, renderState->raycastResult->noDims, pose->GetInvM(), intrinsics->projectionParamsSimple.all, renderState, false);
+}
+
+template<class TVoxel>
+void VisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::FindSurface(VoxelVolume<TVoxel,VoxelBlockHash> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics,
+                                                                   const RenderState *renderState) const
+{
+	GenericRaycast(scene, renderState->raycastResult->noDims, pose->GetInvM(), intrinsics->projectionParamsSimple.all, renderState, false);
+}
+
+template<class TVoxel, class TIndex>
+void VisualizationEngine_CUDA<TVoxel, TIndex>::CreatePointCloud(VoxelVolume<TVoxel,TIndex> *scene, const View *view, CameraTrackingState *trackingState, RenderState *renderState,
+                                                                bool skipPoints) const
+{
+	CreatePointCloud_common(scene, view, trackingState, renderState, skipPoints, noTotalPoints_device);
+}
+
+template<class TVoxel>
+void VisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::CreatePointCloud(VoxelVolume<TVoxel,VoxelBlockHash> *scene, const View *view, CameraTrackingState *trackingState,
+                                                                        RenderState *renderState, bool skipPoints) const
+{
+	CreatePointCloud_common(scene, view, trackingState, renderState, skipPoints, noTotalPoints_device);
+}
+
+template<class TVoxel, class TIndex>
+void VisualizationEngine_CUDA<TVoxel, TIndex>::CreateICPMaps(VoxelVolume<TVoxel,TIndex> *scene, const View *view, CameraTrackingState *trackingState,
+                                                             RenderState *renderState) const
+{
+	CreateICPMaps_common(scene, view, trackingState, renderState);
+}
+
+template<class TVoxel>
+void VisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::CreateICPMaps(VoxelVolume<TVoxel,VoxelBlockHash> *scene, const View *view, CameraTrackingState *trackingState,
+                                                                     RenderState *renderState) const
+{
+	CreateICPMaps_common(scene, view, trackingState, renderState);
+}
+
+template<class TVoxel, class TIndex>
+void VisualizationEngine_CUDA<TVoxel, TIndex>::ForwardRender(const VoxelVolume<TVoxel,TIndex> *scene, const View *view, CameraTrackingState *trackingState,
+                                                             RenderState *renderState) const
+{
+	ForwardRender_common(scene, view, trackingState, renderState, this->noTotalPoints_device);
+}
+
+template<class TVoxel>
+void VisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::ForwardRender(const VoxelVolume<TVoxel,VoxelBlockHash> *scene, const View *view, CameraTrackingState *trackingState,
+                                                                     RenderState *renderState) const
+{
+	ForwardRender_common(scene, view, trackingState, renderState, this->noTotalPoints_device);
+}

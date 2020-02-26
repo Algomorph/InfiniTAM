@@ -23,7 +23,7 @@ void IMUSourceEngine::loadIMUIntoCache(void)
 {
 	char str[2048]; FILE *f; bool success = false;
 
-	cached_imu = new ITMIMUMeasurement();
+	cached_imu = new IMUMeasurement();
 
 	sprintf(str, imuMask, currentFrameNo);
 	f = fopen(str, "r");
@@ -52,7 +52,7 @@ bool IMUSourceEngine::hasMoreMeasurements(void)
 	return (cached_imu != NULL);
 }
 
-void IMUSourceEngine::getMeasurement(ITMIMUMeasurement *imu)
+void IMUSourceEngine::getMeasurement(IMUMeasurement *imu)
 {
 	bool bUsedCache = false;
 	

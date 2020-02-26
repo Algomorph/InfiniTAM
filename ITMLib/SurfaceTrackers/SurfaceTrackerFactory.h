@@ -17,7 +17,6 @@
 
 #include "Interface/SurfaceTrackerInterface.h"
 #include "Interface/SurfaceTracker.h"
-#include "WarpGradientFunctors/WarpGradientFunctor_SlavchevaDiagnostic.h"
 
 #ifdef COMPILE_WITH_METAL
 #error "NOT CURRENTLY SUPPORTED"

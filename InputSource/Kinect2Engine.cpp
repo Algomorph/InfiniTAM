@@ -121,7 +121,7 @@ void Kinect2Engine::getImages(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthI
 	//}
 	//else memset(depth, 0, out->depth->dataSize * sizeof(short));
 
-	//out->inputImageType = ITMView::InfiniTAM_FLOAT_DEPTH_IMAGE;
+	//out->inputImageType = View::InfiniTAM_FLOAT_DEPTH_IMAGE;
 
 	return /*true*/;
 }

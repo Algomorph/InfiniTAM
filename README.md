@@ -7,7 +7,7 @@ This is an ongoing project that aims to integrate voxel hashing techniques for r
 1. SDF-2-SDF rigid alignment (InfiniTAM's camera trackers are used instead)
 2. Capability to run the optimization in-reverse, in order to forward-animate the more-complete canonical mesh.
 3. CUDA implementation in the master branch is currently slow, three times as slow as the OpenMP-parallelized CPU implementation: because I'm not using explicit lists of allocated voxel blocks and lots of CUDA blocks (where each CUDA block corresponds to a single spatial hash block) terminate almost as soon as they are started. Issue #194 fixes this, I'm currently testing it. The current speed-up is **x93** or so on the Snoopy Dataset (i.e. from 20 seconds/frame to 6 frames/second).
-4. Allocations for spatial hash blocks are not perfect, neither in optimization nor in algorithmic sense. See issue #195, I'm currently testing that code and weeding out the remaining bugs. 
+4. Allocations for spatial hash blocks are not perfect, neither in optimization nor in algorithmic sense. See issue #195, I'm currently testing that code and weeding out the remaining bugs.
 5. For a full list of issues & tasks, see the project boards, https://github.com/Algomorph/InfiniTAM/projects/1 and https://github.com/Algomorph/InfiniTAM/projects/2. There are both algorithmic and software engineering issues (the code I've started with is far from perfect).
 
 ## How do I try this code out?
@@ -27,7 +27,7 @@ Yes, after a looong break, I'm officially switching to try to do something with 
 
 ## Will I merge this back into InfiniTAM?
 
-TLDR: Maybe. 
+TLDR: Maybe.
 
 Originally, that was the plan. However, at the time of writing I'm exhausted from trying to stick to the open(for extension)-closed(for modification) principle. The code wasn't originally designed for dynamic-scene fusion, so some things really do need to change to make the new things more maintainable. I've already changed a lot of code from the original InfiniTAM codebase, IMHO, for the better.
 
