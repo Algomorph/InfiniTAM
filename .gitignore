@@ -4,6 +4,7 @@
 .cproject
 .project
 .vimrc
+venv/
 
 doxygen-html/
 cmake-build-*/
