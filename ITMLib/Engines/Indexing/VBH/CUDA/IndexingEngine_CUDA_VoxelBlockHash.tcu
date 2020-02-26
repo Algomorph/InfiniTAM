@@ -51,55 +51,52 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::AllocateUsingOth
 
 	assert(target_volume->index.hashEntryCount == source_volume->index.hashEntryCount);
 
-	target_volume->index.ClearHashEntryAllocationStates();
-	HashTableTraversalEngine<MEMORYDEVICE_CUDA>::TraverseUtilizedWithHashCode(
-			source_volume->index, marker_functor);
-
 	IndexingEngine<TVoxelTarget, VoxelBlockHash, MEMORYDEVICE_CUDA>& indexer =
 			IndexingEngine<TVoxelTarget, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance();
+	do {
+		marker_functor.resetFlagsAndCounters();
+		target_volume->index.ClearHashEntryAllocationStates();
+		HashTableTraversalEngine<MEMORYDEVICE_CUDA>::TraverseUtilizedWithHashCode(
+				source_volume->index, marker_functor);
+		//_DEBUG
+//	std::cout << "(1) target " << target_volume->index.GetUtilizedHashBlockCount() << " vs source "
+//	          << source_volume->index.GetUtilizedHashBlockCount() << std::endl;
 
+		indexer.AllocateHashEntriesUsingAllocationStateList(target_volume);
+		//_DEBUG
+//	std::cout << "(2) target " << target_volume->index.GetUtilizedHashBlockCount() << " vs source "
+//	          << source_volume->index.GetUtilizedHashBlockCount() << ", target + colliding count: " << target_volume->index.GetUtilizedHashBlockCount() + marker_functor.getCollidingBlockCount() << std::endl;
+		indexer.AllocateBlockList(target_volume, marker_functor.colliding_block_positions,
+		                          marker_functor.getCollidingBlockCount());
+	} while (marker_functor.encounteredUnresolvableCollision());
 	//_DEBUG
-	std::cout << "(1) target " << target_volume->index.GetUtilizedHashBlockCount() << " vs source "
-	          << source_volume->index.GetUtilizedHashBlockCount() << std::endl;
-
-	indexer.AllocateHashEntriesUsingAllocationStateList(target_volume);
-
-	//_DEBUG
-	std::cout << "(2) target " << target_volume->index.GetUtilizedHashBlockCount() << " vs source "
-	          << source_volume->index.GetUtilizedHashBlockCount() << ", target + colliding count: " << target_volume->index.GetUtilizedHashBlockCount() + marker_functor.get_colliding_block_count() << std::endl;
-
-	indexer.AllocateBlockList(target_volume, marker_functor.colliding_block_positions,
-	                          marker_functor.get_colliding_block_count());
-	//_DEBUG
-	std::cout << "(3) target " << target_volume->index.GetUtilizedHashBlockCount() << " vs source "
-	          << source_volume->index.GetUtilizedHashBlockCount() << std::endl;
-//
-	std::vector<Vector3s> source_positions = VolumeStatisticsCalculator<TVoxelSource,VoxelBlockHash,MEMORYDEVICE_CUDA>::Instance().GetUtilizedHashBlockPositions(source_volume);
-	std::unordered_set<Vector3s> source_position_set;
-	for(auto pos : source_positions){
-		if(source_position_set.find(pos) != source_position_set.end()){
-			DIEWITHEXCEPTION_REPORTLOCATION("DUPLICATE POSITION");
-		}else{
-			source_position_set.insert(pos);
-		}
-	}
-	std::vector<Vector3s> target_positions = VolumeStatisticsCalculator<TVoxelTarget,VoxelBlockHash,MEMORYDEVICE_CUDA>::Instance().GetUtilizedHashBlockPositions(target_volume);
-	std::unordered_set<Vector3s> target_position_set(target_positions.begin(),target_positions.end());
-
-	for(auto pos : source_positions){
-		if(target_position_set.find(pos) == target_position_set.end()){
-			std::cout << "Missing block pos: " << pos << std::endl;
-			std::vector<Vector3s> colliding_positions = ORUtils_MemoryBlock_to_std_vector(marker_functor.colliding_block_positions, MEMORYDEVICE_CUDA);
-			std::unordered_set<Vector3s> colliding_position_set(colliding_positions.begin(),colliding_positions.end());
-			HashEntry entry = target_volume->index.GetHashEntryAt(pos);
-			std::cout << "Entry when retrieved: " << entry << std::endl;
-			if(colliding_position_set.find(pos) == colliding_position_set.end()){
-				std::cout <<"Missing block NOT in collision set." << std::endl;
-			}
-			break;
-			//DIEWITHEXCEPTION_REPORTLOCATION("MISSING SOURCE BLOCK");
-		}
-	}
+//	std::cout << "(3) target " << target_volume->index.GetUtilizedHashBlockCount() << " vs source "
+//	          << source_volume->index.GetUtilizedHashBlockCount() << std::endl;
+//	std::vector<Vector3s> source_positions = VolumeStatisticsCalculator<TVoxelSource,VoxelBlockHash,MEMORYDEVICE_CUDA>::Instance().GetUtilizedHashBlockPositions(source_volume);
+//	std::unordered_set<Vector3s> source_position_set;
+//	for(auto pos : source_positions){
+//		if(source_position_set.find(pos) != source_position_set.end()){
+//			DIEWITHEXCEPTION_REPORTLOCATION("DUPLICATE POSITION");
+//		}else{
+//			source_position_set.insert(pos);
+//		}
+//	}
+//	std::vector<Vector3s> target_positions = VolumeStatisticsCalculator<TVoxelTarget,VoxelBlockHash,MEMORYDEVICE_CUDA>::Instance().GetUtilizedHashBlockPositions(target_volume);
+//	std::unordered_set<Vector3s> target_position_set(target_positions.begin(),target_positions.end());
+//	for(auto pos : source_positions){
+//		if(target_position_set.find(pos) == target_position_set.end()){
+//			std::cout << "Missing block pos: " << pos << std::endl;
+//			std::vector<Vector3s> colliding_positions = ORUtils_MemoryBlock_to_std_vector(marker_functor.colliding_block_positions, MEMORYDEVICE_CUDA);
+//			std::unordered_set<Vector3s> colliding_position_set(colliding_positions.begin(),colliding_positions.end());
+//			HashEntry entry = target_volume->index.GetHashEntryAt(pos);
+//			std::cout << "Entry when retrieved: " << entry << std::endl;
+//			if(colliding_position_set.find(pos) == colliding_position_set.end()){
+//				std::cout <<"Missing block NOT in collision set." << std::endl;
+//			}
+//			break;
+//			//DIEWITHEXCEPTION_REPORTLOCATION("MISSING SOURCE BLOCK");
+//		}
+//	}
 }
 
 template<typename TVoxel>
@@ -130,6 +127,9 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::AllocateUsingOth
 		VoxelVolume<TVoxelSource, VoxelBlockHash>* source_volume,
 		const Extent3D& source_bounds, const Vector3i& target_offset) {
 
+	IndexingEngine<TVoxelTarget, VoxelBlockHash, MEMORYDEVICE_CUDA>& target_indexer =
+			IndexingEngine<TVoxelTarget, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance();
+
 	HashEntry* target_hash_table = target_volume->index.GetEntries();
 	const HashEntry* source_hash_table = source_volume->index.GetEntries();
 
@@ -158,8 +158,8 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::AllocateUsingOth
 	ORUtils::MemoryBlock<Vector3s> colliding_block_positions(target_volume->index.hashEntryCount, MEMORYDEVICE_CUDA);
 	Vector3s* colliding_block_positions_device = colliding_block_positions.GetData(MEMORYDEVICE_CUDA);
 	ORUtils::MemoryBlock<int> collidng_block_count(1, true, true);
-	*collidng_block_count.GetData(MEMORYDEVICE_CPU) = 0;
-	collidng_block_count.UpdateDeviceFromHost();
+	ORUtils::MemoryBlock<bool> unresolvable_collision_encountered(1, true, true);
+
 
 	Vector6i inverse_offset_block_range;
 	ComputeVoxelBlockOffsetRange(-target_offset, inverse_offset_block_range);
@@ -168,17 +168,25 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::AllocateUsingOth
 	                (int) ceil((float) target_block_range.y / (float) cudaBlockSizeMK.x),
 	                (int) ceil((float) target_block_range.z / (float) cudaBlockSizeMK.x));
 
-	determineTargetAllocationForOffsetCopy_device << < gridSizeMK, cudaBlockSizeMK >> > (
-			target_hash_table, source_hash_table, hash_entry_allocation_states, hash_block_coordinates,
-					target_bounds, inverse_offset_block_range, target_block_range, min_target_block_coordinate,
-					colliding_block_positions_device, collidng_block_count.GetData(MEMORYDEVICE_CUDA));
-	ORcudaKernelCheck;
-	collidng_block_count.UpdateHostFromDevice();
-	IndexingEngine<TVoxelTarget, VoxelBlockHash, MEMORYDEVICE_CUDA>& indexer =
-			IndexingEngine<TVoxelTarget, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance();
-	indexer.AllocateHashEntriesUsingAllocationStateList(target_volume);
-	indexer.AllocateBlockList(target_volume, colliding_block_positions,
-	                          *collidng_block_count.GetData(MEMORYDEVICE_CPU));
+	do {
+		target_volume->index.ClearHashEntryAllocationStates();
+		*collidng_block_count.GetData(MEMORYDEVICE_CPU) = 0;
+		collidng_block_count.UpdateDeviceFromHost();
+		*unresolvable_collision_encountered.GetData(MEMORYDEVICE_CPU) = false;
+		unresolvable_collision_encountered.UpdateDeviceFromHost();
+
+		determineTargetAllocationForOffsetCopy_device << < gridSizeMK, cudaBlockSizeMK >> > (
+				target_hash_table, source_hash_table, hash_entry_allocation_states, hash_block_coordinates,
+						target_bounds, inverse_offset_block_range, target_block_range, min_target_block_coordinate,
+						colliding_block_positions_device, collidng_block_count.GetData(MEMORYDEVICE_CUDA),
+						unresolvable_collision_encountered.GetData(MEMORYDEVICE_CUDA));
+		ORcudaKernelCheck;
+		collidng_block_count.UpdateHostFromDevice();
+		target_indexer.AllocateHashEntriesUsingAllocationStateList(target_volume);
+		target_indexer.AllocateBlockList(target_volume, colliding_block_positions,
+		                                 *collidng_block_count.GetData(MEMORYDEVICE_CPU));
+		unresolvable_collision_encountered.UpdateHostFromDevice();
+	} while (*unresolvable_collision_encountered.GetData(MEMORYDEVICE_CPU));
 }
 
 template<typename TVoxel>

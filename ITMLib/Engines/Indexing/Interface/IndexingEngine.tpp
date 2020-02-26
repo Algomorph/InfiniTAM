@@ -27,17 +27,13 @@ using namespace ITMLib;
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateNearSurface(VoxelVolume<TVoxel, TIndex>* volume,
                                                                             const View* view,
-                                                                            const CameraTrackingState* tracking_state,
-                                                                            bool onlyUpdateVisibleList,
-                                                                            bool resetVisibleList) {}
+                                                                            const CameraTrackingState* tracking_state) {}
 
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateNearSurface(VoxelVolume<TVoxel, TIndex>* scene,
                                                                             const View* view,
-                                                                            const Matrix4f& depth_camera_matrix,
-                                                                            bool onlyUpdateVisibleList,
-                                                                            bool resetVisibleList) {}
+                                                                            const Matrix4f& depth_camera_matrix) {}
 
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>

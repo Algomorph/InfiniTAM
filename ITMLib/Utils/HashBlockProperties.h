@@ -25,11 +25,6 @@ enum HashEntryAllocationState : char {
 	NEEDS_NO_CHANGE = 0,
 	NEEDS_ALLOCATION_IN_ORDERED_LIST = 1,
 	NEEDS_ALLOCATION_IN_EXCESS_LIST = 2,
-	BEING_MODIFIED = 3,
-};
-enum HashBlockPtrFlag : int {
-	ENTRY_REMOVED = -1,
-	ENTRY_EMPTY_POSITIVE = -2,
-	ENTRY_EMPTY_NEGATIVE = -3
+	BEING_MODIFIED = 4
 };
 }//end namespace ITMLib

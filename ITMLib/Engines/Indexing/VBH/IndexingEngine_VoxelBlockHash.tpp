@@ -35,37 +35,29 @@ void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::Re
 
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, typename TDerivedClass>
 void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::AllocateNearSurface(
-		VoxelVolume<TVoxel, VoxelBlockHash>* volume, const View* view, const Matrix4f& depth_camera_matrix,
-		bool only_update_visible_list, bool resetVisibleList) {
-
-	if (resetVisibleList) volume->index.SetUtilizedHashBlockCount(0);
+		VoxelVolume<TVoxel, VoxelBlockHash>* volume, const View* view, const Matrix4f& depth_camera_matrix) {
 
 	float band_factor = configuration::get().general_voxel_volume_parameters.block_allocation_band_factor;
 	float surface_distance_cutoff = band_factor * volume->sceneParams->narrow_band_half_width;
 
-	//bool use_swapping = volume->globalCache != nullptr;
-
 	DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType> depth_based_allocator(
 			volume->index, volume->sceneParams, view, depth_camera_matrix, surface_distance_cutoff);
 
-	//reset visibility of formerly "visible" entries, if any
-	//static_cast<TDerivedClass*>(this)->SetVisibilityToVisibleAtPreviousFrameAndUnstreamed(volume);
-
-	volume->index.ClearHashEntryAllocationStates();
-
-	ImageTraversalEngine<float, TMemoryDeviceType>::TraverseWithPosition(view->depth, depth_based_allocator);
-	static_cast<TDerivedClass*>(this)->AllocateHashEntriesUsingAllocationStateList(volume);
-	static_cast<TDerivedClass*>(this)->AllocateBlockList(volume, depth_based_allocator.colliding_block_positions, depth_based_allocator.get_colliding_block_count());
-
-	//static_cast<TDerivedClass*>(this)->BuildUtilizedBlockListBasedOnVisibility(volume, view, depth_camera_matrix);
-	//if (use_swapping) ReallocateDeletedHashBlocks(volume);
+	do {
+		volume->index.ClearHashEntryAllocationStates();
+		depth_based_allocator.resetFlagsAndCounters();
+		ImageTraversalEngine<float, TMemoryDeviceType>::TraverseWithPosition(view->depth, depth_based_allocator);
+		static_cast<TDerivedClass*>(this)->AllocateHashEntriesUsingAllocationStateList(volume);
+		static_cast<TDerivedClass*>(this)->AllocateBlockList(volume, depth_based_allocator.colliding_block_positions,
+		                                                     depth_based_allocator.getCollidingBlockCount());
+		std::cout << volume->index.GetHashEntryAt(-2,6,29) << std::endl;
+	} while (depth_based_allocator.encounteredUnresolvableCollision());
 }
 
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, typename TDerivedClass>
 void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::AllocateNearSurface(
-		VoxelVolume<TVoxel, VoxelBlockHash>* scene, const View* view, const CameraTrackingState* trackingState,
-		bool onlyUpdateVisibleList, bool resetVisibleList) {
-	AllocateNearSurface(scene, view, trackingState->pose_d->GetM(), onlyUpdateVisibleList, resetVisibleList);
+		VoxelVolume<TVoxel, VoxelBlockHash>* scene, const View* view, const CameraTrackingState* trackingState) {
+	AllocateNearSurface(scene, view, trackingState->pose_d->GetM());
 }
 
 
@@ -80,14 +72,17 @@ void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::Al
 
 	TwoSurfaceBasedAllocationStateMarkerFunctor<TMemoryDeviceType> depth_based_allocator(
 			volume->index, volume->sceneParams, view, tracking_state, surface_distance_cutoff);
-	volume->index.ClearHashEntryAllocationStates();
 
-	TwoImageTraversalEngine<float, Vector4f, TMemoryDeviceType>::TraverseWithPosition(
-			view->depth, tracking_state->pointCloud->locations, depth_based_allocator);
-	static_cast<TDerivedClass*>(this)->AllocateHashEntriesUsingAllocationStateList(volume);
-	static_cast<TDerivedClass*>(this)->AllocateBlockList(volume, depth_based_allocator.colliding_block_positions, depth_based_allocator.get_colliding_block_count());
+	do {
+		volume->index.ClearHashEntryAllocationStates();
+		depth_based_allocator.resetFlagsAndCounters();
+		TwoImageTraversalEngine<float, Vector4f, TMemoryDeviceType>::TraverseWithPosition(
+				view->depth, tracking_state->pointCloud->locations, depth_based_allocator);
+		static_cast<TDerivedClass*>(this)->AllocateHashEntriesUsingAllocationStateList(volume);
+		static_cast<TDerivedClass*>(this)->AllocateBlockList(volume, depth_based_allocator.colliding_block_positions,
+		                                                     depth_based_allocator.getCollidingBlockCount());
+	} while (depth_based_allocator.encounteredUnresolvableCollision());
 }
-
 
 
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, typename TDerivedClass>
@@ -98,7 +93,6 @@ void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::Re
 	HashTableTraversalEngine<TMemoryDeviceType>::TraverseAllWithHashCode(volume->index, reallocation_functor);
 	volume->localVBA.lastFreeBlockId = GET_ATOMIC_VALUE_CPU(reallocation_functor.last_free_voxel_block_id);
 }
-
 
 
 } //namespace ITMLib

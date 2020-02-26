@@ -200,26 +200,6 @@ void allocateHashedVoxelBlocksUsingLists_device(
 	}
 }
 
-__global__ void buildHashAllocAndVisibleType_device(ITMLib::HashEntryAllocationState* hash_entry_states,
-                                                    Vector3s* block_coords, const float* depth,
-                                                    Matrix4f inverted_camera_pose,
-                                                    Vector4f inverted_camera_projection_parameters,
-                                                    float surface_cutoff_distance, Vector2i depth_image_size,
-                                                    float reciprocal_hash_block_size, HashEntry* hash_table,
-                                                    float near_clipping_distance, float far_clipping_distance,
-                                                    Vector3s* colliding_block_positions, int* colliding_block_count) {
-	int x = threadIdx.x + blockIdx.x * blockDim.x, y = threadIdx.y + blockIdx.y * blockDim.y;
-
-	if (x > depth_image_size.x - 1 || y > depth_image_size.y - 1) return;
-
-	findVoxelBlocksForRayNearSurface(hash_entry_states, block_coords, hash_table, x, y, depth,
-	                                 surface_cutoff_distance, inverted_camera_pose,
-	                                 inverted_camera_projection_parameters, reciprocal_hash_block_size,
-	                                 depth_image_size, near_clipping_distance, far_clipping_distance,
-	                                 colliding_block_positions, colliding_block_count);
-}
-
-
 __global__ void
 reAllocateSwappedOutVoxelBlocks_device(int* voxelAllocationList, HashEntry* hashTable, int hashEntryCount,
                                        AllocationTempData* allocData, /*int *countOfAllocatedOrderedEntries,*/
@@ -277,11 +257,9 @@ __global__ void buildHashAllocationTypeList_BlockList_device(
 
 	Vector3s desired_block_position = new_block_positions[new_block_index];
 
-	MarkAsNeedingAllocationIfNotFound(hash_entry_states, block_coordinates,
-	                                  desired_block_position, hash_table, colliding_block_positions,
-	                                  colliding_block_count);
+	MarkAsNeedingAllocationIfNotFound<false>(hash_entry_states, block_coordinates, desired_block_position, hash_table,
+	                                         colliding_block_positions, colliding_block_count);
 }
-
 
 
 __global__ void determineTargetAllocationForOffsetCopy_device(
@@ -294,7 +272,8 @@ __global__ void determineTargetAllocationForOffsetCopy_device(
 		const Vector3i target_block_range,
 		const Vector3i min_target_block_coordinate,
 		Vector3s* colliding_block_positions,
-		int* colliding_block_count) {
+		int* colliding_block_count,
+		bool* unresolvable_collision_encountered) {
 
 	int block_x = threadIdx.x + blockIdx.x * blockDim.x;
 	int block_y = threadIdx.y + blockIdx.y * blockDim.y;
@@ -311,11 +290,14 @@ __global__ void determineTargetAllocationForOffsetCopy_device(
 		return;
 	}
 
-	MarkAsNeedingAllocationIfNotFound(hash_entry_states, block_coordinates,
-	                                  target_block_position, target_hash_table, colliding_block_positions,
-	                                  colliding_block_count);
+	ThreadAllocationStatus status = MarkAsNeedingAllocationIfNotFound<true>(hash_entry_states, block_coordinates,
+	                                                                        target_block_position, target_hash_table,
+	                                                                        colliding_block_positions,
+	                                                                        colliding_block_count);
 
-
+	if(status == BEING_MODIFIED_BY_ANOTHER_THREAD){
+		*unresolvable_collision_encountered = true;
+	}
 }
 
 } // end anonymous namespace (CUDA kernels)

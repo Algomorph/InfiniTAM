@@ -26,7 +26,7 @@ void DepthFusionEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::UpdateVisibleL
 		VoxelVolume<TVoxel, TIndex>* scene, const View* view, const CameraTrackingState* trackingState,
 		const RenderState* renderState, bool resetVisibleList) {
 	IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::Instance()
-			.AllocateNearSurface(scene, view, trackingState, true, resetVisibleList);
+			.AllocateNearSurface(scene, view, trackingState);
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
@@ -45,7 +45,7 @@ void DepthFusionEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::GenerateTsdfVo
 		VoxelVolume<TVoxel, TIndex>* volume, const View* view, const CameraTrackingState* tracking_state) {
 	volume->Reset();
 	IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::Instance()
-			.AllocateNearSurface(volume, view, tracking_state, false, false);
+			.AllocateNearSurface(volume, view, tracking_state);
 	this->IntegrateDepthImageIntoTsdfVolume_Helper(volume, view, tracking_state->pose_d->GetM());
 }
 

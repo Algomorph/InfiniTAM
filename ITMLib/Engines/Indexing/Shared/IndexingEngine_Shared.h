@@ -30,9 +30,10 @@
 #include "../../../Utils/Geometry/IntersectionChecks.h"
 #include "../../../Utils/CLionCudaSyntax.h"
 
-
 #ifdef __CUDACC__
+
 #include "../../../Utils/CUDAUtils.h"
+
 #endif
 
 using namespace ITMLib;
@@ -62,16 +63,17 @@ struct AllocationCounters {
 };
 
 // mostly for debugging purposes
-enum AllocationStatus {
+enum ThreadAllocationStatus {
 	ALREADY_IN_ORDERED_LIST,
 	ALREADY_IN_EXCESS_LIST,
 	MARK_FOR_ALLOCATION_IN_ORDERED_LIST,
 	MARK_FOR_ALLOCATION_IN_EXCESS_LIST,
-	SET_TO_BE_ALLOCATED_BY_ANOTHER_THREAD,
+	TAKEN_CARE_OF_BY_ANOTHER_THREAD,
+	BEING_MODIFIED_BY_ANOTHER_THREAD,
 	LOGGED_HASH_COLLISION
 };
 _DEVICE_WHEN_AVAILABLE_
-inline const char* AllocationStatusToString(const AllocationStatus& status) {
+inline const char* ThreadAllocationStatusToString(const ThreadAllocationStatus& status) {
 	switch (status) {
 		case ALREADY_IN_ORDERED_LIST:
 			return "ALREADY_IN_ORDERED_LIST";
@@ -81,8 +83,10 @@ inline const char* AllocationStatusToString(const AllocationStatus& status) {
 			return "MARK_FOR_ALLOCATION_IN_ORDERED_LIST";
 		case MARK_FOR_ALLOCATION_IN_EXCESS_LIST:
 			return "MARK_FOR_ALLOCATION_IN_EXCESS_LIST";
-		case SET_TO_BE_ALLOCATED_BY_ANOTHER_THREAD:
-			return "SET_TO_BE_ALLOCATED_BY_ANOTHER_THREAD";
+		case TAKEN_CARE_OF_BY_ANOTHER_THREAD:
+			return "TAKEN_CARE_OF_BY_ANOTHER_THREAD";
+		case BEING_MODIFIED_BY_ANOTHER_THREAD:
+			return "BEING_MODIFIED_BY_ANOTHER_THREAD";
 		case LOGGED_HASH_COLLISION:
 			return "LOGGED_HASH_COLLISION";
 		default:
@@ -103,18 +107,23 @@ inline const char* AllocationStatusToString(const AllocationStatus& status) {
  * \param[in] collisionDetected set to true if a block with the same hashcode has already been marked for allocation ( a collision occured )
  * \return true if the block needs allocation, false otherwise
  */
+template<bool TEnableUnresolvableCollisionDetection>
 _DEVICE_WHEN_AVAILABLE_
-inline AllocationStatus MarkAsNeedingAllocationIfNotFound(ITMLib::HashEntryAllocationState* hash_entry_states,
-                                                          Vector3s* hash_block_coordinates, int& hash_code,
-                                                          const CONSTPTR(Vector3s)& desired_hash_block_position,
-                                                          const CONSTPTR(HashEntry)* hash_table,
-                                                          THREADPTR(Vector3s)* colliding_block_positions,
-                                                          ATOMIC_ARGUMENT(int) colliding_block_count) {
+inline ThreadAllocationStatus MarkAsNeedingAllocationIfNotFound(ITMLib::HashEntryAllocationState* hash_entry_states,
+                                                                Vector3s* hash_block_coordinates,
+                                                                const CONSTPTR(Vector3s)& desired_hash_block_position,
+                                                                const CONSTPTR(HashEntry)* hash_table,
+                                                                THREADPTR(Vector3s)* colliding_block_positions,
+                                                                ATOMIC_ARGUMENT(int) colliding_block_count) {
 
+	int hash_code = HashCodeFromBlockPosition(desired_hash_block_position);
 	HashEntry hash_entry = hash_table[hash_code];
 	//check if hash table contains entry
-	HashEntryAllocationState state = NEEDS_NO_CHANGE;
-	if (!(IS_EQUAL3(hash_entry.pos, desired_hash_block_position) && hash_entry.ptr >= -1)) {
+	HashEntryAllocationState new_allocation_state;
+
+	if (IS_EQUAL3(hash_entry.pos, desired_hash_block_position) && hash_entry.ptr >= -1) {
+		return ALREADY_IN_ORDERED_LIST;
+	} else {
 		if (hash_entry.ptr >= -1) {
 			//search excess list only if there is no room in ordered part
 			while (hash_entry.offset >= 1) {
@@ -125,74 +134,61 @@ inline AllocationStatus MarkAsNeedingAllocationIfNotFound(ITMLib::HashEntryAlloc
 					return ALREADY_IN_EXCESS_LIST;
 				}
 			}
-			state = ITMLib::NEEDS_ALLOCATION_IN_EXCESS_LIST;
+			new_allocation_state = ITMLib::NEEDS_ALLOCATION_IN_EXCESS_LIST;
 		} else {
-			state = ITMLib::NEEDS_ALLOCATION_IN_ORDERED_LIST;
+			new_allocation_state = ITMLib::NEEDS_ALLOCATION_IN_ORDERED_LIST;
 		}
-	} else {
-		return ALREADY_IN_ORDERED_LIST;
 	}
+
+	//_DEBUG
+//	printf("Trying to allocate block %d %d %d...\n", desired_hash_block_position.x, desired_hash_block_position.y,
+//	       desired_hash_block_position.z);
 
 //#define __CUDA_ARCH__
 
 #if defined(__CUDACC__) && defined(__CUDA_ARCH__)
-//	if (atomicCAS((char*) (hash_entry_states + hash_code), (char) ITMLib::NEEDS_NO_CHANGE, (char) state) != (char) ITMLib::NEEDS_NO_CHANGE) {
-//		int collision_index = ATOMIC_ADD(colliding_block_count, 1);
-//		colliding_block_positions[collision_index] = desired_hash_block_position;
-//		return LOGGED_HASH_COLLISION;
-//	} else {
-//		hash_block_coordinates[hash_code] = desired_hash_block_position;
-//		return (state == NEEDS_ALLOCATION_IN_EXCESS_LIST) ? MARK_FOR_ALLOCATION_IN_EXCESS_LIST : MARK_FOR_ALLOCATION_IN_ORDERED_LIST;
-//	}
-
-	volatile HashEntryAllocationState current_state;
-	if ((current_state = (HashEntryAllocationState) atomicCAS((char*) (hash_entry_states + hash_code),
-						  (char) ITMLib::NEEDS_NO_CHANGE,
-						  (char) ITMLib::BEING_MODIFIED)) != ITMLib::NEEDS_NO_CHANGE) {
-		//hash code already marked for allocation, possibly at different coordinates, cannot allocate
-//		while(current_state == ITMLib::BEING_MODIFIED){
-//			current_state = hash_entry_states[hash_code];
-//			__threadfence_system();
-//		}
-		if(current_state != ITMLib::BEING_MODIFIED && IS_EQUAL3(hash_block_coordinates[hash_code], desired_hash_block_position)){
-			return SET_TO_BE_ALLOCATED_BY_ANOTHER_THREAD;
-		} else {
-			int collision_index = ATOMIC_ADD(colliding_block_count, 1);
-			colliding_block_positions[collision_index] = desired_hash_block_position;
-			return LOGGED_HASH_COLLISION;
+	if (atomicCAS((char*) (hash_entry_states + hash_code),
+				  (char) ITMLib::NEEDS_NO_CHANGE,
+				  (char) new_allocation_state) != (char) ITMLib::NEEDS_NO_CHANGE) {
+		if (TEnableUnresolvableCollisionDetection) {
+			if (IS_EQUAL3(hash_block_coordinates[hash_code], desired_hash_block_position)) {
+				return BEING_MODIFIED_BY_ANOTHER_THREAD;
+			}
 		}
+		int collision_index = ATOMIC_ADD(colliding_block_count, 1);
+		colliding_block_positions[collision_index] = desired_hash_block_position;
+		return LOGGED_HASH_COLLISION;
 	} else {
 		hash_block_coordinates[hash_code] = desired_hash_block_position;
-//		__threadfence_system();
-		hash_entry_states[hash_code] = state;
-//		__threadfence_system();
-		return (state == NEEDS_ALLOCATION_IN_EXCESS_LIST) ? MARK_FOR_ALLOCATION_IN_EXCESS_LIST : MARK_FOR_ALLOCATION_IN_ORDERED_LIST;
+		return (new_allocation_state == NEEDS_ALLOCATION_IN_EXCESS_LIST) ? MARK_FOR_ALLOCATION_IN_EXCESS_LIST
+																		 : MARK_FOR_ALLOCATION_IN_ORDERED_LIST;
 	}
 #else
-	AllocationStatus status = SET_TO_BE_ALLOCATED_BY_ANOTHER_THREAD;
+	ThreadAllocationStatus status;
 #ifdef WITH_OPENMP
 #pragma omp critical
 #endif
 	{
 		if (hash_entry_states[hash_code] != ITMLib::NEEDS_NO_CHANGE) {
-			if (!IS_EQUAL3(hash_block_coordinates[hash_code], desired_hash_block_position)) {
+			if (IS_EQUAL3(hash_block_coordinates[hash_code], desired_hash_block_position)) {
+				status = TAKEN_CARE_OF_BY_ANOTHER_THREAD;
+			} else {
 				//hash code already marked for allocation, but at different coordinates, cannot allocate
 				int collision_index = ATOMIC_ADD(colliding_block_count, 1);
 				colliding_block_positions[collision_index] = desired_hash_block_position;
+				status = LOGGED_HASH_COLLISION;
 			}
-			status = LOGGED_HASH_COLLISION;
 		} else {
-			hash_entry_states[hash_code] = state;
+			hash_entry_states[hash_code] = new_allocation_state;
 			hash_block_coordinates[hash_code] = desired_hash_block_position;
-			status = (state == NEEDS_ALLOCATION_IN_EXCESS_LIST) ? MARK_FOR_ALLOCATION_IN_EXCESS_LIST
-			                                                    : MARK_FOR_ALLOCATION_IN_ORDERED_LIST;
+			status = (new_allocation_state == NEEDS_ALLOCATION_IN_EXCESS_LIST) ? MARK_FOR_ALLOCATION_IN_EXCESS_LIST
+			                                                                   : MARK_FOR_ALLOCATION_IN_ORDERED_LIST;
 		}
 	}
 	return status;
 #endif
 
 };
-
 
 _CPU_AND_GPU_CODE_
 inline bool
@@ -215,18 +211,7 @@ HashBlockAllocatedAtOffset(const CONSTPTR(ITMLib::VoxelBlockHash::IndexData)* ta
 	return allocated;
 }
 
-_DEVICE_WHEN_AVAILABLE_
-inline AllocationStatus MarkAsNeedingAllocationIfNotFound(ITMLib::HashEntryAllocationState* hash_entry_states,
-                                                          Vector3s* hash_block_coordinates,
-                                                          const CONSTPTR(Vector3s)& desired_hash_block_position,
-                                                          const CONSTPTR(HashEntry)* hash_table,
-                                                          THREADPTR(Vector3s)* colliding_block_positions,
-                                                          ATOMIC_ARGUMENT(int) colliding_block_count) {
-	int hash_code = HashCodeFromBlockPosition(desired_hash_block_position);
-	return MarkAsNeedingAllocationIfNotFound(hash_entry_states, hash_block_coordinates, hash_code,
-	                                         desired_hash_block_position, hash_table, colliding_block_positions,
-	                                         colliding_block_count);
-}
+
 
 
 
@@ -240,6 +225,7 @@ _CPU_AND_GPU_CODE_ inline int get_differing_component_count(Vector3s coord1, Vec
 _DEVICE_WHEN_AVAILABLE_ inline void
 markVoxelHashBlocksAlongSegment(ITMLib::HashEntryAllocationState* hash_entry_allocation_states,
                                 Vector3s* hash_block_coordinates,
+                                bool& unresolvable_collision_encountered,
                                 const CONSTPTR(HashEntry)* hash_table,
                                 const ITMLib::Segment& segment_in_hash_blocks,
                                 THREADPTR(Vector3s)* colliding_block_positions,
@@ -269,10 +255,15 @@ markVoxelHashBlocksAlongSegment(ITMLib::HashEntryAllocationState* hash_entry_all
 						if (SegmentIntersectsGridAlignedCube3D(segment_in_hash_blocks,
 						                                       TO_FLOAT3(potentially_missed_block_position),
 						                                       1.0f)) {
-							MarkAsNeedingAllocationIfNotFound(
+							if (MarkAsNeedingAllocationIfNotFound<true>(
 									hash_entry_allocation_states,
 									hash_block_coordinates, potentially_missed_block_position,
-									hash_table, colliding_block_positions, colliding_block_count);
+									hash_table, colliding_block_positions, colliding_block_count) ==
+							    BEING_MODIFIED_BY_ANOTHER_THREAD) {
+								//_DEBUG
+								//printf("uce: %d, %d, %d\n", potentially_missed_block_position.x, potentially_missed_block_position.y, potentially_missed_block_position.z);
+								unresolvable_collision_encountered = true;
+							}
 						}
 					}
 				}
@@ -284,29 +275,42 @@ markVoxelHashBlocksAlongSegment(ITMLib::HashEntryAllocationState* hash_entry_all
 					if (SegmentIntersectsGridAlignedCube3D(segment_in_hash_blocks,
 					                                       TO_FLOAT3(potentially_missed_block_position),
 					                                       1.0f)) {
-						MarkAsNeedingAllocationIfNotFound(
+						if (MarkAsNeedingAllocationIfNotFound<true>(
 								hash_entry_allocation_states,
 								hash_block_coordinates, potentially_missed_block_position,
-								hash_table, colliding_block_positions, colliding_block_count);
+								hash_table, colliding_block_positions, colliding_block_count) ==
+						    BEING_MODIFIED_BY_ANOTHER_THREAD) {
+							//_DEBUG
+							//printf("uce: %d, %d, %d\n", potentially_missed_block_position.x, potentially_missed_block_position.y, potentially_missed_block_position.z);
+							unresolvable_collision_encountered = true;
+						}
 					}
 					potentially_missed_block_position = current_block_position;
 					potentially_missed_block_position.values[iDirection] = previous_block_position.values[iDirection];
 					if (SegmentIntersectsGridAlignedCube3D(segment_in_hash_blocks,
 					                                       TO_FLOAT3(potentially_missed_block_position),
 					                                       1.0f)) {
-						MarkAsNeedingAllocationIfNotFound(
+						if (MarkAsNeedingAllocationIfNotFound<true>(
 								hash_entry_allocation_states,
 								hash_block_coordinates, potentially_missed_block_position,
-								hash_table, colliding_block_positions, colliding_block_count);
+								hash_table, colliding_block_positions, colliding_block_count) ==
+						    BEING_MODIFIED_BY_ANOTHER_THREAD) {
+							//_DEBUG
+							//printf("uce: %d, %d, %d\n", potentially_missed_block_position.x, potentially_missed_block_position.y, potentially_missed_block_position.z);
+							unresolvable_collision_encountered = true;
+						}
 					}
 				}
 			}
 		}
-		MarkAsNeedingAllocationIfNotFound(
+		if (MarkAsNeedingAllocationIfNotFound<true>(
 				hash_entry_allocation_states,
 				hash_block_coordinates, current_block_position,
-				hash_table, colliding_block_positions, colliding_block_count);
-
+				hash_table, colliding_block_positions, colliding_block_count) == BEING_MODIFIED_BY_ANOTHER_THREAD) {
+			//_DEBUG
+			//printf("uce: %d, %d, %d\n", current_block_position.x, current_block_position.y, current_block_position.z);
+			unresolvable_collision_encountered = true;
+		}
 		check_position += strideVector;
 		previous_block_position = current_block_position;
 	}
@@ -441,6 +445,7 @@ findHashBlockSegmentAlongCameraRayWithinRangeFromDepth(const float distance_from
 _DEVICE_WHEN_AVAILABLE_ inline void
 findVoxelBlocksForRayNearSurface(ITMLib::HashEntryAllocationState* hash_entry_allocation_states,
                                  Vector3s* hash_block_coordinates,
+                                 bool& unresolvable_collision_encountered,
                                  const CONSTPTR(HashEntry)* hash_table,
                                  const int x, const int y, const CONSTPTR(float)* depth, float surface_distance_cutoff,
                                  const Matrix4f inverted_camera_pose,
@@ -459,14 +464,13 @@ findVoxelBlocksForRayNearSurface(ITMLib::HashEntryAllocationState* hash_entry_al
 	// segment from start of the (truncated SDF) band, through the observed point, and to the opposite (occluded)
 	// end of the (truncated SDF) band (increased by backBandFactor), along the ray cast from the camera through the
 	// point, in camera space
-	ITMLib::Segment march_segment = findHashBlockSegmentAlongCameraRayWithinRangeFromDepth(surface_distance_cutoff,
-	                                                                                       depth_measure,
-	                                                                                       x, y, inverted_camera_pose,
-	                                                                                       inverted_projection_parameters,
-	                                                                                       one_over_hash_block_size);
+	ITMLib::Segment march_segment = findHashBlockSegmentAlongCameraRayWithinRangeFromDepth(
+			surface_distance_cutoff, depth_measure, x, y, inverted_camera_pose,
+			inverted_projection_parameters, one_over_hash_block_size);
 
 
 	markVoxelHashBlocksAlongSegment(hash_entry_allocation_states, hash_block_coordinates,
+	                                unresolvable_collision_encountered,
 	                                hash_table, march_segment, colliding_block_positions, colliding_block_count);
 }
 

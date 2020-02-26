@@ -131,7 +131,7 @@ static void SetUpTrackingState16(CameraTrackingState& tracking_state,
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_16(MEMORYDEVICE_CPU,
 	                                                     Frame16And17Fixture::InitParams<VoxelBlockHash>());
 	volume_VBH_16.Reset();
-	indexer_VBH.AllocateNearSurface(&volume_VBH_16, view_16);
+	indexer_VBH.AllocateNearSurface(&volume_VBH_16, view_16, <#initializer#>);
 	depth_fusion_engine_VBH->IntegrateDepthImageIntoTsdfVolume(&volume_VBH_16, view_16);
 	VisualizationEngine<TSDFVoxel, VoxelBlockHash>* visualization_engine =
 			VisualizationEngineFactory::MakeVisualizationEngine<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CPU);
@@ -164,7 +164,7 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_VBH_CPU_NearVsSpan, Frame16And17Fi
 
 	// *** allocate hash blocks ***
 	indexer.AllocateNearAndBetweenTwoSurfaces(&volume_VBH_17_Span, view_17, &tracking_state);
-	indexer.AllocateNearSurface(&volume_VBH_17_Near, view_17);
+	indexer.AllocateNearSurface(&volume_VBH_17_Near, view_17, <#initializer#>);
 
 	// *** integrate depth ***
 	depth_fusion_engine_VBH->IntegrateDepthImageIntoTsdfVolume(&volume_VBH_17_Span, view_17);

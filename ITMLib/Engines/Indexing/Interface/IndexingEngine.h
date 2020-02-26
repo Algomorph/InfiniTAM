@@ -53,10 +53,7 @@ public:
 	 */
 	virtual void
 	AllocateNearSurface(VoxelVolume<TVoxel, TIndex>* volume, const View* view,
-	                    const CameraTrackingState* tracking_state,
-	                    bool only_update_utilized_block_list, bool reset_utilized_block_list) = 0;
-
-	virtual void ResetUtilizedBlockList(VoxelVolume<TVoxel, TIndex>* volume) = 0;
+	                    const CameraTrackingState* tracking_state) = 0;
 
 	/**
 	 * \brief Given a view with a new depth image, compute the
@@ -70,10 +67,9 @@ public:
 	 * \param reset_utilized_block_list  [in] reset visibility list upon completion
 	 */
 	virtual void
-	AllocateNearSurface(VoxelVolume<TVoxel, TIndex>* volume, const View* view,
-	                    const Matrix4f& depth_camera_matrix = Matrix4f::Identity(),
-	                    bool only_update_utilized_block_list = false, bool reset_utilized_block_list = false) = 0;
+	AllocateNearSurface(VoxelVolume<TVoxel, TIndex>* volume, const View* view, const Matrix4f& depth_camera_matrix) = 0;
 
+	virtual void ResetUtilizedBlockList(VoxelVolume<TVoxel, TIndex>* volume) = 0;
 
 	/**
 	 * \brief Given a view with a new depth image and a previous (source) volume, ray trace to determine which blocks
@@ -133,12 +129,10 @@ public:
 	virtual void ResetUtilizedBlockList(VoxelVolume<TVoxel, TIndex>* volume) override;
 
 	virtual void AllocateNearSurface(VoxelVolume<TVoxel, TIndex>* volume, const View* view,
-	                                 const CameraTrackingState* tracking_state, bool onlyUpdateVisibleList,
-	                                 bool resetVisibleList) override;
+	                                 const CameraTrackingState* tracking_state) override;
 
 	virtual void AllocateNearSurface(VoxelVolume<TVoxel, TIndex>* volume, const View* view,
-	                                 const Matrix4f& depth_camera_matrix = Matrix4f::Identity(),
-	                                 bool only_update_visible_list = false, bool reset_visible_list = false) override;
+	                                 const Matrix4f& depth_camera_matrix = Matrix4f::Identity()) override;
 
 	virtual void AllocateNearAndBetweenTwoSurfaces(VoxelVolume<TVoxel, TIndex>* targetVolume,
 	                                               const View* view,

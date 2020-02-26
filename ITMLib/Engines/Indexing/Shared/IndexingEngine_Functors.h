@@ -39,7 +39,12 @@ public:
 			hash_block_coordinates(index.GetAllocationBlockCoordinates()),
 			hash_table(index.GetEntries()),
 
-			colliding_block_positions(index.hashEntryCount, TMemoryDeviceType) {
+			colliding_block_positions(index.hashEntryCount, TMemoryDeviceType),
+
+			unresolvable_collision_encountered(1, true, TMemoryDeviceType == MemoryDeviceType::MEMORYDEVICE_CUDA),
+			unresolvable_collision_encountered_device(unresolvable_collision_encountered.GetData(TMemoryDeviceType)) {
+		*unresolvable_collision_encountered.GetData(MEMORYDEVICE_CPU) = false;
+		unresolvable_collision_encountered.UpdateDeviceFromHost();
 		colliding_block_positions_device = colliding_block_positions.GetData(TMemoryDeviceType);
 		INITIALIZE_ATOMIC(int, colliding_block_count, 0);
 		depth_camera_pose.inv(inverted_camera_pose);
@@ -66,13 +71,25 @@ public:
 
 
 		markVoxelHashBlocksAlongSegment(hash_entry_allocation_states, hash_block_coordinates,
+		                                *unresolvable_collision_encountered_device,
 		                                hash_table, march_segment, colliding_block_positions_device,
 		                                colliding_block_count);
 	}
 
 	ORUtils::MemoryBlock<Vector3s> colliding_block_positions;
 
-	int get_colliding_block_count() {
+	void resetFlagsAndCounters() {
+		*unresolvable_collision_encountered.GetData(MEMORYDEVICE_CPU) = false;
+		unresolvable_collision_encountered.UpdateDeviceFromHost();
+		INITIALIZE_ATOMIC(int, colliding_block_count, 0);
+	}
+
+	bool encounteredUnresolvableCollision() {
+		unresolvable_collision_encountered.UpdateHostFromDevice();
+		return *unresolvable_collision_encountered.GetData(MEMORYDEVICE_CPU);
+	}
+
+	int getCollidingBlockCount() const {
 		return GET_ATOMIC_VALUE_CPU(colliding_block_count);
 	}
 
@@ -92,6 +109,9 @@ protected:
 
 	Vector3s* colliding_block_positions_device;
 	DECLARE_ATOMIC(int, colliding_block_count);
+
+	ORUtils::MemoryBlock<bool> unresolvable_collision_encountered;
+	bool* unresolvable_collision_encountered_device;
 };
 
 template<MemoryDeviceType TMemoryDeviceType>
@@ -139,7 +159,8 @@ public:
 			}
 		}
 
-		markVoxelHashBlocksAlongSegment(hash_entry_allocation_states, hash_block_coordinates, hash_table, march_segment,
+		markVoxelHashBlocksAlongSegment(hash_entry_allocation_states, hash_block_coordinates,
+		                                *unresolvable_collision_encountered_device, hash_table, march_segment,
 		                                colliding_block_positions_device, colliding_block_count);
 	}
 
@@ -159,6 +180,8 @@ protected:
 
 	using DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::colliding_block_positions_device;
 	using DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::colliding_block_count;
+
+	using DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::unresolvable_collision_encountered_device;
 };
 
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
@@ -198,14 +221,18 @@ public:
 			colliding_block_positions(target_index.hashEntryCount, TMemoryDeviceType),
 			hash_entry_allocation_states(target_index.GetHashEntryAllocationStates()),
 			hash_block_coordinates(target_index.GetAllocationBlockCoordinates()),
-			target_hash_table(target_index.GetEntries()) {
+			target_hash_table(target_index.GetEntries()),
+			unresolvable_collision_encountered(1, true, TMemoryDeviceType == MEMORYDEVICE_CUDA) {
 		colliding_block_positions_device = colliding_block_positions.GetData(TMemoryDeviceType);
+		*unresolvable_collision_encountered.GetData(MEMORYDEVICE_CPU) = false;
+		unresolvable_collision_encountered.UpdateDeviceFromHost();
+		unresolvable_collision_encountered_device = unresolvable_collision_encountered.GetData(TMemoryDeviceType);
 		INITIALIZE_ATOMIC(int, colliding_block_count, 0);
 	}
 
 	_DEVICE_WHEN_AVAILABLE_
 	void operator()(const HashEntry& source_hash_entry, const int& source_hash_code) {
-		AllocationStatus status = MarkAsNeedingAllocationIfNotFound(
+		ThreadAllocationStatus status = MarkAsNeedingAllocationIfNotFound<true>(
 				hash_entry_allocation_states,
 				hash_block_coordinates, source_hash_entry.pos,
 				target_hash_table, colliding_block_positions_device, colliding_block_count);
@@ -214,14 +241,27 @@ public:
 //		int hash_code = HashCodeFromBlockPosition(source_hash_entry.pos);
 //		printf("Pos: %d, %d, %d | bucket index: %d | allocation status: %s\n",
 //				source_hash_entry.pos.x, source_hash_entry.pos.y,
-//		       source_hash_entry.pos.z, hash_code, AllocationStatusToString(status));
-
+//		       source_hash_entry.pos.z, hash_code, ThreadAllocationStatusToString(status));
+		if (status == BEING_MODIFIED_BY_ANOTHER_THREAD) {
+			*unresolvable_collision_encountered_device = true;
+		}
 	}
 
 	ORUtils::MemoryBlock<Vector3s> colliding_block_positions;
 
-	int get_colliding_block_count() {
+	int getCollidingBlockCount() {
 		return GET_ATOMIC_VALUE_CPU(colliding_block_count);
+	}
+
+	void resetFlagsAndCounters() {
+		*this->unresolvable_collision_encountered.GetData(MEMORYDEVICE_CPU) = false;
+		unresolvable_collision_encountered.UpdateDeviceFromHost();
+		INITIALIZE_ATOMIC(int, colliding_block_count, 0);
+	}
+
+	bool encounteredUnresolvableCollision() {
+		unresolvable_collision_encountered.UpdateHostFromDevice();
+		return *this->unresolvable_collision_encountered.GetData(MEMORYDEVICE_CPU);
 	}
 
 protected:
@@ -230,6 +270,8 @@ protected:
 	HashEntryAllocationState* hash_entry_allocation_states;
 	Vector3s* hash_block_coordinates;
 	HashEntry* target_hash_table;
+	ORUtils::MemoryBlock<bool> unresolvable_collision_encountered;
+	bool* unresolvable_collision_encountered_device;
 };
 
 template<MemoryDeviceType TMemoryDeviceType>
@@ -244,15 +286,17 @@ public:
 		Vector3i block_position_voxels = source_hash_entry.pos.toInt() * VOXEL_BLOCK_SIZE;
 		if (IsHashBlockFullyInBounds(block_position_voxels, bounds) ||
 		    IsHashBlockPartiallyInBounds(block_position_voxels, bounds)) {
-			MarkAsNeedingAllocationIfNotFound(
+			ThreadAllocationStatus status = MarkAsNeedingAllocationIfNotFound<true>(
 					hash_entry_allocation_states,
 					hash_block_coordinates, source_hash_entry.pos,
 					target_hash_table, colliding_block_positions_device, colliding_block_count);
+			if (status == BEING_MODIFIED_BY_ANOTHER_THREAD) {
+				*unresolvable_collision_encountered_device = true;
+			}
 		}
 	}
 
 	using VolumeBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::colliding_block_positions;
-	using VolumeBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::get_colliding_block_count;
 
 protected:
 	const Extent3D bounds;
@@ -262,4 +306,5 @@ protected:
 	using VolumeBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::hash_entry_allocation_states;
 	using VolumeBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::hash_block_coordinates;
 	using VolumeBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::target_hash_table;
+	using VolumeBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::unresolvable_collision_encountered_device;
 };

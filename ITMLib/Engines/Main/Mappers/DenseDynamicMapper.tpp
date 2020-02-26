@@ -125,7 +125,7 @@ void DenseDynamicMapper<TVoxel, TWarp, TIndex>::ProcessInitialFrame(
 	PrintOperationStatus("Generating raw live frame from view...");
 	bench::StartTimer("GenerateRawLiveAndCanonicalVolumes");
 	live_volume->Reset();
-	indexing_engine->AllocateNearSurface(live_volume, view, tracking_state, false, false);
+	indexing_engine->AllocateNearSurface(live_volume, view, tracking_state);
 	depth_fusion_engine->IntegrateDepthImageIntoTsdfVolume(live_volume, view, tracking_state);
 	bench::StopTimer("GenerateRawLiveAndCanonicalVolumes");
 	//** prepare canonical for new frame

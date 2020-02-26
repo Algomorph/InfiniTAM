@@ -246,7 +246,7 @@ void buildSdfVolumeFromImage_NearSurfaceAllocation(VoxelVolume<TVoxel, TIndex>**
 
 	IndexingEngineInterface<TSDFVoxel, TIndex>* indexing_engine = IndexingEngineFactory::Build<TVoxel, TIndex>(
 			memory_device);
-	indexing_engine->AllocateNearSurface(*volume, *view, &tracking_state, false, false);
+	indexing_engine->AllocateNearSurface(*volume, *view, &tracking_state);
 	depth_fusion_engine->GenerateTsdfVolumeFromSurface(*volume, *view, &tracking_state);
 
 	delete depth_fusion_engine;
@@ -309,7 +309,7 @@ void buildSdfVolumeFromImage_SurfaceSpanAllocation(VoxelVolume<TVoxel, TIndex>**
 			DepthFusionEngineFactory
 			::Build<TVoxel, WarpVoxel, TIndex>(memory_device);
 
-	indexing_engine->AllocateNearSurface(*volume1,*view,&tracking_state, false, false);
+	indexing_engine->AllocateNearSurface(*volume1, *view, &tracking_state);
 	depth_fusion_engine->IntegrateDepthImageIntoTsdfVolume(*volume1, *view, &tracking_state);
 
 	VisualizationEngine<TSDFVoxel, TIndex>* visualization_engine =
