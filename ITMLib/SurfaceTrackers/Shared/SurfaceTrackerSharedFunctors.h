@@ -70,10 +70,8 @@ struct WarpUpdateFunctor {
 		                                           warp_voxel.gradient1 : warp_voxel.gradient0);
 
 		warp_voxel.warp_update = warp_update + momentum_weight * warp_voxel.warp_update;
-		//warp_voxel.framewise_warp += warp_voxel.warp_update;
 
 		// update stats
-		//float framewise_warp_length = ORUtils::length(warp_voxel.framewise_warp);
 		float warp_update_length = ORUtils::length(warp_update);
 
 #if !defined(__CUDACC__) && !defined(WITH_OPENMP)
@@ -92,23 +90,17 @@ struct WarpUpdateFunctor {
 #endif
 	}
 
-//	float GetMaxFramewiseWarpLength(){
-//		return GET_ATOMIC_VALUE_CPU(max_framewise_warp_length);
-//	}
 	float GetMaxWarpUpdateLength() {
 		return GET_ATOMIC_VALUE_CPU(max_warp_update_length);
 	}
 
-//	Vector3i max_framewise_warp_position;
 	Vector3i max_warp_update_position;
 
 	_DEVICE_WHEN_AVAILABLE_
 	void PrintWarp() {
 #if !defined(__CUDACC__) && !defined(WITH_OPENMP)
-		std::cout << ITMLib::green << "Max warp: [" << max_framewise_warp_length << " at " << max_framewise_warp_position
-				  << "] Max update: [" << max_warp_update_length << " at " << max_warp_update_position << "]."
-				  << ITMLib::reset
-				  << std::endl;
+		std::cout << ITMLib::green << " Max update: [" << max_warp_update_length << " at " << max_warp_update_position << "]."
+				  << ITMLib::reset<< std::endl;
 #else
 #endif
 	}
