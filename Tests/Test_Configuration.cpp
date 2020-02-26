@@ -32,7 +32,7 @@ using namespace ITMLib::configuration;
 
 configuration::Configuration generate_default_snoopy_configuration();
 
-//#define SAVE_TEST_DATA
+//#define GENERATE_TEST_DATA
 #ifdef _MSC_VER
 #define SOURCE_DIRECTORY "../../../"
 #else
@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(ConfigurationTest) {
 			      "TestData/frame_depth_%%06i.png",
 			      "TestData/frame_mask_%%06i.png",
 			      ""),
-			AutomaticRunSettings(50, 16, true),
+			AutomaticRunSettings(50, 16, true, true, true),
 			NonRigidTrackingParameters(ITMLib::TRACKER_SLAVCHEVA_DIAGNOSTIC, 300, 0.0002f, 0.4f),
 			true,
 			false,
@@ -70,6 +70,7 @@ BOOST_AUTO_TEST_CASE(ConfigurationTest) {
 			true,
 			true,
 			true,
+			false,
 			configuration::FAILUREMODE_RELOCALIZE,
 			configuration::SWAPPINGMODE_ENABLED,
 			configuration::LIBMODE_BASIC,
@@ -77,7 +78,7 @@ BOOST_AUTO_TEST_CASE(ConfigurationTest) {
 			configuration::VERBOSITY_SILENT,
 			"type=rgb,levels=rrbb"
 	);
-#ifdef SAVE_TEST_DATA
+#ifdef GENERATE_TEST_DATA
 	std::cout << "Saving test data..." << std::endl;
 	configuration::Configuration default_snoopy_configuration = generate_default_snoopy_configuration();
 	configuration::save_configuration_to_json_file(SOURCE_DIRECTORY "Files/infinitam_snoopy_config.json", default_snoopy_configuration);
@@ -156,7 +157,7 @@ configuration::Configuration generate_default_snoopy_configuration(){
 			      "<CONFIGURATION_DIRECTORY>/frames/depth_%06i.png",
 			      "<CONFIGURATION_DIRECTORY>/frames/omask_%06i.png",
 			      ""),
-			AutomaticRunSettings(50, 16, false),
+			AutomaticRunSettings(50, 16, false, false, false),
 			NonRigidTrackingParameters(
 					ITMLib::TRACKER_SLAVCHEVA_OPTIMIZED,
 					300,
@@ -168,6 +169,7 @@ configuration::Configuration generate_default_snoopy_configuration(){
 			false,
 			false,
 			false,
+			true,
 			configuration::FAILUREMODE_IGNORE,
 			configuration::SWAPPINGMODE_DISABLED,
 			configuration::LIBMODE_DYNAMIC,

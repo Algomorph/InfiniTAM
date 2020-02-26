@@ -117,6 +117,8 @@
     "automatic_run_settings": {
         "number_of_frames_to_process": 50,
         "index_of_frame_to_start_at": 16,
+        "load_volume_before_processing": true,
+        "save_volumes_after_processing": true,
         "exit_after_automatic_processing": true
     },
     "non_rigid_tracking_parameters": {
@@ -131,6 +133,7 @@
     "use_approximate_raycast": true,
     "use_threshold_filter": true,
     "use_bilateral_filter": true,
+    "enable_rigid_tracking": false,
     "behavior_on_failure": "relocalize",
     "swapping_mode": "enabled",
     "library_mode": "basic",

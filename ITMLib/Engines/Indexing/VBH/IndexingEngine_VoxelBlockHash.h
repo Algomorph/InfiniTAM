@@ -35,7 +35,7 @@ public:
 
 	void AllocateNearSurface(
 			VoxelVolume <TVoxel, VoxelBlockHash>* volume, const View* view,
-			const Matrix4f& depth_camera_matrix) override;
+			const Matrix4f& depth_camera_matrix = Matrix4f::Identity()) override;
 
 	void AllocateNearSurface(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const View* view,
 	                         const CameraTrackingState* tracking_state) override;

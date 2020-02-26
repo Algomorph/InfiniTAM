@@ -237,11 +237,6 @@ public:
 				hash_block_coordinates, source_hash_entry.pos,
 				target_hash_table, colliding_block_positions_device, colliding_block_count);
 
-		//_DEBUG
-//		int hash_code = HashCodeFromBlockPosition(source_hash_entry.pos);
-//		printf("Pos: %d, %d, %d | bucket index: %d | allocation status: %s\n",
-//				source_hash_entry.pos.x, source_hash_entry.pos.y,
-//		       source_hash_entry.pos.z, hash_code, ThreadAllocationStatusToString(status));
 		if (status == BEING_MODIFIED_BY_ANOTHER_THREAD) {
 			*unresolvable_collision_encountered_device = true;
 		}

@@ -67,7 +67,7 @@ public:
 	 * \param reset_utilized_block_list  [in] reset visibility list upon completion
 	 */
 	virtual void
-	AllocateNearSurface(VoxelVolume<TVoxel, TIndex>* volume, const View* view, const Matrix4f& depth_camera_matrix) = 0;
+	AllocateNearSurface(VoxelVolume<TVoxel, TIndex>* volume, const View* view, const Matrix4f& depth_camera_matrix = Matrix4f::Identity()) = 0;
 
 	virtual void ResetUtilizedBlockList(VoxelVolume<TVoxel, TIndex>* volume) = 0;
 

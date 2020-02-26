@@ -5,7 +5,7 @@
         "far_clipping_distance": 3,
         "narrow_band_half_width": 0.0399999991,
         "max_integration_weight": 100,
-        "stop_integration_at_max_weight": true,
+        "stop_integration_at_max_weight": false,
         "block_allocation_band_factor": 1
     },
     "general_surfel_volume_parameters": {
@@ -117,6 +117,8 @@
     "automatic_run_settings": {
         "number_of_frames_to_process": 50,
         "index_of_frame_to_start_at": 16,
+        "load_volume_before_processing": false,
+        "save_volumes_after_processing": false,
         "exit_after_automatic_processing": false
     },
     "non_rigid_tracking_parameters": {
@@ -131,6 +133,7 @@
     "use_approximate_raycast": false,
     "use_threshold_filter": false,
     "use_bilateral_filter": false,
+    "enable_rigid_tracking": true,
     "behavior_on_failure": "ignore",
     "swapping_mode": "disabled",
     "library_mode": "dynamic",

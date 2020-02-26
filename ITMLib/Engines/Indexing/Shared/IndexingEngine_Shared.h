@@ -140,12 +140,6 @@ inline ThreadAllocationStatus MarkAsNeedingAllocationIfNotFound(ITMLib::HashEntr
 		}
 	}
 
-	//_DEBUG
-//	printf("Trying to allocate block %d %d %d...\n", desired_hash_block_position.x, desired_hash_block_position.y,
-//	       desired_hash_block_position.z);
-
-//#define __CUDA_ARCH__
-
 #if defined(__CUDACC__) && defined(__CUDA_ARCH__)
 	if (atomicCAS((char*) (hash_entry_states + hash_code),
 				  (char) ITMLib::NEEDS_NO_CHANGE,
@@ -260,8 +254,6 @@ markVoxelHashBlocksAlongSegment(ITMLib::HashEntryAllocationState* hash_entry_all
 									hash_block_coordinates, potentially_missed_block_position,
 									hash_table, colliding_block_positions, colliding_block_count) ==
 							    BEING_MODIFIED_BY_ANOTHER_THREAD) {
-								//_DEBUG
-								//printf("uce: %d, %d, %d\n", potentially_missed_block_position.x, potentially_missed_block_position.y, potentially_missed_block_position.z);
 								unresolvable_collision_encountered = true;
 							}
 						}
@@ -280,8 +272,6 @@ markVoxelHashBlocksAlongSegment(ITMLib::HashEntryAllocationState* hash_entry_all
 								hash_block_coordinates, potentially_missed_block_position,
 								hash_table, colliding_block_positions, colliding_block_count) ==
 						    BEING_MODIFIED_BY_ANOTHER_THREAD) {
-							//_DEBUG
-							//printf("uce: %d, %d, %d\n", potentially_missed_block_position.x, potentially_missed_block_position.y, potentially_missed_block_position.z);
 							unresolvable_collision_encountered = true;
 						}
 					}
@@ -295,8 +285,6 @@ markVoxelHashBlocksAlongSegment(ITMLib::HashEntryAllocationState* hash_entry_all
 								hash_block_coordinates, potentially_missed_block_position,
 								hash_table, colliding_block_positions, colliding_block_count) ==
 						    BEING_MODIFIED_BY_ANOTHER_THREAD) {
-							//_DEBUG
-							//printf("uce: %d, %d, %d\n", potentially_missed_block_position.x, potentially_missed_block_position.y, potentially_missed_block_position.z);
 							unresolvable_collision_encountered = true;
 						}
 					}
@@ -307,8 +295,6 @@ markVoxelHashBlocksAlongSegment(ITMLib::HashEntryAllocationState* hash_entry_all
 				hash_entry_allocation_states,
 				hash_block_coordinates, current_block_position,
 				hash_table, colliding_block_positions, colliding_block_count) == BEING_MODIFIED_BY_ANOTHER_THREAD) {
-			//_DEBUG
-			//printf("uce: %d, %d, %d\n", current_block_position.x, current_block_position.y, current_block_position.z);
 			unresolvable_collision_encountered = true;
 		}
 		check_position += strideVector;

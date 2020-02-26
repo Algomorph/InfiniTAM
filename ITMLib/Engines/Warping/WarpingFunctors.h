@@ -76,7 +76,7 @@ struct TrilinearInterpolationFunctor {
 
 		bool printResult = useFocusCoordinates && warpAndDestinationVoxelPosition == focusCoordinates;
 
-		Vector3f warpVector = ITMLib::WarpVoxelStaticFunctor<TWarp, TWarpType>::GetWarp(warp);
+		Vector3f warpVector = ITMLib::WarpAccessStaticFunctor<TWarp, TWarpType>::GetWarp(warp);
 
 		if (ORUtils::length(warpVector) < 1e-5f) {
 			int vmIndex;

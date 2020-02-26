@@ -77,12 +77,12 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_VBH_CPU_CUDA_NearSurface, Frame16A
 	// CPU
 	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>& indexer_CPU =
 			IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance();
-	indexer_CPU.AllocateNearSurface(&volume_VBH_17_CPU, view_17_CPU, <#initializer#>);
+	indexer_CPU.AllocateNearSurface(&volume_VBH_17_CPU, view_17_CPU);
 
 	// CUDA
 	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>& indexer_CUDA =
 			IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance();
-	indexer_CUDA.AllocateNearSurface(&volume_VBH_17_CUDA, view_17_CUDA, <#initializer#>);
+	indexer_CUDA.AllocateNearSurface(&volume_VBH_17_CUDA, view_17_CUDA);
 
 
 // *** compare allocation consistency before depth integration ***
@@ -154,8 +154,8 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_VBH_CPU_CUDA_SurfaceSpan, Frame16A
 		VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_16_CUDA(MEMORYDEVICE_CUDA, InitParams<VoxelBlockHash>());
 		volume_VBH_16_CUDA.Reset();
 
-		indexer_CPU.AllocateNearSurface(&volume_VBH_16_CPU, view_16_CPU, <#initializer#>);
-		indexer_CUDA.AllocateNearSurface(&volume_VBH_16_CUDA, view_16_CUDA, <#initializer#>);
+		indexer_CPU.AllocateNearSurface(&volume_VBH_16_CPU, view_16_CPU);
+		indexer_CUDA.AllocateNearSurface(&volume_VBH_16_CUDA, view_16_CUDA);
 		
 		depth_fusion_engine_VBH_CPU->IntegrateDepthImageIntoTsdfVolume(&volume_VBH_16_CPU, view_16_CPU);
 		depth_fusion_engine_VBH_CUDA->IntegrateDepthImageIntoTsdfVolume(&volume_VBH_16_CUDA, view_16_CUDA);

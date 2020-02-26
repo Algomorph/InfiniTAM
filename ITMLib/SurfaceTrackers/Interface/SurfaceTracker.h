@@ -18,13 +18,14 @@
 #include "SurfaceTrackerInterface.h"
 #include "../WarpGradientFunctors/WarpGradientFunctor.h"
 #include "../../Utils/Configuration.h"
+#include "../../Utils/WarpType.h"
 
 namespace ITMLib {
 
 
-template<typename TTSDFVoxel, typename TWarpVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType, GradientFunctorType TGradientFunctorType>
+template<typename T_TSDF_Voxel, typename TWarpVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType, GradientFunctorType TGradientFunctorType>
 class SurfaceTracker :
-		public SurfaceTrackerInterface<TTSDFVoxel, TWarpVoxel, TIndex>, public SlavchevaSurfaceTracker {
+		public SurfaceTrackerInterface<T_TSDF_Voxel, TWarpVoxel, TIndex>, public SlavchevaSurfaceTracker {
 public:
 	using SlavchevaSurfaceTracker::SlavchevaSurfaceTracker;
 	virtual ~SurfaceTracker() = default;
@@ -35,18 +36,24 @@ public:
 	bool const histograms_enabled = false;
 #endif
 
-	void ClearOutFramewiseWarp(VoxelVolume <TWarpVoxel, TIndex>* warp_field) override;
+	void ClearOutFramewiseWarps(VoxelVolume <TWarpVoxel, TIndex>* warp_field) override;
+	void ClearOutCumulativeWarps(VoxelVolume <TWarpVoxel, TIndex>* warp_field) override;
+	void ClearOutWarpUpdates(VoxelVolume <TWarpVoxel, TIndex>* warp_field) override;
+
 	void AddFramewiseWarpToWarp(
 			VoxelVolume <TWarpVoxel, TIndex>* warp_field, bool clear_framewise_warps) override;
-	void CalculateWarpGradient(VoxelVolume <TWarpVoxel, TIndex>* warp_field, VoxelVolume <TTSDFVoxel, TIndex>* canonical_volume,
-	                           VoxelVolume <TTSDFVoxel, TIndex>* live_volume) override;
+	void CalculateWarpGradient(VoxelVolume <TWarpVoxel, TIndex>* warp_field, VoxelVolume <T_TSDF_Voxel, TIndex>* canonical_volume,
+	                           VoxelVolume <T_TSDF_Voxel, TIndex>* live_volume) override;
 	void SmoothWarpGradient(VoxelVolume <TWarpVoxel, TIndex>* warp_field,
-	                        VoxelVolume <TTSDFVoxel, TIndex>* canonical_volume,
-	                        VoxelVolume <TTSDFVoxel, TIndex>* live_volume) override;
+	                        VoxelVolume <T_TSDF_Voxel, TIndex>* canonical_volume,
+	                        VoxelVolume <T_TSDF_Voxel, TIndex>* live_volume) override;
 	float UpdateWarps(VoxelVolume <TWarpVoxel, TIndex>* warp_field,
-	                  VoxelVolume <TTSDFVoxel, TIndex>* canonical_volume,
-	                  VoxelVolume <TTSDFVoxel, TIndex>* live_volume) override;
-	void ResetWarps(VoxelVolume <TWarpVoxel, TIndex>* warp_field) override;
+	                  VoxelVolume <T_TSDF_Voxel, TIndex>* canonical_volume,
+	                  VoxelVolume <T_TSDF_Voxel, TIndex>* live_volume) override;
+
+private:
+	template<WarpType TWarpType>
+	void ClearOutWarps(VoxelVolume <TWarpVoxel, TIndex>* warp_field);
 };
 
 

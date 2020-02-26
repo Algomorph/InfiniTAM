@@ -181,12 +181,12 @@ BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_DataTermOnly_CUDA) {
 
 BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_DataAndTikhonov_CUDA) {
 	SlavchevaSurfaceTracker::Switches switches(true, false, true, false, false);
-	GenericWarpTest<MEMORYDEVICE_CUDA>(switches, 5, TEST_SUCCESSIVE_ITERATIONS, 3e-5);
+	GenericWarpTest<MEMORYDEVICE_CUDA>(switches, 5, TEST_SUCCESSIVE_ITERATIONS, 1e-5);
 }
 
 BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_DataAndTikhonovAndSobolevSmoothing_CUDA) {
 	SlavchevaSurfaceTracker::Switches switches(true, false, true, false, true);
-	GenericWarpTest<MEMORYDEVICE_CUDA>(switches, 5, TEST_SUCCESSIVE_ITERATIONS, 1e-5);
+	GenericWarpTest<MEMORYDEVICE_CUDA>(switches, 3, TEST_SUCCESSIVE_ITERATIONS, 1e-5);
 }
 
 BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_DataAndTikhonovAndSobolevSmoothing_Fusion_CUDA) {

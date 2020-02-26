@@ -50,7 +50,6 @@ void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::Al
 		static_cast<TDerivedClass*>(this)->AllocateHashEntriesUsingAllocationStateList(volume);
 		static_cast<TDerivedClass*>(this)->AllocateBlockList(volume, depth_based_allocator.colliding_block_positions,
 		                                                     depth_based_allocator.getCollidingBlockCount());
-		std::cout << volume->index.GetHashEntryAt(-2,6,29) << std::endl;
 	} while (depth_based_allocator.encounteredUnresolvableCollision());
 }
 
