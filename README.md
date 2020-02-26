@@ -4,11 +4,10 @@ This is an ongoing project that aims to integrate voxel hashing techniques for r
 
 ## What details are currently missing that I know of, and what are some known issues?
 
-1. SDF-2-SDF rigid alignment (InfiniTAM's camera trackers are used instead)
-2. Capability to run the optimization in-reverse, in order to forward-animate the more-complete canonical mesh.
-3. CUDA implementation in the master branch is currently slow, three times as slow as the OpenMP-parallelized CPU implementation: because I'm not using explicit lists of allocated voxel blocks and lots of CUDA blocks (where each CUDA block corresponds to a single spatial hash block) terminate almost as soon as they are started. Issue #194 fixes this, I'm currently testing it. The current speed-up is **x93** or so on the Snoopy Dataset (i.e. from 20 seconds/frame to 6 frames/second).
-4. Allocations for spatial hash blocks are not perfect, neither in optimization nor in algorithmic sense. See issue #195, I'm currently testing that code and weeding out the remaining bugs.
-5. For a full list of issues & tasks, see the project boards, https://github.com/Algomorph/InfiniTAM/projects/1 and https://github.com/Algomorph/InfiniTAM/projects/2. There are both algorithmic and software engineering issues (the code I've started with is far from perfect).
+1. SDF-2-SDF rigid alignment is not yet implemented (InfiniTAM's camera trackers are used instead)
+2. Capability to run the optimization in-reverse, in order to forward-animate the more-complete canonical mesh, is currently missing.
+3. For the voxel-block-hash (super-fast) indexing, after about 70 frames of the Snoopy sequence, there aren't enough hash blocks any more as allowed by the current settings, and the program crashes. I'm currently investigating how to clean up the hash blocks after every N frames to combat this.
+4. For a full list of issues & tasks, see the project boards, https://github.com/Algomorph/InfiniTAM/projects/1 and https://github.com/Algomorph/InfiniTAM/projects/2. There are both algorithmic and software engineering issues (the code I've started with is far from perfect).
 
 ## How do I try this code out?
 
