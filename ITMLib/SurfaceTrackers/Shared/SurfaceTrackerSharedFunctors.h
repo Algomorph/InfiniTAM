@@ -52,7 +52,6 @@ struct WarpUpdateFunctor {
 	WarpUpdateFunctor(float learningRate, float momentumWeight, bool gradientSmoothingEnabled) :
 			gradient_weight(learningRate * (1.0f - momentumWeight)), momentum_weight(momentumWeight),
 			gradient_smoothing_enabled(gradientSmoothingEnabled),
-			//max_framewise_warp_position(0),
 			max_warp_update_position(0) {
 		INITIALIZE_ATOMIC(float, max_framewise_warp_length, 0.0f);
 		INITIALIZE_ATOMIC(float, max_warp_update_length, 0.0f);
@@ -76,16 +75,11 @@ struct WarpUpdateFunctor {
 
 #if !defined(__CUDACC__) && !defined(WITH_OPENMP)
 		//single-threaded CPU version (for debugging max warp_voxel position)
-//		if (framewise_warp_length > max_framewise_warp_length.load()) {
-//			max_framewise_warp_length.store(framewise_warp_length);
-//			max_framewise_warp_position = position;
-//		}
 		if (warp_update_length > max_warp_update_length.load()) {
 			max_warp_update_length.store(warp_update_length);
 			max_warp_update_position = position;
 		}
 #else
-		//ATOMIC_MAX(max_framewise_warp_length, framewise_warp_length);
 		ATOMIC_MAX(max_warp_update_length, warp_update_length);
 #endif
 	}
