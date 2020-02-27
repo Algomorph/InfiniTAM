@@ -26,6 +26,7 @@
 #endif
 
 #include "../../../Engines/Traversal/Interface/HashTableTraversal.h"
+#include "../../../Engines/Reduction/Interface/VolumeReduction.h"
 #include "../../../../ORUtils/PlatformIndependentAtomics.h"
 #include "../../../../ORUtils/PlatformIndependence.h"
 #include "../../Configuration.h"
@@ -39,9 +40,7 @@
 
 using namespace ITMLib;
 
-
-
-// region =========================================== VECTOR/GRADIENT FIELD MIN/MEAN/MAX ===============================
+// region =========================================== ATOMIC VECTOR/GRADIENT FIELD MIN/MEAN/MAX ========================
 
 template<typename TVoxel, Statistic TStatistic, WarpType TWarpType>
 struct HandleVectorLengthAggregate;
@@ -197,8 +196,32 @@ struct ComputeWarpLengthStatisticFunctor<true, TVoxel, TIndex, TDeviceType, TSta
 };
 
 //endregion
+// region =========================================== REDUCTION VECTOR/GRADIENT FIELD MIN/MEAN/MAX ========================
 
-// region =========================================== VECTOR/GRADIENT FIELD REDUCTION MIN/MAX ==========================
+template<typename TVoxel, ITMLib::WarpType TWarpType>
+struct RetreiveWarpLengthFunctor;
+
+template<typename TVoxel>
+struct RetreiveWarpLengthFunctor<TVoxel, ITMLib::WARP_UPDATE>{
+public:
+	_CPU_AND_GPU_CODE_
+	inline static float retrieve(const TVoxel& voxel){
+		return ORUtils::length(voxel.warp_update);
+	}
+};
+
+template<typename TVoxel, typename TIndex, ITMLib::WarpType TWarpType, ITMLib::Statistic TStatistic>
+struct ReduceWarpLengthStatisticFunctor;
+
+template<typename TVoxel, typename TIndex>
+struct ReduceWarpLengthStatisticFunctor<TVoxel, TIndex, ITMLib::WARP_UPDATE, ITMLib::MAXIMUM>{
+public:
+	_CPU_AND_GPU_CODE_
+	inline static const ReductionResult<float, TIndex>& reduce(
+			const ReductionResult<float, TIndex>& item1, const ReductionResult<float, TIndex>& item2){
+		return (item1.value > item2.value) ? item1 : item2;
+	}
+};
 
 // endregion
 //region ============================================ COUNT VOXELS WITH SPECIFIC SDF VALUE =============================

@@ -53,6 +53,8 @@ public:
 	double ComputeWarpUpdateMin(VoxelVolume <TVoxel, TIndex>* volume) override;
 	double ComputeWarpUpdateMax(VoxelVolume <TVoxel, TIndex>* volume) override;
 	double ComputeWarpUpdateMean(VoxelVolume <TVoxel, TIndex>* volume) override;
+
+	void ComputeWarpUpdateMaxAndPosition(float& value, Vector3i& position, const VoxelVolume<TVoxel,TIndex>* volume);
 	
 	double ComputeFramewiseWarpMin(VoxelVolume <TVoxel, TIndex>* volume) override;
 	double ComputeFramewiseWarpMax(VoxelVolume <TVoxel, TIndex>* volume) override;

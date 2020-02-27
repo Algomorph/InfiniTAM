@@ -16,6 +16,7 @@
 #pragma once
 
 #include "../../../../ORUtils/MemoryDeviceType.h"
+#include "../Shared/ReductionResult.h"
 
 namespace ITMLib{
 

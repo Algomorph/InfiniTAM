@@ -38,7 +38,7 @@ ReduceUtilized(Vector3i& position, const VoxelVolume<TVoxel, VoxelBlockHash>& vo
 		return dividend / divisor + (dividend % divisor != 0);
 	};
 
-	auto getNormalizedCount = [&half_block_voxel_count](int count) {
+	auto getNormalizedCount = [&half_block_voxel_count, &ceilIntDiv](int count) {
 		return ceilIntDiv(count, half_block_voxel_count) * half_block_voxel_count;
 	};
 
@@ -52,7 +52,7 @@ ReduceUtilized(Vector3i& position, const VoxelVolume<TVoxel, VoxelBlockHash>& vo
 	dim3 cuda_tail_grid_size(ceilIntDiv(tail_length, half_block_voxel_count));
 
 	setTailToIgnored<TOutput>
-			<< < cuda_tail_grid_size, cuda_block_size > >> >
+			<< < cuda_tail_grid_size, cuda_block_size >> >
 	(result_buffer1.GetData(MEMORYDEVICE_CUDA), utilized_entry_count, normalized_entry_count, ignored_value);
 	ORcudaKernelCheck;
 
@@ -83,7 +83,7 @@ ReduceUtilized(Vector3i& position, const VoxelVolume<TVoxel, VoxelBlockHash>& vo
 		tail_length = normalized_output_count - output_count;
 		cuda_tail_grid_size.x = ceilIntDiv(tail_length, half_block_voxel_count);
 		setTailToIgnored<TOutput>
-				<< < cuda_tail_grid_size, cuda_block_size > >> >
+				<< < cuda_tail_grid_size, cuda_block_size >> >
 		(output_buffer->GetData(MEMORYDEVICE_CUDA), output_count, normalized_output_count, ignored_value);
 		ORcudaKernelCheck;
 
@@ -101,4 +101,5 @@ ReduceUtilized(Vector3i& position, const VoxelVolume<TVoxel, VoxelBlockHash>& vo
 	HashEntry entry_with_result = volume->index.GetUtilizedHashEntryAtIndex(final_result.hash_code);
 	position = ComputePositionVectorFromLinearIndex_VoxelBlockHash(entry_with_result.pos,
 	                                                               static_cast<int> (final_result.index_within_block));
+	return final_result.value;
 }

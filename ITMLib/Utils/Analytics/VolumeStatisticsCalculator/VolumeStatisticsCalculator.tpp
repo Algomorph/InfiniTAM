@@ -17,6 +17,7 @@
 #include "VolumeStatisticsCalculator.h"
 #include "../../../Objects/Volume/VoxelTypes.h"
 #include "VolumeStatisticsCalculator_Functors.h"
+#include "../../../Engines/Reduction/Interface/VolumeReduction.h"
 
 using namespace ITMLib;
 
@@ -47,8 +48,9 @@ VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::ComputeAllocatedV
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 unsigned int
-VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::ComputeVoxelWithFlagsCount(VoxelVolume<TVoxel,TIndex>* volume,
-                                                                                          VoxelFlags flags) {
+VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::ComputeVoxelWithFlagsCount(
+		VoxelVolume<TVoxel, TIndex>* volume,
+		VoxelFlags flags) {
 	return ComputeVoxelCountWithSpecificFlags<TVoxel::hasSDFInformation, TVoxel, TIndex, TMemoryDeviceType>
 	::compute(volume, flags);
 }
@@ -134,7 +136,16 @@ VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::ComputeAlteredVox
 }
 
 // region ================================ VOXEL GRADIENT / WARP STATISTICS ============================================
-
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+void VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::ComputeWarpUpdateMaxAndPosition(
+		float& value, Vector3i& position, const VoxelVolume<TVoxel, TIndex>* volume) {
+	ReductionResult<TVoxel, TIndex> ignored_value;
+	ignored_value.value = FLT_MIN;
+	value = VolumeReductionEngine<TVoxel, TIndex, TMemoryDeviceType>::
+	template ReduceUtilized<RetreiveWarpLengthFunctor<TVoxel, ITMLib::WARP_UPDATE>,
+			ReduceWarpLengthStatisticFunctor<TVoxel, TIndex, ITMLib::WARP_UPDATE, ITMLib::MAXIMUM>, float>
+			(position, volume, ignored_value);
+}
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 double VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::ComputeWarpUpdateMin(
