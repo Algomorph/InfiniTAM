@@ -15,10 +15,26 @@
 //  ================================================================
 #pragma once
 
+#include "../../../Objects/Volume/VoxelBlockHash.h"
+#include "../../../Objects/Volume/PlainVoxelArray.h"
+
+
 namespace ITMLib{
-template<typename T>
-struct ValueAndIndex {
-	T value;
+
+template<typename TValue, typename TIndex>
+struct ReductionResult;
+
+template<typename TValue>
+struct ReductionResult<TValue, VoxelBlockHash>{
+	TValue value;
 	unsigned int index_within_block;
+	int hash_code;
 };
+
+template<typename TValue>
+struct ReductionResult<TValue, PlainVoxelArray>{
+	TValue value;
+	unsigned int index_within_array;
+};
+
 }// namespace ITMLib

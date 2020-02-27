@@ -13,3 +13,18 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
+
+//local
+#include "VolumeReduction_CPU_VoxelBlockHash.h"
+#include "../../../Utils/Math.h"
+
+using namespace ITMLib;
+
+template<typename TVoxel>
+template<typename TRetrieveSingleFunctor, typename TReduceFunctor, typename TOutput>
+TOutput VolumeReductionEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::ReduceUtilized(
+		Vector3i& position, const VoxelVolume<TVoxel, VoxelBlockHash>& volume,
+		ReductionResult<TOutput, VoxelBlockHash> ignored_value) {
+
+	DIEWITHEXCEPTION_REPORTLOCATION("Not yet implemented.");
+}

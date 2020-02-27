@@ -13,12 +13,12 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-
+//local
 #include "VolumeReduction_CUDA_VoxelBlockHash.tcu"
 
 namespace ITMLib {
-
-template class VolumeReductionEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>;
-template class VolumeReductionEngine<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>;
-
+template
+class VolumeReductionEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>;
+template
+class VolumeReductionEngine<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>;
 } // namespace ITMLib

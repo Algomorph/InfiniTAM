@@ -19,6 +19,7 @@
 #include "../Interface/VolumeReduction.h"
 #include "../../../Objects/Volume/VoxelBlockHash.h"
 #include "../../../Objects/Volume/VoxelVolume.h"
+#include "../Shared/ReductionResult.h"
 #include "../../../GlobalTemplateDefines.h"
 
 namespace ITMLib {
@@ -34,11 +35,15 @@ class VolumeReductionEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA> {
 	 * e.g. minimum or maximum value of some voxel field can be found along with its location.
 	 * \tparam TOutput type of the output value, e.g. float when computing minimum of some voxel float field
 	 * \tparam TRetrieveSingleFunctor a function object with a static function which accepts a single TVoxel as an argument and returns a TOutput value based on this TVoxel.
-	 * \tparam TReduceFunctor a function object with a static function which accepts two ValueAndIndex<TOutput> objects and returns a single ValueAndIndex<TOutput> object
-	 * \param position the position of the voxel based on the indices produced by TReduceFunctor when comparing each ValueAndIndex pair.
+	 * \tparam TReduceFunctor a function object with a static function which accepts two ReductionResult<TOutput> objects and returns a single ReductionResult<TOutput> object
+	 * \param position the position of the voxel based on the indices produced by TReduceFunctor when comparing each ReductionResult pair.
+	 * \param volume the volume to run the reduction over
+	 * \param ignored_value this is a sample value-index-hash triplet that will be ignored / won't skew result of the operation when issued
+	 * to the reduction algorithm. For instance, when seeking a minimum of a float field, it makes sense to set this to {FLT_MAX, 0, -1}.
+	 * This is necessary to normalize input sizes.
 	 * \return end result based on all voxels in the volume.
 	 */
-	static TOutput ReduceUtilized(Vector3i& position, const VoxelVolume<TVoxel, VoxelBlockHash>& volume);
+	static TOutput ReduceUtilized(Vector3i& position, const VoxelVolume<TVoxel, VoxelBlockHash>& volume, ReductionResult<TOutput, VoxelBlockHash> ignored_value = ReductionResult<TOutput, VoxelBlockHash>());
 
 };
 

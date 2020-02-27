@@ -46,6 +46,7 @@ VolumeReductionStatisticsCalculator<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::
 	computeMaxWarpUpdateAndItsPositionForEachBlock
 			<< < cuda_grid_size, cuda_block_size >> >
 	                             (block_results.GetData(MEMORYDEVICE_CUDA), voxels, hash_entries, utilized_hash_codes);
+	ORcudaKernelCheck;
 
 	block_results.UpdateHostFromDevice();
 	ValueAndIndex<float>* block_results_CPU = block_results.GetData(MEMORYDEVICE_CPU);

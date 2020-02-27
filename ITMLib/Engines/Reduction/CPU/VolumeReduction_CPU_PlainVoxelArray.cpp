@@ -13,3 +13,12 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
+//local
+#include "VolumeReduction_CPU_PlainVoxelArray.tpp"
+
+namespace ITMLib {
+template
+class VolumeReductionEngine<TSDFVoxel, PlainVoxelArray, MEMORYDEVICE_CPU>;
+template
+class VolumeReductionEngine<WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU>;
+} // namespace ITMLib

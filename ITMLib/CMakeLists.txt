@@ -206,7 +206,7 @@ set(ITMLIB_ENGINES_REDUCTION_INTERFACE_HEADERS
     )
 ##
 set(ITMLIB_ENGINES_REDUCTION_SHARED_HEADERS
-    Engines/Reduction/Shared/ValueAndIndex.h
+    Engines/Reduction/Shared/ReductionResult.h
     )
 
 ##

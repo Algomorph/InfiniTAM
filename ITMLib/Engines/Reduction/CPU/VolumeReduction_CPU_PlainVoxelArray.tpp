@@ -13,3 +13,17 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
+//local
+#include "VolumeReduction_CPU_PlainVoxelArray.h"
+#include "../../../Utils/Math.h"
+
+using namespace ITMLib;
+
+template<typename TVoxel>
+template<typename TRetrieveSingleFunctor, typename TReduceFunctor, typename TOutput>
+TOutput VolumeReductionEngine<TVoxel, PlainVoxelArray, MEMORYDEVICE_CPU>::ReduceUtilized(
+		Vector3i& position, const VoxelVolume<TVoxel, PlainVoxelArray>& volume,
+		ReductionResult<TOutput, PlainVoxelArray> ignored_value) {
+
+	DIEWITHEXCEPTION_REPORTLOCATION("Not yet implemented.");
+}
