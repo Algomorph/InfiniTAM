@@ -26,7 +26,7 @@ namespace ITMLib {
 
 template<typename TVoxel>
 class VolumeReductionEngine<TVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA> {
-
+public:
 	template <typename TRetrieveSingleFunctor, typename TReduceFunctor, typename TOutput>
 	/**
 	 * \brief Computes reduction on some value from every voxel in the volume, e.g. minimum of some voxel field
@@ -43,7 +43,7 @@ class VolumeReductionEngine<TVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA> {
 	 * This is necessary to normalize input sizes.
 	 * \return end result based on all voxels in the volume.
 	 */
-	static TOutput ReduceUtilized(Vector3i& position, const VoxelVolume<TVoxel, PlainVoxelArray>& volume, ReductionResult<TOutput, PlainVoxelArray> ignored_value = ReductionResult<TOutput, PlainVoxelArray>());
+	static TOutput ReduceUtilized(Vector3i& position, const VoxelVolume<TVoxel, PlainVoxelArray>* volume, ReductionResult<TOutput, PlainVoxelArray> ignored_value = ReductionResult<TOutput, PlainVoxelArray>());
 
 };
 

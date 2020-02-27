@@ -14,6 +14,7 @@
 //  limitations under the License.
 //  ================================================================
 #include "../../../Engines/Traversal/CUDA/VolumeTraversal_CUDA_VoxelBlockHash.h"
+#include "../../../Engines/Reduction/CUDA/VolumeReduction_CUDA_VoxelBlockHash.h"
 #include "../../../Engines/Traversal/CUDA/HashTableTraversal_CUDA.h"
 #include "../../../GlobalTemplateDefines.h"
 #include "VolumeStatisticsCalculator.tpp"

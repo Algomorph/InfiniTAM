@@ -139,7 +139,7 @@ VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::ComputeAlteredVox
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::ComputeWarpUpdateMaxAndPosition(
 		float& value, Vector3i& position, const VoxelVolume<TVoxel, TIndex>* volume) {
-	ReductionResult<TVoxel, TIndex> ignored_value;
+	ReductionResult<float, TIndex> ignored_value;
 	ignored_value.value = FLT_MIN;
 	value = VolumeReductionEngine<TVoxel, TIndex, TMemoryDeviceType>::
 	template ReduceUtilized<RetreiveWarpLengthFunctor<TVoxel, ITMLib::WARP_UPDATE>,

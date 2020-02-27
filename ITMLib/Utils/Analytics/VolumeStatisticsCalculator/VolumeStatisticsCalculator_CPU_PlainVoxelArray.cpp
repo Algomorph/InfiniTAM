@@ -14,6 +14,7 @@
 //  limitations under the License.
 //  ================================================================
 #include "../../../GlobalTemplateDefines.h"
+#include "../../../Engines/Reduction/CPU/VolumeReduction_CPU_PlainVoxelArray.h"
 #include "../../../Engines/Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
 #include "../../../Engines/Traversal/CPU/HashTableTraversal_CPU.h"
 #include "VolumeStatisticsCalculator.tpp"

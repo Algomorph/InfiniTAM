@@ -23,7 +23,7 @@ using namespace ITMLib;
 template<typename TVoxel>
 template<typename TRetrieveSingleFunctor, typename TReduceFunctor, typename TOutput>
 TOutput VolumeReductionEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::ReduceUtilized(
-		Vector3i& position, const VoxelVolume<TVoxel, VoxelBlockHash>& volume,
+		Vector3i& position, const VoxelVolume<TVoxel, VoxelBlockHash>* volume,
 		ReductionResult<TOutput, VoxelBlockHash> ignored_value) {
 
 	DIEWITHEXCEPTION_REPORTLOCATION("Not yet implemented.");

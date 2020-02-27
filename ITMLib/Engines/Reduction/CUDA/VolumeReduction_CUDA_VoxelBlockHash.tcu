@@ -25,7 +25,7 @@ using namespace ITMLib;
 template<typename TVoxel>
 template<typename TRetrieveSingleFunctor, typename TReduceFunctor, typename TOutput>
 TOutput VolumeReductionEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::
-ReduceUtilized(Vector3i& position, const VoxelVolume<TVoxel, VoxelBlockHash>& volume,
+ReduceUtilized(Vector3i& position, const VoxelVolume<TVoxel, VoxelBlockHash>* volume,
                ReductionResult<TOutput, VoxelBlockHash> ignored_value) {
 	const int utilized_entry_count = volume->index.GetUtilizedHashBlockCount();
 	const int* utilized_hash_codes = volume->index.GetUtilizedBlockHashCodes();
