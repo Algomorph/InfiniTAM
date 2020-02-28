@@ -126,7 +126,7 @@ private:
 #endif
 
 		// *** Checks whether voxels on the margin of the array that don't overlap any voxel blocks are altered ***
-		auto marginExtentHasMismatch = [&](const Extent3D& extent) {
+		auto marginExtentHasMismatch = [&](const Extent3Di& extent) {
 #ifdef WITH_OPENMP
 #pragma omp parallel for default(shared)
 #endif
@@ -166,8 +166,8 @@ private:
 		// *** checks all voxels inside array, return false if one's altered but unallocated in the hash or if
 		// the two_voxel_boolean_functor on it and the corresponding one from the hash-block volume returns false ***
 
-		auto centralExtentHasMismatch = [&](const Extent3D& extent) {
-			Extent3D hash_block_extent = extent / VOXEL_BLOCK_SIZE;
+		auto centralExtentHasMismatch = [&](const Extent3Di& extent) {
+			Extent3Di hash_block_extent = extent / VOXEL_BLOCK_SIZE;
 #ifdef WITH_OPENMP
 #pragma omp parallel for default(shared)
 #endif
@@ -240,8 +240,8 @@ private:
 		};
 
 		// *** compute extents ***
-		Extent3D central_extent;
-		std::vector<Extent3D> border_extents = ComputeBoxSetOfHashAlignedCenterAndNonHashBlockAlignedArrayMargins(
+		Extent3Di central_extent;
+		std::vector<Extent3Di> border_extents = ComputeBoxSetOfHashAlignedCenterAndNonHashBlockAlignedArrayMargins(
 				*array_info, central_extent);
 		for (auto& extent : border_extents) {
 			if (marginExtentHasMismatch(extent)) return false;
@@ -308,9 +308,9 @@ private:
 public:
 
 	static inline
-	std::vector<Extent3D>
+	std::vector<Extent3Di>
 	ComputeBoxSetOfHashAlignedCenterAndNonHashBlockAlignedArrayMargins(
-			const ITMLib::PlainVoxelArray::GridAlignedBox& array_info, Extent3D& center_extent) {
+			const ITMLib::PlainVoxelArray::GridAlignedBox& array_info, Extent3Di& center_extent) {
 
 		//TODO: code can probably be condensed throughout to act on a per-dimension basis using Vector indexing, 
 		// but not sure if code clarity will be preserved
@@ -335,21 +335,21 @@ public:
 		int margin_near_z_end = array_bounds_min.z + margin_near_z;
 		int margin_far_z_start = array_bounds_max.z - margin_near_z;
 
-		std::vector<Extent3D> allExtents = {
-				Extent3D{array_bounds_min.x, array_bounds_min.y, array_bounds_min.z,
-				         margin_near_x_end, array_bounds_max.y, array_bounds_max.z},
-				Extent3D{margin_far_x_start, array_bounds_min.y, array_bounds_min.z,
-				         array_bounds_max.x, array_bounds_max.y, array_bounds_max.z},
+		std::vector<Extent3Di> allExtents = {
+				Extent3Di{array_bounds_min.x, array_bounds_min.y, array_bounds_min.z,
+				          margin_near_x_end, array_bounds_max.y, array_bounds_max.z},
+				Extent3Di{margin_far_x_start, array_bounds_min.y, array_bounds_min.z,
+				          array_bounds_max.x, array_bounds_max.y, array_bounds_max.z},
 
-				Extent3D{margin_near_x_end, array_bounds_min.y, array_bounds_min.z,
-				         margin_far_x_start, margin_near_y_end, array_bounds_max.z},
-				Extent3D{margin_near_x_end, margin_far_y_start, array_bounds_min.z,
-				         margin_far_x_start, array_bounds_max.y, array_bounds_max.z},
+				Extent3Di{margin_near_x_end, array_bounds_min.y, array_bounds_min.z,
+				          margin_far_x_start, margin_near_y_end, array_bounds_max.z},
+				Extent3Di{margin_near_x_end, margin_far_y_start, array_bounds_min.z,
+				          margin_far_x_start, array_bounds_max.y, array_bounds_max.z},
 
-				Extent3D{margin_near_x_end, margin_near_y_end, array_bounds_min.z,
-				         margin_far_x_start, margin_far_z_start, margin_near_z_end},
-				Extent3D{margin_near_x_end, margin_near_y_end, margin_far_z_start,
-				         margin_far_x_start, margin_far_z_start, array_bounds_max.z},
+				Extent3Di{margin_near_x_end, margin_near_y_end, array_bounds_min.z,
+				          margin_far_x_start, margin_far_z_start, margin_near_z_end},
+				Extent3Di{margin_near_x_end, margin_near_y_end, margin_far_z_start,
+				          margin_far_x_start, margin_far_z_start, array_bounds_max.z},
 		};
 
 		std::array<int, 6> margins = {
@@ -358,7 +358,7 @@ public:
 				margin_near_z, margin_far_z
 		};
 
-		std::vector<Extent3D> non_zero_extents;
+		std::vector<Extent3Di> non_zero_extents;
 		for (int i_margin = 0; i_margin < margins.size(); i_margin++) {
 			if (margins[i_margin] > 0) non_zero_extents.push_back(allExtents[i_margin]);
 		}

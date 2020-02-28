@@ -202,7 +202,9 @@ BOOST_FIXTURE_TEST_CASE(Test_TwoSurfaceAllocation_CPU, TestData_CPU) {
 	span_volume.Reset();
 	tracking_state->Reset();
 
-	depth_fusion_engine.GenerateTsdfVolumeFromTwoSurfaces(&square_volume, view_square_2, tracking_state);
+
+	indexer.AllocateNearAndBetweenTwoSurfaces(&square_volume, view_square_2, tracking_state);
+	depth_fusion_engine.IntegrateDepthImageIntoTsdfVolume(&square_volume, view_square_2, tracking_state);
 	visualization_engine->CreateICPMaps(&square_volume, view_square_2, tracking_state, render_state);
 	indexer.AllocateNearAndBetweenTwoSurfaces(&span_volume, view_square_1, tracking_state);
 
@@ -259,7 +261,8 @@ BOOST_FIXTURE_TEST_CASE(Test_TwoSurfaceAllocation_CUDA, TestData_CUDA) {
 	span_volume.Reset();
 	tracking_state->Reset();
 
-	depth_fusion_engine.GenerateTsdfVolumeFromTwoSurfaces(&square_volume, view_square_2, tracking_state);
+	indexer.AllocateNearAndBetweenTwoSurfaces(&square_volume, view_square_2, tracking_state);
+	depth_fusion_engine.IntegrateDepthImageIntoTsdfVolume(&square_volume, view_square_2, tracking_state);
 	visualization_engine->CreateICPMaps(&square_volume, view_square_2, tracking_state, render_state);
 	indexer.AllocateNearAndBetweenTwoSurfaces(&span_volume, view_square_1, tracking_state);
 

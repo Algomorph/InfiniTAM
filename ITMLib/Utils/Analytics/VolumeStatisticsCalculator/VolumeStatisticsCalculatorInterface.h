@@ -28,13 +28,8 @@ public:
 	virtual Vector6i ComputeVoxelBounds(const VoxelVolume<TVoxel, TIndex>* volume) = 0;
 	virtual Vector6i ComputeAlteredVoxelBounds(VoxelVolume<TVoxel, TIndex>* volume) = 0;
 
-	virtual int ComputeAllocatedVoxelCount(VoxelVolume<TVoxel, TIndex>* volume) = 0;
-	virtual int ComputeAllocatedHashBlockCount(VoxelVolume<TVoxel, TIndex>* volume) = 0;
-	virtual std::vector<int> GetAllocatedHashCodes(VoxelVolume<TVoxel, TIndex>* volume) = 0;
-	virtual std::vector<Vector3s> GetAllocatedHashBlockPositions(VoxelVolume<TVoxel, TIndex>* volume) = 0;
-	virtual std::vector<int> GetUtilizedHashCodes(VoxelVolume <TVoxel, TIndex>* volume) = 0;
-	virtual std::vector<Vector3s> GetUtilizedHashBlockPositions(VoxelVolume <TVoxel, TIndex>* volume) = 0;
-
+	virtual unsigned int ComputeAllocatedVoxelCount(VoxelVolume<TVoxel, TIndex>* volume) = 0;
+	virtual unsigned int CountVoxelsWithDepthWeightInRange(VoxelVolume <TVoxel, TIndex>* volume, Extent2Di range) = 0;
 	virtual unsigned int ComputeVoxelWithFlagsCount(VoxelVolume<TVoxel, TIndex>* volume, VoxelFlags flags) = 0;
 	virtual unsigned int ComputeNonTruncatedVoxelCount(VoxelVolume<TVoxel, TIndex>* volume) = 0;
 	virtual unsigned int ComputeAlteredVoxelCount(VoxelVolume<TVoxel, TIndex>* volume) = 0;
@@ -52,7 +47,13 @@ public:
 	virtual double ComputeFramewiseWarpMax(VoxelVolume<TVoxel,TIndex>* volume) = 0;
 	virtual double ComputeFramewiseWarpMean(VoxelVolume<TVoxel,TIndex>* volume) = 0;
 
-	virtual Extent3D FindMinimumNonTruncatedBoundingBox(VoxelVolume <TVoxel, TIndex>* volume) = 0;
+	virtual Extent3Di FindMinimumNonTruncatedBoundingBox(VoxelVolume <TVoxel, TIndex>* volume) = 0;
+
+	virtual int ComputeAllocatedHashBlockCount(VoxelVolume<TVoxel, TIndex>* volume) = 0;
+	virtual std::vector<int> GetAllocatedHashCodes(VoxelVolume<TVoxel, TIndex>* volume) = 0;
+	virtual std::vector<Vector3s> GetAllocatedHashBlockPositions(VoxelVolume<TVoxel, TIndex>* volume) = 0;
+	virtual std::vector<int> GetUtilizedHashCodes(VoxelVolume <TVoxel, TIndex>* volume) = 0;
+	virtual std::vector<Vector3s> GetUtilizedHashBlockPositions(VoxelVolume <TVoxel, TIndex>* volume) = 0;
 };
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>

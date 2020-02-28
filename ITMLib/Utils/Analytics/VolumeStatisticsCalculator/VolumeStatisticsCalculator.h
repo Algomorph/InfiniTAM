@@ -22,6 +22,9 @@
 #include "../../../GlobalTemplateDefines.h"
 
 namespace ITMLib {
+
+
+
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 class VolumeStatisticsCalculator :
 		public VolumeStatisticsCalculatorInterface<TVoxel, TIndex> {
@@ -36,13 +39,8 @@ public:
 
 	Vector6i ComputeVoxelBounds(const VoxelVolume <TVoxel, TIndex>* volume) override;
 	Vector6i ComputeAlteredVoxelBounds(VoxelVolume <TVoxel, TIndex>* volume) override;
-	int ComputeAllocatedVoxelCount(VoxelVolume <TVoxel, TIndex>* volume) override;
-	int ComputeAllocatedHashBlockCount(VoxelVolume <TVoxel, TIndex>* volume) override;
-	std::vector<int> GetAllocatedHashCodes(VoxelVolume <TVoxel, TIndex>* volume) override;
-	std::vector<Vector3s> GetAllocatedHashBlockPositions(VoxelVolume <TVoxel, TIndex>* volume) override;
-	std::vector<int> GetUtilizedHashCodes(VoxelVolume <TVoxel, TIndex>* volume) override;
-	std::vector<Vector3s> GetUtilizedHashBlockPositions(VoxelVolume <TVoxel, TIndex>* volume) override;
-
+	unsigned int ComputeAllocatedVoxelCount(VoxelVolume <TVoxel, TIndex>* volume) override;
+	unsigned int CountVoxelsWithDepthWeightInRange(VoxelVolume <TVoxel, TIndex>* volume, Extent2Di range) override;
 	unsigned int ComputeVoxelWithFlagsCount(VoxelVolume <TVoxel, TIndex>* volume, VoxelFlags flags) override;
 	unsigned int ComputeNonTruncatedVoxelCount(VoxelVolume <TVoxel, TIndex>* volume) override;
 	unsigned int ComputeAlteredVoxelCount(VoxelVolume <TVoxel, TIndex>* volume) override;
@@ -55,12 +53,20 @@ public:
 	double ComputeWarpUpdateMean(VoxelVolume <TVoxel, TIndex>* volume) override;
 
 	void ComputeWarpUpdateMaxAndPosition(float& value, Vector3i& position, const VoxelVolume<TVoxel,TIndex>* volume);
+
 	
 	double ComputeFramewiseWarpMin(VoxelVolume <TVoxel, TIndex>* volume) override;
 	double ComputeFramewiseWarpMax(VoxelVolume <TVoxel, TIndex>* volume) override;
 	double ComputeFramewiseWarpMean(VoxelVolume <TVoxel, TIndex>* volume) override;
 
 	Vector6i FindMinimumNonTruncatedBoundingBox(VoxelVolume <TVoxel, TIndex>* volume) override;
+
+
+	int ComputeAllocatedHashBlockCount(VoxelVolume <TVoxel, TIndex>* volume) override;
+	std::vector<int> GetAllocatedHashCodes(VoxelVolume <TVoxel, TIndex>* volume) override;
+	std::vector<Vector3s> GetAllocatedHashBlockPositions(VoxelVolume <TVoxel, TIndex>* volume) override;
+	std::vector<int> GetUtilizedHashCodes(VoxelVolume <TVoxel, TIndex>* volume) override;
+	std::vector<Vector3s> GetUtilizedHashBlockPositions(VoxelVolume <TVoxel, TIndex>* volume) override;
 
 private:
 	VolumeStatisticsCalculator() = default;

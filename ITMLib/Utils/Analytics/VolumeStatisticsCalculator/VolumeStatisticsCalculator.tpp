@@ -40,7 +40,7 @@ Vector6i VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::ComputeA
 //============================================== COUNT VOXELS ==========================================================
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-int
+unsigned int
 VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::ComputeAllocatedVoxelCount(
 		VoxelVolume<TVoxel, TIndex>* volume) {
 	return ComputeAllocatedVoxelCountFunctor<TVoxel, TIndex, TMemoryDeviceType>::compute(volume);
@@ -79,43 +79,12 @@ VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::ComputeTruncatedV
 	compute(volume, VoxelFlags::VOXEL_TRUNCATED);
 }
 
-//========================================= HASH BLOCK STATISTICS ======================================================
-
-
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-int
-VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::ComputeAllocatedHashBlockCount(
-		VoxelVolume<TVoxel, TIndex>* volume) {
-	return HashOnlyStatisticsFunctor<TVoxel, TIndex, TMemoryDeviceType>::ComputeAllocatedHashBlockCount(volume);
+unsigned int VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::CountVoxelsWithDepthWeightInRange(
+		VoxelVolume<TVoxel, TIndex>* volume, Extent2Di range) {
+	return 0;
 }
 
-template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-std::vector<int>
-VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::GetAllocatedHashCodes(
-		VoxelVolume<TVoxel, TIndex>* volume) {
-	return HashOnlyStatisticsFunctor<TVoxel, TIndex, TMemoryDeviceType>::GetAllocatedHashCodes(volume);
-}
-
-template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-std::vector<Vector3s>
-VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::GetAllocatedHashBlockPositions(
-		VoxelVolume<TVoxel, TIndex>* volume) {
-	return HashOnlyStatisticsFunctor<TVoxel, TIndex, TMemoryDeviceType>::GetAllocatedBlockPositions(volume);
-}
-
-template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-std::vector<int>
-VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::GetUtilizedHashCodes(
-		VoxelVolume<TVoxel, TIndex>* volume) {
-	return HashOnlyStatisticsFunctor<TVoxel, TIndex, TMemoryDeviceType>::GetUtilizedHashCodes(volume);
-}
-
-template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-std::vector<Vector3s>
-VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::GetUtilizedHashBlockPositions(
-		VoxelVolume<TVoxel, TIndex>* volume) {
-	return HashOnlyStatisticsFunctor<TVoxel, TIndex, TMemoryDeviceType>::GetUtilizedBlockPositions(volume);
-}
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 unsigned int
@@ -200,3 +169,45 @@ Vector6i VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::FindMini
 	return FlagMatchBBoxFunctor<TVoxel::hasSemanticInformation, TVoxel, TIndex, TMemoryDeviceType>::
 	compute(volume, VoxelFlags::VOXEL_NONTRUNCATED);
 }
+
+
+
+// region ================================= HASH BLOCK STATISTICS ======================================================
+
+
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+int
+VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::ComputeAllocatedHashBlockCount(
+		VoxelVolume<TVoxel, TIndex>* volume) {
+	return HashOnlyStatisticsFunctor<TVoxel, TIndex, TMemoryDeviceType>::ComputeAllocatedHashBlockCount(volume);
+}
+
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+std::vector<int>
+VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::GetAllocatedHashCodes(
+		VoxelVolume<TVoxel, TIndex>* volume) {
+	return HashOnlyStatisticsFunctor<TVoxel, TIndex, TMemoryDeviceType>::GetAllocatedHashCodes(volume);
+}
+
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+std::vector<Vector3s>
+VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::GetAllocatedHashBlockPositions(
+		VoxelVolume<TVoxel, TIndex>* volume) {
+	return HashOnlyStatisticsFunctor<TVoxel, TIndex, TMemoryDeviceType>::GetAllocatedBlockPositions(volume);
+}
+
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+std::vector<int>
+VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::GetUtilizedHashCodes(
+		VoxelVolume<TVoxel, TIndex>* volume) {
+	return HashOnlyStatisticsFunctor<TVoxel, TIndex, TMemoryDeviceType>::GetUtilizedHashCodes(volume);
+}
+
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+std::vector<Vector3s>
+VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::GetUtilizedHashBlockPositions(
+		VoxelVolume<TVoxel, TIndex>* volume) {
+	return HashOnlyStatisticsFunctor<TVoxel, TIndex, TMemoryDeviceType>::GetUtilizedBlockPositions(volume);
+}
+
+// endregion ===========================================================================================================

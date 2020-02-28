@@ -30,6 +30,10 @@ typedef class ORUtils::Vector2<int> Vector2i;
 typedef class ORUtils::Vector2<float> Vector2f;
 typedef class ORUtils::Vector2<double> Vector2d;
 
+typedef class ORUtils::Vector2<int> Extent2Di;
+typedef class ORUtils::Vector2<float> Extent2Df;
+typedef class ORUtils::Vector2<double> Extent2Dd;
+
 typedef class ORUtils::Vector3<short> Vector3s;
 typedef class ORUtils::Vector3<double> Vector3d;
 typedef class ORUtils::Vector3<int> Vector3i;
@@ -45,7 +49,7 @@ typedef class ORUtils::Vector4<double> Vector4d;
 
 typedef class ORUtils::Vector6<float> Vector6f;
 typedef class ORUtils::Vector6<int> Vector6i;
-typedef class ORUtils::Vector6<int> Extent3D;
+typedef class ORUtils::Vector6<int> Extent3Di;
 
 
 #ifndef TO_INT_ROUND3

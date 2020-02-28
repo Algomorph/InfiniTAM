@@ -57,7 +57,7 @@ private:
 
 	template<typename TProcessFunction>
 	inline static void
-	TraverseBlockWithinBounds(TVoxel* voxel_block, const Extent3D& local_bounds, TProcessFunction&& process_function) {
+	TraverseBlockWithinBounds(TVoxel* voxel_block, const Extent3Di& local_bounds, TProcessFunction&& process_function) {
 		for (int z = local_bounds.min_z; z < local_bounds.max_z; z++) {
 			for (int y = local_bounds.min_y; y < local_bounds.max_y; y++) {
 				for (int x = local_bounds.min_x; x < local_bounds.max_x; x++) {
@@ -71,7 +71,7 @@ private:
 
 	template<typename TFunctor>
 	inline static void
-	TraverseBlockWithinBoundsWithFunctor(TVoxel* voxel_block, const Extent3D& local_bounds, TFunctor& functor) {
+	TraverseBlockWithinBoundsWithFunctor(TVoxel* voxel_block, const Extent3Di& local_bounds, TFunctor& functor) {
 		TraverseBlockWithinBounds(voxel_block, local_bounds, [&functor](TVoxel& voxel) { functor(voxel); });
 	}
 
@@ -105,7 +105,7 @@ private:
 	template<typename TProcessFunction>
 	inline static void
 	TraverseBlockWithinBoundsWithPosition(TVoxel* voxel_block, const Vector3i& block_position_voxels,
-	                                      const Extent3D& local_bounds, TProcessFunction&& process_function) {
+	                                      const Extent3Di& local_bounds, TProcessFunction&& process_function) {
 		for (int z = local_bounds.min_z; z < local_bounds.max_z; z++) {
 			for (int y = local_bounds.min_y; y < local_bounds.max_y; y++) {
 				for (int x = local_bounds.min_x; x < local_bounds.max_x; x++) {
@@ -121,7 +121,7 @@ private:
 	template<typename TFunctor>
 	inline static void
 	TraverseBlockWithinBoundsWithPositionWithFunctor(TVoxel* voxel_block, const Vector3i& block_position_voxels,
-	                                                 const Extent3D& local_bounds, TFunctor& functor) {
+	                                                 const Extent3Di& local_bounds, TFunctor& functor) {
 		TraverseBlockWithinBoundsWithPosition(voxel_block, block_position_voxels, local_bounds,
 		                                      [&functor](TVoxel& voxel, const Vector3i& voxel_position) {
 			                                      functor(voxel, voxel_position);

@@ -78,11 +78,11 @@ public:
 	template<typename TVoxelTarget, typename TVoxelSource>
 	void AllocateUsingOtherVolume_Bounded(VoxelVolume<TVoxelTarget, VoxelBlockHash>* target_volume,
 	                                      VoxelVolume<TVoxelSource, VoxelBlockHash>* source_volume,
-	                                      const Extent3D& bounds);
+	                                      const Extent3Di& bounds);
 	template<typename TVoxelTarget, typename TVoxelSource>
 	void AllocateUsingOtherVolume_OffsetAndBounded(VoxelVolume<TVoxelTarget, VoxelBlockHash>* target_volume,
-	                                     VoxelVolume<TVoxelSource, VoxelBlockHash>* source_volume,
-	                                     const Extent3D& source_bounds, const Vector3i& target_offset);
+	                                               VoxelVolume<TVoxelSource, VoxelBlockHash>* source_volume,
+	                                               const Extent3Di& source_bounds, const Vector3i& target_offset);
 
 	void BuildUtilizedBlockListBasedOnVisibility(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const View* view,
 	                                             const Matrix4f& depth_camera_matrix = Matrix4f::Identity());

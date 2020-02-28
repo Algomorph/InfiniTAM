@@ -19,6 +19,7 @@ namespace ORUtils {
 			struct { T s, t; }; // standard names for components
 			struct { T u, v; }; // standard names for components
 			struct { T width, height; }; // standard names for components
+			struct { T from, to; }; // standard names for components
 			T values[2];     // array access
 		};
 	};

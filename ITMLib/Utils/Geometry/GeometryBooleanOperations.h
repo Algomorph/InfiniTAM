@@ -33,7 +33,7 @@ bool IsPointInBounds(const Vector3i& point, const ITMLib::PlainVoxelArray::GridA
 
 _CPU_AND_GPU_CODE_
 inline
-bool IsPointInBounds(const Vector3i& point, const Extent3D& bounds) {
+bool IsPointInBounds(const Vector3i& point, const Extent3Di& bounds) {
 	return point.x >= bounds.min_x &&
 	       point.y >= bounds.min_y &&
 	       point.z >= bounds.min_z &&
@@ -45,7 +45,7 @@ bool IsPointInBounds(const Vector3i& point, const Extent3D& bounds) {
 
 _CPU_AND_GPU_CODE_
 inline
-bool IsHashBlockFullyInBounds(const Vector3i& hashBlockPositionVoxels, const Extent3D& bounds) {
+bool IsHashBlockFullyInBounds(const Vector3i& hashBlockPositionVoxels, const Extent3Di& bounds) {
 	return hashBlockPositionVoxels.x + VOXEL_BLOCK_SIZE - 1 <= bounds.max_x &&
 	       hashBlockPositionVoxels.x >= bounds.min_x &&
 	       hashBlockPositionVoxels.y + VOXEL_BLOCK_SIZE - 1 <= bounds.max_y &&
@@ -56,7 +56,7 @@ bool IsHashBlockFullyInBounds(const Vector3i& hashBlockPositionVoxels, const Ext
 
 _CPU_AND_GPU_CODE_
 inline
-bool IsHashBlockPartiallyInBounds(const Vector3i& hashBlockPositionVoxels, const Extent3D& bounds) {
+bool IsHashBlockPartiallyInBounds(const Vector3i& hashBlockPositionVoxels, const Extent3Di& bounds) {
 	//@formatter:off
 	return ((hashBlockPositionVoxels.x + VOXEL_BLOCK_SIZE - 1 >= bounds.max_x && hashBlockPositionVoxels.x <= bounds.max_x)
 	        || (hashBlockPositionVoxels.x + VOXEL_BLOCK_SIZE - 1 >= bounds.min_x && hashBlockPositionVoxels.x <= bounds.min_x)) &&
@@ -69,7 +69,7 @@ bool IsHashBlockPartiallyInBounds(const Vector3i& hashBlockPositionVoxels, const
 
 _CPU_AND_GPU_CODE_
 inline
-Extent3D UnionExtent(const Extent3D& extent1, const Extent3D& extent2) {
+Extent3Di UnionExtent(const Extent3Di& extent1, const Extent3Di& extent2) {
 	return {ORUTILS_MIN(extent1.min_x, extent2.min_x),
 	        ORUTILS_MIN(extent1.min_y, extent2.min_y),
 	        ORUTILS_MIN(extent1.min_z, extent2.min_z),
@@ -80,32 +80,32 @@ Extent3D UnionExtent(const Extent3D& extent1, const Extent3D& extent2) {
 
 _CPU_AND_GPU_CODE_
 inline
-Extent3D UnionExtent(const ITMLib::PlainVoxelArray::GridAlignedBox& extent1,
-                     const ITMLib::PlainVoxelArray::GridAlignedBox& extent2) {
+Extent3Di UnionExtent(const ITMLib::PlainVoxelArray::GridAlignedBox& extent1,
+                      const ITMLib::PlainVoxelArray::GridAlignedBox& extent2) {
 	return UnionExtent(PVA_InfoToExtent(extent1), PVA_InfoToExtent(extent2));
 }
 
 _CPU_AND_GPU_CODE_
 inline
-Extent3D IntersectionExtent(const Extent3D& extent1, const Extent3D& extent2) {
-	Extent3D extent(ORUTILS_MAX(extent1.min_x, extent2.min_x),
-	                ORUTILS_MAX(extent1.min_y, extent2.min_y),
-	                ORUTILS_MAX(extent1.min_z, extent2.min_z),
-	                ORUTILS_MIN(extent1.max_x, extent2.max_x),
-	                ORUTILS_MIN(extent1.max_y, extent2.max_y),
-	                ORUTILS_MIN(extent1.max_z, extent2.max_z));
+Extent3Di IntersectionExtent(const Extent3Di& extent1, const Extent3Di& extent2) {
+	Extent3Di extent(ORUTILS_MAX(extent1.min_x, extent2.min_x),
+	                 ORUTILS_MAX(extent1.min_y, extent2.min_y),
+	                 ORUTILS_MAX(extent1.min_z, extent2.min_z),
+	                 ORUTILS_MIN(extent1.max_x, extent2.max_x),
+	                 ORUTILS_MIN(extent1.max_y, extent2.max_y),
+	                 ORUTILS_MIN(extent1.max_z, extent2.max_z));
 	if (extent.max_x - extent.min_x < 0 ||
 	    extent.max_y - extent.min_y < 0 ||
 	    extent.max_z - extent.min_z < 0) {
-		return Extent3D();
+		return Extent3Di();
 	}
 	return extent;
 }
 
 _CPU_AND_GPU_CODE_
 inline
-Extent3D IntersectionExtent(const ITMLib::PlainVoxelArray::GridAlignedBox& extent1,
-                            const ITMLib::PlainVoxelArray::GridAlignedBox& extent2) {
+Extent3Di IntersectionExtent(const ITMLib::PlainVoxelArray::GridAlignedBox& extent1,
+                             const ITMLib::PlainVoxelArray::GridAlignedBox& extent2) {
 	return IntersectionExtent(PVA_InfoToExtent(extent1), PVA_InfoToExtent(extent2));
 }
 

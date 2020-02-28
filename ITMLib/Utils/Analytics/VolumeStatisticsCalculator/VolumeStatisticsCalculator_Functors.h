@@ -200,10 +200,10 @@ struct ComputeWarpLengthStatisticFunctor<true, TVoxel, TIndex, TDeviceType, TSta
 // region =========================================== REDUCTION VECTOR/GRADIENT FIELD MIN/MEAN/MAX ========================
 
 template<typename TVoxel, ITMLib::WarpType TWarpType>
-struct RetreiveWarpLengthFunctor{
+struct RetreiveWarpLengthFunctor {
 	_CPU_AND_GPU_CODE_
-	inline static float retrieve(const TVoxel& voxel){
-		return ORUtils::length(WarpAccessStaticFunctor<TVoxel,TWarpType>::GetWarp(voxel));
+	inline static float retrieve(const TVoxel& voxel) {
+		return ORUtils::length(WarpAccessStaticFunctor<TVoxel, TWarpType>::GetWarp(voxel));
 	}
 };
 
@@ -211,16 +211,44 @@ template<typename TVoxel, typename TIndex, ITMLib::WarpType TWarpType, ITMLib::S
 struct ReduceWarpLengthStatisticFunctor;
 
 template<typename TVoxel, typename TIndex>
-struct ReduceWarpLengthStatisticFunctor<TVoxel, TIndex, ITMLib::WARP_UPDATE, ITMLib::MAXIMUM>{
+struct ReduceWarpLengthStatisticFunctor<TVoxel, TIndex, ITMLib::WARP_UPDATE, ITMLib::MAXIMUM> {
 public:
 	_CPU_AND_GPU_CODE_
 	inline static const ReductionResult<float, TIndex>& reduce(
-			const ReductionResult<float, TIndex>& item1, const ReductionResult<float, TIndex>& item2){
+			const ReductionResult<float, TIndex>& item1, const ReductionResult<float, TIndex>& item2) {
 		return (item1.value > item2.value) ? item1 : item2;
 	}
 };
 
 // endregion
+
+//region ================== **** VOXEL COUNTS **** =====================================================================
+
+//region =========================== COUNT ALL VOXELS ==================================================================
+
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+struct ComputeAllocatedVoxelCountFunctor;
+
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
+struct ComputeAllocatedVoxelCountFunctor<TVoxel, PlainVoxelArray, TMemoryDeviceType> {
+	inline
+	static unsigned int compute(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
+		PlainVoxelArray& index = volume->index;
+		return static_cast<unsigned int>(index.GetVolumeSize().x * index.GetVolumeSize().y * index.GetVolumeSize().z);
+	}
+};
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+struct HashOnlyStatisticsFunctor;
+
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
+struct ComputeAllocatedVoxelCountFunctor<TVoxel, VoxelBlockHash, TMemoryDeviceType> {
+	inline
+	static unsigned int compute(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
+		return static_cast<unsigned int>(HashOnlyStatisticsFunctor<TVoxel, VoxelBlockHash, TMemoryDeviceType>
+		::ComputeAllocatedHashBlockCount(volume)) * VOXEL_BLOCK_SIZE3;
+	}
+};
+//endregion
 //region ============================================ COUNT VOXELS WITH SPECIFIC SDF VALUE =============================
 
 template<bool hasSDFInformation, typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
@@ -247,13 +275,13 @@ struct ComputeVoxelCountWithSpecificValue<true, TVoxel, TIndex, TMemoryDeviceTyp
 
 	_DEVICE_WHEN_AVAILABLE_
 	void operator()(TVoxel& voxel) {
-		if(TVoxel::valueToFloat(voxel.sdf) == value){
+		if (TVoxel::valueToFloat(voxel.sdf) == value) {
 			ATOMIC_ADD(count, 1u);
 		}
 	}
 };
 
-template<class TVoxel, typename TIndex  , MemoryDeviceType TMemoryDeviceType>
+template<class TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 struct ComputeVoxelCountWithSpecificValue<false, TVoxel, TIndex, TMemoryDeviceType> {
 	static int compute(VoxelVolume<TVoxel, TIndex>* scene, float value) {
 		DIEWITHEXCEPTION(
@@ -289,7 +317,7 @@ struct ComputeVoxelCountWithSpecificFlags<true, TVoxel, TIndex, TMemoryDeviceTyp
 
 	_DEVICE_WHEN_AVAILABLE_
 	void operator()(TVoxel& voxel) {
-		if(voxel.flags == flags){
+		if (voxel.flags == flags) {
 			ATOMIC_ADD(count, 1u);
 		}
 	}
@@ -303,6 +331,32 @@ struct ComputeVoxelCountWithSpecificFlags<false, TVoxel, TIndex, TMemoryDeviceTy
 				"Voxels in volume need to have semantic flags field for this operation to work.");
 		return 0;
 	}
+};
+//endregion
+//region ================================== COUNT ALTERED VOXELS =======================================================
+
+template<typename TVoxel>
+struct IsAlteredCountFunctor {
+	IsAlteredCountFunctor() {
+		INITIALIZE_ATOMIC(unsigned int, count, 0u);
+	};
+
+	~IsAlteredCountFunctor() {
+		CLEAN_UP_ATOMIC(count);
+	}
+
+	_DEVICE_WHEN_AVAILABLE_
+	void operator()(const TVoxel& voxel) {
+		if (isAltered(voxel)) {
+			ATOMIC_ADD(count, 1u);
+		}
+	}
+
+	unsigned int GetCount() {
+		return GET_ATOMIC_VALUE_CPU(count);
+	}
+
+	DECLARE_ATOMIC(unsigned int, count);
 };
 //endregion
 //region =========================================== SUM OF TOTAL SDF ==================================================
@@ -346,32 +400,7 @@ struct SumSDFFunctor<true, TVoxel, TIndex, TMemoryDeviceType> {
 	}
 };
 //endregion
-//region ================================== COUNT ALTERED VOXELS =======================================================
 
-template<typename TVoxel>
-struct IsAlteredCountFunctor {
-	IsAlteredCountFunctor() {
-		INITIALIZE_ATOMIC(unsigned int, count, 0u);
-	};
-
-	~IsAlteredCountFunctor() {
-		CLEAN_UP_ATOMIC(count);
-	}
-
-	_DEVICE_WHEN_AVAILABLE_
-	void operator()(const TVoxel& voxel) {
-		if (isAltered(voxel)) {
-			ATOMIC_ADD(count, 1u);
-		}
-	}
-
-	unsigned int GetCount() {
-		return GET_ATOMIC_VALUE_CPU(count);
-	}
-
-	DECLARE_ATOMIC(unsigned int, count);
-};
-//endregion
 //region ======================================= BOUNDING BOX COMPUTATIONS =============================================
 
 template<bool hasSemanticInformation, typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
@@ -380,7 +409,7 @@ struct FlagMatchBBoxFunctor;
 template<class TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 struct FlagMatchBBoxFunctor<false, TVoxel, TIndex, TMemoryDeviceType> {
 
-	static Extent3D compute(VoxelVolume<TVoxel, TIndex>* scene, ITMLib::VoxelFlags voxelType) {
+	static Extent3Di compute(VoxelVolume<TVoxel, TIndex>* scene, ITMLib::VoxelFlags voxelType) {
 		DIEWITHEXCEPTION_REPORTLOCATION(
 				"Voxels need to have semantic information to be marked as truncated or non-truncated.");
 		return {};
@@ -409,7 +438,7 @@ struct FlagMatchBBoxFunctor<true, TVoxel, TIndex, TMemoryDeviceType> {
 	}
 
 
-	static Extent3D compute(VoxelVolume<TVoxel, TIndex>* scene, ITMLib::VoxelFlags voxelType) {
+	static Extent3Di compute(VoxelVolume<TVoxel, TIndex>* scene, ITMLib::VoxelFlags voxelType) {
 		FlagMatchBBoxFunctor instance(voxelType);
 		VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseAllWithPosition(scene, instance);
 		return {GET_ATOMIC_VALUE_CPU(instance.min_x),
@@ -533,8 +562,8 @@ private:
 	DECLARE_ATOMIC(int, current_fill_index);
 };
 
-template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-struct HashOnlyStatisticsFunctor;
+//template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+//struct HashOnlyStatisticsFunctor;
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
 struct HashOnlyStatisticsFunctor<TVoxel, PlainVoxelArray, TMemoryDeviceType> {
 	static std::vector<int> GetAllocatedHashCodes(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
@@ -595,28 +624,7 @@ struct HashOnlyStatisticsFunctor<TVoxel, VoxelBlockHash, TMemoryDeviceType> {
 	}
 };
 //endregion
-//region =========================== COUNT ALL VOXELS ==================================================================
 
-template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-struct ComputeAllocatedVoxelCountFunctor;
-
-template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
-struct ComputeAllocatedVoxelCountFunctor<TVoxel, PlainVoxelArray, TMemoryDeviceType> {
-	inline
-	static int compute(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
-		PlainVoxelArray& index = volume->index;
-		return index.GetVolumeSize().x * index.GetVolumeSize().y * index.GetVolumeSize().z;
-	}
-};
-
-template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
-struct ComputeAllocatedVoxelCountFunctor<TVoxel, VoxelBlockHash, TMemoryDeviceType> {
-	inline
-	static int compute(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
-		return HashOnlyStatisticsFunctor<TVoxel, VoxelBlockHash, TMemoryDeviceType>::ComputeAllocatedHashBlockCount(volume) * VOXEL_BLOCK_SIZE3;
-	}
-};
-//endregion
 //region======================= VOLUME BOUNDS COMPUTATION =============================================================
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
@@ -736,8 +744,8 @@ struct ComputeVoxelBoundsFunctor<TVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA> {
 	static Vector6i Compute(const VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
 		const PlainVoxelArray::IndexData* indexData = volume->index.GetIndexData();
 		return Vector6i(indexData->offset.x, indexData->offset.y, indexData->offset.z,
-		                indexData->offset.x + indexData->size.x, indexData->offset.y + indexData->size.y,
-		                indexData->offset.z + indexData->size.z);
+						indexData->offset.x + indexData->size.x, indexData->offset.y + indexData->size.y,
+						indexData->offset.z + indexData->size.z);
 	}
 };
 
@@ -745,7 +753,7 @@ struct ComputeVoxelBoundsFunctor<TVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA> {
 
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, typename TStaticPredicateFunctor>
 struct ComputeConditionalVoxelBoundsFunctor {
-	ComputeConditionalVoxelBoundsFunctor(){
+	ComputeConditionalVoxelBoundsFunctor() {
 		INITIALIZE_ATOMIC(int, min_x, INT_MAX);
 		INITIALIZE_ATOMIC(int, min_y, INT_MAX);
 		INITIALIZE_ATOMIC(int, min_z, INT_MAX);
@@ -755,8 +763,8 @@ struct ComputeConditionalVoxelBoundsFunctor {
 	}
 
 	_DEVICE_WHEN_AVAILABLE_
-	inline void operator()(const TVoxel& voxel, const Vector3i& voxel_position){
-		if(TStaticPredicateFunctor::isSatisfiedBy(voxel)){
+	inline void operator()(const TVoxel& voxel, const Vector3i& voxel_position) {
+		if (TStaticPredicateFunctor::isSatisfiedBy(voxel)) {
 			ATOMIC_MIN(min_x, voxel_position.x);
 			ATOMIC_MIN(min_y, voxel_position.y);
 			ATOMIC_MIN(min_z, voxel_position.z);
@@ -766,16 +774,12 @@ struct ComputeConditionalVoxelBoundsFunctor {
 		}
 	}
 
-	~ComputeConditionalVoxelBoundsFunctor(){
-		CLEAN_UP_ATOMIC(min_x);
-		CLEAN_UP_ATOMIC(min_y);
-		CLEAN_UP_ATOMIC(min_z);
-		CLEAN_UP_ATOMIC(max_x);
-		CLEAN_UP_ATOMIC(max_y);
-		CLEAN_UP_ATOMIC(max_z);
+	~ComputeConditionalVoxelBoundsFunctor() {
+		CLEAN_UP_ATOMIC(min_x);CLEAN_UP_ATOMIC(min_y);CLEAN_UP_ATOMIC(min_z);CLEAN_UP_ATOMIC(max_x);CLEAN_UP_ATOMIC(
+				max_y);CLEAN_UP_ATOMIC(max_z);
 	}
 
-	Extent3D GetBounds(){
+	Extent3Di GetBounds() {
 		return {
 				GET_ATOMIC_VALUE_CPU(min_x),
 				GET_ATOMIC_VALUE_CPU(min_y),

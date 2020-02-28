@@ -64,7 +64,7 @@ template<typename TVoxelTarget, typename TVoxelSource>
 void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateUsingOtherVolume_Bounded(
 		VoxelVolume<TVoxelTarget, VoxelBlockHash>* target_volume,
 		VoxelVolume<TVoxelSource, VoxelBlockHash>* source_volume,
-		const Extent3D& bounds) {
+		const Extent3Di& bounds) {
 	VolumeBasedBoundedAllocationStateMarkerFunctor<MEMORYDEVICE_CPU> volume_based_allocation_state_marker(
 			target_volume->index, bounds);
 	AllocateUsingOtherVolume_Generic(target_volume, source_volume, volume_based_allocation_state_marker);
@@ -75,7 +75,7 @@ template<typename TVoxelTarget, typename TVoxelSource>
 void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateUsingOtherVolume_OffsetAndBounded(
 		VoxelVolume<TVoxelTarget, VoxelBlockHash>* target_volume,
 		VoxelVolume<TVoxelSource, VoxelBlockHash>* source_volume,
-		const Extent3D& source_bounds, const Vector3i& target_offset) {
+		const Extent3Di& source_bounds, const Vector3i& target_offset) {
 
 	IndexingEngine<TVoxelTarget, VoxelBlockHash, MEMORYDEVICE_CPU>& target_indexer =
 			IndexingEngine<TVoxelTarget, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance();

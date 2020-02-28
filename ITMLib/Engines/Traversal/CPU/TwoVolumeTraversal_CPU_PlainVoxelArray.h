@@ -51,7 +51,7 @@ private:
 		TVoxel1* voxels1 = volume1->voxels.GetVoxelBlocks();
 		const PlainVoxelArray::IndexData* volume1Box = volume1->index.GetIndexData();
 
-		const Extent3D bounds = IntersectionExtent(*volume1Box, *volume2Box);
+		const Extent3Di bounds = IntersectionExtent(*volume1Box, *volume2Box);
 
 		volatile bool mismatch_found = false;
 #ifdef WITH_OPENMP

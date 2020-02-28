@@ -273,7 +273,7 @@ template<MemoryDeviceType TMemoryDeviceType>
 struct VolumeBasedBoundedAllocationStateMarkerFunctor :
 		public VolumeBasedAllocationStateMarkerFunctor<TMemoryDeviceType> {
 public:
-	VolumeBasedBoundedAllocationStateMarkerFunctor(VoxelBlockHash& target_index, const Extent3D& bounds) :
+	VolumeBasedBoundedAllocationStateMarkerFunctor(VoxelBlockHash& target_index, const Extent3Di& bounds) :
 			VolumeBasedAllocationStateMarkerFunctor<TMemoryDeviceType>(target_index), bounds(bounds) {}
 
 	_DEVICE_WHEN_AVAILABLE_
@@ -294,7 +294,7 @@ public:
 	using VolumeBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::colliding_block_positions;
 
 protected:
-	const Extent3D bounds;
+	const Extent3Di bounds;
 
 	using VolumeBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::colliding_block_positions_device;
 	using VolumeBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::colliding_block_count;

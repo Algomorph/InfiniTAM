@@ -49,28 +49,28 @@ template void IndexingEngine<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Alloc
 template void IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateUsingOtherVolume_Bounded(
 		ITMLib::VoxelVolume<WarpVoxel, VoxelBlockHash>* targetVolume,
 		ITMLib::VoxelVolume<TSDFVoxel, VoxelBlockHash>* sourceVolume,
-		const Extent3D& bounds);
+		const Extent3Di& bounds);
 template void IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateUsingOtherVolume_Bounded(
 		ITMLib::VoxelVolume<TSDFVoxel, VoxelBlockHash>* targetVolume,
 		ITMLib::VoxelVolume<TSDFVoxel, VoxelBlockHash>* sourceVolume,
-		const Extent3D& bounds);
+		const Extent3Di& bounds);
 template void IndexingEngine<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateUsingOtherVolume_Bounded(
 		ITMLib::VoxelVolume<WarpVoxel, VoxelBlockHash>* target_volume,
 		ITMLib::VoxelVolume<WarpVoxel, VoxelBlockHash>* source_volume,
-		const Extent3D& bounds);
+		const Extent3Di& bounds);
 
 template void IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateUsingOtherVolume_OffsetAndBounded(
 		ITMLib::VoxelVolume<WarpVoxel, VoxelBlockHash>* targetVolume,
 		ITMLib::VoxelVolume<TSDFVoxel, VoxelBlockHash>* sourceVolume,
-		const Extent3D& source_bounds, const Vector3i& target_offset);
+		const Extent3Di& source_bounds, const Vector3i& target_offset);
 template void IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateUsingOtherVolume_OffsetAndBounded(
 		ITMLib::VoxelVolume<TSDFVoxel, VoxelBlockHash>* targetVolume,
 		ITMLib::VoxelVolume<TSDFVoxel, VoxelBlockHash>* sourceVolume,
-		const Extent3D& source_bounds, const Vector3i& target_offset);
+		const Extent3Di& source_bounds, const Vector3i& target_offset);
 template void IndexingEngine<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateUsingOtherVolume_OffsetAndBounded(
 		ITMLib::VoxelVolume<WarpVoxel, VoxelBlockHash>* target_volume,
 		ITMLib::VoxelVolume<WarpVoxel, VoxelBlockHash>* source_volume,
-		const Extent3D& source_bounds, const Vector3i& target_offset);
+		const Extent3Di& source_bounds, const Vector3i& target_offset);
 
 
 }//namespace ITMLib
