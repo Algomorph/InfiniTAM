@@ -73,7 +73,7 @@ set(ITMLIB_CORE_HEADERS
 set(ITMLIB_ENGINES_COMMON_HEADERS
     Engines/Common/AllocationTempData.h
     Engines/Common/CheckBlockVisibility.h
-    Engines/Common/CommonFunctors.h
+    Engines/Common/WarpAccessFunctors.h
 
     )
 #======================================= LOW-LEVEL ENGINES =============================================================
@@ -131,9 +131,6 @@ set(ITMLIB_ENGINES_TRAVERSAL_SHARED_HEADERS
     )
 
 ##
-set(ITMLIB_ENGINES_TRAVERSAL_CPU_SOURCES
-    )
-
 set(ITMLIB_ENGINES_TRAVERSAL_CPU_HEADERS
     Engines/Traversal/CPU/ImageTraversal_CPU.h
     Engines/Traversal/CPU/TwoImageTraversal_CPU.h
@@ -150,9 +147,6 @@ set(ITMLIB_ENGINES_TRAVERSAL_CPU_HEADERS
     Engines/Traversal/CPU/ThreeVolumeTraversal_CPU_PlainVoxelArray.h
     Engines/Traversal/CPU/ThreeVolumeTraversal_CPU_VoxelBlockHash.h)
 ##
-set(ITMLIB_ENGINES_TRAVERSAL_CUDA_SOURCES
-    )
-
 set(ITMLIB_ENGINES_TRAVERSAL_CUDA_HEADERS
     Engines/Traversal/CUDA/ImageTraversal_CUDA.h
     Engines/Traversal/CUDA/ImageTraversal_CUDA_Kernels.h
@@ -191,42 +185,20 @@ set (
         ${ITMLIB_ENGINES_TRAVERSAL_CUDA_HEADERS}
 )
 
-set (
-        ITMLIB_ENGINES_TRAVERSAL_SOURCES
-
-        ${ITMLIB_ENGINES_TRAVERSAL_CPU_SOURCES}
-        ${ITMLIB_ENGINES_TRAVERSAL_CUDA_SOURCES}
-)
-
 #====================================== SCENE REDUCTION ENGINES ======================================================
 
-##
+
 set(ITMLIB_ENGINES_REDUCTION_INTERFACE_HEADERS
     Engines/Reduction/Interface/VolumeReduction.h
     )
-##
+
 set(ITMLIB_ENGINES_REDUCTION_SHARED_HEADERS
     Engines/Reduction/Shared/ReductionResult.h
-    )
-
-##
-set(ITMLIB_ENGINES_REDUCTION_CPU_SOURCES
-    Engines/Reduction/CPU/VolumeReduction_CPU_PlainVoxelArray.tpp
-    Engines/Reduction/CPU/VolumeReduction_CPU_PlainVoxelArray.cpp
-    Engines/Reduction/CPU/VolumeReduction_CPU_VoxelBlockHash.tpp
-    Engines/Reduction/CPU/VolumeReduction_CPU_VoxelBlockHash.cpp
     )
 
 set(ITMLIB_ENGINES_REDUCTION_CPU_HEADERS
     Engines/Reduction/CPU/VolumeReduction_CPU_PlainVoxelArray.h
     Engines/Reduction/CPU/VolumeReduction_CPU_VoxelBlockHash.h
-    )
-##
-set(ITMLIB_ENGINES_REDUCTION_CUDA_SOURCES
-    Engines/Reduction/CUDA/VolumeReduction_CUDA_PlainVoxelArray.tcu
-    Engines/Reduction/CUDA/VolumeReduction_CUDA_PlainVoxelArray.cu
-    Engines/Reduction/CUDA/VolumeReduction_CUDA_VoxelBlockHash.tcu
-    Engines/Reduction/CUDA/VolumeReduction_CUDA_VoxelBlockHash.cu
     )
 
 set(ITMLIB_ENGINES_REDUCTION_CUDA_HEADERS
@@ -245,12 +217,6 @@ set (
         ${ITMLIB_ENGINES_REDUCTION_CUDA_HEADERS}
 )
 
-set (
-        ITMLIB_ENGINES_REDUCTION_SOURCES
-
-        ${ITMLIB_ENGINES_REDUCTION_CPU_SOURCES}
-        ${ITMLIB_ENGINES_REDUCTION_CUDA_SOURCES}
-)
 
 #====================================== SCENE MANIPULATION ENGINES =====================================================
 set(ITMLIB_ENGINES_MANIPULATION_HEADERS
@@ -980,18 +946,6 @@ set(ITMLIB_UTILS_STATCALC_SOURCES
     Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator_CUDA_VoxelBlockHash.cu
     )
 
-## ================================================ UTILS - VOLUME REDUCTION STATISTICS CALCULATOR =====================
-
-set(ITMLIB_UTILS_REDUCTION_STATCALC_HEADERS
-    Utils/Analytics/VolumeReductionStatisticsCalculator/VolumeReductionStatisticsCalculator.h
-    Utils/Analytics/VolumeReductionStatisticsCalculator/VolumeReductionStatisticsCalculator_CUDA_VBH.h
-    Utils/Analytics/VolumeReductionStatisticsCalculator/VolumeReductionStatisticsCalculator_CUDA_VBH_Kernels.h
-    )
-set(ITMLIB_UTILS_REDUCTION_STATCALC_SOURCES
-    Utils/Analytics/VolumeReductionStatisticsCalculator/VolumeReductionStatisticsCalculator_CUDA_VBH.tpp
-    Utils/Analytics/VolumeReductionStatisticsCalculator/VolumeReductionStatisticsCalculator_CUDA_VBH.cu
-    )
-
 ## ================================================ UTILS - FILEIO =====================================================
 set(ITMLIB_UTILS_FILEIO_SOURCES
     Utils/FileIO/TelemetryRecorder_PlainVoxelArray.cpp
@@ -1058,8 +1012,6 @@ set(sources
     ${ITMLIB_ENGINES_LOWLEVEL_CUDA_SOURCES}
     ${ITMLIB_ENGINES_MANIPULATION_CPU_SOURCES}
     ${ITMLIB_ENGINES_MANIPULATION_CUDA_SOURCES}
-    ${ITMLIB_ENGINES_TRAVERSAL_SOURCES}
-    ${ITMLIB_ENGINES_REDUCTION_SOURCES}
     ${ITMLIB_ENGINES_MESHING_CPU_SOURCES}
     ${ITMLIB_ENGINES_MESHING_CUDA_SOURCES}
     ${ITMLIB_ENGINES_MULTISCENE_SOURCES}
@@ -1090,7 +1042,6 @@ set(sources
     ${ITMLIB_SCENE_MOTION_TRACKERS_SHARED_SOURCES}
     ${ITMLIB_UTILS_SOURCES}
     ${ITMLIB_UTILS_STATCALC_SOURCES}
-    ${ITMLIB_UTILS_REDUCTION_STATCALC_SOURCES}
     ${ITMLIB_UTILS_FILEIO_SOURCES}
     ${ITMLIB_UTILS_VISUALIZATION_SOURCES}
     )
@@ -1158,7 +1109,6 @@ set(headers
     ${ITMLIB_SCENE_MOTION_TRACKERS_SHARED_HEADERS}
     ${ITMLIB_UTILS_HEADERS}
     ${ITMLIB_UTILS_STATCALC_HEADERS}
-    ${ITMLIB_UTILS_REDUCTION_STATCALC_HEADERS}
     ${ITMLIB_UTILS_FILEIO_HEADERS}
     ${ITMLIB_UTILS_VISUALIZATION_HEADERS}
     )

@@ -21,7 +21,7 @@
 #include "../../Objects/Volume/VoxelVolume.h"
 #include "../../Objects/Tracking/CameraTrackingState.h"
 #include "../../Objects/Views/View.h"
-#include "../Common/CommonFunctors.h"
+#include "../Common/WarpAccessFunctors.h"
 #include "../../Utils/WarpType.h"
 
 namespace ITMLib {

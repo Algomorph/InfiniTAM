@@ -120,7 +120,7 @@ if (BUILD_TESTS)
         itm_add_test(NAME CUDA_Atomics SOURCES Test_CUDA_Atomics.cpp CUDAAtomicTesting.h
                      CUDAAtomicTesting.cu TemporaryCUDA_Atomics.h)
         itm_add_test(NAME SmoothWarpGradient SOURCES Test_SmoothWarpGradient_CPU_CUDA.cpp)
-        itm_add_test(NAME CUDASpatialHashReduction SOURCES Test_CUDASpatialHashReduction.cpp)
+        itm_add_test(NAME VolumeReduction_VBH_CUDA SOURCES Test_VolumeReduction_VBH_CUDA.cpp)
     endif()
 
     #######################################################

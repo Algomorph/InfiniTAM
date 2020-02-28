@@ -14,7 +14,7 @@
 //  limitations under the License.
 //  ================================================================
 
-#define BOOST_TEST_MODULE CUDASpatialHashReduction
+#define BOOST_TEST_MODULE VolumeReduction_VBH_CUDA
 #ifndef WIN32
 #define BOOST_TEST_DYN_LINK
 #endif
@@ -24,7 +24,6 @@
 
 
 //ITMLib
-#include "../ITMLib/Utils/Analytics/VolumeReductionStatisticsCalculator/VolumeReductionStatisticsCalculator_CUDA_VBH.h"
 #include "../ITMLib/Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator.h"
 
 //local
@@ -33,7 +32,7 @@
 
 using namespace ITMLib;
 
-BOOST_FIXTURE_TEST_CASE(Test_CUDASpatialHashReduction, Frame16And17Fixture) {
+BOOST_FIXTURE_TEST_CASE(Test_VolumeReduction_VBH_CUDA_legacy, Frame16And17Fixture) {
 	const int iteration = 1;
 
 	std::string prefix = "data_tikhonov_sobolev";
@@ -49,7 +48,7 @@ BOOST_FIXTURE_TEST_CASE(Test_CUDASpatialHashReduction, Frame16And17Fixture) {
 
 	float max_value;
 	Vector3i position;
-	VolumeReductionStatisticsCalculator<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance().ComputeWarpUpdateMax(
+	VolumeStatisticsCalculator<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance().ComputeWarpUpdateMaxAndPosition(
 			max_value, position, warps);
 
 	BOOST_REQUIRE_EQUAL(value_gt, max_value);

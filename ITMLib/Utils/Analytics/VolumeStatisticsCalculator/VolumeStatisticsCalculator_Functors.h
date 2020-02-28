@@ -36,6 +36,7 @@
 #include "../../WarpType.h"
 #include "../Statistics.h"
 #include "../../MemoryBlock_StdVector_Converter.h"
+#include "../../../Engines/Common/WarpAccessFunctors.h"
 
 
 using namespace ITMLib;
@@ -199,14 +200,10 @@ struct ComputeWarpLengthStatisticFunctor<true, TVoxel, TIndex, TDeviceType, TSta
 // region =========================================== REDUCTION VECTOR/GRADIENT FIELD MIN/MEAN/MAX ========================
 
 template<typename TVoxel, ITMLib::WarpType TWarpType>
-struct RetreiveWarpLengthFunctor;
-
-template<typename TVoxel>
-struct RetreiveWarpLengthFunctor<TVoxel, ITMLib::WARP_UPDATE>{
-public:
+struct RetreiveWarpLengthFunctor{
 	_CPU_AND_GPU_CODE_
 	inline static float retrieve(const TVoxel& voxel){
-		return ORUtils::length(voxel.warp_update);
+		return ORUtils::length(WarpAccessStaticFunctor<TVoxel,TWarpType>::GetWarp(voxel));
 	}
 };
 
@@ -256,7 +253,7 @@ struct ComputeVoxelCountWithSpecificValue<true, TVoxel, TIndex, TMemoryDeviceTyp
 	}
 };
 
-template<class TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+template<class TVoxel, typename TIndex  , MemoryDeviceType TMemoryDeviceType>
 struct ComputeVoxelCountWithSpecificValue<false, TVoxel, TIndex, TMemoryDeviceType> {
 	static int compute(VoxelVolume<TVoxel, TIndex>* scene, float value) {
 		DIEWITHEXCEPTION(

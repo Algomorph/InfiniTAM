@@ -21,6 +21,8 @@
 #include "../../../Objects/Volume/VoxelVolume.h"
 #include "../Shared/ReductionResult.h"
 #include "../../../GlobalTemplateDefines.h"
+#include "../../../Utils/Geometry/SpatialIndexConversions.h"
+#include "VolumeReduction_CUDA_VoxelBlockHash_Kernels.h"
 
 namespace ITMLib {
 
@@ -43,11 +45,83 @@ public:
 	 * This is necessary to normalize input sizes.
 	 * \return end result based on all voxels in the volume.
 	 */
-	static TOutput ReduceUtilized(Vector3i& position, const VoxelVolume<TVoxel, VoxelBlockHash>* volume, ReductionResult<TOutput, VoxelBlockHash> ignored_value = ReductionResult<TOutput, VoxelBlockHash>());
+	static TOutput ReduceUtilized(Vector3i& position, const VoxelVolume<TVoxel, VoxelBlockHash>* volume, ReductionResult<TOutput, VoxelBlockHash> ignored_value = ReductionResult<TOutput, VoxelBlockHash>()){
+		const int utilized_entry_count = volume->index.GetUtilizedHashBlockCount();
+		const int* utilized_hash_codes = volume->index.GetUtilizedBlockHashCodes();
+		const HashEntry* hash_entries = volume->index.GetEntries();
+		const TVoxel* voxels = volume->voxels.GetVoxelBlocks();
 
+		const int half_block_voxel_count = VOXEL_BLOCK_SIZE3 / 2;
+
+		auto ceilIntDiv = [](int dividend, int divisor) {
+			return dividend / divisor + (dividend % divisor != 0);
+		};
+
+		auto getNormalizedCount = [&half_block_voxel_count, &ceilIntDiv](int count) {
+			return ceilIntDiv(count, half_block_voxel_count) * half_block_voxel_count;
+		};
+
+		const int normalized_entry_count = getNormalizedCount(utilized_entry_count);
+		int tail_length = normalized_entry_count - utilized_entry_count;
+
+		ORUtils::MemoryBlock<ReductionResult<TOutput, VoxelBlockHash>> result_buffer1(normalized_entry_count,
+		                                                                              MEMORYDEVICE_CUDA);
+
+		dim3 cuda_block_size(half_block_voxel_count);
+		dim3 cuda_tail_grid_size(ceilIntDiv(tail_length, half_block_voxel_count));
+
+		setTailToIgnored<TOutput>
+		<< < cuda_tail_grid_size, cuda_block_size >> >
+		(result_buffer1.GetData(MEMORYDEVICE_CUDA), utilized_entry_count, normalized_entry_count, ignored_value);
+		ORcudaKernelCheck;
+
+		dim3 cuda_utilized_grid_size(utilized_entry_count);
+
+		computeVoxelHashReduction_BlockLevel<TVoxel, TRetrieveSingleFunctor, TReduceFunctor, TOutput>
+		<< < cuda_utilized_grid_size, cuda_block_size >> >
+		(result_buffer1.GetData(
+				MEMORYDEVICE_CUDA), voxels, hash_entries, utilized_hash_codes);
+		ORcudaKernelCheck;
+
+
+		int output_count = utilized_entry_count;
+		int normalized_output_count = normalized_entry_count;
+
+		ORUtils::MemoryBlock<ReductionResult<TOutput, VoxelBlockHash>> result_buffer2(
+				normalized_entry_count / half_block_voxel_count,
+				MEMORYDEVICE_CUDA);
+		/* input & output are swapped in the beginning of the loop code as opposed to the end,
+		 so that output_buffer points to the final buffer after the loop finishes*/
+		ORUtils::MemoryBlock<ReductionResult<TOutput, VoxelBlockHash>>* input_buffer = &result_buffer2;
+		ORUtils::MemoryBlock<ReductionResult<TOutput, VoxelBlockHash>>* output_buffer = &result_buffer1;
+
+		while (output_count > 1) {
+			std::swap(input_buffer, output_buffer);
+			output_count = normalized_output_count / half_block_voxel_count;
+			normalized_output_count = getNormalizedCount(output_count);
+			tail_length = normalized_output_count - output_count;
+			cuda_tail_grid_size.x = ceilIntDiv(tail_length, half_block_voxel_count);
+			setTailToIgnored<TOutput>
+			<< < cuda_tail_grid_size, cuda_block_size >> >
+			(output_buffer->GetData(MEMORYDEVICE_CUDA), output_count, normalized_output_count, ignored_value);
+			ORcudaKernelCheck;
+
+			dim3 cuda_grid_size(output_count);
+			computeVoxelHashReduction_ResultLevel<TReduceFunctor, TOutput>
+			<< < cuda_grid_size, cuda_block_size >> >
+			(output_buffer->GetData(MEMORYDEVICE_CUDA), input_buffer->GetData(
+					MEMORYDEVICE_CUDA));
+			ORcudaKernelCheck;
+		}
+
+		ReductionResult<TOutput, VoxelBlockHash> final_result;
+		ORcudaSafeCall(cudaMemcpyAsync(&final_result, output_buffer->GetData(MEMORYDEVICE_CUDA),
+		                               sizeof(ReductionResult<TOutput, VoxelBlockHash>), cudaMemcpyDeviceToHost));
+		HashEntry entry_with_result = volume->index.GetHashEntry(final_result.hash_code);
+		position = ComputePositionVectorFromLinearIndex_VoxelBlockHash(entry_with_result.pos,
+		                                                               static_cast<int> (final_result.index_within_block));
+		return final_result.value;
+	}
 };
-
-extern template class VolumeReductionEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>;
-extern template class VolumeReductionEngine<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>;
 
 } // namespace ITMLib

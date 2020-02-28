@@ -21,7 +21,7 @@
 #include "../../../Objects/Volume/RepresentationAccess.h"
 #include "../../../Objects/Views/View.h"
 #include "../../../Objects/Tracking/CameraTrackingState.h"
-#include "../../Common/CommonFunctors.h"
+#include "../../Common/WarpAccessFunctors.h"
 #include "../../Common/AllocationTempData.h"
 #include "../../../Utils/Math.h"
 #include "../../../Utils/PixelUtils.h"

@@ -45,12 +45,11 @@ public:
 	 * This is necessary to normalize input sizes.
 	 * \return end result based on all voxels in the volume.
 	 */
-	static TOutput ReduceUtilized(Vector3i& position, const VoxelVolume<TVoxel, VoxelBlockHash>* volume, ReductionResult<TOutput, VoxelBlockHash> ignored_value = ReductionResult<TOutput, VoxelBlockHash>());
+	static TOutput ReduceUtilized(Vector3i& position, const VoxelVolume<TVoxel, VoxelBlockHash>* volume, ReductionResult<TOutput, VoxelBlockHash> ignored_value = ReductionResult<TOutput, VoxelBlockHash>()){
+		DIEWITHEXCEPTION_REPORTLOCATION("Not yet implemented.");
+	}
 
 };
-
-extern template class VolumeReductionEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>;
-extern template class VolumeReductionEngine<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>;
 
 } // namespace ITMLib
 

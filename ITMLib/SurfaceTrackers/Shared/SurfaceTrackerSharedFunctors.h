@@ -22,7 +22,7 @@
 #include "../../../ORUtils/PlatformIndependentAtomics.h"
 #include "../../Engines/Traversal/Interface/VolumeTraversal.h"
 #include "../../Engines/Traversal/Interface/ThreeVolumeTraversal.h"
-#include "../../Engines/Common/CommonFunctors.h"
+#include "../../Engines/Common/WarpAccessFunctors.h"
 
 #ifdef __CUDACC__
 #include "../../Utils/CUDAUtils.h"

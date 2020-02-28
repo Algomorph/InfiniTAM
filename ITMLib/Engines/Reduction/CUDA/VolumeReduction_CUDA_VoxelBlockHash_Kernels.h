@@ -41,13 +41,13 @@ computeVoxelHashReduction_BlockLevel(ReductionResult<TOutput, VoxelBlockHash>* b
 	unsigned int thread_id = threadIdx.x;
 	unsigned int i_utilized_hash_block = blockIdx.x;
 	int hash_code = utilized_hash_codes[i_utilized_hash_block];
-	const TVoxel* block = voxels + (hash_entries[hash_code].ptr * VOXEL_BLOCK_SIZE3);
+	const TVoxel* block_voxels = voxels + (hash_entries[hash_code].ptr * VOXEL_BLOCK_SIZE3);
 	unsigned int index_within_block1 = thread_id;
 	unsigned int index_within_block2 = thread_id + blockDim.x;
 
 	shared_data[thread_id] = TReduceFunctor::reduce(
-			{TRetrieveSingleFunctor::retrieve(block[index_within_block1]), index_within_block1, hash_code},
-			{TRetrieveSingleFunctor::retrieve(block[index_within_block2]), index_within_block2, hash_code});
+			{TRetrieveSingleFunctor::retrieve(block_voxels[index_within_block1]), index_within_block1, hash_code},
+			{TRetrieveSingleFunctor::retrieve(block_voxels[index_within_block2]), index_within_block2, hash_code});
 	__syncthreads();
 
 	for (unsigned int step = blockDim.x / 2u; step > 0u; step >>= 1u) {
@@ -69,10 +69,7 @@ void computeVoxelHashReduction_ResultLevel(ReductionResult<TOutput, VoxelBlockHa
 	unsigned int block_id = blockIdx.x;
 	unsigned int base_level_index1 = block_id * blockDim.x * 2 + thread_id;
 	unsigned int base_level_index2 = base_level_index1 + blockDim.x;
-	shared_data[thread_id] = TReduceFunctor::reduce(
-			{input[base_level_index1], base_level_index1},
-			{input[base_level_index2], base_level_index2}
-	);
+	shared_data[thread_id] = TReduceFunctor::reduce( input[base_level_index1], input[base_level_index2]);
 	__syncthreads();
 	for (unsigned int step = blockDim.x / 2u; step > 0u; step >>= 1u) {
 		if(thread_id < step){

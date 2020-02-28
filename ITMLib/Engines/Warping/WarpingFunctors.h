@@ -24,7 +24,7 @@
 #include "../../Objects/Volume/TrilinearInterpolation.h"
 #include "../../Utils/Configuration.h"
 #include "../../../ORUtils/PlatformIndependentAtomics.h"
-#include "../Common/CommonFunctors.h"
+#include "../Common/WarpAccessFunctors.h"
 
 namespace ITMLib {
 
