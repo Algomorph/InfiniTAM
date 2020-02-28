@@ -41,11 +41,11 @@ public:
 	virtual double ComputeWarpUpdateMax(VoxelVolume<TVoxel,TIndex>* volume) = 0;
 	virtual double ComputeWarpUpdateMean(VoxelVolume<TVoxel,TIndex>* volume) = 0;
 
-	virtual void ComputeWarpUpdateMaxAndPosition(float& value, Vector3i& position, const VoxelVolume<TVoxel,TIndex>* volume) = 0;
-	
 	virtual double ComputeFramewiseWarpMin(VoxelVolume<TVoxel,TIndex>* volume) = 0;
 	virtual double ComputeFramewiseWarpMax(VoxelVolume<TVoxel,TIndex>* volume) = 0;
 	virtual double ComputeFramewiseWarpMean(VoxelVolume<TVoxel,TIndex>* volume) = 0;
+
+	virtual void ComputeWarpUpdateMaxAndPosition(float& value, Vector3i& position, const VoxelVolume<TVoxel,TIndex>* volume) = 0;
 
 	virtual Extent3Di FindMinimumNonTruncatedBoundingBox(VoxelVolume <TVoxel, TIndex>* volume) = 0;
 

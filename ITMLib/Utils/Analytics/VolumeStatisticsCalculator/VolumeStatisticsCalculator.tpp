@@ -82,7 +82,12 @@ VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::ComputeTruncatedV
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 unsigned int VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::CountVoxelsWithDepthWeightInRange(
 		VoxelVolume<TVoxel, TIndex>* volume, Extent2Di range) {
-	return 0;
+	RetrieveIsVoxelInDepthWeightRange<TVoxel, unsigned int>::range = range;
+	Vector3i position;
+	return VolumeReductionEngine<TVoxel, TIndex, TMemoryDeviceType>::
+	template ReduceUtilized<RetrieveIsVoxelInDepthWeightRange<TVoxel, unsigned int>,
+			ReduceSumFunctor<TVoxel, TIndex, unsigned int>, unsigned int>
+			(position, volume);
 }
 
 
@@ -112,7 +117,7 @@ void VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::ComputeWarpU
 	ignored_value.value = FLT_MIN;
 	value = VolumeReductionEngine<TVoxel, TIndex, TMemoryDeviceType>::
 	template ReduceUtilized<RetreiveWarpLengthFunctor<TVoxel, ITMLib::WARP_UPDATE>,
-			ReduceWarpLengthStatisticFunctor<TVoxel, TIndex, ITMLib::WARP_UPDATE, ITMLib::MAXIMUM>, float>
+			ReduceStatisticFunctor<TVoxel, TIndex, float, ITMLib::MAXIMUM>, float>
 			(position, volume, ignored_value);
 }
 

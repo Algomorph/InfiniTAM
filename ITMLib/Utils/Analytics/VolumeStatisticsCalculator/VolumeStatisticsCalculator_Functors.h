@@ -197,7 +197,7 @@ struct ComputeWarpLengthStatisticFunctor<true, TVoxel, TIndex, TDeviceType, TSta
 };
 
 //endregion
-// region =========================================== REDUCTION VECTOR/GRADIENT FIELD MIN/MEAN/MAX ========================
+// region =========================================== REDUCTION VECTOR/GRADIENT FIELD MIN/MEAN/MAX =====================
 
 template<typename TVoxel, ITMLib::WarpType TWarpType>
 struct RetreiveWarpLengthFunctor {
@@ -207,15 +207,15 @@ struct RetreiveWarpLengthFunctor {
 	}
 };
 
-template<typename TVoxel, typename TIndex, ITMLib::WarpType TWarpType, ITMLib::Statistic TStatistic>
-struct ReduceWarpLengthStatisticFunctor;
+template<typename TVoxel, typename TIndex, typename TOutput, ITMLib::Statistic TStatistic>
+struct ReduceStatisticFunctor;
 
-template<typename TVoxel, typename TIndex>
-struct ReduceWarpLengthStatisticFunctor<TVoxel, TIndex, ITMLib::WARP_UPDATE, ITMLib::MAXIMUM> {
+template<typename TVoxel, typename TIndex, typename TOutput>
+struct ReduceStatisticFunctor<TVoxel, TIndex, TOutput, ITMLib::MAXIMUM> {
 public:
 	_CPU_AND_GPU_CODE_
-	inline static const ReductionResult<float, TIndex>& reduce(
-			const ReductionResult<float, TIndex>& item1, const ReductionResult<float, TIndex>& item2) {
+	inline static const ReductionResult<TOutput, TIndex>& reduce(
+			const ReductionResult<TOutput, TIndex>& item1, const ReductionResult<TOutput, TIndex>& item2) {
 		return (item1.value > item2.value) ? item1 : item2;
 	}
 };
@@ -224,6 +224,31 @@ public:
 
 //region ================== **** VOXEL COUNTS **** =====================================================================
 
+//region ============================ REDUCTION COUNT FUNCTORS =========================================================
+
+template <typename TVoxel, typename TOutput>
+struct RetrieveIsVoxelInDepthWeightRange{
+	Extent2Di range;
+	_CPU_AND_GPU_CODE_
+	inline TOutput retrieve(const TVoxel& voxel) {
+		return range.from < voxel.w_depth < range.to;
+	}
+};
+
+template<typename TVoxel, typename TIndex, typename TOutput>
+struct ReduceSumFunctor {
+public:
+	_CPU_AND_GPU_CODE_
+	inline static const ReductionResult<TOutput, TIndex>& reduce(
+			ReductionResult<TOutput, TIndex>& item1, const ReductionResult<TOutput, TIndex>& item2) {
+		item1.value += item2.value;
+		return item1;
+	}
+};
+
+
+
+//endregion ============================================================================================================
 //region =========================== COUNT ALL VOXELS ==================================================================
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
@@ -249,7 +274,7 @@ struct ComputeAllocatedVoxelCountFunctor<TVoxel, VoxelBlockHash, TMemoryDeviceTy
 	}
 };
 //endregion
-//region ============================================ COUNT VOXELS WITH SPECIFIC SDF VALUE =============================
+//region ========================= COUNT VOXELS WITH SPECIFIC SDF VALUE ================================================
 
 template<bool hasSDFInformation, typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 struct ComputeVoxelCountWithSpecificValue;
@@ -291,7 +316,7 @@ struct ComputeVoxelCountWithSpecificValue<false, TVoxel, TIndex, TMemoryDeviceTy
 	}
 };
 //endregion
-//region =========================================== COUNT VOXELS WITH SPECIFIC FLAGS ==================================
+//region ================================ COUNT VOXELS WITH SPECIFIC FLAGS =============================================
 
 template<bool hasSemanticInformation, typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 struct ComputeVoxelCountWithSpecificFlags;
@@ -359,6 +384,9 @@ struct IsAlteredCountFunctor {
 	DECLARE_ATOMIC(unsigned int, count);
 };
 //endregion
+
+//endregion
+
 //region =========================================== SUM OF TOTAL SDF ==================================================
 
 template<bool hasSemanticInformation, typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
@@ -562,8 +590,6 @@ private:
 	DECLARE_ATOMIC(int, current_fill_index);
 };
 
-//template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-//struct HashOnlyStatisticsFunctor;
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
 struct HashOnlyStatisticsFunctor<TVoxel, PlainVoxelArray, TMemoryDeviceType> {
 	static std::vector<int> GetAllocatedHashCodes(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {

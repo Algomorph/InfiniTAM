@@ -26,7 +26,7 @@ struct ReductionResult;
 
 template<typename TValue>
 struct ReductionResult<TValue, VoxelBlockHash>{
-	TValue value;
+	TValue value = TValue(0);
 	unsigned int index_within_block;
 	int hash_code;
 };

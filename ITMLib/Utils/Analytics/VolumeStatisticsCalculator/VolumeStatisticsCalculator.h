@@ -39,6 +39,7 @@ public:
 
 	Vector6i ComputeVoxelBounds(const VoxelVolume <TVoxel, TIndex>* volume) override;
 	Vector6i ComputeAlteredVoxelBounds(VoxelVolume <TVoxel, TIndex>* volume) override;
+
 	unsigned int ComputeAllocatedVoxelCount(VoxelVolume <TVoxel, TIndex>* volume) override;
 	unsigned int CountVoxelsWithDepthWeightInRange(VoxelVolume <TVoxel, TIndex>* volume, Extent2Di range) override;
 	unsigned int ComputeVoxelWithFlagsCount(VoxelVolume <TVoxel, TIndex>* volume, VoxelFlags flags) override;
@@ -52,12 +53,13 @@ public:
 	double ComputeWarpUpdateMax(VoxelVolume <TVoxel, TIndex>* volume) override;
 	double ComputeWarpUpdateMean(VoxelVolume <TVoxel, TIndex>* volume) override;
 
-	void ComputeWarpUpdateMaxAndPosition(float& value, Vector3i& position, const VoxelVolume<TVoxel,TIndex>* volume);
-
-	
 	double ComputeFramewiseWarpMin(VoxelVolume <TVoxel, TIndex>* volume) override;
 	double ComputeFramewiseWarpMax(VoxelVolume <TVoxel, TIndex>* volume) override;
 	double ComputeFramewiseWarpMean(VoxelVolume <TVoxel, TIndex>* volume) override;
+
+	void ComputeWarpUpdateMaxAndPosition(float& value, Vector3i& position, const VoxelVolume<TVoxel,TIndex>* volume);
+
+
 
 	Vector6i FindMinimumNonTruncatedBoundingBox(VoxelVolume <TVoxel, TIndex>* volume) override;
 
