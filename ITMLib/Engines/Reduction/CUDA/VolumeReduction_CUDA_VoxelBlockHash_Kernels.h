@@ -32,11 +32,12 @@ setTailToIgnored(ReductionResult<TOutput, VoxelBlockHash>* results, const int fr
 	results[result_idx] = ignored_value;
 }
 
-template<typename TVoxel, typename TRetrieveSingleFunctor, typename TReduceFunctor, typename TOutput>
+template<typename TVoxel, typename TReduceStaticFunctor, typename TOutput, typename TRetrieveFunction>
 __global__ void
-computeVoxelHashReduction_BlockLevel(ReductionResult<TOutput, VoxelBlockHash>* block_results, const TVoxel* voxels,
-                                     const HashEntry* hash_entries,
-                                     const int* utilized_hash_codes) {
+computeVoxelHashReduction_BlockLevel_Generic(ReductionResult<TOutput, VoxelBlockHash>* block_results, const TVoxel* voxels,
+                                            const HashEntry* hash_entries,
+                                            const int* utilized_hash_codes,
+                                            TRetrieveFunction&& retrieve_function) {
 	__shared__ ReductionResult<TOutput, VoxelBlockHash> shared_data[VOXEL_BLOCK_SIZE3 / 2];
 	unsigned int thread_id = threadIdx.x;
 	unsigned int i_utilized_hash_block = blockIdx.x;
@@ -45,20 +46,45 @@ computeVoxelHashReduction_BlockLevel(ReductionResult<TOutput, VoxelBlockHash>* b
 	unsigned int index_within_block1 = thread_id;
 	unsigned int index_within_block2 = thread_id + blockDim.x;
 
-	shared_data[thread_id] = TReduceFunctor::reduce(
-			{TRetrieveSingleFunctor::retrieve(block_voxels[index_within_block1]), index_within_block1, hash_code},
-			{TRetrieveSingleFunctor::retrieve(block_voxels[index_within_block2]), index_within_block2, hash_code});
+	shared_data[thread_id] = TReduceStaticFunctor::reduce(
+			{retrieve_function(block_voxels, index_within_block1), index_within_block1, hash_code},
+			{retrieve_function(block_voxels, index_within_block2), index_within_block2, hash_code});
 	__syncthreads();
 
 	for (unsigned int step = blockDim.x / 2u; step > 0u; step >>= 1u) {
 		if (thread_id < step) {
-			shared_data[thread_id] = TReduceFunctor::reduce(shared_data[thread_id],
-			                                                shared_data[thread_id + step]);
+			shared_data[thread_id] = TReduceStaticFunctor::reduce(shared_data[thread_id],
+			                                                      shared_data[thread_id + step]);
 		}
 		__syncthreads();
 	}
 
 	if (thread_id == 0) block_results[i_utilized_hash_block] = shared_data[0];
+}
+template<typename TVoxel, typename TRetrieveStaticFunctor, typename TReduceStaticFunctor, typename TOutput>
+__global__ void
+computeVoxelHashReduction_BlockLevel_Static(ReductionResult<TOutput, VoxelBlockHash>* block_results, const TVoxel* voxels,
+                                             const HashEntry* hash_entries,
+                                             const int* utilized_hash_codes) {
+	computeVoxelHashReduction_BlockLevel_Generic<TVoxel, TReduceStaticFunctor, TOutput>(
+			block_results, voxels, hash_entries, utilized_hash_codes,
+			[](TVoxel* block_voxels, int index_within_block){
+				return TRetrieveStaticFunctor::retrieve(block_voxels[index_within_block]);
+			}
+			);
+}
+template<typename TVoxel, typename TRetrieveDynamicFunctor, typename TReduceStaticFunctor, typename TOutput>
+__global__ void
+computeVoxelHashReduction_BlockLevel_Dynamic(ReductionResult<TOutput, VoxelBlockHash>* block_results, const TVoxel* voxels,
+                                            const HashEntry* hash_entries,
+                                            const int* utilized_hash_codes,
+                                            const TRetrieveDynamicFunctor* functor_device) {
+	computeVoxelHashReduction_BlockLevel_Generic<TVoxel, TReduceStaticFunctor, TOutput>(
+			block_results, voxels, hash_entries, utilized_hash_codes,
+			[&functor_device](TVoxel* block_voxels, int index_within_block){
+				return functor_device->retrieve(block_voxels[index_within_block]);
+			}
+	);
 }
 
 template<typename TReduceFunctor, typename TOutput>

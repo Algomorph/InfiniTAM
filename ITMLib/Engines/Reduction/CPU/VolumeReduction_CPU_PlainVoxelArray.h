@@ -22,12 +22,14 @@
 #include "../Shared/ReductionResult.h"
 #include "../../../GlobalTemplateDefines.h"
 
+//TODO: implement public static functions that currently throw the "Not yet implemented" exception
+
 namespace ITMLib {
 
 template<typename TVoxel>
 class VolumeReductionEngine<TVoxel, PlainVoxelArray, MEMORYDEVICE_CPU> {
 public:
-	template<typename TRetrieveSingleStaticFunctor, typename TReduceStaticFunctor, typename TOutput>
+
 	/**
 	 * \brief Computes reduction on some value from every voxel in the volume, e.g. minimum of some voxel field
 	 * \details The position output is not always relevant, i.e. in case of accumulator reductions like the sum of some field.
@@ -43,12 +45,13 @@ public:
 	 * This is necessary to normalize input sizes.
 	 * \return end result based on all voxels in the volume.
 	 */
+	template<typename TRetrieveSingleStaticFunctor, typename TReduceStaticFunctor, typename TOutput>
 	static TOutput ReduceUtilized(Vector3i& position, const VoxelVolume<TVoxel, PlainVoxelArray>* volume,
 	                              ReductionResult<TOutput, PlainVoxelArray> ignored_value = ReductionResult<TOutput, PlainVoxelArray>()) {
 		DIEWITHEXCEPTION_REPORTLOCATION("Not yet implemented.");
 	}
 
-	template<typename TRetrieveSingleDynamicFunctor, typename TReduceStaticFunctor, typename TOutput>
+
 	/**
 	 * \brief Computes reduction on some value from every voxel in the volume, e.g. minimum of some voxel field
 	 * \details The position output is not always relevant, i.e. in case of accumulator reductions like the sum of some field.
@@ -60,11 +63,13 @@ public:
 	 * \tparam TReduceStaticFunctor a function object with a static function which accepts two ReductionResult<TOutput> objects and returns a single ReductionResult<TOutput> object
 	 * \param position the position of the voxel based on the indices produced by TReduceStaticFunctor when comparing each ReductionResult pair.
 	 * \param volume the volume to run the reduction over
+	 * \param retrieve_functor functor object to retrieve initial TOutput value from individual voxels
 	 * \param ignored_value this is a sample value-index-hash triplet that will be ignored / won't skew result of the operation when issued
 	 * to the reduction algorithm. For instance, when seeking a minimum of a float field, it makes sense to set this to {FLT_MAX, UINT_MAX}.
 	 * This is necessary to normalize input sizes.
 	 * \return end result based on all voxels in the volume.
 	 */
+	template<typename TRetrieveSingleDynamicFunctor, typename TReduceStaticFunctor, typename TOutput>
 	static TOutput ReduceUtilized(Vector3i& position, const VoxelVolume<TVoxel, PlainVoxelArray>* volume,
 	                              const TRetrieveSingleDynamicFunctor& retrieve_functor,
 	                              ReductionResult<TOutput, PlainVoxelArray> ignored_value = ReductionResult<TOutput, PlainVoxelArray>()
