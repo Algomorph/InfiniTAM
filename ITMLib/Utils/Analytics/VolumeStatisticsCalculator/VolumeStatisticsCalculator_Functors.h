@@ -227,16 +227,24 @@ public:
 //region ============================ REDUCTION COUNT FUNCTORS =========================================================
 
 template <typename TVoxel, typename TOutput, bool ThasDepthInformation>
-struct RetrieveIsVoxelInDepthWeightRange{
+struct RetrieveIsVoxelInDepthWeightRange;
+
+template <typename TVoxel, typename TOutput>
+struct RetrieveIsVoxelInDepthWeightRange<TVoxel,TOutput, true>{
 	Extent2Di range;
 	_CPU_AND_GPU_CODE_
 	inline TOutput retrieve(const TVoxel& voxel) const {
-		if(ThasDepthInformation){
-			return range.from < voxel.w_depth < range.to;
-		} else {
-			DIEWITHEXCEPTION_REPORTLOCATION("Voxel doesn't have depth information.");
-			return TOutput();
-		}
+		return range.from < voxel.w_depth < range.to;
+	}
+};
+
+template <typename TVoxel, typename TOutput>
+struct RetrieveIsVoxelInDepthWeightRange<TVoxel,TOutput, false>{
+	Extent2Di range;
+	_CPU_AND_GPU_CODE_
+	inline TOutput retrieve(const TVoxel& voxel) const {
+		DIEWITHEXCEPTION_REPORTLOCATION("Voxel doesn't have depth information.");
+		return TOutput();
 	}
 };
 
@@ -244,10 +252,9 @@ template<typename TVoxel, typename TIndex, typename TOutput>
 struct ReduceSumFunctor {
 public:
 	_CPU_AND_GPU_CODE_
-	inline static const ReductionResult<TOutput, TIndex>& reduce(
-			ReductionResult<TOutput, TIndex>& item1, const ReductionResult<TOutput, TIndex>& item2) {
-		item1.value += item2.value;
-		return item1;
+	inline static ReductionResult<TOutput, TIndex> reduce(
+			const ReductionResult<TOutput, TIndex>& item1, const ReductionResult<TOutput, TIndex>& item2) {
+		return {item1.value + item2.value, 0, 0};
 	}
 };
 

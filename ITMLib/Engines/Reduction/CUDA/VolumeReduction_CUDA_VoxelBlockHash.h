@@ -48,7 +48,7 @@ public:
 	template<typename TRetrieveSingleStaticFunctor, typename TReduceStaticFunctor, typename TOutput>
 	static TOutput ReduceUtilized(Vector3i& position, const VoxelVolume<TVoxel, VoxelBlockHash>* volume,
 	                              ReductionResult<TOutput, VoxelBlockHash> ignored_value = ReductionResult<TOutput, VoxelBlockHash>()) {
-		return ReduceUtilized_Generic(
+		return ReduceUtilized_Generic<TReduceStaticFunctor, TOutput>(
 				position, volume, ignored_value,
 				[](dim3 cuda_utilized_grid_size, dim3 cuda_block_size,
 				   ReductionResult<TOutput, VoxelBlockHash>* result_buffer_device, const TVoxel* voxels,
@@ -83,7 +83,7 @@ public:
 	                              const TRetrieveSingleDynamicFunctor& retrieve_functor,
 	                              ReductionResult<TOutput, VoxelBlockHash> ignored_value = ReductionResult<TOutput, VoxelBlockHash>()
 	) {
-		return ReduceUtilized_Generic(
+		return ReduceUtilized_Generic<TReduceStaticFunctor, TOutput>(
 				position, volume, ignored_value,
 				[&retrieve_functor](dim3 cuda_utilized_grid_size, dim3 cuda_block_size,
 				   ReductionResult<TOutput, VoxelBlockHash>* result_buffer_device, const TVoxel* voxels,
@@ -103,7 +103,7 @@ public:
 
 private:
 
-	template<typename BlockLevelReductionFunction, typename TReduceFunctor, typename TOutput>
+	template<typename TReduceStaticFunctor, typename TOutput, typename BlockLevelReductionFunction>
 	static TOutput ReduceUtilized_Generic(Vector3i& position, const VoxelVolume<TVoxel, VoxelBlockHash>* volume,
 	                                      ReductionResult<TOutput, VoxelBlockHash> ignored_value,
 	                                      BlockLevelReductionFunction&& function) {

@@ -26,8 +26,10 @@ struct ReductionResult;
 
 template<typename TValue>
 struct ReductionResult<TValue, VoxelBlockHash> {
+	_CPU_AND_GPU_CODE_
 	ReductionResult<TValue, VoxelBlockHash>(TValue value, unsigned int index_within_block, int hash_code) :
 	        value(value), index_within_block(index_within_block), hash_code(hash_code) {}
+	_CPU_AND_GPU_CODE_
 	ReductionResult<TValue, VoxelBlockHash>() : value(0) {}
 	TValue value = TValue(0);
 	unsigned int index_within_block;
