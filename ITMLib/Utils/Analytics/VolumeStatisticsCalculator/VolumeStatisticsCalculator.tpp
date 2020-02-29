@@ -82,12 +82,12 @@ VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::ComputeTruncatedV
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 unsigned int VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::CountVoxelsWithDepthWeightInRange(
 		VoxelVolume<TVoxel, TIndex>* volume, Extent2Di range) {
-	RetrieveIsVoxelInDepthWeightRange<TVoxel, unsigned int>::range = range;
+	typedef RetrieveIsVoxelInDepthWeightRange<TVoxel, unsigned int, TVoxel::hasWeightInformation> RetrievalFunctorType;
+	RetrievalFunctorType functor{range};
 	Vector3i position;
 	return VolumeReductionEngine<TVoxel, TIndex, TMemoryDeviceType>::
-	template ReduceUtilized<RetrieveIsVoxelInDepthWeightRange<TVoxel, unsigned int>,
-			ReduceSumFunctor<TVoxel, TIndex, unsigned int>, unsigned int>
-			(position, volume);
+	template ReduceUtilized<RetrievalFunctorType, ReduceSumFunctor<TVoxel, TIndex, unsigned int>, unsigned int>
+			(position, volume, functor);
 }
 
 

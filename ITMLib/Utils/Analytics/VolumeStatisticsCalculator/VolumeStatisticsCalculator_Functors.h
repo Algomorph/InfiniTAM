@@ -226,12 +226,17 @@ public:
 
 //region ============================ REDUCTION COUNT FUNCTORS =========================================================
 
-template <typename TVoxel, typename TOutput>
+template <typename TVoxel, typename TOutput, bool ThasDepthInformation>
 struct RetrieveIsVoxelInDepthWeightRange{
 	Extent2Di range;
 	_CPU_AND_GPU_CODE_
-	inline TOutput retrieve(const TVoxel& voxel) {
-		return range.from < voxel.w_depth < range.to;
+	inline TOutput retrieve(const TVoxel& voxel) const {
+		if(ThasDepthInformation){
+			return range.from < voxel.w_depth < range.to;
+		} else {
+			DIEWITHEXCEPTION_REPORTLOCATION("Voxel doesn't have depth information.");
+			return TOutput();
+		}
 	}
 };
 

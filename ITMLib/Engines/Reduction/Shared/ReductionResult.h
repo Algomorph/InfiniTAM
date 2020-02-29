@@ -19,20 +19,23 @@
 #include "../../../Objects/Volume/PlainVoxelArray.h"
 
 
-namespace ITMLib{
+namespace ITMLib {
 
 template<typename TValue, typename TIndex>
 struct ReductionResult;
 
 template<typename TValue>
-struct ReductionResult<TValue, VoxelBlockHash>{
+struct ReductionResult<TValue, VoxelBlockHash> {
+	ReductionResult<TValue, VoxelBlockHash>(TValue value, unsigned int index_within_block, int hash_code) :
+	        value(value), index_within_block(index_within_block), hash_code(hash_code) {}
+	ReductionResult<TValue, VoxelBlockHash>() : value(0) {}
 	TValue value = TValue(0);
 	unsigned int index_within_block;
 	int hash_code;
 };
 
 template<typename TValue>
-struct ReductionResult<TValue, PlainVoxelArray>{
+struct ReductionResult<TValue, PlainVoxelArray> {
 	TValue value;
 	unsigned int index_within_array;
 };

@@ -74,6 +74,7 @@ public:
 	                              ReductionResult<TOutput, PlainVoxelArray> ignored_value = ReductionResult<TOutput, PlainVoxelArray>()
 	) {
 		DIEWITHEXCEPTION_REPORTLOCATION("Not yet implemented.");
+		return TOutput();
 	}
 
 };
