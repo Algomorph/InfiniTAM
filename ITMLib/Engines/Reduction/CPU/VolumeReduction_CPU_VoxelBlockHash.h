@@ -48,7 +48,8 @@ public:
 	 * \return end result based on all voxels in the volume.
 	 */
 	template <typename TRetrieveSingleFunctor, typename TReduceFunctor, typename TOutput>
-	static TOutput ReduceUtilized(Vector3i& position, const VoxelVolume<TVoxel, VoxelBlockHash>* volume, ReductionResult<TOutput, VoxelBlockHash> ignored_value = ReductionResult<TOutput, VoxelBlockHash>()){
+	static TOutput ReduceUtilized(Vector3i& position, const VoxelVolume<TVoxel, VoxelBlockHash>* volume,
+			ReductionResult<TOutput, VoxelBlockHash> ignored_value = {TOutput(0), 0u, 0}){
 		DIEWITHEXCEPTION_REPORTLOCATION("Not yet implemented.");
 		return TOutput();
 	}
@@ -73,8 +74,7 @@ public:
 	template<typename TRetrieveSingleDynamicFunctor, typename TReduceStaticFunctor, typename TOutput>
 	static TOutput ReduceUtilized(Vector3i& position, const VoxelVolume<TVoxel, VoxelBlockHash>* volume,
 	                              const TRetrieveSingleDynamicFunctor& retrieve_functor,
-	                              ReductionResult<TOutput, VoxelBlockHash> ignored_value = ReductionResult<TOutput, VoxelBlockHash>()
-	) {
+	                              ReductionResult<TOutput, VoxelBlockHash> ignored_value = {TOutput(0), 0u, 0}) {
 		DIEWITHEXCEPTION_REPORTLOCATION("Not yet implemented.");
 	}
 

@@ -254,7 +254,7 @@ public:
 	_CPU_AND_GPU_CODE_
 	inline static ReductionResult<TOutput, TIndex> reduce(
 			const ReductionResult<TOutput, TIndex>& item1, const ReductionResult<TOutput, TIndex>& item2) {
-		return {item1.value + item2.value, 0, 0};
+		return {item1.value + item2.value, 0u, 0};
 	}
 };
 
