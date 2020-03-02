@@ -99,6 +99,15 @@ public:
 	AllocateBlockList(VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::MemoryBlock<Vector3s>& block_coordinates,
 	                  int new_block_count) = 0;
 
+	/**
+	 * \brief Allocates (at least) enough space to fit the given
+	 * grid-aligned box (within volume allocation bounds, if any, i.e. for array).
+	 * \param volume target volume
+	 * \param box (voxel-)grid-aligned box where to allocate (in voxel coordinates).
+	 */
+	virtual void
+	AllocateGridAlignedBox(VoxelVolume<TVoxel, TIndex>* volume, const Extent3Di& box) = 0;
+
 
 	virtual void AllocateFromOtherVolume(VoxelVolume<TVoxel, TIndex>* target_volume,
 	                                     VoxelVolume<TVoxel, TIndex>* source_volume) = 0;
@@ -137,6 +146,9 @@ public:
 	virtual void AllocateNearAndBetweenTwoSurfaces(VoxelVolume<TVoxel, TIndex>* targetVolume,
 	                                               const View* view,
 	                                               const CameraTrackingState* tracking_state) override;
+
+	void
+	AllocateGridAlignedBox(VoxelVolume<TVoxel, TIndex>* volume, const Extent3Di& box) override;
 
 	void AllocateBlockList(VoxelVolume<TVoxel, TIndex>* volume,
 	                       const ORUtils::MemoryBlock<Vector3s>& new_block_positions, int new_block_count) override;

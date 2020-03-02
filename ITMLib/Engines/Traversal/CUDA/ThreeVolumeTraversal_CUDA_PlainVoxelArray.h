@@ -45,7 +45,7 @@ public:
 		TVoxel2* voxels2 = volume2->voxels.GetVoxelBlocks();
 		TVoxel3* voxels3 = volume3->voxels.GetVoxelBlocks();
 
-		const PlainVoxelArray::GridAlignedBox* arrayInfo = volume1->index.GetIndexData();
+		const GridAlignedBox* arrayInfo = volume1->index.GetIndexData();
 
 		dim3 cudaBlockSize(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
 		dim3 gridSize(
@@ -77,7 +77,7 @@ public:
 		TVoxel2* voxels2 = volume2->voxels.GetVoxelBlocks();
 		TVoxel3* voxels3 = volume3->voxels.GetVoxelBlocks();
 
-		const PlainVoxelArray::GridAlignedBox* arrayInfo = volume2->index.GetIndexData();
+		const GridAlignedBox* arrayInfo = volume2->index.GetIndexData();
 
 		dim3 cudaBlockSize(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
 		dim3 gridSize(
@@ -124,7 +124,7 @@ public:
 		TVoxel2* voxels2 = volume2->voxels.GetVoxelBlocks();
 		TVoxel3* voxels3 = volume3->voxels.GetVoxelBlocks();
 
-		const PlainVoxelArray::GridAlignedBox* arrayInfo = volume2->index.GetIndexData();
+		const GridAlignedBox* arrayInfo = volume2->index.GetIndexData();
 
 		dim3 cudaBlockSize(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
 		dim3 gridSize(

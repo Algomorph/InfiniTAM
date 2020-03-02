@@ -23,6 +23,7 @@
 #include "../../../GlobalTemplateDefines.h"
 #include "../../../Utils/Geometry/SpatialIndexConversions.h"
 #include "VolumeReduction_CUDA_VoxelBlockHash_Kernels.h"
+#include "../../../Utils/Math.h"
 
 namespace ITMLib {
 
@@ -114,12 +115,8 @@ private:
 
 		const int half_block_voxel_count = VOXEL_BLOCK_SIZE3 / 2;
 
-		auto ceilIntDiv = [](int dividend, int divisor) {
-			return dividend / divisor + (dividend % divisor != 0);
-		};
-
-		auto getNormalizedCount = [&half_block_voxel_count, &ceilIntDiv](int count) {
-			return ceilIntDiv(count, half_block_voxel_count) * half_block_voxel_count;
+		auto getNormalizedCount = [&half_block_voxel_count](int count) {
+			return ceil_of_integer_quotient(count, half_block_voxel_count) * half_block_voxel_count;
 		};
 
 		const int normalized_entry_count = getNormalizedCount(utilized_entry_count);
@@ -129,7 +126,7 @@ private:
 		                                                                              MEMORYDEVICE_CUDA);
 
 		dim3 cuda_block_size(half_block_voxel_count);
-		dim3 cuda_tail_grid_size(ceilIntDiv(tail_length, half_block_voxel_count));
+		dim3 cuda_tail_grid_size(ceil_of_integer_quotient(tail_length, half_block_voxel_count));
 
 		setTailToIgnored<TOutput>
 				<< < cuda_tail_grid_size, cuda_block_size >> >
@@ -160,7 +157,7 @@ private:
 			output_count = normalized_output_count / half_block_voxel_count;
 			normalized_output_count = getNormalizedCount(output_count);
 			tail_length = normalized_output_count - output_count;
-			cuda_tail_grid_size.x = ceilIntDiv(tail_length, half_block_voxel_count);
+			cuda_tail_grid_size.x = ceil_of_integer_quotient(tail_length, half_block_voxel_count);
 			setTailToIgnored<TOutput>
 					<< < cuda_tail_grid_size, cuda_block_size >> >
 			                                  (output_buffer->GetData(

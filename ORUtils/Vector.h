@@ -565,6 +565,14 @@ namespace ORUtils {
 			return Vector6<float>((float)this[0], (float)this[1], (float)this[2], (float)this[3], (float)this[4], (float)this[5]);
 		}
 
+		_CPU_AND_GPU_CODE_ inline Vector3<T> min() const{
+			return Vector3<T>(this->min_x, this->min_y, this->min_z);
+		}
+
+		_CPU_AND_GPU_CODE_ inline Vector3<T> max() const{
+			return Vector3<T>(this->max_x, this->max_y, this->max_z);
+		}
+
 		_CPU_AND_GPU_CODE_ const T *getValues() const { return this->values; }
 		_CPU_AND_GPU_CODE_ Vector6<T> &setValues(const T *rhs) { this[0] = rhs[0]; this[1] = rhs[1]; this[2] = rhs[2]; this[3] = rhs[3]; this[4] = rhs[4]; this[5] = rhs[5]; return *this; }
 

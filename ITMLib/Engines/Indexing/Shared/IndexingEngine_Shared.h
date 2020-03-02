@@ -28,7 +28,7 @@
 #include "../../../Utils/VoxelFlags.h"
 #include "../../../Utils/HashBlockProperties.h"
 #include "../../../Utils/Geometry/IntersectionChecks.h"
-#include "../../../Utils/CLionCudaSyntax.h"
+#include "../../../Utils/CLionCUDAsyntax.h"
 
 #ifdef __CUDACC__
 

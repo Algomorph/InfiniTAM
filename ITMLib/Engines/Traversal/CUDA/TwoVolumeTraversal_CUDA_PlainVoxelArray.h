@@ -47,7 +47,7 @@ private:
 		// perform traversal on the CUDA
 		TVoxelPrimary* voxels1 = volume1->voxels.GetVoxelBlocks();
 		TVoxelSecondary* voxels2 = volume2->voxels.GetVoxelBlocks();
-		const PlainVoxelArray::GridAlignedBox* array_info = volume1->index.GetIndexData();
+		const GridAlignedBox* array_info = volume1->index.GetIndexData();
 		dim3 cuda_block_size(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
 		dim3 cuda_grid_size(
 				static_cast<int>(ceil(static_cast<float>(volume1->index.GetVolumeSize().x) / cuda_block_size.x)),
@@ -86,7 +86,7 @@ public:
 
 		TVoxelPrimary* voxels1 = volume1->voxels.GetVoxelBlocks();
 		TVoxelSecondary* voxels2 = volume2->voxels.GetVoxelBlocks();
-		const PlainVoxelArray::GridAlignedBox* array_info = volume1->index.GetIndexData();
+		const GridAlignedBox* array_info = volume1->index.GetIndexData();
 		dim3 cuda_block_size(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
 		dim3 cuda_grid_size(
 				static_cast<int>(ceil(static_cast<float>(volume1->index.GetVolumeSize().x) / cuda_block_size.x)),
@@ -126,7 +126,7 @@ public:
 		// perform traversal on the CUDA
 		TVoxelPrimary* voxels1 = volume1->voxels.GetVoxelBlocks();
 		TVoxelSecondary* voxels2 = volume2->voxels.GetVoxelBlocks();
-		const PlainVoxelArray::GridAlignedBox* array_info = volume1->index.GetIndexData();
+		const GridAlignedBox* array_info = volume1->index.GetIndexData();
 		dim3 cuda_block_size(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
 		dim3 cuda_grid_size(
 				static_cast<int>(ceil(static_cast<float>(volume1->index.GetVolumeSize().x) / cuda_block_size.x)),
@@ -168,7 +168,7 @@ public:
 		// perform traversal on the CUDA
 		TVoxelPrimary* voxels1 = volume1->voxels.GetVoxelBlocks();
 		TVoxelSecondary* voxels2 = volume2->voxels.GetVoxelBlocks();
-		const PlainVoxelArray::GridAlignedBox* array_info = volume1->index.GetIndexData();
+		const GridAlignedBox* array_info = volume1->index.GetIndexData();
 		dim3 cuda_block_size(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
 		dim3 cuda_cuda_grid_size(
 				static_cast<int>(ceil(static_cast<float>(volume1->index.GetVolumeSize().x) / cuda_block_size.x)),
@@ -204,7 +204,7 @@ public:
 				volume1, volume2, functor,
 				[&](const dim3& cuda_grid_size, const dim3& cuda_block_size,
 				    TVoxelPrimary* voxels1, TVoxelSecondary* voxels2,
-				    const PlainVoxelArray::GridAlignedBox* array_info,
+				    const GridAlignedBox* array_info,
 				    TBooleanFunctor* functor_device, bool* mismatch_encountered_device) {
 					TraverseAndCompareAll_device<TBooleanFunctor, TVoxelPrimary, TVoxelSecondary>
 							<< < cuda_grid_size, cuda_block_size >> >
@@ -223,7 +223,7 @@ public:
 				volume1, volume2, functor,
 				[&](const dim3& cuda_grid_size, const dim3& cuda_block_size,
 				    TVoxelPrimary* voxels1, TVoxelSecondary* voxels2,
-				    const PlainVoxelArray::GridAlignedBox* array_info,
+				    const GridAlignedBox* array_info,
 				    TBooleanFunctor* functor_device, bool* mismatch_encountered_device) {
 					TraverseAndCompareAllWithPosition_device<TBooleanFunctor, TVoxelPrimary, TVoxelSecondary>
 							<< < cuda_grid_size, cuda_block_size >> >

@@ -93,5 +93,33 @@ void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::Re
 	volume->voxels.lastFreeBlockId = GET_ATOMIC_VALUE_CPU(reallocation_functor.last_free_voxel_block_id);
 }
 
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, typename TDerivedClass>
+void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::AllocateGridAlignedBox(
+		VoxelVolume<TVoxel, VoxelBlockHash>* volume, const Extent3Di& box) {
+	const Vector3i box_min_blocks = box.min() / VOXEL_BLOCK_SIZE;
+	const Vector3i box_size_voxels_sans_front_margins = (box.max() - (box_min_blocks * VOXEL_BLOCK_SIZE));
+	const Vector3i box_size_blocks = Vector3i(
+			ceil_of_integer_quotient(box_size_voxels_sans_front_margins.x, VOXEL_BLOCK_SIZE),
+			ceil_of_integer_quotient(box_size_voxels_sans_front_margins.y, VOXEL_BLOCK_SIZE),
+			ceil_of_integer_quotient(box_size_voxels_sans_front_margins.z, VOXEL_BLOCK_SIZE));
+
+	const int block_count = box_size_blocks.x * box_size_blocks.y * box_size_blocks.z;
+	ORUtils::MemoryBlock<Vector3s> block_positions(block_count, true, true);
+	Vector3s* block_positions_CPU = block_positions.GetData(MEMORYDEVICE_CPU);
+
+	const GridAlignedBox ga_box(box_size_blocks, box_min_blocks);
+#ifdef WITH_OPENMP
+#pragma omp parallel for default(none) shared(block_positions_CPU)
+#endif
+	for (int i_block = 0; i_block < block_count; i_block++) {
+		Vector3i position;
+		ComputePositionFromLinearIndex_PlainVoxelArray(position.x, position.y, position.z, &ga_box, i_block);
+		block_positions_CPU[i_block] = position.toShort();
+	}
+
+	block_positions.UpdateDeviceFromHost();
+	static_cast<TDerivedClass*>(this)->AllocateBlockList(volume, block_positions, block_count);
+}
+
 
 } //namespace ITMLib

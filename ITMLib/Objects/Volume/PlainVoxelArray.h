@@ -9,6 +9,13 @@
 #include "../../../ORUtils/MemoryBlock.h"
 
 namespace ITMLib {
+
+GENERATE_PATHLESS_SERIALIZABLE_STRUCT(
+		GridAlignedBox,
+		(Vector3i, size, Vector3i(512), VECTOR, "Size, in voxels."),
+		(Vector3i, offset, Vector3i(-256, -256, 0), VECTOR, "Offset of the lower left front corner of the volume, in voxels")
+);
+
 /** \brief
 This is the central class for the original fixed size volume
 representation. It contains the data needed on the CPU and
@@ -16,12 +23,6 @@ a pointer to the data structure on the GPU.
 */
 class PlainVoxelArray {
 public:
-
-	GENERATE_PATHLESS_SERIALIZABLE_STRUCT(
-			GridAlignedBox,
-			(Vector3i, size, Vector3i(512), VECTOR, "Size, in voxels."),
-			(Vector3i, offset, Vector3i(-256, -256, 0), VECTOR, "Offset of the lower left front corner of the volume, in voxels")
-	);
 
 	typedef GridAlignedBox IndexData;
 	typedef GridAlignedBox InitializationParameters;

@@ -52,7 +52,7 @@ private:
 		TArrayVoxel* array_voxels = array_volume->voxels.GetVoxelBlocks();
 		THashVoxel* hash_voxels = hash_volume->voxels.GetVoxelBlocks();
 
-		PlainVoxelArray::GridAlignedBox* array_info = array_volume->index.GetIndexData();
+		GridAlignedBox* array_info = array_volume->index.GetIndexData();
 		Vector3i array_min_voxels = array_info->offset;
 		Vector3i array_max_voxels = array_info->offset + array_info->size;
 
@@ -310,7 +310,7 @@ public:
 	static inline
 	std::vector<Extent3Di>
 	ComputeBoxSetOfHashAlignedCenterAndNonHashBlockAlignedArrayMargins(
-			const ITMLib::PlainVoxelArray::GridAlignedBox& array_info, Extent3Di& center_extent) {
+			const ITMLib::GridAlignedBox& array_info, Extent3Di& center_extent) {
 
 		//TODO: code can probably be condensed throughout to act on a per-dimension basis using Vector indexing, 
 		// but not sure if code clarity will be preserved

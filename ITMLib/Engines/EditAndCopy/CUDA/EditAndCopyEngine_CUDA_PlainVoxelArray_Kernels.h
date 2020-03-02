@@ -30,7 +30,7 @@ namespace {
 // device functions
 
 template<class TVoxel>
-__global__ void setVoxel_device(TVoxel* voxelArray, const PlainVoxelArray::GridAlignedBox* arrayInfo,
+__global__ void setVoxel_device(TVoxel* voxelArray, const GridAlignedBox* arrayInfo,
                                 const Vector3i location, TVoxel value, bool* success) {
 	int vmIndex;
 	int linearIndex = findVoxel(arrayInfo, location, vmIndex);
@@ -44,7 +44,7 @@ __global__ void setVoxel_device(TVoxel* voxelArray, const PlainVoxelArray::GridA
 }
 
 template<class TVoxel>
-__global__ void readVoxel_device(TVoxel* voxelArray, const PlainVoxelArray::GridAlignedBox* arrayInfo,
+__global__ void readVoxel_device(TVoxel* voxelArray, const GridAlignedBox* arrayInfo,
                                  const Vector3i at, ReadVoxelResult<TVoxel>* result) {
 	int vmIndex = 0;
 	int arrayIndex = findVoxel(arrayInfo, at, vmIndex);
@@ -57,7 +57,7 @@ __global__ void readVoxel_device(TVoxel* voxelArray, const PlainVoxelArray::Grid
 }
 
 __global__ void isPointInBounds_device(
-		const PlainVoxelArray::GridAlignedBox* index_bounds,
+		const GridAlignedBox* index_bounds,
 		const Vector3i at, bool* answer) {
 	Vector3i point2 = at - index_bounds->offset;
 	*answer = !((point2.x < 0) || (point2.x >= index_bounds->size.x) ||
@@ -68,7 +68,7 @@ __global__ void isPointInBounds_device(
 
 template<class TVoxel>
 __global__ void directCopy_device(TVoxel* destinationArray, const TVoxel* sourceArray,
-                                  const PlainVoxelArray::GridAlignedBox* arrayInfo) {
+                                  const GridAlignedBox* arrayInfo) {
 	int x = blockIdx.x * blockDim.x + threadIdx.x;
 	int y = blockIdx.y * blockDim.y + threadIdx.y;
 	int z = blockIdx.z * blockDim.z + threadIdx.z;
@@ -79,8 +79,8 @@ __global__ void directCopy_device(TVoxel* destinationArray, const TVoxel* source
 
 template<class TVoxel>
 __global__ void offsetCopy_device(TVoxel* destinationArray, const TVoxel* sourceArray,
-                                  const PlainVoxelArray::GridAlignedBox* destinationIndexData,
-                                  const PlainVoxelArray::GridAlignedBox* sourceIndexData,
+                                  const GridAlignedBox* destinationIndexData,
+                                  const GridAlignedBox* sourceIndexData,
                                   const Vector3i offset, const Vector3i minPointSourceSansOffset,
                                   const Vector3i extent) {
 	int x = blockIdx.x * blockDim.x + threadIdx.x;

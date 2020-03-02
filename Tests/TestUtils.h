@@ -21,17 +21,16 @@
 #include "../ITMLib/Objects/Volume/RepresentationAccess.h"
 #include "../ITMLib/Objects/Volume/VoxelVolume.h"
 #include "../ITMLib/Utils/Configuration.h"
+#include "../ITMLib/Utils/Math.h"
 
 
 using namespace ITMLib;
 
-template<class TVoxel, class TIndex>
-void GenerateTestVolume_CPU(VoxelVolume<TVoxel, TIndex>* volume);
+template<MemoryDeviceType TMemoryDeviceType, typename TVoxel, typename TIndex>
+void GenerateSimpleSurfaceTestVolume(VoxelVolume<TVoxel, TIndex>* volume);
 
-#ifndef COMPILE_WITHOUT_CUDA
-template<class TVoxel, class TIndex>
-void GenerateTestVolume_CUDA(VoxelVolume<TVoxel, TIndex>* volume);
-#endif
+template<MemoryDeviceType TMemoryDeviceType, typename TVoxel, typename TIndex>
+void GenerateRandomDepthWeightSubVolume(VoxelVolume<TVoxel, TIndex>* volume, const Extent3Di& bounds, const Extent2Di& weight_range);
 
 
 template<typename TVoxel>

@@ -17,7 +17,7 @@
 
 //local
 #include "../Shared/ReductionResult.h"
-#include "../../../Utils/CLionCudaSyntax.h"
+#include "../../../Utils/CLionCUDAsyntax.h"
 #include "../../../Objects/Volume/VoxelBlockHash.h"
 
 using namespace ITMLib;

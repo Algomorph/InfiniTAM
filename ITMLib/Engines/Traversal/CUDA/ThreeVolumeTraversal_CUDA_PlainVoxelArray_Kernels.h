@@ -25,7 +25,7 @@ namespace { // CUDA kernels
 template<typename TStaticFunctor, typename TVoxel1, typename TVoxel2, typename TVoxel3>
 __global__ void
 staticThreeVolumeTraversal_device(TVoxel1* voxels1, TVoxel2* voxels2,
-                                  TVoxel3* voxels3, const ITMLib::PlainVoxelArray::GridAlignedBox* arrayInfo) {
+                                  TVoxel3* voxels3, const ITMLib::GridAlignedBox* arrayInfo) {
 	int x = blockIdx.x * blockDim.x + threadIdx.x;
 	int y = blockIdx.y * blockDim.y + threadIdx.y;
 	int z = blockIdx.z * blockDim.z + threadIdx.z;
@@ -46,7 +46,7 @@ template<typename TStaticFunctor, typename TVoxel1, typename TVoxel2, typename T
 __global__ void
 staticThreeVolumeTraversalWithPosition_device(TVoxel1* voxels1, TVoxel2* voxels2,
                                               TVoxel3* voxels3,
-                                              const ITMLib::PlainVoxelArray::GridAlignedBox* arrayInfo) {
+                                              const ITMLib::GridAlignedBox* arrayInfo) {
 	int x = blockIdx.x * blockDim.x + threadIdx.x;
 	int y = blockIdx.y * blockDim.y + threadIdx.y;
 	int z = blockIdx.z * blockDim.z + threadIdx.z;
@@ -73,7 +73,7 @@ staticThreeVolumeTraversalWithPosition_device(TVoxel1* voxels1, TVoxel2* voxels2
 template<typename TFunctor, typename TVoxel1, typename TVoxel2, typename TVoxel3>
 __global__ void
 threeVolumeTraversal_device(TVoxel1* voxels1, TVoxel2* voxels2, TVoxel3* voxels3,
-                            const ITMLib::PlainVoxelArray::GridAlignedBox* arrayInfo,
+                            const ITMLib::GridAlignedBox* arrayInfo,
                             TFunctor& functor) {
 	int x = blockIdx.x * blockDim.x + threadIdx.x;
 	int y = blockIdx.y * blockDim.y + threadIdx.y;
@@ -92,7 +92,7 @@ threeVolumeTraversal_device(TVoxel1* voxels1, TVoxel2* voxels2, TVoxel3* voxels3
 template<typename TFunctor, typename TVoxel1, typename TVoxel2, typename TVoxel3>
 __global__ void
 threeVolumeTraversalWithPosition_device(TVoxel1* voxels1, TVoxel2* voxels2, TVoxel3* voxels3,
-                                        const ITMLib::PlainVoxelArray::GridAlignedBox* arrayInfo,
+                                        const ITMLib::GridAlignedBox* arrayInfo,
                                         TFunctor* functor) {
 	int x = blockIdx.x * blockDim.x + threadIdx.x;
 	int y = blockIdx.y * blockDim.y + threadIdx.y;

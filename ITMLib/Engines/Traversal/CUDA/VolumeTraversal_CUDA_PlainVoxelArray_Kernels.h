@@ -24,7 +24,7 @@ namespace {
 //CUDA device functions
 template<typename TStaticFunctor, typename TVoxel>
 __global__ void
-TraverseAll_device(TVoxel* voxels, const ITMLib::PlainVoxelArray::GridAlignedBox* arrayInfo) {
+TraverseAll_device(TVoxel* voxels, const ITMLib::GridAlignedBox* arrayInfo) {
 	int x = blockIdx.x * blockDim.x + threadIdx.x;
 	int y = blockIdx.y * blockDim.y + threadIdx.y;
 	int z = blockIdx.z * blockDim.z + threadIdx.z;
@@ -38,7 +38,7 @@ TraverseAll_device(TVoxel* voxels, const ITMLib::PlainVoxelArray::GridAlignedBox
 
 template<typename TFunctor, typename TVoxel>
 __global__ void
-traverseAll_device(TVoxel* voxels, const ITMLib::PlainVoxelArray::GridAlignedBox* arrayInfo,
+traverseAll_device(TVoxel* voxels, const ITMLib::GridAlignedBox* arrayInfo,
                    TFunctor* functor) {
 	int x = blockIdx.x * blockDim.x + threadIdx.x;
 	int y = blockIdx.y * blockDim.y + threadIdx.y;
@@ -53,7 +53,7 @@ traverseAll_device(TVoxel* voxels, const ITMLib::PlainVoxelArray::GridAlignedBox
 
 template<typename TFunctor, typename TVoxel>
 __global__ void
-traverseAllWithPosition_device(TVoxel* voxels, const ITMLib::PlainVoxelArray::GridAlignedBox* arrayInfo,
+traverseAllWithPosition_device(TVoxel* voxels, const ITMLib::GridAlignedBox* arrayInfo,
                                TFunctor* functor) {
 	int x = blockIdx.x * blockDim.x + threadIdx.x;
 	int y = blockIdx.y * blockDim.y + threadIdx.y;

@@ -37,7 +37,7 @@ class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, 
 	                                        VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryVolume,
 	                                        VoxelFlags semanticFlags, TBooleanFunctor& functor,
 	                                        TDeviceFunction&& deviceFunction) {
-		PlainVoxelArray::GridAlignedBox* arrayInfo = primaryVolume->index.GetIndexData();
+		GridAlignedBox* arrayInfo = primaryVolume->index.GetIndexData();
 		int hashEntryCount = secondaryVolume->index.hashEntryCount;
 		HashEntry* hashTable = secondaryVolume->index.GetIndexData();
 
@@ -131,7 +131,7 @@ class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, 
 			VoxelVolume<TVoxelPrimary, PlainVoxelArray>* primaryVolume,
 			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryVolume,
 			TBooleanFunctor& functor, TDeviceFunction&& deviceFunction) {
-		PlainVoxelArray::GridAlignedBox* arrayInfo = primaryVolume->index.GetIndexData();
+		GridAlignedBox* arrayInfo = primaryVolume->index.GetIndexData();
 		int hashEntryCount = secondaryVolume->index.hashEntryCount;
 		HashEntry* hashTable = secondaryVolume->index.GetIndexData();
 
@@ -280,7 +280,7 @@ public:
 
 		return TraverseAndCompareAll_Generic(primaryVolume, secondaryVolume, functor, []
 				(dim3 gridSize_ArrayBlockEnvelope, dim3 cudaBlockSize_BlockVoxelPerThread,
-				 TVoxelPrimary* voxelsArray, PlainVoxelArray::GridAlignedBox* arrayInfo,
+				 TVoxelPrimary* voxelsArray, GridAlignedBox* arrayInfo,
 				 TVoxelSecondary* voxelsHash, HashEntry* hashTable, Vector3i minArrayCoord,
 				 Vector3i maxArrayCoord, Vector3s minBlockPos, TBooleanFunctor* functor_device,
 				 bool* falseOrAlteredEncountered_device) {
@@ -322,7 +322,7 @@ public:
 				                                               (dim3 gridSize_ArrayBlockEnvelope,
 				                                                dim3 cudaBlockSize_BlockVoxelPerThread,
 				                                                TVoxelPrimary* voxelsArray,
-				                                                PlainVoxelArray::GridAlignedBox* arrayInfo,
+				                                                GridAlignedBox* arrayInfo,
 				                                                TVoxelSecondary* voxelsHash,
 				                                                HashEntry* hashTable,
 				                                                Vector3i minArrayCoord,
@@ -351,7 +351,7 @@ public:
 				                                               (dim3 gridSize_ArrayBlockEnvelope,
 				                                                dim3 cudaBlockSize_BlockVoxelPerThread,
 				                                                TVoxelPrimary* voxelsArray,
-				                                                PlainVoxelArray::GridAlignedBox* arrayInfo,
+				                                                GridAlignedBox* arrayInfo,
 				                                                TVoxelSecondary* voxelsHash,
 				                                                HashEntry* hashTable,
 				                                                Vector3i minArrayCoord,
@@ -390,7 +390,7 @@ public:
 
 		return TraverseAndCompareAll_Generic(primaryVolume, secondaryVolume, functor, []
 				(dim3 gridSize_ArrayBlockEnvelope, dim3 cudaBlockSize_BlockVoxelPerThread,
-				 TVoxelPrimary* voxelsArray, PlainVoxelArray::GridAlignedBox* arrayInfo,
+				 TVoxelPrimary* voxelsArray, GridAlignedBox* arrayInfo,
 				 TVoxelSecondary* voxelsHash, HashEntry* hashTable, Vector3i minArrayCoord,
 				 Vector3i maxArrayCoord, Vector3s minBlockPos, TBooleanFunctor* functor_device,
 				 bool* falseOrAlteredEncountered_device) {

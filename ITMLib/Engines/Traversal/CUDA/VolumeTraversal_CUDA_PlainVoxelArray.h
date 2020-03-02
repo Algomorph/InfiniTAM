@@ -37,7 +37,7 @@ public:
 	template<typename TStaticFunctor>
 	inline static void TraverseAll(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
 		TVoxel* voxels = volume->voxels.GetVoxelBlocks();
-		const PlainVoxelArray::GridAlignedBox* array_info = volume->index.GetIndexData();
+		const GridAlignedBox* array_info = volume->index.GetIndexData();
 
 		dim3 cuda_block_size(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
 		dim3 cuda_grid_size(volume->index.GetVolumeSize().x / cuda_block_size.x,
@@ -59,7 +59,7 @@ public:
 	inline static void
 	TraverseAll(VoxelVolume<TVoxel, PlainVoxelArray>* volume, TFunctor& functor) {
 		TVoxel* voxels = volume->voxels.GetVoxelBlocks();
-		const PlainVoxelArray::GridAlignedBox* array_info = volume->index.GetIndexData();
+		const GridAlignedBox* array_info = volume->index.GetIndexData();
 
 		dim3 cuda_block_size(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
 		dim3 cuda_grid_size(volume->index.GetVolumeSize().x / cuda_block_size.x,
@@ -90,7 +90,7 @@ public:
 	inline static void
 	TraverseAllWithPosition(VoxelVolume<TVoxel, PlainVoxelArray>* volume, TFunctor& functor) {
 		TVoxel* voxels = volume->voxels.GetVoxelBlocks();
-		const PlainVoxelArray::GridAlignedBox* array_info = volume->index.GetIndexData();
+		const GridAlignedBox* array_info = volume->index.GetIndexData();
 
 		dim3 cuda_block_size(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
 		dim3 cuda_grid_size(volume->index.GetVolumeSize().x / cuda_block_size.x,

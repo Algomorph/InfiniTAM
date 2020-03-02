@@ -22,7 +22,7 @@
 
 _CPU_AND_GPU_CODE_
 inline
-bool IsPointInBounds(const Vector3i& point, const ITMLib::PlainVoxelArray::GridAlignedBox& box) {
+bool IsPointInBounds(const Vector3i& point, const ITMLib::GridAlignedBox& box) {
 	return point.x >= box.offset.x &&
 	       point.y >= box.offset.y &&
 	       point.z >= box.offset.z &&
@@ -80,8 +80,8 @@ Extent3Di UnionExtent(const Extent3Di& extent1, const Extent3Di& extent2) {
 
 _CPU_AND_GPU_CODE_
 inline
-Extent3Di UnionExtent(const ITMLib::PlainVoxelArray::GridAlignedBox& extent1,
-                      const ITMLib::PlainVoxelArray::GridAlignedBox& extent2) {
+Extent3Di UnionExtent(const ITMLib::GridAlignedBox& extent1,
+                      const ITMLib::GridAlignedBox& extent2) {
 	return UnionExtent(PVA_InfoToExtent(extent1), PVA_InfoToExtent(extent2));
 }
 
@@ -104,8 +104,8 @@ Extent3Di IntersectionExtent(const Extent3Di& extent1, const Extent3Di& extent2)
 
 _CPU_AND_GPU_CODE_
 inline
-Extent3Di IntersectionExtent(const ITMLib::PlainVoxelArray::GridAlignedBox& extent1,
-                             const ITMLib::PlainVoxelArray::GridAlignedBox& extent2) {
+Extent3Di IntersectionExtent(const ITMLib::GridAlignedBox& extent1,
+                             const ITMLib::GridAlignedBox& extent2) {
 	return IntersectionExtent(PVA_InfoToExtent(extent1), PVA_InfoToExtent(extent2));
 }
 

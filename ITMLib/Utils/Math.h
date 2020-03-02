@@ -51,6 +51,7 @@ typedef class ORUtils::Vector6<float> Vector6f;
 typedef class ORUtils::Vector6<int> Vector6i;
 typedef class ORUtils::Vector6<int> Extent3Di;
 
+// provisions for METAL
 
 #ifndef TO_INT_ROUND3
 #define TO_INT_ROUND3(x) (x).toIntRound()
@@ -89,7 +90,7 @@ typedef class ORUtils::Vector6<int> Extent3Di;
 #endif
 
 #ifndef IS_EQUAL3
-#define IS_EQUAL3(a,b) (((a).x == (b).x) && ((a).y == (b).y) && ((a).z == (b).z))
+#define IS_EQUAL3(a, b) (((a).x == (b).x) && ((a).y == (b).y) && ((a).z == (b).z))
 #endif
 
 #else
@@ -149,3 +150,13 @@ typedef metal::uchar4 Vector4u;
 #endif
 
 #endif
+
+namespace ITMLib {
+// additional basic math functions
+
+inline
+int ceil_of_integer_quotient(int dividend, int divisor) {
+	return dividend / divisor + (dividend % divisor != 0);
+}
+
+} // namespace ITMLib

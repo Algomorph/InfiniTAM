@@ -27,12 +27,8 @@
 
 using namespace ITMLib;
 
-template void GenerateTestVolume_CPU<TSDFVoxel, VoxelBlockHash>(VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume);
-template void GenerateTestVolume_CPU<TSDFVoxel, PlainVoxelArray>(VoxelVolume<TSDFVoxel, PlainVoxelArray>* volume);
-#ifndef COMPILE_WITHOUT_CUDA
-template void GenerateTestVolume_CUDA<TSDFVoxel, VoxelBlockHash>(VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume);
-template void GenerateTestVolume_CUDA<TSDFVoxel, PlainVoxelArray>(VoxelVolume<TSDFVoxel, PlainVoxelArray>* volume);
-#endif
+template void GenerateSimpleSurfaceTestVolume<MEMORYDEVICE_CPU, TSDFVoxel, VoxelBlockHash>(VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume);
+template void GenerateSimpleSurfaceTestVolume<MEMORYDEVICE_CPU, TSDFVoxel, PlainVoxelArray>(VoxelVolume<TSDFVoxel, PlainVoxelArray>* volume);
 
 template void simulateVoxelAlteration<TSDFVoxel>(TSDFVoxel& voxel, float newSdfValue);
 template void simulateRandomVoxelAlteration<TSDFVoxel>(TSDFVoxel& voxel);

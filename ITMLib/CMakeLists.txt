@@ -915,7 +915,7 @@ set(ITMLIB_UTILS_HEADERS
     Utils/SurfelVolumeParameters.h
     Utils/CPPPrintHelpers.h
     Utils/CPrintHelpers.h
-    Utils/CLionCudaSyntax.h
+    Utils/CLionCUDAsyntax.h
 
     Utils/Analytics/BenchmarkUtils.h
     Utils/Analytics/AlmostEqual.h

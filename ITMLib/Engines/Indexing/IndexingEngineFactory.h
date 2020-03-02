@@ -69,23 +69,25 @@ struct IndexingEngineFactory {
 	template<typename TVoxel, typename TIndex>
 	static IndexingEngineInterface<TVoxel, TIndex>&
 	Get(MemoryDeviceType deviceType) {
-
 		switch (deviceType) {
 			case MEMORYDEVICE_CPU:
 				return IndexingEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance();
-				break;
 			case MEMORYDEVICE_CUDA:
 #ifdef COMPILE_WITHOUT_CUDA
 				DIEWITHEXCEPTION_REPORTLOCATION("Requested instantiation of a CUDA-based specialization, but code was compiled without CUDA. Aborting.");
+				return IndexingEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance();
 #else
 				return IndexingEngine<TVoxel, TIndex, MEMORYDEVICE_CUDA>::Instance();
 #endif
-				break;
 			case MEMORYDEVICE_METAL:
 #ifdef COMPILE_WITH_METAL
 				return IndexingEngine<TVoxel, TIndex, MEMORYDEVICE_METAL>::Instance();
+#else
+				DIEWITHEXCEPTION_REPORTLOCATION("Requested instantiation of a Metal-based specialization, but code was compiled without Metal. Aborting.");
+				return IndexingEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance();
 #endif
-				break;
+			default:
+				return IndexingEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance();
 		}
 	}
 };

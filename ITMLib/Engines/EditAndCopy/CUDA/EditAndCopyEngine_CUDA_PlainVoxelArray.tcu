@@ -63,7 +63,7 @@ bool
 EditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::SetVoxel(VoxelVolume<TVoxel, PlainVoxelArray>* volume,
                                                           Vector3i at, TVoxel voxel) {
 	TVoxel* localVBA = volume->voxels.GetVoxelBlocks();
-	const PlainVoxelArray::GridAlignedBox* arrayInfo = volume->index.GetIndexData();
+	const GridAlignedBox* arrayInfo = volume->index.GetIndexData();
 	ORUtils::MemoryBlock<bool> success(1, true, true);
 	*success.GetData(MEMORYDEVICE_CPU) = true;
 	success.UpdateDeviceFromHost();
@@ -80,7 +80,7 @@ EditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::ReadVoxel(
 		Vector3i at) {
 
 	TVoxel* localVBA = volume->voxels.GetVoxelBlocks();
-	const PlainVoxelArray::GridAlignedBox* arrayInfo = volume->index.GetIndexData();
+	const GridAlignedBox* arrayInfo = volume->index.GetIndexData();
 
 	readVoxel_device<TVoxel> << < 1, 1 >> >
 	                                 (localVBA, arrayInfo, at, (ReadVoxelResult<TVoxel>*) readVoxelResult_device);
@@ -122,7 +122,7 @@ EditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::IsPointInBounds(
 	bool* in_bounds_CUDA;
 	ORcudaSafeCall(cudaMalloc((void**) &in_bounds_CUDA, sizeof(bool)));
 	bool in_bounds;
-	const PlainVoxelArray::GridAlignedBox* arrayInfo = volume->index.GetIndexData();
+	const GridAlignedBox* arrayInfo = volume->index.GetIndexData();
 	isPointInBounds_device << < 1, 1 >> > (arrayInfo, at, in_bounds_CUDA);
 	ORcudaKernelCheck;
 	ORcudaSafeCall(cudaMemcpy(&in_bounds, in_bounds_CUDA, sizeof(bool), cudaMemcpyDeviceToHost));

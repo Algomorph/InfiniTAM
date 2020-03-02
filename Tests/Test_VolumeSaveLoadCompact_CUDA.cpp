@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(testSaveSceneCompact_CUDA) {
 			&configuration::get().general_voxel_volume_parameters, configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 			MEMORYDEVICE_CUDA, {volumeSize, volumeOffset});
 
-	GenerateTestVolume_CUDA(&scene1);
+	GenerateSimpleSurfaceTestVolume<MEMORYDEVICE_CUDA>(&scene1);
 	std::string path = "TestData/test_PVA_";
 	SceneFileIOEngine_PVA::SaveToDirectoryCompact(&scene1, path);
 	ManipulationEngine_CUDA_PVA_Voxel::Inst().ResetVolume(&scene2);
@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE(testSaveSceneCompact_CUDA) {
 			&configuration::get().general_voxel_volume_parameters, configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 			MEMORYDEVICE_CUDA, {0x800, 0x20000});
 
-	GenerateTestVolume_CUDA(&scene3);
+	GenerateSimpleSurfaceTestVolume<MEMORYDEVICE_CUDA>(&scene3);
 	path = "TestData/test_VBH_";
 	SceneFileIOEngine_VBH::SaveToDirectoryCompact(&scene3, path);
 	ManipulationEngine_CUDA_VBH_Voxel::Inst().ResetVolume(&scene4);

@@ -44,6 +44,7 @@
 #include "/usr/lib/llvm-6.0/lib/clang/6.0.0/include/__clang_cuda_math_forward_declares.h"
 #include "/usr/lib/llvm-6.0/lib/clang/6.0.0/include/__clang_cuda_complex_builtins.h"
 #include "/usr/lib/llvm-6.0/lib/clang/6.0.0/include/__clang_cuda_cmath.h"
+#include "../../../../../usr/local/cuda/targets/x86_64-linux/include/curand_kernel.h"
 
 
 #endif

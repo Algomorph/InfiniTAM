@@ -27,7 +27,7 @@ namespace {
 template<typename TStaticFunctor, typename TVoxelPrimary, typename TVoxelSecondary>
 __global__ void
 staticDualVoxelTraversal_device(TVoxelPrimary* primaryVoxels, TVoxelSecondary* secondaryVoxels,
-                                const ITMLib::PlainVoxelArray::GridAlignedBox* arrayInfo) {
+                                const ITMLib::GridAlignedBox* arrayInfo) {
 	int x = blockIdx.x * blockDim.x + threadIdx.x;
 	int y = blockIdx.y * blockDim.y + threadIdx.y;
 	int z = blockIdx.z * blockDim.z + threadIdx.z;
@@ -41,7 +41,7 @@ staticDualVoxelTraversal_device(TVoxelPrimary* primaryVoxels, TVoxelSecondary* s
 template<typename TStaticBooleanFunctor, typename TVoxelPrimary, typename TVoxelSecondary>
 __global__ void
 TraverseAndCompareAll_device(TVoxelPrimary* primaryVoxels, TVoxelSecondary* secondaryVoxels,
-                                        const ITMLib::PlainVoxelArray::GridAlignedBox* arrayInfo,
+                                        const ITMLib::GridAlignedBox* arrayInfo,
                                         bool* falseEncountered) {
 
 	if (*falseEncountered) return;
@@ -64,7 +64,7 @@ TraverseAndCompareAll_device(TVoxelPrimary* primaryVoxels, TVoxelSecondary* seco
 template<typename TFunctor, typename TVoxelPrimary, typename TVoxelSecondary>
 __global__ void
 dualVoxelPositionTraversal_device(TVoxelPrimary* primaryVoxels, TVoxelSecondary* secondaryVoxels,
-                                  const ITMLib::PlainVoxelArray::GridAlignedBox* arrayInfo,
+                                  const ITMLib::GridAlignedBox* arrayInfo,
                                   TFunctor* functor) {
 	int x = blockIdx.x * blockDim.x + threadIdx.x;
 	int y = blockIdx.y * blockDim.y + threadIdx.y;
@@ -88,7 +88,7 @@ dualVoxelPositionTraversal_device(TVoxelPrimary* primaryVoxels, TVoxelSecondary*
 template<typename TFunctor, typename TVoxelPrimary, typename TVoxelSecondary>
 __global__ void
 dualVoxelTraversal_device(TVoxelPrimary* primaryVoxels, TVoxelSecondary* secondaryVoxels,
-                          const ITMLib::PlainVoxelArray::GridAlignedBox* arrayInfo,
+                          const ITMLib::GridAlignedBox* arrayInfo,
                           TFunctor* functor) {
 	int x = blockIdx.x * blockDim.x + threadIdx.x;
 	int y = blockIdx.y * blockDim.y + threadIdx.y;
@@ -107,7 +107,7 @@ dualVoxelTraversal_device(TVoxelPrimary* primaryVoxels, TVoxelSecondary* seconda
 template<typename TFunctor, typename TVoxelPrimary, typename TVoxelSecondary>
 __global__ void
 TraverseAndCompareAll_device(TVoxelPrimary* primaryVoxels, TVoxelSecondary* secondaryVoxels,
-                                  const ITMLib::PlainVoxelArray::GridAlignedBox* arrayInfo,
+                                  const ITMLib::GridAlignedBox* arrayInfo,
                                   TFunctor* functor, bool* falseEncountered) {
 	if (*falseEncountered) return;
 
@@ -129,7 +129,7 @@ TraverseAndCompareAll_device(TVoxelPrimary* primaryVoxels, TVoxelSecondary* seco
 template<typename TFunctor, typename TVoxelPrimary, typename TVoxelSecondary>
 __global__ void
 TraverseAndCompareAllWithPosition_device(TVoxelPrimary* primaryVoxels, TVoxelSecondary* secondaryVoxels,
-                                          const ITMLib::PlainVoxelArray::GridAlignedBox* arrayInfo,
+                                          const ITMLib::GridAlignedBox* arrayInfo,
                                           TFunctor* functor, bool* falseEncountered) {
 	if (*falseEncountered) return;
 

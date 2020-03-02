@@ -6,7 +6,10 @@ option(BUILD_TESTS "Build automated tests with the project (Boost-test required)
 
 set(COMMON_TEST_SOURCES
     TestUtils.cpp
+    TestUtils.cu
     TestUtils.tpp
+    TestUtils_Kernels.h
+    TestUtils_Functors.h
     TestUtilsForSnoopyFrames16And17.cpp
     )
 set(COMMON_TEST_HEADERS

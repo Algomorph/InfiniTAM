@@ -26,6 +26,7 @@ class IndexingEngine_VoxelBlockHash :
 		public IndexingEngineInterface<TVoxel, VoxelBlockHash> {
 
 public:
+
 	virtual void AllocateHashEntriesUsingAllocationStateList(VoxelVolume<TVoxel, VoxelBlockHash>* volume) = 0;
 	virtual void AllocateHashEntriesUsingAllocationStateList_SetVisibility(VoxelVolume<TVoxel, VoxelBlockHash>* volume) = 0;
 	virtual HashEntry FindHashEntry(const VoxelBlockHash& index, const Vector3s& coordinates) = 0;
@@ -43,6 +44,9 @@ public:
 	void AllocateNearAndBetweenTwoSurfaces(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
 	                                       const View* view,
 	                                       const CameraTrackingState* tracking_state) override;
+
+	virtual void AllocateGridAlignedBox(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const Extent3Di& box);
+
 
 private:
 	void ReallocateDeletedHashBlocks(VoxelVolume<TVoxel, VoxelBlockHash>* volume);

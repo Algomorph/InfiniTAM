@@ -15,49 +15,34 @@
 //  ================================================================
 #include <random>
 
+//local
 #include "TestUtils.h"
+#include "TestUtils_Functors.h"
+
+//ITMLib
 #include "../ITMLib/Utils/Configuration.h"
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
 #include "../ITMLib/Engines/Indexing/IndexingEngineFactory.h"
 #include "../ITMLib/Engines/Visualization/VisualizationEngineFactory.h"
 #include "../ORUtils/FileUtils.h"
-#ifndef COMPILE_WITHOUT_CUDA
-#include "../ITMLib/Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
-#endif
+#include "../ITMLib/Engines/EditAndCopy/EditAndCopyEngineFactory.h"
+#include "../ITMLib/Engines/Traversal/Interface/VolumeTraversal.h"
 
 
 using namespace ITMLib;
 
-template<class TVoxel, class TIndex>
-void GenerateTestVolume_CPU(VoxelVolume<TVoxel, TIndex>* volume) {
-	EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().ResetVolume(volume);
-	const int narrowBandThicknessVoxels = 10;
-	int xOffset = 8;
-	int surfaceSizeVoxelsZ = 16;
-	int surfaceSizeVoxelsY = 64;
 
-	for (int iVoxelAcrossBand = 0; iVoxelAcrossBand < narrowBandThicknessVoxels + 1; iVoxelAcrossBand++) {
-		float sdfMagnitude = 0.0f + static_cast<float>(iVoxelAcrossBand) * (1.0f / narrowBandThicknessVoxels);
-		int xPos = xOffset + iVoxelAcrossBand;
-		int xNeg = xOffset - iVoxelAcrossBand;
-		TVoxel voxelPos, voxelNeg;
-		simulateVoxelAlteration(voxelNeg, sdfMagnitude);
-		simulateVoxelAlteration(voxelPos, -sdfMagnitude);
-
-		for (int z = 0; z < surfaceSizeVoxelsZ; z++) {
-			for (int y = 0; y < surfaceSizeVoxelsY; y++) {
-				EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().SetVoxel(volume, Vector3i(xPos, y, z), voxelPos);
-				EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().SetVoxel(volume, Vector3i(xNeg, y, z), voxelNeg);
-			}
-		}
-	}
-
+template<MemoryDeviceType TMemoryDeviceType, typename TVoxel, typename TIndex>
+void GenerateRandomDepthWeightSubVolume(VoxelVolume<TVoxel, TIndex>* volume, const Extent3Di& bounds,
+                                        const Extent2Di& weight_range) {
+	IndexingEngineFactory::Get<TVoxel, TIndex>(TMemoryDeviceType).AllocateGridAlignedBox(volume, bounds);
+	AssignRandomDepthWeightsInRangeFunctor<TVoxel, TIndex, TMemoryDeviceType> functor(weight_range);
+	VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseUtilized(volume, functor);
 }
 
-#ifndef COMPILE_WITHOUT_CUDA
 
-template<class TVoxel, class TIndex>
-void GenerateTestVolume_CUDA(VoxelVolume<TVoxel, TIndex>* volume) {
+template<MemoryDeviceType TMemoryDeviceType, class TVoxel, class TIndex>
+void GenerateSimpleSurfaceTestVolume(VoxelVolume<TVoxel, TIndex>* volume) {
 	volume->Reset();
 	const int narrowBandThicknessVoxels = 10;
 	int xOffset = 8;
@@ -74,15 +59,15 @@ void GenerateTestVolume_CUDA(VoxelVolume<TVoxel, TIndex>* volume) {
 
 		for (int z = 0; z < surfaceSizeVoxelsZ; z++) {
 			for (int y = 0; y < surfaceSizeVoxelsY; y++) {
-				EditAndCopyEngine_CUDA<TVoxel, TIndex>::Inst().SetVoxel(volume, Vector3i(xPos, y, z), voxelPos);
-				EditAndCopyEngine_CUDA<TVoxel, TIndex>::Inst().SetVoxel(volume, Vector3i(xNeg, y, z), voxelNeg);
+				EditAndCopyEngineFactory::Instance<TVoxel, TIndex, TMemoryDeviceType>()
+						.SetVoxel(volume, Vector3i(xPos, y, z), voxelPos);
+				EditAndCopyEngineFactory::Instance<TVoxel, TIndex, TMemoryDeviceType>()
+						.SetVoxel(volume, Vector3i(xNeg, y, z), voxelNeg);
 			}
 		}
 	}
 
 }
-
-#endif
 
 template<bool hasSemanticInformation, typename TVoxel>
 struct HandleSDFBasedFlagsAlterationFunctor;
@@ -110,9 +95,9 @@ struct HandleSDFBasedFlagsAlterationFunctor<false, TVoxel> {
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "cert-err58-cpp"
 namespace internal {
-std::random_device random_device;
-std::mt19937 generator(random_device());
-std::uniform_real_distribution<float> floatDistribution(-1.0f, 1.0f);
+static std::random_device random_device;
+static std::mt19937 generator(random_device());
+static std::uniform_real_distribution<float> floatDistribution(-1.0f, 1.0f);
 }
 #pragma clang diagnostic pop
 
@@ -338,8 +323,7 @@ void buildSdfVolumeFromImage_SurfaceSpanAllocation(VoxelVolume<TVoxel, TIndex>**
                                                    const std::string& calibration_path,
                                                    MemoryDeviceType memory_device,
                                                    typename TIndex::InitializationParameters initialization_parameters,
-                                                   configuration::SwappingMode swapping_mode)
-{
+                                                   configuration::SwappingMode swapping_mode) {
 	View* view = nullptr;
 	buildSdfVolumeFromImage_SurfaceSpanAllocation(volume1, volume2, &view,
 	                                              depth1_path,

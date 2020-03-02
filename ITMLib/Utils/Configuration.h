@@ -150,9 +150,9 @@ struct TrackerConfigurationStringPresets {
 
 #define ARRAY_VOLUME_PARAMETERS_STRUCT_DESCRIPTION \
 	ArrayVolumeParameters, \
-	(PlainVoxelArray::GridAlignedBox, canonical, PlainVoxelArray::GridAlignedBox(), STRUCT, "Parameters specific to the canonical (target / reference) volume in array indexing configuration."), \
-	(PlainVoxelArray::GridAlignedBox, live, PlainVoxelArray::GridAlignedBox(), STRUCT, "Parameters specific to the live (source) volume in array indexing configuration."), \
-	(PlainVoxelArray::GridAlignedBox, warp, PlainVoxelArray::GridAlignedBox(), STRUCT, "Parameters specific to the volume holding warp vectors (motion information) in array indexing configuration.")
+	(GridAlignedBox, canonical, GridAlignedBox(), STRUCT, "Parameters specific to the canonical (target / reference) volume in array indexing configuration."), \
+	(GridAlignedBox, live, GridAlignedBox(), STRUCT, "Parameters specific to the live (source) volume in array indexing configuration."), \
+	(GridAlignedBox, warp, GridAlignedBox(), STRUCT, "Parameters specific to the volume holding warp vectors (motion information) in array indexing configuration.")
 
 DECLARE_SERIALIZABLE_STRUCT(ARRAY_VOLUME_PARAMETERS_STRUCT_DESCRIPTION);
 
