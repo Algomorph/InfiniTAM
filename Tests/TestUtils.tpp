@@ -36,8 +36,8 @@ template<MemoryDeviceType TMemoryDeviceType, typename TVoxel, typename TIndex>
 void GenerateRandomDepthWeightSubVolume(VoxelVolume<TVoxel, TIndex>* volume, const Extent3Di& bounds,
                                         const Extent2Di& weight_range) {
 	IndexingEngineFactory::Get<TVoxel, TIndex>(TMemoryDeviceType).AllocateGridAlignedBox(volume, bounds);
-	AssignRandomDepthWeightsInRangeFunctor<TVoxel, TIndex, TMemoryDeviceType> functor(weight_range);
-	VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseUtilized(volume, functor);
+	AssignRandomDepthWeightsInRangeFunctor<TVoxel, TIndex, TMemoryDeviceType> functor(weight_range, bounds);
+	VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseUtilizedWithPosition(volume, functor);
 }
 
 

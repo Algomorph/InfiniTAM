@@ -24,7 +24,7 @@
 namespace { // (CUDA global kernels)
 
 __global__
-void initialize_random_numbers_for_spatial_blocks(curandState_t* random_states){
+void initialize_random_numbers_for_spatial_blocks(curandState* random_states){
 	int idx = blockIdx.x * blockDim.x + threadIdx.x;
 	curand_init(1337, idx, 0, &random_states[idx]);
 }

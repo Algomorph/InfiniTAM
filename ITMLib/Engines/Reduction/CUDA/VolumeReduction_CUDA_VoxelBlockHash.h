@@ -87,13 +87,16 @@ public:
 		return ReduceUtilized_Generic<TReduceStaticFunctor, TOutput>(
 				position, volume, ignored_value,
 				[&retrieve_functor](dim3 cuda_utilized_grid_size, dim3 cuda_block_size,
-				   ReductionResult<TOutput, VoxelBlockHash>* result_buffer_device, const TVoxel* voxels,
-				   const HashEntry* hash_entries, const int* utilized_hash_codes) {
+				                    ReductionResult<TOutput, VoxelBlockHash>* result_buffer_device,
+				                    const TVoxel* voxels,
+				                    const HashEntry* hash_entries, const int* utilized_hash_codes) {
 
 					// transfer functor from RAM to VRAM
 					TRetrieveSingleDynamicFunctor* retrieve_functor_device = nullptr;
-					ORcudaSafeCall(cudaMalloc((void**) &retrieve_functor_device, sizeof(TRetrieveSingleDynamicFunctor)));
-					ORcudaSafeCall(cudaMemcpy(retrieve_functor_device, &retrieve_functor, sizeof(TRetrieveSingleDynamicFunctor), cudaMemcpyHostToDevice));
+					ORcudaSafeCall(
+							cudaMalloc((void**) &retrieve_functor_device, sizeof(TRetrieveSingleDynamicFunctor)));
+					ORcudaSafeCall(cudaMemcpy(retrieve_functor_device, &retrieve_functor,
+					                          sizeof(TRetrieveSingleDynamicFunctor), cudaMemcpyHostToDevice));
 
 					computeVoxelHashReduction_BlockLevel_Dynamic<TVoxel, TRetrieveSingleDynamicFunctor, TReduceStaticFunctor, TOutput>
 							<< < cuda_utilized_grid_size, cuda_block_size >> >
@@ -113,10 +116,10 @@ private:
 		const HashEntry* hash_entries = volume->index.GetEntries();
 		const TVoxel* voxels = volume->voxels.GetVoxelBlocks();
 
-		const int half_block_voxel_count = VOXEL_BLOCK_SIZE3 / 2;
+		const int half_block_voxel_count = (VOXEL_BLOCK_SIZE3 / 2);
 
-		auto getNormalizedCount = [&half_block_voxel_count](int count) {
-			return ceil_of_integer_quotient(count, half_block_voxel_count) * half_block_voxel_count;
+		auto getNormalizedCount = [](int count) {
+			return ceil_of_integer_quotient(count, VOXEL_BLOCK_SIZE3) * VOXEL_BLOCK_SIZE3;
 		};
 
 		const int normalized_entry_count = getNormalizedCount(utilized_entry_count);
@@ -124,15 +127,16 @@ private:
 
 		ORUtils::MemoryBlock<ReductionResult<TOutput, VoxelBlockHash>> result_buffer1(normalized_entry_count,
 		                                                                              MEMORYDEVICE_CUDA);
-
 		dim3 cuda_block_size(half_block_voxel_count);
-		dim3 cuda_tail_grid_size(ceil_of_integer_quotient(tail_length, half_block_voxel_count));
+		dim3 cuda_tail_grid_size(ceil_of_integer_quotient(tail_length, VOXEL_BLOCK_SIZE3));
 
-		setTailToIgnored<TOutput>
-				<< < cuda_tail_grid_size, cuda_block_size >> >
-		                                  (result_buffer1.GetData(
-				                                  MEMORYDEVICE_CUDA), utilized_entry_count, normalized_entry_count, ignored_value);
-		ORcudaKernelCheck;
+		if(tail_length > 0){
+			setTailToIgnored<TOutput>
+					<< < cuda_tail_grid_size, cuda_block_size >> >
+			                                  (result_buffer1.GetData(
+					                                  MEMORYDEVICE_CUDA), utilized_entry_count, normalized_entry_count, ignored_value);
+			ORcudaKernelCheck;
+		}
 
 		dim3 cuda_utilized_grid_size(utilized_entry_count);
 
@@ -144,9 +148,10 @@ private:
 		int output_count = utilized_entry_count;
 		int normalized_output_count = normalized_entry_count;
 
+
+
 		ORUtils::MemoryBlock<ReductionResult<TOutput, VoxelBlockHash>> result_buffer2(
-				normalized_entry_count / half_block_voxel_count,
-				MEMORYDEVICE_CUDA);
+				getNormalizedCount(normalized_entry_count / half_block_voxel_count),MEMORYDEVICE_CUDA);
 		/* input & output are swapped in the beginning of the loop code as opposed to the end,
 		 so that output_buffer points to the final buffer after the loop finishes*/
 		ORUtils::MemoryBlock<ReductionResult<TOutput, VoxelBlockHash>>* input_buffer = &result_buffer2;
@@ -154,15 +159,17 @@ private:
 
 		while (output_count > 1) {
 			std::swap(input_buffer, output_buffer);
-			output_count = normalized_output_count / half_block_voxel_count;
+			output_count = normalized_output_count / VOXEL_BLOCK_SIZE3;
 			normalized_output_count = getNormalizedCount(output_count);
 			tail_length = normalized_output_count - output_count;
-			cuda_tail_grid_size.x = ceil_of_integer_quotient(tail_length, half_block_voxel_count);
-			setTailToIgnored<TOutput>
-					<< < cuda_tail_grid_size, cuda_block_size >> >
-			                                  (output_buffer->GetData(
-					                                  MEMORYDEVICE_CUDA), output_count, normalized_output_count, ignored_value);
-			ORcudaKernelCheck;
+			if(tail_length > 0) {
+				cuda_tail_grid_size.x = ceil_of_integer_quotient(tail_length, VOXEL_BLOCK_SIZE3);
+				setTailToIgnored<TOutput>
+						<< < cuda_tail_grid_size, cuda_block_size >> >
+				                                  (output_buffer->GetData(
+						                                  MEMORYDEVICE_CUDA), output_count, normalized_output_count, ignored_value);
+				ORcudaKernelCheck;
+			}
 
 			dim3 cuda_grid_size(output_count);
 			computeVoxelHashReduction_ResultLevel<TReduceStaticFunctor, TOutput>

@@ -79,7 +79,7 @@ computeVoxelHashReduction_BlockLevel_Static(ReductionResult<TOutput, VoxelBlockH
                                             const HashEntry* hash_entries,
                                             const int* utilized_hash_codes) {
 	__shared__
-	ReductionResult<TOutput, VoxelBlockHash> shared_data[VOXEL_BLOCK_SIZE3 / 2];
+	ReductionResult<TOutput, VoxelBlockHash> shared_data[(VOXEL_BLOCK_SIZE3 / 2)];
 	computeVoxelHashReduction_BlockLevel_Generic < TVoxel, TReduceStaticFunctor, TOutput > (
 			block_results, voxels, hash_entries, utilized_hash_codes, shared_data,
 					[](const TVoxel* block_voxels, int index_within_block) {
@@ -113,7 +113,7 @@ __global__
 void computeVoxelHashReduction_ResultLevel(ReductionResult<TOutput, VoxelBlockHash>* output,
                                            const ReductionResult<TOutput, VoxelBlockHash>* input) {
 	__shared__
-	ReductionResult<TOutput, VoxelBlockHash> shared_data[VOXEL_BLOCK_SIZE3 / 2];
+	ReductionResult<TOutput, VoxelBlockHash> shared_data[(VOXEL_BLOCK_SIZE3 / 2)];
 	unsigned int thread_id = threadIdx.x;
 	unsigned int block_id = blockIdx.x;
 	unsigned int base_level_index1 = block_id * blockDim.x * 2 + thread_id;

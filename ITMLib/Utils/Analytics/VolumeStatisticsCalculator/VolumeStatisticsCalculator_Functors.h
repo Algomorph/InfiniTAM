@@ -234,7 +234,7 @@ struct RetrieveIsVoxelInDepthWeightRange<TVoxel,TOutput, true>{
 	Extent2Di range;
 	_CPU_AND_GPU_CODE_
 	inline TOutput retrieve(const TVoxel& voxel) const {
-		return range.from < voxel.w_depth < range.to;
+		return (range.from <= voxel.w_depth) && (voxel.w_depth < range.to);
 	}
 };
 
