@@ -15,29 +15,14 @@
 //  ================================================================
 #pragma once
 
-#include <string>
-#include <fstream>
-#include "../Configuration.h"
+
 
 namespace ITMLib {
-namespace text_log {
+namespace logging {
 
-class TextLog {
-public:
-	TextLog() = default;
-	explicit TextLog(std::string path);
-	template<typename T>
-	void operator << (T item){
-		if(!path.empty()){
-			stream << item;
-		}
-	}
-private:
-	std::ofstream stream;
-	std::string path = "";
-};
 
-void start_log(const std::string& name, const std::string& extension = "txt", const std::string& directory = configuration::get().paths.output_path);
-TextLog& get_log(std::string name);
-}//namespace bench
+
+}//namespace logging
 }//namespace ITMLib
+
+

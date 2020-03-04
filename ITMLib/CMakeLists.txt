@@ -13,9 +13,6 @@ include(${PROJECT_SOURCE_DIR}/cmake/UseOpenMP.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/UseVTK.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/UseOpenCV.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/UseBoost.cmake)
-if(NOT log4cplus_FOUND)
-    find_package(log4cplus)
-endif()
 
 #############################
 # Project files             #
@@ -872,7 +869,9 @@ set(ITMLIB_UTILS_SOURCES
 
     Utils/FileIO/JSON_Utilities.cpp
     Utils/FileIO/CSV_Utilities.cpp
-    Utils/Logging/TextLogUtilities.cpp
+
+    Utils/Logging/LoggingUtilities.cpp
+    Utils/Logging/LoggingConfiguration.cpp
 
     Utils/Configuration.cpp
     Utils/CPPPrintHelpers.cpp
@@ -898,7 +897,9 @@ set(ITMLIB_UTILS_HEADERS
 
     Utils/FileIO/JSON_Utilities.h
     Utils/FileIO/CSV_Utilities.h
-    Utils/Logging/TextLogUtilities.h
+
+    Utils/Logging/LoggingConfiguration.cpp
+    Utils/Logging/LoggingUtilities.h
 
     Utils/CUDAUtils.h
     Utils/ValuePosition.h
