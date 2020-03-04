@@ -13,36 +13,31 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "TextLogUtilities.h"
-#include <map>
-#include <utility>
-#include <boost/filesystem.hpp>
+#pragma once
 
-namespace fs = boost::filesystem;
+#include <string>
+#include <fstream>
+#include "../Configuration.h"
 
-namespace ITMLib{
-namespace text_log{
-std::map<std::string, TextLog> text_logs;
+namespace ITMLib {
+namespace text_log {
 
-TextLog::TextLog(std::string path) : stream(path.c_str(), std::ios_base::out | std::ios_base::ate), path(std::move(path)) {}
-
-
-void start_log(const std::string& name, const std::string& extension, const std::string& directory) {
-
-	if(text_logs.find(name) == text_logs.end()){
-		text_logs[name] = TextLog((fs::path(directory) / fs::path(name + "." + extension)).string());
+class TextLog {
+public:
+	TextLog() = default;
+	explicit TextLog(std::string path);
+	template<typename T>
+	void operator << (T item){
+		if(!path.empty()){
+			stream << item;
+		}
 	}
+private:
+	std::ofstream stream;
+	std::string path = "";
+};
 
-}
-
-
-
-TextLog& get_log(std::string name) {
-	return text_logs[name];
-}
-
-
-} // namespace text_log
-} // namespace ITMLib
-
-
+void start_log(const std::string& name, const std::string& extension = "txt", const std::string& directory = configuration::get().paths.output_path);
+TextLog& get_log(std::string name);
+}//namespace bench
+}//namespace ITMLib

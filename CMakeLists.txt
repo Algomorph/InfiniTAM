@@ -64,9 +64,22 @@ add_custom_target(cmake SOURCES ${CMAKE_SOURCES})
 source_group(CMake FILES ${CMAKE_SOURCES})
 
 ######################
+# Dependency options
+######################
+set(LOG4CPLUS_SOURCE_OPTIONS
+    BUILD_EXTERNAL
+    BUILD_PACKAGED
+    FIND_LOCAL
+    )
+list(GET LOG4CPLUS_SOURCE_OPTIONS 0 LOG4CPLUS_SOURCE_DEFAULT_OPTION)
+set(LOG4CPLUS_SOURCE "${LOG4CPLUS_SOURCE_DEFAULT_OPTION}" CACHE STRING "How to obtain the log4cplus dependency. Can be one of: [ ${LOG4CPLUS_SOURCE_OPTIONS}]")
+set_property(CACHE LOG4CPLUS_SOURCE PROPERTY STRINGS ${LOG4CPLUS_SOURCE_OPTIONS})
+
+######################
 # Add subdirectories #
 ######################
 
+add_subdirectory(external)
 add_subdirectory(Apps)
 add_subdirectory(FernRelocLib)
 add_subdirectory(InputSource)
@@ -74,3 +87,4 @@ add_subdirectory(ITMLib)
 add_subdirectory(MiniSlamGraphLib)
 add_subdirectory(ORUtils)
 add_subdirectory(Tests)
+

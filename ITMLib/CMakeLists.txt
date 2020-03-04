@@ -2,14 +2,10 @@
 # CMakeLists.txt for ITMLib #
 #############################
 
-###########################
-# Specify the target name #
-###########################
-
 set(targetname ITMLib)
 
 ################################
-# Specify the libraries to use #
+# Dependencies                 #
 ################################
 
 include(${PROJECT_SOURCE_DIR}/cmake/UseCUDA.cmake)
@@ -17,9 +13,12 @@ include(${PROJECT_SOURCE_DIR}/cmake/UseOpenMP.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/UseVTK.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/UseOpenCV.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/UseBoost.cmake)
+if(NOT log4cplus_FOUND)
+    find_package(log4cplus)
+endif()
 
 #############################
-# Specify the project files #
+# Project files             #
 #############################
 
 set(ITMLIB_TOPLEVEL_HEADERS
@@ -873,7 +872,7 @@ set(ITMLIB_UTILS_SOURCES
 
     Utils/FileIO/JSON_Utilities.cpp
     Utils/FileIO/CSV_Utilities.cpp
-    Utils/FileIO/TextLogUtilities.cpp
+    Utils/Logging/TextLogUtilities.cpp
 
     Utils/Configuration.cpp
     Utils/CPPPrintHelpers.cpp
@@ -899,7 +898,7 @@ set(ITMLIB_UTILS_HEADERS
 
     Utils/FileIO/JSON_Utilities.h
     Utils/FileIO/CSV_Utilities.h
-    Utils/FileIO/TextLogUtilities.h
+    Utils/Logging/TextLogUtilities.h
 
     Utils/CUDAUtils.h
     Utils/ValuePosition.h
@@ -950,23 +949,23 @@ set(ITMLIB_UTILS_STATCALC_SOURCES
 
 ## ================================================ UTILS - FILEIO =====================================================
 set(ITMLIB_UTILS_FILEIO_SOURCES
-    Utils/FileIO/TelemetryRecorder_PlainVoxelArray.cpp
-    Utils/FileIO/TelemetryRecorder_VoxelBlockHash.cpp
-    Utils/FileIO/SceneLogger.tpp
-    Utils/FileIO/SceneLogger_PlainVoxelArray.cpp
-    Utils/FileIO/SceneLogger_VoxelBlockHash.cpp
-    Utils/FileIO/TelemetryRecorder.tpp
-    Utils/FileIO/SceneLogger_SceneSlice.tpp
-    Utils/FileIO/WarpFieldSequenceRecorder.tpp
-    Utils/FileIO/WarpFieldSequenceRecorder_PlainVoxelArray.cpp
-    Utils/FileIO/WarpFieldSequenceRecorder_VoxelBlockHash.cpp
+    Utils/Telemetry/TelemetryRecorder_PlainVoxelArray.cpp
+    Utils/Telemetry/TelemetryRecorder_VoxelBlockHash.cpp
+    Utils/Telemetry/SceneLogger.tpp
+    Utils/Telemetry/SceneLogger_PlainVoxelArray.cpp
+    Utils/Telemetry/SceneLogger_VoxelBlockHash.cpp
+    Utils/Telemetry/TelemetryRecorder.tpp
+    Utils/Telemetry/SceneLogger_SceneSlice.tpp
+    Utils/Telemetry/WarpFieldSequenceRecorder.tpp
+    Utils/Telemetry/WarpFieldSequenceRecorder_PlainVoxelArray.cpp
+    Utils/Telemetry/WarpFieldSequenceRecorder_VoxelBlockHash.cpp
     )
 
 set(ITMLIB_UTILS_FILEIO_HEADERS
-    Utils/FileIO/WriteAndReadFunctors.h
-    Utils/FileIO/VolumeSequenceRecorder.h
-    Utils/FileIO/TelemetryRecorder.h
-    Utils/FileIO/WarpFieldSequenceRecorder.h)
+    Utils/Telemetry/WriteAndReadFunctors.h
+    Utils/Telemetry/VolumeSequenceRecorder.h
+    Utils/Telemetry/TelemetryRecorder.h
+    Utils/Telemetry/WarpFieldSequenceRecorder.h)
 ##
 
 set(ITMLIB_UTILS_VISUALIZATION_SOURCES
@@ -1136,8 +1135,7 @@ if (WITH_VTK)
     target_compile_definitions(${targetname} PUBLIC -DWITH_VTK)
 endif ()
 target_include_directories(${targetname} PUBLIC ${OpenCV_INCLUDE_DIRS})
-target_link_libraries(${targetname} ${OpenCV_LIBS} ${VTK_LIBRARIES})
-
+target_link_libraries(${targetname} ${OpenCV_LIBS} ${VTK_LIBRARIES} log4cplus)
 include(${PROJECT_SOURCE_DIR}/cmake/LinkBoost.cmake)
 
 

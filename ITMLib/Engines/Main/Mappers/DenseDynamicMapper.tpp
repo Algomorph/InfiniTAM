@@ -67,11 +67,13 @@ void DenseDynamicMapper<TVoxel, TWarp, TIndex>::LogVolumeStatistics(VoxelVolume<
 				DIEWITHEXCEPTION_REPORTLOCATION("Metal framework not supported for this.");
 		}
 
+
+
 		std::cout << green << "=== Stats for volume '" << volume_description << "' ===" << reset << std::endl;
 		std::cout << "    Total voxel count: " << calculator->ComputeAllocatedVoxelCount(volume) << std::endl;
 		std::cout << "    NonTruncated voxel count: " << calculator->ComputeNonTruncatedVoxelCount(volume) << std::endl;
 		std::cout << "    +1.0 voxel count: " << calculator->CountVoxelsWithSpecificSdfValue(volume, 1.0f) << std::endl;
-		//std::vector<int> allocatedHashes = calculator->GetAllocatedHashCodes(volume);
+
 		std::cout << "    Allocated hash count: " << calculator->ComputeAllocatedHashBlockCount(volume) << std::endl;
 		std::cout << "    NonTruncated SDF sum: " << calculator->ComputeNonTruncatedVoxelAbsSdfSum(volume) << std::endl;
 		std::cout << "    Truncated SDF sum: " << calculator->ComputeTruncatedVoxelAbsSdfSum(volume) << std::endl;
@@ -139,27 +141,6 @@ void DenseDynamicMapper<TVoxel, TWarp, TIndex>::ProcessInitialFrame(
 }
 
 
-//_DEBUG
-template<typename TVoxel, typename TWarp, typename TIndex>
-struct print_DEBUG_struct;
-
-template<typename TVoxel, typename TWarp>
-struct print_DEBUG_struct<TVoxel, TWarp, PlainVoxelArray>{
-	inline static void print(VoxelVolume<TVoxel, PlainVoxelArray>* canonical_volume, VoxelVolume<TVoxel, PlainVoxelArray>* live_volume1, VoxelVolume<TVoxel, PlainVoxelArray>* live_volume2, VoxelVolume<TWarp, PlainVoxelArray>* warp_field){
-
-	}
-};
-
-template<typename TVoxel, typename TWarp>
-struct print_DEBUG_struct<TVoxel, TWarp, VoxelBlockHash>{
-	inline static void print(VoxelVolume<TVoxel, VoxelBlockHash>* canonical_volume, VoxelVolume<TVoxel, VoxelBlockHash>* live_volume1, VoxelVolume<TVoxel, VoxelBlockHash>* live_volume2, VoxelVolume<TWarp, VoxelBlockHash>* warp_field){
-//		std::cout << canonical_volume->index.GetUtilizedHashBlockCount() << std::endl;
-//		std::cout << live_volume1->index.GetUtilizedHashBlockCount() << std::endl;
-//		std::cout << live_volume2->index.GetUtilizedHashBlockCount() << std::endl;
-//		std::cout << warp_field->index.GetUtilizedHashBlockCount() << std::endl;
-	}
-};
-
 template<typename TVoxel, typename TWarp, typename TIndex>
 void
 DenseDynamicMapper<TVoxel, TWarp, TIndex>::ProcessFrame(const View* view, const CameraTrackingState* trackingState,
@@ -181,11 +162,9 @@ DenseDynamicMapper<TVoxel, TWarp, TIndex>::ProcessFrame(const View* view, const 
 	indexing_engine->AllocateWarpVolumeFromOtherVolume(warp_field, live_volume_pair[0]);
 	depth_fusion_engine->IntegrateDepthImageIntoTsdfVolume(live_volume_pair[0], view, trackingState);
 
-	print_DEBUG_struct<TVoxel,TWarp,TIndex>::print(canonical_volume, live_volume_pair[0], live_volume_pair[1], warp_field);
 
 	LogVolumeStatistics(live_volume_pair[0], "[[live TSDF before tracking]]");
 	bench::stop_timer("GenerateRawLiveVolume");
-	//TelemetryRecorder<TVoxel, TWarp, TIndex>::Instance().InitializeFrameRecording();
 
 	bench::start_timer("TrackMotion");
 	VoxelVolume<TVoxel, TIndex>* target_warped_live_volume = TrackFrameMotion(canonical_volume, live_volume_pair,
@@ -199,11 +178,6 @@ DenseDynamicMapper<TVoxel, TWarp, TIndex>::ProcessFrame(const View* view, const 
 	volume_fusion_engine->FuseOneTsdfVolumeIntoAnother(canonical_volume, target_warped_live_volume);
 	bench::stop_timer("FuseOneTsdfVolumeIntoAnother");
 	LogVolumeStatistics(canonical_volume, "[[canonical TSDF after fusion]]");
-
-	//TelemetryRecorder<TVoxel, TWarp, TIndex>::Instance().FinalizeFrameRecording();
-
-	//TODO: revise how swapping works for dynamic scenes
-	//ProcessSwapping(canonical_volume, canonical_render_state);
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
@@ -239,15 +213,6 @@ VoxelVolume<TVoxel, TIndex>* DenseDynamicMapper<TVoxel, TWarp, TIndex>::TrackFra
 		PerformSingleOptimizationStep(canonical_volume, live_volume_pair[source_live_volume_index],
 		                              live_volume_pair[target_live_volume_index], warp_field,
 		                              max_vector_update_length_in_voxels, iteration);
-		//_DEBUG
-//		if(configuration::get().telemetry_settings.log_volume_statistics && verbosity_level >= configuration::VERBOSITY_PER_ITERATION){
-//			std::cout << green << "*** Per-Iteration Volume Statistics ***" << reset << std::endl;
-//			std::cout << "   Warp update minimum: " << StatCalc_Accessor::Get<TWarp,TIndex>().ComputeWarpUpdateMin(warp_field) << std::endl;
-//			std::cout << "   Warp update mean: " << StatCalc_Accessor::Get<TWarp,TIndex>().ComputeWarpUpdateMean(warp_field) << std::endl;
-//			std::cout << "   Warp update maximum: " << StatCalc_Accessor::Get<TWarp,TIndex>().ComputeWarpUpdateMax(warp_field) << std::endl;
-//			std::cout << "   Source live non-truncated voxel count: " << StatCalc_Accessor::Get<TVoxel,TIndex>().ComputeNonTruncatedVoxelCount(live_volume_pair[source_live_volume_index]) << std::endl;
-//			std::cout << "   Target live non-truncated voxel count: " << StatCalc_Accessor::Get<TVoxel,TIndex>().ComputeNonTruncatedVoxelCount(live_volume_pair[target_live_volume_index]) << std::endl;
-//		}
 
 		std::swap(source_live_volume_index,target_live_volume_index);
 	}
@@ -265,8 +230,6 @@ void DenseDynamicMapper<TVoxel, TWarp, TIndex>::PerformSingleOptimizationStep(
 		VoxelVolume<TWarp, TIndex>* warp_field,
 		float& max_update_vector_length,
 		int iteration) {
-
-	//TelemetryRecorder<TVoxel, TWarp, TIndex>::Instance().SaveWarpSlices(iteration);
 
 	if (configuration::get().verbosity_level >= configuration::VERBOSITY_PER_ITERATION) {
 		std::cout << red << "Iteration: " << iteration << reset << std::endl;
@@ -300,7 +263,6 @@ void DenseDynamicMapper<TVoxel, TWarp, TIndex>::PerformSingleOptimizationStep(
 	bench::start_timer("TrackMotion_35_WarpLiveScene");
 	warping_engine->WarpVolume_WarpUpdates(warp_field, source_live_volume, target_live_volume);
 	bench::stop_timer("TrackMotion_35_WarpLiveScene");
-	//TelemetryRecorder<TVoxel, TWarp, TIndex>::Instance().SaveWarps();
 }
 
 

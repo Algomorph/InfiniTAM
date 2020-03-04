@@ -1,0 +1,4 @@
+# log4cplus 3.0.0
+
+  - **IMPORTANT**: Implementation language is now C++17.
+  

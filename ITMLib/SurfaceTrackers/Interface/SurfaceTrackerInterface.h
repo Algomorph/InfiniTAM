@@ -19,7 +19,7 @@
 #include "../../Objects/Volume/VoxelVolume.h"
 #include "../../Engines/Reconstruction/CPU/SceneReconstructionEngine_CPU.h"
 #include "../../Utils/Visualization/SceneSliceVisualizer2D.h"
-#include "../../Utils/FileIO/VolumeSequenceRecorder.h"
+#include "../../Utils/Telemetry/VolumeSequenceRecorder.h"
 #include "../../Utils/CPPPrintHelpers.h"
 #include "../../Utils/VoxelFlags.h"
 #include "../Shared/SurfaceTrackerOptimizationParameters.h"
