@@ -864,7 +864,7 @@ set(ITMLIB_UTILS_SOURCES
     Utils/Serialization/SerializationDetails.cpp
 
     Utils/Analytics/NeighborVoxelIterationInfo.cpp
-    Utils/Analytics/BenchmarkUtils.cpp
+    Utils/Analytics/BenchmarkUtilities.cpp
 
     Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CPU.tpp
     Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CPU.cpp
@@ -873,6 +873,7 @@ set(ITMLIB_UTILS_SOURCES
 
     Utils/FileIO/JSON_Utilities.cpp
     Utils/FileIO/CSV_Utilities.cpp
+    Utils/FileIO/TextLogUtilities.cpp
 
     Utils/Configuration.cpp
     Utils/CPPPrintHelpers.cpp
@@ -898,6 +899,7 @@ set(ITMLIB_UTILS_HEADERS
 
     Utils/FileIO/JSON_Utilities.h
     Utils/FileIO/CSV_Utilities.h
+    Utils/FileIO/TextLogUtilities.h
 
     Utils/CUDAUtils.h
     Utils/ValuePosition.h
@@ -917,7 +919,7 @@ set(ITMLIB_UTILS_HEADERS
     Utils/CPrintHelpers.h
     Utils/CLionCUDAsyntax.h
 
-    Utils/Analytics/BenchmarkUtils.h
+    Utils/Analytics/BenchmarkUtilities.h
     Utils/Analytics/AlmostEqual.h
     Utils/Analytics/IsAltered.h
     Utils/Analytics/NeighborVoxelIterationInfo.h

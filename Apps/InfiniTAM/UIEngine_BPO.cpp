@@ -38,7 +38,7 @@
 
 #include "../../ORUtils/FileUtils.h"
 #include "../../InputSource/FFMPEGWriter.h"
-#include "../../ITMLib/Utils/Analytics/BenchmarkUtils.h"
+#include "../../ITMLib/Utils/Analytics/BenchmarkUtilities.h"
 #include "../../ITMLib/Utils/CPPPrintHelpers.h"
 
 #ifdef WITH_OPENCV
@@ -55,7 +55,7 @@ using namespace InputSource;
 using namespace ITMLib;
 
 
-namespace bench = ITMLib::Bench;
+namespace bench = ITMLib::bench;
 
 
 /**

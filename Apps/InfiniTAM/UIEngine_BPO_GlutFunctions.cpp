@@ -14,7 +14,7 @@
 //  limitations under the License.
 //  ================================================================
 #include "UIEngine_BPO.h"
-#include "../../ITMLib/Utils/Analytics/BenchmarkUtils.h"
+#include "../../ITMLib/Utils/Analytics/BenchmarkUtilities.h"
 #include "../../ITMLib/Engines/Main/MultiEngine.h"
 #include "../../ITMLib/Engines/Main/BasicVoxelEngine.h"
 #include "../../ITMLib/Utils/FileIO/TelemetryRecorder.h"
@@ -45,9 +45,6 @@
 using namespace InfiniTAM::Engine;
 using namespace InputSource;
 using namespace ITMLib;
-
-
-namespace bench = ITMLib::Bench;
 
 
 static void Safe_GlutBitmapString(void* font, const char* str) {
@@ -205,9 +202,9 @@ void UIEngine_BPO::GlutIdleFunction() {
 				if (uiEngine.save_after_automatic_run) {
 					uiEngine.mainEngine->SaveToFile(uiEngine.GeneratePreviousFrameOutputPath());
 				}
-				bench::PrintAllCumulativeTimes();
+				bench::print_all_cumulative_times_to_stdout();
 				if (configuration::get().telemetry_settings.save_benchmarks_to_disk) {
-					bench::SaveAllCumulativeTimesToDisk();
+					bench::save_all_cumulative_times_to_disk();
 				}
 			}
 			break;

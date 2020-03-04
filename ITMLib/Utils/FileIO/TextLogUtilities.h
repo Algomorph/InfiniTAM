@@ -1,6 +1,6 @@
 //  ================================================================
-//  Created by Gregory Kramida on 5/3/18.
-//  Copyright (c) 2018-2025 Gregory Kramida
+//  Created by Gregory Kramida on 3/4/20.
+//  Copyright (c) 2020 Gregory Kramida
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
 //  You may obtain a copy of the License at
@@ -15,20 +15,28 @@
 //  ================================================================
 #pragma once
 
-//stdlib
 #include <string>
-#include <ostream>
+#include <fstream>
 
 namespace ITMLib {
-namespace Bench {
-void StartTimer(std::string name);
-void StopTimer(std::string name);
-void all_times_to_stream(std::ostream& out, bool colors_enabled);
-void PrintAllCumulativeTimes();
-void SaveAllCumulativeTimesToDisk();
-double StopTimerAndGetCumulativeTime(std::string name);
-double StopTimerAndGetLastTime(std::string name);
-double GetCumulativeTime(std::string name);
-}//namespace Bench
-}//namespace ITMLib
+namespace text_log {
 
+class TextLog {
+public:
+	TextLog() = default;
+	explicit TextLog(std::string path);
+	template<typename T>
+	void operator << (T item){
+		if(!path.empty()){
+			stream << item;
+		}
+	}
+private:
+	std::ofstream stream;
+	std::string path = "";
+};
+
+void start_log(const std::string& name, const std::string& extension = "csv", const std::string& directory = "");
+TextLog& get_log(std::string name);
+}//namespace bench
+}//namespace ITMLib

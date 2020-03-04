@@ -24,14 +24,14 @@
 
 // local
 #include "../../../ORUtils/PlatformIndependence.h"
-#include "BenchmarkUtils.h"
+#include "BenchmarkUtilities.h"
 #include "../CPPPrintHelpers.h"
 #include "../Configuration.h"
 
 namespace fs = boost::filesystem;
 
 namespace ITMLib {
-namespace Bench {
+namespace bench {
 std::map<std::string, std::pair<double, std::chrono::time_point<std::chrono::steady_clock>>> timers;
 
 /**
@@ -39,7 +39,7 @@ std::map<std::string, std::pair<double, std::chrono::time_point<std::chrono::ste
  * \details Not thread-safe
  * \param name name of the timer
  */
-void StartTimer(std::string name) {
+void start_timer(std::string name) {
 	auto itr = timers.find(name);
 	if (itr != timers.end()) {
 		(*itr).second.second = std::chrono::steady_clock::now();
@@ -53,7 +53,7 @@ void StartTimer(std::string name) {
  * \details Not thread-safe
  * \param name name of the timer
  */
-void StopTimer(std::string name) {
+void stop_timer(std::string name) {
 	auto itr = timers.find(name);
 	if (itr != timers.end()) {
 		double cumulativeTime = std::get<0>((*itr).second);
@@ -72,7 +72,7 @@ void StopTimer(std::string name) {
  * \brief Print all cumulative times for timers recorded so far.
  * \details Not thread-safe
  */
-void all_times_to_stream(std::ostream& out, bool colors_enabled) {
+void all_cumulative_times_to_stream(std::ostream& out, bool colors_enabled) {
 	if (colors_enabled) {
 		out << green << "Logged cumulative runtimes:" << reset << std::endl;
 	} else {
@@ -83,25 +83,25 @@ void all_times_to_stream(std::ostream& out, bool colors_enabled) {
 	}
 }
 
-void PrintAllCumulativeTimes() {
-	all_times_to_stream(std::cout, true);
+void print_all_cumulative_times_to_stdout() {
+	all_cumulative_times_to_stream(std::cout, true);
 }
 
-void SaveAllCumulativeTimesToDisk() {
+void save_all_cumulative_times_to_disk() {
 	std::ofstream output_file;
 	std::string path = (fs::path(configuration::get().paths.output_path) / "benchmark.txt").string();
 	output_file.open(path);
-	all_times_to_stream(output_file,false);
+	all_cumulative_times_to_stream(output_file, false);
 	output_file.close();
 }
 
 
-double StopTimerAndGetCumulativeTime(std::string name) {
-	StopTimer(name);
-	return GetCumulativeTime(name);
+double stop_timer_and_get_cumulative_time(std::string name) {
+	stop_timer(name);
+	return get_cumulative_time(name);
 }
 
-double StopTimerAndGetLastTime(std::string name) {
+double stop_timer_and_get_last_time(std::string name) {
 	auto itr = timers.find(name);
 	if (itr != timers.end()) {
 		double cumulativeTime = std::get<0>((*itr).second);
@@ -118,7 +118,7 @@ double StopTimerAndGetLastTime(std::string name) {
 	}
 }
 
-double GetCumulativeTime(std::string name) {
+double get_cumulative_time(std::string name) {
 	auto itr = timers.find(name);
 	if (itr != timers.end()) {
 		double cumulativeTime = std::get<0>((*itr).second);
@@ -129,5 +129,5 @@ double GetCumulativeTime(std::string name) {
 	}
 }
 
-}//namespace Bench
+}//namespace bench
 }//namespace ITMLib

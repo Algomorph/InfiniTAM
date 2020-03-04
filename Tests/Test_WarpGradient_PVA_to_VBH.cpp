@@ -52,7 +52,7 @@
 #include "../ITMLib/Engines/Visualization/VisualizationEngineFactory.h"
 #include "../ITMLib/Engines/Warping/WarpingEngineFactory.h"
 #include "../ITMLib/Engines/VolumeFusion/VolumeFusionEngineFactory.h"
-#include "../ITMLib/Utils/Analytics/BenchmarkUtils.h"
+#include "../ITMLib/Utils/Analytics/BenchmarkUtilities.h"
 #include "../ITMLib/Engines/Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
 #endif
 
@@ -353,17 +353,17 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CPU) {
 	int target_warped_field_ix = live_index_to_start_from;
 	for (int iteration = 0; iteration < iteration_limit; iteration++) {
 		std::swap(source_warped_field_ix, target_warped_field_ix);
-		Bench::StartTimer("1_CalculateWarpGradient");
+		bench::StartTimer("1_CalculateWarpGradient");
 		motion_tracker.CalculateWarpGradient(&warp_field, canonical_volume, live_volumes[source_warped_field_ix]);
 		std::cout << "Warp allocated hash count: " << warp_calculator.ComputeAllocatedHashBlockCount(&warp_field) << std::endl;
-		Bench::StopTimer("1_CalculateWarpGradient");
-		Bench::StartTimer("2_SmoothWarpGradient");
+		bench::StopTimer("1_CalculateWarpGradient");
+		bench::StartTimer("2_SmoothWarpGradient");
 		motion_tracker.SmoothWarpGradient(&warp_field, canonical_volume, live_volumes[source_warped_field_ix]);
-		Bench::StopTimer("2_SmoothWarpGradient");
-		Bench::StartTimer("3_UpdateWarps");
+		bench::StopTimer("2_SmoothWarpGradient");
+		bench::StartTimer("3_UpdateWarps");
 		motion_tracker.UpdateWarps(&warp_field, canonical_volume, live_volumes[source_warped_field_ix]);
-		Bench::StopTimer("3_UpdateWarps");
-		Bench::StartTimer("4_WarpVolume");
+		bench::StopTimer("3_UpdateWarps");
+		bench::StartTimer("4_WarpVolume");
 		motion_tracker.CalculateWarpGradient(&warp_field, canonical_volume, live_volumes[source_warped_field_ix]);
 		std::cout << "Warp allocated hash count (2): " << warp_calculator.ComputeAllocatedHashBlockCount(&warp_field) << std::endl;
 		PrintVolumeStatistics<TSDFVoxel,VoxelBlockHash,MEMORYDEVICE_CPU>(live_volumes[target_warped_field_ix], "[target live before warp]");
@@ -372,10 +372,10 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CPU) {
 		                                       live_volumes[target_warped_field_ix]);
 		PrintVolumeStatistics<TSDFVoxel,VoxelBlockHash,MEMORYDEVICE_CPU>(live_volumes[target_warped_field_ix], "[target live after warp]");
 		std::cout << "Utilized (target) hash count: " << live_volumes[target_warped_field_ix]->index.GetUtilizedHashBlockCount() << std::endl;
-		Bench::StopTimer("4_WarpVolume");
+		bench::StopTimer("4_WarpVolume");
 	}
 
-	Bench::PrintAllCumulativeTimes();
+	bench::PrintAllCumulativeTimes();
 
 	delete visualization_engine;
 	delete view;
@@ -475,22 +475,22 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CUDA) {
 
 	for (int iteration = 0; iteration < iteration_limit; iteration++) {
 		std::swap(source_warped_field_ix, target_warped_field_ix);
-		Bench::StartTimer("1_CalculateWarpGradient");
+		bench::StartTimer("1_CalculateWarpGradient");
 		motion_tracker.CalculateWarpGradient(&warp_field, canonical_volume, live_volumes[source_warped_field_ix]);
-		Bench::StopTimer("1_CalculateWarpGradient");
-		Bench::StartTimer("2_SmoothWarpGradient");
+		bench::StopTimer("1_CalculateWarpGradient");
+		bench::StartTimer("2_SmoothWarpGradient");
 		motion_tracker.SmoothWarpGradient(&warp_field, canonical_volume, live_volumes[source_warped_field_ix]);
-		Bench::StopTimer("2_SmoothWarpGradient");
-		Bench::StartTimer("3_UpdateWarps");
+		bench::StopTimer("2_SmoothWarpGradient");
+		bench::StartTimer("3_UpdateWarps");
 		motion_tracker.UpdateWarps(&warp_field, canonical_volume, live_volumes[source_warped_field_ix]);
-		Bench::StopTimer("3_UpdateWarps");
-		Bench::StartTimer("4_WarpVolume");
+		bench::StopTimer("3_UpdateWarps");
+		bench::StartTimer("4_WarpVolume");
 		warping_engine->WarpVolume_WarpUpdates(&warp_field, live_volumes[source_warped_field_ix],
 		                                       live_volumes[target_warped_field_ix]);
-		Bench::StopTimer("4_WarpVolume");
+		bench::StopTimer("4_WarpVolume");
 	}
 
-	Bench::PrintAllCumulativeTimes();
+	bench::PrintAllCumulativeTimes();
 
 	delete visualization_engine;
 	delete view;

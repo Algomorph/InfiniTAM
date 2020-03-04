@@ -83,7 +83,7 @@ public:
 	CollisionHashFixture() {
 		std::ifstream file("TestData/collision_hash_coordinates.csv");
 
-		for (CSVIterator row_iter(file); row_iter != CSVIterator(); ++row_iter) {
+		for (CSV_Iterator row_iter(file); row_iter != CSV_Iterator(); ++row_iter) {
 			if ((*row_iter).size() > 0) {
 				int hash_code = std::stoi((*row_iter)[0]);
 				if (position_by_hash.find(hash_code) == position_by_hash.end()) {

@@ -18,40 +18,79 @@
 #include "CSV_Utilities.h"
 
 namespace ITMLib {
-std::istream& operator>>(std::istream& str, CSVRow& data) {
-	data.readNextRow(str);
+std::istream& operator>>(std::istream& str, CSV_Row& data) {
+	data.read_next_row(str);
+	return str;
+}
+
+std::ostream& operator<<(std::ostream& str, CSV_Row& data) {
+	data.write_next_row(str);
 	return str;
 }
 }
 using namespace ITMLib;
 
 
-std::string const& CSVRow::operator[](std::size_t index) const {
-	return m_data[index];
+std::string const& CSV_Row::operator[](std::size_t index) const {
+	return data[index];
 }
 
-std::size_t CSVRow::size() const {
-	return m_data.size();
+std::size_t CSV_Row::size() const {
+	return data.size();
 }
 
-void CSVRow::readNextRow(std::istream& str) {
+void CSV_Row::read_next_row(std::istream& str) {
 	std::string line;
 	std::getline(str, line);
 
-	std::stringstream lineStream(line);
+	std::stringstream line_stream(line);
 	std::string cell;
 
-	m_data.clear();
-	while (std::getline(lineStream, cell, ',')) {
-		m_data.push_back(cell);
+	data.clear();
+	while (std::getline(line_stream, cell, ',')) {
+		data.push_back(cell);
 	}
 	// This checks for a trailing comma with no data after it.
-	if (!lineStream && cell.empty()) {
+	if (!line_stream && cell.empty()) {
 		// If there was a trailing comma then add an empty element.
-		m_data.push_back("");
+		data.push_back("");
 	}
 }
 
-CSVIterator::CSVIterator(std::istream& str) : m_str(str.good() ? &str : nullptr) { ++(*this); }
+void CSV_Row::write_next_row(std::ostream& str) {
+	int i = 0;
+	for (auto item : data) {
+		str << item;
+		if (i != data.size() - 1) {
+			str << ", ";
+		}
+		i++;
+	}
+}
 
-CSVIterator::CSVIterator() : m_str(nullptr) {}
+CSV_Row::CSV_Row(std::vector<int> input) : data(to_string_std_vector<int>(input)) {}
+
+CSV_Row::CSV_Row(std::vector<unsigned int> input) : data(to_string_std_vector<unsigned int>(input)) {}
+
+CSV_Row::CSV_Row(std::vector<float> input) : data(to_string_std_vector<float>(input)) {}
+
+CSV_Row::CSV_Row(std::vector<double> input) : data(to_string_std_vector<double>(input)) {}
+
+template<typename T>
+std::vector<std::string> CSV_Row::to_string_std_vector(std::vector<T> vector) {
+	std::vector<std::string> out;
+	for(auto& item : vector){
+		out.push_back(std::to_string(item));
+	}
+	return out;
+}
+
+template<typename T>
+void CSV_Row::operator<<(T item) {
+	this->data.push_back(std::to_string(item));
+}
+
+
+CSV_Iterator::CSV_Iterator(std::istream& str) : m_str(str.good() ? &str : nullptr) { ++(*this); }
+
+CSV_Iterator::CSV_Iterator() : m_str(nullptr) {}

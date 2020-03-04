@@ -34,12 +34,12 @@ void VolumeFileIOEngine<TVoxel, VoxelBlockHash>::SaveToDirectoryCompact(
 
 
 	std::string path = output_directory + compactFilePostfixAndExtension;
-	std::ofstream ofStream = std::ofstream(path.c_str(), std::ios_base::binary | std::ios_base::out);
-	if (!ofStream) throw std::runtime_error("Could not open '" + path + "' for writing.");
+	std::ofstream volume_output_stream = std::ofstream(path.c_str(), std::ios_base::binary | std::ios_base::out);
+	if (!volume_output_stream) throw std::runtime_error("Could not open '" + path + "' for writing.");
 
 	b_ios::filtering_ostream out_filter;
 	out_filter.push(b_ios::zlib_compressor());
-	out_filter.push(ofStream);
+	out_filter.push(volume_output_stream);
 
 	bool temporary_volume_used = false;
 	if (volume->voxels.GetMemoryType() == MEMORYDEVICE_CUDA) {
