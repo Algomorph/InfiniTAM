@@ -19,7 +19,21 @@
 
 namespace ITMLib {
 namespace logging {
+//TODO: rework definitions of constants to the CPP file
+//static const log4cplus::LogLevel FOCUS_SPOTS_LOG_LEVEL = 1;
+//static const log4cplus::LogLevel PER_ITERATION_LOG_LEVEL = 2;
+//static const log4cplus::LogLevel PER_FRAME_LOG_LEVEL = 3;
+//static const log4cplus::LogLevel TOP_LOG_LEVEL = 3;
+//
+//#define LOG4CPLUS_FOCUS_SPOTS(logger, logEvent)                            \
+//    if(logger.isEnabledFor(ITMLib::logging::FOCUS_SPOTS_LOG_LEVEL)) {                       \
+//        log4cplus::tostringstream _log4cplus_buf;                       \
+//        _log4cplus_buf << logEvent;                                     \
+//	logger.forcedLog(ITMLib::logging::FOCUS_SPOTS_LOG_LEVEL, _log4cplus_buf.str(), __FILE__, __LINE__); \
+//    }
 
+
+void initialize_logging();
 
 
 }//namespace logging
