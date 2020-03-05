@@ -100,7 +100,7 @@
             0
         ],
         "record_reconstruction_video": true,
-        "save_benchmarks_to_disk": true,
+        "log_benchmarks": true,
         "log_volume_statistics": true
     },
     "paths": {

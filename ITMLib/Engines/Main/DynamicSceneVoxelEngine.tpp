@@ -16,12 +16,14 @@
 
 #include "../../../ORUtils/FileUtils.h"
 #include "../EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
+#include "../../Utils/Logging/LoggingConfigruation.h"
 
 using namespace ITMLib;
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(const RGBDCalib& calibration_info, Vector2i rgb_image_size,
                                                                         Vector2i depth_image_size) : settings(configuration::get()) {
+	logging::initialize_logging();
 
 	this->InitializeScenes();
 

@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(ConfigurationTest) {
 			),
 			SlavchevaSurfaceTracker::Parameters(0.11f, 0.09f, 2.0f, 0.3f, 0.1f, 1e-6f),
 			SlavchevaSurfaceTracker::Switches(false, true, false, true, false),
-			TelemetrySettings(Vector3i(20, 23, 0), true, true, true),
+			TelemetrySettings(Vector3i(20, 23, 0), true, true, false, true, true),
 			Paths("TestData/output1",
 			      "TestData/calib_file1.txt",
 			      "", "", "",
@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE(ConfigurationTest) {
 			configuration::SWAPPINGMODE_ENABLED,
 			configuration::LIBMODE_BASIC,
 			configuration::INDEX_ARRAY,
-			configuration::VERBOSITY_SILENT,
+			configuration::VERBOSITY_WARNING,
 			"type=rgb,levels=rrbb"
 	);
 #ifdef GENERATE_TEST_DATA
@@ -95,42 +95,51 @@ BOOST_AUTO_TEST_CASE(ConfigurationTest) {
 	configuration::load_configuration_from_json_file("TestData/default_config_cuda.json");
 #endif
 
-	BOOST_REQUIRE_EQUAL(default_configuration.general_voxel_volume_parameters, configuration::get().general_voxel_volume_parameters);
-	BOOST_REQUIRE_EQUAL(default_configuration.general_surfel_volume_parameters, configuration::get().general_surfel_volume_parameters);
+	BOOST_REQUIRE_EQUAL(default_configuration.general_voxel_volume_parameters,
+	                    configuration::get().general_voxel_volume_parameters);
+	BOOST_REQUIRE_EQUAL(default_configuration.general_surfel_volume_parameters,
+	                    configuration::get().general_surfel_volume_parameters);
 	BOOST_REQUIRE_EQUAL(default_configuration.slavcheva_parameters, configuration::get().slavcheva_parameters);
 	BOOST_REQUIRE_EQUAL(default_configuration.slavcheva_switches, configuration::get().slavcheva_switches);
 	BOOST_REQUIRE_EQUAL(default_configuration.telemetry_settings, configuration::get().telemetry_settings);
 	BOOST_REQUIRE_EQUAL(default_configuration.paths, configuration::get().paths);
 	BOOST_REQUIRE_EQUAL(default_configuration.automatic_run_settings, configuration::get().automatic_run_settings);
-	BOOST_REQUIRE_EQUAL(default_configuration.non_rigid_tracking_parameters, configuration::get().non_rigid_tracking_parameters);
+	BOOST_REQUIRE_EQUAL(default_configuration.non_rigid_tracking_parameters,
+	                    configuration::get().non_rigid_tracking_parameters);
 	BOOST_REQUIRE_EQUAL(default_configuration, configuration::get());
 
 	configuration::load_configuration_from_json_file("TestData/config1.json");
-	BOOST_REQUIRE_EQUAL(configuration1.general_voxel_volume_parameters, configuration::get().general_voxel_volume_parameters);
-	BOOST_REQUIRE_EQUAL(configuration1.general_surfel_volume_parameters, configuration::get().general_surfel_volume_parameters);
+	BOOST_REQUIRE_EQUAL(configuration1.general_voxel_volume_parameters,
+	                    configuration::get().general_voxel_volume_parameters);
+	BOOST_REQUIRE_EQUAL(configuration1.general_surfel_volume_parameters,
+	                    configuration::get().general_surfel_volume_parameters);
 	BOOST_REQUIRE_EQUAL(configuration1.slavcheva_parameters, configuration::get().slavcheva_parameters);
 	BOOST_REQUIRE_EQUAL(configuration1.slavcheva_switches, configuration::get().slavcheva_switches);
 	BOOST_REQUIRE_EQUAL(configuration1.telemetry_settings, configuration::get().telemetry_settings);
 	BOOST_REQUIRE_EQUAL(configuration1.paths, configuration::get().paths);
 	BOOST_REQUIRE_EQUAL(configuration1.automatic_run_settings, configuration::get().automatic_run_settings);
-	BOOST_REQUIRE_EQUAL(configuration1.non_rigid_tracking_parameters, configuration::get().non_rigid_tracking_parameters);
+	BOOST_REQUIRE_EQUAL(configuration1.non_rigid_tracking_parameters,
+	                    configuration::get().non_rigid_tracking_parameters);
 	BOOST_REQUIRE_EQUAL(configuration1, configuration::get());
 	configuration::save_configuration_to_json_file("TestData/config2.json", configuration1);
 	configuration::load_configuration_from_json_file("TestData/config2.json");
-	BOOST_REQUIRE_EQUAL(configuration1.general_voxel_volume_parameters, configuration::get().general_voxel_volume_parameters);
-	BOOST_REQUIRE_EQUAL(configuration1.general_surfel_volume_parameters, configuration::get().general_surfel_volume_parameters);
+	BOOST_REQUIRE_EQUAL(configuration1.general_voxel_volume_parameters,
+	                    configuration::get().general_voxel_volume_parameters);
+	BOOST_REQUIRE_EQUAL(configuration1.general_surfel_volume_parameters,
+	                    configuration::get().general_surfel_volume_parameters);
 	BOOST_REQUIRE_EQUAL(configuration1.slavcheva_parameters, configuration::get().slavcheva_parameters);
 	BOOST_REQUIRE_EQUAL(configuration1.slavcheva_switches, configuration::get().slavcheva_switches);
 	BOOST_REQUIRE_EQUAL(configuration1.telemetry_settings, configuration::get().telemetry_settings);
 	BOOST_REQUIRE_EQUAL(configuration1.paths, configuration::get().paths);
 	BOOST_REQUIRE_EQUAL(configuration1.automatic_run_settings, configuration::get().automatic_run_settings);
-	BOOST_REQUIRE_EQUAL(configuration1.non_rigid_tracking_parameters, configuration::get().non_rigid_tracking_parameters);
+	BOOST_REQUIRE_EQUAL(configuration1.non_rigid_tracking_parameters,
+	                    configuration::get().non_rigid_tracking_parameters);
 	BOOST_REQUIRE_EQUAL(configuration1, configuration::get());
 
 
 }
 
-configuration::Configuration generate_default_snoopy_configuration(){
+configuration::Configuration generate_default_snoopy_configuration() {
 	configuration::Configuration default_snoopy_configuration(
 			VoxelVolumeParameters(0.004, 0.2, 3.0, 0.04, 100, false, 1.0f),
 			SurfelVolumeParameters(),
@@ -149,7 +158,12 @@ configuration::Configuration generate_default_snoopy_configuration(){
 					0.2f,
 					1e-5f),
 			SlavchevaSurfaceTracker::Switches(true, false, true, false, true),
-			TelemetrySettings(Vector3i(0), true, true, true),
+			TelemetrySettings(Vector3i(0),
+			                  true,
+			                  true,
+			                  true,
+			                  true,
+			                  false),
 			Paths("<CONFIGURATION_DIRECTORY>",
 			      "<CONFIGURATION_DIRECTORY>/snoopy_calib.txt",
 			      "", "", "",
@@ -174,7 +188,7 @@ configuration::Configuration generate_default_snoopy_configuration(){
 			configuration::SWAPPINGMODE_DISABLED,
 			configuration::LIBMODE_DYNAMIC,
 			configuration::INDEX_HASH,
-			configuration::VERBOSITY_SILENT,
+			configuration::VERBOSITY_WARNING,
 			configuration::TrackerConfigurationStringPresets::default_intensity_depth_extended_tracker_configuration
 	);
 	return default_snoopy_configuration;

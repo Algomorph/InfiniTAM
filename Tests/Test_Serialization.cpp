@@ -27,7 +27,7 @@
 #include "../ITMLib/Utils/Serialization/Serialization.h"
 
 #define VERBOSITY2_LEVEL_ENUM_DESCRIPTION Verbosity2Level, \
-	(VERBOSITY2_SILENT, "silent", "SILENT", "VERBOSITY_SILENT"), \
+	(VERBOSITY2_SILENT, "silent", "SILENT", "VERBOSITY_WARNING"), \
 	(VERBOSITY2_TOP_LEVEL, "top_level", "TOP_LEVEL", "Top-level operations", "VERBOSITY_TOP_LEVEL", "top-level", "top-level operations"), \
 	(VERBOSITY2_PER_FRAME, "per_frame", "PER_FRAME", "Per-frame operations", "VERBOSITY_PER_FRAME", "per-frame", "per-frame operations"), \
 	(VERBOSITY2_PER_ITERATION, "per_iteration", "PER_ITERATION", "Per-iteration operations", "VERBOSITY_PER_ITERATION", "per-iteration", "per-iteration operations")
@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(TestSerializableEnum){
 	OuterClass::Verbosity2Level v2l01, v2l02, v2l03, v2l04;
 	v2l01 = string_to_enumerator<OuterClass::Verbosity2Level>("silent");
 	v2l02 = string_to_enumerator<OuterClass::Verbosity2Level>("SILENT");
-	v2l03 = string_to_enumerator<OuterClass::Verbosity2Level>("VERBOSITY_SILENT");
+	v2l03 = string_to_enumerator<OuterClass::Verbosity2Level>("VERBOSITY_WARNING");
 
 	BOOST_REQUIRE_EQUAL(v2l01, OuterClass::VERBOSITY2_SILENT);
 	BOOST_REQUIRE_EQUAL(v2l02, OuterClass::VERBOSITY2_SILENT);

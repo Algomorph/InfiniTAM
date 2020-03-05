@@ -45,11 +45,17 @@ namespace ITMLib {
 namespace configuration {
 // region ============================================== SERIALIZABLE ENUMS ============================================
 #define VERBOSITY_LEVEL_ENUM_DESCRIPTION VerbosityLevel, \
-    (VERBOSITY_SILENT, "silent", "SILENT", "VERBOSITY_SILENT"), \
+	(VERBOSITY_SILENT, "silent", "SILENT", "VERBOSITY_SILENT"), \
+	(VERBOSITY_FATAL, "fatal", "FATAL", "VERBOSITY_FATAL"), \
+	(VERBOSITY_ERROR, "error", "ERROR", "VERBOSITY_ERROR"), \
+    (VERBOSITY_WARNING, "warning", "WARNING", "VERBOSITY_WARNING"), \
+    (VERBOSITY_INFO, "info", "information", "INFO", "VERBOSITY_INFO"), \
     (VERBOSITY_TOP_LEVEL, "top_level", "TOP_LEVEL", "Top-level operations", "VERBOSITY_TOP_LEVEL", "top-level", "top-level operations"), \
     (VERBOSITY_PER_FRAME, "per_frame", "PER_FRAME", "Per-frame operations", "VERBOSITY_PER_FRAME", "per-frame", "per-frame operations"), \
     (VERBOSITY_PER_ITERATION, "per_iteration", "PER_ITERATION", "Per-iteration operations", "VERBOSITY_PER_ITERATION", "per-iteration", "per-iteration operations"), \
-    (VERBOSITY_FOCUS_SPOTS, "focus_spots", "FOCUS_SPOTS", "focus_coordinates", "Interesting details", "trouble spots")
+    (VERBOSITY_FOCUS_SPOTS, "focus_spots", "FOCUS_SPOTS", "focus_coordinates", "Interesting details", "trouble spots"), \
+    (VERBOSITY_DEBUG, "debug", "DEBUG", "VERBOSITY_DEBUG")
+
 
 DECLARE_SERIALIZABLE_ENUM(VERBOSITY_LEVEL_ENUM_DESCRIPTION)
 
@@ -116,7 +122,9 @@ DECLARE_SERIALIZABLE_STRUCT(PATHS_STRUCT_DESCRIPTION);
     (bool, record_reconstruction_video, false, PRIMITIVE, \
     		"Whether to record video of the canonical reconsturction during automatic run "\
     		"(see number_of_frames_to_process_after_launch and index_of_frame_to_start_at)."), \
-    (bool, save_benchmarks_to_disk, false, PRIMITIVE, "Whether to save runtime benchmarks to disk after automatic run."),\
+    (bool, log_to_disk, false, PRIMITIVE, "Print log to text file, in the output path (preserves older log files). Can be used in combination with stdout."), \
+    (bool, log_to_stdout, true, PRIMITIVE, "Print log to stdout. Can be used in combination with disk logging."), \
+    (bool, log_benchmarks, false, PRIMITIVE, "Whether to log runtime benchmarks after automatic run."),\
 	(bool, log_volume_statistics, false, PRIMITIVE, "Whether to output various volume statistics after some operations (used only when verbosity_level is set at or above PER_FRAME).")
 
 DECLARE_SERIALIZABLE_STRUCT(TELEMETRY_SETTINGS_STRUCT_DESCRIPTION);

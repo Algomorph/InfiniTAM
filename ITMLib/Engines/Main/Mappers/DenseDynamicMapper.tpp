@@ -26,20 +26,12 @@
 #include "../../Warping/WarpingEngineFactory.h"
 #include "../../VolumeFusion/VolumeFusionEngineFactory.h"
 #include "../../Swapping/SwappingEngineFactory.h"
+#include "../../Indexing/IndexingEngineFactory.h"
 #include "../../../SurfaceTrackers/SurfaceTrackerFactory.h"
 #include "../../../Utils/Analytics/BenchmarkUtilities.h"
-#include "../../EditAndCopy/Interface/EditAndCopyEngineInterface.h"
 #include "../../../Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculatorInterface.h"
 #include "../../../Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculatorFactory.h"
-#include "../../Indexing/IndexingEngineFactory.h"
-//** CPU **
-#include "../../EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
-#include "../../../Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator.h"
-//** CUDA **
-#ifndef COMPILE_WITHOUT_CUDA
-#include "../../EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
-#include "../../../Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator.h"
-#endif
+#include "../../../Utils/Logging/LoggingConfigruation.h"
 
 using namespace ITMLib;
 
@@ -51,32 +43,16 @@ template<typename TVoxel, typename TWarp, typename TIndex>
 void DenseDynamicMapper<TVoxel, TWarp, TIndex>::LogVolumeStatistics(VoxelVolume<TVoxel, TIndex>* volume,
                                                                     std::string volume_description) {
 	if (this->log_volume_statistics) {
-		VolumeStatisticsCalculatorInterface<TVoxel, TIndex>* calculator = nullptr;
-		switch (volume->index.memory_type) {
-			case MEMORYDEVICE_CPU:
-				calculator = &VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance();
-				break;
-			case MEMORYDEVICE_CUDA:
-#ifndef COMPILE_WITHOUT_CUDA
-				calculator = &VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CUDA>::Instance();
-#else
-				DIEWITHEXCEPTION_REPORTLOCATION("Built without CUDA support, aborting.");
-#endif
-				break;
-			case MEMORYDEVICE_METAL:
-				DIEWITHEXCEPTION_REPORTLOCATION("Metal framework not supported for this.");
-		}
+		VolumeStatisticsCalculatorInterface<TVoxel, TIndex>& calculator = 
+				VolumeStatisticsCalculatorFactory::Get<TVoxel,TIndex>(volume->index.memory_type);
 
-
-
-		std::cout << green << "=== Stats for volume '" << volume_description << "' ===" << reset << std::endl;
-		std::cout << "    Total voxel count: " << calculator->ComputeAllocatedVoxelCount(volume) << std::endl;
-		std::cout << "    NonTruncated voxel count: " << calculator->ComputeNonTruncatedVoxelCount(volume) << std::endl;
-		std::cout << "    +1.0 voxel count: " << calculator->CountVoxelsWithSpecificSdfValue(volume, 1.0f) << std::endl;
-
-		std::cout << "    Allocated hash count: " << calculator->ComputeAllocatedHashBlockCount(volume) << std::endl;
-		std::cout << "    NonTruncated SDF sum: " << calculator->ComputeNonTruncatedVoxelAbsSdfSum(volume) << std::endl;
-		std::cout << "    Truncated SDF sum: " << calculator->ComputeTruncatedVoxelAbsSdfSum(volume) << std::endl;
+		LOG4CPLUS_PER_FRAME(logging::get_logger(), green << "=== Stats for volume '" << volume_description << "' ===" << reset);
+		LOG4CPLUS_PER_FRAME(logging::get_logger(), "    Total voxel count: " << calculator.ComputeAllocatedVoxelCount(volume));
+		LOG4CPLUS_PER_FRAME(logging::get_logger(), "    NonTruncated voxel count: " << calculator.ComputeNonTruncatedVoxelCount(volume));
+		LOG4CPLUS_PER_FRAME(logging::get_logger(), "    +1.0 voxel count: " << calculator.CountVoxelsWithSpecificSdfValue(volume, 1.0f));
+		LOG4CPLUS_PER_FRAME(logging::get_logger(), "    Allocated hash count: " << calculator.ComputeAllocatedHashBlockCount(volume));
+		LOG4CPLUS_PER_FRAME(logging::get_logger(), "    NonTruncated SDF sum: " << calculator.ComputeNonTruncatedVoxelAbsSdfSum(volume));
+		LOG4CPLUS_PER_FRAME(logging::get_logger(), "    Truncated SDF sum: " << calculator.ComputeTruncatedVoxelAbsSdfSum(volume));
 	}
 };
 

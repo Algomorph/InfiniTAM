@@ -203,7 +203,7 @@ void UIEngine_BPO::GlutIdleFunction() {
 					uiEngine.mainEngine->SaveToFile(uiEngine.GeneratePreviousFrameOutputPath());
 				}
 				bench::print_all_cumulative_times_to_stdout();
-				if (configuration::get().telemetry_settings.save_benchmarks_to_disk) {
+				if (configuration::get().telemetry_settings.log_benchmarks) {
 					bench::save_all_cumulative_times_to_disk();
 				}
 			}

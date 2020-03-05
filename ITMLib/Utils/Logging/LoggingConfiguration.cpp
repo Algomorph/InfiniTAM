@@ -17,27 +17,103 @@
 #include <log4cplus/consoleappender.h>
 #include <log4cplus/loggingmacros.h>
 #include <log4cplus/initializer.h>
+#include <log4cplus/fileappender.h>
+
+//boost
+#include <boost/filesystem.hpp>
 
 //local
 #include "LoggingConfigruation.h"
 #include "../Configuration.h"
 
+
 using namespace log4cplus;
+namespace fs = boost::filesystem;
 
-namespace ITMLib {
-namespace logging {
+namespace ITMLib::logging {
 
-
-
-
-
+static void handle_possible_existing_logs(const std::string& log_path) {
+	fs::path fs_log_path(log_path);
+	if (fs::exists(fs_log_path)) {
+		if (!fs::is_regular_file(fs_log_path)) {
+			Logger root = get_logger();
+			LOG4CPLUS_FATAL(root, "Log file path," << log_path
+			                                       << ", occupied by a non-file, i.e. directory or symlink! Aborting.");
+			DIEWITHEXCEPTION_REPORTLOCATION(
+					"Log file path occupied by a non-file, i.e. directory or symlink! Aborting. ");
+		} else {
+			auto write_time = fs::last_write_time(fs_log_path);
+			std::stringstream buffer;
+			buffer << std::put_time(std::localtime(&write_time), "%y%m%d%H%M%S");
+			fs::path backup_directory = fs::path(configuration::get().paths.output_path) / fs::path("older_logs");
+			fs::create_directories(backup_directory);
+			fs::path move_destination = backup_directory / fs::path(std::string("log_") + buffer.str() + ".txt");
+			fs::rename(fs_log_path, move_destination);
+		}
+	}
+}
 
 void initialize_logging() {
 	log4cplus::initialize();
-	//TODO: add list_enumerators function in SerializationDetails.h within the SERIALIZABLE_ENUM_DEFN_IMPL macro that
-	// produces a list of strings, so you don't have to enter them manually, like here
-	log4cplus::getLogLevelManager().pushLogLevel(FOCUS_SPOTS_LOG_LEVEL, LOG4CPLUS_TEXT("") );
+	log4cplus::getLogLevelManager().pushLogLevel(FOCUS_SPOTS_LOG_LEVEL, LOG4CPLUS_TEXT("FOCUS_SPOTS"));
+	log4cplus::getLogLevelManager().pushLogLevel(PER_ITERATION_LOG_LEVEL, LOG4CPLUS_TEXT("PER_ITERATION"));
+	log4cplus::getLogLevelManager().pushLogLevel(PER_FRAME_LOG_LEVEL, LOG4CPLUS_TEXT("PER_FRAME"));
+	log4cplus::getLogLevelManager().pushLogLevel(TOP_LOG_LEVEL, LOG4CPLUS_TEXT("TOP_LEVEL"));
+
+	Logger root = get_logger();
+
+	switch (configuration::get().verbosity_level) {
+		case configuration::VERBOSITY_SILENT:
+			root.setLogLevel(OFF_LOG_LEVEL);
+			break;
+		case configuration::VERBOSITY_FATAL:
+			root.setLogLevel(FATAL_LOG_LEVEL);
+			break;
+		case configuration::VERBOSITY_ERROR:
+			root.setLogLevel(ERROR_LOG_LEVEL);
+			break;
+		default:
+		case configuration::VERBOSITY_WARNING:
+			root.setLogLevel(WARN_LOG_LEVEL);
+			break;
+		case configuration::VERBOSITY_INFO:
+			root.setLogLevel(INFO_LOG_LEVEL);
+			break;
+		case configuration::VERBOSITY_TOP_LEVEL:
+			root.setLogLevel(TOP_LOG_LEVEL);
+			break;
+		case configuration::VERBOSITY_PER_FRAME:
+			root.setLogLevel(PER_FRAME_LOG_LEVEL);
+			break;
+		case configuration::VERBOSITY_PER_ITERATION:
+			root.setLogLevel(PER_ITERATION_LOG_LEVEL);
+			break;
+		case configuration::VERBOSITY_FOCUS_SPOTS:
+			root.setLogLevel(FOCUS_SPOTS_LOG_LEVEL);
+			break;
+		case configuration::VERBOSITY_DEBUG:
+			root.setLogLevel(DEBUG_LOG_LEVEL);
+			break;
+	}
+
+	if (configuration::get().telemetry_settings.log_to_stdout) {
+		log4cplus::SharedAppenderPtr console_appender(new log4cplus::ConsoleAppender(false, true));
+		root.addAppender(console_appender);
+	}
+
+	if (configuration::get().telemetry_settings.log_to_disk) {
+		std::string log_path = (fs::path(configuration::get().paths.output_path) / fs::path("log.txt")).string();
+		handle_possible_existing_logs(log_path);
+		log4cplus::SharedFileAppenderPtr file_appender(new RollingFileAppender(
+				LOG4CPLUS_TEXT(log_path), 50 * 1024 * 1024, 5, false, true));
+		root.addAppender(SharedAppenderPtr(file_appender.get()));
+	}
+
+
 }
 
-}//namespace logging
+log4cplus::Logger get_logger() {
+	return Logger::getRoot();
+}
+
 }//namespace ITMLib
