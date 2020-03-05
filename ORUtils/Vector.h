@@ -832,7 +832,7 @@ namespace ORUtils {
 
 	template< class T> _CPU_AND_GPU_CODE_ inline T sqr(const T &v) { return v*v; }
 
-	// compute the dot product of two vectors
+	// compute_allocated the dot product of two vectors
 	template<class T> _CPU_AND_GPU_CODE_ inline typename T::value_type dot(const T &lhs, const T &rhs) {
 		typename T::value_type r = 0;
 		for (int i = 0; i < lhs.size(); i++)

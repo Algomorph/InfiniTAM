@@ -40,6 +40,7 @@
 #include "../../InputSource/FFMPEGWriter.h"
 #include "../../ITMLib/Utils/Analytics/BenchmarkUtilities.h"
 #include "../../ITMLib/Utils/CPPPrintHelpers.h"
+#include "../../ITMLib/Utils/Logging/LoggingConfigruation.h"
 
 #ifdef WITH_OPENCV
 #include <opencv2/imgcodecs.hpp>
@@ -77,9 +78,7 @@ void UIEngine_BPO::Initialize(int& argc, char** argv,
                               InputSource::IMUSourceEngine* imuSource,
                               ITMLib::MainEngine* main_engine,
 
-                              const configuration::Configuration& configuration,
-                              ITMLib::TelemetryRecorder_Interface* logger) {
-	this->logger = logger;
+                              const configuration::Configuration& configuration) {
 	this->indexingMethod = configuration.indexing_method;
 
 	this->save_after_automatic_run = configuration.automatic_run_settings.save_volumes_after_processing;
@@ -191,7 +190,6 @@ void UIEngine_BPO::Initialize(int& argc, char** argv,
 		main_engine->LoadFromFile(frame_path);
 		SkipFrames(1);
 	}
-	if (logger != nullptr) logger->SetShutdownRequestedFlagLocation(&this->shutdownRequested);
 	printf("initialised.\n");
 }
 
@@ -214,14 +212,9 @@ void UIEngine_BPO::SkipFrames(int number_of_frames_to_skip) {
 
 
 void UIEngine_BPO::ProcessFrame() {
-
-	if (logger != nullptr && logger->IsRecording3DSceneAndWarpProgression()) {
-		std::cout << yellow << "***" << bright_cyan << "PROCESSING FRAME " << GetCurrentFrameIndex()
-		          << " (WITH RECORDING 3D SCENES ON)" << yellow << "***" << reset << std::endl;
-	} else {
-		std::cout << yellow << "***" << bright_cyan << "PROCESSING FRAME " << GetCurrentFrameIndex() << yellow << "***"
-		          << reset << std::endl;
-	}
+	LOG4CPLUS_TOP_LEVEL(logging::get_logger(),
+	                    yellow << "***" << bright_cyan << "PROCESSING FRAME " << GetCurrentFrameIndex() << yellow
+	                           << "***" << reset);
 
 	if (!imageSource->hasMoreImages()) return;
 	imageSource->getImages(inputRGBImage, inputRawDepthImage);
@@ -229,11 +222,6 @@ void UIEngine_BPO::ProcessFrame() {
 	if (imuSource != nullptr) {
 		if (!imuSource->hasMoreMeasurements()) return;
 		else imuSource->getMeasurement(inputIMUMeasurement);
-	}
-
-	if (logger != nullptr && logger->NeedsFramewiseOutputFolder()) {
-		logger->SetOutputDirectory(
-				this->GenerateCurrentFrameOutputPath());
 	}
 
 	RecordDepthAndRGBInputToImages();
@@ -373,13 +361,7 @@ void UIEngine_BPO::RecordDepthAndRGBInputToImages() {
 }
 
 void UIEngine_BPO::PrintProcessingFrameHeader() const {
-	std::cout << bright_cyan << "PROCESSING FRAME " << GetCurrentFrameIndex() + 1;
-	if (logger != nullptr && logger->IsRecording3DSceneAndWarpProgression()) {
-		std::cout << " [3D SCENE AND WARP UPDATE RECORDING: ON]";
-	}
-	if (logger != nullptr && logger->IsRecordingScene2DSlicesWithUpdates()) {
-		std::cout << " [2D SCENE SLICE & WARP UPDATE RECORDING: ON]";
-	}
-	std::cout << reset << std::endl;
+	LOG4CPLUS_PER_FRAME(logging::get_logger(),
+	                    bright_cyan << "PROCESSING FRAME " << GetCurrentFrameIndex() + 1 << reset);
 }
 

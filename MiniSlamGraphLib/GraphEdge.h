@@ -28,13 +28,13 @@ namespace MiniSlamGraph
 		virtual void setMeasurement(const double *v) = 0;
 		virtual void getMeasurement(double *v) const = 0;
 
-		/** This method is supposed to compute the residual vector of the
+		/** This method is supposed to compute_allocated the residual vector of the
 			Edge/Contraint. The result will be written to a vector of length
 			getMeasureDimensions().
 		*/
 		virtual void computeResidualVector(const NodeIndex & nodes, double *dest) const = 0;
 
-		/** This method is supposed to compute the Jacobian of the
+		/** This method is supposed to compute_allocated the Jacobian of the
 			Edge/Contraint. Here the "Jacobian" means the derivative of the
 			residual vector from computeResidualVector() w.r.t. the parameters
 			of the Node with id @p id. The result is stored in a row-major

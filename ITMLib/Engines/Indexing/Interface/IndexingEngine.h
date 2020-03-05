@@ -41,7 +41,7 @@ template<typename TVoxel, typename TIndex>
 class IndexingEngineInterface {
 public:
 	/**
-	 * \brief Given a view with a new depth image, compute the
+	 * \brief Given a view with a new depth image, compute_allocated the
 		visible blocks, allocate them and update the hash
 		table, as well as the visible block list,
 	    so that the new image data can be integrated.
@@ -56,7 +56,7 @@ public:
 	                    const CameraTrackingState* tracking_state) = 0;
 
 	/**
-	 * \brief Given a view with a new depth image, compute the
+	 * \brief Given a view with a new depth image, compute_allocated the
 		visible blocks, allocate them and update the hash
 		table so that the new image data can be integrated.
 	 * \param volume [out] the volume whose hash needs additional allocations

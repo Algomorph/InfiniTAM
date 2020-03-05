@@ -16,13 +16,13 @@ endif ()
 # for all CMake versions (possibly revisions needed later)
 if (WITH_CUDA)
     if (${CMAKE_VERSION} VERSION_LESS 3.8 OR (MSVC_IDE AND ${CMAKE_VERSION} VERSION_LESS 3.9))
-        # Auto-detect the CUDA compute capability.
+        # Auto-detect the CUDA compute_allocated capability.
         set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
         if (NOT DEFINED CUDA_COMPUTE_CAPABILITY)
             include("${CMAKE_MODULE_PATH}/CUDACheckCompute.cmake")
         endif ()
 
-        # Set the compute capability flags.
+        # Set the compute_allocated capability flags.
         foreach (compute_capability ${CUDA_COMPUTE_CAPABILITY})
             list(APPEND CUDA_NVCC_FLAGS --generate-code arch=compute_${compute_capability},code=sm_${compute_capability})
         endforeach ()

@@ -271,7 +271,7 @@ static ORUtils::SE3Pose estimateRelativePose(const std::vector<Matrix4f> & obser
 		}
 		for (int j = 0; j < 6; ++j) params[j] /= sumweight;
 
-		// compute new weights
+		// compute_allocated new weights
 		float weightchanges = 0.0f;
 		for (size_t i = 0; i < weights.size(); ++i) 
 		{

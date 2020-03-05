@@ -26,7 +26,7 @@ int main() {
         cudaGetDeviceProperties(&properties, device);
         if (properties.major != 9999) {/* 9999 means emulation only */
             ++gpuDeviceCount;
-            /*  get minimum compute capability of all devices */
+            /*  get minimum compute_allocated capability of all devices */
             if (major > properties.major) {
                 major = properties.major;
                 minor = properties.minor;

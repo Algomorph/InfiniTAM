@@ -91,7 +91,7 @@ _CPU_AND_GPU_CODE_ inline void computeNormalAndWeight(const CONSTPTR(float) *dep
 		return;
 	}
 
-	// first compute the normal
+	// first compute_allocated the normal
 	Vector3f xp1_y, xm1_y, x_yp1, x_ym1;
 	Vector3f diff_x(0.0f, 0.0f, 0.0f), diff_y(0.0f, 0.0f, 0.0f);
 
@@ -131,7 +131,7 @@ _CPU_AND_GPU_CODE_ inline void computeNormalAndWeight(const CONSTPTR(float) *dep
     
 	normal_out[idx].x = outNormal.x; normal_out[idx].y = outNormal.y; normal_out[idx].z = outNormal.z; normal_out[idx].w = 1.0f;
 
-	// now compute weight
+	// now compute_allocated weight
 	float theta = acos(outNormal.z);
 	float theta_diff = theta / (PI*0.5f - theta);
 

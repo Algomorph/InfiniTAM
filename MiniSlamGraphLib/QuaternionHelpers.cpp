@@ -109,7 +109,7 @@ void QuaternionHelpers::dQuaternion_dRotationMatrix(const double *matrix, double
 	/* basic conversion taken from "James Diebel. Representing Attitude:
 	   Euler Angles, Quaternions, and Rotation Vectors. Technical Report,
 	   Stanford University, Palo Alto, CA."
-	   Derivatives of the basic conversions are "trivial" to compute... :)
+	   Derivatives of the basic conversions are "trivial" to compute_allocated... :)
 	*/
 	int variant = QuaternionFromRotationMatrix_variant(matrix);
 

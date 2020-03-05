@@ -239,7 +239,7 @@ private:
 			return mismatch_found;
 		};
 
-		// *** compute extents ***
+		// *** compute_allocated extents ***
 		Extent3Di central_extent;
 		std::vector<Extent3Di> border_extents = ComputeBoxSetOfHashAlignedCenterAndNonHashBlockAlignedArrayMargins(
 				*array_info, central_extent);
@@ -317,7 +317,7 @@ public:
 
 		Vector3i array_bounds_min = array_info.offset;
 
-		// compute how many voxels on each side of the array extend past the first hash block fully inside the array.
+		// compute_allocated how many voxels on each side of the array extend past the first hash block fully inside the array.
 		// these are the margin thicknesses, in voxels
 		int margin_near_z = -array_bounds_min.z % VOXEL_BLOCK_SIZE + (array_bounds_min.z <= 0 ? 0 : VOXEL_BLOCK_SIZE);
 		int margin_near_y = -array_bounds_min.y % VOXEL_BLOCK_SIZE + (array_bounds_min.y <= 0 ? 0 : VOXEL_BLOCK_SIZE);

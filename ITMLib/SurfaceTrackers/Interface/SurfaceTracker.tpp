@@ -68,13 +68,13 @@ inline static void PrintVolumeStatistics(
 	VolumeStatisticsCalculator<T_TSDF_Voxel, TIndex, TMemoryDeviceType>& calculator =
 			VolumeStatisticsCalculator<T_TSDF_Voxel, TIndex, TMemoryDeviceType>::Instance();
 	std::cout << green << "=== Stats for scene '" << description << "' ===" << reset << std::endl;
-	std::cout << "    Total voxel count: " << calculator.ComputeAllocatedVoxelCount(volume) << std::endl;
-	std::cout << "    NonTruncated voxel count: " << calculator.ComputeNonTruncatedVoxelCount(volume) << std::endl;
+	std::cout << "    Total voxel count: " << calculator.CountAllocatedVoxels(volume) << std::endl;
+	std::cout << "    NonTruncated voxel count: " << calculator.CountNonTruncatedVoxels(volume) << std::endl;
 	std::cout << "    +1.0 voxel count: " << calculator.CountVoxelsWithSpecificSdfValue(volume, 1.0f) << std::endl;
 	std::vector<int> allocatedHashes = calculator.GetAllocatedHashCodes(volume);
 	std::cout << "    Allocated hash count: " << allocatedHashes.size() << std::endl;
-	std::cout << "    NonTruncated SDF sum: " << calculator.ComputeNonTruncatedVoxelAbsSdfSum(volume) << std::endl;
-	std::cout << "    Truncated SDF sum: " << calculator.ComputeTruncatedVoxelAbsSdfSum(volume) << std::endl;
+	std::cout << "    NonTruncated SDF sum: " << calculator.SumNonTruncatedVoxelAbsSdf(volume) << std::endl;
+	std::cout << "    Truncated SDF sum: " << calculator.SumTruncatedVoxelAbsSdf(volume) << std::endl;
 };
 
 // region ===================================== CALCULATE WARPS ========================================================
@@ -167,7 +167,7 @@ float SurfaceTracker<T_TSDF_Voxel, TWarpVoxel, TIndex, TMemoryDeviceType, TGradi
 #endif
 
 	//TODO: move histogram printing / logging to a separate function
-	//don't compute histogram in CUDA version
+	//don't compute_allocated histogram in CUDA version
 #ifndef __CUDACC__
 	if (histograms_enabled) {
 		WarpHistogramFunctor<T_TSDF_Voxel, TWarpVoxel>

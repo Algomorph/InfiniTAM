@@ -40,14 +40,16 @@ public:
 	Vector6i ComputeVoxelBounds(const VoxelVolume <TVoxel, TIndex>* volume) override;
 	Vector6i ComputeAlteredVoxelBounds(VoxelVolume <TVoxel, TIndex>* volume) override;
 
-	unsigned int ComputeAllocatedVoxelCount(VoxelVolume <TVoxel, TIndex>* volume) override;
+	unsigned int CountAllocatedVoxels(VoxelVolume <TVoxel, TIndex>* volume) override;
+	unsigned int CountUtilizedVoxels(VoxelVolume <TVoxel, TIndex>* volume) override;
+	unsigned int CountHashBlocksWithDepthWeightInRange(VoxelVolume <TVoxel, TIndex>* volume, Extent2Di range) override;
 	unsigned int CountVoxelsWithDepthWeightInRange(VoxelVolume <TVoxel, TIndex>* volume, Extent2Di range) override;
-	unsigned int ComputeVoxelWithFlagsCount(VoxelVolume <TVoxel, TIndex>* volume, VoxelFlags flags) override;
-	unsigned int ComputeNonTruncatedVoxelCount(VoxelVolume <TVoxel, TIndex>* volume) override;
-	unsigned int ComputeAlteredVoxelCount(VoxelVolume <TVoxel, TIndex>* volume) override;
+	unsigned int CountVoxelsWithSpecifiedFlags(VoxelVolume <TVoxel, TIndex>* volume, VoxelFlags flags) override;
+	unsigned int CountNonTruncatedVoxels(VoxelVolume <TVoxel, TIndex>* volume) override;
+	unsigned int CountAlteredVoxels(VoxelVolume <TVoxel, TIndex>* volume) override;
 	unsigned int CountVoxelsWithSpecificSdfValue(VoxelVolume <TVoxel, TIndex>* volume, float value) override;
-	double ComputeNonTruncatedVoxelAbsSdfSum(VoxelVolume <TVoxel, TIndex>* volume) override;
-	double ComputeTruncatedVoxelAbsSdfSum(VoxelVolume <TVoxel, TIndex>* volume) override;
+	double SumNonTruncatedVoxelAbsSdf(VoxelVolume <TVoxel, TIndex>* volume) override;
+	double SumTruncatedVoxelAbsSdf(VoxelVolume <TVoxel, TIndex>* volume) override;
 
 	double ComputeWarpUpdateMin(VoxelVolume <TVoxel, TIndex>* volume) override;
 	double ComputeWarpUpdateMax(VoxelVolume <TVoxel, TIndex>* volume) override;
@@ -64,7 +66,8 @@ public:
 	Vector6i FindMinimumNonTruncatedBoundingBox(VoxelVolume <TVoxel, TIndex>* volume) override;
 
 
-	int ComputeAllocatedHashBlockCount(VoxelVolume <TVoxel, TIndex>* volume) override;
+	unsigned int CountAllocatedHashBlocks(VoxelVolume <TVoxel, TIndex>* volume) override;
+	unsigned int CountUtilizedHashBlocks(VoxelVolume <TVoxel, TIndex>* volume) override;
 	std::vector<int> GetAllocatedHashCodes(VoxelVolume <TVoxel, TIndex>* volume) override;
 	std::vector<Vector3s> GetAllocatedHashBlockPositions(VoxelVolume <TVoxel, TIndex>* volume) override;
 	std::vector<int> GetUtilizedHashCodes(VoxelVolume <TVoxel, TIndex>* volume) override;

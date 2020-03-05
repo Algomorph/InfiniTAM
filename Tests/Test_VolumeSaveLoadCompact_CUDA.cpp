@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(testSaveSceneCompact_CUDA) {
 	SceneFileIOEngine_PVA::LoadFromDirectoryCompact(&scene2, path);
 
 	float tolerance = 1e-8;
-	BOOST_REQUIRE_EQUAL(StatCalc_CUDA_PVA_Voxel ::Instance().ComputeNonTruncatedVoxelCount(&scene2), 19456);
+	BOOST_REQUIRE_EQUAL(StatCalc_CUDA_PVA_Voxel::Instance().CountNonTruncatedVoxels(&scene2), 19456);
 	BOOST_REQUIRE(contentAlmostEqual_CUDA(&scene1, &scene2, tolerance));
 
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> scene3(
@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(testSaveSceneCompact_CUDA) {
 	ManipulationEngine_CUDA_VBH_Voxel::Inst().ResetVolume(&scene4);
 	SceneFileIOEngine_VBH::LoadFromDirectoryCompact(&scene4, path);
 
-	BOOST_REQUIRE_EQUAL(StatCalc_CUDA_VBH_Voxel::Instance().ComputeNonTruncatedVoxelCount(&scene4), 19456);
+	BOOST_REQUIRE_EQUAL(StatCalc_CUDA_VBH_Voxel::Instance().CountNonTruncatedVoxels(&scene4), 19456);
 	BOOST_REQUIRE(contentAlmostEqual_CUDA(&scene3, &scene4, tolerance));
 	BOOST_REQUIRE(contentAlmostEqual_CUDA(&scene1, &scene4, tolerance));
 }

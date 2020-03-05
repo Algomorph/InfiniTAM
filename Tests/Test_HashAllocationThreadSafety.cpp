@@ -151,7 +151,7 @@ BOOST_FIXTURE_TEST_CASE(TestAllocateHashBlockList_CPU, CollisionHashFixture) {
 	                                                                                              MEMORYDEVICE_CPU);
 	indexer.AllocateBlockList(&volume, hash_position_memory_block, hash_position_memory_block.dataSize);
 
-	int allocated_block_count = StatCalc_CPU_VBH_Voxel::Instance().ComputeAllocatedHashBlockCount(&volume);
+	int allocated_block_count = StatCalc_CPU_VBH_Voxel::Instance().CountAllocatedHashBlocks(&volume);
 	BOOST_REQUIRE_EQUAL(allocated_block_count, block_positions.size());
 
 	std::vector<int> allocated_hashes = StatCalc_CPU_VBH_Voxel::Instance().GetAllocatedHashCodes(&volume);
@@ -221,7 +221,7 @@ BOOST_FIXTURE_TEST_CASE(TestAllocateHashBlockList_CUDA, CollisionHashFixture) {
 		                                                                                              MEMORYDEVICE_CUDA);
 		indexer.AllocateBlockList(&volume, hash_position_memory_block, hash_position_memory_block.dataSize);
 
-		int allocated_block_count = StatCalc_CUDA_VBH_Voxel::Instance().ComputeAllocatedHashBlockCount(&volume);
+		int allocated_block_count = StatCalc_CUDA_VBH_Voxel::Instance().CountAllocatedHashBlocks(&volume);
 		BOOST_REQUIRE_EQUAL(allocated_block_count, block_positions.size());
 
 		std::vector<int> allocated_hashes = StatCalc_CUDA_VBH_Voxel::Instance().GetAllocatedHashCodes(&volume);

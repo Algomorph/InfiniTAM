@@ -107,7 +107,7 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_PVA_VBH_Near_CPU, Frame16And17Fixt
 	                                              "TestData/snoopy_calib.txt", MEMORYDEVICE_CPU,
 	                                              InitParams<VoxelBlockHash>());
 
-	//std::cout <<" Voxel block count: " << StatCalc_CPU_VBH_Voxel::Instance().ComputeAllocatedHashBlockCount(volume_VBH_17) << std::endl;
+	//std::cout <<" Voxel block count: " << StatCalc_CPU_VBH_Voxel::Instance().CountAllocatedHashBlocks(volume_VBH_17) << std::endl;
 
 	float absoluteTolerance = 1e-7;
 	BOOST_REQUIRE(allocatedContentAlmostEqual_CPU(volume_PVA_17, volume_VBH_17, absoluteTolerance));
@@ -178,9 +178,9 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_VBH_CPU_NearVsSpan, Frame16And17Fi
 //	voxel_near.print_self();
 
 	int span_nontruncated_voxel_count =
-			StatCalc_CPU_VBH_Voxel::Instance().ComputeNonTruncatedVoxelCount(&volume_VBH_17_Span);
+			StatCalc_CPU_VBH_Voxel::Instance().CountNonTruncatedVoxels(&volume_VBH_17_Span);
 	int near_nontruncated_voxel_count =
-			StatCalc_CPU_VBH_Voxel::Instance().ComputeNonTruncatedVoxelCount(&volume_VBH_17_Near);
+			StatCalc_CPU_VBH_Voxel::Instance().CountNonTruncatedVoxels(&volume_VBH_17_Near);
 	BOOST_REQUIRE_EQUAL(span_nontruncated_voxel_count, near_nontruncated_voxel_count);
 
 	float absolute_tolerance = 1e-7;
@@ -219,7 +219,7 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_PVA_VBH_Span_CPU, Frame16And17Fixt
 	// *** allocate hash blocks ***
 	indexer_VBH.AllocateNearAndBetweenTwoSurfaces(&volume_VBH_17_Span, view_17, &tracking_state);
 
-	//std::cout <<" Voxel block count: " << StatCalc_CPU_VBH_Voxel::Instance().ComputeAllocatedHashBlockCount(&volume_VBH_17_Span) << std::endl;
+	//std::cout <<" Voxel block count: " << StatCalc_CPU_VBH_Voxel::Instance().CountAllocatedHashBlocks(&volume_VBH_17_Span) << std::endl;
 
 	// *** integrate depth ***
 	depth_fusion_engine_VBH->IntegrateDepthImageIntoTsdfVolume(&volume_VBH_17_Span, view_17);
@@ -234,9 +234,9 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_PVA_VBH_Span_CPU, Frame16And17Fixt
 #endif
 
 	int span_nontruncated_voxel_count =
-			StatCalc_CPU_VBH_Voxel::Instance().ComputeNonTruncatedVoxelCount(&volume_VBH_17_Span);
+			StatCalc_CPU_VBH_Voxel::Instance().CountNonTruncatedVoxels(&volume_VBH_17_Span);
 	int near_nontruncated_voxel_count =
-			StatCalc_CPU_PVA_Voxel::Instance().ComputeNonTruncatedVoxelCount(&volume_PVA_17);
+			StatCalc_CPU_PVA_Voxel::Instance().CountNonTruncatedVoxels(&volume_PVA_17);
 	BOOST_REQUIRE_EQUAL(span_nontruncated_voxel_count, near_nontruncated_voxel_count);
 
 	float absolute_tolerance = 1e-7;

@@ -9,7 +9,7 @@ namespace MiniSlamGraph
 	public:
 		static void RotationMatrixFromQuaternion(const double *q, double *matrix);
 
-		/** Read a row-major 3x3 rotation matrix from @p matrix , compute the
+		/** Read a row-major 3x3 rotation matrix from @p matrix , compute_allocated the
 			corresponding quaternion and store it in the 4-vector @p q.
 			The first element of @p q will be real part, followed by the three
 			imaginary parts.

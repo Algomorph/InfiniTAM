@@ -36,25 +36,28 @@ public:
 	 * \details The position output is not always relevant, i.e. in case of accumulator reductions like the sum of some field.
 	 * However, it is extremely useful when trying to either locate a particular value or choose the voxel that best satisfies some criterion,
 	 * e.g. minimum or maximum value of some voxel field can be found along with its location.
+	 * TRetrieveSingleStaticFunctor is used to retrieve initial values from individual voxels.
+	 * TReduceBlockLevelStaticFunctor is used to reduce the result on a block level (until there is 1 result per block).
+	 * TReduceResultLevelStaticFunctor is used to further reduce the block level results until there is only a single,
 	 * \tparam TOutput type of the output value, e.g. float when computing minimum of some voxel float field
 	 * \tparam TRetrieveSingleStaticFunctor a function object with a static function which accepts a single TVoxel as an argument and returns a TOutput value based on this TVoxel.
-	 * \tparam TReduceStaticFunctor a function object with a static function which accepts two ReductionResult<TOutput> objects and returns a single ReductionResult<TOutput> object
-	 * \param position the position of the voxel based on the indices produced by TReduceStaticFunctor when comparing each ReductionResult pair.
+	 * \tparam TReduceBlockLevelStaticFunctor a function object with a static function which accepts two ReductionResult<TOutput> objects and returns a single ReductionResult<TOutput> object
+	 * \param position the position of the voxel based on the indices produced by TReduceBlockLevelStaticFunctor when comparing each ReductionResult pair.
 	 * \param volume the volume to run the reduction over
 	 * \param ignored_value this is a sample value-index-hash triplet that will be ignored / won't skew result of the operation when issued
 	 * to the reduction algorithm. For instance, when seeking a minimum of a float field, it makes sense to set this to {FLT_MAX, 0, -1}.
 	 * This is necessary to normalize input sizes.
 	 * \return end result based on all voxels in the volume.
 	 */
-	template<typename TRetrieveSingleStaticFunctor, typename TReduceStaticFunctor, typename TOutput>
+	template<typename TRetrieveSingleStaticFunctor, typename TReduceBlockLevelStaticFunctor, typename TReduceResultLevelStaticFunctor,  typename TOutput>
 	static TOutput ReduceUtilized(Vector3i& position, const VoxelVolume<TVoxel, VoxelBlockHash>* volume,
 	                              ReductionResult<TOutput, VoxelBlockHash> ignored_value = {TOutput(0), 0u, 0}) {
-		return ReduceUtilized_Generic<TReduceStaticFunctor, TOutput>(
+		return ReduceUtilized_Generic<TReduceResultLevelStaticFunctor, TOutput>(
 				position, volume, ignored_value,
 				[](dim3 cuda_utilized_grid_size, dim3 cuda_block_size,
 				   ReductionResult<TOutput, VoxelBlockHash>* result_buffer_device, const TVoxel* voxels,
 				   const HashEntry* hash_entries, const int* utilized_hash_codes) {
-					computeVoxelHashReduction_BlockLevel_Static<TVoxel, TRetrieveSingleStaticFunctor, TReduceStaticFunctor, TOutput>
+					computeVoxelHashReduction_BlockLevel_Static<TVoxel, TRetrieveSingleStaticFunctor, TReduceBlockLevelStaticFunctor, TOutput>
 							<< < cuda_utilized_grid_size, cuda_block_size >> >
 					                                      (result_buffer_device, voxels, hash_entries, utilized_hash_codes);
 				}
@@ -67,11 +70,16 @@ public:
 	 * \details The position output is not always relevant, i.e. in case of accumulator reductions like the sum of some field.
 	 * However, it is extremely useful when trying to either locate a particular value or choose the voxel that best satisfies some criterion,
 	 * e.g. minimum or maximum value of some voxel field can be found along with its location.
+	 * TRetrieveSingleDynamicFunctor is used to retrieve initial values from individual voxels.
+	 * TReduceBlockLevelStaticFunctor is used to reduce the result on a block level (until there is 1 result per block).
+	 * TReduceResultLevelStaticFunctor is used to further reduce the block level results until there is only a single,
+	 * aggregate result of the whole function.
 	 * \tparam TOutput type of the output value, e.g. float when computing minimum of some voxel float field
 	 * \tparam TRetrieveSingleDynamicFunctor a function object with a retrieve public member function which accepts a
 	 *  single TVoxel as an argument and returns a TOutput value based on this TVoxel.
-	 * \tparam TReduceStaticFunctor a function object with a static function which accepts two ReductionResult<TOutput> objects and returns a single ReductionResult<TOutput> object
-	 * \param position the position of the voxel based on the indices produced by TReduceStaticFunctor when comparing each ReductionResult pair.
+	 * \tparam TReduceBlockLevelStaticFunctor a function object with a static function which accepts two ReductionResult<TOutput> objects and returns a single ReductionResult<TOutput> object
+	 * \tparam TReduceResultLevelStaticFunctor a function object with a static function which accepts two ReductionResult<TOutput> objects and returns a single ReductionResult<TOutput> object
+	 * \param position the position of the voxel based on the indices produced by TReduceBlockLevelStaticFunctor when comparing each ReductionResult pair.
 	 * \param volume the volume to run the reduction over
 	 * \param retrieve_functor functor object to retrieve initial TOutput value from individual voxels
 	 * \param ignored_value this is a sample value-index-hash triplet that will be ignored / won't skew result of the operation when issued
@@ -79,12 +87,13 @@ public:
 	 * This is necessary to normalize input sizes.
 	 * \return end result based on all voxels in the volume.
 	 */
-	template<typename TRetrieveSingleDynamicFunctor, typename TReduceStaticFunctor, typename TOutput>
+	template<typename TRetrieveSingleDynamicFunctor, typename TReduceBlockLevelStaticFunctor,
+	        typename TReduceResultLevelStaticFunctor, typename TOutput>
 	static TOutput ReduceUtilized(Vector3i& position, const VoxelVolume<TVoxel, VoxelBlockHash>* volume,
 	                              const TRetrieveSingleDynamicFunctor& retrieve_functor,
 	                              ReductionResult<TOutput, VoxelBlockHash> ignored_value = {TOutput(0), 0u, 0}
 	) {
-		return ReduceUtilized_Generic<TReduceStaticFunctor, TOutput>(
+		return ReduceUtilized_Generic<TReduceResultLevelStaticFunctor, TOutput>(
 				position, volume, ignored_value,
 				[&retrieve_functor](dim3 cuda_utilized_grid_size, dim3 cuda_block_size,
 				                    ReductionResult<TOutput, VoxelBlockHash>* result_buffer_device,
@@ -98,7 +107,7 @@ public:
 					ORcudaSafeCall(cudaMemcpy(retrieve_functor_device, &retrieve_functor,
 					                          sizeof(TRetrieveSingleDynamicFunctor), cudaMemcpyHostToDevice));
 
-					computeVoxelHashReduction_BlockLevel_Dynamic<TVoxel, TRetrieveSingleDynamicFunctor, TReduceStaticFunctor, TOutput>
+					computeVoxelHashReduction_BlockLevel_Dynamic<TVoxel, TRetrieveSingleDynamicFunctor, TReduceBlockLevelStaticFunctor, TOutput>
 							<< < cuda_utilized_grid_size, cuda_block_size >> >
 					                                      (result_buffer_device, voxels, hash_entries, utilized_hash_codes, retrieve_functor_device);
 				}
@@ -107,7 +116,7 @@ public:
 
 private:
 
-	template<typename TReduceStaticFunctor, typename TOutput, typename BlockLevelReductionFunction>
+	template<typename TReduceResultLevelStaticFunctor, typename TOutput, typename BlockLevelReductionFunction>
 	static TOutput ReduceUtilized_Generic(Vector3i& position, const VoxelVolume<TVoxel, VoxelBlockHash>* volume,
 	                                      ReductionResult<TOutput, VoxelBlockHash> ignored_value,
 	                                      BlockLevelReductionFunction&& function) {
@@ -172,7 +181,7 @@ private:
 			}
 
 			dim3 cuda_grid_size(output_count);
-			computeVoxelHashReduction_ResultLevel<TReduceStaticFunctor, TOutput>
+			computeVoxelHashReduction_ResultLevel<TReduceResultLevelStaticFunctor, TOutput>
 					<< < cuda_grid_size, cuda_block_size >> >
 			                             (output_buffer->GetData(MEMORYDEVICE_CUDA), input_buffer->GetData(
 					                             MEMORYDEVICE_CUDA));

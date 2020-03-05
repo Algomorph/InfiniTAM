@@ -7,7 +7,7 @@
 namespace ITMLib
 {
 	/** \brief
-	    Represents the calibration information to compute a depth
+	    Represents the calibration information to compute_allocated a depth
 	    image from the disparity image typically received from a
 	    Kinect.
 	*/

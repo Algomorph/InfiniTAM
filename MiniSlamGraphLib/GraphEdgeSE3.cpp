@@ -74,7 +74,7 @@ void GraphEdgeSE3::computeResidualVector(const GraphEdgeSE3::NodeIndex & nodes, 
 	ORUtils::Matrix4<float> m;
 	MQTToMatrix(mMeasuredPose, m);
 
-	//compute residual
+	//compute_allocated residual
 	ORUtils::Matrix4<float> residualPose(fromPose.GetM() * toPose.GetInvM() * m);
 	MatrixToMQT(residualPose, dest);
 }
@@ -90,7 +90,7 @@ bool GraphEdgeSE3::computeJacobian(const NodeIndex & nodes, int id, double *jaco
 	ORUtils::Matrix4<float> m;
 	MQTToMatrix(mMeasuredPose, m);
 
-	//compute residual
+	//compute_allocated residual
 	ORUtils::Matrix4<float> AB(fromPose.GetM() * toPose.GetInvM());
 
 	ORUtils::Matrix4<float> dAB_dx[6];

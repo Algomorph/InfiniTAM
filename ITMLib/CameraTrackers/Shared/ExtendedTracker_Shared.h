@@ -166,7 +166,7 @@ _CPU_AND_GPU_CODE_ inline bool computePerPointGH_exRGB_inv_Ab(
 		float tukeyCutoff
 		)
 {
-	// Before invoking this method, projectPoint_exRGB is invoked to compute the intensity
+	// Before invoking this method, projectPoint_exRGB is invoked to compute_allocated the intensity
 	// associated to each depth pixel. Intensities_curr is not the "input" intensity image
 	// but the output of such caching. Its size is therefore the same as imgSize_depth
 	if (x >= imgSize_depth.x || y >= imgSize_depth.y) return false;

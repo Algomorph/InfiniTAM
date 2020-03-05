@@ -28,14 +28,16 @@ public:
 	virtual Vector6i ComputeVoxelBounds(const VoxelVolume<TVoxel, TIndex>* volume) = 0;
 	virtual Vector6i ComputeAlteredVoxelBounds(VoxelVolume<TVoxel, TIndex>* volume) = 0;
 
-	virtual unsigned int ComputeAllocatedVoxelCount(VoxelVolume<TVoxel, TIndex>* volume) = 0;
+	virtual unsigned int CountUtilizedVoxels(VoxelVolume<TVoxel, TIndex>* volume) = 0;
+	virtual unsigned int CountAllocatedVoxels(VoxelVolume<TVoxel, TIndex>* volume) = 0;
 	virtual unsigned int CountVoxelsWithDepthWeightInRange(VoxelVolume <TVoxel, TIndex>* volume, Extent2Di range) = 0;
-	virtual unsigned int ComputeVoxelWithFlagsCount(VoxelVolume<TVoxel, TIndex>* volume, VoxelFlags flags) = 0;
-	virtual unsigned int ComputeNonTruncatedVoxelCount(VoxelVolume<TVoxel, TIndex>* volume) = 0;
-	virtual unsigned int ComputeAlteredVoxelCount(VoxelVolume<TVoxel, TIndex>* volume) = 0;
+	virtual unsigned int CountHashBlocksWithDepthWeightInRange(VoxelVolume <TVoxel, TIndex>* volume, Extent2Di range) = 0;
+	virtual unsigned int CountVoxelsWithSpecifiedFlags(VoxelVolume<TVoxel, TIndex>* volume, VoxelFlags flags) = 0;
+	virtual unsigned int CountNonTruncatedVoxels(VoxelVolume<TVoxel, TIndex>* volume) = 0;
+	virtual unsigned int CountAlteredVoxels(VoxelVolume<TVoxel, TIndex>* volume) = 0;
 	virtual unsigned int CountVoxelsWithSpecificSdfValue(VoxelVolume<TVoxel, TIndex>* volume, float value) = 0;
-	virtual double ComputeNonTruncatedVoxelAbsSdfSum(VoxelVolume<TVoxel, TIndex>* volume) = 0;
-	virtual double ComputeTruncatedVoxelAbsSdfSum(VoxelVolume<TVoxel, TIndex>* volume) = 0;
+	virtual double SumNonTruncatedVoxelAbsSdf(VoxelVolume<TVoxel, TIndex>* volume) = 0;
+	virtual double SumTruncatedVoxelAbsSdf(VoxelVolume<TVoxel, TIndex>* volume) = 0;
 
 	virtual double ComputeWarpUpdateMin(VoxelVolume<TVoxel,TIndex>* volume) = 0;
 	virtual double ComputeWarpUpdateMax(VoxelVolume<TVoxel,TIndex>* volume) = 0;
@@ -49,7 +51,8 @@ public:
 
 	virtual Extent3Di FindMinimumNonTruncatedBoundingBox(VoxelVolume <TVoxel, TIndex>* volume) = 0;
 
-	virtual int ComputeAllocatedHashBlockCount(VoxelVolume<TVoxel, TIndex>* volume) = 0;
+	virtual unsigned int CountAllocatedHashBlocks(VoxelVolume<TVoxel, TIndex>* volume) = 0;
+	virtual unsigned int CountUtilizedHashBlocks(VoxelVolume<TVoxel, TIndex>* volume) = 0;
 	virtual std::vector<int> GetAllocatedHashCodes(VoxelVolume<TVoxel, TIndex>* volume) = 0;
 	virtual std::vector<Vector3s> GetAllocatedHashBlockPositions(VoxelVolume<TVoxel, TIndex>* volume) = 0;
 	virtual std::vector<int> GetUtilizedHashCodes(VoxelVolume <TVoxel, TIndex>* volume) = 0;

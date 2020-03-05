@@ -127,7 +127,7 @@ CameraTrackingState* MultiEngine<TVoxel, TIndex>::GetTrackingState(void)
 // - if success, add to list of new candidates
 // - if less than n_overlap "new candidates" in more than n_reloctrialframes frames, discard
 // - if at least n_overlap "new candidates" :
-// 	- try to compute 3D relation, weighting old information accordingly
+// 	- try to compute_allocated 3D relation, weighting old information accordingly
 //	- if outlier ratio below p_relation_outliers and at least n_overlap inliers, success
 
 struct TodoListEntry {

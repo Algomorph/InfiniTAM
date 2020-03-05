@@ -183,7 +183,7 @@ inline Vector3f cameraVoxelSpaceToWorldHashBlockSpaceLegacy_Algomorph(const Vect
 }
 
 /**
- * \brief compute the segment formed by tracing the camera-space point a fixed distance forward and backward along
+ * \brief compute_allocated the segment formed by tracing the camera-space point a fixed distance forward and backward along
  * the ray; note: the starting & ending points of the returned segment are in voxel block coordinates
  * \param distance_from_point distance to trace backward and forward along the ray
  * \param point_in_camera_space point to trace from
@@ -333,7 +333,7 @@ _CPU_AND_GPU_CODE_ inline float computeUpdatedVoxelDepthInfo(
 	//the voxel is beyond the narrow band, on the other side of the surface. Don't make any updates to SDF.
 	if (eta < -mu) return eta;
 
-	// compute updated SDF value and reliability
+	// compute_allocated updated SDF value and reliability
 	oldF = TVoxel::valueToFloat(voxel.sdf);
 	oldW = voxel.w_depth;
 
@@ -402,7 +402,7 @@ _CPU_AND_GPU_CODE_ inline float computeUpdatedVoxelDepthInfo(
 	//the voxel is beyond the narrow band, on the other side of the surface. Don't make any updates to SDF.
 	if (eta < -mu) return eta;
 
-	// compute updated SDF value and reliability
+	// compute_allocated updated SDF value and reliability
 	oldF = TVoxel::valueToFloat(voxel.sdf);
 	oldW = voxel.w_depth;
 	newF = ORUTILS_MIN(1.0f, eta / mu);
@@ -466,7 +466,7 @@ template<bool hasColor, bool hasConfidence, bool hasSemanticInformation, class T
 struct ComputeUpdatedVoxelInfo;
 
 //================= VOXEL UPDATES FOR VOXELS WITH NO SEMANTIC INFORMATION ==============================================
-//arguments to the "compute" member function should always be the same
+//arguments to the "compute_allocated" member function should always be the same
 #define COMPUTE_VOXEL_UPDATE_PARAMETERS \
 DEVICEPTR(TVoxel) & voxel, const THREADPTR(Vector4f) & pt_model,\
 const CONSTPTR(Matrix4f) & M_d, const CONSTPTR(Vector4f) & projParams_d,\

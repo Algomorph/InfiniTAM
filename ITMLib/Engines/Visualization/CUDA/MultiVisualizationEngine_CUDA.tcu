@@ -85,7 +85,7 @@ void MultiVisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::CreateExpectedDepths
 		// TODO: at the moment, there is no "visible list". Empirically,
 		// if all the local maps are reasonably small (i.e. not too
 		// big a hash table), this is fast enough. It *might* still
-		// be better in terms of parallelism to compute a visible list
+		// be better in terms of parallelism to compute_allocated a visible list
 		// first, then project them into the image, but a lot of the
 		// work is identical anyway.
 

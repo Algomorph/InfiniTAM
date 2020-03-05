@@ -227,13 +227,13 @@ inline static void PrintVolumeStatistics(
 	VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>& calculator =
 			VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::Instance();
 	std::cout << green << "=== Stats for scene '" << description << "' ===" << reset << std::endl;
-	std::cout << "    Total voxel count: " << calculator.ComputeAllocatedVoxelCount(volume) << std::endl;
-	std::cout << "    NonTruncated voxel count: " << calculator.ComputeNonTruncatedVoxelCount(volume) << std::endl;
+	std::cout << "    Total voxel count: " << calculator.CountAllocatedVoxels(volume) << std::endl;
+	std::cout << "    NonTruncated voxel count: " << calculator.CountNonTruncatedVoxels(volume) << std::endl;
 	std::cout << "    +1.0 voxel count: " << calculator.CountVoxelsWithSpecificSdfValue(volume, 1.0f) << std::endl;
 	std::vector<int> allocated_hash_codes = calculator.GetAllocatedHashCodes(volume);
 	std::cout << "    Allocated hash count: " << allocated_hash_codes.size() << std::endl;
-	std::cout << "    NonTruncated SDF sum: " << calculator.ComputeNonTruncatedVoxelAbsSdfSum(volume) << std::endl;
-	std::cout << "    Truncated SDF sum: " << calculator.ComputeTruncatedVoxelAbsSdfSum(volume) << std::endl;
+	std::cout << "    NonTruncated SDF sum: " << calculator.SumNonTruncatedVoxelAbsSdf(volume) << std::endl;
+	std::cout << "    Truncated SDF sum: " << calculator.SumTruncatedVoxelAbsSdf(volume) << std::endl;
 };
 
 #ifdef TEST_PERFORMANCE

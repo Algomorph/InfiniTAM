@@ -135,25 +135,7 @@ int main(int argc, char** argv) {
 		                                         false);
 
 // endregion ===========================================================================================================
-// region =========================== SET LOGGER / VISUALIZERS WITH CLI ARGUMENTS ======================================
-		//NB: Logger's focus coordinates set above together with main engine settings, if provided
-//		if (loggingOptions.plotEnergies) logger.TurnPlottingEnergiesOn();
-//		if (loggingOptions.record3DSceneAndWarps) logger.TurnRecording3DSceneAndWarpProgressionOn();
-//		if (loggingOptions.recordCanonicalSceneAsSlices) logger.TurnRecordingCanonicalSceneAs2DSlicesOn();
-//		if (loggingOptions.recordLiveSceneAsSlices) logger.TurnRecordingLiveSceneAs2DSlicesOn();
-//		if (loggingOptions.record1DSlices) logger.TurnRecordingScene1DSlicesWithUpdatesOn();
-//		if (loggingOptions.record2DSlices) logger.TurnRecordingScene2DSlicesWithUpdatesOn();
-//		if (loggingOptions.record3DSlices) logger.TurnRecordingScene3DSlicesWithUpdatesOn();
-//		if (configuration::get().verbosity_level >= configuration::VERBOSITY_FOCUS_SPOTS) {
-//			logger.SetFocusCoordinates(settings.telemetry_settings.focus_coordinates);
-//		}
-//		logger.SetOutputDirectory(settings.paths.output_path);
-//
-//		logger.SetPlaneFor2Dand3DSlices(loggingOptions.planeFor2Dand3DSlices);
-//		logger.Set3DSliceInPlaneRadius(loggingOptions._3DSliceRadius);
-//		logger.Set3DSliceOutOfPlaneRadius(loggingOptions._3DSliceExtraThicknessMargin);
 
-// endregion
 // region =========================== SET UI ENGINE SETTINGS WITH CLI ARGUMENTS ========================================
 
 
@@ -161,7 +143,7 @@ int main(int argc, char** argv) {
 #if !defined(WIN32) && defined(WITH_VTK)
 		XInitThreads();
 #endif
-		UIEngine_BPO::Instance().Initialize(argc, argv, imageSource, imuSource, mainEngine, configuration, nullptr);
+		UIEngine_BPO::Instance().Initialize(argc, argv, imageSource, imuSource, mainEngine, configuration);
 
 
 // endregion ===========================================================================================================

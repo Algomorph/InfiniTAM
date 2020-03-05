@@ -128,7 +128,7 @@ inline TSurfel make_surfel(int locId, const Matrix4f& T, const Vector4f *vertexM
  * \param source                The source surfel.
  * \param maxSurfelRadius       The maximum radius a surfel is allowed to have.
  * \param shouldMergeProperties Whether or not to merge the surfels' properties (position, normal, radius and colour) rather than just the confidence values and timestamps.
- * \param radiusCombinationMode The way in which to compute the radius of the combined surfel.
+ * \param radiusCombinationMode The way in which to compute_allocated the radius of the combined surfel.
  * \return                      The surfel resulting from the merge.
  */
 template <typename TSurfel>

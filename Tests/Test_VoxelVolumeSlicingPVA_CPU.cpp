@@ -66,10 +66,10 @@ BOOST_AUTO_TEST_CASE(testPVASceneSlice_CPU) {
 	const int expected_non_truncated_voxel_count = 58368;
 	volume_CPU.LoadFromDirectory("TestData/snoopy_result_fr16-17_full/snoopy_full_frame_16_");
 
-	BOOST_REQUIRE_EQUAL(StatCalc_CPU_PVA_Voxel::Instance().ComputeNonTruncatedVoxelCount(&volume_CPU),
+	BOOST_REQUIRE_EQUAL(StatCalc_CPU_PVA_Voxel::Instance().CountNonTruncatedVoxels(&volume_CPU),
 	                    expected_non_truncated_voxel_count);
 
-	BOOST_REQUIRE_CLOSE(StatCalc_CPU_PVA_Voxel::Instance().ComputeNonTruncatedVoxelAbsSdfSum(&volume_CPU),
+	BOOST_REQUIRE_CLOSE(StatCalc_CPU_PVA_Voxel::Instance().SumNonTruncatedVoxelAbsSdf(&volume_CPU),
 	                    28887.87700, 0.001);
 
 	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_slice_same_dimensions_CPU(
@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE(testPVASceneSlice_CPU) {
 	ManipulationEngine_CPU_PVA_Voxel::Inst().CopyVolumeSlice(&volume_slice_same_dimensions_CPU,
 	                                                         &volume_CPU, bounds);
 
-	BOOST_REQUIRE_EQUAL(StatCalc_CPU_PVA_Voxel::Instance().ComputeNonTruncatedVoxelCount(
+	BOOST_REQUIRE_EQUAL(StatCalc_CPU_PVA_Voxel::Instance().CountNonTruncatedVoxels(
 			&volume_slice_same_dimensions_CPU), expected_non_truncated_voxel_count);
 
 	float tolerance = 1e-8;
@@ -101,11 +101,11 @@ BOOST_AUTO_TEST_CASE(testPVASceneSlice_CPU) {
 
 	ManipulationEngine_CPU_PVA_Voxel::Inst().CopyVolumeSlice(&volume_slice_different_dimensions_CPU,
 	                                                         &volume_CPU, bounds);
-	BOOST_REQUIRE_EQUAL(StatCalc_CPU_PVA_Voxel::Instance().ComputeNonTruncatedVoxelCount(
+	BOOST_REQUIRE_EQUAL(StatCalc_CPU_PVA_Voxel::Instance().CountNonTruncatedVoxels(
 			&volume_slice_different_dimensions_CPU), expected_non_truncated_voxel_count);
-	BOOST_REQUIRE_CLOSE(StatCalc_CPU_PVA_Voxel::Instance().ComputeNonTruncatedVoxelAbsSdfSum(
+	BOOST_REQUIRE_CLOSE(StatCalc_CPU_PVA_Voxel::Instance().SumNonTruncatedVoxelAbsSdf(
 			&volume_slice_different_dimensions_CPU), 28887.877, 0.001);
-	BOOST_REQUIRE_CLOSE(StatCalc_CPU_PVA_Voxel::Instance().ComputeNonTruncatedVoxelAbsSdfSum(
+	BOOST_REQUIRE_CLOSE(StatCalc_CPU_PVA_Voxel::Instance().SumNonTruncatedVoxelAbsSdf(
 			&volume_CPU), 28887.877, 0.001);
 	BOOST_REQUIRE(allocatedContentAlmostEqual_CPU_Verbose(&volume_CPU,
 	                                                      &volume_slice_different_dimensions_CPU, tolerance));

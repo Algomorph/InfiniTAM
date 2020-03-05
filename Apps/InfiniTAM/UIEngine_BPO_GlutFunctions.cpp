@@ -160,11 +160,9 @@ void UIEngine_BPO::GlutDisplayFunction() {
 	Safe_GlutBitmapString(GLUT_BITMAP_HELVETICA_12, (const char*) str);
 	glRasterPos2f(-0.98f, -0.95f);
 	sprintf(str,
-	        "i: %d frames \t d: one step \t p: pause \t v: write video %s \t w: log 3D warps %s \t Alt+w: log 2D warps %s",
+	        "i: %d frames \t d: one step \t p: pause \t v: write video %s \t ",
 	        uiEngine.number_of_frames_to_process_after_launch,
-	        uiEngine.depthVideoWriter != nullptr ? "off" : "on",
-	        uiEngine.logger != nullptr && uiEngine.logger->IsRecording3DSceneAndWarpProgression() ? "off" : "on",
-	        uiEngine.logger != nullptr && uiEngine.logger->IsRecordingScene2DSlicesWithUpdates() ? "off" : "on");
+	        uiEngine.depthVideoWriter != nullptr ? "off" : "on");
 	Safe_GlutBitmapString(GLUT_BITMAP_HELVETICA_12, (const char*) str);
 
 	glutSwapBuffers();
@@ -202,9 +200,8 @@ void UIEngine_BPO::GlutIdleFunction() {
 				if (uiEngine.save_after_automatic_run) {
 					uiEngine.mainEngine->SaveToFile(uiEngine.GeneratePreviousFrameOutputPath());
 				}
-				bench::print_all_cumulative_times_to_stdout();
 				if (configuration::get().telemetry_settings.log_benchmarks) {
-					bench::save_all_cumulative_times_to_disk();
+					bench::log_all_cumulative_times();
 				}
 			}
 			break;
@@ -339,14 +336,6 @@ void UIEngine_BPO::GlutKeyUpFunction(unsigned char key, int x, int y) {
 		case 't': {
 			uiEngine.integrationActive = !uiEngine.integrationActive;
 			uiEngine.mainEngine->turnOffIntegration();
-		}
-			break;
-		case 'w': {
-			if (modifiers && GLUT_ACTIVE_ALT && uiEngine.logger != nullptr) {
-				uiEngine.logger->ToggleRecording3DSceneAndWarpProgression();
-			} else {
-				uiEngine.logger->ToggleRecordingScene2DSlicesWithUpdates();
-			}
 		}
 			break;
 		case 'r': {

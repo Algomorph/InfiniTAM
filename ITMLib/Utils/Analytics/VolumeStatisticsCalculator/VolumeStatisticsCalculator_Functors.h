@@ -248,6 +248,28 @@ struct RetrieveIsVoxelInDepthWeightRange<TVoxel,TOutput, false>{
 	}
 };
 
+template <typename TVoxel, typename TOutput, bool ThasDepthInformation>
+struct RetrieveIsVoxelNotInDepthWeightRange;
+
+template <typename TVoxel, typename TOutput>
+struct RetrieveIsVoxelNotInDepthWeightRange<TVoxel,TOutput, true>{
+	Extent2Di range;
+	_CPU_AND_GPU_CODE_
+	inline TOutput retrieve(const TVoxel& voxel) const {
+		return (range.from > voxel.w_depth) || (voxel.w_depth >= range.to);
+	}
+};
+
+template <typename TVoxel, typename TOutput>
+struct RetrieveIsVoxelNotInDepthWeightRange<TVoxel,TOutput, false>{
+	Extent2Di range;
+	_CPU_AND_GPU_CODE_
+	inline TOutput retrieve(const TVoxel& voxel) const {
+		DIEWITHEXCEPTION_REPORTLOCATION("Voxel doesn't have depth information.");
+		return TOutput();
+	}
+};
+
 template<typename TVoxel, typename TIndex, typename TOutput>
 struct ReduceSumFunctor {
 public:
@@ -258,52 +280,80 @@ public:
 	}
 };
 
+template<typename TVoxel, typename TIndex, typename TOutput>
+struct ReduceBinOrFunctor {
+public:
+	_CPU_AND_GPU_CODE_
+	inline static ReductionResult<TOutput, TIndex> reduce(
+			const ReductionResult<TOutput, TIndex>& item1, const ReductionResult<TOutput, TIndex>& item2) {
+		return {item1.value | item2.value, 0u, 0};
+	}
+};
+
+template<typename TVoxel, typename TIndex, typename TOutput>
+struct ReduceBinAndFunctor {
+public:
+	_CPU_AND_GPU_CODE_
+	inline static ReductionResult<TOutput, TIndex> reduce(
+			const ReductionResult<TOutput, TIndex>& item1, const ReductionResult<TOutput, TIndex>& item2) {
+		return {item1.value & item2.value, 0u, 0};
+	}
+};
 
 
 //endregion ============================================================================================================
 //region =========================== COUNT ALL VOXELS ==================================================================
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-struct ComputeAllocatedVoxelCountFunctor;
+struct ComputeVoxelCountFunctor;
 
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
-struct ComputeAllocatedVoxelCountFunctor<TVoxel, PlainVoxelArray, TMemoryDeviceType> {
+struct ComputeVoxelCountFunctor<TVoxel, PlainVoxelArray, TMemoryDeviceType> {
 	inline
-	static unsigned int compute(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
+	static unsigned int compute_allocated(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
 		PlainVoxelArray& index = volume->index;
 		return static_cast<unsigned int>(index.GetVolumeSize().x * index.GetVolumeSize().y * index.GetVolumeSize().z);
+	}
+	inline
+	static unsigned int compute_utilized(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
+		return compute_allocated(volume);
 	}
 };
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 struct HashOnlyStatisticsFunctor;
 
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
-struct ComputeAllocatedVoxelCountFunctor<TVoxel, VoxelBlockHash, TMemoryDeviceType> {
+struct ComputeVoxelCountFunctor<TVoxel, VoxelBlockHash, TMemoryDeviceType> {
 	inline
-	static unsigned int compute(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
+	static unsigned int compute_allocated(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 		return static_cast<unsigned int>(HashOnlyStatisticsFunctor<TVoxel, VoxelBlockHash, TMemoryDeviceType>
 		::ComputeAllocatedHashBlockCount(volume)) * VOXEL_BLOCK_SIZE3;
+	}
+
+	inline
+	static unsigned int compute_utilized(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
+		return volume->index.GetUtilizedHashBlockCount() * VOXEL_BLOCK_SIZE3;
 	}
 };
 //endregion
 //region ========================= COUNT VOXELS WITH SPECIFIC SDF VALUE ================================================
 
 template<bool hasSDFInformation, typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-struct ComputeVoxelCountWithSpecificValue;
+struct CountVoxelsWithSpecificValueFunctor;
 
 template<class TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-struct ComputeVoxelCountWithSpecificValue<true, TVoxel, TIndex, TMemoryDeviceType> {
-	explicit ComputeVoxelCountWithSpecificValue(float value) : value(value) {
+struct CountVoxelsWithSpecificValueFunctor<true, TVoxel, TIndex, TMemoryDeviceType> {
+	explicit CountVoxelsWithSpecificValueFunctor(float value) : value(value) {
 		INITIALIZE_ATOMIC(unsigned int, count, 0u);
 	}
 
-	~ComputeVoxelCountWithSpecificValue() {
+	~CountVoxelsWithSpecificValueFunctor() {
 		CLEAN_UP_ATOMIC(count);
 	}
 
 	static int compute(VoxelVolume<TVoxel, TIndex>* scene, float value) {
-		ComputeVoxelCountWithSpecificValue instance(value);
-		VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseAll(scene, instance);
+		CountVoxelsWithSpecificValueFunctor instance(value);
+		VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseUtilized(scene, instance);
 		return GET_ATOMIC_VALUE_CPU(instance.count);
 	}
 
@@ -319,7 +369,7 @@ struct ComputeVoxelCountWithSpecificValue<true, TVoxel, TIndex, TMemoryDeviceTyp
 };
 
 template<class TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-struct ComputeVoxelCountWithSpecificValue<false, TVoxel, TIndex, TMemoryDeviceType> {
+struct CountVoxelsWithSpecificValueFunctor<false, TVoxel, TIndex, TMemoryDeviceType> {
 	static int compute(VoxelVolume<TVoxel, TIndex>* scene, float value) {
 		DIEWITHEXCEPTION(
 				"Voxel volume issued to count voxels with specific SDF value appears to have no sdf information. "
@@ -331,21 +381,21 @@ struct ComputeVoxelCountWithSpecificValue<false, TVoxel, TIndex, TMemoryDeviceTy
 //region ================================ COUNT VOXELS WITH SPECIFIC FLAGS =============================================
 
 template<bool hasSemanticInformation, typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-struct ComputeVoxelCountWithSpecificFlags;
+struct CountVoxelsWithSpecificFlagsFunctor;
 
 template<class TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-struct ComputeVoxelCountWithSpecificFlags<true, TVoxel, TIndex, TMemoryDeviceType> {
-	explicit ComputeVoxelCountWithSpecificFlags(VoxelFlags flags) : flags(flags) {
+struct CountVoxelsWithSpecificFlagsFunctor<true, TVoxel, TIndex, TMemoryDeviceType> {
+	explicit CountVoxelsWithSpecificFlagsFunctor(VoxelFlags flags) : flags(flags) {
 		INITIALIZE_ATOMIC(unsigned int, count, 0u);
 	}
 
-	~ComputeVoxelCountWithSpecificFlags() {
+	~CountVoxelsWithSpecificFlagsFunctor() {
 		CLEAN_UP_ATOMIC(count);
 	}
 
 	static int compute(VoxelVolume<TVoxel, TIndex>* scene, VoxelFlags flags) {
-		ComputeVoxelCountWithSpecificFlags instance(flags);
-		VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseAll(scene, instance);
+		CountVoxelsWithSpecificFlagsFunctor instance(flags);
+		VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseUtilized(scene, instance);
 		return GET_ATOMIC_VALUE_CPU(instance.count);
 	}
 
@@ -361,7 +411,7 @@ struct ComputeVoxelCountWithSpecificFlags<true, TVoxel, TIndex, TMemoryDeviceTyp
 };
 
 template<class TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-struct ComputeVoxelCountWithSpecificFlags<false, TVoxel, TIndex, TMemoryDeviceType> {
+struct CountVoxelsWithSpecificFlagsFunctor<false, TVoxel, TIndex, TMemoryDeviceType> {
 	static int compute(VoxelVolume<TVoxel, TIndex>* scene, float value) {
 		DIEWITHEXCEPTION(
 				"Voxel volume issued to count voxels with specific semantic flags appears to have no semantic information. "
@@ -373,12 +423,12 @@ struct ComputeVoxelCountWithSpecificFlags<false, TVoxel, TIndex, TMemoryDeviceTy
 //region ================================== COUNT ALTERED VOXELS =======================================================
 
 template<typename TVoxel>
-struct IsAlteredCountFunctor {
-	IsAlteredCountFunctor() {
+struct CountAlteredVoxelsFunctor {
+	CountAlteredVoxelsFunctor() {
 		INITIALIZE_ATOMIC(unsigned int, count, 0u);
 	};
 
-	~IsAlteredCountFunctor() {
+	~CountAlteredVoxelsFunctor() {
 		CLEAN_UP_ATOMIC(count);
 	}
 
@@ -425,7 +475,7 @@ struct SumSDFFunctor<true, TVoxel, TIndex, TMemoryDeviceType> {
 
 	static double compute(VoxelVolume<TVoxel, TIndex>* scene, ITMLib::VoxelFlags voxelType) {
 		SumSDFFunctor instance(voxelType);
-		VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseAll(scene, instance);
+		VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseUtilized(scene, instance);
 		return GET_ATOMIC_VALUE_CPU(instance.sum);
 	}
 
@@ -480,7 +530,7 @@ struct FlagMatchBBoxFunctor<true, TVoxel, TIndex, TMemoryDeviceType> {
 
 	static Extent3Di compute(VoxelVolume<TVoxel, TIndex>* scene, ITMLib::VoxelFlags voxelType) {
 		FlagMatchBBoxFunctor instance(voxelType);
-		VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseAllWithPosition(scene, instance);
+		VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseUtilizedWithPosition(scene, instance);
 		return {GET_ATOMIC_VALUE_CPU(instance.min_x),
 		        GET_ATOMIC_VALUE_CPU(instance.min_y),
 		        GET_ATOMIC_VALUE_CPU(instance.min_z),
@@ -515,7 +565,7 @@ struct FlagMatchBBoxFunctor<true, TVoxel, TIndex, TMemoryDeviceType> {
 template<MemoryDeviceType TMemoryDeviceType>
 struct AllocatedHashBlockCountFunctor {
 	AllocatedHashBlockCountFunctor() {
-		INITIALIZE_ATOMIC(int, allocated_hash_block_count, 0);
+		INITIALIZE_ATOMIC(unsigned int, allocated_hash_block_count, 0);
 	}
 
 	~AllocatedHashBlockCountFunctor() {
@@ -525,23 +575,23 @@ struct AllocatedHashBlockCountFunctor {
 	_DEVICE_WHEN_AVAILABLE_
 	void operator()(HashEntry& entry, int hash_code) {
 		if (entry.ptr >= 0) {
-			ATOMIC_ADD(allocated_hash_block_count, 1);
+			ATOMIC_ADD(allocated_hash_block_count, 1u);
 		}
 	}
 
-	int get_count() {
+	unsigned int get_count() {
 		return GET_ATOMIC_VALUE_CPU(allocated_hash_block_count);
 	}
 
 private:
-	DECLARE_ATOMIC(int, allocated_hash_block_count);
+	DECLARE_ATOMIC(unsigned int, allocated_hash_block_count);
 };
 
 template<MemoryDeviceType TMemoryDeviceType>
 struct AllocatedHashesAggregationFunctor {
-	AllocatedHashesAggregationFunctor(int allocated_block_count) : hash_codes(allocated_block_count,
+	AllocatedHashesAggregationFunctor(unsigned int allocated_block_count) : hash_codes(allocated_block_count,
 	                                                                          TMemoryDeviceType) {
-		INITIALIZE_ATOMIC(int, current_fill_index, 0);
+		INITIALIZE_ATOMIC(unsigned int, current_fill_index, 0);
 		hash_codes_device = hash_codes.GetData(TMemoryDeviceType);
 	}
 
@@ -554,7 +604,7 @@ struct AllocatedHashesAggregationFunctor {
 	_DEVICE_WHEN_AVAILABLE_
 	void operator()(HashEntry& entry, int hash_code) {
 		if (entry.ptr >= 0) {
-			int index = ATOMIC_ADD(current_fill_index, 1);
+			unsigned int index = ATOMIC_ADD(current_fill_index, 1u);
 			hash_codes_device[index] = hash_code;
 		}
 	}
@@ -566,15 +616,15 @@ struct AllocatedHashesAggregationFunctor {
 private:
 	int* hash_codes_device;
 	ORUtils::MemoryBlock<int> hash_codes;
-	DECLARE_ATOMIC(int, current_fill_index);
+	DECLARE_ATOMIC(unsigned int, current_fill_index);
 };
 
 
 template<MemoryDeviceType TMemoryDeviceType>
 struct BlockPositionAggregationFunctor {
-	BlockPositionAggregationFunctor(int block_count) : block_positions(block_count,
+	BlockPositionAggregationFunctor(unsigned int block_count) : block_positions(block_count,
 	                                                                   TMemoryDeviceType) {
-		INITIALIZE_ATOMIC(int, current_fill_index, 0);
+		INITIALIZE_ATOMIC(unsigned int, current_fill_index, 0);
 		block_positions_device = block_positions.GetData(TMemoryDeviceType);
 	}
 
@@ -587,7 +637,7 @@ struct BlockPositionAggregationFunctor {
 	_DEVICE_WHEN_AVAILABLE_
 	void operator()(HashEntry& entry, int hash_code) {
 		if (entry.ptr >= 0) {
-			int index = ATOMIC_ADD(current_fill_index, 1);
+			unsigned int index = ATOMIC_ADD(current_fill_index, 1u);
 			block_positions_device[index] = entry.pos;
 		}
 	}
@@ -599,7 +649,7 @@ struct BlockPositionAggregationFunctor {
 private:
 	Vector3s* block_positions_device;
 	ORUtils::MemoryBlock<Vector3s> block_positions;
-	DECLARE_ATOMIC(int, current_fill_index);
+	DECLARE_ATOMIC(unsigned int, current_fill_index);
 };
 
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
@@ -624,20 +674,24 @@ struct HashOnlyStatisticsFunctor<TVoxel, PlainVoxelArray, TMemoryDeviceType> {
 	}
 
 	static int ComputeAllocatedHashBlockCount(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
-		return 0;
+		return 1;
+	}
+
+	static int ComputeUtilizedHashBlockCount(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
+		return 1;
 	}
 };
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
 struct HashOnlyStatisticsFunctor<TVoxel, VoxelBlockHash, TMemoryDeviceType> {
 	static std::vector<int> GetAllocatedHashCodes(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
-		int allocated_count = ComputeAllocatedHashBlockCount(volume);
+		unsigned int allocated_count = ComputeAllocatedHashBlockCount(volume);
 		AllocatedHashesAggregationFunctor<TMemoryDeviceType> aggregator_functor(allocated_count);
 		HashTableTraversalEngine<TMemoryDeviceType>::TraverseAllWithHashCode(volume->index, aggregator_functor);
 		return aggregator_functor.data();
 	}
 
 	static std::vector<Vector3s> GetAllocatedBlockPositions(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
-		int allocated_count = ComputeAllocatedHashBlockCount(volume);
+		unsigned int allocated_count = ComputeAllocatedHashBlockCount(volume);
 		BlockPositionAggregationFunctor<TMemoryDeviceType> aggregator_functor(allocated_count);
 		HashTableTraversalEngine<TMemoryDeviceType>::TraverseAllWithHashCode(volume->index, aggregator_functor);
 		return aggregator_functor.data();
@@ -649,16 +703,20 @@ struct HashOnlyStatisticsFunctor<TVoxel, VoxelBlockHash, TMemoryDeviceType> {
 	}
 
 	static std::vector<Vector3s> GetUtilizedBlockPositions(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
-		int allocated_count = volume->index.GetUtilizedHashBlockCount();
+		unsigned int allocated_count = volume->index.GetUtilizedHashBlockCount();
 		BlockPositionAggregationFunctor<TMemoryDeviceType> aggregator_functor(allocated_count);
 		HashTableTraversalEngine<TMemoryDeviceType>::TraverseUtilizedWithHashCode(volume->index, aggregator_functor);
 		return aggregator_functor.data();
 	}
 
-	static int ComputeAllocatedHashBlockCount(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
+	static unsigned int ComputeAllocatedHashBlockCount(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 		AllocatedHashBlockCountFunctor<TMemoryDeviceType> count_functor;
 		HashTableTraversalEngine<TMemoryDeviceType>::TraverseAllWithHashCode(volume->index, count_functor);
 		return count_functor.get_count();
+	}
+
+	static unsigned int ComputeUtilizedHashBlockCount(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
+		return volume->index.GetUtilizedHashBlockCount();
 	}
 };
 //endregion

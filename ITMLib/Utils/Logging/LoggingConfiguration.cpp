@@ -47,7 +47,7 @@ static void handle_possible_existing_logs(const std::string& log_path) {
 			buffer << std::put_time(std::localtime(&write_time), "%y%m%d%H%M%S");
 			fs::path backup_directory = fs::path(configuration::get().paths.output_path) / fs::path("older_logs");
 			fs::create_directories(backup_directory);
-			fs::path move_destination = backup_directory / fs::path(std::string("log_") + buffer.str() + ".txt");
+			fs::path move_destination = backup_directory / fs::path(std::string("log_") + buffer.str() + ".ans");
 			fs::rename(fs_log_path, move_destination);
 		}
 	}
@@ -55,10 +55,18 @@ static void handle_possible_existing_logs(const std::string& log_path) {
 
 void initialize_logging() {
 	log4cplus::initialize();
+#define HAVE_CONSOLE_SUPPORT_FOR_256_COLORS
+#ifdef HAVE_CONSOLE_SUPPORT_FOR_256_COLORS
+	log4cplus::getLogLevelManager().pushLogLevel(FOCUS_SPOTS_LOG_LEVEL, LOG4CPLUS_TEXT("\033[38;5;23mFOCUS_SPOTS\033[0m"));
+	log4cplus::getLogLevelManager().pushLogLevel(PER_ITERATION_LOG_LEVEL, LOG4CPLUS_TEXT("\033[38;5;64mPER_ITERATION\033[0m"));
+	log4cplus::getLogLevelManager().pushLogLevel(PER_FRAME_LOG_LEVEL, LOG4CPLUS_TEXT("\033[38;5;67mPER_FRAME\033[0m"));
+	log4cplus::getLogLevelManager().pushLogLevel(TOP_LOG_LEVEL, LOG4CPLUS_TEXT("\033[38;5;78mTOP_LEVEL\033[0m"));
+#else
 	log4cplus::getLogLevelManager().pushLogLevel(FOCUS_SPOTS_LOG_LEVEL, LOG4CPLUS_TEXT("FOCUS_SPOTS"));
 	log4cplus::getLogLevelManager().pushLogLevel(PER_ITERATION_LOG_LEVEL, LOG4CPLUS_TEXT("PER_ITERATION"));
 	log4cplus::getLogLevelManager().pushLogLevel(PER_FRAME_LOG_LEVEL, LOG4CPLUS_TEXT("PER_FRAME"));
 	log4cplus::getLogLevelManager().pushLogLevel(TOP_LOG_LEVEL, LOG4CPLUS_TEXT("TOP_LEVEL"));
+#endif
 
 	Logger root = get_logger();
 
@@ -102,7 +110,7 @@ void initialize_logging() {
 	}
 
 	if (configuration::get().telemetry_settings.log_to_disk) {
-		std::string log_path = (fs::path(configuration::get().paths.output_path) / fs::path("log.txt")).string();
+		std::string log_path = (fs::path(configuration::get().paths.output_path) / fs::path("log.ans")).string();
 		handle_possible_existing_logs(log_path);
 		log4cplus::SharedFileAppenderPtr file_appender(new RollingFileAppender(
 				LOG4CPLUS_TEXT(log_path), 50 * 1024 * 1024, 5, false, true));

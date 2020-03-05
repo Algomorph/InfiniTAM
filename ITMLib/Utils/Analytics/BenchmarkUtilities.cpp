@@ -27,12 +27,47 @@
 #include "BenchmarkUtilities.h"
 #include "../CPPPrintHelpers.h"
 #include "../Configuration.h"
+#include "../Logging/LoggingConfigruation.h"
 
 namespace fs = boost::filesystem;
 
-namespace ITMLib {
-namespace bench {
-std::map<std::string, std::pair<double, std::chrono::time_point<std::chrono::steady_clock>>> timers;
+namespace ITMLib::bench {
+class Timer {
+public:
+	Timer() : cumulative_time(0.0), run_count(0u), start_point(std::chrono::steady_clock::now()) {}
+
+	void start(){
+		start_point = std::chrono::steady_clock::now();
+	}
+
+	double stop_and_get_last_time(){
+		auto end = std::chrono::steady_clock::now();
+		auto diff = end - start_point;
+		double last_time = std::chrono::duration<double, std::milli>(diff).count();
+		cumulative_time += last_time;
+		return last_time;
+	}
+
+	void stop(){
+		auto end = std::chrono::steady_clock::now();
+		auto diff = end - start_point;
+		cumulative_time += std::chrono::duration<double, std::milli>(diff).count();
+	}
+
+	unsigned int get_run_count() const { return run_count;}
+	double get_cumulative_time() const;
+	double get_mean_time() const {return cumulative_time / run_count; }
+
+private:
+	double cumulative_time;
+	unsigned int run_count;
+	std::chrono::time_point<std::chrono::steady_clock> start_point;
+
+};
+
+double Timer::get_cumulative_time() const { return cumulative_time;}
+
+std::map<std::string, Timer> timers;
 
 /**
  * \brief Starts the timer with the specified name (creates it if it doesn't yet exist)
@@ -42,9 +77,9 @@ std::map<std::string, std::pair<double, std::chrono::time_point<std::chrono::ste
 void start_timer(std::string name) {
 	auto itr = timers.find(name);
 	if (itr != timers.end()) {
-		(*itr).second.second = std::chrono::steady_clock::now();
+		(*itr).second.start();
 	} else {
-		timers[name] = std::make_pair(0.0, std::chrono::steady_clock::now());
+		timers[name] = Timer();
 	}
 }
 
@@ -56,12 +91,7 @@ void start_timer(std::string name) {
 void stop_timer(std::string name) {
 	auto itr = timers.find(name);
 	if (itr != timers.end()) {
-		double cumulativeTime = std::get<0>((*itr).second);
-		auto start = std::get<1>((*itr).second);
-		auto end = std::chrono::steady_clock::now();
-		auto diff = end - start;
-		cumulativeTime += std::chrono::duration<double, std::milli>(diff).count();
-		(*itr).second.first = cumulativeTime;
+		(*itr).second.stop();
 	} else {
 		std::cerr << "Timer name: " << name << std::endl;
 		DIEWITHEXCEPTION_REPORTLOCATION("Timer with this name not found.");
@@ -79,7 +109,7 @@ void all_cumulative_times_to_stream(std::ostream& out, bool colors_enabled) {
 		out << "Logged cumulative runtimes:" << std::endl;
 	}
 	for (const auto& timer_pair : timers) {
-		out << "  " << timer_pair.first << ": " << timer_pair.second.first << std::endl;
+		out << "  " << timer_pair.first << ": " << timer_pair.second.get_cumulative_time() << std::endl;
 	}
 }
 
@@ -104,14 +134,7 @@ double stop_timer_and_get_cumulative_time(std::string name) {
 double stop_timer_and_get_last_time(std::string name) {
 	auto itr = timers.find(name);
 	if (itr != timers.end()) {
-		double cumulativeTime = std::get<0>((*itr).second);
-		auto start = std::get<1>((*itr).second);
-		auto end = std::chrono::steady_clock::now();
-		auto diff = end - start;
-		double lastTime = std::chrono::duration<double, std::milli>(diff).count();
-		cumulativeTime += lastTime;
-		(*itr).second.first = cumulativeTime;
-		return lastTime;
+		return (*itr).second.stop_and_get_last_time();
 	} else {
 		std::cerr << "Timer name: " << name << std::endl;
 		DIEWITHEXCEPTION_REPORTLOCATION("Timer with this name not found.");
@@ -121,13 +144,17 @@ double stop_timer_and_get_last_time(std::string name) {
 double get_cumulative_time(std::string name) {
 	auto itr = timers.find(name);
 	if (itr != timers.end()) {
-		double cumulativeTime = std::get<0>((*itr).second);
-		return cumulativeTime;
+		return (*itr).second.get_cumulative_time();
 	} else {
 		std::cerr << "Timer name: " << name << std::endl;
 		DIEWITHEXCEPTION_REPORTLOCATION("Timer with this name not found.");
 	}
 }
 
-}//namespace bench
-}//namespace ITMLib
+void log_all_cumulative_times() {
+	std::stringstream out;
+	all_cumulative_times_to_stream(out, true);
+	LOG4CPLUS_TOP_LEVEL(logging::get_logger(), out.str());
+}
+
+}//namespace ITMLib::bench

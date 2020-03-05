@@ -30,7 +30,7 @@ namespace ITMLib
 		*/
 		Extrinsics trafo_rgb_to_depth;
 		
-		/// Calibration information to compute depth from disparity images.
+		/// Calibration information to compute_allocated depth from disparity images.
 		DisparityCalib disparityCalib;
 	};
 }

@@ -280,26 +280,30 @@ const VoxelVolume<TVoxel, TIndex>* WarpFieldSequenceRecorder<TVoxel, TIndex>::Ge
 template<typename TVoxel, typename TIndex>
 void WarpFieldSequenceRecorder<TVoxel, TIndex>::Load() {
 	warpField->LoadFromDirectory(scenePath.string());
-	voxelCount = VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().ComputeAllocatedVoxelCount(warpField);
+	voxelCount = VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().CountAllocatedVoxels(
+			warpField);
 }
 
 template<typename TVoxel, typename TIndex>
 void WarpFieldSequenceRecorder<TVoxel, TIndex>::Save() {
 	warpField->SaveToDirectory(scenePath.string());
-	this->voxelCount = VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().ComputeAllocatedVoxelCount(warpField);
+	this->voxelCount = VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().CountAllocatedVoxels(
+			warpField);
 }
 
 template<typename TVoxel, typename TIndex>
 void WarpFieldSequenceRecorder<TVoxel, TIndex>::SaveCompact() {
 	VolumeFileIOEngine<TVoxel,TIndex>::SaveToDirectoryCompact(warpField, scenePath.string());
-	this->voxelCount = VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().ComputeAllocatedVoxelCount(warpField);
+	this->voxelCount = VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().CountAllocatedVoxels(
+			warpField);
 }
 
 template<typename TVoxel, typename TIndex>
 void WarpFieldSequenceRecorder<TVoxel, TIndex>::LoadCompact() {
 	warpField->Reset();
 	VolumeFileIOEngine<TVoxel,TIndex>::LoadFromDirectoryCompact(warpField, scenePath.string());
-	this->voxelCount = VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().ComputeAllocatedVoxelCount(warpField);
+	this->voxelCount = VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().CountAllocatedVoxels(
+			warpField);
 }
 //endregion
 // region ======================================== LOAD / SAVE HIGHLIGHTS ==============================================

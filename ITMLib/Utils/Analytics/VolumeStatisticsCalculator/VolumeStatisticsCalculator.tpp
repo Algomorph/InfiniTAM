@@ -33,7 +33,7 @@ template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 Vector6i VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::ComputeAlteredVoxelBounds(
 		VoxelVolume<TVoxel, TIndex>* volume) {
 	ComputeConditionalVoxelBoundsFunctor<TVoxel, TMemoryDeviceType, IsAlteredStaticFunctor<TVoxel>> bounds_functor;
-	VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseAllWithPosition(volume, bounds_functor);
+	VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseUtilizedWithPosition(volume, bounds_functor);
 	return bounds_functor.GetBounds();
 }
 
@@ -41,30 +41,37 @@ Vector6i VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::ComputeA
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 unsigned int
-VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::ComputeAllocatedVoxelCount(
+VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::CountAllocatedVoxels(
 		VoxelVolume<TVoxel, TIndex>* volume) {
-	return ComputeAllocatedVoxelCountFunctor<TVoxel, TIndex, TMemoryDeviceType>::compute(volume);
+	return ComputeVoxelCountFunctor<TVoxel, TIndex, TMemoryDeviceType>::compute_allocated(volume);
 }
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 unsigned int
-VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::ComputeVoxelWithFlagsCount(
+VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::CountUtilizedVoxels(
+		VoxelVolume<TVoxel, TIndex>* volume) {
+	return ComputeVoxelCountFunctor<TVoxel, TIndex, TMemoryDeviceType>::compute_utilized(volume);
+}
+
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+unsigned int
+VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::CountVoxelsWithSpecifiedFlags(
 		VoxelVolume<TVoxel, TIndex>* volume,
 		VoxelFlags flags) {
-	return ComputeVoxelCountWithSpecificFlags<TVoxel::hasSDFInformation, TVoxel, TIndex, TMemoryDeviceType>
+	return CountVoxelsWithSpecificFlagsFunctor<TVoxel::hasSDFInformation, TVoxel, TIndex, TMemoryDeviceType>
 	::compute(volume, flags);
 }
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-unsigned int VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::ComputeNonTruncatedVoxelCount(
+unsigned int VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::CountNonTruncatedVoxels(
 		VoxelVolume<TVoxel, TIndex>* volume) {
-	return ComputeVoxelWithFlagsCount(volume, VoxelFlags::VOXEL_NONTRUNCATED);
+	return CountVoxelsWithSpecifiedFlags(volume, VoxelFlags::VOXEL_NONTRUNCATED);
 }
 
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 double
-VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::ComputeNonTruncatedVoxelAbsSdfSum(
+VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::SumNonTruncatedVoxelAbsSdf(
 		VoxelVolume<TVoxel, TIndex>* volume) {
 	return SumSDFFunctor<TVoxel::hasSemanticInformation, TVoxel, TIndex, TMemoryDeviceType>::compute(
 			volume, VoxelFlags::VOXEL_NONTRUNCATED);
@@ -73,7 +80,7 @@ VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::ComputeNonTruncat
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 double
-VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::ComputeTruncatedVoxelAbsSdfSum(
+VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::SumTruncatedVoxelAbsSdf(
 		VoxelVolume<TVoxel, TIndex>* volume) {
 	return SumSDFFunctor<TVoxel::hasSemanticInformation, TVoxel, TIndex, TMemoryDeviceType>::
 	compute(volume, VoxelFlags::VOXEL_TRUNCATED);
@@ -83,10 +90,24 @@ template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 unsigned int VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::CountVoxelsWithDepthWeightInRange(
 		VoxelVolume<TVoxel, TIndex>* volume, Extent2Di range) {
 	typedef RetrieveIsVoxelInDepthWeightRange<TVoxel, unsigned int, TVoxel::hasWeightInformation> RetrievalFunctorType;
+	typedef ReduceSumFunctor<TVoxel, TIndex, unsigned int> ReduceFunctorType;
 	RetrievalFunctorType functor{range};
 	Vector3i position;
 	return VolumeReductionEngine<TVoxel, TIndex, TMemoryDeviceType>::
-	template ReduceUtilized<RetrievalFunctorType, ReduceSumFunctor<TVoxel, TIndex, unsigned int>, unsigned int>
+	template ReduceUtilized<RetrievalFunctorType, ReduceFunctorType, ReduceFunctorType, unsigned int>
+			(position, volume, functor);
+}
+
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+unsigned int VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::CountHashBlocksWithDepthWeightInRange(
+		VoxelVolume<TVoxel, TIndex>* volume, Extent2Di range) {
+	typedef RetrieveIsVoxelInDepthWeightRange<TVoxel, unsigned int, TVoxel::hasWeightInformation> RetrievalFunctorType;
+	typedef ReduceBinAndFunctor<TVoxel, TIndex, unsigned int> BlockReduceFunctorType;
+	typedef ReduceSumFunctor<TVoxel, TIndex, unsigned int> ResultReduceFunctorType;
+	RetrievalFunctorType functor{range};
+	Vector3i position;
+	return VolumeReductionEngine<TVoxel, TIndex, TMemoryDeviceType>::
+	template ReduceUtilized<RetrievalFunctorType, BlockReduceFunctorType, ResultReduceFunctorType, unsigned int>
 			(position, volume, functor);
 }
 
@@ -96,16 +117,16 @@ unsigned int
 VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::CountVoxelsWithSpecificSdfValue(
 		VoxelVolume<TVoxel, TIndex>* volume,
 		float value) {
-	return ComputeVoxelCountWithSpecificValue<TVoxel::hasSDFInformation, TVoxel, TIndex, TMemoryDeviceType>::compute(
+	return CountVoxelsWithSpecificValueFunctor<TVoxel::hasSDFInformation, TVoxel, TIndex, TMemoryDeviceType>::compute(
 			volume, value);
 }
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 unsigned int
-VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::ComputeAlteredVoxelCount(
+VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::CountAlteredVoxels(
 		VoxelVolume<TVoxel, TIndex>* volume) {
-	IsAlteredCountFunctor<TVoxel> functor;
-	VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseAll(volume, functor);
+	CountAlteredVoxelsFunctor<TVoxel> functor;
+	VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseUtilized(volume, functor);
 	return functor.GetCount();
 }
 
@@ -114,10 +135,11 @@ template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::ComputeWarpUpdateMaxAndPosition(
 		float& value, Vector3i& position, const VoxelVolume<TVoxel, TIndex>* volume) {
 	ReductionResult<float, TIndex> ignored_value;
+	typedef ReduceStatisticFunctor<TVoxel, TIndex, float, ITMLib::MAXIMUM> ReduceFunctorType;
 	ignored_value.value = FLT_MIN;
 	value = VolumeReductionEngine<TVoxel, TIndex, TMemoryDeviceType>::
 	template ReduceUtilized<RetreiveWarpLengthFunctor<TVoxel, ITMLib::WARP_UPDATE>,
-			ReduceStatisticFunctor<TVoxel, TIndex, float, ITMLib::MAXIMUM>, float>
+			ReduceFunctorType,ReduceFunctorType, float>
 			(position, volume, ignored_value);
 }
 
@@ -181,10 +203,17 @@ Vector6i VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::FindMini
 
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-int
-VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::ComputeAllocatedHashBlockCount(
+unsigned int
+VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::CountAllocatedHashBlocks(
 		VoxelVolume<TVoxel, TIndex>* volume) {
 	return HashOnlyStatisticsFunctor<TVoxel, TIndex, TMemoryDeviceType>::ComputeAllocatedHashBlockCount(volume);
+}
+
+
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+unsigned int
+VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::CountUtilizedHashBlocks(VoxelVolume<TVoxel, TIndex>* volume) {
+	return HashOnlyStatisticsFunctor<TVoxel, TIndex, TMemoryDeviceType>::ComputeUtilizedHashBlockCount(volume);
 }
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
@@ -214,5 +243,7 @@ VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::GetUtilizedHashBl
 		VoxelVolume<TVoxel, TIndex>* volume) {
 	return HashOnlyStatisticsFunctor<TVoxel, TIndex, TMemoryDeviceType>::GetUtilizedBlockPositions(volume);
 }
+
+
 
 // endregion ===========================================================================================================

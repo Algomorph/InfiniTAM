@@ -191,7 +191,7 @@ BOOST_FIXTURE_TEST_CASE(Test_TwoSurfaceAllocation_CPU, TestData_CPU) {
 			&span_volume);
 	std::unordered_set<Vector3s> hash_block_positions_span_set(hash_block_positions_span.begin(),
 	                                                           hash_block_positions_span.end());
-	int test_volume_block_count = StatCalc_CPU_VBH_Voxel::Instance().ComputeAllocatedHashBlockCount(&span_volume);
+	int test_volume_block_count = StatCalc_CPU_VBH_Voxel::Instance().CountAllocatedHashBlocks(&span_volume);
 
 	BOOST_REQUIRE_EQUAL(test_volume_block_count, ground_truth_block_positions.size());
 
@@ -212,7 +212,7 @@ BOOST_FIXTURE_TEST_CASE(Test_TwoSurfaceAllocation_CPU, TestData_CPU) {
 			&span_volume);
 	hash_block_positions_span_set = std::unordered_set<Vector3s>(hash_block_positions_span.begin(),
 	                                                             hash_block_positions_span.end());
-	test_volume_block_count = StatCalc_CPU_VBH_Voxel::Instance().ComputeAllocatedHashBlockCount(&span_volume);
+	test_volume_block_count = StatCalc_CPU_VBH_Voxel::Instance().CountAllocatedHashBlocks(&span_volume);
 
 	BOOST_REQUIRE_EQUAL(test_volume_block_count, ground_truth_block_positions.size());
 
@@ -250,7 +250,7 @@ BOOST_FIXTURE_TEST_CASE(Test_TwoSurfaceAllocation_CUDA, TestData_CUDA) {
 	std::unordered_set<Vector3s> hash_block_positions_span_set(hash_block_positions_span.begin(),
 	                                                           hash_block_positions_span.end());
 
-	int test_volume_block_count = StatCalc_CUDA_VBH_Voxel::Instance().ComputeAllocatedHashBlockCount(&span_volume);
+	int test_volume_block_count = StatCalc_CUDA_VBH_Voxel::Instance().CountAllocatedHashBlocks(&span_volume);
 
 	BOOST_REQUIRE_EQUAL(test_volume_block_count, ground_truth_block_positions.size());
 
@@ -270,7 +270,7 @@ BOOST_FIXTURE_TEST_CASE(Test_TwoSurfaceAllocation_CUDA, TestData_CUDA) {
 			&span_volume);
 	hash_block_positions_span_set = std::unordered_set<Vector3s>(hash_block_positions_span.begin(),
 	                                                             hash_block_positions_span.end());
-	test_volume_block_count = StatCalc_CUDA_VBH_Voxel::Instance().ComputeAllocatedHashBlockCount(&span_volume);
+	test_volume_block_count = StatCalc_CUDA_VBH_Voxel::Instance().CountAllocatedHashBlocks(&span_volume);
 
 	BOOST_REQUIRE_EQUAL(test_volume_block_count, ground_truth_block_positions.size());
 

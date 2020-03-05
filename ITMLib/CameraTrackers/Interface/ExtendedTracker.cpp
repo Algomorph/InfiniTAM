@@ -230,7 +230,7 @@ void ExtendedTracker::PrepareForEvaluation()
 
 			currentLevel->intrinsics = previousLevel->intrinsics * 0.5f;
 
-			// Also compute gradients
+			// Also compute_allocated gradients
 			lowLevelEngine->GradientXY(currentLevel->gradients, currentLevel->intensity_prev);
 		}
 
@@ -424,7 +424,7 @@ void ExtendedTracker::TrackCamera(CameraTrackingState *trackingState, const View
 	else trackingState->framesProcessed = 0;
 
 	// populate view-related instance members, initialize base level of image hiararchies,
-	// compute first-level gradients for RGB if necessary
+	// compute_allocated first-level gradients for RGB if necessary
 	this->SetEvaluationData(trackingState, view);
 	this->PrepareForEvaluation();
 
@@ -581,7 +581,7 @@ void ExtendedTracker::TrackCamera(CameraTrackingState *trackingState, const View
 			for (int i = 0; i < 6 * 6; ++i) A[i] = hessian_good[i];
 			for (int i = 0; i < 6; ++i) A[i + i * 6] *= 1.0f + lambda;
 
-			// compute a new step and make sure we've got an SE3
+			// compute_allocated a new step and make sure we've got an SE3
 			float step[6];
 			ComputeDelta(step, nabla_good, A, currentIterationType != TRACKER_ITERATION_BOTH);
 

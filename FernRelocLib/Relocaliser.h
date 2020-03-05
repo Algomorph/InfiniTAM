@@ -55,7 +55,7 @@ namespace FernRelocLib
 
 			filterGaussian(processedImage2, processedImage1, 2.5f);
 
-			// compute code
+			// compute_allocated code
 			int codeLength = encoding->getNumFerns();
 			char *code = new char[codeLength];
 			encoding->computeCode(processedImage1, code);

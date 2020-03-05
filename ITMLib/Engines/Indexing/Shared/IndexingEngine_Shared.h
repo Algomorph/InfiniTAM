@@ -318,7 +318,7 @@ inline float normOfFirst3Components(const Vector4f& vec) {
 	return sqrt(vec.x * vec.x + vec.y + vec.y + vec.z * vec.z);
 }
 /**
- * \brief compute the segment formed by tracing the camera-space point a fixed distance forward and backward along
+ * \brief compute_allocated the segment formed by tracing the camera-space point a fixed distance forward and backward along
  * the ray; note: the starting & ending points of the returned segment are in voxel block coordinates
  * \param distance_from_point distance to trace backward and forward along the ray
  * \param point_in_camera_space point to trace from

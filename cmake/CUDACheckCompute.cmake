@@ -2,7 +2,7 @@
 #Sourced from:
 #https://raw.githubusercontent.com/jwetzl/CudaLBFGS/master/CheckComputeCapability.cmake
 #############################
-# Check for GPUs present and their compute capability
+# Check for GPUs present and their compute_allocated capability
 # based on http://stackoverflow.com/questions/2285185/easiest-way-to-test-for-existence-of-cuda-capable-gpu-from-cmake/2297877#2297877 (Christopher Bruns)
 
 if(CUDA_FOUND)

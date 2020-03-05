@@ -213,7 +213,7 @@ void SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::IntegrateIntoScene(
 	if (volume->index.GetUtilizedHashBlockCount() == 0) return;
 
 	depth_camera_extrinsic_matrix = tracking_state->pose_d->GetM();
-	// compute modelview matrix of the RGB camera
+	// compute_allocated modelview matrix of the RGB camera
 	if (TVoxel::hasColorInformation) rgb_camera_extrinsic_matrix = view->calib.trafo_rgb_to_depth.calib_inv * depth_camera_extrinsic_matrix;
 
 	depth_camera_projection_parameters = view->calib.intrinsics_d.projectionParamsSimple.all;

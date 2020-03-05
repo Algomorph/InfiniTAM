@@ -57,7 +57,7 @@ namespace ITMLib
 	{
 	public:
 
-		/** Given a scene, pose and intrinsics, compute the
+		/** Given a scene, pose and intrinsics, compute_allocated the
 		visible subset of the scene and store it in an
 		appropriate Visualization state object, created
 		previously using allocateInternalState().

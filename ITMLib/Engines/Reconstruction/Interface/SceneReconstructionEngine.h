@@ -29,7 +29,7 @@ namespace ITMLib
 		virtual void ResetScene(VoxelVolume<TVoxel, TIndex> *scene) = 0;
 
 		/**
-		 * \brief Given a view with a new depth image, compute the
+		 * \brief Given a view with a new depth image, compute_allocated the
 		    visible blocks, allocate them and update the hash
 		    table so that the new image data can be integrated.
 		 * \param scene [out] the scene whose hash needs additional allocations

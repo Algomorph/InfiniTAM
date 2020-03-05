@@ -196,7 +196,7 @@ static inline bool minimizeLM(const ColorTracker & tracker, ORUtils::SE3Pose & i
 			tracker.ApplyDelta(x->getParameter(), &(d[0]), *tmp_para);
 
 			// check whether step reduces error function and
-			// compute a new value of lambda
+			// compute_allocated a new value of lambda
 			x2 = tracker.evaluateAt(tmp_para);
 
 			double rho = stepQuality(x, x2, &(d[0]), grad, B, numPara);
@@ -208,7 +208,7 @@ static inline bool minimizeLM(const ColorTracker & tracker, ORUtils::SE3Pose & i
 		else
 		{
 			x2 = NULL;
-			// can't compute a step quality here...
+			// can't compute_allocated a step quality here...
 			lambda = lambda / TR_REGION_DECREASE;
 		}
 

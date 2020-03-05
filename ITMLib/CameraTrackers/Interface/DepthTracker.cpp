@@ -279,7 +279,7 @@ void DepthTracker::TrackCamera(CameraTrackingState *trackingState, const View *v
 			for (int i = 0; i < 6 * 6; ++i) A[i] = hessian_good[i];
 			for (int i = 0; i < 6; ++i) A[i + i * 6] *= 1.0f + lambda;
 
-			// compute a new step and make sure we've got an SE3
+			// compute_allocated a new step and make sure we've got an SE3
 			ComputeDelta(step, nabla_good, A, iterationType != TRACKER_ITERATION_BOTH);
 			ApplyDelta(approxInvPose, step, approxInvPose);
 			trackingState->pose_d->SetInvM(approxInvPose);

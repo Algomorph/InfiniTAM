@@ -219,7 +219,7 @@ template<bool hasColor, bool hasConfidence, bool hasSemanticInformation, typenam
 struct ComputeUpdatedLiveVoxelInfo;
 
 // region ========= VOXEL UPDATES FOR VOXELS WITH NO SEMANTIC INFORMATION ==============================================
-//arguments to the "compute" member function should always be the same
+//arguments to the "compute_allocated" member function should always be the same
 #define COMPUTE_VOXEL_UPDATE_PARAMETERS \
 DEVICEPTR(TVoxel) & voxel, const THREADPTR(Vector4f) & pt_model,\
 const CONSTPTR(Matrix4f) & M_d, const CONSTPTR(Vector4f) & projParams_d,\

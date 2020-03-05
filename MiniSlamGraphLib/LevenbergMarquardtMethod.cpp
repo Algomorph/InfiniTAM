@@ -99,7 +99,7 @@ int LevenbergMarquardtMethod::minimize(const SlamGraphErrorFunction & f, SlamGra
 			f.applyDelta(x->getParameter(), &(d[0]), *tmp_para);
 
 			// check whether step reduces error function and
-			// compute a new value of lambda
+			// compute_allocated a new value of lambda
 			x2 = f.evaluateAt(tmp_para);
 			double q = stepQuality(x, x2, &(d[0]), grad, B);
 			if (q > TR_QUALITY_GAMMA1) {
@@ -120,7 +120,7 @@ int LevenbergMarquardtMethod::minimize(const SlamGraphErrorFunction & f, SlamGra
 		}
 		else {
 			x2 = NULL;
-			// can't compute a step quality here...
+			// can't compute_allocated a step quality here...
 			lambda = lambda / TR_REGION_DECREASE;
 		}
 

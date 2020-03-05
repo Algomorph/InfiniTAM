@@ -105,12 +105,10 @@ public:
 	bool allocateGPU;
 	bool shutdownRequested = false;
 	ITMUChar4Image* saveImage;
-	ITMLib::TelemetryRecorder_Interface* logger;
 	ITMLib::configuration::IndexingMethod indexingMethod;
 
 	void Initialize(int& argc, char** argv, InputSource::ImageSourceEngine* imageSource, InputSource::IMUSourceEngine* imuSource,
-	                ITMLib::MainEngine* main_engine, const ITMLib::configuration::Configuration& configuration,
-	                ITMLib::TelemetryRecorder_Interface* logger);
+	                ITMLib::MainEngine* main_engine, const ITMLib::configuration::Configuration& configuration);
 	void Shutdown();
 
 	void Run();
