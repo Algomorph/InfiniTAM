@@ -45,16 +45,6 @@
 
 using namespace ITMLib;
 
-namespace std {
-template<>
-struct hash<Vector3s> {
-	size_t operator()(const Vector3s& vector) const {
-		return std::hash<size_t>()(static_cast<size_t>(vector.x) << 16u | static_cast<size_t>(vector.y) << 8u |
-		                           static_cast<size_t>(vector.z));
-	}
-};
-} // namespace std
-
 template<MemoryDeviceType TMemoryDeviceType>
 struct TestData {
 	TestData() {

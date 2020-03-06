@@ -69,11 +69,10 @@ public:
 	*/
 	void ProcessFrame(const View* view, const CameraTrackingState* trackingState,
 	                  VoxelVolume <TVoxel, TIndex>* canonical_volume, VoxelVolume <TVoxel, TIndex>** live_volume_pair,
-	                  VoxelVolume <TWarp, TIndex>* warp_field, RenderState* canonical_render_state);
+	                  VoxelVolume <TWarp, TIndex>* warp_field);
 
 	void ProcessInitialFrame(const View* view, const CameraTrackingState* tracking_state,
-	                         VoxelVolume<TVoxel, TIndex>* canonical_volume, VoxelVolume<TVoxel, TIndex>* live_volume,
-	                         RenderState* canonical_render_state);
+	                         VoxelVolume<TVoxel, TIndex>* canonical_volume, VoxelVolume<TVoxel, TIndex>* live_volume);
 
 	/// Update the visible list (this can be called to update the visible list when fusion is turned off)
 	void UpdateVisibleList(const View* view, const CameraTrackingState* trackingState,
@@ -98,7 +97,6 @@ private:
 			int iteration);
 
 	void LogSettings();
-	void LogVolumeStatistics(VoxelVolume<TVoxel, TIndex>* volume, std::string volume_description);
 	// endregion =======================================================================================================
 	// region =========================================== MEMBER VARIABLES =============================================
 	// *** engines ***
@@ -113,7 +111,6 @@ private:
 	// *** parameters ***
 	// logging
 	const bool log_settings = false;
-	const bool log_volume_statistics = configuration::get().verbosity_level >= configuration::VERBOSITY_PER_FRAME && configuration::get().telemetry_settings.log_volume_statistics;
 	bool has_focus_coordinates;
 	const Vector3i focus_coordinates;
 	// algorithm operation

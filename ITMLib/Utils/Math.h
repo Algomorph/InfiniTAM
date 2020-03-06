@@ -151,8 +151,9 @@ typedef metal::uchar4 Vector4u;
 
 #endif
 
+// region ==================== ADDITIONAL MATH FUNCTIONS ===============================================================
 namespace ITMLib {
-// additional basic math functions
+
 
 inline
 int ceil_of_integer_quotient(int dividend, int divisor) {
@@ -160,3 +161,16 @@ int ceil_of_integer_quotient(int dividend, int divisor) {
 }
 
 } // namespace ITMLib
+// endregion
+
+// region ==================== MATH TYPES UTILITY FUNCTIONS ============================================================
+namespace std {
+template<>
+struct hash<Vector3s> {
+	size_t operator()(const Vector3s& vector) const {
+		return std::hash<size_t>()(static_cast<size_t>(vector.x) << 16u | static_cast<size_t>(vector.y) << 8u |
+		                           static_cast<size_t>(vector.z));
+	}
+};
+} // namespace std
+// endregion

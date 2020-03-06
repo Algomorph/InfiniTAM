@@ -311,9 +311,9 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(ITMUChar4Image* rgb
 	if ((last_tracking_result == CameraTrackingState::TRACKING_GOOD || !trackingInitialised) && (fusionActive) &&
 	    (relocalisationCount == 0)) {
 		if (framesProcessed > 0) {
-			denseMapper->ProcessFrame(view, tracking_state, canonical_volume, live_volumes, warp_field, canonical_render_state);
+			denseMapper->ProcessFrame(view, tracking_state, canonical_volume, live_volumes, warp_field);
 		} else {
-			denseMapper->ProcessInitialFrame(view, tracking_state, canonical_volume, live_volumes[0], canonical_render_state);
+			denseMapper->ProcessInitialFrame(view, tracking_state, canonical_volume, live_volumes[0]);
 		}
 		fusion_succeeded = true;
 		if (framesProcessed > 50) trackingInitialised = true;

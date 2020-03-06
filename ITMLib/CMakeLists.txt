@@ -853,6 +853,7 @@ set(ITMLIB_UTILS_SOURCES
     Utils/Collections/NestedMap3DOfArrays.cpp
     Utils/Collections/NestedMap3D.tpp
     Utils/Collections/NestedMap3D.cpp
+    Utils/Collections/OperationsOnSTLContainers.cpp
 
 
     Utils/Geometry/CardinalAxesAndPlanes.cpp
@@ -880,6 +881,7 @@ set(ITMLIB_UTILS_SOURCES
 set(ITMLIB_UTILS_HEADERS
     Utils/Collections/NestedMap3DOfArrays.h
     Utils/Collections/NestedMap3D.h
+    Utils/Collections/OperationsOnSTLContainers.h
 
     Utils/Geometry/FrustumTrigonometry.h
     Utils/Geometry/GeometryBooleanOperations.h
@@ -938,6 +940,7 @@ set(ITMLIB_UTILS_STATCALC_HEADERS
     Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator.h
     Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculatorInterface.h
     Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator_Functors.h
+    Utils/Analytics/VolumeStatistics.h
     )
 
 set(ITMLIB_UTILS_STATCALC_SOURCES
@@ -946,6 +949,7 @@ set(ITMLIB_UTILS_STATCALC_SOURCES
     Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator_CPU_VoxelBlockHash.cpp
     Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator_CUDA_PlainVoxelArray.cu
     Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator_CUDA_VoxelBlockHash.cu
+    Utils/Analytics/VolumeStatistics.cpp
     )
 
 ## ================================================ UTILS - FILEIO =====================================================

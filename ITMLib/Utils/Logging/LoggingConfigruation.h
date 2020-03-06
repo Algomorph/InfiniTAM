@@ -19,10 +19,10 @@
 
 namespace ITMLib::logging {
 //TODO: rework definitions of constants to the CPP file
-const log4cplus::LogLevel FOCUS_SPOTS_LOG_LEVEL = 0;
-const log4cplus::LogLevel PER_ITERATION_LOG_LEVEL = 1;
-const log4cplus::LogLevel PER_FRAME_LOG_LEVEL = 2;
-const log4cplus::LogLevel TOP_LOG_LEVEL = 3;
+const log4cplus::LogLevel FOCUS_SPOTS_LOG_LEVEL = 5000;
+const log4cplus::LogLevel PER_ITERATION_LOG_LEVEL = 5001;
+const log4cplus::LogLevel PER_FRAME_LOG_LEVEL = 5002;
+const log4cplus::LogLevel TOP_LOG_LEVEL = 5003;
 
 #define LOG4CPLUS_FOCUS_SPOTS(logger, logEvent)                               \
     if(logger.isEnabledFor(ITMLib::logging::FOCUS_SPOTS_LOG_LEVEL)) {   \
