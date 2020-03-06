@@ -36,27 +36,31 @@ class Timer {
 public:
 	Timer() : cumulative_time(0.0), run_count(0u), start_point(std::chrono::steady_clock::now()) {}
 
-	void start(){
+	void start() {
 		start_point = std::chrono::steady_clock::now();
 	}
 
-	double stop_and_get_last_time(){
+	double stop_and_get_last_time() {
 		auto end = std::chrono::steady_clock::now();
 		auto diff = end - start_point;
 		double last_time = std::chrono::duration<double, std::milli>(diff).count();
 		cumulative_time += last_time;
+		run_count++;
 		return last_time;
 	}
 
-	void stop(){
+	void stop() {
 		auto end = std::chrono::steady_clock::now();
 		auto diff = end - start_point;
 		cumulative_time += std::chrono::duration<double, std::milli>(diff).count();
+		run_count++;
 	}
 
-	unsigned int get_run_count() const { return run_count;}
+	unsigned int get_run_count() const { return run_count; }
+
 	double get_cumulative_time() const;
-	double get_mean_time() const {return cumulative_time / run_count; }
+
+	double get_mean_time() const { return cumulative_time / run_count; }
 
 private:
 	double cumulative_time;
@@ -65,7 +69,7 @@ private:
 
 };
 
-double Timer::get_cumulative_time() const { return cumulative_time;}
+double Timer::get_cumulative_time() const { return cumulative_time; }
 
 std::map<std::string, Timer> timers;
 
@@ -113,6 +117,22 @@ void all_cumulative_times_to_stream(std::ostream& out, bool colors_enabled) {
 	}
 }
 
+/**
+ * \brief Print all average times for timers based on the cumulative times and run counts recorded so far.
+ * \details Not thread-safe
+ */
+void all_average_times_to_stream(std::ostream& out, bool colors_enabled) {
+	if (colors_enabled) {
+		out << green << "Logged average runtimes:" << reset << std::endl;
+	} else {
+		out << "Logged average runtimes:" << std::endl;
+	}
+	for (const auto& timer_pair : timers) {
+		out << "  " << timer_pair.first << ": "
+		    << timer_pair.second.get_cumulative_time() / timer_pair.second.get_run_count() << std::endl;
+	}
+}
+
 void print_all_cumulative_times_to_stdout() {
 	all_cumulative_times_to_stream(std::cout, true);
 }
@@ -124,7 +144,6 @@ void save_all_cumulative_times_to_disk() {
 	all_cumulative_times_to_stream(output_file, false);
 	output_file.close();
 }
-
 
 double stop_timer_and_get_cumulative_time(std::string name) {
 	stop_timer(name);
@@ -151,9 +170,10 @@ double get_cumulative_time(std::string name) {
 	}
 }
 
-void log_all_cumulative_times() {
+void log_all_timers() {
 	std::stringstream out;
 	all_cumulative_times_to_stream(out, true);
+	all_average_times_to_stream(out, true);
 	LOG4CPLUS_TOP_LEVEL(logging::get_logger(), out.str());
 }
 

@@ -26,7 +26,7 @@ void stop_timer(std::string name);
 void all_cumulative_times_to_stream(std::ostream& out, bool colors_enabled);
 void print_all_cumulative_times_to_stdout();
 void save_all_cumulative_times_to_disk();
-void log_all_cumulative_times();
+void log_all_timers();
 double stop_timer_and_get_cumulative_time(std::string name);
 double stop_timer_and_get_last_time(std::string name);
 double get_cumulative_time(std::string name);
