@@ -32,10 +32,12 @@ include(${PROJECT_SOURCE_DIR}/cmake/UseBoost.cmake)
 set(sources
     InfiniTAM_cli.cpp
     CLIEngine.cpp
+    CreateDefaultImageSource.cpp
 )
 
 set(headers
     CLIEngine.h
+    CreateDefaultImageSource.h
 )
 
 #############################

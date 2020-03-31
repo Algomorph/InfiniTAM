@@ -1,97 +1,108 @@
 // Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
-
+//stdlib
 #include <cstdlib>
 #include <iostream>
 
-#include "CLIEngine.h"
+#define BOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE
+//boost
+#include <boost/program_options.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 
+//local
+#include "CLIEngine.h"
+#include "CreateDefaultImageSource.h"
+
+//InputSource
 #include "../../InputSource/OpenNIEngine.h"
 #include "../../InputSource/Kinect2Engine.h"
 
+//ITMLib
 #include "../../ITMLib/GlobalTemplateDefines.h"
-#include "../../ITMLib/Engines/Main/BasicVoxelEngine.h"
+#include "../../ITMLib/Engines/Main/MainEngineFactory.h"
 
 using namespace InfiniTAM::Engine;
 using namespace InputSource;
 using namespace ITMLib;
 
-int main(int argc, char** argv)
-try
-{
-	const char *calibFile = "";
-	const char *imagesource_part1 = NULL;
-	const char *imagesource_part2 = NULL;
-	const char *imagesource_part3 = NULL;
+namespace po = boost::program_options;
+namespace pt = boost::property_tree;
 
-	int arg = 1;
-	do {
-		if (argv[arg] != NULL) calibFile = argv[arg]; else break;
-		++arg;
-		if (argv[arg] != NULL) imagesource_part1 = argv[arg]; else break;
-		++arg;
-		if (argv[arg] != NULL) imagesource_part2 = argv[arg]; else break;
-		++arg;
-		if (argv[arg] != NULL) imagesource_part3 = argv[arg]; else break;
-	} while (false);
+int main(int argc, char** argv) {
+	try {
+		po::options_description arguments{"Arguments"};
+		po::positional_options_description positional_arguments;
 
-	if (arg == 1) {
-		printf("usage: %s [<calibfile> [<imagesource>] ]\n"
-		       "  <calibfile>   : path to a file containing intrinsic calibration parameters\n"
-		       "  <imagesource> : either one argument to specify OpenNI device ID\n"
-		       "                  or two arguments specifying rgb and depth file masks\n"
-		       "\n"
-		       "examples:\n"
-		       "  %s ./Files/Teddy/calib.txt ./Files/Teddy/Frames/%%04i.ppm ./Files/Teddy/Frames/%%04i.pgm\n"
-		       "  %s ./Files/Teddy/calib.txt\n\n", argv[0], argv[0], argv[0]);
+		arguments.add_options()
+				("help,h", "Print help screen")
+				("halp,h", "Funkaaay")
+				( "config,cfg", po::value<std::string>(),
+				  "Configuration file in JSON format, e.g.  ./default_config_cuda.json "
+				  "WARNING: using this option will invalidate any other command line arguments.");
+
+		ITMLib::configuration::Configuration::AddToOptionsDescription(arguments);
+
+		positional_arguments.add("calibration_file", 1);
+		positional_arguments.add("input_path", 3);
+
+		po::variables_map vm;
+
+		po::store(po::command_line_parser(argc, argv).options(arguments).positional(positional_arguments).style(
+				po::command_line_style::unix_style ^ po::command_line_style::allow_short).run(), vm);
+
+		po::notify(vm);
+
+
+		auto printHelp = [&arguments, &positional_arguments, &argv]() {
+			std::cout << arguments << std::endl;
+			std::cout << "Positional arguments: " << std::endl;
+			std::cout << "   --" << positional_arguments.name_for_position(0) << std::endl;
+			std::cout << "   --" << positional_arguments.name_for_position(1) << std::endl;
+			printf("examples:\n"
+			       "  %s ./Files/Teddy/calib.txt ./Files/Teddy/Frames/%%04i.ppm ./Files/Teddy/Frames/%%04i.pgm\n"
+			       "  %s ./Files/Teddy/calib.txt\n\n", argv[0], argv[0]);
+		};
+
+		if (vm.count("help")) {
+			printHelp();
+			return EXIT_SUCCESS;
+		}
+
+		if (vm.count("halp")) {
+			printf("Ya didn't think it would work, did ya now?\n");
+			printHelp();
+			return EXIT_SUCCESS;
+		}
+
+		if (vm["config"].empty()) {
+			configuration::load_configuration_from_variable_map(vm);
+		} else {
+			std::string configPath = vm["config"].as<std::string>();
+			configuration::load_configuration_from_json_file(configPath);
+		}
+		auto& configuration = configuration::get();
+
+		printf("initialising ...\n");
+		ImageSourceEngine* imageSource = nullptr;
+		IMUSourceEngine* imuSource = nullptr;
+
+		CreateDefaultImageSource(imageSource, imuSource, configuration.paths);
+		MainEngine* mainEngine = BuildMainEngine(imageSource->getCalib(),
+		                                         imageSource->getRGBImageSize(),
+		                                         imageSource->getDepthImageSize(),
+		                                         false);
+
+		CLIEngine::Instance()->Initialise(imageSource, imuSource, mainEngine, configuration::get().device_type);
+		CLIEngine::Instance()->Run();
+		CLIEngine::Instance()->Shutdown();
+
+		delete mainEngine;
+		delete imageSource;
+		delete imuSource;
+		return 0;
 	}
-
-	printf("initialising ...\n");
-	configuration::Configuration *internalSettings = &configuration::get();
-
-	ImageSourceEngine *imageSource;
-	IMUSourceEngine *imuSource = NULL;
-	printf("using calibration file: %s\n", calibFile);
-	if (imagesource_part2 == NULL) 
-	{
-		printf("using OpenNI device: %s\n", (imagesource_part1==NULL)?"<OpenNI default device>":imagesource_part1);
-		imageSource = new OpenNIEngine(calibFile, imagesource_part1);
-		if (imageSource->getDepthImageSize().x == 0) {
-			delete imageSource;
-			printf("trying MS Kinect device\n");
-			imageSource = new Kinect2Engine(calibFile);
-		}
-	} 
-	else
-	{
-		if (imagesource_part3 == NULL)
-		{
-			printf("using rgb images: %s\nusing depth images: %s\n", imagesource_part1, imagesource_part2);
-			ImageMaskPathGenerator pathGenerator(imagesource_part1, imagesource_part2, nullptr);
-			imageSource = new ImageFileReader<ImageMaskPathGenerator>(calibFile, pathGenerator);
-		}
-		else
-		{
-			printf("using rgb images: %s\nusing depth images: %s\nusing imu data: %s\n", imagesource_part1, imagesource_part2, imagesource_part3);
-			imageSource = new RawFileReader(calibFile, imagesource_part1, imagesource_part2, Vector2i(320, 240), 0.5f);
-			imuSource = new IMUSourceEngine(imagesource_part3);
-		}
+	catch (std::exception& e) {
+		std::cerr << e.what() << '\n';
+		return EXIT_FAILURE;
 	}
-
-	MainEngine *mainEngine = new BasicVoxelEngine<TSDFVoxel, VoxelIndex>(imageSource->getCalib(),
-	                                                                     imageSource->getRGBImageSize(),
-	                                                                     imageSource->getDepthImageSize());
-
-	CLIEngine::Instance()->Initialise(imageSource, imuSource, mainEngine, internalSettings->device_type);
-	CLIEngine::Instance()->Run();
-	CLIEngine::Instance()->Shutdown();
-
-	delete mainEngine;
-	delete internalSettings;
-	delete imageSource;
-	return 0;
-}
-catch(std::exception& e)
-{
-	std::cerr << e.what() << '\n';
-	return EXIT_FAILURE;
 }

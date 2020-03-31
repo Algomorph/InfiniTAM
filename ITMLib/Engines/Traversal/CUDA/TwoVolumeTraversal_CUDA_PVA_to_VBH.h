@@ -38,7 +38,7 @@ class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, 
 	                                        VoxelFlags semanticFlags, TBooleanFunctor& functor,
 	                                        TDeviceFunction&& deviceFunction) {
 		GridAlignedBox* arrayInfo = primaryVolume->index.GetIndexData();
-		int hashEntryCount = secondaryVolume->index.hashEntryCount;
+		int hashEntryCount = secondaryVolume->index.hash_entry_count;
 		HashEntry* hashTable = secondaryVolume->index.GetIndexData();
 
 		ORUtils::MemoryBlock<int> hashesNotSpanned(hashEntryCount, true, true);
@@ -132,7 +132,7 @@ class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, 
 			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryVolume,
 			TBooleanFunctor& functor, TDeviceFunction&& deviceFunction) {
 		GridAlignedBox* arrayInfo = primaryVolume->index.GetIndexData();
-		int hashEntryCount = secondaryVolume->index.hashEntryCount;
+		int hashEntryCount = secondaryVolume->index.hash_entry_count;
 		HashEntry* hashTable = secondaryVolume->index.GetIndexData();
 
 		ORUtils::MemoryBlock<int> hashCodesNotSpanned(hashEntryCount, true, true);
@@ -224,7 +224,7 @@ class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, 
 			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryVolume,
 			TBooleanFunctor& functor, TDeviceFunction&& deviceFunction) {
 
-		int hashEntryCount = secondaryVolume->index.hashEntryCount;
+		int hashEntryCount = secondaryVolume->index.hash_entry_count;
 		TVoxelSecondary* hashVoxels = secondaryVolume->voxels.GetVoxelBlocks();
 		TVoxelPrimary* arrayVoxels = primaryVolume->voxels.GetVoxelBlocks();
 		const VoxelBlockHash::IndexData* hashTable = secondaryVolume->index.GetIndexData();

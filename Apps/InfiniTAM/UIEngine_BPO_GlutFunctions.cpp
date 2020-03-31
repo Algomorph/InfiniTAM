@@ -145,18 +145,18 @@ void UIEngine_BPO::GlutDisplayFunction() {
 	glRasterPos2f(-0.98f, -0.90f);
 	const char* modeName;
 	const char* followOrFreeview;
-	if (uiEngine.freeviewActive) {
-		modeName = uiEngine.colourModes_freeview[uiEngine.currentColourMode].name;
+	if (uiEngine.freeview_active) {
+		modeName = uiEngine.colourModes_freeview[uiEngine.current_colour_mode].name;
 		followOrFreeview = "follow camera";
 	} else {
-		modeName = uiEngine.colourModes_main[uiEngine.currentColourMode].name;
+		modeName = uiEngine.colourModes_main[uiEngine.current_colour_mode].name;
 		followOrFreeview = "free viewpoint";
 	}
 
 	//Draw keyboard shortcut legend
 	sprintf(str, "n: one frame \t b: continuous \t q/e/esc: exit \t r: reset \t s: save scene \t l: load scene\t"
 	             " f: %s \t c: colours (currently %s) \t t: turn fusion %s", followOrFreeview, modeName,
-	        uiEngine.integrationActive ? "off" : "on");
+	        uiEngine.integration_active ? "off" : "on");
 	Safe_GlutBitmapString(GLUT_BITMAP_HELVETICA_12, (const char*) str);
 	glRasterPos2f(-0.98f, -0.95f);
 	sprintf(str,
@@ -194,7 +194,7 @@ void UIEngine_BPO::GlutIdleFunction() {
 			uiEngine.ProcessFrame();
 			uiEngine.processedFrameNo++;
 			uiEngine.needsRefresh = true;
-			if ((uiEngine.processedFrameNo - uiEngine.autoIntervalFrameStart) >=
+			if ((uiEngine.processedFrameNo - uiEngine.auto_interval_frame_start) >=
 			    uiEngine.number_of_frames_to_process_after_launch) {
 				uiEngine.mainLoopAction = uiEngine.exit_after_automatic_run ? EXIT : PROCESS_PAUSED;
 				if (uiEngine.save_after_automatic_run) {
@@ -230,7 +230,7 @@ void UIEngine_BPO::GlutKeyUpFunction(unsigned char key, int x, int y) {
 		//TODO: rearrange in asciibeditc order (except fall-through cases) to make maintenance easier
 		case 'i':
 			printf("processing %d frames ...\n", uiEngine.number_of_frames_to_process_after_launch);
-			uiEngine.autoIntervalFrameStart = uiEngine.processedFrameNo;
+			uiEngine.auto_interval_frame_start = uiEngine.processedFrameNo;
 			uiEngine.mainLoopAction = UIEngine_BPO::PROCESS_N_FRAMES;
 			break;
 		case 'b':
@@ -282,13 +282,13 @@ void UIEngine_BPO::GlutKeyUpFunction(unsigned char key, int x, int y) {
 			uiEngine.mainLoopAction = UIEngine_BPO::EXIT;
 			break;
 		case 'f':
-			uiEngine.currentColourMode = 0;
+			uiEngine.current_colour_mode = 0;
 			//TODO: replace this whole if/else block with a separate function, use this function during initialization as well -Greg (Github: Algomorph)
-			if (uiEngine.freeviewActive) {
+			if (uiEngine.freeview_active) {
 				uiEngine.outImageType[0] = MainEngine::InfiniTAM_IMAGE_SCENERAYCAST;
 				uiEngine.outImageType[1] = MainEngine::InfiniTAM_IMAGE_ORIGINAL_DEPTH;
 
-				uiEngine.freeviewActive = false;
+				uiEngine.freeview_active = false;
 			} else {
 				uiEngine.outImageType[0] = MainEngine::InfiniTAM_IMAGE_FREECAMERA_SHADED;
 				uiEngine.outImageType[1] = MainEngine::InfiniTAM_IMAGE_SCENERAYCAST;
@@ -299,7 +299,7 @@ void UIEngine_BPO::GlutKeyUpFunction(unsigned char key, int x, int y) {
 					uiEngine.outImage[0]->ChangeDims(uiEngine.mainEngine->GetView()->depth->noDims);
 				}
 
-				switch (uiEngine.indexingMethod) {
+				switch (uiEngine.indexing_method) {
 					case configuration::INDEX_HASH: {
 						auto* multiEngine = dynamic_cast<MultiEngine<TSDFVoxel, VoxelBlockHash>*>(uiEngine.mainEngine);
 						if (multiEngine != nullptr) {
@@ -320,21 +320,21 @@ void UIEngine_BPO::GlutKeyUpFunction(unsigned char key, int x, int y) {
 				}
 
 
-				uiEngine.freeviewActive = true;
+				uiEngine.freeview_active = true;
 			}
 			uiEngine.needsRefresh = true;
 			break;
 		case 'c':
-			uiEngine.currentColourMode++;
-			if (((uiEngine.freeviewActive) &&
-			     ((unsigned) uiEngine.currentColourMode >= uiEngine.colourModes_freeview.size())) ||
-			    ((!uiEngine.freeviewActive) &&
-			     ((unsigned) uiEngine.currentColourMode >= uiEngine.colourModes_main.size())))
-				uiEngine.currentColourMode = 0;
+			uiEngine.current_colour_mode++;
+			if (((uiEngine.freeview_active) &&
+			     ((unsigned) uiEngine.current_colour_mode >= uiEngine.colourModes_freeview.size())) ||
+			    ((!uiEngine.freeview_active) &&
+			     ((unsigned) uiEngine.current_colour_mode >= uiEngine.colourModes_main.size())))
+				uiEngine.current_colour_mode = 0;
 			uiEngine.needsRefresh = true;
 			break;
 		case 't': {
-			uiEngine.integrationActive = !uiEngine.integrationActive;
+			uiEngine.integration_active = !uiEngine.integration_active;
 			uiEngine.mainEngine->turnOffIntegration();
 		}
 			break;
@@ -395,8 +395,8 @@ void UIEngine_BPO::GlutKeyUpFunction(unsigned char key, int x, int y) {
 		}
 			break;
 	}
-	if (uiEngine.freeviewActive) uiEngine.outImageType[0] = uiEngine.colourModes_freeview[uiEngine.currentColourMode].type;
-	else uiEngine.outImageType[0] = uiEngine.colourModes_main[uiEngine.currentColourMode].type;
+	if (uiEngine.freeview_active) uiEngine.outImageType[0] = uiEngine.colourModes_freeview[uiEngine.current_colour_mode].type;
+	else uiEngine.outImageType[0] = uiEngine.colourModes_main[uiEngine.current_colour_mode].type;
 }
 
 void UIEngine_BPO::GlutMouseButtonFunction(int button, int state, int x, int y) {
@@ -459,7 +459,7 @@ void UIEngine_BPO::GlutMouseMoveFunction(int x, int y) {
 		return;
 	}
 
-	if (!uiEngine.freeviewActive || uiEngine.mouseState == 0) return;
+	if (!uiEngine.freeview_active || uiEngine.mouseState == 0) return;
 
 	Vector2i movement;
 	movement.x = x - uiEngine.mouseLastClick.x;

@@ -71,7 +71,7 @@ void MultiMeshingEngine_CUDA<TVoxel, VoxelBlockHash>::MeshScene(Mesh* mesh,
 	typedef MultiIndex<VoxelBlockHash> ID;
 
 	int noMaxTriangles = mesh->noMaxTriangles;
-	const int hashEntryCount = sceneManager.getLocalMap(0)->scene->index.hashEntryCount;
+	const int hashEntryCount = sceneManager.getLocalMap(0)->scene->index.hash_entry_count;
 	const unsigned int voxelBlockCount = sceneManager.getLocalMap(0)->scene->index.voxelBlockCount;
 	float factor = sceneParams.voxel_size;
 	ORcudaSafeCall(cudaMemset(noTriangles_device, 0, sizeof(unsigned int)));

@@ -1,5 +1,14 @@
 // Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
+// Modified code: Copyright 2019-2020 Gregory Kramida
 
+//stdlib
+#include <unordered_set>
+#include <vector>
+
+//log4cplus
+#include <log4cplus/loggingmacros.h>
+
+// local
 #include "DynamicSceneVoxelEngine.h"
 
 #include "../LowLevel/LowLevelEngineFactory.h"
@@ -17,6 +26,7 @@
 #include "../../../ORUtils/FileUtils.h"
 #include "../EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 #include "../../Utils/Logging/LoggingConfigruation.h"
+#include "../../Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculatorFactory.h"
 
 using namespace ITMLib;
 
@@ -286,7 +296,6 @@ CameraTrackingState::TrackingResult
 DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(ITMUChar4Image* rgbImage,
                                                              ITMShortImage* rawDepthImage,
                                                              IMUMeasurement* imuMeasurement) {
-
 	// prepare image and turn it into a "view"
 	if (imuMeasurement == nullptr)
 		view_builder->UpdateView(&view, rgbImage, rawDepthImage, settings.use_threshold_filter,
@@ -298,7 +307,6 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(ITMUChar4Image* rgb
 	if (!mainProcessingActive) {
 		return CameraTrackingState::TRACKING_FAILED;
 	}
-
 	// camera tracking
 	previousFramePose = (*(tracking_state->pose_d));
 	if (trackingActive) camera_tracking_controller->Track(tracking_state, view);
@@ -340,7 +348,6 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(ITMUChar4Image* rgb
 	QuaternionFromRotationMatrix(R, q);
 	fprintf(stderr, "%f %f %f %f %f %f %f\n", t[0], t[1], t[2], q[1], q[2], q[3], q[0]);
 #endif
-
 	return last_tracking_result;
 }
 
@@ -353,6 +360,8 @@ template<typename TVoxel, typename TWarp, typename TIndex>
 void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(ITMUChar4Image* out, GetImageType getImageType,
                                                               ORUtils::SE3Pose* pose,
                                                               Intrinsics* intrinsics) {
+
+
 	auto& settings = configuration::get();
 	if (view == nullptr) return;
 

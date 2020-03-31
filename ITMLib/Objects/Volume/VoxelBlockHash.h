@@ -86,12 +86,13 @@ public:
 	/** Maximum number of total entries. */
 	const CONSTPTR(int) voxelBlockCount;
 	const CONSTPTR(int) excessListSize;
-	const CONSTPTR(int) hashEntryCount;
+	const CONSTPTR(int) hash_entry_count;
 	const CONSTPTR(int) voxelBlockSize = VOXEL_BLOCK_SIZE3;
 
 private:
 	int last_free_excess_list_id;
 	int utilized_hash_block_count;
+	int visible_hash_block_count;
 
 	/** The actual hash entries in the hash table, ordered by their hash codes. */
 	ORUtils::MemoryBlock<HashEntry> hash_entries;
@@ -105,15 +106,17 @@ private:
 	overflow. */
 	ORUtils::MemoryBlock<int> excess_allocation_list;
 	/** A list of hash codes for "visible entries" */
+	ORUtils::MemoryBlock<int> visible_block_hash_codes;
+	/** A list of hash codes for utilized / allocated entries */
 	ORUtils::MemoryBlock<int> utilized_block_hash_codes;
 	/** Visibility types of "visible entries", ordered by hashCode */
-	ORUtils::MemoryBlock<HashBlockVisibility> blockVisibilityTypes;
+	ORUtils::MemoryBlock<HashBlockVisibility> block_visibility_types;
 
 public:
 	const MemoryDeviceType memory_type;
 
 
-	VoxelBlockHash(VoxelBlockHashParameters parameters, MemoryDeviceType memoryType);
+	VoxelBlockHash(VoxelBlockHashParameters parameters, MemoryDeviceType memory_type);
 
 	explicit VoxelBlockHash(MemoryDeviceType memoryType) : VoxelBlockHash(VoxelBlockHashParameters(),
 	                                                                            memoryType) {}
@@ -174,9 +177,13 @@ public:
 
 	int* GetUtilizedBlockHashCodes() { return utilized_block_hash_codes.GetData(memory_type); }
 
-	HashBlockVisibility* GetBlockVisibilityTypes() { return blockVisibilityTypes.GetData(memory_type); }
+	const int* GetVisibleBlockHashCodes() const { return visible_block_hash_codes.GetData(memory_type); }
 
-	const HashBlockVisibility* GetBlockVisibilityTypes() const { return blockVisibilityTypes.GetData(memory_type); }
+	int* GetVisibleBlockHashCodes() { return visible_block_hash_codes.GetData(memory_type); };
+
+	HashBlockVisibility* GetBlockVisibilityTypes() { return block_visibility_types.GetData(memory_type); }
+
+	const HashBlockVisibility* GetBlockVisibilityTypes() const { return block_visibility_types.GetData(memory_type); }
 
 	/** Get the list that identifies which entries of the
 	overflow list are allocated. This is used if too
@@ -188,11 +195,15 @@ public:
 
 	int GetLastFreeExcessListId() const { return last_free_excess_list_id; }
 
-	void SetLastFreeExcessListId(int newLastFreeExcessListId) { this->last_free_excess_list_id = newLastFreeExcessListId; }
+	void SetLastFreeExcessListId(int last_free_excess_list_id) { this->last_free_excess_list_id = last_free_excess_list_id; }
 
 	int GetUtilizedHashBlockCount() const { return this->utilized_hash_block_count; }
 
-	void SetUtilizedHashBlockCount(int utilizedHashBlockCount) { this->utilized_hash_block_count = utilizedHashBlockCount; }
+	void SetUtilizedHashBlockCount(int utilized_hash_block_count) { this->utilized_hash_block_count = utilized_hash_block_count; }
+
+	int GetVisibleHashBlockCount() const { return this->visible_hash_block_count; }
+
+	void SetVisibleHashBlockCount(int visible_hash_block_count) { this->visible_hash_block_count = visible_hash_block_count; }
 
 	/*VBH-specific*/
 	int GetExcessListSize() const { return this->excessListSize; }

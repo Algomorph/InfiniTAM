@@ -34,7 +34,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateUsingOthe
 		VoxelVolume<TVoxelSource, VoxelBlockHash>* source_volume,
 		TMarkerFunctor& marker_functor) {
 
-	assert(target_volume->index.hashEntryCount == source_volume->index.hashEntryCount);
+	assert(target_volume->index.hash_entry_count == source_volume->index.hash_entry_count);
 	IndexingEngine<TVoxelTarget, VoxelBlockHash, MEMORYDEVICE_CPU>& indexer =
 			IndexingEngine<TVoxelTarget, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance();
 
@@ -99,7 +99,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateUsingOthe
 	HashEntryAllocationState* hash_entry_allocation_states = target_volume->index.GetHashEntryAllocationStates();
 	Vector3s* hash_block_coordinates = target_volume->index.GetAllocationBlockCoordinates();
 
-	ORUtils::MemoryBlock<Vector3s> colliding_block_positions(target_volume->index.hashEntryCount, MEMORYDEVICE_CPU);
+	ORUtils::MemoryBlock<Vector3s> colliding_block_positions(target_volume->index.hash_entry_count, MEMORYDEVICE_CPU);
 	Vector3s* colliding_block_positions_device = colliding_block_positions.GetData(MEMORYDEVICE_CPU);
 	std::atomic<int> colliding_block_count;
 	bool unresolvable_collision_encountered = false;
@@ -152,7 +152,7 @@ AllocateHashEntriesUsingAllocationStateList(VoxelVolume<TVoxel, VoxelBlockHash>*
 	const HashEntryAllocationState* hash_entry_states = volume->index.GetHashEntryAllocationStates();
 	Vector3s* block_coordinates = volume->index.GetAllocationBlockCoordinates();
 
-	const int hash_entry_count = volume->index.hashEntryCount;
+	const int hash_entry_count = volume->index.hash_entry_count;
 	std::atomic<int> last_free_voxel_block_id(volume->voxels.lastFreeBlockId);
 	std::atomic<int> last_free_excess_list_id(volume->index.GetLastFreeExcessListId());
 	std::atomic<int> utilized_block_count(volume->index.GetUtilizedHashBlockCount());
@@ -233,7 +233,7 @@ AllocateHashEntriesUsingAllocationStateList_SetVisibility(VoxelVolume<TVoxel, Vo
 	Vector3s* allocation_block_coordinates_device = volume->index.GetAllocationBlockCoordinates();
 	HashBlockVisibility* hash_block_visibility_types_device = volume->index.GetBlockVisibilityTypes();
 
-	int entry_count = volume->index.hashEntryCount;
+	int entry_count = volume->index.hash_entry_count;
 	int last_free_voxel_block_id = volume->voxels.lastFreeBlockId;
 	int last_free_excess_list_id = volume->index.GetLastFreeExcessListId();
 	int* voxel_allocation_list = volume->voxels.GetAllocationList();
@@ -329,7 +329,7 @@ template<typename TVoxel>
 void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::BuildUtilizedBlockListBasedOnVisibility(
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume, const View* view, const Matrix4f& depth_camera_matrix) {
 	// ** scene data **
-	const int hash_entry_count = volume->index.hashEntryCount;
+	const int hash_entry_count = volume->index.hash_entry_count;
 	HashBlockVisibility* hash_block_visibility_types = volume->index.GetBlockVisibilityTypes();
 	int* visible_hash_entry_codes = volume->index.GetUtilizedBlockHashCodes();
 	HashEntry* hash_table = volume->index.GetEntries();

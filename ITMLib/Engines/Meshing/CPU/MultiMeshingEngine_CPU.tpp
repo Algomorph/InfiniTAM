@@ -37,7 +37,7 @@ inline void MultiMeshingEngine_CPU<TVoxel, VoxelBlockHash>::MeshScene(Mesh * mes
 	mesh->triangles->Clear();
 
 	int noTriangles = 0, noMaxTriangles = mesh->noMaxTriangles;
-	int noTotalEntriesPerLocalMap = sceneManager.getLocalMap(0)->scene->index.hashEntryCount;
+	int noTotalEntriesPerLocalMap = sceneManager.getLocalMap(0)->scene->index.hash_entry_count;
 	float factor = sceneParams.voxel_size;
 
 	// very dumb rendering -- likely to generate lots of duplicates

@@ -65,7 +65,7 @@ EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::ResetVolume(
 	memset(&tmpEntry, 0, sizeof(HashEntry));
 	tmpEntry.ptr = -2;
 	HashEntry* hashEntry_ptr = volume->index.GetEntries();
-	memsetKernel<HashEntry>(hashEntry_ptr, tmpEntry, volume->index.hashEntryCount);
+	memsetKernel<HashEntry>(hashEntry_ptr, tmpEntry, volume->index.hash_entry_count);
 	int* excessList_ptr = volume->index.GetExcessAllocationList();
 	fillArrayKernel<int>(excessList_ptr, volume->index.excessListSize);
 

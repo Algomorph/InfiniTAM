@@ -44,7 +44,7 @@ void EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::ResetVolume(
 	memset(&tmpEntry, 0, sizeof(HashEntry));
 	tmpEntry.ptr = -2;
 	HashEntry* hashEntry_ptr = volume->index.GetEntries();
-	for (int i = 0; i < volume->index.hashEntryCount; ++i) hashEntry_ptr[i] = tmpEntry;
+	for (int i = 0; i < volume->index.hash_entry_count; ++i) hashEntry_ptr[i] = tmpEntry;
 	int* excessList_ptr = volume->index.GetExcessAllocationList();
 	for (int i = 0; i < volume->index.GetExcessListSize(); ++i) excessList_ptr[i] = i;
 
@@ -125,10 +125,10 @@ bool EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::CopyVolumeSlice(
 		VoxelVolume<TVoxel, VoxelBlockHash>* target_volume, VoxelVolume<TVoxel, VoxelBlockHash>* source_volume,
 		Vector6i bounds, const Vector3i& offset) {
 
-	assert(target_volume->index.hashEntryCount == source_volume->index.hashEntryCount);
+	assert(target_volume->index.hash_entry_count == source_volume->index.hash_entry_count);
 
 	//temporary stuff
-	const int hash_entry_count = source_volume->index.hashEntryCount;
+	const int hash_entry_count = source_volume->index.hash_entry_count;
 	ORUtils::MemoryBlock<HashEntryAllocationState> hashEntryStates(hash_entry_count, MEMORYDEVICE_CPU);
 	HashEntryAllocationState* hashEntryStates_device = hashEntryStates.GetData(MEMORYDEVICE_CPU);
 	ORUtils::MemoryBlock<Vector3s> blockCoords(hash_entry_count, MEMORYDEVICE_CPU);
@@ -216,12 +216,12 @@ bool EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::CopyVolume(
 		VoxelVolume<TVoxel, VoxelBlockHash>* target_volume, VoxelVolume<TVoxel, VoxelBlockHash>* source_volume,
 		const Vector3i& offset) {
 
-	assert(target_volume->index.hashEntryCount == source_volume->index.hashEntryCount);
+	assert(target_volume->index.hash_entry_count == source_volume->index.hash_entry_count);
 
 	//reset destination scene
 	EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::ResetVolume(target_volume);
 
-	const int hash_entry_count = source_volume->index.hashEntryCount;
+	const int hash_entry_count = source_volume->index.hash_entry_count;
 
 	TVoxel* source_voxels = source_volume->voxels.GetVoxelBlocks();
 	const HashEntry* source_hash_table = source_volume->index.GetEntries();

@@ -692,6 +692,9 @@ struct HashOnlyStatisticsFunctor<TVoxel, VoxelBlockHash, TMemoryDeviceType> {
 
 	static std::vector<Vector3s> GetAllocatedBlockPositions(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 		unsigned int allocated_count = ComputeAllocatedHashBlockCount(volume);
+		if(allocated_count == 0u){
+			return std::vector<Vector3s>();
+		}
 		BlockPositionAggregationFunctor<TMemoryDeviceType> aggregator_functor(allocated_count);
 		HashTableTraversalEngine<TMemoryDeviceType>::TraverseAllWithHashCode(volume->index, aggregator_functor);
 		return aggregator_functor.data();
@@ -703,8 +706,11 @@ struct HashOnlyStatisticsFunctor<TVoxel, VoxelBlockHash, TMemoryDeviceType> {
 	}
 
 	static std::vector<Vector3s> GetUtilizedBlockPositions(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
-		unsigned int allocated_count = volume->index.GetUtilizedHashBlockCount();
-		BlockPositionAggregationFunctor<TMemoryDeviceType> aggregator_functor(allocated_count);
+		unsigned int utilized_count = volume->index.GetUtilizedHashBlockCount();
+		if(utilized_count == 0u){
+			return std::vector<Vector3s>();
+		}
+		BlockPositionAggregationFunctor<TMemoryDeviceType> aggregator_functor(utilized_count);
 		HashTableTraversalEngine<TMemoryDeviceType>::TraverseUtilizedWithHashCode(volume->index, aggregator_functor);
 		return aggregator_functor.data();
 	}
@@ -737,7 +743,7 @@ struct ComputeVoxelBoundsFunctor<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU> {
 
 		const TVoxel* voxel_blocks = volume->voxels.GetVoxelBlocks();
 		const HashEntry* hash_table = volume->index.GetEntries();
-		int hash_entry_count = volume->index.hashEntryCount;
+		int hash_entry_count = volume->index.hash_entry_count;
 
 		//TODO: if OpenMP standard is 3.1 or above, use OpenMP parallel for reduction clause with (max:maxVoxelPointX,...) -Greg (GitHub: Algomorph)
 		for (int hash_code = 0; hash_code < hash_entry_count; hash_code++) {
@@ -816,7 +822,7 @@ struct ComputeVoxelBoundsFunctor<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA> {
 
 		const TVoxel* voxelBlocks = volume->voxels.GetVoxelBlocks();
 		const HashEntry* hashTable = volume->index.GetEntries();
-		int noTotalEntries = volume->index.hashEntryCount;
+		int noTotalEntries = volume->index.hash_entry_count;
 
 		dim3 cudaBlockSize(256, 1);
 		dim3 cudaGridSize((int) ceil((float) noTotalEntries / (float) cudaBlockSize.x));

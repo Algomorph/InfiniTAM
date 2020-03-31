@@ -133,7 +133,7 @@ private:
 	TraverseAll_Generic(VoxelVolume<TVoxel, VoxelBlockHash>* volume, TProcessBlockFunction&& block_function) {
 		TVoxel* const voxels = volume->voxels.GetVoxelBlocks();
 		const HashEntry* const hash_table = volume->index.GetEntries();
-		const int hash_entry_count = volume->index.hashEntryCount;
+		const int hash_entry_count = volume->index.hash_entry_count;
 #ifdef WITH_OPENMP
 #pragma omp parallel for
 #endif
@@ -247,7 +247,7 @@ public:
 	TraverseAll_ST(VoxelVolume<TVoxel, VoxelBlockHash>* volume, TFunctor& functor) {
 		TVoxel* voxels = volume->voxels.GetVoxelBlocks();
 		const HashEntry* hash_table = volume->index.GetEntries();
-		int hash_entry_count = volume->index.hashEntryCount;
+		int hash_entry_count = volume->index.hash_entry_count;
 		for (int hash_code = 0; hash_code < hash_entry_count; hash_code++) {
 			const HashEntry& hash_entry = hash_table[hash_code];
 			if (hash_entry.ptr < 0) continue;

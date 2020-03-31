@@ -52,7 +52,7 @@ void VolumeFileIOEngine<TVoxel, VoxelBlockHash>::SaveToDirectoryCompact(
 
 	const TVoxel* voxels = volume->voxels.GetVoxelBlocks();
 	const HashEntry* hash_table = volume->index.GetEntries();
-	int hash_entry_count = volume->index.hashEntryCount;
+	int hash_entry_count = volume->index.hash_entry_count;
 
 	int last_excess_list_id = volume->index.GetLastFreeExcessListId();
 	int utilized_block_count = volume->index.GetUtilizedHashBlockCount();

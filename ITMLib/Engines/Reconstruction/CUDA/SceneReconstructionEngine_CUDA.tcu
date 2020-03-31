@@ -82,7 +82,7 @@ void SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::ResetScene(
 	memset(&tmpEntry, 0, sizeof(HashEntry));
 	tmpEntry.ptr = -2;
 	HashEntry* hashEntry_ptr = scene->index.GetEntries();
-	memsetKernel<HashEntry>(hashEntry_ptr, tmpEntry, scene->index.hashEntryCount);
+	memsetKernel<HashEntry>(hashEntry_ptr, tmpEntry, scene->index.hash_entry_count);
 	int* excessList_ptr = scene->index.GetExcessAllocationList();
 	fillArrayKernel<int>(excessList_ptr, scene->index.excessListSize);
 
@@ -118,7 +118,7 @@ void SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::AllocateSceneFromDe
 	HashEntry* hashTable = scene->index.GetEntries();
 	ITMHashSwapState* swapStates = scene->Swapping() ? scene->global_cache->GetSwapStates(true) : 0;
 
-	const int hashEntryCount = scene->index.hashEntryCount;
+	const int hashEntryCount = scene->index.hash_entry_count;
 
 	int* visibleBlockHashCodes = scene->index.GetUtilizedBlockHashCodes();
 	HashBlockVisibility* blockVisibilityTypes = scene->index.GetBlockVisibilityTypes();

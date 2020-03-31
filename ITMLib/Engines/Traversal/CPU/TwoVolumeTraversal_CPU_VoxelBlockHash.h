@@ -89,7 +89,7 @@ private:
 		HashEntry* hash_table1 = volume1->index.GetEntries();
 		TVoxel2* voxels2 = volume2->voxels.GetVoxelBlocks();
 		HashEntry* hash_table2 = volume2->index.GetEntries();
-		int hash_entry_count = volume1->index.hashEntryCount;
+		int hash_entry_count = volume1->index.hash_entry_count;
 
 #ifdef WITH_OPENMP
 #pragma omp parallel for
@@ -169,7 +169,7 @@ private:
 
 		TVoxel1* voxels1 = volume1->voxels.GetVoxelBlocks();
 		HashEntry* hash_table1 = volume1->index.GetEntries();
-		int hash_entry_count = volume1->index.hashEntryCount;
+		int hash_entry_count = volume1->index.hash_entry_count;
 
 		bool mismatch_found = false;
 
@@ -535,7 +535,7 @@ public:
 
 		TVoxel1* voxels1 = volume1->voxels.GetVoxelBlocks();
 		HashEntry* hash_table1 = volume1->index.GetEntries();
-		int totalHashEntryCount = volume1->index.hashEntryCount;
+		int totalHashEntryCount = volume1->index.hash_entry_count;
 
 #ifdef WITH_OPENMP
 #pragma omp parallel for
@@ -602,7 +602,7 @@ public:
 
 		TVoxel1* voxels1 = volume1->voxels.GetVoxelBlocks();
 		HashEntry* hash_table1 = volume1->index.GetEntries();
-		int hash_entry_count = volume1->index.hashEntryCount;
+		int hash_entry_count = volume1->index.hash_entry_count;
 
 		for (int hash = 0; hash < hash_entry_count; hash++) {
 			const HashEntry& hash_entry1 = hash_table1[hash];

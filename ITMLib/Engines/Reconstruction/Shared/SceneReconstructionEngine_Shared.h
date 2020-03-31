@@ -14,20 +14,20 @@
 _CPU_AND_GPU_CODE_ inline void
 MarkForAllocationAndSetVisibilityTypeIfNotFound_Legacy_Algomorph(ITMLib::HashEntryAllocationState* hashEntryStates,
                                                                  Vector3s* hashBlockCoordinates,
-                                                                 ITMLib::HashBlockVisibility* blockVisibilityTypes,
+                                                                 ITMLib::HashBlockVisibility* block_visibility_types,
                                                                  Vector3s desiredHashBlockPosition,
                                                                  const CONSTPTR(HashEntry)* hashTable,
                                                                  bool& collisionDetected) {
 
-	int hashCode = HashCodeFromBlockPosition(desiredHashBlockPosition);
+	int hash_code = HashCodeFromBlockPosition(desiredHashBlockPosition);
 
-	HashEntry hashEntry = hashTable[hashCode];
+	HashEntry hashEntry = hashTable[hash_code];
 
 	//check if hash table contains entry
 	if (IS_EQUAL3(hashEntry.pos, desiredHashBlockPosition) && hashEntry.ptr >= -1) {
 		//entry has been streamed out but is visible or in memory and visible
-		blockVisibilityTypes[hashCode] = (hashEntry.ptr == -1) ? ITMLib::STREAMED_OUT_AND_VISIBLE
-		                                                       : ITMLib::IN_MEMORY_AND_VISIBLE;
+		block_visibility_types[hash_code] = (hashEntry.ptr == -1) ? ITMLib::STREAMED_OUT_AND_VISIBLE
+		                                                          : ITMLib::IN_MEMORY_AND_VISIBLE;
 		return;
 	}
 
@@ -35,13 +35,13 @@ MarkForAllocationAndSetVisibilityTypeIfNotFound_Legacy_Algomorph(ITMLib::HashEnt
 	if (hashEntry.ptr >= -1) //search excess list only if there is no room in ordered part
 	{
 		while (hashEntry.offset >= 1) {
-			hashCode = ORDERED_LIST_SIZE + hashEntry.offset - 1;
-			hashEntry = hashTable[hashCode];
+			hash_code = ORDERED_LIST_SIZE + hashEntry.offset - 1;
+			hashEntry = hashTable[hash_code];
 
 			if (IS_EQUAL3(hashEntry.pos, desiredHashBlockPosition) && hashEntry.ptr >= -1) {
 				//entry has been streamed out but is visible or in memory and visible
-				blockVisibilityTypes[hashCode] = (hashEntry.ptr == -1) ? ITMLib::STREAMED_OUT_AND_VISIBLE
-				                                                       : ITMLib::IN_MEMORY_AND_VISIBLE;
+				block_visibility_types[hash_code] = (hashEntry.ptr == -1) ? ITMLib::STREAMED_OUT_AND_VISIBLE
+				                                                          : ITMLib::IN_MEMORY_AND_VISIBLE;
 				return;
 			}
 		}
@@ -49,30 +49,30 @@ MarkForAllocationAndSetVisibilityTypeIfNotFound_Legacy_Algomorph(ITMLib::HashEnt
 	}
 
 #if defined(__CUDACC__) && defined(__CUDA_ARCH__)
-	if (atomicCAS((char*) hashEntryStates + hashCode,
+	if (atomicCAS((char*) hashEntryStates + hash_code,
 				  (char) ITMLib::NEEDS_NO_CHANGE,
 				  (char) allocationState) != ITMLib::NEEDS_NO_CHANGE) {
-		if (IS_EQUAL3(hashBlockCoordinates[hashCode], desiredHashBlockPosition)) return;
+		if (IS_EQUAL3(hashBlockCoordinates[hash_code], desiredHashBlockPosition)) return;
 		collisionDetected = true;
 	} else {
 		//needs allocation
 		if (allocationState == ITMLib::NEEDS_ALLOCATION_IN_ORDERED_LIST)
-			blockVisibilityTypes[hashCode] = ITMLib::IN_MEMORY_AND_VISIBLE; //new entry is visible
-		hashBlockCoordinates[hashCode] = desiredHashBlockPosition;
+			block_visibility_types[hash_code] = ITMLib::IN_MEMORY_AND_VISIBLE; //new entry is visible
+		hashBlockCoordinates[hash_code] = desiredHashBlockPosition;
 	}
 #else
 #if defined(WITH_OPENMP)
 #pragma omp critical
 #endif
 	{
-		if (hashEntryStates[hashCode] != ITMLib::NEEDS_NO_CHANGE) {
+		if (hashEntryStates[hash_code] != ITMLib::NEEDS_NO_CHANGE) {
 			collisionDetected = true;
 		} else {
 			//needs allocation
-			hashEntryStates[hashCode] = allocationState;
+			hashEntryStates[hash_code] = allocationState;
 			if (allocationState == ITMLib::NEEDS_ALLOCATION_IN_ORDERED_LIST)
-				blockVisibilityTypes[hashCode] = ITMLib::IN_MEMORY_AND_VISIBLE; //new entry is visible
-			hashBlockCoordinates[hashCode] = desiredHashBlockPosition;
+				block_visibility_types[hash_code] = ITMLib::IN_MEMORY_AND_VISIBLE; //new entry is visible
+			hashBlockCoordinates[hash_code] = desiredHashBlockPosition;
 		}
 	}
 #endif

@@ -16,19 +16,29 @@ namespace InfiniTAM
 		class CLIEngine
 		{
 
-			InputSource::ImageSourceEngine *imageSource;
-			InputSource::IMUSourceEngine *imuSource;
+			InputSource::ImageSourceEngine *image_source;
+			InputSource::IMUSourceEngine *imu_source;
 
-			ITMLib::MainEngine *mainEngine;
+			ITMLib::MainEngine *main_engine;
 
 			StopWatchInterface *timer_instant;
 			StopWatchInterface *timer_average;
 
 		private:
-			ITMUChar4Image *inputRGBImage; ITMShortImage *inputRawDepthImage;
-			ITMLib::IMUMeasurement *inputIMUMeasurement;
+			ITMUChar4Image *input_RGB_image; ITMShortImage *input_raw_depth_image;
+			ITMLib::IMUMeasurement *input_IMU_measurement;
 
-			int currentFrameNo;
+			int current_frame_index;
+			int number_of_frames_to_process_after_launch = 0;
+			bool exit_after_automatic_run = false;
+			bool save_after_automatic_run = false;
+			int start_frame_index = 0;
+
+			std::string output_path;
+
+			void SkipFrames(int number_of_frames_to_skip);
+			std::string GenerateCurrentFrameOutputPath() const;
+			std::string GeneratePreviousFrameOutputPath() const;
 		public:
 			static CLIEngine* Instance() {
 				static CLIEngine instance;
@@ -37,8 +47,8 @@ namespace InfiniTAM
 
 			float processedTime;
 
-			void Initialise(InputSource::ImageSourceEngine *imageSource, InputSource::IMUSourceEngine *imuSource, ITMLib::MainEngine *mainEngine,
-				MemoryDeviceType deviceType);
+			void Initialise(InputSource::ImageSourceEngine *image_source, InputSource::IMUSourceEngine *imu_source, ITMLib::MainEngine *main_engine,
+			                MemoryDeviceType device_type);
 			void Shutdown();
 
 			void Run();

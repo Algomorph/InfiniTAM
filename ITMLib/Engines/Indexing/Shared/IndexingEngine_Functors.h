@@ -39,7 +39,7 @@ public:
 			hash_block_coordinates(index.GetAllocationBlockCoordinates()),
 			hash_table(index.GetEntries()),
 
-			colliding_block_positions(index.hashEntryCount, TMemoryDeviceType),
+			colliding_block_positions(index.hash_entry_count, TMemoryDeviceType),
 
 			unresolvable_collision_encountered(1, true, TMemoryDeviceType == MemoryDeviceType::MEMORYDEVICE_CUDA),
 			unresolvable_collision_encountered_device(unresolvable_collision_encountered.GetData(TMemoryDeviceType)) {
@@ -218,7 +218,7 @@ template<MemoryDeviceType TMemoryDeviceType>
 struct VolumeBasedAllocationStateMarkerFunctor {
 public:
 	VolumeBasedAllocationStateMarkerFunctor(VoxelBlockHash& target_index) :
-			colliding_block_positions(target_index.hashEntryCount, TMemoryDeviceType),
+			colliding_block_positions(target_index.hash_entry_count, TMemoryDeviceType),
 			hash_entry_allocation_states(target_index.GetHashEntryAllocationStates()),
 			hash_block_coordinates(target_index.GetAllocationBlockCoordinates()),
 			target_hash_table(target_index.GetEntries()),

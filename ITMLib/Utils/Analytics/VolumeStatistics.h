@@ -36,21 +36,25 @@ void LogTSDFVolumeStatistics(VoxelVolume<TVoxel, TIndex>* volume, std::string vo
 	if (configuration::get().telemetry_settings.log_volume_statistics) {
 		VolumeStatisticsCalculatorInterface<TVoxel, TIndex>& calculator =
 				VolumeStatisticsCalculatorFactory::Get<TVoxel, TIndex>(volume->index.memory_type);
-#define GET_VOXEL_ALLOCATION_STATISTICS
-#ifdef GET_VOXEL_ALLOCATION_STATISTICS
-		unsigned int utilized_voxel_count = calculator.CountUtilizedVoxels(volume);
-		unsigned int allocated_voxel_count = calculator.CountAllocatedVoxels(volume);
-		unsigned int utilized_hash_block_count = calculator.CountUtilizedHashBlocks(volume);
-		unsigned int allocated_hash_block_count = calculator.CountAllocatedHashBlocks(volume);
-
 		LOG4CPLUS_PER_FRAME(logging::get_logger(),
 		                    green << "=== Stats for volume '" << volume_description << "' ===" << reset);
-		LOG4CPLUS_PER_FRAME(logging::get_logger(), "    Utilized voxel count: " << utilized_voxel_count);
+//#define GET_VOXEL_ALLOCATION_STATISTICS
+#ifdef GET_VOXEL_ALLOCATION_STATISTICS
+		unsigned int allocated_voxel_count = calculator.CountAllocatedVoxels(volume);
+		unsigned int allocated_hash_block_count = calculator.CountAllocatedHashBlocks(volume);
 		LOG4CPLUS_PER_FRAME(logging::get_logger(), "    Allocated voxel count: " << allocated_voxel_count);
-		LOG4CPLUS_PER_FRAME(logging::get_logger(), "    Utilized block count: " << utilized_hash_block_count);
 		LOG4CPLUS_PER_FRAME(logging::get_logger(), "    Allocated block count: " << allocated_hash_block_count);
 #endif
-#define DEBUG_ALLOCATION
+
+#define GET_UTILIZED_COUNTS
+#ifdef GET_UTILIZED_COUNTS
+		unsigned int utilized_voxel_count = calculator.CountUtilizedVoxels(volume);
+		unsigned int utilized_hash_block_count = calculator.CountUtilizedHashBlocks(volume);
+		LOG4CPLUS_PER_FRAME(logging::get_logger(), "    Utilized voxel count: " << utilized_voxel_count);
+		LOG4CPLUS_PER_FRAME(logging::get_logger(), "    Utilized block count: " << utilized_hash_block_count);
+#endif
+
+//#define DEBUG_ALLOCATION
 #ifdef DEBUG_ALLOCATION
 		std::vector<Vector3s> utilized_positions = calculator.GetUtilizedHashBlockPositions(volume);
 		std::unordered_set<Vector3s> utilized_position_set(utilized_positions.begin(), utilized_positions.end());
@@ -76,7 +80,7 @@ void LogTSDFVolumeStatistics(VoxelVolume<TVoxel, TIndex>* volume, std::string vo
 			stuff << std::endl;
 			LOG4CPLUS_DEBUG(logging::get_logger(), stuff.str());
 		}
-		Vector3s block_of_interest(15, 5, 26);
+		Vector3s block_of_interest(16, 4, 27);
 		if (utilized_position_set.find(block_of_interest) == utilized_position_set.end()) {
 			LOG4CPLUS_DEBUG(logging::get_logger(),
 			                "Could not find block " << block_of_interest << " among utilized blocks.");
@@ -94,6 +98,7 @@ void LogTSDFVolumeStatistics(VoxelVolume<TVoxel, TIndex>* volume, std::string vo
 		LOG4CPLUS_PER_FRAME(logging::get_logger(), "    NonTruncated voxel count: " << non_truncated_voxel_count);
 		LOG4CPLUS_PER_FRAME(logging::get_logger(), "    +1.0 voxel count: " << plus_one_voxel_count);
 #endif
+#define GET_DEPTH_WEIGHT_STATISTICS
 #ifdef GET_DEPTH_WEIGHT_STATISTICS
 		if (configuration::get().device_type == MEMORYDEVICE_CUDA &&
 			configuration::get().indexing_method == configuration::INDEX_HASH) {

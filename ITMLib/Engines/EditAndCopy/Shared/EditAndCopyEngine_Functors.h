@@ -29,7 +29,7 @@ struct OffsetWarpsFunctor<TVoxel, VoxelBlockHash, true> {
 	static void OffsetWarps(VoxelVolume <TVoxel, VoxelBlockHash>* scene, Vector3f offset) {
 		TVoxel* voxels = scene->voxels.GetVoxelBlocks();
 		const HashEntry* hashTable = scene->index.GetEntries();
-		int noTotalEntries = scene->index.hashEntryCount;
+		int noTotalEntries = scene->index.hash_entry_count;
 #ifdef WITH_OPENMP
 #pragma omp parallel for
 #endif

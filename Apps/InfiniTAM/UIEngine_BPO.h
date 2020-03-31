@@ -39,9 +39,9 @@ private:
 	};
 	std::vector<UIColourMode> colourModes_main, colourModes_freeview;
 
-	int currentColourMode;
+	int current_colour_mode;
 
-	int autoIntervalFrameStart;
+	int auto_interval_frame_start;
 	int number_of_frames_to_process_after_launch;
 	bool exit_after_automatic_run = false;
 	bool save_after_automatic_run = false;
@@ -66,8 +66,8 @@ private:
 	ITMShortImage* inputRawDepthImage;
 	ITMLib::IMUMeasurement* inputIMUMeasurement;
 
-	bool freeviewActive;
-	bool integrationActive;
+	bool freeview_active;
+	bool integration_active;
 	ORUtils::SE3Pose freeviewPose;
 	ITMLib::Intrinsics freeviewIntrinsics;
 
@@ -105,7 +105,7 @@ public:
 	bool allocateGPU;
 	bool shutdownRequested = false;
 	ITMUChar4Image* saveImage;
-	ITMLib::configuration::IndexingMethod indexingMethod;
+	ITMLib::configuration::IndexingMethod indexing_method;
 
 	void Initialize(int& argc, char** argv, InputSource::ImageSourceEngine* imageSource, InputSource::IMUSourceEngine* imuSource,
 	                ITMLib::MainEngine* main_engine, const ITMLib::configuration::Configuration& configuration);

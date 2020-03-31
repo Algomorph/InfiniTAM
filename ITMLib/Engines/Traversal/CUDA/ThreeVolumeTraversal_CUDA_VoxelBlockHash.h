@@ -44,7 +44,7 @@ private:
 		TVoxel3* voxels3 = volume3->voxels.GetVoxelBlocks();
 		HashEntry* hash_table3 = volume3->index.GetEntries();
 
-		const int hash_entry_count = volume3->index.hashEntryCount;
+		const int hash_entry_count = volume3->index.hash_entry_count;
 
 		// transfer functor from RAM to VRAM
 		TFunctor* functor_device = nullptr;

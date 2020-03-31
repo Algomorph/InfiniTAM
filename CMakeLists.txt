@@ -2,7 +2,7 @@
 # Top-level CMakeLists.txt for InfiniTAM #
 ##########################################
 
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
 
 project(InfiniTAM)
 
@@ -23,7 +23,9 @@ endif()
 # Enforce C++ language standards
 #################################
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+set(CMAKE_CUDA_STANDARD 14)
+set(CMAKE_CUDA_STANDARD_REQUIRED TRUE)
 
 #################################
 # Specify the CMake module path #

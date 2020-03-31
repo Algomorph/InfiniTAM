@@ -15,6 +15,7 @@
 //  ================================================================
 //stdlib
 #include <unordered_set>
+#include <vector>
 
 //boost
 #include <boost/filesystem.hpp>
@@ -35,7 +36,6 @@
 #include "../../../Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculatorFactory.h"
 #include "../../../Utils/Logging/LoggingConfigruation.h"
 #include "../../../Utils/Analytics/VolumeStatistics.h"
-
 
 
 using namespace ITMLib;
@@ -110,7 +110,6 @@ DenseDynamicMapper<TVoxel, TWarp, TIndex>::ProcessFrame(const View* view, const 
                                                         VoxelVolume<TVoxel, TIndex>** live_volume_pair,
                                                         VoxelVolume<TWarp, TIndex>* warp_field) {
 
-
 	LogOperationStatus("Generating raw live TSDF from view...");
 	bench::start_timer("GenerateRawLiveVolume");
 	live_volume_pair[0]->Reset();
@@ -138,7 +137,9 @@ DenseDynamicMapper<TVoxel, TWarp, TIndex>::ProcessFrame(const View* view, const 
 	bench::start_timer("FuseOneTsdfVolumeIntoAnother");
 	volume_fusion_engine->FuseOneTsdfVolumeIntoAnother(canonical_volume, target_warped_live_volume);
 	bench::stop_timer("FuseOneTsdfVolumeIntoAnother");
+
 	LogTSDFVolumeStatistics(canonical_volume, "[[canonical TSDF after fusion]]");
+
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
@@ -177,6 +178,7 @@ VoxelVolume<TVoxel, TIndex>* DenseDynamicMapper<TVoxel, TWarp, TIndex>::TrackFra
 
 		std::swap(source_live_volume_index, target_live_volume_index);
 	}
+
 	bench::stop_timer("TrackMotion_3_Optimization");
 	LogOperationStatus("*** Warping optimization finished for current frame. ***");
 	return live_volume_pair[target_live_volume_index];

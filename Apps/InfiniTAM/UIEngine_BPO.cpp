@@ -79,14 +79,14 @@ void UIEngine_BPO::Initialize(int& argc, char** argv,
                               ITMLib::MainEngine* main_engine,
 
                               const configuration::Configuration& configuration) {
-	this->indexingMethod = configuration.indexing_method;
+	this->indexing_method = configuration.indexing_method;
 
 	this->save_after_automatic_run = configuration.automatic_run_settings.save_volumes_after_processing;
 	this->exit_after_automatic_run = configuration.automatic_run_settings.exit_after_automatic_processing;
 
-	this->freeviewActive = true;
-	this->integrationActive = true;
-	this->currentColourMode = 0;
+	this->freeview_active = true;
+	this->integration_active = true;
+	this->current_colour_mode = 0;
 	this->number_of_frames_to_process_after_launch = configuration.automatic_run_settings.number_of_frames_to_process;
 
 	this->colourModes_main.emplace_back("shaded greyscale", MainEngine::InfiniTAM_IMAGE_SCENERAYCAST);
@@ -157,7 +157,7 @@ void UIEngine_BPO::Initialize(int& argc, char** argv,
 	if (inputRGBImage->noDims == Vector2i(0, 0)) outImageType[2] = MainEngine::InfiniTAM_IMAGE_UNKNOWN;
 
 
-	autoIntervalFrameStart = 0;
+	auto_interval_frame_start = 0;
 	mouseState = 0;
 	mouseWarped = false;
 	needsRefresh = false;
@@ -178,8 +178,8 @@ void UIEngine_BPO::Initialize(int& argc, char** argv,
 	}
 
 	mainLoopAction = number_of_frames_to_process_after_launch ? PROCESS_N_FRAMES : PROCESS_PAUSED;
-	outImageType[0] = this->freeviewActive ? this->colourModes_freeview[this->currentColourMode].type
-	                                       : this->colourModes_main[this->currentColourMode].type;
+	outImageType[0] = this->freeview_active ? this->colourModes_freeview[this->current_colour_mode].type
+	                                        : this->colourModes_main[this->current_colour_mode].type;
 
 	if (configuration.telemetry_settings.record_reconstruction_video) {
 		this->reconstructionVideoWriter = new FFMPEGWriter();
@@ -204,7 +204,7 @@ void UIEngine_BPO::GetScreenshot(ITMUChar4Image* dest) const {
 }
 
 void UIEngine_BPO::SkipFrames(int number_of_frames_to_skip) {
-	for (int iFrame = 0; iFrame < number_of_frames_to_skip && imageSource->hasMoreImages(); iFrame++) {
+	for (int i_frame = 0; i_frame < number_of_frames_to_skip && imageSource->hasMoreImages(); i_frame++) {
 		imageSource->getImages(inputRGBImage, inputRawDepthImage);
 	}
 	this->start_frame_index += number_of_frames_to_skip;
@@ -320,7 +320,7 @@ void UIEngine_BPO::RecordCurrentReconstructionFrameToVideo() {
 			cv::putText(img, std::to_string(GetCurrentFrameIndex()), cv::Size(10, 50), cv::FONT_HERSHEY_SIMPLEX,
 						1, cv::Scalar(128, 255, 128), 1, cv::LINE_AA);
 			cv::imwrite(fileName, img);
-			ITMUChar4Image* imageWithText = new ITMUChar4Image(imageSource->getDepthImageSize(), true, allocateGPU);
+			ITMUChar4Image* imageWithText = new ITMUChar4Image(image_source->getDepthImageSize(), true, allocateGPU);
 			ReadImageFromFile(imageWithText, fileName.c_str());
 			reconstructionVideoWriter->writeFrame(imageWithText);
 			delete imageWithText;

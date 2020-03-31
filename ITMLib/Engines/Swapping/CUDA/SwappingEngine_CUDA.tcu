@@ -70,7 +70,7 @@ int SwappingEngine_CUDA<TVoxel, VoxelBlockHash>::LoadFromGlobalMemory(VoxelVolum
 	int *neededEntryIDs_global = globalCache->GetNeededEntryIDs(false);
 
 	dim3 blockSize(256);
-	dim3 gridSize((int)ceil((float)scene->index.hashEntryCount / (float)blockSize.x));
+	dim3 gridSize((int)ceil((float)scene->index.hash_entry_count / (float)blockSize.x));
 
 	ORcudaSafeCall(cudaMemset(noNeededEntries_device, 0, sizeof(int)));
 
@@ -162,7 +162,7 @@ void SwappingEngine_CUDA<TVoxel, VoxelBlockHash>::SaveToGlobalMemory(VoxelVolume
 
 	{
 		blockSize = dim3(256);
-		gridSize = dim3((int)ceil((float)scene->index.hashEntryCount / (float)blockSize.x));
+		gridSize = dim3((int)ceil((float)scene->index.hash_entry_count / (float)blockSize.x));
 
 		ORcudaSafeCall(cudaMemset(noNeededEntries_device, 0, sizeof(int)));
 
@@ -226,11 +226,11 @@ void SwappingEngine_CUDA<TVoxel, VoxelBlockHash>::CleanLocalMemory(VoxelVolume<T
 
 	{
 		blockSize = dim3(256);
-		gridSize = dim3((int)ceil((float)scene->index.hashEntryCount / (float)blockSize.x));
+		gridSize = dim3((int)ceil((float)scene->index.hash_entry_count / (float)blockSize.x));
 
 		ORcudaSafeCall(cudaMemset(noNeededEntries_device, 0, sizeof(int)));
 
-		buildListToClean_device << <gridSize, blockSize >> >(entriesToClean_device, noNeededEntries_device, hashTable, blockVisibilityTypes, scene->index.hashEntryCount);
+		buildListToClean_device << <gridSize, blockSize >> >(entriesToClean_device, noNeededEntries_device, hashTable, blockVisibilityTypes, scene->index.hash_entry_count);
 
 		ORcudaSafeCall(cudaMemcpy(&noNeededEntries, noNeededEntries_device, sizeof(int), cudaMemcpyDeviceToHost));
 	}

@@ -105,7 +105,7 @@ private:
 		TVoxel3* voxels3 = volume3->voxels.GetVoxelBlocks();
 		HashEntry* hash_table3 = volume3->index.GetEntries();
 
-		const int hash_entry_count = volume1->index.hashEntryCount;
+		const int hash_entry_count = volume1->index.hash_entry_count;
 #ifdef WITH_OPENMP
 #pragma omp parallel for
 #endif

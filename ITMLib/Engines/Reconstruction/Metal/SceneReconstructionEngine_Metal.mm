@@ -102,8 +102,8 @@ void ITMSceneReconstructionEngine_Metal<TVoxel,ITMVoxelBlockHash>::BuildAllocAnd
     params->others.z = scene->parameters->viewFrustum_min;
     params->others.w = scene->parameters->viewFrustum_max;
 
-    memset(this->entriesAllocType->GetData(MEMORYDEVICE_CPU), 0, scene->index.hashEntryCount);
-    memset(this->blockCoords->GetData(MEMORYDEVICE_CPU), 0, scene->index.hashEntryCount * sizeof(Vector4s));
+    memset(this->entriesAllocType->GetData(MEMORYDEVICE_CPU), 0, scene->index.hash_entry_count);
+    memset(this->blockCoords->GetData(MEMORYDEVICE_CPU), 0, scene->index.hash_entry_count * sizeof(Vector4s));
 
     uchar *entriesVisibleType = scene->index.GetHashBlockVisibilityTypes();
     int *visibleEntryIDs = scene->index.GetVisibleBlockHashCodes();
@@ -162,7 +162,7 @@ void ITMSceneReconstructionEngine_Metal<TVoxel, ITMVoxelBlockHash>::AllocateScen
     uchar *entriesVisibleType = scene->index.GetEntriesVisibleType();
     uchar *entriesAllocType = this->entriesAllocType->GetData(MEMORYDEVICE_CPU);
     Vector4s *blockCoords = this->blockCoords->GetData(MEMORYDEVICE_CPU);
-    int noTotalEntries = scene->index.hashEntryCount;
+    int noTotalEntries = scene->index.hash_entry_count;
 
     bool useSwapping = scene->useSwapping;
 

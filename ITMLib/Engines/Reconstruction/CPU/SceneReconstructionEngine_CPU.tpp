@@ -23,7 +23,7 @@ void SceneReconstructionEngine_CPU<TVoxel,VoxelBlockHash>::ResetScene(VoxelVolum
 	memset(&tmpEntry, 0, sizeof(HashEntry));
 	tmpEntry.ptr = -2;
 	HashEntry *hashEntry_ptr = scene->index.GetEntries();
-	for (int i = 0; i < scene->index.hashEntryCount; ++i) hashEntry_ptr[i] = tmpEntry;
+	for (int i = 0; i < scene->index.hash_entry_count; ++i) hashEntry_ptr[i] = tmpEntry;
 	int *excessList_ptr = scene->index.GetExcessAllocationList();
 	for (int i = 0; i < scene->index.excessListSize; ++i) excessList_ptr[i] = i;
 
@@ -131,7 +131,7 @@ void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::AllocateSceneFromDep
 	int* visibleBlockHashCodes = scene->index.GetUtilizedBlockHashCodes();
 	HashBlockVisibility* hashBlockVisibilityTypes = scene->index.GetBlockVisibilityTypes();
 
-	int hashEntryCount = scene->index.hashEntryCount;
+	int hashEntryCount = scene->index.hash_entry_count;
 	HashEntryAllocationState* hashEntryStates_device = scene->index.GetHashEntryAllocationStates();
 	Vector3s* blockCoords_device = scene->index.GetAllocationBlockCoordinates();
 

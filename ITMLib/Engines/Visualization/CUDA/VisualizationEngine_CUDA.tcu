@@ -27,18 +27,18 @@ VisualizationEngine_CUDA<TVoxel, TIndex>::~VisualizationEngine_CUDA()
 template<class TVoxel>
 VisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::VisualizationEngine_CUDA()
 {
-	ORcudaSafeCall(cudaMalloc((void**)&renderingBlockList_device, sizeof(RenderingBlock) * MAX_RENDERING_BLOCKS));
-	ORcudaSafeCall(cudaMalloc((void**)&noTotalBlocks_device, sizeof(uint)));
+	ORcudaSafeCall(cudaMalloc((void**)&rendering_block_list_device, sizeof(RenderingBlock) * MAX_RENDERING_BLOCKS));
+	ORcudaSafeCall(cudaMalloc((void**)&block_count_device, sizeof(int)));
 	ORcudaSafeCall(cudaMalloc((void**)&noTotalPoints_device, sizeof(uint)));
-	ORcudaSafeCall(cudaMalloc((void**)&visibleEntryCount_device, sizeof(uint)));
+	ORcudaSafeCall(cudaMalloc((void**)&visible_block_count_device, sizeof(int)));
 }
 
 template<class TVoxel>
 VisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::~VisualizationEngine_CUDA() {
 	ORcudaSafeCall(cudaFree(noTotalPoints_device));
-	ORcudaSafeCall(cudaFree(noTotalBlocks_device));
-	ORcudaSafeCall(cudaFree(renderingBlockList_device));
-	ORcudaSafeCall(cudaFree(visibleEntryCount_device));
+	ORcudaSafeCall(cudaFree(block_count_device));
+	ORcudaSafeCall(cudaFree(rendering_block_list_device));
+	ORcudaSafeCall(cudaFree(visible_block_count_device));
 }
 
 template<class TVoxel, class TIndex>
@@ -49,32 +49,27 @@ void VisualizationEngine_CUDA<TVoxel, TIndex>::FindVisibleBlocks(VoxelVolume<TVo
 template<class TVoxel>
 void VisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::FindVisibleBlocks(VoxelVolume<TVoxel,VoxelBlockHash> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *renderState) const
 {
-	const HashEntry *hashTable = scene->index.GetEntries();
-	int hashEntryCount = scene->index.hashEntryCount;
-	float voxelSize = scene->parameters->voxel_size;
+	const HashEntry *hash_table = scene->index.GetEntries();
+	int hash_entry_count = scene->index.hash_entry_count;
+	float voxel_size = scene->parameters->voxel_size;
 	Vector2i imgSize = renderState->renderingRangeImage->noDims;
 
 	Matrix4f M = pose->GetM();
 	Vector4f projParams = intrinsics->projectionParamsSimple.all;
 
-	ORcudaSafeCall(cudaMemset(visibleEntryCount_device, 0, sizeof(int)));
+	ORcudaSafeCall(cudaMemset(visible_block_count_device, 0, sizeof(int)));
 
 	dim3 cudaBlockSizeAL(256, 1);
-	dim3 gridSizeAL((int)ceil((float)hashEntryCount / (float)cudaBlockSizeAL.x));
+	dim3 gridSizeAL((int)ceil((float)hash_entry_count / (float)cudaBlockSizeAL.x));
 	buildCompleteVisibleList_device << <gridSizeAL, cudaBlockSizeAL >> >(
-			hashTable, /*cacheStates, this->scene->useSwapping,*/ hashEntryCount,
-					scene->index.GetUtilizedBlockHashCodes(), visibleEntryCount_device, scene->index.GetBlockVisibilityTypes(), M, projParams,
-		imgSize, voxelSize);
+			hash_table, /*cacheStates, this->scene->useSwapping,*/ hash_entry_count,
+					scene->index.GetVisibleBlockHashCodes(), visible_block_count_device, scene->index.GetBlockVisibilityTypes(), M, projParams,
+		imgSize, voxel_size);
 	ORcudaKernelCheck;
 
-	/*	if (this->scene->useSwapping)
-			{
-			reAllocateSwappedOutVoxelBlocks_device << <gridSizeAL, cudaBlockSizeAL >> >(voxelAllocationList, hashTable, hashEntryCount,
-			noAllocatedVoxelEntries_device, blockVisibilityTypes);
-			}*/
-	int visibleHashBlockCount_CPU;
-	ORcudaSafeCall(cudaMemcpy(&visibleHashBlockCount_CPU, visibleEntryCount_device, sizeof(int), cudaMemcpyDeviceToHost));
-	scene->index.SetUtilizedHashBlockCount(visibleHashBlockCount_CPU);
+	int visible_hash_block_count_CPU;
+	ORcudaSafeCall(cudaMemcpy(&visible_hash_block_count_CPU, visible_block_count_device, sizeof(int), cudaMemcpyDeviceToHost));
+	scene->index.SetVisibleHashBlockCount(visible_hash_block_count_CPU);
 }
 
 template<class TVoxel, class TIndex>
@@ -86,22 +81,22 @@ int VisualizationEngine_CUDA<TVoxel, TIndex>::CountVisibleBlocks(const VoxelVolu
 template<class TVoxel>
 int VisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::CountVisibleBlocks(const VoxelVolume<TVoxel,VoxelBlockHash> *scene, const RenderState *renderState, int minBlockId, int maxBlockId) const
 {
-	int visibleEntryCount = scene->index.GetUtilizedHashBlockCount();
-	const int *visibleEntryIDs_device = scene->index.GetUtilizedBlockHashCodes();
+	int visible_block_count = scene->index.GetVisibleHashBlockCount();
+	const int *visible_block_hash_codes_device = scene->index.GetVisibleBlockHashCodes();
 
-	ORcudaSafeCall(cudaMemset(noTotalBlocks_device, 0, sizeof(uint)));
+	ORcudaSafeCall(cudaMemset(block_count_device, 0, sizeof(uint)));
 
 	dim3 blockSize(256);
-	dim3 gridSize((int)ceil((float)visibleEntryCount / (float)blockSize.x));
+	dim3 gridSize((int)ceil((float)visible_block_count / (float)blockSize.x));
 
-	const HashEntry *hashTable_device = scene->index.GetEntries();
-	countVisibleBlocks_device<<<gridSize,blockSize>>>(visibleEntryIDs_device, visibleEntryCount, hashTable_device, noTotalBlocks_device, minBlockId, maxBlockId);
+	const HashEntry* hash_table_device = scene->index.GetEntries();
+	countVisibleBlocks_device<<<gridSize,blockSize>>>(visible_block_hash_codes_device, visible_block_count, hash_table_device, block_count_device, minBlockId, maxBlockId);
 	ORcudaKernelCheck;
 
-	uint noTotalBlocks;
-	ORcudaSafeCall(cudaMemcpy(&noTotalBlocks, noTotalBlocks_device, sizeof(uint), cudaMemcpyDeviceToHost));
+	uint visible_block_count_CPU;
+	ORcudaSafeCall(cudaMemcpy(&visible_block_count_CPU, block_count_device, sizeof(uint), cudaMemcpyDeviceToHost));
 
-	return noTotalBlocks;
+	return visible_block_count_CPU;
 }
 
 template<class TVoxel, class TIndex>
@@ -131,30 +126,30 @@ void VisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::CreateExpectedDepths(cons
 
 	//go through list of visible 8x8x8 blocks
 	{
-		const HashEntry *hash_entries = scene->index.GetEntries();
-		const int *visibleEntryIDs = scene->index.GetUtilizedBlockHashCodes();
-		int visibleEntryCount = scene->index.GetUtilizedHashBlockCount();
-		if (visibleEntryCount == 0) return;
+		const HashEntry* hash_entries = scene->index.GetEntries();
+		const int* visible_block_hash_codes = scene->index.GetUtilizedBlockHashCodes();
+		int visible_block_count = scene->index.GetUtilizedHashBlockCount();
+		if (visible_block_count == 0) return;
 
 		dim3 blockSize(256);
-		dim3 gridSize((int)ceil((float)visibleEntryCount / (float)blockSize.x));
-		ORcudaSafeCall(cudaMemset(noTotalBlocks_device, 0, sizeof(uint)));
-		projectAndSplitBlocks_device << <gridSize, blockSize >> >(hash_entries, visibleEntryIDs, visibleEntryCount, pose->GetM(),
-			intrinsics->projectionParamsSimple.all, imgSize, voxelSize, renderingBlockList_device, noTotalBlocks_device);
+		dim3 gridSize((int)ceil((float)visible_block_count / (float)blockSize.x));
+		ORcudaSafeCall(cudaMemset(block_count_device, 0, sizeof(uint)));
+		projectAndSplitBlocks_device << <gridSize, blockSize >> >(hash_entries, visible_block_hash_codes, visible_block_count, pose->GetM(),
+			intrinsics->projectionParamsSimple.all, imgSize, voxelSize, rendering_block_list_device, block_count_device);
 		ORcudaKernelCheck;
 	}
 
-	uint totalBlockCount;
-	ORcudaSafeCall(cudaMemcpy(&totalBlockCount, noTotalBlocks_device, sizeof(uint), cudaMemcpyDeviceToHost));
-	if (totalBlockCount == 0) return;
-	if (totalBlockCount > (unsigned)MAX_RENDERING_BLOCKS) totalBlockCount = MAX_RENDERING_BLOCKS;
+	uint total_block_count;
+	ORcudaSafeCall(cudaMemcpy(&total_block_count, block_count_device, sizeof(uint), cudaMemcpyDeviceToHost));
+	if (total_block_count == 0) return;
+	if (total_block_count > (unsigned)MAX_RENDERING_BLOCKS) total_block_count = MAX_RENDERING_BLOCKS;
 
 	// go through rendering blocks
 	{
 		// fill minmaxData
 		dim3 blockSize(16, 16);
-		dim3 gridSize((unsigned int)ceil((float)totalBlockCount / 4.0f), 4);
-		fillBlocks_device << <gridSize, blockSize >> >(totalBlockCount, renderingBlockList_device, imgSize, minmaxData);
+		dim3 gridSize((unsigned int)ceil((float)total_block_count / 4.0f), 4);
+		fillBlocks_device << <gridSize, blockSize >> >(total_block_count, rendering_block_list_device, imgSize, minmaxData);
 		ORcudaKernelCheck;
 	}
 }

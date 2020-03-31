@@ -38,7 +38,7 @@ private:
 	                    TDeviceFunction&& deviceFunction) {
 		TVoxel* voxels = volume->voxels.GetVoxelBlocks();
 		const HashEntry* hash_table = volume->index.GetIndexData();
-		const int hash_entry_count = volume->index.hashEntryCount;
+		const int hash_entry_count = volume->index.hash_entry_count;
 
 		dim3 voxel_per_thread_cuda_block_size(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
 		dim3 hash_per_block_cuda_grid_size(hash_entry_count);
@@ -93,7 +93,7 @@ public:
 	inline static void TraverseAll(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 		TVoxel* voxels = volume->voxels.GetVoxelBlocks();
 		const HashEntry* hash_table = volume->index.GetIndexData();
-		int hash_entry_count = volume->index.hashEntryCount;
+		int hash_entry_count = volume->index.hash_entry_count;
 
 		dim3 voxel_per_thread_cuda_block_size(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
 		dim3 hash_per_block_cuda_grid_size(hash_entry_count);

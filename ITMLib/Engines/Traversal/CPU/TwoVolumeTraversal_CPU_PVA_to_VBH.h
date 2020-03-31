@@ -46,7 +46,7 @@ private:
 	) {
 
 
-		const int hash_entry_count = hash_volume->index.hashEntryCount;
+		const int hash_entry_count = hash_volume->index.hash_entry_count;
 		HashEntry* hash_table = hash_volume->index.GetIndexData();
 
 		TArrayVoxel* array_voxels = array_volume->voxels.GetVoxelBlocks();
@@ -256,7 +256,7 @@ private:
 			VoxelVolume <THashVoxel, VoxelBlockHash>* hash_volume,
 			TFunctor& functor, TFunctionCall&& functionCall) {
 		volatile bool mismatch_found = false;
-		int hash_entry_count = hash_volume->index.hashEntryCount;
+		int hash_entry_count = hash_volume->index.hash_entry_count;
 		THashVoxel* hash_voxels = hash_volume->voxels.GetVoxelBlocks();
 		TArrayVoxel* array_voxels = array_volume->voxels.GetVoxelBlocks();
 		const VoxelBlockHash::IndexData* hash_table = hash_volume->index.GetIndexData();

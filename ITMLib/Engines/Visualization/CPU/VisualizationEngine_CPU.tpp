@@ -26,37 +26,37 @@ void VisualizationEngine_CPU<TVoxel, VoxelBlockHash>::FindVisibleBlocks(
 		VoxelVolume<TVoxel, VoxelBlockHash>* scene, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics,
 		RenderState* renderState) const
 {
-	const HashEntry *hashTable = scene->index.GetEntries();
-	int hashEntryCount = scene->index.hashEntryCount;
-	float voxelSize = scene->parameters->voxel_size;
-	Vector2i imgSize = renderState->renderingRangeImage->noDims;
+	const HashEntry* hash_table = scene->index.GetEntries();
+	int hash_entry_count = scene->index.hash_entry_count;
+	float voxel_size = scene->parameters->voxel_size;
+	Vector2i image_size = renderState->renderingRangeImage->noDims;
 
 	Matrix4f M = pose->GetM();
 	Vector4f projParams = intrinsics->projectionParamsSimple.all;
 
-	int visibleBlockCount = 0;
-	int* visibleBlockHashCodes = scene->index.GetUtilizedBlockHashCodes();
+	int visible_block_count = 0;
+	int* visible_block_hash_codes = scene->index.GetVisibleBlockHashCodes();
 
 	//build visible list
-	for (int targetIdx = 0; targetIdx < hashEntryCount; targetIdx++)
+	for (int hash_code = 0; hash_code < hash_entry_count; hash_code++)
 	{
-		unsigned char hashVisibleType = 0;// = blockVisibilityTypes[targetIdx];
-		const HashEntry &hashEntry = hashTable[targetIdx];
+		unsigned char block_visibility_type = 0;// = blockVisibilityTypes[targetIdx];
+		const HashEntry &hash_entry = hash_table[hash_code];
 
-		if (hashEntry.ptr >= 0)
+		if (hash_entry.ptr >= 0)
 		{
-			bool isVisible, isVisibleEnlarged;
-			checkBlockVisibility<false>(isVisible, isVisibleEnlarged, hashEntry.pos, M, projParams, voxelSize, imgSize);
-			hashVisibleType = isVisible;
+			bool is_visible, is_visible_enlarged;
+			checkBlockVisibility<false>(is_visible, is_visible_enlarged, hash_entry.pos, M, projParams, voxel_size, image_size);
+			block_visibility_type = is_visible;
 		}
 
-		if (hashVisibleType > 0)
+		if (block_visibility_type > 0)
 		{
-			visibleBlockHashCodes[visibleBlockCount] = targetIdx;
-			visibleBlockCount++;
+			visible_block_hash_codes[visible_block_count] = hash_code;
+			visible_block_count++;
 		}
 	}
-	scene->index.SetUtilizedHashBlockCount(visibleBlockCount);
+	scene->index.SetVisibleHashBlockCount(visible_block_count);
 }
 
 template<class TVoxel, class TIndex>
@@ -69,8 +69,8 @@ template<class TVoxel>
 int VisualizationEngine_CPU<TVoxel, VoxelBlockHash>::CountVisibleBlocks(const VoxelVolume<TVoxel,VoxelBlockHash> *scene, const RenderState *renderState, int minBlockId, int maxBlockId) const
 {
 
-	int visibleBlockCount = scene->index.GetUtilizedHashBlockCount();
-	const int *visibleBlockHashCodes = scene->index.GetUtilizedBlockHashCodes();
+	int visibleBlockCount = scene->index.GetVisibleHashBlockCount();
+	const int *visibleBlockHashCodes = scene->index.GetVisibleBlockHashCodes();
 
 	int ret = 0;
 	for (int i = 0; i < visibleBlockCount; ++i) {
@@ -111,15 +111,15 @@ void VisualizationEngine_CPU<TVoxel,VoxelBlockHash>::CreateExpectedDepths(const 
 
 	float voxelSize = scene->parameters->voxel_size;
 
-	std::vector<RenderingBlock> renderingBlocks(MAX_RENDERING_BLOCKS);
-	int numRenderingBlocks = 0;
+	std::vector<RenderingBlock> render_blocks(MAX_RENDERING_BLOCKS);
+	int render_block_count = 0;
 
-	const int *visibleBlockHashCodes = scene->index.GetUtilizedBlockHashCodes();
-	int visibleEntryCount = scene->index.GetUtilizedHashBlockCount();
+	const int* visible_block_hash_codes = scene->index.GetUtilizedBlockHashCodes();
+	int visible_block_count = scene->index.GetUtilizedHashBlockCount();
 
 	//go through list of visible 8x8x8 blocks
-	for (int blockNo = 0; blockNo < visibleEntryCount; ++blockNo) {
-		const HashEntry & blockData(scene->index.GetEntries()[visibleBlockHashCodes[blockNo]]);
+	for (int blockNo = 0; blockNo < visible_block_count; ++blockNo) {
+		const HashEntry & blockData(scene->index.GetEntries()[visible_block_hash_codes[blockNo]]);
 
 		Vector2i upperLeft, lowerRight;
 		Vector2f zRange;
@@ -133,17 +133,17 @@ void VisualizationEngine_CPU<TVoxel,VoxelBlockHash>::CreateExpectedDepths(const 
 			(int)ceilf((float)(lowerRight.y - upperLeft.y + 1) / (float)renderingBlockSizeY));
 		int requiredNumBlocks = requiredRenderingBlocks.x * requiredRenderingBlocks.y;
 
-		if (numRenderingBlocks + requiredNumBlocks >= MAX_RENDERING_BLOCKS) continue;
-		int offset = numRenderingBlocks;
-		numRenderingBlocks += requiredNumBlocks;
+		if (render_block_count + requiredNumBlocks >= MAX_RENDERING_BLOCKS) continue;
+		int offset = render_block_count;
+		render_block_count += requiredNumBlocks;
 
-		CreateRenderingBlocks(&(renderingBlocks[0]), offset, upperLeft, lowerRight, zRange);
+		CreateRenderingBlocks(&(render_blocks[0]), offset, upperLeft, lowerRight, zRange);
 	}
 
 	// go through rendering blocks
-	for (int blockNo = 0; blockNo < numRenderingBlocks; ++blockNo) {
+	for (int blockNo = 0; blockNo < render_block_count; ++blockNo) {
 		// fill minmaxData
-		const RenderingBlock & b(renderingBlocks[blockNo]);
+		const RenderingBlock & b(render_blocks[blockNo]);
 
 		for (int y = b.upperLeft.y; y <= b.lowerRight.y; ++y) {
 			for (int x = b.upperLeft.x; x <= b.lowerRight.x; ++x) {

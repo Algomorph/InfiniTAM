@@ -27,7 +27,7 @@ public:
 	inline static void
 	TraverseAllWithHashCode(VoxelBlockHash& index, TFunctor& functor) {
 		HashEntry* hash_table = index.GetEntries();
-		const int hash_entry_count = index.hashEntryCount;
+		const int hash_entry_count = index.hash_entry_count;
 		TFunctor* functor_device = nullptr;
 
 		dim3 cuda_block_size(256, 1);

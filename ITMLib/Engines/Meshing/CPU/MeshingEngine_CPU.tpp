@@ -12,7 +12,7 @@ void MeshingEngine_CPU<TVoxel, VoxelBlockHash>::MeshScene(Mesh *mesh, const Voxe
 	const TVoxel *localVBA = scene->voxels.GetVoxelBlocks();
 	const HashEntry *hashTable = scene->index.GetEntries();
 
-	int noTriangles = 0, noMaxTriangles = mesh->noMaxTriangles, noTotalEntries = scene->index.hashEntryCount;
+	int noTriangles = 0, noMaxTriangles = mesh->noMaxTriangles, noTotalEntries = scene->index.hash_entry_count;
 	float factor = scene->parameters->voxel_size;
 
 	mesh->triangles->Clear();

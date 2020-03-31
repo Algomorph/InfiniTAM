@@ -1021,7 +1021,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "28"
             endingLineNumber = "28"
-            landmarkName = "genericRaycastVH_device(DEVICEPTR(Vector4f) *pointsRay [[ buffer(0) ]], DEVICEPTR(uchar) *blockVisibilityTypes [[ buffer(1) ]], const CONSTPTR(ITMVoxel) *voxelData [[ buffer(2) ]], const CONSTPTR(typename ITMVoxelIndex::IndexData) *voxelIndex [[ buffer(3) ]], const CONSTPTR(Vector2f) *minmaxdata [[ buffer(4) ]], const CONSTPTR(CreateICPMaps_Params) *params [[ buffer(5) ]], uint2 threadIdx [[ thread_position_in_threadgroup ]], uint2 blockIdx [[ threadgroup_position_in_grid ]], uint2 blockDim [[ threads_per_threadgroup ]])"
+            landmarkName = "genericRaycastVH_device(DEVICEPTR(Vector4f) *pointsRay [[ buffer(0) ]], DEVICEPTR(uchar) *block_visibility_types [[ buffer(1) ]], const CONSTPTR(ITMVoxel) *voxelData [[ buffer(2) ]], const CONSTPTR(typename ITMVoxelIndex::IndexData) *voxelIndex [[ buffer(3) ]], const CONSTPTR(Vector2f) *minmaxdata [[ buffer(4) ]], const CONSTPTR(CreateICPMaps_Params) *params [[ buffer(5) ]], uint2 threadIdx [[ thread_position_in_threadgroup ]], uint2 blockIdx [[ threadgroup_position_in_grid ]], uint2 blockDim [[ threads_per_threadgroup ]])"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -1037,7 +1037,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "22"
             endingLineNumber = "22"
-            landmarkName = "genericRaycastVH_device(DEVICEPTR(Vector4f) *pointsRay [[ buffer(0) ]], DEVICEPTR(uchar) *blockVisibilityTypes [[ buffer(1) ]], const CONSTPTR(ITMVoxel) *voxelData [[ buffer(2) ]], const CONSTPTR(typename ITMVoxelIndex::IndexData) *voxelIndex [[ buffer(3) ]], const CONSTPTR(Vector2f) *minmaxdata [[ buffer(4) ]], const CONSTPTR(CreateICPMaps_Params) *params [[ buffer(5) ]], uint2 threadIdx [[ thread_position_in_threadgroup ]], uint2 blockIdx [[ threadgroup_position_in_grid ]], uint2 blockDim [[ threads_per_threadgroup ]])"
+            landmarkName = "genericRaycastVH_device(DEVICEPTR(Vector4f) *pointsRay [[ buffer(0) ]], DEVICEPTR(uchar) *block_visibility_types [[ buffer(1) ]], const CONSTPTR(ITMVoxel) *voxelData [[ buffer(2) ]], const CONSTPTR(typename ITMVoxelIndex::IndexData) *voxelIndex [[ buffer(3) ]], const CONSTPTR(Vector2f) *minmaxdata [[ buffer(4) ]], const CONSTPTR(CreateICPMaps_Params) *params [[ buffer(5) ]], uint2 threadIdx [[ thread_position_in_threadgroup ]], uint2 blockIdx [[ threadgroup_position_in_grid ]], uint2 blockDim [[ threads_per_threadgroup ]])"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -1053,7 +1053,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "30"
             endingLineNumber = "30"
-            landmarkName = "genericRaycastVH_device(DEVICEPTR(Vector4f) *pointsRay [[ buffer(0) ]], DEVICEPTR(uchar) *blockVisibilityTypes [[ buffer(1) ]], const CONSTPTR(ITMVoxel) *voxelData [[ buffer(2) ]], const CONSTPTR(typename ITMVoxelIndex::IndexData) *voxelIndex [[ buffer(3) ]], const CONSTPTR(Vector2f) *minmaxdata [[ buffer(4) ]], const CONSTPTR(CreateICPMaps_Params) *params [[ buffer(5) ]], uint2 threadIdx [[ thread_position_in_threadgroup ]], uint2 blockIdx [[ threadgroup_position_in_grid ]], uint2 blockDim [[ threads_per_threadgroup ]])"
+            landmarkName = "genericRaycastVH_device(DEVICEPTR(Vector4f) *pointsRay [[ buffer(0) ]], DEVICEPTR(uchar) *block_visibility_types [[ buffer(1) ]], const CONSTPTR(ITMVoxel) *voxelData [[ buffer(2) ]], const CONSTPTR(typename ITMVoxelIndex::IndexData) *voxelIndex [[ buffer(3) ]], const CONSTPTR(Vector2f) *minmaxdata [[ buffer(4) ]], const CONSTPTR(CreateICPMaps_Params) *params [[ buffer(5) ]], uint2 threadIdx [[ thread_position_in_threadgroup ]], uint2 blockIdx [[ threadgroup_position_in_grid ]], uint2 blockDim [[ threads_per_threadgroup ]])"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -1069,7 +1069,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "33"
             endingLineNumber = "33"
-            landmarkName = "genericRaycastVH_device(DEVICEPTR(Vector4f) *pointsRay [[ buffer(0) ]], DEVICEPTR(uchar) *blockVisibilityTypes [[ buffer(1) ]], const CONSTPTR(ITMVoxel) *voxelData [[ buffer(2) ]], const CONSTPTR(typename ITMVoxelIndex::IndexData) *voxelIndex [[ buffer(3) ]], const CONSTPTR(Vector2f) *minmaxdata [[ buffer(4) ]], const CONSTPTR(CreateICPMaps_Params) *params [[ buffer(5) ]], uint2 threadIdx [[ thread_position_in_threadgroup ]], uint2 blockIdx [[ threadgroup_position_in_grid ]], uint2 blockDim [[ threads_per_threadgroup ]])"
+            landmarkName = "genericRaycastVH_device(DEVICEPTR(Vector4f) *pointsRay [[ buffer(0) ]], DEVICEPTR(uchar) *block_visibility_types [[ buffer(1) ]], const CONSTPTR(ITMVoxel) *voxelData [[ buffer(2) ]], const CONSTPTR(typename ITMVoxelIndex::IndexData) *voxelIndex [[ buffer(3) ]], const CONSTPTR(Vector2f) *minmaxdata [[ buffer(4) ]], const CONSTPTR(CreateICPMaps_Params) *params [[ buffer(5) ]], uint2 threadIdx [[ thread_position_in_threadgroup ]], uint2 blockIdx [[ threadgroup_position_in_grid ]], uint2 blockDim [[ threads_per_threadgroup ]])"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

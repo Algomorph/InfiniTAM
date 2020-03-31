@@ -59,19 +59,21 @@ HashEntry VoxelBlockHash::GetUtilizedHashEntryAtIndex(int index) const {
 	return GetUtilizedHashEntryAtIndex(index, hash_code);
 }
 
-VoxelBlockHash::VoxelBlockHash(VoxelBlockHashParameters parameters, MemoryDeviceType memoryType) :
+VoxelBlockHash::VoxelBlockHash(VoxelBlockHashParameters parameters, MemoryDeviceType memory_type) :
 		voxelBlockCount(parameters.voxel_block_count),
 		excessListSize(parameters.excess_list_size),
-		hashEntryCount(ORDERED_LIST_SIZE + parameters.excess_list_size),
+		hash_entry_count(ORDERED_LIST_SIZE + parameters.excess_list_size),
 		last_free_excess_list_id(parameters.excess_list_size - 1),
-		hash_entry_allocation_states(ORDERED_LIST_SIZE + parameters.excess_list_size, memoryType),
-		allocationBlockCoordinates(ORDERED_LIST_SIZE + parameters.excess_list_size, memoryType),
-		utilized_block_hash_codes(parameters.voxel_block_count, memoryType),
-		blockVisibilityTypes(ORDERED_LIST_SIZE + parameters.excess_list_size, memoryType),
-		memory_type(memoryType),
-		hash_entries(hashEntryCount, memoryType),
-		excess_allocation_list(excessListSize, memoryType),
-		utilized_hash_block_count(0)
+		hash_entry_allocation_states(ORDERED_LIST_SIZE + parameters.excess_list_size, memory_type),
+		allocationBlockCoordinates(ORDERED_LIST_SIZE + parameters.excess_list_size, memory_type),
+		utilized_block_hash_codes(parameters.voxel_block_count, memory_type),
+		visible_block_hash_codes(parameters.voxel_block_count, memory_type),
+		block_visibility_types(ORDERED_LIST_SIZE + parameters.excess_list_size, memory_type),
+		memory_type(memory_type),
+		hash_entries(hash_entry_count, memory_type),
+		excess_allocation_list(excessListSize, memory_type),
+		utilized_hash_block_count(0),
+		visible_hash_block_count(0)
 		{
 	hash_entry_allocation_states.Clear(NEEDS_NO_CHANGE);
 

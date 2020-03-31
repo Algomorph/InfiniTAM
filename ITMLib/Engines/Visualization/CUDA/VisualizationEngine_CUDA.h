@@ -34,10 +34,10 @@ namespace ITMLib
 	class VisualizationEngine_CUDA<TVoxel, VoxelBlockHash> : public VisualizationEngine < TVoxel, VoxelBlockHash >
 	{
 	private:
-		uint *noTotalPoints_device;
-		RenderingBlock *renderingBlockList_device;
-		uint *noTotalBlocks_device;
-		int *visibleEntryCount_device;
+		uint* noTotalPoints_device;
+		RenderingBlock* rendering_block_list_device;
+		uint* block_count_device;
+		int* visible_block_count_device;
 	public:
 		explicit VisualizationEngine_CUDA(void);
 		~VisualizationEngine_CUDA(void);

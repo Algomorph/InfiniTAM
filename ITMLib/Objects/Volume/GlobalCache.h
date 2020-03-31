@@ -93,7 +93,7 @@ namespace ITMLib
 #endif
 		}
 
-		explicit GlobalCache(const VoxelBlockHash& index) : GlobalCache(index.hashEntryCount){}
+		explicit GlobalCache(const VoxelBlockHash& index) : GlobalCache(index.hash_entry_count){}
 
 		explicit GlobalCache(const GlobalCache& other) : GlobalCache(other.hashEntryCount)
 		{

@@ -174,7 +174,7 @@ void SwappingEngine_CPU<TVoxel, VoxelBlockHash>::CleanLocalMemory(VoxelVolume<TV
 	TVoxel *localVBA = scene->voxels.GetVoxelBlocks();
 	int *voxelAllocationList = scene->voxels.GetAllocationList();
 
-	int noTotalEntries = scene->index.hashEntryCount;
+	int noTotalEntries = scene->index.hash_entry_count;
 
 	int noNeededEntries = 0;
 	int noAllocatedVoxelEntries = scene->voxels.lastFreeBlockId;

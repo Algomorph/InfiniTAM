@@ -26,7 +26,7 @@ public:
 	inline static void
 	TraverseAllWithHashCode(VoxelBlockHash& index, TFunctor& functor){
 		HashEntry* hash_table = index.GetEntries();
-		const int hash_entry_count = index.hashEntryCount;
+		const int hash_entry_count = index.hash_entry_count;
 #ifdef WITH_OPENMP
 	#pragma omp parallel for default(none) shared(functor, hash_table)
 #endif
