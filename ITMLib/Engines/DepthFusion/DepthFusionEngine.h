@@ -76,6 +76,8 @@ public:
 	void IntegrateDepthImageIntoTsdfVolume(VoxelVolume<TVoxel, TIndex>* volume, const View* view,
 	                                       const CameraTrackingState* trackingState);
 private:
+
+
 	void IntegrateDepthImageIntoTsdfVolume_Helper(VoxelVolume<TVoxel, TIndex>* volume, const View* view,
 	                                              Matrix4f depth_camera_matrix = Matrix4f::Identity());
 

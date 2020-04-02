@@ -48,11 +48,6 @@ void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateGridAlignedBox(V
                                                                                const Extent3Di& box) {}
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateBlockList(
-		VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::MemoryBlock<Vector3s>& block_coordinates, int new_block_count) {}
-
-
-template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 template<typename TVoxelTarget, typename TVoxelSource>
 void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateUsingOtherVolume(
 		VoxelVolume<TVoxelTarget, TIndex>* targetVolume, VoxelVolume<TVoxelSource, TIndex>* sourceVolume) {}

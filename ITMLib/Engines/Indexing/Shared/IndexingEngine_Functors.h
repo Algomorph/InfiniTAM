@@ -230,6 +230,10 @@ public:
 		INITIALIZE_ATOMIC(int, colliding_block_count, 0);
 	}
 
+	~VolumeBasedAllocationStateMarkerFunctor() {
+		CLEAN_UP_ATOMIC(colliding_block_count);
+	};
+
 	_DEVICE_WHEN_AVAILABLE_
 	void operator()(const HashEntry& source_hash_entry, const int& source_hash_code) {
 		ThreadAllocationStatus status = MarkAsNeedingAllocationIfNotFound<true>(
@@ -303,3 +307,35 @@ protected:
 	using VolumeBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::target_hash_table;
 	using VolumeBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::unresolvable_collision_encountered_device;
 };
+
+//
+//template<typename TVoxel, typename TUnwantedBlockPredicateStaticFunctor, bool clear_deallocated_blocks,
+//		MemoryDeviceType TMemoryDeviceType>
+//struct LazyDeallocateHashBlocksFunctor {
+//	DeallocateHashBlocksFunctor(VoxelVolume<TVoxel, VoxelBlockHash>* volume) :
+//			remaining_utilized_list(volume->index.hash_entry_count, TMemoryDeviceType),
+//			voxels(volume->LocalVBA.GetVoxelBlocks()){
+//		INITIALIZE_ATOMIC(int, remaining_utilized_count, 0);
+//	}
+//
+//	~DeallocateHashBlocksFunctor() {
+//		CLEAN_UP_ATOMIC(remaining_utilized_count);
+//	};
+//
+//	_DEVICE_WHEN_AVAILABLE_
+//	void operator()(const HashEntry& hash_entry, const int& hash_code) {
+//		if (TUnwantedBlockPredicateStaticFunctor::is_block_unwanted(hash_entry)) {
+//			if (clear_deallocated_blocks) {
+//				TVoxel* block_voxels = voxels + (hash_entry.ptr * VOXEL_BLOCK_SIZE3);
+//				memcpy(block_voxels, )
+//			}
+//		} else {
+//
+//		}
+//	}
+//
+//private:
+//	ORUtils::MemoryBlock<int> remaining_utilized_list;
+//	DECLARE_ATOMIC(int, remaining_utilized_count);
+//	TVoxel* voxels;
+//};

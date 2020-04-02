@@ -255,6 +255,13 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::AllocateBlockLis
 	}
 }
 
+template<typename TVoxel>
+void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::DeallocateBlockList(
+		VoxelVolume<TVoxel, VoxelBlockHash>* volume,
+		const ORUtils::MemoryBlock<int>& hash_codes_of_blocks_to_remove,
+		int count_of_blocks_to_remove) {
+
+}
 
 template<typename TVoxel>
 void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::BuildUtilizedBlockListBasedOnVisibility(
@@ -392,6 +399,9 @@ bool IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::AllocateHashBloc
 	volume->index.SetLastFreeExcessListId(data_device->lastFreeExcessListId);
 	return true;
 }
+
+
+
 
 
 

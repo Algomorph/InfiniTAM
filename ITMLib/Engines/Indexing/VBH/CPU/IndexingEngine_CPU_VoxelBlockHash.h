@@ -20,6 +20,7 @@
 
 namespace ITMLib {
 
+
 struct IndexingEngineFactory;
 template<typename TVoxel>
 class IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU> :
@@ -55,6 +56,9 @@ public:
 	                       const ORUtils::MemoryBlock<Vector3s>& new_block_positions,
 	                       int new_block_count) override;
 
+	void DeallocateBlockList(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
+			const ORUtils::MemoryBlock<int>& hash_codes_of_blocks_to_remove, int count_of_blocks_to_remove) override;
+
 	HashEntry FindHashEntry(const VoxelBlockHash& index, const Vector3s& coordinates) override;
 	HashEntry FindHashEntry(const VoxelBlockHash& index, const Vector3s& coordinates, int& hashCode);
 
@@ -71,6 +75,7 @@ public:
 		AllocateUsingOtherVolume<WarpVoxel,TVoxel>(target_volume, source_volume);
 	}
 
+
 	template<typename TVoxelTarget, typename TVoxelSource>
 	void AllocateUsingOtherVolume(VoxelVolume<TVoxelTarget, VoxelBlockHash>* target_volume,
 	                              VoxelVolume<TVoxelSource, VoxelBlockHash>* source_volume);
@@ -84,6 +89,7 @@ public:
 	                                               VoxelVolume<TVoxelSource, VoxelBlockHash>* source_volume,
 	                                               const Extent3Di& source_bounds, const Vector3i& target_offset);
 
+	//TODO: must be changed to "BuildVisibleBlockList" and needs to modify the new VisibleBlockList
 	void BuildUtilizedBlockListBasedOnVisibility(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const View* view,
 	                                             const Matrix4f& depth_camera_matrix = Matrix4f::Identity());
 

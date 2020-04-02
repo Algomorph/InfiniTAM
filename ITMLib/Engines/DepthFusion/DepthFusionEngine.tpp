@@ -25,6 +25,7 @@ template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMem
 void DepthFusionEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::UpdateVisibleList(
 		VoxelVolume<TVoxel, TIndex>* scene, const View* view, const CameraTrackingState* trackingState,
 		const RenderState* renderState, bool resetVisibleList) {
+	//TODO: fixme
 	IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::Instance()
 			.AllocateNearSurface(scene, view, trackingState);
 }

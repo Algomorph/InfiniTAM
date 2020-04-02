@@ -90,14 +90,7 @@ public:
 	AllocateNearAndBetweenTwoSurfaces(VoxelVolume<TVoxel, TIndex>* volume,
 	                                  const View* view,
 	                                  const CameraTrackingState* tracking_state) = 0;
-	/**
-	 * \brief Allocate all hash blocks at given coordinates
-	 * \param volume - volume, where to allocate
-	 * \param block_coordinates coordinates of blocks to allocate (in blocks, not voxels)
-	 */
-	virtual void
-	AllocateBlockList(VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::MemoryBlock<Vector3s>& block_coordinates,
-	                  int new_block_count) = 0;
+
 
 	/**
 	 * \brief Allocates (at least) enough space to fit the given
@@ -149,9 +142,6 @@ public:
 
 	void
 	AllocateGridAlignedBox(VoxelVolume<TVoxel, TIndex>* volume, const Extent3Di& box) override;
-
-	void AllocateBlockList(VoxelVolume<TVoxel, TIndex>* volume,
-	                       const ORUtils::MemoryBlock<Vector3s>& new_block_positions, int new_block_count) override;
 
 
 	void AllocateFromOtherVolume(VoxelVolume<TVoxel, TIndex>* target_volume,

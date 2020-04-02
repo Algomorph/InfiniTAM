@@ -308,6 +308,10 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateBlockList
 
 		volume->index.ClearHashEntryAllocationStates();
 
+#ifdef WITH_OPENMP
+#pragma omp parallel for default(none) shared(hash_entry_states, allocation_block_coordinates, new_positions_device, \
+    hash_table, colliding_positions_device, colliding_block_count)
+#endif
 		for (int new_block_index = 0; new_block_index < new_block_count; new_block_index++) {
 			Vector3s desired_block_position = new_positions_device[new_block_index];
 
@@ -321,6 +325,47 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateBlockList
 
 		new_block_count = colliding_block_count.load();
 		std::swap(new_positions_device, colliding_positions_device);
+	}
+}
+
+template<typename TVoxel>
+void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::DeallocateBlockList(
+		VoxelVolume<TVoxel, VoxelBlockHash>* volume,
+		const ORUtils::MemoryBlock<int>& hash_codes_of_blocks_to_remove,
+		int count_of_blocks_to_remove) {
+	ORUtils::MemoryBlock<int> hash_codes_to_remove_local(count_of_blocks_to_remove, MEMORYDEVICE_CPU);
+	hash_codes_to_remove_local.SetFrom(&hash_codes_of_blocks_to_remove, MemoryCopyDirection::CPU_TO_CPU);
+
+	ORUtils::MemoryBlock<int> colliding_hash_codes(count_of_blocks_to_remove, MEMORYDEVICE_CPU);
+	HashEntry* hash_table = volume->index.GetEntries();
+	HashEntryAllocationState* hash_entry_states = volume->index.GetHashEntryAllocationStates();
+	std::atomic<int> colliding_block_count;
+
+	int* codes_to_remove_device = hash_codes_to_remove_local.GetData(MEMORYDEVICE_CPU);
+	int* colliding_codes_device = colliding_hash_codes.GetData(MEMORYDEVICE_CPU);
+
+	while (count_of_blocks_to_remove > 0) {
+		colliding_block_count.store(0);
+		volume->index.ClearHashEntryAllocationStates();
+#ifdef WITH_OPENMP
+#pragma omp parallel for default(none) shared(hash_entry_states, codes_to_remove_device, \
+    hash_table, colliding_codes_device, colliding_block_count)
+#endif
+		for (int hash_code_index = 0; hash_code_index < count_of_blocks_to_remove; hash_code_index++) {
+			int hash_code_to_remove = codes_to_remove_device[hash_code_index];
+			HashEntry& entry_to_remove = hash_table[hash_code_to_remove];
+			int bucket_code;
+			if(hash_code_to_remove < ORDERED_LIST_SIZE){
+				bucket_code = hash_code_to_remove;
+			} else {
+				bucket_code = HashCodeFromBlockPosition(entry_to_remove.pos);
+			}
+			//TODO
+			//if(hash_entry_states[bucket_code] != NEEDS_NO_CHANGE)
+		}
+
+		count_of_blocks_to_remove =  colliding_block_count.load();
+		std::swap(codes_to_remove_device, colliding_codes_device);
 	}
 }
 
@@ -437,3 +482,4 @@ bool IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateHashBlock
 	volume->index.SetLastFreeExcessListId(lastFreeExcessListId);
 	return true;
 }
+

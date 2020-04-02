@@ -529,6 +529,7 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::HandlePotentialCameraTracki
 					const FernRelocLib::PoseDatabase::PoseInScene& keyframe = relocaliser->RetrievePose(NN);
 					tracking_state->pose_d->SetFrom(&keyframe.pose);
 
+					// TODO: fix this functionality, reuse when fixed
 					denseMapper->UpdateVisibleList(view, tracking_state, live_volumes[0], canonical_render_state, true);
 
 					camera_tracking_controller->Prepare(tracking_state, live_volumes[0], view, visualization_engine, canonical_render_state);
