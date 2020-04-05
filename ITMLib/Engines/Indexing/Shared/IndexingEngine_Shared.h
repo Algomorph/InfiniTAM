@@ -184,6 +184,145 @@ inline ThreadAllocationStatus MarkAsNeedingAllocationIfNotFound(ITMLib::HashEntr
 
 };
 
+// region =================== DEALLOCATION & CLEANING OF SINGLE VOXEL HASH BLOCK =======================================
+
+/**
+ * \brief Resets all voxels in voxel hash block to (given) default values
+ * \tparam TVoxel type of voxel
+ * \param last_free_voxel_block_id index of the next available block's offset in the voxel allocation list
+ * \param voxel_allocation_list list of block offsets that are available for allocation in the future
+ * \param voxels pointer to entire voxel blocks, i.e. where actual voxels for each voxel block are stored
+ * \param entry_to_remove hash entry for block to clean
+ * \param empty_voxel_block_device default (empty) voxel values for an entire block (copied to block being reset)
+ */
+template<typename TVoxel>
+_DEVICE_WHEN_AVAILABLE_
+inline void ResetVoxelBlock(ATOMIC_ARGUMENT(int) last_free_voxel_block_id, int* voxel_allocation_list, TVoxel* voxels,
+                            const HashEntry& entry_to_remove, const TVoxel* empty_voxel_block_device) {
+	int next_last_free_block_id = ATOMIC_ADD(last_free_voxel_block_id, 1) + 1;
+	voxel_allocation_list[next_last_free_block_id] = entry_to_remove.ptr;
+	TVoxel* voxel_block = voxels + entry_to_remove.ptr * VOXEL_BLOCK_SIZE3;
+	memcpy(voxel_block, empty_voxel_block_device, sizeof(TVoxel) * VOXEL_BLOCK_SIZE3);
+}
+
+/**
+ * \brief Deallocates a given block (resets the block's hash entry in hash table, resets the voxels it was pointing to)
+ * \tparam TVoxel
+ * \param hash_code_to_remove index of the entry in the hash table.
+ * \param hash_entry_states states of the hash entries (for parallelization). If the state for the given hash code is
+ * not default (NEEDS_NO_CHANGE), function returns without altering anything.
+ * \param hash_table pointer to the hash entries for the voxel block hash table
+ * \param voxels pointer to the voxels
+ * \param colliding_codes_device
+ * \param colliding_block_count
+ * \param last_free_voxel_block_id
+ * \param last_free_excess_list_id
+ * \param voxel_allocation_list
+ * \param excess_allocation_list
+ * \param empty_voxel_block_device
+ */
+template<typename TVoxel>
+_DEVICE_WHEN_AVAILABLE_
+inline void DeallocateBlock(int hash_code_to_remove,
+                            ITMLib::HashEntryAllocationState* hash_entry_states,
+                            THREADPTR(HashEntry)* hash_table,
+                            THREADPTR(TVoxel*) voxels,
+                            THREADPTR(int)* colliding_codes_device,
+                            ATOMIC_ARGUMENT(int) colliding_block_count,
+                            ATOMIC_ARGUMENT(int) last_free_voxel_block_id,
+                            ATOMIC_ARGUMENT(int) last_free_excess_list_id,
+                            int* voxel_allocation_list,
+                            int* excess_allocation_list,
+                            const TVoxel* empty_voxel_block_device) {
+	static const HashEntry default_entry = []() {
+		HashEntry default_entry;
+		memset(&default_entry, 0, sizeof(HashEntry));
+		default_entry.ptr = -2;
+		return default_entry;
+	}();
+
+	const HashEntry& entry_to_remove = hash_table[hash_code_to_remove];
+	int bucket_code;
+	bool entry_in_ordered_list;
+	if (hash_code_to_remove < ORDERED_LIST_SIZE) {
+		bucket_code = hash_code_to_remove;
+		entry_in_ordered_list = true;
+	} else {
+		bucket_code = HashCodeFromBlockPosition(entry_to_remove.pos);
+		entry_in_ordered_list = false;
+	}
+
+	bool collision = false;
+#pragma omp critical
+	{
+		if (hash_entry_states[bucket_code] == NEEDS_NO_CHANGE) {
+			hash_entry_states[bucket_code] = BUCKET_NEEDS_DEALLOCATION;
+		} else {
+			collision = true;
+		}
+	};
+	/* if there is a bucket collision, we'll want to leave the block alone for now and
+	 process the block again on next run of the outer while loop, so that we don't get a
+	 data race on the intra-bucket entry connections */
+	if (collision) {
+		int collision_index = ATOMIC_ADD(colliding_block_count, 1);
+		colliding_codes_device[collision_index] = hash_code_to_remove;
+		return;
+	}
+
+	ResetVoxelBlock(last_free_voxel_block_id, voxel_allocation_list, voxels, entry_to_remove,
+	                empty_voxel_block_device);
+
+	if (entry_in_ordered_list) {
+		if (entry_to_remove.offset == 0) {
+			// entry has no child in excess list, so it suffices to simply reset the removed entry.
+			hash_table[hash_code_to_remove] = default_entry;
+		} else {
+			// entry has a child in excess list
+			// we must move the child from the excess list to its parent's slot in the ordered list
+
+			// the excess list gains a new empty slot from the former child (which will be moved to the ordered list)
+			int next_last_free_excess_id = ATOMIC_ADD(last_free_excess_list_id, 1) + 1;
+			excess_allocation_list[next_last_free_excess_id] = entry_to_remove.offset - 1;
+
+			// finally, swap parent with child entry in the table and clean out former child's entry slot
+			int child_hash_code = ORDERED_LIST_SIZE + entry_to_remove.offset;
+			hash_table[hash_code_to_remove] = hash_table[child_hash_code];
+			hash_table[child_hash_code] = default_entry;
+		}
+	} else {
+		// we must find direct parent of the excess list entry we're trying to remove
+		int current_parent_code = bucket_code;
+		int current_parent_offset = hash_table[current_parent_code].offset;
+		int original_offset = hash_code_to_remove - ORDERED_LIST_SIZE;
+		while (current_parent_offset != original_offset + 1) {
+			current_parent_code = ORDERED_LIST_SIZE + current_parent_offset - 1;
+			current_parent_offset = hash_table[current_parent_code].offset;
+		}
+		HashEntry& parent_entry = hash_table[current_parent_code];
+
+		// the excess list gains a new empty slot from the removed entry
+		int next_last_free_excess_id = ATOMIC_ADD(last_free_excess_list_id, 1) + 1;
+		excess_allocation_list[next_last_free_excess_id] = parent_entry.offset - 1;
+
+		if (entry_to_remove.offset == 0) {
+			// entry has no child in excess list
+			// the parent should lose its removed child
+			parent_entry.offset = 0;
+		} else {
+			// Removed entry has child in excess list.
+			// We must replace the excess offset of parent with that of the removed entry.
+			// Parent should point to the removed entry's child in the excess list
+			parent_entry.offset = entry_to_remove.offset;
+		}
+		// reset removed hash entry
+		hash_table[hash_code_to_remove] = default_entry;
+	}
+
+}
+
+// endregion ===========================================================================================================
+
 _CPU_AND_GPU_CODE_
 inline bool
 HashBlockAllocatedAtOffset(const CONSTPTR(ITMLib::VoxelBlockHash::IndexData)* target_index,
@@ -204,7 +343,6 @@ HashBlockAllocatedAtOffset(const CONSTPTR(ITMLib::VoxelBlockHash::IndexData)* ta
 	}
 	return allocated;
 }
-
 
 
 
