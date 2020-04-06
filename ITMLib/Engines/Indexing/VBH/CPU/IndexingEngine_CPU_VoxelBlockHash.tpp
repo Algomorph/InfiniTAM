@@ -345,17 +345,13 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::DeallocateBlockLi
 	HashEntryAllocationState* hash_entry_states = volume->index.GetHashEntryAllocationStates();
 	TVoxel* voxels = volume->voxels.GetVoxelBlocks();
 
-	// *** allocation index lists ***
+	// *** allocation index lists & counters ***
 	int* voxel_allocation_list = volume->voxels.GetAllocationList();
 	int* excess_allocation_list = volume->index.GetExcessAllocationList();
+	std::atomic<int> last_free_voxel_block_id(volume->voxels.lastFreeBlockId);
+	std::atomic<int> last_free_excess_list_id(volume->index.GetLastFreeExcessListId());
 
 	// *** to fill removed entry spots in hash table & voxel storage space ***
-	static HashEntry default_entry = []() {
-		HashEntry default_entry;
-		memset(&default_entry, 0, sizeof(HashEntry));
-		default_entry.ptr = -2;
-		return default_entry;
-	}();
 	static ORUtils::MemoryBlock<TVoxel> empty_voxel_block = []() {
 		ORUtils::MemoryBlock<TVoxel> empty_voxel_block(VOXEL_BLOCK_SIZE3, MEMORYDEVICE_CPU);
 		TVoxel* empty_voxel_block_device = empty_voxel_block.GetData(MEMORYDEVICE_CPU);
@@ -368,10 +364,6 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::DeallocateBlockLi
 	while (count_of_blocks_to_remove > 0) {
 		colliding_block_count.store(0);
 		volume->index.ClearHashEntryAllocationStates();
-
-		// voxel block & excess list indices need to be updated on every run, since we're physically deallocating blocks
-		std::atomic<int> last_free_voxel_block_id(volume->voxels.lastFreeBlockId);
-		std::atomic<int> last_free_excess_list_id(volume->index.GetLastFreeExcessListId());
 
 #ifdef WITH_OPENMP
 #pragma omp parallel for default(none) shared(hash_entry_states, codes_to_remove_device, \
@@ -386,10 +378,11 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::DeallocateBlockLi
 		}
 
 		count_of_blocks_to_remove = colliding_block_count.load();
-		volume->voxels.lastFreeBlockId = last_free_voxel_block_id.load();
-		volume->index.SetLastFreeExcessListId(last_free_excess_list_id.load());
+
 		std::swap(codes_to_remove_device, colliding_codes_device);
 	}
+	volume->voxels.lastFreeBlockId = last_free_voxel_block_id.load();
+	volume->index.SetLastFreeExcessListId(last_free_excess_list_id.load());
 }
 
 

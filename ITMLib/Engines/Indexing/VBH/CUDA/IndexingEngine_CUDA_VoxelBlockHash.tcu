@@ -261,6 +261,73 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::DeallocateBlockL
 		const ORUtils::MemoryBlock<int>& hash_codes_of_blocks_to_remove,
 		int count_of_blocks_to_remove) {
 
+	// *** locally-manipulated memory blocks of hash codes & counters *** /
+	ORUtils::MemoryBlock<int> hash_codes_to_remove_local(count_of_blocks_to_remove, MEMORYDEVICE_CUDA);
+	hash_codes_to_remove_local.SetFrom(&hash_codes_of_blocks_to_remove, MemoryCopyDirection::CUDA_TO_CUDA);
+	ORUtils::MemoryBlock<int> colliding_hash_codes(count_of_blocks_to_remove, MEMORYDEVICE_CUDA);
+
+	int* codes_to_remove_device = hash_codes_to_remove_local.GetData(MEMORYDEVICE_CUDA);
+	int* colliding_codes_device = colliding_hash_codes.GetData(MEMORYDEVICE_CUDA);
+
+	ORUtils::MemoryBlock<int> colliding_block_count(1, true, true);
+
+	// *** volume-specific hash table, temporary entry allocation state table, voxel storage *** //
+	HashEntry* hash_table = volume->index.GetEntries();
+	HashEntryAllocationState* hash_entry_states = volume->index.GetHashEntryAllocationStates();
+	TVoxel* voxels = volume->voxels.GetVoxelBlocks();
+
+	// *** allocation index lists & counters ***
+	int* voxel_allocation_list = volume->voxels.GetAllocationList();
+	int* excess_allocation_list = volume->index.GetExcessAllocationList();
+	ORUtils::MemoryBlock<int> last_free_voxel_block_id(1, true, true);
+	*last_free_voxel_block_id.GetData(MEMORYDEVICE_CPU) = volume->voxels.lastFreeBlockId;
+	last_free_voxel_block_id.UpdateDeviceFromHost();
+	ORUtils::MemoryBlock<int> last_free_excess_list_id(1, true, true);
+	*last_free_excess_list_id.GetData(MEMORYDEVICE_CPU) = volume->index.GetLastFreeExcessListId();
+	last_free_excess_list_id.UpdateDeviceFromHost();
+
+	// *** to fill removed entry spots in hash table & voxel storage space ***
+	static ORUtils::MemoryBlock<TVoxel> empty_voxel_block = []() {
+		ORUtils::MemoryBlock<TVoxel> empty_voxel_block(VOXEL_BLOCK_SIZE3, MEMORYDEVICE_CUDA);
+		TVoxel* empty_voxel_block_device = empty_voxel_block.GetData(MEMORYDEVICE_CUDA);
+		for (int i_voxel = 0; i_voxel < VOXEL_BLOCK_SIZE3; i_voxel++) empty_voxel_block_device[i_voxel] = TVoxel();
+		return empty_voxel_block;
+	}();
+	const TVoxel* empty_voxel_block_device = empty_voxel_block.GetData(MEMORYDEVICE_CUDA);
+
+
+	while (count_of_blocks_to_remove > 0) {
+		*colliding_block_count.GetData(MEMORYDEVICE_CPU) = 0;
+		colliding_block_count.UpdateDeviceFromHost();
+
+		volume->index.ClearHashEntryAllocationStates();
+
+		dim3 cuda_block_size(256);
+		dim3 cuda_grid_size(
+				static_cast<int>(ceil(
+						static_cast<float>(count_of_blocks_to_remove) / static_cast<float>(cuda_block_size.x))));
+
+		deallocate_BlockList_device
+				<< < cuda_grid_size, cuda_block_size >> >
+		                             (codes_to_remove_device, count_of_blocks_to_remove, hash_entry_states, hash_table, voxels,
+				                             colliding_codes_device, colliding_block_count.GetData(MEMORYDEVICE_CUDA),
+				                             last_free_voxel_block_id.GetData(MEMORYDEVICE_CUDA),
+				                             last_free_excess_list_id.GetData(MEMORYDEVICE_CUDA),
+				                             voxel_allocation_list,
+				                             excess_allocation_list,
+				                             empty_voxel_block_device);
+
+		colliding_block_count.UpdateHostFromDevice();
+		count_of_blocks_to_remove = *colliding_block_count.GetData(MEMORYDEVICE_CPU);
+
+
+		std::swap(codes_to_remove_device, colliding_codes_device);
+	}
+
+	last_free_voxel_block_id.UpdateHostFromDevice();
+	last_free_excess_list_id.UpdateHostFromDevice();
+	volume->voxels.lastFreeBlockId = *last_free_voxel_block_id.GetData(MEMORYDEVICE_CPU);
+	volume->index.SetLastFreeExcessListId(*last_free_excess_list_id.GetData(MEMORYDEVICE_CPU));
 }
 
 template<typename TVoxel>
@@ -288,16 +355,16 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::BuildUtilizedBlo
 	dim3 gridSizeAL((int) ceil((float) hash_entry_count / (float) cudaBlockSizeAL.x));
 
 	if (useSwapping) {
-		buildVisibilityList_device<true> << < gridSizeAL, cudaBlockSizeAL >> >
-		                                                  (hashTable, swapStates, hash_entry_count, visibleBlockHashCodes_device,
-				                                                  visibleBlockCount.GetData(
-						                                                  MEMORYDEVICE_CUDA), hashBlockVisibilityTypes_device, depth_camera_matrix, depthCameraProjectionParameters, depthImgSize, voxelSize);
+		buildVisibilityList_device < true > << <gridSizeAL, cudaBlockSizeAL >> >
+		(hashTable, swapStates, hash_entry_count, visibleBlockHashCodes_device,
+				visibleBlockCount.GetData(
+						MEMORYDEVICE_CUDA), hashBlockVisibilityTypes_device, depth_camera_matrix, depthCameraProjectionParameters, depthImgSize, voxelSize);
 		ORcudaKernelCheck;
 	} else {
-		buildVisibilityList_device<false> << < gridSizeAL, cudaBlockSizeAL >> >
-		                                                   (hashTable, swapStates, hash_entry_count, visibleBlockHashCodes_device,
-				                                                   visibleBlockCount.GetData(
-						                                                   MEMORYDEVICE_CUDA), hashBlockVisibilityTypes_device, depth_camera_matrix, depthCameraProjectionParameters, depthImgSize, voxelSize);
+		buildVisibilityList_device < false > << <gridSizeAL, cudaBlockSizeAL >> >
+		(hashTable, swapStates, hash_entry_count, visibleBlockHashCodes_device,
+				visibleBlockCount.GetData(
+						MEMORYDEVICE_CUDA), hashBlockVisibilityTypes_device, depth_camera_matrix, depthCameraProjectionParameters, depthImgSize, voxelSize);
 		ORcudaKernelCheck;
 	}
 	visibleBlockCount.UpdateHostFromDevice();

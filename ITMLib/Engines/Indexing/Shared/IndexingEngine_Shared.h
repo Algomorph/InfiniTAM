@@ -206,15 +206,17 @@ inline void ResetVoxelBlock(ATOMIC_ARGUMENT(int) last_free_voxel_block_id, int* 
 }
 
 /**
- * \brief Deallocates a given block (resets the block's hash entry in hash table, resets the voxels it was pointing to)
+ * \brief Deallocates a given block (resets the block's hash entry in hash table, resets the voxels it was pointing to).
+ * \details If the state for the given hash code is not default (NEEDS_NO_CHANGE),
+ * function adds the hash_code_to_remove to the colliding code list (incrementing the colliding_block_count)
+ * and returns without altering anything.
  * \tparam TVoxel
- * \param hash_code_to_remove index of the entry in the hash table.
- * \param hash_entry_states states of the hash entries (for parallelization). If the state for the given hash code is
- * not default (NEEDS_NO_CHANGE), function returns without altering anything.
+ * \param hash_code_to_remove index of the entry in the hash table that is to be removed.
+ * \param hash_entry_states states of the hash entries (for parallelization, see function description details).
  * \param hash_table pointer to the hash entries for the voxel block hash table
- * \param voxels pointer to the voxels
- * \param colliding_codes_device
- * \param colliding_block_count
+ * \param voxels pointer to the blocks' voxels
+ * \param colliding_codes_device list of colliding block codes (for parallelization, see function description details).
+ * \param colliding_block_count count of hash codes recorded to colliding_codes_device.
  * \param last_free_voxel_block_id
  * \param last_free_excess_list_id
  * \param voxel_allocation_list
@@ -223,18 +225,20 @@ inline void ResetVoxelBlock(ATOMIC_ARGUMENT(int) last_free_voxel_block_id, int* 
  */
 template<typename TVoxel>
 _DEVICE_WHEN_AVAILABLE_
-inline void DeallocateBlock(int hash_code_to_remove,
+inline void DeallocateBlock(const int hash_code_to_remove,
                             ITMLib::HashEntryAllocationState* hash_entry_states,
                             THREADPTR(HashEntry)* hash_table,
-                            THREADPTR(TVoxel*) voxels,
+                            THREADPTR(TVoxel)* voxels,
                             THREADPTR(int)* colliding_codes_device,
                             ATOMIC_ARGUMENT(int) colliding_block_count,
                             ATOMIC_ARGUMENT(int) last_free_voxel_block_id,
                             ATOMIC_ARGUMENT(int) last_free_excess_list_id,
-                            int* voxel_allocation_list,
-                            int* excess_allocation_list,
-                            const TVoxel* empty_voxel_block_device) {
-	static const HashEntry default_entry = []() {
+                            THREADPTR(int)* voxel_allocation_list,
+                            THREADPTR(int)* excess_allocation_list,
+                            const CONSTPTR(TVoxel)* empty_voxel_block_device) {
+
+	const HashEntry default_entry =
+	[]() {
 		HashEntry default_entry;
 		memset(&default_entry, 0, sizeof(HashEntry));
 		default_entry.ptr = -2;

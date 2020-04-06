@@ -261,6 +261,30 @@ __global__ void buildHashAllocationTypeList_BlockList_device(
 	                                         colliding_block_positions, colliding_block_count);
 }
 
+template<typename TVoxel>
+__global__ void deallocate_BlockList_device(const int* codes_to_remove_device,
+                                            const int count_of_blocks_to_remove,
+                                            ITMLib::HashEntryAllocationState* hash_entry_states,
+                                            HashEntry* hash_table,
+                                            TVoxel* voxels,
+                                            int* colliding_codes_device,
+                                            int* colliding_block_count,
+                                            int* last_free_voxel_block_id,
+                                            int* last_free_excess_list_id,
+                                            int* voxel_allocation_list,
+                                            int* excess_allocation_list,
+                                            const TVoxel* empty_voxel_block_device){
+
+	int code_to_remove_index = threadIdx.x + blockIdx.x * blockDim.x;
+	if (code_to_remove_index >= count_of_blocks_to_remove) return;
+
+	int hash_code_to_remove = codes_to_remove_device[code_to_remove_index];
+
+	DeallocateBlock( hash_code_to_remove, hash_entry_states, hash_table, voxels, colliding_codes_device,
+	                 colliding_block_count, last_free_voxel_block_id, last_free_excess_list_id, voxel_allocation_list,
+	                 excess_allocation_list, empty_voxel_block_device);
+}
+
 
 __global__ void determineTargetAllocationForOffsetCopy_device(
 		HashEntry* target_hash_table,
