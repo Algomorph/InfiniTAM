@@ -32,6 +32,7 @@
 #include "../ITMLib/GlobalTemplateDefines.h"
 #include "../ITMLib/Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculatorInterface.h"
 #include "../ITMLib/Objects/Volume/RepresentationAccess.h"
+#include "../ITMLib/Utils/MemoryBlock_StdContainer_Convertions.h"
 //(CPU)
 #include "../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
 #include "../ITMLib/Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator.h"
@@ -42,31 +43,6 @@
 #endif
 
 using namespace ITMLib;
-
-
-
-template<typename T>
-static ORUtils::MemoryBlock<T>
-std_vector_to_ORUtils_MemoryBlock(std::vector<T> vector, MemoryDeviceType memoryDeviceType) {
-	ORUtils::MemoryBlock<T> block(vector.size(), memoryDeviceType == MEMORYDEVICE_CPU,
-	                              memoryDeviceType == MEMORYDEVICE_CUDA);
-	switch (memoryDeviceType) {
-		case MEMORYDEVICE_CUDA:
-#ifndef COMPILE_WITHOUT_CUDA
-			ORcudaSafeCall(cudaMemcpy(block.GetData(MEMORYDEVICE_CUDA), vector.data(), vector.size() * sizeof(T),
-			                          cudaMemcpyHostToDevice));
-#else
-			DIEWITHEXCEPTION_REPORTLOCATION("Not supported without compilation with CUDA.");
-#endif
-			break;
-		case MEMORYDEVICE_CPU:
-			memcpy(block.GetData(MEMORYDEVICE_CPU), vector.data(), vector.size() * sizeof(T));
-			break;
-		default:
-			DIEWITHEXCEPTION_REPORTLOCATION("Device type not supported by operation.");
-	}
-	return block;
-}
 
 
 class CollisionHashFixture {
@@ -199,6 +175,36 @@ BOOST_FIXTURE_TEST_CASE(TestAllocateHashBlockList_CPU, CollisionHashFixture) {
 	BOOST_REQUIRE_MESSAGE(!unallocated_bucket_code,
 	                      "Bucket code " << bad_hash_code << " was not allocated in the spatial hash. Seed: " << seed);
 }
+
+BOOST_FIXTURE_TEST_CASE(TestDeallocateHashBlockList_CPU, CollisionHashFixture) {
+	const int excess_list_size = 0x6FFFF;
+	BOOST_TEST_CONTEXT("Seed: " << seed);
+	BOOST_REQUIRE_GE(excess_list_size, required_max_excess_list_size);
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume(MEMORYDEVICE_CPU, {0x80000, excess_list_size});
+	volume.Reset();
+	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>& indexer = IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance();
+	ORUtils::MemoryBlock<Vector3s> hash_position_memory_block = std_vector_to_ORUtils_MemoryBlock(block_positions,
+	                                                                                              MEMORYDEVICE_CPU);
+	indexer.AllocateBlockList(&volume, hash_position_memory_block, hash_position_memory_block.dataSize);
+
+	std::vector<int> utilized_codes = StatCalc_CPU_VBH_Voxel::Instance().GetUtilizedHashCodes(&volume);
+	const size_t blocks_to_remove_count = utilized_codes.size() / 2;
+	const size_t blocks_remaining_count = utilized_codes.size() - blocks_to_remove_count;
+	std::vector<int> codes_to_remove_vector(utilized_codes.begin(), utilized_codes.begin() + blocks_to_remove_count);
+	std::vector<int> remaining_codes_ground_truth(utilized_codes.begin() + blocks_to_remove_count, utilized_codes.end());
+
+	ORUtils::MemoryBlock<int> codes_to_remove_block = std_vector_to_ORUtils_MemoryBlock(codes_to_remove_vector, MEMORYDEVICE_CPU);
+
+	indexer.DeallocateBlockList(&volume, codes_to_remove_block, codes_to_remove_block.dataSize);
+
+	std::vector<int> remaining_utilized_codes = StatCalc_CPU_VBH_Voxel::Instance().GetUtilizedHashCodes(&volume);
+	std::vector<int> remaining_allocated_codes = StatCalc_CPU_VBH_Voxel::Instance().GetAllocatedHashCodes(&volume);
+
+	BOOST_REQUIRE_EQUAL(remaining_utilized_codes, remaining_allocated_codes);
+	BOOST_REQUIRE_EQUAL(remaining_codes_ground_truth, remaining_utilized_codes);
+
+}
+
 
 #ifndef COMPILE_WITHOUT_CUDA
 BOOST_FIXTURE_TEST_CASE(TestAllocateHashBlockList_CUDA, CollisionHashFixture) {

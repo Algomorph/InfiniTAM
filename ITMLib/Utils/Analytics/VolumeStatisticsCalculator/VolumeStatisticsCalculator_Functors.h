@@ -35,7 +35,7 @@
 #include "../../../Engines/Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
 #include "../../WarpType.h"
 #include "../Statistics.h"
-#include "../../MemoryBlock_StdVector_Converter.h"
+#include "../../MemoryBlock_StdContainer_Convertions.h"
 #include "../../../Engines/Common/WarpAccessFunctors.h"
 
 

@@ -15,6 +15,10 @@
 //  ================================================================
 #pragma once
 
+//ORUtils
+#include "../../../../../ORUtils/PlatformIndependentAtomics.h"
+
+// local
 #include "IndexingEngine_CPU_VoxelBlockHash.h"
 #include "../../../../Objects/Volume/RepresentationAccess.h"
 #include "../../../EditAndCopy/Shared/EditAndCopyEngine_Shared.h"
@@ -23,6 +27,7 @@
 #include "../../../Common/CheckBlockVisibility.h"
 #include "../../../../Utils/Configuration.h"
 #include "../../../../Utils/Geometry/FrustumTrigonometry.h"
+#include "../../../../Utils/MemoryBlock_StdContainer_Convertions.h"
 
 
 using namespace ITMLib;
@@ -383,9 +388,33 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::DeallocateBlockLi
 	}
 	volume->voxels.lastFreeBlockId = last_free_voxel_block_id.load();
 	volume->index.SetLastFreeExcessListId(last_free_excess_list_id.load());
+
+	// === rebuild utilized list ===
+
+	ORUtils::MemoryBlock<int> old_utilized_block_list(volume->index.voxelBlockCount, MEMORYDEVICE_CPU);
+	int* utilized_block_codes = volume->index.GetUtilizedBlockHashCodes();
+	const int old_utilized_block_count = volume->index.GetUtilizedHashBlockCount();
+	memcpy(old_utilized_block_list.GetData(MEMORYDEVICE_CPU), utilized_block_codes, sizeof(int) * old_utilized_block_count);
+	std::unordered_set<int> codes_to_remove_set =
+			ORUtils_MemoryBlock_to_std_unordered_set(hash_codes_of_blocks_to_remove, MEMORYDEVICE_CPU, count_of_blocks_to_remove);
+	int* old_utilized_block_codes = old_utilized_block_list.GetData(MEMORYDEVICE_CPU);
+
+	std::atomic<int> new_utilized_block_count(0);
+
+#ifdef WITH_OPENMP
+#pragma omp parallel for default(none) shared(old_utilized_block_codes, new_utilized_block_count, utilized_block_codes, codes_to_remove_set)
+#endif
+	for(int i_utilized_code = 0; i_utilized_code < old_utilized_block_count; i_utilized_code++){
+		int old_code = old_utilized_block_codes[i_utilized_code];
+		if(codes_to_remove_set.find(old_code) == codes_to_remove_set.end()){
+			int block_index = ATOMIC_ADD(new_utilized_block_count, 1);
+			utilized_block_codes[block_index] = old_code;
+		}
+	}
+	volume->index.SetUtilizedHashBlockCount(new_utilized_block_count.load());
 }
 
-
+//TODO: refactor to BuildVisibleBlockList..., use VisibleBlockList instead of UtilizedBlockList inside
 template<typename TVoxel>
 void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::BuildUtilizedBlockListBasedOnVisibility(
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume, const View* view, const Matrix4f& depth_camera_matrix) {

@@ -911,7 +911,7 @@ set(ITMLIB_UTILS_HEADERS
     Utils/WarpType.h
     Utils/Configuration.h
     Utils/Math.h
-    Utils/MemoryBlock_StdVector_Converter.h
+    Utils/MemoryBlock_StdContainer_Convertions.h
     Utils/MemoryBlockTypes.h
     Utils/PixelUtils.h
     Utils/ProjectionUtils.h
