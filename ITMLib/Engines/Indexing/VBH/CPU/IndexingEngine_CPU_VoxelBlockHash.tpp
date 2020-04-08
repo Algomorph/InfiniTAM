@@ -332,16 +332,16 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateBlockList
 template<typename TVoxel>
 void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::DeallocateBlockList(
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume,
-		const ORUtils::MemoryBlock<int>& hash_codes_of_blocks_to_remove,
+		const ORUtils::MemoryBlock<Vector3s>& block_coordinates,
 		int count_of_blocks_to_remove) {
 
 	// *** locally-manipulated memory blocks of hash codes & counters *** /
-	ORUtils::MemoryBlock<int> hash_codes_to_remove_local(count_of_blocks_to_remove, MEMORYDEVICE_CPU);
-	hash_codes_to_remove_local.SetFrom(&hash_codes_of_blocks_to_remove, MemoryCopyDirection::CPU_TO_CPU);
-	ORUtils::MemoryBlock<int> colliding_hash_codes(count_of_blocks_to_remove, MEMORYDEVICE_CPU);
+	ORUtils::MemoryBlock<Vector3s> block_coordinates_to_remove_local(count_of_blocks_to_remove, MEMORYDEVICE_CPU);
+	block_coordinates_to_remove_local.SetFrom(&block_coordinates, MemoryCopyDirection::CPU_TO_CPU);
+	ORUtils::MemoryBlock<Vector3s> colliding_blocks(count_of_blocks_to_remove, MEMORYDEVICE_CPU);
 
-	int* codes_to_remove_device = hash_codes_to_remove_local.GetData(MEMORYDEVICE_CPU);
-	int* colliding_codes_device = colliding_hash_codes.GetData(MEMORYDEVICE_CPU);
+	Vector3s* blocks_to_remove_device = block_coordinates_to_remove_local.GetData(MEMORYDEVICE_CPU);
+	Vector3s* colliding_blocks_device = colliding_blocks.GetData(MEMORYDEVICE_CPU);
 
 	std::atomic<int> colliding_block_count;
 
@@ -371,47 +371,24 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::DeallocateBlockLi
 		volume->index.ClearHashEntryAllocationStates();
 
 #ifdef WITH_OPENMP
-#pragma omp parallel for default(none) shared(hash_entry_states, codes_to_remove_device, \
-    hash_table, colliding_codes_device, colliding_block_count, count_of_blocks_to_remove, last_free_voxel_block_id, \
+#pragma omp parallel for default(none) shared(hash_entry_states, blocks_to_remove_device, \
+    hash_table, colliding_blocks_device, colliding_block_count, count_of_blocks_to_remove, last_free_voxel_block_id, \
     last_free_excess_list_id, voxel_allocation_list, excess_allocation_list, empty_voxel_block_device, voxels)
 #endif
 		for (int hash_code_index = 0; hash_code_index < count_of_blocks_to_remove; hash_code_index++) {
-			int hash_code_to_remove = codes_to_remove_device[hash_code_index];
-			DeallocateBlock( hash_code_to_remove, hash_entry_states, hash_table, voxels, colliding_codes_device,
+			Vector3s block_to_remove = blocks_to_remove_device[hash_code_index];
+			DeallocateBlock( block_to_remove, hash_entry_states, hash_table, voxels, colliding_blocks_device,
 					colliding_block_count, last_free_voxel_block_id, last_free_excess_list_id, voxel_allocation_list,
 					excess_allocation_list, empty_voxel_block_device);
 		}
 
 		count_of_blocks_to_remove = colliding_block_count.load();
 
-		std::swap(codes_to_remove_device, colliding_codes_device);
+		std::swap(blocks_to_remove_device, colliding_blocks_device);
 	}
 	volume->voxels.lastFreeBlockId = last_free_voxel_block_id.load();
 	volume->index.SetLastFreeExcessListId(last_free_excess_list_id.load());
-
-	// === rebuild utilized list ===
-
-	ORUtils::MemoryBlock<int> old_utilized_block_list(volume->index.voxelBlockCount, MEMORYDEVICE_CPU);
-	int* utilized_block_codes = volume->index.GetUtilizedBlockHashCodes();
-	const int old_utilized_block_count = volume->index.GetUtilizedHashBlockCount();
-	memcpy(old_utilized_block_list.GetData(MEMORYDEVICE_CPU), utilized_block_codes, sizeof(int) * old_utilized_block_count);
-	std::unordered_set<int> codes_to_remove_set =
-			ORUtils_MemoryBlock_to_std_unordered_set(hash_codes_of_blocks_to_remove, MEMORYDEVICE_CPU, count_of_blocks_to_remove);
-	int* old_utilized_block_codes = old_utilized_block_list.GetData(MEMORYDEVICE_CPU);
-
-	std::atomic<int> new_utilized_block_count(0);
-
-#ifdef WITH_OPENMP
-#pragma omp parallel for default(none) shared(old_utilized_block_codes, new_utilized_block_count, utilized_block_codes, codes_to_remove_set)
-#endif
-	for(int i_utilized_code = 0; i_utilized_code < old_utilized_block_count; i_utilized_code++){
-		int old_code = old_utilized_block_codes[i_utilized_code];
-		if(codes_to_remove_set.find(old_code) == codes_to_remove_set.end()){
-			int block_index = ATOMIC_ADD(new_utilized_block_count, 1);
-			utilized_block_codes[block_index] = old_code;
-		}
-	}
-	volume->index.SetUtilizedHashBlockCount(new_utilized_block_count.load());
+	this->RebuildUtilizedBlockList(volume);
 }
 
 //TODO: refactor to BuildVisibleBlockList..., use VisibleBlockList instead of UtilizedBlockList inside

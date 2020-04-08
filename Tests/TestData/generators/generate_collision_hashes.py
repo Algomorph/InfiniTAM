@@ -104,9 +104,10 @@ def compile_hash_data_file(test_size):
 
 
 def main():
-    test_size = 10000000
+    get_hash_code(23,139,64)
+    # test_size = 10000000
     # analyze(test_size)
-    compile_hash_data_file(test_size)
+    # compile_hash_data_file(test_size)
 
     return PROGRAM_EXIT_SUCCESS
 

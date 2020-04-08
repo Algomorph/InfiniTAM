@@ -121,5 +121,13 @@ void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::Al
 	static_cast<TDerivedClass*>(this)->AllocateBlockList(volume, block_positions, block_count);
 }
 
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, typename TDerivedClass>
+void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::RebuildUtilizedBlockList(
+		VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
+	BuildUtilizedBlockListFunctor<TVoxel, TMemoryDeviceType> utilized_block_list_functor(volume);
+	HashTableTraversalEngine<TMemoryDeviceType>::TraverseAllWithHashCode(volume->index, utilized_block_list_functor);
+	volume->index.SetUtilizedHashBlockCount(GET_ATOMIC_VALUE_CPU(utilized_block_list_functor.utilized_block_count));
+}
+
 
 } //namespace ITMLib

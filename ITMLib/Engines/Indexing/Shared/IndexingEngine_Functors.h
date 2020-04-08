@@ -214,6 +214,31 @@ private:
 	int* block_allocation_list;
 };
 
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
+struct BuildUtilizedBlockListFunctor {
+	BuildUtilizedBlockListFunctor(VoxelVolume<TVoxel, VoxelBlockHash>* volume) :
+			utilized_block_list(volume->index.GetUtilizedBlockHashCodes()) {
+		INITIALIZE_ATOMIC(int, utilized_block_count, 0);
+	}
+
+	~BuildUtilizedBlockListFunctor() {
+		CLEAN_UP_ATOMIC(utilized_block_count);
+	}
+
+	_DEVICE_WHEN_AVAILABLE_
+	void operator()(HashEntry& entry, int hash_code) {
+		if (entry.ptr >= 0) {
+			int current_utilized_block_index = ATOMIC_ADD(utilized_block_count, 1);
+			utilized_block_list[current_utilized_block_index] = hash_code;
+		}
+	}
+
+	DECLARE_ATOMIC(int, utilized_block_count);
+
+private:
+	int* utilized_block_list;
+};
+
 template<MemoryDeviceType TMemoryDeviceType>
 struct VolumeBasedAllocationStateMarkerFunctor {
 public:

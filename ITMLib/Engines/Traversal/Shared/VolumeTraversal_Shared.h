@@ -44,37 +44,6 @@ Vector6i computeLocalBounds(const Vector3i& hashEntryMinPoint, const Vector3i& h
 	                ORUTILS_MIN(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE - (hashEntryMaxPoint.z - bounds.max_z)));
 }
 
-/**
- * \brief Look for the hash index of the hash entry with the specified position
- * \param hashIdx [out] the index of the hash entry corresponding to the specified position
- * \param hashBlockPosition [in] spacial position of the sough-after hash entry (in hash blocks)
- * \param hashTable [in] the hash table to search
- * \return true if hash block is allocated, false otherwise
- */
-_CPU_AND_GPU_CODE_
-inline bool FindHashAtPosition(THREADPTR(int)& hashIdx,
-                               const CONSTPTR(Vector3s)& hashBlockPosition,
-                               const CONSTPTR(HashEntry)* hashTable) {
-	hashIdx = HashCodeFromBlockPosition(hashBlockPosition);
-	HashEntry hashEntry = hashTable[hashIdx];
-
-	if (!(IS_EQUAL3(hashEntry.pos, hashBlockPosition) && hashEntry.ptr >= -1)) {
-		if (hashEntry.ptr >= -1) {
-			//search excess list only if there is no room in ordered part
-			while (hashEntry.offset >= 1) {
-				hashIdx = ORDERED_LIST_SIZE + hashEntry.offset - 1;
-				hashEntry = hashTable[hashIdx];
-
-				if (IS_EQUAL3(hashEntry.pos, hashBlockPosition) && hashEntry.ptr >= -1) {
-					return true;
-				}
-			}
-			return false;
-		}
-		return false;
-	}
-	return true;
-}
 
 // endregion ===========================================================================================================
 

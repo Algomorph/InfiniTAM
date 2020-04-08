@@ -187,21 +187,36 @@ BOOST_FIXTURE_TEST_CASE(TestDeallocateHashBlockList_CPU, CollisionHashFixture) {
 	                                                                                              MEMORYDEVICE_CPU);
 	indexer.AllocateBlockList(&volume, hash_position_memory_block, hash_position_memory_block.dataSize);
 
-	std::vector<int> utilized_codes = StatCalc_CPU_VBH_Voxel::Instance().GetUtilizedHashCodes(&volume);
-	const size_t blocks_to_remove_count = utilized_codes.size() / 2;
-	const size_t blocks_remaining_count = utilized_codes.size() - blocks_to_remove_count;
-	std::vector<int> codes_to_remove_vector(utilized_codes.begin(), utilized_codes.begin() + blocks_to_remove_count);
-	std::vector<int> remaining_codes_ground_truth(utilized_codes.begin() + blocks_to_remove_count, utilized_codes.end());
+	std::cout << volume.index.GetUtilizedHashBlockCount() << std::endl;
 
-	ORUtils::MemoryBlock<int> codes_to_remove_block = std_vector_to_ORUtils_MemoryBlock(codes_to_remove_vector, MEMORYDEVICE_CPU);
+	std::vector<Vector3s> utilized_blocks = StatCalc_CPU_VBH_Voxel::Instance().GetUtilizedHashBlockPositions(&volume);
+	const size_t blocks_to_remove_count = utilized_blocks.size() / 2;
+	std::vector<Vector3s> blocks_to_remove_vector(utilized_blocks.begin(), utilized_blocks.begin() + blocks_to_remove_count);
+	std::vector<Vector3s> remaining_blocks_ground_truth(utilized_blocks.begin() + blocks_to_remove_count, utilized_blocks.end());
 
-	indexer.DeallocateBlockList(&volume, codes_to_remove_block, codes_to_remove_block.dataSize);
+	ORUtils::MemoryBlock<Vector3s> blocks_to_remove_block = std_vector_to_ORUtils_MemoryBlock(blocks_to_remove_vector, MEMORYDEVICE_CPU);
 
-	std::vector<int> remaining_utilized_codes = StatCalc_CPU_VBH_Voxel::Instance().GetUtilizedHashCodes(&volume);
-	std::vector<int> remaining_allocated_codes = StatCalc_CPU_VBH_Voxel::Instance().GetAllocatedHashCodes(&volume);
+	indexer.DeallocateBlockList(&volume, blocks_to_remove_block, blocks_to_remove_block.dataSize);
 
-	BOOST_REQUIRE_EQUAL(remaining_utilized_codes, remaining_allocated_codes);
-	BOOST_REQUIRE_EQUAL(remaining_codes_ground_truth, remaining_utilized_codes);
+	std::vector<Vector3s> remaining_utilized_blocks = StatCalc_CPU_VBH_Voxel::Instance().GetUtilizedHashBlockPositions(&volume);
+	std::vector<Vector3s> remaining_allocated_blocks = StatCalc_CPU_VBH_Voxel::Instance().GetAllocatedHashBlockPositions(&volume);
+
+	struct {
+		bool operator()(Vector3s a, Vector3s b) const
+		{
+			return a.z == b.z ? (a.y == b.y ? ( a.x < b.x ): a.y < b.y ): a.z < b.z;
+		}
+	} vector3s_coordinate_less;
+
+	std::sort(remaining_blocks_ground_truth.begin(), remaining_blocks_ground_truth.end(), vector3s_coordinate_less);
+	std::sort(remaining_utilized_blocks.begin(), remaining_utilized_blocks.end(), vector3s_coordinate_less);
+	std::sort(remaining_allocated_blocks.begin(), remaining_allocated_blocks.end(), vector3s_coordinate_less);
+
+	BOOST_REQUIRE_EQUAL(remaining_utilized_blocks.size(), remaining_allocated_blocks.size());
+	BOOST_REQUIRE_EQUAL(remaining_blocks_ground_truth.size(), remaining_utilized_blocks.size());
+
+	BOOST_REQUIRE_EQUAL(remaining_utilized_blocks, remaining_allocated_blocks);
+	BOOST_REQUIRE_EQUAL(remaining_blocks_ground_truth, remaining_utilized_blocks);
 
 }
 

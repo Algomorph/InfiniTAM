@@ -9,6 +9,7 @@ template<typename T> _CPU_AND_GPU_CODE_ inline int HashCodeFromBlockPosition(con
 	return (((uint)blockPos.x * 73856093u) ^ ((uint)blockPos.y * 19349669u) ^ ((uint)blockPos.z * 83492791u)) & (uint)VOXEL_HASH_MASK;
 }
 
+//TODO: replace usages with FindHashAtPosition
 /**
  * \brief find the hash block at the specified spatial coordinates (in blocks, not voxels!) and return its hash
  * \param hash_table
@@ -30,6 +31,39 @@ FindHashCodeAt(const CONSTPTR(ITMLib::VoxelBlockHash::IndexData)* hash_table, co
 		hash = ORDERED_LIST_SIZE + hashEntry.offset - 1;
 	}
 	return -1;
+}
+
+
+/**
+ * \brief Look for the hash index of the hash entry with the specified position
+ * \param hash_index [out] the index of the hash entry corresponding to the specified position
+ * \param hash_block_position [in] spacial position of the sough-after hash entry (in hash blocks)
+ * \param hash_table [in] the hash table to search
+ * \return true if hash block is allocated, false otherwise
+ */
+_CPU_AND_GPU_CODE_
+inline bool FindHashAtPosition(THREADPTR(int)& hash_index,
+                               const CONSTPTR(Vector3s)& hash_block_position,
+                               const CONSTPTR(HashEntry)* hash_table) {
+	hash_index = HashCodeFromBlockPosition(hash_block_position);
+	HashEntry hash_entry = hash_table[hash_index];
+
+	if (!(IS_EQUAL3(hash_entry.pos, hash_block_position) && hash_entry.ptr >= -1)) {
+		if (hash_entry.ptr >= -1) {
+			//search excess list only if there is no room in ordered part
+			while (hash_entry.offset >= 1) {
+				hash_index = ORDERED_LIST_SIZE + hash_entry.offset - 1;
+				hash_entry = hash_table[hash_index];
+
+				if (IS_EQUAL3(hash_entry.pos, hash_block_position) && hash_entry.ptr >= -1) {
+					return true;
+				}
+			}
+			return false;
+		}
+		return false;
+	}
+	return true;
 }
 
 

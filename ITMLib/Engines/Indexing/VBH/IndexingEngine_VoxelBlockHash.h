@@ -33,11 +33,11 @@ class IndexingEngine_VoxelBlockHash :
 
 public:
 
-	virtual void AllocateHashEntriesUsingAllocationStateList(VoxelVolume <TVoxel, VoxelBlockHash>* volume) = 0;
+	virtual void AllocateHashEntriesUsingAllocationStateList(VoxelVolume<TVoxel, VoxelBlockHash>* volume) = 0;
 	virtual void
-	AllocateHashEntriesUsingAllocationStateList_SetVisibility(VoxelVolume <TVoxel, VoxelBlockHash>* volume) = 0;
+	AllocateHashEntriesUsingAllocationStateList_SetVisibility(VoxelVolume<TVoxel, VoxelBlockHash>* volume) = 0;
 	virtual HashEntry FindHashEntry(const VoxelBlockHash& index, const Vector3s& coordinates) = 0;
-	virtual bool AllocateHashBlockAt(VoxelVolume <TVoxel, VoxelBlockHash>* volume, Vector3s at, int& hashCode) = 0;
+	virtual bool AllocateHashBlockAt(VoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3s at, int& hashCode) = 0;
 
 	/**
 	 * \brief Allocate all hash blocks at given coordinates
@@ -45,7 +45,7 @@ public:
 	 * \param block_coordinates coordinates of blocks to allocate (in blocks, not voxels)
 	 */
 	virtual void
-	AllocateBlockList(VoxelVolume <TVoxel, VoxelBlockHash>* volume,
+	AllocateBlockList(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
 	                  const ORUtils::MemoryBlock<Vector3s>& block_coordinates,
 	                  int new_block_count) = 0;
 	/**
@@ -53,28 +53,30 @@ public:
 	 * \param volume - volume, where to deallocate
 	 * \param block_coordinates coordinates of blocks to allocate (in blocks, not voxels)
 	 */
-	virtual void DeallocateBlockList(VoxelVolume <TVoxel, VoxelBlockHash>* volume,
-	                                 const ORUtils::MemoryBlock<int>& hash_codes_of_blocks_to_remove,
+	virtual void DeallocateBlockList(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
+	                                 const ORUtils::MemoryBlock<Vector3s>& block_coordinates,
 	                                 int count_blocks_to_remove) = 0;
 
-	virtual void ResetUtilizedBlockList(VoxelVolume <TVoxel, VoxelBlockHash>* volume) override;
+	virtual void ResetUtilizedBlockList(VoxelVolume<TVoxel, VoxelBlockHash>* volume) override;
+
+	void RebuildUtilizedBlockList(VoxelVolume<TVoxel, VoxelBlockHash>* volume);
 
 	void AllocateNearSurface(
-			VoxelVolume <TVoxel, VoxelBlockHash>* volume, const View* view,
+			VoxelVolume<TVoxel, VoxelBlockHash>* volume, const View* view,
 			const Matrix4f& depth_camera_matrix = Matrix4f::Identity()) override;
 
-	void AllocateNearSurface(VoxelVolume <TVoxel, VoxelBlockHash>* volume, const View* view,
+	void AllocateNearSurface(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const View* view,
 	                         const CameraTrackingState* tracking_state) override;
 
-	void AllocateNearAndBetweenTwoSurfaces(VoxelVolume <TVoxel, VoxelBlockHash>* volume,
+	void AllocateNearAndBetweenTwoSurfaces(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
 	                                       const View* view,
 	                                       const CameraTrackingState* tracking_state) override;
 
-	virtual void AllocateGridAlignedBox(VoxelVolume <TVoxel, VoxelBlockHash>* volume, const Extent3Di& box);
+	virtual void AllocateGridAlignedBox(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const Extent3Di& box);
 
 
 private:
-	void ReallocateDeletedHashBlocks(VoxelVolume <TVoxel, VoxelBlockHash>* volume);
+	void ReallocateDeletedHashBlocks(VoxelVolume<TVoxel, VoxelBlockHash>* volume);
 
 };
 

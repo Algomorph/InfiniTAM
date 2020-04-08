@@ -15,8 +15,11 @@
 //  ================================================================
 #pragma once
 
+//ORUtils
 #include "../../../../ORUtils/PlatformIndependence.h"
 #include "../../../../ORUtils/PlatformIndependentAtomics.h"
+
+//local
 #include "../../../Objects/Volume/VoxelBlockHash.h"
 #include "../../../Objects/Volume/RepresentationAccess.h"
 #include "../../../Objects/Views/View.h"
@@ -31,9 +34,7 @@
 #include "../../../Utils/CLionCUDAsyntax.h"
 
 #ifdef __CUDACC__
-
 #include "../../../Utils/CUDAUtils.h"
-
 #endif
 
 using namespace ITMLib;
@@ -225,11 +226,11 @@ inline void ResetVoxelBlock(ATOMIC_ARGUMENT(int) last_free_voxel_block_id, int* 
  */
 template<typename TVoxel>
 _DEVICE_WHEN_AVAILABLE_
-inline void DeallocateBlock(const int hash_code_to_remove,
+inline void DeallocateBlock(Vector3s block_position_to_remove,
                             ITMLib::HashEntryAllocationState* hash_entry_states,
                             THREADPTR(HashEntry)* hash_table,
                             THREADPTR(TVoxel)* voxels,
-                            THREADPTR(int)* colliding_codes_device,
+                            THREADPTR(Vector3s)* colliding_blocks_device,
                             ATOMIC_ARGUMENT(int) colliding_block_count,
                             ATOMIC_ARGUMENT(int) last_free_voxel_block_id,
                             ATOMIC_ARGUMENT(int) last_free_excess_list_id,
@@ -245,18 +246,17 @@ inline void DeallocateBlock(const int hash_code_to_remove,
 		return default_entry;
 	}();
 
-	const HashEntry& entry_to_remove = hash_table[hash_code_to_remove];
-	int bucket_code;
-	bool entry_in_ordered_list;
-	if (hash_code_to_remove < ORDERED_LIST_SIZE) {
-		bucket_code = hash_code_to_remove;
-		entry_in_ordered_list = true;
-	} else {
-		bucket_code = HashCodeFromBlockPosition(entry_to_remove.pos);
-		entry_in_ordered_list = false;
-	}
+	int bucket_code = HashCodeFromBlockPosition(block_position_to_remove);
 
 	bool collision = false;
+
+#if defined(__CUDACC__) && defined(__CUDA_ARCH__)
+	if(atomicCAS((char*) (hash_entry_states + bucket_code),
+				  (char) ITMLib::NEEDS_NO_CHANGE,
+				  (char) BUCKET_NEEDS_DEALLOCATION) != (char) ITMLib::NEEDS_NO_CHANGE){
+		collision = true;
+	}
+#else
 #pragma omp critical
 	{
 		if (hash_entry_states[bucket_code] == NEEDS_NO_CHANGE) {
@@ -265,22 +265,32 @@ inline void DeallocateBlock(const int hash_code_to_remove,
 			collision = true;
 		}
 	};
+#endif
+
 	/* if there is a bucket collision, we'll want to leave the block alone for now and
 	 process the block again on next run of the outer while loop, so that we don't get a
 	 data race on the intra-bucket entry connections */
 	if (collision) {
 		int collision_index = ATOMIC_ADD(colliding_block_count, 1);
-		colliding_codes_device[collision_index] = hash_code_to_remove;
+		colliding_blocks_device[collision_index] = block_position_to_remove;
 		return;
 	}
+
+	int hash_index_to_clear;
+
+	if(!FindHashAtPosition(hash_index_to_clear, block_position_to_remove, hash_table)){
+		return;
+	}
+
+	HashEntry entry_to_remove = hash_table[hash_index_to_clear];
 
 	ResetVoxelBlock(last_free_voxel_block_id, voxel_allocation_list, voxels, entry_to_remove,
 	                empty_voxel_block_device);
 
-	if (entry_in_ordered_list) {
+	if (hash_index_to_clear < ORDERED_LIST_SIZE) {
 		if (entry_to_remove.offset == 0) {
 			// entry has no child in excess list, so it suffices to simply reset the removed entry.
-			hash_table[hash_code_to_remove] = default_entry;
+			hash_table[hash_index_to_clear] = default_entry;
 		} else {
 			// entry has a child in excess list
 			// we must move the child from the excess list to its parent's slot in the ordered list
@@ -290,15 +300,16 @@ inline void DeallocateBlock(const int hash_code_to_remove,
 			excess_allocation_list[next_last_free_excess_id] = entry_to_remove.offset - 1;
 
 			// finally, swap parent with child entry in the table and clean out former child's entry slot
-			int child_hash_code = ORDERED_LIST_SIZE + entry_to_remove.offset;
-			hash_table[hash_code_to_remove] = hash_table[child_hash_code];
+			int child_hash_code = ORDERED_LIST_SIZE + entry_to_remove.offset - 1;
+			hash_table[hash_index_to_clear] = hash_table[child_hash_code];
+
 			hash_table[child_hash_code] = default_entry;
 		}
 	} else {
 		// we must find direct parent of the excess list entry we're trying to remove
 		int current_parent_code = bucket_code;
 		int current_parent_offset = hash_table[current_parent_code].offset;
-		int original_offset = hash_code_to_remove - ORDERED_LIST_SIZE;
+		int original_offset = hash_index_to_clear - ORDERED_LIST_SIZE;
 		while (current_parent_offset != original_offset + 1) {
 			current_parent_code = ORDERED_LIST_SIZE + current_parent_offset - 1;
 			current_parent_offset = hash_table[current_parent_code].offset;
@@ -320,7 +331,7 @@ inline void DeallocateBlock(const int hash_code_to_remove,
 			parent_entry.offset = entry_to_remove.offset;
 		}
 		// reset removed hash entry
-		hash_table[hash_code_to_remove] = default_entry;
+		hash_table[hash_index_to_clear] = default_entry;
 	}
 
 }
