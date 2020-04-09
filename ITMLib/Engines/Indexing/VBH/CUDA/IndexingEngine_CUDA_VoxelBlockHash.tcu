@@ -295,7 +295,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::DeallocateBlockL
 	static ORUtils::MemoryBlock<TVoxel> empty_voxel_block = []() {
 		ORUtils::MemoryBlock<TVoxel> empty_voxel_block(VOXEL_BLOCK_SIZE3, MEMORYDEVICE_CUDA);
 		TVoxel* empty_voxel_block_device = empty_voxel_block.GetData(MEMORYDEVICE_CUDA);
-		for (int i_voxel = 0; i_voxel < VOXEL_BLOCK_SIZE3; i_voxel++) empty_voxel_block_device[i_voxel] = TVoxel();
+		memsetKernel<TVoxel>(empty_voxel_block_device, TVoxel(), VOXEL_BLOCK_SIZE3);
 		return empty_voxel_block;
 	}();
 	const TVoxel* empty_voxel_block_device = empty_voxel_block.GetData(MEMORYDEVICE_CUDA);

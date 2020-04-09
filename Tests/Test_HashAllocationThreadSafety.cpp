@@ -38,8 +38,10 @@
 #include "../ITMLib/Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator.h"
 //(CUDA)
 #ifndef COMPILE_WITHOUT_CUDA
+
 #include "../ITMLib/Engines/Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
 #include "../ITMLib/Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator.h"
+
 #endif
 
 using namespace ITMLib;
@@ -177,6 +179,14 @@ BOOST_FIXTURE_TEST_CASE(TestAllocateHashBlockList_CPU, CollisionHashFixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(TestDeallocateHashBlockList_CPU, CollisionHashFixture) {
+
+	// for sorting later
+	struct {
+		bool operator()(Vector3s a, Vector3s b) const {
+			return a.z == b.z ? (a.y == b.y ? (a.x < b.x) : a.y < b.y) : a.z < b.z;
+		}
+	} vector3s_coordinate_less;
+
 	const int excess_list_size = 0x6FFFF;
 	BOOST_TEST_CONTEXT("Seed: " << seed);
 	BOOST_REQUIRE_GE(excess_list_size, required_max_excess_list_size);
@@ -187,37 +197,59 @@ BOOST_FIXTURE_TEST_CASE(TestDeallocateHashBlockList_CPU, CollisionHashFixture) {
 	                                                                                              MEMORYDEVICE_CPU);
 	indexer.AllocateBlockList(&volume, hash_position_memory_block, hash_position_memory_block.dataSize);
 
-	std::cout << volume.index.GetUtilizedHashBlockCount() << std::endl;
-
 	std::vector<Vector3s> utilized_blocks = StatCalc_CPU_VBH_Voxel::Instance().GetUtilizedHashBlockPositions(&volume);
-	const size_t blocks_to_remove_count = utilized_blocks.size() / 2;
-	std::vector<Vector3s> blocks_to_remove_vector(utilized_blocks.begin(), utilized_blocks.begin() + blocks_to_remove_count);
-	std::vector<Vector3s> remaining_blocks_ground_truth(utilized_blocks.begin() + blocks_to_remove_count, utilized_blocks.end());
 
-	ORUtils::MemoryBlock<Vector3s> blocks_to_remove_block = std_vector_to_ORUtils_MemoryBlock(blocks_to_remove_vector, MEMORYDEVICE_CPU);
+	std::sort(utilized_blocks.begin(), utilized_blocks.end(), vector3s_coordinate_less);
+
+	const size_t blocks_to_remove_count = utilized_blocks.size() / 2;
+	std::vector<Vector3s> blocks_to_remove_vector(utilized_blocks.begin(),
+	                                              utilized_blocks.begin() + blocks_to_remove_count);
+	std::vector<Vector3s> remaining_blocks_ground_truth(utilized_blocks.begin() + blocks_to_remove_count,
+	                                                    utilized_blocks.end());
+
+	ORUtils::MemoryBlock<Vector3s> blocks_to_remove_block = std_vector_to_ORUtils_MemoryBlock(blocks_to_remove_vector,
+	                                                                                          MEMORYDEVICE_CPU);
 
 	indexer.DeallocateBlockList(&volume, blocks_to_remove_block, blocks_to_remove_block.dataSize);
 
-	std::vector<Vector3s> remaining_utilized_blocks = StatCalc_CPU_VBH_Voxel::Instance().GetUtilizedHashBlockPositions(&volume);
-	std::vector<Vector3s> remaining_allocated_blocks = StatCalc_CPU_VBH_Voxel::Instance().GetAllocatedHashBlockPositions(&volume);
+	std::vector<Vector3s> remaining_utilized_blocks = StatCalc_CPU_VBH_Voxel::Instance().GetUtilizedHashBlockPositions(
+			&volume);
+	std::vector<Vector3s> remaining_allocated_blocks = StatCalc_CPU_VBH_Voxel::Instance().GetAllocatedHashBlockPositions(
+			&volume);
 
-	struct {
-		bool operator()(Vector3s a, Vector3s b) const
-		{
-			return a.z == b.z ? (a.y == b.y ? ( a.x < b.x ): a.y < b.y ): a.z < b.z;
-		}
-	} vector3s_coordinate_less;
 
 	std::sort(remaining_blocks_ground_truth.begin(), remaining_blocks_ground_truth.end(), vector3s_coordinate_less);
 	std::sort(remaining_utilized_blocks.begin(), remaining_utilized_blocks.end(), vector3s_coordinate_less);
 	std::sort(remaining_allocated_blocks.begin(), remaining_allocated_blocks.end(), vector3s_coordinate_less);
 
 	BOOST_REQUIRE_EQUAL(remaining_utilized_blocks.size(), remaining_allocated_blocks.size());
-	BOOST_REQUIRE_EQUAL(remaining_blocks_ground_truth.size(), remaining_utilized_blocks.size());
+	BOOST_REQUIRE_EQUAL(remaining_utilized_blocks.size(), remaining_blocks_ground_truth.size());
 
 	BOOST_REQUIRE_EQUAL(remaining_utilized_blocks, remaining_allocated_blocks);
-	BOOST_REQUIRE_EQUAL(remaining_blocks_ground_truth, remaining_utilized_blocks);
+	BOOST_REQUIRE_EQUAL(remaining_utilized_blocks, remaining_blocks_ground_truth);
 
+	const size_t blocks_to_re_add_count = blocks_to_remove_vector.size() / 2;
+
+	std::vector<Vector3s> blocks_to_re_add(blocks_to_remove_vector.begin(),
+	                                       blocks_to_remove_vector.begin() + blocks_to_re_add_count);
+	std::vector<Vector3s> final_block_set_ground_truth(remaining_blocks_ground_truth.begin(),
+	                                                   remaining_blocks_ground_truth.end());
+	final_block_set_ground_truth.insert(final_block_set_ground_truth.end(), blocks_to_re_add.begin(),
+	                                    blocks_to_re_add.end());
+
+
+	ORUtils::MemoryBlock<Vector3s> blocks_to_re_add_block = std_vector_to_ORUtils_MemoryBlock(blocks_to_re_add,
+	                                                                                          MEMORYDEVICE_CPU);
+
+	indexer.AllocateBlockList(&volume, blocks_to_re_add_block, blocks_to_re_add_block.dataSize);
+
+	std::vector<Vector3s> final_block_set = StatCalc_CPU_VBH_Voxel::Instance().GetUtilizedHashBlockPositions(&volume);
+
+	std::sort(final_block_set_ground_truth.begin(), final_block_set_ground_truth.end(), vector3s_coordinate_less);
+	std::sort(final_block_set.begin(), final_block_set.end(), vector3s_coordinate_less);
+
+	BOOST_REQUIRE_EQUAL(final_block_set.size(), final_block_set_ground_truth.size());
+	BOOST_REQUIRE_EQUAL(final_block_set, final_block_set_ground_truth);
 }
 
 
@@ -289,6 +321,80 @@ BOOST_FIXTURE_TEST_CASE(TestAllocateHashBlockList_CUDA, CollisionHashFixture) {
 		BOOST_REQUIRE_MESSAGE(!unallocated_bucket_code,
 		                      "Bucket code " << bad_hash_code << " was not allocated in the spatial hash.");
 	}
+}
+
+BOOST_FIXTURE_TEST_CASE(TestDeallocateHashBlockList_CUDA, CollisionHashFixture) {
+
+	// for sorting later
+	struct {
+		bool operator()(Vector3s a, Vector3s b) const {
+			return a.z == b.z ? (a.y == b.y ? (a.x < b.x) : a.y < b.y) : a.z < b.z;
+		}
+	} vector3s_coordinate_less;
+
+	const int excess_list_size = 0x6FFFF;
+	BOOST_TEST_CONTEXT("Seed: " << seed);
+	BOOST_REQUIRE_GE(excess_list_size, required_max_excess_list_size);
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume(MEMORYDEVICE_CUDA, {0x80000, excess_list_size});
+	volume.Reset();
+	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>& indexer = IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance();
+	ORUtils::MemoryBlock<Vector3s> hash_position_memory_block = std_vector_to_ORUtils_MemoryBlock(block_positions,
+	                                                                                              MEMORYDEVICE_CUDA);
+	indexer.AllocateBlockList(&volume, hash_position_memory_block, hash_position_memory_block.dataSize);
+
+	std::vector<Vector3s> utilized_blocks = StatCalc_CUDA_VBH_Voxel::Instance().GetUtilizedHashBlockPositions(&volume);
+
+	std::sort(utilized_blocks.begin(), utilized_blocks.end(), vector3s_coordinate_less);
+
+	const size_t blocks_to_remove_count = utilized_blocks.size() / 2;
+	std::vector<Vector3s> blocks_to_remove_vector(utilized_blocks.begin(),
+	                                              utilized_blocks.begin() + blocks_to_remove_count);
+	std::vector<Vector3s> remaining_blocks_ground_truth(utilized_blocks.begin() + blocks_to_remove_count,
+	                                                    utilized_blocks.end());
+
+	ORUtils::MemoryBlock<Vector3s> blocks_to_remove_block = std_vector_to_ORUtils_MemoryBlock(blocks_to_remove_vector,
+	                                                                                          MEMORYDEVICE_CUDA);
+
+	indexer.DeallocateBlockList(&volume, blocks_to_remove_block, blocks_to_remove_block.dataSize);
+
+	std::vector<Vector3s> remaining_utilized_blocks = StatCalc_CUDA_VBH_Voxel::Instance().GetUtilizedHashBlockPositions(
+			&volume);
+	std::vector<Vector3s> remaining_allocated_blocks = StatCalc_CUDA_VBH_Voxel::Instance().GetAllocatedHashBlockPositions(
+			&volume);
+
+
+	std::sort(remaining_blocks_ground_truth.begin(), remaining_blocks_ground_truth.end(), vector3s_coordinate_less);
+	std::sort(remaining_utilized_blocks.begin(), remaining_utilized_blocks.end(), vector3s_coordinate_less);
+	std::sort(remaining_allocated_blocks.begin(), remaining_allocated_blocks.end(), vector3s_coordinate_less);
+
+	BOOST_REQUIRE_EQUAL(remaining_utilized_blocks.size(), remaining_allocated_blocks.size());
+	BOOST_REQUIRE_EQUAL(remaining_utilized_blocks.size(), remaining_blocks_ground_truth.size());
+
+	BOOST_REQUIRE_EQUAL(remaining_utilized_blocks, remaining_allocated_blocks);
+	BOOST_REQUIRE_EQUAL(remaining_utilized_blocks, remaining_blocks_ground_truth);
+
+	const size_t blocks_to_re_add_count = blocks_to_remove_vector.size() / 2;
+
+	std::vector<Vector3s> blocks_to_re_add(blocks_to_remove_vector.begin(),
+	                                       blocks_to_remove_vector.begin() + blocks_to_re_add_count);
+	std::vector<Vector3s> final_block_set_ground_truth(remaining_blocks_ground_truth.begin(),
+	                                                   remaining_blocks_ground_truth.end());
+	final_block_set_ground_truth.insert(final_block_set_ground_truth.end(), blocks_to_re_add.begin(),
+	                                    blocks_to_re_add.end());
+
+
+	ORUtils::MemoryBlock<Vector3s> blocks_to_re_add_block = std_vector_to_ORUtils_MemoryBlock(blocks_to_re_add,
+	                                                                                          MEMORYDEVICE_CUDA);
+
+	indexer.AllocateBlockList(&volume, blocks_to_re_add_block, blocks_to_re_add_block.dataSize);
+
+	std::vector<Vector3s> final_block_set = StatCalc_CUDA_VBH_Voxel::Instance().GetUtilizedHashBlockPositions(&volume);
+
+	std::sort(final_block_set_ground_truth.begin(), final_block_set_ground_truth.end(), vector3s_coordinate_less);
+	std::sort(final_block_set.begin(), final_block_set.end(), vector3s_coordinate_less);
+
+	BOOST_REQUIRE_EQUAL(final_block_set.size(), final_block_set_ground_truth.size());
+	BOOST_REQUIRE_EQUAL(final_block_set, final_block_set_ground_truth);
 }
 
 #endif
