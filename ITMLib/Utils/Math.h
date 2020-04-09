@@ -160,6 +160,12 @@ int ceil_of_integer_quotient(int dividend, int divisor) {
 	return dividend / divisor + (dividend % divisor != 0);
 }
 
+template<typename T>
+inline
+bool Vector3CoordinateLess (ORUtils::Vector3<T> a, ORUtils::Vector3<T> b) {
+	return a.z == b.z ? (a.y == b.y ? (a.x < b.x) : a.y < b.y) : a.z < b.z;
+}
+
 } // namespace ITMLib
 // endregion
 

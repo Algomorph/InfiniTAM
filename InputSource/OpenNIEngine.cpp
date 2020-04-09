@@ -300,15 +300,15 @@ void OpenNIEngine::getImages(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthIm
 			rgb[i] = newPix;
 		}
 	}
-	else memset(rgb, 0, rgbImage->dataSize * sizeof(Vector4u));
+	else memset(rgb, 0, rgbImage->element_count * sizeof(Vector4u));
 
 	short *depth = rawDepthImage->GetData(MEMORYDEVICE_CPU);
 	if (depthAvailable)
 	{
 		const openni::DepthPixel* depthImagePix = (const openni::DepthPixel*)data->depthFrame.getData();
-		memcpy(depth, depthImagePix, rawDepthImage->dataSize * sizeof(short));
+		memcpy(depth, depthImagePix, rawDepthImage->element_count * sizeof(short));
 	}
-	else memset(depth, 0, rawDepthImage->dataSize * sizeof(short));
+	else memset(depth, 0, rawDepthImage->element_count * sizeof(short));
 
 #if USE_INPUT_MIRRORING
 	// Mirror the input images horizontally (this is sometimes required when using a Kinect).

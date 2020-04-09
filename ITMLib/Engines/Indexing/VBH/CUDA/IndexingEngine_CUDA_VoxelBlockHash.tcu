@@ -24,6 +24,8 @@
 #include "../../../../../ORUtils/PlatformIndependence.h"
 #include "../../Shared/IndexingEngine_Functors.h"
 #include "../../../Traversal/Interface/HashTableTraversal.h"
+#include "../../../../Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator.h"
+#include "../../../../Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculatorFactory.h"
 
 //Thrust
 #include <thrust/device_ptr.h>
@@ -326,6 +328,22 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::DeallocateBlockL
 
 		colliding_block_count.UpdateHostFromDevice();
 		remaining_count_of_blocks_to_remove = *colliding_block_count.GetData(MEMORYDEVICE_CPU);
+
+		//_DEBUG deallocation
+//		std::vector<int> codes = StatCalc_Accessor::Get<TVoxel,VoxelBlockHash>(MEMORYDEVICE_CUDA).GetAllocatedHashCodes(volume);
+//		std::vector<Vector3s> positions = StatCalc_Accessor::Get<TVoxel,VoxelBlockHash>(MEMORYDEVICE_CUDA).GetAllocatedHashBlockPositions(volume);
+//
+//		std::sort(positions.begin(), positions.end(), Vector3CoordinateLess<short>);
+//		for(int i_code = 0; i_code < 10; i_code++){
+//			std::cout /*<< codes[i_code] << "|"*/ << "(" << positions[i_code] << "), ";
+//		}
+//		std::cout << std::endl;
+		HashEntry entry = volume->index.GetHashEntryAt(86, 21, 108);
+		if(entry.ptr >= 0){
+			std::cout << "Entry allocated" << std::endl;
+		}else{
+			std::cout << "Entry not allocated" << std::endl;
+		}
 
 		std::swap(blocks_to_remove_device, colliding_blocks_device);
 	}

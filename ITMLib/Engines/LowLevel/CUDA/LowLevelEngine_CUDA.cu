@@ -43,7 +43,7 @@ void LowLevelEngine_CUDA::CopyImage(ITMUChar4Image *image_out, const ITMUChar4Im
 	Vector4u *dest = image_out->GetData(MEMORYDEVICE_CUDA);
 	const Vector4u *src = image_in->GetData(MEMORYDEVICE_CUDA);
 
-	ORcudaSafeCall(cudaMemcpy(dest, src, image_in->dataSize * sizeof(Vector4u), cudaMemcpyDeviceToDevice));
+	ORcudaSafeCall(cudaMemcpy(dest, src, image_in->element_count * sizeof(Vector4u), cudaMemcpyDeviceToDevice));
 }
 
 void LowLevelEngine_CUDA::CopyImage(ITMFloatImage *image_out, const ITMFloatImage *image_in) const
@@ -51,7 +51,7 @@ void LowLevelEngine_CUDA::CopyImage(ITMFloatImage *image_out, const ITMFloatImag
 	float *dest = image_out->GetData(MEMORYDEVICE_CUDA);
 	const float *src = image_in->GetData(MEMORYDEVICE_CUDA);
 
-	ORcudaSafeCall(cudaMemcpy(dest, src, image_in->dataSize * sizeof(float), cudaMemcpyDeviceToDevice));
+	ORcudaSafeCall(cudaMemcpy(dest, src, image_in->element_count * sizeof(float), cudaMemcpyDeviceToDevice));
 }
 
 void LowLevelEngine_CUDA::CopyImage(ITMFloat4Image *image_out, const ITMFloat4Image *image_in) const
@@ -59,7 +59,7 @@ void LowLevelEngine_CUDA::CopyImage(ITMFloat4Image *image_out, const ITMFloat4Im
 	Vector4f *dest = image_out->GetData(MEMORYDEVICE_CUDA);
 	const Vector4f *src = image_in->GetData(MEMORYDEVICE_CUDA);
 
-	ORcudaSafeCall(cudaMemcpy(dest, src, image_in->dataSize * sizeof(Vector4f), cudaMemcpyDeviceToDevice));
+	ORcudaSafeCall(cudaMemcpy(dest, src, image_in->element_count * sizeof(Vector4f), cudaMemcpyDeviceToDevice));
 }
 
 void LowLevelEngine_CUDA::ConvertColourToIntensity(ITMFloatImage *image_out, const ITMUChar4Image *image_in) const

@@ -528,8 +528,8 @@ void FFMPEGReader::getImages(ITMUChar4Image *rgbImage, ITMShortImage *depthImage
 			}
 		}
 	}
-	if (!gotColour) memset(rgb, 0, rgbImage->dataSize * sizeof(Vector4u));
-	if (!gotDepth) memset(depth, 0, depthImage->dataSize * sizeof(short));
+	if (!gotColour) memset(rgb, 0, rgbImage->element_count * sizeof(Vector4u));
+	if (!gotDepth) memset(depth, 0, depthImage->element_count * sizeof(short));
 }
 
 Vector2i FFMPEGReader::getDepthImageSize(void) const

@@ -368,7 +368,7 @@ void LibUVCEngine::getImages(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthIm
 	}
 
 	short *depth = rawDepthImage->GetData(MEMORYDEVICE_CPU);
-	memcpy(depth, data->framebuffer_depth->data, rawDepthImage->dataSize * sizeof(short));
+	memcpy(depth, data->framebuffer_depth->data, rawDepthImage->element_count * sizeof(short));
 
 	data->got_color = data->got_depth = 0;
 }

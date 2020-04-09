@@ -267,6 +267,10 @@ inline void DeallocateBlock(Vector3s block_position_to_remove,
 	};
 #endif
 
+	if(block_position_to_remove == Vector3s(86, 21, 108)){
+		printf("bucket_code: %d collision: %s/n", bucket_code, (collision ? "true": "false"));
+	}
+
 	/* if there is a bucket collision, we'll want to leave the block alone for now and
 	 process the block again on next run of the outer while loop, so that we don't get a
 	 data race on the intra-bucket entry connections */

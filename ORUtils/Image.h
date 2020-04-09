@@ -16,7 +16,7 @@ class Image : private MemoryBlock<T> {
 public:
 
 	/** Expose public MemoryBlock<T> member variables. */
-	using MemoryBlock<T>::dataSize;
+	using MemoryBlock<T>::element_count;
 
 
 	/** Expose public MemoryBlock<T> member functions. */
@@ -84,7 +84,7 @@ public:
 			return false;
 		}
 		if (rhs.isAllocated_CPU) {
-			for (int iElement = 0; iElement < rhs.dataSize; iElement++) {
+			for (int iElement = 0; iElement < rhs.element_count; iElement++) {
 				T rhsElement = rhs.GetElement(iElement, MEMORYDEVICE_CPU);
 				T lhsElement = lhs.GetElement(iElement, MEMORYDEVICE_CPU);
 				if (rhsElement != lhsElement) {
@@ -92,7 +92,7 @@ public:
 				}
 			}
 		} else {
-			for (int iElement = 0; iElement < rhs.dataSize; iElement++) {
+			for (int iElement = 0; iElement < rhs.element_count; iElement++) {
 				T rhsElement = rhs.GetElement(iElement, MEMORYDEVICE_CUDA);
 				T lhsElement = lhs.GetElement(iElement, MEMORYDEVICE_CUDA);
 				if (rhsElement != lhsElement) {
@@ -125,7 +125,7 @@ void Image<T>::ApplyMask(const Image<TMask>& maskImage, T blankElement) {
 #ifdef WITH_OPENMP
 #pragma omp parallel for default(none) shared(maskImage, blankElement)
 #endif
-	for (int iElement = 0; iElement < maskImage.dataSize; iElement++) {
+	for (int iElement = 0; iElement < maskImage.element_count; iElement++) {
 		if(!maskImage.GetElement(iElement,MEMORYDEVICE_CPU)){
 			this->data_cpu[iElement] = blankElement;
 		}

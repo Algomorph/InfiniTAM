@@ -876,6 +876,8 @@ set(ITMLIB_UTILS_SOURCES
 
     Utils/Configuration.cpp
     Utils/CPPPrintHelpers.cpp
+
+    Utils/Math.cpp
     )
 
 set(ITMLIB_UTILS_HEADERS

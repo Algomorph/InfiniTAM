@@ -366,7 +366,7 @@ void ExtendedTracker::UpdatePoseQuality(int noValidPoints_old, float *hessian_go
 		return;
 	}
 
-	size_t noTotalPoints = viewHierarchy_Depth->GetLevel(0)->depth->dataSize;
+	size_t noTotalPoints = viewHierarchy_Depth->GetLevel(0)->depth->element_count;
 	int noValidPointsMax = lowLevelEngine->CountValidDepths(view->depth);
 
 	float normFactor_v1 = (float)noValidPoints_old / (float)noTotalPoints;

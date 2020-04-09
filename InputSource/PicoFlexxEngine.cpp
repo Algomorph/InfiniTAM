@@ -184,16 +184,16 @@ void PicoFlexxEngine::getImages(ITMUChar4Image *rgbImage, ITMShortImage *rawDept
 	// copy the color info
 #ifdef PROVIDE_RGB
 	Vector4u *rgb = rgbImage->GetData(MEMORYDEVICE_CPU);
-	if (data->rgbImage.size()) memcpy(rgb, data->rgbImage.data(), rgbImage->dataSize * sizeof(Vector4u));
-	else memset(rgb, 0, rgbImage->dataSize * sizeof(Vector4u));
+	if (data->rgbImage.size()) memcpy(rgb, data->rgbImage.data(), rgbImage->element_count * sizeof(Vector4u));
+	else memset(rgb, 0, rgbImage->element_count * sizeof(Vector4u));
 #else
 	imageSize_rgb = Vector2i(0, 0);
 #endif
 
 	// copy the depth info
 	short *depth = rawDepthImage->GetData(MEMORYDEVICE_CPU);
-	if (data->depthImage.size()) memcpy(depth, data->depthImage.data(), rawDepthImage->dataSize * sizeof(short));
-	else memset(depth, 0, rawDepthImage->dataSize * sizeof(short));
+	if (data->depthImage.size()) memcpy(depth, data->depthImage.data(), rawDepthImage->element_count * sizeof(short));
+	else memset(depth, 0, rawDepthImage->element_count * sizeof(short));
 }
 
 bool PicoFlexxEngine::hasMoreImages(void) const { return data != NULL; }

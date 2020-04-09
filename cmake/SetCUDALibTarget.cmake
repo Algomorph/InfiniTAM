@@ -16,6 +16,6 @@ else ()
         enable_language(CUDA)
     endif ()
 
-    add_library(${targetname} STATIC ${sources} ${headers} ${templates} ../ITMLib/Objects/Volume/VoxelBlockHash.cpp ../ITMLib/SurfaceTrackers/Interface/SlavchevaSurfaceTracker.cpp)
+    add_library(${targetname} STATIC ${sources} ${headers} ${templates} ../ITMLib/Objects/Volume/VoxelBlockHash.cpp ../ITMLib/SurfaceTrackers/Interface/SlavchevaSurfaceTracker.cpp ../ITMLib/Utils/Math.cpp)
     target_include_directories(${targetname} PUBLIC ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 endif ()

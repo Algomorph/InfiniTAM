@@ -118,7 +118,7 @@ BOOST_FIXTURE_TEST_CASE(TestAllocateHashBlockList_CPU, CollisionHashFixture) {
 	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>& indexer = IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance();
 	ORUtils::MemoryBlock<Vector3s> hash_position_memory_block = std_vector_to_ORUtils_MemoryBlock(block_positions,
 	                                                                                              MEMORYDEVICE_CPU);
-	indexer.AllocateBlockList(&volume, hash_position_memory_block, hash_position_memory_block.dataSize);
+	indexer.AllocateBlockList(&volume, hash_position_memory_block, hash_position_memory_block.element_count);
 
 	int allocated_block_count = StatCalc_CPU_VBH_Voxel::Instance().CountAllocatedHashBlocks(&volume);
 	BOOST_REQUIRE_EQUAL(allocated_block_count, block_positions.size());
@@ -195,7 +195,7 @@ BOOST_FIXTURE_TEST_CASE(TestDeallocateHashBlockList_CPU, CollisionHashFixture) {
 	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>& indexer = IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance();
 	ORUtils::MemoryBlock<Vector3s> hash_position_memory_block = std_vector_to_ORUtils_MemoryBlock(block_positions,
 	                                                                                              MEMORYDEVICE_CPU);
-	indexer.AllocateBlockList(&volume, hash_position_memory_block, hash_position_memory_block.dataSize);
+	indexer.AllocateBlockList(&volume, hash_position_memory_block, hash_position_memory_block.element_count);
 
 	std::vector<Vector3s> utilized_blocks = StatCalc_CPU_VBH_Voxel::Instance().GetUtilizedHashBlockPositions(&volume);
 
@@ -210,7 +210,7 @@ BOOST_FIXTURE_TEST_CASE(TestDeallocateHashBlockList_CPU, CollisionHashFixture) {
 	ORUtils::MemoryBlock<Vector3s> blocks_to_remove_block = std_vector_to_ORUtils_MemoryBlock(blocks_to_remove_vector,
 	                                                                                          MEMORYDEVICE_CPU);
 
-	indexer.DeallocateBlockList(&volume, blocks_to_remove_block, blocks_to_remove_block.dataSize);
+	indexer.DeallocateBlockList(&volume, blocks_to_remove_block, blocks_to_remove_block.element_count);
 
 	std::vector<Vector3s> remaining_utilized_blocks = StatCalc_CPU_VBH_Voxel::Instance().GetUtilizedHashBlockPositions(
 			&volume);
@@ -241,7 +241,7 @@ BOOST_FIXTURE_TEST_CASE(TestDeallocateHashBlockList_CPU, CollisionHashFixture) {
 	ORUtils::MemoryBlock<Vector3s> blocks_to_re_add_block = std_vector_to_ORUtils_MemoryBlock(blocks_to_re_add,
 	                                                                                          MEMORYDEVICE_CPU);
 
-	indexer.AllocateBlockList(&volume, blocks_to_re_add_block, blocks_to_re_add_block.dataSize);
+	indexer.AllocateBlockList(&volume, blocks_to_re_add_block, blocks_to_re_add_block.element_count);
 
 	std::vector<Vector3s> final_block_set = StatCalc_CPU_VBH_Voxel::Instance().GetUtilizedHashBlockPositions(&volume);
 
@@ -263,7 +263,7 @@ BOOST_FIXTURE_TEST_CASE(TestAllocateHashBlockList_CUDA, CollisionHashFixture) {
 		IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>& indexer = IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance();
 		ORUtils::MemoryBlock<Vector3s> hash_position_memory_block = std_vector_to_ORUtils_MemoryBlock(block_positions,
 		                                                                                              MEMORYDEVICE_CUDA);
-		indexer.AllocateBlockList(&volume, hash_position_memory_block, hash_position_memory_block.dataSize);
+		indexer.AllocateBlockList(&volume, hash_position_memory_block, hash_position_memory_block.element_count);
 
 		int allocated_block_count = StatCalc_CUDA_VBH_Voxel::Instance().CountAllocatedHashBlocks(&volume);
 		BOOST_REQUIRE_EQUAL(allocated_block_count, block_positions.size());
@@ -340,7 +340,7 @@ BOOST_FIXTURE_TEST_CASE(TestDeallocateHashBlockList_CUDA, CollisionHashFixture) 
 	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>& indexer = IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance();
 	ORUtils::MemoryBlock<Vector3s> hash_position_memory_block = std_vector_to_ORUtils_MemoryBlock(block_positions,
 	                                                                                              MEMORYDEVICE_CUDA);
-	indexer.AllocateBlockList(&volume, hash_position_memory_block, hash_position_memory_block.dataSize);
+	indexer.AllocateBlockList(&volume, hash_position_memory_block, hash_position_memory_block.element_count);
 
 	std::vector<Vector3s> utilized_blocks = StatCalc_CUDA_VBH_Voxel::Instance().GetUtilizedHashBlockPositions(&volume);
 
@@ -355,7 +355,7 @@ BOOST_FIXTURE_TEST_CASE(TestDeallocateHashBlockList_CUDA, CollisionHashFixture) 
 	ORUtils::MemoryBlock<Vector3s> blocks_to_remove_block = std_vector_to_ORUtils_MemoryBlock(blocks_to_remove_vector,
 	                                                                                          MEMORYDEVICE_CUDA);
 
-	indexer.DeallocateBlockList(&volume, blocks_to_remove_block, blocks_to_remove_block.dataSize);
+	indexer.DeallocateBlockList(&volume, blocks_to_remove_block, blocks_to_remove_block.element_count);
 
 	std::vector<Vector3s> remaining_utilized_blocks = StatCalc_CUDA_VBH_Voxel::Instance().GetUtilizedHashBlockPositions(
 			&volume);
@@ -386,7 +386,7 @@ BOOST_FIXTURE_TEST_CASE(TestDeallocateHashBlockList_CUDA, CollisionHashFixture) 
 	ORUtils::MemoryBlock<Vector3s> blocks_to_re_add_block = std_vector_to_ORUtils_MemoryBlock(blocks_to_re_add,
 	                                                                                          MEMORYDEVICE_CUDA);
 
-	indexer.AllocateBlockList(&volume, blocks_to_re_add_block, blocks_to_re_add_block.dataSize);
+	indexer.AllocateBlockList(&volume, blocks_to_re_add_block, blocks_to_re_add_block.element_count);
 
 	std::vector<Vector3s> final_block_set = StatCalc_CUDA_VBH_Voxel::Instance().GetUtilizedHashBlockPositions(&volume);
 

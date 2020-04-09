@@ -182,7 +182,7 @@ void SurfelSceneReconstructionEngine_CUDA<TSurfel>::AddNewSurfels(SurfelScene<TS
   // Calculate the prefix sum of the new points mask.
   const unsigned short *newPointsMask = this->m_newPointsMaskMB->GetData(MEMORYDEVICE_CUDA);
   unsigned int *newPointsPrefixSum = this->m_newPointsPrefixSumMB->GetData(MEMORYDEVICE_CUDA);
-  const int pixelCount = static_cast<int>(this->m_newPointsMaskMB->dataSize - 1);
+  const int pixelCount = static_cast<int>(this->m_newPointsMaskMB->element_count - 1);
   thrust::device_ptr<const unsigned short> newPointsMaskBegin(newPointsMask);
   thrust::device_ptr<unsigned int> newPointsPrefixSumBegin(newPointsPrefixSum);
   thrust::exclusive_scan(newPointsMaskBegin, newPointsMaskBegin + (pixelCount + 1), newPointsPrefixSumBegin);
@@ -232,7 +232,7 @@ template <typename TSurfel>
 void SurfelSceneReconstructionEngine_CUDA<TSurfel>::FindCorrespondingSurfels(const SurfelScene<TSurfel> *scene, const View *view, const CameraTrackingState *trackingState,
                                                                              const SurfelRenderState *renderState) const
 {
-  const int pixelCount = static_cast<int>(view->depth->dataSize);
+  const int pixelCount = static_cast<int>(view->depth->element_count);
 
   int threadsPerBlock = 256;
   int numBlocks = (pixelCount + threadsPerBlock - 1) / threadsPerBlock;
@@ -260,7 +260,7 @@ void SurfelSceneReconstructionEngine_CUDA<TSurfel>::FindCorrespondingSurfels(con
 template <typename TSurfel>
 void SurfelSceneReconstructionEngine_CUDA<TSurfel>::FuseMatchedPoints(SurfelScene<TSurfel> *scene, const View *view, const CameraTrackingState *trackingState) const
 {
-  const int pixelCount = static_cast<int>(view->depth->dataSize);
+  const int pixelCount = static_cast<int>(view->depth->element_count);
 
   int threadsPerBlock = 256;
   int numBlocks = (pixelCount + threadsPerBlock - 1) / threadsPerBlock;
@@ -338,7 +338,7 @@ void SurfelSceneReconstructionEngine_CUDA<TSurfel>::MergeSimilarSurfels(SurfelSc
   const int indexImageHeight = renderState->GetIndexImage()->noDims.y;
   const int indexImageWidth = renderState->GetIndexImage()->noDims.x;
   unsigned int *mergeTargetMap = this->m_mergeTargetMapMB->GetData(MEMORYDEVICE_CUDA);
-  const int pixelCount = static_cast<int>(renderState->GetIndexImage()->dataSize);
+  const int pixelCount = static_cast<int>(renderState->GetIndexImage()->element_count);
   const SurfelVolumeParameters& sceneParams = scene->GetParams();
   TSurfel *surfels = scene->GetSurfels()->GetData(MEMORYDEVICE_CUDA);
   unsigned int *surfelRemovalMask = this->m_surfelRemovalMaskMB->GetData(MEMORYDEVICE_CUDA);
@@ -382,7 +382,7 @@ void SurfelSceneReconstructionEngine_CUDA<TSurfel>::PreprocessDepthMap(const Vie
   const int height = view->depth->noDims.y;
   const Intrinsics& intrinsics = view->calib.intrinsics_d;
   Vector3f *normalMap = this->m_normalMapMB->GetData(MEMORYDEVICE_CUDA);
-  const int pixelCount = static_cast<int>(view->depth->dataSize);
+  const int pixelCount = static_cast<int>(view->depth->element_count);
   float *radiusMap = this->m_radiusMapMB->GetData(MEMORYDEVICE_CUDA);
   Vector4f *vertexMap = this->m_vertexMapMB->GetData(MEMORYDEVICE_CUDA);
   const int width = view->depth->noDims.x;
