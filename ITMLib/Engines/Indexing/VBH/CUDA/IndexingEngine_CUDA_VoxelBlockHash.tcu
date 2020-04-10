@@ -266,7 +266,7 @@ template<typename TVoxel>
 void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::DeallocateBlockList(
 		VoxelVolume <TVoxel, VoxelBlockHash>* volume,
 		const ORUtils::MemoryBlock<Vector3s>& block_coordinates,
-		const int count_of_blocks_to_remove) {
+		int count_of_blocks_to_remove) {
 
 	// *** locally-manipulated memory blocks of hash codes & counters *** /
 	ORUtils::MemoryBlock<Vector3s> block_coordinates_to_remove_local(count_of_blocks_to_remove, MEMORYDEVICE_CUDA);
@@ -303,9 +303,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::DeallocateBlockL
 	}();
 	const TVoxel* empty_voxel_block_device = empty_voxel_block.GetData(MEMORYDEVICE_CUDA);
 
-	int remaining_count_of_blocks_to_remove = count_of_blocks_to_remove;
-
-	while (remaining_count_of_blocks_to_remove > 0) {
+	while (count_of_blocks_to_remove > 0) {
 		*colliding_block_count.GetData(MEMORYDEVICE_CPU) = 0;
 		colliding_block_count.UpdateDeviceFromHost();
 
@@ -318,7 +316,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::DeallocateBlockL
 
 		deallocate_BlockList_device
 				<< < cuda_grid_size, cuda_block_size >> >
-		                             (blocks_to_remove_device, remaining_count_of_blocks_to_remove, hash_entry_states, hash_table, voxels,
+		                             (blocks_to_remove_device, count_of_blocks_to_remove, hash_entry_states, hash_table, voxels,
 				                             colliding_blocks_device, colliding_block_count.GetData(MEMORYDEVICE_CUDA),
 				                             last_free_voxel_block_id.GetData(MEMORYDEVICE_CUDA),
 				                             last_free_excess_list_id.GetData(MEMORYDEVICE_CUDA),
@@ -328,7 +326,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::DeallocateBlockL
 		ORcudaKernelCheck;
 
 		colliding_block_count.UpdateHostFromDevice();
-		remaining_count_of_blocks_to_remove = *colliding_block_count.GetData(MEMORYDEVICE_CPU);
+		count_of_blocks_to_remove = *colliding_block_count.GetData(MEMORYDEVICE_CPU);
 
 		std::swap(blocks_to_remove_device, colliding_blocks_device);
 	}
