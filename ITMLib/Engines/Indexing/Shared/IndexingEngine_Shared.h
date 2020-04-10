@@ -34,7 +34,9 @@
 #include "../../../Utils/CLionCUDAsyntax.h"
 
 #ifdef __CUDACC__
+
 #include "../../../Utils/CUDAUtils.h"
+
 #endif
 
 using namespace ITMLib;
@@ -226,7 +228,7 @@ inline void ResetVoxelBlock(ATOMIC_ARGUMENT(int) last_free_voxel_block_id, int* 
  */
 template<typename TVoxel>
 _DEVICE_WHEN_AVAILABLE_
-inline void DeallocateBlock(Vector3s block_position_to_remove,
+inline void DeallocateBlock(const Vector3s& block_position_to_remove,
                             ITMLib::HashEntryAllocationState* hash_entry_states,
                             THREADPTR(HashEntry)* hash_table,
                             THREADPTR(TVoxel)* voxels,
@@ -239,12 +241,12 @@ inline void DeallocateBlock(Vector3s block_position_to_remove,
                             const CONSTPTR(TVoxel)* empty_voxel_block_device) {
 
 	const HashEntry default_entry =
-	[]() {
-		HashEntry default_entry;
-		memset(&default_entry, 0, sizeof(HashEntry));
-		default_entry.ptr = -2;
-		return default_entry;
-	}();
+			[]() {
+				HashEntry default_entry;
+				memset(&default_entry, 0, sizeof(HashEntry));
+				default_entry.ptr = -2;
+				return default_entry;
+			}();
 
 	int bucket_code = HashCodeFromBlockPosition(block_position_to_remove);
 
@@ -267,10 +269,6 @@ inline void DeallocateBlock(Vector3s block_position_to_remove,
 	};
 #endif
 
-	if(block_position_to_remove == Vector3s(86, 21, 108)){
-		printf("bucket_code: %d collision: %s/n", bucket_code, (collision ? "true": "false"));
-	}
-
 	/* if there is a bucket collision, we'll want to leave the block alone for now and
 	 process the block again on next run of the outer while loop, so that we don't get a
 	 data race on the intra-bucket entry connections */
@@ -282,11 +280,13 @@ inline void DeallocateBlock(Vector3s block_position_to_remove,
 
 	int hash_index_to_clear;
 
-	if(!FindHashAtPosition(hash_index_to_clear, block_position_to_remove, hash_table)){
+	if (!FindHashAtPosition(hash_index_to_clear, block_position_to_remove, hash_table)) {
 		return;
 	}
 
 	HashEntry entry_to_remove = hash_table[hash_index_to_clear];
+
+
 
 	ResetVoxelBlock(last_free_voxel_block_id, voxel_allocation_list, voxels, entry_to_remove,
 	                empty_voxel_block_device);
