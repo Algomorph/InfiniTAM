@@ -193,18 +193,20 @@ public:
 #ifdef WITH_OPENMP
 #pragma omp parallel for
 #endif
-		for (int linearIndex = 0; linearIndex < voxel_count; linearIndex++) {
-			TVoxel1& voxel1 = voxels1[linearIndex];
-			TVoxel2& voxel2 = voxels2[linearIndex];
+		for (int linear_index = 0; linear_index < voxel_count; linear_index++) {
+			TVoxel1& voxel1 = voxels1[linear_index];
+			TVoxel2& voxel2 = voxels2[linear_index];
 			functor(voxel1, voxel2);
 		}
 	}
 
+
+
 	template<typename TFunctor>
 	inline static void
 	TraverseUtilized(VoxelVolume<TVoxel1, PlainVoxelArray>* volume1,
-	            VoxelVolume<TVoxel2, PlainVoxelArray>* volume2,
-	            TFunctor& functor){
+	                 VoxelVolume<TVoxel2, PlainVoxelArray>* volume2,
+	                 TFunctor& functor) {
 		TraverseAll(volume1, volume2, functor);
 	}
 
@@ -235,11 +237,26 @@ public:
 		}
 	}
 
+	/**
+	 * \brief Traverses all corresponding locations within volume1 and volume2, with index data for
+	 * \tparam TFunctor
+	 * \param volume1
+	 * \param volume2
+	 * \param functor
+	 */
+	template<typename TFunctor>
+	inline static void
+	TraverseAllWithVoxelIndexData1(VoxelVolume<TVoxel1, PlainVoxelArray>* volume1,
+	                              VoxelVolume<TVoxel2, PlainVoxelArray>* volume2,
+	                              TFunctor& functor) {
+		TraverseAllWithPosition(volume1, volume2, functor);
+	}
+
 	template<typename TFunctor>
 	inline static void
 	TraverseUtilizedWithPosition(VoxelVolume<TVoxel1, PlainVoxelArray>* volume1,
-	                 VoxelVolume<TVoxel2, PlainVoxelArray>* volume2,
-	                 TFunctor& functor){
+	                             VoxelVolume<TVoxel2, PlainVoxelArray>* volume2,
+	                             TFunctor& functor) {
 		TraverseAllWithPosition(volume1, volume2, functor);
 	}
 

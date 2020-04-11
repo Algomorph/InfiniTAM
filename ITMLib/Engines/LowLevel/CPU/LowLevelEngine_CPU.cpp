@@ -14,7 +14,7 @@ void LowLevelEngine_CPU::CopyImage(ITMUChar4Image *image_out, const ITMUChar4Ima
 	Vector4u *dest = image_out->GetData(MEMORYDEVICE_CPU);
 	const Vector4u *src = image_in->GetData(MEMORYDEVICE_CPU);
 
-	memcpy(dest, src, image_in->element_count * sizeof(Vector4u));
+	memcpy(dest, src, image_in->size() * sizeof(Vector4u));
 }
 
 void LowLevelEngine_CPU::CopyImage(ITMFloatImage *image_out, const ITMFloatImage *image_in) const
@@ -22,7 +22,7 @@ void LowLevelEngine_CPU::CopyImage(ITMFloatImage *image_out, const ITMFloatImage
 	float *dest = image_out->GetData(MEMORYDEVICE_CPU);
 	const float *src = image_in->GetData(MEMORYDEVICE_CPU);
 
-	memcpy(dest, src, image_in->element_count * sizeof(float));
+	memcpy(dest, src, image_in->size() * sizeof(float));
 }
 
 void LowLevelEngine_CPU::CopyImage(ITMFloat4Image *image_out, const ITMFloat4Image *image_in) const
@@ -30,7 +30,7 @@ void LowLevelEngine_CPU::CopyImage(ITMFloat4Image *image_out, const ITMFloat4Ima
 	Vector4f *dest = image_out->GetData(MEMORYDEVICE_CPU);
 	const Vector4f *src = image_in->GetData(MEMORYDEVICE_CPU);
 
-	memcpy(dest, src, image_in->element_count * sizeof(Vector4f));
+	memcpy(dest, src, image_in->size() * sizeof(Vector4f));
 }
 
 void LowLevelEngine_CPU::ConvertColourToIntensity(ITMFloatImage *image_out, const ITMUChar4Image *image_in) const

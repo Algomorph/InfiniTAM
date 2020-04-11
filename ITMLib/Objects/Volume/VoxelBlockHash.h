@@ -52,6 +52,12 @@ struct HashEntry {
 	*/
 	int ptr;
 
+	/** Times the hash block has been modified (only used by some algorithms) **/
+	uchar modification_count;
+
+	/** The frame index when the target block has been last modified. **/
+	unsigned short last_modified_timestamp;
+
 	friend std::ostream& operator<<(std::ostream& os, const HashEntry& entry){
 		os << entry.pos << " | " << entry.offset << " [" << entry.ptr << "]";
 		return os;

@@ -37,7 +37,7 @@ LocalVBA<TVoxel>::LocalVBA(const LocalVBA& other, MemoryDeviceType memoryType):
 		allocatedSize(other.allocatedSize),
 		lastFreeBlockId(other.lastFreeBlockId),
 		voxelBlocks(new ORUtils::MemoryBlock<TVoxel>(other.allocatedSize, memoryType)),
-		allocationList(new ORUtils::MemoryBlock<int>(other.allocationList->element_count, memoryType)) {
+		allocationList(new ORUtils::MemoryBlock<int>(other.allocationList->size(), memoryType)) {
 	this->SetFrom(other);
 }
 

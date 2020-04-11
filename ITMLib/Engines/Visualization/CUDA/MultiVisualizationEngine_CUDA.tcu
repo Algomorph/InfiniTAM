@@ -62,7 +62,7 @@ void MultiVisualizationEngine_CUDA<TVoxel, TIndex>::CreateExpectedDepths(const V
 
 	Vector2f init;
 	init.x = FAR_AWAY; init.y = VERY_CLOSE;
-	memsetKernel<Vector2f>(minmaxData, init, renderState->renderingRangeImage->element_count);
+	memsetKernel<Vector2f>(minmaxData, init, renderState->renderingRangeImage->size());
 }
 
 template<class TVoxel>
@@ -78,7 +78,7 @@ void MultiVisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::CreateExpectedDepths
 
 	Vector2f init;
 	init.x = FAR_AWAY; init.y = VERY_CLOSE;
-	memsetKernel<Vector2f>(minmaxData, init, renderState->renderingRangeImage->element_count);
+	memsetKernel<Vector2f>(minmaxData, init, renderState->renderingRangeImage->size());
 
 	// add the values from each local map
 	for (int localMapId = 0; localMapId < renderState->indexData_host.numLocalMaps; ++localMapId) {

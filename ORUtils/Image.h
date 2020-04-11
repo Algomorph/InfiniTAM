@@ -15,14 +15,12 @@ template<typename T>
 class Image : private MemoryBlock<T> {
 public:
 
-	/** Expose public MemoryBlock<T> member variables. */
-	using MemoryBlock<T>::element_count;
-
-
 	/** Expose public MemoryBlock<T> member functions. */
+	using MemoryBlock<T>::size;
 	using MemoryBlock<T>::Clear;
 	using MemoryBlock<T>::GetData;
 	using MemoryBlock<T>::GetElement;
+
 #ifdef COMPILE_WITH_METAL
 	using MemoryBlock<T>::GetMetalBuffer();
 #endif
@@ -110,7 +108,11 @@ public:
 	// Suppress the default copy constructor and assignment operator
 	Image(const Image&);
 	Image& operator=(const Image&);
-};
+
+private:
+	/** Expose protected MemoryBlock<T> member variables. */
+	using MemoryBlock<T>::element_count;
+}; // class Image<T>
 
 
 template<typename T>
@@ -125,12 +127,13 @@ void Image<T>::ApplyMask(const Image<TMask>& maskImage, T blankElement) {
 #ifdef WITH_OPENMP
 #pragma omp parallel for default(none) shared(maskImage, blankElement)
 #endif
-	for (int iElement = 0; iElement < maskImage.element_count; iElement++) {
+	for (int iElement = 0; iElement < maskImage.size(); iElement++) {
 		if(!maskImage.GetElement(iElement,MEMORYDEVICE_CPU)){
 			this->data_cpu[iElement] = blankElement;
 		}
 	}
 }
+
 }//namespace ORUtils
 
 

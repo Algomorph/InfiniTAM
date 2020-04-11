@@ -175,14 +175,14 @@ void DepthTracker::ApplyDelta(const Matrix4f & para_old, const float *delta, Mat
 	para_new = Tinc * para_old;
 }
 
-void DepthTracker::UpdatePoseQuality(int noValidPoints_old, float *hessian_good, float f_old)
+void DepthTracker::UpdatePoseQuality(int old_valid_points_count, float *hessian_good, float f_old)
 {
-	size_t noTotalPoints = viewHierarchy->GetLevel(0)->data->element_count;
+	size_t point_count = viewHierarchy->GetLevel(0)->data->size();
 
-	int noValidPointsMax = lowLevelEngine->CountValidDepths(view->depth);
+	int max_valid_point_count = lowLevelEngine->CountValidDepths(view->depth);
 
-	float normFactor_v1 = (float)noValidPoints_old / (float)noTotalPoints;
-	float normFactor_v2 = (float)noValidPoints_old / (float)noValidPointsMax;
+	float normFactor_v1 = (float)old_valid_points_count / (float)point_count;
+	float normFactor_v2 = (float)old_valid_points_count / (float)max_valid_point_count;
 
 	float det = 0.0f;
 	if (iterationType == TRACKER_ITERATION_BOTH) {
@@ -209,12 +209,12 @@ void DepthTracker::UpdatePoseQuality(int noValidPoints_old, float *hessian_good,
 		if (isnan(det_norm_v2)) det_norm_v2 = 0.0f;
 	}
 
-	float finalResidual_v2 = sqrt(((float)noValidPoints_old * f_old + (float)(noValidPointsMax - noValidPoints_old) * distThresh[0]) / (float)noValidPointsMax);
-	float percentageInliers_v2 = (float)noValidPoints_old / (float)noValidPointsMax;
+	float finalResidual_v2 = sqrt(((float)old_valid_points_count * f_old + (float)(max_valid_point_count - old_valid_points_count) * distThresh[0]) / (float)max_valid_point_count);
+	float percentageInliers_v2 = (float)old_valid_points_count / (float)max_valid_point_count;
 
 	trackingState->trackerResult = CameraTrackingState::TRACKING_FAILED;
 
-	if (noValidPointsMax != 0 && noTotalPoints != 0 && det_norm_v1 > 0 && det_norm_v2 > 0) {
+	if (max_valid_point_count != 0 && point_count != 0 && det_norm_v1 > 0 && det_norm_v2 > 0) {
 		Vector4f inputVector(log(det_norm_v1), log(det_norm_v2), finalResidual_v2, percentageInliers_v2);
 
 		Vector4f normalisedVector = (inputVector - mu) / sigma;

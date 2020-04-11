@@ -63,7 +63,7 @@ namespace ORUtils
 			if (memoryDeviceType == MEMORYDEVICE_CUDA)
 			{
 				// If we're loading into a block on the CUDA, first try and read the data into a temporary block on the CPU.
-				ORUtils::MemoryBlock<T> cpuBlock(block.element_count, MEMORYDEVICE_CPU);
+				ORUtils::MemoryBlock<T> cpuBlock(block.size(), MEMORYDEVICE_CPU);
 				ReadBlockData(*fs, cpuBlock, blockSize);
 
 				// Then copy the data across to the CUDA.
@@ -143,7 +143,7 @@ namespace ORUtils
 			if (memoryDeviceType == MEMORYDEVICE_CUDA)
 			{
 				// If we are saving the memory block from the CUDA, first make a CPU copy of it.
-				ORUtils::MemoryBlock<T> cpuBlock(block.element_count, MEMORYDEVICE_CPU);
+				ORUtils::MemoryBlock<T> cpuBlock(block.size(), MEMORYDEVICE_CPU);
 				cpuBlock.SetFrom(&block, MemoryCopyDirection::CUDA_TO_CPU);
 
 				// Then write the CPU copy to disk.
@@ -174,7 +174,7 @@ namespace ORUtils
 		static void ReadBlockData(std::istream& is, ORUtils::MemoryBlock<T>& block, size_t blockSize)
 		{
 			// Try and read the block's size.
-			if (block.element_count != blockSize)
+			if (block.size() != blockSize)
 			{
 				throw std::runtime_error("Could not read data into a memory block of the wrong size");
 			}
@@ -237,14 +237,15 @@ namespace ORUtils
 		template <typename T>
 		static void WriteBlock(std::ostream& os, const ORUtils::MemoryBlock<T>& block)
 		{
+			typename ORUtils::MemoryBlock<T>::size_type size = block.size();
 			// Try and write the block's size.
-			if (!os.write(reinterpret_cast<const char *>(&block.element_count), sizeof(size_t)))
+			if (!os.write(reinterpret_cast<const char *>(&size), sizeof(typename ORUtils::MemoryBlock<T>::size_type)))
 			{
 				throw std::runtime_error("Could not write memory block size");
 			}
 
 			// Try and write the block's data.
-			if (!os.write(reinterpret_cast<const char *>(block.GetData(MEMORYDEVICE_CPU)), block.element_count * sizeof(T)))
+			if (!os.write(reinterpret_cast<const char *>(block.GetData(MEMORYDEVICE_CPU)), block.size() * sizeof(T)))
 			{
 				throw std::runtime_error("Could not write memory block data");
 			}

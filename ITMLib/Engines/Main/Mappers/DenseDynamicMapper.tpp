@@ -98,7 +98,8 @@ void DenseDynamicMapper<TVoxel, TWarp, TIndex>::ProcessInitialFrame(
 	//** fuse the live into canonical directly
 	bench::start_timer("FuseOneTsdfVolumeIntoAnother");
 	indexing_engine->AllocateFromOtherVolume(canonical_volume, live_volume);
-	volume_fusion_engine->FuseOneTsdfVolumeIntoAnother(canonical_volume, live_volume);
+	DIEWITHEXCEPTION_REPORTLOCATION("FIXME: use proper frame number here instead of 0");
+	volume_fusion_engine->FuseOneTsdfVolumeIntoAnother(canonical_volume, live_volume, 0u);
 	bench::stop_timer("FuseOneTsdfVolumeIntoAnother");
 }
 
@@ -135,7 +136,8 @@ DenseDynamicMapper<TVoxel, TWarp, TIndex>::ProcessFrame(const View* view, const 
 
 	//fuse warped live into canonical
 	bench::start_timer("FuseOneTsdfVolumeIntoAnother");
-	volume_fusion_engine->FuseOneTsdfVolumeIntoAnother(canonical_volume, target_warped_live_volume);
+	DIEWITHEXCEPTION_REPORTLOCATION("FIXME: use proper frame number here");
+	volume_fusion_engine->FuseOneTsdfVolumeIntoAnother(canonical_volume, target_warped_live_volume, 0);
 	bench::stop_timer("FuseOneTsdfVolumeIntoAnother");
 
 	LogTSDFVolumeStatistics(canonical_volume, "[[canonical TSDF after fusion]]");

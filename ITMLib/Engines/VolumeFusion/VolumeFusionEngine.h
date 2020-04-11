@@ -30,12 +30,13 @@ public:
 	 * \brief Fuses the live scene into the canonical scene
 	 * \details Operation happens after the motion is tracked, at this point sourceTsdfVolume should be as close to the canonical
 	 * as possible
-	 * \param targetTsdfVolume the canonical voxel grid, representing the state at the beginning of the sequence
-	 * \param sourceTsdfVolume the live voxel grid, a TSDF generated from a single recent depth image
+	 * \param targetVolume the target volume: often, the canonical volume, representing state of the surfaces at the beginning of the sequence
+	 * \param sourceVolume the source volume: often, the live volume, i.e. a TSDF generated from a single recent depth image
 	 * \param liveSourceFieldIndex index of the sdf field to use at live scene voxels
 	 */
 	virtual void FuseOneTsdfVolumeIntoAnother(VoxelVolume <TVoxel, TIndex>* targetVolume,
-	                                          VoxelVolume <TVoxel, TIndex>* sourceVolume) = 0;
+	                                          VoxelVolume <TVoxel, TIndex>* sourceVolume,
+	                                          unsigned short timestamp) = 0;
 };
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
@@ -43,7 +44,8 @@ class VolumeFusionEngine :
 		public VolumeFusionEngineInterface<TVoxel, TIndex> {
 public:
 	void FuseOneTsdfVolumeIntoAnother(VoxelVolume <TVoxel, TIndex>* target_volume,
-	                                  VoxelVolume <TVoxel, TIndex>* source_volume) override;
+	                                  VoxelVolume <TVoxel, TIndex>* source_volume,
+	                                  unsigned short timestamp) override;
 };
 
 } // namespace ITMLib

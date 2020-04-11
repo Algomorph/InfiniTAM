@@ -20,7 +20,7 @@ void IVisualizationEngine::DepthToUchar4(ITMUChar4Image *dst, const ITMFloatImag
 {
 	Vector4u *dest = dst->GetData(MEMORYDEVICE_CPU);
 	const float *source = src->GetData(MEMORYDEVICE_CPU);
-	int dataSize = static_cast<int>(dst->element_count);
+	int dataSize = static_cast<int>(dst->size());
 
 	memset(dst->GetData(MEMORYDEVICE_CPU), 0, dataSize * 4);
 
@@ -60,7 +60,7 @@ void IVisualizationEngine::NormalToUchar4(ITMUChar4Image *dst, const ITMFloat4Im
 {
 	Vector4u *dest = dst->GetData(MEMORYDEVICE_CPU);
 	const Vector4f *source = src->GetData(MEMORYDEVICE_CPU);
-	int dataSize = static_cast<int>(dst->element_count);
+	int dataSize = static_cast<int>(dst->size());
 
 	memset(dst->GetData(MEMORYDEVICE_CPU), 0, dataSize * 4);
 	{
@@ -82,10 +82,10 @@ void IVisualizationEngine::WeightToUchar4(ITMUChar4Image *dst, const ITMFloatIma
 {
 	Vector4u *dest = dst->GetData(MEMORYDEVICE_CPU);
 	const float *source = src->GetData(MEMORYDEVICE_CPU);
-	int dataSize = static_cast<int>(dst->element_count);
+	int dataSize = static_cast<int>(dst->size());
 
 	float mindepth = 1000;
-	for (size_t i = 0; i < src->element_count; i++)
+	for (size_t i = 0; i < src->size(); i++)
 		if (source[i]>0) mindepth = ORUTILS_MIN(mindepth, source[i]);
 
 	memset(dst->GetData(MEMORYDEVICE_CPU), 0, dataSize * 4);

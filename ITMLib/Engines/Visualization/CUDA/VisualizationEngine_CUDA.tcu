@@ -108,7 +108,7 @@ void VisualizationEngine_CUDA<TVoxel, TIndex>::CreateExpectedDepths(const VoxelV
 	Vector2f init;
 	//TODO : this could be improved a bit...
 	init.x = 0.2f; init.y = 3.0f;
-	memsetKernel<Vector2f>(minmaxData, init, renderState->renderingRangeImage->element_count);
+	memsetKernel<Vector2f>(minmaxData, init, renderState->renderingRangeImage->size());
 }
 
 template<class TVoxel>
@@ -122,7 +122,7 @@ void VisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::CreateExpectedDepths(cons
 
 	Vector2f init;
 	init.x = FAR_AWAY; init.y = VERY_CLOSE;
-	memsetKernel<Vector2f>(minmaxData, init, renderState->renderingRangeImage->element_count);
+	memsetKernel<Vector2f>(minmaxData, init, renderState->renderingRangeImage->size());
 
 	//go through list of visible 8x8x8 blocks
 	{

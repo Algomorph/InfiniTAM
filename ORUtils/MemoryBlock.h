@@ -110,8 +110,6 @@ public:
 // endregion ===========================================================================================================
 
 	/** Total number of allocated entries in the data array. */
-	size_type element_count;
-
 	size_type size() const { return element_count; };
 
 	/** Get the data pointer on CPU or GPU. */
@@ -438,6 +436,8 @@ public:
 	MemoryBlock& operator=(const MemoryBlock&);
 
 protected:
+	size_type element_count;
+
 	bool isAllocated_CPU, isAllocated_CUDA, isMetalCompatible;
 	/** Pointer to memory on CPU host. */
 	DEVICEPTR(T)* data_cpu;
@@ -448,8 +448,6 @@ protected:
 #ifdef COMPILE_WITH_METAL
 	void *data_metalBuffer;
 #endif
-private:
-
 	MemoryDeviceType access_mode;
 
 };

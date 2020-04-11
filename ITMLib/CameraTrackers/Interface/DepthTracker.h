@@ -40,7 +40,7 @@ namespace ITMLib
 
 		void SetEvaluationData(CameraTrackingState *trackingState, const View *view);
 
-		void UpdatePoseQuality(int noValidPoints_old, float *hessian_good, float f_old);
+		void UpdatePoseQuality(int old_valid_points_count, float *hessian_good, float f_old);
 
 		ORUtils::HomkerMap *map;
 		ORUtils::SVMClassifier *svmClassifier;

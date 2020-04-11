@@ -24,7 +24,7 @@ namespace ITMLib {
 template<typename T>
 inline std::vector<T>
 ORUtils_MemoryBlock_to_std_vector(const ORUtils::MemoryBlock<T>& block, MemoryDeviceType device_type) {
-	std::vector<T> vector(block.element_count);
+	std::vector<T> vector(block.size());
 	switch (device_type) {
 		case MEMORYDEVICE_CPU:
 			memcpy(vector.data(), block.GetData(MEMORYDEVICE_CPU), vector.size() * sizeof(T));
@@ -46,7 +46,7 @@ ORUtils_MemoryBlock_to_std_vector(const ORUtils::MemoryBlock<T>& block, MemoryDe
 template<typename T>
 inline std::vector<T>
 ORUtils_MemoryBlock_to_std_vector(const ORUtils::MemoryBlock<T>& block, MemoryDeviceType device_type, int count) {
-	std::vector<T> vector(block.element_count);
+	std::vector<T> vector(block.size());
 	switch (device_type) {
 		case MEMORYDEVICE_CPU:
 			memcpy(vector.data(), block.GetData(MEMORYDEVICE_CPU), count * sizeof(T));

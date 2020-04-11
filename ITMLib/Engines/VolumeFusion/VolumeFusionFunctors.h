@@ -23,11 +23,11 @@
 // defined differently
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
 struct TSDFFusionFunctor {
-	TSDFFusionFunctor(int maximumWeight) :
-			maximumWeight(maximumWeight) {}
+	TSDFFusionFunctor(int maximum_weight, unsigned short timestamp) :
+			maximum_weight(maximum_weight), timestamp(timestamp) {}
 
 	_CPU_AND_GPU_CODE_
-	void operator()(TVoxel& liveVoxel, TVoxel& canonicalVoxel) {
+	void operator()(TVoxel& source_voxel, TVoxel& target_voxel) {
 		//_DEBUG
 
 		//fusion condition "HARSH" -- yields results almost identical to "COMBINED"
@@ -35,12 +35,12 @@ struct TSDFFusionFunctor {
 //				   && liveVoxel.flag_values[liveSourceFieldIndex] != VOXEL_NONTRUNCATED) return;
 
 		//fusion condition "COMBINED"
-		if (liveVoxel.flags == ITMLib::VoxelFlags::VOXEL_UNKNOWN
-		    || (canonicalVoxel.flags != ITMLib::VoxelFlags::VOXEL_NONTRUNCATED
-		        && liveVoxel.flags != ITMLib::VoxelFlags::VOXEL_NONTRUNCATED))
+		if (source_voxel.flags == ITMLib::VoxelFlags::VOXEL_UNKNOWN
+		    || (target_voxel.flags != ITMLib::VoxelFlags::VOXEL_NONTRUNCATED
+		        && source_voxel.flags != ITMLib::VoxelFlags::VOXEL_NONTRUNCATED))
 			return;
 
-		float liveSdf = TVoxel::valueToFloat(liveVoxel.sdf);
+		float live_sdf = TVoxel::valueToFloat(source_voxel.sdf);
 
 		// parameter eta from SobolevFusion, Sec. 3.1, divided by voxel size
 		// (voxel size, m) / (narrow-band half-width eta, m) * -("2-3 voxels")
@@ -49,33 +49,33 @@ struct TSDFFusionFunctor {
 		const float threshold = -0.3;
 
 		//fusion condition "THRESHOLD"
-		if (liveVoxel.flags == ITMLib::VoxelFlags::VOXEL_UNKNOWN
-		    || (canonicalVoxel.flags != ITMLib::VoxelFlags::VOXEL_NONTRUNCATED
-		        && liveVoxel.flags != ITMLib::VoxelFlags::VOXEL_NONTRUNCATED) || liveSdf < threshold)
+		if (live_sdf < threshold)
 			return;
 
 		//fusion condition "LIVE_UNKNOWN"
 //		if(liveVoxel.flags == VOXEL_UNKNOWN) return;
 
-		int oldWDepth = canonicalVoxel.w_depth;
-		float oldSdf = TVoxel::valueToFloat(canonicalVoxel.sdf);
+		int old_depth_weight = target_voxel.w_depth;
+		float old_sdf = TVoxel::valueToFloat(target_voxel.sdf);
 
-		float newSdf = oldWDepth * oldSdf + liveSdf;
-		float newWDepth = oldWDepth + 1.0f;
-		newSdf /= newWDepth;
-		newWDepth = ORUTILS_MIN(newWDepth, maximumWeight);
+		float new_sdf = old_depth_weight * old_sdf + live_sdf;
+		float new_depth_weight = old_depth_weight + 1.0f;
+		new_sdf /= new_depth_weight;
+		new_depth_weight = ORUTILS_MIN(new_depth_weight, maximum_weight);
 
-		canonicalVoxel.sdf = TVoxel::floatToValue(newSdf);
-		canonicalVoxel.w_depth = (uchar) newWDepth;
-		if (canonicalVoxel.flags != ITMLib::VoxelFlags::VOXEL_NONTRUNCATED) {
-			canonicalVoxel.flags = liveVoxel.flags;
-		} else if (1.0f - std::abs(newSdf) < 1e-5f) {
-			canonicalVoxel.flags = ITMLib::VoxelFlags::VOXEL_TRUNCATED;
+		target_voxel.sdf = TVoxel::floatToValue(new_sdf);
+		target_voxel.w_depth = (uchar) new_depth_weight;
+
+		if (target_voxel.flags != ITMLib::VoxelFlags::VOXEL_NONTRUNCATED) {
+			target_voxel.flags = source_voxel.flags;
+		} else if (1.0f - std::abs(new_sdf) < 1e-5f) {
+			target_voxel.flags = ITMLib::VoxelFlags::VOXEL_TRUNCATED;
 		}
 	}
 
 private:
-	const int maximumWeight;
+	const int maximum_weight;
+	const unsigned short timestamp;
 };
 
 
