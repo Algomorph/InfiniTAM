@@ -832,7 +832,7 @@ struct ComputeVoxelBoundsFunctor<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA> {
 		ORcudaSafeCall(cudaMalloc((void**) &boundsCuda, sizeof(Vector6i)));
 		ORcudaSafeCall(cudaMemcpy(boundsCuda, (void*) &bounds, sizeof(Vector6i), cudaMemcpyHostToDevice));
 
-		computeVoxelBounds << < cudaGridSize, cudaBlockSize >> > (hashTable, boundsCuda, noTotalEntries);
+		computeVoxelBounds <<< cudaGridSize, cudaBlockSize >>> (hashTable, boundsCuda, noTotalEntries);
 		ORcudaKernelCheck;
 
 		ORcudaSafeCall(cudaMemcpy((void*) &bounds, boundsCuda, sizeof(Vector6i), cudaMemcpyDeviceToHost));

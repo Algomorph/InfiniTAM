@@ -117,7 +117,7 @@ public:
 				   HashEntry* hash_table1, HashEntry* hash_table2, HashEntry* hash_table3,
 				   TFunctor* functor_device) {
 					traverseAllWithPosition_device<TFunctor, TVoxel1, TVoxel2, TVoxel3>
-							<< < hash_per_block_cuda_grid_size, voxel_per_thread_cuda_block_size >> >
+							<<< hash_per_block_cuda_grid_size, voxel_per_thread_cuda_block_size >>>
 					                                            (voxels1, voxels2, voxels3,
 							                                            hash_table1, hash_table2, hash_table3, functor_device);
 					ORcudaKernelCheck;
@@ -140,7 +140,7 @@ public:
 				   HashEntry* hash_table1, HashEntry* hash_table2, HashEntry* hash_table3,
 				   const int* utilized_hash_codes, TFunctor* functor_device) {
 					traverseUtilizedWithPosition_device<TFunctor, TVoxel1, TVoxel2, TVoxel3>
-							<< < hash_per_block_cuda_grid_size, voxel_per_thread_cuda_block_size >> >
+							<<< hash_per_block_cuda_grid_size, voxel_per_thread_cuda_block_size >>>
 					                                            (voxels1, voxels2, voxels3,
 							                                            hash_table1, hash_table2, hash_table3,
 							                                            utilized_hash_codes, functor_device);

@@ -95,7 +95,7 @@ public:
 		);
 
 		TraverseAndCompareAll_device<TStaticBooleanFunctor, TVoxelPrimary, TVoxelSecondary>
-				<< < cuda_grid_size, cuda_block_size >> >
+				<<< cuda_grid_size, cuda_block_size >>>
 		                             (voxels1, voxels2, array_info, mismatch_encountered_device);
 		ORcudaKernelCheck;
 
@@ -135,7 +135,7 @@ public:
 		);
 
 		dualVoxelTraversal_device<TFunctor, TVoxelPrimary, TVoxelSecondary>
-				<< < cuda_grid_size, cuda_block_size >> >
+				<<< cuda_grid_size, cuda_block_size >>>
 		                             (voxels1, voxels2, array_info, functor_device);
 		ORcudaKernelCheck;
 
@@ -176,7 +176,7 @@ public:
 				static_cast<int>(ceil(static_cast<float>(volume1->index.GetVolumeSize().z) / cuda_block_size.z))
 		);
 		dualVoxelPositionTraversal_device<TFunctor, TVoxelPrimary, TVoxelSecondary>
-				<< < cuda_cuda_grid_size, cuda_block_size >> >
+				<<< cuda_cuda_grid_size, cuda_block_size >>>
 		                                  (voxels1, voxels2, array_info, functor_device);
 		ORcudaKernelCheck;
 
@@ -207,7 +207,7 @@ public:
 				    const GridAlignedBox* array_info,
 				    TBooleanFunctor* functor_device, bool* mismatch_encountered_device) {
 					TraverseAndCompareAll_device<TBooleanFunctor, TVoxelPrimary, TVoxelSecondary>
-							<< < cuda_grid_size, cuda_block_size >> >
+							<<< cuda_grid_size, cuda_block_size >>>
 					                             (voxels1, voxels2, array_info, functor_device, mismatch_encountered_device);
 				}
 		);
@@ -226,7 +226,7 @@ public:
 				    const GridAlignedBox* array_info,
 				    TBooleanFunctor* functor_device, bool* mismatch_encountered_device) {
 					TraverseAndCompareAllWithPosition_device<TBooleanFunctor, TVoxelPrimary, TVoxelSecondary>
-							<< < cuda_grid_size, cuda_block_size >> >
+							<<< cuda_grid_size, cuda_block_size >>>
 					                             (voxels1, voxels2, array_info, functor_device, mismatch_encountered_device);
 				}
 		);

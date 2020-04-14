@@ -143,15 +143,15 @@ int ExtendedTracker_CUDA::ComputeGandH_Depth(float &f, float *nabla, float *hess
 		switch (currentIterationType)
 		{
 		case TRACKER_ITERATION_ROTATION:
-			exDepthTrackerOneLevel_g_rt_device<true, true, false> << <gridSize, blockSize >> >(args);
+			exDepthTrackerOneLevel_g_rt_device<true, true, false> <<<gridSize, blockSize >>>(args);
 			ORcudaKernelCheck;
 			break;
 		case TRACKER_ITERATION_TRANSLATION:
-			exDepthTrackerOneLevel_g_rt_device<true, false, false> << <gridSize, blockSize >> >(args);
+			exDepthTrackerOneLevel_g_rt_device<true, false, false> <<<gridSize, blockSize >>>(args);
 			ORcudaKernelCheck;
 			break;
 		case TRACKER_ITERATION_BOTH:
-			exDepthTrackerOneLevel_g_rt_device<false, false, false> << <gridSize, blockSize >> >(args);
+			exDepthTrackerOneLevel_g_rt_device<false, false, false> <<<gridSize, blockSize >>>(args);
 			ORcudaKernelCheck;
 			break;
 		default: break;
@@ -162,15 +162,15 @@ int ExtendedTracker_CUDA::ComputeGandH_Depth(float &f, float *nabla, float *hess
 		switch (currentIterationType)
 		{
 		case TRACKER_ITERATION_ROTATION:
-			exDepthTrackerOneLevel_g_rt_device<true, true, true> << <gridSize, blockSize >> >(args);
+			exDepthTrackerOneLevel_g_rt_device<true, true, true> <<<gridSize, blockSize >>>(args);
 			ORcudaKernelCheck;
 			break;
 		case TRACKER_ITERATION_TRANSLATION:
-			exDepthTrackerOneLevel_g_rt_device<true, false, true> << <gridSize, blockSize >> >(args);
+			exDepthTrackerOneLevel_g_rt_device<true, false, true> <<<gridSize, blockSize >>>(args);
 			ORcudaKernelCheck;
 			break;
 		case TRACKER_ITERATION_BOTH:
-			exDepthTrackerOneLevel_g_rt_device<false, false, true> << <gridSize, blockSize >> >(args);
+			exDepthTrackerOneLevel_g_rt_device<false, false, true> <<<gridSize, blockSize >>>(args);
 			ORcudaKernelCheck;
 			break;
 		default: break;
@@ -234,15 +234,15 @@ int ExtendedTracker_CUDA::ComputeGandH_RGB(float &f, float *nabla, float *hessia
 	switch (currentIterationType)
 	{
 	case TRACKER_ITERATION_ROTATION:
-		exRGBTrackerOneLevel_g_rt_device<true, true> << <gridSize, blockSize >> >(args);
+		exRGBTrackerOneLevel_g_rt_device<true, true> <<<gridSize, blockSize >>>(args);
 		ORcudaKernelCheck;
 		break;
 	case TRACKER_ITERATION_TRANSLATION:
-		exRGBTrackerOneLevel_g_rt_device<true, false> << <gridSize, blockSize >> >(args);
+		exRGBTrackerOneLevel_g_rt_device<true, false> <<<gridSize, blockSize >>>(args);
 		ORcudaKernelCheck;
 		break;
 	case TRACKER_ITERATION_BOTH:
-		exRGBTrackerOneLevel_g_rt_device<false, false> << <gridSize, blockSize >> >(args);
+		exRGBTrackerOneLevel_g_rt_device<false, false> <<<gridSize, blockSize >>>(args);
 		ORcudaKernelCheck;
 		break;
 	default: break;

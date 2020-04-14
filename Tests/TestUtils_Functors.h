@@ -15,7 +15,6 @@
 //  ================================================================
 #pragma once
 
-#include "../ITMLib/Utils/CLionCUDAsyntax.h"
 #include "../ITMLib/Objects/Volume/VoxelBlockHash.h"
 #include "../ORUtils/MemoryDeviceType.h"
 
@@ -44,7 +43,7 @@ struct AssignRandomDepthWeightsInRangeFunctor<TVoxel, VoxelBlockHash, MEMORYDEVI
 		dim3 rand_init_cuda_grid_size(random_hash_block_count);
 
 		initialize_random_numbers_for_spatial_blocks
-				<< < rand_init_cuda_grid_size, rand_init_cuda_block_size >> >
+				<<< rand_init_cuda_grid_size, rand_init_cuda_block_size >>>
 		                                       (random_states);
 		ORcudaKernelCheck;
 

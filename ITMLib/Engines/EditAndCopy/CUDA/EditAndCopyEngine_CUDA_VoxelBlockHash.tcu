@@ -86,7 +86,7 @@ EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::SetVoxel(VoxelVolume<TVoxel, Vox
 			.AllocateHashBlockAt(volume, hash_block_position, hash_code)) {
 		return false;
 	}
-	setVoxel_device<TVoxel> << < 1, 1 >> > (voxels, hash_table, hash_code, voxel_index_in_block, voxel);
+	setVoxel_device<TVoxel> <<< 1, 1 >>> (voxels, hash_table, hash_code, voxel_index_in_block, voxel);
 	ORcudaKernelCheck;
 	return true;
 }
@@ -99,7 +99,7 @@ EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::ReadVoxel(VoxelVolume<TVoxel, Vo
 	TVoxel* localVBA = volume->voxels.GetVoxelBlocks();
 	const HashEntry* hashTable = volume->index.GetEntries();
 
-	readVoxel_device<TVoxel> << < 1, 1 >> >
+	readVoxel_device<TVoxel> <<< 1, 1 >>>
 	                                 (localVBA, hashTable, at, (ReadVoxelResult<TVoxel>*) readVoxelResult_device);
 	ORcudaKernelCheck;
 
@@ -123,7 +123,7 @@ EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::ReadVoxel(VoxelVolume<TVoxel, Vo
 	TVoxel* localVBA = volume->voxels.GetVoxelBlocks();
 	const HashEntry* hashTable = volume->index.GetEntries();
 
-	readVoxel_device<TVoxel> << < 1, 1 >> >
+	readVoxel_device<TVoxel> <<< 1, 1 >>>
 	                                 (localVBA, hashTable, at, (ReadVoxelResult<TVoxel>*) readVoxelResult_device, &cache);
 	ORcudaKernelCheck;
 	ReadVoxelResult<TVoxel>* readVoxelResult = (ReadVoxelResult<TVoxel>*) readVoxelResult_host;
@@ -147,7 +147,7 @@ EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::ReadVoxel(VoxelVolume<TVoxel, Vo
 	TVoxel* localVBA = volume->voxels.GetVoxelBlocks();
 	const HashEntry* hashTable = volume->index.GetEntries();
 
-	readVoxel_device<TVoxel> << < 1, 1 >> >
+	readVoxel_device<TVoxel> <<< 1, 1 >>>
 	                                 (localVBA, hashTable, at, (ReadVoxelResult<TVoxel>*) readVoxelResult_device, &cache);
 	ORcudaKernelCheck;
 	ReadVoxelResult<TVoxel>* readVoxelResult = (ReadVoxelResult<TVoxel>*) readVoxelResult_host;
@@ -194,7 +194,7 @@ bool EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::CopyVolumeSlice(
 		dim3 cudaBlockSizeCP(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
 		dim3 gridSizeCP(total_blocks_to_copy);
 
-		noOffsetCopy_device<TVoxel> << < gridSizeCP, cudaBlockSizeCP >> > (target_voxels, source_voxels,
+		noOffsetCopy_device<TVoxel> <<< gridSizeCP, cudaBlockSizeCP >>> (target_voxels, source_voxels,
 				target_hash_table, source_hash_table, starting_utilized_block_count, target_utilized_hash_entries, total_blocks_to_copy, bounds);
 		ORcudaKernelCheck;
 	} else {
@@ -208,7 +208,7 @@ bool EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::CopyVolumeSlice(
 		dim3 cudaBlockSizeCP(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
 		dim3 gridSizeCP(total_blocks_to_copy);
 
-		offsetCopy_device<TVoxel> << < gridSizeCP, cudaBlockSizeCP >> > (target_voxels, source_voxels,
+		offsetCopy_device<TVoxel> <<< gridSizeCP, cudaBlockSizeCP >>> (target_voxels, source_voxels,
 				target_hash_table, source_hash_table, starting_utilized_block_count, target_utilized_hash_entries, total_blocks_to_copy, offset, bounds);
 		ORcudaKernelCheck;
 	}
@@ -243,7 +243,7 @@ bool EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::CopyVolume(
 		dim3 cudaBlockSizeCP(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
 		dim3 gridSizeCP(total_blocks_to_copy);
 
-		noOffsetCopy_device<TVoxel> << < gridSizeCP, cudaBlockSizeCP >> > (target_voxels, source_voxels,
+		noOffsetCopy_device<TVoxel> <<< gridSizeCP, cudaBlockSizeCP >>> (target_voxels, source_voxels,
 				target_hash_table, source_hash_table, starting_utilized_block_count, target_utilized_hash_entries, total_blocks_to_copy, bounds);
 		ORcudaKernelCheck;
 	} else {

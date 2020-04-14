@@ -67,7 +67,7 @@ EditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::SetVoxel(VoxelVolume<TVoxel, Pl
 	ORUtils::MemoryBlock<bool> success(1, true, true);
 	*success.GetData(MEMORYDEVICE_CPU) = true;
 	success.UpdateDeviceFromHost();
-	setVoxel_device<TVoxel> << < 1, 1 >> > (localVBA, arrayInfo, at, voxel, success.GetData(MEMORYDEVICE_CUDA));
+	setVoxel_device<TVoxel> <<< 1, 1 >>> (localVBA, arrayInfo, at, voxel, success.GetData(MEMORYDEVICE_CUDA));
 	ORcudaKernelCheck;
 	success.UpdateHostFromDevice();
 	return *success.GetData(MEMORYDEVICE_CPU);
@@ -82,7 +82,7 @@ EditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::ReadVoxel(
 	TVoxel* localVBA = volume->voxels.GetVoxelBlocks();
 	const GridAlignedBox* arrayInfo = volume->index.GetIndexData();
 
-	readVoxel_device<TVoxel> << < 1, 1 >> >
+	readVoxel_device<TVoxel> <<< 1, 1 >>>
 	                                 (localVBA, arrayInfo, at, (ReadVoxelResult<TVoxel>*) readVoxelResult_device);
 	ORcudaKernelCheck;
 
@@ -123,7 +123,7 @@ EditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::IsPointInBounds(
 	ORcudaSafeCall(cudaMalloc((void**) &in_bounds_CUDA, sizeof(bool)));
 	bool in_bounds;
 	const GridAlignedBox* arrayInfo = volume->index.GetIndexData();
-	isPointInBounds_device << < 1, 1 >> > (arrayInfo, at, in_bounds_CUDA);
+	isPointInBounds_device <<< 1, 1 >>> (arrayInfo, at, in_bounds_CUDA);
 	ORcudaKernelCheck;
 	ORcudaSafeCall(cudaMemcpy(&in_bounds, in_bounds_CUDA, sizeof(bool), cudaMemcpyDeviceToHost));
 	ORcudaSafeCall(cudaFree(in_bounds_CUDA));
@@ -176,7 +176,7 @@ bool EditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::CopyVolumeSlice(
 		              sourceVolume->index.GetVolumeSize().y / cudaBlockSize.y,
 		              sourceVolume->index.GetVolumeSize().z / cudaBlockSize.z);
 
-		directCopy_device<TVoxel> << < gridSize, cudaBlockSize >> > (destinationVoxels, sourceVoxels, indexData);
+		directCopy_device<TVoxel> <<< gridSize, cudaBlockSize >>> (destinationVoxels, sourceVoxels, indexData);
 		ORcudaKernelCheck;
 
 	} else {
@@ -191,7 +191,7 @@ bool EditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::CopyVolumeSlice(
 		              (int) ceil((float) extent.y / (float) cudaBlockSize.y),
 		              (int) ceil((float) extent.z / (float) cudaBlockSize.z));
 
-		offsetCopy_device<TVoxel> << < gridSize, cudaBlockSize >> >
+		offsetCopy_device<TVoxel> <<< gridSize, cudaBlockSize >>>
 		                                         (destinationVoxels, sourceVoxels, destinationIndexData,
 				                                         sourceIndexData, offset, minSourcePointSansOffset,
 				                                         extent);

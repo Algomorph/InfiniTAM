@@ -117,7 +117,7 @@ private:
 		dim3 gridSize_MultipleHashBlocks(static_cast<int>(ceil(static_cast<float>(hash_entry_count) /
 		                                                       static_cast<float>(cudaBlockSize_HashPerThread.x))));
 		matchUpHashEntriesByPosition
-				<< < gridSize_MultipleHashBlocks, cudaBlockSize_HashPerThread >> >
+				<<< gridSize_MultipleHashBlocks, cudaBlockSize_HashPerThread >>>
 		                                          (hash_table1, hash_table2, hash_entry_count,
 				                                          matched_hash_code_pairs.GetData(MEMORYDEVICE_CUDA),
 				                                          unmatchedHashes.GetData(MEMORYDEVICE_CUDA),
@@ -131,7 +131,7 @@ private:
 		if (unmatchedHashCount > 0) {
 			dim3 gridSize_UnmatchedBlocks(unmatchedHashCount);
 			checkIfUnmatchedVoxelBlocksAreAltered
-					<< < gridSize_UnmatchedBlocks, block_voxel_per_thread_block_size >> >
+					<<< gridSize_UnmatchedBlocks, block_voxel_per_thread_block_size >>>
 			                                       (voxels1, voxels2,
 					                                       hash_table1, hash_table2,
 					                                       unmatchedHashes.GetData(MEMORYDEVICE_CUDA),
@@ -190,7 +190,7 @@ public:
 				    TBooleanFunctor* functor_device,
 				    bool* falseEncountered) {
 					checkIfMatchingHashBlockVoxelsYieldTrue<TBooleanFunctor, TVoxel1, TVoxel2>
-							<< < gridSize, cudaBlockSize >> >
+							<<< gridSize, cudaBlockSize >>>
 					                       (voxels1, voxels2, hash_table1_device, hash_table2_device,
 							                       matchedHashes_device, matchInfo_device, functor_device, falseEncountered);
 
@@ -214,7 +214,7 @@ public:
 				    TBooleanFunctor* functor_device,
 				    bool* falseEncountered) {
 					checkIfMatchingHashBlockVoxelsYieldTrue_Position<TBooleanFunctor, TVoxel1, TVoxel2>
-							<< < gridSize, cudaBlockSize >> >
+							<<< gridSize, cudaBlockSize >>>
 					                       (voxels1, voxels2, hash_table1, hash_table2,
 							                       matched_hash_codes, match_info, functor_device, falseEncountered);
 
@@ -232,7 +232,7 @@ public:
 				TVoxel1* voxels1, TVoxel2* voxels2, const HashEntry* hash_table1,
 				const HashEntry* hash_table2, TFunctor* functor_device) {
 			traverseAll_device<TFunctor, TVoxel1, TVoxel2>
-					<< < hash_per_block_grid_size, block_voxel_per_thread_block_size >> >
+					<<< hash_per_block_grid_size, block_voxel_per_thread_block_size >>>
 			                                       (voxels1, voxels2, hash_table1, hash_table2, functor_device);
 		});
 	}
@@ -247,7 +247,7 @@ public:
 				TVoxel1* voxels1, TVoxel2* voxels2, const HashEntry* hash_table1,
 				const HashEntry* hash_table2, const int* utilized_hash_codes, TFunctor* functor_device) {
 			traverseUtilized_device<TFunctor, TVoxel1, TVoxel2>
-					<< < hash_per_block_grid_size, block_voxel_per_thread_block_size >> >
+					<<< hash_per_block_grid_size, block_voxel_per_thread_block_size >>>
 			                                       (voxels1, voxels2, hash_table1, hash_table2, utilized_hash_codes, functor_device);
 		});
 	}
@@ -262,7 +262,7 @@ public:
 				TVoxel1* voxels1, TVoxel2* voxels2, const HashEntry* hash_table1,
 				const HashEntry* hash_table2, TFunctor* functor_device) {
 			traverseAllWithPosition_device<TFunctor, TVoxel1, TVoxel2>
-					<< < hash_per_block_grid_size, block_voxel_per_thread_block_size >> >
+					<<< hash_per_block_grid_size, block_voxel_per_thread_block_size >>>
 			                                       (voxels1, voxels2, hash_table1, hash_table2, functor_device);
 		});
 	}
@@ -278,7 +278,7 @@ public:
 				const HashEntry* hash_table2, const int* utilized_hash_codes,
 				TFunctor* functor_device) {
 			traverseUtilizedWithPosition_device<TFunctor, TVoxel1, TVoxel2>
-					<< < hash_per_block_grid_size, block_voxel_per_thread_block_size >> >
+					<<< hash_per_block_grid_size, block_voxel_per_thread_block_size >>>
 			                                       (voxels1, voxels2, hash_table1, hash_table2, utilized_hash_codes, functor_device);
 		});
 	}

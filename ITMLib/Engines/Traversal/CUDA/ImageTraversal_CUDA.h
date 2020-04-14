@@ -40,7 +40,7 @@ public:
 		ORcudaSafeCall(cudaMemcpy(functor_device, &functor, sizeof(TFunctor), cudaMemcpyHostToDevice));
 
 		imageTraversalWithPosition_device<TImageElement, TFunctor>
-				<< < cuda_grid_size, cuda_block_size >> >
+				<<< cuda_grid_size, cuda_block_size >>>
 		                             (image_data, resolution, functor_device);
 		ORcudaKernelCheck;
 

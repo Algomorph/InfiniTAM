@@ -127,7 +127,7 @@ void ViewBuilder_CUDA::ConvertDisparityToDepth(ITMFloatImage *depth_out, const I
 	dim3 blockSize(16, 16);
 	dim3 gridSize((int)ceil((float)imgSize.x / (float)blockSize.x), (int)ceil((float)imgSize.y / (float)blockSize.y));
 
-	convertDisparityToDepth_device << <gridSize, blockSize >> >(d_out, d_in, disparityCalibParams, fx_depth, imgSize);
+	convertDisparityToDepth_device <<<gridSize, blockSize >>>(d_out, d_in, disparityCalibParams, fx_depth, imgSize);
 	ORcudaKernelCheck;
 }
 
@@ -141,7 +141,7 @@ void ViewBuilder_CUDA::ConvertDepthAffineToFloat(ITMFloatImage *depth_out, const
 	dim3 blockSize(16, 16);
 	dim3 gridSize((int)ceil((float)imgSize.x / (float)blockSize.x), (int)ceil((float)imgSize.y / (float)blockSize.y));
 
-	convertDepthAffineToFloat_device << <gridSize, blockSize >> >(d_out, d_in, imgSize, depthCalibParams);
+	convertDepthAffineToFloat_device <<<gridSize, blockSize >>>(d_out, d_in, imgSize, depthCalibParams);
 	ORcudaKernelCheck;
 }
 
@@ -155,7 +155,7 @@ void ViewBuilder_CUDA::DepthFiltering(ITMFloatImage *image_out, const ITMFloatIm
 	dim3 blockSize(16, 16);
 	dim3 gridSize((int)ceil((float)imgDims.x / (float)blockSize.x), (int)ceil((float)imgDims.y / (float)blockSize.y));
 
-	filterDepth_device << <gridSize, blockSize >> >(imageData_out, imageData_in, imgDims);
+	filterDepth_device <<<gridSize, blockSize >>>(imageData_out, imageData_in, imgDims);
 	ORcudaKernelCheck;
 }
 
@@ -171,7 +171,7 @@ void ViewBuilder_CUDA::ComputeNormalAndWeights(ITMFloat4Image *normal_out, ITMFl
 	dim3 blockSize(16, 16);
 	dim3 gridSize((int)ceil((float)imgDims.x / (float)blockSize.x), (int)ceil((float)imgDims.y / (float)blockSize.y));
 
-	ComputeNormalAndWeight_device << <gridSize, blockSize >> >(depthData_in, normalData_out, sigmaZData_out, imgDims, intrinsic);
+	ComputeNormalAndWeight_device <<<gridSize, blockSize >>>(depthData_in, normalData_out, sigmaZData_out, imgDims, intrinsic);
 	ORcudaKernelCheck;
 }
 
@@ -184,7 +184,7 @@ void ViewBuilder_CUDA::ThresholdFiltering(ITMFloatImage* image_out, const ITMFlo
 	dim3 blockSize(16, 16);
 	dim3 gridSize((int)ceil((float)imgDims.x / (float)blockSize.x), (int)ceil((float)imgDims.y / (float)blockSize.y));
 
-	thresholdDepth_device << <gridSize, blockSize >> >(imageData_out, imageData_in, imgDims);
+	thresholdDepth_device <<<gridSize, blockSize >>>(imageData_out, imageData_in, imgDims);
 	ORcudaKernelCheck;
 }
 
