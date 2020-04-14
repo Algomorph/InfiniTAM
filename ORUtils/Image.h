@@ -29,7 +29,7 @@ public:
 
 	bool IsAllocated_CPU() const
 	{
-		return this->isAllocated_CPU;
+		return this->is_allocated_for_CPU;
 	};
 
 
@@ -77,11 +77,11 @@ public:
 	void ApplyMask(const Image<TMask>& maskImage, T blankElement);
 
 	friend bool operator==(const Image<T>& rhs, const Image<T>& lhs) {
-		if (rhs.noDims != lhs.noDims || rhs.isAllocated_CPU != lhs.isAllocated_CPU ||
-		    rhs.isAllocated_CUDA != lhs.isAllocated_CUDA) {
+		if (rhs.noDims != lhs.noDims || rhs.is_allocated_for_CPU != lhs.is_allocated_for_CPU ||
+		    rhs.is_allocated_for_CUDA != lhs.is_allocated_for_CUDA) {
 			return false;
 		}
-		if (rhs.isAllocated_CPU) {
+		if (rhs.is_allocated_for_CPU) {
 			for (int iElement = 0; iElement < rhs.element_count; iElement++) {
 				T rhsElement = rhs.GetElement(iElement, MEMORYDEVICE_CPU);
 				T lhsElement = lhs.GetElement(iElement, MEMORYDEVICE_CPU);
@@ -118,7 +118,7 @@ private:
 template<typename T>
 template <typename TMask>
 void Image<T>::ApplyMask(const Image<TMask>& maskImage, T blankElement) {
-	if (!this->isAllocated_CPU || !maskImage.IsAllocated_CPU()) {
+	if (!this->is_allocated_for_CPU || !maskImage.IsAllocated_CPU()) {
 		DIEWITHEXCEPTION("Cannot apply mask, either mask or source image or both are not allocated for CPU.");
 	}
 	if (this->noDims != maskImage.noDims) {

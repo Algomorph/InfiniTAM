@@ -13,26 +13,26 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "LocalVBA.h"
+#include "VoxelStorage.h"
 
 using namespace ITMLib;
 
 template<typename TVoxel>
-LocalVBA<TVoxel>::LocalVBA(MemoryDeviceType memoryType, int noBlocks, int blockSize):
+VoxelStorage<TVoxel>::VoxelStorage(MemoryDeviceType memoryType, int noBlocks, int blockSize):
 		memoryType(memoryType),
 		allocatedSize(noBlocks * blockSize),
 		voxelBlocks(new ORUtils::MemoryBlock<TVoxel>(noBlocks * blockSize, memoryType)),
 		allocationList(new ORUtils::MemoryBlock<int>(noBlocks, memoryType)) {}
 
 template<class TVoxel>
-LocalVBA<TVoxel>::~LocalVBA() {
+VoxelStorage<TVoxel>::~VoxelStorage() {
 	delete voxelBlocks;
 	delete allocationList;
 
 }
 
 template<class TVoxel>
-LocalVBA<TVoxel>::LocalVBA(const LocalVBA& other, MemoryDeviceType memoryType):
+VoxelStorage<TVoxel>::VoxelStorage(const VoxelStorage& other, MemoryDeviceType memoryType):
 		memoryType(memoryType),
 		allocatedSize(other.allocatedSize),
 		lastFreeBlockId(other.lastFreeBlockId),
@@ -42,7 +42,7 @@ LocalVBA<TVoxel>::LocalVBA(const LocalVBA& other, MemoryDeviceType memoryType):
 }
 
 template<class TVoxel>
-void LocalVBA<TVoxel>::SetFrom(const LocalVBA& other) {
+void VoxelStorage<TVoxel>::SetFrom(const VoxelStorage& other) {
 	lastFreeBlockId = other.lastFreeBlockId;
 	MemoryCopyDirection memoryCopyDirection = determineMemoryCopyDirection(this->memoryType, other.memoryType);
 	voxelBlocks->SetFrom(other.voxelBlocks, memoryCopyDirection);

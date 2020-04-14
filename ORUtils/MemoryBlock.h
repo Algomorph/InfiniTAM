@@ -1,4 +1,20 @@
-// Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
+//  ================================================================
+//  Created by Gregory Kramida on 4/11/20.
+//  Copyright (c) 2020 Gregory Kramida
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+
+//  http://www.apache.org/licenses/LICENSE-2.0
+
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//  ================================================================
+
+// Credits: Inspired by ORUtils/MemoryBlock.h in original InfiniTAM (https://github.com/victorprad/InfiniTAM/) and ORUtils (https://github.com/carlren/ORUtils)
 
 #pragma once
 
@@ -17,8 +33,8 @@
 #include "MetalContext.h"
 #endif
 
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstring>
 #include <cassert>
 #include <iterator>
 
@@ -65,7 +81,7 @@ public:
 		}
 
 		value_type operator*() {
-			switch (access_mode){
+			switch (access_mode) {
 				case MEMORYDEVICE_CPU: {
 					return *ptr_;
 				}
@@ -109,96 +125,181 @@ public:
 
 // endregion ===========================================================================================================
 
-	/** Total number of allocated entries in the data array. */
-	size_type size() const { return element_count; };
-
-	/** Get the data pointer on CPU or GPU. */
-	inline DEVICEPTR(T)* GetData(MemoryDeviceType memoryType) {
-		switch (memoryType) {
-			case MEMORYDEVICE_CPU:
-				return data_cpu;
-			case MEMORYDEVICE_CUDA:
-				return data_cuda;
-		}
-
-		return 0;
-	}
-
-	/** Get the data pointer on CPU or GPU. */
-	inline const DEVICEPTR(T)* GetData(MemoryDeviceType memoryType) const {
-		switch (memoryType) {
-			case MEMORYDEVICE_CPU:
-				return data_cpu;
-			case MEMORYDEVICE_CUDA:
-				return data_cuda;
-		}
-
-		return 0;
-	}
 
 #ifdef COMPILE_WITH_METAL
-	inline const void *GetMetalBuffer() const { return data_metalBuffer; }
+	inline const void *GetMetalBuffer() const { return data_metal_buffer; }
 #endif
 
-	/** Initialize an empty memory block of the given size,
-	on CPU only or GPU only or on both. CPU might also use the
-	Metal compatible allocator (i.e. with 16384 alignment).
+	/**
+	 * Initialize an empty memory block of the given size,
+	 * on CPU only or GPU only or on both. CPU might also use the
+	 * Metal compatible allocator (i.e. with 16384 alignment).
 	*/
-	MemoryBlock(size_t dataSize, bool allocate_CPU, bool allocate_CUDA, bool metalCompatible = true)
-			: isAllocated_CPU(false), isAllocated_CUDA(false), isMetalCompatible(false),
+	MemoryBlock(size_t dataSize, bool allocate_CPU, bool allocate_CUDA, bool make_metal_compatible = true)
+			: is_allocated_for_CPU(false), is_allocated_for_CUDA(false),
+#ifdef COMPILE_WITH_METAL
+			is_metal_compatible(make_metal_compatible),
+#else
+              is_metal_compatible(false),
+#endif
 #ifdef COMPILE_WITHOUT_CUDA
 			access_mode(allocate_CPU ? MEMORYDEVICE_CPU : MEMORYDEVICE_NONE)
 #else
               access_mode(allocate_CPU ? MEMORYDEVICE_CPU : allocate_CUDA ? MEMORYDEVICE_CUDA : MEMORYDEVICE_NONE) {
 #endif
-		Allocate(dataSize, allocate_CPU, allocate_CUDA, metalCompatible);
+		Allocate(dataSize, allocate_CPU, allocate_CUDA, make_metal_compatible);
 		Clear();
 	}
 
-	/** Initialize an empty memory block of the given size, either
-	on CPU only or on GPU only. CPU will be Metal compatible if Metal
-	is enabled.
+	/**
+	 * Initialize an empty memory block of the given size, either
+	 * on CPU only or on GPU only. CPU allocation will be Metal-compatible if Metal
+	 * is enabled during compilation.
 	*/
-	MemoryBlock(size_t dataSize, MemoryDeviceType memoryType) :
-			isAllocated_CPU(false), isAllocated_CUDA(false), isMetalCompatible(false),
-#ifdef COMPILE_WITHOUT_CUDA
-			access_mode(memoryType == MEMORYDEVICE_NONE ? MEMORYDEVICE_NONE : MEMORYDEVICE_CPU)
+	MemoryBlock(size_t element_count, MemoryDeviceType memory_type) :
+			is_allocated_for_CPU(false), is_allocated_for_CUDA(false),
+#ifdef COMPILE_WITH_METAL
+			is_metal_compatible(true),
 #else
-			access_mode(memoryType) {
+			is_metal_compatible(false),
+#endif
+#ifdef COMPILE_WITHOUT_CUDA
+			access_mode(memory_type == MEMORYDEVICE_NONE ? MEMORYDEVICE_NONE : MEMORYDEVICE_CPU)
+#else
+			access_mode(memory_type) {
 #endif
 
-		switch (memoryType) {
+		switch (memory_type) {
+			case MEMORYDEVICE_METAL:
 			case MEMORYDEVICE_CPU:
-				Allocate(dataSize, true, false, true);
+				Allocate(element_count, true, false, true);
 				break;
 			case MEMORYDEVICE_CUDA: {
-				Allocate(dataSize, false, true, true);
+				Allocate(element_count, false, true, true);
 				break;
 			}
+			default:
+				break;
 		}
 
 		Clear();
 	}
 
-	/** Set all image data to the given @p defaultValue. */
+
+	virtual ~MemoryBlock() {
+		this->Free();
+	}
+
+	MemoryBlock(MemoryBlock&& other) noexcept :
+			element_count(other.element_count), // for code clarity
+			is_allocated_for_CPU(other.is_allocated_for_CPU),
+			is_allocated_for_CUDA(other.is_allocated_for_CUDA),
+			is_metal_compatible(other.is_metal_compatible),
+			data_cpu(other.data_cpu),
+			data_cuda(other.data_cuda),
+#ifdef COMPILE_WITH_METAL
+			data_metal_buffer(other.data_metal_buffer),
+#endif
+			access_mode(other.access_mode) {
+		other.element_count = 0;
+		other.is_allocated_for_CPU = false;
+		other.is_allocated_for_CUDA = false;
+		other.is_metal_compatible = false;
+		other.data_cpu = nullptr;
+		other.data_cuda = nullptr;
+		other.access_mode = MEMORYDEVICE_NONE;
+	}
+
+	MemoryBlock(const MemoryBlock& other) :
+			element_count(other.element_count), // for code clarity
+			is_allocated_for_CPU(other.is_allocated_for_CPU),
+			is_allocated_for_CUDA(other.is_allocated_for_CUDA),
+			is_metal_compatible(other.is_metal_compatible),
+			access_mode(other.access_mode) {
+		Allocate(element_count, is_allocated_for_CPU, is_allocated_for_CUDA, is_metal_compatible);
+		if (is_allocated_for_CPU) {
+			this->SetFrom(other, MemoryCopyDirection::CPU_TO_CPU);
+		}
+		if (is_allocated_for_CUDA) {
+			this->SetFrom(other, MemoryCopyDirection::CUDA_TO_CUDA);
+		}
+	}
+
+	MemoryBlock& operator=(MemoryBlock other) {
+		swap(*this, other);
+		return *this;
+	}
+
+	/**
+	 * Count of elements allocated in the data array.
+	 * */
+	size_type size() const { return this->element_count; };
+
+	/** Get the data pointer for CPU or GPU. */
+	inline DEVICEPTR(T)* GetData(MemoryDeviceType memory_type = MEMORYDEVICE_NONE) {
+		switch (memory_type) {
+			case MEMORYDEVICE_CPU:
+				assert(this->is_allocated_for_CPU);
+				return data_cpu;
+			case MEMORYDEVICE_CUDA:
+				assert(this->is_allocated_for_CUDA);
+				return data_cuda;
+			case MEMORYDEVICE_NONE:
+				switch (access_mode) {
+					case MEMORYDEVICE_CPU:
+						return data_cpu;
+					case MEMORYDEVICE_CUDA:
+						return data_cuda;
+				}
+		}
+		assert(false);
+		return nullptr;
+	}
+
+	/** Get the const data pointer for CPU or GPU. */
+	inline const DEVICEPTR(T)* GetData(MemoryDeviceType memory_type = MEMORYDEVICE_NONE) const {
+		switch (memory_type) {
+			case MEMORYDEVICE_CPU:
+				assert(this->is_allocated_for_CPU);
+				return data_cpu;
+			case MEMORYDEVICE_CUDA:
+				assert(this->is_allocated_for_CUDA);
+				return data_cuda;
+			case MEMORYDEVICE_NONE:
+				switch (access_mode) {
+					case MEMORYDEVICE_CPU:
+						return data_cpu;
+					case MEMORYDEVICE_CUDA:
+						return data_cuda;
+				}
+		}
+		assert(false);
+		return nullptr;
+	}
+
+	//TODO: make a Clear method that accepts a T default value (use cuda kernel to propagate the value throughout array)
+	/**
+	 * Set all data to the given @p defaultValue.
+	 * */
 	void Clear(unsigned char defaultValue = 0) {
-		if (isAllocated_CPU) memset(data_cpu, defaultValue, element_count * sizeof(T));
+		if (is_allocated_for_CPU) memset(data_cpu, defaultValue, element_count * sizeof(T));
 #ifndef COMPILE_WITHOUT_CUDA
-		if (isAllocated_CUDA) ORcudaSafeCall(cudaMemset(data_cuda, defaultValue, element_count * sizeof(T)));
+		if (is_allocated_for_CUDA) ORcudaSafeCall(cudaMemset(data_cuda, defaultValue, element_count * sizeof(T)));
 #endif
 	}
 
-	/** Resize a memory block, losing all old data.
-	Essentially any previously allocated data is
-	released, new memory is allocated.
-	*/
+	/**
+	 * Resize a memory block, losing all old data.
+	 * Essentially any previously allocated data is
+	 * released, new memory is allocated.
+	 * */
 	void Resize(size_t newDataSize, bool forceReallocation = true) {
 		if (newDataSize == element_count) return;
 
 		if (newDataSize > element_count || forceReallocation) {
-			bool allocate_CPU = this->isAllocated_CPU;
-			bool allocate_CUDA = this->isAllocated_CUDA;
-			bool metalCompatible = this->isMetalCompatible;
+			bool allocate_CPU = this->is_allocated_for_CPU;
+			bool allocate_CUDA = this->is_allocated_for_CUDA;
+			bool metalCompatible = this->is_metal_compatible;
 
 			this->Free();
 			this->Allocate(newDataSize, allocate_CPU, allocate_CUDA, metalCompatible);
@@ -210,7 +311,7 @@ public:
 	/** Transfer data from CPU to GPU, if possible. */
 	void UpdateDeviceFromHost() const {
 #ifndef COMPILE_WITHOUT_CUDA
-		if (isAllocated_CUDA && isAllocated_CPU)
+		if (is_allocated_for_CUDA && is_allocated_for_CPU)
 			ORcudaSafeCall(cudaMemcpy(data_cuda, data_cpu, element_count * sizeof(T), cudaMemcpyHostToDevice));
 #endif
 	}
@@ -218,7 +319,7 @@ public:
 	/** Transfer data from GPU to CPU, if possible. */
 	void UpdateHostFromDevice() const {
 #ifndef COMPILE_WITHOUT_CUDA
-		if (isAllocated_CUDA && isAllocated_CPU)
+		if (is_allocated_for_CUDA && is_allocated_for_CPU)
 			ORcudaSafeCall(cudaMemcpy(data_cpu, data_cuda, element_count * sizeof(T), cudaMemcpyDeviceToHost));
 #endif
 	}
@@ -289,12 +390,12 @@ public:
 		}
 	}
 
-	T operator[](size_type index) const{
+	T operator[](size_type index) const {
 		return GetElement(index);
 	}
 
-	iterator begin() const{
-		switch (access_mode){
+	iterator begin() const {
+		switch (access_mode) {
 			case MEMORYDEVICE_CPU:
 				return iterator(this->data_cpu, MEMORYDEVICE_CPU);
 #ifndef COMPILE_WITHOUT_CUDA
@@ -310,8 +411,8 @@ public:
 		}
 	}
 
-	iterator end() const{
-		switch (access_mode){
+	iterator end() const {
+		switch (access_mode) {
 			case MEMORYDEVICE_CPU:
 				return iterator(this->data_cpu + element_count, MEMORYDEVICE_CPU);
 #ifndef COMPILE_WITHOUT_CUDA
@@ -328,130 +429,136 @@ public:
 	}
 
 
-	virtual ~MemoryBlock() { this->Free(); }
+	void Swap(MemoryBlock<T>& rhs) {
+		using std::swap;
+		swap(this->element_count, rhs.element_count);
+		swap(this->is_allocated_for_CPU, rhs.is_allocated_for_CPU);
+		swap(this->is_allocated_for_CUDA, rhs.is_allocated_for_CUDA);
+		swap(this->is_metal_compatible, rhs.is_metal_compatible);
+		swap(this->data_cpu, rhs.data_cpu);
+		swap(this->data_cuda, rhs.data_cuda);
+#ifdef COMPILE_WITH_METAL
+		swap(this->data_metal_buffer, rhs.data_metal_buffer);
+#endif
+		swap(this->access_mode, rhs.access_mode);
+	}
 
-	/** Allocate image data of the specified size. If the
-	data has been allocated before, the data is freed.
+	friend void swap(MemoryBlock<T>& lhs, MemoryBlock<T>& rhs) { // nothrow
+		lhs.Swap(rhs);
+	}
+
+protected:
+	size_type element_count;
+	bool is_allocated_for_CPU, is_allocated_for_CUDA, is_metal_compatible;
+	/** Pointer to memory on CPU host. */
+	DEVICEPTR(T)* data_cpu;
+	/** Pointer to memory on GPU, if available. */
+	DEVICEPTR(T)* data_cuda;
+
+#ifdef COMPILE_WITH_METAL
+	void *data_metal_buffer;
+#endif
+	MemoryDeviceType access_mode;
+
+private:
+	enum AllocationMethod {
+		ALLOCATION_ON_CPU_WITHOUT_CUDA_OR_METAL,
+		ALLOCATION_ON_CPU_WITH_CUDA,
+		ALLOCATION_ON_CPU_AND_GPU_WITH_METAL
+	};
+
+	/**
+	 * Allocate element data of the specified size with the specified method(s). If the
+	 * data has been allocated before, the data is freed.
 	*/
-	void Allocate(size_t dataSize, bool allocate_CPU, bool allocate_CUDA, bool metalCompatible) {
+	void Allocate(size_type element_count, bool allocate_CPU, bool allocate_CUDA, bool metal_compatible) {
 		Free();
 
-		this->element_count = dataSize;
+		this->element_count = element_count;
 
 		if (allocate_CPU) {
-			int allocType = 0;
+			AllocationMethod allocation_method = ALLOCATION_ON_CPU_WITHOUT_CUDA_OR_METAL;
 
 #ifndef COMPILE_WITHOUT_CUDA
-			if (allocate_CUDA) allocType = 1;
+			if (allocate_CUDA) allocation_method = ALLOCATION_ON_CPU_WITH_CUDA;
 #endif
 #ifdef COMPILE_WITH_METAL
-			if (metalCompatible) allocType = 2;
+			if (is_metal_compatible) allocation_method = ALLOCATION_ON_CPU_AND_GPU_WITH_METAL;
 #endif
-			switch (allocType) {
-				case 0:
-					if (dataSize == 0) data_cpu = NULL;
-					else data_cpu = new T[dataSize];
+			switch (allocation_method) {
+				case ALLOCATION_ON_CPU_WITHOUT_CUDA_OR_METAL:
+					if (element_count == 0) data_cpu = nullptr;
+					else data_cpu = new T[element_count];
 					break;
-				case 1:
+				case ALLOCATION_ON_CPU_WITH_CUDA:
 #ifndef COMPILE_WITHOUT_CUDA
-					if (dataSize == 0) data_cpu = NULL;
+					if (element_count == 0) data_cpu = nullptr;
 					else
-						ORcudaSafeCall(cudaMallocHost((void**) &data_cpu, dataSize * sizeof(T)));
+						ORcudaSafeCall(cudaMallocHost((void**) &data_cpu, element_count * sizeof(T)));
 #endif
 					break;
-				case 2:
+				case ALLOCATION_ON_CPU_AND_GPU_WITH_METAL:
 #ifdef COMPILE_WITH_METAL
-					if (element_count == 0) data_cpu = NULL;
-					else allocateMetalData((void**)&data_cpu, (void**)&data_metalBuffer, (int)(element_count * sizeof(T)), true);
+					if (element_count == 0) data_cpu = nullptr;
+					else allocateMetalData((void**)&data_cpu, (void**)&data_metal_buffer, (int)(element_count * sizeof(T)), true);
 #endif
 					break;
 			}
 
-			this->isAllocated_CPU = allocate_CPU;
-			this->isMetalCompatible = metalCompatible;
+			this->is_allocated_for_CPU = allocate_CPU;
+			this->is_metal_compatible = metal_compatible;
 		}
 
 		if (allocate_CUDA) {
 #ifndef COMPILE_WITHOUT_CUDA
-			if (dataSize == 0) data_cuda = NULL;
+			if (element_count == 0) data_cuda = nullptr;
 			else
-				ORcudaSafeCall(cudaMalloc((void**) &data_cuda, dataSize * sizeof(T)));
-			this->isAllocated_CUDA = allocate_CUDA;
+				ORcudaSafeCall(cudaMalloc((void**) &data_cuda, element_count * sizeof(T)));
+			this->is_allocated_for_CUDA = allocate_CUDA;
 #endif
 		}
 	}
 
 	void Free() {
-		if (isAllocated_CPU) {
-			int allocType = 0;
+		if (is_allocated_for_CPU) {
+			AllocationMethod allocation_method = ALLOCATION_ON_CPU_WITHOUT_CUDA_OR_METAL;
 
 #ifndef COMPILE_WITHOUT_CUDA
-			if (isAllocated_CUDA) allocType = 1;
+			if (is_allocated_for_CUDA) allocation_method = ALLOCATION_ON_CPU_WITH_CUDA;
 #endif
 #ifdef COMPILE_WITH_METAL
-			if (isMetalCompatible) allocType = 2;
+			if (is_metal_compatible) allocation_method = ALLOCATION_ON_CPU_AND_GPU_WITH_METAL;
 #endif
-			switch (allocType) {
-				case 0:
-					if (data_cpu != NULL) delete[] data_cpu;
+			switch (allocation_method) {
+				case ALLOCATION_ON_CPU_WITHOUT_CUDA_OR_METAL:
+					if (data_cpu != nullptr) delete[] data_cpu;
 					break;
-				case 1:
+				case ALLOCATION_ON_CPU_WITH_CUDA:
 #ifndef COMPILE_WITHOUT_CUDA
-					if (data_cpu != NULL) ORcudaSafeCall(cudaFreeHost(data_cpu));
+					if (data_cpu != nullptr) ORcudaSafeCall(cudaFreeHost(data_cpu));
 #endif
 					break;
-				case 2:
+				case ALLOCATION_ON_CPU_AND_GPU_WITH_METAL:
 #ifdef COMPILE_WITH_METAL
-					if (data_cpu != NULL) freeMetalData((void**)&data_cpu, (void**)&data_metalBuffer, (int)(element_count * sizeof(T)), true);
+					if (data_cpu != nullptr) freeMetalData((void**)&data_cpu, (void**)&data_metal_buffer, (int)(element_count * sizeof(T)), true);
 #endif
 					break;
 			}
 
-			isMetalCompatible = false;
-			isAllocated_CPU = false;
+			is_metal_compatible = false;
+			is_allocated_for_CPU = false;
 		}
 
-		if (isAllocated_CUDA) {
+		if (is_allocated_for_CUDA) {
 #ifndef COMPILE_WITHOUT_CUDA
-			if (data_cuda != NULL) ORcudaSafeCall(cudaFree(data_cuda));
+			if (data_cuda != nullptr) ORcudaSafeCall(cudaFree(data_cuda));
 #endif
-			isAllocated_CUDA = false;
+			is_allocated_for_CUDA = false;
 		}
 	}
-
-	void Swap(MemoryBlock<T>& rhs) {
-		std::swap(this->element_count, rhs.element_count);
-		std::swap(this->data_cpu, rhs.data_cpu);
-		std::swap(this->data_cuda, rhs.data_cuda);
-#ifdef COMPILE_WITH_METAL
-		std::swap(this->data_metalBuffer, rhs.data_metalBuffer);
-#endif
-		std::swap(this->isAllocated_CPU, rhs.isAllocated_CPU);
-		std::swap(this->isAllocated_CUDA, rhs.isAllocated_CUDA);
-		std::swap(this->isMetalCompatible, rhs.isMetalCompatible);
-	}
-
-	// Suppress the default copy constructor and assignment operator
-	MemoryBlock(const MemoryBlock&);
-	MemoryBlock& operator=(const MemoryBlock&);
-
-protected:
-	size_type element_count;
-
-	bool isAllocated_CPU, isAllocated_CUDA, isMetalCompatible;
-	/** Pointer to memory on CPU host. */
-	DEVICEPTR(T)* data_cpu;
-
-	/** Pointer to memory on GPU, if available. */
-	DEVICEPTR(T)* data_cuda;
-
-#ifdef COMPILE_WITH_METAL
-	void *data_metalBuffer;
-#endif
-	MemoryDeviceType access_mode;
 
 };
 
 }
 
-#endif
+#endif // __METALC__

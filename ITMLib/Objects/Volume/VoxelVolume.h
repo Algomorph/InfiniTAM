@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "LocalVBA.h"
+#include "VoxelStorage.h"
 #include "GlobalCache.h"
 #include "../../Utils/VoxelVolumeParameters.h"
 
@@ -25,7 +25,7 @@ public:
 	TIndex index;
 
 	/** Current local content of the 8x8x8 voxel blocks -- stored host or device */
-	LocalVBA<TVoxel> voxels;
+	VoxelStorage<TVoxel> voxels;
 
 	/** "Global" content -- stored on in host memory only */
 	GlobalCache<TVoxel, TIndex>* global_cache;

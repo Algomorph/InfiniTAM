@@ -13,7 +13,7 @@ namespace ITMLib
 	ITMLib::ITMHashTable.
 	*/
 	template<class TVoxel>
-	class LocalVBA
+	class VoxelStorage
 	{
 	private:
 		ORUtils::MemoryBlock<TVoxel> *voxelBlocks;
@@ -75,14 +75,14 @@ namespace ITMLib
 		}
 
 
-		LocalVBA(MemoryDeviceType memoryType, int noBlocks, int blockSize);
-		LocalVBA(const LocalVBA& other, MemoryDeviceType memoryType);
-		void SetFrom(const LocalVBA& other);
+		VoxelStorage(MemoryDeviceType memoryType, int noBlocks, int blockSize);
+		VoxelStorage(const VoxelStorage& other, MemoryDeviceType memoryType);
+		void SetFrom(const VoxelStorage& other);
 
-		~LocalVBA();
+		~VoxelStorage();
 
 		// Suppress the default copy constructor and assignment operator
-		LocalVBA(const LocalVBA&) = delete;
-		LocalVBA& operator=(const LocalVBA&) = delete;
+		VoxelStorage(const VoxelStorage&) = delete;
+		VoxelStorage& operator=(const VoxelStorage&) = delete;
 	};
 }

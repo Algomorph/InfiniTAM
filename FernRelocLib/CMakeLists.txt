@@ -43,7 +43,6 @@ source_group("" FILES ${sources} ${headers})
 ##########################################
 # Specify the target and where to put it #
 ##########################################
-
 include(${PROJECT_SOURCE_DIR}/cmake/SetCUDALibTarget.cmake)
 
 ##########################################

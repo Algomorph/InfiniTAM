@@ -16,6 +16,6 @@
 #include "LocalVBA.tpp"
 #include "../../GlobalTemplateDefines.h"
 namespace ITMLib{
-	template class LocalVBA<TSDFVoxel>;
-	template class LocalVBA<WarpVoxel>;
+	template class VoxelStorage<TSDFVoxel>;
+	template class VoxelStorage<WarpVoxel>;
 }//namespace ITMLib
