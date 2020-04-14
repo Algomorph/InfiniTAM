@@ -17,7 +17,6 @@
 
 
 #include <curand_kernel.h>
-#include "../ITMLib/Utils/CLionCUDAsyntax.h"
 
 
 

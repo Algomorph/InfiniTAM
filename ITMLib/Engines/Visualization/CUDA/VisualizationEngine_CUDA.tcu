@@ -61,7 +61,7 @@ void VisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::FindVisibleBlocks(VoxelVo
 
 	dim3 cudaBlockSizeAL(256, 1);
 	dim3 gridSizeAL((int)ceil((float)hash_entry_count / (float)cudaBlockSizeAL.x));
-	buildCompleteVisibleList_device << <gridSizeAL, cudaBlockSizeAL >> >(
+	buildCompleteVisibleList_device <<<gridSizeAL, cudaBlockSizeAL >>>(
 			hash_table, /*cacheStates, this->scene->useSwapping,*/ hash_entry_count,
 					scene->index.GetVisibleBlockHashCodes(), visible_block_count_device, scene->index.GetBlockVisibilityTypes(), M, projParams,
 		imgSize, voxel_size);
@@ -134,7 +134,7 @@ void VisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::CreateExpectedDepths(cons
 		dim3 blockSize(256);
 		dim3 gridSize((int)ceil((float)visible_block_count / (float)blockSize.x));
 		ORcudaSafeCall(cudaMemset(block_count_device, 0, sizeof(uint)));
-		projectAndSplitBlocks_device << <gridSize, blockSize >> >(hash_entries, visible_block_hash_codes, visible_block_count, pose->GetM(),
+		projectAndSplitBlocks_device <<<gridSize, blockSize >>>(hash_entries, visible_block_hash_codes, visible_block_count, pose->GetM(),
 			intrinsics->projectionParamsSimple.all, imgSize, voxelSize, rendering_block_list_device, block_count_device);
 		ORcudaKernelCheck;
 	}
@@ -149,7 +149,7 @@ void VisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::CreateExpectedDepths(cons
 		// fill minmaxData
 		dim3 blockSize(16, 16);
 		dim3 gridSize((unsigned int)ceil((float)total_block_count / 4.0f), 4);
-		fillBlocks_device << <gridSize, blockSize >> >(total_block_count, rendering_block_list_device, imgSize, minmaxData);
+		fillBlocks_device <<<gridSize, blockSize >>>(total_block_count, rendering_block_list_device, imgSize, minmaxData);
 		ORcudaKernelCheck;
 	}
 }
@@ -172,7 +172,7 @@ static void GenericRaycast(VoxelVolume<TVoxel, TIndex> *scene, const Vector2i& i
 
 	dim3 cudaBlockSize(16, 12);
 	dim3 gridSize((int)ceil((float)imgSize.x / (float)cudaBlockSize.x), (int)ceil((float)imgSize.y / (float)cudaBlockSize.y));
-	if (blockVisibilityTypes != nullptr) genericRaycast_device<TVoxel, TIndex, true> << < gridSize, cudaBlockSize >> > (
+	if (blockVisibilityTypes != nullptr) genericRaycast_device<TVoxel, TIndex, true> <<< gridSize, cudaBlockSize >>> (
 			renderState->raycastResult->GetData(MEMORYDEVICE_CUDA),
 			blockVisibilityTypes,
 			scene->voxels.GetVoxelBlocks(),
@@ -184,7 +184,7 @@ static void GenericRaycast(VoxelVolume<TVoxel, TIndex> *scene, const Vector2i& i
 			renderState->renderingRangeImage->GetData(MEMORYDEVICE_CUDA),
 			scene->parameters->narrow_band_half_width
 		);
-	else genericRaycast_device<TVoxel, TIndex, false> << <gridSize, cudaBlockSize >> >(
+	else genericRaycast_device<TVoxel, TIndex, false> <<<gridSize, cudaBlockSize >>>(
 			renderState->raycastResult->GetData(MEMORYDEVICE_CUDA),
 					nullptr,
 			scene->voxels.GetVoxelBlocks(),
@@ -283,7 +283,7 @@ static void CreatePointCloud_common(VoxelVolume<TVoxel, TIndex> *scene, const Vi
 
 	dim3 cudaBlockSize(16, 16);
 	dim3 gridSize = getGridSize(imgSize, cudaBlockSize);
-	renderPointCloud_device<TVoxel, TIndex> << <gridSize, cudaBlockSize >> >(locations, colours, noTotalPoints_device,
+	renderPointCloud_device<TVoxel, TIndex> <<<gridSize, cudaBlockSize >>>(locations, colours, noTotalPoints_device,
 		pointsRay, scene->voxels.GetVoxelBlocks(), scene->index.GetIndexData(), skipPoints, scene->parameters->voxel_size, imgSize, lightSource);
 	ORcudaKernelCheck;
 
@@ -347,7 +347,7 @@ static void ForwardRender_common(const VoxelVolume<TVoxel, TIndex> *scene, const
 		blockSize = dim3(16, 16);
 		gridSize = dim3((int)ceil((float)imgSize.x / (float)blockSize.x), (int)ceil((float)imgSize.y / (float)blockSize.y));
 
-		forwardProject_device << <gridSize, blockSize >> >(forwardProjection, pointsRay, imgSize, M, projParams, voxelSize);
+		forwardProject_device <<<gridSize, blockSize >>>(forwardProjection, pointsRay, imgSize, M, projParams, voxelSize);
 		ORcudaKernelCheck;
 	}
 
@@ -357,7 +357,7 @@ static void ForwardRender_common(const VoxelVolume<TVoxel, TIndex> *scene, const
 		blockSize = dim3(16, 16);
 		gridSize = dim3((int)ceil((float)imgSize.x / (float)blockSize.x), (int)ceil((float)imgSize.y / (float)blockSize.y));
 
-		findMissingPoints_device << <gridSize, blockSize >> >(fwdProjMissingPoints, noTotalPoints_device, minmaximg, 
+		findMissingPoints_device <<<gridSize, blockSize >>>(fwdProjMissingPoints, noTotalPoints_device, minmaximg,
 			forwardProjection, currentDepth, imgSize);
 		ORcudaKernelCheck;
 	}
@@ -368,7 +368,7 @@ static void ForwardRender_common(const VoxelVolume<TVoxel, TIndex> *scene, const
 		blockSize = dim3(256);
 		gridSize = dim3((int)ceil((float)renderState->noFwdProjMissingPoints / blockSize.x));
 
-		genericRaycastMissingPoints_device<TVoxel, TIndex, false> << <gridSize, blockSize >> >(forwardProjection, NULL, voxelData, voxelIndex, imgSize, invM,
+		genericRaycastMissingPoints_device<TVoxel, TIndex, false> <<<gridSize, blockSize >> >(forwardProjection, NULL, voxelData, voxelIndex, imgSize, invM,
 			InvertProjectionParams(projParams), oneOverVoxelSize, fwdProjMissingPoints, renderState->noFwdProjMissingPoints, minmaximg, scene->parameters->narrow_band_half_width);
 		ORcudaKernelCheck;
 	}

@@ -44,7 +44,7 @@ public:
 		              volume->index.GetVolumeSize().y / cuda_block_size.y,
 		              volume->index.GetVolumeSize().z / cuda_block_size.z);
 
-		TraverseAll_device<TStaticFunctor, TVoxel> << < cuda_grid_size, cuda_block_size >> > (voxels, array_info);
+		TraverseAll_device<TStaticFunctor, TVoxel> <<< cuda_grid_size, cuda_block_size >>> (voxels, array_info);
 		ORcudaKernelCheck;
 	}
 
@@ -71,7 +71,7 @@ public:
 		ORcudaSafeCall(cudaMalloc((void**) &functor_device, sizeof(TFunctor)));
 		ORcudaSafeCall(cudaMemcpy(functor_device, &functor, sizeof(TFunctor), cudaMemcpyHostToDevice));
 
-		traverseAll_device < TFunctor, TVoxel > << < cuda_grid_size, cuda_block_size >> >
+		traverseAll_device < TFunctor, TVoxel > <<< cuda_grid_size, cuda_block_size >>>
 		                                                    (voxels, array_info, functor_device);
 		ORcudaKernelCheck;
 
@@ -102,7 +102,7 @@ public:
 		ORcudaSafeCall(cudaMalloc((void**) &functor_device, sizeof(TFunctor)));
 		ORcudaSafeCall(cudaMemcpy(functor_device, &functor, sizeof(TFunctor), cudaMemcpyHostToDevice));
 
-		traverseAllWithPosition_device < TFunctor, TVoxel > << < cuda_grid_size, cuda_block_size >> >
+		traverseAllWithPosition_device < TFunctor, TVoxel > <<< cuda_grid_size, cuda_block_size >>>
 		                                                                (voxels, array_info, functor_device);
 		ORcudaKernelCheck;
 

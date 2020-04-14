@@ -58,7 +58,7 @@ public:
 				   ReductionResult<TOutput, VoxelBlockHash>* result_buffer_device, const TVoxel* voxels,
 				   const HashEntry* hash_entries, const int* utilized_hash_codes) {
 					computeVoxelHashReduction_BlockLevel_Static<TVoxel, TRetrieveSingleStaticFunctor, TReduceBlockLevelStaticFunctor, TOutput>
-							<< < cuda_utilized_grid_size, cuda_block_size >> >
+							<<< cuda_utilized_grid_size, cuda_block_size >>>
 					                                      (result_buffer_device, voxels, hash_entries, utilized_hash_codes);
 				}
 
@@ -108,7 +108,7 @@ public:
 					                          sizeof(TRetrieveSingleDynamicFunctor), cudaMemcpyHostToDevice));
 
 					computeVoxelHashReduction_BlockLevel_Dynamic<TVoxel, TRetrieveSingleDynamicFunctor, TReduceBlockLevelStaticFunctor, TOutput>
-							<< < cuda_utilized_grid_size, cuda_block_size >> >
+							<<< cuda_utilized_grid_size, cuda_block_size >>>
 					                                      (result_buffer_device, voxels, hash_entries, utilized_hash_codes, retrieve_functor_device);
 				}
 		);
@@ -141,7 +141,7 @@ private:
 
 		if(tail_length > 0){
 			setTailToIgnored<TOutput>
-					<< < cuda_tail_grid_size, cuda_block_size >> >
+					<<< cuda_tail_grid_size, cuda_block_size >>>
 			                                  (result_buffer1.GetData(
 					                                  MEMORYDEVICE_CUDA), utilized_entry_count, normalized_entry_count, ignored_value);
 			ORcudaKernelCheck;
@@ -174,7 +174,7 @@ private:
 			if(tail_length > 0) {
 				cuda_tail_grid_size.x = ceil_of_integer_quotient(tail_length, VOXEL_BLOCK_SIZE3);
 				setTailToIgnored<TOutput>
-						<< < cuda_tail_grid_size, cuda_block_size >> >
+						<<< cuda_tail_grid_size, cuda_block_size >>>
 				                                  (output_buffer->GetData(
 						                                  MEMORYDEVICE_CUDA), output_count, normalized_output_count, ignored_value);
 				ORcudaKernelCheck;
@@ -182,7 +182,7 @@ private:
 
 			dim3 cuda_grid_size(output_count);
 			computeVoxelHashReduction_ResultLevel<TReduceResultLevelStaticFunctor, TOutput>
-					<< < cuda_grid_size, cuda_block_size >> >
+					<<< cuda_grid_size, cuda_block_size >>>
 			                             (output_buffer->GetData(MEMORYDEVICE_CUDA), input_buffer->GetData(
 					                             MEMORYDEVICE_CUDA));
 			ORcudaKernelCheck;

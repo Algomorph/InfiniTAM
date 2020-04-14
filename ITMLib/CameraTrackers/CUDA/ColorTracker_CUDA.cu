@@ -68,7 +68,7 @@ int ColorTracker_CUDA::F_oneLevel(float *f, ORUtils::SE3Pose *pose)
 	{
 		ORcudaSafeCall(cudaMemset(f_device, 0, sizeof(Vector2f) * gridSize.x));
 
-		colorTrackerOneLevel_f_device << <gridSize, blockSize >> >(f_device, locations, colours, rgb, noTotalPoints, M, projParams, imgSize);
+		colorTrackerOneLevel_f_device <<<gridSize, blockSize >>>(f_device, locations, colours, rgb, noTotalPoints, M, projParams, imgSize);
 		ORcudaKernelCheck;
 
 		ORcudaSafeCall(cudaMemcpy(f_host, f_device, sizeof(Vector2f)* gridSize.x, cudaMemcpyDeviceToHost));
@@ -122,7 +122,7 @@ void ColorTracker_CUDA::G_oneLevel(float *gradient, float *hessian, ORUtils::SE3
 			ORcudaSafeCall(cudaMemset(g_device, 0, sizeof(float) * gridSize.x * 3));
 			ORcudaSafeCall(cudaMemset(h_device, 0, sizeof(float) * gridSize.x * 6));
 
-			colorTrackerOneLevel_g_ro_device << <gridSize, blockSize >> >(g_device, h_device, locations, colours, gx, gy, rgb, noTotalPoints,
+			colorTrackerOneLevel_g_ro_device <<<gridSize, blockSize >>>(g_device, h_device, locations, colours, gx, gy, rgb, noTotalPoints,
 				M, projParams, imgSize);
 			ORcudaKernelCheck;
 		}
@@ -131,7 +131,7 @@ void ColorTracker_CUDA::G_oneLevel(float *gradient, float *hessian, ORUtils::SE3
 			ORcudaSafeCall(cudaMemset(g_device, 0, sizeof(float) * gridSize.x * 6));
 			ORcudaSafeCall(cudaMemset(h_device, 0, sizeof(float) * gridSize.x * 21));
 
-			colorTrackerOneLevel_g_rt_device << <gridSize, blockSize >> >(g_device, h_device, locations, colours, gx, gy, rgb, noTotalPoints,
+			colorTrackerOneLevel_g_rt_device <<<gridSize, blockSize >>>(g_device, h_device, locations, colours, gx, gy, rgb, noTotalPoints,
 				M, projParams, imgSize);
 			ORcudaKernelCheck;
 		}

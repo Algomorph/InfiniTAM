@@ -102,7 +102,7 @@ template<typename T>
 bool AtomicAddTest(){
 	return AtomicTest<T>(
 			[](dim3 grid_size, dim3 block_size, T* data, T* output, int data_count) {
-				testAtomicAdd << < grid_size, block_size >> > (data, output, data_count);
+				testAtomicAdd <<< grid_size, block_size >>> (data, output, data_count);
 			},
 			[](T* data, T* output, int data_count, int count_of_threads_to_modify_each_item){
 				std::vector<T> expected = arange((T)0, (T)count_of_threads_to_modify_each_item, (T)1);
@@ -126,7 +126,7 @@ bool AtomicCASTest(){
 	double final_value = 14;
 	return AtomicTest<T>(
 			[&](dim3 grid_size, dim3 block_size, T* data, T* output, int data_count) {
-				testAtomicCAS << < grid_size, block_size >> > (data, output, data_count, (T)initial_value, (T)final_value);
+				testAtomicCAS <<< grid_size, block_size >>> (data, output, data_count, (T)initial_value, (T)final_value);
 			},
 			[&](T* data, T* output, int data_count, int count_of_threads_to_modify_each_item){
 				std::vector<T> expected;

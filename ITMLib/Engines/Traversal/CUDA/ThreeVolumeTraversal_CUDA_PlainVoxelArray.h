@@ -55,7 +55,7 @@ public:
 		);
 
 		staticThreeVolumeTraversal_device < TStaticFunctor, TVoxel1, TVoxel2, TVoxel3 >
-		<< < gridSize, cudaBlockSize >> >
+		<<< gridSize, cudaBlockSize >>>
 		(voxels1, voxels2, voxels3, arrayInfo);
 		ORcudaKernelCheck;
 	}
@@ -87,7 +87,7 @@ public:
 		);
 
 		threeVolumeTraversal_device<TFunctor, TVoxel2>
-				<< < gridSize, cudaBlockSize >> >
+				<<< gridSize, cudaBlockSize >>>
 		                       (voxels1, voxels2, voxels3, arrayInfo, functor);
 		ORcudaKernelCheck;
 	}
@@ -134,7 +134,7 @@ public:
 		);
 
 		threeVolumeTraversalWithPosition_device<TFunctor, TVoxel1, TVoxel2, TVoxel3>
-				<< < gridSize, cudaBlockSize >> >
+				<<< gridSize, cudaBlockSize >>>
 		                       (voxels1, voxels2, voxels3, arrayInfo, functor_device);
 		// transfer functor from VRAM back to RAM
 		ORcudaSafeCall(cudaMemcpy(&functor, functor_device, sizeof(TFunctor), cudaMemcpyDeviceToHost));

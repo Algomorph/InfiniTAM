@@ -73,7 +73,7 @@ void LowLevelEngine_CUDA::ConvertColourToIntensity(ITMFloatImage *image_out, con
 	dim3 blockSize(16, 16);
 	dim3 gridSize((int)ceil((float)dims.x / (float)blockSize.x), (int)ceil((float)dims.y / (float)blockSize.y));
 
-	convertColourToIntensity_device << <gridSize, blockSize >> >(dest, dims, src);
+	convertColourToIntensity_device <<<gridSize, blockSize >>>(dest, dims, src);
 	ORcudaKernelCheck;
 }
 
@@ -90,7 +90,7 @@ void LowLevelEngine_CUDA::FilterIntensity(ITMFloatImage *image_out, const ITMFlo
 	dim3 blockSize(16, 16);
 	dim3 gridSize((int)ceil((float)dims.x / (float)blockSize.x), (int)ceil((float)dims.y / (float)blockSize.y));
 
-	boxFilter2x2_device << <gridSize, blockSize >> >(imageData_out, imageData_in, dims);
+	boxFilter2x2_device <<<gridSize, blockSize >>>(imageData_out, imageData_in, dims);
 	ORcudaKernelCheck;
 }
 
@@ -107,7 +107,7 @@ void LowLevelEngine_CUDA::FilterSubsample(ITMUChar4Image *image_out, const ITMUC
 	dim3 blockSize(16, 16);
 	dim3 gridSize((int)ceil((float)newDims.x / (float)blockSize.x), (int)ceil((float)newDims.y / (float)blockSize.y));
 
-	filterSubsample_device << <gridSize, blockSize >> >(imageData_out, newDims, imageData_in, oldDims);
+	filterSubsample_device <<<gridSize, blockSize >>>(imageData_out, newDims, imageData_in, oldDims);
 	ORcudaKernelCheck;
 }
 
@@ -125,7 +125,7 @@ void LowLevelEngine_CUDA::FilterSubsample(ITMFloatImage *image_out, const ITMFlo
 	dim3 blockSize(16, 16);
 	dim3 gridSize((int)ceil((float)newDims.x / (float)blockSize.x), (int)ceil((float)newDims.y / (float)blockSize.y));
 
-	filterSubsample_device << <gridSize, blockSize >> >(imageData_out, newDims, imageData_in, oldDims);
+	filterSubsample_device <<<gridSize, blockSize >>>(imageData_out, newDims, imageData_in, oldDims);
 	ORcudaKernelCheck;
 }
 
@@ -142,7 +142,7 @@ void LowLevelEngine_CUDA::FilterSubsampleWithHoles(ITMFloatImage *image_out, con
 	dim3 blockSize(16, 16);
 	dim3 gridSize((int)ceil((float)newDims.x / (float)blockSize.x), (int)ceil((float)newDims.y / (float)blockSize.y));
 
-	filterSubsampleWithHoles_device << <gridSize, blockSize >> >(imageData_out, newDims, imageData_in, oldDims);
+	filterSubsampleWithHoles_device <<<gridSize, blockSize >>>(imageData_out, newDims, imageData_in, oldDims);
 	ORcudaKernelCheck;
 }
 
@@ -159,7 +159,7 @@ void LowLevelEngine_CUDA::FilterSubsampleWithHoles(ITMFloat4Image *image_out, co
 	dim3 blockSize(16, 16);
 	dim3 gridSize((int)ceil((float)newDims.x / (float)blockSize.x), (int)ceil((float)newDims.y / (float)blockSize.y));
 
-	filterSubsampleWithHoles_device << <gridSize, blockSize >> >(imageData_out, newDims, imageData_in, oldDims);
+	filterSubsampleWithHoles_device <<<gridSize, blockSize >>>(imageData_out, newDims, imageData_in, oldDims);
 	ORcudaKernelCheck;
 }
 
@@ -176,7 +176,7 @@ void LowLevelEngine_CUDA::GradientX(ITMShort4Image *grad_out, const ITMUChar4Ima
 
 	ORcudaSafeCall(cudaMemset(grad, 0, imgSize.x * imgSize.y * sizeof(Vector4s)));
 
-	gradientX_device << <gridSize, blockSize >> >(grad, image, imgSize);
+	gradientX_device <<<gridSize, blockSize >>>(grad, image, imgSize);
 	ORcudaKernelCheck;
 }
 
@@ -193,7 +193,7 @@ void LowLevelEngine_CUDA::GradientY(ITMShort4Image *grad_out, const ITMUChar4Ima
 
 	ORcudaSafeCall(cudaMemset(grad, 0, imgSize.x * imgSize.y * sizeof(Vector4s)));
 
-	gradientY_device << <gridSize, blockSize >> >(grad, image, imgSize);
+	gradientY_device <<<gridSize, blockSize >>>(grad, image, imgSize);
 	ORcudaKernelCheck;
 }
 
@@ -209,7 +209,7 @@ void LowLevelEngine_CUDA::GradientXY(ITMFloat2Image *grad_out, const ITMFloatIma
 	dim3 blockSize(16, 16);
 	dim3 gridSize((int)ceil((float)imgSize.x / (float)blockSize.x), (int)ceil((float)imgSize.y / (float)blockSize.y));
 
-	gradientXY_device << <gridSize, blockSize >> >(grad, image, imgSize);
+	gradientXY_device <<<gridSize, blockSize >>>(grad, image, imgSize);
 	ORcudaKernelCheck;
 }
 

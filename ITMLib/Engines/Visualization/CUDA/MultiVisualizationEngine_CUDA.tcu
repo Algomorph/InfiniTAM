@@ -97,7 +97,7 @@ void MultiVisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::CreateExpectedDepths
 		dim3 blockSize(256);
 		dim3 gridSize((int)ceil((float)hashEntryCount / (float)blockSize.x));
 		ORcudaSafeCall(cudaMemset(noTotalBlocks_device, 0, sizeof(uint)));
-		checkProjectAndSplitBlocks_device << <gridSize, blockSize >> > (indexData, hashEntryCount, localPose, intrinsics->projectionParamsSimple.all, imgSize, voxelSize, renderingBlockList_device, noTotalBlocks_device);
+		checkProjectAndSplitBlocks_device <<<gridSize, blockSize >>> (indexData, hashEntryCount, localPose, intrinsics->projectionParamsSimple.all, imgSize, voxelSize, renderingBlockList_device, noTotalBlocks_device);
 		ORcudaKernelCheck;
 
 		uint noTotalBlocks;
@@ -108,7 +108,7 @@ void MultiVisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::CreateExpectedDepths
 		// go through rendering blocks, fill minmaxData
 		blockSize = dim3(16, 16);
 		gridSize = dim3((unsigned int)ceil((float)noTotalBlocks / 4.0f), 4);
-		fillBlocks_device << <gridSize, blockSize >> > (noTotalBlocks, renderingBlockList_device, imgSize, minmaxData);
+		fillBlocks_device <<<gridSize, blockSize >>> (noTotalBlocks, renderingBlockList_device, imgSize, minmaxData);
 		ORcudaKernelCheck;
 	}
 }
@@ -131,7 +131,7 @@ static void RenderImage_common(const ORUtils::SE3Pose *pose, const Intrinsics *i
 		dim3 gridSize((int)ceil((float)imgSize.x / (float)cudaBlockSize.x), (int)ceil((float)imgSize.y / (float)cudaBlockSize.y));
 		typedef MultiVoxel<TVoxel> VD;
 		typedef MultiIndex<TIndex> ID;
-		genericRaycast_device<VD, ID, false> << <gridSize, cudaBlockSize >> > (
+		genericRaycast_device<VD, ID, false> <<<gridSize, cudaBlockSize >>> (
 				renderState->raycastResult->GetData(MEMORYDEVICE_CUDA),
 						NULL,
 						renderState->voxelData_device,
@@ -158,30 +158,30 @@ static void RenderImage_common(const ORUtils::SE3Pose *pose, const Intrinsics *i
 
 	switch (type) {
 		case IVisualizationEngine::RENDER_COLOUR_FROM_VOLUME:
-			renderColour_device<MultiVoxel<TVoxel>, MultiIndex<TIndex> > << <gridSize, cudaBlockSize >> >(outRendering, pointsRay, renderState->voxelData_device,
+			renderColour_device<MultiVoxel<TVoxel>, MultiIndex<TIndex> > <<<gridSize, cudaBlockSize >>>(outRendering, pointsRay, renderState->voxelData_device,
 					renderState->indexData_device, imgSize);
 			ORcudaKernelCheck;
 			break;
 		case IVisualizationEngine::RENDER_COLOUR_FROM_NORMAL:
 			if (intrinsics->FocalLengthSignsDiffer())
-				renderNormals_ImageNormals_device<true> << <gridSize, cudaBlockSize >> >(outRendering, pointsRay, imgSize, renderState->voxelSize, lightSource);
+				renderNormals_ImageNormals_device<true> <<<gridSize, cudaBlockSize >>>(outRendering, pointsRay, imgSize, renderState->voxelSize, lightSource);
 			else
-				renderNormals_ImageNormals_device<false> << <gridSize, cudaBlockSize >> >(outRendering, pointsRay, imgSize, renderState->voxelSize, lightSource);
+				renderNormals_ImageNormals_device<false> <<<gridSize, cudaBlockSize >>>(outRendering, pointsRay, imgSize, renderState->voxelSize, lightSource);
 			ORcudaKernelCheck;
 			break;
 		case IVisualizationEngine::RENDER_COLOUR_FROM_CONFIDENCE:
 			if (intrinsics->FocalLengthSignsDiffer())
-				renderConfidence_ImageNormals_device<true> << <gridSize, cudaBlockSize >> >(outRendering, pointsRay, imgSize, renderState->voxelSize, lightSource);
+				renderConfidence_ImageNormals_device<true> <<<gridSize, cudaBlockSize >>>(outRendering, pointsRay, imgSize, renderState->voxelSize, lightSource);
 			else
-				renderConfidence_ImageNormals_device<false> << <gridSize, cudaBlockSize >> >(outRendering, pointsRay, imgSize, renderState->voxelSize, lightSource);
+				renderConfidence_ImageNormals_device<false> <<<gridSize, cudaBlockSize >>>(outRendering, pointsRay, imgSize, renderState->voxelSize, lightSource);
 			ORcudaKernelCheck;
 			break;
 		case IVisualizationEngine::RENDER_SHADED_GREYSCALE:
 		default:
 			if (intrinsics->FocalLengthSignsDiffer())
-				renderGrey_ImageNormals_device<true> << <gridSize, cudaBlockSize >> >(outRendering, pointsRay, renderState->voxelSize, imgSize, lightSource);
+				renderGrey_ImageNormals_device<true> <<<gridSize, cudaBlockSize >>>(outRendering, pointsRay, renderState->voxelSize, imgSize, lightSource);
 			else
-				renderGrey_ImageNormals_device<false> << <gridSize, cudaBlockSize >> >(outRendering, pointsRay, renderState->voxelSize, imgSize, lightSource);
+				renderGrey_ImageNormals_device<false> <<<gridSize, cudaBlockSize >>>(outRendering, pointsRay, renderState->voxelSize, imgSize, lightSource);
 			ORcudaKernelCheck;
 			break;
 	}

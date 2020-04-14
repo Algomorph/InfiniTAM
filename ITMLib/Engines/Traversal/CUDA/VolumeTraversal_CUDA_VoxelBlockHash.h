@@ -99,7 +99,7 @@ public:
 		dim3 hash_per_block_cuda_grid_size(hash_entry_count);
 
 		traverseAll_StaticFunctor_device<TStaticFunctor, TVoxel>
-				<< < hash_per_block_cuda_grid_size, voxel_per_thread_cuda_block_size >> > (voxels, hash_table);
+				<<< hash_per_block_cuda_grid_size, voxel_per_thread_cuda_block_size >>> (voxels, hash_table);
 		ORcudaKernelCheck;
 	}
 
@@ -114,7 +114,7 @@ public:
 		dim3 hash_per_block_cuda_grid_size(utilized_block_count);
 
 		traverseUtilized_StaticFunctor_device<TStaticFunctor, TVoxel>
-				<< < hash_per_block_cuda_grid_size, voxel_per_thread_cuda_block_size >> > (voxels, hash_table, utilized_hash_codes);
+				<<< hash_per_block_cuda_grid_size, voxel_per_thread_cuda_block_size >>> (voxels, hash_table, utilized_hash_codes);
 		ORcudaKernelCheck;
 	}
 
@@ -127,7 +127,7 @@ public:
 		                                        TVoxel* voxelArray, const HashEntry* hashTable,
 		                                        TFunctor* functor_device) {
 			traverseAll_device<TFunctor, TVoxel>
-					<< < gridSize_HashPerBlock, cudaBlockSize_BlockVoxelPerThread >> >
+					<<< gridSize_HashPerBlock, cudaBlockSize_BlockVoxelPerThread >>>
 			                                    (voxelArray, hashTable, functor_device);
 		});
 	}
@@ -140,7 +140,7 @@ public:
 		                                             const int* utilized_hash_codes,
 		                                             TFunctor* functor_device) {
 			traverseUtilized_device<TFunctor, TVoxel>
-					<< < gridSize_HashPerBlock, cudaBlockSize_BlockVoxelPerThread >> >
+					<<< gridSize_HashPerBlock, cudaBlockSize_BlockVoxelPerThread >>>
 			                                    (voxels, hash_table, utilized_hash_codes, functor_device);
 		});
 	}
@@ -152,7 +152,7 @@ public:
 		                                        TVoxel* voxelArray, const HashEntry* hashTable,
 		                                        TFunctor* functor_device) {
 			traverseAllWithPosition_device<TFunctor, TVoxel>
-					<< < gridSize_HashPerBlock, cudaBlockSize_BlockVoxelPerThread >> >
+					<<< gridSize_HashPerBlock, cudaBlockSize_BlockVoxelPerThread >>>
 			                                    (voxelArray, hashTable, functor_device);
 		});
 	}
@@ -164,7 +164,7 @@ public:
 		                                             TVoxel* voxels, const HashEntry* hash_table,
 		                                             const int* utilized_hash_codes, TFunctor* functor_device) {
 			traverseUtilizedWithPosition_device<TFunctor, TVoxel>
-					<< < gridSize_HashPerBlock, cudaBlockSize_BlockVoxelPerThread >> >
+					<<< gridSize_HashPerBlock, cudaBlockSize_BlockVoxelPerThread >>>
 			                                    (voxels, hash_table, utilized_hash_codes, functor_device);
 		});
 	}
@@ -176,7 +176,7 @@ public:
 		                                        TVoxel* voxelArray, const HashEntry* hashTable,
 		                                        TFunctor* functor_device) {
 			traverseAllWithPositionAndBlockPosition_device<TFunctor, TVoxel>
-					<< < gridSize_HashPerBlock, cudaBlockSize_BlockVoxelPerThread >> >
+					<<< gridSize_HashPerBlock, cudaBlockSize_BlockVoxelPerThread >>>
 			                                    (voxelArray, hashTable, functor_device);
 		});
 	}

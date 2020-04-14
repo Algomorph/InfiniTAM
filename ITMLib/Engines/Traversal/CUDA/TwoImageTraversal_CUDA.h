@@ -41,7 +41,7 @@ public:
 		ORcudaSafeCall(cudaMemcpy(functor_device, &functor, sizeof(TFunctor), cudaMemcpyHostToDevice));
 
 		twoImageTraversalWithPosition_device<TImage1Element, TImage2Element, TFunctor>
-				<< < cuda_grid_size, cuda_block_size >> >
+		        <<< cuda_grid_size, cuda_block_size >>>
 		                             (image1_data, image2_data, resolution, functor_device);
 		ORcudaKernelCheck;
 

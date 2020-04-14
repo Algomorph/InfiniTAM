@@ -56,7 +56,7 @@ void MeshingEngine_CUDA<TVoxel, VoxelBlockHash>::MeshScene(Mesh* mesh,
 		dim3 cudaBlockSize(256);
 		dim3 gridSize((int) ceil((float) noTotalEntries / (float) cudaBlockSize.x));
 
-		findAllocateBlocks<-1> << < gridSize, cudaBlockSize >> >
+		findAllocateBlocks<-1> <<< gridSize, cudaBlockSize >>>
 		                                      (visibleBlockGlobalPos_device, hashTable, noTotalEntries);
 		ORcudaKernelCheck;
 	}
@@ -65,7 +65,7 @@ void MeshingEngine_CUDA<TVoxel, VoxelBlockHash>::MeshScene(Mesh* mesh,
 		dim3 cudaBlockSize(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
 		dim3 gridSize(scene->index.voxelBlockCount / 16, 16);
 
-		meshScene_device<TVoxel> << < gridSize, cudaBlockSize >> >
+		meshScene_device<TVoxel> <<< gridSize, cudaBlockSize >>>
 		                                        (triangles, noTriangles_device, factor, noTotalEntries, noMaxTriangles,
 				                                        visibleBlockGlobalPos_device, localVBA, hashTable);
 		ORcudaKernelCheck;
