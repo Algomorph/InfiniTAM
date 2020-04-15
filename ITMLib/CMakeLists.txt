@@ -694,7 +694,7 @@ set(ITMLIB_OBJECTS_RENDERSTATES_HEADERS
 set(ITMLIB_OBJECTS_SCENE_SOURCES
     Objects/Volume/VoxelVolume.tpp
     Objects/Volume/VoxelVolume.cpp
-    Objects/Volume/LocalVBA.tpp
+    Objects/Volume/VoxelStorage.tpp
     Objects/Volume/VoxelStorage.cpp
     Objects/Volume/VoxelBlockHash.cpp
     )

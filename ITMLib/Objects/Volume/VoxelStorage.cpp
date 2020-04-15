@@ -13,7 +13,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "LocalVBA.tpp"
+#include "VoxelStorage.tpp"
 #include "../../GlobalTemplateDefines.h"
 namespace ITMLib{
 	template class VoxelStorage<TSDFVoxel>;

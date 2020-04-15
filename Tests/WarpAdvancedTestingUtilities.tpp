@@ -194,7 +194,7 @@ void GenericWarpConsistencySubtest(const SlavchevaSurfaceTracker::Switches& swit
 			warp_field.SaveToDirectory(std::string("../../Tests/") + get_path_warps(prefix, iteration_limit - 1));
 			live_volumes[target_warped_field_ix]->SaveToDirectory(
 					std::string("../../Tests/") + get_path_warped_live(prefix, iteration_limit - 1));
-			volume_fusion_engine->FuseOneTsdfVolumeIntoAnother(canonical_volume, live_volumes[target_warped_field_ix]);
+			volume_fusion_engine->FuseOneTsdfVolumeIntoAnother(canonical_volume, live_volumes[target_warped_field_ix], 0);
 			canonical_volume->SaveToDirectory(
 					std::string("../../Tests/") + get_path_fused(prefix, iteration_limit - 1));
 			break;
@@ -207,7 +207,7 @@ void GenericWarpConsistencySubtest(const SlavchevaSurfaceTracker::Switches& swit
 			ground_truth_sdf_volume.LoadFromDirectory(get_path_warped_live(prefix, iteration_limit - 1));
 			BOOST_REQUIRE(contentAlmostEqual_Verbose(live_volumes[target_warped_field_ix], &ground_truth_sdf_volume,
 			                                 absolute_tolerance, TMemoryDeviceType));
-			volume_fusion_engine->FuseOneTsdfVolumeIntoAnother(canonical_volume, live_volumes[target_warped_field_ix]);
+			volume_fusion_engine->FuseOneTsdfVolumeIntoAnother(canonical_volume, live_volumes[target_warped_field_ix], 0);
 			ground_truth_sdf_volume.LoadFromDirectory(get_path_fused(prefix, iteration_limit - 1));
 			BOOST_REQUIRE(contentAlmostEqual(canonical_volume, &ground_truth_sdf_volume, absolute_tolerance,
 			                                 TMemoryDeviceType));

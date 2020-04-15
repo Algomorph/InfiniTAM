@@ -155,18 +155,17 @@ VolumeFileIOEngine<TVoxel, VoxelBlockHash>::LoadFromDirectoryCompact(
 template<typename TVoxel>
 void
 VolumeFileIOEngine<TVoxel, PlainVoxelArray>::SaveToDirectoryCompact(
-		const VoxelVolume<TVoxel, PlainVoxelArray>* scene,
+		const VoxelVolume<TVoxel, PlainVoxelArray>* volume,
 		const std::string& outputDirectory) {
-	scene->voxels.SaveToDirectory(outputDirectory);
-	scene->index.SaveToDirectory(outputDirectory);
+	DIEWITHEXCEPTION_REPORTLOCATION("Not implemented");
+
 }
 
 
 template<typename TVoxel>
 void
 VolumeFileIOEngine<TVoxel, PlainVoxelArray>::LoadFromDirectoryCompact(
-		VoxelVolume<TVoxel, PlainVoxelArray>* scene,
+		VoxelVolume<TVoxel, PlainVoxelArray>* volume,
 		const std::string& outputDirectory) {
-	scene->voxels.LoadFromDirectory(outputDirectory);
-	scene->index.LoadFromDirectory(outputDirectory);
+	DIEWITHEXCEPTION_REPORTLOCATION("Not implemented");
 }

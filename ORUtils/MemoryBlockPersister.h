@@ -143,11 +143,11 @@ namespace ORUtils
 			if (memoryDeviceType == MEMORYDEVICE_CUDA)
 			{
 				// If we are saving the memory block from the CUDA, first make a CPU copy of it.
-				ORUtils::MemoryBlock<T> cpuBlock(block.size(), MEMORYDEVICE_CPU);
-				cpuBlock.SetFrom(&block, MemoryCopyDirection::CUDA_TO_CPU);
+				ORUtils::MemoryBlock<T> block_CPU(block.size(), MEMORYDEVICE_CPU);
+				block_CPU.SetFrom(&block, MemoryCopyDirection::CUDA_TO_CPU);
 
 				// Then write the CPU copy to disk.
-				WriteBlock(*fs, cpuBlock);
+				WriteBlock(*fs, block_CPU);
 			}
 			else
 			{
