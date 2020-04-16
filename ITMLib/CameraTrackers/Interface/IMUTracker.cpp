@@ -10,7 +10,7 @@ IMUTracker::IMUTracker(IMUCalibrator *calibrator)
 	this->calibrator = calibrator;
 }
 
-IMUTracker::~IMUTracker(void)
+IMUTracker::~IMUTracker()
 {
 }
 

@@ -21,12 +21,12 @@ namespace MiniSlamGraph
 			mData.resize(size, 0.0f);
 		}
 
-		int getOverallSize(void) const
+		int getOverallSize() const
 		{
 			return (int)mData.size();
 		}
 
-		const double* getData(void) const
+		const double* getData() const
 		{
 			return &(mData[0]);
 		}

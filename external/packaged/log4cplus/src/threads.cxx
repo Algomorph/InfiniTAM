@@ -222,7 +222,7 @@ SignalsBlocker::SignalsBlocker ()
 #if defined (LOG4CPLUS_USE_PTHREADS)
     sigset_t block_all_set;
     sigfillset (&block_all_set);
-    (void) pthread_sigmask (SIG_BLOCK, &block_all_set, &impl->signal_set);
+    () pthread_sigmask (SIG_BLOCK, &block_all_set, &impl->signal_set);
 #endif
 }
 
@@ -230,7 +230,7 @@ SignalsBlocker::SignalsBlocker ()
 SignalsBlocker::~SignalsBlocker()
 {
 #if defined (LOG4CPLUS_USE_PTHREADS)
-    (void) pthread_sigmask (SIG_SETMASK, &impl->signal_set, nullptr);
+    () pthread_sigmask (SIG_SETMASK, &impl->signal_set, nullptr);
 #endif
 }
 
@@ -261,7 +261,7 @@ AbstractThread::start()
         flags |= fRUNNING;
         thread = std::make_unique<std::thread> (
             [this] (AbstractThreadPtr const & thread_ptr) {
-                    (void) thread_ptr;
+                    () thread_ptr;
                     blockAllSignals ();
                     helpers::LogLog & loglog = helpers::getLogLog();
                     try

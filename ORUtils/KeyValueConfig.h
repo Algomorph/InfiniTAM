@@ -72,13 +72,13 @@ class KeyValueConfig {
 	};
 
 	/** Constructor */
-	KeyValueConfig(void) {}
+	KeyValueConfig() {}
 	/** Constructor calling parseString(). */
 	KeyValueConfig(const char *str) { parseString(str); }
 	/** Copy constructor */
 	KeyValueConfig(const KeyValueConfig & src);
 	/** Destructor */
-	~KeyValueConfig(void);
+	~KeyValueConfig();
 
 	/** @name Setting and Getting Values
 	    @{ */
@@ -94,7 +94,7 @@ class KeyValueConfig {
 	void unsetProperty(const char *key, bool toLower = true);
 
 	/** Remove all properties from the config. */
-	void unsetAllProperties(void);
+	void unsetAllProperties();
 
 	/** Retrieve the value of a property or NULL, if the key is not used. */
 	const char* getProperty(const char *key, bool toLower = true) const;

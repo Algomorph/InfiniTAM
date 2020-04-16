@@ -69,7 +69,7 @@ float ActiveMapManager::visibleOriginalBlocks(int dataID) const
 	return (float)counted / (float)tmp;
 }
 
-bool ActiveMapManager::shouldStartNewArea(void) const
+bool ActiveMapManager::shouldStartNewArea() const
 {
 	int primaryLocalMapIdx = -1;
 	int primaryDataIdx = -1;
@@ -151,7 +151,7 @@ bool ActiveMapManager::shouldMovePrimaryLocalMap(int newDataId, int bestDataId, 
 	if (blocksInUse_best < 0) return true;
 
 	// if this is a new local map, but we previously found that we can loop
-	// close, don't accept the new local map!
+	// Close, don't accept the new local map!
 	if (isNewLocalMap_new && !isNewLocalMap_best) return false;
 	// if this is a loop closure and we have not found any alternative
 	// loop closure before, accept the new one!
@@ -162,7 +162,7 @@ bool ActiveMapManager::shouldMovePrimaryLocalMap(int newDataId, int bestDataId, 
 	return (visibleRatio_new > visibleRatio_best);
 }
 
-int ActiveMapManager::findPrimaryDataIdx(void) const
+int ActiveMapManager::findPrimaryDataIdx() const
 {
 	for (int i = 0; i < (int)activeData.size(); ++i) 
 		if (activeData[i].type == PRIMARY_LOCAL_MAP) return i;
@@ -170,14 +170,14 @@ int ActiveMapManager::findPrimaryDataIdx(void) const
 	return -1;
 }
 
-int ActiveMapManager::findPrimaryLocalMapIdx(void) const
+int ActiveMapManager::findPrimaryLocalMapIdx() const
 {
 	int id = findPrimaryDataIdx();
 	if (id < 0) return -1;
 	return activeData[id].localMapIndex;
 }
 
-int ActiveMapManager::findBestVisualizationDataIdx(void) const
+int ActiveMapManager::findBestVisualizationDataIdx() const
 {
 	int bestIdx = -1;
 	for (int i = 0; i < static_cast<int>(activeData.size()); ++i) 
@@ -194,7 +194,7 @@ int ActiveMapManager::findBestVisualizationDataIdx(void) const
 	return bestIdx;
 }
 
-int ActiveMapManager::findBestVisualizationLocalMapIdx(void) const
+int ActiveMapManager::findBestVisualizationLocalMapIdx() const
 {
 	int id = findBestVisualizationDataIdx();
 	if (id < 0) return -1;
@@ -384,7 +384,7 @@ void ActiveMapManager::AcceptNewLink(int fromData, int toData, const ORUtils::SE
 	}
 }
 
-bool ActiveMapManager::maintainActiveData(void)
+bool ActiveMapManager::maintainActiveData()
 {
 	bool localMapGraphChanged = false;
 

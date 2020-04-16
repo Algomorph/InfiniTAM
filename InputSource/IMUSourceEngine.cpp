@@ -19,7 +19,7 @@ IMUSourceEngine::IMUSourceEngine(const char *imuMask)
 	cached_imu = NULL;
 }
 
-void IMUSourceEngine::loadIMUIntoCache(void)
+void IMUSourceEngine::loadIMUIntoCache()
 {
 	char str[2048]; FILE *f; bool success = false;
 
@@ -45,7 +45,7 @@ void IMUSourceEngine::loadIMUIntoCache(void)
 	}
 }
 
-bool IMUSourceEngine::hasMoreMeasurements(void)
+bool IMUSourceEngine::hasMoreMeasurements()
 {
 	loadIMUIntoCache();
 

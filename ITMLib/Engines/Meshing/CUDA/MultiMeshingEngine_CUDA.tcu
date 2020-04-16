@@ -31,7 +31,7 @@ MultiMeshingEngine_CUDA<TVoxel, VoxelBlockHash>::MultiMeshingEngine_CUDA(const V
 }
 
 template<class TVoxel>
-MultiMeshingEngine_CUDA<TVoxel, VoxelBlockHash>::~MultiMeshingEngine_CUDA(void) {
+MultiMeshingEngine_CUDA<TVoxel, VoxelBlockHash>::~MultiMeshingEngine_CUDA() {
 	ORcudaSafeCall(cudaFree(visibleBlockGlobalPos_device));
 	ORcudaSafeCall(cudaFree(noTriangles_device));
 

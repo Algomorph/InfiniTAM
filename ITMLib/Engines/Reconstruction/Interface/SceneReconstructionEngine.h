@@ -48,7 +48,7 @@ namespace ITMLib
 		virtual void IntegrateIntoScene(VoxelVolume<TVoxel,TIndex> *scene, const View *view, const CameraTrackingState *trackingState,
 		                                const RenderState *renderState) = 0;
 
-		SceneReconstructionEngine(void) { }
-		virtual ~SceneReconstructionEngine(void) { }
+		SceneReconstructionEngine() { }
+		virtual ~SceneReconstructionEngine() { }
 	};
 }

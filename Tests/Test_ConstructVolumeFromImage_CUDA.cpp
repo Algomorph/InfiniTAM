@@ -206,7 +206,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CUDA) {
 			break;
 		}
 
-		// for extremely lateral points close to the camera, the rays are highly skewed,
+		// for extremely lateral points Close to the camera, the rays are highly skewed,
 		// so the value progression won't hold. Skip those.
 		if (i_coordinate > 17) {
 			// don't go into low negative sdf values, since those will be overwritten by positive values
@@ -365,7 +365,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CUDA) {
 	depth_fusion_engine_VBH->IntegrateDepthImageIntoTsdfVolume(&volume3, view, &trackingState);
 
 	BOOST_REQUIRE(allocatedContentAlmostEqual_CUDA(&volume2, &volume3, tolerance));
-	
+
 	delete depth_fusion_engine_VBH;
 	delete view;
 	delete viewBuilder;

@@ -22,7 +22,7 @@ public:
 	IMUSourceEngine(const char *imuMask);
 	~IMUSourceEngine() { }
 
-	bool hasMoreMeasurements(void);
+	bool hasMoreMeasurements();
 	void getMeasurement(ITMLib::IMUMeasurement *imu);
 };
 

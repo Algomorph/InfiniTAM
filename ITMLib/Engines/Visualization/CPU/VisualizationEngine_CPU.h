@@ -10,8 +10,8 @@ namespace ITMLib
 	class VisualizationEngine_CPU : public VisualizationEngine < TVoxel, TIndex >
 	{
 	public:
-		explicit VisualizationEngine_CPU(void) { }
-		~VisualizationEngine_CPU(void) { }
+		explicit VisualizationEngine_CPU() { }
+		~VisualizationEngine_CPU() { }
 
 		void FindVisibleBlocks(VoxelVolume<TVoxel,TIndex> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *renderState) const;
 		int CountVisibleBlocks(const VoxelVolume<TVoxel,TIndex> *scene, const RenderState *renderState, int minBlockId, int maxBlockId) const;
@@ -29,8 +29,8 @@ namespace ITMLib
 	class VisualizationEngine_CPU<TVoxel, VoxelBlockHash> : public VisualizationEngine < TVoxel, VoxelBlockHash >
 	{
 	public:
-		explicit VisualizationEngine_CPU(void) { }
-		~VisualizationEngine_CPU(void) { }
+		explicit VisualizationEngine_CPU() { }
+		~VisualizationEngine_CPU() { }
 
 		void FindVisibleBlocks(VoxelVolume<TVoxel,VoxelBlockHash> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *renderState) const;
 		int CountVisibleBlocks(const VoxelVolume<TVoxel,VoxelBlockHash> *scene, const RenderState *renderState, int minBlockId, int maxBlockId) const;

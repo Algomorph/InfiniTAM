@@ -63,7 +63,7 @@ namespace ITMLib
 			this->gradients->UpdateDeviceFromHost();
 		}
 
-		~IntensityHierarchyLevel(void)
+		~IntensityHierarchyLevel()
 		{
 			if (manageData)
 			{

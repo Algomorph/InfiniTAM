@@ -7,8 +7,8 @@
 
 using namespace FernRelocLib;
 
-PoseDatabase::PoseDatabase(void) {}
-PoseDatabase::~PoseDatabase(void) {}
+PoseDatabase::PoseDatabase() {}
+PoseDatabase::~PoseDatabase() {}
 
 void PoseDatabase::storePose(int id, const ORUtils::SE3Pose & pose, int sceneId)
 {

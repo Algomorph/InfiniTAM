@@ -13,7 +13,7 @@ namespace ITMLib
 	}
 
 	template<class TVoxel, class TIndex>
-	VoxelMapGraphManager<TVoxel, TIndex>::~VoxelMapGraphManager(void)
+	VoxelMapGraphManager<TVoxel, TIndex>::~VoxelMapGraphManager()
 	{
 		while (allData.size() > 0)
 		{
@@ -23,7 +23,7 @@ namespace ITMLib
 	}
 
 	template<class TVoxel, class TIndex>
-	int VoxelMapGraphManager<TVoxel, TIndex>::createNewLocalMap(void)
+	int VoxelMapGraphManager<TVoxel, TIndex>::createNewLocalMap()
 	{
 		int newIdx = (int)allData.size();
 		allData.push_back(new LocalMap<TVoxel, TIndex>(visualization_engine, trackedImageSize));

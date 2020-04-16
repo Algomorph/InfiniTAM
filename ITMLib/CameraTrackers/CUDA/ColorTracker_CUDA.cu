@@ -32,7 +32,7 @@ ColorTracker_CUDA::ColorTracker_CUDA(Vector2i imgSize, TrackerIterationType *tra
 	h_host = new float[dim_h * imgSize.x * imgSize.y / 128];
 }
 
-ColorTracker_CUDA::~ColorTracker_CUDA(void)
+ColorTracker_CUDA::~ColorTracker_CUDA()
 {
 	ORcudaSafeCall(cudaFree(f_device));
 	ORcudaSafeCall(cudaFree(g_device));

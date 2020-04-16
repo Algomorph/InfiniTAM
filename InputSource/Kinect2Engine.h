@@ -24,9 +24,9 @@ namespace InputSource
 		Kinect2Engine(const char *calibFilename);
 		~Kinect2Engine();
 
-		bool HasMoreImages(void) override;
+		bool HasMoreImages() const override;
 		void GetImages(ITMUChar4Image& rgbImage, ITMShortImage& rawDepthImage) override;
-		Vector2i GetDepthImageSize(void) override;
-		Vector2i GetRGBImageSize(void) override;
+		Vector2i GetDepthImageSize() const override;
+		Vector2i GetRGBImageSize() const override;
 	};
 }

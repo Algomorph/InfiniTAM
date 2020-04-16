@@ -13,17 +13,17 @@ namespace FernRelocLib
 	public:
 		struct PoseInScene
 		{
-			PoseInScene(void) {}
+			PoseInScene() {}
 			PoseInScene(const ORUtils::SE3Pose & _pose, int _sceneIdx) : pose(_pose), sceneIdx(_sceneIdx) {}
 			ORUtils::SE3Pose pose;
 			int sceneIdx;
 		};
 
-		PoseDatabase(void);
-		~PoseDatabase(void);
+		PoseDatabase();
+		~PoseDatabase();
 
 		void storePose(int id, const ORUtils::SE3Pose & pose, int sceneId);
-		int numPoses(void) const { return (int)mPoses.size(); }
+		int numPoses() const { return (int)mPoses.size(); }
 
 		const PoseInScene & retrievePose(int id) const { return mPoses[id]; }
 		PoseInScene retrieveWAPose(int k, int ids[], float weights[]) const;

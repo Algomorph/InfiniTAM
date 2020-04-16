@@ -11,29 +11,29 @@
 
 class InfiniTAMApp {
 	public:
-	static InfiniTAMApp* Instance(void)
+	static InfiniTAMApp* Instance()
 	{
 		if (globalInstance==NULL) globalInstance = new InfiniTAMApp();
 		return globalInstance;
 	}
 
-	InfiniTAMApp(void);
-	~InfiniTAMApp(void);
+	InfiniTAMApp();
+	~InfiniTAMApp();
 
 	void InitGL();
 	void ResizeGL(int newWidth, int newHeight);
-	void RenderGL(void);
+	void RenderGL();
 
 	void StartProcessing(int useLiveCamera);
-	bool ProcessFrame(void);
-	void StopProcessing(void);
+	bool ProcessFrame();
+	void StopProcessing();
 
-	bool IsInitialized(void) const
+	bool IsInitialized() const
 	{ return mIsInitialized; }
 
-	void toggleRecordingMode(void);
+	void toggleRecordingMode();
 
-	float getAverageTime(void);
+	float getAverageTime();
 
 	private:
 	static InfiniTAMApp *globalInstance;

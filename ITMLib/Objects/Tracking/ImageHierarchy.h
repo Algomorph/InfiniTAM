@@ -39,7 +39,7 @@ namespace ITMLib
 			return level >= 0 && level < noLevels ? levels[level] : NULL;
 		}
 
-		~ImageHierarchy(void)
+		~ImageHierarchy()
 		{
 			for (int i = 0; i < noLevels; i++) delete levels[i];
 			delete [] levels;

@@ -20,7 +20,7 @@ Relocaliser::Relocaliser(ORUtils::Vector2<int> imgSize, ORUtils::Vector2<float> 
 	processedImage2 = new ORUtils::Image<float>(imgSize, MEMORYDEVICE_CPU);
 }
 
-Relocaliser::~Relocaliser(void)
+Relocaliser::~Relocaliser()
 {
 	delete encoding;
 	delete relocDatabase;

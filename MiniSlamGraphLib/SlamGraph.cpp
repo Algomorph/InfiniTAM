@@ -6,7 +6,7 @@
 
 using namespace MiniSlamGraph;
 
-SlamGraph::~SlamGraph(void)
+SlamGraph::~SlamGraph()
 {
 	for (EdgeList::iterator it = mEdges.begin(); it != mEdges.end(); ++it) delete *it;
 	for (NodeIndex::iterator it = mNodes.begin(); it != mNodes.end(); ++it) delete it->second;
@@ -42,7 +42,7 @@ void SlamGraph::addEdge(GraphEdge *edge)
 	mEdges.push_back(edge);
 }
 
-void SlamGraph::prepareEvaluations(void)
+void SlamGraph::prepareEvaluations()
 {
 	for (NodeIndex::const_iterator it = mNodes.begin(); it != mNodes.end(); ++it) {
 		if (it->second->isFixed()) continue;

@@ -15,13 +15,13 @@ using namespace ITMLib;
 class RealSenseEngine::PrivateData
 {
 	public:
-	PrivateData(void) : dev(NULL){}
+	PrivateData() : dev(NULL){}
 	rs::device *dev = NULL;
 	rs::context ctx;
 };
 
 RealSenseEngine::RealSenseEngine(const char *calibFilename, bool alignColourWithDepth,
-                                 Vector2i requested_imageSize_rgb, Vector2i requested_imageSize_d)
+								 Vector2i requested_imageSize_rgb, Vector2i requested_imageSize_d)
 : BaseImageSourceEngine(calibFilename),
   colourStream(alignColourWithDepth ? rs::stream::color_aligned_to_depth : rs::stream::color)
 {
@@ -119,30 +119,29 @@ void RealSenseEngine::GetImages(ITMUChar4Image *rgbImage, ITMShortImage *rawDept
 	dataAvailable = true;
 }
 
-bool RealSenseEngine::HasMoreImages(void) { return (data!=NULL); }
-Vector2i RealSenseEngine::GetDepthImageSize(void) { return (data!=NULL)?imageSize_d:Vector2i(0,0); }
-Vector2i RealSenseEngine::GetRGBImageSize(void) { return (data!=NULL)?imageSize_rgb:Vector2i(0,0); }
+bool RealSenseEngine::HasMoreImages() const { return (data!=NULL); }
+Vector2i RealSenseEngine::GetDepthImageSize() const { return (data!=NULL)?imageSize_d:Vector2i(0,0); }
+Vector2i RealSenseEngine::GetRGBImageSize() const { return (data!=NULL)?imageSize_rgb:Vector2i(0,0); }
 
 #else
 
 using namespace InputSource;
 
-RealSenseEngine::RealSenseEngine(const char *calibFilename, bool alignColourWithDepth,
+RealSenseEngine::RealSenseEngine(const char* calibFilename, bool alignColourWithDepth,
                                  Vector2i requested_imageSize_rgb, Vector2i requested_imageSize_d)
-: BaseImageSourceEngine(calibFilename)
-{
+		: BaseImageSourceEngine(calibFilename) {
 	printf("compiled without RealSense Windows support\n");
 }
-RealSenseEngine::~RealSenseEngine()
-{}
-void RealSenseEngine::GetImages(ITMUChar4Image& rgbImage, ITMShortImage& rawDepthImage)
-{ return; }
-bool RealSenseEngine::HasMoreImages(void)
-{ return false; }
-Vector2i RealSenseEngine::GetDepthImageSize(void)
-{ return Vector2i(0,0); }
-Vector2i RealSenseEngine::GetRGBImageSize(void)
-{ return Vector2i(0,0); }
+
+RealSenseEngine::~RealSenseEngine() {}
+
+void RealSenseEngine::GetImages(ITMUChar4Image& rgbImage, ITMShortImage& rawDepthImage) { }
+
+bool RealSenseEngine::HasMoreImages() const { return false; }
+
+Vector2i RealSenseEngine::GetDepthImageSize() const { return Vector2i(0, 0); }
+
+Vector2i RealSenseEngine::GetRGBImageSize() const { return Vector2i(0, 0); }
 
 #endif
 

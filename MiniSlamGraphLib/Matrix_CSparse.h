@@ -40,7 +40,7 @@ namespace MiniSlamGraph {
 			mPattern = src.mPattern;
 		}
 
-		~Matrix_CSparse(void)
+		~Matrix_CSparse()
 		{
 			cs_spfree(mData);
 		}
@@ -54,7 +54,7 @@ namespace MiniSlamGraph {
 			return ret;
 		}
 
-		Matrix_CSparse* clone(void) const
+		Matrix_CSparse* clone() const
 		{
 			return new Matrix_CSparse(*this);
 		}
@@ -65,7 +65,7 @@ namespace MiniSlamGraph {
 			cs_gaxpy(mData, b, x);
 		}
 
-		Pattern* computePattern(void) const
+		Pattern* computePattern() const
 		{
 			// order 0: "natural", order 1: "cholesky"
 			static const int order = 1;
@@ -105,12 +105,12 @@ namespace MiniSlamGraph {
 			return emptyElement;
 		}
 
-		int numRows(void) const
+		int numRows() const
 		{
 			return mData->m;
 		}
 
-		int numCols(void) const
+		int numCols() const
 		{
 			return mData->n;
 		}

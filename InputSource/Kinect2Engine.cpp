@@ -26,7 +26,7 @@ inline void SafeRelease(Interface *& pInterfaceToRelease)
 
 class Kinect2Engine::PrivateData {
 	public:
-	PrivateData(void) {}
+	PrivateData() {}
 
 	IKinectSensor* kinectSensor;
 	IDepthFrameReader* depthFrameReader;
@@ -126,28 +126,27 @@ void Kinect2Engine::GetImages(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthI
 	return /*true*/;
 }
 
-bool Kinect2Engine::HasMoreImages(void) { return true; }
-Vector2i Kinect2Engine::GetDepthImageSize(void)  { return imageSize_d; }
-Vector2i Kinect2Engine::GetRGBImageSize(void)  { return imageSize_rgb; }
+bool Kinect2Engine::HasMoreImages() const { return true; }
+Vector2i Kinect2Engine::GetDepthImageSize() const { return imageSize_d; }
+Vector2i Kinect2Engine::GetRGBImageSize() const { return imageSize_rgb; }
 
 #else
 
 using namespace InputSource;
 
-Kinect2Engine::Kinect2Engine(const char *calibFilename) : BaseImageSourceEngine(calibFilename)
-{
+Kinect2Engine::Kinect2Engine(const char* calibFilename) : BaseImageSourceEngine(calibFilename) {
 	printf("compiled without Kinect 2 support\n");
 }
-Kinect2Engine::~Kinect2Engine()
-{}
-void Kinect2Engine::GetImages(ITMUChar4Image& rgbImage, ITMShortImage& rawDepthImage)
-{ return; }
-bool Kinect2Engine::HasMoreImages(void)
-{ return false; }
-Vector2i Kinect2Engine::GetDepthImageSize(void)
-{ return Vector2i(0,0); }
-Vector2i Kinect2Engine::GetRGBImageSize(void)
-{ return Vector2i(0,0); }
+
+Kinect2Engine::~Kinect2Engine() {}
+
+void Kinect2Engine::GetImages(ITMUChar4Image& rgbImage, ITMShortImage& rawDepthImage) { }
+
+bool Kinect2Engine::HasMoreImages() const { return false; }
+
+Vector2i Kinect2Engine::GetDepthImageSize() const { return Vector2i(0, 0); }
+
+Vector2i Kinect2Engine::GetRGBImageSize() const { return Vector2i(0, 0); }
 
 #endif
 

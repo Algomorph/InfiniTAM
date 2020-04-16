@@ -22,7 +22,7 @@ namespace ITMLib
 			imu = new IMUMeasurement();
 		}
 
-		~ViewIMU(void) { delete imu; }
+		~ViewIMU() { delete imu; }
 
 		// Suppress the default copy constructor and assignment operator
 		ViewIMU(const ViewIMU&);

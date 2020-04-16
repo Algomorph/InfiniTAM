@@ -55,13 +55,13 @@ namespace ITMLib
 	public:
 		View* GetView() { return view; }
 
-		CameraTrackingState* GetTrackingState(void);
+		CameraTrackingState* GetTrackingState();
 
 		/// Process a frame with rgb and depth images and (optionally) a corresponding imu measurement
 		CameraTrackingState::TrackingResult ProcessFrame(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage, IMUMeasurement *imuMeasurement = NULL);
 
 		/// Get a result image as output
-		Vector2i GetImageSize(void) const;
+		Vector2i GetImageSize() const;
 
 		void GetImage(ITMUChar4Image *out, GetImageType getImageType, ORUtils::SE3Pose *pose = NULL, Intrinsics *intrinsics = NULL);
 
@@ -70,11 +70,11 @@ namespace ITMLib
 		{
 			freeviewLocalMapIdx = newIdx;
 		}
-		int getFreeviewLocalMapIdx(void) const
+		int getFreeviewLocalMapIdx() const
 		{
 			return freeviewLocalMapIdx;
 		}
-		int findPrimaryLocalMapIdx(void) const
+		int findPrimaryLocalMapIdx() const
 		{
 			return mActiveDataManager->findPrimaryLocalMapIdx();
 		}
@@ -106,6 +106,6 @@ namespace ITMLib
 			will assume same resolution as for the RGB images.
 		*/
 		MultiEngine(const RGBDCalib& calib, Vector2i imgSize_rgb, Vector2i imgSize_d);
-		~MultiEngine(void);
+		~MultiEngine();
 	};
 }

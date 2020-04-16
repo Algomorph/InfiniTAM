@@ -33,9 +33,9 @@ struct PNGReaderData {
 	png_structp png_ptr;
 	png_infop info_ptr;
 
-	PNGReaderData(void)
+	PNGReaderData()
 	{ png_ptr = nullptr; info_ptr = nullptr; }
-	~PNGReaderData(void)
+	~PNGReaderData()
 	{ 
 		if (info_ptr != nullptr) png_destroy_info_struct(png_ptr, &info_ptr);
 		if (png_ptr != nullptr) png_destroy_read_struct(&png_ptr, (png_infopp)nullptr, (png_infopp)nullptr);

@@ -33,7 +33,7 @@
 using namespace ITMLib;
 namespace bench = ITMLib::bench;
 
-//TODO: create/destroy windowed visualizers (i.e. plotter) when their corresponding setting values are turned on/off, and make them close their corresponding windows -Greg (GitHub:Algomorph)
+//TODO: create/destroy windowed visualizers (i.e. plotter) when their corresponding setting values are turned on/off, and make them Close their corresponding windows -Greg (GitHub:Algomorph)
 
 // region ============================== DEFINE CONSTANTS ==============================================================
 template<typename TVoxel, typename TWarp, typename TIndex>

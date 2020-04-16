@@ -19,9 +19,9 @@ namespace InputSource
 			Vector2i imageSize_rgb = Vector2i(224, 171), Vector2i imageSize_d = Vector2i(224, 171));
 		~PicoFlexxEngine();
 
-		bool HasMoreImages(void) override;
+		bool HasMoreImages() const override;
 		void GetImages(ITMUChar4Image& rgb, ITMShortImage& rawDepth) override;
-		Vector2i GetDepthImageSize(void) override;
-		Vector2i GetRGBImageSize(void) override;
+		Vector2i GetDepthImageSize() const override;
+		Vector2i GetRGBImageSize() const override;
 	};
 }

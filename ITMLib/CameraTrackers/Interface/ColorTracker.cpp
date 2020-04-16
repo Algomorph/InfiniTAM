@@ -17,7 +17,7 @@ ColorTracker::ColorTracker(Vector2i imgSize, TrackerIterationType *trackingRegim
 	this->lowLevelEngine = lowLevelEngine;
 }
 
-ColorTracker::~ColorTracker(void)
+ColorTracker::~ColorTracker()
 {
 	delete viewHierarchy;
 }

@@ -12,13 +12,13 @@ class FFMPEGReader : public BaseImageSourceEngine
 	class PrivateData;
 
 	FFMPEGReader(const char *calibFilename, const char *filename1, const char *filename2 = nullptr);
-	~FFMPEGReader(void);
+	~FFMPEGReader();
 
-	bool HasMoreImages(void) override;
+	bool HasMoreImages() const override;
 	void GetImages(ITMUChar4Image& rgb_image, ITMShortImage& depth_image) override;
 
-	Vector2i GetDepthImageSize(void) override;
-	Vector2i GetRGBImageSize(void) override;
+	Vector2i GetDepthImageSize() const override;
+	Vector2i GetRGBImageSize() const override;
 
 	private:
 	PrivateData *mData1;

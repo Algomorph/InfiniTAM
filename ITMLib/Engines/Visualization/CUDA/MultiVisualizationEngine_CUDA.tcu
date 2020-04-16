@@ -11,26 +11,26 @@
 using namespace ITMLib;
 
 template<class TVoxel, class TIndex>
-MultiVisualizationEngine_CUDA<TVoxel, TIndex>::MultiVisualizationEngine_CUDA(void)
+MultiVisualizationEngine_CUDA<TVoxel, TIndex>::MultiVisualizationEngine_CUDA()
 {
 
 }
 
 template<class TVoxel, class TIndex>
-MultiVisualizationEngine_CUDA<TVoxel, TIndex>::~MultiVisualizationEngine_CUDA(void)
+MultiVisualizationEngine_CUDA<TVoxel, TIndex>::~MultiVisualizationEngine_CUDA()
 {
 
 }
 
 template<class TVoxel>
-MultiVisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::MultiVisualizationEngine_CUDA(void)
+MultiVisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::MultiVisualizationEngine_CUDA()
 {
 	ORcudaSafeCall(cudaMalloc((void**)&renderingBlockList_device, sizeof(RenderingBlock) * MAX_RENDERING_BLOCKS));
 	ORcudaSafeCall(cudaMalloc((void**)&noTotalBlocks_device, sizeof(uint)));
 }
 
 template<class TVoxel>
-MultiVisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::~MultiVisualizationEngine_CUDA(void)
+MultiVisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::~MultiVisualizationEngine_CUDA()
 {
 	ORcudaSafeCall(cudaFree(noTotalBlocks_device));
 	ORcudaSafeCall(cudaFree(renderingBlockList_device));

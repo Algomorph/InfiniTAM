@@ -54,7 +54,7 @@ MatrixSymPosDef::MatrixSymPosDef(const MatrixSymPosDef & src)
 }
 
 
-MatrixSymPosDef::~MatrixSymPosDef(void)
+MatrixSymPosDef::~MatrixSymPosDef()
 {
 	delete[] memory;
 }

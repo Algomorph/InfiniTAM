@@ -26,6 +26,6 @@ Got expected exception: Appender::ctor()- Cannot find FilterFactory: log4cplus::
 log4cplus: Destroying appender named [Seventh].
 log4cplus:ERROR Derived Appender did not call destructorImpl().
 log4cplus: Destroying appender named [Second].
-log4cplus: Entering ConsoleAppender::close()..
+log4cplus: Entering ConsoleAppender::Close()..
 log4cplus: Destroying appender named [First].
 Exiting main()...

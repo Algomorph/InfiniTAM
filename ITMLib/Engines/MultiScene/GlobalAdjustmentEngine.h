@@ -29,16 +29,16 @@ namespace ITMLib {
 		struct PrivateData;
 
 	public:
-		GlobalAdjustmentEngine(void);
-		~GlobalAdjustmentEngine(void);
+		GlobalAdjustmentEngine();
+		~GlobalAdjustmentEngine();
 
-		bool hasNewEstimates(void) const;
+		bool hasNewEstimates() const;
 
 		// Check whether pose graph optimisation has converged and produced a
 		// new result. if it hasn't return false, otherwise copy them over
 		bool retrieveNewEstimates(MapGraphManager & dest);
 
-		bool isBusyEstimating(void) const;
+		bool isBusyEstimating() const;
 
 		// Check whether thread is busy, if it is, return false, otherwise
 		// create a copy of all new measurements and make it busy
@@ -46,12 +46,12 @@ namespace ITMLib {
 
 		bool runGlobalAdjustment(bool blockingWait = false);
 
-		bool startSeparateThread(void);
-		bool stopSeparateThread(void);
-		void wakeupSeparateThread(void);
+		bool startSeparateThread();
+		bool stopSeparateThread();
+		void wakeupSeparateThread();
 
 	private:
-		void estimationThreadMain(void);
+		void estimationThreadMain();
 
 		static void MultiSceneToPoseGraph(const MapGraphManager & src, MiniSlamGraph::PoseGraph & dest);
 		static void PoseGraphToMultiScene(const MiniSlamGraph::PoseGraph & src, MapGraphManager & dest);

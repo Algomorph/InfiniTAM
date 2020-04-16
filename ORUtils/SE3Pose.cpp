@@ -5,7 +5,7 @@
 
 using namespace ORUtils;
 
-SE3Pose::SE3Pose(void) { this->SetFrom(0, 0, 0, 0, 0, 0); }
+SE3Pose::SE3Pose() { this->SetFrom(0, 0, 0, 0, 0, 0); }
 
 SE3Pose::SE3Pose(float tx, float ty, float tz, float rx, float ry, float rz)
 {
@@ -255,7 +255,7 @@ void SE3Pose::MultiplyWith(const SE3Pose *pose)
 	this->SetParamsFromModelView();
 }
 
-Matrix3<float> SE3Pose::GetR(void) const
+Matrix3<float> SE3Pose::GetR() const
 {
 	Matrix3<float> R;
 	R.m[0 + 3 * 0] = M.m[0 + 4 * 0]; R.m[1 + 3 * 0] = M.m[1 + 4 * 0]; R.m[2 + 3 * 0] = M.m[2 + 4 * 0];
@@ -265,7 +265,7 @@ Matrix3<float> SE3Pose::GetR(void) const
 	return R;
 }
 
-Vector3<float> SE3Pose::GetT(void) const
+Vector3<float> SE3Pose::GetT() const
 {
 	Vector3<float> T;
 	T.values[0] = M.m[0 + 4 * 3]; T.values[1] = M.m[1 + 4 * 3]; T.values[2] = M.m[2 + 4 * 3];
@@ -317,7 +317,7 @@ void SE3Pose::SetRT(const Matrix3<float> & R, const Vector3<float> & t)
 	SetParamsFromModelView();
 }
 
-Matrix4<float> SE3Pose::GetInvM(void) const
+Matrix4<float> SE3Pose::GetInvM() const
 {
 	Matrix4<float> ret;
 	M.inv(ret);
@@ -330,7 +330,7 @@ void SE3Pose::SetInvM(const Matrix4<float> & invM)
 	SetParamsFromModelView();
 }
 
-void SE3Pose::Coerce(void)
+void SE3Pose::Coerce()
 {
 	SetParamsFromModelView();
 	SetModelViewFromParams();

@@ -6,8 +6,8 @@
 
 using namespace ITMLib;
 
-LowLevelEngine_CPU::LowLevelEngine_CPU(void) { }
-LowLevelEngine_CPU::~LowLevelEngine_CPU(void) { }
+LowLevelEngine_CPU::LowLevelEngine_CPU() { }
+LowLevelEngine_CPU::~LowLevelEngine_CPU() { }
 
 void LowLevelEngine_CPU::CopyImage(ITMUChar4Image *image_out, const ITMUChar4Image *image_in) const
 {

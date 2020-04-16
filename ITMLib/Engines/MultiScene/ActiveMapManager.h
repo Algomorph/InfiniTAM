@@ -31,7 +31,7 @@ namespace ITMLib
 		void AcceptNewLink(int dataId, int primaryDataId, const ORUtils::SE3Pose & pose, int weight);
 
 		float visibleOriginalBlocks(int dataID) const;
-		bool shouldStartNewArea(void) const;
+		bool shouldStartNewArea() const;
 		bool shouldMovePrimaryLocalMap(int newDataIdx, int bestDataIdx, int primaryDataIdx) const;
 
 	public:
@@ -41,19 +41,19 @@ namespace ITMLib
 		void recordTrackingResult(int dataID, CameraTrackingState::TrackingResult trackingResult, bool primaryTrackingSuccess);
 		
 		// return whether or not the local map graph has changed
-		bool maintainActiveData(void);
+		bool maintainActiveData();
 
-		int findPrimaryDataIdx(void) const;
-		int findPrimaryLocalMapIdx(void) const;
+		int findPrimaryDataIdx() const;
+		int findPrimaryLocalMapIdx() const;
 
-		int findBestVisualizationDataIdx(void) const;
-		int findBestVisualizationLocalMapIdx(void) const;
+		int findBestVisualizationDataIdx() const;
+		int findBestVisualizationLocalMapIdx() const;
 
-		int numActiveLocalMaps(void) const { return static_cast<int>(activeData.size()); }
+		int numActiveLocalMaps() const { return static_cast<int>(activeData.size()); }
 		int getLocalMapIndex(int dataIdx) const { return activeData[dataIdx].localMapIndex; }
 		LocalMapActivity getLocalMapType(int dataIdx) const { return activeData[dataIdx].type; }
 
 		ActiveMapManager(MapGraphManager *localMapManager);
-		~ActiveMapManager(void) {}
+		~ActiveMapManager() {}
 	};
 }

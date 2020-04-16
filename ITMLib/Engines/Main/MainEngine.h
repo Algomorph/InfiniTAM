@@ -64,16 +64,16 @@ namespace ITMLib
 		};
 
 		/// Gives access to the current input frame
-		virtual View* GetView(void) = 0;
+		virtual View* GetView() = 0;
 
 		/// Gives access to the current camera pose and additional tracking information
-		virtual CameraTrackingState* GetTrackingState(void) = 0;
+		virtual CameraTrackingState* GetTrackingState() = 0;
 
 		/// Process a frame with rgb and depth images and optionally a corresponding imu measurement
         virtual CameraTrackingState::TrackingResult ProcessFrame(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage, IMUMeasurement *imuMeasurement = NULL) = 0;
 
 		/// Get a result image as output
-		virtual Vector2i GetImageSize(void) const = 0;
+		virtual Vector2i GetImageSize() const = 0;
 
 		virtual void GetImage(ITMUChar4Image *out, GetImageType getImageType, ORUtils::SE3Pose *pose = NULL, Intrinsics *intrinsics = NULL) = 0;
 

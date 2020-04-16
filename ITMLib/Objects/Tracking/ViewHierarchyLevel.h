@@ -51,7 +51,7 @@ namespace ITMLib
 			this->gradientY_rgb->UpdateDeviceFromHost();
 		}
 
-		~ViewHierarchyLevel(void)
+		~ViewHierarchyLevel()
 		{
 			if (manageData) {
 				delete rgb;

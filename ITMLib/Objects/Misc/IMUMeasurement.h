@@ -26,7 +26,7 @@ namespace ITMLib
 			this->R = measurement->R;
 		}
 
-		~IMUMeasurement(void) { }
+		~IMUMeasurement() { }
 
 		// Suppress the default copy constructor and assignment operator
 		IMUMeasurement(const IMUMeasurement&);

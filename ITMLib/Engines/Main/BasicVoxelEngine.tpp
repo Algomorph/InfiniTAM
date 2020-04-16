@@ -348,7 +348,7 @@ CameraTrackingState::TrackingResult BasicVoxelEngine<TVoxel,TIndex>::ProcessFram
 }
 
 template <typename TVoxel, typename TIndex>
-Vector2i BasicVoxelEngine<TVoxel,TIndex>::GetImageSize(void) const
+Vector2i BasicVoxelEngine<TVoxel,TIndex>::GetImageSize() const
 {
 	return renderState_live->raycastImage->dimensions;
 }

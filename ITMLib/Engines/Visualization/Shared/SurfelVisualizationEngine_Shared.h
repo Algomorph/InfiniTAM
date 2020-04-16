@@ -216,7 +216,7 @@ inline void copy_surfel_data_to_icp_maps(int locId, const TSurfel* surfels, cons
 		const Vector3f& p = surfel.position;
 		const Vector3f& n = surfel.normal;
 
-		// If the surfel is sufficiently close to the camera and has a sufficiently high confidence value:
+		// If the surfel is sufficiently Close to the camera and has a sufficiently high confidence value:
 		Vector3f v = visualization_transform_point(invT, p);
 		if (v.z <= trackingSurfelMaxDepth || surfel.confidence >= trackingSurfelMinConfidence) {
 			// Write the surfel's position and normal into the buffers.

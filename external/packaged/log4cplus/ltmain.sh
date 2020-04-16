@@ -4773,7 +4773,7 @@ lt_${my_prefix}_LTX_preloaded_symbols[];\
 
 	  if test -s "$nlist"I; then
 	    echo >> "$output_objdir/$my_dlsyms" "\
-static void lt_syminit(void)
+static void lt_syminit()
 {
   LT_DLSYM_CONST lt_dlsymlist *symbol = lt_${my_prefix}_LTX_preloaded_symbols;
   for (; symbol->name; ++symbol)
@@ -6188,9 +6188,9 @@ lt_debugprintf (const char *file, int line, const char *fmt, ...)
   va_list args;
   if (lt_debug)
     {
-      (void) fprintf (stderr, "%s:%s:%d: ", program_name, file, line);
+      () fprintf (stderr, "%s:%s:%d: ", program_name, file, line);
       va_start (args, fmt);
-      (void) vfprintf (stderr, fmt, args);
+      () vfprintf (stderr, fmt, args);
       va_end (args);
     }
 }

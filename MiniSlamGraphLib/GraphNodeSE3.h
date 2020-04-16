@@ -12,11 +12,11 @@ namespace MiniSlamGraph
 	{
 	public:
 		typedef ORUtils::SE3Pose SE3;
-		GraphNodeSE3(void) {}
+		GraphNodeSE3() {}
 		GraphNodeSE3(const GraphNodeSE3 & src) : GraphNode(src) { mPose.SetFrom(&(src.mPose)); }
 		GraphNodeSE3(const SE3 & pose) : mPose(pose) {}
 
-		GraphNodeSE3* clone(void) const
+		GraphNodeSE3* clone() const
 		{
 			return new GraphNodeSE3(*this);
 		}
@@ -31,7 +31,7 @@ namespace MiniSlamGraph
 			mPose.SetM(deltaPose.GetM() * startingPose.GetM());
 		}
 
-		int numParameters(void) const { return 6; }
+		int numParameters() const { return 6; }
 
 		void setParameters(const double *v)
 		{
@@ -43,7 +43,7 @@ namespace MiniSlamGraph
 			for (int i = 0; i < 6; ++i) v[i] = mPose.GetParams()[i];
 		}
 
-		const SE3 & getPose(void) const
+		const SE3 & getPose() const
 		{
 			return mPose;
 		}

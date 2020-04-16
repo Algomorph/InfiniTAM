@@ -55,7 +55,7 @@ void GraphEdgeSE3::setMeasurementSE3(const SE3 & pose)
 	MatrixToMQT(pose.GetM(), mMeasuredPose);
 }
 
-GraphEdgeSE3::SE3 GraphEdgeSE3::getMeasurementSE3(void) const
+GraphEdgeSE3::SE3 GraphEdgeSE3::getMeasurementSE3() const
 {
 	ORUtils::Matrix4<float> m;
 	MQTToMatrix(mMeasuredPose, m);

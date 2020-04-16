@@ -55,13 +55,13 @@ __global__ void buildVisibleList_device(HashEntry* hashTable, ITMHashSwapState* 
 // host methods
 
 template<class TVoxel>
-SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::SceneReconstructionEngine_CUDA(void) {
+SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::SceneReconstructionEngine_CUDA() {
 	ORcudaSafeCall(cudaMalloc((void**) &allocationTempData_device, sizeof(AllocationTempData)));
 	ORcudaSafeCall(cudaMallocHost((void**) &allocationTempData_host, sizeof(AllocationTempData)));
 }
 
 template<class TVoxel>
-SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::~SceneReconstructionEngine_CUDA(void) {
+SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::~SceneReconstructionEngine_CUDA() {
 	ORcudaSafeCall(cudaFreeHost(allocationTempData_host));
 	ORcudaSafeCall(cudaFree(allocationTempData_device));
 }

@@ -18,7 +18,7 @@ using namespace ITMLib;
 
 InfiniTAMApp* InfiniTAMApp::globalInstance = NULL;
 
-InfiniTAMApp::InfiniTAMApp(void)
+InfiniTAMApp::InfiniTAMApp()
 {
 	mImageSource = NULL;
 	mImuSource = NULL;
@@ -36,7 +36,7 @@ InfiniTAMApp::InfiniTAMApp(void)
 	sdkCreateTimer(&timer_average);
 }
 
-void InfiniTAMApp::InitGL(void)
+void InfiniTAMApp::InitGL()
 {
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glGenTextures(NUM_WIN, textureId);
@@ -48,7 +48,7 @@ void InfiniTAMApp::ResizeGL(int newWidth, int newHeight)
 	mNewWindowSize.y = newHeight;
 }
 
-void InfiniTAMApp::RenderGL(void)
+void InfiniTAMApp::RenderGL()
 {
 	glClear(GL_COLOR_BUFFER_BIT);
 	if (!IsInitialized()) return;
@@ -165,7 +165,7 @@ void InfiniTAMApp::StartProcessing(int useLiveCamera)
 	mIsInitialized = true;
 }
 
-bool InfiniTAMApp::ProcessFrame(void)
+bool InfiniTAMApp::ProcessFrame()
 {
 	if (!mImageSource->hasMoreImages()) return false;
 	mImageSource->getImages(inputRGBImage, inputRawDepthImage);
@@ -219,7 +219,7 @@ bool InfiniTAMApp::ProcessFrame(void)
 	return true;
 }
 
-void InfiniTAMApp::StopProcessing(void)
+void InfiniTAMApp::StopProcessing()
 {
 	if (!mIsInitialized) return;
 	mIsInitialized = false;
@@ -238,12 +238,12 @@ void InfiniTAMApp::StopProcessing(void)
 	if (inputIMUMeasurement!=NULL) delete inputIMUMeasurement;
 }
 
-float InfiniTAMApp::getAverageTime(void)
+float InfiniTAMApp::getAverageTime()
 {
 	return sdkGetAverageTimerValue(&timer_average);
 }
 
-void InfiniTAMApp::toggleRecordingMode(void)
+void InfiniTAMApp::toggleRecordingMode()
 {
 	mRecordingMode = !mRecordingMode;
 }

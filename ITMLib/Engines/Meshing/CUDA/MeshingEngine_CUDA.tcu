@@ -80,7 +80,7 @@ MeshingEngine_CUDA<TVoxel, PlainVoxelArray>::MeshingEngine_CUDA(const PlainVoxel
 		MeshingEngine<TVoxel, PlainVoxelArray>(index) {}
 
 template<class TVoxel>
-MeshingEngine_CUDA<TVoxel, PlainVoxelArray>::~MeshingEngine_CUDA(void) {}
+MeshingEngine_CUDA<TVoxel, PlainVoxelArray>::~MeshingEngine_CUDA() {}
 
 template<class TVoxel>
 void MeshingEngine_CUDA<TVoxel, PlainVoxelArray>::MeshScene(Mesh* mesh,

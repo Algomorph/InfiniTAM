@@ -72,16 +72,16 @@ typedef char log4cplus_char_t;
 #define LOG4CPLUS_TEXT(STRING) LOG4CPLUS_TEXT2(STRING)
 #endif // LOG4CPLUS_TEXT
 
-LOG4CPLUS_EXPORT void * log4cplus_initialize(void);
+LOG4CPLUS_EXPORT void * log4cplus_initialize();
 LOG4CPLUS_EXPORT int log4cplus_deinitialize(void * initializer);
 
 LOG4CPLUS_EXPORT int log4cplus_file_configure(const log4cplus_char_t *pathname);
 LOG4CPLUS_EXPORT int log4cplus_file_reconfigure(const log4cplus_char_t *pathname);
 LOG4CPLUS_EXPORT int log4cplus_str_configure(const log4cplus_char_t *config);
 LOG4CPLUS_EXPORT int log4cplus_str_reconfigure(const log4cplus_char_t *config);
-LOG4CPLUS_EXPORT int log4cplus_basic_configure(void);
+LOG4CPLUS_EXPORT int log4cplus_basic_configure();
 LOG4CPLUS_EXPORT int log4cplus_basic_reconfigure(int logToStdErr);
-LOG4CPLUS_EXPORT void log4cplus_shutdown(void);
+LOG4CPLUS_EXPORT void log4cplus_shutdown();
 
 LOG4CPLUS_EXPORT int log4cplus_logger_exists(const log4cplus_char_t *name);
 LOG4CPLUS_EXPORT int log4cplus_logger_is_enabled_for(

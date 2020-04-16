@@ -47,7 +47,7 @@ namespace ORUtils
 			rank = size;
 		}
 
-		F Determinant(void) const
+		F Determinant() const
 		{
 			F ret = 1.0f;
 			for (int i = 0; i < size; ++i) {
@@ -76,7 +76,7 @@ namespace ORUtils
 			}
 		}
 
-		~GenericCholesky(void)
+		~GenericCholesky()
 		{
 		}
 	};

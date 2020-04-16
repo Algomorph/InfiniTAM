@@ -138,7 +138,7 @@ if(NOT DEFINED LOG4CPLUS_DECLSPEC_EXPORT)
      __attribute__((visibility(\"default\"))) int bar() { return x; }
      __attribute__((visibility(\"hidden\"))) int baz() { return 1; }
 
-     int main(void) { return 0; }"
+     int main() { return 0; }"
    HAVE_ATTRIBUTE_VISIBILITY
   )
   if(HAVE_ATTRIBUTE_VISIBILITY)
@@ -161,7 +161,7 @@ if(NOT DEFINED LOG4CPLUS_DECLSPEC_EXPORT)
      int foo () { return 0; }
      __declspec(dllexport) int bar () { return x; }
 
-     int main(void) { return 0; }"
+     int main() { return 0; }"
     HAVE_DECLSPEC_DLLEXPORT
   )
   if(HAVE_DECLSPEC_DLLEXPORT)
@@ -179,7 +179,7 @@ if(NOT DEFINED LOG4CPLUS_DECLSPEC_EXPORT)
      __global int bar() { return x; }
      __hidden int baz() { return 1; }
 
-     int main(void) { return 0; }"
+     int main() { return 0; }"
     HAVE_GLOBAL_AND_HIDDEN
   )
   if(HAVE_GLOBAL_AND_HIDDEN)

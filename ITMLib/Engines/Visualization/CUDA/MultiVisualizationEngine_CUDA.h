@@ -14,8 +14,8 @@ namespace ITMLib {
 	private:
 
 	public:
-		MultiVisualizationEngine_CUDA(void);
-		~MultiVisualizationEngine_CUDA(void);
+		MultiVisualizationEngine_CUDA();
+		~MultiVisualizationEngine_CUDA();
 
 		void PrepareRenderState(const VoxelMapGraphManager<TVoxel, TIndex> & sceneManager, RenderState *state);
 
@@ -32,8 +32,8 @@ namespace ITMLib {
 		uint *noTotalBlocks_device;
 
 	public:
-		MultiVisualizationEngine_CUDA(void);
-		~MultiVisualizationEngine_CUDA(void);
+		MultiVisualizationEngine_CUDA();
+		~MultiVisualizationEngine_CUDA();
 
 		void PrepareRenderState(const VoxelMapGraphManager<TVoxel, VoxelBlockHash> & sceneManager, RenderState *state);
 

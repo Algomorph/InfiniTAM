@@ -48,11 +48,11 @@ namespace ITMLib
 		CameraTrackingState *trackingState;
 
 	public:
-		View* GetView(void) { return view; }
-		CameraTrackingState* GetTrackingState(void) { return trackingState; }
+		View* GetView() { return view; }
+		CameraTrackingState* GetTrackingState() { return trackingState; }
 
 		/// Gives access to the internal world representation
-		VoxelVolume<TVoxel, TIndex>* GetScene(void) { return scene; }
+		VoxelVolume<TVoxel, TIndex>* GetScene() { return scene; }
 
 		CameraTrackingState::TrackingResult ProcessFrame(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage, IMUMeasurement *imuMeasurement = NULL);
 
@@ -64,7 +64,7 @@ namespace ITMLib
 		void LoadFromFile();
 
 		/// Get a result image as output
-		Vector2i GetImageSize(void) const;
+		Vector2i GetImageSize() const;
 
 		void GetImage(ITMUChar4Image *out, GetImageType getImageType, ORUtils::SE3Pose *pose = NULL, Intrinsics *intrinsics = NULL);
 

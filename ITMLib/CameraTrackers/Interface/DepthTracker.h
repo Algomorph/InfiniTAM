@@ -69,6 +69,6 @@ namespace ITMLib
 		DepthTracker(Vector2i imgSize, TrackerIterationType *trackingRegime, int noHierarchyLevels,
 		             float terminationThreshold, float failureDetectorThreshold,
 		             const LowLevelEngine *lowLevelEngine, MemoryDeviceType memoryType);
-		virtual ~DepthTracker(void);
+		virtual ~DepthTracker();
 	};
 }

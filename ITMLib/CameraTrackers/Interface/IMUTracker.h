@@ -21,6 +21,6 @@ namespace ITMLib
 		bool requiresPointCloudRendering() const { return false; }
 
 		IMUTracker(IMUCalibrator *calibrator);
-		virtual ~IMUTracker(void);
+		virtual ~IMUTracker();
 	};
 }

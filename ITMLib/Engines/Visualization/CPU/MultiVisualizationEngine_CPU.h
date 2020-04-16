@@ -10,8 +10,8 @@ namespace ITMLib
 	class MultiVisualizationEngine_CPU : public MultiVisualizationEngine<TVoxel, TIndex>
 	{
 	public:
-		MultiVisualizationEngine_CPU(void) {}
-		~MultiVisualizationEngine_CPU(void) {}
+		MultiVisualizationEngine_CPU() {}
+		~MultiVisualizationEngine_CPU() {}
 
 		void PrepareRenderState(const VoxelMapGraphManager<TVoxel, TIndex> & sceneManager, RenderState *state);
 
@@ -24,8 +24,8 @@ template<class TVoxel>
 class MultiVisualizationEngine_CPU<TVoxel,VoxelBlockHash> : public MultiVisualizationEngine<TVoxel, VoxelBlockHash>
 {
 public:
-	MultiVisualizationEngine_CPU(void) {}
-	~MultiVisualizationEngine_CPU(void) {}
+	MultiVisualizationEngine_CPU() {}
+	~MultiVisualizationEngine_CPU() {}
 
 	void PrepareRenderState(const VoxelMapGraphManager<TVoxel, VoxelBlockHash> & sceneManager, RenderState *state);
 

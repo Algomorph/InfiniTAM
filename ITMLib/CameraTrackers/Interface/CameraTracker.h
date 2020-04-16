@@ -35,6 +35,6 @@ namespace ITMLib
 		virtual bool requiresDepthReliability() const = 0;
 		virtual bool requiresPointCloudRendering() const = 0;
 
-		virtual ~CameraTracker(void) {}
+		virtual ~CameraTracker() {}
 	};
 }

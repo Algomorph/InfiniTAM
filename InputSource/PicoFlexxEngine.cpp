@@ -196,23 +196,28 @@ void PicoFlexxEngine::GetImages(ITMUChar4Image *rgbImage, ITMShortImage *rawDept
 	else memset(depth, 0, rawDepthImage->element_count * sizeof(short));
 }
 
-bool PicoFlexxEngine::HasMoreImages(void) const { return data != NULL; }
-Vector2i PicoFlexxEngine::GetDepthImageSize(void) const { return data != NULL ? imageSize_d : Vector2i(0, 0); }
-Vector2i PicoFlexxEngine::GetRGBImageSize(void) const { return data != NULL ? imageSize_rgb : Vector2i(0, 0); }
+bool PicoFlexxEngine::HasMoreImages() const { return data != NULL; }
+Vector2i PicoFlexxEngine::GetDepthImageSize() const { return data != NULL ? imageSize_d : Vector2i(0, 0); }
+Vector2i PicoFlexxEngine::GetRGBImageSize() const { return data != NULL ? imageSize_rgb : Vector2i(0, 0); }
 
 #else
 
 using namespace InputSource;
 
-PicoFlexxEngine::PicoFlexxEngine(const char *calibFilename, const char *deviceURI, const bool useInternalCalibration, Vector2i requested_imageSize_rgb, Vector2i requested_imageSize_d)
-	: BaseImageSourceEngine(calibFilename)
-{
+PicoFlexxEngine::PicoFlexxEngine(const char* calibFilename, const char* deviceURI, const bool useInternalCalibration,
+                                 Vector2i requested_imageSize_rgb, Vector2i requested_imageSize_d)
+		: BaseImageSourceEngine(calibFilename) {
 	printf("compiled without LibRoyale support\n");
 }
+
 PicoFlexxEngine::~PicoFlexxEngine() {}
-void PicoFlexxEngine::GetImages(ITMUChar4Image& rgbImage, ITMShortImage& rawDepthImage) { }
-bool PicoFlexxEngine::HasMoreImages(void) { return false; }
-Vector2i PicoFlexxEngine::GetDepthImageSize(void) { return Vector2i(0, 0); }
-Vector2i PicoFlexxEngine::GetRGBImageSize(void) { return Vector2i(0, 0); }
+
+void PicoFlexxEngine::GetImages(ITMUChar4Image& rgbImage, ITMShortImage& rawDepthImage) {}
+
+bool PicoFlexxEngine::HasMoreImages() const { return false; }
+
+Vector2i PicoFlexxEngine::GetDepthImageSize() const { return Vector2i(0, 0); }
+
+Vector2i PicoFlexxEngine::GetRGBImageSize() const { return Vector2i(0, 0); }
 
 #endif

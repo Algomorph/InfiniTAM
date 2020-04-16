@@ -8,13 +8,13 @@
 
 using namespace ITMLib;
 
-LowLevelEngine_CUDA::LowLevelEngine_CUDA(void)
+LowLevelEngine_CUDA::LowLevelEngine_CUDA()
 {
 	ORcudaSafeCall(cudaMalloc((void**)&counterTempData_device, sizeof(int)));
 	ORcudaSafeCall(cudaMallocHost((void**)&counterTempData_host, sizeof(int)));
 }
 
-LowLevelEngine_CUDA::~LowLevelEngine_CUDA(void)
+LowLevelEngine_CUDA::~LowLevelEngine_CUDA()
 {
 	ORcudaSafeCall(cudaFree(counterTempData_device));
 	ORcudaSafeCall(cudaFreeHost(counterTempData_host));

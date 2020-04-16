@@ -40,7 +40,7 @@ namespace ITMLib
 		void IntegrateIntoScene(VoxelVolume<TVoxel, PlainVoxelArray> *scene, const View *view, const CameraTrackingState *trackingState,
 		                        const RenderState *renderState);
 
-		SceneReconstructionEngine_CPU(void);
-		~SceneReconstructionEngine_CPU(void);
+		SceneReconstructionEngine_CPU();
+		~SceneReconstructionEngine_CPU();
 	};
 }

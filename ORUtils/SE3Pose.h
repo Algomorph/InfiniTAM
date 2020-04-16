@@ -57,13 +57,13 @@ namespace ORUtils
 		*/
 		void MultiplyWith(const SE3Pose *pose);
 
-		const Matrix4<float> & GetM(void) const { return M; }
+		const Matrix4<float> & GetM() const { return M; }
 
-		Matrix3<float> GetR(void) const;
-		Vector3<float> GetT(void) const;
+		Matrix3<float> GetR() const;
+		Vector3<float> GetT() const;
 
 		void GetParams(Vector3<float> &translation, Vector3<float> &rotation) const;
-		const float* GetParams(void) const { return params.all; }
+		const float* GetParams() const { return params.all; }
 
 		void SetM(const Matrix4<float> & M);
 
@@ -71,14 +71,14 @@ namespace ORUtils
 		void SetT(const Vector3<float> & t);
 		void SetRT(const Matrix3<float> & R, const Vector3<float> & t);
 
-		Matrix4<float> GetInvM(void) const;
+		Matrix4<float> GetInvM() const;
 		void SetInvM(const Matrix4<float> & invM);
 
 		/** This will enforce the orthonormality constraints on
 			the rotation matrix. It's recommended to call this
 			function after manipulating the matrix M.
 		*/
-		void Coerce(void);
+		void Coerce();
 
 		SE3Pose(const SE3Pose & src);
 		SE3Pose(const Matrix4<float> & src);
@@ -87,7 +87,7 @@ namespace ORUtils
 		SE3Pose(const Matrix3<float> &R, const Vector3<float> &t);
 		explicit SE3Pose(const float pose[6]);
 
-		SE3Pose(void);
+		SE3Pose();
 
 		friend std::ostream& operator<<(std::ostream& os, const SE3Pose& dt){
 			os << dt.M;

@@ -21,6 +21,6 @@ namespace ITMLib
 	public:
 		DepthTracker_CUDA(Vector2i imgSize, TrackerIterationType *trackingRegime, int noHierarchyLevels,
 		                  float terminationThreshold, float failureDetectorThreshold, const LowLevelEngine *lowLevelEngine);
-		~DepthTracker_CUDA(void);
+		~DepthTracker_CUDA();
 	};
 }

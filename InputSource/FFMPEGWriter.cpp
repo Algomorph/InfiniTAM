@@ -32,13 +32,13 @@ using namespace InputSource;
 class FFMPEGWriter::PrivateData {
 	public:
 	int open(const char *filename, int size_x, int size_y, bool isDepth, int fps);
-	int init_filters(void);
+	int init_filters();
 	int encode_write_frame(AVFrame *filt_frame, unsigned int stream_index, int *got_frame);
 	int filter_encode_write_frame(AVFrame *frame, unsigned int stream_index);
 	int flush_encoder(unsigned int stream_index);
-	int close(void);
+	int close();
 
-	AVFrame* getFrame(void) { return frame; }
+	AVFrame* getFrame() { return frame; }
 
 	private:
 	typedef struct FilteringContext {
@@ -48,7 +48,7 @@ class FFMPEGWriter::PrivateData {
 	} FilteringContext;
 
 	void allocFrame(bool isDepth);
-	void freeFrame(void);
+	void freeFrame();
 	static int init_filter(FilteringContext* fctx, AVCodecContext *enc_ctx, const char *filter_spec);
 
 
@@ -218,7 +218,7 @@ end:
 	return ret;
 }
 
-int FFMPEGWriter::PrivateData::init_filters(void)
+int FFMPEGWriter::PrivateData::init_filters()
 {
 	const char *filter_spec;
 	int ret;
@@ -307,7 +307,7 @@ int FFMPEGWriter::PrivateData::flush_encoder(unsigned int stream_index)
 	return ret;
 }
 
-int FFMPEGWriter::PrivateData::close(void)
+int FFMPEGWriter::PrivateData::close()
 {
 	int ret = 0;
         /* flush filter */
@@ -365,20 +365,20 @@ void FFMPEGWriter::PrivateData::allocFrame(bool isDepth)
 	}
 }
 
-void FFMPEGWriter::PrivateData::freeFrame(void)
+void FFMPEGWriter::PrivateData::freeFrame()
 {
 	av_freep(&frame->data[0]);
 	av_frame_free(&frame);
 }
 
 
-FFMPEGWriter::FFMPEGWriter(void)
+FFMPEGWriter::FFMPEGWriter()
 {
 	mData = new PrivateData();
 	counter = -1;
 }
 
-FFMPEGWriter::~FFMPEGWriter(void)
+FFMPEGWriter::~FFMPEGWriter()
 {
 	close();
 
@@ -443,7 +443,7 @@ bool FFMPEGWriter::writeFrame(ITMShortImage *depthImage)
 	return (ret>=0);
 }
 
-bool FFMPEGWriter::close(void)
+bool FFMPEGWriter::close()
 {
 	if (!isOpen()) return false;
 
@@ -452,7 +452,7 @@ bool FFMPEGWriter::close(void)
 	return (ret>=0);
 }
 
-bool FFMPEGWriter::isOpen(void) const
+bool FFMPEGWriter::isOpen() const
 {
 	return (counter>=0);
 }
@@ -461,9 +461,9 @@ bool FFMPEGWriter::isOpen(void) const
 
 using namespace InputSource;
 
-FFMPEGWriter::FFMPEGWriter(void)
+FFMPEGWriter::FFMPEGWriter()
 {}
-FFMPEGWriter::~FFMPEGWriter(void)
+FFMPEGWriter::~FFMPEGWriter()
 {}
 bool FFMPEGWriter::open(const char *filename, int size_x, int size_y, bool isDepth, int fps)
 { printf("compiled without FFMPEG\n"); return false; }
@@ -471,9 +471,9 @@ bool FFMPEGWriter::writeFrame(ITMUChar4Image *rgbImage)
 { return false; }
 bool FFMPEGWriter::writeFrame(ITMShortImage *depthImage)
 { return false; }
-bool FFMPEGWriter::close(void)
+bool FFMPEGWriter::close()
 { return false; }
-bool FFMPEGWriter::isOpen(void) const
+bool FFMPEGWriter::isOpen() const
 { return false; }
 
 #endif

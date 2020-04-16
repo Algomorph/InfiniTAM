@@ -7,7 +7,7 @@ namespace MiniSlamGraph
 	class SparseBlockMatrix
 	{
 	public:
-		virtual ~SparseBlockMatrix(void) {}
+		virtual ~SparseBlockMatrix() {}
 
 		/** Get number of rows, columns and overall elements in the matrix. */
 		virtual void getStats(int & numRows, int & numCols, int & numEntries) const = 0;

@@ -16015,8 +16015,8 @@ for ac_symprfx in "" "_"; do
 extern "C" {
 #endif
 char nm_test_var;
-void nm_test_func(void);
-void nm_test_func(void){}
+void nm_test_func();
+void nm_test_func(){}
 #ifdef __cplusplus
 }
 #endif
@@ -17185,7 +17185,7 @@ else
 	# non-empty at configure time, or by adding -multi_module to the
 	# link flags.
 	rm -rf libconftest.dylib*
-	echo "int foo(void){return 1;}" > conftest.c
+	echo "int foo(){return 1;}" > conftest.c
 	echo "$LTCC $LTCFLAGS $LDFLAGS -o libconftest.dylib \
 -dynamiclib -Wl,-single_module conftest.c" >&5
 	$LTCC $LTCFLAGS $LDFLAGS -o libconftest.dylib \
@@ -19806,7 +19806,7 @@ else
 	   LDFLAGS="$LDFLAGS -shared $wl-exported_symbol ${wl}foo $wl-update_registry $wl/dev/null"
 	   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-int foo (void) { return 0; }
+int foo () { return 0; }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
   lt_cv_irix_exported_symbol=yes
@@ -23452,7 +23452,7 @@ cat > conftest.$ac_ext <<_LT_EOF
 class Foo
 {
 public:
-  Foo (void) { a = 0; }
+  Foo () { a = 0; }
 private:
   int a;
 };

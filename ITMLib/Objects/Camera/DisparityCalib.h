@@ -33,7 +33,7 @@ namespace ITMLib
 
 		//#################### CONSTRUCTORS ####################
 	public:
-		DisparityCalib(void)
+		DisparityCalib()
 		{
 			SetStandard();
 		}

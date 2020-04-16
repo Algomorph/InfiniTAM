@@ -10,7 +10,7 @@ DepthTracker_CPU::DepthTracker_CPU(Vector2i imgSize, TrackerIterationType *track
  : DepthTracker(imgSize, trackingRegime, noHierarchyLevels, terminationThreshold, failureDetectorThreshold, lowLevelEngine, MEMORYDEVICE_CPU)
 { }
 
-DepthTracker_CPU::~DepthTracker_CPU(void) { }
+DepthTracker_CPU::~DepthTracker_CPU() { }
 
 /**
  * \brief Compute gradient and Hessian matrix of the new depth fitted to global data

@@ -43,7 +43,7 @@ namespace ITMLib
 			TRACKING_FAILED = 0
 		} trackerResult;
 
-		bool TrackerFarFromPointCloud(void) const
+		bool TrackerFarFromPointCloud() const
 		{
 			// if no point cloud exists, yet
 			if (point_cloud_age < 0) return true;
@@ -71,7 +71,7 @@ namespace ITMLib
 			Reset();
 		}
 
-		~CameraTrackingState(void)
+		~CameraTrackingState()
 		{
 			delete pointCloud;
 			delete pose_d;

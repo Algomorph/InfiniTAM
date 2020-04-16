@@ -25,7 +25,7 @@ namespace ITMLib
                                     const ITMTrackingState *trackingState, const ITMRenderState *renderState,
                                     bool onlyUpdateVisibleList = false, bool resetVisibleList = false);
         
-        ITMSceneReconstructionEngine_Metal(void);
+        ITMSceneReconstructionEngine_Metal();
     };
     
     template<class TVoxel>

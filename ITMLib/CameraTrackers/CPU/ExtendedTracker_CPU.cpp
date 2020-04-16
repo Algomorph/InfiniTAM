@@ -40,7 +40,7 @@ ExtendedTracker_CPU::ExtendedTracker_CPU(Vector2i imgSize_d,
 	                  MEMORYDEVICE_CPU)
 { }
 
-ExtendedTracker_CPU::~ExtendedTracker_CPU(void) { }
+ExtendedTracker_CPU::~ExtendedTracker_CPU() { }
 
 /**
  * \brief Compute gradient and Hessian matrix of the new depth fitted to global data

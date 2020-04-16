@@ -14,6 +14,6 @@ namespace ITMLib
 
 		ColorTracker_CPU(Vector2i imgSize, TrackerIterationType *trackingRegime, int noHierarchyLevels,
 		                 const LowLevelEngine *lowLevelEngine);
-		~ColorTracker_CPU(void);
+		~ColorTracker_CPU();
 	};
 }

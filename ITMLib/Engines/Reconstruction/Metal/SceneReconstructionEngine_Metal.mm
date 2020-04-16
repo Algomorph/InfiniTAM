@@ -23,7 +23,7 @@ struct SceneReconstructionEngine_MetalBits
 static SceneReconstructionEngine_MetalBits sr_metalBits;
 
 template<class TVoxel>
-ITMSceneReconstructionEngine_Metal<TVoxel,ITMVoxelBlockHash>::ITMSceneReconstructionEngine_Metal(void)
+ITMSceneReconstructionEngine_Metal<TVoxel,ITMVoxelBlockHash>::ITMSceneReconstructionEngine_Metal()
  : ITMSceneReconstructionEngine_CPU<TVoxel,ITMVoxelBlockHash>()
 {
     NSError *errors;

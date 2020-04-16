@@ -29,6 +29,6 @@ namespace ITMLib
         void SaveToGlobalMemory(ITMScene<TVoxel,ITMVoxelBlockHash> *scene, View *view);
         
         explicit ITMSwappingEngine_Metal(const ITMVoxelBlockHash& index);
-        ~ITMSwappingEngine_Metal(void);
+        ~ITMSwappingEngine_Metal();
     };
 }

@@ -45,7 +45,7 @@ namespace ITMLib
 			this->normalsMap->UpdateDeviceFromHost();
 		}
 
-		~VolumeHierarchyLevel(void)
+		~VolumeHierarchyLevel()
 		{
 			if (manageData) {
 				delete pointsMap;

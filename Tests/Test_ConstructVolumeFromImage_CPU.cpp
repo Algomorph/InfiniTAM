@@ -337,7 +337,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
 			break;
 		}
 
-		// for extremely lateral points close to the camera, the rays are highly skewed,
+		// for extremely lateral points Close to the camera, the rays are highly skewed,
 		// so the value progression won't hold. Skip those.
 		if (i_coordinate > 17) {
 			// don't go into low negative sdf values, since those will be overwritten by positive values

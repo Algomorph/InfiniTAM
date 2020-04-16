@@ -25,7 +25,7 @@ KeyValueConfig::KeyValueConfig(const KeyValueConfig & src)
 	for (; it != src.property.end(); ++it) setProperty(it->first, it->second);
 }
 
-KeyValueConfig::~KeyValueConfig(void)
+KeyValueConfig::~KeyValueConfig()
 {
 	unsetAllProperties();
 }
@@ -67,7 +67,7 @@ void KeyValueConfig::unsetProperty(const char *key, bool toLower)
 	property.erase(search);
 }
 
-void KeyValueConfig::unsetAllProperties(void)
+void KeyValueConfig::unsetAllProperties()
 {
 	PropertyList::iterator it = property.begin();
 	for (; it != property.end(); ++it) 

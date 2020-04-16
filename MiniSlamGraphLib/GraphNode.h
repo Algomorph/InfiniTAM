@@ -9,22 +9,22 @@ namespace MiniSlamGraph
 	class GraphNode
 	{
 	public:
-		GraphNode(void) { mFixed = false; mId = -1; }
+		GraphNode() { mFixed = false; mId = -1; }
 		GraphNode(const GraphNode & src) { mFixed = src.mFixed; mId = src.mId; }
-		virtual ~GraphNode(void) {}
+		virtual ~GraphNode() {}
 
-		virtual GraphNode* clone(void) const = 0;
+		virtual GraphNode* clone() const = 0;
 		virtual void applyDelta(const double *delta, const GraphNode *startingPoint = NULL) = 0;
 
-		virtual int numParameters(void) const = 0;
+		virtual int numParameters() const = 0;
 
 		virtual void setParameters(const double *v) = 0;
 		virtual void getParameters(double *v) = 0;
 
-		bool isFixed(void) const { return mFixed; }
+		bool isFixed() const { return mFixed; }
 		void setFixed(bool value = true) { mFixed = value; }
 
-		int getId(void) const { return mId; }
+		int getId() const { return mId; }
 		void setId(int id) { mId = id; }
 
 	private:

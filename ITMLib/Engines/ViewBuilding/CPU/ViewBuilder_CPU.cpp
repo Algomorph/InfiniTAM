@@ -9,7 +9,7 @@ using namespace ITMLib;
 using namespace ORUtils;
 
 ViewBuilder_CPU::ViewBuilder_CPU(const RGBDCalib& calib): ViewBuilder(calib) { }
-ViewBuilder_CPU::~ViewBuilder_CPU(void) { }
+ViewBuilder_CPU::~ViewBuilder_CPU() { }
 
 void ViewBuilder_CPU::UpdateView(View** view_ptr, ITMUChar4Image* rgbImage, ITMShortImage* rawDepthImage, bool useThresholdFilter,
                                  bool useBilateralFilter, bool modelSensorNoise, bool storePreviousImage)

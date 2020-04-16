@@ -51,24 +51,24 @@ public:
   void addSubengine(ImageSourceEngine *subengine);
 
   /** Override */
-  virtual ITMLib::RGBDCalib getCalib(void) const;
+  virtual ITMLib::RGBDCalib getCalib() const;
 
   /**
    * \brief Gets the current sub-engine.
    *
    * \return  The current sub-engine.
    */
-  ImageSourceEngine *getCurrentSubengine(void);
+  const ImageSourceEngine *getCurrentSubengine() const;
 
-  Vector2i GetDepthImageSize(void) override;
+  Vector2i GetDepthImageSize() const override;
 
   virtual void GetImages(ITMUChar4Image& rgb, ITMShortImage& rawDepth);
 
-  Vector2i GetRGBImageSize(void) override;
+  Vector2i GetRGBImageSize() const override;
 
-  virtual bool HasImagesNow(void) override;
+  virtual bool HasImagesNow() const override;
 
-  virtual bool HasMoreImages(void) override;
+  virtual bool HasMoreImages() const override;
 
   //#################### PRIVATE MEMBER FUNCTIONS ####################
 private:
@@ -77,7 +77,7 @@ private:
    *
    * \return  The sub-engine, if any, that can provide the next images, or NULL if there are no more images to provide.
    */
-  ImageSourceEngine *AdvanceToNextImages(void);
+  const ImageSourceEngine *AdvanceToNextImages() const;
 };
 
 }

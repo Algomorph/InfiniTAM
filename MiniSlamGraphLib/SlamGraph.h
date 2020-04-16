@@ -22,12 +22,12 @@ namespace MiniSlamGraph
 		static NodeIndex cloneNodeIndex(const NodeIndex & src);
 		static void clearNodeIndex(NodeIndex & src);
 
-		virtual ~SlamGraph(void);
+		virtual ~SlamGraph();
 
 		void addNode(GraphNode *node);
 		void addEdge(GraphEdge *edge);
 
-		const NodeIndex & getNodeIndex(void) const { return mNodes; }
+		const NodeIndex & getNodeIndex() const { return mNodes; }
 		void setNodeIndex(const NodeIndex & src);
 
 		/** Before any calls to evaluateF() or related functions, the
@@ -35,8 +35,8 @@ namespace MiniSlamGraph
 			This will internally assign the parameters of all nodes to places
 			in the gradient vector and hessian matrix.
 		*/
-		void prepareEvaluations(void);
-		const ParameterIndex & getParameters(void) const
+		void prepareEvaluations();
+		const ParameterIndex & getParameters() const
 		{
 			return mParameterIndex;
 		}

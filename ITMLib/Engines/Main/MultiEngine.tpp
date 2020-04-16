@@ -69,7 +69,7 @@ MultiEngine<TVoxel, TIndex>::MultiEngine(const RGBDCalib& calib, Vector2i imgSiz
 }
 
 template <typename TVoxel, typename TIndex>
-MultiEngine<TVoxel, TIndex>::~MultiEngine(void)
+MultiEngine<TVoxel, TIndex>::~MultiEngine()
 {
 	if (renderState_multiscene != NULL) delete renderState_multiscene;
 
@@ -112,7 +112,7 @@ void MultiEngine<TVoxel, TIndex>::changeFreeviewLocalMapIdx(ORUtils::SE3Pose *po
 }
 
 template <typename TVoxel, typename TIndex>
-CameraTrackingState* MultiEngine<TVoxel, TIndex>::GetTrackingState(void)
+CameraTrackingState* MultiEngine<TVoxel, TIndex>::GetTrackingState()
 {
 	int idx = mActiveDataManager->findPrimaryLocalMapIdx();
 	if (idx < 0) idx = 0;
@@ -133,7 +133,7 @@ CameraTrackingState* MultiEngine<TVoxel, TIndex>::GetTrackingState(void)
 struct TodoListEntry {
 	TodoListEntry(int _activeDataID, bool _track, bool _fusion, bool _prepare)
 		: dataId(_activeDataID), track(_track), fusion(_fusion), prepare(_prepare), preprepare(false) {}
-	TodoListEntry(void) {}
+	TodoListEntry() {}
 	int dataId;
 	bool track;
 	bool fusion;
@@ -330,7 +330,7 @@ void MultiEngine<TVoxel, TIndex>::LoadFromFile()
 }
 
 template <typename TVoxel, typename TIndex>
-Vector2i MultiEngine<TVoxel, TIndex>::GetImageSize(void) const
+Vector2i MultiEngine<TVoxel, TIndex>::GetImageSize() const
 {
 	return trackedImageSize;
 }

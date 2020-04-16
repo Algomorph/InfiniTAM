@@ -11,7 +11,7 @@ namespace ITMLib {
 	class MultiVisualizationEngine
 	{
 	public:
-		virtual ~MultiVisualizationEngine(void) {}
+		virtual ~MultiVisualizationEngine() {}
 
 		virtual void PrepareRenderState(const VoxelMapGraphManager<TVoxel, TIndex> & sceneManager, RenderState *state) = 0;
 

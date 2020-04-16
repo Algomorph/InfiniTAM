@@ -14,7 +14,7 @@ namespace MiniSlamGraph
 		int numPara;
 
 	public:
-		ParameterIndex(void)
+		ParameterIndex()
 		{
 			numPara = 0;
 		}
@@ -32,7 +32,7 @@ namespace MiniSlamGraph
 			return it->second;
 		}
 
-		int numTotalParameters(void) const
+		int numTotalParameters() const
 		{
 			return numPara;
 		}

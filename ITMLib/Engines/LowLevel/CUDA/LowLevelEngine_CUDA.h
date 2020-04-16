@@ -31,7 +31,7 @@ namespace ITMLib
 
 		int CountValidDepths(const ITMFloatImage *image_in) const;
 
-		LowLevelEngine_CUDA(void);
-		~LowLevelEngine_CUDA(void);
+		LowLevelEngine_CUDA();
+		~LowLevelEngine_CUDA();
 	};
 }

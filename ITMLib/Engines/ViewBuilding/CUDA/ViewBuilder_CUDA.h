@@ -24,6 +24,6 @@ namespace ITMLib
 		                bool storePreviousImage);
 
 		ViewBuilder_CUDA(const RGBDCalib& calib);
-		~ViewBuilder_CUDA(void);
+		~ViewBuilder_CUDA();
 	};
 }

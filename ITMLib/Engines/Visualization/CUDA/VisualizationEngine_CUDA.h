@@ -15,8 +15,8 @@ namespace ITMLib
 		uint *noTotalPoints_device;
 
 	public:
-		explicit VisualizationEngine_CUDA(void);
-		~VisualizationEngine_CUDA(void);
+		explicit VisualizationEngine_CUDA();
+		~VisualizationEngine_CUDA();
 
 		void FindVisibleBlocks(VoxelVolume<TVoxel,TIndex> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *renderState) const;
 		int CountVisibleBlocks(const VoxelVolume<TVoxel,TIndex> *scene, const RenderState *renderState, int minBlockId, int maxBlockId) const;
@@ -39,8 +39,8 @@ namespace ITMLib
 		uint* block_count_device;
 		int* visible_block_count_device;
 	public:
-		explicit VisualizationEngine_CUDA(void);
-		~VisualizationEngine_CUDA(void);
+		explicit VisualizationEngine_CUDA();
+		~VisualizationEngine_CUDA();
 
 		void FindVisibleBlocks(VoxelVolume<TVoxel,VoxelBlockHash> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *renderState) const;
 		int CountVisibleBlocks(const VoxelVolume<TVoxel,VoxelBlockHash> *scene, const RenderState *renderState, int minBlockId, int maxBlockId) const;

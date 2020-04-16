@@ -109,7 +109,7 @@ ExtendedTracker::ExtendedTracker(Vector2i imgSize_d,
 	svmClassifier->SetVectors(w, b);
 }
 
-ExtendedTracker::~ExtendedTracker(void)
+ExtendedTracker::~ExtendedTracker()
 {
 	delete viewHierarchy_Depth;
 	delete viewHierarchy_Intensity;

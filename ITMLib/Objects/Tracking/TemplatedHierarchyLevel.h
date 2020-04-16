@@ -41,7 +41,7 @@ namespace ITMLib
 			this->data->UpdateDeviceFromHost();
 		}
 
-		~TemplatedHierarchyLevel(void)
+		~TemplatedHierarchyLevel()
 		{
 			if (manageData) delete data;
 		}

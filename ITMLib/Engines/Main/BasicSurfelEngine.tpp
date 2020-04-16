@@ -298,7 +298,7 @@ BasicSurfelEngine<TSurfel>::ProcessFrame(ITMUChar4Image* rgbImage, ITMShortImage
 }
 
 template<typename TSurfel>
-Vector2i BasicSurfelEngine<TSurfel>::GetImageSize(void) const {
+Vector2i BasicSurfelEngine<TSurfel>::GetImageSize() const {
 	return surfelRenderState_live->GetIndexImage()->dimensions;
 }
 

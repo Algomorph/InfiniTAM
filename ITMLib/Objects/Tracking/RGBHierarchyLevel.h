@@ -56,7 +56,7 @@ namespace ITMLib
 			this->gY->UpdateDeviceFromHost();
 		}
 
-		~RGBHierarchyLevel(void)
+		~RGBHierarchyLevel()
 		{
 			if (manageData)
 			{

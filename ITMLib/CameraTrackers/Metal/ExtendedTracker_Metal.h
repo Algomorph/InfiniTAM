@@ -50,7 +50,7 @@ namespace ITMLib
 								 int framesToSkip,
 								 int framesToWeight,
 								 const ITMLowLevelEngine *lowLevelEngine);
-        ~ITMExtendedTracker_Metal(void);
+        ~ITMExtendedTracker_Metal();
     };
 }
 

@@ -40,7 +40,7 @@ DepthTracker::DepthTracker(Vector2i imgSize, TrackerIterationType *trackingRegim
 	svmClassifier->SetVectors(w, b);
 }
 
-DepthTracker::~DepthTracker(void)
+DepthTracker::~DepthTracker()
 {
 	delete this->viewHierarchy;
 	delete this->sceneHierarchy;

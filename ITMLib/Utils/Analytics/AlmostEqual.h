@@ -98,7 +98,7 @@ bool almostEqualRelative(TReal a, TReal b, TReal epsilon = 3e-6) {
 	if (a == b) { // shortcut, handles infinities
 		return true;
 	} else if (a == 0 || b == 0 || diff < std::numeric_limits<TReal>::denorm_min()) {
-		// a or b is zero or both are extremely close to it
+		// a or b is zero or both are extremely Close to it
 		// relative error is less meaningful here
 		return diff < (epsilon * std::numeric_limits<TReal>::denorm_min());
 	} else { // use relative error

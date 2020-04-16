@@ -84,16 +84,16 @@ using namespace ITMLib;
 
 
 
-- (void)documentInteractionController:(UIDocumentInteractionController *)controller willBeginSendingToApplication:(NSString *)application {
+- ()documentInteractionController:(UIDocumentInteractionController *)controller willBeginSendingToApplication:(NSString *)application {
     NSLog(@"Starting to send this puppy to %@", application);
 }
 
-- (void)documentInteractionController:(UIDocumentInteractionController *)controller didEndSendingToApplication:(NSString *)application {
+- ()documentInteractionController:(UIDocumentInteractionController *)controller didEndSendingToApplication:(NSString *)application {
     NSLog(@"We're done sending the document.");
 }
 
 
-- (void) viewDidLoad
+- () viewDidLoad
 {
     [super viewDidLoad];
     
@@ -109,17 +109,17 @@ using namespace ITMLib;
     totalProcessedFrames = 0;
 }
 
-- (void) viewDidAppear:(BOOL)animated
+- () viewDidAppear:(BOOL)animated
 {
     [self setupApp];
 }
 
-- (void) didReceiveMemoryWarning
+- () didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
 }
 
-- (void) setupApp
+- () setupApp
 {
     isDone = false;
     fullProcess = false;
@@ -298,7 +298,7 @@ using namespace ITMLib;
     else mainImageType = ITMMainEngine::InfiniTAM_IMAGE_COLOUR_FROM_NORMAL;
 }
 
--(void)refreshFreeview
+-()refreshFreeview
 {
     CGContextRef cgContextMain, cgContextSide; CGImageRef cgImageRefMain, cgImageRefSide;
     
@@ -345,7 +345,7 @@ using namespace ITMLib;
     }
 }
 
-- (void)mailComposeController:(MFMailComposeViewController*)controller didFinishWithResult:(MFMailComposeResult)result error:(NSError*)error
+- ()mailComposeController:(MFMailComposeViewController*)controller didFinishWithResult:(MFMailComposeResult)result error:(NSError*)error
 {
     switch (result)
     {
@@ -416,7 +416,7 @@ using namespace ITMLib;
     mainEngine->SaveSceneToMesh(modelPath);
 }
 
-- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
+- ()touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
     if (freeviewActive)
     {
@@ -431,7 +431,7 @@ using namespace ITMLib;
     }
 }
 
-- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
+- ()touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
 
 }
@@ -462,7 +462,7 @@ static inline Matrix3f createRotation(const Vector3f & _axis, float angle)
     return ret;
 }
 
-- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
+- ()touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
 {
     if (freeviewActive && [[event allTouches]count] == 2)
     {
@@ -521,7 +521,7 @@ static inline Matrix3f createRotation(const Vector3f & _axis, float angle)
     }
 }
 
-- (void) updateImage
+- () updateImage
 {
     if (freeviewActive) return;
     
@@ -585,34 +585,34 @@ static inline Matrix3f createRotation(const Vector3f & _axis, float angle)
     CGContextRelease(cgContextSide);
 }
 
-- (void)sensorDidDisconnect
+- ()sensorDidDisconnect
 {
     [self.tbOut setText:@"disconnected "];
 }
 
-- (void)sensorDidConnect
+- ()sensorDidConnect
 {
 }
 
-- (void)sensorDidLeaveLowPowerMode
+- ()sensorDidLeaveLowPowerMode
 {
 }
 
-- (void)sensorBatteryNeedsCharging
+- ()sensorBatteryNeedsCharging
 {
 }
 
-- (void)sensorDidStopStreaming:(STSensorControllerDidStopStreamingReason)reason
+- ()sensorDidStopStreaming:(STSensorControllerDidStopStreamingReason)reason
 {
     [self.tbOut setText:@"stopped streaming"];
 }
 
--(void) sensorDidOutputSynchronizedDepthFrame:(STDepthFrame *)depthFrame andColorBuffer:(CMSampleBufferRef)sampleBuffer
+-() sensorDidOutputSynchronizedDepthFrame:(STDepthFrame *)depthFrame andColorBuffer:(CMSampleBufferRef)sampleBuffer
 {
     [self.tbOut setText:@"got frame c"];
 }
 
-- (void)sensorDidOutputDepthFrame:(STDepthFrame *)depthFrame
+- ()sensorDidOutputDepthFrame:(STDepthFrame *)depthFrame
 {
     if (isDone)
     {

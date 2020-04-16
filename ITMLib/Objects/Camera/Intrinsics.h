@@ -58,7 +58,7 @@ namespace ITMLib
 			return projectionParamsSimple.fx * projectionParamsSimple.fy < 0.f;
 		}
 
-		Intrinsics(void)
+		Intrinsics()
 		{
 			// standard calibration parameters for Kinect RGB camera. Not at all
 			// accurate, though...

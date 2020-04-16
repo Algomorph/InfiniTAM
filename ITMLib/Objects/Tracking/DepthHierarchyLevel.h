@@ -43,7 +43,7 @@ namespace ITMLib
 			this->depth->UpdateDeviceFromHost();
 		}
 
-		~DepthHierarchyLevel(void)
+		~DepthHierarchyLevel()
 		{
 			if (manageData)
 			{

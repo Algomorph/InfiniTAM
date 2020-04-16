@@ -14,7 +14,7 @@ namespace ITMLib {
 	struct PoseConstraint
 	{
 	public:
-		PoseConstraint(void)
+		PoseConstraint()
 		{
 			accu_num = 0;
 		}
@@ -29,8 +29,8 @@ namespace ITMLib {
 			accu_num++;
 		}
 
-		ORUtils::SE3Pose GetAccumulatedObservations(void) const { return accu_poses; }
-		int GetNumAccumulatedObservations(void) const { return accu_num; }
+		ORUtils::SE3Pose GetAccumulatedObservations() const { return accu_poses; }
+		int GetNumAccumulatedObservations() const { return accu_num; }
 
 	private:
 		ORUtils::SE3Pose accu_poses;

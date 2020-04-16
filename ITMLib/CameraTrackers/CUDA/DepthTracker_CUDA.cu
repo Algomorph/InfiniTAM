@@ -41,7 +41,7 @@ DepthTracker_CUDA::DepthTracker_CUDA(Vector2i imgSize, TrackerIterationType *tra
 	ORcudaSafeCall(cudaMalloc((void**)&accu_device, sizeof(AccuCell)));
 }
 
-DepthTracker_CUDA::~DepthTracker_CUDA(void)
+DepthTracker_CUDA::~DepthTracker_CUDA()
 {
 	ORcudaSafeCall(cudaFreeHost(accu_host));
 	ORcudaSafeCall(cudaFree(accu_device));

@@ -11,15 +11,15 @@ class FFMPEGWriter
 	public:
 	class PrivateData;
 
-	FFMPEGWriter(void);
-	~FFMPEGWriter(void);
+	FFMPEGWriter();
+	~FFMPEGWriter();
 
 	bool open(const char *filename, int size_x, int size_y, bool isDepth, int fps);
 	bool writeFrame(ITMUChar4Image *rgbImage);
 	bool writeFrame(ITMShortImage *depthImage);
-	bool close(void);
+	bool close();
 
-	bool isOpen(void) const;
+	bool isOpen() const;
 
 	private:
 	PrivateData *mData;

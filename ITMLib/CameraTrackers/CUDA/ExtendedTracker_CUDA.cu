@@ -97,7 +97,7 @@ ExtendedTracker_CUDA::ExtendedTracker_CUDA(Vector2i imgSize_d,
 	ORcudaSafeCall(cudaMalloc((void**)&accu_device, sizeof(AccuCell)));
 }
 
-ExtendedTracker_CUDA::~ExtendedTracker_CUDA(void)
+ExtendedTracker_CUDA::~ExtendedTracker_CUDA()
 {
 	ORcudaSafeCall(cudaFreeHost(accu_host));
 	ORcudaSafeCall(cudaFree(accu_device));

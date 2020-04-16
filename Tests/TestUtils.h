@@ -40,7 +40,7 @@ template<typename TVoxel>
 void simulateRandomVoxelAlteration(TVoxel& voxel);
 
 inline
-void TimeIt(std::function<void(void)> function, const std::string& description = "Timed Operation", int run_count = 1) {
+void TimeIt(std::function<void()> function, const std::string& description = "Timed Operation", int run_count = 1) {
 	std::cout << description << std::endl;
 	double cumulative = 0.0;
 	for(int i_run = 0; i_run < run_count; i_run++){

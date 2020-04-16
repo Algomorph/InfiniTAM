@@ -28,7 +28,7 @@ public:
 	virtual ~VolumeFusionEngineInterface() = default;
 	/**
 	 * \brief Fuses the live scene into the canonical scene
-	 * \details Operation happens after the motion is tracked, at this point sourceTsdfVolume should be as close to the canonical
+	 * \details Operation happens after the motion is tracked, at this point sourceTsdfVolume should be as Close to the canonical
 	 * as possible
 	 * \param targetVolume the target volume: often, the canonical volume, representing state of the surfaces at the beginning of the sequence
 	 * \param sourceVolume the source volume: often, the live volume, i.e. a TSDF generated from a single recent depth image

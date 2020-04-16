@@ -44,6 +44,6 @@ namespace ITMLib
 		                     int framesToSkip,
 		                     int framesToWeight,
 		                     const LowLevelEngine *lowLevelEngine);
-		~ExtendedTracker_CUDA(void);
+		~ExtendedTracker_CUDA();
 	};
 }

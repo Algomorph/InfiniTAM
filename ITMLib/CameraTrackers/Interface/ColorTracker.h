@@ -33,21 +33,21 @@ namespace ITMLib
 		class EvaluationPoint
 		{
 		public:
-			float f(void) { return cacheF; }
-			const float* nabla_f(void) { if (cacheNabla == NULL) computeGradients(false); return cacheNabla; }
+			float f() { return cacheF; }
+			const float* nabla_f() { if (cacheNabla == NULL) computeGradients(false); return cacheNabla; }
 
-			const float* hessian_GN(void) { if (cacheHessian == NULL) computeGradients(true); return cacheHessian; }
-			const ORUtils::SE3Pose & getParameter(void) const { return *mPara; }
+			const float* hessian_GN() { if (cacheHessian == NULL) computeGradients(true); return cacheHessian; }
+			const ORUtils::SE3Pose & getParameter() const { return *mPara; }
 
 			EvaluationPoint(ORUtils::SE3Pose *pos, const ColorTracker *f_parent);
-			~EvaluationPoint(void)
+			~EvaluationPoint()
 			{
 				delete mPara;
 				if (cacheNabla != NULL) delete[] cacheNabla;
 				if (cacheHessian != NULL) delete[] cacheHessian;
 			}
 
-			int getNumValidPoints(void) const { return mValidPoints; }
+			int getNumValidPoints() const { return mValidPoints; }
 
 		protected:
 			void computeGradients(bool requiresHessian);
@@ -66,7 +66,7 @@ namespace ITMLib
 			return new EvaluationPoint(para, this);
 		}
 
-		int numParameters(void) const { return (iterationType == TRACKER_ITERATION_ROTATION) ? 3 : 6; }
+		int numParameters() const { return (iterationType == TRACKER_ITERATION_ROTATION) ? 3 : 6; }
 
 		virtual int F_oneLevel(float *f, ORUtils::SE3Pose *pose) = 0;
 		virtual void G_oneLevel(float *gradient, float *hessian, ORUtils::SE3Pose *pose) const = 0;
@@ -81,6 +81,6 @@ namespace ITMLib
 
 		ColorTracker(Vector2i imgSize, TrackerIterationType *trackingRegime, int noHierarchyLevels,
 		             const LowLevelEngine *lowLevelEngine, MemoryDeviceType memoryType);
-		virtual ~ColorTracker(void);
+		virtual ~ColorTracker();
 	};
 }

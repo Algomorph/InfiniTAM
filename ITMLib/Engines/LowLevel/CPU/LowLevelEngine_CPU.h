@@ -28,7 +28,7 @@ namespace ITMLib
 
 		int CountValidDepths(const ITMFloatImage *image_in) const;
 
-		LowLevelEngine_CPU(void);
-		~LowLevelEngine_CPU(void);
+		LowLevelEngine_CPU();
+		~LowLevelEngine_CPU();
 	};
 }

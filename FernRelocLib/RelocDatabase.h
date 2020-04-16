@@ -11,7 +11,7 @@ namespace FernRelocLib
 	{
 	public:
 		RelocDatabase(int codeLength, int codeFragmentDim);
-		~RelocDatabase(void);
+		~RelocDatabase();
 
 		/** @return Number of valid similar entries that were found. Mostly
 			relevant in case of an empty database.

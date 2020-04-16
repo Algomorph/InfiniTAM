@@ -64,7 +64,7 @@ ITMExtendedTracker_Metal::ITMExtendedTracker_Metal(Vector2i imgSize_d,
     et_metalBits.paramsBuffer = BUFFEREMPTY(16384);
 }
 
-ITMExtendedTracker_Metal::~ITMExtendedTracker_Metal(void)
+ITMExtendedTracker_Metal::~ITMExtendedTracker_Metal()
 {
     freeMetalData((void**)&ATb_metal, (void**)&ATb_metal_mb, allocImgSize.x * allocImgSize.y * 6 * sizeof(float), true);
     freeMetalData((void**)&ATA_metal, (void**)&ATA_metal_mb, allocImgSize.x * allocImgSize.y * 21 * sizeof(float), true);

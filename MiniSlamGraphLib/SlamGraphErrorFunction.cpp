@@ -56,7 +56,7 @@ SlamGraphErrorFunction::Parameters::Parameters(const Parameters & src)
 	mNodes = SlamGraph::cloneNodeIndex(src.mNodes);
 }
 
-SlamGraphErrorFunction::Parameters::~Parameters(void)
+SlamGraphErrorFunction::Parameters::~Parameters()
 {
 	clear();
 }
@@ -69,7 +69,7 @@ void SlamGraphErrorFunction::Parameters::copyFrom(const /*Optimization*/Paramete
 }
 
 //void copyValuesFrom(const OptimizationParameter & src);
-void SlamGraphErrorFunction::Parameters::clear(void)
+void SlamGraphErrorFunction::Parameters::clear()
 {
 	SlamGraph::clearNodeIndex(mNodes);
 }
@@ -83,31 +83,31 @@ SlamGraphErrorFunction::EvaluationPoint::EvaluationPoint(const SlamGraphErrorFun
 	cacheH = NULL;
 }
 
-SlamGraphErrorFunction::EvaluationPoint::~EvaluationPoint(void)
+SlamGraphErrorFunction::EvaluationPoint::~EvaluationPoint()
 {
 	delete mPara;
 	if (cacheG != NULL) delete cacheG;
 	if (cacheH != NULL) delete cacheH;
 }
 
-double SlamGraphErrorFunction::EvaluationPoint::f(void)
+double SlamGraphErrorFunction::EvaluationPoint::f()
 {
 	return cacheF;
 }
 
-const double* SlamGraphErrorFunction::EvaluationPoint::nabla_f(void)
+const double* SlamGraphErrorFunction::EvaluationPoint::nabla_f()
 {
 	cacheGH();
 	return cacheG->getData();
 }
 
-const Matrix* SlamGraphErrorFunction::EvaluationPoint::hessian_GN(void)
+const Matrix* SlamGraphErrorFunction::EvaluationPoint::hessian_GN()
 {
 	cacheGH();
 	return cacheH;
 }
 
-void SlamGraphErrorFunction::EvaluationPoint::cacheGH(void)
+void SlamGraphErrorFunction::EvaluationPoint::cacheGH()
 {
 	if (cacheG != NULL) return;
 	SparseBlockMatrix *H_tmp = NULL;
@@ -144,14 +144,14 @@ SlamGraphErrorFunction::SlamGraphErrorFunction(const SlamGraph & graph)
 	mSparsityPattern = NULL;
 }
 
-SlamGraphErrorFunction::~SlamGraphErrorFunction(void)
+SlamGraphErrorFunction::~SlamGraphErrorFunction()
 {
 #ifdef COMPILE_WITH_CSPARSE
 	if (mSparsityPattern) Matrix_CSparse::freePattern((Matrix_CSparse::Pattern*)mSparsityPattern);
 #endif
 }
 
-int SlamGraphErrorFunction::numParameters(void) const
+int SlamGraphErrorFunction::numParameters() const
 {
 	return mGraph->getParameters().numTotalParameters();
 }

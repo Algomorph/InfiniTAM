@@ -81,7 +81,7 @@ private:
 	/**
 	 * \brief Constructs a tracker factory.
 	 */
-	CameraTrackerFactory(void) {
+	CameraTrackerFactory() {
 		makers.push_back(Maker("rgb", "Colour based tracker", TRACKER_COLOR, &MakeColourTracker));
 		makers.push_back(Maker("icp", "Depth based ICP tracker", TRACKER_ICP, &MakeICPTracker));
 		makers.push_back(Maker("extended", "Depth + colour based tracker", TRACKER_EXTENDED, &MakeExtendedTracker));

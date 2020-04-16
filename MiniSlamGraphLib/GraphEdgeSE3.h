@@ -13,7 +13,7 @@ namespace MiniSlamGraph
 	public:
 		typedef ORUtils::SE3Pose SE3;
 
-		int getMeasureDimensions(void) const
+		int getMeasureDimensions() const
 		{
 			return 6;
 		}
@@ -27,7 +27,7 @@ namespace MiniSlamGraph
 		}
 
 		void setMeasurementSE3(const SE3 & pose);
-		SE3 getMeasurementSE3(void) const;
+		SE3 getMeasurementSE3() const;
 
 		void computeResidualVector(const NodeIndex & nodes, double *dest) const;
 		bool computeJacobian(const NodeIndex & nodes, int id, double *j) const;

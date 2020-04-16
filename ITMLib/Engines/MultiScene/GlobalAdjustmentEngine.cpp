@@ -18,7 +18,7 @@ using namespace ITMLib;
 struct GlobalAdjustmentEngine::PrivateData
 {
 #ifndef NO_CPP11
-	PrivateData(void) { stopThread = false; wakeupSent = false; }
+	PrivateData() { stopThread = false; wakeupSent = false; }
 	std::mutex workingData_mutex;
 	std::mutex processedData_mutex;
 	std::thread processingThread;
@@ -30,14 +30,14 @@ struct GlobalAdjustmentEngine::PrivateData
 #endif
 };
 
-GlobalAdjustmentEngine::GlobalAdjustmentEngine(void)
+GlobalAdjustmentEngine::GlobalAdjustmentEngine()
 {
 	privateData = new PrivateData();
 	workingData = NULL;
 	processedData = NULL;
 }
 
-GlobalAdjustmentEngine::~GlobalAdjustmentEngine(void)
+GlobalAdjustmentEngine::~GlobalAdjustmentEngine()
 {
 	stopSeparateThread();
 	if (workingData != NULL) delete workingData;
@@ -45,7 +45,7 @@ GlobalAdjustmentEngine::~GlobalAdjustmentEngine(void)
 	delete privateData;
 }
 
-bool GlobalAdjustmentEngine::hasNewEstimates(void) const
+bool GlobalAdjustmentEngine::hasNewEstimates() const
 {
 	return (processedData != NULL);
 }
@@ -64,7 +64,7 @@ bool GlobalAdjustmentEngine::retrieveNewEstimates(MapGraphManager & dest)
 	return true;
 }
 
-bool GlobalAdjustmentEngine::isBusyEstimating(void) const
+bool GlobalAdjustmentEngine::isBusyEstimating() const
 {
 #ifndef NO_CPP11
 	// if someone else is currently using the mutex (most likely the
@@ -118,7 +118,7 @@ bool GlobalAdjustmentEngine::runGlobalAdjustment(bool blockingWait)
 	return true;
 }
 
-bool GlobalAdjustmentEngine::startSeparateThread(void)
+bool GlobalAdjustmentEngine::startSeparateThread()
 {
 #ifndef NO_CPP11
 	if (privateData->processingThread.joinable()) return false;
@@ -128,7 +128,7 @@ bool GlobalAdjustmentEngine::startSeparateThread(void)
 	return true;
 }
 
-bool GlobalAdjustmentEngine::stopSeparateThread(void)
+bool GlobalAdjustmentEngine::stopSeparateThread()
 {
 #ifndef NO_CPP11
 	if (!privateData->processingThread.joinable()) return false;
@@ -140,7 +140,7 @@ bool GlobalAdjustmentEngine::stopSeparateThread(void)
 	return true;
 }
 
-void GlobalAdjustmentEngine::estimationThreadMain(void)
+void GlobalAdjustmentEngine::estimationThreadMain()
 {
 #ifndef NO_CPP11
 	while (!privateData->stopThread)
@@ -153,7 +153,7 @@ void GlobalAdjustmentEngine::estimationThreadMain(void)
 #endif
 }
 
-void GlobalAdjustmentEngine::wakeupSeparateThread(void)
+void GlobalAdjustmentEngine::wakeupSeparateThread()
 {
 #ifndef NO_CPP11
 	std::unique_lock<std::mutex> lck(privateData->wakeupMutex);

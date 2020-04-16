@@ -117,6 +117,6 @@ namespace ITMLib
 		                const LowLevelEngine *lowLevelEngine,
 		                MemoryDeviceType memoryType
 						   );
-		virtual ~ExtendedTracker(void);
+		virtual ~ExtendedTracker();
 	};
 }

@@ -48,7 +48,7 @@ namespace ITMLib
 			this->depthConfidence = new ITMFloatImage(imgSize_d, true, useGPU);
 		}
 
-		virtual ~View(void)
+		virtual ~View()
 		{
 			delete rgb;
 			delete rgb_prev;

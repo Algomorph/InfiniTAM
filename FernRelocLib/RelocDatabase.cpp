@@ -16,7 +16,7 @@ RelocDatabase::RelocDatabase(int codeLength, int codeFragmentDim)
 	mIds = new std::vector<int>[codeLength*codeFragmentDim];
 }
 
-RelocDatabase::~RelocDatabase(void)
+RelocDatabase::~RelocDatabase()
 {
 	delete[] mIds;
 }

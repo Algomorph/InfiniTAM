@@ -46,7 +46,7 @@ using namespace log4cplus::helpers;
 
 
 LOG4CPLUS_EXPORT void *
-log4cplus_initialize(void)
+log4cplus_initialize()
 {
     try
     {
@@ -167,7 +167,7 @@ log4cplus_str_reconfigure(const log4cplus_char_t *config)
 }
 
 LOG4CPLUS_EXPORT int
-log4cplus_basic_configure(void)
+log4cplus_basic_configure()
 {
     try
     {
@@ -201,7 +201,7 @@ log4cplus_basic_reconfigure(int logToStdErr)
 }
 
 LOG4CPLUS_EXPORT void
-log4cplus_shutdown(void)
+log4cplus_shutdown()
 {
     Logger::shutdown();
 }

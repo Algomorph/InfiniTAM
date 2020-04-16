@@ -36,7 +36,7 @@ class EOFListener : public openni::OpenNI::DeviceStateChangedListener
 
 class OpenNIEngine::PrivateData {
 	public:
-	PrivateData(void) : streams(NULL) {}
+	PrivateData() : streams(NULL) {}
 	openni::Device device;
 	openni::VideoStream depthStream, colorStream;
 
@@ -319,9 +319,9 @@ void OpenNIEngine::GetImages(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthIm
 	return /*true*/;
 }
 
-bool OpenNIEngine::HasMoreImages(void) { return data && !data->eofListener.reachedEOF(); }
-Vector2i OpenNIEngine::GetDepthImageSize(void) { return data ? imageSize_d : Vector2i(0,0); }
-Vector2i OpenNIEngine::GetRGBImageSize(void) { return data ? imageSize_rgb : Vector2i(0,0); }
+bool OpenNIEngine::HasMoreImages() const { return data && !data->eofListener.reachedEOF(); }
+Vector2i OpenNIEngine::GetDepthImageSize() const { return data ? imageSize_d : Vector2i(0,0); }
+Vector2i OpenNIEngine::GetRGBImageSize() const { return data ? imageSize_rgb : Vector2i(0,0); }
 
 #else
 
@@ -337,17 +337,11 @@ OpenNIEngine::~OpenNIEngine() {}
 
 void OpenNIEngine::GetImages(ITMUChar4Image& rgbImage, ITMShortImage& rawDepthImage) { return; }
 
-bool OpenNIEngine::HasMoreImages(void) {
-	return false;
-}
+bool OpenNIEngine::HasMoreImages() const { return false; }
 
-Vector2i OpenNIEngine::GetDepthImageSize(void)  {
-	return Vector2i(0,0);
-}
-Vector2i OpenNIEngine::GetRGBImageSize(void)
-{
-	return Vector2i(0,0);
-}
+Vector2i OpenNIEngine::GetDepthImageSize() const { return Vector2i(0, 0); }
+
+Vector2i OpenNIEngine::GetRGBImageSize() const { return Vector2i(0, 0); }
 
 #endif // #ifndef COMPILE_WITHOUT_OpenNI
 

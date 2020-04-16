@@ -271,8 +271,8 @@ LockFile::lock () const
 {
     LogLog & loglog = getLogLog ();
     int ret = 0;
-    (void) loglog;
-    (void) ret;
+    () loglog;
+    () ret;
 
 #if defined (LOG4CPLUS_USE_WIN32_LOCKFILEEX)
     HANDLE fh = get_os_HANDLE (data->fd);

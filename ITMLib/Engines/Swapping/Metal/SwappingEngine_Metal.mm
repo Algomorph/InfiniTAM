@@ -7,12 +7,12 @@
 //using namespace ITMLib::Engine;
 //
 //template<class TVoxel>
-//ITMSwappingEngine_Metal<TVoxel,ITMVoxelBlockHash>::ITMSwappingEngine_Metal(void)
+//ITMSwappingEngine_Metal<TVoxel,ITMVoxelBlockHash>::ITMSwappingEngine_Metal()
 //{
 //}
 //
 //template<class TVoxel>
-//ITMSwappingEngine_Metal<TVoxel,ITMVoxelBlockHash>::~ITMSwappingEngine_Metal(void)
+//ITMSwappingEngine_Metal<TVoxel,ITMVoxelBlockHash>::~ITMSwappingEngine_Metal()
 //{
 //}
 //

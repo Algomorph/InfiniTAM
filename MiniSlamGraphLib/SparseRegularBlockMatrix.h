@@ -18,7 +18,7 @@ namespace MiniSlamGraph
 		struct BlockIndex 
 		{
 			int block_r, block_c;
-			BlockIndex(void) {}
+			BlockIndex() {}
 			BlockIndex(int r, int c) { block_r = r; block_c = c; }
 			bool operator<(const BlockIndex & b) const
 			{
@@ -32,7 +32,7 @@ namespace MiniSlamGraph
 		struct BlockData 
 		{
 			double data[BlockSizeRows*BlockSizeCols];
-			//BlockData(void) { for (int i = 0; i < BlockSizeRows*BlockSizeCols; ++i) data[i] = 0.0f; }
+			//BlockData() { for (int i = 0; i < BlockSizeRows*BlockSizeCols; ++i) data[i] = 0.0f; }
 			double & operator[](int idx) { return data[idx]; }
 			const double & operator[](int idx) const { return data[idx]; }
 		};

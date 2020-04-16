@@ -14,7 +14,7 @@ namespace ITMLib
 
 		IMUCalibrator() { }
 
-		virtual ~IMUCalibrator(void) { }
+		virtual ~IMUCalibrator() { }
 
 		// Suppress the default copy constructor and assignment operator
 		IMUCalibrator(const IMUCalibrator&);
@@ -71,7 +71,7 @@ namespace ITMLib
 			oldR_imu.setIdentity();
 		}
 
-		~ITMIMUCalibrator_iPad(void) 
+		~ITMIMUCalibrator_iPad()
 		{
 			delete imuPose_imucoords;
 			delete imuPose_cameracoords;

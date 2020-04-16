@@ -273,11 +273,11 @@ void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::AllocateSceneFromDep
 }
 
 template<class TVoxel>
-SceneReconstructionEngine_CPU<TVoxel,PlainVoxelArray>::SceneReconstructionEngine_CPU(void)
+SceneReconstructionEngine_CPU<TVoxel,PlainVoxelArray>::SceneReconstructionEngine_CPU()
 {}
 
 template<class TVoxel>
-SceneReconstructionEngine_CPU<TVoxel,PlainVoxelArray>::~SceneReconstructionEngine_CPU(void)
+SceneReconstructionEngine_CPU<TVoxel,PlainVoxelArray>::~SceneReconstructionEngine_CPU()
 {}
 
 template<class TVoxel>

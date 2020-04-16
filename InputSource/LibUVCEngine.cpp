@@ -10,7 +10,7 @@ using namespace InputSource;
 
 class LibUVCEngine::PrivateData {
 	public:
-	PrivateData(void)
+	PrivateData()
 	{
 		ctx = NULL;
 		dev = NULL; devh_d = NULL; devh_rgb = NULL;
@@ -103,8 +103,8 @@ struct FormatSpec findSuitableFormat(uvc_device_handle_t *dev, int requiredResol
 		bool acceptAsBest = false;
 		if (ret.frame_desc == NULL) acceptAsBest = true;
 		else if ((frame_desc->wWidth == ret.frame_desc->wWidth) &&
-		    (frame_desc->wHeight == ret.frame_desc->wHeight) &&
-		    (mininterval < ret.interval)) {
+			(frame_desc->wHeight == ret.frame_desc->wHeight) &&
+			(mininterval < ret.interval)) {
 			acceptAsBest = true;
 		} else if ((requiredResolutionX <= 0)&&(requiredResolutionY <= 0)) {
 			if (frame_desc->wWidth > ret.frame_desc->wWidth) {
@@ -325,7 +325,7 @@ LibUVCEngine::LibUVCEngine(const char *calibFilename, Vector2i requested_imageSi
 	} while (false);
 }
 
-LibUVCEngine::~LibUVCEngine(void)
+LibUVCEngine::~LibUVCEngine()
 {
 	/* End the stream. Blocks until last callback is serviced */
 	if (data->devh_rgb != NULL) {
@@ -373,27 +373,26 @@ void LibUVCEngine::GetImages(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthIm
 	data->got_color = data->got_depth = 0;
 }
 
-bool LibUVCEngine::HasMoreImages(void)  { return true; }
-Vector2i LibUVCEngine::GetDepthImageSize(void)  { return imageSize_d; }
-Vector2i LibUVCEngine::GetRGBImageSize(void)  { return imageSize_rgb; }
+bool LibUVCEngine::HasMoreImages() const  { return true; }
+Vector2i LibUVCEngine::GetDepthImageSize() const  { return imageSize_d; }
+Vector2i LibUVCEngine::GetRGBImageSize() const { return imageSize_rgb; }
 
 #else
 
-LibUVCEngine::LibUVCEngine(const char *calibFilename, Vector2i requested_imageSize_rgb, Vector2i requested_imageSize_d)
-	: BaseImageSourceEngine(calibFilename)
-{
+LibUVCEngine::LibUVCEngine(const char* calibFilename, Vector2i requested_imageSize_rgb, Vector2i requested_imageSize_d)
+		: BaseImageSourceEngine(calibFilename) {
 	printf("compiled without LibUVC support\n");
 }
-LibUVCEngine::~LibUVCEngine()
-{}
-void LibUVCEngine::GetImages(ITMUChar4Image& rgbImage, ITMShortImage& rawDepthImage)
-{ return; }
-bool LibUVCEngine::HasMoreImages(void)
-{ return false; }
-Vector2i LibUVCEngine::GetDepthImageSize(void)
-{ return Vector2i(0,0); }
-Vector2i LibUVCEngine::GetRGBImageSize(void)
-{ return Vector2i(0,0); }
+
+LibUVCEngine::~LibUVCEngine() {}
+
+void LibUVCEngine::GetImages(ITMUChar4Image& rgbImage, ITMShortImage& rawDepthImage) { }
+
+bool LibUVCEngine::HasMoreImages() const { return false; }
+
+Vector2i LibUVCEngine::GetDepthImageSize() const { return Vector2i(0, 0); }
+
+Vector2i LibUVCEngine::GetRGBImageSize() const { return Vector2i(0, 0); }
 
 #endif
 

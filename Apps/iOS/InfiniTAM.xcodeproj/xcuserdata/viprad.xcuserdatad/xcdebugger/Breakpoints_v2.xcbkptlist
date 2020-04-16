@@ -15,7 +15,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "97"
             endingLineNumber = "97"
-            landmarkName = "ImageFileReader::GetDepthImageSize(void)"
+            landmarkName = "ImageFileReader::GetDepthImageSize()"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
@@ -297,7 +297,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "11"
             endingLineNumber = "11"
-            landmarkName = "ITMDepthTracker_CPU::~ITMDepthTracker_CPU(void)"
+            landmarkName = "ITMDepthTracker_CPU::~ITMDepthTracker_CPU()"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
@@ -389,7 +389,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "56"
             endingLineNumber = "56"
-            landmarkName = "ResetData(void)"
+            landmarkName = "ResetData()"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
@@ -909,7 +909,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "37"
             endingLineNumber = "37"
-            landmarkName = "Configuration::Configuration(void)"
+            landmarkName = "Configuration::Configuration()"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>

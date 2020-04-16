@@ -17,14 +17,14 @@ namespace MiniSlamGraph
 	public:
 		typedef std::map<int, GraphNode*> NodeIndex;
 
-		virtual ~GraphEdge(void) {}
+		virtual ~GraphEdge() {}
 
-		int fromNodeId(void) const { return idFrom; }
+		int fromNodeId() const { return idFrom; }
 		void setFromNodeId(int id) { idFrom = id; }
-		int toNodeId(void) const { return idTo; }
+		int toNodeId() const { return idTo; }
 		void setToNodeId(int id) { idTo = id; }
 
-		virtual int getMeasureDimensions(void) const = 0;
+		virtual int getMeasureDimensions() const = 0;
 		virtual void setMeasurement(const double *v) = 0;
 		virtual void getMeasurement(double *v) const = 0;
 

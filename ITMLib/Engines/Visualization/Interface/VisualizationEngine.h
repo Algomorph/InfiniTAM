@@ -30,7 +30,7 @@ namespace ITMLib
 			RENDER_FROM_OLD_FORWARDPROJ
 		};
 
-		virtual ~IVisualizationEngine(void) {}
+		virtual ~IVisualizationEngine() {}
 
 		static void DepthToUchar4(ITMUChar4Image *dst, const ITMFloatImage *src);
 		static void NormalToUchar4(ITMUChar4Image* dst, const ITMFloat4Image *src);

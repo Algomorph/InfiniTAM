@@ -16,11 +16,11 @@ namespace ITMLib
 	class MapGraphManager
 	{
 	public:
-		virtual ~MapGraphManager(void) {}
+		virtual ~MapGraphManager() {}
 
-		virtual int createNewLocalMap(void) = 0;
+		virtual int createNewLocalMap() = 0;
 		virtual void removeLocalMap(int index) = 0;
-		virtual size_t numLocalMaps(void) const = 0;
+		virtual size_t numLocalMaps() const = 0;
 
 		virtual const PoseConstraint & getRelation_const(int fromLocalMap, int toLocalMap) const = 0;
 		virtual PoseConstraint & getRelation(int fromLocalMap, int toLocalMap) = 0;
@@ -50,11 +50,11 @@ namespace ITMLib
 	public:
 		VoxelMapGraphManager(const VisualizationEngine<TVoxel, TIndex>* visualizationEngine,
 		                     const DenseMapper<TVoxel, TIndex>* denseMapper, const Vector2i& trackedImageSize);
-		~VoxelMapGraphManager(void);
+		~VoxelMapGraphManager();
 
-		int createNewLocalMap(void);
+		int createNewLocalMap();
 		void removeLocalMap(int index);
-		size_t numLocalMaps(void) const { return allData.size(); }
+		size_t numLocalMaps() const { return allData.size(); }
 
 		const LocalMap<TVoxel, TIndex>* getLocalMap(int localMapId) const { return allData[localMapId]; }
 

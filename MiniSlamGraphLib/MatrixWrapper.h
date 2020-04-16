@@ -13,10 +13,10 @@ namespace MiniSlamGraph
 	class Matrix {
 	public:
 		/** destructor */
-		virtual ~Matrix(void) {}
+		virtual ~Matrix() {}
 
 		/** Virtual copy constructor */
-		virtual Matrix* clone(void) const = 0;
+		virtual Matrix* clone() const = 0;
 
 		/** Multiply A*b and store result in x. Both b and x are assumed to
 			have correct dimensions. Sparse matrices may provide very
@@ -39,9 +39,9 @@ namespace MiniSlamGraph
 		virtual double & diag(int i) = 0;
 
 		/** Return the number of rows in the matrix. */
-		virtual int numRows(void) const = 0;
+		virtual int numRows() const = 0;
 		/** Return the number of columns in the matrix. */
-		virtual int numCols(void) const = 0;
+		virtual int numCols() const = 0;
 
 		/** A := A + lambda * Id */
 		virtual void addDiagonal(double lambda);
@@ -59,10 +59,10 @@ namespace MiniSlamGraph
 		/** copy constructor */
 		MatrixSymPosDef(const MatrixSymPosDef & src);
 
-		~MatrixSymPosDef(void);
+		~MatrixSymPosDef();
 
 		/** */
-		MatrixSymPosDef* clone(void) const
+		MatrixSymPosDef* clone() const
 		{
 			return new MatrixSymPosDef(*this);
 		}
@@ -73,9 +73,9 @@ namespace MiniSlamGraph
 		bool multisolve(const double *B, double *X, int num, int ldb = -1) const;
 
 		/** */
-		int numRows(void) const { return size; }
+		int numRows() const { return size; }
 		/** */
-		int numCols(void) const { return size; }
+		int numCols() const { return size; }
 
 		/** */
 		const double & ele(int row, int col) const
@@ -99,8 +99,8 @@ namespace MiniSlamGraph
 			return ele(i, i);
 		}
 
-		const double* getMemory(void) const { return memory; }
-		double* getMemory(void) { return memory; }
+		const double* getMemory() const { return memory; }
+		double* getMemory() { return memory; }
 
 		/** Compute the matrix-vector product A * b. */
 		virtual void multiply(const double *b, double *result) const;

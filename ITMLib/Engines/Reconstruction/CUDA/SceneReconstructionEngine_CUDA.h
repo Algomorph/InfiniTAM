@@ -27,8 +27,8 @@ namespace ITMLib
 		void IntegrateIntoScene(VoxelVolume<TVoxel, VoxelBlockHash> *volume, const View *view, const CameraTrackingState *tracking_state,
 		                        const RenderState *render_state);
 
-		SceneReconstructionEngine_CUDA(void);
-		~SceneReconstructionEngine_CUDA(void);
+		SceneReconstructionEngine_CUDA();
+		~SceneReconstructionEngine_CUDA();
 	};
 
 	template<class TVoxel>

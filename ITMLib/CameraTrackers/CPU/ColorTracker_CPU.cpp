@@ -8,7 +8,7 @@ using namespace ITMLib;
 ColorTracker_CPU::ColorTracker_CPU(Vector2i imgSize, TrackerIterationType *trackingRegime, int noHierarchyLevels, const LowLevelEngine *lowLevelEngine)
 	: ColorTracker(imgSize, trackingRegime, noHierarchyLevels, lowLevelEngine, MEMORYDEVICE_CPU) {  }
 
-ColorTracker_CPU::~ColorTracker_CPU(void) { }
+ColorTracker_CPU::~ColorTracker_CPU() { }
 
 int ColorTracker_CPU::F_oneLevel(float *f, ORUtils::SE3Pose *pose)
 {

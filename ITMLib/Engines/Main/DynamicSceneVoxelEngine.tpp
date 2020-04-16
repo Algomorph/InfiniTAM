@@ -352,7 +352,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(ITMUChar4Image* rgb
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-Vector2i DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImageSize(void) const {
+Vector2i DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImageSize() const {
 	return canonical_render_state->raycastImage->dimensions;
 }
 

@@ -672,8 +672,8 @@ error:;
 
     if (sock != INVALID_SOCKET_VALUE)
     {
-        (void) removeSocketEvents (sock, accept_ev);
-        (void) setSocketBlocking (sock);
+        () removeSocketEvents (sock, accept_ev);
+        () setSocketBlocking (sock);
     }
 
     if (accept_ev != WSA_INVALID_EVENT)
@@ -687,14 +687,14 @@ error:;
 void
 ServerSocket::interruptAccept ()
 {
-    (void) WSASetEvent (reinterpret_cast<HANDLE>(interruptHandles[0]));
+    () WSASetEvent (reinterpret_cast<HANDLE>(interruptHandles[0]));
 }
 
 
 ServerSocket::~ServerSocket()
 {
     if (interruptHandles[0] != 0)
-        (void) WSACloseEvent(reinterpret_cast<HANDLE>(interruptHandles[0]));
+        () WSACloseEvent(reinterpret_cast<HANDLE>(interruptHandles[0]));
 }
 
 

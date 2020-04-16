@@ -29,7 +29,7 @@ namespace ITMLib
 
 		virtual int CountValidDepths(const ITMFloatImage *image_in) const = 0;
 
-		LowLevelEngine(void) { }
-		virtual ~LowLevelEngine(void) { }
+		LowLevelEngine() { }
+		virtual ~LowLevelEngine() { }
 	};
 }

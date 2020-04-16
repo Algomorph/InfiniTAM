@@ -42,7 +42,7 @@ namespace ITMLib {
 #endif
 		}
 
-		~RenderStateMultiScene(void)
+		~RenderStateMultiScene()
 		{
 #ifndef COMPILE_WITHOUT_CUDA
 			if (memoryType == MEMORYDEVICE_CUDA) {

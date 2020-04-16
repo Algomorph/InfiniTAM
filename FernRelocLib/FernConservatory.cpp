@@ -6,7 +6,7 @@
 
 using namespace FernRelocLib;
 
-static float random_uniform01(void)
+static float random_uniform01()
 {
 	return (float)rand() / (float)RAND_MAX;
 }
@@ -23,7 +23,7 @@ FernConservatory::FernConservatory(int numFerns, ORUtils::Vector2<int> imgSize, 
 	}
 }
 
-FernConservatory::~FernConservatory(void)
+FernConservatory::~FernConservatory()
 {
 	delete[] mEncoders;
 }
