@@ -60,13 +60,13 @@ int SwappingEngine_CUDA<TVoxel, VoxelBlockHash>::LoadFromGlobalMemory(VoxelVolum
 
 	ITMHashSwapState* swap_states = global_cache.GetSwapStates(true);
 
-	TVoxel *syncedVoxelBlocks_local = global_cache.GetSyncedVoxelBlocks(true);
-	bool *hasSyncedData_local = global_cache.GetHasSyncedData(true);
-	int *neededEntryIDs_local = global_cache.GetNeededEntryIDs(true);
+	TVoxel* syncedVoxelBlocks_local = global_cache.GetSyncedVoxelBlocks(true);
+	bool* hasSyncedData_local = global_cache.GetHasSyncedData(true);
+	int* neededEntryIDs_local = global_cache.GetNeededEntryIDs(true);
 
-	TVoxel *syncedVoxelBlocks_global = global_cache.GetSyncedVoxelBlocks(false);
-	bool *hasSyncedData_global = global_cache.GetHasSyncedData(false);
-	int *neededEntryIDs_global = global_cache.GetNeededEntryIDs(false);
+	TVoxel* syncedVoxelBlocks_global = global_cache.GetSyncedVoxelBlocks(false);
+	bool* hasSyncedData_global = global_cache.GetHasSyncedData(false);
+	int* neededEntryIDs_global = global_cache.GetNeededEntryIDs(false);
 
 	dim3 blockSize(256);
 	dim3 gridSize((int)ceil((float)volume->index.hash_entry_count / (float)blockSize.x));

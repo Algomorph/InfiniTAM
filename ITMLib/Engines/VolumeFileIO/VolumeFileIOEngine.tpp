@@ -1,6 +1,6 @@
 //  ================================================================
 //  Created by Gregory Kramida on 7/10/18.
-//  Copyright (c) 2018-2025 Gregory Kramida
+//  Copyright (c) 2018-2000 Gregory Kramida
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
 //  You may obtain a copy of the License at
@@ -156,7 +156,7 @@ void
 VolumeFileIOEngine<TVoxel, PlainVoxelArray>::SaveToDirectoryCompact(
 		const VoxelVolume<TVoxel, PlainVoxelArray>* volume,
 		const std::string& output_directory) {
-
+	volume
 
 }
 
