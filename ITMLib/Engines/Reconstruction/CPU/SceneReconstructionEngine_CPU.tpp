@@ -108,8 +108,8 @@ void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::AllocateSceneFromDep
 	float *depth = view->depth->GetData(MEMORYDEVICE_CPU);
 	int *voxelAllocationList = scene->index.GetBlockAllocationList();
 	int *excessAllocationList = scene->index.GetExcessEntryList();
-	HashEntry *hashTable = scene->index.GetEntries();
-	ITMHashSwapState *swapStates = scene->Swapping() ? scene->global_cache->GetSwapStates(false) : 0;
+	HashEntry *hash_table = scene->index.GetEntries();
+	ITMHashSwapState *swapStates = scene->SwappingEnabled() ? scene->global_cache.GetSwapStates(false) : 0;
 	int* visibleBlockHashCodes = scene->index.GetUtilizedBlockHashCodes();
 	HashBlockVisibility* hashBlockVisibilityTypes = scene->index.GetBlockVisibilityTypes();
 
@@ -117,7 +117,7 @@ void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::AllocateSceneFromDep
 	HashEntryAllocationState* hashEntryStates_device = scene->index.GetHashEntryAllocationStates();
 	Vector3s* blockCoords_device = scene->index.GetAllocationBlockCoordinates();
 
-	bool useSwapping = scene->Swapping();
+	bool useSwapping = scene->SwappingEnabled();
 
 	float oneOverHashEntrySize = 1.0f / (voxelSize * VOXEL_BLOCK_SIZE);//m
 	float band_factor = configuration::get().general_voxel_volume_parameters.block_allocation_band_factor;
@@ -144,7 +144,7 @@ void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::AllocateSceneFromDep
 		bool collisionDetected = false;
 		findVoxelBlocksForRayNearSurfaceLegacy_Algomorph(hashEntryStates_device,
 		                                                 blockCoords_device, hashBlockVisibilityTypes,
-		                                                 hashTable, x, y,
+		                                                 hash_table, x, y,
 		                                                 depth, surface_cutoff_distance, invM_d,
 		                                                 invProjParams_d,
 		                                                 oneOverHashEntrySize, depthImgSize, scene->parameters->near_clipping_distance,
@@ -172,7 +172,7 @@ void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::AllocateSceneFromDep
 					hashEntry.ptr = voxelAllocationList[vbaIdx];
 					hashEntry.offset = 0;
 
-					hashTable[targetIdx] = hashEntry;
+					hash_table[targetIdx] = hashEntry;
 				}
 				else
 				{
@@ -197,9 +197,9 @@ void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::AllocateSceneFromDep
 
 					int exlOffset = excessAllocationList[exlIdx];
 
-					hashTable[targetIdx].offset = exlOffset + 1; //connect to child
+					hash_table[targetIdx].offset = exlOffset + 1; //connect to child
 
-					hashTable[ORDERED_LIST_SIZE + exlOffset] = hashEntry; //add child to the excess list
+					hash_table[ORDERED_LIST_SIZE + exlOffset] = hashEntry; //add child to the excess list
 
 					hashBlockVisibilityTypes[ORDERED_LIST_SIZE + exlOffset] = IN_MEMORY_AND_VISIBLE;
 				}
@@ -220,7 +220,7 @@ void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::AllocateSceneFromDep
 	for (int targetIdx = 0; targetIdx < hashEntryCount; targetIdx++)
 	{
 		HashBlockVisibility hashVisibleType = hashBlockVisibilityTypes[targetIdx];
-		const HashEntry &hashEntry = hashTable[targetIdx];
+		const HashEntry &hashEntry = hash_table[targetIdx];
 
 		if (hashVisibleType == 3)
 		{
@@ -256,12 +256,12 @@ void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::AllocateSceneFromDep
 		for (int targetIdx = 0; targetIdx < hashEntryCount; targetIdx++)
 		{
 			int vbaIdx;
-			HashEntry hashEntry = hashTable[targetIdx];
+			HashEntry hashEntry = hash_table[targetIdx];
 
 			if (hashBlockVisibilityTypes[targetIdx] > 0 && hashEntry.ptr == -1)
 			{
 				vbaIdx = lastFreeVoxelBlockId; lastFreeVoxelBlockId--;
-				if (vbaIdx >= 0) hashTable[targetIdx].ptr = voxelAllocationList[vbaIdx];
+				if (vbaIdx >= 0) hash_table[targetIdx].ptr = voxelAllocationList[vbaIdx];
 				else lastFreeVoxelBlockId++; // Avoid leaks
 			}
 		}

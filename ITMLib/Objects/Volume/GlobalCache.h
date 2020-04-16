@@ -53,6 +53,7 @@ template<typename TVoxel>
 		int* needed_hash_codes_host;
 		int* needed_hash_codes_device;
 	public:
+		GlobalCache();
 		explicit GlobalCache(const int hash_entry_count);
 
 		explicit GlobalCache(const VoxelBlockHash& index) : GlobalCache(index.hash_entry_count){}

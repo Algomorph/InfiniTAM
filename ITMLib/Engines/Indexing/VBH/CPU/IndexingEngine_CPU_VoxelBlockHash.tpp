@@ -400,8 +400,8 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::BuildUtilizedBloc
 	HashBlockVisibility* hash_block_visibility_types = volume->index.GetBlockVisibilityTypes();
 	int* visible_hash_entry_codes = volume->index.GetUtilizedBlockHashCodes();
 	HashEntry* hash_table = volume->index.GetEntries();
-	bool useSwapping = volume->global_cache != nullptr;
-	ITMHashSwapState* swapStates = volume->Swapping() ? volume->global_cache->GetSwapStates(false) : 0;
+	const bool use_swapping = volume->SwappingEnabled();
+	ITMHashSwapState* swapStates = volume->SwappingEnabled() ? volume->global_cache.GetSwapStates(false) : 0;
 
 	// ** view data **
 	Vector4f depthCameraProjectionParameters = view->calib.intrinsics_d.projectionParamsSimple.all;
@@ -417,7 +417,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::BuildUtilizedBloc
 		if (hash_block_visibility_type == 3) {
 			bool is_visible_enlarged, is_visible;
 
-			if (useSwapping) {
+			if (use_swapping) {
 				checkBlockVisibility<true>(is_visible, is_visible_enlarged, hash_entry.pos, depth_camera_matrix,
 				                           depthCameraProjectionParameters,
 				                           voxelSize, depthImgSize);
@@ -431,7 +431,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::BuildUtilizedBloc
 			hash_block_visibility_types[hash_code] = hash_block_visibility_type;
 		}
 
-		if (useSwapping) {
+		if (use_swapping) {
 			if (hash_block_visibility_type > 0 && swapStates[hash_code].state != 2) swapStates[hash_code].state = 1;
 		}
 

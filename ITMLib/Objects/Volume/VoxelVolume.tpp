@@ -38,31 +38,26 @@ VoxelVolume<TVoxel,TIndex>::VoxelVolume(const VoxelVolumeParameters* volume_para
                                         typename TIndex::InitializationParameters index_parameters)
 	: parameters(volume_parameters),
 	  index(index_parameters, memory_type),
-	  voxels(index.GetMaxVoxelCount(), memory_type)
-{
-	if (use_swapping) global_cache = new GlobalCache<TVoxel,TIndex>(this->index);
-	else global_cache = nullptr;
-}
+	  voxels(index.GetMaxVoxelCount(), memory_type),
+	  swapping_enabled(use_swapping),
+	  global_cache(this->index){}
 
 
 template<class TVoxel, class TIndex>
-VoxelVolume<TVoxel, TIndex>::VoxelVolume(MemoryDeviceType memoryDeviceType,
-                                         typename TIndex::InitializationParameters indexParameters) :
+VoxelVolume<TVoxel, TIndex>::VoxelVolume(MemoryDeviceType memory_type,
+                                         typename TIndex::InitializationParameters index_parameters) :
 	VoxelVolume(&configuration::get().general_voxel_volume_parameters,
 			configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
-			    memoryDeviceType, indexParameters) {}
+			    memory_type, index_parameters) {}
 
 template<class TVoxel, class TIndex>
-VoxelVolume<TVoxel, TIndex>::VoxelVolume(const VoxelVolume& other, MemoryDeviceType _memoryType)
+VoxelVolume<TVoxel, TIndex>::VoxelVolume(const VoxelVolume& other, MemoryDeviceType memory_type)
 	: parameters(other.parameters),
-	  index(other.index, _memoryType),
+	  index(other.index, memory_type),
 	  voxels(other.voxels),
-	  global_cache(nullptr)
-	{
-    if(other.global_cache != nullptr){
-	    this->global_cache = new GlobalCache<TVoxel,TIndex>(*other.global_cache);
-    }
-}
+	  global_cache(other.global_cache),
+	  swapping_enabled(other.swapping_enabled){}
+
 template<class TVoxel, class TIndex>
 void VoxelVolume<TVoxel, TIndex>::Reset(){
 	switch (this->index.memory_type) {
@@ -84,12 +79,7 @@ void VoxelVolume<TVoxel, TIndex>::SetFrom(const VoxelVolume& other) {
 	index.SetFrom(other.index);
 	MemoryCopyDirection memory_copy_direction = determineMemoryCopyDirection(this->index.memory_type, other.index.memory_type);
 	voxels.SetFrom(other.voxels, memory_copy_direction);
-	if(other.global_cache != nullptr){
-		delete this->global_cache;
-		global_cache = new GlobalCache<TVoxel, TIndex>(*other.global_cache);
-	}else{
-		global_cache = nullptr;
-	}
+	this->global_cache = GlobalCache<TVoxel,TIndex>(other.global_cache);
 }
 
 template<class TVoxel, class TIndex>

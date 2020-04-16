@@ -55,27 +55,26 @@ SwappingEngine_CUDA<TVoxel, VoxelBlockHash>::~SwappingEngine_CUDA()
 }
 
 template<class TVoxel>
-int SwappingEngine_CUDA<TVoxel, VoxelBlockHash>::LoadFromGlobalMemory(VoxelVolume<TVoxel, VoxelBlockHash> *scene)
-{
-	GlobalCache<TVoxel, VoxelBlockHash> *globalCache = scene->global_cache;
+int SwappingEngine_CUDA<TVoxel, VoxelBlockHash>::LoadFromGlobalMemory(VoxelVolume<TVoxel, VoxelBlockHash> *volume){
+	GlobalCache<TVoxel, VoxelBlockHash>& global_cache = volume->global_cache;
 
-	ITMHashSwapState *swapStates = globalCache->GetSwapStates(true);
+	ITMHashSwapState* swap_states = global_cache.GetSwapStates(true);
 
-	TVoxel *syncedVoxelBlocks_local = globalCache->GetSyncedVoxelBlocks(true);
-	bool *hasSyncedData_local = globalCache->GetHasSyncedData(true);
-	int *neededEntryIDs_local = globalCache->GetNeededEntryIDs(true);
+	TVoxel *syncedVoxelBlocks_local = global_cache.GetSyncedVoxelBlocks(true);
+	bool *hasSyncedData_local = global_cache.GetHasSyncedData(true);
+	int *neededEntryIDs_local = global_cache.GetNeededEntryIDs(true);
 
-	TVoxel *syncedVoxelBlocks_global = globalCache->GetSyncedVoxelBlocks(false);
-	bool *hasSyncedData_global = globalCache->GetHasSyncedData(false);
-	int *neededEntryIDs_global = globalCache->GetNeededEntryIDs(false);
+	TVoxel *syncedVoxelBlocks_global = global_cache.GetSyncedVoxelBlocks(false);
+	bool *hasSyncedData_global = global_cache.GetHasSyncedData(false);
+	int *neededEntryIDs_global = global_cache.GetNeededEntryIDs(false);
 
 	dim3 blockSize(256);
-	dim3 gridSize((int)ceil((float)scene->index.hash_entry_count / (float)blockSize.x));
+	dim3 gridSize((int)ceil((float)volume->index.hash_entry_count / (float)blockSize.x));
 
 	ORcudaSafeCall(cudaMemset(noNeededEntries_device, 0, sizeof(int)));
 
-	buildListToSwapIn_device <<<gridSize, blockSize >>>(neededEntryIDs_local, noNeededEntries_device, swapStates,
-		scene->global_cache->GetHashEntryCount());
+	buildListToSwapIn_device <<<gridSize, blockSize >>>(neededEntryIDs_local, noNeededEntries_device, swap_states,
+	                                                    volume->global_cache.GetHashEntryCount());
 	ORcudaKernelCheck;
 
 	int neededHashEntryCount;
@@ -92,10 +91,10 @@ int SwappingEngine_CUDA<TVoxel, VoxelBlockHash>::LoadFromGlobalMemory(VoxelVolum
 		{
 			int entryId = neededEntryIDs_global[i];
 
-			if (globalCache->HasStoredData(entryId))
+			if (global_cache.HasStoredData(entryId))
 			{
 				hasSyncedData_global[i] = true;
-				memcpy(syncedVoxelBlocks_global + i * VOXEL_BLOCK_SIZE3, globalCache->GetStoredVoxelBlock(entryId), VOXEL_BLOCK_SIZE3 * sizeof(TVoxel));
+				memcpy(syncedVoxelBlocks_global + i * VOXEL_BLOCK_SIZE3, global_cache.GetStoredVoxelBlock(entryId), VOXEL_BLOCK_SIZE3 * sizeof(TVoxel));
 			}
 		}
 
@@ -107,62 +106,61 @@ int SwappingEngine_CUDA<TVoxel, VoxelBlockHash>::LoadFromGlobalMemory(VoxelVolum
 }
 
 template<class TVoxel>
-void SwappingEngine_CUDA<TVoxel, VoxelBlockHash>::IntegrateGlobalIntoLocal(VoxelVolume<TVoxel, VoxelBlockHash> *scene, RenderState *renderState)
-{
-	GlobalCache<TVoxel, VoxelBlockHash>* globalCache = scene->global_cache;
+void SwappingEngine_CUDA<TVoxel, VoxelBlockHash>::IntegrateGlobalIntoLocal(VoxelVolume<TVoxel, VoxelBlockHash>* volume, RenderState* render_state){
+	GlobalCache<TVoxel, VoxelBlockHash>& global_cache = volume->global_cache;
 
-	HashEntry *hashTable = scene->index.GetEntries();
+	HashEntry* hash_table = volume->index.GetEntries();
 
-	ITMHashSwapState *swapStates = globalCache->GetSwapStates(true);
+	ITMHashSwapState* swap_states = global_cache.GetSwapStates(true);
 
-	TVoxel *syncedVoxelBlocks_local = globalCache->GetSyncedVoxelBlocks(true);
-	int *neededEntryIDs_local = globalCache->GetNeededEntryIDs(true);
+	TVoxel *syncedVoxelBlocks_local = global_cache.GetSyncedVoxelBlocks(true);
+	int *neededEntryIDs_local = global_cache.GetNeededEntryIDs(true);
 
-	TVoxel *localVBA = scene->GetVoxelBlocks();
+	TVoxel *localVBA = volume->GetVoxelBlocks();
 
-	int noNeededEntries = this->LoadFromGlobalMemory(scene);
+	int noNeededEntries = this->LoadFromGlobalMemory(volume);
 
-	int maxW = scene->parameters->max_integration_weight;
+	int maxW = volume->parameters->max_integration_weight;
 
 	if (noNeededEntries > 0) {
 		dim3 blockSize(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
 		dim3 gridSize(noNeededEntries);
 
-		integrateOldIntoActiveData_device <<<gridSize, blockSize >>>(localVBA, swapStates, syncedVoxelBlocks_local,
-			neededEntryIDs_local, hashTable, maxW);
+		integrateOldIntoActiveData_device <<<gridSize, blockSize >>>(localVBA, swap_states, syncedVoxelBlocks_local,
+		                                                             neededEntryIDs_local, hash_table, maxW);
 		ORcudaKernelCheck;
 	}
 }
 
 template<class TVoxel>
-void SwappingEngine_CUDA<TVoxel, VoxelBlockHash>::SaveToGlobalMemory(VoxelVolume<TVoxel, VoxelBlockHash> *scene, RenderState *renderState)
+void SwappingEngine_CUDA<TVoxel, VoxelBlockHash>::SaveToGlobalMemory(VoxelVolume<TVoxel, VoxelBlockHash>* volume, RenderState *render_state)
 {
-	GlobalCache<TVoxel, VoxelBlockHash>* global_cache = scene->global_cache;
+	GlobalCache<TVoxel, VoxelBlockHash>& global_cache = volume->global_cache;
 
-	ITMHashSwapState *swapStates = global_cache->GetSwapStates(true);
+	ITMHashSwapState *swapStates = global_cache.GetSwapStates(true);
 
-	HashEntry *hashTable = scene->index.GetEntries();
-	HashBlockVisibility* blockVisibilityTypes = scene->index.GetBlockVisibilityTypes();
+	HashEntry *hashTable = volume->index.GetEntries();
+	HashBlockVisibility* blockVisibilityTypes = volume->index.GetBlockVisibilityTypes();
 
-	TVoxel *syncedVoxelBlocks_local = global_cache->GetSyncedVoxelBlocks(true);
-	bool *hasSyncedData_local = global_cache->GetHasSyncedData(true);
-	int *neededEntryIDs_local = global_cache->GetNeededEntryIDs(true);
+	TVoxel *syncedVoxelBlocks_local = global_cache.GetSyncedVoxelBlocks(true);
+	bool *hasSyncedData_local = global_cache.GetHasSyncedData(true);
+	int *neededEntryIDs_local = global_cache.GetNeededEntryIDs(true);
 
-	TVoxel *syncedVoxelBlocks_global = global_cache->GetSyncedVoxelBlocks(false);
-	bool *hasSyncedData_global = global_cache->GetHasSyncedData(false);
-	int *neededEntryIDs_global = global_cache->GetNeededEntryIDs(false);
+	TVoxel *syncedVoxelBlocks_global = global_cache.GetSyncedVoxelBlocks(false);
+	bool *hasSyncedData_global = global_cache.GetHasSyncedData(false);
+	int *neededEntryIDs_global = global_cache.GetNeededEntryIDs(false);
 
-	TVoxel *localVBA = scene->GetVoxelBlocks();
-	int *voxelAllocationList = scene->index.GetBlockAllocationList();
+	TVoxel *localVBA = volume->GetVoxelBlocks();
+	int *voxelAllocationList = volume->index.GetBlockAllocationList();
 
-	const int hash_entry_count = global_cache->GetHashEntryCount();
+	const int hash_entry_count = global_cache.GetHashEntryCount();
 
 	dim3 blockSize, gridSize;
 	int noNeededEntries;
 
 	{
 		blockSize = dim3(256);
-		gridSize = dim3((int)ceil((float)scene->index.hash_entry_count / (float)blockSize.x));
+		gridSize = dim3((int)ceil((float)volume->index.hash_entry_count / (float)blockSize.x));
 
 		ORcudaSafeCall(cudaMemset(noNeededEntries_device, 0, sizeof(int)));
 
@@ -188,16 +186,16 @@ void SwappingEngine_CUDA<TVoxel, VoxelBlockHash>::SaveToGlobalMemory(VoxelVolume
 		{
 			blockSize = dim3(256);
 			gridSize = dim3((int)ceil((float)noNeededEntries / (float)blockSize.x));
-			int last_free_block_id = scene->index.GetLastFreeBlockListId();
+			int last_free_block_id = volume->index.GetLastFreeBlockListId();
 			ORcudaSafeCall(cudaMemcpy(noAllocatedVoxelEntries_device, &last_free_block_id, sizeof(int), cudaMemcpyHostToDevice));
 
 			cleanMemory_device <<<gridSize, blockSize >>>(voxelAllocationList, noAllocatedVoxelEntries_device, swapStates, hashTable, localVBA,
-				neededEntryIDs_local, noNeededEntries, scene->index.voxel_block_count);
+			                                              neededEntryIDs_local, noNeededEntries, volume->index.voxel_block_count);
 			ORcudaKernelCheck;
-			last_free_block_id = scene->index.GetLastFreeBlockListId();
+			last_free_block_id = volume->index.GetLastFreeBlockListId();
 			ORcudaSafeCall(cudaMemcpy(&last_free_block_id, noAllocatedVoxelEntries_device, sizeof(int), cudaMemcpyDeviceToHost));
-			scene->index.SetLastFreeBlockListId(ORUTILS_MAX(scene->index.GetLastFreeBlockListId(), 0));
-			scene->index.SetLastFreeBlockListId(ORUTILS_MIN(scene->index.GetLastFreeBlockListId(), scene->index.voxel_block_count));
+			volume->index.SetLastFreeBlockListId(ORUTILS_MAX(volume->index.GetLastFreeBlockListId(), 0));
+			volume->index.SetLastFreeBlockListId(ORUTILS_MIN(volume->index.GetLastFreeBlockListId(), volume->index.voxel_block_count));
 		}
 
 		ORcudaSafeCall(cudaMemcpy(neededEntryIDs_global, neededEntryIDs_local, sizeof(int) * noNeededEntries, cudaMemcpyDeviceToHost));
@@ -207,30 +205,30 @@ void SwappingEngine_CUDA<TVoxel, VoxelBlockHash>::SaveToGlobalMemory(VoxelVolume
 		for (int entryId = 0; entryId < noNeededEntries; entryId++)
 		{
 			if (hasSyncedData_global[entryId])
-				global_cache->SetStoredData(neededEntryIDs_global[entryId], syncedVoxelBlocks_global + entryId * VOXEL_BLOCK_SIZE3);
+				global_cache.SetStoredData(neededEntryIDs_global[entryId], syncedVoxelBlocks_global + entryId * VOXEL_BLOCK_SIZE3);
 		}
 	}
 }
 
 template<class TVoxel>
-void SwappingEngine_CUDA<TVoxel, VoxelBlockHash>::CleanLocalMemory(VoxelVolume<TVoxel, VoxelBlockHash> *scene, RenderState *renderState)
+void SwappingEngine_CUDA<TVoxel, VoxelBlockHash>::CleanLocalMemory(VoxelVolume<TVoxel, VoxelBlockHash> *volume, RenderState *renderState)
 {
-	HashEntry *hashTable = scene->index.GetEntries();
-	HashBlockVisibility* blockVisibilityTypes = scene->index.GetBlockVisibilityTypes();
+	HashEntry* hash_table = volume->index.GetEntries();
+	HashBlockVisibility* blockVisibilityTypes = volume->index.GetBlockVisibilityTypes();
 
-	TVoxel *localVBA = scene->GetVoxelBlocks();
-	int *voxelAllocationList = scene->index.GetBlockAllocationList();
+	TVoxel *localVBA = volume->GetVoxelBlocks();
+	int *voxelAllocationList = volume->index.GetBlockAllocationList();
 
 	dim3 blockSize, gridSize;
 	int noNeededEntries;
 
 	{
 		blockSize = dim3(256);
-		gridSize = dim3((int)ceil((float)scene->index.hash_entry_count / (float)blockSize.x));
+		gridSize = dim3((int)ceil((float)volume->index.hash_entry_count / (float)blockSize.x));
 
 		ORcudaSafeCall(cudaMemset(noNeededEntries_device, 0, sizeof(int)));
 
-		buildListToClean_device <<<gridSize, blockSize >>>(entriesToClean_device, noNeededEntries_device, hashTable, blockVisibilityTypes, scene->index.hash_entry_count);
+		buildListToClean_device <<<gridSize, blockSize >>>(entriesToClean_device, noNeededEntries_device, hash_table, blockVisibilityTypes, volume->index.hash_entry_count);
 
 		ORcudaSafeCall(cudaMemcpy(&noNeededEntries, noNeededEntries_device, sizeof(int), cudaMemcpyDeviceToHost));
 	}
@@ -242,21 +240,21 @@ void SwappingEngine_CUDA<TVoxel, VoxelBlockHash>::CleanLocalMemory(VoxelVolume<T
 			blockSize = dim3(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
 			gridSize = dim3(noNeededEntries);
 
-			cleanVBA <<<gridSize, blockSize >>>(entriesToClean_device, hashTable, localVBA);
+			cleanVBA <<<gridSize, blockSize >>>(entriesToClean_device, hash_table, localVBA);
 		}
 
 		{
 			blockSize = dim3(256);
 			gridSize = dim3((int)ceil((float)noNeededEntries / (float)blockSize.x));
-			int last_free_block_id = scene->index.GetLastFreeBlockListId();
+			int last_free_block_id = volume->index.GetLastFreeBlockListId();
 			ORcudaSafeCall(cudaMemcpy(noAllocatedVoxelEntries_device, &last_free_block_id, sizeof(int), cudaMemcpyHostToDevice));
 
-			cleanMemory_device <<<gridSize, blockSize >>>(voxelAllocationList, noAllocatedVoxelEntries_device, hashTable, localVBA, entriesToClean_device, noNeededEntries, scene->index.voxel_block_count);
+			cleanMemory_device <<<gridSize, blockSize >>>(voxelAllocationList, noAllocatedVoxelEntries_device, hash_table, localVBA, entriesToClean_device, noNeededEntries, volume->index.voxel_block_count);
 
-			last_free_block_id = scene->index.GetLastFreeBlockListId();
+			last_free_block_id = volume->index.GetLastFreeBlockListId();
 			ORcudaSafeCall(cudaMemcpy(&last_free_block_id, noAllocatedVoxelEntries_device, sizeof(int), cudaMemcpyDeviceToHost));
-			scene->index.SetLastFreeBlockListId(ORUTILS_MAX(scene->index.GetLastFreeBlockListId(), 0));
-			scene->index.SetLastFreeBlockListId(ORUTILS_MIN(scene->index.GetLastFreeBlockListId(), scene->index.voxel_block_count));
+			volume->index.SetLastFreeBlockListId(ORUTILS_MAX(volume->index.GetLastFreeBlockListId(), 0));
+			volume->index.SetLastFreeBlockListId(ORUTILS_MIN(volume->index.GetLastFreeBlockListId(), volume->index.voxel_block_count));
 		}
 	}
 }

@@ -20,14 +20,14 @@ namespace ITMLib
 	class SwappingEngine_CPU<TVoxel, VoxelBlockHash> : public SwappingEngine < TVoxel, VoxelBlockHash >
 	{
 	private:
-		int LoadFromGlobalMemory(VoxelVolume<TVoxel, VoxelBlockHash> *scene);
+		int LoadFromGlobalMemory(VoxelVolume<TVoxel, VoxelBlockHash> *volume);
 
 	public:
 		// This class is currently just for debugging purposes -- swaps CPU memory to CPU memory.
 		// Potentially this could stream into the host memory from somewhere else (disk, database, etc.).
 
-		void IntegrateGlobalIntoLocal(VoxelVolume<TVoxel, VoxelBlockHash> *scene, RenderState *renderState);
-		void SaveToGlobalMemory(VoxelVolume<TVoxel, VoxelBlockHash> *scene, RenderState *renderState);
+		void IntegrateGlobalIntoLocal(VoxelVolume<TVoxel, VoxelBlockHash> *volume, RenderState *render_state);
+		void SaveToGlobalMemory(VoxelVolume<TVoxel, VoxelBlockHash> *volume, RenderState *render_state);
 		void CleanLocalMemory(VoxelVolume<TVoxel, VoxelBlockHash> *scene, RenderState *renderState);
 
 		explicit SwappingEngine_CPU(const VoxelBlockHash& index){};

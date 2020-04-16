@@ -23,15 +23,12 @@ public:
 	TIndex index;
 
 	/** "Global" content -- stored on in host memory only */
-	GlobalCache<TVoxel, TIndex>* global_cache;
+	GlobalCache<TVoxel, TIndex> global_cache;
 
 	VoxelVolume(const VoxelVolumeParameters *volume_parameters, bool use_swapping, MemoryDeviceType memory_type,
 	            typename TIndex::InitializationParameters index_parameters = typename TIndex::InitializationParameters());
-	explicit VoxelVolume(MemoryDeviceType memoryDeviceType, typename TIndex::InitializationParameters indexParameters = typename TIndex::InitializationParameters());
-	VoxelVolume(const VoxelVolume& other, MemoryDeviceType _memoryType);
-	~VoxelVolume(){
-		if (global_cache != nullptr) delete global_cache;
-	}
+	explicit VoxelVolume(MemoryDeviceType memory_type, typename TIndex::InitializationParameters index_parameters = typename TIndex::InitializationParameters());
+	VoxelVolume(const VoxelVolume& other, MemoryDeviceType memory_type);
 
 	void Reset();
 	void SetFrom(const VoxelVolume& other);
@@ -46,18 +43,14 @@ public:
 	}
 
 	/** Return whether this scene is using swapping mechanism or not. **/
-	bool Swapping() const{
-		return this->global_cache != nullptr;
+	bool SwappingEnabled() const{
+		return swapping_enabled;
 	}
 
-	//TODO: restore
-	// Suppress the default copy constructor and assignment operator (C++11 way)
-	VoxelVolume(const VoxelVolume&) = delete;
-	//ITMVoxelVolume(ITMVoxelVolume&&) noexcept = default;
-	VoxelVolume& operator=(const VoxelVolume&) = delete;
 private:
 	/** Current local content of the 8x8x8 stored on host or device depending on memory_type*/
 	ORUtils::MemoryBlock<TVoxel> voxels;
+	const bool swapping_enabled;
 };
 
 }//end namespace ITMLib

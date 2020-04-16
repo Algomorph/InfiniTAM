@@ -116,7 +116,7 @@ void SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::AllocateSceneFromDe
 	int* voxelAllocationList = scene->index.GetBlockAllocationList();
 	int* excessAllocationList = scene->index.GetExcessEntryList();
 	HashEntry* hashTable = scene->index.GetEntries();
-	ITMHashSwapState* swapStates = scene->Swapping() ? scene->global_cache->GetSwapStates(true) : 0;
+	ITMHashSwapState* swapStates = scene->SwappingEnabled() ? scene->global_cache.GetSwapStates(true) : 0;
 
 	const int hashEntryCount = scene->index.hash_entry_count;
 
@@ -160,7 +160,7 @@ void SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::AllocateSceneFromDe
 			                                                     scene->parameters->near_clipping_distance, scene->parameters->far_clipping_distance);
 	ORcudaKernelCheck;
 
-	bool useSwapping = scene->Swapping();
+	bool useSwapping = scene->SwappingEnabled();
 	if (onlyUpdateVisibleList) useSwapping = false;
 	if (!onlyUpdateVisibleList) {
 		allocateVoxelBlocksList_device <<< gridSizeAL, cudaBlockSizeAL >>> (

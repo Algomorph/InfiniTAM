@@ -18,11 +18,26 @@
 
 using namespace ITMLib;
 
-template<typename TVoxel>
-GlobalCache<TVoxel, PlainVoxelArray>::GlobalCache(const PlainVoxelArray& index) {
-	DIEWITHEXCEPTION_REPORTLOCATION("Swappling / global cache not implemented for plain voxel array indexing.");
-}
 
+template<typename TVoxel>
+GlobalCache<TVoxel, PlainVoxelArray>::GlobalCache(const PlainVoxelArray& index) {}
+
+template<typename TVoxel>
+GlobalCache<TVoxel, VoxelBlockHash>::GlobalCache() :
+		hash_entry_count(0),
+
+		has_stored_data(nullptr),
+		stored_voxel_blocks(nullptr),
+		swap_states_host(nullptr),
+		swap_states_device(nullptr),
+
+		has_synced_data_host(nullptr),
+		has_synced_data_device(nullptr),
+		synced_voxel_blocks_host(nullptr),
+		synced_voxel_blocks_device(nullptr),
+
+		needed_hash_codes_host(nullptr),
+		needed_hash_codes_device(nullptr) {}
 
 template<typename TVoxel>
 GlobalCache<TVoxel, VoxelBlockHash>::GlobalCache(const int hash_entry_count) : hash_entry_count(hash_entry_count) {
@@ -56,28 +71,31 @@ GlobalCache<TVoxel, VoxelBlockHash>::GlobalCache(const int hash_entry_count) : h
 
 template<typename TVoxel>
 GlobalCache<TVoxel, VoxelBlockHash>::GlobalCache(const GlobalCache& other) : GlobalCache(other.hash_entry_count) {
+	if (other.hash_entry_count > 0) {
 
 #ifndef COMPILE_WITHOUT_CUDA
-	ORcudaSafeCall(cudaMemcpy(synced_voxel_blocks_host, other.synced_voxel_blocks_host,
-	                          SWAP_OPERATION_BLOCK_COUNT * sizeof(TVoxel) * VOXEL_BLOCK_SIZE3, cudaMemcpyHostToHost));
-	ORcudaSafeCall(cudaMemcpy(has_synced_data_host, other.has_synced_data_host,
-	                          SWAP_OPERATION_BLOCK_COUNT * sizeof(bool), cudaMemcpyHostToHost));
-	ORcudaSafeCall(cudaMemcpy(needed_hash_codes_host, other.needed_hash_codes_host,
-	                          SWAP_OPERATION_BLOCK_COUNT * sizeof(int), cudaMemcpyHostToHost));
-	ORcudaSafeCall(cudaMemcpy(swap_states_device, other.swap_states_device,
-	                          hash_entry_count * sizeof(ITMHashSwapState), cudaMemcpyDeviceToDevice));
-	ORcudaSafeCall(cudaMemcpy(synced_voxel_blocks_device, other.synced_voxel_blocks_device,
-	                          SWAP_OPERATION_BLOCK_COUNT * sizeof(TVoxel) * VOXEL_BLOCK_SIZE3,
-	                          cudaMemcpyDeviceToDevice));
-	ORcudaSafeCall(cudaMemcpy(has_synced_data_device, other.has_synced_data_device,
-	                          SWAP_OPERATION_BLOCK_COUNT * sizeof(bool), cudaMemcpyDeviceToDevice));
-	ORcudaSafeCall(cudaMemcpy(needed_hash_codes_device, other.needed_hash_codes_device,
-	                          SWAP_OPERATION_BLOCK_COUNT * sizeof(int), cudaMemcpyDeviceToDevice));
+		ORcudaSafeCall(cudaMemcpy(synced_voxel_blocks_host, other.synced_voxel_blocks_host,
+		                          SWAP_OPERATION_BLOCK_COUNT * sizeof(TVoxel) * VOXEL_BLOCK_SIZE3,
+		                          cudaMemcpyHostToHost));
+		ORcudaSafeCall(cudaMemcpy(has_synced_data_host, other.has_synced_data_host,
+		                          SWAP_OPERATION_BLOCK_COUNT * sizeof(bool), cudaMemcpyHostToHost));
+		ORcudaSafeCall(cudaMemcpy(needed_hash_codes_host, other.needed_hash_codes_host,
+		                          SWAP_OPERATION_BLOCK_COUNT * sizeof(int), cudaMemcpyHostToHost));
+		ORcudaSafeCall(cudaMemcpy(swap_states_device, other.swap_states_device,
+		                          hash_entry_count * sizeof(ITMHashSwapState), cudaMemcpyDeviceToDevice));
+		ORcudaSafeCall(cudaMemcpy(synced_voxel_blocks_device, other.synced_voxel_blocks_device,
+		                          SWAP_OPERATION_BLOCK_COUNT * sizeof(TVoxel) * VOXEL_BLOCK_SIZE3,
+		                          cudaMemcpyDeviceToDevice));
+		ORcudaSafeCall(cudaMemcpy(has_synced_data_device, other.has_synced_data_device,
+		                          SWAP_OPERATION_BLOCK_COUNT * sizeof(bool), cudaMemcpyDeviceToDevice));
+		ORcudaSafeCall(cudaMemcpy(needed_hash_codes_device, other.needed_hash_codes_device,
+		                          SWAP_OPERATION_BLOCK_COUNT * sizeof(int), cudaMemcpyDeviceToDevice));
 #else
-	memcpy(synced_voxel_blocks_host, other.synced_voxel_blocks_host,SWAP_OPERATION_BLOCK_COUNT * sizeof(TVoxel) * VOXEL_BLOCK_SIZE3);
-	memcpy(has_synced_data_host, other.has_synced_data_host, SWAP_OPERATION_BLOCK_COUNT * sizeof(bool));
-	memcpy(needed_hash_codes_host,other.needed_hash_codes_host, SWAP_OPERATION_BLOCK_COUNT * sizeof(int));
+		memcpy(synced_voxel_blocks_host, other.synced_voxel_blocks_host,SWAP_OPERATION_BLOCK_COUNT * sizeof(TVoxel) * VOXEL_BLOCK_SIZE3);
+		memcpy(has_synced_data_host, other.has_synced_data_host, SWAP_OPERATION_BLOCK_COUNT * sizeof(bool));
+		memcpy(needed_hash_codes_host,other.needed_hash_codes_host, SWAP_OPERATION_BLOCK_COUNT * sizeof(int));
 #endif
+	}
 }
 
 template<typename TVoxel>
@@ -157,4 +175,5 @@ template<typename TVoxel>
 int GlobalCache<TVoxel, VoxelBlockHash>::GetHashEntryCount() const {
 	return this->hash_entry_count;
 }
+
 

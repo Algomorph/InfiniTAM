@@ -795,7 +795,7 @@
 				A6AC2B6C1CBD34A7000CC89D /* Metal */,
 				A6AC2B701CBD34A7000CC89D /* Shared */,
 			);
-			path = Swapping;
+			path = SwappingEnabled;
 			sourceTree = "<group>";
 		};
 		A6AC2B631CBD34A7000CC89D /* CPU */ = {

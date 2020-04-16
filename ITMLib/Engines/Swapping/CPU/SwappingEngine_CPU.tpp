@@ -7,25 +7,25 @@ using namespace ITMLib;
 
 
 template<class TVoxel>
-int SwappingEngine_CPU<TVoxel, VoxelBlockHash>::LoadFromGlobalMemory(VoxelVolume<TVoxel, VoxelBlockHash> *scene)
+int SwappingEngine_CPU<TVoxel, VoxelBlockHash>::LoadFromGlobalMemory(VoxelVolume<TVoxel, VoxelBlockHash>* volume)
 {
-	GlobalCache<TVoxel, VoxelBlockHash> *globalCache = scene->global_cache;
+	GlobalCache<TVoxel, VoxelBlockHash>& global_cache = volume->global_cache;
 
-	ITMHashSwapState *swapStates = globalCache->GetSwapStates(false);
+	ITMHashSwapState* swap_states = global_cache.GetSwapStates(false);
 
-	int *neededEntryIDs_local = globalCache->GetNeededEntryIDs(false);
+	int* neededEntryIDs_local = global_cache.GetNeededEntryIDs(false);
 
-	TVoxel *syncedVoxelBlocks_global = globalCache->GetSyncedVoxelBlocks(false);
-	bool *hasSyncedData_global = globalCache->GetHasSyncedData(false);
-	int *neededEntryIDs_global = globalCache->GetNeededEntryIDs(false);
+	TVoxel *syncedVoxelBlocks_global = global_cache.GetSyncedVoxelBlocks(false);
+	bool *hasSyncedData_global = global_cache.GetHasSyncedData(false);
+	int *neededEntryIDs_global = global_cache.GetNeededEntryIDs(false);
 
-	int hashEntryCount = globalCache->GetHashEntryCount();
+	int hashEntryCount = global_cache.GetHashEntryCount();
 
 	int neededHashEntryCount = 0;
 	for (int entryId = 0; entryId < hashEntryCount; entryId++)
 	{
 		if (neededHashEntryCount >= SWAP_OPERATION_BLOCK_COUNT) break;
-		if (swapStates[entryId].state == 1)
+		if (swap_states[entryId].state == 1)
 		{
 			neededEntryIDs_local[neededHashEntryCount] = entryId;
 			neededHashEntryCount++;
@@ -42,10 +42,10 @@ int SwappingEngine_CPU<TVoxel, VoxelBlockHash>::LoadFromGlobalMemory(VoxelVolume
 		{
 			int entryId = neededEntryIDs_global[i];
 
-			if (globalCache->HasStoredData(entryId))
+			if (global_cache.HasStoredData(entryId))
 			{
 				hasSyncedData_global[i] = true;
-				memcpy(syncedVoxelBlocks_global + i * VOXEL_BLOCK_SIZE3, globalCache->GetStoredVoxelBlock(entryId), VOXEL_BLOCK_SIZE3 * sizeof(TVoxel));
+				memcpy(syncedVoxelBlocks_global + i * VOXEL_BLOCK_SIZE3, global_cache.GetStoredVoxelBlock(entryId), VOXEL_BLOCK_SIZE3 * sizeof(TVoxel));
 			}
 		}
 	}
@@ -56,68 +56,68 @@ int SwappingEngine_CPU<TVoxel, VoxelBlockHash>::LoadFromGlobalMemory(VoxelVolume
 }
 
 template<class TVoxel>
-void SwappingEngine_CPU<TVoxel, VoxelBlockHash>::IntegrateGlobalIntoLocal(VoxelVolume<TVoxel, VoxelBlockHash> *scene, RenderState *renderState)
+void SwappingEngine_CPU<TVoxel, VoxelBlockHash>::IntegrateGlobalIntoLocal(VoxelVolume<TVoxel, VoxelBlockHash>* volume, RenderState* render_state)
 {
-	GlobalCache<TVoxel, VoxelBlockHash> *globalCache = scene->global_cache;
+	GlobalCache<TVoxel, VoxelBlockHash>& global_cache = volume->global_cache;
 
-	HashEntry *hashTable = scene->index.GetEntries();
+	HashEntry* hash_table = volume->index.GetEntries();
 
-	ITMHashSwapState *swapStates = globalCache->GetSwapStates(false);
+	ITMHashSwapState* swap_states = global_cache.GetSwapStates(false);
 
-	TVoxel *syncedVoxelBlocks_local = globalCache->GetSyncedVoxelBlocks(false);
-	bool *hasSyncedData_local = globalCache->GetHasSyncedData(false);
-	int *neededEntryIDs_local = globalCache->GetNeededEntryIDs(false);
+	TVoxel *syncedVoxelBlocks_local = global_cache.GetSyncedVoxelBlocks(false);
+	bool *hasSyncedData_local = global_cache.GetHasSyncedData(false);
+	int *neededEntryIDs_local = global_cache.GetNeededEntryIDs(false);
 
-	TVoxel *localVBA = scene->GetVoxelBlocks();
+	TVoxel *localVBA = volume->GetVoxelBlocks();
 
-	int noNeededEntries = this->LoadFromGlobalMemory(scene);
+	const int needed_entry_count = this->LoadFromGlobalMemory(volume);
 
-	int maxW = scene->parameters->max_integration_weight;
+	const int max_integration_weight = volume->parameters->max_integration_weight;
 
-	for (int i = 0; i < noNeededEntries; i++)
+	for (int i = 0; i < needed_entry_count; i++)
 	{
-		int entryDestId = neededEntryIDs_local[i];
+		int destination_hash_code = neededEntryIDs_local[i];
 
 		if (hasSyncedData_local[i])
 		{
 			TVoxel *srcVB = syncedVoxelBlocks_local + i * VOXEL_BLOCK_SIZE3;
-			TVoxel *dstVB = localVBA + hashTable[entryDestId].ptr * VOXEL_BLOCK_SIZE3;
+			TVoxel *dstVB = localVBA + hash_table[destination_hash_code].ptr * VOXEL_BLOCK_SIZE3;
 
 			for (int vIdx = 0; vIdx < VOXEL_BLOCK_SIZE3; vIdx++)
 			{
-				CombineVoxelInformation<TVoxel::hasColorInformation, TVoxel>::compute(srcVB[vIdx], dstVB[vIdx], maxW);
+				CombineVoxelInformation<TVoxel::hasColorInformation, TVoxel>::compute(srcVB[vIdx], dstVB[vIdx], max_integration_weight);
 			}
 		}
 
-		swapStates[entryDestId].state = 2;
+		swap_states[destination_hash_code].state = 2;
 	}
 }
 
 template<class TVoxel>
-void SwappingEngine_CPU<TVoxel, VoxelBlockHash>::SaveToGlobalMemory(VoxelVolume<TVoxel, VoxelBlockHash> *scene, RenderState *renderState)
+void SwappingEngine_CPU<TVoxel, VoxelBlockHash>::SaveToGlobalMemory(VoxelVolume<TVoxel, VoxelBlockHash>* volume, RenderState* render_state)
 {
-	GlobalCache<TVoxel, VoxelBlockHash>* global_cache = scene->global_cache;
+	GlobalCache<TVoxel, VoxelBlockHash>& global_cache = volume->global_cache;
 
-	ITMHashSwapState* swap_states = global_cache->GetSwapStates(false);
+	ITMHashSwapState* swap_states = global_cache.GetSwapStates(false);
 
-	HashEntry* hash_table = scene->index.GetEntries();
-	HashBlockVisibility* block_visibility_types = scene->index.GetBlockVisibilityTypes();
+	HashEntry* hash_table = volume->index.GetEntries();
+	HashBlockVisibility* block_visibility_types = volume->index.GetBlockVisibilityTypes();
 
-	TVoxel *syncedVoxelBlocks_local = global_cache->GetSyncedVoxelBlocks(false);
-	bool *hasSyncedData_local = global_cache->GetHasSyncedData(false);
-	int *neededEntryIDs_local = global_cache->GetNeededEntryIDs(false);
+	TVoxel *syncedVoxelBlocks_local = global_cache.GetSyncedVoxelBlocks(false);
+	bool *hasSyncedData_local = global_cache.GetHasSyncedData(false);
+	int *neededEntryIDs_local = global_cache.GetNeededEntryIDs(false);
 
-	TVoxel *syncedVoxelBlocks_global = global_cache->GetSyncedVoxelBlocks(false);
-	bool *hasSyncedData_global = global_cache->GetHasSyncedData(false);
-	int *neededEntryIDs_global = global_cache->GetNeededEntryIDs(false);
+	TVoxel *syncedVoxelBlocks_global = global_cache.GetSyncedVoxelBlocks(false);
+	bool *hasSyncedData_global = global_cache.GetHasSyncedData(false);
+	int *neededEntryIDs_global = global_cache.GetNeededEntryIDs(false);
 
-	TVoxel* voxels = scene->GetVoxelBlocks();
-	int* block_allocation_list = scene->index.GetBlockAllocationList();
+	TVoxel* voxels = volume->GetVoxelBlocks();
+	int* block_allocation_list = volume->index.GetBlockAllocationList();
 
-	const int hash_entry_count = global_cache->GetHashEntryCount();
+	const int hash_entry_count = global_cache.GetHashEntryCount();
 	
 	int needed_entry_count = 0; // needed for what?
-	int allocated_block_count = scene->index.GetLastFreeBlockListId();
+	int allocated_block_count = volume->index.GetLastFreeBlockListId();
 
 	for (int destination_hash_code = 0; destination_hash_code < hash_entry_count; destination_hash_code++)
 	{
@@ -151,7 +151,7 @@ void SwappingEngine_CPU<TVoxel, VoxelBlockHash>::SaveToGlobalMemory(VoxelVolume<
 		}
 	}
 
-	scene->index.SetLastFreeBlockListId(allocated_block_count);
+	volume->index.SetLastFreeBlockListId(allocated_block_count);
 
 	// would copy neededEntryIDs_local, hasSyncedData_local and syncedVoxelBlocks_local into *_global here
 
@@ -160,7 +160,7 @@ void SwappingEngine_CPU<TVoxel, VoxelBlockHash>::SaveToGlobalMemory(VoxelVolume<
 		for (int entryId = 0; entryId < needed_entry_count; entryId++)
 		{
 			if (hasSyncedData_global[entryId])
-				global_cache->SetStoredData(neededEntryIDs_global[entryId], syncedVoxelBlocks_global + entryId * VOXEL_BLOCK_SIZE3);
+				global_cache.SetStoredData(neededEntryIDs_global[entryId], syncedVoxelBlocks_global + entryId * VOXEL_BLOCK_SIZE3);
 		}
 	}
 }
@@ -168,8 +168,8 @@ void SwappingEngine_CPU<TVoxel, VoxelBlockHash>::SaveToGlobalMemory(VoxelVolume<
 template<class TVoxel>
 void SwappingEngine_CPU<TVoxel, VoxelBlockHash>::CleanLocalMemory(VoxelVolume<TVoxel, VoxelBlockHash> *scene, RenderState *renderState)
 {
-	HashEntry *hashTable = scene->index.GetEntries();
-	HashBlockVisibility *blockVisibilityTypes = scene->index.GetBlockVisibilityTypes();
+	HashEntry* hash_table = scene->index.GetEntries();
+	HashBlockVisibility* block_visibility_types = scene->index.GetBlockVisibilityTypes();
 
 	TVoxel *localVBA = scene->GetVoxelBlocks();
 	int *voxelAllocationList = scene->index.GetBlockAllocationList();
@@ -183,9 +183,9 @@ void SwappingEngine_CPU<TVoxel, VoxelBlockHash>::CleanLocalMemory(VoxelVolume<TV
 	{
 		if (noNeededEntries >= SWAP_OPERATION_BLOCK_COUNT) break;
 
-		int localPtr = hashTable[entryDestId].ptr;
+		int localPtr = hash_table[entryDestId].ptr;
 
-		if (localPtr >= 0 && blockVisibilityTypes[entryDestId] == 0)
+		if (localPtr >= 0 && block_visibility_types[entryDestId] == 0)
 		{
 			TVoxel *localVBALocation = localVBA + localPtr * VOXEL_BLOCK_SIZE3;
 
@@ -194,7 +194,7 @@ void SwappingEngine_CPU<TVoxel, VoxelBlockHash>::CleanLocalMemory(VoxelVolume<TV
 			{
 				noAllocatedVoxelEntries++;
 				voxelAllocationList[vbaIdx + 1] = localPtr;
-				hashTable[entryDestId].ptr = -1;
+				hash_table[entryDestId].ptr = -1;
 
 				for (int i = 0; i < VOXEL_BLOCK_SIZE3; i++) localVBALocation[i] = TVoxel();
 			}

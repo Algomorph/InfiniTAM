@@ -23,7 +23,7 @@ set(ITMLIB_TOPLEVEL_HEADERS
     )
 
 ##
-set(ITMLIB_CORE_SOURCES
+set(ITMLIB_ENGINES_MAIN_SOURCES
     Engines/Main/Mappers/DenseMapper.tpp
     Engines/Main/Mappers/DenseMapper_PlainVoxelArray.cpp
     Engines/Main/Mappers/DenseMapper_VoxelBlockHash.cpp
@@ -50,7 +50,7 @@ set(ITMLIB_CORE_SOURCES
     Engines/Main/DynamicSceneVoxelEngine_VoxelBlockHash.cpp
     )
 
-set(ITMLIB_CORE_HEADERS
+set(ITMLIB_ENGINES_MAIN_HEADERS
     Engines/Main/Mappers/DenseMapper.h
     Engines/Main/Mappers/DenseSurfelMapper.h
     Engines/Main/Mappers/DenseDynamicMapper.h
@@ -1013,7 +1013,7 @@ endif ()
 
 set(sources
     ${ITMLIB_OBJECTS_VOLUME_SOURCES}
-    ${ITMLIB_CORE_SOURCES}
+    ${ITMLIB_ENGINES_MAIN_SOURCES}
     ${ITMLIB_ENGINES_LOWLEVEL_SOURCES}
     ${ITMLIB_ENGINES_LOWLEVEL_CPU_SOURCES}
     ${ITMLIB_ENGINES_LOWLEVEL_CUDA_SOURCES}
@@ -1055,7 +1055,7 @@ set(sources
 
 set(headers
     ${ITMLIB_TOPLEVEL_HEADERS}
-    ${ITMLIB_CORE_HEADERS}
+    ${ITMLIB_ENGINES_MAIN_HEADERS}
     ${ITMLIB_ENGINES_COMMON_HEADERS}
     ${ITMLIB_ENGINES_LOWLEVEL_HEADERS}
     ${ITMLIB_ENGINES_LOWLEVEL_CPU_HEADERS}

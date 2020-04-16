@@ -348,9 +348,9 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::BuildUtilizedBlo
 	const int hash_entry_count = volume->index.hash_entry_count;
 	HashBlockVisibility* hashBlockVisibilityTypes_device = volume->index.GetBlockVisibilityTypes();
 	int* visibleBlockHashCodes_device = volume->index.GetUtilizedBlockHashCodes();
-	HashEntry* hashTable = volume->index.GetEntries();
-	bool useSwapping = volume->global_cache != nullptr;
-	ITMHashSwapState* swapStates = volume->Swapping() ? volume->global_cache->GetSwapStates(false) : 0;
+	HashEntry* hash_table = volume->index.GetEntries();
+	const bool use_swapping = volume->SwappingEnabled();
+	ITMHashSwapState* swapStates = volume->SwappingEnabled() ? volume->global_cache.GetSwapStates(false) : 0;
 
 	// ** view data **
 	Vector4f depthCameraProjectionParameters = view->calib.intrinsics_d.projectionParamsSimple.all;
@@ -363,16 +363,16 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::BuildUtilizedBlo
 	dim3 cudaBlockSizeAL(256, 1);
 	dim3 gridSizeAL((int) ceil((float) hash_entry_count / (float) cudaBlockSizeAL.x));
 
-	if (useSwapping) {
+	if (use_swapping) {
 		buildVisibilityList_device<true> <<< gridSizeAL, cudaBlockSizeAL >>>
-		                                                  (hashTable, swapStates, hash_entry_count, visibleBlockHashCodes_device,
-				                                                  visibleBlockCount.GetData(
+		                                                  (hash_table, swapStates, hash_entry_count, visibleBlockHashCodes_device,
+		                                                   visibleBlockCount.GetData(
 						                                                  MEMORYDEVICE_CUDA), hashBlockVisibilityTypes_device, depth_camera_matrix, depthCameraProjectionParameters, depthImgSize, voxelSize);
 		ORcudaKernelCheck;
 	} else {
 		buildVisibilityList_device<false> <<< gridSizeAL, cudaBlockSizeAL >>>
-		                                                   (hashTable, swapStates, hash_entry_count, visibleBlockHashCodes_device,
-				                                                   visibleBlockCount.GetData(
+		                                                   (hash_table, swapStates, hash_entry_count, visibleBlockHashCodes_device,
+		                                                    visibleBlockCount.GetData(
 						                                                   MEMORYDEVICE_CUDA), hashBlockVisibilityTypes_device, depth_camera_matrix, depthCameraProjectionParameters, depthImgSize, voxelSize);
 		ORcudaKernelCheck;
 	}
