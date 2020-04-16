@@ -45,9 +45,9 @@ private:
 	inline static void TraverseUtilized_Generic(VoxelVolume<TVoxel1, VoxelBlockHash>* volume1,
 	                                            VoxelVolume<TVoxel2, VoxelBlockHash>* volume2,
 	                                            TBlockTraversalFunction&& block_traverser) {
-		TVoxel1* voxels1 = volume1->GetVoxelBlocks();
+		TVoxel1* voxels1 = volume1->GetVoxels();
 		HashEntry* hash_table1 = volume1->index.GetEntries();
-		TVoxel2* voxels2 = volume2->GetVoxelBlocks();
+		TVoxel2* voxels2 = volume2->GetVoxels();
 		HashEntry* hash_table2 = volume2->index.GetEntries();
 		int utilized_entry_count = volume1->index.GetUtilizedBlockCount();
 		const int* utilized_hash_codes = volume1->index.GetUtilizedBlockHashCodes();
@@ -85,9 +85,9 @@ private:
 	inline static void TraverseAll_Generic(VoxelVolume<TVoxel1, VoxelBlockHash>* volume1,
 	                                       VoxelVolume<TVoxel2, VoxelBlockHash>* volume2,
 	                                       TBlockTraversalFunction&& block_traverser) {
-		TVoxel1* voxels1 = volume1->GetVoxelBlocks();
+		TVoxel1* voxels1 = volume1->GetVoxels();
 		HashEntry* hash_table1 = volume1->index.GetEntries();
-		TVoxel2* voxels2 = volume2->GetVoxelBlocks();
+		TVoxel2* voxels2 = volume2->GetVoxels();
 		HashEntry* hash_table2 = volume2->index.GetEntries();
 		int hash_entry_count = volume1->index.hash_entry_count;
 
@@ -163,11 +163,11 @@ private:
 			bool verbose) {
 
 // *** traversal vars
-		TVoxel2* voxels2 = volume2->GetVoxelBlocks();
+		TVoxel2* voxels2 = volume2->GetVoxels();
 		HashEntry* hash_table2 = volume2->index.GetEntries();
 
 
-		TVoxel1* voxels1 = volume1->GetVoxelBlocks();
+		TVoxel1* voxels1 = volume1->GetVoxels();
 		HashEntry* hash_table1 = volume1->index.GetEntries();
 		int hash_entry_count = volume1->index.hash_entry_count;
 
@@ -530,10 +530,10 @@ public:
 			TFunctor& functor, Vector6i bounds) {
 
 // *** traversal vars
-		TVoxel2* voxels2 = volume2->GetVoxelBlocks();
+		TVoxel2* voxels2 = volume2->GetVoxels();
 		HashEntry* hash_table2 = volume2->index.GetEntries();
 
-		TVoxel1* voxels1 = volume1->GetVoxelBlocks();
+		TVoxel1* voxels1 = volume1->GetVoxels();
 		HashEntry* hash_table1 = volume1->index.GetEntries();
 		int totalHashEntryCount = volume1->index.hash_entry_count;
 
@@ -597,10 +597,10 @@ public:
 			TFunctor& functor) {
 
 // *** traversal vars
-		TVoxel2* voxels2 = volume2->GetVoxelBlocks();
+		TVoxel2* voxels2 = volume2->GetVoxels();
 		HashEntry* hash_table2 = volume2->index.GetEntries();
 
-		TVoxel1* voxels1 = volume1->GetVoxelBlocks();
+		TVoxel1* voxels1 = volume1->GetVoxels();
 		HashEntry* hash_table1 = volume1->index.GetEntries();
 		int hash_entry_count = volume1->index.hash_entry_count;
 

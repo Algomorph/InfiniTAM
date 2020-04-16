@@ -74,7 +74,7 @@ void MultiVisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::CreateExpectedDepths
 	Vector2i imgSize = renderState->renderingRangeImage->dimensions;
 	Vector2f *minmaxData = renderState->renderingRangeImage->GetData(MEMORYDEVICE_CUDA);
 
-	const int hashEntryCount = sceneManager.getLocalMap(0)->scene->index.hash_entry_count;
+	const int hashEntryCount = sceneManager.getLocalMap(0)->volume->index.hash_entry_count;
 
 	Vector2f init;
 	init.x = FAR_AWAY; init.y = VERY_CLOSE;

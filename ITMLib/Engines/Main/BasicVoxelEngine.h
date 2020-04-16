@@ -31,7 +31,7 @@ namespace ITMLib
 		DenseMapper<TVoxel, TIndex> *denseMapper;
 		CameraTrackingController *trackingController;
 
-		VoxelVolume<TVoxel, TIndex> *scene;
+		VoxelVolume<TVoxel, TIndex> *volume;
 		RenderState *renderState_live;
 		RenderState *renderState_freeview;
 
@@ -52,7 +52,7 @@ namespace ITMLib
 		CameraTrackingState* GetTrackingState() { return trackingState; }
 
 		/// Gives access to the internal world representation
-		VoxelVolume<TVoxel, TIndex>* GetScene() { return scene; }
+		VoxelVolume<TVoxel, TIndex>* GetScene() { return volume; }
 
 		CameraTrackingState::TrackingResult ProcessFrame(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage, IMUMeasurement *imuMeasurement = NULL);
 

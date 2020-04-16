@@ -116,7 +116,7 @@ void SwappingEngine_CUDA<TVoxel, VoxelBlockHash>::IntegrateGlobalIntoLocal(Voxel
 	TVoxel *syncedVoxelBlocks_local = global_cache.GetSyncedVoxelBlocks(true);
 	int *neededEntryIDs_local = global_cache.GetNeededEntryIDs(true);
 
-	TVoxel *localVBA = volume->GetVoxelBlocks();
+	TVoxel *localVBA = volume->GetVoxels();
 
 	int noNeededEntries = this->LoadFromGlobalMemory(volume);
 
@@ -150,7 +150,7 @@ void SwappingEngine_CUDA<TVoxel, VoxelBlockHash>::SaveToGlobalMemory(VoxelVolume
 	bool *hasSyncedData_global = global_cache.GetHasSyncedData(false);
 	int *neededEntryIDs_global = global_cache.GetNeededEntryIDs(false);
 
-	TVoxel *localVBA = volume->GetVoxelBlocks();
+	TVoxel *localVBA = volume->GetVoxels();
 	int *voxelAllocationList = volume->index.GetBlockAllocationList();
 
 	const int hash_entry_count = global_cache.GetHashEntryCount();
@@ -216,7 +216,7 @@ void SwappingEngine_CUDA<TVoxel, VoxelBlockHash>::CleanLocalMemory(VoxelVolume<T
 	HashEntry* hash_table = volume->index.GetEntries();
 	HashBlockVisibility* blockVisibilityTypes = volume->index.GetBlockVisibilityTypes();
 
-	TVoxel *localVBA = volume->GetVoxelBlocks();
+	TVoxel *localVBA = volume->GetVoxels();
 	int *voxelAllocationList = volume->index.GetBlockAllocationList();
 
 	dim3 blockSize, gridSize;

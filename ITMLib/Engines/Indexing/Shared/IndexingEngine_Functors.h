@@ -339,7 +339,7 @@ protected:
 //struct LazyDeallocateHashBlocksFunctor {
 //	DeallocateHashBlocksFunctor(VoxelVolume<TVoxel, VoxelBlockHash>* volume) :
 //			remaining_utilized_list(volume->index.hash_entry_count, TMemoryDeviceType),
-//			voxels(volume->LocalVBA.GetVoxelBlocks()){
+//			voxels(volume->LocalVBA.GetVoxels()){
 //		INITIALIZE_ATOMIC(int, remaining_utilized_count, 0);
 //	}
 //

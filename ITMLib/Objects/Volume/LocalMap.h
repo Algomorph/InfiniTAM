@@ -43,8 +43,8 @@ namespace ITMLib {
 	class LocalMap
 	{
 	public:
-		VoxelVolume<TVoxel, TIndex> *scene;
-		RenderState *renderState;
+		VoxelVolume<TVoxel, TIndex>* volume;
+		RenderState* renderState;
 		CameraTrackingState *trackingState;
 		ConstraintList relations;
 		ORUtils::SE3Pose estimatedGlobalPose;
@@ -53,14 +53,14 @@ namespace ITMLib {
 		{
 			auto& settings = configuration::get();
 			MemoryDeviceType memoryType = settings.device_type == MEMORYDEVICE_CUDA ? MEMORYDEVICE_CUDA : MEMORYDEVICE_CPU;
-			scene = new VoxelVolume<TVoxel, TIndex>(&settings.general_voxel_volume_parameters, settings.swapping_mode == configuration::SWAPPINGMODE_ENABLED, memoryType);
+			volume = new VoxelVolume<TVoxel, TIndex>(&settings.general_voxel_volume_parameters, settings.swapping_mode == configuration::SWAPPINGMODE_ENABLED, memoryType);
 			renderState = new RenderState(trackedImageSize, settings.general_voxel_volume_parameters.near_clipping_distance,
 			                              settings.general_voxel_volume_parameters.far_clipping_distance, memoryType);
 			trackingState = new CameraTrackingState(trackedImageSize, memoryType);
 		}
 		~LocalMap()
 		{
-			delete scene;
+			delete volume;
 			delete renderState;
 			delete trackingState;
 		}

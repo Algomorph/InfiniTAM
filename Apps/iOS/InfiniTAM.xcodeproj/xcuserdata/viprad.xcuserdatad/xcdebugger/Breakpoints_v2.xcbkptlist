@@ -685,7 +685,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "165"
             endingLineNumber = "165"
-            landmarkName = "ForwardRender_common_metal(const ITMVoxelVolume&lt;TVoxelCanonical, TIndex&gt; *scene, const ITMView *view, ITMTrackingState *trackingState, ITMRenderState *renderState)"
+            landmarkName = "ForwardRender_common_metal(const ITMVoxelVolume&lt;TVoxelCanonical, TIndex&gt; *volume, const ITMView *view, ITMTrackingState *trackingState, ITMRenderState *renderState)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -701,7 +701,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "164"
             endingLineNumber = "164"
-            landmarkName = "ForwardRender_common_metal(const ITMVoxelVolume&lt;TVoxelCanonical, TIndex&gt; *scene, const ITMView *view, ITMTrackingState *trackingState, ITMRenderState *renderState)"
+            landmarkName = "ForwardRender_common_metal(const ITMVoxelVolume&lt;TVoxelCanonical, TIndex&gt; *volume, const ITMView *view, ITMTrackingState *trackingState, ITMRenderState *renderState)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -717,7 +717,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "177"
             endingLineNumber = "177"
-            landmarkName = "ForwardRender_common_metal(const ITMVoxelVolume&lt;TVoxelCanonical, TIndex&gt; *scene, const ITMView *view, ITMTrackingState *trackingState, ITMRenderState *renderState)"
+            landmarkName = "ForwardRender_common_metal(const ITMVoxelVolume&lt;TVoxelCanonical, TIndex&gt; *volume, const ITMView *view, ITMTrackingState *trackingState, ITMRenderState *renderState)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -733,7 +733,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "178"
             endingLineNumber = "178"
-            landmarkName = "ForwardRender_common_metal(const ITMVoxelVolume&lt;TVoxelCanonical, TIndex&gt; *scene, const ITMView *view, ITMTrackingState *trackingState, ITMRenderState *renderState)"
+            landmarkName = "ForwardRender_common_metal(const ITMVoxelVolume&lt;TVoxelCanonical, TIndex&gt; *volume, const ITMView *view, ITMTrackingState *trackingState, ITMRenderState *renderState)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -749,7 +749,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "175"
             endingLineNumber = "175"
-            landmarkName = "ForwardRender_common_metal(const ITMVoxelVolume&lt;TVoxelCanonical, TIndex&gt; *scene, const ITMView *view, ITMTrackingState *trackingState, ITMRenderState *renderState)"
+            landmarkName = "ForwardRender_common_metal(const ITMVoxelVolume&lt;TVoxelCanonical, TIndex&gt; *volume, const ITMView *view, ITMTrackingState *trackingState, ITMRenderState *renderState)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -765,7 +765,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "182"
             endingLineNumber = "182"
-            landmarkName = "ForwardRender_common_metal(const ITMVoxelVolume&lt;TVoxelCanonical, TIndex&gt; *scene, const ITMView *view, ITMTrackingState *trackingState, ITMRenderState *renderState)"
+            landmarkName = "ForwardRender_common_metal(const ITMVoxelVolume&lt;TVoxelCanonical, TIndex&gt; *volume, const ITMView *view, ITMTrackingState *trackingState, ITMRenderState *renderState)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -845,7 +845,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "14"
             endingLineNumber = "14"
-            landmarkName = "ITMDenseMapper(const Configuration *settings, ITMVoxelVolume&lt;TVoxelCanonical, TIndex&gt;* scene, ITMRenderState *renderState_live)"
+            landmarkName = "ITMDenseMapper(const Configuration *settings, ITMVoxelVolume&lt;TVoxelCanonical, TIndex&gt;* volume, ITMRenderState *renderState_live)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -925,7 +925,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "33"
             endingLineNumber = "33"
-            landmarkName = "ITMDenseMapper(const Configuration *settings, ITMVoxelVolume&lt;TVoxelCanonical, TIndex&gt;* scene, ITMRenderState *renderState_live)"
+            landmarkName = "ITMDenseMapper(const Configuration *settings, ITMVoxelVolume&lt;TVoxelCanonical, TIndex&gt;* volume, ITMRenderState *renderState_live)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -941,7 +941,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "32"
             endingLineNumber = "32"
-            landmarkName = "ITMDenseMapper(const Configuration *settings, ITMVoxelVolume&lt;TVoxelCanonical, TIndex&gt;* scene, ITMRenderState *renderState_live)"
+            landmarkName = "ITMDenseMapper(const Configuration *settings, ITMVoxelVolume&lt;TVoxelCanonical, TIndex&gt;* volume, ITMRenderState *renderState_live)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -1005,7 +1005,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "46"
             endingLineNumber = "46"
-            landmarkName = "CreateICPMaps_common_metal(const ITMVoxelVolume&lt;TVoxelCanonical,TIndex&gt; *scene, const ITMView *view, ITMTrackingState *trackingState, ITMRenderState *renderState)"
+            landmarkName = "CreateICPMaps_common_metal(const ITMVoxelVolume&lt;TVoxelCanonical,TIndex&gt; *volume, const ITMView *view, ITMTrackingState *trackingState, ITMRenderState *renderState)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -1085,7 +1085,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "93"
             endingLineNumber = "93"
-            landmarkName = "CreateICPMaps_common_metal(const ITMVoxelVolume&lt;TVoxelCanonical,TIndex&gt; *scene, const ITMView *view, ITMTrackingState *trackingState, ITMRenderState *renderState)"
+            landmarkName = "CreateICPMaps_common_metal(const ITMVoxelVolume&lt;TVoxelCanonical,TIndex&gt; *volume, const ITMView *view, ITMTrackingState *trackingState, ITMRenderState *renderState)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -1101,7 +1101,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "95"
             endingLineNumber = "95"
-            landmarkName = "CreateICPMaps_common_metal(const ITMVoxelVolume&lt;TVoxelCanonical,TIndex&gt; *scene, const ITMView *view, ITMTrackingState *trackingState, ITMRenderState *renderState)"
+            landmarkName = "CreateICPMaps_common_metal(const ITMVoxelVolume&lt;TVoxelCanonical,TIndex&gt; *volume, const ITMView *view, ITMTrackingState *trackingState, ITMRenderState *renderState)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -1117,7 +1117,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "92"
             endingLineNumber = "92"
-            landmarkName = "CreateICPMaps_common_metal(const ITMVoxelVolume&lt;TVoxelCanonical,TIndex&gt; *scene, const ITMView *view, ITMTrackingState *trackingState, ITMRenderState *renderState)"
+            landmarkName = "CreateICPMaps_common_metal(const ITMVoxelVolume&lt;TVoxelCanonical,TIndex&gt; *volume, const ITMView *view, ITMTrackingState *trackingState, ITMRenderState *renderState)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -1133,7 +1133,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "90"
             endingLineNumber = "90"
-            landmarkName = "CreateICPMaps_common_metal(const ITMVoxelVolume&lt;TVoxelCanonical,TIndex&gt; *scene, const ITMView *view, ITMTrackingState *trackingState, ITMRenderState *renderState)"
+            landmarkName = "CreateICPMaps_common_metal(const ITMVoxelVolume&lt;TVoxelCanonical,TIndex&gt; *volume, const ITMView *view, ITMTrackingState *trackingState, ITMRenderState *renderState)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -1149,7 +1149,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "85"
             endingLineNumber = "85"
-            landmarkName = "CreateICPMaps_common_metal(const ITMVoxelVolume&lt;TVoxelCanonical,TIndex&gt; *scene, const ITMView *view, ITMTrackingState *trackingState, ITMRenderState *renderState)"
+            landmarkName = "CreateICPMaps_common_metal(const ITMVoxelVolume&lt;TVoxelCanonical,TIndex&gt; *volume, const ITMView *view, ITMTrackingState *trackingState, ITMRenderState *renderState)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -1165,7 +1165,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "80"
             endingLineNumber = "80"
-            landmarkName = "CreateICPMaps_common_metal(const ITMVoxelVolume&lt;TVoxelCanonical,TIndex&gt; *scene, const ITMView *view, ITMTrackingState *trackingState, ITMRenderState *renderState)"
+            landmarkName = "CreateICPMaps_common_metal(const ITMVoxelVolume&lt;TVoxelCanonical,TIndex&gt; *volume, const ITMView *view, ITMTrackingState *trackingState, ITMRenderState *renderState)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -1181,7 +1181,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "57"
             endingLineNumber = "57"
-            landmarkName = "CreateICPMaps_common_metal(const ITMVoxelVolume&lt;TVoxelCanonical,TIndex&gt; *scene, const ITMView *view, ITMTrackingState *trackingState, ITMRenderState *renderState)"
+            landmarkName = "CreateICPMaps_common_metal(const ITMVoxelVolume&lt;TVoxelCanonical,TIndex&gt; *volume, const ITMView *view, ITMTrackingState *trackingState, ITMRenderState *renderState)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

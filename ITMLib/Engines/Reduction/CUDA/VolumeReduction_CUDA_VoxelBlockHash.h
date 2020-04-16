@@ -123,7 +123,7 @@ private:
 		const int utilized_entry_count = volume->index.GetUtilizedBlockCount();
 		const int* utilized_hash_codes = volume->index.GetUtilizedBlockHashCodes();
 		const HashEntry* hash_entries = volume->index.GetEntries();
-		const TVoxel* voxels = volume->GetVoxelBlocks();
+		const TVoxel* voxels = volume->GetVoxels();
 
 		const int half_block_voxel_count = (VOXEL_BLOCK_SIZE3 / 2);
 

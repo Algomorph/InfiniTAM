@@ -56,12 +56,12 @@ struct TrilinearInterpolationFunctor {
 	                              VoxelVolume<TWarp, TIndex>* warpField) :
 
 			sdfSourceScene(sourceTSDF),
-			sdfSourceVoxels(sourceTSDF->GetVoxelBlocks()),
+			sdfSourceVoxels(sourceTSDF->GetVoxels()),
 			sdfSourceIndexData(sourceTSDF->index.GetIndexData()),
 			sdfSourceCache(),
 
 			warpSourceScene(warpField),
-			warpSourceVoxels(warpField->GetVoxelBlocks()),
+			warpSourceVoxels(warpField->GetVoxels()),
 			warpSourceHashEntries(warpField->index.GetIndexData()),
 			warpSourceCache(),
 

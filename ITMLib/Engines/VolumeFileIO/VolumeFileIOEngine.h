@@ -21,24 +21,22 @@
 
 namespace ITMLib{
 
-static const std::string compactFilePostfixAndExtension = "compact.dat";
-
 template<typename TVoxel, typename TIndex>
 class VolumeFileIOEngine;
 
 template<typename TVoxel>
 class VolumeFileIOEngine<TVoxel,VoxelBlockHash>{
 public:
-	static void SaveToDirectoryCompact(const VoxelVolume<TVoxel,VoxelBlockHash>* volume, const std::string& output_directory);
-	static void LoadFromDirectoryCompact(VoxelVolume<TVoxel,VoxelBlockHash>* volume, const std::string& output_directory);
+	static void SaveVolumeCompact(const VoxelVolume<TVoxel,VoxelBlockHash>* volume, const std::string& path);
+	static void LoadVolumeCompact(VoxelVolume<TVoxel,VoxelBlockHash>* volume, const std::string& path);
 };
 
 
 template<typename TVoxel>
 class VolumeFileIOEngine<TVoxel,PlainVoxelArray>{
 public:
-	static void SaveToDirectoryCompact(const VoxelVolume<TVoxel,PlainVoxelArray>* volume, const std::string& output_directory);
-	static void LoadFromDirectoryCompact(VoxelVolume<TVoxel,PlainVoxelArray>* volume, const std::string& output_directory);
+	static void SaveVolumeCompact(const VoxelVolume<TVoxel,PlainVoxelArray>* volume, const std::string& path);
+	static void LoadVolumeCompact(VoxelVolume<TVoxel,PlainVoxelArray>* volume, const std::string& path);
 };
 
 

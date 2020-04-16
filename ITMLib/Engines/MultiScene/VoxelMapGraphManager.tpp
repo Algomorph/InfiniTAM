@@ -28,7 +28,7 @@ namespace ITMLib
 		int newIdx = (int)allData.size();
 		allData.push_back(new LocalMap<TVoxel, TIndex>(visualization_engine, trackedImageSize));
 
-		allData[newIdx]->scene->Reset();
+		allData[newIdx]->volume->Reset();
 		return newIdx;
 	}
 
@@ -90,7 +90,7 @@ namespace ITMLib
 	{
 		if ((localMapId < 0) || ((unsigned)localMapId >= allData.size())) return -1;
 
-		VoxelVolume<TVoxel, TIndex>* volume = allData[localMapId]->scene;
+		VoxelVolume<TVoxel, TIndex>* volume = allData[localMapId]->volume;
 		return volume->index.GetUtilizedBlockCount() - 1;
 	}
 
@@ -103,11 +103,11 @@ namespace ITMLib
 		if (invertIds) 
 		{
 			int tmp = minBlockId;
-			minBlockId = localMap->scene->index.GetMaximumBlockCount() - maxBlockId - 1;
-			maxBlockId = localMap->scene->index.GetMaximumBlockCount() - tmp - 1;
+			minBlockId = localMap->volume->index.GetMaximumBlockCount() - maxBlockId - 1;
+			maxBlockId = localMap->volume->index.GetMaximumBlockCount() - tmp - 1;
 		}
 
-		return visualization_engine->CountVisibleBlocks(localMap->scene, localMap->renderState, minBlockId, maxBlockId);
+		return visualization_engine->CountVisibleBlocks(localMap->volume, localMap->renderState, minBlockId, maxBlockId);
 	}
 
 	struct LinkPathComparison 

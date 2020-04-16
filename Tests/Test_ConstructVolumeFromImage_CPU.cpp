@@ -409,8 +409,8 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
 			MEMORYDEVICE_CPU);
 	ManipulationEngine_CPU_VBH_Voxel::Inst().ResetVolume(&volume5);
 	std::string path = "TestData/test_VBH_ConstructFromImage_";
-	SceneFileIOEngine_VBH::SaveToDirectoryCompact(&volume4, path);
-	SceneFileIOEngine_VBH::LoadFromDirectoryCompact(&volume5, path);
+	SceneFileIOEngine_VBH::SaveVolumeCompact(&volume4, path);
+	SceneFileIOEngine_VBH::LoadVolumeCompact(&volume5, path);
 	BOOST_REQUIRE(allocatedContentAlmostEqual_CPU(&volume1, &volume5, tolerance));
 	BOOST_REQUIRE(contentAlmostEqual_CPU(&volume4, &volume5, tolerance));
 

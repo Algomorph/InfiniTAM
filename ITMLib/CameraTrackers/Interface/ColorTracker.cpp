@@ -42,9 +42,6 @@ void ColorTracker::TrackCamera(CameraTrackingState *trackingState, const View *v
 	trackingState->pose_d->SetM(view->calib.trafo_rgb_to_depth.calib * currentPara.GetM());
 
 	trackingState->pose_d->Coerce();
-
-	//printf(">> %f %f %f %f %f %f\n", scene->pose->params.each.rx, scene->pose->params.each.ry, scene->pose->params.each.rz,
-	//	scene->pose->params.each.tx, scene->pose->params.each.ty, scene->pose->params.each.tz);
 }
 
 void ColorTracker::PrepareForEvaluation(const View *view)

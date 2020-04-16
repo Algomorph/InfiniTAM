@@ -53,9 +53,9 @@ public:
 	                    VoxelVolume<TTSDFVoxel,TIndex>* live_volume,
 	                    float voxelSize, float narrowBandHalfWidth) :
 			parameters(parameters), switches(switches),
-			live_voxels(live_volume->GetVoxelBlocks()), live_index_data(live_volume->index.GetIndexData()),
-			warp_voxels(warp_field->GetVoxelBlocks()), warp_index_data(warp_field->index.GetIndexData()),
-			canonical_voxels(canonical_volume->GetVoxelBlocks()), canonical_index_data(canonical_volume->index.GetIndexData()),
+			live_voxels(live_volume->GetVoxels()), live_index_data(live_volume->index.GetIndexData()),
+			warp_voxels(warp_field->GetVoxels()), warp_index_data(warp_field->index.GetIndexData()),
+			canonical_voxels(canonical_volume->GetVoxels()), canonical_index_data(canonical_volume->index.GetIndexData()),
 			live_cache(), canonical_cache(),
 			sdf_unity(voxelSize / narrowBandHalfWidth){}
 

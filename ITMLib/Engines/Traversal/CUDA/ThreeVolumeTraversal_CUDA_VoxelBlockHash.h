@@ -37,11 +37,11 @@ private:
 			VoxelVolume<TVoxel3, VoxelBlockHash>* volume3,
 			TProcessFunction&& process_function, TFunctor& functor) {
 // *** traversal vars
-		TVoxel1* voxels1 = volume1->GetVoxelBlocks();
+		TVoxel1* voxels1 = volume1->GetVoxels();
 		HashEntry* hash_table1 = volume1->index.GetEntries();
-		TVoxel2* voxels2 = volume2->GetVoxelBlocks();
+		TVoxel2* voxels2 = volume2->GetVoxels();
 		HashEntry* hash_table2 = volume2->index.GetEntries();
-		TVoxel3* voxels3 = volume3->GetVoxelBlocks();
+		TVoxel3* voxels3 = volume3->GetVoxels();
 		HashEntry* hash_table3 = volume3->index.GetEntries();
 
 		const int hash_entry_count = volume3->index.hash_entry_count;
@@ -72,11 +72,11 @@ private:
 			VoxelVolume<TVoxel3, VoxelBlockHash>* volume3,
 			TProcessFunction&& process_function, TFunctor& functor) {
 // *** traversal vars
-		TVoxel1* voxels1 = volume1->GetVoxelBlocks();
+		TVoxel1* voxels1 = volume1->GetVoxels();
 		HashEntry* hash_table1 = volume1->index.GetEntries();
-		TVoxel2* voxels2 = volume2->GetVoxelBlocks();
+		TVoxel2* voxels2 = volume2->GetVoxels();
 		HashEntry* hash_table2 = volume2->index.GetEntries();
-		TVoxel3* voxels3 = volume3->GetVoxelBlocks();
+		TVoxel3* voxels3 = volume3->GetVoxels();
 		HashEntry* hash_table3 = volume3->index.GetEntries();
 
 		const int utilized_entry_count = volume1->index.GetUtilizedBlockCount();

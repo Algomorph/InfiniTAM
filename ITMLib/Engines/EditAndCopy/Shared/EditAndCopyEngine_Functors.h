@@ -27,7 +27,7 @@ struct OffsetWarpsFunctor;
 template<typename TVoxel>
 struct OffsetWarpsFunctor<TVoxel, VoxelBlockHash, true> {
 	static void OffsetWarps(VoxelVolume <TVoxel, VoxelBlockHash>* volume, Vector3f offset) {
-		TVoxel* voxels = volume->GetVoxelBlocks();
+		TVoxel* voxels = volume->GetVoxels();
 		const HashEntry* hash_table = volume->index.GetEntries();
 		int entry_count = volume->index.hash_entry_count;
 #ifdef WITH_OPENMP
@@ -53,7 +53,7 @@ struct OffsetWarpsFunctor<TVoxel, VoxelBlockHash, true> {
 template<typename TVoxel>
 struct OffsetWarpsFunctor<TVoxel, PlainVoxelArray, true> {
 	static void OffsetWarps(VoxelVolume <TVoxel, PlainVoxelArray>* volume, Vector3f offset) {
-		TVoxel* voxels = volume->GetVoxelBlocks();
+		TVoxel* voxels = volume->GetVoxels();
 #ifdef WITH_OPENMP
 #pragma omp parallel for
 #endif

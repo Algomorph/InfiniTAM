@@ -84,12 +84,12 @@ void VoxelVolume<TVoxel, TIndex>::SetFrom(const VoxelVolume& other) {
 
 template<class TVoxel, class TIndex>
 void VoxelVolume<TVoxel, TIndex>::SaveToDirectory(const std::string& outputDirectory) const {
-	VolumeFileIOEngine<TVoxel,TIndex>::SaveToDirectoryCompact(this, outputDirectory);
+	VolumeFileIOEngine<TVoxel, TIndex>::SaveVolumeCompact(this, outputDirectory);
 }
 
 template<class TVoxel, class TIndex>
 void VoxelVolume<TVoxel, TIndex>::LoadFromDirectory(const std::string& outputDirectory) {
-	VolumeFileIOEngine<TVoxel,TIndex>::LoadFromDirectoryCompact(this, outputDirectory);
+	VolumeFileIOEngine<TVoxel, TIndex>::LoadVolumeCompact(this, outputDirectory);
 }
 
 template<class TVoxel, class TIndex>
@@ -107,12 +107,12 @@ TVoxel VoxelVolume<TVoxel, TIndex>::GetValueAt(const Vector3i& pos) {
 }
 
 template<class TVoxel, class TIndex>
-TVoxel* VoxelVolume<TVoxel, TIndex>::GetVoxelBlocks() {
+TVoxel* VoxelVolume<TVoxel, TIndex>::GetVoxels() {
 	return this->voxels.GetData(this->index.memory_type);
 }
 
 template<class TVoxel, class TIndex>
-const TVoxel* VoxelVolume<TVoxel, TIndex>::GetVoxelBlocks() const{
+const TVoxel* VoxelVolume<TVoxel, TIndex>::GetVoxels() const{
 	return this->voxels.GetData(this->index.memory_type);
 }
 

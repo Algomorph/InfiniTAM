@@ -13,9 +13,9 @@ namespace ITMLib
 		explicit VisualizationEngine_CPU() { }
 		~VisualizationEngine_CPU() { }
 
-		void FindVisibleBlocks(VoxelVolume<TVoxel,TIndex> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *renderState) const;
-		int CountVisibleBlocks(const VoxelVolume<TVoxel,TIndex> *scene, const RenderState *renderState, int minBlockId, int maxBlockId) const;
-		void CreateExpectedDepths(const VoxelVolume<TVoxel,TIndex> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *renderState) const;
+		void FindVisibleBlocks(VoxelVolume<TVoxel,TIndex> *volume, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *renderState) const;
+		int CountVisibleBlocks(const VoxelVolume<TVoxel,TIndex> *volume, const RenderState *renderState, int minBlockId, int maxBlockId) const;
+		void CreateExpectedDepths(const VoxelVolume<TVoxel,TIndex> *volume, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *renderState) const;
 		void RenderImage(VoxelVolume<TVoxel,TIndex> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, const RenderState *renderState,
 		                 ITMUChar4Image *outputImage, IVisualizationEngine::RenderImageType type = IVisualizationEngine::RENDER_SHADED_GREYSCALE,
 		                 IVisualizationEngine::RenderRaycastSelection raycastType = IVisualizationEngine::RENDER_FROM_NEW_RAYCAST) const;
@@ -32,9 +32,9 @@ namespace ITMLib
 		explicit VisualizationEngine_CPU() { }
 		~VisualizationEngine_CPU() { }
 
-		void FindVisibleBlocks(VoxelVolume<TVoxel,VoxelBlockHash> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *renderState) const;
-		int CountVisibleBlocks(const VoxelVolume<TVoxel,VoxelBlockHash> *scene, const RenderState *renderState, int minBlockId, int maxBlockId) const;
-		void CreateExpectedDepths(const VoxelVolume<TVoxel,VoxelBlockHash> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *renderState) const;
+		void FindVisibleBlocks(VoxelVolume<TVoxel,VoxelBlockHash> *volume, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *renderState) const;
+		int CountVisibleBlocks(const VoxelVolume<TVoxel,VoxelBlockHash> *volume, const RenderState *renderState, int minBlockId, int maxBlockId) const;
+		void CreateExpectedDepths(const VoxelVolume<TVoxel,VoxelBlockHash> *volume, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *renderState) const;
 		void RenderImage(VoxelVolume<TVoxel,VoxelBlockHash> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, const RenderState *renderState,
 		                 ITMUChar4Image *outputImage, IVisualizationEngine::RenderImageType type = IVisualizationEngine::RENDER_SHADED_GREYSCALE,
 		                 IVisualizationEngine::RenderRaycastSelection raycastType = IVisualizationEngine::RENDER_FROM_NEW_RAYCAST) const;

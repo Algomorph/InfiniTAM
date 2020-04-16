@@ -159,8 +159,8 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::SaveToFile() {
 	std::string nextFrameOutputPath = TelemetryRecorder<TVoxel, TWarp, TIndex>::Instance().GetOutputDirectory();
 	// throws error if any of the saves fail
 	if (relocaliser) relocaliser->SaveToDirectory(nextFrameOutputPath + "/Relocaliser/");
-	VolumeFileIOEngine<TVoxel, TIndex>::SaveToDirectoryCompact(canonical_volume, nextFrameOutputPath + "/canonical");
-	VolumeFileIOEngine<TVoxel, TIndex>::SaveToDirectoryCompact(live_volumes[0], nextFrameOutputPath + "/live");
+	VolumeFileIOEngine<TVoxel, TIndex>::SaveVolumeCompact(canonical_volume, nextFrameOutputPath + "/canonical");
+	VolumeFileIOEngine<TVoxel, TIndex>::SaveVolumeCompact(live_volumes[0], nextFrameOutputPath + "/live");
 	std::cout << "Saving scenes in a compact way to '" << nextFrameOutputPath << "'." << std::endl;
 }
 
@@ -198,10 +198,10 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::LoadFromFile() {
 	try // load scene
 	{
 		std::cout << "Loading scenes from '" << nextFrameOutputPath << "'." << std::endl;
-		VolumeFileIOEngine<TVoxel, TIndex>::LoadFromDirectoryCompact(canonical_volume,
-		                                                               nextFrameOutputPath + "/canonical");
-		VolumeFileIOEngine<TVoxel, TIndex>::LoadFromDirectoryCompact(live_volumes[0],
-		                                                               nextFrameOutputPath + "/live");
+		VolumeFileIOEngine<TVoxel, TIndex>::LoadVolumeCompact(canonical_volume,
+		                                                      nextFrameOutputPath + "/canonical");
+		VolumeFileIOEngine<TVoxel, TIndex>::LoadVolumeCompact(live_volumes[0],
+		                                                      nextFrameOutputPath + "/live");
 		if (framesProcessed == 0) {
 			framesProcessed = 1; //to skip initialization
 		}
@@ -605,8 +605,8 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::SaveToFile(const std::strin
 	std::string relocalizer_output_path = path + "Relocaliser/";
 	// throws error if any of the saves fail
 	if (relocaliser) relocaliser->SaveToDirectory(relocalizer_output_path);
-	VolumeFileIOEngine<TVoxel, TIndex>::SaveToDirectoryCompact(canonical_volume, path + "/canonical");
-	VolumeFileIOEngine<TVoxel, TIndex>::SaveToDirectoryCompact(live_volumes[0], path + "/live");
+	VolumeFileIOEngine<TVoxel, TIndex>::SaveVolumeCompact(canonical_volume, path + "/canonical");
+	VolumeFileIOEngine<TVoxel, TIndex>::SaveVolumeCompact(live_volumes[0], path + "/live");
 	std::cout << "Saving scenes in a compact way to '" << path << "'." << std::endl;
 }
 

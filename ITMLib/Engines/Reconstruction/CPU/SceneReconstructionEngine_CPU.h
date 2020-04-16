@@ -18,7 +18,7 @@ namespace ITMLib
 	public:
 		void ResetScene(VoxelVolume<TVoxel, VoxelBlockHash> *volume);
 
-		void AllocateSceneFromDepth(VoxelVolume<TVoxel, VoxelBlockHash> *scene, const View *view, const CameraTrackingState *trackingState,
+		void AllocateSceneFromDepth(VoxelVolume<TVoxel, VoxelBlockHash> *volume, const View *view, const CameraTrackingState *trackingState,
 		                            const RenderState *renderState, bool onlyUpdateVisibleList = false, bool resetVisibleList = false) override;
 
 		void IntegrateIntoScene(VoxelVolume<TVoxel, VoxelBlockHash> *scene, const View *view, const CameraTrackingState *trackingState,
@@ -32,12 +32,12 @@ namespace ITMLib
 	class SceneReconstructionEngine_CPU<TVoxel, PlainVoxelArray> : public SceneReconstructionEngine < TVoxel, PlainVoxelArray >
 	{
 	public:
-		void ResetScene(VoxelVolume<TVoxel, PlainVoxelArray> *scene);
+		void ResetScene(VoxelVolume<TVoxel, PlainVoxelArray> *volume);
 
-		void AllocateSceneFromDepth(VoxelVolume<TVoxel, PlainVoxelArray> *scene, const View *view, const CameraTrackingState *trackingState,
+		void AllocateSceneFromDepth(VoxelVolume<TVoxel, PlainVoxelArray> *volume, const View *view, const CameraTrackingState *trackingState,
 		                            const RenderState *renderState, bool onlyUpdateVisibleList = false, bool resetVisibleList = false);
 
-		void IntegrateIntoScene(VoxelVolume<TVoxel, PlainVoxelArray> *scene, const View *view, const CameraTrackingState *trackingState,
+		void IntegrateIntoScene(VoxelVolume<TVoxel, PlainVoxelArray> *volume, const View *view, const CameraTrackingState *trackingState,
 		                        const RenderState *renderState);
 
 		SceneReconstructionEngine_CPU();

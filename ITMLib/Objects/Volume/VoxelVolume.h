@@ -1,6 +1,10 @@
 //  ================================================================
 //  Created by Gregory Kramida on 5/8/19.
 //  Copyright (c) 2019-2000 Gregory Kramida
+//  Inspired by ITMLib/Objects/Scene/ITMScene.h of the original
+//  InfiniTAM repository, Oxford University
+//  (https://github.com/victorprad/InfiniTAM)
+
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
 //  You may obtain a copy of the License at
@@ -19,11 +23,10 @@
 #include "GlobalCache.h"
 #include "../../Utils/VoxelVolumeParameters.h"
 
-namespace ITMLib
-{
-/** \brief
-Represents the 3D world model as collection of voxel blocks, i.e. regular 3D grid
-*/
+namespace ITMLib{
+/**
+ * \brief Represents the 3D world model as collection of voxel blocks, i.e. a regular (raster) 3D grid
+ **/
 template<class TVoxel, class TIndex>
 class VoxelVolume {
 public:
@@ -36,7 +39,9 @@ public:
 	 * blocks. If it's an PlainVoxelArray, it's just a dense regular 3D array. */
 	TIndex index;
 
-	/** "Global" content -- stored on in host memory only */
+	/**
+	 * "Global" content -- stored in host memory only
+	 * */
 	GlobalCache<TVoxel, TIndex> global_cache;
 
 	VoxelVolume(const VoxelVolumeParameters *volume_parameters, bool use_swapping, MemoryDeviceType memory_type,
@@ -48,21 +53,27 @@ public:
 	void SetFrom(const VoxelVolume& other);
 	void SaveToDirectory(const std::string &outputDirectory) const;
 	void LoadFromDirectory(const std::string &outputDirectory);
-	TVoxel* GetVoxelBlocks();
-	const TVoxel* GetVoxelBlocks() const;
+
+	TVoxel* GetVoxels();
+	const TVoxel* GetVoxels() const;
+
 	TVoxel GetValueAt(const Vector3i& pos);
 	TVoxel GetValueAt(int x, int y, int z){
 		Vector3i pos(x,y,z);
 		return GetValueAt(pos);
 	}
 
-	/** Return whether this scene is using swapping mechanism or not. **/
+	/**
+	 * @return Whether this scene is using swapping mechanism or not.
+	 **/
 	bool SwappingEnabled() const{
 		return swapping_enabled;
 	}
 
 private:
-	/** Current local content of the 8x8x8 stored on host or device depending on memory_type*/
+	/**
+	 * Current local content of voxel blocks stored on host or device depending on memory_type
+	 * */
 	ORUtils::MemoryBlock<TVoxel> voxels;
 	const bool swapping_enabled;
 };

@@ -254,7 +254,7 @@ bool VolumeSequenceRecorder<TVoxel, TWarp, TIndex>::SaveScenesCompact() {
 	}
 	std::cout << "Saving scenes for current frame (this might take awhile)..." << std::endl;
 	std::cout.flush();
-	VolumeFileIOEngine<TVoxel, TIndex>::SaveToDirectoryCompact(liveScene, livePath.string());
+	VolumeFileIOEngine<TVoxel, TIndex>::SaveVolumeCompact(liveScene, livePath.string());
 	activeWarpLogger->SaveCompact();
 	std::cout << "Scenes saved." << std::endl;
 	return true;
@@ -268,7 +268,7 @@ bool VolumeSequenceRecorder<TVoxel, TWarp, TIndex>::LoadScenesCompact() {
 	std::cout << "Loading scenes for current frame (this might take awhile)..." << std::endl;
 	std::cout.flush();
 	liveScene->Reset();
-	VolumeFileIOEngine<TVoxel, TIndex>::LoadFromDirectoryCompact(liveScene, livePath.string());
+	VolumeFileIOEngine<TVoxel, TIndex>::LoadVolumeCompact(liveScene, livePath.string());
 	if (!activeWarpLogger->isSlice || !activeWarpLogger->sliceLoaded) {
 		activeWarpLogger->LoadCompact();
 	}

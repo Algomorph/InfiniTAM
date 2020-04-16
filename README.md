@@ -1,6 +1,6 @@
-# InfiniTAM-Based Experiment With Dynamic-scene Reconstruction
+# InfiniTAM-Based Experiment With Dynamic-volume Reconstruction
 
-This is an ongoing project that aims to integrate voxel hashing techniques for real-time reconstruction of dynamic scene from a single, moving RGB-D camera. The main algorithmic insipirations are KillingFusion and SobolevFusion from the dynamic scene reconstruction perspective [see Mira Slavcheva's page at TUM](http://campar.in.tum.de/Main/MiraSlavcheva) , and work of [Matthias Neissner's group](https://niessnerlab.org/publications.html) on spatial voxel hashing in the context of voxel-based 3D reconstruction. The original code is forked from [InfiniTAM, Active Vision Group at Oxford University](http://www.robots.ox.ac.uk/~victor/infinitam/), but many parts have been massively modernized -- essentially, rewritten -- and extended with my own code (hence you'll find many files with a less-restrictive Apache V2 license insted of the original Oxford University Innovation Academic License.) Having said that, I haven't tested the older static-scene algorithms in awhile, so try those at your own risk at this point.
+This is an ongoing project that aims to integrate voxel hashing techniques for real-time reconstruction of dynamic volume from a single, moving RGB-D camera. The main algorithmic insipirations are KillingFusion and SobolevFusion from the dynamic volume reconstruction perspective [see Mira Slavcheva's page at TUM](http://campar.in.tum.de/Main/MiraSlavcheva) , and work of [Matthias Neissner's group](https://niessnerlab.org/publications.html) on spatial voxel hashing in the context of voxel-based 3D reconstruction. The original code is forked from [InfiniTAM, Active Vision Group at Oxford University](http://www.robots.ox.ac.uk/~victor/infinitam/), but many parts have been massively modernized -- essentially, rewritten -- and extended with my own code (hence you'll find many files with a less-restrictive Apache V2 license insted of the original Oxford University Innovation Academic License.) Having said that, I haven't tested the older static-volume algorithms in awhile, so try those at your own risk at this point.
 
 ## What details are currently missing that I know of, and what are some known issues?
 
@@ -28,7 +28,7 @@ Yes, after a looong break, I'm officially switching to try to do something with 
 
 TLDR: Maybe.
 
-Originally, that was the plan. However, at the time of writing I'm exhausted from trying to stick to the open(for extension)-closed(for modification) principle. The code wasn't originally designed for dynamic-scene fusion, so some things really do need to change to make the new things more maintainable. I've already changed a lot of code from the original InfiniTAM codebase, IMHO, for the better.
+Originally, that was the plan. However, at the time of writing I'm exhausted from trying to stick to the open(for extension)-closed(for modification) principle. The code wasn't originally designed for dynamic-volume fusion, so some things really do need to change to make the new things more maintainable. I've already changed a lot of code from the original InfiniTAM codebase, IMHO, for the better.
 
 If this fork achieves reasonable success, I'll reach out to the InfiniTAM authors and ask whether they'd like to work on integrating my changes into their codebase. I (hope that I) didn't break anything so far, but the original code lacks any hint of continuous integration, which I plan to add to it, at least for my code, shortly.
 

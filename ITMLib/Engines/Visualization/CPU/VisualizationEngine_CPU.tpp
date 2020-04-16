@@ -23,19 +23,19 @@ void VisualizationEngine_CPU<TVoxel, TIndex>::FindVisibleBlocks(VoxelVolume<TVox
 
 template<class TVoxel>
 void VisualizationEngine_CPU<TVoxel, VoxelBlockHash>::FindVisibleBlocks(
-		VoxelVolume<TVoxel, VoxelBlockHash>* scene, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics,
+		VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics,
 		RenderState* renderState) const
 {
-	const HashEntry* hash_table = scene->index.GetEntries();
-	int hash_entry_count = scene->index.hash_entry_count;
-	float voxel_size = scene->parameters->voxel_size;
+	const HashEntry* hash_table = volume->index.GetEntries();
+	int hash_entry_count = volume->index.hash_entry_count;
+	float voxel_size = volume->parameters->voxel_size;
 	Vector2i image_size = renderState->renderingRangeImage->dimensions;
 
 	Matrix4f M = pose->GetM();
 	Vector4f projParams = intrinsics->projectionParamsSimple.all;
 
 	int visible_block_count = 0;
-	int* visible_block_hash_codes = scene->index.GetVisibleBlockHashCodes();
+	int* visible_block_hash_codes = volume->index.GetVisibleBlockHashCodes();
 
 	//build visible list
 	for (int hash_code = 0; hash_code < hash_entry_count; hash_code++)
@@ -56,7 +56,7 @@ void VisualizationEngine_CPU<TVoxel, VoxelBlockHash>::FindVisibleBlocks(
 			visible_block_count++;
 		}
 	}
-	scene->index.SetVisibleHashBlockCount(visible_block_count);
+	volume->index.SetVisibleHashBlockCount(visible_block_count);
 }
 
 template<class TVoxel, class TIndex>
@@ -66,15 +66,15 @@ int VisualizationEngine_CPU<TVoxel, TIndex>::CountVisibleBlocks(const VoxelVolum
 }
 
 template<class TVoxel>
-int VisualizationEngine_CPU<TVoxel, VoxelBlockHash>::CountVisibleBlocks(const VoxelVolume<TVoxel,VoxelBlockHash> *scene, const RenderState *renderState, int minBlockId, int maxBlockId) const
+int VisualizationEngine_CPU<TVoxel, VoxelBlockHash>::CountVisibleBlocks(const VoxelVolume<TVoxel,VoxelBlockHash> *volume, const RenderState *renderState, int minBlockId, int maxBlockId) const
 {
 
-	int visibleBlockCount = scene->index.GetVisibleHashBlockCount();
-	const int *visibleBlockHashCodes = scene->index.GetVisibleBlockHashCodes();
+	int visibleBlockCount = volume->index.GetVisibleHashBlockCount();
+	const int *visibleBlockHashCodes = volume->index.GetVisibleBlockHashCodes();
 
 	int ret = 0;
 	for (int i = 0; i < visibleBlockCount; ++i) {
-		int blockID = scene->index.GetEntries()[visibleBlockHashCodes[i]].ptr;
+		int blockID = volume->index.GetEntries()[visibleBlockHashCodes[i]].ptr;
 		if ((blockID >= minBlockId)&&(blockID <= maxBlockId)) ++ret;
 	}
 
@@ -97,7 +97,7 @@ void VisualizationEngine_CPU<TVoxel, TIndex>::CreateExpectedDepths(const VoxelVo
 }
 
 template<class TVoxel>
-void VisualizationEngine_CPU<TVoxel,VoxelBlockHash>::CreateExpectedDepths(const VoxelVolume<TVoxel,VoxelBlockHash> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics,
+void VisualizationEngine_CPU<TVoxel,VoxelBlockHash>::CreateExpectedDepths(const VoxelVolume<TVoxel,VoxelBlockHash> *volume, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics,
                                                                           RenderState *renderState) const
 {
 	Vector2i imgSize = renderState->renderingRangeImage->dimensions;
@@ -109,17 +109,17 @@ void VisualizationEngine_CPU<TVoxel,VoxelBlockHash>::CreateExpectedDepths(const 
 		pixel.y = VERY_CLOSE;
 	}
 
-	float voxelSize = scene->parameters->voxel_size;
+	float voxelSize = volume->parameters->voxel_size;
 
 	std::vector<RenderingBlock> render_blocks(MAX_RENDERING_BLOCKS);
 	int render_block_count = 0;
 
-	const int* visible_block_hash_codes = scene->index.GetUtilizedBlockHashCodes();
-	int visible_block_count = scene->index.GetUtilizedBlockCount();
+	const int* visible_block_hash_codes = volume->index.GetUtilizedBlockHashCodes();
+	int visible_block_count = volume->index.GetUtilizedBlockCount();
 
 	//go through list of visible 8x8x8 blocks
 	for (int blockNo = 0; blockNo < visible_block_count; ++blockNo) {
-		const HashEntry & blockData(scene->index.GetEntries()[visible_block_hash_codes[blockNo]]);
+		const HashEntry & blockData(volume->index.GetEntries()[visible_block_hash_codes[blockNo]]);
 
 		Vector2i upperLeft, lowerRight;
 		Vector2f zRange;
@@ -164,15 +164,15 @@ template<> inline HashBlockVisibility* GetBlockVisibilityTypes<PlainVoxelArray>(
 }
 
 template<class TVoxel, class TIndex>
-static void GenericRaycast(VoxelVolume<TVoxel, TIndex> *scene, const Vector2i& imgSize, const Matrix4f& invM, const Vector4f& projParams, const RenderState *renderState, bool updateVisibleList)
+static void GenericRaycast(VoxelVolume<TVoxel, TIndex> *volume, const Vector2i& imgSize, const Matrix4f& invM, const Vector4f& projParams, const RenderState *renderState, bool updateVisibleList)
 {
 	const Vector2f *minmaximg = renderState->renderingRangeImage->GetData(MEMORYDEVICE_CPU);
-	float mu = scene->parameters->narrow_band_half_width;
-	float oneOverVoxelSize = 1.0f / scene->parameters->voxel_size;
+	float mu = volume->parameters->narrow_band_half_width;
+	float oneOverVoxelSize = 1.0f / volume->parameters->voxel_size;
 	Vector4f *pointsRay = renderState->raycastResult->GetData(MEMORYDEVICE_CPU);
-	const TVoxel *voxelData = scene->GetVoxelBlocks();
-	const typename TIndex::IndexData *voxelIndex = scene->index.GetIndexData();
-	HashBlockVisibility* blockVisibilityTypes = GetBlockVisibilityTypes(scene->index);
+	const TVoxel *voxelData = volume->GetVoxels();
+	const typename TIndex::IndexData *voxelIndex = volume->index.GetIndexData();
+	HashBlockVisibility* blockVisibilityTypes = GetBlockVisibilityTypes(volume->index);
 
 #ifdef WITH_OPENMP
 	#pragma omp parallel for
@@ -212,7 +212,7 @@ static void GenericRaycast(VoxelVolume<TVoxel, TIndex> *scene, const Vector2i& i
 }
 
 template<class TVoxel, class TIndex>
-static void RenderImage_common(VoxelVolume<TVoxel,TIndex> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics,
+static void RenderImage_common(VoxelVolume<TVoxel,TIndex> *volume, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics,
                                const RenderState *renderState, ITMUChar4Image *outputImage, IVisualizationEngine::RenderImageType type, IVisualizationEngine::RenderRaycastSelection raycastType)
 {
 	Vector2i imgSize = outputImage->dimensions;
@@ -229,15 +229,15 @@ static void RenderImage_common(VoxelVolume<TVoxel,TIndex> *scene, const ORUtils:
         {
             // this one is generally done for freeview Visualization, so
             // no, do not update the list of visible blocks
-            GenericRaycast(scene, imgSize, invM, intrinsics->projectionParamsSimple.all, renderState, false);
+            GenericRaycast(volume, imgSize, invM, intrinsics->projectionParamsSimple.all, renderState, false);
             pointsRay = renderState->raycastResult->GetData(MEMORYDEVICE_CPU);
         }
     }
 
 	Vector3f lightSource = -Vector3f(invM.getColumn(2));
 	Vector4u *outRendering = outputImage->GetData(MEMORYDEVICE_CPU);
-	const TVoxel *voxelData = scene->GetVoxelBlocks();
-	const typename TIndex::IndexData *voxelIndex = scene->index.GetIndexData();
+	const TVoxel *voxelData = volume->GetVoxels();
+	const typename TIndex::IndexData *voxelIndex = volume->index.GetIndexData();
 
 	if ((type == IVisualizationEngine::RENDER_COLOUR_FROM_VOLUME)&&
 	    (!TVoxel::hasColorInformation)) type = IVisualizationEngine::RENDER_SHADED_GREYSCALE;
@@ -284,11 +284,11 @@ static void RenderImage_common(VoxelVolume<TVoxel,TIndex> *scene, const ORUtils:
 
 			if (intrinsics->FocalLengthSignsDiffer())
 			{
-				processPixelGrey_ImageNormals<true, true>(outRendering, pointsRay, imgSize, x, y, scene->parameters->voxel_size, lightSource);
+				processPixelGrey_ImageNormals<true, true>(outRendering, pointsRay, imgSize, x, y, volume->parameters->voxel_size, lightSource);
 			}
 			else
 			{
-				processPixelGrey_ImageNormals<true, false>(outRendering, pointsRay, imgSize, x, y, scene->parameters->voxel_size, lightSource);
+				processPixelGrey_ImageNormals<true, false>(outRendering, pointsRay, imgSize, x, y, volume->parameters->voxel_size, lightSource);
 			}
 		}
 		break;
@@ -330,7 +330,7 @@ static void RenderImage_common(VoxelVolume<TVoxel,TIndex> *scene, const ORUtils:
 }
 
 template<class TVoxel, class TIndex>
-static void CreatePointCloud_common(VoxelVolume<TVoxel,TIndex> *scene, const View *view, CameraTrackingState *trackingState,
+static void CreatePointCloud_common(VoxelVolume<TVoxel,TIndex> *volume, const View *view, CameraTrackingState *trackingState,
                                     RenderState *renderState, bool skipPoints)
 {
 	Vector2i imgSize = renderState->raycastResult->dimensions;
@@ -338,38 +338,38 @@ static void CreatePointCloud_common(VoxelVolume<TVoxel,TIndex> *scene, const Vie
 
 	// this one is generally done for the colour tracker, so yes, update
 	// the list of visible blocks if possible
-	GenericRaycast(scene, imgSize, invM, view->calib.intrinsics_rgb.projectionParamsSimple.all, renderState, true);
+	GenericRaycast(volume, imgSize, invM, view->calib.intrinsics_rgb.projectionParamsSimple.all, renderState, true);
 	trackingState->pose_pointCloud->SetFrom(trackingState->pose_d);
 
 	trackingState->pointCloud->noTotalPoints = RenderPointCloud<TVoxel, TIndex>(
-		trackingState->pointCloud->locations->GetData(MEMORYDEVICE_CPU),
-		trackingState->pointCloud->colours->GetData(MEMORYDEVICE_CPU),
-		renderState->raycastResult->GetData(MEMORYDEVICE_CPU),
-		scene->GetVoxelBlocks(),
-		scene->index.GetIndexData(),
-		skipPoints,
-		scene->parameters->voxel_size,
-		imgSize,
-		-Vector3f(invM.getColumn(2))
+			trackingState->pointCloud->locations->GetData(MEMORYDEVICE_CPU),
+			trackingState->pointCloud->colours->GetData(MEMORYDEVICE_CPU),
+			renderState->raycastResult->GetData(MEMORYDEVICE_CPU),
+			volume->GetVoxels(),
+			volume->index.GetIndexData(),
+			skipPoints,
+			volume->parameters->voxel_size,
+			imgSize,
+			-Vector3f(invM.getColumn(2))
 	);
 }
 
 template<class TVoxel, class TIndex>
-static void CreateICPMaps_common(VoxelVolume<TVoxel,TIndex> *scene, const View *view, CameraTrackingState *trackingState, RenderState *renderState)
+static void CreateICPMaps_common(VoxelVolume<TVoxel,TIndex> *volume, const View *view, CameraTrackingState *trackingState, RenderState *renderState)
 {
 	const Vector2i imgSize = renderState->raycastResult->dimensions;
 	Matrix4f invM = trackingState->pose_d->GetInvM();
 
 	// this one is generally done for the ICP tracker, so yes, update
 	// the list of visible blocks if possible
-	GenericRaycast(scene, imgSize, invM, view->calib.intrinsics_d.projectionParamsSimple.all, renderState, true);
+	GenericRaycast(volume, imgSize, invM, view->calib.intrinsics_d.projectionParamsSimple.all, renderState, true);
 	trackingState->pose_pointCloud->SetFrom(trackingState->pose_d);
 
 	const Vector3f lightSource = -Vector3f(invM.getColumn(2));
 	Vector4f *normalsMap = trackingState->pointCloud->colours->GetData(MEMORYDEVICE_CPU);
 	Vector4f *pointsMap = trackingState->pointCloud->locations->GetData(MEMORYDEVICE_CPU);
 	Vector4f *pointsRay = renderState->raycastResult->GetData(MEMORYDEVICE_CPU);
-	const float voxelSize = scene->parameters->voxel_size;
+	const float voxelSize = volume->parameters->voxel_size;
 
 #ifdef WITH_OPENMP
 	#pragma omp parallel for default(none) shared(pointsMap, normalsMap, pointsRay, view)
@@ -389,7 +389,7 @@ static void CreateICPMaps_common(VoxelVolume<TVoxel,TIndex> *scene, const View *
 }
 
 template<class TVoxel, class TIndex>
-static void ForwardRender_common(const VoxelVolume<TVoxel, TIndex> *scene, const View *view, CameraTrackingState *trackingState, RenderState *renderState)
+static void ForwardRender_common(const VoxelVolume<TVoxel, TIndex> *volume, const View *view, CameraTrackingState *trackingState, RenderState *renderState)
 {
 	Vector2i imgSize = renderState->raycastResult->dimensions;
 	Matrix4f M = trackingState->pose_d->GetM();
@@ -401,9 +401,9 @@ static void ForwardRender_common(const VoxelVolume<TVoxel, TIndex> *scene, const
 	float *currentDepth = view->depth->GetData(MEMORYDEVICE_CPU);
 	int *fwdProjMissingPoints = renderState->fwdProjMissingPoints->GetData(MEMORYDEVICE_CPU);
 	const Vector2f *minmaximg = renderState->renderingRangeImage->GetData(MEMORYDEVICE_CPU);
-	float voxelSize = scene->parameters->voxel_size;
-	const TVoxel *voxelData = scene->GetVoxelBlocks();
-	const typename TIndex::IndexData *voxelIndex = scene->index.GetIndexData();
+	float voxelSize = volume->parameters->voxel_size;
+	const TVoxel *voxelData = volume->GetVoxels();
+	const typename TIndex::IndexData *voxelIndex = volume->index.GetIndexData();
 
 	renderState->forwardProjection->Clear();
 
@@ -444,7 +444,7 @@ static void ForwardRender_common(const VoxelVolume<TVoxel, TIndex> *scene, const
 		int locId2 = (int)floor((float)x / minmaximg_subsample) + (int)floor((float)y / minmaximg_subsample) * imgSize.x;
 
 		castRay<TVoxel, TIndex, false>(forwardProjection[locId], NULL, x, y, voxelData, voxelIndex, invM, invProjParams,
-			1.0f / scene->parameters->voxel_size, scene->parameters->narrow_band_half_width, minmaximg[locId2]);
+		                               1.0f / volume->parameters->voxel_size, volume->parameters->narrow_band_half_width, minmaximg[locId2]);
 	}
 }
 

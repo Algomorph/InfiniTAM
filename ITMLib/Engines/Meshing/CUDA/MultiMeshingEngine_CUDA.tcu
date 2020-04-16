@@ -42,7 +42,7 @@ MultiMeshingEngine_CUDA<TVoxel, VoxelBlockHash>::~MultiMeshingEngine_CUDA() {
 template<class TVoxel>
 void MultiMeshingEngine_CUDA<TVoxel, VoxelBlockHash>::MeshScene(Mesh* mesh,
                                                                 const VoxelMapGraphManager<TVoxel, VoxelBlockHash>& sceneManager) {
-	const VoxelVolumeParameters& sceneParams = *(sceneManager.getLocalMap(0)->scene->parameters);
+	const VoxelVolumeParameters& sceneParams = *(sceneManager.getLocalMap(0)->volume->parameters);
 	int numLocalMaps = (int) sceneManager.numLocalMaps();
 
 	{ // prepare MultiIndex etc.
@@ -57,8 +57,8 @@ void MultiMeshingEngine_CUDA<TVoxel, VoxelBlockHash>::MeshScene(Mesh* mesh,
 			indexData_host.posesInv[localMapId].m30 /= sceneParams.voxel_size;
 			indexData_host.posesInv[localMapId].m31 /= sceneParams.voxel_size;
 			indexData_host.posesInv[localMapId].m32 /= sceneParams.voxel_size;
-			indexData_host.index[localMapId] = sceneManager.getLocalMap(localMapId)->scene->index.GetIndexData();
-			voxelData_host.voxels[localMapId] = sceneManager.getLocalMap(localMapId)->scene->GetVoxelBlocks();
+			indexData_host.index[localMapId] = sceneManager.getLocalMap(localMapId)->volume->index.GetIndexData();
+			voxelData_host.voxels[localMapId] = sceneManager.getLocalMap(localMapId)->volume->GetVoxels();
 		}
 
 		ORcudaSafeCall(cudaMemcpy(indexData_device, &(indexData_host), sizeof(MultiIndexData), cudaMemcpyHostToDevice));
@@ -71,8 +71,8 @@ void MultiMeshingEngine_CUDA<TVoxel, VoxelBlockHash>::MeshScene(Mesh* mesh,
 	typedef MultiIndex<VoxelBlockHash> ID;
 
 	int noMaxTriangles = mesh->max_triangle_count;
-	const int hashEntryCount = sceneManager.getLocalMap(0)->scene->index.hash_entry_count;
-	const unsigned int voxelBlockCount = sceneManager.getLocalMap(0)->scene->index.voxel_block_count;
+	const int hashEntryCount = sceneManager.getLocalMap(0)->volume->index.hash_entry_count;
+	const unsigned int voxelBlockCount = sceneManager.getLocalMap(0)->volume->index.voxel_block_count;
 	float factor = sceneParams.voxel_size;
 	ORcudaSafeCall(cudaMemset(noTriangles_device, 0, sizeof(unsigned int)));
 	ORcudaSafeCall(cudaMemset(visibleBlockGlobalPos_device, 0, sizeof(Vector4s) * voxelBlockCount));

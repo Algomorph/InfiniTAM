@@ -19,9 +19,9 @@ namespace ITMLib
 		void *allocationTempData_host;
 
 	public:
-		void ResetScene(VoxelVolume<TVoxel, VoxelBlockHash> *scene);
+		void ResetScene(VoxelVolume<TVoxel, VoxelBlockHash> *volume);
 
-		void AllocateSceneFromDepth(VoxelVolume<TVoxel, VoxelBlockHash> *scene, const View *view, const CameraTrackingState *trackingState,
+		void AllocateSceneFromDepth(VoxelVolume<TVoxel, VoxelBlockHash> *volume, const View *view, const CameraTrackingState *trackingState,
 		                            const RenderState *renderState, bool onlyUpdateVisibleList = false, bool resetVisibleList = false);
 
 		void IntegrateIntoScene(VoxelVolume<TVoxel, VoxelBlockHash> *volume, const View *view, const CameraTrackingState *tracking_state,
@@ -35,12 +35,12 @@ namespace ITMLib
 	class SceneReconstructionEngine_CUDA<TVoxel, PlainVoxelArray> : public SceneReconstructionEngine < TVoxel, PlainVoxelArray >
 	{
 	public:
-		void ResetScene(VoxelVolume<TVoxel, PlainVoxelArray> *scene);
+		void ResetScene(VoxelVolume<TVoxel, PlainVoxelArray> *volume);
 
 		void AllocateSceneFromDepth(VoxelVolume<TVoxel, PlainVoxelArray> *scene, const View *view, const CameraTrackingState *trackingState,
 		                            const RenderState *renderState, bool onlyUpdateVisibleList = false, bool resetVisibleList = false);
 
-		void IntegrateIntoScene(VoxelVolume<TVoxel, PlainVoxelArray> *scene, const View *view, const CameraTrackingState *trackingState,
+		void IntegrateIntoScene(VoxelVolume<TVoxel, PlainVoxelArray> *volume, const View *view, const CameraTrackingState *trackingState,
 		                        const RenderState *renderState);
 	};
 }

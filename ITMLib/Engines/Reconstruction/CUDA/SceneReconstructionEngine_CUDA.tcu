@@ -68,39 +68,39 @@ SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::~SceneReconstructionEngi
 
 template<class TVoxel>
 void SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::ResetScene(
-		VoxelVolume<TVoxel, VoxelBlockHash>* scene) {
-	int numBlocks = scene->index.GetMaximumBlockCount();
-	int blockSize = scene->index.GetVoxelBlockSize();
+		VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
+	int numBlocks = volume->index.GetMaximumBlockCount();
+	int blockSize = volume->index.GetVoxelBlockSize();
 
-	TVoxel* voxelBlocks_ptr = scene->GetVoxelBlocks();
+	TVoxel* voxelBlocks_ptr = volume->GetVoxels();
 	memsetKernel<TVoxel>(voxelBlocks_ptr, TVoxel(), numBlocks * blockSize);
-	int* vbaAllocationList_ptr = scene->index.GetBlockAllocationList();
+	int* vbaAllocationList_ptr = volume->index.GetBlockAllocationList();
 	fillArrayKernel<int>(vbaAllocationList_ptr, numBlocks);
-	scene->index.SetLastFreeBlockListId(numBlocks - 1);
+	volume->index.SetLastFreeBlockListId(numBlocks - 1);
 
 	HashEntry tmpEntry;
 	memset(&tmpEntry, 0, sizeof(HashEntry));
 	tmpEntry.ptr = -2;
-	HashEntry* hashEntry_ptr = scene->index.GetEntries();
-	memsetKernel<HashEntry>(hashEntry_ptr, tmpEntry, scene->index.hash_entry_count);
-	int* excessList_ptr = scene->index.GetExcessEntryList();
-	fillArrayKernel<int>(excessList_ptr, scene->index.excess_list_size);
+	HashEntry* hashEntry_ptr = volume->index.GetEntries();
+	memsetKernel<HashEntry>(hashEntry_ptr, tmpEntry, volume->index.hash_entry_count);
+	int* excessList_ptr = volume->index.GetExcessEntryList();
+	fillArrayKernel<int>(excessList_ptr, volume->index.excess_list_size);
 
-	scene->index.SetLastFreeExcessListId(scene->index.excess_list_size - 1);
+	volume->index.SetLastFreeExcessListId(volume->index.excess_list_size - 1);
 }
 
 template<class TVoxel>
 void SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::AllocateSceneFromDepth(
-		VoxelVolume<TVoxel, VoxelBlockHash>* scene, const View* view,
+		VoxelVolume<TVoxel, VoxelBlockHash>* volume, const View* view,
 		const CameraTrackingState* trackingState, const RenderState* renderState, bool onlyUpdateVisibleList,
 		bool resetVisibleList) {
 	Vector2i depthImgSize = view->depth->dimensions;
-	float voxelSize = scene->parameters->voxel_size;
+	float voxelSize = volume->parameters->voxel_size;
 
 	Matrix4f M_d, invM_d;
 	Vector4f projParams_d, invProjParams_d;
 
-	if (resetVisibleList) scene->index.SetUtilizedBlockCount(0);
+	if (resetVisibleList) volume->index.SetUtilizedBlockCount(0);
 
 	M_d = trackingState->pose_d->GetM();
 	M_d.inv(invM_d);
@@ -110,18 +110,18 @@ void SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::AllocateSceneFromDe
 	invProjParams_d.x = 1.0f / invProjParams_d.x;
 	invProjParams_d.y = 1.0f / invProjParams_d.y;
 
-	float mu = scene->parameters->narrow_band_half_width;
+	float mu = volume->parameters->narrow_band_half_width;
 
 	float* depth = view->depth->GetData(MEMORYDEVICE_CUDA);
-	int* voxelAllocationList = scene->index.GetBlockAllocationList();
-	int* excessAllocationList = scene->index.GetExcessEntryList();
-	HashEntry* hashTable = scene->index.GetEntries();
-	ITMHashSwapState* swapStates = scene->SwappingEnabled() ? scene->global_cache.GetSwapStates(true) : 0;
+	int* voxelAllocationList = volume->index.GetBlockAllocationList();
+	int* excessAllocationList = volume->index.GetExcessEntryList();
+	HashEntry* hashTable = volume->index.GetEntries();
+	ITMHashSwapState* swapStates = volume->SwappingEnabled() ? volume->global_cache.GetSwapStates(true) : 0;
 
-	const int hashEntryCount = scene->index.hash_entry_count;
+	const int hashEntryCount = volume->index.hash_entry_count;
 
-	int* visibleBlockHashCodes = scene->index.GetUtilizedBlockHashCodes();
-	HashBlockVisibility* blockVisibilityTypes = scene->index.GetBlockVisibilityTypes();
+	int* visibleBlockHashCodes = volume->index.GetUtilizedBlockHashCodes();
+	HashBlockVisibility* blockVisibilityTypes = volume->index.GetBlockVisibilityTypes();
 
 	dim3 cudaBlockSizeHV(16, 16);
 	dim3 gridSizeHV((int) ceil((float) depthImgSize.x / (float) cudaBlockSizeHV.x),
@@ -131,36 +131,36 @@ void SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::AllocateSceneFromDe
 	dim3 gridSizeAL((int) ceil((float) hashEntryCount / (float) cudaBlockSizeAL.x));
 
 	dim3 cudaBlockSizeVS(256, 1);
-	dim3 gridSizeVS((int) ceil((float) scene->index.GetUtilizedBlockCount() / (float) cudaBlockSizeVS.x));
+	dim3 gridSizeVS((int) ceil((float) volume->index.GetUtilizedBlockCount() / (float) cudaBlockSizeVS.x));
 
 	float oneOverHashBlockSize = 1.0f / (voxelSize * VOXEL_BLOCK_SIZE);
 	float surface_cutoff_distance = configuration::get().general_voxel_volume_parameters.block_allocation_band_factor * mu;
 
 	AllocationTempData* tempData = (AllocationTempData*) allocationTempData_host;
-	tempData->last_free_voxel_block_id = scene->index.GetLastFreeBlockListId();
-	tempData->last_free_excess_list_id = scene->index.GetLastFreeExcessListId();
+	tempData->last_free_voxel_block_id = volume->index.GetLastFreeBlockListId();
+	tempData->last_free_excess_list_id = volume->index.GetLastFreeExcessListId();
 	tempData->utilized_block_count = 0;
 	ORcudaSafeCall(
 			cudaMemcpyAsync(allocationTempData_device, tempData, sizeof(AllocationTempData), cudaMemcpyHostToDevice));
 
-	ITMLib::HashEntryAllocationState* hashEntryStates_device = scene->index.GetHashEntryAllocationStates();
-	scene->index.ClearHashEntryAllocationStates();
-	Vector3s* blockCoordinates_device = scene->index.GetAllocationBlockCoordinates();
+	ITMLib::HashEntryAllocationState* hashEntryStates_device = volume->index.GetHashEntryAllocationStates();
+	volume->index.ClearHashEntryAllocationStates();
+	Vector3s* blockCoordinates_device = volume->index.GetAllocationBlockCoordinates();
 
 	if (gridSizeVS.x > 0) {
 		setVisibleEntriesToVisibleAtPreviousFrameAndUnstreamed <<< gridSizeVS, cudaBlockSizeVS >>>
 		                                                                        (blockVisibilityTypes, visibleBlockHashCodes,
-		                                                                         scene->index.GetUtilizedBlockCount());
+		                                                                         volume->index.GetUtilizedBlockCount());
 		ORcudaKernelCheck;
 	}
 
 	buildHashAllocAndVisibleType_device <<< gridSizeHV, cudaBlockSizeHV >>>
 	                                                     (hashEntryStates_device, blockVisibilityTypes,
-			                                                     blockCoordinates_device, depth, invM_d, invProjParams_d, surface_cutoff_distance, depthImgSize, oneOverHashBlockSize, hashTable,
-			                                                     scene->parameters->near_clipping_distance, scene->parameters->far_clipping_distance);
+	                                                      blockCoordinates_device, depth, invM_d, invProjParams_d, surface_cutoff_distance, depthImgSize, oneOverHashBlockSize, hashTable,
+	                                                      volume->parameters->near_clipping_distance, volume->parameters->far_clipping_distance);
 	ORcudaKernelCheck;
 
-	bool useSwapping = scene->SwappingEnabled();
+	bool useSwapping = volume->SwappingEnabled();
 	if (onlyUpdateVisibleList) useSwapping = false;
 	if (!onlyUpdateVisibleList) {
 		allocateVoxelBlocksList_device <<< gridSizeAL, cudaBlockSizeAL >>> (
@@ -194,9 +194,9 @@ void SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::AllocateSceneFromDe
 	}
 
 	ORcudaSafeCall(cudaMemcpy(tempData, allocationTempData_device, sizeof(AllocationTempData), cudaMemcpyDeviceToHost));
-	scene->index.SetUtilizedBlockCount(tempData->utilized_block_count);
-	scene->index.SetLastFreeBlockListId(tempData->last_free_voxel_block_id);
-	scene->index.SetLastFreeExcessListId(tempData->last_free_excess_list_id);
+	volume->index.SetUtilizedBlockCount(tempData->utilized_block_count);
+	volume->index.SetLastFreeBlockListId(tempData->last_free_voxel_block_id);
+	volume->index.SetLastFreeExcessListId(tempData->last_free_excess_list_id);
 
 }
 
@@ -226,7 +226,7 @@ void SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::IntegrateIntoScene(
 	float* depth = view->depth->GetData(MEMORYDEVICE_CUDA);
 	float* confidence = view->depthConfidence->GetData(MEMORYDEVICE_CUDA);
 	Vector4u* rgb = view->rgb->GetData(MEMORYDEVICE_CUDA);
-	TVoxel* localVBA = volume->GetVoxelBlocks();
+	TVoxel* localVBA = volume->GetVoxels();
 	HashEntry* hash_table = volume->index.GetEntries();
 
 	int* visibleBlockHashCodes = volume->index.GetUtilizedBlockHashCodes();
@@ -250,8 +250,8 @@ void SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::IntegrateIntoScene(
 
 template<class TVoxel>
 void SceneReconstructionEngine_CUDA<TVoxel, PlainVoxelArray>::ResetScene(
-		VoxelVolume<TVoxel, PlainVoxelArray>* scene) {
-	scene->Reset();
+		VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
+	volume->Reset();
 }
 
 template<class TVoxel>
@@ -263,11 +263,11 @@ void SceneReconstructionEngine_CUDA<TVoxel, PlainVoxelArray>::AllocateSceneFromD
 
 template<class TVoxel>
 void SceneReconstructionEngine_CUDA<TVoxel, PlainVoxelArray>::IntegrateIntoScene(
-		VoxelVolume<TVoxel, PlainVoxelArray>* scene, const View* view,
+		VoxelVolume<TVoxel, PlainVoxelArray>* volume, const View* view,
 		const CameraTrackingState* trackingState, const RenderState* renderState) {
 	Vector2i rgbImgSize = view->rgb->dimensions;
 	Vector2i depthImgSize = view->depth->dimensions;
-	float voxelSize = scene->parameters->voxel_size;
+	float voxelSize = volume->parameters->voxel_size;
 
 	Matrix4f M_d, M_rgb;
 	Vector4f projParams_d, projParams_rgb;
@@ -278,20 +278,20 @@ void SceneReconstructionEngine_CUDA<TVoxel, PlainVoxelArray>::IntegrateIntoScene
 	projParams_d = view->calib.intrinsics_d.projectionParamsSimple.all;
 	projParams_rgb = view->calib.intrinsics_rgb.projectionParamsSimple.all;
 
-	float mu = scene->parameters->narrow_band_half_width;
-	int maxW = scene->parameters->max_integration_weight;
+	float mu = volume->parameters->narrow_band_half_width;
+	int maxW = volume->parameters->max_integration_weight;
 
 	float* depth = view->depth->GetData(MEMORYDEVICE_CUDA);
 	float* confidence = view->depthConfidence->GetData(MEMORYDEVICE_CUDA);
 	Vector4u* rgb = view->rgb->GetData(MEMORYDEVICE_CUDA);
-	TVoxel* localVBA = scene->GetVoxelBlocks();
-	const GridAlignedBox* arrayInfo = scene->index.GetIndexData();
+	TVoxel* localVBA = volume->GetVoxels();
+	const GridAlignedBox* arrayInfo = volume->index.GetIndexData();
 
 	dim3 cudaBlockSize(8, 8, 8);
-	dim3 gridSize(scene->index.GetVolumeSize().x / cudaBlockSize.x, scene->index.GetVolumeSize().y / cudaBlockSize.y,
-	              scene->index.GetVolumeSize().z / cudaBlockSize.z);
+	dim3 gridSize(volume->index.GetVolumeSize().x / cudaBlockSize.x, volume->index.GetVolumeSize().y / cudaBlockSize.y,
+	              volume->index.GetVolumeSize().z / cudaBlockSize.z);
 
-	if (scene->parameters->stop_integration_at_max_weight) {
+	if (volume->parameters->stop_integration_at_max_weight) {
 		integrateIntoScene_device<TVoxel, true> <<< gridSize, cudaBlockSize >>> (localVBA, arrayInfo,
 				rgb, rgbImgSize, depth, confidence, depthImgSize, M_d, M_rgb, projParams_d, projParams_rgb, voxelSize, mu, maxW);
 		ORcudaKernelCheck;

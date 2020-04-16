@@ -53,9 +53,9 @@ BOOST_AUTO_TEST_CASE(testSaveSceneCompact_CPU) {
 	GenerateSimpleSurfaceTestVolume<MEMORYDEVICE_CPU>(&generated_test_scene_PVA);
 
 	std::string path = "TestData/test_PVA_";
-	SceneFileIOEngine_PVA::SaveToDirectoryCompact(&generated_test_scene_PVA, path);
+	SceneFileIOEngine_PVA::SaveVolumeCompact(&generated_test_scene_PVA, path);
 	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetVolume(&loaded_test_scene_PVA);
-	SceneFileIOEngine_PVA::LoadFromDirectoryCompact(&loaded_test_scene_PVA, path);
+	SceneFileIOEngine_PVA::LoadVolumeCompact(&loaded_test_scene_PVA, path);
 
 	float tolerance = 1e-8;
 	BOOST_REQUIRE_EQUAL(StatCalc_CPU_PVA_Voxel::Instance().CountNonTruncatedVoxels(&loaded_test_scene_PVA), 19456);
@@ -71,9 +71,9 @@ BOOST_AUTO_TEST_CASE(testSaveSceneCompact_CPU) {
 
 	GenerateSimpleSurfaceTestVolume<MEMORYDEVICE_CPU>(&generated_test_scene_VBH);
 	path = "TestData/test_VBH_";
-	SceneFileIOEngine_VBH::SaveToDirectoryCompact(&generated_test_scene_VBH, path);
+	SceneFileIOEngine_VBH::SaveVolumeCompact(&generated_test_scene_VBH, path);
 	ManipulationEngine_CPU_VBH_Voxel::Inst().ResetVolume(&loaded_test_scene_VBH);
-	SceneFileIOEngine_VBH::LoadFromDirectoryCompact(&loaded_test_scene_VBH, path);
+	SceneFileIOEngine_VBH::LoadVolumeCompact(&loaded_test_scene_VBH, path);
 
 	BOOST_REQUIRE_EQUAL(StatCalc_CPU_VBH_Voxel::Instance().CountNonTruncatedVoxels(&loaded_test_scene_VBH), 19456);
 	BOOST_REQUIRE(contentAlmostEqual_CPU(&generated_test_scene_VBH, &loaded_test_scene_VBH, tolerance));

@@ -54,7 +54,7 @@ void MultiVisualizationEngine_CPU<TVoxel, VoxelBlockHash>::CreateExpectedDepths(
 	{
 		float voxelSize = renderState->voxelSize;
 		const HashEntry *hash_entries = renderState->indexData_host.index[localMapId];
-		int hashEntryCount = sceneManager.getLocalMap(0)->scene->index.hash_entry_count;
+		int hashEntryCount = sceneManager.getLocalMap(0)->volume->index.hash_entry_count;
 
 		std::vector<RenderingBlock> renderingBlocks(MAX_RENDERING_BLOCKS);
 		int numRenderingBlocks = 0;

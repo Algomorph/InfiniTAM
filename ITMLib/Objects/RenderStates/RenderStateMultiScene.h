@@ -54,8 +54,8 @@ namespace ITMLib {
 
 		void PrepareLocalMaps(const MultiSceneManager & sceneManager)
 		{
-			voxelSize = sceneManager.getLocalMap(0)->scene->parameters->voxel_size;
-			mu = sceneManager.getLocalMap(0)->scene->parameters->narrow_band_half_width;
+			voxelSize = sceneManager.getLocalMap(0)->volume->parameters->voxel_size;
+			mu = sceneManager.getLocalMap(0)->volume->parameters->narrow_band_half_width;
 
 			int num = (int)sceneManager.numLocalMaps();
 			if (num > MAX_NUM_LOCALMAPS) num = MAX_NUM_LOCALMAPS;
@@ -67,8 +67,8 @@ namespace ITMLib {
 				indexData_host.poses_vs[localMapId].m31 /= voxelSize;
 				indexData_host.poses_vs[localMapId].m32 /= voxelSize;
 				indexData_host.posesInv[localMapId] = sceneManager.getEstimatedGlobalPose(localMapId).GetInvM();
-				indexData_host.index[localMapId] = sceneManager.getLocalMap(localMapId)->scene->index.GetIndexData();
-				voxelData_host.voxels[localMapId] = sceneManager.getLocalMap(localMapId)->scene->GetVoxelBlocks();
+				indexData_host.index[localMapId] = sceneManager.getLocalMap(localMapId)->volume->index.GetIndexData();
+				voxelData_host.voxels[localMapId] = sceneManager.getLocalMap(localMapId)->volume->GetVoxels();
 			}
 
 #ifndef COMPILE_WITHOUT_CUDA

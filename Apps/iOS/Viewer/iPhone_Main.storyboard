@@ -7,7 +7,7 @@
     </dependencies>
     <scenes>
         <!--View Controller-->
-        <scene sceneID="Sgd-Xi-pie">
+        <volume sceneID="Sgd-Xi-pie">
             <objects>
                 <viewController id="GBX-KH-cTe" customClass="ViewController" sceneMemberID="viewController">
                     <layoutGuides>
@@ -85,6 +85,6 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="QrS-yb-mX1" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="348.5" y="334.5"/>
-        </scene>
+        </volume>
     </scenes>
 </document>

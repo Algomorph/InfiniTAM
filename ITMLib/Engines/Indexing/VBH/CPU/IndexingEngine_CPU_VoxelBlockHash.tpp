@@ -348,7 +348,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::DeallocateBlockLi
 	// *** volume-specific hash table, temporary entry allocation state table, voxel storage *** //
 	HashEntry* hash_table = volume->index.GetEntries();
 	HashEntryAllocationState* hash_entry_states = volume->index.GetHashEntryAllocationStates();
-	TVoxel* voxels = volume->GetVoxelBlocks();
+	TVoxel* voxels = volume->GetVoxels();
 
 	// *** allocation index lists & counters ***
 	int* block_allocation_list = volume->index.GetBlockAllocationList();

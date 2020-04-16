@@ -28,12 +28,10 @@ namespace b_ios = boost::iostreams;
 
 
 template<typename TVoxel>
-void VolumeFileIOEngine<TVoxel, VoxelBlockHash>::SaveToDirectoryCompact(
+void VolumeFileIOEngine<TVoxel, VoxelBlockHash>::SaveVolumeCompact(
 		const VoxelVolume<TVoxel, VoxelBlockHash>* volume,
-		const std::string& output_directory) {
+		const std::string& path) {
 
-
-	std::string path = output_directory + compactFilePostfixAndExtension;
 	std::ofstream volume_output_stream = std::ofstream(path.c_str(), std::ios_base::binary | std::ios_base::out);
 	if (!volume_output_stream) throw std::runtime_error("Could not open '" + path + "' for writing.");
 
@@ -50,7 +48,7 @@ void VolumeFileIOEngine<TVoxel, VoxelBlockHash>::SaveToDirectoryCompact(
 		temporary_volume_used = true;
 	}
 
-	const TVoxel* voxels = volume->GetVoxelBlocks();
+	const TVoxel* voxels = volume->GetVoxels();
 	const HashEntry* hash_table = volume->index.GetEntries();
 	const int hash_entry_count = volume->index.hash_entry_count;
 
@@ -95,10 +93,9 @@ void VolumeFileIOEngine<TVoxel, VoxelBlockHash>::SaveToDirectoryCompact(
 
 template<typename TVoxel>
 void
-VolumeFileIOEngine<TVoxel, VoxelBlockHash>::LoadFromDirectoryCompact(
+VolumeFileIOEngine<TVoxel, VoxelBlockHash>::LoadVolumeCompact(
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume,
-		const std::string& output_directory) {
-	std::string path = output_directory + "compact.dat";
+		const std::string& path) {
 	std::ifstream ifStream = std::ifstream(path.c_str(), std::ios_base::binary | std::ios_base::in);
 	if (!ifStream) throw std::runtime_error("Could not open '" + path + "' for reading.");
 	b_ios::filtering_istream in_filter;
@@ -115,7 +112,7 @@ VolumeFileIOEngine<TVoxel, VoxelBlockHash>::LoadFromDirectoryCompact(
 		copyToCUDA = true;
 	}
 
-	TVoxel* voxel_blocks = volume->GetVoxelBlocks();
+	TVoxel* voxel_blocks = volume->GetVoxels();
 	HashEntry* hash_table = volume->index.GetEntries();
 	int last_free_excess_list_id;
 	int last_free_voxel_block_id;
@@ -153,18 +150,17 @@ VolumeFileIOEngine<TVoxel, VoxelBlockHash>::LoadFromDirectoryCompact(
 
 template<typename TVoxel>
 void
-VolumeFileIOEngine<TVoxel, PlainVoxelArray>::SaveToDirectoryCompact(
+VolumeFileIOEngine<TVoxel, PlainVoxelArray>::SaveVolumeCompact(
 		const VoxelVolume<TVoxel, PlainVoxelArray>* volume,
-		const std::string& output_directory) {
-	volume
+		const std::string& path) {
 
 }
 
 
 template<typename TVoxel>
 void
-VolumeFileIOEngine<TVoxel, PlainVoxelArray>::LoadFromDirectoryCompact(
+VolumeFileIOEngine<TVoxel, PlainVoxelArray>::LoadVolumeCompact(
 		VoxelVolume<TVoxel, PlainVoxelArray>* volume,
-		const std::string& output_directory) {
+		const std::string& path) {
 
 }

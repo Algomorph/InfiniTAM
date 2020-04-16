@@ -131,7 +131,7 @@ private:
 	template<typename TProcessBlockFunction>
 	inline static void
 	TraverseAll_Generic(VoxelVolume<TVoxel, VoxelBlockHash>* volume, TProcessBlockFunction&& block_function) {
-		TVoxel* const voxels = volume->GetVoxelBlocks();
+		TVoxel* const voxels = volume->GetVoxels();
 		const HashEntry* const hash_table = volume->index.GetEntries();
 		const int hash_entry_count = volume->index.hash_entry_count;
 #ifdef WITH_OPENMP
@@ -148,7 +148,7 @@ private:
 	template<typename TProcessBlockFunction>
 	inline static void
 	TraverseUtilized_Generic(VoxelVolume<TVoxel, VoxelBlockHash>* volume, TProcessBlockFunction&& block_function) {
-		TVoxel* const voxels = volume->GetVoxelBlocks();
+		TVoxel* const voxels = volume->GetVoxels();
 		const HashEntry* const hash_table = volume->index.GetEntries();
 		const int utilized_entry_count = volume->index.GetUtilizedBlockCount();
 		const int* utilized_hash_codes = volume->index.GetUtilizedBlockHashCodes();
@@ -245,7 +245,7 @@ public:
 	template<typename TFunctor>
 	inline static void
 	TraverseAll_ST(VoxelVolume<TVoxel, VoxelBlockHash>* volume, TFunctor& functor) {
-		TVoxel* voxels = volume->GetVoxelBlocks();
+		TVoxel* voxels = volume->GetVoxels();
 		const HashEntry* hash_table = volume->index.GetEntries();
 		int hash_entry_count = volume->index.hash_entry_count;
 		for (int hash_code = 0; hash_code < hash_entry_count; hash_code++) {
@@ -259,7 +259,7 @@ public:
 	template<typename TFunctor>
 	inline static void
 	TraverseUtilized_ST(VoxelVolume<TVoxel, VoxelBlockHash>* volume, TFunctor& functor) {
-		TVoxel* const voxels = volume->GetVoxelBlocks();
+		TVoxel* const voxels = volume->GetVoxels();
 		const HashEntry* const hash_table = volume->index.GetEntries();
 		const int utilized_entry_count = volume->index.GetUtilizedBlockCount();
 		const int* utilized_hash_codes = volume->index.GetUtilizedBlockHashCodes();

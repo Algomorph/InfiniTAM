@@ -64,7 +64,7 @@ class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, 
 		*falseOrAlteredUnmatchedEncountered.GetData(MEMORYDEVICE_CPU) = false;
 		falseOrAlteredUnmatchedEncountered.UpdateDeviceFromHost();
 		dim3 cudaBlockSize_BlockVoxelPerThread(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
-		TVoxelSecondary* voxels_hash = volume2->GetVoxelBlocks();
+		TVoxelSecondary* voxels_hash = volume2->GetVoxels();
 
 		if (count_hash_blocks_outside_array_host > 0) {
 			// if there are any blocks in the hash that are not spanned by the array volume, we must check
@@ -85,7 +85,7 @@ class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, 
 			return false;
 		}
 
-		TVoxelPrimary* voxels_array = volume1->GetVoxelBlocks();
+		TVoxelPrimary* voxels_array = volume1->GetVoxels();
 		Vector3i array_offset = volume1->index.GetVolumeOffset();
 		Vector3i array_size = volume1->index.GetVolumeSize();
 
@@ -157,7 +157,7 @@ class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, 
 		*falseOrAlteredEncountered.GetData(MEMORYDEVICE_CPU) = false;
 		falseOrAlteredEncountered.UpdateDeviceFromHost();
 		dim3 cudaBlockSize_BlockVoxelPerThread(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
-		TVoxelSecondary* voxels_hash = volume2->GetVoxelBlocks();
+		TVoxelSecondary* voxels_hash = volume2->GetVoxels();
 
 		if (count_hash_blocks_outside_array_host > 0) {
 			// if there are any blocks in the hash that are not spanned by the array volume, we must check
@@ -178,7 +178,7 @@ class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, 
 			return false;
 		}
 
-		TVoxelPrimary* voxels_array = volume1->GetVoxelBlocks();
+		TVoxelPrimary* voxels_array = volume1->GetVoxels();
 		Vector3i array_offset = volume1->index.GetVolumeOffset();
 		Vector3i array_size = volume1->index.GetVolumeSize();
 
@@ -225,8 +225,8 @@ class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, 
 			TBooleanFunctor& functor, TDeviceFunction&& deviceFunction) {
 
 		int hash_entry_count = volume2->index.hash_entry_count;
-		TVoxelSecondary* hashVoxels = volume2->GetVoxelBlocks();
-		TVoxelPrimary* arrayVoxels = volume1->GetVoxelBlocks();
+		TVoxelSecondary* hashVoxels = volume2->GetVoxels();
+		TVoxelPrimary* arrayVoxels = volume1->GetVoxels();
 		const VoxelBlockHash::IndexData* hash_table = volume2->index.GetIndexData();
 		const PlainVoxelArray::IndexData* array_index_data = volume1->index.GetIndexData();
 		Vector3i startVoxel = volume1->index.GetVolumeOffset();

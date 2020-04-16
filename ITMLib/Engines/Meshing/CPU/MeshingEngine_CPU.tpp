@@ -9,7 +9,7 @@ template<class TVoxel>
 void MeshingEngine_CPU<TVoxel, VoxelBlockHash>::MeshScene(Mesh* mesh, const VoxelVolume<TVoxel, VoxelBlockHash>* volume)
 {
 	Mesh::Triangle *triangles = mesh->triangles.GetData(MEMORYDEVICE_CPU);
-	const TVoxel *localVBA = volume->GetVoxelBlocks();
+	const TVoxel *localVBA = volume->GetVoxels();
 	const HashEntry *hashTable = volume->index.GetEntries();
 
 	int noTriangles = 0, noMaxTriangles = mesh->max_triangle_count, noTotalEntries = volume->index.hash_entry_count;

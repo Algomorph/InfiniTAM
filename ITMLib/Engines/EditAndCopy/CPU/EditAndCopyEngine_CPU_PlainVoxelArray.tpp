@@ -31,7 +31,7 @@ template<typename TVoxel>
 void ITMLib::EditAndCopyEngine_CPU<TVoxel, PlainVoxelArray>::ResetVolume(
 		ITMLib::VoxelVolume<TVoxel, ITMLib::PlainVoxelArray>* volume) {
 	const unsigned int voxel_count = volume->index.GetMaxVoxelCount();
-	TVoxel* voxels = volume->GetVoxelBlocks();
+	TVoxel* voxels = volume->GetVoxels();
 #ifdef WITH_OPENMP
 #pragma omp parallel for default(none) shared(voxels)
 #endif
@@ -45,7 +45,7 @@ EditAndCopyEngine_CPU<TVoxel, PlainVoxelArray>::SetVoxel(VoxelVolume<TVoxel, Pla
 	int voxel_found = 0;
 	int linear_index_in_array = findVoxel(volume->index.GetIndexData(), at, voxel_found);
 	if (voxel_found) {
-		volume->GetVoxelBlocks()[linear_index_in_array] = voxel;
+		volume->GetVoxels()[linear_index_in_array] = voxel;
 		return true;
 	} else {
 		return false;
@@ -63,7 +63,7 @@ EditAndCopyEngine_CPU<TVoxel, PlainVoxelArray>::ReadVoxel(VoxelVolume<TVoxel, Pl
 		TVoxel voxel;
 		return voxel;
 	}
-	return volume->GetVoxelBlocks()[arrayIndex];
+	return volume->GetVoxels()[arrayIndex];
 }
 
 template<typename TVoxel>
@@ -77,7 +77,7 @@ EditAndCopyEngine_CPU<TVoxel, PlainVoxelArray>::ReadVoxel(VoxelVolume<TVoxel, Pl
 		TVoxel voxel;
 		return voxel;
 	}
-	return volume->GetVoxelBlocks()[arrayIndex];
+	return volume->GetVoxels()[arrayIndex];
 }
 
 template<typename TVoxel>
@@ -133,8 +133,8 @@ bool EditAndCopyEngine_CPU<TVoxel, PlainVoxelArray>::CopyVolumeSlice(
 		DIEWITHEXCEPTION_REPORTLOCATION(
 				"Targeted volume is at least partially out of bounds of the destination scene.");
 	}
-	TVoxel* sourceVoxels = source_volume->GetVoxelBlocks();
-	TVoxel* destinationVoxels = target_volume->GetVoxelBlocks();
+	TVoxel* sourceVoxels = source_volume->GetVoxels();
+	TVoxel* destinationVoxels = target_volume->GetVoxels();
 	if (offset == Vector3i(0)) {
 		const PlainVoxelArray::IndexData* sourceIndexData = source_volume->index.GetIndexData();
 		const PlainVoxelArray::IndexData* destinationIndexData = target_volume->index.GetIndexData();

@@ -36,7 +36,7 @@ private:
 	inline static void
 	TraverseAll_Generic(VoxelVolume<TVoxel, VoxelBlockHash>* volume, TFunctor& functor,
 	                    TDeviceFunction&& deviceFunction) {
-		TVoxel* voxels = volume->GetVoxelBlocks();
+		TVoxel* voxels = volume->GetVoxels();
 		const HashEntry* hash_table = volume->index.GetIndexData();
 		const int hash_entry_count = volume->index.hash_entry_count;
 
@@ -63,7 +63,7 @@ private:
 	inline static void
 	TraverseUtilized_Generic(VoxelVolume<TVoxel, VoxelBlockHash>* volume, TFunctor& functor,
 	                         TDeviceFunction&& deviceFunction) {
-		TVoxel* voxels = volume->GetVoxelBlocks();
+		TVoxel* voxels = volume->GetVoxels();
 		const HashEntry* hash_table = volume->index.GetIndexData();
 		const int utilized_block_count = volume->index.GetUtilizedBlockCount();
 		const int* utilized_hash_codes = volume->index.GetUtilizedBlockHashCodes();
@@ -91,7 +91,7 @@ public:
 
 	template<typename TStaticFunctor>
 	inline static void TraverseAll(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
-		TVoxel* voxels = volume->GetVoxelBlocks();
+		TVoxel* voxels = volume->GetVoxels();
 		const HashEntry* hash_table = volume->index.GetIndexData();
 		int hash_entry_count = volume->index.hash_entry_count;
 
@@ -105,7 +105,7 @@ public:
 
 	template<typename TStaticFunctor>
 	inline static void TraverseUtilized(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
-		TVoxel* voxels = volume->GetVoxelBlocks();
+		TVoxel* voxels = volume->GetVoxels();
 		const HashEntry* hash_table = volume->index.GetIndexData();
 		const int utilized_block_count = volume->index.GetUtilizedBlockCount();
 		const int* utilized_hash_codes = volume->index.GetUtilizedBlockHashCodes();

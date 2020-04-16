@@ -1,6 +1,10 @@
 //  ================================================================
 //  Created by Gregory Kramida on 01/03/20.
 //  Copyright (c) 2020 Gregory Kramida
+//  Inspired by ITMLib/Utils/ITMSceneParameters.h of the original
+//  InfiniTAM repository, Oxford University
+//  (https://github.com/victorprad/InfiniTAM)
+
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
 //  You may obtain a copy of the License at
@@ -14,7 +18,7 @@
 //  limitations under the License.
 //  ================================================================
 
-// inspired in part by InifinTAM/Utils/ITMSceneParameters.h of the original InfiniTAM repository, Oxford University
+
 
 #pragma once
 

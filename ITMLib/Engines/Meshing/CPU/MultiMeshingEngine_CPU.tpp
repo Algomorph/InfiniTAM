@@ -15,7 +15,7 @@ inline void MultiMeshingEngine_CPU<TVoxel, VoxelBlockHash>::MeshScene(Mesh * mes
 	MultiIndexData hashTables;
 	MultiVoxelData localVBAs;
 
-	const VoxelVolumeParameters & sceneParams = *(sceneManager.getLocalMap(0)->scene->parameters);
+	const VoxelVolumeParameters & sceneParams = *(sceneManager.getLocalMap(0)->volume->parameters);
 	hashTables.numLocalMaps = numLocalMaps;
 	for (int localMapId = 0; localMapId < numLocalMaps; ++localMapId)
 	{
@@ -29,15 +29,15 @@ inline void MultiMeshingEngine_CPU<TVoxel, VoxelBlockHash>::MeshScene(Mesh * mes
 		hashTables.posesInv[localMapId].m31 /= sceneParams.voxel_size;
 		hashTables.posesInv[localMapId].m32 /= sceneParams.voxel_size;
 
-		hashTables.index[localMapId] = sceneManager.getLocalMap(localMapId)->scene->index.GetIndexData();
-		localVBAs.voxels[localMapId] = sceneManager.getLocalMap(localMapId)->scene->GetVoxelBlocks();
+		hashTables.index[localMapId] = sceneManager.getLocalMap(localMapId)->volume->index.GetIndexData();
+		localVBAs.voxels[localMapId] = sceneManager.getLocalMap(localMapId)->volume->GetVoxels();
 	}
 
 	Mesh::Triangle *triangles = mesh->triangles.GetData(MEMORYDEVICE_CPU);
 	mesh->triangles.Clear();
 
 	int triangle_count = 0, max_triangle_count = mesh->max_triangle_count;
-	int noTotalEntriesPerLocalMap = sceneManager.getLocalMap(0)->scene->index.hash_entry_count;
+	int noTotalEntriesPerLocalMap = sceneManager.getLocalMap(0)->volume->index.hash_entry_count;
 	float factor = sceneParams.voxel_size;
 
 	// very dumb rendering -- likely to generate lots of duplicates

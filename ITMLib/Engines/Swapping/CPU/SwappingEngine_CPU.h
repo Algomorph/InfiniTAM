@@ -28,7 +28,7 @@ namespace ITMLib
 
 		void IntegrateGlobalIntoLocal(VoxelVolume<TVoxel, VoxelBlockHash> *volume, RenderState *render_state);
 		void SaveToGlobalMemory(VoxelVolume<TVoxel, VoxelBlockHash> *volume, RenderState *render_state);
-		void CleanLocalMemory(VoxelVolume<TVoxel, VoxelBlockHash> *scene, RenderState *renderState);
+		void CleanLocalMemory(VoxelVolume<TVoxel, VoxelBlockHash> *volume, RenderState *renderState);
 
 		explicit SwappingEngine_CPU(const VoxelBlockHash& index){};
 		~SwappingEngine_CPU() = default;

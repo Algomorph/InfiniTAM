@@ -293,7 +293,7 @@ void WarpFieldSequenceRecorder<TVoxel, TIndex>::Save() {
 
 template<typename TVoxel, typename TIndex>
 void WarpFieldSequenceRecorder<TVoxel, TIndex>::SaveCompact() {
-	VolumeFileIOEngine<TVoxel,TIndex>::SaveToDirectoryCompact(warpField, scenePath.string());
+	VolumeFileIOEngine<TVoxel, TIndex>::SaveVolumeCompact(warpField, scenePath.string());
 	this->voxelCount = VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().CountAllocatedVoxels(
 			warpField);
 }
@@ -301,7 +301,7 @@ void WarpFieldSequenceRecorder<TVoxel, TIndex>::SaveCompact() {
 template<typename TVoxel, typename TIndex>
 void WarpFieldSequenceRecorder<TVoxel, TIndex>::LoadCompact() {
 	warpField->Reset();
-	VolumeFileIOEngine<TVoxel,TIndex>::LoadFromDirectoryCompact(warpField, scenePath.string());
+	VolumeFileIOEngine<TVoxel, TIndex>::LoadVolumeCompact(warpField, scenePath.string());
 	this->voxelCount = VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().CountAllocatedVoxels(
 			warpField);
 }

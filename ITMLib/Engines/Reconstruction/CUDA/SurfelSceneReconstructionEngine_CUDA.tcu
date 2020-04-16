@@ -224,7 +224,7 @@ void SurfelSceneReconstructionEngine_CUDA<TSurfel>::AddNewSurfels(SurfelScene<TS
   ORcudaKernelCheck;
 
 #if DEBUGGING
-  scene->GetSurfels()->UpdateHostFromDevice();
+  volume->GetSurfels()->UpdateHostFromDevice();
 #endif
 }
 
@@ -325,7 +325,7 @@ void SurfelSceneReconstructionEngine_CUDA<TSurfel>::MarkBadSurfels(SurfelScene<T
   ORcudaKernelCheck;
 
 #if DEBUGGING
-  scene->GetSurfels()->UpdateHostFromDevice();
+  volume->GetSurfels()->UpdateHostFromDevice();
   this->m_surfelRemovalMaskMB->UpdateHostFromDevice();
 #endif
 }

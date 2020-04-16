@@ -41,9 +41,9 @@ public:
 		assert(volume2->index.GetVolumeSize() == volume3->index.GetVolumeSize() &&
 		       volume2->index.GetVolumeSize() == volume1->index.GetVolumeSize());
 // *** traversal vars
-		TVoxel1* voxels1 = volume1->GetVoxelBlocks();
-		TVoxel2* voxels2 = volume2->GetVoxelBlocks();
-		TVoxel3* voxels3 = volume3->GetVoxelBlocks();
+		TVoxel1* voxels1 = volume1->GetVoxels();
+		TVoxel2* voxels2 = volume2->GetVoxels();
+		TVoxel3* voxels3 = volume3->GetVoxels();
 
 		const GridAlignedBox* arrayInfo = volume1->index.GetIndexData();
 
@@ -73,9 +73,9 @@ public:
 		assert(volume2->index.GetVolumeSize() == volume3->index.GetVolumeSize() &&
 		       volume2->index.GetVolumeSize() == volume1->index.GetVolumeSize());
 // *** traversal vars
-		TVoxel1* voxels1 = volume1->GetVoxelBlocks();
-		TVoxel2* voxels2 = volume2->GetVoxelBlocks();
-		TVoxel3* voxels3 = volume3->GetVoxelBlocks();
+		TVoxel1* voxels1 = volume1->GetVoxels();
+		TVoxel2* voxels2 = volume2->GetVoxels();
+		TVoxel3* voxels3 = volume3->GetVoxels();
 
 		const GridAlignedBox* arrayInfo = volume2->index.GetIndexData();
 
@@ -120,9 +120,9 @@ public:
 		ORcudaSafeCall(cudaMemcpy(functor_device, &functor, sizeof(TFunctor), cudaMemcpyHostToDevice));
 
 // *** traversal vars
-		TVoxel1* voxels1 = volume1->GetVoxelBlocks();
-		TVoxel2* voxels2 = volume2->GetVoxelBlocks();
-		TVoxel3* voxels3 = volume3->GetVoxelBlocks();
+		TVoxel1* voxels1 = volume1->GetVoxels();
+		TVoxel2* voxels2 = volume2->GetVoxels();
+		TVoxel3* voxels3 = volume3->GetVoxels();
 
 		const GridAlignedBox* arrayInfo = volume2->index.GetIndexData();
 

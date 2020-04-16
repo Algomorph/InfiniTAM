@@ -44,11 +44,11 @@ MultiEngine<TVoxel, TIndex>::MultiEngine(const RGBDCalib& calib, Vector2i imgSiz
 	mapManager = new VoxelMapGraphManager<TVoxel, TIndex>(visualization_engine, denseMapper, trackedImageSize);
 	mActiveDataManager = new ActiveMapManager(mapManager);
 	mActiveDataManager->initiateNewLocalMap(true);
-	denseMapper = new DenseMapper<TVoxel, TIndex>(mapManager->getLocalMap(0)->scene->index);
+	denseMapper = new DenseMapper<TVoxel, TIndex>(mapManager->getLocalMap(0)->volume->index);
 
 	meshingEngine = NULL;
 	if (settings.create_meshing_engine)
-		meshingEngine = MultiMeshingEngineFactory::MakeMeshingEngine<TVoxel, TIndex>(deviceType, mapManager->getLocalMap(0)->scene->index);
+		meshingEngine = MultiMeshingEngineFactory::MakeMeshingEngine<TVoxel, TIndex>(deviceType, mapManager->getLocalMap(0)->volume->index);
 
 	renderState_freeview = NULL; //will be created by the Visualization engine
 	imuCalibrator = new ITMIMUCalibrator_iPad();
@@ -229,8 +229,8 @@ CameraTrackingState::TrackingResult MultiEngine<TVoxel, TIndex>::ProcessFrame(IT
 		// if a new relocalization/loop closure is started, this will do the initial raycasting before tracking can start
 		if (todoList[i].preprepare)
 		{
-			denseMapper->UpdateVisibleList(view, currentLocalMap->trackingState, currentLocalMap->scene, currentLocalMap->renderState);
-			trackingController->Prepare(currentLocalMap->trackingState, currentLocalMap->scene, view, visualization_engine, currentLocalMap->renderState);
+			denseMapper->UpdateVisibleList(view, currentLocalMap->trackingState, currentLocalMap->volume, currentLocalMap->renderState);
+			trackingController->Prepare(currentLocalMap->trackingState, currentLocalMap->volume, view, visualization_engine, currentLocalMap->renderState);
 		}
 
 		if (todoList[i].track)
@@ -238,7 +238,7 @@ CameraTrackingState::TrackingResult MultiEngine<TVoxel, TIndex>::ProcessFrame(IT
 			int dataId = todoList[i].dataId;
 
 #ifdef DEBUG_MULTISCENE
-			int blocksInUse = currentLocalMap->scene->index.Getsource_volume() - currentLocalMap->scene->index.GetLastFreeBlockListId() - 1;
+			int blocksInUse = currentLocalMap->volume->index.Getsource_volume() - currentLocalMap->volume->index.GetLastFreeBlockListId() - 1;
 			fprintf(stderr, " %i%s (%i)", currentLocalMapIdx, (todoList[i].dataId == primaryDataIdx) ? "*" : "", blocksInUse);
 #endif
 
@@ -280,11 +280,11 @@ CameraTrackingState::TrackingResult MultiEngine<TVoxel, TIndex>::ProcessFrame(IT
 		}
 
 		// fusion in any subscene as long as tracking is good for the respective subscene
-		if (todoList[i].fusion) denseMapper->ProcessFrame(view, currentLocalMap->trackingState, currentLocalMap->scene, currentLocalMap->renderState);
-		else if (todoList[i].prepare) denseMapper->UpdateVisibleList(view, currentLocalMap->trackingState, currentLocalMap->scene, currentLocalMap->renderState);
+		if (todoList[i].fusion) denseMapper->ProcessFrame(view, currentLocalMap->trackingState, currentLocalMap->volume, currentLocalMap->renderState);
+		else if (todoList[i].prepare) denseMapper->UpdateVisibleList(view, currentLocalMap->trackingState, currentLocalMap->volume, currentLocalMap->renderState);
 
 		// raycast to renderState_canonical for tracking and free Visualization
-		if (todoList[i].prepare) trackingController->Prepare(currentLocalMap->trackingState, currentLocalMap->scene, view, visualization_engine, currentLocalMap->renderState);
+		if (todoList[i].prepare) trackingController->Prepare(currentLocalMap->trackingState, currentLocalMap->volume, view, visualization_engine, currentLocalMap->renderState);
 	}
 
 	mScheduleGlobalAdjustment |= mActiveDataManager->maintainActiveData();
@@ -309,7 +309,7 @@ void MultiEngine<TVoxel, TIndex>::SaveSceneToMesh(const char *modelFileName)
 {
 	if (meshingEngine == NULL) return;
 
-	Mesh *mesh = new Mesh(configuration::get().device_type, mapManager->getLocalMap(0)->scene->index.GetMaxVoxelCount());
+	Mesh *mesh = new Mesh(configuration::get().device_type, mapManager->getLocalMap(0)->volume->index.GetMaxVoxelCount());
 
 	meshingEngine->MeshScene(mesh, *mapManager);
 	mesh->WriteSTL(modelFileName);
@@ -383,7 +383,7 @@ void MultiEngine<TVoxel, TIndex>::GetImage(ITMUChar4Image *out, GetImageType get
 			imageType = IVisualizationEngine::RENDER_SHADED_GREYSCALE_IMAGENORMALS;
 		}
 
-		visualization_engine->RenderImage(activeLocalMap->scene, activeLocalMap->trackingState->pose_d, &view->calib.intrinsics_d, activeLocalMap->renderState, activeLocalMap->renderState->raycastImage, imageType, raycastType);
+		visualization_engine->RenderImage(activeLocalMap->volume, activeLocalMap->trackingState->pose_d, &view->calib.intrinsics_d, activeLocalMap->renderState, activeLocalMap->renderState->raycastImage, imageType, raycastType);
 
 		ORUtils::Image<Vector4u> *srcImage = activeLocalMap->renderState->raycastImage;
 		out->ChangeDims(srcImage->dimensions);
@@ -405,12 +405,12 @@ void MultiEngine<TVoxel, TIndex>::GetImage(ITMUChar4Image *out, GetImageType get
 		if (freeviewLocalMapIdx >= 0){
 			LocalMap<TVoxel, TIndex> *activeData = mapManager->getLocalMap(freeviewLocalMapIdx);
 			if (renderState_freeview == NULL) renderState_freeview =
-					new RenderStateMultiScene<TVoxel,TIndex>(out->dimensions, activeData->scene->parameters->near_clipping_distance,
-					                                         activeData->scene->parameters->far_clipping_distance, settings.device_type);
+					new RenderStateMultiScene<TVoxel,TIndex>(out->dimensions, activeData->volume->parameters->near_clipping_distance,
+					                                         activeData->volume->parameters->far_clipping_distance, settings.device_type);
 
-			visualization_engine->FindVisibleBlocks(activeData->scene, pose, intrinsics, renderState_freeview);
-			visualization_engine->CreateExpectedDepths(activeData->scene, pose, intrinsics, renderState_freeview);
-			visualization_engine->RenderImage(activeData->scene, pose, intrinsics, renderState_freeview, renderState_freeview->raycastImage, type);
+			visualization_engine->FindVisibleBlocks(activeData->volume, pose, intrinsics, renderState_freeview);
+			visualization_engine->CreateExpectedDepths(activeData->volume, pose, intrinsics, renderState_freeview);
+			visualization_engine->RenderImage(activeData->volume, pose, intrinsics, renderState_freeview, renderState_freeview->raycastImage, type);
 
 			if (settings.device_type == MEMORYDEVICE_CUDA)
 				out->SetFrom(*renderState_freeview->raycastImage, MemoryCopyDirection::CUDA_TO_CPU);
@@ -418,7 +418,7 @@ void MultiEngine<TVoxel, TIndex>::GetImage(ITMUChar4Image *out, GetImageType get
 		}
 		else
 		{
-			const VoxelVolumeParameters& params = *mapManager->getLocalMap(0)->scene->parameters;
+			const VoxelVolumeParameters& params = *mapManager->getLocalMap(0)->volume->parameters;
 			if (renderState_multiscene == NULL) renderState_multiscene =
 						new RenderStateMultiScene<TVoxel, TIndex>(out->dimensions, params.near_clipping_distance,
 						                                          params.far_clipping_distance, settings.device_type);

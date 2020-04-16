@@ -51,9 +51,9 @@ BOOST_AUTO_TEST_CASE(testSaveSceneCompact_CUDA) {
 
 	GenerateSimpleSurfaceTestVolume<MEMORYDEVICE_CUDA>(&scene1);
 	std::string path = "TestData/test_PVA_";
-	SceneFileIOEngine_PVA::SaveToDirectoryCompact(&scene1, path);
+	SceneFileIOEngine_PVA::SaveVolumeCompact(&scene1, path);
 	ManipulationEngine_CUDA_PVA_Voxel::Inst().ResetVolume(&scene2);
-	SceneFileIOEngine_PVA::LoadFromDirectoryCompact(&scene2, path);
+	SceneFileIOEngine_PVA::LoadVolumeCompact(&scene2, path);
 
 	float tolerance = 1e-8;
 	BOOST_REQUIRE_EQUAL(StatCalc_CUDA_PVA_Voxel::Instance().CountNonTruncatedVoxels(&scene2), 19456);
@@ -69,9 +69,9 @@ BOOST_AUTO_TEST_CASE(testSaveSceneCompact_CUDA) {
 
 	GenerateSimpleSurfaceTestVolume<MEMORYDEVICE_CUDA>(&scene3);
 	path = "TestData/test_VBH_";
-	SceneFileIOEngine_VBH::SaveToDirectoryCompact(&scene3, path);
+	SceneFileIOEngine_VBH::SaveVolumeCompact(&scene3, path);
 	ManipulationEngine_CUDA_VBH_Voxel::Inst().ResetVolume(&scene4);
-	SceneFileIOEngine_VBH::LoadFromDirectoryCompact(&scene4, path);
+	SceneFileIOEngine_VBH::LoadVolumeCompact(&scene4, path);
 
 	BOOST_REQUIRE_EQUAL(StatCalc_CUDA_VBH_Voxel::Instance().CountNonTruncatedVoxels(&scene4), 19456);
 	BOOST_REQUIRE(contentAlmostEqual_CUDA(&scene3, &scene4, tolerance));

@@ -284,8 +284,8 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CUDA) {
 			settings->device_type, {0x800, 0x20000});
 	ManipulationEngine_CUDA_VBH_Voxel::Inst().ResetVolume(&volume5);
 	std::string path = "TestData/test_VBH_ConstructFromImage_";
-	SceneFileIOEngine_VBH::SaveToDirectoryCompact(&volume4, path);
-	SceneFileIOEngine_VBH::LoadFromDirectoryCompact(&volume5, path);
+	SceneFileIOEngine_VBH::SaveVolumeCompact(&volume4, path);
+	SceneFileIOEngine_VBH::LoadVolumeCompact(&volume5, path);
 	BOOST_REQUIRE(allocatedContentAlmostEqual_CUDA(&volume1, &volume5, tolerance));
 	BOOST_REQUIRE(contentAlmostEqual_CUDA(&volume4, &volume5, tolerance));
 
@@ -324,7 +324,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CUDA) {
 	                                               {volumeSize, volumeOffset});
 	std::string path = "TestData/test_PVA_ConstructFromImage2_";
 	ManipulationEngine_CUDA_PVA_Voxel::Inst().ResetVolume(&volume2);
-	SceneFileIOEngine_PVA::LoadFromDirectoryCompact(&volume2, path);
+	SceneFileIOEngine_PVA::LoadVolumeCompact(&volume2, path);
 	CameraTrackingState trackingState(imageSize, settings->device_type);
 
 	float tolerance = 1e-5;
