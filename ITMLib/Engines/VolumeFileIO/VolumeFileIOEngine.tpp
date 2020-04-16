@@ -52,7 +52,7 @@ void VolumeFileIOEngine<TVoxel, VoxelBlockHash>::SaveToDirectoryCompact(
 
 	const TVoxel* voxels = volume->GetVoxelBlocks();
 	const HashEntry* hash_table = volume->index.GetEntries();
-	int hash_entry_count = volume->index.hash_entry_count;
+	const int hash_entry_count = volume->index.hash_entry_count;
 
 	int last_free_block_id = volume->index.GetLastFreeBlockListId();
 	int last_excess_list_id = volume->index.GetLastFreeExcessListId();
@@ -63,7 +63,7 @@ void VolumeFileIOEngine<TVoxel, VoxelBlockHash>::SaveToDirectoryCompact(
 	//count filled entries
 	int allocated_hash_entry_count = 0;
 #ifdef WITH_OPENMP
-#pragma omp parallel for reduction(+:allocated_hash_entry_count)
+#pragma omp parallel for default(none)  shared(out_filter, hash_table) reduction(+:allocated_hash_entry_count)
 #endif
 	for (int hash_code = 0; hash_code < hash_entry_count; hash_code++) {
 		const HashEntry& hash_entry = hash_table[hash_code];
@@ -155,8 +155,8 @@ template<typename TVoxel>
 void
 VolumeFileIOEngine<TVoxel, PlainVoxelArray>::SaveToDirectoryCompact(
 		const VoxelVolume<TVoxel, PlainVoxelArray>* volume,
-		const std::string& outputDirectory) {
-	DIEWITHEXCEPTION_REPORTLOCATION("Not implemented");
+		const std::string& output_directory) {
+
 
 }
 
@@ -165,6 +165,6 @@ template<typename TVoxel>
 void
 VolumeFileIOEngine<TVoxel, PlainVoxelArray>::LoadFromDirectoryCompact(
 		VoxelVolume<TVoxel, PlainVoxelArray>* volume,
-		const std::string& outputDirectory) {
-	DIEWITHEXCEPTION_REPORTLOCATION("Not implemented");
+		const std::string& output_directory) {
+
 }

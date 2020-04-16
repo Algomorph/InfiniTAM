@@ -11,8 +11,7 @@ namespace ITMLib
 Represents the 3D world model as collection of voxel blocks, i.e. regular 3D grid
 */
 template<class TVoxel, class TIndex>
-class VoxelVolume
-{
+class VoxelVolume {
 public:
 	/** Volume parameters like voxel size etc. */
 	const VoxelVolumeParameters* parameters;
@@ -28,10 +27,9 @@ public:
 
 	VoxelVolume(const VoxelVolumeParameters *volume_parameters, bool use_swapping, MemoryDeviceType memory_type,
 	            typename TIndex::InitializationParameters index_parameters = typename TIndex::InitializationParameters());
-	VoxelVolume(MemoryDeviceType memoryDeviceType, typename TIndex::InitializationParameters indexParameters = typename TIndex::InitializationParameters());
+	explicit VoxelVolume(MemoryDeviceType memoryDeviceType, typename TIndex::InitializationParameters indexParameters = typename TIndex::InitializationParameters());
 	VoxelVolume(const VoxelVolume& other, MemoryDeviceType _memoryType);
-	~VoxelVolume()
-	{
+	~VoxelVolume(){
 		if (global_cache != nullptr) delete global_cache;
 	}
 

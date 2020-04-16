@@ -31,149 +31,91 @@ namespace ITMLib
 	template<typename TVoxel>
 	class GlobalCache<TVoxel, PlainVoxelArray>{
 	public:
-		explicit GlobalCache(const PlainVoxelArray& index){
-			DIEWITHEXCEPTION_REPORTLOCATION("Swappling / global cache not implemented for plain voxel array indexing.");
-		}
+		explicit GlobalCache(const PlainVoxelArray& index);
 	};
 
-	template<typename TVoxel>
-	class GlobalCache<TVoxel, VoxelBlockHash>
-	{
+template<typename TVoxel>
+	class GlobalCache<TVoxel, VoxelBlockHash>{
 	private:
-		bool *hasStoredData;
-		TVoxel *storedVoxelBlocks;
-		ITMHashSwapState *swapStates_host, *swapStates_device;
+		//TODO: rename vars to something more descriptive &/ document them
+		int hash_entry_count;
 
-		bool *hasSyncedData_host, *hasSyncedData_device;
-		TVoxel *syncedVoxelBlocks_host, *syncedVoxelBlocks_device;
+		bool* has_stored_data;
+		TVoxel* stored_voxel_blocks;
+		ITMHashSwapState* swap_states_host;
+		ITMHashSwapState* swap_states_device;
 
-		int *neededEntryIDs_host, *neededEntryIDs_device;
+		bool* has_synced_data_host;
+		bool* has_synced_data_device;
+		TVoxel* synced_voxel_blocks_host;
+		TVoxel* synced_voxel_blocks_device;
+
+		int* needed_hash_codes_host;
+		int* needed_hash_codes_device;
 	public:
-		inline void SetStoredData(int address, TVoxel *data) 
-		{ 
-			hasStoredData[address] = true; 
-			memcpy(storedVoxelBlocks + address * VOXEL_BLOCK_SIZE3, data, sizeof(TVoxel) * VOXEL_BLOCK_SIZE3);
-		}
-		inline bool HasStoredData(int address) const { return hasStoredData[address]; }
-		inline TVoxel *GetStoredVoxelBlock(int address) { return storedVoxelBlocks + address * VOXEL_BLOCK_SIZE3; }
-
-		bool *GetHasSyncedData(bool useGPU) const { return useGPU ? hasSyncedData_device : hasSyncedData_host; }
-		TVoxel *GetSyncedVoxelBlocks(bool useGPU) const { return useGPU ? syncedVoxelBlocks_device : syncedVoxelBlocks_host; }
-
-		ITMHashSwapState *GetSwapStates(bool useGPU) { return useGPU ? swapStates_device : swapStates_host; }
-		int *GetNeededEntryIDs(bool useGPU) { return useGPU ? neededEntryIDs_device : neededEntryIDs_host; }
-
-		const int hashEntryCount;
-
-		explicit GlobalCache(const int hashEntryCount) : hashEntryCount(hashEntryCount)
-		{	
-			hasStoredData = (bool*)malloc(hashEntryCount * sizeof(bool));
-			storedVoxelBlocks = (TVoxel*)malloc(hashEntryCount * sizeof(TVoxel) * VOXEL_BLOCK_SIZE3);
-			memset(hasStoredData, 0, hashEntryCount);
-
-			swapStates_host = (ITMHashSwapState *)malloc(hashEntryCount * sizeof(ITMHashSwapState));
-			memset(swapStates_host, 0, sizeof(ITMHashSwapState) * hashEntryCount);
-
-#ifndef COMPILE_WITHOUT_CUDA
-			ORcudaSafeCall(cudaMallocHost((void**)&syncedVoxelBlocks_host, SWAP_OPERATION_BLOCK_COUNT * sizeof(TVoxel) * VOXEL_BLOCK_SIZE3));
-			ORcudaSafeCall(cudaMallocHost((void**)&hasSyncedData_host, SWAP_OPERATION_BLOCK_COUNT * sizeof(bool)));
-			ORcudaSafeCall(cudaMallocHost((void**)&neededEntryIDs_host, SWAP_OPERATION_BLOCK_COUNT * sizeof(int)));
-
-			ORcudaSafeCall(cudaMalloc((void**)&swapStates_device, hashEntryCount * sizeof(ITMHashSwapState)));
-			ORcudaSafeCall(cudaMemset(swapStates_device, 0, hashEntryCount * sizeof(ITMHashSwapState)));
-
-			ORcudaSafeCall(cudaMalloc((void**)&syncedVoxelBlocks_device, SWAP_OPERATION_BLOCK_COUNT * sizeof(TVoxel) * VOXEL_BLOCK_SIZE3));
-			ORcudaSafeCall(cudaMalloc((void**)&hasSyncedData_device, SWAP_OPERATION_BLOCK_COUNT * sizeof(bool)));
-
-			ORcudaSafeCall(cudaMalloc((void**)&neededEntryIDs_device, SWAP_OPERATION_BLOCK_COUNT * sizeof(int)));
-#else
-			syncedVoxelBlocks_host = (TVoxel*)malloc(SWAP_OPERATION_BLOCK_COUNT * sizeof(TVoxel) * VOXEL_BLOCK_SIZE3);
-			hasSyncedData_host = (bool*)malloc(SWAP_OPERATION_BLOCK_COUNT * sizeof(bool));
-			neededEntryIDs_host = (int*)malloc(SWAP_OPERATION_BLOCK_COUNT * sizeof(int));
-#endif
-		}
+		explicit GlobalCache(const int hash_entry_count);
 
 		explicit GlobalCache(const VoxelBlockHash& index) : GlobalCache(index.hash_entry_count){}
 
-		explicit GlobalCache(const GlobalCache& other) : GlobalCache(other.hashEntryCount)
-		{
+		explicit GlobalCache(const GlobalCache& other);
+		GlobalCache(GlobalCache&& other);
 
-#ifndef COMPILE_WITHOUT_CUDA
-			ORcudaSafeCall(cudaMemcpy(syncedVoxelBlocks_host, other.syncedVoxelBlocks_host,
-					SWAP_OPERATION_BLOCK_COUNT * sizeof(TVoxel) * VOXEL_BLOCK_SIZE3, cudaMemcpyHostToHost));
-			ORcudaSafeCall(cudaMemcpy(hasSyncedData_host, other.hasSyncedData_host,
-					SWAP_OPERATION_BLOCK_COUNT * sizeof(bool), cudaMemcpyHostToHost));
-			ORcudaSafeCall(cudaMemcpy(neededEntryIDs_host, other.neededEntryIDs_host,
-					SWAP_OPERATION_BLOCK_COUNT * sizeof(int), cudaMemcpyHostToHost));
-			ORcudaSafeCall(cudaMemcpy(swapStates_device, other.swapStates_device,
-					hashEntryCount * sizeof(ITMHashSwapState), cudaMemcpyDeviceToDevice));
-			ORcudaSafeCall(cudaMemcpy(syncedVoxelBlocks_device, other.syncedVoxelBlocks_device,
-					SWAP_OPERATION_BLOCK_COUNT * sizeof(TVoxel) * VOXEL_BLOCK_SIZE3, cudaMemcpyDeviceToDevice));
-			ORcudaSafeCall(cudaMemcpy(hasSyncedData_device, other.hasSyncedData_device,
-					SWAP_OPERATION_BLOCK_COUNT * sizeof(bool), cudaMemcpyDeviceToDevice));
-			ORcudaSafeCall(cudaMemcpy(neededEntryIDs_device, other.neededEntryIDs_device,
-			                          SWAP_OPERATION_BLOCK_COUNT * sizeof(int), cudaMemcpyDeviceToDevice));
-#else
-			memcpy(syncedVoxelBlocks_host, other.syncedVoxelBlocks_host,SWAP_OPERATION_BLOCK_COUNT * sizeof(TVoxel) * VOXEL_BLOCK_SIZE3);
-			memcpy(hasSyncedData_host, other.hasSyncedData_host, SWAP_OPERATION_BLOCK_COUNT * sizeof(bool));
-			memcpy(neededEntryIDs_host,other.neededEntryIDs_host, SWAP_OPERATION_BLOCK_COUNT * sizeof(int));
-#endif
+		GlobalCache& operator=(GlobalCache other) {
+			swap(*this, other);
+			return *this;
 		}
 
-		void SaveToFile(char *fileName) const
-		{
-			TVoxel *storedData = storedVoxelBlocks;
+		~GlobalCache();
 
-			FILE *f = fopen(fileName, "wb");
+		void Swap(GlobalCache<TVoxel, VoxelBlockHash>& rhs);
 
-			fwrite(hasStoredData, sizeof(bool), hashEntryCount, f);
-			for (int i = 0; i < hashEntryCount; i++)
-			{
-				fwrite(storedData, sizeof(TVoxel) * VOXEL_BLOCK_SIZE3, 1, f);
-				storedData += VOXEL_BLOCK_SIZE3;
+		friend void swap(GlobalCache<TVoxel, VoxelBlockHash>& lhs, GlobalCache<TVoxel, VoxelBlockHash>& rhs) { // nothrow
+			lhs.Swap(rhs);
+		}
+
+		inline void SetStoredData(int address, TVoxel* data){
+			has_stored_data[address] = true;
+			memcpy(stored_voxel_blocks + address * VOXEL_BLOCK_SIZE3, data, sizeof(TVoxel) * VOXEL_BLOCK_SIZE3);
+		}
+
+		inline bool HasStoredData(int address) const { return has_stored_data[address]; }
+		inline TVoxel *GetStoredVoxelBlock(int address) { return stored_voxel_blocks + address * VOXEL_BLOCK_SIZE3; }
+
+		bool *GetHasSyncedData(bool useGPU) const { return useGPU ? has_synced_data_device : has_synced_data_host; }
+		TVoxel *GetSyncedVoxelBlocks(bool useGPU) const { return useGPU ? synced_voxel_blocks_device : synced_voxel_blocks_host; }
+
+		ITMHashSwapState *GetSwapStates(bool useGPU) { return useGPU ? swap_states_device : swap_states_host; }
+		int *GetNeededEntryIDs(bool useGPU) { return useGPU ? needed_hash_codes_device : needed_hash_codes_host; }
+
+		int GetHashEntryCount() const;
+
+		void SaveToFile(char* path) const{
+			TVoxel* stored_data = stored_voxel_blocks;
+
+			FILE* f = fopen(path, "wb");
+
+			fwrite(has_stored_data, sizeof(bool), hash_entry_count, f);
+			for (int i = 0; i < hash_entry_count; i++){
+				fwrite(stored_data, sizeof(TVoxel) * VOXEL_BLOCK_SIZE3, 1, f);
+				stored_data += VOXEL_BLOCK_SIZE3;
 			}
 
 			fclose(f);
 		}
 
-		void ReadFromFile(char *fileName)
-		{
-			TVoxel *storedData = storedVoxelBlocks;
-			FILE *f = fopen(fileName, "rb");
+		void ReadFromFile(char* path){
+			TVoxel* stored_data = stored_voxel_blocks;
+			FILE* f = fopen(path, "rb");
 
-			size_t tmp = fread(hasStoredData, sizeof(bool), hashEntryCount, f);
-			if (tmp == (size_t)hashEntryCount) {
-				for (int i = 0; i < hashEntryCount; i++)
-				{
-					fread(storedData, sizeof(TVoxel) * VOXEL_BLOCK_SIZE3, 1, f);
-					storedData += VOXEL_BLOCK_SIZE3;
+			size_t tmp = fread(has_stored_data, sizeof(bool), hash_entry_count, f);
+			if (tmp == (size_t)hash_entry_count) {
+				for (int i = 0; i < hash_entry_count; i++){
+					fread(stored_data, sizeof(TVoxel) * VOXEL_BLOCK_SIZE3, 1, f);
+					stored_data += VOXEL_BLOCK_SIZE3;
 				}
 			}
 
 			fclose(f);
-		}
-
-		~GlobalCache()
-		{
-			free(hasStoredData);
-			free(storedVoxelBlocks);
-
-			free(swapStates_host);
-
-#ifndef COMPILE_WITHOUT_CUDA
-			ORcudaSafeCall(cudaFreeHost(hasSyncedData_host));
-			ORcudaSafeCall(cudaFreeHost(syncedVoxelBlocks_host));
-			ORcudaSafeCall(cudaFreeHost(neededEntryIDs_host));
-
-			ORcudaSafeCall(cudaFree(swapStates_device));
-			ORcudaSafeCall(cudaFree(syncedVoxelBlocks_device));
-			ORcudaSafeCall(cudaFree(hasSyncedData_device));
-			ORcudaSafeCall(cudaFree(neededEntryIDs_device));
-#else
-			free(hasSyncedData_host);
-			free(syncedVoxelBlocks_host);
-			free(neededEntryIDs_host);
-#endif
 		}
 	};
 }

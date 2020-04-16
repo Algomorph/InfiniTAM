@@ -691,14 +691,17 @@ set(ITMLIB_OBJECTS_RENDERSTATES_HEADERS
     )
 
 ##
-set(ITMLIB_OBJECTS_SCENE_SOURCES
+set(ITMLIB_OBJECTS_VOLUME_SOURCES
+    Objects/Volume/GlobalCache.tpp
+    Objects/Volume/GlobalCache_PlainVoxelArray.cpp
+    Objects/Volume/GlobalCache_VoxelBlockHash.cpp
     Objects/Volume/VoxelVolume.tpp
     Objects/Volume/VoxelVolume.cpp
     Objects/Volume/VoxelBlockHash.cpp
     )
 
 ##
-set(ITMLIB_OBJECTS_SCENE_HEADERS
+set(ITMLIB_OBJECTS_VOLUME_HEADERS
     Objects/Volume/GlobalCache.h
     Objects/Volume/LocalMap.h
     Objects/Volume/MultiSceneAccess.h
@@ -1009,7 +1012,7 @@ endif ()
 #################################################################
 
 set(sources
-    ${ITMLIB_OBJECTS_SCENE_SOURCES}
+    ${ITMLIB_OBJECTS_VOLUME_SOURCES}
     ${ITMLIB_CORE_SOURCES}
     ${ITMLIB_ENGINES_LOWLEVEL_SOURCES}
     ${ITMLIB_ENGINES_LOWLEVEL_CPU_SOURCES}
@@ -1097,8 +1100,8 @@ set(headers
     ${ITMLIB_OBJECTS_MESHING_HEADERS}
     ${ITMLIB_OBJECTS_MISC_HEADERS}
     ${ITMLIB_OBJECTS_RENDERSTATES_HEADERS}
-    ${ITMLIB_OBJECTS_SCENE_SOURCES}
-    ${ITMLIB_OBJECTS_SCENE_HEADERS}
+    ${ITMLIB_OBJECTS_VOLUME_SOURCES}
+    ${ITMLIB_OBJECTS_VOLUME_HEADERS}
     ${ITMLIB_OBJECTS_TRACKING_HEADERS}
     ${ITMLIB_OBJECTS_VIEWS_HEADERS}
     ${ITMLIB_CAMERA_TRACKERS_HEADERS}

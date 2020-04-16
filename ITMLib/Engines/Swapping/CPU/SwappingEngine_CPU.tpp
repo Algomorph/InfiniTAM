@@ -19,7 +19,7 @@ int SwappingEngine_CPU<TVoxel, VoxelBlockHash>::LoadFromGlobalMemory(VoxelVolume
 	bool *hasSyncedData_global = globalCache->GetHasSyncedData(false);
 	int *neededEntryIDs_global = globalCache->GetNeededEntryIDs(false);
 
-	int hashEntryCount = globalCache->hashEntryCount;
+	int hashEntryCount = globalCache->GetHashEntryCount();
 
 	int neededHashEntryCount = 0;
 	for (int entryId = 0; entryId < hashEntryCount; entryId++)
@@ -96,71 +96,71 @@ void SwappingEngine_CPU<TVoxel, VoxelBlockHash>::IntegrateGlobalIntoLocal(VoxelV
 template<class TVoxel>
 void SwappingEngine_CPU<TVoxel, VoxelBlockHash>::SaveToGlobalMemory(VoxelVolume<TVoxel, VoxelBlockHash> *scene, RenderState *renderState)
 {
-	GlobalCache<TVoxel, VoxelBlockHash> *globalCache = scene->global_cache;
+	GlobalCache<TVoxel, VoxelBlockHash>* global_cache = scene->global_cache;
 
-	ITMHashSwapState *swapStates = globalCache->GetSwapStates(false);
+	ITMHashSwapState* swap_states = global_cache->GetSwapStates(false);
 
-	HashEntry *hashTable = scene->index.GetEntries();
-	HashBlockVisibility *blockVisibilityTypes = scene->index.GetBlockVisibilityTypes();
+	HashEntry* hash_table = scene->index.GetEntries();
+	HashBlockVisibility* block_visibility_types = scene->index.GetBlockVisibilityTypes();
 
-	TVoxel *syncedVoxelBlocks_local = globalCache->GetSyncedVoxelBlocks(false);
-	bool *hasSyncedData_local = globalCache->GetHasSyncedData(false);
-	int *neededEntryIDs_local = globalCache->GetNeededEntryIDs(false);
+	TVoxel *syncedVoxelBlocks_local = global_cache->GetSyncedVoxelBlocks(false);
+	bool *hasSyncedData_local = global_cache->GetHasSyncedData(false);
+	int *neededEntryIDs_local = global_cache->GetNeededEntryIDs(false);
 
-	TVoxel *syncedVoxelBlocks_global = globalCache->GetSyncedVoxelBlocks(false);
-	bool *hasSyncedData_global = globalCache->GetHasSyncedData(false);
-	int *neededEntryIDs_global = globalCache->GetNeededEntryIDs(false);
+	TVoxel *syncedVoxelBlocks_global = global_cache->GetSyncedVoxelBlocks(false);
+	bool *hasSyncedData_global = global_cache->GetHasSyncedData(false);
+	int *neededEntryIDs_global = global_cache->GetNeededEntryIDs(false);
 
-	TVoxel *localVBA = scene->GetVoxelBlocks();
-	int *voxelAllocationList = scene->index.GetBlockAllocationList();
+	TVoxel* voxels = scene->GetVoxelBlocks();
+	int* block_allocation_list = scene->index.GetBlockAllocationList();
 
-	int hashEntryCount = globalCache->hashEntryCount;
+	const int hash_entry_count = global_cache->GetHashEntryCount();
 	
-	int neededEntryCount = 0; // needed for what?
-	int allocatedEntryCount = scene->index.GetLastFreeBlockListId();
+	int needed_entry_count = 0; // needed for what?
+	int allocated_block_count = scene->index.GetLastFreeBlockListId();
 
-	for (int entryDestId = 0; entryDestId < hashEntryCount; entryDestId++)
+	for (int destination_hash_code = 0; destination_hash_code < hash_entry_count; destination_hash_code++)
 	{
-		if (neededEntryCount >= SWAP_OPERATION_BLOCK_COUNT) break;
+		if (needed_entry_count >= SWAP_OPERATION_BLOCK_COUNT) break;
 
-		int localPtr = hashTable[entryDestId].ptr;
-		ITMHashSwapState &swapState = swapStates[entryDestId];
+		int localPtr = hash_table[destination_hash_code].ptr;
+		ITMHashSwapState &swapState = swap_states[destination_hash_code];
 
-		if (swapState.state == 2 && localPtr >= 0 && blockVisibilityTypes[entryDestId] == 0)
+		if (swapState.state == 2 && localPtr >= 0 && block_visibility_types[destination_hash_code] == 0)
 		{
-			TVoxel *localVBALocation = localVBA + localPtr * VOXEL_BLOCK_SIZE3;
+			TVoxel *localVBALocation = voxels + localPtr * VOXEL_BLOCK_SIZE3;
 
-			neededEntryIDs_local[neededEntryCount] = entryDestId;
+			neededEntryIDs_local[needed_entry_count] = destination_hash_code;
 
-			hasSyncedData_local[neededEntryCount] = true;
-			memcpy(syncedVoxelBlocks_local + neededEntryCount * VOXEL_BLOCK_SIZE3, localVBALocation, VOXEL_BLOCK_SIZE3 * sizeof(TVoxel));
+			hasSyncedData_local[needed_entry_count] = true;
+			memcpy(syncedVoxelBlocks_local + needed_entry_count * VOXEL_BLOCK_SIZE3, localVBALocation, VOXEL_BLOCK_SIZE3 * sizeof(TVoxel));
 
-			swapStates[entryDestId].state = 0;
+			swap_states[destination_hash_code].state = 0;
 
-			int vbaIdx = allocatedEntryCount;
+			int vbaIdx = allocated_block_count;
 			if (vbaIdx < ORDERED_LIST_SIZE - 1)
 			{
-				allocatedEntryCount++;
-				voxelAllocationList[vbaIdx + 1] = localPtr;
-				hashTable[entryDestId].ptr = -1;
+				allocated_block_count++;
+				block_allocation_list[vbaIdx + 1] = localPtr;
+				hash_table[destination_hash_code].ptr = -1;
 
 				for (int i = 0; i < VOXEL_BLOCK_SIZE3; i++) localVBALocation[i] = TVoxel();
 			}
 
-			neededEntryCount++;
+			needed_entry_count++;
 		}
 	}
 
-	scene->index.SetLastFreeBlockListId(allocatedEntryCount);
+	scene->index.SetLastFreeBlockListId(allocated_block_count);
 
 	// would copy neededEntryIDs_local, hasSyncedData_local and syncedVoxelBlocks_local into *_global here
 
-	if (neededEntryCount > 0)
+	if (needed_entry_count > 0)
 	{
-		for (int entryId = 0; entryId < neededEntryCount; entryId++)
+		for (int entryId = 0; entryId < needed_entry_count; entryId++)
 		{
 			if (hasSyncedData_global[entryId])
-				globalCache->SetStoredData(neededEntryIDs_global[entryId], syncedVoxelBlocks_global + entryId * VOXEL_BLOCK_SIZE3);
+				global_cache->SetStoredData(neededEntryIDs_global[entryId], syncedVoxelBlocks_global + entryId * VOXEL_BLOCK_SIZE3);
 		}
 	}
 }
