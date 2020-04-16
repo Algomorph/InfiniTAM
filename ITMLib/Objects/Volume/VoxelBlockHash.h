@@ -58,7 +58,7 @@ struct HashEntry {
 	/** The frame index when the target block has been last modified. **/
 	unsigned short last_modified_timestamp;
 
-	friend std::ostream& operator<<(std::ostream& os, const HashEntry& entry){
+	friend std::ostream& operator<<(std::ostream& os, const HashEntry& entry) {
 		os << entry.pos << " | " << entry.offset << " [" << entry.ptr << "]";
 		return os;
 	}
@@ -73,11 +73,11 @@ and a pointer to the data structure on the GPU.
 class VoxelBlockHash {
 public:
 #define VOXEL_BLOCK_HASH_PARAMETERS_STRUCT_DESCRIPTION \
-	VoxelBlockHashParameters, \
-	(int, voxel_block_count, 0x40000, PRIMITIVE, "Total count of voxel hash blocks to preallocate."), \
-	(int, excess_list_size, 0x20000, PRIMITIVE, \
-	"Total count of voxel hash block entries in excess list of the hash table. " \
-	"The excess list is used during hash collisions.")
+    VoxelBlockHashParameters, \
+    (int, voxel_block_count, 0x40000, PRIMITIVE, "Total count of voxel hash blocks to preallocate."), \
+    (int, excess_list_size, 0x20000, PRIMITIVE, \
+    "Total count of voxel hash block entries in excess list of the hash table. " \
+    "The excess list is used during hash collisions.")
 
 	GENERATE_PATHLESS_SERIALIZABLE_STRUCT(VOXEL_BLOCK_HASH_PARAMETERS_STRUCT_DESCRIPTION);
 	typedef VoxelBlockHashParameters InitializationParameters;
@@ -90,12 +90,13 @@ public:
 	};
 
 	/** Maximum number of total entries. */
-	const CONSTPTR(int) voxelBlockCount;
-	const CONSTPTR(int) excessListSize;
+	const CONSTPTR(int) voxel_block_count;
+	const CONSTPTR(int) excess_list_size;
 	const CONSTPTR(int) hash_entry_count;
-	const CONSTPTR(int) voxelBlockSize = VOXEL_BLOCK_SIZE3;
+	const CONSTPTR(int) voxel_block_size = VOXEL_BLOCK_SIZE3;
 
 private:
+	int last_free_block_list_id;
 	int last_free_excess_list_id;
 	int utilized_hash_block_count;
 	int visible_hash_block_count;
@@ -105,12 +106,17 @@ private:
 	/** States of hash entries during allocation procedures */
 	ORUtils::MemoryBlock<HashEntryAllocationState> hash_entry_allocation_states;
 	/** Voxel coordinates assigned to new hash blocks during allocation procedures */
-	ORUtils::MemoryBlock<Vector3s> allocationBlockCoordinates;
+	ORUtils::MemoryBlock<Vector3s> allocation_block_coordinates;
+	/**
+	 * Identifies which voxel blocks within the
+	 * voxel storage can be allocated.
+	 * **/
+	ORUtils::MemoryBlock<int> block_allocation_list;
 	/** Identifies which entries of the overflow
-	list are allocated. This is used if too
-	many hash collisions caused the buckets to
-	overflow. */
-	ORUtils::MemoryBlock<int> excess_allocation_list;
+	 / excess list can be allocated. Any hash collisions
+	 during allocation will cause the losing entry to be
+	 allocated in the excess list. */
+	ORUtils::MemoryBlock<int> excess_entry_list;
 	/** A list of hash codes for "visible entries" */
 	ORUtils::MemoryBlock<int> visible_block_hash_codes;
 	/** A list of hash codes for utilized / allocated entries */
@@ -124,20 +130,22 @@ public:
 
 	VoxelBlockHash(VoxelBlockHashParameters parameters, MemoryDeviceType memory_type);
 
-	explicit VoxelBlockHash(MemoryDeviceType memoryType) : VoxelBlockHash(VoxelBlockHashParameters(),
-	                                                                            memoryType) {}
+	explicit VoxelBlockHash(MemoryDeviceType memory_type) : VoxelBlockHash(VoxelBlockHashParameters(),
+	                                                                       memory_type) {}
 
-	VoxelBlockHash(const VoxelBlockHash& other, MemoryDeviceType memoryType) :
-			VoxelBlockHash({other.voxelBlockCount, other.excessListSize}, memoryType) {
+	VoxelBlockHash(const VoxelBlockHash& other, MemoryDeviceType memory_type) :
+			VoxelBlockHash({other.voxel_block_count, other.excess_list_size}, memory_type) {
 		this->SetFrom(other);
 	}
 
 	void SetFrom(const VoxelBlockHash& other) {
 		MemoryCopyDirection memory_copy_direction = determineMemoryCopyDirection(this->memory_type, other.memory_type);
-		this->hash_entry_allocation_states.SetFrom(&other.hash_entry_allocation_states, memory_copy_direction);
-		this->hash_entries.SetFrom(&other.hash_entries, memory_copy_direction);
-		this->excess_allocation_list.SetFrom(&other.excess_allocation_list, memory_copy_direction);
-		this->utilized_block_hash_codes.SetFrom(&other.utilized_block_hash_codes, memory_copy_direction);
+		this->hash_entry_allocation_states.SetFrom(other.hash_entry_allocation_states, memory_copy_direction);
+		this->hash_entries.SetFrom(other.hash_entries, memory_copy_direction);
+		this->block_allocation_list.SetFrom(other.block_allocation_list, memory_copy_direction);
+		this->excess_entry_list.SetFrom(other.excess_entry_list, memory_copy_direction);
+		this->utilized_block_hash_codes.SetFrom(other.utilized_block_hash_codes, memory_copy_direction);
+		this->last_free_block_list_id = other.last_free_block_list_id;
 		this->last_free_excess_list_id = other.last_free_excess_list_id;
 		this->utilized_hash_block_count = other.utilized_hash_block_count;
 	}
@@ -170,14 +178,16 @@ public:
 		return hash_entry_allocation_states.GetData(memory_type);
 	}
 
-	HashEntryAllocationState* GetHashEntryAllocationStates() { return hash_entry_allocation_states.GetData(memory_type); }
+	HashEntryAllocationState* GetHashEntryAllocationStates() {
+		return hash_entry_allocation_states.GetData(memory_type);
+	}
 
 	void ClearHashEntryAllocationStates() { hash_entry_allocation_states.Clear(NEEDS_NO_CHANGE); }
 
-	const Vector3s* GetAllocationBlockCoordinates() const { return allocationBlockCoordinates.GetData(memory_type); }
+	const Vector3s* GetAllocationBlockCoordinates() const { return allocation_block_coordinates.GetData(memory_type); }
 
 	/** Get a temporary list for coordinates of voxel blocks to be soon allocated**/
-	Vector3s* GetAllocationBlockCoordinates() { return allocationBlockCoordinates.GetData(memory_type); }
+	Vector3s* GetAllocationBlockCoordinates() { return allocation_block_coordinates.GetData(memory_type); }
 
 	const int* GetUtilizedBlockHashCodes() const { return utilized_block_hash_codes.GetData(memory_type); }
 
@@ -191,43 +201,57 @@ public:
 
 	const HashBlockVisibility* GetBlockVisibilityTypes() const { return block_visibility_types.GetData(memory_type); }
 
-	/** Get the list that identifies which entries of the
-	overflow list are allocated. This is used if too
-	many hash collisions caused the buckets to overflow.
-	*/
-	const int* GetExcessAllocationList() const { return excess_allocation_list.GetData(memory_type); }
+	/**
+	 * \brief This list contains indices of blocks that are to be
+	 *  allocated within the voxel store.
+	 */
+	const int* GetBlockAllocationList() const { return block_allocation_list.GetData(memory_type); }
+	int* GetBlockAllocationList() { return block_allocation_list.GetData(memory_type); }
 
-	int* GetExcessAllocationList() { return excess_allocation_list.GetData(memory_type); }
+	/**
+	 * Get the list that identifies which entries of the
+	 * excess list are allocated. The excess list is only
+	 * used when there is a hash collision during hash
+	 * allocations, i.e. two hash positions map to the same
+	 * hash code / bucket. In this case, the second block's
+	 * entry will be put in the excess list and mapped to
+	 * be accessable from the entry at the original bucket
+	 * hash code.
+	 * */
+	const int* GetExcessEntryList() const { return excess_entry_list.GetData(memory_type); }
+	int* GetExcessEntryList() { return excess_entry_list.GetData(memory_type); }
 
+	int GetLastFreeBlockListId() const { return last_free_block_list_id; }
 	int GetLastFreeExcessListId() const { return last_free_excess_list_id; }
 
-	void SetLastFreeExcessListId(int last_free_excess_list_id) { this->last_free_excess_list_id = last_free_excess_list_id; }
+	void
+	SetLastFreeBlockListId(int last_free_block_list_id) { this->last_free_block_list_id = last_free_block_list_id; }
+	void
+	SetLastFreeExcessListId(int last_free_excess_list_id) { this->last_free_excess_list_id = last_free_excess_list_id; }
 
-	int GetUtilizedHashBlockCount() const { return this->utilized_hash_block_count; }
 
-	void SetUtilizedHashBlockCount(int utilized_hash_block_count) { this->utilized_hash_block_count = utilized_hash_block_count; }
+	int GetUtilizedBlockCount() const { return this->utilized_hash_block_count; }
+
+	void SetUtilizedBlockCount(
+			int utilized_hash_block_count) { this->utilized_hash_block_count = utilized_hash_block_count; }
 
 	int GetVisibleHashBlockCount() const { return this->visible_hash_block_count; }
 
-	void SetVisibleHashBlockCount(int visible_hash_block_count) { this->visible_hash_block_count = visible_hash_block_count; }
+	void SetVisibleHashBlockCount(
+			int visible_hash_block_count) { this->visible_hash_block_count = visible_hash_block_count; }
 
 	/*VBH-specific*/
-	int GetExcessListSize() const { return this->excessListSize; }
+	int GetExcessListSize() const { return this->excess_list_size; }
 
 	/** Number of allocated blocks. */
-	int GetAllocatedBlockCount() const { return this->voxelBlockCount; }
+	int GetMaximumBlockCount() const { return this->voxel_block_count; }
 
-	int GetVoxelBlockSize() const { return this->voxelBlockSize; }
+	int GetVoxelBlockSize() const { return this->voxel_block_size; }
 
 	unsigned int GetMaxVoxelCount() const {
-		return static_cast<unsigned int>(this->voxelBlockCount)
-		       * static_cast<unsigned int>(this->voxelBlockSize);
+		return static_cast<unsigned int>(this->voxel_block_count)
+		       * static_cast<unsigned int>(this->voxel_block_size);
 	}
-
-	void SaveToDirectory(const std::string& outputDirectory) const;
-
-	void LoadFromDirectory(const std::string& inputDirectory);
-
 
 	// Suppress the default copy constructor and assignment operator
 	VoxelBlockHash(const VoxelBlockHash&) = delete;

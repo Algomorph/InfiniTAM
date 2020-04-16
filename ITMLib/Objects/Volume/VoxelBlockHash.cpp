@@ -60,50 +60,25 @@ HashEntry VoxelBlockHash::GetUtilizedHashEntryAtIndex(int index) const {
 }
 
 VoxelBlockHash::VoxelBlockHash(VoxelBlockHashParameters parameters, MemoryDeviceType memory_type) :
-		voxelBlockCount(parameters.voxel_block_count),
-		excessListSize(parameters.excess_list_size),
+		voxel_block_count(parameters.voxel_block_count),
+		excess_list_size(parameters.excess_list_size),
 		hash_entry_count(ORDERED_LIST_SIZE + parameters.excess_list_size),
+		last_free_block_list_id(parameters.voxel_block_count - 1),
 		last_free_excess_list_id(parameters.excess_list_size - 1),
 		hash_entry_allocation_states(ORDERED_LIST_SIZE + parameters.excess_list_size, memory_type),
-		allocationBlockCoordinates(ORDERED_LIST_SIZE + parameters.excess_list_size, memory_type),
+		allocation_block_coordinates(ORDERED_LIST_SIZE + parameters.excess_list_size, memory_type),
 		utilized_block_hash_codes(parameters.voxel_block_count, memory_type),
 		visible_block_hash_codes(parameters.voxel_block_count, memory_type),
 		block_visibility_types(ORDERED_LIST_SIZE + parameters.excess_list_size, memory_type),
 		memory_type(memory_type),
 		hash_entries(hash_entry_count, memory_type),
-		excess_allocation_list(excessListSize, memory_type),
+		block_allocation_list(voxel_block_count, memory_type),
+		excess_entry_list(excess_list_size, memory_type),
 		utilized_hash_block_count(0),
 		visible_hash_block_count(0)
 		{
 	hash_entry_allocation_states.Clear(NEEDS_NO_CHANGE);
 
-}
-
-void VoxelBlockHash::SaveToDirectory(const std::string& outputDirectory) const {
-	std::string hashEntriesFileName = outputDirectory + "hash.dat";
-	std::string excessAllocationListFileName = outputDirectory + "excess.dat";
-	std::string lastFreeExcessListIdFileName = outputDirectory + "last.txt";
-
-	std::ofstream ofs(lastFreeExcessListIdFileName.c_str());
-	if (!ofs) throw std::runtime_error("Could not open " + lastFreeExcessListIdFileName + " for writing");
-
-	ofs << last_free_excess_list_id;
-	ORUtils::MemoryBlockPersister::SaveMemoryBlock(hashEntriesFileName, hash_entries, memory_type);
-	ORUtils::MemoryBlockPersister::SaveMemoryBlock(excessAllocationListFileName, excess_allocation_list, memory_type);
-}
-
-void VoxelBlockHash::LoadFromDirectory(const std::string& inputDirectory) {
-	std::string hashEntriesFileName = inputDirectory + "hash.dat";
-	std::string excessAllocationListFileName = inputDirectory + "excess.dat";
-	std::string lastFreeExcessListIdFileName = inputDirectory + "last.txt";
-
-	std::ifstream ifs(lastFreeExcessListIdFileName.c_str());
-	if (!ifs) throw std::runtime_error("Count not open " + lastFreeExcessListIdFileName + " for reading");
-
-	ifs >> this->last_free_excess_list_id;
-	ORUtils::MemoryBlockPersister::LoadMemoryBlock(hashEntriesFileName, hash_entries, memory_type);
-	ORUtils::MemoryBlockPersister::LoadMemoryBlock(excessAllocationListFileName, excess_allocation_list,
-	                                               memory_type);
 }
 
 

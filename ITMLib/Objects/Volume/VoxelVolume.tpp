@@ -26,22 +26,21 @@ namespace ITMLib {
 
 /**
  * \brief Generate a new scene (Caution: does not reset / initialize the voxel storage itself)
- * \param _sceneParams scene parameters (\see ITMSceneParams definition)
- * \param _useSwapping whether or not to use the GPU<--> CPU swapping mechanism
+ * \param volume_parameters volume parameters (\see VoxelVolumeParameters definition)
+ * \param use_swapping whether or not to use the GPU<--> CPU swapping mechanism
  * When on, keeps a larger global scene in main memory and a smaller, working part in VRAM, and continuously updates
  * the former from the latter
- * \param _memoryType DRAM to use -- GPU or CPU
- * \param size (optional) size of the scene -- affects only bounded index types, such as PlainVoxelArray
- * \param offset (optional) offset of the scene -- affects only bounded index types, such as PlainVoxelArray
+ * \param memory_type DRAM to use -- GPU or CPU
+ * \param index_parameters parameters to initialize the index (each index type has its own type)
  */
 template<typename TVoxel, typename TIndex>
-VoxelVolume<TVoxel,TIndex>::VoxelVolume(const VoxelVolumeParameters* _sceneParams, bool _useSwapping, MemoryDeviceType _memoryType,
-                                        typename TIndex::InitializationParameters indexParameters)
-	: parameters(_sceneParams),
-	  index(indexParameters, _memoryType),
-	  voxels(_memoryType, index.GetAllocatedBlockCount(), index.GetVoxelBlockSize())
+VoxelVolume<TVoxel,TIndex>::VoxelVolume(const VoxelVolumeParameters* volume_parameters, bool use_swapping, MemoryDeviceType memory_type,
+                                        typename TIndex::InitializationParameters index_parameters)
+	: parameters(volume_parameters),
+	  index(index_parameters, memory_type),
+	  voxels(index.GetMaxVoxelCount(), memory_type)
 {
-	if (_useSwapping) global_cache = new GlobalCache<TVoxel,TIndex>(this->index);
+	if (use_swapping) global_cache = new GlobalCache<TVoxel,TIndex>(this->index);
 	else global_cache = nullptr;
 }
 
@@ -56,8 +55,8 @@ VoxelVolume<TVoxel, TIndex>::VoxelVolume(MemoryDeviceType memoryDeviceType,
 template<class TVoxel, class TIndex>
 VoxelVolume<TVoxel, TIndex>::VoxelVolume(const VoxelVolume& other, MemoryDeviceType _memoryType)
 	: parameters(other.parameters),
-	  index(other.index,_memoryType),
-	  voxels(other.voxels, _memoryType),
+	  index(other.index, _memoryType),
+	  voxels(other.voxels),
 	  global_cache(nullptr)
 	{
     if(other.global_cache != nullptr){
@@ -83,7 +82,8 @@ void VoxelVolume<TVoxel, TIndex>::Reset(){
 template<class TVoxel, class TIndex>
 void VoxelVolume<TVoxel, TIndex>::SetFrom(const VoxelVolume& other) {
 	index.SetFrom(other.index);
-	voxels.SetFrom(other.voxels);
+	MemoryCopyDirection memory_copy_direction = determineMemoryCopyDirection(this->index.memory_type, other.index.memory_type);
+	voxels.SetFrom(other.voxels, memory_copy_direction);
 	if(other.global_cache != nullptr){
 		delete this->global_cache;
 		global_cache = new GlobalCache<TVoxel, TIndex>(*other.global_cache);
@@ -114,6 +114,16 @@ TVoxel VoxelVolume<TVoxel, TIndex>::GetValueAt(const Vector3i& pos) {
 		default:
 			DIEWITHEXCEPTION_REPORTLOCATION("Unsupported device type.");
 	}
+}
+
+template<class TVoxel, class TIndex>
+TVoxel* VoxelVolume<TVoxel, TIndex>::GetVoxelBlocks() {
+	return this->voxels.GetData(this->index.memory_type);
+}
+
+template<class TVoxel, class TIndex>
+const TVoxel* VoxelVolume<TVoxel, TIndex>::GetVoxelBlocks() const{
+	return this->voxels.GetData(this->index.memory_type);
 }
 
 

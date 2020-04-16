@@ -85,7 +85,7 @@ void UIEngine_BPO::GlutDisplayFunction() {
 			for (int w = 0; w < NUM_WIN; w++) {// Draw each sub window
 				if (uiEngine.outImageType[w] == MainEngine::InfiniTAM_IMAGE_UNKNOWN) continue;
 				glBindTexture(GL_TEXTURE_2D, uiEngine.textureId[w]);
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, showImgs[w]->noDims.x, showImgs[w]->noDims.y, 0, GL_RGBA,
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, showImgs[w]->dimensions.x, showImgs[w]->dimensions.y, 0, GL_RGBA,
 				             GL_UNSIGNED_BYTE, showImgs[w]->GetData(MEMORYDEVICE_CPU));
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -296,7 +296,7 @@ void UIEngine_BPO::GlutKeyUpFunction(unsigned char key, int x, int y) {
 				uiEngine.freeviewPose.SetFrom(uiEngine.mainEngine->GetTrackingState()->pose_d);
 				if (uiEngine.mainEngine->GetView() != nullptr) {
 					uiEngine.freeviewIntrinsics = uiEngine.mainEngine->GetView()->calib.intrinsics_d;
-					uiEngine.outImage[0]->ChangeDims(uiEngine.mainEngine->GetView()->depth->noDims);
+					uiEngine.outImage[0]->ChangeDims(uiEngine.mainEngine->GetView()->depth->dimensions);
 				}
 
 				switch (uiEngine.indexing_method) {

@@ -45,8 +45,8 @@ private:
 
 
 		// perform traversal on the CUDA
-		TVoxelPrimary* voxels1 = volume1->voxels.GetVoxelBlocks();
-		TVoxelSecondary* voxels2 = volume2->voxels.GetVoxelBlocks();
+		TVoxelPrimary* voxels1 = volume1->GetVoxelBlocks();
+		TVoxelSecondary* voxels2 = volume2->GetVoxelBlocks();
 		const GridAlignedBox* array_info = volume1->index.GetIndexData();
 		dim3 cuda_block_size(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
 		dim3 cuda_grid_size(
@@ -84,8 +84,8 @@ public:
 		ORcudaSafeCall(cudaMemset(mismatch_encountered_device, 0, sizeof(bool)));
 
 
-		TVoxelPrimary* voxels1 = volume1->voxels.GetVoxelBlocks();
-		TVoxelSecondary* voxels2 = volume2->voxels.GetVoxelBlocks();
+		TVoxelPrimary* voxels1 = volume1->GetVoxelBlocks();
+		TVoxelSecondary* voxels2 = volume2->GetVoxelBlocks();
 		const GridAlignedBox* array_info = volume1->index.GetIndexData();
 		dim3 cuda_block_size(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
 		dim3 cuda_grid_size(
@@ -124,8 +124,8 @@ public:
 		ORcudaSafeCall(cudaMemcpy(functor_device, &functor, sizeof(TFunctor), cudaMemcpyHostToDevice));
 
 		// perform traversal on the CUDA
-		TVoxelPrimary* voxels1 = volume1->voxels.GetVoxelBlocks();
-		TVoxelSecondary* voxels2 = volume2->voxels.GetVoxelBlocks();
+		TVoxelPrimary* voxels1 = volume1->GetVoxelBlocks();
+		TVoxelSecondary* voxels2 = volume2->GetVoxelBlocks();
 		const GridAlignedBox* array_info = volume1->index.GetIndexData();
 		dim3 cuda_block_size(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
 		dim3 cuda_grid_size(
@@ -166,8 +166,8 @@ public:
 		ORcudaSafeCall(cudaMemcpy(functor_device, &functor, sizeof(TFunctor), cudaMemcpyHostToDevice));
 
 		// perform traversal on the CUDA
-		TVoxelPrimary* voxels1 = volume1->voxels.GetVoxelBlocks();
-		TVoxelSecondary* voxels2 = volume2->voxels.GetVoxelBlocks();
+		TVoxelPrimary* voxels1 = volume1->GetVoxelBlocks();
+		TVoxelSecondary* voxels2 = volume2->GetVoxelBlocks();
 		const GridAlignedBox* array_info = volume1->index.GetIndexData();
 		dim3 cuda_block_size(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
 		dim3 cuda_cuda_grid_size(

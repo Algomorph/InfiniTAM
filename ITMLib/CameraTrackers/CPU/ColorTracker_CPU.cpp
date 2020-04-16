@@ -20,7 +20,7 @@ int ColorTracker_CPU::F_oneLevel(float *f, ORUtils::SE3Pose *pose)
 
 	Matrix4f M = pose->GetM();
 
-	Vector2i imgSize = viewHierarchy->GetLevel(levelId)->rgb->noDims;
+	Vector2i imgSize = viewHierarchy->GetLevel(levelId)->rgb->dimensions;
 
 	float scaleForOcclusions, final_f;
 
@@ -53,7 +53,7 @@ void ColorTracker_CPU::G_oneLevel(float *gradient, float *hessian, ORUtils::SE3P
 
 	Matrix4f M = pose->GetM();
 
-	Vector2i imgSize = viewHierarchy->GetLevel(levelId)->rgb->noDims;
+	Vector2i imgSize = viewHierarchy->GetLevel(levelId)->rgb->dimensions;
 
 	float scaleForOcclusions;
 

@@ -49,7 +49,7 @@ void CreateDefaultImageSource(ImageSourceEngine*& imageSource, IMUSourceEngine*&
 			                                inputPaths.depth_image_path_mask.c_str(), Vector2i(320, 240), 0.5f);
 			imuSource = new IMUSourceEngine(inputPaths.imu_input_path.c_str());
 		}
-		int depthWidth = imageSource->getDepthImageSize().x;
+		int depthWidth = imageSource->GetDepthImageSize().x;
 		if (depthWidth == 0) {
 			delete imageSource;
 			if (imuSource != nullptr) delete imuSource;
@@ -61,7 +61,7 @@ void CreateDefaultImageSource(ImageSourceEngine*& imageSource, IMUSourceEngine*&
 	    (inputPaths.imu_input_path.empty())) {
 		imageSource = new InputSource::FFMPEGReader(inputPaths.calibration_file_path.c_str(), inputPaths.rgb_video_file_path.c_str(),
 		                                            inputPaths.depth_video_file_path.c_str());
-		if (imageSource->getDepthImageSize().x == 0) {
+		if (imageSource->GetDepthImageSize().x == 0) {
 			delete imageSource;
 			imageSource = nullptr;
 		}
@@ -76,7 +76,7 @@ void CreateDefaultImageSource(ImageSourceEngine*& imageSource, IMUSourceEngine*&
 		       useInternalCalibration ? "internal" : "from file");
 		imageSource = new OpenNIEngine(calibFile, inputPaths.openni_file_path.empty() ? nullptr : inputPaths.openni_file_path.c_str(),
 		                               useInternalCalibration);
-		if (imageSource->getDepthImageSize().x == 0) {
+		if (imageSource->GetDepthImageSize().x == 0) {
 			delete imageSource;
 			imageSource = nullptr;
 		}
@@ -85,7 +85,7 @@ void CreateDefaultImageSource(ImageSourceEngine*& imageSource, IMUSourceEngine*&
 	if (imageSource == nullptr) {
 		printf("trying UVC device\n");
 		imageSource = new LibUVCEngine(calibFile);
-		if (imageSource->getDepthImageSize().x == 0) {
+		if (imageSource->GetDepthImageSize().x == 0) {
 			delete imageSource;
 			imageSource = nullptr;
 		}
@@ -94,7 +94,7 @@ void CreateDefaultImageSource(ImageSourceEngine*& imageSource, IMUSourceEngine*&
 	if (imageSource == nullptr) {
 		printf("trying RealSense device\n");
 		imageSource = new RealSenseEngine(calibFile);
-		if (imageSource->getDepthImageSize().x == 0) {
+		if (imageSource->GetDepthImageSize().x == 0) {
 			delete imageSource;
 			imageSource = nullptr;
 		}
@@ -103,7 +103,7 @@ void CreateDefaultImageSource(ImageSourceEngine*& imageSource, IMUSourceEngine*&
 	if (imageSource == nullptr) {
 		printf("trying MS Kinect 2 device\n");
 		imageSource = new Kinect2Engine(calibFile);
-		if (imageSource->getDepthImageSize().x == 0) {
+		if (imageSource->GetDepthImageSize().x == 0) {
 			delete imageSource;
 			imageSource = nullptr;
 		}
@@ -112,7 +112,7 @@ void CreateDefaultImageSource(ImageSourceEngine*& imageSource, IMUSourceEngine*&
 	if (imageSource == nullptr) {
 		printf("trying PMD PicoFlexx device\n");
 		imageSource = new PicoFlexxEngine(calibFile);
-		if (imageSource->getDepthImageSize().x == 0) {
+		if (imageSource->GetDepthImageSize().x == 0) {
 			delete imageSource;
 			imageSource = nullptr;
 		}

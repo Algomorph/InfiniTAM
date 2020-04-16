@@ -35,10 +35,10 @@ public:
 	                Vector2i imageSize_rgb = Vector2i(640, 480), Vector2i imageSize_d = Vector2i(640, 480));
 	~RealSenseEngine();
 
-	bool hasMoreImages(void) const;
-	void getImages(ITMUChar4Image *rgb, ITMShortImage *rawDepth);
-	Vector2i getDepthImageSize(void) const;
-	Vector2i getRGBImageSize(void) const;
+	bool HasMoreImages(void) override;
+	void GetImages(ITMUChar4Image& rgb, ITMShortImage& rawDepth) override;
+	Vector2i GetDepthImageSize(void) override;
+	Vector2i GetRGBImageSize(void) override;
 };
 
 }

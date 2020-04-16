@@ -43,11 +43,11 @@ class FFMPEGReader::PrivateData {
 		av_log_set_level(AV_LOG_QUIET);
 		depthStreamIdx = colorStreamIdx = -1;
 		av_init_packet(&packet);
-		packet.data = NULL;
+		packet.data = nullptr;
 		packet.size = 0;
-		frame = NULL;
-		ifmt_ctx = NULL;
-		filter_ctx = NULL;
+		frame = nullptr;
+		ifmt_ctx = nullptr;
+		filter_ctx = nullptr;
 	}
 
 	~PrivateData(void)
@@ -81,7 +81,7 @@ class FFMPEGReader::PrivateData {
 	{ return (depthFrames.size()>0); }
 	AVFrame* getFromDepthQueue(void)
 	{
-		if (depthFrames.size() == 0) return NULL;
+		if (depthFrames.size() == 0) return nullptr;
 		AVFrame *ret = depthFrames.front();
 		depthFrames.pop_front();
 		return ret;
@@ -93,7 +93,7 @@ class FFMPEGReader::PrivateData {
 	{ return (colorFrames.size()>0); }
 	AVFrame* getFromColorQueue(void)
 	{
-		if (colorFrames.size() == 0) return NULL;
+		if (colorFrames.size() == 0) return nullptr;
 		AVFrame *ret = colorFrames.front();
 		colorFrames.pop_front();
 		return ret;
@@ -118,7 +118,7 @@ class FFMPEGReader::PrivateData {
 			AVFrame *tmp;
 			if (depth) tmp = getFromDepthQueue();
 			else tmp = getFromColorQueue();
-			if (tmp == NULL) break;
+			if (tmp == nullptr) break;
 			av_frame_free(&tmp);
 		}
 	}
@@ -146,11 +146,11 @@ int FFMPEGReader::PrivateData::open_input_file(const char *filename)
 {
 	int ret;
 	unsigned int i;
-	if ((ret = avformat_open_input(&ifmt_ctx, filename, NULL, NULL)) < 0) {
+	if ((ret = avformat_open_input(&ifmt_ctx, filename, nullptr, nullptr)) < 0) {
 		std::cerr << "Cannot open input file" << std::endl;
 		return ret;
 	}
-	if ((ret = avformat_find_stream_info(ifmt_ctx, NULL)) < 0) {
+	if ((ret = avformat_find_stream_info(ifmt_ctx, nullptr)) < 0) {
 		std::cerr << "Cannot find stream information" << std::endl;
 		return ret;
 	}
@@ -162,7 +162,7 @@ int FFMPEGReader::PrivateData::open_input_file(const char *filename)
 		/* Reencode video & audio and remux subtitles etc. */
 		if (codec_ctx->codec_type == AVMEDIA_TYPE_VIDEO) {
 			/* Open decoder */
-			ret = avcodec_open2(codec_ctx, avcodec_find_decoder(codec_ctx->codec_id), NULL);
+			ret = avcodec_open2(codec_ctx, avcodec_find_decoder(codec_ctx->codec_id), nullptr);
 			if (ret < 0) {
 				std::cerr << "Failed to open decoder for stream #" << i << std::endl;
 				continue;
@@ -182,10 +182,10 @@ int FFMPEGReader::PrivateData::init_filter(FilteringContext* fctx, AVCodecContex
 {
 	char args[512];
 	int ret = 0;
-	const AVFilter *buffersrc = NULL;
-	const AVFilter *buffersink = NULL;
-	AVFilterContext *buffersrc_ctx = NULL;
-	AVFilterContext *buffersink_ctx = NULL;
+	const AVFilter *buffersrc = nullptr;
+	const AVFilter *buffersink = nullptr;
+	AVFilterContext *buffersrc_ctx = nullptr;
+	AVFilterContext *buffersink_ctx = nullptr;
 	AVFilterInOut *outputs = avfilter_inout_alloc();
 	AVFilterInOut *inputs  = avfilter_inout_alloc();
 	AVFilterGraph *filter_graph = avfilter_graph_alloc();
@@ -211,12 +211,12 @@ int FFMPEGReader::PrivateData::init_filter(FilteringContext* fctx, AVCodecContex
 	         dec_ctx->time_base.num, dec_ctx->time_base.den,
 	         dec_ctx->sample_aspect_ratio.num,
 	         dec_ctx->sample_aspect_ratio.den);
-	ret = avfilter_graph_create_filter(&buffersrc_ctx, buffersrc, "in", args, NULL, filter_graph);
+	ret = avfilter_graph_create_filter(&buffersrc_ctx, buffersrc, "in", args, nullptr, filter_graph);
 	if (ret < 0) {
 		std::cerr << "Cannot create buffer source" << std::endl;
 		goto end;
 	}
-	ret = avfilter_graph_create_filter(&buffersink_ctx, buffersink, "out", NULL, NULL, filter_graph);
+	ret = avfilter_graph_create_filter(&buffersink_ctx, buffersink, "out", nullptr, nullptr, filter_graph);
 	if (ret < 0) {
 		std::cerr << "Cannot create buffer sink" << std::endl;
 		goto end;
@@ -231,17 +231,17 @@ int FFMPEGReader::PrivateData::init_filter(FilteringContext* fctx, AVCodecContex
 	outputs->name       = av_strdup("in");
 	outputs->filter_ctx = buffersrc_ctx;
 	outputs->pad_idx    = 0;
-	outputs->next       = NULL;
+	outputs->next       = nullptr;
 	inputs->name       = av_strdup("out");
 	inputs->filter_ctx = buffersink_ctx;
 	inputs->pad_idx    = 0;
-	inputs->next       = NULL;
+	inputs->next       = nullptr;
 	if (!outputs->name || !inputs->name) {
 		ret = AVERROR(ENOMEM);
 		goto end;
 	}
-	if ((ret = avfilter_graph_parse_ptr(filter_graph, filter_spec, &inputs, &outputs, NULL)) < 0) goto end;
-	if ((ret = avfilter_graph_config(filter_graph, NULL)) < 0) goto end;
+	if ((ret = avfilter_graph_parse_ptr(filter_graph, filter_spec, &inputs, &outputs, nullptr)) < 0) goto end;
+	if ((ret = avfilter_graph_config(filter_graph, nullptr)) < 0) goto end;
 
 	/* Fill FilteringContext */
 	fctx->buffersrc_ctx = buffersrc_ctx;
@@ -261,9 +261,9 @@ int FFMPEGReader::PrivateData::init_filters(void)
 	filter_ctx = (FilteringContext*)av_malloc_array(ifmt_ctx->nb_streams, sizeof(*filter_ctx));
 	if (!filter_ctx) return AVERROR(ENOMEM);
 	for (i = 0; (unsigned int)i < ifmt_ctx->nb_streams; i++) {
-		filter_ctx[i].buffersrc_ctx  = NULL;
-		filter_ctx[i].buffersink_ctx = NULL;
-		filter_ctx[i].filter_graph   = NULL;
+		filter_ctx[i].buffersrc_ctx  = nullptr;
+		filter_ctx[i].buffersink_ctx = nullptr;
+		filter_ctx[i].filter_graph   = nullptr;
 		if ((i != depthStreamIdx)&&(i != colorStreamIdx)) continue;
 		filter_spec = "null"; /* passthrough (dummy) filter for video */
 		ret = init_filter(&filter_ctx[i], ifmt_ctx->streams[i]->codec, filter_spec, (i == depthStreamIdx));
@@ -322,7 +322,7 @@ void FFMPEGReader::PrivateData::flush_decoder_and_filter(void)
 {
 	AVPacket flushPacket;
 	av_init_packet(&flushPacket);
-	flushPacket.data = NULL;
+	flushPacket.data = nullptr;
 	flushPacket.size = 0;
 	int ret = 0;
 	int got_frame;
@@ -330,7 +330,7 @@ void FFMPEGReader::PrivateData::flush_decoder_and_filter(void)
 	/* flush filters and decoders */
 	for (int i = 0; (unsigned int)i < ifmt_ctx->nb_streams; i++) {
 		if ((i != colorStreamIdx)&&(i != depthStreamIdx)) continue;
-		if (filter_ctx[i].filter_graph == NULL) continue;
+		if (filter_ctx[i].filter_graph == nullptr) continue;
 
 		/* flush decoder */
 		while (true) {
@@ -352,7 +352,7 @@ void FFMPEGReader::PrivateData::flush_decoder_and_filter(void)
 		}
 
 		/* flush filter */
-		ret = filter_decode_frame(NULL, i);
+		ret = filter_decode_frame(nullptr, i);
 		if (ret < 0) {
 			std::cerr << "Flushing filter failed" << std::endl;
 			goto end;
@@ -414,16 +414,16 @@ bool FFMPEGReader::PrivateData::readFrames(void)
 
 bool FFMPEGReader::PrivateData::close(void)
 {
-	if (ifmt_ctx != NULL) {
+	if (ifmt_ctx != nullptr) {
 		for (unsigned int i = 0; i < ifmt_ctx->nb_streams; i++) {
 			avcodec_close(ifmt_ctx->streams[i]->codec);
 			if (filter_ctx && filter_ctx[i].filter_graph) avfilter_graph_free(&filter_ctx[i].filter_graph);
 		}
 		avformat_close_input(&ifmt_ctx);
 	}
-	if (filter_ctx != NULL) av_free(filter_ctx);
-	ifmt_ctx = NULL;
-	filter_ctx = NULL;
+	if (filter_ctx != nullptr) av_free(filter_ctx);
+	ifmt_ctx = nullptr;
+	filter_ctx = nullptr;
 	return true;
 }
 
@@ -431,31 +431,31 @@ FFMPEGReader::FFMPEGReader(const char *calibFilename, const char *filename1, con
 	: BaseImageSourceEngine(calibFilename)
 {
 	mData1 = new PrivateData();
-	isValid = mData1->open(filename1);
+	is_valid = mData1->open(filename1);
 
-	if (isValid && (filename2 != NULL)) {
+	if (is_valid && (filename2 != nullptr)) {
 		mData2 = new PrivateData();
 		mData2->open(filename2);
 	} else {
-		mData2 = NULL;
+		mData2 = nullptr;
 	}
 }
 
 FFMPEGReader::~FFMPEGReader(void)
 {
-	if (isValid) mData1->close();
+	if (is_valid) mData1->close();
 	delete mData1;
-	if (mData2 != NULL) {
-		if (isValid) mData2->close();
+	if (mData2 != nullptr) {
+		if (is_valid) mData2->close();
 		delete mData2;
 	}
 }
 
-bool FFMPEGReader::hasMoreImages(void) const
+bool FFMPEGReader::HasMoreImages(void)
 {
-	if (!isValid) return false;
+	if (!is_valid) return false;
 	if (!mData1->hasMoreImages()) return false;
-	if (mData2 != NULL) if (!mData2->hasMoreImages()) return false;
+	if (mData2 != nullptr) if (!mData2->hasMoreImages()) return false;
 	return true;
 }
 
@@ -476,16 +476,16 @@ static void copyDepth(const AVFrame *frame, short *depth)
 	memcpy(depth, frame->data[0], frame->height*frame->width*2);
 }
 
-void FFMPEGReader::getImages(ITMUChar4Image *rgbImage, ITMShortImage *depthImage)
+void FFMPEGReader::GetImages(ITMUChar4Image& rgb_image, ITMShortImage& depth_image)
 {
-	Vector4u *rgb = rgbImage->GetData(MEMORYDEVICE_CPU);
-	short *depth = depthImage->GetData(MEMORYDEVICE_CPU);
+	Vector4u *rgb = rgb_image.GetData(MEMORYDEVICE_CPU);
+	short *depth = depth_image.GetData(MEMORYDEVICE_CPU);
 
-	bool gotColour = false;
-	bool gotDepth = false;
-	if (isValid) {
+	bool has_color = false;
+	bool has_depth = false;
+	if (is_valid) {
 		if (mData1->providesColor()) {
-			if (mData2 != NULL) mData2->flushQueue(false);
+			if (mData2 != nullptr) mData2->flushQueue(false);
 
 			if (!mData1->hasQueuedColor()) mData1->readFrames();
 			if (mData1->hasQueuedColor()) {
@@ -493,21 +493,21 @@ void FFMPEGReader::getImages(ITMUChar4Image *rgbImage, ITMShortImage *depthImage
 				copyRgba(frame, rgb);
 				av_frame_free(&frame);
 
-				gotColour = true;
+				has_color = true;
 			}
-		} else if (mData2 != NULL) if (mData2->providesColor()) {
+		} else if (mData2 != nullptr) if (mData2->providesColor()) {
 			if (!mData2->hasQueuedColor()) mData2->readFrames();
 			if (mData2->hasQueuedColor()) {
 				AVFrame *frame = mData2->getFromColorQueue();
 				copyRgba(frame, rgb);
 				av_frame_free(&frame);
 
-				gotColour = true;
+				has_color = true;
 			}
 		}
 
 		if (mData1->providesDepth()) {
-			if (mData2 != NULL) mData2->flushQueue(true);
+			if (mData2 != nullptr) mData2->flushQueue(true);
 
 			if (!mData1->hasQueuedDepth()) mData1->readFrames();
 			if (mData1->hasQueuedDepth()) {
@@ -515,34 +515,34 @@ void FFMPEGReader::getImages(ITMUChar4Image *rgbImage, ITMShortImage *depthImage
 				copyDepth(frame, depth);
 				av_frame_free(&frame);
 
-				gotDepth = true;
+				has_depth = true;
 			}
-		} else if (mData2 != NULL) if (mData2->providesDepth()) {
+		} else if (mData2 != nullptr) if (mData2->providesDepth()) {
 			if (!mData2->hasQueuedDepth()) mData2->readFrames();
 			if (mData2->hasQueuedDepth()) {
 				AVFrame *frame = mData2->getFromDepthQueue();
 				copyDepth(frame, depth);
 				av_frame_free(&frame);
 
-				gotDepth = true;
+				has_depth = true;
 			}
 		}
 	}
-	if (!gotColour) memset(rgb, 0, rgbImage->size() * sizeof(Vector4u));
-	if (!gotDepth) memset(depth, 0, depthImage->size() * sizeof(short));
+	if (!has_color) memset(rgb, 0, rgb_image.size() * sizeof(Vector4u));
+	if (!has_depth) memset(depth, 0, depth_image.size() * sizeof(short));
 }
 
-Vector2i FFMPEGReader::getDepthImageSize(void) const
+Vector2i FFMPEGReader::GetDepthImageSize(void)
 {
 	if (mData1->providesDepth()) return mData1->getDepthImageSize();
-	if (mData2 != NULL) if (mData2->providesDepth()) return mData2->getDepthImageSize();
+	if (mData2 != nullptr) if (mData2->providesDepth()) return mData2->getDepthImageSize();
 	return Vector2i(0,0);
 }
 
-Vector2i FFMPEGReader::getRGBImageSize(void) const
+Vector2i FFMPEGReader::GetRGBImageSize(void)
 {
 	if (mData1->providesColor()) return mData1->getColorImageSize();
-	if (mData2 != NULL) if (mData2->providesColor()) return mData2->getColorImageSize();
+	if (mData2 != nullptr) if (mData2->providesColor()) return mData2->getColorImageSize();
 	return Vector2i(0,0);
 }
 

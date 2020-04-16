@@ -238,7 +238,7 @@ CameraTrackingState::TrackingResult MultiEngine<TVoxel, TIndex>::ProcessFrame(IT
 			int dataId = todoList[i].dataId;
 
 #ifdef DEBUG_MULTISCENE
-			int blocksInUse = currentLocalMap->scene->index.GetAllocatedBlockCount() - currentLocalMap->scene->voxels.lastFreeBlockId - 1;
+			int blocksInUse = currentLocalMap->scene->index.Getsource_volume() - currentLocalMap->scene->index.GetLastFreeBlockListId() - 1;
 			fprintf(stderr, " %i%s (%i)", currentLocalMapIdx, (todoList[i].dataId == primaryDataIdx) ? "*" : "", blocksInUse);
 #endif
 
@@ -346,13 +346,13 @@ void MultiEngine<TVoxel, TIndex>::GetImage(ITMUChar4Image *out, GetImageType get
 	switch (getImageType)
 	{
 	case MultiEngine::InfiniTAM_IMAGE_ORIGINAL_RGB:
-		out->ChangeDims(view->rgb->noDims);
+		out->ChangeDims(view->rgb->dimensions);
 		if (settings.device_type == MEMORYDEVICE_CUDA)
-			out->SetFrom(view->rgb, MemoryCopyDirection::CUDA_TO_CPU);
-		else out->SetFrom(view->rgb, MemoryCopyDirection::CPU_TO_CPU);
+			out->SetFrom(*view->rgb, MemoryCopyDirection::CUDA_TO_CPU);
+		else out->SetFrom(*view->rgb, MemoryCopyDirection::CPU_TO_CPU);
 		break;
 	case MultiEngine::InfiniTAM_IMAGE_ORIGINAL_DEPTH:
-		out->ChangeDims(view->depth->noDims);
+		out->ChangeDims(view->depth->dimensions);
 		if (settings.device_type == MEMORYDEVICE_CUDA) view->depth->UpdateHostFromDevice();
 		VisualizationEngine<TVoxel, TIndex>::DepthToUchar4(out, view->depth);
 		break;
@@ -386,10 +386,10 @@ void MultiEngine<TVoxel, TIndex>::GetImage(ITMUChar4Image *out, GetImageType get
 		visualization_engine->RenderImage(activeLocalMap->scene, activeLocalMap->trackingState->pose_d, &view->calib.intrinsics_d, activeLocalMap->renderState, activeLocalMap->renderState->raycastImage, imageType, raycastType);
 
 		ORUtils::Image<Vector4u> *srcImage = activeLocalMap->renderState->raycastImage;
-		out->ChangeDims(srcImage->noDims);
+		out->ChangeDims(srcImage->dimensions);
 		if (settings.device_type == MEMORYDEVICE_CUDA)
-			out->SetFrom(srcImage, MemoryCopyDirection::CUDA_TO_CPU);
-		else out->SetFrom(srcImage, MemoryCopyDirection::CPU_TO_CPU);
+			out->SetFrom(*srcImage, MemoryCopyDirection::CUDA_TO_CPU);
+		else out->SetFrom(*srcImage, MemoryCopyDirection::CPU_TO_CPU);
 		break;
 	}
 	case MultiEngine::InfiniTAM_IMAGE_FREECAMERA_SHADED:
@@ -405,7 +405,7 @@ void MultiEngine<TVoxel, TIndex>::GetImage(ITMUChar4Image *out, GetImageType get
 		if (freeviewLocalMapIdx >= 0){
 			LocalMap<TVoxel, TIndex> *activeData = mapManager->getLocalMap(freeviewLocalMapIdx);
 			if (renderState_freeview == NULL) renderState_freeview =
-					new RenderStateMultiScene<TVoxel,TIndex>(out->noDims, activeData->scene->parameters->near_clipping_distance,
+					new RenderStateMultiScene<TVoxel,TIndex>(out->dimensions, activeData->scene->parameters->near_clipping_distance,
 					                                         activeData->scene->parameters->far_clipping_distance, settings.device_type);
 
 			visualization_engine->FindVisibleBlocks(activeData->scene, pose, intrinsics, renderState_freeview);
@@ -413,21 +413,21 @@ void MultiEngine<TVoxel, TIndex>::GetImage(ITMUChar4Image *out, GetImageType get
 			visualization_engine->RenderImage(activeData->scene, pose, intrinsics, renderState_freeview, renderState_freeview->raycastImage, type);
 
 			if (settings.device_type == MEMORYDEVICE_CUDA)
-				out->SetFrom(renderState_freeview->raycastImage, MemoryCopyDirection::CUDA_TO_CPU);
-			else out->SetFrom(renderState_freeview->raycastImage, MemoryCopyDirection::CPU_TO_CPU);
+				out->SetFrom(*renderState_freeview->raycastImage, MemoryCopyDirection::CUDA_TO_CPU);
+			else out->SetFrom(*renderState_freeview->raycastImage, MemoryCopyDirection::CPU_TO_CPU);
 		}
 		else
 		{
 			const VoxelVolumeParameters& params = *mapManager->getLocalMap(0)->scene->parameters;
 			if (renderState_multiscene == NULL) renderState_multiscene =
-						new RenderStateMultiScene<TVoxel, TIndex>(out->noDims, params.near_clipping_distance,
+						new RenderStateMultiScene<TVoxel, TIndex>(out->dimensions, params.near_clipping_distance,
 						                                          params.far_clipping_distance, settings.device_type);
 			multiVisualizationEngine->PrepareRenderState(*mapManager, renderState_multiscene);
 			multiVisualizationEngine->CreateExpectedDepths(*mapManager, pose, intrinsics, renderState_multiscene);
 			multiVisualizationEngine->RenderImage(pose, intrinsics, renderState_multiscene, renderState_multiscene->raycastImage, type);
 			if (settings.device_type == MEMORYDEVICE_CUDA)
-				out->SetFrom(renderState_multiscene->raycastImage, MemoryCopyDirection::CUDA_TO_CPU);
-			else out->SetFrom(renderState_multiscene->raycastImage, MemoryCopyDirection::CPU_TO_CPU);
+				out->SetFrom(*renderState_multiscene->raycastImage, MemoryCopyDirection::CUDA_TO_CPU);
+			else out->SetFrom(*renderState_multiscene->raycastImage, MemoryCopyDirection::CPU_TO_CPU);
 		}
 
 		break;

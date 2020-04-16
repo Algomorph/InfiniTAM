@@ -31,25 +31,46 @@ using namespace ITMLib;
 template<typename TVoxel>
 void EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::ResetVolume(
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
-	int numBlocks = volume->index.GetAllocatedBlockCount();
-	int blockSize = volume->index.GetVoxelBlockSize();
+	const int block_count = volume->index.GetMaximumBlockCount();
+	const int block_size = volume->index.GetVoxelBlockSize();
 
-	TVoxel* voxelBlocks_ptr = volume->voxels.GetVoxelBlocks();
-	for (int i = 0; i < numBlocks * blockSize; ++i) voxelBlocks_ptr[i] = TVoxel();
-	int* vbaAllocationList_ptr = volume->voxels.GetAllocationList();
-	for (int i = 0; i < numBlocks; ++i) vbaAllocationList_ptr[i] = i;
-	volume->voxels.lastFreeBlockId = numBlocks - 1;
+	TVoxel* voxels = volume->GetVoxelBlocks();
+#ifdef WITH_OPENMP
+#pragma omp parallel for default(none) shared(voxels)
+#endif
+	for (int i_voxel = 0; i_voxel < block_count * block_size; i_voxel++) voxels[i_voxel] = TVoxel();
+	int* block_allocation_list = volume->index.GetBlockAllocationList();
+#ifdef WITH_OPENMP
+#pragma omp parallel for default(none) shared(block_allocation_list)
+#endif
+	for (int i_block_index = 0; i_block_index < block_count; i_block_index++)
+		block_allocation_list[i_block_index] = i_block_index;
 
-	HashEntry tmpEntry;
-	memset(&tmpEntry, 0, sizeof(HashEntry));
-	tmpEntry.ptr = -2;
-	HashEntry* hashEntry_ptr = volume->index.GetEntries();
-	for (int i = 0; i < volume->index.hash_entry_count; ++i) hashEntry_ptr[i] = tmpEntry;
-	int* excessList_ptr = volume->index.GetExcessAllocationList();
-	for (int i = 0; i < volume->index.GetExcessListSize(); ++i) excessList_ptr[i] = i;
+	volume->index.SetLastFreeBlockListId(block_count - 1);
+
+	const HashEntry default_entry = [](){
+		HashEntry default_entry;
+		memset(&default_entry, 0, sizeof(HashEntry));
+		default_entry.ptr = -2;
+		return default_entry;
+	}();
+
+	HashEntry* hash_table = volume->index.GetEntries();
+	const int entry_count = volume->index.hash_entry_count;
+#ifdef WITH_OPENMP
+#pragma omp parallel for default(none) shared(hash_table)
+#endif
+	for (int i_entry = 0; i_entry < entry_count; i_entry++) hash_table[i_entry] = default_entry;
+	int* excess_entry_list = volume->index.GetExcessEntryList();
+	const int excess_list_size = volume->index.GetExcessListSize();
+#ifdef WITH_OPENMP
+#pragma omp parallel for default(none) shared(excess_entry_list)
+#endif
+	for (int i_excess_entry = 0; i_excess_entry < excess_list_size; i_excess_entry++)
+		excess_entry_list[i_excess_entry] = i_excess_entry;
 
 	volume->index.SetLastFreeExcessListId(volume->index.GetExcessListSize() - 1);
-	volume->index.SetUtilizedHashBlockCount(0);
+	volume->index.SetUtilizedBlockCount(0);
 }
 
 template<typename TVoxel>
@@ -58,7 +79,7 @@ EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::SetVoxel(VoxelVolume<TVoxel, Voxe
                                                         Vector3i at, TVoxel voxel) {
 
 	HashEntry* hashTable = volume->index.GetEntries();
-	TVoxel* voxels = volume->voxels.GetVoxelBlocks();
+	TVoxel* voxels = volume->GetVoxelBlocks();
 	int hashCode = -1;
 	Vector3s blockPos;
 	int voxelIndexInBlock = pointToVoxelBlockPos(at, blockPos);
@@ -78,7 +99,7 @@ bool EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::SetVoxelNoAllocation(
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume,
 		Vector3i at, TVoxel voxel) {
 	HashEntry* hashTable = volume->index.GetEntries();
-	TVoxel* voxels = volume->voxels.GetVoxelBlocks();
+	TVoxel* voxels = volume->GetVoxelBlocks();
 	Vector3i blockPos;
 	int linearIdx = pointToVoxelBlockPos(at, blockPos);
 	int hash_index;
@@ -96,7 +117,7 @@ template<typename TVoxel>
 TVoxel
 EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::ReadVoxel(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
                                                          Vector3i at) {
-	TVoxel* voxels = volume->voxels.GetVoxelBlocks();
+	TVoxel* voxels = volume->GetVoxelBlocks();
 	HashEntry* hashTable = volume->index.GetEntries();
 	int vmIndex;
 	return readVoxel(voxels, hashTable, at, vmIndex);
@@ -107,7 +128,7 @@ TVoxel
 EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::ReadVoxel(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
                                                          Vector3i at,
                                                          VoxelBlockHash::IndexCache& cache) {
-	TVoxel* voxels = volume->voxels.GetVoxelBlocks();
+	TVoxel* voxels = volume->GetVoxelBlocks();
 	HashEntry* hashTable = volume->index.GetEntries();
 	int vmIndex;
 	return readVoxel(voxels, hashTable, at, vmIndex, cache);
@@ -134,11 +155,11 @@ bool EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::CopyVolumeSlice(
 	ORUtils::MemoryBlock<Vector3s> blockCoords(hash_entry_count, MEMORYDEVICE_CPU);
 	Vector3s* blockCoords_device = blockCoords.GetData(MEMORYDEVICE_CPU);
 
-	TVoxel* source_voxels = source_volume->voxels.GetVoxelBlocks();
+	TVoxel* source_voxels = source_volume->GetVoxelBlocks();
 	const HashEntry* source_hash_table = source_volume->index.GetEntries();
 
 	HashEntry* destination_hash_table = target_volume->index.GetEntries();
-	TVoxel* destination_voxels = target_volume->voxels.GetVoxelBlocks();
+	TVoxel* destination_voxels = target_volume->GetVoxelBlocks();
 
 	bool voxels_were_copied = false;
 
@@ -223,11 +244,11 @@ bool EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::CopyVolume(
 
 	const int hash_entry_count = source_volume->index.hash_entry_count;
 
-	TVoxel* source_voxels = source_volume->voxels.GetVoxelBlocks();
+	TVoxel* source_voxels = source_volume->GetVoxelBlocks();
 	const HashEntry* source_hash_table = source_volume->index.GetEntries();
 
 	HashEntry* destination_hash_table = target_volume->index.GetEntries();
-	TVoxel* destination_voxels = target_volume->voxels.GetVoxelBlocks();
+	TVoxel* destination_voxels = target_volume->GetVoxelBlocks();
 
 	bool voxels_were_copied = false;
 

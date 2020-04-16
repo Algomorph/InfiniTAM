@@ -131,7 +131,7 @@ private:
 	template<typename TProcessBlockFunction>
 	inline static void
 	TraverseAll_Generic(VoxelVolume<TVoxel, VoxelBlockHash>* volume, TProcessBlockFunction&& block_function) {
-		TVoxel* const voxels = volume->voxels.GetVoxelBlocks();
+		TVoxel* const voxels = volume->GetVoxelBlocks();
 		const HashEntry* const hash_table = volume->index.GetEntries();
 		const int hash_entry_count = volume->index.hash_entry_count;
 #ifdef WITH_OPENMP
@@ -148,9 +148,9 @@ private:
 	template<typename TProcessBlockFunction>
 	inline static void
 	TraverseUtilized_Generic(VoxelVolume<TVoxel, VoxelBlockHash>* volume, TProcessBlockFunction&& block_function) {
-		TVoxel* const voxels = volume->voxels.GetVoxelBlocks();
+		TVoxel* const voxels = volume->GetVoxelBlocks();
 		const HashEntry* const hash_table = volume->index.GetEntries();
-		const int utilized_entry_count = volume->index.GetUtilizedHashBlockCount();
+		const int utilized_entry_count = volume->index.GetUtilizedBlockCount();
 		const int* utilized_hash_codes = volume->index.GetUtilizedBlockHashCodes();
 #ifdef WITH_OPENMP
 #pragma omp parallel for
@@ -245,7 +245,7 @@ public:
 	template<typename TFunctor>
 	inline static void
 	TraverseAll_ST(VoxelVolume<TVoxel, VoxelBlockHash>* volume, TFunctor& functor) {
-		TVoxel* voxels = volume->voxels.GetVoxelBlocks();
+		TVoxel* voxels = volume->GetVoxelBlocks();
 		const HashEntry* hash_table = volume->index.GetEntries();
 		int hash_entry_count = volume->index.hash_entry_count;
 		for (int hash_code = 0; hash_code < hash_entry_count; hash_code++) {
@@ -259,9 +259,9 @@ public:
 	template<typename TFunctor>
 	inline static void
 	TraverseUtilized_ST(VoxelVolume<TVoxel, VoxelBlockHash>* volume, TFunctor& functor) {
-		TVoxel* const voxels = volume->voxels.GetVoxelBlocks();
+		TVoxel* const voxels = volume->GetVoxelBlocks();
 		const HashEntry* const hash_table = volume->index.GetEntries();
-		const int utilized_entry_count = volume->index.GetUtilizedHashBlockCount();
+		const int utilized_entry_count = volume->index.GetUtilizedBlockCount();
 		const int* utilized_hash_codes = volume->index.GetUtilizedBlockHashCodes();
 		for (int hash_code_index = 0; hash_code_index < utilized_entry_count; hash_code_index++) {
 			const HashEntry& hash_entry = hash_table[utilized_hash_codes[hash_code_index]];

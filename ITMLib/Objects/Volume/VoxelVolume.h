@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "VoxelStorage.h"
 #include "GlobalCache.h"
 #include "../../Utils/VoxelVolumeParameters.h"
 
@@ -24,14 +23,11 @@ public:
 	 * blocks. If it's an PlainVoxelArray, it's just a dense regular 3D array. */
 	TIndex index;
 
-	/** Current local content of the 8x8x8 voxel blocks -- stored host or device */
-	VoxelStorage<TVoxel> voxels;
-
 	/** "Global" content -- stored on in host memory only */
 	GlobalCache<TVoxel, TIndex>* global_cache;
 
-	VoxelVolume(const VoxelVolumeParameters *_sceneParams, bool _useSwapping, MemoryDeviceType _memoryType,
-	            typename TIndex::InitializationParameters indexParameters = typename TIndex::InitializationParameters());
+	VoxelVolume(const VoxelVolumeParameters *volume_parameters, bool use_swapping, MemoryDeviceType memory_type,
+	            typename TIndex::InitializationParameters index_parameters = typename TIndex::InitializationParameters());
 	VoxelVolume(MemoryDeviceType memoryDeviceType, typename TIndex::InitializationParameters indexParameters = typename TIndex::InitializationParameters());
 	VoxelVolume(const VoxelVolume& other, MemoryDeviceType _memoryType);
 	~VoxelVolume()
@@ -43,6 +39,8 @@ public:
 	void SetFrom(const VoxelVolume& other);
 	void SaveToDirectory(const std::string &outputDirectory) const;
 	void LoadFromDirectory(const std::string &outputDirectory);
+	TVoxel* GetVoxelBlocks();
+	const TVoxel* GetVoxelBlocks() const;
 	TVoxel GetValueAt(const Vector3i& pos);
 	TVoxel GetValueAt(int x, int y, int z){
 		Vector3i pos(x,y,z);
@@ -54,10 +52,14 @@ public:
 		return this->global_cache != nullptr;
 	}
 
+	//TODO: restore
 	// Suppress the default copy constructor and assignment operator (C++11 way)
 	VoxelVolume(const VoxelVolume&) = delete;
 	//ITMVoxelVolume(ITMVoxelVolume&&) noexcept = default;
 	VoxelVolume& operator=(const VoxelVolume&) = delete;
+private:
+	/** Current local content of the 8x8x8 stored on host or device depending on memory_type*/
+	ORUtils::MemoryBlock<TVoxel> voxels;
 };
 
 }//end namespace ITMLib

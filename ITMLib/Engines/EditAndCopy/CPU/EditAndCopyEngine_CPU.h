@@ -80,8 +80,8 @@ public:
 	                 PlainVoxelArray::IndexCache& cache) override;
 	bool IsPointInBounds(VoxelVolume<TVoxel, PlainVoxelArray>* volume, const Vector3i& at);
 	void OffsetWarps(VoxelVolume<TVoxel, PlainVoxelArray>* volume, Vector3f offset) override;
-	bool CopyVolumeSlice(VoxelVolume<TVoxel, PlainVoxelArray>* targetVolume,
-	                     VoxelVolume<TVoxel, PlainVoxelArray>* sourceVolume,
+	bool CopyVolumeSlice(VoxelVolume<TVoxel, PlainVoxelArray>* target_volume,
+	                     VoxelVolume<TVoxel, PlainVoxelArray>* source_volume,
 	                     Vector6i bounds, const Vector3i& offset = Vector3i(0)) override;
 	bool CopyVolume(VoxelVolume<TVoxel, PlainVoxelArray>* targetVolume,
 	                VoxelVolume<TVoxel, PlainVoxelArray>* sourceVolume,

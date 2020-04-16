@@ -22,7 +22,7 @@ namespace ITMLib
 	class MeshingEngine_CPU<TVoxel, VoxelBlockHash> : public MeshingEngine < TVoxel, VoxelBlockHash >
 	{
 	public:
-		void MeshScene(Mesh *mesh, const VoxelVolume<TVoxel, VoxelBlockHash> *scene);
+		void MeshScene(Mesh *mesh, const VoxelVolume<TVoxel, VoxelBlockHash> *volume);
 
 		explicit MeshingEngine_CPU(const VoxelBlockHash& index) :
 				MeshingEngine<TVoxel,VoxelBlockHash>(index) { }

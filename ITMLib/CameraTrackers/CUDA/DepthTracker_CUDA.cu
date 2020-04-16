@@ -52,11 +52,11 @@ int DepthTracker_CUDA::ComputeGandH(float &f, float *nabla, float *hessian, Matr
 	Vector4f *pointsMap = sceneHierarchyLevel->pointsMap->GetData(MEMORYDEVICE_CUDA);
 	Vector4f *normalsMap = sceneHierarchyLevel->normalsMap->GetData(MEMORYDEVICE_CUDA);
 	Vector4f sceneIntrinsics = sceneHierarchyLevel->intrinsics;
-	Vector2i sceneImageSize = sceneHierarchyLevel->pointsMap->noDims;
+	Vector2i sceneImageSize = sceneHierarchyLevel->pointsMap->dimensions;
 
 	float *depth = viewHierarchyLevel->data->GetData(MEMORYDEVICE_CUDA);
 	Vector4f viewIntrinsics = viewHierarchyLevel->intrinsics;
-	Vector2i viewImageSize = viewHierarchyLevel->data->noDims;
+	Vector2i viewImageSize = viewHierarchyLevel->data->dimensions;
 
 	if (iterationType == TRACKER_ITERATION_NONE) return 0;
 

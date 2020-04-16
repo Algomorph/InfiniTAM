@@ -33,49 +33,49 @@ class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, 
 	// way as done in the the CPU version to avoid DRY violations
 	template<typename TBooleanFunctor, typename TDeviceFunction>
 	inline static bool
-	TraverseAndCompareMatchingFlags_Generic(VoxelVolume<TVoxelPrimary, PlainVoxelArray>* primaryVolume,
-	                                        VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryVolume,
+	TraverseAndCompareMatchingFlags_Generic(VoxelVolume<TVoxelPrimary, PlainVoxelArray>* volume1,
+	                                        VoxelVolume<TVoxelSecondary, VoxelBlockHash>* volume2,
 	                                        VoxelFlags semanticFlags, TBooleanFunctor& functor,
 	                                        TDeviceFunction&& deviceFunction) {
-		GridAlignedBox* arrayInfo = primaryVolume->index.GetIndexData();
-		int hashEntryCount = secondaryVolume->index.hash_entry_count;
-		HashEntry* hashTable = secondaryVolume->index.GetIndexData();
+		GridAlignedBox* array_index_data = volume1->index.GetIndexData();
+		int hash_entry_count = volume2->index.hash_entry_count;
+		HashEntry* hash_table = volume2->index.GetIndexData();
 
-		ORUtils::MemoryBlock<int> hashesNotSpanned(hashEntryCount, true, true);
-		ORUtils::MemoryBlock<int> countHashesNotSpanned(1, true, true);
-		*countHashesNotSpanned.GetData(MEMORYDEVICE_CPU) = 0;
-		countHashesNotSpanned.UpdateDeviceFromHost();
+		ORUtils::MemoryBlock<int> hash_blocks_outside_array(hash_entry_count, true, true);
+		ORUtils::MemoryBlock<int> count_hash_blocks_outside_array(1, true, true);
+		*count_hash_blocks_outside_array.GetData(MEMORYDEVICE_CPU) = 0;
+		count_hash_blocks_outside_array.UpdateDeviceFromHost();
 
 		dim3 cudaBlockSize_HashPerThread(256);
-		dim3 gridSize_MultipleHashBlocks(static_cast<int>(ceil(static_cast<float>(hashEntryCount) /
+		dim3 gridSize_MultipleHashBlocks(static_cast<int>(ceil(static_cast<float>(hash_entry_count) /
 		                                                       static_cast<float>(cudaBlockSize_HashPerThread.x))));
 		findBlocksNotSpannedByArray <<< gridSize_MultipleHashBlocks, cudaBlockSize_HashPerThread >>>
-		                                                              (arrayInfo, hashTable, hashEntryCount,
-				                                                              hashesNotSpanned.GetData(
+		                                                              (array_index_data, hash_table, hash_entry_count,
+				                                                              hash_blocks_outside_array.GetData(
 						                                                              MEMORYDEVICE_CUDA),
-				                                                              countHashesNotSpanned.GetData(
+				                                                              count_hash_blocks_outside_array.GetData(
 						                                                              MEMORYDEVICE_CUDA));
 		ORcudaKernelCheck;
-		countHashesNotSpanned.UpdateHostFromDevice();
-		int countHashesNotSpanned_host = *countHashesNotSpanned.GetData(MEMORYDEVICE_CPU);
+		count_hash_blocks_outside_array.UpdateHostFromDevice();
+		int count_hash_blocks_outside_array_host = *count_hash_blocks_outside_array.GetData(MEMORYDEVICE_CPU);
 
 		//*** used in the next two kernels
 		ORUtils::MemoryBlock<bool> falseOrAlteredUnmatchedEncountered(1, true, true);
 		*falseOrAlteredUnmatchedEncountered.GetData(MEMORYDEVICE_CPU) = false;
 		falseOrAlteredUnmatchedEncountered.UpdateDeviceFromHost();
 		dim3 cudaBlockSize_BlockVoxelPerThread(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
-		TVoxelSecondary* voxelsHash = secondaryVolume->voxels.GetVoxelBlocks();
+		TVoxelSecondary* voxels_hash = volume2->GetVoxelBlocks();
 
-		if (countHashesNotSpanned_host > 0) {
+		if (count_hash_blocks_outside_array_host > 0) {
 			// if there are any blocks in the hash that are not spanned by the array volume, we must check
 			// whether any of them are altered
-			dim3 gridSize_UnspannedHashBlocks(static_cast<int>(ceil(static_cast<float>(countHashesNotSpanned_host) /
+			dim3 gridSize_UnspannedHashBlocks(static_cast<int>(ceil(static_cast<float>(count_hash_blocks_outside_array_host) /
 			                                                        static_cast<float>(cudaBlockSize_HashPerThread.x))));
 			checkIfHashVoxelBlocksHaveAlteredVoxelsWithSpecificFlags
 					<<< gridSize_UnspannedHashBlocks, cudaBlockSize_BlockVoxelPerThread >>>
-			                                           (voxelsHash, hashTable, hashesNotSpanned.GetData(
+			                                           (voxels_hash, hash_table, hash_blocks_outside_array.GetData(
 					                                           MEMORYDEVICE_CUDA),
-					                                           countHashesNotSpanned_host,
+					                                           count_hash_blocks_outside_array_host,
 					                                           falseOrAlteredUnmatchedEncountered.GetData(
 							                                           MEMORYDEVICE_CUDA), semanticFlags);
 			ORcudaKernelCheck;
@@ -85,19 +85,19 @@ class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, 
 			return false;
 		}
 
-		TVoxelPrimary* voxelsArray = primaryVolume->voxels.GetVoxelBlocks();
-		Vector3i arrayOffset = primaryVolume->index.GetVolumeOffset();
-		Vector3i arraySize = primaryVolume->index.GetVolumeSize();
+		TVoxelPrimary* voxels_array = volume1->GetVoxelBlocks();
+		Vector3i array_offset = volume1->index.GetVolumeOffset();
+		Vector3i array_size = volume1->index.GetVolumeSize();
 
 		Vector3s minBlockPos(
-				static_cast<int>(floor(static_cast<float>(arrayOffset.x) / VOXEL_BLOCK_SIZE)),
-				static_cast<int>(floor(static_cast<float>(arrayOffset.y) / VOXEL_BLOCK_SIZE)),
-				static_cast<int>(floor(static_cast<float>(arrayOffset.z) / VOXEL_BLOCK_SIZE)));
+				static_cast<int>(floor(static_cast<float>(array_offset.x) / VOXEL_BLOCK_SIZE)),
+				static_cast<int>(floor(static_cast<float>(array_offset.y) / VOXEL_BLOCK_SIZE)),
+				static_cast<int>(floor(static_cast<float>(array_offset.z) / VOXEL_BLOCK_SIZE)));
 		Vector3i minIndexCoord(minBlockPos.x * VOXEL_BLOCK_SIZE,
 		                       minBlockPos.y * VOXEL_BLOCK_SIZE,
 		                       minBlockPos.z * VOXEL_BLOCK_SIZE);
-		Vector3i minArrayCoord = arrayOffset - minIndexCoord; // inclusive
-		Vector3i maxArrayCoord = minArrayCoord + arraySize; // exclusive
+		Vector3i minArrayCoord = array_offset - minIndexCoord; // inclusive
+		Vector3i maxArrayCoord = minArrayCoord + array_size; // exclusive
 
 		// transfer functor from RAM to VRAM (has to be done manually, i.e. without MemoryBlock at this point)
 		TBooleanFunctor* functor_device = nullptr;
@@ -111,8 +111,8 @@ class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, 
 		);
 
 		std::forward<TDeviceFunction>(deviceFunction)(
-				gridSize_ArrayBlockEnvelope, cudaBlockSize_BlockVoxelPerThread, voxelsArray, arrayInfo, voxelsHash,
-				hashTable, minArrayCoord, maxArrayCoord, minBlockPos, functor_device, semanticFlags,
+				gridSize_ArrayBlockEnvelope, cudaBlockSize_BlockVoxelPerThread, voxels_array, array_index_data, voxels_hash,
+				hash_table, minArrayCoord, maxArrayCoord, minBlockPos, functor_device, semanticFlags,
 				falseOrAlteredUnmatchedEncountered.GetData(MEMORYDEVICE_CUDA));
 		ORcudaKernelCheck;
 
@@ -128,47 +128,47 @@ class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, 
 	template<typename TBooleanFunctor, typename TDeviceFunction>
 	inline static bool
 	TraverseAndCompareAll_Generic(
-			VoxelVolume<TVoxelPrimary, PlainVoxelArray>* primaryVolume,
-			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryVolume,
+			VoxelVolume<TVoxelPrimary, PlainVoxelArray>* volume1,
+			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* volume2,
 			TBooleanFunctor& functor, TDeviceFunction&& deviceFunction) {
-		GridAlignedBox* arrayInfo = primaryVolume->index.GetIndexData();
-		int hashEntryCount = secondaryVolume->index.hash_entry_count;
-		HashEntry* hashTable = secondaryVolume->index.GetIndexData();
+		GridAlignedBox* array_index_data = volume1->index.GetIndexData();
+		int hash_entry_count = volume2->index.hash_entry_count;
+		HashEntry* hash_table = volume2->index.GetIndexData();
 
-		ORUtils::MemoryBlock<int> hashCodesNotSpanned(hashEntryCount, true, true);
+		ORUtils::MemoryBlock<int> hashCodesNotSpanned(hash_entry_count, true, true);
 		ORUtils::MemoryBlock<int> countBlocksNotSpanned(1, true, true);
 		*countBlocksNotSpanned.GetData(MEMORYDEVICE_CPU) = 0;
 		countBlocksNotSpanned.UpdateDeviceFromHost();
 
 		dim3 cudaBlockSize_HashPerThread(256);
-		dim3 gridSize_MultipleHashBlocks(static_cast<int>(ceil(static_cast<float>(hashEntryCount) /
+		dim3 gridSize_MultipleHashBlocks(static_cast<int>(ceil(static_cast<float>(hash_entry_count) /
 		                                                       static_cast<float>(cudaBlockSize_HashPerThread.x))));
 		findBlocksNotSpannedByArray
 				<<< gridSize_MultipleHashBlocks, cudaBlockSize_HashPerThread >>>
-		                                          (arrayInfo, hashTable, hashEntryCount,
+		                                          (array_index_data, hash_table, hash_entry_count,
 		                                          		hashCodesNotSpanned.GetData(MEMORYDEVICE_CUDA),
 				                                          countBlocksNotSpanned.GetData(MEMORYDEVICE_CUDA));
 		ORcudaKernelCheck;
 		countBlocksNotSpanned.UpdateHostFromDevice();
-		int countHashesNotSpanned_host = *countBlocksNotSpanned.GetData(MEMORYDEVICE_CPU);
+		int count_hash_blocks_outside_array_host = *countBlocksNotSpanned.GetData(MEMORYDEVICE_CPU);
 
 		//*** used in the next two kernels
 		ORUtils::MemoryBlock<bool> falseOrAlteredEncountered(1, true, true);
 		*falseOrAlteredEncountered.GetData(MEMORYDEVICE_CPU) = false;
 		falseOrAlteredEncountered.UpdateDeviceFromHost();
 		dim3 cudaBlockSize_BlockVoxelPerThread(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
-		TVoxelSecondary* voxelsHash = secondaryVolume->voxels.GetVoxelBlocks();
+		TVoxelSecondary* voxels_hash = volume2->GetVoxelBlocks();
 
-		if (countHashesNotSpanned_host > 0) {
+		if (count_hash_blocks_outside_array_host > 0) {
 			// if there are any blocks in the hash that are not spanned by the array volume, we must check
 			// whether any of them are altered
-			dim3 gridSize_UnspannedHashBlocks(static_cast<int>(ceil(static_cast<float>(countHashesNotSpanned_host) /
+			dim3 gridSize_UnspannedHashBlocks(static_cast<int>(ceil(static_cast<float>(count_hash_blocks_outside_array_host) /
 			                                                        static_cast<float>(cudaBlockSize_HashPerThread.x))));
 			checkIfHashVoxelBlocksAreAltered
 					<<< gridSize_UnspannedHashBlocks, cudaBlockSize_BlockVoxelPerThread >>>
-			                                           (voxelsHash, hashTable, hashCodesNotSpanned.GetData(
+			                                           (voxels_hash, hash_table, hashCodesNotSpanned.GetData(
 					                                           MEMORYDEVICE_CUDA),
-					                                           countHashesNotSpanned_host,
+					                                           count_hash_blocks_outside_array_host,
 					                                           falseOrAlteredEncountered.GetData(
 							                                           MEMORYDEVICE_CUDA));
 			ORcudaKernelCheck;
@@ -178,19 +178,19 @@ class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, 
 			return false;
 		}
 
-		TVoxelPrimary* voxelsArray = primaryVolume->voxels.GetVoxelBlocks();
-		Vector3i arrayOffset = primaryVolume->index.GetVolumeOffset();
-		Vector3i arraySize = primaryVolume->index.GetVolumeSize();
+		TVoxelPrimary* voxels_array = volume1->GetVoxelBlocks();
+		Vector3i array_offset = volume1->index.GetVolumeOffset();
+		Vector3i array_size = volume1->index.GetVolumeSize();
 
 		Vector3s minBlockPos(
-				static_cast<int>(floor(static_cast<float>(arrayOffset.x) / VOXEL_BLOCK_SIZE)),
-				static_cast<int>(floor(static_cast<float>(arrayOffset.y) / VOXEL_BLOCK_SIZE)),
-				static_cast<int>(floor(static_cast<float>(arrayOffset.z) / VOXEL_BLOCK_SIZE)));
+				static_cast<int>(floor(static_cast<float>(array_offset.x) / VOXEL_BLOCK_SIZE)),
+				static_cast<int>(floor(static_cast<float>(array_offset.y) / VOXEL_BLOCK_SIZE)),
+				static_cast<int>(floor(static_cast<float>(array_offset.z) / VOXEL_BLOCK_SIZE)));
 		Vector3i minIndexCoord(minBlockPos.x * VOXEL_BLOCK_SIZE,
 		                       minBlockPos.y * VOXEL_BLOCK_SIZE,
 		                       minBlockPos.z * VOXEL_BLOCK_SIZE);
-		Vector3i minArrayCoord = arrayOffset - minIndexCoord; // inclusive
-		Vector3i maxArrayCoord = minArrayCoord + arraySize; // exclusive
+		Vector3i minArrayCoord = array_offset - minIndexCoord; // inclusive
+		Vector3i maxArrayCoord = minArrayCoord + array_size; // exclusive
 
 		// transfer functor from RAM to VRAM (has to be done manually, i.e. without MemoryBlock at this point)
 		TBooleanFunctor* functor_device = nullptr;
@@ -204,8 +204,8 @@ class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, 
 		);
 
 		std::forward<TDeviceFunction>(deviceFunction)(
-				gridSize_ArrayBlockEnvelope, cudaBlockSize_BlockVoxelPerThread, voxelsArray, arrayInfo, voxelsHash,
-				hashTable, minArrayCoord, maxArrayCoord, minBlockPos, functor_device,
+				gridSize_ArrayBlockEnvelope, cudaBlockSize_BlockVoxelPerThread, voxels_array, array_index_data, voxels_hash,
+				hash_table, minArrayCoord, maxArrayCoord, minBlockPos, functor_device,
 				falseOrAlteredEncountered.GetData(MEMORYDEVICE_CUDA));
 		ORcudaKernelCheck;
 
@@ -220,18 +220,18 @@ class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, 
 	template<typename TBooleanFunctor, typename TDeviceFunction>
 	inline static bool
 	TravereAndCompareAllocated_Generic(
-			VoxelVolume<TVoxelPrimary, PlainVoxelArray>* primaryVolume,
-			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryVolume,
+			VoxelVolume<TVoxelPrimary, PlainVoxelArray>* volume1,
+			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* volume2,
 			TBooleanFunctor& functor, TDeviceFunction&& deviceFunction) {
 
-		int hashEntryCount = secondaryVolume->index.hash_entry_count;
-		TVoxelSecondary* hashVoxels = secondaryVolume->voxels.GetVoxelBlocks();
-		TVoxelPrimary* arrayVoxels = primaryVolume->voxels.GetVoxelBlocks();
-		const VoxelBlockHash::IndexData* hashTable = secondaryVolume->index.GetIndexData();
-		const PlainVoxelArray::IndexData* arrayInfo = primaryVolume->index.GetIndexData();
-		Vector3i startVoxel = primaryVolume->index.GetVolumeOffset();
-		Vector3i arraySize = primaryVolume->index.GetVolumeSize();
-		Vector3i endVoxel = startVoxel + arraySize; // open last traversal bound (this voxel doesn't get processed)
+		int hash_entry_count = volume2->index.hash_entry_count;
+		TVoxelSecondary* hashVoxels = volume2->GetVoxelBlocks();
+		TVoxelPrimary* arrayVoxels = volume1->GetVoxelBlocks();
+		const VoxelBlockHash::IndexData* hash_table = volume2->index.GetIndexData();
+		const PlainVoxelArray::IndexData* array_index_data = volume1->index.GetIndexData();
+		Vector3i startVoxel = volume1->index.GetVolumeOffset();
+		Vector3i array_size = volume1->index.GetVolumeSize();
+		Vector3i endVoxel = startVoxel + array_size; // open last traversal bound (this voxel doesn't get processed)
 		Vector6i arrayBounds(startVoxel.x, startVoxel.y, startVoxel.z, endVoxel.x, endVoxel.y, endVoxel.z);
 
 		// for result storage
@@ -244,12 +244,12 @@ class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, 
 		ORcudaSafeCall(cudaMemcpy(functor_device, &functor, sizeof(TBooleanFunctor), cudaMemcpyHostToDevice));
 
 		dim3 cudaBlockSize_BlockVoxelPerThread(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
-		dim3 gridSize_HashPerBlock(hashEntryCount);
+		dim3 gridSize_HashPerBlock(hash_entry_count);
 
 		std::forward<TDeviceFunction>(deviceFunction)(
 				gridSize_HashPerBlock, cudaBlockSize_BlockVoxelPerThread, arrayVoxels, hashVoxels,
-				hashTable, hashEntryCount, arrayBounds,
-				arraySize, functor_device, falseEncountered.GetData(MEMORYDEVICE_CUDA));
+				hash_table, hash_entry_count, arrayBounds,
+				array_size, functor_device, falseEncountered.GetData(MEMORYDEVICE_CUDA));
 		ORcudaKernelCheck;
 // transfer functor from VRAM back to RAM (in case there was any alteration to the functor object)
 		ORcudaSafeCall(cudaMemcpy(&functor, functor_device, sizeof(TBooleanFunctor), cudaMemcpyDeviceToHost));
@@ -266,27 +266,27 @@ public:
 	 * voxel volume are ignored if the voxel hash block at this location at the secondary voxel volume has not been
 	 * allocated.
 	 * \tparam TFunctor type of the function object (see parameter description)
-	 * \param primaryVolume the primary volume -- indexed using plain voxel array (PVA)
-	 * \param secondaryVolume the secondary volume -- indexed using voxel block hash table (VBH)
+	 * \param volume1 the primary volume -- indexed using plain voxel array (PVA)
+	 * \param volume2 the secondary volume -- indexed using voxel block hash table (VBH)
 	 * \param functor a function object accepting two voxels by reference as arguments and returning true/false
 	 * \return true if the matching functor returns "true" for all allocated voxels, false otherwise.
 	 */
 	template<typename TBooleanFunctor>
 	inline static bool
 	TraverseAndCompareAll(
-			VoxelVolume<TVoxelPrimary, PlainVoxelArray>* primaryVolume,
-			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryVolume,
+			VoxelVolume<TVoxelPrimary, PlainVoxelArray>* volume1,
+			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* volume2,
 			TBooleanFunctor& functor) {
 
-		return TraverseAndCompareAll_Generic(primaryVolume, secondaryVolume, functor, []
+		return TraverseAndCompareAll_Generic(volume1, volume2, functor, []
 				(dim3 gridSize_ArrayBlockEnvelope, dim3 cudaBlockSize_BlockVoxelPerThread,
-				 TVoxelPrimary* voxelsArray, GridAlignedBox* arrayInfo,
-				 TVoxelSecondary* voxelsHash, HashEntry* hashTable, Vector3i minArrayCoord,
+				 TVoxelPrimary* voxels_array, GridAlignedBox* array_index_data,
+				 TVoxelSecondary* voxels_hash, HashEntry* hash_table, Vector3i minArrayCoord,
 				 Vector3i maxArrayCoord, Vector3s minBlockPos, TBooleanFunctor* functor_device,
 				 bool* falseOrAlteredEncountered_device) {
 			checkIfArrayContentIsUnalteredOrYieldsTrue
 					<<< gridSize_ArrayBlockEnvelope, cudaBlockSize_BlockVoxelPerThread >>>
-			                                          (voxelsArray, arrayInfo, voxelsHash, hashTable,
+			                                          (voxels_array, array_index_data, voxels_hash, hash_table,
 					                                          minArrayCoord, maxArrayCoord, minBlockPos, functor_device,
 					                                          falseOrAlteredEncountered_device);
 		});
@@ -304,8 +304,8 @@ public:
 	 * \note works only for voxels that have semantic flags defined.
 	 *
 	 * \tparam TFunctor type of the function object (see parameter description)
-	 * \param primaryVolume the primary volume -- indexed using plain voxel array (PVA)
-	 * \param secondaryVolume the secondary volume -- indexed using voxel block hash table (VBH)
+	 * \param volume1 the primary volume -- indexed using plain voxel array (PVA)
+	 * \param volume2 the secondary volume -- indexed using voxel block hash table (VBH)
 	 * \param semanticFlags semantic flags to match
 	 * \param functor a function object accepting two voxels by reference as arguments and returning true/false
 	 * \return true if the matching functor returns "true" for all allocated voxels, false otherwise.
@@ -313,18 +313,18 @@ public:
 	template<typename TBooleanFunctor>
 	inline static bool
 	TraverseAndCompareMatchingFlags(
-			VoxelVolume<TVoxelPrimary, PlainVoxelArray>* primaryVolume,
-			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryVolume,
+			VoxelVolume<TVoxelPrimary, PlainVoxelArray>* volume1,
+			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* volume2,
 			VoxelFlags semanticFlags, TBooleanFunctor& functor) {
 
-		return TraverseAndCompareMatchingFlags_Generic(primaryVolume, secondaryVolume, semanticFlags, functor,
+		return TraverseAndCompareMatchingFlags_Generic(volume1, volume2, semanticFlags, functor,
 		                                               []
 				                                               (dim3 gridSize_ArrayBlockEnvelope,
 				                                                dim3 cudaBlockSize_BlockVoxelPerThread,
-				                                                TVoxelPrimary* voxelsArray,
-				                                                GridAlignedBox* arrayInfo,
-				                                                TVoxelSecondary* voxelsHash,
-				                                                HashEntry* hashTable,
+				                                                TVoxelPrimary* voxels_array,
+				                                                GridAlignedBox* array_index_data,
+				                                                TVoxelSecondary* voxels_hash,
+				                                                HashEntry* hash_table,
 				                                                Vector3i minArrayCoord,
 				                                                Vector3i maxArrayCoord, Vector3s minBlockPos,
 				                                                TBooleanFunctor* functor_device,
@@ -333,7 +333,7 @@ public:
 			                                               checkIfArrayContentIsUnalteredOrYieldsTrue_SemanticFlags
 					                                               <<< gridSize_ArrayBlockEnvelope,
 					                                               cudaBlockSize_BlockVoxelPerThread >>>
-					                                               (voxelsArray, arrayInfo, voxelsHash, hashTable,
+					                                               (voxels_array, array_index_data, voxels_hash, hash_table,
 							                                               minArrayCoord, maxArrayCoord, minBlockPos, functor_device,
 							                                               semanticFlags, falseOrAlteredEncountered_device);
 		                                               });
@@ -342,18 +342,18 @@ public:
 	template<typename TBooleanFunctor>
 	inline static bool
 	TraverseAndCompareMatchingFlagsWithPosition(
-			VoxelVolume<TVoxelPrimary, PlainVoxelArray>* primaryVolume,
-			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryVolume,
+			VoxelVolume<TVoxelPrimary, PlainVoxelArray>* volume1,
+			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* volume2,
 			VoxelFlags semanticFlags, TBooleanFunctor& functor) {
 
-		return TraverseAndCompareMatchingFlags_Generic(primaryVolume, secondaryVolume, semanticFlags, functor,
+		return TraverseAndCompareMatchingFlags_Generic(volume1, volume2, semanticFlags, functor,
 		                                               []
 				                                               (dim3 gridSize_ArrayBlockEnvelope,
 				                                                dim3 cudaBlockSize_BlockVoxelPerThread,
-				                                                TVoxelPrimary* voxelsArray,
-				                                                GridAlignedBox* arrayInfo,
-				                                                TVoxelSecondary* voxelsHash,
-				                                                HashEntry* hashTable,
+				                                                TVoxelPrimary* voxels_array,
+				                                                GridAlignedBox* array_index_data,
+				                                                TVoxelSecondary* voxels_hash,
+				                                                HashEntry* hash_table,
 				                                                Vector3i minArrayCoord,
 				                                                Vector3i maxArrayCoord, Vector3s minBlockPos,
 				                                                TBooleanFunctor* functor_device,
@@ -362,7 +362,7 @@ public:
 			                                               checkIfArrayContentIsUnalteredOrYieldsTrue_SemanticFlags_Position_Verbose
 					                                               <<< gridSize_ArrayBlockEnvelope,
 					                                               cudaBlockSize_BlockVoxelPerThread >>>
-					                                               (voxelsArray, arrayInfo, voxelsHash, hashTable,
+					                                               (voxels_array, array_index_data, voxels_hash, hash_table,
 							                                               minArrayCoord, maxArrayCoord, minBlockPos, functor_device,
 							                                               semanticFlags, falseOrAlteredEncountered_device);
 		                                               });
@@ -375,8 +375,8 @@ public:
 	 * voxel volume are ignored if the voxel hash block at this location at the secondary voxel volume has not been
 	 * allocated.
 	 * \tparam TFunctor type of the function object (see parameter description)
-	 * \param primaryVolume the primary volume -- indexed using plain voxel array (PVA)
-	 * \param secondaryVolume the secondary volume -- indexed using voxel block hash table (VBH)
+	 * \param volume1 the primary volume -- indexed using plain voxel array (PVA)
+	 * \param volume2 the secondary volume -- indexed using voxel block hash table (VBH)
 	 * \param functor a function object accepting two voxels by reference as arguments and their mutual spatial coordinate,
 	 *  and returning true/false
 	 * \return true if the matching functor returns "true" for all allocated voxels, false otherwise.
@@ -384,19 +384,19 @@ public:
 	template<typename TBooleanFunctor>
 	inline static bool
 	TraverseAndCompareAllWithPosition(
-			VoxelVolume<TVoxelPrimary, PlainVoxelArray>* primaryVolume,
-			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryVolume,
+			VoxelVolume<TVoxelPrimary, PlainVoxelArray>* volume1,
+			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* volume2,
 			TBooleanFunctor& functor) {
 
-		return TraverseAndCompareAll_Generic(primaryVolume, secondaryVolume, functor, []
+		return TraverseAndCompareAll_Generic(volume1, volume2, functor, []
 				(dim3 gridSize_ArrayBlockEnvelope, dim3 cudaBlockSize_BlockVoxelPerThread,
-				 TVoxelPrimary* voxelsArray, GridAlignedBox* arrayInfo,
-				 TVoxelSecondary* voxelsHash, HashEntry* hashTable, Vector3i minArrayCoord,
+				 TVoxelPrimary* voxels_array, GridAlignedBox* array_index_data,
+				 TVoxelSecondary* voxels_hash, HashEntry* hash_table, Vector3i minArrayCoord,
 				 Vector3i maxArrayCoord, Vector3s minBlockPos, TBooleanFunctor* functor_device,
 				 bool* falseOrAlteredEncountered_device) {
 			checkIfArrayContentIsUnalteredOrYieldsTrue_Position_Verbose
 					<<< gridSize_ArrayBlockEnvelope, cudaBlockSize_BlockVoxelPerThread >>>
-			                                          (voxelsArray, arrayInfo, voxelsHash, hashTable,
+			                                          (voxels_array, array_index_data, voxels_hash, hash_table,
 					                                          minArrayCoord, maxArrayCoord, minBlockPos, functor_device,
 					                                          falseOrAlteredEncountered_device);
 		});
@@ -405,35 +405,35 @@ public:
 	template<typename TBooleanFunctor>
 	inline static bool
 	TraverseAndCompareAllocated(
-			VoxelVolume<TVoxelPrimary, PlainVoxelArray>* primaryVolume,
-			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryVolume,
+			VoxelVolume<TVoxelPrimary, PlainVoxelArray>* volume1,
+			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* volume2,
 			TBooleanFunctor& functor) {
-		return TravereAndCompareAllocated_Generic(primaryVolume, secondaryVolume, functor, []
+		return TravereAndCompareAllocated_Generic(volume1, volume2, functor, []
 				(dim3 gridSize_HashPerBlock, dim3 cudaBlockSize_BlockVoxelPerThread, TVoxelPrimary* arrayVoxels,
-				 TVoxelSecondary* hashVoxels, const HashEntry* hashTable,
-				 int hashEntryCount, Vector6i arrayBounds, Vector3i arraySize,
+				 TVoxelSecondary* hashVoxels, const HashEntry* hash_table,
+				 int hash_entry_count, Vector6i arrayBounds, Vector3i array_size,
 				 TBooleanFunctor* functor_device, bool* falseEncountered_device) {
 			checkIfAllocatedHashBlocksYieldTrue <<< gridSize_HashPerBlock, cudaBlockSize_BlockVoxelPerThread >>>
-			                                                                (arrayVoxels, hashVoxels, hashTable, hashEntryCount, arrayBounds,
-					                                                                arraySize, functor_device, falseEncountered_device);
+			                                                                (arrayVoxels, hashVoxels, hash_table, hash_entry_count, arrayBounds,
+					                                                                array_size, functor_device, falseEncountered_device);
 		});
 	}
 
 	template<typename TBooleanFunctor>
 	inline static bool
 	TraverseAndCompareAllocatedWithPosition(
-			VoxelVolume<TVoxelPrimary, PlainVoxelArray>* primaryVolume,
-			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* secondaryVolume,
+			VoxelVolume<TVoxelPrimary, PlainVoxelArray>* volume1,
+			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* volume2,
 			TBooleanFunctor& functor) {
-		return TravereAndCompareAllocated_Generic(primaryVolume, secondaryVolume, functor, []
+		return TravereAndCompareAllocated_Generic(volume1, volume2, functor, []
 				(dim3 gridSize_HashPerBlock, dim3 cudaBlockSize_BlockVoxelPerThread, TVoxelPrimary* arrayVoxels,
-				 TVoxelSecondary* hashVoxels, const HashEntry* hashTable,
-				 int hashEntryCount, Vector6i arrayBounds, Vector3i arraySize,
+				 TVoxelSecondary* hashVoxels, const HashEntry* hash_table,
+				 int hash_entry_count, Vector6i arrayBounds, Vector3i array_size,
 				 TBooleanFunctor* functor_device, bool* falseEncountered_device) {
 			checkIfAllocatedHashBlocksYieldTrue_Position <<< gridSize_HashPerBlock,
 					cudaBlockSize_BlockVoxelPerThread >>>
-					(arrayVoxels, hashVoxels, hashTable, hashEntryCount, arrayBounds,
-							arraySize, functor_device, falseEncountered_device);
+					(arrayVoxels, hashVoxels, hash_table, hash_entry_count, arrayBounds,
+							array_size, functor_device, falseEncountered_device);
 		});
 	}
 
@@ -450,20 +450,20 @@ public:
 	 * voxel volume are ignored if the voxel hash block at this location at the secondary voxel volume has not been
 	 * allocated.
 	 * \tparam TFunctor type of the function object (see parameter description)
-	 * \param primaryVolume the primary volume -- indexed using plain voxel array (PVA)
-	 * \param secondaryVolume the secondary volume -- indexed using voxel block hash table (VBH)
+	 * \param volume1 the primary volume -- indexed using plain voxel array (PVA)
+	 * \param volume2 the secondary volume -- indexed using voxel block hash table (VBH)
 	 * \param functor a function object accepting two voxels by reference as arguments and returning true/false
 	 * \return true if the matching functor returns "true" for all allocated voxels, false otherwise.
 	 */
 	template<typename TBooleanFunctor>
 	inline static bool
 	TraverseAndCompareAll(
-			VoxelVolume<TVoxelPrimary, VoxelBlockHash>* primaryVolume,
-			VoxelVolume<TVoxelSecondary, PlainVoxelArray>* secondaryVolume,
+			VoxelVolume<TVoxelPrimary, VoxelBlockHash>* volume1,
+			VoxelVolume<TVoxelSecondary, PlainVoxelArray>* volume2,
 			TBooleanFunctor& functor) {
-		ITMFlipArgumentBooleanFunctor<TVoxelPrimary, TVoxelSecondary, TBooleanFunctor> flipFunctor(functor);
+		ITMFlipArgumentBooleanFunctor<TVoxelPrimary, TVoxelSecondary, TBooleanFunctor> flip_functor(functor);
 		return TwoVolumeTraversalEngine<TVoxelSecondary, TVoxelPrimary, PlainVoxelArray, VoxelBlockHash, MEMORYDEVICE_CUDA>::
-		TraverseAndCompareAll(secondaryVolume, primaryVolume, flipFunctor);
+		TraverseAndCompareAll(volume2, volume1, flip_functor);
 
 	}
 
@@ -471,12 +471,12 @@ public:
 	template<typename TBooleanFunctor>
 	inline static bool
 	TraverseAndCompareAllocated(
-			VoxelVolume<TVoxelPrimary, VoxelBlockHash>* primaryVolume,
-			VoxelVolume<TVoxelSecondary, PlainVoxelArray>* secondaryVolume,
+			VoxelVolume<TVoxelPrimary, VoxelBlockHash>* volume1,
+			VoxelVolume<TVoxelSecondary, PlainVoxelArray>* volume2,
 			TBooleanFunctor& functor) {
-		ITMFlipArgumentBooleanFunctor<TVoxelPrimary, TVoxelSecondary, TBooleanFunctor> flipFunctor(functor);
+		ITMFlipArgumentBooleanFunctor<TVoxelPrimary, TVoxelSecondary, TBooleanFunctor> flip_functor(functor);
 		return TwoVolumeTraversalEngine<TVoxelSecondary, TVoxelPrimary, PlainVoxelArray, VoxelBlockHash, MEMORYDEVICE_CUDA>::
-		TraverseAndCompareAllocated(secondaryVolume, primaryVolume, flipFunctor);
+		TraverseAndCompareAllocated(volume2, volume1, flip_functor);
 
 	}
 };

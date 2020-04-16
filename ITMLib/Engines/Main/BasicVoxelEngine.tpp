@@ -139,7 +139,7 @@ void BasicVoxelEngine<TVoxel, TIndex>::LoadFromFile()
 
 	try // load relocaliser
 	{
-		FernRelocLib::Relocaliser<float> *relocaliser_temp = new FernRelocLib::Relocaliser<float>(view->depth->noDims, Vector2f(settings.general_voxel_volume_parameters.near_clipping_distance, settings.general_voxel_volume_parameters.far_clipping_distance), 0.2f, 500, 4);
+		FernRelocLib::Relocaliser<float> *relocaliser_temp = new FernRelocLib::Relocaliser<float>(view->depth->dimensions, Vector2f(settings.general_voxel_volume_parameters.near_clipping_distance, settings.general_voxel_volume_parameters.far_clipping_distance), 0.2f, 500, 4);
 
 		relocaliser_temp->LoadFromDirectory(relocaliserInputDirectory);
 
@@ -327,7 +327,7 @@ CameraTrackingState::TrackingResult BasicVoxelEngine<TVoxel,TIndex>::ProcessFram
 			MemoryCopyDirection memoryCopyDirection =
 					settings.device_type == MEMORYDEVICE_CUDA ? MemoryCopyDirection::CUDA_TO_CUDA : MemoryCopyDirection::CPU_TO_CPU;
 
-			kfRaycast->SetFrom(renderState_live->raycastImage, memoryCopyDirection);
+			kfRaycast->SetFrom(*renderState_live->raycastImage, memoryCopyDirection);
 		}
 	}
 	else *trackingState->pose_d = oldPose;
@@ -350,7 +350,7 @@ CameraTrackingState::TrackingResult BasicVoxelEngine<TVoxel,TIndex>::ProcessFram
 template <typename TVoxel, typename TIndex>
 Vector2i BasicVoxelEngine<TVoxel,TIndex>::GetImageSize(void) const
 {
-	return renderState_live->raycastImage->noDims;
+	return renderState_live->raycastImage->dimensions;
 }
 
 template <typename TVoxel, typename TIndex>
@@ -365,13 +365,13 @@ void BasicVoxelEngine<TVoxel,TIndex>::GetImage(ITMUChar4Image *out, GetImageType
 	switch (getImageType)
 	{
 	case BasicVoxelEngine::InfiniTAM_IMAGE_ORIGINAL_RGB:
-		out->ChangeDims(view->rgb->noDims);
+		out->ChangeDims(view->rgb->dimensions);
 		if (settings.device_type == MEMORYDEVICE_CUDA)
-			out->SetFrom(view->rgb, MemoryCopyDirection::CUDA_TO_CPU);
-		else out->SetFrom(view->rgb, MemoryCopyDirection::CPU_TO_CPU);
+			out->SetFrom(*view->rgb, MemoryCopyDirection::CUDA_TO_CPU);
+		else out->SetFrom(*view->rgb, MemoryCopyDirection::CPU_TO_CPU);
 		break;
 	case BasicVoxelEngine::InfiniTAM_IMAGE_ORIGINAL_DEPTH:
-		out->ChangeDims(view->depth->noDims);
+		out->ChangeDims(view->depth->dimensions);
 		if (settings.device_type == MEMORYDEVICE_CUDA) view->depth->UpdateHostFromDevice();
 		VisualizationEngine<TVoxel, TIndex>::DepthToUchar4(out, view->depth);
 
@@ -404,14 +404,14 @@ void BasicVoxelEngine<TVoxel,TIndex>::GetImage(ITMUChar4Image *out, GetImageType
 
 		visualizationEngine->RenderImage(scene, trackingState->pose_d, &view->calib.intrinsics_d, renderState_live, renderState_live->raycastImage, imageType, raycastType);
 
-		ORUtils::Image<Vector4u> *srcImage = NULL;
+		ORUtils::Image<Vector4u> *srcImage = nullptr;
 		if (relocalisationCount != 0) srcImage = kfRaycast;
 		else srcImage = renderState_live->raycastImage;
 
-		out->ChangeDims(srcImage->noDims);
+		out->ChangeDims(srcImage->dimensions);
 		if (settings.device_type == MEMORYDEVICE_CUDA)
-			out->SetFrom(srcImage, MemoryCopyDirection::CUDA_TO_CPU);
-		else out->SetFrom(srcImage, MemoryCopyDirection::CPU_TO_CPU);
+			out->SetFrom(*srcImage, MemoryCopyDirection::CUDA_TO_CPU);
+		else out->SetFrom(*srcImage, MemoryCopyDirection::CPU_TO_CPU);
 
 		break;
 		}
@@ -427,7 +427,7 @@ void BasicVoxelEngine<TVoxel,TIndex>::GetImage(ITMUChar4Image *out, GetImageType
 
 		if (renderState_freeview == NULL)
 		{
-			renderState_freeview = new RenderState(out->noDims, scene->parameters->near_clipping_distance, scene->parameters->far_clipping_distance, settings.device_type);
+			renderState_freeview = new RenderState(out->dimensions, scene->parameters->near_clipping_distance, scene->parameters->far_clipping_distance, settings.device_type);
 		}
 
 		visualizationEngine->FindVisibleBlocks(scene, pose, intrinsics, renderState_freeview);
@@ -435,8 +435,8 @@ void BasicVoxelEngine<TVoxel,TIndex>::GetImage(ITMUChar4Image *out, GetImageType
 		visualizationEngine->RenderImage(scene, pose, intrinsics, renderState_freeview, renderState_freeview->raycastImage, type);
 
 		if (settings.device_type == MEMORYDEVICE_CUDA)
-			out->SetFrom(renderState_freeview->raycastImage, MemoryCopyDirection::CUDA_TO_CPU);
-		else out->SetFrom(renderState_freeview->raycastImage, MemoryCopyDirection::CPU_TO_CPU);
+			out->SetFrom(*renderState_freeview->raycastImage, MemoryCopyDirection::CUDA_TO_CPU);
+		else out->SetFrom(*renderState_freeview->raycastImage, MemoryCopyDirection::CPU_TO_CPU);
 		break;
 	}
 	case MainEngine::InfiniTAM_IMAGE_UNKNOWN:

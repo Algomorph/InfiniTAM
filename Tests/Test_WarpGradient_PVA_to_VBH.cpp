@@ -271,7 +271,7 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CPU) {
 	                                              MEMORYDEVICE_CPU,
 	                                              Frame16And17Fixture::InitParams<VoxelBlockHash>());
 
-	Vector2i image_size = view->depth->noDims;
+	Vector2i image_size = view->depth->dimensions;
 
 	CameraTrackingState tracking_state(image_size, MEMORYDEVICE_CPU);
 
@@ -422,7 +422,7 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CUDA) {
 	                                              MEMORYDEVICE_CUDA,
 	                                              Frame16And17Fixture::InitParams<VoxelBlockHash>());
 
-	Vector2i image_size = view->depth->noDims;
+	Vector2i image_size = view->depth->dimensions;
 
 	CameraTrackingState tracking_state(image_size, MEMORYDEVICE_CUDA);
 

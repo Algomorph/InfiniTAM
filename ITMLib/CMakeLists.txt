@@ -694,8 +694,6 @@ set(ITMLIB_OBJECTS_RENDERSTATES_HEADERS
 set(ITMLIB_OBJECTS_SCENE_SOURCES
     Objects/Volume/VoxelVolume.tpp
     Objects/Volume/VoxelVolume.cpp
-    Objects/Volume/VoxelStorage.tpp
-    Objects/Volume/VoxelStorage.cpp
     Objects/Volume/VoxelBlockHash.cpp
     )
 
@@ -703,7 +701,6 @@ set(ITMLIB_OBJECTS_SCENE_SOURCES
 set(ITMLIB_OBJECTS_SCENE_HEADERS
     Objects/Volume/GlobalCache.h
     Objects/Volume/LocalMap.h
-    Objects/Volume/VoxelStorage.h
     Objects/Volume/MultiSceneAccess.h
     Objects/Volume/PlainVoxelArray.h
     Objects/Volume/RepresentationAccess.h

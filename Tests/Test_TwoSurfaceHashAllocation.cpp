@@ -49,21 +49,19 @@ template<MemoryDeviceType TMemoryDeviceType>
 struct TestData {
 	TestData() {
 		view_builder = ViewBuilderFactory::MakeViewBuilder(calibration_path, TMemoryDeviceType);
-		auto* rgb = new ITMUChar4Image(true, false);
-		auto* depth = new ITMShortImage(true, false);
+		ITMUChar4Image rgb(true, false);
+		ITMShortImage depth(true, false);
 		ReadImageFromFile(rgb, square_1_color_path.c_str());
 		ReadImageFromFile(depth, square_1_depth_path.c_str());
-		view_builder->UpdateView(&view_square_1, rgb, depth, false, false, false, true);
+		view_builder->UpdateView(&view_square_1, &rgb, &depth, false, false, false, true);
 		ReadImageFromFile(rgb, square_2_color_path.c_str());
 		ReadImageFromFile(depth, square_2_depth_path.c_str());
-		view_builder->UpdateView(&view_square_2, rgb, depth, false, false, false, true);
-		tracking_state = new CameraTrackingState(depth->noDims, TMemoryDeviceType);
-		render_state = new RenderState(depth->noDims,
+		view_builder->UpdateView(&view_square_2, &rgb, &depth, false, false, false, true);
+		tracking_state = new CameraTrackingState(depth.dimensions, TMemoryDeviceType);
+		render_state = new RenderState(depth.dimensions,
 		                               configuration::get().general_voxel_volume_parameters.near_clipping_distance,
 		                               configuration::get().general_voxel_volume_parameters.far_clipping_distance,
 		                               TMemoryDeviceType);
-		delete rgb;
-		delete depth;
 
 		GenerateGroundTruthPositions();
 	}

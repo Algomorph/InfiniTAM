@@ -36,16 +36,16 @@ void ViewBuilder_CUDA::UpdateView(View** view_ptr, ITMUChar4Image* rgbImage, ITM
 {
 	if (*view_ptr == NULL)
 	{
-		*view_ptr = new View(calib, rgbImage->noDims, rawDepthImage->noDims, true);
+		*view_ptr = new View(calib, rgbImage->dimensions, rawDepthImage->dimensions, true);
 		if (this->shortImage != NULL) delete this->shortImage;
-		this->shortImage = new ITMShortImage(rawDepthImage->noDims, true, true);
+		this->shortImage = new ITMShortImage(rawDepthImage->dimensions, true, true);
 		if (this->floatImage != NULL) delete this->floatImage;
-		this->floatImage = new ITMFloatImage(rawDepthImage->noDims, true, true);
+		this->floatImage = new ITMFloatImage(rawDepthImage->dimensions, true, true);
 
 		if (modelSensorNoise)
 		{
-			(*view_ptr)->depthNormal = new ITMFloat4Image(rawDepthImage->noDims, true, true);
-			(*view_ptr)->depthUncertainty = new ITMFloatImage(rawDepthImage->noDims, true, true);
+			(*view_ptr)->depthNormal = new ITMFloat4Image(rawDepthImage->dimensions, true, true);
+			(*view_ptr)->depthUncertainty = new ITMFloatImage(rawDepthImage->dimensions, true, true);
 		}
 	}
 
@@ -53,12 +53,12 @@ void ViewBuilder_CUDA::UpdateView(View** view_ptr, ITMUChar4Image* rgbImage, ITM
 
 	if (storePreviousImage)
 	{
-		if (!view->rgb_prev) view->rgb_prev = new ITMUChar4Image(rgbImage->noDims, true, true);
-		else view->rgb_prev->SetFrom(view->rgb, MemoryCopyDirection::CUDA_TO_CUDA);
+		if (!view->rgb_prev) view->rgb_prev = new ITMUChar4Image(rgbImage->dimensions, true, true);
+		else view->rgb_prev->SetFrom(*view->rgb, MemoryCopyDirection::CUDA_TO_CUDA);
 	}	
 
-	view->rgb->SetFrom(rgbImage, MemoryCopyDirection::CPU_TO_CUDA);
-	this->shortImage->SetFrom(rawDepthImage, MemoryCopyDirection::CPU_TO_CUDA);
+	view->rgb->SetFrom(*rgbImage, MemoryCopyDirection::CPU_TO_CUDA);
+	this->shortImage->SetFrom(*rawDepthImage, MemoryCopyDirection::CPU_TO_CUDA);
 
 	switch (view->calib.disparityCalib.GetType())
 	{
@@ -80,7 +80,7 @@ void ViewBuilder_CUDA::UpdateView(View** view_ptr, ITMUChar4Image* rgbImage, ITM
 		this->DepthFiltering(this->floatImage, view->depth);
 		this->DepthFiltering(view->depth, this->floatImage);
 		this->DepthFiltering(this->floatImage, view->depth);
-		view->depth->SetFrom(this->floatImage, MemoryCopyDirection::CUDA_TO_CUDA);
+		view->depth->SetFrom(*this->floatImage, MemoryCopyDirection::CUDA_TO_CUDA);
 	}
 
 	if (modelSensorNoise)
@@ -95,16 +95,16 @@ void ViewBuilder_CUDA::UpdateView(View** view_ptr, ITMUChar4Image* rgbImage, ITM
 {
 	if (*view_ptr == NULL) 
 	{
-		*view_ptr = new ViewIMU(calib, rgbImage->noDims, depthImage->noDims, true);
+		*view_ptr = new ViewIMU(calib, rgbImage->dimensions, depthImage->dimensions, true);
 		if (this->shortImage != NULL) delete this->shortImage;
-		this->shortImage = new ITMShortImage(depthImage->noDims, true, true);
+		this->shortImage = new ITMShortImage(depthImage->dimensions, true, true);
 		if (this->floatImage != NULL) delete this->floatImage;
-		this->floatImage = new ITMFloatImage(depthImage->noDims, true, true);
+		this->floatImage = new ITMFloatImage(depthImage->dimensions, true, true);
 
 		if (modelSensorNoise)
 		{
-			(*view_ptr)->depthNormal = new ITMFloat4Image(depthImage->noDims, true, true);
-			(*view_ptr)->depthUncertainty = new ITMFloatImage(depthImage->noDims, true, true);
+			(*view_ptr)->depthNormal = new ITMFloat4Image(depthImage->dimensions, true, true);
+			(*view_ptr)->depthUncertainty = new ITMFloatImage(depthImage->dimensions, true, true);
 		}
 	}
 
@@ -117,7 +117,7 @@ void ViewBuilder_CUDA::UpdateView(View** view_ptr, ITMUChar4Image* rgbImage, ITM
 void ViewBuilder_CUDA::ConvertDisparityToDepth(ITMFloatImage *depth_out, const ITMShortImage *depth_in, const Intrinsics *depthIntrinsics,
                                                Vector2f disparityCalibParams)
 {
-	Vector2i imgSize = depth_in->noDims;
+	Vector2i imgSize = depth_in->dimensions;
 
 	const short *d_in = depth_in->GetData(MEMORYDEVICE_CUDA);
 	float *d_out = depth_out->GetData(MEMORYDEVICE_CUDA);
@@ -133,7 +133,7 @@ void ViewBuilder_CUDA::ConvertDisparityToDepth(ITMFloatImage *depth_out, const I
 
 void ViewBuilder_CUDA::ConvertDepthAffineToFloat(ITMFloatImage *depth_out, const ITMShortImage *depth_in, Vector2f depthCalibParams)
 {
-	Vector2i imgSize = depth_in->noDims;
+	Vector2i imgSize = depth_in->dimensions;
 
 	const short *d_in = depth_in->GetData(MEMORYDEVICE_CUDA);
 	float *d_out = depth_out->GetData(MEMORYDEVICE_CUDA);
@@ -147,7 +147,7 @@ void ViewBuilder_CUDA::ConvertDepthAffineToFloat(ITMFloatImage *depth_out, const
 
 void ViewBuilder_CUDA::DepthFiltering(ITMFloatImage *image_out, const ITMFloatImage *image_in)
 {
-	Vector2i imgDims = image_in->noDims;
+	Vector2i imgDims = image_in->dimensions;
 
 	const float *imageData_in = image_in->GetData(MEMORYDEVICE_CUDA);
 	float *imageData_out = image_out->GetData(MEMORYDEVICE_CUDA);
@@ -161,7 +161,7 @@ void ViewBuilder_CUDA::DepthFiltering(ITMFloatImage *image_out, const ITMFloatIm
 
 void ViewBuilder_CUDA::ComputeNormalAndWeights(ITMFloat4Image *normal_out, ITMFloatImage *sigmaZ_out, const ITMFloatImage *depth_in, Vector4f intrinsic)
 {
-	Vector2i imgDims = depth_in->noDims;
+	Vector2i imgDims = depth_in->dimensions;
 
 	const float *depthData_in = depth_in->GetData(MEMORYDEVICE_CUDA);
 
@@ -176,7 +176,7 @@ void ViewBuilder_CUDA::ComputeNormalAndWeights(ITMFloat4Image *normal_out, ITMFl
 }
 
 void ViewBuilder_CUDA::ThresholdFiltering(ITMFloatImage* image_out, const ITMFloatImage* image_in) {
-	Vector2i imgDims = image_in->noDims;
+	Vector2i imgDims = image_in->dimensions;
 
 	const float *imageData_in = image_in->GetData(MEMORYDEVICE_CUDA);
 	float *imageData_out = image_out->GetData(MEMORYDEVICE_CUDA);

@@ -110,8 +110,8 @@ void UIEngine_BPO::Initialize(int& argc, char** argv,
 
 	int textHeight = 60; // Height of text area, 2 lines
 
-	winSize.x = (int) (1.5f * (float) (imageSource->getDepthImageSize().x));
-	winSize.y = imageSource->getDepthImageSize().y + textHeight;
+	winSize.x = (int) (1.5f * (float) (imageSource->GetDepthImageSize().x));
+	winSize.y = imageSource->GetDepthImageSize().y + textHeight;
 	float h1 = textHeight / (float) winSize.y, h2 = (1.f + h1) / 2;
 	winReg[0] = Vector4f(0.0f, h1, 0.665f, 1.0f);   // Main render
 	winReg[1] = Vector4f(0.665f, h2, 1.0f, 1.0f);   // Side sub window 0
@@ -142,19 +142,19 @@ void UIEngine_BPO::Initialize(int& argc, char** argv,
 	allocateGPU = configuration.device_type == MEMORYDEVICE_CUDA;
 
 	for (int w = 0; w < NUM_WIN; w++) {
-		outImage[w] = new ITMUChar4Image(imageSource->getDepthImageSize(), true, allocateGPU);
+		outImage[w] = new ITMUChar4Image(imageSource->GetDepthImageSize(), true, allocateGPU);
 	}
 
-	inputRGBImage = new ITMUChar4Image(imageSource->getRGBImageSize(), true, allocateGPU);
-	inputRawDepthImage = new ITMShortImage(imageSource->getDepthImageSize(), true, allocateGPU);
+	inputRGBImage = new ITMUChar4Image(imageSource->GetRGBImageSize(), true, allocateGPU);
+	inputRawDepthImage = new ITMShortImage(imageSource->GetDepthImageSize(), true, allocateGPU);
 	inputIMUMeasurement = new IMUMeasurement();
 
-	saveImage = new ITMUChar4Image(imageSource->getDepthImageSize(), true, false);
+	saveImage = new ITMUChar4Image(imageSource->GetDepthImageSize(), true, false);
 
 
 	outImageType[1] = MainEngine::InfiniTAM_IMAGE_ORIGINAL_DEPTH;
 	outImageType[2] = MainEngine::InfiniTAM_IMAGE_ORIGINAL_RGB;
-	if (inputRGBImage->noDims == Vector2i(0, 0)) outImageType[2] = MainEngine::InfiniTAM_IMAGE_UNKNOWN;
+	if (inputRGBImage->dimensions == Vector2i(0, 0)) outImageType[2] = MainEngine::InfiniTAM_IMAGE_UNKNOWN;
 
 
 	auto_interval_frame_start = 0;
@@ -196,16 +196,16 @@ void UIEngine_BPO::Initialize(int& argc, char** argv,
 void UIEngine_BPO::SaveScreenshot(const char* filename) const {
 	ITMUChar4Image screenshot(GetWindowSize(), true, false);
 	GetScreenshot(&screenshot);
-	SaveImageToFile(&screenshot, filename, true);
+	SaveImageToFile(screenshot, filename, true);
 }
 
 void UIEngine_BPO::GetScreenshot(ITMUChar4Image* dest) const {
-	glReadPixels(0, 0, dest->noDims.x, dest->noDims.y, GL_RGBA, GL_UNSIGNED_BYTE, dest->GetData(MEMORYDEVICE_CPU));
+	glReadPixels(0, 0, dest->dimensions.x, dest->dimensions.y, GL_RGBA, GL_UNSIGNED_BYTE, dest->GetData(MEMORYDEVICE_CPU));
 }
 
 void UIEngine_BPO::SkipFrames(int number_of_frames_to_skip) {
-	for (int i_frame = 0; i_frame < number_of_frames_to_skip && imageSource->hasMoreImages(); i_frame++) {
-		imageSource->getImages(inputRGBImage, inputRawDepthImage);
+	for (int i_frame = 0; i_frame < number_of_frames_to_skip && imageSource->HasMoreImages(); i_frame++) {
+		imageSource->GetImages(*inputRGBImage, *inputRawDepthImage);
 	}
 	this->start_frame_index += number_of_frames_to_skip;
 }
@@ -216,8 +216,8 @@ void UIEngine_BPO::ProcessFrame() {
 	                    yellow << "***" << bright_cyan << "PROCESSING FRAME " << GetCurrentFrameIndex() << yellow
 	                           << "***" << reset);
 
-	if (!imageSource->hasMoreImages()) return;
-	imageSource->getImages(inputRGBImage, inputRawDepthImage);
+	if (!imageSource->HasMoreImages()) return;
+	imageSource->GetImages(*inputRGBImage, *inputRawDepthImage);
 
 	if (imuSource != nullptr) {
 		if (!imuSource->hasMoreMeasurements()) return;
@@ -305,10 +305,10 @@ std::string UIEngine_BPO::GeneratePreviousFrameOutputPath() const {
 void UIEngine_BPO::RecordCurrentReconstructionFrameToVideo() {
 	if ((reconstructionVideoWriter != nullptr)) {
 		mainEngine->GetImage(outImage[0], outImageType[0], &this->freeviewPose, &freeviewIntrinsics);
-		if (outImage[0]->noDims.x != 0) {
+		if (outImage[0]->dimensions.x != 0) {
 			if (!reconstructionVideoWriter->isOpen())
 				reconstructionVideoWriter->open((std::string(this->output_path) + "/out_reconstruction.avi").c_str(),
-				                                outImage[0]->noDims.x, outImage[0]->noDims.y,
+				                                outImage[0]->dimensions.x, outImage[0]->dimensions.y,
 				                                false, 30);
 			//TODO This image saving/reading/saving is a production hack -Greg (GitHub:Algomorph)
 			//TODO move to a separate function and apply to all recorded video
@@ -332,16 +332,16 @@ void UIEngine_BPO::RecordCurrentReconstructionFrameToVideo() {
 }
 
 void UIEngine_BPO::RecordDepthAndRGBInputToVideo() {
-	if ((rgbVideoWriter != nullptr) && (inputRGBImage->noDims.x != 0)) {
+	if ((rgbVideoWriter != nullptr) && (inputRGBImage->dimensions.x != 0)) {
 		if (!rgbVideoWriter->isOpen())
 			rgbVideoWriter->open((std::string(this->output_path) + "/out_rgb.avi").c_str(),
-			                     inputRGBImage->noDims.x, inputRGBImage->noDims.y, false, 30);
+			                     inputRGBImage->dimensions.x, inputRGBImage->dimensions.y, false, 30);
 		rgbVideoWriter->writeFrame(inputRGBImage);
 	}
-	if ((depthVideoWriter != nullptr) && (inputRawDepthImage->noDims.x != 0)) {
+	if ((depthVideoWriter != nullptr) && (inputRawDepthImage->dimensions.x != 0)) {
 		if (!depthVideoWriter->isOpen())
 			depthVideoWriter->open((std::string(this->output_path) + "/out_depth.avi").c_str(),
-			                       inputRawDepthImage->noDims.x, inputRawDepthImage->noDims.y, true, 30);
+			                       inputRawDepthImage->dimensions.x, inputRawDepthImage->dimensions.y, true, 30);
 		depthVideoWriter->writeFrame(inputRawDepthImage);
 	}
 }
@@ -351,11 +351,11 @@ void UIEngine_BPO::RecordDepthAndRGBInputToImages() {
 		char str[250];
 
 		sprintf(str, "%s/%04d.pgm", output_path.c_str(), processed_frame_count);
-		SaveImageToFile(inputRawDepthImage, str);
+		SaveImageToFile(*inputRawDepthImage, str);
 
-		if (inputRGBImage->noDims != Vector2i(0, 0)) {
+		if (inputRGBImage->dimensions != Vector2i(0, 0)) {
 			sprintf(str, "%s/%04d.ppm", output_path.c_str(), processed_frame_count);
-			SaveImageToFile(inputRGBImage, str);
+			SaveImageToFile(*inputRGBImage, str);
 		}
 	}
 }

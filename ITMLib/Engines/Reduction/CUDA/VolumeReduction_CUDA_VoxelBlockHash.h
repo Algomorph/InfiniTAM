@@ -120,10 +120,10 @@ private:
 	static TOutput ReduceUtilized_Generic(Vector3i& position, const VoxelVolume<TVoxel, VoxelBlockHash>* volume,
 	                                      ReductionResult<TOutput, VoxelBlockHash> ignored_value,
 	                                      BlockLevelReductionFunction&& function) {
-		const int utilized_entry_count = volume->index.GetUtilizedHashBlockCount();
+		const int utilized_entry_count = volume->index.GetUtilizedBlockCount();
 		const int* utilized_hash_codes = volume->index.GetUtilizedBlockHashCodes();
 		const HashEntry* hash_entries = volume->index.GetEntries();
-		const TVoxel* voxels = volume->voxels.GetVoxelBlocks();
+		const TVoxel* voxels = volume->GetVoxelBlocks();
 
 		const int half_block_voxel_count = (VOXEL_BLOCK_SIZE3 / 2);
 

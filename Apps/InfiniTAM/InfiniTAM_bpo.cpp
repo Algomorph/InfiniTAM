@@ -130,8 +130,8 @@ int main(int argc, char** argv) {
 		configuration::IndexingMethod chosenIndexingMethod = configuration.indexing_method;
 		//TelemetryRecorder_Interface& logger = GetLogger(chosenIndexingMethod);
 		MainEngine* mainEngine = BuildMainEngine(imageSource->getCalib(),
-		                                         imageSource->getRGBImageSize(),
-		                                         imageSource->getDepthImageSize(),
+		                                         imageSource->GetRGBImageSize(),
+		                                         imageSource->GetDepthImageSize(),
 		                                         false);
 
 // endregion ===========================================================================================================

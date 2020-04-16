@@ -8,35 +8,17 @@
 
 using namespace ITMLib;
 template<class TVoxel>
-void SceneReconstructionEngine_CPU<TVoxel,VoxelBlockHash>::ResetScene(VoxelVolume<TVoxel, VoxelBlockHash> *scene)
-{
-	int numBlocks = scene->index.GetAllocatedBlockCount();
-	int blockSize = scene->index.GetVoxelBlockSize();
-
-	TVoxel *voxelBlocks_ptr = scene->voxels.GetVoxelBlocks();
-	for (int i = 0; i < numBlocks * blockSize; ++i) voxelBlocks_ptr[i] = TVoxel();
-	int *vbaAllocationList_ptr = scene->voxels.GetAllocationList();
-	for (int i = 0; i < numBlocks; ++i) vbaAllocationList_ptr[i] = i;
-	scene->voxels.lastFreeBlockId = numBlocks - 1;
-
-	HashEntry tmpEntry;
-	memset(&tmpEntry, 0, sizeof(HashEntry));
-	tmpEntry.ptr = -2;
-	HashEntry *hashEntry_ptr = scene->index.GetEntries();
-	for (int i = 0; i < scene->index.hash_entry_count; ++i) hashEntry_ptr[i] = tmpEntry;
-	int *excessList_ptr = scene->index.GetExcessAllocationList();
-	for (int i = 0; i < scene->index.excessListSize; ++i) excessList_ptr[i] = i;
-
-	scene->index.SetLastFreeExcessListId(scene->index.excessListSize - 1);
+void SceneReconstructionEngine_CPU<TVoxel,VoxelBlockHash>::ResetScene(VoxelVolume<TVoxel, VoxelBlockHash>* volume){
+	volume->Reset();
 }
 
 template<class TVoxel>
-void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::IntegrateIntoScene(VoxelVolume<TVoxel, VoxelBlockHash> *scene, const View *view,
-                                                                               const CameraTrackingState *trackingState, const RenderState *renderState)
+void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::IntegrateIntoScene(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const View* view,
+                                                                               const CameraTrackingState* trackingState, const RenderState* renderState)
 {
-	Vector2i rgbImgSize = view->rgb->noDims;
-	Vector2i depthImgSize = view->depth->noDims;
-	float voxelSize = scene->parameters->voxel_size;
+	Vector2i rgbImgSize = view->rgb->dimensions;
+	Vector2i depthImgSize = view->depth->dimensions;
+	float voxelSize = volume->parameters->voxel_size;
 
 	Matrix4f M_d, M_rgb;
 	Vector4f projParams_d, projParams_rgb;
@@ -47,21 +29,21 @@ void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::IntegrateIntoScene(V
 	projParams_d = view->calib.intrinsics_d.projectionParamsSimple.all;
 	projParams_rgb = view->calib.intrinsics_rgb.projectionParamsSimple.all;
 
-	float mu = scene->parameters->narrow_band_half_width; int maxW = scene->parameters->max_integration_weight;
+	float mu = volume->parameters->narrow_band_half_width; int maxW = volume->parameters->max_integration_weight;
 
 	float *depth = view->depth->GetData(MEMORYDEVICE_CPU);
 	float *confidence = view->depthConfidence->GetData(MEMORYDEVICE_CPU);
 	Vector4u *rgb = view->rgb->GetData(MEMORYDEVICE_CPU);
-	TVoxel *localVBA = scene->voxels.GetVoxelBlocks();
-	HashEntry *hashTable = scene->index.GetEntries();
+	TVoxel *localVBA = volume->GetVoxelBlocks();
+	HashEntry *hashTable = volume->index.GetEntries();
 
-	int *visibleBlockHashCodes = scene->index.GetUtilizedBlockHashCodes();
-	int visibleHashBlockCount = scene->index.GetUtilizedHashBlockCount();
+	int *visibleBlockHashCodes = volume->index.GetUtilizedBlockHashCodes();
+	int visibleHashBlockCount = volume->index.GetUtilizedBlockCount();
 
-	bool stopIntegratingAtMaxW = scene->parameters->stop_integration_at_max_weight;
+	bool stopIntegratingAtMaxW = volume->parameters->stop_integration_at_max_weight;
 
 #ifdef WITH_OPENMP
-	#pragma omp parallel for
+	#pragma omp parallel for default(shared)
 #endif
 	for (int visibleHash = 0; visibleHash < visibleHashBlockCount; visibleHash++)
 	{
@@ -106,13 +88,13 @@ template<class TVoxel>
 void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::AllocateSceneFromDepth(VoxelVolume<TVoxel, VoxelBlockHash> *scene, const View *view,
                                                                                    const CameraTrackingState *trackingState, const RenderState *renderState, bool onlyUpdateVisibleList, bool resetVisibleList)
 {
-	Vector2i depthImgSize = view->depth->noDims;
+	Vector2i depthImgSize = view->depth->dimensions;
 	float voxelSize = scene->parameters->voxel_size;
 
 	Matrix4f M_d, invM_d;
 	Vector4f projParams_d, invProjParams_d;
 
-	if (resetVisibleList) scene->index.SetUtilizedHashBlockCount(0);
+	if (resetVisibleList) scene->index.SetUtilizedBlockCount(0);
 
 	M_d = trackingState->pose_d->GetM(); M_d.inv(invM_d);
 
@@ -124,8 +106,8 @@ void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::AllocateSceneFromDep
 	float mu = scene->parameters->narrow_band_half_width;
 
 	float *depth = view->depth->GetData(MEMORYDEVICE_CPU);
-	int *voxelAllocationList = scene->voxels.GetAllocationList();
-	int *excessAllocationList = scene->index.GetExcessAllocationList();
+	int *voxelAllocationList = scene->index.GetBlockAllocationList();
+	int *excessAllocationList = scene->index.GetExcessEntryList();
 	HashEntry *hashTable = scene->index.GetEntries();
 	ITMHashSwapState *swapStates = scene->Swapping() ? scene->global_cache->GetSwapStates(false) : 0;
 	int* visibleBlockHashCodes = scene->index.GetUtilizedBlockHashCodes();
@@ -141,19 +123,19 @@ void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::AllocateSceneFromDep
 	float band_factor = configuration::get().general_voxel_volume_parameters.block_allocation_band_factor;
 	float surface_cutoff_distance = mu * band_factor;
 
-	int lastFreeVoxelBlockId = scene->voxels.lastFreeBlockId;
+	int lastFreeVoxelBlockId = scene->index.GetLastFreeBlockListId();
 	int lastFreeExcessListId = scene->index.GetLastFreeExcessListId();
 
 	int visibleHashBlockCount = 0;
 
 	scene->index.ClearHashEntryAllocationStates();
 
-	for (int i = 0; i < scene->index.GetUtilizedHashBlockCount(); i++)
+	for (int i = 0; i < scene->index.GetUtilizedBlockCount(); i++)
 		hashBlockVisibilityTypes[visibleBlockHashCodes[i]] = VISIBLE_AT_PREVIOUS_FRAME_AND_UNSTREAMED;
 
 	//build hashVisibility
 #ifdef WITH_OPENMP
-	#pragma omp parallel for
+	#pragma omp parallel for default(shared)
 #endif
 	for (int locId = 0; locId < depthImgSize.x*depthImgSize.y; locId++)
 	{
@@ -285,8 +267,8 @@ void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::AllocateSceneFromDep
 		}
 	}
 
-	scene->index.SetUtilizedHashBlockCount(visibleHashBlockCount);
-	scene->voxels.lastFreeBlockId = lastFreeVoxelBlockId;
+	scene->index.SetUtilizedBlockCount(visibleHashBlockCount);
+	scene->index.SetLastFreeBlockListId(lastFreeVoxelBlockId);
 	scene->index.SetLastFreeExcessListId(lastFreeExcessListId);
 }
 
@@ -301,14 +283,7 @@ SceneReconstructionEngine_CPU<TVoxel,PlainVoxelArray>::~SceneReconstructionEngin
 template<class TVoxel>
 void SceneReconstructionEngine_CPU<TVoxel,PlainVoxelArray>::ResetScene(VoxelVolume<TVoxel, PlainVoxelArray> *scene)
 {
-	int numBlocks = scene->index.GetAllocatedBlockCount();
-	int blockSize = scene->index.GetVoxelBlockSize();
-
-	TVoxel *voxelBlocks_ptr = scene->voxels.GetVoxelBlocks();
-	for (int i = 0; i < numBlocks * blockSize; ++i) voxelBlocks_ptr[i] = TVoxel();
-	int *vbaAllocationList_ptr = scene->voxels.GetAllocationList();
-	for (int i = 0; i < numBlocks; ++i) vbaAllocationList_ptr[i] = i;
-	scene->voxels.lastFreeBlockId = numBlocks - 1;
+	scene->Reset();
 }
 
 template<class TVoxel>
@@ -317,36 +292,34 @@ void SceneReconstructionEngine_CPU<TVoxel, PlainVoxelArray>::AllocateSceneFromDe
 {}
 
 template<class TVoxel>
-void SceneReconstructionEngine_CPU<TVoxel, PlainVoxelArray>::IntegrateIntoScene(VoxelVolume<TVoxel, PlainVoxelArray> *scene, const View *view,
+void SceneReconstructionEngine_CPU<TVoxel, PlainVoxelArray>::IntegrateIntoScene(VoxelVolume<TVoxel, PlainVoxelArray>* scene, const View *view,
                                                                                 const CameraTrackingState *trackingState, const RenderState *renderState)
 {
-	Vector2i rgbImgSize = view->rgb->noDims;
-	Vector2i depthImgSize = view->depth->noDims;
-	float voxelSize = scene->parameters->voxel_size;
+	const Vector2i rgbImgSize = view->rgb->dimensions;
+	const Vector2i depthImgSize = view->depth->dimensions;
+	const float voxelSize = scene->parameters->voxel_size;
 
-	Matrix4f M_d, M_rgb;
-	Vector4f projParams_d, projParams_rgb;
+	const Matrix4f M_d = trackingState->pose_d->GetM();
+	const Matrix4f M_rgb = TVoxel::hasColorInformation ? view->calib.trafo_rgb_to_depth.calib_inv * M_d : Matrix4f();
 
-	M_d = trackingState->pose_d->GetM();
-	if (TVoxel::hasColorInformation) M_rgb = view->calib.trafo_rgb_to_depth.calib_inv * M_d;
+	const Vector4f projParams_d = view->calib.intrinsics_d.projectionParamsSimple.all;
+	const Vector4f projParams_rgb = view->calib.intrinsics_rgb.projectionParamsSimple.all;
 
-	projParams_d = view->calib.intrinsics_d.projectionParamsSimple.all;
-	projParams_rgb = view->calib.intrinsics_rgb.projectionParamsSimple.all;
-
-	float mu = scene->parameters->narrow_band_half_width; int maxW = scene->parameters->max_integration_weight;
+	const float mu = scene->parameters->narrow_band_half_width;
+	const int maxW = scene->parameters->max_integration_weight;
 
 	float *depth = view->depth->GetData(MEMORYDEVICE_CPU);
 	float *confidence = view->depthConfidence->GetData(MEMORYDEVICE_CPU);
 	Vector4u *rgb = view->rgb->GetData(MEMORYDEVICE_CPU);
-	TVoxel *voxelArray = scene->voxels.GetVoxelBlocks();
+	TVoxel *voxelArray = scene->GetVoxelBlocks();
 
 	const PlainVoxelArray::IndexData *arrayInfo = scene->index.GetIndexData();
 
-	bool stopIntegratingAtMaxW = scene->parameters->stop_integration_at_max_weight;
+	const bool stopIntegratingAtMaxW = scene->parameters->stop_integration_at_max_weight;
 	//bool approximateIntegration = !trackingState->requiresFullRendering;
 
 #ifdef WITH_OPENMP
-	#pragma omp parallel for
+	#pragma omp parallel for default(none) shared(scene, voxelArray, arrayInfo, rgb, depth, confidence)
 #endif
 	for (int locId = 0; locId < scene->index.GetVolumeSize().x * scene->index.GetVolumeSize().y *
 	                            scene->index.GetVolumeSize().z; ++locId)

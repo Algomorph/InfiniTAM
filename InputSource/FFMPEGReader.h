@@ -11,19 +11,19 @@ class FFMPEGReader : public BaseImageSourceEngine
 	public:
 	class PrivateData;
 
-	FFMPEGReader(const char *calibFilename, const char *filename1, const char *filename2 = NULL);
+	FFMPEGReader(const char *calibFilename, const char *filename1, const char *filename2 = nullptr);
 	~FFMPEGReader(void);
 
-	bool hasMoreImages(void) const;
-	void getImages(ITMUChar4Image *rgb, ITMShortImage *rawDepth);
+	bool HasMoreImages(void) override;
+	void GetImages(ITMUChar4Image& rgb_image, ITMShortImage& depth_image) override;
 
-	Vector2i getDepthImageSize(void) const;
-	Vector2i getRGBImageSize(void) const;
+	Vector2i GetDepthImageSize(void) override;
+	Vector2i GetRGBImageSize(void) override;
 
 	private:
 	PrivateData *mData1;
 	PrivateData *mData2;
-	bool isValid;
+	bool is_valid;
 };
 
 }

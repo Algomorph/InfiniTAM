@@ -90,8 +90,8 @@ namespace ITMLib
 	{
 		if ((localMapId < 0) || ((unsigned)localMapId >= allData.size())) return -1;
 
-		VoxelVolume<TVoxel, TIndex> *scene = allData[localMapId]->scene;
-		return scene->index.GetAllocatedBlockCount() - scene->voxels.lastFreeBlockId - 1;
+		VoxelVolume<TVoxel, TIndex>* volume = allData[localMapId]->scene;
+		return volume->index.GetUtilizedBlockCount() - 1;
 	}
 
 	template<class TVoxel, class TIndex>
@@ -103,8 +103,8 @@ namespace ITMLib
 		if (invertIds) 
 		{
 			int tmp = minBlockId;
-			minBlockId = localMap->scene->index.GetAllocatedBlockCount() - maxBlockId - 1;
-			maxBlockId = localMap->scene->index.GetAllocatedBlockCount() - tmp - 1;
+			minBlockId = localMap->scene->index.GetMaximumBlockCount() - maxBlockId - 1;
+			maxBlockId = localMap->scene->index.GetMaximumBlockCount() - tmp - 1;
 		}
 
 		return visualization_engine->CountVisibleBlocks(localMap->scene, localMap->renderState, minBlockId, maxBlockId);

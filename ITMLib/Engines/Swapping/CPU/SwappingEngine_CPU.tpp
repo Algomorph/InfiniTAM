@@ -68,7 +68,7 @@ void SwappingEngine_CPU<TVoxel, VoxelBlockHash>::IntegrateGlobalIntoLocal(VoxelV
 	bool *hasSyncedData_local = globalCache->GetHasSyncedData(false);
 	int *neededEntryIDs_local = globalCache->GetNeededEntryIDs(false);
 
-	TVoxel *localVBA = scene->voxels.GetVoxelBlocks();
+	TVoxel *localVBA = scene->GetVoxelBlocks();
 
 	int noNeededEntries = this->LoadFromGlobalMemory(scene);
 
@@ -111,13 +111,13 @@ void SwappingEngine_CPU<TVoxel, VoxelBlockHash>::SaveToGlobalMemory(VoxelVolume<
 	bool *hasSyncedData_global = globalCache->GetHasSyncedData(false);
 	int *neededEntryIDs_global = globalCache->GetNeededEntryIDs(false);
 
-	TVoxel *localVBA = scene->voxels.GetVoxelBlocks();
-	int *voxelAllocationList = scene->voxels.GetAllocationList();
+	TVoxel *localVBA = scene->GetVoxelBlocks();
+	int *voxelAllocationList = scene->index.GetBlockAllocationList();
 
 	int hashEntryCount = globalCache->hashEntryCount;
 	
 	int neededEntryCount = 0; // needed for what?
-	int allocatedEntryCount = scene->voxels.lastFreeBlockId;
+	int allocatedEntryCount = scene->index.GetLastFreeBlockListId();
 
 	for (int entryDestId = 0; entryDestId < hashEntryCount; entryDestId++)
 	{
@@ -151,7 +151,7 @@ void SwappingEngine_CPU<TVoxel, VoxelBlockHash>::SaveToGlobalMemory(VoxelVolume<
 		}
 	}
 
-	scene->voxels.lastFreeBlockId = allocatedEntryCount;
+	scene->index.SetLastFreeBlockListId(allocatedEntryCount);
 
 	// would copy neededEntryIDs_local, hasSyncedData_local and syncedVoxelBlocks_local into *_global here
 
@@ -171,13 +171,13 @@ void SwappingEngine_CPU<TVoxel, VoxelBlockHash>::CleanLocalMemory(VoxelVolume<TV
 	HashEntry *hashTable = scene->index.GetEntries();
 	HashBlockVisibility *blockVisibilityTypes = scene->index.GetBlockVisibilityTypes();
 
-	TVoxel *localVBA = scene->voxels.GetVoxelBlocks();
-	int *voxelAllocationList = scene->voxels.GetAllocationList();
+	TVoxel *localVBA = scene->GetVoxelBlocks();
+	int *voxelAllocationList = scene->index.GetBlockAllocationList();
 
 	int noTotalEntries = scene->index.hash_entry_count;
 
 	int noNeededEntries = 0;
-	int noAllocatedVoxelEntries = scene->voxels.lastFreeBlockId;
+	int noAllocatedVoxelEntries = scene->index.GetLastFreeBlockListId();
 
 	for (int entryDestId = 0; entryDestId < noTotalEntries; entryDestId++)
 	{
@@ -203,5 +203,5 @@ void SwappingEngine_CPU<TVoxel, VoxelBlockHash>::CleanLocalMemory(VoxelVolume<TV
 		}
 	}
 
-	scene->voxels.lastFreeBlockId = noAllocatedVoxelEntries;
+	scene->index.SetLastFreeBlockListId(noAllocatedVoxelEntries);
 }

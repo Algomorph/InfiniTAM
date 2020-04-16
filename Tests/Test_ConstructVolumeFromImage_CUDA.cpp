@@ -123,14 +123,14 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CUDA) {
 	Vector2i imageSize(640, 480);
 	View* view = nullptr;
 
-	auto* rgb = new ITMUChar4Image(true, true);
-	auto* depth = new ITMShortImage(true, true);
+	ITMUChar4Image rgb(true, true);
+	ITMShortImage depth(true, true);
 	BOOST_REQUIRE(ReadImageFromFile(rgb, "TestData/stripes_color.png"));
 	BOOST_REQUIRE(ReadImageFromFile(depth, "TestData/stripes_depth.png"));
-	rgb->UpdateDeviceFromHost();
-	depth->UpdateDeviceFromHost();
+	rgb.UpdateDeviceFromHost();
+	depth.UpdateDeviceFromHost();
 
-	viewBuilder->UpdateView(&view, rgb, depth, false, false, false, true);
+	viewBuilder->UpdateView(&view, &rgb, &depth, false, false, false, true);
 
 	// endregion =======================================================================================================
 
@@ -293,8 +293,6 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CUDA) {
 	delete depth_fusion_engine_PVA;
 	delete depth_fusion_engine_VBH;
 	delete viewBuilder;
-	delete rgb;
-	delete depth;
 }
 
 BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CUDA) {
@@ -309,12 +307,12 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CUDA) {
 	Vector2i imageSize(640, 480);
 	View* view = nullptr;
 
-	auto* rgb = new ITMUChar4Image(true, false);
-	auto* depth = new ITMShortImage(true, false);
+	ITMUChar4Image rgb(true, false);
+	ITMShortImage depth(true, false);
 	BOOST_REQUIRE(ReadImageFromFile(rgb, "TestData/snoopy_color_000000.png"));
 	BOOST_REQUIRE(ReadImageFromFile(depth, "TestData/snoopy_depth_000000.png"));
 
-	viewBuilder->UpdateView(&view, rgb, depth, false, false, false, true);
+	viewBuilder->UpdateView(&view, &rgb, &depth, false, false, false, true);
 
 	// endregion =======================================================================================================
 
@@ -367,9 +365,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CUDA) {
 	depth_fusion_engine_VBH->IntegrateDepthImageIntoTsdfVolume(&volume3, view, &trackingState);
 
 	BOOST_REQUIRE(allocatedContentAlmostEqual_CUDA(&volume2, &volume3, tolerance));
-
-	delete rgb;
-	delete depth;
+	
 	delete depth_fusion_engine_VBH;
 	delete view;
 	delete viewBuilder;

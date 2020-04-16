@@ -64,7 +64,7 @@ void LowLevelEngine_CUDA::CopyImage(ITMFloat4Image *image_out, const ITMFloat4Im
 
 void LowLevelEngine_CUDA::ConvertColourToIntensity(ITMFloatImage *image_out, const ITMUChar4Image *image_in) const
 {
-	const Vector2i dims = image_in->noDims;
+	const Vector2i dims = image_in->dimensions;
 	image_out->ChangeDims(dims);
 
 	float *dest = image_out->GetData(MEMORYDEVICE_CUDA);
@@ -79,7 +79,7 @@ void LowLevelEngine_CUDA::ConvertColourToIntensity(ITMFloatImage *image_out, con
 
 void LowLevelEngine_CUDA::FilterIntensity(ITMFloatImage *image_out, const ITMFloatImage *image_in) const
 {
-	Vector2i dims = image_in->noDims;
+	Vector2i dims = image_in->dimensions;
 
 	image_out->ChangeDims(dims);
 	image_out->Clear(0);
@@ -96,8 +96,8 @@ void LowLevelEngine_CUDA::FilterIntensity(ITMFloatImage *image_out, const ITMFlo
 
 void LowLevelEngine_CUDA::FilterSubsample(ITMUChar4Image *image_out, const ITMUChar4Image *image_in) const
 {
-	Vector2i oldDims = image_in->noDims;
-	Vector2i newDims; newDims.x = image_in->noDims.x / 2; newDims.y = image_in->noDims.y / 2;
+	Vector2i oldDims = image_in->dimensions;
+	Vector2i newDims; newDims.x = image_in->dimensions.x / 2; newDims.y = image_in->dimensions.y / 2;
 
 	image_out->ChangeDims(newDims);
 
@@ -113,8 +113,8 @@ void LowLevelEngine_CUDA::FilterSubsample(ITMUChar4Image *image_out, const ITMUC
 
 void LowLevelEngine_CUDA::FilterSubsample(ITMFloatImage *image_out, const ITMFloatImage *image_in) const
 {
-	Vector2i oldDims = image_in->noDims;
-	Vector2i newDims; newDims.x = image_in->noDims.x / 2; newDims.y = image_in->noDims.y / 2;
+	Vector2i oldDims = image_in->dimensions;
+	Vector2i newDims; newDims.x = image_in->dimensions.x / 2; newDims.y = image_in->dimensions.y / 2;
 
 	image_out->ChangeDims(newDims);
 	image_out->Clear(0);
@@ -131,8 +131,8 @@ void LowLevelEngine_CUDA::FilterSubsample(ITMFloatImage *image_out, const ITMFlo
 
 void LowLevelEngine_CUDA::FilterSubsampleWithHoles(ITMFloatImage *image_out, const ITMFloatImage *image_in) const
 {
-	Vector2i oldDims = image_in->noDims;
-	Vector2i newDims; newDims.x = image_in->noDims.x / 2; newDims.y = image_in->noDims.y / 2;
+	Vector2i oldDims = image_in->dimensions;
+	Vector2i newDims; newDims.x = image_in->dimensions.x / 2; newDims.y = image_in->dimensions.y / 2;
 
 	image_out->ChangeDims(newDims);
 
@@ -148,8 +148,8 @@ void LowLevelEngine_CUDA::FilterSubsampleWithHoles(ITMFloatImage *image_out, con
 
 void LowLevelEngine_CUDA::FilterSubsampleWithHoles(ITMFloat4Image *image_out, const ITMFloat4Image *image_in) const
 {
-	Vector2i oldDims = image_in->noDims;
-	Vector2i newDims; newDims.x = image_in->noDims.x / 2; newDims.y = image_in->noDims.y / 2;
+	Vector2i oldDims = image_in->dimensions;
+	Vector2i newDims; newDims.x = image_in->dimensions.x / 2; newDims.y = image_in->dimensions.y / 2;
 
 	image_out->ChangeDims(newDims);
 
@@ -165,8 +165,8 @@ void LowLevelEngine_CUDA::FilterSubsampleWithHoles(ITMFloat4Image *image_out, co
 
 void LowLevelEngine_CUDA::GradientX(ITMShort4Image *grad_out, const ITMUChar4Image *image_in) const
 {
-	grad_out->ChangeDims(image_in->noDims);
-	Vector2i imgSize = image_in->noDims;
+	grad_out->ChangeDims(image_in->dimensions);
+	Vector2i imgSize = image_in->dimensions;
 
 	Vector4s *grad = grad_out->GetData(MEMORYDEVICE_CUDA);
 	const Vector4u *image = image_in->GetData(MEMORYDEVICE_CUDA);
@@ -182,8 +182,8 @@ void LowLevelEngine_CUDA::GradientX(ITMShort4Image *grad_out, const ITMUChar4Ima
 
 void LowLevelEngine_CUDA::GradientY(ITMShort4Image *grad_out, const ITMUChar4Image *image_in) const
 {
-	grad_out->ChangeDims(image_in->noDims);
-	Vector2i imgSize = image_in->noDims;
+	grad_out->ChangeDims(image_in->dimensions);
+	Vector2i imgSize = image_in->dimensions;
 
 	Vector4s *grad = grad_out->GetData(MEMORYDEVICE_CUDA);
 	const Vector4u *image = image_in->GetData(MEMORYDEVICE_CUDA);
@@ -199,7 +199,7 @@ void LowLevelEngine_CUDA::GradientY(ITMShort4Image *grad_out, const ITMUChar4Ima
 
 void LowLevelEngine_CUDA::GradientXY(ITMFloat2Image *grad_out, const ITMFloatImage *image_in) const
 {
-	Vector2i imgSize = image_in->noDims;
+	Vector2i imgSize = image_in->dimensions;
 	grad_out->ChangeDims(imgSize);
 	grad_out->Clear();
 
@@ -216,7 +216,7 @@ void LowLevelEngine_CUDA::GradientXY(ITMFloat2Image *grad_out, const ITMFloatIma
 int LowLevelEngine_CUDA::CountValidDepths(const ITMFloatImage *image_in) const
 {
 	const float *imageData_in = image_in->GetData(MEMORYDEVICE_CUDA);
-	Vector2i imgSize = image_in->noDims;
+	Vector2i imgSize = image_in->dimensions;
 
 	dim3 blockSize(256);
 	dim3 gridSize((int)ceil((float)imgSize.x*imgSize.y / (float)blockSize.x));

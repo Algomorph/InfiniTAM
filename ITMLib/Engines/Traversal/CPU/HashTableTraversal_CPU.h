@@ -39,7 +39,7 @@ public:
 	inline static void
 	TraverseUtilizedWithHashCode(VoxelBlockHash& index, TFunctor& functor){
 		HashEntry* hash_table = index.GetEntries();
-		const int utilized_entry_count = index.GetUtilizedHashBlockCount();
+		const int utilized_entry_count = index.GetUtilizedBlockCount();
 		int* utilized_entry_codes = index.GetUtilizedBlockHashCodes();
 #ifdef WITH_OPENMP
 #pragma omp parallel for default(none) shared(functor, hash_table, utilized_entry_codes)

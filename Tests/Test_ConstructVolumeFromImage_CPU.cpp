@@ -125,7 +125,7 @@ static void SetUpTrackingState16(CameraTrackingState& tracking_state,
 	updateView(&view_16, "TestData/snoopy_depth_000016.png",
 	           "TestData/snoopy_color_000016.png", "TestData/snoopy_omask_000016.png",
 	           "TestData/snoopy_calib.txt", MEMORYDEVICE_CPU);
-	RenderState render_state(view_16->depth->noDims,
+	RenderState render_state(view_16->depth->dimensions,
 	                         configuration::get().general_voxel_volume_parameters.near_clipping_distance,
 	                         configuration::get().general_voxel_volume_parameters.far_clipping_distance,
 	                         MEMORYDEVICE_CPU);
@@ -256,12 +256,12 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
 	Vector2i imageSize(640, 480);
 	View* view = nullptr;
 
-	auto* rgb = new ITMUChar4Image(true, false);
-	auto* depth = new ITMShortImage(true, false);
+	ITMUChar4Image rgb(true, false);
+	ITMShortImage depth(true, false);
 	BOOST_REQUIRE(ReadImageFromFile(rgb, "TestData/stripes_color.png"));
 	BOOST_REQUIRE(ReadImageFromFile(depth, "TestData/stripes_depth.png"));
 
-	viewBuilder->UpdateView(&view, rgb, depth, false, false, false, true);
+	viewBuilder->UpdateView(&view, &rgb, &depth, false, false, false, true);
 
 	// endregion =======================================================================================================
 
@@ -418,8 +418,6 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
 	delete depth_fusion_engine;
 	delete depth_fusion_engine_VBH;
 	delete viewBuilder;
-	delete rgb;
-	delete depth;
 }
 
 BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CPU) {
@@ -432,12 +430,12 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CPU) {
 	Vector2i imageSize(640, 480);
 	View* view = nullptr;
 
-	auto* rgb = new ITMUChar4Image(true, false);
-	auto* depth = new ITMShortImage(true, false);
+	ITMUChar4Image rgb(true, false);
+	ITMShortImage depth(true, false);
 	BOOST_REQUIRE(ReadImageFromFile(rgb, "TestData/snoopy_color_000000.png"));
 	BOOST_REQUIRE(ReadImageFromFile(depth, "TestData/snoopy_depth_000000.png"));
 
-	viewBuilder->UpdateView(&view, rgb, depth, false, false, false, true);
+	viewBuilder->UpdateView(&view, &rgb, &depth, false, false, false, true);
 
 	// endregion =======================================================================================================
 
@@ -489,8 +487,6 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CPU) {
 	depth_fusion_engine_VBH->IntegrateDepthImageIntoTsdfVolume(&volume3, view, &trackingState);
 
 	BOOST_REQUIRE(allocatedContentAlmostEqual_CPU(&loaded_volume, &volume3, tolerance));
-	delete depth;
-	delete rgb;
 	delete depth_fusion_engine_VBH;
 	delete depth_fusion_engine_PVA;
 }

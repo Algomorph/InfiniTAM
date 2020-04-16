@@ -18,7 +18,7 @@ namespace ITMLib
 		Vector4s *visibleBlockGlobalPos_device;
 
 	public:
-		void MeshScene(Mesh *mesh, const VoxelVolume<TVoxel, VoxelBlockHash> *scene) override;
+		void MeshScene(Mesh *mesh, const VoxelVolume<TVoxel, VoxelBlockHash> *volume) override;
 
 		explicit MeshingEngine_CUDA(const VoxelBlockHash& index);
 		~MeshingEngine_CUDA();

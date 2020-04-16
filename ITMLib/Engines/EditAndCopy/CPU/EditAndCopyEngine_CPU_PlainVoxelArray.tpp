@@ -30,24 +30,22 @@ using namespace ITMLib;
 template<typename TVoxel>
 void ITMLib::EditAndCopyEngine_CPU<TVoxel, PlainVoxelArray>::ResetVolume(
 		ITMLib::VoxelVolume<TVoxel, ITMLib::PlainVoxelArray>* volume) {
-	int numBlocks = volume->index.GetAllocatedBlockCount();
-	int blockSize = volume->index.GetVoxelBlockSize();
-
-	TVoxel *voxelBlocks_ptr = volume->voxels.GetVoxelBlocks();
-	for (int i = 0; i < numBlocks * blockSize; ++i) voxelBlocks_ptr[i] = TVoxel();
-	int *vbaAllocationList_ptr = volume->voxels.GetAllocationList();
-	for (int i = 0; i < numBlocks; ++i) vbaAllocationList_ptr[i] = i;
-	volume->voxels.lastFreeBlockId = numBlocks - 1;
+	const unsigned int voxel_count = volume->index.GetMaxVoxelCount();
+	TVoxel* voxels = volume->GetVoxelBlocks();
+#ifdef WITH_OPENMP
+#pragma omp parallel for default(none) shared(voxels)
+#endif
+	for (unsigned int i_voxel = 0; i_voxel < voxel_count; ++i_voxel) voxels[i_voxel] = TVoxel();
 }
 
 template<typename TVoxel>
 bool
 EditAndCopyEngine_CPU<TVoxel, PlainVoxelArray>::SetVoxel(VoxelVolume<TVoxel, PlainVoxelArray>* volume,
                                                          Vector3i at, TVoxel voxel) {
-	int vmIndex = 0;
-	int arrayIndex = findVoxel(volume->index.GetIndexData(), at, vmIndex);
-	if (vmIndex) {
-		volume->voxels.GetVoxelBlocks()[arrayIndex] = voxel;
+	int voxel_found = 0;
+	int linear_index_in_array = findVoxel(volume->index.GetIndexData(), at, voxel_found);
+	if (voxel_found) {
+		volume->GetVoxelBlocks()[linear_index_in_array] = voxel;
 		return true;
 	} else {
 		return false;
@@ -65,7 +63,7 @@ EditAndCopyEngine_CPU<TVoxel, PlainVoxelArray>::ReadVoxel(VoxelVolume<TVoxel, Pl
 		TVoxel voxel;
 		return voxel;
 	}
-	return volume->voxels.GetVoxelBlocks()[arrayIndex];
+	return volume->GetVoxelBlocks()[arrayIndex];
 }
 
 template<typename TVoxel>
@@ -79,7 +77,7 @@ EditAndCopyEngine_CPU<TVoxel, PlainVoxelArray>::ReadVoxel(VoxelVolume<TVoxel, Pl
 		TVoxel voxel;
 		return voxel;
 	}
-	return volume->voxels.GetVoxelBlocks()[arrayIndex];
+	return volume->GetVoxelBlocks()[arrayIndex];
 }
 
 template<typename TVoxel>
@@ -104,14 +102,14 @@ EditAndCopyEngine_CPU<TVoxel, PlainVoxelArray>::OffsetWarps(
 
 template<typename TVoxel>
 bool EditAndCopyEngine_CPU<TVoxel, PlainVoxelArray>::CopyVolumeSlice(
-		VoxelVolume<TVoxel, PlainVoxelArray>* targetVolume, VoxelVolume<TVoxel, PlainVoxelArray>* sourceVolume,
+		VoxelVolume<TVoxel, PlainVoxelArray>* target_volume, VoxelVolume<TVoxel, PlainVoxelArray>* source_volume,
 		Vector6i bounds, const Vector3i& offset) {
 
 	Vector3i min_pt_source = Vector3i(bounds.min_x, bounds.min_y, bounds.min_z);
 	Vector3i max_pt_source = Vector3i(bounds.max_x - 1, bounds.max_y - 1, bounds.max_z - 1);
 
-	if (!EditAndCopyEngine_CPU<TVoxel, PlainVoxelArray>::IsPointInBounds(sourceVolume, min_pt_source) ||
-	    !EditAndCopyEngine_CPU<TVoxel, PlainVoxelArray>::IsPointInBounds(sourceVolume, max_pt_source)) {
+	if (!EditAndCopyEngine_CPU<TVoxel, PlainVoxelArray>::IsPointInBounds(source_volume, min_pt_source) ||
+	    !EditAndCopyEngine_CPU<TVoxel, PlainVoxelArray>::IsPointInBounds(source_volume, max_pt_source)) {
 		DIEWITHEXCEPTION_REPORTLOCATION(
 				"Specified source volume is at least partially out of bounds of the source scene.");
 	}
@@ -130,16 +128,16 @@ bool EditAndCopyEngine_CPU<TVoxel, PlainVoxelArray>::CopyVolumeSlice(
 	Vector3i max_pt_destination = Vector3i(bounds_destination.max_x - 1, bounds_destination.max_y - 1,
 	                                       bounds_destination.max_z - 1);
 
-	if (!EditAndCopyEngine_CPU<TVoxel, PlainVoxelArray>::IsPointInBounds(targetVolume, min_pt_destination) ||
-	    !EditAndCopyEngine_CPU<TVoxel, PlainVoxelArray>::IsPointInBounds(targetVolume, max_pt_destination)) {
+	if (!EditAndCopyEngine_CPU<TVoxel, PlainVoxelArray>::IsPointInBounds(target_volume, min_pt_destination) ||
+	    !EditAndCopyEngine_CPU<TVoxel, PlainVoxelArray>::IsPointInBounds(target_volume, max_pt_destination)) {
 		DIEWITHEXCEPTION_REPORTLOCATION(
 				"Targeted volume is at least partially out of bounds of the destination scene.");
 	}
-	TVoxel* sourceVoxels = sourceVolume->voxels.GetVoxelBlocks();
-	TVoxel* destinationVoxels = targetVolume->voxels.GetVoxelBlocks();
+	TVoxel* sourceVoxels = source_volume->GetVoxelBlocks();
+	TVoxel* destinationVoxels = target_volume->GetVoxelBlocks();
 	if (offset == Vector3i(0)) {
-		const PlainVoxelArray::IndexData* sourceIndexData = sourceVolume->index.GetIndexData();
-		const PlainVoxelArray::IndexData* destinationIndexData = targetVolume->index.GetIndexData();
+		const PlainVoxelArray::IndexData* sourceIndexData = source_volume->index.GetIndexData();
+		const PlainVoxelArray::IndexData* destinationIndexData = target_volume->index.GetIndexData();
 		for (int source_z = bounds.min_z; source_z < bounds.max_z; source_z++) {
 			for (int source_y = bounds.min_y; source_y < bounds.max_y; source_y++) {
 				for (int source_x = bounds.min_x; source_x < bounds.max_x; source_x++) {
@@ -151,8 +149,8 @@ bool EditAndCopyEngine_CPU<TVoxel, PlainVoxelArray>::CopyVolumeSlice(
 			}
 		}
 	} else {
-		const PlainVoxelArray::IndexData* sourceIndexData = sourceVolume->index.GetIndexData();
-		const PlainVoxelArray::IndexData* destinationIndexData = targetVolume->index.GetIndexData();
+		const PlainVoxelArray::IndexData* sourceIndexData = source_volume->index.GetIndexData();
+		const PlainVoxelArray::IndexData* destinationIndexData = target_volume->index.GetIndexData();
 		for (int source_z = bounds.min_z; source_z < bounds.max_z; source_z++) {
 			for (int source_y = bounds.min_y; source_y < bounds.max_y; source_y++) {
 				for (int source_x = bounds.min_x; source_x < bounds.max_x; source_x++) {

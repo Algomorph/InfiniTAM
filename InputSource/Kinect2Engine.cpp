@@ -85,7 +85,7 @@ Kinect2Engine::~Kinect2Engine()
 	SafeRelease(data->kinectSensor);
 }
 
-void Kinect2Engine::getImages(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage)
+void Kinect2Engine::GetImages(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage)
 {
 	//Vector4u *rgb = rgbImage->GetData(MEMORYDEVICE_CPU);
 	//if (colorAvailable)
@@ -126,9 +126,9 @@ void Kinect2Engine::getImages(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthI
 	return /*true*/;
 }
 
-bool Kinect2Engine::hasMoreImages(void) const { return true; }
-Vector2i Kinect2Engine::getDepthImageSize(void) const { return imageSize_d; }
-Vector2i Kinect2Engine::getRGBImageSize(void) const { return imageSize_rgb; }
+bool Kinect2Engine::HasMoreImages(void) { return true; }
+Vector2i Kinect2Engine::GetDepthImageSize(void)  { return imageSize_d; }
+Vector2i Kinect2Engine::GetRGBImageSize(void)  { return imageSize_rgb; }
 
 #else
 
@@ -140,13 +140,13 @@ Kinect2Engine::Kinect2Engine(const char *calibFilename) : BaseImageSourceEngine(
 }
 Kinect2Engine::~Kinect2Engine()
 {}
-void Kinect2Engine::getImages(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage)
+void Kinect2Engine::GetImages(ITMUChar4Image& rgbImage, ITMShortImage& rawDepthImage)
 { return; }
-bool Kinect2Engine::hasMoreImages(void) const
+bool Kinect2Engine::HasMoreImages(void)
 { return false; }
-Vector2i Kinect2Engine::getDepthImageSize(void) const
+Vector2i Kinect2Engine::GetDepthImageSize(void)
 { return Vector2i(0,0); }
-Vector2i Kinect2Engine::getRGBImageSize(void) const
+Vector2i Kinect2Engine::GetRGBImageSize(void)
 { return Vector2i(0,0); }
 
 #endif

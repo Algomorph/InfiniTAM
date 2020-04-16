@@ -34,8 +34,8 @@ void CLIEngine::Initialise(ImageSourceEngine *image_source, IMUSourceEngine *imu
 	ORcudaSafeCall(cudaDeviceSynchronize());
 #endif
 
-	input_RGB_image = new ITMUChar4Image(image_source->getRGBImageSize(), true, allocate_GPU);
-	input_raw_depth_image = new ITMShortImage(image_source->getDepthImageSize(), true, allocate_GPU);
+	input_RGB_image = new ITMUChar4Image(image_source->GetRGBImageSize(), true, allocate_GPU);
+	input_raw_depth_image = new ITMShortImage(image_source->GetDepthImageSize(), true, allocate_GPU);
 	input_IMU_measurement = new IMUMeasurement();
 
 	this->current_frame_index = 0;
@@ -65,8 +65,8 @@ void CLIEngine::Initialise(ImageSourceEngine *image_source, IMUSourceEngine *imu
 
 bool CLIEngine::ProcessFrame()
 {
-	if (!image_source->hasMoreImages()) return false;
-	image_source->getImages(input_RGB_image, input_raw_depth_image);
+	if (!image_source->HasMoreImages()) return false;
+	image_source->GetImages(*input_RGB_image, *input_raw_depth_image);
 
 	if (imu_source != NULL) {
 		if (!imu_source->hasMoreMeasurements()) return false;
@@ -118,8 +118,8 @@ void CLIEngine::Shutdown()
 }
 
 void CLIEngine::SkipFrames(int number_of_frames_to_skip) {
-	for (int i_frame = 0; i_frame < number_of_frames_to_skip && image_source->hasMoreImages(); i_frame++) {
-		image_source->getImages(input_RGB_image, input_raw_depth_image);
+	for (int i_frame = 0; i_frame < number_of_frames_to_skip && image_source->HasMoreImages(); i_frame++) {
+		image_source->GetImages(*input_RGB_image, *input_raw_depth_image);
 	}
 	this->current_frame_index += number_of_frames_to_skip;
 }

@@ -90,7 +90,7 @@ RealSenseEngine::~RealSenseEngine()
 }
 
 
-void RealSenseEngine::getImages(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage)
+void RealSenseEngine::GetImages(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage)
 {
 	dataAvailable = false;
 
@@ -103,13 +103,13 @@ void RealSenseEngine::getImages(ITMUChar4Image *rgbImage, ITMShortImage *rawDept
 	short *rawDepth = rawDepthImage->GetData(MEMORYDEVICE_CPU);
 	Vector4u *rgb = rgbImage->GetData(MEMORYDEVICE_CPU);
 
-	Vector2i noDims = rawDepthImage->noDims;
+	Vector2i dimensions = rawDepthImage->dimensions;
 	rawDepthImage->Clear();
 	rgbImage->Clear();
 
-	for (int y = 0; y < noDims.y; y++) for (int x = 0; x < noDims.x; x++) rawDepth[x + y * noDims.x] = *depth_frame++;
+	for (int y = 0; y < dimensions.y; y++) for (int x = 0; x < dimensions.x; x++) rawDepth[x + y * dimensions.x] = *depth_frame++;
 
-	for (int i = 0; i < rgbImage->noDims.x * 3 * rgbImage->noDims.y ; i+=3) {
+	for (int i = 0; i < rgbImage->dimensions.x * 3 * rgbImage->dimensions.y ; i+=3) {
 		Vector4u newPix;
 		newPix.x = color_frame[i]; newPix.y = color_frame[i+1]; newPix.z = color_frame[i+2];
 		newPix.w = 255;
@@ -119,9 +119,9 @@ void RealSenseEngine::getImages(ITMUChar4Image *rgbImage, ITMShortImage *rawDept
 	dataAvailable = true;
 }
 
-bool RealSenseEngine::hasMoreImages(void) const { return (data!=NULL); }
-Vector2i RealSenseEngine::getDepthImageSize(void) const { return (data!=NULL)?imageSize_d:Vector2i(0,0); }
-Vector2i RealSenseEngine::getRGBImageSize(void) const { return (data!=NULL)?imageSize_rgb:Vector2i(0,0); }
+bool RealSenseEngine::HasMoreImages(void) { return (data!=NULL); }
+Vector2i RealSenseEngine::GetDepthImageSize(void) { return (data!=NULL)?imageSize_d:Vector2i(0,0); }
+Vector2i RealSenseEngine::GetRGBImageSize(void) { return (data!=NULL)?imageSize_rgb:Vector2i(0,0); }
 
 #else
 
@@ -135,13 +135,13 @@ RealSenseEngine::RealSenseEngine(const char *calibFilename, bool alignColourWith
 }
 RealSenseEngine::~RealSenseEngine()
 {}
-void RealSenseEngine::getImages(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage)
+void RealSenseEngine::GetImages(ITMUChar4Image& rgbImage, ITMShortImage& rawDepthImage)
 { return; }
-bool RealSenseEngine::hasMoreImages(void) const
+bool RealSenseEngine::HasMoreImages(void)
 { return false; }
-Vector2i RealSenseEngine::getDepthImageSize(void) const
+Vector2i RealSenseEngine::GetDepthImageSize(void)
 { return Vector2i(0,0); }
-Vector2i RealSenseEngine::getRGBImageSize(void) const
+Vector2i RealSenseEngine::GetRGBImageSize(void)
 { return Vector2i(0,0); }
 
 #endif

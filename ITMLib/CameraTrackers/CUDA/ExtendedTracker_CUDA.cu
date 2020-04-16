@@ -105,8 +105,8 @@ ExtendedTracker_CUDA::~ExtendedTracker_CUDA(void)
 
 int ExtendedTracker_CUDA::ComputeGandH_Depth(float &f, float *nabla, float *hessian, Matrix4f approxInvPose)
 {
-	Vector2i sceneImageSize = sceneHierarchyLevel_Depth->pointsMap->noDims;
-	Vector2i viewImageSize = viewHierarchyLevel_Depth->depth->noDims;
+	Vector2i sceneImageSize = sceneHierarchyLevel_Depth->pointsMap->dimensions;
+	Vector2i viewImageSize = viewHierarchyLevel_Depth->depth->dimensions;
 
 	if (currentIterationType == TRACKER_ITERATION_NONE) return 0;
 
@@ -130,7 +130,7 @@ int ExtendedTracker_CUDA::ComputeGandH_Depth(float &f, float *nabla, float *hess
 	args.sceneImageSize = sceneImageSize;
 	args.scenePose = scenePose;
 	args.viewIntrinsics = viewHierarchyLevel_Depth->intrinsics;
-	args.viewImageSize = viewHierarchyLevel_Depth->depth->noDims;
+	args.viewImageSize = viewHierarchyLevel_Depth->depth->dimensions;
 	args.spaceThresh = spaceThresh[currentLevelId];
 	args.viewFrustum_min = viewFrustum_min;
 	args.viewFrustum_max = viewFrustum_max;
@@ -198,8 +198,8 @@ int ExtendedTracker_CUDA::ComputeGandH_Depth(float &f, float *nabla, float *hess
 
 int ExtendedTracker_CUDA::ComputeGandH_RGB(float &f, float *nabla, float *hessian, Matrix4f approxInvPose)
 {
-	Vector2i imageSize_depth = viewHierarchyLevel_Depth->depth->noDims;
-	Vector2i imageSize_rgb = viewHierarchyLevel_Intensity->intensity_prev->noDims;
+	Vector2i imageSize_depth = viewHierarchyLevel_Depth->depth->dimensions;
+	Vector2i imageSize_rgb = viewHierarchyLevel_Intensity->intensity_prev->dimensions;
 
 	if (currentIterationType == TRACKER_ITERATION_NONE) return 0;
 
@@ -275,8 +275,8 @@ void ExtendedTracker_CUDA::ProjectCurrentIntensityFrame(ITMFloat4Image *points_o
                                                         const Vector4f &intrinsics_rgb,
                                                         const Matrix4f &scenePose)
 {
-	const Vector2i imageSize_rgb = intensity_in->noDims;
-	const Vector2i imageSize_depth = depth_in->noDims; // Also the size of the projected image
+	const Vector2i imageSize_rgb = intensity_in->dimensions;
+	const Vector2i imageSize_depth = depth_in->dimensions; // Also the size of the projected image
 
 	points_out->ChangeDims(imageSize_depth); // Actual reallocation should happen only once per Run.
 	intensity_out->ChangeDims(imageSize_depth); // Actual reallocation should happen only once per Run.

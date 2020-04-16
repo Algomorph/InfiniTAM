@@ -27,7 +27,7 @@ public:
 	template<typename TFunctor>
 	inline static void
 	TraverseWithPosition(ORUtils::Image<TImageElement>* image, TFunctor& functor) {
-		const Vector2i resolution = image->noDims;
+		const Vector2i resolution = image->dimensions;
 		const TImageElement* image_data = image->GetData(MEMORYDEVICE_CUDA);
 
 		TFunctor* functor_device = nullptr;

@@ -16,7 +16,7 @@ namespace ITMLib
 	{
 
 	public:
-		void ResetScene(VoxelVolume<TVoxel, VoxelBlockHash> *scene);
+		void ResetScene(VoxelVolume<TVoxel, VoxelBlockHash> *volume);
 
 		void AllocateSceneFromDepth(VoxelVolume<TVoxel, VoxelBlockHash> *scene, const View *view, const CameraTrackingState *trackingState,
 		                            const RenderState *renderState, bool onlyUpdateVisibleList = false, bool resetVisibleList = false) override;

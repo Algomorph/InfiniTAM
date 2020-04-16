@@ -27,7 +27,7 @@ public:
 	inline static void
 	TraverseWithPosition(const ORUtils::Image<TImage1Element>* image1, const ORUtils::Image<TImage2Element>* image2, TFunctor& functor){
 
-		const Vector2i resolution = image1->noDims;
+		const Vector2i resolution = image1->dimensions;
 		const int element_count = resolution.x * resolution.y;
 
 		const TImage1Element* image1_data = image1->GetData(MEMORYDEVICE_CPU);

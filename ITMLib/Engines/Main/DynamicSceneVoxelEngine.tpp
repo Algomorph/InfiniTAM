@@ -179,7 +179,7 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::LoadFromFile() {
 		{
 			auto& settings = configuration::get();
 			FernRelocLib::Relocaliser<float>* relocaliser_temp =
-					new FernRelocLib::Relocaliser<float>(view->depth->noDims,
+					new FernRelocLib::Relocaliser<float>(view->depth->dimensions,
 					                                     Vector2f(
 							                                     settings.general_voxel_volume_parameters.near_clipping_distance,
 							                                     settings.general_voxel_volume_parameters.far_clipping_distance),
@@ -353,7 +353,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(ITMUChar4Image* rgb
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 Vector2i DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImageSize(void) const {
-	return canonical_render_state->raycastImage->noDims;
+	return canonical_render_state->raycastImage->dimensions;
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
@@ -369,13 +369,13 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(ITMUChar4Image* ou
 
 	switch (getImageType) {
 		case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_ORIGINAL_RGB:
-			out->ChangeDims(view->rgb->noDims);
+			out->ChangeDims(view->rgb->dimensions);
 			if (settings.device_type == MEMORYDEVICE_CUDA)
-				out->SetFrom(view->rgb, MemoryCopyDirection::CUDA_TO_CPU);
-			else out->SetFrom(view->rgb, MemoryCopyDirection::CPU_TO_CPU);
+				out->SetFrom(*view->rgb, MemoryCopyDirection::CUDA_TO_CPU);
+			else out->SetFrom(*view->rgb, MemoryCopyDirection::CPU_TO_CPU);
 			break;
 		case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_ORIGINAL_DEPTH:
-			out->ChangeDims(view->depth->noDims);
+			out->ChangeDims(view->depth->dimensions);
 			if (settings.device_type == MEMORYDEVICE_CUDA) view->depth->UpdateHostFromDevice();
 			VisualizationEngine<TVoxel, TIndex>::DepthToUchar4(out, view->depth);
 			break;
@@ -413,10 +413,10 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(ITMUChar4Image* ou
 			if (relocalisationCount != 0) srcImage = kfRaycast;
 			else srcImage = canonical_render_state->raycastImage;
 
-			out->ChangeDims(srcImage->noDims);
+			out->ChangeDims(srcImage->dimensions);
 			if (settings.device_type == MEMORYDEVICE_CUDA)
-				out->SetFrom(srcImage, MemoryCopyDirection::CUDA_TO_CPU);
-			else out->SetFrom(srcImage, MemoryCopyDirection::CPU_TO_CPU);
+				out->SetFrom(*srcImage, MemoryCopyDirection::CUDA_TO_CPU);
+			else out->SetFrom(*srcImage, MemoryCopyDirection::CPU_TO_CPU);
 
 			break;
 		}
@@ -433,7 +433,7 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(ITMUChar4Image* ou
 				type = IVisualizationEngine::RENDER_COLOUR_FROM_CONFIDENCE;
 
 			if (freeview_render_state == nullptr) {
-				freeview_render_state = new RenderState(out->noDims,
+				freeview_render_state = new RenderState(out->dimensions,
 				                                        live_volumes[0]->parameters->near_clipping_distance,
 				                                        live_volumes[0]->parameters->far_clipping_distance,
 				                                        settings.device_type);
@@ -444,15 +444,15 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(ITMUChar4Image* ou
 			visualization_engine->RenderImage(live_volumes[0], pose, intrinsics, freeview_render_state, freeview_render_state->raycastImage, type);
 
 			if (settings.device_type == MEMORYDEVICE_CUDA)
-				out->SetFrom(freeview_render_state->raycastImage, MemoryCopyDirection::CUDA_TO_CPU);
-			else out->SetFrom(freeview_render_state->raycastImage, MemoryCopyDirection::CPU_TO_CPU);
+				out->SetFrom(*freeview_render_state->raycastImage, MemoryCopyDirection::CUDA_TO_CPU);
+			else out->SetFrom(*freeview_render_state->raycastImage, MemoryCopyDirection::CPU_TO_CPU);
 			break;
 		}
 		case MainEngine::InfiniTAM_IMAGE_FREECAMERA_CANONICAL: {
 			IVisualizationEngine::RenderImageType type = IVisualizationEngine::RENDER_SHADED_GREYSCALE;
 
 			if (freeview_render_state == nullptr) {
-				freeview_render_state = new RenderState(out->noDims,
+				freeview_render_state = new RenderState(out->dimensions,
 				                                        canonical_volume->parameters->near_clipping_distance,
 				                                        canonical_volume->parameters->far_clipping_distance,
 				                                        settings.device_type);
@@ -464,8 +464,8 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(ITMUChar4Image* ou
 			                                  freeview_render_state->raycastImage, type);
 
 			if (settings.device_type == MEMORYDEVICE_CUDA)
-				out->SetFrom(freeview_render_state->raycastImage, MemoryCopyDirection::CUDA_TO_CPU);
-			else out->SetFrom(freeview_render_state->raycastImage, MemoryCopyDirection::CPU_TO_CPU);
+				out->SetFrom(*freeview_render_state->raycastImage, MemoryCopyDirection::CUDA_TO_CPU);
+			else out->SetFrom(*freeview_render_state->raycastImage, MemoryCopyDirection::CPU_TO_CPU);
 			break;
 		}
 
@@ -569,7 +569,7 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::LoadFromFile(const std::str
 		{
 			auto& settings = configuration::get();
 			FernRelocLib::Relocaliser<float>* relocaliser_temp =
-					new FernRelocLib::Relocaliser<float>(view->depth->noDims,
+					new FernRelocLib::Relocaliser<float>(view->depth->dimensions,
 					                                     Vector2f(
 							                                     settings.general_voxel_volume_parameters.near_clipping_distance,
 							                                     settings.general_voxel_volume_parameters.far_clipping_distance),

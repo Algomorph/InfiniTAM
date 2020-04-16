@@ -35,49 +35,49 @@ ITMLib::RGBDCalib CompositeImageSourceEngine::getCalib(void) const
   else throw std::runtime_error("Cannot get calibration parameters from an empty composite image source engine");
 }
 
-const ImageSourceEngine *CompositeImageSourceEngine::getCurrentSubengine(void) const
+ImageSourceEngine* CompositeImageSourceEngine::getCurrentSubengine(void)
 {
-  return m_curSubengineIndex < m_subengines.size() ? m_subengines[m_curSubengineIndex] : NULL;
+  return m_curSubengineIndex < m_subengines.size() ? m_subengines[m_curSubengineIndex] : nullptr;
 }
 
-Vector2i CompositeImageSourceEngine::getDepthImageSize(void) const
+Vector2i CompositeImageSourceEngine::GetDepthImageSize(void)
 {
   // There is an assumption being made that the depth image sizes for all the sub-engines are the same,
   // although this is not currently being enforced.
-  if(!m_subengines.empty()) return m_subengines[0]->getDepthImageSize();
+  if(!m_subengines.empty()) return m_subengines[0]->GetDepthImageSize();
   else throw std::runtime_error("Cannot get the depth image size from an empty composite image source engine");
 }
 
-void CompositeImageSourceEngine::getImages(ITMUChar4Image *rgb, ITMShortImage *rawDepth)
+void CompositeImageSourceEngine::GetImages(ITMUChar4Image& rgb, ITMShortImage& rawDepth)
 {
-  if(advanceToNextImages()) m_subengines[m_curSubengineIndex]->getImages(rgb, rawDepth);
+  if(AdvanceToNextImages()) m_subengines[m_curSubengineIndex]->GetImages(rgb, rawDepth);
 }
 
-Vector2i CompositeImageSourceEngine::getRGBImageSize(void) const
+Vector2i CompositeImageSourceEngine::GetRGBImageSize(void)
 {
   // There is an assumption being made that the RGB image sizes for all the sub-engines are the same,
   // although this is not currently being enforced.
-  if(!m_subengines.empty()) return m_subengines[0]->getRGBImageSize();
+  if(!m_subengines.empty()) return m_subengines[0]->GetRGBImageSize();
   else throw std::runtime_error("Cannot get the RGB image size from an empty composite image source engine");
 }
 
-bool CompositeImageSourceEngine::hasImagesNow(void) const
+bool CompositeImageSourceEngine::HasImagesNow(void)
 {
-  const ImageSourceEngine *curSubengine = advanceToNextImages();
-  return curSubengine != NULL && curSubengine->hasImagesNow();
+  ImageSourceEngine *curSubengine = AdvanceToNextImages();
+  return curSubengine != nullptr && curSubengine->HasImagesNow();
 }
 
-bool CompositeImageSourceEngine::hasMoreImages(void) const
+bool CompositeImageSourceEngine::HasMoreImages(void)
 {
-  return advanceToNextImages() != NULL;
+  return AdvanceToNextImages() != nullptr;
 }
 
 //#################### PRIVATE MEMBER FUNCTIONS ####################
 
-const ImageSourceEngine *CompositeImageSourceEngine::advanceToNextImages(void) const
+ImageSourceEngine *CompositeImageSourceEngine::AdvanceToNextImages(void)
 {
-  const ImageSourceEngine *curSubengine = getCurrentSubengine();
-  while(curSubengine && !curSubengine->hasMoreImages())
+  ImageSourceEngine *curSubengine = getCurrentSubengine();
+  while(curSubengine && !curSubengine->HasMoreImages())
   {
     ++m_curSubengineIndex;
     curSubengine = getCurrentSubengine();

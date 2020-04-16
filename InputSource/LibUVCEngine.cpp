@@ -346,7 +346,7 @@ LibUVCEngine::~LibUVCEngine(void)
 	if (data->ctx != NULL) uvc_exit(data->ctx);
 }
 
-void LibUVCEngine::getImages(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage)
+void LibUVCEngine::GetImages(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage)
 {
 	int counter = 0;
 	while ((data->hasColour&&(data->got_color == 0)) || (data->got_depth == 0)) {
@@ -361,7 +361,7 @@ void LibUVCEngine::getImages(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthIm
 	}
 
 	Vector4u *rgb = rgbImage->GetData(MEMORYDEVICE_CPU);
-	for (int i = 0; i < rgbImage->noDims.x * rgbImage->noDims.y; i++) {
+	for (int i = 0; i < rgbImage->dimensions.x * rgbImage->dimensions.y; i++) {
 		Vector4u newPix; char *oldPix = &(((char*)(data->framebuffer_rgb->data))[i*3]);
 		newPix.x = oldPix[0]; newPix.y = oldPix[1]; newPix.z = oldPix[2]; newPix.w = 255;
 		rgb[i] = newPix;
@@ -373,9 +373,9 @@ void LibUVCEngine::getImages(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthIm
 	data->got_color = data->got_depth = 0;
 }
 
-bool LibUVCEngine::hasMoreImages(void) const { return true; }
-Vector2i LibUVCEngine::getDepthImageSize(void) const { return imageSize_d; }
-Vector2i LibUVCEngine::getRGBImageSize(void) const { return imageSize_rgb; }
+bool LibUVCEngine::HasMoreImages(void)  { return true; }
+Vector2i LibUVCEngine::GetDepthImageSize(void)  { return imageSize_d; }
+Vector2i LibUVCEngine::GetRGBImageSize(void)  { return imageSize_rgb; }
 
 #else
 
@@ -386,13 +386,13 @@ LibUVCEngine::LibUVCEngine(const char *calibFilename, Vector2i requested_imageSi
 }
 LibUVCEngine::~LibUVCEngine()
 {}
-void LibUVCEngine::getImages(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage)
+void LibUVCEngine::GetImages(ITMUChar4Image& rgbImage, ITMShortImage& rawDepthImage)
 { return; }
-bool LibUVCEngine::hasMoreImages(void) const
+bool LibUVCEngine::HasMoreImages(void)
 { return false; }
-Vector2i LibUVCEngine::getDepthImageSize(void) const
+Vector2i LibUVCEngine::GetDepthImageSize(void)
 { return Vector2i(0,0); }
-Vector2i LibUVCEngine::getRGBImageSize(void) const
+Vector2i LibUVCEngine::GetRGBImageSize(void)
 { return Vector2i(0,0); }
 
 #endif

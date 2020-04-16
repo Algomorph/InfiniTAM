@@ -158,12 +158,12 @@ AllocateHashEntriesUsingAllocationStateList(VoxelVolume<TVoxel, VoxelBlockHash>*
 	Vector3s* block_coordinates = volume->index.GetAllocationBlockCoordinates();
 
 	const int hash_entry_count = volume->index.hash_entry_count;
-	std::atomic<int> last_free_voxel_block_id(volume->voxels.lastFreeBlockId);
+	std::atomic<int> last_free_voxel_block_id(volume->index.GetLastFreeBlockListId());
 	std::atomic<int> last_free_excess_list_id(volume->index.GetLastFreeExcessListId());
-	std::atomic<int> utilized_block_count(volume->index.GetUtilizedHashBlockCount());
+	std::atomic<int> utilized_block_count(volume->index.GetUtilizedBlockCount());
 
-	int* block_allocation_list = volume->voxels.GetAllocationList();
-	int* excess_allocation_list = volume->index.GetExcessAllocationList();
+	int* block_allocation_list = volume->index.GetBlockAllocationList();
+	int* excess_entry_list = volume->index.GetExcessEntryList();
 	int* utilized_block_hash_codes = volume->index.GetUtilizedBlockHashCodes();
 
 	HashEntry* hash_table = volume->index.GetEntries();
@@ -175,7 +175,7 @@ AllocateHashEntriesUsingAllocationStateList(VoxelVolume<TVoxel, VoxelBlockHash>*
 
 #ifdef WITH_OPENMP
 #pragma omp parallel for default(none) shared(updateUtilizedHashCodes, hash_entry_states, block_coordinates, \
-    last_free_voxel_block_id, last_free_excess_list_id, block_allocation_list, excess_allocation_list, hash_table)
+    last_free_voxel_block_id, last_free_excess_list_id, block_allocation_list, excess_entry_list, hash_table)
 #endif
 	for (int hash_code = 0; hash_code < hash_entry_count; hash_code++) {
 		int voxel_block_index, excess_list_index;
@@ -209,7 +209,7 @@ AllocateHashEntriesUsingAllocationStateList(VoxelVolume<TVoxel, VoxelBlockHash>*
 					hash_entry.ptr = block_allocation_list[voxel_block_index];
 					hash_entry.offset = 0;
 
-					const int excess_list_offset = excess_allocation_list[excess_list_index];
+					const int excess_list_offset = excess_entry_list[excess_list_index];
 
 					hash_table[hash_code].offset = excess_list_offset + 1; //connect to child
 
@@ -225,9 +225,9 @@ AllocateHashEntriesUsingAllocationStateList(VoxelVolume<TVoxel, VoxelBlockHash>*
 				break;
 		}
 	}
-	volume->voxels.lastFreeBlockId = last_free_voxel_block_id;
+	volume->index.SetLastFreeBlockListId(last_free_voxel_block_id);
 	volume->index.SetLastFreeExcessListId(last_free_excess_list_id);
-	volume->index.SetUtilizedHashBlockCount(utilized_block_count.load());
+	volume->index.SetUtilizedBlockCount(utilized_block_count.load());
 }
 
 template<typename TVoxel>
@@ -239,10 +239,10 @@ AllocateHashEntriesUsingAllocationStateList_SetVisibility(VoxelVolume<TVoxel, Vo
 	HashBlockVisibility* hash_block_visibility_types_device = volume->index.GetBlockVisibilityTypes();
 
 	int entry_count = volume->index.hash_entry_count;
-	int last_free_voxel_block_id = volume->voxels.lastFreeBlockId;
+	int last_free_voxel_block_id = volume->index.GetLastFreeBlockListId();
 	int last_free_excess_list_id = volume->index.GetLastFreeExcessListId();
-	int* voxel_allocation_list = volume->voxels.GetAllocationList();
-	int* excess_allocation_list = volume->index.GetExcessAllocationList();
+	int* voxel_allocation_list = volume->index.GetBlockAllocationList();
+	int* excess_allocation_list = volume->index.GetExcessEntryList();
 	HashEntry* hash_table = volume->index.GetEntries();
 
 	for (int hash = 0; hash < entry_count; hash++) {
@@ -285,7 +285,7 @@ AllocateHashEntriesUsingAllocationStateList_SetVisibility(VoxelVolume<TVoxel, Vo
 				break;
 		}
 	}
-	volume->voxels.lastFreeBlockId = last_free_voxel_block_id;
+	volume->index.SetLastFreeBlockListId(last_free_voxel_block_id);
 	volume->index.SetLastFreeExcessListId(last_free_excess_list_id);
 }
 
@@ -297,7 +297,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateBlockList
 	if (new_block_count == 0) return;
 
 	ORUtils::MemoryBlock<Vector3s> new_positions_local(new_block_count, MEMORYDEVICE_CPU);
-	new_positions_local.SetFrom(&new_block_positions, MemoryCopyDirection::CPU_TO_CPU);
+	new_positions_local.SetFrom(new_block_positions, MemoryCopyDirection::CPU_TO_CPU);
 	ORUtils::MemoryBlock<Vector3s> colliding_positions_local(new_block_count, MEMORYDEVICE_CPU);
 	std::atomic<int> colliding_block_count;
 
@@ -337,7 +337,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::DeallocateBlockLi
 
 	// *** locally-manipulated memory blocks of hash codes & counters *** /
 	ORUtils::MemoryBlock<Vector3s> block_coordinates_to_remove_local(count_of_blocks_to_remove, MEMORYDEVICE_CPU);
-	block_coordinates_to_remove_local.SetFrom(&block_coordinates, MemoryCopyDirection::CPU_TO_CPU);
+	block_coordinates_to_remove_local.SetFrom(block_coordinates, MemoryCopyDirection::CPU_TO_CPU);
 	ORUtils::MemoryBlock<Vector3s> colliding_blocks(count_of_blocks_to_remove, MEMORYDEVICE_CPU);
 
 	Vector3s* blocks_to_remove_device = block_coordinates_to_remove_local.GetData(MEMORYDEVICE_CPU);
@@ -348,12 +348,12 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::DeallocateBlockLi
 	// *** volume-specific hash table, temporary entry allocation state table, voxel storage *** //
 	HashEntry* hash_table = volume->index.GetEntries();
 	HashEntryAllocationState* hash_entry_states = volume->index.GetHashEntryAllocationStates();
-	TVoxel* voxels = volume->voxels.GetVoxelBlocks();
+	TVoxel* voxels = volume->GetVoxelBlocks();
 
 	// *** allocation index lists & counters ***
-	int* voxel_allocation_list = volume->voxels.GetAllocationList();
-	int* excess_allocation_list = volume->index.GetExcessAllocationList();
-	std::atomic<int> last_free_voxel_block_id(volume->voxels.lastFreeBlockId);
+	int* block_allocation_list = volume->index.GetBlockAllocationList();
+	int* excess_entry_list = volume->index.GetExcessEntryList();
+	std::atomic<int> last_free_voxel_block_id(volume->index.GetLastFreeBlockListId());
 	std::atomic<int> last_free_excess_list_id(volume->index.GetLastFreeExcessListId());
 
 	// *** to fill removed entry spots in hash table & voxel storage space ***
@@ -373,20 +373,20 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::DeallocateBlockLi
 #ifdef WITH_OPENMP
 #pragma omp parallel for default(none) shared(hash_entry_states, blocks_to_remove_device, \
     hash_table, colliding_blocks_device, colliding_block_count, count_of_blocks_to_remove, last_free_voxel_block_id, \
-    last_free_excess_list_id, voxel_allocation_list, excess_allocation_list, empty_voxel_block_device, voxels)
+    last_free_excess_list_id, block_allocation_list, excess_entry_list, empty_voxel_block_device, voxels)
 #endif
 		for (int hash_code_index = 0; hash_code_index < count_of_blocks_to_remove; hash_code_index++) {
 			Vector3s block_to_remove = blocks_to_remove_device[hash_code_index];
-			DeallocateBlock( block_to_remove, hash_entry_states, hash_table, voxels, colliding_blocks_device,
-					colliding_block_count, last_free_voxel_block_id, last_free_excess_list_id, voxel_allocation_list,
-					excess_allocation_list, empty_voxel_block_device);
+			DeallocateBlock(block_to_remove, hash_entry_states, hash_table, voxels, colliding_blocks_device,
+			                colliding_block_count, last_free_voxel_block_id, last_free_excess_list_id,
+			                block_allocation_list, excess_entry_list, empty_voxel_block_device);
 		}
 
 		count_of_blocks_to_remove = colliding_block_count.load();
 
 		std::swap(blocks_to_remove_device, colliding_blocks_device);
 	}
-	volume->voxels.lastFreeBlockId = last_free_voxel_block_id.load();
+	volume->index.SetLastFreeBlockListId(last_free_voxel_block_id.load());
 	volume->index.SetLastFreeExcessListId(last_free_excess_list_id.load());
 	this->RebuildUtilizedBlockList(volume);
 }
@@ -405,7 +405,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::BuildUtilizedBloc
 
 	// ** view data **
 	Vector4f depthCameraProjectionParameters = view->calib.intrinsics_d.projectionParamsSimple.all;
-	Vector2i depthImgSize = view->depth->noDims;
+	Vector2i depthImgSize = view->depth->dimensions;
 	float voxelSize = volume->parameters->voxel_size;
 
 	int visibleEntryCount = 0;
@@ -440,7 +440,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::BuildUtilizedBloc
 			visibleEntryCount++;
 		}
 	}
-	volume->index.SetUtilizedHashBlockCount(visibleEntryCount);
+	volume->index.SetUtilizedBlockCount(visibleEntryCount);
 }
 
 template<typename TVoxel>
@@ -448,7 +448,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::SetVisibilityToVi
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 	HashBlockVisibility* utilized_block_visibility_types = volume->index.GetBlockVisibilityTypes();
 	const int* utilized_block_hash_codes = volume->index.GetUtilizedBlockHashCodes();
-	const int utilized_block_count = volume->index.GetUtilizedHashBlockCount();
+	const int utilized_block_count = volume->index.GetUtilizedBlockCount();
 #if WITH_OPENMP
 #pragma omp parallel for default(none) shared(utilized_block_hash_codes, utilized_block_visibility_types)
 #endif
@@ -487,21 +487,21 @@ IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::FindHashEntry(const Vo
 
 template<typename TVoxel>
 bool IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateHashBlockAt(
-		VoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3s at, int& hashCode) {
+		VoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3s at, int& hash_code) {
 
-	HashEntry* hashTable = volume->index.GetEntries();
-	int lastFreeVoxelBlockId = volume->voxels.lastFreeBlockId;
-	int lastFreeExcessListId = volume->index.GetLastFreeExcessListId();
-	int* voxelAllocationList = volume->voxels.GetAllocationList();
-	int* excessAllocationList = volume->index.GetExcessAllocationList();
+	HashEntry* hash_table = volume->index.GetEntries();
+	int last_free_voxel_block_id = volume->index.GetLastFreeBlockListId();
+	int last_free_excess_list_id = volume->index.GetLastFreeExcessListId();
+	int* block_allocation_list = volume->index.GetBlockAllocationList();
+	int* excess_entry_list = volume->index.GetExcessEntryList();
 	HashEntry* entry = nullptr;
-	hashCode = -1;
-	if (!FindOrAllocateHashEntry(at, hashTable, entry, lastFreeVoxelBlockId, lastFreeExcessListId,
-	                             voxelAllocationList, excessAllocationList, hashCode)) {
+	hash_code = -1;
+	if (!FindOrAllocateHashEntry(at, hash_table, entry, last_free_voxel_block_id, last_free_excess_list_id,
+	                             block_allocation_list, excess_entry_list, hash_code)) {
 		return false;
 	}
-	volume->voxels.lastFreeBlockId = lastFreeVoxelBlockId;
-	volume->index.SetLastFreeExcessListId(lastFreeExcessListId);
+	volume->index.SetLastFreeBlockListId(last_free_voxel_block_id);
+	volume->index.SetLastFreeExcessListId(last_free_excess_list_id);
 	return true;
 }
 

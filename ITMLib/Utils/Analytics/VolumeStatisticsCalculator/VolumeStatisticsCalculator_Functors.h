@@ -332,7 +332,7 @@ struct ComputeVoxelCountFunctor<TVoxel, VoxelBlockHash, TMemoryDeviceType> {
 
 	inline
 	static unsigned int compute_utilized(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
-		return volume->index.GetUtilizedHashBlockCount() * VOXEL_BLOCK_SIZE3;
+		return volume->index.GetUtilizedBlockCount() * VOXEL_BLOCK_SIZE3;
 	}
 };
 //endregion
@@ -702,11 +702,11 @@ struct HashOnlyStatisticsFunctor<TVoxel, VoxelBlockHash, TMemoryDeviceType> {
 
 	static std::vector<int> GetUtilizedHashCodes(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 		const int* codes = volume->index.GetUtilizedBlockHashCodes();
-		return raw_block_to_std_vector(codes, TMemoryDeviceType, volume->index.GetUtilizedHashBlockCount());
+		return raw_block_to_std_vector(codes, TMemoryDeviceType, volume->index.GetUtilizedBlockCount());
 	}
 
 	static std::vector<Vector3s> GetUtilizedBlockPositions(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
-		unsigned int utilized_count = volume->index.GetUtilizedHashBlockCount();
+		unsigned int utilized_count = volume->index.GetUtilizedBlockCount();
 		if(utilized_count == 0u){
 			return std::vector<Vector3s>();
 		}
@@ -722,7 +722,7 @@ struct HashOnlyStatisticsFunctor<TVoxel, VoxelBlockHash, TMemoryDeviceType> {
 	}
 
 	static unsigned int ComputeUtilizedHashBlockCount(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
-		return volume->index.GetUtilizedHashBlockCount();
+		return volume->index.GetUtilizedBlockCount();
 	}
 };
 //endregion
@@ -741,7 +741,7 @@ struct ComputeVoxelBoundsFunctor<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU> {
 		bounds.min_y = std::numeric_limits<int>::max();
 		bounds.min_z = std::numeric_limits<int>::max();
 
-		const TVoxel* voxel_blocks = volume->voxels.GetVoxelBlocks();
+		const TVoxel* voxel_blocks = volume->GetVoxelBlocks();
 		const HashEntry* hash_table = volume->index.GetEntries();
 		int hash_entry_count = volume->index.hash_entry_count;
 
@@ -820,7 +820,7 @@ struct ComputeVoxelBoundsFunctor<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA> {
 		bounds.min_y = std::numeric_limits<int>::max();
 		bounds.min_z = std::numeric_limits<int>::max();
 
-		const TVoxel* voxelBlocks = volume->voxels.GetVoxelBlocks();
+		const TVoxel* voxels = volume->GetVoxelBlocks();
 		const HashEntry* hashTable = volume->index.GetEntries();
 		int noTotalEntries = volume->index.hash_entry_count;
 

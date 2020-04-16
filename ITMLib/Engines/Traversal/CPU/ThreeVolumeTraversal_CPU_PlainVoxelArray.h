@@ -42,9 +42,9 @@ private:
 		assert(volume2->index.GetVolumeSize() == volume3->index.GetVolumeSize() &&
 		       volume2->index.GetVolumeSize() == volume1->index.GetVolumeSize());
 // *** traversal vars
-		TVoxel1* voxels1 = volume1->voxels.GetVoxelBlocks();
-		TVoxel2* voxels2 = volume2->voxels.GetVoxelBlocks();
-		TVoxel3* voxels3 = volume3->voxels.GetVoxelBlocks();
+		TVoxel1* voxels1 = volume1->GetVoxelBlocks();
+		TVoxel2* voxels2 = volume2->GetVoxelBlocks();
+		TVoxel3* voxels3 = volume3->GetVoxelBlocks();
 
 		//asserted to be the same
 		int voxel_count = volume1->index.GetVolumeSize().x * volume1->index.GetVolumeSize().y *
@@ -140,9 +140,9 @@ public:
 		       volume1->index.GetVolumeSize() == volume3->index.GetVolumeSize());
 
 		// *** traversal vars
-		TVoxel1* voxels1 = volume1->voxels.GetVoxelBlocks();
-		TVoxel2* voxels2 = volume2->voxels.GetVoxelBlocks();
-		TVoxel3* voxels3 = volume3->voxels.GetVoxelBlocks();
+		TVoxel1* voxels1 = volume1->GetVoxelBlocks();
+		TVoxel2* voxels2 = volume2->GetVoxelBlocks();
+		TVoxel3* voxels3 = volume3->GetVoxelBlocks();
 
 		//asserted to be the same
 		int voxel_count = volume2->index.GetVolumeSize().x * volume2->index.GetVolumeSize().y *

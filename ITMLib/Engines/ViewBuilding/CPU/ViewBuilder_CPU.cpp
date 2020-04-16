@@ -16,30 +16,30 @@ void ViewBuilder_CPU::UpdateView(View** view_ptr, ITMUChar4Image* rgbImage, ITMS
 {
 	if (*view_ptr == NULL)
 	{
-		*view_ptr = new View(calib, rgbImage->noDims, rawDepthImage->noDims, false);
+		*view_ptr = new View(calib, rgbImage->dimensions, rawDepthImage->dimensions, false);
 		//TODO: This is very bad coding practice, assumes that there's ever only one ViewBuilder updating a single view... \
 		// Most likely, these "shortImage" and "floatImage" should be a part of View itself, while this class should have no state but parameters
 		if (this->shortImage != NULL) delete this->shortImage;
-		this->shortImage = new ITMShortImage(rawDepthImage->noDims, true, false);
+		this->shortImage = new ITMShortImage(rawDepthImage->dimensions, true, false);
 		if (this->floatImage != NULL) delete this->floatImage;
-		this->floatImage = new ITMFloatImage(rawDepthImage->noDims, true, false);
+		this->floatImage = new ITMFloatImage(rawDepthImage->dimensions, true, false);
 
 		if (modelSensorNoise)
 		{
-			(*view_ptr)->depthNormal = new ITMFloat4Image(rawDepthImage->noDims, true, false);
-			(*view_ptr)->depthUncertainty = new ITMFloatImage(rawDepthImage->noDims, true, false);
+			(*view_ptr)->depthNormal = new ITMFloat4Image(rawDepthImage->dimensions, true, false);
+			(*view_ptr)->depthUncertainty = new ITMFloatImage(rawDepthImage->dimensions, true, false);
 		}
 	}
 	View *view = *view_ptr;
 
 	if (storePreviousImage)
 	{
-		if (!view->rgb_prev) view->rgb_prev = new ITMUChar4Image(rgbImage->noDims, true, false);
-		else view->rgb_prev->SetFrom(view->rgb, MemoryCopyDirection::CPU_TO_CPU);
+		if (!view->rgb_prev) view->rgb_prev = new ITMUChar4Image(rgbImage->dimensions, true, false);
+		else view->rgb_prev->SetFrom(*view->rgb, MemoryCopyDirection::CPU_TO_CPU);
 	}
 
-	view->rgb->SetFrom(rgbImage, MemoryCopyDirection::CPU_TO_CPU);
-	this->shortImage->SetFrom(rawDepthImage, MemoryCopyDirection::CPU_TO_CPU);
+	view->rgb->SetFrom(*rgbImage, MemoryCopyDirection::CPU_TO_CPU);
+	this->shortImage->SetFrom(*rawDepthImage, MemoryCopyDirection::CPU_TO_CPU);
 
 	switch (view->calib.disparityCalib.GetType())
 	{
@@ -55,7 +55,7 @@ void ViewBuilder_CPU::UpdateView(View** view_ptr, ITMUChar4Image* rgbImage, ITMS
 
 	if (useThresholdFilter){
 		this->ThresholdFiltering(this->floatImage, view->depth);
-		view->depth->SetFrom(this->floatImage,MemoryCopyDirection::CPU_TO_CPU);
+		view->depth->SetFrom(*this->floatImage,MemoryCopyDirection::CPU_TO_CPU);
 	}
 
 	if (useBilateralFilter)
@@ -66,7 +66,7 @@ void ViewBuilder_CPU::UpdateView(View** view_ptr, ITMUChar4Image* rgbImage, ITMS
 		this->DepthFiltering(this->floatImage, view->depth);
 		this->DepthFiltering(view->depth, this->floatImage);
 		this->DepthFiltering(this->floatImage, view->depth);
-		view->depth->SetFrom(this->floatImage, MemoryCopyDirection::CPU_TO_CPU);
+		view->depth->SetFrom(*this->floatImage, MemoryCopyDirection::CPU_TO_CPU);
 	}
 
 	if (modelSensorNoise)
@@ -81,16 +81,16 @@ void ViewBuilder_CPU::UpdateView(View** view_ptr, ITMUChar4Image* rgbImage, ITMS
 {
 	if (*view_ptr == NULL)
 	{
-		*view_ptr = new ViewIMU(calib, rgbImage->noDims, depthImage->noDims, false);
+		*view_ptr = new ViewIMU(calib, rgbImage->dimensions, depthImage->dimensions, false);
 		if (this->shortImage != NULL) delete this->shortImage;
-		this->shortImage = new ITMShortImage(depthImage->noDims, true, false);
+		this->shortImage = new ITMShortImage(depthImage->dimensions, true, false);
 		if (this->floatImage != NULL) delete this->floatImage;
-		this->floatImage = new ITMFloatImage(depthImage->noDims, true, false);
+		this->floatImage = new ITMFloatImage(depthImage->dimensions, true, false);
 
 		if (modelSensorNoise)
 		{
-			(*view_ptr)->depthNormal = new ITMFloat4Image(depthImage->noDims, true, false);
-			(*view_ptr)->depthUncertainty = new ITMFloatImage(depthImage->noDims, true, false);
+			(*view_ptr)->depthNormal = new ITMFloat4Image(depthImage->dimensions, true, false);
+			(*view_ptr)->depthUncertainty = new ITMFloatImage(depthImage->dimensions, true, false);
 		}
 	}
 
@@ -103,7 +103,7 @@ void ViewBuilder_CPU::UpdateView(View** view_ptr, ITMUChar4Image* rgbImage, ITMS
 void ViewBuilder_CPU::ConvertDisparityToDepth(ITMFloatImage *depth_out, const ITMShortImage *depth_in, const Intrinsics *depthIntrinsics,
                                               Vector2f disparityCalibParams)
 {
-	Vector2i imgSize = depth_in->noDims;
+	Vector2i imgSize = depth_in->dimensions;
 
 	const short *d_in = depth_in->GetData(MEMORYDEVICE_CPU);
 	float *d_out = depth_out->GetData(MEMORYDEVICE_CPU);
@@ -116,7 +116,7 @@ void ViewBuilder_CPU::ConvertDisparityToDepth(ITMFloatImage *depth_out, const IT
 
 void ViewBuilder_CPU::ConvertDepthAffineToFloat(ITMFloatImage *depth_out, const ITMShortImage *depth_in, const Vector2f depthCalibParams)
 {
-	Vector2i imgSize = depth_in->noDims;
+	Vector2i imgSize = depth_in->dimensions;
 
 	const short *d_in = depth_in->GetData(MEMORYDEVICE_CPU);
 	float *d_out = depth_out->GetData(MEMORYDEVICE_CPU);
@@ -130,7 +130,7 @@ void ViewBuilder_CPU::ConvertDepthAffineToFloat(ITMFloatImage *depth_out, const 
 
 void ViewBuilder_CPU::DepthFiltering(ITMFloatImage *image_out, const ITMFloatImage *image_in)
 {
-	Vector2i imgSize = image_in->noDims;
+	Vector2i imgSize = image_in->dimensions;
 
 	image_out->Clear();
 
@@ -143,7 +143,7 @@ void ViewBuilder_CPU::DepthFiltering(ITMFloatImage *image_out, const ITMFloatIma
 
 void ViewBuilder_CPU::ComputeNormalAndWeights(ITMFloat4Image *normal_out, ITMFloatImage *sigmaZ_out, const ITMFloatImage *depth_in, Vector4f intrinsic)
 {
-	Vector2i imgDims = depth_in->noDims;
+	Vector2i imgDims = depth_in->dimensions;
 
 	const float *depthData_in = depth_in->GetData(MEMORYDEVICE_CPU);
 
@@ -155,7 +155,7 @@ void ViewBuilder_CPU::ComputeNormalAndWeights(ITMFloat4Image *normal_out, ITMFlo
 }
 
 void ViewBuilder_CPU::ThresholdFiltering(ITMFloatImage* image_out, const ITMFloatImage* image_in) {
-	Vector2i imgSize = image_in->noDims;
+	Vector2i imgSize = image_in->dimensions;
 
 	image_out->Clear();
 

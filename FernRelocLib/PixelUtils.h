@@ -15,7 +15,7 @@ namespace FernRelocLib
 	inline void filterSeparable_x(const ORUtils::Image<float> *input, ORUtils::Image<float> *output, int masksize, const float *coeff)
 	{
 		int s2 = masksize / 2;
-		ORUtils::Vector2<int> imgSize = input->noDims;
+		ORUtils::Vector2<int> imgSize = input->dimensions;
 		output->ChangeDims(imgSize);
 
 		const float *imageData_in = input->GetData(MEMORYDEVICE_CPU);
@@ -50,7 +50,7 @@ namespace FernRelocLib
 	inline void filterSeparable_x(const ORUtils::Image< ORUtils::Vector4<unsigned char> > *input, ORUtils::Image<ORUtils::Vector4<unsigned char> > *output, int masksize, const float *coeff)
 	{
 		int s2 = masksize / 2;
-		ORUtils::Vector2<int> imgSize = input->noDims;
+		ORUtils::Vector2<int> imgSize = input->dimensions;
 		output->ChangeDims(imgSize);
 
 		const ORUtils::Vector4<unsigned char> *imageData_in = input->GetData(MEMORYDEVICE_CPU);
@@ -87,7 +87,7 @@ namespace FernRelocLib
 	inline void filterSeparable_y(const ORUtils::Image<float> *input, ORUtils::Image<float> *output, int masksize, const float *coeff)
 	{
 		int s2 = masksize / 2;
-		ORUtils::Vector2<int> imgSize = input->noDims;
+		ORUtils::Vector2<int> imgSize = input->dimensions;
 		output->ChangeDims(imgSize);
 
 		const float *imageData_in = input->GetData(MEMORYDEVICE_CPU);
@@ -121,7 +121,7 @@ namespace FernRelocLib
 	inline void filterSeparable_y(const ORUtils::Image< ORUtils::Vector4<unsigned char> > *input, ORUtils::Image<ORUtils::Vector4<unsigned char> > *output, int masksize, const float *coeff)
 	{
 		int s2 = masksize / 2;
-		ORUtils::Vector2<int> imgSize = input->noDims;
+		ORUtils::Vector2<int> imgSize = input->dimensions;
 		output->ChangeDims(imgSize);
 
 		const ORUtils::Vector4<unsigned char> *imageData_in = input->GetData(MEMORYDEVICE_CPU);
@@ -158,7 +158,7 @@ namespace FernRelocLib
 		int filtersize = (int)(2.0f*3.5f*sigma);
 		if ((filtersize & 1) == 0) filtersize += 1;
 		float *coeff = new float[filtersize];
-		ORUtils::Image<T> tmpimg(input->noDims, MEMORYDEVICE_CPU);
+		ORUtils::Image<T> tmpimg(input->dimensions, MEMORYDEVICE_CPU);
 
 		createGaussianFilter(filtersize, sigma, coeff);
 		filterSeparable_x(input, &tmpimg, filtersize, coeff);
@@ -167,7 +167,7 @@ namespace FernRelocLib
 
 	inline void filterSubsample(const ORUtils::Image<float> *input, ORUtils::Image<float> *output)
 	{
-		ORUtils::Vector2<int> imgSize_in = input->noDims;
+		ORUtils::Vector2<int> imgSize_in = input->dimensions;
 		ORUtils::Vector2<int> imgSize_out(imgSize_in.x / 2, imgSize_in.y / 2);
 		output->ChangeDims(imgSize_out, false);
 
@@ -199,7 +199,7 @@ namespace FernRelocLib
 	}
 
 	inline void filterSubsample(const ORUtils::Image< ORUtils::Vector4<unsigned char> > *input, ORUtils::Image<ORUtils::Vector4<unsigned char> > *output) {
-		ORUtils::Vector2<int> imgSize_in = input->noDims;
+		ORUtils::Vector2<int> imgSize_in = input->dimensions;
 		ORUtils::Vector2<int> imgSize_out(imgSize_in.x / 2, imgSize_in.y / 2);
 		output->ChangeDims(imgSize_out, false);
 

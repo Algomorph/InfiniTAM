@@ -52,25 +52,25 @@ template<typename TVoxel>
 void
 EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::ResetVolume(
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
-	int numBlocks = volume->index.GetAllocatedBlockCount();
+	int numBlocks = volume->index.GetMaximumBlockCount();
 	int blockSize = volume->index.GetVoxelBlockSize();
 
-	TVoxel* voxelBlocks_ptr = volume->voxels.GetVoxelBlocks();
+	TVoxel* voxelBlocks_ptr = volume->GetVoxelBlocks();
 	memsetKernel<TVoxel>(voxelBlocks_ptr, TVoxel(), numBlocks * blockSize);
-	int* vbaAllocationList_ptr = volume->voxels.GetAllocationList();
+	int* vbaAllocationList_ptr = volume->index.GetBlockAllocationList();
 	fillArrayKernel<int>(vbaAllocationList_ptr, numBlocks);
-	volume->voxels.lastFreeBlockId = numBlocks - 1;
+	volume->index.SetLastFreeBlockListId(numBlocks - 1);
 
 	HashEntry tmpEntry;
 	memset(&tmpEntry, 0, sizeof(HashEntry));
 	tmpEntry.ptr = -2;
 	HashEntry* hashEntry_ptr = volume->index.GetEntries();
 	memsetKernel<HashEntry>(hashEntry_ptr, tmpEntry, volume->index.hash_entry_count);
-	int* excessList_ptr = volume->index.GetExcessAllocationList();
-	fillArrayKernel<int>(excessList_ptr, volume->index.excessListSize);
+	int* excessList_ptr = volume->index.GetExcessEntryList();
+	fillArrayKernel<int>(excessList_ptr, volume->index.excess_list_size);
 
-	volume->index.SetLastFreeExcessListId(volume->index.excessListSize - 1);
-	volume->index.SetUtilizedHashBlockCount(0);
+	volume->index.SetLastFreeExcessListId(volume->index.excess_list_size - 1);
+	volume->index.SetUtilizedBlockCount(0);
 }
 
 template<typename TVoxel>
@@ -78,7 +78,7 @@ bool
 EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::SetVoxel(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
                                                          Vector3i at, TVoxel voxel) {
 	HashEntry* hash_table = volume->index.GetEntries();
-	TVoxel* voxels = volume->voxels.GetVoxelBlocks();
+	TVoxel* voxels = volume->GetVoxelBlocks();
 	Vector3s hash_block_position;
 	int voxel_index_in_block = pointToVoxelBlockPos(at, hash_block_position);
 	int hash_code;
@@ -96,7 +96,7 @@ template<typename TVoxel>
 TVoxel
 EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::ReadVoxel(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
                                                           Vector3i at) {
-	TVoxel* localVBA = volume->voxels.GetVoxelBlocks();
+	TVoxel* localVBA = volume->GetVoxelBlocks();
 	const HashEntry* hashTable = volume->index.GetEntries();
 
 	readVoxel_device<TVoxel> <<< 1, 1 >>>
@@ -120,7 +120,7 @@ TVoxel
 EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::ReadVoxel(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
                                                           Vector3i at,
                                                           VoxelBlockHash::IndexCache& cache) {
-	TVoxel* localVBA = volume->voxels.GetVoxelBlocks();
+	TVoxel* localVBA = volume->GetVoxelBlocks();
 	const HashEntry* hashTable = volume->index.GetEntries();
 
 	readVoxel_device<TVoxel> <<< 1, 1 >>>
@@ -144,7 +144,7 @@ TVoxel
 EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::ReadVoxel(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
                                                           Vector3i at, int& where,
                                                           VoxelBlockHash::IndexCache& cache) {
-	TVoxel* localVBA = volume->voxels.GetVoxelBlocks();
+	TVoxel* localVBA = volume->GetVoxelBlocks();
 	const HashEntry* hashTable = volume->index.GetEntries();
 
 	readVoxel_device<TVoxel> <<< 1, 1 >>>
@@ -176,19 +176,19 @@ bool EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::CopyVolumeSlice(
 		VoxelVolume<TVoxel, VoxelBlockHash>* target_volume, VoxelVolume<TVoxel, VoxelBlockHash>* source_volume,
 		Vector6i bounds, const Vector3i& offset) {
 
-	TVoxel* source_voxels = source_volume->voxels.GetVoxelBlocks();
+	TVoxel* source_voxels = source_volume->GetVoxelBlocks();
 	const HashEntry* source_hash_table = source_volume->index.GetEntries();
 
-	TVoxel* target_voxels = target_volume->voxels.GetVoxelBlocks();
+	TVoxel* target_voxels = target_volume->GetVoxelBlocks();
 	HashEntry* target_hash_table = target_volume->index.GetEntries();
 
 	int* target_utilized_hash_entries = target_volume->index.GetUtilizedBlockHashCodes();
 
 	if (offset == Vector3i(0)) {
-		int starting_utilized_block_count = target_volume->index.GetUtilizedHashBlockCount();
+		int starting_utilized_block_count = target_volume->index.GetUtilizedBlockCount();
 		IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance().AllocateUsingOtherVolume_Bounded(
 				target_volume, source_volume, bounds);
-		int final_utilized_block_count = target_volume->index.GetUtilizedHashBlockCount();
+		int final_utilized_block_count = target_volume->index.GetUtilizedBlockCount();
 		int total_blocks_to_copy = final_utilized_block_count - starting_utilized_block_count;
 
 		dim3 cudaBlockSizeCP(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
@@ -199,10 +199,10 @@ bool EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::CopyVolumeSlice(
 		ORcudaKernelCheck;
 	} else {
 
-		int starting_utilized_block_count = target_volume->index.GetUtilizedHashBlockCount();
+		int starting_utilized_block_count = target_volume->index.GetUtilizedBlockCount();
 		IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance().AllocateUsingOtherVolume_OffsetAndBounded(
 				target_volume, source_volume, bounds, offset);
-		int final_utilized_block_count = target_volume->index.GetUtilizedHashBlockCount();
+		int final_utilized_block_count = target_volume->index.GetUtilizedBlockCount();
 		int total_blocks_to_copy = final_utilized_block_count - starting_utilized_block_count;
 
 		dim3 cudaBlockSizeCP(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
@@ -222,9 +222,9 @@ bool EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::CopyVolume(
 		VoxelVolume<TVoxel, VoxelBlockHash>* source_volume,
 		const Vector3i& offset) {
 
-	TVoxel* source_voxels = source_volume->voxels.GetVoxelBlocks();
+	TVoxel* source_voxels = source_volume->GetVoxelBlocks();
 	const HashEntry* source_hash_table = source_volume->index.GetEntries();
-	TVoxel* target_voxels = target_volume->voxels.GetVoxelBlocks();
+	TVoxel* target_voxels = target_volume->GetVoxelBlocks();
 	HashEntry* target_hash_table = target_volume->index.GetEntries();
 
 // dummy bounds, to avoid writing yet another function for copying
@@ -233,10 +233,10 @@ bool EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::CopyVolume(
 	int* target_utilized_hash_entries = target_volume->index.GetUtilizedBlockHashCodes();
 
 	if (offset == Vector3i(0)) {
-		int starting_utilized_block_count = target_volume->index.GetUtilizedHashBlockCount();
+		int starting_utilized_block_count = target_volume->index.GetUtilizedBlockCount();
 		IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance().AllocateUsingOtherVolume(target_volume,
 		                                                                                              source_volume);
-		int final_utilized_block_count = target_volume->index.GetUtilizedHashBlockCount();
+		int final_utilized_block_count = target_volume->index.GetUtilizedBlockCount();
 		int total_blocks_to_copy = final_utilized_block_count - starting_utilized_block_count;
 
 

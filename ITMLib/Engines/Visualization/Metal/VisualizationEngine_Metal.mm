@@ -159,7 +159,7 @@ static void RenderImage_common_metal(const ITMScene<TVoxel,ITMVoxelBlockHash> *s
 
     Vector3f lightSource = -Vector3f(invM.getColumn(2));
     Vector4u *outRendering = outputImage->GetData(MEMORYDEVICE_CPU);
-    const TVoxel *voxelData = scene->voxels.GetVoxelBlocks();
+    const TVoxel *voxelData = scene->GetVoxelBlocks();
     const typename ITMVoxelBlockHash::IndexData *voxelIndex = scene->index.GetIndexData();
 
     if ((type == IVisualizationEngine::RENDER_COLOUR_FROM_VOLUME)&&

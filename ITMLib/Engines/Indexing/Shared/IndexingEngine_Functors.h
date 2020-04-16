@@ -188,8 +188,8 @@ template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
 struct ReallocateDeletedHashBlocksFunctor {
 	ReallocateDeletedHashBlocksFunctor(VoxelVolume<TVoxel, VoxelBlockHash>* volume) :
 			hash_block_visibility_types(volume->index.GetBlockVisibilityTypes()),
-			block_allocation_list(volume->voxels.GetAllocationList()) {
-		INITIALIZE_ATOMIC(int, last_free_voxel_block_id, volume->voxels.lastFreeBlockId);
+			block_allocation_list(volume->index.GetBlockAllocationList()) {
+		INITIALIZE_ATOMIC(int, last_free_voxel_block_id, volume->index.GetLastFreeBlockListId());
 	}
 
 	~ReallocateDeletedHashBlocksFunctor() {

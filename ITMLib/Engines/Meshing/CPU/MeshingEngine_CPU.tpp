@@ -6,16 +6,16 @@
 using namespace ITMLib;
 
 template<class TVoxel>
-void MeshingEngine_CPU<TVoxel, VoxelBlockHash>::MeshScene(Mesh *mesh, const VoxelVolume<TVoxel, VoxelBlockHash> *scene)
+void MeshingEngine_CPU<TVoxel, VoxelBlockHash>::MeshScene(Mesh* mesh, const VoxelVolume<TVoxel, VoxelBlockHash>* volume)
 {
-	Mesh::Triangle *triangles = mesh->triangles->GetData(MEMORYDEVICE_CPU);
-	const TVoxel *localVBA = scene->voxels.GetVoxelBlocks();
-	const HashEntry *hashTable = scene->index.GetEntries();
+	Mesh::Triangle *triangles = mesh->triangles.GetData(MEMORYDEVICE_CPU);
+	const TVoxel *localVBA = volume->GetVoxelBlocks();
+	const HashEntry *hashTable = volume->index.GetEntries();
 
-	int noTriangles = 0, noMaxTriangles = mesh->noMaxTriangles, noTotalEntries = scene->index.hash_entry_count;
-	float factor = scene->parameters->voxel_size;
+	int noTriangles = 0, noMaxTriangles = mesh->max_triangle_count, noTotalEntries = volume->index.hash_entry_count;
+	float factor = volume->parameters->voxel_size;
 
-	mesh->triangles->Clear();
+	mesh->triangles.Clear();
 
 	for (int entryId = 0; entryId < noTotalEntries; entryId++)
 	{
@@ -50,5 +50,5 @@ void MeshingEngine_CPU<TVoxel, VoxelBlockHash>::MeshScene(Mesh *mesh, const Voxe
 		}
 	}
 
-	mesh->noTotalTriangles = noTriangles;
+	mesh->triangle_count = noTriangles;
 }

@@ -299,7 +299,7 @@ BasicSurfelEngine<TSurfel>::ProcessFrame(ITMUChar4Image* rgbImage, ITMShortImage
 
 template<typename TSurfel>
 Vector2i BasicSurfelEngine<TSurfel>::GetImageSize(void) const {
-	return surfelRenderState_live->GetIndexImage()->noDims;
+	return surfelRenderState_live->GetIndexImage()->dimensions;
 }
 
 template<typename TSurfel>
@@ -331,13 +331,13 @@ void BasicSurfelEngine<TSurfel>::GetImage(ITMUChar4Image* out, GetImageType getI
 
 	switch (getImageType) {
 		case BasicSurfelEngine::InfiniTAM_IMAGE_ORIGINAL_RGB:
-			out->ChangeDims(view->rgb->noDims);
+			out->ChangeDims(view->rgb->dimensions);
 			if (settings.device_type == MEMORYDEVICE_CUDA)
-				out->SetFrom(view->rgb, MemoryCopyDirection::CUDA_TO_CPU);
-			else out->SetFrom(view->rgb, MemoryCopyDirection::CPU_TO_CPU);
+				out->SetFrom(*view->rgb, MemoryCopyDirection::CUDA_TO_CPU);
+			else out->SetFrom(*view->rgb, MemoryCopyDirection::CPU_TO_CPU);
 			break;
 		case BasicSurfelEngine::InfiniTAM_IMAGE_ORIGINAL_DEPTH:
-			out->ChangeDims(view->depth->noDims);
+			out->ChangeDims(view->depth->dimensions);
 			if (settings.device_type == MEMORYDEVICE_CUDA) view->depth->UpdateHostFromDevice();
 			IVisualizationEngine::DepthToUchar4(out, view->depth);
 			break;
@@ -358,7 +358,7 @@ void BasicSurfelEngine<TSurfel>::GetImage(ITMUChar4Image* out, GetImageType getI
 		case BasicSurfelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_NORMAL:
 		case BasicSurfelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_CONFIDENCE: {
 			if (!surfelRenderState_freeview)
-				surfelRenderState_freeview = new SurfelRenderState(view->depth->noDims,
+				surfelRenderState_freeview = new SurfelRenderState(view->depth->dimensions,
 				                                                   surfelScene->GetParams().supersampling_factor);
 			const bool useRadii = true;
 			surfelVisualizationEngine->FindSurface(surfelScene, pose, intrinsics, useRadii, USR_DONOTRENDER,

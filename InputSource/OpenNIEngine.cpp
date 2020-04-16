@@ -58,7 +58,7 @@ static openni::VideoMode findBestMode(const openni::SensorInfo *sensorInfo, int 
 
 		bool acceptAsBest = false;
 		if ((curMode.getResolutionX() == bestMode.getResolutionX())&&
-		     (curMode.getFps() > bestMode.getFps())) {
+			 (curMode.getFps() > bestMode.getFps())) {
 			acceptAsBest = true;
 		} else if ((requiredResolutionX <= 0)&&(requiredResolutionY <= 0)) {
 			if (curMode.getResolutionX() > bestMode.getResolutionX()) {
@@ -92,7 +92,7 @@ template <typename T>
 void mirrorHorizontally(ORUtils::Image<T> *img)
 {
 	T *data = img->GetData(MEMORYDEVICE_CPU);
-	const int width = img->noDims.x, height = img->noDims.y;
+	const int width = img->dimensions.x, height = img->dimensions.y;
 	const int halfWidth = width / 2;
 
 	int rowOffset = 0;
@@ -274,7 +274,7 @@ OpenNIEngine::~OpenNIEngine()
 	openni::OpenNI::shutdown();
 }
 
-void OpenNIEngine::getImages(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage)
+void OpenNIEngine::GetImages(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage)
 {
 	int changedIndex, waitStreamCount;
 	if (depthAvailable && colorAvailable) waitStreamCount = 2;
@@ -286,14 +286,14 @@ void OpenNIEngine::getImages(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthIm
 	if(depthAvailable) data->depthStream.readFrame(&data->depthFrame);
 	if(colorAvailable) data->colorStream.readFrame(&data->colorFrame);
 
-	if (depthAvailable && !data->depthFrame.isValid()) return;
-	if (colorAvailable && !data->colorFrame.isValid()) return;
+	if (depthAvailable && !data->depthFrame.is_valid()) return;
+	if (colorAvailable && !data->colorFrame.is_valid()) return;
 
 	Vector4u *rgb = rgbImage->GetData(MEMORYDEVICE_CPU);
 	if (colorAvailable)
 	{
 		const openni::RGB888Pixel* colorImagePix = (const openni::RGB888Pixel*)data->colorFrame.getData();
-		for (int i = 0; i < rgbImage->noDims.x * rgbImage->noDims.y; i++)
+		for (int i = 0; i < rgbImage->dimensions.x * rgbImage->dimensions.y; i++)
 		{
 			Vector4u newPix; openni::RGB888Pixel oldPix = colorImagePix[i];
 			newPix.x = oldPix.r; newPix.y = oldPix.g; newPix.z = oldPix.b; newPix.w = 255;
@@ -319,29 +319,35 @@ void OpenNIEngine::getImages(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthIm
 	return /*true*/;
 }
 
-bool OpenNIEngine::hasMoreImages(void) const { return data && !data->eofListener.reachedEOF(); }
-Vector2i OpenNIEngine::getDepthImageSize(void) const { return data ? imageSize_d : Vector2i(0,0); }
-Vector2i OpenNIEngine::getRGBImageSize(void) const { return data ? imageSize_rgb : Vector2i(0,0); }
+bool OpenNIEngine::HasMoreImages(void) { return data && !data->eofListener.reachedEOF(); }
+Vector2i OpenNIEngine::GetDepthImageSize(void) { return data ? imageSize_d : Vector2i(0,0); }
+Vector2i OpenNIEngine::GetRGBImageSize(void) { return data ? imageSize_rgb : Vector2i(0,0); }
 
 #else
 
 using namespace InputSource;
 
-OpenNIEngine::OpenNIEngine(const char *calibFilename, const char *deviceURI, const bool useInternalCalibration, Vector2i requested_imageSize_rgb, Vector2i requested_imageSize_d)
-	: BaseImageSourceEngine(calibFilename)
-{
+OpenNIEngine::OpenNIEngine(const char* calibFilename, const char* deviceURI, const bool useInternalCalibration,
+                           Vector2i requested_imageSize_rgb, Vector2i requested_imageSize_d)
+		: BaseImageSourceEngine(calibFilename) {
 	printf("compiled without OpenNI support\n");
 }
-OpenNIEngine::~OpenNIEngine()
-{}
-void OpenNIEngine::getImages(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage)
-{ return; }
-bool OpenNIEngine::hasMoreImages(void) const
-{ return false; }
-Vector2i OpenNIEngine::getDepthImageSize(void) const
-{ return Vector2i(0,0); }
-Vector2i OpenNIEngine::getRGBImageSize(void) const
-{ return Vector2i(0,0); }
 
-#endif
+OpenNIEngine::~OpenNIEngine() {}
+
+void OpenNIEngine::GetImages(ITMUChar4Image& rgbImage, ITMShortImage& rawDepthImage) { return; }
+
+bool OpenNIEngine::HasMoreImages(void) {
+	return false;
+}
+
+Vector2i OpenNIEngine::GetDepthImageSize(void)  {
+	return Vector2i(0,0);
+}
+Vector2i OpenNIEngine::GetRGBImageSize(void)
+{
+	return Vector2i(0,0);
+}
+
+#endif // #ifndef COMPILE_WITHOUT_OpenNI
 

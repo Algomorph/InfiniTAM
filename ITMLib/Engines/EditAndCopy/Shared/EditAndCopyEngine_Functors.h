@@ -26,22 +26,22 @@ struct OffsetWarpsFunctor;
 
 template<typename TVoxel>
 struct OffsetWarpsFunctor<TVoxel, VoxelBlockHash, true> {
-	static void OffsetWarps(VoxelVolume <TVoxel, VoxelBlockHash>* scene, Vector3f offset) {
-		TVoxel* voxels = scene->voxels.GetVoxelBlocks();
-		const HashEntry* hashTable = scene->index.GetEntries();
-		int noTotalEntries = scene->index.hash_entry_count;
+	static void OffsetWarps(VoxelVolume <TVoxel, VoxelBlockHash>* volume, Vector3f offset) {
+		TVoxel* voxels = volume->GetVoxelBlocks();
+		const HashEntry* hash_table = volume->index.GetEntries();
+		int entry_count = volume->index.hash_entry_count;
 #ifdef WITH_OPENMP
 #pragma omp parallel for
 #endif
-		for (int entryId = 0; entryId < noTotalEntries; entryId++) {
-			const HashEntry& currentHashEntry = hashTable[entryId];
-			if (currentHashEntry.ptr < 0) continue;
-			TVoxel* localVoxelBlock = &(voxels[currentHashEntry.ptr * (VOXEL_BLOCK_SIZE3)]);
+		for (int hash_code = 0; hash_code < entry_count; hash_code++) {
+			const HashEntry& hash_entry = hash_table[hash_code];
+			if (hash_entry.ptr < 0) continue;
+			TVoxel* voxel_block = &(voxels[hash_entry.ptr * (VOXEL_BLOCK_SIZE3)]);
 			for (int z = 0; z < VOXEL_BLOCK_SIZE; z++) {
 				for (int y = 0; y < VOXEL_BLOCK_SIZE; y++) {
 					for (int x = 0; x < VOXEL_BLOCK_SIZE; x++) {
-						int locId = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
-						localVoxelBlock[locId].warp += offset;
+						int linear_index_in_block = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
+						voxel_block[linear_index_in_block].warp += offset;
 					}
 				}
 			}
@@ -52,28 +52,28 @@ struct OffsetWarpsFunctor<TVoxel, VoxelBlockHash, true> {
 
 template<typename TVoxel>
 struct OffsetWarpsFunctor<TVoxel, PlainVoxelArray, true> {
-	static void OffsetWarps(VoxelVolume <TVoxel, PlainVoxelArray>* scene, Vector3f offset) {
-		TVoxel* voxels = scene->voxels.GetVoxelBlocks();
+	static void OffsetWarps(VoxelVolume <TVoxel, PlainVoxelArray>* volume, Vector3f offset) {
+		TVoxel* voxels = volume->GetVoxelBlocks();
 #ifdef WITH_OPENMP
 #pragma omp parallel for
 #endif
-		for (int linearArrayIndex = 0;
-		     linearArrayIndex < scene->index.GetVolumeSize().x * scene->index.GetVolumeSize().y *
-		                        scene->index.GetVolumeSize().z; ++linearArrayIndex) {
-			voxels[linearArrayIndex].warp += offset;
+		for (int linear_index_in_array = 0;
+		     linear_index_in_array < volume->index.GetVolumeSize().x * volume->index.GetVolumeSize().y *
+		                             volume->index.GetVolumeSize().z; ++linear_index_in_array) {
+			voxels[linear_index_in_array].warp += offset;
 		}
 	}
 };
 
 template<typename TVoxel>
 struct OffsetWarpsFunctor<TVoxel, VoxelBlockHash, false> {
-	static void OffsetWarps(VoxelVolume <TVoxel, VoxelBlockHash>* scene, Vector3f offset) {
+	static void OffsetWarps(VoxelVolume <TVoxel, VoxelBlockHash>* volume, Vector3f offset) {
 		DIEWITHEXCEPTION_REPORTLOCATION("Warps not defined for scene of using this voxel type.");
 	}
 };
 template<typename TVoxel>
 struct OffsetWarpsFunctor<TVoxel, PlainVoxelArray, false> {
-	static void OffsetWarps(VoxelVolume <TVoxel, PlainVoxelArray>* scene, Vector3f offset) {
+	static void OffsetWarps(VoxelVolume <TVoxel, PlainVoxelArray>* volume, Vector3f offset) {
 		DIEWITHEXCEPTION_REPORTLOCATION("Warps not defined for scene of using this voxel type.");
 	}
 };

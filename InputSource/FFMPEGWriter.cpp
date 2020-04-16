@@ -406,16 +406,16 @@ bool FFMPEGWriter::writeFrame(ITMUChar4Image *rgbImage)
 
 	AVFrame *frame = mData->getFrame();
 
-	if ((frame->format != AV_PIX_FMT_RGBA)||(frame->width != rgbImage->noDims.x)||(frame->height != rgbImage->noDims.y)) {
+	if ((frame->format != AV_PIX_FMT_RGBA) || (frame->width != rgbImage->dimensions.x) || (frame->height != rgbImage->dimensions.y)) {
 		std::cerr << "FFMPEGWriter: wrong image format for rgb stream" << std::endl;
 	}
 
 	Vector4u *rgb = rgbImage->GetData(MEMORYDEVICE_CPU);
 	for (int y = 0; y < frame->height; ++y) for (int x = 0; x < frame->width; ++x) {
-		frame->data[0][x*4+y*frame->linesize[0] + 0] = rgb[x+y*rgbImage->noDims.x].x;
-		frame->data[0][x*4+y*frame->linesize[0] + 1] = rgb[x+y*rgbImage->noDims.x].y;
-		frame->data[0][x*4+y*frame->linesize[0] + 2] = rgb[x+y*rgbImage->noDims.x].z;
-		frame->data[0][x*4+y*frame->linesize[0] + 3] = rgb[x+y*rgbImage->noDims.x].w;
+		frame->data[0][x*4+y*frame->linesize[0] + 0] = rgb[x+y*rgbImage->dimensions.x].x;
+		frame->data[0][x*4+y*frame->linesize[0] + 1] = rgb[x+y*rgbImage->dimensions.x].y;
+		frame->data[0][x*4+y*frame->linesize[0] + 2] = rgb[x+y*rgbImage->dimensions.x].z;
+		frame->data[0][x*4+y*frame->linesize[0] + 3] = rgb[x+y*rgbImage->dimensions.x].w;
 	}
 
 	frame->pts = counter++;
@@ -429,7 +429,7 @@ bool FFMPEGWriter::writeFrame(ITMShortImage *depthImage)
 
 	AVFrame *frame = mData->getFrame();
 
-	if ((frame->format != AV_PIX_FMT_GRAY16LE)||(frame->width != depthImage->noDims.x)||(frame->height != depthImage->noDims.y)) {
+	if ((frame->format != AV_PIX_FMT_GRAY16LE) || (frame->width != depthImage->dimensions.x) || (frame->height != depthImage->dimensions.y)) {
 		std::cerr << "FFMPEGWriter: wrong image format for depth stream" << std::endl;
 	}
 

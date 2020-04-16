@@ -88,8 +88,8 @@ int main(int argc, char** argv) {
 
 		CreateDefaultImageSource(imageSource, imuSource, configuration.paths);
 		MainEngine* mainEngine = BuildMainEngine(imageSource->getCalib(),
-		                                         imageSource->getRGBImageSize(),
-		                                         imageSource->getDepthImageSize(),
+		                                         imageSource->GetRGBImageSize(),
+		                                         imageSource->GetDepthImageSize(),
 		                                         false);
 
 		CLIEngine::Instance()->Initialise(imageSource, imuSource, mainEngine, configuration::get().device_type);

@@ -154,7 +154,7 @@ void ITMSceneReconstructionEngine_Metal<TVoxel, ITMVoxelBlockHash>::AllocateScen
     float mu = scene->parameters->mu;
 
     float *depth = view->depth->GetData(MEMORYDEVICE_CPU);
-    int *voxelAllocationList = scene->voxels.GetAllocationList();
+    int *voxelAllocationList = scene->index.GetBlockAllocationList();
     int *excessAllocationList = scene->index.GetExcessAllocationList();
     ITMHashEntry *hashTable = scene->index.GetEntries();
     ITMHashSwapState *swapStates = scene->useSwapping ? scene->globalCache->GetSwapStates(false) : 0;

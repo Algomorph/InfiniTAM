@@ -30,13 +30,13 @@ inline void MultiMeshingEngine_CPU<TVoxel, VoxelBlockHash>::MeshScene(Mesh * mes
 		hashTables.posesInv[localMapId].m32 /= sceneParams.voxel_size;
 
 		hashTables.index[localMapId] = sceneManager.getLocalMap(localMapId)->scene->index.GetIndexData();
-		localVBAs.voxels[localMapId] = sceneManager.getLocalMap(localMapId)->scene->voxels.GetVoxelBlocks();
+		localVBAs.voxels[localMapId] = sceneManager.getLocalMap(localMapId)->scene->GetVoxelBlocks();
 	}
 
-	Mesh::Triangle *triangles = mesh->triangles->GetData(MEMORYDEVICE_CPU);
-	mesh->triangles->Clear();
+	Mesh::Triangle *triangles = mesh->triangles.GetData(MEMORYDEVICE_CPU);
+	mesh->triangles.Clear();
 
-	int noTriangles = 0, noMaxTriangles = mesh->noMaxTriangles;
+	int triangle_count = 0, max_triangle_count = mesh->max_triangle_count;
 	int noTotalEntriesPerLocalMap = sceneManager.getLocalMap(0)->scene->index.hash_entry_count;
 	float factor = sceneParams.voxel_size;
 
@@ -63,15 +63,15 @@ inline void MultiMeshingEngine_CPU<TVoxel, VoxelBlockHash>::MeshScene(Mesh * mes
 
 				for (int i = 0; triangleTable[cubeIndex][i] != -1; i += 3)
 				{
-					triangles[noTriangles].p0 = vertList[triangleTable[cubeIndex][i]] * factor;
-					triangles[noTriangles].p1 = vertList[triangleTable[cubeIndex][i + 1]] * factor;
-					triangles[noTriangles].p2 = vertList[triangleTable[cubeIndex][i + 2]] * factor;
+					triangles[triangle_count].p0 = vertList[triangleTable[cubeIndex][i]] * factor;
+					triangles[triangle_count].p1 = vertList[triangleTable[cubeIndex][i + 1]] * factor;
+					triangles[triangle_count].p2 = vertList[triangleTable[cubeIndex][i + 2]] * factor;
 
-					if (noTriangles < noMaxTriangles - 1) noTriangles++;
+					if (triangle_count < max_triangle_count - 1) triangle_count++;
 				}
 			}
 		}
 	}
 
-	mesh->noTotalTriangles = noTriangles;
+	mesh->triangle_count = triangle_count;
 }

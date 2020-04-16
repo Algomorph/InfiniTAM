@@ -34,24 +34,24 @@ public:
 
 
 	/** Size of the image in pixels. */
-	Vector2<int> noDims;
+	Vector2<int> dimensions;
 
 	/** Initialize an empty image of the given size, either
 	on CPU only or on both CPU and GPU.
 	*/
 	Image(Vector2<int> noDims, bool allocate_CPU, bool allocate_CUDA, bool metalCompatible = true)
 			: MemoryBlock<T>(noDims.x * noDims.y, allocate_CPU, allocate_CUDA, metalCompatible) {
-		this->noDims = noDims;
+		this->dimensions = noDims;
 	}
 
 	Image(bool allocate_CPU, bool allocate_CUDA, bool metalCompatible = true)
 			: MemoryBlock<T>(0, allocate_CPU, allocate_CUDA, metalCompatible) {
-		this->noDims = Vector2<int>(0, 0);
+		this->dimensions = Vector2<int>(0, 0);
 	}
 
 	Image(Vector2<int> noDims, MemoryDeviceType memoryType)
 			: MemoryBlock<T>(noDims.x * noDims.y, memoryType) {
-		this->noDims = noDims;
+		this->dimensions = noDims;
 	}
 
 	/** Resize an image, losing all old image data.
@@ -60,24 +60,24 @@ public:
 	*/
 	void ChangeDims(Vector2<int> newDims, bool forceReallocation = true) {
 		MemoryBlock<T>::Resize(newDims.x * newDims.y, forceReallocation);
-		noDims = newDims;
+		dimensions = newDims;
 	}
 
-	void SetFrom(const Image<T>* source, MemoryCopyDirection memoryCopyDirection) {
-		ChangeDims(source->noDims);
-		MemoryBlock<T>::SetFrom(source, memoryCopyDirection);
+	void SetFrom(const Image<T>& source, MemoryCopyDirection memory_copy_direction) {
+		ChangeDims(source.dimensions);
+		MemoryBlock<T>::SetFrom(source, memory_copy_direction);
 	}
 
 	void Swap(Image<T>& rhs) {
 		MemoryBlock<T>::Swap(rhs);
-		std::swap(this->noDims, rhs.noDims);
+		std::swap(this->dimensions, rhs.dimensions);
 	}
 
 	template <typename TMask>
 	void ApplyMask(const Image<TMask>& maskImage, T blankElement);
 
 	friend bool operator==(const Image<T>& rhs, const Image<T>& lhs) {
-		if (rhs.noDims != lhs.noDims || rhs.is_allocated_for_CPU != lhs.is_allocated_for_CPU ||
+		if (rhs.dimensions != lhs.dimensions || rhs.is_allocated_for_CPU != lhs.is_allocated_for_CPU ||
 		    rhs.is_allocated_for_CUDA != lhs.is_allocated_for_CUDA) {
 			return false;
 		}
@@ -121,7 +121,7 @@ void Image<T>::ApplyMask(const Image<TMask>& maskImage, T blankElement) {
 	if (!this->is_allocated_for_CPU || !maskImage.IsAllocated_CPU()) {
 		DIEWITHEXCEPTION("Cannot apply mask, either mask or source image or both are not allocated for CPU.");
 	}
-	if (this->noDims != maskImage.noDims) {
+	if (this->dimensions != maskImage.dimensions) {
 		DIEWITHEXCEPTION("Source and mask image dimensions must match.");
 	}
 #ifdef WITH_OPENMP

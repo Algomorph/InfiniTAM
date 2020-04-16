@@ -44,28 +44,26 @@ namespace ITMLib
 
 		ORUtils::Image<Vector4u> *raycastImage;
 
-		RenderState(const Vector2i &imgSize, float vf_min, float vf_max, MemoryDeviceType memoryType)
+		RenderState(const Vector2i& image_size, float near_clipping_distance, float far_clipping_distance, MemoryDeviceType memory_type)
 		{
-			renderingRangeImage = new ORUtils::Image<Vector2f>(imgSize, memoryType);
-			raycastResult = new ORUtils::Image<Vector4f>(imgSize, memoryType);
-			forwardProjection = new ORUtils::Image<Vector4f>(imgSize, memoryType);
-			fwdProjMissingPoints = new ORUtils::Image<int>(imgSize, memoryType);
-			raycastImage = new ORUtils::Image<Vector4u>(imgSize, memoryType);
+			renderingRangeImage = new ORUtils::Image<Vector2f>(image_size, memory_type);
+			raycastResult = new ORUtils::Image<Vector4f>(image_size, memory_type);
+			forwardProjection = new ORUtils::Image<Vector4f>(image_size, memory_type);
+			fwdProjMissingPoints = new ORUtils::Image<int>(image_size, memory_type);
+			raycastImage = new ORUtils::Image<Vector4u>(image_size, memory_type);
 
-			ORUtils::Image<Vector2f> *buffImage = new ORUtils::Image<Vector2f>(imgSize, MEMORYDEVICE_CPU);
+			ORUtils::Image<Vector2f> buffer_image(image_size, MEMORYDEVICE_CPU);
 
-			Vector2f v_lims(vf_min, vf_max);
-			for (int i = 0; i < imgSize.x * imgSize.y; i++) buffImage->GetData(MEMORYDEVICE_CPU)[i] = v_lims;
+			Vector2f clipping_distances(near_clipping_distance, far_clipping_distance);
+			for (int i = 0; i < image_size.x * image_size.y; i++) buffer_image.GetData(MEMORYDEVICE_CPU)[i] = clipping_distances;
 
-			if (memoryType == MEMORYDEVICE_CUDA)
+			if (memory_type == MEMORYDEVICE_CUDA)
 			{
 #ifndef COMPILE_WITHOUT_CUDA
-				renderingRangeImage->SetFrom(buffImage, MemoryCopyDirection::CPU_TO_CUDA);
+				renderingRangeImage->SetFrom(buffer_image, MemoryCopyDirection::CPU_TO_CUDA);
 #endif
 			}
-			else renderingRangeImage->SetFrom(buffImage, MemoryCopyDirection::CPU_TO_CPU);
-
-			delete buffImage;
+			else renderingRangeImage->SetFrom(buffer_image, MemoryCopyDirection::CPU_TO_CPU);
 
 			noFwdProjMissingPoints = 0;
 		}

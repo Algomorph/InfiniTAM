@@ -37,18 +37,17 @@
 BOOST_AUTO_TEST_CASE(testImageMaskReader) {
 
 	using namespace InputSource;
-	auto* rgb = new ITMUChar4Image(true, false);
-	auto* depth = new ITMShortImage(true, false);
-	auto* gtMaskedRgb = new ITMUChar4Image(true, false);
-	auto* gtMaskedDepth = new ITMShortImage(true, false);
-
-	ITMUCharImage* mask = new ITMUCharImage(true, false);
+	ITMUChar4Image rgb(true, false);
+	ITMShortImage depth(true, false);
+	ITMUChar4Image gtMaskedRgb(true, false);
+	ITMShortImage gtMaskedDepth(true, false);
+	ITMUCharImage mask(true, false);
 
 	InputSource::ImageMaskPathGenerator pathGenerator("TestData/snoopy_color_%06i.png", "TestData/snoopy_depth_%06i.png",
 	                                                  "TestData/snoopy_omask_%06i.png");
 	InputSource::ImageSourceEngine* imageSource = new InputSource::ImageFileReader<InputSource::ImageMaskPathGenerator>(
 			"TestData/snoopy_calib.txt", pathGenerator);
-	imageSource->getImages(rgb, depth);
+	imageSource->GetImages(rgb, depth);
 
 #ifdef GENERATE_GT_MASKED_IMAGES
 	BOOST_REQUIRE(ReadImageFromFile(rgb, "TestData/snoopy_color_000000.png"));
@@ -56,8 +55,8 @@ BOOST_AUTO_TEST_CASE(testImageMaskReader) {
 #endif
 	BOOST_REQUIRE(ReadImageFromFile(mask, "TestData/snoopy_omask_000000.png"));
 
-	rgb->ApplyMask(*mask,Vector4u((unsigned char)0));
-	depth->ApplyMask(*mask,0);
+	rgb.ApplyMask(mask,Vector4u((unsigned char)0));
+	depth.ApplyMask(mask,0);
 
 #ifdef GENERATE_GT_MASKED_IMAGES
 	SaveImageToFile(rgb, "TestData/snoopy_color_000000_masked.pnm");
@@ -65,16 +64,10 @@ BOOST_AUTO_TEST_CASE(testImageMaskReader) {
 #endif
 
 BOOST_REQUIRE(ReadImageFromFile(gtMaskedRgb, "TestData/snoopy_color_000000.png"));
-	gtMaskedRgb->ApplyMask(*mask, Vector4u((unsigned char) 0));
+	gtMaskedRgb.ApplyMask(mask, Vector4u((unsigned char) 0));
 	BOOST_REQUIRE(ReadImageFromFile(gtMaskedDepth, "TestData/snoopy_depth_000000_masked.pnm"));
 
-	BOOST_REQUIRE(*rgb == *gtMaskedRgb);
-	BOOST_REQUIRE(*depth == *gtMaskedDepth);
+	BOOST_REQUIRE(rgb == gtMaskedRgb);
+	BOOST_REQUIRE(depth == gtMaskedDepth);
 
-	delete rgb;
-	delete depth;
-	//delete mask;
-	delete imageSource;
-	delete gtMaskedDepth;
-	delete gtMaskedRgb;
 }

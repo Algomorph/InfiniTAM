@@ -68,7 +68,7 @@ namespace ITMLib {
 				indexData_host.poses_vs[localMapId].m32 /= voxelSize;
 				indexData_host.posesInv[localMapId] = sceneManager.getEstimatedGlobalPose(localMapId).GetInvM();
 				indexData_host.index[localMapId] = sceneManager.getLocalMap(localMapId)->scene->index.GetIndexData();
-				voxelData_host.voxels[localMapId] = sceneManager.getLocalMap(localMapId)->scene->voxels.GetVoxelBlocks();
+				voxelData_host.voxels[localMapId] = sceneManager.getLocalMap(localMapId)->scene->GetVoxelBlocks();
 			}
 
 #ifndef COMPILE_WITHOUT_CUDA

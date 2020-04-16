@@ -34,11 +34,11 @@ struct PNGReaderData {
 	png_infop info_ptr;
 
 	PNGReaderData(void)
-	{ png_ptr = NULL; info_ptr = NULL; }
+	{ png_ptr = nullptr; info_ptr = nullptr; }
 	~PNGReaderData(void)
 	{ 
-		if (info_ptr != NULL) png_destroy_info_struct(png_ptr, &info_ptr);
-		if (png_ptr != NULL) png_destroy_read_struct(&png_ptr, (png_infopp)NULL, (png_infopp)NULL);
+		if (info_ptr != nullptr) png_destroy_info_struct(png_ptr, &info_ptr);
+		if (png_ptr != nullptr) png_destroy_read_struct(&png_ptr, (png_infopp)nullptr, (png_infopp)nullptr);
 	}
 #endif
 };
@@ -60,7 +60,7 @@ static FormatType png_readheader(FILE *fp, int & width, int & height, PNGReaderD
 	}
 
 	/* initialize stuff */
-	internal.png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+	internal.png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
 
 	if (!internal.png_ptr) {
 		//"png_create_read_struct failed"
@@ -122,7 +122,7 @@ static bool png_readdata(FILE *f, int xsize, int ysize, PNGReaderData & internal
 	for (int y=0; y<ysize; y++) row_pointers[y] = &(data[bytesPerRow*y]);
 
 	png_read_image(internal.png_ptr, row_pointers);
-	png_read_end(internal.png_ptr, NULL);
+	png_read_end(internal.png_ptr, nullptr);
 
 	delete[] row_pointers;
 
@@ -217,12 +217,12 @@ static bool pnm_readdata_binary(FILE *f, int xsize, int ysize, FormatType type, 
 
 	size_t tmp = fread(data, bytesPerSample, xsize*ysize*channels, f);
 	if (tmp != (size_t)xsize*ysize*channels) return false;
-	return (data != NULL);
+	return (data != nullptr);
 }
 
 static bool pnm_writeheader(FILE *f, int xsize, int ysize, FormatType type)
 {
-	const char *pnmid = NULL;
+	const char *pnmid = nullptr;
 	int max = 0;
 	switch (type) {
 	case MONO_8u: pnmid = pgm_id; max = 256; break;
@@ -232,7 +232,7 @@ static bool pnm_writeheader(FILE *f, int xsize, int ysize, FormatType type)
 	case FORMAT_UNKNOWN:
 	default: return false;
 	}
-	if (pnmid == NULL) return false;
+	if (pnmid == nullptr) return false;
 
 	fprintf(f, "%s\n", pnmid);
 	fprintf(f, "%i %i\n", xsize, ysize);
@@ -258,18 +258,18 @@ static bool pnm_writedata(FILE *f, int xsize, int ysize, FormatType type, const 
 	return true;
 }
 
-void SaveImageToFile(const ORUtils::Image<ORUtils::Vector4<unsigned char> > * image, const char* fileName, bool flipVertical)
+void SaveImageToFile(const ORUtils::Image<ORUtils::Vector4<unsigned char> >& image, const char* file_name, bool flip_vertical)
 {
-	FILE *f = fopen(fileName, "wb");
-	if (!pnm_writeheader(f, image->noDims.x, image->noDims.y, RGB_8u)) {
+	FILE *f = fopen(file_name, "wb");
+	if (!pnm_writeheader(f, image.dimensions.x, image.dimensions.y, RGB_8u)) {
 		fclose(f); return;
 	}
 
-	unsigned char *data = new unsigned char[image->noDims.x*image->noDims.y * 3];
+	unsigned char *data = new unsigned char[image.dimensions.x * image.dimensions.y * 3];
 
-	ORUtils::Vector2<int> noDims = image->noDims;
+	ORUtils::Vector2<int> noDims = image.dimensions;
 
-	if (flipVertical)
+	if (flip_vertical)
 	{
 		for (int y = 0; y < noDims.y; y++) for (int x = 0; x < noDims.x; x++)
 		{
@@ -277,61 +277,61 @@ void SaveImageToFile(const ORUtils::Image<ORUtils::Vector4<unsigned char> > * im
 			locId_src = x + y * noDims.x;
 			locId_dst = x + (noDims.y - y - 1) * noDims.x;
 
-			data[locId_dst * 3 + 0] = image->GetData(MEMORYDEVICE_CPU)[locId_src].x;
-			data[locId_dst * 3 + 1] = image->GetData(MEMORYDEVICE_CPU)[locId_src].y;
-			data[locId_dst * 3 + 2] = image->GetData(MEMORYDEVICE_CPU)[locId_src].z;
+			data[locId_dst * 3 + 0] = image.GetData(MEMORYDEVICE_CPU)[locId_src].x;
+			data[locId_dst * 3 + 1] = image.GetData(MEMORYDEVICE_CPU)[locId_src].y;
+			data[locId_dst * 3 + 2] = image.GetData(MEMORYDEVICE_CPU)[locId_src].z;
 		}
 	}
 	else
 	{
 		for (int i = 0; i < noDims.x * noDims.y; ++i) {
-			data[i * 3 + 0] = image->GetData(MEMORYDEVICE_CPU)[i].x;
-			data[i * 3 + 1] = image->GetData(MEMORYDEVICE_CPU)[i].y;
-			data[i * 3 + 2] = image->GetData(MEMORYDEVICE_CPU)[i].z;
+			data[i * 3 + 0] = image.GetData(MEMORYDEVICE_CPU)[i].x;
+			data[i * 3 + 1] = image.GetData(MEMORYDEVICE_CPU)[i].y;
+			data[i * 3 + 2] = image.GetData(MEMORYDEVICE_CPU)[i].z;
 		}
 	}
 
-	pnm_writedata(f, image->noDims.x, image->noDims.y, RGB_8u, data);
+	pnm_writedata(f, image.dimensions.x, image.dimensions.y, RGB_8u, data);
 	delete[] data;
 	fclose(f);
 }
 
-void SaveImageToFile(const ORUtils::Image<short>* image, const char* fileName)
+void SaveImageToFile(const ORUtils::Image<short>& image, const char* file_name)
 {
-	short *data = (short*)malloc(sizeof(short) * image->size());
-	const short *dataSource = image->GetData(MEMORYDEVICE_CPU);
-	for (size_t i = 0; i < image->size(); i++) data[i] = (dataSource[i] << 8) | ((dataSource[i] >> 8) & 255);
+	short *data = (short*)malloc(sizeof(short) * image.size());
+	const short *dataSource = image.GetData(MEMORYDEVICE_CPU);
+	for (size_t i = 0; i < image.size(); i++) data[i] = (dataSource[i] << 8) | ((dataSource[i] >> 8) & 255);
 
-	FILE *f = fopen(fileName, "wb");
-	if (!pnm_writeheader(f, image->noDims.x, image->noDims.y, MONO_16u)) {
+	FILE *f = fopen(file_name, "wb");
+	if (!pnm_writeheader(f, image.dimensions.x, image.dimensions.y, MONO_16u)) {
 		fclose(f); return;
 	}
-	pnm_writedata(f, image->noDims.x, image->noDims.y, MONO_16u, data);
+	pnm_writedata(f, image.dimensions.x, image.dimensions.y, MONO_16u, data);
 	fclose(f);
 
 	delete data;
 }
 
-void SaveImageToFile(const ORUtils::Image<float>* image, const char* fileName)
+void SaveImageToFile(const ORUtils::Image<float>& image, const char* file_name)
 {
-	unsigned short *data = new unsigned short[image->size()];
-	for (size_t i = 0; i < image->size(); i++)
+	unsigned short *data = new unsigned short[image.size()];
+	for (size_t i = 0; i < image.size(); i++)
 	{
-		float localData = image->GetData(MEMORYDEVICE_CPU)[i];
+		float localData = image.GetData(MEMORYDEVICE_CPU)[i];
 		data[i] = localData >= 0 ? (unsigned short)(localData * 1000.0f) : 0;
 	}
 
-	FILE *f = fopen(fileName, "wb");
-	if (!pnm_writeheader(f, image->noDims.x, image->noDims.y, MONO_16u)) {
+	FILE *f = fopen(file_name, "wb");
+	if (!pnm_writeheader(f, image.dimensions.x, image.dimensions.y, MONO_16u)) {
 		fclose(f); return;
 	}
-	pnm_writedata(f, image->noDims.x, image->noDims.y, MONO_16u, data);
+	pnm_writedata(f, image.dimensions.x, image.dimensions.y, MONO_16u, data);
 	fclose(f);
 
 	delete[] data;
 }
 
-bool ReadImageFromFile(ORUtils::Image<ORUtils::Vector4<unsigned char> > * image, const char* fileName)
+bool ReadImageFromFile(ORUtils::Image<ORUtils::Vector4<unsigned char> >& image, const char* file_name)
 {
 	PNGReaderData pngData;
 	bool usepng = false;
@@ -339,12 +339,12 @@ bool ReadImageFromFile(ORUtils::Image<ORUtils::Vector4<unsigned char> > * image,
 	int xsize, ysize;
 	FormatType type;
 	bool binary;
-	FILE *f = fopen(fileName, "rb");
-	if (f == NULL) return false;
+	FILE *f = fopen(file_name, "rb");
+	if (f == nullptr) return false;
 	type = pnm_readheader(f, &xsize, &ysize, &binary);
 	if ((type != RGB_8u)&&(type != RGBA_8u)) {
 		fclose(f);
-		f = fopen(fileName, "rb");
+		f = fopen(file_name, "rb");
 		type = png_readheader(f, xsize, ysize, pngData);
 		if ((type != RGB_8u)&&(type != RGBA_8u)) {
 			fclose(f);
@@ -353,13 +353,13 @@ bool ReadImageFromFile(ORUtils::Image<ORUtils::Vector4<unsigned char> > * image,
 		usepng = true;
 	}
 
-	ORUtils::Vector2<int> newSize(xsize, ysize);
-	image->ChangeDims(newSize);
-	ORUtils::Vector4<unsigned char> *dataPtr = image->GetData(MEMORYDEVICE_CPU);
+	ORUtils::Vector2<int> new_size(xsize, ysize);
+	image.ChangeDims(new_size);
+	ORUtils::Vector4<unsigned char> *dataPtr = image.GetData(MEMORYDEVICE_CPU);
 
 	unsigned char *data;
 	if (type != RGBA_8u) data = new unsigned char[xsize*ysize * 3];
-	else data = (unsigned char*)image->GetData(MEMORYDEVICE_CPU);
+	else data = (unsigned char*)image.GetData(MEMORYDEVICE_CPU);
 
 	if (usepng) {
 		if (!png_readdata(f, xsize, ysize, pngData, data)) { fclose(f); delete[] data; return false; }
@@ -372,7 +372,7 @@ bool ReadImageFromFile(ORUtils::Image<ORUtils::Vector4<unsigned char> > * image,
 
 	if (type != RGBA_8u)
 	{
-		for (int i = 0; i < image->noDims.x*image->noDims.y; ++i)
+		for (int i = 0; i < image.dimensions.x * image.dimensions.y; ++i)
 		{
 			dataPtr[i].x = data[i * 3 + 0]; dataPtr[i].y = data[i * 3 + 1];
 			dataPtr[i].z = data[i * 3 + 2]; dataPtr[i].w = 255;
@@ -384,19 +384,19 @@ bool ReadImageFromFile(ORUtils::Image<ORUtils::Vector4<unsigned char> > * image,
 	return true;
 }
 
-bool ReadImageFromFile(ORUtils::Image<short> *image, const char *fileName)
+bool ReadImageFromFile(ORUtils::Image<short>& image, const char *file_name)
 {
 	PNGReaderData pngData;
 	bool usepng = false;
 
 	int xsize, ysize;
 	bool binary;
-	FILE *f = fopen(fileName, "rb");
-	if (f == NULL) return false;
+	FILE *f = fopen(file_name, "rb");
+	if (f == nullptr) return false;
 	FormatType type = pnm_readheader(f, &xsize, &ysize, &binary);
 	if ((type != MONO_16s) && (type != MONO_16u)) {
 		fclose(f);
-		f = fopen(fileName, "rb");
+		f = fopen(file_name, "rb");
 		type = png_readheader(f, xsize, ysize, pngData);
 		if ((type != MONO_16s) && (type != MONO_16u)) {
 			fclose(f);
@@ -417,14 +417,14 @@ bool ReadImageFromFile(ORUtils::Image<short> *image, const char *fileName)
 	fclose(f);
 
 	ORUtils::Vector2<int> newSize(xsize, ysize);
-	image->ChangeDims(newSize);
+	image.ChangeDims(newSize);
 	if (binary) {
-		for (int i = 0; i < image->noDims.x*image->noDims.y; ++i) {
-			image->GetData(MEMORYDEVICE_CPU)[i] = (data[i] << 8) | ((data[i] >> 8) & 255);
+		for (int i = 0; i < image.dimensions.x * image.dimensions.y; ++i) {
+			image.GetData(MEMORYDEVICE_CPU)[i] = (data[i] << 8) | ((data[i] >> 8) & 255);
 		}
 	} else {
-		for (int i = 0; i < image->noDims.x*image->noDims.y; ++i) {
-			image->GetData(MEMORYDEVICE_CPU)[i] = data[i];
+		for (int i = 0; i < image.dimensions.x * image.dimensions.y; ++i) {
+			image.GetData(MEMORYDEVICE_CPU)[i] = data[i];
 		}
 	}
 	delete[] data;
@@ -433,7 +433,7 @@ bool ReadImageFromFile(ORUtils::Image<short> *image, const char *fileName)
 }
 
 
-bool ReadImageFromFile(ORUtils::Image<unsigned char> *image, const char *fileName)
+bool ReadImageFromFile(ORUtils::Image<unsigned char>& image, const char *file_name)
 {
 	PNGReaderData pngData;
 	bool usepng = false;
@@ -441,12 +441,12 @@ bool ReadImageFromFile(ORUtils::Image<unsigned char> *image, const char *fileNam
 	int xsize, ysize;
 	FormatType type;
 	bool binary;
-	FILE *f = fopen(fileName, "rb");
-	if (f == NULL) return false;
+	FILE *f = fopen(file_name, "rb");
+	if (f == nullptr) return false;
 	type = pnm_readheader(f, &xsize, &ysize, &binary);
 	if (type != MONO_8u) {
 		fclose(f);
-		f = fopen(fileName, "rb");
+		f = fopen(file_name, "rb");
 		type = png_readheader(f, xsize, ysize, pngData);
 		if (type != MONO_8u) {
 			fclose(f);
@@ -456,9 +456,9 @@ bool ReadImageFromFile(ORUtils::Image<unsigned char> *image, const char *fileNam
 	}
 
 	ORUtils::Vector2<int> newSize(xsize, ysize);
-	image->ChangeDims(newSize);
+	image.ChangeDims(newSize);
 
-	unsigned char *data = (unsigned char*) image->GetData(MEMORYDEVICE_CPU);
+	unsigned char *data = (unsigned char*) image.GetData(MEMORYDEVICE_CPU);
 
 	if (usepng) {
 		if (!png_readdata(f, xsize, ysize, pngData, data)) { fclose(f); delete[] data; return false; }
@@ -471,11 +471,11 @@ bool ReadImageFromFile(ORUtils::Image<unsigned char> *image, const char *fileNam
 	return true;
 }
 
-void MakeDir(const char *dirName)
+void MakeDir(const char *directory_name)
 {
 #if defined _MSC_VER
-		_mkdir(dirName);
+		_mkdir(directory_name);
 #else
-		mkdir(dirName, 0777);
+		mkdir(directory_name, 0777);
 #endif
 }

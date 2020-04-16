@@ -30,16 +30,16 @@ public:
 	};
 
 private:
-	ORUtils::MemoryBlock<IndexData>* index_data;
+	ORUtils::MemoryBlock<IndexData> index_data;
 
 public:
 	const MemoryDeviceType memory_type;
 
 	PlainVoxelArray(PlainVoxelArray::InitializationParameters info, MemoryDeviceType memoryType) :
 			memory_type(memoryType),
-			index_data(new ORUtils::MemoryBlock<IndexData>(1, true, true)) {
-		*(index_data->GetData(MEMORYDEVICE_CPU)) = info;
-		index_data->UpdateDeviceFromHost();
+			index_data(1, true, true) {
+		*(index_data.GetData(MEMORYDEVICE_CPU)) = info;
+		index_data.UpdateDeviceFromHost();
 	}
 
 	explicit PlainVoxelArray(MemoryDeviceType memoryType, Vector3i size = Vector3i(512),
@@ -53,40 +53,39 @@ public:
 
 	void SetFrom(const PlainVoxelArray& other) {
 		MemoryCopyDirection memoryCopyDirection = determineMemoryCopyDirection(this->memory_type, other.memory_type);
-		this->index_data->SetFrom(other.index_data, memoryCopyDirection);
-	}
-
-	~PlainVoxelArray() {
-		delete index_data;
+		this->index_data.SetFrom(other.index_data, memoryCopyDirection);
 	}
 
 	/** Maximum number of total entries. */
-	int GetAllocatedBlockCount() { return 1; }
+	int GetMaximumBlockCount() const { return 1; }
+	int GetUtilizedBlockCount() const { return 1; }
 
 	int GetVoxelBlockSize() {
-		return index_data->GetData(MEMORYDEVICE_CPU)->size.x *
-		       index_data->GetData(MEMORYDEVICE_CPU)->size.y *
-		       index_data->GetData(MEMORYDEVICE_CPU)->size.z;
+		return index_data.GetData(MEMORYDEVICE_CPU)->size.x *
+		       index_data.GetData(MEMORYDEVICE_CPU)->size.y *
+		       index_data.GetData(MEMORYDEVICE_CPU)->size.z;
 	}
+
+
 
 	unsigned int GetMaxVoxelCount() const {
-		return static_cast<unsigned int>(index_data->GetData(MEMORYDEVICE_CPU)->size.x) *
-		       static_cast<unsigned int>(index_data->GetData(MEMORYDEVICE_CPU)->size.y) *
-		       static_cast<unsigned int>(index_data->GetData(MEMORYDEVICE_CPU)->size.z);
+		return static_cast<unsigned int>(index_data.GetData(MEMORYDEVICE_CPU)->size.x) *
+		       static_cast<unsigned int>(index_data.GetData(MEMORYDEVICE_CPU)->size.y) *
+		       static_cast<unsigned int>(index_data.GetData(MEMORYDEVICE_CPU)->size.z);
 	}
 
-	Vector3i GetVolumeSize() const { return index_data->GetData(MEMORYDEVICE_CPU)->size; }
+	Vector3i GetVolumeSize() const { return index_data.GetData(MEMORYDEVICE_CPU)->size; }
 
-	Vector3i GetVolumeOffset() const { return index_data->GetData(MEMORYDEVICE_CPU)->offset; }
+	Vector3i GetVolumeOffset() const { return index_data.GetData(MEMORYDEVICE_CPU)->offset; }
 
 	/**Get the memory type used for storage.**/
 	MemoryDeviceType GetMemoryType() const {
 		return this->memory_type;
 	}
 
-	const IndexData* GetIndexData() const { return index_data->GetData(memory_type); }
+	const IndexData* GetIndexData() const { return index_data.GetData(memory_type); }
 
-	IndexData* GetIndexData() { return index_data->GetData(memory_type); }
+	IndexData* GetIndexData() { return index_data.GetData(memory_type); }
 
 	void SaveToDirectory(const std::string& outputDirectory) const {
 	}
@@ -102,7 +101,7 @@ public:
 #pragma clang diagnostic pop
 #endif
 #ifdef COMPILE_WITH_METAL
-	const void *getIndexData_MB() const { return index_data->GetMetalBuffer(); }
+	const void *getIndexData_MB() const { return index_data.GetMetalBuffer(); }
 #endif
 
 	// Suppress the default copy constructor and assignment operator

@@ -58,22 +58,17 @@ public:
    *
    * \return  The current sub-engine.
    */
-  const ImageSourceEngine *getCurrentSubengine(void) const;
+  ImageSourceEngine *getCurrentSubengine(void);
 
-  /** Override */
-  virtual Vector2i getDepthImageSize(void) const;
+  Vector2i GetDepthImageSize(void) override;
 
-  /** Override */
-  virtual void getImages(ITMUChar4Image *rgb, ITMShortImage *rawDepth);
+  virtual void GetImages(ITMUChar4Image& rgb, ITMShortImage& rawDepth);
 
-  /** Override */
-  virtual Vector2i getRGBImageSize(void) const;
+  Vector2i GetRGBImageSize(void) override;
 
-  /** Override */
-  virtual bool hasImagesNow(void) const;
+  virtual bool HasImagesNow(void) override;
 
-  /** Override */
-  virtual bool hasMoreImages(void) const;
+  virtual bool HasMoreImages(void) override;
 
   //#################### PRIVATE MEMBER FUNCTIONS ####################
 private:
@@ -82,7 +77,7 @@ private:
    *
    * \return  The sub-engine, if any, that can provide the next images, or NULL if there are no more images to provide.
    */
-  const ImageSourceEngine *advanceToNextImages(void) const;
+  ImageSourceEngine *AdvanceToNextImages(void);
 };
 
 }

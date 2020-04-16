@@ -53,7 +53,7 @@ void GenerateRawLiveAndCanonicalVolumes(VoxelVolume<TSDFVoxel, TIndex>** canonic
 	                                              TMemoryDeviceType,
 	                                              Frame16And17Fixture::InitParams<TIndex>());
 
-	Vector2i image_size = view->depth->noDims;
+	Vector2i image_size = view->depth->dimensions;
 
 	CameraTrackingState tracking_state(image_size, TMemoryDeviceType);
 

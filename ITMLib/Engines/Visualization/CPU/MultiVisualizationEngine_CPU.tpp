@@ -39,7 +39,7 @@ void MultiVisualizationEngine_CPU<TVoxel, VoxelBlockHash>::CreateExpectedDepths(
 	RenderStateMultiScene<TVoxel, VoxelBlockHash> *renderState = (RenderStateMultiScene<TVoxel, VoxelBlockHash>*)_renderState;
 
 	// reset min max image
-	Vector2i imgSize = renderState->renderingRangeImage->noDims;
+	Vector2i imgSize = renderState->renderingRangeImage->dimensions;
 	Vector2f *minmaxData = renderState->renderingRangeImage->GetData(MEMORYDEVICE_CPU);
 
 	for (int locId = 0; locId < imgSize.x*imgSize.y; ++locId) 
@@ -103,7 +103,7 @@ template<typename TVoxel, typename TIndex>
 static void RenderImage_common(const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *_renderState, ITMUChar4Image *outputImage, IVisualizationEngine::RenderImageType type){
 	RenderStateMultiScene<TVoxel, TIndex> *renderState = (RenderStateMultiScene<TVoxel, TIndex>*)_renderState;
 
-	Vector2i imgSize = outputImage->noDims;
+	Vector2i imgSize = outputImage->dimensions;
 	Matrix4f invM = pose->GetInvM();
 
 	// Generic Raycast

@@ -17,7 +17,7 @@ namespace InputSource {
 		/**
 		 * \brief Gets the calibration parameters associated with the next RGB-D image (if any).
 		 *
-		 * \pre     hasMoreImages()
+		 * \pre     HasMoreImages()
 		 * \return  The calibration parameters associated with the next RGB-D image (if any), or the default calibration parameters otherwise.
 		 */
 		virtual ITMLib::RGBDCalib getCalib() const = 0;
@@ -25,38 +25,38 @@ namespace InputSource {
 		/**
 		 * \brief Gets the size of the next depth image (if any).
 		 *
-		 * \pre     hasMoreImages()
+		 * \pre     HasMoreImages()
 		 * \return  The size of the next depth image (if any), or Vector2i(0,0) otherwise.
 		 */
-		virtual Vector2i getDepthImageSize(void) const = 0;
+		virtual Vector2i GetDepthImageSize() = 0;
 
 		/**
 		 * \brief Gets the next RGB and depth images (if any).
 		 *
-		 * \pre             hasMoreImages()
+		 * \pre             HasMoreImages()
 		 * \param rgb       An image into which to store the next RGB image.
 		 * \param rawDepth  An image into which to store the next depth image.
 		 */
-		virtual void getImages(ITMUChar4Image *rgb, ITMShortImage *rawDepth) = 0;
+		virtual void GetImages(ITMUChar4Image& rgb, ITMShortImage& rawDepth) = 0;
 
 		/**
 		 * \brief Gets the size of the next RGB image (if any).
 		 *
-		 * \pre     hasMoreImages()
+		 * \pre     HasMoreImages()
 		 * \return  The size of the next RGB image (if any), or Vector2i(0,0) otherwise.
 		 */
-		virtual Vector2i getRGBImageSize(void) const = 0;
+		virtual Vector2i GetRGBImageSize() = 0;
 
 		/**
 		 * \brief Determines whether or not the image source engine has RGB-D images currently available.
 		 *
 		 * \return  true, if the image source engine has RGB-D images currently available, or false otherwise.
 		 */
-		virtual bool hasImagesNow(void) const
+		virtual bool HasImagesNow()
 		{
-			// By default, this just returns the same as hasMoreImages(), but it can be overridden by image
+			// By default, this just returns the same as HasMoreImages(), but it can be overridden by image
 			// source engines that need to support the case of being temporarily unable to yield images.
-			return hasMoreImages();
+			return HasMoreImages();
 		}
 
 		/**
@@ -64,7 +64,7 @@ namespace InputSource {
 		 *
 		 * \return  true, if the image source engine is able to yield more RGB-D images, or false otherwise.
 		 */
-		virtual bool hasMoreImages(void) const = 0;
+		virtual bool HasMoreImages() = 0;
 	};
 
 	class BaseImageSourceEngine : public ImageSourceEngine
@@ -88,7 +88,7 @@ namespace InputSource {
 		char maskImageMask[BUF_SIZE];
 	public:
 		const bool hasMaskImagePaths;
-		ImageMaskPathGenerator(const char* rgbImageMask, const char* depthImageMask, const char* maskImageMask = NULL);
+		ImageMaskPathGenerator(const char* rgbImageMask, const char* depthImageMask, const char* maskImageMask = nullptr);
 		std::string getRgbImagePath(size_t currentFrameNo) const;
 		std::string getDepthImagePath(size_t currentFrameNo) const;
 		std::string getMaskImagePath(size_t currentFrameNo) const;
@@ -120,70 +120,69 @@ namespace InputSource {
 	class ImageFileReader : public BaseImageSourceEngine
 	{
 	private:
-		ITMUChar4Image *cached_rgb;
-		ITMShortImage *cached_depth;
-		ITMUCharImage *cached_mask;
+		ITMUChar4Image cached_rgb;
+		ITMShortImage cached_depth;
+		ITMUCharImage cached_mask;
 
-		void loadIntoCache() const;
-		mutable size_t cachedFrameNo;
-		size_t currentFrameNo;
-		mutable bool cacheIsValid;
+		void LoadIntoCache();
+		mutable size_t cached_frame_number;
+		size_t current_frame_number;
+		mutable bool cache_is_valid;
 
 		PathGenerator pathGenerator;
 	public:
 
-		ImageFileReader(const char *calibFilename, const PathGenerator& pathGenerator_, size_t initialFrameNo = 0);
-		~ImageFileReader();
+		ImageFileReader(const char *calibration_file_name, const PathGenerator& path_generator, size_t initial_frame_number = 0);
 
-		bool hasMaskImages(void) const;
-		bool hasMoreImages(void) const;
-		void getImages(ITMUChar4Image *rgb, ITMShortImage *rawDepth);
-		Vector2i getDepthImageSize(void) const;
-		Vector2i getRGBImageSize(void) const;
+		bool HasMaskImages() const;
+		bool HasMoreImages();
+		void GetImages(ITMUChar4Image& rgb, ITMShortImage& raw_depth);
+		Vector2i GetDepthImageSize();
+		Vector2i GetRGBImageSize();
 	};
 
 	class CalibSource : public BaseImageSourceEngine
 	{
 	private:
-		Vector2i imgSize;
+		Vector2i image_size;
 		void ResizeIntrinsics(ITMLib::Intrinsics &intrinsics, float ratio);
 
 	public:
 		CalibSource(const char *calibFilename, Vector2i setImageSize, float ratio);
 		~CalibSource() { }
 
-		bool hasMoreImages(void) const { return true; }
-		void getImages(ITMUChar4Image *rgb, ITMShortImage *rawDepth) { }
-		Vector2i getDepthImageSize(void) const { return imgSize; }
-		Vector2i getRGBImageSize(void) const { return imgSize; }
+		bool HasMoreImages() const { return true; }
+		void GetImages(ITMUChar4Image& rgb, ITMShortImage& rawDepth) { }
+		Vector2i GetDepthImageSize() const { return image_size; }
+		Vector2i GetRGBImageSize() const { return image_size; }
 	};
 
 	class RawFileReader : public BaseImageSourceEngine
 	{
 	private:
 		static const int BUF_SIZE = 2048;
-		char rgbImageMask[BUF_SIZE];
+		char rgb_image_mask[BUF_SIZE];
 		char depthImageMask[BUF_SIZE];
 
-		mutable ITMUChar4Image *cached_rgb;
-		mutable ITMShortImage *cached_depth;
+		mutable ITMUChar4Image cached_rgb;
+		mutable ITMShortImage cached_depth;
 
-		void loadIntoCache() const;
-		mutable int cachedFrameNo;
-		int currentFrameNo;
+		bool LoadIntoCache();
+		mutable int cached_frame_number;
+		int current_frame_number;
 
-		Vector2i imgSize;
+		Vector2i image_size;
 		void ResizeIntrinsics(ITMLib::Intrinsics &intrinsics, float ratio);
 
 	public:
-		RawFileReader(const char *calibFilename, const char *rgbImageMask, const char *depthImageMask, Vector2i setImageSize, float ratio);
+		RawFileReader(const char *calibration_file_name, const char *rgb_image_filename_mask, const char *depth_image_filename_mask, Vector2i image_size, float ratio);
 		~RawFileReader() { }
 
-		bool hasMoreImages(void) const;
-		void getImages(ITMUChar4Image *rgb, ITMShortImage *rawDepth);
+		bool HasMoreImages() override;
+		void GetImages(ITMUChar4Image& rgb, ITMShortImage& rawDepth) override;
 
-		Vector2i getDepthImageSize(void) const { return imgSize; }
-		Vector2i getRGBImageSize(void) const { return imgSize; }
+		Vector2i GetDepthImageSize() override { return image_size; }
+		Vector2i GetRGBImageSize() override { return image_size; }
 	};
 
 	class BlankImageGenerator : public BaseImageSourceEngine
@@ -195,10 +194,10 @@ namespace InputSource {
 		BlankImageGenerator(const char *calibFilename, Vector2i setImageSize);
 		~BlankImageGenerator() { }
 
-		bool hasMoreImages(void) const;
-		void getImages(ITMUChar4Image *rgb, ITMShortImage *rawDepth);
+		bool HasMoreImages() override;
+		void GetImages(ITMUChar4Image& rgb, ITMShortImage& raw_depth) override;
 
-		Vector2i getDepthImageSize(void) const { return imgSize; }
-		Vector2i getRGBImageSize(void) const { return imgSize; }
+		Vector2i GetDepthImageSize() override { return imgSize; }
+		Vector2i GetRGBImageSize() override { return imgSize; }
 	};
 }

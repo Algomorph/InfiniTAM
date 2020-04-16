@@ -325,23 +325,23 @@ public:
 	}
 
 	/** Copy data */
-	void SetFrom(const MemoryBlock<T>* source, MemoryCopyDirection memoryCopyDirection) {
-		Resize(source->element_count);
-		switch (memoryCopyDirection) {
+	void SetFrom(const MemoryBlock<T>& source, MemoryCopyDirection memory_copy_direction) {
+		Resize(source.element_count);
+		switch (memory_copy_direction) {
 			case CPU_TO_CPU:
-				memcpy(this->data_cpu, source->data_cpu, source->element_count * sizeof(T));
+				memcpy(this->data_cpu, source.data_cpu, source.element_count * sizeof(T));
 				break;
 #ifndef COMPILE_WITHOUT_CUDA
 			case CPU_TO_CUDA:
-				ORcudaSafeCall(cudaMemcpyAsync(this->data_cuda, source->data_cpu, source->element_count * sizeof(T),
+				ORcudaSafeCall(cudaMemcpyAsync(this->data_cuda, source.data_cpu, source.element_count * sizeof(T),
 				                               cudaMemcpyHostToDevice));
 				break;
 			case CUDA_TO_CPU:
-				ORcudaSafeCall(cudaMemcpy(this->data_cpu, source->data_cuda, source->element_count * sizeof(T),
+				ORcudaSafeCall(cudaMemcpy(this->data_cpu, source.data_cuda, source.element_count * sizeof(T),
 				                          cudaMemcpyDeviceToHost));
 				break;
 			case CUDA_TO_CUDA:
-				ORcudaSafeCall(cudaMemcpyAsync(this->data_cuda, source->data_cuda, source->element_count * sizeof(T),
+				ORcudaSafeCall(cudaMemcpyAsync(this->data_cuda, source.data_cuda, source.element_count * sizeof(T),
 				                               cudaMemcpyDeviceToDevice));
 				break;
 #endif
@@ -351,8 +351,8 @@ public:
 	}
 
 	/** Get an individual element of the memory block from either the CPU or GPU. */
-	T GetElement(int n, MemoryDeviceType memoryType) const {
-		switch (memoryType) {
+	T GetElement(int n, MemoryDeviceType memory_type) const {
+		switch (memory_type) {
 			case MEMORYDEVICE_CPU: {
 				return this->data_cpu[n];
 			}
