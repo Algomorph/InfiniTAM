@@ -89,7 +89,7 @@ public:
 		_CPU_AND_GPU_CODE_ IndexCache() : blockPos(0x7fffffff), blockPtr(-1) {}
 	};
 
-	/** Maximum number of total entries. */
+	/** Maximum count of blocks in volume / entries in hash table. */
 	const CONSTPTR(int) voxel_block_count;
 	const CONSTPTR(int) excess_list_size;
 	const CONSTPTR(int) hash_entry_count;
@@ -127,6 +127,7 @@ private:
 public:
 	const MemoryDeviceType memory_type;
 
+	VoxelBlockHash();
 
 	VoxelBlockHash(VoxelBlockHashParameters parameters, MemoryDeviceType memory_type);
 

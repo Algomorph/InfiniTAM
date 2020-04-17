@@ -24,8 +24,8 @@
 using namespace ITMLib;
 namespace b_ios = boost::iostreams;
 
-//TODO: revise member functions & their usages to accept the full path as argument instead of the directory
 
+// region ==================================== VOXEL BLOCK HASH ========================================================
 
 template<typename TVoxel>
 void VolumeFileIOEngine<TVoxel, VoxelBlockHash>::SaveVolumeCompact(
@@ -148,13 +148,17 @@ VolumeFileIOEngine<TVoxel, VoxelBlockHash>::LoadVolumeCompact(VoxelVolume<TVoxel
 	}
 }
 
+// endregion ===========================================================================================================
+// region ================================= PLAIN VOXEL ARRAY ==========================================================
 
 template<typename TVoxel>
 void
 VolumeFileIOEngine<TVoxel, PlainVoxelArray>::SaveVolumeCompact(
 		const VoxelVolume<TVoxel, PlainVoxelArray>& volume,
 		const std::string& path) {
-
+	ORUtils::MemoryBlockOStreamWrapper file(path, true);
+	volume.index.Save(file);
+	volume.SaveVoxels(file);
 }
 
 
@@ -163,5 +167,9 @@ void
 VolumeFileIOEngine<TVoxel, PlainVoxelArray>::LoadVolumeCompact(
 		VoxelVolume<TVoxel, PlainVoxelArray>& volume,
 		const std::string& path) {
-
+	ORUtils::MemoryBlockIStreamWrapper file(path, true);
+	volume.index.Load(file);
+	volume.LoadVoxels(file);
 }
+
+// endregion ===========================================================================================================

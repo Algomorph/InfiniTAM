@@ -122,16 +122,15 @@ void GenericWarpConsistencySubtest(const SlavchevaSurfaceTracker::Switches& swit
 	SurfaceTracker<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, TRACKER_SLAVCHEVA_DIAGNOSTIC>
 			motion_tracker(switches);
 
-	VoxelVolume<WarpVoxel, TIndex> ground_truth_warp_field(
-			TMemoryDeviceType, Frame16And17Fixture::InitParams<TIndex>());
-	VoxelVolume<TSDFVoxel, TIndex> ground_truth_sdf_volume(
-			TMemoryDeviceType, Frame16And17Fixture::InitParams<TIndex>());
+	VoxelVolume<WarpVoxel, TIndex> ground_truth_warp_field(TMemoryDeviceType,
+	                                                       Frame16And17Fixture::InitParams<TIndex>());
+	VoxelVolume<TSDFVoxel, TIndex> ground_truth_sdf_volume(TMemoryDeviceType,
+	                                                       Frame16And17Fixture::InitParams<TIndex>());
 
 	ground_truth_warp_field.Reset();
 
 	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, TIndex>* reconstruction_engine =
-			DepthFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, TIndex>(
-					TMemoryDeviceType);
+			DepthFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, TIndex>(TMemoryDeviceType);
 	WarpingEngineInterface<TSDFVoxel, WarpVoxel, TIndex>* warping_engine =
 			WarpingEngineFactory::MakeWarpingEngine<TSDFVoxel, WarpVoxel, TIndex>(TMemoryDeviceType);
 	VolumeFusionEngineInterface<TSDFVoxel, TIndex>* volume_fusion_engine =

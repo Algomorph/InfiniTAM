@@ -47,6 +47,7 @@ public:
 	                     typename TIndex::InitializationParameters index_parameters = typename TIndex::InitializationParameters());
 	VoxelVolume(const VoxelVolume& other, MemoryDeviceType memory_type);
 
+
 	void Reset();
 	void SetFrom(const VoxelVolume& other);
 	void SaveToDisk(const std::string& path) const;
@@ -68,6 +69,10 @@ public:
 	bool SwappingEnabled() const { return swapping_enabled; }
 
 	const VoxelVolumeParameters& GetParameters() const { return this->parameters; }
+
+	void SaveVoxels(ORUtils::MemoryBlockOStreamWrapper& file) const;
+
+	void LoadVoxels(ORUtils::MemoryBlockIStreamWrapper& file);
 
 private:
 	/**

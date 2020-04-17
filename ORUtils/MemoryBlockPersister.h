@@ -23,6 +23,86 @@ namespace b_ios = boost::iostreams;
 
 namespace ORUtils {
 
+class MemoryBlockIStreamWrapper {
+public:
+	MemoryBlockIStreamWrapper(const std::string& filename, bool use_compression = false)
+			: file(filename.c_str(), std::ios::binary), compression_enabled(use_compression) {
+		if (file) {
+#ifdef WITH_BOOST
+			if (use_compression) {
+				filter.push(b_ios::zlib_decompressor());
+				filter.push(file);
+				final_stream = &filter;
+			} else {
+				final_stream = &file;
+			}
+#else
+			if(use_compression){
+				std::cerr << "Warning! Attempting to use compression w/o boost iostreams library linked to the project."
+				 " Defaulting to saving without compression." << std::endl;
+			}
+			final_stream = &file;
+#endif
+		}
+	}
+
+	bool operator!() {
+		return !file;
+	}
+
+	std::istream& IStream() {
+		return *final_stream;
+	}
+
+	const bool compression_enabled;
+private:
+#ifdef WITH_BOOST
+	b_ios::filtering_istream filter;
+#endif
+	std::ifstream file;
+	std::istream* final_stream = nullptr;
+};
+
+class MemoryBlockOStreamWrapper {
+public:
+	MemoryBlockOStreamWrapper(const std::string& filename, bool use_compression = false)
+			: file(filename.c_str(), std::ios::binary), compression_enabled(use_compression) {
+		if (file) {
+#ifdef WITH_BOOST
+			if (use_compression) {
+				filter.push(b_ios::zlib_compressor());
+				filter.push(file);
+				final_stream = &filter;
+			} else {
+				final_stream = &file;
+			}
+#else
+			if(use_compression){
+				std::cerr << "Warning! Attempting to use compression w/o boost iostreams library linked to the project."
+				 " Defaulting to saving without compression." << std::endl;
+			}
+			final_stream = &file;
+#endif
+		}
+	}
+
+	bool operator!() {
+		return !file;
+	}
+
+	std::ostream& OStream() {
+		return *final_stream;
+	}
+
+	const bool compression_enabled;
+private:
+#ifdef WITH_BOOST
+	b_ios::filtering_ostream filter;
+#endif
+	std::ofstream file;
+	std::ostream* final_stream = nullptr;
+};
+
 /**
  * \brief This class provides functions for loading and saving memory blocks.
  */
@@ -32,62 +112,58 @@ public:
 	/**
 	 * \brief Loads data from a file on disk into a memory block.
 	 *
-	 * \param filename          The name of the file.
-	 * \param block             The memory block into which to load the data.
-	 * \param memoryDeviceType  The type of memory device on which to load the data.
+	 * \param path            Path to the file.
+	 * \param block           The memory block into which to load the data.
+	 * \param memory_type     The type of memory device on which to load the data.
+	 * \param use_compression Whether or not to use (zlib) compression
+	 * (only useful when code is compiled with Boost Iostreams)
 	 */
 	template<typename T>
 	static void
-	LoadMemoryBlock(const std::string& filename, ORUtils::MemoryBlock<T>& block, MemoryDeviceType memoryDeviceType,
-	                bool useCompression = false) {
-		std::istream* fs;
-		std::ifstream file(filename.c_str(), std::ios::binary);
-		if (!file) throw std::runtime_error("Could not open " + filename + " for reading");
-#ifdef WITH_BOOST
-		b_ios::filtering_istream inFilter;
-		if (useCompression) {
-			inFilter.push(b_ios::zlib_decompressor());
-			inFilter.push(file);
-			fs = &inFilter;
-		} else {
-			fs = &file;
-		}
-#else
-		if(useCompression){
-			std::cerr << "Warning! Attempting to use compression w/o boost iostreams library linked to the project."
-			 " Defaulting to saving without compression." << std::endl;
-		}
-		fs = &file;
-#endif
+	LoadMemoryBlock(const std::string& path, ORUtils::MemoryBlock<T>& block, MemoryDeviceType memory_type,
+	                bool use_compression = false) {
+		MemoryBlockIStreamWrapper file(path.c_str(), use_compression);
+		if (!file) throw std::runtime_error("Could not open " + path + " for reading");
+		LoadMemoryBlock(file, block, memory_type);
+	}
 
-		size_t blockSize = ReadBlockSize(*fs);
-		if (memoryDeviceType == MEMORYDEVICE_CUDA) {
+	/**
+	 * \brief Loads data from an input stream.
+	 *
+	 * \param file          	Successfully-opened handle to the file.
+	 * \param block             The memory block into which to load the data.
+	 * \param memory_type       The type of memory device on which to load the data.
+	 */
+	template<typename T>
+	static void
+	LoadMemoryBlock(MemoryBlockIStreamWrapper& file, ORUtils::MemoryBlock<T>& block, MemoryDeviceType memory_type) {
+		size_t block_size = ReadBlockSize(file.IStream());
+		if (memory_type == MEMORYDEVICE_CUDA) {
 			// If we're loading into a block on the CUDA, first try and read the data into a temporary block on the CPU.
-			ORUtils::MemoryBlock<T> cpuBlock(block.size(), MEMORYDEVICE_CPU);
-			ReadBlockData(*fs, cpuBlock, blockSize);
+			ORUtils::MemoryBlock<T> cpu_block(block.size(), MEMORYDEVICE_CPU);
+			ReadBlockData(file.IStream(), cpu_block, block_size);
 
 			// Then copy the data across to the CUDA.
-			block.SetFrom(cpuBlock, MemoryCopyDirection::CPU_TO_CUDA);
+			block.SetFrom(cpu_block, MemoryCopyDirection::CPU_TO_CUDA);
 		} else {
 			// If we're loading into a block on the CPU, read the data directly into the block.
-			ReadBlockData(*fs, block, blockSize);
+			ReadBlockData(file.IStream(), block, block_size);
 		}
-
 	}
 
 	/**
 	 * \brief Loads data from a file on disk into a memory block newly-allocated on the CPU with the appropriate size.
-	 *
+	 * \tparam T	    Element type
 	 * \param filename  The name of the file.
 	 * \param dummy     An optional dummy parameter that can be used for type inference.
 	 * \return          The loaded memory block.
 	 */
 	template<typename T>
 	static ORUtils::MemoryBlock<T>*
-	LoadMemoryBlock(const std::string& filename, ORUtils::MemoryBlock<T>* dummy = NULL) {
-		size_t blockSize = ReadBlockSize(filename);
-		ORUtils::MemoryBlock<T>* block = new ORUtils::MemoryBlock<T>(blockSize, MEMORYDEVICE_CPU);
-		ReadBlockData(filename, *block, blockSize);
+	LoadMemoryBlock(const std::string& filename, ORUtils::MemoryBlock<T>* dummy = nullptr) {
+		size_t block_size = ReadBlockSize(filename);
+		ORUtils::MemoryBlock<T>* block = new ORUtils::MemoryBlock<T>(block_size, MEMORYDEVICE_CPU);
+		ReadBlockData(filename, *block, block_size);
 		return block;
 	}
 
@@ -111,42 +187,39 @@ public:
 	 *
 	 * \param filename          The name of the file.
 	 * \param block             The memory block to save.
-	 * \param memoryDeviceType  The type of memory device from which to save the data.
+	 * \param memory_type       The type of memory device from which to save the data.
+	 * \param use_compression   Whether or not to use compression (with ZLib).
+	 * Has no effect (or compression) if the code is compiled without Boost Iostreams library.
 	 */
 	template<typename T>
 	static void SaveMemoryBlock(const std::string& filename, const ORUtils::MemoryBlock<T>& block,
-	                            MemoryDeviceType memoryDeviceType, bool useCompression = false) {
-		std::ostream* fs;
-		std::ofstream file(filename.c_str(), std::ios::binary);
+	                            MemoryDeviceType memory_type, bool use_compression = false) {
+		MemoryBlockOStreamWrapper file(filename.c_str(), use_compression);
 		if (!file) throw std::runtime_error("Could not open " + filename + " for writing");
-#ifdef WITH_BOOST
-		b_ios::filtering_ostream outFilter;
-		if (useCompression) {
-			outFilter.push(b_ios::zlib_compressor());
-			outFilter.push(file);
-			fs = &outFilter;
-		} else {
-			fs = &file;
-		}
-#else
-		if(useCompression){
-			std::cerr << "Warning! Attempting to use compression w/o boost iostreams. "
-			 "Defaulting to saving without compression." << std::endl;
-		}
-		fs = &file;
-#endif
+		SaveMemoryBlock(file, block, memory_type);
+	}
 
+	/**
+	 * \brief Saves a memory block to a file on disk.
+	 *
+	 * \param file          	Successfully-opened handle to the file
+	 * \param block             The memory block to save.
+	 * \param memory_type       The type of memory device from which to save the data.
+	 */
+	template<typename T>
+	static void SaveMemoryBlock(MemoryBlockOStreamWrapper& file, const ORUtils::MemoryBlock<T>& block,
+	                            MemoryDeviceType memory_type, bool use_compression = false) {
 
-		if (memoryDeviceType == MEMORYDEVICE_CUDA) {
+		if (memory_type == MEMORYDEVICE_CUDA) {
 			// If we are saving the memory block from the CUDA, first make a CPU copy of it.
 			ORUtils::MemoryBlock<T> block_CPU(block.size(), MEMORYDEVICE_CPU);
 			block_CPU.SetFrom(block, MemoryCopyDirection::CUDA_TO_CPU);
 
 			// Then write the CPU copy to disk.
-			WriteBlock(*fs, block_CPU);
+			WriteBlock(file.OStream(), block_CPU);
 		} else {
 			// If we are saving the memory block from the CPU, write it directly to disk.
-			WriteBlock(*fs, block);
+			WriteBlock(file.OStream(), block);
 		}
 	}
 
@@ -161,18 +234,18 @@ private:
 	 *
 	 * \param is                  The input stream.
 	 * \param block               The memory block into which to read.
-	 * \param blockSize           The required size for the memory block.
+	 * \param block_size           The required size for the memory block.
 	 * \throws std::runtime_error If the read is unsuccessful.
 	 */
 	template<typename T>
-	static void ReadBlockData(std::istream& is, ORUtils::MemoryBlock<T>& block, size_t blockSize) {
+	static void ReadBlockData(std::istream& is, ORUtils::MemoryBlock<T>& block, size_t block_size) {
 		// Try and read the block's size.
-		if (block.size() != blockSize) {
+		if (block.size() != block_size) {
 			throw std::runtime_error("Could not read data into a memory block of the wrong size");
 		}
 
 		// Try and read the block's data.
-		if (!is.read(reinterpret_cast<char*>(block.GetData(MEMORYDEVICE_CPU)), blockSize * sizeof(T))) {
+		if (!is.read(reinterpret_cast<char*>(block.GetData(MEMORYDEVICE_CPU)), block_size * sizeof(T))) {
 			throw std::runtime_error("Could not read memory block data");
 		}
 	}

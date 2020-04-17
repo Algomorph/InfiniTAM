@@ -125,6 +125,15 @@ public:
 
 // endregion ===========================================================================================================
 
+	MemoryBlock()
+			: element_count(0),
+			  is_allocated_for_CPU(false),
+			  is_allocated_for_CUDA(false),
+			  is_metal_compatible(false),
+			  data_cpu(nullptr),
+			  data_cuda(nullptr),
+			  access_mode(MEMORYDEVICE_NONE) {}
+
 
 #ifdef COMPILE_WITH_METAL
 	inline const void *GetMetalBuffer() const { return data_metal_buffer; }
@@ -135,7 +144,7 @@ public:
 	 * on CPU only or GPU only or on both. CPU might also use the
 	 * Metal compatible allocator (i.e. with 16384 alignment).
 	*/
-	MemoryBlock(size_t dataSize, bool allocate_CPU, bool allocate_CUDA, bool make_metal_compatible = true)
+	MemoryBlock(size_type element_count, bool allocate_CPU, bool allocate_CUDA, bool make_metal_compatible = true)
 			: is_allocated_for_CPU(false), is_allocated_for_CUDA(false),
 #ifdef COMPILE_WITH_METAL
 			is_metal_compatible(make_metal_compatible),
@@ -147,7 +156,7 @@ public:
 #else
               access_mode(allocate_CPU ? MEMORYDEVICE_CPU : allocate_CUDA ? MEMORYDEVICE_CUDA : MEMORYDEVICE_NONE) {
 #endif
-		Allocate(dataSize, allocate_CPU, allocate_CUDA, make_metal_compatible);
+		Allocate(element_count, allocate_CPU, allocate_CUDA, make_metal_compatible);
 		Clear();
 	}
 
@@ -156,7 +165,7 @@ public:
 	 * on CPU only or on GPU only. CPU allocation will be Metal-compatible if Metal
 	 * is enabled during compilation.
 	*/
-	MemoryBlock(size_t element_count, MemoryDeviceType memory_type) :
+	MemoryBlock(size_type element_count, MemoryDeviceType memory_type) :
 			is_allocated_for_CPU(false), is_allocated_for_CUDA(false),
 #ifdef COMPILE_WITH_METAL
 			is_metal_compatible(true),
@@ -190,7 +199,7 @@ public:
 		this->Free();
 	}
 
-	MemoryBlock(MemoryBlock&& other) noexcept :
+	MemoryBlock(MemoryBlock&& other) noexcept:
 			element_count(other.element_count), // for code clarity
 			is_allocated_for_CPU(other.is_allocated_for_CPU),
 			is_allocated_for_CUDA(other.is_allocated_for_CUDA),

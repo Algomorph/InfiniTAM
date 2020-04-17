@@ -698,6 +698,7 @@ set(ITMLIB_OBJECTS_VOLUME_SOURCES
     Objects/Volume/VoxelVolume.tpp
     Objects/Volume/VoxelVolume.cpp
     Objects/Volume/VoxelBlockHash.cpp
+    Objects/Volume/PlainVoxelArray.cpp
     )
 
 ##

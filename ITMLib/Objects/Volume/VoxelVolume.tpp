@@ -121,5 +121,15 @@ const TVoxel* VoxelVolume<TVoxel, TIndex>::GetVoxels() const {
 	return this->voxels.GetData(this->index.memory_type);
 }
 
+template<class TVoxel, class TIndex>
+void VoxelVolume<TVoxel, TIndex>::SaveVoxels(ORUtils::MemoryBlockOStreamWrapper& file) const {
+	ORUtils::MemoryBlockPersister::SaveMemoryBlock(file, voxels, this->index.memory_type);
+}
+
+template<class TVoxel, class TIndex>
+void VoxelVolume<TVoxel, TIndex>::LoadVoxels(ORUtils::MemoryBlockIStreamWrapper& file) {
+	ORUtils::MemoryBlockPersister::LoadMemoryBlock(file, voxels, this->index.memory_type);
+}
+
 
 }  // namespace ITMLib
