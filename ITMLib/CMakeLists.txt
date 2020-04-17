@@ -653,6 +653,26 @@ set(ITMLIB_ENGINES_Visualization_SHARED_HEADERS
     Engines/Visualization/Shared/VisualizationEngine_Shared.h
     )
 
+
+## ================================================ ANALYTICS ENGINES ==================================================
+
+set(ITMLIB_ENGINES_ANALYTICS_HEADERS
+    Engines/Analytics/AnalyticsEngineFactory.h
+    Engines/Analytics/AnalyticsEngine.h
+    Engines/Analytics/AnalyticsEngineInterface.h
+    Engines/Analytics/AnalyticsEngine_Functors.h
+    Engines/Analytics/AnalyticsLogging.h
+    )
+
+set(ITMLIB_ENGINES_ANALYTICS_SOURCES
+    Engines/Analytics/AnalyticsEngine.tpp
+    Engines/Analytics/AnalyticsEngine_CPU_PlainVoxelArray.cpp
+    Engines/Analytics/AnalyticsEngine_CPU_VoxelBlockHash.cpp
+    Engines/Analytics/AnalyticsEngine_CUDA_PlainVoxelArray.cu
+    Engines/Analytics/AnalyticsEngine_CUDA_VoxelBlockHash.cu
+    Engines/Analytics/AnalyticsLogging.cpp
+    )
+
 ## ================================================== OBJECTS ==========================================================
 set(ITMLIB_OBJECTS_CAMERA_SOURCES
     Objects/Camera/CalibIO.cpp
@@ -935,24 +955,6 @@ set(ITMLIB_UTILS_HEADERS
     Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_Functors.h
     )
 
-## ================================================ UTILS - VOLUME STATISTICS CALCULATOR ================================
-
-set(ITMLIB_UTILS_STATCALC_HEADERS
-    Engines/Analytics/AnalyticsEngineFactory.h
-    Engines/Analytics/AnalyticsEngine.h
-    Engines/Analytics/AnalyticsEngineInterface.h
-    Engines/Analytics/AnalyticsEngine_Functors.h
-    Engines/Analytics/AnalyticsLogging.h
-    )
-
-set(ITMLIB_UTILS_STATCALC_SOURCES
-    Engines/Analytics/AnalyticsEngine.tpp
-    Engines/Analytics/AnalyticsEngine_CPU_PlainVoxelArray.cpp
-    Engines/Analytics/AnalyticsEngine_CPU_VoxelBlockHash.cpp
-    Engines/Analytics/AnalyticsEngine_CUDA_PlainVoxelArray.cu
-    Engines/Analytics/AnalyticsEngine_CUDA_VoxelBlockHash.cu
-    Engines/Analytics/AnalyticsLogging.cpp
-    )
 
 ## ================================================ UTILS - FILEIO =====================================================
 set(ITMLIB_UTILS_FILEIO_SOURCES
@@ -1049,7 +1051,7 @@ set(sources
     ${ITMLIB_SCENE_MOTION_TRACKERS_INTERFACE_SOURCES}
     ${ITMLIB_SCENE_MOTION_TRACKERS_SHARED_SOURCES}
     ${ITMLIB_UTILS_SOURCES}
-    ${ITMLIB_UTILS_STATCALC_SOURCES}
+    ${ITMLIB_ENGINES_ANALYTICS_SOURCES}
     ${ITMLIB_UTILS_FILEIO_SOURCES}
     ${ITMLIB_UTILS_VISUALIZATION_SOURCES}
     )
@@ -1116,7 +1118,7 @@ set(headers
     ${ITMLIB_SCENE_MOTION_TRACKERS_INTERFACE_HEADERS}
     ${ITMLIB_SCENE_MOTION_TRACKERS_SHARED_HEADERS}
     ${ITMLIB_UTILS_HEADERS}
-    ${ITMLIB_UTILS_STATCALC_HEADERS}
+    ${ITMLIB_ENGINES_ANALYTICS_HEADERS}
     ${ITMLIB_UTILS_FILEIO_HEADERS}
     ${ITMLIB_UTILS_VISUALIZATION_HEADERS}
     )
