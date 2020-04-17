@@ -37,7 +37,7 @@ MultiEngine<TVoxel, TIndex>::MultiEngine(const RGBDCalib& calib, Vector2i imgSiz
 	visualization_engine = VisualizationEngineFactory::MakeVisualizationEngine<TVoxel, TIndex>(deviceType);
 
 	tracker = CameraTrackerFactory::Instance().Make(imgSize_rgb, imgSize_d, lowLevelEngine, imuCalibrator,
-	                                                &settings.general_voxel_volume_parameters);
+	                                                settings.general_voxel_volume_parameters);
 	trackingController = new CameraTrackingController(tracker);
 	trackedImageSize = trackingController->GetTrackedImageSize(imgSize_rgb, imgSize_d);
 
@@ -405,8 +405,8 @@ void MultiEngine<TVoxel, TIndex>::GetImage(ITMUChar4Image *out, GetImageType get
 		if (freeviewLocalMapIdx >= 0){
 			LocalMap<TVoxel, TIndex> *activeData = mapManager->getLocalMap(freeviewLocalMapIdx);
 			if (renderState_freeview == NULL) renderState_freeview =
-					new RenderStateMultiScene<TVoxel,TIndex>(out->dimensions, activeData->volume->parameters->near_clipping_distance,
-					                                         activeData->volume->parameters->far_clipping_distance, settings.device_type);
+					new RenderStateMultiScene<TVoxel,TIndex>(out->dimensions, activeData->volume->GetParameters().near_clipping_distance,
+					                                         activeData->volume->GetParameters().far_clipping_distance, settings.device_type);
 
 			visualization_engine->FindVisibleBlocks(activeData->volume, pose, intrinsics, renderState_freeview);
 			visualization_engine->CreateExpectedDepths(activeData->volume, pose, intrinsics, renderState_freeview);
@@ -418,8 +418,8 @@ void MultiEngine<TVoxel, TIndex>::GetImage(ITMUChar4Image *out, GetImageType get
 		}
 		else
 		{
-			const VoxelVolumeParameters& params = *mapManager->getLocalMap(0)->volume->parameters;
-			if (renderState_multiscene == NULL) renderState_multiscene =
+			const VoxelVolumeParameters& params = mapManager->getLocalMap(0)->volume->GetParameters();
+			if (renderState_multiscene == nullptr) renderState_multiscene =
 						new RenderStateMultiScene<TVoxel, TIndex>(out->dimensions, params.near_clipping_distance,
 						                                          params.far_clipping_distance, settings.device_type);
 			multiVisualizationEngine->PrepareRenderState(*mapManager, renderState_multiscene);

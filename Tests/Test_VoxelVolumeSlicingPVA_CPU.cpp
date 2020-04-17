@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(testPVASceneSlice_CPU) {
 	volume_CPU.Reset();
 
 	const int expected_non_truncated_voxel_count = 58368;
-	volume_CPU.LoadFromDirectory("TestData/snoopy_result_fr16-17_full/snoopy_full_frame_16_");
+	volume_CPU.LoadFromDisk("TestData/snoopy_result_fr16-17_full/snoopy_full_frame_16_");
 
 	BOOST_REQUIRE_EQUAL(StatCalc_CPU_PVA_Voxel::Instance().CountNonTruncatedVoxels(&volume_CPU),
 	                    expected_non_truncated_voxel_count);
@@ -73,8 +73,6 @@ BOOST_AUTO_TEST_CASE(testPVASceneSlice_CPU) {
 	                    28887.87700, 0.001);
 
 	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_slice_same_dimensions_CPU(
-			&configuration::get().general_voxel_volume_parameters,
-			configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 			MEMORYDEVICE_CPU);
 	volume_slice_same_dimensions_CPU.Reset();
 
@@ -94,8 +92,6 @@ BOOST_AUTO_TEST_CASE(testPVASceneSlice_CPU) {
 	Vector3i sizeSlice(bounds.max_x - bounds.min_x, bounds.max_y - bounds.min_y, bounds.max_z - bounds.min_z);
 
 	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_slice_different_dimensions_CPU(
-			&configuration::get().general_voxel_volume_parameters,
-			configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 			MEMORYDEVICE_CPU, {sizeSlice, offsetSlice});
 	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetVolume(&volume_slice_different_dimensions_CPU);
 
@@ -111,12 +107,10 @@ BOOST_AUTO_TEST_CASE(testPVASceneSlice_CPU) {
 	                                                      &volume_slice_different_dimensions_CPU, tolerance));
 
 	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_slice_from_disk_CPU(
-			&configuration::get().general_voxel_volume_parameters,
-			configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 			MEMORYDEVICE_CPU, {sizeSlice, offsetSlice});
 	volume_slice_from_disk_CPU.Reset();
 
-	volume_slice_from_disk_CPU.LoadFromDirectory("TestData/snoopy_result_fr16-17_partial_PVA/snoopy_partial_frame_16_");
+	volume_slice_from_disk_CPU.LoadFromDisk("TestData/snoopy_result_fr16-17_partial_PVA/snoopy_partial_frame_16_");
 
 	BOOST_REQUIRE(contentAlmostEqual_CPU(&volume_slice_different_dimensions_CPU,
 	                                     &volume_slice_from_disk_CPU, tolerance));

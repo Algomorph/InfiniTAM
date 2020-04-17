@@ -18,7 +18,7 @@ void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::IntegrateIntoScene(V
 {
 	Vector2i rgbImgSize = view->rgb->dimensions;
 	Vector2i depthImgSize = view->depth->dimensions;
-	float voxelSize = volume->parameters->voxel_size;
+	float voxelSize = volume->GetParameters().voxel_size;
 
 	Matrix4f M_d, M_rgb;
 	Vector4f projParams_d, projParams_rgb;
@@ -29,7 +29,7 @@ void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::IntegrateIntoScene(V
 	projParams_d = view->calib.intrinsics_d.projectionParamsSimple.all;
 	projParams_rgb = view->calib.intrinsics_rgb.projectionParamsSimple.all;
 
-	float mu = volume->parameters->narrow_band_half_width; int maxW = volume->parameters->max_integration_weight;
+	float mu = volume->GetParameters().narrow_band_half_width; int maxW = volume->GetParameters().max_integration_weight;
 
 	float *depth = view->depth->GetData(MEMORYDEVICE_CPU);
 	float *confidence = view->depthConfidence->GetData(MEMORYDEVICE_CPU);
@@ -40,7 +40,7 @@ void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::IntegrateIntoScene(V
 	int *visibleBlockHashCodes = volume->index.GetUtilizedBlockHashCodes();
 	int visibleHashBlockCount = volume->index.GetUtilizedBlockCount();
 
-	bool stopIntegratingAtMaxW = volume->parameters->stop_integration_at_max_weight;
+	bool stopIntegratingAtMaxW = volume->GetParameters().stop_integration_at_max_weight;
 
 #ifdef WITH_OPENMP
 	#pragma omp parallel for default(shared)
@@ -89,7 +89,7 @@ void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::AllocateSceneFromDep
                                                                                    const CameraTrackingState *trackingState, const RenderState *renderState, bool onlyUpdateVisibleList, bool resetVisibleList)
 {
 	Vector2i depthImgSize = view->depth->dimensions;
-	float voxelSize = volume->parameters->voxel_size;
+	float voxelSize = volume->GetParameters().voxel_size;
 
 	Matrix4f M_d, invM_d;
 	Vector4f projParams_d, invProjParams_d;
@@ -103,7 +103,7 @@ void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::AllocateSceneFromDep
 	invProjParams_d.x = 1.0f / invProjParams_d.x;
 	invProjParams_d.y = 1.0f / invProjParams_d.y;
 
-	float mu = volume->parameters->narrow_band_half_width;
+	float mu = volume->GetParameters().narrow_band_half_width;
 
 	float *depth = view->depth->GetData(MEMORYDEVICE_CPU);
 	int *voxelAllocationList = volume->index.GetBlockAllocationList();
@@ -147,8 +147,8 @@ void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::AllocateSceneFromDep
 		                                                 hash_table, x, y,
 		                                                 depth, surface_cutoff_distance, invM_d,
 		                                                 invProjParams_d,
-		                                                 oneOverHashEntrySize, depthImgSize, volume->parameters->near_clipping_distance,
-		                                                 volume->parameters->far_clipping_distance, collisionDetected);
+		                                                 oneOverHashEntrySize, depthImgSize, volume->GetParameters().near_clipping_distance,
+		                                                 volume->GetParameters().far_clipping_distance, collisionDetected);
 	}
 
 	if (onlyUpdateVisibleList) useSwapping = false;
@@ -297,7 +297,7 @@ void SceneReconstructionEngine_CPU<TVoxel, PlainVoxelArray>::IntegrateIntoScene(
 {
 	const Vector2i rgbImgSize = view->rgb->dimensions;
 	const Vector2i depthImgSize = view->depth->dimensions;
-	const float voxelSize = volume->parameters->voxel_size;
+	const float voxelSize = volume->GetParameters().voxel_size;
 
 	const Matrix4f M_d = trackingState->pose_d->GetM();
 	const Matrix4f M_rgb = TVoxel::hasColorInformation ? view->calib.trafo_rgb_to_depth.calib_inv * M_d : Matrix4f();
@@ -305,8 +305,8 @@ void SceneReconstructionEngine_CPU<TVoxel, PlainVoxelArray>::IntegrateIntoScene(
 	const Vector4f projParams_d = view->calib.intrinsics_d.projectionParamsSimple.all;
 	const Vector4f projParams_rgb = view->calib.intrinsics_rgb.projectionParamsSimple.all;
 
-	const float mu = volume->parameters->narrow_band_half_width;
-	const int maxW = volume->parameters->max_integration_weight;
+	const float mu = volume->GetParameters().narrow_band_half_width;
+	const int maxW = volume->GetParameters().max_integration_weight;
 
 	float *depth = view->depth->GetData(MEMORYDEVICE_CPU);
 	float *confidence = view->depthConfidence->GetData(MEMORYDEVICE_CPU);
@@ -315,7 +315,7 @@ void SceneReconstructionEngine_CPU<TVoxel, PlainVoxelArray>::IntegrateIntoScene(
 
 	const PlainVoxelArray::IndexData *arrayInfo = volume->index.GetIndexData();
 
-	const bool stopIntegratingAtMaxW = volume->parameters->stop_integration_at_max_weight;
+	const bool stopIntegratingAtMaxW = volume->GetParameters().stop_integration_at_max_weight;
 	//bool approximateIntegration = !trackingState->requiresFullRendering;
 
 #ifdef WITH_OPENMP

@@ -120,7 +120,7 @@ void SwappingEngine_CUDA<TVoxel, VoxelBlockHash>::IntegrateGlobalIntoLocal(Voxel
 
 	int noNeededEntries = this->LoadFromGlobalMemory(volume);
 
-	int maxW = volume->parameters->max_integration_weight;
+	int maxW = volume->GetParameters().max_integration_weight;
 
 	if (noNeededEntries > 0) {
 		dim3 blockSize(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);

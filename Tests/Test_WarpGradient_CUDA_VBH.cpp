@@ -43,10 +43,7 @@ using namespace ITMLib;
 typedef WarpGradientDataFixture<MemoryDeviceType::MEMORYDEVICE_CUDA, VoxelBlockHash> DataFixture;
 BOOST_FIXTURE_TEST_CASE(testDataTerm_CUDA_VBH, DataFixture) {
 
-	VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field(&configuration::get().general_voxel_volume_parameters,
-	                                                            configuration::get().swapping_mode ==
-	                                                            configuration::SWAPPINGMODE_ENABLED,
-	                                                  MEMORYDEVICE_CUDA, indexParameters);
+	VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field(MEMORYDEVICE_CUDA, indexParameters);
 	ManipulationEngine_CUDA_VBH_Warp::Inst().ResetVolume(&warp_field);
 
 	indexing_engine.AllocateWarpVolumeFromOtherVolume(&warp_field, live_volume);
@@ -79,7 +76,7 @@ BOOST_FIXTURE_TEST_CASE(testUpdateWarps_CUDA_VBH, DataFixture) {
 	IndexingEngine<TSDFVoxel,VoxelBlockHash,MEMORYDEVICE_CUDA>::Instance().AllocateUsingOtherVolume(canonical_volume, live_volume);
 
 	float max_warp = motionTracker_VBH_CUDA->UpdateWarps(&warp_field_copy, canonical_volume, live_volume);
-	//warp_field_copy.SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_VBH/warp_iter0");
+	//warp_field_copy.SaveToDisk("../../Tests/TestData/snoopy_result_fr16-17_partial_VBH/warp_iter0");
 	BOOST_REQUIRE_CLOSE(max_warp, 0.121243507f, 1e-7f);
 
 	float tolerance = 1e-8;

@@ -97,8 +97,8 @@ SurfaceTracker<T_TSDF_Voxel, TWarpVoxel, TIndex, TMemoryDeviceType, TGradientFun
 
 	WarpGradientFunctor<T_TSDF_Voxel, TWarpVoxel, TIndex, TMemoryDeviceType, TGradientFunctorType>
 			calculate_gradient_functor(this->parameters, this->switches, warp_field, canonical_volume, live_volume,
-			                           canonical_volume->parameters->voxel_size,
-			                           canonical_volume->parameters->narrow_band_half_width);
+			                           canonical_volume->GetParameters().voxel_size,
+			                           canonical_volume->GetParameters().narrow_band_half_width);
 
 	ThreeVolumeTraversalEngine<TWarpVoxel, T_TSDF_Voxel, T_TSDF_Voxel, TIndex, TMemoryDeviceType>::
 #ifdef TRAVERSE_ALL_HASH_BLOCKS

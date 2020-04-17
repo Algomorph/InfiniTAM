@@ -47,7 +47,7 @@ void MeshingEngine_CUDA<TVoxel, VoxelBlockHash>::MeshScene(Mesh* mesh,
 	const HashEntry* hashTable = volume->index.GetEntries();
 
 	int noMaxTriangles = mesh->max_triangle_count, noTotalEntries = volume->index.hash_entry_count;
-	float factor = volume->parameters->voxel_size;
+	float factor = volume->GetParameters().voxel_size;
 
 	ORcudaSafeCall(cudaMemset(noTriangles_device, 0, sizeof(unsigned int)));
 	ORcudaSafeCall(cudaMemset(visibleBlockGlobalPos_device, 0, sizeof(Vector4s) * volume->index.voxel_block_count));

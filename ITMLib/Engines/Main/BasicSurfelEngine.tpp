@@ -34,7 +34,7 @@ BasicSurfelEngine<TSurfel>::BasicSurfelEngine(const RGBDCalib& calib, Vector2i i
 
 	imuCalibrator = new ITMIMUCalibrator_iPad();
 	tracker = CameraTrackerFactory::Instance().Make(imgSize_rgb, imgSize_d, lowLevelEngine, imuCalibrator,
-	                                                &settings.general_voxel_volume_parameters);
+	                                                settings.general_voxel_volume_parameters);
 	trackingController = new CameraTrackingController(tracker);
 
 	Vector2i trackedImageSize = trackingController->GetTrackedImageSize(imgSize_rgb, imgSize_d);

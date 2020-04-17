@@ -406,7 +406,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::BuildUtilizedBloc
 	// ** view data **
 	Vector4f depthCameraProjectionParameters = view->calib.intrinsics_d.projectionParamsSimple.all;
 	Vector2i depthImgSize = view->depth->dimensions;
-	float voxelSize = volume->parameters->voxel_size;
+	float voxelSize = volume->GetParameters().voxel_size;
 
 	int visibleEntryCount = 0;
 	//build visible list

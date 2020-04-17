@@ -72,7 +72,7 @@ void SwappingEngine_CPU<TVoxel, VoxelBlockHash>::IntegrateGlobalIntoLocal(VoxelV
 
 	const int needed_entry_count = this->LoadFromGlobalMemory(volume);
 
-	const int max_integration_weight = volume->parameters->max_integration_weight;
+	const int max_integration_weight = volume->GetParameters().max_integration_weight;
 
 	for (int i = 0; i < needed_entry_count; i++)
 	{

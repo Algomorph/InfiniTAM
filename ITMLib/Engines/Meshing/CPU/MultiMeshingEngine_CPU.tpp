@@ -15,7 +15,7 @@ inline void MultiMeshingEngine_CPU<TVoxel, VoxelBlockHash>::MeshScene(Mesh * mes
 	MultiIndexData hashTables;
 	MultiVoxelData localVBAs;
 
-	const VoxelVolumeParameters & sceneParams = *(sceneManager.getLocalMap(0)->volume->parameters);
+	const VoxelVolumeParameters& sceneParams = sceneManager.getLocalMap(0)->volume->GetParameters();
 	hashTables.numLocalMaps = numLocalMaps;
 	for (int localMapId = 0; localMapId < numLocalMaps; ++localMapId)
 	{

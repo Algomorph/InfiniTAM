@@ -54,6 +54,7 @@
 #include "../ITMLib/Engines/VolumeFusion/VolumeFusionEngineFactory.h"
 #include "../ITMLib/Utils/Analytics/BenchmarkUtilities.h"
 #include "../ITMLib/Engines/Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
+
 #endif
 
 
@@ -71,60 +72,47 @@ GenericWarpTest(const SlavchevaSurfaceTracker::Switches& switches, int iteration
 	GenericWarpConsistencySubtest<VoxelBlockHash, TMemoryDeviceType>(switches, iteration_limit, mode,
 	                                                                 absoluteTolerance);
 
-	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_PVA(&configuration::get().general_voxel_volume_parameters,
-	                                                   configuration::get().swapping_mode ==
-	                                                   configuration::SWAPPINGMODE_ENABLED,
-	                                                   TMemoryDeviceType,
+	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_PVA(TMemoryDeviceType,
 	                                                   Frame16And17Fixture::InitParams<PlainVoxelArray>());
-	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH(&configuration::get().general_voxel_volume_parameters,
-	                                                  configuration::get().swapping_mode ==
-	                                                  configuration::SWAPPINGMODE_ENABLED,
-	                                                  TMemoryDeviceType,
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH(TMemoryDeviceType,
 	                                                  Frame16And17Fixture::InitParams<VoxelBlockHash>());
 	switch (mode) {
 		case TEST_SUCCESSIVE_ITERATIONS: {
 
-			VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field_PVA(
-					&configuration::get().general_voxel_volume_parameters,
-					configuration::get().swapping_mode ==
-					configuration::SWAPPINGMODE_ENABLED,
-					TMemoryDeviceType,
-					Frame16And17Fixture::InitParams<PlainVoxelArray>());
-			VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field_VBH(&configuration::get().general_voxel_volume_parameters,
-			                                                      configuration::get().swapping_mode ==
-			                                                      configuration::SWAPPINGMODE_ENABLED,
-			                                                      TMemoryDeviceType,
+			VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field_PVA(TMemoryDeviceType,
+			                                                       Frame16And17Fixture::InitParams<PlainVoxelArray>());
+			VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field_VBH(TMemoryDeviceType,
 			                                                      Frame16And17Fixture::InitParams<VoxelBlockHash>());
 
 			for (int iteration = 0; iteration < iteration_limit; iteration++) {
 				std::cout << "Testing iteration " << iteration << std::endl;
-				warp_field_PVA.LoadFromDirectory(get_path_warps(prefix, iteration));
+				warp_field_PVA.LoadFromDisk(get_path_warps(prefix, iteration));
 				EditAndCopyEngineFactory::Instance<WarpVoxel, VoxelBlockHash, TMemoryDeviceType>().ResetVolume(
 						&warp_field_VBH);
-				warp_field_VBH.LoadFromDirectory(get_path_warps(prefix, iteration));
+				warp_field_VBH.LoadFromDisk(get_path_warps(prefix, iteration));
 				BOOST_REQUIRE(allocatedContentAlmostEqual_Verbose(&warp_field_PVA, &warp_field_VBH,
 				                                                  absoluteTolerance, TMemoryDeviceType));
 				EditAndCopyEngineFactory::Instance<TSDFVoxel, VoxelBlockHash, TMemoryDeviceType>().ResetVolume(
 						&volume_VBH);
-				volume_PVA.LoadFromDirectory(get_path_warped_live(prefix, iteration));
-				volume_VBH.LoadFromDirectory(get_path_warped_live(prefix, iteration));
+				volume_PVA.LoadFromDisk(get_path_warped_live(prefix, iteration));
+				volume_VBH.LoadFromDisk(get_path_warped_live(prefix, iteration));
 				BOOST_REQUIRE(contentForFlagsAlmostEqual_Verbose(&volume_PVA, &volume_VBH, VOXEL_NONTRUNCATED,
 				                                                 absoluteTolerance, TMemoryDeviceType));
 			}
 		}
 			break;
 		case TEST_FINAL_ITERATION_AND_FUSION: {
-			volume_PVA.LoadFromDirectory(get_path_warped_live(prefix, iteration_limit - 1));
+			volume_PVA.LoadFromDisk(get_path_warped_live(prefix, iteration_limit - 1));
 			EditAndCopyEngineFactory::Instance<TSDFVoxel, VoxelBlockHash, TMemoryDeviceType>().ResetVolume(
 					&volume_VBH);
-			volume_VBH.LoadFromDirectory(get_path_warped_live(prefix, iteration_limit - 1));
+			volume_VBH.LoadFromDisk(get_path_warped_live(prefix, iteration_limit - 1));
 			BOOST_REQUIRE(
 					contentForFlagsAlmostEqual(&volume_PVA, &volume_VBH, VOXEL_NONTRUNCATED, absoluteTolerance,
 					                           TMemoryDeviceType));
-			volume_PVA.LoadFromDirectory(get_path_fused(prefix, iteration_limit - 1));
+			volume_PVA.LoadFromDisk(get_path_fused(prefix, iteration_limit - 1));
 			EditAndCopyEngineFactory::Instance<TSDFVoxel, VoxelBlockHash, TMemoryDeviceType>().ResetVolume(
 					&volume_VBH);
-			volume_VBH.LoadFromDirectory(get_path_fused(prefix, iteration_limit - 1));
+			volume_VBH.LoadFromDisk(get_path_fused(prefix, iteration_limit - 1));
 			BOOST_REQUIRE(
 					contentForFlagsAlmostEqual(&volume_PVA, &volume_VBH, VOXEL_NONTRUNCATED, absoluteTolerance,
 					                           TMemoryDeviceType));
@@ -239,24 +227,24 @@ inline static void PrintVolumeStatistics(
 #ifdef TEST_PERFORMANCE
 BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CPU) {
 	VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field(&configuration::get().general_voxel_volume_parameters,
-	                                                  configuration::get().swapping_mode ==
-	                                                  configuration::SWAPPINGMODE_ENABLED,
-	                                                  MEMORYDEVICE_CPU,
-	                                                  Frame16And17Fixture::InitParams<VoxelBlockHash>());
+													  configuration::get().swapping_mode ==
+													  configuration::SWAPPINGMODE_ENABLED,
+													  MEMORYDEVICE_CPU,
+													  Frame16And17Fixture::InitParams<VoxelBlockHash>());
 	warp_field.Reset();
 
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* canonical_volume;
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* live_volumes[2] = {
 			new VoxelVolume<TSDFVoxel, VoxelBlockHash>(&configuration::get().general_voxel_volume_parameters,
-			                                           configuration::get().swapping_mode ==
-			                                           configuration::SWAPPINGMODE_ENABLED,
-			                                           MEMORYDEVICE_CPU,
-			                                           Frame16And17Fixture::InitParams<VoxelBlockHash>()),
+													   configuration::get().swapping_mode ==
+													   configuration::SWAPPINGMODE_ENABLED,
+													   MEMORYDEVICE_CPU,
+													   Frame16And17Fixture::InitParams<VoxelBlockHash>()),
 			new VoxelVolume<TSDFVoxel, VoxelBlockHash>(&configuration::get().general_voxel_volume_parameters,
-			                                           configuration::get().swapping_mode ==
-			                                           configuration::SWAPPINGMODE_ENABLED,
-			                                           MEMORYDEVICE_CPU,
-			                                           Frame16And17Fixture::InitParams<VoxelBlockHash>())
+													   configuration::get().swapping_mode ==
+													   configuration::SWAPPINGMODE_ENABLED,
+													   MEMORYDEVICE_CPU,
+													   Frame16And17Fixture::InitParams<VoxelBlockHash>())
 	};
 	live_volumes[0]->Reset();
 	live_volumes[1]->Reset();
@@ -264,12 +252,12 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CPU) {
 
 	View* view = nullptr;
 	buildSdfVolumeFromImage_NearSurfaceAllocation(&canonical_volume, &view,
-	                                              "TestData/snoopy_depth_000016.png",
-	                                              "TestData/snoopy_color_000016.png",
-	                                              "TestData/snoopy_omask_000016.png",
-	                                              "TestData/snoopy_calib.txt",
-	                                              MEMORYDEVICE_CPU,
-	                                              Frame16And17Fixture::InitParams<VoxelBlockHash>());
+												  "TestData/snoopy_depth_000016.png",
+												  "TestData/snoopy_color_000016.png",
+												  "TestData/snoopy_omask_000016.png",
+												  "TestData/snoopy_calib.txt",
+												  MEMORYDEVICE_CPU,
+												  Frame16And17Fixture::InitParams<VoxelBlockHash>());
 
 	Vector2i image_size = view->depth->dimensions;
 
@@ -279,14 +267,14 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CPU) {
 			VisualizationEngineFactory::MakeVisualizationEngine<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CPU);
 
 	RenderState render_state(image_size, configuration::get().general_voxel_volume_parameters.near_clipping_distance,
-	                         configuration::get().general_voxel_volume_parameters.far_clipping_distance,
-	                         MEMORYDEVICE_CPU);
+							 configuration::get().general_voxel_volume_parameters.far_clipping_distance,
+							 MEMORYDEVICE_CPU);
 
 	visualization_engine->CreateICPMaps(canonical_volume, view, &tracking_state, &render_state);
 
 	updateView(&view, "TestData/snoopy_depth_000017.png",
-	           "TestData/snoopy_color_000017.png", "TestData/snoopy_omask_000017.png",
-	           "TestData/snoopy_calib.txt", MEMORYDEVICE_CPU);
+			   "TestData/snoopy_color_000017.png", "TestData/snoopy_omask_000017.png",
+			   "TestData/snoopy_calib.txt", MEMORYDEVICE_CPU);
 
 	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, VoxelBlockHash>* reconstructionEngine =
 			DepthFusionEngineFactory
@@ -294,7 +282,7 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CPU) {
 
 	const int live_index_to_start_from = 0;
 	reconstructionEngine->GenerateTsdfVolumeFromTwoSurfaces(live_volumes[live_index_to_start_from], view,
-	                                                        &tracking_state);
+															&tracking_state);
 
 	VolumeStatisticsCalculator<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>& tsdf_calculator =
 			VolumeStatisticsCalculator<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance();
@@ -304,7 +292,7 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CPU) {
 	std::cout << "Utilized (initial source) hash count: " << live_volumes[live_index_to_start_from]->index.GetUtilizedHashBlockCount() << std::endl;
 
 	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance().AllocateUsingOtherVolume(live_volumes[(live_index_to_start_from + 1) % 2],
-	                                                                                                  live_volumes[live_index_to_start_from]);
+																									  live_volumes[live_index_to_start_from]);
 
 
 
@@ -331,9 +319,9 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CPU) {
 	}
 
 	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance().AllocateUsingOtherVolume(canonical_volume,
-	                                                                                                  live_volumes[live_index_to_start_from]);
+																									  live_volumes[live_index_to_start_from]);
 	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance().AllocateUsingOtherVolume(&warp_field,
-	                                                                                                  live_volumes[live_index_to_start_from]);
+																									  live_volumes[live_index_to_start_from]);
 
 
 
@@ -369,7 +357,7 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CPU) {
 		PrintVolumeStatistics<TSDFVoxel,VoxelBlockHash,MEMORYDEVICE_CPU>(live_volumes[target_warped_field_ix], "[target live before warp]");
 		std::cout << "Utilized (target) hash count: " << live_volumes[target_warped_field_ix]->index.GetUtilizedHashBlockCount() << std::endl;
 		warping_engine->WarpVolume_WarpUpdates(&warp_field, live_volumes[source_warped_field_ix],
-		                                       live_volumes[target_warped_field_ix]);
+											   live_volumes[target_warped_field_ix]);
 		PrintVolumeStatistics<TSDFVoxel,VoxelBlockHash,MEMORYDEVICE_CPU>(live_volumes[target_warped_field_ix], "[target live after warp]");
 		std::cout << "Utilized (target) hash count: " << live_volumes[target_warped_field_ix]->index.GetUtilizedHashBlockCount() << std::endl;
 		bench::StopTimer("4_WarpVolume");
@@ -390,24 +378,24 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CPU) {
 #if !defined(COMPILE_WITHOUT_CUDA) && defined(TEST_PERFORMANCE)
 BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CUDA) {
 	VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field(&configuration::get().general_voxel_volume_parameters,
-	                                                  configuration::get().swapping_mode ==
-	                                                  configuration::SWAPPINGMODE_ENABLED,
-	                                                  MEMORYDEVICE_CUDA,
-	                                                  Frame16And17Fixture::InitParams<VoxelBlockHash>());
+													  configuration::get().swapping_mode ==
+													  configuration::SWAPPINGMODE_ENABLED,
+													  MEMORYDEVICE_CUDA,
+													  Frame16And17Fixture::InitParams<VoxelBlockHash>());
 	warp_field.Reset();
 
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* canonical_volume;
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* live_volumes[2] = {
 			new VoxelVolume<TSDFVoxel, VoxelBlockHash>(&configuration::get().general_voxel_volume_parameters,
-			                                           configuration::get().swapping_mode ==
-			                                           configuration::SWAPPINGMODE_ENABLED,
-			                                           MEMORYDEVICE_CUDA,
-			                                           Frame16And17Fixture::InitParams<VoxelBlockHash>()),
+													   configuration::get().swapping_mode ==
+													   configuration::SWAPPINGMODE_ENABLED,
+													   MEMORYDEVICE_CUDA,
+													   Frame16And17Fixture::InitParams<VoxelBlockHash>()),
 			new VoxelVolume<TSDFVoxel, VoxelBlockHash>(&configuration::get().general_voxel_volume_parameters,
-			                                           configuration::get().swapping_mode ==
-			                                           configuration::SWAPPINGMODE_ENABLED,
-			                                           MEMORYDEVICE_CUDA,
-			                                           Frame16And17Fixture::InitParams<VoxelBlockHash>())
+													   configuration::get().swapping_mode ==
+													   configuration::SWAPPINGMODE_ENABLED,
+													   MEMORYDEVICE_CUDA,
+													   Frame16And17Fixture::InitParams<VoxelBlockHash>())
 	};
 	live_volumes[0]->Reset();
 	live_volumes[1]->Reset();
@@ -415,12 +403,12 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CUDA) {
 
 	View* view = nullptr;
 	buildSdfVolumeFromImage_NearSurfaceAllocation(&canonical_volume, &view,
-	                                              "TestData/snoopy_depth_000016.png",
-	                                              "TestData/snoopy_color_000016.png",
-	                                              "TestData/snoopy_omask_000016.png",
-	                                              "TestData/snoopy_calib.txt",
-	                                              MEMORYDEVICE_CUDA,
-	                                              Frame16And17Fixture::InitParams<VoxelBlockHash>());
+												  "TestData/snoopy_depth_000016.png",
+												  "TestData/snoopy_color_000016.png",
+												  "TestData/snoopy_omask_000016.png",
+												  "TestData/snoopy_calib.txt",
+												  MEMORYDEVICE_CUDA,
+												  Frame16And17Fixture::InitParams<VoxelBlockHash>());
 
 	Vector2i image_size = view->depth->dimensions;
 
@@ -430,14 +418,14 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CUDA) {
 			VisualizationEngineFactory::MakeVisualizationEngine<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CUDA);
 
 	RenderState render_state(image_size, configuration::get().general_voxel_volume_parameters.near_clipping_distance,
-	                         configuration::get().general_voxel_volume_parameters.far_clipping_distance,
-	                         MEMORYDEVICE_CUDA);
+							 configuration::get().general_voxel_volume_parameters.far_clipping_distance,
+							 MEMORYDEVICE_CUDA);
 
 	visualization_engine->CreateICPMaps(canonical_volume, view, &tracking_state, &render_state);
 
 	updateView(&view, "TestData/snoopy_depth_000017.png",
-	           "TestData/snoopy_color_000017.png", "TestData/snoopy_omask_000017.png",
-	           "TestData/snoopy_calib.txt", MEMORYDEVICE_CUDA);
+			   "TestData/snoopy_color_000017.png", "TestData/snoopy_omask_000017.png",
+			   "TestData/snoopy_calib.txt", MEMORYDEVICE_CUDA);
 
 	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, VoxelBlockHash>* reconstructionEngine =
 			DepthFusionEngineFactory
@@ -445,18 +433,18 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CUDA) {
 
 	const int live_index_to_start_from = 0;
 	reconstructionEngine->GenerateTsdfVolumeFromTwoSurfaces(live_volumes[live_index_to_start_from], view,
-	                                                        &tracking_state);
+															&tracking_state);
 
 	VolumeStatisticsCalculator<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>& tsdf_calculator =
 			VolumeStatisticsCalculator<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance();
 
 	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance().AllocateUsingOtherVolume(live_volumes[(live_index_to_start_from + 1) % 2],
-	                                                                                       live_volumes[live_index_to_start_from]);
+																						   live_volumes[live_index_to_start_from]);
 
 	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance().AllocateUsingOtherVolume(canonical_volume,
-	                                                                                                  live_volumes[live_index_to_start_from]);
+																									  live_volumes[live_index_to_start_from]);
 	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance().AllocateUsingOtherVolume(&warp_field,
-	                                                                                                  live_volumes[live_index_to_start_from]);
+																									  live_volumes[live_index_to_start_from]);
 
 	SlavchevaSurfaceTracker::Switches switches(true, false, true, false, true);
 
@@ -486,7 +474,7 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CUDA) {
 		bench::StopTimer("3_UpdateWarps");
 		bench::StartTimer("4_WarpVolume");
 		warping_engine->WarpVolume_WarpUpdates(&warp_field, live_volumes[source_warped_field_ix],
-		                                       live_volumes[target_warped_field_ix]);
+											   live_volumes[target_warped_field_ix]);
 		bench::StopTimer("4_WarpVolume");
 	}
 

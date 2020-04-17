@@ -61,9 +61,7 @@ BOOST_AUTO_TEST_CASE(testSetVoxelAndCopy_PlainVoxelArray_CUDA) {
 	Vector3i volumeOffset(-10, -10, 0);
 	PlainVoxelArray::InitializationParameters indexParameters(volumeSize,volumeOffset);
 
-	VoxelVolume<TSDFVoxel, PlainVoxelArray> scene1(&configuration::get().general_voxel_volume_parameters,
-	                                                    configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
-	                                               MEMORYDEVICE_CUDA, indexParameters);
+	VoxelVolume<TSDFVoxel, PlainVoxelArray> scene1(MEMORYDEVICE_CUDA, indexParameters);
 
 
 	ManipulationEngine_CUDA_PVA_Voxel::Inst().ResetVolume(&scene1);
@@ -94,9 +92,7 @@ BOOST_AUTO_TEST_CASE(testSetVoxelAndCopy_PlainVoxelArray_CUDA) {
 	BOOST_REQUIRE(out.sdf == voxelZero.sdf);
 
 	Vector3i offset(-2, 3, 4);
-	VoxelVolume<TSDFVoxel, PlainVoxelArray> scene2(&configuration::get().general_voxel_volume_parameters,
-	                                                    configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
-	                                               MEMORYDEVICE_CUDA);
+	VoxelVolume<TSDFVoxel, PlainVoxelArray> scene2(MEMORYDEVICE_CUDA);
 	ManipulationEngine_CUDA_PVA_Voxel::Inst().ResetVolume(&scene2);
 	ManipulationEngine_CUDA_PVA_Voxel::Inst().CopyVolume(&scene2, &scene1, offset);
 
@@ -111,9 +107,7 @@ BOOST_AUTO_TEST_CASE(testSetVoxelAndCopy_PlainVoxelArray_CUDA) {
 }
 
 BOOST_AUTO_TEST_CASE(testSetVoxelAndCopy_VoxelBlockHash_CUDA) {
-	VoxelVolume<TSDFVoxel, VoxelBlockHash> scene1(&configuration::get().general_voxel_volume_parameters,
-	                                                   configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
-	                                              MEMORYDEVICE_CUDA);
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> scene1(MEMORYDEVICE_CUDA);
 
 	typedef EditAndCopyEngine_CPU<TSDFVoxel, VoxelBlockHash> SceneManipulationEngine;
 
@@ -144,9 +138,7 @@ BOOST_AUTO_TEST_CASE(testSetVoxelAndCopy_VoxelBlockHash_CUDA) {
 	BOOST_REQUIRE(out.sdf == voxelZero.sdf);
 
 	Vector3i offset(-34, 6, 9);
-	VoxelVolume<TSDFVoxel, VoxelBlockHash> scene2(&configuration::get().general_voxel_volume_parameters,
-	                                                   configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
-	                                              MEMORYDEVICE_CUDA);
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> scene2(MEMORYDEVICE_CUDA);
 	ManipulationEngine_CUDA_VBH_Voxel::Inst().ResetVolume(&scene2);
 	ManipulationEngine_CUDA_VBH_Voxel::Inst().CopyVolume(&scene2, &scene1, offset);
 	out = ManipulationEngine_CUDA_VBH_Voxel::Inst().ReadVoxel(&scene2, voxelPos + offset);
@@ -170,34 +162,22 @@ BOOST_AUTO_TEST_CASE(testCompareVoxelVolumes_CUDA_and_CPU_ITMVoxel) {
 	Vector3i extentEndVoxel = volumeOffset + volumeSize;
 
 
-	VoxelVolume<TSDFVoxel, PlainVoxelArray> scene_PVA1(&configuration::get().general_voxel_volume_parameters,
-	                                                    configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
-	                                                   MEMORYDEVICE_CUDA,
+	VoxelVolume<TSDFVoxel, PlainVoxelArray> scene_PVA1(MEMORYDEVICE_CUDA,
 	                                                   indexParametersPVA);
 	ManipulationEngine_CUDA_PVA_Voxel::Inst().ResetVolume(&scene_PVA1);
-	VoxelVolume<TSDFVoxel, PlainVoxelArray> scene_PVA2(&configuration::get().general_voxel_volume_parameters,
-	                                                    configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
-	                                                   MEMORYDEVICE_CUDA,
+	VoxelVolume<TSDFVoxel, PlainVoxelArray> scene_PVA2(MEMORYDEVICE_CUDA,
 	                                                   indexParametersPVA);
 	ManipulationEngine_CUDA_PVA_Voxel::Inst().ResetVolume(&scene_PVA2);
-	VoxelVolume<TSDFVoxel, VoxelBlockHash> scene_VBH1(&configuration::get().general_voxel_volume_parameters,
-	                                                   configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
-	                                                  MEMORYDEVICE_CUDA,
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> scene_VBH1(MEMORYDEVICE_CUDA,
 	                                                  indexParametersVBH);
 	ManipulationEngine_CUDA_VBH_Voxel::Inst().ResetVolume(&scene_VBH1);
-	VoxelVolume<TSDFVoxel, VoxelBlockHash> scene_VBH2(&configuration::get().general_voxel_volume_parameters,
-	                                                   configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
-	                                                  MEMORYDEVICE_CUDA,
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> scene_VBH2(MEMORYDEVICE_CUDA,
 	                                                  indexParametersVBH);
 	ManipulationEngine_CUDA_VBH_Voxel::Inst().ResetVolume(&scene_VBH2);
-	VoxelVolume<TSDFVoxel, PlainVoxelArray> scene5(&configuration::get().general_voxel_volume_parameters,
-	                                                   configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
-	                                               MEMORYDEVICE_CPU,
+	VoxelVolume<TSDFVoxel, PlainVoxelArray> scene5(MEMORYDEVICE_CPU,
 	                                               indexParametersPVA);
 	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetVolume(&scene5);
-	VoxelVolume<TSDFVoxel, VoxelBlockHash> scene6(&configuration::get().general_voxel_volume_parameters,
-	                                                   configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
-	                                              MEMORYDEVICE_CPU,
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> scene6(MEMORYDEVICE_CPU,
 	                                              indexParametersVBH);
 	ManipulationEngine_CPU_VBH_Voxel::Inst().ResetVolume(&scene6);
 
@@ -285,21 +265,13 @@ BOOST_AUTO_TEST_CASE(testCompareVoxelVolumes_CUDA_ITMWarp) {
 	VoxelBlockHash::InitializationParameters indexParametersVBH(0x800, 0x20000);
 	Vector3i extentEndVoxel = volumeOffset + volumeSize;
 
-	VoxelVolume<WarpVoxel, PlainVoxelArray> scene1(&configuration::get().general_voxel_volume_parameters,
-	                                                   configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
-	                                               MEMORYDEVICE_CUDA, indexParametersPVA);
+	VoxelVolume<WarpVoxel, PlainVoxelArray> scene1(MEMORYDEVICE_CUDA, indexParametersPVA);
 	ManipulationEngine_CUDA_PVA_Warp::Inst().ResetVolume(&scene1);
-	VoxelVolume<WarpVoxel, PlainVoxelArray> scene2(&configuration::get().general_voxel_volume_parameters,
-	                                                   configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
-	                                               MEMORYDEVICE_CUDA, indexParametersPVA);
+	VoxelVolume<WarpVoxel, PlainVoxelArray> scene2(MEMORYDEVICE_CUDA, indexParametersPVA);
 	ManipulationEngine_CUDA_PVA_Warp::Inst().ResetVolume(&scene2);
-	VoxelVolume<WarpVoxel, VoxelBlockHash> scene3(&configuration::get().general_voxel_volume_parameters,
-	                                                  configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
-	                                              MEMORYDEVICE_CUDA, indexParametersVBH);
+	VoxelVolume<WarpVoxel, VoxelBlockHash> scene3(MEMORYDEVICE_CUDA, indexParametersVBH);
 	ManipulationEngine_CUDA_VBH_Warp::Inst().ResetVolume(&scene3);
-	VoxelVolume<WarpVoxel, VoxelBlockHash> scene4(&configuration::get().general_voxel_volume_parameters,
-	                                                  configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
-	                                              MEMORYDEVICE_CUDA, indexParametersVBH);
+	VoxelVolume<WarpVoxel, VoxelBlockHash> scene4(MEMORYDEVICE_CUDA, indexParametersVBH);
 	ManipulationEngine_CUDA_VBH_Warp::Inst().ResetVolume(&scene4);
 
 	std::random_device random_device;

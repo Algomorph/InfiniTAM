@@ -51,7 +51,7 @@ void VisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::FindVisibleBlocks(VoxelVo
 {
 	const HashEntry *hash_table = volume->index.GetEntries();
 	int hash_entry_count = volume->index.hash_entry_count;
-	float voxel_size = volume->parameters->voxel_size;
+	float voxel_size = volume->GetParameters().voxel_size;
 	Vector2i imgSize = renderState->renderingRangeImage->dimensions;
 
 	Matrix4f M = pose->GetM();
@@ -114,7 +114,7 @@ template<class TVoxel>
 void VisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::CreateExpectedDepths(const VoxelVolume<TVoxel,VoxelBlockHash> *volume, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics,
                                                                             RenderState *renderState) const
 {
-	float voxelSize = volume->parameters->voxel_size;
+	float voxelSize = volume->GetParameters().voxel_size;
 
 	Vector2i imgSize = renderState->renderingRangeImage->dimensions;
 	Vector2f *minmaxData = renderState->renderingRangeImage->GetData(MEMORYDEVICE_CUDA);
@@ -164,7 +164,7 @@ template<> inline HashBlockVisibility* GetBlockVisibilityTypes<PlainVoxelArray>(
 template <class TVoxel, class TIndex>
 static void GenericRaycast(VoxelVolume<TVoxel, TIndex> *volume, const Vector2i& imgSize, const Matrix4f& invM, const Vector4f& projParams, const RenderState *renderState, bool updateVisibleList)
 {
-	float voxelSize = volume->parameters->voxel_size;
+	float voxelSize = volume->GetParameters().voxel_size;
 	float oneOverVoxelSize = 1.0f / voxelSize;
 
 	HashBlockVisibility* blockVisibilityTypes = GetBlockVisibilityTypes(volume->index);
@@ -181,7 +181,7 @@ static void GenericRaycast(VoxelVolume<TVoxel, TIndex> *volume, const Vector2i& 
 				InvertProjectionParams(projParams),
 				oneOverVoxelSize,
 				renderState->renderingRangeImage->GetData(MEMORYDEVICE_CUDA),
-				volume->parameters->narrow_band_half_width
+				volume->GetParameters().narrow_band_half_width
 		);
 	else genericRaycast_device<TVoxel, TIndex, false> <<<gridSize, cudaBlockSize >>>(
 				renderState->raycastResult->GetData(MEMORYDEVICE_CUDA),
@@ -193,7 +193,7 @@ static void GenericRaycast(VoxelVolume<TVoxel, TIndex> *volume, const Vector2i& 
 				InvertProjectionParams(projParams),
 				oneOverVoxelSize,
 				renderState->renderingRangeImage->GetData(MEMORYDEVICE_CUDA),
-				volume->parameters->narrow_band_half_width
+				volume->GetParameters().narrow_band_half_width
 		);
 	ORcudaKernelCheck;
 }
@@ -246,12 +246,12 @@ static void RenderImage_common(VoxelVolume<TVoxel, TIndex> *volume, const ORUtil
 	case IVisualizationEngine::RENDER_SHADED_GREYSCALE_IMAGENORMALS:
 		if (intrinsics->FocalLengthSignsDiffer())
 		{
-			renderGrey_ImageNormals_device<true> <<<gridSize, cudaBlockSize>>>(outRendering, pointsRay, volume->parameters->voxel_size,
+			renderGrey_ImageNormals_device<true> <<<gridSize, cudaBlockSize>>>(outRendering, pointsRay, volume->GetParameters().voxel_size,
 			                                                                   imgSize, lightSource);
 		}
 		else
 		{
-			renderGrey_ImageNormals_device<false> <<<gridSize, cudaBlockSize>>>(outRendering, pointsRay, volume->parameters->voxel_size,
+			renderGrey_ImageNormals_device<false> <<<gridSize, cudaBlockSize>>>(outRendering, pointsRay, volume->GetParameters().voxel_size,
 			                                                                    imgSize, lightSource);
 		}
 		ORcudaKernelCheck;
@@ -286,7 +286,7 @@ static void CreatePointCloud_common(VoxelVolume<TVoxel, TIndex> *volume, const V
 	dim3 gridSize = getGridSize(imgSize, cudaBlockSize);
 	renderPointCloud_device<TVoxel, TIndex> <<<gridSize, cudaBlockSize >>>
 			(locations, colours, noTotalPoints_device,
-			 pointsRay, volume->GetVoxels(), volume->index.GetIndexData(), skipPoints, volume->parameters->voxel_size,
+			 pointsRay, volume->GetVoxels(), volume->index.GetIndexData(), skipPoints, volume->GetParameters().voxel_size,
 			 imgSize, lightSource);
 	ORcudaKernelCheck;
 
@@ -313,12 +313,12 @@ void CreateICPMaps_common(VoxelVolume<TVoxel, TIndex> *volume, const View *view,
 	if (view->calib.intrinsics_d.FocalLengthSignsDiffer())
 	{
 		renderICP_device<true> <<<gridSize, cudaBlockSize>>>(pointsMap, normalsMap, pointsRay,
-		                                                     volume->parameters->voxel_size, imgSize, lightSource);
+		                                                     volume->GetParameters().voxel_size, imgSize, lightSource);
 	}
 	else
 	{
 		renderICP_device<false> <<<gridSize, cudaBlockSize>>>(pointsMap, normalsMap, pointsRay,
-		                                                      volume->parameters->voxel_size, imgSize, lightSource);
+		                                                      volume->GetParameters().voxel_size, imgSize, lightSource);
 	}
 	ORcudaKernelCheck;
 }
@@ -337,8 +337,8 @@ static void ForwardRender_common(const VoxelVolume<TVoxel, TIndex> *volume, cons
 	Vector4f *forwardProjection = renderState->forwardProjection->GetData(MEMORYDEVICE_CUDA);
 	int *fwdProjMissingPoints = renderState->fwdProjMissingPoints->GetData(MEMORYDEVICE_CUDA);
 	const Vector2f *minmaximg = renderState->renderingRangeImage->GetData(MEMORYDEVICE_CUDA);
-	float oneOverVoxelSize = 1.0f / volume->parameters->voxel_size;
-	float voxelSize = volume->parameters->voxel_size;
+	float oneOverVoxelSize = 1.0f / volume->GetParameters().voxel_size;
+	float voxelSize = volume->GetParameters().voxel_size;
 	const TVoxel *voxelData = volume->GetVoxels();
 	const typename TIndex::IndexData *voxelIndex = volume->index.GetIndexData();
 
@@ -374,7 +374,7 @@ static void ForwardRender_common(const VoxelVolume<TVoxel, TIndex> *volume, cons
 		genericRaycastMissingPoints_device<TVoxel, TIndex, false> <<<gridSize, blockSize >> >(
 				forwardProjection, NULL, voxelData, voxelIndex, imgSize, invM,
 				InvertProjectionParams(projParams), oneOverVoxelSize, fwdProjMissingPoints,
-				renderState->noFwdProjMissingPoints, minmaximg, volume->parameters->narrow_band_half_width);
+				renderState->noFwdProjMissingPoints, minmaximg, volume->GetParameters().narrow_band_half_width);
 		ORcudaKernelCheck;
 	}
 }

@@ -55,14 +55,14 @@ BOOST_FIXTURE_TEST_CASE(Test_WarpScene_CPU_PVA, Frame16And17Fixture) {
 	loadVolume(&live_volume, "TestData/snoopy_result_fr16-17_partial_PVA/snoopy_partial_frame_17_",
 	           MEMORYDEVICE_CPU, InitParams<PlainVoxelArray>());
 	auto warped_live_volume = new VoxelVolume<TSDFVoxel, PlainVoxelArray>(
-			&settings.general_voxel_volume_parameters, false, MEMORYDEVICE_CPU, InitParams<PlainVoxelArray>());
+			settings.general_voxel_volume_parameters, false, MEMORYDEVICE_CPU, InitParams<PlainVoxelArray>());
 	warped_live_volume->Reset();
 
 	WarpingEngine_CPU_PVA warpingEngine;
 
 	warpingEngine.WarpVolume_WarpUpdates(warps, live_volume, warped_live_volume);
 #ifdef SAVE_TEST_DATA
-	warped_live_volume->SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_PVA/warped_live_");
+	warped_live_volume->SaveToDisk("../../Tests/TestData/snoopy_result_fr16-17_partial_PVA/warped_live_");
 #endif
 
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* warped_live_volume_gt;
@@ -87,7 +87,7 @@ BOOST_FIXTURE_TEST_CASE(Test_WarpScene_CPU_VBH, Frame16And17Fixture) {
 	loadVolume(&live_volume, "TestData/snoopy_result_fr16-17_partial_VBH/snoopy_partial_frame_17_",
 	           MEMORYDEVICE_CPU, InitParams<VoxelBlockHash>());
 	auto warped_live_volume = new VoxelVolume<TSDFVoxel, VoxelBlockHash>(
-			&settings.general_voxel_volume_parameters, false, MEMORYDEVICE_CPU, InitParams<VoxelBlockHash>());
+			settings.general_voxel_volume_parameters, false, MEMORYDEVICE_CPU, InitParams<VoxelBlockHash>());
 	warped_live_volume->Reset();
 
 	WarpingEngine_CPU_VBH warpingEngine;
@@ -95,7 +95,7 @@ BOOST_FIXTURE_TEST_CASE(Test_WarpScene_CPU_VBH, Frame16And17Fixture) {
 	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance().AllocateFromOtherVolume(warped_live_volume, live_volume);
 	warpingEngine.WarpVolume_WarpUpdates(warps, live_volume, warped_live_volume);
 #ifdef SAVE_TEST_DATA
-	warped_live_volume->SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_VBH/warped_live_");
+	warped_live_volume->SaveToDisk("../../Tests/TestData/snoopy_result_fr16-17_partial_VBH/warped_live_");
 #endif
 
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* warped_live_volume_gt;
@@ -272,14 +272,14 @@ BOOST_FIXTURE_TEST_CASE(Test_WarpScene_CUDA_PVA, Frame16And17Fixture) {
 	loadVolume(&live_volume, "TestData/snoopy_result_fr16-17_partial_PVA/snoopy_partial_frame_17_",
 	           MEMORYDEVICE_CUDA, InitParams<PlainVoxelArray>());
 	auto warped_live_volume = new VoxelVolume<TSDFVoxel, PlainVoxelArray>(
-			&configuration::get().general_voxel_volume_parameters, false, MEMORYDEVICE_CUDA,
+			configuration::get().general_voxel_volume_parameters, false, MEMORYDEVICE_CUDA,
 			InitParams<PlainVoxelArray>());
 	warped_live_volume->Reset();
 
 	WarpingEngine_CUDA_PVA warpingEngine;
 
 	warpingEngine.WarpVolume_WarpUpdates(warps, live_volume, warped_live_volume);
-	//warped_live_volume->SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_PVA/warped_live_");
+	//warped_live_volume->SaveToDisk("../../Tests/TestData/snoopy_result_fr16-17_partial_PVA/warped_live_");
 
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* warped_live_volume_gt;
 	loadVolume(&warped_live_volume_gt, "TestData/snoopy_result_fr16-17_partial_PVA/warped_live_",
@@ -303,7 +303,7 @@ BOOST_FIXTURE_TEST_CASE(Test_WarpScene_CUDA_VBH, Frame16And17Fixture) {
 	loadVolume(&live_volume, "TestData/snoopy_result_fr16-17_partial_VBH/snoopy_partial_frame_17_",
 	           MEMORYDEVICE_CUDA, InitParams<VoxelBlockHash>());
 	auto warped_live_volume = new VoxelVolume<TSDFVoxel, VoxelBlockHash>(
-			&configuration::get().general_voxel_volume_parameters, false, MEMORYDEVICE_CUDA,
+			configuration::get().general_voxel_volume_parameters, false, MEMORYDEVICE_CUDA,
 			InitParams<VoxelBlockHash>());
 	warped_live_volume->Reset();
 
@@ -313,7 +313,7 @@ BOOST_FIXTURE_TEST_CASE(Test_WarpScene_CUDA_VBH, Frame16And17Fixture) {
 
 	warpingEngine.WarpVolume_WarpUpdates(warps, live_volume, warped_live_volume);
 #ifdef SAVE_TEST_DATA
-	warped_live_volume->SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_VBH/warped_live_");
+	warped_live_volume->SaveToDisk("../../Tests/TestData/snoopy_result_fr16-17_partial_VBH/warped_live_");
 #endif
 
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* warped_live_volume_gt;

@@ -73,7 +73,7 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct16_PVA_VBH_Near_CPU, Frame16And17Fixt
 	std::string path_PVA = "TestData/snoopy_result_fr16-17_partial_PVA/snoopy_partial_frame_16_";
 	volume_PVA_16->SaveToDirectory(std::string("../../Tests/") +path_PVA);
 	std::string path_VBH = "TestData/snoopy_result_fr16-17_partial_VBH/snoopy_partial_frame_16_";
-	volume_VBH_16->SaveToDirectory(std::string("../../Tests/") +path_VBH);
+	volume_VBH_16->SaveToDisk(std::string("../../Tests/") +path_VBH);
 #endif
 //
 //	Vector3i test_pos = Vector3i(-1, 64, 233);
@@ -228,7 +228,7 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_PVA_VBH_Span_CPU, Frame16And17Fixt
 
 #ifdef SAVE_TEST_DATA
 	std::string path_PVA = "TestData/snoopy_result_fr16-17_partial_PVA/snoopy_partial_frame_17_";
-	volume_PVA_17.SaveToDirectory(std::string("../../Tests/") + path_PVA);
+	volume_PVA_17.SaveToDisk(std::string("../../Tests/") + path_PVA);
 	std::string path_VBH = "TestData/snoopy_result_fr16-17_partial_VBH/snoopy_partial_frame_17_";
 	volume_VBH_17_Span.SaveToDirectory(std::string("../../Tests/") + path_VBH);
 #endif
@@ -267,10 +267,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
 
 	Vector3i volumeSize(1024, 32, 1024), volumeOffset(-volumeSize.x / 2, -volumeSize.y / 2, 0);
 
-	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume1(&configuration::get().general_voxel_volume_parameters,
-	                                               configuration::get().swapping_mode ==
-	                                               configuration::SWAPPINGMODE_ENABLED,
-	                                               MEMORYDEVICE_CPU, {volumeSize, volumeOffset});
+	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume1(MEMORYDEVICE_CPU, {volumeSize, volumeOffset});
 	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetVolume(&volume1);
 	CameraTrackingState trackingState(imageSize, MEMORYDEVICE_CPU);
 
@@ -314,7 +311,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
 
 	float tolerance = 1e-4;
 	int narrow_band_half_width_voxels = static_cast<int>(std::round(
-			volume1.parameters->narrow_band_half_width / volume1.parameters->voxel_size));
+			volume1.GetParameters().narrow_band_half_width / volume1.GetParameters().voxel_size));
 	float max_SDF_step = 1.0f / narrow_band_half_width_voxels;
 
 	// check constructed volume integrity
@@ -362,10 +359,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
 	BOOST_REQUIRE_MESSAGE(!unexpected_sdf_at_level_set, "Expected sdf " << bad_expected_sdf << " for voxel " \
  << bad_coordinate << " at level set " << i_bad_level_set << ", got: " << bad_sdf);
 
-	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume2(&configuration::get().general_voxel_volume_parameters,
-	                                              configuration::get().swapping_mode ==
-	                                              configuration::SWAPPINGMODE_ENABLED,
-	                                              MEMORYDEVICE_CPU);
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume2(MEMORYDEVICE_CPU);
 	volume2.Reset();
 
 	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, VoxelBlockHash>* depth_fusion_engine_VBH =
@@ -379,10 +373,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
 
 	tolerance = 1e-5;
 	BOOST_REQUIRE(allocatedContentAlmostEqual_CPU(&volume1, &volume2, tolerance));
-	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume3(&configuration::get().general_voxel_volume_parameters,
-	                                               configuration::get().swapping_mode ==
-	                                               configuration::SWAPPINGMODE_ENABLED,
-	                                               MEMORYDEVICE_CPU, {volumeSize, volumeOffset});
+	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume3(MEMORYDEVICE_CPU, {volumeSize, volumeOffset});
 	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetVolume(&volume3);
 	indexer_PVA.AllocateNearAndBetweenTwoSurfaces(&volume3, view, &trackingState);
 	depth_fusion_engine->IntegrateDepthImageIntoTsdfVolume(&volume3, view, &trackingState);
@@ -404,13 +395,11 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
 	BOOST_REQUIRE(!allocatedContentAlmostEqual_CPU(&volume1, &volume2, tolerance));
 
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume5(
-			&configuration::get().general_voxel_volume_parameters,
-			configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 			MEMORYDEVICE_CPU);
 	ManipulationEngine_CPU_VBH_Voxel::Inst().ResetVolume(&volume5);
-	std::string path = "TestData/test_VBH_ConstructFromImage_";
-	SceneFileIOEngine_VBH::SaveVolumeCompact(&volume4, path);
-	SceneFileIOEngine_VBH::LoadVolumeCompact(&volume5, path);
+	std::string path = "TestData/test_ConstructFromImage_VBH_CPU_volume4.dat";
+	volume4.SaveToDisk(path);
+	volume5.LoadFromDisk(path);
 	BOOST_REQUIRE(allocatedContentAlmostEqual_CPU(&volume1, &volume5, tolerance));
 	BOOST_REQUIRE(contentAlmostEqual_CPU(&volume4, &volume5, tolerance));
 
@@ -441,10 +430,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CPU) {
 
 	//Vector3i volumeSize(512, 512, 512), volumeOffset(-volumeSize.x / 2, -volumeSize.y / 2, 0);
 	Vector3i volumeSize(512, 112, 360), volumeOffset(-512, -24, 152);
-	VoxelVolume<TSDFVoxel, PlainVoxelArray> generated_volume(&configuration::get().general_voxel_volume_parameters,
-	                                                         configuration::get().swapping_mode ==
-	                                                         configuration::SWAPPINGMODE_ENABLED,
-	                                                         MEMORYDEVICE_CPU, {volumeSize, volumeOffset});
+	VoxelVolume<TSDFVoxel, PlainVoxelArray> generated_volume(MEMORYDEVICE_CPU, {volumeSize, volumeOffset});
 
 	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetVolume(&generated_volume);
 	CameraTrackingState trackingState(imageSize, MEMORYDEVICE_CPU);
@@ -456,25 +442,19 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CPU) {
 			= IndexingEngineFactory::Get<TSDFVoxel, PlainVoxelArray>(MEMORYDEVICE_CPU);
 	indexer_PVA.AllocateNearAndBetweenTwoSurfaces(&generated_volume, view, &trackingState);
 	depth_fusion_engine_PVA->IntegrateDepthImageIntoTsdfVolume(&generated_volume, view, &trackingState);
-	//generated_volume.SaveToDirectory("../../Tests/TestData/test_PVA_ConstructFromImage2_");
+	//generated_volume.SaveToDisk("../../Tests/TestData/test_PVA_ConstructFromImage2_");
 
-	VoxelVolume<TSDFVoxel, PlainVoxelArray> loaded_volume(&configuration::get().general_voxel_volume_parameters,
-	                                                      configuration::get().swapping_mode ==
-	                                                      configuration::SWAPPINGMODE_ENABLED,
-	                                                      MEMORYDEVICE_CPU,
+	VoxelVolume<TSDFVoxel, PlainVoxelArray> loaded_volume(MEMORYDEVICE_CPU,
 	                                                      {volumeSize, volumeOffset});
 
 	std::string path = "TestData/test_PVA_ConstructFromImage2_";
 	loaded_volume.Reset();
-	loaded_volume.LoadFromDirectory(path);
+	loaded_volume.LoadFromDisk(path);
 
 	float tolerance = 1e-5;
 	BOOST_REQUIRE(contentAlmostEqual_CPU_Verbose(&generated_volume, &loaded_volume, tolerance));
 
-	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume3(&configuration::get().general_voxel_volume_parameters,
-	                                              configuration::get().swapping_mode ==
-	                                              configuration::SWAPPINGMODE_ENABLED,
-	                                              MEMORYDEVICE_CPU);
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume3(MEMORYDEVICE_CPU);
 	volume3.Reset();
 
 	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, VoxelBlockHash>* depth_fusion_engine_VBH =
@@ -562,6 +542,6 @@ BOOST_FIXTURE_TEST_CASE(GenerateTestData, Frame16And17Fixture) {
 	path_PVA = "TestData/snoopy_result_fr16-17_full/snoopy_full_frame_17_";
 	volume_PVA_17->SaveToDirectory(std::string("../../Tests/") + path_PVA);
 	path_VBH = "TestData/snoopy_result_fr16-17_full/snoopy_full_frame_17_";
-	volume_VBH_17->SaveToDirectory(std::string("../../Tests/") + path_VBH);
+	volume_VBH_17->SaveToDisk(std::string("../../Tests/") + path_VBH);
 }
 #endif

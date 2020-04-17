@@ -176,7 +176,7 @@ void simulateRandomVoxelAlteration(TVoxel& voxel) {
 //	                                              swapping_mode,
 //	                                              memoryDeviceType,initializationParameters);
 //	PrepareVoxelVolumeForLoading(&scene, memoryDeviceType);
-//	scene.LoadFromDirectory(path);
+//	scene.LoadFromDisk(path);
 //	return scene;
 //};
 
@@ -185,11 +185,10 @@ void loadVolume(VoxelVolume<TVoxel, TIndex>** volume, const std::string& path, M
                 typename TIndex::InitializationParameters initializationParameters,
                 configuration::SwappingMode swappingMode) {
 	configuration::Configuration& settings = configuration::get();
-	(*volume) = new VoxelVolume<TVoxel, TIndex>(&settings.general_voxel_volume_parameters,
-	                                            swappingMode,
+	(*volume) = new VoxelVolume<TVoxel, TIndex>(settings.general_voxel_volume_parameters, swappingMode,
 	                                            memoryDeviceType, initializationParameters);
 	PrepareVoxelVolumeForLoading(*volume);
-	(*volume)->LoadFromDirectory(path);
+	(*volume)->LoadFromDisk(path);
 }
 
 
@@ -210,16 +209,16 @@ void buildSdfVolumeFromImage_NearSurfaceAllocation(VoxelVolume<TVoxel, TIndex>**
                                                    const std::string& mask_path,
                                                    const std::string& calibration_path,
                                                    MemoryDeviceType memory_device,
-                                                   typename TIndex::InitializationParameters initializationParameters,
-                                                   configuration::SwappingMode swappingMode
+                                                   typename TIndex::InitializationParameters initialization_parameters,
+                                                   configuration::SwappingMode swapping_mode
 ) {
 
 	// region ================================= CONSTRUCT VIEW =========================================================
 	Vector2i imageSize(640, 480);
 	updateView(view, depth_path, color_path, mask_path, calibration_path, memory_device);
-	initializeVolume(volume, initializationParameters, memory_device, swappingMode);
-	(*volume) = new VoxelVolume<TVoxel, TIndex>(&configuration::get().general_voxel_volume_parameters, swappingMode,
-	                                            memory_device, initializationParameters);
+	initializeVolume(volume, initialization_parameters, memory_device, swapping_mode);
+	(*volume) = new VoxelVolume<TVoxel, TIndex>(configuration::get().general_voxel_volume_parameters, swapping_mode,
+	                                            memory_device, initialization_parameters);
 	(*volume)->Reset();
 	RenderState renderState(imageSize, configuration::get().general_voxel_volume_parameters.near_clipping_distance,
 	                        configuration::get().general_voxel_volume_parameters.far_clipping_distance, memory_device);

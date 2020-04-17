@@ -185,7 +185,7 @@ void VolumeSequenceRecorder<TVoxel, TWarp, TIndex>::SetPath(std::string path) {
 	if (activeWarpLogger) {
 		this->activeWarpLogger->SetPath(path);
 	}
-	this->livePath = this->path / liveName;
+	this->live_path = this->path / liveName;
 
 }
 
@@ -222,7 +222,7 @@ bool VolumeSequenceRecorder<TVoxel, TWarp, TIndex>::SaveScenes() {
 	}
 	std::cout << "Saving scenes for current frame (this might take awhile)..." << std::endl;
 	std::cout.flush();
-	liveScene->SaveToDirectory(livePath.string());
+	liveScene->SaveToDisk(live_path.string());
 	activeWarpLogger->Save();
 	std::cout << "Scenes saved." << std::endl;
 	return true;
@@ -236,7 +236,7 @@ bool VolumeSequenceRecorder<TVoxel, TWarp, TIndex>::LoadScenes() {
 	}
 	std::cout << "Loading scenes for current frame (this might take awhile)..." << std::endl;
 	std::cout.flush();
-	liveScene->LoadFromDirectory(livePath.string());
+	liveScene->LoadFromDisk(live_path.string());
 	activeWarpLogger->Load();
 	std::cout << "Scenes loaded." << std::endl;
 	return true;
@@ -254,7 +254,7 @@ bool VolumeSequenceRecorder<TVoxel, TWarp, TIndex>::SaveScenesCompact() {
 	}
 	std::cout << "Saving scenes for current frame (this might take awhile)..." << std::endl;
 	std::cout.flush();
-	VolumeFileIOEngine<TVoxel, TIndex>::SaveVolumeCompact(liveScene, livePath.string());
+	liveScene->SaveToDisk(live_path.string());
 	activeWarpLogger->SaveCompact();
 	std::cout << "Scenes saved." << std::endl;
 	return true;
@@ -268,7 +268,7 @@ bool VolumeSequenceRecorder<TVoxel, TWarp, TIndex>::LoadScenesCompact() {
 	std::cout << "Loading scenes for current frame (this might take awhile)..." << std::endl;
 	std::cout.flush();
 	liveScene->Reset();
-	VolumeFileIOEngine<TVoxel, TIndex>::LoadVolumeCompact(liveScene, livePath.string());
+	liveScene->LoadFromDisk(live_path.string());
 	if (!activeWarpLogger->isSlice || !activeWarpLogger->sliceLoaded) {
 		activeWarpLogger->LoadCompact();
 	}

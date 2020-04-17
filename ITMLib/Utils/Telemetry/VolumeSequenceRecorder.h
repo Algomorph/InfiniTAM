@@ -173,7 +173,7 @@ private:
 	fs::path path;
 
 // *** subpaths
-	fs::path livePath;
+	fs::path live_path;
 
 // *** scene structures ***
 	WarpFieldSequenceRecorder<TWarp, TIndex>* fullWarpLogger;

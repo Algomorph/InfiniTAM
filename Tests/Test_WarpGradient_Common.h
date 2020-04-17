@@ -67,22 +67,16 @@ struct WarpGradientDataFixture {
 
 		BOOST_TEST_MESSAGE("setup fixture");
 		auto loadSdfVolume = [&](VoxelVolume<TSDFVoxel, TIndex>** scene, const std::string& pathSuffix) {
-			*scene = new VoxelVolume<TSDFVoxel, TIndex>(&configuration::get().general_voxel_volume_parameters,
-			                                              settings->swapping_mode ==
-			                                              configuration::SWAPPINGMODE_ENABLED,
-			                                            TMemoryType,
+			*scene = new VoxelVolume<TSDFVoxel, TIndex>(TMemoryType,
 			                                            indexParameters);
 			PrepareVoxelVolumeForLoading(*scene);
-			(*scene)->LoadFromDirectory(pathToData + pathSuffix);
+			(*scene)->LoadFromDisk(pathToData + pathSuffix);
 		};
 		auto loadWarpVolume = [&](VoxelVolume<WarpVoxel, TIndex>** scene, const std::string& pathSuffix) {
-			*scene = new VoxelVolume<WarpVoxel, TIndex>(&configuration::get().general_voxel_volume_parameters,
-			                                             settings->swapping_mode ==
-			                                             configuration::SWAPPINGMODE_ENABLED,
-			                                            TMemoryType,
+			*scene = new VoxelVolume<WarpVoxel, TIndex>(TMemoryType,
 			                                            indexParameters);
 			PrepareVoxelVolumeForLoading(*scene);
-			(*scene)->LoadFromDirectory(pathToData + pathSuffix);
+			(*scene)->LoadFromDisk(pathToData + pathSuffix);
 		};
 		loadSdfVolume(&live_volume, "snoopy_partial_frame_17_");
 		loadSdfVolume(&canonical_volume, "snoopy_partial_frame_16_");
@@ -180,12 +174,12 @@ void GenerateTestData() {
 			data_only_switches);
 
 	dataOnlyMotionTracker.CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
-	warp_field.SaveToDirectory(output_directory + data_only_filename);
+	warp_field.SaveToDisk(output_directory + data_only_filename);
 
 	SurfaceTracker<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, TRACKER_SLAVCHEVA_DIAGNOSTIC> dataSmoothedMotionTracker(
 			data_smoothed_switches);
 	dataSmoothedMotionTracker.SmoothWarpGradient(&warp_field, canonical_volume, live_volume);
-	warp_field.SaveToDirectory(output_directory + data_smoothed_filename);
+	warp_field.SaveToDisk(output_directory + data_smoothed_filename);
 
 	warp_field.Reset();
 	IndexingEngine<TSDFVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().AllocateWarpVolumeFromOtherVolume(&warp_field, live_volume);
@@ -194,24 +188,24 @@ void GenerateTestData() {
 	completeMotionTracker.CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
 	completeMotionTracker.SmoothWarpGradient(&warp_field, canonical_volume, live_volume);
 	completeMotionTracker.UpdateWarps(&warp_field, canonical_volume, live_volume);
-	warp_field.SaveToDirectory(output_directory + warp_complete_filename);
+	warp_field.SaveToDisk(output_directory + warp_complete_filename);
 
 	warp_field.Reset();
 	IndexingEngine<TSDFVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().AllocateWarpVolumeFromOtherVolume(&warp_field, live_volume);
-	warp_field.LoadFromDirectory(output_directory + data_only_filename);
+	warp_field.LoadFromDisk(output_directory + data_only_filename);
 
 	dataOnlyMotionTracker.UpdateWarps(&warp_field, canonical_volume, live_volume);
-	warp_field.SaveToDirectory(output_directory + framewise_warps_filename);
+	warp_field.SaveToDisk(output_directory + framewise_warps_filename);
 
 
 	for (auto& pair : configurationPairs) {
 		EditAndCopyEngineFactory::Instance<WarpVoxel, TIndex, TMemoryDeviceType>().ResetVolume(&warp_field);
-		warp_field.LoadFromDirectory(output_directory + framewise_warps_filename);
+		warp_field.LoadFromDisk(output_directory + framewise_warps_filename);
 		std::string filename = std::get<0>(pair);
 		SurfaceTracker<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, TRACKER_SLAVCHEVA_DIAGNOSTIC> tracker(
 				std::get<1>(pair));
 		tracker.CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
-		warp_field.SaveToDirectory(output_directory + filename);
+		warp_field.SaveToDisk(output_directory + filename);
 	}
 
 	delete canonical_volume;

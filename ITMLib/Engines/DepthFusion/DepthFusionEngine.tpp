@@ -33,12 +33,12 @@ void DepthFusionEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::UpdateVisibleL
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void DepthFusionEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::IntegrateDepthImageIntoTsdfVolume_Helper(
 		VoxelVolume<TVoxel, TIndex>* volume, const View* view, Matrix4f depth_camera_matrix) {
-	if (volume->parameters->stop_integration_at_max_weight) {
-		VoxelDepthIntegrationFunctor<TVoxel, TMemoryDeviceType, true> integration_functor(*(volume->parameters), view,
+	if (volume->GetParameters().stop_integration_at_max_weight) {
+		VoxelDepthIntegrationFunctor<TVoxel, TMemoryDeviceType, true> integration_functor(volume->GetParameters(), view,
 		                                                                                  depth_camera_matrix);
 		VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseAllWithPosition(volume, integration_functor);
 	} else {
-		VoxelDepthIntegrationFunctor<TVoxel, TMemoryDeviceType, false> integration_functor(*(volume->parameters), view,
+		VoxelDepthIntegrationFunctor<TVoxel, TMemoryDeviceType, false> integration_functor(volume->GetParameters(), view,
 		                                                                                   depth_camera_matrix);
 		VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseAllWithPosition(volume, integration_functor);
 	}

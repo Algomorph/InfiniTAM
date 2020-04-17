@@ -18,8 +18,11 @@
 #include "../../Engines/VolumeFileIO/VolumeFileIOEngine.h"
 #include "../../Utils/Configuration.h"
 #include "../../Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
+
 #ifndef COMPILE_WITHOUT_CUDA
+
 #include "../../Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
+
 #endif
 
 namespace ITMLib {
@@ -34,32 +37,33 @@ namespace ITMLib {
  * \param index_parameters parameters to initialize the index (each index type has its own type)
  */
 template<typename TVoxel, typename TIndex>
-VoxelVolume<TVoxel,TIndex>::VoxelVolume(const VoxelVolumeParameters* volume_parameters, bool use_swapping, MemoryDeviceType memory_type,
-                                        typename TIndex::InitializationParameters index_parameters)
-	: parameters(volume_parameters),
-	  index(index_parameters, memory_type),
-	  voxels(index.GetMaxVoxelCount(), memory_type),
-	  swapping_enabled(use_swapping),
-	  global_cache(this->index){}
+VoxelVolume<TVoxel, TIndex>::VoxelVolume(const VoxelVolumeParameters& volume_parameters, bool use_swapping,
+                                         MemoryDeviceType memory_type,
+                                         typename TIndex::InitializationParameters index_parameters)
+		: parameters(volume_parameters),
+		  index(index_parameters, memory_type),
+		  voxels(index.GetMaxVoxelCount(), memory_type),
+		  swapping_enabled(use_swapping),
+		  global_cache(this->index) {}
 
 
 template<class TVoxel, class TIndex>
 VoxelVolume<TVoxel, TIndex>::VoxelVolume(MemoryDeviceType memory_type,
                                          typename TIndex::InitializationParameters index_parameters) :
-	VoxelVolume(&configuration::get().general_voxel_volume_parameters,
-			configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
-			    memory_type, index_parameters) {}
+		VoxelVolume(configuration::get().general_voxel_volume_parameters,
+		            configuration::get().swapping_mode == configuration::SWAPPINGMODE_ENABLED,
+		            memory_type, index_parameters) {}
 
 template<class TVoxel, class TIndex>
 VoxelVolume<TVoxel, TIndex>::VoxelVolume(const VoxelVolume& other, MemoryDeviceType memory_type)
-	: parameters(other.parameters),
-	  index(other.index, memory_type),
-	  voxels(other.voxels),
-	  global_cache(other.global_cache),
-	  swapping_enabled(other.swapping_enabled){}
+		: parameters(other.parameters),
+		  index(other.index, memory_type),
+		  voxels(other.voxels),
+		  global_cache(other.global_cache),
+		  swapping_enabled(other.swapping_enabled) {}
 
 template<class TVoxel, class TIndex>
-void VoxelVolume<TVoxel, TIndex>::Reset(){
+void VoxelVolume<TVoxel, TIndex>::Reset() {
 	switch (this->index.memory_type) {
 		case MEMORYDEVICE_CPU:
 			EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().ResetVolume(this);
@@ -77,19 +81,20 @@ void VoxelVolume<TVoxel, TIndex>::Reset(){
 template<class TVoxel, class TIndex>
 void VoxelVolume<TVoxel, TIndex>::SetFrom(const VoxelVolume& other) {
 	index.SetFrom(other.index);
-	MemoryCopyDirection memory_copy_direction = determineMemoryCopyDirection(this->index.memory_type, other.index.memory_type);
+	MemoryCopyDirection memory_copy_direction = determineMemoryCopyDirection(this->index.memory_type,
+	                                                                         other.index.memory_type);
 	voxels.SetFrom(other.voxels, memory_copy_direction);
-	this->global_cache = GlobalCache<TVoxel,TIndex>(other.global_cache);
+	this->global_cache = GlobalCache<TVoxel, TIndex>(other.global_cache);
 }
 
 template<class TVoxel, class TIndex>
-void VoxelVolume<TVoxel, TIndex>::SaveToDirectory(const std::string& outputDirectory) const {
-	VolumeFileIOEngine<TVoxel, TIndex>::SaveVolumeCompact(this, outputDirectory);
+void VoxelVolume<TVoxel, TIndex>::SaveToDisk(const std::string& path) const {
+	VolumeFileIOEngine<TVoxel, TIndex>::SaveVolumeCompact(*this, path);
 }
 
 template<class TVoxel, class TIndex>
-void VoxelVolume<TVoxel, TIndex>::LoadFromDirectory(const std::string& outputDirectory) {
-	VolumeFileIOEngine<TVoxel, TIndex>::LoadVolumeCompact(this, outputDirectory);
+void VoxelVolume<TVoxel, TIndex>::LoadFromDisk(const std::string& path) {
+	VolumeFileIOEngine<TVoxel, TIndex>::LoadVolumeCompact(*this, path);
 }
 
 template<class TVoxel, class TIndex>
@@ -112,7 +117,7 @@ TVoxel* VoxelVolume<TVoxel, TIndex>::GetVoxels() {
 }
 
 template<class TVoxel, class TIndex>
-const TVoxel* VoxelVolume<TVoxel, TIndex>::GetVoxels() const{
+const TVoxel* VoxelVolume<TVoxel, TIndex>::GetVoxels() const {
 	return this->voxels.GetData(this->index.memory_type);
 }
 

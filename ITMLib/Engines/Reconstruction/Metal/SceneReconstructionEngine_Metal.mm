@@ -47,10 +47,10 @@ void ITMSceneReconstructionEngine_Metal<TVoxel,ITMVoxelBlockHash>::IntegrateInto
     IntegrateIntoScene_VH_Params *params = (IntegrateIntoScene_VH_Params*)[sr_metalBits.paramsBuffer contents];
     params->rgbImgSize = view->rgb->noDims;
     params->depthImgSize = view->depth->noDims;
-    params->others.x = scene->parameters->voxelSize;
-    params->others.y = scene->parameters->mu;
-    params->others.z = scene->parameters->maxW;
-    params->others.w = (float)scene->parameters->stopIntegratingAtMaxW;
+    params->others.x = scene->GetParameters().voxelSize;
+    params->others.y = scene->GetParameters().mu;
+    params->others.z = scene->GetParameters().maxW;
+    params->others.w = (float)scene->GetParameters().stopIntegratingAtMaxW;
     params->M_d = trackingState->pose_d->GetM();
     if (TVoxel::hasColorInformation) params->M_rgb = view->calib.trafo_rgb_to_depth.calib_inv * trackingState->pose_d->GetM();
 
@@ -86,7 +86,7 @@ void ITMSceneReconstructionEngine_Metal<TVoxel,ITMVoxelBlockHash>::BuildAllocAnd
     ITMRenderState_VH *renderState_vh = (ITMRenderState_VH*)renderState;
 
     Vector2i depthImgSize = view->depth->noDims;
-    float voxelSize = scene->parameters->voxelSize;
+    float voxelSize = scene->GetParameters().voxelSize;
 
     Matrix4f invM_d = trackingState->pose_d->GetInvM();
     Vector4f invProjParams_d = view->calib.intrinsics_d.projectionParamsSimple.all;
@@ -97,10 +97,10 @@ void ITMSceneReconstructionEngine_Metal<TVoxel,ITMVoxelBlockHash>::BuildAllocAnd
     params->invM_d = invM_d;
     params->invProjParams_d = invProjParams_d;
     params->depthImgSize = depthImgSize;
-    params->others.x = scene->parameters->mu;
+    params->others.x = scene->GetParameters().mu;
     params->others.y = 1.0f / (voxelSize * SDF_BLOCK_SIZE);
-    params->others.z = scene->parameters->viewFrustum_min;
-    params->others.w = scene->parameters->viewFrustum_max;
+    params->others.z = scene->GetParameters().viewFrustum_min;
+    params->others.w = scene->GetParameters().viewFrustum_max;
 
     memset(this->entriesAllocType->GetData(MEMORYDEVICE_CPU), 0, scene->index.hash_entry_count);
     memset(this->blockCoords->GetData(MEMORYDEVICE_CPU), 0, scene->index.hash_entry_count * sizeof(Vector4s));
@@ -136,7 +136,7 @@ void ITMSceneReconstructionEngine_Metal<TVoxel, ITMVoxelBlockHash>::AllocateScen
                                                                                            bool onlyUpdateVisibleList, bool resetVisibleList)
 {
     Vector2i depthImgSize = view->depth->noDims;
-    float voxelSize = scene->parameters->voxelSize;
+    float voxelSize = scene->GetParameters().voxelSize;
 
     Matrix4f M_d, invM_d;
     Vector4f projParams_d, invProjParams_d;
@@ -151,7 +151,7 @@ void ITMSceneReconstructionEngine_Metal<TVoxel, ITMVoxelBlockHash>::AllocateScen
     invProjParams_d.x = 1.0f / invProjParams_d.x;
     invProjParams_d.y = 1.0f / invProjParams_d.y;
 
-    float mu = scene->parameters->mu;
+    float mu = scene->GetParameters().mu;
 
     float *depth = view->depth->GetData(MEMORYDEVICE_CPU);
     int *voxelAllocationList = scene->index.GetBlockAllocationList();

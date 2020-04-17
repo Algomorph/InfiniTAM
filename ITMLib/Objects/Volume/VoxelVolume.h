@@ -23,16 +23,13 @@
 #include "GlobalCache.h"
 #include "../../Utils/VoxelVolumeParameters.h"
 
-namespace ITMLib{
+namespace ITMLib {
 /**
  * \brief Represents the 3D world model as collection of voxel blocks, i.e. a regular (raster) 3D grid
  **/
 template<class TVoxel, class TIndex>
 class VoxelVolume {
 public:
-	/** Volume parameters like voxel size etc. */
-	const VoxelVolumeParameters* parameters;
-
 	/**
 	 * \brief An indexing method for access to the volume's voxels.
 	 * \details For instance, if VoxelBlockHash is used as TIndex, this is a hash table to reference the 8x8x8
@@ -44,31 +41,33 @@ public:
 	 * */
 	GlobalCache<TVoxel, TIndex> global_cache;
 
-	VoxelVolume(const VoxelVolumeParameters *volume_parameters, bool use_swapping, MemoryDeviceType memory_type,
+	VoxelVolume(const VoxelVolumeParameters& volume_parameters, bool use_swapping, MemoryDeviceType memory_type,
 	            typename TIndex::InitializationParameters index_parameters = typename TIndex::InitializationParameters());
-	explicit VoxelVolume(MemoryDeviceType memory_type, typename TIndex::InitializationParameters index_parameters = typename TIndex::InitializationParameters());
+	explicit VoxelVolume(MemoryDeviceType memory_type,
+	                     typename TIndex::InitializationParameters index_parameters = typename TIndex::InitializationParameters());
 	VoxelVolume(const VoxelVolume& other, MemoryDeviceType memory_type);
 
 	void Reset();
 	void SetFrom(const VoxelVolume& other);
-	void SaveToDirectory(const std::string &outputDirectory) const;
-	void LoadFromDirectory(const std::string &outputDirectory);
+	void SaveToDisk(const std::string& path) const;
+	void LoadFromDisk(const std::string& path);
 
 	TVoxel* GetVoxels();
 	const TVoxel* GetVoxels() const;
 
 	TVoxel GetValueAt(const Vector3i& pos);
-	TVoxel GetValueAt(int x, int y, int z){
-		Vector3i pos(x,y,z);
+
+	TVoxel GetValueAt(int x, int y, int z) {
+		Vector3i pos(x, y, z);
 		return GetValueAt(pos);
 	}
 
 	/**
 	 * @return Whether this scene is using swapping mechanism or not.
 	 **/
-	bool SwappingEnabled() const{
-		return swapping_enabled;
-	}
+	bool SwappingEnabled() const { return swapping_enabled; }
+
+	const VoxelVolumeParameters& GetParameters() const { return this->parameters; }
 
 private:
 	/**
@@ -76,6 +75,8 @@ private:
 	 * */
 	ORUtils::MemoryBlock<TVoxel> voxels;
 	const bool swapping_enabled;
+	/** Volume parameters, such as voxel size */
+	VoxelVolumeParameters parameters;
 };
 
 }//end namespace ITMLib

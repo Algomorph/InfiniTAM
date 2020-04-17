@@ -56,16 +56,16 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(const RG
 
 	imuCalibrator = new ITMIMUCalibrator_iPad();
 	tracker = CameraTrackerFactory::Instance().Make(rgb_image_size, depth_image_size, low_level_engine, imuCalibrator,
-	                                                canonical_volume->parameters);
+	                                                canonical_volume->GetParameters());
 	camera_tracking_controller = new CameraTrackingController(tracker);
 	Vector2i trackedImageSize = camera_tracking_controller->GetTrackedImageSize(rgb_image_size, depth_image_size);
 	tracking_state = new CameraTrackingState(trackedImageSize, memoryType);
 
 
-	canonical_render_state = new RenderState(trackedImageSize, canonical_volume->parameters->near_clipping_distance,
-	                                         canonical_volume->parameters->far_clipping_distance, settings.device_type);
-	live_render_state = new RenderState(trackedImageSize, canonical_volume->parameters->near_clipping_distance,
-	                                    canonical_volume->parameters->far_clipping_distance, settings.device_type);
+	canonical_render_state = new RenderState(trackedImageSize, canonical_volume->GetParameters().near_clipping_distance,
+	                                         canonical_volume->GetParameters().far_clipping_distance, settings.device_type);
+	live_render_state = new RenderState(trackedImageSize, canonical_volume->GetParameters().near_clipping_distance,
+	                                    canonical_volume->GetParameters().far_clipping_distance, settings.device_type);
 	freeview_render_state = nullptr; //will be created if needed
 
 
@@ -98,17 +98,17 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::InitializeScenes() {
 	configuration::Configuration& settings = configuration::get();
 	MemoryDeviceType memoryType = settings.device_type;
 	this->canonical_volume = new VoxelVolume<TVoxel, TIndex>(
-			&settings.general_voxel_volume_parameters, settings.swapping_mode == configuration::SWAPPINGMODE_ENABLED,
+			settings.general_voxel_volume_parameters, settings.swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 			memoryType, configuration::for_volume_role<TIndex>(configuration::VOLUME_CANONICAL));
 	this->live_volumes = new VoxelVolume<TVoxel, TIndex>* [2];
 	for (int iLiveScene = 0; iLiveScene < DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::live_scene_count; iLiveScene++) {
 		this->live_volumes[iLiveScene] = new VoxelVolume<TVoxel, TIndex>(
-				&settings.general_voxel_volume_parameters,
+				settings.general_voxel_volume_parameters,
 				settings.swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 				memoryType, configuration::for_volume_role<TIndex>(configuration::VOLUME_LIVE));
 	}
 	this->warp_field = new VoxelVolume<TWarp, TIndex>(
-			&settings.general_voxel_volume_parameters,
+			settings.general_voxel_volume_parameters,
 			settings.swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 			memoryType, configuration::for_volume_role<TIndex>(configuration::VOLUME_WARP));
 }
@@ -159,15 +159,15 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::SaveToFile() {
 	std::string nextFrameOutputPath = TelemetryRecorder<TVoxel, TWarp, TIndex>::Instance().GetOutputDirectory();
 	// throws error if any of the saves fail
 	if (relocaliser) relocaliser->SaveToDirectory(nextFrameOutputPath + "/Relocaliser/");
-	VolumeFileIOEngine<TVoxel, TIndex>::SaveVolumeCompact(canonical_volume, nextFrameOutputPath + "/canonical");
-	VolumeFileIOEngine<TVoxel, TIndex>::SaveVolumeCompact(live_volumes[0], nextFrameOutputPath + "/live");
+	canonical_volume->SaveToDisk(nextFrameOutputPath + "/canonical_volume.dat");
+	live_volumes[0]->SaveToDisk(nextFrameOutputPath + "/live_volume.dat");
 	std::cout << "Saving scenes in a compact way to '" << nextFrameOutputPath << "'." << std::endl;
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::LoadFromFile() {
-	std::string nextFrameOutputPath = TelemetryRecorder<TVoxel, TWarp, TIndex>::Instance().GetOutputDirectory();
-	std::string relocaliserInputDirectory = nextFrameOutputPath + "Relocaliser/";
+	std::string next_frame_output_path = TelemetryRecorder<TVoxel, TWarp, TIndex>::Instance().GetOutputDirectory();
+	std::string relocaliserInputDirectory = next_frame_output_path + "Relocaliser/";
 
 	////TODO: add factory for relocaliser and rebuild using config from relocaliserOutputDirectory + "config.txt"
 	////TODO: add proper management of case when scene load fails (keep old scene or also reset relocaliser)
@@ -197,11 +197,9 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::LoadFromFile() {
 
 	try // load scene
 	{
-		std::cout << "Loading scenes from '" << nextFrameOutputPath << "'." << std::endl;
-		VolumeFileIOEngine<TVoxel, TIndex>::LoadVolumeCompact(canonical_volume,
-		                                                      nextFrameOutputPath + "/canonical");
-		VolumeFileIOEngine<TVoxel, TIndex>::LoadVolumeCompact(live_volumes[0],
-		                                                      nextFrameOutputPath + "/live");
+		std::cout << "Loading volumes from '" << next_frame_output_path << "'." << std::endl;
+		canonical_volume->LoadFromDisk(next_frame_output_path + "/canonical_volume.dat");
+		live_volumes[0]->LoadFromDisk(next_frame_output_path + "/live_volume.dat");
 		if (framesProcessed == 0) {
 			framesProcessed = 1; //to skip initialization
 		}
@@ -434,8 +432,8 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(ITMUChar4Image* ou
 
 			if (freeview_render_state == nullptr) {
 				freeview_render_state = new RenderState(out->dimensions,
-				                                        live_volumes[0]->parameters->near_clipping_distance,
-				                                        live_volumes[0]->parameters->far_clipping_distance,
+				                                        live_volumes[0]->GetParameters().near_clipping_distance,
+				                                        live_volumes[0]->GetParameters().far_clipping_distance,
 				                                        settings.device_type);
 			}
 
@@ -453,8 +451,8 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(ITMUChar4Image* ou
 
 			if (freeview_render_state == nullptr) {
 				freeview_render_state = new RenderState(out->dimensions,
-				                                        canonical_volume->parameters->near_clipping_distance,
-				                                        canonical_volume->parameters->far_clipping_distance,
+				                                        canonical_volume->GetParameters().near_clipping_distance,
+				                                        canonical_volume->GetParameters().far_clipping_distance,
 				                                        settings.device_type);
 			}
 
@@ -588,7 +586,7 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::LoadFromFile(const std::str
 	try // load scene
 	{
 		std::cout << "Loading canonical volume from '" << path << "'." << std::endl;
-		canonical_volume->LoadFromDirectory(path + "/canonical");
+		canonical_volume->LoadFromDisk(path + "/canonical");
 
 		if (framesProcessed == 0) {
 			framesProcessed = 1; //to skip initialization
@@ -605,8 +603,8 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::SaveToFile(const std::strin
 	std::string relocalizer_output_path = path + "Relocaliser/";
 	// throws error if any of the saves fail
 	if (relocaliser) relocaliser->SaveToDirectory(relocalizer_output_path);
-	VolumeFileIOEngine<TVoxel, TIndex>::SaveVolumeCompact(canonical_volume, path + "/canonical");
-	VolumeFileIOEngine<TVoxel, TIndex>::SaveVolumeCompact(live_volumes[0], path + "/live");
+	canonical_volume->SaveToDisk(path + "/canonical_volume.dat");
+	live_volumes[0]->SaveToDisk(path + "/live_volume.dat");
 	std::cout << "Saving scenes in a compact way to '" << path << "'." << std::endl;
 }
 

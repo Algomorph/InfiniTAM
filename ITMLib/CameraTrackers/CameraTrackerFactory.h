@@ -41,7 +41,7 @@ private:
 	//#################### TYPEDEFS ####################
 	typedef CameraTracker* MakerFunc(const Vector2i&, const Vector2i&, MemoryDeviceType,
 	                                 const ORUtils::KeyValueConfig&, const LowLevelEngine*, IMUCalibrator*,
-	                                 const VoxelVolumeParameters*);
+	                                 const VoxelVolumeParameters&);
 
 	/// Tracker types
 	typedef enum {
@@ -110,10 +110,10 @@ public:
 	 */
 	CameraTracker* Make(MemoryDeviceType deviceType, const char* trackerConfig, const Vector2i& imgSize_rgb,
 	                    const Vector2i& imgSize_d, const LowLevelEngine* lowLevelEngine,
-	                    IMUCalibrator* imuCalibrator, const VoxelVolumeParameters* sceneParams) const {
+	                    IMUCalibrator* imuCalibrator, const VoxelVolumeParameters& sceneParams) const {
 		ORUtils::KeyValueConfig cfg(trackerConfig);
 		int verbose = 0;
-		if (cfg.getProperty("help") != NULL) if (verbose < 10) verbose = 10;
+		if (cfg.getProperty("help") != nullptr) if (verbose < 10) verbose = 10;
 
 		ORUtils::KeyValueConfig::ChoiceList trackerOptions;
 		for (int i = 0; (unsigned) i < makers.size(); ++i) {
@@ -121,14 +121,14 @@ public:
 		}
 		int type = TRACKER_ICP;
 		cfg.parseChoiceProperty("type", "type of tracker", type, trackerOptions, verbose);
-		const Maker* maker = NULL;
+		const Maker* maker = nullptr;
 		for (int i = 0; (unsigned) i < makers.size(); ++i) {
 			if (makers[i].type == type) {
 				maker = &(makers[i]);
 				break;
 			}
 		}
-		if (maker == NULL) DIEWITHEXCEPTION("Unknown tracker type");
+		if (maker == nullptr) DIEWITHEXCEPTION("Unknown tracker type");
 
 		CameraTracker* ret = (*(maker->make))(imgSize_rgb, imgSize_d, deviceType, cfg, lowLevelEngine, imuCalibrator,
 		                                      sceneParams);
@@ -143,7 +143,7 @@ public:
 	 * \brief Makes a tracker of the type specified in the settings.
 	 */
 	CameraTracker* Make(const Vector2i& imgSize_rgb, const Vector2i& imgSize_d, const LowLevelEngine* lowLevelEngine,
-	                    IMUCalibrator* imuCalibrator, const VoxelVolumeParameters* sceneParams) const {
+	                    IMUCalibrator* imuCalibrator, const VoxelVolumeParameters& sceneParams) const {
 		auto& settings = configuration::get();
 		return Make(settings.device_type, settings.tracker_configuration.c_str(), imgSize_rgb, imgSize_d, lowLevelEngine,
 		            imuCalibrator, sceneParams);
@@ -188,15 +188,15 @@ public:
 	MakeColourTracker(const Vector2i& imgSize_rgb, const Vector2i& imgSize_d, MemoryDeviceType deviceType,
 	                  const ORUtils::KeyValueConfig& cfg,
 	                  const LowLevelEngine* lowLevelEngine, IMUCalibrator* imuCalibrator,
-	                  const VoxelVolumeParameters* sceneParams) {
+	                  const VoxelVolumeParameters& sceneParams) {
 		int verbose = 0;
-		if (cfg.getProperty("help") != NULL) if (verbose < 10) verbose = 10;
+		if (cfg.getProperty("help") != nullptr) if (verbose < 10) verbose = 10;
 
 		const char* levelSetup = "rrrbb";
 		cfg.parseStrProperty("levels", "resolution hierarchy levels", levelSetup, verbose);
 		std::vector<TrackerIterationType> levels = parseLevelConfig(levelSetup);
 
-		ColorTracker* ret = NULL;
+		ColorTracker* ret = nullptr;
 		switch (deviceType) {
 			case MEMORYDEVICE_CPU:
 				ret = new ColorTracker_CPU(imgSize_rgb, &(levels[0]), static_cast<int>(levels.size()),
@@ -215,7 +215,7 @@ public:
 				break;
 		}
 
-		if (ret == NULL) DIEWITHEXCEPTION("Failed to make colour tracker");
+		if (ret == nullptr) DIEWITHEXCEPTION("Failed to make colour tracker");
 		return ret;
 	}
 
@@ -226,7 +226,7 @@ public:
 	MakeICPTracker(const Vector2i& imgSize_rgb, const Vector2i& imgSize_d, MemoryDeviceType deviceType,
 	               const ORUtils::KeyValueConfig& cfg,
 	               const LowLevelEngine* lowLevelEngine, IMUCalibrator* imuCalibrator,
-	               const VoxelVolumeParameters* sceneParams) {
+	               const VoxelVolumeParameters& sceneParams) {
 		const char* levelSetup = "rrrbb";
 		float smallStepSizeCriterion = 1e-3f;
 		float outlierDistanceFine = 0.002f;
@@ -236,7 +236,7 @@ public:
 		int numIterationsFine = 2;
 
 		int verbose = 0;
-		if (cfg.getProperty("help") != NULL) if (verbose < 10) verbose = 10;
+		if (cfg.getProperty("help") != nullptr) if (verbose < 10) verbose = 10;
 		cfg.parseStrProperty("levels", "resolution hierarchy levels", levelSetup, verbose);
 		std::vector<TrackerIterationType> levels = parseLevelConfig(levelSetup);
 
@@ -248,7 +248,7 @@ public:
 		cfg.parseIntProperty("numiterF", "maximum number of iterations at finest level", numIterationsFine, verbose);
 		cfg.parseFltProperty("failureDec", "threshold for the failure detection", failureDetectorThd, verbose);
 
-		DepthTracker* ret = NULL;
+		DepthTracker* ret = nullptr;
 		switch (deviceType) {
 			case MEMORYDEVICE_CPU:
 				ret = new DepthTracker_CPU(imgSize_d, &(levels[0]), static_cast<int>(levels.size()),
@@ -267,7 +267,7 @@ public:
 				break;
 		}
 
-		if (ret == NULL) DIEWITHEXCEPTION("Failed to make ICP tracker");
+		if (ret == nullptr) DIEWITHEXCEPTION("Failed to make ICP tracker");
 		ret->SetupLevels(numIterationsCoarse, numIterationsFine,
 		                 outlierDistanceCoarse, outlierDistanceFine);
 		return ret;
@@ -286,7 +286,7 @@ public:
 	                                              MemoryDeviceType deviceType,
 	                                              const ORUtils::KeyValueConfig& cfg,
 	                                              const LowLevelEngine* lowLevelEngine, IMUCalibrator* imuCalibrator,
-	                                              const VoxelVolumeParameters* sceneParams) {
+	                                              const VoxelVolumeParameters& sceneParams) {
 
 		//ensure template arguments derive from correct types
 		static_assert(std::is_base_of<ExtendedTracker_CPU, TTracker_CPU>::value,
@@ -316,7 +316,7 @@ public:
 		int numIterationsFine = 20;
 
 		int verbose = 0;
-		if (cfg.getProperty("help") != NULL) if (verbose < 10) verbose = 10;
+		if (cfg.getProperty("help") != nullptr) if (verbose < 10) verbose = 10;
 		cfg.parseStrProperty("levels", "resolution hierarchy levels", levelSetup, verbose);
 		std::vector<TrackerIterationType> levels = parseLevelConfig(levelSetup);
 
@@ -346,7 +346,7 @@ public:
 		                     framesToWeight, verbose);
 		cfg.parseFltProperty("failureDec", "threshold for the failure detection", failureDetectorThd, verbose);
 
-		ExtendedTracker* ret = NULL;
+		ExtendedTracker* ret = nullptr;
 		switch (deviceType) {
 			case MEMORYDEVICE_CPU:
 				ret = new TTracker_CPU(imgSize_d,
@@ -358,8 +358,8 @@ public:
 				                       static_cast<int>(levels.size()),
 				                       smallStepSizeCriterion,
 				                       failureDetectorThd,
-				                       sceneParams->near_clipping_distance,
-				                       sceneParams->far_clipping_distance,
+				                       sceneParams.near_clipping_distance,
+				                       sceneParams.far_clipping_distance,
 				                       minColourGradient,
 				                       tukeyCutOff,
 				                       framesToSkip,
@@ -377,8 +377,8 @@ public:
 				                        static_cast<int>(levels.size()),
 				                        smallStepSizeCriterion,
 				                        failureDetectorThd,
-				                        sceneParams->near_clipping_distance,
-				                        sceneParams->far_clipping_distance,
+				                        sceneParams.near_clipping_distance,
+				                        sceneParams.far_clipping_distance,
 				                        minColourGradient,
 				                        tukeyCutOff,
 				                        framesToSkip,
@@ -389,12 +389,12 @@ public:
 			case MEMORYDEVICE_METAL:
 #ifdef COMPILE_WITH_METAL
 				ret = new TTracker_METAL(imgSize_d, imgSize_rgb, useDepth, useColour, colourWeight, &(levels[0]), static_cast<int>(levels.size()), smallStepSizeCriterion, failureDetectorThd,
-				volume->voxel_volume_parameters->near_clipping_distance, volume->voxel_volume_parameters->far_clipping_distance, tukeyCutOff, framesToSkip, framesToWeight, lowLevelEngine);
+				volume->voxel_volume.GetParameters().near_clipping_distance, volume->voxel_volume.GetParameters().far_clipping_distance, tukeyCutOff, framesToSkip, framesToWeight, lowLevelEngine);
 #endif
 				break;
 		}
 
-		if (ret == NULL) DIEWITHEXCEPTION("Failed to make extended tracker");
+		if (ret == nullptr) DIEWITHEXCEPTION("Failed to make extended tracker");
 		ret->SetupLevels(numIterationsCoarse, numIterationsFine, outlierSpaceDistanceCoarse, outlierSpaceDistanceFine,
 		                 outlierColourDistanceCoarse, outlierColourDistanceFine);
 		return ret;
@@ -407,7 +407,7 @@ public:
 	MakeExtendedTracker(const Vector2i& imgSize_rgb, const Vector2i& imgSize_d, MemoryDeviceType deviceType,
 	                    const ORUtils::KeyValueConfig& cfg,
 	                    const LowLevelEngine* lowLevelEngine, IMUCalibrator* imuCalibrator,
-	                    const VoxelVolumeParameters* sceneParams) {
+	                    const VoxelVolumeParameters& sceneParams) {
 		return
 				MakeExtendedLikeTracker<
 						ExtendedTracker_CPU
@@ -429,7 +429,7 @@ public:
 	                                         MemoryDeviceType deviceType,
 	                                         const ORUtils::KeyValueConfig& cfg,
 	                                         const LowLevelEngine* lowLevelEngine, IMUCalibrator* imuCalibrator,
-	                                         const VoxelVolumeParameters* sceneParams) {
+	                                         const VoxelVolumeParameters& sceneParams) {
 		return MakeExtendedLikeTracker<
 				SDF2SDFCameraTracker_CPU
 #ifndef COMPILE_WITHOUT_CUDA
@@ -448,7 +448,7 @@ public:
 	MakeIMUTracker(const Vector2i& imgSize_rgb, const Vector2i& imgSize_d, MemoryDeviceType deviceType,
 	               const ORUtils::KeyValueConfig& cfg,
 	               const LowLevelEngine* lowLevelEngine, IMUCalibrator* imuCalibrator,
-	               const VoxelVolumeParameters* sceneParams) {
+	               const VoxelVolumeParameters& sceneParams) {
 		const char* levelSetup = "tb";
 		float smallStepSizeCriterion = 1e-3f;
 		float outlierDistanceFine = 0.005f;
@@ -458,7 +458,7 @@ public:
 		int numIterationsFine = 2;
 
 		int verbose = 0;
-		if (cfg.getProperty("help") != NULL) if (verbose < 10) verbose = 10;
+		if (cfg.getProperty("help") != nullptr) if (verbose < 10) verbose = 10;
 		cfg.parseStrProperty("levels", "resolution hierarchy levels", levelSetup, verbose);
 		std::vector<TrackerIterationType> levels = parseLevelConfig(levelSetup);
 
@@ -470,7 +470,7 @@ public:
 		cfg.parseIntProperty("numiterF", "maximum number of iterations at finest level", numIterationsFine, verbose);
 		cfg.parseFltProperty("failureDec", "threshold for the failure detection", failureDetectorThd, verbose);
 
-		DepthTracker* dTracker = NULL;
+		DepthTracker* dTracker = nullptr;
 		switch (deviceType) {
 			case MEMORYDEVICE_CPU:
 				dTracker = new DepthTracker_CPU(imgSize_d, &(levels[0]), static_cast<int>(levels.size()),
@@ -491,7 +491,7 @@ public:
 				break;
 		}
 
-		if (dTracker == NULL) DIEWITHEXCEPTION("Failed to make IMU tracker");
+		if (dTracker == nullptr) DIEWITHEXCEPTION("Failed to make IMU tracker");
 		dTracker->SetupLevels(numIterationsCoarse, numIterationsFine,
 		                      outlierDistanceCoarse, outlierDistanceFine);
 
@@ -507,10 +507,10 @@ public:
 	static CameraTracker* MakeExtendedIMUTracker(const Vector2i& imgSize_rgb, const Vector2i& imgSize_d,
 	                                             MemoryDeviceType deviceType, const ORUtils::KeyValueConfig& cfg,
 	                                             const LowLevelEngine* lowLevelEngine, IMUCalibrator* imuCalibrator,
-	                                             const VoxelVolumeParameters* sceneParams) {
+	                                             const VoxelVolumeParameters& sceneParams) {
 		CameraTracker* dTracker = MakeExtendedTracker(imgSize_rgb, imgSize_d, deviceType, cfg,
 		                                              lowLevelEngine, imuCalibrator, sceneParams);
-		if (dTracker == NULL) DIEWITHEXCEPTION("Failed to make extended tracker"); // Should never happen though
+		if (dTracker == nullptr) DIEWITHEXCEPTION("Failed to make extended tracker"); // Should never happen though
 
 		CompositeTracker* compositeTracker = new CompositeTracker;
 		compositeTracker->AddTracker(new IMUTracker(imuCalibrator));
@@ -525,7 +525,7 @@ public:
 	MakeFileBasedTracker(const Vector2i& imgSize_rgb, const Vector2i& imgSize_d, MemoryDeviceType deviceType,
 	                     const ORUtils::KeyValueConfig& cfg,
 	                     const LowLevelEngine* lowLevelEngine, IMUCalibrator* imuCalibrator,
-	                     const VoxelVolumeParameters* sceneParams) {
+	                     const VoxelVolumeParameters& sceneParams) {
 		int verbose = 0;
 		if (cfg.getProperty("help") && verbose < 10) verbose = 10;
 
@@ -542,7 +542,7 @@ public:
 	MakeForceFailTracker(const Vector2i& imgSize_rgb, const Vector2i& imgSize_d, MemoryDeviceType deviceType,
 	                     const ORUtils::KeyValueConfig& cfg,
 	                     const LowLevelEngine* lowLevelEngine, IMUCalibrator* imuCalibrator,
-	                     const VoxelVolumeParameters* sceneParams) {
+	                     const VoxelVolumeParameters& sceneParams) {
 		return new ForceFailTracker;
 	}
 

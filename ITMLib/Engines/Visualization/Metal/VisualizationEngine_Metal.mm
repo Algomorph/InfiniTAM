@@ -55,14 +55,14 @@ static void CreateICPMaps_common_metal(const ITMScene<TVoxel,TIndex> *scene, con
 
     CreateICPMaps_Params *params = (CreateICPMaps_Params*)[vis_metalBits.paramsBuffer contents];
     params->imgSize.x = view->depth->noDims.x; params->imgSize.y = view->depth->noDims.y; params->imgSize.z = 0; params->imgSize.w = 1;
-    params->voxelSizes.x = scene->parameters->voxelSize;
-    params->voxelSizes.y = 1.0f / scene->parameters->voxelSize;
+    params->voxelSizes.x = scene->GetParameters().voxelSize;
+    params->voxelSizes.y = 1.0f / scene->GetParameters().voxelSize;
     params->invM = trackingState->pose_d->GetInvM();
     params->invProjParams = InvertProjectionParams(view->calib.intrinsics_d.projectionParamsSimple.all);
     params->lightSource.x = -Vector3f(params->invM.getColumn(2)).x;
     params->lightSource.y = -Vector3f(params->invM.getColumn(2)).y;
     params->lightSource.z = -Vector3f(params->invM.getColumn(2)).z;
-    params->lightSource.w = scene->parameters->mu;
+    params->lightSource.w = scene->GetParameters().mu;
 
     [commandEncoder setComputePipelineState:vis_metalBits.p_genericRaycastVH_device];
     [commandEncoder setBuffer:(__bridge id<MTLBuffer>) renderState->raycastResult->GetMetalBuffer()             offset:0 atIndex:0];
@@ -126,14 +126,14 @@ static void RenderImage_common_metal(const ITMScene<TVoxel,ITMVoxelBlockHash> *s
 
             CreateICPMaps_Params *params = (CreateICPMaps_Params*)[vis_metalBits.paramsBuffer contents];
             params->imgSize.x = outputImage->noDims.x; params->imgSize.y = outputImage->noDims.y; params->imgSize.z = 0; params->imgSize.w = 0;
-            params->voxelSizes.x = scene->parameters->voxelSize;
-            params->voxelSizes.y = 1.0f / scene->parameters->voxelSize;
+            params->voxelSizes.x = scene->GetParameters().voxelSize;
+            params->voxelSizes.y = 1.0f / scene->GetParameters().voxelSize;
             params->invM = pose->GetInvM();
             params->invProjParams = InvertProjectionParams(intrinsics->projectionParamsSimple.all);
             params->lightSource.x = -Vector3f(params->invM.getColumn(2)).x;
             params->lightSource.y = -Vector3f(params->invM.getColumn(2)).y;
             params->lightSource.z = -Vector3f(params->invM.getColumn(2)).z;
-            params->lightSource.w = scene->parameters->mu;
+            params->lightSource.w = scene->GetParameters().mu;
 
             [commandEncoder setComputePipelineState:vis_metalBits.p_genericRaycastVH_device];
             [commandEncoder setBuffer:(__bridge id<MTLBuffer>) renderState->raycastResult->GetMetalBuffer()             offset:0 atIndex:0];
@@ -192,7 +192,7 @@ static void RenderImage_common_metal(const ITMScene<TVoxel,ITMVoxelBlockHash> *s
             {
                 int y = locId/imgSize.x;
                 int x = locId - y*imgSize.x;
-                processPixelGrey_ImageNormals<true, false>(outRendering, pointsRay, imgSize, x, y, scene->parameters->voxelSize, lightSource);
+                processPixelGrey_ImageNormals<true, false>(outRendering, pointsRay, imgSize, x, y, scene->GetParameters().voxelSize, lightSource);
             }
             break;
         case IVisualizationEngine::RENDER_SHADED_GREYSCALE:

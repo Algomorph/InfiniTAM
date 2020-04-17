@@ -44,10 +44,7 @@ using namespace ITMLib;
 typedef WarpGradientDataFixture<MemoryDeviceType::MEMORYDEVICE_CUDA, PlainVoxelArray> DataFixture;
 BOOST_FIXTURE_TEST_CASE(testDataTerm_CUDA_PVA, DataFixture) {
 
-	VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field_CUDA1(&configuration::get().general_voxel_volume_parameters,
-	                                                             configuration::get().swapping_mode ==
-	                                                             configuration::SWAPPINGMODE_ENABLED,
-	                                                         MEMORYDEVICE_CUDA, indexParameters);
+	VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field_CUDA1(MEMORYDEVICE_CUDA, indexParameters);
 	ManipulationEngine_CUDA_PVA_Warp::Inst().ResetVolume(&warp_field_CUDA1);
 
 
@@ -59,7 +56,7 @@ BOOST_FIXTURE_TEST_CASE(testDataTerm_CUDA_PVA, DataFixture) {
 		motionTracker_PVA_CUDA->CalculateWarpGradient(&warp_field_CUDA1, canonical_volume, live_volume);
 	}, "Calculate Warping Gradient - PVA CPU data term");
 
-	//warp_field_CPU1.SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_PVA/warp_field_0_data_");
+	//warp_field_CPU1.SaveToDisk("../../Tests/TestData/snoopy_result_fr16-17_partial_PVA/warp_field_0_data_");
 
 	float tolerance = 1e-5;
 	BOOST_REQUIRE(contentAlmostEqual_CUDA(&warp_field_CUDA1, warp_field_data_term, tolerance));
@@ -72,7 +69,7 @@ BOOST_FIXTURE_TEST_CASE(testUpdateWarps_CUDA_PVA, DataFixture) {
 	                                                        MemoryDeviceType::MEMORYDEVICE_CUDA);
 
 	float maxWarp = motionTracker_PVA_CUDA->UpdateWarps(&warp_field_copy, canonical_volume, live_volume);
-	//warp_field_copy.SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_PVA/warp_field_0_data_framewise_warps_");
+	//warp_field_copy.SaveToDisk("../../Tests/TestData/snoopy_result_fr16-17_partial_PVA/warp_field_0_data_framewise_warps_");
 	BOOST_REQUIRE_CLOSE(maxWarp, 0.121243507f, 1e-7);
 
 	float tolerance = 1e-8;
@@ -88,7 +85,7 @@ BOOST_FIXTURE_TEST_CASE(testSmoothWarpGradient_CUDA_PVA, DataFixture) {
 	TimeIt([&]() {
 		motionTracker_PVA_CUDA->SmoothWarpGradient(&warp_field_CUDA1, canonical_volume, live_volume);
 	}, "Smooth Warping Gradient - PVA CUDA");
-//	warp_field_CUDA1.SaveToDirectory("../../Tests/TestData/snoopy_result_fr16-17_partial_PVA/warp_field_0_smoothed_");
+//	warp_field_CUDA1.SaveToDisk("../../Tests/TestData/snoopy_result_fr16-17_partial_PVA/warp_field_0_smoothed_");
 
 	float tolerance = 1e-6;
 	BOOST_REQUIRE(contentAlmostEqual_CUDA(&warp_field_CUDA1, warp_field_data_term_smoothed, tolerance));

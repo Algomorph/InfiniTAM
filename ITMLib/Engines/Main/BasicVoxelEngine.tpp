@@ -23,7 +23,7 @@ BasicVoxelEngine<TVoxel,TIndex>::BasicVoxelEngine(const RGBDCalib& calib, Vector
 	if ((imgSize_d.x == -1) || (imgSize_d.y == -1)) imgSize_d = imgSize_rgb;
 
 	MemoryDeviceType memoryType = settings.device_type;
-	this->volume = new VoxelVolume<TVoxel,TIndex>(&settings.general_voxel_volume_parameters, settings.swapping_mode == configuration::SWAPPINGMODE_ENABLED, memoryType);
+	this->volume = new VoxelVolume<TVoxel,TIndex>(memoryType);
 
 	const MemoryDeviceType deviceType = settings.device_type;
 
@@ -40,12 +40,12 @@ BasicVoxelEngine<TVoxel,TIndex>::BasicVoxelEngine(const RGBDCalib& calib, Vector
 
 	imuCalibrator = new ITMIMUCalibrator_iPad();
 	tracker = CameraTrackerFactory::Instance().Make(imgSize_rgb, imgSize_d, lowLevelEngine, imuCalibrator,
-	                                                volume->parameters);
+	                                                volume->GetParameters());
 	trackingController = new CameraTrackingController(tracker);
 
 	Vector2i trackedImageSize = trackingController->GetTrackedImageSize(imgSize_rgb, imgSize_d);
 
-	renderState_live =  new RenderState(imgSize_d, volume->parameters->near_clipping_distance, volume->parameters->far_clipping_distance, memoryType);
+	renderState_live =  new RenderState(imgSize_d, volume->GetParameters().near_clipping_distance, volume->GetParameters().far_clipping_distance, memoryType);
 	renderState_freeview = nullptr; //will be created if needed
 
 	trackingState = new CameraTrackingState(trackedImageSize, memoryType);
@@ -122,7 +122,7 @@ void BasicVoxelEngine<TVoxel, TIndex>::SaveToFile()
 
 	if (relocaliser) relocaliser->SaveToDirectory(relocaliserOutputDirectory);
 
-	volume->SaveToDirectory(sceneOutputDirectory);
+	volume->SaveToDisk(sceneOutputDirectory);
 }
 
 template <typename TVoxel, typename TIndex>
@@ -153,7 +153,7 @@ void BasicVoxelEngine<TVoxel, TIndex>::LoadFromFile()
 
 	try // load scene
 	{
-		volume->LoadFromDirectory(sceneInputDirectory);
+		volume->LoadFromDisk(sceneInputDirectory);
 	}
 	catch (std::runtime_error &e)
 	{
@@ -427,7 +427,7 @@ void BasicVoxelEngine<TVoxel,TIndex>::GetImage(ITMUChar4Image *out, GetImageType
 
 		if (renderState_freeview == NULL)
 		{
-			renderState_freeview = new RenderState(out->dimensions, volume->parameters->near_clipping_distance, volume->parameters->far_clipping_distance, settings.device_type);
+			renderState_freeview = new RenderState(out->dimensions, volume->GetParameters().near_clipping_distance, volume->GetParameters().far_clipping_distance, settings.device_type);
 		}
 
 		visualizationEngine->FindVisibleBlocks(volume, pose, intrinsics, renderState_freeview);

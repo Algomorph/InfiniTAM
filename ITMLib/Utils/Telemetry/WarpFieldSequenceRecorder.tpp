@@ -54,7 +54,8 @@ const size_t WarpFieldSequenceRecorder<TVoxel, TIndex>::updateFloatSize =
 
 template<typename TVoxel, typename TIndex>
 const size_t WarpFieldSequenceRecorder<TVoxel, TIndex>::warpAndUpdateByteSize =
-		WarpFieldSequenceRecorder<TVoxel, TIndex>::warpByteSize + WarpFieldSequenceRecorder<TVoxel, TIndex>::updateByteSize;
+		WarpFieldSequenceRecorder<TVoxel, TIndex>::warpByteSize +
+		WarpFieldSequenceRecorder<TVoxel, TIndex>::updateByteSize;
 
 template<typename TVoxel, typename TIndex>
 const size_t WarpFieldSequenceRecorder<TVoxel, TIndex>::warpAndUpdateFloatSize =
@@ -126,8 +127,9 @@ void WarpFieldSequenceRecorder<TVoxel, TIndex>::ExtractBoundsFromSliceStringIden
 
 template<typename TVoxel, typename TIndex>
 boost::filesystem::path
-WarpFieldSequenceRecorder<TVoxel, TIndex>::GenerateSliceFolderPath(const fs::path& fullScenePath, const Vector6i& bounds) {
-	return fullScenePath / (sliceFolderPrefix+ GenerateSliceStringIdentifier(bounds));
+WarpFieldSequenceRecorder<TVoxel, TIndex>::GenerateSliceFolderPath(const fs::path& fullScenePath,
+                                                                   const Vector6i& bounds) {
+	return fullScenePath / (sliceFolderPrefix + GenerateSliceStringIdentifier(bounds));
 }
 
 template<typename TVoxel, typename TIndex>
@@ -138,14 +140,16 @@ WarpFieldSequenceRecorder<TVoxel, TIndex>::GenerateSliceFolderPath(const fs::pat
 };
 
 template<typename TVoxel, typename TIndex>
-std::string WarpFieldSequenceRecorder<TVoxel, TIndex>::GenerateSliceSceneFilename_UpToPostfix(const fs::path& fullScenePath,
-                                                                                              const Vector6i& bounds) {
+std::string
+WarpFieldSequenceRecorder<TVoxel, TIndex>::GenerateSliceSceneFilename_UpToPostfix(const fs::path& fullScenePath,
+                                                                                  const Vector6i& bounds) {
 	return (GenerateSliceFolderPath(fullScenePath, bounds) / sliceScenePrefix).string();
 }
 
 template<typename TVoxel, typename TIndex>
-std::string WarpFieldSequenceRecorder<TVoxel, TIndex>::GenerateSliceSceneFilename_UpToPostfix(const fs::path& fullScenePath,
-                                                                                              const std::string& sliceIdentifier) {
+std::string
+WarpFieldSequenceRecorder<TVoxel, TIndex>::GenerateSliceSceneFilename_UpToPostfix(const fs::path& fullScenePath,
+                                                                                  const std::string& sliceIdentifier) {
 	return (GenerateSliceFolderPath(fullScenePath, sliceIdentifier) / sliceScenePrefix).string();
 }
 
@@ -164,7 +168,8 @@ WarpFieldSequenceRecorder<TVoxel, TIndex>::GenerateSliceSceneFilename_Full(const
 
 template<typename TVoxel, typename TIndex>
 std::string
-WarpFieldSequenceRecorder<TVoxel, TIndex>::GenerateSliceWarpFilename(const fs::path& rootScenePath, const Vector6i& bounds) {
+WarpFieldSequenceRecorder<TVoxel, TIndex>::GenerateSliceWarpFilename(const fs::path& rootScenePath,
+                                                                     const Vector6i& bounds) {
 	return (GenerateSliceFolderPath(rootScenePath, bounds) /
 	        (warpUpdatesFilename + binaryFileExtension)).string();
 };
@@ -184,7 +189,8 @@ std::string WarpFieldSequenceRecorder<TVoxel, TIndex>::GenerateSliceWarpFilename
  * \param path path to root location of the files for the scene
  */
 template<typename TVoxel, typename TIndex>
-WarpFieldSequenceRecorder<TVoxel, TIndex>::WarpFieldSequenceRecorder(VoxelVolume<TVoxel, TIndex>* scene, boost::filesystem::path path):
+WarpFieldSequenceRecorder<TVoxel, TIndex>::WarpFieldSequenceRecorder(VoxelVolume<TVoxel, TIndex>* scene,
+                                                                     boost::filesystem::path path):
 		warpField(scene),
 		path(""),
 		isSlice(false),
@@ -205,7 +211,8 @@ WarpFieldSequenceRecorder<TVoxel, TIndex>::WarpFieldSequenceRecorder(VoxelVolume
  * \param fullScenePath to the root location of the files for the full scene encompassing the slice
  */
 template<typename TVoxel, typename TIndex>
-WarpFieldSequenceRecorder<TVoxel, TIndex>::WarpFieldSequenceRecorder(const Vector6i& bounds, boost::filesystem::path fullScenePath):
+WarpFieldSequenceRecorder<TVoxel, TIndex>::WarpFieldSequenceRecorder(const Vector6i& bounds,
+                                                                     boost::filesystem::path fullScenePath):
 		warpField(nullptr),
 		path(""),
 		isSlice(true),
@@ -216,8 +223,8 @@ WarpFieldSequenceRecorder<TVoxel, TIndex>::WarpFieldSequenceRecorder(const Vecto
 	configuration::Configuration& settings = configuration::get();
 	MemoryDeviceType memoryType =
 			settings.device_type == MEMORYDEVICE_CUDA ? MEMORYDEVICE_CUDA : MEMORYDEVICE_CPU;
-	this->warpField = new VoxelVolume<TVoxel, TIndex>(&settings.general_voxel_volume_parameters,
-	                                                     settings.swapping_mode == configuration::SWAPPINGMODE_ENABLED,
+	this->warpField = new VoxelVolume<TVoxel, TIndex>(settings.general_voxel_volume_parameters,
+	                                                  settings.swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 	                                                  memoryType);
 
 	SetPath(fullScenePath);
@@ -279,21 +286,21 @@ const VoxelVolume<TVoxel, TIndex>* WarpFieldSequenceRecorder<TVoxel, TIndex>::Ge
 
 template<typename TVoxel, typename TIndex>
 void WarpFieldSequenceRecorder<TVoxel, TIndex>::Load() {
-	warpField->LoadFromDirectory(scenePath.string());
+	warpField->LoadFromDisk(scenePath.string());
 	voxelCount = VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().CountAllocatedVoxels(
 			warpField);
 }
 
 template<typename TVoxel, typename TIndex>
 void WarpFieldSequenceRecorder<TVoxel, TIndex>::Save() {
-	warpField->SaveToDirectory(scenePath.string());
+	warpField->SaveToDisk(scenePath.string());
 	this->voxelCount = VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().CountAllocatedVoxels(
 			warpField);
 }
 
 template<typename TVoxel, typename TIndex>
 void WarpFieldSequenceRecorder<TVoxel, TIndex>::SaveCompact() {
-	VolumeFileIOEngine<TVoxel, TIndex>::SaveVolumeCompact(warpField, scenePath.string());
+	warpField->SaveToDisk(scenePath.string());
 	this->voxelCount = VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().CountAllocatedVoxels(
 			warpField);
 }
@@ -301,7 +308,7 @@ void WarpFieldSequenceRecorder<TVoxel, TIndex>::SaveCompact() {
 template<typename TVoxel, typename TIndex>
 void WarpFieldSequenceRecorder<TVoxel, TIndex>::LoadCompact() {
 	warpField->Reset();
-	VolumeFileIOEngine<TVoxel, TIndex>::LoadVolumeCompact(warpField, scenePath.string());
+	warpField->LoadFromDisk(scenePath.string());
 	this->voxelCount = VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().CountAllocatedVoxels(
 			warpField);
 }
@@ -392,11 +399,6 @@ template<typename TVoxel, typename TIndex>
 void WarpFieldSequenceRecorder<TVoxel, TIndex>::StopSavingWarpState() {
 	warpOFStream.close();
 }
-
-
-
-
-
 
 
 template<typename TVoxel, typename TIndex>

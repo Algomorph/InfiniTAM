@@ -25,16 +25,16 @@ template<MemoryDeviceType TMemoryDeviceType>
 struct DepthBasedAllocationStateMarkerFunctor {
 public:
 	DepthBasedAllocationStateMarkerFunctor(VoxelBlockHash& index,
-	                                       const VoxelVolumeParameters* volume_parameters, const ITMLib::View* view,
+	                                       const VoxelVolumeParameters& volume_parameters, const ITMLib::View* view,
 	                                       Matrix4f depth_camera_pose, float surface_distance_cutoff) :
 
-			near_clipping_distance(volume_parameters->near_clipping_distance),
-			far_clipping_distance(volume_parameters->far_clipping_distance),
+			near_clipping_distance(volume_parameters.near_clipping_distance),
+			far_clipping_distance(volume_parameters.far_clipping_distance),
 			inverted_projection_parameters(view->calib.intrinsics_d.projectionParamsSimple.all),
 
 			surface_distance_cutoff(surface_distance_cutoff),
 
-			hash_block_size_reciprocal(1.0f / (volume_parameters->voxel_size * VOXEL_BLOCK_SIZE)),
+			hash_block_size_reciprocal(1.0f / (volume_parameters.voxel_size * VOXEL_BLOCK_SIZE)),
 			hash_entry_allocation_states(index.GetHashEntryAllocationStates()),
 			hash_block_coordinates(index.GetAllocationBlockCoordinates()),
 			hash_table(index.GetEntries()),
@@ -119,7 +119,7 @@ struct TwoSurfaceBasedAllocationStateMarkerFunctor
 		: public DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType> {
 public:
 	TwoSurfaceBasedAllocationStateMarkerFunctor(VoxelBlockHash& index,
-	                                            const VoxelVolumeParameters* volume_parameters,
+	                                            const VoxelVolumeParameters& volume_parameters,
 	                                            const ITMLib::View* view,
 	                                            const CameraTrackingState* tracking_state,
 	                                            float surface_distance_cutoff) :

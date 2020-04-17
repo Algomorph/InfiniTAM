@@ -28,7 +28,7 @@ void VisualizationEngine_CPU<TVoxel, VoxelBlockHash>::FindVisibleBlocks(
 {
 	const HashEntry* hash_table = volume->index.GetEntries();
 	int hash_entry_count = volume->index.hash_entry_count;
-	float voxel_size = volume->parameters->voxel_size;
+	float voxel_size = volume->GetParameters().voxel_size;
 	Vector2i image_size = renderState->renderingRangeImage->dimensions;
 
 	Matrix4f M = pose->GetM();
@@ -109,7 +109,7 @@ void VisualizationEngine_CPU<TVoxel,VoxelBlockHash>::CreateExpectedDepths(const 
 		pixel.y = VERY_CLOSE;
 	}
 
-	float voxelSize = volume->parameters->voxel_size;
+	float voxelSize = volume->GetParameters().voxel_size;
 
 	std::vector<RenderingBlock> render_blocks(MAX_RENDERING_BLOCKS);
 	int render_block_count = 0;
@@ -167,8 +167,8 @@ template<class TVoxel, class TIndex>
 static void GenericRaycast(VoxelVolume<TVoxel, TIndex> *volume, const Vector2i& imgSize, const Matrix4f& invM, const Vector4f& projParams, const RenderState *renderState, bool updateVisibleList)
 {
 	const Vector2f *minmaximg = renderState->renderingRangeImage->GetData(MEMORYDEVICE_CPU);
-	float mu = volume->parameters->narrow_band_half_width;
-	float oneOverVoxelSize = 1.0f / volume->parameters->voxel_size;
+	float mu = volume->GetParameters().narrow_band_half_width;
+	float oneOverVoxelSize = 1.0f / volume->GetParameters().voxel_size;
 	Vector4f *pointsRay = renderState->raycastResult->GetData(MEMORYDEVICE_CPU);
 	const TVoxel *voxelData = volume->GetVoxels();
 	const typename TIndex::IndexData *voxelIndex = volume->index.GetIndexData();
@@ -284,11 +284,11 @@ static void RenderImage_common(VoxelVolume<TVoxel,TIndex> *volume, const ORUtils
 
 			if (intrinsics->FocalLengthSignsDiffer())
 			{
-				processPixelGrey_ImageNormals<true, true>(outRendering, pointsRay, imgSize, x, y, volume->parameters->voxel_size, lightSource);
+				processPixelGrey_ImageNormals<true, true>(outRendering, pointsRay, imgSize, x, y, volume->GetParameters().voxel_size, lightSource);
 			}
 			else
 			{
-				processPixelGrey_ImageNormals<true, false>(outRendering, pointsRay, imgSize, x, y, volume->parameters->voxel_size, lightSource);
+				processPixelGrey_ImageNormals<true, false>(outRendering, pointsRay, imgSize, x, y, volume->GetParameters().voxel_size, lightSource);
 			}
 		}
 		break;
@@ -348,7 +348,7 @@ static void CreatePointCloud_common(VoxelVolume<TVoxel,TIndex> *volume, const Vi
 			volume->GetVoxels(),
 			volume->index.GetIndexData(),
 			skipPoints,
-			volume->parameters->voxel_size,
+			volume->GetParameters().voxel_size,
 			imgSize,
 			-Vector3f(invM.getColumn(2))
 	);
@@ -369,7 +369,7 @@ static void CreateICPMaps_common(VoxelVolume<TVoxel,TIndex> *volume, const View 
 	Vector4f *normalsMap = trackingState->pointCloud->colours->GetData(MEMORYDEVICE_CPU);
 	Vector4f *pointsMap = trackingState->pointCloud->locations->GetData(MEMORYDEVICE_CPU);
 	Vector4f *pointsRay = renderState->raycastResult->GetData(MEMORYDEVICE_CPU);
-	const float voxelSize = volume->parameters->voxel_size;
+	const float voxelSize = volume->GetParameters().voxel_size;
 
 #ifdef WITH_OPENMP
 	#pragma omp parallel for default(none) shared(pointsMap, normalsMap, pointsRay, view)
@@ -401,7 +401,7 @@ static void ForwardRender_common(const VoxelVolume<TVoxel, TIndex> *volume, cons
 	float *currentDepth = view->depth->GetData(MEMORYDEVICE_CPU);
 	int *fwdProjMissingPoints = renderState->fwdProjMissingPoints->GetData(MEMORYDEVICE_CPU);
 	const Vector2f *minmaximg = renderState->renderingRangeImage->GetData(MEMORYDEVICE_CPU);
-	float voxelSize = volume->parameters->voxel_size;
+	float voxelSize = volume->GetParameters().voxel_size;
 	const TVoxel *voxelData = volume->GetVoxels();
 	const typename TIndex::IndexData *voxelIndex = volume->index.GetIndexData();
 
@@ -444,7 +444,7 @@ static void ForwardRender_common(const VoxelVolume<TVoxel, TIndex> *volume, cons
 		int locId2 = (int)floor((float)x / minmaximg_subsample) + (int)floor((float)y / minmaximg_subsample) * imgSize.x;
 
 		castRay<TVoxel, TIndex, false>(forwardProjection[locId], NULL, x, y, voxelData, voxelIndex, invM, invProjParams,
-		                               1.0f / volume->parameters->voxel_size, volume->parameters->narrow_band_half_width, minmaximg[locId2]);
+		                               1.0f / volume->GetParameters().voxel_size, volume->GetParameters().narrow_band_half_width, minmaximg[locId2]);
 	}
 }
 
