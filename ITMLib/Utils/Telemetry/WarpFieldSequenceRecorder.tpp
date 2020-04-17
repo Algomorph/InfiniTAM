@@ -152,14 +152,14 @@ std::string WarpFieldSequenceRecorder<TVoxel, TIndex>::GenerateSliceSceneFilenam
 template<typename TVoxel, typename TIndex>
 std::string WarpFieldSequenceRecorder<TVoxel, TIndex>::GenerateSliceSceneFilename_Full(const fs::path& fullScenePath,
                                                                                        const Vector6i& bounds) {
-	return GenerateSliceSceneFilename_UpToPostfix(fullScenePath, bounds) + compactFilePostfixAndExtension;
+	return GenerateSliceSceneFilename_UpToPostfix(fullScenePath, bounds) + "compact.dat";
 }
 
 template<typename TVoxel, typename TIndex>
 std::string
 WarpFieldSequenceRecorder<TVoxel, TIndex>::GenerateSliceSceneFilename_Full(const fs::path& fullScenePath,
                                                                            const std::string& sliceIdentifier) {
-	return GenerateSliceSceneFilename_UpToPostfix(fullScenePath, sliceIdentifier) + compactFilePostfixAndExtension;
+	return GenerateSliceSceneFilename_UpToPostfix(fullScenePath, sliceIdentifier) + "compact.dat";
 }
 
 template<typename TVoxel, typename TIndex>
