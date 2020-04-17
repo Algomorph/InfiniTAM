@@ -175,11 +175,11 @@ BOOST_FIXTURE_TEST_CASE(Test_TwoSurfaceAllocation_CPU, TestData_CPU) {
 	span_volume.Reset();
 	indexer.AllocateNearAndBetweenTwoSurfaces(&span_volume, view_square_2, tracking_state);
 
-	std::vector<Vector3s> hash_block_positions_span = StatCalc_CPU_VBH_Voxel::Instance().GetAllocatedHashBlockPositions(
+	std::vector<Vector3s> hash_block_positions_span = Analytics_CPU_VBH_Voxel::Instance().GetAllocatedHashBlockPositions(
 			&span_volume);
 	std::unordered_set<Vector3s> hash_block_positions_span_set(hash_block_positions_span.begin(),
 	                                                           hash_block_positions_span.end());
-	int test_volume_block_count = StatCalc_CPU_VBH_Voxel::Instance().CountAllocatedHashBlocks(&span_volume);
+	int test_volume_block_count = Analytics_CPU_VBH_Voxel::Instance().CountAllocatedHashBlocks(&span_volume);
 
 	BOOST_REQUIRE_EQUAL(test_volume_block_count, ground_truth_block_positions.size());
 
@@ -196,11 +196,11 @@ BOOST_FIXTURE_TEST_CASE(Test_TwoSurfaceAllocation_CPU, TestData_CPU) {
 	visualization_engine->CreateICPMaps(&square_volume, view_square_2, tracking_state, render_state);
 	indexer.AllocateNearAndBetweenTwoSurfaces(&span_volume, view_square_1, tracking_state);
 
-	hash_block_positions_span = StatCalc_CPU_VBH_Voxel::Instance().GetAllocatedHashBlockPositions(
+	hash_block_positions_span = Analytics_CPU_VBH_Voxel::Instance().GetAllocatedHashBlockPositions(
 			&span_volume);
 	hash_block_positions_span_set = std::unordered_set<Vector3s>(hash_block_positions_span.begin(),
 	                                                             hash_block_positions_span.end());
-	test_volume_block_count = StatCalc_CPU_VBH_Voxel::Instance().CountAllocatedHashBlocks(&span_volume);
+	test_volume_block_count = Analytics_CPU_VBH_Voxel::Instance().CountAllocatedHashBlocks(&span_volume);
 
 	BOOST_REQUIRE_EQUAL(test_volume_block_count, ground_truth_block_positions.size());
 
@@ -233,12 +233,12 @@ BOOST_FIXTURE_TEST_CASE(Test_TwoSurfaceAllocation_CUDA, TestData_CUDA) {
 	span_volume.Reset();
 	indexer.AllocateNearAndBetweenTwoSurfaces(&span_volume, view_square_2, tracking_state);
 
-	std::vector<Vector3s> hash_block_positions_span = StatCalc_CUDA_VBH_Voxel::Instance().GetAllocatedHashBlockPositions(
+	std::vector<Vector3s> hash_block_positions_span = Analytics_CUDA_VBH_Voxel::Instance().GetAllocatedHashBlockPositions(
 			&span_volume);
 	std::unordered_set<Vector3s> hash_block_positions_span_set(hash_block_positions_span.begin(),
 	                                                           hash_block_positions_span.end());
 
-	int test_volume_block_count = StatCalc_CUDA_VBH_Voxel::Instance().CountAllocatedHashBlocks(&span_volume);
+	int test_volume_block_count = Analytics_CUDA_VBH_Voxel::Instance().CountAllocatedHashBlocks(&span_volume);
 
 	BOOST_REQUIRE_EQUAL(test_volume_block_count, ground_truth_block_positions.size());
 
@@ -254,11 +254,11 @@ BOOST_FIXTURE_TEST_CASE(Test_TwoSurfaceAllocation_CUDA, TestData_CUDA) {
 	visualization_engine->CreateICPMaps(&square_volume, view_square_2, tracking_state, render_state);
 	indexer.AllocateNearAndBetweenTwoSurfaces(&span_volume, view_square_1, tracking_state);
 
-	hash_block_positions_span = StatCalc_CUDA_VBH_Voxel::Instance().GetAllocatedHashBlockPositions(
+	hash_block_positions_span = Analytics_CUDA_VBH_Voxel::Instance().GetAllocatedHashBlockPositions(
 			&span_volume);
 	hash_block_positions_span_set = std::unordered_set<Vector3s>(hash_block_positions_span.begin(),
 	                                                             hash_block_positions_span.end());
-	test_volume_block_count = StatCalc_CUDA_VBH_Voxel::Instance().CountAllocatedHashBlocks(&span_volume);
+	test_volume_block_count = Analytics_CUDA_VBH_Voxel::Instance().CountAllocatedHashBlocks(&span_volume);
 
 	BOOST_REQUIRE_EQUAL(test_volume_block_count, ground_truth_block_positions.size());
 

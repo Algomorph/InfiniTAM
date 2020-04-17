@@ -41,20 +41,20 @@ BOOST_AUTO_TEST_CASE(GetSceneBounds){
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_vbh_CPU(MEMORYDEVICE_CPU);
 	volume_vbh_CPU.Reset();
 	volume_vbh_CPU.LoadFromDirectory("TestData/snoopy_result_fr16-17_full/snoopy_full_frame_16_");
-	std::cout << "BOUNDS(16/VBH):  " << StatCalc_CPU_VBH_Voxel::Instance().ComputeVoxelBounds(&volume_vbh_CPU) << std::endl;
+	std::cout << "BOUNDS(16/VBH):  " << Analytics_CPU_VBH_Voxel::Instance().ComputeVoxelBounds(&volume_vbh_CPU) << std::endl;
 	volume_vbh_CPU.Reset();
 	volume_vbh_CPU.LoadFromDirectory("TestData/snoopy_result_fr16-17_full/snoopy_full_frame_17_");
-	std::cout << "BOUNDS(17/VBH):  " << StatCalc_CPU_VBH_Voxel::Instance().ComputeVoxelBounds(&volume_vbh_CPU) << std::endl;
+	std::cout << "BOUNDS(17/VBH):  " << Analytics_CPU_VBH_Voxel::Instance().ComputeVoxelBounds(&volume_vbh_CPU) << std::endl;
 	#ifndef COMPILE_WITHOUT_CUDA
 	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_pva_CUDA(MEMORYDEVICE_CUDA);
 	volume_pva_CUDA.Reset();
 	volume_pva_CUDA.LoadFromDirectory("TestData/snoopy_result_fr16-17_full/snoopy_full_frame_16_");
-	std::cout << "ALTERED BOUNDS(16/PVA): " << StatCalc_CUDA_PVA_Voxel::Instance().ComputeAlteredVoxelBounds(&volume_pva_CUDA) << std::endl;
+	std::cout << "ALTERED BOUNDS(16/PVA): " << Analytics_CUDA_PVA_Voxel::Instance().ComputeAlteredVoxelBounds(&volume_pva_CUDA) << std::endl;
 	#else
 	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_pva_CPU(MEMORYDEVICE_CPU);
 	volume_pva_CPU.Reset();
 	volume_pva_CPU.LoadFromDirectory("TestData/snoopy_result_fr16-17_full/snoopy_full_frame_16_");
-	std::cout << "ALTERED BOUNDS(16/PVA): " << StatCalc_CPU_PVA_Voxel::Instance().ComputeAlteredVoxelBounds(&volume_pva_CPU) << std::endl;
+	std::cout << "ALTERED BOUNDS(16/PVA): " << Analytics_CPU_PVA_Voxel::Instance().ComputeAlteredVoxelBounds(&volume_pva_CPU) << std::endl;
 	#endif
 }
 #endif
@@ -66,10 +66,10 @@ BOOST_AUTO_TEST_CASE(testPVASceneSlice_CPU) {
 	const int expected_non_truncated_voxel_count = 58368;
 	volume_CPU.LoadFromDisk("TestData/snoopy_result_fr16-17_full/snoopy_full_frame_16_");
 
-	BOOST_REQUIRE_EQUAL(StatCalc_CPU_PVA_Voxel::Instance().CountNonTruncatedVoxels(&volume_CPU),
+	BOOST_REQUIRE_EQUAL(Analytics_CPU_PVA_Voxel::Instance().CountNonTruncatedVoxels(&volume_CPU),
 	                    expected_non_truncated_voxel_count);
 
-	BOOST_REQUIRE_CLOSE(StatCalc_CPU_PVA_Voxel::Instance().SumNonTruncatedVoxelAbsSdf(&volume_CPU),
+	BOOST_REQUIRE_CLOSE(Analytics_CPU_PVA_Voxel::Instance().SumNonTruncatedVoxelAbsSdf(&volume_CPU),
 	                    28887.87700, 0.001);
 
 	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_slice_same_dimensions_CPU(
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE(testPVASceneSlice_CPU) {
 	ManipulationEngine_CPU_PVA_Voxel::Inst().CopyVolumeSlice(&volume_slice_same_dimensions_CPU,
 	                                                         &volume_CPU, bounds);
 
-	BOOST_REQUIRE_EQUAL(StatCalc_CPU_PVA_Voxel::Instance().CountNonTruncatedVoxels(
+	BOOST_REQUIRE_EQUAL(Analytics_CPU_PVA_Voxel::Instance().CountNonTruncatedVoxels(
 			&volume_slice_same_dimensions_CPU), expected_non_truncated_voxel_count);
 
 	float tolerance = 1e-8;
@@ -97,11 +97,11 @@ BOOST_AUTO_TEST_CASE(testPVASceneSlice_CPU) {
 
 	ManipulationEngine_CPU_PVA_Voxel::Inst().CopyVolumeSlice(&volume_slice_different_dimensions_CPU,
 	                                                         &volume_CPU, bounds);
-	BOOST_REQUIRE_EQUAL(StatCalc_CPU_PVA_Voxel::Instance().CountNonTruncatedVoxels(
+	BOOST_REQUIRE_EQUAL(Analytics_CPU_PVA_Voxel::Instance().CountNonTruncatedVoxels(
 			&volume_slice_different_dimensions_CPU), expected_non_truncated_voxel_count);
-	BOOST_REQUIRE_CLOSE(StatCalc_CPU_PVA_Voxel::Instance().SumNonTruncatedVoxelAbsSdf(
+	BOOST_REQUIRE_CLOSE(Analytics_CPU_PVA_Voxel::Instance().SumNonTruncatedVoxelAbsSdf(
 			&volume_slice_different_dimensions_CPU), 28887.877, 0.001);
-	BOOST_REQUIRE_CLOSE(StatCalc_CPU_PVA_Voxel::Instance().SumNonTruncatedVoxelAbsSdf(
+	BOOST_REQUIRE_CLOSE(Analytics_CPU_PVA_Voxel::Instance().SumNonTruncatedVoxelAbsSdf(
 			&volume_CPU), 28887.877, 0.001);
 	BOOST_REQUIRE(allocatedContentAlmostEqual_CPU_Verbose(&volume_CPU,
 	                                                      &volume_slice_different_dimensions_CPU, tolerance));

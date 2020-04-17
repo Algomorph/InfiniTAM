@@ -47,7 +47,7 @@ public:
 	}
 };
 
-typedef AnalyticsEngineFactory StatCalc_Accessor;
+typedef AnalyticsEngineFactory Analytics_Accessor;
 
 }
 

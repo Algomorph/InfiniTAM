@@ -95,14 +95,14 @@ class AnalyticsEngine<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>;
 extern template
 class AnalyticsEngine<WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA>;
 
-typedef AnalyticsEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU> StatCalc_CPU_VBH_Voxel;
-typedef AnalyticsEngine<TSDFVoxel, PlainVoxelArray, MEMORYDEVICE_CPU> StatCalc_CPU_PVA_Voxel;
-typedef AnalyticsEngine<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU> StatCalc_CPU_VBH_Warp;
-typedef AnalyticsEngine<WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU> StatCalc_CPU_PVA_Warp;
-typedef AnalyticsEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA> StatCalc_CUDA_VBH_Voxel;
-typedef AnalyticsEngine<TSDFVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA> StatCalc_CUDA_PVA_Voxel;
-typedef AnalyticsEngine<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA> StatCalc_CUDA_VBH_Warp;
-typedef AnalyticsEngine<WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA> StatCalc_CUDA_PVA_Warp;
+typedef AnalyticsEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU> Analytics_CPU_VBH_Voxel;
+typedef AnalyticsEngine<TSDFVoxel, PlainVoxelArray, MEMORYDEVICE_CPU> Analytics_CPU_PVA_Voxel;
+typedef AnalyticsEngine<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU> Analytics_CPU_VBH_Warp;
+typedef AnalyticsEngine<WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU> Analytics_CPU_PVA_Warp;
+typedef AnalyticsEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA> Analytics_CUDA_VBH_Voxel;
+typedef AnalyticsEngine<TSDFVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA> Analytics_CUDA_PVA_Voxel;
+typedef AnalyticsEngine<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA> Analytics_CUDA_VBH_Warp;
+typedef AnalyticsEngine<WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA> Analytics_CUDA_PVA_Warp;
 
 }//end namespace ITMLib
 

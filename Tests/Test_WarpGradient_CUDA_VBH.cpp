@@ -58,7 +58,7 @@ BOOST_FIXTURE_TEST_CASE(testDataTerm_CUDA_VBH, DataFixture) {
 		motionTracker_VBH_CUDA->CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
 	}, "Calculate Warping Gradient - VBH CUDA data term");
 
-	BOOST_REQUIRE_EQUAL(StatCalc_CUDA_VBH_Warp::Instance().CountAllocatedHashBlocks(&warp_field), 633);
+	BOOST_REQUIRE_EQUAL(Analytics_CUDA_VBH_Warp::Instance().CountAllocatedHashBlocks(&warp_field), 633);
 
 	float tolerance = 1e-7;
 	BOOST_REQUIRE(contentAlmostEqual_CUDA_Verbose(&warp_field, warp_field_data_term, tolerance));
@@ -71,7 +71,7 @@ BOOST_FIXTURE_TEST_CASE(testUpdateWarps_CUDA_VBH, DataFixture) {
 	                                                       MemoryDeviceType::MEMORYDEVICE_CUDA);
 	indexing_engine.AllocateUsingOtherVolume(canonical_volume, live_volume);
 
-	BOOST_REQUIRE_EQUAL(StatCalc_CUDA_VBH_Warp::Instance().CountAllocatedHashBlocks(&warp_field_copy), 633);
+	BOOST_REQUIRE_EQUAL(Analytics_CUDA_VBH_Warp::Instance().CountAllocatedHashBlocks(&warp_field_copy), 633);
 
 	IndexingEngine<TSDFVoxel,VoxelBlockHash,MEMORYDEVICE_CUDA>::Instance().AllocateUsingOtherVolume(canonical_volume, live_volume);
 
@@ -113,7 +113,7 @@ BOOST_FIXTURE_TEST_CASE(testTikhonovTerm_CUDA_VBH, DataFixture) {
 	TimeIt([&]() {
 		motionTracker_VBH_CUDA->CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
 	}, "Calculate Warping Gradient - VBH CUDA tikhonov term");
-	BOOST_REQUIRE_EQUAL(StatCalc_CUDA_VBH_Warp::Instance().CountAllocatedHashBlocks(&warp_field), 633);
+	BOOST_REQUIRE_EQUAL(Analytics_CUDA_VBH_Warp::Instance().CountAllocatedHashBlocks(&warp_field), 633);
 
 	WarpVoxel warp1 = ManipulationEngine_CUDA_VBH_Warp::Inst().ReadVoxel(&warp_field, testPosition);
 	WarpVoxel warp2 = ManipulationEngine_CUDA_VBH_Warp::Inst().ReadVoxel(warp_field_tikhonov_term, testPosition);
@@ -140,7 +140,7 @@ BOOST_FIXTURE_TEST_CASE(testDataAndTikhonovTerm_CUDA_VBH, DataFixture) {
 	TimeIt([&]() {
 		motionTracker_VBH_CUDA->CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
 	}, "Calculate Warping Gradient - VBH CUDA data term + tikhonov term");
-	BOOST_REQUIRE_EQUAL(StatCalc_CUDA_VBH_Warp::Instance().CountAllocatedHashBlocks(&warp_field), 633);
+	BOOST_REQUIRE_EQUAL(Analytics_CUDA_VBH_Warp::Instance().CountAllocatedHashBlocks(&warp_field), 633);
 
 	WarpVoxel warp1 = ManipulationEngine_CUDA_VBH_Warp::Inst().ReadVoxel(&warp_field, testPosition);
 	WarpVoxel warp2 = ManipulationEngine_CUDA_VBH_Warp::Inst().ReadVoxel(warp_field_data_and_tikhonov_term, testPosition);
