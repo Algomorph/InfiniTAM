@@ -32,10 +32,10 @@
 #include "../../Indexing/IndexingEngineFactory.h"
 #include "../../../SurfaceTrackers/SurfaceTrackerFactory.h"
 #include "../../../Utils/Analytics/BenchmarkUtilities.h"
-#include "../../../Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculatorInterface.h"
-#include "../../../Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculatorFactory.h"
+#include "../../../Engines/Analytics/AnalyticsEngineInterface.h"
+#include "../../../Engines/Analytics/AnalyticsEngineFactory.h"
 #include "../../../Utils/Logging/LoggingConfigruation.h"
-#include "../../../Utils/Analytics/VolumeStatistics.h"
+#include "../../Analytics/AnalyticsLogging.h"
 
 
 using namespace ITMLib;

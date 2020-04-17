@@ -34,12 +34,12 @@
 #include "../ITMLib/Engines/Visualization/VisualizationEngineFactory.h"
 //(CPU)
 #include "../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
-#include "../ITMLib/Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator.h"
+#include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
 //(CUDA)
 #ifndef COMPILE_WITHOUT_CUDA
 
 #include "../ITMLib/Engines/Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
-#include "../ITMLib/Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator.h"
+#include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
 
 #endif
 

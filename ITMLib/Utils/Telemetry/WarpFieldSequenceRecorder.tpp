@@ -19,7 +19,7 @@
 
 //local
 #include "WarpFieldSequenceRecorder.h"
-#include "../Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator.h"
+#include "../../Engines/Analytics/AnalyticsEngine.h"
 #include "../Configuration.h"
 #include "../../Engines/DepthFusion/DepthFusionEngineFactory.h"
 #include "../../Engines/Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
@@ -287,21 +287,21 @@ const VoxelVolume<TVoxel, TIndex>* WarpFieldSequenceRecorder<TVoxel, TIndex>::Ge
 template<typename TVoxel, typename TIndex>
 void WarpFieldSequenceRecorder<TVoxel, TIndex>::Load() {
 	warpField->LoadFromDisk(scenePath.string());
-	voxelCount = VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().CountAllocatedVoxels(
+	voxelCount = AnalyticsEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().CountAllocatedVoxels(
 			warpField);
 }
 
 template<typename TVoxel, typename TIndex>
 void WarpFieldSequenceRecorder<TVoxel, TIndex>::Save() {
 	warpField->SaveToDisk(scenePath.string());
-	this->voxelCount = VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().CountAllocatedVoxels(
+	this->voxelCount = AnalyticsEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().CountAllocatedVoxels(
 			warpField);
 }
 
 template<typename TVoxel, typename TIndex>
 void WarpFieldSequenceRecorder<TVoxel, TIndex>::SaveCompact() {
 	warpField->SaveToDisk(scenePath.string());
-	this->voxelCount = VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().CountAllocatedVoxels(
+	this->voxelCount = AnalyticsEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().CountAllocatedVoxels(
 			warpField);
 }
 
@@ -309,7 +309,7 @@ template<typename TVoxel, typename TIndex>
 void WarpFieldSequenceRecorder<TVoxel, TIndex>::LoadCompact() {
 	warpField->Reset();
 	warpField->LoadFromDisk(scenePath.string());
-	this->voxelCount = VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().CountAllocatedVoxels(
+	this->voxelCount = AnalyticsEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().CountAllocatedVoxels(
 			warpField);
 }
 //endregion

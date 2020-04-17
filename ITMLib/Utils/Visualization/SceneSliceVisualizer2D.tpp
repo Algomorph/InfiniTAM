@@ -29,7 +29,7 @@
 #include "SceneSliceVisualizer2D.h"
 #include "SceneSliceVisualizerCommon.h"
 #include "../../Objects/Volume/RepresentationAccess.h"
-#include "../Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator.h"
+#include "../../Engines/Analytics/AnalyticsEngine.h"
 #include "../../Engines/Traversal/Interface/VolumeTraversal.h"
 #include "../../Engines/Traversal/Interface/TwoVolumeTraversal.h"
 #include "../../Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
@@ -374,7 +374,7 @@ SceneSliceVisualizer2D<TVoxel, TWarp, TIndex>::RenderSceneSlices(VoxelVolume<TVo
                                                                  const std::string& outputFolder,
                                                                  bool verbose) {
 
-	Vector6i bounds = VolumeStatisticsCalculator<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().ComputeVoxelBounds(scene);
+	Vector6i bounds = AnalyticsEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().ComputeVoxelBounds(scene);
 	Vector3i minPoint(bounds.min_x, bounds.min_y, bounds.min_z);
 
 	int imageSizeX, imageSizeY, imageSizeZ;

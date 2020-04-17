@@ -40,7 +40,7 @@
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CPU.h"
 #include "../ORUtils/FileUtils.h"
 #include "../ITMLib/Engines/VolumeFileIO/VolumeFileIOEngine.h"
-#include "../ITMLib/Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator.h"
+#include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
 #include "TestUtils.h"
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
 #include "../ITMLib/Engines/Visualization/VisualizationEngineFactory.h"

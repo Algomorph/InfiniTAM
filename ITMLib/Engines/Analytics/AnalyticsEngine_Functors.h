@@ -20,23 +20,23 @@
 
 //local
 #ifdef __CUDACC__
-#include "../../../Utils/CUDAUtils.h"
-#include "../../../Engines/Traversal/CUDA/VolumeTraversal_CUDA_PlainVoxelArray.h"
-#include "../../../Engines/Traversal/CUDA/VolumeTraversal_CUDA_VoxelBlockHash.h"
+#include "../../Utils/CUDAUtils.h"
+#include "../Traversal/CUDA/VolumeTraversal_CUDA_PlainVoxelArray.h"
+#include "../Traversal/CUDA/VolumeTraversal_CUDA_VoxelBlockHash.h"
 #endif
 
-#include "../../../Engines/Traversal/Interface/HashTableTraversal.h"
-#include "../../../Engines/Reduction/Interface/VolumeReduction.h"
-#include "../../../../ORUtils/PlatformIndependentAtomics.h"
-#include "../../../../ORUtils/PlatformIndependence.h"
-#include "../../Configuration.h"
-#include "../../../Objects/Volume/VoxelVolume.h"
-#include "../../../Engines/Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
-#include "../../../Engines/Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
-#include "../../WarpType.h"
-#include "../Statistics.h"
-#include "../../MemoryBlock_StdContainer_Convertions.h"
-#include "../../../Engines/Common/WarpAccessFunctors.h"
+#include "../Traversal/Interface/HashTableTraversal.h"
+#include "../Reduction/Interface/VolumeReduction.h"
+#include "../../../ORUtils/PlatformIndependentAtomics.h"
+#include "../../../ORUtils/PlatformIndependence.h"
+#include "../../Utils/Configuration.h"
+#include "../../Objects/Volume/VoxelVolume.h"
+#include "../Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
+#include "../Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
+#include "../../Utils/WarpType.h"
+#include "../../Utils/Analytics/Statistics.h"
+#include "../../Utils/MemoryBlock_StdContainer_Convertions.h"
+#include "../Common/WarpAccessFunctors.h"
 
 
 using namespace ITMLib;

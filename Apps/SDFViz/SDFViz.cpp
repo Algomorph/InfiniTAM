@@ -59,7 +59,7 @@
 //ITMLib
 #include "../../ITMLib/Utils/Telemetry/VolumeSequenceRecorder.h"
 #include "../../ITMLib/Utils/Configuration.h"
-#include "../../ITMLib/Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator.h"
+#include "../../ITMLib/Engines/Analytics/AnalyticsEngine.h"
 #include "SDFVizGlobalDefines.h"
 #include "../../ITMLib/Utils/Visualization/SceneSliceVisualizer3DCommon.h"
 //TODO: organize regions -Greg (GitHub: Algomorph)

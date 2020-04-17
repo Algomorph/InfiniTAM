@@ -42,13 +42,13 @@
 
 //local CPU
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CPU.h"
-#include "../ITMLib/Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator.h"
+#include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
 #include "../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
 
 #ifndef COMPILE_WITHOUT_CUDA
 //local CUDA
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CUDA.h"
-#include "../ITMLib/Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator.h"
+#include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
 #include "../ITMLib/Engines/Visualization/VisualizationEngineFactory.h"
 #include "../ITMLib/Engines/Warping/WarpingEngineFactory.h"
 #include "../ITMLib/Engines/VolumeFusion/VolumeFusionEngineFactory.h"
@@ -212,8 +212,8 @@ template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 inline static void PrintVolumeStatistics(
 		VoxelVolume<TVoxel, TIndex>* volume,
 		std::string description) {
-	VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>& calculator =
-			VolumeStatisticsCalculator<TVoxel, TIndex, TMemoryDeviceType>::Instance();
+	AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>& calculator =
+			AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::Instance();
 	std::cout << green << "=== Stats for scene '" << description << "' ===" << reset << std::endl;
 	std::cout << "    Total voxel count: " << calculator.CountAllocatedVoxels(volume) << std::endl;
 	std::cout << "    NonTruncated voxel count: " << calculator.CountNonTruncatedVoxels(volume) << std::endl;

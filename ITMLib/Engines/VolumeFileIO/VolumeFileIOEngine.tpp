@@ -148,6 +148,12 @@ VolumeFileIOEngine<TVoxel, VoxelBlockHash>::LoadVolumeCompact(VoxelVolume<TVoxel
 	}
 }
 
+template<typename TVoxel>
+void VolumeFileIOEngine<TVoxel, VoxelBlockHash>::AppendFileWithUtilizedIndexSpaceInformation(
+		ORUtils::MemoryBlockOStreamWrapper& file, const VoxelVolume<TVoxel, VoxelBlockHash>& volume) {
+
+}
+
 // endregion ===========================================================================================================
 // region ================================= PLAIN VOXEL ARRAY ==========================================================
 
@@ -170,6 +176,12 @@ VolumeFileIOEngine<TVoxel, PlainVoxelArray>::LoadVolumeCompact(
 	ORUtils::MemoryBlockIStreamWrapper file(path, true);
 	volume.index.Load(file);
 	volume.LoadVoxels(file);
+}
+
+template<typename TVoxel>
+void VolumeFileIOEngine<TVoxel, PlainVoxelArray>::AppendFileWithUtilizedIndexSpaceInformation(
+		ORUtils::MemoryBlockOStreamWrapper& file, const VoxelVolume<TVoxel, PlainVoxelArray>& volume) {
+
 }
 
 // endregion ===========================================================================================================

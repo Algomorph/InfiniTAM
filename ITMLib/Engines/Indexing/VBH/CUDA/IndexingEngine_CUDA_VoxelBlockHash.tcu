@@ -24,8 +24,8 @@
 #include "../../../../../ORUtils/PlatformIndependence.h"
 #include "../../Shared/IndexingEngine_Functors.h"
 #include "../../../Traversal/Interface/HashTableTraversal.h"
-#include "../../../../Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator.h"
-#include "../../../../Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculatorFactory.h"
+#include "../../../../Engines/Analytics/AnalyticsEngine.h"
+#include "../../../../Engines/Analytics/AnalyticsEngineFactory.h"
 #include "../../../../Utils/MemoryBlock_StdContainer_Convertions.h"
 
 //Thrust

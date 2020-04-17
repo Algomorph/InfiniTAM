@@ -30,17 +30,17 @@
 #include "../ITMLib/Utils/Math.h"
 #include "../ITMLib/Objects/Volume/VoxelVolume.h"
 #include "../ITMLib/GlobalTemplateDefines.h"
-#include "../ITMLib/Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculatorInterface.h"
+#include "../ITMLib/Engines/Analytics/AnalyticsEngineInterface.h"
 #include "../ITMLib/Objects/Volume/RepresentationAccess.h"
 #include "../ITMLib/Utils/MemoryBlock_StdContainer_Convertions.h"
 //(CPU)
 #include "../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
-#include "../ITMLib/Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator.h"
+#include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
 //(CUDA)
 #ifndef COMPILE_WITHOUT_CUDA
 
 #include "../ITMLib/Engines/Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
-#include "../ITMLib/Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator.h"
+#include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
 
 #endif
 

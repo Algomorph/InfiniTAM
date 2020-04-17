@@ -21,7 +21,7 @@
 #include "../ITMLib/Utils/Configuration.h"
 #include "../ITMLib/Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 #include "../ITMLib/Utils/Telemetry/VolumeSequenceRecorder.h"
-#include "../ITMLib/Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator.h"
+#include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
 #include "../ITMLib/Engines/ViewBuilding/Interface/ViewBuilder.h"
 #include "../ITMLib/Engines/ViewBuilding/ViewBuilderFactory.h"
 

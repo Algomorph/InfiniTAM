@@ -26,7 +26,7 @@
 #include "../../../ORUtils/FileUtils.h"
 #include "../EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 #include "../../Utils/Logging/LoggingConfigruation.h"
-#include "../../Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculatorFactory.h"
+#include "../Analytics/AnalyticsEngineFactory.h"
 
 using namespace ITMLib;
 

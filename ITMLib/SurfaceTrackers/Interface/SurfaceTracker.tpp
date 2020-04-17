@@ -20,7 +20,7 @@
 #include "SurfaceTracker.h"
 #include "../WarpGradientFunctors/WarpGradientFunctor.h"
 #include "../../Engines/Indexing/Interface/IndexingEngine.h"
-#include "../../Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculatorInterface.h"
+#include "../../Engines/Analytics/AnalyticsEngineInterface.h"
 #include "../Shared/SurfaceTrackerSharedFunctors.h"
 #include "../../Engines/Traversal/Interface/VolumeTraversal.h"
 #include "../../Engines/Traversal/Interface/ThreeVolumeTraversal.h"
@@ -65,8 +65,8 @@ template<typename T_TSDF_Voxel, typename TIndex, MemoryDeviceType TMemoryDeviceT
 inline static void PrintVolumeStatistics(
 		VoxelVolume<T_TSDF_Voxel, TIndex>* volume,
 		std::string description) {
-	VolumeStatisticsCalculator<T_TSDF_Voxel, TIndex, TMemoryDeviceType>& calculator =
-			VolumeStatisticsCalculator<T_TSDF_Voxel, TIndex, TMemoryDeviceType>::Instance();
+	AnalyticsEngine<T_TSDF_Voxel, TIndex, TMemoryDeviceType>& calculator =
+			AnalyticsEngine<T_TSDF_Voxel, TIndex, TMemoryDeviceType>::Instance();
 	std::cout << green << "=== Stats for scene '" << description << "' ===" << reset << std::endl;
 	std::cout << "    Total voxel count: " << calculator.CountAllocatedVoxels(volume) << std::endl;
 	std::cout << "    NonTruncated voxel count: " << calculator.CountNonTruncatedVoxels(volume) << std::endl;

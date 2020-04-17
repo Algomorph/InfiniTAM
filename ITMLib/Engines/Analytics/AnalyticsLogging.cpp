@@ -13,7 +13,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "VolumeStatistics.h"
+#include "AnalyticsLogging.h"
 
 namespace ITMLib {
 

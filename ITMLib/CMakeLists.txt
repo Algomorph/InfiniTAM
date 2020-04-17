@@ -938,20 +938,20 @@ set(ITMLIB_UTILS_HEADERS
 ## ================================================ UTILS - VOLUME STATISTICS CALCULATOR ================================
 
 set(ITMLIB_UTILS_STATCALC_HEADERS
-    Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculatorFactory.h
-    Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator.h
-    Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculatorInterface.h
-    Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator_Functors.h
-    Utils/Analytics/VolumeStatistics.h
+    Engines/Analytics/AnalyticsEngineFactory.h
+    Engines/Analytics/AnalyticsEngine.h
+    Engines/Analytics/AnalyticsEngineInterface.h
+    Engines/Analytics/AnalyticsEngine_Functors.h
+    Engines/Analytics/AnalyticsLogging.h
     )
 
 set(ITMLIB_UTILS_STATCALC_SOURCES
-    Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator.tpp
-    Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator_CPU_PlainVoxelArray.cpp
-    Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator_CPU_VoxelBlockHash.cpp
-    Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator_CUDA_PlainVoxelArray.cu
-    Utils/Analytics/VolumeStatisticsCalculator/VolumeStatisticsCalculator_CUDA_VoxelBlockHash.cu
-    Utils/Analytics/VolumeStatistics.cpp
+    Engines/Analytics/AnalyticsEngine.tpp
+    Engines/Analytics/AnalyticsEngine_CPU_PlainVoxelArray.cpp
+    Engines/Analytics/AnalyticsEngine_CPU_VoxelBlockHash.cpp
+    Engines/Analytics/AnalyticsEngine_CUDA_PlainVoxelArray.cu
+    Engines/Analytics/AnalyticsEngine_CUDA_VoxelBlockHash.cu
+    Engines/Analytics/AnalyticsLogging.cpp
     )
 
 ## ================================================ UTILS - FILEIO =====================================================

@@ -15,25 +15,25 @@
 //  ================================================================
 #pragma once
 
-#include "VolumeStatisticsCalculator.h"
-#include "../../Configuration.h"
+#include "AnalyticsEngine.h"
+#include "../../Utils/Configuration.h"
 
 namespace ITMLib {
 
-struct VolumeStatisticsCalculatorFactory {
+struct AnalyticsEngineFactory {
 public:
 	template<typename TVoxel, typename TIndex>
-	static VolumeStatisticsCalculatorInterface<TVoxel, TIndex>&
+	static AnalyticsEngineInterface<TVoxel, TIndex>&
 	Get(MemoryDeviceType device_type = configuration::get().device_type) {
 		switch (device_type) {
 			case MEMORYDEVICE_CPU:
-				return VolumeStatisticsCalculator<TVoxel,TIndex,MEMORYDEVICE_CPU>::Instance();
+				return AnalyticsEngine<TVoxel,TIndex,MEMORYDEVICE_CPU>::Instance();
 				break;
 			case MEMORYDEVICE_CUDA:
 #ifdef COMPILE_WITHOUT_CUDA
 				DIEWITHEXCEPTION_REPORTLOCATION("Trying to access an instance of a class template specialized for CUDA, while code does not appear to be built with CUDA support.");
 #else
-				return VolumeStatisticsCalculator<TVoxel,TIndex,MEMORYDEVICE_CUDA>::Instance();
+				return AnalyticsEngine<TVoxel,TIndex,MEMORYDEVICE_CUDA>::Instance();
 				break;
 #endif
 				break;
@@ -47,7 +47,7 @@ public:
 	}
 };
 
-typedef VolumeStatisticsCalculatorFactory StatCalc_Accessor;
+typedef AnalyticsEngineFactory StatCalc_Accessor;
 
 }
 

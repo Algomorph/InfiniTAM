@@ -24,18 +24,18 @@
 #include <log4cplus/loggingmacros.h>
 
 //local
-#include "../Math.h"
-#include "../Logging/LoggingConfigruation.h"
-#include "VolumeStatisticsCalculator/VolumeStatisticsCalculatorFactory.h"
-#include "../Collections/OperationsOnSTLContainers.h"
+#include "../../Utils/Math.h"
+#include "../../Utils/Logging/LoggingConfigruation.h"
+#include "AnalyticsEngineFactory.h"
+#include "../../Utils/Collections/OperationsOnSTLContainers.h"
 
 namespace ITMLib {
 
 template<typename TVoxel, typename TIndex>
 void LogTSDFVolumeStatistics(VoxelVolume<TVoxel, TIndex>* volume, std::string volume_description) {
 	if (configuration::get().telemetry_settings.log_volume_statistics) {
-		VolumeStatisticsCalculatorInterface<TVoxel, TIndex>& calculator =
-				VolumeStatisticsCalculatorFactory::Get<TVoxel, TIndex>(volume->index.memory_type);
+		AnalyticsEngineInterface<TVoxel, TIndex>& calculator =
+				AnalyticsEngineFactory::Get<TVoxel, TIndex>(volume->index.memory_type);
 		LOG4CPLUS_PER_FRAME(logging::get_logger(),
 		                    green << "=== Stats for volume '" << volume_description << "' ===" << reset);
 //#define GET_VOXEL_ALLOCATION_STATISTICS

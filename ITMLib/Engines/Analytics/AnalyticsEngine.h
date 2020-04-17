@@ -16,26 +16,26 @@
 #pragma once
 
 #include <vector>
-#include "../../Math.h"
-#include "../../../Objects/Volume/VoxelVolume.h"
-#include "VolumeStatisticsCalculatorInterface.h"
-#include "../../../GlobalTemplateDefines.h"
+#include "../../Utils/Math.h"
+#include "../../Objects/Volume/VoxelVolume.h"
+#include "AnalyticsEngineInterface.h"
+#include "../../GlobalTemplateDefines.h"
 
 namespace ITMLib {
 
 
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-class VolumeStatisticsCalculator :
-		public VolumeStatisticsCalculatorInterface<TVoxel, TIndex> {
+class AnalyticsEngine :
+		public AnalyticsEngineInterface<TVoxel, TIndex> {
 public:
-	static VolumeStatisticsCalculator& Instance() {
-		static VolumeStatisticsCalculator instance;
+	static AnalyticsEngine& Instance() {
+		static AnalyticsEngine instance;
 		return instance;
 	}
 
-	VolumeStatisticsCalculator(VolumeStatisticsCalculator const&) = delete;
-	void operator=(VolumeStatisticsCalculator const&) = delete;
+	AnalyticsEngine(AnalyticsEngine const&) = delete;
+	void operator=(AnalyticsEngine const&) = delete;
 
 	Vector6i ComputeVoxelBounds(const VoxelVolume <TVoxel, TIndex>* volume) override;
 	Vector6i ComputeAlteredVoxelBounds(VoxelVolume <TVoxel, TIndex>* volume) override;
@@ -74,35 +74,35 @@ public:
 	std::vector<Vector3s> GetUtilizedHashBlockPositions(VoxelVolume <TVoxel, TIndex>* volume) override;
 
 private:
-	VolumeStatisticsCalculator() = default;
-	~VolumeStatisticsCalculator() = default;
+	AnalyticsEngine() = default;
+	~AnalyticsEngine() = default;
 };
 
 extern template
-class VolumeStatisticsCalculator<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>;
+class AnalyticsEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>;
 extern template
-class VolumeStatisticsCalculator<TSDFVoxel, PlainVoxelArray, MEMORYDEVICE_CPU>;
+class AnalyticsEngine<TSDFVoxel, PlainVoxelArray, MEMORYDEVICE_CPU>;
 extern template
-class VolumeStatisticsCalculator<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>;
+class AnalyticsEngine<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>;
 extern template
-class VolumeStatisticsCalculator<WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU>;
+class AnalyticsEngine<WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU>;
 extern template
-class VolumeStatisticsCalculator<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>;
+class AnalyticsEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>;
 extern template
-class VolumeStatisticsCalculator<TSDFVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA>;
+class AnalyticsEngine<TSDFVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA>;
 extern template
-class VolumeStatisticsCalculator<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>;
+class AnalyticsEngine<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>;
 extern template
-class VolumeStatisticsCalculator<WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA>;
+class AnalyticsEngine<WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA>;
 
-typedef VolumeStatisticsCalculator<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU> StatCalc_CPU_VBH_Voxel;
-typedef VolumeStatisticsCalculator<TSDFVoxel, PlainVoxelArray, MEMORYDEVICE_CPU> StatCalc_CPU_PVA_Voxel;
-typedef VolumeStatisticsCalculator<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU> StatCalc_CPU_VBH_Warp;
-typedef VolumeStatisticsCalculator<WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU> StatCalc_CPU_PVA_Warp;
-typedef VolumeStatisticsCalculator<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA> StatCalc_CUDA_VBH_Voxel;
-typedef VolumeStatisticsCalculator<TSDFVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA> StatCalc_CUDA_PVA_Voxel;
-typedef VolumeStatisticsCalculator<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA> StatCalc_CUDA_VBH_Warp;
-typedef VolumeStatisticsCalculator<WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA> StatCalc_CUDA_PVA_Warp;
+typedef AnalyticsEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU> StatCalc_CPU_VBH_Voxel;
+typedef AnalyticsEngine<TSDFVoxel, PlainVoxelArray, MEMORYDEVICE_CPU> StatCalc_CPU_PVA_Voxel;
+typedef AnalyticsEngine<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU> StatCalc_CPU_VBH_Warp;
+typedef AnalyticsEngine<WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU> StatCalc_CPU_PVA_Warp;
+typedef AnalyticsEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA> StatCalc_CUDA_VBH_Voxel;
+typedef AnalyticsEngine<TSDFVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA> StatCalc_CUDA_PVA_Voxel;
+typedef AnalyticsEngine<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA> StatCalc_CUDA_VBH_Warp;
+typedef AnalyticsEngine<WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA> StatCalc_CUDA_PVA_Warp;
 
 }//end namespace ITMLib
 

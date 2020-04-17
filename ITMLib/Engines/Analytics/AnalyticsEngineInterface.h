@@ -17,13 +17,13 @@
 
 
 #include <vector>
-#include "../../../Objects/Volume/VoxelVolume.h"
-#include "../../WarpType.h"
-#include "../../VoxelFlags.h"
+#include "../../Objects/Volume/VoxelVolume.h"
+#include "../../Utils/WarpType.h"
+#include "../../Utils/VoxelFlags.h"
 
 namespace ITMLib {
 template<typename TVoxel, typename TIndex>
-class VolumeStatisticsCalculatorInterface {
+class AnalyticsEngineInterface {
 public:
 	virtual Vector6i ComputeVoxelBounds(const VoxelVolume<TVoxel, TIndex>* volume) = 0;
 	virtual Vector6i ComputeAlteredVoxelBounds(VoxelVolume<TVoxel, TIndex>* volume) = 0;
@@ -60,7 +60,7 @@ public:
 };
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-class VolumeStatisticsCalculator;
+class AnalyticsEngine;
 
 }//end namespace ITMLib
 

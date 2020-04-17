@@ -18,6 +18,7 @@
 #include "../../Objects/Volume/VoxelBlockHash.h"
 #include "../../Objects/Volume/PlainVoxelArray.h"
 #include "../../Objects/Volume/VoxelVolume.h"
+#include "../../../ORUtils/MemoryBlockPersister.h"
 
 namespace ITMLib{
 
@@ -29,6 +30,7 @@ class VolumeFileIOEngine<TVoxel,VoxelBlockHash>{
 public:
 	static void SaveVolumeCompact(const VoxelVolume<TVoxel,VoxelBlockHash>& volume, const std::string& path);
 	static void LoadVolumeCompact(VoxelVolume<TVoxel,VoxelBlockHash>& volume, const std::string& path);
+	static void AppendFileWithUtilizedIndexSpaceInformation(ORUtils::MemoryBlockOStreamWrapper& file, const VoxelVolume<TVoxel,VoxelBlockHash>& volume);
 };
 
 
@@ -37,6 +39,7 @@ class VolumeFileIOEngine<TVoxel,PlainVoxelArray>{
 public:
 	static void SaveVolumeCompact(const VoxelVolume<TVoxel,PlainVoxelArray>& volume, const std::string& path);
 	static void LoadVolumeCompact(VoxelVolume<TVoxel,PlainVoxelArray>& volume, const std::string& path);
+	static void AppendFileWithUtilizedIndexSpaceInformation(ORUtils::MemoryBlockOStreamWrapper& file, const VoxelVolume<TVoxel,PlainVoxelArray>& volume);
 };
 
 

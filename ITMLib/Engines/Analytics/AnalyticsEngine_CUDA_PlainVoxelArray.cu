@@ -1,5 +1,5 @@
 //  ================================================================
-//  Created by Gregory Kramida on 8/27/19.
+//  Created by Gregory Kramida on 10/1/19.
 //  Copyright (c) 2019 Gregory Kramida
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -13,15 +13,15 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "../../../GlobalTemplateDefines.h"
-#include "../../../Engines/Reduction/CPU/VolumeReduction_CPU_PlainVoxelArray.h"
-#include "../../../Engines/Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
-#include "../../../Engines/Traversal/CPU/HashTableTraversal_CPU.h"
-#include "VolumeStatisticsCalculator.tpp"
+#include "../../GlobalTemplateDefines.h"
+#include "../Reduction/CUDA/VolumeReduction_CUDA_PlainVoxelArray.h"
+#include "../Traversal/CUDA/VolumeTraversal_CUDA_PlainVoxelArray.h"
+#include "../Traversal/CUDA/HashTableTraversal_CUDA.h"
+#include "AnalyticsEngine.tpp"
 
 namespace ITMLib {
 template
-class VolumeStatisticsCalculator<TSDFVoxel, PlainVoxelArray, MEMORYDEVICE_CPU>;
+class AnalyticsEngine<TSDFVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA>;
 template
-class VolumeStatisticsCalculator<WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU>;
+class AnalyticsEngine<WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA>;
 } // namespace ITMLib
