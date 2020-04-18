@@ -125,7 +125,8 @@ DECLARE_SERIALIZABLE_STRUCT(PATHS_STRUCT_DESCRIPTION);
     (bool, log_to_disk, false, PRIMITIVE, "Print log to text file, in the output path (preserves older log files). Can be used in combination with stdout."), \
     (bool, log_to_stdout, true, PRIMITIVE, "Print log to stdout. Can be used in combination with disk logging."), \
     (bool, log_benchmarks, false, PRIMITIVE, "Whether to log runtime benchmarks after automatic run."),\
-	(bool, log_volume_statistics, false, PRIMITIVE, "Whether to output various volume statistics after some operations (used only when verbosity_level is set at or above PER_FRAME).")
+	(bool, log_volume_statistics, false, PRIMITIVE, "Whether to output various volume statistics after some operations (used only when verbosity_level is set at or above PER_FRAME)."),\
+	(bool, record_volume_memory_usage, false, PRIMITIVE, "Whether to record information required to debug memory usage, e.g. used block locations for the VoxelBlockHash index")
 
 DECLARE_SERIALIZABLE_STRUCT(TELEMETRY_SETTINGS_STRUCT_DESCRIPTION);
 
