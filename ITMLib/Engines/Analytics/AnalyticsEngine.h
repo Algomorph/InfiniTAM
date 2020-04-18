@@ -16,9 +16,9 @@
 #pragma once
 
 #include <vector>
+#include "AnalyticsEngineInterface.h"
 #include "../../Utils/Math.h"
 #include "../../Objects/Volume/VoxelVolume.h"
-#include "AnalyticsEngineInterface.h"
 #include "../../GlobalTemplateDefines.h"
 
 namespace ITMLib {
@@ -48,6 +48,7 @@ public:
 	unsigned int CountNonTruncatedVoxels(VoxelVolume <TVoxel, TIndex>* volume) override;
 	unsigned int CountAlteredVoxels(VoxelVolume <TVoxel, TIndex>* volume) override;
 	unsigned int CountVoxelsWithSpecificSdfValue(VoxelVolume <TVoxel, TIndex>* volume, float value) override;
+
 	double SumNonTruncatedVoxelAbsSdf(VoxelVolume <TVoxel, TIndex>* volume) override;
 	double SumTruncatedVoxelAbsSdf(VoxelVolume <TVoxel, TIndex>* volume) override;
 
@@ -61,17 +62,14 @@ public:
 
 	void ComputeWarpUpdateMaxAndPosition(float& value, Vector3i& position, const VoxelVolume<TVoxel,TIndex>* volume);
 
-
-
 	Vector6i FindMinimumNonTruncatedBoundingBox(VoxelVolume <TVoxel, TIndex>* volume) override;
-
 
 	unsigned int CountAllocatedHashBlocks(VoxelVolume <TVoxel, TIndex>* volume) override;
 	unsigned int CountUtilizedHashBlocks(VoxelVolume <TVoxel, TIndex>* volume) override;
 	std::vector<int> GetAllocatedHashCodes(VoxelVolume <TVoxel, TIndex>* volume) override;
 	std::vector<Vector3s> GetAllocatedHashBlockPositions(VoxelVolume <TVoxel, TIndex>* volume) override;
 	std::vector<int> GetUtilizedHashCodes(VoxelVolume <TVoxel, TIndex>* volume) override;
-	std::vector<Vector3s> GetUtilizedHashBlockPositions(VoxelVolume <TVoxel, TIndex>* volume) override;
+	std::vector<Vector3s> GetUtilizedHashBlockPositions(const VoxelVolume <TVoxel, TIndex>* volume) override;
 
 private:
 	AnalyticsEngine() = default;

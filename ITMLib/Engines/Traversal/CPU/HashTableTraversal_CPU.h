@@ -49,6 +49,21 @@ public:
 			functor(hash_table[hash_code], hash_code);
 		}
 	}
+
+	template<typename TFunctor>
+	inline static void
+	TraverseUtilizedWithHashCode(const VoxelBlockHash& index, TFunctor& functor){
+		const HashEntry* hash_table = index.GetEntries();
+		const int utilized_entry_count = index.GetUtilizedBlockCount();
+		const int* utilized_entry_codes = index.GetUtilizedBlockHashCodes();
+#ifdef WITH_OPENMP
+#pragma omp parallel for default(none) shared(functor, hash_table, utilized_entry_codes)
+#endif
+		for (int hash_code_index = 0; hash_code_index < utilized_entry_count; hash_code_index++){
+			int hash_code = utilized_entry_codes[hash_code_index];
+			functor(hash_table[hash_code], hash_code);
+		}
+	}
 };
 
 } // namespace ITMLib

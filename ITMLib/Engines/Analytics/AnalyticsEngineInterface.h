@@ -56,7 +56,7 @@ public:
 	virtual std::vector<int> GetAllocatedHashCodes(VoxelVolume<TVoxel, TIndex>* volume) = 0;
 	virtual std::vector<Vector3s> GetAllocatedHashBlockPositions(VoxelVolume<TVoxel, TIndex>* volume) = 0;
 	virtual std::vector<int> GetUtilizedHashCodes(VoxelVolume <TVoxel, TIndex>* volume) = 0;
-	virtual std::vector<Vector3s> GetUtilizedHashBlockPositions(VoxelVolume <TVoxel, TIndex>* volume) = 0;
+	virtual std::vector<Vector3s> GetUtilizedHashBlockPositions(const VoxelVolume <TVoxel, TIndex>* volume) = 0;
 };
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>

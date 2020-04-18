@@ -320,13 +320,13 @@ struct ComputeVoxelCountFunctor<TVoxel, PlainVoxelArray, TMemoryDeviceType> {
 	}
 };
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-struct HashOnlyStatisticsFunctor;
+struct HashOnlyAnalysisFunctor;
 
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
 struct ComputeVoxelCountFunctor<TVoxel, VoxelBlockHash, TMemoryDeviceType> {
 	inline
 	static unsigned int compute_allocated(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
-		return static_cast<unsigned int>(HashOnlyStatisticsFunctor<TVoxel, VoxelBlockHash, TMemoryDeviceType>
+		return static_cast<unsigned int>(HashOnlyAnalysisFunctor<TVoxel, VoxelBlockHash, TMemoryDeviceType>
 		::ComputeAllocatedHashBlockCount(volume)) * VOXEL_BLOCK_SIZE3;
 	}
 
@@ -635,7 +635,7 @@ struct BlockPositionAggregationFunctor {
 
 
 	_DEVICE_WHEN_AVAILABLE_
-	void operator()(HashEntry& entry, int hash_code) {
+	void operator()(const HashEntry& entry, int hash_code) {
 		if (entry.ptr >= 0) {
 			unsigned int index = ATOMIC_ADD(current_fill_index, 1u);
 			block_positions_device[index] = entry.pos;
@@ -653,7 +653,7 @@ private:
 };
 
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
-struct HashOnlyStatisticsFunctor<TVoxel, PlainVoxelArray, TMemoryDeviceType> {
+struct HashOnlyAnalysisFunctor<TVoxel, PlainVoxelArray, TMemoryDeviceType> {
 	static std::vector<int> GetAllocatedHashCodes(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
 		return std::vector<int>();
 	}
@@ -668,7 +668,7 @@ struct HashOnlyStatisticsFunctor<TVoxel, PlainVoxelArray, TMemoryDeviceType> {
 		return pos_vector;
 	}
 
-	static std::vector<Vector3s> GetUtilizedBlockPositions(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
+	static std::vector<Vector3s> GetUtilizedBlockPositions(const VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
 		std::vector<Vector3s> pos_vector = {TO_SHORT3(volume->index.GetVolumeOffset())};
 		return pos_vector;
 	}
@@ -682,7 +682,7 @@ struct HashOnlyStatisticsFunctor<TVoxel, PlainVoxelArray, TMemoryDeviceType> {
 	}
 };
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
-struct HashOnlyStatisticsFunctor<TVoxel, VoxelBlockHash, TMemoryDeviceType> {
+struct HashOnlyAnalysisFunctor<TVoxel, VoxelBlockHash, TMemoryDeviceType> {
 	static std::vector<int> GetAllocatedHashCodes(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 		unsigned int allocated_count = ComputeAllocatedHashBlockCount(volume);
 		AllocatedHashesAggregationFunctor<TMemoryDeviceType> aggregator_functor(allocated_count);
@@ -705,7 +705,7 @@ struct HashOnlyStatisticsFunctor<TVoxel, VoxelBlockHash, TMemoryDeviceType> {
 		return raw_block_to_std_vector(codes, TMemoryDeviceType, volume->index.GetUtilizedBlockCount());
 	}
 
-	static std::vector<Vector3s> GetUtilizedBlockPositions(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
+	static std::vector<Vector3s> GetUtilizedBlockPositions(const VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 		unsigned int utilized_count = volume->index.GetUtilizedBlockCount();
 		if(utilized_count == 0u){
 			return std::vector<Vector3s>();

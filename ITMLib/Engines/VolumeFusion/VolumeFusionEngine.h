@@ -30,12 +30,12 @@ public:
 	 * \brief Fuses the live scene into the canonical scene
 	 * \details Operation happens after the motion is tracked, at this point sourceTsdfVolume should be as Close to the canonical
 	 * as possible
-	 * \param targetVolume the target volume: often, the canonical volume, representing state of the surfaces at the beginning of the sequence
-	 * \param sourceVolume the source volume: often, the live volume, i.e. a TSDF generated from a single recent depth image
+	 * \param target_volume the target volume: often, the canonical volume, representing state of the surfaces at the beginning of the sequence
+	 * \param source_volume the source volume: often, the live volume, i.e. a TSDF generated from a single recent depth image
 	 * \param liveSourceFieldIndex index of the sdf field to use at live scene voxels
 	 */
-	virtual void FuseOneTsdfVolumeIntoAnother(VoxelVolume <TVoxel, TIndex>* targetVolume,
-	                                          VoxelVolume <TVoxel, TIndex>* sourceVolume,
+	virtual void FuseOneTsdfVolumeIntoAnother(VoxelVolume <TVoxel, TIndex>* target_volume,
+	                                          VoxelVolume <TVoxel, TIndex>* source_volume,
 	                                          unsigned short timestamp) = 0;
 };
 

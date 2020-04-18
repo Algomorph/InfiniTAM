@@ -20,6 +20,7 @@
 
 //local
 #include "VolumeFileIOEngine.h"
+#include "../Analytics/AnalyticsEngineFactory.h"
 
 using namespace ITMLib;
 namespace b_ios = boost::iostreams;
@@ -149,9 +150,14 @@ VolumeFileIOEngine<TVoxel, VoxelBlockHash>::LoadVolumeCompact(VoxelVolume<TVoxel
 }
 
 template<typename TVoxel>
-void VolumeFileIOEngine<TVoxel, VoxelBlockHash>::AppendFileWithUtilizedIndexSpaceInformation(
+void VolumeFileIOEngine<TVoxel, VoxelBlockHash>::AppendFileWithUtilizedMemoryInformation(
 		ORUtils::MemoryBlockOStreamWrapper& file, const VoxelVolume<TVoxel, VoxelBlockHash>& volume) {
-
+	std::vector<Vector3s> positions = Analytics_Accessor::Get<TVoxel, VoxelBlockHash>(volume.index.memory_type).GetUtilizedHashBlockPositions(&volume);
+	size_t position_count = positions.size();
+	file.OStream().write(reinterpret_cast<const char*>(&position_count), sizeof(size_t));
+	for(auto& position : positions){
+		file.OStream().write(reinterpret_cast<const char*>(&position), sizeof(position));
+	}
 }
 
 // endregion ===========================================================================================================
@@ -179,9 +185,10 @@ VolumeFileIOEngine<TVoxel, PlainVoxelArray>::LoadVolumeCompact(
 }
 
 template<typename TVoxel>
-void VolumeFileIOEngine<TVoxel, PlainVoxelArray>::AppendFileWithUtilizedIndexSpaceInformation(
+void VolumeFileIOEngine<TVoxel, PlainVoxelArray>::AppendFileWithUtilizedMemoryInformation(
 		ORUtils::MemoryBlockOStreamWrapper& file, const VoxelVolume<TVoxel, PlainVoxelArray>& volume) {
-
+	//FIXME
+	DIEWITHEXCEPTION_REPORTLOCATION("Not yet implemented.");
 }
 
 // endregion ===========================================================================================================
