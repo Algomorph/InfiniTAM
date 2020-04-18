@@ -74,7 +74,7 @@ namespace ITMLib
 		//TODO need better function separation here, "begin" is logically too arbitrary and does too many things
 		void HandlePotentialCameraTrackingFailure();
 
-		bool trackingActive, fusionActive, mainProcessingActive, trackingInitialised;
+		bool camera_tracking_enabled, fusionActive, mainProcessingActive, trackingInitialised;
 		int framesProcessed, relocalisationCount;
 
 		configuration::Configuration settings;
@@ -85,7 +85,7 @@ namespace ITMLib
 		MeshingEngine<TVoxel, TIndex>* meshing_engine;
 
 		ViewBuilder* view_builder;
-		DenseDynamicMapper<TVoxel, TWarp, TIndex>* denseMapper;
+		DenseDynamicMapper<TVoxel, TWarp, TIndex>* dense_mapper;
 		CameraTrackingController* camera_tracking_controller;
 
 		VoxelVolume<TVoxel, TIndex>* canonical_volume;
@@ -95,8 +95,8 @@ namespace ITMLib
 		RenderState* live_render_state;
 		RenderState* freeview_render_state;
 
-		CameraTracker* tracker;
-		IMUCalibrator* imuCalibrator;
+		CameraTracker* camera_tracker;
+		IMUCalibrator* imu_calibrator;
 
 		FernRelocLib::Relocaliser<float>* relocaliser;
 		ITMUChar4Image* kfRaycast;

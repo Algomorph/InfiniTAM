@@ -686,7 +686,7 @@ details.
 Contributions
 =============
 
-[log4cplus] (bug tracker, files, wiki) is hosted on SourceForge,
+[log4cplus] (bug camera_tracker, files, wiki) is hosted on SourceForge,
 except for [log4cplus source][5], which is hosted on GitHub. This
 allows the project to integrate with [Travis CI][11] service offered
 by GitHub.
@@ -701,7 +701,7 @@ Patches
 Anybody can contribute to log4cplus development. If you are
 contributing a source code change, use a reasonable form: a merge
 request of a Git branch or a patch file attached to a ticket in
-[Bugs tracker][6] or sent to [log4cplus-devel mailing list][7]. Unless
+[Bugs camera_tracker][6] or sent to [log4cplus-devel mailing list][7]. Unless
 it is obvious, always state what branch or release tarball is your
 patch based upon.
 

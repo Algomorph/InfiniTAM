@@ -113,6 +113,9 @@ private:
 	const bool log_settings = false;
 	bool has_focus_coordinates;
 	const Vector3i focus_coordinates;
+	//TODO: revise TelemetryRecorder and add to that
+	ORUtils::MemoryBlockOStreamWrapper* canonical_volume_memory_usage_file = nullptr;
+
 	// algorithm operation
 	const configuration::SwappingMode swapping_mode;
 	const NonRigidTrackingParameters parameters;

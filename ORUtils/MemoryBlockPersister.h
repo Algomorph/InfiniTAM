@@ -25,6 +25,8 @@ namespace ORUtils {
 
 class MemoryBlockIStreamWrapper {
 public:
+	MemoryBlockIStreamWrapper() : compression_enabled(false) {}
+
 	MemoryBlockIStreamWrapper(const std::string& filename, bool use_compression = false)
 			: file(filename.c_str(), std::ios::binary), compression_enabled(use_compression) {
 		if (file) {
@@ -65,6 +67,8 @@ private:
 
 class MemoryBlockOStreamWrapper {
 public:
+	MemoryBlockOStreamWrapper() : compression_enabled(false) {};
+
 	MemoryBlockOStreamWrapper(const std::string& filename, bool use_compression = false)
 			: file(filename.c_str(), std::ios::binary), compression_enabled(use_compression) {
 		if (file) {

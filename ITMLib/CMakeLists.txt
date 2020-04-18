@@ -662,6 +662,7 @@ set(ITMLIB_ENGINES_ANALYTICS_HEADERS
     Engines/Analytics/AnalyticsEngineInterface.h
     Engines/Analytics/AnalyticsEngine_Functors.h
     Engines/Analytics/AnalyticsLogging.h
+    Engines/Analytics/AnalyticsTelemetry.h
     )
 
 set(ITMLIB_ENGINES_ANALYTICS_SOURCES
@@ -671,6 +672,7 @@ set(ITMLIB_ENGINES_ANALYTICS_SOURCES
     Engines/Analytics/AnalyticsEngine_CUDA_PlainVoxelArray.cu
     Engines/Analytics/AnalyticsEngine_CUDA_VoxelBlockHash.cu
     Engines/Analytics/AnalyticsLogging.cpp
+    Engines/Analytics/AnalyticsTelemetry.cpp
     )
 
 ## ================================================== OBJECTS ==========================================================

@@ -37,7 +37,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(const RG
 
 	this->InitializeScenes();
 
-	trackingActive = settings.enable_rigid_tracking;
+	camera_tracking_enabled = settings.enable_rigid_tracking;
 
 	const MemoryDeviceType deviceType = settings.device_type;
 	MemoryDeviceType memoryType = settings.device_type;
@@ -52,19 +52,20 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(const RG
 	if (settings.create_meshing_engine)
 		meshing_engine = MeshingEngineFactory::MakeMeshingEngine<TVoxel, TIndex>(deviceType, canonical_volume->index);
 
-	denseMapper = new DenseDynamicMapper<TVoxel, TWarp, TIndex>(canonical_volume->index);
+	dense_mapper = new DenseDynamicMapper<TVoxel, TWarp, TIndex>(canonical_volume->index);
 
-	imuCalibrator = new ITMIMUCalibrator_iPad();
-	tracker = CameraTrackerFactory::Instance().Make(rgb_image_size, depth_image_size, low_level_engine, imuCalibrator,
-	                                                canonical_volume->GetParameters());
-	camera_tracking_controller = new CameraTrackingController(tracker);
-	Vector2i trackedImageSize = camera_tracking_controller->GetTrackedImageSize(rgb_image_size, depth_image_size);
-	tracking_state = new CameraTrackingState(trackedImageSize, memoryType);
+	imu_calibrator = new ITMIMUCalibrator_iPad();
+	camera_tracker = CameraTrackerFactory::Instance().Make(rgb_image_size, depth_image_size, low_level_engine, imu_calibrator,
+	                                                       canonical_volume->GetParameters());
+	camera_tracking_controller = new CameraTrackingController(camera_tracker);
+	//TODO: is "tracked" image size ever different from actual depth image size? If so, document GetTrackedImageSize function. Otherwise, revise.
+	Vector2i tracked_image_size = camera_tracking_controller->GetTrackedImageSize(rgb_image_size, depth_image_size);
+	tracking_state = new CameraTrackingState(tracked_image_size, memoryType);
 
 
-	canonical_render_state = new RenderState(trackedImageSize, canonical_volume->GetParameters().near_clipping_distance,
+	canonical_render_state = new RenderState(tracked_image_size, canonical_volume->GetParameters().near_clipping_distance,
 	                                         canonical_volume->GetParameters().far_clipping_distance, settings.device_type);
-	live_render_state = new RenderState(trackedImageSize, canonical_volume->GetParameters().near_clipping_distance,
+	live_render_state = new RenderState(tracked_image_size, canonical_volume->GetParameters().near_clipping_distance,
 	                                    canonical_volume->GetParameters().far_clipping_distance, settings.device_type);
 	freeview_render_state = nullptr; //will be created if needed
 
@@ -72,7 +73,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(const RG
 
 	Reset();
 
-	tracker->UpdateInitialPose(tracking_state);
+	camera_tracker->UpdateInitialPose(tracking_state);
 
 	view = nullptr; // will be allocated by the view builder
 
@@ -125,11 +126,11 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::~DynamicSceneVoxelEngine() {
 	delete live_volumes;
 	delete canonical_volume;
 
-	delete denseMapper;
+	delete dense_mapper;
 	delete camera_tracking_controller;
 
-	delete tracker;
-	delete imuCalibrator;
+	delete camera_tracker;
+	delete imu_calibrator;
 
 	delete low_level_engine;
 	delete view_builder;
@@ -307,7 +308,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(ITMUChar4Image* rgb
 	}
 	// camera tracking
 	previousFramePose = (*(tracking_state->pose_d));
-	if (trackingActive) camera_tracking_controller->Track(tracking_state, view);
+	if (camera_tracking_enabled) camera_tracking_controller->Track(tracking_state, view);
 
 	HandlePotentialCameraTrackingFailure();
 
@@ -317,9 +318,9 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(ITMUChar4Image* rgb
 	if ((last_tracking_result == CameraTrackingState::TRACKING_GOOD || !trackingInitialised) && (fusionActive) &&
 	    (relocalisationCount == 0)) {
 		if (framesProcessed > 0) {
-			denseMapper->ProcessFrame(view, tracking_state, canonical_volume, live_volumes, warp_field);
+			dense_mapper->ProcessFrame(view, tracking_state, canonical_volume, live_volumes, warp_field);
 		} else {
-			denseMapper->ProcessInitialFrame(view, tracking_state, canonical_volume, live_volumes[0]);
+			dense_mapper->ProcessInitialFrame(view, tracking_state, canonical_volume, live_volumes[0]);
 		}
 		fusion_succeeded = true;
 		if (framesProcessed > 50) trackingInitialised = true;
@@ -473,10 +474,10 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(ITMUChar4Image* ou
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::turnOnTracking() { trackingActive = true; }
+void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::turnOnTracking() { camera_tracking_enabled = true; }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::turnOffTracking() { trackingActive = false; }
+void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::turnOffTracking() { camera_tracking_enabled = false; }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::turnOnIntegration() { fusionActive = true; }
@@ -528,7 +529,7 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::HandlePotentialCameraTracki
 					tracking_state->pose_d->SetFrom(&keyframe.pose);
 
 					// TODO: fix this functionality, reuse when fixed
-					denseMapper->UpdateVisibleList(view, tracking_state, live_volumes[0], canonical_render_state, true);
+					dense_mapper->UpdateVisibleList(view, tracking_state, live_volumes[0], canonical_render_state, true);
 
 					camera_tracking_controller->Prepare(tracking_state, live_volumes[0], view, visualization_engine, canonical_render_state);
 					camera_tracking_controller->Track(tracking_state, view);

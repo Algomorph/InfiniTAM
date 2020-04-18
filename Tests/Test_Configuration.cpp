@@ -50,7 +50,8 @@ BOOST_AUTO_TEST_CASE(ConfigurationTest) {
 					HashVolumeParameters(
 							VoxelBlockHash::VoxelBlockHashParameters(0x40000, 0x20000),
 							VoxelBlockHash::VoxelBlockHashParameters(0x20000, 0x20000),
-							VoxelBlockHash::VoxelBlockHashParameters(0x20000, 0x20000))
+							VoxelBlockHash::VoxelBlockHashParameters(0x20000, 0x20000)
+					)
 			),
 			SlavchevaSurfaceTracker::Parameters(0.11f, 0.09f, 2.0f, 0.3f, 0.1f, 1e-6f),
 			SlavchevaSurfaceTracker::Switches(false, true, false, true, false),
@@ -148,7 +149,8 @@ configuration::Configuration generate_default_snoopy_configuration() {
 					HashVolumeParameters(
 							VoxelBlockHash::VoxelBlockHashParameters(0x40000, 0x20000),
 							VoxelBlockHash::VoxelBlockHashParameters(0x20000, 0x20000),
-							VoxelBlockHash::VoxelBlockHashParameters(0x20000, 0x20000))
+							VoxelBlockHash::VoxelBlockHashParameters(0x20000, 0x20000)
+					)
 			),
 			SlavchevaSurfaceTracker::Parameters(
 					0.2f,

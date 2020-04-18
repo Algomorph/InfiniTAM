@@ -36,6 +36,7 @@
 #include "../../../Engines/Analytics/AnalyticsEngineFactory.h"
 #include "../../../Utils/Logging/LoggingConfigruation.h"
 #include "../../Analytics/AnalyticsLogging.h"
+#include "../../Analytics/AnalyticsTelemetry.h"
 
 
 using namespace ITMLib;
@@ -72,6 +73,7 @@ DenseDynamicMapper<TVoxel, TWarp, TIndex>::DenseDynamicMapper(const TIndex& inde
 		focus_coordinates(configuration::get().telemetry_settings.focus_coordinates),
 		verbosity_level(configuration::get().verbosity_level) {
 	LogSettings();
+	InitializePerFrameAnalyticsTelemetry(this->canonical_volume_memory_usage_file);
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
@@ -80,6 +82,7 @@ DenseDynamicMapper<TVoxel, TWarp, TIndex>::~DenseDynamicMapper() {
 	delete warping_engine;
 	delete swapping_engine;
 	delete surface_tracker;
+	delete canonical_volume_memory_usage_file;
 }
 //endregion ================================= C/D ======================================================================
 
@@ -98,7 +101,7 @@ void DenseDynamicMapper<TVoxel, TWarp, TIndex>::ProcessInitialFrame(
 	//** fuse the live into canonical directly
 	bench::start_timer("FuseOneTsdfVolumeIntoAnother");
 	indexing_engine->AllocateFromOtherVolume(canonical_volume, live_volume);
-	DIEWITHEXCEPTION_REPORTLOCATION("FIXME: use proper frame number here instead of 0");
+	//FIXME: use proper frame number here instead of 0
 	volume_fusion_engine->FuseOneTsdfVolumeIntoAnother(canonical_volume, live_volume, 0u);
 	bench::stop_timer("FuseOneTsdfVolumeIntoAnother");
 }
@@ -136,12 +139,12 @@ DenseDynamicMapper<TVoxel, TWarp, TIndex>::ProcessFrame(const View* view, const 
 
 	//fuse warped live into canonical
 	bench::start_timer("FuseOneTsdfVolumeIntoAnother");
-	DIEWITHEXCEPTION_REPORTLOCATION("FIXME: use proper frame number here");
+	//FIXME: use proper frame number here
 	volume_fusion_engine->FuseOneTsdfVolumeIntoAnother(canonical_volume, target_warped_live_volume, 0);
 	bench::stop_timer("FuseOneTsdfVolumeIntoAnother");
 
 	LogTSDFVolumeStatistics(canonical_volume, "[[canonical TSDF after fusion]]");
-
+	RecordVolumeMemoryUsageInfo(*canonical_volume_memory_usage_file, *canonical_volume);
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
