@@ -5,15 +5,15 @@
 option(BUILD_TESTS "Build automated tests with the project (Boost-test required)." OFF)
 
 set(COMMON_TEST_SOURCES
-    TestUtils.cpp
-    TestUtils.cu
-    TestUtils.tpp
+    TestUtilities.cpp
+    TestUtilities.cu
+    TestUtilities.tpp
     TestUtils_Kernels.h
     TestUtils_Functors.h
     TestUtilsForSnoopyFrames16And17.cpp
     )
 set(COMMON_TEST_HEADERS
-    TestUtils.h
+    TestUtilities.h
     TestUtilsForSnoopyFrames16And17.h)
 
 macro(load_use_includes)

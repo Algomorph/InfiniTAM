@@ -18,11 +18,6 @@
 //boost
 #include <boost/test/test_tools.hpp>
 
-//local
-#include "WarpAdvancedTestingUtilities.h"
-#include "TestUtils.h"
-#include "TestUtilsForSnoopyFrames16And17.h"
-
 //ITMLib
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
 #include "../ITMLib/Engines/VolumeFusion/VolumeFusionEngineFactory.h"
@@ -32,15 +27,24 @@
 #include "../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
 #include "../ITMLib/Engines/Visualization/VisualizationEngineFactory.h"
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison.h"
-//CPU
+//(CPU)
 #include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
-//CUDA
+//(CUDA)
 #ifndef COMPILE_WITHOUT_CUDA
-
 #include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
 #include "../ITMLib/Engines/Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
-
 #endif
+
+
+//test_utilities
+#include "TestUtilities.h"
+#include "TestUtilsForSnoopyFrames16And17.h"
+
+#include "WarpAdvancedTestingUtilities.h"
+
+using namespace ITMLib;
+using namespace test_utilities;
+namespace snoopy = snoopy16and17utilities;
 
 
 template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
@@ -53,7 +57,7 @@ void GenerateRawLiveAndCanonicalVolumes(VoxelVolume<TSDFVoxel, TIndex>** canonic
 	                                              "TestData/snoopy_omask_000016.png",
 	                                              "TestData/snoopy_calib.txt",
 	                                              TMemoryDeviceType,
-	                                              Frame16And17Fixture::InitParams<TIndex>());
+	                                              snoopy::InitializationParameters<TIndex>());
 
 	Vector2i image_size = view->depth->dimensions;
 
@@ -95,13 +99,15 @@ void GenericWarpConsistencySubtest(const SlavchevaSurfaceTracker::Switches& swit
 		DIEWITHEXCEPTION_REPORTLOCATION("Iteration limit must be at least 2");
 	}
 
-	VoxelVolume<WarpVoxel, TIndex> warp_field(TMemoryDeviceType, Frame16And17Fixture::InitParams<TIndex>());
+	VoxelVolume<WarpVoxel, TIndex> warp_field(TMemoryDeviceType, snoopy::InitializationParameters<TIndex>());
 	warp_field.Reset();
 
 	VoxelVolume<TSDFVoxel, TIndex>* canonical_volume;
 	VoxelVolume<TSDFVoxel, TIndex>* live_volumes[2] = {
-			new VoxelVolume<TSDFVoxel, TIndex>(TMemoryDeviceType, Frame16And17Fixture::InitParams<TIndex>()),
-			new VoxelVolume<TSDFVoxel, TIndex>(TMemoryDeviceType, Frame16And17Fixture::InitParams<TIndex>())
+			new VoxelVolume<TSDFVoxel, TIndex>(TMemoryDeviceType,
+			                                   snoopy::InitializationParameters<TIndex>()),
+			new VoxelVolume<TSDFVoxel, TIndex>(TMemoryDeviceType,
+			                                   snoopy::InitializationParameters<TIndex>())
 	};
 	live_volumes[0]->Reset();
 	live_volumes[1]->Reset();
@@ -123,9 +129,9 @@ void GenericWarpConsistencySubtest(const SlavchevaSurfaceTracker::Switches& swit
 			motion_tracker(switches);
 
 	VoxelVolume<WarpVoxel, TIndex> ground_truth_warp_field(TMemoryDeviceType,
-	                                                       Frame16And17Fixture::InitParams<TIndex>());
+	                                                       snoopy::InitializationParameters<TIndex>());
 	VoxelVolume<TSDFVoxel, TIndex> ground_truth_sdf_volume(TMemoryDeviceType,
-	                                                       Frame16And17Fixture::InitParams<TIndex>());
+	                                                       snoopy::InitializationParameters<TIndex>());
 
 	ground_truth_warp_field.Reset();
 
@@ -230,14 +236,14 @@ void Warp_PVA_VBH_simple_subtest(int iteration, SlavchevaSurfaceTracker::Switche
 	VoxelVolume<WarpVoxel, VoxelBlockHash>* warps_VBH;
 	if (iteration > 0) {
 		std::string path_warps = get_path_warps(prefix, iteration - 1);
-		loadVolume(&warps_PVA, path_warps, TMemoryDeviceType,
-		           Frame16And17Fixture::InitParams<PlainVoxelArray>());
-		loadVolume(&warps_VBH, path_warps, TMemoryDeviceType,
-		           Frame16And17Fixture::InitParams<VoxelBlockHash>());
+		LoadVolume(&warps_PVA, path_warps, TMemoryDeviceType,
+		           snoopy::InitializationParameters<PlainVoxelArray>());
+		LoadVolume(&warps_VBH, path_warps, TMemoryDeviceType,
+		           snoopy::InitializationParameters<VoxelBlockHash>());
 		BOOST_REQUIRE(allocatedContentAlmostEqual(warps_PVA, warps_VBH, absoluteTolerance, TMemoryDeviceType));
 	} else {
-		initializeVolume(&warps_PVA, Frame16And17Fixture::InitParams<PlainVoxelArray>(), TMemoryDeviceType);
-		initializeVolume(&warps_VBH, Frame16And17Fixture::InitParams<VoxelBlockHash>(), TMemoryDeviceType);
+		initializeVolume(&warps_PVA, snoopy::InitializationParameters<PlainVoxelArray>(), TMemoryDeviceType);
+		initializeVolume(&warps_VBH, snoopy::InitializationParameters<VoxelBlockHash>(), TMemoryDeviceType);
 
 		BOOST_REQUIRE(allocatedContentAlmostEqual(warps_PVA, warps_VBH, absoluteTolerance, TMemoryDeviceType));
 	}
@@ -254,10 +260,10 @@ void Warp_PVA_VBH_simple_subtest(int iteration, SlavchevaSurfaceTracker::Switche
 		path_live_PVA = path_frame_17_PVA;
 		path_live_VBH = path_frame_17_VBH;
 	}
-	loadVolume(&warped_live_PVA, path_live_PVA, TMemoryDeviceType,
-	           Frame16And17Fixture::InitParams<PlainVoxelArray>());
-	loadVolume(&warped_live_VBH, path_live_VBH, TMemoryDeviceType,
-	           Frame16And17Fixture::InitParams<VoxelBlockHash>());
+	LoadVolume(&warped_live_PVA, path_live_PVA, TMemoryDeviceType,
+	           snoopy::InitializationParameters<PlainVoxelArray>());
+	LoadVolume(&warped_live_VBH, path_live_VBH, TMemoryDeviceType,
+	           snoopy::InitializationParameters<VoxelBlockHash>());
 	if (iteration == 0) {
 		IndexingEngine<TSDFVoxel, VoxelBlockHash, TMemoryDeviceType>::Instance()
 				.AllocateWarpVolumeFromOtherVolume(warps_VBH, warped_live_VBH);
@@ -265,11 +271,11 @@ void Warp_PVA_VBH_simple_subtest(int iteration, SlavchevaSurfaceTracker::Switche
 
 	// *** load canonical volume as the two different data structures
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* volume_16_PVA;
-	loadVolume(&volume_16_PVA, path_frame_16_PVA, TMemoryDeviceType,
-	           Frame16And17Fixture::InitParams<PlainVoxelArray>());
+	LoadVolume(&volume_16_PVA, path_frame_16_PVA, TMemoryDeviceType,
+	           snoopy::InitializationParameters<PlainVoxelArray>());
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume_16_VBH;
-	loadVolume(&volume_16_VBH, path_frame_16_VBH, TMemoryDeviceType,
-	           Frame16And17Fixture::InitParams<VoxelBlockHash>());
+	LoadVolume(&volume_16_VBH, path_frame_16_VBH, TMemoryDeviceType,
+	           snoopy::InitializationParameters<VoxelBlockHash>());
 	IndexingEngine<TSDFVoxel, VoxelBlockHash, TMemoryDeviceType>::Instance()
 			.AllocateFromOtherVolume(volume_16_VBH, warped_live_VBH);
 
@@ -354,10 +360,10 @@ void Warp_PVA_VBH_simple_subtest(int iteration, SlavchevaSurfaceTracker::Switche
 	VoxelVolume<WarpVoxel, PlainVoxelArray>* loaded_warps_PVA;
 	VoxelVolume<WarpVoxel, VoxelBlockHash>* loaded_warps_VBH;
 	std::string path_loaded_warps = get_path_warps(prefix, iteration);
-	loadVolume(&loaded_warps_PVA, path_loaded_warps, TMemoryDeviceType,
-	           Frame16And17Fixture::InitParams<PlainVoxelArray>());
-	loadVolume(&loaded_warps_VBH, path_loaded_warps, TMemoryDeviceType,
-	           Frame16And17Fixture::InitParams<VoxelBlockHash>());
+	LoadVolume(&loaded_warps_PVA, path_loaded_warps, TMemoryDeviceType,
+	           snoopy::InitializationParameters<PlainVoxelArray>());
+	LoadVolume(&loaded_warps_VBH, path_loaded_warps, TMemoryDeviceType,
+	           snoopy::InitializationParameters<VoxelBlockHash>());
 
 
 	BOOST_REQUIRE(contentAlmostEqual_Verbose(warps_PVA, loaded_warps_PVA, absoluteTolerance, TMemoryDeviceType));

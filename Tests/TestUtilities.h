@@ -23,27 +23,35 @@
 #include "../ITMLib/Utils/Configuration.h"
 #include "../ITMLib/Utils/Math.h"
 
-
 using namespace ITMLib;
+
+namespace test_utilities {
+
+template<typename TIndex>
+std::string IndexString();
+
+template<MemoryDeviceType TMemoryDeviceType>
+std::string DeviceString();
 
 template<MemoryDeviceType TMemoryDeviceType, typename TVoxel, typename TIndex>
 void GenerateSimpleSurfaceTestVolume(VoxelVolume<TVoxel, TIndex>* volume);
 
 template<MemoryDeviceType TMemoryDeviceType, typename TVoxel, typename TIndex>
-void GenerateRandomDepthWeightSubVolume(VoxelVolume<TVoxel, TIndex>* volume, const Extent3Di& bounds, const Extent2Di& weight_range);
+void GenerateRandomDepthWeightSubVolume(VoxelVolume<TVoxel, TIndex>* volume, const Extent3Di& bounds,
+                                        const Extent2Di& weight_range);
 
 
 template<typename TVoxel>
-void simulateVoxelAlteration(TVoxel& voxel, float newSdfValue);
+void SimulateVoxelAlteration(TVoxel& voxel, float newSdfValue);
 
 template<typename TVoxel>
-void simulateRandomVoxelAlteration(TVoxel& voxel);
+void SimulateRandomVoxelAlteration(TVoxel& voxel);
 
 inline
 void TimeIt(std::function<void()> function, const std::string& description = "Timed Operation", int run_count = 1) {
 	std::cout << description << std::endl;
 	double cumulative = 0.0;
-	for(int i_run = 0; i_run < run_count; i_run++){
+	for (int i_run = 0; i_run < run_count; i_run++) {
 		auto start = std::chrono::high_resolution_clock::now();
 		function();
 		auto finish = std::chrono::high_resolution_clock::now();
@@ -59,9 +67,6 @@ void PrepareVoxelVolumeForLoading(VoxelVolume<TVoxel, TIndex>* volume);
 
 
 template<typename TIndex>
-typename TIndex::InitializationParameters GetFrame17PartialIndexParameters();
-
-template<typename TIndex>
 typename TIndex::InitializationParameters GetStandard512IndexParameters();
 
 template<typename TIndex>
@@ -71,13 +76,14 @@ typename TIndex::InitializationParameters GetStandard128IndexParameters();
 // Then restore or delete this depending on the decision. If the decision is negative, provide a constructor that loads from path instead.
 //
 //template<typename TVoxelA, typename TIndex>
-//ITMVoxelVolume<TVoxelA, TIndex> loadVolume (const std::string& path, MemoryDeviceType memoryDeviceType,
+//ITMVoxelVolume<TVoxelA, TIndex> LoadVolume (const std::string& path, MemoryDeviceType memoryDeviceType,
 //		typename TIndex::InitializationParameters initializationParameters = GetFrame17PartialIndexParameters<TIndex>(),
 //		configuration::SwappingMode swapping_mode = configuration::SWAPPINGMODE_DISABLED);
 
+struct Frame16And17Utilities;
 template<typename TVoxel, typename TIndex>
-void loadVolume(VoxelVolume<TVoxel, TIndex>** volume, const std::string& path, MemoryDeviceType memoryDeviceType,
-                typename TIndex::InitializationParameters initializationParameters = GetFrame17PartialIndexParameters<TIndex>(),
+void LoadVolume(VoxelVolume<TVoxel, TIndex>** volume, const std::string& path, MemoryDeviceType memoryDeviceType,
+                typename TIndex::InitializationParameters initializationParameters = GetStandard512IndexParameters<TIndex>(),
                 configuration::SwappingMode swappingMode = configuration::SWAPPINGMODE_DISABLED);
 
 void
@@ -91,7 +97,8 @@ void initializeVolume(VoxelVolume<TVoxel, TIndex>** volume,
 
 template<typename TVoxel, typename TIndex>
 void buildSdfVolumeFromImage_NearSurfaceAllocation(VoxelVolume<TVoxel, TIndex>** volume,
-                                                   const std::string& depth_path, const std::string& color_path, const std::string& mask_path,
+                                                   const std::string& depth_path, const std::string& color_path,
+                                                   const std::string& mask_path,
                                                    const std::string& calibration_path = "TestData/snoopy_calib.txt",
                                                    MemoryDeviceType memory_device = MEMORYDEVICE_CUDA,
                                                    typename TIndex::InitializationParameters initialization_parameters = GetStandard512IndexParameters<TIndex>(),
@@ -100,7 +107,8 @@ void buildSdfVolumeFromImage_NearSurfaceAllocation(VoxelVolume<TVoxel, TIndex>**
 template<typename TVoxel, typename TIndex>
 void buildSdfVolumeFromImage_NearSurfaceAllocation(VoxelVolume<TVoxel, TIndex>** volume,
                                                    View** view,
-                                                   const std::string& depth_path, const std::string& color_path, const std::string& mask_path,
+                                                   const std::string& depth_path, const std::string& color_path,
+                                                   const std::string& mask_path,
                                                    const std::string& calibration_path = "TestData/snoopy_calib.txt",
                                                    MemoryDeviceType memory_device = MEMORYDEVICE_CUDA,
                                                    typename TIndex::InitializationParameters initialization_parameters = GetStandard512IndexParameters<TIndex>(),
@@ -109,8 +117,10 @@ template<typename TVoxel, typename TIndex>
 void buildSdfVolumeFromImage_SurfaceSpanAllocation(VoxelVolume<TVoxel, TIndex>** volume1,
                                                    VoxelVolume<TVoxel, TIndex>** volume2,
                                                    View** view,
-                                                   const std::string& depth1_path, const std::string& color1_path, const std::string& mask1_path,
-                                                   const std::string& depth2_path, const std::string& color2_path, const std::string& mask2_path,
+                                                   const std::string& depth1_path, const std::string& color1_path,
+                                                   const std::string& mask1_path,
+                                                   const std::string& depth2_path, const std::string& color2_path,
+                                                   const std::string& mask2_path,
                                                    const std::string& calibration_path = "TestData/snoopy_calib.txt",
                                                    MemoryDeviceType memoryDevice = MEMORYDEVICE_CUDA,
                                                    typename TIndex::InitializationParameters initialization_parameters = GetStandard512IndexParameters<TIndex>(),
@@ -118,9 +128,13 @@ void buildSdfVolumeFromImage_SurfaceSpanAllocation(VoxelVolume<TVoxel, TIndex>**
 template<typename TVoxel, typename TIndex>
 void buildSdfVolumeFromImage_SurfaceSpanAllocation(VoxelVolume<TVoxel, TIndex>** volume1,
                                                    VoxelVolume<TVoxel, TIndex>** volume2,
-                                                   const std::string& depth1_path, const std::string& color1_path, const std::string& mask1_path,
-                                                   const std::string& depth2_path, const std::string& color2_path, const std::string& mask2_path,
+                                                   const std::string& depth1_path, const std::string& color1_path,
+                                                   const std::string& mask1_path,
+                                                   const std::string& depth2_path, const std::string& color2_path,
+                                                   const std::string& mask2_path,
                                                    const std::string& calibration_path = "TestData/snoopy_calib.txt",
                                                    MemoryDeviceType memoryDevice = MEMORYDEVICE_CUDA,
                                                    typename TIndex::InitializationParameters initializationParameters = GetStandard512IndexParameters<TIndex>(),
                                                    configuration::SwappingMode swapping_mode = configuration::SWAPPINGMODE_DISABLED);
+
+} // namespace test_utilities

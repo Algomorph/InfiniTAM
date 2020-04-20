@@ -18,7 +18,7 @@
 #define BOOST_TEST_DYN_LINK
 #endif
 
-//boost
+// *** boost ***
 #include <boost/test/unit_test.hpp>
 
 // *** ITMLib ***
@@ -29,7 +29,6 @@
 #include "../ITMLib/Engines/EditAndCopy/EditAndCopyEngineFactory.h"
 #include "../ITMLib/Engines/Indexing/Interface/IndexingEngine.h"
 #include "../ITMLib/Utils/Analytics/AlmostEqual.h"
-#include "TestUtils.h"
 #include "../ITMLib/Objects/Tracking/CameraTrackingState.h"
 //(cpu)
 #include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
@@ -40,13 +39,17 @@
 #include "../ITMLib/Engines/Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
 #include "../ITMLib/Engines/Visualization/Interface/VisualizationEngine.h"
 #include "../ITMLib/Engines/Visualization/VisualizationEngineFactory.h"
-
 #endif
+
+// *** test_utils ***
+#include "TestUtilities.h"
 
 
 using namespace ITMLib;
+using namespace test_utilities;
+namespace snoopy = snoopy16and17utilities;
 
-BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_VBH_CPU_CUDA_NearSurface, Frame16And17Fixture) {
+BOOST_AUTO_TEST_CASE(Test_SceneConstruct17_VBH_CPU_CUDA_NearSurface){
 	
 		
 	View* view_17_CPU = nullptr;
@@ -62,13 +65,13 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_VBH_CPU_CUDA_NearSurface, Frame16A
 
 // *** initialize volumes ***
 	// CPU
-	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_17_CPU(MEMORYDEVICE_CPU, InitParams<VoxelBlockHash>());
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_17_CPU(MEMORYDEVICE_CPU, snoopy::InitializationParameters<VoxelBlockHash>());
 	volume_VBH_17_CPU.Reset();
 	// CUDA
-	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_17_CUDA(MEMORYDEVICE_CUDA, InitParams<VoxelBlockHash>());
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_17_CUDA(MEMORYDEVICE_CUDA, snoopy::InitializationParameters<VoxelBlockHash>());
 	volume_VBH_17_CUDA.Reset();
 	// comparison volume
-	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_CUDA_to_CPU(MEMORYDEVICE_CPU, InitParams<VoxelBlockHash>());
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_CUDA_to_CPU(MEMORYDEVICE_CPU, snoopy::InitializationParameters<VoxelBlockHash>());
 	volume_CUDA_to_CPU.Reset();
 
 	CameraTrackingState tracking_state_CPU(view_17_CPU->depth->dimensions, MEMORYDEVICE_CPU);
@@ -113,7 +116,7 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_VBH_CPU_CUDA_NearSurface, Frame16A
 }
 
 
-BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_VBH_CPU_CUDA_SurfaceSpan, Frame16And17Fixture) {
+BOOST_AUTO_TEST_CASE(Test_SceneConstruct17_VBH_CPU_CUDA_SurfaceSpan){
 
 	View* view_16_CPU = nullptr;
 	updateView(&view_16_CPU, "TestData/snoopy_depth_000016.png",
@@ -146,12 +149,12 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_VBH_CPU_CUDA_SurfaceSpan, Frame16A
 		// CPU 
 		RenderState render_state_CPU(view_16_CPU->depth->dimensions, configuration::get().general_voxel_volume_parameters.near_clipping_distance,
 		                             configuration::get().general_voxel_volume_parameters.far_clipping_distance, MEMORYDEVICE_CPU);
-		VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_16_CPU(MEMORYDEVICE_CPU, InitParams<VoxelBlockHash>());
+		VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_16_CPU(MEMORYDEVICE_CPU, snoopy::InitializationParameters<VoxelBlockHash>());
 		volume_VBH_16_CPU.Reset();
 		// CUDA
 		RenderState render_state_CUDA(view_16_CUDA->depth->dimensions, configuration::get().general_voxel_volume_parameters.near_clipping_distance,
 		                              configuration::get().general_voxel_volume_parameters.far_clipping_distance, MEMORYDEVICE_CUDA);
-		VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_16_CUDA(MEMORYDEVICE_CUDA, InitParams<VoxelBlockHash>());
+		VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_16_CUDA(MEMORYDEVICE_CUDA, snoopy::InitializationParameters<VoxelBlockHash>());
 		volume_VBH_16_CUDA.Reset();
 
 		indexer_CPU.AllocateNearSurface(&volume_VBH_16_CPU, view_16_CPU);
@@ -185,13 +188,13 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_VBH_CPU_CUDA_SurfaceSpan, Frame16A
 
 // *** initialize volumes ***
 	// CPU
-	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_17_CPU(MEMORYDEVICE_CPU, InitParams<VoxelBlockHash>());
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_17_CPU(MEMORYDEVICE_CPU, snoopy::InitializationParameters<VoxelBlockHash>());
 	volume_VBH_17_CPU.Reset();
 	// CUDA
-	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_17_CUDA(MEMORYDEVICE_CUDA, InitParams<VoxelBlockHash>());
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_17_CUDA(MEMORYDEVICE_CUDA, snoopy::InitializationParameters<VoxelBlockHash>());
 	volume_VBH_17_CUDA.Reset();
 	// comparison volume
-	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_CUDA_to_CPU(MEMORYDEVICE_CPU, InitParams<VoxelBlockHash>());
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_CUDA_to_CPU(MEMORYDEVICE_CPU, snoopy::InitializationParameters<VoxelBlockHash>());
 	volume_CUDA_to_CPU.Reset();
 
 // *** allocate hash blocks ***

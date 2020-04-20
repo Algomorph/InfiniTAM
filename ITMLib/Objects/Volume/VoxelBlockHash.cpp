@@ -53,8 +53,8 @@ VoxelBlockHash::VoxelBlockHash()
 
 		  last_free_block_list_id(0),
 		  last_free_excess_list_id(0),
-		  utilized_hash_block_count(0),
-		  visible_hash_block_count(0),
+		  utilized_block_count(0),
+		  visible_block_count(0),
 
 		  hash_entries(), hash_entry_allocation_states(), allocation_block_coordinates(), block_allocation_list(),
 		  excess_entry_list(), visible_block_hash_codes(), utilized_block_hash_codes(), block_visibility_types(){}
@@ -116,8 +116,8 @@ VoxelBlockHash::VoxelBlockHash(VoxelBlockHashParameters parameters, MemoryDevice
 		hash_entries(hash_entry_count, memory_type),
 		block_allocation_list(voxel_block_count, memory_type),
 		excess_entry_list(excess_list_size, memory_type),
-		utilized_hash_block_count(0),
-		visible_hash_block_count(0) {
+		utilized_block_count(0),
+		visible_block_count(0) {
 	hash_entry_allocation_states.Clear(NEEDS_NO_CHANGE);
 
 }

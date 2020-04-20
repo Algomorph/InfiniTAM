@@ -56,7 +56,7 @@ void VisualizationEngine_CPU<TVoxel, VoxelBlockHash>::FindVisibleBlocks(
 			visible_block_count++;
 		}
 	}
-	volume->index.SetVisibleHashBlockCount(visible_block_count);
+	volume->index.SetVisibleBlockCount(visible_block_count);
 }
 
 template<class TVoxel, class TIndex>
@@ -69,7 +69,7 @@ template<class TVoxel>
 int VisualizationEngine_CPU<TVoxel, VoxelBlockHash>::CountVisibleBlocks(const VoxelVolume<TVoxel,VoxelBlockHash> *volume, const RenderState *renderState, int minBlockId, int maxBlockId) const
 {
 
-	int visibleBlockCount = volume->index.GetVisibleHashBlockCount();
+	int visibleBlockCount = volume->index.GetVisibleBlockCount();
 	const int *visibleBlockHashCodes = volume->index.GetVisibleBlockHashCodes();
 
 	int ret = 0;

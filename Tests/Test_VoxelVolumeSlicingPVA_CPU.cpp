@@ -21,19 +21,23 @@
 //boost
 #include <boost/test/unit_test.hpp>
 
-//local
-#include "TestUtils.h"
+
+//ITMLib
 #include "../ITMLib/Utils/Configuration.h"
 #include "../ITMLib/Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CPU.h"
 #include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
-
-
 #ifndef COMPILE_WITHOUT_CUDA
 #include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
 #endif
 
+//test_utilities
+#include "TestUtilities.h"
+#include "TestUtilsForSnoopyFrames16And17.h"
+
 using namespace ITMLib;
+using namespace test_utilities;
+namespace snoopy = snoopy16and17utilities;
 
 //#define GET_SCENE_BOUNDS
 #ifdef GET_SCENE_BOUNDS

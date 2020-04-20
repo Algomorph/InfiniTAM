@@ -36,7 +36,7 @@
 #include "../ITMLib/Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
 #include "CUDAAtomicTesting.h"
 #include "../ITMLib/Engines/EditAndCopy/EditAndCopyEngineFactory.h"
-#include "TestUtils.h"
+#include "TestUtilities.h"
 #include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
 #endif
 
@@ -148,13 +148,13 @@ void TestAllocateBasedOnVolumeExpanded_Generic() {
 	                                                    configuration::get().swapping_mode ==
 	                                                    configuration::SWAPPINGMODE_ENABLED,
 	                                               TMemoryDeviceType,
-	                                               Frame16And17Fixture::InitParams<VoxelBlockHash>());
+	                                               Frame16And17Fixture::InitializationParameters<VoxelBlockHash>());
 	EditAndCopyEngineFactory::Instance<TSDFVoxel, VoxelBlockHash, TMemoryDeviceType>().ResetVolume(&volume1);
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume2(&configuration::get().general_voxel_volume_parameters,
 	                                                    configuration::get().swapping_mode ==
 	                                                    configuration::SWAPPINGMODE_ENABLED,
 	                                               TMemoryDeviceType,
-	                                               Frame16And17Fixture::InitParams<VoxelBlockHash>());
+	                                               Frame16And17Fixture::InitializationParameters<VoxelBlockHash>());
 	EditAndCopyEngineFactory::Instance<TSDFVoxel, VoxelBlockHash, TMemoryDeviceType>().ResetVolume(&volume2);
 	View* view = nullptr;
 	updateView(&view, "TestData/snoopy_depth_000017.png",

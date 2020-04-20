@@ -98,8 +98,8 @@ public:
 private:
 	int last_free_block_list_id;
 	int last_free_excess_list_id;
-	int utilized_hash_block_count;
-	int visible_hash_block_count;
+	int utilized_block_count;
+	int visible_block_count;
 
 	/** The actual hash entries in the hash table, ordered by their hash codes. */
 	ORUtils::MemoryBlock<HashEntry> hash_entries;
@@ -148,7 +148,7 @@ public:
 		this->utilized_block_hash_codes.SetFrom(other.utilized_block_hash_codes, memory_copy_direction);
 		this->last_free_block_list_id = other.last_free_block_list_id;
 		this->last_free_excess_list_id = other.last_free_excess_list_id;
-		this->utilized_hash_block_count = other.utilized_hash_block_count;
+		this->utilized_block_count = other.utilized_block_count;
 	}
 
 	~VoxelBlockHash() = default;
@@ -231,15 +231,15 @@ public:
 	SetLastFreeExcessListId(int last_free_excess_list_id) { this->last_free_excess_list_id = last_free_excess_list_id; }
 
 
-	int GetUtilizedBlockCount() const { return this->utilized_hash_block_count; }
+	int GetUtilizedBlockCount() const { return this->utilized_block_count; }
 
 	void SetUtilizedBlockCount(
-			int utilized_hash_block_count) { this->utilized_hash_block_count = utilized_hash_block_count; }
+			int utilized_hash_block_count) { this->utilized_block_count = utilized_hash_block_count; }
 
-	int GetVisibleHashBlockCount() const { return this->visible_hash_block_count; }
+	int GetVisibleBlockCount() const { return this->visible_block_count; }
 
-	void SetVisibleHashBlockCount(
-			int visible_hash_block_count) { this->visible_hash_block_count = visible_hash_block_count; }
+	void SetVisibleBlockCount(
+			int visible_hash_block_count) { this->visible_block_count = visible_hash_block_count; }
 
 	/*VBH-specific*/
 	int GetExcessListSize() const { return this->excess_list_size; }

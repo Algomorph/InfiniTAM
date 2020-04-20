@@ -49,11 +49,12 @@
 #include "../InputSource/ImageSourceEngine.h"
 #include "../ORUtils/FileUtils.h"
 
-//local
-#include "TestUtils.h"
+//test_utilities
+#include "TestUtilities.h"
 
 
 using namespace ITMLib;
+using namespace test_utilities;
 
 
 BOOST_AUTO_TEST_CASE(testSetVoxelAndCopy_PlainVoxelArray_CUDA) {
@@ -188,7 +189,7 @@ BOOST_AUTO_TEST_CASE(testCompareVoxelVolumes_CUDA_and_CPU_ITMVoxel) {
 	auto singleVoxelTests = [&]() {
 		std::uniform_int_distribution<int> coordinate_distribution2(volumeOffset.x, 0);
 		TSDFVoxel voxel;
-		simulateVoxelAlteration(voxel, -0.1f);
+		SimulateVoxelAlteration(voxel, -0.1f);
 
 		Vector3i coordinate(coordinate_distribution2(generator), coordinate_distribution2(generator), 0);
 
@@ -206,7 +207,7 @@ BOOST_AUTO_TEST_CASE(testCompareVoxelVolumes_CUDA_and_CPU_ITMVoxel) {
 
 		coordinate = volumeOffset + volumeSize - Vector3i(1);
 		voxel = ManipulationEngine_CUDA_PVA_Voxel::Inst().ReadVoxel(&scene_PVA2, coordinate);
-		simulateVoxelAlteration(voxel, fmod((TSDFVoxel::valueToFloat(voxel.sdf) + 0.1f), 1.0f));
+		SimulateVoxelAlteration(voxel, fmod((TSDFVoxel::valueToFloat(voxel.sdf) + 0.1f), 1.0f));
 		std::cout << coordinate << std::endl;
 		ManipulationEngine_CUDA_PVA_Voxel::Inst().SetVoxel(&scene_PVA2, coordinate, voxel);
 		ManipulationEngine_CUDA_VBH_Voxel::Inst().SetVoxel(&scene_VBH2, coordinate, voxel);
@@ -229,7 +230,7 @@ BOOST_AUTO_TEST_CASE(testCompareVoxelVolumes_CUDA_and_CPU_ITMVoxel) {
 	for (int iVoxel = 0; iVoxel < modifiedVoxelCount; iVoxel++) {
 		TSDFVoxel voxel;
 
-		simulateVoxelAlteration(voxel, sdf_distribution(generator));
+		SimulateVoxelAlteration(voxel, sdf_distribution(generator));
 		Vector3i coordinate(coordinate_distribution(generator),
 		                    coordinate_distribution(generator),
 		                    coordinate_distribution(generator));

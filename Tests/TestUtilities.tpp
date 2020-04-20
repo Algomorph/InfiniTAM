@@ -16,7 +16,7 @@
 #include <random>
 
 //local
-#include "TestUtils.h"
+#include "TestUtilities.h"
 #include "TestUtils_Functors.h"
 
 //ITMLib
@@ -30,6 +30,8 @@
 
 
 using namespace ITMLib;
+
+namespace test_utilities {
 
 
 template<MemoryDeviceType TMemoryDeviceType, typename TVoxel, typename TIndex>
@@ -54,8 +56,8 @@ void GenerateSimpleSurfaceTestVolume(VoxelVolume<TVoxel, TIndex>* volume) {
 		int xPos = xOffset + iVoxelAcrossBand;
 		int xNeg = xOffset - iVoxelAcrossBand;
 		TVoxel voxelPos, voxelNeg;
-		simulateVoxelAlteration(voxelNeg, sdfMagnitude);
-		simulateVoxelAlteration(voxelPos, -sdfMagnitude);
+		SimulateVoxelAlteration(voxelNeg, sdfMagnitude);
+		SimulateVoxelAlteration(voxelPos, -sdfMagnitude);
 
 		for (int z = 0; z < surfaceSizeVoxelsZ; z++) {
 			for (int y = 0; y < surfaceSizeVoxelsY; y++) {
@@ -157,19 +159,19 @@ struct HandleFramewiseWarpAlterationFunctor<false, TVoxel> {
 
 
 template<typename TVoxel>
-void simulateVoxelAlteration(TVoxel& voxel, float newSdfValue) {
+void SimulateVoxelAlteration(TVoxel& voxel, float newSdfValue) {
 	HandleSDFAlterationFunctor<TVoxel::hasSDFInformation, TVoxel>::setValue(voxel, newSdfValue);
 }
 
 template<typename TVoxel>
-void simulateRandomVoxelAlteration(TVoxel& voxel) {
+void SimulateRandomVoxelAlteration(TVoxel& voxel) {
 	HandleSDFAlterationFunctor<TVoxel::hasSDFInformation, TVoxel>::setRandom(voxel);
 	HandleFramewiseWarpAlterationFunctor<TVoxel::hasFramewiseWarp, TVoxel>::setRandom(voxel);
 }
 
 // FIXME: see TODO in header
 //template<typename TVoxelA, typename TIndex>
-//ITMVoxelVolume<TVoxelA, TIndex> loadVolume (const std::string& path, MemoryDeviceType memoryDeviceType,
+//ITMVoxelVolume<TVoxelA, TIndex> LoadVolume (const std::string& path, MemoryDeviceType memoryDeviceType,
 //                    typename TIndex::InitializationParameters initializationParameters, configuration::SwappingMode swapping_mode){
 //	Configuration& settings = configuration::get();
 //	ITMVoxelVolume<TVoxelA, TIndex> scene(&settings.general_voxel_volume_parameters,
@@ -181,7 +183,7 @@ void simulateRandomVoxelAlteration(TVoxel& voxel) {
 //};
 
 template<typename TVoxel, typename TIndex>
-void loadVolume(VoxelVolume<TVoxel, TIndex>** volume, const std::string& path, MemoryDeviceType memoryDeviceType,
+void LoadVolume(VoxelVolume<TVoxel, TIndex>** volume, const std::string& path, MemoryDeviceType memoryDeviceType,
                 typename TIndex::InitializationParameters initializationParameters,
                 configuration::SwappingMode swappingMode) {
 	configuration::Configuration& settings = configuration::get();
@@ -335,3 +337,4 @@ void buildSdfVolumeFromImage_SurfaceSpanAllocation(VoxelVolume<TVoxel, TIndex>**
 	                                              memory_device,
 	                                              initialization_parameters, swapping_mode);
 }
+} // namespace test_utilities

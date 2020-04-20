@@ -68,7 +68,7 @@ void VisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::FindVisibleBlocks(VoxelVo
 
 	int visible_hash_block_count_CPU;
 	ORcudaSafeCall(cudaMemcpy(&visible_hash_block_count_CPU, visible_block_count_device, sizeof(int), cudaMemcpyDeviceToHost));
-	volume->index.SetVisibleHashBlockCount(visible_hash_block_count_CPU);
+	volume->index.SetVisibleBlockCount(visible_hash_block_count_CPU);
 }
 
 template<class TVoxel, class TIndex>
@@ -80,7 +80,7 @@ int VisualizationEngine_CUDA<TVoxel, TIndex>::CountVisibleBlocks(const VoxelVolu
 template<class TVoxel>
 int VisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::CountVisibleBlocks(const VoxelVolume<TVoxel,VoxelBlockHash> *volume, const RenderState *renderState, int minBlockId, int maxBlockId) const
 {
-	int visible_block_count = volume->index.GetVisibleHashBlockCount();
+	int visible_block_count = volume->index.GetVisibleBlockCount();
 	const int *visible_block_hash_codes_device = volume->index.GetVisibleBlockHashCodes();
 
 	ORcudaSafeCall(cudaMemset(block_count_device, 0, sizeof(uint)));

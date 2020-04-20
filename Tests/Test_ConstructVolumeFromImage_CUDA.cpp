@@ -22,7 +22,6 @@
 #include <boost/test/unit_test.hpp>
 
 //ITMLib
-#include "TestUtilsForSnoopyFrames16And17.h"
 #include "../ITMLib/GlobalTemplateDefines.h"
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngine.h"
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
@@ -31,39 +30,41 @@
 #include "../ITMLib/Engines/Indexing/Interface/IndexingEngine.h"
 #include "../ITMLib/Engines/Indexing/IndexingEngineFactory.h"
 #include "../ITMLib/Engines/Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
+#include "../ITMLib/Engines/VolumeFileIO/VolumeFileIOEngine.h"
+#include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
+#include "../ITMLib/Engines/EditAndCopy/EditAndCopyEngineFactory.h"
+#include "../ITMLib/Engines/Visualization/VisualizationEngineFactory.h"
 #include "../ITMLib/Utils/Configuration.h"
 #include "../ITMLib/Utils/Analytics/AlmostEqual.h"
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CPU.h"
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CUDA.h"
-
 #include "../ORUtils/FileUtils.h"
-#include "../ITMLib/Engines/VolumeFileIO/VolumeFileIOEngine.h"
-#include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
-#include "TestUtils.h"
-#include "../ITMLib/Engines/EditAndCopy/EditAndCopyEngineFactory.h"
-#include "../ITMLib/Engines/Visualization/VisualizationEngineFactory.h"
+
+//test_utilities
+#include "TestUtilities.h"
+#include "TestUtilsForSnoopyFrames16And17.h"
 
 using namespace ITMLib;
+using namespace test_utilities;
+namespace snoopy = snoopy16and17utilities;
 
 typedef VolumeFileIOEngine<TSDFVoxel, PlainVoxelArray> SceneFileIOEngine_PVA;
 typedef VolumeFileIOEngine<TSDFVoxel, VoxelBlockHash> SceneFileIOEngine_VBH;
 
 
-BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct16_PVA_VBH_Near_CUDA, Frame16And17Fixture) {
+BOOST_AUTO_TEST_CASE(Test_SceneConstruct16_PVA_VBH_Near_CUDA){
 
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* volume_PVA_16;
 	buildSdfVolumeFromImage_NearSurfaceAllocation(&volume_PVA_16, "TestData/snoopy_depth_000016.png",
 	                                              "TestData/snoopy_color_000016.png",
 	                                              "TestData/snoopy_omask_000016.png",
-	                                              "TestData/snoopy_calib.txt", MEMORYDEVICE_CUDA,
-	                                              InitParams<PlainVoxelArray>());
+	                                              "TestData/snoopy_calib.txt", MEMORYDEVICE_CUDA, snoopy::InitializationParameters<PlainVoxelArray>());
 
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume_VBH_16;
 	buildSdfVolumeFromImage_NearSurfaceAllocation(&volume_VBH_16, "TestData/snoopy_depth_000016.png",
 	                                              "TestData/snoopy_color_000016.png",
 	                                              "TestData/snoopy_omask_000016.png",
-	                                              "TestData/snoopy_calib.txt", MEMORYDEVICE_CUDA,
-	                                              InitParams<VoxelBlockHash>());
+	                                              "TestData/snoopy_calib.txt", MEMORYDEVICE_CUDA, snoopy::InitializationParameters<VoxelBlockHash>());
 //
 //	TSDFVoxel voxelPVA = ManipulationEngine_CUDA_PVA_Voxel::Inst().ReadVoxel(volume_PVA_16, Vector3i(-24,63,240));
 //	voxelPVA.print_self();
@@ -79,21 +80,19 @@ BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct16_PVA_VBH_Near_CUDA, Frame16And17Fix
 	delete volume_PVA_16;
 }
 
-BOOST_FIXTURE_TEST_CASE(Test_SceneConstruct17_PVA_VBH_Near_CUDA, Frame16And17Fixture) {
+BOOST_AUTO_TEST_CASE(Test_SceneConstruct17_PVA_VBH_Near_CUDA){
 
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* volume_PVA_17;
 	buildSdfVolumeFromImage_NearSurfaceAllocation(&volume_PVA_17, "TestData/snoopy_depth_000017.png",
 	                                              "TestData/snoopy_color_000017.png",
 	                                              "TestData/snoopy_omask_000017.png",
-	                                              "TestData/snoopy_calib.txt", MEMORYDEVICE_CUDA,
-	                                              InitParams<PlainVoxelArray>());
+	                                              "TestData/snoopy_calib.txt", MEMORYDEVICE_CUDA, snoopy::InitializationParameters<PlainVoxelArray>());
 
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume_VBH_17;
 	buildSdfVolumeFromImage_NearSurfaceAllocation(&volume_VBH_17, "TestData/snoopy_depth_000017.png",
 	                                              "TestData/snoopy_color_000017.png",
 	                                              "TestData/snoopy_omask_000017.png",
-	                                              "TestData/snoopy_calib.txt", MEMORYDEVICE_CUDA,
-	                                              InitParams<VoxelBlockHash>());
+	                                              "TestData/snoopy_calib.txt", MEMORYDEVICE_CUDA, snoopy::InitializationParameters<VoxelBlockHash>());
 
 //	Vector3i voxelPosition(-24, -2, 87);
 //	TSDFVoxel voxelPVA = ManipulationEngine_CUDA_PVA_Voxel::Inst().ReadVoxel(volume_PVA_17, voxelPosition);

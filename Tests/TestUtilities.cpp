@@ -14,8 +14,8 @@
 //  limitations under the License.
 //  ================================================================
 #include <boost/test/test_tools.hpp>
-#include "TestUtils.h"
-#include "TestUtils.tpp"
+#include "TestUtilities.h"
+#include "TestUtilities.tpp"
 
 
 #include "../ITMLib/Utils/Configuration.h"
@@ -27,12 +27,36 @@
 
 using namespace ITMLib;
 
-template void GenerateSimpleSurfaceTestVolume<MEMORYDEVICE_CPU, TSDFVoxel, VoxelBlockHash>(VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume);
-template void GenerateSimpleSurfaceTestVolume<MEMORYDEVICE_CPU, TSDFVoxel, PlainVoxelArray>(VoxelVolume<TSDFVoxel, PlainVoxelArray>* volume);
+namespace test_utilities {
 
-template void simulateVoxelAlteration<TSDFVoxel>(TSDFVoxel& voxel, float newSdfValue);
-template void simulateRandomVoxelAlteration<TSDFVoxel>(TSDFVoxel& voxel);
-template void simulateRandomVoxelAlteration<WarpVoxel>(WarpVoxel& voxel);
+template<>
+std::string IndexString<VoxelBlockHash>() {
+	return "VBH";
+}
+
+template<>
+std::string IndexString<PlainVoxelArray>() {
+	return "PVA";
+}
+
+template<>
+std::string DeviceString<MEMORYDEVICE_CPU>() {
+	return "CPU";
+}
+
+template<>
+std::string DeviceString<MEMORYDEVICE_CUDA>() {
+	return "CUDA";
+}
+
+template void GenerateSimpleSurfaceTestVolume<MEMORYDEVICE_CPU, TSDFVoxel, VoxelBlockHash>(
+		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume);
+template void GenerateSimpleSurfaceTestVolume<MEMORYDEVICE_CPU, TSDFVoxel, PlainVoxelArray>(
+		VoxelVolume<TSDFVoxel, PlainVoxelArray>* volume);
+
+template void SimulateVoxelAlteration<TSDFVoxel>(TSDFVoxel& voxel, float newSdfValue);
+template void SimulateRandomVoxelAlteration<TSDFVoxel>(TSDFVoxel& voxel);
+template void SimulateRandomVoxelAlteration<WarpVoxel>(WarpVoxel& voxel);
 
 
 //have nothing to prep for PVA -- everything gets copied off the disk exactly
@@ -51,16 +75,6 @@ void PrepareVoxelVolumeForLoading(VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume
 template<>
 void PrepareVoxelVolumeForLoading(VoxelVolume<WarpVoxel, VoxelBlockHash>* volume) {
 	volume->Reset();
-}
-
-template<>
-PlainVoxelArray::InitializationParameters GetFrame17PartialIndexParameters<PlainVoxelArray>() {
-	return {Vector3i(80, 96, 144), Vector3i(-64, -24, 168)};
-}
-
-template<>
-VoxelBlockHash::InitializationParameters GetFrame17PartialIndexParameters<VoxelBlockHash>() {
-	return {0x800, 0x20000};
 }
 
 template<>
@@ -85,34 +99,34 @@ typename VoxelBlockHash::InitializationParameters GetStandard128IndexParameters<
 }
 
 // FIXME: see TODO in header
-//template ITMVoxelVolume<TSDFVoxel, PlainVoxelArray> loadVolume<TSDFVoxel, PlainVoxelArray>(
+//template ITMVoxelVolume<TSDFVoxel, PlainVoxelArray> LoadVolume<TSDFVoxel, PlainVoxelArray>(
 //                                                 const std::string& path, MemoryDeviceType memoryDeviceType,
 //                                                 PlainVoxelArray::InitializationParameters initializationParameters,
 //                                                 configuration::SwappingMode swapping_mode);
-//template ITMVoxelVolume<TSDFVoxel, VoxelBlockHash> loadVolume<TSDFVoxel, VoxelBlockHash>(const std::string& path, MemoryDeviceType memoryDeviceType,
+//template ITMVoxelVolume<TSDFVoxel, VoxelBlockHash> LoadVolume<TSDFVoxel, VoxelBlockHash>(const std::string& path, MemoryDeviceType memoryDeviceType,
 //                                                 VoxelBlockHash::InitializationParameters initializationParameters,
 //                                                 configuration::SwappingMode swapping_mode);
-//template ITMVoxelVolume<WarpVoxel, PlainVoxelArray> loadVolume<WarpVoxel, PlainVoxelArray>(const std::string& path, MemoryDeviceType memoryDeviceType,
+//template ITMVoxelVolume<WarpVoxel, PlainVoxelArray> LoadVolume<WarpVoxel, PlainVoxelArray>(const std::string& path, MemoryDeviceType memoryDeviceType,
 //                                                          PlainVoxelArray::InitializationParameters initializationParameters,
 //                                                          configuration::SwappingMode swapping_mode);
-//template ITMVoxelVolume<WarpVoxel, VoxelBlockHash> loadVolume<WarpVoxel, VoxelBlockHash>(
+//template ITMVoxelVolume<WarpVoxel, VoxelBlockHash> LoadVolume<WarpVoxel, VoxelBlockHash>(
 //                                                         const std::string& path, MemoryDeviceType memoryDeviceType,
 //                                                         VoxelBlockHash::InitializationParameters initializationParameters,
 //                                                         configuration::SwappingMode swapping_mode);
 
-template void loadVolume<TSDFVoxel, PlainVoxelArray>(VoxelVolume<TSDFVoxel, PlainVoxelArray>** volume,
+template void LoadVolume<TSDFVoxel, PlainVoxelArray>(VoxelVolume<TSDFVoxel, PlainVoxelArray>** volume,
                                                      const std::string& path, MemoryDeviceType memoryDeviceType,
                                                      PlainVoxelArray::InitializationParameters initializationParameters,
                                                      configuration::SwappingMode swappingMode);
-template void loadVolume<TSDFVoxel, VoxelBlockHash>(VoxelVolume<TSDFVoxel, VoxelBlockHash>** volume,
+template void LoadVolume<TSDFVoxel, VoxelBlockHash>(VoxelVolume<TSDFVoxel, VoxelBlockHash>** volume,
                                                     const std::string& path, MemoryDeviceType memoryDeviceType,
                                                     VoxelBlockHash::InitializationParameters initializationParameters,
                                                     configuration::SwappingMode swappingMode);
-template void loadVolume<WarpVoxel, PlainVoxelArray>(VoxelVolume<WarpVoxel, PlainVoxelArray>** volume,
+template void LoadVolume<WarpVoxel, PlainVoxelArray>(VoxelVolume<WarpVoxel, PlainVoxelArray>** volume,
                                                      const std::string& path, MemoryDeviceType memoryDeviceType,
                                                      PlainVoxelArray::InitializationParameters initializationParameters,
                                                      configuration::SwappingMode swappingMode);
-template void loadVolume<WarpVoxel, VoxelBlockHash>(VoxelVolume<WarpVoxel, VoxelBlockHash>** volume,
+template void LoadVolume<WarpVoxel, VoxelBlockHash>(VoxelVolume<WarpVoxel, VoxelBlockHash>** volume,
                                                     const std::string& path, MemoryDeviceType memoryDeviceType,
                                                     VoxelBlockHash::InitializationParameters initializationParameters,
                                                     configuration::SwappingMode swappingMode);
@@ -169,7 +183,7 @@ void buildSdfVolumeFromImage_NearSurfaceAllocation<TSDFVoxel, PlainVoxelArray>(
 template
 void buildSdfVolumeFromImage_NearSurfaceAllocation<TSDFVoxel, PlainVoxelArray>(
 		VoxelVolume<TSDFVoxel, PlainVoxelArray>** volume,
-		const std::string& depth_path,const std::string& color_path,const std::string& mask_path,
+		const std::string& depth_path, const std::string& color_path, const std::string& mask_path,
 		const std::string& calibration_path,
 		MemoryDeviceType memory_device,
 		PlainVoxelArray::InitializationParameters initialization_parameters,
@@ -188,7 +202,7 @@ void buildSdfVolumeFromImage_NearSurfaceAllocation<TSDFVoxel, VoxelBlockHash>(
 template
 void buildSdfVolumeFromImage_NearSurfaceAllocation<TSDFVoxel, VoxelBlockHash>(
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>** volume,
-		const std::string& depth_path,const std::string& color_path,const std::string& mask_path,
+		const std::string& depth_path, const std::string& color_path, const std::string& mask_path,
 		const std::string& calibration_path,
 		MemoryDeviceType memory_device,
 		VoxelBlockHash::InitializationParameters initialization_parameters,
@@ -210,8 +224,8 @@ template
 void buildSdfVolumeFromImage_SurfaceSpanAllocation<TSDFVoxel, PlainVoxelArray>(
 		VoxelVolume<TSDFVoxel, PlainVoxelArray>** volume1,
 		VoxelVolume<TSDFVoxel, PlainVoxelArray>** volume2,
-		const std::string& depth1_path,const std::string& color1_path,const std::string& mask1_path,
-		const std::string& depth2_path,const std::string& color2_path,const std::string& mask2_path,
+		const std::string& depth1_path, const std::string& color1_path, const std::string& mask1_path,
+		const std::string& depth2_path, const std::string& color2_path, const std::string& mask2_path,
 		const std::string& calibration_path,
 		MemoryDeviceType memory_device,
 		PlainVoxelArray::InitializationParameters initialization_parameters,
@@ -231,8 +245,8 @@ template
 void buildSdfVolumeFromImage_SurfaceSpanAllocation<TSDFVoxel, VoxelBlockHash>(
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>** volume1,
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>** volume2,
-		const std::string& depth1_path,const std::string& color1_path,const std::string& mask1_path,
-		const std::string& depth2_path,const std::string& color2_path,const std::string& mask2_path,
+		const std::string& depth1_path, const std::string& color1_path, const std::string& mask1_path,
+		const std::string& depth2_path, const std::string& color2_path, const std::string& mask2_path,
 		const std::string& calibration_path,
 		MemoryDeviceType memory_device,
 		VoxelBlockHash::InitializationParameters initialization_parameters,
@@ -259,3 +273,4 @@ void initializeVolume<WarpVoxel, PlainVoxelArray>(VoxelVolume<WarpVoxel, PlainVo
                                                   PlainVoxelArray::InitializationParameters initializationParameters,
                                                   MemoryDeviceType memoryDevice,
                                                   configuration::SwappingMode swappingMode);
+} // namespace test_utilities

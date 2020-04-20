@@ -33,26 +33,25 @@
 #include "../ITMLib/Objects/Volume/VoxelVolume.h"
 #include "../ITMLib/Objects/Volume/RepresentationAccess.h"
 #include "../ITMLib/Objects/Camera/CalibIO.h"
-
 #include "../ITMLib/Utils/Configuration.h"
-#include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CPU.h"
-
+#include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
 #include "../ITMLib/Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 #include "../ITMLib/Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
 #include "../ITMLib/Engines/ViewBuilding/ViewBuilderFactory.h"
 #include "../ITMLib/Engines/VolumeFileIO/VolumeFileIOEngine.h"
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngine.h"
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
-
 #include "../InputSource/ImageSourceEngine.h"
 #include "../ORUtils/FileUtils.h"
 
-//local
-#include "TestUtils.h"
+//test_utilities
+#include "TestUtilities.h"
 #include "TestUtilsForSnoopyFrames16And17.h"
 
 using namespace ITMLib;
+using namespace test_utilities;
+namespace snoopy = snoopy16and17utilities;
 
 BOOST_AUTO_TEST_CASE(testSetVoxelAndCopy_PlainVoxelArray_CPU) {
 	Vector3i volumeSize(20);
@@ -147,19 +146,19 @@ BOOST_AUTO_TEST_CASE(testSetVoxelAndCopy_VoxelBlockHash_CPU) {
 	BOOST_REQUIRE(out.sdf == voxelHalf.sdf);
 }
 
-BOOST_FIXTURE_TEST_CASE(testCopyToDifferentlyInitializedVolume_VBH_CPU, Frame16And17Fixture) {
-	VoxelVolume<TSDFVoxel, VoxelBlockHash> scene1(MEMORYDEVICE_CPU, InitParams<VoxelBlockHash>());
-	scene1.Reset();
-	std::string path = partial_frame_17_path<VoxelBlockHash>(false);
+BOOST_AUTO_TEST_CASE(testCopyToDifferentlyInitializedVolume_VBH_CPU){
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume(MEMORYDEVICE_CPU, snoopy::InitializationParameters<VoxelBlockHash>());
+	volume.Reset();
+	std::string path = snoopy::PartialVolume17Path<VoxelBlockHash>();
 
-	scene1.LoadFromDisk(path);
-	VoxelVolume<TSDFVoxel, VoxelBlockHash> scene2(MEMORYDEVICE_CPU,
-	                                              {InitParams<VoxelBlockHash>().voxel_block_count * 2,
-	                                                    InitParams<VoxelBlockHash>().excess_list_size});
-	scene2.Reset();
-	ManipulationEngine_CPU_VBH_Voxel::Inst().CopyVolume(&scene2, &scene1);
+	volume.LoadFromDisk(path);
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_copy(MEMORYDEVICE_CPU,
+	                                                   {snoopy::InitializationParameters<VoxelBlockHash>().voxel_block_count * 2,
+	                                                    snoopy::InitializationParameters<VoxelBlockHash>().excess_list_size});
+	volume_copy.Reset();
+	ManipulationEngine_CPU_VBH_Voxel::Inst().CopyVolume(&volume_copy, &volume);
 	float tolerance = 1e-8;
-	BOOST_REQUIRE(contentAlmostEqual_CPU_Verbose(&scene2, &scene1, tolerance));
+	BOOST_REQUIRE(contentAlmostEqual_CPU_Verbose(&volume_copy, &volume, tolerance));
 }
 
 BOOST_AUTO_TEST_CASE(testCompareVoxelVolumes_CPU_ITMVoxel) {
@@ -191,7 +190,7 @@ BOOST_AUTO_TEST_CASE(testCompareVoxelVolumes_CPU_ITMVoxel) {
 		singleVoxelTestsRunCounter++;
 		std::uniform_int_distribution<int> coordinate_distribution2(volumeOffset.x, 0);
 		TSDFVoxel voxel;
-		simulateVoxelAlteration(voxel, -0.1f);
+		SimulateVoxelAlteration(voxel, -0.1f);
 
 		Vector3i coordinate(coordinate_distribution2(generator), coordinate_distribution2(generator), 0);
 
@@ -212,7 +211,7 @@ BOOST_AUTO_TEST_CASE(testCompareVoxelVolumes_CPU_ITMVoxel) {
 
 		coordinate = volumeOffset + volumeSize - Vector3i(1);
 		voxel = ManipulationEngine_CPU_PVA_Voxel::Inst().ReadVoxel(&scene_PVA2, coordinate);
-		simulateVoxelAlteration(voxel, fmod((TSDFVoxel::valueToFloat(voxel.sdf) + 0.1f), 1.0f));
+		SimulateVoxelAlteration(voxel, fmod((TSDFVoxel::valueToFloat(voxel.sdf) + 0.1f), 1.0f));
 		ManipulationEngine_CPU_PVA_Voxel::Inst().SetVoxel(&scene_PVA2, coordinate, voxel);
 		ManipulationEngine_CPU_VBH_Voxel::Inst().SetVoxel(&scene_VBH2, coordinate, voxel);
 
@@ -236,7 +235,7 @@ BOOST_AUTO_TEST_CASE(testCompareVoxelVolumes_CPU_ITMVoxel) {
 //	generate only in the positive coordinates' volume, to make sure that the unneeded voxel hash blocks are properly dismissed
 	for (int iVoxel = 0; iVoxel < modifiedVoxelCount; iVoxel++) {
 		TSDFVoxel voxel;
-		simulateVoxelAlteration(voxel, sdf_distribution(generator));
+		SimulateVoxelAlteration(voxel, sdf_distribution(generator));
 		Vector3i coordinate(coordinate_distribution(generator),
 		                    coordinate_distribution(generator),
 		                    coordinate_distribution(generator));

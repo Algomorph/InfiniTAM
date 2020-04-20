@@ -13,11 +13,12 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "TestUtils.tpp"
+#include "TestUtilities.tpp"
 #include "../ITMLib/Engines/Traversal/CUDA/VolumeTraversal_CUDA_VoxelBlockHash.h"
 
 using namespace ITMLib;
 
+namespace test_utilities {
 
 template void GenerateSimpleSurfaceTestVolume<MEMORYDEVICE_CUDA, TSDFVoxel, VoxelBlockHash>(
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume);
@@ -25,4 +26,6 @@ template void GenerateSimpleSurfaceTestVolume<MEMORYDEVICE_CUDA, TSDFVoxel, Plai
 		VoxelVolume<TSDFVoxel, PlainVoxelArray>* volume);
 template void GenerateRandomDepthWeightSubVolume<MEMORYDEVICE_CUDA, TSDFVoxel, VoxelBlockHash>(
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume, const Extent3Di& bounds, const Extent2Di&
-		weight_range);
+weight_range);
+
+} // namespace test_utilities

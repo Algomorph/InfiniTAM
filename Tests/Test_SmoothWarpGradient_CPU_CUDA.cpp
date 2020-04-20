@@ -23,19 +23,22 @@
 //boost
 #include <boost/test/unit_test.hpp>
 
-//local
+//ITMLib
 #include "../ITMLib/GlobalTemplateDefines.h"
 #include "../ITMLib/Objects/Volume/VoxelVolume.h"
-#include "TestUtils.h"
 #include "../ITMLib/SurfaceTrackers/Interface/SurfaceTracker.h"
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CPU.h"
+
+//test_utilities
+#include "TestUtilities.h"
 #include "TestUtilsForSnoopyFrames16And17.h"
 
-
 using namespace ITMLib;
+using namespace test_utilities;
+namespace snoopy = snoopy16and17utilities;
 
 
-BOOST_FIXTURE_TEST_CASE(testSmoothWarpGradient_PVA, Frame16And17Fixture) {
+BOOST_AUTO_TEST_CASE(testSmoothWarpGradient_PVA){
 	const int iteration = 0;
 
 	std::string path_warps = "TestData/snoopy_result_fr16-17_warps/data_only_iter_" + std::to_string(iteration) + "_";
@@ -45,18 +48,18 @@ BOOST_FIXTURE_TEST_CASE(testSmoothWarpGradient_PVA, Frame16And17Fixture) {
 	std::string path_frame_16_VBH = "TestData/snoopy_result_fr16-17_partial_VBH/snoopy_partial_frame_16_";
 
 	VoxelVolume<WarpVoxel, PlainVoxelArray>* warp_field_CPU;
-	loadVolume(&warp_field_CPU, path_warps, MEMORYDEVICE_CPU, InitParams<PlainVoxelArray>());
+	LoadVolume(&warp_field_CPU, path_warps, MEMORYDEVICE_CPU, snoopy::InitializationParameters<PlainVoxelArray>());
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* canonical_volume_CPU;
-	loadVolume(&canonical_volume_CPU, path_frame_17_PVA, MEMORYDEVICE_CPU, InitParams<PlainVoxelArray>());
+	LoadVolume(&canonical_volume_CPU, path_frame_17_PVA, MEMORYDEVICE_CPU, snoopy::InitializationParameters<PlainVoxelArray>());
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* live_volume_CPU;
-	loadVolume(&live_volume_CPU, path_frame_16_PVA, MEMORYDEVICE_CPU, InitParams<PlainVoxelArray>());
+	LoadVolume(&live_volume_CPU, path_frame_16_PVA, MEMORYDEVICE_CPU, snoopy::InitializationParameters<PlainVoxelArray>());
 
 	VoxelVolume<WarpVoxel, PlainVoxelArray>* warp_field_CUDA;
-	loadVolume(&warp_field_CUDA, path_warps, MEMORYDEVICE_CUDA, InitParams<PlainVoxelArray>());
+	LoadVolume(&warp_field_CUDA, path_warps, MEMORYDEVICE_CUDA, snoopy::InitializationParameters<PlainVoxelArray>());
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* canonical_volume_CUDA;
-	loadVolume(&canonical_volume_CUDA, path_frame_17_PVA, MEMORYDEVICE_CUDA, InitParams<PlainVoxelArray>());
+	LoadVolume(&canonical_volume_CUDA, path_frame_17_PVA, MEMORYDEVICE_CUDA, snoopy::InitializationParameters<PlainVoxelArray>());
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* live_volume_CUDA;
-	loadVolume(&live_volume_CUDA, path_frame_16_PVA, MEMORYDEVICE_CUDA, InitParams<PlainVoxelArray>());
+	LoadVolume(&live_volume_CUDA, path_frame_16_PVA, MEMORYDEVICE_CUDA, snoopy::InitializationParameters<PlainVoxelArray>());
 
 
 	auto motionTracker_PVA_CPU = new SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_DIAGNOSTIC>(

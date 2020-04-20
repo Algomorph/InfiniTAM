@@ -15,30 +15,60 @@
 //  ================================================================
 #include "TestUtilsForSnoopyFrames16And17.h"
 
-template<>
-std::string Frame16And17Fixture::partial_frame_16_path<PlainVoxelArray>(){
-	return "TestData/snoopy_result_fr16-17_partial_PVA/snoopy_partial_frame_16_";
-}
-template<>
-std::string Frame16And17Fixture::partial_frame_16_path<VoxelBlockHash>(){
-	return "TestData/snoopy_result_fr16-17_partial_VBH/snoopy_partial_frame_16_";
-}
-template<>
-std::string Frame16And17Fixture::partial_frame_17_path<PlainVoxelArray>(bool expanded_allocation){
-	return "TestData/snoopy_result_fr16-17_partial_PVA/snoopy_partial_frame_17_";
-}
-template<>
-std::string Frame16And17Fixture::partial_frame_17_path<VoxelBlockHash>(bool expanded_allocation){
-	std::string path = "TestData/snoopy_result_fr16-17_partial_VBH/snoopy_partial_frame_17_";
-	return expanded_allocation ? path + "expanded_" : path;
+namespace snoopy16and17utilities {
+
+std::string Frame16DepthPath() {
+	return "TestData/frames/snoopy_depth_000016.png";
 }
 
+std::string Frame16ColorPath() {
+	return "TestData/frames/snoopy_color_000016.png";
+}
+
+std::string Frame16MaskPath() {
+	return "TestData/frames/snoopy_omask_000016.png";
+}
+
+std::string Frame17DepthPath() {
+	return "TestData/frames/snoopy_depth_000017.png";
+}
+
+std::string Frame17ColorPath() {
+	return "TestData/frames/snoopy_color_000017.png";
+}
+
+std::string Frame17MaskPath() {
+	return "TestData/frames/snoopy_omask_000017.png";
+}
+
+
+template std::string PartialVolume16Path<PlainVoxelArray>();
+template std::string PartialVolume16Path<VoxelBlockHash>();
+template std::string PartialVolume17Path<PlainVoxelArray>();
+template std::string PartialVolume17Path<VoxelBlockHash>();
+
 template<>
-PlainVoxelArray::InitializationParameters Frame16And17Fixture::InitParams<PlainVoxelArray>() {
+PlainVoxelArray::InitializationParameters InitializationParameters<PlainVoxelArray>() {
 	return {Vector3i(88, 104, 160), Vector3i(-72, -24, 160)};
 }
-
 template<>
-VoxelBlockHash::InitializationParameters Frame16And17Fixture::InitParams<VoxelBlockHash>() {
+VoxelBlockHash::InitializationParameters InitializationParameters<VoxelBlockHash>() {
 	return {0x0800, 0x20000};
 }
+
+
+
+template void
+Load<PlainVoxelArray>(VoxelVolume<TSDFVoxel, PlainVoxelArray>** volume, Frame frame,
+                      MemoryDeviceType device_type,
+                      PlainVoxelArray::InitializationParameters initialization_parameters = InitializationParameters<PlainVoxelArray>(),
+                      configuration::SwappingMode swapping_mode = configuration::SWAPPINGMODE_DISABLED);
+
+template void
+Load<VoxelBlockHash>(VoxelVolume<TSDFVoxel, VoxelBlockHash>** volume, Frame frame,
+                     MemoryDeviceType device_type,
+                     VoxelBlockHash::InitializationParameters initialization_parameters = InitializationParameters<VoxelBlockHash>(),
+                     configuration::SwappingMode swapping_mode = configuration::SWAPPINGMODE_DISABLED);
+
+
+} // namespace snoopy16and17utilities

@@ -13,7 +13,6 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-
 #define BOOST_TEST_MODULE VolumeReduction_VBH_CUDA
 #ifndef WIN32
 #define BOOST_TEST_DYN_LINK
@@ -22,18 +21,19 @@
 //boost
 #include <boost/test/unit_test.hpp>
 
-
 //ITMLib
 #include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
 #include "../ITMLib/Engines/EditAndCopy/EditAndCopyEngineFactory.h"
 
-//local
-#include "TestUtils.h"
+//test_utilities
+#include "TestUtilities.h"
 #include "TestUtilsForSnoopyFrames16And17.h"
 
 using namespace ITMLib;
+using namespace test_utilities;
+namespace snoopy = snoopy16and17utilities;
 
-BOOST_FIXTURE_TEST_CASE(Test_VolumeReduction_MaxWarpUpdate_VBH_CUDA, Frame16And17Fixture) {
+BOOST_AUTO_TEST_CASE(Test_VolumeReduction_MaxWarpUpdate_VBH_CUDA){
 	const int iteration = 1;
 
 	std::string prefix = "data_tikhonov_sobolev";
@@ -42,7 +42,7 @@ BOOST_FIXTURE_TEST_CASE(Test_VolumeReduction_MaxWarpUpdate_VBH_CUDA, Frame16And1
 			"TestData/snoopy_result_fr16-17_warps/" + prefix + "_iter_" + std::to_string(iteration) + "_";
 
 	VoxelVolume<WarpVoxel, VoxelBlockHash>* warps;
-	loadVolume(&warps, path_warps, MEMORYDEVICE_CUDA, InitParams<VoxelBlockHash>());
+	LoadVolume(&warps, path_warps, MEMORYDEVICE_CUDA, snoopy::InitializationParameters<VoxelBlockHash>());
 
 	float value_gt =
 			AnalyticsEngine<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance().ComputeWarpUpdateMax(
@@ -79,7 +79,7 @@ BOOST_FIXTURE_TEST_CASE(Test_VolumeReduction_MaxWarpUpdate_VBH_CUDA, Frame16And1
 }
 
 
-BOOST_FIXTURE_TEST_CASE(Test_VolumeReduction_CountWeightRange_VBH_CUDA, Frame16And17Fixture) {
+BOOST_AUTO_TEST_CASE(Test_VolumeReduction_CountWeightRange_VBH_CUDA){
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume(MEMORYDEVICE_CUDA, {65536, 32768});
 	volume.Reset();
 
@@ -136,7 +136,7 @@ BOOST_FIXTURE_TEST_CASE(Test_VolumeReduction_CountWeightRange_VBH_CUDA, Frame16A
 	BOOST_REQUIRE_EQUAL(sub_volume_voxel_count, voxels_in_range);
 }
 
-BOOST_FIXTURE_TEST_CASE(Test_VolumeReduction_CountWeightRange_VBH_CUDA2, Frame16And17Fixture) {
+BOOST_AUTO_TEST_CASE(Test_VolumeReduction_CountWeightRange_VBH_CUDA2){
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume(MEMORYDEVICE_CUDA, {65536, 32768});
 	volume.Reset();
 

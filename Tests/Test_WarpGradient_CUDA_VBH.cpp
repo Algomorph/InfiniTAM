@@ -27,7 +27,7 @@
 #include <boost/test/unit_test.hpp>
 
 //local
-#include "TestUtils.h"
+#include "TestUtilities.h"
 #include "Test_WarpGradient_Common.h"
 #include "../ITMLib/Utils/Configuration.h"
 #include "../ITMLib/Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"

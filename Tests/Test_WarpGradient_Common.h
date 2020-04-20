@@ -18,10 +18,7 @@
 //stdlib
 #include <unordered_map>
 
-//local
-#include "TestUtilsForSnoopyFrames16And17.h"
-#include "TestUtils.h"
-
+//ITMLib
 #include "../ORUtils/MemoryDeviceType.h"
 #include "../ITMLib/GlobalTemplateDefines.h"
 #include "../ITMLib/Utils/Configuration.h"
@@ -31,14 +28,19 @@
 #include "../ITMLib/Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 #include "../ITMLib/SurfaceTrackers/Interface/SurfaceTracker.h"
 #include "../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
-
 #ifndef COMPILE_WITHOUT_CUDA
 #include "../ITMLib/Engines/Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
 #include "../ITMLib/Engines/Indexing/Interface/IndexingEngine.h"
 #include "../ITMLib/Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
 #endif
 
+//test_utils
+#include "TestUtilsForSnoopyFrames16And17.h"
+#include "TestUtilities.h"
+
 using namespace ITMLib;
+using namespace test_utilities;
+namespace snoopy = snoopy16and17utilities;
 
 template<typename TIndex>
 std::string getIndexSuffix();
@@ -60,7 +62,7 @@ struct WarpGradientDataFixture {
 			settings(nullptr),
 			warp_field_data_term(nullptr), canonical_volume(nullptr), live_volume(nullptr),
 			pathToData("TestData/snoopy_result_fr16-17_partial_" + getIndexSuffix<TIndex>() + "/"),
-			indexParameters(Frame16And17Fixture::InitParams<TIndex>()),
+			indexParameters(snoopy::InitializationParameters<TIndex>()),
 			indexing_engine(IndexingEngine<TSDFVoxel, TIndex, TMemoryType>::Instance()){
 		configuration::load_default();
 		settings = &configuration::get();
@@ -138,9 +140,10 @@ void GenerateTestData() {
 
 	VoxelVolume<TSDFVoxel, TIndex>* canonical_volume;
 	VoxelVolume<TSDFVoxel, TIndex>* live_volume;
-	loadVolume(&live_volume, output_directory + "snoopy_partial_frame_17_", TMemoryDeviceType, Frame16And17Fixture::InitParams<TIndex>());
-	loadVolume(&canonical_volume, output_directory + "snoopy_partial_frame_16_", TMemoryDeviceType,
-	           Frame16And17Fixture::InitParams<TIndex>());
+	LoadVolume(&live_volume, output_directory + "snoopy_partial_frame_17_", TMemoryDeviceType,
+	           snoopy::InitializationParameters<TIndex>());
+	LoadVolume(&canonical_volume, output_directory + "snoopy_partial_frame_16_", TMemoryDeviceType,
+	           snoopy::InitializationParameters<TIndex>());
 
 	SlavchevaSurfaceTracker::Switches data_only_switches(true, false, false, false, false);
 	std::string data_only_filename = "warp_field_0_data_";
@@ -165,7 +168,7 @@ void GenerateTestData() {
 	VoxelVolume<WarpVoxel, TIndex> warp_field(&configuration::get().general_voxel_volume_parameters,
 	                                           configuration::get().swapping_mode ==
 	                                           configuration::SWAPPINGMODE_ENABLED,
-	                                          TMemoryDeviceType, Frame16And17Fixture::InitParams<TIndex>());
+	                                          TMemoryDeviceType, snoopy::InitializationParameters<TIndex>());
 	warp_field.Reset();
 	IndexingEngine<TSDFVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().AllocateWarpVolumeFromOtherVolume(&warp_field, live_volume);
 	IndexingEngine<TSDFVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().AllocateFromOtherVolume(canonical_volume, live_volume);

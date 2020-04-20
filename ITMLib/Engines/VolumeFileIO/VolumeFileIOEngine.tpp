@@ -42,55 +42,46 @@ void VolumeFileIOEngine<TVoxel, VoxelBlockHash>::SaveVolumeCompact(
 
 	bool temporary_volume_used = false;
 
-	const VoxelVolume<TVoxel, VoxelBlockHash>* volume_to_write = &volume;
+	const VoxelVolume<TVoxel, VoxelBlockHash>* volume_to_save = &volume;
 
 	if (volume.index.memory_type == MEMORYDEVICE_CUDA) {
 		// we cannot access CUDA blocks directly, so the easiest solution here is to make a local main-memory copy first
 		auto volume_cpu_copy = new VoxelVolume<TVoxel, VoxelBlockHash>(volume, MEMORYDEVICE_CPU);
-		volume_to_write = volume_cpu_copy;
+		volume_to_save = volume_cpu_copy;
 		temporary_volume_used = true;
 	}
 
-	const TVoxel* voxels = volume_to_write->GetVoxels();
-	const HashEntry* hash_table = volume_to_write->index.GetEntries();
-	const int hash_entry_count = volume_to_write->index.hash_entry_count;
+	const TVoxel* voxels = volume_to_save->GetVoxels();
+	const HashEntry* hash_table = volume_to_save->index.GetEntries();
 
-	int last_free_block_id = volume_to_write->index.GetLastFreeBlockListId();
-	int last_excess_list_id = volume_to_write->index.GetLastFreeExcessListId();
-	int utilized_block_count = volume_to_write->index.GetUtilizedBlockCount();
+	int last_free_block_id = volume_to_save->index.GetLastFreeBlockListId();
+	int last_excess_list_id = volume_to_save->index.GetLastFreeExcessListId();
+	int utilized_block_count = volume_to_save->index.GetUtilizedBlockCount();
+	int visible_block_count = volume_to_save->index.GetVisibleBlockCount();
+
 	out_filter.write(reinterpret_cast<const char* >(&last_free_block_id), sizeof(int));
 	out_filter.write(reinterpret_cast<const char* >(&last_excess_list_id), sizeof(int));
 	out_filter.write(reinterpret_cast<const char* >(&utilized_block_count), sizeof(int));
-	//count filled entries
-	int allocated_hash_entry_count = 0;
-#ifdef WITH_OPENMP
-#pragma omp parallel for default(none)  shared(out_filter, hash_table) reduction(+:allocated_hash_entry_count)
-#endif
-	for (int hash_code = 0; hash_code < hash_entry_count; hash_code++) {
-		const HashEntry& hash_entry = hash_table[hash_code];
-		//skip unfilled hash
-		if (hash_entry.ptr < 0) continue;
-		allocated_hash_entry_count++;
-	}
+	out_filter.write(reinterpret_cast<const char* >(&visible_block_count), sizeof(int));
 
-	out_filter.write(reinterpret_cast<const char* >(&allocated_hash_entry_count), sizeof(int));
-	for (int hash_code = 0; hash_code < hash_entry_count; hash_code++) {
+	const int* utilized_hash_codes = volume_to_save->index.GetUtilizedBlockHashCodes();
+
+	for (int i_utilized_hash_code = 0; i_utilized_hash_code < utilized_block_count; i_utilized_hash_code++) {
+		const int hash_code = utilized_hash_codes[i_utilized_hash_code];
 		const HashEntry& hash_entry = hash_table[hash_code];
-		//skip unfilled hash
-		if (hash_entry.ptr < 0) continue;
 		out_filter.write(reinterpret_cast<const char* >(&hash_code), sizeof(int));
 		out_filter.write(reinterpret_cast<const char* >(&hash_entry), sizeof(HashEntry));
 		const TVoxel* voxel_block = &(voxels[hash_entry.ptr * (VOXEL_BLOCK_SIZE3)]);
 		out_filter.write(reinterpret_cast<const char* >(voxel_block), sizeof(TVoxel) * VOXEL_BLOCK_SIZE3);
 	}
-	const int* utilized_hash_codes = volume_to_write->index.GetUtilizedBlockHashCodes();
-	for (int i_utilized_hash_code = 0; i_utilized_hash_code < utilized_block_count; i_utilized_hash_code++) {
-		out_filter.write(reinterpret_cast<const char* >(utilized_hash_codes + i_utilized_hash_code), sizeof(int));
+
+	const int* visible_hash_codes = volume_to_save->index.GetVisibleBlockHashCodes();
+	for (int i_visible_hash_code = 0; i_visible_hash_code < visible_block_count; i_visible_hash_code++) {
+		out_filter.write(reinterpret_cast<const char* >(visible_hash_codes + i_visible_hash_code), sizeof(int));
 	}
 
-
 	if (temporary_volume_used) {
-		delete volume_to_write;
+		delete volume_to_save;
 	}
 }
 
@@ -107,7 +98,7 @@ VolumeFileIOEngine<TVoxel, VoxelBlockHash>::LoadVolumeCompact(VoxelVolume<TVoxel
 	VoxelVolume<TVoxel, VoxelBlockHash>* volume_to_load = &volume;
 	bool temporary_volume_used = false;
 	if (volume.index.memory_type == MEMORYDEVICE_CUDA) {
-		// we cannot access CUDA blocks directly, so the easiest solution here is to make a local main-memory copy
+		// we cannot access CUDA blocks directly, so the easiest solution here is to make a local main (CPU) memory copy
 		// first, read it in from disk, and then copy it over into the target
 		auto scene_cpu_copy = new VoxelVolume<TVoxel, VoxelBlockHash>(*volume_to_load, MEMORYDEVICE_CPU);
 		volume_to_load = scene_cpu_copy;
@@ -116,31 +107,34 @@ VolumeFileIOEngine<TVoxel, VoxelBlockHash>::LoadVolumeCompact(VoxelVolume<TVoxel
 
 	TVoxel* voxel_blocks = volume_to_load->GetVoxels();
 	HashEntry* hash_table = volume_to_load->index.GetEntries();
-	int last_free_excess_list_id;
-	int last_free_voxel_block_id;
-	int utilized_block_count;
+
+	int last_free_voxel_block_id, last_free_excess_list_id, utilized_block_count, visible_block_count;
+
 	in_filter.read(reinterpret_cast<char* >(&last_free_voxel_block_id), sizeof(int));
 	in_filter.read(reinterpret_cast<char* >(&last_free_excess_list_id), sizeof(int));
 	in_filter.read(reinterpret_cast<char* >(&utilized_block_count), sizeof(int));
+	in_filter.read(reinterpret_cast<char* >(&visible_block_count), sizeof(int));
+
+	volume_to_load->index.SetLastFreeBlockListId(last_free_voxel_block_id);
 	volume_to_load->index.SetLastFreeExcessListId(last_free_excess_list_id);
 	volume_to_load->index.SetUtilizedBlockCount(utilized_block_count);
-	volume_to_load->index.SetLastFreeBlockListId(last_free_voxel_block_id);
+	volume_to_load->index.SetVisibleBlockCount(visible_block_count);
 
+	int* utilized_hash_codes = volume_to_load->index.GetUtilizedBlockHashCodes();
 
-	//count filled entries
-	int allocated_hash_entry_count;
-	in_filter.read(reinterpret_cast<char* >(&allocated_hash_entry_count), sizeof(int));
-	for (int i_block = 0; i_block < allocated_hash_entry_count; i_block++) {
+	for (int i_utilized_hash_code = 0; i_utilized_hash_code < utilized_block_count; i_utilized_hash_code++) {
 		int hash_code;
 		in_filter.read(reinterpret_cast<char* >(&hash_code), sizeof(int));
+		utilized_hash_codes[i_utilized_hash_code] = hash_code;
 		HashEntry& hash_entry = hash_table[hash_code];
 		in_filter.read(reinterpret_cast<char* >(&hash_entry), sizeof(HashEntry));
 		TVoxel* voxel_block = &(voxel_blocks[hash_entry.ptr * (VOXEL_BLOCK_SIZE3)]);
 		in_filter.read(reinterpret_cast<char* >(voxel_block), sizeof(TVoxel) * VOXEL_BLOCK_SIZE3);
 	}
-	int* utilized_hash_codes = volume_to_load->index.GetUtilizedBlockHashCodes();
-	for (int i_utilized_hash_code = 0; i_utilized_hash_code < utilized_block_count; i_utilized_hash_code++) {
-		in_filter.read(reinterpret_cast<char* >(utilized_hash_codes + i_utilized_hash_code), sizeof(int));
+
+	int* visible_hash_codes = volume_to_load->index.GetVisibleBlockHashCodes();
+	for (int i_visible_hash_code = 0; i_visible_hash_code < utilized_block_count; i_visible_hash_code++) {
+		in_filter.read(reinterpret_cast<char* >(visible_hash_codes + i_visible_hash_code), sizeof(int));
 	}
 
 	if (temporary_volume_used) {

@@ -18,7 +18,6 @@
 #define BOOST_TEST_DYN_LINK
 #endif
 
-
 //stdlib
 #include <vector>
 #include <atomic>
@@ -27,14 +26,16 @@
 #include <boost/test/unit_test.hpp>
 
 //local
-#include "TestUtils.h"
-#include "Test_WarpGradient_Common.h"
 #include "../ITMLib/Utils/Configuration.h"
 #include "../ITMLib/SurfaceTrackers/Interface/SurfaceTracker.h"
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CPU.h"
 #include "../ITMLib/Engines/Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
 
+//test_utils
+#include "Test_WarpGradient_Common.h"
+
 using namespace ITMLib;
+using namespace test_utilities;
 
 template<typename TVoxel>
 struct AlteredGradientCountFunctor {
