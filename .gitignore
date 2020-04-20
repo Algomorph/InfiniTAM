@@ -33,3 +33,7 @@ x64/
 
 # QtCreator CMake
 CMakeLists.txt.user*
+
+# generated test data
+/Tests/TestData/volumes/PVA/*
+/Tests/TestData/volumes/VBH/*
