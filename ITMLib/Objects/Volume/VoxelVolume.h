@@ -70,9 +70,9 @@ public:
 
 	const VoxelVolumeParameters& GetParameters() const { return this->parameters; }
 
-	void SaveVoxels(ORUtils::MemoryBlockOStreamWrapper& file) const;
+	void SaveVoxels(ORUtils::OStreamWrapper& file) const;
 
-	void LoadVoxels(ORUtils::MemoryBlockIStreamWrapper& file);
+	void LoadVoxels(ORUtils::IStreamWrapper& file);
 
 private:
 	/**

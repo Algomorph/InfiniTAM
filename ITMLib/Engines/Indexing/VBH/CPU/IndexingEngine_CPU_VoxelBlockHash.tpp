@@ -492,16 +492,19 @@ bool IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateHashBlock
 	HashEntry* hash_table = volume->index.GetEntries();
 	int last_free_voxel_block_id = volume->index.GetLastFreeBlockListId();
 	int last_free_excess_list_id = volume->index.GetLastFreeExcessListId();
+	int utilized_block_count = volume->index.GetUtilizedBlockCount();
 	int* block_allocation_list = volume->index.GetBlockAllocationList();
 	int* excess_entry_list = volume->index.GetExcessEntryList();
+	int* utilized_hash_codes = volume->index.GetUtilizedBlockHashCodes();
 	HashEntry* entry = nullptr;
 	hash_code = -1;
-	if (!FindOrAllocateHashEntry(at, hash_table, entry, last_free_voxel_block_id, last_free_excess_list_id,
-	                             block_allocation_list, excess_entry_list, hash_code)) {
+	if (!FindOrAllocateHashEntry(at, hash_table, entry, last_free_voxel_block_id, last_free_excess_list_id, utilized_block_count,
+	                             block_allocation_list, excess_entry_list, utilized_hash_codes, hash_code)) {
 		return false;
 	}
 	volume->index.SetLastFreeBlockListId(last_free_voxel_block_id);
 	volume->index.SetLastFreeExcessListId(last_free_excess_list_id);
+	volume->index.SetUtilizedBlockCount(utilized_block_count);
 	return true;
 }
 

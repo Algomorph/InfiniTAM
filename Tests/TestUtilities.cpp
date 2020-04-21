@@ -101,17 +101,17 @@ typename VoxelBlockHash::InitializationParameters GetStandard128IndexParameters<
 // FIXME: see TODO in header
 //template ITMVoxelVolume<TSDFVoxel, PlainVoxelArray> LoadVolume<TSDFVoxel, PlainVoxelArray>(
 //                                                 const std::string& path, MemoryDeviceType memoryDeviceType,
-//                                                 PlainVoxelArray::InitializationParameters initializationParameters,
+//                                                 PlainVoxelArray::InitializationParameters_Fr16andFr17 initializationParameters,
 //                                                 configuration::SwappingMode swapping_mode);
 //template ITMVoxelVolume<TSDFVoxel, VoxelBlockHash> LoadVolume<TSDFVoxel, VoxelBlockHash>(const std::string& path, MemoryDeviceType memoryDeviceType,
-//                                                 VoxelBlockHash::InitializationParameters initializationParameters,
+//                                                 VoxelBlockHash::InitializationParameters_Fr16andFr17 initializationParameters,
 //                                                 configuration::SwappingMode swapping_mode);
 //template ITMVoxelVolume<WarpVoxel, PlainVoxelArray> LoadVolume<WarpVoxel, PlainVoxelArray>(const std::string& path, MemoryDeviceType memoryDeviceType,
-//                                                          PlainVoxelArray::InitializationParameters initializationParameters,
+//                                                          PlainVoxelArray::InitializationParameters_Fr16andFr17 initializationParameters,
 //                                                          configuration::SwappingMode swapping_mode);
 //template ITMVoxelVolume<WarpVoxel, VoxelBlockHash> LoadVolume<WarpVoxel, VoxelBlockHash>(
 //                                                         const std::string& path, MemoryDeviceType memoryDeviceType,
-//                                                         VoxelBlockHash::InitializationParameters initializationParameters,
+//                                                         VoxelBlockHash::InitializationParameters_Fr16andFr17 initializationParameters,
 //                                                         configuration::SwappingMode swapping_mode);
 
 template void LoadVolume<TSDFVoxel, PlainVoxelArray>(VoxelVolume<TSDFVoxel, PlainVoxelArray>** volume,
@@ -131,11 +131,48 @@ template void LoadVolume<WarpVoxel, VoxelBlockHash>(VoxelVolume<WarpVoxel, Voxel
                                                     VoxelBlockHash::InitializationParameters initializationParameters,
                                                     configuration::SwappingMode swappingMode);
 
+static ViewBuilder* viewBuilder_CPU = nullptr;
+static ViewBuilder* viewBuilder_CUDA = nullptr;
+
 void
-updateView(View** view, const std::string& depth_path, const std::string& color_path, const std::string& mask_path,
+UpdateView(View** view, const std::string& depth_path, const std::string& color_path,
            const std::string& calibration_path, MemoryDeviceType memoryDevice) {
-	static ViewBuilder* viewBuilder_CPU = nullptr;
-	static ViewBuilder* viewBuilder_CUDA = nullptr;
+
+	ViewBuilder* viewBuilderToUse;
+	switch (memoryDevice) {
+		case MEMORYDEVICE_CPU:
+			if (viewBuilder_CPU == nullptr)
+				viewBuilder_CPU = ViewBuilderFactory::MakeViewBuilder(calibration_path, memoryDevice);
+			viewBuilderToUse = viewBuilder_CPU;
+			break;
+		case MEMORYDEVICE_CUDA:
+#ifndef COMPILE_WITHOUT_CUDA
+			if (viewBuilder_CUDA == nullptr)
+				viewBuilder_CUDA = ViewBuilderFactory::MakeViewBuilder(calibration_path, memoryDevice);
+			viewBuilderToUse = viewBuilder_CUDA;
+#else
+			DIEWITHEXCEPTION_REPORTLOCATION("Attmpted to update CUDA view while build without CUDA support, aborting.");
+#endif
+			break;
+		default:
+			DIEWITHEXCEPTION_REPORTLOCATION("unsupported memory device type!");
+	}
+
+	auto* rgb = new ITMUChar4Image(true, false);
+	auto* depth = new ITMShortImage(true, false);
+	auto* mask = new ITMUCharImage(true, false);
+	ReadImageFromFile(*rgb, color_path.c_str());
+	ReadImageFromFile(*depth, depth_path.c_str());
+	viewBuilderToUse->UpdateView(view, rgb, depth, false, false, false, true);
+	delete rgb;
+	delete depth;
+	delete mask;
+}
+
+void
+UpdateView(View** view, const std::string& depth_path, const std::string& color_path, const std::string& mask_path,
+           const std::string& calibration_path, MemoryDeviceType memoryDevice) {
+
 	ViewBuilder* viewBuilderToUse;
 	switch (memoryDevice) {
 		case MEMORYDEVICE_CPU:
@@ -170,8 +207,48 @@ updateView(View** view, const std::string& depth_path, const std::string& color_
 	delete mask;
 }
 
+
 template
-void buildSdfVolumeFromImage_NearSurfaceAllocation<TSDFVoxel, PlainVoxelArray>(
+void BuildSdfVolumeFromImage_NearSurfaceAllocation<TSDFVoxel, PlainVoxelArray>(
+		VoxelVolume<TSDFVoxel, PlainVoxelArray>** volume,
+		View** view,
+		const std::string& depth_path, const std::string& color_path,
+		const std::string& calibration_path,
+		MemoryDeviceType memory_device,
+		PlainVoxelArray::InitializationParameters initialization_parameters,
+		configuration::SwappingMode swapping_mode);
+
+template
+void BuildSdfVolumeFromImage_NearSurfaceAllocation<TSDFVoxel, PlainVoxelArray>(
+		VoxelVolume<TSDFVoxel, PlainVoxelArray>** volume,
+		const std::string& depth_path, const std::string& color_path,
+		const std::string& calibration_path,
+		MemoryDeviceType memory_device,
+		PlainVoxelArray::InitializationParameters initialization_parameters,
+		configuration::SwappingMode swapping_mode);
+
+template
+void BuildSdfVolumeFromImage_NearSurfaceAllocation<TSDFVoxel, VoxelBlockHash>(
+		VoxelVolume<TSDFVoxel, VoxelBlockHash>** volume,
+		View** view,
+		const std::string& depth_path, const std::string& color_path,
+		const std::string& calibration_path,
+		MemoryDeviceType memory_device,
+		VoxelBlockHash::InitializationParameters initialization_parameters,
+		configuration::SwappingMode swapping_mode);
+
+template
+void BuildSdfVolumeFromImage_NearSurfaceAllocation<TSDFVoxel, VoxelBlockHash>(
+		VoxelVolume<TSDFVoxel, VoxelBlockHash>** volume,
+		const std::string& depth_path, const std::string& color_path,
+		const std::string& calibration_path,
+		MemoryDeviceType memory_device,
+		VoxelBlockHash::InitializationParameters initialization_parameters,
+		configuration::SwappingMode swapping_mode);
+
+
+template
+void BuildSdfVolumeFromImage_NearSurfaceAllocation<TSDFVoxel, PlainVoxelArray>(
 		VoxelVolume<TSDFVoxel, PlainVoxelArray>** volume,
 		View** view,
 		const std::string& depth_path, const std::string& color_path, const std::string& mask_path,
@@ -181,7 +258,7 @@ void buildSdfVolumeFromImage_NearSurfaceAllocation<TSDFVoxel, PlainVoxelArray>(
 		configuration::SwappingMode swapping_mode);
 
 template
-void buildSdfVolumeFromImage_NearSurfaceAllocation<TSDFVoxel, PlainVoxelArray>(
+void BuildSdfVolumeFromImage_NearSurfaceAllocation<TSDFVoxel, PlainVoxelArray>(
 		VoxelVolume<TSDFVoxel, PlainVoxelArray>** volume,
 		const std::string& depth_path, const std::string& color_path, const std::string& mask_path,
 		const std::string& calibration_path,
@@ -190,7 +267,7 @@ void buildSdfVolumeFromImage_NearSurfaceAllocation<TSDFVoxel, PlainVoxelArray>(
 		configuration::SwappingMode swapping_mode);
 
 template
-void buildSdfVolumeFromImage_NearSurfaceAllocation<TSDFVoxel, VoxelBlockHash>(
+void BuildSdfVolumeFromImage_NearSurfaceAllocation<TSDFVoxel, VoxelBlockHash>(
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>** volume,
 		View** view,
 		const std::string& depth_path, const std::string& color_path, const std::string& mask_path,
@@ -200,7 +277,7 @@ void buildSdfVolumeFromImage_NearSurfaceAllocation<TSDFVoxel, VoxelBlockHash>(
 		configuration::SwappingMode swapping_mode);
 
 template
-void buildSdfVolumeFromImage_NearSurfaceAllocation<TSDFVoxel, VoxelBlockHash>(
+void BuildSdfVolumeFromImage_NearSurfaceAllocation<TSDFVoxel, VoxelBlockHash>(
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>** volume,
 		const std::string& depth_path, const std::string& color_path, const std::string& mask_path,
 		const std::string& calibration_path,
@@ -210,7 +287,7 @@ void buildSdfVolumeFromImage_NearSurfaceAllocation<TSDFVoxel, VoxelBlockHash>(
 
 
 template
-void buildSdfVolumeFromImage_SurfaceSpanAllocation<TSDFVoxel, PlainVoxelArray>(
+void BuildSdfVolumeFromImage_SurfaceSpanAllocation<TSDFVoxel, PlainVoxelArray>(
 		VoxelVolume<TSDFVoxel, PlainVoxelArray>** volume1,
 		VoxelVolume<TSDFVoxel, PlainVoxelArray>** volume2,
 		View** view,
@@ -221,7 +298,7 @@ void buildSdfVolumeFromImage_SurfaceSpanAllocation<TSDFVoxel, PlainVoxelArray>(
 		PlainVoxelArray::InitializationParameters initialization_parameters,
 		configuration::SwappingMode swapping_mode);
 template
-void buildSdfVolumeFromImage_SurfaceSpanAllocation<TSDFVoxel, PlainVoxelArray>(
+void BuildSdfVolumeFromImage_SurfaceSpanAllocation<TSDFVoxel, PlainVoxelArray>(
 		VoxelVolume<TSDFVoxel, PlainVoxelArray>** volume1,
 		VoxelVolume<TSDFVoxel, PlainVoxelArray>** volume2,
 		const std::string& depth1_path, const std::string& color1_path, const std::string& mask1_path,
@@ -231,7 +308,7 @@ void buildSdfVolumeFromImage_SurfaceSpanAllocation<TSDFVoxel, PlainVoxelArray>(
 		PlainVoxelArray::InitializationParameters initialization_parameters,
 		configuration::SwappingMode swapping_mode);
 template
-void buildSdfVolumeFromImage_SurfaceSpanAllocation<TSDFVoxel, VoxelBlockHash>(
+void BuildSdfVolumeFromImage_SurfaceSpanAllocation<TSDFVoxel, VoxelBlockHash>(
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>** volume1,
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>** volume2,
 		View** view,
@@ -242,7 +319,7 @@ void buildSdfVolumeFromImage_SurfaceSpanAllocation<TSDFVoxel, VoxelBlockHash>(
 		VoxelBlockHash::InitializationParameters initialization_parameters,
 		configuration::SwappingMode swapping_mode);
 template
-void buildSdfVolumeFromImage_SurfaceSpanAllocation<TSDFVoxel, VoxelBlockHash>(
+void BuildSdfVolumeFromImage_SurfaceSpanAllocation<TSDFVoxel, VoxelBlockHash>(
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>** volume1,
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>** volume2,
 		const std::string& depth1_path, const std::string& color1_path, const std::string& mask1_path,

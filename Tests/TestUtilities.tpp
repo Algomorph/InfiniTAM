@@ -172,7 +172,7 @@ void SimulateRandomVoxelAlteration(TVoxel& voxel) {
 // FIXME: see TODO in header
 //template<typename TVoxelA, typename TIndex>
 //ITMVoxelVolume<TVoxelA, TIndex> LoadVolume (const std::string& path, MemoryDeviceType memoryDeviceType,
-//                    typename TIndex::InitializationParameters initializationParameters, configuration::SwappingMode swapping_mode){
+//                    typename TIndex::InitializationParameters_Fr16andFr17 initializationParameters, configuration::SwappingMode swapping_mode){
 //	Configuration& settings = configuration::get();
 //	ITMVoxelVolume<TVoxelA, TIndex> scene(&settings.general_voxel_volume_parameters,
 //	                                              swapping_mode,
@@ -196,29 +196,19 @@ void LoadVolume(VoxelVolume<TVoxel, TIndex>** volume, const std::string& path, M
 
 template<typename TVoxel, typename TIndex>
 void initializeVolume(VoxelVolume<TVoxel, TIndex>** volume,
-                      typename TIndex::InitializationParameters initializationParameters, MemoryDeviceType memoryDevice,
-                      configuration::SwappingMode swappingMode) {
-	(*volume) = new VoxelVolume<TVoxel, TIndex>(memoryDevice, initializationParameters);
+                      typename TIndex::InitializationParameters initializationParameters, MemoryDeviceType memory_device,
+                      configuration::SwappingMode swapping_mode) {
+	(*volume) = new VoxelVolume<TVoxel, TIndex>(memory_device, initializationParameters);
 	(*volume)->Reset();
 }
 
 
 template<typename TVoxel, typename TIndex>
-void buildSdfVolumeFromImage_NearSurfaceAllocation(VoxelVolume<TVoxel, TIndex>** volume,
-                                                   View** view,
-                                                   const std::string& depth_path,
-                                                   const std::string& color_path,
-                                                   const std::string& mask_path,
-                                                   const std::string& calibration_path,
-                                                   MemoryDeviceType memory_device,
-                                                   typename TIndex::InitializationParameters initialization_parameters,
-                                                   configuration::SwappingMode swapping_mode
-) {
-
-	// region ================================= CONSTRUCT VIEW =========================================================
+void BuildSdfVolumeFromImage_NearSurfaceAllocation_Common(VoxelVolume<TVoxel, TIndex>** volume,
+                                                          View** view,MemoryDeviceType memory_device,
+                                                          typename TIndex::InitializationParameters initialization_parameters,
+                                                          configuration::SwappingMode swapping_mode){
 	Vector2i imageSize(640, 480);
-	updateView(view, depth_path, color_path, mask_path, calibration_path, memory_device);
-	initializeVolume(volume, initialization_parameters, memory_device, swapping_mode);
 	(*volume) = new VoxelVolume<TVoxel, TIndex>(configuration::get().general_voxel_volume_parameters, swapping_mode,
 	                                            memory_device, initialization_parameters);
 	(*volume)->Reset();
@@ -239,8 +229,67 @@ void buildSdfVolumeFromImage_NearSurfaceAllocation(VoxelVolume<TVoxel, TIndex>**
 	delete indexing_engine;
 }
 
+
 template<typename TVoxel, typename TIndex>
-void buildSdfVolumeFromImage_NearSurfaceAllocation(VoxelVolume<TVoxel, TIndex>** volume,
+void BuildSdfVolumeFromImage_NearSurfaceAllocation(VoxelVolume<TVoxel, TIndex>** volume,
+                                                   View** view,
+                                                   const std::string& depth_path,
+                                                   const std::string& color_path,
+                                                   const std::string& calibration_path,
+                                                   MemoryDeviceType memory_device,
+                                                   typename TIndex::InitializationParameters initialization_parameters,
+                                                   configuration::SwappingMode swapping_mode
+) {
+
+	// region ================================= CONSTRUCT VIEW =========================================================
+
+	UpdateView(view, depth_path, color_path, calibration_path, memory_device);
+	initializeVolume(volume, initialization_parameters, memory_device, swapping_mode);
+	BuildSdfVolumeFromImage_NearSurfaceAllocation_Common(volume, view, memory_device, initialization_parameters, swapping_mode);
+}
+
+
+template<typename TVoxel, typename TIndex>
+void BuildSdfVolumeFromImage_NearSurfaceAllocation(VoxelVolume<TVoxel, TIndex>** volume,
+                                                   const std::string& depth_path,
+                                                   const std::string& color_path,
+                                                   const std::string& calibration_path,
+                                                   MemoryDeviceType memory_device,
+                                                   typename TIndex::InitializationParameters initialization_parameters,
+                                                   configuration::SwappingMode swapping_mode
+) {
+	View* view = nullptr;
+	BuildSdfVolumeFromImage_NearSurfaceAllocation(volume, &view,
+	                                              depth_path,
+	                                              color_path,
+	                                              calibration_path,
+	                                              memory_device,
+	                                              initialization_parameters, swapping_mode);
+	delete view;
+}
+
+
+template<typename TVoxel, typename TIndex>
+void BuildSdfVolumeFromImage_NearSurfaceAllocation(VoxelVolume<TVoxel, TIndex>** volume,
+                                                   View** view,
+                                                   const std::string& depth_path,
+                                                   const std::string& color_path,
+                                                   const std::string& mask_path,
+                                                   const std::string& calibration_path,
+                                                   MemoryDeviceType memory_device,
+                                                   typename TIndex::InitializationParameters initialization_parameters,
+                                                   configuration::SwappingMode swapping_mode
+) {
+
+	// region ================================= CONSTRUCT VIEW =========================================================
+	Vector2i imageSize(640, 480);
+	UpdateView(view, depth_path, color_path, mask_path, calibration_path, memory_device);
+	initializeVolume(volume, initialization_parameters, memory_device, swapping_mode);
+	BuildSdfVolumeFromImage_NearSurfaceAllocation_Common(volume, view, memory_device, initialization_parameters, swapping_mode);
+}
+
+template<typename TVoxel, typename TIndex>
+void BuildSdfVolumeFromImage_NearSurfaceAllocation(VoxelVolume<TVoxel, TIndex>** volume,
                                                    const std::string& depth_path, const std::string& color_path,
                                                    const std::string& mask_path,
                                                    const std::string& calibration_path,
@@ -251,7 +300,7 @@ void buildSdfVolumeFromImage_NearSurfaceAllocation(VoxelVolume<TVoxel, TIndex>**
 	// region ================================= CONSTRUCT VIEW =========================================================
 
 	View* view = nullptr;
-	buildSdfVolumeFromImage_NearSurfaceAllocation(volume, &view,
+	BuildSdfVolumeFromImage_NearSurfaceAllocation(volume, &view,
 	                                              depth_path,
 	                                              color_path,
 	                                              mask_path,
@@ -262,7 +311,7 @@ void buildSdfVolumeFromImage_NearSurfaceAllocation(VoxelVolume<TVoxel, TIndex>**
 }
 
 template<typename TVoxel, typename TIndex>
-void buildSdfVolumeFromImage_SurfaceSpanAllocation(VoxelVolume<TVoxel, TIndex>** volume1,
+void BuildSdfVolumeFromImage_SurfaceSpanAllocation(VoxelVolume<TVoxel, TIndex>** volume1,
                                                    VoxelVolume<TVoxel, TIndex>** volume2,
                                                    View** view,
                                                    const std::string& depth1_path,
@@ -278,7 +327,7 @@ void buildSdfVolumeFromImage_SurfaceSpanAllocation(VoxelVolume<TVoxel, TIndex>**
 ) {
 
 	// region ================================= CONSTRUCT VIEW =========================================================
-	updateView(view, depth1_path, color1_path, mask1_path, calibration_path, memory_device);
+	UpdateView(view, depth1_path, color1_path, mask1_path, calibration_path, memory_device);
 	initializeVolume(volume1, initialization_parameters, memory_device, swapping_mode);
 	(*volume1) = new VoxelVolume<TVoxel, TIndex>(memory_device, initialization_parameters);
 	(*volume1)->Reset();
@@ -302,7 +351,7 @@ void buildSdfVolumeFromImage_SurfaceSpanAllocation(VoxelVolume<TVoxel, TIndex>**
 			VisualizationEngineFactory::MakeVisualizationEngine<TSDFVoxel, TIndex>(memory_device);
 	visualization_engine->CreateICPMaps(*volume1, *view, &tracking_state, &render_state);
 
-	updateView(view, depth2_path, color2_path, mask2_path, calibration_path, memory_device);
+	UpdateView(view, depth2_path, color2_path, mask2_path, calibration_path, memory_device);
 
 	indexing_engine->AllocateNearAndBetweenTwoSurfaces(*volume2, *view, &tracking_state);
 	depth_fusion_engine->IntegrateDepthImageIntoTsdfVolume(*volume2, *view, &tracking_state);
@@ -313,7 +362,7 @@ void buildSdfVolumeFromImage_SurfaceSpanAllocation(VoxelVolume<TVoxel, TIndex>**
 
 
 template<typename TVoxel, typename TIndex>
-void buildSdfVolumeFromImage_SurfaceSpanAllocation(VoxelVolume<TVoxel, TIndex>** volume1,
+void BuildSdfVolumeFromImage_SurfaceSpanAllocation(VoxelVolume<TVoxel, TIndex>** volume1,
                                                    VoxelVolume<TVoxel, TIndex>** volume2,
                                                    const std::string& depth1_path,
                                                    const std::string& color1_path,
@@ -326,7 +375,7 @@ void buildSdfVolumeFromImage_SurfaceSpanAllocation(VoxelVolume<TVoxel, TIndex>**
                                                    typename TIndex::InitializationParameters initialization_parameters,
                                                    configuration::SwappingMode swapping_mode) {
 	View* view = nullptr;
-	buildSdfVolumeFromImage_SurfaceSpanAllocation(volume1, volume2, &view,
+	BuildSdfVolumeFromImage_SurfaceSpanAllocation(volume1, volume2, &view,
 	                                              depth1_path,
 	                                              color1_path,
 	                                              mask1_path,

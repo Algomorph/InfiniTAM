@@ -36,11 +36,11 @@
 
 //test_utilities
 #include "TestUtilities.h"
-#include "TestUtilsForSnoopyFrames16And17.h"
+#include "SnoopyTestUtilities.h"
 
 using namespace ITMLib;
 using namespace test_utilities;
-namespace snoopy = snoopy16and17utilities;
+namespace snoopy = snoopy_test_utilities;
 
 typedef WarpingEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU> WarpingEngine_CPU_PVA;
 typedef WarpingEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU> WarpingEngine_CPU_VBH;
@@ -50,12 +50,13 @@ BOOST_AUTO_TEST_CASE(Test_WarpScene_CPU_PVA){
 	const configuration::Configuration& settings = configuration::get();
 	VoxelVolume<WarpVoxel, PlainVoxelArray>* warps;
 	LoadVolume(&warps, "TestData/snoopy_result_fr16-17_partial_PVA/warp_field_0_complete_",
-	           MEMORYDEVICE_CPU, snoopy::InitializationParameters<PlainVoxelArray>());
+	           MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* live_volume;
 	LoadVolume(&live_volume, "TestData/snoopy_result_fr16-17_partial_PVA/snoopy_partial_frame_17_",
-	           MEMORYDEVICE_CPU, snoopy::InitializationParameters<PlainVoxelArray>());
+	           MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 	auto warped_live_volume = new VoxelVolume<TSDFVoxel, PlainVoxelArray>(
-			settings.general_voxel_volume_parameters, false, MEMORYDEVICE_CPU, snoopy::InitializationParameters<PlainVoxelArray>());
+			settings.general_voxel_volume_parameters, false, MEMORYDEVICE_CPU,
+			snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 	warped_live_volume->Reset();
 
 	WarpingEngine_CPU_PVA warpingEngine;
@@ -67,7 +68,7 @@ BOOST_AUTO_TEST_CASE(Test_WarpScene_CPU_PVA){
 
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* warped_live_volume_gt;
 	LoadVolume(&warped_live_volume_gt, "TestData/snoopy_result_fr16-17_partial_PVA/warped_live_",
-	           MEMORYDEVICE_CPU, snoopy::InitializationParameters<PlainVoxelArray>());
+	           MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 
 	float absoluteTolerance = 1e-7;
 	BOOST_REQUIRE(!contentAlmostEqual_CPU(warped_live_volume, live_volume, absoluteTolerance));
@@ -82,12 +83,13 @@ BOOST_AUTO_TEST_CASE(Test_WarpScene_CPU_VBH){
 	const configuration::Configuration& settings = configuration::get();
 	VoxelVolume<WarpVoxel, VoxelBlockHash>* warps;
 	LoadVolume(&warps, "TestData/snoopy_result_fr16-17_partial_VBH/warp_field_0_complete_",
-	           MEMORYDEVICE_CPU, snoopy::InitializationParameters<VoxelBlockHash>());
+	           MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* live_volume;
 	LoadVolume(&live_volume, "TestData/snoopy_result_fr16-17_partial_VBH/snoopy_partial_frame_17_",
-	           MEMORYDEVICE_CPU, snoopy::InitializationParameters<VoxelBlockHash>());
+	           MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 	auto warped_live_volume = new VoxelVolume<TSDFVoxel, VoxelBlockHash>(
-			settings.general_voxel_volume_parameters, false, MEMORYDEVICE_CPU, snoopy::InitializationParameters<VoxelBlockHash>());
+			settings.general_voxel_volume_parameters, false, MEMORYDEVICE_CPU,
+			snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 	warped_live_volume->Reset();
 
 	WarpingEngine_CPU_VBH warpingEngine;
@@ -100,7 +102,7 @@ BOOST_AUTO_TEST_CASE(Test_WarpScene_CPU_VBH){
 
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* warped_live_volume_gt;
 	LoadVolume(&warped_live_volume_gt, "TestData/snoopy_result_fr16-17_partial_VBH/warped_live_",
-	           MEMORYDEVICE_CPU, snoopy::InitializationParameters<VoxelBlockHash>());
+	           MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
 
 	float absoluteTolerance = 1e-6;
@@ -117,9 +119,9 @@ BOOST_AUTO_TEST_CASE(Test_WarpScene_CPU_VBH_to_PVA){
 	// *** load warps
 	std::string path_warps = "TestData/snoopy_result_fr16-17_warps/data_only_iter_" + std::to_string(iteration) + "_";
 	VoxelVolume<WarpVoxel, PlainVoxelArray>* warps_PVA;
-	LoadVolume(&warps_PVA, path_warps, MEMORYDEVICE_CPU, snoopy::InitializationParameters<PlainVoxelArray>());
+	LoadVolume(&warps_PVA, path_warps, MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 	VoxelVolume<WarpVoxel, VoxelBlockHash>* warps_VBH;
-	LoadVolume(&warps_VBH, path_warps, MEMORYDEVICE_CPU, snoopy::InitializationParameters<VoxelBlockHash>());
+	LoadVolume(&warps_VBH, path_warps, MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
 	std::string path_frame_17_PVA = "TestData/snoopy_result_fr16-17_partial_PVA/snoopy_partial_frame_17_";
 	std::string path_frame_17_VBH = "TestData/snoopy_result_fr16-17_partial_VBH/snoopy_partial_frame_17_";
@@ -140,15 +142,17 @@ BOOST_AUTO_TEST_CASE(Test_WarpScene_CPU_VBH_to_PVA){
 
 	// *** load same frame scene as the two different data structures
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* source_volume_PVA;
-	LoadVolume(&source_volume_PVA, source_path_PVA, MEMORYDEVICE_CPU, snoopy::InitializationParameters<PlainVoxelArray>());
+	LoadVolume(&source_volume_PVA, source_path_PVA, MEMORYDEVICE_CPU,
+	           snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* source_volume_VBH;
-	LoadVolume(&source_volume_VBH, source_path_VBH, MEMORYDEVICE_CPU, snoopy::InitializationParameters<VoxelBlockHash>());
+	LoadVolume(&source_volume_VBH, source_path_VBH, MEMORYDEVICE_CPU,
+	           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
 	// *** initialize target scenes
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* target_PVA;
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* target_VBH;
-	initializeVolume(&target_PVA, snoopy::InitializationParameters<PlainVoxelArray>(), MEMORYDEVICE_CPU);
-	initializeVolume(&target_VBH, snoopy::InitializationParameters<VoxelBlockHash>(), MEMORYDEVICE_CPU);
+	initializeVolume(&target_PVA, snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>(), MEMORYDEVICE_CPU);
+	initializeVolume(&target_VBH, snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>(), MEMORYDEVICE_CPU);
 
 	// *** perform the warping
 	WarpingEngine_CPU_PVA warpingEngine_PVA;
@@ -187,11 +191,13 @@ BOOST_AUTO_TEST_CASE(Test_WarpScene_CUDA_VBH_to_PVA){
 	std::string path_warps =
 			"TestData/snoopy_result_fr16-17_warps/" + prefix + "_iter_" + std::to_string(iteration) + "_";
 	VoxelVolume<WarpVoxel, PlainVoxelArray>* warps_PVA;
-	LoadVolume(&warps_PVA, path_warps, MEMORYDEVICE_CUDA, snoopy::InitializationParameters<PlainVoxelArray>());
+	LoadVolume(&warps_PVA, path_warps, MEMORYDEVICE_CUDA,
+	           snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 	VoxelVolume<WarpVoxel, VoxelBlockHash>* warps_VBH_CPU;
-	LoadVolume(&warps_VBH_CPU, path_warps, MEMORYDEVICE_CPU, snoopy::InitializationParameters<VoxelBlockHash>());
+	LoadVolume(&warps_VBH_CPU, path_warps, MEMORYDEVICE_CPU,
+	           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 	VoxelVolume<WarpVoxel, VoxelBlockHash>* warps_VBH;
-	LoadVolume(&warps_VBH, path_warps, MEMORYDEVICE_CUDA, snoopy::InitializationParameters<VoxelBlockHash>());
+	LoadVolume(&warps_VBH, path_warps, MEMORYDEVICE_CUDA, snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
 	std::string path_frame_17_PVA = "TestData/snoopy_result_fr16-17_partial_PVA/snoopy_partial_frame_17_";
 	std::string path_frame_17_VBH = "TestData/snoopy_result_fr16-17_partial_VBH/snoopy_partial_frame_17_";
@@ -212,19 +218,22 @@ BOOST_AUTO_TEST_CASE(Test_WarpScene_CUDA_VBH_to_PVA){
 
 	// *** load same frame scene as the two different data structures
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* source_volume_PVA;
-	LoadVolume(&source_volume_PVA, source_path_PVA, MEMORYDEVICE_CUDA, snoopy::InitializationParameters<PlainVoxelArray>());
+	LoadVolume(&source_volume_PVA, source_path_PVA, MEMORYDEVICE_CUDA,
+	           snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* source_volume_VBH_CPU;
-	LoadVolume(&source_volume_VBH_CPU, source_path_VBH, MEMORYDEVICE_CPU, snoopy::InitializationParameters<VoxelBlockHash>());
+	LoadVolume(&source_volume_VBH_CPU, source_path_VBH, MEMORYDEVICE_CPU,
+	           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* source_volume_VBH;
-	LoadVolume(&source_volume_VBH, source_path_VBH, MEMORYDEVICE_CUDA, snoopy::InitializationParameters<VoxelBlockHash>());
+	LoadVolume(&source_volume_VBH, source_path_VBH, MEMORYDEVICE_CUDA,
+	           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
 	// *** initialize target scenes
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* target_PVA;
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* target_VBH_CPU;
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* target_VBH;
-	initializeVolume(&target_PVA, snoopy::InitializationParameters<PlainVoxelArray>(), MEMORYDEVICE_CUDA);
-	initializeVolume(&target_VBH_CPU, snoopy::InitializationParameters<VoxelBlockHash>(), MEMORYDEVICE_CPU);
-	initializeVolume(&target_VBH, snoopy::InitializationParameters<VoxelBlockHash>(), MEMORYDEVICE_CUDA);
+	initializeVolume(&target_PVA, snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>(), MEMORYDEVICE_CUDA);
+	initializeVolume(&target_VBH_CPU, snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>(), MEMORYDEVICE_CPU);
+	initializeVolume(&target_VBH, snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>(), MEMORYDEVICE_CUDA);
 
 	// *** perform the warping
 	WarpingEngine_CUDA_PVA warpingEngine_PVA;
@@ -267,12 +276,13 @@ BOOST_AUTO_TEST_CASE(Test_WarpScene_CUDA_VBH_to_PVA){
 BOOST_AUTO_TEST_CASE(Test_WarpScene_CUDA_PVA){
 	VoxelVolume<WarpVoxel, PlainVoxelArray>* warps;
 	LoadVolume(&warps, "TestData/snoopy_result_fr16-17_partial_PVA/warp_field_0_complete_",
-	           MEMORYDEVICE_CUDA, snoopy::InitializationParameters<PlainVoxelArray>());
+	           MEMORYDEVICE_CUDA, snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* live_volume;
 	LoadVolume(&live_volume, "TestData/snoopy_result_fr16-17_partial_PVA/snoopy_partial_frame_17_",
-	           MEMORYDEVICE_CUDA, snoopy::InitializationParameters<PlainVoxelArray>());
+	           MEMORYDEVICE_CUDA, snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 	auto warped_live_volume = new VoxelVolume<TSDFVoxel, PlainVoxelArray>(
-			configuration::get().general_voxel_volume_parameters, false, MEMORYDEVICE_CUDA, snoopy::InitializationParameters<PlainVoxelArray>());
+			configuration::get().general_voxel_volume_parameters, false, MEMORYDEVICE_CUDA,
+			snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 	warped_live_volume->Reset();
 
 	WarpingEngine_CUDA_PVA warpingEngine;
@@ -282,7 +292,7 @@ BOOST_AUTO_TEST_CASE(Test_WarpScene_CUDA_PVA){
 
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* warped_live_volume_gt;
 	LoadVolume(&warped_live_volume_gt, "TestData/snoopy_result_fr16-17_partial_PVA/warped_live_",
-	           MEMORYDEVICE_CUDA, snoopy::InitializationParameters<PlainVoxelArray>());
+	           MEMORYDEVICE_CUDA, snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 
 	float absoluteTolerance = 1e-5;
 	BOOST_REQUIRE(contentAlmostEqual_CUDA(warped_live_volume, warped_live_volume_gt, absoluteTolerance));
@@ -297,12 +307,13 @@ BOOST_AUTO_TEST_CASE(Test_WarpScene_CUDA_VBH){
 
 	VoxelVolume<WarpVoxel, VoxelBlockHash>* warps;
 	LoadVolume(&warps, "TestData/snoopy_result_fr16-17_partial_VBH/warp_field_0_complete_",
-	           MEMORYDEVICE_CUDA, snoopy::InitializationParameters<VoxelBlockHash>());
+	           MEMORYDEVICE_CUDA, snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* live_volume;
 	LoadVolume(&live_volume, "TestData/snoopy_result_fr16-17_partial_VBH/snoopy_partial_frame_17_",
-	           MEMORYDEVICE_CUDA, snoopy::InitializationParameters<VoxelBlockHash>());
+	           MEMORYDEVICE_CUDA, snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 	auto warped_live_volume = new VoxelVolume<TSDFVoxel, VoxelBlockHash>(
-			configuration::get().general_voxel_volume_parameters, false, MEMORYDEVICE_CUDA, snoopy::InitializationParameters<VoxelBlockHash>());
+			configuration::get().general_voxel_volume_parameters, false, MEMORYDEVICE_CUDA,
+			snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 	warped_live_volume->Reset();
 
 	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance()
@@ -316,7 +327,7 @@ BOOST_AUTO_TEST_CASE(Test_WarpScene_CUDA_VBH){
 
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* warped_live_volume_gt;
 	LoadVolume(&warped_live_volume_gt, "TestData/snoopy_result_fr16-17_partial_VBH/warped_live_",
-	           MEMORYDEVICE_CUDA, snoopy::InitializationParameters<VoxelBlockHash>());
+	           MEMORYDEVICE_CUDA, snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
 	float absoluteTolerance = 1e-5;
 	BOOST_REQUIRE(contentAlmostEqual_CUDA(warped_live_volume, warped_live_volume_gt, absoluteTolerance));

@@ -56,7 +56,7 @@
 
 using namespace ITMLib;
 using namespace test_utilities;
-namespace snoopy = snoopy16and17utilities;
+namespace snoopy = snoopy_test_utilities;
 
 ///CAUTION: SAVE modes require the build directory to be immediately inside the root source directory.
 template<MemoryDeviceType TMemoryDeviceType>
@@ -71,16 +71,16 @@ GenericWarpTest(const SlavchevaSurfaceTracker::Switches& switches, int iteration
 	                                                                 absoluteTolerance);
 
 	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_PVA(TMemoryDeviceType,
-	                                                   snoopy::InitializationParameters<PlainVoxelArray>());
+	                                                   snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH(TMemoryDeviceType,
-	                                                  snoopy::InitializationParameters<VoxelBlockHash>());
+	                                                  snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 	switch (mode) {
 		case TEST_SUCCESSIVE_ITERATIONS: {
 
 			VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field_PVA(TMemoryDeviceType,
-			                                                       snoopy::InitializationParameters<PlainVoxelArray>());
+			                                                       snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 			VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field_VBH(TMemoryDeviceType,
-			                                                      snoopy::InitializationParameters<VoxelBlockHash>());
+			                                                      snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
 			for (int iteration = 0; iteration < iteration_limit; iteration++) {
 				std::cout << "Testing iteration " << iteration << std::endl;

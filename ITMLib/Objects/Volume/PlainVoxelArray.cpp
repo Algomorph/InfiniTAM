@@ -49,7 +49,7 @@ unsigned int PlainVoxelArray::GetMaxVoxelCount() const {
 	       static_cast<unsigned int>(index_data.GetData(MEMORYDEVICE_CPU)->size.z);
 }
 
-void PlainVoxelArray::Save(ORUtils::MemoryBlockOStreamWrapper& file) const {
+void PlainVoxelArray::Save(ORUtils::OStreamWrapper& file) const {
 	PlainVoxelArray::IndexData data = *index_data.GetData(MEMORYDEVICE_CPU);
 	file.OStream().write(reinterpret_cast<const char* >(&data.size.x), sizeof(int));
 	file.OStream().write(reinterpret_cast<const char* >(&data.size.y), sizeof(int));
@@ -57,7 +57,7 @@ void PlainVoxelArray::Save(ORUtils::MemoryBlockOStreamWrapper& file) const {
 
 }
 
-void PlainVoxelArray::Load(ORUtils::MemoryBlockIStreamWrapper& file) {
+void PlainVoxelArray::Load(ORUtils::IStreamWrapper& file) {
 	PlainVoxelArray::IndexData data;
 	file.IStream().read(reinterpret_cast<char* >(&data.size.x), sizeof(int));
 	file.IStream().read(reinterpret_cast<char* >(&data.size.y), sizeof(int));

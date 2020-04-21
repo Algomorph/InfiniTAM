@@ -30,7 +30,7 @@ class VolumeFileIOEngine<TVoxel,VoxelBlockHash>{
 public:
 	static void SaveVolumeCompact(const VoxelVolume<TVoxel,VoxelBlockHash>& volume, const std::string& path);
 	static void LoadVolumeCompact(VoxelVolume<TVoxel,VoxelBlockHash>& volume, const std::string& path);
-	static void AppendFileWithUtilizedMemoryInformation(ORUtils::MemoryBlockOStreamWrapper& file, const VoxelVolume<TVoxel,VoxelBlockHash>& volume);
+	static void AppendFileWithUtilizedMemoryInformation(ORUtils::OStreamWrapper& file, const VoxelVolume<TVoxel,VoxelBlockHash>& volume);
 };
 
 
@@ -39,7 +39,7 @@ class VolumeFileIOEngine<TVoxel,PlainVoxelArray>{
 public:
 	static void SaveVolumeCompact(const VoxelVolume<TVoxel,PlainVoxelArray>& volume, const std::string& path);
 	static void LoadVolumeCompact(VoxelVolume<TVoxel,PlainVoxelArray>& volume, const std::string& path);
-	static void AppendFileWithUtilizedMemoryInformation(ORUtils::MemoryBlockOStreamWrapper& file, const VoxelVolume<TVoxel,PlainVoxelArray>& volume);
+	static void AppendFileWithUtilizedMemoryInformation(ORUtils::OStreamWrapper& file, const VoxelVolume<TVoxel,PlainVoxelArray>& volume);
 };
 
 

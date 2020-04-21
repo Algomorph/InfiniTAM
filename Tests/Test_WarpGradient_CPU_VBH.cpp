@@ -41,7 +41,7 @@
 #include "../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
 
 //test_utils
-#include "TestUtilsForSnoopyFrames16And17.h"
+#include "SnoopyTestUtilities.h"
 #include "TestUtilities.h"
 
 using namespace ITMLib;
@@ -89,7 +89,7 @@ struct AlteredFramewiseWarpCountFunctor {
 typedef WarpGradientDataFixture<MemoryDeviceType::MEMORYDEVICE_CPU, VoxelBlockHash> DataFixture;
 BOOST_FIXTURE_TEST_CASE(testDataTerm_CPU_VBH, DataFixture) {
 
-	VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field(MEMORYDEVICE_CPU, indexParameters);
+	VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field(MEMORYDEVICE_CPU, index_parameters);
 	ManipulationEngine_CPU_VBH_Warp::Inst().ResetVolume(&warp_field);
 
 	indexing_engine.AllocateWarpVolumeFromOtherVolume(&warp_field, live_volume);

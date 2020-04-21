@@ -25,7 +25,7 @@
 //local
 #include "../ITMLib/GlobalTemplateDefines.h"
 #include "../ITMLib/Utils/Configuration.h"
-#include "TestUtilsForSnoopyFrames16And17.h"
+#include "SnoopyTestUtilities.h"
 //local - CPU
 #include "../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
 #include "../ITMLib/Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"

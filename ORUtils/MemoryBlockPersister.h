@@ -23,11 +23,11 @@ namespace b_ios = boost::iostreams;
 
 namespace ORUtils {
 
-class MemoryBlockIStreamWrapper {
+class IStreamWrapper {
 public:
-	MemoryBlockIStreamWrapper() : compression_enabled(false) {}
+	IStreamWrapper() : compression_enabled(false) {}
 
-	MemoryBlockIStreamWrapper(const std::string& filename, bool use_compression = false)
+	IStreamWrapper(const std::string& filename, bool use_compression = false)
 			: file(filename.c_str(), std::ios::binary), compression_enabled(use_compression) {
 		if (file) {
 #ifdef WITH_BOOST
@@ -45,6 +45,8 @@ public:
 			}
 			final_stream = &file;
 #endif
+		} else {
+			DIEWITHEXCEPTION_REPORTLOCATION("Could not open file.");
 		}
 	}
 
@@ -58,19 +60,20 @@ public:
 
 	const bool compression_enabled;
 private:
+	std::ifstream file;
 #ifdef WITH_BOOST
 	b_ios::filtering_istream filter;
 #endif
-	std::ifstream file;
 	std::istream* final_stream = nullptr;
 };
 
-class MemoryBlockOStreamWrapper {
+class OStreamWrapper {
 public:
-	MemoryBlockOStreamWrapper() : compression_enabled(false) {};
+	OStreamWrapper() : compression_enabled(false) {};
 
-	MemoryBlockOStreamWrapper(const std::string& filename, bool use_compression = false)
+	OStreamWrapper(const std::string& filename, bool use_compression = false)
 			: file(filename.c_str(), std::ios::binary), compression_enabled(use_compression) {
+
 		if (file) {
 #ifdef WITH_BOOST
 			if (use_compression) {
@@ -87,6 +90,8 @@ public:
 			}
 			final_stream = &file;
 #endif
+		} else {
+			DIEWITHEXCEPTION_REPORTLOCATION("Could not open file.");
 		}
 	}
 
@@ -100,10 +105,10 @@ public:
 
 	const bool compression_enabled;
 private:
+	std::ofstream file;
 #ifdef WITH_BOOST
 	b_ios::filtering_ostream filter;
 #endif
-	std::ofstream file;
 	std::ostream* final_stream = nullptr;
 };
 
@@ -126,7 +131,7 @@ public:
 	static void
 	LoadMemoryBlock(const std::string& path, ORUtils::MemoryBlock<T>& block, MemoryDeviceType memory_type,
 	                bool use_compression = false) {
-		MemoryBlockIStreamWrapper file(path.c_str(), use_compression);
+		IStreamWrapper file(path.c_str(), use_compression);
 		if (!file) throw std::runtime_error("Could not open " + path + " for reading");
 		LoadMemoryBlock(file, block, memory_type);
 	}
@@ -140,7 +145,7 @@ public:
 	 */
 	template<typename T>
 	static void
-	LoadMemoryBlock(MemoryBlockIStreamWrapper& file, ORUtils::MemoryBlock<T>& block, MemoryDeviceType memory_type) {
+	LoadMemoryBlock(IStreamWrapper& file, ORUtils::MemoryBlock<T>& block, MemoryDeviceType memory_type) {
 		size_t block_size = ReadBlockSize(file.IStream());
 		if (memory_type == MEMORYDEVICE_CUDA) {
 			// If we're loading into a block on the CUDA, first try and read the data into a temporary block on the CPU.
@@ -198,7 +203,7 @@ public:
 	template<typename T>
 	static void SaveMemoryBlock(const std::string& filename, const ORUtils::MemoryBlock<T>& block,
 	                            MemoryDeviceType memory_type, bool use_compression = false) {
-		MemoryBlockOStreamWrapper file(filename.c_str(), use_compression);
+		OStreamWrapper file(filename.c_str(), use_compression);
 		if (!file) throw std::runtime_error("Could not open " + filename + " for writing");
 		SaveMemoryBlock(file, block, memory_type);
 	}
@@ -211,7 +216,7 @@ public:
 	 * \param memory_type       The type of memory device from which to save the data.
 	 */
 	template<typename T>
-	static void SaveMemoryBlock(MemoryBlockOStreamWrapper& file, const ORUtils::MemoryBlock<T>& block,
+	static void SaveMemoryBlock(OStreamWrapper& file, const ORUtils::MemoryBlock<T>& block,
 	                            MemoryDeviceType memory_type, bool use_compression = false) {
 
 		if (memory_type == MEMORYDEVICE_CUDA) {

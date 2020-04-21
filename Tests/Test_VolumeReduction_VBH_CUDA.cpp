@@ -27,11 +27,11 @@
 
 //test_utilities
 #include "TestUtilities.h"
-#include "TestUtilsForSnoopyFrames16And17.h"
+#include "SnoopyTestUtilities.h"
 
 using namespace ITMLib;
 using namespace test_utilities;
-namespace snoopy = snoopy16and17utilities;
+namespace snoopy = snoopy_test_utilities;
 
 BOOST_AUTO_TEST_CASE(Test_VolumeReduction_MaxWarpUpdate_VBH_CUDA){
 	const int iteration = 1;
@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(Test_VolumeReduction_MaxWarpUpdate_VBH_CUDA){
 			"TestData/snoopy_result_fr16-17_warps/" + prefix + "_iter_" + std::to_string(iteration) + "_";
 
 	VoxelVolume<WarpVoxel, VoxelBlockHash>* warps;
-	LoadVolume(&warps, path_warps, MEMORYDEVICE_CUDA, snoopy::InitializationParameters<VoxelBlockHash>());
+	LoadVolume(&warps, path_warps, MEMORYDEVICE_CUDA, snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
 	float value_gt =
 			AnalyticsEngine<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance().ComputeWarpUpdateMax(

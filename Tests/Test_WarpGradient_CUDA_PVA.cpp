@@ -44,7 +44,7 @@ using namespace ITMLib;
 typedef WarpGradientDataFixture<MemoryDeviceType::MEMORYDEVICE_CUDA, PlainVoxelArray> DataFixture;
 BOOST_FIXTURE_TEST_CASE(testDataTerm_CUDA_PVA, DataFixture) {
 
-	VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field_CUDA1(MEMORYDEVICE_CUDA, indexParameters);
+	VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field_CUDA1(MEMORYDEVICE_CUDA, index_parameters);
 	ManipulationEngine_CUDA_PVA_Warp::Inst().ResetVolume(&warp_field_CUDA1);
 
 

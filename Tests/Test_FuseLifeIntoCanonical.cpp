@@ -41,11 +41,11 @@
 
 //test_utilities
 #include "TestUtilities.h"
-#include "TestUtilsForSnoopyFrames16And17.h"
+#include "SnoopyTestUtilities.h"
 
 using namespace ITMLib;
 using namespace test_utilities;
-namespace snoopy = snoopy16and17utilities;
+namespace snoopy = snoopy_test_utilities;
 
 typedef VolumeFusionEngine<TSDFVoxel, PlainVoxelArray, MEMORYDEVICE_CPU> VolumeFusionEngine_CPU_PVA;
 typedef VolumeFusionEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU> VolumeFusionEngine_CPU_VBH;
@@ -57,10 +57,10 @@ BOOST_AUTO_TEST_CASE(Test_FuseLifeIntoCanonical_CPU_PVA){
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* warped_live_volume;
 	LoadVolume(&warped_live_volume, "TestData/snoopy_result_fr16-17_warps/data_tikhonov_sobolev_iter_"
 	                                + std::to_string(iteration) + "_warped_live_",
-	           MEMORYDEVICE_CPU, snoopy::InitializationParameters<PlainVoxelArray>());
+	           MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* canonical_volume;
 	LoadVolume(&canonical_volume, "TestData/snoopy_result_fr16-17_partial_PVA/snoopy_partial_frame_16_",
-	           MEMORYDEVICE_CPU, snoopy::InitializationParameters<PlainVoxelArray>());
+	           MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 
 	VolumeFusionEngine_CPU_PVA volumeFusionEngine;
 	volumeFusionEngine.FuseOneTsdfVolumeIntoAnother(canonical_volume, warped_live_volume, 0);
@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(Test_FuseLifeIntoCanonical_CPU_PVA){
 
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* fused_canonical_volume_gt;
 	LoadVolume(&fused_canonical_volume_gt, "TestData/snoopy_result_fr16-17_partial_PVA/fused_canonical_",
-	           MEMORYDEVICE_CPU, snoopy::InitializationParameters<PlainVoxelArray>());
+	           MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 
 	float absoluteTolerance = 1e-7;
 
@@ -82,10 +82,10 @@ BOOST_AUTO_TEST_CASE(Test_FuseLifeIntoCanonical_CPU_VBH){
 	const int iteration = 4;
 	LoadVolume(&warped_live_volume, "TestData/snoopy_result_fr16-17_warps/data_tikhonov_sobolev_iter_"
 	                                + std::to_string(iteration) + "_warped_live_",
-	           MEMORYDEVICE_CPU, snoopy::InitializationParameters<VoxelBlockHash>());
+	           MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* canonical_volume;
 	LoadVolume(&canonical_volume, "TestData/snoopy_result_fr16-17_partial_VBH/snoopy_partial_frame_16_",
-	           MEMORYDEVICE_CPU, snoopy::InitializationParameters<VoxelBlockHash>());
+	           MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
 	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance().AllocateFromOtherVolume(canonical_volume, warped_live_volume);
 
@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE(Test_FuseLifeIntoCanonical_CPU_VBH){
 
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* fused_canonical_volume_gt;
 	LoadVolume(&fused_canonical_volume_gt, "TestData/snoopy_result_fr16-17_partial_VBH/fused_canonical_",
-	           MEMORYDEVICE_CPU, snoopy::InitializationParameters<VoxelBlockHash>());
+	           MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
 	float absoluteTolerance = 1e-7;
 
@@ -112,17 +112,17 @@ BOOST_AUTO_TEST_CASE(Test_FuseLifeIntoCanonical_CUDA_PVA){
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* warped_live_volume;
 	LoadVolume(&warped_live_volume, "TestData/snoopy_result_fr16-17_warps/data_tikhonov_sobolev_iter_"
 	                                + std::to_string(iteration) + "_warped_live_",
-	           MEMORYDEVICE_CUDA, snoopy::InitializationParameters<PlainVoxelArray>());
+	           MEMORYDEVICE_CUDA, snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* canonical_volume;
 	LoadVolume(&canonical_volume, "TestData/snoopy_result_fr16-17_partial_PVA/snoopy_partial_frame_16_",
-	           MEMORYDEVICE_CUDA, snoopy::InitializationParameters<PlainVoxelArray>());
+	           MEMORYDEVICE_CUDA, snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 
 	VolumeFusionEngine_CUDA_PVA volume_fusion_engine;
 	volume_fusion_engine.FuseOneTsdfVolumeIntoAnother(canonical_volume, warped_live_volume, 0);
 
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* fused_canonical_volume_gt;
 	LoadVolume(&fused_canonical_volume_gt, "TestData/snoopy_result_fr16-17_partial_PVA/fused_canonical_",
-	           MEMORYDEVICE_CUDA, snoopy::InitializationParameters<PlainVoxelArray>());
+	           MEMORYDEVICE_CUDA, snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 
 	float absoluteTolerance = 1e-7;
 
@@ -134,10 +134,10 @@ BOOST_AUTO_TEST_CASE(Test_FuseLifeIntoCanonical_CUDA_VBH){
 	const int iteration = 4;
 	LoadVolume(&warped_live_volume, "TestData/snoopy_result_fr16-17_warps/data_tikhonov_sobolev_iter_"
 	                                + std::to_string(iteration) + "_warped_live_",
-	           MEMORYDEVICE_CUDA, snoopy::InitializationParameters<VoxelBlockHash>());
+	           MEMORYDEVICE_CUDA, snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* canonical_volume;
 	LoadVolume(&canonical_volume, "TestData/snoopy_result_fr16-17_partial_VBH/snoopy_partial_frame_16_",
-	           MEMORYDEVICE_CUDA, snoopy::InitializationParameters<VoxelBlockHash>());
+	           MEMORYDEVICE_CUDA, snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance().AllocateFromOtherVolume(canonical_volume, warped_live_volume);
 
 	VolumeFusionEngine_CUDA_VBH volume_fusion_engine;
@@ -145,7 +145,7 @@ BOOST_AUTO_TEST_CASE(Test_FuseLifeIntoCanonical_CUDA_VBH){
 
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* fused_canonical_volume_gt;
 	LoadVolume(&fused_canonical_volume_gt, "TestData/snoopy_result_fr16-17_partial_VBH/fused_canonical_",
-	           MEMORYDEVICE_CUDA, snoopy::InitializationParameters<VoxelBlockHash>());
+	           MEMORYDEVICE_CUDA, snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
 	float absoluteTolerance = 1e-7;
 
@@ -160,19 +160,19 @@ void Generic_Fusion_PVA_to_VBH_test(int iteration){
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* warped_live_volume_PVA;
 	LoadVolume(&warped_live_volume_PVA, "TestData/snoopy_result_fr16-17_warps/data_tikhonov_sobolev_iter_"
 	                                    + std::to_string(iteration) + "_warped_live_",
-	           TMemoryDeviceType, snoopy::InitializationParameters<PlainVoxelArray>());
+	           TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* canonical_volume_PVA;
 	LoadVolume(&canonical_volume_PVA, "TestData/snoopy_result_fr16-17_partial_PVA/snoopy_partial_frame_16_",
-	           TMemoryDeviceType, snoopy::InitializationParameters<PlainVoxelArray>());
+	           TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 	
 	// *** load VBH stuff
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* warped_live_volume_VBH;
 	LoadVolume(&warped_live_volume_VBH, "TestData/snoopy_result_fr16-17_warps/data_tikhonov_sobolev_iter_"
 	                                    + std::to_string(iteration) + "_warped_live_",
-	           TMemoryDeviceType, snoopy::InitializationParameters<VoxelBlockHash>());
+	           TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* canonical_volume_VBH;
 	LoadVolume(&canonical_volume_VBH, "TestData/snoopy_result_fr16-17_partial_VBH/snoopy_partial_frame_16_",
-	           TMemoryDeviceType, snoopy::InitializationParameters<VoxelBlockHash>());
+	           TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
 	IndexingEngine<TSDFVoxel, VoxelBlockHash, TMemoryDeviceType>::Instance().AllocateFromOtherVolume(canonical_volume_VBH, warped_live_volume_VBH);
 

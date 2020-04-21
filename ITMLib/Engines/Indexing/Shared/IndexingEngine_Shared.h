@@ -286,7 +286,6 @@ inline void DeallocateBlock(const Vector3s& block_position_to_remove,
 	HashEntry entry_to_remove = hash_table[hash_index_to_clear];
 
 
-
 	ResetVoxelBlock(last_free_voxel_block_id, voxel_allocation_list, voxels, entry_to_remove,
 	                empty_voxel_block_device);
 
@@ -619,14 +618,20 @@ findVoxelBlocksForRayNearSurface(ITMLib::HashEntryAllocationState* hash_entry_al
 
 _CPU_AND_GPU_CODE_
 inline
-bool FindOrAllocateHashEntry(const Vector3s& hash_entry_position, HashEntry* hash_table, HashEntry*& result_entry,
-                             int& last_free_voxel_block_id, int& last_free_excess_list_id,
+bool FindOrAllocateHashEntry(const Vector3s& hash_entry_position,
+                             HashEntry* hash_table,
+                             HashEntry*& result_entry,
+                             int& last_free_voxel_block_id,
+                             int& last_free_excess_list_id,
+                             int& utilized_hash_code_count,
                              const int* voxel_allocation_list,
-                             const int* excess_allocation_list, int& hash_code) {
+                             const int* excess_allocation_list,
+                             int* utilized_hash_codes,
+                             int& hash_code) {
 	hash_code = HashCodeFromBlockPosition(hash_entry_position);
 	HashEntry hash_entry = hash_table[hash_code];
 	if (!IS_EQUAL3(hash_entry.pos, hash_entry_position) || hash_entry.ptr < -1) {
-		bool isExcess = false;
+		bool add_to_excess_list = false;
 		//search excess list only if there is no room in ordered part
 		if (hash_entry.ptr >= -1) {
 			while (hash_entry.offset >= 1) {
@@ -637,23 +642,25 @@ bool FindOrAllocateHashEntry(const Vector3s& hash_entry_position, HashEntry* has
 					return true;
 				}
 			}
-			isExcess = true;
+			add_to_excess_list = true;
 
 		}
 		//still not found, allocate
-		if (isExcess && last_free_voxel_block_id >= 0 && last_free_excess_list_id >= 0) {
+		if (add_to_excess_list && last_free_voxel_block_id >= 0 && last_free_excess_list_id >= 0) {
 			//there is room in the voxel block array and excess list
-			HashEntry newHashEntry;
-			newHashEntry.pos = hash_entry_position;
-			newHashEntry.ptr = voxel_allocation_list[last_free_voxel_block_id];
-			newHashEntry.offset = 0;
+			HashEntry new_hash_entry;
+			new_hash_entry.pos = hash_entry_position;
+			new_hash_entry.ptr = voxel_allocation_list[last_free_voxel_block_id];
+			new_hash_entry.offset = 0;
 			int excess_list_offset = excess_allocation_list[last_free_excess_list_id];
 			hash_table[hash_code].offset = excess_list_offset + 1; //connect to child
 			hash_code = ORDERED_LIST_SIZE + excess_list_offset;
-			hash_table[hash_code] = newHashEntry; //add child to the excess list
+			hash_table[hash_code] = new_hash_entry; //add child to the excess list
 			result_entry = &hash_table[hash_code];
 			last_free_voxel_block_id--;
 			last_free_excess_list_id--;
+			utilized_hash_codes[utilized_hash_code_count] = hash_code;
+			utilized_hash_code_count++;
 			return true;
 		} else if (last_free_voxel_block_id >= 0) {
 			//there is room in the voxel block array
@@ -664,6 +671,8 @@ bool FindOrAllocateHashEntry(const Vector3s& hash_entry_position, HashEntry* has
 			hash_table[hash_code] = new_hash_entry;
 			result_entry = &hash_table[hash_code];
 			last_free_voxel_block_id--;
+			utilized_hash_codes[utilized_hash_code_count] = hash_code;
+			utilized_hash_code_count++;
 			return true;
 		} else {
 			return false;

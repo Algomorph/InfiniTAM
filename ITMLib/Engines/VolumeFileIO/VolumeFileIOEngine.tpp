@@ -145,7 +145,7 @@ VolumeFileIOEngine<TVoxel, VoxelBlockHash>::LoadVolumeCompact(VoxelVolume<TVoxel
 
 template<typename TVoxel>
 void VolumeFileIOEngine<TVoxel, VoxelBlockHash>::AppendFileWithUtilizedMemoryInformation(
-		ORUtils::MemoryBlockOStreamWrapper& file, const VoxelVolume<TVoxel, VoxelBlockHash>& volume) {
+		ORUtils::OStreamWrapper& file, const VoxelVolume<TVoxel, VoxelBlockHash>& volume) {
 	std::vector<Vector3s> positions = Analytics_Accessor::Get<TVoxel, VoxelBlockHash>(volume.index.memory_type).GetUtilizedHashBlockPositions(&volume);
 	size_t position_count = positions.size();
 	file.OStream().write(reinterpret_cast<const char*>(&position_count), sizeof(size_t));
@@ -162,7 +162,7 @@ void
 VolumeFileIOEngine<TVoxel, PlainVoxelArray>::SaveVolumeCompact(
 		const VoxelVolume<TVoxel, PlainVoxelArray>& volume,
 		const std::string& path) {
-	ORUtils::MemoryBlockOStreamWrapper file(path, true);
+	ORUtils::OStreamWrapper file(path, true);
 	volume.index.Save(file);
 	volume.SaveVoxels(file);
 }
@@ -173,14 +173,14 @@ void
 VolumeFileIOEngine<TVoxel, PlainVoxelArray>::LoadVolumeCompact(
 		VoxelVolume<TVoxel, PlainVoxelArray>& volume,
 		const std::string& path) {
-	ORUtils::MemoryBlockIStreamWrapper file(path, true);
+	ORUtils::IStreamWrapper file(path, true);
 	volume.index.Load(file);
 	volume.LoadVoxels(file);
 }
 
 template<typename TVoxel>
 void VolumeFileIOEngine<TVoxel, PlainVoxelArray>::AppendFileWithUtilizedMemoryInformation(
-		ORUtils::MemoryBlockOStreamWrapper& file, const VoxelVolume<TVoxel, PlainVoxelArray>& volume) {
+		ORUtils::OStreamWrapper& file, const VoxelVolume<TVoxel, PlainVoxelArray>& volume) {
 	//FIXME
 	DIEWITHEXCEPTION_REPORTLOCATION("Not yet implemented.");
 }

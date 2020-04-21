@@ -43,7 +43,7 @@ using namespace ITMLib;
 typedef WarpGradientDataFixture<MemoryDeviceType::MEMORYDEVICE_CUDA, VoxelBlockHash> DataFixture;
 BOOST_FIXTURE_TEST_CASE(testDataTerm_CUDA_VBH, DataFixture) {
 
-	VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field(MEMORYDEVICE_CUDA, indexParameters);
+	VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field(MEMORYDEVICE_CUDA, index_parameters);
 	ManipulationEngine_CUDA_VBH_Warp::Inst().ResetVolume(&warp_field);
 
 	indexing_engine.AllocateWarpVolumeFromOtherVolume(&warp_field, live_volume);

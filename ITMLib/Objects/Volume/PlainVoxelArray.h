@@ -68,9 +68,9 @@ public:
 
 	IndexData* GetIndexData() { return index_data.GetData(memory_type); }
 
-	void Save(ORUtils::MemoryBlockOStreamWrapper& file) const;
+	void Save(ORUtils::OStreamWrapper& file) const;
 
-	void Load(ORUtils::MemoryBlockIStreamWrapper& file);
+	void Load(ORUtils::IStreamWrapper& file);
 
 #ifdef COMPILE_WITH_METAL
 	const void *getIndexData_MB() const { return index_data.GetMetalBuffer(); }

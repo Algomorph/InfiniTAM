@@ -42,39 +42,39 @@ BOOST_AUTO_TEST_CASE(testSaveSceneCompact_CPU) {
 
 	configuration::Configuration* settings = &configuration::get();
 
-	Vector3i volumeSize(40, 68, 20);
-	Vector3i volumeOffset(-20, 0, 0);
+	Vector3i volume_size(40, 68, 20);
+	Vector3i volume_offset(-20, 0, 0);
 
-	VoxelVolume<TSDFVoxel, PlainVoxelArray> generated_test_scene_PVA(
-			MEMORYDEVICE_CPU, {volumeSize, volumeOffset});
+	VoxelVolume<TSDFVoxel, PlainVoxelArray> generated_test_volume_PVA(
+			MEMORYDEVICE_CPU, {volume_size, volume_offset});
 
-	VoxelVolume<TSDFVoxel, PlainVoxelArray> loaded_test_scene_PVA(
-			MEMORYDEVICE_CPU, {volumeSize, volumeOffset});
+	VoxelVolume<TSDFVoxel, PlainVoxelArray> loaded_test_volume_PVA(
+			MEMORYDEVICE_CPU, {volume_size, volume_offset});
 
-	GenerateSimpleSurfaceTestVolume<MEMORYDEVICE_CPU>(&generated_test_scene_PVA);
+	GenerateSimpleSurfaceTestVolume<MEMORYDEVICE_CPU>(&generated_test_volume_PVA);
 
-	std::string path = "TestData/testSaveSceneCompact_PVA_CPU.dat";
-	generated_test_scene_PVA.SaveToDisk(path);
-	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetVolume(&loaded_test_scene_PVA);
-	loaded_test_scene_PVA.LoadFromDisk(path);
+	std::string path = "TestData/volumes/PVA/generated_test_volume.dat";
+	generated_test_volume_PVA.SaveToDisk(path);
+	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetVolume(&loaded_test_volume_PVA);
+	loaded_test_volume_PVA.LoadFromDisk(path);
 
 	float tolerance = 1e-8;
-	BOOST_REQUIRE_EQUAL(Analytics_CPU_PVA_Voxel::Instance().CountNonTruncatedVoxels(&loaded_test_scene_PVA), 19456);
-	BOOST_REQUIRE(contentAlmostEqual_CPU(&generated_test_scene_PVA, &loaded_test_scene_PVA, tolerance));
+	BOOST_REQUIRE_EQUAL(Analytics_CPU_PVA_Voxel::Instance().CountNonTruncatedVoxels(&loaded_test_volume_PVA), 19456);
+	BOOST_REQUIRE(contentAlmostEqual_CPU(&generated_test_volume_PVA, &loaded_test_volume_PVA, tolerance));
 
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> generated_test_scene_VBH(
 			MEMORYDEVICE_CPU);
 
+	GenerateSimpleSurfaceTestVolume<MEMORYDEVICE_CPU>(&generated_test_scene_VBH);
+	path = "TestData/volumes/VBH/generated_test_volume.dat";
+	generated_test_scene_VBH.SaveToDisk(path);
+
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> loaded_test_scene_VBH(
 			MEMORYDEVICE_CPU);
-
-	GenerateSimpleSurfaceTestVolume<MEMORYDEVICE_CPU>(&generated_test_scene_VBH);
-	path = "TestData/test_VBH_CPU_generated_test_scene.dat";
-	generated_test_scene_VBH.SaveToDisk(path);
-	ManipulationEngine_CPU_VBH_Voxel::Inst().ResetVolume(&loaded_test_scene_VBH);
+	loaded_test_scene_VBH.Reset();
 	loaded_test_scene_VBH.LoadFromDisk(path);
 
 	BOOST_REQUIRE_EQUAL(Analytics_CPU_VBH_Voxel::Instance().CountNonTruncatedVoxels(&loaded_test_scene_VBH), 19456);
 	BOOST_REQUIRE(contentAlmostEqual_CPU(&generated_test_scene_VBH, &loaded_test_scene_VBH, tolerance));
-	BOOST_REQUIRE(contentAlmostEqual_CPU_Verbose(&generated_test_scene_PVA, &loaded_test_scene_VBH, tolerance));
+	BOOST_REQUIRE(contentAlmostEqual_CPU_Verbose(&generated_test_volume_PVA, &loaded_test_scene_VBH, tolerance));
 }

@@ -13,9 +13,25 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "TestUtilsForSnoopyFrames16And17.h"
+#include "SnoopyTestUtilities.h"
 
-namespace snoopy16and17utilities {
+namespace snoopy_test_utilities {
+
+std::string SnoopyCalibrationPath() {
+	return "TestData/calibration/snoopy_calib.txt";
+}
+
+std::string Frame00DepthPath() {
+	return "TestData/frames/snoopy_depth_000000.png";
+}
+
+std::string Frame00ColorPath() {
+	return "TestData/frames/snoopy_color_000000.png";
+}
+
+std::string Frame00MaskPath() {
+	return "TestData/frames/snoopy_omask_000000.png";
+}
 
 std::string Frame16DepthPath() {
 	return "TestData/frames/snoopy_depth_000016.png";
@@ -41,18 +57,33 @@ std::string Frame17MaskPath() {
 	return "TestData/frames/snoopy_omask_000017.png";
 }
 
-
+template std::string PartialVolume00Path<PlainVoxelArray>();
+template std::string PartialVolume00Path<VoxelBlockHash>();
 template std::string PartialVolume16Path<PlainVoxelArray>();
 template std::string PartialVolume16Path<VoxelBlockHash>();
 template std::string PartialVolume17Path<PlainVoxelArray>();
 template std::string PartialVolume17Path<VoxelBlockHash>();
 
+template std::string FullVolume16Path<PlainVoxelArray>();
+template std::string FullVolume16Path<VoxelBlockHash>();
+template std::string FullVolume17Path<PlainVoxelArray>();
+template std::string FullVolume17Path<VoxelBlockHash>();
+
 template<>
-PlainVoxelArray::InitializationParameters InitializationParameters<PlainVoxelArray>() {
+PlainVoxelArray::InitializationParameters InitializationParameters_Fr00<PlainVoxelArray>() {
+	return {Vector3i(512, 112, 360), Vector3i(-512, -24, 152)};
+}
+template<>
+VoxelBlockHash::InitializationParameters InitializationParameters_Fr00<VoxelBlockHash>() {
+	return {0x0800, 0x20000};
+}
+
+template<>
+PlainVoxelArray::InitializationParameters InitializationParameters_Fr16andFr17<PlainVoxelArray>() {
 	return {Vector3i(88, 104, 160), Vector3i(-72, -24, 160)};
 }
 template<>
-VoxelBlockHash::InitializationParameters InitializationParameters<VoxelBlockHash>() {
+VoxelBlockHash::InitializationParameters InitializationParameters_Fr16andFr17<VoxelBlockHash>() {
 	return {0x0800, 0x20000};
 }
 
@@ -61,13 +92,13 @@ VoxelBlockHash::InitializationParameters InitializationParameters<VoxelBlockHash
 template void
 Load<PlainVoxelArray>(VoxelVolume<TSDFVoxel, PlainVoxelArray>** volume, Frame frame,
                       MemoryDeviceType device_type,
-                      PlainVoxelArray::InitializationParameters initialization_parameters = InitializationParameters<PlainVoxelArray>(),
+                      PlainVoxelArray::InitializationParameters initialization_parameters = InitializationParameters_Fr16andFr17<PlainVoxelArray>(),
                       configuration::SwappingMode swapping_mode = configuration::SWAPPINGMODE_DISABLED);
 
 template void
 Load<VoxelBlockHash>(VoxelVolume<TSDFVoxel, VoxelBlockHash>** volume, Frame frame,
                      MemoryDeviceType device_type,
-                     VoxelBlockHash::InitializationParameters initialization_parameters = InitializationParameters<VoxelBlockHash>(),
+                     VoxelBlockHash::InitializationParameters initialization_parameters = InitializationParameters_Fr16andFr17<VoxelBlockHash>(),
                      configuration::SwappingMode swapping_mode = configuration::SWAPPINGMODE_DISABLED);
 
 

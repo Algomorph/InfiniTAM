@@ -18,17 +18,17 @@
 namespace ITMLib {
 
 template void RecordVolumeMemoryUsageInfo<TSDFVoxel, VoxelBlockHash>(
-		ORUtils::MemoryBlockOStreamWrapper& file,
+		ORUtils::OStreamWrapper& file,
 		const VoxelVolume<TSDFVoxel, VoxelBlockHash>& volume);
 
 template void RecordVolumeMemoryUsageInfo<TSDFVoxel, PlainVoxelArray>(
-		ORUtils::MemoryBlockOStreamWrapper& file,
+		ORUtils::OStreamWrapper& file,
 		const VoxelVolume<TSDFVoxel, PlainVoxelArray>& volume);
 
 
-void InitializePerFrameAnalyticsTelemetry(ORUtils::MemoryBlockOStreamWrapper* canonical_volume_memory_usage_file) {
+void InitializePerFrameAnalyticsTelemetry(ORUtils::OStreamWrapper* canonical_volume_memory_usage_file) {
 	if (configuration::get().telemetry_settings.record_volume_memory_usage) {
-		canonical_volume_memory_usage_file = new ORUtils::MemoryBlockOStreamWrapper(
+		canonical_volume_memory_usage_file = new ORUtils::OStreamWrapper(
 				(fs::path(configuration::get().paths.output_path) / fs::path("canonical_volume_memory_usage.dat")).string(),
 				true
 		);

@@ -32,16 +32,16 @@
 
 //test_utilities
 #include "TestUtilities.h"
-#include "TestUtilsForSnoopyFrames16And17.h"
+#include "SnoopyTestUtilities.h"
 
 using namespace ITMLib;
 using namespace test_utilities;
-namespace snoopy = snoopy16and17utilities;
+namespace snoopy = snoopy_test_utilities;
 
 BOOST_AUTO_TEST_CASE(Test_ClearOutFramewiseWarp_CPU_PVA){
 	VoxelVolume<WarpVoxel, PlainVoxelArray>* warps_PVA;
 	LoadVolume(&warps_PVA, "TestData/snoopy_result_fr16-17_partial_PVA/warp_field_0_data_framewise_warps_",
-	           MEMORYDEVICE_CPU, snoopy::InitializationParameters<PlainVoxelArray>());
+	           MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 	float relativeTolerance = 0.1f;//percent
 	BOOST_REQUIRE_CLOSE(Analytics_CPU_PVA_Warp::Instance().ComputeWarpUpdateMax(warps_PVA), 0.12124350666999817f, relativeTolerance);
 	BOOST_REQUIRE_CLOSE(Analytics_CPU_PVA_Warp::Instance().ComputeWarpUpdateMin(warps_PVA), 0.0f, relativeTolerance);
@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(Test_ClearOutFramewiseWarp_CPU_PVA){
 BOOST_AUTO_TEST_CASE(Test_ClearOutWarpUpdate_CPU_VBH){
 	VoxelVolume<WarpVoxel, VoxelBlockHash>* warps_VBH;
 	LoadVolume(&warps_VBH, "TestData/snoopy_result_fr16-17_partial_VBH/warp_field_0_data_framewise_warps_",
-	           MEMORYDEVICE_CPU, snoopy::InitializationParameters<VoxelBlockHash>());
+	           MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 	float relativeTolerance = 0.1f;//percent
 	BOOST_REQUIRE_CLOSE(Analytics_CPU_VBH_Warp::Instance().ComputeWarpUpdateMax(warps_VBH), 0.12124350666999817f, relativeTolerance);
 	BOOST_REQUIRE_CLOSE(Analytics_CPU_VBH_Warp::Instance().ComputeWarpUpdateMin(warps_VBH), 0.0f, relativeTolerance);
@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE(Test_ClearOutWarpUpdate_CPU_VBH){
 BOOST_AUTO_TEST_CASE(Test_ClearOutWarpUpdate_CUDA_PVA){
 	VoxelVolume<WarpVoxel, PlainVoxelArray>* warps_PVA;
 	LoadVolume(&warps_PVA, "TestData/snoopy_result_fr16-17_partial_PVA/warp_field_0_data_framewise_warps_",
-	           MEMORYDEVICE_CUDA, snoopy::InitializationParameters<PlainVoxelArray>());
+	           MEMORYDEVICE_CUDA, snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 	float relativeTolerance = 0.1f;//percent
 	BOOST_REQUIRE_CLOSE(Analytics_CUDA_PVA_Warp::Instance().ComputeWarpUpdateMax(warps_PVA), 0.12124350666999817, relativeTolerance);
 	BOOST_REQUIRE_CLOSE(Analytics_CUDA_PVA_Warp::Instance().ComputeWarpUpdateMin(warps_PVA), 0.0f, relativeTolerance);
@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE(Test_ClearOutWarpUpdate_CUDA_PVA){
 BOOST_AUTO_TEST_CASE(Test_ClearOutWarpUpdate_CUDA_VBH){
 	VoxelVolume<WarpVoxel, VoxelBlockHash>* warps_VBH;
 	LoadVolume(&warps_VBH, "TestData/snoopy_result_fr16-17_partial_VBH/warp_field_0_data_framewise_warps_",
-	           MEMORYDEVICE_CUDA, snoopy::InitializationParameters<VoxelBlockHash>());
+	           MEMORYDEVICE_CUDA, snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 	float relativeTolerance = 0.1f;//percent
 	BOOST_REQUIRE_CLOSE(Analytics_CUDA_VBH_Warp::Instance().ComputeWarpUpdateMax(warps_VBH), 0.12124350666999817f, relativeTolerance);
 	BOOST_REQUIRE_CLOSE(Analytics_CUDA_VBH_Warp::Instance().ComputeWarpUpdateMin(warps_VBH), 0.0f, relativeTolerance);

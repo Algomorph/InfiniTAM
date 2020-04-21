@@ -47,11 +47,11 @@
 
 //test_utilities
 #include "TestUtilities.h"
-#include "TestUtilsForSnoopyFrames16And17.h"
+#include "SnoopyTestUtilities.h"
 
 using namespace ITMLib;
 using namespace test_utilities;
-namespace snoopy = snoopy16and17utilities;
+namespace snoopy = snoopy_test_utilities;
 
 BOOST_AUTO_TEST_CASE(testSetVoxelAndCopy_PlainVoxelArray_CPU) {
 	Vector3i volumeSize(20);
@@ -147,14 +147,15 @@ BOOST_AUTO_TEST_CASE(testSetVoxelAndCopy_VoxelBlockHash_CPU) {
 }
 
 BOOST_AUTO_TEST_CASE(testCopyToDifferentlyInitializedVolume_VBH_CPU){
-	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume(MEMORYDEVICE_CPU, snoopy::InitializationParameters<VoxelBlockHash>());
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume(MEMORYDEVICE_CPU,
+	                                              snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 	volume.Reset();
 	std::string path = snoopy::PartialVolume17Path<VoxelBlockHash>();
 
 	volume.LoadFromDisk(path);
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_copy(MEMORYDEVICE_CPU,
-	                                                   {snoopy::InitializationParameters<VoxelBlockHash>().voxel_block_count * 2,
-	                                                    snoopy::InitializationParameters<VoxelBlockHash>().excess_list_size});
+	                                                   {snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>().voxel_block_count * 2,
+	                                                    snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>().excess_list_size});
 	volume_copy.Reset();
 	ManipulationEngine_CPU_VBH_Voxel::Inst().CopyVolume(&volume_copy, &volume);
 	float tolerance = 1e-8;

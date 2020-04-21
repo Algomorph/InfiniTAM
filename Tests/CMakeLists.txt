@@ -10,11 +10,11 @@ set(COMMON_TEST_SOURCES
     TestUtilities.tpp
     TestUtils_Kernels.h
     TestUtils_Functors.h
-    TestUtilsForSnoopyFrames16And17.cpp
+    SnoopyTestUtilities.cpp
     )
 set(COMMON_TEST_HEADERS
     TestUtilities.h
-    TestUtilsForSnoopyFrames16And17.h)
+    SnoopyTestUtilities.h)
 
 macro(load_use_includes)
     include(${PROJECT_SOURCE_DIR}/cmake/UseCUDA.cmake)
@@ -71,14 +71,10 @@ if (BUILD_TESTS)
     enable_testing()
 
     ###########################
-    # Find additional packages #
+    # test_utilities library  #
     ###########################
 
     find_package(Boost COMPONENTS unit_test_framework REQUIRED)
-
-    ####################################
-    # Specify test targets and sources #
-    ####################################
 
     set(targetname test_utilities)
     set(sources ${COMMON_TEST_SOURCES} ${COMMON_TEST_HEADERS})
@@ -89,6 +85,24 @@ if (BUILD_TESTS)
     target_link_libraries(${targetname} ITMLib ORUtils
                           ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
     include(${PROJECT_SOURCE_DIR}/cmake/LinkPNG.cmake)
+
+    #######################################################
+    # generator executable for derived test data library  #
+    #######################################################
+
+    load_use_includes()
+    set(targetname generate_derived_test_data)
+    set(GENERATED_TEST_DATA_PREFIX ${CMAKE_CURRENT_SOURCE_DIR})
+    configure_file(GenerateDerivedTestData_Config.h.in GenerateDerivedTestData_Config.h @ONLY)
+    set(sources "GenerateDerivedTestData.cpp" "GenerateDerivedTestData_Config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/GenerateDerivedTestData_Config.h")
+    include(${PROJECT_SOURCE_DIR}/cmake/SetCUDAAppTarget.cmake)
+    target_link_libraries(${targetname} InputSource ITMLib MiniSlamGraphLib ORUtils FernRelocLib test_utilities)
+    target_include_directories(${targetname} PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
+    load_target_link_includes()
+
+    ##########################
+    # test suite executables #
+    ##########################
 
     # *** CPU-only tests
     itm_add_test(NAME SetCopyCompare_CPU SOURCES Test_SetCopyCompare_CPU.cpp)

@@ -527,7 +527,7 @@ __global__ void buildVisibleList_device(HashEntry* hashTable, ITMHashSwapState* 
 	if (shouldPrefix)
 	{
 		int offset = computePrefixSum_device<int>(hashVisibleType == 1, noActiveEntries, blockDim.x * blockDim.y, threadIdx.x);
-		if (offset != -1) activeEntryIDs[offset] = hashCode;
+		if (offset != -1) activeEntryIDs[offset] = hash_code;
 	}
 #endif
 }

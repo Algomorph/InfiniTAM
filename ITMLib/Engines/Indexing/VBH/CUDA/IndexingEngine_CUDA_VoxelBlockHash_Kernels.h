@@ -232,19 +232,23 @@ __global__ void findHashEntry_device(HashEntry* entry, const HashEntry* hashTabl
 
 
 struct SingleHashAllocationData {
-	int lastFreeVoxelBlockId;
-	int lastFreeExcessListId;
-	int hashCode;
+	int last_free_allocation_block_id;
+	int last_free_excess_entry_id;
+	int utilized_hash_code_count;
+	int hash_code;
 	bool success;
 };
 
 __global__ void allocateHashEntry_device(SingleHashAllocationData* data,
-                                         const Vector3s at, HashEntry* hashTable,
-                                         const int* voxelAllocationList, const int* excessAllocationList) {
+                                         const Vector3s at, HashEntry* hash_table,
+                                         const int* voxel_allocation_list,
+                                         const int* excess_allocation_list,
+                                         int* utilized_hash_codes) {
 	HashEntry* entry;
-	data->success = FindOrAllocateHashEntry(at, hashTable, entry, data->lastFreeVoxelBlockId,
-	                                        data->lastFreeExcessListId, voxelAllocationList, excessAllocationList,
-	                                        data->hashCode);
+	data->success = FindOrAllocateHashEntry(at, hash_table, entry, data->last_free_allocation_block_id,
+	                                        data->last_free_excess_entry_id, data->utilized_hash_code_count,
+	                                        voxel_allocation_list, excess_allocation_list,
+	                                        utilized_hash_codes, data->hash_code);
 };
 
 __global__ void buildHashAllocationTypeList_BlockList_device(
