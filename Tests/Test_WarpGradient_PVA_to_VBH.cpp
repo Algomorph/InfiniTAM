@@ -51,75 +51,13 @@
 
 
 //test_utils
-#include "WarpAdvancedTestingUtilities.h"
+#include "TestUtilities/WarpAdvancedTestingUtilities.h"
 #include "Test_WarpGradient_Common.h"
 
 using namespace ITMLib;
 using namespace test_utilities;
 namespace snoopy = snoopy_test_utilities;
 
-///CAUTION: SAVE modes require the build directory to be immediately inside the root source directory.
-template<MemoryDeviceType TMemoryDeviceType>
-void
-GenericWarpTest(const SlavchevaSurfaceTracker::Switches& switches, int iteration_limit = 10,
-                GenericWarpTestMode mode = TEST_SUCCESSIVE_ITERATIONS, float absoluteTolerance = 1e-7) {
-
-	std::string prefix = switches_to_prefix(switches);
-	GenericWarpConsistencySubtest<PlainVoxelArray, TMemoryDeviceType>(switches, iteration_limit, mode,
-	                                                                  absoluteTolerance);
-	GenericWarpConsistencySubtest<VoxelBlockHash, TMemoryDeviceType>(switches, iteration_limit, mode,
-	                                                                 absoluteTolerance);
-
-	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_PVA(TMemoryDeviceType,
-	                                                   snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
-	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH(TMemoryDeviceType,
-	                                                  snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
-	switch (mode) {
-		case TEST_SUCCESSIVE_ITERATIONS: {
-
-			VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field_PVA(TMemoryDeviceType,
-			                                                       snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
-			VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field_VBH(TMemoryDeviceType,
-			                                                      snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
-
-			for (int iteration = 0; iteration < iteration_limit; iteration++) {
-				std::cout << "Testing iteration " << iteration << std::endl;
-				warp_field_PVA.LoadFromDisk(get_path_warps(prefix, iteration));
-				EditAndCopyEngineFactory::Instance<WarpVoxel, VoxelBlockHash, TMemoryDeviceType>().ResetVolume(
-						&warp_field_VBH);
-				warp_field_VBH.LoadFromDisk(get_path_warps(prefix, iteration));
-				BOOST_REQUIRE(allocatedContentAlmostEqual_Verbose(&warp_field_PVA, &warp_field_VBH,
-				                                                  absoluteTolerance, TMemoryDeviceType));
-				EditAndCopyEngineFactory::Instance<TSDFVoxel, VoxelBlockHash, TMemoryDeviceType>().ResetVolume(
-						&volume_VBH);
-				volume_PVA.LoadFromDisk(get_path_warped_live(prefix, iteration));
-				volume_VBH.LoadFromDisk(get_path_warped_live(prefix, iteration));
-				BOOST_REQUIRE(contentForFlagsAlmostEqual_Verbose(&volume_PVA, &volume_VBH, VOXEL_NONTRUNCATED,
-				                                                 absoluteTolerance, TMemoryDeviceType));
-			}
-		}
-			break;
-		case TEST_FINAL_ITERATION_AND_FUSION: {
-			volume_PVA.LoadFromDisk(get_path_warped_live(prefix, iteration_limit - 1));
-			EditAndCopyEngineFactory::Instance<TSDFVoxel, VoxelBlockHash, TMemoryDeviceType>().ResetVolume(
-					&volume_VBH);
-			volume_VBH.LoadFromDisk(get_path_warped_live(prefix, iteration_limit - 1));
-			BOOST_REQUIRE(
-					contentForFlagsAlmostEqual(&volume_PVA, &volume_VBH, VOXEL_NONTRUNCATED, absoluteTolerance,
-					                           TMemoryDeviceType));
-			volume_PVA.LoadFromDisk(get_path_fused(prefix, iteration_limit - 1));
-			EditAndCopyEngineFactory::Instance<TSDFVoxel, VoxelBlockHash, TMemoryDeviceType>().ResetVolume(
-					&volume_VBH);
-			volume_VBH.LoadFromDisk(get_path_fused(prefix, iteration_limit - 1));
-			BOOST_REQUIRE(
-					contentForFlagsAlmostEqual(&volume_PVA, &volume_VBH, VOXEL_NONTRUNCATED, absoluteTolerance,
-					                           TMemoryDeviceType));
-		}
-			break;
-		default:
-			break;
-	}
-}
 
 //#define GENERATE_TEST_DATA
 BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_DataTermOnly_CPU) {

@@ -36,8 +36,8 @@
 #endif
 
 //test_utils
-#include "SnoopyTestUtilities.h"
-#include "TestUtilities.h"
+#include "TestUtilities/SnoopyTestUtilities.h"
+#include "TestUtilities/TestUtilities.h"
 
 using namespace ITMLib;
 using namespace test_utilities;

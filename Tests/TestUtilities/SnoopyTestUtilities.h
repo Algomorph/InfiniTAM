@@ -16,8 +16,8 @@
 
 #pragma once
 
-#include "../ITMLib/Objects/Volume/PlainVoxelArray.h"
-#include "../ITMLib/Objects/Volume/VoxelBlockHash.h"
+#include "../../ITMLib/Objects/Volume/PlainVoxelArray.h"
+#include "../../ITMLib/Objects/Volume/VoxelBlockHash.h"
 #include "TestUtilities.h"
 
 using namespace ITMLib;

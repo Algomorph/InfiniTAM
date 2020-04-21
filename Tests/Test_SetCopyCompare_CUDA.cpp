@@ -50,7 +50,7 @@
 #include "../ORUtils/FileUtils.h"
 
 //test_utilities
-#include "TestUtilities.h"
+#include "TestUtilities/TestUtilities.h"
 
 
 using namespace ITMLib;

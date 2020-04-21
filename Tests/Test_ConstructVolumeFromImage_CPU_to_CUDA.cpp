@@ -22,7 +22,7 @@
 #include <boost/test/unit_test.hpp>
 
 // *** ITMLib ***
-#include "SnoopyTestUtilities.h"
+#include "TestUtilities/SnoopyTestUtilities.h"
 #include "../ITMLib/GlobalTemplateDefines.h"
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngine.h"
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
@@ -42,7 +42,7 @@
 #endif
 
 // *** test_utils ***
-#include "TestUtilities.h"
+#include "TestUtilities/TestUtilities.h"
 
 
 using namespace ITMLib;

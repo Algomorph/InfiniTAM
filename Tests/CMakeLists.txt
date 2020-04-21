@@ -4,17 +4,7 @@
 
 option(BUILD_TESTS "Build automated tests with the project (Boost-test required)." OFF)
 
-set(COMMON_TEST_SOURCES
-    TestUtilities.cpp
-    TestUtilities.cu
-    TestUtilities.tpp
-    TestUtils_Kernels.h
-    TestUtils_Functors.h
-    SnoopyTestUtilities.cpp
-    )
-set(COMMON_TEST_HEADERS
-    TestUtilities.h
-    SnoopyTestUtilities.h)
+
 
 macro(load_use_includes)
     include(${PROJECT_SOURCE_DIR}/cmake/UseCUDA.cmake)
@@ -73,31 +63,47 @@ if (BUILD_TESTS)
     ###########################
     # test_utilities library  #
     ###########################
+    set(GENERATED_TEST_DATA_PREFIX ${CMAKE_CURRENT_SOURCE_DIR})
+    configure_file(TestUtilities/TestUtilitiesConfig.h.in TestUtilities/TestUtilitiesConfig.h @ONLY)
 
+    set(TEST_UTILITIES_SOURCES
+        TestUtilities/TestUtilities.cpp
+        TestUtilities/TestUtilities.cu
+        TestUtilities/TestUtilities.tpp
+        TestUtilities/SnoopyTestUtilities.cpp
+        TestUtilities/WarpAdvancedTestingUtilities.tpp
+        TestUtilities/WarpAdvancedTestingUtilities.cpp
+        )
+    set(TEST_UTILITIES_HEADERS
+        TestUtilities/TestUtilityKernels.h
+        TestUtilities/TestUtilityFunctors.h
+        TestUtilities/TestUtilities.h
+        TestUtilities/SnoopyTestUtilities.h
+        TestUtilities/WarpAdvancedTestingUtilities.h
+        TestUtilities/TestUtilitiesConfig.h.in
+        ${CMAKE_CURRENT_BINARY_DIR}/TestUtilities/TestUtilitiesConfig.h)
+    
     find_package(Boost COMPONENTS unit_test_framework REQUIRED)
 
     set(targetname test_utilities)
-    set(sources ${COMMON_TEST_SOURCES} ${COMMON_TEST_HEADERS})
+    set(sources ${TEST_UTILITIES_SOURCES} ${TEST_UTILITIES_HEADERS})
 
     load_use_includes()
     include(${PROJECT_SOURCE_DIR}/cmake/SetCUDALibTarget.cmake)
 
     target_link_libraries(${targetname} ITMLib ORUtils
                           ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+    target_include_directories(${targetname} PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/TestUtilities)
     include(${PROJECT_SOURCE_DIR}/cmake/LinkPNG.cmake)
 
     #######################################################
     # generator executable for derived test data library  #
     #######################################################
-
-    load_use_includes()
     set(targetname generate_derived_test_data)
-    set(GENERATED_TEST_DATA_PREFIX ${CMAKE_CURRENT_SOURCE_DIR})
-    configure_file(GenerateDerivedTestData_Config.h.in GenerateDerivedTestData_Config.h @ONLY)
-    set(sources "GenerateDerivedTestData.cpp" "GenerateDerivedTestData_Config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/GenerateDerivedTestData_Config.h")
+    load_use_includes()
+    set(sources GenerateDerivedTestData.cpp)
     include(${PROJECT_SOURCE_DIR}/cmake/SetCUDAAppTarget.cmake)
     target_link_libraries(${targetname} InputSource ITMLib MiniSlamGraphLib ORUtils FernRelocLib test_utilities)
-    target_include_directories(${targetname} PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
     load_target_link_includes()
 
     ##########################
@@ -116,8 +122,7 @@ if (BUILD_TESTS)
     itm_add_test(NAME SurfaceTrackingAuxiliaryFunctions SOURCES Test_SurfaceTrackingAuxiliaryFunctions.cpp)
     itm_add_test(NAME WarpVolume SOURCES Test_WarpVolume.cpp)
     itm_add_test(NAME FuseLifeIntoCanonical SOURCES Test_FuseLifeIntoCanonical.cpp)
-    itm_add_test(NAME WarpGradient_PVA_to_VBH SOURCES Test_WarpGradient_PVA_to_VBH.cpp
-                 WarpAdvancedTestingUtilities.h WarpAdvancedTestingUtilities.tpp WarpAdvancedTestingUtilities.cpp)
+    itm_add_test(NAME WarpGradient_PVA_to_VBH SOURCES Test_WarpGradient_PVA_to_VBH.cpp)
     itm_add_test(NAME Configuration SOURCES Test_Configuration.cpp)
     itm_add_test(NAME GeometryUtilities SOURCES Test_GeometryUtilities.cpp)
     itm_add_test(NAME HashAllocationThreadSafety SOURCES Test_HashAllocationThreadSafety.cpp)

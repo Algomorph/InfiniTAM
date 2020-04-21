@@ -14,7 +14,7 @@
 //  limitations under the License.
 //  ================================================================
 #include "TestUtilities.tpp"
-#include "../ITMLib/Engines/Traversal/CUDA/VolumeTraversal_CUDA_VoxelBlockHash.h"
+#include "../../ITMLib/Engines/Traversal/CUDA/VolumeTraversal_CUDA_VoxelBlockHash.h"
 
 using namespace ITMLib;
 

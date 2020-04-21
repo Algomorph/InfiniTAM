@@ -19,10 +19,16 @@
 #include <string>
 #include <unordered_map>
 
+//ITMLib
+#include "../../ITMLib/SurfaceTrackers/Interface/SurfaceTracker.h"
+
 //local
-#include "../ITMLib/SurfaceTrackers/Interface/SurfaceTracker.h"
+#include "TestUtilities.h"
+
 
 using namespace ITMLib;
+
+namespace test_utilities {
 
 enum GenericWarpTestMode {
 	SAVE_SUCCESSIVE_ITERATIONS,
@@ -31,14 +37,18 @@ enum GenericWarpTestMode {
 	TEST_FINAL_ITERATION_AND_FUSION
 };
 
-std::string get_path_warps(std::string prefix, int iteration);
-std::string get_path_warped_live(std::string prefix, int iteration);
-std::string get_path_fused(std::string prefix, int iteration);
-unsigned int switches_to_int_code(const SlavchevaSurfaceTracker::Switches& switches);
-std::string switches_to_prefix(const SlavchevaSurfaceTracker::Switches& switches);
+template<typename TIndex>
+std::string GetWarpsPath(std::string prefix, int iteration);
 
 template<typename TIndex>
-std::string getIndexString();
+std::string GetWarpedLivePath(std::string prefix, int iteration);
+
+template<typename TIndex>
+std::string GetFusedPath(std::string prefix, int iteration);
+
+unsigned int SwitchesToIntCode(const SlavchevaSurfaceTracker::Switches& switches);
+std::string SwitchesToPrefix(const SlavchevaSurfaceTracker::Switches& switches);
+
 
 template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void
@@ -54,3 +64,11 @@ GenericWarpConsistencySubtest(const SlavchevaSurfaceTracker::Switches& switches,
 
 template<MemoryDeviceType TMemoryDeviceType>
 void Warp_PVA_VBH_simple_subtest(int iteration, SlavchevaSurfaceTracker::Switches trackerSwitches);
+
+
+template<MemoryDeviceType TMemoryDeviceType>
+void
+GenericWarpTest(const SlavchevaSurfaceTracker::Switches& switches, int iteration_limit = 10,
+                GenericWarpTestMode mode = TEST_SUCCESSIVE_ITERATIONS, float absolute_tolerance = 1e-7);
+
+} // namespace test_utilities

@@ -30,8 +30,9 @@
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CPU.h"
 
 //test_utilities
-#include "TestUtilities.h"
-#include "SnoopyTestUtilities.h"
+#include "TestUtilities/TestUtilities.h"
+#include "TestUtilities/SnoopyTestUtilities.h"
+#include "TestUtilities/WarpAdvancedTestingUtilities.h"
 
 using namespace ITMLib;
 using namespace test_utilities;
@@ -41,11 +42,10 @@ namespace snoopy = snoopy_test_utilities;
 BOOST_AUTO_TEST_CASE(testSmoothWarpGradient_PVA){
 	const int iteration = 0;
 
-	std::string path_warps = "TestData/snoopy_result_fr16-17_warps/data_only_iter_" + std::to_string(iteration) + "_";
-	std::string path_frame_17_PVA = "TestData/snoopy_result_fr16-17_partial_PVA/snoopy_partial_frame_17_";
-	std::string path_frame_16_PVA = "TestData/snoopy_result_fr16-17_partial_PVA/snoopy_partial_frame_16_";
-	std::string path_frame_17_VBH = "TestData/snoopy_result_fr16-17_partial_VBH/snoopy_partial_frame_17_";
-	std::string path_frame_16_VBH = "TestData/snoopy_result_fr16-17_partial_VBH/snoopy_partial_frame_16_";
+	SlavchevaSurfaceTracker::Switches data_only_switches(true, false, false, false, false);
+	std::string path_warps = GetWarpsPath<PlainVoxelArray>(SwitchesToPrefix(data_only_switches), iteration);
+	std::string path_frame_16_PVA = snoopy::PartialVolume16Path<PlainVoxelArray>();
+	std::string path_frame_17_PVA = snoopy::PartialVolume17Path<PlainVoxelArray>();
 
 	VoxelVolume<WarpVoxel, PlainVoxelArray>* warp_field_CPU;
 	LoadVolume(&warp_field_CPU, path_warps, MEMORYDEVICE_CPU,

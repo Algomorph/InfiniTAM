@@ -26,7 +26,7 @@
 #include <boost/test/unit_test.hpp>
 #include "../ITMLib/GlobalTemplateDefines.h"
 #include "../ITMLib/Objects/Volume/VoxelVolume.h"
-#include "TestUtilities.h"
+#include "TestUtilities/TestUtilities.h"
 #include "../ITMLib/Engines/ViewBuilding/Interface/ViewBuilder.h"
 #include "../ITMLib/Engines/ViewBuilding/ViewBuilderFactory.h"
 #include "../ORUtils/FileUtils.h"

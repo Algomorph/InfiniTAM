@@ -29,7 +29,7 @@
 #include <boost/test/unit_test.hpp>
 
 //local
-#include "TestUtilities.h"
+#include "TestUtilities/TestUtilities.h"
 #include "Test_WarpGradient_Common.h"
 #include "../ITMLib/Utils/Configuration.h"
 #include "../ITMLib/Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
@@ -41,8 +41,8 @@
 #include "../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
 
 //test_utils
-#include "SnoopyTestUtilities.h"
-#include "TestUtilities.h"
+#include "TestUtilities/SnoopyTestUtilities.h"
+#include "TestUtilities/TestUtilities.h"
 
 using namespace ITMLib;
 using namespace test_utilities;

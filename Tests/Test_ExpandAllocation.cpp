@@ -25,7 +25,7 @@
 //local
 #include "../ITMLib/GlobalTemplateDefines.h"
 #include "../ITMLib/Utils/Configuration.h"
-#include "SnoopyTestUtilities.h"
+#include "TestUtilities/SnoopyTestUtilities.h"
 //local - CPU
 #include "../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
 #include "../ITMLib/Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
@@ -36,7 +36,7 @@
 #include "../ITMLib/Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
 #include "CUDAAtomicTesting.h"
 #include "../ITMLib/Engines/EditAndCopy/EditAndCopyEngineFactory.h"
-#include "TestUtilities.h"
+#include "TestUtilities/TestUtilities.h"
 #include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
 #endif
 

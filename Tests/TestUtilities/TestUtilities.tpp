@@ -17,16 +17,16 @@
 
 //local
 #include "TestUtilities.h"
-#include "TestUtils_Functors.h"
+#include "TestUtilityFunctors.h"
 
 //ITMLib
-#include "../ITMLib/Utils/Configuration.h"
-#include "../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
-#include "../ITMLib/Engines/Indexing/IndexingEngineFactory.h"
-#include "../ITMLib/Engines/Visualization/VisualizationEngineFactory.h"
-#include "../ORUtils/FileUtils.h"
-#include "../ITMLib/Engines/EditAndCopy/EditAndCopyEngineFactory.h"
-#include "../ITMLib/Engines/Traversal/Interface/VolumeTraversal.h"
+#include "../../ITMLib/Utils/Configuration.h"
+#include "../../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
+#include "../../ITMLib/Engines/Indexing/IndexingEngineFactory.h"
+#include "../../ITMLib/Engines/Visualization/VisualizationEngineFactory.h"
+#include "../../ORUtils/FileUtils.h"
+#include "../../ITMLib/Engines/EditAndCopy/EditAndCopyEngineFactory.h"
+#include "../../ITMLib/Engines/Traversal/Interface/VolumeTraversal.h"
 
 
 using namespace ITMLib;

@@ -15,13 +15,13 @@
 //  ================================================================
 #pragma once
 
-#include "../ITMLib/Objects/Volume/VoxelBlockHash.h"
-#include "../ORUtils/MemoryDeviceType.h"
+#include "../../ITMLib/Objects/Volume/VoxelBlockHash.h"
+#include "../../ORUtils/MemoryDeviceType.h"
 
 #ifdef __CUDACC__
 
-#include "TestUtils_Kernels.h"
-#include "../ITMLib/Utils/Geometry/GeometryBooleanOperations.h"
+#include "TestUtilityKernels.h"
+#include "../../ITMLib/Utils/Geometry/GeometryBooleanOperations.h"
 
 #endif
 

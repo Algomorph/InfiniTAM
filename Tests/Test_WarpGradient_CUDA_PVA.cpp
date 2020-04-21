@@ -29,7 +29,7 @@
 #include <boost/test/unit_test.hpp>
 
 //local
-#include "TestUtilities.h"
+#include "TestUtilities/TestUtilities.h"
 #include "Test_WarpGradient_Common.h"
 #include "../ITMLib/Utils/Configuration.h"
 #include "../ITMLib/Engines/VolumeFileIO/VolumeFileIOEngine.h"

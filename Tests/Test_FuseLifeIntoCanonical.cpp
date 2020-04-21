@@ -35,146 +35,89 @@
 #include "../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
 //(CUDA)
 #ifndef COMPILE_WITHOUT_CUDA
+
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CUDA.h"
 #include "../ITMLib/Engines/Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
+
 #endif
 
 //test_utilities
-#include "TestUtilities.h"
-#include "SnoopyTestUtilities.h"
+#include "TestUtilities/TestUtilities.h"
+#include "TestUtilities/SnoopyTestUtilities.h"
+#include "TestUtilities/WarpAdvancedTestingUtilities.h"
 
 using namespace ITMLib;
 using namespace test_utilities;
 namespace snoopy = snoopy_test_utilities;
 
-typedef VolumeFusionEngine<TSDFVoxel, PlainVoxelArray, MEMORYDEVICE_CPU> VolumeFusionEngine_CPU_PVA;
-typedef VolumeFusionEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU> VolumeFusionEngine_CPU_VBH;
+template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
+void GenericFusionTest(const int iteration = 4) {
+	VoxelVolume<TSDFVoxel, TIndex>* warped_live_volume;
+	SlavchevaSurfaceTracker::Switches data_tikhonov_sobolev_switches(true, false, true, false, true);
+	LoadVolume(&warped_live_volume,
+	           GetWarpedLivePath<TIndex>(SwitchesToPrefix(data_tikhonov_sobolev_switches), iteration),
+	           TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	VoxelVolume<TSDFVoxel, TIndex>* canonical_volume;
+	LoadVolume(&canonical_volume, snoopy::PartialVolume16Path<TIndex>(),
+	           TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	IndexingEngine<TSDFVoxel,TIndex,MEMORYDEVICE_CPU>::Instance().AllocateUsingOtherVolume(canonical_volume, warped_live_volume);
 
+	VolumeFusionEngineInterface<TSDFVoxel, TIndex>* volume_fusion_engine = VolumeFusionEngineFactory::Build<TSDFVoxel, TIndex>(
+			TMemoryDeviceType);
+	volume_fusion_engine->FuseOneTsdfVolumeIntoAnother(canonical_volume, warped_live_volume, 0);
 
-//#define SAVE_TEST_DATA
-BOOST_AUTO_TEST_CASE(Test_FuseLifeIntoCanonical_CPU_PVA){
-	const int iteration = 4;
-	VoxelVolume<TSDFVoxel, PlainVoxelArray>* warped_live_volume;
-	LoadVolume(&warped_live_volume, "TestData/snoopy_result_fr16-17_warps/data_tikhonov_sobolev_iter_"
-	                                + std::to_string(iteration) + "_warped_live_",
-	           MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
-	VoxelVolume<TSDFVoxel, PlainVoxelArray>* canonical_volume;
-	LoadVolume(&canonical_volume, "TestData/snoopy_result_fr16-17_partial_PVA/snoopy_partial_frame_16_",
-	           MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
-
-	VolumeFusionEngine_CPU_PVA volumeFusionEngine;
-	volumeFusionEngine.FuseOneTsdfVolumeIntoAnother(canonical_volume, warped_live_volume, 0);
-#ifdef SAVE_TEST_DATA
-	canonical_volume->SaveToDisk("../../Tests/TestData/snoopy_result_fr16-17_partial_PVA/fused_canonical_");
-#endif
-
-	VoxelVolume<TSDFVoxel, PlainVoxelArray>* fused_canonical_volume_gt;
-	LoadVolume(&fused_canonical_volume_gt, "TestData/snoopy_result_fr16-17_partial_PVA/fused_canonical_",
-	           MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
+	VoxelVolume<TSDFVoxel, TIndex>* fused_canonical_volume_gt;
+	LoadVolume(&fused_canonical_volume_gt,
+	           GetFusedPath<TIndex>(SwitchesToPrefix(data_tikhonov_sobolev_switches), iteration),
+	           TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 
 	float absoluteTolerance = 1e-7;
 
-	BOOST_REQUIRE(contentAlmostEqual_CPU(fused_canonical_volume_gt, canonical_volume, absoluteTolerance));
+	BOOST_REQUIRE(
+			contentAlmostEqual(fused_canonical_volume_gt, canonical_volume, absoluteTolerance, TMemoryDeviceType));
 }
 
-BOOST_AUTO_TEST_CASE(Test_FuseLifeIntoCanonical_CPU_VBH){
-	VoxelVolume<TSDFVoxel, VoxelBlockHash>* warped_live_volume;
-	const int iteration = 4;
-	LoadVolume(&warped_live_volume, "TestData/snoopy_result_fr16-17_warps/data_tikhonov_sobolev_iter_"
-	                                + std::to_string(iteration) + "_warped_live_",
-	           MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
-	VoxelVolume<TSDFVoxel, VoxelBlockHash>* canonical_volume;
-	LoadVolume(&canonical_volume, "TestData/snoopy_result_fr16-17_partial_VBH/snoopy_partial_frame_16_",
-	           MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
+BOOST_AUTO_TEST_CASE(Test_FuseLifeIntoCanonical_CPU_PVA) {
+	GenericFusionTest<PlainVoxelArray, MEMORYDEVICE_CPU>();
+}
 
-	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance().AllocateFromOtherVolume(canonical_volume, warped_live_volume);
-
-	VolumeFusionEngine_CPU_VBH volume_fusion_engine;
-	volume_fusion_engine.FuseOneTsdfVolumeIntoAnother(canonical_volume, warped_live_volume, 0);
-#ifdef SAVE_TEST_DATA
-	canonical_volume->SaveToDisk("../../Tests/TestData/snoopy_result_fr16-17_partial_VBH/fused_canonical_");
-#endif
-
-	VoxelVolume<TSDFVoxel, VoxelBlockHash>* fused_canonical_volume_gt;
-	LoadVolume(&fused_canonical_volume_gt, "TestData/snoopy_result_fr16-17_partial_VBH/fused_canonical_",
-	           MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
-
-	float absoluteTolerance = 1e-7;
-
-	BOOST_REQUIRE(contentAlmostEqual_CPU(fused_canonical_volume_gt, canonical_volume, absoluteTolerance));
+BOOST_AUTO_TEST_CASE(Test_FuseLifeIntoCanonical_CPU_VBH) {
+	GenericFusionTest<VoxelBlockHash, MEMORYDEVICE_CPU>();
 }
 
 #ifndef COMPILE_WITHOUT_CUDA
-typedef VolumeFusionEngine<TSDFVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA> VolumeFusionEngine_CUDA_PVA;
-typedef VolumeFusionEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA> VolumeFusionEngine_CUDA_VBH;
-BOOST_AUTO_TEST_CASE(Test_FuseLifeIntoCanonical_CUDA_PVA){
-	const int iteration = 4;
-	VoxelVolume<TSDFVoxel, PlainVoxelArray>* warped_live_volume;
-	LoadVolume(&warped_live_volume, "TestData/snoopy_result_fr16-17_warps/data_tikhonov_sobolev_iter_"
-	                                + std::to_string(iteration) + "_warped_live_",
-	           MEMORYDEVICE_CUDA, snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
-	VoxelVolume<TSDFVoxel, PlainVoxelArray>* canonical_volume;
-	LoadVolume(&canonical_volume, "TestData/snoopy_result_fr16-17_partial_PVA/snoopy_partial_frame_16_",
-	           MEMORYDEVICE_CUDA, snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 
-	VolumeFusionEngine_CUDA_PVA volume_fusion_engine;
-	volume_fusion_engine.FuseOneTsdfVolumeIntoAnother(canonical_volume, warped_live_volume, 0);
-
-	VoxelVolume<TSDFVoxel, PlainVoxelArray>* fused_canonical_volume_gt;
-	LoadVolume(&fused_canonical_volume_gt, "TestData/snoopy_result_fr16-17_partial_PVA/fused_canonical_",
-	           MEMORYDEVICE_CUDA, snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
-
-	float absoluteTolerance = 1e-7;
-
-	BOOST_REQUIRE(contentAlmostEqual_CUDA(fused_canonical_volume_gt, canonical_volume, absoluteTolerance));
+BOOST_AUTO_TEST_CASE(Test_FuseLifeIntoCanonical_CUDA_PVA) {
+	GenericFusionTest<PlainVoxelArray, MEMORYDEVICE_CUDA>();
 }
 
-BOOST_AUTO_TEST_CASE(Test_FuseLifeIntoCanonical_CUDA_VBH){
-	VoxelVolume<TSDFVoxel, VoxelBlockHash>* warped_live_volume;
-	const int iteration = 4;
-	LoadVolume(&warped_live_volume, "TestData/snoopy_result_fr16-17_warps/data_tikhonov_sobolev_iter_"
-	                                + std::to_string(iteration) + "_warped_live_",
-	           MEMORYDEVICE_CUDA, snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
-	VoxelVolume<TSDFVoxel, VoxelBlockHash>* canonical_volume;
-	LoadVolume(&canonical_volume, "TestData/snoopy_result_fr16-17_partial_VBH/snoopy_partial_frame_16_",
-	           MEMORYDEVICE_CUDA, snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
-	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance().AllocateFromOtherVolume(canonical_volume, warped_live_volume);
-
-	VolumeFusionEngine_CUDA_VBH volume_fusion_engine;
-	volume_fusion_engine.FuseOneTsdfVolumeIntoAnother(canonical_volume, warped_live_volume, 0);
-
-	VoxelVolume<TSDFVoxel, VoxelBlockHash>* fused_canonical_volume_gt;
-	LoadVolume(&fused_canonical_volume_gt, "TestData/snoopy_result_fr16-17_partial_VBH/fused_canonical_",
-	           MEMORYDEVICE_CUDA, snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
-
-	float absoluteTolerance = 1e-7;
-
-	BOOST_REQUIRE(contentAlmostEqual_CUDA(fused_canonical_volume_gt, canonical_volume, absoluteTolerance));
+BOOST_AUTO_TEST_CASE(Test_FuseLifeIntoCanonical_CUDA_VBH) {
+	GenericFusionTest<PlainVoxelArray, MEMORYDEVICE_CUDA>();
 }
 
 
 template<MemoryDeviceType TMemoryDeviceType>
-void Generic_Fusion_PVA_to_VBH_test(int iteration){
+void GenericFusion_PVA_to_VBH_Test(const int iteration = 4) {
+	SlavchevaSurfaceTracker::Switches data_tikhonov_sobolev_switches(true, false, true, false, true);
 
 	// *** load PVA stuff
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* warped_live_volume_PVA;
-	LoadVolume(&warped_live_volume_PVA, "TestData/snoopy_result_fr16-17_warps/data_tikhonov_sobolev_iter_"
-	                                    + std::to_string(iteration) + "_warped_live_",
+	LoadVolume(&warped_live_volume_PVA, GetWarpedLivePath<PlainVoxelArray>(SwitchesToPrefix(data_tikhonov_sobolev_switches), iteration),
 	           TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* canonical_volume_PVA;
-	LoadVolume(&canonical_volume_PVA, "TestData/snoopy_result_fr16-17_partial_PVA/snoopy_partial_frame_16_",
+	LoadVolume(&canonical_volume_PVA, snoopy::PartialVolume16Path<PlainVoxelArray>(),
 	           TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
-	
+
 	// *** load VBH stuff
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* warped_live_volume_VBH;
-	LoadVolume(&warped_live_volume_VBH, "TestData/snoopy_result_fr16-17_warps/data_tikhonov_sobolev_iter_"
-	                                    + std::to_string(iteration) + "_warped_live_",
+	LoadVolume(&warped_live_volume_VBH, GetWarpedLivePath<VoxelBlockHash>(SwitchesToPrefix(data_tikhonov_sobolev_switches), iteration),
 	           TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* canonical_volume_VBH;
-	LoadVolume(&canonical_volume_VBH, "TestData/snoopy_result_fr16-17_partial_VBH/snoopy_partial_frame_16_",
+	LoadVolume(&canonical_volume_VBH, snoopy::PartialVolume16Path<VoxelBlockHash>(),
 	           TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
-	IndexingEngine<TSDFVoxel, VoxelBlockHash, TMemoryDeviceType>::Instance().AllocateFromOtherVolume(canonical_volume_VBH, warped_live_volume_VBH);
+	IndexingEngine<TSDFVoxel, VoxelBlockHash, TMemoryDeviceType>::Instance().AllocateFromOtherVolume(
+			canonical_volume_VBH, warped_live_volume_VBH);
 
 	VolumeFusionEngineInterface<TSDFVoxel, PlainVoxelArray>* volume_fusion_engine_PVA =
 			VolumeFusionEngineFactory::Build<TSDFVoxel, PlainVoxelArray>(TMemoryDeviceType);
@@ -184,17 +127,19 @@ void Generic_Fusion_PVA_to_VBH_test(int iteration){
 	volume_fusion_engine_PVA->FuseOneTsdfVolumeIntoAnother(canonical_volume_PVA, warped_live_volume_PVA, 0);
 	volume_fusion_engine_VBH->FuseOneTsdfVolumeIntoAnother(canonical_volume_VBH, warped_live_volume_VBH, 0);
 	float absoluteTolerance = 1e-7;
+	//(uncomment for a less rigorous test)
 	//BOOST_REQUIRE( allocatedContentAlmostEqual_Verbose(canonical_volume_PVA, canonical_volume_VBH, absoluteTolerance, TMemoryDeviceType));
-	BOOST_REQUIRE(contentForFlagsAlmostEqual(canonical_volume_PVA, canonical_volume_VBH, VOXEL_NONTRUNCATED, absoluteTolerance, TMemoryDeviceType));
+	BOOST_REQUIRE(contentForFlagsAlmostEqual(canonical_volume_PVA, canonical_volume_VBH, VOXEL_NONTRUNCATED,
+	                                         absoluteTolerance, TMemoryDeviceType));
 }
 
-BOOST_AUTO_TEST_CASE(Test_FuseLifeIntoCanonical_PVA_to_VBH_CPU){
-	Generic_Fusion_PVA_to_VBH_test<MEMORYDEVICE_CPU>(4);
-}
-BOOST_AUTO_TEST_CASE(Test_FuseLifeIntoCanonical_PVA_to_VBH_CUDA){
-	Generic_Fusion_PVA_to_VBH_test<MEMORYDEVICE_CUDA>(4);
+BOOST_AUTO_TEST_CASE(Test_FuseLifeIntoCanonical_PVA_to_VBH_CPU) {
+	GenericFusion_PVA_to_VBH_Test<MEMORYDEVICE_CPU>(4);
 }
 
+BOOST_AUTO_TEST_CASE(Test_FuseLifeIntoCanonical_PVA_to_VBH_CUDA) {
+	GenericFusion_PVA_to_VBH_Test<MEMORYDEVICE_CUDA>(4);
+}
 
 
 #endif

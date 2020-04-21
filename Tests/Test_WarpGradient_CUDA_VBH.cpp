@@ -18,7 +18,6 @@
 #define BOOST_TEST_DYN_LINK
 #endif
 
-
 //stdlib
 #include <vector>
 #include <atomic>
@@ -26,15 +25,17 @@
 //boost
 #include <boost/test/unit_test.hpp>
 
-//local
-#include "TestUtilities.h"
-#include "Test_WarpGradient_Common.h"
+//ITMLib
 #include "../ITMLib/Utils/Configuration.h"
 #include "../ITMLib/Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
 #include "../ITMLib/SurfaceTrackers/Interface/SurfaceTrackerInterface.h"
 #include "../ITMLib/SurfaceTrackers/Interface/SurfaceTracker.h"
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CUDA.h"
 #include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
+
+//test_utilities
+#include "TestUtilities/TestUtilities.h"
+#include "Test_WarpGradient_Common.h"
 
 
 using namespace ITMLib;

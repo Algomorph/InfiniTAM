@@ -16,6 +16,8 @@
 
 //ITMLib
 #include "../ITMLib/SurfaceTrackers/Interface/SurfaceTracker.h"
+#include "../ITMLib/Engines/VolumeFusion/VolumeFusionEngine.h"
+#include "../ITMLib/Engines/VolumeFusion/VolumeFusionEngineFactory.h"
 #include "../ITMLib/Engines/EditAndCopy/EditAndCopyEngineFactory.h"
 //(CPU)
 #include "../ITMLib/Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
@@ -29,12 +31,13 @@
 #endif
 
 //test_utilities
-#include "TestUtilities.h"
-#include "SnoopyTestUtilities.h"
+#include "TestUtilities/TestUtilities.h"
+#include "TestUtilities/SnoopyTestUtilities.h"
+#include "TestUtilities/WarpAdvancedTestingUtilities.h"
 
 //local
-#include <GenerateDerivedTestData_Config.h>
 #include <log4cplus/loggingmacros.h>
+#include <log4cplus/consoleappender.h>
 
 using namespace ITMLib;
 using namespace test_utilities;
@@ -232,13 +235,53 @@ void GenerateWarpGradientTestData() {
 	delete live_volume;
 }
 
+void GenerateWarpGradient_PVA_to_VBH_TestData(){
+	LOG4CPLUS_DEBUG(log4cplus::Logger::getRoot(),
+	                "Generating multi-iteration warp field data from snoopy masked partial volumes 16 & 17 (PVA & VBH)... ");
+	SlavchevaSurfaceTracker::Switches switches_data_only(true, false, false, false, false);
+	GenericWarpTest<MEMORYDEVICE_CPU>(switches_data_only, 10, SAVE_SUCCESSIVE_ITERATIONS);
+	SlavchevaSurfaceTracker::Switches switches_data_and_tikhonov(true, false, true, false, false);
+	GenericWarpTest<MEMORYDEVICE_CPU>(switches_data_and_tikhonov, 5, SAVE_SUCCESSIVE_ITERATIONS);
+	SlavchevaSurfaceTracker::Switches switches_data_and_tikhonov_and_sobolev_smoothing(true, false, true, false, true);
+	GenericWarpTest<MEMORYDEVICE_CPU>(switches_data_and_tikhonov_and_sobolev_smoothing, 5, SAVE_SUCCESSIVE_ITERATIONS);
+	GenericWarpTest<MEMORYDEVICE_CPU>(SlavchevaSurfaceTracker::Switches(true, false, true, false, true),
+	                                  5,GenericWarpTestMode::SAVE_FINAL_ITERATION_AND_FUSION);
+}
+
+template<typename TIndex>
+void GenerateFusedVolumeTestData(int iteration = 4){
+	VoxelVolume<TSDFVoxel, TIndex>* warped_live_volume;
+	SlavchevaSurfaceTracker::Switches data_tikhonov_sobolev_switches(true, false, true, false, true);
+	LoadVolume(&warped_live_volume, GetWarpedLivePath<TIndex>(SwitchesToPrefix(data_tikhonov_sobolev_switches), iteration),
+	           MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	VoxelVolume<TSDFVoxel, TIndex>* canonical_volume;
+	LoadVolume(&canonical_volume, snoopy::PartialVolume16Path<TIndex>(),
+	           MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	IndexingEngine<TSDFVoxel,TIndex,MEMORYDEVICE_CPU>::Instance().AllocateUsingOtherVolume(canonical_volume, warped_live_volume);
+
+
+	VolumeFusionEngineInterface<TSDFVoxel, TIndex>* volume_fusion_engine = VolumeFusionEngineFactory::Build<TSDFVoxel, TIndex>(MEMORYDEVICE_CPU);
+	volume_fusion_engine->FuseOneTsdfVolumeIntoAnother(canonical_volume, warped_live_volume, 0);
+
+	canonical_volume->SaveToDisk(GENERATED_TEST_DATA_PREFIX + GetFusedPath<TIndex>(SwitchesToPrefix(data_tikhonov_sobolev_switches), iteration));
+
+	delete volume_fusion_engine;
+	delete warped_live_volume;
+	delete canonical_volume;
+}
+
 
 int main(int argc, char* argv[]) {
 	log4cplus::initialize();
+	log4cplus::SharedAppenderPtr console_appender(new log4cplus::ConsoleAppender(false, true));
+	log4cplus::Logger::getRoot().addAppender(console_appender);
 	log4cplus::Logger::getRoot().setLogLevel(log4cplus::DEBUG_LOG_LEVEL);
-	ConstructSnoopyUnmaskedVolumes00();
-	ConstructSnoopyMaskedVolumes16and17();
-	GenerateWarpGradientTestData<PlainVoxelArray, MEMORYDEVICE_CPU>();
-	GenerateWarpGradientTestData<VoxelBlockHash, MEMORYDEVICE_CPU>();
+//	ConstructSnoopyUnmaskedVolumes00();
+//	ConstructSnoopyMaskedVolumes16and17();
+//	GenerateWarpGradientTestData<PlainVoxelArray, MEMORYDEVICE_CPU>();
+//	GenerateWarpGradientTestData<VoxelBlockHash, MEMORYDEVICE_CPU>();
+//	GenerateWarpGradient_PVA_to_VBH_TestData();
+	GenerateFusedVolumeTestData<PlainVoxelArray>();
+	GenerateFusedVolumeTestData<VoxelBlockHash>();
 	return 0;
 }

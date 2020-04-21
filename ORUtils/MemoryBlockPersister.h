@@ -10,6 +10,7 @@
 
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/filter/zlib.hpp>
+#include <sstream>
 
 #else
 #error compiling without BOOST FLAG
@@ -27,8 +28,8 @@ class IStreamWrapper {
 public:
 	IStreamWrapper() : compression_enabled(false) {}
 
-	IStreamWrapper(const std::string& filename, bool use_compression = false)
-			: file(filename.c_str(), std::ios::binary), compression_enabled(use_compression) {
+	IStreamWrapper(const std::string& path, bool use_compression = false)
+			: file(path.c_str(), std::ios::binary), compression_enabled(use_compression) {
 		if (file) {
 #ifdef WITH_BOOST
 			if (use_compression) {
@@ -46,7 +47,9 @@ public:
 			final_stream = &file;
 #endif
 		} else {
-			DIEWITHEXCEPTION_REPORTLOCATION("Could not open file.");
+			std::stringstream ss;
+			ss << "Could not open file \"" << path << "\" for reading.\n[" __FILE__ ":" TOSTRING(__LINE__) "]";
+			throw std::runtime_error(ss.str());
 		}
 	}
 
@@ -71,8 +74,8 @@ class OStreamWrapper {
 public:
 	OStreamWrapper() : compression_enabled(false) {};
 
-	OStreamWrapper(const std::string& filename, bool use_compression = false)
-			: file(filename.c_str(), std::ios::binary), compression_enabled(use_compression) {
+	OStreamWrapper(const std::string& path, bool use_compression = false)
+			: file(path.c_str(), std::ios::binary), compression_enabled(use_compression) {
 
 		if (file) {
 #ifdef WITH_BOOST
@@ -91,7 +94,9 @@ public:
 			final_stream = &file;
 #endif
 		} else {
-			DIEWITHEXCEPTION_REPORTLOCATION("Could not open file.");
+			std::stringstream ss;
+			ss << "Could not open file \"" << path << "\" for writing.\n[" __FILE__ ":" TOSTRING(__LINE__) "]";
+			throw std::runtime_error(ss.str());
 		}
 	}
 
