@@ -100,8 +100,11 @@
             0
         ],
         "record_reconstruction_video": false,
+        "log_to_disk": false,
+        "log_to_stdout": true,
         "log_benchmarks": false,
-        "log_volume_statistics": false
+        "log_volume_statistics": false,
+        "record_volume_memory_usage": false
     },
     "paths": {
         "output_path": "output",

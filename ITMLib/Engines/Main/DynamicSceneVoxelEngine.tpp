@@ -45,7 +45,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(const RG
 	TelemetryRecorder<TVoxel, TWarp, TIndex>::Instance().SetScenes(canonical_volume, live_volumes[0], warp_field);
 
 	low_level_engine = LowLevelEngineFactory::MakeLowLevelEngine(deviceType);
-	view_builder = ViewBuilderFactory::MakeViewBuilder(calibration_info, deviceType);
+	view_builder = ViewBuilderFactory::Build(calibration_info, deviceType);
 	visualization_engine = VisualizationEngineFactory::MakeVisualizationEngine<TVoxel, TIndex>(deviceType);
 
 	meshing_engine = nullptr;

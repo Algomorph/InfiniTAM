@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(testPVASceneSlice_CPU) {
 	volume_CPU.Reset();
 
 	const int expected_non_truncated_voxel_count = 58368;
-	volume_CPU.LoadFromDisk("TestData/snoopy_result_fr16-17_full/snoopy_full_frame_16_");
+	volume_CPU.LoadFromDisk(snoopy::FullVolume16Path<PlainVoxelArray>());
 
 	BOOST_REQUIRE_EQUAL(Analytics_CPU_PVA_Voxel::Instance().CountNonTruncatedVoxels(&volume_CPU),
 	                    expected_non_truncated_voxel_count);
@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE(testPVASceneSlice_CPU) {
 			MEMORYDEVICE_CPU, {sizeSlice, offsetSlice});
 	volume_slice_from_disk_CPU.Reset();
 
-	volume_slice_from_disk_CPU.LoadFromDisk("TestData/snoopy_result_fr16-17_partial_PVA/snoopy_partial_frame_16_");
+	volume_slice_from_disk_CPU.LoadFromDisk(snoopy::PartialVolume16Path<PlainVoxelArray>());
 
 	BOOST_REQUIRE(contentAlmostEqual_CPU(&volume_slice_different_dimensions_CPU,
 	                                     &volume_slice_from_disk_CPU, tolerance));

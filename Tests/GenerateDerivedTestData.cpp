@@ -17,8 +17,11 @@
 //ITMLib
 #include "../ITMLib/SurfaceTrackers/Interface/SurfaceTracker.h"
 #include "../ITMLib/Engines/VolumeFusion/VolumeFusionEngine.h"
+#include "../ITMLib/Engines/Indexing/IndexingEngineFactory.h"
 #include "../ITMLib/Engines/VolumeFusion/VolumeFusionEngineFactory.h"
+#include "../ITMLib/Engines/Warping/WarpingEngineFactory.h"
 #include "../ITMLib/Engines/EditAndCopy/EditAndCopyEngineFactory.h"
+#include "../ITMLib/Utils/Configuration.h"
 //(CPU)
 #include "../ITMLib/Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 #include "../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
@@ -34,6 +37,9 @@
 #include "TestUtilities/TestUtilities.h"
 #include "TestUtilities/SnoopyTestUtilities.h"
 #include "TestUtilities/WarpAdvancedTestingUtilities.h"
+#include "../ORUtils/FileUtils.h"
+#include "../ITMLib/Engines/ViewBuilding/ViewBuilderFactory.h"
+#include "../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
 
 //local
 #include <log4cplus/loggingmacros.h>
@@ -150,11 +156,46 @@ void ConstructSnoopyMaskedVolumes16and17() {
 	delete volume_VBH_17;
 }
 
+void ConstructStripesTestVolumes(){
+	// region ================================= CONSTRUCT VIEW =========================================================
+
+	RGBDCalib calibration_data;
+	readRGBDCalib(snoopy::SnoopyCalibrationPath().c_str(), calibration_data);
+
+	auto view_builder = ViewBuilderFactory::Build(calibration_data, MEMORYDEVICE_CPU);
+	Vector2i image_size(640, 480);
+	View* view = nullptr;
+
+	ITMUChar4Image rgb(true, false);
+	ITMShortImage depth(true, false);
+	ReadImageFromFile(rgb, "TestData/frames/stripes_color.png");
+	ReadImageFromFile(depth, "TestData/frames/stripes_depth.png");
+
+	view_builder->UpdateView(&view, &rgb, &depth, false, false, false, true);
+
+	// endregion =======================================================================================================
+
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume4(MEMORYDEVICE_CPU, {0x800, 0x20000});
+	volume4.Reset();
+	IndexingEngineInterface<TSDFVoxel, VoxelBlockHash>& indexer_VBH
+			= IndexingEngineFactory::Get<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CPU);
+	CameraTrackingState tracking_state(image_size, MEMORYDEVICE_CPU);
+	indexer_VBH.AllocateNearAndBetweenTwoSurfaces(&volume4, view, &tracking_state);
+	auto depth_fusion_engine_VBH = DepthFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, VoxelBlockHash>(MEMORYDEVICE_CPU);
+	depth_fusion_engine_VBH->IntegrateDepthImageIntoTsdfVolume(&volume4, view, &tracking_state);
+	std::string path = "TestData/volumes/VBH/stripes.dat";
+	volume4.SaveToDisk(path);
+
+	delete depth_fusion_engine_VBH;
+	delete view;
+	delete view_builder;
+}
+
 template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void GenerateWarpGradientTestData() {
 	LOG4CPLUS_DEBUG(log4cplus::Logger::getRoot(),
 	                "Generating warp field data from snoopy masked partial volumes 16 & 17 "
-	                << IndexString<TIndex>() << "...");
+			                << IndexString<TIndex>() << "...");
 
 	std::string output_directory = GENERATED_TEST_DATA_PREFIX "TestData/volumes/" + IndexString<TIndex>() + "/";
 
@@ -235,7 +276,7 @@ void GenerateWarpGradientTestData() {
 	delete live_volume;
 }
 
-void GenerateWarpGradient_PVA_to_VBH_TestData(){
+void GenerateWarpGradient_PVA_to_VBH_TestData() {
 	LOG4CPLUS_DEBUG(log4cplus::Logger::getRoot(),
 	                "Generating multi-iteration warp field data from snoopy masked partial volumes 16 & 17 (PVA & VBH)... ");
 	SlavchevaSurfaceTracker::Switches switches_data_only(true, false, false, false, false);
@@ -245,31 +286,149 @@ void GenerateWarpGradient_PVA_to_VBH_TestData(){
 	SlavchevaSurfaceTracker::Switches switches_data_and_tikhonov_and_sobolev_smoothing(true, false, true, false, true);
 	GenericWarpTest<MEMORYDEVICE_CPU>(switches_data_and_tikhonov_and_sobolev_smoothing, 5, SAVE_SUCCESSIVE_ITERATIONS);
 	GenericWarpTest<MEMORYDEVICE_CPU>(SlavchevaSurfaceTracker::Switches(true, false, true, false, true),
-	                                  5,GenericWarpTestMode::SAVE_FINAL_ITERATION_AND_FUSION);
+	                                  5, GenericWarpTestMode::SAVE_FINAL_ITERATION_AND_FUSION);
 }
 
 template<typename TIndex>
-void GenerateFusedVolumeTestData(int iteration = 4){
+void GenerateFusedVolumeTestData(int iteration = 4) {
+	LOG4CPLUS_DEBUG(log4cplus::Logger::getRoot(),
+	                "Generating fused volume data from snoopy masked partial volume 16 & 17 warps ("
+			                << IndexString<TIndex>() << ") ... ");
 	VoxelVolume<TSDFVoxel, TIndex>* warped_live_volume;
 	SlavchevaSurfaceTracker::Switches data_tikhonov_sobolev_switches(true, false, true, false, true);
-	LoadVolume(&warped_live_volume, GetWarpedLivePath<TIndex>(SwitchesToPrefix(data_tikhonov_sobolev_switches), iteration),
+	LoadVolume(&warped_live_volume,
+	           GENERATED_TEST_DATA_PREFIX +
+	           GetWarpedLivePath<TIndex>(SwitchesToPrefix(data_tikhonov_sobolev_switches), iteration),
 	           MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 	VoxelVolume<TSDFVoxel, TIndex>* canonical_volume;
 	LoadVolume(&canonical_volume, snoopy::PartialVolume16Path<TIndex>(),
 	           MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
-	IndexingEngine<TSDFVoxel,TIndex,MEMORYDEVICE_CPU>::Instance().AllocateUsingOtherVolume(canonical_volume, warped_live_volume);
+	IndexingEngine<TSDFVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().AllocateUsingOtherVolume(canonical_volume,
+	                                                                                         warped_live_volume);
 
 
-	VolumeFusionEngineInterface<TSDFVoxel, TIndex>* volume_fusion_engine = VolumeFusionEngineFactory::Build<TSDFVoxel, TIndex>(MEMORYDEVICE_CPU);
+	VolumeFusionEngineInterface<TSDFVoxel, TIndex>* volume_fusion_engine =
+			VolumeFusionEngineFactory::Build<TSDFVoxel, TIndex>(MEMORYDEVICE_CPU);
 	volume_fusion_engine->FuseOneTsdfVolumeIntoAnother(canonical_volume, warped_live_volume, 0);
 
-	canonical_volume->SaveToDisk(GENERATED_TEST_DATA_PREFIX + GetFusedPath<TIndex>(SwitchesToPrefix(data_tikhonov_sobolev_switches), iteration));
+	canonical_volume->SaveToDisk(GENERATED_TEST_DATA_PREFIX +
+	                             GetFusedPath<TIndex>(SwitchesToPrefix(data_tikhonov_sobolev_switches), iteration));
 
 	delete volume_fusion_engine;
 	delete warped_live_volume;
 	delete canonical_volume;
 }
 
+template<typename TIndex>
+void GenerateWarpedVolumeTestData() {
+	LOG4CPLUS_DEBUG(log4cplus::Logger::getRoot(),
+	                "Generating warped volume data from snoopy masked partial volume 16 & 17 warps ("
+			                << IndexString<TIndex>() << ") ... ");
+	VoxelVolume<WarpVoxel, TIndex>* warps;
+	LoadVolume(&warps,
+	           GENERATED_TEST_DATA_PREFIX "TestData/volumes/" + IndexString<TIndex>() + "/warp_field_0_complete.dat",
+	           MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	VoxelVolume<TSDFVoxel, TIndex>* live_volume;
+	LoadVolume(&live_volume, snoopy::PartialVolume17Path<TIndex>(),
+	           MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	auto warped_live_volume = new VoxelVolume<TSDFVoxel, TIndex>(MEMORYDEVICE_CPU,
+	                                                             snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	warped_live_volume->Reset();
+
+	auto warping_engine =
+			WarpingEngineFactory::Build<TSDFVoxel, WarpVoxel, TIndex>(MEMORYDEVICE_CPU);
+
+	IndexingEngine<TSDFVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().AllocateFromOtherVolume(warped_live_volume,
+	                                                                                        live_volume);
+	warping_engine->WarpVolume_WarpUpdates(warps, live_volume, warped_live_volume);
+
+	warped_live_volume->SaveToDisk(
+			GENERATED_TEST_DATA_PREFIX "TestData/volumes/" + IndexString<TIndex>() + "/warped_live.dat");
+
+	delete warping_engine;
+	delete warps;
+	delete live_volume;
+	delete warped_live_volume;
+}
+
+
+configuration::Configuration GenerateDefaultSnoopyConfiguration() {
+	using namespace configuration;
+	configuration::Configuration default_snoopy_configuration(
+			VoxelVolumeParameters(0.004, 0.2, 3.0, 0.04, 100, false, 1.0f),
+			SurfelVolumeParameters(),
+			SpecificVolumeParameters(
+					ArrayVolumeParameters(),
+					HashVolumeParameters(
+							VoxelBlockHash::VoxelBlockHashParameters(0x40000, 0x20000),
+							VoxelBlockHash::VoxelBlockHashParameters(0x20000, 0x20000),
+							VoxelBlockHash::VoxelBlockHashParameters(0x20000, 0x20000)
+					)
+			),
+			SlavchevaSurfaceTracker::Parameters(
+					0.2f,
+					0.1f,
+					2.0f,
+					0.2f,
+					0.2f,
+					1e-5f),
+			SlavchevaSurfaceTracker::Switches(true, false, true, false, true),
+			TelemetrySettings(Vector3i(0),
+			                  true,
+			                  true,
+			                  true,
+			                  true,
+			                  false,
+			                  false),
+			Paths("<CONFIGURATION_DIRECTORY>",
+			      "<CONFIGURATION_DIRECTORY>/snoopy_calib.txt",
+			      "", "", "",
+			      "<CONFIGURATION_DIRECTORY>/frames/color_%06i.png",
+			      "<CONFIGURATION_DIRECTORY>/frames/depth_%06i.png",
+			      "<CONFIGURATION_DIRECTORY>/frames/omask_%06i.png",
+			      ""),
+			AutomaticRunSettings(50, 16, false, false, false),
+			NonRigidTrackingParameters(
+					ITMLib::TRACKER_SLAVCHEVA_OPTIMIZED,
+					300,
+					1e-06,
+					0.5f),
+			false,
+			true,
+			MEMORYDEVICE_CUDA,
+			false,
+			false,
+			false,
+			true,
+			configuration::FAILUREMODE_IGNORE,
+			configuration::SWAPPINGMODE_DISABLED,
+			configuration::LIBMODE_DYNAMIC,
+			configuration::INDEX_HASH,
+			configuration::VERBOSITY_WARNING,
+			configuration::TrackerConfigurationStringPresets::default_intensity_depth_extended_tracker_configuration
+	);
+	return default_snoopy_configuration;
+}
+
+void GenerateConfigurationTestData() {
+	using namespace configuration;
+	configuration::Configuration changed_up_configuration = GenerateChangedUpConfiguration();
+	LOG4CPLUS_DEBUG(log4cplus::Logger::getRoot(),
+	                "Generating configuration test data ... ");
+	std::cout << "Saving test data..." << std::endl;
+	configuration::Configuration default_snoopy_configuration = GenerateDefaultSnoopyConfiguration();
+	configuration::save_configuration_to_json_file(GENERATED_TEST_DATA_PREFIX
+	"../Files/infinitam_snoopy_config.json", default_snoopy_configuration);
+	configuration::Configuration default_configuration;
+	default_configuration.device_type = MEMORYDEVICE_CPU;
+	configuration::save_configuration_to_json_file(GENERATED_TEST_DATA_PREFIX
+	"TestData/configuration/default_config_cpu.json", default_configuration);
+	default_configuration.device_type = MEMORYDEVICE_CUDA;
+	configuration::save_configuration_to_json_file(GENERATED_TEST_DATA_PREFIX
+	"TestData/configuration/default_config_cuda.json", default_configuration);
+	configuration::save_configuration_to_json_file(GENERATED_TEST_DATA_PREFIX
+	"TestData/configuration/config1.json", changed_up_configuration);
+}
 
 int main(int argc, char* argv[]) {
 	log4cplus::initialize();
@@ -278,10 +437,14 @@ int main(int argc, char* argv[]) {
 	log4cplus::Logger::getRoot().setLogLevel(log4cplus::DEBUG_LOG_LEVEL);
 //	ConstructSnoopyUnmaskedVolumes00();
 //	ConstructSnoopyMaskedVolumes16and17();
+
 //	GenerateWarpGradientTestData<PlainVoxelArray, MEMORYDEVICE_CPU>();
 //	GenerateWarpGradientTestData<VoxelBlockHash, MEMORYDEVICE_CPU>();
 //	GenerateWarpGradient_PVA_to_VBH_TestData();
-	GenerateFusedVolumeTestData<PlainVoxelArray>();
-	GenerateFusedVolumeTestData<VoxelBlockHash>();
+//	GenerateWarpedVolumeTestData<PlainVoxelArray>();
+//	GenerateWarpedVolumeTestData<VoxelBlockHash>();
+//	GenerateFusedVolumeTestData<PlainVoxelArray>();
+//	GenerateFusedVolumeTestData<VoxelBlockHash>();
+//	GenerateConfigurationTestData();
 	return 0;
 }

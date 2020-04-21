@@ -26,7 +26,7 @@ BasicSurfelEngine<TSurfel>::BasicSurfelEngine(const RGBDCalib& calib, Vector2i i
 	const MemoryDeviceType deviceType = settings.device_type;
 
 	lowLevelEngine = LowLevelEngineFactory::MakeLowLevelEngine(deviceType);
-	viewBuilder = ViewBuilderFactory::MakeViewBuilder(calib, deviceType);
+	viewBuilder = ViewBuilderFactory::Build(calib, deviceType);
 	surfelVisualizationEngine = SurfelVisualizationEngineFactory::Build<TSurfel>(deviceType);
 
 	denseSurfelMapper = new DenseSurfelMapper<TSurfel>(imgSize_d, deviceType);

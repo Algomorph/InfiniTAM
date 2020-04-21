@@ -48,7 +48,7 @@ using namespace ITMLib;
 template<MemoryDeviceType TMemoryDeviceType>
 struct TestData {
 	TestData() {
-		view_builder = ViewBuilderFactory::MakeViewBuilder(calibration_path, TMemoryDeviceType);
+		view_builder = ViewBuilderFactory::Build(calibration_path, TMemoryDeviceType);
 		ITMUChar4Image rgb(true, false);
 		ITMShortImage depth(true, false);
 		ReadImageFromFile(rgb, square_1_color_path.c_str());

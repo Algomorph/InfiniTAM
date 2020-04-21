@@ -46,35 +46,35 @@ BOOST_AUTO_TEST_CASE(testSaveSceneCompact_CUDA) {
 	Vector3i volumeSize(40, 68, 20);
 	Vector3i volumeOffset(-20, 0, 0);
 
-	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_saved_to_disk(
+	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_PVA_saved_to_disk(
 			MEMORYDEVICE_CUDA, {volumeSize, volumeOffset});
 
-	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_loaded_from_disk(
+	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_PVA_loaded_from_disk(
 			MEMORYDEVICE_CUDA, {volumeSize, volumeOffset});
 
-	GenerateSimpleSurfaceTestVolume<MEMORYDEVICE_CUDA>(&volume_saved_to_disk);
-	std::string path = "TestData/testSaveSceneCompact_CUDA_PVA_volume1.dat";
-	volume_saved_to_disk.SaveToDisk(path);
-	ManipulationEngine_CUDA_PVA_Voxel::Inst().ResetVolume(&volume_loaded_from_disk);
-	volume_loaded_from_disk.LoadFromDisk(path);
+	GenerateSimpleSurfaceTestVolume<MEMORYDEVICE_CUDA>(&volume_PVA_saved_to_disk);
+	std::string path = "TestData/volumes/PVA/generated_test_volume_CUDA.dat";
+	volume_PVA_saved_to_disk.SaveToDisk(path);
+	volume_PVA_loaded_from_disk.Reset();
+	volume_PVA_loaded_from_disk.LoadFromDisk(path);
 
 	float tolerance = 1e-8;
-	BOOST_REQUIRE_EQUAL(Analytics_CUDA_PVA_Voxel::Instance().CountNonTruncatedVoxels(&volume_loaded_from_disk), 19456);
-	BOOST_REQUIRE(contentAlmostEqual_CUDA(&volume_saved_to_disk, &volume_loaded_from_disk, tolerance));
+	BOOST_REQUIRE_EQUAL(Analytics_CUDA_PVA_Voxel::Instance().CountNonTruncatedVoxels(&volume_PVA_loaded_from_disk), 19456);
+	BOOST_REQUIRE(contentAlmostEqual_CUDA(&volume_PVA_saved_to_disk, &volume_PVA_loaded_from_disk, tolerance));
 
-	VoxelVolume<TSDFVoxel, VoxelBlockHash> scene3(
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_saved_to_disk(
 			MEMORYDEVICE_CUDA, {0x800, 0x20000});
 
-	VoxelVolume<TSDFVoxel, VoxelBlockHash> scene4(
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_loaded_from_disk(
 			MEMORYDEVICE_CUDA, {0x800, 0x20000});
 
-	GenerateSimpleSurfaceTestVolume<MEMORYDEVICE_CUDA>(&scene3);
-	path = "TestData/test_VBH_";
-	scene3.SaveToDisk(path);
-	ManipulationEngine_CUDA_VBH_Voxel::Inst().ResetVolume(&scene4);
-	scene4.LoadFromDisk(path);
+	GenerateSimpleSurfaceTestVolume<MEMORYDEVICE_CUDA>(&volume_VBH_saved_to_disk);
+	path = "TestData/volumes/VBH/generated_test_volume_CUDA.dat";
+	volume_VBH_saved_to_disk.SaveToDisk(path);
+	volume_VBH_loaded_from_disk.Reset();
+	volume_VBH_loaded_from_disk.LoadFromDisk(path);
 
-	BOOST_REQUIRE_EQUAL(Analytics_CUDA_VBH_Voxel::Instance().CountNonTruncatedVoxels(&scene4), 19456);
-	BOOST_REQUIRE(contentAlmostEqual_CUDA(&scene3, &scene4, tolerance));
-	BOOST_REQUIRE(contentAlmostEqual_CUDA(&volume_saved_to_disk, &scene4, tolerance));
+	BOOST_REQUIRE_EQUAL(Analytics_CUDA_VBH_Voxel::Instance().CountNonTruncatedVoxels(&volume_VBH_loaded_from_disk), 19456);
+	BOOST_REQUIRE(contentAlmostEqual_CUDA(&volume_VBH_saved_to_disk, &volume_VBH_loaded_from_disk, tolerance));
+	BOOST_REQUIRE(contentAlmostEqual_CUDA(&volume_PVA_saved_to_disk, &volume_VBH_loaded_from_disk, tolerance));
 }

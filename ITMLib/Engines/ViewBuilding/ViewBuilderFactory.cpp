@@ -3,64 +3,62 @@
 #include "ViewBuilderFactory.h"
 
 #include "CPU/ViewBuilder_CPU.h"
+
 #ifndef COMPILE_WITHOUT_CUDA
+
 #include "CUDA/ViewBuilder_CUDA.h"
+
 #endif
 
-namespace ITMLib
-{
+namespace ITMLib {
 
 //#################### PUBLIC STATIC MEMBER FUNCTIONS ####################
 
-ViewBuilder *ViewBuilderFactory::MakeViewBuilder(const RGBDCalib& calib, MemoryDeviceType deviceType)
-{
-  ViewBuilder *viewBuilder = nullptr;
+ViewBuilder* ViewBuilderFactory::Build(const RGBDCalib& calib, MemoryDeviceType device_type) {
+	ViewBuilder* view_builder = nullptr;
 
-  switch(deviceType)
-  {
-    case MEMORYDEVICE_CPU:
-      viewBuilder = new ViewBuilder_CPU(calib);
-      break;
-    case MEMORYDEVICE_CUDA:
-#ifndef COMPILE_WITHOUT_CUDA
-      viewBuilder = new ViewBuilder_CUDA(calib);
-#endif
-      break;
-    case MEMORYDEVICE_METAL:
-#ifdef COMPILE_WITH_METAL
-      viewBuilder = new ViewBuilder_CPU(calib);
-#endif
-      break;
-  }
-
-  return viewBuilder;
-}
-
-ViewBuilder *ViewBuilderFactory::MakeViewBuilder(const std::string& calibration_path, MemoryDeviceType deviceType)
-{
-	ViewBuilder *viewBuilder = nullptr;
-
-	RGBDCalib calibrationData;
-	readRGBDCalib(calibration_path.c_str(), calibrationData);
-
-	switch(deviceType)
-	{
+	switch (device_type) {
 		case MEMORYDEVICE_CPU:
-			viewBuilder = new ViewBuilder_CPU(calibrationData);
+			view_builder = new ViewBuilder_CPU(calib);
 			break;
 		case MEMORYDEVICE_CUDA:
 #ifndef COMPILE_WITHOUT_CUDA
-			viewBuilder = new ViewBuilder_CUDA(calibrationData);
+			view_builder = new ViewBuilder_CUDA(calib);
 #endif
 			break;
 		case MEMORYDEVICE_METAL:
 #ifdef COMPILE_WITH_METAL
-			viewBuilder = new ViewBuilder_CPU(calibrationData);
+			view_builder = new ViewBuilder_CPU(calib);
 #endif
 			break;
 	}
 
-	return viewBuilder;
+	return view_builder;
 }
 
+ViewBuilder* ViewBuilderFactory::Build(const std::string& calibration_path, MemoryDeviceType device_type) {
+	ViewBuilder* view_builder = nullptr;
+
+	RGBDCalib calibrationData;
+	readRGBDCalib(calibration_path.c_str(), calibrationData);
+
+	switch (device_type) {
+		case MEMORYDEVICE_CPU:
+			view_builder = new ViewBuilder_CPU(calibrationData);
+			break;
+		case MEMORYDEVICE_CUDA:
+#ifndef COMPILE_WITHOUT_CUDA
+			view_builder = new ViewBuilder_CUDA(calibrationData);
+#endif
+			break;
+		case MEMORYDEVICE_METAL:
+#ifdef COMPILE_WITH_METAL
+			view_builder = new ViewBuilder_CPU(calibrationData);
+#endif
+			break;
+	}
+
+	return view_builder;
 }
+
+} // namespace ITMLib

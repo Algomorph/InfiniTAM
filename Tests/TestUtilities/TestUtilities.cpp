@@ -142,13 +142,13 @@ UpdateView(View** view, const std::string& depth_path, const std::string& color_
 	switch (memoryDevice) {
 		case MEMORYDEVICE_CPU:
 			if (viewBuilder_CPU == nullptr)
-				viewBuilder_CPU = ViewBuilderFactory::MakeViewBuilder(calibration_path, memoryDevice);
+				viewBuilder_CPU = ViewBuilderFactory::Build(calibration_path, memoryDevice);
 			viewBuilderToUse = viewBuilder_CPU;
 			break;
 		case MEMORYDEVICE_CUDA:
 #ifndef COMPILE_WITHOUT_CUDA
 			if (viewBuilder_CUDA == nullptr)
-				viewBuilder_CUDA = ViewBuilderFactory::MakeViewBuilder(calibration_path, memoryDevice);
+				viewBuilder_CUDA = ViewBuilderFactory::Build(calibration_path, memoryDevice);
 			viewBuilderToUse = viewBuilder_CUDA;
 #else
 			DIEWITHEXCEPTION_REPORTLOCATION("Attmpted to update CUDA view while build without CUDA support, aborting.");
@@ -177,13 +177,13 @@ UpdateView(View** view, const std::string& depth_path, const std::string& color_
 	switch (memoryDevice) {
 		case MEMORYDEVICE_CPU:
 			if (viewBuilder_CPU == nullptr)
-				viewBuilder_CPU = ViewBuilderFactory::MakeViewBuilder(calibration_path, memoryDevice);
+				viewBuilder_CPU = ViewBuilderFactory::Build(calibration_path, memoryDevice);
 			viewBuilderToUse = viewBuilder_CPU;
 			break;
 		case MEMORYDEVICE_CUDA:
 #ifndef COMPILE_WITHOUT_CUDA
 			if (viewBuilder_CUDA == nullptr)
-				viewBuilder_CUDA = ViewBuilderFactory::MakeViewBuilder(calibration_path, memoryDevice);
+				viewBuilder_CUDA = ViewBuilderFactory::Build(calibration_path, memoryDevice);
 			viewBuilderToUse = viewBuilder_CUDA;
 #else
 			DIEWITHEXCEPTION_REPORTLOCATION("Attmpted to update CUDA view while build without CUDA support, aborting.");
@@ -350,4 +350,48 @@ void initializeVolume<WarpVoxel, PlainVoxelArray>(VoxelVolume<WarpVoxel, PlainVo
                                                   PlainVoxelArray::InitializationParameters initializationParameters,
                                                   MemoryDeviceType memoryDevice,
                                                   configuration::SwappingMode swappingMode);
+
+configuration::Configuration GenerateChangedUpConfiguration(){
+	using namespace configuration;
+	configuration::Configuration changed_up_configuration(
+			VoxelVolumeParameters(0.005, 0.12, 4.12, 0.05, 200, true, 1.2f),
+			SurfelVolumeParameters(0.4f, 0.5f, static_cast<float>(22 * M_PI / 180), 0.008f, 0.0003f, 3.4f, 26.0f, 5,
+			                       1.1f, 4.5f, 21, 300, false, false),
+			SpecificVolumeParameters(
+					ArrayVolumeParameters(),
+					HashVolumeParameters(
+							VoxelBlockHash::VoxelBlockHashParameters(0x40000, 0x20000),
+							VoxelBlockHash::VoxelBlockHashParameters(0x20000, 0x20000),
+							VoxelBlockHash::VoxelBlockHashParameters(0x20000, 0x20000)
+					)
+			),
+			SlavchevaSurfaceTracker::Parameters(0.11f, 0.09f, 2.0f, 0.3f, 0.1f, 1e-6f),
+			SlavchevaSurfaceTracker::Switches(false, true, false, true, false),
+			TelemetrySettings(Vector3i(20, 23, 0), true, true, false, true, true, true),
+			Paths("TestData/output1",
+			      "TestData/calib_file1.txt",
+			      "", "", "",
+			      "TestData/frame_color_%%06i.png",
+			      "TestData/frame_depth_%%06i.png",
+			      "TestData/frame_mask_%%06i.png",
+			      ""),
+			AutomaticRunSettings(50, 16, true, true, true),
+			NonRigidTrackingParameters(ITMLib::TRACKER_SLAVCHEVA_DIAGNOSTIC, 300, 0.0002f, 0.4f),
+			true,
+			false,
+			MEMORYDEVICE_CPU,
+			true,
+			true,
+			true,
+			false,
+			configuration::FAILUREMODE_RELOCALIZE,
+			configuration::SWAPPINGMODE_ENABLED,
+			configuration::LIBMODE_BASIC,
+			configuration::INDEX_ARRAY,
+			configuration::VERBOSITY_WARNING,
+			"type=rgb,levels=rrbb"
+	);
+	return changed_up_configuration;
+}
+
 } // namespace test_utilities

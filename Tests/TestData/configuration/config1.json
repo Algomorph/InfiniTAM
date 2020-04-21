@@ -100,8 +100,11 @@
             0
         ],
         "record_reconstruction_video": true,
+        "log_to_disk": true,
+        "log_to_stdout": false,
         "log_benchmarks": true,
-        "log_volume_statistics": true
+        "log_volume_statistics": true,
+        "record_volume_memory_usage": true
     },
     "paths": {
         "output_path": "TestData\/output1",
@@ -138,6 +141,6 @@
     "swapping_mode": "enabled",
     "library_mode": "basic",
     "indexing_method": "array",
-    "verbosity_level": "silent",
+    "verbosity_level": "warning",
     "tracker_configuration": "type=rgb,levels=rrbb"
 }

@@ -117,7 +117,8 @@ template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void GenericWarpConsistencySubtest(const SlavchevaSurfaceTracker::Switches& switches, int iteration_limit,
                                    GenericWarpTestMode mode, float absolute_tolerance) {
 
-	std::string prefix = SwitchesToPrefix(switches);
+
+	std::string volume_filename_prefix = SwitchesToPrefix(switches);
 	if (iteration_limit < 2) {
 		DIEWITHEXCEPTION_REPORTLOCATION("Iteration limit must be at least 2");
 	}
@@ -162,7 +163,7 @@ void GenericWarpConsistencySubtest(const SlavchevaSurfaceTracker::Switches& swit
 	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, TIndex>* reconstruction_engine =
 			DepthFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, TIndex>(TMemoryDeviceType);
 	WarpingEngineInterface<TSDFVoxel, WarpVoxel, TIndex>* warping_engine =
-			WarpingEngineFactory::MakeWarpingEngine<TSDFVoxel, WarpVoxel, TIndex>(TMemoryDeviceType);
+			WarpingEngineFactory::Build<TSDFVoxel, WarpVoxel, TIndex>(TMemoryDeviceType);
 	VolumeFusionEngineInterface<TSDFVoxel, TIndex>* volume_fusion_engine =
 			VolumeFusionEngineFactory::Build<TSDFVoxel, TIndex>(TMemoryDeviceType);
 
@@ -178,8 +179,8 @@ void GenericWarpConsistencySubtest(const SlavchevaSurfaceTracker::Switches& swit
 		motion_tracker.UpdateWarps(&warp_field, canonical_volume, live_volumes[source_warped_field_ix]);
 		warping_engine->WarpVolume_WarpUpdates(&warp_field, live_volumes[source_warped_field_ix],
 		                                       live_volumes[target_warped_field_ix]);
-		std::string path = GetWarpsPath<TIndex>(prefix, iteration);
-		std::string path_warped_live = GetWarpedLivePath<TIndex>(prefix, iteration);
+		std::string path = GetWarpsPath<TIndex>(volume_filename_prefix, iteration);
+		std::string path_warped_live = GetWarpedLivePath<TIndex>(volume_filename_prefix, iteration);
 		switch (mode) {
 			case SAVE_SUCCESSIVE_ITERATIONS:
 				live_volumes[target_warped_field_ix]->SaveToDisk(std::string(GENERATED_TEST_DATA_PREFIX) + path_warped_live);
@@ -205,26 +206,26 @@ void GenericWarpConsistencySubtest(const SlavchevaSurfaceTracker::Switches& swit
 	std::cout << IndexString<TIndex>() << " fusion test" << std::endl;
 	switch (mode) {
 		case SAVE_FINAL_ITERATION_AND_FUSION:
-			warp_field.SaveToDisk(std::string(GENERATED_TEST_DATA_PREFIX) + GetWarpsPath<TIndex>(prefix, iteration_limit - 1));
+			warp_field.SaveToDisk(std::string(GENERATED_TEST_DATA_PREFIX) + GetWarpsPath<TIndex>(volume_filename_prefix, iteration_limit - 1));
 			live_volumes[target_warped_field_ix]->SaveToDisk(
-					std::string(GENERATED_TEST_DATA_PREFIX) + GetWarpedLivePath<TIndex>(prefix, iteration_limit - 1));
+					std::string(GENERATED_TEST_DATA_PREFIX) + GetWarpedLivePath<TIndex>(volume_filename_prefix, iteration_limit - 1));
 			volume_fusion_engine->FuseOneTsdfVolumeIntoAnother(canonical_volume, live_volumes[target_warped_field_ix],
 			                                                   0);
 			canonical_volume->SaveToDisk(
-					std::string(GENERATED_TEST_DATA_PREFIX) + GetFusedPath<TIndex>(prefix, iteration_limit - 1));
+					std::string(GENERATED_TEST_DATA_PREFIX) + GetFusedPath<TIndex>(volume_filename_prefix, iteration_limit - 1));
 			break;
 		case TEST_FINAL_ITERATION_AND_FUSION:
 			EditAndCopyEngineFactory::Instance<WarpVoxel, TIndex, TMemoryDeviceType>().ResetVolume(
 					&ground_truth_warp_field);
-			ground_truth_warp_field.LoadFromDisk(GetWarpsPath<TIndex>(prefix, iteration_limit - 1));
+			ground_truth_warp_field.LoadFromDisk(GetWarpsPath<TIndex>(volume_filename_prefix, iteration_limit - 1));
 			BOOST_REQUIRE(
 					contentAlmostEqual(&warp_field, &ground_truth_warp_field, absolute_tolerance, TMemoryDeviceType));
-			ground_truth_sdf_volume.LoadFromDisk(GetWarpedLivePath<TIndex>(prefix, iteration_limit - 1));
+			ground_truth_sdf_volume.LoadFromDisk(GetWarpedLivePath<TIndex>(volume_filename_prefix, iteration_limit - 1));
 			BOOST_REQUIRE(contentAlmostEqual_Verbose(live_volumes[target_warped_field_ix], &ground_truth_sdf_volume,
 			                                         absolute_tolerance, TMemoryDeviceType));
 			volume_fusion_engine->FuseOneTsdfVolumeIntoAnother(canonical_volume, live_volumes[target_warped_field_ix],
 			                                                   0);
-			ground_truth_sdf_volume.LoadFromDisk(GetFusedPath<TIndex>(prefix, iteration_limit - 1));
+			ground_truth_sdf_volume.LoadFromDisk(GetFusedPath<TIndex>(volume_filename_prefix, iteration_limit - 1));
 			BOOST_REQUIRE(contentAlmostEqual(canonical_volume, &ground_truth_sdf_volume, absolute_tolerance,
 			                                 TMemoryDeviceType));
 			break;

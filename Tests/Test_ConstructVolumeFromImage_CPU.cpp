@@ -59,18 +59,22 @@ typedef VolumeFileIOEngine<TSDFVoxel, VoxelBlockHash> SceneFileIOEngine_VBH;
 BOOST_AUTO_TEST_CASE(Test_SceneConstruct16_PVA_VBH_Near_CPU) {
 
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* volume_PVA_16;
-	BuildSdfVolumeFromImage_NearSurfaceAllocation(&volume_PVA_16, "TestData/snoopy_depth_000016.png",
-	                                              "TestData/snoopy_color_000016.png",
-	                                              "TestData/snoopy_omask_000016.png",
-	                                              "TestData/snoopy_calib.txt", MEMORYDEVICE_CPU,
+	BuildSdfVolumeFromImage_NearSurfaceAllocation(&volume_PVA_16,
+	                                              snoopy::Frame16DepthPath(),
+	                                              snoopy::Frame16ColorPath(),
+	                                              snoopy::Frame16MaskPath(),
+	                                              snoopy::SnoopyCalibrationPath(),
+	                                              MEMORYDEVICE_CPU,
 	                                              snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 
 
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume_VBH_16;
-	BuildSdfVolumeFromImage_NearSurfaceAllocation(&volume_VBH_16, "TestData/snoopy_depth_000016.png",
-	                                              "TestData/snoopy_color_000016.png",
-	                                              "TestData/snoopy_omask_000016.png",
-	                                              "TestData/snoopy_calib.txt", MEMORYDEVICE_CPU,
+	BuildSdfVolumeFromImage_NearSurfaceAllocation(&volume_VBH_16,
+	                                              snoopy::Frame16DepthPath(),
+	                                              snoopy::Frame16ColorPath(),
+	                                              snoopy::Frame16MaskPath(),
+	                                              snoopy::SnoopyCalibrationPath(),
+	                                              MEMORYDEVICE_CPU,
 	                                              snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
 #ifdef SAVE_TEST_DATA
@@ -92,17 +96,21 @@ BOOST_AUTO_TEST_CASE(Test_SceneConstruct16_PVA_VBH_Near_CPU) {
 BOOST_AUTO_TEST_CASE(Test_SceneConstruct17_PVA_VBH_Near_CPU) {
 
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* volume_PVA_17;
-	BuildSdfVolumeFromImage_NearSurfaceAllocation(&volume_PVA_17, "TestData/snoopy_depth_000017.png",
-	                                              "TestData/snoopy_color_000017.png",
-	                                              "TestData/snoopy_omask_000017.png",
-	                                              "TestData/snoopy_calib.txt", MEMORYDEVICE_CPU,
+	BuildSdfVolumeFromImage_NearSurfaceAllocation(&volume_PVA_17,
+	                                              snoopy::Frame17DepthPath(),
+	                                              snoopy::Frame17ColorPath(),
+	                                              snoopy::Frame17MaskPath(),
+	                                              snoopy::SnoopyCalibrationPath(),
+	                                              MEMORYDEVICE_CPU,
 	                                              snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume_VBH_17;
-	BuildSdfVolumeFromImage_NearSurfaceAllocation(&volume_VBH_17, "TestData/snoopy_depth_000017.png",
-	                                              "TestData/snoopy_color_000017.png",
-	                                              "TestData/snoopy_omask_000017.png",
-	                                              "TestData/snoopy_calib.txt", MEMORYDEVICE_CPU,
+	BuildSdfVolumeFromImage_NearSurfaceAllocation(&volume_VBH_17,
+	                                              snoopy::Frame17DepthPath(),
+	                                              snoopy::Frame17ColorPath(),
+	                                              snoopy::Frame17MaskPath(),
+	                                              snoopy::SnoopyCalibrationPath(),
+	                                              MEMORYDEVICE_CPU,
 	                                              snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
 	float absoluteTolerance = 1e-7;
@@ -118,9 +126,12 @@ static void SetUpTrackingState16(CameraTrackingState& tracking_state,
                                  IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>& indexer_VBH,
                                  DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, VoxelBlockHash>* depth_fusion_engine_VBH) {
 	View* view_16 = nullptr;
-	UpdateView(&view_16, "TestData/snoopy_depth_000016.png",
-	           "TestData/snoopy_color_000016.png", "TestData/snoopy_omask_000016.png",
-	           "TestData/snoopy_calib.txt", MEMORYDEVICE_CPU);
+	UpdateView(&view_16,
+	           snoopy::Frame16DepthPath(),
+	           snoopy::Frame16ColorPath(),
+	           snoopy::Frame16MaskPath(),
+	           snoopy::SnoopyCalibrationPath(),
+	           MEMORYDEVICE_CPU);
 	RenderState render_state(view_16->depth->dimensions,
 	                         configuration::get().general_voxel_volume_parameters.near_clipping_distance,
 	                         configuration::get().general_voxel_volume_parameters.far_clipping_distance,
@@ -149,9 +160,12 @@ BOOST_AUTO_TEST_CASE(Test_SceneConstruct17_VBH_CPU_NearVsSpan) {
 	SetUpTrackingState16(tracking_state, indexer, depth_fusion_engine_VBH);
 
 	View* view_17 = nullptr;
-	UpdateView(&view_17, "TestData/snoopy_depth_000017.png",
-	           "TestData/snoopy_color_000017.png", "TestData/snoopy_omask_000017.png",
-	           "TestData/snoopy_calib.txt", MEMORYDEVICE_CPU);
+	UpdateView(&view_17,
+	           snoopy::Frame17DepthPath(),
+	           snoopy::Frame17ColorPath(),
+	           snoopy::Frame17MaskPath(),
+	           snoopy::SnoopyCalibrationPath(),
+	           MEMORYDEVICE_CPU);
 
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_17_Span(MEMORYDEVICE_CPU,
 	                                                          snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
@@ -198,9 +212,12 @@ BOOST_AUTO_TEST_CASE(Test_SceneConstruct17_PVA_VBH_Span_CPU) {
 	SetUpTrackingState16(tracking_state, indexer_VBH, depth_fusion_engine_VBH);
 
 	View* view_17 = nullptr;
-	UpdateView(&view_17, "TestData/snoopy_depth_000017.png",
-	           "TestData/snoopy_color_000017.png", "TestData/snoopy_omask_000017.png",
-	           "TestData/snoopy_calib.txt", MEMORYDEVICE_CPU);
+	UpdateView(&view_17,
+	           snoopy::Frame17DepthPath(),
+	           snoopy::Frame17ColorPath(),
+	           snoopy::Frame17MaskPath(),
+	           snoopy::SnoopyCalibrationPath(),
+	           MEMORYDEVICE_CPU);
 
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_17_Span(MEMORYDEVICE_CPU,
 	                                                          snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
@@ -233,35 +250,35 @@ BOOST_AUTO_TEST_CASE(Test_SceneConstruct17_PVA_VBH_Span_CPU) {
 BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
 	// region ================================= CONSTRUCT VIEW =========================================================
 
-	RGBDCalib calibrationData;
-	readRGBDCalib("TestData/snoopy_calib.txt", calibrationData);
+	RGBDCalib calibration_data;
+	readRGBDCalib(snoopy::SnoopyCalibrationPath().c_str(), calibration_data);
 
-	ViewBuilder* viewBuilder = ViewBuilderFactory::MakeViewBuilder(calibrationData, MEMORYDEVICE_CPU);
-	Vector2i imageSize(640, 480);
+	ViewBuilder* view_builder = ViewBuilderFactory::Build(calibration_data, MEMORYDEVICE_CPU);
+	Vector2i image_size(640, 480);
 	View* view = nullptr;
 
 	ITMUChar4Image rgb(true, false);
 	ITMShortImage depth(true, false);
-	BOOST_REQUIRE(ReadImageFromFile(rgb, "TestData/stripes_color.png"));
-	BOOST_REQUIRE(ReadImageFromFile(depth, "TestData/stripes_depth.png"));
+	BOOST_REQUIRE(ReadImageFromFile(rgb, "TestData/frames/stripes_color.png"));
+	BOOST_REQUIRE(ReadImageFromFile(depth, "TestData/frames/stripes_depth.png"));
 
-	viewBuilder->UpdateView(&view, &rgb, &depth, false, false, false, true);
+	view_builder->UpdateView(&view, &rgb, &depth, false, false, false, true);
 
 	// endregion =======================================================================================================
 
-	Vector3i volumeSize(1024, 32, 1024), volumeOffset(-volumeSize.x / 2, -volumeSize.y / 2, 0);
+	Vector3i volume_size(1024, 32, 1024), volume_offset(-volume_size.x / 2, -volume_size.y / 2, 0);
 
-	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume1(MEMORYDEVICE_CPU, {volumeSize, volumeOffset});
+	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume1(MEMORYDEVICE_CPU, {volume_size, volume_offset});
 	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetVolume(&volume1);
-	CameraTrackingState trackingState(imageSize, MEMORYDEVICE_CPU);
+	CameraTrackingState tracking_state(image_size, MEMORYDEVICE_CPU);
 
 	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, PlainVoxelArray>* depth_fusion_engine =
 			DepthFusionEngineFactory
 			::Build<TSDFVoxel, WarpVoxel, PlainVoxelArray>(MEMORYDEVICE_CPU);
 	IndexingEngineInterface<TSDFVoxel, PlainVoxelArray>& indexer_PVA
 			= IndexingEngineFactory::Get<TSDFVoxel, PlainVoxelArray>(MEMORYDEVICE_CPU);
-	indexer_PVA.AllocateNearAndBetweenTwoSurfaces(&volume1, view, &trackingState);
-	depth_fusion_engine->IntegrateDepthImageIntoTsdfVolume(&volume1, view, &trackingState);
+	indexer_PVA.AllocateNearAndBetweenTwoSurfaces(&volume1, view, &tracking_state);
+	depth_fusion_engine->IntegrateDepthImageIntoTsdfVolume(&volume1, view, &tracking_state);
 
 	const int num_stripes = 62;
 
@@ -352,20 +369,20 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
 
 	IndexingEngineInterface<TSDFVoxel, VoxelBlockHash>& indexer_VBH
 			= IndexingEngineFactory::Get<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CPU);
-	indexer_VBH.AllocateNearAndBetweenTwoSurfaces(&volume2, view, &trackingState);
-	depth_fusion_engine_VBH->IntegrateDepthImageIntoTsdfVolume(&volume2, view, &trackingState);
+	indexer_VBH.AllocateNearAndBetweenTwoSurfaces(&volume2, view, &tracking_state);
+	depth_fusion_engine_VBH->IntegrateDepthImageIntoTsdfVolume(&volume2, view, &tracking_state);
 
 	tolerance = 1e-5;
 	BOOST_REQUIRE(allocatedContentAlmostEqual_CPU(&volume1, &volume2, tolerance));
-	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume3(MEMORYDEVICE_CPU, {volumeSize, volumeOffset});
+	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume3(MEMORYDEVICE_CPU, {volume_size, volume_offset});
 	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetVolume(&volume3);
-	indexer_PVA.AllocateNearAndBetweenTwoSurfaces(&volume3, view, &trackingState);
-	depth_fusion_engine->IntegrateDepthImageIntoTsdfVolume(&volume3, view, &trackingState);
+	indexer_PVA.AllocateNearAndBetweenTwoSurfaces(&volume3, view, &tracking_state);
+	depth_fusion_engine->IntegrateDepthImageIntoTsdfVolume(&volume3, view, &tracking_state);
 	BOOST_REQUIRE(contentAlmostEqual_CPU(&volume1, &volume3, tolerance));
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume4(MEMORYDEVICE_CPU, {0x800, 0x20000});
 	volume4.Reset();
-	indexer_VBH.AllocateNearAndBetweenTwoSurfaces(&volume4, view, &trackingState);
-	depth_fusion_engine_VBH->IntegrateDepthImageIntoTsdfVolume(&volume4, view, &trackingState);
+	indexer_VBH.AllocateNearAndBetweenTwoSurfaces(&volume4, view, &tracking_state);
+	depth_fusion_engine_VBH->IntegrateDepthImageIntoTsdfVolume(&volume4, view, &tracking_state);
 	BOOST_REQUIRE(contentAlmostEqual_CPU(&volume2, &volume4, tolerance));
 
 	Vector3i coordinate = zero_level_set_coordinates[0];
@@ -381,7 +398,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume5(
 			MEMORYDEVICE_CPU);
 	ManipulationEngine_CPU_VBH_Voxel::Inst().ResetVolume(&volume5);
-	std::string path = "TestData/test_ConstructFromImage_VBH_CPU_volume4.dat";
+	std::string path = "TestData/volumes/VBH/stripes_CPU.dat";
 	volume4.SaveToDisk(path);
 	volume5.LoadFromDisk(path);
 	BOOST_REQUIRE(allocatedContentAlmostEqual_CPU(&volume1, &volume5, tolerance));
@@ -390,7 +407,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
 	delete view;
 	delete depth_fusion_engine;
 	delete depth_fusion_engine_VBH;
-	delete viewBuilder;
+	delete view_builder;
 }
 
 BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CPU) {
@@ -399,7 +416,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CPU) {
 	RGBDCalib calibration_data;
 	readRGBDCalib(snoopy::SnoopyCalibrationPath().c_str(), calibration_data);
 
-	ViewBuilder* viewBuilder = ViewBuilderFactory::MakeViewBuilder(calibration_data, MEMORYDEVICE_CPU);
+	ViewBuilder* viewBuilder = ViewBuilderFactory::Build(calibration_data, MEMORYDEVICE_CPU);
 	Vector2i imageSize(640, 480);
 	View* view = nullptr;
 
@@ -437,7 +454,8 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CPU) {
 	float tolerance = 1e-5;
 	BOOST_REQUIRE(contentAlmostEqual_CPU_Verbose(&generated_volume, &loaded_volume, tolerance));
 
-	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume3(MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr00<VoxelBlockHash>());
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume3(MEMORYDEVICE_CPU,
+	                                               snoopy::InitializationParameters_Fr00<VoxelBlockHash>());
 	volume3.Reset();
 
 	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, VoxelBlockHash>* depth_fusion_engine_VBH =

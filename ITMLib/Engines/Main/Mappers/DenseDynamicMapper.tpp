@@ -58,7 +58,7 @@ DenseDynamicMapper<TVoxel, TWarp, TIndex>::DenseDynamicMapper(const TIndex& inde
 		depth_fusion_engine(
 				DepthFusionEngineFactory::Build<TVoxel, TWarp, TIndex>
 						(configuration::get().device_type)),
-		warping_engine(WarpingEngineFactory::MakeWarpingEngine<TVoxel, TWarp, TIndex>()),
+		warping_engine(WarpingEngineFactory::Build<TVoxel, TWarp, TIndex>()),
 		volume_fusion_engine(VolumeFusionEngineFactory::Build<TVoxel, TIndex>(configuration::get().device_type)),
 		surface_tracker(SurfaceTrackerFactory::MakeSceneMotionTracker<TVoxel, TWarp, TIndex>()),
 		swapping_engine(configuration::get().swapping_mode != configuration::SWAPPINGMODE_DISABLED

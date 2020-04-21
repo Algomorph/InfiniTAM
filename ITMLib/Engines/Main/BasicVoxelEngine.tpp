@@ -28,7 +28,7 @@ BasicVoxelEngine<TVoxel,TIndex>::BasicVoxelEngine(const RGBDCalib& calib, Vector
 	const MemoryDeviceType deviceType = settings.device_type;
 
 	lowLevelEngine = LowLevelEngineFactory::MakeLowLevelEngine(deviceType);
-	viewBuilder = ViewBuilderFactory::MakeViewBuilder(calib, deviceType);
+	viewBuilder = ViewBuilderFactory::Build(calib, deviceType);
 	visualizationEngine = VisualizationEngineFactory::MakeVisualizationEngine<TVoxel,TIndex>(deviceType);
 
 	meshingEngine = nullptr;

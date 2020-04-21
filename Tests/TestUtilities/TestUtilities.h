@@ -173,4 +173,6 @@ void BuildSdfVolumeFromImage_SurfaceSpanAllocation(VoxelVolume<TVoxel, TIndex>**
                                                    typename TIndex::InitializationParameters initializationParameters = GetStandard512IndexParameters<TIndex>(),
                                                    configuration::SwappingMode swapping_mode = configuration::SWAPPINGMODE_DISABLED);
 
+configuration::Configuration GenerateChangedUpConfiguration();
+
 } // namespace test_utilities

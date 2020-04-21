@@ -454,6 +454,7 @@ bool IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::AllocateHashBloc
 	SingleHashAllocationData* data_CPU = data.GetData(MEMORYDEVICE_CPU);
 	data_CPU->last_free_allocation_block_id = volume->index.GetLastFreeBlockListId();
 	data_CPU->last_free_excess_entry_id = volume->index.GetLastFreeExcessListId();
+	data_CPU->utilized_hash_code_count = volume->index.GetUtilizedBlockCount();
 	data_CPU->hash_code = -1;
 	data_CPU->success = false;
 	data.UpdateDeviceFromHost();

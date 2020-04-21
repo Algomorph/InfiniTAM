@@ -19,10 +19,10 @@ struct ViewBuilderFactory
    * \brief Makes a view builder.
    *
    * \param calib       The joint RGBD calibration parameters.
-   * \param deviceType  The device on which the view builder should operate.
+   * \param device_type  The device on which the view builder should operate.
    */
-  static ViewBuilder *MakeViewBuilder(const RGBDCalib& calib, MemoryDeviceType deviceType);
-  static ViewBuilder *MakeViewBuilder(const std::string& calibration_path, MemoryDeviceType deviceType);
+  static ViewBuilder *Build(const RGBDCalib& calib, MemoryDeviceType device_type);
+  static ViewBuilder *Build(const std::string& calibration_path, MemoryDeviceType device_type);
 };
 
 }

@@ -39,8 +39,8 @@ namespace ITMLib {
  */
 template<typename TVoxel, typename TIndexA, typename TIndexB, typename ToleranceType>
 bool contentAlmostEqual(VoxelVolume<TVoxel, TIndexA>* a, VoxelVolume<TVoxel, TIndexB>* b, ToleranceType tolerance,
-                        MemoryDeviceType memoryDeviceType) {
-	switch (memoryDeviceType) {
+                        MemoryDeviceType memory_type) {
+	switch (memory_type) {
 		case MEMORYDEVICE_CPU:
 			return contentAlmostEqual_CPU(a, b, tolerance);
 		case MEMORYDEVICE_CUDA:
@@ -62,8 +62,8 @@ bool contentAlmostEqual(VoxelVolume<TVoxel, TIndexA>* a, VoxelVolume<TVoxel, TIn
 
 template<typename TVoxel, typename TIndexA, typename TIndexB, typename ToleranceType>
 bool contentAlmostEqual_Verbose(VoxelVolume<TVoxel, TIndexA>* a, VoxelVolume<TVoxel, TIndexB>* b,
-                                ToleranceType tolerance, MemoryDeviceType memoryDeviceType){
-	switch (memoryDeviceType) {
+                                ToleranceType tolerance, MemoryDeviceType memory_type){
+	switch (memory_type) {
 		case MEMORYDEVICE_CPU:
 			return contentAlmostEqual_CPU_Verbose(a, b, tolerance);
 		case MEMORYDEVICE_CUDA:
@@ -86,8 +86,8 @@ bool contentAlmostEqual_Verbose(VoxelVolume<TVoxel, TIndexA>* a, VoxelVolume<TVo
 template<typename TVoxel, typename TIndexA, typename TIndexB, typename ToleranceType>
 bool
 contentForFlagsAlmostEqual(VoxelVolume<TVoxel, TIndexA>* a, VoxelVolume<TVoxel, TIndexB>* b, VoxelFlags flags,
-                           ToleranceType tolerance, MemoryDeviceType memoryDeviceType){
-	switch (memoryDeviceType) {
+                           ToleranceType tolerance, MemoryDeviceType memory_type){
+	switch (memory_type) {
 		case MEMORYDEVICE_CPU:
 			return contentForFlagsAlmostEqual_CPU(a, b, flags, tolerance);
 		case MEMORYDEVICE_CUDA:
@@ -109,8 +109,8 @@ contentForFlagsAlmostEqual(VoxelVolume<TVoxel, TIndexA>* a, VoxelVolume<TVoxel, 
 
 template<typename TVoxel, typename TIndexA, typename TIndexB, typename ToleranceType>
 bool contentForFlagsAlmostEqual_Verbose(VoxelVolume<TVoxel, TIndexA>* a, VoxelVolume<TVoxel, TIndexB>* b,
-                                        VoxelFlags flags, ToleranceType tolerance, MemoryDeviceType memoryDeviceType){
-	switch (memoryDeviceType) {
+                                        VoxelFlags flags, ToleranceType tolerance, MemoryDeviceType memory_type){
+	switch (memory_type) {
 		case MEMORYDEVICE_CPU:
 			return contentForFlagsAlmostEqual_CPU_Verbose(a, b, flags, tolerance);
 		case MEMORYDEVICE_CUDA:
@@ -149,8 +149,8 @@ bool contentForFlagsAlmostEqual_Verbose(VoxelVolume<TVoxel, TIndexA>* a, VoxelVo
  */
 template<typename TVoxel, typename TIndexA, typename TIndexB, typename ToleranceType>
 bool allocatedContentAlmostEqual(VoxelVolume<TVoxel, TIndexA>* a, VoxelVolume<TVoxel, TIndexB>* b,
-                                 ToleranceType tolerance, MemoryDeviceType memoryDeviceType){
-	switch (memoryDeviceType) {
+                                 ToleranceType tolerance, MemoryDeviceType memory_type){
+	switch (memory_type) {
 		case MEMORYDEVICE_CPU:
 			return allocatedContentAlmostEqual_CPU(a, b, tolerance);
 		case MEMORYDEVICE_CUDA:
@@ -171,8 +171,8 @@ bool allocatedContentAlmostEqual(VoxelVolume<TVoxel, TIndexA>* a, VoxelVolume<TV
 }
 template<typename TVoxel, typename TIndexA, typename TIndexB, typename ToleranceType>
 bool allocatedContentAlmostEqual_Verbose(VoxelVolume<TVoxel, TIndexA>* a, VoxelVolume<TVoxel, TIndexB>* b,
-                                         ToleranceType tolerance, MemoryDeviceType memoryDeviceType){
-	switch (memoryDeviceType) {
+                                         ToleranceType tolerance, MemoryDeviceType memory_type){
+	switch (memory_type) {
 		case MEMORYDEVICE_CPU:
 			return allocatedContentAlmostEqual_CPU_Verbose(a, b, tolerance);
 		case MEMORYDEVICE_CUDA:
