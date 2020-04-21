@@ -73,7 +73,7 @@ DenseDynamicMapper<TVoxel, TWarp, TIndex>::DenseDynamicMapper(const TIndex& inde
 		focus_coordinates(configuration::get().telemetry_settings.focus_coordinates),
 		verbosity_level(configuration::get().verbosity_level) {
 	LogSettings();
-	InitializePerFrameAnalyticsTelemetry(this->canonical_volume_memory_usage_file);
+	InitializePerFrameAnalyticsTelemetry(&canonical_volume_memory_usage_file);
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>

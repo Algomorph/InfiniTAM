@@ -30,7 +30,7 @@ namespace fs = boost::filesystem;
 namespace ITMLib {
 
 //TODO: revise TelemetryRecorder and move all this functionality there
-void InitializePerFrameAnalyticsTelemetry(ORUtils::OStreamWrapper* canonical_volume_memory_usage_file);
+void InitializePerFrameAnalyticsTelemetry(ORUtils::OStreamWrapper** canonical_volume_memory_usage_file);
 
 
 template<typename TVoxel, typename TIndex>

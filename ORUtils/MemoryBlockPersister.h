@@ -10,6 +10,7 @@
 
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/filter/zlib.hpp>
+#include <boost/iostreams/filter/gzip.hpp>
 #include <sstream>
 
 #else
@@ -28,12 +29,16 @@ class IStreamWrapper {
 public:
 	IStreamWrapper() : compression_enabled(false) {}
 
-	IStreamWrapper(const std::string& path, bool use_compression = false)
+	IStreamWrapper(const std::string& path, bool use_compression = false, bool use_gzip = false)
 			: file(path.c_str(), std::ios::binary), compression_enabled(use_compression) {
 		if (file) {
 #ifdef WITH_BOOST
 			if (use_compression) {
-				filter.push(b_ios::zlib_decompressor());
+				if (use_gzip) {
+					filter.push(b_ios::gzip_decompressor());
+				} else {
+					filter.push(b_ios::zlib_decompressor());
+				}
 				filter.push(file);
 				final_stream = &filter;
 			} else {
@@ -74,13 +79,17 @@ class OStreamWrapper {
 public:
 	OStreamWrapper() : compression_enabled(false) {};
 
-	OStreamWrapper(const std::string& path, bool use_compression = false)
+	OStreamWrapper(const std::string& path, bool use_compression = false, bool use_gzip = false)
 			: file(path.c_str(), std::ios::binary), compression_enabled(use_compression) {
 
 		if (file) {
 #ifdef WITH_BOOST
 			if (use_compression) {
-				filter.push(b_ios::zlib_compressor());
+				if (use_gzip) {
+					filter.push(b_ios::gzip_compressor());
+				} else {
+					filter.push(b_ios::zlib_compressor());
+				}
 				filter.push(file);
 				final_stream = &filter;
 			} else {

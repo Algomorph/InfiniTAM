@@ -26,10 +26,11 @@ template void RecordVolumeMemoryUsageInfo<TSDFVoxel, PlainVoxelArray>(
 		const VoxelVolume<TSDFVoxel, PlainVoxelArray>& volume);
 
 
-void InitializePerFrameAnalyticsTelemetry(ORUtils::OStreamWrapper* canonical_volume_memory_usage_file) {
+void InitializePerFrameAnalyticsTelemetry(ORUtils::OStreamWrapper** canonical_volume_memory_usage_file) {
 	if (configuration::get().telemetry_settings.record_volume_memory_usage) {
-		canonical_volume_memory_usage_file = new ORUtils::OStreamWrapper(
+		(*canonical_volume_memory_usage_file) = new ORUtils::OStreamWrapper(
 				(fs::path(configuration::get().paths.output_path) / fs::path("canonical_volume_memory_usage.dat")).string(),
+				true,
 				true
 		);
 	}
