@@ -46,8 +46,9 @@ public:
 	PlainVoxelArray(const PlainVoxelArray& other, MemoryDeviceType memory_type);
 
 	void SetFrom(const PlainVoxelArray& other) {
-		MemoryCopyDirection memoryCopyDirection = determineMemoryCopyDirection(this->memory_type, other.memory_type);
-		this->index_data.SetFrom(other.index_data, memoryCopyDirection);
+		MemoryCopyDirection memory_copy_direction = determineMemoryCopyDirection(this->memory_type, other.memory_type);
+		this->index_data.SetFrom(other.index_data, memory_copy_direction);
+		this->index_data.UpdateHostFromDevice();
 	}
 
 	/** Maximum number of total entries. */

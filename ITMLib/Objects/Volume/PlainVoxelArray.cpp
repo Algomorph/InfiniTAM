@@ -50,11 +50,14 @@ unsigned int PlainVoxelArray::GetMaxVoxelCount() const {
 }
 
 void PlainVoxelArray::Save(ORUtils::OStreamWrapper& file) const {
+	index_data.UpdateHostFromDevice();
 	PlainVoxelArray::IndexData data = *index_data.GetData(MEMORYDEVICE_CPU);
 	file.OStream().write(reinterpret_cast<const char* >(&data.size.x), sizeof(int));
 	file.OStream().write(reinterpret_cast<const char* >(&data.size.y), sizeof(int));
 	file.OStream().write(reinterpret_cast<const char* >(&data.size.z), sizeof(int));
-
+	file.OStream().write(reinterpret_cast<const char* >(&data.offset.x), sizeof(int));
+	file.OStream().write(reinterpret_cast<const char* >(&data.offset.y), sizeof(int));
+	file.OStream().write(reinterpret_cast<const char* >(&data.offset.z), sizeof(int));
 }
 
 void PlainVoxelArray::Load(ORUtils::IStreamWrapper& file) {
@@ -62,6 +65,9 @@ void PlainVoxelArray::Load(ORUtils::IStreamWrapper& file) {
 	file.IStream().read(reinterpret_cast<char* >(&data.size.x), sizeof(int));
 	file.IStream().read(reinterpret_cast<char* >(&data.size.y), sizeof(int));
 	file.IStream().read(reinterpret_cast<char* >(&data.size.z), sizeof(int));
+	file.IStream().read(reinterpret_cast<char* >(&data.offset.x), sizeof(int));
+	file.IStream().read(reinterpret_cast<char* >(&data.offset.y), sizeof(int));
+	file.IStream().read(reinterpret_cast<char* >(&data.offset.z), sizeof(int));
 	*index_data.GetData(MEMORYDEVICE_CPU) = data;
 	index_data.UpdateDeviceFromHost();
 }

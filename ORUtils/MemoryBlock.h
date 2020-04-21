@@ -220,12 +220,12 @@ public:
 	}
 
 	MemoryBlock(const MemoryBlock& other) :
-			element_count(other.element_count), // for code clarity
-			is_allocated_for_CPU(other.is_allocated_for_CPU),
-			is_allocated_for_CUDA(other.is_allocated_for_CUDA),
-			is_metal_compatible(other.is_metal_compatible),
+			element_count(0),
+			is_allocated_for_CPU(false),
+			is_allocated_for_CUDA(false),
+			is_metal_compatible(false),
 			access_mode(other.access_mode) {
-		Allocate(element_count, is_allocated_for_CPU, is_allocated_for_CUDA, is_metal_compatible);
+		Allocate(other.element_count, other.is_allocated_for_CPU, other.is_allocated_for_CUDA, other.is_metal_compatible);
 		if (is_allocated_for_CPU) {
 			this->SetFrom(other, MemoryCopyDirection::CPU_TO_CPU);
 		}
