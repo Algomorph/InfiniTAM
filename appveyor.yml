@@ -9,7 +9,9 @@ image:
 
 platform: x64
 
-configuration: Release
+configuration:
+  - Debug
+  - Release
 
 matrix:
   fast_finish: true
@@ -26,8 +28,13 @@ for:
   -
     build_cloud: Juggernaut
     image: Linux
-    skip_commits:
-      message: /Test Ubuntu Image/
+    configuration: Debug
+
+  -
+    build_cloud:
+      except: Juggernaut
+    image: Ubuntu1804
+    configuration: Release
 
   -
     matrix:
