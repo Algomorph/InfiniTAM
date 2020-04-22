@@ -21,9 +21,7 @@ for:
     matrix:
       only:
         - image: Ubuntu1804
-    build_cloud:
-      except:
-        - Juggernaut
+    build_cloud: Docker
     install:
       - sh: |
           sudo DEBIAN_FRONTEND=noninteractive apt-get update -qq && sudo apt-get install -qq
