@@ -17,6 +17,14 @@ for:
       only:
         - image: Linux
     build_cloud: Juggernaut
+    build_script:
+      - sh : |
+          echo "Juggernaut Build Script"
+          export CUDACXX=/usr/local/cuda/bin/nvcc
+          cd $APPVEYOR_BUILD_FOLDER/InfiniTAM
+          mkdir build && cd build
+          cmake -DCMAKE_BUILD_TYPE=$CONFIGURATION -DBUILD_TESTS=ON -DWITH_PNG=ON -DWITH_CUDA=ON -DWITH_OPENMP=OFF -DWITH_FFMPEG=ON ..
+          make -j8
   -
     matrix:
       only:
