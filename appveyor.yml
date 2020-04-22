@@ -31,8 +31,6 @@ for:
     configuration: Debug
 
   -
-    build_cloud:
-      except: Juggernaut
     image: Ubuntu1804
     configuration: Release
 
