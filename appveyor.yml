@@ -80,7 +80,7 @@ test_script:
     - sh: |
           echo "Generating test data..."
           echo "Current folder:"
-          ls 
+          ls
           cd $APPVEYOR_BUILD_FOLDER/InfiniTAM
           echo "Inside $APPVEYOR_BUILD_FOLDER/InfiniTAM:"
           ls
