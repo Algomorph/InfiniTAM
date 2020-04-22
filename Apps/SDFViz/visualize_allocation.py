@@ -11,6 +11,11 @@ PROGRAM_EXIT_FAILURE = -1
 offset_cam = (-500, -200, -500)
 
 
+class keyboard_interactor_style(vtk.vtkInteractorStyleTrackballCamera):
+    # def __init__(self, super(self)):
+    pass
+
+
 def visualize_point_set(point_set):
     colors = vtk.vtkNamedColors()
 
@@ -54,7 +59,7 @@ def visualize_point_set(point_set):
     renderer = vtk.vtkRenderer()
     render_window = vtk.vtkRenderWindow()
     render_window.AddRenderer(renderer)
-    #key_press_interactor_style = vtk.vtkKeyPressInteractorStyle()
+    # key_press_interactor_style = vtk.vtkKeyPressInteractorStyle()
     interactor = vtk.vtkRenderWindowInteractor()
     interactor.SetRenderWindow(render_window)
 
