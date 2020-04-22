@@ -74,11 +74,11 @@ struct TestData {
 		delete render_state;
 	}
 
-	const std::string calibration_path = "TestData/snoopy_calib.txt";
-	const std::string square_1_depth_path = "TestData/square1_depth.png";
-	const std::string square_2_depth_path = "TestData/square2_depth.png";
-	const std::string square_1_color_path = "TestData/square1_color.png";
-	const std::string square_2_color_path = "TestData/square2_color.png";
+	const std::string calibration_path = "TestData/frames/snoopy_calib.txt";
+	const std::string square_1_depth_path = "TestData/frames/square1_depth.png";
+	const std::string square_2_depth_path = "TestData/frames/square2_depth.png";
+	const std::string square_1_color_path = "TestData/frames/square1_color.png";
+	const std::string square_2_color_path = "TestData/frames/square2_color.png";
 	ViewBuilder* view_builder;
 	View* view_square_1 = nullptr;
 	View* view_square_2 = nullptr;

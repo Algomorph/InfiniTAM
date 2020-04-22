@@ -415,7 +415,6 @@ void GenerateConfigurationTestData() {
 	configuration::Configuration changed_up_configuration = GenerateChangedUpConfiguration();
 	LOG4CPLUS_DEBUG(log4cplus::Logger::getRoot(),
 	                "Generating configuration test data ... ");
-	std::cout << "Saving test data..." << std::endl;
 	configuration::Configuration default_snoopy_configuration = GenerateDefaultSnoopyConfiguration();
 	configuration::save_configuration_to_json_file(GENERATED_TEST_DATA_PREFIX
 	"../Files/infinitam_snoopy_config.json", default_snoopy_configuration);
