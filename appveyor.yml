@@ -3,6 +3,9 @@ build: on
 test: on
 
 build_cloud: Juggernaut
+image:
+  - Linux
+  - Ubuntu1804
 
 platform: x64
 
@@ -19,6 +22,14 @@ for:
     build_cloud: Juggernaut
     before_build:
       - sh : export CUDACXX=/usr/local/cuda/bin/nvcc
+
+  -
+    matrix:
+      only:
+        - image: Ubuntu1804
+        - build_cloud: Juggernaut
+    skip_commits:
+      message: /Test Ubuntu Image/
 
   -
     matrix:
