@@ -26,7 +26,7 @@ for:
     matrix:
       only:
        - image: Ubuntu1804
-      before_build:
+      build_script:
         - sh: |
             sudo DEBIAN_FRONTEND=noninteractive apt-get update -qq && sudo apt-get install -qq
             sudo DEBIAN_FRONTEND=noninteractive apt-get -y install libboost-filesystem-dev libboost-iostreams-dev libboost-test-dev libboost-program-options-dev
