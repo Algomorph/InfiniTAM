@@ -27,21 +27,21 @@ for:
       only:
        - image: Ubuntu1804
 
-      install:
-        - sh: |
-            sudo DEBIAN_FRONTEND=noninteractive apt-get update -qq && sudo apt-get install -qq
-            sudo DEBIAN_FRONTEND=noninteractive apt-get -y install libboost-filesystem-dev libboost-iostreams-dev libboost-test-dev libboost-program-options-dev
-            sudo DEBIAN_FRONTEND=noninteractive apt-get -y install freeglut3-dev
-            sudo DEBIAN_FRONTEND=noninteractive apt-get -y install libavcodec-dev libavfilter-dev libavdevice-dev libavformat-dev libavresample-dev libswresample-dev libswscale-dev
-            sudo DEBIAN_FRONTEND=noninteractive apt-get -y install libpng-dev libxss-dev  libegl1-mesa-dev libglu1-mesa-dev libglvnd-dev
-            wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-ubuntu1804.pin
-            sudo mv cuda-ubuntu1804.pin /etc/apt/preferences.d/cuda-repository-pin-600
-            sudo DEBIAN_FRONTEND=noninteractive apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub
-            sudo DEBIAN_FRONTEND=noninteractive add-apt-repository "deb http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/ /" -y
-            sudo DEBIAN_FRONTEND=noninteractive apt-get update
-            sudo DEBIAN_FRONTEND=noninteractive apt-get -y install cuda-10-1
-            sudo ln -s /usr/local/cuda-10.1 /usr/local/cuda
-            export CUDACXX=/usr/local/cuda/bin/nvcc
+    install:
+      - sh: |
+          sudo DEBIAN_FRONTEND=noninteractive apt-get update -qq && sudo apt-get install -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get -y install libboost-filesystem-dev libboost-iostreams-dev libboost-test-dev libboost-program-options-dev
+          sudo DEBIAN_FRONTEND=noninteractive apt-get -y install freeglut3-dev
+          sudo DEBIAN_FRONTEND=noninteractive apt-get -y install libavcodec-dev libavfilter-dev libavdevice-dev libavformat-dev libavresample-dev libswresample-dev libswscale-dev
+          sudo DEBIAN_FRONTEND=noninteractive apt-get -y install libpng-dev libxss-dev  libegl1-mesa-dev libglu1-mesa-dev libglvnd-dev
+          wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-ubuntu1804.pin
+          sudo mv cuda-ubuntu1804.pin /etc/apt/preferences.d/cuda-repository-pin-600
+          sudo DEBIAN_FRONTEND=noninteractive apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub
+          sudo DEBIAN_FRONTEND=noninteractive add-apt-repository "deb http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/ /" -y
+          sudo DEBIAN_FRONTEND=noninteractive apt-get update
+          sudo DEBIAN_FRONTEND=noninteractive apt-get -y install cuda-10-1
+          sudo ln -s /usr/local/cuda-10.1 /usr/local/cuda
+          export CUDACXX=/usr/local/cuda/bin/nvcc
 #           sudo DEBIAN_FRONTEND=noninteractive apt-get -y install libopencv-dev
 #           sudo DEBIAN_FRONTEND=noninteractive apt-get -y install qtbase5-dev qttools5-dev libqt5x11extras5-dev qt5-default
 #           cd ~ && mkdir VTK
