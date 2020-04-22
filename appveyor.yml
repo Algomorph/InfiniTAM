@@ -55,16 +55,19 @@ install:
 
 # scripts that run after install scripts finish and services are started
 build_script:
-    - sh: |
+     - sh: |
           echo "Ubuntu Build Script"
           cd $APPVEYOR_BUILD_FOLDER/InfiniTAM
           mkdir build && cd build
           cmake -DCMAKE_BUILD_TYPE=$CONFIGURATION -DBUILD_TESTS=ON -DWITH_PNG=ON -DWITH_CUDA=ON -DWITH_OPENMP=OFF -DWITH_FFMPEG=ON ..
-          make -j2
+          make -j8
 
 test_script:
     - sh: |
+          echo "Generating test data..."
+          cd $APPVEYOR_BUILD_FOLDER/InfiniTAM/build/Tests
+          generate_derived_test_data
           echo "Running Tests..."
           cd $APPVEYOR_BUILD_FOLDER/InfiniTAM/build/Tests
-          ctest CTEST_OUTPUT_ON_FAILURE=TRUE
+          ctest --output-on-failure
 
