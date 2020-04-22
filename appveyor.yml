@@ -3,10 +3,6 @@ build: on
 test: on
 
 build_cloud: Juggernaut
-image:
-    - Ubuntu1804
-    - Linux
-    # - Visual Studio 2017
 
 platform: x64
 
@@ -19,14 +15,17 @@ for:
   -
     matrix:
       only:
-        - image: Ubuntu
-      except:
-        - build_cloud: Juggernaut
+        - image: Linux
+    build_cloud:
+      only:
+        - Juggernaut
   -
     matrix:
       only:
-       - image: Ubuntu1804
-
+        - image: Ubuntu1804
+    build_cloud:
+      except:
+        - Juggernaut
     install:
       - sh: |
           sudo DEBIAN_FRONTEND=noninteractive apt-get update -qq && sudo apt-get install -qq
