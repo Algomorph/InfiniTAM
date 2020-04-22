@@ -27,7 +27,6 @@ for:
     matrix:
       only:
         - image: Ubuntu1804
-    clone_folder: ~/InfiniTAM
     install:
       - sh: |
           sudo DEBIAN_FRONTEND=noninteractive apt-get update -qq && sudo apt-get install -qq
@@ -70,11 +69,8 @@ install:
 
 # scripts that run after install scripts finish and services are started
 build_script:
-      - cmd: set INFINITAM_BUILD_FOLDER=%APPVEYOR_BUILD_FOLDER%
       - sh: |
-          export INFINITAM_BUILD_FOLDER=$APPVEYOR_BUILD_FOLDER
           echo "Build Script for Ubuntu, Image: $APPVEYOR_BUILD_WORKER_IMAGE, Configuration: $CONFIGURATION"
-          cd $APPVEYOR_BUILD_FOLDER/InfiniTAM
           mkdir build && cd build
           cmake -DCMAKE_BUILD_TYPE=$CONFIGURATION -DBUILD_TESTS=ON -DWITH_PNG=ON -DWITH_CUDA=ON -DWITH_OPENMP=OFF -DWITH_FFMPEG=ON ..
 #          make -j8
@@ -84,15 +80,15 @@ test_script:
           echo "Generating test data..."
           echo "Current folder:"
           ls
-          cd $APPVEYOR_BUILD_FOLDER/InfiniTAM
-          echo "Inside $INFINITAM_BUILD_FOLDER/InfiniTAM:"
+          cd $APPVEYOR_BUILD_FOLDER
+          echo "Inside $APPVEYOR_BUILD_FOLDER/:"
           ls
-          cd $APPVEYOR_BUILD_FOLDER/InfiniTAM/build
-          echo "Inside $INFINITAM_BUILD_FOLDER/InfiniTAM/build:"
+          cd $APPVEYOR_BUILD_FOLDER/build
+          echo "Inside $$APPVEYOR_BUILD_FOLDER/build:"
           ls
-#          cd $APPVEYOR_BUILD_FOLDER/InfiniTAM/build/Tests
+#          cd $APPVEYOR_BUILD_FOLDER/build/Tests
 #          generate_derived_test_data
 #          echo "Running Tests..."
-#          cd $APPVEYOR_BUILD_FOLDER/InfiniTAM/build/Tests
+#          cd $APPVEYOR_BUILD_FOLDER/build/Tests
 #          ctest --output-on-failure
 
