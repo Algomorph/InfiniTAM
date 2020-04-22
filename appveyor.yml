@@ -24,10 +24,8 @@ for:
 #      - sh : export CUDACXX=/usr/local/cuda/bin/nvcc
 
   -
-    matrix:
-      only:
-        - image: Ubuntu1804
-#    build_cloud: Juggernaut
+    build_cloud: Juggernaut
+    image: Linux
     skip_commits:
       message: /Test Ubuntu Image/
 
