@@ -27,7 +27,7 @@ for:
     matrix:
       only:
         - image: Ubuntu1804
-    build_cloud: Juggernaut
+#    build_cloud: Juggernaut
     skip_commits:
       message: /Test Ubuntu Image/
 
