@@ -16,9 +16,7 @@ for:
     matrix:
       only:
         - image: Linux
-    build_cloud:
-      only:
-        - Juggernaut
+    build_cloud: Juggernaut
   -
     matrix:
       only:
