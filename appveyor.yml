@@ -16,12 +16,13 @@ matrix:
   fast_finish: true
 
 for:
-  - matrix:
+  -
+    matrix:
       only:
         - image: Ubuntu
         - build_cloud: Juggernaut
-      build: off
-      test: off
+      only_commits:
+        message: /test Ubuntu image/
   -
     matrix:
       only:
