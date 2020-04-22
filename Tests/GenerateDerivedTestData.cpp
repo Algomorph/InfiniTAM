@@ -435,16 +435,16 @@ int main(int argc, char* argv[]) {
 	log4cplus::SharedAppenderPtr console_appender(new log4cplus::ConsoleAppender(false, true));
 	log4cplus::Logger::getRoot().addAppender(console_appender);
 	log4cplus::Logger::getRoot().setLogLevel(log4cplus::DEBUG_LOG_LEVEL);
-//	ConstructSnoopyUnmaskedVolumes00();
-//	ConstructSnoopyMaskedVolumes16and17();
+	ConstructSnoopyUnmaskedVolumes00();
+	ConstructSnoopyMaskedVolumes16and17();
 
-//	GenerateWarpGradientTestData<PlainVoxelArray, MEMORYDEVICE_CPU>();
-//	GenerateWarpGradientTestData<VoxelBlockHash, MEMORYDEVICE_CPU>();
-//	GenerateWarpGradient_PVA_to_VBH_TestData();
-//	GenerateWarpedVolumeTestData<PlainVoxelArray>();
-//	GenerateWarpedVolumeTestData<VoxelBlockHash>();
-//	GenerateFusedVolumeTestData<PlainVoxelArray>();
-//	GenerateFusedVolumeTestData<VoxelBlockHash>();
-//	GenerateConfigurationTestData();
+	GenerateWarpGradientTestData<PlainVoxelArray, MEMORYDEVICE_CPU>();
+	GenerateWarpGradientTestData<VoxelBlockHash, MEMORYDEVICE_CPU>();
+	GenerateWarpGradient_PVA_to_VBH_TestData();
+	GenerateWarpedVolumeTestData<PlainVoxelArray>();
+	GenerateWarpedVolumeTestData<VoxelBlockHash>();
+	GenerateFusedVolumeTestData<PlainVoxelArray>();
+	GenerateFusedVolumeTestData<VoxelBlockHash>();
+	GenerateConfigurationTestData();
 	return 0;
 }
