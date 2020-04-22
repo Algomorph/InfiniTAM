@@ -301,7 +301,7 @@ void GenerateFusedVolumeTestData(int iteration = 4) {
 	           GetWarpedLivePath<TIndex>(SwitchesToPrefix(data_tikhonov_sobolev_switches), iteration),
 	           MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 	VoxelVolume<TSDFVoxel, TIndex>* canonical_volume;
-	LoadVolume(&canonical_volume, snoopy::PartialVolume16Path<TIndex>(),
+	LoadVolume(&canonical_volume, GENERATED_TEST_DATA_PREFIX + snoopy::PartialVolume16Path<TIndex>(),
 	           MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 	IndexingEngine<TSDFVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().AllocateUsingOtherVolume(canonical_volume,
 	                                                                                         warped_live_volume);
@@ -329,7 +329,7 @@ void GenerateWarpedVolumeTestData() {
 	           GENERATED_TEST_DATA_PREFIX "TestData/volumes/" + IndexString<TIndex>() + "/warp_field_0_complete.dat",
 	           MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 	VoxelVolume<TSDFVoxel, TIndex>* live_volume;
-	LoadVolume(&live_volume, snoopy::PartialVolume17Path<TIndex>(),
+	LoadVolume(&live_volume, GENERATED_TEST_DATA_PREFIX + snoopy::PartialVolume17Path<TIndex>(),
 	           MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 	auto warped_live_volume = new VoxelVolume<TSDFVoxel, TIndex>(MEMORYDEVICE_CPU,
 	                                                             snoopy::InitializationParameters_Fr16andFr17<TIndex>());
