@@ -24,6 +24,8 @@
 
 //boost
 #include <boost/test/unit_test.hpp>
+
+//ITMLib
 #include "../ITMLib/GlobalTemplateDefines.h"
 #include "../ITMLib/Objects/Volume/VoxelVolume.h"
 #include "TestUtilities/TestUtilities.h"
@@ -37,11 +39,14 @@
 #include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
 //(CUDA)
 #ifndef COMPILE_WITHOUT_CUDA
-
 #include "../ITMLib/Engines/Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
 #include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
-
 #endif
+
+//test_utilities
+#include "TestUtilities/SnoopyTestUtilities.h"
+
+namespace snoopy = snoopy_test_utilities;
 
 using namespace ITMLib;
 
@@ -74,7 +79,7 @@ struct TestData {
 		delete render_state;
 	}
 
-	const std::string calibration_path = "TestData/frames/snoopy_calib.txt";
+	const std::string calibration_path = snoopy::SnoopyCalibrationPath();
 	const std::string square_1_depth_path = "TestData/frames/square1_depth.png";
 	const std::string square_2_depth_path = "TestData/frames/square2_depth.png";
 	const std::string square_1_color_path = "TestData/frames/square1_color.png";
