@@ -4,7 +4,7 @@ test: on
 
 build_cloud: Juggernaut
 image:
-    # - Ubuntu1804
+    - Ubuntu1804
     - Linux
     # - Visual Studio 2017
 
@@ -16,6 +16,12 @@ matrix:
   - fast_finish: true
 
 for:
+  - matrix:
+      only:
+        - image: Ubuntu
+        - build_cloud: Juggernaut
+      build: off
+      test: off
   -
     matrix:
       only:
