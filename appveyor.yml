@@ -2,8 +2,10 @@
 build: on
 test: on
 
+build_cloud: Juggernaut
 image:
-    - Ubuntu1804
+    # - Ubuntu1804
+    - Linux
     # - Visual Studio 2017
 
 platform: x64
@@ -11,47 +13,49 @@ platform: x64
 configuration: Release
 
 matrix:
-    fast_finish: true
+  - fast_finish: true
 
-    # for:
-    #   -
-    #     matrix:
-    #       only:
-    #         - image: Ubuntu1804
-    #     clone_folder: ~/InfiniTAM
+for:
+  -
+    matrix:
+      only:
+       - image: Ubuntu1804
+      install:
+        - sh: |
+            sudo DEBIAN_FRONTEND=noninteractive apt-get update -qq && sudo apt-get install -qq
+            sudo DEBIAN_FRONTEND=noninteractive apt-get -y install libboost-filesystem-dev libboost-iostreams-dev libboost-test-dev libboost-program-options-dev
+            sudo DEBIAN_FRONTEND=noninteractive apt-get -y install freeglut3-dev
+            sudo DEBIAN_FRONTEND=noninteractive apt-get -y install libavcodec-dev libavfilter-dev libavdevice-dev libavformat-dev libavresample-dev libswresample-dev libswscale-dev
+            sudo DEBIAN_FRONTEND=noninteractive apt-get -y install libpng-dev libxss-dev  libegl1-mesa-dev libglu1-mesa-dev libglvnd-dev
+            wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-ubuntu1804.pin
+            sudo mv cuda-ubuntu1804.pin /etc/apt/preferences.d/cuda-repository-pin-600
+            sudo DEBIAN_FRONTEND=noninteractive apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub
+            sudo DEBIAN_FRONTEND=noninteractive add-apt-repository "deb http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/ /" -y
+            sudo DEBIAN_FRONTEND=noninteractive apt-get update
+            sudo DEBIAN_FRONTEND=noninteractive apt-get -y install cuda-10-1
+            sudo ln -s /usr/local/cuda-10.1 /usr/local/cuda
+            export CUDACXX=/usr/local/cuda/bin/nvcc
+#           sudo DEBIAN_FRONTEND=noninteractive apt-get -y install libopencv-dev
+#           sudo DEBIAN_FRONTEND=noninteractive apt-get -y install qtbase5-dev qttools5-dev libqt5x11extras5-dev qt5-default
+#           cd ~ && mkdir VTK
+#           cd VTK && wget https://www.vtk.org/files/release/8.2/VTK-8.2.0.tar.gz
+#           tar -zxf VTK-8.2.0.tar.gz
+#           mkdir build
+#           mdkir install
+#           cd build
+#           cmake ../VTK-8.2.0 -DCMAKE_BUILD_TYPE=$CONFIGURATION -DCMAKE_INSTALL_PREFIX=~/VTK/install -DVTK_QT_VERSION=5 -DVTK_Group_Qt=ON -DModule_vtkGUISupportQt=ON
+#           make -j2 && make install
+
+#         clone_folder: ~/InfiniTAM
     # -
     #   matrix:
     #     only:
     #       - image: Visual Studio 2017
     #   clone_folder: c:\projects\InfiniTAM
 
-# scripts that run after cloning repository
-install:
     # Ubuntu
-    - sh: |
-          sudo DEBIAN_FRONTEND=noninteractive apt-get update -qq && sudo apt-get install -qq
-          sudo DEBIAN_FRONTEND=noninteractive apt-get -y install libboost-filesystem-dev libboost-iostreams-dev libboost-test-dev libboost-program-options-dev
-          # sudo DEBIAN_FRONTEND=noninteractive apt-get -y install libopencv-dev
-          # sudo DEBIAN_FRONTEND=noninteractive apt-get -y install qtbase5-dev qttools5-dev libqt5x11extras5-dev qt5-default
-          sudo DEBIAN_FRONTEND=noninteractive apt-get -y install freeglut3-dev
-          sudo DEBIAN_FRONTEND=noninteractive apt-get -y install libavcodec-dev libavfilter-dev libavdevice-dev libavformat-dev libavresample-dev libswresample-dev libswscale-dev
-          sudo DEBIAN_FRONTEND=noninteractive apt-get -y install libpng-dev libxss-dev  libegl1-mesa-dev libglu1-mesa-dev libglvnd-dev
-          wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-ubuntu1804.pin
-          sudo mv cuda-ubuntu1804.pin /etc/apt/preferences.d/cuda-repository-pin-600
-          sudo DEBIAN_FRONTEND=noninteractive apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub
-          sudo DEBIAN_FRONTEND=noninteractive add-apt-repository "deb http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/ /" -y
-          sudo DEBIAN_FRONTEND=noninteractive apt-get update
-          sudo DEBIAN_FRONTEND=noninteractive apt-get -y install cuda-10-1
-          sudo ln -s /usr/local/cuda-10.1 /usr/local/cuda
-          export CUDACXX=/usr/local/cuda/bin/nvcc
-          # cd ~ && mkdir VTK
-          # cd VTK && wget https://www.vtk.org/files/release/8.2/VTK-8.2.0.tar.gz
-          # tar -zxf VTK-8.2.0.tar.gz
-          # mkdir build
-          # mdkir install
-          # cd build
-          # cmake ../VTK-8.2.0 -DCMAKE_BUILD_TYPE=$CONFIGURATION -DCMAKE_INSTALL_PREFIX=~/VTK/install -DVTK_QT_VERSION=5 -DVTK_Group_Qt=ON -DModule_vtkGUISupportQt=ON
-          # make -j2 && make install
+
+
 
 # scripts that run after install scripts finish and services are started
 build_script:
@@ -65,9 +69,11 @@ build_script:
 test_script:
     - sh: |
           echo "Generating test data..."
-          cd $APPVEYOR_BUILD_FOLDER/InfiniTAM/build/Tests
-          generate_derived_test_data
-          echo "Running Tests..."
-          cd $APPVEYOR_BUILD_FOLDER/InfiniTAM/build/Tests
-          ctest --output-on-failure
+          cd $APPVEYOR_BUILD_FOLDER/InfiniTAM/build
+          ls
+#          cd $APPVEYOR_BUILD_FOLDER/InfiniTAM/build/Tests
+#          generate_derived_test_data
+#          echo "Running Tests..."
+#          cd $APPVEYOR_BUILD_FOLDER/InfiniTAM/build/Tests
+#          ctest --output-on-failure
 
