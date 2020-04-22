@@ -53,14 +53,20 @@ BOOST_AUTO_TEST_CASE(Test_SceneConstruct17_VBH_CPU_CUDA_NearSurface){
 	
 		
 	View* view_17_CPU = nullptr;
-	UpdateView(&view_17_CPU, "TestData/snoopy_depth_000017.png",
-	           "TestData/snoopy_color_000017.png", "TestData/snoopy_omask_000017.png",
-	           "TestData/snoopy_calib.txt", MEMORYDEVICE_CPU);
+	UpdateView(&view_17_CPU,
+	           snoopy::Frame17DepthPath(),
+	           snoopy::Frame17ColorPath(),
+	           snoopy::Frame17MaskPath(),
+	           snoopy::SnoopyCalibrationPath(),
+	           MEMORYDEVICE_CPU);
 
 	View* view_17_CUDA = nullptr;
-	UpdateView(&view_17_CUDA, "TestData/snoopy_depth_000017.png",
-	           "TestData/snoopy_color_000017.png", "TestData/snoopy_omask_000017.png",
-	           "TestData/snoopy_calib.txt", MEMORYDEVICE_CUDA);
+	UpdateView(&view_17_CUDA,
+	           snoopy::Frame17DepthPath(),
+	           snoopy::Frame17ColorPath(),
+	           snoopy::Frame17MaskPath(),
+	           snoopy::SnoopyCalibrationPath(),
+	           MEMORYDEVICE_CUDA);
 
 
 // *** initialize volumes ***
@@ -122,14 +128,20 @@ BOOST_AUTO_TEST_CASE(Test_SceneConstruct17_VBH_CPU_CUDA_NearSurface){
 BOOST_AUTO_TEST_CASE(Test_SceneConstruct17_VBH_CPU_CUDA_SurfaceSpan){
 
 	View* view_16_CPU = nullptr;
-	UpdateView(&view_16_CPU, "TestData/snoopy_depth_000016.png",
-	           "TestData/snoopy_color_000016.png", "TestData/snoopy_omask_000016.png",
-	           "TestData/snoopy_calib.txt", MEMORYDEVICE_CPU);
+	UpdateView(&view_16_CPU,
+	           snoopy::Frame16DepthPath(),
+	           snoopy::Frame16ColorPath(),
+	           snoopy::Frame16MaskPath(),
+	           snoopy::SnoopyCalibrationPath(),
+	           MEMORYDEVICE_CPU);
 
 	View* view_16_CUDA = nullptr;
-	UpdateView(&view_16_CUDA, "TestData/snoopy_depth_000016.png",
-	           "TestData/snoopy_color_000016.png", "TestData/snoopy_omask_000016.png",
-	           "TestData/snoopy_calib.txt", MEMORYDEVICE_CUDA);
+	UpdateView(&view_16_CUDA,
+	           snoopy::Frame16DepthPath(),
+	           snoopy::Frame16ColorPath(),
+	           snoopy::Frame16MaskPath(),
+	           snoopy::SnoopyCalibrationPath(),
+	           MEMORYDEVICE_CUDA);
 	
 	//*** prep engines and tracking states ***
 	// CPU 
@@ -182,14 +194,20 @@ BOOST_AUTO_TEST_CASE(Test_SceneConstruct17_VBH_CPU_CUDA_SurfaceSpan){
 
 
 	View* view_17_CPU = nullptr;
-	UpdateView(&view_17_CPU, "TestData/snoopy_depth_000017.png",
-	           "TestData/snoopy_color_000017.png", "TestData/snoopy_omask_000017.png",
-	           "TestData/snoopy_calib.txt", MEMORYDEVICE_CPU);
+	UpdateView(&view_17_CPU,
+	           snoopy::Frame17DepthPath(),
+	           snoopy::Frame17ColorPath(),
+	           snoopy::Frame17MaskPath(),
+	           snoopy::SnoopyCalibrationPath(),
+	           MEMORYDEVICE_CPU);
 
 	View* view_17_CUDA = nullptr;
-	UpdateView(&view_17_CUDA, "TestData/snoopy_depth_000017.png",
-	           "TestData/snoopy_color_000017.png", "TestData/snoopy_omask_000017.png",
-	           "TestData/snoopy_calib.txt", MEMORYDEVICE_CUDA);
+	UpdateView(&view_17_CUDA,
+	           snoopy::Frame17DepthPath(),
+	           snoopy::Frame17ColorPath(),
+	           snoopy::Frame17MaskPath(),
+	           snoopy::SnoopyCalibrationPath(),
+	           MEMORYDEVICE_CUDA);
 
 // *** initialize volumes ***
 	// CPU

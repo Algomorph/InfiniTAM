@@ -311,8 +311,8 @@ void GenerateFusedVolumeTestData(int iteration = 4) {
 			VolumeFusionEngineFactory::Build<TSDFVoxel, TIndex>(MEMORYDEVICE_CPU);
 	volume_fusion_engine->FuseOneTsdfVolumeIntoAnother(canonical_volume, warped_live_volume, 0);
 
-	canonical_volume->SaveToDisk(GENERATED_TEST_DATA_PREFIX +
-	                             GetFusedPath<TIndex>(SwitchesToPrefix(data_tikhonov_sobolev_switches), iteration));
+	canonical_volume->SaveToDisk(GENERATED_TEST_DATA_PREFIX
+	                             "TestData/volumes/" + IndexString<TIndex>() + "/fused.dat");
 
 	delete volume_fusion_engine;
 	delete warped_live_volume;

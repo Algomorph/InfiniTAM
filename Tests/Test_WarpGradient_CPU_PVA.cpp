@@ -95,10 +95,6 @@ BOOST_FIXTURE_TEST_CASE(testDataTerm_CPU_PVA, DataFixture) {
 		motion_tracker_PVA_CPU->CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
 	}, "Calculate Warping Gradient - PVA CPU data term");
 
-	std::cout << Analytics_Accessor::Get<TSDFVoxel,PlainVoxelArray>(MEMORYDEVICE_CPU).CountNonTruncatedVoxels(canonical_volume) << std::endl;
-	std::cout << Analytics_Accessor::Get<TSDFVoxel,PlainVoxelArray>(MEMORYDEVICE_CPU).CountNonTruncatedVoxels(live_volume) << std::endl;
-	std::cout << Analytics_Accessor::Get<WarpVoxel,PlainVoxelArray>(MEMORYDEVICE_CPU).CountAlteredVoxels(&warp_field) << std::endl;
-
 	AlteredGradientCountFunctor<WarpVoxel> functor;
 	VolumeTraversalEngine<WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU>::
 	TraverseAll(&warp_field, functor);

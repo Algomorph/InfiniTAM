@@ -68,7 +68,7 @@ void GenericFusionTest(const int iteration = 4) {
 
 	VoxelVolume<TSDFVoxel, TIndex>* fused_canonical_volume_gt;
 	LoadVolume(&fused_canonical_volume_gt,
-	           GetFusedPath<TIndex>(SwitchesToPrefix(data_tikhonov_sobolev_switches), iteration),
+	           "TestData/volumes/" + IndexString<TIndex>() + "/fused.dat",
 	           TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 
 	float absoluteTolerance = 1e-7;
