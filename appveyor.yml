@@ -10,29 +10,18 @@ image:
 platform: x64
 
 configuration:
-  - Debug
   - Release
 
 matrix:
   fast_finish: true
 
 for:
-#  -
-#    matrix:
-#      only:
-#        - image: Linux
-#    build_cloud: Juggernaut
-#    before_build:
-#      - sh : export CUDACXX=/usr/local/cuda/bin/nvcc
-
   -
     build_cloud: Juggernaut
     image: Linux
-    configuration: Debug
 
   -
     image: Ubuntu1804
-    configuration: Release
 
   -
     matrix:
@@ -81,16 +70,22 @@ install:
 # scripts that run after install scripts finish and services are started
 build_script:
       - sh: |
-          echo "Build Script for Ubuntu, Image: $APPVEYOR_BUILD_WORKER_IMAGE"
+          echo "Build Script for Ubuntu, Image: $APPVEYOR_BUILD_WORKER_IMAGE, Configuration: $CONFIGURATION"
           cd $APPVEYOR_BUILD_FOLDER/InfiniTAM
           mkdir build && cd build
           cmake -DCMAKE_BUILD_TYPE=$CONFIGURATION -DBUILD_TESTS=ON -DWITH_PNG=ON -DWITH_CUDA=ON -DWITH_OPENMP=OFF -DWITH_FFMPEG=ON ..
-          make -j8
+#          make -j8
 
 test_script:
     - sh: |
           echo "Generating test data..."
+          echo "Current folder:"
+          ls
+          cd $APPVEYOR_BUILD_FOLDER/InfiniTAM
+          echo "Inside $APPVEYOR_BUILD_FOLDER/InfiniTAM:"
+          ls
           cd $APPVEYOR_BUILD_FOLDER/InfiniTAM/build
+          echo "Inside $APPVEYOR_BUILD_FOLDER/InfiniTAM/build:"
           ls
 #          cd $APPVEYOR_BUILD_FOLDER/InfiniTAM/build/Tests
 #          generate_derived_test_data
