@@ -17,14 +17,9 @@ for:
       only:
         - image: Linux
     build_cloud: Juggernaut
-    build_script:
-      - sh : |
-          echo "Juggernaut Build Script"
-          export CUDACXX=/usr/local/cuda/bin/nvcc
-          cd $APPVEYOR_BUILD_FOLDER/InfiniTAM
-          mkdir build && cd build
-          cmake -DCMAKE_BUILD_TYPE=$CONFIGURATION -DBUILD_TESTS=ON -DWITH_PNG=ON -DWITH_CUDA=ON -DWITH_OPENMP=OFF -DWITH_FFMPEG=ON ..
-          make -j8
+    before_build:
+      - sh : export CUDACXX=/usr/local/cuda/bin/nvcc
+
   -
     matrix:
       only:
@@ -55,13 +50,7 @@ for:
 #          cd build
 #          cmake ../VTK-8.2.0 -DCMAKE_BUILD_TYPE=$CONFIGURATION -DCMAKE_INSTALL_PREFIX=~/VTK/install -DVTK_QT_VERSION=5 -DVTK_Group_Qt=ON -DModule_vtkGUISupportQt=ON
 #          make -j2 && make install
-    build_script:
-      - sh: |
-          echo "Ubuntu1804 Build Script"
-          cd $APPVEYOR_BUILD_FOLDER/InfiniTAM
-          mkdir build && cd build
-          cmake -DCMAKE_BUILD_TYPE=$CONFIGURATION -DBUILD_TESTS=ON -DWITH_PNG=ON -DWITH_CUDA=ON -DWITH_OPENMP=OFF -DWITH_FFMPEG=ON ..
-          make -j8
+
 
 #         clone_folder: ~/InfiniTAM
     # -
@@ -75,7 +64,13 @@ for:
 
 
 # scripts that run after install scripts finish and services are started
-
+build_script:
+      - sh: |
+          echo "Build Script for Ubuntu, Image: $APPVEYOR_BUILD_WORKER_IMAGE"
+          cd $APPVEYOR_BUILD_FOLDER/InfiniTAM
+          mkdir build && cd build
+          cmake -DCMAKE_BUILD_TYPE=$CONFIGURATION -DBUILD_TESTS=ON -DWITH_PNG=ON -DWITH_CUDA=ON -DWITH_OPENMP=OFF -DWITH_FFMPEG=ON ..
+          make -j8
 
 test_script:
     - sh: |
