@@ -20,9 +20,8 @@ for:
     matrix:
       only:
         - image: Ubuntu
+      except:
         - build_cloud: Juggernaut
-      only_commits:
-        message: /test Ubuntu image/
   -
     matrix:
       only:
