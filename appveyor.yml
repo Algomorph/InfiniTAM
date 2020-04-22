@@ -15,13 +15,13 @@ matrix:
   fast_finish: true
 
 for:
-  -
-    matrix:
-      only:
-        - image: Linux
-    build_cloud: Juggernaut
-    before_build:
-      - sh : export CUDACXX=/usr/local/cuda/bin/nvcc
+#  -
+#    matrix:
+#      only:
+#        - image: Linux
+#    build_cloud: Juggernaut
+#    before_build:
+#      - sh : export CUDACXX=/usr/local/cuda/bin/nvcc
 
   -
     matrix:
@@ -50,7 +50,7 @@ for:
           sudo DEBIAN_FRONTEND=noninteractive apt-get update
           sudo DEBIAN_FRONTEND=noninteractive apt-get -y install cuda-10-1
           sudo ln -s /usr/local/cuda-10.1 /usr/local/cuda
-          export CUDACXX=/usr/local/cuda/bin/nvcc
+
 #          sudo DEBIAN_FRONTEND=noninteractive apt-get -y install libopencv-dev
 #          sudo DEBIAN_FRONTEND=noninteractive apt-get -y install qtbase5-dev qttools5-dev libqt5x11extras5-dev qt5-default
 #          cd ~ && mkdir VTK
@@ -72,7 +72,9 @@ for:
 
     # Ubuntu
 
-
+install:
+  - sh : |
+        export CUDACXX=/usr/local/cuda/bin/nvcc
 
 # scripts that run after install scripts finish and services are started
 build_script:
