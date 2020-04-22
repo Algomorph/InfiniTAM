@@ -27,6 +27,7 @@ for:
     matrix:
       only:
         - image: Ubuntu1804
+    clone_folder: ~/InfiniTAM
     install:
       - sh: |
           sudo DEBIAN_FRONTEND=noninteractive apt-get update -qq && sudo apt-get install -qq
@@ -69,7 +70,9 @@ install:
 
 # scripts that run after install scripts finish and services are started
 build_script:
+      - cmd: set INFINITAM_BUILD_FOLDER=%APPVEYOR_BUILD_FOLDER%
       - sh: |
+          export INFINITAM_BUILD_FOLDER=$APPVEYOR_BUILD_FOLDER
           echo "Build Script for Ubuntu, Image: $APPVEYOR_BUILD_WORKER_IMAGE, Configuration: $CONFIGURATION"
           cd $APPVEYOR_BUILD_FOLDER/InfiniTAM
           mkdir build && cd build
@@ -80,12 +83,12 @@ test_script:
     - sh: |
           echo "Generating test data..."
           echo "Current folder:"
-          ls 
+          ls
           cd $APPVEYOR_BUILD_FOLDER/InfiniTAM
-          echo "Inside $APPVEYOR_BUILD_FOLDER/InfiniTAM:"
+          echo "Inside $INFINITAM_BUILD_FOLDER/InfiniTAM:"
           ls
           cd $APPVEYOR_BUILD_FOLDER/InfiniTAM/build
-          echo "Inside $APPVEYOR_BUILD_FOLDER/InfiniTAM/build:"
+          echo "Inside $INFINITAM_BUILD_FOLDER/InfiniTAM/build:"
           ls
 #          cd $APPVEYOR_BUILD_FOLDER/InfiniTAM/build/Tests
 #          generate_derived_test_data
