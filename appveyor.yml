@@ -82,7 +82,7 @@ test_script:
           ./generate_derived_test_data
           cd ..
           cmake ..
-          cd Tests
+          cd Tests 
           echo "Running Tests..."
           cd $APPVEYOR_BUILD_FOLDER/build/Tests
           ctest --output-on-failure
