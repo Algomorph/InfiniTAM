@@ -793,10 +793,10 @@ namespace {
 // CUDA kernel implementations
 
 __global__ void computeVoxelBounds(const HashEntry* hash_table, Vector6i* bounds, int hash_entry_count) {
-	int hash = threadIdx.x + blockIdx.x * blockDim.x;
-	if (hash >= hash_entry_count) return;
+	int hash_code = threadIdx.x + blockIdx.x * blockDim.x;
+	if (hash_code >= hash_entry_count) return;
 
-	const HashEntry& hashEntry = hash_table[hash];
+	const HashEntry& hashEntry = hash_table[hash_code];
 	if (hashEntry.ptr < 0) return;
 
 	Vector3i hashEntryPosVoxels = hashEntry.pos.toInt() * VOXEL_BLOCK_SIZE;

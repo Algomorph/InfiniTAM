@@ -49,18 +49,6 @@ using namespace ITMLib;
 namespace po = boost::program_options;
 namespace pt = boost::property_tree;
 
-
-TelemetryRecorder_Interface& GetLogger(configuration::IndexingMethod method) {
-	switch (method) {
-		case configuration::INDEX_HASH: {
-			return static_cast<TelemetryRecorder_Interface&>(TelemetryRecorder<TSDFVoxel, WarpVoxel, VoxelBlockHash>::Instance());
-		}
-		case configuration::INDEX_ARRAY: {
-			return static_cast<TelemetryRecorder_Interface&>(TelemetryRecorder<TSDFVoxel, WarpVoxel, PlainVoxelArray>::Instance());
-		}
-	}
-};
-
 int main(int argc, char** argv) {
 	try {
 		po::options_description arguments{"Arguments"};

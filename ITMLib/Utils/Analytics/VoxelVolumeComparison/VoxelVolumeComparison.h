@@ -53,11 +53,19 @@ bool contentAlmostEqual(VoxelVolume<TVoxel, TIndexA>* a, VoxelVolume<TVoxel, TIn
 		case MEMORYDEVICE_METAL:
 #ifdef COMPILE_WITH_METAL
 #error METAL SUPPORT NOT FULLY IMPLEMENTED
+			return false;
 #else
 			printf("WARNING: trying to run METAL volume comparison while compiled without METAL\n");
 			return false;
 #endif
+		case MEMORYDEVICE_NONE:
+			DIEWITHEXCEPTION_REPORTLOCATION("memory_type cannot be MEMORYDEVICE_NONE for comparison.");
+			return false;
+		default:
+			DIEWITHEXCEPTION_REPORTLOCATION("Unsupported memory device.");
+			return false;
 	}
+
 }
 
 template<typename TVoxel, typename TIndexA, typename TIndexB, typename ToleranceType>
@@ -76,10 +84,17 @@ bool contentAlmostEqual_Verbose(VoxelVolume<TVoxel, TIndexA>* a, VoxelVolume<TVo
 		case MEMORYDEVICE_METAL:
 #ifdef COMPILE_WITH_METAL
 #error METAL SUPPORT NOT FULLY IMPLEMENTED
+			return false;
 #else
 			printf("WARNING: trying to run METAL volume comparison while compiled without METAL\n");
 			return false;
 #endif
+		case MEMORYDEVICE_NONE:
+			DIEWITHEXCEPTION_REPORTLOCATION("memory_type cannot be MEMORYDEVICE_NONE for comparison.");
+			return false;
+		default:
+			DIEWITHEXCEPTION_REPORTLOCATION("Unsupported memory device.");
+			return false;
 	}
 }
 
@@ -100,10 +115,17 @@ contentForFlagsAlmostEqual(VoxelVolume<TVoxel, TIndexA>* a, VoxelVolume<TVoxel, 
 		case MEMORYDEVICE_METAL:
 #ifdef COMPILE_WITH_METAL
 #error METAL SUPPORT NOT FULLY IMPLEMENTED
+			return false;
 #else
 			printf("WARNING: trying to run METAL volume comparison while compiled without METAL\n");
 			return false;
 #endif
+		case MEMORYDEVICE_NONE:
+			DIEWITHEXCEPTION_REPORTLOCATION("memory_type cannot be MEMORYDEVICE_NONE for comparison.");
+			return false;
+		default:
+			DIEWITHEXCEPTION_REPORTLOCATION("Unsupported memory device.");
+			return false;
 	}
 }
 
@@ -123,10 +145,17 @@ bool contentForFlagsAlmostEqual_Verbose(VoxelVolume<TVoxel, TIndexA>* a, VoxelVo
 		case MEMORYDEVICE_METAL:
 #ifdef COMPILE_WITH_METAL
 #error METAL SUPPORT NOT FULLY IMPLEMENTED
+			return false;
 #else
 			printf("WARNING: trying to run METAL volume comparison while compiled without METAL\n");
 			return false;
 #endif
+		case MEMORYDEVICE_NONE:
+			DIEWITHEXCEPTION_REPORTLOCATION("memory_type cannot be MEMORYDEVICE_NONE for comparison.");
+			return false;
+		default:
+			DIEWITHEXCEPTION_REPORTLOCATION("Unsupported memory device.");
+			return false;
 	}
 }
 
@@ -167,6 +196,12 @@ bool allocatedContentAlmostEqual(VoxelVolume<TVoxel, TIndexA>* a, VoxelVolume<TV
 			printf("WARNING: trying to run METAL volume comparison while compiled without METAL\n");
 			return false;
 #endif
+		case MEMORYDEVICE_NONE:
+			DIEWITHEXCEPTION_REPORTLOCATION("memory_type cannot be MEMORYDEVICE_NONE for comparison.");
+			return false;
+		default:
+			DIEWITHEXCEPTION_REPORTLOCATION("Unsupported memory device.");
+			return false;
 	}
 }
 template<typename TVoxel, typename TIndexA, typename TIndexB, typename ToleranceType>
@@ -189,6 +224,12 @@ bool allocatedContentAlmostEqual_Verbose(VoxelVolume<TVoxel, TIndexA>* a, VoxelV
 			printf("WARNING: trying to run METAL volume comparison while compiled without METAL\n");
 			return false;
 #endif
+		case MEMORYDEVICE_NONE:
+			DIEWITHEXCEPTION_REPORTLOCATION("memory_type cannot be MEMORYDEVICE_NONE for comparison.");
+			return false;
+		default:
+			DIEWITHEXCEPTION_REPORTLOCATION("Unsupported memory device.");
+			return false;
 	}
 }
 } // namespace ITMLib

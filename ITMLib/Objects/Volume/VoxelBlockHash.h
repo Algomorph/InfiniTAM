@@ -3,13 +3,13 @@
 #pragma once
 
 #ifndef __METALC__
-
-#include <stdlib.h>
+//stdlib
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
-
 #endif
 
+//ITMLib
 #include "../../Utils/Math.h"
 #include "../../../ORUtils/MemoryBlock.h"
 #include "../../../ORUtils/MemoryBlockPersister.h"
@@ -25,17 +25,10 @@
 // Used to compute_allocated the hash of a bucket from a 3D location,  VOXEL_HASH_MASK = ORDERED_LIST_SIZE - 1
 #define VOXEL_HASH_MASK 0xfffff
 
-
-//// for loop closure
-// Number of locally stored blocks, currently 2^12
-//#define DEFAULT_VOXEL_BLOCK_NUM 0x10000
-
-// Number of Hash Bucket, should be a power of two and bigger than voxel block count, VOXEL_HASH_MASK = ORDERED_LIST_SIZE - 1
-//#define ORDERED_LIST_SIZE 0x40000
-
-
 // Maximum number of blocks transfered in one swap operation
 #define SWAP_OPERATION_BLOCK_COUNT 0x1000
+
+namespace ITMLib {
 
 /** \brief
 	A single entry in the hash table.
@@ -64,7 +57,7 @@ struct HashEntry {
 	}
 };
 
-namespace ITMLib {
+
 /** \brief
 This is the central class for the voxel block hash
 implementation. It contains all the data needed on the CPU

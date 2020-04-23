@@ -309,6 +309,6 @@ std::vector<std::string> VolumeSequenceRecorder<TVoxel, TWarp, TIndex>::LoadAllS
 			identifiers.push_back(sliceIdentifier);
 		}
 	}
-
+	return identifiers;
 }
 // endregion

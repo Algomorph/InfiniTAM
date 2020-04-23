@@ -24,9 +24,9 @@ namespace {
 
 template<typename TStaticFunctor, typename TVoxel>
 __global__ void
-traverseAll_StaticFunctor_device(TVoxel* voxels, const HashEntry* hash_table) {
+traverseAll_StaticFunctor_device(TVoxel* voxels, const ITMLib::HashEntry* hash_table) {
 	int hash_code = blockIdx.x;
-	const HashEntry& hash_entry = hash_table[hash_code];
+	const ITMLib::HashEntry& hash_entry = hash_table[hash_code];
 	if (hash_entry.ptr < 0) return;
 	int x = threadIdx.x, y = threadIdx.y, z = threadIdx.z;
 	int locId = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
@@ -36,9 +36,9 @@ traverseAll_StaticFunctor_device(TVoxel* voxels, const HashEntry* hash_table) {
 
 template<typename TStaticFunctor, typename TVoxel>
 __global__ void
-traverseUtilized_StaticFunctor_device(TVoxel* voxels, const HashEntry* hash_table, const int* utilized_hash_codes) {
+traverseUtilized_StaticFunctor_device(TVoxel* voxels, const ITMLib::HashEntry* hash_table, const int* utilized_hash_codes) {
 	int hash_code = utilized_hash_codes[blockIdx.x];
-	const HashEntry& hash_entry = hash_table[hash_code];
+	const ITMLib::HashEntry& hash_entry = hash_table[hash_code];
 	if (hash_entry.ptr < 0) return;
 	int x = threadIdx.x, y = threadIdx.y, z = threadIdx.z;
 	int locId = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
@@ -48,10 +48,9 @@ traverseUtilized_StaticFunctor_device(TVoxel* voxels, const HashEntry* hash_tabl
 
 template<typename TFunctor, typename TVoxel>
 __global__ void
-traverseAll_device(TVoxel* voxels, const HashEntry* hash_table,
-                   TFunctor* functor) {
+traverseAll_device(TVoxel* voxels, const ITMLib::HashEntry* hash_table, TFunctor* functor) {
 	int hash = blockIdx.x;
-	const HashEntry& hash_entry = hash_table[hash];
+	const ITMLib::HashEntry& hash_entry = hash_table[hash];
 	if (hash_entry.ptr < 0) return;
 	int x = threadIdx.x, y = threadIdx.y, z = threadIdx.z;
 	int voxel_index_within_block = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
@@ -61,10 +60,10 @@ traverseAll_device(TVoxel* voxels, const HashEntry* hash_table,
 
 template<typename TFunctor, typename TVoxel>
 __global__ void
-traverseUtilized_device(TVoxel* voxels, const HashEntry* hash_table, const int* utilized_hash_codes,
+traverseUtilized_device(TVoxel* voxels, const ITMLib::HashEntry* hash_table, const int* utilized_hash_codes,
                         TFunctor* functor) {
 	int hash_code = utilized_hash_codes[blockIdx.x];
-	const HashEntry& hash_entry = hash_table[hash_code];
+	const ITMLib::HashEntry& hash_entry = hash_table[hash_code];
 
 	int x = threadIdx.x, y = threadIdx.y, z = threadIdx.z;
 	int voxel_index_within_block = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
@@ -74,10 +73,10 @@ traverseUtilized_device(TVoxel* voxels, const HashEntry* hash_table, const int* 
 
 template<typename TFunctor, typename TVoxel>
 __global__ void
-traverseAllWithPosition_device(TVoxel* voxels, const HashEntry* hash_table,
+traverseAllWithPosition_device(TVoxel* voxels, const ITMLib::HashEntry* hash_table,
                                TFunctor* functor) {
 	int hash = blockIdx.x;
-	const HashEntry& hash_entry = hash_table[hash];
+	const ITMLib::HashEntry& hash_entry = hash_table[hash];
 	if (hash_entry.ptr < 0) return;
 
 	int x = threadIdx.x, y = threadIdx.y, z = threadIdx.z;
@@ -92,10 +91,10 @@ traverseAllWithPosition_device(TVoxel* voxels, const HashEntry* hash_table,
 
 template<typename TFunctor, typename TVoxel>
 __global__ void
-traverseUtilizedWithPosition_device(TVoxel* voxels, const HashEntry* hash_table, const int* utilized_hash_codes,
+traverseUtilizedWithPosition_device(TVoxel* voxels, const ITMLib::HashEntry* hash_table, const int* utilized_hash_codes,
                         TFunctor* functor) {
 	int hash_code = utilized_hash_codes[blockIdx.x];
-	const HashEntry& hash_entry = hash_table[hash_code];
+	const ITMLib::HashEntry& hash_entry = hash_table[hash_code];
 
 	int x = threadIdx.x, y = threadIdx.y, z = threadIdx.z;
 	int voxel_index_within_block = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
@@ -109,10 +108,10 @@ traverseUtilizedWithPosition_device(TVoxel* voxels, const HashEntry* hash_table,
 
 template<typename TFunctor, typename TVoxel>
 __global__ void
-traverseAllWithPositionAndBlockPosition_device(TVoxel* voxels, const HashEntry* hash_table,
+traverseAllWithPositionAndBlockPosition_device(TVoxel* voxels, const ITMLib::HashEntry* hash_table,
                                                TFunctor* functor) {
 	int hash = blockIdx.x;
-	const HashEntry& hash_entry = hash_table[hash];
+	const ITMLib::HashEntry& hash_entry = hash_table[hash];
 	if (hash_entry.ptr < 0) return;
 	int x = threadIdx.x, y = threadIdx.y, z = threadIdx.z;
 	int locId = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;

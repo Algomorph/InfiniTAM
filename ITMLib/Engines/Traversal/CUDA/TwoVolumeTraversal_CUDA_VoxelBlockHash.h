@@ -101,8 +101,8 @@ private:
 		*mismatch_encountered.GetData(MEMORYDEVICE_CPU) = false;
 		mismatch_encountered.UpdateDeviceFromHost();
 		ORUtils::MemoryBlock<HashMatchInfo> hash_match_info(1, true, true);
-		hash_match_info.GetData(MEMORYDEVICE_CPU)->matchedHashCount = 0;
-		hash_match_info.GetData(MEMORYDEVICE_CPU)->unmatchedHashCount = 0;
+		hash_match_info.GetData(MEMORYDEVICE_CPU)->matched_hash_count = 0;
+		hash_match_info.GetData(MEMORYDEVICE_CPU)->unmatched_hash_count = 0;
 		hash_match_info.UpdateDeviceFromHost();
 		ORUtils::MemoryBlock<HashPair> matched_hash_code_pairs(hash_entry_count, true, true);
 		ORUtils::MemoryBlock<UnmatchedHash> unmatchedHashes(hash_entry_count, true, true);
@@ -127,7 +127,7 @@ private:
 		// check unmatched hashes
 		hash_match_info.UpdateHostFromDevice();
 		dim3 block_voxel_per_thread_block_size(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
-		int unmatchedHashCount = hash_match_info.GetData(MEMORYDEVICE_CPU)->unmatchedHashCount;
+		int unmatchedHashCount = hash_match_info.GetData(MEMORYDEVICE_CPU)->unmatched_hash_count;
 		if (unmatchedHashCount > 0) {
 			dim3 gridSize_UnmatchedBlocks(unmatchedHashCount);
 			checkIfUnmatchedVoxelBlocksAreAltered
@@ -144,7 +144,7 @@ private:
 		mismatch_encountered.UpdateHostFromDevice();
 		if (*mismatch_encountered.GetData(MEMORYDEVICE_CPU)) return false;
 
-		int matchedHashCount = hash_match_info.GetData(MEMORYDEVICE_CPU)->matchedHashCount;
+		int matchedHashCount = hash_match_info.GetData(MEMORYDEVICE_CPU)->matched_hash_count;
 
 		if (matchedHashCount == 0) return true;
 

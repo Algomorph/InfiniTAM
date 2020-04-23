@@ -21,7 +21,7 @@ inline int
 FindHashCodeAt(const CONSTPTR(ITMLib::VoxelBlockHash::IndexData)* hash_table, const THREADPTR(Vector3s)& at) {
 	int hash = HashCodeFromBlockPosition(at);
 	while (true) {
-		HashEntry hashEntry = hash_table[hash];
+		ITMLib::HashEntry hashEntry = hash_table[hash];
 
 		if (IS_EQUAL3(hashEntry.pos, at) && hashEntry.ptr >= 0) {
 			return hash;
@@ -44,9 +44,9 @@ FindHashCodeAt(const CONSTPTR(ITMLib::VoxelBlockHash::IndexData)* hash_table, co
 _CPU_AND_GPU_CODE_
 inline bool FindHashAtPosition(THREADPTR(int)& hash_index,
                                const CONSTPTR(Vector3s)& hash_block_position,
-                               const CONSTPTR(HashEntry)* hash_table) {
+                               const CONSTPTR(ITMLib::HashEntry)* hash_table) {
 	hash_index = HashCodeFromBlockPosition(hash_block_position);
-	HashEntry hash_entry = hash_table[hash_index];
+	ITMLib::HashEntry hash_entry = hash_table[hash_index];
 
 	if (!(IS_EQUAL3(hash_entry.pos, hash_block_position) && hash_entry.ptr >= -1)) {
 		if (hash_entry.ptr >= -1) {
@@ -105,7 +105,7 @@ _CPU_AND_GPU_CODE_ inline int findVoxel(const CONSTPTR(ITMLib::VoxelBlockHash::I
 
 	while (true)
 	{
-		HashEntry hashEntry = voxelIndex[hashIdx];
+		ITMLib::HashEntry hashEntry = voxelIndex[hashIdx];
 
 		if (IS_EQUAL3(hashEntry.pos, blockPos) && hashEntry.ptr >= 0)
 		{
@@ -156,7 +156,7 @@ _CPU_AND_GPU_CODE_ inline TVoxel readVoxel(const CONSTPTR(TVoxel) *voxelData, co
 
 	while (true)
 	{
-		HashEntry hashEntry = voxelIndex[hashIdx];
+		ITMLib::HashEntry hashEntry = voxelIndex[hashIdx];
 
 		if (IS_EQUAL3(hashEntry.pos, blockPos) && hashEntry.ptr >= 0)
 		{

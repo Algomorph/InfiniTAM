@@ -16,12 +16,12 @@ MarkForAllocationAndSetVisibilityTypeIfNotFound_Legacy_Algomorph(ITMLib::HashEnt
                                                                  Vector3s* hashBlockCoordinates,
                                                                  ITMLib::HashBlockVisibility* block_visibility_types,
                                                                  Vector3s desiredHashBlockPosition,
-                                                                 const CONSTPTR(HashEntry)* hashTable,
+                                                                 const CONSTPTR(ITMLib::HashEntry)* hashTable,
                                                                  bool& collisionDetected) {
 
 	int hash_code = HashCodeFromBlockPosition(desiredHashBlockPosition);
 
-	HashEntry hashEntry = hashTable[hash_code];
+	ITMLib::HashEntry hashEntry = hashTable[hash_code];
 
 	//check if hash table contains entry
 	if (IS_EQUAL3(hashEntry.pos, desiredHashBlockPosition) && hashEntry.ptr >= -1) {
@@ -95,7 +95,7 @@ _CPU_AND_GPU_CODE_ inline void
 findVoxelHashBlocksAlongSegmentLegacy_Algomorph(ITMLib::HashEntryAllocationState* hash_entry_allocation_states,
                                                 Vector3s* hash_block_coordinates,
                                                 ITMLib::HashBlockVisibility* hash_block_visibility_types,
-                                                const CONSTPTR(HashEntry)* hash_table,
+                                                const CONSTPTR(ITMLib::HashEntry)* hash_table,
                                                 const ITMLib::Segment& segment_in_hash_blocks,
                                                 bool& collision_detected) {
 
@@ -253,7 +253,7 @@ findVoxelBlocksForRayNearSurfaceLegacy_Algomorph(
 		ITMLib::HashEntryAllocationState* hash_entry_allocation_states,
 		Vector3s* hash_block_coordinates,
 		ITMLib::HashBlockVisibility* hash_block_visibility_types,
-		const CONSTPTR(HashEntry)* hash_table,
+		const CONSTPTR(ITMLib::HashEntry)* hash_table,
 		const int x, const int y, const CONSTPTR(float)* depth, float surface_distance_cutoff,
 		const Matrix4f inverted_camera_pose,
 		const Vector4f inverted_projection_parameters,

@@ -76,7 +76,7 @@ void GetVoxelHashLocals(int& vmIndex, int& locId, int& xInBlock, int& yInBlock, 
 _CPU_AND_GPU_CODE_
 inline
 void GetVoxelHashLocals(int& vmIndex, int& locId, int& xInBlock, int& yInBlock, int& zInBlock,
-                        const CONSTPTR(ITMLib::VoxelBlockHash::IndexData)* hashEntries,
+                        const CONSTPTR(ITMLib::HashEntry)* hashEntries,
                         ITMLib::VoxelBlockHash::IndexCache& cache, const CONSTPTR(Vector3i)& point) {
 	Vector3i blockPos;
 	int linearIdx = pointToVoxelBlockPos(point, blockPos);
@@ -92,7 +92,7 @@ void GetVoxelHashLocals(int& vmIndex, int& locId, int& xInBlock, int& yInBlock, 
 	int hashIdx = HashCodeFromBlockPosition(blockPos);
 
 	while (true) {
-		HashEntry hashEntry = hashEntries[hashIdx];
+		ITMLib::HashEntry hashEntry = hashEntries[hashIdx];
 
 		if (IS_EQUAL3(hashEntry.pos, blockPos) && hashEntry.ptr >= 0) {
 			cache.blockPos = blockPos;

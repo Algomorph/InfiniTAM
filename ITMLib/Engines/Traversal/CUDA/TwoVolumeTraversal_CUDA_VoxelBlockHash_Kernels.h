@@ -24,25 +24,27 @@
 
 
 struct HashPair {
-	int primaryHash;
-	int secondaryHash;
+	int hash_code1;
+	int hash_code2;
 };
 
 struct UnmatchedHash {
-	int hash;
+	int hash_code;
 	bool primary;
 };
 
 struct HashMatchInfo {
-	int matchedHashCount;
-	int unmatchedHashCount;
+	int matched_hash_count;
+	int unmatched_hash_count;
 };
 
 namespace {
 // CUDA kernels
 
 
-__device__ inline void checkOtherHashHasMatchingEntry(HashEntry& hash_entry2, const HashEntry* hash_table2, const HashEntry& hash_entry1, const int hash_code1){
+__device__ inline void
+checkOtherHashHasMatchingEntry(ITMLib::HashEntry& hash_entry2, const ITMLib::HashEntry* hash_table2,
+                               const ITMLib::HashEntry& hash_entry1, const int hash_code1) {
 	if (hash_entry2.pos != hash_entry1.pos) {
 		int hash_code2 = 0;
 		if (!FindHashAtPosition(hash_code2, hash_entry1.pos, hash_table2)) {
@@ -56,10 +58,11 @@ __device__ inline void checkOtherHashHasMatchingEntry(HashEntry& hash_entry2, co
 
 __device__ inline bool
 getVoxelIndexesFromHashBlock(int& voxel1_index, int& voxel2_index,
-                             const int hash_code1, const HashEntry* hash_table1, const HashEntry* hash_table2) {
-	const HashEntry& hash_entry1 = hash_table1[hash_code1];
+                             const int hash_code1, const ITMLib::HashEntry* hash_table1,
+                             const ITMLib::HashEntry* hash_table2) {
+	const ITMLib::HashEntry& hash_entry1 = hash_table1[hash_code1];
 	if (hash_entry1.ptr < 0) return false;
-	HashEntry hash_entry2 = hash_table2[hash_code1];
+	ITMLib::HashEntry hash_entry2 = hash_table2[hash_code1];
 
 	checkOtherHashHasMatchingEntry(hash_entry2, hash_table2, hash_entry1, hash_code1);
 
@@ -75,11 +78,11 @@ getVoxelIndexesFromHashBlock(int& voxel1_index, int& voxel2_index,
 
 __device__ inline bool
 getVoxelIndexesAndPositionFromHashBlock(int& voxel1_index, int& voxel2_index, Vector3i& voxel_position,
-                                        const int hash_code1, const HashEntry* hash_table1,
-                                        const HashEntry* hash_table2) {
-	const HashEntry& hash_entry1 = hash_table1[hash_code1];
+                                        const int hash_code1, const ITMLib::HashEntry* hash_table1,
+                                        const ITMLib::HashEntry* hash_table2) {
+	const ITMLib::HashEntry& hash_entry1 = hash_table1[hash_code1];
 	if (hash_entry1.ptr < 0) return false;
-	HashEntry hash_entry2 = hash_table2[hash_code1];
+	ITMLib::HashEntry hash_entry2 = hash_table2[hash_code1];
 
 	checkOtherHashHasMatchingEntry(hash_entry2, hash_table2, hash_entry1, hash_code1);
 
@@ -98,7 +101,7 @@ getVoxelIndexesAndPositionFromHashBlock(int& voxel1_index, int& voxel2_index, Ve
 template<typename TFunctor, typename TVoxel1, typename TVoxel2>
 __global__ void
 traverseAll_device(TVoxel1* voxels1, TVoxel2* voxels2,
-                   const HashEntry* hash_table1, const HashEntry* hash_table2,
+                   const ITMLib::HashEntry* hash_table1, const ITMLib::HashEntry* hash_table2,
                    TFunctor* functor) {
 	int hash_code1 = blockIdx.x;
 	int voxel1_index, voxel2_index;
@@ -113,7 +116,7 @@ traverseAll_device(TVoxel1* voxels1, TVoxel2* voxels2,
 template<typename TFunctor, typename TVoxel1, typename TVoxel2>
 __global__ void
 traverseUtilized_device(TVoxel1* voxels1, TVoxel2* voxels2,
-                        const HashEntry* hash_table1, const HashEntry* hash_table2,
+                        const ITMLib::HashEntry* hash_table1, const ITMLib::HashEntry* hash_table2,
                         const int* utilized_hash_codes, TFunctor* functor) {
 	int hash_code1 = utilized_hash_codes[blockIdx.x];
 	int voxel1_index, voxel2_index;
@@ -129,13 +132,13 @@ traverseUtilized_device(TVoxel1* voxels1, TVoxel2* voxels2,
 template<typename TFunctor, typename TVoxel1, typename TVoxel2>
 __global__ void
 traverseAllWithPosition_device(TVoxel1* voxels1, TVoxel2* voxels2,
-                               const HashEntry* hash_table1, const HashEntry* hash_table2,
+                               const ITMLib::HashEntry* hash_table1, const ITMLib::HashEntry* hash_table2,
                                TFunctor* functor) {
 	int hash_code1 = blockIdx.x;
 	int voxel1_index, voxel2_index;
 	Vector3i voxel_position;
 	if (!getVoxelIndexesAndPositionFromHashBlock(voxel1_index, voxel2_index, voxel_position, hash_code1, hash_table1,
-	                                             hash_table2)){
+	                                             hash_table2)) {
 		return;
 	}
 	TVoxel1& voxel1 = voxels1[voxel1_index];
@@ -147,7 +150,7 @@ traverseAllWithPosition_device(TVoxel1* voxels1, TVoxel2* voxels2,
 template<typename TFunctor, typename TVoxel1, typename TVoxel2>
 __global__ void
 traverseUtilizedWithPosition_device(TVoxel1* voxels1, TVoxel2* voxels2,
-                                    const HashEntry* hash_table1, const HashEntry* hash_table2,
+                                    const ITMLib::HashEntry* hash_table1, const ITMLib::HashEntry* hash_table2,
                                     const int* utilized_hash_codes, TFunctor* functor) {
 	int hash_code1 = utilized_hash_codes[blockIdx.x];
 	int voxel1_index, voxel2_index;
@@ -162,8 +165,8 @@ traverseUtilizedWithPosition_device(TVoxel1* voxels1, TVoxel2* voxels2,
 }
 
 
-__global__ void matchUpHashEntriesByPosition(const HashEntry* hash_table1,
-                                             const HashEntry* hash_table2,
+__global__ void matchUpHashEntriesByPosition(const ITMLib::HashEntry* hash_table1,
+                                             const ITMLib::HashEntry* hash_table2,
                                              int hashEntryCount,
                                              HashPair* matchedHashPairs,
                                              UnmatchedHash* unmatchedHashes,
@@ -172,8 +175,8 @@ __global__ void matchUpHashEntriesByPosition(const HashEntry* hash_table1,
 	int hash = blockIdx.x * blockDim.x + threadIdx.x;
 	if (hash > hashEntryCount) return;
 
-	const HashEntry& hash_entry1 = hash_table1[hash];
-	const HashEntry hash_entry2 = hash_table2[hash];
+	const ITMLib::HashEntry& hash_entry1 = hash_table1[hash];
+	const ITMLib::HashEntry hash_entry2 = hash_table2[hash];
 	int secondaryHash = hash;
 	if (hash_entry1.ptr < 0) {
 		if (hash_entry2.ptr < 0) {
@@ -183,8 +186,8 @@ __global__ void matchUpHashEntriesByPosition(const HashEntry* hash_table1,
 			int alternativePrimaryHash;
 			// found no primary at hash index, but did find secondary. Ensure we have a matching primary.
 			if (!FindHashAtPosition(alternativePrimaryHash, hash_entry2.pos, hash_table1)) {
-				int unmatchedHashIdx = atomicAdd(&hashMatchInfo->unmatchedHashCount, 1);
-				unmatchedHashes[unmatchedHashIdx].hash = hash;
+				int unmatchedHashIdx = atomicAdd(&hashMatchInfo->unmatched_hash_count, 1);
+				unmatchedHashes[unmatchedHashIdx].hash_code = hash;
 				unmatchedHashes[unmatchedHashIdx].primary = false;
 				return;
 			} else {
@@ -200,8 +203,8 @@ __global__ void matchUpHashEntriesByPosition(const HashEntry* hash_table1,
 		if (hash_entry2.ptr >= 0) {
 			int alternativePrimaryHash;
 			if (!FindHashAtPosition(alternativePrimaryHash, hash_entry2.pos, hash_table1)) {
-				int unmatchedHashIdx = atomicAdd(&hashMatchInfo->unmatchedHashCount, 1);
-				unmatchedHashes[unmatchedHashIdx].hash = hash;
+				int unmatchedHashIdx = atomicAdd(&hashMatchInfo->unmatched_hash_count, 1);
+				unmatchedHashes[unmatchedHashIdx].hash_code = hash;
 				unmatchedHashes[unmatchedHashIdx].primary = false;
 				return;
 			}
@@ -209,16 +212,16 @@ __global__ void matchUpHashEntriesByPosition(const HashEntry* hash_table1,
 
 		if (!FindHashAtPosition(secondaryHash, hash_entry1.pos, hash_table2)) {
 			// If we cannot find the matching secondary hash, we will check whether the primary voxel block has been altered later
-			int unmatchedHashIdx = atomicAdd(&hashMatchInfo->unmatchedHashCount, 1);
-			unmatchedHashes[unmatchedHashIdx].hash = hash;
+			int unmatchedHashIdx = atomicAdd(&hashMatchInfo->unmatched_hash_count, 1);
+			unmatchedHashes[unmatchedHashIdx].hash_code = hash;
 			unmatchedHashes[unmatchedHashIdx].primary = true;
 			return;
 		}
 	}
 
-	int matchedPairIdx = atomicAdd(&hashMatchInfo->matchedHashCount, 1);
-	matchedHashPairs[matchedPairIdx].primaryHash = hash;
-	matchedHashPairs[matchedPairIdx].secondaryHash = secondaryHash;
+	int matchedPairIdx = atomicAdd(&hashMatchInfo->matched_hash_count, 1);
+	matchedHashPairs[matchedPairIdx].hash_code1 = hash;
+	matchedHashPairs[matchedPairIdx].hash_code2 = secondaryHash;
 }
 
 // region ========================= ALL-TRUE CHECK KERNELS =============================================================
@@ -226,7 +229,7 @@ __global__ void matchUpHashEntriesByPosition(const HashEntry* hash_table1,
 template<typename TVoxel1, typename TVoxel2>
 __global__ void checkIfUnmatchedVoxelBlocksAreAltered(
 		const TVoxel1* voxels1, const TVoxel2* voxels2,
-		const HashEntry* hash_table1, const HashEntry* hash_table2,
+		const ITMLib::HashEntry* hash_table1, const ITMLib::HashEntry* hash_table2,
 		const UnmatchedHash* unmatchedHashes, const HashMatchInfo* hashMatchInfo,
 		bool* alteredVoxelEncountered) {
 
@@ -234,8 +237,8 @@ __global__ void checkIfUnmatchedVoxelBlocksAreAltered(
 
 	// assume one thread block per hash block
 	int hashIdx = blockIdx.x;
-	if (hashIdx > hashMatchInfo->unmatchedHashCount) return;
-	int hash = unmatchedHashes[hashIdx].hash;
+	if (hashIdx > hashMatchInfo->unmatched_hash_count) return;
+	int hash = unmatchedHashes[hashIdx].hash_code;
 
 	int x = threadIdx.x, y = threadIdx.y, z = threadIdx.z;
 	int locId = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
@@ -253,15 +256,15 @@ __global__ void checkIfUnmatchedVoxelBlocksAreAltered(
 template<typename TBooleanFunctor, typename TVoxel1, typename TVoxel2>
 __global__ void checkIfMatchingHashBlockVoxelsYieldTrue(
 		TVoxel1* voxels1, TVoxel2* voxels2,
-		const HashEntry* hash_table1, const HashEntry* hash_table2,
+		const ITMLib::HashEntry* hash_table1, const ITMLib::HashEntry* hash_table2,
 		const HashPair* matchedHashes, const HashMatchInfo* matchInfo, TBooleanFunctor* functor,
 		bool* falseEncountered) {
 	if (*falseEncountered) return;
 
 	int hashPairIdx = blockIdx.x;
-	if (hashPairIdx > matchInfo->matchedHashCount) return;
-	int primaryHash = matchedHashes[hashPairIdx].primaryHash;
-	int secondaryHash = matchedHashes[hashPairIdx].secondaryHash;
+	if (hashPairIdx > matchInfo->matched_hash_count) return;
+	int primaryHash = matchedHashes[hashPairIdx].hash_code1;
+	int secondaryHash = matchedHashes[hashPairIdx].hash_code2;
 
 	int x = threadIdx.x, y = threadIdx.y, z = threadIdx.z;
 	int locId = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
@@ -276,20 +279,20 @@ __global__ void checkIfMatchingHashBlockVoxelsYieldTrue(
 template<typename TBooleanFunctor, typename TVoxel1, typename TVoxel2>
 __global__ void checkIfMatchingHashBlockVoxelsYieldTrue_Position(
 		TVoxel1* voxels1, TVoxel2* voxels2,
-		const HashEntry* hash_table1, const HashEntry* hash_table2,
+		const ITMLib::HashEntry* hash_table1, const ITMLib::HashEntry* hash_table2,
 		const HashPair* matchedHashes, const HashMatchInfo* matchInfo, TBooleanFunctor* functor,
 		bool* falseEncountered) {
 	if (*falseEncountered) return;
 
 	int hashPairIdx = blockIdx.x;
-	if (hashPairIdx > matchInfo->matchedHashCount) return;
-	int primaryHash = matchedHashes[hashPairIdx].primaryHash;
-	int secondaryHash = matchedHashes[hashPairIdx].secondaryHash;
+	if (hashPairIdx > matchInfo->matched_hash_count) return;
+	int primaryHash = matchedHashes[hashPairIdx].hash_code1;
+	int secondaryHash = matchedHashes[hashPairIdx].hash_code2;
 
 	int x = threadIdx.x, y = threadIdx.y, z = threadIdx.z;
 	int locId = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
 
-	const HashEntry& hash_entry1 = hash_table1[primaryHash];
+	const ITMLib::HashEntry& hash_entry1 = hash_table1[primaryHash];
 	// position of the current entry in 3D space in voxel units
 	Vector3i hashBlockPosition = hash_entry1.pos.toInt() * VOXEL_BLOCK_SIZE;
 	Vector3i voxel_position = hashBlockPosition + Vector3i(x, y, z);

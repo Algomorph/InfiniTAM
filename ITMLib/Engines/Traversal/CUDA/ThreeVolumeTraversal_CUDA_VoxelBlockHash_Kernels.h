@@ -25,8 +25,8 @@ namespace { // CUDA kernels
 
 
 __device__ inline void
-checkOtherHashHasMatchingEntry(HashEntry& slave_hash_entry, const HashEntry* slave_hash_table,
-                               const HashEntry& master_hash_entry, const int& master_hash_code, int volume_index) {
+checkOtherHashHasMatchingEntry(ITMLib::HashEntry& slave_hash_entry, const ITMLib::HashEntry* slave_hash_table,
+                               const ITMLib::HashEntry& master_hash_entry, const int& master_hash_code, int volume_index) {
 	if (slave_hash_entry.pos != master_hash_entry.pos) {
 		int slave_hash_code = 0;
 		if (!FindHashAtPosition(slave_hash_code, master_hash_entry.pos, slave_hash_table)) {
@@ -43,14 +43,14 @@ __device__ inline bool
 getVoxelIndicesAndPositionInHashTables(
 		int& voxel1_index, int& voxel2_index, int& voxel3_index, Vector3i& voxel_position,
 		const int hash_code1,
-		const HashEntry* hash_table1, const HashEntry* hash_table2, const HashEntry* hash_table3) {
+		const ITMLib::HashEntry* hash_table1, const ITMLib::HashEntry* hash_table2, const ITMLib::HashEntry* hash_table3) {
 
-	const HashEntry& hash_entry1 = hash_table1[hash_code1];
+	const ITMLib::HashEntry& hash_entry1 = hash_table1[hash_code1];
 	if (hash_entry1.ptr < 0){
 		return false;
 	}
-	HashEntry hash_entry2 = hash_table2[hash_code1];
-	HashEntry hash_entry3 = hash_table3[hash_code1];
+	ITMLib::HashEntry hash_entry2 = hash_table2[hash_code1];
+	ITMLib::HashEntry hash_entry3 = hash_table3[hash_code1];
 
 	checkOtherHashHasMatchingEntry(hash_entry2, hash_table2, hash_entry1, hash_code1, 2);
 	checkOtherHashHasMatchingEntry(hash_entry3, hash_table3, hash_entry1, hash_code1, 3);
@@ -72,8 +72,8 @@ getVoxelIndicesAndPositionInHashTables(
 template<typename TFunctor, typename TVoxel1, typename TVoxel2, typename TVoxel3>
 __global__ void
 traverseAllWithPosition_device(TVoxel1* voxels1, TVoxel2* voxels2, TVoxel3* voxels3,
-                               const HashEntry* hash_table1, const HashEntry* hash_table2,
-                               const HashEntry* hash_table3, TFunctor* functor) {
+                               const ITMLib::HashEntry* hash_table1, const ITMLib::HashEntry* hash_table2,
+                               const ITMLib::HashEntry* hash_table3, TFunctor* functor) {
 	int hash_code1 = blockIdx.x;
 	int voxel1_index, voxel2_index, voxel3_index;
 	Vector3i voxel_position;
@@ -90,8 +90,8 @@ traverseAllWithPosition_device(TVoxel1* voxels1, TVoxel2* voxels2, TVoxel3* voxe
 template<typename TFunctor, typename TVoxel1, typename TVoxel2, typename TVoxel3>
 __global__ void
 traverseUtilizedWithPosition_device(TVoxel1* voxels1, TVoxel2* voxels2, TVoxel3* voxels3,
-                               const HashEntry* hash_table1, const HashEntry* hash_table2,
-                               const HashEntry* hash_table3, const int* utilized_hash_codes, TFunctor* functor) {
+                               const ITMLib::HashEntry* hash_table1, const ITMLib::HashEntry* hash_table2,
+                               const ITMLib::HashEntry* hash_table3, const int* utilized_hash_codes, TFunctor* functor) {
 	int hash_code1 = utilized_hash_codes[blockIdx.x];
 	int voxel1_index, voxel2_index, voxel3_index;
 	Vector3i voxel_position;
