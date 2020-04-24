@@ -24,49 +24,90 @@
 #include "../Shared/SurfaceTrackerSharedFunctors.h"
 #include "../../Engines/Traversal/Interface/VolumeTraversal.h"
 #include "../../Engines/Traversal/Interface/ThreeVolumeTraversal.h"
+#include "../../Utils/Analytics/BenchmarkUtilities.h"
+#include "../../Utils/Logging/LoggingConfigruation.h"
+#include "../../Engines/Warping/WarpingEngineFactory.h"
 
 using namespace ITMLib;
 
-// region ===================================== HOUSEKEEPING ===========================================================
-template<typename T_TSDF_Voxel, typename TWarpVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType, GradientFunctorType TGradientFunctorType>
-template<WarpType TWarpType>
-void SurfaceTracker<T_TSDF_Voxel, TWarpVoxel, TIndex, TMemoryDeviceType, TGradientFunctorType>::ClearOutWarps(
-		VoxelVolume<TWarpVoxel, TIndex>* warp_field) {
-	VolumeTraversalEngine<TWarpVoxel, TIndex, TMemoryDeviceType>::
-#ifdef TRAVERSE_ALL_HASH_BLOCKS
-	template TraverseAll<ClearOutFramewiseWarpStaticFunctor<TWarpVoxel, TWarpVoxel::hasFramewiseWarp>>(warp_field);
-#else
-	template TraverseUtilized<ClearOutWarpStaticFunctor<TWarpVoxel, TWarpType>>(warp_field);
-#endif
+namespace bench = ITMLib::benchmarking;
+
+
+// region ===================================== CONSTRUCTORS / DESTRUCTORS =============================================
+
+template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, GradientFunctorType TGradientFunctorType>
+SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorType>::SurfaceTracker(
+		SlavchevaSurfaceTracker::Switches switches, SlavchevaSurfaceTracker::Parameters parameters)
+		: SlavchevaSurfaceTracker(switches, parameters),
+		 warping_engine(WarpingEngineFactory::Build<TVoxel, TWarp, TIndex>()),
+		 parameters_nr(configuration::get().non_rigid_tracking_parameters),
+		 max_vector_update_threshold_in_voxels(parameters_nr.max_update_length_threshold /
+		                                       configuration::get().general_voxel_volume_parameters.voxel_size)
+		{}
+template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, GradientFunctorType TGradientFunctorType>
+SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorType>::SurfaceTracker()
+		: SlavchevaSurfaceTracker(),
+		  warping_engine(WarpingEngineFactory::Build<TVoxel, TWarp, TIndex>()),
+		  parameters_nr(),
+		  max_vector_update_threshold_in_voxels(parameters_nr.max_update_length_threshold /
+		                                        configuration::get().general_voxel_volume_parameters.voxel_size) {}
+
+template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, GradientFunctorType TGradientFunctorType>
+SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorType>::~SurfaceTracker() {
+	delete warping_engine;
 }
 
-//#define TRAVERSE_ALL_HASH_BLOCKS
-template<typename T_TSDF_Voxel, typename TWarpVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType, GradientFunctorType TGradientFunctorType>
-void SurfaceTracker<T_TSDF_Voxel, TWarpVoxel, TIndex, TMemoryDeviceType, TGradientFunctorType>::ClearOutCumulativeWarps(
-		VoxelVolume<TWarpVoxel, TIndex>* warp_field) {
+template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, GradientFunctorType TGradientFunctorType>
+void SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorType>::LogSettings() {
+	if (this->log_settings) {
+		LOG4CPLUS_TOP_LEVEL(logging::get_logger(), bright_cyan << "*** NonRigidTrackingParameters ***" << reset);
+		LOG4CPLUS_TOP_LEVEL(logging::get_logger(), "Max iteration count: " << this->parameters_nr.max_iteration_threshold)
+		LOG4CPLUS_TOP_LEVEL(logging::get_logger(),
+		                    "Warping vector update threshold: " << this->parameters_nr.max_update_length_threshold
+		                                                        << " m, " << this->max_vector_update_threshold_in_voxels
+		                                                        << " voxels");
+		LOG4CPLUS_TOP_LEVEL(logging::get_logger(),
+		                    bright_cyan << "*** *********************************** ***" << reset);
+	}
+}
+
+// region ===================================== HOUSEKEEPING ===========================================================
+template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, GradientFunctorType TGradientFunctorType>
+template<WarpType TWarpType>
+void SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorType>::ClearOutWarps(
+		VoxelVolume<TWarp, TIndex>* warp_field) {
+	VolumeTraversalEngine<TWarp, TIndex, TMemoryDeviceType>::
+	template TraverseUtilized<ClearOutWarpStaticFunctor<TWarp, TWarpType>>(warp_field);
+}
+
+template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, GradientFunctorType TGradientFunctorType>
+void SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorType>::ClearOutCumulativeWarps(
+		VoxelVolume<TWarp, TIndex>* warp_field) {
 	ClearOutWarps<WARP_CUMULATIVE>(warp_field);
 };
 
-template<typename T_TSDF_Voxel, typename TWarpVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType, GradientFunctorType TGradientFunctorType>
-void SurfaceTracker<T_TSDF_Voxel, TWarpVoxel, TIndex, TMemoryDeviceType, TGradientFunctorType>::ClearOutFramewiseWarps(
-		VoxelVolume<TWarpVoxel, TIndex>* warp_field) {
+template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, GradientFunctorType TGradientFunctorType>
+void SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorType>::ClearOutFramewiseWarps(
+		VoxelVolume<TWarp, TIndex>* warp_field) {
 	ClearOutWarps<WARP_FRAMEWISE>(warp_field);
 }
 
-template<typename T_TSDF_Voxel, typename TWarpVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType, GradientFunctorType TGradientFunctorType>
-void SurfaceTracker<T_TSDF_Voxel, TWarpVoxel, TIndex, TMemoryDeviceType, TGradientFunctorType>::ClearOutWarpUpdates(
-		VoxelVolume<TWarpVoxel, TIndex>* warp_field) {
+template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, GradientFunctorType TGradientFunctorType>
+void SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorType>::ClearOutWarpUpdates(
+		VoxelVolume<TWarp, TIndex>* warp_field) {
 	ClearOutWarps<WARP_UPDATE>(warp_field);
 }
 
-// endregion ===========================================================================================================
+// endregion ====================================== LOGGING ============================================================
 
-template<typename T_TSDF_Voxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+//TODO: use Logging functions for this instead
+
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 inline static void PrintVolumeStatistics(
-		VoxelVolume<T_TSDF_Voxel, TIndex>* volume,
+		VoxelVolume<TVoxel, TIndex>* volume,
 		std::string description) {
-	AnalyticsEngine<T_TSDF_Voxel, TIndex, TMemoryDeviceType>& calculator =
-			AnalyticsEngine<T_TSDF_Voxel, TIndex, TMemoryDeviceType>::Instance();
+	AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>& calculator =
+			AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::Instance();
 	std::cout << green << "=== Stats for scene '" << description << "' ===" << reset << std::endl;
 	std::cout << "    Total voxel count: " << calculator.CountAllocatedVoxels(volume) << std::endl;
 	std::cout << "    NonTruncated voxel count: " << calculator.CountNonTruncatedVoxels(volume) << std::endl;
@@ -77,35 +118,106 @@ inline static void PrintVolumeStatistics(
 	std::cout << "    Truncated SDF sum: " << calculator.SumTruncatedVoxelAbsSdf(volume) << std::endl;
 };
 
+// region ==================================== MOTION TRACKING LOOP ====================================================
+/**
+ * \brief Tracks motion of voxels (around surface) from canonical frame to live frame.
+ * \details The warp field representing motion of voxels in the canonical frame is updated such that the live frame maps
+ * as closely as possible back to the canonical using the warp.
+ * \param canonical_volume the canonical voxel grid
+ * \param liveScene the live voxel grid (typically obtained by integrating a single depth image into an empty TSDF grid)
+ */
+template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, GradientFunctorType TGradientFunctorType>
+VoxelVolume<TVoxel, TIndex>*
+SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorType>::TrackFrameMotion(
+		VoxelVolume<TVoxel, TIndex>* canonical_volume,
+		VoxelVolume<TVoxel, TIndex>** live_volume_pair,
+		VoxelVolume<TWarp, TIndex>* warp_field) {
+
+	float max_vector_update_length_in_voxels = std::numeric_limits<float>::infinity();
+
+	int source_live_volume_index = 0;
+	int target_live_volume_index = 1;
+	for (int iteration = 0; max_vector_update_length_in_voxels > this->max_vector_update_threshold_in_voxels
+	                        && iteration < parameters_nr.max_iteration_threshold; iteration++) {
+		PerformSingleOptimizationStep(canonical_volume, live_volume_pair[source_live_volume_index],
+		                              live_volume_pair[target_live_volume_index], warp_field,
+		                              max_vector_update_length_in_voxels, iteration);
+
+		std::swap(source_live_volume_index, target_live_volume_index);
+	}
+
+
+	return live_volume_pair[target_live_volume_index];
+}
+
+
+template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, GradientFunctorType TGradientFunctorType>
+void SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorType>::PerformSingleOptimizationStep(
+		VoxelVolume<TVoxel, TIndex>* canonical_volume,
+		VoxelVolume<TVoxel, TIndex>* source_live_volume,
+		VoxelVolume<TVoxel, TIndex>* target_live_volume,
+		VoxelVolume<TWarp, TIndex>* warp_field,
+		float& max_update_vector_length,
+		int iteration) {
+
+
+	LOG4CPLUS_PER_ITERATION(logging::get_logger(), red << "Iteration: " << iteration << reset);
+	//** warp update gradient computation
+	LOG4CPLUS_PER_ITERATION(logging::get_logger(), bright_cyan << "Calculating warp energy gradient..." << reset);
+
+	bench::start_timer("TrackMotion_1_CalculateWarpUpdate");
+	CalculateWarpGradient(warp_field, canonical_volume, source_live_volume);
+	bench::stop_timer("TrackMotion_1_CalculateWarpUpdate");
+
+
+	LOG4CPLUS_PER_ITERATION(logging::get_logger(),
+	                        bright_cyan << "Applying Sobolev smoothing to energy gradient..." << reset);
+
+
+	bench::start_timer("TrackMotion_2_ApplySmoothingToGradient");
+	SmoothWarpGradient(warp_field, canonical_volume, source_live_volume);
+	bench::stop_timer("TrackMotion_2_ApplySmoothingToGradient");
+
+
+	LOG4CPLUS_PER_ITERATION(logging::get_logger(),
+	                        bright_cyan << "Applying warp update (based on energy gradient) to the cumulative warp..."
+	                                    << reset);
+
+	bench::start_timer("TrackMotion_3_UpdateWarps");
+	max_update_vector_length = UpdateWarps(warp_field, canonical_volume, source_live_volume);
+	bench::stop_timer("TrackMotion_3_UpdateWarps");
+
+
+	LOG4CPLUS_PER_ITERATION(logging::get_logger(),
+	                        bright_cyan << "Updating live frame SDF by mapping from raw live SDF "
+	                                       "to new warped SDF based on latest warp..." << reset);
+
+	bench::start_timer("TrackMotion_4_WarpLiveScene");
+	warping_engine->WarpVolume_WarpUpdates(warp_field, source_live_volume, target_live_volume);
+	bench::stop_timer("TrackMotion_4_WarpLiveScene");
+}
+
 // region ===================================== CALCULATE WARPS ========================================================
 
 
-template<typename T_TSDF_Voxel, typename TWarpVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType, GradientFunctorType TGradientFunctorType>
+template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, GradientFunctorType TGradientFunctorType>
 void
-SurfaceTracker<T_TSDF_Voxel, TWarpVoxel, TIndex, TMemoryDeviceType, TGradientFunctorType>::CalculateWarpGradient(
-		VoxelVolume<TWarpVoxel, TIndex>* warp_field,
-		VoxelVolume<T_TSDF_Voxel, TIndex>* canonical_volume,
-		VoxelVolume<T_TSDF_Voxel, TIndex>* live_volume) {
+SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorType>::CalculateWarpGradient(
+		VoxelVolume<TWarp, TIndex>* warp_field,
+		VoxelVolume<TVoxel, TIndex>* canonical_volume,
+		VoxelVolume<TVoxel, TIndex>* live_volume) {
 
 	// manage hash
-	VolumeTraversalEngine<TWarpVoxel, TIndex, TMemoryDeviceType>::template
-#ifdef TRAVERSE_ALL_HASH_BLOCKS
-	TraverseAll<ClearOutGradientStaticFunctor<TWarpVoxel>>(warp_field);
-#else
-	TraverseUtilized<ClearOutGradientStaticFunctor<TWarpVoxel>>(warp_field);
-#endif
+	VolumeTraversalEngine<TWarp, TIndex, TMemoryDeviceType>::template
+	TraverseUtilized<ClearOutGradientStaticFunctor<TWarp>>(warp_field);
 
-	WarpGradientFunctor<T_TSDF_Voxel, TWarpVoxel, TIndex, TMemoryDeviceType, TGradientFunctorType>
+	WarpGradientFunctor<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorType>
 			calculate_gradient_functor(this->parameters, this->switches, warp_field, canonical_volume, live_volume,
 			                           canonical_volume->GetParameters().voxel_size,
 			                           canonical_volume->GetParameters().narrow_band_half_width);
 
-	ThreeVolumeTraversalEngine<TWarpVoxel, T_TSDF_Voxel, T_TSDF_Voxel, TIndex, TMemoryDeviceType>::
-#ifdef TRAVERSE_ALL_HASH_BLOCKS
-	TraverseAllWithPosition(warp_field, canonical_volume, live_volume, calculate_gradient_functor);
-#else
-	TraverseUtilizedWithPosition(warp_field,  canonical_volume, live_volume, calculate_gradient_functor);
-#endif
+	ThreeVolumeTraversalEngine<TWarp, TVoxel, TVoxel, TIndex, TMemoryDeviceType>::
+	TraverseUtilizedWithPosition(warp_field, canonical_volume, live_volume, calculate_gradient_functor);
 	calculate_gradient_functor.PrintStatistics();
 }
 
@@ -113,72 +225,52 @@ SurfaceTracker<T_TSDF_Voxel, TWarpVoxel, TIndex, TMemoryDeviceType, TGradientFun
 // region ========================================== SOBOLEV GRADIENT SMOOTHING ========================================
 
 
-template<typename T_TSDF_Voxel, typename TWarpVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType, GradientFunctorType TGradientFunctorType>
-void SurfaceTracker<T_TSDF_Voxel, TWarpVoxel, TIndex, TMemoryDeviceType, TGradientFunctorType>::SmoothWarpGradient(
-		VoxelVolume<TWarpVoxel, TIndex>* warp_field,
-		VoxelVolume<T_TSDF_Voxel, TIndex>* canonical_volume,
-		VoxelVolume<T_TSDF_Voxel, TIndex>* live_volume) {
+template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, GradientFunctorType TGradientFunctorType>
+void SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorType>::SmoothWarpGradient(
+		VoxelVolume<TWarp, TIndex>* warp_field,
+		VoxelVolume<TVoxel, TIndex>* canonical_volume,
+		VoxelVolume<TVoxel, TIndex>* live_volume) {
 
 	if (this->switches.enable_sobolev_gradient_smoothing) {
-		GradientSmoothingPassFunctor<T_TSDF_Voxel, TWarpVoxel, TIndex, X> smoothing_pass_functor_X(warp_field);
-		GradientSmoothingPassFunctor<T_TSDF_Voxel, TWarpVoxel, TIndex, Y> smoothing_pass_functor_Y(warp_field);
-		GradientSmoothingPassFunctor<T_TSDF_Voxel, TWarpVoxel, TIndex, Z> smoothing_pass_functor_Z(warp_field);
+		GradientSmoothingPassFunctor<TVoxel, TWarp, TIndex, X> smoothing_pass_functor_X(warp_field);
+		GradientSmoothingPassFunctor<TVoxel, TWarp, TIndex, Y> smoothing_pass_functor_Y(warp_field);
+		GradientSmoothingPassFunctor<TVoxel, TWarp, TIndex, Z> smoothing_pass_functor_Z(warp_field);
 
-		ITMLib::ThreeVolumeTraversalEngine<TWarpVoxel, T_TSDF_Voxel, T_TSDF_Voxel, TIndex, TMemoryDeviceType>::
-#ifdef TRAVERSE_ALL_HASH_BLOCKS
-		template TraverseAllWithPosition(warp_field, canonical_volume, live_volume, smoothing_pass_functor_X);
-#else
+		ITMLib::ThreeVolumeTraversalEngine<TWarp, TVoxel, TVoxel, TIndex, TMemoryDeviceType>::
 		template TraverseUtilizedWithPosition(warp_field, canonical_volume, live_volume, smoothing_pass_functor_X);
-#endif
-		ITMLib::ThreeVolumeTraversalEngine<TWarpVoxel, T_TSDF_Voxel, T_TSDF_Voxel, TIndex, TMemoryDeviceType>::
-#ifdef TRAVERSE_ALL_HASH_BLOCKS
-		template TraverseAllWithPosition(warp_field, canonical_volume, live_volume, smoothing_pass_functor_Y);
-#else
+		ITMLib::ThreeVolumeTraversalEngine<TWarp, TVoxel, TVoxel, TIndex, TMemoryDeviceType>::
 		template TraverseUtilizedWithPosition(warp_field, canonical_volume, live_volume, smoothing_pass_functor_Y);
-#endif
-		ITMLib::ThreeVolumeTraversalEngine<TWarpVoxel, T_TSDF_Voxel, T_TSDF_Voxel, TIndex, TMemoryDeviceType>::
-#ifdef TRAVERSE_ALL_HASH_BLOCKS
-		template TraverseAllWithPosition(warp_field, canonical_volume, live_volume, smoothing_pass_functor_Z);
-#else
+		ITMLib::ThreeVolumeTraversalEngine<TWarp, TVoxel, TVoxel, TIndex, TMemoryDeviceType>::
 		template TraverseUtilizedWithPosition(warp_field, canonical_volume, live_volume, smoothing_pass_functor_Z);
-#endif
 	}
 }
 
 // endregion ===========================================================================================================
 
 // region ============================= UPDATE FRAMEWISE & GLOBAL (CUMULATIVE) WARPS ===================================
-template<typename T_TSDF_Voxel, typename TWarpVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType, GradientFunctorType TGradientFunctorType>
-float SurfaceTracker<T_TSDF_Voxel, TWarpVoxel, TIndex, TMemoryDeviceType, TGradientFunctorType>::UpdateWarps(
-		VoxelVolume<TWarpVoxel, TIndex>* warp_field,
-		VoxelVolume<T_TSDF_Voxel, TIndex>* canonical_volume,
-		VoxelVolume<T_TSDF_Voxel, TIndex>* live_volume) {
+template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, GradientFunctorType TGradientFunctorType>
+float SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorType>::UpdateWarps(
+		VoxelVolume<TWarp, TIndex>* warp_field,
+		VoxelVolume<TVoxel, TIndex>* canonical_volume,
+		VoxelVolume<TVoxel, TIndex>* live_volume) {
 
-	WarpUpdateFunctor<T_TSDF_Voxel, TWarpVoxel, TMemoryDeviceType>
+	WarpUpdateFunctor<TVoxel, TWarp, TMemoryDeviceType>
 			warp_update_functor(this->parameters.learning_rate,
 			                    ITMLib::configuration::get().non_rigid_tracking_parameters.momentum_weight,
 			                    this->switches.enable_sobolev_gradient_smoothing);
 
-	ThreeVolumeTraversalEngine<TWarpVoxel, T_TSDF_Voxel, T_TSDF_Voxel, TIndex, TMemoryDeviceType>::
-#ifdef TRAVERSE_ALL_HASH_BLOCKS
-	TraverseAllWithPosition(warp_field, canonical_volume, live_volume, warp_update_functor);
-#else
+	ThreeVolumeTraversalEngine<TWarp, TVoxel, TVoxel, TIndex, TMemoryDeviceType>::
 	TraverseUtilizedWithPosition(warp_field, canonical_volume, live_volume, warp_update_functor);
-#endif
 
 	//TODO: move histogram printing / logging to a separate function
 	//don't compute_allocated histogram in CUDA version
 #ifndef __CUDACC__
 	if (histograms_enabled) {
-		WarpHistogramFunctor<T_TSDF_Voxel, TWarpVoxel>
+		WarpHistogramFunctor<TVoxel, TWarp>
 				warp_histogram_functor(/*warp_update_functor.GetMaxFramewiseWarpLength(),*/
-				                       warp_update_functor.GetMaxWarpUpdateLength());
-		ThreeVolumeTraversalEngine<TWarpVoxel, T_TSDF_Voxel, T_TSDF_Voxel, TIndex, TMemoryDeviceType>::
-#ifdef TRAVERSE_ALL_HASH_BLOCKS
-		TraverseAll(warp_field, canonical_volume, live_volume, warp_histogram_functor);
-#else
+				warp_update_functor.GetMaxWarpUpdateLength());
+		ThreeVolumeTraversalEngine<TWarp, TVoxel, TVoxel, TIndex, TMemoryDeviceType>::
 		TraverseUtilized(warp_field, canonical_volume, live_volume, warp_histogram_functor);
-#endif
 		warp_histogram_functor.PrintHistogram();
 		warp_update_functor.PrintWarp();
 	}
@@ -187,30 +279,19 @@ float SurfaceTracker<T_TSDF_Voxel, TWarpVoxel, TIndex, TMemoryDeviceType, TGradi
 	return warp_update_functor.GetMaxWarpUpdateLength();
 }
 
-template<typename T_TSDF_Voxel, typename TWarpVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType, GradientFunctorType TGradientFunctorType>
-void SurfaceTracker<T_TSDF_Voxel, TWarpVoxel, TIndex, TMemoryDeviceType, TGradientFunctorType>::AddFramewiseWarpToWarp(
-		VoxelVolume<TWarpVoxel, TIndex>* warp_field, bool clear_framewise_warps) {
+template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, GradientFunctorType TGradientFunctorType>
+void SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorType>::AddFramewiseWarpToWarp(
+		VoxelVolume<TWarp, TIndex>* warp_field, bool clear_framewise_warps) {
 	if (clear_framewise_warps) {
-		VolumeTraversalEngine<TWarpVoxel, TIndex, TMemoryDeviceType>::
-#ifdef TRAVERSE_ALL_HASH_BLOCKS
-		template TraverseAll<
-				AddFramewiseWarpToWarpWithClearStaticFunctor<TWarpVoxel, TWarpVoxel::hasCumulativeWarp>>(warp_field);
-#else
+		VolumeTraversalEngine<TWarp, TIndex, TMemoryDeviceType>::
 		template TraverseUtilized<
-				AddFramewiseWarpToWarpWithClearStaticFunctor<TWarpVoxel, TWarpVoxel::hasCumulativeWarp>>(warp_field);
-#endif
+				AddFramewiseWarpToWarpWithClearStaticFunctor<TWarp, TWarp::hasCumulativeWarp>>(warp_field);
 	} else {
-		VolumeTraversalEngine<TWarpVoxel, TIndex, TMemoryDeviceType>::
-#ifdef TRAVERSE_ALL_HASH_BLOCKS
-		template TraverseAll<
-				AddFramewiseWarpToWarpStaticFunctor<TWarpVoxel, TWarpVoxel::hasCumulativeWarp>>(warp_field);
-#else
-		template TraverseUtilized<
-				AddFramewiseWarpToWarpStaticFunctor<TWarpVoxel, TWarpVoxel::hasCumulativeWarp>>(warp_field);
-#endif
+		VolumeTraversalEngine<TWarp, TIndex, TMemoryDeviceType>::
+		template TraverseUtilized<AddFramewiseWarpToWarpStaticFunctor<TWarp, TWarp::hasCumulativeWarp>>(warp_field);
+
 	}
 }
-
 
 
 //endregion ============================================================================================================

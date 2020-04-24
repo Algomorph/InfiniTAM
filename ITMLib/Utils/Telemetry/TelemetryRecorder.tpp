@@ -31,7 +31,7 @@
 
 
 using namespace ITMLib;
-namespace bench = ITMLib::bench;
+namespace bench = ITMLib::benchmarking;
 
 //TODO: create/destroy windowed visualizers (i.e. plotter) when their corresponding setting values are turned on/off, and make them Close their corresponding windows -Greg (GitHub:Algomorph)
 
@@ -345,13 +345,13 @@ void TelemetryRecorder<TVoxel, TWarp, TIndex>::InitializeFrameRecording() {
 	}
 
 	// region ========================= INITIALIZE WARP RECORDING ======================================================
-	bench::start_timer("TrackMotion_2_RecordingEnergy");
+	benchmarking::start_timer("TrackMotion_2_RecordingEnergy");
 
 	const std::string energyStatFilePath = outputDirectory + "/energy.txt";
 	energyStatisticsFile = std::ofstream(energyStatFilePath.c_str(), std::ios_base::out);
 	energyStatisticsFile << "data" << "," << "level_set" << "," << "smoothness" << ","
 	                     << "killing" << "," << "total" << std::endl;
-	bench::stop_timer("TrackMotion_2_RecordingEnergy");
+	benchmarking::stop_timer("TrackMotion_2_RecordingEnergy");
 
 	if (recording3DSceneAndWarpProgression) {
 		scene3DLogger->SaveScenesCompact();

@@ -1,4 +1,3 @@
-#############################
 # CMakeLists.txt for ITMLib #
 #############################
 
@@ -896,6 +895,7 @@ set(ITMLIB_UTILS_SOURCES
 
     Utils/Logging/LoggingUtilities.cpp
     Utils/Logging/LoggingConfiguration.cpp
+    Utils/Logging/LoggingCUDAWrapper.cpp
 
     Utils/Configuration.cpp
     Utils/CPPPrintHelpers.cpp
@@ -927,6 +927,7 @@ set(ITMLIB_UTILS_HEADERS
 
     Utils/Logging/LoggingConfiguration.cpp
     Utils/Logging/LoggingUtilities.h
+    Utils/Logging/LoggingCUDAWrapper.h
 
     Utils/CUDAUtils.h
     Utils/ValuePosition.h

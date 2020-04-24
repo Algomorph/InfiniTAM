@@ -20,7 +20,7 @@
 #include <ostream>
 
 namespace ITMLib {
-namespace bench {
+namespace benchmarking {
 void start_timer(std::string name);
 void stop_timer(std::string name);
 void all_cumulative_times_to_stream(std::ostream& out, bool colors_enabled);

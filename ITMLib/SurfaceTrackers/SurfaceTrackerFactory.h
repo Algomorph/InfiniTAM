@@ -33,16 +33,16 @@ public:
 	template<typename TVoxel, typename TWarp, typename TIndex>
 	static SurfaceTrackerInterface<TVoxel, TWarp, TIndex>*
 	MakeSceneMotionTracker() {
-		SurfaceTrackerInterface<TVoxel, TWarp, TIndex>* motionTracker = nullptr;
+		SurfaceTrackerInterface<TVoxel, TWarp, TIndex>* surface_tracker = nullptr;
 		auto& settings = configuration::get();
 		switch (settings.device_type) {
 			case MEMORYDEVICE_CPU:
 				switch (settings.non_rigid_tracking_parameters.functor_type){
 					case TRACKER_SLAVCHEVA_OPTIMIZED:
-						motionTracker = new SurfaceTracker<TVoxel, TWarp, TIndex, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_OPTIMIZED>();
+						surface_tracker = new SurfaceTracker<TVoxel, TWarp, TIndex, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_OPTIMIZED>();
 						break;
 					case TRACKER_SLAVCHEVA_DIAGNOSTIC:
-						motionTracker = new SurfaceTracker<TVoxel, TWarp, TIndex, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_DIAGNOSTIC>();
+						surface_tracker = new SurfaceTracker<TVoxel, TWarp, TIndex, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_DIAGNOSTIC>();
 						break;
 				}
 				break;
@@ -50,10 +50,10 @@ public:
 #ifndef COMPILE_WITHOUT_CUDA
 				switch (settings.non_rigid_tracking_parameters.functor_type) {
 					case TRACKER_SLAVCHEVA_OPTIMIZED:
-						motionTracker = new SurfaceTracker<TVoxel, TWarp, TIndex, MEMORYDEVICE_CUDA, TRACKER_SLAVCHEVA_OPTIMIZED>();
+						surface_tracker = new SurfaceTracker<TVoxel, TWarp, TIndex, MEMORYDEVICE_CUDA, TRACKER_SLAVCHEVA_OPTIMIZED>();
 						break;
 					case TRACKER_SLAVCHEVA_DIAGNOSTIC:
-						motionTracker = new SurfaceTracker<TVoxel, TWarp, TIndex, MEMORYDEVICE_CUDA, TRACKER_SLAVCHEVA_DIAGNOSTIC>();
+						surface_tracker = new SurfaceTracker<TVoxel, TWarp, TIndex, MEMORYDEVICE_CUDA, TRACKER_SLAVCHEVA_DIAGNOSTIC>();
 						break;
 				}
 #else
@@ -66,9 +66,12 @@ public:
 					DIEWITHEXCEPTION("Motion Scene Tracking not yet implemented on Metal")
 #endif
 				break;
+			case MEMORYDEVICE_NONE:
+				DIEWITHEXCEPTION_REPORTLOCATION("For construction of a SurfaceTracker instance, device_type cannot be MEMORYDEVICE_NONE.");
+				break;
 		}
 
-		return motionTracker;
+		return surface_tracker;
 	}
 };
 }//namespace ITMLib

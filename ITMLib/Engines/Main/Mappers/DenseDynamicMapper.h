@@ -20,7 +20,6 @@
 #include "../../Indexing/Interface/IndexingEngine.h"
 #include "../../DepthFusion/DepthFusionEngine.h"
 #include "../../VolumeFusion/VolumeFusionEngine.h"
-#include "../../Warping/WarpingEngine.h"
 #include "../../Swapping/Interface/SwappingEngine.h"
 #include "../../../SurfaceTrackers/Interface/SurfaceTrackerInterface.h"
 // utils
@@ -33,9 +32,6 @@
 namespace ITMLib {
 
 
-//TODO: naming the grouping of these functions as "DynamicMapper" is very arbitrary and even less suitable than for
-// static scene fusion, where it's an allusion to "mapping" in SLAM. Here, we also track the surfaces...
-// Think about reorganization on a higher level.
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 class DenseDynamicMapper {
@@ -79,38 +75,19 @@ public:
 	                       VoxelVolume<TVoxel, TIndex>* scene, RenderState* renderState, bool resetVisibleList = false);
 	// endregion
 private:
-	// region ========================================== FUNCTIONS =====================================================
+
 	void ProcessSwapping(
 			VoxelVolume <TVoxel, TIndex>* canonicalScene, RenderState* renderState);
 
-	VoxelVolume<TVoxel, TIndex>* TrackFrameMotion(
-			VoxelVolume<TVoxel, TIndex>* canonical_volume,
-			VoxelVolume<TVoxel, TIndex>** live_volume_pair,
-			VoxelVolume<TWarp, TIndex>* warp_field);
-
-	void PerformSingleOptimizationStep(
-			VoxelVolume<TVoxel, TIndex>* canonical_volume,
-			VoxelVolume<TVoxel, TIndex>* source_live_volume,
-			VoxelVolume<TVoxel, TIndex>* target_live_volume,
-			VoxelVolume<TWarp, TIndex>* warp_field,
-			float& max_update_vector_length,
-			int iteration);
-
-	void LogSettings();
-	// endregion =======================================================================================================
-	// region =========================================== MEMBER VARIABLES =============================================
 	// *** engines ***
 	IndexingEngineInterface<TVoxel,TIndex>* indexing_engine;
 	DepthFusionEngineInterface<TVoxel, TWarp, TIndex>* depth_fusion_engine;
-	WarpingEngineInterface<TVoxel, TWarp, TIndex>* warping_engine;
 	VolumeFusionEngineInterface<TVoxel, TIndex>* volume_fusion_engine;
-
 	SwappingEngine<TVoxel, TIndex>* swapping_engine;
 	SurfaceTrackerInterface<TVoxel, TWarp, TIndex>* surface_tracker;
 
 	// *** parameters ***
 	// logging
-	const bool log_settings = false;
 	bool has_focus_coordinates;
 	const Vector3i focus_coordinates;
 	//TODO: revise TelemetryRecorder and add to that
@@ -118,12 +95,7 @@ private:
 
 	// algorithm operation
 	const configuration::SwappingMode swapping_mode;
-	const NonRigidTrackingParameters parameters;
-	// needs to be declared after "parameters", derives value from it during initialization
-	const float max_vector_update_threshold_in_voxels;
 	const configuration::VerbosityLevel verbosity_level;
-	// endregion =======================================================================================================
-
 };
 }//namespace ITMLib
 

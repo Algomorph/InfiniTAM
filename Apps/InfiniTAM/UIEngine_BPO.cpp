@@ -56,7 +56,7 @@ using namespace InputSource;
 using namespace ITMLib;
 
 
-namespace bench = ITMLib::bench;
+namespace bench = ITMLib::benchmarking;
 
 
 /**

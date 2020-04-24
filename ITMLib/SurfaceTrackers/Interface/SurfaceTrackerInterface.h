@@ -38,6 +38,11 @@ class SurfaceTrackerInterface {
 public:
 
 	virtual ~SurfaceTrackerInterface() = default;
+	virtual VoxelVolume<TVoxel, TIndex>* TrackFrameMotion(
+			VoxelVolume<TVoxel, TIndex>* canonical_volume,
+			VoxelVolume<TVoxel, TIndex>** live_volume_pair,
+			VoxelVolume<TWarp, TIndex>* warp_field) = 0;
+
 	virtual void
 	CalculateWarpGradient(VoxelVolume<TWarp, TIndex>* warpField,
 	                      VoxelVolume<TVoxel, TIndex>* canonicalScene,

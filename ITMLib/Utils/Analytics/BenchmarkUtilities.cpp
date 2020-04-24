@@ -31,7 +31,7 @@
 
 namespace fs = boost::filesystem;
 
-namespace ITMLib::bench {
+namespace ITMLib::benchmarking {
 class Timer {
 public:
 	Timer() : cumulative_time(0.0), run_count(0u), start_point(std::chrono::steady_clock::now()) {}
