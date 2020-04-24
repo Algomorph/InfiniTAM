@@ -31,7 +31,7 @@ namespace ITMLib
 		    Ommitting a separate image size for the depth images
 		    will assume same resolution as for the RGB images.
 		*/
-		explicit DenseMapper(const TIndex& index);
+		explicit DenseMapper();
 		~DenseMapper();
 	};
 }

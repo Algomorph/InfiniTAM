@@ -87,19 +87,19 @@ namespace ITMLib
 		virtual void LoadFromFile(const std::string& path) { };
 
 		/// resets the scene and the tracker
-		virtual void resetAll() = 0;
+		virtual void ResetAll() = 0;
 
 		/// switch for turning tracking on/off
-		virtual void turnOnTracking() = 0;
-		virtual void turnOffTracking() = 0;
+		virtual void TurnOnTracking() = 0;
+		virtual void TurnOffTracking() = 0;
 
 		/// switch for turning integration on/off
-		virtual void turnOnIntegration() = 0;
-		virtual void turnOffIntegration() = 0;
+		virtual void TurnOnIntegration() = 0;
+		virtual void TurnOffIntegration() = 0;
 
 		/// switch for turning main processing on/off
-		virtual void turnOnMainProcessing() = 0;
-		virtual void turnOffMainProcessing() = 0;
+		virtual void TurnOnMainProcessing() = 0;
+		virtual void TurnOffMainProcessing() = 0;
 
 
 

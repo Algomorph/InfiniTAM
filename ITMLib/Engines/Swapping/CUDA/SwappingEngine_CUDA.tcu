@@ -39,11 +39,11 @@ namespace
 }
 
 template<class TVoxel>
-SwappingEngine_CUDA<TVoxel, VoxelBlockHash>::SwappingEngine_CUDA(const VoxelBlockHash& index)
+SwappingEngine_CUDA<TVoxel, VoxelBlockHash>::SwappingEngine_CUDA(typename VoxelBlockHash::InitializationParameters index_parameters)
 {
 	ORcudaSafeCall(cudaMalloc((void**)&noAllocatedVoxelEntries_device, sizeof(int)));
 	ORcudaSafeCall(cudaMalloc((void**)&noNeededEntries_device, sizeof(int)));
-	ORcudaSafeCall(cudaMalloc((void**)&entriesToClean_device, index.voxel_block_count * sizeof(int)));
+	ORcudaSafeCall(cudaMalloc((void**)&entriesToClean_device, index_parameters.voxel_block_count * sizeof(int)));
 }
 
 template<class TVoxel>

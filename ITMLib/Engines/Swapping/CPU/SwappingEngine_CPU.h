@@ -10,7 +10,7 @@ namespace ITMLib
 	class SwappingEngine_CPU : public SwappingEngine < TVoxel, TIndex >
 	{
 	public:
-		explicit SwappingEngine_CPU(const TIndex& index){};
+		explicit SwappingEngine_CPU(typename TIndex::InitializationParameters index_parameters){};
 		void IntegrateGlobalIntoLocal(VoxelVolume<TVoxel, TIndex> *scene, RenderState *renderState) {}
 		void SaveToGlobalMemory(VoxelVolume<TVoxel, TIndex> *scene, RenderState *renderState) {}
 		void CleanLocalMemory(VoxelVolume<TVoxel, TIndex> *scene, RenderState *renderState) {}
@@ -30,7 +30,7 @@ namespace ITMLib
 		void SaveToGlobalMemory(VoxelVolume<TVoxel, VoxelBlockHash> *volume, RenderState *render_state);
 		void CleanLocalMemory(VoxelVolume<TVoxel, VoxelBlockHash> *volume, RenderState *renderState);
 
-		explicit SwappingEngine_CPU(const VoxelBlockHash& index){};
+		explicit SwappingEngine_CPU(typename VoxelBlockHash::InitializationParameters index){};
 		~SwappingEngine_CPU() = default;
 	};
 }

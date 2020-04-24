@@ -44,7 +44,7 @@ MultiEngine<TVoxel, TIndex>::MultiEngine(const RGBDCalib& calib, Vector2i imgSiz
 	mapManager = new VoxelMapGraphManager<TVoxel, TIndex>(visualization_engine, denseMapper, trackedImageSize);
 	mActiveDataManager = new ActiveMapManager(mapManager);
 	mActiveDataManager->initiateNewLocalMap(true);
-	denseMapper = new DenseMapper<TVoxel, TIndex>(mapManager->getLocalMap(0)->volume->index);
+	denseMapper = new DenseMapper<TVoxel, TIndex>();
 
 	meshingEngine = NULL;
 	if (settings.create_meshing_engine)
@@ -438,36 +438,36 @@ void MultiEngine<TVoxel, TIndex>::GetImage(ITMUChar4Image *out, GetImageType get
 }
 
 template<typename TVoxel, typename TIndex>
-void MultiEngine<TVoxel, TIndex>::turnOnTracking() {
+void MultiEngine<TVoxel, TIndex>::TurnOnTracking() {
 	std::cerr << "Tracking on/off switch not available in " __FILE__ "." << std::endl;
 }
 
 template<typename TVoxel, typename TIndex>
-void MultiEngine<TVoxel, TIndex>::turnOffTracking() {
+void MultiEngine<TVoxel, TIndex>::TurnOffTracking() {
 	std::cerr << "Tracking on/off switch not available in " __FILE__ "." << std::endl;
 }
 
 template<typename TVoxel, typename TIndex>
-void MultiEngine<TVoxel, TIndex>::turnOnIntegration() {
+void MultiEngine<TVoxel, TIndex>::TurnOnIntegration() {
 	std::cerr << "Fusion on/off switch not available in " __FILE__ "." << std::endl;
 }
 
 template<typename TVoxel, typename TIndex>
-void MultiEngine<TVoxel, TIndex>::turnOffIntegration() {
+void MultiEngine<TVoxel, TIndex>::TurnOffIntegration() {
 	std::cerr << "Fusion on/off switch not available in " __FILE__ "." << std::endl;
 }
 
 template<typename TVoxel, typename TIndex>
-void MultiEngine<TVoxel, TIndex>::turnOnMainProcessing() {
+void MultiEngine<TVoxel, TIndex>::TurnOnMainProcessing() {
 	std::cerr << "Main processing on/off switch not available in " __FILE__ "." << std::endl;
 }
 
 template<typename TVoxel, typename TIndex>
-void MultiEngine<TVoxel, TIndex>::turnOffMainProcessing() {
+void MultiEngine<TVoxel, TIndex>::TurnOffMainProcessing() {
 	std::cerr << "Main processing on/off switch not available in " __FILE__ "." << std::endl;
 }
 
 template<typename TVoxel, typename TIndex>
-void MultiEngine<TVoxel, TIndex>::resetAll() {
+void MultiEngine<TVoxel, TIndex>::ResetAll() {
 	DIEWITHEXCEPTION_REPORTLOCATION("Not implemented");
 }

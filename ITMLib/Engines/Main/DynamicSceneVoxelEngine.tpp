@@ -27,35 +27,56 @@
 #include "../EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 #include "../../Utils/Logging/LoggingConfigruation.h"
 #include "../Analytics/AnalyticsEngineFactory.h"
+#include "../../Utils/Analytics/BenchmarkUtilities.h"
+#include "../VolumeFusion/VolumeFusionEngineFactory.h"
+#include "../DepthFusion/DepthFusionEngineFactory.h"
+#include "../Indexing/IndexingEngineFactory.h"
+#include "../../SurfaceTrackers/SurfaceTrackerFactory.h"
+#include "../Swapping/SwappingEngineFactory.h"
+#include "../Analytics/AnalyticsLogging.h"
+#include "../Analytics/AnalyticsTelemetry.h"
 
 using namespace ITMLib;
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(const RGBDCalib& calibration_info, Vector2i rgb_image_size,
-                                                                        Vector2i depth_image_size) : settings(configuration::get()) {
+DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(const RGBDCalib& calibration_info,
+                                                                        Vector2i rgb_image_size,
+                                                                        Vector2i depth_image_size)
+		: config(configuration::get()),
+		  indexing_engine(IndexingEngineFactory::Build<TVoxel, TIndex>(configuration::get().device_type)),
+		  depth_fusion_engine(
+				  DepthFusionEngineFactory::Build<TVoxel, TWarp, TIndex>
+						  (configuration::get().device_type)),
+		  volume_fusion_engine(VolumeFusionEngineFactory::Build<TVoxel, TIndex>(configuration::get().device_type)),
+		  surface_tracker(SurfaceTrackerFactory::Build<TVoxel, TWarp, TIndex>()),
+		  swapping_engine(configuration::get().swapping_mode != configuration::SWAPPINGMODE_DISABLED ?
+		                  SwappingEngineFactory::Build<TVoxel, TIndex>(
+				                  configuration::get().device_type,
+				                  configuration::for_volume_role<TIndex>(configuration::VOLUME_CANONICAL)
+		                  ) : nullptr),
+		  low_level_engine(LowLevelEngineFactory::MakeLowLevelEngine(configuration::get().device_type)),
+		  view_builder(ViewBuilderFactory::Build(calibration_info, configuration::get().device_type)),
+		  visualization_engine(VisualizationEngineFactory::MakeVisualizationEngine<TVoxel, TIndex>(
+				  configuration::get().device_type)) {
 	logging::initialize_logging();
 
 	this->InitializeScenes();
 
-	camera_tracking_enabled = settings.enable_rigid_tracking;
+	camera_tracking_enabled = config.enable_rigid_tracking;
 
-	const MemoryDeviceType deviceType = settings.device_type;
-	MemoryDeviceType memoryType = settings.device_type;
+	const MemoryDeviceType device_type = config.device_type;
+	MemoryDeviceType memoryType = config.device_type;
 	if ((depth_image_size.x == -1) || (depth_image_size.y == -1)) depth_image_size = rgb_image_size;
-	TelemetryRecorder<TVoxel, TWarp, TIndex>::Instance().SetScenes(canonical_volume, live_volumes[0], warp_field);
 
-	low_level_engine = LowLevelEngineFactory::MakeLowLevelEngine(deviceType);
-	view_builder = ViewBuilderFactory::Build(calibration_info, deviceType);
-	visualization_engine = VisualizationEngineFactory::MakeVisualizationEngine<TVoxel, TIndex>(deviceType);
 
 	meshing_engine = nullptr;
-	if (settings.create_meshing_engine)
-		meshing_engine = MeshingEngineFactory::MakeMeshingEngine<TVoxel, TIndex>(deviceType, canonical_volume->index);
+	if (config.create_meshing_engine)
+		meshing_engine = MeshingEngineFactory::MakeMeshingEngine<TVoxel, TIndex>(device_type, canonical_volume->index);
 
-	dense_mapper = new DenseDynamicMapper<TVoxel, TWarp, TIndex>(canonical_volume->index);
 
 	imu_calibrator = new ITMIMUCalibrator_iPad();
-	camera_tracker = CameraTrackerFactory::Instance().Make(rgb_image_size, depth_image_size, low_level_engine, imu_calibrator,
+	camera_tracker = CameraTrackerFactory::Instance().Make(rgb_image_size, depth_image_size, low_level_engine,
+	                                                       imu_calibrator,
 	                                                       canonical_volume->GetParameters());
 	camera_tracking_controller = new CameraTrackingController(camera_tracker);
 	//TODO: is "tracked" image size ever different from actual depth image size? If so, document GetTrackedImageSize function. Otherwise, revise.
@@ -63,10 +84,13 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(const RG
 	tracking_state = new CameraTrackingState(tracked_image_size, memoryType);
 
 
-	canonical_render_state = new RenderState(tracked_image_size, canonical_volume->GetParameters().near_clipping_distance,
-	                                         canonical_volume->GetParameters().far_clipping_distance, settings.device_type);
+	canonical_render_state = new RenderState(tracked_image_size,
+	                                         canonical_volume->GetParameters().near_clipping_distance,
+	                                         canonical_volume->GetParameters().far_clipping_distance,
+	                                         config.device_type);
 	live_render_state = new RenderState(tracked_image_size, canonical_volume->GetParameters().near_clipping_distance,
-	                                    canonical_volume->GetParameters().far_clipping_distance, settings.device_type);
+	                                    canonical_volume->GetParameters().far_clipping_distance,
+	                                    config.device_type);
 	freeview_render_state = nullptr; //will be created if needed
 
 
@@ -77,21 +101,21 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(const RG
 
 	view = nullptr; // will be allocated by the view builder
 
-	if (settings.behavior_on_failure == configuration::FAILUREMODE_RELOCALIZE)
-		relocaliser = new FernRelocLib::Relocaliser<float>(depth_image_size,
+	if (config.behavior_on_failure == configuration::FAILUREMODE_RELOCALIZE)
+		relocalizer = new FernRelocLib::Relocaliser<float>(depth_image_size,
 		                                                   Vector2f(
-				                                                   settings.general_voxel_volume_parameters.near_clipping_distance,
-				                                                   settings.general_voxel_volume_parameters.far_clipping_distance),
+				                                                   config.general_voxel_volume_parameters.near_clipping_distance,
+				                                                   config.general_voxel_volume_parameters.far_clipping_distance),
 		                                                   0.2f, 500, 4);
-	else relocaliser = nullptr;
+	else relocalizer = nullptr;
 
-	kfRaycast = new ITMUChar4Image(depth_image_size, memoryType);
+	keyframe_raycast = new ITMUChar4Image(depth_image_size, memoryType);
 
-	fusionActive = true;
-	mainProcessingActive = true;
-	trackingInitialised = false;
-	relocalisationCount = 0;
-	framesProcessed = 0;
+	fusion_active = true;
+	main_processing_active = true;
+	tracking_initialised = false;
+	relocalization_count = 0;
+	frames_processed = 0;
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
@@ -102,7 +126,8 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::InitializeScenes() {
 			settings.general_voxel_volume_parameters, settings.swapping_mode == configuration::SWAPPINGMODE_ENABLED,
 			memoryType, configuration::for_volume_role<TIndex>(configuration::VOLUME_CANONICAL));
 	this->live_volumes = new VoxelVolume<TVoxel, TIndex>* [2];
-	for (int iLiveScene = 0; iLiveScene < DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::live_scene_count; iLiveScene++) {
+	for (int iLiveScene = 0;
+	     iLiveScene < DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::live_scene_count; iLiveScene++) {
 		this->live_volumes[iLiveScene] = new VoxelVolume<TVoxel, TIndex>(
 				settings.general_voxel_volume_parameters,
 				settings.swapping_mode == configuration::SWAPPINGMODE_ENABLED,
@@ -116,9 +141,19 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::InitializeScenes() {
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::~DynamicSceneVoxelEngine() {
-	delete canonical_render_state;
-	delete live_render_state;
-	if (freeview_render_state != nullptr) delete freeview_render_state;
+
+	delete visualization_engine;
+	delete meshing_engine;
+	delete depth_fusion_engine;
+	delete swapping_engine;
+	delete low_level_engine;
+	delete view_builder;
+
+	delete camera_tracking_controller;
+
+	delete surface_tracker;
+	delete camera_tracker;
+	delete imu_calibrator;
 
 	for (int iScene = 0; iScene < DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::live_scene_count; iScene++) {
 		delete live_volumes[iScene];
@@ -126,24 +161,17 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::~DynamicSceneVoxelEngine() {
 	delete live_volumes;
 	delete canonical_volume;
 
-	delete dense_mapper;
-	delete camera_tracking_controller;
+	delete canonical_render_state;
+	delete live_render_state;
+	if (freeview_render_state != nullptr) delete freeview_render_state;
 
-	delete camera_tracker;
-	delete imu_calibrator;
+	delete keyframe_raycast;
+	delete relocalizer;
 
-	delete low_level_engine;
-	delete view_builder;
-
-	delete tracking_state;
 	delete view;
+	delete tracking_state;
 
-	delete visualization_engine;
-
-	delete relocaliser;
-	delete kfRaycast;
-
-	delete meshing_engine;
+	delete canonical_volume_memory_usage_file;
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
@@ -156,25 +184,27 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::SaveSceneToMesh(const char*
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::SaveToFile() {
-	std::string nextFrameOutputPath = TelemetryRecorder<TVoxel, TWarp, TIndex>::Instance().GetOutputDirectory();
+void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::SaveToFile(const std::string& path) {
+	std::string relocalizer_output_path = path + "Relocaliser/";
 	// throws error if any of the saves fail
-	if (relocaliser) relocaliser->SaveToDirectory(nextFrameOutputPath + "/Relocaliser/");
-	canonical_volume->SaveToDisk(nextFrameOutputPath + "/canonical_volume.dat");
-	live_volumes[0]->SaveToDisk(nextFrameOutputPath + "/live_volume.dat");
-	std::cout << "Saving scenes in a compact way to '" << nextFrameOutputPath << "'." << std::endl;
+	if (relocalizer) relocalizer->SaveToDirectory(relocalizer_output_path);
+	canonical_volume->SaveToDisk(path + "/canonical_volume.dat");
+	live_volumes[0]->SaveToDisk(path + "/live_volume.dat");
+	std::cout << "Saving scenes in a compact way to '" << path << "'." << std::endl;
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::LoadFromFile() {
-	std::string next_frame_output_path = TelemetryRecorder<TVoxel, TWarp, TIndex>::Instance().GetOutputDirectory();
-	std::string relocaliserInputDirectory = next_frame_output_path + "Relocaliser/";
+void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::SaveToFile() {
+	fs::path path(std::string(config.paths.output_path) + "/ProcessedFrame_" + std::to_string(frames_processed));
+	if (!fs::exists(path)) {
+		fs::create_directories(path);
+	}
+	SaveToFile(path.string());
+}
 
-	////TODO: add factory for relocaliser and rebuild using config from relocaliserOutputDirectory + "config.txt"
-	////TODO: add proper management of case when scene load fails (keep old scene or also reset relocaliser)
-
-	this->resetAll();
-
+template<typename TVoxel, typename TWarp, typename TIndex>
+void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::LoadFromFile(const std::string& path) {
+	std::string relocaliser_input_path = path + "Relocaliser/";
 	if (view != nullptr) {
 		try // load relocaliser
 		{
@@ -186,10 +216,10 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::LoadFromFile() {
 							                                     settings.general_voxel_volume_parameters.far_clipping_distance),
 					                                     0.2f, 500, 4);
 
-			relocaliser_temp->LoadFromDirectory(relocaliserInputDirectory);
+			relocaliser_temp->LoadFromDirectory(relocaliser_input_path);
 
-			delete relocaliser;
-			relocaliser = relocaliser_temp;
+			delete relocalizer;
+			relocalizer = relocaliser_temp;
 		}
 		catch (std::runtime_error& e) {
 			throw std::runtime_error("Could not load relocaliser: " + std::string(e.what()));
@@ -198,21 +228,27 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::LoadFromFile() {
 
 	try // load scene
 	{
-		std::cout << "Loading volumes from '" << next_frame_output_path << "'." << std::endl;
-		canonical_volume->LoadFromDisk(next_frame_output_path + "/canonical_volume.dat");
-		live_volumes[0]->LoadFromDisk(next_frame_output_path + "/live_volume.dat");
-		if (framesProcessed == 0) {
-			framesProcessed = 1; //to skip initialization
+		std::cout << "Loading canonical volume from '" << path << "'." << std::endl;
+		canonical_volume->LoadFromDisk(path + "/canonical");
+
+		if (frames_processed == 0) {
+			frames_processed = 1; //to skip initialization
 		}
 	}
 	catch (std::runtime_error& e) {
 		canonical_volume->Reset();
-		throw std::runtime_error("Could not load scene:" + std::string(e.what()));
+		throw std::runtime_error("Could not load volume:" + std::string(e.what()));
 	}
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::resetAll() {
+void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::LoadFromFile() {
+	fs::path path(std::string(config.paths.output_path) + "/ProcessedFrame_" + std::to_string(frames_processed));
+	LoadFromFile(path.string());
+}
+
+template<typename TVoxel, typename TWarp, typename TIndex>
+void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ResetAll() {
 	Reset();
 }
 
@@ -292,49 +328,101 @@ static void QuaternionFromRotationMatrix(const double *matrix, double *q) {
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 CameraTrackingState::TrackingResult
-DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(ITMUChar4Image* rgbImage,
-                                                             ITMShortImage* rawDepthImage,
-                                                             IMUMeasurement* imuMeasurement) {
-	// prepare image and turn it into a "view"
-	if (imuMeasurement == nullptr)
-		view_builder->UpdateView(&view, rgbImage, rawDepthImage, settings.use_threshold_filter,
-		                         settings.use_bilateral_filter, false, true);
-	else
-		view_builder->UpdateView(&view, rgbImage, rawDepthImage, settings.use_threshold_filter,
-		                         settings.use_bilateral_filter, imuMeasurement, false, true);
+DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(ITMUChar4Image* rgb_image,
+                                                             ITMShortImage* depth_image,
+                                                             IMUMeasurement* imu_measurement) {
+	// prepare images & IMU measurements and turn them into a "view"
+	if (imu_measurement == nullptr) {
+		view_builder->UpdateView(&view, rgb_image, depth_image, config.use_threshold_filter,
+		                         config.use_bilateral_filter, false, true);
+	} else {
+		view_builder->UpdateView(&view, rgb_image, depth_image, config.use_threshold_filter,
+		                         config.use_bilateral_filter, imu_measurement, false, true);
+	}
 
-	if (!mainProcessingActive) {
+	if (!main_processing_active) {
 		return CameraTrackingState::TRACKING_FAILED;
 	}
 	// camera tracking
-	previousFramePose = (*(tracking_state->pose_d));
+	previous_frame_pose = (*(tracking_state->pose_d));
 	if (camera_tracking_enabled) camera_tracking_controller->Track(tracking_state, view);
 
 	HandlePotentialCameraTrackingFailure();
 
 	// surface tracking & fusion
-	if (!mainProcessingActive) return CameraTrackingState::TRACKING_FAILED;
-	fusion_succeeded = false;
-	if ((last_tracking_result == CameraTrackingState::TRACKING_GOOD || !trackingInitialised) && (fusionActive) &&
-	    (relocalisationCount == 0)) {
-		if (framesProcessed > 0) {
-			dense_mapper->ProcessFrame(view, tracking_state, canonical_volume, live_volumes, warp_field);
+	if (!main_processing_active) return CameraTrackingState::TRACKING_FAILED;
+	bool fusion_succeeded = false;
+	if ((last_tracking_result == CameraTrackingState::TRACKING_GOOD || !tracking_initialised) && (fusion_active) &&
+	    (relocalization_count == 0)) {
+		if (frames_processed > 0) {
+			LOG4CPLUS_PER_FRAME(logging::get_logger(), bright_cyan << "Generating raw live TSDF from view..." << reset);
+			benchmarking::start_timer("GenerateRawLiveVolume");
+			live_volumes[0]->Reset();
+			live_volumes[1]->Reset();
+			warp_field->Reset();
+
+			indexing_engine->AllocateNearAndBetweenTwoSurfaces(live_volumes[0], view, tracking_state);
+			indexing_engine->AllocateFromOtherVolume(live_volumes[1], live_volumes[0]);
+			indexing_engine->AllocateFromOtherVolume(canonical_volume, live_volumes[0]);
+			indexing_engine->AllocateWarpVolumeFromOtherVolume(warp_field, live_volumes[0]);
+			depth_fusion_engine->IntegrateDepthImageIntoTsdfVolume(live_volumes[0], view, tracking_state);
+
+
+			LogTSDFVolumeStatistics(live_volumes[0], "[[live TSDF before tracking]]");
+			benchmarking::stop_timer("GenerateRawLiveVolume");
+
+			benchmarking::start_timer("TrackMotion");
+			LOG4CPLUS_PER_FRAME(logging::get_logger(), bright_cyan
+					<< "*** Optimizing warp based on difference between canonical and live SDF. ***" << reset);
+			VoxelVolume<TVoxel, TIndex>* target_warped_live_volume =
+					surface_tracker->TrackFrameMotion(canonical_volume, live_volumes, warp_field);
+			LOG4CPLUS_PER_FRAME(logging::get_logger(),
+			                    bright_cyan << "*** Warping optimization finished for current frame. ***" << reset);
+			benchmarking::stop_timer("TrackMotion");
+			LogTSDFVolumeStatistics(target_warped_live_volume, "[[live TSDF after tracking]]");
+
+
+			//fuse warped live into canonical
+			benchmarking::start_timer("FuseOneTsdfVolumeIntoAnother");
+			//FIXME: use proper frame number here
+			volume_fusion_engine->FuseOneTsdfVolumeIntoAnother(canonical_volume, target_warped_live_volume, 0);
+			benchmarking::stop_timer("FuseOneTsdfVolumeIntoAnother");
+
+			LogTSDFVolumeStatistics(canonical_volume, "[[canonical TSDF after fusion]]");
+			RecordVolumeMemoryUsageInfo(*canonical_volume_memory_usage_file, *canonical_volume);
+
 		} else {
-			dense_mapper->ProcessInitialFrame(view, tracking_state, canonical_volume, live_volumes[0]);
+			LOG4CPLUS_PER_FRAME(logging::get_logger(),
+			                    bright_cyan << "Generating raw live frame from view..." << reset);
+			benchmarking::start_timer("GenerateRawLiveAndCanonicalVolumes");
+			indexing_engine->AllocateNearSurface(live_volumes[0], view, tracking_state);
+			depth_fusion_engine->IntegrateDepthImageIntoTsdfVolume(live_volumes[0], view, tracking_state);
+			benchmarking::stop_timer("GenerateRawLiveAndCanonicalVolumes");
+			//** prepare canonical for new frame
+			LOG4CPLUS_PER_FRAME(logging::get_logger(),
+			                    bright_cyan << "Fusing data from live frame into canonical frame..." << reset);
+			//** fuse the live into canonical directly
+			benchmarking::start_timer("FuseOneTsdfVolumeIntoAnother");
+			indexing_engine->AllocateFromOtherVolume(canonical_volume, live_volumes[0]);
+			//FIXME: use proper frame number here instead of 0
+			volume_fusion_engine->FuseOneTsdfVolumeIntoAnother(canonical_volume, live_volumes[0], frames_processed);
+			benchmarking::stop_timer("FuseOneTsdfVolumeIntoAnother");
 		}
 		fusion_succeeded = true;
-		if (framesProcessed > 50) trackingInitialised = true;
-		framesProcessed++;
+		if (frames_processed > 50) tracking_initialised = true;
+		frames_processed++;
 	}
 
 	//preparation for next-frame tracking
 	if (last_tracking_result == CameraTrackingState::TRACKING_GOOD ||
 	    last_tracking_result == CameraTrackingState::TRACKING_POOR) {
-		//if (!fusion_succeeded) denseMapper->UpdateVisibleList(view, tracking_state, canonical_volume, canonical_render_state);
+		//TODO: FIXME (See issue #214 at https://github.com/Algomorph/InfiniTAM/issues/214)
+		//if (!fusion_succeeded) indexing_engine->UpdateVisibleList(view, tracking_state, canonical_volume, canonical_render_state);
 
 		// raycast to renderState_canonical for tracking and free Visualization
-		camera_tracking_controller->Prepare(tracking_state, canonical_volume, view, visualization_engine, canonical_render_state);
-	} else *tracking_state->pose_d = previousFramePose;
+		camera_tracking_controller->Prepare(tracking_state, canonical_volume, view, visualization_engine,
+		                                    canonical_render_state);
+	} else *tracking_state->pose_d = previous_frame_pose;
 
 #ifdef OUTPUT_TRAJECTORY_QUATERNIONS
 	const ORUtils::SE3Pose *p = trackingState->pose_d;
@@ -356,7 +444,7 @@ Vector2i DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImageSize() const {
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(ITMUChar4Image* out, GetImageType getImageType,
+void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(ITMUChar4Image* out, GetImageType type,
                                                               ORUtils::SE3Pose* pose,
                                                               Intrinsics* intrinsics) {
 
@@ -366,7 +454,7 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(ITMUChar4Image* ou
 
 	out->Clear();
 
-	switch (getImageType) {
+	switch (type) {
 		case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_ORIGINAL_RGB:
 			out->ChangeDims(view->rgb->dimensions);
 			if (settings.device_type == MEMORYDEVICE_CUDA)
@@ -388,28 +476,28 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(ITMUChar4Image* ou
 			else raycastType = IVisualizationEngine::RENDER_FROM_OLD_FORWARDPROJ;
 
 			// what sort of image is it?
-			IVisualizationEngine::RenderImageType imageType;
-			switch (getImageType) {
+			IVisualizationEngine::RenderImageType render_type;
+			switch (type) {
 				case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_COLOUR_FROM_CONFIDENCE:
-					imageType = IVisualizationEngine::RENDER_COLOUR_FROM_CONFIDENCE;
+					render_type = IVisualizationEngine::RENDER_COLOUR_FROM_CONFIDENCE;
 					break;
 				case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_COLOUR_FROM_NORMAL:
-					imageType = IVisualizationEngine::RENDER_COLOUR_FROM_NORMAL;
+					render_type = IVisualizationEngine::RENDER_COLOUR_FROM_NORMAL;
 					break;
 				case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_COLOUR_FROM_VOLUME:
-					imageType = IVisualizationEngine::RENDER_COLOUR_FROM_VOLUME;
+					render_type = IVisualizationEngine::RENDER_COLOUR_FROM_VOLUME;
 					break;
 				default:
-					imageType = IVisualizationEngine::RENDER_SHADED_GREYSCALE_IMAGENORMALS;
+					render_type = IVisualizationEngine::RENDER_SHADED_GREYSCALE_IMAGENORMALS;
 			}
 
 			visualization_engine->RenderImage(live_volumes[0], tracking_state->pose_d, &view->calib.intrinsics_d,
-			                                  live_render_state, live_render_state->raycastImage, imageType,
+			                                  live_render_state, live_render_state->raycastImage, render_type,
 			                                  raycastType);
 
 
 			ORUtils::Image<Vector4u>* srcImage = nullptr;
-			if (relocalisationCount != 0) srcImage = kfRaycast;
+			if (relocalization_count != 0) srcImage = keyframe_raycast;
 			else srcImage = canonical_render_state->raycastImage;
 
 			out->ChangeDims(srcImage->dimensions);
@@ -423,13 +511,18 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(ITMUChar4Image* ou
 		case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_VOLUME:
 		case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_NORMAL:
 		case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_CONFIDENCE: {
-			IVisualizationEngine::RenderImageType type = IVisualizationEngine::RENDER_SHADED_GREYSCALE;
-			if (getImageType == DynamicSceneVoxelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_VOLUME)
-				type = IVisualizationEngine::RENDER_COLOUR_FROM_VOLUME;
-			else if (getImageType == DynamicSceneVoxelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_NORMAL)
-				type = IVisualizationEngine::RENDER_COLOUR_FROM_NORMAL;
-			else if (getImageType == DynamicSceneVoxelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_CONFIDENCE)
-				type = IVisualizationEngine::RENDER_COLOUR_FROM_CONFIDENCE;
+			IVisualizationEngine::RenderImageType render_type = IVisualizationEngine::RENDER_SHADED_GREYSCALE;
+			switch (type) {
+				case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_VOLUME:
+					render_type = IVisualizationEngine::RENDER_COLOUR_FROM_VOLUME;
+					break;
+				case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_NORMAL:
+					render_type = IVisualizationEngine::RENDER_COLOUR_FROM_NORMAL;
+					break;
+				case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_CONFIDENCE:
+					render_type = IVisualizationEngine::RENDER_COLOUR_FROM_CONFIDENCE;
+					break;
+			}
 
 			if (freeview_render_state == nullptr) {
 				freeview_render_state = new RenderState(out->dimensions,
@@ -440,7 +533,8 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(ITMUChar4Image* ou
 
 			visualization_engine->FindVisibleBlocks(live_volumes[0], pose, intrinsics, freeview_render_state);
 			visualization_engine->CreateExpectedDepths(live_volumes[0], pose, intrinsics, freeview_render_state);
-			visualization_engine->RenderImage(live_volumes[0], pose, intrinsics, freeview_render_state, freeview_render_state->raycastImage, type);
+			visualization_engine->RenderImage(live_volumes[0], pose, intrinsics, freeview_render_state,
+			                                  freeview_render_state->raycastImage, render_type);
 
 			if (settings.device_type == MEMORYDEVICE_CUDA)
 				out->SetFrom(*freeview_render_state->raycastImage, MemoryCopyDirection::CUDA_TO_CPU);
@@ -474,22 +568,22 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(ITMUChar4Image* ou
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::turnOnTracking() { camera_tracking_enabled = true; }
+void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::TurnOnTracking() { camera_tracking_enabled = true; }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::turnOffTracking() { camera_tracking_enabled = false; }
+void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::TurnOffTracking() { camera_tracking_enabled = false; }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::turnOnIntegration() { fusionActive = true; }
+void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::TurnOnIntegration() { fusion_active = true; }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::turnOffIntegration() { fusionActive = false; }
+void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::TurnOffIntegration() { fusion_active = false; }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::turnOnMainProcessing() { mainProcessingActive = true; }
+void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::TurnOnMainProcessing() { main_processing_active = true; }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::turnOffMainProcessing() { mainProcessingActive = false; }
+void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::TurnOffMainProcessing() { main_processing_active = false; }
 
 // region ==================================== STEP-BY-STEP MODE =======================================================
 
@@ -503,8 +597,8 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::HandlePotentialCameraTracki
 		case configuration::FAILUREMODE_RELOCALIZE:
 			//relocalisation
 			last_tracking_result = tracking_state->trackerResult;
-			if (last_tracking_result == CameraTrackingState::TRACKING_GOOD && relocalisationCount > 0)
-				relocalisationCount--;
+			if (last_tracking_result == CameraTrackingState::TRACKING_GOOD && relocalization_count > 0)
+				relocalization_count--;
 
 			view->depth->UpdateHostFromDevice();
 
@@ -512,26 +606,27 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::HandlePotentialCameraTracki
 				int NN;
 				float distances;
 				//find and add keyframe, if necessary
-				bool hasAddedKeyframe = relocaliser->ProcessFrame(view->depth, tracking_state->pose_d, 0, 1, &NN,
+				bool hasAddedKeyframe = relocalizer->ProcessFrame(view->depth, tracking_state->pose_d, 0, 1, &NN,
 				                                                  &distances,
 				                                                  last_tracking_result ==
 				                                                  CameraTrackingState::TRACKING_GOOD &&
-				                                                  relocalisationCount == 0);
+				                                                  relocalization_count == 0);
 
 				//frame not added and tracking failed -> we need to relocalise
 				if (!hasAddedKeyframe && last_tracking_result == CameraTrackingState::TRACKING_FAILED) {
-					relocalisationCount = 10;
+					relocalization_count = 10;
 
 					// Reset previous rgb frame since the rgb image is likely different than the one acquired when setting the keyframe
 					view->rgb_prev->Clear();
 
-					const FernRelocLib::PoseDatabase::PoseInScene& keyframe = relocaliser->RetrievePose(NN);
+					const FernRelocLib::PoseDatabase::PoseInScene& keyframe = relocalizer->RetrievePose(NN);
 					tracking_state->pose_d->SetFrom(&keyframe.pose);
 
-					// TODO: fix this functionality, reuse when fixed
-					dense_mapper->UpdateVisibleList(view, tracking_state, live_volumes[0], canonical_render_state, true);
+					//TODO: FIXME (See issue #214 at https://github.com/Algomorph/InfiniTAM/issues/214)
+					//indexing_engine->UpdateVisibleList(view, tracking_state, live_volumes[0], canonical_render_state, true);
 
-					camera_tracking_controller->Prepare(tracking_state, live_volumes[0], view, visualization_engine, canonical_render_state);
+					camera_tracking_controller->Prepare(tracking_state, live_volumes[0], view, visualization_engine,
+					                                    canonical_render_state);
 					camera_tracking_controller->Track(tracking_state, view);
 
 					last_tracking_result = tracking_state->trackerResult;
@@ -560,53 +655,23 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::Reset() {
 	tracking_state->Reset();
 }
 
-template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::LoadFromFile(const std::string& path) {
-	std::string relocaliser_input_path = path + "Relocaliser/";
-	if (view != nullptr) {
-		try // load relocaliser
-		{
-			auto& settings = configuration::get();
-			FernRelocLib::Relocaliser<float>* relocaliser_temp =
-					new FernRelocLib::Relocaliser<float>(view->depth->dimensions,
-					                                     Vector2f(
-							                                     settings.general_voxel_volume_parameters.near_clipping_distance,
-							                                     settings.general_voxel_volume_parameters.far_clipping_distance),
-					                                     0.2f, 500, 4);
 
-			relocaliser_temp->LoadFromDirectory(relocaliser_input_path);
-
-			delete relocaliser;
-			relocaliser = relocaliser_temp;
-		}
-		catch (std::runtime_error& e) {
-			throw std::runtime_error("Could not load relocaliser: " + std::string(e.what()));
-		}
-	}
-
-	try // load scene
-	{
-		std::cout << "Loading canonical volume from '" << path << "'." << std::endl;
-		canonical_volume->LoadFromDisk(path + "/canonical");
-
-		if (framesProcessed == 0) {
-			framesProcessed = 1; //to skip initialization
-		}
-	}
-	catch (std::runtime_error& e) {
-		canonical_volume->Reset();
-		throw std::runtime_error("Could not load volume:" + std::string(e.what()));
-	}
-}
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::SaveToFile(const std::string& path) {
-	std::string relocalizer_output_path = path + "Relocaliser/";
-	// throws error if any of the saves fail
-	if (relocaliser) relocaliser->SaveToDirectory(relocalizer_output_path);
-	canonical_volume->SaveToDisk(path + "/canonical_volume.dat");
-	live_volumes[0]->SaveToDisk(path + "/live_volume.dat");
-	std::cout << "Saving scenes in a compact way to '" << path << "'." << std::endl;
+void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessSwapping(RenderState* render_state) {
+
+	// swapping: CUDA -> CPU
+	switch (config.swapping_mode) {
+		case configuration::SWAPPINGMODE_ENABLED:
+			swapping_engine->IntegrateGlobalIntoLocal(canonical_volume, render_state);
+			swapping_engine->SaveToGlobalMemory(canonical_volume, render_state);
+			break;
+		case configuration::SWAPPINGMODE_DELETE:
+			swapping_engine->CleanLocalMemory(canonical_volume, render_state);
+			break;
+		case configuration::SWAPPINGMODE_DISABLED:
+			break;
+	}
 }
 
 // endregion ===========================================================================================================

@@ -72,7 +72,7 @@ MainEngine* BuildMainEngine(const RGBDCalib& calib, Vector2i imgSize_rgb, Vector
 	if (fix_camera) {
 		std::cout << "fix_camera flag passed, automatically locking camera if possible "
 		             "(attempting to disable tracking)." << std::endl;
-		mainEngine->turnOffTracking();
+		mainEngine->TurnOffTracking();
 	}
 	return mainEngine;
 }

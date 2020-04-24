@@ -23,21 +23,21 @@ struct SwappingEngineFactory
   /**
    * \brief Makes a swapping engine.
    *
-   * \param deviceType  The device on which the swapping engine should operate.
+   * \param device_type  The device on which the swapping engine should operate.
    */
   template <typename TVoxel, typename TIndex>
-  static SwappingEngine<TVoxel,TIndex> *Build(MemoryDeviceType deviceType, const TIndex& index)
+  static SwappingEngine<TVoxel,TIndex>* Build(MemoryDeviceType device_type, typename TIndex::InitializationParameters index_parameters = configuration::for_volume_role<TIndex>(configuration::VOLUME_CANONICAL))
   {
-    SwappingEngine<TVoxel,TIndex> *swapping_engine = NULL;
+    SwappingEngine<TVoxel,TIndex>* swapping_engine = nullptr;
 
-    switch(deviceType)
+    switch(device_type)
     {
       case MEMORYDEVICE_CPU:
-	      swapping_engine = new SwappingEngine_CPU<TVoxel,TIndex>(index);
+	      swapping_engine = new SwappingEngine_CPU<TVoxel,TIndex>(index_parameters);
         break;
       case MEMORYDEVICE_CUDA:
 #ifndef COMPILE_WITHOUT_CUDA
-        swapping_engine = new SwappingEngine_CUDA<TVoxel,TIndex>(index);
+        swapping_engine = new SwappingEngine_CUDA<TVoxel,TIndex>(index_parameters);
 #endif
         break;
       case MEMORYDEVICE_METAL:

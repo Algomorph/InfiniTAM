@@ -32,7 +32,7 @@ public:
 */
 	template<typename TVoxel, typename TWarp, typename TIndex>
 	static SurfaceTrackerInterface<TVoxel, TWarp, TIndex>*
-	MakeSceneMotionTracker() {
+	Build() {
 		SurfaceTrackerInterface<TVoxel, TWarp, TIndex>* surface_tracker = nullptr;
 		auto& settings = configuration::get();
 		switch (settings.device_type) {

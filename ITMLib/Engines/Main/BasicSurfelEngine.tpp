@@ -105,7 +105,7 @@ void BasicSurfelEngine<TSurfel>::LoadFromFile() {
 }
 
 template<typename TSurfel>
-void BasicSurfelEngine<TSurfel>::resetAll() {
+void BasicSurfelEngine<TSurfel>::ResetAll() {
 	surfelScene->Reset();
 	trackingState->Reset();
 }
@@ -277,7 +277,7 @@ BasicSurfelEngine<TSurfel>::ProcessFrame(ITMUChar4Image* rgbImage, ITMShortImage
 			ORUtils::MemoryBlock<Vector4u>::MemoryCopyDirection memoryCopyDirection =
 				settings.device_type == MEMORYDEVICE_CUDA ? ORUtils::MemoryBlock<Vector4u>::CUDA_TO_CUDA : ORUtils::MemoryBlock<Vector4u>::CPU_TO_CPU;
 
-			kfRaycast->SetFrom(renderState_canonical->raycastImage, memoryCopyDirection);
+			keyframe_raycast->SetFrom(renderState_canonical->raycastImage, memoryCopyDirection);
 		}
 #endif
 	} else *trackingState->pose_d = oldPose;
@@ -374,19 +374,19 @@ void BasicSurfelEngine<TSurfel>::GetImage(ITMUChar4Image* out, GetImageType getI
 }
 
 template<typename TSurfel>
-void BasicSurfelEngine<TSurfel>::turnOnTracking() { trackingActive = true; }
+void BasicSurfelEngine<TSurfel>::TurnOnTracking() { trackingActive = true; }
 
 template<typename TSurfel>
-void BasicSurfelEngine<TSurfel>::turnOffTracking() { trackingActive = false; }
+void BasicSurfelEngine<TSurfel>::TurnOffTracking() { trackingActive = false; }
 
 template<typename TSurfel>
-void BasicSurfelEngine<TSurfel>::turnOnIntegration() { fusionActive = true; }
+void BasicSurfelEngine<TSurfel>::TurnOnIntegration() { fusionActive = true; }
 
 template<typename TSurfel>
-void BasicSurfelEngine<TSurfel>::turnOffIntegration() { fusionActive = false; }
+void BasicSurfelEngine<TSurfel>::TurnOffIntegration() { fusionActive = false; }
 
 template<typename TSurfel>
-void BasicSurfelEngine<TSurfel>::turnOnMainProcessing() { mainProcessingActive = true; }
+void BasicSurfelEngine<TSurfel>::TurnOnMainProcessing() { mainProcessingActive = true; }
 
 template<typename TSurfel>
-void BasicSurfelEngine<TSurfel>::turnOffMainProcessing() { mainProcessingActive = false; }
+void BasicSurfelEngine<TSurfel>::TurnOffMainProcessing() { mainProcessingActive = false; }

@@ -44,7 +44,7 @@ public:
 
 
 	virtual void
-	UpdateVisibleList(VoxelVolume<TVoxel, TIndex>* scene, const View* view, const CameraTrackingState* trackingState,
+	UpdateVisibleList(VoxelVolume<TVoxel, TIndex>* volume, const View* view, const CameraTrackingState* trackingState,
 	                  const RenderState* renderState, bool resetVisibleList) = 0;
 
 	/**

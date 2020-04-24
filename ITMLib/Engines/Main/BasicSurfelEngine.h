@@ -65,19 +65,19 @@ namespace ITMLib
 		void GetImage(ITMUChar4Image *out, GetImageType getImageType, ORUtils::SE3Pose *pose = NULL, Intrinsics *intrinsics = NULL);
 
 		/// switch for turning tracking on/off
-		void turnOnTracking() override;
-		void turnOffTracking() override;
+		void TurnOnTracking() override;
+		void TurnOffTracking() override;
 
 		/// switch for turning integration on/off
-		void turnOnIntegration() override;
-		void turnOffIntegration() override;
+		void TurnOnIntegration() override;
+		void TurnOffIntegration() override;
 
 		/// switch for turning main processing on/off
-		void turnOnMainProcessing() override;
-		void turnOffMainProcessing() override;
+		void TurnOnMainProcessing() override;
+		void TurnOffMainProcessing() override;
 
 		/// resets the scene and the tracker
-		void resetAll();
+		void ResetAll();
 
 		/** \brief Constructor
 			Omitting a separate image size for the depth images

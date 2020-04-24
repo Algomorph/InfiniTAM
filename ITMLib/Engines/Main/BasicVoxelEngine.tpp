@@ -35,7 +35,7 @@ BasicVoxelEngine<TVoxel,TIndex>::BasicVoxelEngine(const RGBDCalib& calib, Vector
 	if (settings.create_meshing_engine)
 		meshingEngine = MeshingEngineFactory::MakeMeshingEngine<TVoxel,TIndex>(deviceType, volume->index);
 
-	denseMapper = new DenseMapper<TVoxel, TIndex>(volume->index);
+	denseMapper = new DenseMapper<TVoxel, TIndex>();
 	volume->Reset();
 
 	imuCalibrator = new ITMIMUCalibrator_iPad();
@@ -135,7 +135,7 @@ void BasicVoxelEngine<TVoxel, TIndex>::LoadFromFile()
 	////TODO: add factory for relocaliser and rebuild using config from relocaliserOutputDirectory + "config.txt"
 	////TODO: add proper management of case when scene load fails (keep old scene or also reset relocaliser)
 
-	this->resetAll();
+	this->ResetAll();
 
 	try // load relocaliser
 	{
@@ -163,7 +163,7 @@ void BasicVoxelEngine<TVoxel, TIndex>::LoadFromFile()
 }
 
 template <typename TVoxel, typename TIndex>
-void BasicVoxelEngine<TVoxel,TIndex>::resetAll()
+void BasicVoxelEngine<TVoxel,TIndex>::ResetAll()
 {
 	volume->Reset();
 	trackingState->Reset();
@@ -446,19 +446,19 @@ void BasicVoxelEngine<TVoxel,TIndex>::GetImage(ITMUChar4Image *out, GetImageType
 }
 
 template <typename TVoxel, typename TIndex>
-void BasicVoxelEngine<TVoxel,TIndex>::turnOnTracking() { trackingActive = true; }
+void BasicVoxelEngine<TVoxel,TIndex>::TurnOnTracking() { trackingActive = true; }
 
 template <typename TVoxel, typename TIndex>
-void BasicVoxelEngine<TVoxel,TIndex>::turnOffTracking() { trackingActive = false; }
+void BasicVoxelEngine<TVoxel,TIndex>::TurnOffTracking() { trackingActive = false; }
 
 template <typename TVoxel, typename TIndex>
-void BasicVoxelEngine<TVoxel,TIndex>::turnOnIntegration() { fusionActive = true; }
+void BasicVoxelEngine<TVoxel,TIndex>::TurnOnIntegration() { fusionActive = true; }
 
 template <typename TVoxel, typename TIndex>
-void BasicVoxelEngine<TVoxel,TIndex>::turnOffIntegration() { fusionActive = false; }
+void BasicVoxelEngine<TVoxel,TIndex>::TurnOffIntegration() { fusionActive = false; }
 
 template <typename TVoxel, typename TIndex>
-void BasicVoxelEngine<TVoxel,TIndex>::turnOnMainProcessing() { mainProcessingActive = true; }
+void BasicVoxelEngine<TVoxel,TIndex>::TurnOnMainProcessing() { mainProcessingActive = true; }
 
 template <typename TVoxel, typename TIndex>
-void BasicVoxelEngine<TVoxel,TIndex>::turnOffMainProcessing() { mainProcessingActive = false; }
+void BasicVoxelEngine<TVoxel,TIndex>::TurnOffMainProcessing() { mainProcessingActive = false; }

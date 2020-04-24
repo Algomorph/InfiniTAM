@@ -1,6 +1,6 @@
 //  ================================================================
 //  Created by Gregory Kramida (https://github.com/Algomorph) on 4/18/20.
-//  Copyright (c) $YEAR-2020 Gregory Kramida
+//  Copyright (c) 2020 Gregory Kramida
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
 //  You may obtain a copy of the License at

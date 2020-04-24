@@ -8,12 +8,12 @@
 using namespace ITMLib;
 
 template<class TVoxel, class TIndex>
-DenseMapper<TVoxel, TIndex>::DenseMapper(const TIndex& index)
+DenseMapper<TVoxel, TIndex>::DenseMapper()
 {
 	auto& settings = configuration::get();
 	sceneRecoEngine = SceneReconstructionEngineFactory::MakeSceneReconstructionEngine<TVoxel,TIndex>(settings.device_type);
-	swappingEngine = settings.swapping_mode != configuration::SWAPPINGMODE_DISABLED ? SwappingEngineFactory::Build<TVoxel, TIndex>(
-			settings.device_type, index) : nullptr;
+	swappingEngine = settings.swapping_mode != configuration::SWAPPINGMODE_DISABLED ?
+			SwappingEngineFactory::Build<TVoxel, TIndex>(settings.device_type, configuration::for_volume_role<TIndex>(configuration::VOLUME_CANONICAL)) : nullptr;
 
 	swappingMode = settings.swapping_mode;
 }

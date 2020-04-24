@@ -87,19 +87,19 @@ namespace ITMLib
 		void LoadFromFile() override;
 
 		/// resets the scene and the tracker
-		void resetAll() override;
+		void ResetAll() override;
 
 		/// switch for turning tracking on/off
-		void turnOnTracking() override;
-		void turnOffTracking() override;
+		void TurnOnTracking() override;
+		void TurnOffTracking() override;
 
 		/// switch for turning integration on/off
-		void turnOnIntegration() override;
-		void turnOffIntegration() override;
+		void TurnOnIntegration() override;
+		void TurnOffIntegration() override;
 
 		/// switch for turning main processing on/off
-		void turnOnMainProcessing() override;
-		void turnOffMainProcessing() override;
+		void TurnOnMainProcessing() override;
+		void TurnOffMainProcessing() override;
 
 		/** \brief Constructor
 			Ommitting a separate image size for the depth images

@@ -28,9 +28,6 @@ set(ITMLIB_ENGINES_MAIN_SOURCES
     Engines/Main/Mappers/DenseMapper_VoxelBlockHash.cpp
     Engines/Main/Mappers/DenseSurfelMapper.tpp
     Engines/Main/Mappers/DenseSurfelMapper.cpp
-    Engines/Main/Mappers/DenseDynamicMapper.tpp
-    Engines/Main/Mappers/DenseDynamicMapper_PlainVoxelArray.cpp
-    Engines/Main/Mappers/DenseDynamicMapper_VoxelBlockHash.cpp
 
     Engines/Main/BasicVoxelEngine.tpp
     Engines/Main/BasicVoxelEngine_PlainVoxelArray.cpp
@@ -52,7 +49,6 @@ set(ITMLIB_ENGINES_MAIN_SOURCES
 set(ITMLIB_ENGINES_MAIN_HEADERS
     Engines/Main/Mappers/DenseMapper.h
     Engines/Main/Mappers/DenseSurfelMapper.h
-    Engines/Main/Mappers/DenseDynamicMapper.h
 
     Engines/Main/BasicVoxelEngine.h
     Engines/Main/BasicSurfelEngine.h

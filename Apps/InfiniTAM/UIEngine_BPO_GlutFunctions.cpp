@@ -335,11 +335,11 @@ void UIEngine_BPO::GlutKeyUpFunction(unsigned char key, int x, int y) {
 			break;
 		case 't': {
 			uiEngine.integration_active = !uiEngine.integration_active;
-			uiEngine.mainEngine->turnOffIntegration();
+			uiEngine.mainEngine->TurnOffIntegration();
 		}
 			break;
 		case 'r': {
-			uiEngine.mainEngine->resetAll();
+			uiEngine.mainEngine->ResetAll();
 		}
 			break;
 		case 's': {
