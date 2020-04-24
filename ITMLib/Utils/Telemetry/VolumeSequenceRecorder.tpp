@@ -21,7 +21,7 @@
 #include <boost/filesystem.hpp>
 
 //local
-#include "SceneLogger_SceneSlice.tpp"
+#include "VolumeSequenceRecorder_VolumeSlice.tpp"
 #include "../../Engines/DepthFusion/DepthFusionEngineFactory.h"
 #include "../../Engines/VolumeFileIO/VolumeFileIOEngine.h"
 #include "../../Engines/Analytics/AnalyticsEngine.h"

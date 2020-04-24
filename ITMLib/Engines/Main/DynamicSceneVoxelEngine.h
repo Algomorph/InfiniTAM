@@ -39,7 +39,7 @@ namespace ITMLib {
 template<typename TVoxel, typename TWarp, typename TIndex>
 class DynamicSceneVoxelEngine : public MainEngine {
 private: // member variables
-	static constexpr int live_scene_count = 2;
+	static constexpr int live_volume_count = 2;
 
 	bool camera_tracking_enabled, fusion_active, main_processing_active, tracking_initialised;
 	int frames_processed, relocalization_count;

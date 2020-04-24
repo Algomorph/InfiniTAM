@@ -959,11 +959,11 @@ set(ITMLIB_UTILS_HEADERS
 set(ITMLIB_UTILS_FILEIO_SOURCES
     Utils/Telemetry/TelemetryRecorder_PlainVoxelArray.cpp
     Utils/Telemetry/TelemetryRecorder_VoxelBlockHash.cpp
-    Utils/Telemetry/SceneLogger.tpp
-    Utils/Telemetry/SceneLogger_PlainVoxelArray.cpp
-    Utils/Telemetry/SceneLogger_VoxelBlockHash.cpp
+    Utils/Telemetry/VolumeSequenceRecorder.tpp
+    Utils/Telemetry/VolumeSequenceRecorder_PlainVoxelArray.cpp
+    Utils/Telemetry/VolumeSequenceRecorder_VoxelBlockHash.cpp
     Utils/Telemetry/TelemetryRecorder.tpp
-    Utils/Telemetry/SceneLogger_SceneSlice.tpp
+    Utils/Telemetry/VolumeSequenceRecorder_VolumeSlice.tpp
     Utils/Telemetry/WarpFieldSequenceRecorder.tpp
     Utils/Telemetry/WarpFieldSequenceRecorder_PlainVoxelArray.cpp
     Utils/Telemetry/WarpFieldSequenceRecorder_VoxelBlockHash.cpp

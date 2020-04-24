@@ -1,5 +1,18 @@
-// Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
-// Modified code: Copyright 2019-2020 Gregory Kramida
+//  ================================================================
+//  Created by Gregory Kramida on 10/18/17.
+//  Copyright (c) 2017-2000 Gregory Kramida
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+
+//  http://www.apache.org/licenses/LICENSE-2.0
+
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//  ================================================================
 
 //stdlib
 #include <unordered_set>
@@ -127,7 +140,7 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::InitializeScenes() {
 			memoryType, configuration::for_volume_role<TIndex>(configuration::VOLUME_CANONICAL));
 	this->live_volumes = new VoxelVolume<TVoxel, TIndex>* [2];
 	for (int iLiveScene = 0;
-	     iLiveScene < DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::live_scene_count; iLiveScene++) {
+	     iLiveScene < DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::live_volume_count; iLiveScene++) {
 		this->live_volumes[iLiveScene] = new VoxelVolume<TVoxel, TIndex>(
 				settings.general_voxel_volume_parameters,
 				settings.swapping_mode == configuration::SWAPPINGMODE_ENABLED,
@@ -155,8 +168,8 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::~DynamicSceneVoxelEngine() {
 	delete camera_tracker;
 	delete imu_calibrator;
 
-	for (int iScene = 0; iScene < DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::live_scene_count; iScene++) {
-		delete live_volumes[iScene];
+	for (int i_volume = 0; i_volume < DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::live_volume_count; i_volume++) {
+		delete live_volumes[i_volume];
 	}
 	delete live_volumes;
 	delete canonical_volume;
@@ -648,7 +661,7 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::HandlePotentialCameraTracki
 template<typename TVoxel, typename TWarp, typename TIndex>
 void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::Reset() {
 	canonical_volume->Reset();
-	for (int iScene = 0; iScene < DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::live_scene_count; iScene++) {
+	for (int iScene = 0; iScene < DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::live_volume_count; iScene++) {
 		live_volumes[iScene]->Reset();
 	}
 	warp_field->Reset();
