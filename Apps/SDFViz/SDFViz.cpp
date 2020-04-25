@@ -57,7 +57,7 @@
 #include "SDFVizInteractorStyle.h"
 
 //ITMLib
-#include "../../ITMLib/Utils/Telemetry/VolumeSequenceRecorder.h"
+#include "../../ITMLib/Engines/Telemetry/VolumeSequenceRecorder.h"
 #include "../../ITMLib/Utils/Configuration.h"
 #include "../../ITMLib/Engines/Analytics/AnalyticsEngine.h"
 #include "SDFVizGlobalDefines.h"

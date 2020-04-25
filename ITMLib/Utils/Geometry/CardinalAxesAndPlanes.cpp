@@ -19,22 +19,20 @@
 #include "CardinalAxesAndPlanes.h"
 
 
-namespace ITMLib{
+namespace ITMLib {
 
-std::istream& operator >> (std::istream& in, ITMLib::Plane& plane)
-{
+std::istream& operator>>(std::istream& in, ITMLib::Plane& plane) {
 	std::string token;
 	char c[3];
 	in >> c;
-	token = c;
-	if (token == "yz" || token == "YZ")
-		plane = Plane::PLANE_YZ;
-	else if (token == "xz" || token == "XZ")
-		plane = Plane::PLANE_XZ;
-	else if (token == "xy" || token == "XY")
-		plane = Plane::PLANE_XY;
-	else
-		in.setstate(std::ios_base::failbit);
+	try {
+		plane = string_to_enumerator<Plane>(c);
+	} catch (const std::exception&) {
+		char c2[6];
+		in >> c2;
+		plane = string_to_enumerator<Plane>(c + std::string(c2));
+	}
 	return in;
 }
+
 }// end namespace ITMLib

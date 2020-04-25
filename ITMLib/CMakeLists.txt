@@ -167,7 +167,7 @@ set(ITMLIB_ENGINES_TRAVERSAL_CUDA_HEADERS
     )
 
 
-set (
+set(
         ITMLIB_ENGINES_TRAVERSAL_HEADERS
 
         ${ITMLIB_ENGINES_TRAVERSAL_INTERFACE_HEADERS}
@@ -199,7 +199,7 @@ set(ITMLIB_ENGINES_REDUCTION_CUDA_HEADERS
     Engines/Reduction/CUDA/VolumeReduction_CUDA_VoxelBlockHash_Kernels.h
     )
 
-set (
+set(
         ITMLIB_ENGINES_REDUCTION_HEADERS
 
         ${ITMLIB_ENGINES_REDUCTION_INTERFACE_HEADERS}
@@ -362,7 +362,6 @@ set(
         ITMLIB_ENGINES_INDEXING_AUX_SOURCES
 
 
-
 )
 set(
         ITMLIB_ENGINES_INDEXING_AUX_HEADERS
@@ -500,10 +499,10 @@ set(ITMLIB_ENGINES_WARP_VOLUME_HEADERS
     Engines/Warping/WarpingEngineFactory.h)
 
 ## ======================================= SCENE FILE IO ENGINES =======================================================
-set(ITMLIB_ENGINES_SCENEFILEIO_HEADERS
+set(ITMLIB_ENGINES_VOLUMEFILEIO_HEADERS
     Engines/VolumeFileIO/VolumeFileIOEngine.h
     )
-set(ITMLIB_ENGINES_SCENEFILEIO_SOURCES
+set(ITMLIB_ENGINES_VOLUMEFILEIO_SOURCES
     Engines/VolumeFileIO/VolumeFileIOEngine.tpp
     Engines/VolumeFileIO/VolumeFileIOEngine.cpp
     Engines/VolumeFileIO/VolumeFileIOEngine_PlainVoxelArray.cpp
@@ -584,14 +583,14 @@ set(ITMLIB_ENGINES_VIEWBUILDING_SHARED_HEADERS
     )
 ## ======================================== VISUALIZATION ENGINES ======================================================
 ##
-set(ITMLIB_ENGINES_Visualization_HEADERS
+set(ITMLIB_ENGINES_VISUALIZATION_HEADERS
     Engines/Visualization/MultiVisualizationEngineFactory.h
     Engines/Visualization/SurfelVisualizationEngineFactory.h
     Engines/Visualization/VisualizationEngineFactory.h
     )
 
 ##
-set(ITMLIB_ENGINES_Visualization_CPU_SOURCES
+set(ITMLIB_ENGINES_VISUALIZATION_CPU_SOURCES
     Engines/Visualization/CPU/MultiVisualizationEngine_CPU.tpp
     Engines/Visualization/CPU/MultiVisualizationEngine_CPU_PlainVoxelArray.cpp
     Engines/Visualization/CPU/MultiVisualizationEngine_CPU_VoxelBlockHash.cpp
@@ -602,14 +601,14 @@ set(ITMLIB_ENGINES_Visualization_CPU_SOURCES
     Engines/Visualization/CPU/VisualizationEngine_CPU_PlainVoxelArray.cpp
     )
 
-set(ITMLIB_ENGINES_Visualization_CPU_HEADERS
+set(ITMLIB_ENGINES_VISUALIZATION_CPU_HEADERS
     Engines/Visualization/CPU/MultiVisualizationEngine_CPU.h
     Engines/Visualization/CPU/SurfelVisualizationEngine_CPU.h
     Engines/Visualization/CPU/VisualizationEngine_CPU.h
     )
 
 ##
-set(ITMLIB_ENGINES_Visualization_CUDA_SOURCES
+set(ITMLIB_ENGINES_VISUALIZATION_CUDA_SOURCES
     Engines/Visualization/CUDA/MultiVisualizationEngine_CUDA.tcu
     Engines/Visualization/CUDA/MultiVisualizationEngine_CUDA_PlainVoxelArray.cu
     Engines/Visualization/CUDA/MultiVisualizationEngine_CUDA_VoxelBlockHash.cu
@@ -621,7 +620,7 @@ set(ITMLIB_ENGINES_Visualization_CUDA_SOURCES
     Engines/Visualization/CUDA/VisualizationEngine_CUDA_PlainVoxelArray.cu
     )
 
-set(ITMLIB_ENGINES_Visualization_CUDA_HEADERS
+set(ITMLIB_ENGINES_VISUALIZATION_CUDA_HEADERS
     Engines/Visualization/CUDA/MultiVisualizationEngine_CUDA.h
     Engines/Visualization/CUDA/SurfelVisualizationEngine_CUDA.h
     Engines/Visualization/CUDA/VisualizationEngine_CUDA.h
@@ -629,20 +628,20 @@ set(ITMLIB_ENGINES_Visualization_CUDA_HEADERS
     )
 
 ##
-set(ITMLIB_ENGINES_Visualization_INTERFACE_SOURCES
+set(ITMLIB_ENGINES_VISUALIZATION_INTERFACE_SOURCES
     Engines/Visualization/Interface/SurfelVisualizationEngine.tpp
     Engines/Visualization/Interface/SurfelVisualizationEngine.cpp
     Engines/Visualization/Interface/VisualizationEngine.cpp
     )
 
-set(ITMLIB_ENGINES_Visualization_INTERFACE_HEADERS
+set(ITMLIB_ENGINES_VISUALIZATION_INTERFACE_HEADERS
     Engines/Visualization/Interface/MultiVisualizationEngine.h
     Engines/Visualization/Interface/SurfelVisualizationEngine.h
     Engines/Visualization/Interface/VisualizationEngine.h
     )
 
 ##
-set(ITMLIB_ENGINES_Visualization_SHARED_HEADERS
+set(ITMLIB_ENGINES_VISUALIZATION_SHARED_HEADERS
     Engines/Visualization/Shared/SurfelVisualizationEngine_Settings.h
     Engines/Visualization/Shared/SurfelVisualizationEngine_Shared.h
     Engines/Visualization/Shared/VisualizationEngine_Shared.h
@@ -668,6 +667,36 @@ set(ITMLIB_ENGINES_ANALYTICS_SOURCES
     Engines/Analytics/AnalyticsEngine_CUDA_VoxelBlockHash.cu
     Engines/Analytics/AnalyticsLogging.cpp
     Engines/Analytics/AnalyticsTelemetry.cpp
+    )
+
+## ============================================== FILEIO ENGINES ====================================================
+
+set(ITMLIB_ENGINES_FILEIO_SOURCES
+
+    )
+
+set(ITMLIB_ENGINES_FILEIO_HEADERS
+    )
+
+## ================================================== TELEMETRY ENGINES ================================================
+
+set(ITMLIB_ENGINES_TELEMETRY_HEADERS
+    Engines/Telemetry/TelemetryRecorder_PlainVoxelArray.cpp
+    Engines/Telemetry/TelemetryRecorder_VoxelBlockHash.cpp
+    Engines/Telemetry/VolumeSequenceRecorder.tpp
+    Engines/Telemetry/VolumeSequenceRecorder_PlainVoxelArray.cpp
+    Engines/Telemetry/VolumeSequenceRecorder_VoxelBlockHash.cpp
+    Engines/Telemetry/TelemetryRecorder.tpp
+    Engines/Telemetry/VolumeSequenceRecorder_VolumeSlice.tpp
+    Engines/Telemetry/WarpFieldSequenceRecorder.tpp
+    Engines/Telemetry/WarpFieldSequenceRecorder_PlainVoxelArray.cpp
+    Engines/Telemetry/WarpFieldSequenceRecorder_VoxelBlockHash.cpp
+    )
+set(ITMLIB_ENGINES_TELEMETRY_SOURCES
+    Engines/Telemetry/WriteAndReadFunctors.h
+    Engines/Telemetry/VolumeSequenceRecorder.h
+    Engines/Telemetry/TelemetryRecorder.h
+    Engines/Telemetry/WarpFieldSequenceRecorder.h
     )
 
 ## ================================================== OBJECTS ==========================================================
@@ -955,35 +984,17 @@ set(ITMLIB_UTILS_HEADERS
     )
 
 
-## ================================================ UTILS - FILEIO =====================================================
-set(ITMLIB_UTILS_FILEIO_SOURCES
-    Utils/Telemetry/TelemetryRecorder_PlainVoxelArray.cpp
-    Utils/Telemetry/TelemetryRecorder_VoxelBlockHash.cpp
-    Utils/Telemetry/VolumeSequenceRecorder.tpp
-    Utils/Telemetry/VolumeSequenceRecorder_PlainVoxelArray.cpp
-    Utils/Telemetry/VolumeSequenceRecorder_VoxelBlockHash.cpp
-    Utils/Telemetry/TelemetryRecorder.tpp
-    Utils/Telemetry/VolumeSequenceRecorder_VolumeSlice.tpp
-    Utils/Telemetry/WarpFieldSequenceRecorder.tpp
-    Utils/Telemetry/WarpFieldSequenceRecorder_PlainVoxelArray.cpp
-    Utils/Telemetry/WarpFieldSequenceRecorder_VoxelBlockHash.cpp
-    )
+## ================================================ UTILS - VISUALIZATION ==============================================
 
-set(ITMLIB_UTILS_FILEIO_HEADERS
-    Utils/Telemetry/WriteAndReadFunctors.h
-    Utils/Telemetry/VolumeSequenceRecorder.h
-    Utils/Telemetry/TelemetryRecorder.h
-    Utils/Telemetry/WarpFieldSequenceRecorder.h)
-##
 
 set(ITMLIB_UTILS_VISUALIZATION_SOURCES
-    Utils/Visualization/SceneSliceVisualizer2D.tpp
+    Utils/Visualization/VolumeSliceVisualizer2D.tpp
     Utils/Visualization/SceneSliceVisualizer2D_PlainVoxelArray.cpp
     Utils/Visualization/SceneSliceVisualizer2D_VoxelBlockHash.cpp)
 
 if (WITH_VTK)
     list(APPEND ITMLIB_UTILS_VISUALIZATION_SOURCES
-         Utils/Visualization/SceneSliceVisualizer1D.cpp
+         Utils/Visualization/VoxelValueGrapher.cpp
          Utils/Visualization/SceneSliceVisualizer1D.tpp
          Utils/Visualization/SceneSliceVisualizer3D.tpp
          Utils/Visualization/SceneSliceVisualizer3DInteractorStyle.tpp
@@ -997,11 +1008,11 @@ endif ()
 
 set(ITMLIB_UTILS_VISUALIZATION_HEADERS
     Utils/Visualization/SceneSliceVisualizerCommon.h
-    Utils/Visualization/SceneSliceVisualizer2D.h
+    Utils/Visualization/VolumeSliceVisualizer2D.h
     )
 if (WITH_VTK)
     list(APPEND ITMLIB_UTILS_VISUALIZATION_HEADERS
-         Utils/Visualization/SceneSliceVisualizer1D.h
+         Utils/Visualization/VoxelValueGrapher.h
          Utils/Visualization/SceneSliceVisualizer3D.h
          Utils/Visualization/SceneSliceVisualizer3DInteractorStyle.h
          Utils/Visualization/SceneSliceVisualizer3DCommon.h
@@ -1029,16 +1040,18 @@ set(sources
     ${ITMLIB_ENGINES_DEPTH_FUSION_SOURCES}
     ${ITMLIB_ENGINES_VOLUME_FUSION_SOURCES}
     ${ITMLIB_ENGINES_WARP_VOLUME_SOURCES}
-    ${ITMLIB_ENGINES_SCENEFILEIO_SOURCES}
+    ${ITMLIB_ENGINES_VOLUMEFILEIO_SOURCES}
     ${ITMLIB_ENGINES_SWAPPING_CPU_SOURCES}
     ${ITMLIB_ENGINES_SWAPPING_CUDA_SOURCES}
     ${ITMLIB_ENGINES_VIEWBUILDING_SOURCES}
     ${ITMLIB_ENGINES_VIEWBUILDING_CPU_SOURCES}
     ${ITMLIB_ENGINES_VIEWBUILDING_CUDA_SOURCES}
-    ${ITMLIB_ENGINES_Visualization_SOURCES}
-    ${ITMLIB_ENGINES_Visualization_CPU_SOURCES}
-    ${ITMLIB_ENGINES_Visualization_CUDA_SOURCES}
-    ${ITMLIB_ENGINES_Visualization_INTERFACE_SOURCES}
+    ${ITMLIB_ENGINES_VISUALIZATION_SOURCES}
+    ${ITMLIB_ENGINES_VISUALIZATION_CPU_SOURCES}
+    ${ITMLIB_ENGINES_VISUALIZATION_CUDA_SOURCES}
+    ${ITMLIB_ENGINES_VISUALIZATION_INTERFACE_SOURCES}
+    ${ITMLIB_ENGINES_ANALYTICS_SOURCES}
+    ${ITMLIB_ENGINES_TELEMETRY_SOURCES}
     ${ITMLIB_OBJECTS_CAMERA_SOURCES}
     ${ITMLIB_OBJECTS_RENDERSTATES_SOURCES}
     ${ITMLIB_CAMERA_TRACKERS_CPU_SOURCES}
@@ -1050,8 +1063,6 @@ set(sources
     ${ITMLIB_SCENE_MOTION_TRACKERS_INTERFACE_SOURCES}
     ${ITMLIB_SCENE_MOTION_TRACKERS_SHARED_SOURCES}
     ${ITMLIB_UTILS_SOURCES}
-    ${ITMLIB_ENGINES_ANALYTICS_SOURCES}
-    ${ITMLIB_UTILS_FILEIO_SOURCES}
     ${ITMLIB_UTILS_VISUALIZATION_SOURCES}
     )
 
@@ -1082,7 +1093,7 @@ set(headers
     ${ITMLIB_ENGINES_DEPTH_FUSION_HEADERS}
     ${ITMLIB_ENGINES_VOLUME_FUSION_HEADERS}
     ${ITMLIB_ENGINES_WARP_VOLUME_HEADERS}
-    ${ITMLIB_ENGINES_SCENEFILEIO_HEADERS}
+    ${ITMLIB_ENGINES_VOLUMEFILEIO_HEADERS}
     ${ITMLIB_ENGINES_SWAPPING_HEADERS}
     ${ITMLIB_ENGINES_SWAPPING_CPU_HEADERS}
     ${ITMLIB_ENGINES_SWAPPING_CUDA_HEADERS}
@@ -1093,11 +1104,13 @@ set(headers
     ${ITMLIB_ENGINES_VIEWBUILDING_CUDA_HEADERS}
     ${ITMLIB_ENGINES_VIEWBUILDING_INTERFACE_HEADERS}
     ${ITMLIB_ENGINES_VIEWBUILDING_SHARED_HEADERS}
-    ${ITMLIB_ENGINES_Visualization_HEADERS}
-    ${ITMLIB_ENGINES_Visualization_CPU_HEADERS}
-    ${ITMLIB_ENGINES_Visualization_CUDA_HEADERS}
-    ${ITMLIB_ENGINES_Visualization_INTERFACE_HEADERS}
-    ${ITMLIB_ENGINES_Visualization_SHARED_HEADERS}
+    ${ITMLIB_ENGINES_VISUALIZATION_HEADERS}
+    ${ITMLIB_ENGINES_VISUALIZATION_CPU_HEADERS}
+    ${ITMLIB_ENGINES_VISUALIZATION_CUDA_HEADERS}
+    ${ITMLIB_ENGINES_VISUALIZATION_INTERFACE_HEADERS}
+    ${ITMLIB_ENGINES_VISUALIZATION_SHARED_HEADERS}
+    ${ITMLIB_ENGINES_ANALYTICS_HEADERS}
+    ${ITMLIB_ENGINES_TELEMETRY_HEADERS}
     ${ITMLIB_OBJECTS_CAMERA_HEADERS}
     ${ITMLIB_OBJECTS_MESHING_HEADERS}
     ${ITMLIB_OBJECTS_MISC_HEADERS}
@@ -1117,8 +1130,6 @@ set(headers
     ${ITMLIB_SCENE_MOTION_TRACKERS_INTERFACE_HEADERS}
     ${ITMLIB_SCENE_MOTION_TRACKERS_SHARED_HEADERS}
     ${ITMLIB_UTILS_HEADERS}
-    ${ITMLIB_ENGINES_ANALYTICS_HEADERS}
-    ${ITMLIB_UTILS_FILEIO_HEADERS}
     ${ITMLIB_UTILS_VISUALIZATION_HEADERS}
     )
 

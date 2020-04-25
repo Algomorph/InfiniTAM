@@ -30,17 +30,10 @@
 #endif
 
 //ITMLib
-#include "../../ITMLib/GlobalTemplateDefines.h"
-#include "../../ITMLib/Engines/Main/BasicVoxelEngine.h"
-#include "../../ITMLib/Engines/Main/BasicSurfelEngine.h"
-#include "../../ITMLib/Engines/Main/MultiEngine.h"
-#include "../../ITMLib/Engines/Main/DynamicSceneVoxelEngine.h"
 
-#include "../../ORUtils/FileUtils.h"
-#include "../../InputSource/FFMPEGWriter.h"
 #include "../../ITMLib/Utils/Analytics/BenchmarkUtilities.h"
-#include "../../ITMLib/Utils/CPPPrintHelpers.h"
 #include "../../ITMLib/Utils/Logging/LoggingConfigruation.h"
+#include "../../ITMLib/Engines/Telemetry/TelemetryRecorder.h"
 
 #ifdef WITH_OPENCV
 #include <opencv2/imgcodecs.hpp>
@@ -200,7 +193,8 @@ void UIEngine_BPO::SaveScreenshot(const char* filename) const {
 }
 
 void UIEngine_BPO::GetScreenshot(ITMUChar4Image* dest) const {
-	glReadPixels(0, 0, dest->dimensions.x, dest->dimensions.y, GL_RGBA, GL_UNSIGNED_BYTE, dest->GetData(MEMORYDEVICE_CPU));
+	glReadPixels(0, 0, dest->dimensions.x, dest->dimensions.y, GL_RGBA, GL_UNSIGNED_BYTE,
+	             dest->GetData(MEMORYDEVICE_CPU));
 }
 
 void UIEngine_BPO::SkipFrames(int number_of_frames_to_skip) {
@@ -278,27 +272,15 @@ void UIEngine_BPO::Shutdown() {
 
 
 std::string UIEngine_BPO::GenerateNextFrameOutputPath() const {
-	fs::path path(std::string(this->output_path) + "/Frame_" + std::to_string(GetCurrentFrameIndex() + 1));
-	if (!fs::exists(path)) {
-		fs::create_directories(path);
-	}
-	return path.string();
+	return ITMLib::telemetry::GetAndCreateOutputFolderForFrame(GetCurrentFrameIndex() + 1);
 }
 
 std::string UIEngine_BPO::GenerateCurrentFrameOutputPath() const {
-	fs::path path(std::string(this->output_path) + "/Frame_" + std::to_string(GetCurrentFrameIndex()));
-	if (!fs::exists(path)) {
-		fs::create_directories(path);
-	}
-	return path.string();
+	return ITMLib::telemetry::GetAndCreateOutputFolderForFrame(GetCurrentFrameIndex());
 }
 
 std::string UIEngine_BPO::GeneratePreviousFrameOutputPath() const {
-	fs::path path(std::string(this->output_path) + "/Frame_" + std::to_string(GetCurrentFrameIndex() - 1));
-	if (!fs::exists(path)) {
-		fs::create_directories(path);
-	}
-	return path.string();
+	return ITMLib::telemetry::GetAndCreateOutputFolderForFrame(GetCurrentFrameIndex() - 1);
 }
 
 //TODO: Group all recording & make it toggleable with a single keystroke / command flag

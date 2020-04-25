@@ -24,10 +24,10 @@
 
 //ITMLib
 #include "VolumeSequenceRecorder.h"
-#include "../Configuration.h"
-#include "../../Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
-#include "../../Engines/Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
-#include "../../Engines/Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
+#include "../../Utils/Configuration.h"
+#include "../EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
+#include "../Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
+#include "../Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
 #include "WriteAndReadFunctors.h"
 
 using namespace ITMLib;

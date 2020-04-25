@@ -19,12 +19,12 @@
 
 //local
 #include "WarpFieldSequenceRecorder.h"
-#include "../../Engines/Analytics/AnalyticsEngine.h"
-#include "../Configuration.h"
-#include "../../Engines/DepthFusion/DepthFusionEngineFactory.h"
-#include "../../Engines/Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
-#include "../../Engines/Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
-#include "../../Engines/VolumeFileIO/VolumeFileIOEngine.h"
+#include "../Analytics/AnalyticsEngine.h"
+#include "../../Utils/Configuration.h"
+#include "../DepthFusion/DepthFusionEngineFactory.h"
+#include "../Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
+#include "../Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
+#include "../VolumeFileIO/VolumeFileIOEngine.h"
 #include "WriteAndReadFunctors.h"
 
 

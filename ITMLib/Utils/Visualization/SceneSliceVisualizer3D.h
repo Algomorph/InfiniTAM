@@ -22,7 +22,7 @@
 
 //ITMLib
 #include "../../Objects/Volume/VoxelVolume.h"
-#include "../Telemetry/VolumeSequenceRecorder.h"
+#include "../../Engines/Telemetry/VolumeSequenceRecorder.h"
 #include "SceneSliceVisualizer3DCommon.h"
 #include "VisualizationWindowManager.h"
 #include "../Geometry/CardinalAxesAndPlanes.h"

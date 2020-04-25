@@ -16,10 +16,10 @@
 #ifdef WITH_OPENCV
 #include "../../Engines/Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
 #include "../../Engines/Traversal/CPU/TwoVolumeTraversal_CPU_VoxelBlockHash.h"
-#include "../../Utils/Visualization/SceneSliceVisualizer2D.tpp"
+#include "../../Utils/Visualization/VolumeSliceVisualizer2D.tpp"
 #include "../../GlobalTemplateDefines.h"
 
 namespace ITMLib{
-template class SceneSliceVisualizer2D<TSDFVoxel, WarpVoxel, VoxelBlockHash>;
+template class VolumeSliceVisualizer2D<TSDFVoxel, WarpVoxel, VoxelBlockHash>;
 } // namespace ITMLib
 #endif // #ifdef WITH_OPENCV

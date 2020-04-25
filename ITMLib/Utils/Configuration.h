@@ -36,6 +36,7 @@
 #include "../Engines/Main/NonRigidTrackingParameters.h"
 #include "../Objects/Volume/VoxelBlockHash.h"
 #include "../Objects/Volume/PlainVoxelArray.h"
+#include "../Utils/Geometry/CardinalAxesAndPlanes.h"
 
 namespace po = boost::program_options;
 namespace pt = boost::property_tree;
@@ -45,9 +46,9 @@ namespace ITMLib {
 namespace configuration {
 // region ============================================== SERIALIZABLE ENUMS ============================================
 #define VERBOSITY_LEVEL_ENUM_DESCRIPTION VerbosityLevel, \
-	(VERBOSITY_SILENT, "silent", "SILENT", "VERBOSITY_SILENT"), \
-	(VERBOSITY_FATAL, "fatal", "FATAL", "VERBOSITY_FATAL"), \
-	(VERBOSITY_ERROR, "error", "ERROR", "VERBOSITY_ERROR"), \
+    (VERBOSITY_SILENT, "silent", "SILENT", "VERBOSITY_SILENT"), \
+    (VERBOSITY_FATAL, "fatal", "FATAL", "VERBOSITY_FATAL"), \
+    (VERBOSITY_ERROR, "error", "ERROR", "VERBOSITY_ERROR"), \
     (VERBOSITY_WARNING, "warning", "WARNING", "VERBOSITY_WARNING"), \
     (VERBOSITY_INFO, "info", "information", "INFO", "VERBOSITY_INFO"), \
     (VERBOSITY_TOP_LEVEL, "top_level", "TOP_LEVEL", "Top-level operations", "VERBOSITY_TOP_LEVEL", "top-level", "top-level operations"), \
@@ -88,9 +89,9 @@ DECLARE_SERIALIZABLE_ENUM(LIBMODE_ENUM_DESCRIPTION)
 DECLARE_SERIALIZABLE_ENUM(INDEXING_METHOD_ENUM_DESCRIPTION)
 
 #define VOLUME_ROLE_ENUM_DESCRIPTION VolumeRole, \
-	(VOLUME_CANONICAL, "canonical", "CANONICAL"), \
-	(VOLUME_LIVE, "live", "LIVE"), \
-	(VOLUME_WARP, "warp", "WARP")
+    (VOLUME_CANONICAL, "canonical", "CANONICAL"), \
+    (VOLUME_LIVE, "live", "LIVE"), \
+    (VOLUME_WARP, "warp", "WARP")
 
 DECLARE_SERIALIZABLE_ENUM(VOLUME_ROLE_ENUM_DESCRIPTION)
 //endregion ========================================================================================================
@@ -107,8 +108,8 @@ DECLARE_SERIALIZABLE_ENUM(VOLUME_ROLE_ENUM_DESCRIPTION)
         "Path to depth image files (ex. %06i is a frame number bask for files with 6 digit frame numbers, "\
         "where frame numbers must start with 000000)."),\
     (std::string, mask_image_path_mask, "", PATH,\
-		"Path to mask image files. These must be binary images. RGB and depth pixels where mask pixels have 0" \
-		" intensity will be ignored. (Formatting rules are the same as depth_image_path_mask)."),\
+        "Path to mask image files. These must be binary images. RGB and depth pixels where mask pixels have 0" \
+        " intensity will be ignored. (Formatting rules are the same as depth_image_path_mask)."),\
     (std::string, imu_input_path, "", PATH, "Path to imu input file/handle.")
 
 DECLARE_SERIALIZABLE_STRUCT(PATHS_STRUCT_DESCRIPTION);
@@ -117,16 +118,43 @@ DECLARE_SERIALIZABLE_STRUCT(PATHS_STRUCT_DESCRIPTION);
 ///For focus_coordinates to be used, VerbosityLevel must be set to VERBOSITY_FOCUS_SPOTS or above
 #define TELEMETRY_SETTINGS_STRUCT_DESCRIPTION TelemetrySettings, \
     (Vector3i, focus_coordinates, Vector3i(0), VECTOR, \
-    "Focus 3d coordinates (integer) that specify the voxel to print additional diagnostic information about. "\
+    "Focus 3d coordinates (integer) that specify the voxel to print additional diagnostic information about (and " \
+	"where to focus telemetry information records). "\
     "Only effective when verbosity_level is set to focus_spots (alt. VERBOSITY_FOCUS_SPOTS) or above."), \
     (bool, record_reconstruction_video, false, PRIMITIVE, \
-    		"Whether to record video of the canonical reconsturction during automatic run "\
-    		"(see number_of_frames_to_process_after_launch and index_of_frame_to_start_at)."), \
-    (bool, log_to_disk, false, PRIMITIVE, "Print log to text file, in the output path (preserves older log files). Can be used in combination with stdout."), \
+            "Whether to record video of the canonical reconsturction during automatic run "\
+            "(see number_of_frames_to_process_after_launch and index_of_frame_to_start_at)."), \
+    (bool, log_to_disk, false, PRIMITIVE, "Print log to text file, in the output path (preserves older log files). "\
+    "Can be used in combination with stdout."), \
     (bool, log_to_stdout, true, PRIMITIVE, "Print log to stdout. Can be used in combination with disk logging."), \
     (bool, log_benchmarks, false, PRIMITIVE, "Whether to log runtime benchmarks after automatic run."),\
-	(bool, log_volume_statistics, false, PRIMITIVE, "Whether to output various volume statistics after some operations (used only when verbosity_level is set at or above PER_FRAME)."),\
-	(bool, record_volume_memory_usage, false, PRIMITIVE, "Whether to record information required to debug memory usage, e.g. used block locations for the VoxelBlockHash index")
+    (bool, log_volume_statistics, false, PRIMITIVE, "Whether to output various volume statistics after some operations" \
+    " (used only when verbosity_level is set at or above PER_FRAME)."),\
+    (bool, record_volume_memory_usage, false, PRIMITIVE, "Whether to record information required to debug memory" \
+    " usage, e.g. used block locations for the VoxelBlockHash index."), \
+    (bool, record_live_volume_as_2D_slices, false, PRIMITIVE, "Whether to record 2D slices (images, with pixel " \
+    "representing TSDF value) of the live volume once per frame before the beginning of the surface tracking optimization."), \
+	(bool, record_canonical_volume_as_2D_slices, false, PRIMITIVE, "Whether to record 2D slices (images, with pixel " \
+    "representing TSDF value) of the canonical volume once per frame before the beginning of the surface tracking optimization."), \
+    (bool, record_live_focus_point_TSDF_graph, false, PRIMITIVE, "Whether to record graphs of SDF value of a single " \
+    "voxel plotted against iteration number of the surface tracking optimization."), \
+    (bool, record_live_focus_layer_TSDF_heatmap, false, PRIMITIVE, "Whether to record TSDF heatmaps for the voxel layer in " \
+    "the warped live volume (in the plane specified by TSDF_heatmap_plane parameter) for each iteration of the surface" \
+    "tracking optimization."), \
+    (Plane, TSDF_heatmap_plane, PLANE_ZX, ENUM, "Plane in which to record TSDF heatmaps " \
+    "(see record_live_focus_layer_TSDF_heatmap parameter help)."), \
+    (bool, record_focus_neighborhood_live_tsdf_sequence, false, PRIMITIVE, "Whether to record a sequence of TSDF " \
+    "volumes representing the immediate neighborhood of the focus_coordinates (see focus_coordinates parameter) " \
+    "in the warped live frame over the course of the entire surface tracking optimization. [WITH_VTK compilation required!]"), \
+    (int, focus_neighborhood_size, false, PRIMITIVE, "For focus neighborhood recording: a cube of size " \
+    "2 x focus_neighborhood_size + 1 around the focus_coordinates will be recorded. [WITH_VTK compilation required!]"), \
+    (bool, record_focus_neighborhood_warp_sequence, false, PRIMITIVE, "Whether to record a sequence of warp " \
+    "vectors in the immediate neighborhood of the focus_coordinates (see focus_coordinates parameter) over " \
+    "the course of the entire surface tracking optimization. [WITH_VTK compilation required!]"), \
+	(bool, log_surface_tracking_optimization_energies, false, PRIMITIVE, "Whether to log optimization energies " \
+	"for each iteration of the surface tracking optimization. Only works when non_rigid_tracking_parameters.functor_type " \
+	"parameter is set to \"slavcheva_diagnostic\"")
+
 
 DECLARE_SERIALIZABLE_STRUCT(TELEMETRY_SETTINGS_STRUCT_DESCRIPTION);
 
@@ -158,25 +186,25 @@ struct TrackerConfigurationStringPresets {
 #endif
 
 #define ARRAY_VOLUME_PARAMETERS_STRUCT_DESCRIPTION \
-	ArrayVolumeParameters, \
-	(GridAlignedBox, canonical, GridAlignedBox(), STRUCT, "Parameters specific to the canonical (target / reference) volume in array indexing configuration."), \
-	(GridAlignedBox, live, GridAlignedBox(), STRUCT, "Parameters specific to the live (source) volume in array indexing configuration."), \
-	(GridAlignedBox, warp, GridAlignedBox(), STRUCT, "Parameters specific to the volume holding warp vectors (motion information) in array indexing configuration.")
+    ArrayVolumeParameters, \
+    (GridAlignedBox, canonical, GridAlignedBox(), STRUCT, "Parameters specific to the canonical (target / reference) volume in array indexing configuration."), \
+    (GridAlignedBox, live, GridAlignedBox(), STRUCT, "Parameters specific to the live (source) volume in array indexing configuration."), \
+    (GridAlignedBox, warp, GridAlignedBox(), STRUCT, "Parameters specific to the volume holding warp vectors (motion information) in array indexing configuration.")
 
 DECLARE_SERIALIZABLE_STRUCT(ARRAY_VOLUME_PARAMETERS_STRUCT_DESCRIPTION);
 
 #define HASH_VOLUME_PARAMETERS_STRUCT_DESCRIPTION \
-	HashVolumeParameters, \
-	(VoxelBlockHash::VoxelBlockHashParameters, canonical, VoxelBlockHash::VoxelBlockHashParameters(), STRUCT, "Parameters specific to the canonical (target / reference) volume in voxel block hash indexing configuration."), \
-	(VoxelBlockHash::VoxelBlockHashParameters, live, VoxelBlockHash::VoxelBlockHashParameters(), STRUCT, "Parameters specific to the live (source) volume in voxel block hash indexing configuration."), \
-	(VoxelBlockHash::VoxelBlockHashParameters, warp, VoxelBlockHash::VoxelBlockHashParameters(), STRUCT, "Parameters specific to the volume holding warp vectors (motion information) in voxel block hash indexing configuration.")
+    HashVolumeParameters, \
+    (VoxelBlockHash::VoxelBlockHashParameters, canonical, VoxelBlockHash::VoxelBlockHashParameters(), STRUCT, "Parameters specific to the canonical (target / reference) volume in voxel block hash indexing configuration."), \
+    (VoxelBlockHash::VoxelBlockHashParameters, live, VoxelBlockHash::VoxelBlockHashParameters(), STRUCT, "Parameters specific to the live (source) volume in voxel block hash indexing configuration."), \
+    (VoxelBlockHash::VoxelBlockHashParameters, warp, VoxelBlockHash::VoxelBlockHashParameters(), STRUCT, "Parameters specific to the volume holding warp vectors (motion information) in voxel block hash indexing configuration.")
 
 DECLARE_SERIALIZABLE_STRUCT(HASH_VOLUME_PARAMETERS_STRUCT_DESCRIPTION);
 
 #define SPECIFIC_VOLUME_PARAMETERS_STRUCT_DESCRIPTION \
-	SpecificVolumeParameters, \
-	(ArrayVolumeParameters, array, ArrayVolumeParameters(), STRUCT, "Specific parameters to use for different volumes with the array indexing method."), \
-	(HashVolumeParameters, hash, HashVolumeParameters(), STRUCT, "Specific parameters to use for different volumes with the hash indexing method.")
+    SpecificVolumeParameters, \
+    (ArrayVolumeParameters, array, ArrayVolumeParameters(), STRUCT, "Specific parameters to use for different volumes with the array indexing method."), \
+    (HashVolumeParameters, hash, HashVolumeParameters(), STRUCT, "Specific parameters to use for different volumes with the hash indexing method.")
 
 DECLARE_SERIALIZABLE_STRUCT(SPECIFIC_VOLUME_PARAMETERS_STRUCT_DESCRIPTION);
 

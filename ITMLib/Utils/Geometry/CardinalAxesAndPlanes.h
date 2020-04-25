@@ -15,65 +15,32 @@
 //  ================================================================
 #pragma once
 
+#include "../../Utils/Serialization/Serialization.h"
+
 namespace ITMLib {
-enum Axis {
-	//NOTA BENE: due to absence of reflection in C++, when modifying this enum, please also modify AxisToString
 
-	AXIS_X = 0,
-	AXIS_Y = 1,
-	AXIS_Z = 2
-};
+#define AXIS_ENUM_DESCRIPTION Axis, \
+    (AXIS_X, "axis_x", "AXIS_X", "Axis_X",  "X", "x"),\
+    (AXIS_Y, "axis_y", "AXIS_Y", "Axis_Y",  "Y", "y"),\
+    (AXIS_Z, "axis_z", "AXIS_Z", "Axis_Z",  "Z", "z")
 
+DECLARE_SERIALIZABLE_ENUM(AXIS_ENUM_DESCRIPTION)
 
-inline std::string AxisToString(Axis axis) {
-	switch (axis) {
-		case AXIS_X:
-			return "X";
-		case AXIS_Y:
-			return "Y";
-		case AXIS_Z:
-			return "Z";
-		default:
-			return  "Unknown";
-	}
+#define PLANE_ENUM_DESCRIPTION Plane, \
+    (PLANE_YZ, "plane_yz", "PLANE_YZ", "Plane_YZ",  "YZ", "yz"),\
+    (PLANE_XZ, "plane_xz", "PLANE_XZ", "Plane_XZ",  "XZ", "xz"),\
+    (PLANE_XY, "plane_xy", "PLANE_XY", "Plane_XY",  "XY", "xy"),\
+    (PLANE_ZY, "plane_zy", "PLANE_ZY", "Plane_ZY",  "ZY", "zy"),\
+    (PLANE_ZX, "plane_zx", "PLANE_ZX", "Plane_ZX",  "ZX", "zx"),\
+    (PLANE_YX, "plane_yx", "PLANE_YX", "Plane_YX",  "YX", "yx")
 
-}
-
-enum Plane {
-	//0-2 ordered to correspond to Axes
-	//NOTA BENE: due to absence of reflection in C++, when modifying this enum, please also modify PlaneToString and the
-	// >> overload below
-
-	PLANE_YZ = 0,
-	PLANE_XZ = 1,
-	PLANE_XY = 2,
-
-	PLANE_ZY = 3,
-	PLANE_ZX = 4,
-	PLANE_YX = 5
-};
-
-inline std::string PlaneToString(Plane plane) {
-	switch (plane) {
-		case PLANE_XY:
-			return "XY";
-		case PLANE_YZ:
-			return "YZ";
-		case PLANE_XZ:
-			return "XZ";
-		case PLANE_ZY:
-			return "ZY";
-		case PLANE_ZX:
-			return "ZX";
-		case PLANE_YX:
-			return "YX";
-		default:
-			return "Unknown";
-	}
-}
+DECLARE_SERIALIZABLE_ENUM(PLANE_ENUM_DESCRIPTION)
 
 std::istream& operator>>(std::istream& in, ITMLib::Plane& plane);
 
 
 }//namespace ITMLib
+
+DEFINE_INLINE_SERIALIZABLE_ENUM(ITMLib::AXIS_ENUM_DESCRIPTION)
+DEFINE_INLINE_SERIALIZABLE_ENUM(ITMLib::PLANE_ENUM_DESCRIPTION)
 

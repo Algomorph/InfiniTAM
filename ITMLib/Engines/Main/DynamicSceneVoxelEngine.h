@@ -86,10 +86,6 @@ private: // member variables
 	ORUtils::OStreamWrapper* canonical_volume_memory_usage_file = nullptr;
 public: // member functions
 
-	/** \brief Constructor
-		Omitting a separate image size for the depth images
-		will assume same resolution as for the RGB images.
-	*/
 	DynamicSceneVoxelEngine(const RGBDCalib& calibration_info, Vector2i rgb_image_size, Vector2i depth_image_size);
 	~DynamicSceneVoxelEngine() override;
 
@@ -100,8 +96,8 @@ public: // member functions
 	CameraTrackingState::TrackingResult ProcessFrame(ITMUChar4Image* rgb_image, ITMShortImage* depth_image,
 	                                                 IMUMeasurement* imu_measurement = nullptr) override;
 
-	/// Extracts a mesh from the current scene and saves it to the model file specified by the file name
-	void SaveSceneToMesh(const char* fileName) override;
+	/// Extracts a mesh from the current volume and saves it to the disk at the specified path
+	void SaveSceneToMesh(const char* path) override;
 
 	/// save and load the full volume and relocalizer (if any) to/from file
 	void SaveToFile() override;

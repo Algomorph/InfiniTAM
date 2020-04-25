@@ -22,9 +22,9 @@
 
 //local
 #include "VolumeSequenceRecorder_VolumeSlice.tpp"
-#include "../../Engines/DepthFusion/DepthFusionEngineFactory.h"
-#include "../../Engines/VolumeFileIO/VolumeFileIOEngine.h"
-#include "../../Engines/Analytics/AnalyticsEngine.h"
+#include "../DepthFusion/DepthFusionEngineFactory.h"
+#include "../VolumeFileIO/VolumeFileIOEngine.h"
+#include "../Analytics/AnalyticsEngine.h"
 
 
 

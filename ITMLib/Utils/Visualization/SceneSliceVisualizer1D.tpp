@@ -32,7 +32,7 @@
 #include <vtkPen.h>
 
 //local
-#include "SceneSliceVisualizer1D.h"
+#include "VoxelValueGrapher.h"
 #include "../../Objects/Volume/VoxelVolume.h"
 #include "../../Objects/Volume/RepresentationAccess.h"
 #include "VisualizationWindowManager.h"
@@ -40,27 +40,15 @@
 
 using namespace ITMLib;
 
-template<typename TVoxel>
-struct TGetRegularSDFFunctor {
-	static inline float GetSdf(TVoxel& voxel) {
-		return TVoxel::valueToFloat(voxel.sdf);
-	}
-};
-
-template<typename TVoxel, int TFieldIndex>
-struct TGetIndexedSDFFunctor {
-	static inline float GetSdf(TVoxel& voxel) {
-		return TVoxel::valueToFloat(voxel.sdf_values[TFieldIndex]);
-	}
-};
 
 
-template<typename TVoxel, typename TIndex, typename TGetSDFFunctor>
-void SceneSliceVisualizer1D::Plot1DSceneSliceHelper(VoxelVolume<TVoxel, TIndex>* volume, Vector4i color, double width) {
+
+template<typename TVoxel, typename TIndex>
+void VoxelValueGrapher::Plot1DSceneSliceHelper(VoxelVolume<TVoxel, TIndex>* volume, Vector4i color, double width) {
 
 	// set up table & columns
 	vtkSmartPointer<vtkFloatArray> horizontalAxisPoints = vtkSmartPointer<vtkFloatArray>::New();
-	horizontalAxisPoints->SetName((AxisToString(this->axis) + " Axis").c_str());
+	horizontalAxisPoints->SetName((enumerator_to_string(this->axis) + " Axis").c_str());
 	vtkSmartPointer<vtkFloatArray> sdfValues = vtkSmartPointer<vtkFloatArray>::New();
 	sdfValues->SetName("SDF Value");
 	vtkSmartPointer<vtkTable> table = vtkSmartPointer<vtkTable>::New();
@@ -72,18 +60,18 @@ void SceneSliceVisualizer1D::Plot1DSceneSliceHelper(VoxelVolume<TVoxel, TIndex>*
 	typename TIndex::IndexCache cache;
 
 	Vector3i currentVoxelPosition = focus_coordinates;
-	currentVoxelPosition[axis] = rangeStartVoxelIndex;
+	currentVoxelPosition[axis] = range_start_voxel_index;
 
 	// fill table
 	for (int iValue = 0; iValue < voxelRange; iValue++, currentVoxelPosition[axis]++) {
 		int vmIndex = 0;
 		TVoxel voxel = EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().ReadVoxel(volume, focus_coordinates, cache);
 		table->SetValue(iValue, 0, currentVoxelPosition[axis]);
-		table->SetValue(iValue, 1, TGetSDFFunctor::GetSdf(voxel));
+		table->SetValue(iValue, 1, TVoxel::valueToFloat(voxel.sdf));
 	}
 
 	vtkSmartPointer<vtkChartXY> chart = this->window->GetChart();
-	chart->GetAxis(1)->SetTitle((AxisToString(this->axis) + " Axis").c_str());
+	chart->GetAxis(1)->SetTitle((enumerator_to_string(this->axis) + " Axis").c_str());
 	chart->ForceAxesToBoundsOff();
 	chart->AutoAxesOff();
 	chart->DrawAxesAtOriginOn();
@@ -104,8 +92,8 @@ void SceneSliceVisualizer1D::Plot1DSceneSliceHelper(VoxelVolume<TVoxel, TIndex>*
 
 
 template<typename TVoxel, typename TIndex>
-void SceneSliceVisualizer1D::Plot1DSceneSlice(VoxelVolume<TVoxel, TIndex>* scene, Vector4i color, double width) {
-	Plot1DSceneSliceHelper<TVoxel, TIndex, TGetRegularSDFFunctor<TVoxel>>(scene, color, width);
+void VoxelValueGrapher::Plot1DSceneSlice(VoxelVolume<TVoxel, TIndex>* volume, Vector4i color, double width) {
+	Plot1DSceneSliceHelper<TVoxel, TIndex>(volume, color, width);
 }
 
 
@@ -137,7 +125,7 @@ struct DetermineEndpointsStaticFunctor<TWarp, false, true> {
 };
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void SceneSliceVisualizer1D::Draw1DWarpUpdateVector(
+void VoxelValueGrapher::Draw1DWarpUpdateVector(
 		VoxelVolume<TVoxel, TIndex>* TSDF,
 		VoxelVolume<TWarp, TIndex>* warp_field,
 		Vector4i color) {

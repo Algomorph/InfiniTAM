@@ -32,7 +32,7 @@ include(${PROJECT_SOURCE_DIR}/cmake/UseVTK.cmake)
 set(
         sources
 
-        InfiniTAM_bpo.cpp
+        InfiniTAM.cpp
         UIEngine_BPO.cpp
         UIEngine_BPO_GlutFunctions.cpp
         CreateDefaultImageSource.cpp

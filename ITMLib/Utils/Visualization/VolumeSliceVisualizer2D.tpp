@@ -26,7 +26,7 @@
 #include <boost/filesystem.hpp>
 
 //local
-#include "SceneSliceVisualizer2D.h"
+#include "VolumeSliceVisualizer2D.h"
 #include "SceneSliceVisualizerCommon.h"
 #include "../../Objects/Volume/RepresentationAccess.h"
 #include "../../Engines/Analytics/AnalyticsEngine.h"
@@ -39,7 +39,7 @@ namespace fs = boost::filesystem;
 
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-const bool SceneSliceVisualizer2D<TVoxel, TWarp, TIndex>::absFillingStrategy = false;
+const bool VolumeSliceVisualizer2D<TVoxel, TWarp, TIndex>::absFillingStrategy = false;
 
 inline float SdfToShadeValue(float sdf, bool absFillingStrategy) {
 	return absFillingStrategy ? std::abs(sdf) : (sdf + 1.0f) / 2.0f;
@@ -54,10 +54,10 @@ inline bool IsPointInImageRange(int x, int y, int z, const Vector6i bounds) {
 // region ===================================== CONSTRUCTORS / DESTRUCTORS =============================================
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-SceneSliceVisualizer2D<TVoxel, TWarp, TIndex>::SceneSliceVisualizer2D(Vector3i focus_coordinates,
-                                                                      unsigned int imageSizeVoxels,
-                                                                      float pixelsPerVoxel,
-                                                                      Plane plane)
+VolumeSliceVisualizer2D<TVoxel, TWarp, TIndex>::VolumeSliceVisualizer2D(Vector3i focus_coordinates,
+                                                                        unsigned int imageSizeVoxels,
+                                                                        float pixelsPerVoxel,
+                                                                        Plane plane)
 		:
 		focus_coordinates(focus_coordinates),
 		imageSizeVoxels(imageSizeVoxels),
@@ -71,10 +71,33 @@ SceneSliceVisualizer2D<TVoxel, TWarp, TIndex>::SceneSliceVisualizer2D(Vector3i f
 		imgPixelRangeY(static_cast<int>(pixelsPerVoxel * bounds.max_y - bounds.min_y)),
 		imgPixelRangeZ(static_cast<int>(pixelsPerVoxel * bounds.max_z - bounds.min_z)),
 		plane(plane) {
-
+	blank = cv::Mat::zeros(imageSizeVoxels.rows, liveImg.cols, CV_8UC1);
 }
 
 // endregion ===========================================================================================================
+
+
+template<typename TVoxel, typename TWarp, typename TIndex>
+void VolumeSliceVisualizer2D<TVoxel, TWarp, TIndex>::InitializeWarp2DSliceRecording(
+		VoxelVolume<TVoxel, TIndex>* canonicalScene,
+		VoxelVolume<TVoxel, TIndex>* sourceLiveScene) {
+#ifdef WITH_OPENCV
+	cv::Mat canonicalImg = volume_2D_slice_visualizer->DrawSceneImageAroundPoint(canonicalScene) * 255.0f;
+	cv::Mat canonicalImgOut;
+	canonicalImg.convertTo(canonicalImgOut, CV_8UC1);
+	cv::cvtColor(canonicalImgOut, canonicalImgOut, cv::COLOR_GRAY2BGR);
+
+	cv::imwrite(GetOutputDirectoryFor2DSceneSlicesWithWarps() + "/canonical.png", canonicalImgOut);
+	cv::Mat liveImg = volume_2D_slice_visualizer->DrawSceneImageAroundPoint(sourceLiveScene) * 255.0f;
+	cv::Mat liveImgOut;
+	liveImg.convertTo(liveImgTemplate, CV_8UC1);
+	cv::cvtColor(liveImgTemplate, liveImgOut, cv::COLOR_GRAY2BGR);
+	cv::imwrite(GetOutputDirectoryFor2DSceneSlicesWithWarps() + "/live.png", liveImgOut);
+	//TODO: this is kinda backwards. Just build this in the constructor using constants from rasterizer for size. -Greg (GitHub: Algomorph)
+
+#endif
+}
+
 
 
 inline
@@ -129,7 +152,7 @@ private:
 
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-cv::Mat SceneSliceVisualizer2D<TVoxel, TWarp, TIndex>::DrawSceneImageAroundPoint(
+cv::Mat VolumeSliceVisualizer2D<TVoxel, TWarp, TIndex>::DrawSceneImageAroundPoint(
 		VoxelVolume<TVoxel, TIndex>* scene) {
 	//use if default voxel SDF value is 1.0
 	cv::Mat img = cv::Mat::ones(imgPixelRangeX, imgPixelRangeY, CV_32F);
@@ -137,7 +160,7 @@ cv::Mat SceneSliceVisualizer2D<TVoxel, TWarp, TIndex>::DrawSceneImageAroundPoint
 	std::unordered_set<float> valueSet = {};
 	DrawVoxelAtOriginalPositionFunctor<TVoxel> draw_voxel_functor(
 			imgPixelRangeY, imgPixelRangeZ, bounds, plane,
-			this->pixelsPerVoxel, absFillingStrategy, img);
+			this->pixelsPerVoxel, enable_abs_tsdf_filling_strategy, img);
 	VolumeTraversalEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>::
 	TraverseAllWithinBoundsWithPosition(scene, draw_voxel_functor, bounds);
 	return img;
@@ -194,7 +217,7 @@ private:
 };
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-cv::Mat SceneSliceVisualizer2D<TVoxel, TWarp, TIndex>::DrawWarpedSceneImageAroundPoint(
+cv::Mat VolumeSliceVisualizer2D<TVoxel, TWarp, TIndex>::DrawWarpedSceneImageAroundPoint(
 		VoxelVolume<TVoxel, TIndex>* scene,
 		VoxelVolume<TWarp, TIndex>* warpField) {
 #ifdef IMAGE_BLACK_BACKGROUND
@@ -214,7 +237,7 @@ cv::Mat SceneSliceVisualizer2D<TVoxel, TWarp, TIndex>::DrawWarpedSceneImageAroun
 			bounds.max_z + margin);
 	DrawSceneVoxelAtWarpedPositionFunctor<TVoxel, TWarp> drawSceneVoxelFunctor(
 			imgPixelRangeY, imgPixelRangeZ, bounds, plane,
-			this->pixelsPerVoxel, absFillingStrategy, img);
+			this->pixelsPerVoxel, enable_abs_tsdf_filling_strategy, img);
 	TwoVolumeTraversalEngine<TVoxel, TWarp, TIndex, TIndex, MEMORYDEVICE_CPU>::
 	template TraverseAllWithinBoundsWithPosition(scene, warpField, drawSceneVoxelFunctor, expandedBounds);
 	return img;
@@ -232,7 +255,7 @@ cv::Mat SceneSliceVisualizer2D<TVoxel, TWarp, TIndex>::DrawWarpedSceneImageAroun
  * \param positionOfVoxelToMark voxel position (before warp application) of the voxel to highlight/mark
  */
 template<typename TVoxel, typename TWarp, typename TIndex>
-void SceneSliceVisualizer2D<TVoxel, TWarp, TIndex>::MarkWarpedSceneImageAroundPoint(
+void VolumeSliceVisualizer2D<TVoxel, TWarp, TIndex>::MarkWarpedSceneImageAroundPoint(
 		VoxelVolume<TVoxel, TIndex>* scene, VoxelVolume<TWarp, TIndex>* warpField, cv::Mat& imageToMarkOn,
 		Vector3i positionOfVoxelToMark) {
 	TVoxel voxel = EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().ReadVoxel(scene, positionOfVoxelToMark);
@@ -267,7 +290,7 @@ void SceneSliceVisualizer2D<TVoxel, TWarp, TIndex>::MarkWarpedSceneImageAroundPo
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-bool SceneSliceVisualizer2D<TVoxel, TWarp, TIndex>::IsPointInImageRange(int x, int y, int z) const {
+bool VolumeSliceVisualizer2D<TVoxel, TWarp, TIndex>::IsPointInImageRange(int x, int y, int z) const {
 	return bounds.min_x <= x && bounds.max_x > x && bounds.min_y <= y && bounds.max_y > y && bounds.min_z <= z &&
 	       bounds.max_z > z;
 }
@@ -275,7 +298,7 @@ bool SceneSliceVisualizer2D<TVoxel, TWarp, TIndex>::IsPointInImageRange(int x, i
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 Vector2i
-SceneSliceVisualizer2D<TVoxel, TWarp, TIndex>::GetVoxelImageCoordinates(
+VolumeSliceVisualizer2D<TVoxel, TWarp, TIndex>::GetVoxelImageCoordinates(
 		Vector3i coordinates,
 		Plane plane) {
 	switch (plane) {
@@ -296,7 +319,7 @@ SceneSliceVisualizer2D<TVoxel, TWarp, TIndex>::GetVoxelImageCoordinates(
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 Vector2i
-SceneSliceVisualizer2D<TVoxel, TWarp, TIndex>::GetVoxelImageCoordinates(
+VolumeSliceVisualizer2D<TVoxel, TWarp, TIndex>::GetVoxelImageCoordinates(
 		Vector3f coordinates,
 		Plane plane) {
 	switch (plane) {
@@ -369,10 +392,10 @@ private:
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 void
-SceneSliceVisualizer2D<TVoxel, TWarp, TIndex>::RenderSceneSlices(VoxelVolume<TVoxel, TIndex>* scene,
-                                                                 Axis axis,
-                                                                 const std::string& outputFolder,
-                                                                 bool verbose) {
+VolumeSliceVisualizer2D<TVoxel, TWarp, TIndex>::RenderSceneSlices(VoxelVolume<TVoxel, TIndex>* scene,
+                                                                  Axis axis,
+                                                                  const std::string& outputFolder,
+                                                                  bool verbose) {
 
 	Vector6i bounds = AnalyticsEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance().ComputeVoxelBounds(scene);
 	Vector3i minPoint(bounds.min_x, bounds.min_y, bounds.min_z);
@@ -411,7 +434,7 @@ SceneSliceVisualizer2D<TVoxel, TWarp, TIndex>::RenderSceneSlices(VoxelVolume<TVo
 		images.push_back(cv::Mat::zeros(imSize, CV_8UC3));
 	}
 	DrawSingleVoxelForSliceFunctor<TVoxel> drawSingleVoxelForSliceFunctor(images, axis, focus_coordinates, minPoint,
-	                                                                      absFillingStrategy);
+	                                                                      enable_abs_tsdf_filling_strategy);
 	VolumeTraversalEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>::
 	TraverseAllWithPosition(scene, drawSingleVoxelForSliceFunctor);
 
@@ -427,41 +450,70 @@ SceneSliceVisualizer2D<TVoxel, TWarp, TIndex>::RenderSceneSlices(VoxelVolume<TVo
 
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void SceneSliceVisualizer2D<TVoxel, TWarp, TIndex>::SaveSceneSlicesAs2DImages_AllDirections(
+void VolumeSliceVisualizer2D<TVoxel, TWarp, TIndex>::SaveSceneSlicesAs2DImages_AllDirections(
 		VoxelVolume<TVoxel, TIndex>* scene, std::string pathWithoutPostfix) {
 	fs::create_directories(pathWithoutPostfix + "/X");
 	fs::create_directories(pathWithoutPostfix + "/Y");
 	fs::create_directories(pathWithoutPostfix + "/Z");
-	SceneSliceVisualizer2D<TVoxel, TWarp, TIndex>::SaveSceneSlicesAs2DImages(
+	VolumeSliceVisualizer2D<TVoxel, TWarp, TIndex>::SaveSceneSlicesAs2DImages(
 			scene, AXIS_X, pathWithoutPostfix + "/X");
-	SceneSliceVisualizer2D<TVoxel, TWarp, TIndex>::SaveSceneSlicesAs2DImages(
+	VolumeSliceVisualizer2D<TVoxel, TWarp, TIndex>::SaveSceneSlicesAs2DImages(
 			scene, AXIS_Y, pathWithoutPostfix + "/Y");
-	SceneSliceVisualizer2D<TVoxel, TWarp, TIndex>::SaveSceneSlicesAs2DImages(
+	VolumeSliceVisualizer2D<TVoxel, TWarp, TIndex>::SaveSceneSlicesAs2DImages(
 			scene, AXIS_Z, pathWithoutPostfix + "/Z");
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void SceneSliceVisualizer2D<TVoxel, TWarp, TIndex>::SaveSceneSlicesAs2DImages(
+void VolumeSliceVisualizer2D<TVoxel, TWarp, TIndex>::SaveSceneSlicesAs2DImages(
 		VoxelVolume<TVoxel, TIndex>* scene, Axis axis, std::string path) {
 	RenderSceneSlices(scene, axis, path, false);
 }
 
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void SceneSliceVisualizer2D<TVoxel, TWarp, TIndex>::MarkWarpedSceneImageAroundFocusPoint(
+void VolumeSliceVisualizer2D<TVoxel, TWarp, TIndex>::MarkWarpedSceneImageAroundFocusPoint(
 		VoxelVolume<TVoxel, TIndex>* scene,
 		VoxelVolume<TWarp, TIndex>* warpField, cv::Mat& imageToMarkOn) {
 	MarkWarpedSceneImageAroundPoint(scene, warpField, imageToMarkOn, focus_coordinates);
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-float SceneSliceVisualizer2D<TVoxel, TWarp, TIndex>::SdfToShadeValue(float sdf) {
-	return absFillingStrategy ? std::abs(sdf) : (sdf + 1.0f) / 2.0f;
+float VolumeSliceVisualizer2D<TVoxel, TWarp, TIndex>::SdfToShadeValue(float sdf) {
+	return enable_abs_tsdf_filling_strategy ? std::abs(sdf) : (sdf + 1.0f) / 2.0f;
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-Plane SceneSliceVisualizer2D<TVoxel, TWarp, TIndex>::GetPlane() const {
+Plane VolumeSliceVisualizer2D<TVoxel, TWarp, TIndex>::GetPlane() const {
 	return this->plane;
+}
+
+template<typename TVoxel, typename TWarp, typename TIndex>
+void VolumeSliceVisualizer2D<TVoxel, TWarp, TIndex>::RecordWarpUpdates() {
+	cv::Mat warpImg =
+			volume_2D_slice_visualizer->DrawWarpedSceneImageAroundPoint(canonicalScene, warpField) * 255.0f;
+	cv::Mat warpImgChannel, warpImgOut, mask, liveImgChannel, markChannel;
+	blank.copyTo(markChannel);
+	volume_2D_slice_visualizer->MarkWarpedSceneImageAroundFocusPoint(canonicalScene, warpField, markChannel);
+	liveImgChannel = cv::Mat::zeros(warpImg.rows, warpImg.cols, CV_8UC1);
+
+	warpImg.convertTo(warpImgChannel, CV_8UC1);
+	cv::threshold(warpImgChannel, mask, 1.0, 1.0, cv::THRESH_BINARY_INV);
+	liveImgTemplate.copyTo(liveImgChannel, mask);
+
+	cv::Mat channels[3] = {liveImgTemplate, warpImgChannel, markChannel};
+
+	cv::merge(channels, 3, warpImgOut);
+	std::stringstream numStringStream;
+	numStringStream << std::setw(3) << std::setfill('0') << iteration;
+	std::string image_name =
+			GetOutputDirectoryFor2DSceneSlicesWithWarps() + "/warp" + numStringStream.str() + ".png";
+	cv::imwrite(image_name, warpImgOut);
+	cv::Mat liveImg = volume_2D_slice_visualizer->DrawSceneImageAroundPoint(liveScene) * 255.0f;
+	cv::Mat liveImgOut;
+	liveImg.convertTo(liveImgOut, CV_8UC1);
+	cv::cvtColor(liveImgOut, liveImgOut, cv::COLOR_GRAY2BGR);
+	cv::imwrite(GetOutputDirectoryFor2DLiveSceneSliceProgression() + "/live " + numStringStream.str() +
+	            ".png", liveImgOut);
 }
 
 #endif // #ifdef WITH_OPENCV

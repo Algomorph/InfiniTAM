@@ -28,47 +28,14 @@ namespace ITMLib {
 
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-class SceneSliceVisualizer2D {
+class VolumeSliceVisualizer2D {
 
 	//TODO: positions of voxels to highlight / draw around should be defined extenally in the user code, not as class static members. Static functions should be probably changed to become member functions, with focus coordinates (testPos1, testPos2...) being set in user code during construction. -Greg (GitHub: Algomorph)
-public:
-	static float SdfToShadeValue(float sdf);
+private: // member variables
+	cv::Mat blank;
+	cv::Mat liveImgTemplate;
 
-	explicit SceneSliceVisualizer2D(Vector3i focus_coordinates, unsigned int imageSizeVoxels, float pixelsPerVoxel,
-	                                Plane plane);
-
-	virtual ~SceneSliceVisualizer2D() = default;
-
-	Plane GetPlane() const;
-
-	void SaveSceneSlicesAs2DImages_AllDirections(
-			VoxelVolume <TVoxel, TIndex>* scene, std::string pathWithoutPostfix);
-	void SaveSceneSlicesAs2DImages(VoxelVolume <TVoxel, TIndex>* scene,
-	                               Axis axis, std::string path);
-
-	cv::Mat DrawSceneImageAroundPoint(VoxelVolume <TVoxel, TIndex>* scene);
-	cv::Mat DrawWarpedSceneImageAroundPoint(VoxelVolume <TVoxel, TIndex>* scene, VoxelVolume <TWarp, TIndex>* warpField);
-
-	void MarkWarpedSceneImageAroundFocusPoint(VoxelVolume <TVoxel, TIndex>* scene,
-			VoxelVolume <TWarp, TIndex>* warpField, cv::Mat& imageToMarkOn);
-	void MarkWarpedSceneImageAroundPoint(VoxelVolume <TVoxel, TIndex>* scene,
-			VoxelVolume <TWarp, TIndex>* warpField, cv::Mat& imageToMarkOn, Vector3i positionOfVoxelToMark);
-
-	const std::string outputDirectory;
-	const float pixelsPerVoxel;
-
-private:
-	void RenderSceneSlices(VoxelVolume <TVoxel, TIndex>* scene,
-	                       Axis axis,
-	                       const std::string& outputFolder,
-	                       bool verbose = false);
-
-	Vector2i GetVoxelImageCoordinates(Vector3i coordinates, Plane plane);
-	Vector2i GetVoxelImageCoordinates(Vector3f coordinates, Plane plane);
-
-	bool IsPointInImageRange(int x, int y, int z) const;
-
-	static const bool absFillingStrategy;
+	static const bool enable_abs_tsdf_filling_strategy;
 
 	const int imageSizeVoxels;
 	const int imageHalfSizeVoxels;
@@ -86,6 +53,50 @@ private:
 
 	Plane plane;
 	const Vector3i focus_coordinates;
+
+	const std::string outputDirectory;
+	const float pixelsPerVoxel;
+
+public: // member functions
+
+	static float SdfToShadeValue(float sdf);
+
+	explicit VolumeSliceVisualizer2D(Vector3i focus_coordinates, unsigned int imageSizeVoxels, float pixelsPerVoxel,
+	                                 Plane plane);
+
+	virtual ~VolumeSliceVisualizer2D() = default;
+
+	Plane GetPlane() const;
+
+	void SaveSceneSlicesAs2DImages_AllDirections(
+			VoxelVolume <TVoxel, TIndex>* scene, std::string pathWithoutPostfix);
+	void SaveSceneSlicesAs2DImages(VoxelVolume <TVoxel, TIndex>* scene,
+	                               Axis axis, std::string path);
+
+	cv::Mat DrawSceneImageAroundPoint(VoxelVolume <TVoxel, TIndex>* scene);
+	cv::Mat DrawWarpedSceneImageAroundPoint(VoxelVolume <TVoxel, TIndex>* scene, VoxelVolume <TWarp, TIndex>* warpField);
+
+	void MarkWarpedSceneImageAroundFocusPoint(VoxelVolume <TVoxel, TIndex>* scene,
+			VoxelVolume <TWarp, TIndex>* warpField, cv::Mat& imageToMarkOn);
+	void MarkWarpedSceneImageAroundPoint(VoxelVolume <TVoxel, TIndex>* scene,
+			VoxelVolume <TWarp, TIndex>* warpField, cv::Mat& imageToMarkOn, Vector3i positionOfVoxelToMark);
+
+	void RecordWarpUpdates();
+
+
+private: // member functions
+	void InitializeWarp2DSliceRecording(VoxelVolume<TVoxel, TIndex>* canonicalScene,
+	                                    VoxelVolume<TVoxel, TIndex>* sourceLiveScene);
+
+	void RenderSceneSlices(VoxelVolume <TVoxel, TIndex>* scene,
+	                       Axis axis,
+	                       const std::string& outputFolder,
+	                       bool verbose = false);
+
+	Vector2i GetVoxelImageCoordinates(Vector3i coordinates, Plane plane);
+	Vector2i GetVoxelImageCoordinates(Vector3f coordinates, Plane plane);
+
+	bool IsPointInImageRange(int x, int y, int z) const;
 };
 
 

@@ -21,10 +21,10 @@
 
 //local
 #include "../../Objects/Volume/VoxelVolume.h"
-#include "../Collections/NestedMap3DOfArrays.h"
-#include "../Analytics/NeighborVoxelIterationInfo.h"
+#include "../../Utils/Collections/NestedMap3DOfArrays.h"
+#include "../../Utils/Analytics/NeighborVoxelIterationInfo.h"
 #include "WarpFieldSequenceRecorder.h"
-#include "../../Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
+#include "../EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 
 //boost
 #include <boost/filesystem.hpp>

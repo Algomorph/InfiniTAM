@@ -20,8 +20,8 @@
 
 //local
 #include "../../Objects/Volume/VoxelVolume.h"
-#include "../Collections/NestedMap3DOfArrays.h"
-#include "../Analytics/NeighborVoxelIterationInfo.h"
+#include "../../Utils/Collections/NestedMap3DOfArrays.h"
+#include "../../Utils/Analytics/NeighborVoxelIterationInfo.h"
 
 namespace fs = boost::filesystem;
 
