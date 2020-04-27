@@ -29,6 +29,7 @@ namespace ITMLib
 		Vector4s *visible_block_positions_device;
 		const bool streaming_mode_enabled;
 		bool buffers_allocated;
+		int maximum_block_count;
 
 	public:
 		void MeshScene(Mesh *mesh, const VoxelVolume<TVoxel, VoxelBlockHash> *volume) override;

@@ -6,8 +6,7 @@
 using namespace ITMLib;
 
 template<class TVoxel>
-void MeshingEngine_CPU<TVoxel, VoxelBlockHash>::MeshScene(Mesh* mesh, const VoxelVolume<TVoxel, VoxelBlockHash>* volume)
-{
+void MeshingEngine_CPU<TVoxel, VoxelBlockHash>::MeshScene(Mesh* mesh, const VoxelVolume<TVoxel, VoxelBlockHash>* volume){
 	Mesh::Triangle *triangles = mesh->triangles.GetData(MEMORYDEVICE_CPU);
 	const TVoxel *localVBA = volume->GetVoxels();
 	const HashEntry *hashTable = volume->index.GetEntries();

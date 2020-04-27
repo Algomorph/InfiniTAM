@@ -5,14 +5,27 @@
 #include "../Shared/MeshingEngine_Shared.h"
 #include "../../../Utils/CUDAUtils.h"
 #include "../../../../ORUtils/CUDADefines.h"
+#include "MeshingEngine_CUDA_Kernels.h"
 
 using namespace ITMLib;
 
+
+// region =================================== PlainVoxelArray ==========================================================
+
 template<class TVoxel>
-__global__ void
-meshScene_device(Mesh::Triangle* triangles, unsigned int* noTriangles_device, float factor, int noTotalEntries,
-                 int noMaxTriangles, const Vector4s* visibleBlockGlobalPos, const TVoxel* localVBA,
-                 const HashEntry* hashTable);
+MeshingEngine_CUDA<TVoxel, PlainVoxelArray>::MeshingEngine_CUDA() {}
+
+template<class TVoxel>
+MeshingEngine_CUDA<TVoxel, PlainVoxelArray>::~MeshingEngine_CUDA() {}
+
+template<class TVoxel>
+void MeshingEngine_CUDA<TVoxel, PlainVoxelArray>::MeshScene(Mesh* mesh,
+                                                            const VoxelVolume<TVoxel, PlainVoxelArray>* scene) {
+	DIEWITHEXCEPTION_REPORTLOCATION("Not implemented");
+}
+// endregion ===========================================================================================================
+
+// region =================================== VoxelBlockHash ===========================================================
 
 template<int dummy>
 __global__ void findAllocateBlocks(Vector4s* visibleBlockGlobalPos, const HashEntry* hashTable, int noTotalEntries) {
@@ -31,45 +44,58 @@ MeshingEngine_CUDA<TVoxel, VoxelBlockHash>::MeshingEngine_CUDA()
 		: MeshingEngine<TVoxel, VoxelBlockHash>(), streaming_mode_enabled(false), buffers_allocated(false) {}
 
 template<class TVoxel>
-MeshingEngine_CUDA<TVoxel, VoxelBlockHash>::~MeshingEngine_CUDA() {}
+MeshingEngine_CUDA<TVoxel, VoxelBlockHash>::~MeshingEngine_CUDA() {
+	if(streaming_mode_enabled && buffers_allocated){
+		ORcudaSafeCall(cudaFree(visible_block_positions_device));
+		ORcudaSafeCall(cudaFree(triangle_count_device));
+	}
+}
 
 
 template<class TVoxel>
 void MeshingEngine_CUDA<TVoxel, VoxelBlockHash>::PreallocateTemporaryBuffers(int maximum_block_count) {
+	this->maximum_block_count = maximum_block_count;
 	ORcudaSafeCall(cudaMalloc((void**)&visible_block_positions_device,
 	                          maximum_block_count * sizeof(Vector4s)));
 	ORcudaSafeCall(cudaMalloc((void**)&triangle_count_device, sizeof(unsigned int)));
+	buffers_allocated = true;
 }
 
 template<class TVoxel>
 void MeshingEngine_CUDA<TVoxel, VoxelBlockHash>::MeshScene(Mesh* mesh,
                                                            const VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
+	int maximum_block_count;
+
 	if (!streaming_mode_enabled) {
+		maximum_block_count = volume->index.GetUtilizedBlockCount();
 		ORcudaSafeCall(cudaMalloc((void**)&visible_block_positions_device,
-		                          volume->index.GetUtilizedBlockCount() * sizeof(Vector4s)));
+                          volume->index.GetUtilizedBlockCount() * sizeof(Vector4s)));
 		ORcudaSafeCall(cudaMalloc((void**)&triangle_count_device, sizeof(unsigned int)));
-	} else {
+
+	} else if(!buffers_allocated) {
 		DIEWITHEXCEPTION_REPORTLOCATION("When operating in streaming mode, buffers in "
 		                                "MeshingEngine_CUDA<...,VoxelBlockHash> should be allocated using "
 		                                "PreallocateTemporaryBuffers before MeshScene is called.");
+	} else {
+		maximum_block_count = this->maximum_block_count;
 	}
 
 	Mesh::Triangle* triangles = mesh->triangles.GetData(MEMORYDEVICE_CUDA);
 	const TVoxel* localVBA = volume->GetVoxels();
 	const HashEntry* hashTable = volume->index.GetEntries();
 
-	int noMaxTriangles = mesh->max_triangle_count, noTotalEntries = volume->index.hash_entry_count;
+	int noMaxTriangles = mesh->max_triangle_count, total_entry_count = volume->index.hash_entry_count;
 	float factor = volume->GetParameters().voxel_size;
 
 	ORcudaSafeCall(cudaMemset(triangle_count_device, 0, sizeof(unsigned int)));
-	ORcudaSafeCall(cudaMemset(visible_block_positions_device, 0, sizeof(Vector4s) * volume->index.voxel_block_count));
+	ORcudaSafeCall(cudaMemset(visible_block_positions_device, 0, sizeof(Vector4s) * maximum_block_count));
 
 	{ // identify used voxel blocks
 		dim3 cudaBlockSize(256);
-		dim3 gridSize((int) ceil((float) noTotalEntries / (float) cudaBlockSize.x));
+		dim3 gridSize((int) ceil((float) total_entry_count / (float) cudaBlockSize.x));
 
 		findAllocateBlocks<-1> <<< gridSize, cudaBlockSize >>>
-				(visible_block_positions_device, hashTable, noTotalEntries);
+				(visible_block_positions_device, hashTable, total_entry_count);
 		ORcudaKernelCheck;
 	}
 
@@ -78,56 +104,17 @@ void MeshingEngine_CUDA<TVoxel, VoxelBlockHash>::MeshScene(Mesh* mesh,
 		dim3 gridSize(volume->index.voxel_block_count / 16, 16);
 
 		meshScene_device<TVoxel> <<< gridSize, cudaBlockSize >>>
-				(triangles, triangle_count_device, factor, noTotalEntries, noMaxTriangles,
+				(triangles, triangle_count_device, factor, total_entry_count, noMaxTriangles,
 				 visible_block_positions_device, localVBA, hashTable);
 		ORcudaKernelCheck;
 
 		ORcudaSafeCall(
 				cudaMemcpy(&mesh->triangle_count, triangle_count_device, sizeof(unsigned int), cudaMemcpyDeviceToHost));
 	}
-
-	ORcudaSafeCall(cudaFree(visible_block_positions_device));
-	ORcudaSafeCall(cudaFree(triangle_count_device));
-}
-
-
-template<class TVoxel>
-MeshingEngine_CUDA<TVoxel, PlainVoxelArray>::MeshingEngine_CUDA() {}
-
-template<class TVoxel>
-MeshingEngine_CUDA<TVoxel, PlainVoxelArray>::~MeshingEngine_CUDA() {}
-
-template<class TVoxel>
-void MeshingEngine_CUDA<TVoxel, PlainVoxelArray>::MeshScene(Mesh* mesh,
-                                                            const VoxelVolume<TVoxel, PlainVoxelArray>* scene) {
-	DIEWITHEXCEPTION_REPORTLOCATION("Not implemented");
-}
-
-
-template<class TVoxel>
-__global__ void
-meshScene_device(Mesh::Triangle* triangles, unsigned int* noTriangles_device, float factor, int noTotalEntries,
-                 int noMaxTriangles, const Vector4s* visibleBlockGlobalPos, const TVoxel* localVBA,
-                 const HashEntry* hashTable) {
-	const Vector4s globalPos_4s = visibleBlockGlobalPos[blockIdx.x + gridDim.x * blockIdx.y];
-
-	if (globalPos_4s.w == 0) return;
-
-	Vector3i globalPos = Vector3i(globalPos_4s.x, globalPos_4s.y, globalPos_4s.z) * VOXEL_BLOCK_SIZE;
-
-	Vector3f vertList[12];
-	int cubeIndex = buildVertexList(vertList, globalPos, Vector3i(threadIdx.x, threadIdx.y, threadIdx.z), localVBA,
-	                                hashTable);
-
-	if (cubeIndex < 0) return;
-
-	for (int i = 0; triangleTable[cubeIndex][i] != -1; i += 3) {
-		int triangleId = atomicAdd(noTriangles_device, 1);
-
-		if (triangleId < noMaxTriangles - 1) {
-			triangles[triangleId].p0 = vertList[triangleTable[cubeIndex][i]] * factor;
-			triangles[triangleId].p1 = vertList[triangleTable[cubeIndex][i + 1]] * factor;
-			triangles[triangleId].p2 = vertList[triangleTable[cubeIndex][i + 2]] * factor;
-		}
+	if (!streaming_mode_enabled) {
+		ORcudaSafeCall(cudaFree(visible_block_positions_device));
+		ORcudaSafeCall(cudaFree(triangle_count_device));
 	}
 }
+
+// endregion ===========================================================================================================
