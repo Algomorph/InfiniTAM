@@ -71,7 +71,7 @@ private: // member variables
 	std::unique_ptr<VolumeSliceVisualizer2D<TVoxel, TWarp, TIndex>> volume_2D_slice_visualizer;
 #endif
 #ifdef WITH_VTK
-	std::unique_ptr<VoxelValueGrapher> focus_point_TSDF_grapher;
+	std::unique_ptr<VoxelValueGrapher<TVoxel,TWarp,TIndex>> focus_point_TSDF_grapher;
 	std::unique_ptr<SceneSliceVisualizer3D<TVoxel, TWarp, TIndex>> scene3DSliceVisualizer;
 	std::unique_ptr<ITMSceneTrackingEnergyPlotter> energy_plotter;
 #endif

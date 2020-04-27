@@ -681,22 +681,23 @@ set(ITMLIB_ENGINES_FILEIO_HEADERS
 ## ================================================== TELEMETRY ENGINES ================================================
 
 set(ITMLIB_ENGINES_TELEMETRY_HEADERS
-    Engines/Telemetry/TelemetryRecorder_PlainVoxelArray.cpp
-    Engines/Telemetry/TelemetryRecorder_VoxelBlockHash.cpp
-    Engines/Telemetry/VolumeSequenceRecorder.tpp
-    Engines/Telemetry/VolumeSequenceRecorder_PlainVoxelArray.cpp
-    Engines/Telemetry/VolumeSequenceRecorder_VoxelBlockHash.cpp
-    Engines/Telemetry/TelemetryRecorder.tpp
-    Engines/Telemetry/VolumeSequenceRecorder_VolumeSlice.tpp
-    Engines/Telemetry/WarpFieldSequenceRecorder.tpp
-    Engines/Telemetry/WarpFieldSequenceRecorder_PlainVoxelArray.cpp
-    Engines/Telemetry/WarpFieldSequenceRecorder_VoxelBlockHash.cpp
+    #TODO: fixme
+#    Engines/Telemetry/TelemetryRecorder_PlainVoxelArray.cpp
+#    Engines/Telemetry/TelemetryRecorder_VoxelBlockHash.cpp
+#    Engines/Telemetry/VolumeSequenceRecorder.tpp
+#    Engines/Telemetry/VolumeSequenceRecorder_PlainVoxelArray.cpp
+#    Engines/Telemetry/VolumeSequenceRecorder_VoxelBlockHash.cpp
+#    Engines/Telemetry/TelemetryRecorder.tpp
+#    Engines/Telemetry/VolumeSequenceRecorder_VolumeSlice.tpp
+#    Engines/Telemetry/WarpFieldSequenceRecorder.tpp
+#    Engines/Telemetry/WarpFieldSequenceRecorder_PlainVoxelArray.cpp
+#    Engines/Telemetry/WarpFieldSequenceRecorder_VoxelBlockHash.cpp
     )
 set(ITMLIB_ENGINES_TELEMETRY_SOURCES
-    Engines/Telemetry/WriteAndReadFunctors.h
-    Engines/Telemetry/VolumeSequenceRecorder.h
-    Engines/Telemetry/TelemetryRecorder.h
-    Engines/Telemetry/WarpFieldSequenceRecorder.h
+#    Engines/Telemetry/WriteAndReadFunctors.h
+#    Engines/Telemetry/VolumeSequenceRecorder.h
+#    Engines/Telemetry/TelemetryRecorder.h
+#    Engines/Telemetry/WarpFieldSequenceRecorder.h
     )
 
 ## ================================================== OBJECTS ==========================================================
@@ -988,14 +989,17 @@ set(ITMLIB_UTILS_HEADERS
 
 
 set(ITMLIB_UTILS_VISUALIZATION_SOURCES
-    Utils/Visualization/VolumeSliceVisualizer2D.tpp
-    Utils/Visualization/SceneSliceVisualizer2D_PlainVoxelArray.cpp
-    Utils/Visualization/SceneSliceVisualizer2D_VoxelBlockHash.cpp)
+    # TODO: FIXME
+    #Utils/Visualization/VolumeSliceVisualizer2D.tpp
+    #Utils/Visualization/SceneSliceVisualizer2D_PlainVoxelArray.cpp
+    #Utils/Visualization/SceneSliceVisualizer2D_VoxelBlockHash.cpp
+    )
 
 if (WITH_VTK)
     list(APPEND ITMLIB_UTILS_VISUALIZATION_SOURCES
-         Utils/Visualization/VoxelValueGrapher.cpp
-         Utils/Visualization/SceneSliceVisualizer1D.tpp
+         #TODO: fixme
+#         Utils/Visualization/VoxelValueGrapher.cpp
+#         Utils/Visualization/SceneSliceVisualizer1D.tpp
          Utils/Visualization/SceneSliceVisualizer3D.tpp
          Utils/Visualization/SceneSliceVisualizer3DInteractorStyle.tpp
          Utils/Visualization/SceneSliceVisualizer3DCommon.cpp
@@ -1008,11 +1012,11 @@ endif ()
 
 set(ITMLIB_UTILS_VISUALIZATION_HEADERS
     Utils/Visualization/SceneSliceVisualizerCommon.h
-    Utils/Visualization/VolumeSliceVisualizer2D.h
+#    Utils/Visualization/VolumeSliceVisualizer2D.h
     )
 if (WITH_VTK)
     list(APPEND ITMLIB_UTILS_VISUALIZATION_HEADERS
-         Utils/Visualization/VoxelValueGrapher.h
+#         Utils/Visualization/VoxelValueGrapher.h
          Utils/Visualization/SceneSliceVisualizer3D.h
          Utils/Visualization/SceneSliceVisualizer3DInteractorStyle.h
          Utils/Visualization/SceneSliceVisualizer3DCommon.h

@@ -169,7 +169,9 @@ void SceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>:
 
 template<typename TVoxelCanonical, typename TVoxelLive, typename TIndex>
 void SceneSliceVisualizer3DInteractorStyle<TVoxelCanonical, TVoxelLive, TIndex>::RequestShutdown() {
-	TelemetryRecorder<TVoxelCanonical, TVoxelLive, TIndex>::Instance().RequestAppShutdown();
+	//TODO: fixme
+	DIEWITHEXCEPTION_REPORTLOCATION("Under construction...");
+//	TelemetryRecorder<TVoxelCanonical, TVoxelLive, TIndex>::Instance().RequestAppShutdown();
 }
 
 template<typename TVoxelCanonical, typename TVoxelLive, typename TIndex>
