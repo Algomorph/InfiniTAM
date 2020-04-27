@@ -42,9 +42,12 @@ void GenericMeshSavingTest() {
 	LoadVolume(&canonical_volume, snoopy::PartialVolume16Path<TIndex>(),
 	           TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 
-	Mesh *mesh = new Mesh(configuration::get().device_type, canonical_volume->index.GetMaxVoxelCount());
-	MeshingEngine<TSDFVoxel, TIndex>* meshing_engine = MeshingEngineFactory::Build<TSDFVoxel, TIndex>(
-			configuration::get().device_type, volume->index);
+	Mesh* mesh = new Mesh(configuration::get().device_type, canonical_volume->index.GetMaxVoxelCount());
+	MeshingEngine<TSDFVoxel, TIndex>* meshing_engine =
+			MeshingEngineFactory::Build<TSDFVoxel, TIndex>(configuration::get().device_type);
+	meshing_engine->MeshScene(mesh, canonical_volume);
+
+	mesh->WriteOBJ("TestData/meshes/mesh_partial_16.obj");
 
 
 	delete canonical_volume;
@@ -52,7 +55,7 @@ void GenericMeshSavingTest() {
 	delete meshing_engine;
 }
 
-BOOST_AUTO_TEST_CASE(Test_MeshGeneration_CPU_PVA) {
-	GenericMeshSavingTest<PlainVoxelArray, MEMORYDEVICE_CPU>();
+BOOST_AUTO_TEST_CASE(Test_MeshGeneration_CPU_VBH) {
+	GenericMeshSavingTest<VoxelBlockHash, MEMORYDEVICE_CPU>();
 }
 

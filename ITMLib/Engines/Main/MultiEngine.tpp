@@ -308,13 +308,8 @@ template <typename TVoxel, typename TIndex>
 void MultiEngine<TVoxel, TIndex>::SaveSceneToMesh(const char *modelFileName)
 {
 	if (meshingEngine == NULL) return;
-
-	Mesh *mesh = new Mesh(configuration::get().device_type, mapManager->getLocalMap(0)->volume->index.GetMaxVoxelCount());
-
-	meshingEngine->MeshScene(mesh, *mapManager);
-	mesh->WriteSTL(modelFileName);
-
-	delete mesh;
+	Mesh mesh = meshingEngine->MeshScene(*mapManager);
+	mesh.WriteSTL(modelFileName);
 }
 
 template <typename TVoxel, typename TIndex>

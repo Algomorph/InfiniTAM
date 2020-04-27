@@ -286,6 +286,8 @@ public:
 		return nullptr;
 	}
 
+	MemoryDeviceType GetAccessMode() const { return this->access_mode; }
+
 	//TODO: make a Clear method that accepts a T default value (use cuda kernel to propagate the value throughout array)
 	/**
 	 * Set all data to the given @p defaultValue.

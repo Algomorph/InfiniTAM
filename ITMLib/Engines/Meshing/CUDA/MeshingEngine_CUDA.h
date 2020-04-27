@@ -15,7 +15,7 @@ namespace ITMLib
 	{
 	public:
 		//TODO: implement meshing for PVA (for completeness / consistency)
-		void MeshScene(Mesh *mesh, const VoxelVolume<TVoxel, PlainVoxelArray> *scene) override;
+		Mesh MeshScene(const VoxelVolume<TVoxel, PlainVoxelArray> *volume) override;
 
 		explicit MeshingEngine_CUDA();
 		~MeshingEngine_CUDA();
@@ -24,16 +24,9 @@ namespace ITMLib
 	template<class TVoxel>
 	class MeshingEngine_CUDA<TVoxel, VoxelBlockHash> : public MeshingEngine < TVoxel, VoxelBlockHash >
 	{
-	private:
-		unsigned int  *triangle_count_device;
-		Vector4s *visible_block_positions_device;
-		const bool streaming_mode_enabled;
-		bool buffers_allocated;
-		int maximum_block_count;
 
 	public:
-		void MeshScene(Mesh *mesh, const VoxelVolume<TVoxel, VoxelBlockHash> *volume) override;
-		void PreallocateTemporaryBuffers(int maximum_block_count);
+		Mesh MeshScene(const VoxelVolume<TVoxel, VoxelBlockHash> *volume) override;
 		explicit MeshingEngine_CUDA();
 		~MeshingEngine_CUDA();
 	};

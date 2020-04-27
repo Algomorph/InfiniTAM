@@ -7,37 +7,37 @@
 using namespace ITMLib;
 
 template<class TVoxel>
-inline void MultiMeshingEngine_CPU<TVoxel, VoxelBlockHash>::MeshScene(Mesh * mesh, const MultiSceneManager & sceneManager)
+inline Mesh MultiMeshingEngine_CPU<TVoxel, VoxelBlockHash>::MeshScene(const MultiSceneManager & manager)
 {
-	int numLocalMaps = (int)sceneManager.numLocalMaps();
+	int numLocalMaps = (int)manager.numLocalMaps();
 	if (numLocalMaps > MAX_NUM_LOCALMAPS) numLocalMaps = MAX_NUM_LOCALMAPS;
 
 	MultiIndexData hashTables;
 	MultiVoxelData localVBAs;
 
-	const VoxelVolumeParameters& sceneParams = sceneManager.getLocalMap(0)->volume->GetParameters();
+	const VoxelVolumeParameters& sceneParams = manager.getLocalMap(0)->volume->GetParameters();
 	hashTables.numLocalMaps = numLocalMaps;
 	for (int localMapId = 0; localMapId < numLocalMaps; ++localMapId)
 	{
-		hashTables.poses_vs[localMapId] = sceneManager.getEstimatedGlobalPose(localMapId).GetM();
+		hashTables.poses_vs[localMapId] = manager.getEstimatedGlobalPose(localMapId).GetM();
 		hashTables.poses_vs[localMapId].m30 /= sceneParams.voxel_size;
 		hashTables.poses_vs[localMapId].m31 /= sceneParams.voxel_size;
 		hashTables.poses_vs[localMapId].m32 /= sceneParams.voxel_size;
 		
-		hashTables.posesInv[localMapId] = sceneManager.getEstimatedGlobalPose(localMapId).GetInvM();
+		hashTables.posesInv[localMapId] = manager.getEstimatedGlobalPose(localMapId).GetInvM();
 		hashTables.posesInv[localMapId].m30 /= sceneParams.voxel_size;
 		hashTables.posesInv[localMapId].m31 /= sceneParams.voxel_size;
 		hashTables.posesInv[localMapId].m32 /= sceneParams.voxel_size;
 
-		hashTables.index[localMapId] = sceneManager.getLocalMap(localMapId)->volume->index.GetIndexData();
-		localVBAs.voxels[localMapId] = sceneManager.getLocalMap(localMapId)->volume->GetVoxels();
+		hashTables.index[localMapId] = manager.getLocalMap(localMapId)->volume->index.GetIndexData();
+		localVBAs.voxels[localMapId] = manager.getLocalMap(localMapId)->volume->GetVoxels();
 	}
+	const unsigned int max_triangle_count = manager.getLocalMap(0)->volume->index.GetMaxVoxelCount();
+	ORUtils::MemoryBlock<Mesh::Triangle> triangles(max_triangle_count, MEMORYDEVICE_CUDA);
+	Mesh::Triangle *triangles_device = triangles.GetData(MEMORYDEVICE_CPU);
 
-	Mesh::Triangle *triangles = mesh->triangles.GetData(MEMORYDEVICE_CPU);
-	mesh->triangles.Clear();
-
-	int triangle_count = 0, max_triangle_count = mesh->max_triangle_count;
-	int noTotalEntriesPerLocalMap = sceneManager.getLocalMap(0)->volume->index.hash_entry_count;
+	int triangle_count = 0;
+	int noTotalEntriesPerLocalMap = manager.getLocalMap(0)->volume->index.hash_entry_count;
 	float factor = sceneParams.voxel_size;
 
 	// very dumb rendering -- likely to generate lots of duplicates
@@ -61,11 +61,11 @@ inline void MultiMeshingEngine_CPU<TVoxel, VoxelBlockHash>::MeshScene(Mesh * mes
 
 				if (cubeIndex < 0) continue;
 
-				for (int i = 0; triangleTable[cubeIndex][i] != -1; i += 3)
+				for (int i = 0; triangle_table[cubeIndex][i] != -1; i += 3)
 				{
-					triangles[triangle_count].p0 = vertList[triangleTable[cubeIndex][i]] * factor;
-					triangles[triangle_count].p1 = vertList[triangleTable[cubeIndex][i + 1]] * factor;
-					triangles[triangle_count].p2 = vertList[triangleTable[cubeIndex][i + 2]] * factor;
+					triangles_device[triangle_count].p0 = vertList[triangle_table[cubeIndex][i]] * factor;
+					triangles_device[triangle_count].p1 = vertList[triangle_table[cubeIndex][i + 1]] * factor;
+					triangles_device[triangle_count].p2 = vertList[triangle_table[cubeIndex][i + 2]] * factor;
 
 					if (triangle_count < max_triangle_count - 1) triangle_count++;
 				}
@@ -73,5 +73,5 @@ inline void MultiMeshingEngine_CPU<TVoxel, VoxelBlockHash>::MeshScene(Mesh * mes
 		}
 	}
 
-	mesh->triangle_count = triangle_count;
+	return Mesh(triangles, triangle_count);
 }

@@ -99,13 +99,8 @@ template <typename TVoxel, typename TIndex>
 void BasicVoxelEngine<TVoxel,TIndex>::SaveSceneToMesh(const char *objFileName)
 {
 	if (meshingEngine == NULL) return;
-
-	Mesh *mesh = new Mesh(configuration::get().device_type, volume->index.GetMaxVoxelCount());
-
-	meshingEngine->MeshScene(mesh, volume);
-	mesh->WriteSTL(objFileName);
-
-	delete mesh;
+	Mesh mesh = meshingEngine->MeshScene(volume);
+	mesh.WriteSTL(objFileName);
 }
 
 template <typename TVoxel, typename TIndex>

@@ -40,39 +40,39 @@ MultiMeshingEngine_CUDA<TVoxel, VoxelBlockHash>::~MultiMeshingEngine_CUDA() {
 }
 
 template<class TVoxel>
-void MultiMeshingEngine_CUDA<TVoxel, VoxelBlockHash>::MeshScene(Mesh* mesh,
-                                                                const VoxelMapGraphManager<TVoxel, VoxelBlockHash>& sceneManager) {
-	const VoxelVolumeParameters& sceneParams = sceneManager.getLocalMap(0)->volume->GetParameters();
-	int numLocalMaps = (int) sceneManager.numLocalMaps();
+Mesh MultiMeshingEngine_CUDA<TVoxel, VoxelBlockHash>::MeshScene(const VoxelMapGraphManager<TVoxel, VoxelBlockHash>& manager) {
+	const VoxelVolumeParameters& sceneParams = manager.getLocalMap(0)->volume->GetParameters();
+	int numLocalMaps = (int) manager.numLocalMaps();
 
 	{ // prepare MultiIndex etc.
 		if (numLocalMaps > MAX_NUM_LOCALMAPS) numLocalMaps = MAX_NUM_LOCALMAPS;
 		indexData_host.numLocalMaps = numLocalMaps;
 		for (int localMapId = 0; localMapId < numLocalMaps; ++localMapId) {
-			indexData_host.poses_vs[localMapId] = sceneManager.getEstimatedGlobalPose(localMapId).GetM();
+			indexData_host.poses_vs[localMapId] = manager.getEstimatedGlobalPose(localMapId).GetM();
 			indexData_host.poses_vs[localMapId].m30 /= sceneParams.voxel_size;
 			indexData_host.poses_vs[localMapId].m31 /= sceneParams.voxel_size;
 			indexData_host.poses_vs[localMapId].m32 /= sceneParams.voxel_size;
-			indexData_host.posesInv[localMapId] = sceneManager.getEstimatedGlobalPose(localMapId).GetInvM();
+			indexData_host.posesInv[localMapId] = manager.getEstimatedGlobalPose(localMapId).GetInvM();
 			indexData_host.posesInv[localMapId].m30 /= sceneParams.voxel_size;
 			indexData_host.posesInv[localMapId].m31 /= sceneParams.voxel_size;
 			indexData_host.posesInv[localMapId].m32 /= sceneParams.voxel_size;
-			indexData_host.index[localMapId] = sceneManager.getLocalMap(localMapId)->volume->index.GetIndexData();
-			voxelData_host.voxels[localMapId] = sceneManager.getLocalMap(localMapId)->volume->GetVoxels();
+			indexData_host.index[localMapId] = manager.getLocalMap(localMapId)->volume->index.GetIndexData();
+			voxelData_host.voxels[localMapId] = manager.getLocalMap(localMapId)->volume->GetVoxels();
 		}
 
 		ORcudaSafeCall(cudaMemcpy(indexData_device, &(indexData_host), sizeof(MultiIndexData), cudaMemcpyHostToDevice));
 		ORcudaSafeCall(cudaMemcpy(voxelData_device, &(voxelData_host), sizeof(MultiVoxelData), cudaMemcpyHostToDevice));
 	}
-
-	Mesh::Triangle* triangles = mesh->triangles.GetData(MEMORYDEVICE_CUDA);
+	const int noMaxTriangles = manager.getLocalMap(0)->volume->index.GetMaxVoxelCount();
+	ORUtils::MemoryBlock<Mesh::Triangle> triangles(noMaxTriangles, MEMORYDEVICE_CUDA);
+	Mesh::Triangle* triangles_device = triangles.GetData(MEMORYDEVICE_CUDA);
 
 	typedef MultiVoxel<TVoxel> VD;
 	typedef MultiIndex<VoxelBlockHash> ID;
 
-	int noMaxTriangles = mesh->max_triangle_count;
-	const int hashEntryCount = sceneManager.getLocalMap(0)->volume->index.hash_entry_count;
-	const unsigned int voxelBlockCount = sceneManager.getLocalMap(0)->volume->index.voxel_block_count;
+
+	const int hashEntryCount = manager.getLocalMap(0)->volume->index.hash_entry_count;
+	const unsigned int voxelBlockCount = manager.getLocalMap(0)->volume->index.voxel_block_count;
 	float factor = sceneParams.voxel_size;
 	ORcudaSafeCall(cudaMemset(noTriangles_device, 0, sizeof(unsigned int)));
 	ORcudaSafeCall(cudaMemset(visibleBlockGlobalPos_device, 0, sizeof(Vector4s) * voxelBlockCount));
@@ -85,22 +85,23 @@ void MultiMeshingEngine_CUDA<TVoxel, VoxelBlockHash>::MeshScene(Mesh* mesh,
 		                                                          (visibleBlockGlobalPos_device, indexData_device, hashEntryCount, voxelBlockCount);
 		ORcudaKernelCheck;
 	}
-
+	unsigned int triangle_count;
 	{ // mesh used voxel blocks
 		dim3 cudaBlockSize(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
 		dim3 gridSize(voxelBlockCount / 16, 16, numLocalMaps);
 
 		meshScene_device<VD, typename ID::IndexData>
 				<<< gridSize, cudaBlockSize >>>
-		                       (triangles, noTriangles_device, factor,
-				                       voxelBlockCount, noMaxTriangles,
-				                       visibleBlockGlobalPos_device, voxelData_device, indexData_device);
+		                       (triangles_device, noTriangles_device, factor,
+		                        voxelBlockCount, noMaxTriangles,
+		                        visibleBlockGlobalPos_device, voxelData_device, indexData_device);
 		ORcudaKernelCheck;
 
 		ORcudaSafeCall(
-				cudaMemcpy(&mesh->triangle_count, noTriangles_device, sizeof(unsigned int), cudaMemcpyDeviceToHost));
-		mesh->triangle_count = ORUTILS_MIN(mesh->triangle_count, mesh->max_triangle_count);
+				cudaMemcpy(&triangle_count, noTriangles_device, sizeof(unsigned int), cudaMemcpyDeviceToHost));
+
 	}
+	return Mesh(triangles, ORUTILS_MIN(triangle_count, noMaxTriangles));
 }
 
 template<class TMultiIndex>
@@ -139,13 +140,13 @@ meshScene_device(Mesh::Triangle* triangles, unsigned int* noTriangles_device, fl
 
 	if (cubeIndex < 0) return;
 
-	for (int i = 0; triangleTable[cubeIndex][i] != -1; i += 3) {
+	for (int i = 0; triangle_table[cubeIndex][i] != -1; i += 3) {
 		int triangleId = atomicAdd(noTriangles_device, 1);
 
 		if (triangleId < noMaxTriangles - 1) {
-			triangles[triangleId].p0 = vertList[triangleTable[cubeIndex][i]] * factor;
-			triangles[triangleId].p1 = vertList[triangleTable[cubeIndex][i + 1]] * factor;
-			triangles[triangleId].p2 = vertList[triangleTable[cubeIndex][i + 2]] * factor;
+			triangles[triangleId].p0 = vertList[triangle_table[cubeIndex][i]] * factor;
+			triangles[triangleId].p1 = vertList[triangle_table[cubeIndex][i + 1]] * factor;
+			triangles[triangleId].p2 = vertList[triangle_table[cubeIndex][i + 2]] * factor;
 		}
 	}
 }

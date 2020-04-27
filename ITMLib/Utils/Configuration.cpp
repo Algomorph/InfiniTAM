@@ -121,6 +121,7 @@ Configuration& get() {
 template<>
 typename VoxelBlockHash::InitializationParameters for_volume_role<VoxelBlockHash>(VolumeRole role){
 	switch(role){
+		default:
 		case VOLUME_CANONICAL:
 			return instance.specific_volume_parameters.hash.canonical;
 		case VOLUME_LIVE:
@@ -132,6 +133,7 @@ typename VoxelBlockHash::InitializationParameters for_volume_role<VoxelBlockHash
 template<>
 typename PlainVoxelArray::InitializationParameters for_volume_role<PlainVoxelArray>(VolumeRole role){
 	switch(role){
+		default:
 		case VOLUME_CANONICAL:
 			return instance.specific_volume_parameters.array.canonical;
 		case VOLUME_LIVE:

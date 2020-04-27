@@ -186,10 +186,8 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::~DynamicSceneVoxelEngine() {
 template<typename TVoxel, typename TWarp, typename TIndex>
 void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::SaveSceneToMesh(const char* path) {
 	if (meshing_engine == nullptr) return;
-	Mesh* mesh = new Mesh(configuration::get().device_type, canonical_volume->index.GetMaxVoxelCount());
-	meshing_engine->MeshScene(mesh, canonical_volume);
-	mesh->WriteSTL(path);
-	delete mesh;
+	Mesh mesh = meshing_engine->MeshScene(canonical_volume);
+	mesh.WriteSTL(path);
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>

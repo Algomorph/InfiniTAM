@@ -1,53 +1,73 @@
-// Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
+//  ================================================================
+//  Created by Gregory Kramida (https://github.com/Algomorph) on 4/27/20.
+//  Copyright (c) 2020 Gregory Kramida
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+
+//  http://www.apache.org/licenses/LICENSE-2.0
+
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//  ================================================================
 
 #include "MeshingEngine_CPU.h"
 #include "../Shared/MeshingEngine_Shared.h"
+#include "../../../../ORUtils/PlatformIndependentAtomics.h"
 
 using namespace ITMLib;
 
 template<class TVoxel>
-void MeshingEngine_CPU<TVoxel, VoxelBlockHash>::MeshScene(Mesh* mesh, const VoxelVolume<TVoxel, VoxelBlockHash>* volume){
-	Mesh::Triangle *triangles = mesh->triangles.GetData(MEMORYDEVICE_CPU);
-	const TVoxel *localVBA = volume->GetVoxels();
-	const HashEntry *hashTable = volume->index.GetEntries();
+Mesh MeshingEngine_CPU<TVoxel, VoxelBlockHash>::MeshScene(const VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 
-	int noTriangles = 0, noMaxTriangles = mesh->max_triangle_count, noTotalEntries = volume->index.hash_entry_count;
-	const float factor = volume->GetParameters().voxel_size;
+	const int utilized_block_count = volume->index.GetUtilizedBlockCount();
+	const int max_triangle_count = utilized_block_count * VOXEL_BLOCK_SIZE3;
+	const int hash_entry_count = volume->index.hash_entry_count;
+	const float voxel_size = volume->GetParameters().voxel_size;
 
-	mesh->triangles.Clear();
+	ORUtils::MemoryBlock<Mesh::Triangle> triangles(max_triangle_count, MEMORYDEVICE_CPU);
+	Mesh::Triangle* triangles_device = triangles.GetData(MEMORYDEVICE_CUDA);
+	const TVoxel* voxels = volume->GetVoxels();
+	const HashEntry* hash_table = volume->index.GetEntries();
 
-	for (int entryId = 0; entryId < noTotalEntries; entryId++)
-	{
-		Vector3i hashBlockCornerPosition;
-		const HashEntry &currentHashEntry = hashTable[entryId];
+	const int* utilized_block_indices = volume->index.GetUtilizedBlockHashCodes();
 
-		if (currentHashEntry.ptr < 0) continue;
+	std::atomic<unsigned int> triangle_count(0);
+
+
+	for (int utilized_entry_index = 0; utilized_entry_index < utilized_block_count; utilized_entry_index++) {
+		const HashEntry& hash_entry = hash_table[utilized_block_indices[utilized_entry_index]];
 
 		//position of the voxel at the current hash block corner with minimum coordinates
-		hashBlockCornerPosition = currentHashEntry.pos.toInt() * VOXEL_BLOCK_SIZE;
+		Vector3i block_corner_position = hash_entry.pos.toInt() * VOXEL_BLOCK_SIZE;
 
-		for (int z = 0; z < VOXEL_BLOCK_SIZE; z++) for (int y = 0; y < VOXEL_BLOCK_SIZE; y++) for (int x = 0; x < VOXEL_BLOCK_SIZE; x++)
-		{
-			Vector3f vertexList[12];
-			// build vertices by interpolating edges of cubes that intersect with the isosurface
-			// based on positive/negative SDF values
-			int cubeIndex = buildVertexList(vertexList, hashBlockCornerPosition, Vector3i(x, y, z), localVBA, hashTable);
+		for (int z = 0; z < VOXEL_BLOCK_SIZE; z++){
+			for (int y = 0; y < VOXEL_BLOCK_SIZE; y++){
+				for (int x = 0; x < VOXEL_BLOCK_SIZE; x++) {
+					Vector3f vertex_list[12];
+					// build vertices by interpolating edges of cubes that intersect with the isosurface
+					// based on positive/negative SDF values
+					int cube_index = buildVertexList(vertex_list, block_corner_position, Vector3i(x, y, z), voxels,
+					                                 hash_table);
 
-			// cube does not intersect with the isosurface
-			if (cubeIndex < 0) continue;
+					// cube does not intersect with the isosurface
+					if (cube_index < 0) continue;
 
-			for (int i = 0; triangleTable[cubeIndex][i] != -1; i += 3)
-			{
-				// cube index also tells us how the vertices are grouped into triangles,
-				// use it to look up the vertex indices composing each triangle from the vertex list
-				triangles[noTriangles].p0 = vertexList[triangleTable[cubeIndex][i]] * factor;
-				triangles[noTriangles].p1 = vertexList[triangleTable[cubeIndex][i + 1]] * factor;
-				triangles[noTriangles].p2 = vertexList[triangleTable[cubeIndex][i + 2]] * factor;
-
-				if (noTriangles < noMaxTriangles - 1) noTriangles++;
+					for (int i_vertex = 0; triangle_table[cube_index][i_vertex] != -1; i_vertex += 3) {
+						unsigned int current_triangle_count = atomicAdd_CPU(triangle_count, 1u);
+						// cube index also tells us how the vertices are grouped into triangles,
+						// use it to look up the vertex indices composing each triangle from the vertex list
+						triangles[current_triangle_count].p0 = vertex_list[triangle_table[cube_index][i_vertex]] * voxel_size;
+						triangles[current_triangle_count].p1 = vertex_list[triangle_table[cube_index][i_vertex + 1]] * voxel_size;
+						triangles[current_triangle_count].p2 = vertex_list[triangle_table[cube_index][i_vertex + 2]] * voxel_size;
+					}
+				}
 			}
 		}
 	}
 
-	mesh->triangle_count = noTriangles;
+	return Mesh(triangles, triangle_count.load());
 }
