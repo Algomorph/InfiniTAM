@@ -42,7 +42,7 @@ void GenericMeshSavingTest() {
 	LoadVolume(&canonical_volume, snoopy::PartialVolume16Path<TIndex>(),
 	           TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 	MeshingEngine<TSDFVoxel, TIndex>* meshing_engine =
-			MeshingEngineFactory::Build<TSDFVoxel, TIndex>(configuration::get().device_type);
+			MeshingEngineFactory::Build<TSDFVoxel, TIndex>(TMemoryDeviceType);
 	Mesh mesh = meshing_engine->MeshScene( canonical_volume);
 	mesh.WriteOBJ("TestData/meshes/mesh_partial_16.obj");
 

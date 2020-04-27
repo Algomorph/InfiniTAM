@@ -25,11 +25,10 @@ Mesh MeshingEngine_CPU<TVoxel, VoxelBlockHash>::MeshScene(const VoxelVolume<TVox
 
 	const int utilized_block_count = volume->index.GetUtilizedBlockCount();
 	const int max_triangle_count = utilized_block_count * VOXEL_BLOCK_SIZE3;
-	const int hash_entry_count = volume->index.hash_entry_count;
 	const float voxel_size = volume->GetParameters().voxel_size;
 
 	ORUtils::MemoryBlock<Mesh::Triangle> triangles(max_triangle_count, MEMORYDEVICE_CPU);
-	Mesh::Triangle* triangles_device = triangles.GetData(MEMORYDEVICE_CUDA);
+	Mesh::Triangle* triangles_device = triangles.GetData(MEMORYDEVICE_CPU);
 	const TVoxel* voxels = volume->GetVoxels();
 	const HashEntry* hash_table = volume->index.GetEntries();
 
@@ -39,7 +38,7 @@ Mesh MeshingEngine_CPU<TVoxel, VoxelBlockHash>::MeshScene(const VoxelVolume<TVox
 
 
 #ifdef WITH_OPENMP
-#pragma omp parallel for default(none) shared(hash_table, voxels, utilized_block_indices, triangle_count, triangle_table, triangles)
+#pragma omp parallel for default(none) shared(hash_table, voxels, utilized_block_indices, triangle_count, triangle_table, triangles_device)
 #endif
 	for (int utilized_entry_index = 0; utilized_entry_index < utilized_block_count; utilized_entry_index++) {
 		const HashEntry& hash_entry = hash_table[utilized_block_indices[utilized_entry_index]];
@@ -63,9 +62,9 @@ Mesh MeshingEngine_CPU<TVoxel, VoxelBlockHash>::MeshScene(const VoxelVolume<TVox
 						unsigned int current_triangle_count = atomicAdd_CPU(triangle_count, 1u);
 						// cube index also tells us how the vertices are grouped into triangles,
 						// use it to look up the vertex indices composing each triangle from the vertex list
-						triangles[current_triangle_count].p0 = vertex_list[triangle_table[cube_index][i_vertex]] * voxel_size;
-						triangles[current_triangle_count].p1 = vertex_list[triangle_table[cube_index][i_vertex + 1]] * voxel_size;
-						triangles[current_triangle_count].p2 = vertex_list[triangle_table[cube_index][i_vertex + 2]] * voxel_size;
+						triangles_device[current_triangle_count].p0 = vertex_list[triangle_table[cube_index][i_vertex]] * voxel_size;
+						triangles_device[current_triangle_count].p1 = vertex_list[triangle_table[cube_index][i_vertex + 1]] * voxel_size;
+						triangles_device[current_triangle_count].p2 = vertex_list[triangle_table[cube_index][i_vertex + 2]] * voxel_size;
 					}
 				}
 			}
