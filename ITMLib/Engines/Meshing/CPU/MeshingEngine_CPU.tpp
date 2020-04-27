@@ -38,6 +38,9 @@ Mesh MeshingEngine_CPU<TVoxel, VoxelBlockHash>::MeshScene(const VoxelVolume<TVox
 	std::atomic<unsigned int> triangle_count(0);
 
 
+#ifdef WITH_OPENMP
+#pragma omp parallel for default(none) shared(hash_table, voxels, utilized_block_indices, triangle_count, triangle_table, triangles)
+#endif
 	for (int utilized_entry_index = 0; utilized_entry_index < utilized_block_count; utilized_entry_index++) {
 		const HashEntry& hash_entry = hash_table[utilized_block_indices[utilized_entry_index]];
 
