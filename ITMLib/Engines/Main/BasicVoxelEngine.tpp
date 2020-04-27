@@ -33,7 +33,7 @@ BasicVoxelEngine<TVoxel,TIndex>::BasicVoxelEngine(const RGBDCalib& calib, Vector
 
 	meshingEngine = nullptr;
 	if (settings.create_meshing_engine)
-		meshingEngine = MeshingEngineFactory::MakeMeshingEngine<TVoxel,TIndex>(deviceType, volume->index);
+		meshingEngine = MeshingEngineFactory::Build<TVoxel, TIndex>(deviceType);
 
 	denseMapper = new DenseMapper<TVoxel, TIndex>();
 	volume->Reset();

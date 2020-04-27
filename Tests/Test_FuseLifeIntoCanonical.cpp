@@ -71,10 +71,15 @@ void GenericFusionTest(const int iteration = 4) {
 	           "TestData/volumes/" + IndexString<TIndex>() + "/fused.dat",
 	           TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 
-	float absoluteTolerance = 1e-7;
+	float absolute_tolerance = 1e-7;
 
 	BOOST_REQUIRE(
-			contentAlmostEqual(fused_canonical_volume_gt, canonical_volume, absoluteTolerance, TMemoryDeviceType));
+			contentAlmostEqual(fused_canonical_volume_gt, canonical_volume, absolute_tolerance, TMemoryDeviceType));
+
+	delete warped_live_volume;
+	delete canonical_volume;
+	delete fused_canonical_volume_gt;
+	delete volume_fusion_engine;
 }
 
 BOOST_AUTO_TEST_CASE(Test_FuseLifeIntoCanonical_CPU_PVA) {
@@ -126,11 +131,19 @@ void GenericFusion_PVA_to_VBH_Test(const int iteration = 4) {
 
 	volume_fusion_engine_PVA->FuseOneTsdfVolumeIntoAnother(canonical_volume_PVA, warped_live_volume_PVA, 0);
 	volume_fusion_engine_VBH->FuseOneTsdfVolumeIntoAnother(canonical_volume_VBH, warped_live_volume_VBH, 0);
-	float absoluteTolerance = 1e-7;
+	float absolute_tolerance = 1e-7;
 	//(uncomment for a less rigorous test)
 	//BOOST_REQUIRE( allocatedContentAlmostEqual_Verbose(canonical_volume_PVA, canonical_volume_VBH, absoluteTolerance, TMemoryDeviceType));
 	BOOST_REQUIRE(contentForFlagsAlmostEqual(canonical_volume_PVA, canonical_volume_VBH, VOXEL_NONTRUNCATED,
-	                                         absoluteTolerance, TMemoryDeviceType));
+	                                         absolute_tolerance, TMemoryDeviceType));
+
+	delete warped_live_volume_PVA;
+	delete warped_live_volume_VBH;
+	delete canonical_volume_PVA;
+	delete canonical_volume_VBH;
+	delete volume_fusion_engine_PVA;
+	delete volume_fusion_engine_VBH;
+
 }
 
 BOOST_AUTO_TEST_CASE(Test_FuseLifeIntoCanonical_PVA_to_VBH_CPU) {

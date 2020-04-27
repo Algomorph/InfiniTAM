@@ -70,7 +70,9 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(const RG
 		  low_level_engine(LowLevelEngineFactory::MakeLowLevelEngine(configuration::get().device_type)),
 		  view_builder(ViewBuilderFactory::Build(calibration_info, configuration::get().device_type)),
 		  visualization_engine(VisualizationEngineFactory::MakeVisualizationEngine<TVoxel, TIndex>(
-				  configuration::get().device_type)) {
+				  configuration::get().device_type)),
+		  meshing_engine(config.create_meshing_engine ? MeshingEngineFactory::Build<TVoxel, TIndex>(
+		  		configuration::get().device_type) : nullptr) {
 	logging::initialize_logging();
 
 	this->InitializeScenes();
@@ -80,12 +82,6 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(const RG
 	const MemoryDeviceType device_type = config.device_type;
 	MemoryDeviceType memoryType = config.device_type;
 	if ((depth_image_size.x == -1) || (depth_image_size.y == -1)) depth_image_size = rgb_image_size;
-
-
-	meshing_engine = nullptr;
-	if (config.create_meshing_engine)
-		meshing_engine = MeshingEngineFactory::MakeMeshingEngine<TVoxel, TIndex>(device_type, canonical_volume->index);
-
 
 	imu_calibrator = new ITMIMUCalibrator_iPad();
 	camera_tracker = CameraTrackerFactory::Instance().Make(rgb_image_size, depth_image_size, low_level_engine,

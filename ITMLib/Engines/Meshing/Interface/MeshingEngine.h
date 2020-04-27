@@ -26,7 +26,6 @@ namespace ITMLib
 		 */
 		virtual void MeshScene(Mesh *mesh, const VoxelVolume<TVoxel,TIndex> *scene) = 0;
 
-		explicit MeshingEngine(const TIndex& index){}
 		virtual ~MeshingEngine() = default;
 	};
 }

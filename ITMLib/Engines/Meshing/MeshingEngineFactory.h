@@ -20,31 +20,31 @@ namespace ITMLib
 		/**
 		 * \brief Makes a meshing engine.
 		 *
-		 * \param deviceType  The device on which the meshing engine should operate.
+		 * \param device_type  The device on which the meshing engine should operate.
 		 */
 		template <typename TVoxel, typename TIndex>
-		static MeshingEngine<TVoxel, TIndex> *MakeMeshingEngine(MemoryDeviceType deviceType, const TIndex& index)
-		{
-			MeshingEngine<TVoxel, TIndex> *meshingEngine = NULL;
+		static MeshingEngine<TVoxel, TIndex>* Build(MemoryDeviceType device_type){
+			MeshingEngine<TVoxel, TIndex>* meshing_engine = nullptr;
 
-			switch (deviceType)
-			{
+			switch (device_type){
 			case MEMORYDEVICE_CPU:
-				meshingEngine = new MeshingEngine_CPU<TVoxel, TIndex>(index);
+				meshing_engine = new MeshingEngine_CPU<TVoxel, TIndex>();
 				break;
 			case MEMORYDEVICE_CUDA:
 #ifndef COMPILE_WITHOUT_CUDA
-				meshingEngine = new MeshingEngine_CUDA<TVoxel, TIndex>(index);
+				meshing_engine = new MeshingEngine_CUDA<TVoxel, TIndex>();
 #endif
 				break;
 			case MEMORYDEVICE_METAL:
 #ifdef COMPILE_WITH_METAL
-				meshingEngine = new MeshingEngine_CPU<TVoxelCanonical, TIndex>(index);
+				meshing_engine = new MeshingEngine_CPU<TVoxelCanonical, TIndex>();
 #endif
 				break;
+			default:
+				DIEWITHEXCEPTION_REPORTLOCATION("Unsupported device type");
 			}
 
-			return meshingEngine;
+			return meshing_engine;
 		}
 	};
 }

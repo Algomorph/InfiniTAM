@@ -127,7 +127,7 @@ if (BUILD_TESTS)
     itm_add_test(NAME GeometryUtilities SOURCES Test_GeometryUtilities.cpp)
     itm_add_test(NAME HashAllocationThreadSafety SOURCES Test_HashAllocationThreadSafety.cpp)
     itm_add_test(NAME TwoSurfaceHashAllocation SOURCES Test_TwoSurfaceHashAllocation.cpp)
-    # itm_add_test(NAME ExpandedAllocation SOURCES Test_ExpandAllocation.cpp)
+    itm_add_test(NAME MeshGeneration SOURCES Test_MeshGeneration.cpp)
     itm_add_test(NAME Serialization SOURCES Test_Serialization.cpp)
 
     # *** tests that require CUDA
