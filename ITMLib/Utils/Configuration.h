@@ -146,7 +146,7 @@ DECLARE_SERIALIZABLE_STRUCT(PATHS_STRUCT_DESCRIPTION);
     (bool, record_focus_neighborhood_live_tsdf_sequence, false, PRIMITIVE, "Whether to record a sequence of TSDF " \
     "volumes representing the immediate neighborhood of the focus_coordinates (see focus_coordinates parameter) " \
     "in the warped live frame over the course of the entire surface tracking optimization. [WITH_VTK compilation required!]"), \
-    (int, focus_neighborhood_size, false, PRIMITIVE, "For focus neighborhood recording: a cube of size " \
+    (int, focus_neighborhood_size, 3, PRIMITIVE, "For focus neighborhood recording: a cube of size " \
     "2 x focus_neighborhood_size + 1 around the focus_coordinates will be recorded. [WITH_VTK compilation required!]"), \
     (bool, record_focus_neighborhood_warp_sequence, false, PRIMITIVE, "Whether to record a sequence of warp " \
     "vectors in the immediate neighborhood of the focus_coordinates (see focus_coordinates parameter) over " \
