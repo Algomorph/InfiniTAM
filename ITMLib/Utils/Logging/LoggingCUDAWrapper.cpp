@@ -25,17 +25,24 @@
 namespace l4c = log4cplus;
 
 namespace ITMLib::logging::CUDA::log4cplus {
+//
+//static bool root_logger_initialized = false;
+//static l4c::Logger root_logger;
 
-Logger::Logger() : logger(new l4c::Logger(l4c::Logger::getRoot())) {}
+Logger::Logger() /*: logger(new l4c::Logger(l4c::Logger::getRoot()))*/ {
+//	if(!root_logger_initialized) root_logger = l4c::Logger::getRoot();
+}
 
-Logger::~Logger() { delete reinterpret_cast<l4c::Logger*>(this->logger);}
+Logger::~Logger() { /*delete reinterpret_cast<l4c::Logger*>(this->logger);*/}
 
 bool Logger::isEnabledFor(LogLevel level) const {
-	return reinterpret_cast<l4c::Logger*>(this->logger)->isEnabledFor(level);
+	//return reinterpret_cast<l4c::Logger*>(this->logger)->isEnabledFor(level);
+	return l4c::Logger::getRoot().isEnabledFor(level);
 }
 
 void Logger::forcedLog(LogLevel ll, const std::string& message, const char* file, int line) {
-	reinterpret_cast<l4c::Logger*>(this->logger)->forcedLog(ll, message, file, line);
+	//reinterpret_cast<l4c::Logger*>(this->logger)->forcedLog(ll, message, file, line);
+	return l4c::Logger::getRoot().forcedLog(ll, message, file, line);
 }
 
 Logger Logger::getRoot() {

@@ -74,6 +74,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(const RG
 		  meshing_engine(config.create_meshing_engine ? MeshingEngineFactory::Build<TVoxel, TIndex>(
 		  		configuration::get().device_type) : nullptr) {
 	logging::initialize_logging();
+	InitializePerFrameAnalyticsTelemetry(&canonical_volume_memory_usage_file);
 
 	this->InitializeScenes();
 
