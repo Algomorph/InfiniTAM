@@ -877,7 +877,7 @@ set(ITMLIB_SCENE_MOTION_TRACKERS_INTERFACE_SOURCES
 set(ITMLIB_SCENE_MOTION_TRACKERS_INTERFACE_HEADERS
     SurfaceTrackers/WarpGradientFunctors/WarpGradientFunctor.h
     SurfaceTrackers/Interface/SurfaceTrackerInterface.h
-    SurfaceTrackers/Interface/SlavchevaSufraceTracker.h
+    SurfaceTrackers/Interface/SlavchevaSurfaceTracker.h
     SurfaceTrackers/Interface/SurfaceTracker.h
     )
 ##

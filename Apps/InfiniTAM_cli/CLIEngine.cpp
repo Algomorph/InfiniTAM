@@ -1,7 +1,8 @@
 // Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
 
 //stdlib
-#include <string.h>
+#include <cstring>
+#include <filesystem>
 
 //local
 #include "CLIEngine.h"
@@ -16,6 +17,7 @@ using namespace InfiniTAM::Engine;
 using namespace InputSource;
 using namespace ITMLib;
 
+namespace fs = std::filesystem;
 
 void CLIEngine::Initialise(ImageSourceEngine *image_source, IMUSourceEngine *imu_source, MainEngine *main_engine,
                            MemoryDeviceType device_type)

@@ -28,6 +28,7 @@
 #include "../../Utils/Logging/LoggingConfigruation.h"
 #include "AnalyticsEngineFactory.h"
 #include "../../Utils/Collections/OperationsOnSTLContainers.h"
+#include "../../Utils/CPPPrintHelpers.h"
 
 namespace ITMLib {
 

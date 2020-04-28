@@ -23,7 +23,7 @@
 
 //local
 #include "WarpGradientFunctor.h"
-#include "../Interface/SlavchevaSufraceTracker.h"
+#include "../Interface/SlavchevaSurfaceTracker.h"
 #include "../../../ORUtils/PlatformIndependentAtomics.h"
 #include "../Shared/SurfaceTrackerSharedRoutines.h"
 #include "../Shared/SurfaceTrackerDiagnosticRoutines.h"

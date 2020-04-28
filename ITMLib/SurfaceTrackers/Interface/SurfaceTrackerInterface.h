@@ -17,13 +17,9 @@
 
 //local
 #include "../../Objects/Volume/VoxelVolume.h"
-#include "../../Engines/Reconstruction/CPU/SceneReconstructionEngine_CPU.h"
-#include "../../Utils/Visualization/VolumeSliceVisualizer2D.h"
-#include "../../Engines/Telemetry/VolumeSequenceRecorder.h"
 #include "../../Utils/CPPPrintHelpers.h"
 #include "../../Utils/VoxelFlags.h"
-#include "../Shared/SurfaceTrackerOptimizationParameters.h"
-#include "SlavchevaSufraceTracker.h"
+#include "SlavchevaSurfaceTracker.h"
 
 namespace ITMLib {
 /**

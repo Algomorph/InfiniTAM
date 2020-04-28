@@ -32,6 +32,7 @@
 #include "../../Objects/Misc/IMUCalibrator.h"
 #include "../../../FernRelocLib/Relocaliser.h"
 #include "../../CameraTrackers/Interface/CameraTracker.h"
+#include "../../SurfaceTrackers/Interface/SurfaceTracker.h"
 
 
 namespace ITMLib {

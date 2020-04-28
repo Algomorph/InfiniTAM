@@ -19,9 +19,10 @@
 #include <string>
 
 //local
-#include "SlavchevaSufraceTracker.h"
+#include "SlavchevaSurfaceTracker.h"
 #include "../../Utils/Configuration.h"
 #include "../../Utils/FileIO/JSON_Utilities.h"
+#include "../../Utils/CPPPrintHelpers.h"
 
 namespace ITMLib{
 

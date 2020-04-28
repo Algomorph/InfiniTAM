@@ -31,7 +31,7 @@
 #include "SurfelVolumeParameters.h"
 #include "../../ORUtils/MemoryDeviceType.h"
 #include "Math.h"
-#include "../SurfaceTrackers/Interface/SurfaceTrackerInterface.h"
+#include "../SurfaceTrackers/Interface/SlavchevaSurfaceTracker.h"
 #include "../SurfaceTrackers/WarpGradientFunctors/WarpGradientFunctor.h"
 #include "../Engines/Main/NonRigidTrackingParameters.h"
 #include "../Objects/Volume/VoxelBlockHash.h"

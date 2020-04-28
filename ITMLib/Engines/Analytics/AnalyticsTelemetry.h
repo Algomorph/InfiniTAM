@@ -23,6 +23,7 @@
 #include "../VolumeFileIO/VolumeFileIOEngine.h"
 #include "../../Objects/Volume/VoxelVolume.h"
 #include "../../Utils/Configuration.h"
+#include "../../GlobalTemplateDefines.h"
 
 
 namespace fs = boost::filesystem;
@@ -32,14 +33,12 @@ namespace ITMLib {
 //TODO: revise TelemetryRecorder and move all this functionality there
 void InitializePerFrameAnalyticsTelemetry(ORUtils::OStreamWrapper** canonical_volume_memory_usage_file);
 
-
 template<typename TVoxel, typename TIndex>
 void RecordVolumeMemoryUsageInfo(ORUtils::OStreamWrapper& file, const VoxelVolume<TVoxel, TIndex>& volume) {
 	if (configuration::get().telemetry_settings.record_volume_memory_usage) {
 		VolumeFileIOEngine<TVoxel, TIndex>::AppendFileWithUtilizedMemoryInformation(file, volume);
 	}
 }
-
 
 extern template void RecordVolumeMemoryUsageInfo<TSDFVoxel, VoxelBlockHash>(
 		ORUtils::OStreamWrapper& file,
