@@ -36,25 +36,6 @@ namespace bench = ITMLib::benchmarking;
 
 //TODO: create/destroy windowed visualizers (i.e. plotter) when their corresponding setting values are turned on/off, and make them Close their corresponding windows -Greg (GitHub:Algomorph)
 
-// region ============================== DEFINE CONSTANTS ==============================================================
-namespace telemetry {
-const std::string warp_iteration_2D_slices_folder_name = "bucket_interest_region_2D_iteration_slices";
-const std::string live_iteration_2D_slices_folder_name = "bucket_interest_region_live_slices";
-const std::string canonical_scene_rasterized_folder_name = "canonical_rasterized";
-const std::string live_scene_rasterized_folder_name = "live_rasterized";
-const std::string frame_folder_prefix = "/Frame_";
-
-std::string GetAndCreateOutputFolderForFrame(int frame_index) {
-	fs::path path(configuration::get().paths.output_path + frame_folder_prefix + std::to_string(frame_index));
-	if (!fs::exists(path)) {
-		fs::create_directories(path);
-	}
-	return path.string();
-}
-} // namespace telemetry
-// endregion ================================== END CONSTANT DEFINITIONS ===============================================
-
-// endregion ===========================================================================================================
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 TelemetryRecorder<TVoxel, TWarp, TIndex>::TelemetryRecorder()

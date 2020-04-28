@@ -897,31 +897,33 @@ set(ITMLIB_SCENE_MOTION_TRACKERS_SHARED_HEADERS
 # ======================================================================================================================
 # =================================================== UTILITIES (MISC) =================================================
 set(ITMLIB_UTILS_SOURCES
-    Utils/Collections/NestedMap3DOfArrays.tpp
-    Utils/Collections/NestedMap3DOfArrays.cpp
-    Utils/Collections/NestedMap3D.tpp
-    Utils/Collections/NestedMap3D.cpp
-    Utils/Collections/OperationsOnSTLContainers.cpp
-
-
-    Utils/Geometry/CardinalAxesAndPlanes.cpp
-
-    Utils/Serialization/SerializationDetails.cpp
-
-    Utils/Analytics/NeighborVoxelIterationInfo.cpp
-    Utils/Analytics/BenchmarkUtilities.cpp
 
     Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CPU.tpp
     Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CPU.cpp
     Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CUDA.tcu
     Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CUDA.cu
 
+    Utils/Collections/NestedMap3DOfArrays.tpp
+    Utils/Collections/NestedMap3DOfArrays.cpp
+    Utils/Collections/NestedMap3D.tpp
+    Utils/Collections/NestedMap3D.cpp
+    Utils/Collections/OperationsOnSTLContainers.cpp
+
     Utils/FileIO/JSON_Utilities.cpp
     Utils/FileIO/CSV_Utilities.cpp
+
+    Utils/Geometry/CardinalAxesAndPlanes.cpp
 
     Utils/Logging/LoggingUtilities.cpp
     Utils/Logging/LoggingConfiguration.cpp
     Utils/Logging/LoggingCUDAWrapper.cpp
+
+    Utils/Serialization/SerializationDetails.cpp
+
+    Utils/Telemetry/TelemetryUtilities.cpp
+
+    Utils/Analytics/NeighborVoxelIterationInfo.cpp
+    Utils/Analytics/BenchmarkUtilities.cpp
 
     Utils/Configuration.cpp
     Utils/CPPPrintHelpers.cpp
@@ -933,6 +935,9 @@ set(ITMLIB_UTILS_HEADERS
     Utils/Collections/NestedMap3DOfArrays.h
     Utils/Collections/NestedMap3D.h
     Utils/Collections/OperationsOnSTLContainers.h
+
+    Utils/FileIO/JSON_Utilities.h
+    Utils/FileIO/CSV_Utilities.h
 
     Utils/Geometry/FrustumTrigonometry.h
     Utils/Geometry/GeometryBooleanOperations.h
@@ -948,8 +953,7 @@ set(ITMLIB_UTILS_HEADERS
     Utils/Serialization/SerializationSequenceLevel2Macros.h
     Utils/Serialization/PreprocessorNargs.h
 
-    Utils/FileIO/JSON_Utilities.h
-    Utils/FileIO/CSV_Utilities.h
+    Utils/Telemetry/TelemetryUtilities.h
 
     Utils/Logging/LoggingConfiguration.cpp
     Utils/Logging/LoggingUtilities.h

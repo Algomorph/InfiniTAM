@@ -20,6 +20,13 @@
 #include <condition_variable>
 #include <unordered_map>
 
+//VTK
+#include <vtkSmartPointer.h>
+#include <vtkExtractPolyDataGeometry.h>
+#include <vtkSphereSource.h>
+#include <vtkCubeSource.h>
+#include <vtkPointSet.h>
+
 //ITMLib
 #include "../../Objects/Volume/VoxelVolume.h"
 #include "../../Engines/Telemetry/VolumeSequenceRecorder.h"
@@ -27,13 +34,6 @@
 #include "VisualizationWindowManager.h"
 #include "../Geometry/CardinalAxesAndPlanes.h"
 #include "../../GlobalTemplateDefines.h"
-
-//VTK
-#include <vtkSmartPointer.h>
-#include <vtkExtractPolyDataGeometry.h>
-#include <vtkSphereSource.h>
-#include <vtkCubeSource.h>
-#include <vtkPointSet.h>
 
 
 class vtkPoints;

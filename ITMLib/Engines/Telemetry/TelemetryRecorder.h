@@ -20,31 +20,15 @@
 #include "VolumeSequenceRecorder.h"
 #include "../../Utils/Visualization/VolumeSliceVisualizer2D.h"
 #include "../../Utils/Geometry/CardinalAxesAndPlanes.h"
-
 #ifdef WITH_VTK
-
 #include "../../Utils/Visualization/VoxelValueGrapher.h"
 #include "../../Utils/Visualization/SceneSliceVisualizer3D.h"
 #include "../../Utils/Visualization/SceneTrackingEnergyPlotter.h"
-
 #endif
-
 #include "../../Utils/Configuration.h"
-
+#include "../../Utils/Telemetry/TelemetryUtilities.h"
 
 namespace ITMLib {
-
-namespace telemetry {
-// where to save the data within the output directory
-const std::string warp_iteration_2D_slices_folder_name;
-const std::string live_iteration_2D_slices_folder_name;
-const std::string canonical_scene_rasterized_folder_name;
-const std::string live_scene_rasterized_folder_name;
-const std::string frame_folder_prefix;
-
-std::string GetAndCreateOutputFolderForFrame(int frame_index);
-
-}
 
 //TODO: adapt to record warpField properly (+test)
 //TODO: adapt to live-scene-pair structure; the live scene is now split into two that are being ping-ponged (+test)

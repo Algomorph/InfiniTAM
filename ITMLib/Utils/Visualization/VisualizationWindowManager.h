@@ -17,7 +17,6 @@
 
 //stdlib
 #include <unordered_map>
-
 #include <vector>
 
 #ifdef WITH_VTK

@@ -34,7 +34,6 @@
 #include <vtkVertexGlyphFilter.h>
 #include <vtkPolyLineSource.h>
 
-
 //Local
 #include "SceneSliceVisualizer3D.h"
 #include "SceneSliceVisualizer3DCommon.h"
