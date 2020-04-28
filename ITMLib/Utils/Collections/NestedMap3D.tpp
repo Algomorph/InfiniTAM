@@ -204,6 +204,7 @@ NestedMap3D<T>& NestedMap3D<T>::operator=(NestedMap3D&& other) noexcept {
 	prefixLevel0 = other.prefixLevel0;
 	prefixLevel1 = other.prefixLevel1;
 	prefixLevel2 = other.prefixLevel2;
+	return *this;
 }
 
 template<typename T>

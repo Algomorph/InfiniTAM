@@ -99,7 +99,7 @@ template <typename TVoxel, typename TIndex>
 void BasicVoxelEngine<TVoxel,TIndex>::SaveSceneToMesh(const char *objFileName)
 {
 	if (meshingEngine == NULL) return;
-	Mesh mesh = meshingEngine->MeshScene(volume);
+	Mesh mesh = meshingEngine->MeshVolume(volume);
 	mesh.WriteSTL(objFileName);
 }
 

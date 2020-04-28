@@ -15,7 +15,7 @@ namespace ITMLib
 	{
 	public:
 		//TODO: implement meshing for PVA (for completeness / consistency)
-		Mesh MeshScene(const VoxelVolume<TVoxel, PlainVoxelArray> *volume) override;
+		Mesh MeshVolume(const VoxelVolume<TVoxel, PlainVoxelArray> *volume) override;
 
 		explicit MeshingEngine_CUDA();
 		~MeshingEngine_CUDA();
@@ -26,7 +26,7 @@ namespace ITMLib
 	{
 
 	public:
-		Mesh MeshScene(const VoxelVolume<TVoxel, VoxelBlockHash> *volume) override;
+		Mesh MeshVolume(const VoxelVolume<TVoxel, VoxelBlockHash> *volume) override;
 		explicit MeshingEngine_CUDA();
 		~MeshingEngine_CUDA();
 	};

@@ -42,21 +42,75 @@ namespace fs = std::filesystem;
 
 template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void GenericMeshSavingTest() {
-	VoxelVolume<TSDFVoxel, TIndex>* canonical_volume;
-	LoadVolume(&canonical_volume, snoopy::PartialVolume16Path<TIndex>(),
+	VoxelVolume<TSDFVoxel, TIndex>* volume;
+	LoadVolume(&volume, snoopy::PartialVolume16Path<TIndex>(),
 	           TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 	MeshingEngine<TSDFVoxel, TIndex>* meshing_engine =
 			MeshingEngineFactory::Build<TSDFVoxel, TIndex>(TMemoryDeviceType);
-	Mesh mesh = meshing_engine->MeshScene( canonical_volume);
+	Mesh mesh = meshing_engine->MeshVolume( volume);
 	fs::create_directories("TestData/meshes");
-	mesh.WriteOBJ("TestData/meshes/mesh_partial_16.obj");
-
-
-	delete canonical_volume;
+	mesh.WriteOBJ("TestData/meshes/mesh_partial_16_" + DeviceString<TMemoryDeviceType>() + ".obj");
+	
+	delete volume;
 	delete meshing_engine;
 }
+
+#ifndef COMPILE_WITHOUT_CUDA
+template<typename TIndex>
+void GenericMeshGenerationAndComparisonTest_CUDA_to_CPU() {
+	MeshingEngine<TSDFVoxel, TIndex>* meshing_engine_CPU =
+			MeshingEngineFactory::Build<TSDFVoxel, TIndex>(MEMORYDEVICE_CPU);
+	MeshingEngine<TSDFVoxel, TIndex>* meshing_engine_CUDA =
+			MeshingEngineFactory::Build<TSDFVoxel, TIndex>(MEMORYDEVICE_CUDA);
+
+	//(CPU meshes)
+	VoxelVolume<TSDFVoxel, TIndex>* volume_16_CPU;
+	LoadVolume(&volume_16_CPU, snoopy::PartialVolume16Path<TIndex>(),
+	           MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	Mesh mesh_16_CPU = meshing_engine_CPU->MeshVolume(volume_16_CPU);
+
+	VoxelVolume<TSDFVoxel, TIndex>* volume_17_CPU;
+	LoadVolume(&volume_17_CPU, snoopy::PartialVolume17Path<TIndex>(),
+	           MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	Mesh mesh_17_CPU = meshing_engine_CPU->MeshVolume(volume_17_CPU);
+
+	//(CUDA meshes)
+	VoxelVolume<TSDFVoxel, TIndex>* volume_16_CUDA;
+	LoadVolume(&volume_16_CUDA, snoopy::PartialVolume16Path<TIndex>(),
+	           MEMORYDEVICE_CUDA, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	Mesh mesh_16_CUDA = meshing_engine_CUDA->MeshVolume(volume_16_CUDA);
+
+	VoxelVolume<TSDFVoxel, TIndex>* volume_17_CUDA;
+	LoadVolume(&volume_17_CUDA, snoopy::PartialVolume17Path<TIndex>(),
+	           MEMORYDEVICE_CUDA, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	Mesh mesh_17_CUDA = meshing_engine_CUDA->MeshVolume(volume_17_CUDA);
+
+	float absolute_tolerance = 1e-7;
+	BOOST_REQUIRE(AlmostEqual(mesh_16_CPU, mesh_16_CUDA, absolute_tolerance));
+	BOOST_REQUIRE(!AlmostEqual(mesh_17_CPU, mesh_16_CUDA, absolute_tolerance));
+	BOOST_REQUIRE(AlmostEqual(mesh_17_CPU, mesh_17_CUDA, absolute_tolerance));
+
+	delete volume_16_CPU;
+	delete volume_17_CPU;
+	delete volume_16_CUDA;
+	delete volume_17_CUDA;
+	delete meshing_engine_CPU;
+	delete meshing_engine_CUDA;
+}
+#endif
+
 
 BOOST_AUTO_TEST_CASE(Test_MeshGeneration_CPU_VBH) {
 	GenericMeshSavingTest<VoxelBlockHash, MEMORYDEVICE_CPU>();
 }
 
+#ifndef COMPILE_WITHOUT_CUDA
+BOOST_AUTO_TEST_CASE(Test_MeshGeneration_CUDA_VBH) {
+	GenericMeshSavingTest<VoxelBlockHash, MEMORYDEVICE_CUDA>();
+}
+
+BOOST_AUTO_TEST_CASE(Test_MeshGeneration_CPU_to_CUDA){
+	GenericMeshGenerationAndComparisonTest_CUDA_to_CPU<VoxelBlockHash>();
+}
+
+#endif

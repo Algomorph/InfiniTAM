@@ -24,7 +24,7 @@ namespace ITMLib
 		 * \param mesh[out] mesh that is generated
 		 * \param scene[in] voxel grid with SDF values
 		 */
-		virtual Mesh MeshScene(const VoxelVolume<TVoxel,TIndex>* scene) = 0;
+		virtual Mesh MeshVolume(const VoxelVolume<TVoxel,TIndex>* scene) = 0;
 
 		virtual ~MeshingEngine() = default;
 	};

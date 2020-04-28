@@ -186,7 +186,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::~DynamicSceneVoxelEngine() {
 template<typename TVoxel, typename TWarp, typename TIndex>
 void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::SaveSceneToMesh(const char* path) {
 	if (meshing_engine == nullptr) return;
-	Mesh mesh = meshing_engine->MeshScene(canonical_volume);
+	Mesh mesh = meshing_engine->MeshVolume(canonical_volume);
 	mesh.WriteSTL(path);
 }
 
@@ -373,10 +373,11 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(ITMUChar4Image* rgb
 			indexing_engine->AllocateFromOtherVolume(canonical_volume, live_volumes[0]);
 			indexing_engine->AllocateWarpVolumeFromOtherVolume(warp_field, live_volumes[0]);
 			depth_fusion_engine->IntegrateDepthImageIntoTsdfVolume(live_volumes[0], view, tracking_state);
-
-
-			LogTSDFVolumeStatistics(live_volumes[0], "[[live TSDF before tracking]]");
 			benchmarking::stop_timer("GenerateRawLiveVolume");
+
+			//pre-tracking recording
+			LogTSDFVolumeStatistics(live_volumes[0], "[[live TSDF before tracking]]");
+			RecordFrameMeshFromVolume(*live_volumes[0], "live_raw.ply", config.automatic_run_settings.index_of_frame_to_start_at + frames_processed);
 
 			benchmarking::start_timer("TrackMotion");
 			LOG4CPLUS_PER_FRAME(logging::get_logger(), bright_cyan
@@ -386,34 +387,44 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(ITMUChar4Image* rgb
 			LOG4CPLUS_PER_FRAME(logging::get_logger(),
 			                    bright_cyan << "*** Warping optimization finished for current frame. ***" << reset);
 			benchmarking::stop_timer("TrackMotion");
-			LogTSDFVolumeStatistics(target_warped_live_volume, "[[live TSDF after tracking]]");
 
+			//post-tracking recording
+			LogTSDFVolumeStatistics(target_warped_live_volume, "[[live TSDF after tracking]]");
+			RecordFrameMeshFromVolume(*target_warped_live_volume, "live_warped.ply", config.automatic_run_settings.index_of_frame_to_start_at + frames_processed);
 
 			//fuse warped live into canonical
 			benchmarking::start_timer("FuseOneTsdfVolumeIntoAnother");
-			//FIXME: use proper frame number here
-			volume_fusion_engine->FuseOneTsdfVolumeIntoAnother(canonical_volume, target_warped_live_volume, 0);
+			volume_fusion_engine->FuseOneTsdfVolumeIntoAnother(canonical_volume, target_warped_live_volume, frames_processed);
 			benchmarking::stop_timer("FuseOneTsdfVolumeIntoAnother");
-
 			LogTSDFVolumeStatistics(canonical_volume, "[[canonical TSDF after fusion]]");
-			RecordVolumeMemoryUsageInfo(*canonical_volume_memory_usage_file, *canonical_volume);
 
+			//post-fusion recording
+			RecordVolumeMemoryUsageInfo(*canonical_volume_memory_usage_file, *canonical_volume);
+			RecordFrameMeshFromVolume(*canonical_volume, "canonical.ply", config.automatic_run_settings.index_of_frame_to_start_at + frames_processed);
 		} else {
 			LOG4CPLUS_PER_FRAME(logging::get_logger(),
 			                    bright_cyan << "Generating raw live frame from view..." << reset);
-			benchmarking::start_timer("GenerateRawLiveAndCanonicalVolumes");
+			benchmarking::start_timer("GenerateRawLiveVolume");
 			indexing_engine->AllocateNearSurface(live_volumes[0], view, tracking_state);
 			depth_fusion_engine->IntegrateDepthImageIntoTsdfVolume(live_volumes[0], view, tracking_state);
-			benchmarking::stop_timer("GenerateRawLiveAndCanonicalVolumes");
+			benchmarking::stop_timer("GenerateRawLiveVolume");
+
+			//post-tracking recording
+			RecordFrameMeshFromVolume(*live_volumes[0], "live_raw.ply", config.automatic_run_settings.index_of_frame_to_start_at + frames_processed);
+			RecordFrameMeshFromVolume(*live_volumes[0], "live_warped.ply", config.automatic_run_settings.index_of_frame_to_start_at + frames_processed);
+
 			//** prepare canonical for new frame
 			LOG4CPLUS_PER_FRAME(logging::get_logger(),
 			                    bright_cyan << "Fusing data from live frame into canonical frame..." << reset);
 			//** fuse the live into canonical directly
 			benchmarking::start_timer("FuseOneTsdfVolumeIntoAnother");
 			indexing_engine->AllocateFromOtherVolume(canonical_volume, live_volumes[0]);
-			//FIXME: use proper frame number here instead of 0
 			volume_fusion_engine->FuseOneTsdfVolumeIntoAnother(canonical_volume, live_volumes[0], frames_processed);
 			benchmarking::stop_timer("FuseOneTsdfVolumeIntoAnother");
+
+			//post-fusion recording
+			RecordVolumeMemoryUsageInfo(*canonical_volume_memory_usage_file, *canonical_volume);
+			RecordFrameMeshFromVolume(*canonical_volume, "canonical.ply", config.automatic_run_settings.index_of_frame_to_start_at + frames_processed);
 		}
 		fusion_succeeded = true;
 		if (frames_processed > 50) tracking_initialised = true;

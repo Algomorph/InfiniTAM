@@ -58,4 +58,5 @@ else ()
     endif ()
 endif ()
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/header_only)
+add_library(tinyply ${CMAKE_CURRENT_SOURCE_DIR}/packaged/tinyply/tinyply.h ${CMAKE_CURRENT_SOURCE_DIR}/packaged/tinyply/tinyply.cpp)
+target_include_directories(tinyply INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/packaged)

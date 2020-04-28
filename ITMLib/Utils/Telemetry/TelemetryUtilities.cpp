@@ -25,12 +25,13 @@ namespace fs = std::filesystem;
 namespace ITMLib {
 namespace telemetry {
 
-std::string GetAndCreateOutputFolderForFrame(int frame_index) {
+std::string CreateAndGetOutputPathForFrame(int frame_index) {
 	fs::path path(configuration::get().paths.output_path + frame_folder_prefix + std::to_string(frame_index));
 	if (!fs::exists(path)) {
 		fs::create_directories(path);
 	}
 	return path.string();
 }
+
 } // namespace telemetry
 } // namespace ITMLib

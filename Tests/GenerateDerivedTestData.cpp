@@ -13,6 +13,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
+//stdlib
+#include <filesystem>
 
 //ITMLib
 #include "../ITMLib/SurfaceTrackers/Interface/SurfaceTracker.h"
@@ -20,6 +22,7 @@
 #include "../ITMLib/Engines/Indexing/IndexingEngineFactory.h"
 #include "../ITMLib/Engines/VolumeFusion/VolumeFusionEngineFactory.h"
 #include "../ITMLib/Engines/Warping/WarpingEngineFactory.h"
+#include "../ITMLib/Engines/Meshing/MeshingEngineFactory.h"
 #include "../ITMLib/Engines/EditAndCopy/EditAndCopyEngineFactory.h"
 #include "../ITMLib/Utils/Configuration.h"
 //(CPU)
@@ -27,10 +30,8 @@
 #include "../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
 //(CUDA)
 #ifndef COMPILE_WITHOUT_CUDA
-
 #include "../ITMLib/Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
 #include "../ITMLib/Engines/Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
-
 #endif
 
 //test_utilities
@@ -40,6 +41,8 @@
 #include "../ORUtils/FileUtils.h"
 #include "../ITMLib/Engines/ViewBuilding/ViewBuilderFactory.h"
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
+#include "../ITMLib/Engines/Meshing/MeshingEngineFactory.h"
+#include "../ITMLib/Objects/Meshing/Mesh.h"
 
 //local
 #include <log4cplus/loggingmacros.h>
@@ -48,6 +51,8 @@
 using namespace ITMLib;
 using namespace test_utilities;
 namespace snoopy = snoopy_test_utilities;
+
+namespace fs = std::filesystem;
 
 void ConstructSnoopyUnmaskedVolumes00() {
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* volume_PVA_00;
@@ -431,6 +436,21 @@ void GenerateConfigurationTestData() {
 	"TestData/configuration/config1.json", changed_up_configuration);
 }
 
+template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
+void GenerateMeshingTestData() {
+	VoxelVolume<TSDFVoxel, TIndex>* canonical_volume;
+	LoadVolume(&canonical_volume, snoopy::PartialVolume16Path<TIndex>(),
+	           TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	MeshingEngine<TSDFVoxel, TIndex>* meshing_engine =
+			MeshingEngineFactory::Build<TSDFVoxel, TIndex>(TMemoryDeviceType);
+	Mesh mesh = meshing_engine->MeshVolume( canonical_volume);
+	fs::create_directories(GENERATED_TEST_DATA_PREFIX "TestData/meshes");
+	mesh.WriteOBJ(GENERATED_TEST_DATA_PREFIX "TestData/meshes/mesh_partial_16.obj");
+
+	delete canonical_volume;
+	delete meshing_engine;
+}
+
 int main(int argc, char* argv[]) {
 	log4cplus::initialize();
 	log4cplus::SharedAppenderPtr console_appender(new log4cplus::ConsoleAppender(false, true));
@@ -447,5 +467,6 @@ int main(int argc, char* argv[]) {
 	GenerateFusedVolumeTestData<PlainVoxelArray>();
 	GenerateFusedVolumeTestData<VoxelBlockHash>();
 	GenerateConfigurationTestData();
+	GenerateMeshingTestData<VoxelBlockHash,MEMORYDEVICE_CPU>();
 	return 0;
 }

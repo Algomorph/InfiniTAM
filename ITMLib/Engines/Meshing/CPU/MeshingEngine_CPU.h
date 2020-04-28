@@ -13,7 +13,7 @@ namespace ITMLib
 	public:
 		explicit MeshingEngine_CPU() = default;
 		//TODO: implement meshing for PVA (for completeness / consistency)
-		Mesh MeshScene(const VoxelVolume<TVoxel, TIndex> *volume) {
+		Mesh MeshVolume(const VoxelVolume<TVoxel, TIndex> *volume) {
 			DIEWITHEXCEPTION_REPORTLOCATION("Not implemented");
 		}
 	};
@@ -22,7 +22,7 @@ namespace ITMLib
 	class MeshingEngine_CPU<TVoxel, VoxelBlockHash> : public MeshingEngine < TVoxel, VoxelBlockHash >
 	{
 	public:
-		Mesh MeshScene(const VoxelVolume<TVoxel, VoxelBlockHash> *volume);
+		Mesh MeshVolume(const VoxelVolume<TVoxel, VoxelBlockHash> *volume);
 
 		explicit MeshingEngine_CPU() = default;
 		~MeshingEngine_CPU() = default;

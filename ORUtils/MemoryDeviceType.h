@@ -20,7 +20,7 @@ enum MemoryCopyDirection {
 };
 
 inline
-MemoryCopyDirection determineMemoryCopyDirection(MemoryDeviceType targetMemoryType, MemoryDeviceType sourceMemoryType){
+MemoryCopyDirection DetermineMemoryCopyDirection(MemoryDeviceType targetMemoryType, MemoryDeviceType sourceMemoryType){
 	if(targetMemoryType == sourceMemoryType){
 		switch(targetMemoryType){
 			default:

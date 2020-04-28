@@ -21,7 +21,7 @@
 using namespace ITMLib;
 
 template<class TVoxel>
-Mesh MeshingEngine_CPU<TVoxel, VoxelBlockHash>::MeshScene(const VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
+Mesh MeshingEngine_CPU<TVoxel, VoxelBlockHash>::MeshVolume(const VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 
 	const int utilized_block_count = volume->index.GetUtilizedBlockCount();
 	const int max_triangle_count = utilized_block_count * VOXEL_BLOCK_SIZE3;

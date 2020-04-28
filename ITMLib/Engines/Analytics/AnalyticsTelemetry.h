@@ -24,6 +24,8 @@
 #include "../../Objects/Volume/VoxelVolume.h"
 #include "../../Utils/Configuration.h"
 #include "../../GlobalTemplateDefines.h"
+#include "../../Utils/Telemetry/TelemetryUtilities.h"
+#include "../Meshing/MeshingEngineFactory.h"
 
 
 namespace fs = boost::filesystem;
@@ -32,6 +34,18 @@ namespace ITMLib {
 
 //TODO: revise TelemetryRecorder and move all this functionality there
 void InitializePerFrameAnalyticsTelemetry(ORUtils::OStreamWrapper** canonical_volume_memory_usage_file);
+
+template<typename TVoxel, typename TIndex>
+void RecordFrameMeshFromVolume(const VoxelVolume<TVoxel, TIndex>& volume, const std::string& filename, int frame_index){
+	if(configuration::get().telemetry_settings.record_frame_meshes){
+		std::string frame_output_path = telemetry::CreateAndGetOutputPathForFrame(frame_index);
+		std::string mesh_file_path = (fs::path(frame_output_path) / fs::path(filename)).string();
+		auto meshing_engine = MeshingEngineFactory::Build<TVoxel,TIndex>(configuration::get().device_type);
+		Mesh mesh = meshing_engine->MeshVolume(&volume);
+		mesh.WritePLY(mesh_file_path, false, false);
+		delete meshing_engine;
+	}
+}
 
 template<typename TVoxel, typename TIndex>
 void RecordVolumeMemoryUsageInfo(ORUtils::OStreamWrapper& file, const VoxelVolume<TVoxel, TIndex>& volume) {

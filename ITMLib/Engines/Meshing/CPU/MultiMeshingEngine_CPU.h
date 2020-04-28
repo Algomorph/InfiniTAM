@@ -12,7 +12,7 @@ namespace ITMLib
 	{
 	public:
 		explicit MultiMeshingEngine_CPU(const TIndex& index){};
-		Mesh MeshScene(const VoxelMapGraphManager<TVoxel, TIndex> & sceneManager) override {
+		Mesh MeshVolume(const VoxelMapGraphManager<TVoxel, TIndex> & sceneManager) override {
 			DIEWITHEXCEPTION_REPORTLOCATION("Not implemented.");
 		}
 	};
@@ -25,6 +25,6 @@ namespace ITMLib
 		typedef typename MultiIndex<VoxelBlockHash>::IndexData MultiIndexData;
 		typedef MultiVoxel<TVoxel> MultiVoxelData;
 		typedef VoxelMapGraphManager<TVoxel, VoxelBlockHash> MultiSceneManager;
-		Mesh MeshScene(const MultiSceneManager & sceneManager);
+		Mesh MeshVolume(const MultiSceneManager & sceneManager);
 	};
 }

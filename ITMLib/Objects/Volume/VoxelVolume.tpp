@@ -61,7 +61,7 @@ VoxelVolume<TVoxel, TIndex>::VoxelVolume(const VoxelVolume& other, MemoryDeviceT
 		  voxels(index.GetMaxVoxelCount(), memory_type),
 		  global_cache(other.global_cache),
 		  swapping_enabled(other.swapping_enabled) {
-	MemoryCopyDirection memory_copy_direction = determineMemoryCopyDirection(this->index.memory_type,
+	MemoryCopyDirection memory_copy_direction = DetermineMemoryCopyDirection(this->index.memory_type,
 	                                                                         other.index.memory_type);
 	voxels.SetFrom(other.voxels, memory_copy_direction);
 }
@@ -85,7 +85,7 @@ void VoxelVolume<TVoxel, TIndex>::Reset() {
 template<class TVoxel, class TIndex>
 void VoxelVolume<TVoxel, TIndex>::SetFrom(const VoxelVolume& other) {
 	index.SetFrom(other.index);
-	MemoryCopyDirection memory_copy_direction = determineMemoryCopyDirection(this->index.memory_type,
+	MemoryCopyDirection memory_copy_direction = DetermineMemoryCopyDirection(this->index.memory_type,
 	                                                                         other.index.memory_type);
 	voxels.SetFrom(other.voxels, memory_copy_direction);
 	this->global_cache = GlobalCache<TVoxel, TIndex>(other.global_cache);

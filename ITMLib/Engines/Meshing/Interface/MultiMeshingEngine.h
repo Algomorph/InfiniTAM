@@ -14,6 +14,6 @@ namespace ITMLib
 	public:
 		virtual ~MultiMeshingEngine() {}
 
-		virtual Mesh MeshScene(const VoxelMapGraphManager<TVoxel, TIndex> & manager) = 0;
+		virtual Mesh MeshVolume(const VoxelMapGraphManager<TVoxel, TIndex> & manager) = 0;
 	};
 }

@@ -40,7 +40,7 @@ MultiMeshingEngine_CUDA<TVoxel, VoxelBlockHash>::~MultiMeshingEngine_CUDA() {
 }
 
 template<class TVoxel>
-Mesh MultiMeshingEngine_CUDA<TVoxel, VoxelBlockHash>::MeshScene(const VoxelMapGraphManager<TVoxel, VoxelBlockHash>& manager) {
+Mesh MultiMeshingEngine_CUDA<TVoxel, VoxelBlockHash>::MeshVolume(const VoxelMapGraphManager<TVoxel, VoxelBlockHash>& manager) {
 	const VoxelVolumeParameters& sceneParams = manager.getLocalMap(0)->volume->GetParameters();
 	int numLocalMaps = (int) manager.numLocalMaps();
 

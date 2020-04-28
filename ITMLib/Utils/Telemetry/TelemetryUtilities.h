@@ -32,6 +32,6 @@ inline const std::string frame_folder_prefix = "/Frame_";
 
 // endregion ================================== END CONSTANT DEFINITIONS ===============================================
 
-std::string GetAndCreateOutputFolderForFrame(int frame_index);
+std::string CreateAndGetOutputPathForFrame(int frame_index);
 } // namespace telemetry
 } // namespace ITMLib

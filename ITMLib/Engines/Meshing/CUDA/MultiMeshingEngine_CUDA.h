@@ -12,7 +12,7 @@ namespace ITMLib
 	{
 	public:
 		explicit MultiMeshingEngine_CUDA(const TIndex& index){};
-		Mesh MeshScene(const VoxelMapGraphManager<TVoxel, TIndex> & manager) override {
+		Mesh MeshVolume(const VoxelMapGraphManager<TVoxel, TIndex> & manager) override {
 			DIEWITHEXCEPTION_REPORTLOCATION("Not implemented");
 			return Mesh();
 		}
@@ -33,7 +33,7 @@ namespace ITMLib
 		MultiIndexData *indexData_device, indexData_host;
 		MultiVoxelData *voxelData_device, voxelData_host;
 
-		Mesh MeshScene(const MultiVolumeManager & manager) override;
+		Mesh MeshVolume(const MultiVolumeManager & manager) override;
 
 		explicit MultiMeshingEngine_CUDA(const VoxelBlockHash& index);
 		~MultiMeshingEngine_CUDA();

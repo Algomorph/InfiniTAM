@@ -153,7 +153,10 @@ DECLARE_SERIALIZABLE_STRUCT(PATHS_STRUCT_DESCRIPTION);
     "the course of the entire surface tracking optimization. [WITH_VTK compilation required!]"), \
 	(bool, log_surface_tracking_optimization_energies, false, PRIMITIVE, "Whether to log optimization energies " \
 	"for each iteration of the surface tracking optimization. Only works when non_rigid_tracking_parameters.functor_type " \
-	"parameter is set to \"slavcheva_diagnostic\"")
+	"parameter is set to \"slavcheva_diagnostic\""), \
+	(bool, record_frame_meshes, false, PRIMITIVE, "Whether to log three meshes at every frame: (a) from live volume " \
+	"after camera tracking and before surface tracking, (b) from live volume after surface tracking, and (c) from " \
+	"canonical volume after fusion.")
 
 
 DECLARE_SERIALIZABLE_STRUCT(TELEMETRY_SETTINGS_STRUCT_DESCRIPTION);

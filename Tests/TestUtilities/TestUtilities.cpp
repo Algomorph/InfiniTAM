@@ -368,7 +368,7 @@ configuration::Configuration GenerateChangedUpConfiguration(){
 			SlavchevaSurfaceTracker::Parameters(0.11f, 0.09f, 2.0f, 0.3f, 0.1f, 1e-6f),
 			SlavchevaSurfaceTracker::Switches(false, true, false, true, false),
 			TelemetrySettings(Vector3i(20, 23, 0),
-					true, true, false, true, true, true, true, true, true, true, Plane::PLANE_XY, true, 4, true, true),
+					true, true, false, true, true, true, true, true, true, true, Plane::PLANE_XY, true, 4, true, true, true),
 			Paths("TestData/output1",
 			      "TestData/calib_file1.txt",
 			      "", "", "",

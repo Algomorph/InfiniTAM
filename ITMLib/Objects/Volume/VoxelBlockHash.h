@@ -133,7 +133,7 @@ public:
 	}
 
 	void SetFrom(const VoxelBlockHash& other) {
-		MemoryCopyDirection memory_copy_direction = determineMemoryCopyDirection(this->memory_type, other.memory_type);
+		MemoryCopyDirection memory_copy_direction = DetermineMemoryCopyDirection(this->memory_type, other.memory_type);
 		this->hash_entry_allocation_states.SetFrom(other.hash_entry_allocation_states, memory_copy_direction);
 		this->hash_entries.SetFrom(other.hash_entries, memory_copy_direction);
 		this->block_allocation_list.SetFrom(other.block_allocation_list, memory_copy_direction);

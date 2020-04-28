@@ -308,7 +308,7 @@ template <typename TVoxel, typename TIndex>
 void MultiEngine<TVoxel, TIndex>::SaveSceneToMesh(const char *modelFileName)
 {
 	if (meshingEngine == NULL) return;
-	Mesh mesh = meshingEngine->MeshScene(*mapManager);
+	Mesh mesh = meshingEngine->MeshVolume(*mapManager);
 	mesh.WriteSTL(modelFileName);
 }
 

@@ -272,15 +272,15 @@ void UIEngine_BPO::Shutdown() {
 
 
 std::string UIEngine_BPO::GenerateNextFrameOutputPath() const {
-	return ITMLib::telemetry::GetAndCreateOutputFolderForFrame(GetCurrentFrameIndex() + 1);
+	return ITMLib::telemetry::CreateAndGetOutputPathForFrame(GetCurrentFrameIndex() + 1);
 }
 
 std::string UIEngine_BPO::GenerateCurrentFrameOutputPath() const {
-	return ITMLib::telemetry::GetAndCreateOutputFolderForFrame(GetCurrentFrameIndex());
+	return ITMLib::telemetry::CreateAndGetOutputPathForFrame(GetCurrentFrameIndex());
 }
 
 std::string UIEngine_BPO::GeneratePreviousFrameOutputPath() const {
-	return ITMLib::telemetry::GetAndCreateOutputFolderForFrame(GetCurrentFrameIndex() - 1);
+	return ITMLib::telemetry::CreateAndGetOutputPathForFrame(GetCurrentFrameIndex() - 1);
 }
 
 //TODO: Group all recording & make it toggleable with a single keystroke / command flag

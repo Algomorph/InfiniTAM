@@ -15,6 +15,7 @@
 //  ================================================================
 #pragma once
 //stdlib
+#include <vector>
 #include <set>
 #include <unordered_set>
 
@@ -43,6 +44,14 @@ operator-(const std::unordered_set<_Value, _Hash, _Pred, _Alloc>& source,
 		target.erase(elem);
 	}
 	return target;
+}
+
+template<typename T>
+std::vector<T> arange(T start, T stop, T step = 1) {
+	std::vector<T> values;
+	for (T value = start; value < stop; value += step)
+		values.push_back(value);
+	return values;
 }
 
 

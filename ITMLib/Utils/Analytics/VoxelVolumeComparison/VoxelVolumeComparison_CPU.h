@@ -15,6 +15,7 @@
 //  ================================================================
 #pragma once
 #include "../../../Objects/Volume/VoxelVolume.h"
+#include "../../VoxelFlags.h"
 
 namespace ITMLib{
 /**

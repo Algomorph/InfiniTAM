@@ -718,6 +718,10 @@ set(ITMLIB_OBJECTS_MESHING_HEADERS
     Objects/Meshing/Mesh.h
     )
 
+set(ITMLIB_OBJECTS_MESHING_SOURCES
+    Objects/Meshing/Mesh.cpp
+    )
+
 ##
 set(ITMLIB_OBJECTS_MISC_HEADERS
     Objects/Misc/IMUCalibrator.h
@@ -1061,6 +1065,7 @@ set(sources
     ${ITMLIB_ENGINES_ANALYTICS_SOURCES}
     ${ITMLIB_ENGINES_TELEMETRY_SOURCES}
     ${ITMLIB_OBJECTS_CAMERA_SOURCES}
+    ${ITMLIB_OBJECTS_MESHING_SOURCES}
     ${ITMLIB_OBJECTS_RENDERSTATES_SOURCES}
     ${ITMLIB_CAMERA_TRACKERS_CPU_SOURCES}
     ${ITMLIB_CAMERA_TRACKERS_CUDA_SOURCES}
@@ -1162,7 +1167,7 @@ if (WITH_VTK)
     target_compile_definitions(${targetname} PUBLIC -DWITH_VTK)
 endif ()
 target_include_directories(${targetname} PUBLIC ${OpenCV_INCLUDE_DIRS})
-target_link_libraries(${targetname} ${OpenCV_LIBS} ${VTK_LIBRARIES} log4cplus)
+target_link_libraries(${targetname} ${OpenCV_LIBS} ${VTK_LIBRARIES} log4cplus tinyply)
 include(${PROJECT_SOURCE_DIR}/cmake/LinkBoost.cmake)
 
 

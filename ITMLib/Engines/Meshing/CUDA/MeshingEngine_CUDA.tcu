@@ -33,7 +33,7 @@ template<class TVoxel>
 MeshingEngine_CUDA<TVoxel, PlainVoxelArray>::~MeshingEngine_CUDA() {}
 
 template<class TVoxel>
-Mesh MeshingEngine_CUDA<TVoxel, PlainVoxelArray>::MeshScene(const VoxelVolume<TVoxel, PlainVoxelArray>* scene) {
+Mesh MeshingEngine_CUDA<TVoxel, PlainVoxelArray>::MeshVolume(const VoxelVolume<TVoxel, PlainVoxelArray>* scene) {
 	DIEWITHEXCEPTION_REPORTLOCATION("Not implemented");
 	return Mesh();
 }
@@ -49,7 +49,7 @@ MeshingEngine_CUDA<TVoxel, VoxelBlockHash>::~MeshingEngine_CUDA() {
 }
 
 template<class TVoxel>
-Mesh MeshingEngine_CUDA<TVoxel, VoxelBlockHash>::MeshScene(const VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
+Mesh MeshingEngine_CUDA<TVoxel, VoxelBlockHash>::MeshVolume(const VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 
 	const int utilized_block_count = volume->index.GetUtilizedBlockCount();
 	const int max_triangle_count = utilized_block_count * VOXEL_BLOCK_SIZE3;
