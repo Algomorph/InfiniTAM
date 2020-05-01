@@ -1,130 +1,114 @@
-#!/usr/bin/python3
-import os
-import sys
 import gzip
-import numpy as np
+import os
 import vtk
-from plyfile import PlyData, PlyElement
+import sys
+import numpy as np
 
-PROGRAM_EXIT_SUCCESS = 0
-PROGRAM_EXIT_FAILURE = -1
-
-
-class Mesh:
-    FACTOR = 1.0
-
-    def __init__(self, renderer, render_window, color):
-        self.renderer = renderer
-        self.render_window = render_window
-
-        # Create a polydata object
-        self.triangle_poly_data = vtk.vtkPolyData()
-
-        # Create mapper and actor
-        self.mapper = vtk.vtkPolyDataMapper()
-        self.mapper.SetInputData(self.triangle_poly_data)
-        self.actor = vtk.vtkActor()
-        self.actor.GetProperty().SetColor(color)
-        self.actor.GetProperty().SetBackfaceCulling(True)
-        self.actor.SetMapper(self.mapper)
-        self.renderer.AddActor(self.actor)
-
-    def update(self, path, render=False):
-        ply_data = PlyData.read(path)
-        vertex_data = ply_data["vertex"]
-        index_data = ply_data['face'].data['vertex_indices']
-        points = vtk.vtkPoints()
-
-        for vert_d in vertex_data:
-            vert = np.array(vert_d.tolist()) * Mesh.FACTOR
-            # print(vert)
-            points.InsertNextPoint((vert[0], -vert[1], vert[2]))
-
-        triangle_count = points.GetNumberOfPoints() // 3
-        triangles = vtk.vtkCellArray()
-
-        for i_tri in range(0, triangle_count):
-            triangle = vtk.vtkTriangle()
-            indices = index_data[i_tri]
-            triangle.GetPointIds().SetId(0, indices[0])
-            triangle.GetPointIds().SetId(1, indices[1])
-            triangle.GetPointIds().SetId(2, indices[2])
-            triangles.InsertNextCell(triangle)
-
-        # Add the geometry and topology to the polydata
-        self.triangle_poly_data.SetPoints(points)
-        self.triangle_poly_data.SetPolys(triangles)
-
-        self.mapper.SetInputData(self.triangle_poly_data)
-        self.mapper.Modified()
-
-        if render:
-            self.render_window.Render()
-
-    def hide(self):
-        self.actor.SetVisibility(False)
-
-    def show(self):
-        self.actor.SetVisibility(True)
+from Apps.visualizer.mesh import Mesh
 
 
-class Visualizer:
-    BLOCK_SIZE = 8.0 * 0.004
-    BLOCK_OFFSET = 0.002
+def read_allocation_data(
+        data_path="/mnt/Data/Reconstruction/experiment_output/2020-04-28/full_run/canonical_volume_memory_usage.dat"):
+    file = gzip.open(data_path, "rb")
 
-    def __init__(self, allocation_sets):
-        self.current_frame = 0
-        self.frame_count = len(allocation_sets)
+    point_sets = []
+    i_frame = 17
+    while file.readable():
+        buffer = file.read(size=8)
+        if not buffer:
+            break
+        count = np.frombuffer(buffer, dtype=np.uint32)[0]
+        print("Reading allocation data for frame:", i_frame, "Block count:", count, "...")
+        point_set = np.resize(np.frombuffer(file.read(size=6 * count), dtype=np.int16), (count, 3))
+        point_sets.append(point_set)
+        i_frame += 1
+    return point_sets
 
-        self.allocation_sets = allocation_sets
+
+class VisualizerApp:
+    BLOCK_WIDTH_VOXELS = 8
+    VOXEL_SIZE = 0.004  # meters
+    BLOCK_SIZE = BLOCK_WIDTH_VOXELS * VOXEL_SIZE
+    BLOCK_OFFSET = - (VOXEL_SIZE / 2) - (BLOCK_SIZE / 2)
+
+    def __init__(self):
         self.offset_cam = (0.2562770766576, 0.13962609403401335, -0.2113334598208764)
-
         colors = vtk.vtkNamedColors()
+        self.current_frame = 0
 
-        self.allocation_block_points = vtk.vtkPoints()
+        allocated_block_sets = read_allocation_data()
 
-        self.allocation_polydata = vtk.vtkPolyData()
-        self.allocation_polydata.SetPoints(self.allocation_block_points)
+        self.frame_count = len(allocated_block_sets)
+        self.allocated_block_sets = allocated_block_sets
+
+        # region ============================== BLOCKS AND LABELS =====================================================#
+
+        self.block_locations = vtk.vtkPoints()
+        self.block_labels = vtk.vtkStringArray()
+        self.block_labels.SetName("label")
+
+        self.block_polydata = vtk.vtkPolyData()
+        self.block_polydata.SetPoints(self.block_locations)
+        self.block_polydata.GetPointData().AddArray(self.block_labels)
+
+        self.block_label_hierarchy = vtk.vtkPointSetToLabelHierarchy()
+        self.block_label_hierarchy.SetInputData(self.block_polydata)
+        self.block_label_hierarchy.SetLabelArrayName("label")
+
+        self.block_label_placement_mapper = vtk.vtkLabelPlacementMapper()
+        self.block_label_placement_mapper.SetInputConnection(self.block_label_hierarchy.GetOutputPort())
+        self.block_label_placement_mapper.SetRenderStrategy(vtk.vtkFreeTypeLabelRenderStrategy())
+        self.block_label_placement_mapper.SetShapeToRoundedRect()
+        self.block_label_placement_mapper.SetBackgroundColor(1.0, 1.0, 0.7)
+        self.block_label_placement_mapper.SetBackgroundOpacity(0.4)
+        self.block_label_placement_mapper.SetMargin(3)
 
         self.block_mapper = vtk.vtkGlyph3DMapper()
-        self.block_mapper.SetInputData(self.allocation_polydata)
+        self.block_mapper.SetInputData(self.block_polydata)
 
         block = vtk.vtkCubeSource()
-        block.SetXLength(Visualizer.BLOCK_SIZE)
-        block.SetYLength(Visualizer.BLOCK_SIZE)
-        block.SetZLength(Visualizer.BLOCK_SIZE)
+        block.SetXLength(VisualizerApp.BLOCK_SIZE)
+        block.SetYLength(VisualizerApp.BLOCK_SIZE)
+        block.SetZLength(VisualizerApp.BLOCK_SIZE)
         self.block_mapper.SetSourceConnection(block.GetOutputPort())
 
-        # The actor is a grouping mechanism: besides the geometry (mapper), it
-        # also has a property, transformation matrix, and/or texture map.
-        # Here we set its color and rotate it -22.5 degrees.
+        # block actor
         self.block_actor = vtk.vtkActor()
         self.block_actor.SetMapper(self.block_mapper)
         self.block_actor.GetProperty().SetColor(colors.GetColor3d("PowderBlue"))
         self.block_actor.GetProperty().SetLineWidth(0.1)
         self.block_actor.GetProperty().SetRepresentationToWireframe()
-        # self.block_actor.SetVisibility(False)
 
-        # Create the graphics structure. The renderer renders into the render
-        # window. The render window interactor captures mouse events and will
-        # perform appropriate camera or actor manipulation depending on the
-        # nature of the events.
+        # label actor
+        self.block_label_actor = vtk.vtkActor2D()
+        self.block_label_actor.SetMapper(self.block_label_placement_mapper)
+
+        # endregion ====================================================================================================
+        # renderer & render window initialization
         self.renderer = vtk.vtkRenderer()
         self.render_window = vtk.vtkRenderWindow()
         self.render_window.AddRenderer(self.renderer)
-        # key_press_interactor_style = vtk.vtkKeyPressInteractorStyle()
-        self.interactor = vtk.vtkRenderWindowInteractor()
-        self.interactor.SetInteractorStyle(None)
-        self.interactor.SetRenderWindow(self.render_window)
+
+        # mesh setup
+        self.canonical_mesh = Mesh(self.renderer, self.render_window, colors.GetColor3d("Cyan"))
+        self.raw_live_mesh = Mesh(self.renderer, self.render_window, colors.GetColor3d("Pink"))
+        self.warped_live_mesh = Mesh(self.renderer, self.render_window, colors.GetColor3d("Green"))
+        self.shown_mesh_index = 0
+
+        self.meshes = [self.raw_live_mesh, self.warped_live_mesh, self.canonical_mesh]
+        self.mesh_names = ["canonical_mesh", "raw_live_mesh", "warped_live_mesh"]
 
         # Add the actors to the renderer, set the background and size
         self.renderer.AddActor(self.block_actor)
+        self.renderer.AddActor(self.block_label_actor)
         self.renderer.SetBackground(colors.GetColor3d("Black"))
         self.render_window.SetSize(1400, 900)
         self.render_window.SetWindowName('Allocation')
 
-        # This allows the interactor to initalize itself. It has to be
-        # called before an event loop.
+        # Interactor setup
+        self.interactor = vtk.vtkRenderWindowInteractor()
+        self.interactor.SetInteractorStyle(None)
+        self.interactor.SetRenderWindow(self.render_window)
         self.interactor.Initialize()
         self.interactor.AddObserver("KeyPressEvent", self.keypress)
         self.interactor.AddObserver("LeftButtonPressEvent", self.button_event)
@@ -142,6 +126,17 @@ class Visualizer:
         self.panning = False
         self.zooming = False
 
+        # axes actor
+        self.axes = vtk.vtkAxesActor()
+        self.axes_widget = widget = vtk.vtkOrientationMarkerWidget()
+        rgba = colors.GetColor4ub("Carrot")
+        widget.SetOutlineColor(rgba[0], rgba[1], rgba[2])
+        widget.SetOrientationMarker(self.axes)
+        widget.SetInteractor(self.interactor)
+        widget.SetViewport(0.0, 0.2, 0.2, 0.4)
+        widget.SetEnabled(1)
+        widget.InteractiveOn()
+
         # We'll zoom in a little by accessing the camera and invoking a "Zoom"
         # method on it.
         self.camera = camera = self.renderer.GetActiveCamera()
@@ -150,14 +145,6 @@ class Visualizer:
         camera.SetViewUp(0, 0, 0)
         camera.SetFocalPoint(0, 0, 0.512)
         camera.SetClippingRange(0.01, 10.0)
-
-        self.canonical_mesh = Mesh(self.renderer, self.render_window, colors.GetColor3d("Cyan"))
-        self.raw_live_mesh = Mesh(self.renderer, self.render_window, colors.GetColor3d("Pink"))
-        self.warped_live_mesh = Mesh(self.renderer, self.render_window, colors.GetColor3d("Green"))
-        self.shown_mesh_index = 0
-
-        self.meshes = [self.raw_live_mesh, self.warped_live_mesh, self.canonical_mesh]
-        self.mesh_names = ["canonical_mesh", "raw_live_mesh", "warped_live_mesh"]
 
         self.render_window.Render()
         self.set_frame(0)
@@ -195,18 +182,31 @@ class Visualizer:
         self.load_frame_meshes(i_frame)
 
         self.current_frame = i_frame
-        allocation_data = self.allocation_sets[i_frame]
-        del self.allocation_block_points
-        self.allocation_block_points = vtk.vtkPoints()
+        allocated_block_set = self.allocated_block_sets[i_frame]
+        del self.block_locations
+        self.block_locations = vtk.vtkPoints()
+        self.block_labels.SetNumberOfValues(len(allocated_block_set))
+        verts = vtk.vtkCellArray()
 
-        for block_coordinate in allocation_data:
-            point_scaled = block_coordinate * Visualizer.BLOCK_SIZE - Visualizer.BLOCK_OFFSET
-            # print(point_scaled)
-            self.allocation_block_points.InsertNextPoint(point_scaled[0], -point_scaled[1], point_scaled[2])
-            # (point_scaled[0] * Visualizer.BLOCK_SIZE, point_scaled[1] * Visualizer.BLOCK_SIZE, point_scaled[2] * Visualizer.BLOCK_SIZE))
+        i_block = 0
+        for block_coordinate in allocated_block_set:
+            point_scaled = block_coordinate * VisualizerApp.BLOCK_SIZE - VisualizerApp.BLOCK_OFFSET
+            self.block_locations.InsertNextPoint((point_scaled[0], -point_scaled[1], point_scaled[2]))
 
-        self.allocation_polydata.SetPoints(self.allocation_block_points)
-        self.block_mapper.SetInputData(self.allocation_polydata)
+            label = "({:d}, {:d}, {:d})".format(block_coordinate[0],
+                                                block_coordinate[1],
+                                                block_coordinate[2])
+
+            self.block_labels.SetValue(i_block, label)
+            verts.InsertNextCell(1)
+            verts.InsertCellPoint(i_block)
+            i_block += 1
+
+        self.block_polydata.SetPoints(self.block_locations)
+        self.block_polydata.SetVerts(verts)
+
+        self.block_mapper.SetInputData(self.block_polydata)
+        self.block_label_placement_mapper.Modified()
         self.block_mapper.Modified()
         self.render_window.Render()
 
@@ -357,34 +357,3 @@ class Visualizer:
             self.advance_view()
         elif key == "Left":
             self.retreat_view()
-
-
-def read_allocation_data(
-        data_path="/mnt/Data/Reconstruction/experiment_output/2020-04-28/full_run/canonical_volume_memory_usage.dat"):
-    file = gzip.open(data_path, "rb")
-
-    point_sets = []
-    i_frame = 17
-    while file.readable():
-        buffer = file.read(size=8)
-        if not buffer:
-            break
-        count = np.frombuffer(buffer, dtype=np.uint32)[0]
-        print("reading frame", i_frame, "of size", count, "...")
-        point_set = np.resize(np.frombuffer(file.read(size=6 * count), dtype=np.int16), (count, 3))
-        point_sets.append(point_set)
-        i_frame += 1
-    return point_sets
-
-
-def main():
-    allocation_sets = read_allocation_data()
-    visualizer = Visualizer(allocation_sets)
-
-    visualizer.launch()
-
-    return PROGRAM_EXIT_SUCCESS
-
-
-if __name__ == "__main__":
-    sys.exit(main())

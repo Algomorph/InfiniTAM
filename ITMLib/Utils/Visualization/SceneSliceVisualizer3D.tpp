@@ -392,7 +392,7 @@ void SceneSliceVisualizer3D<TVoxel, TWarp, TIndex>::InitializeVoxels() {
 
 	window = VisualizationWindowManager::Instance().MakeOrGet3DWindow(
 			"SceneSliceVisualizer3D" + to_string(this->bounds),
-			"Volume 3D Slice Visualizer for bounds (" + to_string(this->bounds) + "))");
+			"Volume 3D Slice VisualizerApp for bounds (" + to_string(this->bounds) + "))");
 
 	// Create the color maps
 	SetUpSDFColorLookupTable(liveSlice.voxelColorLookupTable, liveHighlightVoxelColor.data(),

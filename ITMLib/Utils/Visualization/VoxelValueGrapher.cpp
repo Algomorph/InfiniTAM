@@ -43,7 +43,7 @@ VoxelValueGrapher::VoxelValueGrapher(Vector3i focus_coordinate, Axis axis, unsig
 		previous_point(focus_coordinate[axis]),
 		window(VisualizationWindowManager::Instance().MakeOrGetChartWindow(
 				"SceneSliceVisualizer1D_" + AxisToString(axis),
-				"Volume 1D Slice Visualizer for " + AxisToString(axis) + " Axis")){}
+				"Volume 1D Slice VisualizerApp for " + AxisToString(axis) + " Axis")){}
 
 //TODO: DRY violation -- same code as EnergyPlotter -- group into single class hierarchy with shared methods
 void VoxelValueGrapher::SaveScreenshot(std::string path) {
