@@ -176,7 +176,7 @@ void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::AllocateSceneFromDep
 				}
 				else
 				{
-					// Mark entry as not visible since we couldn't allocate it but findVoxelBlocksForRayNearSurface changed its state.
+					// Mark entry as not visible since we couldn't allocate it but FindVoxelBlocksForRayNearSurface changed its state.
 					hashBlockVisibilityTypes[targetIdx] = INVISIBLE;
 
 					// Restore previous value to avoid leaks.
@@ -205,7 +205,7 @@ void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::AllocateSceneFromDep
 				}
 				else
 				{
-					// No need to mark the entry as not visible since findVoxelBlocksForRayNearSurface did not mark it.
+					// No need to mark the entry as not visible since FindVoxelBlocksForRayNearSurface did not mark it.
 					// Restore previous value to avoid leaks.
 					lastFreeVoxelBlockId++;
 					lastFreeExcessListId++;

@@ -419,7 +419,7 @@ __global__ void allocateVoxelBlocksList_device(
 
 				hashTable[targetIdx] = hashEntry;
 			} else {
-				// Mark entry as not visible since we couldn't allocate it but findVoxelBlocksForRayNearSurface changed its state.
+				// Mark entry as not visible since we couldn't allocate it but FindVoxelBlocksForRayNearSurface changed its state.
 				blockVisibilityTypes[targetIdx] = INVISIBLE;
 
 				// Restore the previous value to avoid leaks.
@@ -446,7 +446,7 @@ __global__ void allocateVoxelBlocksList_device(
 
 				blockVisibilityTypes[ORDERED_LIST_SIZE + exlOffset] = IN_MEMORY_AND_VISIBLE; //make child visible
 			} else {
-				// No need to mark the entry as not visible since findVoxelBlocksForRayNearSurface did not mark it.
+				// No need to mark the entry as not visible since FindVoxelBlocksForRayNearSurface did not mark it.
 				// Restore the previous values to avoid leaks.
 				atomicAdd(&allocData->last_free_voxel_block_id, 1);
 				atomicAdd(&allocData->last_free_excess_list_id, 1);

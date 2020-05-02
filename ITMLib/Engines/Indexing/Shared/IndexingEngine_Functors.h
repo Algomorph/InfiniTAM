@@ -62,7 +62,7 @@ public:
 		// segment from start of the (truncated SDF) band, through the observed point, and to the opposite (occluded)
 		// end of the (truncated SDF) band (increased by backBandFactor), along the ray cast from the camera through the
 		// point, in camera space
-		ITMLib::Segment march_segment = findHashBlockSegmentAlongCameraRayWithinRangeFromDepth(surface_distance_cutoff,
+		ITMLib::Segment march_segment = FindHashBlockSegmentAlongCameraRayWithinRangeFromDepth(surface_distance_cutoff,
 		                                                                                       depth_measure,
 		                                                                                       x, y,
 		                                                                                       inverted_camera_pose,
@@ -70,7 +70,7 @@ public:
 		                                                                                       hash_block_size_reciprocal);
 
 
-		markVoxelHashBlocksAlongSegment(hash_entry_allocation_states, hash_block_coordinates,
+		MarkVoxelHashBlocksAlongSegment(hash_entry_allocation_states, hash_block_coordinates,
 		                                *unresolvable_collision_encountered_device,
 		                                hash_table, march_segment, colliding_block_positions_device,
 		                                colliding_block_count);
@@ -141,25 +141,25 @@ public:
 		ITMLib::Segment march_segment;
 
 		if (has_surface1 && has_surface2) {
-			Vector4f surface1_point = imageSpacePointToCameraSpace(surface1_depth, x, y,
+			Vector4f surface1_point = ImageSpacePointToCameraSpace(surface1_depth, x, y,
 			                                                       inverted_projection_parameters);
-			march_segment = findHashBlockSegmentAlongCameraRayWithinRangeFromAndBetweenTwoPoints(
+			march_segment = FindHashBlockSegmentAlongCameraRayWithinRangeFromAndBetweenTwoPoints(
 					surface_distance_cutoff, surface1_point, surface2_point, inverted_camera_pose,
 					hash_block_size_reciprocal);
 		} else {
 			if (has_surface1) {
-				march_segment = findHashBlockSegmentAlongCameraRayWithinRangeFromDepth(
+				march_segment = FindHashBlockSegmentAlongCameraRayWithinRangeFromDepth(
 						surface_distance_cutoff, surface1_depth, x, y, inverted_camera_pose,
 						inverted_projection_parameters, hash_block_size_reciprocal);
 			} else if (has_surface2) {
-				march_segment = findHashBlockSegmentAlongCameraRayWithinRangeFromPoint(
+				march_segment = FindHashBlockSegmentAlongCameraRayWithinRangeFromPoint(
 						surface_distance_cutoff, surface2_point, inverted_camera_pose, hash_block_size_reciprocal);
 			} else {
 				return; // neither surface is defined at this point, nothing to do.
 			}
 		}
 
-		markVoxelHashBlocksAlongSegment(hash_entry_allocation_states, hash_block_coordinates,
+		MarkVoxelHashBlocksAlongSegment(hash_entry_allocation_states, hash_block_coordinates,
 		                                *unresolvable_collision_encountered_device, hash_table, march_segment,
 		                                colliding_block_positions_device, colliding_block_count);
 	}
