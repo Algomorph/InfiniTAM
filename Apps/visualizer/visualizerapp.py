@@ -44,6 +44,7 @@ class VisualizerApp:
         self.interactor.SetInteractorStyle(None)
         self.interactor.SetRenderWindow(self.render_window)
         self.interactor.Initialize()
+
         self.interactor.AddObserver("KeyPressEvent", self.keypress)
         self.interactor.AddObserver("LeftButtonPressEvent", self.button_event)
         self.interactor.AddObserver("LeftButtonReleaseEvent", self.button_event)

@@ -15,6 +15,9 @@
 //  ================================================================
 #pragma once
 
+//_DEBUG allocation
+#include <unordered_set>
+
 //ORUtils
 #include "../../../../ORUtils/PlatformIndependence.h"
 #include "../../../../ORUtils/PlatformIndependentAtomics.h"
@@ -31,11 +34,8 @@
 #include "../../../Utils/VoxelFlags.h"
 #include "../../../Utils/HashBlockProperties.h"
 #include "../../../Utils/Geometry/IntersectionChecks.h"
-
 #ifdef __CUDACC__
-
 #include "../../../Utils/CUDAUtils.h"
-
 #endif
 
 using namespace ITMLib;
@@ -372,6 +372,37 @@ _CPU_AND_GPU_CODE_ inline int GetDifferingComponentCount(Vector3s coord1, Vector
 }
 
 _DEVICE_WHEN_AVAILABLE_ inline void
+TryToMarkBlockForAllocation(const Vector3s& block_position,
+                            ITMLib::HashEntryAllocationState* hash_entry_allocation_states,
+                            Vector3s* hash_block_coordinates,
+                            bool& unresolvable_collision_encountered,
+                            const CONSTPTR(HashEntry)* hash_table,
+                            THREADPTR(Vector3s)* colliding_block_positions,
+                            ATOMIC_ARGUMENT(int) colliding_block_count) {
+	ThreadAllocationStatus resulting_status = MarkAsNeedingAllocationIfNotFound<true>(
+			hash_entry_allocation_states,
+			hash_block_coordinates, block_position,
+			hash_table, colliding_block_positions, colliding_block_count);
+	//_DEBUG allocation
+#ifndef __CUDACC__
+//	std::unordered_set<Vector3s> debug_locations = {Vector3s(0,6,38), Vector3s(1,6,38)};
+	std::unordered_set<Vector3s> debug_locations = {Vector3s(3,-1,73), Vector3s(10,-4,31), Vector3s(-3,3,24)};
+#endif
+
+	if (resulting_status == BEING_MODIFIED_BY_ANOTHER_THREAD) {
+		unresolvable_collision_encountered = true;
+	}
+
+	//_DEBUG allocation
+#ifndef __CUDACC__
+	else if(debug_locations.find(block_position) != debug_locations.end() &&
+			(resulting_status == MARK_FOR_ALLOCATION_IN_EXCESS_LIST || resulting_status == MARK_FOR_ALLOCATION_IN_ORDERED_LIST)){
+		int i = 0;
+	}
+#endif
+}
+
+_DEVICE_WHEN_AVAILABLE_ inline void
 MarkVoxelHashBlocksAlongSegment(ITMLib::HashEntryAllocationState* hash_entry_allocation_states,
                                 Vector3s* hash_block_coordinates,
                                 bool& unresolvable_collision_encountered,
@@ -404,13 +435,15 @@ MarkVoxelHashBlocksAlongSegment(ITMLib::HashEntryAllocationState* hash_entry_all
 						if (SegmentIntersectsGridAlignedCube3D(segment_in_hash_blocks,
 						                                       TO_FLOAT3(potentially_missed_block_position),
 						                                       1.0f)) {
-							if (MarkAsNeedingAllocationIfNotFound<true>(
+							TryToMarkBlockForAllocation(
+									potentially_missed_block_position,
 									hash_entry_allocation_states,
-									hash_block_coordinates, potentially_missed_block_position,
-									hash_table, colliding_block_positions, colliding_block_count) ==
-							    BEING_MODIFIED_BY_ANOTHER_THREAD) {
-								unresolvable_collision_encountered = true;
-							}
+									hash_block_coordinates,
+									unresolvable_collision_encountered,
+									hash_table,
+									colliding_block_positions,
+									colliding_block_count
+							);
 						}
 					}
 				}
@@ -422,36 +455,43 @@ MarkVoxelHashBlocksAlongSegment(ITMLib::HashEntryAllocationState* hash_entry_all
 					if (SegmentIntersectsGridAlignedCube3D(segment_in_hash_blocks,
 					                                       TO_FLOAT3(potentially_missed_block_position),
 					                                       1.0f)) {
-						if (MarkAsNeedingAllocationIfNotFound<true>(
+						TryToMarkBlockForAllocation(
+								potentially_missed_block_position,
 								hash_entry_allocation_states,
-								hash_block_coordinates, potentially_missed_block_position,
-								hash_table, colliding_block_positions, colliding_block_count) ==
-						    BEING_MODIFIED_BY_ANOTHER_THREAD) {
-							unresolvable_collision_encountered = true;
-						}
+								hash_block_coordinates,
+								unresolvable_collision_encountered,
+								hash_table,
+								colliding_block_positions,
+								colliding_block_count
+						);
 					}
 					potentially_missed_block_position = current_block_position;
 					potentially_missed_block_position.values[iDirection] = previous_block_position.values[iDirection];
 					if (SegmentIntersectsGridAlignedCube3D(segment_in_hash_blocks,
 					                                       TO_FLOAT3(potentially_missed_block_position),
 					                                       1.0f)) {
-						if (MarkAsNeedingAllocationIfNotFound<true>(
+						TryToMarkBlockForAllocation(
+								potentially_missed_block_position,
 								hash_entry_allocation_states,
-								hash_block_coordinates, potentially_missed_block_position,
-								hash_table, colliding_block_positions, colliding_block_count) ==
-						    BEING_MODIFIED_BY_ANOTHER_THREAD) {
-							unresolvable_collision_encountered = true;
-						}
+								hash_block_coordinates,
+								unresolvable_collision_encountered,
+								hash_table,
+								colliding_block_positions,
+								colliding_block_count
+						);
 					}
 				}
 			}
 		}
-		if (MarkAsNeedingAllocationIfNotFound<true>(
+		TryToMarkBlockForAllocation(
+				current_block_position,
 				hash_entry_allocation_states,
-				hash_block_coordinates, current_block_position,
-				hash_table, colliding_block_positions, colliding_block_count) == BEING_MODIFIED_BY_ANOTHER_THREAD) {
-			unresolvable_collision_encountered = true;
-		}
+				hash_block_coordinates,
+				unresolvable_collision_encountered,
+				hash_table,
+				colliding_block_positions,
+				colliding_block_count
+		);
 		check_position += strideVector;
 		previous_block_position = current_block_position;
 	}

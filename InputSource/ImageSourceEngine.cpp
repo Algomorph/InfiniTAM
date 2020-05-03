@@ -123,25 +123,25 @@ void ImageFileReader<PathGenerator>::LoadIntoCache(){
 
 	cache_is_valid = true;
 
-	std::string rgbPath = path_generator.GetRgbImagePath(current_frame_number);
-	if (!ReadImageFromFile(cached_rgb, rgbPath.c_str())){
+	std::string rgb_path = path_generator.GetRgbImagePath(current_frame_number);
+	if (!ReadImageFromFile(cached_rgb, rgb_path.c_str())){
 		if (cached_rgb.dimensions.x > 0) cache_is_valid = false;
-		printf("error reading file '%s'\n", rgbPath.c_str());
+		printf("error reading file '%s'\n", rgb_path.c_str());
 	}
 
-	std::string depthPath = path_generator.GetDepthImagePath(current_frame_number);
-	if (!ReadImageFromFile(cached_depth, depthPath.c_str())){
+	std::string depth_path = path_generator.GetDepthImagePath(current_frame_number);
+	if (!ReadImageFromFile(cached_depth, depth_path.c_str())){
 		if (cached_depth.dimensions.x > 0) cache_is_valid = false;
-		printf("error reading file '%s'\n", depthPath.c_str());
+		printf("error reading file '%s'\n", depth_path.c_str());
 	}
 
 	if ((cached_rgb.dimensions.x <= 0) && (cached_depth.dimensions.x <= 0)) cache_is_valid = false;
 
 	if(path_generator.has_mask_image_paths){
-		std::string maskPath = path_generator.GetMaskImagePath(current_frame_number);
-		if (!ReadImageFromFile(cached_mask, maskPath.c_str())){
+		std::string mask_path = path_generator.GetMaskImagePath(current_frame_number);
+		if (!ReadImageFromFile(cached_mask, mask_path.c_str())){
 			if (cached_mask.dimensions.x > 0) cache_is_valid = false;
-			printf("error reading file '%s'\n", maskPath.c_str());
+			printf("error reading file '%s'\n", mask_path.c_str());
 		}else{
 			Vector4u blackRGB((unsigned char)0);
 			cached_depth.ApplyMask(cached_mask, 0);
