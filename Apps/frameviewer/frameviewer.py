@@ -18,10 +18,21 @@ class ViewingMode(Enum):
     COLOR = 1
 
 
+class CameraProjection:
+    def __init__(self, fx, fy, cx, cy):
+        self.fx = fx
+        self.fy = fy
+        self.cx = cx
+        self.cy = cy
+
+    def project_to_camera_space(self, u, v, depth):
+        x = (u * depth - self.cx) / self.fx
+        y = (v * depth - self.cy) / self.fy
+        return x, y, depth
+
+
 class FrameViewerApp:
-    NEAR_CLIPPING_DISTANCE = 0.2
-    FAR_CLIPPING_DISTANCE = 3.0
-    CLIPPING_RANGE = FAR_CLIPPING_DISTANCE - NEAR_CLIPPING_DISTANCE
+    PROJECTION = CameraProjection(fx=517, fy=517, cx=320, cy=240)
 
     def __init__(self, frame_index_to_start_with=16):
         self.image_masks_enabled = True
@@ -40,25 +51,13 @@ class FrameViewerApp:
         self.image_mapper.SetColorWindow(255)
         self.image_mapper.SetColorLevel(127.5)
 
-        image_actor = vtk.vtkActor2D()
-        image_actor.SetMapper(self.image_mapper)
-        image_actor.SetPosition(20, 20)
+        self.image_actor = vtk.vtkActor2D()
+        self.image_actor.SetMapper(self.image_mapper)
+        self.image_actor.SetPosition(20, 20)
 
         colors = vtk.vtkNamedColors()
         window_width = 1400
         window_height = 900
-
-        self.text_mapper = vtk.vtkTextMapper()
-        self.text_mapper.SetInput("Frame: 16\n Pixel: 0, 0\nDepth: 0 m")
-        number_of_lines = 3
-        text_property = self.text_mapper.GetTextProperty()
-        font_size = 15
-        text_property.SetFontSize(font_size)
-        text_property.SetColor(colors.GetColor3d('Cyan'))
-
-        self.text_actor = vtk.vtkActor2D()
-        self.text_actor.SetMapper(self.text_mapper)
-        self.text_actor.SetDisplayPosition(30,window_height - 10 - number_of_lines * font_size)
 
         self.renderer = vtk.vtkRenderer()
         self.renderer.SetBackground(0.1, 0.1, 0.1)
@@ -66,22 +65,39 @@ class FrameViewerApp:
         self.render_window.SetSize(window_width, window_height)
         self.render_window.AddRenderer(self.renderer)
 
-        self.renderer.AddActor2D(image_actor)
+        self.renderer.AddActor2D(self.image_actor)
 
         self.frame_index = -1
         self.viewing_mode = ViewingMode.COLOR
         self.scale = 2.0
+        self._scaled_resolution = None
         self.panning = False
         self.zooming = False
+
+        self.text_mapper = vtk.vtkTextMapper()
+        self.text_mapper.SetInput("Frame: {:d} | Scale: {:f}\nPixel: 0, 0\nDepth: 0 m\nColor: 0 0 0\n3D: 0 0 0"
+                                  .format(frame_index_to_start_with, self.scale))
+        self.text_mapper.GetInput()
+        number_of_lines = len(self.text_mapper.GetInput().splitlines())
+        text_property = self.text_mapper.GetTextProperty()
+        font_size = 15
+        text_property.SetFontSize(font_size)
+        text_property.SetColor(colors.GetColor3d('Cyan'))
+
+        self.text_actor = vtk.vtkActor2D()
+        self.text_actor.SetMapper(self.text_mapper)
+        self.text_actor.SetDisplayPosition(30, window_height - 10 - number_of_lines * font_size)
+        self.renderer.AddActor(self.text_actor)
 
         self.interactor = vtk.vtkRenderWindowInteractor()
         self.interactor.SetInteractorStyle(None)
         self.interactor.SetRenderWindow(self.render_window)
         self.interactor.AddObserver("KeyPressEvent", self.keypress)
+        self.interactor.AddObserver("LeftButtonPressEvent", self.button_event)
+        self.interactor.AddObserver("LeftButtonReleaseEvent", self.button_event)
         self.interactor.AddObserver("MouseWheelForwardEvent", self.button_event)
         self.interactor.AddObserver("MouseWheelBackwardEvent", self.button_event)
-
-        self.renderer.AddActor(self.text_actor)
+        self.interactor.AddObserver("MouseMoveEvent", self.mouse_move)
 
         self.frame_index = None
         self.load_frame_images(frame_index_to_start_with)
@@ -112,9 +128,15 @@ class FrameViewerApp:
         self.render_window.Render()
 
     def update_scaled_images(self):
-        self.scaled_depth = cv2.resize(self.depth_numpy_image_uint8,
-                                       tuple((self.image_size * self.scale).astype(np.int32)))
-        self.scaled_color = cv2.resize(self.color_numpy_image, tuple((self.image_size * self.scale).astype(np.int32)))
+        self._scaled_resolution = (self.image_size * self.scale).astype(np.int32)
+        if self.scale % 1.0 == 0:
+            interpolation_mode = cv2.INTER_NEAREST
+        else:
+            interpolation_mode = cv2.INTER_LINEAR
+        self.scaled_depth = cv2.resize(self.depth_numpy_image_uint8, tuple(self._scaled_resolution),
+                                       interpolation=interpolation_mode)
+        self.scaled_color = cv2.resize(self.color_numpy_image, tuple(self._scaled_resolution),
+                                       interpolation=interpolation_mode)
         self.update_active_vtk_image(force_reset=True)
 
     def update_viewing_mode(self, viewing_mode):
@@ -141,9 +163,17 @@ class FrameViewerApp:
         self.depth_numpy_image_uint8 = image_conversion.convert_to_viewable_depth(self.depth_numpy_image)
         self.update_scaled_images()
 
-    def zoom_scale(self, factor):
-        self.scale *= pow(1.02, (1.0 * factor))
+    def zoom_scale(self, step, increment_step=False, increment=0.5):
+        x_y_pos = self.interactor.GetEventPosition()
+        x = x_y_pos[0]
+        y = x_y_pos[1]
+        if increment_step:
+            self.scale -= (self.scale % increment)
+            self.scale += (step * increment)
+        else:
+            self.scale *= pow(1.02, (1.0 * step))
         self.update_scaled_images()
+        self.report_on_mouse_location(x, y)
 
     # Handle the mouse button events.
     def button_event(self, obj, event):
@@ -156,9 +186,9 @@ class FrameViewerApp:
         elif event == "RightButtonReleaseEvent":
             self.zooming = False
         elif event == "MouseWheelForwardEvent":
-            self.zoom_scale(1)
+            self.zoom_scale(1, self.interactor.GetControlKey())
         elif event == "MouseWheelBackwardEvent":
-            self.zoom_scale(-1)
+            self.zoom_scale(-1, self.interactor.GetControlKey())
 
     def keypress(self, obj, event):
         key = obj.GetKeySym()
@@ -176,6 +206,61 @@ class FrameViewerApp:
             pass
         elif key == "Left":
             pass
+
+    def mouse_move(self, obj, event):
+        last_x_y_pos = self.interactor.GetLastEventPosition()
+        last_x = last_x_y_pos[0]
+        last_y = last_x_y_pos[1]
+
+        x_y_pos = self.interactor.GetEventPosition()
+        x = x_y_pos[0]
+        y = x_y_pos[1]
+
+        if self.panning:
+            self.pan(x, y, last_x, last_y)
+        elif self.zooming:
+            self.zoom(x, y, last_x, last_y)
+        else:
+            self.report_on_mouse_location(x, y)
+
+    def zoom(self, x, y, last_x, last_y):
+        self.scale *= pow(1.02, (0.5 * (y - last_y)))
+        self.update_scaled_images()
+
+    def pan(self, x, y, last_x, last_y):
+        point_x = x - last_x
+        point_y = y - last_y
+        image_position = self.image_actor.GetPosition()
+        self.image_actor.SetPosition(image_position[0] + point_x, image_position[1] + point_y)
+        self.render_window.Render()
+
+    def is_pixel_within_image(self, x, y):
+        image_start_x, image_start_y = self.image_actor.GetPosition()
+        image_end_x = image_start_x + self._scaled_resolution[0]
+        image_end_y = image_start_y + self._scaled_resolution[1]
+        return image_start_x < x < image_end_x and image_start_y < y < image_end_y
+
+    def get_frame_pixel(self, x, y):
+        image_start_x, image_start_y = self.image_actor.GetPosition()
+        frame_x = int((x - image_start_x) / self.scale + 0.5)
+        frame_y = self.color_numpy_image.shape[0] - int((y - image_start_y) / self.scale + 0.5)
+        return frame_x, frame_y
+
+    def update_location_text(self, u, v, depth, color):
+        camera_coords = FrameViewerApp.PROJECTION.project_to_camera_space(u, v, depth)
+        self.text_mapper.SetInput("Frame: {:d} | Scale: {:f}\nPixel: {:d}, {:d}\nDepth: {:f} m\nColor: {:d}, {:d}, "
+                                  "{:d}\nCamera: {:02.2f}, {:02.2f}, {:02.2f}"
+                                  .format(self.frame_index, self.scale, u, v, depth, color[0], color[1], color[2],
+                                          camera_coords[0], camera_coords[1], camera_coords[2]))
+        self.text_mapper.Modified()
+        self.render_window.Render()
+
+    def report_on_mouse_location(self, x, y):
+        if self.is_pixel_within_image(x, y):
+            frame_x, frame_y = self.get_frame_pixel(x, y)
+            depth = self.depth_numpy_image[frame_y, frame_x]
+            color = self.color_numpy_image[frame_y, frame_x]
+            self.update_location_text(frame_x, frame_y, depth, color)
 
 
 def main():

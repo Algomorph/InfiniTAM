@@ -656,7 +656,6 @@ set(ITMLIB_ENGINES_ANALYTICS_HEADERS
     Engines/Analytics/AnalyticsEngineInterface.h
     Engines/Analytics/AnalyticsEngine_Functors.h
     Engines/Analytics/AnalyticsLogging.h
-    Engines/Analytics/AnalyticsTelemetry.h
     )
 
 set(ITMLIB_ENGINES_ANALYTICS_SOURCES
@@ -666,21 +665,14 @@ set(ITMLIB_ENGINES_ANALYTICS_SOURCES
     Engines/Analytics/AnalyticsEngine_CUDA_PlainVoxelArray.cu
     Engines/Analytics/AnalyticsEngine_CUDA_VoxelBlockHash.cu
     Engines/Analytics/AnalyticsLogging.cpp
-    Engines/Analytics/AnalyticsTelemetry.cpp
-    )
-
-## ============================================== FILEIO ENGINES ====================================================
-
-set(ITMLIB_ENGINES_FILEIO_SOURCES
-
-    )
-
-set(ITMLIB_ENGINES_FILEIO_HEADERS
     )
 
 ## ================================================== TELEMETRY ENGINES ================================================
 
-set(ITMLIB_ENGINES_TELEMETRY_HEADERS
+set(ITMLIB_ENGINES_TELEMETRY_SOURCES
+    Engines/Telemetry/TelemetryRecorder.tpp
+    Engines/Telemetry/TelemetryRecorder_PlainVoxelArray.cpp
+    Engines/Telemetry/TelemetryRecorder_VoxelBlockHash.cpp
     #TODO: fixme
 #    Engines/Telemetry/TelemetryRecorder_PlainVoxelArray.cpp
 #    Engines/Telemetry/TelemetryRecorder_VoxelBlockHash.cpp
@@ -693,7 +685,9 @@ set(ITMLIB_ENGINES_TELEMETRY_HEADERS
 #    Engines/Telemetry/WarpFieldSequenceRecorder_PlainVoxelArray.cpp
 #    Engines/Telemetry/WarpFieldSequenceRecorder_VoxelBlockHash.cpp
     )
-set(ITMLIB_ENGINES_TELEMETRY_SOURCES
+set(ITMLIB_ENGINES_TELEMETRY_HEADERS
+    Engines/Telemetry/TelemetryRecorder.h
+    Engines/Telemetry/TelemetryRecorderFactory.h
 #    Engines/Telemetry/WriteAndReadFunctors.h
 #    Engines/Telemetry/VolumeSequenceRecorder.h
 #    Engines/Telemetry/TelemetryRecorder.h

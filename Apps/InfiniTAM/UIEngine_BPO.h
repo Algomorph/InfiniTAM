@@ -12,7 +12,7 @@
 #include "../../ITMLib/Utils/Configuration.h"
 #include "../../ORUtils/FileUtils.h"
 #include "../../ORUtils/NVTimer.h"
-#include "../../ITMLib/Engines/Telemetry/TelemetryRecorder.h"
+#include "../../ITMLib/Engines/Telemetry/TelemetryRecorderLegacy.h"
 
 //stdlib
 #include <vector>

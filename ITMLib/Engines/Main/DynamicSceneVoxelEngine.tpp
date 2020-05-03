@@ -17,6 +17,8 @@
 //stdlib
 #include <unordered_set>
 #include <vector>
+#include <filesystem>
+namespace fs = std::filesystem;
 
 //log4cplus
 #include <log4cplus/loggingmacros.h>
@@ -29,25 +31,21 @@
 #include "../ViewBuilding/ViewBuilderFactory.h"
 #include "../Visualization/VisualizationEngineFactory.h"
 #include "../VolumeFileIO/VolumeFileIOEngine.h"
-#include "../../CameraTrackers/CameraTrackerFactory.h"
-
-#include "../../../ORUtils/NVTimer.h"
-#include "../../../ORUtils/FileUtils.h"
-
-//#define OUTPUT_TRAJECTORY_QUATERNIONS
-
-#include "../../../ORUtils/FileUtils.h"
-#include "../EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
-#include "../../Utils/Logging/LoggingConfigruation.h"
-#include "../Analytics/AnalyticsEngineFactory.h"
-#include "../../Utils/Analytics/BenchmarkUtilities.h"
 #include "../VolumeFusion/VolumeFusionEngineFactory.h"
+#include "../EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
+#include "../Analytics/AnalyticsEngineFactory.h"
 #include "../DepthFusion/DepthFusionEngineFactory.h"
 #include "../Indexing/IndexingEngineFactory.h"
-#include "../../SurfaceTrackers/SurfaceTrackerFactory.h"
 #include "../Swapping/SwappingEngineFactory.h"
 #include "../Analytics/AnalyticsLogging.h"
-#include "../Analytics/AnalyticsTelemetry.h"
+#include "../Telemetry/TelemetryRecorderFactory.h"
+#include "../../CameraTrackers/CameraTrackerFactory.h"
+#include "../../SurfaceTrackers/SurfaceTrackerFactory.h"
+#include "../../Utils/Analytics/BenchmarkUtilities.h"
+#include "../../Utils/Logging/LoggingConfigruation.h"
+#include "../../../ORUtils/NVTimer.h"
+#include "../../../ORUtils/FileUtils.h"
+#include "../../../ORUtils/FileUtils.h"
 
 using namespace ITMLib;
 
@@ -68,13 +66,14 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(const RG
 				                  configuration::for_volume_role<TIndex>(configuration::VOLUME_CANONICAL)
 		                  ) : nullptr),
 		  low_level_engine(LowLevelEngineFactory::MakeLowLevelEngine(configuration::get().device_type)),
+		  telemetry_recorder(TelemetryRecorderFactory::GetDefault<TVoxel, TWarp, TIndex>(configuration::get().device_type)),
 		  view_builder(ViewBuilderFactory::Build(calibration_info, configuration::get().device_type)),
 		  visualization_engine(VisualizationEngineFactory::MakeVisualizationEngine<TVoxel, TIndex>(
 				  configuration::get().device_type)),
 		  meshing_engine(config.create_meshing_engine ? MeshingEngineFactory::Build<TVoxel, TIndex>(
 		  		configuration::get().device_type) : nullptr) {
 	logging::initialize_logging();
-	InitializePerFrameAnalyticsTelemetry(&canonical_volume_memory_usage_file);
+
 
 	this->InitializeScenes();
 
@@ -180,8 +179,6 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::~DynamicSceneVoxelEngine() {
 
 	delete view;
 	delete tracking_state;
-
-	delete canonical_volume_memory_usage_file;
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
@@ -260,6 +257,7 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ResetAll() {
 	Reset();
 }
 
+//#define OUTPUT_TRAJECTORY_QUATERNIONS
 #ifdef OUTPUT_TRAJECTORY_QUATERNIONS
 static int QuaternionFromRotationMatrix_variant(const double *matrix)
 {
@@ -360,6 +358,8 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(ITMUChar4Image* rgb
 	// surface tracking & fusion
 	if (!main_processing_active) return CameraTrackingState::TRACKING_FAILED;
 	bool fusion_succeeded = false;
+
+	auto frame_index = [this]{ return config.automatic_run_settings.index_of_frame_to_start_at + frames_processed;};
 	if ((last_tracking_result == CameraTrackingState::TRACKING_GOOD || !tracking_initialised) && (fusion_active) &&
 	    (relocalization_count == 0)) {
 		if (frames_processed > 0) {
@@ -378,7 +378,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(ITMUChar4Image* rgb
 
 			//pre-tracking recording
 			LogTSDFVolumeStatistics(live_volumes[0], "[[live TSDF before tracking]]");
-			RecordFrameMeshFromVolume(*live_volumes[0], "live_raw.ply", config.automatic_run_settings.index_of_frame_to_start_at + frames_processed);
+			telemetry_recorder.RecordPreTrackingData(*live_volumes[0], frame_index());
 
 			benchmarking::start_timer("TrackMotion");
 			LOG4CPLUS_PER_FRAME(logging::get_logger(), bright_cyan
@@ -391,7 +391,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(ITMUChar4Image* rgb
 
 			//post-tracking recording
 			LogTSDFVolumeStatistics(target_warped_live_volume, "[[live TSDF after tracking]]");
-			RecordFrameMeshFromVolume(*target_warped_live_volume, "live_warped.ply", config.automatic_run_settings.index_of_frame_to_start_at + frames_processed);
+			telemetry_recorder.RecordPostTrackingData(*target_warped_live_volume, frame_index());
 
 			//fuse warped live into canonical
 			benchmarking::start_timer("FuseOneTsdfVolumeIntoAnother");
@@ -400,8 +400,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(ITMUChar4Image* rgb
 			LogTSDFVolumeStatistics(canonical_volume, "[[canonical TSDF after fusion]]");
 
 			//post-fusion recording
-			RecordVolumeMemoryUsageInfo(*canonical_volume_memory_usage_file, *canonical_volume);
-			RecordFrameMeshFromVolume(*canonical_volume, "canonical.ply", config.automatic_run_settings.index_of_frame_to_start_at + frames_processed);
+			telemetry_recorder.RecordPostFusionData(*canonical_volume, frame_index());
 		} else {
 			LOG4CPLUS_PER_FRAME(logging::get_logger(),
 			                    bright_cyan << "Generating raw live frame from view..." << reset);
@@ -411,8 +410,8 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(ITMUChar4Image* rgb
 			benchmarking::stop_timer("GenerateRawLiveVolume");
 
 			//post-tracking recording
-			RecordFrameMeshFromVolume(*live_volumes[0], "live_raw.ply", config.automatic_run_settings.index_of_frame_to_start_at + frames_processed);
-			RecordFrameMeshFromVolume(*live_volumes[0], "live_warped.ply", config.automatic_run_settings.index_of_frame_to_start_at + frames_processed);
+			telemetry_recorder.RecordPreTrackingData(*live_volumes[0], frame_index());
+			telemetry_recorder.RecordPostTrackingData(*live_volumes[0], frame_index());
 
 			//** prepare canonical for new frame
 			LOG4CPLUS_PER_FRAME(logging::get_logger(),
@@ -424,8 +423,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(ITMUChar4Image* rgb
 			benchmarking::stop_timer("FuseOneTsdfVolumeIntoAnother");
 
 			//post-fusion recording
-			RecordVolumeMemoryUsageInfo(*canonical_volume_memory_usage_file, *canonical_volume);
-			RecordFrameMeshFromVolume(*canonical_volume, "canonical.ply", config.automatic_run_settings.index_of_frame_to_start_at + frames_processed);
+			telemetry_recorder.RecordPostFusionData(*canonical_volume, frame_index());
 		}
 		fusion_succeeded = true;
 		if (frames_processed > 50) tracking_initialised = true;

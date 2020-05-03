@@ -25,7 +25,7 @@
 
 //local
 #include "SceneSliceVisualizer3DInteractorStyle.h"
-#include "../../Engines/Telemetry/TelemetryRecorder.h"
+#include "../../Engines/Telemetry/TelemetryRecorderLegacy.h"
 
 using namespace ITMLib;
 

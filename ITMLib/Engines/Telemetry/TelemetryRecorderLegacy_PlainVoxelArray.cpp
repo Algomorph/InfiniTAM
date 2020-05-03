@@ -15,11 +15,9 @@
 //  ================================================================
 
 #include "../../GlobalTemplateDefines.h"
-#include "TelemetryRecorder.tpp"
+#include "TelemetryRecorderLegacy.tpp"
 
 namespace ITMLib {
 template
-class TelemetryRecorder<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU>;
-template
-class TelemetryRecorder<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA>;
+class TelemetryRecorder<TSDFVoxel, WarpVoxel, PlainVoxelArray>;
 } // namespace ITMLib

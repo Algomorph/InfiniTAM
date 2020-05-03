@@ -174,7 +174,7 @@ class VisualizerApp:
         elif self.panning:
             self.pan(x, y, last_x, last_y, center_x, center_y)
         elif self.zooming:
-            self.dolly(x, y, last_x, last_y, center_x, center_y)
+            self.dolly(x, y, last_x, last_y)
 
     def rotate(self, x, y, last_x, last_y):
         speed = 0.5
@@ -183,7 +183,7 @@ class VisualizerApp:
         self.camera.SetViewUp(0, 0, 0)
         self.render_window.Render()
 
-    def pan(self, x, y, lastX, lastY, centerX, centerY):
+    def pan(self, x, y, last_x, last_y, center_x, center_y):
         renderer = self.renderer
         camera = self.camera
         f_point = camera.GetFocalPoint()
@@ -201,8 +201,8 @@ class VisualizerApp:
         d_point = renderer.GetDisplayPoint()
         focal_depth = d_point[2]
 
-        a_point0 = centerX + (x - lastX)
-        a_point1 = centerY + (y - lastY)
+        a_point0 = center_x + (x - last_x)
+        a_point1 = center_y + (y - last_y)
 
         renderer.SetDisplayPoint(a_point0, a_point1, focal_depth)
         renderer.DisplayToWorld()
@@ -225,8 +225,8 @@ class VisualizerApp:
                            (f_point2 - r_point2) / 2.0 + p_point2)
         self.render_window.Render()
 
-    def dolly(self, x, y, lastX, lastY, centerX, centerY):
-        dolly_factor = pow(1.02, (0.5 * (y - lastY)))
+    def dolly(self, x, y, last_x, last_y):
+        dolly_factor = pow(1.02, (0.5 * (y - last_y)))
         camera = self.camera
         if camera.GetParallelProjection():
             parallel_scale = camera.GetParallelScale() * dolly_factor

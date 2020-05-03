@@ -19,5 +19,7 @@
 
 namespace ITMLib {
 template
-class TelemetryRecorder<TSDFVoxel, WarpVoxel, VoxelBlockHash>;
-}
+class TelemetryRecorder<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>;
+template
+class TelemetryRecorder<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>;
+} // namespace ITMLib

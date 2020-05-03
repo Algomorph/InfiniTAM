@@ -33,7 +33,7 @@
 
 #include "../../ITMLib/Utils/Analytics/BenchmarkUtilities.h"
 #include "../../ITMLib/Utils/Logging/LoggingConfigruation.h"
-#include "../../ITMLib/Engines/Telemetry/TelemetryRecorder.h"
+#include "../../ITMLib/Engines/Telemetry/TelemetryRecorderLegacy.h"
 
 #ifdef WITH_OPENCV
 #include <opencv2/imgcodecs.hpp>

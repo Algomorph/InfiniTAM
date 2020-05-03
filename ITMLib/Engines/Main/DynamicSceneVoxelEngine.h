@@ -29,10 +29,11 @@
 #include "../DepthFusion/DepthFusionEngine.h"
 #include "../VolumeFusion/VolumeFusionEngine.h"
 #include "../Swapping/Interface/SwappingEngine.h"
+#include "../Telemetry/TelemetryRecorder.h"
 #include "../../Objects/Misc/IMUCalibrator.h"
-#include "../../../FernRelocLib/Relocaliser.h"
 #include "../../CameraTrackers/Interface/CameraTracker.h"
 #include "../../SurfaceTrackers/Interface/SurfaceTracker.h"
+#include "../../../FernRelocLib/Relocaliser.h"
 
 
 namespace ITMLib {
@@ -56,6 +57,7 @@ private: // member variables
 	VolumeFusionEngineInterface<TVoxel, TIndex>* volume_fusion_engine;
 	SwappingEngine<TVoxel, TIndex>* swapping_engine;
 
+	TelemetryRecorderInterface<TVoxel, TWarp, TIndex>& telemetry_recorder;
 	ViewBuilder* view_builder;
 	CameraTrackingController* camera_tracking_controller;
 
@@ -82,9 +84,6 @@ private: // member variables
 	CameraTrackingState::TrackingResult last_tracking_result;
 	ORUtils::SE3Pose previous_frame_pose;
 
-
-	//TODO: revise TelemetryRecorder and add to that
-	ORUtils::OStreamWrapper* canonical_volume_memory_usage_file = nullptr;
 public: // member functions
 
 	DynamicSceneVoxelEngine(const RGBDCalib& calibration_info, Vector2i rgb_image_size, Vector2i depth_image_size);
