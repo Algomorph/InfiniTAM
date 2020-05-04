@@ -119,7 +119,7 @@ DECLARE_SERIALIZABLE_STRUCT(PATHS_STRUCT_DESCRIPTION);
 #define TELEMETRY_SETTINGS_STRUCT_DESCRIPTION TelemetrySettings, \
     (Vector3i, focus_coordinates, Vector3i(0), VECTOR, \
     "Focus 3d coordinates (integer) that specify the voxel to print additional diagnostic information about (and " \
-	"where to focus telemetry information records). "\
+    "where to focus telemetry information records). "\
     "Only effective when verbosity_level is set to focus_spots (alt. VERBOSITY_FOCUS_SPOTS) or above."), \
     (bool, record_reconstruction_video, false, PRIMITIVE, \
             "Whether to record video of the canonical reconsturction during automatic run "\
@@ -130,11 +130,12 @@ DECLARE_SERIALIZABLE_STRUCT(PATHS_STRUCT_DESCRIPTION);
     (bool, log_benchmarks, false, PRIMITIVE, "Whether to log runtime benchmarks after automatic run."),\
     (bool, log_volume_statistics, false, PRIMITIVE, "Whether to output various volume statistics after some operations" \
     " (used only when verbosity_level is set at or above PER_FRAME)."),\
+    (bool, log_trajectory_quaternions, false, PRIMITIVE, "Whether to log estimated camera trajectory quaternions"),\
     (bool, record_volume_memory_usage, false, PRIMITIVE, "Whether to record information required to debug memory" \
     " usage, e.g. used block locations for the VoxelBlockHash index."), \
     (bool, record_live_volume_as_2D_slices, false, PRIMITIVE, "Whether to record 2D slices (images, with pixel " \
     "representing TSDF value) of the live volume once per frame before the beginning of the surface tracking optimization."), \
-	(bool, record_canonical_volume_as_2D_slices, false, PRIMITIVE, "Whether to record 2D slices (images, with pixel " \
+    (bool, record_canonical_volume_as_2D_slices, false, PRIMITIVE, "Whether to record 2D slices (images, with pixel " \
     "representing TSDF value) of the canonical volume once per frame before the beginning of the surface tracking optimization."), \
     (bool, record_live_focus_point_TSDF_graph, false, PRIMITIVE, "Whether to record graphs of SDF value of a single " \
     "voxel plotted against iteration number of the surface tracking optimization."), \
@@ -151,12 +152,14 @@ DECLARE_SERIALIZABLE_STRUCT(PATHS_STRUCT_DESCRIPTION);
     (bool, record_focus_neighborhood_warp_sequence, false, PRIMITIVE, "Whether to record a sequence of warp " \
     "vectors in the immediate neighborhood of the focus_coordinates (see focus_coordinates parameter) over " \
     "the course of the entire surface tracking optimization. [WITH_VTK compilation required!]"), \
-	(bool, log_surface_tracking_optimization_energies, false, PRIMITIVE, "Whether to log optimization energies " \
-	"for each iteration of the surface tracking optimization. Only works when non_rigid_tracking_parameters.functor_type " \
-	"parameter is set to \"slavcheva_diagnostic\""), \
-	(bool, record_frame_meshes, false, PRIMITIVE, "Whether to log three meshes at every frame: (a) from live volume " \
-	"after camera tracking and before surface tracking, (b) from live volume after surface tracking, and (c) from " \
-	"canonical volume after fusion.")
+    (bool, log_surface_tracking_optimization_energies, false, PRIMITIVE, "Whether to log optimization energies " \
+    "for each iteration of the surface tracking optimization. Only works when non_rigid_tracking_parameters.functor_type " \
+    "parameter is set to \"slavcheva_diagnostic\""), \
+    (bool, record_frame_meshes, false, PRIMITIVE, "Whether to log three meshes at every frame: (a) from live volume " \
+    "after camera tracking and before surface tracking, (b) from live volume after surface tracking, and (c) from " \
+    "canonical volume after fusion."), \
+    (bool, use_CPU_for_mesh_recording, false, PRIMITIVE, "Whether to use CPU & regular RAM when recording mesh telemetry. Will reduce GPU memory usage."), \
+	(bool, record_camera_matrices, false, PRIMITIVE, "Whether to record estimated camera trajectory matrices in world space.")
 
 
 DECLARE_SERIALIZABLE_STRUCT(TELEMETRY_SETTINGS_STRUCT_DESCRIPTION);

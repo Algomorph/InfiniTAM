@@ -21,29 +21,6 @@
 
 namespace ITMLib {
 
-/*
-  const CONSTPTR(int) voxel_block_count;
-  const CONSTPTR(int) excess_list_size;
-  const CONSTPTR(int) hash_entry_count;
-  const CONSTPTR(int) voxel_block_size = VOXEL_BLOCK_SIZE3;
-
-private:
-	int last_free_block_list_id;
-	int last_free_excess_list_id;
-	int utilized_hash_block_count;
-	int visible_hash_block_count;
-
-
-ORUtils::MemoryBlock<HashEntry> hash_entries;
-ORUtils::MemoryBlock<HashEntryAllocationState> hash_entry_allocation_states;
-ORUtils::MemoryBlock<Vector3s> allocation_block_coordinates;
-ORUtils::MemoryBlock<int> block_allocation_list;
-ORUtils::MemoryBlock<int> excess_entry_list;
-ORUtils::MemoryBlock<int> visible_block_hash_codes;
-ORUtils::MemoryBlock<int> utilized_block_hash_codes;
-ORUtils::MemoryBlock<HashBlockVisibility> block_visibility_types;
- */
-
 VoxelBlockHash::VoxelBlockHash()
 		: memory_type(MEMORYDEVICE_NONE),
 		  voxel_block_count(0),

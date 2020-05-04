@@ -22,17 +22,29 @@ using namespace ITMLib;
 
 template<class TVoxel>
 Mesh MeshingEngine_CPU<TVoxel, VoxelBlockHash>::MeshVolume(const VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
+	bool temporary_volume_used = false;
 
-	const int utilized_block_count = volume->index.GetUtilizedBlockCount();
+	const VoxelVolume<TVoxel, VoxelBlockHash>* meshing_target_volume;
+	VoxelVolume<TVoxel, VoxelBlockHash>* temporary_volume;
+
+	if (volume->GetMemoryType() == MEMORYDEVICE_CUDA) {
+		temporary_volume_used = true;
+		temporary_volume = new VoxelVolume<TVoxel, VoxelBlockHash>(*volume, MEMORYDEVICE_CPU);
+		meshing_target_volume = temporary_volume;
+	} else {
+		meshing_target_volume = volume;
+	}
+
+	const int utilized_block_count = meshing_target_volume->index.GetUtilizedBlockCount();
 	const int max_triangle_count = utilized_block_count * VOXEL_BLOCK_SIZE3;
-	const float voxel_size = volume->GetParameters().voxel_size;
+	const float voxel_size = meshing_target_volume->GetParameters().voxel_size;
 
 	ORUtils::MemoryBlock<Mesh::Triangle> triangles(max_triangle_count, MEMORYDEVICE_CPU);
 	Mesh::Triangle* triangles_device = triangles.GetData(MEMORYDEVICE_CPU);
-	const TVoxel* voxels = volume->GetVoxels();
-	const HashEntry* hash_table = volume->index.GetEntries();
+	const TVoxel* voxels = meshing_target_volume->GetVoxels();
+	const HashEntry* hash_table = meshing_target_volume->index.GetEntries();
 
-	const int* utilized_block_indices = volume->index.GetUtilizedBlockHashCodes();
+	const int* utilized_block_indices = meshing_target_volume->index.GetUtilizedBlockHashCodes();
 
 	std::atomic<unsigned int> triangle_count(0);
 
@@ -46,8 +58,8 @@ Mesh MeshingEngine_CPU<TVoxel, VoxelBlockHash>::MeshVolume(const VoxelVolume<TVo
 		//position of the voxel at the current hash block corner with minimum coordinates
 		Vector3i block_corner_position = hash_entry.pos.toInt() * VOXEL_BLOCK_SIZE;
 
-		for (int z = 0; z < VOXEL_BLOCK_SIZE; z++){
-			for (int y = 0; y < VOXEL_BLOCK_SIZE; y++){
+		for (int z = 0; z < VOXEL_BLOCK_SIZE; z++) {
+			for (int y = 0; y < VOXEL_BLOCK_SIZE; y++) {
 				for (int x = 0; x < VOXEL_BLOCK_SIZE; x++) {
 					Vector3f vertex_list[12];
 					// build vertices by interpolating edges of cubes that intersect with the isosurface
@@ -62,14 +74,20 @@ Mesh MeshingEngine_CPU<TVoxel, VoxelBlockHash>::MeshVolume(const VoxelVolume<TVo
 						unsigned int current_triangle_count = atomicAdd_CPU(triangle_count, 1u);
 						// cube index also tells us how the vertices are grouped into triangles,
 						// use it to look up the vertex indices composing each triangle from the vertex list
-						triangles_device[current_triangle_count].p0 = vertex_list[triangle_table[cube_index][i_vertex]] * voxel_size;
-						triangles_device[current_triangle_count].p1 = vertex_list[triangle_table[cube_index][i_vertex + 1]] * voxel_size;
-						triangles_device[current_triangle_count].p2 = vertex_list[triangle_table[cube_index][i_vertex + 2]] * voxel_size;
+						triangles_device[current_triangle_count].p0 =
+								vertex_list[triangle_table[cube_index][i_vertex]] * voxel_size;
+						triangles_device[current_triangle_count].p1 =
+								vertex_list[triangle_table[cube_index][i_vertex + 1]] * voxel_size;
+						triangles_device[current_triangle_count].p2 =
+								vertex_list[triangle_table[cube_index][i_vertex + 2]] * voxel_size;
 					}
 				}
 			}
 		}
 	}
 
+	if (temporary_volume_used) {
+		delete temporary_volume;
+	}
 	return Mesh(triangles, triangle_count.load());
 }

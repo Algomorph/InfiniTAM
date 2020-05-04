@@ -23,8 +23,8 @@ template<typename TVoxel, typename TWarp, typename TIndex>
 class TelemetryRecorderInterface {
 public:
 	virtual ~TelemetryRecorderInterface() = default;
-	virtual void RecordPreTrackingData(const VoxelVolume <TVoxel, TIndex>& raw_live_volume, int frame_index) = 0;
-	virtual void RecordPostTrackingData(const VoxelVolume <TVoxel, TIndex>& warped_live_volume, int frame_index) = 0;
+	virtual void RecordPreSurfaceTrackingData(const VoxelVolume <TVoxel, TIndex>& raw_live_volume, const Matrix4f camera_matrix, int frame_index) = 0;
+	virtual void RecordPostSurfaceTrackingData(const VoxelVolume <TVoxel, TIndex>& warped_live_volume, int frame_index) = 0;
 	virtual void RecordPostFusionData(const VoxelVolume <TVoxel, TIndex>& canonical_volume, int frame_index) = 0;
 };
 
@@ -33,6 +33,7 @@ class TelemetryRecorder : public TelemetryRecorderInterface<TVoxel, TWarp, TInde
 
 private: // member variables
 	ORUtils::OStreamWrapper canonical_volume_memory_usage_file;
+	ORUtils::OStreamWrapper camera_trajectory_file;
 public: // member functions
 	static TelemetryRecorder& GetDefaultInstance() {
 		static TelemetryRecorder instance;
@@ -40,13 +41,13 @@ public: // member functions
 	}
 
 	TelemetryRecorder();
-	void RecordPreTrackingData(const VoxelVolume <TVoxel, TIndex>& raw_live_volume, int frame_index) override;
-	void RecordPostTrackingData(const VoxelVolume <TVoxel, TIndex>& warped_live_volume, int frame_index) override;
+	void RecordPreSurfaceTrackingData(const VoxelVolume <TVoxel, TIndex>& raw_live_volume, const Matrix4f camera_matrix, int frame_index) override;
+	void RecordPostSurfaceTrackingData(const VoxelVolume <TVoxel, TIndex>& warped_live_volume, int frame_index) override;
 	void RecordPostFusionData(const VoxelVolume <TVoxel, TIndex>& canonical_volume, int frame_index) override;
 private: // member functions
 	void RecordVolumeMemoryUsageInfo(const VoxelVolume <TVoxel, TIndex>& canonical_volume);
-	void
-	RecordFrameMeshFromVolume(const VoxelVolume <TVoxel, TIndex>& volume, const std::string& filename, int frame_index);
+	void RecordFrameMeshFromVolume(const VoxelVolume <TVoxel, TIndex>& volume, const std::string& filename, int frame_index);
+	void RecordCameraPose(const Matrix4f& camera_pose);
 };
 
 

@@ -25,7 +25,6 @@ namespace fs = std::filesystem;
 
 // local
 #include "DynamicSceneVoxelEngine.h"
-
 #include "../LowLevel/LowLevelEngineFactory.h"
 #include "../Meshing/MeshingEngineFactory.h"
 #include "../ViewBuilding/ViewBuilderFactory.h"
@@ -43,6 +42,7 @@ namespace fs = std::filesystem;
 #include "../../SurfaceTrackers/SurfaceTrackerFactory.h"
 #include "../../Utils/Analytics/BenchmarkUtilities.h"
 #include "../../Utils/Logging/LoggingConfigruation.h"
+#include "../../Utils/Quaternions.h"
 #include "../../../ORUtils/NVTimer.h"
 #include "../../../ORUtils/FileUtils.h"
 #include "../../../ORUtils/FileUtils.h"
@@ -257,81 +257,6 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ResetAll() {
 	Reset();
 }
 
-//#define OUTPUT_TRAJECTORY_QUATERNIONS
-#ifdef OUTPUT_TRAJECTORY_QUATERNIONS
-static int QuaternionFromRotationMatrix_variant(const double *matrix)
-{
-	int variant = 0;
-	if
-		((matrix[4]>-matrix[8]) && (matrix[0]>-matrix[4]) && (matrix[0]>-matrix[8]))
-	{
-		variant = 0;
-	}
-	else if ((matrix[4]<-matrix[8]) && (matrix[0]>
-		matrix[4]) && (matrix[0]> matrix[8])) {
-		variant = 1;
-	}
-	else if ((matrix[4]> matrix[8]) && (matrix[0]<
-		matrix[4]) && (matrix[0]<-matrix[8])) {
-		variant = 2;
-	}
-	else if ((matrix[4]<
-		matrix[8]) && (matrix[0]<-matrix[4]) && (matrix[0]< matrix[8])) {
-		variant = 3;
-	}
-	return variant;
-}
-
-static void QuaternionFromRotationMatrix(const double *matrix, double *q) {
-	/* taken from "James Diebel. Representing Attitude: Euler
-	Angles, Quaternions, and Rotation Vectors. Technical Report, Stanford
-	University, Palo Alto, CA."
-	*/
-
-	// choose the numerically best variant...
-	int variant = QuaternionFromRotationMatrix_variant(matrix);
-	double denom = 1.0;
-	if (variant == 0) {
-		denom += matrix[0] + matrix[4] + matrix[8];
-	}
-	else {
-		int tmp = variant * 4;
-		denom += matrix[tmp - 4];
-		denom -= matrix[tmp % 12];
-		denom -= matrix[(tmp + 4) % 12];
-	}
-	denom = sqrt(denom);
-	q[variant] = 0.5*denom;
-
-	denom *= 2.0;
-	switch (variant) {
-	case 0:
-		q[1] = (matrix[5] - matrix[7]) / denom;
-		q[2] = (matrix[6] - matrix[2]) / denom;
-		q[3] = (matrix[1] - matrix[3]) / denom;
-		break;
-	case 1:
-		q[0] = (matrix[5] - matrix[7]) / denom;
-		q[2] = (matrix[1] + matrix[3]) / denom;
-		q[3] = (matrix[6] + matrix[2]) / denom;
-		break;
-	case 2:
-		q[0] = (matrix[6] - matrix[2]) / denom;
-		q[1] = (matrix[1] + matrix[3]) / denom;
-		q[3] = (matrix[5] + matrix[7]) / denom;
-		break;
-	case 3:
-		q[0] = (matrix[1] - matrix[3]) / denom;
-		q[1] = (matrix[6] + matrix[2]) / denom;
-		q[2] = (matrix[5] + matrix[7]) / denom;
-		break;
-	}
-
-	if (q[0] < 0.0f) for (int i = 0; i < 4; ++i) q[i] *= -1.0f;
-}
-#endif
-
-
 template<typename TVoxel, typename TWarp, typename TIndex>
 CameraTrackingState::TrackingResult
 DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(ITMUChar4Image* rgb_image,
@@ -378,7 +303,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(ITMUChar4Image* rgb
 
 			//pre-tracking recording
 			LogTSDFVolumeStatistics(live_volumes[0], "[[live TSDF before tracking]]");
-			telemetry_recorder.RecordPreTrackingData(*live_volumes[0], frame_index());
+			telemetry_recorder.RecordPreSurfaceTrackingData(*live_volumes[0], tracking_state->pose_d->GetM(), frame_index());
 
 			benchmarking::start_timer("TrackMotion");
 			LOG4CPLUS_PER_FRAME(logging::get_logger(), bright_cyan
@@ -391,7 +316,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(ITMUChar4Image* rgb
 
 			//post-tracking recording
 			LogTSDFVolumeStatistics(target_warped_live_volume, "[[live TSDF after tracking]]");
-			telemetry_recorder.RecordPostTrackingData(*target_warped_live_volume, frame_index());
+			telemetry_recorder.RecordPostSurfaceTrackingData(*target_warped_live_volume, frame_index());
 
 			//fuse warped live into canonical
 			benchmarking::start_timer("FuseOneTsdfVolumeIntoAnother");
@@ -410,8 +335,8 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(ITMUChar4Image* rgb
 			benchmarking::stop_timer("GenerateRawLiveVolume");
 
 			//post-tracking recording
-			telemetry_recorder.RecordPreTrackingData(*live_volumes[0], frame_index());
-			telemetry_recorder.RecordPostTrackingData(*live_volumes[0], frame_index());
+			telemetry_recorder.RecordPreSurfaceTrackingData(*live_volumes[0], tracking_state->pose_d->GetM(), frame_index());
+			telemetry_recorder.RecordPostSurfaceTrackingData(*live_volumes[0], frame_index());
 
 			//** prepare canonical for new frame
 			LOG4CPLUS_PER_FRAME(logging::get_logger(),
@@ -441,17 +366,9 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(ITMUChar4Image* rgb
 		                                    canonical_render_state);
 	} else *tracking_state->pose_d = previous_frame_pose;
 
-#ifdef OUTPUT_TRAJECTORY_QUATERNIONS
-	const ORUtils::SE3Pose *p = trackingState->pose_d;
-	double t[3];
-	double R[9];
-	double q[4];
-	for (int i = 0; i < 3; ++i) t[i] = p->GetInvM().m[3 * 4 + i];
-	for (int r = 0; r < 3; ++r) for (int c = 0; c < 3; ++c)
-		R[r * 3 + c] = p->GetM().m[c * 4 + r];
-	QuaternionFromRotationMatrix(R, q);
-	fprintf(stderr, "%f %f %f %f %f %f %f\n", t[0], t[1], t[2], q[1], q[2], q[3], q[0]);
-#endif
+
+	LogCameraTrajectoryQuaternion(tracking_state->pose_d);
+
 	return last_tracking_result;
 }
 
@@ -539,6 +456,8 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(ITMUChar4Image* ou
 				case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_CONFIDENCE:
 					render_type = IVisualizationEngine::RENDER_COLOUR_FROM_CONFIDENCE;
 					break;
+				default:
+					assert(false);
 			}
 
 			if (freeview_render_state == nullptr) {

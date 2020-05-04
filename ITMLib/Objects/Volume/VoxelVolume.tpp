@@ -135,5 +135,10 @@ void VoxelVolume<TVoxel, TIndex>::LoadVoxels(ORUtils::IStreamWrapper& file) {
 	ORUtils::MemoryBlockPersister::LoadMemoryBlock(file, voxels, this->index.memory_type);
 }
 
+template<class TVoxel, class TIndex>
+MemoryDeviceType VoxelVolume<TVoxel, TIndex>::GetMemoryType() const {
+	return index.memory_type;
+}
+
 
 }  // namespace ITMLib

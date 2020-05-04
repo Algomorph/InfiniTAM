@@ -927,6 +927,7 @@ set(ITMLIB_UTILS_SOURCES
     Utils/CPPPrintHelpers.cpp
 
     Utils/Math.cpp
+    Utils/Quaternions.cpp
     )
 
 set(ITMLIB_UTILS_HEADERS
@@ -969,6 +970,7 @@ set(ITMLIB_UTILS_HEADERS
     Utils/MemoryBlockTypes.h
     Utils/PixelUtils.h
     Utils/ProjectionUtils.h
+    Utils/Quaternions.h
     Utils/VoxelVolumeParameters.h
     Utils/SurfelVolumeParameters.h
     Utils/CPPPrintHelpers.h

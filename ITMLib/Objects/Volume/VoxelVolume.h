@@ -62,6 +62,7 @@ public:
 		Vector3i pos(x, y, z);
 		return GetValueAt(pos);
 	}
+	MemoryDeviceType GetMemoryType() const;
 
 	/**
 	 * @return Whether this scene is using swapping mechanism or not.

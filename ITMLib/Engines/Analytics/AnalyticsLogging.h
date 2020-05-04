@@ -29,6 +29,7 @@
 #include "AnalyticsEngineFactory.h"
 #include "../../Utils/Collections/OperationsOnSTLContainers.h"
 #include "../../Utils/CPPPrintHelpers.h"
+#include "../../../ORUtils/SE3Pose.h"
 
 namespace ITMLib {
 
@@ -140,13 +141,16 @@ void LogTSDFVolumeStatistics(VoxelVolume<TVoxel, TIndex>* volume, std::string vo
 		}
 #endif
 	}
-};
+}
+
 
 extern template void LogTSDFVolumeStatistics<TSDFVoxel, VoxelBlockHash>(VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume,
                                                                         std::string volume_description);
 extern template void
 LogTSDFVolumeStatistics<TSDFVoxel, PlainVoxelArray>(VoxelVolume<TSDFVoxel, PlainVoxelArray>* volume,
                                                     std::string volume_description);
+
+void LogCameraTrajectoryQuaternion(const ORUtils::SE3Pose* p);
 
 
 } // namespace ITMLib
