@@ -55,8 +55,8 @@ template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMem
 void TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::RecordCameraPose(const Matrix4f& camera_pose) {
 	if (configuration::get().telemetry_settings.record_camera_matrices) {
 		for (int i_value = 0; i_value < 16; i_value++) {
-			camera_trajectory_file.OStream().write(reinterpret_cast<const char*>(camera_pose.getValues() + i_value),
-			                                       sizeof(float));
+			float value = camera_pose.getValues()[i_value];
+			camera_trajectory_file.OStream().write(reinterpret_cast<const char*>(&value),sizeof(float));
 		}
 	}
 }

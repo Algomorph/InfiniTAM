@@ -7,7 +7,7 @@ import cv2
 import vtk
 import numpy as np
 
-from Apps.frameviewer import frameloading, image_conversion
+from Apps.frameviewer import frameloading, image_conversion, trajectoryloading
 
 PROGRAM_EXIT_SUCCESS = 0
 PROGRAM_EXIT_FAILURE = -1
@@ -34,7 +34,11 @@ class CameraProjection:
 class FrameViewerApp:
     PROJECTION = CameraProjection(fx=517, fy=517, cx=320, cy=240)
 
-    def __init__(self, frame_index_to_start_with=16):
+    def __init__(self, output_folder, frame_index_to_start_with):
+        self.start_frame_index = frame_index_to_start_with
+        self.inverse_camera_matrices = trajectoryloading.load_inverse_matrices(output_folder)
+        self.current_camera_matrix = None if len(self.inverse_camera_matrices) == 0 else self.inverse_camera_matrices[0]
+
         self.image_masks_enabled = True
 
         self.color_numpy_image = None
@@ -75,7 +79,8 @@ class FrameViewerApp:
         self.zooming = False
 
         self.text_mapper = vtk.vtkTextMapper()
-        self.text_mapper.SetInput("Frame: {:d} | Scale: {:f}\nPixel: 0, 0\nDepth: 0 m\nColor: 0 0 0\n3D: 0 0 0"
+        self.text_mapper.SetInput("Frame: {:d} | Scale: {:f}\nPixel: 0, 0\nDepth: 0 m\nColor: 0 0 0\n"
+                                  "Camera-space: 0 0 0\nWorld-space: 0 0 0"
                                   .format(frame_index_to_start_with, self.scale))
         self.text_mapper.GetInput()
         number_of_lines = len(self.text_mapper.GetInput().splitlines())
@@ -100,7 +105,7 @@ class FrameViewerApp:
         self.interactor.AddObserver("MouseMoveEvent", self.mouse_move)
 
         self.frame_index = None
-        self.load_frame_images(frame_index_to_start_with)
+        self.set_frame(frame_index_to_start_with)
 
     def launch(self):
         self.interactor.Initialize()
@@ -148,8 +153,11 @@ class FrameViewerApp:
             self.viewing_mode = viewing_mode
             self.update_active_vtk_image()
 
-    def load_frame_images(self, frame_index):
+    def set_frame(self, frame_index):
         print("Frame:", frame_index)
+        self.current_camera_matrix = None if len(self.inverse_camera_matrices) <= frame_index \
+            else self.inverse_camera_matrices[frame_index-self.start_frame_index]
+
         self.frame_index = frame_index
         self.color_numpy_image = frameloading.load_color_numpy_image(frame_index)
         self.depth_numpy_image = frameloading.load_depth_numpy_image(frame_index)
@@ -197,9 +205,9 @@ class FrameViewerApp:
             obj.InvokeEvent("DeleteAllObjects")
             sys.exit()
         elif key == "bracketright":
-            self.load_frame_images(self.frame_index + 1)
+            self.set_frame(self.frame_index + 1)
         elif key == "bracketleft":
-            self.load_frame_images(self.frame_index - 1)
+            self.set_frame(self.frame_index - 1)
         elif key == "c":
             pass
         elif key == "Right":
@@ -248,10 +256,16 @@ class FrameViewerApp:
 
     def update_location_text(self, u, v, depth, color):
         camera_coords = FrameViewerApp.PROJECTION.project_to_camera_space(u, v, depth)
-        self.text_mapper.SetInput("Frame: {:d} | Scale: {:f}\nPixel: {:d}, {:d}\nDepth: {:f} m\nColor: {:d}, {:d}, "
-                                  "{:d}\nCamera: {:02.2f}, {:02.2f}, {:02.2f}"
-                                  .format(self.frame_index, self.scale, u, v, depth, color[0], color[1], color[2],
-                                          camera_coords[0], camera_coords[1], camera_coords[2]))
+        camera_coords_homogenized = np.array((camera_coords[0], camera_coords[1], camera_coords[2], 1.0)).T
+        world_coords = self.current_camera_matrix.dot(camera_coords_homogenized)
+        # world_coords /= world_coords[3]
+        # print(self.current_camera_matrix)
+        self.text_mapper.SetInput(
+            "Frame: {:d} | Scale: {:f}\nPixel: {:d}, {:d}\nDepth: {:f} m\nColor: {:d}, {:d}, {:d}\n"
+            "Camera-space: {:02.4f}, {:02.4f}, {:02.4f}\nWorld-space: {:02.4f}, {:02.4f}, {:02.4f}"
+            .format(self.frame_index, self.scale, u, v, depth, color[0], color[1], color[2],
+                    camera_coords[0], camera_coords[1], camera_coords[2],
+                    world_coords[0], world_coords[1], world_coords[2]))
         self.text_mapper.Modified()
         self.render_window.Render()
 
@@ -264,7 +278,7 @@ class FrameViewerApp:
 
 
 def main():
-    app = FrameViewerApp()
+    app = FrameViewerApp("/mnt/Data/Reconstruction/experiment_output/2020-05-04/recording", 16)
     app.launch()
 
     return PROGRAM_EXIT_SUCCESS
