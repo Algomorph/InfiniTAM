@@ -86,7 +86,7 @@ class VisualizerApp:
         self.show_mesh_at_index(0)
 
     def load_frame_meshes(self, i_frame):
-        base_path = "/mnt/Data/Reconstruction/experiment_output/2020-04-28/full_run"
+        base_path = "/mnt/Data/Reconstruction/experiment_output/2020-05-04/recording"
         frame_path = os.path.join(base_path, "Frame_{:02}".format(i_frame + 16))
         canonical_path = os.path.join(frame_path, "canonical.ply")
         raw_live_path = os.path.join(frame_path, "live_raw.ply")

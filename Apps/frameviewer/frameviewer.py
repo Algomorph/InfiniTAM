@@ -109,13 +109,13 @@ class FrameViewerApp:
         self.text_mapper.GetInput()
         number_of_lines = len(self.text_mapper.GetInput().splitlines())
         text_property = self.text_mapper.GetTextProperty()
-        font_size = 15
+        font_size = 20
         text_property.SetFontSize(font_size)
-        text_property.SetColor(colors.GetColor3d('Cyan'))
+        text_property.SetColor(colors.GetColor3d('Mint'))
 
         self.text_actor = vtk.vtkActor2D()
         self.text_actor.SetMapper(self.text_mapper)
-        self.text_actor.SetDisplayPosition(30, window_height - 10 - number_of_lines * font_size)
+        self.text_actor.SetDisplayPosition(window_width - 400, window_height - (number_of_lines + 1) * font_size)
         self.renderer_image.AddActor(self.text_actor)
 
         self.pixel_highlighter = PixelHighlighter(self.renderer_highlights)
@@ -189,7 +189,7 @@ class FrameViewerApp:
         if self.viewing_mode != viewing_mode:
             print("Viewing mode:", viewing_mode.name)
             self.viewing_mode = viewing_mode
-            self.update_active_vtk_image()
+            self.update_scaled_images()
 
     def set_frame(self, frame_index):
         print("Frame:", frame_index)

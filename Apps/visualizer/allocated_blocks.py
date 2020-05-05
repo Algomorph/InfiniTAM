@@ -4,7 +4,7 @@ import numpy as np
 
 
 def read_allocation_data(
-        data_path="/mnt/Data/Reconstruction/experiment_output/2020-04-28/full_run/canonical_volume_memory_usage.dat"):
+        data_path="/mnt/Data/Reconstruction/experiment_output/2020-05-04/recording/canonical_volume_memory_usage.dat"):
     file = gzip.open(data_path, "rb")
 
     point_sets = []

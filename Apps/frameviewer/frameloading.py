@@ -23,13 +23,16 @@ def generate_frame_image_path(index, frame_image_type):
     }
     return "{:s}/{:s}_{:06d}.png".format(base_path, filename_prefix_by_frame_image_type[frame_image_type], index)
 
+
 def load_frame_numpy_raw_image(index, frame_image_type):
-    return cv2.imread(generate_frame_image_path(index, frame_image_type),cv2.IMREAD_UNCHANGED)
+    return cv2.imread(generate_frame_image_path(index, frame_image_type), cv2.IMREAD_UNCHANGED)
+
 
 def load_mask_numpy_image(index):
     return load_frame_numpy_raw_image(index, FrameImageType.MASK).astype(bool)
 
-def load_depth_numpy_image(index, conversion_factor = 0.001):
+
+def load_depth_numpy_image(index, conversion_factor=0.001):
     return load_frame_numpy_raw_image(index, FrameImageType.DEPTH).astype(np.float32) * conversion_factor
 
 
