@@ -158,7 +158,7 @@ DECLARE_SERIALIZABLE_STRUCT(PATHS_STRUCT_DESCRIPTION);
     (bool, record_frame_meshes, false, PRIMITIVE, "Whether to log three meshes at every frame: (a) from live volume " \
     "after camera tracking and before surface tracking, (b) from live volume after surface tracking, and (c) from " \
     "canonical volume after fusion."), \
-    (bool, use_CPU_for_mesh_recording, false, PRIMITIVE, "Whether to use CPU & regular RAM when recording mesh telemetry. Will reduce GPU memory usage."), \
+    (bool, use_CPU_for_mesh_recording, false, PRIMITIVE, "Whether to ALWAYS use CPU & regular RAM when recording mesh telemetry. For CUDA runs, this will reduce GPU memory usage."), \
 	(bool, record_camera_matrices, false, PRIMITIVE, "Whether to record estimated camera trajectory matrices in world space.")
 
 

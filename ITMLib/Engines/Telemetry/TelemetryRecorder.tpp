@@ -53,9 +53,10 @@ void TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::RecordVolumeMe
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::RecordCameraPose(const Matrix4f& camera_pose) {
-	if(configuration::get().telemetry_settings.record_camera_matrices){
-		for(int i_value = 0; i_value < 16; i_value++){
-			camera_trajectory_file.OStream().write(reinterpret_cast<const char*>(camera_pose.getValues() + i_value), sizeof(float));
+	if (configuration::get().telemetry_settings.record_camera_matrices) {
+		for (int i_value = 0; i_value < 16; i_value++) {
+			camera_trajectory_file.OStream().write(reinterpret_cast<const char*>(camera_pose.getValues() + i_value),
+			                                       sizeof(float));
 		}
 	}
 }
@@ -66,7 +67,13 @@ void TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::RecordFrameMes
 	if (configuration::get().telemetry_settings.record_frame_meshes) {
 		std::string frame_output_path = telemetry::CreateAndGetOutputPathForFrame(frame_index);
 		std::string mesh_file_path = (fs::path(frame_output_path) / fs::path(filename)).string();
-		auto meshing_engine = MeshingEngineFactory::Build<TVoxel, TIndex>(configuration::get().device_type);
+		MeshingEngine<TVoxel, TIndex>* meshing_engine;
+		if (configuration::get().telemetry_settings.use_CPU_for_mesh_recording) {
+			meshing_engine = MeshingEngineFactory::Build<TVoxel, TIndex>(MEMORYDEVICE_CPU);
+		} else {
+			meshing_engine = MeshingEngineFactory::Build<TVoxel, TIndex>(configuration::get().device_type);
+		}
+
 		Mesh mesh = meshing_engine->MeshVolume(&volume);
 		mesh.WritePLY(mesh_file_path, false, false);
 		delete meshing_engine;
