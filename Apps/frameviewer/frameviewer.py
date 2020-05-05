@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+import os
 import sys
 from enum import Enum
 
@@ -8,6 +9,7 @@ import vtk
 import numpy as np
 
 from Apps.frameviewer import frameloading, image_conversion, trajectoryloading
+from Apps.frameviewer.pixel_highlighter import PixelHighlighter
 
 PROGRAM_EXIT_SUCCESS = 0
 PROGRAM_EXIT_FAILURE = -1
@@ -24,18 +26,34 @@ class CameraProjection:
         self.fy = fy
         self.cx = cx
         self.cy = cy
+        self._fx_inv = 1.0 / fx
+        self._fy_inv = 1.0 / fy
 
     def project_to_camera_space(self, u, v, depth):
-        x = (u * depth - self.cx) / self.fx
-        y = (v * depth - self.cy) / self.fy
+        x = depth * (u - self.cx) * self._fx_inv
+        y = depth * (v - self.cy) * self._fy_inv
         return x, y, depth
 
 
 class FrameViewerApp:
     PROJECTION = CameraProjection(fx=517, fy=517, cx=320, cy=240)
+    VOXEL_BLOCK_SIZE_VOXELS = 8
+    VOXEL_SIZE = 0.004
+    VOXEL_BLOCK_SIZE_METERS = VOXEL_BLOCK_SIZE_VOXELS * VOXEL_SIZE
 
     def __init__(self, output_folder, frame_index_to_start_with):
         self.start_frame_index = frame_index_to_start_with
+        self.output_folder = output_folder
+
+        path = os.path.join(self.output_folder, "frameviewer_state.txt")
+        state = (20.0, 20.0, 2.0, frame_index_to_start_with)
+        if os.path.isfile(path):
+            loaded_state = np.loadtxt(path)
+            if len(loaded_state) < len(state):
+                os.unlink(path)
+            else:
+                state = loaded_state
+
         self.inverse_camera_matrices = trajectoryloading.load_inverse_matrices(output_folder)
         self.current_camera_matrix = None if len(self.inverse_camera_matrices) == 0 else self.inverse_camera_matrices[0]
 
@@ -57,30 +75,36 @@ class FrameViewerApp:
 
         self.image_actor = vtk.vtkActor2D()
         self.image_actor.SetMapper(self.image_mapper)
-        self.image_actor.SetPosition(20, 20)
+        self.image_actor.SetPosition(int(state[0]), int(state[1]))
 
         colors = vtk.vtkNamedColors()
         window_width = 1400
         window_height = 900
 
-        self.renderer = vtk.vtkRenderer()
-        self.renderer.SetBackground(0.1, 0.1, 0.1)
+        self.renderer_image = vtk.vtkRenderer()
+        self.renderer_image.SetBackground(0.1, 0.1, 0.1)
+        self.renderer_image.SetLayer(0)
+        self.renderer_highlights = vtk.vtkRenderer()
+        self.renderer_highlights.SetLayer(1)
+
         self.render_window = vtk.vtkRenderWindow()
         self.render_window.SetSize(window_width, window_height)
-        self.render_window.AddRenderer(self.renderer)
+        self.render_window.SetNumberOfLayers(2)
+        self.render_window.AddRenderer(self.renderer_image)
+        self.render_window.AddRenderer(self.renderer_highlights)
 
-        self.renderer.AddActor2D(self.image_actor)
+        self.renderer_image.AddActor2D(self.image_actor)
 
         self.frame_index = -1
         self.viewing_mode = ViewingMode.COLOR
-        self.scale = 2.0
+        self.scale = state[2]
         self._scaled_resolution = None
         self.panning = False
         self.zooming = False
 
         self.text_mapper = vtk.vtkTextMapper()
         self.text_mapper.SetInput("Frame: {:d} | Scale: {:f}\nPixel: 0, 0\nDepth: 0 m\nColor: 0 0 0\n"
-                                  "Camera-space: 0 0 0\nWorld-space: 0 0 0"
+                                  "Camera-space: 0 0 0\nWorld-space: 0 0 0\nBlock-space: 0 0 0"
                                   .format(frame_index_to_start_with, self.scale))
         self.text_mapper.GetInput()
         number_of_lines = len(self.text_mapper.GetInput().splitlines())
@@ -92,7 +116,10 @@ class FrameViewerApp:
         self.text_actor = vtk.vtkActor2D()
         self.text_actor.SetMapper(self.text_mapper)
         self.text_actor.SetDisplayPosition(30, window_height - 10 - number_of_lines * font_size)
-        self.renderer.AddActor(self.text_actor)
+        self.renderer_image.AddActor(self.text_actor)
+
+        self.pixel_highlighter = PixelHighlighter(self.renderer_highlights)
+        self.pixel_highlighter.set_scale(self.scale)
 
         self.interactor = vtk.vtkRenderWindowInteractor()
         self.interactor.SetInteractorStyle(None)
@@ -105,7 +132,7 @@ class FrameViewerApp:
         self.interactor.AddObserver("MouseMoveEvent", self.mouse_move)
 
         self.frame_index = None
-        self.set_frame(frame_index_to_start_with)
+        self.set_frame(int(state[3]))
 
     def launch(self):
         self.interactor.Initialize()
@@ -138,10 +165,21 @@ class FrameViewerApp:
             interpolation_mode = cv2.INTER_NEAREST
         else:
             interpolation_mode = cv2.INTER_LINEAR
+
+        old_scaled_depth_shape = None if self.scaled_depth is None else self.scaled_depth.shape
         self.scaled_depth = cv2.resize(self.depth_numpy_image_uint8, tuple(self._scaled_resolution),
                                        interpolation=interpolation_mode)
+        old_scaled_color_shape = None if self.scaled_color is None else self.scaled_color.shape
         self.scaled_color = cv2.resize(self.color_numpy_image, tuple(self._scaled_resolution),
                                        interpolation=interpolation_mode)
+        if old_scaled_depth_shape is not None:
+            old_image_shape = old_scaled_color_shape if self.viewing_mode == ViewingMode.COLOR else old_scaled_depth_shape
+            new_image_shape = self.scaled_color.shape if self.viewing_mode == ViewingMode.COLOR else self.scaled_depth.shape
+            image_x, image_y = self.image_actor.GetPosition()
+            x, y = self.interactor.GetEventPosition()
+            new_image_x = x - ((x - image_x) / old_image_shape[1]) * new_image_shape[1]
+            new_image_y = y - ((y - image_y) / old_image_shape[0]) * new_image_shape[0]
+            self.image_actor.SetPosition(new_image_x, new_image_y)
         self.update_active_vtk_image(force_reset=True)
 
     def update_viewing_mode(self, viewing_mode):
@@ -156,7 +194,7 @@ class FrameViewerApp:
     def set_frame(self, frame_index):
         print("Frame:", frame_index)
         self.current_camera_matrix = None if len(self.inverse_camera_matrices) <= frame_index \
-            else self.inverse_camera_matrices[frame_index-self.start_frame_index]
+            else self.inverse_camera_matrices[frame_index - self.start_frame_index]
 
         self.frame_index = frame_index
         self.color_numpy_image = frameloading.load_color_numpy_image(frame_index)
@@ -170,16 +208,17 @@ class FrameViewerApp:
 
         self.depth_numpy_image_uint8 = image_conversion.convert_to_viewable_depth(self.depth_numpy_image)
         self.update_scaled_images()
+        x, y = self.interactor.GetEventPosition()
+        self.report_on_mouse_location(x, y)
 
     def zoom_scale(self, step, increment_step=False, increment=0.5):
-        x_y_pos = self.interactor.GetEventPosition()
-        x = x_y_pos[0]
-        y = x_y_pos[1]
+        x, y = self.interactor.GetEventPosition()
         if increment_step:
             self.scale -= (self.scale % increment)
             self.scale += (step * increment)
         else:
             self.scale *= pow(1.02, (1.0 * step))
+        self.pixel_highlighter.set_scale(self.scale)
         self.update_scaled_images()
         self.report_on_mouse_location(x, y)
 
@@ -202,6 +241,9 @@ class FrameViewerApp:
         key = obj.GetKeySym()
         print("Key:", key)
         if key == "q" or key == "Escape":
+            image_x, image_y = self.image_actor.GetPosition()
+            path = os.path.join(self.output_folder, "frameviewer_state.txt")
+            np.savetxt(path, (image_x, image_y, self.scale, self.frame_index))
             obj.InvokeEvent("DeleteAllObjects")
             sys.exit()
         elif key == "bracketright":
@@ -209,7 +251,9 @@ class FrameViewerApp:
         elif key == "bracketleft":
             self.set_frame(self.frame_index - 1)
         elif key == "c":
-            pass
+            self.update_viewing_mode(ViewingMode.COLOR)
+        elif key == "d":
+            self.update_viewing_mode(ViewingMode.DEPTH)
         elif key == "Right":
             pass
         elif key == "Left":
@@ -244,37 +288,51 @@ class FrameViewerApp:
 
     def is_pixel_within_image(self, x, y):
         image_start_x, image_start_y = self.image_actor.GetPosition()
-        image_end_x = image_start_x + self._scaled_resolution[0]
-        image_end_y = image_start_y + self._scaled_resolution[1]
+        image_end_x = image_start_x + self._scaled_resolution[0] - 1
+        image_end_y = image_start_y + self._scaled_resolution[1] - 1
         return image_start_x < x < image_end_x and image_start_y < y < image_end_y
 
     def get_frame_pixel(self, x, y):
         image_start_x, image_start_y = self.image_actor.GetPosition()
-        frame_x = int((x - image_start_x) / self.scale + 0.5)
-        frame_y = self.color_numpy_image.shape[0] - int((y - image_start_y) / self.scale + 0.5)
+        frame_x = ((x - image_start_x) / self.scale)
+        frame_y = self.color_numpy_image.shape[0] - ((y - image_start_y + 1) / self.scale)
         return frame_x, frame_y
+
+    @staticmethod
+    def get_block_coordinate(point_world):
+        return ((point_world / FrameViewerApp.VOXEL_BLOCK_SIZE_METERS) + 1 / (
+                    2 * FrameViewerApp.VOXEL_BLOCK_SIZE_VOXELS)).astype(np.int32)
 
     def update_location_text(self, u, v, depth, color):
         camera_coords = FrameViewerApp.PROJECTION.project_to_camera_space(u, v, depth)
         camera_coords_homogenized = np.array((camera_coords[0], camera_coords[1], camera_coords[2], 1.0)).T
         world_coords = self.current_camera_matrix.dot(camera_coords_homogenized)
-        # world_coords /= world_coords[3]
-        # print(self.current_camera_matrix)
+        block_coords = FrameViewerApp.get_block_coordinate(world_coords)
         self.text_mapper.SetInput(
             "Frame: {:d} | Scale: {:f}\nPixel: {:d}, {:d}\nDepth: {:f} m\nColor: {:d}, {:d}, {:d}\n"
-            "Camera-space: {:02.4f}, {:02.4f}, {:02.4f}\nWorld-space: {:02.4f}, {:02.4f}, {:02.4f}"
-            .format(self.frame_index, self.scale, u, v, depth, color[0], color[1], color[2],
-                    camera_coords[0], camera_coords[1], camera_coords[2],
-                    world_coords[0], world_coords[1], world_coords[2]))
+            "Camera-space: {:02.4f}, {:02.4f}, {:02.4f}\nWorld-space: {:02.4f}, {:02.4f}, {:02.4f}\n"
+            "Block-space: {:d} {:d} {:d}"
+                .format(self.frame_index, self.scale, u, v, depth, color[0], color[1], color[2],
+                        camera_coords[0], camera_coords[1], camera_coords[2],
+                        world_coords[0], world_coords[1], world_coords[2],
+                        block_coords[0], block_coords[1], block_coords[2]))
         self.text_mapper.Modified()
         self.render_window.Render()
 
     def report_on_mouse_location(self, x, y):
         if self.is_pixel_within_image(x, y):
             frame_x, frame_y = self.get_frame_pixel(x, y)
-            depth = self.depth_numpy_image[frame_y, frame_x]
-            color = self.color_numpy_image[frame_y, frame_x]
-            self.update_location_text(frame_x, frame_y, depth, color)
+            frame_x_int = int(frame_x)
+            frame_y_int = int(frame_y)
+            depth = self.depth_numpy_image[frame_y_int, frame_x_int]
+            color = self.color_numpy_image[frame_y_int, frame_x_int]
+            image_x, image_y = self.image_actor.GetPosition()
+            self.pixel_highlighter.set_position(image_x + frame_x_int * self.scale, image_y + (
+                    self.color_numpy_image.shape[0] - frame_y_int - 1) * self.scale)
+            self.pixel_highlighter.show()
+            self.update_location_text(frame_x_int, frame_y_int, depth, color)
+        else:
+            self.pixel_highlighter.hide()
 
 
 def main():
