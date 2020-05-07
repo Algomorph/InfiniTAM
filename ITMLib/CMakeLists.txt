@@ -916,7 +916,7 @@ set(ITMLIB_UTILS_SOURCES
     Utils/Logging/LoggingConfiguration.cpp
     Utils/Logging/LoggingCUDAWrapper.cpp
 
-    Utils/Metacoding/MetacodingStruct_Impl.cpp
+    Utils/Metacoding/SerializableStruct_Impl.cpp
 
     Utils/Telemetry/TelemetryUtilities.cpp
 
@@ -947,13 +947,12 @@ set(ITMLIB_UTILS_HEADERS
     Utils/Geometry/CardinalAxesAndPlanes.h
 
     Utils/Metacoding/Metacoding.h
-    Utils/Metacoding/MetacodingStruct.h
-    Utils/Metacoding/MetacodingStruct_Impl.h
-    Utils/Metacoding/MetacodingEnum.h
-    Utils/Metacoding/MetacodingEnum_Impl.h
-    Utils/Metacoding/MetacodingUtilities.h
-    Utils/Metacoding/MetacodingSequenceLevel1Macros.h
-    Utils/Metacoding/MetacodingSequenceLevel2Macros.h
+    Utils/Metacoding/SerializableStruct.h
+    Utils/Metacoding/SerializableStruct_Impl.h
+    Utils/Metacoding/SerializableEnum.h
+    Utils/Metacoding/SerializableEnum_Impl.h
+    Utils/Metacoding/SequenceLevel1Macros.h
+    Utils/Metacoding/SequenceLevel2Macros.h
     Utils/Metacoding/PreprocessorNargs.h
 
     Utils/Telemetry/TelemetryUtilities.h

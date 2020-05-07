@@ -28,7 +28,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/preprocessor/stringize.hpp>
 
-#include "MetacodingSequenceLevel1Macros.h"
+#include "SequenceLevel1Macros.h"
 #include "PreprocessorNargs.h"
 
 // region ================== SERIALIZABLE ENUM TEMPLATED FUNCTION DEFINITIONS ==========================================

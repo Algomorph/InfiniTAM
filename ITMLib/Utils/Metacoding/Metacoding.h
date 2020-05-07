@@ -14,6 +14,6 @@
 //  limitations under the License.
 //  ================================================================
 #pragma once
-#include "MetacodingStruct.h"
-#include "MetacodingEnum.h"
+#include "SerializableStruct.h"
+#include "SerializableEnum.h"
 

@@ -15,7 +15,7 @@
 //  ================================================================
 #pragma once
 
-#include "MetacodingStruct_Impl.h"
+#include "SerializableStruct_Impl.h"
 
 /**
  * \brief Generate declaration and definition of a  struct that has utilities to be generated from program arguments or

@@ -15,7 +15,7 @@
 //  ================================================================
 #pragma once
 
-#include "MetacodingEnum_Impl.h"
+#include "SerializableEnum_Impl.h"
 
 #ifdef _MSC_VER
 #define GENERATE_SERIALIZABLE_ENUM(...) ITM_METACODING_OUTER_EXPAND(SERIALIZABLE_ENUM_IMPL( __VA_ARGS__ ))

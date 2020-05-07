@@ -261,6 +261,7 @@ NestedMap3DOfArrays<T>& NestedMap3DOfArrays<T>::operator=(NestedMap3DOfArrays&& 
 	prefixLevel1 = other.prefixLevel1;
 	prefixLevel2 = other.prefixLevel2;
 	prefixLevel3 = other.prefixLevel3;
+	return *this;
 }
 
 template<typename T>

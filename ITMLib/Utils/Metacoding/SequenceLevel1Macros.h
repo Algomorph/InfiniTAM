@@ -14,8 +14,7 @@
 //  limitations under the License.
 //  ================================================================
 #pragma once
-#include "MetacodingSequenceLevel2Macros.h"
-#include "MetacodingUtilities.h"
+#include "SequenceLevel2Macros.h"
 
 #define ITM_METACODING_IMPL_EXPAND(x) x
 
