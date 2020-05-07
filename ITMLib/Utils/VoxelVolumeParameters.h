@@ -58,5 +58,6 @@ namespace ITMLib {
 /** \brief
 	Stores parameters of a voxel volume, such as voxel size
 */
+//#pragma message BOOST_PP_STRINGIZE( (GENERATE_SERIALIZABLE_STRUCT(VOXEL_VOLUME_PARAMETERS_STRUCT_DESCRIPTION)))
 GENERATE_SERIALIZABLE_STRUCT(VOXEL_VOLUME_PARAMETERS_STRUCT_DESCRIPTION);
 } // namespace ITMLib

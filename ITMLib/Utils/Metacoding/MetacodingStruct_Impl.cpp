@@ -14,7 +14,7 @@
 //  limitations under the License.
 //  ================================================================
 
-#include "MetacodingDetails.h"
+#include "MetacodingStruct_Impl.h"
 
 std::string preprocess_path(const std::string& path, const std::string& origin) {
 	const std::regex configuration_directory_regex("^<CONFIGURATION_DIRECTORY>");
