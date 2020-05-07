@@ -122,7 +122,7 @@ DECLARE_SERIALIZABLE_STRUCT(PATHS_STRUCT_DESCRIPTION);
     "where to focus telemetry information records). "\
     "Only effective when verbosity_level is set to focus_spots (alt. VERBOSITY_FOCUS_SPOTS) or above."), \
     (bool, record_reconstruction_video, false, PRIMITIVE, \
-            "Whether to record video of the canonical reconsturction during automatic run "\
+            "Whether to record video of the canonical reconstruction during automatic run "\
             "(see number_of_frames_to_process_after_launch and index_of_frame_to_start_at)."), \
     (bool, log_to_disk, false, PRIMITIVE, "Print log to text file, in the output path (preserves older log files). "\
     "Can be used in combination with stdout."), \

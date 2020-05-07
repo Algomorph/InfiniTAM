@@ -311,6 +311,7 @@ boost::property_tree::ptree serializable_vector_to_ptree(TVector vector) {
                                                    ITM_METACODING_IMPL_COMMA, __VA_ARGS__)), \
         std::string origin = ""); \
     explicit struct_name (const boost::program_options::variables_map& vm, std::string origin = ""); \
+    void SetFromPTree(const boost::property_tree::ptree& tree); \
     static struct_name BuildFromPTree(const boost::property_tree::ptree& tree, std::string origin = ""); \
     boost::property_tree::ptree ToPTree(std::string origin = "") const; \
     friend bool operator==(const struct_name & instance1, const struct_name & instance2); \
@@ -350,6 +351,10 @@ boost::property_tree::ptree serializable_vector_to_ptree(TVector vector) {
                                                ITM_METACODING_IMPL_COMMA, __VA_ARGS__)) \
             ORIGIN_SEPARATOR() origin_initializer \
         {} \
+	void outer_class inner_qualifier SetFromPTree(const boost::property_tree::ptree& tree){ \
+		struct_name temporary_instance = BuildFromPTree(tree);\
+		*this = temporary_instance;\
+    } \
     static_qualifier outer_class struct_name outer_class inner_qualifier BuildFromPTree(const boost::property_tree::ptree& tree, \
                                                                     std::string origin default_origin_arg){ \
         struct_name default_instance; \
