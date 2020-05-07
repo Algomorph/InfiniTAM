@@ -2,7 +2,7 @@
 
 #ifdef _MSC_VER
 
-#define ITM_SERIALIZATION_IMPL_ARG_N(                                                   \
+#define ITM_METACODING_IMPL_ARG_N(                                                   \
     _1, _2, _3, _4, _5, _6, _7, _8, _9, _10,                                            \
     _11, _12, _13, _14, _15, _16, _17, _18, _19, _20,                                   \
     _21, _22, _23, _24, _25, _26, _27, _28, _29, _30,                                   \
@@ -20,7 +20,7 @@
   N                                                                                     \
 
 #define ITM_SERIALIZATION_EXPAND(x) x
-#define ITM_SERIALIZATION_IMPL_NARG_(...) ITM_SERIALIZATION_EXPAND(ITM_SERIALIZATION_IMPL_ARG_N(__VA_ARGS__, \
+#define ITM_METACODING_IMPL_NARG_(...) ITM_SERIALIZATION_EXPAND(ITM_METACODING_IMPL_ARG_N(__VA_ARGS__, \
   124, 123, 122, 121, 120, 119, 118, 117,                                               \
   116, 115, 114, 113, 112, 111, 110, 109, 108, 107,                                     \
   106, 105, 104, 103, 102, 101, 100, 99, 98, 97,                                        \
@@ -37,14 +37,14 @@
 ))
 
 #define ITM_SERIALIZATION_AUGMENTER(...) unused, __VA_ARGS__
-#define ITM_SERIALIZATION_IMPL_NARG(...) ITM_SERIALIZATION_IMPL_NARG_(ITM_SERIALIZATION_AUGMENTER(__VA_ARGS__))
+#define ITM_METACODING_IMPL_NARG(...) ITM_METACODING_IMPL_NARG_(ITM_SERIALIZATION_AUGMENTER(__VA_ARGS__))
 
 #else
-#define ITM_SERIALIZATION_IMPL_NARG(...)                                                                               \
-  ITM_SERIALIZATION_IMPL_NARG_(__VA_ARGS__, ITM_SERIALIZATION_IMPL_RSEQ_N())
-#define ITM_SERIALIZATION_IMPL_NARG_(...) ITM_SERIALIZATION_IMPL_ARG_N(__VA_ARGS__)
+#define ITM_METACODING_IMPL_NARG(...)                                                                               \
+  ITM_METACODING_IMPL_NARG_(__VA_ARGS__, ITM_METACODING_IMPL_RSEQ_N())
+#define ITM_METACODING_IMPL_NARG_(...) ITM_METACODING_IMPL_ARG_N(__VA_ARGS__)
 
-#define ITM_SERIALIZATION_IMPL_ARG_N(                                                   \
+#define ITM_METACODING_IMPL_ARG_N(                                                   \
     _1, _2, _3, _4, _5, _6, _7, _8, _9, _10,                                            \
     _11, _12, _13, _14, _15, _16, _17, _18, _19, _20,                                   \
     _21, _22, _23, _24, _25, _26, _27, _28, _29, _30,                                   \
@@ -74,7 +74,7 @@
   )                                                                                     \
   N                                                                                     \
 
-#define ITM_SERIALIZATION_IMPL_RSEQ_N()                                                 \
+#define ITM_METACODING_IMPL_RSEQ_N()                                                 \
   256, 255, 254, 253, 252, 251, 250, 249, 248, 247,                                     \
   246, 245, 244, 243, 242, 241, 240, 239, 238, 237,                                     \
   236, 235, 234, 233, 232, 231, 230, 229, 228, 227,                                     \

@@ -10,7 +10,8 @@ from Apps.visualizer.allocated_blocks import AllocatedBlocks
 
 class VisualizerApp:
 
-    def __init__(self):
+    def __init__(self, output_path="/mnt/Data/Reconstruction/experiment_output/2020-05-04/recording"):
+        self.output_path = output_path
         self.offset_cam = (0.2562770766576, 0.13962609403401335, -0.2113334598208764)
         colors = vtk.vtkNamedColors()
         self.current_frame = 0
@@ -21,7 +22,7 @@ class VisualizerApp:
         self.render_window.AddRenderer(self.renderer)
 
         # allocated blocks & labels
-        self.blocks = AllocatedBlocks(self.renderer)
+        self.blocks = AllocatedBlocks(self.renderer, output_path)
         self.frame_count = self.blocks.frame_count
 
         # mesh setup
@@ -86,8 +87,7 @@ class VisualizerApp:
         self.show_mesh_at_index(0)
 
     def load_frame_meshes(self, i_frame):
-        base_path = "/mnt/Data/Reconstruction/experiment_output/2020-05-04/recording"
-        frame_path = os.path.join(base_path, "Frame_{:02}".format(i_frame + 16))
+        frame_path = os.path.join(self.output_path, "Frame_{:02}".format(i_frame + 16))
         canonical_path = os.path.join(frame_path, "canonical.ply")
         raw_live_path = os.path.join(frame_path, "live_raw.ply")
         warped_live_path = os.path.join(frame_path, "live_warped.ply")

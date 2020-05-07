@@ -14,7 +14,7 @@
 //  limitations under the License.
 //  ================================================================
 #pragma once
-#include "SerializationDetails.h"
+#include "MetacodingDetails.h"
 /// Macros for making serializable stucts and enums
 
 /**

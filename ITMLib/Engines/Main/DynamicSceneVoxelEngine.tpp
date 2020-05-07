@@ -204,37 +204,37 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::SaveToFile() {
 	if (!fs::exists(path)) {
 		fs::create_directories(path);
 	}
-	SaveToFile(path.string());
+	SaveToFile(path.string() + "/canonical_volume.dat");
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::LoadFromFile(const std::string& path) {
-	std::string relocaliser_input_path = path + "Relocaliser/";
+	std::string relocalizer_input_path = path + "Relocalizer/";
 	if (view != nullptr) {
-		try // load relocaliser
+		try // load relocalizer
 		{
 			auto& settings = configuration::get();
-			FernRelocLib::Relocaliser<float>* relocaliser_temp =
+			FernRelocLib::Relocaliser<float>* relocalizer_temp =
 					new FernRelocLib::Relocaliser<float>(view->depth->dimensions,
 					                                     Vector2f(
 							                                     settings.general_voxel_volume_parameters.near_clipping_distance,
 							                                     settings.general_voxel_volume_parameters.far_clipping_distance),
 					                                     0.2f, 500, 4);
 
-			relocaliser_temp->LoadFromDirectory(relocaliser_input_path);
+			relocalizer_temp->LoadFromDirectory(relocalizer_input_path);
 
 			delete relocalizer;
-			relocalizer = relocaliser_temp;
+			relocalizer = relocalizer_temp;
 		}
 		catch (std::runtime_error& e) {
-			throw std::runtime_error("Could not load relocaliser: " + std::string(e.what()));
+			throw std::runtime_error("Could not load relocalizer: " + std::string(e.what()));
 		}
 	}
 
 	try // load scene
 	{
 		std::cout << "Loading canonical volume from '" << path << "'." << std::endl;
-		canonical_volume->LoadFromDisk(path + "/canonical");
+		canonical_volume->LoadFromDisk(path + "/canonical_volume.dat");
 
 		if (frames_processed == 0) {
 			frames_processed = 1; //to skip initialization

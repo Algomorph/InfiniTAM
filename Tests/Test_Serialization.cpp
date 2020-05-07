@@ -24,7 +24,7 @@
 //boost
 #include <boost/test/unit_test.hpp>
 
-#include "../ITMLib/Utils/Serialization/Serialization.h"
+#include "../ITMLib/Utils/Metacoding/Metacoding.h"
 
 #define VERBOSITY2_LEVEL_ENUM_DESCRIPTION Verbosity2Level, \
 	(VERBOSITY2_SILENT, "silent", "SILENT", "VERBOSITY_WARNING"), \

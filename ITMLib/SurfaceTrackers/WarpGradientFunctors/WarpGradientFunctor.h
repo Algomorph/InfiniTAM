@@ -15,7 +15,7 @@
 //  ================================================================
 #pragma once
 
-#include "../../Utils/Serialization/Serialization.h"
+#include "../../Utils/Metacoding/Metacoding.h"
 #include "../../../ORUtils/MemoryDeviceType.h"
 
 namespace ITMLib {

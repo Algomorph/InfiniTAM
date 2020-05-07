@@ -20,7 +20,7 @@
 #include <boost/property_tree/ptree.hpp>
 
 //local
-#include "../../Utils/Serialization/Serialization.h"
+#include "../../Utils/Metacoding/Metacoding.h"
 
 namespace ITMLib {
 

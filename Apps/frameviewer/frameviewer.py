@@ -55,7 +55,7 @@ class FrameViewerApp:
                 state = loaded_state
 
         self.inverse_camera_matrices = trajectoryloading.load_inverse_matrices(output_folder)
-        self.current_camera_matrix = None if len(self.inverse_camera_matrices) == 0 else self.inverse_camera_matrices[0]
+        self.current_camera_matrix = None
 
         self.image_masks_enabled = True
 
@@ -195,6 +195,9 @@ class FrameViewerApp:
         print("Frame:", frame_index)
         self.current_camera_matrix = None if len(self.inverse_camera_matrices) <= frame_index \
             else self.inverse_camera_matrices[frame_index - self.start_frame_index]
+        if self.current_camera_matrix is not None:
+            print("Inverted camera pose:")
+            print(self.current_camera_matrix)
 
         self.frame_index = frame_index
         self.color_numpy_image = frameloading.load_color_numpy_image(frame_index)
@@ -300,8 +303,8 @@ class FrameViewerApp:
 
     @staticmethod
     def get_block_coordinate(point_world):
-        return ((point_world / FrameViewerApp.VOXEL_BLOCK_SIZE_METERS) + 1 / (
-                    2 * FrameViewerApp.VOXEL_BLOCK_SIZE_VOXELS)).astype(np.int32)
+        return (point_world / FrameViewerApp.VOXEL_BLOCK_SIZE_METERS) + 1 / (
+                    2 * FrameViewerApp.VOXEL_BLOCK_SIZE_VOXELS)
 
     def update_location_text(self, u, v, depth, color):
         camera_coords = FrameViewerApp.PROJECTION.project_to_camera_space(u, v, depth)
@@ -311,7 +314,7 @@ class FrameViewerApp:
         self.text_mapper.SetInput(
             "Frame: {:d} | Scale: {:f}\nPixel: {:d}, {:d}\nDepth: {:f} m\nColor: {:d}, {:d}, {:d}\n"
             "Camera-space: {:02.4f}, {:02.4f}, {:02.4f}\nWorld-space: {:02.4f}, {:02.4f}, {:02.4f}\n"
-            "Block-space: {:d} {:d} {:d}"
+            "Block-space: {:02.4f}, {:02.4f}, {:02.4f}"
                 .format(self.frame_index, self.scale, u, v, depth, color[0], color[1], color[2],
                         camera_coords[0], camera_coords[1], camera_coords[2],
                         world_coords[0], world_coords[1], world_coords[2],

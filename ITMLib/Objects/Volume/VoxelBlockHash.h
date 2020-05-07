@@ -14,7 +14,7 @@
 #include "../../../ORUtils/MemoryBlock.h"
 #include "../../../ORUtils/MemoryBlockPersister.h"
 #include "../../Utils/HashBlockProperties.h"
-#include "../../Utils/Serialization/Serialization.h"
+#include "../../Utils/Metacoding/Metacoding.h"
 
 #define VOXEL_BLOCK_SIZE 8
 // VOXEL_BLOCK_SIZE3 = VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE

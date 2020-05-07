@@ -916,7 +916,7 @@ set(ITMLIB_UTILS_SOURCES
     Utils/Logging/LoggingConfiguration.cpp
     Utils/Logging/LoggingCUDAWrapper.cpp
 
-    Utils/Serialization/SerializationDetails.cpp
+    Utils/Metacoding/MetacodingDetails.cpp
 
     Utils/Telemetry/TelemetryUtilities.cpp
 
@@ -946,11 +946,11 @@ set(ITMLIB_UTILS_HEADERS
     Utils/Geometry/Segment.h
     Utils/Geometry/CardinalAxesAndPlanes.h
 
-    Utils/Serialization/Serialization.h
-    Utils/Serialization/SerializationDetails.h
-    Utils/Serialization/SerializationSequenceMacros.h
-    Utils/Serialization/SerializationSequenceLevel2Macros.h
-    Utils/Serialization/PreprocessorNargs.h
+    Utils/Metacoding/Metacoding.h
+    Utils/Metacoding/MetacodingDetails.h
+    Utils/Metacoding/MetacodingSequenceLevel1Macros.h
+    Utils/Metacoding/MetacodingSequenceLevel2Macros.h
+    Utils/Metacoding/PreprocessorNargs.h
 
     Utils/Telemetry/TelemetryUtilities.h
 

@@ -5,7 +5,7 @@
 #ifndef __METALC__
 
 #include "../../Utils/Math.h"
-#include "../../Utils/Serialization/Serialization.h"
+#include "../../Utils/Metacoding/Metacoding.h"
 #include "../../../ORUtils/MemoryBlock.h"
 #include "../../../ORUtils/MemoryBlockPersister.h"
 

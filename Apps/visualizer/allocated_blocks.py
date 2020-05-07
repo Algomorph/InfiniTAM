@@ -1,3 +1,5 @@
+import os
+
 import vtk
 import gzip
 import numpy as np
@@ -27,9 +29,10 @@ class AllocatedBlocks:
     BLOCK_SIZE = BLOCK_WIDTH_VOXELS * VOXEL_SIZE
     BLOCK_OFFSET = - (VOXEL_SIZE / 2) - (BLOCK_SIZE / 2)
 
-    def __init__(self, renderer):
+    def __init__(self, renderer, output_path):
+        self.output_path = output_path
         self.renderer = renderer
-        allocated_block_sets = read_allocation_data()
+        allocated_block_sets = read_allocation_data(os.path.join(output_path, "canonical_volume_memory_usage.dat"))
         self.frame_count = len(allocated_block_sets)
         self.allocated_block_sets = allocated_block_sets
 
