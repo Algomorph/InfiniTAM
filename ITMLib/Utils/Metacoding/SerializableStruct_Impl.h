@@ -297,6 +297,7 @@ boost::property_tree::ptree serializable_vector_to_ptree(TVector vector) {
 
 #define SERIALIZABLE_STRUCT_DECL_IMPL_BODY(struct_name, loop, ...) \
         std::string origin = ""; \
+        boost::property_tree::ptree tree; \
         SERIALIZABLE_STRUCT_DECL_IMPL_MEMBER_VARS(loop, __VA_ARGS__) \
         struct_name () {}; \
         SERIALIZABLE_STRUCT_DECL_IMPL_MEMBER_FUNCS(struct_name, loop, __VA_ARGS__)
@@ -328,11 +329,11 @@ boost::property_tree::ptree serializable_vector_to_ptree(TVector vector) {
 
 #define SERIALIZABLE_STRUCT_DEFN_IMPL_2(outer_class, struct_name, field_count, ...) \
     SERIALIZABLE_STRUCT_DEFN_IMPL_3(SERIALIZABLE_STRUCT_DEFN_HANDLE_QUALIFIER(outer_class), \
-                             SERIALIZABLE_STRUCT_DEFN_HANDLE_QUALIFIER(struct_name), struct_name, , , \
+                             SERIALIZABLE_STRUCT_DEFN_HANDLE_QUALIFIER(struct_name), struct_name, default_instance.tree=tree, , \
                              ITM_METACODING_IMPL_COMMA, origin(std::move(origin)), origin, , \
                              ITM_METACODING_IMPL_CAT(ITM_METACODING_IMPL_LOOP_, field_count), __VA_ARGS__)
 
-#define SERIALIZABLE_STRUCT_DEFN_IMPL_3(outer_class, inner_qualifier, struct_name, \
+#define SERIALIZABLE_STRUCT_DEFN_IMPL_3(outer_class, inner_qualifier, struct_name, tree_initializer, \
 										friend_qualifier, static_qualifier, \
 										ORIGIN_SEPARATOR, origin_initializer, origin_varname, default_origin_arg, \
 										loop, ...) \
@@ -352,6 +353,7 @@ boost::property_tree::ptree serializable_vector_to_ptree(TVector vector) {
     static_qualifier outer_class struct_name outer_class inner_qualifier BuildFromPTree(const boost::property_tree::ptree& tree, \
                                                                     std::string origin default_origin_arg){ \
         struct_name default_instance; \
+        tree_initializer; \
         ITM_METACODING_IMPL_EXPAND(loop(SERIALIZABLE_STRUCT_IMPL_FIELD_OPTIONAL_FROM_TREE, _, \
                                            ITM_METACODING_IMPL_NOTHING, __VA_ARGS__)) \
         return { \
@@ -392,9 +394,10 @@ boost::property_tree::ptree serializable_vector_to_ptree(TVector vector) {
 #define SERIALIZABLE_STRUCT_IMPL_3(struct_name, field_count, loop, ...) \
     struct struct_name { \
         std::string origin = ""; \
+        boost::property_tree::ptree tree; \
         SERIALIZABLE_STRUCT_DECL_IMPL_MEMBER_VARS(loop, __VA_ARGS__) \
         struct_name () {}; \
-        SERIALIZABLE_STRUCT_DEFN_IMPL_3( , , struct_name, friend, static, ITM_METACODING_IMPL_COMMA, origin(std::move(origin)), origin, ="", loop, __VA_ARGS__) \
+        SERIALIZABLE_STRUCT_DEFN_IMPL_3( , , struct_name, default_instance.tree=tree, friend, static, ITM_METACODING_IMPL_COMMA, origin(std::move(origin)), origin, ="", loop, __VA_ARGS__) \
     };
 
 // Pathless serializable struct
@@ -410,7 +413,7 @@ boost::property_tree::ptree serializable_vector_to_ptree(TVector vector) {
     struct struct_name { \
         SERIALIZABLE_STRUCT_DECL_IMPL_MEMBER_VARS(loop, __VA_ARGS__) \
         struct_name () = default; \
-        SERIALIZABLE_STRUCT_DEFN_IMPL_3( , , struct_name, friend, static, ITM_METACODING_IMPL_NOTHING, , , ="", loop, __VA_ARGS__) \
+        SERIALIZABLE_STRUCT_DEFN_IMPL_3( , , struct_name, , friend, static, ITM_METACODING_IMPL_NOTHING, , , ="", loop, __VA_ARGS__) \
     };
 
 
