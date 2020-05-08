@@ -15,13 +15,19 @@
 //  ================================================================
 #pragma once
 
+#include "../Common/Configurable.h"
 #include "../../Objects/Volume/VoxelVolume.h"
+#include "../../Utils/Configuration/TelemetrySettings.h"
 
 namespace ITMLib {
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-class TelemetryRecorderInterface {
+class TelemetryRecorderInterface : public Configurable<TelemetrySettings> {
+protected: // member variables
+	using Configurable<TelemetrySettings>::parameters;
 public:
+	using Configurable<TelemetrySettings>::Configurable;
+	using Configurable<TelemetrySettings>::GetParameters;
 	virtual ~TelemetryRecorderInterface() = default;
 	virtual void RecordPreSurfaceTrackingData(const VoxelVolume <TVoxel, TIndex>& raw_live_volume, const Matrix4f camera_matrix, int frame_index) = 0;
 	virtual void RecordPostSurfaceTrackingData(const VoxelVolume <TVoxel, TIndex>& warped_live_volume, int frame_index) = 0;
@@ -34,7 +40,11 @@ class TelemetryRecorder : public TelemetryRecorderInterface<TVoxel, TWarp, TInde
 private: // member variables
 	ORUtils::OStreamWrapper canonical_volume_memory_usage_file;
 	ORUtils::OStreamWrapper camera_trajectory_file;
+protected: // member variables
+	using TelemetryRecorderInterface<TVoxel,TWarp,TIndex>::parameters;
 public: // member functions
+	using TelemetryRecorderInterface<TVoxel,TWarp,TIndex>::GetParameters;
+
 	static TelemetryRecorder& GetDefaultInstance() {
 		static TelemetryRecorder instance;
 		return instance;

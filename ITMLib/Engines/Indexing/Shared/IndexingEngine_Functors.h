@@ -17,7 +17,7 @@
 
 //local
 #include "IndexingEngine_Shared.h"
-#include "../../Common/CheckBlockVisibility.h"
+#include "../../../Utils/Geometry/CheckBlockVisibility.h"
 #include "../../../Utils/Geometry/GeometryBooleanOperations.h"
 
 

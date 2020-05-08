@@ -63,9 +63,8 @@ set(ITMLIB_ENGINES_MAIN_HEADERS
 #======================================= COMMON TO MULTIPLE ENGINES ====================================================
 set(ITMLIB_ENGINES_COMMON_HEADERS
     Engines/Common/AllocationTempData.h
-    Engines/Common/CheckBlockVisibility.h
+    Engines/Common/Configurable.h
     Engines/Common/WarpAccessFunctors.h
-
     )
 #======================================= LOW-LEVEL ENGINES =============================================================
 ##
@@ -951,7 +950,10 @@ set(ITMLIB_UTILS_HEADERS
     Utils/Geometry/IntersectionChecks.h
     Utils/Geometry/Segment.h
     Utils/Geometry/CardinalAxesAndPlanes.h
+    Utils/Geometry/CheckBlockVisibility.h
 
+    Utils/Metacoding/DeferrableSerializableStruct.h
+    Utils/Metacoding/DeferrableSerializableStruct_Impl.h
     Utils/Metacoding/Metacoding.h
     Utils/Metacoding/SerializableStruct.h
     Utils/Metacoding/SerializableStruct_Impl.h

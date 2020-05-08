@@ -7,7 +7,7 @@
 #include "VisualizationEngine_CPU.h"
 #include "../Shared/VisualizationEngine_Shared.h"
 //#include "../../Reconstruction/Shared/SceneReconstructionEngine_Shared.h"
-#include "../../Common/CheckBlockVisibility.h"
+#include "../../../Utils/Geometry/CheckBlockVisibility.h"
 
 using namespace ITMLib;
 
@@ -46,7 +46,9 @@ void VisualizationEngine_CPU<TVoxel, VoxelBlockHash>::FindVisibleBlocks(
 		if (hash_entry.ptr >= 0)
 		{
 			bool is_visible, is_visible_enlarged;
-			checkBlockVisibility<false>(is_visible, is_visible_enlarged, hash_entry.pos, M, projParams, voxel_size, image_size);
+			CheckVoxelHashBlockVisibility<false>(is_visible, is_visible_enlarged, hash_entry.pos, M, projParams,
+			                                     voxel_size,
+			                                     image_size);
 			block_visibility_type = is_visible;
 		}
 

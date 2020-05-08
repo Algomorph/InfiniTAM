@@ -31,12 +31,12 @@ using namespace ITMLib;
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::TelemetryRecorder()
-		: canonical_volume_memory_usage_file(
-		configuration::get().telemetry_settings.record_volume_memory_usage ?
+		:TelemetryRecorderInterface<TVoxel, TWarp, TIndex>(),
+		canonical_volume_memory_usage_file(parameters.record_volume_memory_usage ?
 		ORUtils::OStreamWrapper((fs::path(configuration::get().paths.output_path)
 		                         / fs::path("canonical_volume_memory_usage.dat")).string(), true, true)
 		                                                                   : ORUtils::OStreamWrapper()),
-		  camera_trajectory_file(configuration::get().telemetry_settings.record_camera_matrices ?
+		  camera_trajectory_file(parameters.record_camera_matrices ?
 		                         ORUtils::OStreamWrapper((fs::path(configuration::get().paths.output_path)
 		                                                  / fs::path("camera_matrices.dat")).string(), true, true)
 		                                                                                        : ORUtils::OStreamWrapper()) {}
@@ -44,7 +44,7 @@ TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::TelemetryRecorder()
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::RecordVolumeMemoryUsageInfo(
 		const VoxelVolume<TVoxel, TIndex>& canonical_volume) {
-	if (configuration::get().telemetry_settings.record_volume_memory_usage) {
+	if (parameters.record_volume_memory_usage) {
 		VolumeFileIOEngine<TVoxel, TIndex>::AppendFileWithUtilizedMemoryInformation(
 				this->canonical_volume_memory_usage_file, canonical_volume);
 	}
@@ -53,7 +53,7 @@ void TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::RecordVolumeMe
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::RecordCameraPose(const Matrix4f& camera_pose) {
-	if (configuration::get().telemetry_settings.record_camera_matrices) {
+	if (parameters.record_camera_matrices) {
 		for (int i_value = 0; i_value < 16; i_value++) {
 			float value = camera_pose.getValues()[i_value];
 			camera_trajectory_file.OStream().write(reinterpret_cast<const char*>(&value),sizeof(float));
@@ -64,11 +64,11 @@ void TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::RecordCameraPo
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::RecordFrameMeshFromVolume(
 		const VoxelVolume<TVoxel, TIndex>& volume, const std::string& filename, int frame_index) {
-	if (configuration::get().telemetry_settings.record_frame_meshes) {
+	if (parameters.record_frame_meshes) {
 		std::string frame_output_path = telemetry::CreateAndGetOutputPathForFrame(frame_index);
 		std::string mesh_file_path = (fs::path(frame_output_path) / fs::path(filename)).string();
 		MeshingEngine<TVoxel, TIndex>* meshing_engine;
-		if (configuration::get().telemetry_settings.use_CPU_for_mesh_recording) {
+		if (parameters.use_CPU_for_mesh_recording) {
 			meshing_engine = MeshingEngineFactory::Build<TVoxel, TIndex>(MEMORYDEVICE_CPU);
 		} else {
 			meshing_engine = MeshingEngineFactory::Build<TVoxel, TIndex>(configuration::get().device_type);

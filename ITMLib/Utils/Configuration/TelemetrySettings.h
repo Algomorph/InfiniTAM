@@ -16,12 +16,12 @@
 #pragma once
 
 //local
-#include "../Metacoding/SerializableStruct.h"
+#include "../Metacoding/DeferrableSerializableStruct.h"
 #include "../Geometry/CardinalAxesAndPlanes.h"
 
 namespace ITMLib{
 
-#define TELEMETRY_SETTINGS_STRUCT_DESCRIPTION TelemetrySettings, \
+#define TELEMETRY_SETTINGS_STRUCT_DESCRIPTION TelemetrySettings, "telemetry_settings", \
     (bool, record_volume_memory_usage, false, PRIMITIVE, "Whether to record information required to debug memory" \
     " usage, e.g. used block locations for the VoxelBlockHash index."), \
     (bool, record_live_volume_as_2D_slices, false, PRIMITIVE, "Whether to record 2D slices (images, with pixel " \
@@ -53,6 +53,6 @@ namespace ITMLib{
     (bool, record_camera_matrices, false, PRIMITIVE, "Whether to record estimated camera trajectory matrices in world space.")
 
 
-DECLARE_SERIALIZABLE_STRUCT(TELEMETRY_SETTINGS_STRUCT_DESCRIPTION);
+DECLARE_DEFERRABLE_SERIALIZABLE_STRUCT(TELEMETRY_SETTINGS_STRUCT_DESCRIPTION);
 
 } // namespace ITMLib

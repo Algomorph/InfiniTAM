@@ -27,6 +27,7 @@
 //local
 #include "Configuration.h"
 #include "../FileIO/JSON_Utilities.h"
+#include "TelemetrySettings.h"
 
 using namespace ITMLib::configuration;
 
@@ -153,12 +154,23 @@ void load_configuration_from_json_file(const std::string& path) {
 	instance = Configuration::BuildFromPTree(tree, path);
 }
 
+template<typename TDeferrableSerializableStruct>
+static inline void AddDeferrableToInstanceTree(pt::ptree& main_configuration_tree){
+	pt::ptree deferrable_subtree =
+			instance.source_tree.empty() ? TDeferrableSerializableStruct().ToPTree(instance.origin) : instance.source_tree.get_child(TDeferrableSerializableStruct::default_parse_path);
+	main_configuration_tree.add_child(TDeferrableSerializableStruct::default_parse_path, deferrable_subtree);
+}
+
 void save_configuration_to_json_file(const std::string& path) {
-	pt::write_json_no_quotes(path, instance.ToPTree(path), true);
+	pt::ptree main_configuration_tree = instance.ToPTree(path);
+	AddDeferrableToInstanceTree<TelemetrySettings>(main_configuration_tree);
+	pt::write_json_no_quotes(path, main_configuration_tree, true);
 }
 
 void save_configuration_to_json_file(const std::string& path, const Configuration& configuration) {
-	pt::write_json_no_quotes(path, configuration.ToPTree(path), true);
+	pt::ptree main_configuration_tree = configuration.ToPTree(path);
+	AddDeferrableToInstanceTree<TelemetrySettings>(main_configuration_tree);
+	pt::write_json_no_quotes(path, main_configuration_tree, true);
 }
 // endregion ===========================================================================================================
 } // namespace ITMLib::configuration

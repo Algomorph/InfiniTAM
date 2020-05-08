@@ -19,7 +19,7 @@
 #include "../../../../Objects/Volume/GlobalCache.h"
 #include "../../../EditAndCopy/Shared/EditAndCopyEngine_Shared.h"
 #include "../../Shared/IndexingEngine_Shared.h"
-#include "../../../Common/CheckBlockVisibility.h"
+#include "../../../../Utils/Geometry/CheckBlockVisibility.h"
 
 namespace {
 
@@ -53,12 +53,14 @@ buildVisibilityList_device(HashEntry* hashTable, ITMLib::ITMHashSwapState* swapS
 		bool isVisibleEnlarged, isVisible;
 
 		if (useSwapping) {
-			checkBlockVisibility<true>(isVisible, isVisibleEnlarged, hashEntry.pos, M_d, projParams_d, voxelSize,
-			                           depthImgSize);
+			CheckVoxelHashBlockVisibility<true>(isVisible, isVisibleEnlarged, hashEntry.pos, M_d, projParams_d,
+			                                    voxelSize,
+			                                    depthImgSize);
 			if (!isVisibleEnlarged) hash_block_visibility_type = INVISIBLE;
 		} else {
-			checkBlockVisibility<false>(isVisible, isVisibleEnlarged, hashEntry.pos, M_d, projParams_d, voxelSize,
-			                            depthImgSize);
+			CheckVoxelHashBlockVisibility<false>(isVisible, isVisibleEnlarged, hashEntry.pos, M_d, projParams_d,
+			                                     voxelSize,
+			                                     depthImgSize);
 			if (!isVisible) hash_block_visibility_type = INVISIBLE;
 		}
 		blockVisibilityTypes[hash_code] = hash_block_visibility_type;

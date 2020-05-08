@@ -3,7 +3,7 @@
 //local
 #include "SceneReconstructionEngine_CPU.h"
 #include "../Shared/SceneReconstructionEngine_Shared.h"
-#include "../../Common/CheckBlockVisibility.h"
+#include "../../../Utils/Geometry/CheckBlockVisibility.h"
 #include "../../../Utils/Configuration/Configuration.h"
 
 using namespace ITMLib;
@@ -228,10 +228,14 @@ void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::AllocateSceneFromDep
 
 			if (useSwapping)
 			{
-				checkBlockVisibility<true>(isVisible, isVisibleEnlarged, hashEntry.pos, M_d, projParams_d, voxelSize, depthImgSize);
+				CheckVoxelHashBlockVisibility<true>(isVisible, isVisibleEnlarged, hashEntry.pos, M_d, projParams_d,
+				                                    voxelSize,
+				                                    depthImgSize);
 				if (!isVisibleEnlarged) hashVisibleType = INVISIBLE;
 			} else {
-				checkBlockVisibility<false>(isVisible, isVisibleEnlarged, hashEntry.pos, M_d, projParams_d, voxelSize, depthImgSize);
+				CheckVoxelHashBlockVisibility<false>(isVisible, isVisibleEnlarged, hashEntry.pos, M_d, projParams_d,
+				                                     voxelSize,
+				                                     depthImgSize);
 				if (!isVisible) { hashVisibleType = INVISIBLE; }
 			}
 			hashBlockVisibilityTypes[targetIdx] = hashVisibleType;

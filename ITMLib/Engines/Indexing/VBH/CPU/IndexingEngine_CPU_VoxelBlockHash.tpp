@@ -24,7 +24,7 @@
 #include "../../../EditAndCopy/Shared/EditAndCopyEngine_Shared.h"
 #include "../../../Traversal/Interface/HashTableTraversal.h"
 #include "../../Shared/IndexingEngine_Functors.h"
-#include "../../../Common/CheckBlockVisibility.h"
+#include "../../../../Utils/Geometry/CheckBlockVisibility.h"
 #include "../../../../Utils/Configuration/Configuration.h"
 #include "../../../../Utils/Geometry/FrustumTrigonometry.h"
 #include "../../../../Utils/MemoryBlock_StdContainer_Convertions.h"
@@ -418,14 +418,16 @@ void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::BuildUtilizedBloc
 			bool is_visible_enlarged, is_visible;
 
 			if (use_swapping) {
-				checkBlockVisibility<true>(is_visible, is_visible_enlarged, hash_entry.pos, depth_camera_matrix,
-				                           depthCameraProjectionParameters,
-				                           voxelSize, depthImgSize);
+				CheckVoxelHashBlockVisibility<true>(is_visible, is_visible_enlarged, hash_entry.pos,
+				                                    depth_camera_matrix,
+				                                    depthCameraProjectionParameters,
+				                                    voxelSize, depthImgSize);
 				if (!is_visible_enlarged) hash_block_visibility_type = INVISIBLE;
 			} else {
-				checkBlockVisibility<false>(is_visible, is_visible_enlarged, hash_entry.pos, depth_camera_matrix,
-				                            depthCameraProjectionParameters,
-				                            voxelSize, depthImgSize);
+				CheckVoxelHashBlockVisibility<false>(is_visible, is_visible_enlarged, hash_entry.pos,
+				                                     depth_camera_matrix,
+				                                     depthCameraProjectionParameters,
+				                                     voxelSize, depthImgSize);
 				if (!is_visible) { hash_block_visibility_type = INVISIBLE; }
 			}
 			hash_block_visibility_types[hash_code] = hash_block_visibility_type;

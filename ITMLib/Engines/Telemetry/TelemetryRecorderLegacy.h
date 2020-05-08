@@ -26,6 +26,7 @@
 #include "../../Utils/Visualization/SceneTrackingEnergyPlotter.h"
 #endif
 #include "../../Utils/Configuration/Configuration.h"
+#include "../../Utils/Configuration/TelemetrySettings.h"
 #include "../../Utils/Telemetry/TelemetryUtilities.h"
 
 namespace ITMLib {

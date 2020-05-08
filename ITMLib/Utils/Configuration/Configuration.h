@@ -36,7 +36,6 @@
 #include "../../Engines/Main/NonRigidTrackingParameters.h"
 #include "../../Objects/Volume/VoxelBlockHash.h"
 #include "../../Objects/Volume/PlainVoxelArray.h"
-#include "TelemetrySettings.h"
 #include "LoggingSettings.h"
 
 namespace po = boost::program_options;
@@ -164,7 +163,6 @@ DECLARE_SERIALIZABLE_STRUCT(SPECIFIC_VOLUME_PARAMETERS_STRUCT_DESCRIPTION);
     (SpecificVolumeParameters, specific_volume_parameters, SpecificVolumeParameters(), STRUCT, "Parameters for specific volumes (multiple volumes are used in dynamic mode), may include information for different indexing methods."), \
     (SlavchevaSurfaceTracker::Parameters, slavcheva_parameters, SlavchevaSurfaceTracker::Parameters(), STRUCT,"Parameters pertaining to energy tuning for dynamic surface tracking."),\
     (SlavchevaSurfaceTracker::Switches, slavcheva_switches, SlavchevaSurfaceTracker::Switches(), STRUCT,"Switches pertaining to optimization for dynamic surface tracking."),\
-    (TelemetrySettings, telemetry_settings, TelemetrySettings(), STRUCT, "Telemetry / diagnostic data recording settings"),\
     (LoggingSettings, logging_settings, LoggingSettings(), STRUCT, "Logging settings"),\
     (Paths, paths, Paths(), STRUCT,"Input / output paths"),\
     (AutomaticRunSettings, automatic_run_settings, AutomaticRunSettings(), STRUCT, "Settings that dictate how the experiment is run, i.e. such as how much data to process automatically, how to behave after the automatic run, etc."),\

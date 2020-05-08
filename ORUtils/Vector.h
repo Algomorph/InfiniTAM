@@ -40,13 +40,14 @@ namespace ORUtils {
 			struct { T r, g, b, a; }; // standard names for components
 			struct { T s, t, p, q; }; // standard names for components
 			struct { T fx, fy, cx, cy; }; // camera frustum names for components
+			struct { T min_x, min_y, max_x, max_y; }; // common range names for components
 			T values[4];
 		};
 	};
 
 	template <class T> struct Vector6_ {
 		union {
-			struct { T min_x, min_y, min_z, max_x, max_y, max_z; };// standard names for components
+			struct { T min_x, min_y, min_z, max_x, max_y, max_z; }; // common range names for components
 			T values[6];
 		};
 	};

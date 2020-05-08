@@ -1,7 +1,7 @@
 // Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
 
 #include "VisualizationHelpers_CUDA.h"
-#include "../../Common/CheckBlockVisibility.h"
+#include "../../../Utils/Geometry/CheckBlockVisibility.h"
 
 using namespace ITMLib;
 
@@ -36,7 +36,8 @@ __global__ void ITMLib::buildCompleteVisibleList_device(const HashEntry *hashTab
 		shouldPrefix = true;
 
 		bool isVisible, isVisibleEnlarged;
-		checkBlockVisibility<false>(isVisible, isVisibleEnlarged, hashEntry.pos, M, projParams, voxelSize, imgSize);
+		CheckVoxelHashBlockVisibility<false>(isVisible, isVisibleEnlarged, hashEntry.pos, M, projParams, voxelSize,
+		                                     imgSize);
 
 		hashVisibleType = isVisible;
 	}

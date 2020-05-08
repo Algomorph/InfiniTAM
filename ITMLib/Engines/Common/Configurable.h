@@ -13,11 +13,38 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "TelemetrySettings.h"
+#pragma once
 
+#include "../../Utils/Configuration/Configuration.h"
 
 namespace ITMLib {
+template<typename TParameters>
+class Configurable {
+protected:
+	const TParameters parameters;
+public: // member functions
+	Configurable() :
+			parameters(
+					ExtractSerializableStructFromPtreeIfPresent<TParameters>(
+							configuration::get().source_tree,
+							TParameters::default_parse_path,
+							configuration::get().origin
+					)
+			) {}
 
-DEFINE_DEFERRABLE_SERIALIZABLE_STRUCT(TELEMETRY_SETTINGS_STRUCT_DESCRIPTION);
+	Configurable(configuration::Configuration& config) :
+			parameters(
+					ExtractSerializableStructFromPtreeIfPresent<TParameters>(
+							config.source_tree,
+							TParameters::default_parse_path,
+							config.origin
+					)
+			) {}
+
+	Configurable(TParameters) : parameters(parameters) {};
+
+	const TParameters GetParameters() const { return this->parameters; }
+};
 
 } // namespace ITMLib
+
