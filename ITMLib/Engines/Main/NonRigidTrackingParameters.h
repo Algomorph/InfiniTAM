@@ -22,9 +22,10 @@
 namespace ITMLib {
 
 GENERATE_SERIALIZABLE_STRUCT(NonRigidTrackingParameters,
-                             (GradientFunctorType, functor_type, ITMLib::TRACKER_SLAVCHEVA_DIAGNOSTIC, ENUM, blah),
-                             (unsigned int, max_iteration_threshold, 200, PRIMITIVE, blah),
-                             (float, max_update_length_threshold, 0.0001f, PRIMITIVE, blah),
-                             (float, momentum_weight, 0.5f, PRIMITIVE, blah));
+                             (GradientFunctorType, functor_type, ITMLib::TRACKER_SLAVCHEVA_DIAGNOSTIC, ENUM,
+                             		"blah"),
+                             (unsigned int, max_iteration_threshold, 200, PRIMITIVE, "blah"),
+                             (float, max_update_length_threshold, 0.0001f, PRIMITIVE, "blah"),
+                             (float, momentum_weight, 0.5f, PRIMITIVE, "blah"));
 
 } // namespace ITMLib

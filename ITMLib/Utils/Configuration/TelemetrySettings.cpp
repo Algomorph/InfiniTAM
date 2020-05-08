@@ -13,3 +13,11 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
+#include "TelemetrySettings.h"
+
+
+namespace ITMLib {
+
+DEFINE_SERIALIZABLE_STRUCT(TELEMETRY_SETTINGS_STRUCT_DESCRIPTION);
+
+} // namespace ITMLib

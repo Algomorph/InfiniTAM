@@ -24,7 +24,7 @@ template void LogTSDFVolumeStatistics<TSDFVoxel, PlainVoxelArray>(VoxelVolume<TS
                                                                   std::string volume_description);
 
 void LogCameraTrajectoryQuaternion(const ORUtils::SE3Pose* p) {
-	if (configuration::get().telemetry_settings.log_trajectory_quaternions) {
+	if (configuration::get().logging_settings.log_trajectory_quaternions) {
 		double t[3];
 		double R[9];
 		double q[4];

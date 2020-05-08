@@ -13,3 +13,13 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
+#include "LoggingSettings.h"
+
+using namespace ITMLib;
+DEFINE_SERIALIZABLE_ENUM(VERBOSITY_LEVEL_ENUM_DESCRIPTION);
+
+namespace ITMLib{
+DEFINE_SERIALIZABLE_STRUCT(LOGGING_SETTINGS_STRUCT_DESCRIPTION);
+} // namespace ITMLib
+
+

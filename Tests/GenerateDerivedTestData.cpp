@@ -412,7 +412,7 @@ configuration::Configuration GenerateDefaultSnoopyConfiguration() {
 			configuration::SWAPPINGMODE_DISABLED,
 			configuration::LIBMODE_DYNAMIC,
 			configuration::INDEX_HASH,
-			configuration::VERBOSITY_WARNING,
+			VERBOSITY_WARNING,
 			configuration::TrackerConfigurationStringPresets::default_intensity_depth_extended_tracker_configuration
 	);
 	return default_snoopy_configuration;

@@ -70,46 +70,46 @@ void initialize_logging() {
 
 	Logger root = get_logger();
 
-	switch (configuration::get().verbosity_level) {
-		case configuration::VERBOSITY_SILENT:
+	switch (configuration::get().logging_settings.verbosity_level) {
+		case VERBOSITY_SILENT:
 			root.setLogLevel(OFF_LOG_LEVEL);
 			break;
-		case configuration::VERBOSITY_FATAL:
+		case VERBOSITY_FATAL:
 			root.setLogLevel(FATAL_LOG_LEVEL);
 			break;
-		case configuration::VERBOSITY_ERROR:
+		case VERBOSITY_ERROR:
 			root.setLogLevel(ERROR_LOG_LEVEL);
 			break;
 		default:
-		case configuration::VERBOSITY_WARNING:
+		case VERBOSITY_WARNING:
 			root.setLogLevel(WARN_LOG_LEVEL);
 			break;
-		case configuration::VERBOSITY_INFO:
+		case VERBOSITY_INFO:
 			root.setLogLevel(INFO_LOG_LEVEL);
 			break;
-		case configuration::VERBOSITY_TOP_LEVEL:
+		case VERBOSITY_TOP_LEVEL:
 			root.setLogLevel(TOP_LOG_LEVEL);
 			break;
-		case configuration::VERBOSITY_PER_FRAME:
+		case VERBOSITY_PER_FRAME:
 			root.setLogLevel(PER_FRAME_LOG_LEVEL);
 			break;
-		case configuration::VERBOSITY_PER_ITERATION:
+		case VERBOSITY_PER_ITERATION:
 			root.setLogLevel(PER_ITERATION_LOG_LEVEL);
 			break;
-		case configuration::VERBOSITY_FOCUS_SPOTS:
+		case VERBOSITY_FOCUS_SPOTS:
 			root.setLogLevel(FOCUS_SPOTS_LOG_LEVEL);
 			break;
-		case configuration::VERBOSITY_DEBUG:
+		case VERBOSITY_DEBUG:
 			root.setLogLevel(DEBUG_LOG_LEVEL);
 			break;
 	}
 
-	if (configuration::get().telemetry_settings.log_to_stdout) {
+	if (configuration::get().logging_settings.log_to_stdout) {
 		log4cplus::SharedAppenderPtr console_appender(new log4cplus::ConsoleAppender(false, true));
 		root.addAppender(console_appender);
 	}
 
-	if (configuration::get().telemetry_settings.log_to_disk) {
+	if (configuration::get().logging_settings.log_to_disk) {
 		std::string log_path = (fs::path(configuration::get().paths.output_path) / fs::path("log.ans")).string();
 		handle_possible_existing_logs(log_path);
 		log4cplus::SharedFileAppenderPtr file_appender(new RollingFileAppender(

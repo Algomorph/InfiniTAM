@@ -39,7 +39,7 @@ public: // static variables
 
 
 public: // member variables
-	const configuration::TelemetrySettings settings;
+	const TelemetrySettings settings;
 	const std::string output_path;
 	const bool focus_spots_enabled;
 
@@ -61,7 +61,7 @@ private: // member variables
 
 public: // member functions
 	TelemetryRecorderLegacy();
-	TelemetryRecorderLegacy(const configuration::TelemetrySettings& settings, const std::string& output_path,
+	TelemetryRecorderLegacy(const TelemetrySettings& settings, const std::string& output_path,
 	                        bool focus_spots_enabled = true);
 	~TelemetryRecorderLegacy();
 

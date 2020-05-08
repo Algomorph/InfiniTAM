@@ -200,7 +200,7 @@ void UIEngine_BPO::GlutIdleFunction() {
 				if (uiEngine.save_after_automatic_run) {
 					uiEngine.mainEngine->SaveToFile(uiEngine.GeneratePreviousFrameOutputPath());
 				}
-				if (configuration::get().telemetry_settings.log_benchmarks) {
+				if (configuration::get().logging_settings.log_benchmarks) {
 					benchmarking::log_all_timers();
 				}
 			}

@@ -389,7 +389,7 @@ configuration::Configuration GenerateChangedUpConfiguration(){
 			configuration::SWAPPINGMODE_ENABLED,
 			configuration::LIBMODE_BASIC,
 			configuration::INDEX_ARRAY,
-			configuration::VERBOSITY_WARNING,
+			VERBOSITY_WARNING,
 			"type=rgb,levels=rrbb"
 	);
 	return changed_up_configuration;

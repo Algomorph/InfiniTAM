@@ -117,10 +117,10 @@ public:
 			warp_voxels(warp_field->GetVoxels()), warp_index_data(warp_field->index.GetIndexData()),
 			canonical_voxels(canonical_volume->GetVoxels()), canonical_index_data(canonical_volume->index.GetIndexData()),
 			live_cache(), canonical_cache(),
-			use_focus_coordinates(configuration::get().verbosity_level >= configuration::VERBOSITY_FOCUS_SPOTS),
+			use_focus_coordinates(configuration::get().logging_settings.verbosity_level >= VERBOSITY_FOCUS_SPOTS),
 			focus_coordinates(configuration::get().focus_coordinates),
 			sdf_unity(voxel_size / narrow_band_half_width),
-			verbosity_level(configuration::get().verbosity_level)
+			verbosity_level(configuration::get().logging_settings.verbosity_level)
 			{}
 
 	// endregion =======================================================================================================
@@ -329,7 +329,7 @@ public:
 
 
 	void PrintStatistics() {
-		if(verbosity_level < configuration::VERBOSITY_PER_ITERATION) return;
+		if(verbosity_level < VERBOSITY_PER_ITERATION) return;
 		std::cout << bright_cyan << "*** Non-rigid Alignment Iteration Statistics ***" << reset << std::endl;
 		PrintEnergyStatistics(this->switches.enable_data_term, this->switches.enable_level_set_term,
 		                      this->switches.enable_smoothing_term, this->switches.enable_killing_rigidity_enforcement_term,
@@ -366,7 +366,7 @@ private:
 	const SlavchevaSurfaceTracker::Parameters parameters;
 	const SlavchevaSurfaceTracker::Switches switches;
 
-	const configuration::VerbosityLevel verbosity_level;
+	const VerbosityLevel verbosity_level;
 };
 
 }// namespace ITMLib

@@ -14,3 +14,38 @@
 //  limitations under the License.
 //  ================================================================
 #pragma once
+
+#include "../Metacoding/Metacoding.h"
+
+namespace ITMLib {
+
+#define VERBOSITY_LEVEL_ENUM_DESCRIPTION VerbosityLevel, \
+    (VERBOSITY_SILENT, "silent", "SILENT", "VERBOSITY_SILENT"), \
+    (VERBOSITY_FATAL, "fatal", "FATAL", "VERBOSITY_FATAL"), \
+    (VERBOSITY_ERROR, "error", "ERROR", "VERBOSITY_ERROR"), \
+    (VERBOSITY_WARNING, "warning", "WARNING", "VERBOSITY_WARNING"), \
+    (VERBOSITY_INFO, "info", "information", "INFO", "VERBOSITY_INFO"), \
+    (VERBOSITY_TOP_LEVEL, "top_level", "TOP_LEVEL", "Top-level operations", "VERBOSITY_TOP_LEVEL", "top-level", "top-level operations"), \
+    (VERBOSITY_PER_FRAME, "per_frame", "PER_FRAME", "Per-frame operations", "VERBOSITY_PER_FRAME", "per-frame", "per-frame operations"), \
+    (VERBOSITY_PER_ITERATION, "per_iteration", "PER_ITERATION", "Per-iteration operations", "VERBOSITY_PER_ITERATION", "per-iteration", "per-iteration operations"), \
+    (VERBOSITY_FOCUS_SPOTS, "focus_spots", "FOCUS_SPOTS", "focus_coordinates", "Interesting details", "trouble spots"), \
+    (VERBOSITY_DEBUG, "debug", "DEBUG", "VERBOSITY_DEBUG")
+
+DECLARE_SERIALIZABLE_ENUM(VERBOSITY_LEVEL_ENUM_DESCRIPTION);
+
+#define LOGGING_SETTINGS_STRUCT_DESCRIPTION LoggingSettings, \
+    (VerbosityLevel, verbosity_level, VERBOSITY_PER_FRAME, ENUM, "Verbosity level. "),\
+    (bool, log_to_disk, false, PRIMITIVE, "Print log to text file, in the output path (preserves older log files). "\
+    "Can be used in combination with stdout."), \
+    (bool, log_to_stdout, true, PRIMITIVE, "Print log to stdout. Can be used in combination with disk logging."), \
+    (bool, log_benchmarks, false, PRIMITIVE, "Whether to log runtime benchmarks after automatic run."),\
+    (bool, log_volume_statistics, false, PRIMITIVE, "Whether to output various volume statistics after some operations" \
+    " (used only when verbosity_level is set at or above PER_FRAME)."),\
+    (bool, log_trajectory_quaternions, false, PRIMITIVE, "Whether to log estimated camera trajectory quaternions"), \
+    (bool, log_surface_tracking_optimization_energies, false, PRIMITIVE, "Whether to log optimization energies " \
+    "for each iteration of the surface tracking optimization. Only works when non_rigid_tracking_parameters.functor_type " \
+    "parameter is set to \"slavcheva_diagnostic\"")
+
+DECLARE_SERIALIZABLE_STRUCT(LOGGING_SETTINGS_STRUCT_DESCRIPTION);
+
+} // namespace ITMLib

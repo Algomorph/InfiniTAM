@@ -41,8 +41,8 @@ template<typename TVoxel, typename TWarp, typename TIndex>
 TelemetryRecorder<TVoxel, TWarp, TIndex>::TelemetryRecorder()
 		: TelemetryRecorder<TVoxel, TWarp, TIndex>(configuration::get().telemetry_settings,
 		                                           configuration::get().paths.output_path,
-		                                           configuration::get().verbosity_level >=
-		                                           configuration::VERBOSITY_FOCUS_SPOTS) {};
+		                                           configuration::get().logging_settings.verbosity_level >=
+		                                           VERBOSITY_FOCUS_SPOTS) {};
 
 
 template<typename TVoxel, typename TWarp, typename TIndex>
