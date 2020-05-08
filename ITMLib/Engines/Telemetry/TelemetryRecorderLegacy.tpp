@@ -73,7 +73,7 @@ void TelemetryRecorder<TVoxel, TWarp, TIndex>::InitializeFrameRecording(
 
 		if (settings.record_live_focus_point_TSDF_graph) {
 #ifdef WITH_VTK
-			this->focus_point_TSDF_grapher.reset(new VoxelValueGrapher(settings.focus_coordinates, AXIS_X, 16));
+			this->focus_point_TSDF_grapher.reset(new VoxelValueGrapher(configuration::get().focus_coordinates, AXIS_X, 16));
 			focus_point_TSDF_grapher->Plot1DSceneSlice(canonical_volume, Vector4i(97, 181, 193, 255), 3.0);
 			focus_point_TSDF_grapher->Plot1DSceneSlice(raw_live_volume, Vector4i(183, 115, 46, 255), 3.0);
 #else
@@ -83,7 +83,7 @@ void TelemetryRecorder<TVoxel, TWarp, TIndex>::InitializeFrameRecording(
 		}
 #ifdef WITH_OPENCV
 		volume_2D_slice_visualizer.reset(
-				new VolumeSliceVisualizer2D<TVoxel, TWarp, TIndex>(focus_coordinates, 100,
+				new VolumeSliceVisualizer2D<TVoxel, TWarp, TIndex>(configuration::get().focus_coordinates, 100,
 				                                                   16.0,
 				                                                   planeFor2Dand3DSlices));
 
@@ -109,7 +109,7 @@ void TelemetryRecorder<TVoxel, TWarp, TIndex>::InitializeFrameRecording(
 #ifdef WITH_VTK
 			if (!scene3DSliceVisualizer) {
 				scene3DSliceVisualizer.reset(new SceneSliceVisualizer3D<TVoxel, TWarp, TIndex>
-						                             (canonical_volume, raw_live_volume, warpField, focus_coordinates,
+						                             (canonical_volume, raw_live_volume, warpField, configuration::get().focus_coordinates,
 						                              planeFor2Dand3DSlices, _3dSliceInPlaneRadius,
 						                              _3dSliceOutOfPlaneRadius));
 			} else {
@@ -162,14 +162,14 @@ void TelemetryRecorder<TVoxel, TWarp, TIndex>::FinalizeFrameRecording() {
 	if (recording3DSceneAndWarpProgression) {
 		scene3DLogger->StopSavingWarpState();
 		if (hasFocusCoordinates) {
-			Vector3i sliceMinPoint(focus_coordinates[0] - focusSliceRadius,
-			                       focus_coordinates[1] - focusSliceRadius,
-			                       focus_coordinates[2] - focusSliceRadius);
-			Vector3i sliceMaxPoint(focus_coordinates[0] + focusSliceRadius,
-			                       focus_coordinates[1] + focusSliceRadius,
-			                       focus_coordinates[2] + focusSliceRadius);
+			Vector3i sliceMinPoint(configuration::get().focus_coordinates[0] - focusSliceRadius,
+			                       configuration::get().focus_coordinates[1] - focusSliceRadius,
+			                       configuration::get().focus_coordinates[2] - focusSliceRadius);
+			Vector3i sliceMaxPoint(configuration::get().focus_coordinates[0] + focusSliceRadius,
+			                       configuration::get().focus_coordinates[1] + focusSliceRadius,
+			                       configuration::get().focus_coordinates[2] + focusSliceRadius);
 
-			std::cout << "Making slice around voxel " << green << focus_coordinates << reset << " with l_0 radius of "
+			std::cout << "Making slice around voxel " << green << configuration::get().focus_coordinates << reset << " with l_0 radius of "
 			          << focusSliceRadius << "...";
 			std::string sliceId;
 			scene3DLogger->MakeSlice(sliceMinPoint, sliceMaxPoint, sliceId);

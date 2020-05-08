@@ -25,7 +25,7 @@
 
 //local
 #include "../../Utils/Math.h"
-#include "../../Utils/Logging/LoggingConfigruation.h"
+#include "../../Utils/Logging/Logging.h"
 #include "AnalyticsEngineFactory.h"
 #include "../../Utils/Collections/OperationsOnSTLContainers.h"
 #include "../../Utils/CPPPrintHelpers.h"

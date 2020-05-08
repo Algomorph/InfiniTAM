@@ -118,7 +118,7 @@ public:
 			canonical_voxels(canonical_volume->GetVoxels()), canonical_index_data(canonical_volume->index.GetIndexData()),
 			live_cache(), canonical_cache(),
 			use_focus_coordinates(configuration::get().verbosity_level >= configuration::VERBOSITY_FOCUS_SPOTS),
-			focus_coordinates(configuration::get().telemetry_settings.focus_coordinates),
+			focus_coordinates(configuration::get().focus_coordinates),
 			sdf_unity(voxel_size / narrow_band_half_width),
 			verbosity_level(configuration::get().verbosity_level)
 			{}

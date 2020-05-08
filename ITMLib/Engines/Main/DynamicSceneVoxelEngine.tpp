@@ -41,7 +41,7 @@ namespace fs = std::filesystem;
 #include "../../CameraTrackers/CameraTrackerFactory.h"
 #include "../../SurfaceTrackers/SurfaceTrackerFactory.h"
 #include "../../Utils/Analytics/BenchmarkUtilities.h"
-#include "../../Utils/Logging/LoggingConfigruation.h"
+#include "../../Utils/Logging/Logging.h"
 #include "../../Utils/Quaternions.h"
 #include "../../../ORUtils/NVTimer.h"
 #include "../../../ORUtils/FileUtils.h"

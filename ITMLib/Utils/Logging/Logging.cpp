@@ -23,7 +23,7 @@
 #include <boost/filesystem.hpp>
 
 //local
-#include "LoggingConfigruation.h"
+#include "Logging.h"
 #include "../Configuration/Configuration.h"
 
 

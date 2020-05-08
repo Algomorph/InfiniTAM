@@ -1,5 +1,5 @@
 //  ================================================================
-//  Created by Gregory Kramida (https://github.com/Algomorph) on 4/24/20.
+//  Created by Gregory Kramida (https://github.com/Algomorph) on 5/8/20.
 //  Copyright (c) 2020 Gregory Kramida
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -13,37 +13,3 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-
-#include <cstdlib>
-#include <cstring>
-
-//log4cplus
-#include <log4cplus/logger.h>
-
-#include "LoggingCUDAWrapper.h"
-
-namespace l4c = log4cplus;
-
-namespace ITMLib::logging::CUDA::log4cplus {
-
-Logger::Logger()  {
-}
-
-Logger::~Logger() { }
-
-bool Logger::isEnabledFor(LogLevel level) const {
-	return l4c::Logger::getRoot().isEnabledFor(level);
-}
-
-void Logger::forcedLog(LogLevel ll, const std::string& message, const char* file, int line) {
-	return l4c::Logger::getRoot().forcedLog(ll, message, file, line);
-}
-
-Logger Logger::getRoot() {
-	return Logger();
-}
-
-} // namespace ITMLib
-
-
-

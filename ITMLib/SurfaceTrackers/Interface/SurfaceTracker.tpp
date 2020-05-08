@@ -25,7 +25,7 @@
 #include "../../Engines/Traversal/Interface/VolumeTraversal.h"
 #include "../../Engines/Traversal/Interface/ThreeVolumeTraversal.h"
 #include "../../Utils/Analytics/BenchmarkUtilities.h"
-#include "../../Utils/Logging/LoggingConfigruation.h"
+#include "../../Utils/Logging/Logging.h"
 #include "../../Engines/Warping/WarpingEngineFactory.h"
 
 using namespace ITMLib;

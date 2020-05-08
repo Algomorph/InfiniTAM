@@ -32,7 +32,7 @@
 //ITMLib
 
 #include "../../ITMLib/Utils/Analytics/BenchmarkUtilities.h"
-#include "../../ITMLib/Utils/Logging/LoggingConfigruation.h"
+#include "../../ITMLib/Utils/Logging/Logging.h"
 #include "../../ITMLib/Engines/Telemetry/TelemetryRecorderLegacy.h"
 
 #ifdef WITH_OPENCV
@@ -174,7 +174,7 @@ void UIEngine_BPO::Initialize(int& argc, char** argv,
 	outImageType[0] = this->freeview_active ? this->colourModes_freeview[this->current_colour_mode].type
 	                                        : this->colourModes_main[this->current_colour_mode].type;
 
-	if (configuration.telemetry_settings.record_reconstruction_video) {
+	if (configuration.record_reconstruction_video) {
 		this->reconstructionVideoWriter = new FFMPEGWriter();
 	}
 

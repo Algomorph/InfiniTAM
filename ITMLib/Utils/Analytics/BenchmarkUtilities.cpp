@@ -27,7 +27,7 @@
 #include "BenchmarkUtilities.h"
 #include "../CPPPrintHelpers.h"
 #include "../Configuration/Configuration.h"
-#include "../Logging/LoggingConfigruation.h"
+#include "../Logging/Logging.h"
 
 namespace fs = boost::filesystem;
 

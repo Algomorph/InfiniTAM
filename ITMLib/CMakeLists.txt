@@ -900,6 +900,8 @@ set(ITMLIB_UTILS_SOURCES
     Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CPU.cpp
     Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CUDA.tcu
     Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CUDA.cu
+    Utils/Analytics/NeighborVoxelIterationInfo.cpp
+    Utils/Analytics/BenchmarkUtilities.cpp
 
     Utils/Collections/NestedMap3DOfArrays.tpp
     Utils/Collections/NestedMap3DOfArrays.cpp
@@ -907,23 +909,23 @@ set(ITMLIB_UTILS_SOURCES
     Utils/Collections/NestedMap3D.cpp
     Utils/Collections/OperationsOnSTLContainers.cpp
 
+    Utils/Configuration/Configuration.cpp
+    Utils/Configuration/LoggingSettings.cpp
+    Utils/Configuration/TelemetrySettings.cpp
+
     Utils/FileIO/JSON_Utilities.cpp
     Utils/FileIO/CSV_Utilities.cpp
 
     Utils/Geometry/CardinalAxesAndPlanes.cpp
 
     Utils/Logging/LoggingUtilities.cpp
-    Utils/Logging/LoggingConfiguration.cpp
+    Utils/Logging/Logging.cpp
     Utils/Logging/LoggingCUDAWrapper.cpp
 
     Utils/Metacoding/SerializableStruct_Impl.cpp
 
     Utils/Telemetry/TelemetryUtilities.cpp
 
-    Utils/Analytics/NeighborVoxelIterationInfo.cpp
-    Utils/Analytics/BenchmarkUtilities.cpp
-
-    Utils/Configuration/Configuration.cpp
     Utils/CPPPrintHelpers.cpp
 
     Utils/Math.cpp
@@ -934,6 +936,10 @@ set(ITMLIB_UTILS_HEADERS
     Utils/Collections/NestedMap3DOfArrays.h
     Utils/Collections/NestedMap3D.h
     Utils/Collections/OperationsOnSTLContainers.h
+
+    Utils/Configuration/Configuration.h
+    Utils/Configuration/LoggingSettings.h
+    Utils/Configuration/TelemetrySettings.h
 
     Utils/FileIO/JSON_Utilities.h
     Utils/FileIO/CSV_Utilities.h
@@ -957,7 +963,7 @@ set(ITMLIB_UTILS_HEADERS
 
     Utils/Telemetry/TelemetryUtilities.h
 
-    Utils/Logging/LoggingConfiguration.cpp
+    Utils/Logging/Logging.cpp
     Utils/Logging/LoggingUtilities.h
     Utils/Logging/LoggingCUDAWrapper.h
 
@@ -967,7 +973,6 @@ set(ITMLIB_UTILS_HEADERS
     Utils/HashBlockProperties.h
     Utils/VoxelFlags.h
     Utils/WarpType.h
-    Utils/Configuration/Configuration.h
     Utils/Math.h
     Utils/MemoryBlock_StdContainer_Convertions.h
     Utils/MemoryBlockTypes.h

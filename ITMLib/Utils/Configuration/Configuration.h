@@ -117,13 +117,6 @@ DECLARE_SERIALIZABLE_STRUCT(PATHS_STRUCT_DESCRIPTION);
 
 ///For focus_coordinates to be used, VerbosityLevel must be set to VERBOSITY_FOCUS_SPOTS or above
 #define TELEMETRY_SETTINGS_STRUCT_DESCRIPTION TelemetrySettings, \
-    (Vector3i, focus_coordinates, Vector3i(0), VECTOR, \
-    "Focus 3d coordinates (integer) that specify the voxel to print additional diagnostic information about (and " \
-    "where to focus telemetry information records). "\
-    "Only effective when verbosity_level is set to focus_spots (alt. VERBOSITY_FOCUS_SPOTS) or above."), \
-    (bool, record_reconstruction_video, false, PRIMITIVE, \
-            "Whether to record video of the canonical reconstruction during automatic run "\
-            "(see number_of_frames_to_process_after_launch and index_of_frame_to_start_at)."), \
     (bool, log_to_disk, false, PRIMITIVE, "Print log to text file, in the output path (preserves older log files). "\
     "Can be used in combination with stdout."), \
     (bool, log_to_stdout, true, PRIMITIVE, "Print log to stdout. Can be used in combination with disk logging."), \
@@ -159,7 +152,7 @@ DECLARE_SERIALIZABLE_STRUCT(PATHS_STRUCT_DESCRIPTION);
     "after camera tracking and before surface tracking, (b) from live volume after surface tracking, and (c) from " \
     "canonical volume after fusion."), \
     (bool, use_CPU_for_mesh_recording, false, PRIMITIVE, "Whether to ALWAYS use CPU & regular RAM when recording mesh telemetry. For CUDA runs, this will reduce GPU memory usage."), \
-	(bool, record_camera_matrices, false, PRIMITIVE, "Whether to record estimated camera trajectory matrices in world space.")
+    (bool, record_camera_matrices, false, PRIMITIVE, "Whether to record estimated camera trajectory matrices in world space.")
 
 
 DECLARE_SERIALIZABLE_STRUCT(TELEMETRY_SETTINGS_STRUCT_DESCRIPTION);
@@ -215,6 +208,13 @@ DECLARE_SERIALIZABLE_STRUCT(HASH_VOLUME_PARAMETERS_STRUCT_DESCRIPTION);
 DECLARE_SERIALIZABLE_STRUCT(SPECIFIC_VOLUME_PARAMETERS_STRUCT_DESCRIPTION);
 
 #define CONFIGURATION_STRUCT_DESCRIPTION Configuration, \
+    (Vector3i, focus_coordinates, Vector3i(0), VECTOR, \
+    "Focus 3d coordinates (integer) that specify the voxel to print additional diagnostic information about (and " \
+    "where to focus telemetry information records). "\
+    "Only effective when verbosity_level is set to focus_spots (alt. VERBOSITY_FOCUS_SPOTS) or above."), \
+    (bool, record_reconstruction_video, false, PRIMITIVE, \
+            "Whether to record video of the canonical reconstruction during automatic run "\
+            "(see number_of_frames_to_process_after_launch and index_of_frame_to_start_at)."), \
     (VoxelVolumeParameters, general_voxel_volume_parameters, VoxelVolumeParameters(), STRUCT, "Voxel volume parameters, such as voxel size."),\
     (SurfelVolumeParameters, general_surfel_volume_parameters, SurfelVolumeParameters(), STRUCT, "Surfel volume parameters, such as surfel radius."),\
     (SpecificVolumeParameters, specific_volume_parameters, SpecificVolumeParameters(), STRUCT, "Parameters for specific volumes (multiple volumes are used in dynamic mode), may include information for different indexing methods."), \

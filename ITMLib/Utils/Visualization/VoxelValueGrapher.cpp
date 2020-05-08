@@ -34,8 +34,8 @@ using namespace ITMLib;
 
 // region ==================================== CONSTRUCTORS / DESTRUCTORS ==============================================
 
-VoxelValueGrapher::VoxelValueGrapher(Vector3i focus_coordinate, Axis axis, unsigned int voxel_range) :
-		focus_coordinates(focus_coordinate),
+VoxelValueGrapher::VoxelValueGrapher(Vector3i focus_coordinates, Axis axis, unsigned int voxel_range) :
+		focus_coordinates(focus_coordinates),
 		axis(axis),
 		voxelRange(voxel_range),
 		range_start_voxel_index(focus_coordinate[axis] - ((voxel_range + 1) / 2)),

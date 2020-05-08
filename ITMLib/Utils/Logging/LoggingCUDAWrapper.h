@@ -31,6 +31,8 @@ typedef wchar_t tchar;
 typedef char tchar;
 
 #endif
+//TODO: revise to use a shared pointer to the root logger somehow, to enable multiple instances.
+// The pointer has to use some dummy type, i.e. cannot use log4cpp headers directly. Raw pointers don't work well with log4cpp's internal pointers.
 
 typedef int LogLevel;
 typedef std::basic_ostringstream<tchar> tostringstream;
