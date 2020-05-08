@@ -16,7 +16,7 @@
 
 #include "VoxelVolume.h"
 #include "../../Engines/VolumeFileIO/VolumeFileIOEngine.h"
-#include "../../Utils/Configuration.h"
+#include "../../Utils/Configuration/Configuration.h"
 #include "../../Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 
 #ifndef COMPILE_WITHOUT_CUDA

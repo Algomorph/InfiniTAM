@@ -18,7 +18,7 @@
 #include "TestUtilities.tpp"
 
 
-#include "../../ITMLib/Utils/Configuration.h"
+#include "../../ITMLib/Utils/Configuration/Configuration.h"
 #include "../../ITMLib/Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 #include "../../ITMLib/Engines/Telemetry/VolumeSequenceRecorder.h"
 #include "../../ITMLib/Engines/Analytics/AnalyticsEngine.h"

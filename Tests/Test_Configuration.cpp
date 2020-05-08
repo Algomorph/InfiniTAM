@@ -23,7 +23,7 @@
 #include <boost/test/unit_test.hpp>
 
 //ITMLib
-#include "../ITMLib/Utils/Configuration.h"
+#include "../ITMLib/Utils/Configuration/Configuration.h"
 
 //test_utilities
 #include "TestUtilities/TestUtilities.h"

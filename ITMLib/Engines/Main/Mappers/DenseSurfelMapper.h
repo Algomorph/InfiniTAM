@@ -4,7 +4,7 @@
 
 #include "../../Reconstruction/Interface/SurfelSceneReconstructionEngine.h"
 #include "../../../Objects/RenderStates/SurfelRenderState.h"
-#include "../../../Utils/Configuration.h"
+#include "../../../Utils/Configuration/Configuration.h"
 
 namespace ITMLib
 {

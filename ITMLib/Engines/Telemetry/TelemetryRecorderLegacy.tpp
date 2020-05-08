@@ -28,7 +28,7 @@
 #include "TelemetryRecorderLegacy.h"
 #include "../../Utils/Analytics/BenchmarkUtilities.h"
 #include "../../Utils/CPPPrintHelpers.h"
-#include "../../Utils/Configuration.h"
+#include "../../Utils/Configuration/Configuration.h"
 
 
 using namespace ITMLib;

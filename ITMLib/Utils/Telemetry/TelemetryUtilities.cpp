@@ -19,7 +19,7 @@
 
 //local
 #include "TelemetryUtilities.h"
-#include "../Configuration.h"
+#include "../Configuration/Configuration.h"
 
 namespace fs = std::filesystem;
 namespace ITMLib {

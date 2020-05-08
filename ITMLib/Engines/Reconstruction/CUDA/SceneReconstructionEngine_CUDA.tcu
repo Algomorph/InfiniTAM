@@ -6,7 +6,7 @@
 #include "../../../Utils/CUDAUtils.h"
 #include "../../Common/CheckBlockVisibility.h"
 #include "../../Common/AllocationTempData.h"
-#include "../../../Utils/Configuration.h"
+#include "../../../Utils/Configuration/Configuration.h"
 
 
 using namespace ITMLib;

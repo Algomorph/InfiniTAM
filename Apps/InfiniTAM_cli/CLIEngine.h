@@ -5,7 +5,7 @@
 #include "../../InputSource/ImageSourceEngine.h"
 #include "../../InputSource/IMUSourceEngine.h"
 #include "../../ITMLib/Engines/Main/MainEngine.h"
-#include "../../ITMLib/Utils/Configuration.h"
+#include "../../ITMLib/Utils/Configuration/Configuration.h"
 #include "../../ORUtils/FileUtils.h"
 #include "../../ORUtils/NVTimer.h"
 

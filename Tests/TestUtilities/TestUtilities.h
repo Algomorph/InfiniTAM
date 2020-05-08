@@ -23,7 +23,7 @@
 #include "../../ITMLib/Objects/Volume/RepresentationAccess.h"
 #include "../../ITMLib/Objects/Volume/VoxelVolume.h"
 #include "../../ITMLib/Objects/Views/View.h"
-#include "../../ITMLib/Utils/Configuration.h"
+#include "../../ITMLib/Utils/Configuration/Configuration.h"
 #include "../../ITMLib/Utils/Math.h"
 
 

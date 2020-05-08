@@ -20,7 +20,7 @@
 
 //local
 #include "SlavchevaSurfaceTracker.h"
-#include "../../Utils/Configuration.h"
+#include "../../Utils/Configuration/Configuration.h"
 #include "../../Utils/FileIO/JSON_Utilities.h"
 #include "../../Utils/CPPPrintHelpers.h"
 

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "Interface/SurfelVisualizationEngine.h"
-#include "../../Utils/Configuration.h"
+#include "../../Utils/Configuration/Configuration.h"
 #include "CPU/SurfelVisualizationEngine_CPU.h"
 #ifndef COMPILE_WITHOUT_CUDA
 #include "CUDA/SurfelVisualizationEngine_CUDA.h"

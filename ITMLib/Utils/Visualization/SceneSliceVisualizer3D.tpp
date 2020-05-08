@@ -42,7 +42,7 @@
 #include "SceneSliceVisualizer3DInteractorStyle.h"
 #include "../../Engines/Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
 #include "../../Engines/Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
-#include "../Configuration.h"
+#include "../Configuration/Configuration.h"
 
 
 

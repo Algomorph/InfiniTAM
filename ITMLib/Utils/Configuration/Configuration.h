@@ -27,16 +27,16 @@
 #include <boost/property_tree/ptree.hpp>
 
 //local
-#include "VoxelVolumeParameters.h"
-#include "SurfelVolumeParameters.h"
-#include "../../ORUtils/MemoryDeviceType.h"
-#include "Math.h"
-#include "../SurfaceTrackers/Interface/SlavchevaSurfaceTracker.h"
-#include "../SurfaceTrackers/WarpGradientFunctors/WarpGradientFunctor.h"
-#include "../Engines/Main/NonRigidTrackingParameters.h"
-#include "../Objects/Volume/VoxelBlockHash.h"
-#include "../Objects/Volume/PlainVoxelArray.h"
-#include "../Utils/Geometry/CardinalAxesAndPlanes.h"
+#include "../VoxelVolumeParameters.h"
+#include "../SurfelVolumeParameters.h"
+#include "../../../ORUtils/MemoryDeviceType.h"
+#include "../Math.h"
+#include "../../SurfaceTrackers/Interface/SlavchevaSurfaceTracker.h"
+#include "../../SurfaceTrackers/WarpGradientFunctors/WarpGradientFunctor.h"
+#include "../../Engines/Main/NonRigidTrackingParameters.h"
+#include "../../Objects/Volume/VoxelBlockHash.h"
+#include "../../Objects/Volume/PlainVoxelArray.h"
+#include "../Geometry/CardinalAxesAndPlanes.h"
 
 namespace po = boost::program_options;
 namespace pt = boost::property_tree;

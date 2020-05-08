@@ -26,7 +26,7 @@
 #include <boost/test/unit_test.hpp>
 
 //local
-#include "../ITMLib/Utils/Configuration.h"
+#include "../ITMLib/Utils/Configuration/Configuration.h"
 #include "../ITMLib/SurfaceTrackers/Interface/SurfaceTracker.h"
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CPU.h"
 #include "../ITMLib/Engines/Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"

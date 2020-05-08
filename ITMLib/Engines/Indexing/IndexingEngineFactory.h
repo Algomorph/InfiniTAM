@@ -16,7 +16,7 @@
 #pragma once
 
 
-#include "../../Utils/Configuration.h"
+#include "../../Utils/Configuration/Configuration.h"
 
 #include "Interface/IndexingEngine.h"
 #include "VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"

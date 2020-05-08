@@ -34,7 +34,7 @@
 #include "../ITMLib/Objects/Volume/RepresentationAccess.h"
 #include "../ITMLib/Objects/Camera/CalibIO.h"
 
-#include "../ITMLib/Utils/Configuration.h"
+#include "../ITMLib/Utils/Configuration/Configuration.h"
 #include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CUDA.h"
 #include "../ITMLib/Utils/Analytics/AlmostEqual.h"

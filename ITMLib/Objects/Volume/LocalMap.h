@@ -8,7 +8,7 @@
 #include "../RenderStates/RenderState.h"
 #include "VoxelVolume.h"
 #include "../Tracking/CameraTrackingState.h"
-#include "../../Utils/Configuration.h"
+#include "../../Utils/Configuration/Configuration.h"
 
 namespace ITMLib {
 	struct PoseConstraint

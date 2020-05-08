@@ -15,7 +15,7 @@
 //  ================================================================
 #pragma once
 
-#include "../../Utils/Configuration.h"
+#include "../../Utils/Configuration/Configuration.h"
 
 #include "DepthFusionEngine.h"
 

@@ -22,7 +22,7 @@
 #include "../../Utils/WarpType.h"
 #include "../../Objects/Volume/VoxelVolume.h"
 #include "../../Objects/Volume/TrilinearInterpolation.h"
-#include "../../Utils/Configuration.h"
+#include "../../Utils/Configuration/Configuration.h"
 #include "../../../ORUtils/PlatformIndependentAtomics.h"
 #include "../Common/WarpAccessFunctors.h"
 

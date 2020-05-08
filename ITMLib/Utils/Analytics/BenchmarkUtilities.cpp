@@ -26,7 +26,7 @@
 #include "../../../ORUtils/PlatformIndependence.h"
 #include "BenchmarkUtilities.h"
 #include "../CPPPrintHelpers.h"
-#include "../Configuration.h"
+#include "../Configuration/Configuration.h"
 #include "../Logging/LoggingConfigruation.h"
 
 namespace fs = boost::filesystem;

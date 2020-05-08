@@ -26,7 +26,7 @@
 #include <boost/test/unit_test.hpp>
 
 //ITMLib
-#include "../ITMLib/Utils/Configuration.h"
+#include "../ITMLib/Utils/Configuration/Configuration.h"
 #include "../ITMLib/Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
 #include "../ITMLib/SurfaceTrackers/Interface/SurfaceTrackerInterface.h"
 #include "../ITMLib/SurfaceTrackers/Interface/SurfaceTracker.h"

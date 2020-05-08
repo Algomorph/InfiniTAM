@@ -7,7 +7,7 @@
 #include "../Visualization/Interface/SurfelVisualizationEngine.h"
 #include "../Visualization/Interface/VisualizationEngine.h"
 #include "../../CameraTrackers/Interface/CameraTracker.h"
-#include "../../Utils/Configuration.h"
+#include "../../Utils/Configuration/Configuration.h"
 #include "../../CameraTrackers/Interface/CameraTracker.h"
 
 namespace ITMLib

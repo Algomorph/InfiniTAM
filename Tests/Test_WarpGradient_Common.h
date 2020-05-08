@@ -21,7 +21,7 @@
 //ITMLib
 #include "../ORUtils/MemoryDeviceType.h"
 #include "../ITMLib/GlobalTemplateDefines.h"
-#include "../ITMLib/Utils/Configuration.h"
+#include "../ITMLib/Utils/Configuration/Configuration.h"
 #include "../ITMLib/Objects/Volume/VoxelVolume.h"
 #include "../ITMLib/Engines/EditAndCopy/Interface/EditAndCopyEngineInterface.h"
 #include "../ITMLib/Engines/EditAndCopy/EditAndCopyEngineFactory.h"

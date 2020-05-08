@@ -17,7 +17,7 @@
 
 #include "../../Utils/Math.h"
 #include "../../Objects/Volume/VoxelVolume.h"
-#include "../../Utils/Configuration.h"
+#include "../../Utils/Configuration/Configuration.h"
 #include "SurfaceTrackerSharedRoutines.h"
 #include "../../../ORUtils/PlatformIndependentAtomics.h"
 #include "../../Engines/Traversal/Interface/VolumeTraversal.h"

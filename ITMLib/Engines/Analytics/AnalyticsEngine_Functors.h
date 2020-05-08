@@ -29,7 +29,7 @@
 #include "../Reduction/Interface/VolumeReduction.h"
 #include "../../../ORUtils/PlatformIndependentAtomics.h"
 #include "../../../ORUtils/PlatformIndependence.h"
-#include "../../Utils/Configuration.h"
+#include "../../Utils/Configuration/Configuration.h"
 #include "../../Objects/Volume/VoxelVolume.h"
 #include "../Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
 #include "../Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"

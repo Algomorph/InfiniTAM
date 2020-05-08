@@ -22,7 +22,7 @@ namespace fs = std::filesystem;
 #include "TelemetryRecorder.h"
 #include "../VolumeFileIO/VolumeFileIOEngine.h"
 #include "../../Objects/Volume/VoxelVolume.h"
-#include "../../Utils/Configuration.h"
+#include "../../Utils/Configuration/Configuration.h"
 #include "../../GlobalTemplateDefines.h"
 #include "../../Utils/Telemetry/TelemetryUtilities.h"
 #include "../Meshing/MeshingEngineFactory.h"

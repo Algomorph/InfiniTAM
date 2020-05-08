@@ -19,7 +19,7 @@
 #include "../WarpGradientFunctors/WarpGradientFunctor.h"
 #include "../../Engines/Warping/WarpingEngine.h"
 #include "../../Engines/Main/NonRigidTrackingParameters.h"
-#include "../../Utils/Configuration.h"
+#include "../../Utils/Configuration/Configuration.h"
 #include "../../Utils/WarpType.h"
 
 

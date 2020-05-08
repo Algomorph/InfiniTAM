@@ -20,7 +20,7 @@
 #include "TestUtilityFunctors.h"
 
 //ITMLib
-#include "../../ITMLib/Utils/Configuration.h"
+#include "../../ITMLib/Utils/Configuration/Configuration.h"
 #include "../../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
 #include "../../ITMLib/Engines/Indexing/IndexingEngineFactory.h"
 #include "../../ITMLib/Engines/Visualization/VisualizationEngineFactory.h"

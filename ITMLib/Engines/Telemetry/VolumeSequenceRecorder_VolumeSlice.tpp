@@ -24,7 +24,7 @@
 
 //ITMLib
 #include "VolumeSequenceRecorder.h"
-#include "../../Utils/Configuration.h"
+#include "../../Utils/Configuration/Configuration.h"
 #include "../EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 #include "../Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
 #include "../Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"

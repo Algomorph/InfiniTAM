@@ -923,7 +923,7 @@ set(ITMLIB_UTILS_SOURCES
     Utils/Analytics/NeighborVoxelIterationInfo.cpp
     Utils/Analytics/BenchmarkUtilities.cpp
 
-    Utils/Configuration.cpp
+    Utils/Configuration/Configuration.cpp
     Utils/CPPPrintHelpers.cpp
 
     Utils/Math.cpp
@@ -967,7 +967,7 @@ set(ITMLIB_UTILS_HEADERS
     Utils/HashBlockProperties.h
     Utils/VoxelFlags.h
     Utils/WarpType.h
-    Utils/Configuration.h
+    Utils/Configuration/Configuration.h
     Utils/Math.h
     Utils/MemoryBlock_StdContainer_Convertions.h
     Utils/MemoryBlockTypes.h

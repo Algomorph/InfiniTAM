@@ -22,7 +22,7 @@
 #include "../../Traversal/Interface/HashTableTraversal.h"
 #include "../../Traversal/Interface/VolumeTraversal.h"
 #include "../Shared/IndexingEngine_Functors.h"
-#include "../../../Utils/Configuration.h"
+#include "../../../Utils/Configuration/Configuration.h"
 
 namespace ITMLib {
 

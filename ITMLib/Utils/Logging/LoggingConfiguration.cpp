@@ -24,7 +24,7 @@
 
 //local
 #include "LoggingConfigruation.h"
-#include "../Configuration.h"
+#include "../Configuration/Configuration.h"
 
 
 using namespace log4cplus;

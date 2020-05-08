@@ -4,7 +4,7 @@
 #include "SceneReconstructionEngine_CPU.h"
 #include "../Shared/SceneReconstructionEngine_Shared.h"
 #include "../../Common/CheckBlockVisibility.h"
-#include "../../../Utils/Configuration.h"
+#include "../../../Utils/Configuration/Configuration.h"
 
 using namespace ITMLib;
 template<class TVoxel>

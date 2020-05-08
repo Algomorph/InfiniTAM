@@ -4,7 +4,7 @@
 
 #include "Interface/SurfelSceneReconstructionEngine.h"
 #include "CPU/SurfelSceneReconstructionEngine_CPU.h"
-#include "../../Utils/Configuration.h"
+#include "../../Utils/Configuration/Configuration.h"
 
 #ifndef COMPILE_WITHOUT_CUDA
 #include "CUDA/SurfelSceneReconstructionEngine_CUDA.h"

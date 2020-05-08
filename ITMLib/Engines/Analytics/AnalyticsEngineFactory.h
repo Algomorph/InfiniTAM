@@ -16,7 +16,7 @@
 #pragma once
 
 #include "AnalyticsEngine.h"
-#include "../../Utils/Configuration.h"
+#include "../../Utils/Configuration/Configuration.h"
 
 namespace ITMLib {
 

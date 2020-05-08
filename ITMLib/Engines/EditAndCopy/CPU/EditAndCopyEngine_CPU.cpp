@@ -19,7 +19,7 @@
 #include "../../../Objects/Volume/RepresentationAccess.h"
 #include "../../../GlobalTemplateDefines.h"
 #include "../../../Objects/Volume/VoxelVolume.h"
-#include "../../../Utils/Configuration.h"
+#include "../../../Utils/Configuration/Configuration.h"
 #include "../../Reconstruction/Interface/SceneReconstructionEngine.h"
 #include "../../Reconstruction/SceneReconstructionEngineFactory.h"
 

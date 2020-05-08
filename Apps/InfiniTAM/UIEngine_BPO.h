@@ -9,7 +9,7 @@
 #include "../../InputSource/FFMPEGWriter.h"
 #include "../../ITMLib/Engines/Main/MainEngine.h"
 #include "../../ITMLib/Objects/Tracking/CameraTrackingState.h"
-#include "../../ITMLib/Utils/Configuration.h"
+#include "../../ITMLib/Utils/Configuration/Configuration.h"
 #include "../../ORUtils/FileUtils.h"
 #include "../../ORUtils/NVTimer.h"
 #include "../../ITMLib/Engines/Telemetry/TelemetryRecorderLegacy.h"

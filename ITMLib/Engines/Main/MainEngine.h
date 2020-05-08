@@ -4,7 +4,7 @@
 
 #include "../../Objects/Misc/IMUMeasurement.h"
 #include "../../CameraTrackers/Interface/CameraTracker.h"
-#include "../../Utils/Configuration.h"
+#include "../../Utils/Configuration/Configuration.h"
 
 /** \mainpage
     This is the API reference documentation for InfiniTAM. For a general

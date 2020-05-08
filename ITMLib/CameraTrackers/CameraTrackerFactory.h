@@ -14,7 +14,7 @@
 #include "Interface/ForceFailTracker.h"
 #include "Interface/CameraTracker.h"
 #include "../Engines/LowLevel/Interface/LowLevelEngine.h"
-#include "../Utils/Configuration.h"
+#include "../Utils/Configuration/Configuration.h"
 
 #ifndef COMPILE_WITHOUT_CUDA
 

@@ -20,7 +20,7 @@
 //local
 #include "WarpFieldSequenceRecorder.h"
 #include "../Analytics/AnalyticsEngine.h"
-#include "../../Utils/Configuration.h"
+#include "../../Utils/Configuration/Configuration.h"
 #include "../DepthFusion/DepthFusionEngineFactory.h"
 #include "../Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
 #include "../Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"

@@ -28,7 +28,7 @@
 #include "../Shared/WarpGradientCommon.h"
 #include "../../Utils/VoxelFlags.h"
 #include "../../Utils/CPrintHelpers.h"
-#include "../../Utils/Configuration.h"
+#include "../../Utils/Configuration/Configuration.h"
 #include "../../Engines/EditAndCopy/Shared/EditAndCopyEngine_Shared.h"
 
 

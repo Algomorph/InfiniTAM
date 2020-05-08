@@ -17,7 +17,7 @@
 
 //local
 #include "WarpingEngine.h"
-#include "../../Utils/Configuration.h"
+#include "../../Utils/Configuration/Configuration.h"
 
 #ifdef COMPILE_WITH_METAL
 #error "NOT CURRENTLY SUPPORTED"

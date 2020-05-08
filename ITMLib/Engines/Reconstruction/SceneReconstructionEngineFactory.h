@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "../../Utils/Configuration.h"
+#include "../../Utils/Configuration/Configuration.h"
 #include "CPU/SceneReconstructionEngine_CPU.h"
 #ifndef COMPILE_WITHOUT_CUDA
 #include "CUDA/SceneReconstructionEngine_CUDA.h"

@@ -17,7 +17,7 @@
 
 #include <string>
 #include <fstream>
-#include "../Configuration.h"
+#include "../Configuration/Configuration.h"
 
 namespace ITMLib {
 namespace logging {

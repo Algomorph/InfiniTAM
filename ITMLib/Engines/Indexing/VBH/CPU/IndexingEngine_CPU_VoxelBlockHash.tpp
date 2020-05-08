@@ -25,7 +25,7 @@
 #include "../../../Traversal/Interface/HashTableTraversal.h"
 #include "../../Shared/IndexingEngine_Functors.h"
 #include "../../../Common/CheckBlockVisibility.h"
-#include "../../../../Utils/Configuration.h"
+#include "../../../../Utils/Configuration/Configuration.h"
 #include "../../../../Utils/Geometry/FrustumTrigonometry.h"
 #include "../../../../Utils/MemoryBlock_StdContainer_Convertions.h"
 

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "Interface/ViewBuilder.h"
-#include "../../Utils/Configuration.h"
+#include "../../Utils/Configuration/Configuration.h"
 
 namespace ITMLib
 {

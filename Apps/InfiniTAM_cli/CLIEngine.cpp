@@ -11,7 +11,7 @@
 #include "../../ORUtils/FileUtils.h"
 
 //ITMLib
-#include "../../ITMLib/Utils/Configuration.h"
+#include "../../ITMLib/Utils/Configuration/Configuration.h"
 
 using namespace InfiniTAM::Engine;
 using namespace InputSource;

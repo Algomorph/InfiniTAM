@@ -19,7 +19,7 @@
 #include "IndexingEngine_CUDA_VoxelBlockHash.h"
 #include "IndexingEngine_CUDA_VoxelBlockHash_Kernels.h"
 #include "../../Interface/IndexingEngine.h"
-#include "../../../../Utils/Configuration.h"
+#include "../../../../Utils/Configuration/Configuration.h"
 #include "../CPU/IndexingEngine_CPU_VoxelBlockHash.h"
 #include "../../../../../ORUtils/PlatformIndependence.h"
 #include "../../Shared/IndexingEngine_Functors.h"
