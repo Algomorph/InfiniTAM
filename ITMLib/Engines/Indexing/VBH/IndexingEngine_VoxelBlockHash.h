@@ -20,18 +20,11 @@
 
 namespace ITMLib {
 
-
-struct VoxelBlockMatch {
-	int hash_code1;
-	int hash_code2;
-};
-
-
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, typename TDerivedClass>
 class IndexingEngine_VoxelBlockHash :
 		public IndexingEngineInterface<TVoxel, VoxelBlockHash> {
 
-public:
+public: // member functions
 
 	virtual void AllocateHashEntriesUsingAllocationStateList(VoxelVolume<TVoxel, VoxelBlockHash>* volume) = 0;
 	virtual void
@@ -79,6 +72,16 @@ private:
 	void ReallocateDeletedHashBlocks(VoxelVolume<TVoxel, VoxelBlockHash>* volume);
 
 };
+
+namespace internal{
+template<MemoryDeviceType TMemoryDeviceType, typename TVoxelTarget, typename TVoxelSource, typename TMarkerFunctor>
+void AllocateUsingOtherVolume_Generic(VoxelVolume<TVoxelTarget, VoxelBlockHash>* target_volume,
+                                      VoxelVolume<TVoxelSource, VoxelBlockHash>* source_volume,
+                                      TMarkerFunctor& marker_functor);
+template<MemoryDeviceType TMemoryDeviceType, typename TVoxelTarget, typename TVoxelSource>
+struct AllocateUsingOtherVolume_OffsetAndBounded_Executor;
+} // namespace internal
+
 
 }// namespace ITMLib
 

@@ -33,9 +33,7 @@ class IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA> :
 
 private:
 	IndexingEngine() = default;
-	template<typename TVoxelTarget, typename TVoxelSource, typename TMarkerFunctor>
-	void AllocateUsingOtherVolume_Generic(VoxelVolume<TVoxelTarget, VoxelBlockHash>* target_volume,
-	                                      VoxelVolume<TVoxelSource, VoxelBlockHash>* source_volume, TMarkerFunctor& marker_functor);
+
 
 public:
 	static IndexingEngine& Instance() {
@@ -67,36 +65,29 @@ public:
 	HashEntry FindHashEntry(const VoxelBlockHash& index, const Vector3s& coordinates, int& hashCode);
 	bool AllocateHashBlockAt(VoxelVolume <TVoxel, VoxelBlockHash>* volume, Vector3s at, int& hash_code) override;
 
-	void AllocateFromOtherVolume(VoxelVolume<TVoxel, VoxelBlockHash>* target_volume,
-	                             VoxelVolume<TVoxel, VoxelBlockHash>* source_volume) override {
-		AllocateUsingOtherVolume<TVoxel,TVoxel>(target_volume, source_volume);
-	}
-
-	void AllocateWarpVolumeFromOtherVolume(VoxelVolume<WarpVoxel, VoxelBlockHash>* target_volume,
-	                                       VoxelVolume<TVoxel, VoxelBlockHash>* source_volume) override {
-		AllocateUsingOtherVolume<WarpVoxel,TVoxel>(target_volume, source_volume);
-	}
-
-	template<typename TVoxelATarget, typename TVoxelASource>
-	void AllocateUsingOtherVolume(VoxelVolume <TVoxelATarget, VoxelBlockHash>* target_volume,
-	                              VoxelVolume <TVoxelASource, VoxelBlockHash>* source_volume);
-
-	template<typename TVoxelTarget, typename TVoxelSource>
-	void AllocateUsingOtherVolume_Bounded(VoxelVolume<TVoxelTarget, VoxelBlockHash>* target_volume,
-	                                      VoxelVolume<TVoxelSource, VoxelBlockHash>* source_volume,
-	                                      const Extent3Di& bounds);
-
-	template<typename TVoxelTarget, typename TVoxelSource>
-	void AllocateUsingOtherVolume_OffsetAndBounded(VoxelVolume<TVoxelTarget, VoxelBlockHash>* target_volume,
-	                                               VoxelVolume<TVoxelSource, VoxelBlockHash>* source_volume,
-	                                               const Extent3Di& source_bounds, const Vector3i& target_offset);
-
 };
 
 extern template
 class IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>;
 extern template
 class IndexingEngine<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>;
+
+namespace internal {
+template<typename TVoxelTarget, typename TVoxelSource>
+struct AllocateUsingOtherVolume_OffsetAndBounded_Executor<MEMORYDEVICE_CUDA, TVoxelTarget, TVoxelSource> {
+	static inline
+	void Execute(VoxelVolume<TVoxelTarget, VoxelBlockHash>* target_volume,
+	             VoxelVolume<TVoxelSource, VoxelBlockHash>* source_volume,
+	             const Extent3Di& source_bounds, const Vector3i& target_offset);
+};
+
+extern template
+struct AllocateUsingOtherVolume_OffsetAndBounded_Executor<MEMORYDEVICE_CUDA, TSDFVoxel, TSDFVoxel>;
+extern template
+struct AllocateUsingOtherVolume_OffsetAndBounded_Executor<MEMORYDEVICE_CUDA, WarpVoxel, TSDFVoxel>;
+
+} // namespace internal
+
 
 } //namespace ITMLib
 

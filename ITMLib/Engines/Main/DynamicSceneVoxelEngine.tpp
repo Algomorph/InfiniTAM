@@ -80,7 +80,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(const RG
 	camera_tracking_enabled = config.enable_rigid_tracking;
 
 	const MemoryDeviceType device_type = config.device_type;
-	MemoryDeviceType memoryType = config.device_type;
+	MemoryDeviceType memory_device_type = config.device_type;
 	if ((depth_image_size.x == -1) || (depth_image_size.y == -1)) depth_image_size = rgb_image_size;
 
 	imu_calibrator = new ITMIMUCalibrator_iPad();
@@ -90,7 +90,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(const RG
 	camera_tracking_controller = new CameraTrackingController(camera_tracker);
 	//TODO: is "tracked" image size ever different from actual depth image size? If so, document GetTrackedImageSize function. Otherwise, revise.
 	Vector2i tracked_image_size = camera_tracking_controller->GetTrackedImageSize(rgb_image_size, depth_image_size);
-	tracking_state = new CameraTrackingState(tracked_image_size, memoryType);
+	tracking_state = new CameraTrackingState(tracked_image_size, memory_device_type);
 
 
 	canonical_render_state = new RenderState(tracked_image_size,
@@ -118,7 +118,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(const RG
 		                                                   0.2f, 500, 4);
 	else relocalizer = nullptr;
 
-	keyframe_raycast = new ITMUChar4Image(depth_image_size, memoryType);
+	keyframe_raycast = new ITMUChar4Image(depth_image_size, memory_device_type);
 
 	fusion_active = true;
 	main_processing_active = true;
@@ -295,9 +295,9 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(ITMUChar4Image* rgb
 			warp_field->Reset();
 
 			indexing_engine->AllocateNearAndBetweenTwoSurfaces(live_volumes[0], view, tracking_state);
-			indexing_engine->AllocateFromOtherVolume(live_volumes[1], live_volumes[0]);
-			indexing_engine->AllocateFromOtherVolume(canonical_volume, live_volumes[0]);
-			indexing_engine->AllocateWarpVolumeFromOtherVolume(warp_field, live_volumes[0]);
+			AllocateUsingOtherVolume(live_volumes[1], live_volumes[0], this->config.device_type);
+			AllocateUsingOtherVolume(canonical_volume, live_volumes[0], this->config.device_type);
+			AllocateUsingOtherVolume(warp_field, live_volumes[0], this->config.device_type);
 			depth_fusion_engine->IntegrateDepthImageIntoTsdfVolume(live_volumes[0], view, tracking_state);
 			benchmarking::stop_timer("GenerateRawLiveVolume");
 
@@ -343,7 +343,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(ITMUChar4Image* rgb
 			                    bright_cyan << "Fusing data from live frame into canonical frame..." << reset);
 			//** fuse the live into canonical directly
 			benchmarking::start_timer("FuseOneTsdfVolumeIntoAnother");
-			indexing_engine->AllocateFromOtherVolume(canonical_volume, live_volumes[0]);
+			AllocateUsingOtherVolume(canonical_volume, live_volumes[0], config.device_type);
 			volume_fusion_engine->FuseOneTsdfVolumeIntoAnother(canonical_volume, live_volumes[0], frames_processed);
 			benchmarking::stop_timer("FuseOneTsdfVolumeIntoAnother");
 

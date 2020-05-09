@@ -67,6 +67,3 @@ public:
 };
 
 } // namespace ITMLib
-
-
-// TODO

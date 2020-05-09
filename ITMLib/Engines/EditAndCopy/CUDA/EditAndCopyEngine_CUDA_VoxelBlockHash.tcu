@@ -186,8 +186,7 @@ bool EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::CopyVolumeSlice(
 
 	if (offset == Vector3i(0)) {
 		int starting_utilized_block_count = target_volume->index.GetUtilizedBlockCount();
-		IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance().AllocateUsingOtherVolume_Bounded(
-				target_volume, source_volume, bounds);
+		internal::AllocateUsingOtherVolume_Bounded<MEMORYDEVICE_CUDA>(target_volume, source_volume, bounds);
 		int final_utilized_block_count = target_volume->index.GetUtilizedBlockCount();
 		int total_blocks_to_copy = final_utilized_block_count - starting_utilized_block_count;
 
@@ -200,8 +199,7 @@ bool EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::CopyVolumeSlice(
 	} else {
 
 		int starting_utilized_block_count = target_volume->index.GetUtilizedBlockCount();
-		IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance().AllocateUsingOtherVolume_OffsetAndBounded(
-				target_volume, source_volume, bounds, offset);
+		internal::AllocateUsingOtherVolume_OffsetAndBounded<MEMORYDEVICE_CUDA>(target_volume, source_volume, bounds, offset);
 		int final_utilized_block_count = target_volume->index.GetUtilizedBlockCount();
 		int total_blocks_to_copy = final_utilized_block_count - starting_utilized_block_count;
 
@@ -234,8 +232,7 @@ bool EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::CopyVolume(
 
 	if (offset == Vector3i(0)) {
 		int starting_utilized_block_count = target_volume->index.GetUtilizedBlockCount();
-		IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance().AllocateUsingOtherVolume(target_volume,
-		                                                                                              source_volume);
+		internal::AllocateUsingOtherVolume<MEMORYDEVICE_CUDA>(target_volume,source_volume);
 		int final_utilized_block_count = target_volume->index.GetUtilizedBlockCount();
 		int total_blocks_to_copy = final_utilized_block_count - starting_utilized_block_count;
 

@@ -101,13 +101,6 @@ public:
 	virtual void
 	AllocateGridAlignedBox(VoxelVolume<TVoxel, TIndex>* volume, const Extent3Di& box) = 0;
 
-
-	virtual void AllocateFromOtherVolume(VoxelVolume<TVoxel, TIndex>* target_volume,
-	                                     VoxelVolume<TVoxel, TIndex>* source_volume) = 0;
-
-	virtual void AllocateWarpVolumeFromOtherVolume(VoxelVolume<WarpVoxel, TIndex>* target_volume,
-	                                               VoxelVolume<TVoxel, TIndex>* source_volume) = 0;
-
 };
 
 
@@ -143,32 +136,84 @@ public:
 	void
 	AllocateGridAlignedBox(VoxelVolume<TVoxel, TIndex>* volume, const Extent3Di& box) override;
 
-
-	void AllocateFromOtherVolume(VoxelVolume<TVoxel, TIndex>* target_volume,
-	                             VoxelVolume<TVoxel, TIndex>* source_volume) override {
-		AllocateUsingOtherVolume<TVoxel, TVoxel>(target_volume, source_volume);
-	}
-
-	void AllocateWarpVolumeFromOtherVolume(VoxelVolume<WarpVoxel, TIndex>* target_volume,
-	                                       VoxelVolume<TVoxel, TIndex>* source_volume) override {
-		AllocateUsingOtherVolume<WarpVoxel, TVoxel>(target_volume, source_volume);
-	}
-
-	template<typename TVoxelTarget, typename TVoxelSource>
-	void AllocateUsingOtherVolume(VoxelVolume<TVoxelTarget, TIndex>* target_volume,
-	                              VoxelVolume<TVoxelSource, TIndex>* source_volume);
-
-	template<typename TVoxelTarget, typename TVoxelSource>
-	void AllocateUsingOtherVolume_Bounded(VoxelVolume<TVoxelTarget, TIndex>* target_volume,
-	                                      VoxelVolume<TVoxelSource, TIndex>* source_volume,
-	                                      const Extent3Di& bounds);
-
-	template<typename TVoxelTarget, typename TVoxelSource>
-	void AllocateUsingOtherVolume_OffsetAndBounded(VoxelVolume<TVoxelTarget, TIndex>* target_volume,
-	                                               VoxelVolume<TVoxelSource, TIndex>* source_volume,
-	                                               const Extent3Di& source_bounds, const Vector3i& target_offset);
-
 };
+
+
+namespace internal{
+template<MemoryDeviceType TMemoryDeviceType, typename TVoxelTarget, typename TVoxelSource>
+void AllocateUsingOtherVolume(VoxelVolume<TVoxelTarget, PlainVoxelArray>* target_volume,
+                              VoxelVolume<TVoxelSource, PlainVoxelArray>* source_volume);
+
+template<MemoryDeviceType TMemoryDeviceType, typename TVoxelTarget, typename TVoxelSource>
+void AllocateUsingOtherVolume_Bounded(VoxelVolume<TVoxelTarget, PlainVoxelArray>* target_volume,
+                                      VoxelVolume<TVoxelSource, PlainVoxelArray>* source_volume,
+                                      const Extent3Di& bounds);
+template<MemoryDeviceType TMemoryDeviceType, typename TVoxelTarget, typename TVoxelSource>
+void AllocateUsingOtherVolume_OffsetAndBounded(VoxelVolume<TVoxelTarget, PlainVoxelArray>* target_volume,
+                                               VoxelVolume<TVoxelSource, PlainVoxelArray>* source_volume,
+                                               const Extent3Di& source_bounds, const Vector3i& target_offset);
+
+template<MemoryDeviceType TMemoryDeviceType, typename TVoxelTarget, typename TVoxelSource>
+void AllocateUsingOtherVolume(VoxelVolume<TVoxelTarget, VoxelBlockHash>* target_volume,
+                              VoxelVolume<TVoxelSource, VoxelBlockHash>* source_volume);
+
+template<MemoryDeviceType TMemoryDeviceType, typename TVoxelTarget, typename TVoxelSource>
+void AllocateUsingOtherVolume_Bounded(VoxelVolume<TVoxelTarget, VoxelBlockHash>* target_volume,
+                                      VoxelVolume<TVoxelSource, VoxelBlockHash>* source_volume,
+                                      const Extent3Di& bounds);
+template<MemoryDeviceType TMemoryDeviceType, typename TVoxelTarget, typename TVoxelSource>
+void AllocateUsingOtherVolume_OffsetAndBounded(VoxelVolume<TVoxelTarget, VoxelBlockHash>* target_volume,
+                                               VoxelVolume<TVoxelSource, VoxelBlockHash>* source_volume,
+                                               const Extent3Di& source_bounds, const Vector3i& target_offset);
+}// namespace internal
+
+template<typename TVoxelTarget, typename TVoxelSource, typename TIndex>
+void AllocateUsingOtherVolume(VoxelVolume<TVoxelTarget, TIndex>* target_volume,
+                              VoxelVolume<TVoxelSource, TIndex>* source_volume,
+                              MemoryDeviceType memory_device_type){
+	switch (memory_device_type) {
+		case MEMORYDEVICE_CPU:
+			internal::AllocateUsingOtherVolume<MEMORYDEVICE_CPU>(target_volume, source_volume);
+			break;
+		case MEMORYDEVICE_CUDA:
+			internal::AllocateUsingOtherVolume<MEMORYDEVICE_CUDA>(target_volume, source_volume);
+			break;
+		default:
+			DIEWITHEXCEPTION_REPORTLOCATION("Unsupported device type.");
+	}
+}
+
+template<typename TVoxelTarget, typename TVoxelSource, typename TIndex>
+void AllocateUsingOtherVolume_Bounded(VoxelVolume<TVoxelTarget, TIndex>* target_volume,
+                              VoxelVolume<TVoxelSource, TIndex>* source_volume,
+                              MemoryDeviceType memory_device_type){
+	switch (memory_device_type) {
+		case MEMORYDEVICE_CPU:
+			internal::AllocateUsingOtherVolume_Bounded<MEMORYDEVICE_CPU>(target_volume, source_volume);
+			break;
+		case MEMORYDEVICE_CUDA:
+			internal::AllocateUsingOtherVolume_Bounded<MEMORYDEVICE_CUDA>(target_volume, source_volume);
+			break;
+		default:
+			DIEWITHEXCEPTION_REPORTLOCATION("Unsupported device type.");
+	}
+}
+
+template<typename TVoxelTarget, typename TVoxelSource, typename TIndex>
+void AllocateUsingOtherVolume_OffsetAndBounded(VoxelVolume<TVoxelTarget, TIndex>* target_volume,
+                                      VoxelVolume<TVoxelSource, TIndex>* source_volume,
+                                      MemoryDeviceType memory_device_type){
+	switch (memory_device_type) {
+		case MEMORYDEVICE_CPU:
+			internal::AllocateUsingOtherVolume_OffsetAndBounded<MEMORYDEVICE_CPU>(target_volume, source_volume);
+			break;
+		case MEMORYDEVICE_CUDA:
+			internal::AllocateUsingOtherVolume_OffsetAndBounded<MEMORYDEVICE_CUDA>(target_volume, source_volume);
+			break;
+		default:
+			DIEWITHEXCEPTION_REPORTLOCATION("Unsupported device type.");
+	}
+}
 
 }//namespace ITMLib
 

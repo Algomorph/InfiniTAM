@@ -129,5 +129,55 @@ void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::Re
 	volume->index.SetUtilizedBlockCount(GET_ATOMIC_VALUE_CPU(utilized_block_list_functor.utilized_block_count));
 }
 
+namespace internal {
+template<MemoryDeviceType TMemoryDeviceType, typename TVoxelTarget, typename TVoxelSource, typename TMarkerFunctor>
+void AllocateUsingOtherVolume_Generic(
+		VoxelVolume<TVoxelTarget, VoxelBlockHash>* target_volume,
+		VoxelVolume<TVoxelSource, VoxelBlockHash>* source_volume,
+		TMarkerFunctor& marker_functor) {
+
+	assert(target_volume->index.hash_entry_count == source_volume->index.hash_entry_count);
+	IndexingEngine<TVoxelTarget, VoxelBlockHash, TMemoryDeviceType>& indexer =
+			IndexingEngine<TVoxelTarget, VoxelBlockHash, TMemoryDeviceType>::Instance();
+
+	do {
+		marker_functor.resetFlagsAndCounters();
+		target_volume->index.ClearHashEntryAllocationStates();
+		HashTableTraversalEngine<TMemoryDeviceType>::TraverseUtilizedWithHashCode(
+				source_volume->index, marker_functor);
+		indexer.AllocateHashEntriesUsingAllocationStateList(target_volume);
+		indexer.AllocateBlockList(target_volume, marker_functor.colliding_block_positions,
+		                          marker_functor.getCollidingBlockCount());
+	} while (marker_functor.encounteredUnresolvableCollision());
+}
+
+template<MemoryDeviceType TMemoryDeviceType, typename TVoxelTarget, typename TVoxelSource>
+void AllocateUsingOtherVolume(
+		VoxelVolume<TVoxelTarget, VoxelBlockHash>* target_volume,
+		VoxelVolume<TVoxelSource, VoxelBlockHash>* source_volume) {
+	VolumeBasedAllocationStateMarkerFunctor<TMemoryDeviceType>
+			volume_based_allocation_state_marker(target_volume->index);
+	internal::AllocateUsingOtherVolume_Generic<TMemoryDeviceType>(target_volume, source_volume, volume_based_allocation_state_marker);
+}
+
+template<MemoryDeviceType TMemoryDeviceType, typename TVoxelTarget, typename TVoxelSource>
+void AllocateUsingOtherVolume_Bounded(
+		VoxelVolume<TVoxelTarget, VoxelBlockHash>* target_volume,
+		VoxelVolume<TVoxelSource, VoxelBlockHash>* source_volume,
+		const Extent3Di& bounds) {
+	VolumeBasedBoundedAllocationStateMarkerFunctor<TMemoryDeviceType> volume_based_allocation_state_marker(
+			target_volume->index, bounds);
+	internal::AllocateUsingOtherVolume_Generic<TMemoryDeviceType>(target_volume, source_volume, volume_based_allocation_state_marker);
+}
+
+template<MemoryDeviceType TMemoryDeviceType, typename TVoxelTarget, typename TVoxelSource>
+void AllocateUsingOtherVolume_OffsetAndBounded(
+		VoxelVolume<TVoxelTarget, VoxelBlockHash>* target_volume,
+		VoxelVolume<TVoxelSource, VoxelBlockHash>* source_volume,
+		const Extent3Di& source_bounds, const Vector3i& target_offset){
+	internal::AllocateUsingOtherVolume_OffsetAndBounded_Executor<TMemoryDeviceType, TVoxelTarget, TVoxelSource>::Execute(target_volume, source_volume, source_bounds, target_offset);
+}
+
+} // namespace internal
 
 } //namespace ITMLib

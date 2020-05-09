@@ -36,41 +36,47 @@ class IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>;
 template
 class IndexingEngine<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>;
 
-template void IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::AllocateUsingOtherVolume(
+
+namespace internal {
+template void AllocateUsingOtherVolume<MEMORYDEVICE_CUDA, WarpVoxel, TSDFVoxel>(
 		ITMLib::VoxelVolume<WarpVoxel, VoxelBlockHash>* target_volume,
 		ITMLib::VoxelVolume<TSDFVoxel, VoxelBlockHash>* source_volume);
-template void IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::AllocateUsingOtherVolume(
+template void AllocateUsingOtherVolume<MEMORYDEVICE_CUDA, TSDFVoxel, TSDFVoxel>(
 		ITMLib::VoxelVolume<TSDFVoxel, VoxelBlockHash>* target_volume,
 		ITMLib::VoxelVolume<TSDFVoxel, VoxelBlockHash>* source_volume);
-template void IndexingEngine<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::AllocateUsingOtherVolume(
+template void AllocateUsingOtherVolume<MEMORYDEVICE_CUDA, WarpVoxel, WarpVoxel>(
 		ITMLib::VoxelVolume<WarpVoxel, VoxelBlockHash>* target_volume,
 		ITMLib::VoxelVolume<WarpVoxel, VoxelBlockHash>* source_volume);
 
-template void IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::AllocateUsingOtherVolume_Bounded(
+template void AllocateUsingOtherVolume_Bounded<MEMORYDEVICE_CUDA, WarpVoxel, TSDFVoxel>(
 		ITMLib::VoxelVolume<WarpVoxel, VoxelBlockHash>* targetVolume,
 		ITMLib::VoxelVolume<TSDFVoxel, VoxelBlockHash>* sourceVolume,
 		const Extent3Di& bounds);
-template void IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::AllocateUsingOtherVolume_Bounded(
+template void AllocateUsingOtherVolume_Bounded<MEMORYDEVICE_CUDA, TSDFVoxel, TSDFVoxel>(
 		ITMLib::VoxelVolume<TSDFVoxel, VoxelBlockHash>* targetVolume,
 		ITMLib::VoxelVolume<TSDFVoxel, VoxelBlockHash>* sourceVolume,
 		const Extent3Di& bounds);
-template void IndexingEngine<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::AllocateUsingOtherVolume_Bounded(
+template void AllocateUsingOtherVolume_Bounded<MEMORYDEVICE_CUDA, WarpVoxel, WarpVoxel>(
 		ITMLib::VoxelVolume<WarpVoxel, VoxelBlockHash>* target_volume,
 		ITMLib::VoxelVolume<WarpVoxel, VoxelBlockHash>* source_volume,
 		const Extent3Di& bounds);
 
-template void IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::AllocateUsingOtherVolume_OffsetAndBounded(
+template
+struct AllocateUsingOtherVolume_OffsetAndBounded_Executor<MEMORYDEVICE_CUDA, TSDFVoxel, TSDFVoxel>;
+template
+struct AllocateUsingOtherVolume_OffsetAndBounded_Executor<MEMORYDEVICE_CUDA, WarpVoxel, TSDFVoxel>;
+
+template void AllocateUsingOtherVolume_OffsetAndBounded<MEMORYDEVICE_CUDA, WarpVoxel, TSDFVoxel>(
 		ITMLib::VoxelVolume<WarpVoxel, VoxelBlockHash>* targetVolume,
 		ITMLib::VoxelVolume<TSDFVoxel, VoxelBlockHash>* sourceVolume,
 		const Extent3Di& source_bounds, const Vector3i& target_offset);
-template void IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::AllocateUsingOtherVolume_OffsetAndBounded(
+template void AllocateUsingOtherVolume_OffsetAndBounded<MEMORYDEVICE_CUDA, TSDFVoxel, TSDFVoxel>(
 		ITMLib::VoxelVolume<TSDFVoxel, VoxelBlockHash>* targetVolume,
 		ITMLib::VoxelVolume<TSDFVoxel, VoxelBlockHash>* sourceVolume,
 		const Extent3Di& source_bounds, const Vector3i& target_offset);
-template void IndexingEngine<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::AllocateUsingOtherVolume_OffsetAndBounded(
-		ITMLib::VoxelVolume<WarpVoxel, VoxelBlockHash>* targetVolume,
-		ITMLib::VoxelVolume<WarpVoxel, VoxelBlockHash>* sourceVolume,
+template void AllocateUsingOtherVolume_OffsetAndBounded<MEMORYDEVICE_CUDA, WarpVoxel, WarpVoxel>(
+		ITMLib::VoxelVolume<WarpVoxel, VoxelBlockHash>* target_volume,
+		ITMLib::VoxelVolume<WarpVoxel, VoxelBlockHash>* source_volume,
 		const Extent3Di& source_bounds, const Vector3i& target_offset);
-
-
+}// namespace internal
 }//namespace ITMLib

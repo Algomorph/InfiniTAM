@@ -47,22 +47,23 @@ template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateGridAlignedBox(VoxelVolume<TVoxel, TIndex>* volume,
                                                                                const Extent3Di& box) {}
 
-template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-template<typename TVoxelTarget, typename TVoxelSource>
-void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateUsingOtherVolume(
-		VoxelVolume<TVoxelTarget, TIndex>* targetVolume, VoxelVolume<TVoxelSource, TIndex>* sourceVolume) {}
 
-template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-template<typename TVoxelTarget, typename TVoxelSource>
-void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateUsingOtherVolume_Bounded(
-		VoxelVolume<TVoxelTarget, TIndex>* targetVolume, VoxelVolume<TVoxelSource, TIndex>* sourceVolume,
-		const Extent3Di& bounds) {}
+namespace ITMLib{
+namespace internal{
+template<MemoryDeviceType TMemoryDeviceType, typename TVoxelTarget, typename TVoxelSource>
+void AllocateUsingOtherVolume(VoxelVolume<TVoxelTarget, PlainVoxelArray>* target_volume,
+                              VoxelVolume<TVoxelSource, PlainVoxelArray>* source_volume){}
 
-template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-template<typename TVoxelTarget, typename TVoxelSource>
-void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateUsingOtherVolume_OffsetAndBounded(
-		VoxelVolume<TVoxelTarget, TIndex>* targetVolume, VoxelVolume<TVoxelSource, TIndex>* sourceVolume,
-		const Extent3Di& source_bounds, const Vector3i& target_offset) {}
+template<MemoryDeviceType TMemoryDeviceType, typename TVoxelTarget, typename TVoxelSource>
+void AllocateUsingOtherVolume_Bounded(VoxelVolume<TVoxelTarget, PlainVoxelArray>* target_volume,
+                                      VoxelVolume<TVoxelSource, PlainVoxelArray>* source_volume,
+                                      const Extent3Di& bounds){}
+template<MemoryDeviceType TMemoryDeviceType, typename TVoxelTarget, typename TVoxelSource>
+void AllocateUsingOtherVolume_OffsetAndBounded(VoxelVolume<TVoxelTarget, PlainVoxelArray>* target_volume,
+                                               VoxelVolume<TVoxelSource, PlainVoxelArray>* source_volume,
+                                               const Extent3Di& source_bounds, const Vector3i& target_offset){}
+} // namespace internal
+} // namespace ITMLib
 
 
 

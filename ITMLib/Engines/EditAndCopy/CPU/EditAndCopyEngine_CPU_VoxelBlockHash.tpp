@@ -167,8 +167,7 @@ bool EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::CopyVolumeSlice(
 		// *** allocate missing entries in target hash table
 		// traverse source hash blocks, see which ones are at least partially inside the specified bounds
 
-		IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance().AllocateUsingOtherVolume_Bounded(
-				target_volume, source_volume, bounds);
+		internal::AllocateUsingOtherVolume_Bounded<MEMORYDEVICE_CPU>(target_volume, source_volume, bounds);
 
 		//iterate over source hash blocks & fill in the target hash blocks
 		for (int source_hash_code = 0; source_hash_code < hash_entry_count; source_hash_code++) {
@@ -208,8 +207,7 @@ bool EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::CopyVolumeSlice(
 		}
 	} else {
 		//non-zero-offset case
-		IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance()
-				.AllocateUsingOtherVolume_OffsetAndBounded(target_volume, source_volume, bounds, offset);
+		internal::AllocateUsingOtherVolume_OffsetAndBounded<MEMORYDEVICE_CPU>(target_volume, source_volume, bounds, offset);
 
 		VoxelBlockHash::IndexCache source_cache;
 
@@ -253,8 +251,7 @@ bool EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::CopyVolume(
 	bool voxels_were_copied = false;
 
 	if (offset == Vector3i(0)) {
-		IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance().AllocateUsingOtherVolume(target_volume,
-		                                                                                              source_volume);
+		internal::AllocateUsingOtherVolume<MEMORYDEVICE_CPU>(target_volume, source_volume);
 #ifdef WITH_OPENMP
 #pragma omp parallel for default(none) shared(source_hash_table, destination_hash_table, source_voxels, destination_voxels, voxels_were_copied)
 #endif

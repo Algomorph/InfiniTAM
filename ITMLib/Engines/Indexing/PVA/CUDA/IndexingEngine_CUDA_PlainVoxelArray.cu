@@ -24,28 +24,41 @@ template
 class IndexingEngine<WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA>;
 
 
-template void IndexingEngine<TSDFVoxel,PlainVoxelArray,MEMORYDEVICE_CUDA>::AllocateUsingOtherVolume(
-		ITMLib::VoxelVolume<WarpVoxel, PlainVoxelArray>* targetVolume,
-		ITMLib::VoxelVolume<TSDFVoxel, PlainVoxelArray>* sourceVolume);
-template void IndexingEngine<TSDFVoxel,PlainVoxelArray,MEMORYDEVICE_CUDA>::AllocateUsingOtherVolume(
-		ITMLib::VoxelVolume<TSDFVoxel, PlainVoxelArray>* targetVolume,
-		ITMLib::VoxelVolume<TSDFVoxel, PlainVoxelArray>* sourceVolume);
+namespace internal{
+template void AllocateUsingOtherVolume<MEMORYDEVICE_CUDA, WarpVoxel, TSDFVoxel>(
+		ITMLib::VoxelVolume<WarpVoxel, PlainVoxelArray>* target_volume,
+		ITMLib::VoxelVolume<TSDFVoxel, PlainVoxelArray>* source_volume);
+template void AllocateUsingOtherVolume<MEMORYDEVICE_CUDA, TSDFVoxel, TSDFVoxel>(
+		ITMLib::VoxelVolume<TSDFVoxel, PlainVoxelArray>* target_volume,
+		ITMLib::VoxelVolume<TSDFVoxel, PlainVoxelArray>* source_volume);
+template void AllocateUsingOtherVolume<MEMORYDEVICE_CUDA, WarpVoxel, WarpVoxel>(
+		ITMLib::VoxelVolume<WarpVoxel, PlainVoxelArray>* target_volume,
+		ITMLib::VoxelVolume<WarpVoxel, PlainVoxelArray>* source_volume);
 
-template void IndexingEngine<TSDFVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA>::AllocateUsingOtherVolume_Bounded(
+template void AllocateUsingOtherVolume_Bounded<MEMORYDEVICE_CUDA, WarpVoxel, TSDFVoxel>(
 		ITMLib::VoxelVolume<WarpVoxel, PlainVoxelArray>* targetVolume,
 		ITMLib::VoxelVolume<TSDFVoxel, PlainVoxelArray>* sourceVolume,
 		const Extent3Di& bounds);
-template void IndexingEngine<TSDFVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA>::AllocateUsingOtherVolume_Bounded(
+template void AllocateUsingOtherVolume_Bounded<MEMORYDEVICE_CUDA, TSDFVoxel, TSDFVoxel>(
 		ITMLib::VoxelVolume<TSDFVoxel, PlainVoxelArray>* targetVolume,
 		ITMLib::VoxelVolume<TSDFVoxel, PlainVoxelArray>* sourceVolume,
 		const Extent3Di& bounds);
+template void AllocateUsingOtherVolume_Bounded<MEMORYDEVICE_CUDA, WarpVoxel, WarpVoxel>(
+		ITMLib::VoxelVolume<WarpVoxel, PlainVoxelArray>* target_volume,
+		ITMLib::VoxelVolume<WarpVoxel, PlainVoxelArray>* source_volume,
+		const Extent3Di& bounds);
 
-template void IndexingEngine<TSDFVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA>::AllocateUsingOtherVolume_OffsetAndBounded(
+template void AllocateUsingOtherVolume_OffsetAndBounded<MEMORYDEVICE_CUDA, WarpVoxel, TSDFVoxel>(
 		ITMLib::VoxelVolume<WarpVoxel, PlainVoxelArray>* targetVolume,
 		ITMLib::VoxelVolume<TSDFVoxel, PlainVoxelArray>* sourceVolume,
 		const Extent3Di& source_bounds, const Vector3i& target_offset);
-template void IndexingEngine<TSDFVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA>::AllocateUsingOtherVolume_OffsetAndBounded(
+template void AllocateUsingOtherVolume_OffsetAndBounded<MEMORYDEVICE_CUDA, TSDFVoxel, TSDFVoxel>(
 		ITMLib::VoxelVolume<TSDFVoxel, PlainVoxelArray>* targetVolume,
 		ITMLib::VoxelVolume<TSDFVoxel, PlainVoxelArray>* sourceVolume,
 		const Extent3Di& source_bounds, const Vector3i& target_offset);
+template void AllocateUsingOtherVolume_OffsetAndBounded<MEMORYDEVICE_CUDA, WarpVoxel, WarpVoxel>(
+		ITMLib::VoxelVolume<WarpVoxel, PlainVoxelArray>* target_volume,
+		ITMLib::VoxelVolume<WarpVoxel, PlainVoxelArray>* source_volume,
+		const Extent3Di& source_bounds, const Vector3i& target_offset);
+} // namespace internal
 } //namespace ITMLib

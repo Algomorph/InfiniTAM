@@ -108,9 +108,10 @@ set(ITMLIB_ENGINES_LOWLEVEL_SHARED_HEADERS
 
 ##
 set(ITMLIB_ENGINES_TRAVERSAL_INTERFACE_HEADERS
+    Engines/Traversal/Interface/HashTableTraversal.h
     Engines/Traversal/Interface/ImageTraversal.h
     Engines/Traversal/Interface/TwoImageTraversal.h
-    Engines/Traversal/Interface/HashTableTraversal.h
+    Engines/Traversal/Interface/MemoryBlockTraversal.h
     Engines/Traversal/Interface/VolumeTraversal.h
     Engines/Traversal/Interface/TwoVolumeTraversal.h
     Engines/Traversal/Interface/ThreeVolumeTraversal.h
@@ -124,6 +125,8 @@ set(ITMLIB_ENGINES_TRAVERSAL_SHARED_HEADERS
 set(ITMLIB_ENGINES_TRAVERSAL_CPU_HEADERS
     Engines/Traversal/CPU/ImageTraversal_CPU.h
     Engines/Traversal/CPU/TwoImageTraversal_CPU.h
+
+    Engines/Traversal/CPU/MemoryBlockTraversal_CPU.h
 
     Engines/Traversal/CPU/HashTableTraversal_CPU.h
 
@@ -142,6 +145,9 @@ set(ITMLIB_ENGINES_TRAVERSAL_CUDA_HEADERS
     Engines/Traversal/CUDA/ImageTraversal_CUDA_Kernels.h
     Engines/Traversal/CUDA/TwoImageTraversal_CUDA.h
     Engines/Traversal/CUDA/TwoImageTraversal_CUDA_Kernels.h
+
+    Engines/Traversal/CUDA/MemoryBlockTraversal_CUDA.h
+    Engines/Traversal/CUDA/MemoryBlockTraversal_CUDA_Kernels.h
 
     Engines/Traversal/CUDA/HashTableTraversal_CUDA.h
     Engines/Traversal/CUDA/HashTableTraversal_CUDA_Kernels.h
