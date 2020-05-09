@@ -19,6 +19,7 @@
 #include "../../../../Objects/Volume/GlobalCache.h"
 #include "../../../EditAndCopy/Shared/EditAndCopyEngine_Shared.h"
 #include "../../Shared/IndexingEngine_Shared.h"
+#include "../../Shared/IndexingEngine_RayMarching.h"
 #include "../../../../Utils/Geometry/CheckBlockVisibility.h"
 
 namespace {

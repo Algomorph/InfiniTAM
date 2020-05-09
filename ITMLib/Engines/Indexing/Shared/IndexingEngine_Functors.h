@@ -17,6 +17,7 @@
 
 //local
 #include "IndexingEngine_Shared.h"
+#include "IndexingEngine_RayMarching.h"
 #include "../../../Utils/Geometry/CheckBlockVisibility.h"
 #include "../../../Utils/Geometry/GeometryBooleanOperations.h"
 
