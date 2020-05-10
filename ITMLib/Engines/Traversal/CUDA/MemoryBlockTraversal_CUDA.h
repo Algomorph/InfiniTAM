@@ -22,10 +22,9 @@ namespace ITMLib {
 
 template<>
 class MemoryBlockTraversalEngine<MEMORYDEVICE_CUDA> {
-	template<typename TData, typename TMemoryBlock, typename TFunctor>
-	inline static void Traverse_Generic(TMemoryBlock& memory_block, unsigned int element_count, TFunctor& functor){
-		TData* data = memory_block.GetData(MEMORYDEVICE_CUDA);
-		assert(element_count < memory_block.size());
+private: // static functions
+	template<typename TData, typename TFunctor>
+	inline static void TraverseRaw_Generic(TData* data, const unsigned int element_count, TFunctor& functor){
 		dim3 cuda_block_size(256, 1);
 		dim3 cuda_grid_size((int) ceil((float) element_count / (float) cuda_block_size.x));
 
@@ -34,14 +33,34 @@ class MemoryBlockTraversalEngine<MEMORYDEVICE_CUDA> {
 		ORcudaSafeCall(cudaMalloc((void**) &functor_device, sizeof(TFunctor)));
 		ORcudaSafeCall(cudaMemcpy(functor_device, &functor, sizeof(TFunctor), cudaMemcpyHostToDevice));
 
-		memoryBlockTraversalWithItemIndex_device < TData, TFunctor > <<< cuda_grid_size, cuda_block_size >>>(data, memory_block.size(), functor_device);
+		memoryBlockTraversalWithItemIndex_device < TData, TFunctor > <<< cuda_grid_size, cuda_block_size >>>(data, element_count, functor_device);
 		ORcudaKernelCheck;
 
 		ORcudaSafeCall(cudaMemcpy(&functor, functor_device, sizeof(TFunctor), cudaMemcpyDeviceToHost));
 		ORcudaSafeCall(cudaFree(functor_device));
 	}
 
-public:
+	template<typename TData, typename TMemoryBlock, typename TFunctor>
+	inline static void Traverse_Generic(TMemoryBlock& memory_block, unsigned int element_count, TFunctor& functor){
+		TData* data = memory_block.GetData(MEMORYDEVICE_CUDA);
+		assert(element_count < memory_block.size());
+		TraverseRaw_Generic(data, element_count, functor);
+	}
+
+public: // static functions
+
+	template<typename T, typename TFunctor>
+	inline static void
+	TraverseRaw(T* data, const unsigned int element_count, TFunctor& functor){
+		TraverseRaw_Generic<T, TFunctor>(data, element_count, functor);
+	}
+
+	template<typename T, typename TFunctor>
+	inline static void
+	TraverseRaw(const T* data, const unsigned int element_count, TFunctor& functor){
+		TraverseRaw_Generic<const T, TFunctor>(data, element_count, functor);
+	}
+
 	template<typename T, typename TFunctor>
 	inline static void
 	Traverse(ORUtils::MemoryBlock<T>& memory_block, unsigned int element_count, TFunctor& functor){
@@ -53,42 +72,6 @@ public:
 	Traverse(const ORUtils::MemoryBlock<T>& memory_block, unsigned int element_count, TFunctor& functor){
 		Traverse_Generic<const T, const ORUtils::MemoryBlock<T>, TFunctor>(memory_block, element_count, functor);
 	}
-//	template<typename T, typename TFunctor>
-//	inline static void
-//	Traverse(ORUtils::MemoryBlock<T>& memory_block, unsigned int element_count, TFunctor& functor){
-//		T* data = memory_block.GetData(MEMORYDEVICE_CUDA);
-//		assert(element_count < memory_block.size());
-//		dim3 cuda_block_size(256, 1);
-//		dim3 cuda_grid_size((int) ceil((float) hash_entry_count / (float) cuda_block_size.x));
-//
-//		ORcudaSafeCall(cudaMalloc((void**) &functor_device, sizeof(TFunctor)));
-//		ORcudaSafeCall(cudaMemcpy(functor_device, &functor, sizeof(TFunctor), cudaMemcpyHostToDevice));
-//
-//		memoryBlockTraversalWithItemIndex_device < TFunctor >
-//		<<< cuda_grid_size, cuda_block_size >>>
-//		                    (data, memory_block.size(), functor_device);
-//
-//		ORcudaSafeCall(cudaMemcpy(&functor, functor_device, sizeof(TFunctor), cudaMemcpyDeviceToHost));
-//		ORcudaSafeCall(cudaFree(functor_device));
-//	}
-//	template<typename T, typename TFunctor>
-//	inline static void
-//	Traverse(const ORUtils::MemoryBlock<T>& memory_block, unsigned int element_count, TFunctor& functor){
-//		const T* data = memory_block.GetData(MEMORYDEVICE_CUDA);
-//		assert(element_count < memory_block.size());
-//		dim3 cuda_block_size(256, 1);
-//		dim3 cuda_grid_size((int) ceil((float) hash_entry_count / (float) cuda_block_size.x));
-//
-//		ORcudaSafeCall(cudaMalloc((void**) &functor_device, sizeof(TFunctor)));
-//		ORcudaSafeCall(cudaMemcpy(functor_device, &functor, sizeof(TFunctor), cudaMemcpyHostToDevice));
-//
-//		memoryBlockTraversalWithItemIndex_device < TFunctor >
-//		<<< cuda_grid_size, cuda_block_size >>>
-//		                    (data, memory_block.size(), functor_device);
-//
-//		ORcudaSafeCall(cudaMemcpy(&functor, functor_device, sizeof(TFunctor), cudaMemcpyDeviceToHost));
-//		ORcudaSafeCall(cudaFree(functor_device));
-//	}
 
 };
 

@@ -35,40 +35,6 @@
 using namespace ITMLib;
 
 
-template<typename TVoxel>
-void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::
-AllocateHashEntriesUsingAllocationStateList(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
-
-	const HashEntryAllocationState* hash_entry_allocation_states = volume->index.GetHashEntryAllocationStates();
-	Vector3s* allocation_block_coordinates = volume->index.GetAllocationBlockCoordinates();
-
-	const int hash_entry_count = volume->index.hash_entry_count;
-	int* block_allocation_list = volume->index.GetBlockAllocationList();
-	int* excess_allocation_list = volume->index.GetExcessEntryList();
-	int* utilized_block_hash_codes = volume->index.GetUtilizedBlockHashCodes();
-
-	HashEntry* hashTable = volume->index.GetIndexData();
-
-	ORUtils::MemoryBlock<AllocationTempData> allocationTempData(1, true, true);
-	AllocationTempData* allocationTempData_host = allocationTempData.GetData(MEMORYDEVICE_CPU);
-	allocationTempData_host->last_free_voxel_block_id = volume->index.GetLastFreeBlockListId();
-	allocationTempData_host->last_free_excess_list_id = volume->index.GetLastFreeExcessListId();
-	allocationTempData_host->utilized_block_count = volume->index.GetUtilizedBlockCount();
-	allocationTempData.UpdateDeviceFromHost();
-
-	dim3 cudaBlockSizeAL(256, 1);
-	dim3 gridSizeAL((int) ceil((float) hash_entry_count / (float) cudaBlockSizeAL.x));
-
-	allocateHashedVoxelBlocksUsingLists_device <<< gridSizeAL, cudaBlockSizeAL >>>(
-			block_allocation_list, excess_allocation_list, allocationTempData.GetData(MEMORYDEVICE_CUDA),
-			hashTable, hash_entry_count, hash_entry_allocation_states, allocation_block_coordinates,
-			utilized_block_hash_codes);
-	ORcudaKernelCheck;
-	allocationTempData.UpdateHostFromDevice();
-	volume->index.SetLastFreeBlockListId(allocationTempData_host->last_free_voxel_block_id);
-	volume->index.SetLastFreeExcessListId(allocationTempData_host->last_free_excess_list_id);
-	volume->index.SetUtilizedBlockCount(allocationTempData_host->utilized_block_count);
-}
 
 
 template<typename TVoxel>

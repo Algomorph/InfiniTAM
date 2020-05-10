@@ -132,7 +132,7 @@ public: // member functions
 	void UpdateIndexCounters() {
 		this->index.SetLastFreeBlockListId(GET_ATOMIC_VALUE_CPU(last_free_voxel_block_id));
 		this->index.SetLastFreeExcessListId(GET_ATOMIC_VALUE_CPU(last_free_excess_list_id));
-		this->index.SetUtilizedBlockCount(utilized_block_count.load());
+		this->index.SetUtilizedBlockCount(GET_ATOMIC_VALUE_CPU(utilized_block_count));
 	}
 
 	_DEVICE_WHEN_AVAILABLE_

@@ -31,14 +31,11 @@ template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, typename TDerivedC
 void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::
         AllocateHashEntriesUsingAllocationStateList(VoxelVolume<TVoxel, VoxelBlockHash>* volume){
 	HashEntryStateBasedAllocationFunctor<TMemoryDeviceType> allocation_functor(volume->index);
-
-	MemoryBlockTraversalEngine<TMemoryDeviceType>::Traverse(volume->index.)
-
-	volume->index.SetLastFreeBlockListId(last_free_voxel_block_id);
-	volume->index.SetLastFreeExcessListId(last_free_excess_list_id);
-	volume->index.SetUtilizedBlockCount(utilized_block_count.load());
+	HashEntryAllocationState* hash_entry_allocation_states = volume->index.GetHashEntryAllocationStates();
+	unsigned int hash_entry_count = volume->index.hash_entry_count;
+	MemoryBlockTraversalEngine<TMemoryDeviceType>::TraverseRaw(hash_entry_allocation_states, hash_entry_count, allocation_functor);
+	allocation_functor.UpdateIndexCounters();
 }
-
 
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, typename TDerivedClass>
 void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::ResetUtilizedBlockList(
@@ -60,7 +57,7 @@ void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::Al
 		volume->index.ClearHashEntryAllocationStates();
 		depth_based_allocator.ResetFlagsAndCounters();
 		ImageTraversalEngine<float, TMemoryDeviceType>::TraverseWithPosition(view->depth, depth_based_allocator);
-		static_cast<TDerivedClass*>(this)->AllocateHashEntriesUsingAllocationStateList(volume);
+		this->AllocateHashEntriesUsingAllocationStateList(volume);
 		this->AllocateBlockList(volume, depth_based_allocator.colliding_block_positions,
 		                                                     depth_based_allocator.GetCollidingBlockCount());
 	} while (depth_based_allocator.EncounteredUnresolvableCollision());
@@ -90,7 +87,7 @@ void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::Al
 		depth_based_allocator.ResetFlagsAndCounters();
 		TwoImageTraversalEngine<float, Vector4f, TMemoryDeviceType>::TraverseWithPosition(
 				view->depth, tracking_state->pointCloud->locations, depth_based_allocator);
-		static_cast<TDerivedClass*>(this)->AllocateHashEntriesUsingAllocationStateList(volume);
+		this->AllocateHashEntriesUsingAllocationStateList(volume);
 		this->AllocateBlockList(volume, depth_based_allocator.colliding_block_positions,
 		                                                     depth_based_allocator.GetCollidingBlockCount());
 	} while (depth_based_allocator.EncounteredUnresolvableCollision());

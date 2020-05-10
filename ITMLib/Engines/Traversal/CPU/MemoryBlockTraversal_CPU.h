@@ -21,13 +21,11 @@ namespace ITMLib {
 
 template<>
 class MemoryBlockTraversalEngine<MEMORYDEVICE_CPU> {
-public:
-	template<typename T, typename TFunctor>
-	inline static void
-	Traverse(ORUtils::MemoryBlock<T>& memory_block, const unsigned int element_count, TFunctor& functor){
-		T* data = memory_block.GetData(MEMORYDEVICE_CPU);
-		assert(element_count < memory_block.size());
+private: // static functions
 
+	template<typename TData, typename TFunctor>
+	inline static void
+	TraverseRaw_Generic(TData* data, const unsigned int element_count, TFunctor& functor){
 #ifdef WITH_OPENMP
 #pragma omp parallel for default(none) shared(data, functor)
 #endif
@@ -36,18 +34,38 @@ public:
 		}
 	}
 
+	template<typename TData, typename TMemoryBlock, typename TFunctor>
+	inline static void
+	Traverse_Generic(TMemoryBlock& memory_block, const unsigned int element_count, TFunctor& functor){
+		TData* data = memory_block.GetData(MEMORYDEVICE_CPU);
+		assert(element_count < memory_block.size());
+		TraverseRaw_Generic(data, element_count, functor);
+	}
+
+public: // static functions
+
+	template<typename T, typename TFunctor>
+	inline static void
+	TraverseRaw(T* data, const unsigned int element_count, TFunctor& functor){
+		TraverseRaw_Generic<T, TFunctor>(data, element_count, functor);
+	}
+
+	template<typename T, typename TFunctor>
+	inline static void
+	TraverseRaw(const T* data, const unsigned int element_count, TFunctor& functor){
+		TraverseRaw_Generic<const T, TFunctor>(data, element_count, functor);
+	}
+
+	template<typename T, typename TFunctor>
+	inline static void
+	Traverse(ORUtils::MemoryBlock<T>& memory_block, const unsigned int element_count, TFunctor& functor){
+		Traverse_Generic<T, ORUtils::MemoryBlock<T>, TFunctor>(memory_block, element_count, functor);
+	}
+
 	template<typename T, typename TFunctor>
 	inline static void
 	Traverse(const ORUtils::MemoryBlock<T>& memory_block, const unsigned int element_count, TFunctor& functor){
-		const T* data = memory_block.GetData(MEMORYDEVICE_CPU);
-		assert(element_count < memory_block.size());
-
-#ifdef WITH_OPENMP
-#pragma omp parallel for default(none) shared(data, functor)
-#endif
-		for (int i_item = 0; i_item < element_count; i_item++){
-			functor(data[i_item], i_item);
-		}
+		Traverse_Generic<const T, const ORUtils::MemoryBlock<T>, TFunctor>(memory_block, element_count, functor);
 	}
 };
 
