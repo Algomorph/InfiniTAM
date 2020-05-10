@@ -16,15 +16,196 @@
 #pragma once
 
 //local
+#include "../../../../ORUtils/PlatformIndependence.h"
+#include "../../../../ORUtils/PlatformIndependentAtomics.h"
+#include "../../../Objects/Volume/VoxelVolume.h"
 #include "IndexingEngine_Shared.h"
 #include "IndexingEngine_RayMarching.h"
 #include "../../../Utils/Geometry/CheckBlockVisibility.h"
 #include "../../../Utils/Geometry/GeometryBooleanOperations.h"
+#include "../../../Utils/VoxelVolumeParameters.h"
 
+namespace ITMLib {
+
+
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
+struct BlockListDeallocationFunctor {
+public:
+	Vector3s* colliding_positions_device = nullptr;
+
+private: // member variables
+	VoxelBlockHash& index;
+	TVoxel* voxels;
+	HashEntryAllocationState* hash_entry_states;
+	HashEntry* hash_table;
+	int* block_allocation_list;
+	int* excess_entry_list;
+	const TVoxel* empty_voxel_block_device;
+
+	DECLARE_ATOMIC(int, colliding_block_count);
+	DECLARE_ATOMIC(int, last_free_voxel_block_id);
+	DECLARE_ATOMIC(int, last_free_excess_list_id);
+
+public: // member functions
+	explicit BlockListDeallocationFunctor(VoxelVolume<TVoxel, VoxelBlockHash>* volume)
+			: index(volume->index),
+			  voxels(volume->GetVoxels()),
+			  hash_entry_states(volume->index.GetHashEntryAllocationStates()),
+			  hash_table(volume->index.GetEntries()),
+			  block_allocation_list(volume->index.GetBlockAllocationList()),
+			  excess_entry_list(volume->index.GetExcessEntryList()) {
+		INITIALIZE_ATOMIC(int, colliding_block_count, 0);
+		INITIALIZE_ATOMIC(int, last_free_voxel_block_id, volume->index.GetLastFreeBlockListId());
+		INITIALIZE_ATOMIC(int, last_free_excess_list_id, volume->index.GetLastFreeExcessListId());
+
+		static ORUtils::MemoryBlock<TVoxel> empty_voxel_block = []() {
+			ORUtils::MemoryBlock<TVoxel> empty_voxel_block(VOXEL_BLOCK_SIZE3, true, true);
+			TVoxel* empty_voxel_block_CPU = empty_voxel_block.GetData(MEMORYDEVICE_CPU);
+			for (int i_voxel = 0; i_voxel < VOXEL_BLOCK_SIZE3; i_voxel++) empty_voxel_block_CPU[i_voxel] = TVoxel();
+			empty_voxel_block.UpdateDeviceFromHost();
+			return empty_voxel_block;
+		}();
+		empty_voxel_block_device = empty_voxel_block.GetData(TMemoryDeviceType);
+	}
+
+	~BlockListDeallocationFunctor() {
+		CLEAN_UP_ATOMIC(colliding_block_count);CLEAN_UP_ATOMIC(last_free_voxel_block_id);CLEAN_UP_ATOMIC(
+				last_free_excess_list_id);
+	}
+
+	void SetCollidingBlockCount(int value) {
+		SET_ATOMIC_VALUE_CPU(colliding_block_count, value);
+	}
+
+	int GetCollidingBlockCount() const {
+		return GET_ATOMIC_VALUE_CPU(colliding_block_count);
+	}
+
+	void SetIndexFreeVoxelBlockIdAndExcessListId() {
+		this->index.SetLastFreeBlockListId(GET_ATOMIC_VALUE_CPU(last_free_voxel_block_id));
+		this->index.SetLastFreeExcessListId(GET_ATOMIC_VALUE_CPU(last_free_excess_list_id));
+	}
+
+	_DEVICE_WHEN_AVAILABLE_
+	void operator()(const Vector3s& block_position_to_clear, int i_new_block) {
+		DeallocateBlock(block_position_to_clear, hash_entry_states, hash_table, voxels, colliding_positions_device,
+		                colliding_block_count, last_free_voxel_block_id, last_free_excess_list_id,
+		                block_allocation_list, excess_entry_list, empty_voxel_block_device);
+	}
+};
+
+template<MemoryDeviceType TMemoryDeviceType>
+struct HashEntryStateBasedAllocationFunctor {
+private: // member variables
+	VoxelBlockHash& index;
+	HashEntryAllocationState* hash_entry_states;
+	Vector3s* block_coordinates;
+
+	HashEntry* hash_table;
+	const int* block_allocation_list;
+	const int* excess_entry_list;
+	int* utilized_block_hash_codes;
+
+	DECLARE_ATOMIC(int, last_free_voxel_block_id);
+	DECLARE_ATOMIC(int, last_free_excess_list_id);
+	DECLARE_ATOMIC(int, utilized_block_count);
+public: // member functions
+	HashEntryStateBasedAllocationFunctor(VoxelBlockHash& index)
+			: index(index),
+			  hash_entry_states(index.GetHashEntryAllocationStates()),
+			  block_coordinates(index.GetAllocationBlockCoordinates()),
+			  hash_table(index.GetEntries()),
+
+			  block_allocation_list(index.GetBlockAllocationList()),
+			  excess_entry_list(index.GetExcessEntryList()),
+			  utilized_block_hash_codes(index.GetUtilizedBlockHashCodes()) {
+		INITIALIZE_ATOMIC(int, last_free_voxel_block_id, index.GetLastFreeBlockListId());
+		INITIALIZE_ATOMIC(int, last_free_excess_list_id, index.GetLastFreeExcessListId());
+		INITIALIZE_ATOMIC(int, utilized_block_count, index.GetUtilizedBlockCount());
+	}
+
+	~HashEntryStateBasedAllocationFunctor() {
+		CLEAN_UP_ATOMIC(last_free_voxel_block_id);CLEAN_UP_ATOMIC(last_free_excess_list_id);CLEAN_UP_ATOMIC(
+				utilized_block_count);
+	}
+
+	void UpdateIndexCounters() {
+		this->index.SetLastFreeBlockListId(GET_ATOMIC_VALUE_CPU(last_free_voxel_block_id));
+		this->index.SetLastFreeExcessListId(GET_ATOMIC_VALUE_CPU(last_free_excess_list_id));
+		this->index.SetUtilizedBlockCount(utilized_block_count.load());
+	}
+
+	_DEVICE_WHEN_AVAILABLE_
+	void operator()(const HashEntryAllocationState& hash_entry_state, int hash_code) {
+		AllocateBlockBasedOnState<TMemoryDeviceType>(
+				hash_entry_state, hash_code, block_coordinates, hash_table,
+				last_free_voxel_block_id, last_free_excess_list_id, utilized_block_count,
+				block_allocation_list, excess_entry_list, utilized_block_hash_codes);
+	}
+};
+
+template<MemoryDeviceType TMemoryDeviceType>
+struct BlockListAllocationStateMarkerFunctor {
+public:
+	Vector3s* colliding_positions_device = nullptr;
+
+private: // member variables
+	HashEntryAllocationState* hash_entry_states;
+	Vector3s* allocation_block_coordinates;
+	HashEntry* hash_table;
+	DECLARE_ATOMIC(int, colliding_block_count);
+public: // member functions
+	explicit BlockListAllocationStateMarkerFunctor(VoxelBlockHash& index)
+			: hash_entry_states(index.GetHashEntryAllocationStates()),
+			  allocation_block_coordinates(index.GetAllocationBlockCoordinates()),
+			  hash_table(index.GetEntries()) {
+		INITIALIZE_ATOMIC(int, colliding_block_count, 0);
+	}
+
+	~BlockListAllocationStateMarkerFunctor() {
+		CLEAN_UP_ATOMIC(colliding_block_count);
+	}
+
+	void SetCollidingBlockCount(int value) {
+		SET_ATOMIC_VALUE_CPU(colliding_block_count, value);
+	}
+
+	int GetCollidingBlockCount() const {
+		return GET_ATOMIC_VALUE_CPU(colliding_block_count);
+	}
+
+	_DEVICE_WHEN_AVAILABLE_
+	void operator()(const Vector3s& desired_block_position, int i_new_block) {
+		MarkAsNeedingAllocationIfNotFound<false>(hash_entry_states, allocation_block_coordinates,
+		                                         desired_block_position, hash_table, colliding_positions_device,
+		                                         colliding_block_count);
+	}
+};
 
 template<MemoryDeviceType TMemoryDeviceType>
 struct DepthBasedAllocationStateMarkerFunctor {
-public:
+public: // member variables
+	ORUtils::MemoryBlock<Vector3s> colliding_block_positions;
+protected: // member variables
+
+	float near_clipping_distance;
+	float far_clipping_distance;
+	Matrix4f inverted_camera_pose;
+	Vector4f inverted_projection_parameters;
+
+	float surface_distance_cutoff;
+
+	float hash_block_size_reciprocal;
+	HashEntryAllocationState* hash_entry_allocation_states;
+	Vector3s* hash_block_coordinates;
+	HashEntry* hash_table;
+
+	Vector3s* colliding_block_positions_device;
+	DECLARE_ATOMIC(int, colliding_block_count);
+
+	ORUtils::MemoryBlock<bool> unresolvable_collision_encountered;
+	bool* unresolvable_collision_encountered_device;
+public: // member functions
 	DepthBasedAllocationStateMarkerFunctor(VoxelBlockHash& index,
 	                                       const VoxelVolumeParameters& volume_parameters, const ITMLib::View* view,
 	                                       Matrix4f depth_camera_pose, float surface_distance_cutoff) :
@@ -53,6 +234,10 @@ public:
 		inverted_projection_parameters.fy = 1.0f / inverted_projection_parameters.fy;
 	}
 
+	virtual ~DepthBasedAllocationStateMarkerFunctor() {
+		CLEAN_UP_ATOMIC(colliding_block_count);
+	}
+
 	_DEVICE_WHEN_AVAILABLE_
 	void operator()(const float& depth_measure, int x, int y) {
 		if (depth_measure <= 0 || (depth_measure - surface_distance_cutoff) < 0 ||
@@ -78,42 +263,20 @@ public:
 		                                colliding_block_count);
 	}
 
-	ORUtils::MemoryBlock<Vector3s> colliding_block_positions;
-
-	void resetFlagsAndCounters() {
+	void ResetFlagsAndCounters() {
 		*unresolvable_collision_encountered.GetData(MEMORYDEVICE_CPU) = false;
 		unresolvable_collision_encountered.UpdateDeviceFromHost();
 		INITIALIZE_ATOMIC(int, colliding_block_count, 0);
 	}
 
-	bool encounteredUnresolvableCollision() {
+	bool EncounteredUnresolvableCollision() {
 		unresolvable_collision_encountered.UpdateHostFromDevice();
 		return *unresolvable_collision_encountered.GetData(MEMORYDEVICE_CPU);
 	}
 
-	int getCollidingBlockCount() const {
+	int GetCollidingBlockCount() const {
 		return GET_ATOMIC_VALUE_CPU(colliding_block_count);
 	}
-
-protected:
-
-	float near_clipping_distance;
-	float far_clipping_distance;
-	Matrix4f inverted_camera_pose;
-	Vector4f inverted_projection_parameters;
-
-	float surface_distance_cutoff;
-
-	float hash_block_size_reciprocal;
-	HashEntryAllocationState* hash_entry_allocation_states;
-	Vector3s* hash_block_coordinates;
-	HashEntry* hash_table;
-
-	Vector3s* colliding_block_positions_device;
-	DECLARE_ATOMIC(int, colliding_block_count);
-
-	ORUtils::MemoryBlock<bool> unresolvable_collision_encountered;
-	bool* unresolvable_collision_encountered_device;
 };
 
 template<MemoryDeviceType TMemoryDeviceType>
@@ -339,34 +502,4 @@ protected:
 	using VolumeBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::unresolvable_collision_encountered_device;
 };
 
-//
-//template<typename TVoxel, typename TUnwantedBlockPredicateStaticFunctor, bool clear_deallocated_blocks,
-//		MemoryDeviceType TMemoryDeviceType>
-//struct LazyDeallocateHashBlocksFunctor {
-//	DeallocateHashBlocksFunctor(VoxelVolume<TVoxel, VoxelBlockHash>* volume) :
-//			remaining_utilized_list(volume->index.hash_entry_count, TMemoryDeviceType),
-//			voxels(volume->LocalVBA.GetVoxels()){
-//		INITIALIZE_ATOMIC(int, remaining_utilized_count, 0);
-//	}
-//
-//	~DeallocateHashBlocksFunctor() {
-//		CLEAN_UP_ATOMIC(remaining_utilized_count);
-//	};
-//
-//	_DEVICE_WHEN_AVAILABLE_
-//	void operator()(const HashEntry& hash_entry, const int& hash_code) {
-//		if (TUnwantedBlockPredicateStaticFunctor::is_block_unwanted(hash_entry)) {
-//			if (clear_deallocated_blocks) {
-//				TVoxel* block_voxels = voxels + (hash_entry.ptr * VOXEL_BLOCK_SIZE3);
-//				memcpy(block_voxels, )
-//			}
-//		} else {
-//
-//		}
-//	}
-//
-//private:
-//	ORUtils::MemoryBlock<int> remaining_utilized_list;
-//	DECLARE_ATOMIC(int, remaining_utilized_count);
-//	TVoxel* voxels;
-//};
+} // namespace ITMLib

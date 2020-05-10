@@ -26,29 +26,32 @@ class IndexingEngine_VoxelBlockHash :
 
 public: // member functions
 
-	virtual void AllocateHashEntriesUsingAllocationStateList(VoxelVolume<TVoxel, VoxelBlockHash>* volume) = 0;
+	void AllocateHashEntriesUsingAllocationStateList(VoxelVolume<TVoxel, VoxelBlockHash>* volume);
 	virtual void
 	AllocateHashEntriesUsingAllocationStateList_SetVisibility(VoxelVolume<TVoxel, VoxelBlockHash>* volume) = 0;
 	virtual HashEntry FindHashEntry(const VoxelBlockHash& index, const Vector3s& coordinates) = 0;
 	virtual bool AllocateHashBlockAt(VoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3s at, int& hashCode) = 0;
 
 	/**
-	 * \brief Allocate all hash blocks at given coordinates
-	 * \param volume - volume, where to allocate
-	 * \param block_coordinates coordinates of blocks to allocate (in blocks, not voxels)
+	 * \brief Allocate all hash blocks at the first [0, new_block_count) of the given block coordinates
+	 * \param volume volume where to allocate
+	 * \param new_block_positions list of coordinates of blocks to allocate (coordinates to be specified in blocks, not voxels or meters)
+	 * \param new_block_count only the first [0, new_block_count) new_block_positions will be used.
+	 * If -1 is passed, new_block_positions.size() will be used.
 	 */
-	virtual void
-	AllocateBlockList(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
-	                  const ORUtils::MemoryBlock<Vector3s>& block_coordinates,
-	                  int new_block_count) = 0;
+	void AllocateBlockList(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
+	                       const ORUtils::MemoryBlock<Vector3s>& new_block_positions,
+	                       int new_block_count = -1);
 	/**
-	 * \brief Deallocate all hash blocks at given hash codes (hash codes here are treated as direct indices in the hash table, not buckets)
-	 * \param volume - volume, where to deallocate
-	 * \param block_coordinates coordinates of blocks to allocate (in blocks, not voxels)
+	 * \brief Deallocate all hash blocks at the first [0, count_of_blocks_to_remove) of the given block coordinates
+	 * \param volume volume where to deallocate
+	 * \param coordinates_of_blocks_to_remove coordinates (specified in blocks, not voxels or meters) from which to remove blocks
+	 * \param count_of_blocks_to_remove only the first [0, count_of_blocks_to_remove) coordinates_of_blocks_to_remove will be used.
+	 * If -1 is passed, coordinates_of_blocks_to_remove.size() will be used.
 	 */
-	virtual void DeallocateBlockList(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
-	                                 const ORUtils::MemoryBlock<Vector3s>& block_coordinates,
-	                                 int count_blocks_to_remove) = 0;
+	void DeallocateBlockList(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
+	                                 const ORUtils::MemoryBlock<Vector3s>& coordinates_of_blocks_to_remove,
+	                                 int count_of_blocks_to_remove = -1);
 
 	virtual void ResetUtilizedBlockList(VoxelVolume<TVoxel, VoxelBlockHash>* volume) override;
 
@@ -73,7 +76,7 @@ private:
 
 };
 
-namespace internal{
+namespace internal {
 template<MemoryDeviceType TMemoryDeviceType, typename TVoxelTarget, typename TVoxelSource, typename TMarkerFunctor>
 void AllocateUsingOtherVolume_Generic(VoxelVolume<TVoxelTarget, VoxelBlockHash>* target_volume,
                                       VoxelVolume<TVoxelSource, VoxelBlockHash>* source_volume,
@@ -83,7 +86,7 @@ struct AllocateUsingOtherVolume_OffsetAndBounded_Executor;
 } // namespace internal
 
 
-}// namespace ITMLib
+} // namespace ITMLib
 
 
 

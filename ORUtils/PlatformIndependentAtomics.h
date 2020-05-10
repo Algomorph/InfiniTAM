@@ -76,10 +76,15 @@ unsigned int atomicAdd_CPU<unsigned int>(std::atomic<unsigned int>& variable, un
 
 #if defined(__CUDACC__)
 template <typename T>
-inline T getDataCPU(T* var){
+inline T GetDataCPU(T* var){
 	T var_val;
 	ORcudaSafeCall(cudaMemcpy(&var_val, var, sizeof(T), cudaMemcpyDeviceToHost));
 	return var_val;
+}
+
+template <typename T>
+inline void SetDataCPU(T* var, T var_val){
+	ORcudaSafeCall(cudaMemcpy(&var_val, var, sizeof(T), cudaMemcpyHostToDevice));
 }
 #endif
 
@@ -91,8 +96,9 @@ inline T getDataCPU(T* var){
 #define DECLARE_ATOMIC_FLOAT(name) float* name = nullptr
 #define DECLARE_ATOMIC_DOUBLE(name) double* name = nullptr
 #define CLEAN_UP_ATOMIC(name) ORcudaSafeCall (cudaFree(name))
+#define SET_ATOMIC_VALUE_CPU(name, value) SetDataCPU(name, value)
 #define GET_ATOMIC_VALUE(name) (* name)
-#define GET_ATOMIC_VALUE_CPU(name) getDataCPU( name )
+#define GET_ATOMIC_VALUE_CPU(name) GetDataCPU( name )
 #define ATOMIC_ARGUMENT(type) type *
 #define ATOMIC_FLOAT_ARGUMENT_TYPE float*
 #define ATOMIC_INT_ARGUMENT_TYPE int*
@@ -110,6 +116,7 @@ ORcudaSafeCall(cudaMemcpy(var, &val, sizeof( type ), cudaMemcpyHostToDevice)); \
 #define DECLARE_ATOMIC_FLOAT(name) std::atomic<float> name = {0}
 #define DECLARE_ATOMIC_DOUBLE(name) std::atomic<double> name = {0}
 #define CLEAN_UP_ATOMIC(name) ;
+#define SET_ATOMIC_VALUE_CPU(name, value) (name .store(value))
 #define GET_ATOMIC_VALUE(name) (name .load())
 #define GET_ATOMIC_VALUE_CPU(name) GET_ATOMIC_VALUE(name)
 #define ATOMIC_ARGUMENT(type) std::atomic< type >&

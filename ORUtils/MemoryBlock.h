@@ -336,6 +336,11 @@ public:
 	}
 
 	/** Copy data */
+	void SetFrom(const MemoryBlock<T>& source) {
+		SetFrom(source, DetermineMemoryCopyDirection(this->access_mode, source.access_mode));
+	}
+
+	/** Copy data */
 	void SetFrom(const MemoryBlock<T>& source, MemoryCopyDirection memory_copy_direction) {
 		Resize(source.element_count);
 		switch (memory_copy_direction) {

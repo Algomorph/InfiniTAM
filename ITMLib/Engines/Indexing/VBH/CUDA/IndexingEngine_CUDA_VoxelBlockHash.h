@@ -49,13 +49,6 @@ public:
 
 	void AllocateHashEntriesUsingAllocationStateList_SetVisibility(VoxelVolume <TVoxel, VoxelBlockHash>* volume) override;
 
-	void AllocateBlockList(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
-	                       const ORUtils::MemoryBlock<Vector3s>& new_block_positions,
-	                       int new_block_count) override;
-
-	void DeallocateBlockList(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
-	                         const ORUtils::MemoryBlock<Vector3s>& block_coordinates, int count_blocks_to_remove) override;
-
 	void BuildUtilizedBlockListBasedOnVisibility(VoxelVolume <TVoxel, VoxelBlockHash>* volume, const View* view,
 	                                             const Matrix4f& depth_camera_matrix = Matrix4f::Identity());
 
@@ -87,7 +80,6 @@ extern template
 struct AllocateUsingOtherVolume_OffsetAndBounded_Executor<MEMORYDEVICE_CUDA, WarpVoxel, TSDFVoxel>;
 
 } // namespace internal
-
 
 } //namespace ITMLib
 

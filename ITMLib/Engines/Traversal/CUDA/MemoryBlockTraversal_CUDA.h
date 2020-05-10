@@ -35,6 +35,7 @@ class MemoryBlockTraversalEngine<MEMORYDEVICE_CUDA> {
 		ORcudaSafeCall(cudaMemcpy(functor_device, &functor, sizeof(TFunctor), cudaMemcpyHostToDevice));
 
 		memoryBlockTraversalWithItemIndex_device < TData, TFunctor > <<< cuda_grid_size, cuda_block_size >>>(data, memory_block.size(), functor_device);
+		ORcudaKernelCheck;
 
 		ORcudaSafeCall(cudaMemcpy(&functor, functor_device, sizeof(TFunctor), cudaMemcpyDeviceToHost));
 		ORcudaSafeCall(cudaFree(functor_device));

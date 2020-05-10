@@ -28,7 +28,8 @@
 
 namespace ITMLib {
 
-// mostly for debugging purposes
+// region ============================== HASH STATE MARKING FOR ALLOCATION =============================================
+// mostly for debugging purposes and detection of unresolvable collisions
 enum ThreadAllocationStatus {
 	ALREADY_IN_ORDERED_LIST,
 	ALREADY_IN_EXCESS_LIST,
@@ -83,10 +84,9 @@ inline ThreadAllocationStatus MarkAsNeedingAllocationIfNotFound(ITMLib::HashEntr
                                                                 ATOMIC_ARGUMENT(int) colliding_block_count) {
 
 	int hash_code = HashCodeFromBlockPosition(desired_hash_block_position);
-	HashEntry hash_entry = hash_table[hash_code];
-	//check if hash table contains entry
 	HashEntryAllocationState new_allocation_state;
-
+	// if hash table contains a fully-allocated entry associated with the desired position, nothing has to be done
+	HashEntry hash_entry = hash_table[hash_code];
 	if (IS_EQUAL3(hash_entry.pos, desired_hash_block_position) && hash_entry.ptr >= -1) {
 		return ALREADY_IN_ORDERED_LIST;
 	} else {
@@ -149,7 +149,80 @@ inline ThreadAllocationStatus MarkAsNeedingAllocationIfNotFound(ITMLib::HashEntr
 #endif
 
 };
+// endregion ===========================================================================================================
+// region =================== ALLOCATION USING HASH STATES =============================================================
 
+template<MemoryDeviceType TMemoryDeviceType>
+_DEVICE_WHEN_AVAILABLE_
+inline void
+UpdateUtilizedHashCodes(int* utilized_block_hash_codes, ATOMIC_ARGUMENT(int) utilized_block_count, int hash_code) {
+	int utilized_index = ATOMIC_ADD(utilized_block_count, 1);
+	utilized_block_hash_codes[utilized_index] = hash_code;
+}
+
+template<MemoryDeviceType TMemoryDeviceType>
+_DEVICE_WHEN_AVAILABLE_
+inline void AllocateBlockBasedOnState(const HashEntryAllocationState& hash_entry_state, int hash_code,
+                                      Vector3s* block_coordinates,
+                                      HashEntry* hash_table,
+                                      ATOMIC_ARGUMENT(int) last_free_voxel_block_id,
+                                      ATOMIC_ARGUMENT(int) last_free_excess_list_id,
+                                      ATOMIC_ARGUMENT(int) utilized_block_count,
+                                      const int* block_allocation_list,
+                                      const int* excess_entry_list,
+                                      int* utilized_block_hash_codes) {
+	int voxel_block_index, excess_list_index;
+	switch (hash_entry_state) {
+		case ITMLib::NEEDS_ALLOCATION_IN_ORDERED_LIST: //needs allocation, fits in the ordered list
+			voxel_block_index = ATOMIC_SUB(last_free_voxel_block_id, 1);
+			if (voxel_block_index >= 0) //there is room in the voxel block array
+			{
+				HashEntry hash_entry;
+				hash_entry.pos = block_coordinates[hash_code];
+				hash_entry.ptr = block_allocation_list[voxel_block_index];
+				hash_entry.offset = 0;
+				hash_table[hash_code] = hash_entry;
+				UpdateUtilizedHashCodes<TMemoryDeviceType>(utilized_block_hash_codes, utilized_block_count, hash_code);
+			} else {
+				// Restore the previous value to avoid leaks.
+				ATOMIC_ADD(last_free_voxel_block_id, 1);
+			}
+			break;
+
+		case ITMLib::NEEDS_ALLOCATION_IN_EXCESS_LIST: //needs allocation in the excess list
+			voxel_block_index = ATOMIC_SUB(last_free_voxel_block_id, 1);
+			excess_list_index = ATOMIC_SUB(last_free_excess_list_id, 1);
+
+			if (voxel_block_index >= 0 &&
+			    excess_list_index >= 0) //there is room in the voxel block array and excess list
+			{
+				HashEntry hash_entry;
+				hash_entry.pos = block_coordinates[hash_code];
+				hash_entry.ptr = block_allocation_list[voxel_block_index];
+				hash_entry.offset = 0;
+
+				const int excess_list_offset = excess_entry_list[excess_list_index];
+
+				hash_table[hash_code].offset = excess_list_offset + 1; //connect to child
+
+				const int new_hash_code = ORDERED_LIST_SIZE + excess_list_offset;
+				hash_table[new_hash_code] = hash_entry; //add child to the excess list
+				UpdateUtilizedHashCodes<TMemoryDeviceType>(utilized_block_hash_codes, utilized_block_count, hash_code);
+			} else {
+				// Restore the previous values to avoid leaks.
+				ATOMIC_ADD(last_free_voxel_block_id, 1);
+				ATOMIC_ADD(last_free_excess_list_id, 1);
+			}
+
+			break;
+		default:
+			//no other states should be used here.
+			assert(false);
+			break;
+	}
+}
+
+// endregion ===========================================================================================================
 // region =================== DEALLOCATION & CLEANING OF SINGLE VOXEL HASH BLOCK =======================================
 
 /**

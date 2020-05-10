@@ -20,9 +20,9 @@ enum MemoryCopyDirection {
 };
 
 inline
-MemoryCopyDirection DetermineMemoryCopyDirection(MemoryDeviceType targetMemoryType, MemoryDeviceType sourceMemoryType){
-	if(targetMemoryType == sourceMemoryType){
-		switch(targetMemoryType){
+MemoryCopyDirection DetermineMemoryCopyDirection(MemoryDeviceType target_memory_device_type, MemoryDeviceType source_memory_device_type){
+	if(target_memory_device_type == source_memory_device_type){
+		switch(target_memory_device_type){
 			default:
 			case MEMORYDEVICE_CPU:
 				return CPU_TO_CPU;
@@ -30,7 +30,7 @@ MemoryCopyDirection DetermineMemoryCopyDirection(MemoryDeviceType targetMemoryTy
 				return CUDA_TO_CUDA;
 		}
 	}else{
-		switch(targetMemoryType){
+		switch(target_memory_device_type){
 			default:
 			case MEMORYDEVICE_CPU:
 				return CUDA_TO_CPU;
