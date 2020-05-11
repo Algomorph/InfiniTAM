@@ -19,9 +19,9 @@
 #include "../../Utils/Configuration/Configuration.h"
 
 #include "Interface/IndexingEngine.h"
-#include "VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
 #include "VBH/IndexingEngine_VoxelBlockHash.h"
 #include "PVA/IndexingEngine_PlainVoxelArray.h"
+#include "VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
 
 #ifndef COMPILE_WITHOUT_CUDA
 #include "VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"

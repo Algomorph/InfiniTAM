@@ -25,8 +25,8 @@
 #include "../Shared/IndexingEngine_Functors.h"
 #include "../../../Utils/Configuration/Configuration.h"
 
-namespace ITMLib {
 
+using namespace ITMLib;
 
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
 template<typename TAllocationFunctor>
@@ -306,7 +306,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType>::RebuildVisibleBl
 	internal::SpecializedVoxelHashBlockManager<TMemoryDeviceType,TVoxel>::RebuildVisibleBlockList(volume, view, depth_camera_matrix);
 }
 
-
+namespace ITMLib {
 namespace internal {
 template<MemoryDeviceType TMemoryDeviceType, typename TVoxelTarget, typename TVoxelSource, typename TMarkerFunctor>
 void AllocateUsingOtherVolume_Generic(
