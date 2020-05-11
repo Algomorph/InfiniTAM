@@ -92,8 +92,8 @@ BOOST_FIXTURE_TEST_CASE(testDataTerm_CPU_VBH, DataFixture) {
 	VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field(MEMORYDEVICE_CPU, index_parameters);
 	ManipulationEngine_CPU_VBH_Warp::Inst().ResetVolume(&warp_field);
 
-	indexing_engine.AllocateWarpVolumeFromOtherVolume(&warp_field, live_volume);
-	indexing_engine.AllocateUsingOtherVolume(canonical_volume, live_volume);
+	AllocateUsingOtherVolume(&warp_field, live_volume, MEMORYDEVICE_CPU);
+	AllocateUsingOtherVolume(canonical_volume, live_volume, MEMORYDEVICE_CPU);
 
 	BOOST_REQUIRE_EQUAL(Analytics_CPU_VBH_Warp::Instance().CountAllocatedHashBlocks(&warp_field), 633);
 
@@ -128,7 +128,7 @@ BOOST_FIXTURE_TEST_CASE(testUpdateWarps_CPU_VBH, DataFixture) {
 	BOOST_REQUIRE_EQUAL(altered_count_functor.count.load(), 37525u);
 	BOOST_REQUIRE_EQUAL(Analytics_CPU_VBH_Warp::Instance().CountAllocatedHashBlocks(&warp_field_copy), 633);
 
-	indexing_engine.AllocateUsingOtherVolume(canonical_volume, live_volume);
+	AllocateUsingOtherVolume(canonical_volume, live_volume, MEMORYDEVICE_CPU);
 
 	float max_warp = motionTracker_VBH_CPU->UpdateWarps(&warp_field_copy, canonical_volume, live_volume);
 	BOOST_REQUIRE_CLOSE(max_warp, 0.121243507f, 1e-7f);
@@ -148,7 +148,7 @@ BOOST_FIXTURE_TEST_CASE(testSmoothWarpGradient_CPU_VBH, DataFixture) {
 
 	VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field(*warp_field_data_term, MEMORYDEVICE_CPU);
 
-	indexing_engine.AllocateUsingOtherVolume(canonical_volume, live_volume);
+	AllocateUsingOtherVolume(canonical_volume, live_volume, MEMORYDEVICE_CPU);
 
 
 	auto motionTracker_VBH_CPU = new SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_DIAGNOSTIC>(
@@ -167,7 +167,7 @@ BOOST_FIXTURE_TEST_CASE(testTikhonovTerm_CPU_VBH, DataFixture) {
 
 	VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field(*warp_field_iter0, MEMORYDEVICE_CPU);
 
-	indexing_engine.AllocateUsingOtherVolume(canonical_volume, live_volume);
+	AllocateUsingOtherVolume(canonical_volume, live_volume, MEMORYDEVICE_CPU);
 
 
 	auto motionTracker_VBH_CPU = new SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_DIAGNOSTIC>(
@@ -198,7 +198,7 @@ BOOST_FIXTURE_TEST_CASE(testTikhonovTerm_CPU_VBH, DataFixture) {
 
 BOOST_FIXTURE_TEST_CASE(testDataAndTikhonovTerm_CPU_VBH, DataFixture) {
 	VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field(*warp_field_iter0, MEMORYDEVICE_CPU);
-	indexing_engine.AllocateUsingOtherVolume(canonical_volume, live_volume);
+	AllocateUsingOtherVolume(canonical_volume, live_volume, MEMORYDEVICE_CPU);
 
 	auto motionTracker_VBH_CPU = new SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_DIAGNOSTIC>(
 			SlavchevaSurfaceTracker::Switches(true, false, true, false, false));
@@ -230,7 +230,7 @@ BOOST_FIXTURE_TEST_CASE(testDataAndKillingTerm_CPU_VBH, DataFixture) {
 
 	VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field(*warp_field_iter0, MEMORYDEVICE_CPU);
 
-	indexing_engine.AllocateUsingOtherVolume(canonical_volume, live_volume);
+	AllocateUsingOtherVolume(canonical_volume, live_volume, MEMORYDEVICE_CPU);
 
 	auto motionTracker_VBH_CPU = new SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_DIAGNOSTIC>(
 			SlavchevaSurfaceTracker::Switches(true, false, true, true, false));
@@ -253,7 +253,7 @@ BOOST_FIXTURE_TEST_CASE(testDataAndKillingTerm_CPU_VBH, DataFixture) {
 BOOST_FIXTURE_TEST_CASE(testDataAndLevelSetTerm_CPU_VBH, DataFixture) {
 	VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field(*warp_field_iter0, MEMORYDEVICE_CPU);
 
-	indexing_engine.AllocateUsingOtherVolume(canonical_volume, live_volume);
+	AllocateUsingOtherVolume(canonical_volume, live_volume, MEMORYDEVICE_CPU);
 
 	auto motionTracker_VBH_CPU = new SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_DIAGNOSTIC>(
 			SlavchevaSurfaceTracker::Switches(true, true, false, false, false));

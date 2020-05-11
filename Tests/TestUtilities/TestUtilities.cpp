@@ -19,11 +19,13 @@
 
 
 #include "../../ITMLib/Utils/Configuration/Configuration.h"
+#include "../../ITMLib/Utils/Geometry/CardinalAxesAndPlanes.h"
 #include "../../ITMLib/Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 #include "../../ITMLib/Engines/Telemetry/VolumeSequenceRecorder.h"
 #include "../../ITMLib/Engines/Analytics/AnalyticsEngine.h"
 #include "../../ITMLib/Engines/ViewBuilding/Interface/ViewBuilder.h"
 #include "../../ITMLib/Engines/ViewBuilding/ViewBuilderFactory.h"
+#include "../../ITMLib/Utils/Configuration/TelemetrySettings.h"
 
 using namespace ITMLib;
 
@@ -353,7 +355,10 @@ void initializeVolume<WarpVoxel, PlainVoxelArray>(VoxelVolume<WarpVoxel, PlainVo
 
 configuration::Configuration GenerateChangedUpConfiguration(){
 	using namespace configuration;
+	TelemetrySettings changed_up_telemetry_settings(true, true, true, true, true, PLANE_XY, true, 4, true, true, true, true, true);
 	configuration::Configuration changed_up_configuration(
+			Vector3i(20, 23, 0),
+			true,
 			VoxelVolumeParameters(0.005, 0.12, 4.12, 0.05, 200, true, 1.2f),
 			SurfelVolumeParameters(0.4f, 0.5f, static_cast<float>(22 * M_PI / 180), 0.008f, 0.0003f, 3.4f, 26.0f, 5,
 			                       1.1f, 4.5f, 21, 300, false, false),
@@ -367,8 +372,7 @@ configuration::Configuration GenerateChangedUpConfiguration(){
 			),
 			SlavchevaSurfaceTracker::Parameters(0.11f, 0.09f, 2.0f, 0.3f, 0.1f, 1e-6f),
 			SlavchevaSurfaceTracker::Switches(false, true, false, true, false),
-			TelemetrySettings(Vector3i(20, 23, 0),
-					true, true, false, true, true, true, true, true, true, true, Plane::PLANE_XY, true, 4, true, true, true),
+			LoggingSettings(VERBOSITY_WARNING, true, false, true, true, true, true),
 			Paths("TestData/output1",
 			      "TestData/calib_file1.txt",
 			      "", "", "",
@@ -389,9 +393,9 @@ configuration::Configuration GenerateChangedUpConfiguration(){
 			configuration::SWAPPINGMODE_ENABLED,
 			configuration::LIBMODE_BASIC,
 			configuration::INDEX_ARRAY,
-			VERBOSITY_WARNING,
 			"type=rgb,levels=rrbb"
 	);
+	changed_up_configuration.source_tree.add_child(TelemetrySettings::default_parse_path, changed_up_telemetry_settings.ToPTree(changed_up_configuration.origin));
 	return changed_up_configuration;
 }
 

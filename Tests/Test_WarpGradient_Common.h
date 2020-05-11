@@ -25,7 +25,7 @@
 #include "../ITMLib/Objects/Volume/VoxelVolume.h"
 #include "../ITMLib/Engines/EditAndCopy/Interface/EditAndCopyEngineInterface.h"
 #include "../ITMLib/Engines/EditAndCopy/EditAndCopyEngineFactory.h"
-#include "../ITMLib/Engines/Indexing/Interface/IndexingEngine.h"
+#include "../ITMLib/Engines/Indexing/IndexingEngineFactory.h"
 //(CPU)
 #include "../ITMLib/Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 #include "../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
@@ -44,33 +44,33 @@ using namespace test_utilities;
 namespace snoopy = snoopy_test_utilities;
 
 
-template<MemoryDeviceType TMemoryType, typename TIndex>
+template<MemoryDeviceType TMemoryDeviceType, typename TIndex>
 struct WarpGradientDataFixture {
 	WarpGradientDataFixture() :
 			settings(nullptr),
 			warp_field_data_term(nullptr), canonical_volume(nullptr), live_volume(nullptr),
 			path_to_data("TestData/volumes/" + IndexString<TIndex>() + "/"),
 			index_parameters(snoopy::InitializationParameters_Fr16andFr17<TIndex>()),
-			indexing_engine(IndexingEngine<TSDFVoxel, TIndex, TMemoryType>::Instance()){
+			indexing_engine(IndexingEngine<TSDFVoxel, TIndex, TMemoryDeviceType>::Instance()){
 		configuration::load_default();
 		settings = &configuration::get();
 
 		BOOST_TEST_MESSAGE("setup fixture");
 		auto loadSdfVolume = [&](VoxelVolume<TSDFVoxel, TIndex>** volume, const std::string& pathSuffix) {
-			*volume = new VoxelVolume<TSDFVoxel, TIndex>(TMemoryType,
-			                                            index_parameters);
+			*volume = new VoxelVolume<TSDFVoxel, TIndex>(TMemoryDeviceType,
+			                                             index_parameters);
 			PrepareVoxelVolumeForLoading(*volume);
 			(*volume)->LoadFromDisk(path_to_data + pathSuffix);
 		};
 		auto loadWarpVolume = [&](VoxelVolume<WarpVoxel, TIndex>** volume, const std::string& pathSuffix) {
-			*volume = new VoxelVolume<WarpVoxel, TIndex>(TMemoryType,
-			                                            index_parameters);
+			*volume = new VoxelVolume<WarpVoxel, TIndex>(TMemoryDeviceType,
+			                                             index_parameters);
 			PrepareVoxelVolumeForLoading(*volume);
 			(*volume)->LoadFromDisk(path_to_data + pathSuffix);
 		};
 		loadSdfVolume(&live_volume, "snoopy_partial_frame_17.dat");
 		loadSdfVolume(&canonical_volume, "snoopy_partial_frame_16.dat");
-		IndexingEngine<TSDFVoxel,TIndex,TMemoryType>::Instance().AllocateUsingOtherVolume(canonical_volume, live_volume);
+		AllocateUsingOtherVolume(canonical_volume, live_volume, TMemoryDeviceType);
 		loadWarpVolume(&warp_field_data_term, "warp_field_0_data.dat");
 		loadWarpVolume(&warp_field_iter0, "warp_field_0_data_framewise_warps.dat");
 		loadWarpVolume(&warp_field_data_term_smoothed, "warp_field_0_smoothed.dat");
@@ -105,5 +105,5 @@ struct WarpGradientDataFixture {
 	VoxelVolume<TSDFVoxel, TIndex>* live_volume;
 	const std::string path_to_data;
 	const typename TIndex::InitializationParameters index_parameters;
-	IndexingEngine<TSDFVoxel, TIndex, TMemoryType>& indexing_engine;
+	IndexingEngine<TSDFVoxel, TIndex, TMemoryDeviceType>& indexing_engine;
 };

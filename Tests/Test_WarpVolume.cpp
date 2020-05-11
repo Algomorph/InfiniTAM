@@ -66,8 +66,7 @@ void GenericWarpVolumeTest() {
 	auto warping_engine =
 			WarpingEngineFactory::Build<TSDFVoxel, WarpVoxel, TIndex>(TMemoryDeviceType);
 
-	IndexingEngine<TSDFVoxel, TIndex, TMemoryDeviceType>::Instance().AllocateFromOtherVolume(warped_live_volume,
-	                                                                                        live_volume);
+	AllocateUsingOtherVolume(warped_live_volume, live_volume, TMemoryDeviceType);
 	warping_engine->WarpVolume_WarpUpdates(warps, live_volume, warped_live_volume);
 
 	VoxelVolume<TSDFVoxel, TIndex>* warped_live_volume_gt;
@@ -76,7 +75,8 @@ void GenericWarpVolumeTest() {
 
 	float absolute_tolerance = 1e-6;
 	BOOST_REQUIRE(!contentAlmostEqual(warped_live_volume, live_volume, absolute_tolerance, TMemoryDeviceType));
-	BOOST_REQUIRE(contentAlmostEqual_Verbose(warped_live_volume, warped_live_volume_gt, absolute_tolerance, TMemoryDeviceType));
+	BOOST_REQUIRE(contentAlmostEqual_Verbose(warped_live_volume, warped_live_volume_gt, absolute_tolerance,
+	                                         TMemoryDeviceType));
 
 	delete warping_engine;
 	delete warps;
@@ -133,16 +133,18 @@ void GenericWarpVolume_VBH_to_PVA_Test(const int iteration = 0) {
 
 	IndexingEngine<TSDFVoxel, VoxelBlockHash, TMemoryDeviceType>& indexer =
 			IndexingEngine<TSDFVoxel, VoxelBlockHash, TMemoryDeviceType>::Instance();
-	indexer.AllocateFromOtherVolume(target_VBH, source_volume_VBH);
+	AllocateUsingOtherVolume(target_VBH, source_volume_VBH, TMemoryDeviceType);
 	warping_engine_PVA->WarpVolume_WarpUpdates(warps_PVA, source_volume_PVA, target_PVA);
 	warping_engine_VBH->WarpVolume_WarpUpdates(warps_VBH, source_volume_VBH, target_VBH);
 
 	// *** test content
 	float absolute_tolerance = 1e-7;
 	BOOST_REQUIRE(
-			contentForFlagsAlmostEqual_Verbose(target_PVA, target_VBH, VOXEL_NONTRUNCATED, absolute_tolerance,
-			                                   TMemoryDeviceType));
-
+			contentForFlagsAlmostEqual_Verbose(
+					target_PVA, target_VBH,
+					VOXEL_NONTRUNCATED, absolute_tolerance, TMemoryDeviceType
+			)
+	);
 
 	delete warps_PVA;
 	delete warps_VBH;

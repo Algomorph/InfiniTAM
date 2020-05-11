@@ -27,6 +27,7 @@
 
 //test_utilities
 #include "TestUtilities/TestUtilities.h"
+#include "../ITMLib/Utils/Configuration/TelemetrySettings.h"
 
 namespace pt = boost::property_tree;
 
@@ -38,8 +39,11 @@ configuration::Configuration GenerateDefaultSnoopyConfiguration();
 
 BOOST_AUTO_TEST_CASE(ConfigurationTest) {
 	configuration::Configuration default_configuration;
+	TelemetrySettings default_telemetry_settings;
 
 	configuration::Configuration configuration1 = GenerateChangedUpConfiguration();
+	TelemetrySettings telemetry_settings1 = TelemetrySettings::BuildFromPTree(
+			configuration1.source_tree.get_child(TelemetrySettings::default_parse_path));
 
 #ifdef COMPILE_WITHOUT_CUDA
 	configuration::load_configuration_from_json_file("TestData/configuration/default_config_cpu.json");
@@ -47,13 +51,17 @@ BOOST_AUTO_TEST_CASE(ConfigurationTest) {
 	configuration::load_configuration_from_json_file("TestData/configuration/default_config_cuda.json");
 #endif
 
+	TelemetrySettings loaded_telemetry_settings = TelemetrySettings::BuildFromPTree(
+			configuration::get().source_tree.get_child(TelemetrySettings::default_parse_path));
+
 	BOOST_REQUIRE_EQUAL(default_configuration.general_voxel_volume_parameters,
 	                    configuration::get().general_voxel_volume_parameters);
 	BOOST_REQUIRE_EQUAL(default_configuration.general_surfel_volume_parameters,
 	                    configuration::get().general_surfel_volume_parameters);
 	BOOST_REQUIRE_EQUAL(default_configuration.slavcheva_parameters, configuration::get().slavcheva_parameters);
 	BOOST_REQUIRE_EQUAL(default_configuration.slavcheva_switches, configuration::get().slavcheva_switches);
-	BOOST_REQUIRE_EQUAL(default_configuration.telemetry_settings, configuration::get().telemetry_settings);
+	BOOST_REQUIRE_EQUAL(default_configuration.logging_settings, configuration::get().logging_settings);
+	BOOST_REQUIRE_EQUAL(default_telemetry_settings, loaded_telemetry_settings);
 	BOOST_REQUIRE_EQUAL(default_configuration.paths, configuration::get().paths);
 	BOOST_REQUIRE_EQUAL(default_configuration.automatic_run_settings, configuration::get().automatic_run_settings);
 	BOOST_REQUIRE_EQUAL(default_configuration.non_rigid_tracking_parameters,
@@ -61,13 +69,17 @@ BOOST_AUTO_TEST_CASE(ConfigurationTest) {
 	BOOST_REQUIRE_EQUAL(default_configuration, configuration::get());
 
 	configuration::load_configuration_from_json_file("TestData/configuration/config1.json");
+	loaded_telemetry_settings = TelemetrySettings::BuildFromPTree(
+			configuration::get().source_tree.get_child(TelemetrySettings::default_parse_path));
+
 	BOOST_REQUIRE_EQUAL(configuration1.general_voxel_volume_parameters,
 	                    configuration::get().general_voxel_volume_parameters);
 	BOOST_REQUIRE_EQUAL(configuration1.general_surfel_volume_parameters,
 	                    configuration::get().general_surfel_volume_parameters);
 	BOOST_REQUIRE_EQUAL(configuration1.slavcheva_parameters, configuration::get().slavcheva_parameters);
 	BOOST_REQUIRE_EQUAL(configuration1.slavcheva_switches, configuration::get().slavcheva_switches);
-	BOOST_REQUIRE_EQUAL(configuration1.telemetry_settings, configuration::get().telemetry_settings);
+	BOOST_REQUIRE_EQUAL(configuration1.logging_settings, configuration::get().logging_settings);
+	BOOST_REQUIRE_EQUAL(telemetry_settings1, loaded_telemetry_settings);
 	BOOST_REQUIRE_EQUAL(configuration1.paths, configuration::get().paths);
 	BOOST_REQUIRE_EQUAL(configuration1.automatic_run_settings, configuration::get().automatic_run_settings);
 	BOOST_REQUIRE_EQUAL(configuration1.non_rigid_tracking_parameters,
@@ -75,18 +87,19 @@ BOOST_AUTO_TEST_CASE(ConfigurationTest) {
 	BOOST_REQUIRE_EQUAL(configuration1, configuration::get());
 	configuration::save_configuration_to_json_file("TestData/configuration/config2.json", configuration1);
 	configuration::load_configuration_from_json_file("TestData/configuration/config2.json");
+	loaded_telemetry_settings = TelemetrySettings::BuildFromPTree(
+			configuration::get().source_tree.get_child(TelemetrySettings::default_parse_path));
 	BOOST_REQUIRE_EQUAL(configuration1.general_voxel_volume_parameters,
 	                    configuration::get().general_voxel_volume_parameters);
 	BOOST_REQUIRE_EQUAL(configuration1.general_surfel_volume_parameters,
 	                    configuration::get().general_surfel_volume_parameters);
 	BOOST_REQUIRE_EQUAL(configuration1.slavcheva_parameters, configuration::get().slavcheva_parameters);
 	BOOST_REQUIRE_EQUAL(configuration1.slavcheva_switches, configuration::get().slavcheva_switches);
-	BOOST_REQUIRE_EQUAL(configuration1.telemetry_settings, configuration::get().telemetry_settings);
+	BOOST_REQUIRE_EQUAL(configuration1.logging_settings, configuration::get().logging_settings);
+	BOOST_REQUIRE_EQUAL(telemetry_settings1, loaded_telemetry_settings);
 	BOOST_REQUIRE_EQUAL(configuration1.paths, configuration::get().paths);
 	BOOST_REQUIRE_EQUAL(configuration1.automatic_run_settings, configuration::get().automatic_run_settings);
 	BOOST_REQUIRE_EQUAL(configuration1.non_rigid_tracking_parameters,
 	                    configuration::get().non_rigid_tracking_parameters);
 	BOOST_REQUIRE_EQUAL(configuration1, configuration::get());
-
-
 }

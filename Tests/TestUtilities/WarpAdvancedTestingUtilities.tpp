@@ -24,7 +24,7 @@
 #include "../../ITMLib/Engines/Warping/WarpingEngineFactory.h"
 #include "../../ITMLib/Engines/EditAndCopy/EditAndCopyEngineFactory.h"
 #include "../../ITMLib/Engines/Indexing/Interface/IndexingEngine.h"
-#include "../../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
+#include "../../ITMLib/Engines/Indexing/IndexingEngineFactory.h"
 #include "../../ITMLib/Engines/Visualization/VisualizationEngineFactory.h"
 #include "../../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison.h"
 //(CPU)
@@ -144,14 +144,10 @@ void GenericWarpConsistencySubtest(const SlavchevaSurfaceTracker::Switches& swit
 	const int live_index_to_start_from = 0;
 	GenerateRawLiveAndCanonicalVolumes<TIndex, TMemoryDeviceType>(&canonical_volume,
 	                                                              &live_volumes[live_index_to_start_from]);
-	IndexingEngine<TSDFVoxel, TIndex, TMemoryDeviceType>::Instance()
-			.AllocateFromOtherVolume(live_volumes[(live_index_to_start_from + 1) % 2],
-			                         live_volumes[live_index_to_start_from]);
-	IndexingEngine<TSDFVoxel, TIndex, TMemoryDeviceType>::Instance()
-			.AllocateWarpVolumeFromOtherVolume(&warp_field, live_volumes[live_index_to_start_from]);
-
-	IndexingEngine<TSDFVoxel, TIndex, TMemoryDeviceType>::Instance()
-			.AllocateFromOtherVolume(canonical_volume, live_volumes[live_index_to_start_from]);
+	AllocateUsingOtherVolume(live_volumes[(live_index_to_start_from + 1) % 2], live_volumes[live_index_to_start_from],
+	                         TMemoryDeviceType);
+	AllocateUsingOtherVolume(&warp_field, live_volumes[live_index_to_start_from], TMemoryDeviceType);
+	AllocateUsingOtherVolume(canonical_volume, live_volumes[live_index_to_start_from], TMemoryDeviceType);
 
 
 	SurfaceTracker<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, TRACKER_SLAVCHEVA_DIAGNOSTIC>
@@ -301,8 +297,7 @@ void Warp_PVA_VBH_simple_subtest(int iteration, SlavchevaSurfaceTracker::Switche
 	LoadVolume(&warped_live_VBH, path_live_VBH, TMemoryDeviceType,
 	           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 	if (iteration == 0) {
-		IndexingEngine<TSDFVoxel, VoxelBlockHash, TMemoryDeviceType>::Instance()
-				.AllocateWarpVolumeFromOtherVolume(warps_VBH, warped_live_VBH);
+		AllocateUsingOtherVolume(warps_VBH, warped_live_VBH, TMemoryDeviceType);
 	}
 
 	// *** load canonical volume as the two different data structures
@@ -312,8 +307,7 @@ void Warp_PVA_VBH_simple_subtest(int iteration, SlavchevaSurfaceTracker::Switche
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume_16_VBH;
 	LoadVolume(&volume_16_VBH, path_frame_16_VBH, TMemoryDeviceType,
 	           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
-	IndexingEngine<TSDFVoxel, VoxelBlockHash, TMemoryDeviceType>::Instance()
-			.AllocateFromOtherVolume(volume_16_VBH, warped_live_VBH);
+	AllocateUsingOtherVolume(volume_16_VBH, warped_live_VBH, TMemoryDeviceType);
 
 	// *** perform the warp gradient computation and warp updates
 	SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, TMemoryDeviceType, TRACKER_SLAVCHEVA_DIAGNOSTIC>

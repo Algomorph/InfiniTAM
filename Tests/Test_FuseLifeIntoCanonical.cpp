@@ -60,7 +60,7 @@ void GenericFusionTest(const int iteration = 4) {
 	VoxelVolume<TSDFVoxel, TIndex>* canonical_volume;
 	LoadVolume(&canonical_volume, snoopy::PartialVolume16Path<TIndex>(),
 	           TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
-	IndexingEngine<TSDFVoxel,TIndex,MEMORYDEVICE_CPU>::Instance().AllocateUsingOtherVolume(canonical_volume, warped_live_volume);
+	AllocateUsingOtherVolume(canonical_volume, warped_live_volume, MEMORYDEVICE_CPU);
 
 	VolumeFusionEngineInterface<TSDFVoxel, TIndex>* volume_fusion_engine = VolumeFusionEngineFactory::Build<TSDFVoxel, TIndex>(
 			TMemoryDeviceType);
@@ -121,8 +121,7 @@ void GenericFusion_PVA_to_VBH_Test(const int iteration = 4) {
 	LoadVolume(&canonical_volume_VBH, snoopy::PartialVolume16Path<VoxelBlockHash>(),
 	           TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
-	IndexingEngine<TSDFVoxel, VoxelBlockHash, TMemoryDeviceType>::Instance().AllocateFromOtherVolume(
-			canonical_volume_VBH, warped_live_volume_VBH);
+AllocateUsingOtherVolume(canonical_volume_VBH,  warped_live_volume_VBH, TMemoryDeviceType);
 
 	VolumeFusionEngineInterface<TSDFVoxel, PlainVoxelArray>* volume_fusion_engine_PVA =
 			VolumeFusionEngineFactory::Build<TSDFVoxel, PlainVoxelArray>(TMemoryDeviceType);

@@ -47,8 +47,8 @@ BOOST_FIXTURE_TEST_CASE(testDataTerm_CUDA_VBH, DataFixture) {
 	VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field(MEMORYDEVICE_CUDA, index_parameters);
 	ManipulationEngine_CUDA_VBH_Warp::Inst().ResetVolume(&warp_field);
 
-	indexing_engine.AllocateWarpVolumeFromOtherVolume(&warp_field, live_volume);
-	indexing_engine.AllocateUsingOtherVolume(canonical_volume, live_volume);
+	AllocateUsingOtherVolume(&warp_field, live_volume, MEMORYDEVICE_CUDA);
+	AllocateUsingOtherVolume(canonical_volume, live_volume, MEMORYDEVICE_CUDA);
 
 
 	auto motionTracker_VBH_CUDA = new SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA, TRACKER_SLAVCHEVA_DIAGNOSTIC>(
@@ -70,11 +70,11 @@ BOOST_FIXTURE_TEST_CASE(testUpdateWarps_CUDA_VBH, DataFixture) {
 			SlavchevaSurfaceTracker::Switches(false, false, false, false, false));
 	VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field_copy(*warp_field_data_term,
 	                                                       MemoryDeviceType::MEMORYDEVICE_CUDA);
-	indexing_engine.AllocateUsingOtherVolume(canonical_volume, live_volume);
+	AllocateUsingOtherVolume(canonical_volume, live_volume, MEMORYDEVICE_CUDA);
 
 	BOOST_REQUIRE_EQUAL(Analytics_CUDA_VBH_Warp::Instance().CountAllocatedHashBlocks(&warp_field_copy), 633);
 
-	IndexingEngine<TSDFVoxel,VoxelBlockHash,MEMORYDEVICE_CUDA>::Instance().AllocateUsingOtherVolume(canonical_volume, live_volume);
+	AllocateUsingOtherVolume(canonical_volume, live_volume, MEMORYDEVICE_CUDA);
 
 	float max_warp = motionTracker_VBH_CUDA->UpdateWarps(&warp_field_copy, canonical_volume, live_volume);
 	//warp_field_copy.SaveToDisk("../../Tests/TestData/snoopy_result_fr16-17_partial_VBH/warp_iter0");
@@ -87,8 +87,8 @@ BOOST_FIXTURE_TEST_CASE(testUpdateWarps_CUDA_VBH, DataFixture) {
 
 BOOST_FIXTURE_TEST_CASE(testSmoothWarpGradient_CUDA_VBH, DataFixture) {
 	VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field(*warp_field_data_term, MEMORYDEVICE_CUDA);
-	indexing_engine.AllocateWarpVolumeFromOtherVolume(&warp_field, live_volume);
-	indexing_engine.AllocateUsingOtherVolume(canonical_volume, live_volume);
+	AllocateUsingOtherVolume(&warp_field, live_volume, MEMORYDEVICE_CUDA);
+	AllocateUsingOtherVolume(canonical_volume, live_volume, MEMORYDEVICE_CUDA);
 	auto motionTracker_VBH_CUDA = new SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA, TRACKER_SLAVCHEVA_DIAGNOSTIC>(
 			SlavchevaSurfaceTracker::Switches(false, false, false, false, true));
 
@@ -104,7 +104,7 @@ BOOST_FIXTURE_TEST_CASE(testSmoothWarpGradient_CUDA_VBH, DataFixture) {
 BOOST_FIXTURE_TEST_CASE(testTikhonovTerm_CUDA_VBH, DataFixture) {
 	VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field(*warp_field_iter0, MEMORYDEVICE_CUDA);
 
-	indexing_engine.AllocateUsingOtherVolume(canonical_volume, live_volume);
+	AllocateUsingOtherVolume(canonical_volume, live_volume, MEMORYDEVICE_CUDA);
 
 	auto motionTracker_VBH_CUDA = new SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA, TRACKER_SLAVCHEVA_DIAGNOSTIC>(
 			SlavchevaSurfaceTracker::Switches(false, false, true, false, false));
@@ -131,7 +131,7 @@ BOOST_FIXTURE_TEST_CASE(testTikhonovTerm_CUDA_VBH, DataFixture) {
 BOOST_FIXTURE_TEST_CASE(testDataAndTikhonovTerm_CUDA_VBH, DataFixture) {
 	VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field(*warp_field_iter0, MEMORYDEVICE_CUDA);
 
-	indexing_engine.AllocateUsingOtherVolume(canonical_volume, live_volume);
+	AllocateUsingOtherVolume(canonical_volume, live_volume, MEMORYDEVICE_CUDA);
 
 	auto motionTracker_VBH_CUDA = new SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA, TRACKER_SLAVCHEVA_DIAGNOSTIC>(
 			SlavchevaSurfaceTracker::Switches(true, false, true, false, false));
@@ -157,7 +157,7 @@ BOOST_FIXTURE_TEST_CASE(testDataAndTikhonovTerm_CUDA_VBH, DataFixture) {
 BOOST_FIXTURE_TEST_CASE(testDataAndKillingTerm_CUDA_VBH, DataFixture) {
 	VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field(*warp_field_iter0, MEMORYDEVICE_CUDA);
 
-	indexing_engine.AllocateUsingOtherVolume(canonical_volume, live_volume);
+	AllocateUsingOtherVolume(canonical_volume, live_volume, MEMORYDEVICE_CUDA);
 
 	auto motionTracker_VBH_CUDA = new SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA, TRACKER_SLAVCHEVA_DIAGNOSTIC>(
 			SlavchevaSurfaceTracker::Switches(true, false, true, true, false));
@@ -174,7 +174,7 @@ BOOST_FIXTURE_TEST_CASE(testDataAndKillingTerm_CUDA_VBH, DataFixture) {
 BOOST_FIXTURE_TEST_CASE(testDataAndLevelSetTerm_CUDA_VBH, DataFixture) {
 	VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field(*warp_field_iter0, MEMORYDEVICE_CUDA);
 
-	indexing_engine.AllocateUsingOtherVolume(canonical_volume, live_volume);
+	AllocateUsingOtherVolume(canonical_volume, live_volume, MEMORYDEVICE_CUDA);
 
 	auto motionTracker_VBH_CUDA = new SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA, TRACKER_SLAVCHEVA_DIAGNOSTIC>(
 			SlavchevaSurfaceTracker::Switches(true, true, false, false, false)
