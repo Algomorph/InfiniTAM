@@ -414,6 +414,7 @@ configuration::Configuration GenerateDefaultSnoopyConfiguration() {
 			configuration::INDEX_HASH,
 			configuration::TrackerConfigurationStringPresets::default_intensity_depth_extended_tracker_configuration
 	);
+	default_snoopy_configuration.source_tree = default_snoopy_configuration.ToPTree();
 	default_snoopy_configuration.source_tree.add_child(TelemetrySettings::default_parse_path,
 	                                                   default_snoopy_telemetry_settings.ToPTree());
 	return default_snoopy_configuration;
@@ -461,17 +462,17 @@ int main(int argc, char* argv[]) {
 	log4cplus::SharedAppenderPtr console_appender(new log4cplus::ConsoleAppender(false, true));
 	log4cplus::Logger::getRoot().addAppender(console_appender);
 	log4cplus::Logger::getRoot().setLogLevel(log4cplus::DEBUG_LOG_LEVEL);
-	ConstructSnoopyUnmaskedVolumes00();
-	ConstructSnoopyMaskedVolumes16and17();
-
-	GenerateWarpGradientTestData<PlainVoxelArray, MEMORYDEVICE_CPU>();
-	GenerateWarpGradientTestData<VoxelBlockHash, MEMORYDEVICE_CPU>();
-	GenerateWarpGradient_PVA_to_VBH_TestData();
-	GenerateWarpedVolumeTestData<PlainVoxelArray>();
-	GenerateWarpedVolumeTestData<VoxelBlockHash>();
-	GenerateFusedVolumeTestData<PlainVoxelArray>();
-	GenerateFusedVolumeTestData<VoxelBlockHash>();
+//	ConstructSnoopyUnmaskedVolumes00();
+//	ConstructSnoopyMaskedVolumes16and17();
+//
+//	GenerateWarpGradientTestData<PlainVoxelArray, MEMORYDEVICE_CPU>();
+//	GenerateWarpGradientTestData<VoxelBlockHash, MEMORYDEVICE_CPU>();
+//	GenerateWarpGradient_PVA_to_VBH_TestData();
+//	GenerateWarpedVolumeTestData<PlainVoxelArray>();
+//	GenerateWarpedVolumeTestData<VoxelBlockHash>();
+//	GenerateFusedVolumeTestData<PlainVoxelArray>();
+//	GenerateFusedVolumeTestData<VoxelBlockHash>();
 	GenerateConfigurationTestData();
-	GenerateMeshingTestData<VoxelBlockHash, MEMORYDEVICE_CPU>();
+//	GenerateMeshingTestData<VoxelBlockHash, MEMORYDEVICE_CPU>();
 	return 0;
 }

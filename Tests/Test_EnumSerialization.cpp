@@ -13,7 +13,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#define BOOST_TEST_MODULE Serialization
+#define BOOST_TEST_MODULE EnumSerialization
 #ifndef WIN32
 #define BOOST_TEST_DYN_LINK
 #endif

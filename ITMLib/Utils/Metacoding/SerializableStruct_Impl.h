@@ -343,7 +343,7 @@ boost::property_tree::ptree serializable_vector_to_ptree(TVector vector) {
 
 #define SERIALIZABLE_STRUCT_DEFN_IMPL_2(outer_class, struct_name, field_count, ...) \
     SERIALIZABLE_STRUCT_DEFN_IMPL_3(SERIALIZABLE_STRUCT_DEFN_HANDLE_QUALIFIER(outer_class), \
-                             SERIALIZABLE_STRUCT_DEFN_HANDLE_QUALIFIER(struct_name), struct_name, default_instance.source_tree=tree, , ,\
+                             SERIALIZABLE_STRUCT_DEFN_HANDLE_QUALIFIER(struct_name), struct_name, instance.source_tree=tree, , ,\
                              ITM_METACODING_IMPL_COMMA, origin(std::move(origin)), origin, , \
                              ITM_METACODING_IMPL_CAT(ITM_METACODING_IMPL_LOOP_, field_count), __VA_ARGS__)
 
@@ -372,14 +372,15 @@ boost::property_tree::ptree serializable_vector_to_ptree(TVector vector) {
     static_qualifier outer_class struct_name outer_class inner_qualifier BuildFromPTree(const boost::property_tree::ptree& tree, \
                                                                     std::string origin default_origin_arg){ \
         struct_name default_instance; \
-        source_tree_initializer; \
         ITM_METACODING_IMPL_EXPAND(loop(SERIALIZABLE_STRUCT_IMPL_FIELD_OPTIONAL_FROM_TREE, _, \
                                            ITM_METACODING_IMPL_NOTHING, __VA_ARGS__)) \
-        return { \
+        struct_name instance = { \
             ITM_METACODING_IMPL_EXPAND(loop(SERIALIZABLE_STRUCT_IMPL_FIELD_FROM_OPTIONAL, _, \
                                                ITM_METACODING_IMPL_COMMA, __VA_ARGS__)) \
             ORIGIN_SEPARATOR() origin_varname \
         }; \
+        source_tree_initializer; \
+        return instance; \
     } \
     boost::property_tree::ptree outer_class inner_qualifier ToPTree(std::string origin default_origin_arg) const { \
         boost::property_tree::ptree tree; \
@@ -414,7 +415,7 @@ boost::property_tree::ptree serializable_vector_to_ptree(TVector vector) {
     struct struct_name { \
         ORIGIN_AND_SOURCE_TREE() \
         SERIALIZABLE_STRUCT_DECL_IMPL_MEMBER_VARS(loop, __VA_ARGS__) \
-        SERIALIZABLE_STRUCT_DEFN_IMPL_3 ( , , struct_name, default_instance.source_tree=tree, friend, static, \
+        SERIALIZABLE_STRUCT_DEFN_IMPL_3 ( , , struct_name, instance.source_tree=tree, friend, static, \
         ITM_METACODING_IMPL_COMMA, origin(std::move(origin)), origin, ="", loop, __VA_ARGS__) \
     };
 

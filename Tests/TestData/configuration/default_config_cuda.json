@@ -1,4 +1,10 @@
 {
+    "focus_coordinates": [
+        0,
+        0,
+        0
+    ],
+    "record_reconstruction_video": false,
     "general_voxel_volume_parameters": {
         "voxel_size": 0.00400000019,
         "near_clipping_distance": 0.200000003,
@@ -93,18 +99,14 @@
         "enable_killing_rigidity_enforcement_term": false,
         "enable_sobolev_gradient_smoothing": true
     },
-    "telemetry_settings": {
-        "focus_coordinates": [
-            0,
-            0,
-            0
-        ],
-        "record_reconstruction_video": false,
+    "logging_settings": {
+        "verbosity_level": "per_frame",
         "log_to_disk": false,
         "log_to_stdout": true,
         "log_benchmarks": false,
         "log_volume_statistics": false,
-        "record_volume_memory_usage": false
+        "log_trajectory_quaternions": false,
+        "log_surface_tracking_optimization_energies": false
     },
     "paths": {
         "output_path": "output",
@@ -141,6 +143,20 @@
     "swapping_mode": "disabled",
     "library_mode": "dynamic",
     "indexing_method": "hash",
-    "verbosity_level": "per_frame",
-    "tracker_configuration": "type=extended,levels=rrbb,useDepth=1,minstep=1e-4,outlierSpaceC=0.1,outlierSpaceF=0.004,numiterC=20,numiterF=50,tukeyCutOff=8,framesToSkip=20,framesToWeight=50,failureDec=20.0"
+    "tracker_configuration": "type=extended,levels=rrbb,useDepth=1,minstep=1e-4,outlierSpaceC=0.1,outlierSpaceF=0.004,numiterC=20,numiterF=50,tukeyCutOff=8,framesToSkip=20,framesToWeight=50,failureDec=20.0",
+    "telemetry_settings": {
+        "record_volume_memory_usage": false,
+        "record_live_volume_as_2D_slices": false,
+        "record_canonical_volume_as_2D_slices": false,
+        "record_live_focus_point_TSDF_graph": false,
+        "record_live_focus_layer_TSDF_heatmap": false,
+        "TSDF_heatmap_plane": "plane_zx",
+        "record_focus_neighborhood_live_tsdf_sequence": false,
+        "focus_neighborhood_size": 3,
+        "record_focus_neighborhood_warp_sequence": false,
+        "record_surface_tracking_optimization_energies": false,
+        "record_frame_meshes": false,
+        "use_CPU_for_mesh_recording": false,
+        "record_camera_matrices": false
+    }
 }
