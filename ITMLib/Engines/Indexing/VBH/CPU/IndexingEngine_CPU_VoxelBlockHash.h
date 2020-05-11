@@ -20,51 +20,16 @@
 
 namespace ITMLib {
 
-struct IndexingEngineFactory;
-template<typename TVoxel>
-class IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU> :
-		public IndexingEngine_VoxelBlockHash<TVoxel, MEMORYDEVICE_CPU,
-				IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>> {
-
-	friend IndexingEngineFactory;
-	friend IndexingEngine_VoxelBlockHash<TVoxel, MEMORYDEVICE_CPU,
-			IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>>;
-
-private:
-	IndexingEngine() = default;
-
-public:
-	static IndexingEngine& Instance() {
-		static IndexingEngine instance; // Guaranteed to be destroyed.
-		// Instantiated on first use.
-		return instance;
-	}
-
-	IndexingEngine(IndexingEngine const&) = delete;
-	void operator=(IndexingEngine const&) = delete;
-
-	void
-	AllocateHashEntriesUsingAllocationStateList_SetVisibility(VoxelVolume<TVoxel, VoxelBlockHash>* volume) override;
-
-	HashEntry FindHashEntry(const VoxelBlockHash& index, const Vector3s& coordinates) override;
-	HashEntry FindHashEntry(const VoxelBlockHash& index, const Vector3s& coordinates, int& hashCode);
-
-
-	bool AllocateHashBlockAt(VoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3s at, int& hash_code) override;
-
-	//TODO: must be changed to "BuildVisibleBlockList" and needs to modify the new VisibleBlockList
-	void BuildUtilizedBlockListBasedOnVisibility(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const View* view,
-	                                             const Matrix4f& depth_camera_matrix = Matrix4f::Identity());
-
-	void SetVisibilityToVisibleAtPreviousFrameAndUnstreamed(VoxelVolume<TVoxel, VoxelBlockHash>* volume);
-};
-
-extern template
-class IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>;
-extern template
-class IndexingEngine<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>;
 
 namespace internal {
+
+template<typename TVoxel>
+struct SpecializedVoxelHashBlockManager<MEMORYDEVICE_CPU, TVoxel>{
+	static HashEntry FindHashEntry(const VoxelBlockHash& index, const Vector3s& coordinates, int& hash_code);
+	static bool AllocateHashBlockAt(VoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3s at, int& hash_code);
+	static void RebuildVisibleBlockList(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const View* view, const Matrix4f& depth_camera_matrix);
+};
+
 template<typename TVoxelTarget, typename TVoxelSource>
 struct AllocateUsingOtherVolume_OffsetAndBounded_Executor<MEMORYDEVICE_CPU, TVoxelTarget, TVoxelSource> {
 	static inline

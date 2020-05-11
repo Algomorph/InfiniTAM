@@ -20,11 +20,11 @@
 
 #include "Interface/IndexingEngine.h"
 #include "VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
+#include "VBH/IndexingEngine_VoxelBlockHash.h"
+#include "PVA/IndexingEngine_PlainVoxelArray.h"
 
 #ifndef COMPILE_WITHOUT_CUDA
-
 #include "VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
-
 #endif
 
 namespace ITMLib {
@@ -36,16 +36,16 @@ struct IndexingEngineFactory {
 	//#################### PUBLIC STATIC MEMBER FUNCTIONS ####################
 
 	/**
-	 * \brief Makes a scene reconstruction engine.
+	 * \brief Makes an indexing engine.
 	 *
-	 * \param deviceType  The device on which the scene reconstruction engine should operate.
+	 * \param device_type  The device on which the scene reconstruction engine should operate.
 	 */
 	template<typename TVoxel, typename TIndex>
 	static IndexingEngineInterface<TVoxel, TIndex>*
-	Build(MemoryDeviceType deviceType) {
+	Build(MemoryDeviceType device_type) {
 		IndexingEngineInterface<TVoxel, TIndex>* indexing_engine = nullptr;
 
-		switch (deviceType) {
+		switch (device_type) {
 			case MEMORYDEVICE_CPU:
 				indexing_engine = new IndexingEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>();
 				break;
@@ -68,8 +68,8 @@ struct IndexingEngineFactory {
 
 	template<typename TVoxel, typename TIndex>
 	static IndexingEngineInterface<TVoxel, TIndex>&
-	Get(MemoryDeviceType deviceType) {
-		switch (deviceType) {
+	Get(MemoryDeviceType device_type) {
+		switch (device_type) {
 			case MEMORYDEVICE_CPU:
 				return IndexingEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance();
 			case MEMORYDEVICE_CUDA:

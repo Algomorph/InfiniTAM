@@ -15,7 +15,7 @@
 //  ================================================================
 #include "../Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
 #include "../Traversal/CPU/TwoVolumeTraversal_CPU_PlainVoxelArray.h"
-#include "../Indexing/Interface/IndexingEngine.tpp"
+#include "../Indexing/PVA/IndexingEngine_PlainVoxelArray.tpp"
 #include "WarpingEngine.tpp"
 #include "../../GlobalTemplateDefines.h"
 namespace ITMLib{

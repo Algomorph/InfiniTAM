@@ -20,69 +20,63 @@
 
 namespace ITMLib {
 
-template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, typename TDerivedClass>
-class IndexingEngine_VoxelBlockHash :
-		public IndexingEngineInterface<TVoxel, VoxelBlockHash> {
+
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
+class IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType> :
+		public IndexingEngineInterface<TVoxel, VoxelBlockHash>{
 
 public: // member functions
+	IndexingEngine() = default;
+	static IndexingEngine& Instance() {
+		static IndexingEngine instance;
+		return instance;
+	}
 
-	void AllocateHashEntriesUsingAllocationStateList(VoxelVolume<TVoxel, VoxelBlockHash>* volume);
-	virtual void
-	AllocateHashEntriesUsingAllocationStateList_SetVisibility(VoxelVolume<TVoxel, VoxelBlockHash>* volume) = 0;
-	virtual HashEntry FindHashEntry(const VoxelBlockHash& index, const Vector3s& coordinates) = 0;
-	virtual bool AllocateHashBlockAt(VoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3s at, int& hashCode) = 0;
-
-	/**
-	 * \brief Allocate all hash blocks at the first [0, new_block_count) of the given block coordinates
-	 * \param volume volume where to allocate
-	 * \param new_block_positions list of coordinates of blocks to allocate (coordinates to be specified in blocks, not voxels or meters)
-	 * \param new_block_count only the first [0, new_block_count) new_block_positions will be used.
-	 * If -1 is passed, new_block_positions.size() will be used.
-	 */
+	HashEntry FindHashEntry(const VoxelBlockHash& index, const Vector3s& coordinates);
+	HashEntry FindHashEntry(const VoxelBlockHash& index, const Vector3s& coordinates, int& hash_code);
+	bool AllocateHashBlockAt(VoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3s at, int& hash_code);
 	void AllocateBlockList(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
 	                       const ORUtils::MemoryBlock<Vector3s>& new_block_positions,
 	                       int new_block_count = -1);
-	/**
-	 * \brief Deallocate all hash blocks at the first [0, count_of_blocks_to_remove) of the given block coordinates
-	 * \param volume volume where to deallocate
-	 * \param coordinates_of_blocks_to_remove coordinates (specified in blocks, not voxels or meters) from which to remove blocks
-	 * \param count_of_blocks_to_remove only the first [0, count_of_blocks_to_remove) coordinates_of_blocks_to_remove will be used.
-	 * If -1 is passed, coordinates_of_blocks_to_remove.size() will be used.
-	 */
 	void DeallocateBlockList(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
-	                                 const ORUtils::MemoryBlock<Vector3s>& coordinates_of_blocks_to_remove,
-	                                 int count_of_blocks_to_remove = -1);
-
-	virtual void ResetUtilizedBlockList(VoxelVolume<TVoxel, VoxelBlockHash>* volume) override;
-
+	                         const ORUtils::MemoryBlock<Vector3s>& coordinates_of_blocks_to_remove,
+	                         int count_of_blocks_to_remove = -1);
+	void ResetUtilizedBlockList(VoxelVolume<TVoxel, VoxelBlockHash>* volume) override;
+	void ResetVisibleBlockList(VoxelVolume<TVoxel, VoxelBlockHash>* volume) override;
 	void RebuildUtilizedBlockList(VoxelVolume<TVoxel, VoxelBlockHash>* volume);
-
-	void AllocateNearSurface(
-			VoxelVolume<TVoxel, VoxelBlockHash>* volume, const View* view,
-			const Matrix4f& depth_camera_matrix = Matrix4f::Identity()) override;
-
+	void RebuildVisibleBlockList(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const View* view,
+	                             const Matrix4f& depth_camera_matrix = Matrix4f::Identity());
+	void AllocateNearSurface(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const View* view,
+	                         const Matrix4f& depth_camera_matrix = Matrix4f::Identity()) override;
 	void AllocateNearSurface(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const View* view,
 	                         const CameraTrackingState* tracking_state) override;
-
 	void AllocateNearAndBetweenTwoSurfaces(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
 	                                       const View* view,
 	                                       const CameraTrackingState* tracking_state) override;
+	void AllocateHashEntriesUsingAllocationStateList(VoxelVolume<TVoxel, VoxelBlockHash>* volume);
+	void AllocateHashEntriesUsingAllocationStateList_SetVisibility(VoxelVolume<TVoxel, VoxelBlockHash>* volume);
+	void AllocateGridAlignedBox(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const Extent3Di& box) override;
 
-	virtual void AllocateGridAlignedBox(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const Extent3Di& box);
 
-
-private:
+private: // member functions
 	void ReallocateDeletedHashBlocks(VoxelVolume<TVoxel, VoxelBlockHash>* volume);
+	void ChangeVisibleBlockVisibility(VoxelVolume<TVoxel, VoxelBlockHash>* volume, HashBlockVisibility visibility);
+	template<typename TAllocationFunctor>
+	void AllocateHashEntriesUsingAllocationStateList_Generic(VoxelVolume<TVoxel, VoxelBlockHash>* volume);
 
 };
 
 namespace internal {
+template<MemoryDeviceType TMemoryDeviceType, typename TVoxel>
+struct SpecializedVoxelHashBlockManager;
+
 template<MemoryDeviceType TMemoryDeviceType, typename TVoxelTarget, typename TVoxelSource, typename TMarkerFunctor>
 void AllocateUsingOtherVolume_Generic(VoxelVolume<TVoxelTarget, VoxelBlockHash>* target_volume,
                                       VoxelVolume<TVoxelSource, VoxelBlockHash>* source_volume,
                                       TMarkerFunctor& marker_functor);
 template<MemoryDeviceType TMemoryDeviceType, typename TVoxelTarget, typename TVoxelSource>
 struct AllocateUsingOtherVolume_OffsetAndBounded_Executor;
+
 } // namespace internal
 
 

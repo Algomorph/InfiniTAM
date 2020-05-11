@@ -14,7 +14,7 @@
 //  limitations under the License.
 //  ================================================================
 #include "../Traversal/CUDA/VolumeTraversal_CUDA_PlainVoxelArray.h"
-#include "../Indexing/Interface/IndexingEngine.tpp"
+#include "../Indexing/PVA/IndexingEngine_PlainVoxelArray.tpp"
 #include "DepthFusionEngine.tpp"
 #include "../../GlobalTemplateDefines.h"
 

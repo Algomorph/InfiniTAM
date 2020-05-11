@@ -33,165 +33,25 @@
 using namespace ITMLib;
 
 
-template<typename TVoxel>
-void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::
-AllocateHashEntriesUsingAllocationStateList_SetVisibility(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
-
-	const HashEntryAllocationState* hash_entry_allocation_states_device = volume->index.GetHashEntryAllocationStates();
-	Vector3s* allocation_block_coordinates_device = volume->index.GetAllocationBlockCoordinates();
-	HashBlockVisibility* hash_block_visibility_types_device = volume->index.GetBlockVisibilityTypes();
-
-	int entry_count = volume->index.hash_entry_count;
-	int last_free_voxel_block_id = volume->index.GetLastFreeBlockListId();
-	int last_free_excess_list_id = volume->index.GetLastFreeExcessListId();
-	int* voxel_allocation_list = volume->index.GetBlockAllocationList();
-	int* excess_allocation_list = volume->index.GetExcessEntryList();
-	HashEntry* hash_table = volume->index.GetEntries();
-
-	for (int hash = 0; hash < entry_count; hash++) {
-		const HashEntryAllocationState& hash_entry_state = hash_entry_allocation_states_device[hash];
-		switch (hash_entry_state) {
-			case ITMLib::NEEDS_ALLOCATION_IN_ORDERED_LIST:
-
-				if (last_free_voxel_block_id >= 0) //there is room in the voxel block array
-				{
-					HashEntry hashEntry;
-					hashEntry.pos = allocation_block_coordinates_device[hash];
-					hashEntry.ptr = voxel_allocation_list[last_free_voxel_block_id];
-					hashEntry.offset = 0;
-					hash_table[hash] = hashEntry;
-					last_free_voxel_block_id--;
-				} else {
-					hash_block_visibility_types_device[hash] = INVISIBLE;
-				}
-
-				break;
-			case NEEDS_ALLOCATION_IN_EXCESS_LIST:
-
-				if (last_free_voxel_block_id >= 0 &&
-				    last_free_excess_list_id >= 0) //there is room in the voxel block array and excess list
-				{
-					HashEntry hashEntry;
-					hashEntry.pos = allocation_block_coordinates_device[hash];
-					hashEntry.ptr = voxel_allocation_list[last_free_voxel_block_id];
-					hashEntry.offset = 0;
-					int exlOffset = excess_allocation_list[last_free_excess_list_id];
-					hash_table[hash].offset = exlOffset + 1; //connect to child
-					hash_table[ORDERED_LIST_SIZE + exlOffset] = hashEntry; //add child to the excess list
-					hash_block_visibility_types_device[ORDERED_LIST_SIZE +
-					                                   exlOffset] = IN_MEMORY_AND_VISIBLE; //make child visible and in memory
-					last_free_voxel_block_id--;
-					last_free_excess_list_id--;
-				}
-				break;
-			default:
-				break;
-		}
-	}
-	volume->index.SetLastFreeBlockListId(last_free_voxel_block_id);
-	volume->index.SetLastFreeExcessListId(last_free_excess_list_id);
-}
-
-//TODO: refactor to BuildVisibleBlockList..., use VisibleBlockList instead of UtilizedBlockList inside
-template<typename TVoxel>
-void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::BuildUtilizedBlockListBasedOnVisibility(
-		VoxelVolume<TVoxel, VoxelBlockHash>* volume, const View* view, const Matrix4f& depth_camera_matrix) {
-	// ** scene data **
-	const int hash_entry_count = volume->index.hash_entry_count;
-	HashBlockVisibility* hash_block_visibility_types = volume->index.GetBlockVisibilityTypes();
-	int* visible_hash_entry_codes = volume->index.GetUtilizedBlockHashCodes();
-	HashEntry* hash_table = volume->index.GetEntries();
-	const bool use_swapping = volume->SwappingEnabled();
-	ITMHashSwapState* swapStates = volume->SwappingEnabled() ? volume->global_cache.GetSwapStates(false) : 0;
-
-	// ** view data **
-	Vector4f depthCameraProjectionParameters = view->calib.intrinsics_d.projectionParamsSimple.all;
-	Vector2i depthImgSize = view->depth->dimensions;
-	float voxelSize = volume->GetParameters().voxel_size;
-
-	int visibleEntryCount = 0;
-	//build visible list
-	for (int hash_code = 0; hash_code < hash_entry_count; hash_code++) {
-		HashBlockVisibility hash_block_visibility_type = hash_block_visibility_types[hash_code];
-		const HashEntry& hash_entry = hash_table[hash_code];
-
-		if (hash_block_visibility_type == 3) {
-			bool is_visible_enlarged, is_visible;
-
-			if (use_swapping) {
-				CheckVoxelHashBlockVisibility<true>(is_visible, is_visible_enlarged, hash_entry.pos,
-				                                    depth_camera_matrix,
-				                                    depthCameraProjectionParameters,
-				                                    voxelSize, depthImgSize);
-				if (!is_visible_enlarged) hash_block_visibility_type = INVISIBLE;
-			} else {
-				CheckVoxelHashBlockVisibility<false>(is_visible, is_visible_enlarged, hash_entry.pos,
-				                                     depth_camera_matrix,
-				                                     depthCameraProjectionParameters,
-				                                     voxelSize, depthImgSize);
-				if (!is_visible) { hash_block_visibility_type = INVISIBLE; }
-			}
-			hash_block_visibility_types[hash_code] = hash_block_visibility_type;
-		}
-
-		if (use_swapping) {
-			if (hash_block_visibility_type > 0 && swapStates[hash_code].state != 2) swapStates[hash_code].state = 1;
-		}
-
-		if (hash_block_visibility_type > 0) {
-			visible_hash_entry_codes[visibleEntryCount] = hash_code;
-			visibleEntryCount++;
-		}
-	}
-	volume->index.SetUtilizedBlockCount(visibleEntryCount);
-}
+namespace ITMLib {
+namespace internal {
 
 template<typename TVoxel>
-void IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::SetVisibilityToVisibleAtPreviousFrameAndUnstreamed(
-		VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
-	HashBlockVisibility* utilized_block_visibility_types = volume->index.GetBlockVisibilityTypes();
-	const int* utilized_block_hash_codes = volume->index.GetUtilizedBlockHashCodes();
-	const int utilized_block_count = volume->index.GetUtilizedBlockCount();
-#if WITH_OPENMP
-#pragma omp parallel for default(none) shared(utilized_block_hash_codes, utilized_block_visibility_types)
-#endif
-	for (int i_visible_block = 0; i_visible_block < utilized_block_count; i_visible_block++) {
-		utilized_block_visibility_types[utilized_block_hash_codes[i_visible_block]] =
-				HashBlockVisibility::VISIBLE_AT_PREVIOUS_FRAME_AND_UNSTREAMED;
-	}
-}
-
-template<typename TVoxel>
-HashEntry
-IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::FindHashEntry(const VoxelBlockHash& index,
-                                                                        const Vector3s& coordinates) {
+HashEntry SpecializedVoxelHashBlockManager<MEMORYDEVICE_CPU, TVoxel>::FindHashEntry(const VoxelBlockHash& index,
+                                                                                    const Vector3s& coordinates,
+                                                                                    int& hash_code) {
 	const HashEntry* entries = index.GetEntries();
-	int hashCode = FindHashCodeAt(entries, coordinates);
-	if (hashCode == -1) {
+	hash_code = FindHashCodeAt(entries, coordinates);
+	if (hash_code == -1) {
 		return {Vector3s(0, 0, 0), 0, -2};
 	} else {
-		return entries[hashCode];
+		return entries[hash_code];
 	}
 }
 
 template<typename TVoxel>
-HashEntry
-IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::FindHashEntry(const VoxelBlockHash& index,
-                                                                        const Vector3s& coordinates,
-                                                                        int& hashCode) {
-	const HashEntry* entries = index.GetEntries();
-	hashCode = FindHashCodeAt(entries, coordinates);
-	if (hashCode == -1) {
-		return {Vector3s(0, 0, 0), 0, -2};
-	} else {
-		return entries[hashCode];
-	}
-}
-
-template<typename TVoxel>
-bool IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateHashBlockAt(
+bool SpecializedVoxelHashBlockManager<MEMORYDEVICE_CPU, TVoxel>::AllocateHashBlockAt(
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3s at, int& hash_code) {
-
 	HashEntry* hash_table = volume->index.GetEntries();
 	int last_free_voxel_block_id = volume->index.GetLastFreeBlockListId();
 	int last_free_excess_list_id = volume->index.GetLastFreeExcessListId();
@@ -201,7 +61,8 @@ bool IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateHashBlock
 	int* utilized_hash_codes = volume->index.GetUtilizedBlockHashCodes();
 	HashEntry* entry = nullptr;
 	hash_code = -1;
-	if (!FindOrAllocateHashEntry(at, hash_table, entry, last_free_voxel_block_id, last_free_excess_list_id, utilized_block_count,
+	if (!FindOrAllocateHashEntry(at, hash_table, entry, last_free_voxel_block_id, last_free_excess_list_id,
+	                             utilized_block_count,
 	                             block_allocation_list, excess_entry_list, utilized_hash_codes, hash_code)) {
 		return false;
 	}
@@ -211,7 +72,60 @@ bool IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::AllocateHashBlock
 	return true;
 }
 
-using namespace ITMLib::internal;
+template<typename TVoxel>
+void SpecializedVoxelHashBlockManager<MEMORYDEVICE_CPU, TVoxel>::RebuildVisibleBlockList(
+		VoxelVolume<TVoxel, VoxelBlockHash>* volume, const View* view, const Matrix4f& depth_camera_matrix) {
+	// ** volume data **
+	const int hash_entry_count = volume->index.hash_entry_count;
+	HashBlockVisibility* hash_block_visibility_types = volume->index.GetBlockVisibilityTypes();
+	int* visible_hash_entry_codes = volume->index.GetVisibleBlockHashCodes();
+	HashEntry* hash_table = volume->index.GetEntries();
+	const bool use_swapping = volume->SwappingEnabled();
+	ITMHashSwapState* swapStates = volume->SwappingEnabled() ? volume->global_cache.GetSwapStates(false) : 0;
+
+	// ** view data **
+	Vector4f depth_camera_projection_parameters = view->calib.intrinsics_d.projectionParamsSimple.all;
+	Vector2i depth_image_size = view->depth->dimensions;
+	float voxel_size = volume->GetParameters().voxel_size;
+
+	int visible_entry_count = 0;
+	//build visible list
+	for (int hash_code = 0; hash_code < hash_entry_count; hash_code++) {
+		HashBlockVisibility hash_block_visibility_type = hash_block_visibility_types[hash_code];
+		const HashEntry& hash_entry = hash_table[hash_code];
+
+		if (hash_block_visibility_type == 3) {
+			bool intersects_camera_ray_through_pixel, intersects_enlarged_camera_frustum;
+
+			if (use_swapping) {
+				CheckVoxelHashBlockVisibility<true>(intersects_camera_ray_through_pixel,
+				                                    intersects_enlarged_camera_frustum,
+				                                    hash_entry.pos,
+				                                    depth_camera_matrix, depth_camera_projection_parameters,
+				                                    voxel_size, depth_image_size);
+				if (!intersects_camera_ray_through_pixel) hash_block_visibility_type = INVISIBLE;
+			} else {
+				CheckVoxelHashBlockVisibility<false>(intersects_camera_ray_through_pixel,
+				                                     intersects_enlarged_camera_frustum,
+				                                     hash_entry.pos,
+				                                     depth_camera_matrix, depth_camera_projection_parameters,
+				                                     voxel_size, depth_image_size);
+				if (!intersects_enlarged_camera_frustum) { hash_block_visibility_type = INVISIBLE; }
+			}
+			hash_block_visibility_types[hash_code] = hash_block_visibility_type;
+		}
+
+		if (use_swapping) {
+			if (hash_block_visibility_type > 0 && swapStates[hash_code].state != 2) swapStates[hash_code].state = 1;
+		}
+
+		if (hash_block_visibility_type > 0) {
+			visible_hash_entry_codes[visible_entry_count] = hash_code;
+			visible_entry_count++;
+		}
+	}
+	volume->index.SetVisibleBlockCount(visible_entry_count);
+}
 
 template<typename TVoxelTarget, typename TVoxelSource>
 void AllocateUsingOtherVolume_OffsetAndBounded_Executor<MEMORYDEVICE_CPU, TVoxelTarget, TVoxelSource>::Execute(
@@ -272,3 +186,6 @@ void AllocateUsingOtherVolume_OffsetAndBounded_Executor<MEMORYDEVICE_CPU, TVoxel
 		target_indexer.AllocateBlockList(target_volume, colliding_block_positions, colliding_block_count.load());
 	} while (unresolvable_collision_encountered);
 }
+
+} // namespace internal
+} // namespace ITMLib

@@ -16,7 +16,7 @@
 #pragma once
 
 //local
-#include "IndexingEngine.h"
+#include "IndexingEngine_PlainVoxelArray.h"
 #include "../../../Objects/Volume/RepresentationAccess.h"
 #include "../../EditAndCopy/Shared/EditAndCopyEngine_Shared.h"
 #include "../../../Utils/Geometry/FrustumTrigonometry.h"
@@ -24,27 +24,29 @@
 using namespace ITMLib;
 
 
-template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateNearSurface(VoxelVolume<TVoxel, TIndex>* volume,
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
+void IndexingEngine<TVoxel, PlainVoxelArray, TMemoryDeviceType>::AllocateNearSurface(VoxelVolume<TVoxel, PlainVoxelArray>* volume,
                                                                             const View* view,
                                                                             const CameraTrackingState* tracking_state) {}
 
 
-template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateNearSurface(VoxelVolume<TVoxel, TIndex>* scene,
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
+void IndexingEngine<TVoxel, PlainVoxelArray, TMemoryDeviceType>::AllocateNearSurface(VoxelVolume<TVoxel, PlainVoxelArray>* scene,
                                                                             const View* view,
                                                                             const Matrix4f& depth_camera_matrix) {}
 
 
-template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateNearAndBetweenTwoSurfaces(
-		VoxelVolume<TVoxel, TIndex>* targetVolume, const View* view, const CameraTrackingState* tracking_state) {}
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
+void IndexingEngine<TVoxel, PlainVoxelArray, TMemoryDeviceType>::AllocateNearAndBetweenTwoSurfaces(
+		VoxelVolume<TVoxel, PlainVoxelArray>* targetVolume, const View* view, const CameraTrackingState* tracking_state) {}
 
-template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::ResetUtilizedBlockList(VoxelVolume<TVoxel, TIndex>* volume) {}
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
+void IndexingEngine<TVoxel, PlainVoxelArray, TMemoryDeviceType>::ResetUtilizedBlockList(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {}
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
+void IndexingEngine<TVoxel, PlainVoxelArray, TMemoryDeviceType>::ResetVisibleBlockList(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {}
 
-template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-void IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::AllocateGridAlignedBox(VoxelVolume<TVoxel, TIndex>* volume,
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
+void IndexingEngine<TVoxel, PlainVoxelArray, TMemoryDeviceType>::AllocateGridAlignedBox(VoxelVolume<TVoxel, PlainVoxelArray>* volume,
                                                                                const Extent3Di& box) {}
 
 

@@ -28,6 +28,19 @@
 namespace ITMLib {
 
 
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, HashBlockVisibility THashBlockVisibility>
+struct BlockVisibilitySetFunctor{
+private: // member variables
+	HashBlockVisibility* block_visibility_types;
+public: // member functions
+	explicit BlockVisibilitySetFunctor(VoxelVolume<TVoxel, VoxelBlockHash>* volume) :
+			block_visibility_types(volume->index.GetBlockVisibilityTypes()){}
+	_DEVICE_WHEN_AVAILABLE_
+	void operator() (const int visible_block_hash_code, const int i_visible_block){
+		block_visibility_types[visible_block_hash_code] = THashBlockVisibility;
+	}
+};
+
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
 struct BlockListDeallocationFunctor {
 public:
@@ -94,9 +107,10 @@ public: // member functions
 	}
 };
 
+
 template<MemoryDeviceType TMemoryDeviceType>
 struct HashEntryStateBasedAllocationFunctor {
-private: // member variables
+protected: // member variables
 	VoxelBlockHash& index;
 	HashEntryAllocationState* hash_entry_states;
 	Vector3s* block_coordinates;
@@ -124,7 +138,7 @@ public: // member functions
 		INITIALIZE_ATOMIC(int, utilized_block_count, index.GetUtilizedBlockCount());
 	}
 
-	~HashEntryStateBasedAllocationFunctor() {
+	virtual ~HashEntryStateBasedAllocationFunctor() {
 		CLEAN_UP_ATOMIC(last_free_voxel_block_id);CLEAN_UP_ATOMIC(last_free_excess_list_id);CLEAN_UP_ATOMIC(
 				utilized_block_count);
 	}
@@ -136,11 +150,30 @@ public: // member functions
 	}
 
 	_DEVICE_WHEN_AVAILABLE_
-	void operator()(const HashEntryAllocationState& hash_entry_state, int hash_code) {
+	virtual void operator()(const HashEntryAllocationState& hash_entry_state, int hash_code) {
 		AllocateBlockBasedOnState<TMemoryDeviceType>(
-				hash_entry_state, hash_code, block_coordinates, hash_table,
-				last_free_voxel_block_id, last_free_excess_list_id, utilized_block_count,
-				block_allocation_list, excess_entry_list, utilized_block_hash_codes);
+				hash_entry_state, hash_code, this->block_coordinates, this->hash_table,
+				this->last_free_voxel_block_id, this->last_free_excess_list_id, this->utilized_block_count,
+				this->block_allocation_list, this->excess_entry_list, this->utilized_block_hash_codes);
+	}
+};
+
+template<MemoryDeviceType TMemoryDeviceType>
+struct HashEntryStateBasedAllocationFunctor_SetVisibility
+		: public HashEntryStateBasedAllocationFunctor<TMemoryDeviceType> {
+protected: // member variables
+	HashBlockVisibility* block_visibility_types;
+public: // member functions
+	HashEntryStateBasedAllocationFunctor_SetVisibility(VoxelBlockHash& index)
+			: HashEntryStateBasedAllocationFunctor<TMemoryDeviceType>(index),
+			  block_visibility_types(index.GetBlockVisibilityTypes()){}
+
+	_DEVICE_WHEN_AVAILABLE_
+	void operator()(const HashEntryAllocationState& hash_entry_state, int hash_code) override {
+		AllocateBlockBasedOnState_SetVisibility<TMemoryDeviceType>(
+				hash_entry_state, hash_code, this->block_coordinates, this->hash_table, this->block_visibility_types,
+				this->last_free_voxel_block_id, this->last_free_excess_list_id, this->utilized_block_count,
+				this->block_allocation_list, this->excess_entry_list, this->utilized_block_hash_codes);
 	}
 };
 

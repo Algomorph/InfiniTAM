@@ -27,12 +27,6 @@
 namespace ITMLib {
 
 template
-class IndexingEngine_VoxelBlockHash<TSDFVoxel, MEMORYDEVICE_CUDA,
-		IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>>;
-template
-class IndexingEngine_VoxelBlockHash<WarpVoxel, MEMORYDEVICE_CUDA,
-		IndexingEngine<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>>;
-template
 class IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>;
 template
 class IndexingEngine<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>;

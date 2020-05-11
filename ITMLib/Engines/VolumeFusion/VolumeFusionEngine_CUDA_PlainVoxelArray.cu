@@ -16,7 +16,7 @@
 
 //local
 #include "../Traversal/CUDA/TwoVolumeTraversal_CUDA_PlainVoxelArray.h"
-#include "../Indexing/Interface/IndexingEngine.tpp"
+#include "../Indexing/PVA/IndexingEngine_PlainVoxelArray.tpp"
 #include "VolumeFusionEngine.tpp"
 #include "../../GlobalTemplateDefines.h"
 

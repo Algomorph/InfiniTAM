@@ -160,17 +160,18 @@ UpdateUtilizedHashCodes(int* utilized_block_hash_codes, ATOMIC_ARGUMENT(int) uti
 	utilized_block_hash_codes[utilized_index] = hash_code;
 }
 
-template<MemoryDeviceType TMemoryDeviceType>
+template<MemoryDeviceType TMemoryDeviceType, typename THandleOrderedAllocationFailure, typename THandleExcessAllocationSuccess>
 _DEVICE_WHEN_AVAILABLE_
-inline void AllocateBlockBasedOnState(const HashEntryAllocationState& hash_entry_state, int hash_code,
-                                      Vector3s* block_coordinates,
-                                      HashEntry* hash_table,
-                                      ATOMIC_ARGUMENT(int) last_free_voxel_block_id,
-                                      ATOMIC_ARGUMENT(int) last_free_excess_list_id,
-                                      ATOMIC_ARGUMENT(int) utilized_block_count,
-                                      const int* block_allocation_list,
-                                      const int* excess_entry_list,
-                                      int* utilized_block_hash_codes) {
+inline void AllocateBlockBasedOnState_Generic(const HashEntryAllocationState& hash_entry_state,
+                                              int hash_code, Vector3s* block_coordinates, HashEntry* hash_table,
+                                              ATOMIC_ARGUMENT(int) last_free_voxel_block_id,
+                                              ATOMIC_ARGUMENT(int) last_free_excess_list_id,
+                                              ATOMIC_ARGUMENT(int) utilized_block_count,
+                                              const int* block_allocation_list,
+                                              const int* excess_entry_list,
+                                              int* utilized_block_hash_codes,
+                                              THandleOrderedAllocationFailure&& handle_ordered_allocation_failure,
+                                              THandleExcessAllocationSuccess&& handle_excess_allocation_success) {
 	int voxel_block_index, excess_list_index;
 	switch (hash_entry_state) {
 		case ITMLib::NEEDS_ALLOCATION_IN_ORDERED_LIST: //needs allocation, fits in the ordered list
@@ -186,6 +187,7 @@ inline void AllocateBlockBasedOnState(const HashEntryAllocationState& hash_entry
 			} else {
 				// Restore the previous value to avoid leaks.
 				ATOMIC_ADD(last_free_voxel_block_id, 1);
+				handle_ordered_allocation_failure(hash_code);
 			}
 			break;
 
@@ -200,14 +202,13 @@ inline void AllocateBlockBasedOnState(const HashEntryAllocationState& hash_entry
 				hash_entry.pos = block_coordinates[hash_code];
 				hash_entry.ptr = block_allocation_list[voxel_block_index];
 				hash_entry.offset = 0;
-
 				const int excess_list_offset = excess_entry_list[excess_list_index];
-
-				hash_table[hash_code].offset = excess_list_offset + 1; //connect to child
-
-				const int new_hash_code = ORDERED_LIST_SIZE + excess_list_offset;
-				hash_table[new_hash_code] = hash_entry; //add child to the excess list
+				// connect to child
+				hash_table[hash_code].offset = excess_list_offset + 1;
+				const int new_entry_index = ORDERED_LIST_SIZE + excess_list_offset;
+				hash_table[new_entry_index] = hash_entry;
 				UpdateUtilizedHashCodes<TMemoryDeviceType>(utilized_block_hash_codes, utilized_block_count, hash_code);
+				handle_excess_allocation_success(new_entry_index);
 			} else {
 				// Restore the previous values to avoid leaks.
 				ATOMIC_ADD(last_free_voxel_block_id, 1);
@@ -222,6 +223,54 @@ inline void AllocateBlockBasedOnState(const HashEntryAllocationState& hash_entry
 	}
 }
 
+template<MemoryDeviceType TMemoryDeviceType>
+_DEVICE_WHEN_AVAILABLE_
+inline void AllocateBlockBasedOnState(const HashEntryAllocationState& hash_entry_state,
+                                      int hash_code, Vector3s* block_coordinates, HashEntry* hash_table,
+                                      ATOMIC_ARGUMENT(int) last_free_voxel_block_id,
+                                      ATOMIC_ARGUMENT(int) last_free_excess_list_id,
+                                      ATOMIC_ARGUMENT(int) utilized_block_count,
+                                      const int* block_allocation_list,
+                                      const int* excess_entry_list,
+                                      int* utilized_block_hash_codes) {
+	AllocateBlockBasedOnState_Generic<TMemoryDeviceType>(
+			hash_entry_state,
+			hash_code, block_coordinates, hash_table,
+			last_free_voxel_block_id,
+			last_free_excess_list_id,
+			utilized_block_count,
+			block_allocation_list,
+			excess_entry_list,
+			utilized_block_hash_codes,
+			[](const int dummy) {},
+			[](const int dummy) {});
+}
+
+template<MemoryDeviceType TMemoryDeviceType>
+_DEVICE_WHEN_AVAILABLE_
+inline void AllocateBlockBasedOnState_SetVisibility(const HashEntryAllocationState& hash_entry_state,
+                                                    int hash_code, Vector3s* block_coordinates, HashEntry* hash_table,
+                                                    HashBlockVisibility* block_visibility_types,
+                                                    ATOMIC_ARGUMENT(int) last_free_voxel_block_id,
+                                                    ATOMIC_ARGUMENT(int) last_free_excess_list_id,
+                                                    ATOMIC_ARGUMENT(int) utilized_block_count,
+                                                    const int* block_allocation_list,
+                                                    const int* excess_entry_list,
+                                                    int* utilized_block_hash_codes) {
+	AllocateBlockBasedOnState_Generic<TMemoryDeviceType>(hash_entry_state,
+	                                                     hash_code, block_coordinates, hash_table,
+	                                                     last_free_voxel_block_id,
+	                                                     last_free_excess_list_id,
+	                                                     utilized_block_count,
+	                                                     block_allocation_list,
+	                                                     excess_entry_list,
+	                                                     utilized_block_hash_codes,
+	                                                     [&block_visibility_types](
+			                                                     const int hash_code) { block_visibility_types[hash_code] = INVISIBLE; },
+	                                                     [&block_visibility_types](
+			                                                     const int entry_index) { block_visibility_types[entry_index] = IN_MEMORY_AND_VISIBLE; });
+
+}
 // endregion ===========================================================================================================
 // region =================== DEALLOCATION & CLEANING OF SINGLE VOXEL HASH BLOCK =======================================
 

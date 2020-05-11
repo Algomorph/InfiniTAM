@@ -33,7 +33,7 @@
 
 
 
-using namespace ITMLib;
+namespace ITMLib{
 
 _CPU_AND_GPU_CODE_
 inline bool
@@ -165,3 +165,4 @@ ComputeVoxelBlockOffsetRange(const CONSTPTR(Vector3i)& offset,
 }
 
 //endregion
+} // namespace ITMLib

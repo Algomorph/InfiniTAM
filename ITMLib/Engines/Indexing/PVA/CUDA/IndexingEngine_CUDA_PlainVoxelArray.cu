@@ -14,7 +14,7 @@
 //  limitations under the License.
 //  ================================================================
 
-#include "../../Interface/IndexingEngine.tpp"
+#include "../IndexingEngine_PlainVoxelArray.tpp"
 #include "../../../../GlobalTemplateDefines.h"
 
 namespace ITMLib {

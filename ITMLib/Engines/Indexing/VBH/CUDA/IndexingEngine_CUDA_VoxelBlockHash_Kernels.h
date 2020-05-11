@@ -26,19 +26,21 @@ namespace {
 
 //CUDA kernels
 
-__global__ void setVisibleEntriesToVisibleAtPreviousFrameAndUnstreamed(HashBlockVisibility* hash_block_visibility_types,
-                                                                       const int* utilized_block_hash_codes,
-                                                                       int utilized_entry_count) {
+__global__ void
+setVisibleEntriesToVisibleAtPreviousFrameAndUnstreamed(ITMLib::HashBlockVisibility* hash_block_visibility_types,
+                                                       const int* utilized_block_hash_codes,
+                                                       int utilized_entry_count) {
 	int entryId = threadIdx.x + blockIdx.x * blockDim.x;
 	if (entryId > utilized_entry_count - 1) return;
-	hash_block_visibility_types[utilized_block_hash_codes[entryId]] = VISIBLE_AT_PREVIOUS_FRAME_AND_UNSTREAMED;
+	hash_block_visibility_types[utilized_block_hash_codes[entryId]] = ITMLib::VISIBLE_AT_PREVIOUS_FRAME_AND_UNSTREAMED;
 }
 
 
 template<bool useSwapping>
 __global__ void
-buildVisibilityList_device(HashEntry* hashTable, ITMLib::ITMHashSwapState* swapStates, int hash_entry_count,
-                           int* visibleEntryIDs, int* visible_block_count, HashBlockVisibility* blockVisibilityTypes,
+buildVisibilityList_device(ITMLib::HashEntry* hashTable, ITMLib::ITMHashSwapState* swapStates, int hash_entry_count,
+                           int* visibleEntryIDs, int* visible_block_count,
+                           ITMLib::HashBlockVisibility* blockVisibilityTypes,
                            Matrix4f M_d, Vector4f projParams_d, Vector2i depthImgSize, float voxelSize) {
 	int hash_code = threadIdx.x + blockIdx.x * blockDim.x;
 	if (hash_code >= hash_entry_count) return;
@@ -47,22 +49,22 @@ buildVisibilityList_device(HashEntry* hashTable, ITMLib::ITMHashSwapState* swapS
 	shouldPrefix = false;
 	__syncthreads();
 
-	HashBlockVisibility hash_block_visibility_type = blockVisibilityTypes[hash_code];
-	const HashEntry& hashEntry = hashTable[hash_code];
+	ITMLib::HashBlockVisibility hash_block_visibility_type = blockVisibilityTypes[hash_code];
+	const ITMLib::HashEntry& hashEntry = hashTable[hash_code];
 
-	if (hash_block_visibility_type == VISIBLE_AT_PREVIOUS_FRAME_AND_UNSTREAMED) {
+	if (hash_block_visibility_type == ITMLib::VISIBLE_AT_PREVIOUS_FRAME_AND_UNSTREAMED) {
 		bool isVisibleEnlarged, isVisible;
 
 		if (useSwapping) {
 			CheckVoxelHashBlockVisibility<true>(isVisible, isVisibleEnlarged, hashEntry.pos, M_d, projParams_d,
 			                                    voxelSize,
 			                                    depthImgSize);
-			if (!isVisibleEnlarged) hash_block_visibility_type = INVISIBLE;
+			if (!isVisibleEnlarged) hash_block_visibility_type = ITMLib::INVISIBLE;
 		} else {
 			CheckVoxelHashBlockVisibility<false>(isVisible, isVisibleEnlarged, hashEntry.pos, M_d, projParams_d,
 			                                     voxelSize,
 			                                     depthImgSize);
-			if (!isVisible) hash_block_visibility_type = INVISIBLE;
+			if (!isVisible) hash_block_visibility_type = ITMLib::INVISIBLE;
 		}
 		blockVisibilityTypes[hash_code] = hash_block_visibility_type;
 	}
@@ -83,130 +85,10 @@ buildVisibilityList_device(HashEntry* hashTable, ITMLib::ITMHashSwapState* swapS
 
 }
 
-__global__
-void allocateHashedVoxelBlocksUsingLists_SetVisibility_device(
-		int* voxelAllocationList, int* excessAllocationList,
-		AllocationTempData* allocData,
-		HashEntry* hashTable, int noTotalEntries,
-		const ITMLib::HashEntryAllocationState* hashEntryStates, Vector3s* blockCoords,
-		HashBlockVisibility* blockVisibilityTypes) {
-	int hashCode = threadIdx.x + blockIdx.x * blockDim.x;
-	if (hashCode >= noTotalEntries) return;
-	int vbaIdx, exlIdx;
-
-	switch (hashEntryStates[hashCode]) {
-		case ITMLib::NEEDS_ALLOCATION_IN_ORDERED_LIST: //needs allocation, fits in the ordered list
-			vbaIdx = atomicSub(&allocData->last_free_voxel_block_id, 1);
-
-			if (vbaIdx >= 0) //there is room in the voxel block array
-			{
-				HashEntry hashEntry;
-				hashEntry.pos = blockCoords[hashCode];
-				hashEntry.ptr = voxelAllocationList[vbaIdx];
-				hashEntry.offset = 0;
-				hashTable[hashCode] = hashEntry;
-			} else {
-				blockVisibilityTypes[hashCode] = INVISIBLE;
-				// Restore the previous value to avoid leaks.
-				atomicAdd(&allocData->last_free_voxel_block_id, 1);
-			}
-			break;
-
-		case ITMLib::NEEDS_ALLOCATION_IN_EXCESS_LIST: //needs allocation in the excess list
-			vbaIdx = atomicSub(&allocData->last_free_voxel_block_id, 1);
-			exlIdx = atomicSub(&allocData->last_free_excess_list_id, 1);
-
-			if (vbaIdx >= 0 && exlIdx >= 0) //there is room in the voxel block array and excess list
-			{
-				HashEntry hashEntry;
-				hashEntry.pos = blockCoords[hashCode];
-				hashEntry.ptr = voxelAllocationList[vbaIdx];
-				hashEntry.offset = 0;
-
-				int exlOffset = excessAllocationList[exlIdx];
-
-				hashTable[hashCode].offset = exlOffset + 1; //connect to child
-
-				hashTable[ORDERED_LIST_SIZE + exlOffset] = hashEntry; //add child to the excess list
-				blockVisibilityTypes[ORDERED_LIST_SIZE + exlOffset] = IN_MEMORY_AND_VISIBLE;
-			} else {
-				// Restore the previous values to avoid leaks.
-				atomicAdd(&allocData->last_free_voxel_block_id, 1);
-				atomicAdd(&allocData->last_free_excess_list_id, 1);
-			}
-
-			break;
-	}
-}
-
-
-__global__
-void allocateHashedVoxelBlocksUsingLists_device(
-		int* block_allocation_list, int* excess_allocation_list,
-		AllocationTempData* temporary_allocation_data,
-		HashEntry* hash_table, const int hash_entry_count,
-		const ITMLib::HashEntryAllocationState* hash_entry_states, Vector3s* block_coordinates,
-		int* utilized_block_hash_codes) {
-	int hash_code = threadIdx.x + blockIdx.x * blockDim.x;
-	if (hash_code >= hash_entry_count) return;
-
-	int voxel_block_index, excess_list_index;
-
-	auto updateUtilizedHashCodes = [&temporary_allocation_data, &utilized_block_hash_codes](int hash_code) {
-		int utilized_index = atomicAdd(&temporary_allocation_data->utilized_block_count, 1);
-		utilized_block_hash_codes[utilized_index] = hash_code;
-	};
-
-	switch (hash_entry_states[hash_code]) {
-		case ITMLib::NEEDS_ALLOCATION_IN_ORDERED_LIST: //needs allocation, fits in the ordered list
-			voxel_block_index = atomicSub(&temporary_allocation_data->last_free_voxel_block_id, 1);
-			if (voxel_block_index >= 0) //there is room in the voxel block array
-			{
-				HashEntry hash_entry;
-				hash_entry.pos = block_coordinates[hash_code];
-				hash_entry.ptr = block_allocation_list[voxel_block_index];
-				hash_entry.offset = 0;
-				hash_table[hash_code] = hash_entry;
-				updateUtilizedHashCodes(hash_code);
-			} else {
-				// Restore the previous value to avoid leaks.
-				atomicAdd(&temporary_allocation_data->last_free_voxel_block_id, 1);
-			}
-			break;
-
-		case ITMLib::NEEDS_ALLOCATION_IN_EXCESS_LIST: //needs allocation in the excess list
-			voxel_block_index = atomicSub(&temporary_allocation_data->last_free_voxel_block_id, 1);
-			excess_list_index = atomicSub(&temporary_allocation_data->last_free_excess_list_id, 1);
-
-			if (voxel_block_index >= 0 &&
-			    excess_list_index >= 0) //there is room in the voxel block array and excess list
-			{
-				HashEntry hash_entry;
-				hash_entry.pos = block_coordinates[hash_code];
-				hash_entry.ptr = block_allocation_list[voxel_block_index];
-				hash_entry.offset = 0;
-
-				const int excess_list_offset = excess_allocation_list[excess_list_index];
-
-				hash_table[hash_code].offset = excess_list_offset + 1; //connect to child
-
-				const int new_hash_code = ORDERED_LIST_SIZE + excess_list_offset;
-				hash_table[new_hash_code] = hash_entry; //add child to the excess list
-				updateUtilizedHashCodes(new_hash_code);
-			} else {
-				// Restore the previous values to avoid leaks.
-				atomicAdd(&temporary_allocation_data->last_free_voxel_block_id, 1);
-				atomicAdd(&temporary_allocation_data->last_free_excess_list_id, 1);
-			}
-
-			break;
-	}
-}
-
 __global__ void
-reAllocateSwappedOutVoxelBlocks_device(int* voxelAllocationList, HashEntry* hashTable, int hashEntryCount,
+reAllocateSwappedOutVoxelBlocks_device(int* voxelAllocationList, ITMLib::HashEntry* hashTable, int hashEntryCount,
                                        AllocationTempData* allocData, /*int *countOfAllocatedOrderedEntries,*/
-                                       HashBlockVisibility* blockVisibilityTypes) {
+                                       ITMLib::HashBlockVisibility* blockVisibilityTypes) {
 	int hashCode = threadIdx.x + blockIdx.x * blockDim.x;
 	if (hashCode >= hashEntryCount) return;
 
@@ -222,11 +104,12 @@ reAllocateSwappedOutVoxelBlocks_device(int* voxelAllocationList, HashEntry* hash
 	}
 }
 
-__global__ void findHashEntry_device(HashEntry* entry, const HashEntry* hashTable, Vector3s pos, int* hashCode) {
+__global__ void
+findHashEntry_device(ITMLib::HashEntry* entry, const ITMLib::HashEntry* hashTable, Vector3s pos, int* hashCode) {
 
 	*hashCode = FindHashCodeAt(hashTable, pos);
 	if (*hashCode != -1) {
-		const HashEntry& targetEntry = hashTable[*hashCode];
+		const ITMLib::HashEntry& targetEntry = hashTable[*hashCode];
 		entry->offset = targetEntry.offset;
 		entry->ptr = targetEntry.ptr;
 		entry->pos = targetEntry.pos;
@@ -243,59 +126,21 @@ struct SingleHashAllocationData {
 };
 
 __global__ void allocateHashEntry_device(SingleHashAllocationData* data,
-                                         const Vector3s at, HashEntry* hash_table,
+                                         const Vector3s at, ITMLib::HashEntry* hash_table,
                                          const int* voxel_allocation_list,
                                          const int* excess_allocation_list,
                                          int* utilized_hash_codes) {
-	HashEntry* entry;
+	ITMLib::HashEntry* entry;
 	data->success = FindOrAllocateHashEntry(at, hash_table, entry, data->last_free_allocation_block_id,
 	                                        data->last_free_excess_entry_id, data->utilized_hash_code_count,
 	                                        voxel_allocation_list, excess_allocation_list,
 	                                        utilized_hash_codes, data->hash_code);
 };
 
-__global__ void buildHashAllocationTypeList_BlockList_device(
-		const Vector3s* new_block_positions, HashEntryAllocationState* hash_entry_states, Vector3s* block_coordinates,
-		HashEntry* hash_table, const int new_block_count, Vector3s* colliding_block_positions,
-		int* colliding_block_count) {
-
-	int new_block_index = threadIdx.x + blockIdx.x * blockDim.x;
-	if (new_block_index >= new_block_count) return;
-
-	Vector3s desired_block_position = new_block_positions[new_block_index];
-
-	MarkAsNeedingAllocationIfNotFound<false>(hash_entry_states, block_coordinates, desired_block_position, hash_table,
-	                                         colliding_block_positions, colliding_block_count);
-}
-
-template<typename TVoxel>
-__global__ void deallocate_BlockList_device(const Vector3s* blocks_to_remove_device,
-                                            const int count_of_blocks_to_remove,
-                                            ITMLib::HashEntryAllocationState* hash_entry_states,
-                                            HashEntry* hash_table,
-                                            TVoxel* voxels,
-                                            Vector3s* colliding_blocks_device,
-                                            int* colliding_block_count,
-                                            int* last_free_voxel_block_id,
-                                            int* last_free_excess_list_id,
-                                            int* voxel_allocation_list,
-                                            int* excess_allocation_list,
-                                            const TVoxel* empty_voxel_block_device){
-
-	int block_to_remove_index = threadIdx.x + blockIdx.x * blockDim.x;
-	if (block_to_remove_index >= count_of_blocks_to_remove) return;
-
-	Vector3s block_to_remove = blocks_to_remove_device[block_to_remove_index];
-
-	DeallocateBlock(block_to_remove, hash_entry_states, hash_table, voxels, colliding_blocks_device,
-	                colliding_block_count, last_free_voxel_block_id, last_free_excess_list_id, voxel_allocation_list,
-	                excess_allocation_list, empty_voxel_block_device);
-}
-
 
 __global__ void determineTargetAllocationForOffsetCopy_device(
-		HashEntry* target_hash_table,
-		const HashEntry* source_hash_table,
+		ITMLib::HashEntry* target_hash_table,
+		const ITMLib::HashEntry* source_hash_table,
 		ITMLib::HashEntryAllocationState* hash_entry_states,
 		Vector3s* block_coordinates,
 		const Vector6i target_bounds,
@@ -321,12 +166,12 @@ __global__ void determineTargetAllocationForOffsetCopy_device(
 		return;
 	}
 
-	ThreadAllocationStatus status = MarkAsNeedingAllocationIfNotFound<true>(hash_entry_states, block_coordinates,
-	                                                                        target_block_position, target_hash_table,
-	                                                                        colliding_block_positions,
-	                                                                        colliding_block_count);
+	ITMLib::ThreadAllocationStatus status =
+			ITMLib::MarkAsNeedingAllocationIfNotFound<true>(hash_entry_states, block_coordinates,
+			                                                target_block_position, target_hash_table,
+			                                                colliding_block_positions, colliding_block_count);
 
-	if(status == BEING_MODIFIED_BY_ANOTHER_THREAD){
+	if (status == ITMLib::BEING_MODIFIED_BY_ANOTHER_THREAD) {
 		*unresolvable_collision_encountered = true;
 	}
 }

@@ -67,9 +67,11 @@ public:
 	 * \param reset_utilized_block_list  [in] reset visibility list upon completion
 	 */
 	virtual void
-	AllocateNearSurface(VoxelVolume<TVoxel, TIndex>* volume, const View* view, const Matrix4f& depth_camera_matrix = Matrix4f::Identity()) = 0;
+	AllocateNearSurface(VoxelVolume<TVoxel, TIndex>* volume, const View* view,
+	                    const Matrix4f& depth_camera_matrix = Matrix4f::Identity()) = 0;
 
 	virtual void ResetUtilizedBlockList(VoxelVolume<TVoxel, TIndex>* volume) = 0;
+	virtual void ResetVisibleBlockList(VoxelVolume<TVoxel, TIndex>* volume) = 0;
 
 	/**
 	 * \brief Given a view with a new depth image and a previous (source) volume, ray trace to determine which blocks
@@ -103,43 +105,11 @@ public:
 
 };
 
-
-struct IndexingEngineFactory;
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-class IndexingEngine :
-		public IndexingEngineInterface<TVoxel, TIndex> {
-	friend IndexingEngineFactory;
-private:
-	IndexingEngine() = default;
-public:
-	static IndexingEngine& Instance() {
-		static IndexingEngine instance; // Guaranteed to be destroyed.
-		// Instantiated on first use.
-		return instance;
-	}
-
-	IndexingEngine(IndexingEngine const&) = delete;
-	void operator=(IndexingEngine const&) = delete;
-
-	virtual void ResetUtilizedBlockList(VoxelVolume<TVoxel, TIndex>* volume) override;
-
-	virtual void AllocateNearSurface(VoxelVolume<TVoxel, TIndex>* volume, const View* view,
-	                                 const CameraTrackingState* tracking_state) override;
-
-	virtual void AllocateNearSurface(VoxelVolume<TVoxel, TIndex>* volume, const View* view,
-	                                 const Matrix4f& depth_camera_matrix = Matrix4f::Identity()) override;
-
-	virtual void AllocateNearAndBetweenTwoSurfaces(VoxelVolume<TVoxel, TIndex>* targetVolume,
-	                                               const View* view,
-	                                               const CameraTrackingState* tracking_state) override;
-
-	void
-	AllocateGridAlignedBox(VoxelVolume<TVoxel, TIndex>* volume, const Extent3Di& box) override;
-
-};
+class IndexingEngine;
 
 
-namespace internal{
+namespace internal {
 template<MemoryDeviceType TMemoryDeviceType, typename TVoxelTarget, typename TVoxelSource>
 void AllocateUsingOtherVolume(VoxelVolume<TVoxelTarget, PlainVoxelArray>* target_volume,
                               VoxelVolume<TVoxelSource, PlainVoxelArray>* source_volume);
@@ -170,7 +140,7 @@ void AllocateUsingOtherVolume_OffsetAndBounded(VoxelVolume<TVoxelTarget, VoxelBl
 template<typename TVoxelTarget, typename TVoxelSource, typename TIndex>
 void AllocateUsingOtherVolume(VoxelVolume<TVoxelTarget, TIndex>* target_volume,
                               VoxelVolume<TVoxelSource, TIndex>* source_volume,
-                              MemoryDeviceType memory_device_type){
+                              MemoryDeviceType memory_device_type) {
 	switch (memory_device_type) {
 		case MEMORYDEVICE_CPU:
 			internal::AllocateUsingOtherVolume<MEMORYDEVICE_CPU>(target_volume, source_volume);
@@ -185,8 +155,8 @@ void AllocateUsingOtherVolume(VoxelVolume<TVoxelTarget, TIndex>* target_volume,
 
 template<typename TVoxelTarget, typename TVoxelSource, typename TIndex>
 void AllocateUsingOtherVolume_Bounded(VoxelVolume<TVoxelTarget, TIndex>* target_volume,
-                              VoxelVolume<TVoxelSource, TIndex>* source_volume,
-                              MemoryDeviceType memory_device_type){
+                                      VoxelVolume<TVoxelSource, TIndex>* source_volume,
+                                      MemoryDeviceType memory_device_type) {
 	switch (memory_device_type) {
 		case MEMORYDEVICE_CPU:
 			internal::AllocateUsingOtherVolume_Bounded<MEMORYDEVICE_CPU>(target_volume, source_volume);
@@ -201,8 +171,8 @@ void AllocateUsingOtherVolume_Bounded(VoxelVolume<TVoxelTarget, TIndex>* target_
 
 template<typename TVoxelTarget, typename TVoxelSource, typename TIndex>
 void AllocateUsingOtherVolume_OffsetAndBounded(VoxelVolume<TVoxelTarget, TIndex>* target_volume,
-                                      VoxelVolume<TVoxelSource, TIndex>* source_volume,
-                                      MemoryDeviceType memory_device_type){
+                                               VoxelVolume<TVoxelSource, TIndex>* source_volume,
+                                               MemoryDeviceType memory_device_type) {
 	switch (memory_device_type) {
 		case MEMORYDEVICE_CPU:
 			internal::AllocateUsingOtherVolume_OffsetAndBounded<MEMORYDEVICE_CPU>(target_volume, source_volume);

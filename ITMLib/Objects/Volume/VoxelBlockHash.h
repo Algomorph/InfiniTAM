@@ -45,10 +45,10 @@ struct HashEntry {
 	*/
 	int ptr;
 
-	/** Times the hash block has been modified (only used by some algorithms) **/
+	/** Times the hash block has been modified (only used by some algorithms). **/
 	uchar modification_count;
 
-	/** The frame index when the target block has been last modified. **/
+	/** The frame index when the target block has been last modified (only used by some algorithms). **/
 	unsigned short last_modified_timestamp;
 
 	friend std::ostream& operator<<(std::ostream& os, const HashEntry& entry) {

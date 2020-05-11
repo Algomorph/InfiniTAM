@@ -27,24 +27,60 @@
 
 namespace ITMLib {
 
-template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, typename TDerivedClass>
-void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::
-        AllocateHashEntriesUsingAllocationStateList(VoxelVolume<TVoxel, VoxelBlockHash>* volume){
-	HashEntryStateBasedAllocationFunctor<TMemoryDeviceType> allocation_functor(volume->index);
+
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
+template<typename TAllocationFunctor>
+void IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType>::
+AllocateHashEntriesUsingAllocationStateList_Generic(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
+	TAllocationFunctor allocation_functor(volume->index);
 	HashEntryAllocationState* hash_entry_allocation_states = volume->index.GetHashEntryAllocationStates();
 	unsigned int hash_entry_count = volume->index.hash_entry_count;
-	MemoryBlockTraversalEngine<TMemoryDeviceType>::TraverseRaw(hash_entry_allocation_states, hash_entry_count, allocation_functor);
+	MemoryBlockTraversalEngine<TMemoryDeviceType>::TraverseRaw(hash_entry_allocation_states, hash_entry_count,
+	                                                           allocation_functor);
 	allocation_functor.UpdateIndexCounters();
 }
 
-template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, typename TDerivedClass>
-void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::ResetUtilizedBlockList(
+/**
+ * \brief Uses hash_entry_allocation_states of the given volume (presumably, previously initialized with an allocation-state-marker function)
+ * to allocate new entries in the voxel block hash table index of the same volume. Does not modify block visibility.
+ * \param volume volume where to allocate new voxel blocks.
+ */
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
+void IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType>::
+AllocateHashEntriesUsingAllocationStateList(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
+	this->AllocateHashEntriesUsingAllocationStateList_Generic<HashEntryStateBasedAllocationFunctor<TMemoryDeviceType>>(
+			volume);
+}
+
+/**
+ * \brief Uses hash_entry_allocation_states of the given volume (presumably, previously initialized with an allocation-state-marker function)
+ * to allocate new entries in the voxel block hash table index of the same volume. Modifies block visibility.
+ * \details If an entry is successfully allocated in the excess list, sets visibility for that entry index to IN_MEMORY_AND_VISIBLE.
+ * If no room is left in the ordered list, does not assign the voxel block pointer to the entry and sets the visibility
+ * for that entry index to INVISIBLE.
+ * \param volume volume where to allocate new voxel blocks.
+ */
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
+void IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType>::
+AllocateHashEntriesUsingAllocationStateList_SetVisibility(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
+	this->AllocateHashEntriesUsingAllocationStateList_Generic<HashEntryStateBasedAllocationFunctor_SetVisibility<TMemoryDeviceType>>(
+			volume);
+}
+
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
+void IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType>::ResetUtilizedBlockList(
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 	volume->index.SetUtilizedBlockCount(0);
 }
 
-template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, typename TDerivedClass>
-void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::AllocateNearSurface(
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
+void IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType>::ResetVisibleBlockList(
+		VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
+	volume->index.SetVisibleBlockCount(0);
+}
+
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
+void IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType>::AllocateNearSurface(
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume, const View* view, const Matrix4f& depth_camera_matrix) {
 
 	float band_factor = configuration::get().general_voxel_volume_parameters.block_allocation_band_factor;
@@ -59,19 +95,19 @@ void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::Al
 		ImageTraversalEngine<float, TMemoryDeviceType>::TraverseWithPosition(view->depth, depth_based_allocator);
 		this->AllocateHashEntriesUsingAllocationStateList(volume);
 		this->AllocateBlockList(volume, depth_based_allocator.colliding_block_positions,
-		                                                     depth_based_allocator.GetCollidingBlockCount());
+		                        depth_based_allocator.GetCollidingBlockCount());
 	} while (depth_based_allocator.EncounteredUnresolvableCollision());
 }
 
-template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, typename TDerivedClass>
-void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::AllocateNearSurface(
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
+void IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType>::AllocateNearSurface(
 		VoxelVolume<TVoxel, VoxelBlockHash>* scene, const View* view, const CameraTrackingState* trackingState) {
 	AllocateNearSurface(scene, view, trackingState->pose_d->GetM());
 }
 
 
-template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, typename TDerivedClass>
-void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::AllocateNearAndBetweenTwoSurfaces(
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
+void IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType>::AllocateNearAndBetweenTwoSurfaces(
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume, const View* view, const CameraTrackingState* tracking_state) {
 
 	volume->index.SetUtilizedBlockCount(0);
@@ -89,13 +125,13 @@ void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::Al
 				view->depth, tracking_state->pointCloud->locations, depth_based_allocator);
 		this->AllocateHashEntriesUsingAllocationStateList(volume);
 		this->AllocateBlockList(volume, depth_based_allocator.colliding_block_positions,
-		                                                     depth_based_allocator.GetCollidingBlockCount());
+		                        depth_based_allocator.GetCollidingBlockCount());
 	} while (depth_based_allocator.EncounteredUnresolvableCollision());
 }
 
 
-template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, typename TDerivedClass>
-void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::ReallocateDeletedHashBlocks(
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
+void IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType>::ReallocateDeletedHashBlocks(
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 
 	ReallocateDeletedHashBlocksFunctor<TVoxel, TMemoryDeviceType> reallocation_functor(volume);
@@ -103,8 +139,8 @@ void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::Re
 	volume->index.SetLastFreeBlockListId(GET_ATOMIC_VALUE_CPU(reallocation_functor.last_free_voxel_block_id));
 }
 
-template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, typename TDerivedClass>
-void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::AllocateGridAlignedBox(
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
+void IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType>::AllocateGridAlignedBox(
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume, const Extent3Di& box) {
 	const Vector3i box_min_blocks = box.min() / VOXEL_BLOCK_SIZE;
 	const Vector3i box_size_voxels_sans_front_margins = (box.max() - (box_min_blocks * VOXEL_BLOCK_SIZE));
@@ -131,20 +167,27 @@ void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::Al
 	this->AllocateBlockList(volume, block_positions, block_count);
 }
 
-template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, typename TDerivedClass>
-void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::RebuildUtilizedBlockList(
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
+void IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType>::RebuildUtilizedBlockList(
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 	BuildUtilizedBlockListFunctor<TVoxel, TMemoryDeviceType> utilized_block_list_functor(volume);
 	HashTableTraversalEngine<TMemoryDeviceType>::TraverseAllWithHashCode(volume->index, utilized_block_list_functor);
 	volume->index.SetUtilizedBlockCount(GET_ATOMIC_VALUE_CPU(utilized_block_list_functor.utilized_block_count));
 }
 
-template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, typename TDerivedClass>
-void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::AllocateBlockList(
+/**
+ * \brief Allocate all hash blocks at the first [0, new_block_count) of the given block coordinates
+ * \param volume volume where to allocate
+ * \param new_block_positions list of coordinates of blocks to allocate (coordinates to be specified in blocks, not voxels or meters)
+ * \param new_block_count only the first [0, new_block_count) new_block_positions will be used.
+ * If -1 is passed, new_block_positions.size() will be used.
+ */
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
+void IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType>::AllocateBlockList(
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume,
 		const ORUtils::MemoryBlock<Vector3s>& new_block_positions,
 		int new_block_count) {
-	if(new_block_count == -1) new_block_count = new_block_positions.size();
+	if (new_block_count == -1) new_block_count = new_block_positions.size();
 	if (new_block_count == 0) return;
 
 	ORUtils::MemoryBlock<Vector3s> new_positions_local(new_block_count, TMemoryDeviceType);
@@ -169,14 +212,20 @@ void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::Al
 	}
 }
 
-
-template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, typename TDerivedClass>
-void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::DeallocateBlockList(
+/**
+ * \brief Deallocate all hash blocks at the first [0, count_of_blocks_to_remove) of the given block coordinates
+ * \param volume volume where to deallocate
+ * \param coordinates_of_blocks_to_remove coordinates (specified in blocks, not voxels or meters) from which to remove blocks
+ * \param count_of_blocks_to_remove only the first [0, count_of_blocks_to_remove) coordinates_of_blocks_to_remove will be used.
+ * If -1 is passed, coordinates_of_blocks_to_remove.size() will be used.
+ */
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
+void IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType>::DeallocateBlockList(
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume,
 		const ORUtils::MemoryBlock<Vector3s>& coordinates_of_blocks_to_remove,
 		int count_of_blocks_to_remove) {
 
-	if(count_of_blocks_to_remove == -1) count_of_blocks_to_remove = coordinates_of_blocks_to_remove.size();
+	if (count_of_blocks_to_remove == -1) count_of_blocks_to_remove = coordinates_of_blocks_to_remove.size();
 	if (count_of_blocks_to_remove == 0) return;
 
 	// *** locally-manipulated memory blocks of hash codes & counters *** /
@@ -192,7 +241,8 @@ void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::De
 
 		volume->index.ClearHashEntryAllocationStates();
 
-		MemoryBlockTraversalEngine<TMemoryDeviceType>::Traverse(coordinates_of_blocks_to_remove, count_of_blocks_to_remove, deallocation_functor);
+		MemoryBlockTraversalEngine<TMemoryDeviceType>::Traverse(coordinates_of_blocks_to_remove,
+		                                                        count_of_blocks_to_remove, deallocation_functor);
 
 		count_of_blocks_to_remove = deallocation_functor.GetCollidingBlockCount();
 		std::swap(blocks_to_remove_device, deallocation_functor.colliding_positions_device);
@@ -200,6 +250,62 @@ void IndexingEngine_VoxelBlockHash<TVoxel, TMemoryDeviceType, TDerivedClass>::De
 	deallocation_functor.SetIndexFreeVoxelBlockIdAndExcessListId();
 	this->RebuildUtilizedBlockList(volume);
 }
+
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
+HashEntry
+IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType>::FindHashEntry(const VoxelBlockHash& index,
+                                                                                       const Vector3s& coordinates) {
+	int hash_code;
+	return internal::SpecializedVoxelHashBlockManager<TMemoryDeviceType,TVoxel>::FindHashEntry(index, coordinates, hash_code);
+}
+
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
+HashEntry
+IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType>::FindHashEntry(const VoxelBlockHash& index,
+                                                                                       const Vector3s& coordinates,
+                                                                                       int& hash_code) {
+	return internal::SpecializedVoxelHashBlockManager<TMemoryDeviceType,TVoxel>::FindHashEntry(index, coordinates, hash_code);
+}
+
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
+bool IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType>::AllocateHashBlockAt(
+		VoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3s at, int& hash_code) {
+	return internal::SpecializedVoxelHashBlockManager<TMemoryDeviceType,TVoxel>::AllocateHashBlockAt(volume, at, hash_code);
+}
+
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, HashBlockVisibility THashBlockVisibility>
+static inline void ChangeVisibleBlockVisibility_Aux(VoxelVolume<TVoxel, VoxelBlockHash>* volume){
+	const int* visible_block_hash_codes = volume->index.GetVisibleBlockHashCodes();
+	BlockVisibilitySetFunctor<TVoxel, TMemoryDeviceType, THashBlockVisibility> visibility_functor(volume);
+	MemoryBlockTraversalEngine<TMemoryDeviceType>::TraverseRaw(visible_block_hash_codes, volume->index.GetVisibleBlockCount(), visibility_functor);
+}
+
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
+void IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType>::ChangeVisibleBlockVisibility(
+		VoxelVolume<TVoxel, VoxelBlockHash>* volume, HashBlockVisibility visibility) {
+
+	switch (visibility) {
+		case VISIBLE_AT_PREVIOUS_FRAME_AND_UNSTREAMED:
+			ChangeVisibleBlockVisibility_Aux<TVoxel, TMemoryDeviceType, VISIBLE_AT_PREVIOUS_FRAME_AND_UNSTREAMED>(volume);
+			break;
+		case STREAMED_OUT_AND_VISIBLE:
+			ChangeVisibleBlockVisibility_Aux<TVoxel, TMemoryDeviceType, STREAMED_OUT_AND_VISIBLE>(volume);
+			break;
+		case IN_MEMORY_AND_VISIBLE:
+			ChangeVisibleBlockVisibility_Aux<TVoxel, TMemoryDeviceType, IN_MEMORY_AND_VISIBLE>(volume);
+			break;
+		case INVISIBLE:
+			ChangeVisibleBlockVisibility_Aux<TVoxel, TMemoryDeviceType, INVISIBLE>(volume);
+			break;
+	}
+}
+
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
+void IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType>::RebuildVisibleBlockList(
+		VoxelVolume<TVoxel, VoxelBlockHash>* volume, const View* view, const Matrix4f& depth_camera_matrix) {
+	internal::SpecializedVoxelHashBlockManager<TMemoryDeviceType,TVoxel>::RebuildVisibleBlockList(volume, view, depth_camera_matrix);
+}
+
 
 namespace internal {
 template<MemoryDeviceType TMemoryDeviceType, typename TVoxelTarget, typename TVoxelSource, typename TMarkerFunctor>
