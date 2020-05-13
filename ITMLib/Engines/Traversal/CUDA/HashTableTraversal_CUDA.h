@@ -22,11 +22,11 @@ namespace ITMLib {
 
 template<>
 class HashTableTraversalEngine<MEMORYDEVICE_CUDA> {
-public:
-	template<typename TFunctor>
+private: // member functions
+	template<typename TVoxelBlockHash, typename THashEntry, typename TFunctor>
 	inline static void
-	TraverseAllWithHashCode(VoxelBlockHash& index, TFunctor& functor) {
-		HashEntry* hash_table = index.GetEntries();
+	TraverseAllWithHashCode_Generic(TVoxelBlockHash& index, TFunctor& functor) {
+		THashEntry* hash_table = index.GetEntries();
 		const int hash_entry_count = index.hash_entry_count;
 		TFunctor* functor_device = nullptr;
 
@@ -38,40 +38,16 @@ public:
 
 		hashTableAllEntryTraversalWithHashCode_device < TFunctor >
 		<<< cuda_grid_size, cuda_block_size >>>
-		(hash_table, hash_entry_count, functor_device);
+				(hash_table, hash_entry_count, functor_device);
 		ORcudaKernelCheck;
 
 		ORcudaSafeCall(cudaMemcpy(&functor, functor_device, sizeof(TFunctor), cudaMemcpyDeviceToHost));
 		ORcudaSafeCall(cudaFree(functor_device));
 	}
-
-	template<typename TFunctor>
+	template<typename TVoxelBlockHash, typename THashEntry, typename TFunctor>
 	inline static void
-	TraverseUtilizedWithHashCode(VoxelBlockHash& index, TFunctor& functor){
-		HashEntry* hash_table = index.GetEntries();
-		const int utilized_entry_count = index.GetUtilizedBlockCount();
-		int* utilized_entry_codes = index.GetUtilizedBlockHashCodes();
-		TFunctor* functor_device = nullptr;
-
-		dim3 cuda_block_size(256, 1);
-		dim3 cuda_grid_size((int) ceil((float) utilized_entry_count / (float) cuda_block_size.x));
-
-		ORcudaSafeCall(cudaMalloc((void**) &functor_device, sizeof(TFunctor)));
-		ORcudaSafeCall(cudaMemcpy(functor_device, &functor, sizeof(TFunctor), cudaMemcpyHostToDevice));
-
-		hashTableUtilizedEntryTraversalWithHashCode_device < TFunctor >
-				<<< cuda_grid_size, cuda_block_size >>>
-		                             (hash_table, utilized_entry_codes, utilized_entry_count, functor_device);
-		ORcudaKernelCheck;
-
-		ORcudaSafeCall(cudaMemcpy(&functor, functor_device, sizeof(TFunctor), cudaMemcpyDeviceToHost));
-		ORcudaSafeCall(cudaFree(functor_device));
-	}
-
-	template<typename TFunctor>
-	inline static void
-	TraverseUtilizedWithHashCode(const VoxelBlockHash& index, TFunctor& functor){
-		const HashEntry* hash_table = index.GetEntries();
+	TraverseUtilizedWithHashCode_Generic(TVoxelBlockHash& index, TFunctor& functor){
+		THashEntry* hash_table = index.GetEntries();
 		const int utilized_entry_count = index.GetUtilizedBlockCount();
 		const int* utilized_entry_codes = index.GetUtilizedBlockHashCodes();
 		TFunctor* functor_device = nullptr;
@@ -90,9 +66,27 @@ public:
 		ORcudaSafeCall(cudaMemcpy(&functor, functor_device, sizeof(TFunctor), cudaMemcpyDeviceToHost));
 		ORcudaSafeCall(cudaFree(functor_device));
 	}
+public: // member functions
+	template<typename TFunctor>
+	inline static void TraverseAllWithHashCode(VoxelBlockHash& index, TFunctor& functor) {
+		TraverseAllWithHashCode_Generic<VoxelBlockHash, HashEntry, TFunctor>(index, functor);
+	}
+	template<typename TFunctor>
+	inline static void TraverseAllWithHashCode(const VoxelBlockHash& index, TFunctor& functor) {
+		TraverseAllWithHashCode_Generic<const VoxelBlockHash, const HashEntry, TFunctor>(index, functor);
+	}
+
+	template<typename TFunctor>
+	inline static void
+	TraverseUtilizedWithHashCode(VoxelBlockHash& index, TFunctor& functor){
+		TraverseUtilizedWithHashCode_Generic<VoxelBlockHash, HashEntry, TFunctor>(index, functor);
+	}
+
+	template<typename TFunctor>
+	inline static void
+	TraverseUtilizedWithHashCode(const VoxelBlockHash& index, TFunctor& functor){
+		TraverseUtilizedWithHashCode_Generic<const VoxelBlockHash, const HashEntry, TFunctor>(index, functor);
+	}
 };
 
 } // namespace ITMLib
-
-
-// TODO

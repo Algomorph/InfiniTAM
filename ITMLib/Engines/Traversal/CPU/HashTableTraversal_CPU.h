@@ -21,39 +21,22 @@ namespace ITMLib {
 
 template<>
 class HashTableTraversalEngine<MEMORYDEVICE_CPU> {
-public:
-	template<typename TFunctor>
-	inline static void
-	TraverseAllWithHashCode(VoxelBlockHash& index, TFunctor& functor){
-		HashEntry* hash_table = index.GetEntries();
+private: // static functions
+	template<typename TVoxelBlockHash, typename THashEntry, typename TFunctor>
+	inline static void TraverseAllWithHashCode_Generic(TVoxelBlockHash& index, TFunctor& functor){
+		THashEntry* hash_table = index.GetEntries();
 		const int hash_entry_count = index.hash_entry_count;
 #ifdef WITH_OPENMP
-	#pragma omp parallel for default(none) shared(functor, hash_table)
+#pragma omp parallel for default(none) shared(functor, hash_table)
 #endif
 		for (int hash_code = 0; hash_code < hash_entry_count; hash_code++){
 			functor(hash_table[hash_code], hash_code);
 		}
 	}
 
-	template<typename TFunctor>
-	inline static void
-	TraverseUtilizedWithHashCode(VoxelBlockHash& index, TFunctor& functor){
-		HashEntry* hash_table = index.GetEntries();
-		const int utilized_entry_count = index.GetUtilizedBlockCount();
-		int* utilized_entry_codes = index.GetUtilizedBlockHashCodes();
-#ifdef WITH_OPENMP
-#pragma omp parallel for default(none) shared(functor, hash_table, utilized_entry_codes)
-#endif
-		for (int hash_code_index = 0; hash_code_index < utilized_entry_count; hash_code_index++){
-			int hash_code = utilized_entry_codes[hash_code_index];
-			functor(hash_table[hash_code], hash_code);
-		}
-	}
-
-	template<typename TFunctor>
-	inline static void
-	TraverseUtilizedWithHashCode(const VoxelBlockHash& index, TFunctor& functor){
-		const HashEntry* hash_table = index.GetEntries();
+	template<typename TVoxelBlockHash, typename THashEntry, typename TFunctor>
+	inline static void TraverseUtilizedWithHashCode_Generic(TVoxelBlockHash& index, TFunctor& functor){
+		THashEntry* hash_table = index.GetEntries();
 		const int utilized_entry_count = index.GetUtilizedBlockCount();
 		const int* utilized_entry_codes = index.GetUtilizedBlockHashCodes();
 #ifdef WITH_OPENMP
@@ -63,6 +46,31 @@ public:
 			int hash_code = utilized_entry_codes[hash_code_index];
 			functor(hash_table[hash_code], hash_code);
 		}
+	}
+
+public: // static functions
+	template<typename TFunctor>
+	inline static void
+	TraverseAllWithHashCode(VoxelBlockHash& index, TFunctor& functor){
+		TraverseAllWithHashCode_Generic<VoxelBlockHash, HashEntry, TFunctor>(index, functor);
+	}
+
+	template<typename TFunctor>
+	inline static void
+	TraverseAllWithHashCode(const VoxelBlockHash& index, TFunctor& functor){
+		TraverseAllWithHashCode_Generic<const VoxelBlockHash, const HashEntry, TFunctor>(index, functor);
+	}
+
+	template<typename TFunctor>
+	inline static void
+	TraverseUtilizedWithHashCode(VoxelBlockHash& index, TFunctor& functor){
+		TraverseUtilizedWithHashCode_Generic<VoxelBlockHash, HashEntry, TFunctor>(index, functor);
+	}
+
+	template<typename TFunctor>
+	inline static void
+	TraverseUtilizedWithHashCode(const VoxelBlockHash& index, TFunctor& functor){
+		TraverseUtilizedWithHashCode_Generic<const VoxelBlockHash, const HashEntry, TFunctor>(index, functor);
 	}
 };
 

@@ -355,7 +355,6 @@ void initializeVolume<WarpVoxel, PlainVoxelArray>(VoxelVolume<WarpVoxel, PlainVo
 
 configuration::Configuration GenerateChangedUpConfiguration(){
 	using namespace configuration;
-	TelemetrySettings changed_up_telemetry_settings(true, true, true, true, true, PLANE_XY, true, 4, true, true, true, true, true);
 	configuration::Configuration changed_up_configuration(
 			Vector3i(20, 23, 0),
 			true,
@@ -396,6 +395,21 @@ configuration::Configuration GenerateChangedUpConfiguration(){
 			"type=rgb,levels=rrbb"
 	);
 	changed_up_configuration.source_tree = changed_up_configuration.ToPTree();
+	TelemetrySettings changed_up_telemetry_settings(
+			true,
+			true,
+			true,
+			true,
+			true,
+			PLANE_XY,
+			true,
+			4,
+			true,
+			true,
+			true,
+			true,
+			true
+			);
 	changed_up_configuration.source_tree.add_child(TelemetrySettings::default_parse_path, changed_up_telemetry_settings.ToPTree(changed_up_configuration.origin));
 	return changed_up_configuration;
 }

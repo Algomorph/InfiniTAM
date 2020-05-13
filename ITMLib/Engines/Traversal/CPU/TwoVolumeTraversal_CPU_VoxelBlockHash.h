@@ -21,6 +21,7 @@
 #include "../../../Objects/Volume/VoxelBlockHash.h"
 #include "../Shared/VolumeTraversal_Shared.h"
 #include "../../../Utils/Analytics/IsAltered.h"
+#include "../../../Utils/ExecutionMode.h"
 
 //TODO: work on reducing DRY violations
 
@@ -28,16 +29,15 @@ namespace ITMLib {
 
 //======================================================================================================================
 //                            CONTAINS TRAVERSAL METHODS FOR VOLUMES USING VoxelBlockHash FOR INDEXING
-//                                  (TWO VOLUMES WITH DIFFERING VOXEL TYPES)
+//                                  (TWO VOLUMES WITH POTENTIALLY DIFFERING VOXEL TYPES)
 //======================================================================================================================
 
+/**
+ * \brief Concurrent traversal of two volumes with potentially-differing voxel types
+ * \details The two volumes must have matching hash table size
+ */
 template<typename TVoxel1, typename TVoxel2>
 class TwoVolumeTraversalEngine<TVoxel1, TVoxel2, VoxelBlockHash, VoxelBlockHash, MEMORYDEVICE_CPU> {
-	/**
-	 * \brief Concurrent traversal of two volumes with potentially-differing voxel types
-	 * \details The two volumes must have matching hash table size
-	 */
-
 private:
 
 
@@ -152,14 +152,14 @@ private:
 		}
 	}
 
-	template<typename TProcessMatchedBlocksFunction, typename TProcessUnmatchedBlock1Function, typename TProcessUnmatchedBlock2Function>
+	template<typename TProcessMatchedBlocksFunction, typename TCheckIfUnmatchedBlock1IsSignificantFunction, typename TCheckIfUnmatchedBlock2IsSignificantFunction>
 	inline static bool
 	TraverseAndCompareAll_Generic(
 			VoxelVolume<TVoxel1, VoxelBlockHash>* volume1,
 			VoxelVolume<TVoxel2, VoxelBlockHash>* volume2,
 			TProcessMatchedBlocksFunction&& traverse_matched_block_function,
-			TProcessUnmatchedBlock1Function&& traverse_unmatched_block1_function,
-			TProcessUnmatchedBlock2Function&& traverse_unmatched_block2_function,
+			TCheckIfUnmatchedBlock1IsSignificantFunction&& check_if_unmatched_block1_is_significant,
+			TCheckIfUnmatchedBlock2IsSignificantFunction&& check_if_unmatched_block2_is_significant,
 			bool verbose) {
 
 // *** traversal vars
@@ -181,14 +181,14 @@ private:
 			const HashEntry& hash_entry1 = hash_table1[hash_code1];
 			HashEntry hash_entry2 = hash_table2[hash_code1];
 
-			auto block2HasMatchingBlock1 = [&](int hash_code2) {
+			auto block_2_has_matching_block_1 = [&](int hash_code2) {
 				int alternative_hash_code1;
 				if (!FindHashAtPosition(alternative_hash_code1, hash_entry2.pos, hash_table1)) {
 					// could not find primary block corresponding to the secondary hash
 					TVoxel2* voxel_block2 = &(voxels2[hash_entry2.ptr *
 					                                  (VOXEL_BLOCK_SIZE3)]);
 					// if the secondary block is unaltered anyway, so no need to match and we're good, so return "true"
-					if(std::forward<TProcessUnmatchedBlock2Function>(traverse_unmatched_block2_function)
+					if(std::forward<TCheckIfUnmatchedBlock2IsSignificantFunction>(check_if_unmatched_block2_is_significant)
 							(voxel_block2, verbose, "Second-hash voxel block unmatched in first hash: ",
 							 hash_entry2.pos, hash_code2)){
 						return false;
@@ -203,7 +203,7 @@ private:
 				if (hash_entry2.ptr < 0) {
 					continue;
 				} else {
-					if (!block2HasMatchingBlock1(hash_code1)) {
+					if (!block_2_has_matching_block_1(hash_code1)) {
 						mismatch_found = true;
 						continue;
 					} else {
@@ -216,7 +216,7 @@ private:
 			// we have a hash bucket miss, find the secondary voxel block with the matching coordinates
 			if (hash_entry2.pos != hash_entry1.pos) {
 				if (hash_entry2.ptr >= 0) {
-					if (!block2HasMatchingBlock1(hash_code1)) {
+					if (!block_2_has_matching_block_1(hash_code1)) {
 						mismatch_found = true;
 						continue;
 					}
@@ -232,7 +232,7 @@ private:
 					                                  (VOXEL_BLOCK_SIZE3)]);
 
 
-					if (std::forward<TProcessUnmatchedBlock1Function>(traverse_unmatched_block1_function)
+					if (std::forward<TCheckIfUnmatchedBlock1IsSignificantFunction>(check_if_unmatched_block1_is_significant)
 							(voxel_block1, verbose, "First-hash voxel block unmatched in second hash table: ",
 							 hash_entry1.pos, hash_code1)) {
 						mismatch_found = true;
@@ -440,6 +440,32 @@ public:
 
 	template<typename TFunctor>
 	inline static bool
+	TraverseAndCompareAllWithPosition_Volume1SupersetVolume2(
+			VoxelVolume<TVoxel1, VoxelBlockHash>* volume1,
+			VoxelVolume<TVoxel2, VoxelBlockHash>* volume2,
+			TFunctor& functor, bool verbose) {
+		return TraverseAndCompareAll_Generic(
+				volume1, volume2,
+				[&functor](TVoxel1* voxel_block1, TVoxel2* voxel_block2, const HashEntry& hash_entry1,
+				           bool& mismatch_found) {
+					Traverse2BlocksWithPosition(
+							voxel_block1, voxel_block2, hash_entry1,
+							[&functor, &mismatch_found](TVoxel1& voxel1, TVoxel2& voxel2,
+							                            const Vector3i& voxel_position) {
+								if (!functor(voxel1, voxel2, voxel_position)) {
+									mismatch_found = true;
+								}
+							}
+					);
+				},
+				false,
+				isVoxelBlockAltered<TVoxel2>,
+				verbose
+		);
+	}
+
+	template<typename TFunctor>
+	inline static bool
 	TraverseAndCompareMatchingFlags(
 			VoxelVolume<TVoxel1, VoxelBlockHash>* volume1,
 			VoxelVolume<TVoxel2, VoxelBlockHash>* volume2,
@@ -479,7 +505,7 @@ public:
 		);
 	}
 
-	template<typename TFunctor>
+	template<ExecutionMode TExecutionMode = OPTIMIZED, typename TFunctor>
 	inline static bool
 	TraverseAndCompareMatchingFlagsWithPosition(
 			VoxelVolume<TVoxel1, VoxelBlockHash>* volume1,
@@ -516,6 +542,47 @@ public:
 					return isVoxelBlockAlteredPredicate(voxel_block,
 					                             [&flags](TVoxel2& voxel) { return voxel.flags == flags; }, verbose,
 					                             message, block_spatial_position, hash_code);
+				},
+				verbose
+		);
+	}
+
+	template<typename TFunctor>
+	inline static bool
+	TraverseAndCompareMatchingFlagsWithPosition_Volume1SupersetVolume2(
+			VoxelVolume<TVoxel1, VoxelBlockHash>* volume1,
+			VoxelVolume<TVoxel2, VoxelBlockHash>* volume2,
+			VoxelFlags flags,
+			TFunctor& functor, bool verbose) {
+		return TraverseAndCompareAll_Generic(
+				volume1, volume2,
+				[&functor, &flags](TVoxel1* voxel_block1, TVoxel2* voxel_block2, const HashEntry& hash_entry1,
+				                   bool& mismatch_found) {
+					Traverse2BlocksWithPosition(
+							voxel_block1, voxel_block2, hash_entry1,
+							[&functor, &mismatch_found, &flags](TVoxel1& voxel1, TVoxel2& voxel2,
+							                                    const Vector3i& voxel_position) {
+								if ((voxel1.flags == flags || voxel2.flags == flags) &&
+								    (!functor(voxel1, voxel2, voxel_position) || voxel2.flags != voxel2.flags)) {
+									mismatch_found = true;
+								}
+							}
+					);
+				},
+				[&flags](TVoxel1* voxel_block, bool verbose = false,
+				         std::string message = "",
+				         Vector3s block_spatial_position = Vector3s((short) 0),
+				         int hash_code = 0) {
+					// ignore any blocks present in volume 1 that are absent in volume 2
+					return false;
+				},
+				[&flags](TVoxel2* voxel_block, bool verbose = false,
+				         std::string message = "",
+				         Vector3s block_spatial_position = Vector3s((short) 0),
+				         int hash_code = 0) {
+					return isVoxelBlockAlteredPredicate(voxel_block,
+					                                    [&flags](TVoxel2& voxel) { return voxel.flags == flags; }, verbose,
+					                                    message, block_spatial_position, hash_code);
 				},
 				verbose
 		);
@@ -572,7 +639,7 @@ public:
 			TVoxel1* voxel_block1 = &(voxels1[primaryHashEntry.ptr * (VOXEL_BLOCK_SIZE3)]);
 			TVoxel2* voxel_block2 = &(voxels2[hash_code2Entry.ptr * (VOXEL_BLOCK_SIZE3)]);
 
-			Vector6i localBounds = computeLocalBounds(hashEntryMinPoint, hashEntryMaxPoint, bounds);
+			Vector6i localBounds = ComputeLocalBounds(hashEntryMinPoint, hashEntryMaxPoint, bounds);
 
 			for (int z = localBounds.min_z; z < localBounds.max_z; z++) {
 				for (int y = localBounds.min_y; y < localBounds.max_y; y++) {

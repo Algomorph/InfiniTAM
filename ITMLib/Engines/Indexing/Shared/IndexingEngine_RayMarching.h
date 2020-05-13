@@ -50,9 +50,13 @@ TryToMarkBlockForAllocation(const Vector3s& block_position,
 			hash_table, colliding_block_positions, colliding_block_count);
 //_DEBUG allocation
 #ifndef __CUDACC__
-//	std::unordered_set<Vector3s> debug_locations = {Vector3s(0,6,38), Vector3s(1,6,38)};
-//	std::unordered_set<Vector3s> debug_locations = {Vector3s(3,-1,73), Vector3s(10,-4,31), Vector3s(-3,3,24)};
-	std::unordered_set<Vector3s> debug_locations = {Vector3s(10, -4, 31)};
+	std::unordered_set<Vector3s> debug_locations =
+	{
+//	Vector3s(0,6,38), Vector3s(1,6,38)
+//	Vector3s(3,-1,73), Vector3s(10,-4,31), Vector3s(-3,3,24)
+//		Vector3s(10, -4, 31)
+		Vector3s(-4, 3, 21)
+	};
 #endif
 
 	if (resulting_status == BEING_MODIFIED_BY_ANOTHER_THREAD) {
@@ -258,9 +262,9 @@ _CPU_AND_GPU_CODE_
 inline Vector4f ImageSpacePointToCameraSpace(const float depth, const int x, const int y,
                                              const Vector4f& inverted_camera_projection_parameters) {
 	return {depth *
-	        ((float(x) - inverted_camera_projection_parameters.fx) * inverted_camera_projection_parameters.cx),
+	        ((float(x) - inverted_camera_projection_parameters.cx) * inverted_camera_projection_parameters.fx),
 	        depth *
-	        ((float(y) - inverted_camera_projection_parameters.fy) * inverted_camera_projection_parameters.cy),
+	        ((float(y) - inverted_camera_projection_parameters.cy) * inverted_camera_projection_parameters.fy),
 	        depth, 1.0f};
 }
 
@@ -268,9 +272,9 @@ _CPU_AND_GPU_CODE_
 inline Vector4f ImageSpacePointToCameraSpace(const float depth, const float x, const float y,
                                              const Vector4f& inverted_camera_projection_parameters) {
 	return {depth *
-	        ((x - inverted_camera_projection_parameters.fx) * inverted_camera_projection_parameters.cx),
+	        ((x - inverted_camera_projection_parameters.cx) * inverted_camera_projection_parameters.fx),
 	        depth *
-	        ((y - inverted_camera_projection_parameters.fy) * inverted_camera_projection_parameters.cy),
+	        ((y - inverted_camera_projection_parameters.cy) * inverted_camera_projection_parameters.fy),
 	        depth, 1.0f};
 }
 

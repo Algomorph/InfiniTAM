@@ -205,35 +205,35 @@ Vector6i AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::FindMinimumNonTrunc
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 unsigned int
 AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::CountAllocatedHashBlocks(
-		VoxelVolume<TVoxel, TIndex>* volume) {
+		const VoxelVolume<TVoxel, TIndex>* volume) {
 	return HashOnlyAnalysisFunctor<TVoxel, TIndex, TMemoryDeviceType>::ComputeAllocatedHashBlockCount(volume);
 }
 
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 unsigned int
-AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::CountUtilizedHashBlocks(VoxelVolume<TVoxel, TIndex>* volume) {
+AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::CountUtilizedHashBlocks(const VoxelVolume<TVoxel, TIndex>* volume) {
 	return HashOnlyAnalysisFunctor<TVoxel, TIndex, TMemoryDeviceType>::ComputeUtilizedHashBlockCount(volume);
 }
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 std::vector<int>
 AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::GetAllocatedHashCodes(
-		VoxelVolume<TVoxel, TIndex>* volume) {
+		const VoxelVolume<TVoxel, TIndex>* volume) {
 	return HashOnlyAnalysisFunctor<TVoxel, TIndex, TMemoryDeviceType>::GetAllocatedHashCodes(volume);
 }
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 std::vector<Vector3s>
 AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::GetAllocatedHashBlockPositions(
-		VoxelVolume<TVoxel, TIndex>* volume) {
+		const VoxelVolume<TVoxel, TIndex>* volume) {
 	return HashOnlyAnalysisFunctor<TVoxel, TIndex, TMemoryDeviceType>::GetAllocatedBlockPositions(volume);
 }
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 std::vector<int>
 AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::GetUtilizedHashCodes(
-		VoxelVolume<TVoxel, TIndex>* volume) {
+		const VoxelVolume<TVoxel, TIndex>* volume) {
 	return HashOnlyAnalysisFunctor<TVoxel, TIndex, TMemoryDeviceType>::GetUtilizedHashCodes(volume);
 }
 
@@ -242,6 +242,13 @@ std::vector<Vector3s>
 AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::GetUtilizedHashBlockPositions(
 		const VoxelVolume<TVoxel, TIndex>* volume) {
 	return HashOnlyAnalysisFunctor<TVoxel, TIndex, TMemoryDeviceType>::GetUtilizedBlockPositions(volume);
+}
+
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+std::vector<Vector3s>
+AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::GetDifferenceBetweenAllocatedAndUtilizedHashBlockPositionSets(
+		const VoxelVolume<TVoxel, TIndex>* volume) {
+	return HashOnlyAnalysisFunctor<TVoxel, TIndex, TMemoryDeviceType>::GetDifferenceBetweenAllocatedAndUtilizedHashBlockPositionSets(volume);
 }
 
 

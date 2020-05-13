@@ -51,12 +51,13 @@ public:
 
 	virtual Extent3Di FindMinimumNonTruncatedBoundingBox(VoxelVolume <TVoxel, TIndex>* volume) = 0;
 
-	virtual unsigned int CountAllocatedHashBlocks(VoxelVolume<TVoxel, TIndex>* volume) = 0;
-	virtual unsigned int CountUtilizedHashBlocks(VoxelVolume<TVoxel, TIndex>* volume) = 0;
-	virtual std::vector<int> GetAllocatedHashCodes(VoxelVolume<TVoxel, TIndex>* volume) = 0;
-	virtual std::vector<Vector3s> GetAllocatedHashBlockPositions(VoxelVolume<TVoxel, TIndex>* volume) = 0;
-	virtual std::vector<int> GetUtilizedHashCodes(VoxelVolume <TVoxel, TIndex>* volume) = 0;
+	virtual unsigned int CountAllocatedHashBlocks(const VoxelVolume<TVoxel, TIndex>* volume) = 0;
+	virtual unsigned int CountUtilizedHashBlocks(const VoxelVolume<TVoxel, TIndex>* volume) = 0;
+	virtual std::vector<int> GetAllocatedHashCodes(const VoxelVolume<TVoxel, TIndex>* volume) = 0;
+	virtual std::vector<Vector3s> GetAllocatedHashBlockPositions(const VoxelVolume<TVoxel, TIndex>* volume) = 0;
+	virtual std::vector<int> GetUtilizedHashCodes(const VoxelVolume <TVoxel, TIndex>* volume) = 0;
 	virtual std::vector<Vector3s> GetUtilizedHashBlockPositions(const VoxelVolume <TVoxel, TIndex>* volume) = 0;
+	virtual std::vector<Vector3s> GetDifferenceBetweenAllocatedAndUtilizedHashBlockPositionSets(const VoxelVolume<TVoxel,TIndex>* volume) = 0;
 };
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>

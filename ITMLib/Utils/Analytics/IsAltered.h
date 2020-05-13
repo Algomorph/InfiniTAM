@@ -107,7 +107,9 @@ bool isAltered_VerbosePosition(TVoxel& voxel, Vector3i position, const char* mes
 	bool altered = IsAlteredUtility<TVoxel::hasSDFInformation, TVoxel::hasSemanticInformation, TVoxel::hasFramewiseWarp,
 			TVoxel::hasWarpUpdate, TVoxel>::evaluate(voxel);
 	if (altered) {
-		printf("%sVoxel altered at position %d, %d, %d.\n", message, position.x, position.y, position.z);
+		printf("%sVoxel altered at position %d, %d, %d [Block, if relevant: %d, %d, %d].\n",
+				message, position.x, position.y, position.z,
+				position.x / VOXEL_BLOCK_SIZE, position.y / VOXEL_BLOCK_SIZE, position.z / VOXEL_BLOCK_SIZE);
 	}
 
 	return altered;

@@ -44,6 +44,14 @@ bool contentAlmostEqual_CPU_Verbose(VoxelVolume<TVoxel, TIndexA>* a, VoxelVolume
 	::template TraverseAndCompareAllWithPosition(a, b, functor, true);
 }
 
+template<typename TVoxel, typename TIndexA, typename TIndexB, typename ToleranceType>
+bool contentAlmostEqual_AsupersetB_CPU_Verbose(VoxelVolume<TVoxel, TIndexA>* a, VoxelVolume<TVoxel, TIndexB>* b,
+                                    ToleranceType tolerance) {
+	VoxelEqualVerboseFunctor<TVoxel, ToleranceType> functor(tolerance);
+	return TwoVolumeTraversalEngine<TVoxel, TVoxel, TIndexA, TIndexB, MEMORYDEVICE_CPU>
+	::template TraverseAndCompareAllWithPosition_Volume1SupersetVolume2(a, b, functor, true);
+}
+
 
 // region ============================ COMPARISON OF VOXELS WITH SPECIFIC FLAGS WITHIN BOTH VOLUMES ====================
 
@@ -61,12 +69,21 @@ struct FlaggedVoxelComparisonUtility<true, TVoxel, TIndexA, TIndexB, ToleranceTy
 		::template TraverseAndCompareMatchingFlags(a, b, flags, functor, false);
 	}
 
+	template<ExecutionMode TExecutionMode = ExecutionMode::OPTIMIZED>
 	static
 	bool compare_Verbose(VoxelVolume<TVoxel, TIndexA>* a, VoxelVolume<TVoxel, TIndexB>* b, VoxelFlags flags,
 	                     ToleranceType tolerance) {
 		VoxelEqualVerboseFunctor<TVoxel, ToleranceType> functor(tolerance);
 		return TwoVolumeTraversalEngine<TVoxel, TVoxel, TIndexA, TIndexB, MEMORYDEVICE_CPU>
-		::template TraverseAndCompareMatchingFlagsWithPosition(a, b, flags, functor, true);
+		::template TraverseAndCompareMatchingFlagsWithPosition<TExecutionMode>(a, b, flags, functor, true);
+	}
+
+	static
+	bool compare_AsupersetB_Verbose(VoxelVolume<TVoxel, TIndexA>* a, VoxelVolume<TVoxel, TIndexB>* b, VoxelFlags flags,
+	                     ToleranceType tolerance) {
+		VoxelEqualVerboseFunctor<TVoxel, ToleranceType> functor(tolerance);
+		return TwoVolumeTraversalEngine<TVoxel, TVoxel, TIndexA, TIndexB, MEMORYDEVICE_CPU>
+		::template TraverseAndCompareMatchingFlagsWithPosition_Volume1SupersetVolume2(a, b, flags, functor, true);
 	}
 };
 
@@ -80,12 +97,20 @@ struct FlaggedVoxelComparisonUtility<false, TVoxel, TIndexA, TIndexB, ToleranceT
 		return contentAlmostEqual_CPU(a, b, tolerance);
 	}
 
+	template<ExecutionMode TExecutionMode = ExecutionMode::OPTIMIZED>
 	static
 	bool compare_Verbose(VoxelVolume<TVoxel, TIndexA>* a, VoxelVolume<TVoxel, TIndexB>* b, VoxelFlags flags,
 	                     ToleranceType tolerance) {
 		std::cout << "Warning: flagged voxel comparison called on volumes where the voxel type doesn't have flags. "
 		             " Defaulting to exact comparison for all voxels." << std::endl;
 		return contentAlmostEqual_CPU_Verbose(a, b, tolerance);
+	}
+
+	bool compare_AsupersetB_Verbose(VoxelVolume<TVoxel, TIndexA>* a, VoxelVolume<TVoxel, TIndexB>* b, VoxelFlags flags,
+	                                  ToleranceType tolerance){
+		std::cout << "Warning: flagged voxel comparison called on volumes where the voxel type doesn't have flags. "
+		             " Defaulting to exact comparison for voxels of volume b (assuming a should be a superset b)." << std::endl;
+		return contentAlmostEqual_AsupersetB_CPU_Verbose(a, b, tolerance);
 	}
 };
 
@@ -96,9 +121,24 @@ bool contentForFlagsAlmostEqual_CPU(VoxelVolume<TVoxel,TIndexA>* a, VoxelVolume<
 }
 
 template<typename TVoxel, typename TIndexA, typename TIndexB, typename ToleranceType>
-bool contentForFlagsAlmostEqual_CPU_Verbose(VoxelVolume<TVoxel,TIndexA>* a, VoxelVolume<TVoxel,TIndexB>* b, VoxelFlags flags, ToleranceType tolerance){
+bool contentForFlagsAlmostEqual_CPU_Verbose(VoxelVolume<TVoxel,TIndexA>* a, VoxelVolume<TVoxel,TIndexB>* b, VoxelFlags flags, ToleranceType tolerance, ExecutionMode execution_mode){
+	switch (execution_mode) {
+		case OPTIMIZED:
+			return FlaggedVoxelComparisonUtility<TVoxel::hasSemanticInformation, TVoxel, TIndexA, TIndexB, ToleranceType, MEMORYDEVICE_CPU>::
+			template compare_Verbose<OPTIMIZED>(a, b, flags, tolerance);
+		case DIAGNOSTIC:
+			return FlaggedVoxelComparisonUtility<TVoxel::hasSemanticInformation, TVoxel, TIndexA, TIndexB, ToleranceType, MEMORYDEVICE_CPU>::
+			template compare_Verbose<DIAGNOSTIC>(a, b, flags, tolerance);
+		default:
+			assert(false);
+			return false;
+	}
+}
+
+template<typename TVoxel, typename TIndexA, typename TIndexB, typename ToleranceType>
+bool contentForFlagsAlmostEqual_AsupersetB_CPU_Verbose(VoxelVolume<TVoxel,TIndexA>* a, VoxelVolume<TVoxel,TIndexB>* b, VoxelFlags flags, ToleranceType tolerance){
 	return FlaggedVoxelComparisonUtility<TVoxel::hasSemanticInformation, TVoxel, TIndexA, TIndexB, ToleranceType, MEMORYDEVICE_CPU>::
-	compare_Verbose(a, b, flags, tolerance);
+	compare_AsupersetB_Verbose(a, b, flags, tolerance);
 }
 
 // endregion ============================================================================================================

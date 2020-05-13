@@ -301,7 +301,7 @@ public:
 					Vector3i hash_entry_min = hash_entry.pos.toInt() * VOXEL_BLOCK_SIZE;
 					Vector3i hash_entry_max = hash_entry_min + Vector3i(VOXEL_BLOCK_SIZE);
 					if (!HashBlockDoesNotIntersectBounds(hash_entry_min, hash_entry_max, bounds)) {
-						Vector6i local_bounds = computeLocalBounds(hash_entry_min, hash_entry_max, bounds);
+						Vector6i local_bounds = ComputeLocalBounds(hash_entry_min, hash_entry_max, bounds);
 						TraverseBlockWithinBoundsWithFunctor(voxel_block, local_bounds, functor);
 					}
 				}
@@ -319,7 +319,7 @@ public:
 					Vector3i hash_entry_max = hash_entry_min + Vector3i(VOXEL_BLOCK_SIZE);
 					if (!HashBlockDoesNotIntersectBounds(hash_entry_min, hash_entry_max, bounds)) {
 						Vector3i block_position_voxels = hash_entry.pos.toInt() * VOXEL_BLOCK_SIZE;
-						Vector6i local_bounds = computeLocalBounds(hash_entry_min, hash_entry_max, bounds);
+						Vector6i local_bounds = ComputeLocalBounds(hash_entry_min, hash_entry_max, bounds);
 						TraverseBlockWithinBoundsWithPositionWithFunctor(voxel_block, block_position_voxels,
 						                                                 local_bounds, functor);
 					}
@@ -336,7 +336,7 @@ public:
 					Vector3i hash_entry_min = hash_entry.pos.toInt() * VOXEL_BLOCK_SIZE;
 					Vector3i hash_entry_max = hash_entry_min + Vector3i(VOXEL_BLOCK_SIZE);
 					if (!HashBlockDoesNotIntersectBounds(hash_entry_min, hash_entry_max, bounds)) {
-						Vector6i local_bounds = computeLocalBounds(hash_entry_min, hash_entry_max, bounds);
+						Vector6i local_bounds = ComputeLocalBounds(hash_entry_min, hash_entry_max, bounds);
 						functor.processHashEntry(hash_entry);
 						Vector3i block_position_voxels = hash_entry.pos.toInt() * VOXEL_BLOCK_SIZE;
 						TraverseBlockWithinBoundsWithPositionWithFunctor(voxel_block, block_position_voxels,

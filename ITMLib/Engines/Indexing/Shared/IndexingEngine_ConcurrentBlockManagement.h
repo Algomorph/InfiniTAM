@@ -173,6 +173,7 @@ inline void AllocateBlockBasedOnState_Generic(const HashEntryAllocationState& ha
                                               THandleOrderedAllocationFailure&& handle_ordered_allocation_failure,
                                               THandleExcessAllocationSuccess&& handle_excess_allocation_success) {
 	int voxel_block_index, excess_list_index;
+
 	switch (hash_entry_state) {
 		case ITMLib::NEEDS_ALLOCATION_IN_ORDERED_LIST: //needs allocation, fits in the ordered list
 			voxel_block_index = ATOMIC_SUB(last_free_voxel_block_id, 1);
@@ -195,8 +196,7 @@ inline void AllocateBlockBasedOnState_Generic(const HashEntryAllocationState& ha
 			voxel_block_index = ATOMIC_SUB(last_free_voxel_block_id, 1);
 			excess_list_index = ATOMIC_SUB(last_free_excess_list_id, 1);
 
-			if (voxel_block_index >= 0 &&
-			    excess_list_index >= 0) //there is room in the voxel block array and excess list
+			if (voxel_block_index >= 0 && excess_list_index >= 0) //there is room in the voxel block array and excess list
 			{
 				HashEntry hash_entry;
 				hash_entry.pos = block_coordinates[hash_code];
@@ -207,7 +207,7 @@ inline void AllocateBlockBasedOnState_Generic(const HashEntryAllocationState& ha
 				hash_table[hash_code].offset = excess_list_offset + 1;
 				const int new_entry_index = ORDERED_LIST_SIZE + excess_list_offset;
 				hash_table[new_entry_index] = hash_entry;
-				UpdateUtilizedHashCodes<TMemoryDeviceType>(utilized_block_hash_codes, utilized_block_count, hash_code);
+				UpdateUtilizedHashCodes<TMemoryDeviceType>(utilized_block_hash_codes, utilized_block_count, new_entry_index);
 				handle_excess_allocation_success(new_entry_index);
 			} else {
 				// Restore the previous values to avoid leaks.
@@ -217,8 +217,7 @@ inline void AllocateBlockBasedOnState_Generic(const HashEntryAllocationState& ha
 
 			break;
 		default:
-			//no other states should be used here.
-			assert(false);
+			// ignore any alternative states.
 			break;
 	}
 }

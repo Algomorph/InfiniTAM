@@ -16,6 +16,7 @@
 #pragma once
 #include "../../../Objects/Volume/VoxelVolume.h"
 #include "../../VoxelFlags.h"
+#include "../../ExecutionMode.h"
 
 namespace ITMLib{
 /**
@@ -39,10 +40,16 @@ template<typename TVoxel, typename TIndexA, typename TIndexB, typename Tolerance
 bool contentAlmostEqual_CPU_Verbose(VoxelVolume<TVoxel,TIndexA>* a, VoxelVolume<TVoxel,TIndexB>* b, ToleranceType tolerance);
 
 template<typename TVoxel, typename TIndexA, typename TIndexB, typename ToleranceType>
+bool contentAlmostEqual_AsupersetB_CPU_Verbose(VoxelVolume<TVoxel,TIndexA>* a, VoxelVolume<TVoxel,TIndexB>* b, ToleranceType tolerance);
+
+template<typename TVoxel, typename TIndexA, typename TIndexB, typename ToleranceType>
 bool contentForFlagsAlmostEqual_CPU(VoxelVolume<TVoxel,TIndexA>* a, VoxelVolume<TVoxel,TIndexB>* b, VoxelFlags flags, ToleranceType tolerance);
 
 template<typename TVoxel, typename TIndexA, typename TIndexB, typename ToleranceType>
-bool contentForFlagsAlmostEqual_CPU_Verbose(VoxelVolume<TVoxel,TIndexA>* a, VoxelVolume<TVoxel,TIndexB>* b, VoxelFlags flags, ToleranceType tolerance);
+bool contentForFlagsAlmostEqual_CPU_Verbose(VoxelVolume<TVoxel,TIndexA>* a, VoxelVolume<TVoxel,TIndexB>* b, VoxelFlags flags, ToleranceType tolerance, ExecutionMode execution_mode = ExecutionMode::OPTIMIZED);
+
+template<typename TVoxel, typename TIndexA, typename TIndexB, typename ToleranceType>
+bool contentForFlagsAlmostEqual_AsupersetB_CPU_Verbose(VoxelVolume<TVoxel,TIndexA>* a, VoxelVolume<TVoxel,TIndexB>* b, VoxelFlags flags, ToleranceType tolerance);
 
 /**
  * \brief Determine if every pair of corresponding voxels within the two voxel volumes is within the provided tolerance

@@ -273,11 +273,16 @@ public: // member functions
 
 	_DEVICE_WHEN_AVAILABLE_
 	void operator()(const float& depth_measure, int x, int y) {
+		//DEBUG alloc
+		if(x == 226 && y == 332){
+			int i = 10;
+		}
+
 		if (depth_measure <= 0 || (depth_measure - surface_distance_cutoff) < 0 ||
 		    (depth_measure - surface_distance_cutoff) < near_clipping_distance ||
 		    (depth_measure + surface_distance_cutoff) > far_clipping_distance)
 			return;
-		//DEBUG alloc
+
 
 		// segment from start of the (truncated SDF) band, through the observed point, and to the opposite (occluded)
 		// end of the (truncated SDF) band (increased by backBandFactor), along the ray cast from the camera through the
@@ -330,9 +335,9 @@ public:
 		bool has_surface1 = false, has_surface2 = false;
 
 		//_DEBUG alloc
-//		if(x == 337 && y == 224){
-//			int i = 10;
-//		}
+		if(x == 226 && y == 332){
+			int i = 10;
+		}
 		if (!(surface1_depth <= 0 || (surface1_depth - surface_distance_cutoff) < 0 ||
 		      (surface1_depth - surface_distance_cutoff) < near_clipping_distance ||
 		      (surface1_depth + surface_distance_cutoff) > far_clipping_distance))

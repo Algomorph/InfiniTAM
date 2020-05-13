@@ -114,8 +114,8 @@ Configuration& get() {
 }
 
 template<>
-typename VoxelBlockHash::InitializationParameters for_volume_role<VoxelBlockHash>(VolumeRole role){
-	switch(role){
+typename VoxelBlockHash::InitializationParameters for_volume_role<VoxelBlockHash>(VolumeRole role) {
+	switch (role) {
 		default:
 		case VOLUME_CANONICAL:
 			return instance.specific_volume_parameters.hash.canonical;
@@ -125,9 +125,10 @@ typename VoxelBlockHash::InitializationParameters for_volume_role<VoxelBlockHash
 			return instance.specific_volume_parameters.hash.warp;
 	}
 }
+
 template<>
-typename PlainVoxelArray::InitializationParameters for_volume_role<PlainVoxelArray>(VolumeRole role){
-	switch(role){
+typename PlainVoxelArray::InitializationParameters for_volume_role<PlainVoxelArray>(VolumeRole role) {
+	switch (role) {
 		default:
 		case VOLUME_CANONICAL:
 			return instance.specific_volume_parameters.array.canonical;
@@ -155,22 +156,28 @@ void load_configuration_from_json_file(const std::string& path) {
 }
 
 template<typename TDeferrableSerializableStruct>
-static inline void AddDeferrableToInstanceTree(pt::ptree& main_configuration_tree){
-	pt::ptree deferrable_subtree =
-			instance.source_tree.empty() ? TDeferrableSerializableStruct().ToPTree(instance.origin) : instance.source_tree.get_child(TDeferrableSerializableStruct::default_parse_path);
-	main_configuration_tree.add_child(TDeferrableSerializableStruct::default_parse_path, deferrable_subtree);
+static inline void AddDeferrableToTargetTree(pt::ptree& target_tree, const pt::ptree& source_tree, std::string origin = "") {
+	pt::ptree deferrable_subtree;
+	if (source_tree.empty() ||
+			source_tree.find(TDeferrableSerializableStruct::default_parse_path) ==
+					source_tree.not_found()) {
+		deferrable_subtree = TDeferrableSerializableStruct().ToPTree(origin);
+	} else {
+		deferrable_subtree = source_tree.get_child(TDeferrableSerializableStruct::default_parse_path);
+	}
+	target_tree.add_child(TDeferrableSerializableStruct::default_parse_path, deferrable_subtree);
 }
 
 void save_configuration_to_json_file(const std::string& path) {
-	pt::ptree main_configuration_tree = instance.ToPTree(path);
-	AddDeferrableToInstanceTree<TelemetrySettings>(main_configuration_tree);
-	pt::write_json_no_quotes(path, main_configuration_tree, true);
+	pt::ptree target_tree = instance.ToPTree(path);
+	AddDeferrableToTargetTree<TelemetrySettings>(target_tree, instance.source_tree, instance.origin);
+	pt::write_json_no_quotes(path, target_tree, true);
 }
 
 void save_configuration_to_json_file(const std::string& path, const Configuration& configuration) {
-	pt::ptree main_configuration_tree = configuration.ToPTree(path);
-	AddDeferrableToInstanceTree<TelemetrySettings>(main_configuration_tree);
-	pt::write_json_no_quotes(path, main_configuration_tree, true);
+	pt::ptree target_tree = configuration.ToPTree(path);
+	AddDeferrableToTargetTree<TelemetrySettings>(target_tree, configuration.source_tree, configuration.origin);
+	pt::write_json_no_quotes(path, target_tree, true);
 }
 // endregion ===========================================================================================================
 } // namespace ITMLib::configuration

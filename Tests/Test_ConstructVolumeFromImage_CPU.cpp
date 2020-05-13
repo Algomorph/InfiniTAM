@@ -86,8 +86,8 @@ BOOST_AUTO_TEST_CASE(Test_SceneConstruct16_PVA_VBH_Near_CPU) {
 
 	float absoluteTolerance = 1e-7;
 	BOOST_REQUIRE(allocatedContentAlmostEqual_CPU(volume_PVA_16, volume_VBH_16, absoluteTolerance));
-	BOOST_REQUIRE(contentForFlagsAlmostEqual_CPU(volume_PVA_16, volume_VBH_16, VoxelFlags::VOXEL_NONTRUNCATED,
-	                                             absoluteTolerance));
+	BOOST_REQUIRE(contentForFlagsAlmostEqual_CPU_Verbose(volume_PVA_16, volume_VBH_16, VoxelFlags::VOXEL_NONTRUNCATED,
+	                                                     absoluteTolerance));
 
 	delete volume_VBH_16;
 	delete volume_PVA_16;
@@ -176,8 +176,8 @@ BOOST_AUTO_TEST_CASE(Test_SceneConstruct17_VBH_CPU_NearVsSpan) {
 	volume_VBH_17_Near.Reset();
 
 	// *** allocate hash blocks ***
-	indexer.AllocateNearAndBetweenTwoSurfaces(&volume_VBH_17_Span, view_17, &tracking_state);
 	indexer.AllocateNearSurface(&volume_VBH_17_Near, view_17);
+	indexer.AllocateNearAndBetweenTwoSurfaces(&volume_VBH_17_Span, view_17, &tracking_state);
 
 	// *** integrate depth ***
 	depth_fusion_engine_VBH->IntegrateDepthImageIntoTsdfVolume(&volume_VBH_17_Span, view_17);
@@ -187,12 +187,15 @@ BOOST_AUTO_TEST_CASE(Test_SceneConstruct17_VBH_CPU_NearVsSpan) {
 			Analytics_CPU_VBH_Voxel::Instance().CountNonTruncatedVoxels(&volume_VBH_17_Span);
 	int near_nontruncated_voxel_count =
 			Analytics_CPU_VBH_Voxel::Instance().CountNonTruncatedVoxels(&volume_VBH_17_Near);
-	BOOST_REQUIRE_EQUAL(span_nontruncated_voxel_count, near_nontruncated_voxel_count);
+
+	BOOST_REQUIRE_GE(span_nontruncated_voxel_count, near_nontruncated_voxel_count);
 
 	float absolute_tolerance = 1e-7;
 	BOOST_REQUIRE(
-			contentForFlagsAlmostEqual_CPU(&volume_VBH_17_Span, &volume_VBH_17_Near, VoxelFlags::VOXEL_NONTRUNCATED,
-			                               absolute_tolerance));
+			contentForFlagsAlmostEqual_AsupersetB_CPU_Verbose(&volume_VBH_17_Span, &volume_VBH_17_Near,
+			                                                  VoxelFlags::VOXEL_NONTRUNCATED,
+			                                                  absolute_tolerance));
+
 
 	delete view_17;
 	delete depth_fusion_engine_VBH;
@@ -234,16 +237,27 @@ BOOST_AUTO_TEST_CASE(Test_SceneConstruct17_PVA_VBH_Span_CPU) {
 	depth_fusion_engine_VBH->IntegrateDepthImageIntoTsdfVolume(&volume_VBH_17_Span, view_17);
 	depth_fusion_engine_PVA->IntegrateDepthImageIntoTsdfVolume(&volume_PVA_17, view_17);
 
-	int span_nontruncated_voxel_count =
+	std::vector<Vector3s> difference_set = Analytics_CPU_VBH_Voxel::Instance()
+			.GetDifferenceBetweenAllocatedAndUtilizedHashBlockPositionSets(&volume_VBH_17_Span);
+
+//	std::cout << difference_set << std::endl;
+//	int hash_code;
+//	indexer_VBH.FindHashEntry(volume_VBH_17_Span.index, difference_set[0], hash_code);
+//	std::cout << hash_code << std::endl;
+
+	BOOST_REQUIRE(difference_set.empty());
+
+	int vbh_span_nontruncated_voxel_count =
 			Analytics_CPU_VBH_Voxel::Instance().CountNonTruncatedVoxels(&volume_VBH_17_Span);
-	int near_nontruncated_voxel_count =
+	int pva_nontruncated_voxel_count =
 			Analytics_CPU_PVA_Voxel::Instance().CountNonTruncatedVoxels(&volume_PVA_17);
-	BOOST_REQUIRE_EQUAL(span_nontruncated_voxel_count, near_nontruncated_voxel_count);
+	BOOST_REQUIRE_EQUAL(vbh_span_nontruncated_voxel_count, pva_nontruncated_voxel_count);
 
 	float absolute_tolerance = 1e-7;
 	BOOST_REQUIRE(allocatedContentAlmostEqual_CPU(&volume_PVA_17, &volume_VBH_17_Span, absolute_tolerance));
-	BOOST_REQUIRE(contentForFlagsAlmostEqual_CPU(&volume_PVA_17, &volume_VBH_17_Span, VoxelFlags::VOXEL_NONTRUNCATED,
-	                                             absolute_tolerance));
+	BOOST_REQUIRE(
+			contentForFlagsAlmostEqual_CPU_Verbose(&volume_PVA_17, &volume_VBH_17_Span, VoxelFlags::VOXEL_NONTRUNCATED,
+			                                       absolute_tolerance, OPTIMIZED));
 }
 
 

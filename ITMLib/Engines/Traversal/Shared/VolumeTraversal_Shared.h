@@ -19,29 +19,30 @@
 #include "../../../Objects/Volume/PlainVoxelArray.h"
 #include "../../../Objects/Volume/RepresentationAccess.h"
 
+namespace ITMLib{
 
 // region ======================================= AUXILIARY FUNCTIONS (VOXEL HASH BLOCKS) ==============================
 _CPU_AND_GPU_CODE_
-inline bool HashBlockDoesNotIntersectBounds(const Vector3i& hashEntryMinPoint, const Vector3i& hashEntryMaxPoint,
+inline bool HashBlockDoesNotIntersectBounds(const Vector3i& hash_entry_min_point, const Vector3i& hash_entry_max_point,
                                             const Vector6i& bounds) {
-	return hashEntryMaxPoint.x < bounds.min_x ||
-	       hashEntryMaxPoint.y < bounds.min_y ||
-	       hashEntryMaxPoint.z < bounds.min_z ||
-	       hashEntryMinPoint.x >= bounds.max_x ||
-	       hashEntryMinPoint.y >= bounds.max_y ||
-	       hashEntryMinPoint.z >= bounds.max_z;
+	return hash_entry_max_point.x < bounds.min_x ||
+	       hash_entry_max_point.y < bounds.min_y ||
+	       hash_entry_max_point.z < bounds.min_z ||
+	       hash_entry_min_point.x >= bounds.max_x ||
+	       hash_entry_min_point.y >= bounds.max_y ||
+	       hash_entry_min_point.z >= bounds.max_z;
 }
 
 _CPU_AND_GPU_CODE_
 inline
-Vector6i computeLocalBounds(const Vector3i& hashEntryMinPoint, const Vector3i& hashEntryMaxPoint,
+Vector6i ComputeLocalBounds(const Vector3i& hash_entry_min_point, const Vector3i& hash_entry_max_point,
                             const Vector6i& bounds) {
-	return Vector6i(ORUTILS_MAX(0, bounds.min_x - hashEntryMinPoint.x),
-	                ORUTILS_MAX(0, bounds.min_y - hashEntryMinPoint.y),
-	                ORUTILS_MAX(0, bounds.min_z - hashEntryMinPoint.z),
-	                ORUTILS_MIN(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE - (hashEntryMaxPoint.x - bounds.max_x)),
-	                ORUTILS_MIN(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE - (hashEntryMaxPoint.y - bounds.max_y)),
-	                ORUTILS_MIN(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE - (hashEntryMaxPoint.z - bounds.max_z)));
+	return Vector6i(ORUTILS_MAX(0, bounds.min_x - hash_entry_min_point.x),
+	                ORUTILS_MAX(0, bounds.min_y - hash_entry_min_point.y),
+	                ORUTILS_MAX(0, bounds.min_z - hash_entry_min_point.z),
+	                ORUTILS_MIN(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE - (hash_entry_max_point.x - bounds.max_x)),
+	                ORUTILS_MIN(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE - (hash_entry_max_point.y - bounds.max_y)),
+	                ORUTILS_MIN(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE - (hash_entry_max_point.z - bounds.max_z)));
 }
 
 
@@ -62,13 +63,15 @@ struct ITMFlipArgumentBooleanFunctor {
 
 template<typename TVoxel, typename TPredicateFunctor>
 inline static bool
-voxelBlockSatisfiesPredicate(TVoxel* voxelBlock,
-                             TPredicateFunctor& oneVoxelPredicateFunctor) {
-	for (int locId = 0; locId < VOXEL_BLOCK_SIZE3; locId++) {
-		TVoxel& voxel = voxelBlock[locId];
-		if (!oneVoxelPredicateFunctor(voxel)) {
+VoxelBlockSatisfiesPredicate(TVoxel* block_voxels,
+                             TPredicateFunctor& one_voxel_predicate_functor) {
+	for (int linear_index_in_block = 0; linear_index_in_block < VOXEL_BLOCK_SIZE3; linear_index_in_block++) {
+		TVoxel& voxel = block_voxels[linear_index_in_block];
+		if (!one_voxel_predicate_functor(voxel)) {
 			return false;
 		}
 	}
 	return true;
 }
+
+} // namespace ITMLib

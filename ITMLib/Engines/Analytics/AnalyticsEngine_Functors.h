@@ -24,20 +24,19 @@
 #include "../Traversal/CUDA/VolumeTraversal_CUDA_PlainVoxelArray.h"
 #include "../Traversal/CUDA/VolumeTraversal_CUDA_VoxelBlockHash.h"
 #endif
-
-#include "../Traversal/Interface/HashTableTraversal.h"
-#include "../Reduction/Interface/VolumeReduction.h"
+#include "../Common/WarpAccessFunctors.h"
 #include "../../../ORUtils/PlatformIndependentAtomics.h"
 #include "../../../ORUtils/PlatformIndependence.h"
-#include "../../Utils/Configuration/Configuration.h"
 #include "../../Objects/Volume/VoxelVolume.h"
+#include "../Reduction/Interface/VolumeReduction.h"
+#include "../Traversal/Interface/HashTableTraversal.h"
 #include "../Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
 #include "../Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
 #include "../../Utils/WarpType.h"
 #include "../../Utils/Analytics/Statistics.h"
 #include "../../Utils/MemoryBlock_StdContainer_Convertions.h"
-#include "../Common/WarpAccessFunctors.h"
-
+#include "../../Utils/Configuration/Configuration.h"
+#include "../../Utils/Collections/OperationsOnSTLContainers.h"
 
 using namespace ITMLib;
 
@@ -370,7 +369,7 @@ struct CountVoxelsWithSpecificValueFunctor<true, TVoxel, TIndex, TMemoryDeviceTy
 
 template<class TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 struct CountVoxelsWithSpecificValueFunctor<false, TVoxel, TIndex, TMemoryDeviceType> {
-	static int compute(VoxelVolume<TVoxel, TIndex>* scene, float value) {
+	static int compute(VoxelVolume<TVoxel, TIndex>* volume, float value) {
 		DIEWITHEXCEPTION(
 				"Voxel volume issued to count voxels with specific SDF value appears to have no sdf information. "
 				"Voxels in volume need to have sdf information for this operation to work.");
@@ -393,9 +392,9 @@ struct CountVoxelsWithSpecificFlagsFunctor<true, TVoxel, TIndex, TMemoryDeviceTy
 		CLEAN_UP_ATOMIC(count);
 	}
 
-	static int compute(VoxelVolume<TVoxel, TIndex>* scene, VoxelFlags flags) {
+	static int compute(VoxelVolume<TVoxel, TIndex>* volume, VoxelFlags flags) {
 		CountVoxelsWithSpecificFlagsFunctor instance(flags);
-		VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseUtilized(scene, instance);
+		VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseUtilized(volume, instance);
 		return GET_ATOMIC_VALUE_CPU(instance.count);
 	}
 
@@ -457,7 +456,7 @@ struct SumSDFFunctor;
 template<class TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 struct SumSDFFunctor<false, TVoxel, TIndex, TMemoryDeviceType> {
 
-	static double compute(VoxelVolume<TVoxel, TIndex>* scene, ITMLib::VoxelFlags voxelType) {
+	static double compute(VoxelVolume<TVoxel, TIndex>* volume, ITMLib::VoxelFlags voxel_flags) {
 		DIEWITHEXCEPTION_REPORTLOCATION(
 				"Voxels need to have semantic information to be marked as truncated or non-truncated.");
 		return 0.0;
@@ -465,7 +464,7 @@ struct SumSDFFunctor<false, TVoxel, TIndex, TMemoryDeviceType> {
 };
 template<class TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 struct SumSDFFunctor<true, TVoxel, TIndex, TMemoryDeviceType> {
-	explicit SumSDFFunctor(ITMLib::VoxelFlags voxelType) : voxelType(voxelType) {
+	explicit SumSDFFunctor(ITMLib::VoxelFlags voxel_flags) : voxel_flags(voxel_flags) {
 		INITIALIZE_ATOMIC(double, sum, 0.0);
 	}
 
@@ -473,18 +472,18 @@ struct SumSDFFunctor<true, TVoxel, TIndex, TMemoryDeviceType> {
 		CLEAN_UP_ATOMIC(sum);
 	}
 
-	static double compute(VoxelVolume<TVoxel, TIndex>* scene, ITMLib::VoxelFlags voxelType) {
-		SumSDFFunctor instance(voxelType);
-		VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseUtilized(scene, instance);
+	static double compute(VoxelVolume<TVoxel, TIndex>* volume, ITMLib::VoxelFlags voxel_flags) {
+		SumSDFFunctor instance(voxel_flags);
+		VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseUtilized(volume, instance);
 		return GET_ATOMIC_VALUE_CPU(instance.sum);
 	}
 
 	DECLARE_ATOMIC(double, sum);
-	ITMLib::VoxelFlags voxelType;
+	ITMLib::VoxelFlags voxel_flags;
 
 	_DEVICE_WHEN_AVAILABLE_
 	void operator()(TVoxel& voxel) {
-		if (voxelType == (ITMLib::VoxelFlags) voxel.flags) {
+		if (voxel_flags == (ITMLib::VoxelFlags) voxel.flags) {
 			ATOMIC_ADD(sum, std::abs(static_cast<double>(TVoxel::valueToFloat(voxel.sdf))));
 		}
 	}
@@ -499,7 +498,7 @@ struct FlagMatchBBoxFunctor;
 template<class TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 struct FlagMatchBBoxFunctor<false, TVoxel, TIndex, TMemoryDeviceType> {
 
-	static Extent3Di compute(VoxelVolume<TVoxel, TIndex>* scene, ITMLib::VoxelFlags voxelType) {
+	static Extent3Di compute(VoxelVolume<TVoxel, TIndex>* scene, ITMLib::VoxelFlags voxel_flags) {
 		DIEWITHEXCEPTION_REPORTLOCATION(
 				"Voxels need to have semantic information to be marked as truncated or non-truncated.");
 		return {};
@@ -507,7 +506,7 @@ struct FlagMatchBBoxFunctor<false, TVoxel, TIndex, TMemoryDeviceType> {
 };
 template<class TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 struct FlagMatchBBoxFunctor<true, TVoxel, TIndex, TMemoryDeviceType> {
-	explicit FlagMatchBBoxFunctor(ITMLib::VoxelFlags voxelType) : voxelType(voxelType) {
+	explicit FlagMatchBBoxFunctor(ITMLib::VoxelFlags voxel_flags) : voxel_flags(voxel_flags) {
 		INITIALIZE_ATOMIC(int, min_x, INT_MAX);
 		INITIALIZE_ATOMIC(int, min_y, INT_MAX);
 		INITIALIZE_ATOMIC(int, min_z, INT_MAX);
@@ -528,8 +527,8 @@ struct FlagMatchBBoxFunctor<true, TVoxel, TIndex, TMemoryDeviceType> {
 	}
 
 
-	static Extent3Di compute(VoxelVolume<TVoxel, TIndex>* scene, ITMLib::VoxelFlags voxelType) {
-		FlagMatchBBoxFunctor instance(voxelType);
+	static Extent3Di compute(VoxelVolume<TVoxel, TIndex>* scene, ITMLib::VoxelFlags voxel_flags) {
+		FlagMatchBBoxFunctor instance(voxel_flags);
 		VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseUtilizedWithPosition(scene, instance);
 		return {GET_ATOMIC_VALUE_CPU(instance.min_x),
 		        GET_ATOMIC_VALUE_CPU(instance.min_y),
@@ -545,11 +544,11 @@ struct FlagMatchBBoxFunctor<true, TVoxel, TIndex, TMemoryDeviceType> {
 	DECLARE_ATOMIC(int, max_x);
 	DECLARE_ATOMIC(int, max_y);
 	DECLARE_ATOMIC(int, max_z);
-	ITMLib::VoxelFlags voxelType;
+	ITMLib::VoxelFlags voxel_flags;
 
 	_DEVICE_WHEN_AVAILABLE_
 	void operator()(TVoxel& voxel, Vector3i voxelPosition) {
-		if (voxelType == (ITMLib::VoxelFlags) voxel.flags) {
+		if (voxel_flags == (ITMLib::VoxelFlags) voxel.flags) {
 			ATOMIC_MIN(min_x, voxelPosition.x);
 			ATOMIC_MIN(min_y, voxelPosition.y);
 			ATOMIC_MIN(min_z, voxelPosition.z);
@@ -573,7 +572,7 @@ struct AllocatedHashBlockCountFunctor {
 	}
 
 	_DEVICE_WHEN_AVAILABLE_
-	void operator()(HashEntry& entry, int hash_code) {
+	void operator()(const HashEntry& entry, const int hash_code) {
 		if (entry.ptr >= 0) {
 			ATOMIC_ADD(allocated_hash_block_count, 1u);
 		}
@@ -602,7 +601,7 @@ struct AllocatedHashesAggregationFunctor {
 
 
 	_DEVICE_WHEN_AVAILABLE_
-	void operator()(HashEntry& entry, int hash_code) {
+	void operator()(const HashEntry& entry, const int hash_code) {
 		if (entry.ptr >= 0) {
 			unsigned int index = ATOMIC_ADD(current_fill_index, 1u);
 			hash_codes_device[index] = hash_code;
@@ -635,7 +634,7 @@ struct BlockPositionAggregationFunctor {
 
 
 	_DEVICE_WHEN_AVAILABLE_
-	void operator()(const HashEntry& entry, int hash_code) {
+	void operator()(const HashEntry& entry, const int hash_code) {
 		if (entry.ptr >= 0) {
 			unsigned int index = ATOMIC_ADD(current_fill_index, 1u);
 			block_positions_device[index] = entry.pos;
@@ -654,16 +653,16 @@ private:
 
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
 struct HashOnlyAnalysisFunctor<TVoxel, PlainVoxelArray, TMemoryDeviceType> {
-	static std::vector<int> GetAllocatedHashCodes(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
+	static std::vector<int> GetAllocatedHashCodes(const VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
 		return std::vector<int>();
 	}
 
-	static std::vector<int> GetUtilizedHashCodes(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
+	static std::vector<int> GetUtilizedHashCodes(const VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
 		return std::vector<int>();
 	}
 
 
-	static std::vector<Vector3s> GetAllocatedBlockPositions(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
+	static std::vector<Vector3s> GetAllocatedBlockPositions(const VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
 		std::vector<Vector3s> pos_vector = {TO_SHORT3(volume->index.GetVolumeOffset())};
 		return pos_vector;
 	}
@@ -673,24 +672,28 @@ struct HashOnlyAnalysisFunctor<TVoxel, PlainVoxelArray, TMemoryDeviceType> {
 		return pos_vector;
 	}
 
-	static int ComputeAllocatedHashBlockCount(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
+	static std::vector<Vector3s> GetDifferenceBetweenAllocatedAndUtilizedHashBlockPositionSets(const VoxelVolume<TVoxel, PlainVoxelArray>* volume){
+		return std::vector<Vector3s>();
+	}
+
+	static int ComputeAllocatedHashBlockCount(const VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
 		return 1;
 	}
 
-	static int ComputeUtilizedHashBlockCount(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
+	static int ComputeUtilizedHashBlockCount(const VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
 		return 1;
 	}
 };
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
 struct HashOnlyAnalysisFunctor<TVoxel, VoxelBlockHash, TMemoryDeviceType> {
-	static std::vector<int> GetAllocatedHashCodes(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
+	static std::vector<int> GetAllocatedHashCodes(const VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 		unsigned int allocated_count = ComputeAllocatedHashBlockCount(volume);
 		AllocatedHashesAggregationFunctor<TMemoryDeviceType> aggregator_functor(allocated_count);
 		HashTableTraversalEngine<TMemoryDeviceType>::TraverseAllWithHashCode(volume->index, aggregator_functor);
 		return aggregator_functor.data();
 	}
 
-	static std::vector<Vector3s> GetAllocatedBlockPositions(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
+	static std::vector<Vector3s> GetAllocatedBlockPositions(const VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 		unsigned int allocated_count = ComputeAllocatedHashBlockCount(volume);
 		if(allocated_count == 0u){
 			return std::vector<Vector3s>();
@@ -700,7 +703,7 @@ struct HashOnlyAnalysisFunctor<TVoxel, VoxelBlockHash, TMemoryDeviceType> {
 		return aggregator_functor.data();
 	}
 
-	static std::vector<int> GetUtilizedHashCodes(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
+	static std::vector<int> GetUtilizedHashCodes(const VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 		const int* codes = volume->index.GetUtilizedBlockHashCodes();
 		return raw_block_to_std_vector(codes, TMemoryDeviceType, volume->index.GetUtilizedBlockCount());
 	}
@@ -715,13 +718,23 @@ struct HashOnlyAnalysisFunctor<TVoxel, VoxelBlockHash, TMemoryDeviceType> {
 		return aggregator_functor.data();
 	}
 
-	static unsigned int ComputeAllocatedHashBlockCount(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
+	static std::vector<Vector3s> GetDifferenceBetweenAllocatedAndUtilizedHashBlockPositionSets(const VoxelVolume<TVoxel, VoxelBlockHash>* volume){
+		std::vector<Vector3s> allocated_positions = GetAllocatedBlockPositions(volume);
+		std::unordered_set<Vector3s> allocated_positions_set(allocated_positions.begin(), allocated_positions.end());
+		std::vector<Vector3s> utilized_positions = GetUtilizedBlockPositions(volume);
+		std::unordered_set<Vector3s> utilized_positions_set(utilized_positions.begin(), utilized_positions.end());
+		std::unordered_set<Vector3s> difference_set = allocated_positions_set - utilized_positions_set;
+		std::vector<Vector3s> difference_vector(difference_set.begin(), difference_set.end());
+		return difference_vector;
+	}
+
+	static unsigned int ComputeAllocatedHashBlockCount(const VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 		AllocatedHashBlockCountFunctor<TMemoryDeviceType> count_functor;
 		HashTableTraversalEngine<TMemoryDeviceType>::TraverseAllWithHashCode(volume->index, count_functor);
 		return count_functor.get_count();
 	}
 
-	static unsigned int ComputeUtilizedHashBlockCount(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
+	static unsigned int ComputeUtilizedHashBlockCount(const VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 		return volume->index.GetUtilizedBlockCount();
 	}
 };
