@@ -343,7 +343,6 @@ public: // member functions
 
 protected: // member functions
 
-
 	_DEVICE_WHEN_AVAILABLE_
 	inline bool
 	ComputeMarchSegment(ITMLib::Segment& march_segment, Vector4f& surface1_point,
@@ -359,7 +358,7 @@ protected: // member functions
 
 		if (has_surface1 && has_surface2) {
 			surface1_point = ImageSpacePointToCameraSpace(surface1_depth, x, y,
-			                                                       this->inverted_projection_parameters);
+			                                              this->inverted_projection_parameters);
 			march_segment = FindHashBlockSegmentAlongCameraRayWithinRangeFromAndBetweenTwoPoints(
 					this->surface_distance_cutoff, surface1_point, surface2_point, this->inverted_camera_pose,
 					this->hash_block_size_reciprocal);
@@ -406,8 +405,39 @@ public:
 //		}
 
 		ITMLib::Segment march_segment;
-		if (!this->ComputeMarchSegment(march_segment, surface1_depth, surface2_point, x, y));
+		if (!this->ComputeMarchSegment(march_segment, surface1_depth, surface2_point, x, y)) {
+			return;
+		}
 
+		MarkVoxelHashBlocksAlongSegment(this->hash_entry_allocation_states, this->hash_block_coordinates,
+		                                *this->unresolvable_collision_encountered_device, this->hash_table,
+		                                march_segment,
+		                                this->colliding_block_positions_device, this->colliding_block_count);
+	}
+
+	using DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::colliding_block_positions;
+};
+
+template<MemoryDeviceType TMemoryDeviceType>
+struct TwoSurfaceBasedAllocationStateMarkerFunctor<TMemoryDeviceType, DIAGNOSTIC>
+		: public TwoSurfaceBasedAllocationStateMarkerFunctor_Base<TMemoryDeviceType> {
+public:
+	TwoSurfaceBasedAllocationStateMarkerFunctor(VoxelBlockHash& index,
+	                                            const VoxelVolumeParameters& volume_parameters,
+	                                            const ITMLib::View* view,
+	                                            const CameraTrackingState* tracking_state,
+	                                            float surface_distance_cutoff) :
+			TwoSurfaceBasedAllocationStateMarkerFunctor_Base<TMemoryDeviceType>(index, volume_parameters, view,
+			                                                                    tracking_state->pose_d->GetM(),
+			                                                                    surface_distance_cutoff) {}
+
+	_DEVICE_WHEN_AVAILABLE_
+	void operator()(const float& surface1_depth, const Vector4f& surface2_point, const int x, const int y) {
+		ITMLib::Segment march_segment;
+		Vector4i surface1_point;
+		if (!this->ComputeMarchSegment(march_segment, surface1_point, surface1_depth, surface2_point, x, y)) {
+			return;
+		}
 		MarkVoxelHashBlocksAlongSegment(this->hash_entry_allocation_states, this->hash_block_coordinates,
 		                                *this->unresolvable_collision_encountered_device, this->hash_table,
 		                                march_segment,

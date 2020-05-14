@@ -15,9 +15,11 @@
 //  ================================================================
 #pragma once
 
+//local
 #include "../Common/Configurable.h"
 #include "../../Objects/Volume/VoxelVolume.h"
 #include "../../Utils/Configuration/TelemetrySettings.h"
+#include "../../../ORUtils/PlatformIndependentAtomics.h
 
 namespace ITMLib {
 
@@ -40,6 +42,13 @@ class TelemetryRecorder : public TelemetryRecorderInterface<TVoxel, TWarp, TInde
 private: // member variables
 	ORUtils::OStreamWrapper canonical_volume_memory_usage_file;
 	ORUtils::OStreamWrapper camera_trajectory_file;
+
+	// ** indexing engine diagnostics **
+	ITMFloat3Image surface1_point_cloud;
+	ITMFloat3Image surface2_point_cloud;
+	ITMFloat3Image march_endpoint1_point_cloud;
+	ITMFloat3Image march_endpoint2_point_cloud;
+
 protected: // member variables
 	using TelemetryRecorderInterface<TVoxel,TWarp,TIndex>::parameters;
 public: // member functions
@@ -49,6 +58,8 @@ public: // member functions
 		static TelemetryRecorder instance;
 		return instance;
 	}
+
+
 
 	TelemetryRecorder();
 	void RecordPreSurfaceTrackingData(const VoxelVolume <TVoxel, TIndex>& raw_live_volume, const Matrix4f camera_matrix, int frame_index) override;
