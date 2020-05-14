@@ -78,16 +78,16 @@ bool
 EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::SetVoxel(VoxelVolume<TVoxel, VoxelBlockHash>* volume,
                                                         Vector3i at, TVoxel voxel) {
 
-	HashEntry* hashTable = volume->index.GetEntries();
+	HashEntry* hash_table = volume->index.GetEntries();
 	TVoxel* voxels = volume->GetVoxels();
-	int hashCode = -1;
-	Vector3s blockPos;
-	int voxelIndexInBlock = pointToVoxelBlockPos(at, blockPos);
+	int hash_code = -1;
+	Vector3s block_position;
+	int linear_index_in_block = pointToVoxelBlockPos(at, block_position);
 	if (IndexingEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance()
-			.AllocateHashBlockAt(volume, blockPos, hashCode)) {
-		HashEntry& entry = hashTable[hashCode];
-		TVoxel* localVoxelBlock = &(voxels[entry.ptr * (VOXEL_BLOCK_SIZE3)]);
-		localVoxelBlock[voxelIndexInBlock] = voxel;
+			.AllocateHashBlockAt(volume, block_position, hash_code)) {
+		HashEntry& entry = hash_table[hash_code];
+		TVoxel* local_voxel_block = &(voxels[entry.ptr * (VOXEL_BLOCK_SIZE3)]);
+		local_voxel_block[linear_index_in_block] = voxel;
 		return true;
 	} else {
 		return false;

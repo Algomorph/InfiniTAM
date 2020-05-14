@@ -412,7 +412,7 @@ public:
 	}
 
 
-	template<typename TFunctor>
+	template<ExecutionMode TExecutionMode = ExecutionMode::OPTIMIZED, typename TFunctor>
 	inline static bool
 	TraverseAndCompareAllWithPosition(
 			VoxelVolume<TVoxel1, VoxelBlockHash>* volume1,

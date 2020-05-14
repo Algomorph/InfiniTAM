@@ -86,7 +86,9 @@ public:
 		}
 
 		std::random_device rd;
-		seed = rd();
+		//_DEBUG alloc
+		//seed = rd();
+		seed = 2567557357;
 		std::mt19937 gen(seed);
 		std::shuffle(block_positions.begin(), block_positions.end(), gen);
 

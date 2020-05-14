@@ -22,38 +22,18 @@ namespace {
 // CUDA global kernels
 
 template <typename THashEntry, typename TFunctor>
-__device__ inline void hashTableAllEntryTraversalWithHashCode_device_Generic (THashEntry* hash_table, const int hash_entry_count, TFunctor* functor_device){
+__global__ void hashTableAllEntryTraversalWithHashCode_device (THashEntry* hash_table, const int hash_entry_count, TFunctor* functor_device){
 	int hash_code = threadIdx.x + blockIdx.x * blockDim.x;
 	if (hash_code >= hash_entry_count) return;
 	(*functor_device)(hash_table[hash_code], hash_code);
 }
 
-template <typename TFunctor>
-__global__ void hashTableAllEntryTraversalWithHashCode_device (ITMLib::HashEntry* hash_table, const int hash_entry_count, TFunctor* functor_device){
-	hashTableAllEntryTraversalWithHashCode_device_Generic<ITMLib::HashEntry, TFunctor>(hash_table, hash_entry_count, functor_device);
-}
-
-template <typename TFunctor>
-__global__ void hashTableAllEntryTraversalWithHashCode_device (const ITMLib::HashEntry* hash_table, const int hash_entry_count, TFunctor* functor_device){
-	hashTableAllEntryTraversalWithHashCode_device_Generic<const ITMLib::HashEntry, TFunctor>(hash_table, hash_entry_count, functor_device);
-}
-
 template <typename THashEntry, typename TFunctor>
-__device__ inline void hashTableUtilizedEntryTraversalWithHashCode_device_Generic (THashEntry* hash_table, const int* utilized_hash_codes, const int utilized_entry_count, TFunctor* functor_device){
+__global__ void hashTableUtilizedEntryTraversalWithHashCode_device (THashEntry* hash_table, const int* utilized_hash_codes, const int utilized_entry_count, TFunctor* functor_device){
 	int hash_code_index = threadIdx.x + blockIdx.x * blockDim.x;
 	if (hash_code_index >= utilized_entry_count) return;
 	int hash_code = utilized_hash_codes[hash_code_index];
 	(*functor_device)(hash_table[hash_code], hash_code);
-}
-
-template <typename TFunctor>
-__global__ void hashTableUtilizedEntryTraversalWithHashCode_device (ITMLib::HashEntry* hash_table, const int* utilized_hash_codes, const int utilized_entry_count, TFunctor* functor_device){
-	hashTableUtilizedEntryTraversalWithHashCode_device_Generic<ITMLib::HashEntry, TFunctor>(hash_table, utilized_hash_codes, utilized_entry_count, functor_device);
-}
-
-template <typename TFunctor>
-__global__ void hashTableUtilizedEntryTraversalWithHashCode_device (const ITMLib::HashEntry* hash_table, const int* utilized_hash_codes, const int utilized_entry_count, TFunctor* functor_device){
-	hashTableUtilizedEntryTraversalWithHashCode_device_Generic<const ITMLib::HashEntry, TFunctor>(hash_table, utilized_hash_codes, utilized_entry_count, functor_device);
 }
 
 } // end anonymous namespace (CUDA global kernels)

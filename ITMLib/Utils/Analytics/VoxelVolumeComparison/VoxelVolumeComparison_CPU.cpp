@@ -31,7 +31,7 @@ bool contentAlmostEqual_CPU<TSDFVoxel, PlainVoxelArray, PlainVoxelArray, float>(
 template
 bool contentAlmostEqual_CPU_Verbose<TSDFVoxel, PlainVoxelArray, PlainVoxelArray, float>(
 		VoxelVolume<TSDFVoxel, PlainVoxelArray>* a, VoxelVolume<TSDFVoxel, PlainVoxelArray>* b,
-		float tolerance);
+		float tolerance, ExecutionMode execution_mode);
 
 template
 bool contentAlmostEqual_CPU<TSDFVoxel, VoxelBlockHash, VoxelBlockHash, float>(
@@ -41,7 +41,7 @@ bool contentAlmostEqual_CPU<TSDFVoxel, VoxelBlockHash, VoxelBlockHash, float>(
 template
 bool contentAlmostEqual_CPU_Verbose<TSDFVoxel, VoxelBlockHash, VoxelBlockHash, float>(
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>* a, VoxelVolume<TSDFVoxel, VoxelBlockHash>* b,
-		float tolerance);
+		float tolerance, ExecutionMode execution_mode);
 
 template
 bool contentAlmostEqual_CPU<TSDFVoxel, PlainVoxelArray, VoxelBlockHash, float>(
@@ -51,7 +51,7 @@ bool contentAlmostEqual_CPU<TSDFVoxel, PlainVoxelArray, VoxelBlockHash, float>(
 template
 bool contentAlmostEqual_CPU_Verbose<TSDFVoxel, PlainVoxelArray, VoxelBlockHash, float>(
 		VoxelVolume<TSDFVoxel, PlainVoxelArray>* a, VoxelVolume<TSDFVoxel, VoxelBlockHash>* b,
-		float tolerance);
+		float tolerance, ExecutionMode execution_mode);
 
 template
 bool contentAlmostEqual_CPU<TSDFVoxel, VoxelBlockHash, PlainVoxelArray, float>(
@@ -122,7 +122,7 @@ bool contentAlmostEqual_CPU<WarpVoxel, PlainVoxelArray, PlainVoxelArray, float>(
 template
 bool contentAlmostEqual_CPU_Verbose<WarpVoxel, PlainVoxelArray, PlainVoxelArray, float>(
 		VoxelVolume<WarpVoxel, PlainVoxelArray>* a, VoxelVolume<WarpVoxel, PlainVoxelArray>* b,
-		float tolerance);
+		float tolerance, ExecutionMode execution_mode);
 
 template
 bool contentAlmostEqual_CPU<WarpVoxel, VoxelBlockHash, VoxelBlockHash, float>(
@@ -132,7 +132,7 @@ bool contentAlmostEqual_CPU<WarpVoxel, VoxelBlockHash, VoxelBlockHash, float>(
 template
 bool contentAlmostEqual_CPU_Verbose<WarpVoxel, VoxelBlockHash, VoxelBlockHash, float>(
 		VoxelVolume<WarpVoxel, VoxelBlockHash>* a, VoxelVolume<WarpVoxel, VoxelBlockHash>* b,
-		float tolerance);
+		float tolerance, ExecutionMode execution_mode);
 
 template
 bool contentAlmostEqual_CPU<WarpVoxel, PlainVoxelArray, VoxelBlockHash, float>(

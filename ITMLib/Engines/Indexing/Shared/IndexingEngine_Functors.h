@@ -29,14 +29,15 @@ namespace ITMLib {
 
 
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, HashBlockVisibility THashBlockVisibility>
-struct BlockVisibilitySetFunctor{
+struct BlockVisibilitySetFunctor {
 private: // member variables
 	HashBlockVisibility* block_visibility_types;
 public: // member functions
 	explicit BlockVisibilitySetFunctor(VoxelVolume<TVoxel, VoxelBlockHash>* volume) :
-			block_visibility_types(volume->index.GetBlockVisibilityTypes()){}
+			block_visibility_types(volume->index.GetBlockVisibilityTypes()) {}
+
 	_DEVICE_WHEN_AVAILABLE_
-	void operator() (const int visible_block_hash_code, const int i_visible_block){
+	void operator()(const int visible_block_hash_code, const int i_visible_block) {
 		block_visibility_types[visible_block_hash_code] = THashBlockVisibility;
 	}
 };
@@ -109,9 +110,8 @@ public: // member functions
 
 
 template<MemoryDeviceType TMemoryDeviceType>
-struct HashEntryStateBasedAllocationFunctor {
+struct HashEntryStateBasedAllocationFunctor_Base {
 protected: // member variables
-	VoxelBlockHash& index;
 	HashEntryAllocationState* hash_entry_states;
 	Vector3s* block_coordinates;
 
@@ -124,9 +124,8 @@ protected: // member variables
 	DECLARE_ATOMIC(int, last_free_excess_list_id);
 	DECLARE_ATOMIC(int, utilized_block_count);
 public: // member functions
-	HashEntryStateBasedAllocationFunctor(VoxelBlockHash& index)
-			: index(index),
-			  hash_entry_states(index.GetHashEntryAllocationStates()),
+	HashEntryStateBasedAllocationFunctor_Base(VoxelBlockHash& index)
+			: hash_entry_states(index.GetHashEntryAllocationStates()),
 			  block_coordinates(index.GetAllocationBlockCoordinates()),
 			  hash_table(index.GetEntries()),
 
@@ -138,19 +137,30 @@ public: // member functions
 		INITIALIZE_ATOMIC(int, utilized_block_count, index.GetUtilizedBlockCount());
 	}
 
-	virtual ~HashEntryStateBasedAllocationFunctor() {
+	virtual ~HashEntryStateBasedAllocationFunctor_Base() {
 		CLEAN_UP_ATOMIC(last_free_voxel_block_id);CLEAN_UP_ATOMIC(last_free_excess_list_id);CLEAN_UP_ATOMIC(
 				utilized_block_count);
 	}
 
-	void UpdateIndexCounters() {
-		this->index.SetLastFreeBlockListId(GET_ATOMIC_VALUE_CPU(last_free_voxel_block_id));
-		this->index.SetLastFreeExcessListId(GET_ATOMIC_VALUE_CPU(last_free_excess_list_id));
-		this->index.SetUtilizedBlockCount(GET_ATOMIC_VALUE_CPU(utilized_block_count));
+	void UpdateIndexCounters(VoxelBlockHash& index) {
+		index.SetLastFreeBlockListId(GET_ATOMIC_VALUE_CPU(last_free_voxel_block_id));
+		index.SetLastFreeExcessListId(GET_ATOMIC_VALUE_CPU(last_free_excess_list_id));
+		index.SetUtilizedBlockCount(GET_ATOMIC_VALUE_CPU(utilized_block_count));
 	}
+};
 
+template<MemoryDeviceType TMemoryDeviceType>
+struct HashEntryStateBasedAllocationFunctor
+		: public HashEntryStateBasedAllocationFunctor_Base<TMemoryDeviceType> {
+public: // member functions
+	HashEntryStateBasedAllocationFunctor(VoxelBlockHash& index)
+			: HashEntryStateBasedAllocationFunctor_Base<TMemoryDeviceType>(index) {}
 	_DEVICE_WHEN_AVAILABLE_
-	virtual void operator()(const HashEntryAllocationState& hash_entry_state, int hash_code) {
+	void operator()(const HashEntryAllocationState& hash_entry_state, const int hash_code) {
+		//_DEBUG alloc
+//		if(this->block_coordinates[hash_code] == Vector3s(153, 12, 14)){
+//			printf("Hello!");
+//		}
 		AllocateBlockBasedOnState<TMemoryDeviceType>(
 				hash_entry_state, hash_code, this->block_coordinates, this->hash_table,
 				this->last_free_voxel_block_id, this->last_free_excess_list_id, this->utilized_block_count,
@@ -160,16 +170,16 @@ public: // member functions
 
 template<MemoryDeviceType TMemoryDeviceType>
 struct HashEntryStateBasedAllocationFunctor_SetVisibility
-		: public HashEntryStateBasedAllocationFunctor<TMemoryDeviceType> {
+		: public HashEntryStateBasedAllocationFunctor_Base<TMemoryDeviceType> {
 protected: // member variables
 	HashBlockVisibility* block_visibility_types;
 public: // member functions
 	HashEntryStateBasedAllocationFunctor_SetVisibility(VoxelBlockHash& index)
-			: HashEntryStateBasedAllocationFunctor<TMemoryDeviceType>(index),
-			  block_visibility_types(index.GetBlockVisibilityTypes()){}
+			: HashEntryStateBasedAllocationFunctor_Base<TMemoryDeviceType>(index),
+			  block_visibility_types(index.GetBlockVisibilityTypes()) {}
 
 	_DEVICE_WHEN_AVAILABLE_
-	void operator()(const HashEntryAllocationState& hash_entry_state, int hash_code) override {
+	void operator()(const HashEntryAllocationState& hash_entry_state, int hash_code) {
 		AllocateBlockBasedOnState_SetVisibility<TMemoryDeviceType>(
 				hash_entry_state, hash_code, this->block_coordinates, this->hash_table, this->block_visibility_types,
 				this->last_free_voxel_block_id, this->last_free_excess_list_id, this->utilized_block_count,
@@ -274,9 +284,9 @@ public: // member functions
 	_DEVICE_WHEN_AVAILABLE_
 	void operator()(const float& depth_measure, int x, int y) {
 		//DEBUG alloc
-		if(x == 226 && y == 332){
-			int i = 10;
-		}
+//		if(x == 226 && y == 332){
+//			int i = 10;
+//		}
 
 		if (depth_measure <= 0 || (depth_measure - surface_distance_cutoff) < 0 ||
 		    (depth_measure - surface_distance_cutoff) < near_clipping_distance ||
@@ -335,9 +345,9 @@ public:
 		bool has_surface1 = false, has_surface2 = false;
 
 		//_DEBUG alloc
-		if(x == 226 && y == 332){
-			int i = 10;
-		}
+//		if(x == 226 && y == 332){
+//			int i = 10;
+//		}
 		if (!(surface1_depth <= 0 || (surface1_depth - surface_distance_cutoff) < 0 ||
 		      (surface1_depth - surface_distance_cutoff) < near_clipping_distance ||
 		      (surface1_depth + surface_distance_cutoff) > far_clipping_distance))

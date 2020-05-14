@@ -38,10 +38,20 @@ bool contentAlmostEqual_CPU(VoxelVolume<TVoxel, TIndexA>* a, VoxelVolume<TVoxel,
 
 template<typename TVoxel, typename TIndexA, typename TIndexB, typename ToleranceType>
 bool contentAlmostEqual_CPU_Verbose(VoxelVolume<TVoxel, TIndexA>* a, VoxelVolume<TVoxel, TIndexB>* b,
-                                    ToleranceType tolerance) {
+                                    ToleranceType tolerance, ExecutionMode execution_mode) {
 	VoxelEqualVerboseFunctor<TVoxel, ToleranceType> functor(tolerance);
-	return TwoVolumeTraversalEngine<TVoxel, TVoxel, TIndexA, TIndexB, MEMORYDEVICE_CPU>
-	::template TraverseAndCompareAllWithPosition(a, b, functor, true);
+	switch (execution_mode) {
+		case OPTIMIZED:
+			return TwoVolumeTraversalEngine<TVoxel, TVoxel, TIndexA, TIndexB, MEMORYDEVICE_CPU>
+			::template TraverseAndCompareAllWithPosition<OPTIMIZED>(a, b, functor, true);
+		case DIAGNOSTIC:
+			return TwoVolumeTraversalEngine<TVoxel, TVoxel, TIndexA, TIndexB, MEMORYDEVICE_CPU>
+			::template TraverseAndCompareAllWithPosition<DIAGNOSTIC>(a, b, functor, true);
+		default:
+			DIEWITHEXCEPTION_REPORTLOCATION("Unrecognized ExecutionMode.");
+			return false;
+	}
+
 }
 
 template<typename TVoxel, typename TIndexA, typename TIndexB, typename ToleranceType>
@@ -130,7 +140,7 @@ bool contentForFlagsAlmostEqual_CPU_Verbose(VoxelVolume<TVoxel,TIndexA>* a, Voxe
 			return FlaggedVoxelComparisonUtility<TVoxel::hasSemanticInformation, TVoxel, TIndexA, TIndexB, ToleranceType, MEMORYDEVICE_CPU>::
 			template compare_Verbose<DIAGNOSTIC>(a, b, flags, tolerance);
 		default:
-			assert(false);
+			DIEWITHEXCEPTION_REPORTLOCATION("Unrecognized ExecutionMode.");
 			return false;
 	}
 }

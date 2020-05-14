@@ -169,90 +169,91 @@ BOOST_AUTO_TEST_CASE(testCompareVoxelVolumes_CPU_ITMVoxel) {
 	Vector3i volumeOffset(-20, -20, 0);
 	Vector3i extentEndVoxel = volumeOffset + volumeSize;
 
-	VoxelVolume<TSDFVoxel, PlainVoxelArray> scene_PVA1(MEMORYDEVICE_CPU,
-	                                                   {volumeSize, volumeOffset});
-	scene_PVA1.Reset();
-	VoxelVolume<TSDFVoxel, PlainVoxelArray> scene_PVA2(MEMORYDEVICE_CPU,
-	                                                   {volumeSize, volumeOffset});
-	scene_PVA2.Reset();
-	VoxelVolume<TSDFVoxel, VoxelBlockHash> scene_VBH1(MEMORYDEVICE_CPU,
-	                                                  {0x800, 0x20000});
-	scene_VBH1.Reset();
-	VoxelVolume<TSDFVoxel, VoxelBlockHash> scene_VBH2(MEMORYDEVICE_CPU,
-	                                                  {0x800, 0x20000});
-	scene_VBH2.Reset();
+	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_PVA1(MEMORYDEVICE_CPU,
+	                                                    {volumeSize, volumeOffset});
+	volume_PVA1.Reset();
+	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_PVA2(MEMORYDEVICE_CPU,
+	                                                    {volumeSize, volumeOffset});
+	volume_PVA2.Reset();
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH1(MEMORYDEVICE_CPU,
+	                                                   {0x800, 0x20000});
+	volume_VBH1.Reset();
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH2(MEMORYDEVICE_CPU,
+	                                                   {0x800, 0x20000});
+	volume_VBH2.Reset();
 
 	std::random_device random_device;
 	std::mt19937 generator(random_device());
-	int singleVoxelTestsRunCounter = 0;
+	int single_voxel_tests_run_counter = 0;
 
-	auto singleVoxelTests = [&]() {
-		std::cout << "Single voxel test run " << singleVoxelTestsRunCounter << std::endl;
-		singleVoxelTestsRunCounter++;
+	auto single_voxel_tests = [&]() {
+		std::cout << "Single voxel test run " << single_voxel_tests_run_counter << std::endl;
+		single_voxel_tests_run_counter++;
 		std::uniform_int_distribution<int> coordinate_distribution2(volumeOffset.x, 0);
 		TSDFVoxel voxel;
 		SimulateVoxelAlteration(voxel, -0.1f);
 
 		Vector3i coordinate(coordinate_distribution2(generator), coordinate_distribution2(generator), 0);
 
-		ManipulationEngine_CPU_PVA_Voxel::Inst().SetVoxel(&scene_PVA2, coordinate, voxel);
-		ManipulationEngine_CPU_VBH_Voxel::Inst().SetVoxel(&scene_VBH2, coordinate, voxel);
+		ManipulationEngine_CPU_PVA_Voxel::Inst().SetVoxel(&volume_PVA2, coordinate, voxel);
+		ManipulationEngine_CPU_VBH_Voxel::Inst().SetVoxel(&volume_VBH2, coordinate, voxel);
 
 		std::cout << "Altering single voxel at: " << coordinate << std::endl;
 
-		BOOST_REQUIRE(!contentAlmostEqual_CPU(&scene_PVA1, &scene_PVA2, tolerance));
-		BOOST_REQUIRE(!contentAlmostEqual_CPU(&scene_VBH1, &scene_VBH2, tolerance));
-		BOOST_REQUIRE(!contentAlmostEqual_CPU(&scene_PVA1, &scene_VBH2, tolerance));
+		BOOST_REQUIRE(!contentAlmostEqual_CPU(&volume_PVA1, &volume_PVA2, tolerance));
+		BOOST_REQUIRE(!contentAlmostEqual_CPU(&volume_VBH1, &volume_VBH2, tolerance));
+		BOOST_REQUIRE(!contentAlmostEqual_CPU(&volume_PVA1, &volume_VBH2, tolerance));
 
 		TSDFVoxel defaultVoxel;
-		ManipulationEngine_CPU_PVA_Voxel::Inst().SetVoxel(&scene_PVA2, coordinate, defaultVoxel);
-		ManipulationEngine_CPU_VBH_Voxel::Inst().SetVoxel(&scene_VBH2, coordinate, defaultVoxel);
-		BOOST_REQUIRE(contentAlmostEqual_CPU(&scene_PVA1, &scene_PVA2, tolerance));
-		BOOST_REQUIRE(contentAlmostEqual_CPU(&scene_VBH1, &scene_VBH2, tolerance));
+		ManipulationEngine_CPU_PVA_Voxel::Inst().SetVoxel(&volume_PVA2, coordinate, defaultVoxel);
+		ManipulationEngine_CPU_VBH_Voxel::Inst().SetVoxel(&volume_VBH2, coordinate, defaultVoxel);
+		BOOST_REQUIRE(contentAlmostEqual_CPU(&volume_PVA1, &volume_PVA2, tolerance));
+		BOOST_REQUIRE(contentAlmostEqual_CPU(&volume_VBH1, &volume_VBH2, tolerance));
 
 		coordinate = volumeOffset + volumeSize - Vector3i(1);
-		voxel = ManipulationEngine_CPU_PVA_Voxel::Inst().ReadVoxel(&scene_PVA2, coordinate);
+		voxel = ManipulationEngine_CPU_PVA_Voxel::Inst().ReadVoxel(&volume_PVA2, coordinate);
 		SimulateVoxelAlteration(voxel, fmod((TSDFVoxel::valueToFloat(voxel.sdf) + 0.1f), 1.0f));
-		ManipulationEngine_CPU_PVA_Voxel::Inst().SetVoxel(&scene_PVA2, coordinate, voxel);
-		ManipulationEngine_CPU_VBH_Voxel::Inst().SetVoxel(&scene_VBH2, coordinate, voxel);
+		ManipulationEngine_CPU_PVA_Voxel::Inst().SetVoxel(&volume_PVA2, coordinate, voxel);
+		ManipulationEngine_CPU_VBH_Voxel::Inst().SetVoxel(&volume_VBH2, coordinate, voxel);
 
 		std::cout << "Altering single voxel at: " << coordinate << std::endl;
 
-		BOOST_REQUIRE(!contentAlmostEqual_CPU(&scene_PVA1, &scene_PVA2, tolerance));
-		BOOST_REQUIRE(!contentAlmostEqual_CPU(&scene_VBH1, &scene_VBH2, tolerance));
-		BOOST_REQUIRE(!contentAlmostEqual_CPU(&scene_PVA1, &scene_VBH2, tolerance));
+		BOOST_REQUIRE(!contentAlmostEqual_CPU(&volume_PVA1, &volume_PVA2, tolerance));
+		BOOST_REQUIRE(!contentAlmostEqual_CPU(&volume_VBH1, &volume_VBH2, tolerance));
+		BOOST_REQUIRE(!contentAlmostEqual_CPU(&volume_PVA1, &volume_VBH2, tolerance));
 
-		ManipulationEngine_CPU_PVA_Voxel::Inst().SetVoxel(&scene_PVA2, coordinate, defaultVoxel);
-		ManipulationEngine_CPU_VBH_Voxel::Inst().SetVoxel(&scene_VBH2, coordinate, defaultVoxel);
+		ManipulationEngine_CPU_PVA_Voxel::Inst().SetVoxel(&volume_PVA2, coordinate, defaultVoxel);
+		ManipulationEngine_CPU_VBH_Voxel::Inst().SetVoxel(&volume_VBH2, coordinate, defaultVoxel);
 	};
 
 	std::uniform_real_distribution<float> sdf_distribution(-1.0f, 1.0f);
 	std::uniform_int_distribution<int> coordinate_distribution(0, extentEndVoxel.x - 1);
 
-	const int modifiedVoxelCount = 120;
+   const int modified_voxel_count = 120;
 
-	singleVoxelTests();
+	single_voxel_tests();
 
 //	generate only in the positive coordinates' volume, to make sure that the unneeded voxel hash blocks are properly dismissed
-	for (int iVoxel = 0; iVoxel < modifiedVoxelCount; iVoxel++) {
+	for (int iVoxel = 0; iVoxel < modified_voxel_count; iVoxel++) {
 		TSDFVoxel voxel;
 		SimulateVoxelAlteration(voxel, sdf_distribution(generator));
+		voxel.print_self();
 		Vector3i coordinate(coordinate_distribution(generator),
 		                    coordinate_distribution(generator),
 		                    coordinate_distribution(generator));
 
-		ManipulationEngine_CPU_PVA_Voxel::Inst().SetVoxel(&scene_PVA1, coordinate, voxel);
-		ManipulationEngine_CPU_PVA_Voxel::Inst().SetVoxel(&scene_PVA2, coordinate, voxel);
-		ManipulationEngine_CPU_VBH_Voxel::Inst().SetVoxel(&scene_VBH1, coordinate, voxel);
-		ManipulationEngine_CPU_VBH_Voxel::Inst().SetVoxel(&scene_VBH2, coordinate, voxel);
+		ManipulationEngine_CPU_PVA_Voxel::Inst().SetVoxel(&volume_PVA1, coordinate, voxel);
+		ManipulationEngine_CPU_PVA_Voxel::Inst().SetVoxel(&volume_PVA2, coordinate, voxel);
+		ManipulationEngine_CPU_VBH_Voxel::Inst().SetVoxel(&volume_VBH1, coordinate, voxel);
+		ManipulationEngine_CPU_VBH_Voxel::Inst().SetVoxel(&volume_VBH2, coordinate, voxel);
 
 	}
 
-	BOOST_REQUIRE(contentAlmostEqual_CPU(&scene_PVA1, &scene_PVA2, tolerance));
-	BOOST_REQUIRE(contentAlmostEqual_CPU(&scene_VBH1, &scene_VBH2, tolerance));
-	BOOST_REQUIRE(contentAlmostEqual_CPU(&scene_PVA1, &scene_VBH1, tolerance));
+	BOOST_REQUIRE(contentAlmostEqual_CPU(&volume_PVA1, &volume_PVA2, tolerance));
+	BOOST_REQUIRE(contentAlmostEqual_CPU(&volume_VBH1, &volume_VBH2, tolerance));
+	BOOST_REQUIRE(contentAlmostEqual_CPU_Verbose(&volume_PVA1, &volume_VBH1, tolerance, OPTIMIZED));
 
-	singleVoxelTests();
+	single_voxel_tests();
 }
 
 BOOST_AUTO_TEST_CASE(testCompareVoxelVolumes_CPU_ITMWarp) {

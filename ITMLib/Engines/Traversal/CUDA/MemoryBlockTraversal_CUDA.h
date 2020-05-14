@@ -43,7 +43,7 @@ private: // static functions
 	template<typename TData, typename TMemoryBlock, typename TFunctor>
 	inline static void Traverse_Generic(TMemoryBlock& memory_block, unsigned int element_count, TFunctor& functor){
 		TData* data = memory_block.GetData(MEMORYDEVICE_CUDA);
-		assert(element_count < memory_block.size());
+		assert(element_count <= memory_block.size());
 		TraverseRaw_Generic(data, element_count, functor);
 	}
 

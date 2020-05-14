@@ -37,7 +37,7 @@ template<typename TVoxel, typename TIndexA, typename TIndexB, typename Tolerance
 bool contentAlmostEqual_CPU(VoxelVolume<TVoxel,TIndexA>* a, VoxelVolume<TVoxel,TIndexB>* b, ToleranceType tolerance);
 
 template<typename TVoxel, typename TIndexA, typename TIndexB, typename ToleranceType>
-bool contentAlmostEqual_CPU_Verbose(VoxelVolume<TVoxel,TIndexA>* a, VoxelVolume<TVoxel,TIndexB>* b, ToleranceType tolerance);
+bool contentAlmostEqual_CPU_Verbose(VoxelVolume<TVoxel,TIndexA>* a, VoxelVolume<TVoxel,TIndexB>* b, ToleranceType tolerance, ExecutionMode execution_mode = ExecutionMode::OPTIMIZED);
 
 template<typename TVoxel, typename TIndexA, typename TIndexB, typename ToleranceType>
 bool contentAlmostEqual_AsupersetB_CPU_Verbose(VoxelVolume<TVoxel,TIndexA>* a, VoxelVolume<TVoxel,TIndexB>* b, ToleranceType tolerance);

@@ -374,6 +374,7 @@ set(
 set(
         ITMLIB_ENGINES_INDEXING_AUX_HEADERS
         Engines/Indexing/IndexingEngineFactory.h
+        Engines/Indexing/IndexingSettings.h
 )
 ##
 set(

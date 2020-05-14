@@ -36,7 +36,7 @@ private: // member functions
 		ORcudaSafeCall(cudaMalloc((void**) &functor_device, sizeof(TFunctor)));
 		ORcudaSafeCall(cudaMemcpy(functor_device, &functor, sizeof(TFunctor), cudaMemcpyHostToDevice));
 
-		hashTableAllEntryTraversalWithHashCode_device < TFunctor >
+		hashTableAllEntryTraversalWithHashCode_device < THashEntry, TFunctor >
 		<<< cuda_grid_size, cuda_block_size >>>
 				(hash_table, hash_entry_count, functor_device);
 		ORcudaKernelCheck;
@@ -58,7 +58,7 @@ private: // member functions
 		ORcudaSafeCall(cudaMalloc((void**) &functor_device, sizeof(TFunctor)));
 		ORcudaSafeCall(cudaMemcpy(functor_device, &functor, sizeof(TFunctor), cudaMemcpyHostToDevice));
 
-		hashTableUtilizedEntryTraversalWithHashCode_device < TFunctor >
+		hashTableUtilizedEntryTraversalWithHashCode_device < THashEntry, TFunctor >
 		<<< cuda_grid_size, cuda_block_size >>>
 				(hash_table, utilized_entry_codes, utilized_entry_count, functor_device);
 		ORcudaKernelCheck;

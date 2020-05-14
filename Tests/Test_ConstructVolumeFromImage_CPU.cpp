@@ -188,11 +188,11 @@ BOOST_AUTO_TEST_CASE(Test_SceneConstruct17_VBH_CPU_NearVsSpan) {
 	int near_nontruncated_voxel_count =
 			Analytics_CPU_VBH_Voxel::Instance().CountNonTruncatedVoxels(&volume_VBH_17_Near);
 
-	BOOST_REQUIRE_GE(span_nontruncated_voxel_count, near_nontruncated_voxel_count);
+	BOOST_REQUIRE_EQUAL(span_nontruncated_voxel_count, near_nontruncated_voxel_count);
 
 	float absolute_tolerance = 1e-7;
 	BOOST_REQUIRE(
-			contentForFlagsAlmostEqual_AsupersetB_CPU_Verbose(&volume_VBH_17_Span, &volume_VBH_17_Near,
+			contentForFlagsAlmostEqual_CPU_Verbose(&volume_VBH_17_Span, &volume_VBH_17_Near,
 			                                                  VoxelFlags::VOXEL_NONTRUNCATED,
 			                                                  absolute_tolerance));
 

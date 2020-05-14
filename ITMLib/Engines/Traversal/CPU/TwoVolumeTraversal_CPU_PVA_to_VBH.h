@@ -33,8 +33,8 @@ namespace ITMLib {
 template<typename TArrayVoxel, typename THashVoxel>
 class TwoVolumeTraversalEngine<TArrayVoxel, THashVoxel, PlainVoxelArray, VoxelBlockHash, MEMORYDEVICE_CPU> {
 private:
-	inline static bool BlockIsCompletelyOutsideArray(const Vector3i& block_max_voxels,
-	                                                 const Vector3i& block_min_voxels,
+	inline static bool BlockIsCompletelyOutsideArray(const Vector3i& block_min_voxels,
+	                                                 const Vector3i& block_max_voxels,
 	                                                 const Vector3i& array_min_voxels,
 	                                                 const Vector3i& array_max_voxels) {
 		return block_max_voxels.x < array_min_voxels.x || block_min_voxels.x > array_max_voxels.x ||
@@ -42,8 +42,8 @@ private:
 		       block_max_voxels.z < array_min_voxels.z || block_min_voxels.z > array_max_voxels.z;
 	}
 
-	inline static bool BlockAtLeastPartiallyOutsideArray(const Vector3i& block_max_voxels,
-	                                                     const Vector3i& block_min_voxels,
+	inline static bool BlockAtLeastPartiallyOutsideArray(const Vector3i& block_min_voxels,
+	                                                     const Vector3i& block_max_voxels,
 	                                                     const Vector3i& array_min_voxels,
 	                                                     const Vector3i& array_max_voxels) {
 		return block_max_voxels.x > array_max_voxels.x || block_min_voxels.x < array_min_voxels.x ||

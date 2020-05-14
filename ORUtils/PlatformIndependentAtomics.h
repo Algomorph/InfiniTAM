@@ -84,7 +84,7 @@ inline T GetDataCPU(T* var){
 
 template <typename T>
 inline void SetDataCPU(T* var, T var_val){
-	ORcudaSafeCall(cudaMemcpy(&var_val, var, sizeof(T), cudaMemcpyHostToDevice));
+	ORcudaSafeCall(cudaMemcpy(var, &var_val, sizeof(T), cudaMemcpyHostToDevice));
 }
 #endif
 

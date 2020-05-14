@@ -22,6 +22,7 @@
 #include "../../../Objects/Volume/RepresentationAccess.h"
 #include "../../../Utils/Geometry/SpatialIndexConversions.h"
 #include "../../../Utils/Geometry/GeometryBooleanOperations.h"
+#include "../../../Utils/ExecutionMode.h"
 
 namespace ITMLib {
 
@@ -290,7 +291,7 @@ public:
 		return !mismatch_found;
 	}
 
-	template<typename TFunctor>
+	template<ExecutionMode TExecutionMode = ExecutionMode::OPTIMIZED, typename TFunctor>
 	inline static bool
 	TraverseAndCompareAllWithPosition(
 			VoxelVolume<TVoxel1, PlainVoxelArray>* volume1,
@@ -305,15 +306,15 @@ public:
 		int voxel_count = volume1->index.GetVolumeSize().x * volume1->index.GetVolumeSize().y *
 		                  volume1->index.GetVolumeSize().z;
 		volatile bool mismatch_found = false;
-		PlainVoxelArray::IndexData* indexData = volume1->index.GetIndexData();
+		PlainVoxelArray::IndexData* index_data = volume1->index.GetIndexData();
 #ifdef WITH_OPENMP
 #pragma omp parallel for
 #endif
-		for (int linearIndex = 0; linearIndex < voxel_count; linearIndex++) {
+		for (int linear_index_in_array = 0; linear_index_in_array < voxel_count; linear_index_in_array++) {
 			if (mismatch_found) continue;
-			TVoxel1& voxel1 = voxels1[linearIndex];
-			TVoxel2& voxel2 = voxels2[linearIndex];
-			Vector3i voxel_position = ComputePositionVectorFromLinearIndex_PlainVoxelArray(indexData, linearIndex);
+			TVoxel1& voxel1 = voxels1[linear_index_in_array];
+			TVoxel2& voxel2 = voxels2[linear_index_in_array];
+			Vector3i voxel_position = ComputePositionVectorFromLinearIndex_PlainVoxelArray(index_data, linear_index_in_array);
 			if (!(functor(voxel1, voxel2, voxel_position))) {
 				mismatch_found = true;
 			}
