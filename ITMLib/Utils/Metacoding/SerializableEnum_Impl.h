@@ -30,6 +30,8 @@
 
 #include "SequenceLevel1Macros.h"
 #include "PreprocessorNargs.h"
+#include "MetacodingAuxiliaryUtilities.h"
+#include "../../../ORUtils/PlatformIndependence.h"
 
 // region ================== SERIALIZABLE ENUM TEMPLATED FUNCTION DEFINITIONS ==========================================
 
@@ -48,7 +50,7 @@ TEnum variables_map_to_enumerator(const boost::program_options::variables_map& v
 }
 
 template<typename TEnum>
-boost::optional<TEnum> ptree_to_optional_enumerator(const pt::ptree& ptree, const pt::ptree::key_type& key) {
+boost::optional<TEnum> ptree_to_optional_enumerator(const boost::property_tree::ptree& ptree, const boost::property_tree::ptree::key_type& key) {
 	auto child = ptree.get_child_optional(key);
 	if (child) {
 		return boost::optional<TEnum>(string_to_enumerator<TEnum>(ptree.get<std::string>(key)));

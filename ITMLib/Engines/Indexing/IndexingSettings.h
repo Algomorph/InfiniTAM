@@ -18,5 +18,11 @@
 #include "../../Utils/Metacoding/DeferrableSerializableStruct.h"
 
 namespace ITMLib{
+#define INDEXING_SETTINGS_STRUCT_DESCRIPTION IndexingSettings, "indexing_settings", \
+
+
+
+DECLARE_DEFERRABLE_SERIALIZABLE_STRUCT(TELEMETRY_SETTINGS_STRUCT_DESCRIPTION);
+
 
 }

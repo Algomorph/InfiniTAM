@@ -937,6 +937,7 @@ set(ITMLIB_UTILS_SOURCES
     Utils/Telemetry/TelemetryUtilities.cpp
 
     Utils/CPPPrintHelpers.cpp
+    Utils/ExecutionMode.cpp
 
     Utils/Math.cpp
     Utils/Quaternions.cpp
@@ -966,6 +967,7 @@ set(ITMLIB_UTILS_HEADERS
     Utils/Metacoding/DeferrableSerializableStruct.h
     Utils/Metacoding/DeferrableSerializableStruct_Impl.h
     Utils/Metacoding/Metacoding.h
+    Utils/Metacoding/MetacodingAuxiliaryUtilities.h
     Utils/Metacoding/SerializableStruct.h
     Utils/Metacoding/SerializableStruct_Impl.h
     Utils/Metacoding/SerializableEnum.h
@@ -980,7 +982,10 @@ set(ITMLIB_UTILS_HEADERS
     Utils/Logging/LoggingUtilities.h
     Utils/Logging/LoggingCUDAWrapper.h
 
+    Utils/CPPPrintHelpers.h
+    Utils/CPrintHelpers.h
     Utils/CUDAUtils.h
+    Utils/ExecutionMode.h
     Utils/ValuePosition.h
     Utils/ImageTypes.h
     Utils/HashBlockProperties.h
@@ -994,8 +999,6 @@ set(ITMLIB_UTILS_HEADERS
     Utils/Quaternions.h
     Utils/VoxelVolumeParameters.h
     Utils/SurfelVolumeParameters.h
-    Utils/CPPPrintHelpers.h
-    Utils/CPrintHelpers.h
 
     Utils/Analytics/BenchmarkUtilities.h
     Utils/Analytics/AlmostEqual.h
