@@ -186,7 +186,7 @@ void ConstructStripesTestVolumes() {
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume4(MEMORYDEVICE_CPU, {0x800, 0x20000});
 	volume4.Reset();
 	IndexingEngineInterface<TSDFVoxel, VoxelBlockHash>& indexer_VBH
-			= IndexingEngineFactory::Get<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CPU);
+			= IndexingEngineFactory::GetDefault<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CPU);
 	CameraTrackingState tracking_state(image_size, MEMORYDEVICE_CPU);
 	indexer_VBH.AllocateNearAndBetweenTwoSurfaces(&volume4, view, &tracking_state);
 	auto depth_fusion_engine_VBH = DepthFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, VoxelBlockHash>(

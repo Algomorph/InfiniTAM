@@ -150,7 +150,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CUDA) {
 			DepthFusionEngineFactory
 			::Build<TSDFVoxel, WarpVoxel, PlainVoxelArray>(MEMORYDEVICE_CUDA);
 	IndexingEngineInterface<TSDFVoxel, PlainVoxelArray>& indexer_PVA
-			= IndexingEngineFactory::Get<TSDFVoxel, PlainVoxelArray>(MEMORYDEVICE_CUDA);
+			= IndexingEngineFactory::GetDefault<TSDFVoxel, PlainVoxelArray>(MEMORYDEVICE_CUDA);
 	indexer_PVA.AllocateNearAndBetweenTwoSurfaces(&volume1, view, &trackingState);
 	depth_fusion_engine_PVA->IntegrateDepthImageIntoTsdfVolume(&volume1, view, &trackingState);
 
@@ -245,7 +245,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CUDA) {
 	                        configuration::get().general_voxel_volume_parameters.far_clipping_distance,
 	                        settings->device_type);
 	IndexingEngineInterface<TSDFVoxel, VoxelBlockHash>& indexer_VBH
-			= IndexingEngineFactory::Get<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CUDA);
+			= IndexingEngineFactory::GetDefault<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CUDA);
 	indexer_VBH.AllocateNearAndBetweenTwoSurfaces(&volume2, view, &trackingState);
 	depth_fusion_engine_VBH->IntegrateDepthImageIntoTsdfVolume(&volume2, view, &trackingState);
 
@@ -326,7 +326,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CUDA) {
 				DepthFusionEngineFactory
 				::Build<TSDFVoxel, WarpVoxel, PlainVoxelArray>(MEMORYDEVICE_CUDA);
 		IndexingEngineInterface<TSDFVoxel, PlainVoxelArray>& indexer_PVA
-				= IndexingEngineFactory::Get<TSDFVoxel, PlainVoxelArray>(MEMORYDEVICE_CUDA);
+				= IndexingEngineFactory::GetDefault<TSDFVoxel, PlainVoxelArray>(MEMORYDEVICE_CUDA);
 		indexer_PVA.AllocateNearAndBetweenTwoSurfaces(&volume1, view, &trackingState);
 		depth_fusion_engine_PVA->IntegrateDepthImageIntoTsdfVolume(&volume1, view, &trackingState);
 
@@ -341,7 +341,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CUDA) {
 			DepthFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, VoxelBlockHash>(MEMORYDEVICE_CUDA);
 
 	IndexingEngineInterface<TSDFVoxel, VoxelBlockHash>& indexer_VBH
-			= IndexingEngineFactory::Get<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CUDA);
+			= IndexingEngineFactory::GetDefault<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CUDA);
 	indexer_VBH.AllocateNearAndBetweenTwoSurfaces(&volume3, view, &trackingState);
 	depth_fusion_engine_VBH->IntegrateDepthImageIntoTsdfVolume(&volume3, view, &trackingState);
 

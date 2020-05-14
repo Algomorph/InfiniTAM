@@ -25,6 +25,7 @@
 #include <boost/preprocessor/stringize.hpp>
 
 //local
+#include "../Metacoding/DefferableStructUtilities.h"
 #include "Configuration.h"
 #include "../FileIO/JSON_Utilities.h"
 #include "TelemetrySettings.h"
@@ -155,28 +156,15 @@ void load_configuration_from_json_file(const std::string& path) {
 	instance = Configuration::BuildFromPTree(tree, path);
 }
 
-template<typename TDeferrableSerializableStruct>
-static inline void AddDeferrableToTargetTree(pt::ptree& target_tree, const pt::ptree& source_tree, std::string origin = "") {
-	pt::ptree deferrable_subtree;
-	if (source_tree.empty() ||
-			source_tree.find(TDeferrableSerializableStruct::default_parse_path) ==
-					source_tree.not_found()) {
-		deferrable_subtree = TDeferrableSerializableStruct().ToPTree(origin);
-	} else {
-		deferrable_subtree = source_tree.get_child(TDeferrableSerializableStruct::default_parse_path);
-	}
-	target_tree.add_child(TDeferrableSerializableStruct::default_parse_path, deferrable_subtree);
-}
-
 void save_configuration_to_json_file(const std::string& path) {
 	pt::ptree target_tree = instance.ToPTree(path);
-	AddDeferrableToTargetTree<TelemetrySettings>(target_tree, instance.source_tree, instance.origin);
+	AddDeferrableFromSourceToTargetTree<TelemetrySettings>(target_tree, instance.source_tree, instance.origin);
 	pt::write_json_no_quotes(path, target_tree, true);
 }
 
 void save_configuration_to_json_file(const std::string& path, const Configuration& configuration) {
 	pt::ptree target_tree = configuration.ToPTree(path);
-	AddDeferrableToTargetTree<TelemetrySettings>(target_tree, configuration.source_tree, configuration.origin);
+	AddDeferrableFromSourceToTargetTree<TelemetrySettings>(target_tree, configuration.source_tree, configuration.origin);
 	pt::write_json_no_quotes(path, target_tree, true);
 }
 // endregion ===========================================================================================================

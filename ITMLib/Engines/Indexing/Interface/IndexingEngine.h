@@ -25,6 +25,9 @@
 #include "../../../../ORUtils/MemoryDeviceType.h"
 #include "../../../GlobalTemplateDefines.h"
 #include "../../../Objects/Volume/VoxelBlockHash.h"
+#include "../../../Utils/ExecutionMode.h"
+#include "../../Common/Configurable.h"
+#include "../IndexingSettings.h"
 
 
 //ORUtils
@@ -38,8 +41,12 @@ namespace ITMLib {
  * \tparam TIndex type of index
  */
 template<typename TVoxel, typename TIndex>
-class IndexingEngineInterface {
+class IndexingEngineInterface : public Configurable<IndexingSettings> {
+protected: // member variables
+	using Configurable<IndexingSettings>::parameters;
 public:
+	using Configurable<IndexingSettings>::Configurable;
+	using Configurable<IndexingSettings>::GetParameters;
 	/**
 	 * \brief Given a view with a new depth image, compute_allocated the
 		visible blocks, allocate them and update the hash
@@ -105,7 +112,7 @@ public:
 
 };
 
-template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode = OPTIMIZED>
 class IndexingEngine;
 
 

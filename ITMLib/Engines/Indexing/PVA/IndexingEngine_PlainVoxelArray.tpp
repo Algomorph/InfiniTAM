@@ -24,29 +24,29 @@
 using namespace ITMLib;
 
 
-template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
-void IndexingEngine<TVoxel, PlainVoxelArray, TMemoryDeviceType>::AllocateNearSurface(VoxelVolume<TVoxel, PlainVoxelArray>* volume,
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
+void IndexingEngine<TVoxel, PlainVoxelArray, TMemoryDeviceType, TExecutionMode>::AllocateNearSurface(VoxelVolume<TVoxel, PlainVoxelArray>* volume,
                                                                             const View* view,
                                                                             const CameraTrackingState* tracking_state) {}
 
 
-template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
-void IndexingEngine<TVoxel, PlainVoxelArray, TMemoryDeviceType>::AllocateNearSurface(VoxelVolume<TVoxel, PlainVoxelArray>* scene,
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
+void IndexingEngine<TVoxel, PlainVoxelArray, TMemoryDeviceType, TExecutionMode>::AllocateNearSurface(VoxelVolume<TVoxel, PlainVoxelArray>* scene,
                                                                             const View* view,
                                                                             const Matrix4f& depth_camera_matrix) {}
 
 
-template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
-void IndexingEngine<TVoxel, PlainVoxelArray, TMemoryDeviceType>::AllocateNearAndBetweenTwoSurfaces(
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
+void IndexingEngine<TVoxel, PlainVoxelArray, TMemoryDeviceType, TExecutionMode>::AllocateNearAndBetweenTwoSurfaces(
 		VoxelVolume<TVoxel, PlainVoxelArray>* targetVolume, const View* view, const CameraTrackingState* tracking_state) {}
 
-template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
-void IndexingEngine<TVoxel, PlainVoxelArray, TMemoryDeviceType>::ResetUtilizedBlockList(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {}
-template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
-void IndexingEngine<TVoxel, PlainVoxelArray, TMemoryDeviceType>::ResetVisibleBlockList(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {}
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
+void IndexingEngine<TVoxel, PlainVoxelArray, TMemoryDeviceType, TExecutionMode>::ResetUtilizedBlockList(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {}
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
+void IndexingEngine<TVoxel, PlainVoxelArray, TMemoryDeviceType, TExecutionMode>::ResetVisibleBlockList(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {}
 
-template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
-void IndexingEngine<TVoxel, PlainVoxelArray, TMemoryDeviceType>::AllocateGridAlignedBox(VoxelVolume<TVoxel, PlainVoxelArray>* volume,
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
+void IndexingEngine<TVoxel, PlainVoxelArray, TMemoryDeviceType, TExecutionMode>::AllocateGridAlignedBox(VoxelVolume<TVoxel, PlainVoxelArray>* volume,
                                                                                const Extent3Di& box) {}
 
 

@@ -18,8 +18,8 @@
 
 namespace ITMLib{
 
-template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
-class IndexingEngine<TVoxel, PlainVoxelArray, TMemoryDeviceType>:
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
+class IndexingEngine<TVoxel, PlainVoxelArray, TMemoryDeviceType, TExecutionMode>:
 		public IndexingEngineInterface<TVoxel, PlainVoxelArray> {
 
 public: // member functions

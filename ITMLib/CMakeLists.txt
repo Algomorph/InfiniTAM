@@ -370,9 +370,12 @@ set(ITMLIB_ENGINES_INDEXING_SHARED_HEADERS
 ##
 set(
         ITMLIB_ENGINES_INDEXING_AUX_SOURCES
+
+        Engines/Indexing/IndexingSettings.cpp
 )
 set(
         ITMLIB_ENGINES_INDEXING_AUX_HEADERS
+
         Engines/Indexing/IndexingEngineFactory.h
         Engines/Indexing/IndexingSettings.h
 )
@@ -964,6 +967,7 @@ set(ITMLIB_UTILS_HEADERS
     Utils/Geometry/CardinalAxesAndPlanes.h
     Utils/Geometry/CheckBlockVisibility.h
 
+    Utils/Metacoding/DefferableStructUtilities.h
     Utils/Metacoding/DeferrableSerializableStruct.h
     Utils/Metacoding/DeferrableSerializableStruct_Impl.h
     Utils/Metacoding/Metacoding.h

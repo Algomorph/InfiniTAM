@@ -21,12 +21,15 @@
 namespace ITMLib {
 
 
-template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
-class IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType> :
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
+class IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType, TExecutionMode> :
 		public IndexingEngineInterface<TVoxel, VoxelBlockHash>{
-
+protected: // member variables
+	using IndexingEngineInterface<TVoxel,VoxelBlockHash>::parameters;
 public: // member functions
-	IndexingEngine() = default;
+	using IndexingEngineInterface<TVoxel,VoxelBlockHash>::GetParameters;
+	using  IndexingEngineInterface<TVoxel,VoxelBlockHash>::IndexingEngineInterface;
+
 	static IndexingEngine& Instance() {
 		static IndexingEngine instance;
 		return instance;

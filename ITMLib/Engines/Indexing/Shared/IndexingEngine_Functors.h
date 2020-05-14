@@ -155,6 +155,7 @@ struct HashEntryStateBasedAllocationFunctor
 public: // member functions
 	HashEntryStateBasedAllocationFunctor(VoxelBlockHash& index)
 			: HashEntryStateBasedAllocationFunctor_Base<TMemoryDeviceType>(index) {}
+
 	_DEVICE_WHEN_AVAILABLE_
 	void operator()(const HashEntryAllocationState& hash_entry_state, const int hash_code) {
 		//_DEBUG alloc
@@ -328,77 +329,92 @@ public: // member functions
 };
 
 template<MemoryDeviceType TMemoryDeviceType>
-struct TwoSurfaceBasedAllocationStateMarkerFunctor
+struct TwoSurfaceBasedAllocationStateMarkerFunctor_Base
 		: public DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType> {
-public:
-	TwoSurfaceBasedAllocationStateMarkerFunctor(VoxelBlockHash& index,
-	                                            const VoxelVolumeParameters& volume_parameters,
-	                                            const ITMLib::View* view,
-	                                            const CameraTrackingState* tracking_state,
-	                                            float surface_distance_cutoff) :
+public: // member functions
+	TwoSurfaceBasedAllocationStateMarkerFunctor_Base(VoxelBlockHash& index,
+	                                                 const VoxelVolumeParameters& volume_parameters,
+	                                                 const ITMLib::View* view,
+	                                                 const CameraTrackingState* tracking_state,
+	                                                 float surface_distance_cutoff) :
 			DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType>(index, volume_parameters, view,
 			                                                          tracking_state->pose_d->GetM(),
 			                                                          surface_distance_cutoff) {}
 
+protected: // member functions
+
+
 	_DEVICE_WHEN_AVAILABLE_
-	void operator()(const float& surface1_depth, const Vector4f& surface2_point, int x, int y) {
+	inline bool
+	ComputeMarchSegment(ITMLib::Segment& march_segment, Vector4f& surface1_point,
+	                    const float& surface1_depth, const Vector4f& surface2_point,
+	                    const int x, const int y) {
 		bool has_surface1 = false, has_surface2 = false;
+		if (!(surface1_depth <= 0 || (surface1_depth - this->surface_distance_cutoff) < 0 ||
+		      (surface1_depth - this->surface_distance_cutoff) < this->near_clipping_distance ||
+		      (surface1_depth + this->surface_distance_cutoff) > this->far_clipping_distance))
+			has_surface1 = true;
+
+		if (surface2_point.z > 0.0f) has_surface2 = true;
+
+		if (has_surface1 && has_surface2) {
+			surface1_point = ImageSpacePointToCameraSpace(surface1_depth, x, y,
+			                                                       this->inverted_projection_parameters);
+			march_segment = FindHashBlockSegmentAlongCameraRayWithinRangeFromAndBetweenTwoPoints(
+					this->surface_distance_cutoff, surface1_point, surface2_point, this->inverted_camera_pose,
+					this->hash_block_size_reciprocal);
+		} else {
+			if (has_surface1) {
+				march_segment = FindHashBlockSegmentAlongCameraRayWithinRangeFromDepth(
+						this->surface_distance_cutoff, surface1_depth, x, y, this->inverted_camera_pose,
+						this->inverted_projection_parameters, this->hash_block_size_reciprocal);
+			} else if (has_surface2) {
+				march_segment = FindHashBlockSegmentAlongCameraRayWithinRangeFromPoint(
+						this->surface_distance_cutoff, surface2_point, this->inverted_camera_pose,
+						this->hash_block_size_reciprocal);
+			} else {
+				return false; // neither surface is defined at this point, nothing to do.
+			}
+		}
+		return true;
+	}
+
+	_DEVICE_WHEN_AVAILABLE_
+	inline bool
+	ComputeMarchSegment(ITMLib::Segment& march_segment, const float& surface1_depth, const Vector4f& surface2_point,
+	                    const int x, const int y) {
+		Vector4f surface1_point;
+		return ComputeMarchSegment(march_segment, surface1_point, surface1_depth, surface2_point, x, y);
+	}
+};
+
+template<MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode = OPTIMIZED>
+struct TwoSurfaceBasedAllocationStateMarkerFunctor;
+
+template<MemoryDeviceType TMemoryDeviceType>
+struct TwoSurfaceBasedAllocationStateMarkerFunctor<TMemoryDeviceType, OPTIMIZED>
+		: public TwoSurfaceBasedAllocationStateMarkerFunctor_Base<TMemoryDeviceType> {
+public:
+	using TwoSurfaceBasedAllocationStateMarkerFunctor_Base<TMemoryDeviceType>::TwoSurfaceBasedAllocationStateMarkerFunctor_Base;
+
+	_DEVICE_WHEN_AVAILABLE_
+	void operator()(const float& surface1_depth, const Vector4f& surface2_point, const int x, const int y) {
 
 		//_DEBUG alloc
 //		if(x == 226 && y == 332){
 //			int i = 10;
 //		}
-		if (!(surface1_depth <= 0 || (surface1_depth - surface_distance_cutoff) < 0 ||
-		      (surface1_depth - surface_distance_cutoff) < near_clipping_distance ||
-		      (surface1_depth + surface_distance_cutoff) > far_clipping_distance))
-			has_surface1 = true;
-
-		if (surface2_point.z > 0.0f) has_surface2 = true;
 
 		ITMLib::Segment march_segment;
+		if (!this->ComputeMarchSegment(march_segment, surface1_depth, surface2_point, x, y));
 
-		if (has_surface1 && has_surface2) {
-			Vector4f surface1_point = ImageSpacePointToCameraSpace(surface1_depth, x, y,
-			                                                       inverted_projection_parameters);
-			march_segment = FindHashBlockSegmentAlongCameraRayWithinRangeFromAndBetweenTwoPoints(
-					surface_distance_cutoff, surface1_point, surface2_point, inverted_camera_pose,
-					hash_block_size_reciprocal);
-		} else {
-			if (has_surface1) {
-				march_segment = FindHashBlockSegmentAlongCameraRayWithinRangeFromDepth(
-						surface_distance_cutoff, surface1_depth, x, y, inverted_camera_pose,
-						inverted_projection_parameters, hash_block_size_reciprocal);
-			} else if (has_surface2) {
-				march_segment = FindHashBlockSegmentAlongCameraRayWithinRangeFromPoint(
-						surface_distance_cutoff, surface2_point, inverted_camera_pose, hash_block_size_reciprocal);
-			} else {
-				return; // neither surface is defined at this point, nothing to do.
-			}
-		}
-
-		MarkVoxelHashBlocksAlongSegment(hash_entry_allocation_states, hash_block_coordinates,
-		                                *unresolvable_collision_encountered_device, hash_table, march_segment,
-		                                colliding_block_positions_device, colliding_block_count);
+		MarkVoxelHashBlocksAlongSegment(this->hash_entry_allocation_states, this->hash_block_coordinates,
+		                                *this->unresolvable_collision_encountered_device, this->hash_table,
+		                                march_segment,
+		                                this->colliding_block_positions_device, this->colliding_block_count);
 	}
 
 	using DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::colliding_block_positions;
-protected:
-	using DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::near_clipping_distance;
-	using DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::far_clipping_distance;
-	using DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::inverted_camera_pose;
-	using DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::inverted_projection_parameters;
-
-	using DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::surface_distance_cutoff;
-
-	using DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::hash_block_size_reciprocal;
-	using DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::hash_entry_allocation_states;
-	using DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::hash_block_coordinates;
-	using DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::hash_table;
-
-	using DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::colliding_block_positions_device;
-	using DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::colliding_block_count;
-
-	using DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::unresolvable_collision_encountered_device;
 };
 
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
