@@ -135,14 +135,14 @@ void UIEngine_BPO::Initialize(int& argc, char** argv,
 	allocateGPU = configuration.device_type == MEMORYDEVICE_CUDA;
 
 	for (int w = 0; w < NUM_WIN; w++) {
-		outImage[w] = new ITMUChar4Image(imageSource->GetDepthImageSize(), true, allocateGPU);
+		outImage[w] = new UChar4Image(imageSource->GetDepthImageSize(), true, allocateGPU);
 	}
 
-	inputRGBImage = new ITMUChar4Image(imageSource->GetRGBImageSize(), true, allocateGPU);
-	inputRawDepthImage = new ITMShortImage(imageSource->GetDepthImageSize(), true, allocateGPU);
+	inputRGBImage = new UChar4Image(imageSource->GetRGBImageSize(), true, allocateGPU);
+	inputRawDepthImage = new ShortImage(imageSource->GetDepthImageSize(), true, allocateGPU);
 	inputIMUMeasurement = new IMUMeasurement();
 
-	saveImage = new ITMUChar4Image(imageSource->GetDepthImageSize(), true, false);
+	saveImage = new UChar4Image(imageSource->GetDepthImageSize(), true, false);
 
 
 	outImageType[1] = MainEngine::InfiniTAM_IMAGE_ORIGINAL_DEPTH;
@@ -187,12 +187,12 @@ void UIEngine_BPO::Initialize(int& argc, char** argv,
 }
 
 void UIEngine_BPO::SaveScreenshot(const char* filename) const {
-	ITMUChar4Image screenshot(GetWindowSize(), true, false);
+	UChar4Image screenshot(GetWindowSize(), true, false);
 	GetScreenshot(&screenshot);
 	SaveImageToFile(screenshot, filename, true);
 }
 
-void UIEngine_BPO::GetScreenshot(ITMUChar4Image* dest) const {
+void UIEngine_BPO::GetScreenshot(UChar4Image* dest) const {
 	glReadPixels(0, 0, dest->dimensions.x, dest->dimensions.y, GL_RGBA, GL_UNSIGNED_BYTE,
 	             dest->GetData(MEMORYDEVICE_CPU));
 }
@@ -302,7 +302,7 @@ void UIEngine_BPO::RecordCurrentReconstructionFrameToVideo() {
 			cv::putText(img, std::to_string(GetCurrentFrameIndex()), cv::Size(10, 50), cv::FONT_HERSHEY_SIMPLEX,
 						1, cv::Scalar(128, 255, 128), 1, cv::LINE_AA);
 			cv::imwrite(fileName, img);
-			ITMUChar4Image* imageWithText = new ITMUChar4Image(image_source->getDepthImageSize(), true, allocateGPU);
+			UChar4Image* imageWithText = new UChar4Image(image_source->getDepthImageSize(), true, allocateGPU);
 			ReadImageFromFile(imageWithText, fileName.c_str());
 			reconstructionVideoWriter->writeFrame(imageWithText);
 			delete imageWithText;

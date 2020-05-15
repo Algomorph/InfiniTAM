@@ -100,7 +100,7 @@ void MultiVisualizationEngine_CPU<TVoxel, VoxelBlockHash>::CreateExpectedDepths(
 }
 
 template<typename TVoxel, typename TIndex>
-static void RenderImage_common(const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *_renderState, ITMUChar4Image *outputImage, IVisualizationEngine::RenderImageType type){
+static void RenderImage_common(const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *_renderState, UChar4Image *outputImage, IVisualizationEngine::RenderImageType type){
 	RenderStateMultiScene<TVoxel, TIndex> *renderState = (RenderStateMultiScene<TVoxel, TIndex>*)_renderState;
 
 	Vector2i imgSize = outputImage->dimensions;
@@ -228,13 +228,13 @@ static void RenderImage_common(const ORUtils::SE3Pose *pose, const Intrinsics *i
 };
 
 template<class TVoxel, class TIndex>
-void MultiVisualizationEngine_CPU<TVoxel, TIndex>::RenderImage(const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *_renderState, ITMUChar4Image *outputImage, IVisualizationEngine::RenderImageType type) const
+void MultiVisualizationEngine_CPU<TVoxel, TIndex>::RenderImage(const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *_renderState, UChar4Image *outputImage, IVisualizationEngine::RenderImageType type) const
 {
 	RenderImage_common<TVoxel,TIndex>(pose,intrinsics,_renderState,outputImage,type);
 }
 
 template<class TVoxel>
-void MultiVisualizationEngine_CPU<TVoxel, VoxelBlockHash>::RenderImage(const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *_renderState, ITMUChar4Image *outputImage, IVisualizationEngine::RenderImageType type) const
+void MultiVisualizationEngine_CPU<TVoxel, VoxelBlockHash>::RenderImage(const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *_renderState, UChar4Image *outputImage, IVisualizationEngine::RenderImageType type) const
 {
 	RenderImage_common<TVoxel,VoxelBlockHash>(pose,intrinsics,_renderState,outputImage,type);
 }

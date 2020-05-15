@@ -681,7 +681,7 @@ public:
 			VoxelVolume<TVoxelPrimary, VoxelBlockHash>* hash_volume,
 			VoxelVolume<TVoxelSecondary, PlainVoxelArray>* array_volume,
 			TFunctor& functor, bool verbose) {
-		ITMFlipArgumentBooleanFunctor<TVoxelPrimary, TVoxelSecondary, TFunctor> flip_functor(functor);
+		FlipArgumentBooleanFunctor<TVoxelPrimary, TVoxelSecondary, TFunctor> flip_functor(functor);
 		return TwoVolumeTraversalEngine<TVoxelSecondary, TVoxelPrimary, PlainVoxelArray, VoxelBlockHash, MEMORYDEVICE_CPU>::
 		TraverseAndCompareAll(array_volume, hash_volume, flip_functor, verbose);
 
@@ -694,7 +694,7 @@ public:
 			VoxelVolume<TVoxelPrimary, VoxelBlockHash>* hash_volume,
 			VoxelVolume<TVoxelSecondary, PlainVoxelArray>* array_volume,
 			TFunctor& functor) {
-		ITMFlipArgumentBooleanFunctor<TVoxelPrimary, TVoxelSecondary, TFunctor> flip_functor(functor);
+		FlipArgumentBooleanFunctor<TVoxelPrimary, TVoxelSecondary, TFunctor> flip_functor(functor);
 		return TwoVolumeTraversalEngine<TVoxelSecondary, TVoxelPrimary, PlainVoxelArray, VoxelBlockHash, MEMORYDEVICE_CPU>::
 		TraverseAndCompareAllocated(array_volume, hash_volume, flip_functor);
 	}

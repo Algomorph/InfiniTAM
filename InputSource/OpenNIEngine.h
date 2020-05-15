@@ -23,7 +23,7 @@ public:
 	~OpenNIEngine();
 
 	bool HasMoreImages() const override;
-	void GetImages(ITMUChar4Image& rgb, ITMShortImage& rawDepth);
+	void GetImages(UChar4Image& rgb, ShortImage& rawDepth);
 	Vector2i GetDepthImageSize() const override;
 	Vector2i GetRGBImageSize() const override;
 };

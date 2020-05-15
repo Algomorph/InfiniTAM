@@ -16,6 +16,8 @@
 #pragma once
 
 //local
+#include "IndexingEngine_DiagnosticData.h"
+#include "../../Telemetry/TelemetryRecorderFactory.h"
 #include "../../../../ORUtils/PlatformIndependence.h"
 #include "../../../../ORUtils/PlatformIndependentAtomics.h"
 #include "../../../Objects/Volume/VoxelVolume.h"
@@ -393,7 +395,7 @@ struct TwoSurfaceBasedAllocationStateMarkerFunctor;
 template<MemoryDeviceType TMemoryDeviceType>
 struct TwoSurfaceBasedAllocationStateMarkerFunctor<TMemoryDeviceType, OPTIMIZED>
 		: public TwoSurfaceBasedAllocationStateMarkerFunctor_Base<TMemoryDeviceType> {
-public:
+public: // member functions
 	using TwoSurfaceBasedAllocationStateMarkerFunctor_Base<TMemoryDeviceType>::TwoSurfaceBasedAllocationStateMarkerFunctor_Base;
 
 	_DEVICE_WHEN_AVAILABLE_
@@ -421,7 +423,9 @@ public:
 template<MemoryDeviceType TMemoryDeviceType>
 struct TwoSurfaceBasedAllocationStateMarkerFunctor<TMemoryDeviceType, DIAGNOSTIC>
 		: public TwoSurfaceBasedAllocationStateMarkerFunctor_Base<TMemoryDeviceType> {
-public:
+private: // member variables
+	IndexingDiagnosticData<VoxelBlockHash, TMemoryDeviceType> diagnostic_data;
+public: // member functions
 	TwoSurfaceBasedAllocationStateMarkerFunctor(VoxelBlockHash& index,
 	                                            const VoxelVolumeParameters& volume_parameters,
 	                                            const ITMLib::View* view,
@@ -429,7 +433,8 @@ public:
 	                                            float surface_distance_cutoff) :
 			TwoSurfaceBasedAllocationStateMarkerFunctor_Base<TMemoryDeviceType>(index, volume_parameters, view,
 			                                                                    tracking_state->pose_d->GetM(),
-			                                                                    surface_distance_cutoff) {}
+			                                                                    surface_distance_cutoff),
+            diagnostic_data(){}
 
 	_DEVICE_WHEN_AVAILABLE_
 	void operator()(const float& surface1_depth, const Vector4f& surface2_point, const int x, const int y) {

@@ -30,8 +30,8 @@ namespace ITMLib
 		ImageHierarchy<VolumeHierarchyLevel> *sceneHierarchy;
 		ImageHierarchy<DepthHierarchyLevel> *viewHierarchy_Depth;
 		ImageHierarchy<IntensityHierarchyLevel> *viewHierarchy_Intensity;
-		ImageHierarchy<TemplatedHierarchyLevel<ITMFloat4Image> > *reprojectedPointsHierarchy;
-		ImageHierarchy<TemplatedHierarchyLevel<ITMFloatImage> > *projectedIntensityHierarchy;
+		ImageHierarchy<TemplatedHierarchyLevel<Float4Image> > *reprojectedPointsHierarchy;
+		ImageHierarchy<TemplatedHierarchyLevel<FloatImage> > *projectedIntensityHierarchy;
 
 		CameraTrackingState *trackingState;
 		const View *view;
@@ -68,8 +68,8 @@ namespace ITMLib
 		VolumeHierarchyLevel *sceneHierarchyLevel_Depth;
 		DepthHierarchyLevel *viewHierarchyLevel_Depth;
 		IntensityHierarchyLevel *viewHierarchyLevel_Intensity;
-		TemplatedHierarchyLevel<ITMFloat4Image> *reprojectedPointsLevel;
-		TemplatedHierarchyLevel<ITMFloatImage > *projectedIntensityLevel;
+		TemplatedHierarchyLevel<Float4Image> *reprojectedPointsLevel;
+		TemplatedHierarchyLevel<FloatImage > *projectedIntensityLevel;
 
 		bool useColour;
 		bool useDepth;
@@ -82,13 +82,13 @@ namespace ITMLib
 
 		virtual int ComputeGandH_Depth(float &f, float *nabla, float *hessian, Matrix4f approxInvPose) = 0;
 		virtual int ComputeGandH_RGB(float &f, float *nabla, float *hessian, Matrix4f approxPose) = 0;
-		virtual void ProjectCurrentIntensityFrame(ITMFloat4Image *points_out,
-												  ITMFloatImage *intensity_out,
-												  const ITMFloatImage *intensity_in,
-												  const ITMFloatImage *depth_in,
-												  const Vector4f &intrinsics_depth,
-												  const Vector4f &intrinsics_rgb,
-												  const Matrix4f &scenePose) = 0;
+		virtual void ProjectCurrentIntensityFrame(Float4Image *points_out,
+		                                          FloatImage *intensity_out,
+		                                          const FloatImage *intensity_in,
+		                                          const FloatImage *depth_in,
+		                                          const Vector4f &intrinsics_depth,
+		                                          const Vector4f &intrinsics_rgb,
+		                                          const Matrix4f &scenePose) = 0;
 
 	public:
 		void TrackCamera(CameraTrackingState *trackingState, const View *view);

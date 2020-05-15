@@ -699,6 +699,7 @@ set(ITMLIB_ENGINES_TELEMETRY_SOURCES
 #    Engines/Telemetry/WarpFieldSequenceRecorder_VoxelBlockHash.cpp
     )
 set(ITMLIB_ENGINES_TELEMETRY_HEADERS
+    Engines/Indexing/Shared/IndexingEngine_DiagnosticData.h
     Engines/Telemetry/TelemetryRecorder.h
     Engines/Telemetry/TelemetryRecorderFactory.h
 #    Engines/Telemetry/WriteAndReadFunctors.h

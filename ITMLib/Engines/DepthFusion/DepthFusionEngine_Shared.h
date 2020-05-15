@@ -61,62 +61,62 @@ _CPU_AND_GPU_CODE_ inline void updateSdfAndFlagsBasedOnDistanceSurfaceToVoxel(
  * \brief Voxel update without confidence computation
  * \tparam TVoxel
  * \param voxel
- * \param voxelInSceneCoordinates
- * \param depthCameraSceneMatrix
- * \param depthCameraProjectionParameters
- * \param narrowBandHalfWidth
- * \param depthImage an array of float depths corresponding to the depth image
- * \param imageSize
+ * \param voxel_in_scene_coordinates
+ * \param depth_camera_pose
+ * \param depth_camera_projection_parameters
+ * \param narrow_band_half_width
+ * \param depth_image an array of float depths corresponding to the depth image
+ * \param depth_image_size
  * \return -1 if voxel point is behind camera or depth value is invalid (0.0f),
  * distance between voxel point & measured surface depth along camera ray otherwise
  */
 template<class TVoxel>
 _CPU_AND_GPU_CODE_ inline float computeUpdatedLiveVoxelDepthInfo(
 		DEVICEPTR(TVoxel)& voxel,
-		const THREADPTR(Vector4f)& voxelInSceneCoordinates,
-		const CONSTPTR(Matrix4f)& depthCameraSceneMatrix,
-		const CONSTPTR(Vector4f)& depthCameraProjectionParameters,
-		float narrowBandHalfWidth,
-		const CONSTPTR(float)* depthImage,
-		const CONSTPTR(Vector2i)& imageSize,
-		float effectiveRangeCutoff = 0.08f) {
+		const THREADPTR(Vector4f)& voxel_in_scene_coordinates,
+		const CONSTPTR(Matrix4f)& depth_camera_pose,
+		const CONSTPTR(Vector4f)& depth_camera_projection_parameters,
+		float narrow_band_half_width,
+		const CONSTPTR(float)* depth_image,
+		const CONSTPTR(Vector2i)& depth_image_size,
+		float effective_range_cutoff = 0.08f) {
 
 	// project point into image (voxel point in camera coordinates)
-	Vector4f voxelPointInCameraCoordinates = depthCameraSceneMatrix * voxelInSceneCoordinates;
+	Vector4f voxel_point_in_camera_coordinates = depth_camera_pose * voxel_in_scene_coordinates;
 	// if point is behind the camera, don't modify any voxels
-	if (voxelPointInCameraCoordinates.z <= 0) {
+	if (voxel_point_in_camera_coordinates.z <= 0) {
 		return -1.0f;
 	}
 
-	Vector2f voxelPointProjectedToImage;
-	voxelPointProjectedToImage.x = depthCameraProjectionParameters.x * voxelPointInCameraCoordinates.x
-	                               / voxelPointInCameraCoordinates.z + depthCameraProjectionParameters.z;
-	voxelPointProjectedToImage.y = depthCameraProjectionParameters.y * voxelPointInCameraCoordinates.y
-	                               / voxelPointInCameraCoordinates.z + depthCameraProjectionParameters.w;
+	Vector2f voxel_point_projected_to_image;
+	voxel_point_projected_to_image.x = depth_camera_projection_parameters.fx * voxel_point_in_camera_coordinates.x
+	                                   / voxel_point_in_camera_coordinates.z + depth_camera_projection_parameters.cx;
+	voxel_point_projected_to_image.y = depth_camera_projection_parameters.fy * voxel_point_in_camera_coordinates.y
+	                                   / voxel_point_in_camera_coordinates.z + depth_camera_projection_parameters.cy;
 
 	// point falls outside of the image bounds
-	if ((voxelPointProjectedToImage.x < 1) || (voxelPointProjectedToImage.x > imageSize.x - 2)
-	    || (voxelPointProjectedToImage.y < 1) || (voxelPointProjectedToImage.y > imageSize.y - 2)) {
+	if ((voxel_point_projected_to_image.x < 1) || (voxel_point_projected_to_image.x > depth_image_size.width - 2)
+	    || (voxel_point_projected_to_image.y < 1) || (voxel_point_projected_to_image.y > depth_image_size.height - 2)) {
 		return -1.0f;
 	}
 
-	// get measured depthImage from image
-	float depthMeasure = depthImage[static_cast<int>(voxelPointProjectedToImage.x + 0.5f) +
-	                                static_cast<int>(voxelPointProjectedToImage.y + 0.5f) * imageSize.x];
+	// get measured depth_image from image
+	float depth_measure = depth_image[static_cast<int>(voxel_point_projected_to_image.x + 0.5f) +
+	                                  static_cast<int>(voxel_point_projected_to_image.y + 0.5f) * depth_image_size.width];
 
-	// if depthImage is "invalid", return "unknown"
-	if (depthMeasure <= 0.0f) {
+	// if depth_image is "invalid", return "unknown"
+	if (depth_measure <= 0.0f) {
 		//keep voxel flags at ITMLib::VOXEL_UNKNOWN
 		return -1.0f;
 	}
 
-	// signedDistanceSurfaceToVoxelAlongCameraRay (i.e. eta) =
-	// [distance from surface to camera, i.e. depthImage] - [distance from voxel to camera]
+	// signed_distance_surface_to_voxel_along_camera_ray (i.e. "eta" or 𝜂 in many publications) =
+	// [distance from surface to camera, i.e. depth_image] - [distance from voxel to camera]
 	// effectively, eta is the distance between measured surface & voxel point
-	float signedDistanceSurfaceToVoxelAlongCameraRay = depthMeasure - voxelPointInCameraCoordinates.z;
-	updateSdfAndFlagsBasedOnDistanceSurfaceToVoxel(voxel, signedDistanceSurfaceToVoxelAlongCameraRay,
-	                                               narrowBandHalfWidth, effectiveRangeCutoff);
-	return signedDistanceSurfaceToVoxelAlongCameraRay;
+	float signed_distance_surface_to_voxel_along_camera_ray = depth_measure - voxel_point_in_camera_coordinates.z;
+	updateSdfAndFlagsBasedOnDistanceSurfaceToVoxel(voxel, signed_distance_surface_to_voxel_along_camera_ray,
+	                                               narrow_band_half_width, effective_range_cutoff);
+	return signed_distance_surface_to_voxel_along_camera_ray;
 }
 
 /**

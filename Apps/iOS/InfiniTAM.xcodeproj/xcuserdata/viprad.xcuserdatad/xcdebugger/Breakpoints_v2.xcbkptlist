@@ -513,7 +513,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "32"
             endingLineNumber = "32"
-            landmarkName = "ITMViewBuilder_Metal::ConvertDisparityToDepth(ITMFloatImage *depth_out, const ITMShortImage *depth_in, const ITMIntrinsics *depthIntrinsics, const ITMDisparityCalib *disparityCalib)"
+            landmarkName = "ITMViewBuilder_Metal::ConvertDisparityToDepth(FloatImage *depth_out, const ShortImage *depth_in, const ITMIntrinsics *depthIntrinsics, const ITMDisparityCalib *disparityCalib)"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>

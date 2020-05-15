@@ -9,7 +9,7 @@ using namespace ITMLib;
 LowLevelEngine_CPU::LowLevelEngine_CPU() { }
 LowLevelEngine_CPU::~LowLevelEngine_CPU() { }
 
-void LowLevelEngine_CPU::CopyImage(ITMUChar4Image *image_out, const ITMUChar4Image *image_in) const
+void LowLevelEngine_CPU::CopyImage(UChar4Image *image_out, const UChar4Image *image_in) const
 {
 	Vector4u *dest = image_out->GetData(MEMORYDEVICE_CPU);
 	const Vector4u *src = image_in->GetData(MEMORYDEVICE_CPU);
@@ -17,7 +17,7 @@ void LowLevelEngine_CPU::CopyImage(ITMUChar4Image *image_out, const ITMUChar4Ima
 	memcpy(dest, src, image_in->size() * sizeof(Vector4u));
 }
 
-void LowLevelEngine_CPU::CopyImage(ITMFloatImage *image_out, const ITMFloatImage *image_in) const
+void LowLevelEngine_CPU::CopyImage(FloatImage *image_out, const FloatImage *image_in) const
 {
 	float *dest = image_out->GetData(MEMORYDEVICE_CPU);
 	const float *src = image_in->GetData(MEMORYDEVICE_CPU);
@@ -25,7 +25,7 @@ void LowLevelEngine_CPU::CopyImage(ITMFloatImage *image_out, const ITMFloatImage
 	memcpy(dest, src, image_in->size() * sizeof(float));
 }
 
-void LowLevelEngine_CPU::CopyImage(ITMFloat4Image *image_out, const ITMFloat4Image *image_in) const
+void LowLevelEngine_CPU::CopyImage(Float4Image *image_out, const Float4Image *image_in) const
 {
 	Vector4f *dest = image_out->GetData(MEMORYDEVICE_CPU);
 	const Vector4f *src = image_in->GetData(MEMORYDEVICE_CPU);
@@ -33,7 +33,7 @@ void LowLevelEngine_CPU::CopyImage(ITMFloat4Image *image_out, const ITMFloat4Ima
 	memcpy(dest, src, image_in->size() * sizeof(Vector4f));
 }
 
-void LowLevelEngine_CPU::ConvertColourToIntensity(ITMFloatImage *image_out, const ITMUChar4Image *image_in) const
+void LowLevelEngine_CPU::ConvertColourToIntensity(FloatImage *image_out, const UChar4Image *image_in) const
 {
 	const Vector2i dims = image_in->dimensions;
 	image_out->ChangeDims(dims);
@@ -45,7 +45,7 @@ void LowLevelEngine_CPU::ConvertColourToIntensity(ITMFloatImage *image_out, cons
 		convertColourToIntensity(dest, x, y, dims, src);
 }
 
-void LowLevelEngine_CPU::FilterIntensity(ITMFloatImage *image_out, const ITMFloatImage *image_in) const
+void LowLevelEngine_CPU::FilterIntensity(FloatImage *image_out, const FloatImage *image_in) const
 {
 	Vector2i dims = image_in->dimensions;
 
@@ -59,7 +59,7 @@ void LowLevelEngine_CPU::FilterIntensity(ITMFloatImage *image_out, const ITMFloa
 		boxFilter2x2(imageData_out, x, y, dims, imageData_in, x, y, dims);
 }
 
-void LowLevelEngine_CPU::FilterSubsample(ITMUChar4Image *image_out, const ITMUChar4Image *image_in) const
+void LowLevelEngine_CPU::FilterSubsample(UChar4Image *image_out, const UChar4Image *image_in) const
 {
 	Vector2i oldDims = image_in->dimensions;
 	Vector2i newDims; newDims.x = image_in->dimensions.x / 2; newDims.y = image_in->dimensions.y / 2;
@@ -73,7 +73,7 @@ void LowLevelEngine_CPU::FilterSubsample(ITMUChar4Image *image_out, const ITMUCh
 		filterSubsample(imageData_out, x, y, newDims, imageData_in, oldDims);
 }
 
-void LowLevelEngine_CPU::FilterSubsample(ITMFloatImage *image_out, const ITMFloatImage *image_in) const
+void LowLevelEngine_CPU::FilterSubsample(FloatImage *image_out, const FloatImage *image_in) const
 {
 	Vector2i oldDims = image_in->dimensions;
 	Vector2i newDims(image_in->dimensions.x / 2, image_in->dimensions.y / 2);
@@ -88,7 +88,7 @@ void LowLevelEngine_CPU::FilterSubsample(ITMFloatImage *image_out, const ITMFloa
 		boxFilter2x2(imageData_out, x, y, newDims, imageData_in, x * 2, y * 2, oldDims);
 }
 
-void LowLevelEngine_CPU::FilterSubsampleWithHoles(ITMFloatImage *image_out, const ITMFloatImage *image_in) const
+void LowLevelEngine_CPU::FilterSubsampleWithHoles(FloatImage *image_out, const FloatImage *image_in) const
 {
 	Vector2i oldDims = image_in->dimensions;
 	Vector2i newDims; newDims.x = image_in->dimensions.x / 2; newDims.y = image_in->dimensions.y / 2;
@@ -102,7 +102,7 @@ void LowLevelEngine_CPU::FilterSubsampleWithHoles(ITMFloatImage *image_out, cons
 		filterSubsampleWithHoles(imageData_out, x, y, newDims, imageData_in, oldDims);
 }
 
-void LowLevelEngine_CPU::FilterSubsampleWithHoles(ITMFloat4Image *image_out, const ITMFloat4Image *image_in) const
+void LowLevelEngine_CPU::FilterSubsampleWithHoles(Float4Image *image_out, const Float4Image *image_in) const
 {
 	Vector2i oldDims = image_in->dimensions;
 	Vector2i newDims; newDims.x = image_in->dimensions.x / 2; newDims.y = image_in->dimensions.y / 2;
@@ -116,7 +116,7 @@ void LowLevelEngine_CPU::FilterSubsampleWithHoles(ITMFloat4Image *image_out, con
 		filterSubsampleWithHoles(imageData_out, x, y, newDims, imageData_in, oldDims);
 }
 
-void LowLevelEngine_CPU::GradientX(ITMShort4Image *grad_out, const ITMUChar4Image *image_in) const
+void LowLevelEngine_CPU::GradientX(Short4Image *grad_out, const UChar4Image *image_in) const
 {
 	grad_out->ChangeDims(image_in->dimensions);
 	Vector2i imgSize = image_in->dimensions;
@@ -130,7 +130,7 @@ void LowLevelEngine_CPU::GradientX(ITMShort4Image *grad_out, const ITMUChar4Imag
 		gradientX(grad, x, y, image, imgSize);
 }
 
-void LowLevelEngine_CPU::GradientY(ITMShort4Image *grad_out, const ITMUChar4Image *image_in) const
+void LowLevelEngine_CPU::GradientY(Short4Image *grad_out, const UChar4Image *image_in) const
 {
 	grad_out->ChangeDims(image_in->dimensions);
 	Vector2i imgSize = image_in->dimensions;
@@ -144,7 +144,7 @@ void LowLevelEngine_CPU::GradientY(ITMShort4Image *grad_out, const ITMUChar4Imag
 		gradientY(grad, x, y, image, imgSize);
 }
 
-void LowLevelEngine_CPU::GradientXY(ITMFloat2Image *grad_out, const ITMFloatImage *image_in) const
+void LowLevelEngine_CPU::GradientXY(Float2Image *grad_out, const FloatImage *image_in) const
 {
 	Vector2i imgSize = image_in->dimensions;
 	grad_out->ChangeDims(imgSize);
@@ -157,7 +157,7 @@ void LowLevelEngine_CPU::GradientXY(ITMFloat2Image *grad_out, const ITMFloatImag
 		gradientXY(grad, x, y, image, imgSize);
 }
 
-int LowLevelEngine_CPU::CountValidDepths(const ITMFloatImage *image_in) const
+int LowLevelEngine_CPU::CountValidDepths(const FloatImage *image_in) const
 {
 	int noValidPoints = 0;
 	const float *imageData_in = image_in->GetData(MEMORYDEVICE_CPU);

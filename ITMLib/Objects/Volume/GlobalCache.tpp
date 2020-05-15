@@ -45,8 +45,8 @@ GlobalCache<TVoxel, VoxelBlockHash>::GlobalCache(const int hash_entry_count) : h
 	stored_voxel_blocks = (TVoxel*) malloc(hash_entry_count * sizeof(TVoxel) * VOXEL_BLOCK_SIZE3);
 	memset(has_stored_data, 0, hash_entry_count);
 
-	swap_states_host = (ITMHashSwapState*) malloc(hash_entry_count * sizeof(ITMHashSwapState));
-	memset(swap_states_host, 0, sizeof(ITMHashSwapState) * hash_entry_count);
+	swap_states_host = (HashSwapState*) malloc(hash_entry_count * sizeof(HashSwapState));
+	memset(swap_states_host, 0, sizeof(HashSwapState) * hash_entry_count);
 
 #ifndef COMPILE_WITHOUT_CUDA
 	ORcudaSafeCall(cudaMallocHost((void**) &synced_voxel_blocks_host,
@@ -54,8 +54,8 @@ GlobalCache<TVoxel, VoxelBlockHash>::GlobalCache(const int hash_entry_count) : h
 	ORcudaSafeCall(cudaMallocHost((void**) &has_synced_data_host, SWAP_OPERATION_BLOCK_COUNT * sizeof(bool)));
 	ORcudaSafeCall(cudaMallocHost((void**) &needed_hash_codes_host, SWAP_OPERATION_BLOCK_COUNT * sizeof(int)));
 
-	ORcudaSafeCall(cudaMalloc((void**) &swap_states_device, hash_entry_count * sizeof(ITMHashSwapState)));
-	ORcudaSafeCall(cudaMemset(swap_states_device, 0, hash_entry_count * sizeof(ITMHashSwapState)));
+	ORcudaSafeCall(cudaMalloc((void**) &swap_states_device, hash_entry_count * sizeof(HashSwapState)));
+	ORcudaSafeCall(cudaMemset(swap_states_device, 0, hash_entry_count * sizeof(HashSwapState)));
 
 	ORcudaSafeCall(cudaMalloc((void**) &synced_voxel_blocks_device,
 	                          SWAP_OPERATION_BLOCK_COUNT * sizeof(TVoxel) * VOXEL_BLOCK_SIZE3));
@@ -82,7 +82,7 @@ GlobalCache<TVoxel, VoxelBlockHash>::GlobalCache(const GlobalCache& other) : Glo
 		ORcudaSafeCall(cudaMemcpy(needed_hash_codes_host, other.needed_hash_codes_host,
 		                          SWAP_OPERATION_BLOCK_COUNT * sizeof(int), cudaMemcpyHostToHost));
 		ORcudaSafeCall(cudaMemcpy(swap_states_device, other.swap_states_device,
-		                          hash_entry_count * sizeof(ITMHashSwapState), cudaMemcpyDeviceToDevice));
+		                          hash_entry_count * sizeof(HashSwapState), cudaMemcpyDeviceToDevice));
 		ORcudaSafeCall(cudaMemcpy(synced_voxel_blocks_device, other.synced_voxel_blocks_device,
 		                          SWAP_OPERATION_BLOCK_COUNT * sizeof(TVoxel) * VOXEL_BLOCK_SIZE3,
 		                          cudaMemcpyDeviceToDevice));

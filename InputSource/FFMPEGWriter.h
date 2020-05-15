@@ -15,8 +15,8 @@ class FFMPEGWriter
 	~FFMPEGWriter();
 
 	bool open(const char *filename, int size_x, int size_y, bool isDepth, int fps);
-	bool writeFrame(ITMUChar4Image *rgbImage);
-	bool writeFrame(ITMShortImage *depthImage);
+	bool writeFrame(UChar4Image *rgbImage);
+	bool writeFrame(ShortImage *depthImage);
 	bool close();
 
 	bool isOpen() const;

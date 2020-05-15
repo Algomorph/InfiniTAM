@@ -42,11 +42,11 @@ namespace snoopy = snoopy_test_utilities;
 BOOST_AUTO_TEST_CASE(testImageMaskReader) {
 
 	using namespace InputSource;
-	ITMUChar4Image rgb(true, false);
-	ITMShortImage depth(true, false);
-	ITMUChar4Image masked_rgb_ground_truth(true, false);
-	ITMShortImage masked_depth_ground_truth(true, false);
-	ITMUCharImage mask(true, false);
+	UChar4Image rgb(true, false);
+	ShortImage depth(true, false);
+	UChar4Image masked_rgb_ground_truth(true, false);
+	ShortImage masked_depth_ground_truth(true, false);
+	UCharImage mask(true, false);
 
 	InputSource::ImageMaskPathGenerator pathGenerator(
 			"TestData/frames/snoopy_color_%06i.png",

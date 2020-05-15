@@ -39,7 +39,7 @@ namespace ITMLib
 		IMUCalibrator *imuCalibrator;
 
 		FernRelocLib::Relocaliser<float> *relocaliser;
-		ITMUChar4Image *kfRaycast;
+		UChar4Image *kfRaycast;
 
 		/// Pointer for storing the current input frame
 		View *view;
@@ -54,7 +54,7 @@ namespace ITMLib
 		/// Gives access to the internal world representation
 		VoxelVolume<TVoxel, TIndex>* GetScene() { return volume; }
 
-		CameraTrackingState::TrackingResult ProcessFrame(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage, IMUMeasurement *imuMeasurement = NULL);
+		CameraTrackingState::TrackingResult ProcessFrame(UChar4Image *rgbImage, ShortImage *rawDepthImage, IMUMeasurement *imuMeasurement = NULL);
 
 		/// Extracts a mesh from the current scene and saves it to the model file specified by the file name
 		void SaveSceneToMesh(const char *fileName);
@@ -66,7 +66,7 @@ namespace ITMLib
 		/// Get a result image as output
 		Vector2i GetImageSize() const;
 
-		void GetImage(ITMUChar4Image *out, GetImageType getImageType, ORUtils::SE3Pose *pose = NULL, Intrinsics *intrinsics = NULL);
+		void GetImage(UChar4Image *out, GetImageType getImageType, ORUtils::SE3Pose *pose = NULL, Intrinsics *intrinsics = NULL);
 
 		/// switch for turning tracking on/off
 		void TurnOnTracking() override;

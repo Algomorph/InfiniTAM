@@ -25,7 +25,7 @@ namespace InputSource
 		~Kinect2Engine();
 
 		bool HasMoreImages() const override;
-		void GetImages(ITMUChar4Image& rgbImage, ITMShortImage& rawDepthImage) override;
+		void GetImages(UChar4Image& rgbImage, ShortImage& rawDepthImage) override;
 		Vector2i GetDepthImageSize() const override;
 		Vector2i GetRGBImageSize() const override;
 	};

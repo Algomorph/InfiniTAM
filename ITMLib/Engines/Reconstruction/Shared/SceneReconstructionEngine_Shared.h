@@ -103,7 +103,7 @@ findVoxelHashBlocksAlongSegmentLegacy_Algomorph(ITMLib::HashEntryAllocationState
 	int step_count = (int) std::ceil(2.0f * segment_in_hash_blocks.length());
 
 	// a single stride along the sdf band segment from one step to the next
-	Vector3f strideVector = segment_in_hash_blocks.direction / (float) (step_count - 1);
+	Vector3f strideVector = segment_in_hash_blocks.vector_to_destination / (float) (step_count - 1);
 
 	Vector3s previousHashBlockPosition;
 	Vector3f check_position = segment_in_hash_blocks.origin;

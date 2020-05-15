@@ -274,7 +274,7 @@ OpenNIEngine::~OpenNIEngine()
 	openni::OpenNI::shutdown();
 }
 
-void OpenNIEngine::GetImages(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage)
+void OpenNIEngine::GetImages(UChar4Image *rgbImage, ITMShortImage *rawDepthImage)
 {
 	int changedIndex, waitStreamCount;
 	if (depthAvailable && colorAvailable) waitStreamCount = 2;
@@ -335,7 +335,7 @@ OpenNIEngine::OpenNIEngine(const char* calibFilename, const char* deviceURI, con
 
 OpenNIEngine::~OpenNIEngine() {}
 
-void OpenNIEngine::GetImages(ITMUChar4Image& rgbImage, ITMShortImage& rawDepthImage) { return; }
+void OpenNIEngine::GetImages(UChar4Image& rgbImage, ShortImage& rawDepthImage) { return; }
 
 bool OpenNIEngine::HasMoreImages() const { return false; }
 

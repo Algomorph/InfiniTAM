@@ -23,22 +23,26 @@ class Segment {
 public:
 	_CPU_AND_GPU_CODE_
 	Segment() :
-			origin(0.0f), direction(0.0f),
+			origin(0.0f), vector_to_destination(0.0f),
 			inverseDirection(0.0f),
 			sign{(inverseDirection.x < 0),(inverseDirection.y < 0),(inverseDirection.z < 0)}
 	{}
 	_CPU_AND_GPU_CODE_
 	Segment(const Vector3f& startPoint, const Vector3f& endPoint) :
-			origin(startPoint), direction(endPoint - startPoint),
-			inverseDirection(Vector3f(1.0) / direction),
+			origin(startPoint), vector_to_destination(endPoint - startPoint),
+			inverseDirection(Vector3f(1.0) / vector_to_destination),
 			sign{(inverseDirection.x < 0),(inverseDirection.y < 0),(inverseDirection.z < 0)}
 			{}
 	_CPU_AND_GPU_CODE_
 	float length() const{
-		return sqrtf(direction.x * direction.x + direction.y * direction.y +
-		             direction.z * direction.z);
+		return sqrtf(vector_to_destination.x * vector_to_destination.x + vector_to_destination.y * vector_to_destination.y +
+		             vector_to_destination.z * vector_to_destination.z);
 	}
-	Vector3f origin, direction;
+	_CPU_AND_GPU_CODE_
+	Vector3f destination() const{
+		return origin + vector_to_destination;
+	}
+	Vector3f origin, vector_to_destination;
 	Vector3f inverseDirection;
 	int sign[3];
 };

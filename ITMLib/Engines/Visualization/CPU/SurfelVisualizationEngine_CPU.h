@@ -30,11 +30,11 @@ namespace ITMLib
 
     /** Override */
     virtual void RenderDepthImage(const SurfelScene<TSurfel> *scene, const ORUtils::SE3Pose *pose, const SurfelRenderState *renderState,
-                                  ITMFloatImage *outputImage) const;
+                                  FloatImage *outputImage) const;
 
     /** Override */
     virtual void RenderImage(const SurfelScene<TSurfel> *scene, const ORUtils::SE3Pose *pose, const SurfelRenderState *renderState,
-                             ITMUChar4Image *outputImage, RenderImageType type) const;
+                             UChar4Image *outputImage, RenderImageType type) const;
 
     //#################### PRIVATE MEMBER FUNCTIONS ####################
   private:

@@ -142,7 +142,7 @@ struct TodoListEntry {
 };
 
 template <typename TVoxel, typename TIndex>
-CameraTrackingState::TrackingResult MultiEngine<TVoxel, TIndex>::ProcessFrame(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage, IMUMeasurement *imuMeasurement)
+CameraTrackingState::TrackingResult MultiEngine<TVoxel, TIndex>::ProcessFrame(UChar4Image *rgbImage, ShortImage *rawDepthImage, IMUMeasurement *imuMeasurement)
 {
 	auto& settings = configuration::get();
 	std::vector<TodoListEntry> todoList;
@@ -331,7 +331,7 @@ Vector2i MultiEngine<TVoxel, TIndex>::GetImageSize() const
 }
 
 template <typename TVoxel, typename TIndex>
-void MultiEngine<TVoxel, TIndex>::GetImage(ITMUChar4Image *out, GetImageType getImageType, ORUtils::SE3Pose *pose, Intrinsics *intrinsics)
+void MultiEngine<TVoxel, TIndex>::GetImage(UChar4Image *out, GetImageType getImageType, ORUtils::SE3Pose *pose, Intrinsics *intrinsics)
 {
 	if (view == NULL) return;
 	auto& settings = configuration::get();

@@ -39,11 +39,7 @@ TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::TelemetryRecorder()
 		  camera_trajectory_file(parameters.record_camera_matrices ?
 		                         ORUtils::OStreamWrapper((fs::path(configuration::get().paths.output_path)
 		                                                  / fs::path("camera_matrices.dat")).string(), true, true)
-		                                                                                        : ORUtils::OStreamWrapper()),
-                                    surface1_point_cloud(Vector2i(0,0),TMemoryDeviceType),
-                                    surface2_point_cloud(Vector2i(0,0),TMemoryDeviceType),
-                                    march_endpoint1_point_cloud(Vector2i(0,0),TMemoryDeviceType),
-                                    march_endpoint2_point_cloud(Vector2i(0,0),TMemoryDeviceType){}
+		                                                                                        : ORUtils::OStreamWrapper()) {}
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::RecordVolumeMemoryUsageInfo(

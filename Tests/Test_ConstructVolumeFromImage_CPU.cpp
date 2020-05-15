@@ -271,8 +271,8 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
 	Vector2i image_size(640, 480);
 	View* view = nullptr;
 
-	ITMUChar4Image rgb(true, false);
-	ITMShortImage depth(true, false);
+	UChar4Image rgb(true, false);
+	ShortImage depth(true, false);
 	BOOST_REQUIRE(ReadImageFromFile(rgb, "TestData/frames/stripes_color.png"));
 	BOOST_REQUIRE(ReadImageFromFile(depth, "TestData/frames/stripes_depth.png"));
 
@@ -434,8 +434,8 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CPU) {
 	Vector2i imageSize(640, 480);
 	View* view = nullptr;
 
-	ITMUChar4Image rgb(true, false);
-	ITMShortImage depth(true, false);
+	UChar4Image rgb(true, false);
+	ShortImage depth(true, false);
 	BOOST_REQUIRE(ReadImageFromFile(rgb, snoopy::Frame00ColorPath().c_str()));
 	BOOST_REQUIRE(ReadImageFromFile(depth, snoopy::Frame00DepthPath().c_str()));
 

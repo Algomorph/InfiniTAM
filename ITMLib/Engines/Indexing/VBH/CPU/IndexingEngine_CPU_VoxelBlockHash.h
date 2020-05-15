@@ -24,7 +24,7 @@ namespace ITMLib {
 namespace internal {
 
 template<typename TVoxel>
-struct SpecializedVoxelHashBlockManager<MEMORYDEVICE_CPU, TVoxel>{
+struct IndexingEngine_VoxelBlockHash_MemoryDeviceTypeSpecialized<MEMORYDEVICE_CPU, TVoxel>{
 	static HashEntry FindHashEntry(const VoxelBlockHash& index, const Vector3s& coordinates, int& hash_code);
 	static bool AllocateHashBlockAt(VoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3s at, int& hash_code);
 	static void RebuildVisibleBlockList(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const View* view, const Matrix4f& depth_camera_matrix);

@@ -38,7 +38,7 @@ setVisibleEntriesToVisibleAtPreviousFrameAndUnstreamed(ITMLib::HashBlockVisibili
 
 template<bool useSwapping>
 __global__ void
-buildVisibilityList_device(ITMLib::HashEntry* hashTable, ITMLib::ITMHashSwapState* swapStates, int hash_entry_count,
+buildVisibilityList_device(ITMLib::HashEntry* hashTable, ITMLib::HashSwapState* swapStates, int hash_entry_count,
                            int* visibleEntryIDs, int* visible_block_count,
                            ITMLib::HashBlockVisibility* blockVisibilityTypes,
                            Matrix4f M_d, Vector4f projParams_d, Vector2i depthImgSize, float voxelSize) {

@@ -117,7 +117,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType, TExecutionMode>::
 	float band_factor = configuration::get().general_voxel_volume_parameters.block_allocation_band_factor;
 	float surface_distance_cutoff = band_factor * volume->GetParameters().narrow_band_half_width;
 
-	TwoSurfaceBasedAllocationStateMarkerFunctor<TMemoryDeviceType> depth_based_allocator(
+	TwoSurfaceBasedAllocationStateMarkerFunctor<TMemoryDeviceType, TExecutionMode> depth_based_allocator(
 			volume->index, volume->GetParameters(), view, tracking_state, surface_distance_cutoff);
 
 	do {
@@ -258,8 +258,8 @@ HashEntry
 IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType, TExecutionMode>::FindHashEntry(const VoxelBlockHash& index,
                                                                                          const Vector3s& coordinates) {
 	int hash_code;
-	return internal::SpecializedVoxelHashBlockManager<TMemoryDeviceType, TVoxel>::FindHashEntry(index, coordinates,
-	                                                                                            hash_code);
+	return internal::IndexingEngine_VoxelBlockHash_MemoryDeviceTypeSpecialized<TMemoryDeviceType, TVoxel>::FindHashEntry(index, coordinates,
+	                                                                                                                     hash_code);
 }
 
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
@@ -267,15 +267,15 @@ HashEntry
 IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType, TExecutionMode>::FindHashEntry(const VoxelBlockHash& index,
                                                                                          const Vector3s& coordinates,
                                                                                          int& hash_code) {
-	return internal::SpecializedVoxelHashBlockManager<TMemoryDeviceType, TVoxel>::FindHashEntry(index, coordinates,
-	                                                                                            hash_code);
+	return internal::IndexingEngine_VoxelBlockHash_MemoryDeviceTypeSpecialized<TMemoryDeviceType, TVoxel>::FindHashEntry(index, coordinates,
+	                                                                                                                     hash_code);
 }
 
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
 bool IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType, TExecutionMode>::AllocateHashBlockAt(
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3s at, int& hash_code) {
-	return internal::SpecializedVoxelHashBlockManager<TMemoryDeviceType, TVoxel>::AllocateHashBlockAt(volume, at,
-	                                                                                                  hash_code);
+	return internal::IndexingEngine_VoxelBlockHash_MemoryDeviceTypeSpecialized<TMemoryDeviceType, TVoxel>::AllocateHashBlockAt(volume, at,
+	                                                                                                                           hash_code);
 }
 
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode, HashBlockVisibility THashBlockVisibility>
@@ -312,8 +312,8 @@ void IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType, TExecutionMode>::
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
 void IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType, TExecutionMode>::RebuildVisibleBlockList(
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume, const View* view, const Matrix4f& depth_camera_matrix) {
-	internal::SpecializedVoxelHashBlockManager<TMemoryDeviceType, TVoxel>::RebuildVisibleBlockList(volume, view,
-	                                                                                               depth_camera_matrix);
+	internal::IndexingEngine_VoxelBlockHash_MemoryDeviceTypeSpecialized<TMemoryDeviceType, TVoxel>::RebuildVisibleBlockList(volume, view,
+	                                                                                                                        depth_camera_matrix);
 }
 
 namespace ITMLib {

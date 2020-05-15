@@ -346,7 +346,7 @@ LibUVCEngine::~LibUVCEngine()
 	if (data->ctx != NULL) uvc_exit(data->ctx);
 }
 
-void LibUVCEngine::GetImages(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage)
+void LibUVCEngine::GetImages(UChar4Image *rgbImage, ShortImage *rawDepthImage)
 {
 	int counter = 0;
 	while ((data->hasColour&&(data->got_color == 0)) || (data->got_depth == 0)) {
@@ -386,7 +386,7 @@ LibUVCEngine::LibUVCEngine(const char* calibFilename, Vector2i requested_imageSi
 
 LibUVCEngine::~LibUVCEngine() {}
 
-void LibUVCEngine::GetImages(ITMUChar4Image& rgbImage, ITMShortImage& rawDepthImage) { }
+void LibUVCEngine::GetImages(UChar4Image& rgbImage, ShortImage& rawDepthImage) { }
 
 bool LibUVCEngine::HasMoreImages() const { return false; }
 

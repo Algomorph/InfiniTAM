@@ -36,7 +36,7 @@ public:
 	~RealSenseEngine();
 
 	bool HasMoreImages() const override;
-	void GetImages(ITMUChar4Image& rgb, ITMShortImage& rawDepth) override;
+	void GetImages(UChar4Image& rgb, ShortImage& rawDepth) override;
 	Vector2i GetDepthImageSize() const override;
 	Vector2i GetRGBImageSize() const override;
 };

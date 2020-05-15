@@ -160,9 +160,9 @@ UpdateView(View** view, const std::string& depth_path, const std::string& color_
 			DIEWITHEXCEPTION_REPORTLOCATION("unsupported memory device type!");
 	}
 
-	auto* rgb = new ITMUChar4Image(true, false);
-	auto* depth = new ITMShortImage(true, false);
-	auto* mask = new ITMUCharImage(true, false);
+	auto* rgb = new UChar4Image(true, false);
+	auto* depth = new ShortImage(true, false);
+	auto* mask = new UCharImage(true, false);
 	ReadImageFromFile(*rgb, color_path.c_str());
 	ReadImageFromFile(*depth, depth_path.c_str());
 	viewBuilderToUse->UpdateView(view, rgb, depth, false, false, false, true);
@@ -195,9 +195,9 @@ UpdateView(View** view, const std::string& depth_path, const std::string& color_
 			DIEWITHEXCEPTION_REPORTLOCATION("unsupported memory device type!");
 	}
 
-	auto* rgb = new ITMUChar4Image(true, false);
-	auto* depth = new ITMShortImage(true, false);
-	auto* mask = new ITMUCharImage(true, false);
+	auto* rgb = new UChar4Image(true, false);
+	auto* depth = new ShortImage(true, false);
+	auto* mask = new UCharImage(true, false);
 	ReadImageFromFile(*rgb, color_path.c_str());
 	ReadImageFromFile(*depth, depth_path.c_str());
 	ReadImageFromFile(*mask, mask_path.c_str());

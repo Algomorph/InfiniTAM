@@ -81,7 +81,7 @@ namespace ITMLib
      * \param outputImage   The image into which to write the result.
      */
     virtual void RenderDepthImage(const SurfelScene<TSurfel> *scene, const ORUtils::SE3Pose *pose, const SurfelRenderState *renderState,
-                                  ITMFloatImage *outputImage) const = 0;
+                                  FloatImage *outputImage) const = 0;
 
     /**
      * \brief Renders a Visualization of the scene (as viewed from a particular camera) to an image.
@@ -93,7 +93,7 @@ namespace ITMLib
      * \param type          The type of Visualization to render.
      */
     virtual void RenderImage(const SurfelScene<TSurfel> *scene, const ORUtils::SE3Pose *pose, const SurfelRenderState *renderState,
-                             ITMUChar4Image *outputImage, RenderImageType type = RENDER_LAMBERTIAN) const = 0;
+                             UChar4Image *outputImage, RenderImageType type = RENDER_LAMBERTIAN) const = 0;
 
     //#################### PUBLIC MEMBER FUNCTIONS ####################
   public:

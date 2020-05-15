@@ -18,34 +18,34 @@ namespace ITMLib
 		const RGBDCalib calib;
 
 		/// RGB colour image for the current frame.
-		ITMUChar4Image *rgb; 
+		UChar4Image *rgb;
 
 		/// RGB colour image for the previous frame.
-		ITMUChar4Image *rgb_prev; 
+		UChar4Image *rgb_prev;
 
 		/// Float valued depth image, if available according to @ref inputImageType.
-		ITMFloatImage *depth;
+		FloatImage *depth;
 
 		/// surface normal of depth image
 		// allocated when needed
-		ITMFloat4Image *depthNormal;
+		Float4Image *depthNormal;
 
 		/// uncertainty (std) in each pixel of depth value based on sensor noise model
 		/// allocated when needed
-		ITMFloatImage *depthUncertainty;
+		FloatImage *depthUncertainty;
 
 		// confidence based on distance from center
-		ITMFloatImage *depthConfidence;
+		FloatImage *depthConfidence;
 
 		View(const RGBDCalib& calibration, Vector2i imgSize_rgb, Vector2i imgSize_d, bool useGPU)
 		: calib(calibration)
 		{
-			this->rgb = new ITMUChar4Image(imgSize_rgb, true, useGPU);
+			this->rgb = new UChar4Image(imgSize_rgb, true, useGPU);
 			this->rgb_prev = NULL;
-			this->depth = new ITMFloatImage(imgSize_d, true, useGPU);
+			this->depth = new FloatImage(imgSize_d, true, useGPU);
 			this->depthNormal = NULL;
 			this->depthUncertainty = NULL;
-			this->depthConfidence = new ITMFloatImage(imgSize_d, true, useGPU);
+			this->depthConfidence = new FloatImage(imgSize_d, true, useGPU);
 		}
 
 		virtual ~View()

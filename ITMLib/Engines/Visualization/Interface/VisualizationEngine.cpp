@@ -16,7 +16,7 @@ inline float base(float val) {
 	else return 0.0;
 }
 
-void IVisualizationEngine::DepthToUchar4(ITMUChar4Image *dst, const ITMFloatImage *src)
+void IVisualizationEngine::DepthToUchar4(UChar4Image *dst, const FloatImage *src)
 {
 	Vector4u *dest = dst->GetData(MEMORYDEVICE_CPU);
 	const float *source = src->GetData(MEMORYDEVICE_CPU);
@@ -56,7 +56,7 @@ void IVisualizationEngine::DepthToUchar4(ITMUChar4Image *dst, const ITMFloatImag
 	}
 }
 
-void IVisualizationEngine::NormalToUchar4(ITMUChar4Image *dst, const ITMFloat4Image *src)
+void IVisualizationEngine::NormalToUchar4(UChar4Image *dst, const Float4Image *src)
 {
 	Vector4u *dest = dst->GetData(MEMORYDEVICE_CPU);
 	const Vector4f *source = src->GetData(MEMORYDEVICE_CPU);
@@ -78,7 +78,7 @@ void IVisualizationEngine::NormalToUchar4(ITMUChar4Image *dst, const ITMFloat4Im
 	}
 }
 
-void IVisualizationEngine::WeightToUchar4(ITMUChar4Image *dst, const ITMFloatImage *src)
+void IVisualizationEngine::WeightToUchar4(UChar4Image *dst, const FloatImage *src)
 {
 	Vector4u *dest = dst->GetData(MEMORYDEVICE_CPU);
 	const float *source = src->GetData(MEMORYDEVICE_CPU);

@@ -54,8 +54,8 @@ template<MemoryDeviceType TMemoryDeviceType>
 struct TestData {
 	TestData() {
 		view_builder = ViewBuilderFactory::Build(calibration_path, TMemoryDeviceType);
-		ITMUChar4Image rgb(true, false);
-		ITMShortImage depth(true, false);
+		UChar4Image rgb(true, false);
+		ShortImage depth(true, false);
 		ReadImageFromFile(rgb, square_1_color_path.c_str());
 		ReadImageFromFile(depth, square_1_depth_path.c_str());
 		view_builder->UpdateView(&view_square_1, &rgb, &depth, false, false, false, true);

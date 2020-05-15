@@ -20,10 +20,18 @@
 
 namespace ITMLib {
 
+namespace internal {
+template<MemoryDeviceType TMemoryDeviceType, typename TVoxel>
+struct IndexingEngine_VoxelBlockHash_MemoryDeviceTypeSpecialized;
+template<MemoryDeviceType TMemoryDeviceType, typename TVoxel, ExecutionMode TExecutionMode>
+struct IndexingEngine_VoxelBlockHash_ExecutionModeSpecialized;
+} //namespace  internal
 
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
 class IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType, TExecutionMode> :
 		public IndexingEngineInterface<TVoxel, VoxelBlockHash>{
+private: // member variables
+
 protected: // member variables
 	using IndexingEngineInterface<TVoxel,VoxelBlockHash>::parameters;
 public: // member functions
@@ -69,9 +77,8 @@ private: // member functions
 
 };
 
-namespace internal {
-template<MemoryDeviceType TMemoryDeviceType, typename TVoxel>
-struct SpecializedVoxelHashBlockManager;
+
+namespace  internal {
 
 template<MemoryDeviceType TMemoryDeviceType, typename TVoxelTarget, typename TVoxelSource, typename TMarkerFunctor>
 void AllocateUsingOtherVolume_Generic(VoxelVolume<TVoxelTarget, VoxelBlockHash>* target_volume,

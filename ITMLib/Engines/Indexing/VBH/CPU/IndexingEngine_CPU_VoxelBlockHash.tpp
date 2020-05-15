@@ -37,9 +37,9 @@ namespace ITMLib {
 namespace internal {
 
 template<typename TVoxel>
-HashEntry SpecializedVoxelHashBlockManager<MEMORYDEVICE_CPU, TVoxel>::FindHashEntry(const VoxelBlockHash& index,
-                                                                                    const Vector3s& coordinates,
-                                                                                    int& hash_code) {
+HashEntry IndexingEngine_VoxelBlockHash_MemoryDeviceTypeSpecialized<MEMORYDEVICE_CPU, TVoxel>::FindHashEntry(const VoxelBlockHash& index,
+                                                                                                             const Vector3s& coordinates,
+                                                                                                             int& hash_code) {
 	const HashEntry* entries = index.GetEntries();
 	hash_code = FindHashCodeAt(entries, coordinates);
 	if (hash_code == -1) {
@@ -50,7 +50,7 @@ HashEntry SpecializedVoxelHashBlockManager<MEMORYDEVICE_CPU, TVoxel>::FindHashEn
 }
 
 template<typename TVoxel>
-bool SpecializedVoxelHashBlockManager<MEMORYDEVICE_CPU, TVoxel>::AllocateHashBlockAt(
+bool IndexingEngine_VoxelBlockHash_MemoryDeviceTypeSpecialized<MEMORYDEVICE_CPU, TVoxel>::AllocateHashBlockAt(
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume, Vector3s at, int& hash_code) {
 	HashEntry* hash_table = volume->index.GetEntries();
 	int last_free_voxel_block_id = volume->index.GetLastFreeBlockListId();
@@ -73,7 +73,7 @@ bool SpecializedVoxelHashBlockManager<MEMORYDEVICE_CPU, TVoxel>::AllocateHashBlo
 }
 
 template<typename TVoxel>
-void SpecializedVoxelHashBlockManager<MEMORYDEVICE_CPU, TVoxel>::RebuildVisibleBlockList(
+void IndexingEngine_VoxelBlockHash_MemoryDeviceTypeSpecialized<MEMORYDEVICE_CPU, TVoxel>::RebuildVisibleBlockList(
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume, const View* view, const Matrix4f& depth_camera_matrix) {
 	// ** volume data **
 	const int hash_entry_count = volume->index.hash_entry_count;
@@ -81,7 +81,7 @@ void SpecializedVoxelHashBlockManager<MEMORYDEVICE_CPU, TVoxel>::RebuildVisibleB
 	int* visible_hash_entry_codes = volume->index.GetVisibleBlockHashCodes();
 	HashEntry* hash_table = volume->index.GetEntries();
 	const bool use_swapping = volume->SwappingEnabled();
-	ITMHashSwapState* swapStates = volume->SwappingEnabled() ? volume->global_cache.GetSwapStates(false) : 0;
+	HashSwapState* swapStates = volume->SwappingEnabled() ? volume->global_cache.GetSwapStates(false) : 0;
 
 	// ** view data **
 	Vector4f depth_camera_projection_parameters = view->calib.intrinsics_d.projectionParamsSimple.all;

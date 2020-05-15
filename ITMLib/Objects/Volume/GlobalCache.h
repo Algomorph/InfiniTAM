@@ -17,7 +17,8 @@ namespace ITMLib {
 template<typename TVoxel, typename TIndex>
 class GlobalCache;
 
-struct ITMHashSwapState {
+//TODO: convert to enum class based on uchar
+struct HashSwapState {
 	/// 0 - most recent data is on host, data not currently in active
 	///     memory
 	/// 1 - data both on host and in active memory, information has not
@@ -41,8 +42,8 @@ private:
 
 	bool* has_stored_data;
 	TVoxel* stored_voxel_blocks;
-	ITMHashSwapState* swap_states_host;
-	ITMHashSwapState* swap_states_device;
+	HashSwapState* swap_states_host;
+	HashSwapState* swap_states_device;
 
 	bool* has_synced_data_host;
 	bool* has_synced_data_device;
@@ -88,7 +89,7 @@ public:
 		return useGPU ? synced_voxel_blocks_device : synced_voxel_blocks_host;
 	}
 
-	ITMHashSwapState* GetSwapStates(bool useGPU) { return useGPU ? swap_states_device : swap_states_host; }
+	HashSwapState* GetSwapStates(bool useGPU) { return useGPU ? swap_states_device : swap_states_host; }
 
 	int* GetNeededEntryIDs(bool useGPU) { return useGPU ? needed_hash_codes_device : needed_hash_codes_host; }
 

@@ -10,19 +10,19 @@ using namespace ITMLib;
 namespace
 {
 
-	__global__ void buildListToSwapIn_device(int *neededEntryIDs, int *noNeededEntries, ITMHashSwapState *swapStates, int noTotalEntries);
+	__global__ void buildListToSwapIn_device(int *neededEntryIDs, int *noNeededEntries, HashSwapState *swapStates, int noTotalEntries);
 
 	template<class TVoxel>
-	__global__ void integrateOldIntoActiveData_device(TVoxel *localVBA, ITMHashSwapState *swapStates, TVoxel *syncedVoxelBlocks_local,
+	__global__ void integrateOldIntoActiveData_device(TVoxel *localVBA, HashSwapState *swapStates, TVoxel *syncedVoxelBlocks_local,
 	                                                  int *neededEntryIDs_local, HashEntry *hashTable, int maxW);
 
-	__global__ void buildListToSwapOut_device(int *neededEntryIDs, int *noNeededEntries, ITMHashSwapState *swapStates,
+	__global__ void buildListToSwapOut_device(int *neededEntryIDs, int *noNeededEntries, HashSwapState *swapStates,
 	                                          HashEntry *hashTable, HashBlockVisibility* entriesVisibleType, int noTotalEntries);
 
 	__global__ void buildListToClean_device(int *neededEntryIDs, int *noNeededEntries, HashEntry *hashTable, HashBlockVisibility* blockVisibilityTypes, int noTotalEntries);
 
 	template<class TVoxel>
-	__global__ void cleanMemory_device(int *voxelAllocationList, int *noAllocatedVoxelEntries, ITMHashSwapState *swapStates,
+	__global__ void cleanMemory_device(int *voxelAllocationList, int *noAllocatedVoxelEntries, HashSwapState *swapStates,
 	                                   HashEntry *hashTable, TVoxel *localVBA, int *neededEntryIDs_local, int neededEntryCount, const int voxelBlockCount);
 
 	template<class TVoxel>
@@ -58,7 +58,7 @@ template<class TVoxel>
 int SwappingEngine_CUDA<TVoxel, VoxelBlockHash>::LoadFromGlobalMemory(VoxelVolume<TVoxel, VoxelBlockHash> *volume){
 	GlobalCache<TVoxel, VoxelBlockHash>& global_cache = volume->global_cache;
 
-	ITMHashSwapState* swap_states = global_cache.GetSwapStates(true);
+	HashSwapState* swap_states = global_cache.GetSwapStates(true);
 
 	TVoxel* syncedVoxelBlocks_local = global_cache.GetSyncedVoxelBlocks(true);
 	bool* hasSyncedData_local = global_cache.GetHasSyncedData(true);
@@ -111,7 +111,7 @@ void SwappingEngine_CUDA<TVoxel, VoxelBlockHash>::IntegrateGlobalIntoLocal(Voxel
 
 	HashEntry* hash_table = volume->index.GetEntries();
 
-	ITMHashSwapState* swap_states = global_cache.GetSwapStates(true);
+	HashSwapState* swap_states = global_cache.GetSwapStates(true);
 
 	TVoxel *syncedVoxelBlocks_local = global_cache.GetSyncedVoxelBlocks(true);
 	int *neededEntryIDs_local = global_cache.GetNeededEntryIDs(true);
@@ -137,7 +137,7 @@ void SwappingEngine_CUDA<TVoxel, VoxelBlockHash>::SaveToGlobalMemory(VoxelVolume
 {
 	GlobalCache<TVoxel, VoxelBlockHash>& global_cache = volume->global_cache;
 
-	ITMHashSwapState *swapStates = global_cache.GetSwapStates(true);
+	HashSwapState *swapStates = global_cache.GetSwapStates(true);
 
 	HashEntry *hashTable = volume->index.GetEntries();
 	HashBlockVisibility* blockVisibilityTypes = volume->index.GetBlockVisibilityTypes();
@@ -261,7 +261,7 @@ void SwappingEngine_CUDA<TVoxel, VoxelBlockHash>::CleanLocalMemory(VoxelVolume<T
 
 namespace
 {
-	__global__ void buildListToSwapIn_device(int *neededEntryIDs, int *noNeededEntries, ITMHashSwapState *swapStates, int noTotalEntries)
+	__global__ void buildListToSwapIn_device(int *neededEntryIDs, int *noNeededEntries, HashSwapState *swapStates, int noTotalEntries)
 	{
 		int targetIdx = threadIdx.x + blockIdx.x * blockDim.x;
 		if (targetIdx > noTotalEntries - 1) return;
@@ -283,7 +283,7 @@ namespace
 		}
 	}
 
-	__global__ void buildListToSwapOut_device(int *neededEntryIDs, int *noNeededEntries, ITMHashSwapState *swapStates,
+	__global__ void buildListToSwapOut_device(int *neededEntryIDs, int *noNeededEntries, HashSwapState *swapStates,
 	                                          HashEntry *hashTable, HashBlockVisibility* blockVisibilityTypes,
 	                                          int hashEntryCount)
 	{
@@ -295,7 +295,7 @@ namespace
 		shouldPrefix = false;
 		__syncthreads();
 
-		ITMHashSwapState &swapState = swapStates[targetIdx];
+		HashSwapState &swapState = swapStates[targetIdx];
 
 		bool isNeededId = (swapState.state == 2 &&
 			hashTable[targetIdx].ptr >= 0 && blockVisibilityTypes[targetIdx] == INVISIBLE);
@@ -311,7 +311,7 @@ namespace
 	}
 
 	template<class TVoxel>
-	__global__ void cleanMemory_device(int *voxelAllocationList, int *noAllocatedVoxelEntries, ITMHashSwapState *swapStates,
+	__global__ void cleanMemory_device(int *voxelAllocationList, int *noAllocatedVoxelEntries, HashSwapState *swapStates,
 	                                   HashEntry *hashTable, TVoxel *localVBA, int *neededEntryIDs_local,
 	                                   int neededEntryCount, const int voxelBlockCount)
 	{
@@ -404,7 +404,7 @@ namespace
 	}
 
 	template<class TVoxel>
-	__global__ void integrateOldIntoActiveData_device(TVoxel *localVBA, ITMHashSwapState *swapStates, TVoxel *syncedVoxelBlocks_local,
+	__global__ void integrateOldIntoActiveData_device(TVoxel *localVBA, HashSwapState *swapStates, TVoxel *syncedVoxelBlocks_local,
 	                                                  int *neededEntryIDs_local, HashEntry *hashTable, int maxW)
 	{
 		int entryDestId = neededEntryIDs_local[blockIdx.x];

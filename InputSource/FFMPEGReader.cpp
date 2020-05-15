@@ -461,7 +461,7 @@ static void CopyDepth(const AVFrame* frame, short* depth) {
 	memcpy(depth, frame->data[0], frame->height * frame->width * 2);
 }
 
-void FFMPEGReader::GetImages(ITMUChar4Image& rgb_image, ITMShortImage& depth_image) {
+void FFMPEGReader::GetImages(UChar4Image& rgb_image, ShortImage& depth_image) {
 	Vector4u* rgb = rgb_image.GetData(MEMORYDEVICE_CPU);
 	short* depth = depth_image.GetData(MEMORYDEVICE_CPU);
 
@@ -541,7 +541,7 @@ FFMPEGReader::FFMPEGReader(const char *calibFilename, const char *filename1, con
 }
 FFMPEGReader::~FFMPEGReader()
 {}
-void FFMPEGReader::getImages(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage)
+void FFMPEGReader::getImages(UChar4Image *rgbImage, ShortImage *rawDepthImage)
 { return; }
 bool FFMPEGReader::hasMoreImages() const
 { return false; }

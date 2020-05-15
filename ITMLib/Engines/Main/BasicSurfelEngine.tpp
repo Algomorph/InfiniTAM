@@ -54,7 +54,7 @@ BasicSurfelEngine<TSurfel>::BasicSurfelEngine(const RGBDCalib& calib, Vector2i i
 		                                                   0.2f, 500, 4);
 	else relocaliser = nullptr;
 
-	kfRaycast = new ITMUChar4Image(imgSize_d, memoryType);
+	kfRaycast = new UChar4Image(imgSize_d, memoryType);
 
 	trackingActive = true;
 	fusionActive = true;
@@ -185,7 +185,7 @@ static void QuaternionFromRotationMatrix(const double *matrix, double *q) {
 
 template<typename TSurfel>
 CameraTrackingState::TrackingResult
-BasicSurfelEngine<TSurfel>::ProcessFrame(ITMUChar4Image* rgbImage, ITMShortImage* rawDepthImage,
+BasicSurfelEngine<TSurfel>::ProcessFrame(UChar4Image* rgbImage, ShortImage* rawDepthImage,
                                          IMUMeasurement* imuMeasurement) {
 	auto& settings = configuration::get();
 	// prepare image and turn it into a depth image
@@ -321,7 +321,7 @@ BasicSurfelEngine<TSurfel>::ToSurfelImageType(GetImageType getImageType) {
 }
 
 template<typename TSurfel>
-void BasicSurfelEngine<TSurfel>::GetImage(ITMUChar4Image* out, GetImageType getImageType, ORUtils::SE3Pose* pose,
+void BasicSurfelEngine<TSurfel>::GetImage(UChar4Image* out, GetImageType getImageType, ORUtils::SE3Pose* pose,
                                           Intrinsics* intrinsics) {
 
 	auto& settings = configuration::get();

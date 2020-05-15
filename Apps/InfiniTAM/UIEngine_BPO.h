@@ -59,11 +59,11 @@ private:
 	Vector4f winReg[NUM_WIN]; // (x1, y1, x2, y2)
 	Vector2i winSize;
 	uint textureId[NUM_WIN];
-	ITMUChar4Image* outImage[NUM_WIN];
+	UChar4Image* outImage[NUM_WIN];
 	ITMLib::MainEngine::GetImageType outImageType[NUM_WIN];
 
-	ITMUChar4Image* inputRGBImage;
-	ITMShortImage* inputRawDepthImage;
+	UChar4Image* inputRGBImage;
+	ShortImage* inputRawDepthImage;
 	ITMLib::IMUMeasurement* inputIMUMeasurement;
 
 	bool freeview_active;
@@ -104,7 +104,7 @@ public:
 
 	bool allocateGPU;
 	bool shutdownRequested = false;
-	ITMUChar4Image* saveImage;
+	UChar4Image* saveImage;
 	ITMLib::configuration::IndexingMethod indexing_method;
 
 	void Initialize(int& argc, char** argv, InputSource::ImageSourceEngine* imageSource, InputSource::IMUSourceEngine* imuSource,
@@ -115,7 +115,7 @@ public:
 	void PrintProcessingFrameHeader() const;
 	void ProcessFrame();
 
-	void GetScreenshot(ITMUChar4Image* dest) const;
+	void GetScreenshot(UChar4Image* dest) const;
 	void SaveScreenshot(const char* filename) const;
 
 	void SkipFrames(int number_of_frames_to_skip);

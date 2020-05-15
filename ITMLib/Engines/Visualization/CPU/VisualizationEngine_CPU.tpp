@@ -215,7 +215,7 @@ static void GenericRaycast(VoxelVolume<TVoxel, TIndex> *volume, const Vector2i& 
 
 template<class TVoxel, class TIndex>
 static void RenderImage_common(VoxelVolume<TVoxel,TIndex> *volume, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics,
-                               const RenderState *renderState, ITMUChar4Image *outputImage, IVisualizationEngine::RenderImageType type, IVisualizationEngine::RenderRaycastSelection raycastType)
+                               const RenderState *renderState, UChar4Image *outputImage, IVisualizationEngine::RenderImageType type, IVisualizationEngine::RenderRaycastSelection raycastType)
 {
 	Vector2i imgSize = outputImage->dimensions;
 	Matrix4f invM = pose->GetInvM();
@@ -452,7 +452,7 @@ static void ForwardRender_common(const VoxelVolume<TVoxel, TIndex> *volume, cons
 
 template<class TVoxel, class TIndex>
 void VisualizationEngine_CPU<TVoxel,TIndex>::RenderImage(VoxelVolume<TVoxel,TIndex> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics,
-                                                         const RenderState *renderState, ITMUChar4Image *outputImage, IVisualizationEngine::RenderImageType type,
+                                                         const RenderState *renderState, UChar4Image *outputImage, IVisualizationEngine::RenderImageType type,
                                                          IVisualizationEngine::RenderRaycastSelection raycastType) const
 {
 	RenderImage_common(scene, pose, intrinsics, renderState, outputImage, type, raycastType);
@@ -460,7 +460,7 @@ void VisualizationEngine_CPU<TVoxel,TIndex>::RenderImage(VoxelVolume<TVoxel,TInd
 
 template<class TVoxel>
 void VisualizationEngine_CPU<TVoxel,VoxelBlockHash>::RenderImage(VoxelVolume<TVoxel,VoxelBlockHash> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics,
-                                                                 const RenderState *renderState, ITMUChar4Image *outputImage, IVisualizationEngine::RenderImageType type,
+                                                                 const RenderState *renderState, UChar4Image *outputImage, IVisualizationEngine::RenderImageType type,
                                                                  IVisualizationEngine::RenderRaycastSelection raycastType) const
 {
 	RenderImage_common(scene, pose, intrinsics, renderState, outputImage, type, raycastType);

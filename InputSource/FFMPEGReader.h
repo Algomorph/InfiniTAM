@@ -15,7 +15,7 @@ class FFMPEGReader : public BaseImageSourceEngine
 	~FFMPEGReader();
 
 	bool HasMoreImages() const override;
-	void GetImages(ITMUChar4Image& rgb_image, ITMShortImage& depth_image) override;
+	void GetImages(UChar4Image& rgb_image, ShortImage& depth_image) override;
 
 	Vector2i GetDepthImageSize() const override;
 	Vector2i GetRGBImageSize() const override;

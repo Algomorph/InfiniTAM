@@ -13,13 +13,13 @@ namespace ITMLib
 	{
 	protected:
 		const RGBDCalib calib;
-		ITMShortImage *shortImage;
-		ITMFloatImage *floatImage;
+		ShortImage *shortImage;
+		FloatImage *floatImage;
 
 	public:
-		virtual void ConvertDisparityToDepth(ITMFloatImage *depth_out, const ITMShortImage *disp_in, const Intrinsics *depthIntrinsics,
-			Vector2f disparityCalibParams) = 0;
-		virtual void ConvertDepthAffineToFloat(ITMFloatImage *depth_out, const ITMShortImage *depth_in, Vector2f depthCalibParams) = 0;
+		virtual void ConvertDisparityToDepth(FloatImage *depth_out, const ShortImage *disp_in, const Intrinsics *depthIntrinsics,
+		                                     Vector2f disparityCalibParams) = 0;
+		virtual void ConvertDepthAffineToFloat(FloatImage *depth_out, const ShortImage *depth_in, Vector2f depthCalibParams) = 0;
 
 		/** \brief Find discontinuities in a depth image by removing all pixels for
 	     * which the maximum difference between the center pixel and it's neighbours
@@ -27,13 +27,13 @@ namespace ITMLib
 	     *  \param[in] image_out output image
 	     *  \param[in] image_in input image
 	     */
-		virtual void ThresholdFiltering(ITMFloatImage *image_out, const ITMFloatImage *image_in) = 0;
-		virtual void DepthFiltering(ITMFloatImage *image_out, const ITMFloatImage *image_in) = 0;
-		virtual void ComputeNormalAndWeights(ITMFloat4Image *normal_out, ITMFloatImage *sigmaZ_out, const ITMFloatImage *depth_in, Vector4f intrinsic) = 0;
+		virtual void ThresholdFiltering(FloatImage *image_out, const FloatImage *image_in) = 0;
+		virtual void DepthFiltering(FloatImage *image_out, const FloatImage *image_in) = 0;
+		virtual void ComputeNormalAndWeights(Float4Image *normal_out, FloatImage *sigmaZ_out, const FloatImage *depth_in, Vector4f intrinsic) = 0;
 
-		virtual void UpdateView(View** view, ITMUChar4Image* rgbImage, ITMShortImage* rawDepthImage, bool useThresholdFilter,
+		virtual void UpdateView(View** view, UChar4Image* rgbImage, ShortImage* rawDepthImage, bool useThresholdFilter,
 		                        bool useBilateralFilter, bool modelSensorNoise, bool storePreviousImage) = 0;
-		virtual void UpdateView(View** view, ITMUChar4Image* rgbImage, ITMShortImage* depthImage, bool useThresholdFilter,
+		virtual void UpdateView(View** view, UChar4Image* rgbImage, ShortImage* depthImage, bool useThresholdFilter,
 		                        bool useBilateralFilter, IMUMeasurement* imuMeasurement, bool modelSensorNoise,
 		                        bool storePreviousImage) = 0;
 

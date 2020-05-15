@@ -50,8 +50,8 @@ Vector6i ComputeLocalBounds(const Vector3i& hash_entry_min_point, const Vector3i
 
 
 template<typename TVoxelPrimary, typename TVoxelSecondary, typename TFunctor>
-struct ITMFlipArgumentBooleanFunctor {
-	ITMFlipArgumentBooleanFunctor(TFunctor functor) : functor(functor) {}
+struct FlipArgumentBooleanFunctor {
+	FlipArgumentBooleanFunctor(TFunctor functor) : functor(functor) {}
 	_CPU_AND_GPU_CODE_
 	bool operator()(TVoxelPrimary& voxelPrimary, TVoxelSecondary& voxelSecondary) {
 		return functor(voxelSecondary, voxelPrimary);

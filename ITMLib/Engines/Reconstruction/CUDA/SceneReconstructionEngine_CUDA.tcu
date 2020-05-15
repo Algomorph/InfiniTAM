@@ -45,7 +45,7 @@ __global__ void setVisibleEntriesToVisibleAtPreviousFrameAndUnstreamed(HashBlock
                                                                        const int* utilized_block_hash_codes, int utilized_entry_count);
 
 template<bool useSwapping>
-__global__ void buildVisibleList_device(HashEntry* hashTable, ITMHashSwapState* swapStates, int hashEntryCount,
+__global__ void buildVisibleList_device(HashEntry* hashTable, HashSwapState* swapStates, int hashEntryCount,
                                         int* visibleEntryIDs, AllocationTempData* allocData,
                                         HashBlockVisibility* entriesVisibleType,
                                         Matrix4f M_d, Vector4f projParams_d, Vector2i depthImgSize, float voxelSize);
@@ -116,7 +116,7 @@ void SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::AllocateSceneFromDe
 	int* voxelAllocationList = volume->index.GetBlockAllocationList();
 	int* excessAllocationList = volume->index.GetExcessEntryList();
 	HashEntry* hashTable = volume->index.GetEntries();
-	ITMHashSwapState* swapStates = volume->SwappingEnabled() ? volume->global_cache.GetSwapStates(true) : 0;
+	HashSwapState* swapStates = volume->SwappingEnabled() ? volume->global_cache.GetSwapStates(true) : 0;
 
 	const int hashEntryCount = volume->index.hash_entry_count;
 
@@ -476,7 +476,7 @@ reAllocateSwappedOutVoxelBlocks_device(int* voxelAllocationList, HashEntry* hash
 }
 
 template<bool useSwapping>
-__global__ void buildVisibleList_device(HashEntry* hashTable, ITMHashSwapState* swapStates, int hashEntryCount,
+__global__ void buildVisibleList_device(HashEntry* hashTable, HashSwapState* swapStates, int hashEntryCount,
                                         int* visibleEntryIDs, AllocationTempData* allocData,
                                         HashBlockVisibility* entriesVisibleType, Matrix4f M_d, Vector4f projParams_d,
                                         Vector2i depthImgSize, float voxelSize) {

@@ -157,7 +157,7 @@ bool ImageFileReader<PathGenerator>::HasMoreImages() const
 }
 
 template <typename PathGenerator>
-void ImageFileReader<PathGenerator>::GetImages(ITMUChar4Image& rgb, ITMShortImage& raw_depth)
+void ImageFileReader<PathGenerator>::GetImages(UChar4Image& rgb, ShortImage& raw_depth)
 {
 	LoadIntoCache();
 	rgb.SetFrom(cached_rgb, MemoryCopyDirection::CPU_TO_CPU);
@@ -273,7 +273,7 @@ bool RawFileReader::HasMoreImages() const
 	return cache_is_valid;
 }
 
-void RawFileReader::GetImages(ITMUChar4Image& rgb, ITMShortImage& rawDepth)
+void RawFileReader::GetImages(UChar4Image& rgb, ShortImage& rawDepth)
 {
 	rgb.SetFrom(cached_rgb, MemoryCopyDirection::CPU_TO_CPU);
 	rawDepth.SetFrom(cached_depth, MemoryCopyDirection::CPU_TO_CPU);
@@ -293,7 +293,7 @@ bool BlankImageGenerator::HasMoreImages() const
 	return true;
 }
 
-void BlankImageGenerator::GetImages(ITMUChar4Image& rgb, ITMShortImage& raw_depth)
+void BlankImageGenerator::GetImages(UChar4Image& rgb, ShortImage& raw_depth)
 {
 	rgb.Clear();
 	raw_depth.Clear();

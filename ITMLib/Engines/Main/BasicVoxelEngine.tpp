@@ -57,7 +57,7 @@ BasicVoxelEngine<TVoxel,TIndex>::BasicVoxelEngine(const RGBDCalib& calib, Vector
 		relocaliser = new FernRelocLib::Relocaliser<float>(imgSize_d, Vector2f(settings.general_voxel_volume_parameters.near_clipping_distance, settings.general_voxel_volume_parameters.far_clipping_distance), 0.2f, 500, 4);
 	else relocaliser = nullptr;
 
-	kfRaycast = new ITMUChar4Image(imgSize_d, memoryType);
+	kfRaycast = new UChar4Image(imgSize_d, memoryType);
 
 	trackingActive = true;
 	fusionActive = true;
@@ -238,7 +238,7 @@ static void QuaternionFromRotationMatrix(const double *matrix, double *q) {
 #endif
 
 template <typename TVoxel, typename TIndex>
-CameraTrackingState::TrackingResult BasicVoxelEngine<TVoxel,TIndex>::ProcessFrame(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage, IMUMeasurement *imuMeasurement)
+CameraTrackingState::TrackingResult BasicVoxelEngine<TVoxel,TIndex>::ProcessFrame(UChar4Image *rgbImage, ShortImage *rawDepthImage, IMUMeasurement *imuMeasurement)
 {
 	auto& settings = configuration::get();
 	// prepare image and turn it into a depth image
@@ -349,7 +349,7 @@ Vector2i BasicVoxelEngine<TVoxel,TIndex>::GetImageSize() const
 }
 
 template <typename TVoxel, typename TIndex>
-void BasicVoxelEngine<TVoxel,TIndex>::GetImage(ITMUChar4Image *out, GetImageType getImageType, ORUtils::SE3Pose *pose, Intrinsics *intrinsics)
+void BasicVoxelEngine<TVoxel,TIndex>::GetImage(UChar4Image *out, GetImageType getImageType, ORUtils::SE3Pose *pose, Intrinsics *intrinsics)
 {
 	if (view == NULL) return;
 

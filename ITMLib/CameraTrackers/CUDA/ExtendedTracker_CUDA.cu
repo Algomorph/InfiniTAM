@@ -267,10 +267,10 @@ int ExtendedTracker_CUDA::ComputeGandH_RGB(float &f, float *nabla, float *hessia
 	return accu_host->numPoints;
 }
 
-void ExtendedTracker_CUDA::ProjectCurrentIntensityFrame(ITMFloat4Image *points_out,
-                                                        ITMFloatImage *intensity_out,
-                                                        const ITMFloatImage *intensity_in,
-                                                        const ITMFloatImage *depth_in,
+void ExtendedTracker_CUDA::ProjectCurrentIntensityFrame(Float4Image *points_out,
+                                                        FloatImage *intensity_out,
+                                                        const FloatImage *intensity_in,
+                                                        const FloatImage *depth_in,
                                                         const Vector4f &intrinsics_depth,
                                                         const Vector4f &intrinsics_rgb,
                                                         const Matrix4f &scenePose)

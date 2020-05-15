@@ -37,7 +37,7 @@ namespace InputSource {
 		 * \param rgb       An image into which to store the next RGB image.
 		 * \param rawDepth  An image into which to store the next depth image.
 		 */
-		virtual void GetImages(ITMUChar4Image& rgb, ITMShortImage& rawDepth) = 0;
+		virtual void GetImages(UChar4Image& rgb, ShortImage& rawDepth) = 0;
 
 		/**
 		 * \brief Gets the size of the next RGB image (if any).
@@ -119,9 +119,9 @@ namespace InputSource {
 	class ImageFileReader : public BaseImageSourceEngine
 	{
 	private:
-		ITMUChar4Image cached_rgb;
-		ITMShortImage cached_depth;
-		ITMUCharImage cached_mask;
+		UChar4Image cached_rgb;
+		ShortImage cached_depth;
+		UCharImage cached_mask;
 
 		void LoadIntoCache();
 		mutable size_t cached_frame_number;
@@ -135,7 +135,7 @@ namespace InputSource {
 
 		bool HasMaskImages() const;
 		bool HasMoreImages() const override;
-		void GetImages(ITMUChar4Image& rgb, ITMShortImage& raw_depth);
+		void GetImages(UChar4Image& rgb, ShortImage& raw_depth);
 		Vector2i GetDepthImageSize() const override;
 		Vector2i GetRGBImageSize() const override;
 	};
@@ -151,7 +151,7 @@ namespace InputSource {
 		~CalibSource() { }
 
 		bool HasMoreImages() const override { return true; }
-		void GetImages(ITMUChar4Image& rgb, ITMShortImage& rawDepth) { }
+		void GetImages(UChar4Image& rgb, ShortImage& rawDepth) { }
 		Vector2i GetDepthImageSize() const override { return image_size; }
 		Vector2i GetRGBImageSize() const override { return image_size; }
 	};
@@ -163,8 +163,8 @@ namespace InputSource {
 		char rgb_image_filename_mask[BUF_SIZE];
 		char depth_image_filename_mask[BUF_SIZE];
 
-		mutable ITMUChar4Image cached_rgb;
-		mutable ITMShortImage cached_depth;
+		mutable UChar4Image cached_rgb;
+		mutable ShortImage cached_depth;
 
 		mutable int cached_frame_number;
 		int current_frame_number;
@@ -179,7 +179,7 @@ namespace InputSource {
 		RawFileReader(const char *calibration_file_name, const char *rgb_image_filename_mask, const char *depth_image_filename_mask, Vector2i image_size, float ratio);
 
 		bool HasMoreImages() const override;
-		void GetImages(ITMUChar4Image& rgb, ITMShortImage& rawDepth) override;
+		void GetImages(UChar4Image& rgb, ShortImage& rawDepth) override;
 
 		Vector2i GetDepthImageSize() const override { return image_size; }
 		Vector2i GetRGBImageSize() const override { return image_size; }
@@ -194,7 +194,7 @@ namespace InputSource {
 		BlankImageGenerator(const char *calibFilename, Vector2i image_size);
 
 		bool HasMoreImages() const override;
-		void GetImages(ITMUChar4Image& rgb, ITMShortImage& raw_depth) override;
+		void GetImages(UChar4Image& rgb, ShortImage& raw_depth) override;
 
 		Vector2i GetDepthImageSize() const override { return image_size; }
 		Vector2i GetRGBImageSize() const override { return image_size; }

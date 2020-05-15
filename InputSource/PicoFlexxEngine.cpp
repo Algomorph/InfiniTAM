@@ -177,7 +177,7 @@ PicoFlexxEngine::~PicoFlexxEngine()
 	}
 }
 
-void PicoFlexxEngine::GetImages(ITMUChar4Image *rgbImage, ITMShortImage *rawDepthImage)
+void PicoFlexxEngine::GetImages(UChar4Image *rgbImage, ShortImage *rawDepthImage)
 {
 	lock_guard<mutex> lock(data->mtx);
 
@@ -212,7 +212,7 @@ PicoFlexxEngine::PicoFlexxEngine(const char* calibFilename, const char* deviceUR
 
 PicoFlexxEngine::~PicoFlexxEngine() {}
 
-void PicoFlexxEngine::GetImages(ITMUChar4Image& rgbImage, ITMShortImage& rawDepthImage) {}
+void PicoFlexxEngine::GetImages(UChar4Image& rgbImage, ShortImage& rawDepthImage) {}
 
 bool PicoFlexxEngine::HasMoreImages() const { return false; }
 

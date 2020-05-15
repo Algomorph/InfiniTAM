@@ -9,17 +9,17 @@ namespace ITMLib
 	class ViewBuilder_CUDA : public ViewBuilder
 	{
 	public:
-		void ConvertDisparityToDepth(ITMFloatImage *depth_out, const ITMShortImage *depth_in, const Intrinsics *depthIntrinsics,
-			Vector2f disparityCalibParams);
-		void ConvertDepthAffineToFloat(ITMFloatImage *depth_out, const ITMShortImage *depth_in, Vector2f depthCalibParams);
+		void ConvertDisparityToDepth(FloatImage *depth_out, const ShortImage *depth_in, const Intrinsics *depthIntrinsics,
+		                             Vector2f disparityCalibParams);
+		void ConvertDepthAffineToFloat(FloatImage *depth_out, const ShortImage *depth_in, Vector2f depthCalibParams);
 
-		void ThresholdFiltering(ITMFloatImage *image_out, const ITMFloatImage *image_in) override;
-		void DepthFiltering(ITMFloatImage *image_out, const ITMFloatImage *image_in);
-		void ComputeNormalAndWeights(ITMFloat4Image *normal_out, ITMFloatImage *sigmaZ_out, const ITMFloatImage *depth_in, Vector4f intrinsic);
+		void ThresholdFiltering(FloatImage *image_out, const FloatImage *image_in) override;
+		void DepthFiltering(FloatImage *image_out, const FloatImage *image_in);
+		void ComputeNormalAndWeights(Float4Image *normal_out, FloatImage *sigmaZ_out, const FloatImage *depth_in, Vector4f intrinsic);
 
-		void UpdateView(View** view, ITMUChar4Image* rgbImage, ITMShortImage* rawDepthImage, bool useThresholdFilter,
+		void UpdateView(View** view, UChar4Image* rgbImage, ShortImage* rawDepthImage, bool useThresholdFilter,
 		                bool useBilateralFilter, bool modelSensorNoise, bool storePreviousImage);
-		void UpdateView(View** view, ITMUChar4Image* rgbImage, ITMShortImage* depthImage, bool useThresholdFilter,
+		void UpdateView(View** view, UChar4Image* rgbImage, ShortImage* depthImage, bool useThresholdFilter,
 		                bool useBilateralFilter, IMUMeasurement* imuMeasurement, bool modelSensorNoise,
 		                bool storePreviousImage);
 

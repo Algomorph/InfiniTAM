@@ -70,7 +70,7 @@ void UIEngine_BPO::GlutDisplayFunction() {
 	glColor3f(1.0f, 1.0f, 1.0f);
 	glEnable(GL_TEXTURE_2D);
 
-	ITMUChar4Image** showImgs = uiEngine.outImage;
+	UChar4Image** showImgs = uiEngine.outImage;
 	Vector4f* winReg = uiEngine.winReg;
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();

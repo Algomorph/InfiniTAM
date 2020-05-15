@@ -174,8 +174,8 @@ void ConstructStripesTestVolumes() {
 	Vector2i image_size(640, 480);
 	View* view = nullptr;
 
-	ITMUChar4Image rgb(true, false);
-	ITMShortImage depth(true, false);
+	UChar4Image rgb(true, false);
+	ShortImage depth(true, false);
 	ReadImageFromFile(rgb, "TestData/frames/stripes_color.png");
 	ReadImageFromFile(depth, "TestData/frames/stripes_depth.png");
 

@@ -23,7 +23,7 @@ namespace ITMLib
 	private:
 		const LowLevelEngine *lowLevelEngine;
 		ImageHierarchy<VolumeHierarchyLevel> *sceneHierarchy;
-		ImageHierarchy<TemplatedHierarchyLevel<ITMFloatImage> > *viewHierarchy;
+		ImageHierarchy<TemplatedHierarchyLevel<FloatImage> > *viewHierarchy;
 
 		CameraTrackingState *trackingState; const View *view;
 
@@ -53,7 +53,7 @@ namespace ITMLib
 
 		Matrix4f scenePose;
 		VolumeHierarchyLevel *sceneHierarchyLevel;
-		TemplatedHierarchyLevel<ITMFloatImage> *viewHierarchyLevel;
+		TemplatedHierarchyLevel<FloatImage> *viewHierarchyLevel;
 
 		virtual int ComputeGandH(float &f, float *nabla, float *hessian, Matrix4f approxInvPose) = 0;
 

@@ -36,8 +36,8 @@ void CLIEngine::Initialise(ImageSourceEngine *image_source, IMUSourceEngine *imu
 	ORcudaSafeCall(cudaDeviceSynchronize());
 #endif
 
-	input_RGB_image = new ITMUChar4Image(image_source->GetRGBImageSize(), true, allocate_GPU);
-	input_raw_depth_image = new ITMShortImage(image_source->GetDepthImageSize(), true, allocate_GPU);
+	input_RGB_image = new UChar4Image(image_source->GetRGBImageSize(), true, allocate_GPU);
+	input_raw_depth_image = new ShortImage(image_source->GetDepthImageSize(), true, allocate_GPU);
 	input_IMU_measurement = new IMUMeasurement();
 
 	this->current_frame_index = 0;

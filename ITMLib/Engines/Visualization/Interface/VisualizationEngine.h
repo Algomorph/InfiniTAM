@@ -32,9 +32,9 @@ namespace ITMLib
 
 		virtual ~IVisualizationEngine() {}
 
-		static void DepthToUchar4(ITMUChar4Image *dst, const ITMFloatImage *src);
-		static void NormalToUchar4(ITMUChar4Image* dst, const ITMFloat4Image *src);
-		static void WeightToUchar4(ITMUChar4Image *dst, const ITMFloatImage *src);
+		static void DepthToUchar4(UChar4Image *dst, const FloatImage *src);
+		static void NormalToUchar4(UChar4Image* dst, const Float4Image *src);
+		static void WeightToUchar4(UChar4Image *dst, const FloatImage *src);
 	};
 
 	template<class TIndex> struct IndexToRenderState { typedef RenderState type; };
@@ -79,7 +79,7 @@ namespace ITMLib
 
 		/** This will render an image using raycasting. */
 		virtual void RenderImage(VoxelVolume<TVoxel,TIndex> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics,
-		                         const RenderState *renderState, ITMUChar4Image *outputImage, RenderImageType type = RENDER_SHADED_GREYSCALE, RenderRaycastSelection raycastType = RENDER_FROM_NEW_RAYCAST) const = 0;
+		                         const RenderState *renderState, UChar4Image *outputImage, RenderImageType type = RENDER_SHADED_GREYSCALE, RenderRaycastSelection raycastType = RENDER_FROM_NEW_RAYCAST) const = 0;
 
 		/** Finds the scene surface using raycasting. */
 		virtual void FindSurface(VoxelVolume<TVoxel,TIndex> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics,

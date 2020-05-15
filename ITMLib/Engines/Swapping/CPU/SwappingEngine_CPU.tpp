@@ -11,7 +11,7 @@ int SwappingEngine_CPU<TVoxel, VoxelBlockHash>::LoadFromGlobalMemory(VoxelVolume
 {
 	GlobalCache<TVoxel, VoxelBlockHash>& global_cache = volume->global_cache;
 
-	ITMHashSwapState* swap_states = global_cache.GetSwapStates(false);
+	HashSwapState* swap_states = global_cache.GetSwapStates(false);
 
 	int* neededEntryIDs_local = global_cache.GetNeededEntryIDs(false);
 
@@ -62,7 +62,7 @@ void SwappingEngine_CPU<TVoxel, VoxelBlockHash>::IntegrateGlobalIntoLocal(VoxelV
 
 	HashEntry* hash_table = volume->index.GetEntries();
 
-	ITMHashSwapState* swap_states = global_cache.GetSwapStates(false);
+	HashSwapState* swap_states = global_cache.GetSwapStates(false);
 
 	TVoxel *syncedVoxelBlocks_local = global_cache.GetSyncedVoxelBlocks(false);
 	bool *hasSyncedData_local = global_cache.GetHasSyncedData(false);
@@ -98,7 +98,7 @@ void SwappingEngine_CPU<TVoxel, VoxelBlockHash>::SaveToGlobalMemory(VoxelVolume<
 {
 	GlobalCache<TVoxel, VoxelBlockHash>& global_cache = volume->global_cache;
 
-	ITMHashSwapState* swap_states = global_cache.GetSwapStates(false);
+	HashSwapState* swap_states = global_cache.GetSwapStates(false);
 
 	HashEntry* hash_table = volume->index.GetEntries();
 	HashBlockVisibility* block_visibility_types = volume->index.GetBlockVisibilityTypes();
@@ -124,7 +124,7 @@ void SwappingEngine_CPU<TVoxel, VoxelBlockHash>::SaveToGlobalMemory(VoxelVolume<
 		if (needed_entry_count >= SWAP_OPERATION_BLOCK_COUNT) break;
 
 		int localPtr = hash_table[destination_hash_code].ptr;
-		ITMHashSwapState &swapState = swap_states[destination_hash_code];
+		HashSwapState &swapState = swap_states[destination_hash_code];
 
 		if (swapState.state == 2 && localPtr >= 0 && block_visibility_types[destination_hash_code] == 0)
 		{

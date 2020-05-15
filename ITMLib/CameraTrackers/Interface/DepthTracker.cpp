@@ -10,7 +10,7 @@ using namespace ITMLib;
 DepthTracker::DepthTracker(Vector2i imgSize, TrackerIterationType *trackingRegime, int noHierarchyLevels,
                            float terminationThreshold, float failureDetectorThreshold, const LowLevelEngine *lowLevelEngine, MemoryDeviceType memoryType)
 {
-	viewHierarchy = new ImageHierarchy<TemplatedHierarchyLevel<ITMFloatImage> >(imgSize, trackingRegime, noHierarchyLevels, memoryType, true);
+	viewHierarchy = new ImageHierarchy<TemplatedHierarchyLevel<FloatImage> >(imgSize, trackingRegime, noHierarchyLevels, memoryType, true);
 	sceneHierarchy = new ImageHierarchy<VolumeHierarchyLevel>(imgSize, trackingRegime, noHierarchyLevels, memoryType, true);
 
 	this->noIterationsPerLevel = new int[noHierarchyLevels];
@@ -94,8 +94,8 @@ void DepthTracker::PrepareForEvaluation()
 {
 	for (int i = 1; i < viewHierarchy->GetNoLevels(); i++)
 	{
-		TemplatedHierarchyLevel<ITMFloatImage> *currentLevelView = viewHierarchy->GetLevel(i);
-		TemplatedHierarchyLevel<ITMFloatImage> *previousLevelView = viewHierarchy->GetLevel(i - 1);
+		TemplatedHierarchyLevel<FloatImage> *currentLevelView = viewHierarchy->GetLevel(i);
+		TemplatedHierarchyLevel<FloatImage> *previousLevelView = viewHierarchy->GetLevel(i - 1);
 		lowLevelEngine->FilterSubsampleWithHoles(currentLevelView->data, previousLevelView->data);
 		currentLevelView->intrinsics = previousLevelView->intrinsics * 0.5f;
 

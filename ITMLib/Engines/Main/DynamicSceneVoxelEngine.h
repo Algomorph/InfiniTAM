@@ -74,7 +74,7 @@ private: // member variables
 
 
 	FernRelocLib::Relocaliser<float>* relocalizer;
-	ITMUChar4Image* keyframe_raycast;
+	UChar4Image* keyframe_raycast;
 
 	/// The current input frame data
 	View* view;
@@ -93,7 +93,7 @@ public: // member functions
 
 	CameraTrackingState* GetTrackingState() override { return tracking_state; }
 
-	CameraTrackingState::TrackingResult ProcessFrame(ITMUChar4Image* rgb_image, ITMShortImage* depth_image,
+	CameraTrackingState::TrackingResult ProcessFrame(UChar4Image* rgb_image, ShortImage* depth_image,
 	                                                 IMUMeasurement* imu_measurement = nullptr) override;
 
 	/// Extracts a mesh from the current volume and saves it to the disk at the specified path
@@ -108,7 +108,7 @@ public: // member functions
 	Vector2i GetImageSize() const override;
 
 	/// Get a render of the result
-	void GetImage(ITMUChar4Image* out, GetImageType type,
+	void GetImage(UChar4Image* out, GetImageType type,
 	              ORUtils::SE3Pose* pose = nullptr, Intrinsics* intrinsics = nullptr) override;
 
 	void ResetAll() override;

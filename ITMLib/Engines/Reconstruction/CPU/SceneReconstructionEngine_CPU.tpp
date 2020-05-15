@@ -109,7 +109,7 @@ void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::AllocateSceneFromDep
 	int *voxelAllocationList = volume->index.GetBlockAllocationList();
 	int *excessAllocationList = volume->index.GetExcessEntryList();
 	HashEntry *hash_table = volume->index.GetEntries();
-	ITMHashSwapState *swapStates = volume->SwappingEnabled() ? volume->global_cache.GetSwapStates(false) : 0;
+	HashSwapState *swapStates = volume->SwappingEnabled() ? volume->global_cache.GetSwapStates(false) : 0;
 	int* visibleBlockHashCodes = volume->index.GetUtilizedBlockHashCodes();
 	HashBlockVisibility* hashBlockVisibilityTypes = volume->index.GetBlockVisibilityTypes();
 

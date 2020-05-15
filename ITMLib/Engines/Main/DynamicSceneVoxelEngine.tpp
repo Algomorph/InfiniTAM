@@ -118,7 +118,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(const RG
 		                                                   0.2f, 500, 4);
 	else relocalizer = nullptr;
 
-	keyframe_raycast = new ITMUChar4Image(depth_image_size, memory_device_type);
+	keyframe_raycast = new UChar4Image(depth_image_size, memory_device_type);
 
 	fusion_active = true;
 	main_processing_active = true;
@@ -259,8 +259,8 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ResetAll() {
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 CameraTrackingState::TrackingResult
-DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(ITMUChar4Image* rgb_image,
-                                                             ITMShortImage* depth_image,
+DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(UChar4Image* rgb_image,
+                                                             ShortImage* depth_image,
                                                              IMUMeasurement* imu_measurement) {
 	// prepare images & IMU measurements and turn them into a "view"
 	if (imu_measurement == nullptr) {
@@ -378,7 +378,7 @@ Vector2i DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImageSize() const {
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(ITMUChar4Image* out, GetImageType type,
+void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(UChar4Image* out, GetImageType type,
                                                               ORUtils::SE3Pose* pose,
                                                               Intrinsics* intrinsics) {
 
