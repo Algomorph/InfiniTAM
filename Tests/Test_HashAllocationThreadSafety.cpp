@@ -34,12 +34,12 @@
 #include "../ITMLib/Objects/Volume/RepresentationAccess.h"
 #include "../ITMLib/Utils/MemoryBlock_StdContainer_Convertions.h"
 //(CPU)
-#include "../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
+#include "../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_VoxelBlockHash_CPU.h"
 #include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
 //(CUDA)
 #ifndef COMPILE_WITHOUT_CUDA
 
-#include "../ITMLib/Engines/Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
+#include "../ITMLib/Engines/Indexing/VBH/CUDA/IndexingEngine_VoxelBlockHash_CUDA.h"
 #include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
 
 #endif

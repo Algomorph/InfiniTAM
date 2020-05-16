@@ -22,7 +22,7 @@
 #include "../../../Utils/Geometry/GeometryBooleanOperations.h"
 #include "../../../Engines/Analytics/AnalyticsEngine.h"
 #include "EditAndCopyEngine_CUDA_VoxelBlockHash_Kernels.h"
-#include "../../Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
+#include "../../Indexing/VBH/CUDA/IndexingEngine_VoxelBlockHash_CUDA.h"
 
 #include <cstring>
 #include <limits>

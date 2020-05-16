@@ -19,7 +19,7 @@
 #include "../../../../../ORUtils/PlatformIndependentAtomics.h"
 
 // local
-#include "IndexingEngine_CPU_VoxelBlockHash.h"
+#include "IndexingEngine_VoxelBlockHash_CPU.h"
 #include "../../../../Objects/Volume/RepresentationAccess.h"
 #include "../../../EditAndCopy/Shared/EditAndCopyEngine_Shared.h"
 #include "../../../Traversal/Interface/HashTableTraversal.h"

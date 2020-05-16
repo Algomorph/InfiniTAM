@@ -14,7 +14,7 @@
 //  limitations under the License.
 //  ================================================================
 
-#include "../Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
+#include "../Indexing/VBH/CPU/IndexingEngine_VoxelBlockHash_CPU.h"
 #include "../Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
 #include "DepthFusionEngine.tpp"
 #include "../../GlobalTemplateDefines.h"

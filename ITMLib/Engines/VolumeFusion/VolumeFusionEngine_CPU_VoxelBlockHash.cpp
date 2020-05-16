@@ -15,7 +15,7 @@
 //  ================================================================
 #include "../Traversal/CPU/TwoVolumeTraversal_CPU_VoxelBlockHash.h"
 #include "VolumeFusionEngine.tpp"
-#include "../Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
+#include "../Indexing/VBH/CPU/IndexingEngine_VoxelBlockHash_CPU.h"
 #include "../../GlobalTemplateDefines.h"
 
 namespace ITMLib{

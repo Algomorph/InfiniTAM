@@ -20,9 +20,9 @@
 #include "../../Utils/Configuration/Configuration.h"
 #include "VBH/IndexingEngine_VoxelBlockHash.h"
 #include "PVA/IndexingEngine_PlainVoxelArray.h"
-#include "VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
+#include "VBH/CPU/IndexingEngine_VoxelBlockHash_CPU.h"
 #ifndef COMPILE_WITHOUT_CUDA
-#include "VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
+#include "VBH/CUDA/IndexingEngine_VoxelBlockHash_CUDA.h"
 #endif
 #include "../../Utils/Metacoding/DefferableStructUtilities.h"
 

@@ -1,5 +1,5 @@
 //  ================================================================
-//  Created by Gregory Kramida on 1/29/20.
+//  Created by Gregory Kramida (https://github.com/Algomorph) on 5/16/20.
 //  Copyright (c) 2020 Gregory Kramida
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -13,12 +13,17 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "../Traversal/CUDA/TwoVolumeTraversal_CUDA_VoxelBlockHash.h"
-#include "../Indexing/VBH/CUDA/IndexingEngine_VoxelBlockHash_CUDA.h"
-#include "VolumeFusionEngine.tpp"
-#include "../../GlobalTemplateDefines.h"
+#pragma once
+
+#include "../IndexingEngine_VoxelBlockHash_Internal.h"
 
 namespace ITMLib{
-template
-class VolumeFusionEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>;
+namespace internal{
+
+template<MemoryDeviceType TMemoryDeviceType>
+struct IndexingEngine_VoxelBlockHash_ExecutionModeSpecialized<TMemoryDeviceType, OPTIMIZED>{
+
+};
+
+} // namespace internal
 } // namespace ITMLib

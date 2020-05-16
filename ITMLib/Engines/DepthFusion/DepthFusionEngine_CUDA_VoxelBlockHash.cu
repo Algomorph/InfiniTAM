@@ -14,7 +14,7 @@
 //  limitations under the License.
 //  ================================================================
 #include "../Traversal/CUDA/VolumeTraversal_CUDA_VoxelBlockHash.h"
-#include "../Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
+#include "../Indexing/VBH/CUDA/IndexingEngine_VoxelBlockHash_CUDA.h"
 #include "DepthFusionEngine.tpp"
 #include "../../GlobalTemplateDefines.h"
 

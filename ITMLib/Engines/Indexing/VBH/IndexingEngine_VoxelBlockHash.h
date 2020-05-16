@@ -17,20 +17,16 @@
 
 #include "../Interface/IndexingEngine.h"
 #include "../../../Utils/WarpType.h"
+#include "IndexingEngine_VoxelBlockHash_Internal.h"
+#include "DIAGNOSTIC/IndexingEngine_VoxelBlockHash_DIAGNOSTIC.h"
+#include "OPTIMIZED/IndexingEngine_VoxelBlockHash_OPTIMIZED.h"
 
 namespace ITMLib {
-
-namespace internal {
-template<MemoryDeviceType TMemoryDeviceType, typename TVoxel>
-struct IndexingEngine_VoxelBlockHash_MemoryDeviceTypeSpecialized;
-template<MemoryDeviceType TMemoryDeviceType, typename TVoxel, ExecutionMode TExecutionMode>
-struct IndexingEngine_VoxelBlockHash_ExecutionModeSpecialized;
-} //namespace  internal
-
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
 class IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType, TExecutionMode> :
 		public IndexingEngineInterface<TVoxel, VoxelBlockHash>{
 private: // member variables
+	internal::IndexingEngine_VoxelBlockHash_ExecutionModeSpecialized<TMemoryDeviceType, TExecutionMode> execution_mode_specialized_engine;
 
 protected: // member variables
 	using IndexingEngineInterface<TVoxel,VoxelBlockHash>::parameters;
@@ -67,7 +63,6 @@ public: // member functions
 	void AllocateHashEntriesUsingAllocationStateList(VoxelVolume<TVoxel, VoxelBlockHash>* volume);
 	void AllocateHashEntriesUsingAllocationStateList_SetVisibility(VoxelVolume<TVoxel, VoxelBlockHash>* volume);
 	void AllocateGridAlignedBox(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const Extent3Di& box) override;
-
 
 private: // member functions
 	void ReallocateDeletedHashBlocks(VoxelVolume<TVoxel, VoxelBlockHash>* volume);

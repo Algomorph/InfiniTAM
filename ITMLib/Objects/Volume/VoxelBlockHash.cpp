@@ -16,8 +16,8 @@
 
 #include "VoxelBlockHash.h"
 #include "../../GlobalTemplateDefines.h"
-#include "../../Engines/Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h"
-#include "../../Engines/Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.h"
+#include "../../Engines/Indexing/VBH/CPU/IndexingEngine_VoxelBlockHash_CPU.h"
+#include "../../Engines/Indexing/VBH/CUDA/IndexingEngine_VoxelBlockHash_CUDA.h"
 
 namespace ITMLib {
 

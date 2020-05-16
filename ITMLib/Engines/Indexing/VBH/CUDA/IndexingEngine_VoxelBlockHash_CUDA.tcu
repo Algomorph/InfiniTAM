@@ -16,11 +16,11 @@
 #pragma once
 
 //local
-#include "IndexingEngine_CUDA_VoxelBlockHash.h"
-#include "IndexingEngine_CUDA_VoxelBlockHash_Kernels.h"
+#include "IndexingEngine_VoxelBlockHash_CUDA.h"
+#include "IndexingEngine_VoxelBlockHash_CUDA_Kernels.h"
 #include "../../Interface/IndexingEngine.h"
 #include "../../../../Utils/Configuration/Configuration.h"
-#include "../CPU/IndexingEngine_CPU_VoxelBlockHash.h"
+#include "../CPU/IndexingEngine_VoxelBlockHash_CPU.h"
 #include "../../../../../ORUtils/PlatformIndependence.h"
 #include "../../Shared/IndexingEngine_Functors.h"
 #include "../../../Traversal/Interface/HashTableTraversal.h"

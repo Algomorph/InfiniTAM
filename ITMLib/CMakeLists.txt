@@ -320,87 +320,44 @@ set(ITMLIB_ENGINES_MULTISCENE_HEADERS
     Engines/MultiScene/VoxelMapGraphManager.h
     )
 #====================================== INDEXING ENGINES ===============================================================
-set(ITMLIB_ENGINES_INDEXING_VBH_SOURCES
-    Engines/Indexing/VBH/IndexingEngine_VoxelBlockHash.tpp
-    )
-
-set(ITMLIB_ENGINES_INDEXING_VBH_HEADERS
-    Engines/Indexing/VBH/IndexingEngine_VoxelBlockHash.h
-    )
-
-##
-set(ITMLIB_ENGINES_INDEXING_CPU_SOURCES
-    Engines/Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.tpp
-    Engines/Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.cpp
-    Engines/Indexing/PVA/CPU/IndexingEngine_CPU_PlainVoxelArray.cpp
-    )
-
-set(ITMLIB_ENGINES_INDEXING_CPU_HEADERS
-    Engines/Indexing/VBH/CPU/IndexingEngine_CPU_VoxelBlockHash.h
-    )
-##
-set(ITMLIB_ENGINES_INDEXING_CUDA_SOURCES
-    Engines/Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.tcu
-    Engines/Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash.cu
-    Engines/Indexing/PVA/CUDA/IndexingEngine_CUDA_PlainVoxelArray.cu
-    )
-
-set(ITMLIB_ENGINES_INDEXING_CUDA_HEADERS
-    Engines/Indexing/VBH/CUDA/IndexingEngine_CUDA_VoxelBlockHash_Kernels.h
-    )
-
-##
-set(ITMLIB_ENGINES_INDEXING_INTERFACE_HEADERS
-    Engines/Indexing/Interface/IndexingEngine.h
-
-    )
-set(ITMLIB_ENGINES_INDEXING_PVA_SOURCES
-    Engines/Indexing/PVA/IndexingEngine_PlainVoxelArray.tpp
-    )
-set(ITMLIB_ENGINES_INDEXING_PVA_HEADERS
-    Engines/Indexing/PVA/IndexingEngine_PlainVoxelArray.h
-    )
-
-set(ITMLIB_ENGINES_INDEXING_SHARED_HEADERS
-    Engines/Indexing/Shared/IndexingEngine_Shared.h
-    Engines/Indexing/Shared/IndexingEngine_RayMarching.h
-    Engines/Indexing/Shared/IndexingEngine_Functors.h
-    Engines/Indexing/Shared/IndexingEngine_ConcurrentBlockManagement.h
-    )
-##
-set(
-        ITMLIB_ENGINES_INDEXING_AUX_SOURCES
-
-        Engines/Indexing/IndexingSettings.cpp
-)
-set(
-        ITMLIB_ENGINES_INDEXING_AUX_HEADERS
-
-        Engines/Indexing/IndexingEngineFactory.h
-        Engines/Indexing/IndexingSettings.h
-)
-##
 set(
         ITMLIB_ENGINES_INDEXING_SOURCES
 
-        ${ITMLIB_ENGINES_INDEXING_VBH_SOURCES}
-        ${ITMLIB_ENGINES_INDEXING_PVA_SOURCES}
-        ${ITMLIB_ENGINES_INDEXING_CPU_SOURCES}
-        ${ITMLIB_ENGINES_INDEXING_CUDA_SOURCES}
-        ${ITMLIB_ENGINES_INDEXING_INTERFACE_SOURCES}
-        ${ITMLIB_ENGINES_INDEXING_AUX_SOURCES}
+        Engines/Indexing/Interface/IndexingEngine.h
+
+        Engines/Indexing/PVA/IndexingEngine_CUDA_PlainVoxelArray.cu
+        Engines/Indexing/PVA/IndexingEngine_CPU_PlainVoxelArray.cpp
+        Engines/Indexing/PVA/IndexingEngine_PlainVoxelArray.tpp
+
+        Engines/Indexing/VBH/IndexingEngine_VoxelBlockHash.tpp
+        Engines/Indexing/VBH/IndexingEngine_VoxelBlockHash_CPU.cpp
+        Engines/Indexing/VBH/IndexingEngine_VoxelBlockHash_CUDA.cu
+
+        Engines/Indexing/VBH/CPU/IndexingEngine_VoxelBlockHash_CPU.tpp
+        Engines/Indexing/VBH/CUDA/IndexingEngine_VoxelBlockHash_CUDA.tcu
+
+        Engines/Indexing/IndexingSettings.cpp
 )
 
 set(
         ITMLIB_ENGINES_INDEXING_HEADERS
 
-        ${ITMLIB_ENGINES_INDEXING_VBH_HEADERS}
-        ${ITMLIB_ENGINES_INDEXING_PVA_HEADERS}
-        ${ITMLIB_ENGINES_INDEXING_CPU_HEADERS}
-        ${ITMLIB_ENGINES_INDEXING_CUDA_HEADERS}
-        ${ITMLIB_ENGINES_INDEXING_INTERFACE_HEADERS}
-        ${ITMLIB_ENGINES_INDEXING_SHARED_HEADERS}
-        ${ITMLIB_ENGINES_INDEXING_AUX_HEADERS}
+        Engines/Indexing/PVA/IndexingEngine_PlainVoxelArray.h
+
+        Engines/Indexing/Shared/IndexingEngine_Shared.h
+        Engines/Indexing/Shared/IndexingEngine_RayMarching.h
+        Engines/Indexing/Shared/IndexingEngine_Functors.h
+        Engines/Indexing/Shared/IndexingEngine_ConcurrentBlockManagement.h
+
+        Engines/Indexing/VBH/IndexingEngine_VoxelBlockHash.h
+        Engines/Indexing/VBH/IndexingEngine_VoxelBlockHash_Internal.h
+        Engines/Indexing/VBH/CPU/IndexingEngine_VoxelBlockHash_CPU.h
+        Engines/Indexing/VBH/CUDA/IndexingEngine_VoxelBlockHash_CUDA_Kernels.h
+        Engines/Indexing/VBH/DIAGNOSTIC/IndexingEngine_VoxelBlockHash_DIAGNOSTIC.h
+        Engines/Indexing/VBH/OPTIMIZED/IndexingEngine_VoxelBlockHash_OPTIMIZED.h
+
+        Engines/Indexing/IndexingEngineFactory.h
+        Engines/Indexing/IndexingSettings.h
 )
 
 
@@ -687,25 +644,25 @@ set(ITMLIB_ENGINES_TELEMETRY_SOURCES
     Engines/Telemetry/TelemetryRecorder_PlainVoxelArray.cpp
     Engines/Telemetry/TelemetryRecorder_VoxelBlockHash.cpp
     #TODO: fixme
-#    Engines/Telemetry/TelemetryRecorder_PlainVoxelArray.cpp
-#    Engines/Telemetry/TelemetryRecorder_VoxelBlockHash.cpp
-#    Engines/Telemetry/VolumeSequenceRecorder.tpp
-#    Engines/Telemetry/VolumeSequenceRecorder_PlainVoxelArray.cpp
-#    Engines/Telemetry/VolumeSequenceRecorder_VoxelBlockHash.cpp
-#    Engines/Telemetry/TelemetryRecorder.tpp
-#    Engines/Telemetry/VolumeSequenceRecorder_VolumeSlice.tpp
-#    Engines/Telemetry/WarpFieldSequenceRecorder.tpp
-#    Engines/Telemetry/WarpFieldSequenceRecorder_PlainVoxelArray.cpp
-#    Engines/Telemetry/WarpFieldSequenceRecorder_VoxelBlockHash.cpp
+    #    Engines/Telemetry/TelemetryRecorder_PlainVoxelArray.cpp
+    #    Engines/Telemetry/TelemetryRecorder_VoxelBlockHash.cpp
+    #    Engines/Telemetry/VolumeSequenceRecorder.tpp
+    #    Engines/Telemetry/VolumeSequenceRecorder_PlainVoxelArray.cpp
+    #    Engines/Telemetry/VolumeSequenceRecorder_VoxelBlockHash.cpp
+    #    Engines/Telemetry/TelemetryRecorder.tpp
+    #    Engines/Telemetry/VolumeSequenceRecorder_VolumeSlice.tpp
+    #    Engines/Telemetry/WarpFieldSequenceRecorder.tpp
+    #    Engines/Telemetry/WarpFieldSequenceRecorder_PlainVoxelArray.cpp
+    #    Engines/Telemetry/WarpFieldSequenceRecorder_VoxelBlockHash.cpp
     )
 set(ITMLIB_ENGINES_TELEMETRY_HEADERS
     Engines/Indexing/Shared/IndexingEngine_DiagnosticData.h
     Engines/Telemetry/TelemetryRecorder.h
     Engines/Telemetry/TelemetryRecorderFactory.h
-#    Engines/Telemetry/WriteAndReadFunctors.h
-#    Engines/Telemetry/VolumeSequenceRecorder.h
-#    Engines/Telemetry/TelemetryRecorder.h
-#    Engines/Telemetry/WarpFieldSequenceRecorder.h
+    #    Engines/Telemetry/WriteAndReadFunctors.h
+    #    Engines/Telemetry/VolumeSequenceRecorder.h
+    #    Engines/Telemetry/TelemetryRecorder.h
+    #    Engines/Telemetry/WarpFieldSequenceRecorder.h
     )
 
 ## ================================================== OBJECTS ==========================================================
@@ -1031,8 +988,8 @@ set(ITMLIB_UTILS_VISUALIZATION_SOURCES
 if (WITH_VTK)
     list(APPEND ITMLIB_UTILS_VISUALIZATION_SOURCES
          #TODO: fixme
-#         Utils/Visualization/VoxelValueGrapher.cpp
-#         Utils/Visualization/SceneSliceVisualizer1D.tpp
+         #         Utils/Visualization/VoxelValueGrapher.cpp
+         #         Utils/Visualization/SceneSliceVisualizer1D.tpp
          Utils/Visualization/SceneSliceVisualizer3D.tpp
          Utils/Visualization/SceneSliceVisualizer3DInteractorStyle.tpp
          Utils/Visualization/SceneSliceVisualizer3DCommon.cpp
@@ -1045,11 +1002,11 @@ endif ()
 
 set(ITMLIB_UTILS_VISUALIZATION_HEADERS
     Utils/Visualization/SceneSliceVisualizerCommon.h
-#    Utils/Visualization/VolumeSliceVisualizer2D.h
+    #    Utils/Visualization/VolumeSliceVisualizer2D.h
     )
 if (WITH_VTK)
     list(APPEND ITMLIB_UTILS_VISUALIZATION_HEADERS
-#         Utils/Visualization/VoxelValueGrapher.h
+         #         Utils/Visualization/VoxelValueGrapher.h
          Utils/Visualization/SceneSliceVisualizer3D.h
          Utils/Visualization/SceneSliceVisualizer3DInteractorStyle.h
          Utils/Visualization/SceneSliceVisualizer3DCommon.h
