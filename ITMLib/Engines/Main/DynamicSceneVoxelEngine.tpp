@@ -46,6 +46,7 @@ namespace fs = std::filesystem;
 #include "../../../ORUtils/NVTimer.h"
 #include "../../../ORUtils/FileUtils.h"
 #include "../../../ORUtils/FileUtils.h"
+#include "../../Utils/Telemetry/TelemetryUtilities.h"
 
 using namespace ITMLib;
 
@@ -285,6 +286,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(UChar4Image* rgb_im
 	bool fusion_succeeded = false;
 
 	auto frame_index = [this]{ return config.automatic_run_settings.index_of_frame_to_start_at + frames_processed;};
+	telemetry::SetGlobalFrameIndex(frame_index());
 	if ((last_tracking_result == CameraTrackingState::TRACKING_GOOD || !tracking_initialised) && (fusion_active) &&
 	    (relocalization_count == 0)) {
 		if (frames_processed > 0) {

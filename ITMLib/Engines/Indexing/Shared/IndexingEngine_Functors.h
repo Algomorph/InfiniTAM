@@ -26,6 +26,7 @@
 #include "../../../Utils/Geometry/CheckBlockVisibility.h"
 #include "../../../Utils/Geometry/GeometryBooleanOperations.h"
 #include "../../../Utils/VoxelVolumeParameters.h"
+#include "../../../Utils/Telemetry/TelemetryUtilities.h"
 
 namespace ITMLib {
 
@@ -446,6 +447,10 @@ public: // member functions
 			                                                                    surface_distance_cutoff),
             diagnostic_data(specialized_engine.diagnostic_data){
 		diagnostic_data.PrepareForFrame(view->depth->dimensions);
+	}
+	~TwoSurfaceBasedAllocationStateMarkerFunctor(){
+		std::string output_folder = telemetry::CreateAndGetOutputPathForFrame();
+		diagnostic_data.SaveToDisk(output_folder);
 	}
 
 	_DEVICE_WHEN_AVAILABLE_

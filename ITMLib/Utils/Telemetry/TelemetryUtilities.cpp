@@ -25,13 +25,50 @@ namespace fs = std::filesystem;
 namespace ITMLib {
 namespace telemetry {
 
-std::string CreateAndGetOutputPathForFrame(int frame_index) {
-	fs::path path(configuration::get().paths.output_path + frame_folder_prefix + std::to_string(frame_index));
+static int global_frame_index = -1;
+
+bool GlobalFrameIndexWasInitialized() {
+	return global_frame_index > 0;
+}
+
+int GetGlobalFrameIndex() {
+	if (GlobalFrameIndexWasInitialized()) {
+		return global_frame_index;
+	} else {
+		DIEWITHEXCEPTION_REPORTLOCATION("Argh! The global frame index hasn't been initialized. What a bummer!");
+		return 0;
+	}
+}
+
+void SetGlobalFrameIndex(int frame_index) {
+	global_frame_index = frame_index;
+}
+
+static inline std::string CreateAndGetOutputPathForFrame_Aux(const std::string& frame_folder_postfix) {
+	fs::path path(configuration::get().paths.output_path + frame_folder_prefix + frame_folder_postfix);
 	if (!fs::exists(path)) {
 		fs::create_directories(path);
 	}
 	return path.string();
 }
+
+std::string CreateAndGetOutputPathForFrame(int frame_index) {
+	return CreateAndGetOutputPathForFrame_Aux(std::to_string(frame_index));
+}
+
+std::string CreateAndGetOutputPathForUnknownFrame() {
+	return CreateAndGetOutputPathForFrame_Aux("Unknown");
+}
+
+std::string CreateAndGetOutputPathForFrame() {
+#ifdef UNKNOWN_FRAME_OUTPUT_ALLOWED
+	return GlobalFrameIndexWasInitialized() ? CreateAndGetOutputPathForFrame(global_frame_index)
+	                                        : CreateAndGetOutputPathForUnknownFrame();
+#else
+	return CreateAndGetOutputPathForFrame(GetGlobalFrameIndex());
+#endif
+}
+
 
 } // namespace telemetry
 } // namespace ITMLib

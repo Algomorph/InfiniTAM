@@ -19,6 +19,7 @@
 #include "../../../Objects/Volume/VoxelBlockHash.h"
 #include "../../../../ORUtils/PlatformIndependentAtomics.h"
 #include "../../../Utils/Geometry/Segment.h"
+#include "../../../../ORUtils/MemoryBlockPersister.h"
 
 namespace ITMLib {
 
@@ -65,7 +66,22 @@ public: // member functions
 		surface1_point_cloud_device[element_ix] = surface1_point.toVector3();
 		surface2_point_cloud_device[element_ix] = surface2_point.toVector3();
 		march_endpoint1_point_cloud_device[element_ix] = march_segment_blocks.origin;
-		march_endpoint1_point_cloud_device[element_ix] = march_segment_blocks.destination();
+		march_endpoint2_point_cloud_device[element_ix] = march_segment_blocks.destination();
+	}
+
+	void SaveToDisk(std::string output_folder_path) {
+		ORUtils::OStreamWrapper file(output_folder_path + "/voxel_block_hash_diagnostic_data.dat", true, true);
+		Vector2i& image_dimensions = *this->depth_image_dimensions.GetData(MEMORYDEVICE_CPU);
+		const int num_layers = 4;
+		file.OStream().write(reinterpret_cast<const char*>(&num_layers), sizeof(int));
+		file.OStream().write(reinterpret_cast<const char*>(&image_dimensions.y), sizeof(int));
+		file.OStream().write(reinterpret_cast<const char*>(&image_dimensions.x), sizeof(int));
+		const int num_channels = 3;
+		file.OStream().write(reinterpret_cast<const char*>(&num_channels), sizeof(int));
+		ORUtils::MemoryBlockPersister::SaveImageData(file, surface1_point_cloud);
+		ORUtils::MemoryBlockPersister::SaveImageData(file, surface2_point_cloud);
+		ORUtils::MemoryBlockPersister::SaveImageData(file, march_endpoint1_point_cloud);
+		ORUtils::MemoryBlockPersister::SaveImageData(file, march_endpoint2_point_cloud);
 	}
 
 	void PrepareForFrame(const Vector2i& depth_image_dimensions) {

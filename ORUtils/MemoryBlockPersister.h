@@ -18,6 +18,7 @@
 #endif
 
 #include "MemoryBlock.h"
+#include "Image.h"
 
 #ifdef WITH_BOOST
 namespace b_ios = boost::iostreams;
@@ -222,6 +223,22 @@ public:
 		SaveMemoryBlock(file, block, memory_type);
 	}
 
+	template<typename TElement, typename TBlockType>
+	static void SaveMemoryBlock_Generic(OStreamWrapper& file, const TBlockType& block,
+	                                    MemoryDeviceType memory_type) {
+		if (memory_type == MEMORYDEVICE_CUDA) {
+			// If we are saving the memory block from the CUDA, first make a CPU copy of it.
+			TBlockType block_CPU(block.size(), MEMORYDEVICE_CPU);
+			block_CPU.SetFrom(block, MemoryCopyDirection::CUDA_TO_CPU);
+
+			// Then write the CPU copy to disk.
+			WriteBlock_Generic<TElement, TBlockType>(file.OStream(), block_CPU);
+		} else {
+			// If we are saving the memory block from the CPU, write it directly to disk.
+			WriteBlock_Generic<TElement, TBlockType>(file.OStream(), block);
+		}
+	}
+
 	/**
 	 * \brief Saves a memory block to a file on disk.
 	 *
@@ -231,20 +248,36 @@ public:
 	 */
 	template<typename T>
 	static void SaveMemoryBlock(OStreamWrapper& file, const ORUtils::MemoryBlock<T>& block,
-	                            MemoryDeviceType memory_type, bool use_compression = false) {
-
-		if (memory_type == MEMORYDEVICE_CUDA) {
-			// If we are saving the memory block from the CUDA, first make a CPU copy of it.
-			ORUtils::MemoryBlock<T> block_CPU(block.size(), MEMORYDEVICE_CPU);
-			block_CPU.SetFrom(block, MemoryCopyDirection::CUDA_TO_CPU);
-
-			// Then write the CPU copy to disk.
-			WriteBlock(file.OStream(), block_CPU);
-		} else {
-			// If we are saving the memory block from the CPU, write it directly to disk.
-			WriteBlock(file.OStream(), block);
-		}
+	                            MemoryDeviceType memory_type) {
+		SaveMemoryBlock_Generic<T, ORUtils::MemoryBlock<T>>(file, block, memory_type);
 	}
+
+
+
+	/**
+	 * \brief Saves a memory block to a file on disk.
+	 *
+	 * \param file          	Successfully-opened handle to the file
+	 * \param block             The memory block to save.
+	 * \param memory_type       The type of memory device from which to save the data.
+	 */
+	template<typename T>
+	static void SaveMemoryBlock(OStreamWrapper& file, const ORUtils::MemoryBlock<T>& block) {
+		SaveMemoryBlock_Generic<T, ORUtils::MemoryBlock<T>>(file, block, block.GetAccessMode());
+	}
+
+	/**
+	 * \brief Saves image data to a file on disk.
+	 *
+	 * \param file          	Successfully-opened handle to the file
+	 * \param image             The image whose data to save.
+	 * \param memory_type       The type of memory device from which to save the data.
+	 */
+	template<typename T>
+	static void SaveImageData(OStreamWrapper& file, const ORUtils::Image<T>& image) {
+		SaveMemoryBlock_Generic<T, ORUtils::Image<T>>(file, image, image.GetAccessMode());
+	}
+
 
 	//#################### PRIVATE STATIC MEMBER FUNCTIONS ####################
 private:
@@ -310,6 +343,20 @@ private:
 		else throw std::runtime_error("Could not read memory block size");
 	}
 
+	template<typename TElement, typename TBlockType>
+	static void WriteBlock_Generic(std::ostream& os, const TBlockType& block) {
+		typename ORUtils::MemoryBlock<TElement>::size_type size = block.size();
+		// Try and write the block's size.
+		if (!os.write(reinterpret_cast<const char*>(&size), sizeof(typename ORUtils::MemoryBlock<TElement>::size_type))) {
+			throw std::runtime_error("Could not write memory block size");
+		}
+
+		// Try and write the block's data.
+		if (!os.write(reinterpret_cast<const char*>(block.GetData(MEMORYDEVICE_CPU)), block.size() * sizeof(TElement))) {
+			throw std::runtime_error("Could not write memory block data");
+		}
+	}
+
 	/**
 	 * \brief Attempts to write a memory block allocated on the CPU to an output stream.
 	 *
@@ -321,16 +368,11 @@ private:
 	 */
 	template<typename T>
 	static void WriteBlock(std::ostream& os, const ORUtils::MemoryBlock<T>& block) {
-		typename ORUtils::MemoryBlock<T>::size_type size = block.size();
-		// Try and write the block's size.
-		if (!os.write(reinterpret_cast<const char*>(&size), sizeof(typename ORUtils::MemoryBlock<T>::size_type))) {
-			throw std::runtime_error("Could not write memory block size");
-		}
-
-		// Try and write the block's data.
-		if (!os.write(reinterpret_cast<const char*>(block.GetData(MEMORYDEVICE_CPU)), block.size() * sizeof(T))) {
-			throw std::runtime_error("Could not write memory block data");
-		}
+		WriteBlock_Generic<T, ORUtils::MemoryBlock<T>>(os, block);
+	}
+	template<typename T>
+	static void WriteImageData(std::ostream& os, const ORUtils::Image<T>& image) {
+		WriteBlock_Generic<T, ORUtils::Image<T>>(os, image);
 	}
 };
 }

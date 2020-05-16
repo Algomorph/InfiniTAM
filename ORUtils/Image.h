@@ -20,6 +20,8 @@ public:
 	using MemoryBlock<T>::Clear;
 	using MemoryBlock<T>::GetData;
 	using MemoryBlock<T>::GetElement;
+	using MemoryBlock<T>::GetAccessMode;
+	using MemoryBlock<T>::SetFrom;
 
 #ifdef COMPILE_WITH_METAL
 	using MemoryBlock<T>::GetMetalBuffer();

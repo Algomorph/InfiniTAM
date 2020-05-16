@@ -25,7 +25,6 @@ template<MemoryDeviceType TMemoryDeviceType>
 struct IndexingEngine_VoxelBlockHash_ExecutionModeSpecialized<TMemoryDeviceType, DIAGNOSTIC>{
 public: // member variables
 	IndexingDiagnosticData<VoxelBlockHash, TMemoryDeviceType> diagnostic_data;
-
 };
 
 
