@@ -925,7 +925,7 @@ set(ITMLIB_UTILS_HEADERS
     Utils/Geometry/CardinalAxesAndPlanes.h
     Utils/Geometry/CheckBlockVisibility.h
 
-    Utils/Metacoding/DefferableStructUtilities.h
+    Utils/Metacoding/DeferrableStructUtilities.h
     Utils/Metacoding/DeferrableSerializableStruct.h
     Utils/Metacoding/DeferrableSerializableStruct_Impl.h
     Utils/Metacoding/Metacoding.h

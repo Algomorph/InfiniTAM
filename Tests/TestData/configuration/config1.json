@@ -158,5 +158,8 @@
         "record_frame_meshes": true,
         "use_CPU_for_mesh_recording": true,
         "record_camera_matrices": true
+    },
+    "indexing_settings": {
+        "execution_mode": "diagnostic"
     }
 }

@@ -22,12 +22,14 @@
 //boost
 #include <boost/test/unit_test.hpp>
 
-//ITMLib
-#include "../ITMLib/Utils/Configuration/Configuration.h"
-
 //test_utilities
 #include "TestUtilities/TestUtilities.h"
 #include "../ITMLib/Utils/Configuration/TelemetrySettings.h"
+
+//ITMLib
+#include "../ITMLib/Utils/Configuration/Configuration.h"
+#include "../ITMLib/Engines/Indexing/IndexingSettings.h"
+#include "../ITMLib/Utils/Metacoding/DeferrableStructUtilities.h"
 
 namespace pt = boost::property_tree;
 
@@ -35,15 +37,29 @@ using namespace ITMLib;
 using namespace ITMLib::configuration;
 using namespace test_utilities;
 
+struct DeferrableStructCollection {
+	TelemetrySettings telemetry_settings;
+	IndexingSettings indexing_settings;
+
+	DeferrableStructCollection(const configuration::Configuration& source_configuration = configuration::get()) :
+			telemetry_settings(BuildDeferrableFromParentIfPresent<TelemetrySettings>(source_configuration)),
+			indexing_settings(BuildDeferrableFromParentIfPresent<IndexingSettings>(source_configuration)) {}
+
+	friend void RequireEqualDeferrables(const DeferrableStructCollection& l, const DeferrableStructCollection& r){
+		BOOST_REQUIRE_EQUAL(l.telemetry_settings, r.telemetry_settings);
+		BOOST_REQUIRE_EQUAL(l.indexing_settings, r.indexing_settings);
+	}
+
+};
+
 configuration::Configuration GenerateDefaultSnoopyConfiguration();
 
 BOOST_AUTO_TEST_CASE(ConfigurationTest) {
 	configuration::Configuration default_configuration;
-	TelemetrySettings default_telemetry_settings;
+	DeferrableStructCollection default_deferrables(default_configuration);
 
 	configuration::Configuration configuration1 = GenerateChangedUpConfiguration();
-	TelemetrySettings telemetry_settings1 = TelemetrySettings::BuildFromPTree(
-			configuration1.source_tree.get_child(TelemetrySettings::default_parse_path));
+	DeferrableStructCollection deferrables1(configuration1);
 
 #ifdef COMPILE_WITHOUT_CUDA
 	configuration::load_configuration_from_json_file("TestData/configuration/default_config_cpu.json");
@@ -51,8 +67,7 @@ BOOST_AUTO_TEST_CASE(ConfigurationTest) {
 	configuration::load_configuration_from_json_file("TestData/configuration/default_config_cuda.json");
 #endif
 
-	TelemetrySettings loaded_telemetry_settings = TelemetrySettings::BuildFromPTree(
-			configuration::get().source_tree.get_child(TelemetrySettings::default_parse_path));
+	DeferrableStructCollection loaded_deferrables;
 
 	BOOST_REQUIRE_EQUAL(default_configuration.general_voxel_volume_parameters,
 	                    configuration::get().general_voxel_volume_parameters);
@@ -61,7 +76,7 @@ BOOST_AUTO_TEST_CASE(ConfigurationTest) {
 	BOOST_REQUIRE_EQUAL(default_configuration.slavcheva_parameters, configuration::get().slavcheva_parameters);
 	BOOST_REQUIRE_EQUAL(default_configuration.slavcheva_switches, configuration::get().slavcheva_switches);
 	BOOST_REQUIRE_EQUAL(default_configuration.logging_settings, configuration::get().logging_settings);
-	BOOST_REQUIRE_EQUAL(default_telemetry_settings, loaded_telemetry_settings);
+	RequireEqualDeferrables(default_deferrables, loaded_deferrables);
 	BOOST_REQUIRE_EQUAL(default_configuration.paths, configuration::get().paths);
 	BOOST_REQUIRE_EQUAL(default_configuration.automatic_run_settings, configuration::get().automatic_run_settings);
 	BOOST_REQUIRE_EQUAL(default_configuration.non_rigid_tracking_parameters,
@@ -69,8 +84,7 @@ BOOST_AUTO_TEST_CASE(ConfigurationTest) {
 	BOOST_REQUIRE_EQUAL(default_configuration, configuration::get());
 
 	configuration::load_configuration_from_json_file("TestData/configuration/config1.json");
-	loaded_telemetry_settings = TelemetrySettings::BuildFromPTree(
-			configuration::get().source_tree.get_child(TelemetrySettings::default_parse_path));
+	loaded_deferrables = DeferrableStructCollection();
 
 	BOOST_REQUIRE_EQUAL(configuration1.general_voxel_volume_parameters,
 	                    configuration::get().general_voxel_volume_parameters);
@@ -79,7 +93,7 @@ BOOST_AUTO_TEST_CASE(ConfigurationTest) {
 	BOOST_REQUIRE_EQUAL(configuration1.slavcheva_parameters, configuration::get().slavcheva_parameters);
 	BOOST_REQUIRE_EQUAL(configuration1.slavcheva_switches, configuration::get().slavcheva_switches);
 	BOOST_REQUIRE_EQUAL(configuration1.logging_settings, configuration::get().logging_settings);
-	BOOST_REQUIRE_EQUAL(telemetry_settings1, loaded_telemetry_settings);
+	RequireEqualDeferrables(deferrables1, loaded_deferrables);
 	BOOST_REQUIRE_EQUAL(configuration1.paths, configuration::get().paths);
 	BOOST_REQUIRE_EQUAL(configuration1.automatic_run_settings, configuration::get().automatic_run_settings);
 	BOOST_REQUIRE_EQUAL(configuration1.non_rigid_tracking_parameters,
@@ -87,8 +101,8 @@ BOOST_AUTO_TEST_CASE(ConfigurationTest) {
 	BOOST_REQUIRE_EQUAL(configuration1, configuration::get());
 	configuration::save_configuration_to_json_file("TestData/configuration/config2.json", configuration1);
 	configuration::load_configuration_from_json_file("TestData/configuration/config2.json");
-	loaded_telemetry_settings = TelemetrySettings::BuildFromPTree(
-			configuration::get().source_tree.get_child(TelemetrySettings::default_parse_path));
+	loaded_deferrables = DeferrableStructCollection();
+
 	BOOST_REQUIRE_EQUAL(configuration1.general_voxel_volume_parameters,
 	                    configuration::get().general_voxel_volume_parameters);
 	BOOST_REQUIRE_EQUAL(configuration1.general_surfel_volume_parameters,
@@ -96,7 +110,7 @@ BOOST_AUTO_TEST_CASE(ConfigurationTest) {
 	BOOST_REQUIRE_EQUAL(configuration1.slavcheva_parameters, configuration::get().slavcheva_parameters);
 	BOOST_REQUIRE_EQUAL(configuration1.slavcheva_switches, configuration::get().slavcheva_switches);
 	BOOST_REQUIRE_EQUAL(configuration1.logging_settings, configuration::get().logging_settings);
-	BOOST_REQUIRE_EQUAL(telemetry_settings1, loaded_telemetry_settings);
+	RequireEqualDeferrables(deferrables1, loaded_deferrables);
 	BOOST_REQUIRE_EQUAL(configuration1.paths, configuration::get().paths);
 	BOOST_REQUIRE_EQUAL(configuration1.automatic_run_settings, configuration::get().automatic_run_settings);
 	BOOST_REQUIRE_EQUAL(configuration1.non_rigid_tracking_parameters,

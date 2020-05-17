@@ -130,5 +130,5 @@ boost::optional<TEnum> ptree_to_optional_enumerator(const boost::property_tree::
 
 #define SERIALIZABLE_ENUM_IMPL(enum_name, ...) \
     SERIALIZABLE_ENUM_DECL_IMPL(enum_name, __VA_ARGS__) \
-    SERIALIZABLE_ENUM_DEFN_IMPL(enum_name, __VA_ARGS__)
+    SERIALIZABLE_ENUM_DEFN_IMPL(,enum_name, __VA_ARGS__)
 // endregion

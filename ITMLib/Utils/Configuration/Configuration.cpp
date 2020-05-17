@@ -25,10 +25,11 @@
 #include <boost/preprocessor/stringize.hpp>
 
 //local
-#include "../Metacoding/DefferableStructUtilities.h"
+#include "../Metacoding/DeferrableStructUtilities.h"
 #include "Configuration.h"
 #include "../FileIO/JSON_Utilities.h"
 #include "TelemetrySettings.h"
+#include "../../Engines/Indexing/IndexingSettings.h"
 
 using namespace ITMLib::configuration;
 
@@ -156,15 +157,20 @@ void load_configuration_from_json_file(const std::string& path) {
 	instance = Configuration::BuildFromPTree(tree, path);
 }
 
+static void AddAllDeferrableStructsFromSourceToTargetRootConfiguration(pt::ptree& target_tree, const pt::ptree& origin_tree, std::string origin){
+	AddDeferrableFromSourceToTargetTree<TelemetrySettings>(target_tree, origin_tree, origin);
+	AddDeferrableFromSourceToTargetTree<IndexingSettings>(target_tree, origin_tree, origin);
+}
+
 void save_configuration_to_json_file(const std::string& path) {
 	pt::ptree target_tree = instance.ToPTree(path);
-	AddDeferrableFromSourceToTargetTree<TelemetrySettings>(target_tree, instance.source_tree, instance.origin);
+	AddAllDeferrableStructsFromSourceToTargetRootConfiguration(target_tree, instance.source_tree, instance.origin);
 	pt::write_json_no_quotes(path, target_tree, true);
 }
 
 void save_configuration_to_json_file(const std::string& path, const Configuration& configuration) {
 	pt::ptree target_tree = configuration.ToPTree(path);
-	AddDeferrableFromSourceToTargetTree<TelemetrySettings>(target_tree, configuration.source_tree, configuration.origin);
+	AddAllDeferrableStructsFromSourceToTargetRootConfiguration(target_tree, configuration.source_tree, configuration.origin);
 	pt::write_json_no_quotes(path, target_tree, true);
 }
 // endregion ===========================================================================================================

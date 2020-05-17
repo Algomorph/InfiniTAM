@@ -158,5 +158,8 @@
         "record_frame_meshes": false,
         "use_CPU_for_mesh_recording": false,
         "record_camera_matrices": false
+    },
+    "indexing_settings": {
+        "execution_mode": "optimized"
     }
 }

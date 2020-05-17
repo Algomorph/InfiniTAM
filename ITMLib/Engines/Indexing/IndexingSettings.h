@@ -21,7 +21,7 @@
 namespace ITMLib {
 #define INDEXING_SETTINGS_STRUCT_DESCRIPTION IndexingSettings, "indexing_settings", \
     (ExecutionMode, execution_mode, OPTIMIZED, ENUM, "Set to \"diagnostic\" for recording telemetry while performing " \
-	 "index allocations, \"optimized\" for unhindered, optimized execution of index allocations")
+	 "index allocations, or \"optimized\" for unhindered, optimized execution of index allocations.")
 
 
 DECLARE_DEFERRABLE_SERIALIZABLE_STRUCT(INDEXING_SETTINGS_STRUCT_DESCRIPTION);

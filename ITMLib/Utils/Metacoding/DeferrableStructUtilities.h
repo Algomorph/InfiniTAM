@@ -32,9 +32,9 @@ inline void AddDeferrableFromSourceToTargetTree(boost::property_tree::ptree& tar
 	boost::property_tree::ptree deferrable_subtree;
 	auto subtree = source_tree.get_child_optional(TDeferrableSerializableStruct::default_parse_path);
 	if (subtree) {
-		deferrable_subtree = TDeferrableSerializableStruct().ToPTree(origin);
-	} else {
 		deferrable_subtree = subtree.get();
+	} else {
+		deferrable_subtree = TDeferrableSerializableStruct().ToPTree(origin);
 	}
 	target_tree.add_child(TDeferrableSerializableStruct::default_parse_path, deferrable_subtree);
 }

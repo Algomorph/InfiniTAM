@@ -24,7 +24,7 @@
 #ifndef COMPILE_WITHOUT_CUDA
 #include "VBH/CUDA/IndexingEngine_VoxelBlockHash_CUDA.h"
 #endif
-#include "../../Utils/Metacoding/DefferableStructUtilities.h"
+#include "../../Utils/Metacoding/DeferrableStructUtilities.h"
 
 namespace ITMLib {
 

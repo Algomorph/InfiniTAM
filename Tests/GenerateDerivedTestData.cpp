@@ -16,6 +16,7 @@
 //stdlib
 #include <filesystem>
 
+
 //ITMLib
 #include "../ITMLib/SurfaceTrackers/Interface/SurfaceTracker.h"
 #include "../ITMLib/Engines/VolumeFusion/VolumeFusionEngine.h"
@@ -25,6 +26,7 @@
 #include "../ITMLib/Engines/Meshing/MeshingEngineFactory.h"
 #include "../ITMLib/Engines/EditAndCopy/EditAndCopyEngineFactory.h"
 #include "../ITMLib/Utils/Configuration/Configuration.h"
+#include "../ITMLib/Utils/Metacoding/SerializableEnum.h"
 //(CPU)
 #include "../ITMLib/Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 #include "../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_VoxelBlockHash_CPU.h"
@@ -295,7 +297,8 @@ void GenerateWarpGradient_PVA_to_VBH_TestData() {
 }
 
 template<typename TIndex>
-void GenerateFusedVolumeTestData(int iteration = 4) {
+void GenerateFusedVolumeTestData() {
+	const int iteration = 4;
 	LOG4CPLUS_DEBUG(log4cplus::Logger::getRoot(),
 	                "Generating fused volume data from snoopy masked partial volume 16 & 17 warps ("
 			                << IndexString<TIndex>() << ") ... ");
@@ -357,7 +360,7 @@ void GenerateWarpedVolumeTestData() {
 
 configuration::Configuration GenerateDefaultSnoopyConfiguration() {
 	using namespace configuration;
-	TelemetrySettings default_snoopy_telemetry_settings;
+
 
 	configuration::Configuration
 			default_snoopy_configuration(
@@ -385,7 +388,7 @@ configuration::Configuration GenerateDefaultSnoopyConfiguration() {
 			                true,
 			                true,
 			                true,
-			                true,
+			                false,
 			                false,
 			                false),
 			Paths("<CONFIGURATION_DIRECTORY>",
@@ -415,8 +418,10 @@ configuration::Configuration GenerateDefaultSnoopyConfiguration() {
 			configuration::TrackerConfigurationStringPresets::default_intensity_depth_extended_tracker_configuration
 	);
 	default_snoopy_configuration.source_tree = default_snoopy_configuration.ToPTree();
-	default_snoopy_configuration.source_tree.add_child(TelemetrySettings::default_parse_path,
-	                                                   default_snoopy_telemetry_settings.ToPTree());
+	TelemetrySettings default_snoopy_telemetry_settings;
+	IndexingSettings default_snoopy_indexing_settings;
+	AddDeferrableToSourceTree(default_snoopy_configuration, default_snoopy_telemetry_settings);
+	AddDeferrableToSourceTree(default_snoopy_configuration, default_snoopy_indexing_settings);
 	return default_snoopy_configuration;
 }
 
@@ -457,22 +462,51 @@ void GenerateMeshingTestData() {
 	delete meshing_engine;
 }
 
+#define GENERATED_TEST_DATA_TYPE_ENUM_DESCRIPTION GeneratedTestDataType, \
+    (SNOOPY_UNMASKED_VOLUMES,    "SNOOPY_UNMASKED_VOLUMES", "snoopy_unmasked_volumes", "unmasked_volumes", "unmasked", "u", "su", "suv"), \
+    (MASKED_VOLUMES,             "SNOOPY_MASKED_VOLUMES", "snoopy_masked_volumes", "masked_volumes", "masked", "m", "sm", "smv"), \
+    (PVA_WARP_GRADIENTS,         "PVA_WARP_GRADIENTS", "pva_warp_gradients", "pva_warps", "pw", "pva_w"), \
+    (VBH_WARP_GRADIENTS,         "VBH_WARP_GRADIENTS", "vbh_warp_gradients", "vbh_warps", "vw", "vbh_w"), \
+    (COMPARATIVE_WARP_GRADIENTS, "COMPARATIVE_WARP_GRADIENTS", "comparative_warp_gradients", "warps", "comparative_warps", "w"), \
+    (PVA_WARPED_VOLUMES,         "PVA_WARPED_VOLUMES", "pva_warped_volumes", "pva_wv"), \
+    (VBH_WARPED_VOLUMES,         "VBH_WARPED_VOLUMES", "vbh_warped_volumes", "vbh_wv"), \
+    (PVA_FUSED_VOLUMES,          "PVA_FUSED_VOLUMES", "pva_fused_volumes", "pva_fv"), \
+    (VBH_FUSED_VOLUMES,          "VBH_FUSED_VOLUMES", "vbh_fused_volumes", "vbh_fv"), \
+    (CONFUGRATIONS,              "CONFIGURATIONS", "configurations", "config", "c"), \
+    (MESHES,                     "MESHES", "meshes", "m")
+
+GENERATE_SERIALIZABLE_ENUM(GENERATED_TEST_DATA_TYPE_ENUM_DESCRIPTION);
+
 int main(int argc, char* argv[]) {
 	log4cplus::initialize();
 	log4cplus::SharedAppenderPtr console_appender(new log4cplus::ConsoleAppender(false, true));
 	log4cplus::Logger::getRoot().addAppender(console_appender);
 	log4cplus::Logger::getRoot().setLogLevel(log4cplus::DEBUG_LOG_LEVEL);
-	ConstructSnoopyUnmaskedVolumes00();
-	ConstructSnoopyMaskedVolumes16and17();
 
-	GenerateWarpGradientTestData<PlainVoxelArray, MEMORYDEVICE_CPU>();
-	GenerateWarpGradientTestData<VoxelBlockHash, MEMORYDEVICE_CPU>();
-	GenerateWarpGradient_PVA_to_VBH_TestData();
-	GenerateWarpedVolumeTestData<PlainVoxelArray>();
-	GenerateWarpedVolumeTestData<VoxelBlockHash>();
-	GenerateFusedVolumeTestData<PlainVoxelArray>();
-	GenerateFusedVolumeTestData<VoxelBlockHash>();
-	GenerateConfigurationTestData();
-	GenerateMeshingTestData<VoxelBlockHash, MEMORYDEVICE_CPU>();
+	std::unordered_map<GeneratedTestDataType, std::function<void()>> generator_by_string(
+			{
+					{SNOOPY_UNMASKED_VOLUMES,    ConstructSnoopyUnmaskedVolumes00},
+					{MASKED_VOLUMES,             ConstructSnoopyMaskedVolumes16and17},
+					{PVA_WARP_GRADIENTS,         GenerateWarpGradientTestData<PlainVoxelArray, MEMORYDEVICE_CPU>},
+					{VBH_WARP_GRADIENTS,         GenerateWarpGradientTestData<VoxelBlockHash, MEMORYDEVICE_CPU>},
+					{COMPARATIVE_WARP_GRADIENTS, GenerateWarpGradient_PVA_to_VBH_TestData},
+					{PVA_WARPED_VOLUMES,         GenerateWarpedVolumeTestData<PlainVoxelArray>},
+					{VBH_WARPED_VOLUMES,         GenerateWarpedVolumeTestData<VoxelBlockHash>},
+					{PVA_FUSED_VOLUMES,          GenerateFusedVolumeTestData<PlainVoxelArray>},
+					{VBH_FUSED_VOLUMES,          GenerateFusedVolumeTestData<VoxelBlockHash>},
+					{CONFUGRATIONS,              GenerateConfigurationTestData},
+					{MESHES,                     GenerateMeshingTestData<VoxelBlockHash, MEMORYDEVICE_CPU>},
+			});
+	if (argc < 2) {
+		// calls every generator iteratively
+		for (auto iter : generator_by_string) {
+			(iter.second)();
+		}
+	} else {
+		std::string generated_data_type_argument = argv[1];
+		GeneratedTestDataType chosen = string_to_enumerator<GeneratedTestDataType>(generated_data_type_argument);
+		generator_by_string[chosen]();
+
+	}
 	return 0;
 }

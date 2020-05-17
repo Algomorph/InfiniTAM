@@ -43,6 +43,8 @@ namespace pt = boost::property_tree;
 
 namespace ITMLib {
 namespace configuration {
+
+
 // region ============================================== SERIALIZABLE ENUMS ============================================
 
 #define FAILUREMODE_ENUM_DESCRIPTION FailureMode, \
@@ -191,6 +193,11 @@ void load_default();
 void load_configuration_from_json_file(const std::string& path);
 void save_configuration_to_json_file(const std::string& path);
 void save_configuration_to_json_file(const std::string& path, const Configuration& configuration);
+
+template<typename TDeferrableStruct>
+static void AddDeferrableToSourceTree(configuration::Configuration& _configuration, const TDeferrableStruct& deferrable_struct){
+    _configuration.source_tree.add_child(TDeferrableStruct::default_parse_path, deferrable_struct.ToPTree(_configuration.origin));
+}
 
 } // namespace configuration
 } // namespace ITMLib

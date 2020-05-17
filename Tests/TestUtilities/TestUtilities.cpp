@@ -408,9 +408,10 @@ configuration::Configuration GenerateChangedUpConfiguration(){
 			true,
 			true,
 			true,
-			true
-			);
-	changed_up_configuration.source_tree.add_child(TelemetrySettings::default_parse_path, changed_up_telemetry_settings.ToPTree(changed_up_configuration.origin));
+			true);
+	IndexingSettings changed_up_indexing_settings(DIAGNOSTIC);
+	AddDeferrableToSourceTree(changed_up_configuration, changed_up_telemetry_settings);
+	AddDeferrableToSourceTree(changed_up_configuration, changed_up_indexing_settings);
 	return changed_up_configuration;
 }
 
