@@ -436,6 +436,7 @@ struct TwoSurfaceBasedAllocationStateMarkerFunctor<TMemoryDeviceType, DIAGNOSTIC
 private: // member variables
 	IndexingDiagnosticData<VoxelBlockHash, TMemoryDeviceType>& diagnostic_data;
 	typename IndexingDiagnosticData<VoxelBlockHash, TMemoryDeviceType>::DataDevice* device_diagnostic_data;
+
 public: // member functions
 	TwoSurfaceBasedAllocationStateMarkerFunctor(VoxelBlockHash& index,
 	                                            const VoxelVolumeParameters& volume_parameters,
@@ -448,7 +449,9 @@ public: // member functions
 			                                                                    surface_distance_cutoff),
             diagnostic_data(specialized_engine.diagnostic_data),
             device_diagnostic_data(diagnostic_data.data_device.GetData(TMemoryDeviceType)){
-		diagnostic_data.PrepareForFrame(view->depth->dimensions);
+		if(diagnostic_data.PrepareForFrame(view->depth->dimensions)){
+			device_diagnostic_data = diagnostic_data.data_device.GetData(TMemoryDeviceType);
+		}
 	}
 	~TwoSurfaceBasedAllocationStateMarkerFunctor(){
 		std::string output_folder = telemetry::CreateAndGetOutputPathForFrame();
@@ -463,6 +466,7 @@ public: // member functions
 			return;
 		}
 		device_diagnostic_data->SetPixelData(x,y, surface1_point, surface2_point, march_segment);
+
 		MarkVoxelHashBlocksAlongSegment(this->hash_entry_allocation_states, this->hash_block_coordinates,
 		                                *this->unresolvable_collision_encountered_device, this->hash_table,
 		                                march_segment,

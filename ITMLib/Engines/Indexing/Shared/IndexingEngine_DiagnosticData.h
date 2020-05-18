@@ -97,17 +97,19 @@ public: // member functions
 		ORUtils::MemoryBlockPersister::SaveImageData(file, march_endpoint2_point_cloud);
 	}
 
-	void PrepareForFrame(const Vector2i& depth_image_dimensions) {
+	bool PrepareForFrame(const Vector2i& depth_image_dimensions) {
 		if (*this->depth_image_dimensions.GetData(MEMORYDEVICE_CPU) != depth_image_dimensions) {
 			*this->depth_image_dimensions.GetData(MEMORYDEVICE_CPU) = depth_image_dimensions;
 			this->depth_image_dimensions.UpdateDeviceFromHost();
 			this->surface1_point_cloud.ChangeDims(depth_image_dimensions, false);
 			this->surface2_point_cloud.ChangeDims(depth_image_dimensions, false);
 			this->march_endpoint1_point_cloud.ChangeDims(depth_image_dimensions, false);
-			this->march_endpoint1_point_cloud.ChangeDims(depth_image_dimensions, false);
+			this->march_endpoint2_point_cloud.ChangeDims(depth_image_dimensions, false);
 			*this->data_device.GetData(MEMORYDEVICE_CPU) = DataDevice(*this);
 			this->data_device.UpdateDeviceFromHost();
+			return true;
 		}
+		return false;
 	}
 };
 
