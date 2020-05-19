@@ -30,6 +30,8 @@ template<MemoryDeviceType TMemoryDeviceType>
 struct IndexingDiagnosticData<VoxelBlockHash, TMemoryDeviceType> {
 public: // member variables
 	// ** indexing engine diagnostics **
+	BoolImage surface1_point_mask;
+	BoolImage surface2_point_mask;
 	Float3Image surface1_point_cloud;
 	Float3Image surface2_point_cloud;
 	Float3Image march_endpoint1_point_cloud;
@@ -37,24 +39,32 @@ public: // member variables
 	ORUtils::MemoryBlock<Vector2i> depth_image_dimensions;
 
 
-	struct DataDevice{
+	struct DataDevice {
 		DataDevice() = default;
+
 		DataDevice(IndexingDiagnosticData<VoxelBlockHash, TMemoryDeviceType>& parent) :
+				surface1_point_mask_device(parent.surface1_point_mask.GetData(TMemoryDeviceType)),
+				surface2_point_mask_device(parent.surface2_point_mask.GetData(TMemoryDeviceType)),
 				surface1_point_cloud_device(parent.surface1_point_cloud.GetData(TMemoryDeviceType)),
 				surface2_point_cloud_device(parent.surface2_point_cloud.GetData(TMemoryDeviceType)),
 				march_endpoint1_point_cloud_device(parent.march_endpoint1_point_cloud.GetData(TMemoryDeviceType)),
 				march_endpoint2_point_cloud_device(parent.march_endpoint2_point_cloud.GetData(TMemoryDeviceType)),
-				depth_image_dimensions_device(parent.depth_image_dimensions.GetData(TMemoryDeviceType))
-			{}
+				depth_image_dimensions_device(parent.depth_image_dimensions.GetData(TMemoryDeviceType)) {}
+
+		bool* surface1_point_mask_device;
+		bool* surface2_point_mask_device;
 		Vector3f* surface1_point_cloud_device;
 		Vector3f* surface2_point_cloud_device;
 		Vector3f* march_endpoint1_point_cloud_device;
 		Vector3f* march_endpoint2_point_cloud_device;
 		Vector2i* depth_image_dimensions_device;
 		_DEVICE_WHEN_AVAILABLE_
-		inline void SetPixelData(const int x, const int y, const Vector4f& surface1_point, const Vector4f& surface2_point,
+		inline void SetPixelData(const int x, const int y, bool has_surface1_point, bool has_surface2_point,
+		                         const Vector4f& surface1_point, const Vector4f& surface2_point,
 		                         const Segment& march_segment_blocks) {
 			const int element_ix = x + y * depth_image_dimensions_device->width;
+			surface1_point_mask_device[element_ix] = has_surface1_point;
+			surface2_point_mask_device[element_ix] = has_surface2_point;
 			surface1_point_cloud_device[element_ix] = surface1_point.toVector3();
 			surface2_point_cloud_device[element_ix] = surface2_point.toVector3();
 			march_endpoint1_point_cloud_device[element_ix] = march_segment_blocks.origin;
@@ -68,12 +78,14 @@ public: // member variables
 public: // member functions
 
 	IndexingDiagnosticData(const Vector2i& depth_image_dimensions) :
+			surface1_point_mask(depth_image_dimensions, TMemoryDeviceType),
+			surface2_point_mask(depth_image_dimensions, TMemoryDeviceType),
 			surface1_point_cloud(depth_image_dimensions, TMemoryDeviceType),
 			surface2_point_cloud(depth_image_dimensions, TMemoryDeviceType),
 			march_endpoint1_point_cloud(depth_image_dimensions, TMemoryDeviceType),
 			march_endpoint2_point_cloud(depth_image_dimensions, TMemoryDeviceType),
 			depth_image_dimensions(1, true, true),
-			data_device(1, true, true){
+			data_device(1, true, true) {
 		*this->depth_image_dimensions.GetData(MEMORYDEVICE_CPU) = depth_image_dimensions;
 		this->depth_image_dimensions.UpdateDeviceFromHost();
 		*this->data_device.GetData(MEMORYDEVICE_CPU) = DataDevice(*this);
@@ -85,12 +97,39 @@ public: // member functions
 	void SaveToDisk(std::string output_folder_path) {
 		ORUtils::OStreamWrapper file(output_folder_path + "/voxel_block_hash_diagnostic_data.dat", true, true);
 		Vector2i& image_dimensions = *this->depth_image_dimensions.GetData(MEMORYDEVICE_CPU);
-		const int num_layers = 4;
-		file.OStream().write(reinterpret_cast<const char*>(&num_layers), sizeof(int));
-		file.OStream().write(reinterpret_cast<const char*>(&image_dimensions.y), sizeof(int));
-		file.OStream().write(reinterpret_cast<const char*>(&image_dimensions.x), sizeof(int));
+		const int num_bool_layers = 2;
+		file.OStream().write(reinterpret_cast<const char*>(&num_bool_layers), sizeof(int));
+		file.OStream().write(reinterpret_cast<const char*>(&image_dimensions.height), sizeof(int));
+		file.OStream().write(reinterpret_cast<const char*>(&image_dimensions.width), sizeof(int));
+		ORUtils::MemoryBlockPersister::SaveImageData(file, surface1_point_mask);
+		ORUtils::MemoryBlockPersister::SaveImageData(file, surface2_point_mask);
+
+		const int num_float_layers = 4;
+		file.OStream().write(reinterpret_cast<const char*>(&num_float_layers), sizeof(int));
+		file.OStream().write(reinterpret_cast<const char*>(&image_dimensions.height), sizeof(int));
+		file.OStream().write(reinterpret_cast<const char*>(&image_dimensions.width), sizeof(int));
 		const int num_channels = 3;
 		file.OStream().write(reinterpret_cast<const char*>(&num_channels), sizeof(int));
+
+		//_DEBUG alloc
+//		Float3Image copy(image_dimensions, MEMORYDEVICE_CPU);
+//		copy.SetFrom(surface1_point_cloud, CUDA_TO_CPU);
+//		Vector3f datum1 = copy.GetData(MEMORYDEVICE_CPU)[319 + 385 * 640];
+//		copy.SetFrom(surface2_point_cloud, CUDA_TO_CPU);
+//		Vector3f datum2 = copy.GetData(MEMORYDEVICE_CPU)[319 + 385 * 640];
+//		printf("Surface points for px 319, 385 while saving: %f, %f, %f to %f, %f, %f\n",
+//		       datum1[0], datum1[1], datum1[2],
+//		       datum2[0], datum2[1], datum2[2]);
+//
+//		copy.SetFrom(march_endpoint1_point_cloud, CUDA_TO_CPU);
+//		datum1 = copy.GetData(MEMORYDEVICE_CPU)[319 + 385 * 640];
+//		copy.SetFrom(march_endpoint2_point_cloud, CUDA_TO_CPU);
+//		datum2 = copy.GetData(MEMORYDEVICE_CPU)[319 + 385 * 640];
+//		std::cout << "Size of Vector3f: " << sizeof(Vector3f) << std::endl;
+//		printf("March segment for px 319, 385 while saving: %f, %f, %f to %f, %f, %f\n",
+//		       datum1[0], datum1[1], datum1[2],
+//		       datum2[0], datum2[1], datum2[2]);
+
 		ORUtils::MemoryBlockPersister::SaveImageData(file, surface1_point_cloud);
 		ORUtils::MemoryBlockPersister::SaveImageData(file, surface2_point_cloud);
 		ORUtils::MemoryBlockPersister::SaveImageData(file, march_endpoint1_point_cloud);
@@ -101,6 +140,8 @@ public: // member functions
 		if (*this->depth_image_dimensions.GetData(MEMORYDEVICE_CPU) != depth_image_dimensions) {
 			*this->depth_image_dimensions.GetData(MEMORYDEVICE_CPU) = depth_image_dimensions;
 			this->depth_image_dimensions.UpdateDeviceFromHost();
+			this->surface1_point_mask.ChangeDims(depth_image_dimensions, false);
+			this->surface2_point_mask.ChangeDims(depth_image_dimensions, false);
 			this->surface1_point_cloud.ChangeDims(depth_image_dimensions, false);
 			this->surface2_point_cloud.ChangeDims(depth_image_dimensions, false);
 			this->march_endpoint1_point_cloud.ChangeDims(depth_image_dimensions, false);

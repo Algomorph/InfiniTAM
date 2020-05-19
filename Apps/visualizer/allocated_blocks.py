@@ -4,35 +4,35 @@ import vtk
 import gzip
 import numpy as np
 
+from Apps.visualizer.geometric_conversions import convert_block_to_metric, VoxelVolumeParameters
 
-def read_allocation_data(
-        data_path="/mnt/Data/Reconstruction/experiment_output/2020-05-04/recording/canonical_volume_memory_usage.dat"):
+
+def read_allocation_data(data_path, i_frame):
     file = gzip.open(data_path, "rb")
 
-    point_sets = []
-    i_frame = 17
+    block_sets = []
+    metric_sets = []
     while file.readable():
         buffer = file.read(size=8)
         if not buffer:
             break
         count = np.frombuffer(buffer, dtype=np.uint32)[0]
         print("Reading allocation data for frame:", i_frame, "Block count:", count, "...")
-        point_set = np.resize(np.frombuffer(file.read(size=6 * count), dtype=np.int16), (count, 3))
-        point_sets.append(point_set)
+        block_set = np.resize(np.frombuffer(file.read(size=6 * count), dtype=np.int16), (count, 3))
+        metric_set = convert_block_to_metric(block_set)
+        block_sets.append((block_set, metric_set))
         i_frame += 1
-    return point_sets
+    return block_sets
 
 
 class AllocatedBlocks:
-    BLOCK_WIDTH_VOXELS = 8
-    VOXEL_SIZE = 0.004  # meters
-    BLOCK_SIZE = BLOCK_WIDTH_VOXELS * VOXEL_SIZE
-    BLOCK_OFFSET = - (VOXEL_SIZE / 2) - (BLOCK_SIZE / 2)
 
-    def __init__(self, renderer, output_path):
+    def __init__(self, renderer, output_path, start_frame_index):
+        self.start_frame_index = start_frame_index
         self.output_path = output_path
         self.renderer = renderer
-        allocated_block_sets = read_allocation_data(os.path.join(output_path, "canonical_volume_memory_usage.dat"))
+        allocated_block_sets = read_allocation_data(os.path.join(output_path, "canonical_volume_memory_usage.dat"),
+                                                    start_frame_index)
         self.frame_count = len(allocated_block_sets)
         self.allocated_block_sets = allocated_block_sets
 
@@ -64,9 +64,9 @@ class AllocatedBlocks:
         self.block_mapper.SetInputData(self.block_polydata)
 
         block = vtk.vtkCubeSource()
-        block.SetXLength(AllocatedBlocks.BLOCK_SIZE)
-        block.SetYLength(AllocatedBlocks.BLOCK_SIZE)
-        block.SetZLength(AllocatedBlocks.BLOCK_SIZE)
+        block.SetXLength(VoxelVolumeParameters.BLOCK_SIZE)
+        block.SetYLength(VoxelVolumeParameters.BLOCK_SIZE)
+        block.SetZLength(VoxelVolumeParameters.BLOCK_SIZE)
         self.block_mapper.SetSourceConnection(block.GetOutputPort())
 
         # block actor
@@ -84,7 +84,7 @@ class AllocatedBlocks:
         self.renderer.AddActor(self.block_label_actor)
 
     def set_frame(self, i_frame):
-        allocated_block_set = self.allocated_block_sets[i_frame]
+        allocated_block_set, metric_set = self.allocated_block_sets[i_frame - self.start_frame_index]
         del self.block_locations
         self.block_locations = vtk.vtkPoints()
         self.block_labels.SetNumberOfValues(len(allocated_block_set))
@@ -93,8 +93,8 @@ class AllocatedBlocks:
 
         i_block = 0
         for block_coordinate in allocated_block_set:
-            point_scaled = block_coordinate * AllocatedBlocks.BLOCK_SIZE - AllocatedBlocks.BLOCK_OFFSET
-            self.block_locations.InsertNextPoint((point_scaled[0], -point_scaled[1], point_scaled[2]))
+            metric_coord = metric_set[i_block]
+            self.block_locations.InsertNextPoint((metric_coord[0], -metric_coord[1], metric_coord[2]))
 
             label = "({:d}, {:d}, {:d})".format(block_coordinate[0],
                                                 block_coordinate[1],
@@ -111,3 +111,10 @@ class AllocatedBlocks:
         self.block_mapper.SetInputData(self.block_polydata)
         self.block_label_placement_mapper.Modified()
         self.block_mapper.Modified()
+
+    def toggle_labels(self):
+        self.block_label_actor.SetVisibility(not self.block_label_actor.GetVisibility())
+
+    def toggle_visibility(self):
+        self.block_actor.SetVisibility(not self.block_actor.GetVisibility())
+        pass

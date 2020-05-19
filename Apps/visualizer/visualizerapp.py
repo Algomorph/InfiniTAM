@@ -4,17 +4,24 @@ import vtk
 import sys
 import numpy as np
 
+from Apps.python_shared import trajectory_loading
+from Apps.visualizer.block_allocation_ray_data import AllocationRays
 from Apps.visualizer.mesh import Mesh
 from Apps.visualizer.allocated_blocks import AllocatedBlocks
+from Apps.visualizer.utilities import get_frame_output_path
 
 
 class VisualizerApp:
 
-    def __init__(self, output_path="/mnt/Data/Reconstruction/experiment_output/2020-05-04/recording"):
+    def __init__(self, output_path="/mnt/Data/Reconstruction/experiment_output/2020-05-04/recording",
+                 start_frame_ix=16):
+        self.inverse_camera_matrices = trajectory_loading.load_inverse_matrices(output_path)
+        # self.camera_matrices = trajectory_loading.load_matrices(output_path)
+        self.start_frame_ix = start_frame_ix
         self.output_path = output_path
         self.offset_cam = (0.2562770766576, 0.13962609403401335, -0.2113334598208764)
         colors = vtk.vtkNamedColors()
-        self.current_frame = 0
+        self.current_frame = start_frame_ix
 
         # renderer & render window initialization
         self.renderer = vtk.vtkRenderer()
@@ -22,12 +29,13 @@ class VisualizerApp:
         self.render_window.AddRenderer(self.renderer)
 
         # allocated blocks & labels
-        self.blocks = AllocatedBlocks(self.renderer, output_path)
+        self.blocks = AllocatedBlocks(self.renderer, output_path, start_frame_ix)
+        self.rays = AllocationRays(self.renderer, output_path, start_frame_ix, self.inverse_camera_matrices)
         self.frame_count = self.blocks.frame_count
 
         # mesh setup
-        self.canonical_mesh = Mesh(self.renderer, self.render_window, colors.GetColor3d("Cyan"))
-        self.raw_live_mesh = Mesh(self.renderer, self.render_window, colors.GetColor3d("Pink"))
+        self.canonical_mesh = Mesh(self.renderer, self.render_window, colors.GetColor3d("Peacock"))
+        self.raw_live_mesh = Mesh(self.renderer, self.render_window, colors.GetColor3d("Orange"))
         self.warped_live_mesh = Mesh(self.renderer, self.render_window, colors.GetColor3d("Green"))
         self.shown_mesh_index = 0
 
@@ -83,11 +91,21 @@ class VisualizerApp:
         camera.SetClippingRange(0.01, 10.0)
 
         self.render_window.Render()
-        self.set_frame(0)
+        # 2nd monitor from left
+        # self.render_window.SetPosition(1281, 187)
+        # 4th monitor
+        self.render_window.SetPosition(5121, 75)
+        # fullscreen
+        self.render_window.SetSize(self.render_window.GetScreenSize())
+        self.set_frame(self.current_frame)
         self.show_mesh_at_index(0)
+        # _DEBUG alloc
+        self.meshes[self.shown_mesh_index].toggle_visibility()
+        self.blocks.toggle_labels()
+        self.render_window.Render()
 
     def load_frame_meshes(self, i_frame):
-        frame_path = os.path.join(self.output_path, "Frame_{:02}".format(i_frame + 16))
+        frame_path = get_frame_output_path(self.output_path, i_frame)
         canonical_path = os.path.join(frame_path, "canonical.ply")
         raw_live_path = os.path.join(frame_path, "live_raw.ply")
         warped_live_path = os.path.join(frame_path, "live_warped.ply")
@@ -112,10 +130,11 @@ class VisualizerApp:
         self.render_window.Render()
 
     def set_frame(self, i_frame):
-        print("Frame:", i_frame + 16)
+        print("Frame:", i_frame)
 
         self.load_frame_meshes(i_frame)
         self.blocks.set_frame(i_frame)
+        self.rays.set_frame(i_frame)
         self.current_frame = i_frame
 
         self.render_window.Render()
@@ -267,3 +286,15 @@ class VisualizerApp:
             self.advance_view()
         elif key == "Left":
             self.retreat_view()
+        elif key == "p":
+            print(self.render_window.GetPosition())
+        elif key == "m":
+            self.meshes[self.shown_mesh_index].toggle_visibility()
+            self.render_window.Render()
+        elif key == "l":
+            self.blocks.toggle_labels()
+            self.render_window.Render()
+        elif key == "g":
+            self.blocks.toggle_visibility()
+            self.render_window.Render()
+

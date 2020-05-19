@@ -349,9 +349,10 @@ protected: // member functions
 	_DEVICE_WHEN_AVAILABLE_
 	inline bool
 	ComputeMarchSegment(ITMLib::Segment& march_segment, Vector4f& surface1_point,
+	                    bool& has_surface1, bool& has_surface2,
 	                    const float& surface1_depth, const Vector4f& surface2_point,
 	                    const int x, const int y) {
-		bool has_surface1 = false, has_surface2 = false;
+		has_surface1 = has_surface2 = false;
 		if (!(surface1_depth <= 0 || (surface1_depth - this->surface_distance_cutoff) < 0 ||
 		      (surface1_depth - this->surface_distance_cutoff) < this->near_clipping_distance ||
 		      (surface1_depth + this->surface_distance_cutoff) > this->far_clipping_distance))
@@ -386,7 +387,9 @@ protected: // member functions
 	ComputeMarchSegment(ITMLib::Segment& march_segment, const float& surface1_depth, const Vector4f& surface2_point,
 	                    const int x, const int y) {
 		Vector4f surface1_point;
-		return ComputeMarchSegment(march_segment, surface1_point, surface1_depth, surface2_point, x, y);
+		bool has_surface1, has_surface2;
+		return ComputeMarchSegment(march_segment, surface1_point, has_surface1, has_surface2, surface1_depth,
+		                           surface2_point, x, y);
 	}
 };
 
@@ -402,11 +405,15 @@ public: // member functions
 	                                            const ITMLib::View* view,
 	                                            const CameraTrackingState* tracking_state,
 	                                            float surface_distance_cutoff,
-	                                            internal::IndexingEngine_VoxelBlockHash_ExecutionModeSpecialized<TMemoryDeviceType, OPTIMIZED>& specialized_engine):
+	                                            internal::IndexingEngine_VoxelBlockHash_ExecutionModeSpecialized<TMemoryDeviceType, OPTIMIZED>& specialized_engine)
+			:
 			TwoSurfaceBasedAllocationStateMarkerFunctor_Base<TMemoryDeviceType>(index, volume_parameters, view,
-			                                                                    tracking_state,surface_distance_cutoff){}
+			                                                                    tracking_state,
+			                                                                    surface_distance_cutoff) {}
 
 	using TwoSurfaceBasedAllocationStateMarkerFunctor_Base<TMemoryDeviceType>::TwoSurfaceBasedAllocationStateMarkerFunctor_Base;
+
+	void SaveDataToDisk() {}
 
 	_DEVICE_WHEN_AVAILABLE_
 	void operator()(const float& surface1_depth, const Vector4f& surface2_point, const int x, const int y) {
@@ -443,29 +450,54 @@ public: // member functions
 	                                            const ITMLib::View* view,
 	                                            const CameraTrackingState* tracking_state,
 	                                            float surface_distance_cutoff,
-	                                            internal::IndexingEngine_VoxelBlockHash_ExecutionModeSpecialized<TMemoryDeviceType, DIAGNOSTIC>& specialized_engine):
+	                                            internal::IndexingEngine_VoxelBlockHash_ExecutionModeSpecialized<TMemoryDeviceType, DIAGNOSTIC>& specialized_engine)
+			:
 			TwoSurfaceBasedAllocationStateMarkerFunctor_Base<TMemoryDeviceType>(index, volume_parameters, view,
 			                                                                    tracking_state,
 			                                                                    surface_distance_cutoff),
-            diagnostic_data(specialized_engine.diagnostic_data),
-            device_diagnostic_data(diagnostic_data.data_device.GetData(TMemoryDeviceType)){
-		if(diagnostic_data.PrepareForFrame(view->depth->dimensions)){
+			diagnostic_data(specialized_engine.diagnostic_data),
+			device_diagnostic_data(diagnostic_data.data_device.GetData(TMemoryDeviceType)) {
+		if (diagnostic_data.PrepareForFrame(view->depth->dimensions)) {
 			device_diagnostic_data = diagnostic_data.data_device.GetData(TMemoryDeviceType);
 		}
 	}
-	~TwoSurfaceBasedAllocationStateMarkerFunctor(){
+
+	void SaveDataToDisk() {
 		std::string output_folder = telemetry::CreateAndGetOutputPathForFrame();
 		diagnostic_data.SaveToDisk(output_folder);
 	}
 
 	_DEVICE_WHEN_AVAILABLE_
 	void operator()(const float& surface1_depth, const Vector4f& surface2_point, const int x, const int y) {
-		ITMLib::Segment march_segment;
-		Vector4f surface1_point;
-		if (!this->ComputeMarchSegment(march_segment, surface1_point, surface1_depth, surface2_point, x, y)) {
+		ITMLib::Segment march_segment(Vector3f(0.0), Vector3f(0.0));
+		Vector4f surface1_point(0.0f); bool has_surface1, has_surface2;
+
+		//_DEBUG alloc
+//		if (x == 319 && y == 385) {
+//			int i = 10;
+//		}
+
+		if (!this->ComputeMarchSegment(march_segment, surface1_point, has_surface1, has_surface2, surface1_depth, surface2_point, x, y)) {
+			device_diagnostic_data->SetPixelData(x, y, has_surface1, has_surface2, surface1_point, surface2_point, march_segment);
 			return;
 		}
-		device_diagnostic_data->SetPixelData(x,y, surface1_point, surface2_point, march_segment);
+
+//		//_DEBUG alloc
+//		if (x == 319 && y == 385) {
+//			printf("Surface points for px 319, 385 while processing: %f, %f, %f to %f, %f, %f\n",
+//			       surface1_point.values[0], surface1_point.values[1], surface1_point.values[2],
+//			       surface2_point.values[0], surface2_point.values[1], surface2_point.values[2]);
+//			printf("March segment for px 319, 385 while processing: %f, %f, %f to %f, %f, %f\n",
+//			       march_segment.origin[0], march_segment.origin[1], march_segment.origin[2],
+//			       march_segment.destination()[0], march_segment.destination()[1], march_segment.destination()[2]);
+//		}
+
+		if(has_surface1 && !has_surface2){
+			// this computation is skipped in "ComputeMarchSegment" in this case, but we need it for the debugging data
+			surface1_point = ImageSpacePointToCameraSpace(surface1_depth, x, y,this->inverted_projection_parameters);
+		}
+
+		device_diagnostic_data->SetPixelData(x, y, has_surface1, has_surface2, surface1_point, surface2_point, march_segment);
 
 		MarkVoxelHashBlocksAlongSegment(this->hash_entry_allocation_states, this->hash_block_coordinates,
 		                                *this->unresolvable_collision_encountered_device, this->hash_table,

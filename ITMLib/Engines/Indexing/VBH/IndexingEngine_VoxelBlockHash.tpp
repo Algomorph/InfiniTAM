@@ -118,7 +118,6 @@ void IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType, TExecutionMode>::
 
 	TwoSurfaceBasedAllocationStateMarkerFunctor<TMemoryDeviceType, TExecutionMode> depth_based_allocator(
 			volume->index, volume->GetParameters(), view, tracking_state, surface_distance_cutoff, execution_mode_specialized_engine);
-
 	do {
 		volume->index.ClearHashEntryAllocationStates();
 		depth_based_allocator.ResetFlagsAndCounters();
@@ -128,6 +127,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType, TExecutionMode>::
 		this->AllocateBlockList(volume, depth_based_allocator.colliding_block_positions,
 		                        depth_based_allocator.GetCollidingBlockCount());
 	} while (depth_based_allocator.EncounteredUnresolvableCollision());
+	depth_based_allocator.SaveDataToDisk();
 }
 
 

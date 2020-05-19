@@ -170,12 +170,12 @@ MarkVoxelHashBlocksAlongSegment(ITMLib::HashEntryAllocationState* hash_entry_all
 
 
 _CPU_AND_GPU_CODE_
-inline Vector3f CameraVoxelSpaceToWorldHashBlockSpace(const Vector4f& point_camera_space_voxels,
-                                                      const Matrix4f& inverted_camera_pose,
-                                                      const float one_over_hash_block_size) {
+inline Vector3f CameraSpaceToWorldHashBlockSpace(const Vector4f& point_camera_space,
+                                                 const Matrix4f& inverted_camera_pose,
+                                                 const float one_over_hash_block_size) {
 	// account for the fact that voxel coordinates represent the voxel center, and we need the extreme corner position of
 	// the hash block, i.e. 0.5 voxel (1/16 block) offset from the position along the ray
-	return (TO_VECTOR3(inverted_camera_pose * point_camera_space_voxels)) * one_over_hash_block_size
+	return (TO_VECTOR3(inverted_camera_pose * point_camera_space)) * one_over_hash_block_size
 	       + Vector3f(1.0f / (2.0f * VOXEL_BLOCK_SIZE));
 }
 
@@ -207,13 +207,13 @@ inline ITMLib::Segment FindHashBlockSegmentAlongCameraRayWithinRangeFromPoint(
 	endpoint_in_camera_space = point_in_camera_space * (1.0f - distance_from_point / norm);
 	endpoint_in_camera_space.w = 1.0f;
 	//start position along ray in hash blocks
-	Vector3f start_point_in_hash_blocks = CameraVoxelSpaceToWorldHashBlockSpace(
+	Vector3f start_point_in_hash_blocks = CameraSpaceToWorldHashBlockSpace(
 			endpoint_in_camera_space, inverted_camera_pose, one_over_hash_block_size);
 
 	endpoint_in_camera_space = point_in_camera_space * (1.0f + distance_from_point / norm);
 	endpoint_in_camera_space.w = 1.0f;
 	//end position of the segment to march along the ray
-	Vector3f end_point_in_hash_blocks = CameraVoxelSpaceToWorldHashBlockSpace(
+	Vector3f end_point_in_hash_blocks = CameraSpaceToWorldHashBlockSpace(
 			endpoint_in_camera_space, inverted_camera_pose, one_over_hash_block_size);
 
 	// segment from start of the (truncated SDF) band, through the observed point, and to the opposite (occluded)
@@ -237,22 +237,22 @@ inline ITMLib::Segment FindHashBlockSegmentAlongCameraRayWithinRangeFromAndBetwe
 		norm = NormOfFirst3Components(point1_in_camera_space);
 		endpoint_in_camera_space = point1_in_camera_space * (1.0f - range / norm);
 		endpoint_in_camera_space.w = 1.0f;
-		Vector3f start_point_in_hash_blocks = CameraVoxelSpaceToWorldHashBlockSpace(
+		Vector3f start_point_in_hash_blocks = CameraSpaceToWorldHashBlockSpace(
 				endpoint_in_camera_space, inverted_camera_pose, one_over_hash_block_size);
 		norm = NormOfFirst3Components(point2_in_camera_space);
 		endpoint_in_camera_space = point2_in_camera_space * (1.0f + range / norm);
-		Vector3f end_point_in_hash_blocks = CameraVoxelSpaceToWorldHashBlockSpace(
+		Vector3f end_point_in_hash_blocks = CameraSpaceToWorldHashBlockSpace(
 				endpoint_in_camera_space, inverted_camera_pose, one_over_hash_block_size);
 		return ITMLib::Segment(start_point_in_hash_blocks, end_point_in_hash_blocks);
 	} else {
 		norm = NormOfFirst3Components(point2_in_camera_space);
 		endpoint_in_camera_space = point2_in_camera_space * (1.0f - range / norm);
 		endpoint_in_camera_space.w = 1.0f;
-		Vector3f start_point_in_hash_blocks = CameraVoxelSpaceToWorldHashBlockSpace(
+		Vector3f start_point_in_hash_blocks = CameraSpaceToWorldHashBlockSpace(
 				endpoint_in_camera_space, inverted_camera_pose, one_over_hash_block_size);
 		norm = NormOfFirst3Components(point1_in_camera_space);
 		endpoint_in_camera_space = point1_in_camera_space * (1.0f + range / norm);
-		Vector3f end_point_in_hash_blocks = CameraVoxelSpaceToWorldHashBlockSpace(
+		Vector3f end_point_in_hash_blocks = CameraSpaceToWorldHashBlockSpace(
 				endpoint_in_camera_space, inverted_camera_pose, one_over_hash_block_size);
 		return ITMLib::Segment(start_point_in_hash_blocks, end_point_in_hash_blocks);
 	}

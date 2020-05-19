@@ -8,7 +8,8 @@ import cv2
 import vtk
 import numpy as np
 
-from Apps.frameviewer import frameloading, image_conversion, trajectoryloading
+from Apps.frameviewer import frameloading, image_conversion
+from Apps.python_shared import trajectory_loading
 from Apps.frameviewer.pixel_highlighter import PixelHighlighter
 
 PROGRAM_EXIT_SUCCESS = 0
@@ -54,7 +55,7 @@ class FrameViewerApp:
             else:
                 state = loaded_state
 
-        self.inverse_camera_matrices = trajectoryloading.load_inverse_matrices(output_folder)
+        self.inverse_camera_matrices = trajectory_loading.load_inverse_matrices(output_folder)
         self.current_camera_matrix = None
 
         self.image_masks_enabled = True

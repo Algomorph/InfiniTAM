@@ -1,4 +1,3 @@
-
 import numpy as np
 import vtk
 from plyfile import PlyData, PlyElement
@@ -54,6 +53,9 @@ class Mesh:
 
         if render:
             self.render_window.Render()
+
+    def toggle_visibility(self):
+        self.actor.SetVisibility(not self.actor.GetVisibility())
 
     def hide(self):
         self.actor.SetVisibility(False)
