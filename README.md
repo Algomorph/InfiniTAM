@@ -9,7 +9,7 @@ This is an ongoing project that aims to integrate voxel hashing techniques for r
 1. SDF-2-SDF rigid alignment is not yet implemented (InfiniTAM's camera trackers are used instead)
 2. Capability to run the optimization in-reverse, in order to forward-animate the more-complete canonical mesh, is currently missing.
 3. For the voxel-block-hash (super-fast) indexing, after about 70 frames of the Snoopy sequence, there aren't enough hash blocks any more as allowed by the current settings, and the program crashes. I'm currently investigating how to clean up the hash blocks after every N frames to combat this. For details and progress, check [issue #203](https://github.com/Algomorph/InfiniTAM/issues/203) and all the tasks in the project board referencing it.
-4. For a full list of issues & tasks, see the [Dynamic-Scene Project Board] (https://github.com/Algomorph/InfiniTAM/projects/1) and the [Maintenance/Reengineering Project Board]( https://github.com/Algomorph/InfiniTAM/projects/2). There are both algorithmic and software engineering issues (the code I've started with is far from perfect).
+4. For a full list of issues & tasks, see the [Dynamic-Scene Project Board](https://github.com/Algomorph/InfiniTAM/projects/1) and the [Maintenance/Reengineering Project Board]( https://github.com/Algomorph/InfiniTAM/projects/2). There are both algorithmic and software engineering issues (the code I've started with is far from perfect).
 
 ## How do I try this code out?
 
