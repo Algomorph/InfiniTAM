@@ -235,14 +235,14 @@ public: // member variables
 	ORUtils::MemoryBlock<Vector3s> colliding_block_positions;
 protected: // member variables
 
-	float near_clipping_distance;
-	float far_clipping_distance;
-	Matrix4f inverted_camera_pose;
-	Vector4f inverted_projection_parameters;
+	const float near_clipping_distance;
+	const float far_clipping_distance;
+	const Matrix4f inverted_camera_pose;
+	const Vector4f inverted_projection_parameters;
 
-	float surface_distance_cutoff;
+	const float surface_distance_cutoff;
 
-	float hash_block_size_reciprocal;
+	const float hash_block_size_reciprocal;
 	HashEntryAllocationState* hash_entry_allocation_states;
 	Vector3s* hash_block_coordinates;
 	HashEntry* hash_table;
@@ -255,14 +255,18 @@ protected: // member variables
 public: // member functions
 	DepthBasedAllocationStateMarkerFunctor(VoxelBlockHash& index,
 	                                       const VoxelVolumeParameters& volume_parameters, const ITMLib::View* view,
-	                                       Matrix4f depth_camera_pose, float surface_distance_cutoff) :
+	                                       Matrix4f inverted_depth_camera_pose, float surface_distance_cutoff) :
 
 			near_clipping_distance(volume_parameters.near_clipping_distance),
 			far_clipping_distance(volume_parameters.far_clipping_distance),
-			inverted_projection_parameters(view->calib.intrinsics_d.projectionParamsSimple.all),
-
+			inverted_camera_pose(inverted_depth_camera_pose),
+			inverted_projection_parameters([&view]() {
+				Vector4f params = view->calib.intrinsics_d.projectionParamsSimple.all;
+				params.fx = 1.0f / params.fx;
+				params.fy = 1.0f / params.fy;
+				return params;
+			}()),
 			surface_distance_cutoff(surface_distance_cutoff),
-
 			hash_block_size_reciprocal(1.0f / (volume_parameters.voxel_size * VOXEL_BLOCK_SIZE)),
 			hash_entry_allocation_states(index.GetHashEntryAllocationStates()),
 			hash_block_coordinates(index.GetAllocationBlockCoordinates()),
@@ -276,9 +280,10 @@ public: // member functions
 		unresolvable_collision_encountered.UpdateDeviceFromHost();
 		colliding_block_positions_device = colliding_block_positions.GetData(TMemoryDeviceType);
 		INITIALIZE_ATOMIC(int, colliding_block_count, 0);
-		depth_camera_pose.inv(inverted_camera_pose);
-		inverted_projection_parameters.fx = 1.0f / inverted_projection_parameters.fx;
-		inverted_projection_parameters.fy = 1.0f / inverted_projection_parameters.fy;
+		//DEBUG alloc
+		//inverted_depth_camera_pose.inv(inverted_camera_pose);
+//		inverted_projection_parameters.fx = 1.0f / inverted_projection_parameters.fx;
+//		inverted_projection_parameters.fy = 1.0f / inverted_projection_parameters.fy;
 	}
 
 	virtual ~DepthBasedAllocationStateMarkerFunctor() {
@@ -334,6 +339,8 @@ public: // member functions
 template<MemoryDeviceType TMemoryDeviceType>
 struct TwoSurfaceBasedAllocationStateMarkerFunctor_Base
 		: public DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType> {
+protected: // member variables
+	const Matrix4f depth_camera_pose;
 public: // member functions
 	TwoSurfaceBasedAllocationStateMarkerFunctor_Base(VoxelBlockHash& index,
 	                                                 const VoxelVolumeParameters& volume_parameters,
@@ -341,39 +348,48 @@ public: // member functions
 	                                                 const CameraTrackingState* tracking_state,
 	                                                 float surface_distance_cutoff) :
 			DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType>(index, volume_parameters, view,
-			                                                          tracking_state->pose_d->GetM(),
-			                                                          surface_distance_cutoff) {}
+			                                                          tracking_state->pose_d->GetInvM(),
+			                                                          surface_distance_cutoff),
+			depth_camera_pose(tracking_state->pose_d->GetM()) {}
 
 protected: // member functions
 
 	_DEVICE_WHEN_AVAILABLE_
 	inline bool
-	ComputeMarchSegment(ITMLib::Segment& march_segment, Vector4f& surface1_point,
+	ComputeMarchSegment(ITMLib::Segment& march_segment,
+	                    Vector4f& surface1_point_in_camera_space,
+	                    Vector4f& surface2_point_in_camera_space,
 	                    bool& has_surface1, bool& has_surface2,
-	                    const float& surface1_depth, const Vector4f& surface2_point,
+	                    const float& surface1_depth_metric,
+	                    const Vector4f& surface2_point_in_world_space,
 	                    const int x, const int y) {
 		has_surface1 = has_surface2 = false;
-		if (!(surface1_depth <= 0 || (surface1_depth - this->surface_distance_cutoff) < 0 ||
-		      (surface1_depth - this->surface_distance_cutoff) < this->near_clipping_distance ||
-		      (surface1_depth + this->surface_distance_cutoff) > this->far_clipping_distance))
+		if (!(surface1_depth_metric <= 0 || (surface1_depth_metric - this->surface_distance_cutoff) < 0 ||
+		      (surface1_depth_metric - this->surface_distance_cutoff) < this->near_clipping_distance ||
+		      (surface1_depth_metric + this->surface_distance_cutoff) > this->far_clipping_distance))
 			has_surface1 = true;
 
-		if (surface2_point.z > 0.0f) has_surface2 = true;
+		surface2_point_in_camera_space = WorldSpacePointToCameraSpace(surface2_point_in_world_space,
+		                                                              this->depth_camera_pose);
+
+		if (surface2_point_in_camera_space.z > 0.0f) has_surface2 = true;
 
 		if (has_surface1 && has_surface2) {
-			surface1_point = ImageSpacePointToCameraSpace(surface1_depth, x, y,
-			                                              this->inverted_projection_parameters);
+			surface1_point_in_camera_space = ImageSpacePointToCameraSpace(surface1_depth_metric, x, y,
+			                                                              this->inverted_projection_parameters);
 			march_segment = FindHashBlockSegmentAlongCameraRayWithinRangeFromAndBetweenTwoPoints(
-					this->surface_distance_cutoff, surface1_point, surface2_point, this->inverted_camera_pose,
+					this->surface_distance_cutoff, surface1_point_in_camera_space, surface2_point_in_camera_space,
+					this->inverted_camera_pose,
 					this->hash_block_size_reciprocal);
 		} else {
 			if (has_surface1) {
 				march_segment = FindHashBlockSegmentAlongCameraRayWithinRangeFromDepth(
-						this->surface_distance_cutoff, surface1_depth, x, y, this->inverted_camera_pose,
-						this->inverted_projection_parameters, this->hash_block_size_reciprocal);
+						surface1_point_in_camera_space, this->surface_distance_cutoff, surface1_depth_metric, x, y,
+						this->inverted_camera_pose, this->inverted_projection_parameters,
+						this->hash_block_size_reciprocal);
 			} else if (has_surface2) {
 				march_segment = FindHashBlockSegmentAlongCameraRayWithinRangeFromPoint(
-						this->surface_distance_cutoff, surface2_point, this->inverted_camera_pose,
+						this->surface_distance_cutoff, surface2_point_in_camera_space, this->inverted_camera_pose,
 						this->hash_block_size_reciprocal);
 			} else {
 				return false; // neither surface is defined at this point, nothing to do.
@@ -384,12 +400,13 @@ protected: // member functions
 
 	_DEVICE_WHEN_AVAILABLE_
 	inline bool
-	ComputeMarchSegment(ITMLib::Segment& march_segment, const float& surface1_depth, const Vector4f& surface2_point,
+	ComputeMarchSegment(ITMLib::Segment& march_segment, const float& surface1_depth,
+	                    const Vector4f& surface2_point_world_space,
 	                    const int x, const int y) {
-		Vector4f surface1_point;
+		Vector4f surface1_point_camera_space, surface2_point_camera_space;
 		bool has_surface1, has_surface2;
-		return ComputeMarchSegment(march_segment, surface1_point, has_surface1, has_surface2, surface1_depth,
-		                           surface2_point, x, y);
+		return ComputeMarchSegment(march_segment, surface1_point_camera_space, surface2_point_camera_space,
+		                           has_surface1, has_surface2, surface1_depth, surface2_point_world_space, x, y);
 	}
 };
 
@@ -416,7 +433,7 @@ public: // member functions
 	void SaveDataToDisk() {}
 
 	_DEVICE_WHEN_AVAILABLE_
-	void operator()(const float& surface1_depth, const Vector4f& surface2_point, const int x, const int y) {
+	void operator()(const float& surface1_depth, const Vector4f& surface2_point_world_space, const int x, const int y) {
 
 		//_DEBUG alloc
 //		if(x == 226 && y == 332){
@@ -424,7 +441,7 @@ public: // member functions
 //		}
 
 		ITMLib::Segment march_segment;
-		if (!this->ComputeMarchSegment(march_segment, surface1_depth, surface2_point, x, y)) {
+		if (!this->ComputeMarchSegment(march_segment, surface1_depth, surface2_point_world_space, x, y)) {
 			return;
 		}
 
@@ -468,36 +485,37 @@ public: // member functions
 	}
 
 	_DEVICE_WHEN_AVAILABLE_
-	void operator()(const float& surface1_depth, const Vector4f& surface2_point, const int x, const int y) {
+	void operator()(const float& surface1_depth, const Vector4f& surface2_point_world_space, const int x, const int y) {
 		ITMLib::Segment march_segment(Vector3f(0.0), Vector3f(0.0));
-		Vector4f surface1_point(0.0f); bool has_surface1, has_surface2;
+		Vector4f surface1_point_camera_space(0.0f), surface2_point_camera_space(0.0f);
+		bool has_surface1, has_surface2;
 
 		//_DEBUG alloc
 //		if (x == 319 && y == 385) {
 //			int i = 10;
 //		}
 
-		if (!this->ComputeMarchSegment(march_segment, surface1_point, has_surface1, has_surface2, surface1_depth, surface2_point, x, y)) {
-			device_diagnostic_data->SetPixelData(x, y, has_surface1, has_surface2, surface1_point, surface2_point, march_segment);
+		if (!this->ComputeMarchSegment(march_segment, surface1_point_camera_space, surface2_point_camera_space,
+		                               has_surface1, has_surface2, surface1_depth, surface2_point_world_space, x, y)) {
+			device_diagnostic_data->SetPixelData(x, y, has_surface1, has_surface2, surface1_point_camera_space,
+			                                     surface2_point_world_space, march_segment);
 			return;
 		}
 
-//		//_DEBUG alloc
-//		if (x == 319 && y == 385) {
-//			printf("Surface points for px 319, 385 while processing: %f, %f, %f to %f, %f, %f\n",
-//			       surface1_point.values[0], surface1_point.values[1], surface1_point.values[2],
-//			       surface2_point.values[0], surface2_point.values[1], surface2_point.values[2]);
-//			printf("March segment for px 319, 385 while processing: %f, %f, %f to %f, %f, %f\n",
-//			       march_segment.origin[0], march_segment.origin[1], march_segment.origin[2],
-//			       march_segment.destination()[0], march_segment.destination()[1], march_segment.destination()[2]);
-//		}
-
-		if(has_surface1 && !has_surface2){
-			// this computation is skipped in "ComputeMarchSegment" in this case, but we need it for the debugging data
-			surface1_point = ImageSpacePointToCameraSpace(surface1_depth, x, y,this->inverted_projection_parameters);
+		//_DEBUG alloc
+		if (x == 263 && y == 313) {
+			printf("Surface points for px 319, 385 while processing: %f, %f, %f to %f, %f, %f\n",
+			       surface1_point_camera_space.values[0], surface1_point_camera_space.values[1],
+			       surface1_point_camera_space.values[2],
+			       surface2_point_camera_space.values[0], surface2_point_camera_space.values[1],
+			       surface2_point_camera_space.values[2]);
+			printf("March segment for px 319, 385 while processing: %f, %f, %f to %f, %f, %f\n",
+			       march_segment.origin[0], march_segment.origin[1], march_segment.origin[2],
+			       march_segment.destination()[0], march_segment.destination()[1], march_segment.destination()[2]);
 		}
 
-		device_diagnostic_data->SetPixelData(x, y, has_surface1, has_surface2, surface1_point, surface2_point, march_segment);
+		device_diagnostic_data->SetPixelData(x, y, has_surface1, has_surface2, surface1_point_camera_space,
+		                                     surface2_point_camera_space, march_segment);
 
 		MarkVoxelHashBlocksAlongSegment(this->hash_entry_allocation_states, this->hash_block_coordinates,
 		                                *this->unresolvable_collision_encountered_device, this->hash_table,

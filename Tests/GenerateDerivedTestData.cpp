@@ -27,13 +27,18 @@
 #include "../ITMLib/Engines/EditAndCopy/EditAndCopyEngineFactory.h"
 #include "../ITMLib/Utils/Configuration/Configuration.h"
 #include "../ITMLib/Utils/Metacoding/SerializableEnum.h"
+#include "../ITMLib/Objects/Camera/CalibIO.h"
+#include "../ITMLib/Utils/Quaternions/Quaternion.h"
+
 //(CPU)
 #include "../ITMLib/Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 #include "../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_VoxelBlockHash_CPU.h"
 //(CUDA)
 #ifndef COMPILE_WITHOUT_CUDA
+
 #include "../ITMLib/Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
 #include "../ITMLib/Engines/Indexing/VBH/CUDA/IndexingEngine_VoxelBlockHash_CUDA.h"
+
 #endif
 
 //test_utilities
@@ -46,6 +51,7 @@
 #include "../ITMLib/Engines/Meshing/MeshingEngineFactory.h"
 #include "../ITMLib/Objects/Meshing/Mesh.h"
 #include "../ITMLib/Utils/Configuration/TelemetrySettings.h"
+#include "../ITMLib/Engines/Visualization/VisualizationEngineFactory.h"
 
 //local
 #include <log4cplus/loggingmacros.h>
@@ -460,6 +466,71 @@ void GenerateMeshingTestData() {
 	delete meshing_engine;
 }
 
+
+template<MemoryDeviceType TMemoryDeviceType>
+void GenerateRaytracingTestData_VoxelBlockHash() {
+	using namespace quaternion;
+	VisualizationEngine<TSDFVoxel, VoxelBlockHash>* visualization_engine = VisualizationEngineFactory::MakeVisualizationEngine<TSDFVoxel, VoxelBlockHash>(
+			TMemoryDeviceType);
+	RGBDCalib calibration_data;
+	readRGBDCalib(snoopy::SnoopyCalibrationPath().c_str(), calibration_data);
+	RenderState* render_state = new RenderState(Vector2i(640, 480),
+	                                            configuration::get().general_voxel_volume_parameters.near_clipping_distance,
+	                                            configuration::get().general_voxel_volume_parameters.far_clipping_distance,
+	                                            TMemoryDeviceType);
+	VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume;
+	LoadVolume(&volume, snoopy::PartialVolume17Path<VoxelBlockHash>(), TMemoryDeviceType,
+	           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
+
+	Vector3f target(-0.09150545, 0.07265271, 0.7908916);
+	Vector3f x_axis_unit(1.0f, 0.0f, 0.0f);
+	Vector3f rotation_axis = ORUtils::normalize(ORUtils::cross(target, x_axis_unit));
+
+	Vector3f original_viewpoint(0.f);
+
+	Vector3f target_to_viewpoint = original_viewpoint - target;
+	Quaternion<float> target_to_viewpoint_quaternion(0.f, target_to_viewpoint.x, target_to_viewpoint.y,
+	                                                 target_to_viewpoint.z);
+	float angle_radians = 0.0;
+	for (int i_sample = 0; i_sample < (360 / 45 /*degrees*/); i_sample++) {
+		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume;
+		LoadVolume(&volume, snoopy::PartialVolume17Path<VoxelBlockHash>(), TMemoryDeviceType,
+		           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
+
+		float half_angle = angle_radians / 2.0f; // for code clarity, math not baked in
+		float cos_theta = cos(half_angle);
+		float sin_theta = sin(half_angle);
+		Quaternion<float> half_rotation_a(cos_theta, rotation_axis.x * sin_theta, rotation_axis.y * sin_theta,
+		                                  rotation_axis.z * sin_theta);
+		Quaternion<float> half_rotation_b(cos_theta, -rotation_axis.x * sin_theta, -rotation_axis.y * sin_theta,
+		                                  -rotation_axis.z * sin_theta);
+		Quaternion<float> rotation_result = (half_rotation_a *= target_to_viewpoint_quaternion) *= half_rotation_b;
+		Vector3f rotated_target_to_viewpoint(rotation_result.b(), rotation_result.c(), rotation_result.d());
+		Vector3f viewpoint = target + rotated_target_to_viewpoint;
+		angle_radians += (PI / 4.0f);
+		Vector3f viewpoint_to_target_normalized = ORUtils::normalize(-rotated_target_to_viewpoint);
+		float angle_x = atan2(viewpoint_to_target_normalized.z, viewpoint_to_target_normalized.y);
+//		float angle_x = 0 * PI;
+		float angle_y = atan2(viewpoint_to_target_normalized.z, viewpoint_to_target_normalized.x);
+//		float angle_z = atan2(viewpoint_to_target_normalized.y, viewpoint_to_target_normalized.x);
+		float angle_z = 0 * PI;
+		std::cout << "rx: " << angle_x * 180 / PI << " ry: " << angle_y * 180 / PI<< " rz: " << angle_z * 180 / PI<< std::endl;
+		ORUtils::SE3Pose pose(viewpoint.x, viewpoint.y, viewpoint.z, angle_x, angle_y, angle_z);
+		//ORUtils::SE3Pose pose(viewpoint.x, viewpoint.y, viewpoint.z, 0, 0, 0);
+		visualization_engine->FindVisibleBlocks(volume, &pose, &calibration_data.intrinsics_d, render_state);
+		int* visible_codes_device = volume->index.GetVisibleBlockHashCodes();
+		const int visible_block_count = volume->index.GetVisibleBlockCount();
+		ORUtils::OStreamWrapper file(GENERATED_TEST_DATA_PREFIX "TestData/data_blocks/visible_blocks.dat");
+		SaveRawDataToFile<int>(file, visible_codes_device, visible_block_count, TMemoryDeviceType);
+		std::cout << visible_block_count << std::endl;
+		delete volume;
+	}
+
+	delete render_state;
+	delete visualization_engine;
+}
+
+
 #define GENERATED_TEST_DATA_TYPE_ENUM_DESCRIPTION GeneratedTestDataType, \
     (SNOOPY_UNMASKED_VOLUMES,    "SNOOPY_UNMASKED_VOLUMES", "snoopy_unmasked_volumes", "unmasked_volumes", "unmasked", "u", "su", "suv"), \
     (MASKED_VOLUMES,             "SNOOPY_MASKED_VOLUMES", "snoopy_masked_volumes", "masked_volumes", "masked", "m", "sm", "smv"), \
@@ -471,7 +542,9 @@ void GenerateMeshingTestData() {
     (PVA_FUSED_VOLUMES,          "PVA_FUSED_VOLUMES", "pva_fused_volumes", "pva_fv"), \
     (VBH_FUSED_VOLUMES,          "VBH_FUSED_VOLUMES", "vbh_fused_volumes", "vbh_fv"), \
     (CONFUGRATIONS,              "CONFIGURATIONS", "configurations", "config", "c"), \
-    (MESHES,                     "MESHES", "meshes", "m")
+    (MESHES,                     "MESHES", "meshes", "m"), \
+    (RAYTRACING_CPU,             "RAYTRACING_CPU", "raytracing_cpu", "r_cpu"), \
+    (RAYTRACING_CUDA,            "RAYTRACING_CUDA", "raytracing_cuda", "r_cuda")
 
 GENERATE_SERIALIZABLE_ENUM(GENERATED_TEST_DATA_TYPE_ENUM_DESCRIPTION);
 
@@ -494,6 +567,8 @@ int main(int argc, char* argv[]) {
 					{VBH_FUSED_VOLUMES,          GenerateFusedVolumeTestData<VoxelBlockHash>},
 					{CONFUGRATIONS,              GenerateConfigurationTestData},
 					{MESHES,                     GenerateMeshingTestData<VoxelBlockHash, MEMORYDEVICE_CPU>},
+					{RAYTRACING_CPU,             GenerateRaytracingTestData_VoxelBlockHash<MEMORYDEVICE_CPU>},
+					{RAYTRACING_CUDA,            GenerateRaytracingTestData_VoxelBlockHash<MEMORYDEVICE_CUDA>},
 			});
 	if (argc < 2) {
 		// calls every generator iteratively

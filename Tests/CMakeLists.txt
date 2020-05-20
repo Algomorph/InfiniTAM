@@ -129,6 +129,7 @@ if (BUILD_TESTS)
     itm_add_test(NAME TwoSurfaceHashAllocation SOURCES Test_TwoSurfaceHashAllocation.cpp)
     itm_add_test(NAME MeshGeneration SOURCES Test_MeshGeneration.cpp)
     itm_add_test(NAME EnumSerialization SOURCES Test_EnumSerialization.cpp)
+    itm_add_test(NAME RayTracingEngine SOURCES Test_RayTracingEngine.cpp)
 
     # *** tests that require CUDA
     if(WITH_CUDA)

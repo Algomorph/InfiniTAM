@@ -168,6 +168,57 @@ MarkVoxelHashBlocksAlongSegment(ITMLib::HashEntryAllocationState* hash_entry_all
 	}
 }
 
+_CPU_AND_GPU_CODE_
+inline Vector4f ImageSpacePointToCameraSpace(const float depth, const float x, const float y,
+                                             const Vector4f& inverted_camera_projection_parameters) {
+	return {depth *
+	        ((x - inverted_camera_projection_parameters.cx) * inverted_camera_projection_parameters.fx),
+	        depth *
+	        ((y - inverted_camera_projection_parameters.cy) * inverted_camera_projection_parameters.fy),
+	        depth, 1.0f};
+}
+
+
+_CPU_AND_GPU_CODE_
+inline Vector4f ImageSpacePointToCameraSpace(const float depth, const int x, const int y,
+                                             const Vector4f& inverted_camera_projection_parameters) {
+	return {depth *
+	        ((float(x) - inverted_camera_projection_parameters.cx) * inverted_camera_projection_parameters.fx),
+	        depth *
+	        ((float(y) - inverted_camera_projection_parameters.cy) * inverted_camera_projection_parameters.fy),
+	        depth, 1.0f};
+}
+
+_CPU_AND_GPU_CODE_
+inline Vector4f WorldSpacePointToCameraSpace(const Vector4f& point_world_space_metric,
+                                             const Matrix4f& camera_pose) {
+	return camera_pose * point_world_space_metric;
+}
+
+_CPU_AND_GPU_CODE_
+inline Vector4f CameraSpacePointToWorldSpace(const Vector4f& point_camera_space_metric,
+                                             const Matrix4f& inverted_camera_pose) {
+	return inverted_camera_pose * point_camera_space_metric;
+}
+
+_CPU_AND_GPU_CODE_
+inline Vector4f ImageSpacePointToWorldSpace(const float depth, const int x, const int y,
+                                            const Vector4f& inverted_camera_projection_parameters,
+                                            const Matrix4f& inverted_camera_pose) {
+	return CameraSpacePointToWorldSpace(
+			ImageSpacePointToCameraSpace(depth, x, y, inverted_camera_projection_parameters),
+			inverted_camera_pose
+	);
+}
+
+_CPU_AND_GPU_CODE_
+inline Vector3f WorldSpaceToWorldHashBlockSpace(const Vector4f& point_world_space_metric,
+                                                const float one_over_hash_block_size) {
+	// account for the fact that voxel coordinates represent the voxel center, and we need the extreme corner position of
+	// the hash block, i.e. 0.5 voxel (1/16 block) offset from the position along the ray
+	return TO_VECTOR3(point_world_space_metric) * one_over_hash_block_size + Vector3f(1.0f / (2.0f * VOXEL_BLOCK_SIZE));
+}
+
 
 _CPU_AND_GPU_CODE_
 inline Vector3f CameraSpaceToWorldHashBlockSpace(const Vector4f& point_camera_space,
@@ -175,8 +226,8 @@ inline Vector3f CameraSpaceToWorldHashBlockSpace(const Vector4f& point_camera_sp
                                                  const float one_over_hash_block_size) {
 	// account for the fact that voxel coordinates represent the voxel center, and we need the extreme corner position of
 	// the hash block, i.e. 0.5 voxel (1/16 block) offset from the position along the ray
-	return (TO_VECTOR3(inverted_camera_pose * point_camera_space)) * one_over_hash_block_size
-	       + Vector3f(1.0f / (2.0f * VOXEL_BLOCK_SIZE));
+	return WorldSpaceToWorldHashBlockSpace(CameraSpacePointToWorldSpace(point_camera_space, inverted_camera_pose),
+	                                       one_over_hash_block_size);
 }
 
 _CPU_AND_GPU_CODE_
@@ -202,19 +253,19 @@ inline ITMLib::Segment FindHashBlockSegmentAlongCameraRayWithinRangeFromPoint(
 	// distance to the point along camera ray
 	float norm = NormOfFirst3Components(point_in_camera_space);
 
-	Vector4f endpoint_in_camera_space;
+	Vector4f endpoint_in_camear_space;
 
-	endpoint_in_camera_space = point_in_camera_space * (1.0f - distance_from_point / norm);
-	endpoint_in_camera_space.w = 1.0f;
+	endpoint_in_camear_space = point_in_camera_space * (1.0f - distance_from_point / norm);
+	endpoint_in_camear_space.w = 1.0f;
 	//start position along ray in hash blocks
 	Vector3f start_point_in_hash_blocks = CameraSpaceToWorldHashBlockSpace(
-			endpoint_in_camera_space, inverted_camera_pose, one_over_hash_block_size);
+			endpoint_in_camear_space, inverted_camera_pose, one_over_hash_block_size);
 
-	endpoint_in_camera_space = point_in_camera_space * (1.0f + distance_from_point / norm);
-	endpoint_in_camera_space.w = 1.0f;
+	endpoint_in_camear_space = point_in_camera_space * (1.0f + distance_from_point / norm);
+	endpoint_in_camear_space.w = 1.0f;
 	//end position of the segment to march along the ray
 	Vector3f end_point_in_hash_blocks = CameraSpaceToWorldHashBlockSpace(
-			endpoint_in_camera_space, inverted_camera_pose, one_over_hash_block_size);
+			endpoint_in_camear_space, inverted_camera_pose, one_over_hash_block_size);
 
 	// segment from start of the (truncated SDF) band, through the observed point, and to the opposite (occluded)
 	// end of the (truncated SDF) band (increased by backBandFactor), along the ray cast from the camera through the
@@ -259,38 +310,35 @@ inline ITMLib::Segment FindHashBlockSegmentAlongCameraRayWithinRangeFromAndBetwe
 }
 
 _CPU_AND_GPU_CODE_
-inline Vector4f ImageSpacePointToCameraSpace(const float depth, const int x, const int y,
-                                             const Vector4f& inverted_camera_projection_parameters) {
-	return {depth *
-	        ((float(x) - inverted_camera_projection_parameters.cx) * inverted_camera_projection_parameters.fx),
-	        depth *
-	        ((float(y) - inverted_camera_projection_parameters.cy) * inverted_camera_projection_parameters.fy),
-	        depth, 1.0f};
-}
+inline ITMLib::Segment
+FindHashBlockSegmentAlongCameraRayWithinRangeFromDepth(Vector4f& point_in_camera_space_metric,
+                                                       const float distance_from_point, const float depth_measure,
+                                                       const int x, const int y,
+                                                       const Matrix4f& inverse_camera_pose,
+                                                       const Vector4f& inverse_camera_projection_parameters,
+                                                       const float one_over_hash_block_size) {
 
-_CPU_AND_GPU_CODE_
-inline Vector4f ImageSpacePointToCameraSpace(const float depth, const float x, const float y,
-                                             const Vector4f& inverted_camera_projection_parameters) {
-	return {depth *
-	        ((x - inverted_camera_projection_parameters.cx) * inverted_camera_projection_parameters.fx),
-	        depth *
-	        ((y - inverted_camera_projection_parameters.cy) * inverted_camera_projection_parameters.fy),
-	        depth, 1.0f};
+	point_in_camera_space_metric = ImageSpacePointToCameraSpace(depth_measure, x, y,
+	                                                            inverse_camera_projection_parameters);
+	return FindHashBlockSegmentAlongCameraRayWithinRangeFromPoint(distance_from_point,
+	                                                              point_in_camera_space_metric,
+	                                                              inverse_camera_pose,
+	                                                              one_over_hash_block_size);
 }
 
 _CPU_AND_GPU_CODE_
 inline ITMLib::Segment
 FindHashBlockSegmentAlongCameraRayWithinRangeFromDepth(const float distance_from_point, const float depth_measure,
-                                                       const int x, const int y, const Matrix4f& inverted_camera_pose,
-                                                       const Vector4f& inverted_camera_projection_parameters,
-                                                       const float one_over_hash_block_size) {
+                                                       const int x, const int y,
+                                                       const Matrix4f& inverse_camera_pose,
+                                                       const Vector4f& inverse_camera_projection_parameters,
+                                                       const float hash_block_size_reciprocal) {
 
-	Vector4f point_in_camera_space = ImageSpacePointToCameraSpace(depth_measure, x, y,
-	                                                              inverted_camera_projection_parameters);
-	return FindHashBlockSegmentAlongCameraRayWithinRangeFromPoint(distance_from_point,
-	                                                              point_in_camera_space,
-	                                                              inverted_camera_pose,
-	                                                              one_over_hash_block_size);
+	Vector4f point_in_camera_space_metric;
+	return FindHashBlockSegmentAlongCameraRayWithinRangeFromDepth(point_in_camera_space_metric, distance_from_point,
+	                                                              depth_measure, x, y, inverse_camera_pose,
+	                                                              inverse_camera_projection_parameters,
+	                                                              hash_block_size_reciprocal);
 }
 
 
@@ -299,7 +347,8 @@ FindVoxelBlocksForRayNearSurface(ITMLib::HashEntryAllocationState* hash_entry_al
                                  Vector3s* hash_block_coordinates,
                                  bool& unresolvable_collision_encountered,
                                  const CONSTPTR(HashEntry)* hash_table,
-                                 const int x, const int y, const CONSTPTR(float)* depth, float surface_distance_cutoff,
+                                 const int x, const int y, const CONSTPTR(float)* depth,
+                                 float surface_distance_cutoff,
                                  const Matrix4f inverted_camera_pose,
                                  const Vector4f inverted_projection_parameters,
                                  const float one_over_hash_block_size, const Vector2i depth_image_size,

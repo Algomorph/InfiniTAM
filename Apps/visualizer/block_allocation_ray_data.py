@@ -29,7 +29,7 @@ def read_block_allocation_ray_data(inverse_camera_matrices,
     else:
         total_frame_count = get_output_frame_count(output_path)
 
-    for i_frame in range(initial_frame_index + 1, total_frame_count):
+    for i_frame in range(initial_frame_index + 1, initial_frame_index + total_frame_count):
         print("Reading ray allocation data for frame:", i_frame)
         frame_folder = get_frame_output_path(output_path, i_frame)
         data_path = os.path.join(frame_folder, "voxel_block_hash_diagnostic_data.dat")
@@ -70,14 +70,15 @@ def read_block_allocation_ray_data(inverse_camera_matrices,
 
         camera_matrix_current = inverse_camera_matrices[i_frame - initial_frame_index]
         camera_matrix_prev = inverse_camera_matrices[i_frame - initial_frame_index - 1]
-        camera_matrix_next = inverse_camera_matrices[i_frame - initial_frame_index + 1]
+        #camera_matrix_next = inverse_camera_matrices[i_frame - initial_frame_index + 1]
         point_cloud1 = layers[2][point_mask1]
         one_col = np.ones((point_cloud1.shape[0], 1), dtype=np.float32)
         point_cloud1 = camera_matrix_current.dot(np.hstack((point_cloud1, one_col)).T).T[:, 0:3]
 
         point_cloud2 = layers[3][point_mask2]
         one_col = np.ones((point_cloud2.shape[0], 1), dtype=np.float32)
-        #point_cloud2 = camera_matrix_current.dot(np.hstack((point_cloud2, one_col)).T).T[:, 0:3]
+        # cm = np.linalg.inv(camera_matrix_current)
+        point_cloud2 = camera_matrix_current.dot(np.hstack((point_cloud2, one_col)).T).T[:, 0:3]
 
         # index_cols = [2, 0, 1] [:, index_cols]
         march_segment_endpoints = np.hstack((convert_block_to_metric(layers[4][segment_mask]),
@@ -138,8 +139,9 @@ class AllocationRays:
         self.renderer = renderer
 
     def set_frame(self, frame_index):
+        print(frame_index, len(self.frame_ray_datasets), self.initial_frame_index)
         if self.initial_frame_index < frame_index != self.current_frame_index:
-            dataset = self.frame_ray_datasets[frame_index]
+            dataset = self.frame_ray_datasets[frame_index-self.initial_frame_index]
 
             point_cloud1_points = vtk.vtkPoints()
             for x, y, z in dataset.surface1_points:

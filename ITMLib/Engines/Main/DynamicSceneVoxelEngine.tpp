@@ -42,7 +42,7 @@ namespace fs = std::filesystem;
 #include "../../SurfaceTrackers/SurfaceTrackerFactory.h"
 #include "../../Utils/Analytics/BenchmarkUtilities.h"
 #include "../../Utils/Logging/Logging.h"
-#include "../../Utils/Quaternions.h"
+#include "../../Utils/Quaternions/QuaternionFromMatrix.h"
 #include "../../../ORUtils/NVTimer.h"
 #include "../../../ORUtils/FileUtils.h"
 #include "../../../ORUtils/FileUtils.h"

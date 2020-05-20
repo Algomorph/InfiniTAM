@@ -31,7 +31,7 @@ class VisualizerApp:
         # allocated blocks & labels
         self.blocks = AllocatedBlocks(self.renderer, output_path, start_frame_ix)
         self.rays = AllocationRays(self.renderer, output_path, start_frame_ix, self.inverse_camera_matrices)
-        self.frame_count = self.blocks.frame_count
+        self.frame_index_upper_bound = start_frame_ix + self.blocks.frame_count
 
         # mesh setup
         self.canonical_mesh = Mesh(self.renderer, self.render_window, colors.GetColor3d("Peacock"))
@@ -141,7 +141,7 @@ class VisualizerApp:
 
     def advance_view(self):
         if self.shown_mesh_index == len(self.meshes) - 1:
-            if self.current_frame < self.frame_count - 1:
+            if self.current_frame < self.frame_index_upper_bound - 1:
                 self.set_frame(self.current_frame + 1)
                 self.show_mesh_at_index(0)
         else:
@@ -275,7 +275,7 @@ class VisualizerApp:
             obj.InvokeEvent("DeleteAllObjects")
             sys.exit()
         elif key == "bracketright":
-            if self.current_frame < self.frame_count - 1:
+            if self.current_frame < self.frame_index_upper_bound - 1:
                 self.set_frame(self.current_frame + 1)
         elif key == "bracketleft":
             if self.current_frame > 0:

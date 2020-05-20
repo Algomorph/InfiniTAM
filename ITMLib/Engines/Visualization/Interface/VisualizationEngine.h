@@ -59,8 +59,7 @@ namespace ITMLib
 
 		/** Given a scene, pose and intrinsics, compute_allocated the
 		visible subset of the scene and store it in an
-		appropriate Visualization state object, created
-		previously using allocateInternalState().
+		appropriate RenderState object.
 		*/
 		virtual void FindVisibleBlocks(VoxelVolume<TVoxel,TIndex> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics,
 		                               RenderState *renderState) const = 0;

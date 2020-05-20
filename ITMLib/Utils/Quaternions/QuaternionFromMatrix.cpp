@@ -17,7 +17,7 @@
 #include <cassert>
 
 //local
-#include "Quaternions.h"
+#include "QuaternionFromMatrix.h"
 
 namespace ITMLib{
 

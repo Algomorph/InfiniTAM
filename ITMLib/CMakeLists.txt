@@ -894,6 +894,7 @@ set(ITMLIB_UTILS_SOURCES
     Utils/Logging/LoggingCUDAWrapper.cpp
 
     Utils/Metacoding/SerializableStruct_Impl.cpp
+    Utils/Quaternions/QuaternionFromMatrix.cpp
 
     Utils/Telemetry/TelemetryUtilities.cpp
 
@@ -901,7 +902,7 @@ set(ITMLIB_UTILS_SOURCES
     Utils/ExecutionMode.cpp
 
     Utils/Math.cpp
-    Utils/Quaternions.cpp
+
     )
 
 set(ITMLIB_UTILS_HEADERS
@@ -938,6 +939,11 @@ set(ITMLIB_UTILS_HEADERS
     Utils/Metacoding/SequenceLevel2Macros.h
     Utils/Metacoding/PreprocessorNargs.h
 
+    Utils/Quaternions/Quaternion.h
+    Utils/Quaternions/QuaternionIO.h
+    Utils/Quaternions/QuaternionUtils.h
+    Utils/Quaternions/QuaternionFromMatrix.h
+
     Utils/Telemetry/TelemetryUtilities.h
 
     Utils/Logging/Logging.cpp
@@ -958,7 +964,7 @@ set(ITMLIB_UTILS_HEADERS
     Utils/MemoryBlockTypes.h
     Utils/PixelUtils.h
     Utils/ProjectionUtils.h
-    Utils/Quaternions.h
+
     Utils/VoxelVolumeParameters.h
     Utils/SurfelVolumeParameters.h
 

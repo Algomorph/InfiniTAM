@@ -38,6 +38,7 @@ CMakeLists.txt.user*
 /Tests/TestData/volumes/PVA/*
 /Tests/TestData/volumes/VBH/*
 /Tests/TestData/meshes/*
+/Tests/TestData/data_blocks/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

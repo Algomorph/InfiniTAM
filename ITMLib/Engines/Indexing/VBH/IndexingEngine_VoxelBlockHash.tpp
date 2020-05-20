@@ -87,9 +87,11 @@ void IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType, TExecutionMode>::
 
 	float band_factor = configuration::get().general_voxel_volume_parameters.block_allocation_band_factor;
 	float surface_distance_cutoff = band_factor * volume->GetParameters().narrow_band_half_width;
+	Matrix4f inverse_depth_camera_matrix;
+	depth_camera_matrix.inv(inverse_depth_camera_matrix);
 
 	DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType> depth_based_allocator(
-			volume->index, volume->GetParameters(), view, depth_camera_matrix, surface_distance_cutoff);
+			volume->index, volume->GetParameters(), view, inverse_depth_camera_matrix, surface_distance_cutoff);
 
 	do {
 		volume->index.ClearHashEntryAllocationStates();

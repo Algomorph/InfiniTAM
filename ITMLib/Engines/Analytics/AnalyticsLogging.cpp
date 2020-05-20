@@ -14,7 +14,7 @@
 //  limitations under the License.
 //  ================================================================
 #include "AnalyticsLogging.h"
-#include "../../Utils/Quaternions.h"
+#include "../../Utils/Quaternions/QuaternionFromMatrix.h"
 
 namespace ITMLib {
 

@@ -177,4 +177,36 @@ void BuildSdfVolumeFromImage_SurfaceSpanAllocation(VoxelVolume<TVoxel, TIndex>**
 
 configuration::Configuration GenerateChangedUpConfiguration();
 
+
+template<typename TElement>
+void SaveRawDataToFile(ORUtils::OStreamWrapper& file, const TElement* data, size_t element_count,
+                       MemoryDeviceType memory_device_type) {
+	const TElement* data_to_write = data;
+	bool copy_used = false;
+	if (memory_device_type == MEMORYDEVICE_CUDA) {
+#ifndef COMPILE_WITHOUT_CUDA
+		// If we are saving the memory block from the CUDA, first make a CPU copy of it.
+		TElement* data_cpu = new TElement[element_count];
+		ORcudaSafeCall(cudaMemcpy(data_cpu, data, element_count * sizeof(TElement), cudaMemcpyDeviceToHost));
+		// Then write the CPU copy to disk.
+		data_to_write = data_cpu;
+#else
+		DIEWITHEXCEPTION_REPORTLOCATION("Compipled without CUDA, but tried to write CUDA data to disk "\
+								  "(memory_device_type was set to MEMORYDEVICE_CUDA)");
+#endif
+	}
+	if (!file.OStream().write(reinterpret_cast<const char*>(&element_count), sizeof(size_t))) {
+		throw std::runtime_error("Could not write memory block size");
+	}
+
+	// Try and write the block's data.
+	if (!file.OStream().write(reinterpret_cast<const char*>(data_to_write), element_count * sizeof(TElement))) {
+		throw std::runtime_error("Could not write memory block data");
+	}
+	if (copy_used) {
+		delete[] data_to_write;
+	}
+}
+
+
 } // namespace test_utilities
