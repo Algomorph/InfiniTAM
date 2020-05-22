@@ -26,6 +26,7 @@
 #include "../../ITMLib/Engines/ViewBuilding/Interface/ViewBuilder.h"
 #include "../../ITMLib/Engines/ViewBuilding/ViewBuilderFactory.h"
 #include "../../ITMLib/Utils/Configuration/TelemetrySettings.h"
+#include "../../ITMLib/Utils/Quaternions/Quaternion.h"
 
 using namespace ITMLib;
 
@@ -413,6 +414,62 @@ configuration::Configuration GenerateChangedUpConfiguration(){
 	AddDeferrableToSourceTree(changed_up_configuration, changed_up_telemetry_settings);
 	AddDeferrableToSourceTree(changed_up_configuration, changed_up_indexing_settings);
 	return changed_up_configuration;
+}
+
+std::vector<ORUtils::SE3Pose> GenerateCameraTrajectoryAroundPoint(const Vector3f& original_viewpoint, const Vector3f& target, int degree_increment){
+	using namespace quaternion;
+	Vector3f x_axis_unit(1.0f, 0.0f, 0.0f);
+	Vector3f rotation_axis = ORUtils::normalize(ORUtils::cross(target, x_axis_unit));
+
+	Vector3f target_to_viewpoint = original_viewpoint - target;
+	Quaternion<float> target_to_viewpoint_quaternion(0.f, target_to_viewpoint.x, target_to_viewpoint.y,
+	                                                 target_to_viewpoint.z);
+	float angle_radians = 0.0;
+	ORUtils::OStreamWrapper visible_blocks_file(GENERATED_TEST_DATA_PREFIX "TestData/data_blocks/visible_blocks.dat");
+
+	const float angle_increment = static_cast<float>(degree_increment) * PI / 180.0f;
+
+	std::vector<ORUtils::SE3Pose> poses;
+	for (int i_sample = 0; i_sample < (360 / degree_increment); i_sample++) {
+
+		float half_angle = angle_radians / 2.0f; // for code clarity, math not baked in
+		float cos_theta = cos(half_angle);
+		float sin_theta = sin(half_angle);
+		Quaternion<float> half_rotation_a(cos_theta, rotation_axis.x * sin_theta, rotation_axis.y * sin_theta,
+		                                  rotation_axis.z * sin_theta);
+		Quaternion<float> half_rotation_b(cos_theta, -rotation_axis.x * sin_theta, -rotation_axis.y * sin_theta,
+		                                  -rotation_axis.z * sin_theta);
+		Quaternion<float> rotation_result = (half_rotation_a *= target_to_viewpoint_quaternion) *= half_rotation_b;
+		Vector3f rotated_target_to_viewpoint(rotation_result.b(), rotation_result.c(), rotation_result.d());
+		Vector3f viewpoint = target + rotated_target_to_viewpoint;
+
+		Vector3f viewpoint_to_target_normalized = ORUtils::normalize(-rotated_target_to_viewpoint);
+		/* InfiniTAM's default (unconventional) axis system is as follows:
+		 *               ◢ ----------▶ +x
+		 *             ╱ |
+		 *           ╱   |
+		*          ╱     |
+		 *    +z ◣       |
+		 *               |
+		 *               ▼ +y
+		 * (Probably, this was done because it mimics the default +x/+y image pixel raster ordering.
+		 *
+		 * Sticking with the right-hand rule for rotations, euler rotation of a (0,0,1) unit vector to some
+		 * arbitrary unit-vector v is calculated as follows:
+		 *
+		 * rx = atan2(v.y, v.z)
+		 * ry = atan2(v.x, v.z)
+		 * rz = atan2(v.x, v.y)
+		 *
+		 */
+		Vector3f euler(atan2(viewpoint_to_target_normalized.y, viewpoint_to_target_normalized.z),
+		               atan2(viewpoint_to_target_normalized.x, viewpoint_to_target_normalized.z), 0.0f);
+		ORUtils::SE3Pose pose;
+		pose.SetFrom(viewpoint, euler);
+		poses.push_back(pose);
+		angle_radians += angle_increment;
+	}
+	return poses;
 }
 
 } // namespace test_utilities

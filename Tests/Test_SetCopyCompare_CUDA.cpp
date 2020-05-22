@@ -98,7 +98,7 @@ BOOST_AUTO_TEST_CASE(testSetVoxelAndCopy_PlainVoxelArray_CUDA) {
 	ManipulationEngine_CUDA_PVA_Voxel::Inst().CopyVolume(&scene2, &scene1, offset);
 
 	float tolerance = 1e-5f;
-	BOOST_REQUIRE(almostEqual(out.sdf, voxelZero.sdf, tolerance));
+	BOOST_REQUIRE(AlmostEqual(out.sdf, voxelZero.sdf, tolerance));
 	out = ManipulationEngine_CUDA_PVA_Voxel::Inst().ReadVoxel(&scene2, Vector3i(0, 0, 0) + offset);
 	BOOST_REQUIRE(out.sdf == voxelZero.sdf);
 	out = ManipulationEngine_CUDA_PVA_Voxel::Inst().ReadVoxel(&scene2, Vector3i(3, 3, 3) + offset);

@@ -340,7 +340,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
 		Vector3i coord = zero_level_set_coordinates[i_coordinate];
 		TSDFVoxel voxel = ManipulationEngine_CPU_PVA_Voxel::Inst().ReadVoxel(&volume1, coord);
 		float sdf = TSDFVoxel::valueToFloat(voxel.sdf);
-		if (!almostEqual(sdf, 0.0f, tolerance)) {
+		if (!AlmostEqual(sdf, 0.0f, tolerance)) {
 			unexpected_sdf_at_level_set = true;
 			i_bad_level_set = 0;
 			bad_sdf = sdf;
@@ -360,7 +360,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
 				float expected_sdf = -static_cast<float>(i_level_set) * max_SDF_step;
 				voxel = ManipulationEngine_CPU_PVA_Voxel::Inst().ReadVoxel(&volume1, augmented_coord);
 				sdf = TSDFVoxel::valueToFloat(voxel.sdf);
-				if (!almostEqual(sdf, expected_sdf, tolerance)) {
+				if (!AlmostEqual(sdf, expected_sdf, tolerance)) {
 					unexpected_sdf_at_level_set = true;
 					i_bad_level_set = i_level_set;
 					bad_coordinate = augmented_coord;

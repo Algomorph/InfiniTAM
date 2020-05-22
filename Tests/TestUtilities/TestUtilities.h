@@ -18,6 +18,9 @@
 //stdlib
 #include <chrono>
 
+//ORUtils
+#include "../../ORUtils/SE3Pose.h"
+
 //ITMLib
 #include "../../ITMLib/GlobalTemplateDefines.h"
 #include "../../ITMLib/Objects/Volume/RepresentationAccess.h"
@@ -207,6 +210,8 @@ void SaveRawDataToFile(ORUtils::OStreamWrapper& file, const TElement* data, size
 		delete[] data_to_write;
 	}
 }
+
+std::vector<ORUtils::SE3Pose> GenerateCameraTrajectoryAroundPoint(const Vector3f& original_viewpoint, const Vector3f& target, int degree_increment);
 
 
 } // namespace test_utilities

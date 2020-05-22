@@ -865,120 +865,128 @@ set(ITMLIB_SCENE_MOTION_TRACKERS_SHARED_HEADERS
 
 # ======================================================================================================================
 # =================================================== UTILITIES (MISC) =================================================
-set(ITMLIB_UTILS_SOURCES
+set(
+        ITMLIB_UTILS_SOURCES
 
-    Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CPU.tpp
-    Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CPU.cpp
-    Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CUDA.tcu
-    Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CUDA.cu
-    Utils/Analytics/NeighborVoxelIterationInfo.cpp
-    Utils/Analytics/BenchmarkUtilities.cpp
+        Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CPU.tpp
+        Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CPU.cpp
+        Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CUDA.tcu
+        Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CUDA.cu
+        Utils/Analytics/NeighborVoxelIterationInfo.cpp
+        Utils/Analytics/RawMemoryArrayComparison.cpp
+        Utils/Analytics/RawMemoryArrayComparison.cu
+        Utils/Analytics/BenchmarkUtilities.cpp
 
-    Utils/Collections/NestedMap3DOfArrays.tpp
-    Utils/Collections/NestedMap3DOfArrays.cpp
-    Utils/Collections/NestedMap3D.tpp
-    Utils/Collections/NestedMap3D.cpp
-    Utils/Collections/OperationsOnSTLContainers.cpp
+        Utils/Collections/NestedMap3DOfArrays.tpp
+        Utils/Collections/NestedMap3DOfArrays.cpp
+        Utils/Collections/NestedMap3D.tpp
+        Utils/Collections/NestedMap3D.cpp
+        Utils/Collections/OperationsOnSTLContainers.cpp
 
-    Utils/Configuration/Configuration.cpp
-    Utils/Configuration/LoggingSettings.cpp
-    Utils/Configuration/TelemetrySettings.cpp
+        Utils/Configuration/Configuration.cpp
+        Utils/Configuration/LoggingSettings.cpp
+        Utils/Configuration/TelemetrySettings.cpp
 
-    Utils/FileIO/JSON_Utilities.cpp
-    Utils/FileIO/CSV_Utilities.cpp
+        Utils/FileIO/JSON_Utilities.cpp
+        Utils/FileIO/CSV_Utilities.cpp
 
-    Utils/Geometry/CardinalAxesAndPlanes.cpp
+        Utils/Geometry/CardinalAxesAndPlanes.cpp
+        Utils/Geometry/Rodrigues.cpp
 
-    Utils/Logging/LoggingUtilities.cpp
-    Utils/Logging/Logging.cpp
-    Utils/Logging/LoggingCUDAWrapper.cpp
+        Utils/Logging/LoggingUtilities.cpp
+        Utils/Logging/Logging.cpp
+        Utils/Logging/LoggingCUDAWrapper.cpp
 
-    Utils/Metacoding/SerializableStruct_Impl.cpp
-    Utils/Quaternions/QuaternionFromMatrix.cpp
+        Utils/Metacoding/SerializableStruct_Impl.cpp
+        Utils/Quaternions/QuaternionFromMatrix.cpp
 
-    Utils/Telemetry/TelemetryUtilities.cpp
+        Utils/Telemetry/TelemetryUtilities.cpp
 
-    Utils/CPPPrintHelpers.cpp
-    Utils/ExecutionMode.cpp
+        Utils/CPPPrintHelpers.cpp
+        Utils/ExecutionMode.cpp
 
-    Utils/Math.cpp
+        Utils/Math.cpp
+)
 
-    )
+set(
+        ITMLIB_UTILS_HEADERS
 
-set(ITMLIB_UTILS_HEADERS
-    Utils/Collections/NestedMap3DOfArrays.h
-    Utils/Collections/NestedMap3D.h
-    Utils/Collections/OperationsOnSTLContainers.h
+        Utils/Analytics/BenchmarkUtilities.h
+        Utils/Analytics/AlmostEqual.h
+        Utils/Analytics/IsAltered.h
+        Utils/Analytics/NeighborVoxelIterationInfo.h
+        Utils/Analytics/RawMemoryArrayComparison.h
+        Utils/Analytics/RawMemoryArrayComparison.cuh
+        Utils/Analytics/Statistics.h
 
-    Utils/Configuration/Configuration.h
-    Utils/Configuration/LoggingSettings.h
-    Utils/Configuration/TelemetrySettings.h
+        Utils/Collections/NestedMap3DOfArrays.h
+        Utils/Collections/NestedMap3D.h
+        Utils/Collections/OperationsOnSTLContainers.h
 
-    Utils/FileIO/JSON_Utilities.h
-    Utils/FileIO/CSV_Utilities.h
+        Utils/Configuration/Configuration.h
+        Utils/Configuration/LoggingSettings.h
+        Utils/Configuration/TelemetrySettings.h
 
-    Utils/Geometry/FrustumTrigonometry.h
-    Utils/Geometry/GeometryBooleanOperations.h
-    Utils/Geometry/GeometryConversionOperations.h
-    Utils/Geometry/SpatialIndexConversions.h
-    Utils/Geometry/IntersectionChecks.h
-    Utils/Geometry/Segment.h
-    Utils/Geometry/CardinalAxesAndPlanes.h
-    Utils/Geometry/CheckBlockVisibility.h
+        Utils/FileIO/JSON_Utilities.h
+        Utils/FileIO/CSV_Utilities.h
 
-    Utils/Metacoding/DeferrableStructUtilities.h
-    Utils/Metacoding/DeferrableSerializableStruct.h
-    Utils/Metacoding/DeferrableSerializableStruct_Impl.h
-    Utils/Metacoding/Metacoding.h
-    Utils/Metacoding/MetacodingAuxiliaryUtilities.h
-    Utils/Metacoding/SerializableStruct.h
-    Utils/Metacoding/SerializableStruct_Impl.h
-    Utils/Metacoding/SerializableEnum.h
-    Utils/Metacoding/SerializableEnum_Impl.h
-    Utils/Metacoding/SequenceLevel1Macros.h
-    Utils/Metacoding/SequenceLevel2Macros.h
-    Utils/Metacoding/PreprocessorNargs.h
+        Utils/Geometry/CardinalAxesAndPlanes.h
+        Utils/Geometry/CheckBlockVisibility.h
+        Utils/Geometry/FrustumTrigonometry.h
+        Utils/Geometry/GeometryBooleanOperations.h
+        Utils/Geometry/GeometryConversionOperations.h
+        Utils/Geometry/IntersectionChecks.h
+        Utils/Geometry/Rodrigues.h
+        Utils/Geometry/Segment.h
+        Utils/Geometry/SpatialIndexConversions.h
 
-    Utils/Quaternions/Quaternion.h
-    Utils/Quaternions/QuaternionIO.h
-    Utils/Quaternions/QuaternionUtils.h
-    Utils/Quaternions/QuaternionFromMatrix.h
+        Utils/Metacoding/DeferrableStructUtilities.h
+        Utils/Metacoding/DeferrableSerializableStruct.h
+        Utils/Metacoding/DeferrableSerializableStruct_Impl.h
+        Utils/Metacoding/Metacoding.h
+        Utils/Metacoding/MetacodingAuxiliaryUtilities.h
+        Utils/Metacoding/SerializableStruct.h
+        Utils/Metacoding/SerializableStruct_Impl.h
+        Utils/Metacoding/SerializableEnum.h
+        Utils/Metacoding/SerializableEnum_Impl.h
+        Utils/Metacoding/SequenceLevel1Macros.h
+        Utils/Metacoding/SequenceLevel2Macros.h
+        Utils/Metacoding/PreprocessorNargs.h
 
-    Utils/Telemetry/TelemetryUtilities.h
+        Utils/Quaternions/Quaternion.h
+        Utils/Quaternions/QuaternionIO.h
+        Utils/Quaternions/QuaternionUtils.h
+        Utils/Quaternions/QuaternionFromMatrix.h
 
-    Utils/Logging/Logging.cpp
-    Utils/Logging/LoggingUtilities.h
-    Utils/Logging/LoggingCUDAWrapper.h
+        Utils/Telemetry/TelemetryUtilities.h
 
-    Utils/CPPPrintHelpers.h
-    Utils/CPrintHelpers.h
-    Utils/CUDAUtils.h
-    Utils/ExecutionMode.h
-    Utils/ValuePosition.h
-    Utils/ImageTypes.h
-    Utils/HashBlockProperties.h
-    Utils/VoxelFlags.h
-    Utils/WarpType.h
-    Utils/Math.h
-    Utils/MemoryBlock_StdContainer_Convertions.h
-    Utils/MemoryBlockTypes.h
-    Utils/PixelUtils.h
-    Utils/ProjectionUtils.h
+        Utils/Logging/Logging.cpp
+        Utils/Logging/LoggingUtilities.h
+        Utils/Logging/LoggingCUDAWrapper.h
 
-    Utils/VoxelVolumeParameters.h
-    Utils/SurfelVolumeParameters.h
+        Utils/CPPPrintHelpers.h
+        Utils/CPrintHelpers.h
+        Utils/CUDAUtils.h
+        Utils/ExecutionMode.h
+        Utils/ValuePosition.h
+        Utils/ImageTypes.h
+        Utils/HashBlockProperties.h
+        Utils/VoxelFlags.h
+        Utils/WarpType.h
+        Utils/Math.h
+        Utils/MemoryBlock_StdContainer_Convertions.h
+        Utils/MemoryBlockTypes.h
+        Utils/PixelUtils.h
+        Utils/ProjectionUtils.h
 
-    Utils/Analytics/BenchmarkUtilities.h
-    Utils/Analytics/AlmostEqual.h
-    Utils/Analytics/IsAltered.h
-    Utils/Analytics/NeighborVoxelIterationInfo.h
-    Utils/Analytics/Statistics.h
+        Utils/VoxelVolumeParameters.h
+        Utils/SurfelVolumeParameters.h
 
-    Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison.h
-    Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CPU.h
-    Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CUDA.h
-    Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_Functors.h
-    )
+        Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison.h
+        Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CPU.h
+        Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CUDA.h
+        Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_Functors.h
+)
 
 
 ## ================================================ UTILS - VISUALIZATION ==============================================

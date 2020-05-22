@@ -642,7 +642,7 @@ inline Quaternion<T> from_real_matrix_4d(const real_matrix_4d<T>& rm) {
 }
 
 /**
- * A 3D rotation matrix.
+ * A 3D rotation matrix (row-major).
  */
 template<typename T>
 using rotation_matrix = std::array<std::array<T, 3>, 3>;
@@ -663,6 +663,33 @@ inline rotation_matrix<T> to_rotation_matrix(const Quaternion<T>& x) {
 	std::array<T, 3> r1{{2 * (bc + ad), a2 - b2 + c2 - d2, 2 * (cd - ab)}};
 	std::array<T, 3> r2{{2 * (bd - ac), 2 * (cd + ab), a2 - b2 - c2 + d2}};
 	return {{r0, r1, r2}};
+}
+
+/**
+ * Returns a 3D rotation matrix (in InfiniTAM/ORUtils format).
+ * This is the "homogeneous" expression to convert to a rotation matrix,
+ * which works if the Quaternoin is not a unit Quaternion.
+ */
+template<typename T>
+inline ORUtils::Matrix3<T> to_rotation_matrix(const Quaternion<T>& x) {
+	// 21 operations?
+	T a2 = x.a() * x.a(), b2 = x.b() * x.b(), c2 = x.c() * x.c(), d2 = x.d() * x.d();
+	T ab = x.a() * x.b(), ac = x.a() * x.c(), ad = x.a() * x.d();
+	T bc = x.b() * x.c(), bd = x.b() * x.d();
+	T cd = x.c() * x.d();
+
+	// InfiniTAM matrices are column-major
+	return { a2 + b2 - c2 - d2,
+	         2 * (bc + ad),
+	         2 * (bd - ac),
+
+	         2 * (bc - ad),
+	         a2 - b2 + c2 - d2,
+	         2 * (cd + ab),
+
+	         2 * (bd + ac),
+	         2 * (cd - ab),
+	         a2 - b2 - c2 + d2};
 }
 
 template<typename T>

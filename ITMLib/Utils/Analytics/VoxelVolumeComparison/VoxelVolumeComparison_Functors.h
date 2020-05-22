@@ -25,7 +25,7 @@ struct VoxelEqualFunctor {
 	_CPU_AND_GPU_CODE_
 	inline
 	bool operator()(const TVoxel& a, const TVoxel& b) const {
-		return almostEqual(a, b, tolerance);
+		return AlmostEqual(a, b, tolerance);
 	}
 	ToleranceType tolerance;
 };
@@ -36,7 +36,7 @@ struct VoxelEqualVerboseFunctor {
 	_CPU_AND_GPU_CODE_
 	inline
 	bool operator()(const TVoxel& a, const TVoxel& b, const Vector3i& position) const {
-		return almostEqualVerbose_Position(a, b, position, tolerance);
+		return AlmostEqualVerbose_Position(a, b, position, tolerance);
 	}
 	ToleranceType tolerance;
 };

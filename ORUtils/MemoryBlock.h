@@ -573,6 +573,9 @@ private:
 		}
 	}
 
+	template<typename T2>
+	friend bool operator==(const MemoryBlock<T2>& l, const MemoryBlock<T2>& r);
+
 };
 
 }

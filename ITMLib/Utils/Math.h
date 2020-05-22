@@ -160,6 +160,11 @@ int ceil_of_integer_quotient(int dividend, int divisor) {
 	return dividend / divisor + (dividend % divisor != 0);
 }
 
+inline
+unsigned int ceil_of_integer_quotient(unsigned int dividend, unsigned int divisor) {
+	return dividend / divisor + (dividend % divisor != 0);
+}
+
 template<typename T>
 inline
 bool Vector3CoordinateLess (ORUtils::Vector3<T> a, ORUtils::Vector3<T> b) {

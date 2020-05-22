@@ -171,9 +171,9 @@ bool operator!=(const Mesh::Triangle& triangle1, const Mesh::Triangle& triangle2
 
 _CPU_AND_GPU_CODE_
 bool AlmostEqual(const Mesh::Triangle& triangle1, const Mesh::Triangle& triangle2, const float tolerance) {
-	return almostEqual(triangle1.p0, triangle2.p0, tolerance) &&
-	       almostEqual(triangle1.p1, triangle2.p1, tolerance) &&
-	       almostEqual(triangle1.p2, triangle2.p2, tolerance);
+	return AlmostEqual(triangle1.p0, triangle2.p0, tolerance) &&
+	       AlmostEqual(triangle1.p1, triangle2.p1, tolerance) &&
+	       AlmostEqual(triangle1.p2, triangle2.p2, tolerance);
 }
 
 bool AlmostEqual(const Mesh& mesh1, const Mesh& mesh2, const float tolerance, bool presort_triangles) {

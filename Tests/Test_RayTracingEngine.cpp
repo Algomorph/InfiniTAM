@@ -26,13 +26,54 @@
 #include "TestUtilities/SnoopyTestUtilities.h"
 #include "TestUtilities/WarpAdvancedTestingUtilities.h"
 
+//ITMLib
+#include "../ITMLib/Engines/Visualization/VisualizationEngineFactory.h"
+
 using namespace ITMLib;
 using namespace test_utilities;
 namespace snoopy = snoopy_test_utilities;
 
-BOOST_AUTO_TEST_CASE(Test_FindVisibleBlocks) {
-//	VisualizationEngine<TVoxel, TIndex>* visualization_engine = ;
-//	visualization_engine->FindVisibleBlocks(live_volumes[0], pose, intrinsics, freeview_render_state);
+
+template<MemoryDeviceType TMemoryDeviceType>
+void GenericFindVisibleBlocksTest() {
+	VisualizationEngine<TSDFVoxel, VoxelBlockHash>* visualization_engine = VisualizationEngineFactory::MakeVisualizationEngine<TSDFVoxel, VoxelBlockHash>(
+			TMemoryDeviceType);
+
+	RGBDCalib calibration_data;
+	readRGBDCalib(snoopy::SnoopyCalibrationPath().c_str(), calibration_data);
+	RenderState* render_state = new RenderState(Vector2i(640, 480),
+	                                            configuration::get().general_voxel_volume_parameters.near_clipping_distance,
+	                                            configuration::get().general_voxel_volume_parameters.far_clipping_distance,
+	                                            TMemoryDeviceType);
+
+	Vector3f target(-0.09150545, 0.07265271, 0.7908916);
+	Vector3f original_viewpoint(0.f);
+	const int degree_increment = 30;
+	std::vector<ORUtils::SE3Pose> camera_poses =
+			GenerateCameraTrajectoryAroundPoint(original_viewpoint, target, degree_increment);
+	for (auto& pose : camera_poses) {
+		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume;
+		LoadVolume(&volume, snoopy::PartialVolume17Path<VoxelBlockHash>(), TMemoryDeviceType,
+		           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
+
+		visualization_engine->FindVisibleBlocks(volume, &pose, &calibration_data.intrinsics_d, render_state);
+		const int visible_block_count = volume->index.GetVisibleBlockCount();
+		if(visible_block_count == 0) continue; // skip shots without results
+
+		int* visible_codes_device = volume->index.GetVisibleBlockHashCodes();
+
+
+
+		delete volume;
+	}
+
+	delete render_state;
+	delete visualization_engine;
+}
+
+
+BOOST_AUTO_TEST_CASE(Test_FindVisibleBlocks_CPU) {
+	GenericFindVisibleBlocksTest<MEMORYDEVICE_CPU>();
 }
 
 BOOST_AUTO_TEST_CASE(Test_CountVisibleBlocks) {

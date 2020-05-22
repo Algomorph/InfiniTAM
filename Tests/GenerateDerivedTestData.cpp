@@ -483,46 +483,25 @@ void GenerateRaytracingTestData_VoxelBlockHash() {
 	           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
 	Vector3f target(-0.09150545, 0.07265271, 0.7908916);
-	Vector3f x_axis_unit(1.0f, 0.0f, 0.0f);
-	Vector3f rotation_axis = ORUtils::normalize(ORUtils::cross(target, x_axis_unit));
-
 	Vector3f original_viewpoint(0.f);
+	const int degree_increment = 30;
 
-	Vector3f target_to_viewpoint = original_viewpoint - target;
-	Quaternion<float> target_to_viewpoint_quaternion(0.f, target_to_viewpoint.x, target_to_viewpoint.y,
-	                                                 target_to_viewpoint.z);
-	float angle_radians = 0.0;
-	for (int i_sample = 0; i_sample < (360 / 45 /*degrees*/); i_sample++) {
+	std::vector<ORUtils::SE3Pose> camera_poses = GenerateCameraTrajectoryAroundPoint(original_viewpoint, target, degree_increment);
+
+	ORUtils::OStreamWrapper visible_blocks_file(GENERATED_TEST_DATA_PREFIX "TestData/data_blocks/visible_blocks.dat");
+
+	for (auto& pose : camera_poses) {
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume;
 		LoadVolume(&volume, snoopy::PartialVolume17Path<VoxelBlockHash>(), TMemoryDeviceType,
 		           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
-		float half_angle = angle_radians / 2.0f; // for code clarity, math not baked in
-		float cos_theta = cos(half_angle);
-		float sin_theta = sin(half_angle);
-		Quaternion<float> half_rotation_a(cos_theta, rotation_axis.x * sin_theta, rotation_axis.y * sin_theta,
-		                                  rotation_axis.z * sin_theta);
-		Quaternion<float> half_rotation_b(cos_theta, -rotation_axis.x * sin_theta, -rotation_axis.y * sin_theta,
-		                                  -rotation_axis.z * sin_theta);
-		Quaternion<float> rotation_result = (half_rotation_a *= target_to_viewpoint_quaternion) *= half_rotation_b;
-		Vector3f rotated_target_to_viewpoint(rotation_result.b(), rotation_result.c(), rotation_result.d());
-		Vector3f viewpoint = target + rotated_target_to_viewpoint;
-		angle_radians += (PI / 4.0f);
-		Vector3f viewpoint_to_target_normalized = ORUtils::normalize(-rotated_target_to_viewpoint);
-		float angle_x = atan2(viewpoint_to_target_normalized.z, viewpoint_to_target_normalized.y);
-//		float angle_x = 0 * PI;
-		float angle_y = atan2(viewpoint_to_target_normalized.z, viewpoint_to_target_normalized.x);
-//		float angle_z = atan2(viewpoint_to_target_normalized.y, viewpoint_to_target_normalized.x);
-		float angle_z = 0 * PI;
-		std::cout << "rx: " << angle_x * 180 / PI << " ry: " << angle_y * 180 / PI<< " rz: " << angle_z * 180 / PI<< std::endl;
-		ORUtils::SE3Pose pose(viewpoint.x, viewpoint.y, viewpoint.z, angle_x, angle_y, angle_z);
-		//ORUtils::SE3Pose pose(viewpoint.x, viewpoint.y, viewpoint.z, 0, 0, 0);
 		visualization_engine->FindVisibleBlocks(volume, &pose, &calibration_data.intrinsics_d, render_state);
-		int* visible_codes_device = volume->index.GetVisibleBlockHashCodes();
 		const int visible_block_count = volume->index.GetVisibleBlockCount();
-		ORUtils::OStreamWrapper file(GENERATED_TEST_DATA_PREFIX "TestData/data_blocks/visible_blocks.dat");
-		SaveRawDataToFile<int>(file, visible_codes_device, visible_block_count, TMemoryDeviceType);
-		std::cout << visible_block_count << std::endl;
+		if(visible_block_count == 0) continue; // skip shots without results
+
+		int* visible_codes_device = volume->index.GetVisibleBlockHashCodes();
+		SaveRawDataToFile<int>(visible_blocks_file, visible_codes_device, visible_block_count, TMemoryDeviceType);
+
 		delete volume;
 	}
 
