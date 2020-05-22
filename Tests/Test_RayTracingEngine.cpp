@@ -28,6 +28,7 @@
 
 //ITMLib
 #include "../ITMLib/Engines/Visualization/VisualizationEngineFactory.h"
+#include "../ITMLib/Utils/Analytics/RawMemoryArrayComparison.h"
 
 using namespace ITMLib;
 using namespace test_utilities;
@@ -36,7 +37,7 @@ namespace snoopy = snoopy_test_utilities;
 
 template<MemoryDeviceType TMemoryDeviceType>
 void GenericFindVisibleBlocksTest() {
-	VisualizationEngine<TSDFVoxel, VoxelBlockHash>* visualization_engine = VisualizationEngineFactory::MakeVisualizationEngine<TSDFVoxel, VoxelBlockHash>(
+	VisualizationEngine <TSDFVoxel, VoxelBlockHash>* visualization_engine = VisualizationEngineFactory::MakeVisualizationEngine<TSDFVoxel, VoxelBlockHash>(
 			TMemoryDeviceType);
 
 	RGBDCalib calibration_data;
@@ -51,18 +52,27 @@ void GenericFindVisibleBlocksTest() {
 	const int degree_increment = 30;
 	std::vector<ORUtils::SE3Pose> camera_poses =
 			GenerateCameraTrajectoryAroundPoint(original_viewpoint, target, degree_increment);
+
+	ORUtils::IStreamWrapper visible_blocks_file("TestData/arrays/visible_blocks.dat", true, true);
+	if(!visible_blocks_file) {
+		DIEWITHEXCEPTION_REPORTLOCATION("File could not be opened");
+	}
+
 	for (auto& pose : camera_poses) {
-		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume;
+		VoxelVolume <TSDFVoxel, VoxelBlockHash>* volume;
 		LoadVolume(&volume, snoopy::PartialVolume17Path<VoxelBlockHash>(), TMemoryDeviceType,
 		           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
 		visualization_engine->FindVisibleBlocks(volume, &pose, &calibration_data.intrinsics_d, render_state);
 		const int visible_block_count = volume->index.GetVisibleBlockCount();
-		if(visible_block_count == 0) continue; // skip shots without results
+		if (visible_block_count == 0) continue; // skip shots without results
 
 		int* visible_codes_device = volume->index.GetVisibleBlockHashCodes();
-
-
+		ORUtils::MemoryBlock<int> visible_codes_ground_truth(visible_block_count, MEMORYDEVICE_CPU);
+		ORUtils::MemoryBlockPersister::LoadMemoryBlock(visible_blocks_file, visible_codes_ground_truth,
+		                                               MEMORYDEVICE_CPU);
+		BOOST_REQUIRE(RawMemoryArraysEqual(visible_codes_ground_truth.GetData(MEMORYDEVICE_CPU), MEMORYDEVICE_CPU,
+				visible_codes_device, TMemoryDeviceType, visible_block_count));
 
 		delete volume;
 	}

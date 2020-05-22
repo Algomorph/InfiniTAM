@@ -193,8 +193,9 @@ void SaveRawDataToFile(ORUtils::OStreamWrapper& file, const TElement* data, size
 		ORcudaSafeCall(cudaMemcpy(data_cpu, data, element_count * sizeof(TElement), cudaMemcpyDeviceToHost));
 		// Then write the CPU copy to disk.
 		data_to_write = data_cpu;
+		copy_used = true;
 #else
-		DIEWITHEXCEPTION_REPORTLOCATION("Compipled without CUDA, but tried to write CUDA data to disk "\
+		DIEWITHEXCEPTION_REPORTLOCATION("Compiled without CUDA, but tried to write CUDA data to disk "\
 								  "(memory_device_type was set to MEMORYDEVICE_CUDA)");
 #endif
 	}

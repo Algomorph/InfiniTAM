@@ -488,7 +488,7 @@ void GenerateRaytracingTestData_VoxelBlockHash() {
 
 	std::vector<ORUtils::SE3Pose> camera_poses = GenerateCameraTrajectoryAroundPoint(original_viewpoint, target, degree_increment);
 
-	ORUtils::OStreamWrapper visible_blocks_file(GENERATED_TEST_DATA_PREFIX "TestData/arrays/visible_blocks.dat");
+	ORUtils::OStreamWrapper visible_blocks_file(GENERATED_TEST_DATA_PREFIX "TestData/arrays/visible_blocks.dat", true, true);
 
 	for (auto& pose : camera_poses) {
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume;
