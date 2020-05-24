@@ -5,20 +5,21 @@
 //stdlib
 #include <fstream>
 #include <string>
+#include <sstream>
 
 #ifdef WITH_BOOST
-
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/filter/zlib.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
-#include <sstream>
-
 #else
 #error compiling without BOOST FLAG
 #endif
 
 #include "MemoryBlock.h"
 #include "Image.h"
+#include "IStreamWrapper.h"
+#include "IStreamWrapper2.h"
+#include "OStreamWrapper2.h"
 
 #ifdef WITH_BOOST
 namespace b_ios = boost::iostreams;
@@ -26,64 +27,14 @@ namespace b_ios = boost::iostreams;
 
 namespace ORUtils {
 
-class IStreamWrapper {
-public:
-	IStreamWrapper() : compression_enabled(false) {}
-
-	IStreamWrapper(const std::string& path, bool use_compression = false, bool use_gzip = false)
-			: file(path.c_str(), std::ios::binary), compression_enabled(use_compression) {
-		if (file) {
-#ifdef WITH_BOOST
-			if (use_compression) {
-				if (use_gzip) {
-					filter.push(b_ios::gzip_decompressor());
-				} else {
-					filter.push(b_ios::zlib_decompressor());
-				}
-				filter.push(file);
-				final_stream = &filter;
-			} else {
-				final_stream = &file;
-			}
-#else
-			if(use_compression){
-				std::cerr << "Warning! Attempting to use compression w/o boost iostreams library linked to the project."
-				 " Defaulting to saving without compression." << std::endl;
-			}
-			final_stream = &file;
-#endif
-		} else {
-			std::stringstream ss;
-			ss << "Could not open file \"" << path << "\" for reading.\n[" __FILE__ ":" TOSTRING(__LINE__) "]";
-			throw std::runtime_error(ss.str());
-		}
-	}
-
-	bool operator!() {
-		return !file;
-	}
-
-	std::istream& IStream() {
-		return *final_stream;
-	}
-
-	const bool compression_enabled;
-private:
-	std::ifstream file;
-#ifdef WITH_BOOST
-	b_ios::filtering_istream filter;
-#endif
-	std::istream* final_stream = nullptr;
-};
-
 class OStreamWrapper {
 public:
 	OStreamWrapper() : compression_enabled(false) {};
 
 	OStreamWrapper(const std::string& path, bool use_compression = false, bool use_gzip = false)
-			: file(path.c_str(), std::ios::binary), compression_enabled(use_compression) {
+			: file(path.c_str(), std::ios::binary | std::ios::out), compression_enabled(use_compression) {
 
-		if (file) {
+		if (file.is_open()) {
 #ifdef WITH_BOOST
 			if (use_compression) {
 				if (use_gzip) {
@@ -111,7 +62,7 @@ public:
 	}
 
 	bool operator!() {
-		return !file;
+		return !file.is_open();
 	}
 
 	std::ostream& OStream() {
@@ -130,7 +81,7 @@ private:
 /**
  * \brief This class provides functions for loading and saving memory blocks.
  */
-class MemoryBlockPersister {
+class MemoryBlockPersistence {
 	//#################### PUBLIC STATIC MEMBER FUNCTIONS ####################
 public:
 	/**
@@ -223,8 +174,8 @@ public:
 		SaveMemoryBlock(file, block, memory_type);
 	}
 
-	template<typename TElement, typename TBlockType>
-	static void SaveMemoryBlock_Generic(OStreamWrapper& file, const TBlockType& block,
+	template<typename TElement, typename TBlockType, typename TOstreamWrapper>
+	static void SaveMemoryBlock_Generic(TOstreamWrapper& file, const TBlockType& block,
 	                                    MemoryDeviceType memory_type) {
 		if (memory_type == MEMORYDEVICE_CUDA) {
 			// If we are saving the memory block from the CUDA, first make a CPU copy of it.
@@ -246,13 +197,11 @@ public:
 	 * \param block             The memory block to save.
 	 * \param memory_type       The type of memory device from which to save the data.
 	 */
-	template<typename T>
-	static void SaveMemoryBlock(OStreamWrapper& file, const ORUtils::MemoryBlock<T>& block,
+	template<typename T, typename TOStreamWrapper>
+	static void SaveMemoryBlock(TOStreamWrapper& file, const ORUtils::MemoryBlock<T>& block,
 	                            MemoryDeviceType memory_type) {
-		SaveMemoryBlock_Generic<T, ORUtils::MemoryBlock<T>>(file, block, memory_type);
+		SaveMemoryBlock_Generic<T, ORUtils::MemoryBlock<T>, TOStreamWrapper>(file, block, memory_type);
 	}
-
-
 
 	/**
 	 * \brief Saves a memory block to a file on disk.
@@ -338,8 +287,8 @@ private:
 	 * \throws std::runtime_error If the read is unsuccesssful.
 	 */
 	static size_t ReadBlockSize(std::istream& is) {
-		size_t blockSize;
-		if (is.read(reinterpret_cast<char*>(&blockSize), sizeof(size_t))) return blockSize;
+		size_t block_size;
+		if (is.read(reinterpret_cast<char*>(&block_size), sizeof(size_t))) return block_size;
 		else throw std::runtime_error("Could not read memory block size");
 	}
 
