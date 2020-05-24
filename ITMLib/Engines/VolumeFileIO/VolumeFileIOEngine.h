@@ -18,7 +18,7 @@
 #include "../../Objects/Volume/VoxelBlockHash.h"
 #include "../../Objects/Volume/PlainVoxelArray.h"
 #include "../../Objects/Volume/VoxelVolume.h"
-#include "../../../ORUtils/MemoryBlockPersister.h"
+#include "../../../ORUtils/MemoryBlockPersistence.h"
 
 namespace ITMLib{
 

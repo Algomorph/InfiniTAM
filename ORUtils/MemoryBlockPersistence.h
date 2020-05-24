@@ -3,80 +3,16 @@
 #pragma once
 
 //stdlib
-#include <fstream>
 #include <string>
-#include <sstream>
+#include <fstream>
 
-#ifdef WITH_BOOST
-#include <boost/iostreams/filtering_stream.hpp>
-#include <boost/iostreams/filter/zlib.hpp>
-#include <boost/iostreams/filter/gzip.hpp>
-#else
-#error compiling without BOOST FLAG
-#endif
-
+//local
 #include "MemoryBlock.h"
 #include "Image.h"
+#include "OStreamWrapper.h"
 #include "IStreamWrapper.h"
-#include "IStreamWrapper2.h"
-#include "OStreamWrapper2.h"
-
-#ifdef WITH_BOOST
-namespace b_ios = boost::iostreams;
-#endif
 
 namespace ORUtils {
-
-class OStreamWrapper {
-public:
-	OStreamWrapper() : compression_enabled(false) {};
-
-	OStreamWrapper(const std::string& path, bool use_compression = false, bool use_gzip = false)
-			: file(path.c_str(), std::ios::binary | std::ios::out), compression_enabled(use_compression) {
-
-		if (file.is_open()) {
-#ifdef WITH_BOOST
-			if (use_compression) {
-				if (use_gzip) {
-					filter.push(b_ios::gzip_compressor());
-				} else {
-					filter.push(b_ios::zlib_compressor());
-				}
-				filter.push(file);
-				final_stream = &filter;
-			} else {
-				final_stream = &file;
-			}
-#else
-			if(use_compression){
-				std::cerr << "Warning! Attempting to use compression w/o boost iostreams library linked to the project."
-				 " Defaulting to saving without compression." << std::endl;
-			}
-			final_stream = &file;
-#endif
-		} else {
-			std::stringstream ss;
-			ss << "Could not open file \"" << path << "\" for writing.\n[" __FILE__ ":" TOSTRING(__LINE__) "]";
-			throw std::runtime_error(ss.str());
-		}
-	}
-
-	bool operator!() {
-		return !file.is_open();
-	}
-
-	std::ostream& OStream() {
-		return *final_stream;
-	}
-
-	const bool compression_enabled;
-private:
-	std::ofstream file;
-#ifdef WITH_BOOST
-	b_ios::filtering_ostream filter;
-#endif
-	std::ostream* final_stream = nullptr;
-};
 
 /**
  * \brief This class provides functions for loading and saving memory blocks.
@@ -109,9 +45,9 @@ public:
 	 * \param block             The memory block into which to load the data.
 	 * \param memory_type       The type of memory device on which to load the data.
 	 */
-	template<typename T>
+	template<typename T, typename TIStreamWrapper>
 	static void
-	LoadMemoryBlock(IStreamWrapper& file, ORUtils::MemoryBlock<T>& block, MemoryDeviceType memory_type) {
+	LoadMemoryBlock(TIStreamWrapper& file, ORUtils::MemoryBlock<T>& block, MemoryDeviceType memory_type) {
 		size_t block_size = ReadBlockSize(file.IStream());
 		if (memory_type == MEMORYDEVICE_CUDA) {
 			// If we're loading into a block on the CUDA, first try and read the data into a temporary block on the CPU.

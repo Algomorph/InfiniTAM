@@ -13,15 +13,32 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#ifndef INFINITAM_OSTREAMWRAPPER_H
-#define INFINITAM_OSTREAMWRAPPER_H
+#pragma once
 
+#include <memory>
+#include <ostream>
 
+#include "PlatformIndependence.h"
 
+namespace ORUtils {
 class OStreamWrapper {
+public:
+	OStreamWrapper() : compression_enabled(false), file(nullptr) {};
+
+	explicit OStreamWrapper(const std::string& path, bool use_compression = false);
+
+	bool operator!() {
+		return file == nullptr || !file->good();
+	}
+
+	std::ostream& OStream() {
+		return *file;
+	}
+
+	const bool compression_enabled;
+private:
+	std::unique_ptr<std::ostream> file;
+	std::unique_ptr<std::ostream> buffer_file;
 
 };
-
-
-
-#endif //INFINITAM_OSTREAMWRAPPER_H
+} // namespace ORUtils

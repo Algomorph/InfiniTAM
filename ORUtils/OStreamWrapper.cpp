@@ -13,4 +13,28 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
+//stdlib
+#include <memory>
+#include <fstream>
+
+#include <zstr/zstr.hpp>
+
+//local
 #include "OStreamWrapper.h"
+
+using namespace ORUtils;
+
+OStreamWrapper::OStreamWrapper(const std::string& path, bool use_compression)
+		: file(nullptr),
+		  compression_enabled(use_compression) {
+	if (use_compression) {
+		file = std::make_unique<zstr::ofstream>(path, std::ios::binary | std::ios::out);
+	} else {
+		file = std::make_unique<std::ofstream>(path, std::ios::binary | std::ios::out);
+	}
+	if (!file->good()) {
+		std::stringstream ss;
+		ss << "Could not open file \"" << path << "\" for writing.\n[" __FILE__ ":" TOSTRING(__LINE__) "]";
+		throw std::runtime_error(ss.str());
+	}
+}

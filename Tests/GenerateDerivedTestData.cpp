@@ -16,6 +16,8 @@
 //stdlib
 #include <filesystem>
 
+//ORUtils
+#include "../ORUtils/OStreamWrapper.h"
 
 //ITMLib
 #include "../ITMLib/SurfaceTrackers/Interface/SurfaceTracker.h"
@@ -29,13 +31,11 @@
 #include "../ITMLib/Utils/Metacoding/SerializableEnum.h"
 #include "../ITMLib/Objects/Camera/CalibIO.h"
 #include "../ITMLib/Utils/Quaternions/Quaternion.h"
-
 //(CPU)
 #include "../ITMLib/Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 #include "../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_VoxelBlockHash_CPU.h"
 //(CUDA)
 #ifndef COMPILE_WITHOUT_CUDA
-
 #include "../ITMLib/Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
 #include "../ITMLib/Engines/Indexing/VBH/CUDA/IndexingEngine_VoxelBlockHash_CUDA.h"
 
@@ -488,7 +488,11 @@ void GenerateRaytracingTestData_VoxelBlockHash() {
 
 	std::vector<ORUtils::SE3Pose> camera_poses = GenerateCameraTrajectoryAroundPoint(original_viewpoint, target, degree_increment);
 
-	ORUtils::OStreamWrapper visible_blocks_file(GENERATED_TEST_DATA_PREFIX "TestData/arrays/visible_blocks.dat", true, true);
+	ORUtils::OStreamWrapper visible_blocks_file(GENERATED_TEST_DATA_PREFIX "TestData/arrays/visible_blocks.dat", true);
+
+	std::vector<int> pose_range_visible_block_counts1;
+	std::vector<int> pose_range_visible_block_counts2;
+	std::vector<int> pose_range_visible_block_counts3;
 
 	for (auto& pose : camera_poses) {
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume;
@@ -496,14 +500,25 @@ void GenerateRaytracingTestData_VoxelBlockHash() {
 		           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
 		visualization_engine->FindVisibleBlocks(volume, &pose, &calibration_data.intrinsics_d, render_state);
-		const int visible_block_count = volume->index.GetVisibleBlockCount();
-		if(visible_block_count == 0) continue; // skip shots without results
+		int range_visible_block_count1 = visualization_engine->CountVisibleBlocks(volume, render_state, 0, 56147);
+		int range_visible_block_count2 = visualization_engine->CountVisibleBlocks(volume, render_state, 112823, 455307);
+		int range_visible_block_count3 = visualization_engine->CountVisibleBlocks(volume, render_state, 365764, 1179647);
+		pose_range_visible_block_counts1.push_back(range_visible_block_count1);
+		pose_range_visible_block_counts2.push_back(range_visible_block_count2);
+		pose_range_visible_block_counts3.push_back(range_visible_block_count3);
 
+		const int visible_block_count = volume->index.GetVisibleBlockCount();
+
+		if(visible_block_count == 0) continue; // skip rest for shots without results
 		int* visible_codes_device = volume->index.GetVisibleBlockHashCodes();
 		SaveRawDataToFile<int>(visible_blocks_file, visible_codes_device, visible_block_count, TMemoryDeviceType);
 
 		delete volume;
 	}
+	size_t pose_count = camera_poses.size();
+	SaveRawDataToFile<int>(visible_blocks_file, pose_range_visible_block_counts1.data(), pose_count, MEMORYDEVICE_CPU);
+	SaveRawDataToFile<int>(visible_blocks_file, pose_range_visible_block_counts2.data(), pose_count, MEMORYDEVICE_CPU);
+	SaveRawDataToFile<int>(visible_blocks_file, pose_range_visible_block_counts3.data(), pose_count, MEMORYDEVICE_CPU);
 
 	delete render_state;
 	delete visualization_engine;

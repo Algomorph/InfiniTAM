@@ -7,7 +7,7 @@
 #include "../../Utils/Math.h"
 #include "../../Utils/Metacoding/Metacoding.h"
 #include "../../../ORUtils/MemoryBlock.h"
-#include "../../../ORUtils/MemoryBlockPersister.h"
+#include "../../../ORUtils/MemoryBlockPersistence.h"
 
 namespace ITMLib {
 

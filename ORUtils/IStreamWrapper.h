@@ -1,5 +1,5 @@
 //  ================================================================
-//  Created by Gregory Kramida (https://github.com/Algomorph) on 5/22/20.
+//  Created by Gregory Kramida (https://github.com/Algomorph) on 5/23/20.
 //  Copyright (c) 2020 Gregory Kramida
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -14,3 +14,31 @@
 //  limitations under the License.
 //  ================================================================
 #pragma once
+//stdlib
+#include <memory>
+#include <istream>
+//local
+#include "PlatformIndependence.h"
+
+namespace ORUtils {
+class IStreamWrapper {
+public:
+	IStreamWrapper() : compression_enabled(false), file(nullptr) {};
+
+	explicit IStreamWrapper(const std::string& path, bool use_compression = false);
+
+	bool operator!() {
+		return file == nullptr || !file->good();
+	}
+
+	std::istream& IStream() {
+		return *file;
+	}
+
+	const bool compression_enabled;
+private:
+	std::unique_ptr<std::istream> file;
+	std::unique_ptr<std::istream> buffer_file;
+
+};
+} // namespace ORUtils

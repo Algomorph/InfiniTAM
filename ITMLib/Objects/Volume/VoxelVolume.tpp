@@ -127,12 +127,12 @@ const TVoxel* VoxelVolume<TVoxel, TIndex>::GetVoxels() const {
 
 template<class TVoxel, class TIndex>
 void VoxelVolume<TVoxel, TIndex>::SaveVoxels(ORUtils::OStreamWrapper& file) const {
-	ORUtils::MemoryBlockPersister::SaveMemoryBlock(file, voxels, this->index.memory_type);
+	ORUtils::MemoryBlockPersistence::SaveMemoryBlock(file, voxels, this->index.memory_type);
 }
 
 template<class TVoxel, class TIndex>
 void VoxelVolume<TVoxel, TIndex>::LoadVoxels(ORUtils::IStreamWrapper& file) {
-	ORUtils::MemoryBlockPersister::LoadMemoryBlock(file, voxels, this->index.memory_type);
+	ORUtils::MemoryBlockPersistence::LoadMemoryBlock(file, voxels, this->index.memory_type);
 }
 
 template<class TVoxel, class TIndex>

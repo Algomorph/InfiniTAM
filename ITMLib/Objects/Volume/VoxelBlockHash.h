@@ -12,7 +12,7 @@
 //ITMLib
 #include "../../Utils/Math.h"
 #include "../../../ORUtils/MemoryBlock.h"
-#include "../../../ORUtils/MemoryBlockPersister.h"
+#include "../../../ORUtils/MemoryBlockPersistence.h"
 #include "../../Utils/HashBlockProperties.h"
 #include "../../Utils/Metacoding/Metacoding.h"
 

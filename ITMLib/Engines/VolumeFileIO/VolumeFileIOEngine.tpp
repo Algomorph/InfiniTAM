@@ -15,15 +15,14 @@
 //  ================================================================
 
 //boost
-#include <boost/iostreams/filtering_stream.hpp>
-#include <boost/iostreams/filter/zlib.hpp>
+#include "../../../ORUtils/OStreamWrapper.h"
+#include "../../../ORUtils/IStreamWrapper.h"
 
 //local
 #include "VolumeFileIOEngine.h"
 #include "../Analytics/AnalyticsEngineFactory.h"
 
 using namespace ITMLib;
-namespace b_ios = boost::iostreams;
 
 
 // region ==================================== VOXEL BLOCK HASH ========================================================
@@ -33,12 +32,8 @@ void VolumeFileIOEngine<TVoxel, VoxelBlockHash>::SaveVolumeCompact(
 		const VoxelVolume<TVoxel, VoxelBlockHash>& volume,
 		const std::string& path) {
 
-	std::ofstream volume_output_stream = std::ofstream(path.c_str(), std::ios_base::binary | std::ios_base::out);
-	if (!volume_output_stream) throw std::runtime_error("Could not open '" + path + "' for writing.");
-
-	b_ios::filtering_ostream out_filter;
-	out_filter.push(b_ios::zlib_compressor());
-	out_filter.push(volume_output_stream);
+	ORUtils::OStreamWrapper file(path, true);
+	std::ostream& out_filter = file.OStream();
 
 	bool temporary_volume_used = false;
 
@@ -89,11 +84,8 @@ template<typename TVoxel>
 void
 VolumeFileIOEngine<TVoxel, VoxelBlockHash>::LoadVolumeCompact(VoxelVolume<TVoxel, VoxelBlockHash>& volume,
                                                               const std::string& path) {
-	std::ifstream if_stream = std::ifstream(path.c_str(), std::ios_base::binary | std::ios_base::in);
-	if (!if_stream) throw std::runtime_error("Could not open '" + path + "' for reading.");
-	b_ios::filtering_istream in_filter;
-	in_filter.push(b_ios::zlib_decompressor());
-	in_filter.push(if_stream);
+	ORUtils::IStreamWrapper file(path, true);
+	std::istream& in_filter = file.IStream();
 
 	VoxelVolume<TVoxel, VoxelBlockHash>* volume_to_load = &volume;
 	bool temporary_volume_used = false;

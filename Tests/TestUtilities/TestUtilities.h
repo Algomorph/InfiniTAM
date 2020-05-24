@@ -181,8 +181,8 @@ void BuildSdfVolumeFromImage_SurfaceSpanAllocation(VoxelVolume<TVoxel, TIndex>**
 configuration::Configuration GenerateChangedUpConfiguration();
 
 
-template<typename TElement>
-void SaveRawDataToFile(ORUtils::OStreamWrapper& file, const TElement* data, size_t element_count,
+template<typename TElement, typename TOStreamWrapper>
+void SaveRawDataToFile(TOStreamWrapper& file, const TElement* data, size_t element_count,
                        MemoryDeviceType memory_device_type) {
 	const TElement* data_to_write = data;
 	bool copy_used = false;

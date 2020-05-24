@@ -425,7 +425,6 @@ std::vector<ORUtils::SE3Pose> GenerateCameraTrajectoryAroundPoint(const Vector3f
 	Quaternion<float> target_to_viewpoint_quaternion(0.f, target_to_viewpoint.x, target_to_viewpoint.y,
 	                                                 target_to_viewpoint.z);
 	float angle_radians = 0.0;
-	ORUtils::OStreamWrapper visible_blocks_file(GENERATED_TEST_DATA_PREFIX "TestData/arrays/visible_blocks.dat");
 
 	const float angle_increment = static_cast<float>(degree_increment) * PI / 180.0f;
 

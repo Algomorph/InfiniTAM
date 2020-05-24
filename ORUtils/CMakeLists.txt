@@ -25,7 +25,10 @@ set(
         sources
 
         FileUtils.cpp
+        IStreamWrapper.cpp
         KeyValueConfig.cpp
+        MemoryBlockPersistence.cpp
+        OStreamWrapper.cpp
         SE3Pose.cpp
 )
 
@@ -37,15 +40,17 @@ set(
         FileUtils.h
         HomkerMap.h
         Image.h
+        IStreamWrapper.h
         KeyValueConfig.h
         LexicalCast.h
         MathUtils.h
         Matrix.h
         MemoryBlock.h
-        MemoryBlockPersister.h
+        MemoryBlockPersistence.h
         MemoryBlockComparison.h
         MemoryDeviceType.h
         NVTimer.h
+        OStreamWrapper.h
         PlatformIndependence.h
         PlatformIndependentAtomics.h
         SE3Pose.h
@@ -71,3 +76,4 @@ include(${PROJECT_SOURCE_DIR}/cmake/SetCUDALibTarget.cmake)
 
 include(${PROJECT_SOURCE_DIR}/cmake/LinkPNG.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/LinkBoost.cmake)
+target_link_libraries(${targetname} zstr)

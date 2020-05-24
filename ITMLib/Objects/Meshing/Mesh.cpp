@@ -26,7 +26,7 @@
 #include "Mesh.h"
 #include "../../Utils/Analytics/AlmostEqual.h"
 #include "../../Utils/MemoryBlock_StdContainer_Convertions.h"
-#include "../../../ORUtils/MemoryBlockPersister.h"
+#include "../../../ORUtils/MemoryBlockPersistence.h"
 #include "../../Utils/Collections/OperationsOnSTLContainers.h"
 
 using namespace ITMLib;
@@ -118,7 +118,7 @@ void Mesh::WritePLY(const std::string& path, bool ascii, bool use_compression) {
 	using namespace tinyply;
 	this->GenericWriteToDisk(
 			[&path, ascii, use_compression, this](Triangle* triangle_array) {
-				ORUtils::OStreamWrapper file(path, use_compression, true);
+				ORUtils::OStreamWrapper file(path, use_compression);
 				if (!file) return;
 				const unsigned int vertex_count = triangle_count * 3;
 				PlyFile mesh_file;

@@ -4,8 +4,6 @@
 
 option(BUILD_TESTS "Build automated tests with the project (Boost-test required)." OFF)
 
-
-
 macro(load_use_includes)
     include(${PROJECT_SOURCE_DIR}/cmake/UseCUDA.cmake)
     include(${PROJECT_SOURCE_DIR}/cmake/UseFFmpeg.cmake)

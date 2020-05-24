@@ -6,14 +6,21 @@ include(ExternalProject)
 
 function(handle_external_package)
     set(options PACKAGED)
-    set(oneValueArgs NAME SOURCE GIT_REPOSITORY GIT_TAG INCLUDE_TARGET LIBRARY_TARGET_POSIX LIBRARY_TARGET_MSVC)
+    set(oneValueArgs NAME SOURCE GIT_REPOSITORY GIT_TAG INCLUDE_TARGET LIBRARY_TARGET_POSIX LIBRARY_TARGET_MSVC ALTERNATIVE_LOCAL_NAME)
     set(multiValueArgs CMAKE_ARGS)
     cmake_parse_arguments(HEP "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     string(TOUPPER ${HEP_NAME} HEP_UC_NAME)
 
     if (${HEP_SOURCE} STREQUAL "FIND_LOCAL")
-        find_package(${HEP_NAME} REQUIRED)
+        if(HEP_ALTERNATIVE_LOCAL_NAME)
+            find_package(${HEP_ALTERNATIVE_LOCAL_NAME} REQUIRED)
+            add_library(${HEP_NAME} INTERFACE IMPORTED)
+            set(${HEP_NAME}_FOUND TRUE PARENT_SCOPE)
+            target_link_libraries(${HEP_NAME} INTERFACE ${HEP_ALTERNATIVE_LOCAL_NAME}::${HEP_ALTERNATIVE_LOCAL_NAME})
+        else()
+            find_package(${HEP_NAME} REQUIRED)
+        endif()
     else ()
         set(${HEP_UC_NAME}_PREFIX ${CMAKE_CURRENT_BINARY_DIR}/${HEP_NAME})
         if (${HEP_SOURCE} STREQUAL "BUILD_EXTERNAL")
@@ -36,7 +43,7 @@ function(handle_external_package)
                                 PREFIX ${${HEP_UC_NAME}_PREFIX}
                                 SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/packaged/${HEP_NAME}
                                 INSTALL_DIR ${${HEP_UC_NAME}_PREFIX}
-                                CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${LOG4CPLUS_PREFIX}
+                                CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${${HEP_UC_NAME}_PREFIX}
                                 ${HEP_CMAKE_ARGS}
                                 -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
                                 -DCMAKE_C_FLAGS_RELEASE=${CMAKE_C_FLAGS_RELEASE}
@@ -87,6 +94,7 @@ handle_external_package(NAME zlib
                         INCLUDE_TARGET include
                         LIBRARY_TARGET_MSVC lib/libz.lib
                         LIBRARY_TARGET_POSIX lib/libz.a
+                        ALTERNATIVE_LOCAL_NAME ZLIB
                         )
 
 add_library(tinyply ${CMAKE_CURRENT_SOURCE_DIR}/packaged/tinyply/tinyply.h ${CMAKE_CURRENT_SOURCE_DIR}/packaged/tinyply/tinyply.cpp)
@@ -95,4 +103,4 @@ target_include_directories(tinyply INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/package
 add_library(zstr ${CMAKE_CURRENT_SOURCE_DIR}/packaged/zstr/zstr.hpp ${CMAKE_CURRENT_SOURCE_DIR}/packaged/zstr/strict_fstream.hpp
             ${CMAKE_CURRENT_SOURCE_DIR}/packaged/zstr/zstr.cpp)
 target_link_libraries(zstr zlib)
-target_include_directories(tinyply INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/packaged)
+target_include_directories(zstr INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/packaged)

@@ -19,7 +19,7 @@
 #include "../../../Objects/Volume/VoxelBlockHash.h"
 #include "../../../../ORUtils/PlatformIndependentAtomics.h"
 #include "../../../Utils/Geometry/Segment.h"
-#include "../../../../ORUtils/MemoryBlockPersister.h"
+#include "../../../../ORUtils/MemoryBlockPersistence.h"
 
 namespace ITMLib {
 
@@ -95,14 +95,14 @@ public: // member functions
 	IndexingDiagnosticData() : IndexingDiagnosticData(Vector2i(0, 0)) {};
 
 	void SaveToDisk(std::string output_folder_path) {
-		ORUtils::OStreamWrapper file(output_folder_path + "/voxel_block_hash_diagnostic_data.dat", true, true);
+		ORUtils::OStreamWrapper file(output_folder_path + "/voxel_block_hash_diagnostic_data.dat", true);
 		Vector2i& image_dimensions = *this->depth_image_dimensions.GetData(MEMORYDEVICE_CPU);
 		const int num_bool_layers = 2;
 		file.OStream().write(reinterpret_cast<const char*>(&num_bool_layers), sizeof(int));
 		file.OStream().write(reinterpret_cast<const char*>(&image_dimensions.height), sizeof(int));
 		file.OStream().write(reinterpret_cast<const char*>(&image_dimensions.width), sizeof(int));
-		ORUtils::MemoryBlockPersister::SaveImageData(file, surface1_point_mask);
-		ORUtils::MemoryBlockPersister::SaveImageData(file, surface2_point_mask);
+		ORUtils::MemoryBlockPersistence::SaveImageData(file, surface1_point_mask);
+		ORUtils::MemoryBlockPersistence::SaveImageData(file, surface2_point_mask);
 
 		const int num_float_layers = 4;
 		file.OStream().write(reinterpret_cast<const char*>(&num_float_layers), sizeof(int));
@@ -130,10 +130,10 @@ public: // member functions
 //		       datum1[0], datum1[1], datum1[2],
 //		       datum2[0], datum2[1], datum2[2]);
 
-		ORUtils::MemoryBlockPersister::SaveImageData(file, surface1_point_cloud);
-		ORUtils::MemoryBlockPersister::SaveImageData(file, surface2_point_cloud);
-		ORUtils::MemoryBlockPersister::SaveImageData(file, march_endpoint1_point_cloud);
-		ORUtils::MemoryBlockPersister::SaveImageData(file, march_endpoint2_point_cloud);
+		ORUtils::MemoryBlockPersistence::SaveImageData(file, surface1_point_cloud);
+		ORUtils::MemoryBlockPersistence::SaveImageData(file, surface2_point_cloud);
+		ORUtils::MemoryBlockPersistence::SaveImageData(file, march_endpoint1_point_cloud);
+		ORUtils::MemoryBlockPersistence::SaveImageData(file, march_endpoint2_point_cloud);
 	}
 
 	bool PrepareForFrame(const Vector2i& depth_image_dimensions) {
