@@ -45,7 +45,7 @@ BasicVoxelEngine<TVoxel,TIndex>::BasicVoxelEngine(const RGBDCalib& calib, Vector
 
 	Vector2i trackedImageSize = trackingController->GetTrackedImageSize(imgSize_rgb, imgSize_d);
 
-	renderState_live =  new RenderState(imgSize_d, volume->GetParameters().near_clipping_distance, volume->GetParameters().far_clipping_distance, memoryType);
+	render_state =  new RenderState(imgSize_d, volume->GetParameters().near_clipping_distance, volume->GetParameters().far_clipping_distance, memoryType);
 	renderState_freeview = nullptr; //will be created if needed
 
 	trackingState = new CameraTrackingState(trackedImageSize, memoryType);
@@ -70,7 +70,7 @@ BasicVoxelEngine<TVoxel,TIndex>::BasicVoxelEngine(const RGBDCalib& calib, Vector
 template <typename TVoxel, typename TIndex>
 BasicVoxelEngine<TVoxel,TIndex>::~BasicVoxelEngine()
 {
-	delete renderState_live;
+	delete render_state;
 	if (renderState_freeview != NULL) delete renderState_freeview;
 
 	delete volume;
@@ -292,8 +292,8 @@ CameraTrackingState::TrackingResult BasicVoxelEngine<TVoxel,TIndex>::ProcessFram
 			const FernRelocLib::PoseDatabase::PoseInScene & keyframe = relocaliser->RetrievePose(NN);
 			trackingState->pose_d->SetFrom(&keyframe.pose);
 
-			denseMapper->UpdateVisibleList(view, trackingState, volume, renderState_live, true);
-			trackingController->Prepare(trackingState, volume, view, visualizationEngine, renderState_live);
+			denseMapper->UpdateVisibleList(view, trackingState, volume, render_state, true);
+			trackingController->Prepare(trackingState, volume, view, visualizationEngine, render_state);
 			trackingController->Track(trackingState, view);
 
 			trackerResult = trackingState->trackerResult;
@@ -303,7 +303,7 @@ CameraTrackingState::TrackingResult BasicVoxelEngine<TVoxel,TIndex>::ProcessFram
 	bool didFusion = false;
 	if ((trackerResult == CameraTrackingState::TRACKING_GOOD || !trackingInitialised) && (fusionActive) && (relocalisationCount == 0)) {
 		// fusion
-		denseMapper->ProcessFrame(view, trackingState, volume, renderState_live);
+		denseMapper->ProcessFrame(view, trackingState, volume, render_state);
 		didFusion = true;
 		if (framesProcessed > 50) trackingInitialised = true;
 
@@ -312,17 +312,17 @@ CameraTrackingState::TrackingResult BasicVoxelEngine<TVoxel,TIndex>::ProcessFram
 
 	if (trackerResult == CameraTrackingState::TRACKING_GOOD || trackerResult == CameraTrackingState::TRACKING_POOR)
 	{
-		if (!didFusion) denseMapper->UpdateVisibleList(view, trackingState, volume, renderState_live);
+		if (!didFusion) denseMapper->UpdateVisibleList(view, trackingState, volume, render_state);
 
 		// raycast to renderState_canonical for tracking and free Visualization
-		trackingController->Prepare(trackingState, volume, view, visualizationEngine, renderState_live);
+		trackingController->Prepare(trackingState, volume, view, visualizationEngine, render_state);
 
 		if (addKeyframeIdx >= 0)
 		{
 			MemoryCopyDirection memoryCopyDirection =
 					settings.device_type == MEMORYDEVICE_CUDA ? MemoryCopyDirection::CUDA_TO_CUDA : MemoryCopyDirection::CPU_TO_CPU;
 
-			kfRaycast->SetFrom(*renderState_live->raycastImage, memoryCopyDirection);
+			kfRaycast->SetFrom(*render_state->raycastImage, memoryCopyDirection);
 		}
 	}
 	else *trackingState->pose_d = oldPose;
@@ -345,7 +345,7 @@ CameraTrackingState::TrackingResult BasicVoxelEngine<TVoxel,TIndex>::ProcessFram
 template <typename TVoxel, typename TIndex>
 Vector2i BasicVoxelEngine<TVoxel,TIndex>::GetImageSize() const
 {
-	return renderState_live->raycastImage->dimensions;
+	return render_state->raycastImage->dimensions;
 }
 
 template <typename TVoxel, typename TIndex>
@@ -397,11 +397,11 @@ void BasicVoxelEngine<TVoxel,TIndex>::GetImage(UChar4Image *out, GetImageType ge
 			imageType = IVisualizationEngine::RENDER_SHADED_GREYSCALE_IMAGENORMALS;
 		}
 
-		visualizationEngine->RenderImage(volume, trackingState->pose_d, &view->calib.intrinsics_d, renderState_live, renderState_live->raycastImage, imageType, raycastType);
+		visualizationEngine->RenderImage(volume, trackingState->pose_d, &view->calib.intrinsics_d, render_state, render_state->raycastImage, imageType, raycastType);
 
 		ORUtils::Image<Vector4u> *srcImage = nullptr;
 		if (relocalisationCount != 0) srcImage = kfRaycast;
-		else srcImage = renderState_live->raycastImage;
+		else srcImage = render_state->raycastImage;
 
 		out->ChangeDims(srcImage->dimensions);
 		if (settings.device_type == MEMORYDEVICE_CUDA)

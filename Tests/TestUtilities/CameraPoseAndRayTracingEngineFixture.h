@@ -21,7 +21,7 @@
 
 using namespace ITMLib;
 
-namespace test_utilities{
+namespace test_utilities {
 template<MemoryDeviceType TMemoryDeviceType>
 struct CameraPoseAndRayTracingEngineFixture {
 public: // member variables
@@ -30,9 +30,8 @@ public: // member variables
 	const Vector3f target;
 	const Vector3f original_viewpoint;
 	const int degree_increment;
-	std::vector<ORUtils::SE3Pose> camera_poses;
+	std::vector<std::shared_ptr<CameraTrackingState>> tracking_states;
 	VisualizationEngine<TSDFVoxel, VoxelBlockHash>* visualization_engine;
-	CameraTrackingState* camera_tracking_state;
 	View* view_17;
 
 public: // member functions
@@ -44,12 +43,19 @@ public: // member functions
 			  target(-0.09150545, 0.07265271, 0.7908916),
 			  original_viewpoint(0.f),
 			  degree_increment(30),
-			  camera_poses(GenerateCameraTrajectoryAroundPoint(original_viewpoint, target,
-			                                                   degree_increment)),
+			  tracking_states([&]() {
+				  std::vector<ORUtils::SE3Pose> camera_poses = GenerateCameraTrajectoryAroundPoint(original_viewpoint, target, degree_increment);
+				  std::vector<std::shared_ptr<CameraTrackingState>> camera_tracking_states(camera_poses.size());
+				  int i_pose = 0;
+				  for(auto& pose: camera_poses){
+					  camera_tracking_states[i_pose] = std::make_shared<CameraTrackingState>(snoopy_test_utilities::frame_image_size, TMemoryDeviceType);
+					  i_pose++;
+				  }
+				  return camera_tracking_states;
+			  }()),
 			  visualization_engine(VisualizationEngineFactory::MakeVisualizationEngine<TSDFVoxel, VoxelBlockHash>(
 					  TMemoryDeviceType)),
-					  camera_tracking_state(new CameraTrackingState(snoopy_test_utilities::frame_image_size, TMemoryDeviceType)),
-					  view_17(nullptr){
+			  view_17(nullptr) {
 		readRGBDCalib(snoopy_test_utilities::SnoopyCalibrationPath().c_str(), calibration_data);
 		UpdateView(&view_17,
 		           snoopy_test_utilities::Frame17DepthPath(),
@@ -58,15 +64,20 @@ public: // member functions
 		           snoopy_test_utilities::SnoopyCalibrationPath(),
 		           MEMORYDEVICE_CPU);
 	}
-	std::shared_ptr<RenderState> MakeRenderState(){
+
+	std::shared_ptr<RenderState> MakeRenderState() {
 		return std::make_shared<RenderState>(snoopy_test_utilities::frame_image_size,
 		                                     configuration::get().general_voxel_volume_parameters.near_clipping_distance,
 		                                     configuration::get().general_voxel_volume_parameters.far_clipping_distance,
 		                                     TMemoryDeviceType);
 	}
-	~CameraPoseAndRayTracingEngineFixture(){
+
+	std::shared_ptr<CameraTrackingState> MakeCameraTrackingState() {
+		return std::make_shared<CameraTrackingState>(snoopy_test_utilities::frame_image_size, TMemoryDeviceType);
+	}
+
+	~CameraPoseAndRayTracingEngineFixture() {
 		delete view_17;
-		delete camera_tracking_state;
 		delete visualization_engine;
 		delete render_state;
 	}

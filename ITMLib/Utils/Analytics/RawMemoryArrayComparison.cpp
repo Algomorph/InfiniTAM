@@ -34,6 +34,9 @@ RawMemoryArraysEqual<int>(const int* l, MemoryDeviceType memory_device_type_l, c
 template bool
 RawMemoryArraysEqual<Vector3u>(const Vector3u* l, MemoryDeviceType memory_device_type_l, const Vector3u* r,
                               MemoryDeviceType memory_device_type_r, const int element_count);
+template bool
+RawMemoryArraysEqual<Vector4u>(const Vector4u* l, MemoryDeviceType memory_device_type_l, const Vector4u* r,
+                               MemoryDeviceType memory_device_type_r, const int element_count);
 
 template bool
 RawMemoryArraysEqual<Vector2s>(const Vector2s* l, MemoryDeviceType memory_device_type_l, const Vector2s* r,

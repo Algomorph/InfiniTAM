@@ -133,6 +133,8 @@ RawMemoryArraysEqual_CUDA<int>(const int* l, const int* r, const int element_cou
 // Vector specializations
 extern template bool
 RawMemoryArraysEqual_CUDA<Vector3u>(const Vector3u* l, const Vector3u* r, const int element_count);
+extern template bool
+RawMemoryArraysEqual_CUDA<Vector4u>(const Vector4u* l, const Vector4u* r, const int element_count);
 
 extern template bool
 RawMemoryArraysEqual_CUDA<Vector2s>(const Vector2s* l, const Vector2s* r, const int element_count);

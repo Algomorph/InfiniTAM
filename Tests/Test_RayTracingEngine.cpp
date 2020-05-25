@@ -51,10 +51,12 @@ void GenericFindAndCountVisibleBlocksTest() {
 
 	CameraPoseAndRayTracingEngineFixture<TMemoryDeviceType> fixture;
 
-	for (auto& pose : fixture.camera_poses) {
+	for (auto& tracking_state : fixture.tracking_states) {
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume;
 		LoadVolume(&volume, snoopy::PartialVolume17Path<VoxelBlockHash>(), TMemoryDeviceType,
 		           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
+
+		ORUtils::SE3Pose& pose = *tracking_state->pose_d;
 
 		fixture.visualization_engine->FindVisibleBlocks(volume, &pose, &fixture.calibration_data.intrinsics_d, fixture.render_state);
 		int range_visible_block_count1 = fixture.visualization_engine->CountVisibleBlocks(volume, fixture.render_state, block_address_range_bounds[0],
@@ -96,10 +98,12 @@ void GenericCreateExpectedDepthsTest() {
 
 	ORUtils::IStreamWrapper range_images_file("TestData/arrays/range_images.dat", true);
 
-	for (auto& pose : fixture.camera_poses) {
+	for (auto& tracking_state : fixture.tracking_states) {
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume;
 		LoadVolume(&volume, snoopy::PartialVolume17Path<VoxelBlockHash>(), TMemoryDeviceType,
 		           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
+
+		ORUtils::SE3Pose& pose = *tracking_state->pose_d;
 
 		fixture.visualization_engine->FindVisibleBlocks(volume, &pose, &fixture.calibration_data.intrinsics_d, fixture.render_state);
 
@@ -122,10 +126,12 @@ void GenericFindSurfaceTest() {
 
 	ORUtils::IStreamWrapper raycast_images_file("TestData/arrays/raycast_images.dat", true);
 
-	for (auto& pose : fixture.camera_poses) {
+	for (auto& tracking_state : fixture.tracking_states) {
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume;
 		LoadVolume(&volume, snoopy::PartialVolume17Path<VoxelBlockHash>(), TMemoryDeviceType,
 		           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
+
+		ORUtils::SE3Pose& pose = *tracking_state->pose_d;
 
 		fixture.visualization_engine->FindVisibleBlocks(volume, &pose, &fixture.calibration_data.intrinsics_d, fixture.render_state);
 
@@ -134,7 +140,8 @@ void GenericFindSurfaceTest() {
 		std::shared_ptr<RenderState> render_state = fixture.MakeRenderState();
 		fixture.visualization_engine->FindSurface(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get());
 		ORUtils::Image<Vector4f>& raycast_image = *render_state->raycastResult;
-		ORUtils::Image<Vector4f> raycast_image_ground_truth = ORUtils::MemoryBlockPersistence::LoadImage<Vector4f>(raycast_images_file, MEMORYDEVICE_CPU);
+		ORUtils::Image<Vector4f> raycast_image_ground_truth = ORUtils::MemoryBlockPersistence::LoadImage<Vector4f>(raycast_images_file,
+		                                                                                                           MEMORYDEVICE_CPU);
 		BOOST_REQUIRE(RawMemoryArraysEqual(raycast_image_ground_truth.GetData(MEMORYDEVICE_CPU), MEMORYDEVICE_CPU,
 		                                   raycast_image.GetData(TMemoryDeviceType), TMemoryDeviceType, raycast_image.size()));
 
@@ -148,29 +155,34 @@ void GenericCreatePointCloudTest() {
 
 	ORUtils::IStreamWrapper point_cloud_images_file("TestData/arrays/point_cloud_images.dat", true);
 
-	for (auto& pose : fixture.camera_poses) {
+	for (auto& tracking_state : fixture.tracking_states) {
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume;
 		LoadVolume(&volume, snoopy::PartialVolume17Path<VoxelBlockHash>(), TMemoryDeviceType,
 		           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
+
+		ORUtils::SE3Pose& pose = *tracking_state->pose_d;
 
 		fixture.visualization_engine->FindVisibleBlocks(volume, &pose, &fixture.calibration_data.intrinsics_d, fixture.render_state);
 
 		const int visible_block_count = volume->index.GetVisibleBlockCount();
 		if (visible_block_count == 0) continue; // skip shots without results
 		std::shared_ptr<RenderState> render_state = fixture.MakeRenderState();
-		fixture.visualization_engine->CreatePointCloud(volume, fixture.view_17, fixture.camera_tracking_state, render_state.get(), false);
+		fixture.visualization_engine->CreateExpectedDepths(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get());
+		fixture.visualization_engine->CreatePointCloud(volume, fixture.view_17, tracking_state.get(), render_state.get(), false);
 
-		ORUtils::Image<Vector4f>& locations = *fixture.camera_tracking_state->pointCloud->locations;
-		ORUtils::Image<Vector4f>& colors = *fixture.camera_tracking_state->pointCloud->colours;
+		ORUtils::Image<Vector4f>& locations = *tracking_state->pointCloud->locations;
+		ORUtils::Image<Vector4f>& colors = *tracking_state->pointCloud->colours;
 		unsigned int total_points_ground_truth;
 		point_cloud_images_file.IStream().read(reinterpret_cast<char*>(&total_points_ground_truth), sizeof(unsigned int));
-		BOOST_REQUIRE_EQUAL(fixture.camera_tracking_state->pointCloud->noTotalPoints, total_points_ground_truth);
-		ORUtils::Image<Vector4f> locations_ground_truth = ORUtils::MemoryBlockPersistence::LoadImage<Vector4f>(point_cloud_images_file, MEMORYDEVICE_CPU);
-		ORUtils::Image<Vector4f> colors_ground_truth = ORUtils::MemoryBlockPersistence::LoadImage<Vector4f>(point_cloud_images_file, MEMORYDEVICE_CPU);
+		BOOST_REQUIRE_EQUAL(tracking_state->pointCloud->noTotalPoints, total_points_ground_truth);
+		ORUtils::Image<Vector4f> locations_ground_truth = ORUtils::MemoryBlockPersistence::LoadImage<Vector4f>(point_cloud_images_file,
+		                                                                                                       MEMORYDEVICE_CPU);
+		ORUtils::Image<Vector4f> colors_ground_truth = ORUtils::MemoryBlockPersistence::LoadImage<Vector4f>(point_cloud_images_file,
+		                                                                                                    MEMORYDEVICE_CPU);
 		BOOST_REQUIRE(RawMemoryArraysAlmostEqual_Verbose(locations_ground_truth.GetData(MEMORYDEVICE_CPU), MEMORYDEVICE_CPU,
-		                                   locations.GetData(TMemoryDeviceType), TMemoryDeviceType, total_points_ground_truth));
+		                                                 locations.GetData(TMemoryDeviceType), TMemoryDeviceType, total_points_ground_truth));
 		BOOST_REQUIRE(RawMemoryArraysAlmostEqual(colors_ground_truth.GetData(MEMORYDEVICE_CPU), MEMORYDEVICE_CPU,
-		                                   colors.GetData(TMemoryDeviceType), TMemoryDeviceType, total_points_ground_truth));
+		                                         colors.GetData(TMemoryDeviceType), TMemoryDeviceType, total_points_ground_truth));
 
 		delete volume;
 	}
@@ -182,25 +194,141 @@ void GenericCreateICPMapsTest() {
 
 	ORUtils::IStreamWrapper ICP_images_file("TestData/arrays/ICP_images.dat", true);
 
-	for (auto& pose : fixture.camera_poses) {
+	for (auto& tracking_state : fixture.tracking_states) {
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume;
 		LoadVolume(&volume, snoopy::PartialVolume17Path<VoxelBlockHash>(), TMemoryDeviceType,
 		           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
+		ORUtils::SE3Pose& pose = *tracking_state->pose_d;
 
 		fixture.visualization_engine->FindVisibleBlocks(volume, &pose, &fixture.calibration_data.intrinsics_d, fixture.render_state);
 
 		const int visible_block_count = volume->index.GetVisibleBlockCount();
 		if (visible_block_count == 0) continue; // skip shots without results
 		std::shared_ptr<RenderState> render_state = fixture.MakeRenderState();
-		fixture.visualization_engine->CreateICPMaps(volume, fixture.view_17, fixture.camera_tracking_state, render_state.get());
-		ORUtils::Image<Vector4f>& locations = *fixture.camera_tracking_state->pointCloud->locations;
-		ORUtils::Image<Vector4f>& normals = *fixture.camera_tracking_state->pointCloud->colours;
+		fixture.visualization_engine->CreateExpectedDepths(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get());
+		fixture.visualization_engine->CreateICPMaps(volume, fixture.view_17, tracking_state.get(), render_state.get());
+		ORUtils::Image<Vector4f>& locations = *tracking_state->pointCloud->locations;
+		ORUtils::Image<Vector4f>& normals = *tracking_state->pointCloud->colours;
 		ORUtils::Image<Vector4f> locations_ground_truth = ORUtils::MemoryBlockPersistence::LoadImage<Vector4f>(ICP_images_file, MEMORYDEVICE_CPU);
 		ORUtils::Image<Vector4f> normals_ground_truth = ORUtils::MemoryBlockPersistence::LoadImage<Vector4f>(ICP_images_file, MEMORYDEVICE_CPU);
 		BOOST_REQUIRE(RawMemoryArraysEqual(locations_ground_truth.GetData(MEMORYDEVICE_CPU), MEMORYDEVICE_CPU,
 		                                   locations.GetData(TMemoryDeviceType), TMemoryDeviceType, locations.size()));
 		BOOST_REQUIRE(RawMemoryArraysEqual(normals_ground_truth.GetData(MEMORYDEVICE_CPU), MEMORYDEVICE_CPU,
 		                                   normals.GetData(TMemoryDeviceType), TMemoryDeviceType, normals.size()));
+
+		delete volume;
+	}
+}
+
+template<MemoryDeviceType TMemoryDeviceType>
+void GenericForwardRenderTest() {
+	CameraPoseAndRayTracingEngineFixture<TMemoryDeviceType> fixture;
+
+	ORUtils::IStreamWrapper forward_render_images_file("TestData/arrays/forward_render_images.dat", true);
+
+	for (auto& tracking_state : fixture.tracking_states) {
+		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume;
+		LoadVolume(&volume, snoopy::PartialVolume17Path<VoxelBlockHash>(), TMemoryDeviceType,
+		           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
+
+		ORUtils::SE3Pose& pose = *tracking_state->pose_d;
+
+		fixture.visualization_engine->FindVisibleBlocks(volume, &pose, &fixture.calibration_data.intrinsics_d, fixture.render_state);
+
+		const int visible_block_count = volume->index.GetVisibleBlockCount();
+		if (visible_block_count == 0) continue; // skip shots without results
+		std::shared_ptr<RenderState> render_state = fixture.MakeRenderState();
+		fixture.visualization_engine->FindSurface(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get());
+
+		// nudge the pose a bit to imitate tracking result
+		std::shared_ptr<CameraTrackingState> tracking_state_forward_render = fixture.MakeCameraTrackingState();
+		ORUtils::SE3Pose& adjusted_pose = *tracking_state_forward_render->pose_d;
+		adjusted_pose.SetFrom(&pose);
+		std::vector<float> adjustment_values = ReadStdVectorFromFile<float>(forward_render_images_file);
+		ORUtils::SE3Pose adjustment(adjustment_values[0], adjustment_values[1], adjustment_values[2], adjustment_values[3], adjustment_values[4],
+		                            adjustment_values[5]);
+		adjusted_pose.MultiplyWith(&adjustment);
+
+		fixture.visualization_engine->CreateExpectedDepths(volume, &adjusted_pose, &fixture.calibration_data.intrinsics_d, render_state.get());
+		fixture.visualization_engine->ForwardRender(volume, fixture.view_17, tracking_state_forward_render.get(), render_state.get());
+
+		int forward_rendering_missing_point_cout_ground_truth;
+		forward_render_images_file.IStream().read(reinterpret_cast<char*>(&forward_rendering_missing_point_cout_ground_truth), sizeof(int));
+		BOOST_REQUIRE_EQUAL(render_state->noFwdProjMissingPoints, forward_rendering_missing_point_cout_ground_truth);
+		ORUtils::Image<int> missing_points_ground_truth = ORUtils::MemoryBlockPersistence::LoadImage<int>(forward_render_images_file,
+		                                                                                                  MEMORYDEVICE_CPU);
+		ORUtils::Image<Vector4f> forward_projection_ground_truth = ORUtils::MemoryBlockPersistence::LoadImage<Vector4f>(forward_render_images_file,
+		                                                                                                                MEMORYDEVICE_CPU);
+		BOOST_REQUIRE(RawMemoryArraysEqual(missing_points_ground_truth.GetData(MEMORYDEVICE_CPU), MEMORYDEVICE_CPU,
+		                                   render_state->fwdProjMissingPoints->GetData(TMemoryDeviceType), TMemoryDeviceType,
+		                                   forward_rendering_missing_point_cout_ground_truth));
+		BOOST_REQUIRE(RawMemoryArraysAlmostEqual(forward_projection_ground_truth.GetData(MEMORYDEVICE_CPU), MEMORYDEVICE_CPU,
+		                                         render_state->forwardProjection->GetData(TMemoryDeviceType), TMemoryDeviceType,
+		                                         forward_projection_ground_truth.size()));
+
+		delete volume;
+	}
+}
+
+template<MemoryDeviceType TMemoryDeviceType>
+void GenericRenderImageTest() {
+	CameraPoseAndRayTracingEngineFixture<TMemoryDeviceType> fixture;
+
+	ORUtils::IStreamWrapper rendered_images_file("TestData/arrays/rendered_images.dat", true);
+
+	for (auto& tracking_state : fixture.tracking_states) {
+		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume;
+		LoadVolume(&volume, snoopy::PartialVolume17Path<VoxelBlockHash>(), TMemoryDeviceType,
+		           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
+		ORUtils::SE3Pose& pose = *tracking_state->pose_d;
+
+		fixture.visualization_engine->FindVisibleBlocks(volume, &pose, &fixture.calibration_data.intrinsics_d, fixture.render_state);
+
+		const int visible_block_count = volume->index.GetVisibleBlockCount();
+		if (visible_block_count == 0) continue; // skip shots without results
+		std::shared_ptr<RenderState> render_state = fixture.MakeRenderState();
+		fixture.visualization_engine->FindSurface(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get());
+		fixture.visualization_engine->CreateExpectedDepths(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get());
+
+		UChar4Image output_image(snoopy::frame_image_size, TMemoryDeviceType);
+		fixture.visualization_engine->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get(),
+		                                          &output_image, IVisualizationEngine::RenderImageType::RENDER_COLOUR_FROM_VOLUME,
+		                                          IVisualizationEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
+		UChar4Image output_image_ground_truth = ORUtils::MemoryBlockPersistence::LoadImage<Vector4u>(rendered_images_file,MEMORYDEVICE_CPU);
+		BOOST_REQUIRE(RawMemoryArraysEqual(output_image_ground_truth.GetData(MEMORYDEVICE_CPU), MEMORYDEVICE_CPU,
+		                                   output_image.GetData(TMemoryDeviceType), TMemoryDeviceType, output_image.size()));
+		// render again re-doing the raycast internally, make sure the results match again
+//		fixture.visualization_engine->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get(),
+//		                                          &output_image, IVisualizationEngine::RenderImageType::RENDER_COLOUR_FROM_VOLUME,
+//		                                          IVisualizationEngine::RenderRaycastSelection::RENDER_FROM_NEW_RAYCAST);
+//		BOOST_REQUIRE(RawMemoryArraysEqual(output_image_ground_truth.GetData(MEMORYDEVICE_CPU), MEMORYDEVICE_CPU,
+//		                                   output_image.GetData(TMemoryDeviceType), TMemoryDeviceType, output_image.size()));
+
+		fixture.visualization_engine->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get(),
+		                                          &output_image, IVisualizationEngine::RenderImageType::RENDER_COLOUR_FROM_NORMAL,
+		                                          IVisualizationEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
+		output_image_ground_truth = ORUtils::MemoryBlockPersistence::LoadImage<Vector4u>(rendered_images_file,MEMORYDEVICE_CPU);
+		BOOST_REQUIRE(RawMemoryArraysEqual(output_image_ground_truth.GetData(MEMORYDEVICE_CPU), MEMORYDEVICE_CPU,
+		                                   output_image.GetData(TMemoryDeviceType), TMemoryDeviceType, output_image.size()));
+
+		fixture.visualization_engine->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get(),
+		                                          &output_image, IVisualizationEngine::RenderImageType::RENDER_SHADED_GREYSCALE_IMAGENORMALS,
+		                                          IVisualizationEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
+		output_image_ground_truth = ORUtils::MemoryBlockPersistence::LoadImage<Vector4u>(rendered_images_file,MEMORYDEVICE_CPU);
+		BOOST_REQUIRE(RawMemoryArraysEqual(output_image_ground_truth.GetData(MEMORYDEVICE_CPU), MEMORYDEVICE_CPU,
+		                                   output_image.GetData(TMemoryDeviceType), TMemoryDeviceType, output_image.size()));
+		fixture.visualization_engine->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get(),
+		                                          &output_image, IVisualizationEngine::RenderImageType::RENDER_SHADED_GREEN,
+		                                          IVisualizationEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
+		output_image_ground_truth = ORUtils::MemoryBlockPersistence::LoadImage<Vector4u>(rendered_images_file,MEMORYDEVICE_CPU);
+		BOOST_REQUIRE(RawMemoryArraysEqual(output_image_ground_truth.GetData(MEMORYDEVICE_CPU), MEMORYDEVICE_CPU,
+		                                   output_image.GetData(TMemoryDeviceType), TMemoryDeviceType, output_image.size()));
+		fixture.visualization_engine->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get(),
+		                                          &output_image, IVisualizationEngine::RenderImageType::RENDER_SHADED_OVERLAY,
+		                                          IVisualizationEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
+		output_image_ground_truth = ORUtils::MemoryBlockPersistence::LoadImage<Vector4u>(rendered_images_file,MEMORYDEVICE_CPU);
+		BOOST_REQUIRE(RawMemoryArraysEqual(output_image_ground_truth.GetData(MEMORYDEVICE_CPU), MEMORYDEVICE_CPU,
+		                                   output_image.GetData(TMemoryDeviceType), TMemoryDeviceType, output_image.size()));
 
 		delete volume;
 	}
@@ -215,7 +343,7 @@ BOOST_AUTO_TEST_CASE(Test_CreateExpectedDepths) {
 }
 
 BOOST_AUTO_TEST_CASE(Test_RenderImage) {
-
+	GenericRenderImageTest<MEMORYDEVICE_CPU>();
 }
 
 BOOST_AUTO_TEST_CASE(Test_FindSurface) {
@@ -231,5 +359,5 @@ BOOST_AUTO_TEST_CASE(Test_CreateICPMaps) {
 }
 
 BOOST_AUTO_TEST_CASE(Test_ForwardRender) {
-
+	GenericForwardRenderTest<MEMORYDEVICE_CPU>();
 }

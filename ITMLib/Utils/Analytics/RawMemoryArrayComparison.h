@@ -23,6 +23,21 @@
 namespace ITMLib {
 
 namespace internal {
+
+#ifndef COMPILE_WITHOUT_CUDA
+//template<typename TElement, typename TComparisonFunction, typename TReportMismatchFunction>
+//bool CompareRawMemoryArrays_Generic_CUDA(const TElement* l, const TElement* r, const int element_count,
+//                                         TComparisonFunction&& compare_elements, TReportMismatchFunction&& report_mismatch)
+template<typename TElement>
+bool RawMemoryArraysEqual_CUDA(const TElement* l, const TElement* r, const int element_count);
+template<typename TElement>
+bool RawMemoryArraysAlmostEqual_CUDA(const TElement* l, const TElement* r, const int element_count,
+                                     const float absolute_tolerance = 1e-6);
+template<typename TElement>
+bool RawMemoryArraysAlmostEqual_Verbose_CUDA(const TElement* l, const TElement* r, const int element_count,
+                                             const float absolute_tolerance = 1e-6);
+#endif
+
 template<typename TElement, typename TCompareElementsCPUFunction, typename TCompareArraysCUDAFunction, typename TReportMismatchFunction>
 bool CompareRawMemoryArrays_Generic(const TElement* a, MemoryDeviceType memory_device_type_l,
                                     const TElement* b, MemoryDeviceType memory_device_type_r,
@@ -99,8 +114,7 @@ bool CompareRawMemoryArrays_Generic(const TElement* a, MemoryDeviceType memory_d
 }
 } // namespace internal
 
-template<typename TElement>
-bool RawMemoryArraysEqual_CUDA(const TElement* l, const TElement* r, const int element_count);
+
 
 template<typename TElement>
 bool RawMemoryArraysEqual(const TElement* a, MemoryDeviceType memory_device_type_l,
@@ -119,10 +133,6 @@ bool RawMemoryArraysEqual(const TElement* a, MemoryDeviceType memory_device_type
 }
 
 template<typename TElement>
-bool RawMemoryArraysAlmostEqual_CUDA(const TElement* l, const TElement* r, const int element_count,
-                                     const float absolute_tolerance = 1e-6);
-
-template<typename TElement>
 bool RawMemoryArraysAlmostEqual(const TElement* a, MemoryDeviceType memory_device_type_l,
                                 const TElement* b, MemoryDeviceType memory_device_type_r,
                                 const int element_count, const float absolute_tolerance = 1e-6) {
@@ -139,10 +149,6 @@ bool RawMemoryArraysAlmostEqual(const TElement* a, MemoryDeviceType memory_devic
 			[](const TElement& element_a, const TElement& element_b, const int mismatch_index) {}
 	);
 }
-
-template<typename TElement>
-bool RawMemoryArraysAlmostEqual_Verbose_CUDA(const TElement* l, const TElement* r, const int element_count,
-                                             const float absolute_tolerance = 1e-6);
 
 template<typename TElement>
 bool RawMemoryArraysAlmostEqual_Verbose(const TElement* a, MemoryDeviceType memory_device_type_l,
@@ -185,6 +191,9 @@ RawMemoryArraysEqual<int>(const int* l, MemoryDeviceType memory_device_type_l, c
 // Vector specializations
 extern template bool
 RawMemoryArraysEqual<Vector3u>(const Vector3u* l, MemoryDeviceType memory_device_type_l, const Vector3u* r,
+                               MemoryDeviceType memory_device_type_r, const int element_count);
+extern template bool
+RawMemoryArraysEqual<Vector4u>(const Vector4u* l, MemoryDeviceType memory_device_type_l, const Vector4u* r,
                                MemoryDeviceType memory_device_type_r, const int element_count);
 
 extern template bool

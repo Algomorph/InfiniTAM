@@ -32,7 +32,7 @@ namespace ITMLib
 		CameraTrackingController *trackingController;
 
 		VoxelVolume<TVoxel, TIndex> *volume;
-		RenderState *renderState_live;
+		RenderState *render_state;
 		RenderState *renderState_freeview;
 
 		CameraTracker *tracker;
