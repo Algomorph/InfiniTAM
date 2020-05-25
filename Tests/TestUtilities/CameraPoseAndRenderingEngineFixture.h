@@ -16,7 +16,7 @@
 #pragma once
 
 #include "../../ITMLib/Objects/RenderStates/RenderState.h"
-#include "../../ITMLib/Engines/Rendering/VisualizationEngineFactory.h"
+#include "../../ITMLib/Engines/Rendering/RenderingEngineFactory.h"
 #include "SnoopyTestUtilities.h"
 
 using namespace ITMLib;
@@ -31,7 +31,7 @@ public: // member variables
 	const Vector3f original_viewpoint;
 	const int degree_increment;
 	std::vector<std::shared_ptr<CameraTrackingState>> tracking_states;
-	VisualizationEngine<TSDFVoxel, VoxelBlockHash>* visualization_engine;
+	RenderingEngineBase<TSDFVoxel, VoxelBlockHash>* visualization_engine;
 	View* view_17;
 
 public: // member functions
@@ -53,7 +53,7 @@ public: // member functions
 				  }
 				  return camera_tracking_states;
 			  }()),
-			  visualization_engine(VisualizationEngineFactory::MakeVisualizationEngine<TSDFVoxel, VoxelBlockHash>(
+			  visualization_engine(RenderingEngineFactory::MakeVisualizationEngine<TSDFVoxel, VoxelBlockHash>(
 					  TMemoryDeviceType)),
 			  view_17(nullptr) {
 		readRGBDCalib(snoopy_test_utilities::SnoopyCalibrationPath().c_str(), calibration_data);

@@ -100,7 +100,7 @@ void MultiVisualizationEngine_CPU<TVoxel, VoxelBlockHash>::CreateExpectedDepths(
 }
 
 template<typename TVoxel, typename TIndex>
-static void RenderImage_common(const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *_renderState, UChar4Image *outputImage, IVisualizationEngine::RenderImageType type){
+static void RenderImage_common(const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *_renderState, UChar4Image *outputImage, IRenderingEngine::RenderImageType type){
 	RenderStateMultiScene<TVoxel, TIndex> *renderState = (RenderStateMultiScene<TVoxel, TIndex>*)_renderState;
 
 	Vector2i imgSize = outputImage->dimensions;
@@ -137,11 +137,11 @@ static void RenderImage_common(const ORUtils::SE3Pose *pose, const Intrinsics *i
 	Vector4u *outRendering = outputImage->GetData(MEMORYDEVICE_CPU);
 	Vector4f *pointsRay = renderState->raycastResult->GetData(MEMORYDEVICE_CPU);
 
-	if ((type == IVisualizationEngine::RENDER_COLOUR_FROM_VOLUME) &&
-	    (!TVoxel::hasColorInformation)) type = IVisualizationEngine::RENDER_SHADED_GREYSCALE;
+	if ((type == IRenderingEngine::RENDER_COLOUR_FROM_VOLUME) &&
+	    (!TVoxel::hasColorInformation)) type = IRenderingEngine::RENDER_SHADED_GREYSCALE;
 
 	switch (type) {
-		case IVisualizationEngine::RENDER_COLOUR_FROM_VOLUME:
+		case IRenderingEngine::RENDER_COLOUR_FROM_VOLUME:
 #ifdef WITH_OPENMP
 #pragma omp parallel for
 #endif
@@ -151,7 +151,7 @@ static void RenderImage_common(const ORUtils::SE3Pose *pose, const Intrinsics *i
 				                                                            &(renderState->indexData_host));
 			}
 			break;
-		case IVisualizationEngine::RENDER_COLOUR_FROM_NORMAL:
+		case IRenderingEngine::RENDER_COLOUR_FROM_NORMAL:
 			if (intrinsics->FocalLengthSignsDiffer())
 			{
 #ifdef WITH_OPENMP
@@ -175,7 +175,7 @@ static void RenderImage_common(const ORUtils::SE3Pose *pose, const Intrinsics *i
 				}
 			}
 			break;
-		case IVisualizationEngine::RENDER_COLOUR_FROM_CONFIDENCE:
+		case IRenderingEngine::RENDER_COLOUR_FROM_CONFIDENCE:
 			if (intrinsics->FocalLengthSignsDiffer())
 			{
 #ifdef WITH_OPENMP
@@ -199,7 +199,7 @@ static void RenderImage_common(const ORUtils::SE3Pose *pose, const Intrinsics *i
 				}
 			}
 			break;
-		case IVisualizationEngine::RENDER_SHADED_GREYSCALE:
+		case IRenderingEngine::RENDER_SHADED_GREYSCALE:
 		default:
 			if (intrinsics->FocalLengthSignsDiffer())
 			{
@@ -228,13 +228,13 @@ static void RenderImage_common(const ORUtils::SE3Pose *pose, const Intrinsics *i
 };
 
 template<class TVoxel, class TIndex>
-void MultiVisualizationEngine_CPU<TVoxel, TIndex>::RenderImage(const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *_renderState, UChar4Image *outputImage, IVisualizationEngine::RenderImageType type) const
+void MultiVisualizationEngine_CPU<TVoxel, TIndex>::RenderImage(const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *_renderState, UChar4Image *outputImage, IRenderingEngine::RenderImageType type) const
 {
 	RenderImage_common<TVoxel,TIndex>(pose,intrinsics,_renderState,outputImage,type);
 }
 
 template<class TVoxel>
-void MultiVisualizationEngine_CPU<TVoxel, VoxelBlockHash>::RenderImage(const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *_renderState, UChar4Image *outputImage, IVisualizationEngine::RenderImageType type) const
+void MultiVisualizationEngine_CPU<TVoxel, VoxelBlockHash>::RenderImage(const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *_renderState, UChar4Image *outputImage, IRenderingEngine::RenderImageType type) const
 {
 	RenderImage_common<TVoxel,VoxelBlockHash>(pose,intrinsics,_renderState,outputImage,type);
 }

@@ -7,7 +7,7 @@
 namespace ITMLib
 {
 	template<class TVoxel, class TIndex>
-	VoxelMapGraphManager<TVoxel, TIndex>::VoxelMapGraphManager(const VisualizationEngine<TVoxel, TIndex> *_VisualizationEngine, const DenseMapper<TVoxel, TIndex> *_denseMapper, const Vector2i & _trackedImageSize)
+	VoxelMapGraphManager<TVoxel, TIndex>::VoxelMapGraphManager(const RenderingEngineBase<TVoxel, TIndex> *_VisualizationEngine, const DenseMapper<TVoxel, TIndex> *_denseMapper, const Vector2i & _trackedImageSize)
 		: visualization_engine(_VisualizationEngine), denseMapper(_denseMapper), trackedImageSize(_trackedImageSize)
 	{
 	}

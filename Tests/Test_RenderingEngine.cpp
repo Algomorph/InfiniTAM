@@ -30,7 +30,7 @@
 #include "../ORUtils/IStreamWrapper.h"
 
 //ITMLib
-#include "../ITMLib/Engines/Rendering/VisualizationEngineFactory.h"
+#include "../ITMLib/Engines/Rendering/RenderingEngineFactory.h"
 #include "../ITMLib/Utils/Analytics/RawMemoryArrayComparison.h"
 #include "../ITMLib/Utils/Collections/OperationsOnSTLContainers.h"
 
@@ -291,40 +291,40 @@ void GenericRenderImageTest() {
 
 		UChar4Image output_image(snoopy::frame_image_size, TMemoryDeviceType);
 		fixture.visualization_engine->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get(),
-		                                          &output_image, IVisualizationEngine::RenderImageType::RENDER_COLOUR_FROM_VOLUME,
-		                                          IVisualizationEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
+		                                          &output_image, IRenderingEngine::RenderImageType::RENDER_COLOUR_FROM_VOLUME,
+		                                          IRenderingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
 		UChar4Image output_image_ground_truth = ORUtils::MemoryBlockPersistence::LoadImage<Vector4u>(rendered_images_file, MEMORYDEVICE_CPU);
 		BOOST_REQUIRE(RawMemoryArraysEqual(output_image_ground_truth.GetData(MEMORYDEVICE_CPU), MEMORYDEVICE_CPU,
 		                                   output_image.GetData(TMemoryDeviceType), TMemoryDeviceType, output_image.size()));
 		// render again re-doing the raycast internally, make sure the results match again
 		fixture.visualization_engine->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get(),
-		                                          &output_image, IVisualizationEngine::RenderImageType::RENDER_COLOUR_FROM_VOLUME,
-		                                          IVisualizationEngine::RenderRaycastSelection::RENDER_FROM_NEW_RAYCAST);
+		                                          &output_image, IRenderingEngine::RenderImageType::RENDER_COLOUR_FROM_VOLUME,
+		                                          IRenderingEngine::RenderRaycastSelection::RENDER_FROM_NEW_RAYCAST);
 		BOOST_REQUIRE(RawMemoryArraysEqual_Verbose(output_image_ground_truth.GetData(MEMORYDEVICE_CPU), MEMORYDEVICE_CPU,
 		                                           output_image.GetData(TMemoryDeviceType), TMemoryDeviceType, output_image.size()));
 
 		fixture.visualization_engine->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get(),
-		                                          &output_image, IVisualizationEngine::RenderImageType::RENDER_COLOUR_FROM_NORMAL,
-		                                          IVisualizationEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
+		                                          &output_image, IRenderingEngine::RenderImageType::RENDER_COLOUR_FROM_NORMAL,
+		                                          IRenderingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
 		output_image_ground_truth = ORUtils::MemoryBlockPersistence::LoadImage<Vector4u>(rendered_images_file, MEMORYDEVICE_CPU);
 		BOOST_REQUIRE(RawMemoryArraysEqual(output_image_ground_truth.GetData(MEMORYDEVICE_CPU), MEMORYDEVICE_CPU,
 		                                   output_image.GetData(TMemoryDeviceType), TMemoryDeviceType, output_image.size()));
 
 		fixture.visualization_engine->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get(),
-		                                          &output_image, IVisualizationEngine::RenderImageType::RENDER_SHADED_GREYSCALE_IMAGENORMALS,
-		                                          IVisualizationEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
+		                                          &output_image, IRenderingEngine::RenderImageType::RENDER_SHADED_GREYSCALE_IMAGENORMALS,
+		                                          IRenderingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
 		output_image_ground_truth = ORUtils::MemoryBlockPersistence::LoadImage<Vector4u>(rendered_images_file, MEMORYDEVICE_CPU);
 		BOOST_REQUIRE(RawMemoryArraysEqual(output_image_ground_truth.GetData(MEMORYDEVICE_CPU), MEMORYDEVICE_CPU,
 		                                   output_image.GetData(TMemoryDeviceType), TMemoryDeviceType, output_image.size()));
 		fixture.visualization_engine->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get(),
-		                                          &output_image, IVisualizationEngine::RenderImageType::RENDER_SHADED_GREEN,
-		                                          IVisualizationEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
+		                                          &output_image, IRenderingEngine::RenderImageType::RENDER_SHADED_GREEN,
+		                                          IRenderingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
 		output_image_ground_truth = ORUtils::MemoryBlockPersistence::LoadImage<Vector4u>(rendered_images_file, MEMORYDEVICE_CPU);
 		BOOST_REQUIRE(RawMemoryArraysEqual(output_image_ground_truth.GetData(MEMORYDEVICE_CPU), MEMORYDEVICE_CPU,
 		                                   output_image.GetData(TMemoryDeviceType), TMemoryDeviceType, output_image.size()));
 		fixture.visualization_engine->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get(),
-		                                          &output_image, IVisualizationEngine::RenderImageType::RENDER_SHADED_OVERLAY,
-		                                          IVisualizationEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
+		                                          &output_image, IRenderingEngine::RenderImageType::RENDER_SHADED_OVERLAY,
+		                                          IRenderingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
 		output_image_ground_truth = ORUtils::MemoryBlockPersistence::LoadImage<Vector4u>(rendered_images_file, MEMORYDEVICE_CPU);
 		BOOST_REQUIRE(RawMemoryArraysEqual(output_image_ground_truth.GetData(MEMORYDEVICE_CPU), MEMORYDEVICE_CPU,
 		                                   output_image.GetData(TMemoryDeviceType), TMemoryDeviceType, output_image.size()));

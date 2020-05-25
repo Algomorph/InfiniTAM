@@ -231,16 +231,16 @@ static void GenericRaycast(VoxelVolume<TVoxel, TIndex>* volume, const Vector2i& 
 template<class TVoxel, class TIndex>
 static void
 RenderImage_common(VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics,
-                   const RenderState* renderState, UChar4Image* outputImage, IVisualizationEngine::RenderImageType type,
-                   IVisualizationEngine::RenderRaycastSelection raycastType) {
+                   const RenderState* renderState, UChar4Image* outputImage, IRenderingEngine::RenderImageType type,
+                   IRenderingEngine::RenderRaycastSelection raycastType) {
 	Vector2i imgSize = outputImage->dimensions;
 	Matrix4f invM = pose->GetInvM();
 
 	Vector4f* pointsRay;
-	if (raycastType == IVisualizationEngine::RENDER_FROM_OLD_RAYCAST)
+	if (raycastType == IRenderingEngine::RENDER_FROM_OLD_RAYCAST)
 		pointsRay = renderState->raycastResult->GetData(MEMORYDEVICE_CPU);
 	else {
-		if (raycastType == IVisualizationEngine::RENDER_FROM_OLD_FORWARDPROJ)
+		if (raycastType == IRenderingEngine::RENDER_FROM_OLD_FORWARDPROJ)
 			pointsRay = renderState->forwardProjection->GetData(MEMORYDEVICE_CPU);
 		else {
 			// this one is generally done for freeview Rendering, so
@@ -255,12 +255,12 @@ RenderImage_common(VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::SE3Pose* 
 	const TVoxel* voxelData = volume->GetVoxels();
 	const typename TIndex::IndexData* voxelIndex = volume->index.GetIndexData();
 
-	if ((type == IVisualizationEngine::RENDER_COLOUR_FROM_VOLUME) &&
+	if ((type == IRenderingEngine::RENDER_COLOUR_FROM_VOLUME) &&
 	    (!TVoxel::hasColorInformation))
-		type = IVisualizationEngine::RENDER_SHADED_GREYSCALE;
+		type = IRenderingEngine::RENDER_SHADED_GREYSCALE;
 
 	switch (type) {
-		case IVisualizationEngine::RENDER_COLOUR_FROM_VOLUME:
+		case IRenderingEngine::RENDER_COLOUR_FROM_VOLUME:
 #ifdef WITH_OPENMP
 #pragma omp parallel for
 #endif
@@ -270,7 +270,7 @@ RenderImage_common(VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::SE3Pose* 
 				                                   voxelIndex);
 			}
 			break;
-		case IVisualizationEngine::RENDER_COLOUR_FROM_NORMAL:
+		case IRenderingEngine::RENDER_COLOUR_FROM_NORMAL:
 #ifdef WITH_OPENMP
 #pragma omp parallel for
 #endif
@@ -280,7 +280,7 @@ RenderImage_common(VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::SE3Pose* 
 				                                   voxelIndex, lightSource);
 			}
 			break;
-		case IVisualizationEngine::RENDER_COLOUR_FROM_CONFIDENCE:
+		case IRenderingEngine::RENDER_COLOUR_FROM_CONFIDENCE:
 #ifdef WITH_OPENMP
 #pragma omp parallel for
 #endif
@@ -290,7 +290,7 @@ RenderImage_common(VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::SE3Pose* 
 				                                       lightSource);
 			}
 			break;
-		case IVisualizationEngine::RENDER_SHADED_GREYSCALE_IMAGENORMALS:
+		case IRenderingEngine::RENDER_SHADED_GREYSCALE_IMAGENORMALS:
 #ifdef WITH_OPENMP
 #pragma omp parallel for
 #endif
@@ -307,7 +307,7 @@ RenderImage_common(VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::SE3Pose* 
 				}
 			}
 			break;
-		case IVisualizationEngine::RENDER_SHADED_GREEN: {
+		case IRenderingEngine::RENDER_SHADED_GREEN: {
 #ifdef WITH_OPENMP
 #pragma omp parallel for
 #endif
@@ -318,7 +318,7 @@ RenderImage_common(VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::SE3Pose* 
 			}
 			break;
 		}
-		case IVisualizationEngine::RENDER_SHADED_OVERLAY: {
+		case IRenderingEngine::RENDER_SHADED_OVERLAY: {
 #ifdef WITH_OPENMP
 #pragma omp parallel for
 #endif
@@ -329,7 +329,7 @@ RenderImage_common(VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::SE3Pose* 
 			}
 			break;
 		}
-		case IVisualizationEngine::RENDER_SHADED_GREYSCALE:
+		case IRenderingEngine::RENDER_SHADED_GREYSCALE:
 		default:
 #ifdef WITH_OPENMP
 #pragma omp parallel for
@@ -468,8 +468,8 @@ void
 VisualizationEngine_CPU<TVoxel, TIndex>::RenderImage(VoxelVolume<TVoxel, TIndex>* scene, const ORUtils::SE3Pose* pose,
                                                      const Intrinsics* intrinsics,
                                                      const RenderState* renderState, UChar4Image* outputImage,
-                                                     IVisualizationEngine::RenderImageType type,
-                                                     IVisualizationEngine::RenderRaycastSelection raycastType) const {
+                                                     IRenderingEngine::RenderImageType type,
+                                                     IRenderingEngine::RenderRaycastSelection raycastType) const {
 	RenderImage_common(scene, pose, intrinsics, renderState, outputImage, type, raycastType);
 }
 
@@ -479,8 +479,8 @@ void VisualizationEngine_CPU<TVoxel, VoxelBlockHash>::RenderImage(VoxelVolume<TV
                                                                   const Intrinsics* intrinsics,
                                                                   const RenderState* renderState,
                                                                   UChar4Image* outputImage,
-                                                                  IVisualizationEngine::RenderImageType type,
-                                                                  IVisualizationEngine::RenderRaycastSelection raycastType) const {
+                                                                  IRenderingEngine::RenderImageType type,
+                                                                  IRenderingEngine::RenderRaycastSelection raycastType) const {
 	RenderImage_common(scene, pose, intrinsics, renderState, outputImage, type, raycastType);
 }
 

@@ -5,7 +5,7 @@
 #include <stdexcept>
 
 #include "../Rendering/Interface/SurfelVisualizationEngine.h"
-#include "../Rendering/Interface/VisualizationEngine.h"
+#include "../Rendering/Interface/RenderingEngine.h"
 #include "../../CameraTrackers/Interface/CameraTracker.h"
 #include "../../Utils/Configuration/Configuration.h"
 #include "../../CameraTrackers/Interface/CameraTracker.h"
@@ -75,7 +75,7 @@ namespace ITMLib
 		 */
 		template <typename TVoxel, typename TIndex>
 		void Prepare(CameraTrackingState *tracking_state, VoxelVolume<TVoxel,TIndex> *volume, const View *view,
-		             const VisualizationEngine<TVoxel,TIndex> *visualization_engine, RenderState *render_state)
+		             const RenderingEngineBase<TVoxel,TIndex> *visualization_engine, RenderState *render_state)
 		{
 			if (!tracker->requiresPointCloudRendering())
 				return;

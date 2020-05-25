@@ -21,7 +21,7 @@ namespace ITMLib {
 
 		void CreateExpectedDepths(const VoxelMapGraphManager<TVoxel, TIndex> & sceneManager, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *renderState) const;
 
-		void RenderImage(const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *renderState, UChar4Image *outputImage, IVisualizationEngine::RenderImageType type) const;
+		void RenderImage(const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *renderState, UChar4Image *outputImage, IRenderingEngine::RenderImageType type) const;
 	};
 
 	template<class TVoxel>
@@ -39,6 +39,6 @@ namespace ITMLib {
 
 		void CreateExpectedDepths(const VoxelMapGraphManager<TVoxel, VoxelBlockHash> & sceneManager, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *renderState) const;
 
-		void RenderImage(const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *renderState, UChar4Image *outputImage, IVisualizationEngine::RenderImageType type) const;
+		void RenderImage(const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *renderState, UChar4Image *outputImage, IRenderingEngine::RenderImageType type) const;
 	};
 }

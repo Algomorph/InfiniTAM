@@ -24,7 +24,7 @@
 #include "../LowLevel/Interface/LowLevelEngine.h"
 #include "../Meshing/Interface/MeshingEngine.h"
 #include "../ViewBuilding/Interface/ViewBuilder.h"
-#include "../Rendering/Interface/VisualizationEngine.h"
+#include "../Rendering/Interface/RenderingEngine.h"
 #include "../Indexing/Interface/IndexingEngine.h"
 #include "../DepthFusion/DepthFusionEngine.h"
 #include "../VolumeFusion/VolumeFusionEngine.h"
@@ -50,7 +50,7 @@ private: // member variables
 
 	// engines
 	LowLevelEngine* low_level_engine;
-	VisualizationEngine<TVoxel, TIndex>* visualization_engine;
+	RenderingEngineBase<TVoxel, TIndex>* visualization_engine;
 	MeshingEngine<TVoxel, TIndex>* meshing_engine;
 	IndexingEngineInterface<TVoxel, TIndex>* indexing_engine;
 	DepthFusionEngineInterface<TVoxel, TWarp, TIndex>* depth_fusion_engine;

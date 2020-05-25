@@ -200,15 +200,15 @@ static void GenericRaycast(VoxelVolume<TVoxel, TIndex> *volume, const Vector2i& 
 
 template<class TVoxel, class TIndex>
 static void RenderImage_common(VoxelVolume<TVoxel, TIndex> *volume, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, const RenderState *renderState,
-                               UChar4Image *outputImage, IVisualizationEngine::RenderImageType type, IVisualizationEngine::RenderRaycastSelection raycastType)
+                               UChar4Image *outputImage, IRenderingEngine::RenderImageType type, IRenderingEngine::RenderRaycastSelection raycastType)
 {
 	Vector2i imgSize = outputImage->dimensions;
 	Matrix4f invM = pose->GetInvM();
 
 	Vector4f *pointsRay;
-	if (raycastType == IVisualizationEngine::RENDER_FROM_OLD_RAYCAST) {
+	if (raycastType == IRenderingEngine::RENDER_FROM_OLD_RAYCAST) {
 		pointsRay = renderState->raycastResult->GetData(MEMORYDEVICE_CUDA);
-	} else if (raycastType == IVisualizationEngine::RENDER_FROM_OLD_FORWARDPROJ) {
+	} else if (raycastType == IRenderingEngine::RENDER_FROM_OLD_FORWARDPROJ) {
 		pointsRay = renderState->forwardProjection->GetData(MEMORYDEVICE_CUDA);
 	} else {
 		GenericRaycast(volume, imgSize, invM, intrinsics->projectionParamsSimple.all, renderState, false);
@@ -222,28 +222,28 @@ static void RenderImage_common(VoxelVolume<TVoxel, TIndex> *volume, const ORUtil
 	dim3 cudaBlockSize(8, 8);
 	dim3 gridSize((int)ceil((float)imgSize.x / (float)cudaBlockSize.x), (int)ceil((float)imgSize.y / (float)cudaBlockSize.y));
 
-	if ((type == IVisualizationEngine::RENDER_COLOUR_FROM_VOLUME)&&
-	    (!TVoxel::hasColorInformation)) type = IVisualizationEngine::RENDER_SHADED_GREYSCALE;
+	if ((type == IRenderingEngine::RENDER_COLOUR_FROM_VOLUME) &&
+	    (!TVoxel::hasColorInformation)) type = IRenderingEngine::RENDER_SHADED_GREYSCALE;
 
 	switch (type) {
-	case IVisualizationEngine::RENDER_COLOUR_FROM_VOLUME:
+	case IRenderingEngine::RENDER_COLOUR_FROM_VOLUME:
 		renderColour_device<TVoxel, TIndex> <<<gridSize, cudaBlockSize>>>(outRendering, pointsRay, volume->GetVoxels(),
 		                                                                  volume->index.GetIndexData(), imgSize);
 		ORcudaKernelCheck;
 		break;
-	case IVisualizationEngine::RENDER_COLOUR_FROM_NORMAL:
+	case IRenderingEngine::RENDER_COLOUR_FROM_NORMAL:
 		renderColourFromNormal_device<TVoxel, TIndex> <<<gridSize, cudaBlockSize>>>(outRendering, pointsRay,
 		                                                                            volume->GetVoxels(),
 		                                                                            volume->index.GetIndexData(), imgSize, lightSource);
 		ORcudaKernelCheck;
 		break;
-	case IVisualizationEngine::RENDER_COLOUR_FROM_CONFIDENCE:
+	case IRenderingEngine::RENDER_COLOUR_FROM_CONFIDENCE:
 		renderColourFromConfidence_device<TVoxel, TIndex> <<<gridSize, cudaBlockSize>>>(outRendering, pointsRay,
 		                                                                                volume->GetVoxels(),
 		                                                                                volume->index.GetIndexData(), imgSize, lightSource);
 		ORcudaKernelCheck;
 		break;
-	case IVisualizationEngine::RENDER_SHADED_GREYSCALE_IMAGENORMALS:
+	case IRenderingEngine::RENDER_SHADED_GREYSCALE_IMAGENORMALS:
 		if (intrinsics->FocalLengthSignsDiffer())
 		{
 			renderGrey_ImageNormals_device<true> <<<gridSize, cudaBlockSize>>>(outRendering, pointsRay, volume->GetParameters().voxel_size,
@@ -256,7 +256,7 @@ static void RenderImage_common(VoxelVolume<TVoxel, TIndex> *volume, const ORUtil
 		}
 		ORcudaKernelCheck;
 		break;
-	case IVisualizationEngine::RENDER_SHADED_GREYSCALE:
+	case IRenderingEngine::RENDER_SHADED_GREYSCALE:
 	default:
 		renderGrey_device<TVoxel, TIndex> <<<gridSize, cudaBlockSize>>>(outRendering, pointsRay, volume->GetVoxels(),
 		                                                                volume->index.GetIndexData(), imgSize, lightSource);
@@ -381,16 +381,16 @@ static void ForwardRender_common(const VoxelVolume<TVoxel, TIndex> *volume, cons
 
 template<class TVoxel, class TIndex>
 void VisualizationEngine_CUDA<TVoxel, TIndex>::RenderImage(VoxelVolume<TVoxel,TIndex> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, const RenderState *renderState,
-                                                           UChar4Image *outputImage, IVisualizationEngine::RenderImageType type,
-                                                           IVisualizationEngine::RenderRaycastSelection raycastType) const
+                                                           UChar4Image *outputImage, IRenderingEngine::RenderImageType type,
+                                                           IRenderingEngine::RenderRaycastSelection raycastType) const
 {
 	RenderImage_common(scene, pose, intrinsics, renderState, outputImage, type, raycastType);
 }
 
 template<class TVoxel>
 void VisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::RenderImage(VoxelVolume<TVoxel,VoxelBlockHash> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics,
-                                                                   const RenderState *renderState, UChar4Image *outputImage, IVisualizationEngine::RenderImageType type,
-                                                                   IVisualizationEngine::RenderRaycastSelection raycastType) const
+                                                                   const RenderState *renderState, UChar4Image *outputImage, IRenderingEngine::RenderImageType type,
+                                                                   IRenderingEngine::RenderRaycastSelection raycastType) const
 {
 	RenderImage_common(scene, pose, intrinsics, renderState, outputImage, type, raycastType);
 }

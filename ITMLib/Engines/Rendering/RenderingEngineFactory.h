@@ -16,7 +16,7 @@ namespace ITMLib
 /**
  * \brief This struct provides functions that can be used to construct Rendering engines.
  */
-struct VisualizationEngineFactory
+struct RenderingEngineFactory
 {
   //#################### PUBLIC STATIC MEMBER FUNCTIONS ####################
 
@@ -26,9 +26,9 @@ struct VisualizationEngineFactory
    * \param deviceType  The device on which the Rendering engine should operate.
    */
   template <typename TVoxel, typename TIndex>
-  static VisualizationEngine<TVoxel,TIndex> *MakeVisualizationEngine(MemoryDeviceType deviceType)
+  static RenderingEngineBase<TVoxel,TIndex> *MakeVisualizationEngine(MemoryDeviceType deviceType)
   {
-    VisualizationEngine<TVoxel,TIndex> *visualization_engine = NULL;
+    RenderingEngineBase<TVoxel,TIndex> *visualization_engine = NULL;
 
     switch(deviceType)
     {

@@ -42,7 +42,7 @@
 //(CUDA)
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CUDA.h"
 #include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
-#include "../ITMLib/Engines/Rendering/VisualizationEngineFactory.h"
+#include "../ITMLib/Engines/Rendering/RenderingEngineFactory.h"
 #include "../ITMLib/Engines/Warping/WarpingEngineFactory.h"
 #include "../ITMLib/Engines/VolumeFusion/VolumeFusionEngineFactory.h"
 #include "../ITMLib/Utils/Analytics/BenchmarkUtilities.h"
@@ -199,7 +199,7 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CPU) {
 
 	CameraTrackingState tracking_state(image_size, MEMORYDEVICE_CPU);
 
-	VisualizationEngine <TSDFVoxel, VoxelBlockHash>* visualization_engine =
+	RenderingEngineBase <TSDFVoxel, VoxelBlockHash>* visualization_engine =
 			VisualizationEngineFactory::MakeVisualizationEngine<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CPU);
 
 	RenderState render_state(image_size, configuration::get().general_voxel_volume_parameters.near_clipping_distance,
@@ -350,7 +350,7 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CUDA) {
 
 	CameraTrackingState tracking_state(image_size, MEMORYDEVICE_CUDA);
 
-	VisualizationEngine <TSDFVoxel, VoxelBlockHash>* visualization_engine =
+	RenderingEngineBase <TSDFVoxel, VoxelBlockHash>* visualization_engine =
 			VisualizationEngineFactory::MakeVisualizationEngine<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CUDA);
 
 	RenderState render_state(image_size, configuration::get().general_voxel_volume_parameters.near_clipping_distance,

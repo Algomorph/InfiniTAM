@@ -3,7 +3,7 @@
 #pragma once
 
 #include "../../MultiScene/VoxelMapGraphManager.h"
-#include "VisualizationEngine.h"
+#include "RenderingEngine.h"
 
 namespace ITMLib {
 
@@ -19,7 +19,7 @@ namespace ITMLib {
 
 		virtual void CreateExpectedDepths(const VoxelMapGraphManager<TVoxel, TIndex> & sceneManager, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *renderState) const = 0;
 		virtual void RenderImage(const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *renderState,
-		                         UChar4Image *outputImage, IVisualizationEngine::RenderImageType type) const = 0;
+		                         UChar4Image *outputImage, IRenderingEngine::RenderImageType type) const = 0;
 	};
 }
 

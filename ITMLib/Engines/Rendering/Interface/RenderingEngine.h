@@ -9,7 +9,7 @@
 
 namespace ITMLib
 {
-	class IVisualizationEngine
+	class IRenderingEngine
 	{
 	public:
 		enum RenderImageType
@@ -30,7 +30,7 @@ namespace ITMLib
 			RENDER_FROM_OLD_FORWARDPROJ
 		};
 
-		virtual ~IVisualizationEngine() {}
+		virtual ~IRenderingEngine() {}
 
 		static void DepthToUchar4(UChar4Image *dst, const FloatImage *src);
 		static void NormalToUchar4(UChar4Image* dst, const Float4Image *src);
@@ -53,7 +53,7 @@ namespace ITMLib
 		operations.
 		*/
 	template<class TVoxel, class TIndex>
-	class VisualizationEngine : public IVisualizationEngine
+	class RenderingEngineBase : public IRenderingEngine
 	{
 	public:
 
@@ -104,4 +104,26 @@ namespace ITMLib
 		virtual void ForwardRender(const VoxelVolume<TVoxel,TIndex> *scene, const View *view, CameraTrackingState *trackingState,
 		                           RenderState *renderState) const = 0;
 	};
-}
+	template<class TVoxel, class TIndex, MemoryDeviceType TMemoryDeviceType>
+	class RenderingEngine : public RenderingEngineBase<TVoxel, TIndex>{
+	public: // member functions
+		void FindVisibleBlocks(VoxelVolume<TVoxel,TIndex> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics,
+		                       RenderState *renderState) const override;
+		int CountVisibleBlocks(const VoxelVolume<TVoxel,TIndex> *scene, const RenderState *renderState, int minBlockId, int maxBlockId) const override;
+		void CreateExpectedDepths(const VoxelVolume<TVoxel,TIndex> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics,
+		                          RenderState *renderState) override;
+		void RenderImage(VoxelVolume<TVoxel,TIndex> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics,
+		                 const RenderState *renderState, UChar4Image *outputImage, IRenderingEngine::RenderImageType type = IRenderingEngine::RENDER_SHADED_GREYSCALE, IRenderingEngine::RenderRaycastSelection raycastType = IRenderingEngine::RENDER_FROM_NEW_RAYCAST) override;
+		void FindSurface(VoxelVolume<TVoxel,TIndex> *scene, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics,
+		                 const RenderState *renderState) override;
+		void CreatePointCloud(VoxelVolume<TVoxel,TIndex> *scene, const View *view, CameraTrackingState *trackingState,
+		                      RenderState *renderState, bool skipPoints) override;
+		void CreateICPMaps(VoxelVolume<TVoxel,TIndex> *scene, const View *view, CameraTrackingState *trackingState,
+		                   RenderState *renderState) override;
+		void ForwardRender(const VoxelVolume<TVoxel,TIndex> *scene, const View *view, CameraTrackingState *trackingState,
+		                           RenderState *renderState) override;
+
+	};
+
+
+}// namespace ITMLib

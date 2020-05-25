@@ -27,7 +27,7 @@ namespace ITMLib
 	private:
 
 		LowLevelEngine *lowLevelEngine;
-		VisualizationEngine<TVoxel, TIndex>* visualization_engine;
+		RenderingEngineBase<TVoxel, TIndex>* visualization_engine;
 		MultiVisualizationEngine<TVoxel, TIndex> *multiVisualizationEngine;
 
 		MultiMeshingEngine<TVoxel, TIndex> *meshingEngine;

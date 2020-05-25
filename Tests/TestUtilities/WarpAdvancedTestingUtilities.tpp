@@ -25,7 +25,7 @@
 #include "../../ITMLib/Engines/EditAndCopy/EditAndCopyEngineFactory.h"
 #include "../../ITMLib/Engines/Indexing/Interface/IndexingEngine.h"
 #include "../../ITMLib/Engines/Indexing/IndexingEngineFactory.h"
-#include "../../ITMLib/Engines/Rendering/VisualizationEngineFactory.h"
+#include "../../ITMLib/Engines/Rendering/RenderingEngineFactory.h"
 #include "../../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison.h"
 //(CPU)
 #include "../../ITMLib/Engines/Analytics/AnalyticsEngine.h"
@@ -87,8 +87,8 @@ void GenerateRawLiveAndCanonicalVolumes(VoxelVolume<TSDFVoxel, TIndex>** canonic
 
 	CameraTrackingState tracking_state(image_size, TMemoryDeviceType);
 
-	VisualizationEngine<TSDFVoxel, TIndex>* visualization_engine =
-			VisualizationEngineFactory::MakeVisualizationEngine<TSDFVoxel, TIndex>(TMemoryDeviceType);
+	RenderingEngineBase<TSDFVoxel, TIndex>* visualization_engine =
+			RenderingEngineFactory::MakeVisualizationEngine<TSDFVoxel, TIndex>(TMemoryDeviceType);
 
 	RenderState render_state(image_size, configuration::get().general_voxel_volume_parameters.near_clipping_distance,
 	                         configuration::get().general_voxel_volume_parameters.far_clipping_distance,

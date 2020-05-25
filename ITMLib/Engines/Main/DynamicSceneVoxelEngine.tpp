@@ -28,7 +28,7 @@ namespace fs = std::filesystem;
 #include "../LowLevel/LowLevelEngineFactory.h"
 #include "../Meshing/MeshingEngineFactory.h"
 #include "../ViewBuilding/ViewBuilderFactory.h"
-#include "../Rendering/VisualizationEngineFactory.h"
+#include "../Rendering/RenderingEngineFactory.h"
 #include "../VolumeFileIO/VolumeFileIOEngine.h"
 #include "../VolumeFusion/VolumeFusionEngineFactory.h"
 #include "../EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
@@ -69,7 +69,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(const RG
 		  low_level_engine(LowLevelEngineFactory::MakeLowLevelEngine(configuration::get().device_type)),
 		  telemetry_recorder(TelemetryRecorderFactory::GetDefault<TVoxel, TWarp, TIndex>(configuration::get().device_type)),
 		  view_builder(ViewBuilderFactory::Build(calibration_info, configuration::get().device_type)),
-		  visualization_engine(VisualizationEngineFactory::MakeVisualizationEngine<TVoxel, TIndex>(
+		  visualization_engine(RenderingEngineFactory::MakeVisualizationEngine<TVoxel, TIndex>(
 				  configuration::get().device_type)),
 		  meshing_engine(config.create_meshing_engine ? MeshingEngineFactory::Build<TVoxel, TIndex>(
 		  		configuration::get().device_type) : nullptr) {
@@ -400,31 +400,31 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(UChar4Image* out, 
 		case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_ORIGINAL_DEPTH:
 			out->ChangeDims(view->depth->dimensions);
 			if (settings.device_type == MEMORYDEVICE_CUDA) view->depth->UpdateHostFromDevice();
-			VisualizationEngine<TVoxel, TIndex>::DepthToUchar4(out, view->depth);
+			RenderingEngineBase<TVoxel, TIndex>::DepthToUchar4(out, view->depth);
 			break;
 		case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_SCENERAYCAST:
 		case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_COLOUR_FROM_VOLUME:
 		case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_COLOUR_FROM_NORMAL:
 		case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_COLOUR_FROM_CONFIDENCE: {
 			// use current raycast or forward projection?
-			IVisualizationEngine::RenderRaycastSelection raycastType;
-			if (tracking_state->point_cloud_age <= 0) raycastType = IVisualizationEngine::RENDER_FROM_OLD_RAYCAST;
-			else raycastType = IVisualizationEngine::RENDER_FROM_OLD_FORWARDPROJ;
+			IRenderingEngine::RenderRaycastSelection raycastType;
+			if (tracking_state->point_cloud_age <= 0) raycastType = IRenderingEngine::RENDER_FROM_OLD_RAYCAST;
+			else raycastType = IRenderingEngine::RENDER_FROM_OLD_FORWARDPROJ;
 
 			// what sort of image is it?
-			IVisualizationEngine::RenderImageType render_type;
+			IRenderingEngine::RenderImageType render_type;
 			switch (type) {
 				case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_COLOUR_FROM_CONFIDENCE:
-					render_type = IVisualizationEngine::RENDER_COLOUR_FROM_CONFIDENCE;
+					render_type = IRenderingEngine::RENDER_COLOUR_FROM_CONFIDENCE;
 					break;
 				case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_COLOUR_FROM_NORMAL:
-					render_type = IVisualizationEngine::RENDER_COLOUR_FROM_NORMAL;
+					render_type = IRenderingEngine::RENDER_COLOUR_FROM_NORMAL;
 					break;
 				case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_COLOUR_FROM_VOLUME:
-					render_type = IVisualizationEngine::RENDER_COLOUR_FROM_VOLUME;
+					render_type = IRenderingEngine::RENDER_COLOUR_FROM_VOLUME;
 					break;
 				default:
-					render_type = IVisualizationEngine::RENDER_SHADED_GREYSCALE_IMAGENORMALS;
+					render_type = IRenderingEngine::RENDER_SHADED_GREYSCALE_IMAGENORMALS;
 			}
 
 			visualization_engine->RenderImage(live_volumes[0], tracking_state->pose_d, &view->calib.intrinsics_d,
@@ -447,16 +447,16 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(UChar4Image* out, 
 		case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_VOLUME:
 		case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_NORMAL:
 		case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_CONFIDENCE: {
-			IVisualizationEngine::RenderImageType render_type = IVisualizationEngine::RENDER_SHADED_GREYSCALE;
+			IRenderingEngine::RenderImageType render_type = IRenderingEngine::RENDER_SHADED_GREYSCALE;
 			switch (type) {
 				case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_VOLUME:
-					render_type = IVisualizationEngine::RENDER_COLOUR_FROM_VOLUME;
+					render_type = IRenderingEngine::RENDER_COLOUR_FROM_VOLUME;
 					break;
 				case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_NORMAL:
-					render_type = IVisualizationEngine::RENDER_COLOUR_FROM_NORMAL;
+					render_type = IRenderingEngine::RENDER_COLOUR_FROM_NORMAL;
 					break;
 				case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_CONFIDENCE:
-					render_type = IVisualizationEngine::RENDER_COLOUR_FROM_CONFIDENCE;
+					render_type = IRenderingEngine::RENDER_COLOUR_FROM_CONFIDENCE;
 					break;
 				default:
 					assert(false);
@@ -480,7 +480,7 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(UChar4Image* out, 
 			break;
 		}
 		case MainEngine::InfiniTAM_IMAGE_FREECAMERA_CANONICAL: {
-			IVisualizationEngine::RenderImageType type = IVisualizationEngine::RENDER_SHADED_GREYSCALE;
+			IRenderingEngine::RenderImageType type = IRenderingEngine::RENDER_SHADED_GREYSCALE;
 
 			if (freeview_render_state == nullptr) {
 				freeview_render_state = new RenderState(out->dimensions,

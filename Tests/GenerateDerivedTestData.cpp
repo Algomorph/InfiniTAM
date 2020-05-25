@@ -58,7 +58,7 @@
 #include "../ITMLib/Engines/Meshing/MeshingEngineFactory.h"
 #include "../ITMLib/Objects/Meshing/Mesh.h"
 #include "../ITMLib/Utils/Configuration/TelemetrySettings.h"
-#include "../ITMLib/Engines/Rendering/VisualizationEngineFactory.h"
+#include "../ITMLib/Engines/Rendering/RenderingEngineFactory.h"
 
 
 using namespace ITMLib;
@@ -599,19 +599,19 @@ void GenerateRenderingTestData_VoxelBlockHash() {
 
 			UChar4Image output_image(snoopy::frame_image_size, TMemoryDeviceType);
 			fixture.visualization_engine->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state_render_image.get(),
-			                                          &output_image, IVisualizationEngine::RenderImageType::RENDER_COLOUR_FROM_VOLUME, IVisualizationEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
+			                                          &output_image, IRenderingEngine::RenderImageType::RENDER_COLOUR_FROM_VOLUME, IRenderingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
 			ORUtils::MemoryBlockPersistence::SaveImage(rendered_images_file, output_image);
 			fixture.visualization_engine->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state_render_image.get(),
-			                                          &output_image, IVisualizationEngine::RenderImageType::RENDER_COLOUR_FROM_NORMAL, IVisualizationEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
+			                                          &output_image, IRenderingEngine::RenderImageType::RENDER_COLOUR_FROM_NORMAL, IRenderingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
 			ORUtils::MemoryBlockPersistence::SaveImage(rendered_images_file, output_image);
 			fixture.visualization_engine->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state_render_image.get(),
-			                                          &output_image, IVisualizationEngine::RenderImageType::RENDER_SHADED_GREYSCALE_IMAGENORMALS, IVisualizationEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
+			                                          &output_image, IRenderingEngine::RenderImageType::RENDER_SHADED_GREYSCALE_IMAGENORMALS, IRenderingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
 			ORUtils::MemoryBlockPersistence::SaveImage(rendered_images_file, output_image);
 			fixture.visualization_engine->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state_render_image.get(),
-			                                          &output_image, IVisualizationEngine::RenderImageType::RENDER_SHADED_GREEN, IVisualizationEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
+			                                          &output_image, IRenderingEngine::RenderImageType::RENDER_SHADED_GREEN, IRenderingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
 			ORUtils::MemoryBlockPersistence::SaveImage(rendered_images_file, output_image);
 			fixture.visualization_engine->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state_render_image.get(),
-			                                          &output_image, IVisualizationEngine::RenderImageType::RENDER_SHADED_OVERLAY, IVisualizationEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
+			                                          &output_image, IRenderingEngine::RenderImageType::RENDER_SHADED_OVERLAY, IRenderingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
 			ORUtils::MemoryBlockPersistence::SaveImage(rendered_images_file, output_image);
 		}
 

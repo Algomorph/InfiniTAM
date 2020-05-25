@@ -1,6 +1,6 @@
 // Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
 
-#include "VisualizationEngine.h"
+#include "RenderingEngine.h"
 
 using namespace ITMLib;
 
@@ -16,7 +16,7 @@ inline float base(float val) {
 	else return 0.0;
 }
 
-void IVisualizationEngine::DepthToUchar4(UChar4Image *dst, const FloatImage *src)
+void IRenderingEngine::DepthToUchar4(UChar4Image *dst, const FloatImage *src)
 {
 	Vector4u *dest = dst->GetData(MEMORYDEVICE_CPU);
 	const float *source = src->GetData(MEMORYDEVICE_CPU);
@@ -56,7 +56,7 @@ void IVisualizationEngine::DepthToUchar4(UChar4Image *dst, const FloatImage *src
 	}
 }
 
-void IVisualizationEngine::NormalToUchar4(UChar4Image *dst, const Float4Image *src)
+void IRenderingEngine::NormalToUchar4(UChar4Image *dst, const Float4Image *src)
 {
 	Vector4u *dest = dst->GetData(MEMORYDEVICE_CPU);
 	const Vector4f *source = src->GetData(MEMORYDEVICE_CPU);
@@ -78,7 +78,7 @@ void IVisualizationEngine::NormalToUchar4(UChar4Image *dst, const Float4Image *s
 	}
 }
 
-void IVisualizationEngine::WeightToUchar4(UChar4Image *dst, const FloatImage *src)
+void IRenderingEngine::WeightToUchar4(UChar4Image *dst, const FloatImage *src)
 {
 	Vector4u *dest = dst->GetData(MEMORYDEVICE_CPU);
 	const float *source = src->GetData(MEMORYDEVICE_CPU);

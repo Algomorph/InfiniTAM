@@ -114,7 +114,7 @@ void MultiVisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::CreateExpectedDepths
 }
 
 template <typename TVoxel, typename TIndex>
-static void RenderImage_common(const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *_renderState, UChar4Image *outputImage, IVisualizationEngine::RenderImageType type){
+static void RenderImage_common(const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *_renderState, UChar4Image *outputImage, IRenderingEngine::RenderImageType type){
 	RenderStateMultiScene<TVoxel, TIndex> *renderState = (RenderStateMultiScene<TVoxel, TIndex>*)_renderState;
 
 	Vector2i imgSize = outputImage->dimensions;
@@ -153,30 +153,30 @@ static void RenderImage_common(const ORUtils::SE3Pose *pose, const Intrinsics *i
 	dim3 cudaBlockSize(8, 8);
 	dim3 gridSize((int)ceil((float)imgSize.x / (float)cudaBlockSize.x), (int)ceil((float)imgSize.y / (float)cudaBlockSize.y));
 
-	if ((type == IVisualizationEngine::RENDER_COLOUR_FROM_VOLUME) &&
-	    (!TVoxel::hasColorInformation)) type = IVisualizationEngine::RENDER_SHADED_GREYSCALE;
+	if ((type == IRenderingEngine::RENDER_COLOUR_FROM_VOLUME) &&
+	    (!TVoxel::hasColorInformation)) type = IRenderingEngine::RENDER_SHADED_GREYSCALE;
 
 	switch (type) {
-		case IVisualizationEngine::RENDER_COLOUR_FROM_VOLUME:
+		case IRenderingEngine::RENDER_COLOUR_FROM_VOLUME:
 			renderColour_device<MultiVoxel<TVoxel>, MultiIndex<TIndex> > <<<gridSize, cudaBlockSize >>>(outRendering, pointsRay, renderState->voxelData_device,
 					renderState->indexData_device, imgSize);
 			ORcudaKernelCheck;
 			break;
-		case IVisualizationEngine::RENDER_COLOUR_FROM_NORMAL:
+		case IRenderingEngine::RENDER_COLOUR_FROM_NORMAL:
 			if (intrinsics->FocalLengthSignsDiffer())
 				renderNormals_ImageNormals_device<true> <<<gridSize, cudaBlockSize >>>(outRendering, pointsRay, imgSize, renderState->voxelSize, lightSource);
 			else
 				renderNormals_ImageNormals_device<false> <<<gridSize, cudaBlockSize >>>(outRendering, pointsRay, imgSize, renderState->voxelSize, lightSource);
 			ORcudaKernelCheck;
 			break;
-		case IVisualizationEngine::RENDER_COLOUR_FROM_CONFIDENCE:
+		case IRenderingEngine::RENDER_COLOUR_FROM_CONFIDENCE:
 			if (intrinsics->FocalLengthSignsDiffer())
 				renderConfidence_ImageNormals_device<true> <<<gridSize, cudaBlockSize >>>(outRendering, pointsRay, imgSize, renderState->voxelSize, lightSource);
 			else
 				renderConfidence_ImageNormals_device<false> <<<gridSize, cudaBlockSize >>>(outRendering, pointsRay, imgSize, renderState->voxelSize, lightSource);
 			ORcudaKernelCheck;
 			break;
-		case IVisualizationEngine::RENDER_SHADED_GREYSCALE:
+		case IRenderingEngine::RENDER_SHADED_GREYSCALE:
 		default:
 			if (intrinsics->FocalLengthSignsDiffer())
 				renderGrey_ImageNormals_device<true> <<<gridSize, cudaBlockSize >>>(outRendering, pointsRay, renderState->voxelSize, imgSize, lightSource);
@@ -188,13 +188,13 @@ static void RenderImage_common(const ORUtils::SE3Pose *pose, const Intrinsics *i
 };
 
 template<class TVoxel, class TIndex>
-void MultiVisualizationEngine_CUDA<TVoxel, TIndex>::RenderImage(const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *_renderState, UChar4Image *outputImage, IVisualizationEngine::RenderImageType type) const
+void MultiVisualizationEngine_CUDA<TVoxel, TIndex>::RenderImage(const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *_renderState, UChar4Image *outputImage, IRenderingEngine::RenderImageType type) const
 {
 	RenderImage_common<TVoxel,TIndex>(pose, intrinsics, _renderState, outputImage, type);
 }
 
 template<class TVoxel>
-void MultiVisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::RenderImage(const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *_renderState, UChar4Image *outputImage, IVisualizationEngine::RenderImageType type) const
+void MultiVisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::RenderImage(const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *_renderState, UChar4Image *outputImage, IRenderingEngine::RenderImageType type) const
 {
 	RenderImage_common<TVoxel,VoxelBlockHash>(pose, intrinsics, _renderState, outputImage, type);
 }

@@ -339,7 +339,7 @@ void BasicSurfelEngine<TSurfel>::GetImage(UChar4Image* out, GetImageType getImag
 		case BasicSurfelEngine::InfiniTAM_IMAGE_ORIGINAL_DEPTH:
 			out->ChangeDims(view->depth->dimensions);
 			if (settings.device_type == MEMORYDEVICE_CUDA) view->depth->UpdateHostFromDevice();
-			IVisualizationEngine::DepthToUchar4(out, view->depth);
+			IRenderingEngine::DepthToUchar4(out, view->depth);
 			break;
 		case BasicSurfelEngine::InfiniTAM_IMAGE_SCENERAYCAST:
 		case BasicSurfelEngine::InfiniTAM_IMAGE_COLOUR_FROM_VOLUME:

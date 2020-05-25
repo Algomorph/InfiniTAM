@@ -33,7 +33,7 @@
 #include "../ITMLib/Engines/ViewBuilding/ViewBuilderFactory.h"
 #include "../ORUtils/FileUtils.h"
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngine.h"
-#include "../ITMLib/Engines/Rendering/VisualizationEngineFactory.h"
+#include "../ITMLib/Engines/Rendering/RenderingEngineFactory.h"
 //(CPU)
 #include "../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_VoxelBlockHash_CPU.h"
 #include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
@@ -170,7 +170,7 @@ BOOST_FIXTURE_TEST_CASE(Test_TwoSurfaceAllocation_CPU, TestData_CPU) {
 	indexer.AllocateNearSurface(&square_volume, view_square_1, tracking_state);
 	depth_fusion_engine.IntegrateDepthImageIntoTsdfVolume(&square_volume, view_square_1, tracking_state);
 
-	VisualizationEngine<TSDFVoxel, VoxelBlockHash>* visualization_engine = VisualizationEngineFactory::MakeVisualizationEngine<TSDFVoxel, VoxelBlockHash>(
+	RenderingEngineBase<TSDFVoxel, VoxelBlockHash>* visualization_engine = RenderingEngineFactory::MakeVisualizationEngine<TSDFVoxel, VoxelBlockHash>(
 			MEMORYDEVICE_CPU);
 
 	// builds the point cloud
@@ -228,7 +228,7 @@ BOOST_FIXTURE_TEST_CASE(Test_TwoSurfaceAllocation_CUDA, TestData_CUDA) {
 	indexer.AllocateNearSurface(&square_volume, view_square_1, tracking_state);
 	depth_fusion_engine.IntegrateDepthImageIntoTsdfVolume(&square_volume, view_square_1, tracking_state);
 
-	VisualizationEngine<TSDFVoxel, VoxelBlockHash>* visualization_engine = VisualizationEngineFactory::MakeVisualizationEngine<TSDFVoxel, VoxelBlockHash>(
+	RenderingEngineBase<TSDFVoxel, VoxelBlockHash>* visualization_engine = RenderingEngineFactory::MakeVisualizationEngine<TSDFVoxel, VoxelBlockHash>(
 			MEMORYDEVICE_CUDA);
 
 	// builds the point cloud

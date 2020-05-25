@@ -4,7 +4,7 @@
 
 #include "../LowLevel/LowLevelEngineFactory.h"
 #include "../ViewBuilding/ViewBuilderFactory.h"
-#include "../Rendering/VisualizationEngineFactory.h"
+#include "../Rendering/RenderingEngineFactory.h"
 #include "../Rendering/MultiVisualizationEngineFactory.h"
 #include "../../CameraTrackers/CameraTrackerFactory.h"
 
@@ -34,7 +34,7 @@ MultiEngine<TVoxel, TIndex>::MultiEngine(const RGBDCalib& calib, Vector2i imgSiz
 	const MemoryDeviceType deviceType = settings.device_type;
 	lowLevelEngine = LowLevelEngineFactory::MakeLowLevelEngine(deviceType);
 	viewBuilder = ViewBuilderFactory::Build(calib, deviceType);
-	visualization_engine = VisualizationEngineFactory::MakeVisualizationEngine<TVoxel, TIndex>(deviceType);
+	visualization_engine = RenderingEngineFactory::MakeVisualizationEngine<TVoxel, TIndex>(deviceType);
 
 	tracker = CameraTrackerFactory::Instance().Make(imgSize_rgb, imgSize_d, lowLevelEngine, imuCalibrator,
 	                                                settings.general_voxel_volume_parameters);
@@ -349,7 +349,7 @@ void MultiEngine<TVoxel, TIndex>::GetImage(UChar4Image *out, GetImageType getIma
 	case MultiEngine::InfiniTAM_IMAGE_ORIGINAL_DEPTH:
 		out->ChangeDims(view->depth->dimensions);
 		if (settings.device_type == MEMORYDEVICE_CUDA) view->depth->UpdateHostFromDevice();
-		VisualizationEngine<TVoxel, TIndex>::DepthToUchar4(out, view->depth);
+		RenderingEngineBase<TVoxel, TIndex>::DepthToUchar4(out, view->depth);
 		break;
     case MultiEngine::InfiniTAM_IMAGE_COLOUR_FROM_VOLUME: //TODO: add colour rendering
 	case MultiEngine::InfiniTAM_IMAGE_SCENERAYCAST:
@@ -361,21 +361,21 @@ void MultiEngine<TVoxel, TIndex>::GetImage(UChar4Image *out, GetImageType getIma
 
 		LocalMap<TVoxel, TIndex> *activeLocalMap = mapManager->getLocalMap(VisualizationLocalMapIdx);
 
-		IVisualizationEngine::RenderRaycastSelection raycastType;
-		if (activeLocalMap->trackingState->point_cloud_age <= 0) raycastType = IVisualizationEngine::RENDER_FROM_OLD_RAYCAST;
-		else raycastType = IVisualizationEngine::RENDER_FROM_OLD_FORWARDPROJ;
+		IRenderingEngine::RenderRaycastSelection raycastType;
+		if (activeLocalMap->trackingState->point_cloud_age <= 0) raycastType = IRenderingEngine::RENDER_FROM_OLD_RAYCAST;
+		else raycastType = IRenderingEngine::RENDER_FROM_OLD_FORWARDPROJ;
 
-		IVisualizationEngine::RenderImageType imageType;
+		IRenderingEngine::RenderImageType imageType;
 		switch (getImageType)
 		{
 		case MultiEngine::InfiniTAM_IMAGE_COLOUR_FROM_CONFIDENCE:
-			imageType = IVisualizationEngine::RENDER_COLOUR_FROM_CONFIDENCE;
+			imageType = IRenderingEngine::RENDER_COLOUR_FROM_CONFIDENCE;
 			break;
 		case MultiEngine::InfiniTAM_IMAGE_COLOUR_FROM_NORMAL:
-			imageType = IVisualizationEngine::RENDER_COLOUR_FROM_NORMAL;
+			imageType = IRenderingEngine::RENDER_COLOUR_FROM_NORMAL;
 			break;
 		default:
-			imageType = IVisualizationEngine::RENDER_SHADED_GREYSCALE_IMAGENORMALS;
+			imageType = IRenderingEngine::RENDER_SHADED_GREYSCALE_IMAGENORMALS;
 		}
 
 		visualization_engine->RenderImage(activeLocalMap->volume, activeLocalMap->trackingState->pose_d, &view->calib.intrinsics_d, activeLocalMap->renderState, activeLocalMap->renderState->raycastImage, imageType, raycastType);
@@ -392,10 +392,10 @@ void MultiEngine<TVoxel, TIndex>::GetImage(UChar4Image *out, GetImageType getIma
 	case MultiEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_NORMAL:
 	case MultiEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_CONFIDENCE:
 	{
-		IVisualizationEngine::RenderImageType type = IVisualizationEngine::RENDER_SHADED_GREYSCALE;
-		if (getImageType == MultiEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_VOLUME) type = IVisualizationEngine::RENDER_COLOUR_FROM_VOLUME;
-		else if (getImageType == MultiEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_NORMAL) type = IVisualizationEngine::RENDER_COLOUR_FROM_NORMAL;
-		else if (getImageType == MultiEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_CONFIDENCE) type = IVisualizationEngine::RENDER_COLOUR_FROM_CONFIDENCE;
+		IRenderingEngine::RenderImageType type = IRenderingEngine::RENDER_SHADED_GREYSCALE;
+		if (getImageType == MultiEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_VOLUME) type = IRenderingEngine::RENDER_COLOUR_FROM_VOLUME;
+		else if (getImageType == MultiEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_NORMAL) type = IRenderingEngine::RENDER_COLOUR_FROM_NORMAL;
+		else if (getImageType == MultiEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_CONFIDENCE) type = IRenderingEngine::RENDER_COLOUR_FROM_CONFIDENCE;
 
 		if (freeviewLocalMapIdx >= 0){
 			LocalMap<TVoxel, TIndex> *activeData = mapManager->getLocalMap(freeviewLocalMapIdx);

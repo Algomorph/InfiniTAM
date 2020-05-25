@@ -553,69 +553,61 @@ set(ITMLIB_ENGINES_VIEWBUILDING_SHARED_HEADERS
     )
 ## ======================================== VISUALIZATION ENGINES ======================================================
 ##
-set(ITMLIB_ENGINES_VISUALIZATION_HEADERS
-    Engines/Rendering/MultiVisualizationEngineFactory.h
-    Engines/Rendering/SurfelVisualizationEngineFactory.h
-    Engines/Rendering/VisualizationEngineFactory.h
-    )
+set(
+        ITMLIB_ENGINES_RENDERING_HEADERS
+
+        Engines/Rendering/MultiVisualizationEngineFactory.h
+        Engines/Rendering/SurfelVisualizationEngineFactory.h
+        Engines/Rendering/RenderingEngineFactory.h
+        Engines/Rendering/RenderingEngineFactory.h
+
+        Engines/Rendering/CPU/MultiVisualizationEngine_CPU.h
+        Engines/Rendering/CPU/SurfelVisualizationEngine_CPU.h
+        Engines/Rendering/CPU/VisualizationEngine_CPU.h
+
+        Engines/Rendering/CUDA/MultiVisualizationEngine_CUDA.h
+        Engines/Rendering/CUDA/SurfelVisualizationEngine_CUDA.h
+        Engines/Rendering/CUDA/VisualizationEngine_CUDA.h
+        Engines/Rendering/CUDA/VisualizationHelpers_CUDA.h
+
+        Engines/Rendering/Interface/MultiVisualizationEngine.h
+        Engines/Rendering/Interface/SurfelVisualizationEngine.h
+        Engines/Rendering/Interface/RenderingEngine.h
+
+        Engines/Rendering/Shared/SurfelVisualizationEngine_Settings.h
+        Engines/Rendering/Shared/SurfelVisualizationEngine_Shared.h
+        Engines/Rendering/Shared/VisualizationEngine_Shared.h
+)
 
 ##
-set(ITMLIB_ENGINES_VISUALIZATION_CPU_SOURCES
-    Engines/Rendering/CPU/MultiVisualizationEngine_CPU.tpp
-    Engines/Rendering/CPU/MultiVisualizationEngine_CPU_PlainVoxelArray.cpp
-    Engines/Rendering/CPU/MultiVisualizationEngine_CPU_VoxelBlockHash.cpp
-    Engines/Rendering/CPU/SurfelVisualizationEngine_CPU.tpp
-    Engines/Rendering/CPU/SurfelVisualizationEngine_CPU.cpp
-    Engines/Rendering/CPU/VisualizationEngine_CPU.tpp
-    Engines/Rendering/CPU/VisualizationEngine_CPU_VoxelBlockHash.cpp
-    Engines/Rendering/CPU/VisualizationEngine_CPU_PlainVoxelArray.cpp
-    )
+set(
+        ITMLIB_ENGINES_RENDERING_SOURCES
 
-set(ITMLIB_ENGINES_VISUALIZATION_CPU_HEADERS
-    Engines/Rendering/CPU/MultiVisualizationEngine_CPU.h
-    Engines/Rendering/CPU/SurfelVisualizationEngine_CPU.h
-    Engines/Rendering/CPU/VisualizationEngine_CPU.h
-    )
+        Engines/Rendering/RenderingEngine.tpp
 
-##
-set(ITMLIB_ENGINES_VISUALIZATION_CUDA_SOURCES
-    Engines/Rendering/CUDA/MultiVisualizationEngine_CUDA.tcu
-    Engines/Rendering/CUDA/MultiVisualizationEngine_CUDA_PlainVoxelArray.cu
-    Engines/Rendering/CUDA/MultiVisualizationEngine_CUDA_VoxelBlockHash.cu
-    Engines/Rendering/CUDA/SurfelVisualizationEngine_CUDA.tcu
-    Engines/Rendering/CUDA/SurfelVisualizationEngine_CUDA.cu
-    Engines/Rendering/CUDA/VisualizationEngine_CUDA.tcu
-    Engines/Rendering/CUDA/VisualizationHelpers_CUDA.cu
-    Engines/Rendering/CUDA/VisualizationEngine_CUDA_VoxelBlockHash.cu
-    Engines/Rendering/CUDA/VisualizationEngine_CUDA_PlainVoxelArray.cu
-    )
+        Engines/Rendering/CPU/MultiVisualizationEngine_CPU.tpp
+        Engines/Rendering/CPU/MultiVisualizationEngine_CPU_PlainVoxelArray.cpp
+        Engines/Rendering/CPU/MultiVisualizationEngine_CPU_VoxelBlockHash.cpp
+        Engines/Rendering/CPU/SurfelVisualizationEngine_CPU.tpp
+        Engines/Rendering/CPU/SurfelVisualizationEngine_CPU.cpp
+        Engines/Rendering/CPU/VisualizationEngine_CPU.tpp
+        Engines/Rendering/CPU/VisualizationEngine_CPU_VoxelBlockHash.cpp
+        Engines/Rendering/CPU/VisualizationEngine_CPU_PlainVoxelArray.cpp
 
-set(ITMLIB_ENGINES_VISUALIZATION_CUDA_HEADERS
-    Engines/Rendering/CUDA/MultiVisualizationEngine_CUDA.h
-    Engines/Rendering/CUDA/SurfelVisualizationEngine_CUDA.h
-    Engines/Rendering/CUDA/VisualizationEngine_CUDA.h
-    Engines/Rendering/CUDA/VisualizationHelpers_CUDA.h
-    )
+        Engines/Rendering/CUDA/MultiVisualizationEngine_CUDA.tcu
+        Engines/Rendering/CUDA/MultiVisualizationEngine_CUDA_PlainVoxelArray.cu
+        Engines/Rendering/CUDA/MultiVisualizationEngine_CUDA_VoxelBlockHash.cu
+        Engines/Rendering/CUDA/SurfelVisualizationEngine_CUDA.tcu
+        Engines/Rendering/CUDA/SurfelVisualizationEngine_CUDA.cu
+        Engines/Rendering/CUDA/VisualizationEngine_CUDA.tcu
+        Engines/Rendering/CUDA/VisualizationHelpers_CUDA.cu
+        Engines/Rendering/CUDA/VisualizationEngine_CUDA_VoxelBlockHash.cu
+        Engines/Rendering/CUDA/VisualizationEngine_CUDA_PlainVoxelArray.cu
 
-##
-set(ITMLIB_ENGINES_VISUALIZATION_INTERFACE_SOURCES
-    Engines/Rendering/Interface/SurfelVisualizationEngine.tpp
-    Engines/Rendering/Interface/SurfelVisualizationEngine.cpp
-    Engines/Rendering/Interface/VisualizationEngine.cpp
-    )
-
-set(ITMLIB_ENGINES_VISUALIZATION_INTERFACE_HEADERS
-    Engines/Rendering/Interface/MultiVisualizationEngine.h
-    Engines/Rendering/Interface/SurfelVisualizationEngine.h
-    Engines/Rendering/Interface/VisualizationEngine.h
-    )
-
-##
-set(ITMLIB_ENGINES_VISUALIZATION_SHARED_HEADERS
-    Engines/Rendering/Shared/SurfelVisualizationEngine_Settings.h
-    Engines/Rendering/Shared/SurfelVisualizationEngine_Shared.h
-    Engines/Rendering/Shared/VisualizationEngine_Shared.h
-    )
+        Engines/Rendering/Interface/SurfelVisualizationEngine.tpp
+        Engines/Rendering/Interface/SurfelVisualizationEngine.cpp
+        Engines/Rendering/Interface/IRenderingEngine.cpp
+)
 
 
 ## ================================================ ANALYTICS ENGINES ==================================================
@@ -1055,10 +1047,7 @@ set(sources
     ${ITMLIB_ENGINES_VIEWBUILDING_SOURCES}
     ${ITMLIB_ENGINES_VIEWBUILDING_CPU_SOURCES}
     ${ITMLIB_ENGINES_VIEWBUILDING_CUDA_SOURCES}
-    ${ITMLIB_ENGINES_VISUALIZATION_SOURCES}
-    ${ITMLIB_ENGINES_VISUALIZATION_CPU_SOURCES}
-    ${ITMLIB_ENGINES_VISUALIZATION_CUDA_SOURCES}
-    ${ITMLIB_ENGINES_VISUALIZATION_INTERFACE_SOURCES}
+    ${ITMLIB_ENGINES_RENDERING_SOURCES}
     ${ITMLIB_ENGINES_ANALYTICS_SOURCES}
     ${ITMLIB_ENGINES_TELEMETRY_SOURCES}
     ${ITMLIB_OBJECTS_CAMERA_SOURCES}
@@ -1114,11 +1103,7 @@ set(headers
     ${ITMLIB_ENGINES_VIEWBUILDING_CUDA_HEADERS}
     ${ITMLIB_ENGINES_VIEWBUILDING_INTERFACE_HEADERS}
     ${ITMLIB_ENGINES_VIEWBUILDING_SHARED_HEADERS}
-    ${ITMLIB_ENGINES_VISUALIZATION_HEADERS}
-    ${ITMLIB_ENGINES_VISUALIZATION_CPU_HEADERS}
-    ${ITMLIB_ENGINES_VISUALIZATION_CUDA_HEADERS}
-    ${ITMLIB_ENGINES_VISUALIZATION_INTERFACE_HEADERS}
-    ${ITMLIB_ENGINES_VISUALIZATION_SHARED_HEADERS}
+    ${ITMLIB_ENGINES_RENDERING_HEADERS}
     ${ITMLIB_ENGINES_ANALYTICS_HEADERS}
     ${ITMLIB_ENGINES_TELEMETRY_HEADERS}
     ${ITMLIB_OBJECTS_CAMERA_HEADERS}

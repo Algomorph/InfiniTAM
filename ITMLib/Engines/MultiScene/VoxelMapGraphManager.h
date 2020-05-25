@@ -6,7 +6,7 @@
 
 #include "../../Objects/Volume/LocalMap.h"
 #include "../Main/Mappers/DenseMapper.h"
-#include "../Rendering/Interface/VisualizationEngine.h"
+#include "../Rendering/Interface/RenderingEngine.h"
 
 namespace ITMLib
 {
@@ -41,14 +41,14 @@ namespace ITMLib
 	class VoxelMapGraphManager : public MapGraphManager
 	{
 	private:
-		const VisualizationEngine<TVoxel, TIndex> *visualization_engine;
+		const RenderingEngineBase<TVoxel, TIndex> *visualization_engine;
 		const DenseMapper<TVoxel, TIndex> *denseMapper;
 		Vector2i trackedImageSize;
 
 		std::vector<LocalMap<TVoxel, TIndex>*> allData;
 
 	public:
-		VoxelMapGraphManager(const VisualizationEngine<TVoxel, TIndex>* visualizationEngine,
+		VoxelMapGraphManager(const RenderingEngineBase<TVoxel, TIndex>* visualizationEngine,
 		                     const DenseMapper<TVoxel, TIndex>* denseMapper, const Vector2i& trackedImageSize);
 		~VoxelMapGraphManager();
 
