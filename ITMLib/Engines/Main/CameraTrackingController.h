@@ -4,8 +4,8 @@
 
 #include <stdexcept>
 
-#include "../Visualization/Interface/SurfelVisualizationEngine.h"
-#include "../Visualization/Interface/VisualizationEngine.h"
+#include "../Rendering/Interface/SurfelVisualizationEngine.h"
+#include "../Rendering/Interface/VisualizationEngine.h"
 #include "../../CameraTrackers/Interface/CameraTracker.h"
 #include "../../Utils/Configuration/Configuration.h"
 #include "../../CameraTrackers/Interface/CameraTracker.h"

@@ -112,7 +112,7 @@ static void RenderImage_common_metal(const ITMScene<TVoxel,ITMVoxelBlockHash> *s
             pointsRay = renderState->forwardProjection->GetData(MEMORYDEVICE_CPU);
         else
         {
-            // this one is generally done for freeview Visualization, so
+            // this one is generally done for freeview Rendering, so
             // no, do not update the list of visible blocks
 
             const void *entriesVisibleType = NULL;

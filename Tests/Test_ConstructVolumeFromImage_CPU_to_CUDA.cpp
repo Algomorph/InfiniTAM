@@ -37,8 +37,8 @@
 #ifndef COMPILE_WITHOUT_CUDA
 #include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
 #include "../ITMLib/Engines/Indexing/VBH/CUDA/IndexingEngine_VoxelBlockHash_CUDA.h"
-#include "../ITMLib/Engines/Visualization/Interface/VisualizationEngine.h"
-#include "../ITMLib/Engines/Visualization/VisualizationEngineFactory.h"
+#include "../ITMLib/Engines/Rendering/Interface/VisualizationEngine.h"
+#include "../ITMLib/Engines/Rendering/VisualizationEngineFactory.h"
 #endif
 
 // *** test_utils ***

@@ -4,7 +4,7 @@
 
 #include "../LowLevel/LowLevelEngineFactory.h"
 #include "../ViewBuilding/ViewBuilderFactory.h"
-#include "../Visualization/SurfelVisualizationEngineFactory.h"
+#include "../Rendering/SurfelVisualizationEngineFactory.h"
 #include "../../CameraTrackers/CameraTrackerFactory.h"
 
 #include "../../../ORUtils/NVTimer.h"
@@ -265,7 +265,7 @@ BasicSurfelEngine<TSurfel>::ProcessFrame(UChar4Image* rgbImage, ShortImage* rawD
 	}
 
 	if (trackerResult == CameraTrackingState::TRACKING_GOOD || trackerResult == CameraTrackingState::TRACKING_POOR) {
-		// raycast to renderState_canonical for tracking and free Visualization
+		// raycast to renderState_canonical for tracking and free Rendering
 		trackingController->Prepare(trackingState, surfelScene, view, surfelVisualizationEngine,
 		                            surfelRenderState_live);
 		surfelVisualizationEngine->FindSurfaceSuper(surfelScene, trackingState->pose_d, &view->calib.intrinsics_d,

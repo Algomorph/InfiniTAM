@@ -4,8 +4,8 @@
 
 #include "../LowLevel/LowLevelEngineFactory.h"
 #include "../ViewBuilding/ViewBuilderFactory.h"
-#include "../Visualization/VisualizationEngineFactory.h"
-#include "../Visualization/MultiVisualizationEngineFactory.h"
+#include "../Rendering/VisualizationEngineFactory.h"
+#include "../Rendering/MultiVisualizationEngineFactory.h"
 #include "../../CameraTrackers/CameraTrackerFactory.h"
 
 #include "../../../MiniSlamGraphLib/QuaternionHelpers.h"
@@ -50,7 +50,7 @@ MultiEngine<TVoxel, TIndex>::MultiEngine(const RGBDCalib& calib, Vector2i imgSiz
 	if (settings.create_meshing_engine)
 		meshingEngine = MultiMeshingEngineFactory::MakeMeshingEngine<TVoxel, TIndex>(deviceType, mapManager->getLocalMap(0)->volume->index);
 
-	renderState_freeview = NULL; //will be created by the Visualization engine
+	renderState_freeview = NULL; //will be created by the Rendering engine
 	imuCalibrator = new ITMIMUCalibrator_iPad();
 	freeviewLocalMapIdx = 0;
 
@@ -283,7 +283,7 @@ CameraTrackingState::TrackingResult MultiEngine<TVoxel, TIndex>::ProcessFrame(UC
 		if (todoList[i].fusion) denseMapper->ProcessFrame(view, currentLocalMap->trackingState, currentLocalMap->volume, currentLocalMap->renderState);
 		else if (todoList[i].prepare) denseMapper->UpdateVisibleList(view, currentLocalMap->trackingState, currentLocalMap->volume, currentLocalMap->renderState);
 
-		// raycast to renderState_canonical for tracking and free Visualization
+		// raycast to renderState_canonical for tracking and free Rendering
 		if (todoList[i].prepare) trackingController->Prepare(currentLocalMap->trackingState, currentLocalMap->volume, view, visualization_engine, currentLocalMap->renderState);
 	}
 

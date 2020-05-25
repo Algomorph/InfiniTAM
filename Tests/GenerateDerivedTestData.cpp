@@ -24,7 +24,7 @@
 #include "TestUtilities/TestUtilities.h"
 #include "TestUtilities/SnoopyTestUtilities.h"
 #include "TestUtilities/WarpAdvancedTestingUtilities.h"
-#include "TestUtilities/CameraPoseAndRayTracingEngineFixture.h"
+#include "TestUtilities/CameraPoseAndRenderingEngineFixture.h"
 
 //ORUtils
 #include "../ORUtils/OStreamWrapper.h"
@@ -58,7 +58,7 @@
 #include "../ITMLib/Engines/Meshing/MeshingEngineFactory.h"
 #include "../ITMLib/Objects/Meshing/Mesh.h"
 #include "../ITMLib/Utils/Configuration/TelemetrySettings.h"
-#include "../ITMLib/Engines/Visualization/VisualizationEngineFactory.h"
+#include "../ITMLib/Engines/Rendering/VisualizationEngineFactory.h"
 
 
 using namespace ITMLib;
@@ -472,9 +472,9 @@ void GenerateMeshingTestData() {
 
 
 template<MemoryDeviceType TMemoryDeviceType>
-void GenerateRaytracingTestData_VoxelBlockHash() {
+void GenerateRenderingTestData_VoxelBlockHash() {
 
-	CameraPoseAndRayTracingEngineFixture<TMemoryDeviceType> fixture;
+	CameraPoseAndRenderingEngineFixture<TMemoryDeviceType> fixture;
 
 	ORUtils::OStreamWrapper visible_blocks_file(GENERATED_TEST_DATA_PREFIX "TestData/arrays/visible_blocks.dat", true);
 	ORUtils::OStreamWrapper range_images_file(GENERATED_TEST_DATA_PREFIX "TestData/arrays/range_images.dat", true);
@@ -637,8 +637,8 @@ void GenerateRaytracingTestData_VoxelBlockHash() {
     (VBH_FUSED_VOLUMES,          "VBH_FUSED_VOLUMES", "vbh_fused_volumes", "vbh_fv"), \
     (CONFUGRATIONS,              "CONFIGURATIONS", "configurations", "config", "c"), \
     (MESHES,                     "MESHES", "meshes", "m"), \
-    (RAYTRACING_CPU,             "RAYTRACING_CPU", "raytracing_cpu", "r_cpu"), \
-    (RAYTRACING_CUDA,            "RAYTRACING_CUDA", "raytracing_cuda", "r_cuda")
+    (RENDERING_CPU,             "RENDERING_CPU", "rendering_cpu", "r_cpu"), \
+    (RENDERING_CUDA,            "RENDERING_CUDA", "rendering_cuda", "r_cuda")
 
 GENERATE_SERIALIZABLE_ENUM(GENERATED_TEST_DATA_TYPE_ENUM_DESCRIPTION);
 
@@ -661,8 +661,8 @@ int main(int argc, char* argv[]) {
 					{VBH_FUSED_VOLUMES,          GenerateFusedVolumeTestData<VoxelBlockHash>},
 					{CONFUGRATIONS,              GenerateConfigurationTestData},
 					{MESHES,                     GenerateMeshingTestData<VoxelBlockHash, MEMORYDEVICE_CPU>},
-					{RAYTRACING_CPU,             GenerateRaytracingTestData_VoxelBlockHash<MEMORYDEVICE_CPU>},
-					{RAYTRACING_CUDA,            GenerateRaytracingTestData_VoxelBlockHash<MEMORYDEVICE_CUDA>},
+					{RENDERING_CPU,             GenerateRenderingTestData_VoxelBlockHash<MEMORYDEVICE_CPU>},
+					{RENDERING_CUDA,            GenerateRenderingTestData_VoxelBlockHash<MEMORYDEVICE_CUDA>},
 			});
 	if (argc < 2) {
 		// calls every generator iteratively

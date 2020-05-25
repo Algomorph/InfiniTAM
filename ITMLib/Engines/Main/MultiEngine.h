@@ -11,7 +11,7 @@
 
 #include "../MultiScene/ActiveMapManager.h"
 #include "../MultiScene/GlobalAdjustmentEngine.h"
-#include "../Visualization/Interface/MultiVisualizationEngine.h"
+#include "../Rendering/Interface/MultiVisualizationEngine.h"
 #include "../Meshing/MultiMeshingEngineFactory.h"
 #include "../../CameraTrackers/Interface/CameraTracker.h"
 

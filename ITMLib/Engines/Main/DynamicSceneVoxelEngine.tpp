@@ -28,7 +28,7 @@ namespace fs = std::filesystem;
 #include "../LowLevel/LowLevelEngineFactory.h"
 #include "../Meshing/MeshingEngineFactory.h"
 #include "../ViewBuilding/ViewBuilderFactory.h"
-#include "../Visualization/VisualizationEngineFactory.h"
+#include "../Rendering/VisualizationEngineFactory.h"
 #include "../VolumeFileIO/VolumeFileIOEngine.h"
 #include "../VolumeFusion/VolumeFusionEngineFactory.h"
 #include "../EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
@@ -363,7 +363,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(UChar4Image* rgb_im
 		//TODO: FIXME (See issue #214 at https://github.com/Algomorph/InfiniTAM/issues/214)
 		//if (!fusion_succeeded) indexing_engine->UpdateVisibleList(view, tracking_state, canonical_volume, canonical_render_state);
 
-		// raycast to renderState_canonical for tracking and free Visualization
+		// raycast to renderState_canonical for tracking and free Rendering
 		camera_tracking_controller->Prepare(tracking_state, canonical_volume, view, visualization_engine,
 		                                    canonical_render_state);
 	} else *tracking_state->pose_d = previous_frame_pose;

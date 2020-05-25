@@ -23,7 +23,7 @@
 #include "../../ITMLib/Utils/Configuration/Configuration.h"
 #include "../../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
 #include "../../ITMLib/Engines/Indexing/IndexingEngineFactory.h"
-#include "../../ITMLib/Engines/Visualization/VisualizationEngineFactory.h"
+#include "../../ITMLib/Engines/Rendering/VisualizationEngineFactory.h"
 #include "../../ORUtils/FileUtils.h"
 #include "../../ITMLib/Engines/EditAndCopy/EditAndCopyEngineFactory.h"
 #include "../../ITMLib/Engines/Traversal/Interface/VolumeTraversal.h"

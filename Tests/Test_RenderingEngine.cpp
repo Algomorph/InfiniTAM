@@ -13,7 +13,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#define BOOST_TEST_MODULE RayTracingEngine
+#define BOOST_TEST_MODULE RenderingEngine
 #ifndef WIN32
 #define BOOST_TEST_DYN_LINK
 #endif
@@ -24,13 +24,13 @@
 //test_utilities
 #include "TestUtilities/TestUtilities.h"
 #include "TestUtilities/SnoopyTestUtilities.h"
-#include "TestUtilities/CameraPoseAndRayTracingEngineFixture.h"
+#include "TestUtilities/CameraPoseAndRenderingEngineFixture.h"
 
 //ORUtils
 #include "../ORUtils/IStreamWrapper.h"
 
 //ITMLib
-#include "../ITMLib/Engines/Visualization/VisualizationEngineFactory.h"
+#include "../ITMLib/Engines/Rendering/VisualizationEngineFactory.h"
 #include "../ITMLib/Utils/Analytics/RawMemoryArrayComparison.h"
 #include "../ITMLib/Utils/Collections/OperationsOnSTLContainers.h"
 
@@ -49,7 +49,7 @@ void GenericFindAndCountVisibleBlocksTest() {
 	std::vector<int> pose_range_visible_block_counts2;
 	std::vector<int> pose_range_visible_block_counts3;
 
-	CameraPoseAndRayTracingEngineFixture<TMemoryDeviceType> fixture;
+	CameraPoseAndRenderingEngineFixture<TMemoryDeviceType> fixture;
 
 	for (auto& tracking_state : fixture.tracking_states) {
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume;
@@ -94,7 +94,7 @@ void GenericFindAndCountVisibleBlocksTest() {
 
 template<MemoryDeviceType TMemoryDeviceType>
 void GenericCreateExpectedDepthsTest() {
-	CameraPoseAndRayTracingEngineFixture<TMemoryDeviceType> fixture;
+	CameraPoseAndRenderingEngineFixture<TMemoryDeviceType> fixture;
 
 	ORUtils::IStreamWrapper range_images_file("TestData/arrays/range_images.dat", true);
 
@@ -122,7 +122,7 @@ void GenericCreateExpectedDepthsTest() {
 
 template<MemoryDeviceType TMemoryDeviceType>
 void GenericFindSurfaceTest() {
-	CameraPoseAndRayTracingEngineFixture<TMemoryDeviceType> fixture;
+	CameraPoseAndRenderingEngineFixture<TMemoryDeviceType> fixture;
 
 	ORUtils::IStreamWrapper raycast_images_file("TestData/arrays/raycast_images.dat", true);
 
@@ -151,7 +151,7 @@ void GenericFindSurfaceTest() {
 
 template<MemoryDeviceType TMemoryDeviceType>
 void GenericCreatePointCloudTest() {
-	CameraPoseAndRayTracingEngineFixture<TMemoryDeviceType> fixture;
+	CameraPoseAndRenderingEngineFixture<TMemoryDeviceType> fixture;
 
 	ORUtils::IStreamWrapper point_cloud_images_file("TestData/arrays/point_cloud_images.dat", true);
 
@@ -190,7 +190,7 @@ void GenericCreatePointCloudTest() {
 
 template<MemoryDeviceType TMemoryDeviceType>
 void GenericCreateICPMapsTest() {
-	CameraPoseAndRayTracingEngineFixture<TMemoryDeviceType> fixture;
+	CameraPoseAndRenderingEngineFixture<TMemoryDeviceType> fixture;
 
 	ORUtils::IStreamWrapper ICP_images_file("TestData/arrays/ICP_images.dat", true);
 
@@ -222,7 +222,7 @@ void GenericCreateICPMapsTest() {
 
 template<MemoryDeviceType TMemoryDeviceType>
 void GenericForwardRenderTest() {
-	CameraPoseAndRayTracingEngineFixture<TMemoryDeviceType> fixture;
+	CameraPoseAndRenderingEngineFixture<TMemoryDeviceType> fixture;
 
 	ORUtils::IStreamWrapper forward_render_images_file("TestData/arrays/forward_render_images.dat", true);
 
@@ -271,7 +271,7 @@ void GenericForwardRenderTest() {
 
 template<MemoryDeviceType TMemoryDeviceType>
 void GenericRenderImageTest() {
-	CameraPoseAndRayTracingEngineFixture<TMemoryDeviceType> fixture;
+	CameraPoseAndRenderingEngineFixture<TMemoryDeviceType> fixture;
 
 	ORUtils::IStreamWrapper rendered_images_file("TestData/arrays/rendered_images.dat", true);
 

@@ -12,17 +12,17 @@
 namespace ITMLib
 {
   /**
-   * \brief An instantiation of this struct can be used to construct surfel Visualization engines.
+   * \brief An instantiation of this struct can be used to construct surfel Rendering engines.
    */
   struct SurfelVisualizationEngineFactory
   {
     //#################### PUBLIC STATIC MEMBER FUNCTIONS ####################
 
     /**
-     * \brief Makes a surfel Visualization engine.
+     * \brief Makes a surfel Rendering engine.
      *
-     * \param deviceType  The device on which the surfel Visualization engine should operate.
-     * \return            The surfel Visualization engine.
+     * \param deviceType  The device on which the surfel Rendering engine should operate.
+     * \return            The surfel Rendering engine.
      */
     template <typename TSurfel>
     static SurfelVisualizationEngine<TSurfel> *Build(MemoryDeviceType deviceType){

@@ -14,16 +14,16 @@ namespace ITMLib
 {
 
 	/**
-	 * \brief This struct provides functions that can be used to construct Visualization engines.
+	 * \brief This struct provides functions that can be used to construct Rendering engines.
 	 */
 	struct MultiVisualizationEngineFactory
 	{
 		//#################### PUBLIC STATIC MEMBER FUNCTIONS ####################
 
 		/**
-		 * \brief Makes a Visualization engine.
+		 * \brief Makes a Rendering engine.
 		 *
-		 * \param deviceType  The device on which the Visualization engine should operate.
+		 * \param deviceType  The device on which the Rendering engine should operate.
 		 */
 		template <typename TVoxel, typename TIndex>
 		static MultiVisualizationEngine<TVoxel, TIndex> *MakeVisualizationEngine(MemoryDeviceType deviceType)

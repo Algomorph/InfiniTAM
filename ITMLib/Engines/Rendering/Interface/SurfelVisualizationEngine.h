@@ -22,7 +22,7 @@ namespace ITMLib
     //#################### ENUMERATIONS ####################
   public:
     /**
-     * \brief The types of scene Visualization that the engine supports.
+     * \brief The types of scene Rendering that the engine supports.
      */
     enum RenderImageType
     {
@@ -37,7 +37,7 @@ namespace ITMLib
     //#################### DESTRUCTOR ####################
   public:
     /**
-     * \brief Destroys the Visualization engine.
+     * \brief Destroys the Rendering engine.
      */
     virtual ~SurfelVisualizationEngine();
 
@@ -73,7 +73,7 @@ namespace ITMLib
     virtual void CreateICPMaps(const SurfelScene<TSurfel> *scene, const SurfelRenderState *renderState, CameraTrackingState *trackingState) const = 0;
 
     /**
-     * \brief Renders a depth Visualization of the scene (as viewed from a particular camera) to an image.
+     * \brief Renders a depth Rendering of the scene (as viewed from a particular camera) to an image.
      *
      * \param scene         The scene.
      * \param pose          The pose of the camera from which to render.
@@ -84,13 +84,13 @@ namespace ITMLib
                                   FloatImage *outputImage) const = 0;
 
     /**
-     * \brief Renders a Visualization of the scene (as viewed from a particular camera) to an image.
+     * \brief Renders a Rendering of the scene (as viewed from a particular camera) to an image.
      *
      * \param scene         The scene.
      * \param pose          The pose of the camera from which to render.
      * \param renderState   The render state corresponding to the camera from which to render.
      * \param outputImage   The image into which to write the result.
-     * \param type          The type of Visualization to render.
+     * \param type          The type of Rendering to render.
      */
     virtual void RenderImage(const SurfelScene<TSurfel> *scene, const ORUtils::SE3Pose *pose, const SurfelRenderState *renderState,
                              UChar4Image *outputImage, RenderImageType type = RENDER_LAMBERTIAN) const = 0;
@@ -124,9 +124,9 @@ namespace ITMLib
     //#################### PRIVATE ABSTRACT MEMBER FUNCTIONS ####################
   private:
     /**
-     * \brief Gets the type of device on which the Visualization engine is operating.
+     * \brief Gets the type of device on which the Rendering engine is operating.
      *
-     * \return  The type of device on which the Visualization engine is operating.
+     * \return  The type of device on which the Rendering engine is operating.
      */
     virtual MemoryDeviceType GetMemoryType() const = 0;
 

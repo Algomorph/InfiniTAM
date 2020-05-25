@@ -5,7 +5,7 @@
 #include "../LowLevel/LowLevelEngineFactory.h"
 #include "../Meshing/MeshingEngineFactory.h"
 #include "../ViewBuilding/ViewBuilderFactory.h"
-#include "../Visualization/VisualizationEngineFactory.h"
+#include "../Rendering/VisualizationEngineFactory.h"
 #include "../../CameraTrackers/CameraTrackerFactory.h"
 
 #include "../../../ORUtils/NVTimer.h"
@@ -314,7 +314,7 @@ CameraTrackingState::TrackingResult BasicVoxelEngine<TVoxel,TIndex>::ProcessFram
 	{
 		if (!didFusion) denseMapper->UpdateVisibleList(view, trackingState, volume, render_state);
 
-		// raycast to renderState_canonical for tracking and free Visualization
+		// raycast to renderState_canonical for tracking and free Rendering
 		trackingController->Prepare(trackingState, volume, view, visualizationEngine, render_state);
 
 		if (addKeyframeIdx >= 0)

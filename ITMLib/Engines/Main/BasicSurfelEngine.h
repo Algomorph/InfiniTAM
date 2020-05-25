@@ -7,7 +7,7 @@
 #include "CameraTrackingController.h"
 #include "../LowLevel/Interface/LowLevelEngine.h"
 #include "../ViewBuilding/Interface/ViewBuilder.h"
-#include "../Visualization/Interface/SurfelVisualizationEngine.h"
+#include "../Rendering/Interface/SurfelVisualizationEngine.h"
 #include "../../Objects/Misc/IMUCalibrator.h"
 
 #include "../../../FernRelocLib/Relocaliser.h"

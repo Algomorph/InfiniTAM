@@ -151,7 +151,7 @@ void SurfelVisualizationEngine_CPU<TSurfel>::RenderImage(const SurfelScene<TSurf
     default:
     {
       // This should never happen.
-      throw std::runtime_error("Unsupported surfel Visualization type");
+      throw std::runtime_error("Unsupported surfel Rendering type");
     }
   }
 }

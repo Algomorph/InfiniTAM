@@ -16,14 +16,14 @@
 #pragma once
 
 #include "../../ITMLib/Objects/RenderStates/RenderState.h"
-#include "../../ITMLib/Engines/Visualization/VisualizationEngineFactory.h"
+#include "../../ITMLib/Engines/Rendering/VisualizationEngineFactory.h"
 #include "SnoopyTestUtilities.h"
 
 using namespace ITMLib;
 
 namespace test_utilities {
 template<MemoryDeviceType TMemoryDeviceType>
-struct CameraPoseAndRayTracingEngineFixture {
+struct CameraPoseAndRenderingEngineFixture {
 public: // member variables
 	RGBDCalib calibration_data;
 	RenderState* render_state;
@@ -35,7 +35,7 @@ public: // member variables
 	View* view_17;
 
 public: // member functions
-	CameraPoseAndRayTracingEngineFixture()
+	CameraPoseAndRenderingEngineFixture()
 			: render_state(new RenderState(Vector2i(snoopy_test_utilities::frame_image_size),
 			                               configuration::get().general_voxel_volume_parameters.near_clipping_distance,
 			                               configuration::get().general_voxel_volume_parameters.far_clipping_distance,
@@ -76,7 +76,7 @@ public: // member functions
 		return std::make_shared<CameraTrackingState>(snoopy_test_utilities::frame_image_size, TMemoryDeviceType);
 	}
 
-	~CameraPoseAndRayTracingEngineFixture() {
+	~CameraPoseAndRenderingEngineFixture() {
 		delete view_17;
 		delete visualization_engine;
 		delete render_state;

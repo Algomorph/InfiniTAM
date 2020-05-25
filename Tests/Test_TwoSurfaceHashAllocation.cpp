@@ -33,7 +33,7 @@
 #include "../ITMLib/Engines/ViewBuilding/ViewBuilderFactory.h"
 #include "../ORUtils/FileUtils.h"
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngine.h"
-#include "../ITMLib/Engines/Visualization/VisualizationEngineFactory.h"
+#include "../ITMLib/Engines/Rendering/VisualizationEngineFactory.h"
 //(CPU)
 #include "../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_VoxelBlockHash_CPU.h"
 #include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"

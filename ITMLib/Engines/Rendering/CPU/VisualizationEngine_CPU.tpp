@@ -243,7 +243,7 @@ RenderImage_common(VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::SE3Pose* 
 		if (raycastType == IVisualizationEngine::RENDER_FROM_OLD_FORWARDPROJ)
 			pointsRay = renderState->forwardProjection->GetData(MEMORYDEVICE_CPU);
 		else {
-			// this one is generally done for freeview Visualization, so
+			// this one is generally done for freeview Rendering, so
 			// no, do not update the list of visible blocks
 			GenericRaycast(volume, imgSize, invM, intrinsics->projectionParamsSimple.all, renderState, false);
 			pointsRay = renderState->raycastResult->GetData(MEMORYDEVICE_CPU);
@@ -489,7 +489,7 @@ void
 VisualizationEngine_CPU<TVoxel, TIndex>::FindSurface(VoxelVolume<TVoxel, TIndex>* scene, const ORUtils::SE3Pose* pose,
                                                      const Intrinsics* intrinsics,
                                                      const RenderState* renderState) const {
-	// this one is generally done for freeview Visualization, so no, do not
+	// this one is generally done for freeview Rendering, so no, do not
 	// update the list of visible blocks
 	GenericRaycast(scene, renderState->raycastResult->dimensions, pose->GetInvM(),
 	               intrinsics->projectionParamsSimple.all, renderState, false);
@@ -500,7 +500,7 @@ void VisualizationEngine_CPU<TVoxel, VoxelBlockHash>::FindSurface(VoxelVolume<TV
                                                                   const ORUtils::SE3Pose* pose,
                                                                   const Intrinsics* intrinsics,
                                                                   const RenderState* renderState) const {
-	// this one is generally done for freeview Visualization, so no, do not
+	// this one is generally done for freeview Rendering, so no, do not
 	// update the list of visible blocks
 	GenericRaycast(scene, renderState->raycastResult->dimensions, pose->GetInvM(),
 	               intrinsics->projectionParamsSimple.all, renderState, false);

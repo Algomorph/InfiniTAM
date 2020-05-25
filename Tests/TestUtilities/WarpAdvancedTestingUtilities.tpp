@@ -25,7 +25,7 @@
 #include "../../ITMLib/Engines/EditAndCopy/EditAndCopyEngineFactory.h"
 #include "../../ITMLib/Engines/Indexing/Interface/IndexingEngine.h"
 #include "../../ITMLib/Engines/Indexing/IndexingEngineFactory.h"
-#include "../../ITMLib/Engines/Visualization/VisualizationEngineFactory.h"
+#include "../../ITMLib/Engines/Rendering/VisualizationEngineFactory.h"
 #include "../../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison.h"
 //(CPU)
 #include "../../ITMLib/Engines/Analytics/AnalyticsEngine.h"

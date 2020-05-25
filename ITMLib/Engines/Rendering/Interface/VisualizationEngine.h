@@ -41,7 +41,7 @@ namespace ITMLib
 	template<> struct IndexToRenderState<VoxelBlockHash> { typedef RenderState type; };
 
 	/** \brief
-		Interface to engines helping with the Visualization of
+		Interface to engines helping with the Rendering of
 		the results from the rest of the library.
 
 		This is also used internally to get depth estimates for the

@@ -554,67 +554,67 @@ set(ITMLIB_ENGINES_VIEWBUILDING_SHARED_HEADERS
 ## ======================================== VISUALIZATION ENGINES ======================================================
 ##
 set(ITMLIB_ENGINES_VISUALIZATION_HEADERS
-    Engines/Visualization/MultiVisualizationEngineFactory.h
-    Engines/Visualization/SurfelVisualizationEngineFactory.h
-    Engines/Visualization/VisualizationEngineFactory.h
+    Engines/Rendering/MultiVisualizationEngineFactory.h
+    Engines/Rendering/SurfelVisualizationEngineFactory.h
+    Engines/Rendering/VisualizationEngineFactory.h
     )
 
 ##
 set(ITMLIB_ENGINES_VISUALIZATION_CPU_SOURCES
-    Engines/Visualization/CPU/MultiVisualizationEngine_CPU.tpp
-    Engines/Visualization/CPU/MultiVisualizationEngine_CPU_PlainVoxelArray.cpp
-    Engines/Visualization/CPU/MultiVisualizationEngine_CPU_VoxelBlockHash.cpp
-    Engines/Visualization/CPU/SurfelVisualizationEngine_CPU.tpp
-    Engines/Visualization/CPU/SurfelVisualizationEngine_CPU.cpp
-    Engines/Visualization/CPU/VisualizationEngine_CPU.tpp
-    Engines/Visualization/CPU/VisualizationEngine_CPU_VoxelBlockHash.cpp
-    Engines/Visualization/CPU/VisualizationEngine_CPU_PlainVoxelArray.cpp
+    Engines/Rendering/CPU/MultiVisualizationEngine_CPU.tpp
+    Engines/Rendering/CPU/MultiVisualizationEngine_CPU_PlainVoxelArray.cpp
+    Engines/Rendering/CPU/MultiVisualizationEngine_CPU_VoxelBlockHash.cpp
+    Engines/Rendering/CPU/SurfelVisualizationEngine_CPU.tpp
+    Engines/Rendering/CPU/SurfelVisualizationEngine_CPU.cpp
+    Engines/Rendering/CPU/VisualizationEngine_CPU.tpp
+    Engines/Rendering/CPU/VisualizationEngine_CPU_VoxelBlockHash.cpp
+    Engines/Rendering/CPU/VisualizationEngine_CPU_PlainVoxelArray.cpp
     )
 
 set(ITMLIB_ENGINES_VISUALIZATION_CPU_HEADERS
-    Engines/Visualization/CPU/MultiVisualizationEngine_CPU.h
-    Engines/Visualization/CPU/SurfelVisualizationEngine_CPU.h
-    Engines/Visualization/CPU/VisualizationEngine_CPU.h
+    Engines/Rendering/CPU/MultiVisualizationEngine_CPU.h
+    Engines/Rendering/CPU/SurfelVisualizationEngine_CPU.h
+    Engines/Rendering/CPU/VisualizationEngine_CPU.h
     )
 
 ##
 set(ITMLIB_ENGINES_VISUALIZATION_CUDA_SOURCES
-    Engines/Visualization/CUDA/MultiVisualizationEngine_CUDA.tcu
-    Engines/Visualization/CUDA/MultiVisualizationEngine_CUDA_PlainVoxelArray.cu
-    Engines/Visualization/CUDA/MultiVisualizationEngine_CUDA_VoxelBlockHash.cu
-    Engines/Visualization/CUDA/SurfelVisualizationEngine_CUDA.tcu
-    Engines/Visualization/CUDA/SurfelVisualizationEngine_CUDA.cu
-    Engines/Visualization/CUDA/VisualizationEngine_CUDA.tcu
-    Engines/Visualization/CUDA/VisualizationHelpers_CUDA.cu
-    Engines/Visualization/CUDA/VisualizationEngine_CUDA_VoxelBlockHash.cu
-    Engines/Visualization/CUDA/VisualizationEngine_CUDA_PlainVoxelArray.cu
+    Engines/Rendering/CUDA/MultiVisualizationEngine_CUDA.tcu
+    Engines/Rendering/CUDA/MultiVisualizationEngine_CUDA_PlainVoxelArray.cu
+    Engines/Rendering/CUDA/MultiVisualizationEngine_CUDA_VoxelBlockHash.cu
+    Engines/Rendering/CUDA/SurfelVisualizationEngine_CUDA.tcu
+    Engines/Rendering/CUDA/SurfelVisualizationEngine_CUDA.cu
+    Engines/Rendering/CUDA/VisualizationEngine_CUDA.tcu
+    Engines/Rendering/CUDA/VisualizationHelpers_CUDA.cu
+    Engines/Rendering/CUDA/VisualizationEngine_CUDA_VoxelBlockHash.cu
+    Engines/Rendering/CUDA/VisualizationEngine_CUDA_PlainVoxelArray.cu
     )
 
 set(ITMLIB_ENGINES_VISUALIZATION_CUDA_HEADERS
-    Engines/Visualization/CUDA/MultiVisualizationEngine_CUDA.h
-    Engines/Visualization/CUDA/SurfelVisualizationEngine_CUDA.h
-    Engines/Visualization/CUDA/VisualizationEngine_CUDA.h
-    Engines/Visualization/CUDA/VisualizationHelpers_CUDA.h
+    Engines/Rendering/CUDA/MultiVisualizationEngine_CUDA.h
+    Engines/Rendering/CUDA/SurfelVisualizationEngine_CUDA.h
+    Engines/Rendering/CUDA/VisualizationEngine_CUDA.h
+    Engines/Rendering/CUDA/VisualizationHelpers_CUDA.h
     )
 
 ##
 set(ITMLIB_ENGINES_VISUALIZATION_INTERFACE_SOURCES
-    Engines/Visualization/Interface/SurfelVisualizationEngine.tpp
-    Engines/Visualization/Interface/SurfelVisualizationEngine.cpp
-    Engines/Visualization/Interface/VisualizationEngine.cpp
+    Engines/Rendering/Interface/SurfelVisualizationEngine.tpp
+    Engines/Rendering/Interface/SurfelVisualizationEngine.cpp
+    Engines/Rendering/Interface/VisualizationEngine.cpp
     )
 
 set(ITMLIB_ENGINES_VISUALIZATION_INTERFACE_HEADERS
-    Engines/Visualization/Interface/MultiVisualizationEngine.h
-    Engines/Visualization/Interface/SurfelVisualizationEngine.h
-    Engines/Visualization/Interface/VisualizationEngine.h
+    Engines/Rendering/Interface/MultiVisualizationEngine.h
+    Engines/Rendering/Interface/SurfelVisualizationEngine.h
+    Engines/Rendering/Interface/VisualizationEngine.h
     )
 
 ##
 set(ITMLIB_ENGINES_VISUALIZATION_SHARED_HEADERS
-    Engines/Visualization/Shared/SurfelVisualizationEngine_Settings.h
-    Engines/Visualization/Shared/SurfelVisualizationEngine_Shared.h
-    Engines/Visualization/Shared/VisualizationEngine_Shared.h
+    Engines/Rendering/Shared/SurfelVisualizationEngine_Settings.h
+    Engines/Rendering/Shared/SurfelVisualizationEngine_Shared.h
+    Engines/Rendering/Shared/VisualizationEngine_Shared.h
     )
 
 
@@ -995,16 +995,16 @@ set(
 
 set(ITMLIB_UTILS_VISUALIZATION_SOURCES
     # TODO: FIXME
-    #Utils/Visualization/VolumeSliceVisualizer2D.tpp
-    #Utils/Visualization/SceneSliceVisualizer2D_PlainVoxelArray.cpp
-    #Utils/Visualization/SceneSliceVisualizer2D_VoxelBlockHash.cpp
+    #Utils/Rendering/VolumeSliceVisualizer2D.tpp
+    #Utils/Rendering/SceneSliceVisualizer2D_PlainVoxelArray.cpp
+    #Utils/Rendering/SceneSliceVisualizer2D_VoxelBlockHash.cpp
     )
 
 if (WITH_VTK)
     list(APPEND ITMLIB_UTILS_VISUALIZATION_SOURCES
          #TODO: fixme
-         #         Utils/Visualization/VoxelValueGrapher.cpp
-         #         Utils/Visualization/SceneSliceVisualizer1D.tpp
+         #         Utils/Rendering/VoxelValueGrapher.cpp
+         #         Utils/Rendering/SceneSliceVisualizer1D.tpp
          Utils/Visualization/SceneSliceVisualizer3D.tpp
          Utils/Visualization/SceneSliceVisualizer3DInteractorStyle.tpp
          Utils/Visualization/SceneSliceVisualizer3DCommon.cpp
@@ -1017,11 +1017,11 @@ endif ()
 
 set(ITMLIB_UTILS_VISUALIZATION_HEADERS
     Utils/Visualization/SceneSliceVisualizerCommon.h
-    #    Utils/Visualization/VolumeSliceVisualizer2D.h
+    #    Utils/Rendering/VolumeSliceVisualizer2D.h
     )
 if (WITH_VTK)
     list(APPEND ITMLIB_UTILS_VISUALIZATION_HEADERS
-         #         Utils/Visualization/VoxelValueGrapher.h
+         #         Utils/Rendering/VoxelValueGrapher.h
          Utils/Visualization/SceneSliceVisualizer3D.h
          Utils/Visualization/SceneSliceVisualizer3DInteractorStyle.h
          Utils/Visualization/SceneSliceVisualizer3DCommon.h

@@ -41,7 +41,7 @@
 #include "../ITMLib/Engines/VolumeFileIO/VolumeFileIOEngine.h"
 #include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
-#include "../ITMLib/Engines/Visualization/VisualizationEngineFactory.h"
+#include "../ITMLib/Engines/Rendering/VisualizationEngineFactory.h"
 
 //test_utilities
 #include "TestUtilities/TestUtilities.h"

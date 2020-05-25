@@ -24,7 +24,7 @@
 #include "../LowLevel/Interface/LowLevelEngine.h"
 #include "../Meshing/Interface/MeshingEngine.h"
 #include "../ViewBuilding/Interface/ViewBuilder.h"
-#include "../Visualization/Interface/VisualizationEngine.h"
+#include "../Rendering/Interface/VisualizationEngine.h"
 #include "../Indexing/Interface/IndexingEngine.h"
 #include "../DepthFusion/DepthFusionEngine.h"
 #include "../VolumeFusion/VolumeFusionEngine.h"

@@ -42,7 +42,7 @@
 //(CUDA)
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CUDA.h"
 #include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
-#include "../ITMLib/Engines/Visualization/VisualizationEngineFactory.h"
+#include "../ITMLib/Engines/Rendering/VisualizationEngineFactory.h"
 #include "../ITMLib/Engines/Warping/WarpingEngineFactory.h"
 #include "../ITMLib/Engines/VolumeFusion/VolumeFusionEngineFactory.h"
 #include "../ITMLib/Utils/Analytics/BenchmarkUtilities.h"

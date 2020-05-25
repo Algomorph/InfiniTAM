@@ -79,7 +79,7 @@ if (BUILD_TESTS)
         TestUtilities/SnoopyTestUtilities.h
         TestUtilities/WarpAdvancedTestingUtilities.h
         TestUtilities/TestUtilitiesConfig.h.in
-        TestUtilities/CameraPoseAndRayTracingEngineFixture.h
+        TestUtilities/CameraPoseAndRenderingEngineFixture.h
         ${CMAKE_CURRENT_BINARY_DIR}/TestUtilities/TestUtilitiesConfig.h)
     
     find_package(Boost COMPONENTS unit_test_framework REQUIRED)
@@ -128,7 +128,7 @@ if (BUILD_TESTS)
     itm_add_test(NAME TwoSurfaceHashAllocation SOURCES Test_TwoSurfaceHashAllocation.cpp)
     itm_add_test(NAME MeshGeneration SOURCES Test_MeshGeneration.cpp)
     itm_add_test(NAME EnumSerialization SOURCES Test_EnumSerialization.cpp)
-    itm_add_test(NAME RayTracingEngine SOURCES Test_RayTracingEngine.cpp)
+    itm_add_test(NAME RenderingEngine SOURCES Test_RenderingEngine.cpp)
 
     # *** tests that require CUDA
     if(WITH_CUDA)

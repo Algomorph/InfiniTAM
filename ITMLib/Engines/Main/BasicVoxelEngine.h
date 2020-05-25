@@ -8,7 +8,7 @@
 #include "../LowLevel/Interface/LowLevelEngine.h"
 #include "../Meshing/Interface/MeshingEngine.h"
 #include "../ViewBuilding/Interface/ViewBuilder.h"
-#include "../Visualization/Interface/VisualizationEngine.h"
+#include "../Rendering/Interface/VisualizationEngine.h"
 #include "../../Objects/Misc/IMUCalibrator.h"
 
 #include "../../../FernRelocLib/Relocaliser.h"
