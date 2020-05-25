@@ -199,6 +199,11 @@ public:
 		this->Free();
 	}
 
+	MemoryBlock(const MemoryBlock& other, MemoryDeviceType memory_device_type):
+		MemoryBlock(other.element_count, memory_device_type){
+		this->SetFrom(other);
+	}
+
 	MemoryBlock(MemoryBlock&& other) noexcept:
 			element_count(other.element_count), // for code clarity
 			is_allocated_for_CPU(other.is_allocated_for_CPU),

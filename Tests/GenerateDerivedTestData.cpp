@@ -16,10 +16,30 @@
 //stdlib
 #include <filesystem>
 
+//log4cplus
+#include <log4cplus/loggingmacros.h>
+#include <log4cplus/consoleappender.h>
+
+//test_utilities
+#include "TestUtilities/TestUtilities.h"
+#include "TestUtilities/SnoopyTestUtilities.h"
+#include "TestUtilities/WarpAdvancedTestingUtilities.h"
+#include "TestUtilities/CameraPoseAndRayTracingEngineFixture.h"
+
 //ORUtils
 #include "../ORUtils/OStreamWrapper.h"
+#include "../ORUtils/FileUtils.h"
 
 //ITMLib
+//(CPU)
+#include "../ITMLib/Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
+#include "../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_VoxelBlockHash_CPU.h"
+//(CUDA)
+#ifndef COMPILE_WITHOUT_CUDA
+#include "../ITMLib/Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
+#include "../ITMLib/Engines/Indexing/VBH/CUDA/IndexingEngine_VoxelBlockHash_CUDA.h"
+#endif
+//(misc)
 #include "../ITMLib/SurfaceTrackers/Interface/SurfaceTracker.h"
 #include "../ITMLib/Engines/VolumeFusion/VolumeFusionEngine.h"
 #include "../ITMLib/Engines/Indexing/IndexingEngineFactory.h"
@@ -31,21 +51,6 @@
 #include "../ITMLib/Utils/Metacoding/SerializableEnum.h"
 #include "../ITMLib/Objects/Camera/CalibIO.h"
 #include "../ITMLib/Utils/Quaternions/Quaternion.h"
-//(CPU)
-#include "../ITMLib/Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
-#include "../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_VoxelBlockHash_CPU.h"
-//(CUDA)
-#ifndef COMPILE_WITHOUT_CUDA
-#include "../ITMLib/Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
-#include "../ITMLib/Engines/Indexing/VBH/CUDA/IndexingEngine_VoxelBlockHash_CUDA.h"
-
-#endif
-
-//test_utilities
-#include "TestUtilities/TestUtilities.h"
-#include "TestUtilities/SnoopyTestUtilities.h"
-#include "TestUtilities/WarpAdvancedTestingUtilities.h"
-#include "../ORUtils/FileUtils.h"
 #include "../ITMLib/Engines/ViewBuilding/ViewBuilderFactory.h"
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
 #include "../ITMLib/Engines/Meshing/MeshingEngineFactory.h"
@@ -53,9 +58,7 @@
 #include "../ITMLib/Utils/Configuration/TelemetrySettings.h"
 #include "../ITMLib/Engines/Visualization/VisualizationEngineFactory.h"
 
-//local
-#include <log4cplus/loggingmacros.h>
-#include <log4cplus/consoleappender.h>
+
 
 using namespace ITMLib;
 using namespace test_utilities;
@@ -469,59 +472,91 @@ void GenerateMeshingTestData() {
 
 template<MemoryDeviceType TMemoryDeviceType>
 void GenerateRaytracingTestData_VoxelBlockHash() {
-	using namespace quaternion;
-	VisualizationEngine<TSDFVoxel, VoxelBlockHash>* visualization_engine = VisualizationEngineFactory::MakeVisualizationEngine<TSDFVoxel, VoxelBlockHash>(
-			TMemoryDeviceType);
-	RGBDCalib calibration_data;
-	readRGBDCalib(snoopy::SnoopyCalibrationPath().c_str(), calibration_data);
-	RenderState* render_state = new RenderState(Vector2i(640, 480),
-	                                            configuration::get().general_voxel_volume_parameters.near_clipping_distance,
-	                                            configuration::get().general_voxel_volume_parameters.far_clipping_distance,
-	                                            TMemoryDeviceType);
-	VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume;
-	LoadVolume(&volume, snoopy::PartialVolume17Path<VoxelBlockHash>(), TMemoryDeviceType,
-	           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
-	Vector3f target(-0.09150545, 0.07265271, 0.7908916);
-	Vector3f original_viewpoint(0.f);
-	const int degree_increment = 30;
-
-	std::vector<ORUtils::SE3Pose> camera_poses = GenerateCameraTrajectoryAroundPoint(original_viewpoint, target, degree_increment);
+	CameraPoseAndRayTracingEngineFixture<TMemoryDeviceType> fixture;
 
 	ORUtils::OStreamWrapper visible_blocks_file(GENERATED_TEST_DATA_PREFIX "TestData/arrays/visible_blocks.dat", true);
+	ORUtils::OStreamWrapper range_images_file(GENERATED_TEST_DATA_PREFIX "TestData/arrays/range_images.dat", true);
+	ORUtils::OStreamWrapper raycast_images_file(GENERATED_TEST_DATA_PREFIX "TestData/arrays/raycast_images.dat", true);
+	ORUtils::OStreamWrapper point_cloud_images_file(GENERATED_TEST_DATA_PREFIX "TestData/arrays/point_cloud_images.dat", true);
+	ORUtils::OStreamWrapper ICP_images_file(GENERATED_TEST_DATA_PREFIX "TestData/arrays/ICP_images.dat", true);
 
 	std::vector<int> pose_range_visible_block_counts1;
 	std::vector<int> pose_range_visible_block_counts2;
 	std::vector<int> pose_range_visible_block_counts3;
 
-	for (auto& pose : camera_poses) {
+	std::vector<int> block_address_range_bounds =
+			{1250, 1500,
+			 1450, 1800,
+			 1750, 2000};
+	size_t range_bound_count = block_address_range_bounds.size();
+	SaveRawDataToFile<int>(visible_blocks_file, block_address_range_bounds.data(), range_bound_count, MEMORYDEVICE_CPU);
+
+	for (auto& pose : fixture.camera_poses) {
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume;
 		LoadVolume(&volume, snoopy::PartialVolume17Path<VoxelBlockHash>(), TMemoryDeviceType,
 		           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
-		visualization_engine->FindVisibleBlocks(volume, &pose, &calibration_data.intrinsics_d, render_state);
-		int range_visible_block_count1 = visualization_engine->CountVisibleBlocks(volume, render_state, 0, 56147);
-		int range_visible_block_count2 = visualization_engine->CountVisibleBlocks(volume, render_state, 112823, 455307);
-		int range_visible_block_count3 = visualization_engine->CountVisibleBlocks(volume, render_state, 365764, 1179647);
+		// find visible blocks, count visible blocks
+		fixture.visualization_engine->FindVisibleBlocks(volume, &pose, &fixture.calibration_data.intrinsics_d, fixture.render_state);
+		int range_visible_block_count1 = fixture.visualization_engine->CountVisibleBlocks(volume, fixture.render_state, block_address_range_bounds[0],
+		                                                                          block_address_range_bounds[1]);
+		int range_visible_block_count2 = fixture.visualization_engine->CountVisibleBlocks(volume, fixture.render_state, block_address_range_bounds[2],
+		                                                                          block_address_range_bounds[3]);
+		int range_visible_block_count3 = fixture.visualization_engine->CountVisibleBlocks(volume, fixture.render_state, block_address_range_bounds[4],
+		                                                                          block_address_range_bounds[5]);
+
 		pose_range_visible_block_counts1.push_back(range_visible_block_count1);
 		pose_range_visible_block_counts2.push_back(range_visible_block_count2);
 		pose_range_visible_block_counts3.push_back(range_visible_block_count3);
 
 		const int visible_block_count = volume->index.GetVisibleBlockCount();
 
-		if(visible_block_count == 0) continue; // skip rest for shots without results
+		if (visible_block_count == 0) continue; // skip rest for shots without results
 		int* visible_codes_device = volume->index.GetVisibleBlockHashCodes();
 		SaveRawDataToFile<int>(visible_blocks_file, visible_codes_device, visible_block_count, TMemoryDeviceType);
 
+		// create expected depths (in legacy InfiniTAM, fills "renderingRangeImage" of the "render state")
+		std::shared_ptr<RenderState> render_state_expected_depths = fixture.MakeRenderState();
+		fixture.visualization_engine->CreateExpectedDepths(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state_expected_depths.get());
+		ORUtils::MemoryBlockPersistence::SaveImage(range_images_file, *render_state_expected_depths->renderingRangeImage);
+
+		// find surface (in legacy InfiniTAM, fills "raycastResult" of the render state)
+		std::shared_ptr<RenderState> render_state_find_surface = fixture.MakeRenderState();
+		fixture.visualization_engine->FindSurface(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state_find_surface.get());
+		ORUtils::MemoryBlockPersistence::SaveImage(raycast_images_file, *render_state_find_surface->raycastResult);
+
+		delete volume;
+		LoadVolume(&volume, snoopy::PartialVolume17Path<VoxelBlockHash>(), TMemoryDeviceType,
+		           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
+
+		// create point cloud (in legacy InfiniTAM, fills "raycastResult" of "render state", locations & colors of the point cloud in the "tracking state")
+		std::shared_ptr<RenderState> render_state_create_point_cloud = fixture.MakeRenderState();
+		fixture.visualization_engine->CreatePointCloud(volume, fixture.view_17, fixture.camera_tracking_state, render_state_create_point_cloud.get(), false);
+
+		point_cloud_images_file.OStream().write(reinterpret_cast<const char*>(&(fixture.camera_tracking_state->pointCloud->noTotalPoints)), sizeof(unsigned int));
+		ORUtils::MemoryBlockPersistence::SaveImage(point_cloud_images_file, *fixture.camera_tracking_state->pointCloud->locations);
+		ORUtils::MemoryBlockPersistence::SaveImage(point_cloud_images_file, *fixture.camera_tracking_state->pointCloud->colours);
+
+		delete volume;
+		LoadVolume(&volume, snoopy::PartialVolume17Path<VoxelBlockHash>(), TMemoryDeviceType,
+		           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
+
+		// create icp maps (in legacy InfiniTAM, fills "raycastResult" of "render state", locations and
+		// colors -- interpreted as normals -- honestly, WTF, Oxford? Yeah, I'm blaming you, Oxford, you heard me! -- of the point cloud in the "tracking state")
+		std::shared_ptr<RenderState> render_state_create_ICP_maps = fixture.MakeRenderState();
+		fixture.visualization_engine->CreateICPMaps(volume, fixture.view_17, fixture.camera_tracking_state, render_state_create_ICP_maps.get());
+		ORUtils::MemoryBlockPersistence::SaveImage(ICP_images_file, *fixture.camera_tracking_state->pointCloud->locations);
+		ORUtils::MemoryBlockPersistence::SaveImage(ICP_images_file, *fixture.camera_tracking_state->pointCloud->colours);
+
+
 		delete volume;
 	}
-	size_t pose_count = camera_poses.size();
+
+	size_t pose_count = fixture.camera_poses.size();
 	SaveRawDataToFile<int>(visible_blocks_file, pose_range_visible_block_counts1.data(), pose_count, MEMORYDEVICE_CPU);
 	SaveRawDataToFile<int>(visible_blocks_file, pose_range_visible_block_counts2.data(), pose_count, MEMORYDEVICE_CPU);
 	SaveRawDataToFile<int>(visible_blocks_file, pose_range_visible_block_counts3.data(), pose_count, MEMORYDEVICE_CPU);
-
-	delete render_state;
-	delete visualization_engine;
 }
 
 
@@ -572,6 +607,7 @@ int main(int argc, char* argv[]) {
 	} else {
 		std::string generated_data_type_argument = argv[1];
 		GeneratedTestDataType chosen = string_to_enumerator<GeneratedTestDataType>(generated_data_type_argument);
+		std::cout << "Generating data using the " << enumerator_to_string(chosen) << " generator." << std::endl;
 		generator_by_string[chosen]();
 
 	}

@@ -99,41 +99,16 @@ public: // member functions
 		Vector2i& image_dimensions = *this->depth_image_dimensions.GetData(MEMORYDEVICE_CPU);
 		const int num_bool_layers = 2;
 		file.OStream().write(reinterpret_cast<const char*>(&num_bool_layers), sizeof(int));
-		file.OStream().write(reinterpret_cast<const char*>(&image_dimensions.height), sizeof(int));
-		file.OStream().write(reinterpret_cast<const char*>(&image_dimensions.width), sizeof(int));
-		ORUtils::MemoryBlockPersistence::SaveImageData(file, surface1_point_mask);
-		ORUtils::MemoryBlockPersistence::SaveImageData(file, surface2_point_mask);
+		ORUtils::MemoryBlockPersistence::SaveImage(file, surface1_point_mask);
+		ORUtils::MemoryBlockPersistence::SaveImage(file, surface2_point_mask);
 
 		const int num_float_layers = 4;
 		file.OStream().write(reinterpret_cast<const char*>(&num_float_layers), sizeof(int));
-		file.OStream().write(reinterpret_cast<const char*>(&image_dimensions.height), sizeof(int));
-		file.OStream().write(reinterpret_cast<const char*>(&image_dimensions.width), sizeof(int));
-		const int num_channels = 3;
-		file.OStream().write(reinterpret_cast<const char*>(&num_channels), sizeof(int));
 
-		//_DEBUG alloc
-//		Float3Image copy(image_dimensions, MEMORYDEVICE_CPU);
-//		copy.SetFrom(surface1_point_cloud, CUDA_TO_CPU);
-//		Vector3f datum1 = copy.GetData(MEMORYDEVICE_CPU)[319 + 385 * 640];
-//		copy.SetFrom(surface2_point_cloud, CUDA_TO_CPU);
-//		Vector3f datum2 = copy.GetData(MEMORYDEVICE_CPU)[319 + 385 * 640];
-//		printf("Surface points for px 319, 385 while saving: %f, %f, %f to %f, %f, %f\n",
-//		       datum1[0], datum1[1], datum1[2],
-//		       datum2[0], datum2[1], datum2[2]);
-//
-//		copy.SetFrom(march_endpoint1_point_cloud, CUDA_TO_CPU);
-//		datum1 = copy.GetData(MEMORYDEVICE_CPU)[319 + 385 * 640];
-//		copy.SetFrom(march_endpoint2_point_cloud, CUDA_TO_CPU);
-//		datum2 = copy.GetData(MEMORYDEVICE_CPU)[319 + 385 * 640];
-//		std::cout << "Size of Vector3f: " << sizeof(Vector3f) << std::endl;
-//		printf("March segment for px 319, 385 while saving: %f, %f, %f to %f, %f, %f\n",
-//		       datum1[0], datum1[1], datum1[2],
-//		       datum2[0], datum2[1], datum2[2]);
-
-		ORUtils::MemoryBlockPersistence::SaveImageData(file, surface1_point_cloud);
-		ORUtils::MemoryBlockPersistence::SaveImageData(file, surface2_point_cloud);
-		ORUtils::MemoryBlockPersistence::SaveImageData(file, march_endpoint1_point_cloud);
-		ORUtils::MemoryBlockPersistence::SaveImageData(file, march_endpoint2_point_cloud);
+		ORUtils::MemoryBlockPersistence::SaveImage(file, surface1_point_cloud);
+		ORUtils::MemoryBlockPersistence::SaveImage(file, surface2_point_cloud);
+		ORUtils::MemoryBlockPersistence::SaveImage(file, march_endpoint1_point_cloud);
+		ORUtils::MemoryBlockPersistence::SaveImage(file, march_endpoint2_point_cloud);
 	}
 
 	bool PrepareForFrame(const Vector2i& depth_image_dimensions) {

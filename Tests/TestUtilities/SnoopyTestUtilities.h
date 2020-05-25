@@ -24,6 +24,8 @@ using namespace ITMLib;
 
 namespace snoopy_test_utilities {
 
+static const Vector2i frame_image_size = Vector2i(640, 480);
+
 enum Frame {
 	FRAME00,
 	FRAME16,

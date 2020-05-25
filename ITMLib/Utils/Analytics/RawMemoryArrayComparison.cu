@@ -70,7 +70,6 @@ RawMemoryArraysEqual_CUDA<Matrix3f>(const Matrix3f* l, const Matrix3f* r, const 
 template bool
 RawMemoryArraysEqual_CUDA<Matrix4f>(const Matrix4f* l, const Matrix4f* r, const int element_count);
 
-
 // *** approximate comparisons ***
 
 // Vector specializations
@@ -108,5 +107,44 @@ RawMemoryArraysAlmostEqual_CUDA<Matrix3f>(const Matrix3f* l, const Matrix3f* r, 
 template bool
 RawMemoryArraysAlmostEqual_CUDA<Matrix4f>(const Matrix4f* l, const Matrix4f* r, const int element_count,
                                           const float absolute_tolerance);
+
+// *** verbose approximate comparisons ***
+
+// Vector specializations
+template bool
+RawMemoryArraysAlmostEqual_Verbose_CUDA<Vector3u>(const Vector3u* l, const Vector3u* r, const int element_count,
+                                          const float absolute_tolerance);
+
+template bool
+RawMemoryArraysAlmostEqual_Verbose_CUDA<Vector2f>(const Vector2f* l, const Vector2f* r, const int element_count,
+                                          const float absolute_tolerance);
+template bool
+RawMemoryArraysAlmostEqual_Verbose_CUDA<Vector3f>(const Vector3f* l, const Vector3f* r, const int element_count,
+                                          const float absolute_tolerance);
+template bool
+RawMemoryArraysAlmostEqual_Verbose_CUDA<Vector4f>(const Vector4f* l, const Vector4f* r, const int element_count,
+                                          const float absolute_tolerance);
+template bool
+RawMemoryArraysAlmostEqual_Verbose_CUDA<Vector6f>(const Vector6f* l, const Vector6f* r, const int element_count,
+                                          const float absolute_tolerance);
+
+template bool
+RawMemoryArraysAlmostEqual_Verbose_CUDA<Vector2d>(const Vector2d* l, const Vector2d* r, const int element_count,
+                                          const float absolute_tolerance);
+template bool
+RawMemoryArraysAlmostEqual_Verbose_CUDA<Vector3d>(const Vector3d* l, const Vector3d* r, const int element_count,
+                                          const float absolute_tolerance);
+template bool
+RawMemoryArraysAlmostEqual_Verbose_CUDA<Vector4d>(const Vector4d* l, const Vector4d* r, const int element_count,
+                                          const float absolute_tolerance);
+
+// Matrix specializations
+template bool
+RawMemoryArraysAlmostEqual_Verbose_CUDA<Matrix3f>(const Matrix3f* l, const Matrix3f* r, const int element_count,
+                                          const float absolute_tolerance);
+template bool
+RawMemoryArraysAlmostEqual_Verbose_CUDA<Matrix4f>(const Matrix4f* l, const Matrix4f* r, const int element_count,
+                                          const float absolute_tolerance);
+
 
 } // namespace ITMLib

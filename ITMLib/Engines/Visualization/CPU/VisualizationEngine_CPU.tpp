@@ -96,8 +96,8 @@ void VisualizationEngine_CPU<TVoxel, TIndex>::CreateExpectedDepths(const VoxelVo
 	for (int locId = 0; locId < imgSize.x * imgSize.y; ++locId) {
 		//TODO : this could be improved a bit...
 		Vector2f& pixel = minmaxData[locId];
-		pixel.x = 0.2f;
-		pixel.y = 3.0f;
+		pixel.x = scene->GetParameters().near_clipping_distance;
+		pixel.y = scene->GetParameters().far_clipping_distance;
 	}
 }
 
@@ -560,6 +560,7 @@ static int RenderPointCloud(Vector4f* locations, Vector4f* colours, const Vector
 
 	for (int y = 0, locId = 0; y < imgSize.y; y++)
 		for (int x = 0; x < imgSize.x; x++, locId++) {
+
 			Vector3f outNormal;
 			float angle;
 			Vector4f pointRay = ptsRay[locId];

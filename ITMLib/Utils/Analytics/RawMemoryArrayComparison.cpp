@@ -136,4 +136,51 @@ RawMemoryArraysAlmostEqual<Matrix4f>(const Matrix4f* l, MemoryDeviceType memory_
                                      MemoryDeviceType memory_device_type_r, const int element_count,
                                      const float absolute_tolerance);
 
+
+// *** verbose approximate comparisons ***
+// Vector specializations
+template bool
+RawMemoryArraysAlmostEqual_Verbose<Vector3u>(const Vector3u* l, MemoryDeviceType memory_device_type_l, const Vector3u* r,
+                                     MemoryDeviceType memory_device_type_r, const int element_count,
+                                     const float absolute_tolerance);
+
+template bool
+RawMemoryArraysAlmostEqual_Verbose<Vector2f>(const Vector2f* l, MemoryDeviceType memory_device_type_l, const Vector2f* r,
+                                     MemoryDeviceType memory_device_type_r, const int element_count,
+                                     const float absolute_tolerance);
+template bool
+RawMemoryArraysAlmostEqual_Verbose<Vector3f>(const Vector3f* l, MemoryDeviceType memory_device_type_l, const Vector3f* r,
+                                     MemoryDeviceType memory_device_type_r, const int element_count,
+                                     const float absolute_tolerance);
+template bool
+RawMemoryArraysAlmostEqual_Verbose<Vector4f>(const Vector4f* l, MemoryDeviceType memory_device_type_l, const Vector4f* r,
+                                     MemoryDeviceType memory_device_type_r, const int element_count,
+                                     const float absolute_tolerance);
+template bool
+RawMemoryArraysAlmostEqual_Verbose<Vector6f>(const Vector6f* l, MemoryDeviceType memory_device_type_l, const Vector6f* r,
+                                     MemoryDeviceType memory_device_type_r, const int element_count,
+                                     const float absolute_tolerance);
+
+template bool
+RawMemoryArraysAlmostEqual_Verbose<Vector2d>(const Vector2d* l, MemoryDeviceType memory_device_type_l, const Vector2d* r,
+                                     MemoryDeviceType memory_device_type_r, const int element_count,
+                                     const float absolute_tolerance);
+template bool
+RawMemoryArraysAlmostEqual_Verbose<Vector3d>(const Vector3d* l, MemoryDeviceType memory_device_type_l, const Vector3d* r,
+                                     MemoryDeviceType memory_device_type_r, const int element_count,
+                                     const float absolute_tolerance);
+template bool
+RawMemoryArraysAlmostEqual_Verbose<Vector4d>(const Vector4d* l, MemoryDeviceType memory_device_type_l, const Vector4d* r,
+                                     MemoryDeviceType memory_device_type_r, const int element_count,
+                                     const float absolute_tolerance);
+
+// Matrix specializations
+template bool
+RawMemoryArraysAlmostEqual_Verbose<Matrix3f>(const Matrix3f* l, MemoryDeviceType memory_device_type_l, const Matrix3f* r,
+                                     MemoryDeviceType memory_device_type_r, const int element_count,
+                                     const float absolute_tolerance);
+template bool
+RawMemoryArraysAlmostEqual_Verbose<Matrix4f>(const Matrix4f* l, MemoryDeviceType memory_device_type_l, const Matrix4f* r,
+                                     MemoryDeviceType memory_device_type_r, const int element_count,
+                                     const float absolute_tolerance);
 } // namespace ITMLib

@@ -79,6 +79,7 @@ if (BUILD_TESTS)
         TestUtilities/SnoopyTestUtilities.h
         TestUtilities/WarpAdvancedTestingUtilities.h
         TestUtilities/TestUtilitiesConfig.h.in
+        TestUtilities/CameraPoseAndRayTracingEngineFixture.h
         ${CMAKE_CURRENT_BINARY_DIR}/TestUtilities/TestUtilitiesConfig.h)
     
     find_package(Boost COMPONENTS unit_test_framework REQUIRED)

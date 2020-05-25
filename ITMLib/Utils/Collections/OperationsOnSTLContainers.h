@@ -19,6 +19,10 @@
 #include <set>
 #include <unordered_set>
 
+//ORUtils
+#include "../../../ORUtils/IStreamWrapper.h"
+#include "../../../ORUtils/OStreamWrapper.h"
+
 namespace std {
 
 template<typename Key, typename Compare, typename Allocator>
@@ -54,5 +58,24 @@ std::vector<T> arange(T start, T stop, T step = 1) {
 	return values;
 }
 
-
 } // namespace std
+
+namespace ITMLib {
+
+template<typename T>
+std::vector<T> ReadStdVectorFromFile(ORUtils::IStreamWrapper& file){
+	size_t element_count;
+	file.IStream().read(reinterpret_cast<char*>(&element_count), sizeof(size_t));
+	std::vector<T> vector(element_count);
+	file.IStream().read(reinterpret_cast<char*>(vector.data()), element_count * sizeof(T));
+	return vector;
+}
+
+template<typename T>
+void WriteStdVectorToFile(ORUtils::OStreamWrapper& file, const std::vector<T> vector){
+	size_t element_count = vector.size();
+	file.OStream().write(reinterpret_cast<const char*>(&element_count), sizeof(size_t));
+	file.OStream().write(reinterpret_cast<const char*>(vector.data()), element_count * sizeof(T));
+}
+
+} // namespace ITMLib

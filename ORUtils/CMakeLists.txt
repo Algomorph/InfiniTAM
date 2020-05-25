@@ -30,6 +30,7 @@ set(
         MemoryBlockPersistence.cpp
         OStreamWrapper.cpp
         SE3Pose.cpp
+        TypeTraits.cpp
 )
 
 set(
@@ -56,6 +57,7 @@ set(
         SE3Pose.h
         SVMClassifier.h
         Vector.h
+        TypeTraits.h
 )
 
 #############################

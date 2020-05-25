@@ -36,29 +36,22 @@ def read_block_allocation_ray_data(inverse_camera_matrices,
         file = gzip.open(data_path, "rb")
         layers = []
         num_bool_layers = int(np.frombuffer(file.read(size=np.dtype(np.int32).itemsize), dtype=np.int32)[0])
-        bool_layer_shape = tuple(np.frombuffer(file.read(size=2 * np.dtype(np.int32).itemsize), dtype=np.int32))
         for i_layer in range(0, num_bool_layers):
-            layer_element_count = int(np.frombuffer(file.read(size=np.dtype(np.uint64).itemsize), dtype=np.uint64)[0])
-            if layer_element_count != bool_layer_shape[0] * bool_layer_shape[1]:
-                raise ValueError(
-                    "Discrepancy between layer element count and layer shape: {:d} vs {:d} x {:d} = {:d}".format(
-                        layer_element_count, bool_layer_shape[0], bool_layer_shape[1],
-                        bool_layer_shape[0] * bool_layer_shape[1]))
+            bool_layer_shape = tuple(np.frombuffer(file.read(size=2 * np.dtype(np.int32).itemsize), dtype=np.int32))
+            channel_count = int(np.frombuffer(file.read(size=1 * np.dtype(np.int32).itemsize), dtype=np.int32)[0])
+            if channel_count != 1:
+                raise ValueError("Expected a a channel_count of 1, got {:d}".format(channel_count))
+            layer_element_count = bool_layer_shape[0] * bool_layer_shape[0]
             layer = np.frombuffer(file.read(layer_element_count * np.dtype(np.bool).itemsize),
                                   dtype=np.bool)
             layers.append(layer)
 
         num_float_layers = int(np.frombuffer(file.read(size=np.dtype(np.int32).itemsize), dtype=np.int32)[0])
-        float_layer_shape = tuple(np.frombuffer(file.read(size=3 * np.dtype(np.int32).itemsize), dtype=np.int32))
         for i_layer in range(0, num_float_layers):
-            layer_element_count = np.frombuffer(file.read(size=np.dtype(np.uint64).itemsize), dtype=np.uint64)[0]
-            if layer_element_count != float_layer_shape[0] * float_layer_shape[1]:
-                raise ValueError(
-                    "Discrepancy between layer element count and layer shape: {:d} vs {:d} x {:d} = {:d}".format(
-                        layer_element_count, float_layer_shape[0], float_layer_shape[1],
-                        float_layer_shape[0] * float_layer_shape[1]))
-            sub_element_count = int(layer_element_count * float_layer_shape[-1])
-            layer = np.frombuffer(file.read(sub_element_count * np.dtype(np.float32).itemsize),
+            float_layer_shape = tuple(np.frombuffer(file.read(size=3 * np.dtype(np.int32).itemsize), dtype=np.int32))
+            channel_count = int(np.frombuffer(file.read(size=1 * np.dtype(np.int32).itemsize), dtype=np.int32)[0])
+            value_count = int(bool_layer_shape[0] * bool_layer_shape[0] * channel_count)
+            layer = np.frombuffer(file.read(value_count * np.dtype(np.float32).itemsize),
                                   dtype=np.float32).reshape(-1, float_layer_shape[-1])
             layers.append(layer)
 

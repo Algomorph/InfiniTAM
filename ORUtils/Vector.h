@@ -64,6 +64,7 @@ namespace ORUtils {
 	{
 	public:
 		typedef T value_type;
+		static constexpr int element_count = 2;
 		_CPU_AND_GPU_CODE_ static inline int size() { return 2; }
 
 		////////////////////////////////////////////////////////
@@ -203,6 +204,7 @@ namespace ORUtils {
 	{
 	public:
 		typedef T value_type;
+		static constexpr int element_count = 3;
 		_CPU_AND_GPU_CODE_ static inline int size() { return 3; }
 
 		////////////////////////////////////////////////////////
@@ -398,6 +400,7 @@ namespace ORUtils {
 	{
 	public:
 		typedef T value_type;
+		static constexpr int element_count = 4;
 		_CPU_AND_GPU_CODE_ static inline int size() { return 4; }
 
 		////////////////////////////////////////////////////////
@@ -540,6 +543,7 @@ namespace ORUtils {
 	{
 	public:
 		typedef T value_type;
+		static constexpr int element_count = 6;
 		_CPU_AND_GPU_CODE_ static inline int size() { return 6; }
 
 		////////////////////////////////////////////////////////
@@ -685,6 +689,7 @@ namespace ORUtils {
 	public:
 		typedef T value_type;
 		enum { value_size = s };
+		static constexpr int element_count = s;
 		_CPU_AND_GPU_CODE_ static inline int size() { return value_size; }
 
 		////////////////////////////////////////////////////////
