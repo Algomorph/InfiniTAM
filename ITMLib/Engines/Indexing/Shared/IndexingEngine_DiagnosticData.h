@@ -18,6 +18,7 @@
 #include "../../../Utils/ImageTypes.h"
 #include "../../../Objects/Volume/VoxelBlockHash.h"
 #include "../../../../ORUtils/PlatformIndependentAtomics.h"
+#include "../../../../ORUtils/CrossPlatformMacros.h"
 #include "../../../Utils/Geometry/Segment.h"
 #include "../../../../ORUtils/MemoryBlockPersistence.h"
 

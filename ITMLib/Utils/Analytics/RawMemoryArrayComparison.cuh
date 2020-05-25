@@ -15,7 +15,8 @@
 //  ================================================================
 #pragma once
 
-#include "RawMemoryArrayComparison.h"
+#include "../Math.h"
+#include "../../../ORUtils/MemoryBlock.h"
 
 namespace ITMLib {
 
@@ -49,7 +50,7 @@ __global__ void TwoRawMemoryArrayItemGenericComparison(RawArrayComparisonData<TE
 namespace internal {
 
 template<typename TElement, typename TComparisonFunction, typename TReportMismatchFunction>
-bool CompareRawMemoryArrays_Generic_CUDA(const TElement* l, const TElement* r, const int element_count,
+bool CompareRawMemoryArrays_Generic_CUDA(const TElement* left, const TElement* right, const int element_count,
                                          TComparisonFunction&& compare_elements, TReportMismatchFunction&& report_mismatch) {
 	assert(element_count > 0);
 	dim3 cuda_block_dimensions(256);
@@ -59,7 +60,7 @@ bool CompareRawMemoryArrays_Generic_CUDA(const TElement* l, const TElement* r, c
 	raw_array_comparison_data.UpdateDeviceFromHost();
 
 	TwoRawMemoryArrayItemGenericComparison <<< cuda_grid_dimensions, cuda_block_dimensions >>>
-			(raw_array_comparison_data.GetData(MEMORYDEVICE_CUDA), l, r, element_count, compare_elements);
+			(raw_array_comparison_data.GetData(MEMORYDEVICE_CUDA), left, right, element_count, compare_elements);
 
 	ORcudaKernelCheck;
 	raw_array_comparison_data.UpdateHostFromDevice();
@@ -73,180 +74,5 @@ bool CompareRawMemoryArrays_Generic_CUDA(const TElement* l, const TElement* r, c
 }
 
 } // end namespace internal
-
-template<typename TElement>
-bool RawMemoryArraysAlmostEqual_CUDA(const TElement* l, const TElement* r, const int element_count,
-                                     const float absolute_tolerance) {
-	//TODO: potentially, eliminate this method and use the generic directly by using a __host__ __device__ compare_elements lambda in calling functions
-	auto compare_elements = [=] __device__(
-	const TElement& element_l,
-	const TElement& element_r) {
-		return AlmostEqual(element_l, element_r, absolute_tolerance);
-	};
-	return internal::CompareRawMemoryArrays_Generic_CUDA(l, r, element_count, compare_elements,
-	                                                     [](const TElement& element_a, const TElement& element_b, const int mismatch_index) {});
-}
-
-//TODO: add a report_mismatch std::funtion(void(const TElement& element_a, const TElement& element_b, const int mismatch_index))
-// to all versions, such that business logic doesn't have to be duplicated and huge template instantiation lists can be avoided
-template<typename TElement>
-bool RawMemoryArraysAlmostEqual_Verbose_CUDA(const TElement* l, const TElement* r, const int element_count,
-                                             const float absolute_tolerance) {
-	//TODO: potentially, eliminate this method and use the generic directly by using a __host__ __device__ compare_elements lambda in calling functions
-	auto compare_elements = [=] __device__(
-	const TElement& element_l,
-	const TElement& element_r) {
-		return AlmostEqual(element_l, element_r, absolute_tolerance);
-	};
-	return internal::CompareRawMemoryArrays_Generic_CUDA(l, r, element_count, compare_elements,
-	                                                     [&absolute_tolerance](const TElement& element_a, const TElement& element_b,
-	                                                                           const int mismatch_index) {
-		                                                     std::cerr << "Memory array approximate comparison failure. First discovered mismatch: "
-		                                                               << element_a << " vs. " << element_b << " at position " << mismatch_index
-		                                                               << ". Tolerance " << absolute_tolerance << " exceeded." << std::endl;
-	                                                     });
-}
-
-template<typename TElement>
-bool RawMemoryArraysEqual_CUDA(const TElement* l, const TElement* r, const int element_count) {
-	//TODO: potentially, eliminate this method and use the generic directly by using a __host__ __device__ compare_elements lambda in calling functions
-	auto compare_elements = [] __device__(
-	const TElement& element_l,
-	const TElement& element_r) {
-		return element_l == element_r;
-	};
-	return internal::CompareRawMemoryArrays_Generic_CUDA(l, r, element_count, compare_elements,
-	                                                     [](const TElement& element_a, const TElement& element_b, const int mismatch_index) {});
-}
-// *** exact comparisons ***
-
-// primitive specializations
-extern template bool
-RawMemoryArraysEqual_CUDA<bool>(const bool* l, const bool* r, const int element_count);
-
-extern template bool
-RawMemoryArraysEqual_CUDA<short>(const short* l, const short* r, const int element_count);
-
-extern template bool
-RawMemoryArraysEqual_CUDA<int>(const int* l, const int* r, const int element_count);
-
-// Vector specializations
-extern template bool
-RawMemoryArraysEqual_CUDA<Vector3u>(const Vector3u* l, const Vector3u* r, const int element_count);
-extern template bool
-RawMemoryArraysEqual_CUDA<Vector4u>(const Vector4u* l, const Vector4u* r, const int element_count);
-
-extern template bool
-RawMemoryArraysEqual_CUDA<Vector2s>(const Vector2s* l, const Vector2s* r, const int element_count);
-extern template bool
-RawMemoryArraysEqual_CUDA<Vector3s>(const Vector3s* l, const Vector3s* r, const int element_count);
-extern template bool
-RawMemoryArraysEqual_CUDA<Vector4s>(const Vector4s* l, const Vector4s* r, const int element_count);
-
-extern template bool
-RawMemoryArraysEqual_CUDA<Vector2i>(const Vector2i* l, const Vector2i* r, const int element_count);
-extern template bool
-RawMemoryArraysEqual_CUDA<Vector3i>(const Vector3i* l, const Vector3i* r, const int element_count);
-extern template bool
-RawMemoryArraysEqual_CUDA<Vector4i>(const Vector4i* l, const Vector4i* r, const int element_count);
-extern template bool
-RawMemoryArraysEqual_CUDA<Vector6i>(const Vector6i* l, const Vector6i* r, const int element_count);
-
-extern template bool
-RawMemoryArraysEqual_CUDA<Vector2f>(const Vector2f* l, const Vector2f* r, const int element_count);
-extern template bool
-RawMemoryArraysEqual_CUDA<Vector3f>(const Vector3f* l, const Vector3f* r, const int element_count);
-extern template bool
-RawMemoryArraysEqual_CUDA<Vector4f>(const Vector4f* l, const Vector4f* r, const int element_count);
-extern template bool
-RawMemoryArraysEqual_CUDA<Vector6f>(const Vector6f* l, const Vector6f* r, const int element_count);
-
-extern template bool
-RawMemoryArraysEqual_CUDA<Vector2d>(const Vector2d* l, const Vector2d* r, const int element_count);
-extern template bool
-RawMemoryArraysEqual_CUDA<Vector3d>(const Vector3d* l, const Vector3d* r, const int element_count);
-extern template bool
-RawMemoryArraysEqual_CUDA<Vector4d>(const Vector4d* l, const Vector4d* r, const int element_count);
-
-// Matrix specializations
-extern template bool
-RawMemoryArraysEqual_CUDA<Matrix3f>(const Matrix3f* l, const Matrix3f* r, const int element_count);
-extern template bool
-RawMemoryArraysEqual_CUDA<Matrix4f>(const Matrix4f* l, const Matrix4f* r, const int element_count);
-
-// *** approximate comparisons ***
-
-// Vector specializations
-extern template bool
-RawMemoryArraysAlmostEqual_CUDA<Vector3u>(const Vector3u* l, const Vector3u* r, const int element_count,
-                                          const float absolute_tolerance);
-
-extern template bool
-RawMemoryArraysAlmostEqual_CUDA<Vector2f>(const Vector2f* l, const Vector2f* r, const int element_count,
-                                          const float absolute_tolerance);
-extern template bool
-RawMemoryArraysAlmostEqual_CUDA<Vector3f>(const Vector3f* l, const Vector3f* r, const int element_count,
-                                          const float absolute_tolerance);
-extern template bool
-RawMemoryArraysAlmostEqual_CUDA<Vector4f>(const Vector4f* l, const Vector4f* r, const int element_count,
-                                          const float absolute_tolerance);
-extern template bool
-RawMemoryArraysAlmostEqual_CUDA<Vector6f>(const Vector6f* l, const Vector6f* r, const int element_count,
-                                          const float absolute_tolerance);
-
-extern template bool
-RawMemoryArraysAlmostEqual_CUDA<Vector2d>(const Vector2d* l, const Vector2d* r, const int element_count,
-                                          const float absolute_tolerance);
-extern template bool
-RawMemoryArraysAlmostEqual_CUDA<Vector3d>(const Vector3d* l, const Vector3d* r, const int element_count,
-                                          const float absolute_tolerance);
-extern template bool
-RawMemoryArraysAlmostEqual_CUDA<Vector4d>(const Vector4d* l, const Vector4d* r, const int element_count,
-                                          const float absolute_tolerance);
-
-// Matrix specializations
-extern template bool
-RawMemoryArraysAlmostEqual_CUDA<Matrix3f>(const Matrix3f* l, const Matrix3f* r, const int element_count,
-                                          const float absolute_tolerance);
-extern template bool
-RawMemoryArraysAlmostEqual_CUDA<Matrix4f>(const Matrix4f* l, const Matrix4f* r, const int element_count,
-                                          const float absolute_tolerance);
-
-// *** verbose approximate comparisons ***
-// Vector specializations
-extern template bool
-RawMemoryArraysAlmostEqual_Verbose_CUDA<Vector3u>(const Vector3u* l, const Vector3u* r, const int element_count,
-                                                  const float absolute_tolerance);
-
-extern template bool
-RawMemoryArraysAlmostEqual_Verbose_CUDA<Vector2f>(const Vector2f* l, const Vector2f* r, const int element_count,
-                                                  const float absolute_tolerance);
-extern template bool
-RawMemoryArraysAlmostEqual_Verbose_CUDA<Vector3f>(const Vector3f* l, const Vector3f* r, const int element_count,
-                                                  const float absolute_tolerance);
-extern template bool
-RawMemoryArraysAlmostEqual_Verbose_CUDA<Vector4f>(const Vector4f* l, const Vector4f* r, const int element_count,
-                                                  const float absolute_tolerance);
-extern template bool
-RawMemoryArraysAlmostEqual_Verbose_CUDA<Vector6f>(const Vector6f* l, const Vector6f* r, const int element_count,
-                                                  const float absolute_tolerance);
-
-extern template bool
-RawMemoryArraysAlmostEqual_Verbose_CUDA<Vector2d>(const Vector2d* l, const Vector2d* r, const int element_count,
-                                                  const float absolute_tolerance);
-extern template bool
-RawMemoryArraysAlmostEqual_Verbose_CUDA<Vector3d>(const Vector3d* l, const Vector3d* r, const int element_count,
-                                                  const float absolute_tolerance);
-extern template bool
-RawMemoryArraysAlmostEqual_Verbose_CUDA<Vector4d>(const Vector4d* l, const Vector4d* r, const int element_count,
-                                                  const float absolute_tolerance);
-
-// Matrix specializations
-extern template bool
-RawMemoryArraysAlmostEqual_Verbose_CUDA<Matrix3f>(const Matrix3f* l, const Matrix3f* r, const int element_count,
-                                                  const float absolute_tolerance);
-extern template bool
-RawMemoryArraysAlmostEqual_Verbose_CUDA<Matrix4f>(const Matrix4f* l, const Matrix4f* r, const int element_count,
-                                                  const float absolute_tolerance);
 
 } // namespace ITMLib

@@ -568,7 +568,6 @@ void GenerateRaytracingTestData_VoxelBlockHash() {
 		//forward-render
 		{
 			std::shared_ptr<RenderState> render_state_forward_render = fixture.MakeRenderState();
-			fixture.visualization_engine->FindSurface(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state_forward_render.get());
 
 			std::shared_ptr<CameraTrackingState> tracking_state_forward_render = fixture.MakeCameraTrackingState();
 			ORUtils::SE3Pose& adjusted_pose = *tracking_state_forward_render->pose_d;
@@ -582,6 +581,7 @@ void GenerateRaytracingTestData_VoxelBlockHash() {
 
 			fixture.visualization_engine->CreateExpectedDepths(volume, &adjusted_pose, &fixture.calibration_data.intrinsics_d,
 			                                                   render_state_forward_render.get());
+			fixture.visualization_engine->FindSurface(volume, &adjusted_pose, &fixture.calibration_data.intrinsics_d, render_state_forward_render.get());
 			fixture.visualization_engine->ForwardRender(volume, fixture.view_17, tracking_state_forward_render.get(),
 			                                            render_state_forward_render.get());
 			forward_render_images_file.OStream().write(reinterpret_cast<const char*>(&(render_state_forward_render->noFwdProjMissingPoints)),
@@ -593,8 +593,9 @@ void GenerateRaytracingTestData_VoxelBlockHash() {
 		// render image
 		{
 			std::shared_ptr<RenderState> render_state_render_image = fixture.MakeRenderState();
-			fixture.visualization_engine->FindSurface(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state_render_image.get());
 			fixture.visualization_engine->CreateExpectedDepths(volume, &pose, &fixture.calibration_data.intrinsics_d,render_state_render_image.get());
+			fixture.visualization_engine->FindSurface(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state_render_image.get());
+
 
 			UChar4Image output_image(snoopy::frame_image_size, TMemoryDeviceType);
 			fixture.visualization_engine->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state_render_image.get(),

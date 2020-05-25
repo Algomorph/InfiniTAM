@@ -192,6 +192,7 @@ static void GenericRaycast(VoxelVolume<TVoxel, TIndex>* volume, const Vector2i& 
 #pragma omp parallel for default(none) shared(imgSize, minmaximg, projParams, invM, pointsRay, blockVisibilityTypes, voxelData, voxelIndex)
 #endif
 	for (int locId = 0; locId < imgSize.x * imgSize.y; ++locId) {
+
 		int y = locId / imgSize.x;
 		int x = locId - y * imgSize.x;
 

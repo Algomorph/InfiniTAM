@@ -20,6 +20,7 @@
 
 #include "../../../../ORUtils/PlatformIndependence.h"
 #include "../../../../ORUtils/PlatformIndependentAtomics.h"
+#include "../../../../ORUtils/CrossPlatformMacros.h"
 #include "../../../Utils/Math.h"
 #include "../../../Utils/HashBlockProperties.h"
 #include "IndexingEngine_ConcurrentBlockManagement.h"

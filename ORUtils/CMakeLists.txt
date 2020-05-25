@@ -54,6 +54,7 @@ set(
         OStreamWrapper.h
         PlatformIndependence.h
         PlatformIndependentAtomics.h
+        CrossPlatformMacros.h
         SE3Pose.h
         SVMClassifier.h
         Vector.h

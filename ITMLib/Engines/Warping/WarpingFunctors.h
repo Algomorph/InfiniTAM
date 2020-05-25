@@ -23,7 +23,7 @@
 #include "../../Objects/Volume/VoxelVolume.h"
 #include "../../Objects/Volume/TrilinearInterpolation.h"
 #include "../../Utils/Configuration/Configuration.h"
-#include "../../../ORUtils/PlatformIndependentAtomics.h"
+#include "../../../ORUtils/CrossPlatformMacros.h"
 #include "../Common/WarpAccessFunctors.h"
 
 namespace ITMLib {

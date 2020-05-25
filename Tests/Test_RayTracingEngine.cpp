@@ -233,8 +233,6 @@ void GenericForwardRenderTest() {
 
 		ORUtils::SE3Pose& pose = *tracking_state->pose_d;
 
-		fixture.visualization_engine->FindVisibleBlocks(volume, &pose, &fixture.calibration_data.intrinsics_d, fixture.render_state);
-
 		const int visible_block_count = volume->index.GetVisibleBlockCount();
 		if (visible_block_count == 0) continue; // skip shots without results
 		std::shared_ptr<RenderState> render_state = fixture.MakeRenderState();
@@ -250,6 +248,7 @@ void GenericForwardRenderTest() {
 		adjusted_pose.MultiplyWith(&adjustment);
 
 		fixture.visualization_engine->CreateExpectedDepths(volume, &adjusted_pose, &fixture.calibration_data.intrinsics_d, render_state.get());
+		fixture.visualization_engine->FindVisibleBlocks(volume, &adjusted_pose, &fixture.calibration_data.intrinsics_d, fixture.render_state);
 		fixture.visualization_engine->ForwardRender(volume, fixture.view_17, tracking_state_forward_render.get(), render_state.get());
 
 		int forward_rendering_missing_point_cout_ground_truth;
@@ -287,46 +286,46 @@ void GenericRenderImageTest() {
 		const int visible_block_count = volume->index.GetVisibleBlockCount();
 		if (visible_block_count == 0) continue; // skip shots without results
 		std::shared_ptr<RenderState> render_state = fixture.MakeRenderState();
-		fixture.visualization_engine->FindSurface(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get());
 		fixture.visualization_engine->CreateExpectedDepths(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get());
+		fixture.visualization_engine->FindSurface(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get());
 
 		UChar4Image output_image(snoopy::frame_image_size, TMemoryDeviceType);
 		fixture.visualization_engine->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get(),
 		                                          &output_image, IVisualizationEngine::RenderImageType::RENDER_COLOUR_FROM_VOLUME,
 		                                          IVisualizationEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
-		UChar4Image output_image_ground_truth = ORUtils::MemoryBlockPersistence::LoadImage<Vector4u>(rendered_images_file,MEMORYDEVICE_CPU);
+		UChar4Image output_image_ground_truth = ORUtils::MemoryBlockPersistence::LoadImage<Vector4u>(rendered_images_file, MEMORYDEVICE_CPU);
 		BOOST_REQUIRE(RawMemoryArraysEqual(output_image_ground_truth.GetData(MEMORYDEVICE_CPU), MEMORYDEVICE_CPU,
 		                                   output_image.GetData(TMemoryDeviceType), TMemoryDeviceType, output_image.size()));
 		// render again re-doing the raycast internally, make sure the results match again
-//		fixture.visualization_engine->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get(),
-//		                                          &output_image, IVisualizationEngine::RenderImageType::RENDER_COLOUR_FROM_VOLUME,
-//		                                          IVisualizationEngine::RenderRaycastSelection::RENDER_FROM_NEW_RAYCAST);
-//		BOOST_REQUIRE(RawMemoryArraysEqual(output_image_ground_truth.GetData(MEMORYDEVICE_CPU), MEMORYDEVICE_CPU,
-//		                                   output_image.GetData(TMemoryDeviceType), TMemoryDeviceType, output_image.size()));
+		fixture.visualization_engine->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get(),
+		                                          &output_image, IVisualizationEngine::RenderImageType::RENDER_COLOUR_FROM_VOLUME,
+		                                          IVisualizationEngine::RenderRaycastSelection::RENDER_FROM_NEW_RAYCAST);
+		BOOST_REQUIRE(RawMemoryArraysEqual_Verbose(output_image_ground_truth.GetData(MEMORYDEVICE_CPU), MEMORYDEVICE_CPU,
+		                                           output_image.GetData(TMemoryDeviceType), TMemoryDeviceType, output_image.size()));
 
 		fixture.visualization_engine->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get(),
 		                                          &output_image, IVisualizationEngine::RenderImageType::RENDER_COLOUR_FROM_NORMAL,
 		                                          IVisualizationEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
-		output_image_ground_truth = ORUtils::MemoryBlockPersistence::LoadImage<Vector4u>(rendered_images_file,MEMORYDEVICE_CPU);
+		output_image_ground_truth = ORUtils::MemoryBlockPersistence::LoadImage<Vector4u>(rendered_images_file, MEMORYDEVICE_CPU);
 		BOOST_REQUIRE(RawMemoryArraysEqual(output_image_ground_truth.GetData(MEMORYDEVICE_CPU), MEMORYDEVICE_CPU,
 		                                   output_image.GetData(TMemoryDeviceType), TMemoryDeviceType, output_image.size()));
 
 		fixture.visualization_engine->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get(),
 		                                          &output_image, IVisualizationEngine::RenderImageType::RENDER_SHADED_GREYSCALE_IMAGENORMALS,
 		                                          IVisualizationEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
-		output_image_ground_truth = ORUtils::MemoryBlockPersistence::LoadImage<Vector4u>(rendered_images_file,MEMORYDEVICE_CPU);
+		output_image_ground_truth = ORUtils::MemoryBlockPersistence::LoadImage<Vector4u>(rendered_images_file, MEMORYDEVICE_CPU);
 		BOOST_REQUIRE(RawMemoryArraysEqual(output_image_ground_truth.GetData(MEMORYDEVICE_CPU), MEMORYDEVICE_CPU,
 		                                   output_image.GetData(TMemoryDeviceType), TMemoryDeviceType, output_image.size()));
 		fixture.visualization_engine->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get(),
 		                                          &output_image, IVisualizationEngine::RenderImageType::RENDER_SHADED_GREEN,
 		                                          IVisualizationEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
-		output_image_ground_truth = ORUtils::MemoryBlockPersistence::LoadImage<Vector4u>(rendered_images_file,MEMORYDEVICE_CPU);
+		output_image_ground_truth = ORUtils::MemoryBlockPersistence::LoadImage<Vector4u>(rendered_images_file, MEMORYDEVICE_CPU);
 		BOOST_REQUIRE(RawMemoryArraysEqual(output_image_ground_truth.GetData(MEMORYDEVICE_CPU), MEMORYDEVICE_CPU,
 		                                   output_image.GetData(TMemoryDeviceType), TMemoryDeviceType, output_image.size()));
 		fixture.visualization_engine->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get(),
 		                                          &output_image, IVisualizationEngine::RenderImageType::RENDER_SHADED_OVERLAY,
 		                                          IVisualizationEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
-		output_image_ground_truth = ORUtils::MemoryBlockPersistence::LoadImage<Vector4u>(rendered_images_file,MEMORYDEVICE_CPU);
+		output_image_ground_truth = ORUtils::MemoryBlockPersistence::LoadImage<Vector4u>(rendered_images_file, MEMORYDEVICE_CPU);
 		BOOST_REQUIRE(RawMemoryArraysEqual(output_image_ground_truth.GetData(MEMORYDEVICE_CPU), MEMORYDEVICE_CPU,
 		                                   output_image.GetData(TMemoryDeviceType), TMemoryDeviceType, output_image.size()));
 

@@ -27,6 +27,7 @@
 #include "../Common/WarpAccessFunctors.h"
 #include "../../../ORUtils/PlatformIndependentAtomics.h"
 #include "../../../ORUtils/PlatformIndependence.h"
+#include "../../../ORUtils/CrossPlatformMacros.h"
 #include "../../Objects/Volume/VoxelVolume.h"
 #include "../Reduction/Interface/VolumeReduction.h"
 #include "../Traversal/Interface/HashTableTraversal.h"

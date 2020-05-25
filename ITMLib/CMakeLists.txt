@@ -917,6 +917,7 @@ set(
         Utils/Analytics/NeighborVoxelIterationInfo.h
         Utils/Analytics/RawMemoryArrayComparison.h
         Utils/Analytics/RawMemoryArrayComparison.cuh
+        Utils/Analytics/RawMemoryArrayComparisonTemplateInstantiations.h
         Utils/Analytics/Statistics.h
 
         Utils/Collections/NestedMap3DOfArrays.h

@@ -20,6 +20,7 @@
 #include "../../Telemetry/TelemetryRecorderFactory.h"
 #include "../../../../ORUtils/PlatformIndependence.h"
 #include "../../../../ORUtils/PlatformIndependentAtomics.h"
+#include "../../../../ORUtils/CrossPlatformMacros.h"
 #include "../../../Objects/Volume/VoxelVolume.h"
 #include "IndexingEngine_Shared.h"
 #include "IndexingEngine_RayMarching.h"

@@ -20,6 +20,7 @@
 #include "../../Utils/Configuration/Configuration.h"
 #include "SurfaceTrackerSharedRoutines.h"
 #include "../../../ORUtils/PlatformIndependentAtomics.h"
+#include "../../../ORUtils/CrossPlatformMacros.h"
 #include "../../Engines/Traversal/Interface/VolumeTraversal.h"
 #include "../../Engines/Traversal/Interface/ThreeVolumeTraversal.h"
 #include "../../Engines/Common/WarpAccessFunctors.h"

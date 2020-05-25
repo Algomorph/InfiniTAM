@@ -22,6 +22,7 @@
 //local
 #include "WarpGradientFunctor.h"
 #include "../../../ORUtils/PlatformIndependentAtomics.h"
+#include "../../../ORUtils/CrossPlatformMacros.h"
 #include "../Shared/SurfaceTrackerSharedRoutines.h"
 #include "../Shared/SurfaceTrackerDiagnosticRoutines.h"
 #include "../Shared/WarpGradientAggregates.h"
