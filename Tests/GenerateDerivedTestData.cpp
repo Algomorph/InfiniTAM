@@ -532,6 +532,7 @@ void GenerateRenderingTestData_VoxelBlockHash() {
 		// find surface (in legacy InfiniTAM, fills "raycastResult" of the render state)
 		{
 			std::shared_ptr<RenderState> render_state_find_surface = fixture.MakeRenderState();
+			fixture.visualization_engine->CreateExpectedDepths(volume, &pose, &fixture.calibration_data.intrinsics_d,render_state_find_surface.get());
 			fixture.visualization_engine->FindSurface(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state_find_surface.get());
 			ORUtils::MemoryBlockPersistence::SaveImage(raycast_images_file, *render_state_find_surface->raycastResult);
 		}
@@ -549,10 +550,6 @@ void GenerateRenderingTestData_VoxelBlockHash() {
 			ORUtils::MemoryBlockPersistence::SaveImage(point_cloud_images_file, *tracking_state->pointCloud->locations);
 			ORUtils::MemoryBlockPersistence::SaveImage(point_cloud_images_file, *tracking_state->pointCloud->colours);
 		}
-
-//		delete volume;
-//		LoadVolume(&volume, snoopy::PartialVolume17Path<VoxelBlockHash>(), TMemoryDeviceType,
-//		           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
 		// create icp maps (in legacy InfiniTAM, fills "raycastResult" of "render state", locations and
 		{

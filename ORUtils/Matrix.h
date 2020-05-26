@@ -173,20 +173,6 @@ namespace ORUtils {
 		_CPU_AND_GPU_CODE_ inline Matrix4 &operator += (const Matrix4 &mat) { for (int i = 0; i < 16; ++i) this->m[i] += mat.m[i]; return *this; }
 		_CPU_AND_GPU_CODE_ inline Matrix4 &operator -= (const Matrix4 &mat) { for (int i = 0; i < 16; ++i) this->m[i] -= mat.m[i]; return *this; }
 
-		_CPU_AND_GPU_CODE_ inline friend bool operator == (const Matrix4 &lhs, const Matrix4 &rhs) {
-			bool r = lhs.m[0] == rhs.m[0];
-			for (int i = 1; i < 16; i++)
-				r &= lhs.m[i] == rhs.m[i];
-			return r;
-		}
-
-		_CPU_AND_GPU_CODE_ inline friend bool operator != (const Matrix4 &lhs, const Matrix4 &rhs) {
-			bool r = lhs.m[0] != rhs.m[0];
-			for (int i = 1; i < 16; i++)
-				r |= lhs.m[i] != rhs.m[i];
-			return r;
-		}
-
 		// The inverse matrix for float/double type
 		_CPU_AND_GPU_CODE_ inline bool inv(Matrix4 &out) const {
 			T tmp[12], src[16], det;
@@ -251,6 +237,35 @@ namespace ORUtils {
 			return true;
 		}
 
+		////////////////////////////////////////////////////////
+		//  Comparison operators
+		////////////////////////////////////////////////////////
+
+		_CPU_AND_GPU_CODE_ inline friend bool operator == (const Matrix4 &lhs, const Matrix4 &rhs) {
+			bool r = lhs.m[0] == rhs.m[0];
+			for (int i = 1; i < 16; i++)
+				r &= lhs.m[i] == rhs.m[i];
+			return r;
+		}
+
+		_CPU_AND_GPU_CODE_ inline friend bool operator != (const Matrix4 &lhs, const Matrix4 &rhs) {
+			bool r = lhs.m[0] != rhs.m[0];
+			for (int i = 1; i < 16; i++)
+				r |= lhs.m[i] != rhs.m[i];
+			return r;
+		}
+
+		_CPU_AND_GPU_CODE_ inline friend bool operator < (const Matrix4 &lhs, const Matrix4 &rhs) {
+			for(int index = 15; index >= 0; index--){
+				if(lhs.m[index] < rhs.m[index]) return true;
+				if(lhs.m[index] > rhs.m[index]) return false;
+			}
+			return true;
+		}
+
+		////////////////////////////////////////////////////////
+		//  IO operators
+		////////////////////////////////////////////////////////
 		friend std::ostream& operator<<(std::ostream& os, const Matrix4<T>& dt) {
 			for (int y = 0; y < 4; y++)
 				os << dt(0, y) << ", " << dt(1, y) << ", " << dt(2, y) << ", " << dt(3, y) << "\n";
@@ -349,20 +364,6 @@ namespace ORUtils {
 		_CPU_AND_GPU_CODE_ inline Matrix3& operator += (const Matrix3 &mat) { for (int i = 0; i < 9; ++i) this->m[i] += mat.m[i]; return *this; }
 		_CPU_AND_GPU_CODE_ inline Matrix3& operator -= (const Matrix3 &mat) { for (int i = 0; i < 9; ++i) this->m[i] -= mat.m[i]; return *this; }
 
-		_CPU_AND_GPU_CODE_ inline friend bool operator == (const Matrix3 &lhs, const Matrix3 &rhs) {
-			bool r = lhs.m[0] == rhs.m[0];
-			for (int i = 1; i < 9; i++)
-				r &= lhs.m[i] == rhs.m[i];
-			return r;
-		}
-
-		_CPU_AND_GPU_CODE_ inline friend bool operator != (const Matrix3 &lhs, const Matrix3 &rhs) {
-			bool r = lhs.m[0] != rhs.m[0];
-			for (int i = 1; i < 9; i++)
-				r |= lhs.m[i] != rhs.m[i];
-			return r;
-		}
-
 		// Matrix determinant
 		_CPU_AND_GPU_CODE_ inline T det() const {
 			return (this->m11*this->m22 - this->m12*this->m21)*this->m00 + (this->m12*this->m20 - this->m10*this->m22)*this->m01 + (this->m10*this->m21 - this->m11*this->m20)*this->m02;
@@ -387,7 +388,33 @@ namespace ORUtils {
 			out.m22 = (this->m00*this->m11 - this->m01*this->m10) / determinant;
 			return true;
 		}
+		////////////////////////////////////////////////////////
+		//  Comparison operators
+		////////////////////////////////////////////////////////
+		_CPU_AND_GPU_CODE_ inline friend bool operator == (const Matrix3 &lhs, const Matrix3 &rhs) {
+			bool r = lhs.m[0] == rhs.m[0];
+			for (int i = 1; i < 9; i++)
+				r &= lhs.m[i] == rhs.m[i];
+			return r;
+		}
 
+		_CPU_AND_GPU_CODE_ inline friend bool operator != (const Matrix3 &lhs, const Matrix3 &rhs) {
+			bool r = lhs.m[0] != rhs.m[0];
+			for (int i = 1; i < 9; i++)
+				r |= lhs.m[i] != rhs.m[i];
+			return r;
+		}
+
+		_CPU_AND_GPU_CODE_ inline friend bool operator < (const Matrix3 &lhs, const Matrix3 &rhs) {
+			for(int index = 9; index >= 0; index--){
+				if(lhs.m[index] < rhs.m[index]) return true;
+				if(lhs.m[index] > rhs.m[index]) return false;
+			}
+			return true;
+		}
+		////////////////////////////////////////////////////////
+		//  IO Operators
+		////////////////////////////////////////////////////////
 		friend std::ostream& operator<<(std::ostream& os, const Matrix3<T>& dt)	{
 			for (int y = 0; y < 3; y++)
 				os << dt(0, y) << ", " << dt(1, y) << ", " << dt(2, y) << "\n";

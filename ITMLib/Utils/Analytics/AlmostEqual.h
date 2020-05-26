@@ -32,11 +32,6 @@ namespace ITMLib {
 
 //  region ==================== DECLARATIONS ===========================================================================
 
-_CPU_AND_GPU_CODE_ inline bool AlmostEqual(bool a, bool b) { return a == b; };
-_CPU_AND_GPU_CODE_ inline bool AlmostEqual(short a, short b) { return a == b; };
-_CPU_AND_GPU_CODE_ inline bool AlmostEqual(int a, int b) { return a == b; };
-_CPU_AND_GPU_CODE_ inline bool AlmostEqual(float a, float b);
-_CPU_AND_GPU_CODE_ inline bool AlmostEqual(double a, double b);
 /**
  * \brief Determine whether the two values are within a given tolerance of each-other
  * \details The comparison is done in an absolute way, i.e. the relative value magnitudes don't matter. This is useful
@@ -44,46 +39,49 @@ _CPU_AND_GPU_CODE_ inline bool AlmostEqual(double a, double b);
  * small values don't really matter all that much.
  * \param a the first value
  * \param b the second value
+ * \param tolerance tolerance bound within which all of the elements or sub-elements in @p a and @p b should match.
+ * \details For integral types or element types an integral value of the same type is treated as an admissible difference bound.
+ * For floating-point or element types: if a floating-point value is given, it is treated as an admissible difference bound directly, but if an
+ * integral value is given, it is treated as the order after the decimal point point for the error bound, i.e. the bound for argument "1" will be 0.1,
+ * the bound for argument "2" will be 0.02, etc.
  * \return true if the two values are within the provided tolerance, false otherwise.
  */
-_CPU_AND_GPU_CODE_ inline bool AlmostEqual(short a, short b, short tolerance);
-_CPU_AND_GPU_CODE_ inline bool AlmostEqual(int a, int b, int tolerance);
-_CPU_AND_GPU_CODE_ inline bool AlmostEqual(float a, float b, float tolerance);
-_CPU_AND_GPU_CODE_ inline bool AlmostEqual(float a, float b, double tolerance);
-_CPU_AND_GPU_CODE_ inline bool AlmostEqual(double a, double b, double tolerance);
-_CPU_AND_GPU_CODE_ inline bool AlmostEqual(float a, float b, unsigned int decimal_places);
-
-
 template<typename ElementType, typename ToleranceType>
 _CPU_AND_GPU_CODE_
 inline
 bool AlmostEqual(ORUtils::Vector2<ElementType> a, ORUtils::Vector2<ElementType> b, ToleranceType tolerance);
 
+/** \overload */
 template<typename ElementType, typename ToleranceType>
 _CPU_AND_GPU_CODE_
 inline
 bool AlmostEqual(ORUtils::Vector3<ElementType> a, ORUtils::Vector3<ElementType> b, ToleranceType tolerance);
 
+/** \overload */
 template<typename ElementType, typename ToleranceType>
 _CPU_AND_GPU_CODE_
 inline
 bool AlmostEqual(ORUtils::Vector4<ElementType> a, ORUtils::Vector4<ElementType> b, ToleranceType tolerance);
 
+/** \overload */
 template<typename ElementType, typename ToleranceType>
 _CPU_AND_GPU_CODE_
 inline
 bool AlmostEqual(ORUtils::Vector6<ElementType> a, ORUtils::Vector6<ElementType> b, ToleranceType tolerance);
 
+/** \overload */
 template<typename ElementType, typename ToleranceType>
 _CPU_AND_GPU_CODE_
 inline
 bool AlmostEqual(ORUtils::Matrix3<ElementType> a, ORUtils::Matrix3<ElementType> b, ToleranceType tolerance);
 
+/** \overload */
 template<typename ElementType, typename ToleranceType>
 _CPU_AND_GPU_CODE_
 inline
 bool AlmostEqual(ORUtils::Matrix4<ElementType> a, ORUtils::Matrix4<ElementType> b, ToleranceType tolerance);
 
+/** \overload */
 template<typename TVoxel, typename ToleranceType>
 _CPU_AND_GPU_CODE_
 inline
@@ -121,20 +119,91 @@ bool RealAlmostEqualRelative(const TReal a, const TReal b, const TReal epsilon =
 	}
 }
 
-template<typename TReal>
+template<typename TFloatingPoint>
 _CPU_AND_GPU_CODE_
 inline
-bool RealAlmostEqualAbsolute(const TReal a, const TReal b, const TReal epsilon = 3e-6) {
+bool FloatingPointAlmostEqualAbsolute(const TFloatingPoint a, const TFloatingPoint b, const TFloatingPoint epsilon = 3e-6) {
 	return std::abs(a - b) < epsilon;
 }
 
-template<typename TIntegral>
+template<typename TSignedIntegral>
 _CPU_AND_GPU_CODE_
 inline
-bool IntegralAlmostEqualAbsolute(const TIntegral a, const TIntegral b, const TIntegral epsilon = 10) {
-	return std::abs(a - b) < epsilon;
+bool SignedIntegralAlmostEqualAbsolute(const TSignedIntegral a, const TSignedIntegral b, const TSignedIntegral epsilon = 10) {
+	return std::abs<TSignedIntegral>(a - b) < epsilon;
 }
-// endregion
+
+template<typename TUnsignedIntegral>
+_CPU_AND_GPU_CODE_
+inline
+bool UnsignedIntegralAlmostEqualAbsolute(const TUnsignedIntegral a, const TUnsignedIntegral b, const TUnsignedIntegral epsilon = 10) {
+	return a > b ? a - b < epsilon : b - a < epsilon;
+}
+
+template<typename T>
+struct NumericTypeTraits;
+
+template<>
+struct NumericTypeTraits<float> {
+	_CPU_AND_GPU_CODE_
+	static inline bool AlmostEqual(float a, float b, float epsilon) {
+		return FloatingPointAlmostEqualAbsolute(a, b, epsilon);
+	}
+
+	_CPU_AND_GPU_CODE_
+	static inline bool AlmostEqual(float a, float b) {
+		return FloatingPointAlmostEqualAbsolute(a, b);
+	}
+};
+template<>
+struct NumericTypeTraits<double> {
+	_CPU_AND_GPU_CODE_
+	static inline bool AlmostEqual(double a, double b, double epsilon) {
+		return FloatingPointAlmostEqualAbsolute(a, b, epsilon);
+	}
+
+	_CPU_AND_GPU_CODE_
+	static inline bool AlmostEqual(double a, double b) {
+		return FloatingPointAlmostEqualAbsolute(a, b);
+	}
+};
+template<>
+struct NumericTypeTraits<unsigned char> {
+	_CPU_AND_GPU_CODE_
+	static inline bool AlmostEqual(unsigned char a, unsigned char b, unsigned char epsilon) {
+		return UnsignedIntegralAlmostEqualAbsolute(a, b, epsilon);
+	}
+
+	_CPU_AND_GPU_CODE_
+	static inline bool AlmostEqual(unsigned char a, unsigned char b) {
+		return UnsignedIntegralAlmostEqualAbsolute(a, b);
+	}
+};
+template<>
+struct NumericTypeTraits<int> {
+	_CPU_AND_GPU_CODE_
+	static inline bool AlmostEqual(int a, int b, int epsilon) {
+		return SignedIntegralAlmostEqualAbsolute(a, b, epsilon);
+	}
+
+	_CPU_AND_GPU_CODE_
+	static inline bool AlmostEqual(int a, int b) {
+		return a == b;
+	}
+};
+template<>
+struct NumericTypeTraits<unsigned int> {
+	_CPU_AND_GPU_CODE_
+	static inline bool AlmostEqual(unsigned int a, unsigned int b, unsigned int epsilon) {
+		return UnsignedIntegralAlmostEqualAbsolute(a, b, epsilon);
+	}
+
+	_CPU_AND_GPU_CODE_
+	static inline bool AlmostEqual(unsigned int a, unsigned int b) {
+		return a == b;
+	}
+};
+//endregion
 
 // region ==================== SPECIFIC REAL TYPE COMPARISONS ==========================================================
 _CPU_AND_GPU_CODE_
@@ -142,53 +211,20 @@ inline float DecimalPlacesToFloatTolerance(const unsigned int decimal_places) {
 	return 1.0f / (10.0f * static_cast<float>(decimal_places));
 }
 
+/** \overload */
+template<typename T>
 _CPU_AND_GPU_CODE_
 inline
-bool AlmostEqual(float a, float b) {
-	return RealAlmostEqualAbsolute(a, b);
+bool AlmostEqual(T a, T b) {
+	return NumericTypeTraits<T>::AlmostEqual(a, b);
 }
 
+/** \overload */
+template<typename T>
 _CPU_AND_GPU_CODE_
 inline
-bool AlmostEqual(double a, double b) {
-	return RealAlmostEqualAbsolute(a, b);
-}
-
-_CPU_AND_GPU_CODE_
-inline
-bool AlmostEqual(short a, short b, short tolerance) {
-	return IntegralAlmostEqualAbsolute(a, b, tolerance);
-}
-
-_CPU_AND_GPU_CODE_
-inline
-bool AlmostEqual(int a, int b, int tolerance) {
-	return IntegralAlmostEqualAbsolute(a, b, tolerance);
-}
-
-_CPU_AND_GPU_CODE_
-inline
-bool AlmostEqual(float a, float b, float tolerance) {
-	return RealAlmostEqualAbsolute(a, b, tolerance);
-}
-
-_CPU_AND_GPU_CODE_
-inline
-bool AlmostEqual(float a, float b, double tolerance) {
-	return RealAlmostEqualAbsolute(a, b, static_cast<float>(tolerance));
-}
-
-_CPU_AND_GPU_CODE_
-inline
-bool AlmostEqual(double a, double b, double tolerance) {
-	return RealAlmostEqualAbsolute(a, b, tolerance);
-}
-
-_CPU_AND_GPU_CODE_
-inline
-bool AlmostEqual(float a, float b, unsigned int decimal_places) {
-	const float tolerance = DecimalPlacesToFloatTolerance(decimal_places);
-	return RealAlmostEqualAbsolute(a, b, tolerance);
+bool AlmostEqual(T a, T b, T tolerance) {
+	return NumericTypeTraits<T>::AlmostEqual(a, b, tolerance);
 }
 
 //endregion
@@ -201,7 +237,7 @@ _CPU_AND_GPU_CODE_
 inline bool
 Vector2AlmostEqual(const ORUtils::Vector2<VectorElementType>& a, const ORUtils::Vector2<VectorElementType>& b,
                    VectorElementType tolerance) {
-	return RealAlmostEqualAbsolute(a.x, b.x, tolerance) && RealAlmostEqualAbsolute(a.y, b.y, tolerance);
+	return AlmostEqual(a.x, b.x, tolerance) && AlmostEqual(a.y, b.y, tolerance);
 }
 
 template<typename VectorElementType>
@@ -209,9 +245,9 @@ _CPU_AND_GPU_CODE_
 inline bool
 Vector3AlmostEqual(const ORUtils::Vector3<VectorElementType>& a, const ORUtils::Vector3<VectorElementType>& b,
                    VectorElementType tolerance) {
-	return RealAlmostEqualAbsolute(a.x, b.x, tolerance)
-	       && RealAlmostEqualAbsolute(a.y, b.y, tolerance)
-	       && RealAlmostEqualAbsolute(a.z, b.z, tolerance);
+	return AlmostEqual(a.x, b.x, tolerance)
+	       && AlmostEqual(a.y, b.y, tolerance)
+	       && AlmostEqual(a.z, b.z, tolerance);
 }
 
 template<typename VectorElementType>
@@ -219,10 +255,10 @@ _CPU_AND_GPU_CODE_
 inline bool
 Vector4AlmostEqual(const ORUtils::Vector4<VectorElementType>& a, const ORUtils::Vector4<VectorElementType>& b,
                    VectorElementType tolerance) {
-	return RealAlmostEqualAbsolute(a.x, b.x, tolerance)
-	       && RealAlmostEqualAbsolute(a.y, b.y, tolerance)
-	       && RealAlmostEqualAbsolute(a.z, b.z, tolerance)
-	       && RealAlmostEqualAbsolute(a.w, b.w, tolerance);
+	return AlmostEqual(a.x, b.x, tolerance)
+	       && AlmostEqual(a.y, b.y, tolerance)
+	       && AlmostEqual(a.z, b.z, tolerance)
+	       && AlmostEqual(a.w, b.w, tolerance);
 }
 
 template<typename VectorElementType>
@@ -230,12 +266,12 @@ _CPU_AND_GPU_CODE_
 inline bool
 Vector6AlmostEqual(const ORUtils::Vector6<VectorElementType>& a, const ORUtils::Vector6<VectorElementType>& b,
                    VectorElementType tolerance) {
-	return RealAlmostEqualAbsolute(a.min_x, b.min_x, tolerance)
-	       && RealAlmostEqualAbsolute(a.min_y, b.min_y, tolerance)
-	       && RealAlmostEqualAbsolute(a.min_z, b.min_z, tolerance)
-	       && RealAlmostEqualAbsolute(a.max_y, b.max_y, tolerance)
-	       && RealAlmostEqualAbsolute(a.max_z, b.max_z, tolerance)
-	       && RealAlmostEqualAbsolute(a.max_z, b.max_z, tolerance);
+	return AlmostEqual(a.min_x, b.min_x, tolerance)
+	       && AlmostEqual(a.min_y, b.min_y, tolerance)
+	       && AlmostEqual(a.min_z, b.min_z, tolerance)
+	       && AlmostEqual(a.max_y, b.max_y, tolerance)
+	       && AlmostEqual(a.max_z, b.max_z, tolerance)
+	       && AlmostEqual(a.max_z, b.max_z, tolerance);
 }
 
 
@@ -252,6 +288,15 @@ bool AlmostEqual<uchar, float>(Vector3u a, Vector3u b, float tolerance) {
 	auto a_float_normalized = TO_FLOAT3(a) / 255.0f;
 	auto b_float_normalized = TO_FLOAT3(b) / 255.0f;
 	return Vector3AlmostEqual<float>(a_float_normalized, b_float_normalized, tolerance);
+}
+
+template<>
+_CPU_AND_GPU_CODE_
+inline
+bool AlmostEqual<uchar, float>(Vector4u a, Vector4u b, float tolerance) {
+	auto a_float_normalized = a.toFloat() / 255.0f;
+	auto b_float_normalized = b.toFloat() / 255.0f;
+	return Vector4AlmostEqual<float>(a_float_normalized, b_float_normalized, tolerance);
 }
 
 // *float*
@@ -311,7 +356,7 @@ _CPU_AND_GPU_CODE_
 inline
 bool AlmostEqual<float, float>(Matrix3f a, Matrix3f b, float tolerance) {
 	for (int i_entry = 0; i_entry < 9; i_entry++) {
-		if (!RealAlmostEqualAbsolute(a.m[i_entry], b.m[i_entry], tolerance)) return false;
+		if (!FloatingPointAlmostEqualAbsolute(a.m[i_entry], b.m[i_entry], tolerance)) return false;
 	}
 	return true;
 }
@@ -321,7 +366,7 @@ _CPU_AND_GPU_CODE_
 inline
 bool AlmostEqual<float, float>(Matrix4f a, Matrix4f b, float tolerance) {
 	for (int i_entry = 0; i_entry < 16; i_entry++) {
-		if (!RealAlmostEqualAbsolute(a.m[i_entry], b.m[i_entry], tolerance)) return false;
+		if (!FloatingPointAlmostEqualAbsolute(a.m[i_entry], b.m[i_entry], tolerance)) return false;
 	}
 	return true;
 }
@@ -340,6 +385,16 @@ bool AlmostEqual<uchar, double>(Vector3u a, Vector3u b, double tolerance) {
 	auto a_float_normalized = TO_FLOAT3(a) / 255.0f;
 	auto b_float_normalized = TO_FLOAT3(b) / 255.0f;
 	return AlmostEqual(a_float_normalized, b_float_normalized, tolerance_float);
+}
+
+template<>
+_CPU_AND_GPU_CODE_
+inline
+bool AlmostEqual<uchar, double>(Vector4u a, Vector4u b, double tolerance) {
+	auto tolerance_float = static_cast<float>(tolerance);
+	auto a_float_normalized = a.toFloat() / 255.0f;
+	auto b_float_normalized = b.toFloat() / 255.0f;
+	return Vector4AlmostEqual<float>(a_float_normalized, b_float_normalized, tolerance_float);
 }
 
 // *float*
@@ -406,7 +461,7 @@ inline
 bool AlmostEqual<float, double>(Matrix3f a, Matrix3f b, double tolerance) {
 	auto tolerance_float = static_cast<float>(tolerance);
 	for (int i_entry = 0; i_entry < 9; i_entry++) {
-		if (!RealAlmostEqualAbsolute(a.m[i_entry], b.m[i_entry], tolerance_float)) return false;
+		if (!FloatingPointAlmostEqualAbsolute(a.m[i_entry], b.m[i_entry], tolerance_float)) return false;
 	}
 	return true;
 }
@@ -417,7 +472,7 @@ inline
 bool AlmostEqual<float, double>(Matrix4f a, Matrix4f b, double tolerance) {
 	auto tolerance_float = static_cast<float>(tolerance);
 	for (int i_entry = 0; i_entry < 9; i_entry++) {
-		if (!RealAlmostEqualAbsolute(a.m[i_entry], b.m[i_entry], tolerance_float)) return false;
+		if (!FloatingPointAlmostEqualAbsolute(a.m[i_entry], b.m[i_entry], tolerance_float)) return false;
 	}
 	return true;
 }
@@ -439,14 +494,29 @@ bool AlmostEqual<float, unsigned int>(Vector3f a, Vector3f b, unsigned int toler
 	return Vector3AlmostEqual<float>(a, b, tolerance_float);
 }
 
+template<>
+_CPU_AND_GPU_CODE_
+inline
+bool AlmostEqual<float, unsigned int>(Vector4f a, Vector4f b, unsigned int tolerance) {
+	const float tolerance_float = DecimalPlacesToFloatTolerance(tolerance);
+	return Vector4AlmostEqual<float>(a, b, tolerance_float);
+}
+
 //color comparison
 template<>
 _CPU_AND_GPU_CODE_
 inline
 bool AlmostEqual<uchar, unsigned int>(Vector3u a, Vector3u b, unsigned int tolerance) {
-	auto a_float_normalized = TO_FLOAT3(a) / 255.0f;
-	auto b_float_normalized = TO_FLOAT3(b) / 255.0f;
-	return AlmostEqual<float, unsigned int>(a_float_normalized, b_float_normalized, tolerance);
+	uchar tolerance_uchar = static_cast<uchar>(tolerance);
+	return Vector3AlmostEqual<uchar>(a, b, tolerance_uchar);
+}
+
+template<>
+_CPU_AND_GPU_CODE_
+inline
+bool AlmostEqual<uchar, unsigned int>(Vector4u a, Vector4u b, unsigned int tolerance) {
+	uchar tolerance_uchar = static_cast<uchar>(tolerance);
+	return Vector4AlmostEqual<uchar>(a, b, tolerance_uchar);
 }
 
 template<>
@@ -455,7 +525,7 @@ inline
 bool AlmostEqual<float, unsigned int>(Matrix3f a, Matrix3f b, unsigned int tolerance) {
 	const float tolerance_float = 1.0f / (10.0f * static_cast<float>(tolerance));
 	for (int i_entry = 0; i_entry < 9; i_entry++) {
-		if (!RealAlmostEqualAbsolute(a.m[i_entry], b.m[i_entry], tolerance_float)) return false;
+		if (!FloatingPointAlmostEqualAbsolute(a.m[i_entry], b.m[i_entry], tolerance_float)) return false;
 	}
 	return true;
 }
@@ -467,7 +537,7 @@ inline
 bool AlmostEqual<float, unsigned int>(Matrix4f a, Matrix4f b, unsigned int tolerance) {
 	const float tolerance_float = 1.0f / (10.0f * static_cast<float>(tolerance));
 	for (int i_entry = 0; i_entry < 16; i_entry++) {
-		if (!RealAlmostEqualAbsolute(a.m[i_entry], b.m[i_entry], tolerance_float)) return false;
+		if (!FloatingPointAlmostEqualAbsolute(a.m[i_entry], b.m[i_entry], tolerance_float)) return false;
 	}
 	return true;
 }
