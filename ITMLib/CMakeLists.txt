@@ -559,7 +559,6 @@ set(
         Engines/Rendering/MultiVisualizationEngineFactory.h
         Engines/Rendering/SurfelVisualizationEngineFactory.h
         Engines/Rendering/RenderingEngineFactory.h
-        Engines/Rendering/RenderingEngineFactory.h
 
         Engines/Rendering/CPU/MultiVisualizationEngine_CPU.h
         Engines/Rendering/CPU/SurfelVisualizationEngine_CPU.h
@@ -574,9 +573,11 @@ set(
         Engines/Rendering/Interface/SurfelVisualizationEngine.h
         Engines/Rendering/Interface/RenderingEngine.h
 
+        Engines/Rendering/Shared/RenderingEngine_Functors.h
         Engines/Rendering/Shared/SurfelVisualizationEngine_Settings.h
         Engines/Rendering/Shared/SurfelVisualizationEngine_Shared.h
         Engines/Rendering/Shared/VisualizationEngine_Shared.h
+
 )
 
 ##
@@ -584,6 +585,8 @@ set(
         ITMLIB_ENGINES_RENDERING_SOURCES
 
         Engines/Rendering/RenderingEngine.tpp
+        Engines/Rendering/RenderingEngine.cpp
+        Engines/Rendering/RenderingEngine.cu
 
         Engines/Rendering/CPU/MultiVisualizationEngine_CPU.tpp
         Engines/Rendering/CPU/MultiVisualizationEngine_CPU_PlainVoxelArray.cpp

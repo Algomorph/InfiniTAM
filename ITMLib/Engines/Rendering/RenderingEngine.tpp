@@ -46,6 +46,8 @@ namespace internal{
 			int visible_block_count = 0;
 			int* visible_block_hash_codes = volume->index.GetVisibleBlockHashCodes();
 
+
+
 			//build visible list
 			for (int hash_code = 0; hash_code < hash_entry_count; hash_code++) {
 				unsigned char block_visibility_type = 0;// = blockVisibilityTypes[targetIdx];
@@ -84,38 +86,38 @@ int RenderingEngine<TVoxel, TIndex, TMemoryDeviceType>::CountVisibleBlocks(
 
 template<class TVoxel, class TIndex, MemoryDeviceType TMemoryDeviceType>
 void RenderingEngine<TVoxel, TIndex, TMemoryDeviceType>::CreateExpectedDepths(
-		const VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics, RenderState* render_state) {
+		const VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics, RenderState* render_state) const {
 
 }
 
 template<class TVoxel, class TIndex, MemoryDeviceType TMemoryDeviceType>
 void RenderingEngine<TVoxel, TIndex, TMemoryDeviceType>::RenderImage(
 		VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics, const RenderState* render_state,
-		UChar4Image* output_image, IRenderingEngine::RenderImageType type, IRenderingEngine::RenderRaycastSelection raycast_type) {
+		UChar4Image* output_image, IRenderingEngine::RenderImageType type, IRenderingEngine::RenderRaycastSelection raycast_type) const {
 
 }
 
 template<class TVoxel, class TIndex, MemoryDeviceType TMemoryDeviceType>
 void
 RenderingEngine<TVoxel, TIndex, TMemoryDeviceType>::FindSurface(
-		VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics, const RenderState* render_state) {
+		VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics, const RenderState* render_state) const  {
 
 }
 
 template<class TVoxel, class TIndex, MemoryDeviceType TMemoryDeviceType>
 void RenderingEngine<TVoxel, TIndex, TMemoryDeviceType>::CreatePointCloud(
-		VoxelVolume<TVoxel, TIndex>* volume, const View* view, CameraTrackingState* camera_tracking_state, RenderState* render_state, bool skipPoints) {
+		VoxelVolume<TVoxel, TIndex>* volume, const View* view, CameraTrackingState* camera_tracking_state, RenderState* render_state, bool skipPoints) const {
 
 }
 
 template<class TVoxel, class TIndex, MemoryDeviceType TMemoryDeviceType>
 void RenderingEngine<TVoxel, TIndex, TMemoryDeviceType>::CreateICPMaps(
-		VoxelVolume<TVoxel, TIndex>* volume, const View* view, CameraTrackingState* camera_tracking_state, RenderState* render_state) {
+		VoxelVolume<TVoxel, TIndex>* volume, const View* view, CameraTrackingState* camera_tracking_state, RenderState* render_state) const {
 
 }
 
 template<class TVoxel, class TIndex, MemoryDeviceType TMemoryDeviceType>
 void RenderingEngine<TVoxel, TIndex, TMemoryDeviceType>::ForwardRender(
-		const VoxelVolume<TVoxel, TIndex>* volume, const View* view, CameraTrackingState* camera_tracking_state, RenderState* render_state) {
+		const VoxelVolume<TVoxel, TIndex>* volume, const View* view, CameraTrackingState* camera_tracking_state, RenderState* render_state) const {
 
 }

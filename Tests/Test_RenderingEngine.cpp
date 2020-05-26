@@ -13,6 +13,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "cert-err58-cpp"
 #define BOOST_TEST_MODULE RenderingEngine
 #ifndef WIN32
 #define BOOST_TEST_DYN_LINK
@@ -395,3 +397,4 @@ BOOST_AUTO_TEST_CASE(Test_ForwardRender_CUDA) {
 }
 
 #endif // #ifndef COMPILE_WITHOUT_CUDA
+#pragma clang diagnostic pop

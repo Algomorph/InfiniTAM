@@ -532,7 +532,8 @@ void GenerateRenderingTestData_VoxelBlockHash() {
 		// find surface (in legacy InfiniTAM, fills "raycastResult" of the render state)
 		{
 			std::shared_ptr<RenderState> render_state_find_surface = fixture.MakeRenderState();
-			fixture.visualization_engine->CreateExpectedDepths(volume, &pose, &fixture.calibration_data.intrinsics_d,render_state_find_surface.get());
+			fixture.visualization_engine->CreateExpectedDepths(volume, &pose, &fixture.calibration_data.intrinsics_d,
+			                                                   render_state_find_surface.get());
 			fixture.visualization_engine->FindSurface(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state_find_surface.get());
 			ORUtils::MemoryBlockPersistence::SaveImage(raycast_images_file, *render_state_find_surface->raycastResult);
 		}
@@ -578,11 +579,12 @@ void GenerateRenderingTestData_VoxelBlockHash() {
 
 			fixture.visualization_engine->CreateExpectedDepths(volume, &adjusted_pose, &fixture.calibration_data.intrinsics_d,
 			                                                   render_state_forward_render.get());
-			fixture.visualization_engine->FindSurface(volume, &adjusted_pose, &fixture.calibration_data.intrinsics_d, render_state_forward_render.get());
+			fixture.visualization_engine->FindSurface(volume, &adjusted_pose, &fixture.calibration_data.intrinsics_d,
+			                                          render_state_forward_render.get());
 			fixture.visualization_engine->ForwardRender(volume, fixture.view_17, tracking_state_forward_render.get(),
 			                                            render_state_forward_render.get());
 			forward_render_images_file.OStream().write(reinterpret_cast<const char*>(&(render_state_forward_render->noFwdProjMissingPoints)),
-			                                        sizeof(int));
+			                                           sizeof(int));
 			ORUtils::MemoryBlockPersistence::SaveImage(forward_render_images_file, *render_state_forward_render->fwdProjMissingPoints);
 			ORUtils::MemoryBlockPersistence::SaveImage(forward_render_images_file, *render_state_forward_render->forwardProjection);
 		}
@@ -590,25 +592,31 @@ void GenerateRenderingTestData_VoxelBlockHash() {
 		// render image
 		{
 			std::shared_ptr<RenderState> render_state_render_image = fixture.MakeRenderState();
-			fixture.visualization_engine->CreateExpectedDepths(volume, &pose, &fixture.calibration_data.intrinsics_d,render_state_render_image.get());
+			fixture.visualization_engine->CreateExpectedDepths(volume, &pose, &fixture.calibration_data.intrinsics_d,
+			                                                   render_state_render_image.get());
 			fixture.visualization_engine->FindSurface(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state_render_image.get());
 
 
 			UChar4Image output_image(snoopy::frame_image_size, TMemoryDeviceType);
 			fixture.visualization_engine->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state_render_image.get(),
-			                                          &output_image, IRenderingEngine::RenderImageType::RENDER_COLOUR_FROM_VOLUME, IRenderingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
+			                                          &output_image, IRenderingEngine::RenderImageType::RENDER_COLOUR_FROM_VOLUME,
+			                                          IRenderingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
 			ORUtils::MemoryBlockPersistence::SaveImage(rendered_images_file, output_image);
 			fixture.visualization_engine->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state_render_image.get(),
-			                                          &output_image, IRenderingEngine::RenderImageType::RENDER_COLOUR_FROM_NORMAL, IRenderingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
+			                                          &output_image, IRenderingEngine::RenderImageType::RENDER_COLOUR_FROM_NORMAL,
+			                                          IRenderingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
 			ORUtils::MemoryBlockPersistence::SaveImage(rendered_images_file, output_image);
 			fixture.visualization_engine->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state_render_image.get(),
-			                                          &output_image, IRenderingEngine::RenderImageType::RENDER_SHADED_GREYSCALE_IMAGENORMALS, IRenderingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
+			                                          &output_image, IRenderingEngine::RenderImageType::RENDER_SHADED_GREYSCALE_IMAGENORMALS,
+			                                          IRenderingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
 			ORUtils::MemoryBlockPersistence::SaveImage(rendered_images_file, output_image);
 			fixture.visualization_engine->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state_render_image.get(),
-			                                          &output_image, IRenderingEngine::RenderImageType::RENDER_SHADED_GREEN, IRenderingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
+			                                          &output_image, IRenderingEngine::RenderImageType::RENDER_SHADED_GREEN,
+			                                          IRenderingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
 			ORUtils::MemoryBlockPersistence::SaveImage(rendered_images_file, output_image);
 			fixture.visualization_engine->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state_render_image.get(),
-			                                          &output_image, IRenderingEngine::RenderImageType::RENDER_SHADED_OVERLAY, IRenderingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
+			                                          &output_image, IRenderingEngine::RenderImageType::RENDER_SHADED_OVERLAY,
+			                                          IRenderingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
 			ORUtils::MemoryBlockPersistence::SaveImage(rendered_images_file, output_image);
 		}
 
@@ -634,8 +642,7 @@ void GenerateRenderingTestData_VoxelBlockHash() {
     (VBH_FUSED_VOLUMES,          "VBH_FUSED_VOLUMES", "vbh_fused_volumes", "vbh_fv"), \
     (CONFUGRATIONS,              "CONFIGURATIONS", "configurations", "config", "c"), \
     (MESHES,                     "MESHES", "meshes", "m"), \
-    (RENDERING_CPU,             "RENDERING_CPU", "rendering_cpu", "r_cpu"), \
-    (RENDERING_CUDA,            "RENDERING_CUDA", "rendering_cuda", "r_cuda")
+    (RENDERING,                  "RENDERING", "rendering", "r")
 
 GENERATE_SERIALIZABLE_ENUM(GENERATED_TEST_DATA_TYPE_ENUM_DESCRIPTION);
 
@@ -658,12 +665,11 @@ int main(int argc, char* argv[]) {
 					{VBH_FUSED_VOLUMES,          GenerateFusedVolumeTestData<VoxelBlockHash>},
 					{CONFUGRATIONS,              GenerateConfigurationTestData},
 					{MESHES,                     GenerateMeshingTestData<VoxelBlockHash, MEMORYDEVICE_CPU>},
-					{RENDERING_CPU,             GenerateRenderingTestData_VoxelBlockHash<MEMORYDEVICE_CPU>},
-					{RENDERING_CUDA,            GenerateRenderingTestData_VoxelBlockHash<MEMORYDEVICE_CUDA>},
+					{RENDERING,                  GenerateRenderingTestData_VoxelBlockHash<MEMORYDEVICE_CPU>}
 			});
 	if (argc < 2) {
 		// calls every generator iteratively
-		for (auto iter : generator_by_string) {
+		for (const auto& iter : generator_by_string) {
 			(iter.second)();
 		}
 	} else {

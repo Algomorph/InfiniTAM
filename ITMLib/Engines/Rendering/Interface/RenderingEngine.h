@@ -75,13 +75,21 @@ public:
 	of the minimum and maximum depths at each pixel of
 	an image.
 	*/
-	virtual void CreateExpectedDepths(const VoxelVolume<TVoxel, TIndex>* scene, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics,
-	                                  RenderState* renderState) const = 0;
+	virtual void CreateExpectedDepths(const VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics,
+	                                  RenderState* render_state) const = 0;
 
 	/** This will render an image using raycasting. */
 	virtual void RenderImage(VoxelVolume<TVoxel, TIndex>* scene, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics,
-	                         const RenderState* renderState, UChar4Image* outputImage, RenderImageType type = RENDER_SHADED_GREYSCALE,
-	                         RenderRaycastSelection raycastType = RENDER_FROM_NEW_RAYCAST) const = 0;
+	                         const RenderState* renderState, UChar4Image* outputImage, RenderImageType type,
+	                         RenderRaycastSelection raycastType) const = 0;
+	void RenderImage(VoxelVolume<TVoxel, TIndex>* scene, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics,
+	                 const RenderState* renderState, UChar4Image* outputImage, RenderImageType type) {
+		RenderImage(scene, pose, intrinsics, renderState, outputImage, type, RENDER_FROM_NEW_RAYCAST);
+	};
+	void RenderImage(VoxelVolume<TVoxel, TIndex>* scene, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics,
+	                 const RenderState* renderState, UChar4Image* outputImage) {
+		RenderImage(scene, pose, intrinsics, renderState, outputImage, RENDER_SHADED_GREYSCALE, RENDER_FROM_NEW_RAYCAST);
+	};
 
 	/** Finds the scene surface using raycasting. */
 	virtual void FindSurface(VoxelVolume<TVoxel, TIndex>* scene, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics,
@@ -115,26 +123,25 @@ namespace internal{
 
 template<class TVoxel, class TIndex, MemoryDeviceType TMemoryDeviceType>
 class RenderingEngine : public RenderingEngineBase<TVoxel, TIndex> {
-private: // memmber variables
+private: // member variables
 	internal::RenderingEngine_IndexSpecialized<TVoxel, TIndex, TMemoryDeviceType> index_specialized_engine;
 public: // member functions
 	void FindVisibleBlocks(VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics,
 	                       RenderState* render_state) const override;
 	int CountVisibleBlocks(const VoxelVolume<TVoxel, TIndex>* volume, const RenderState* render_state, int min_block_index, int max_block_index) const override;
 	void CreateExpectedDepths(const VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics,
-	                          RenderState* render_state) override;
+	                          RenderState* render_state) const override;
 	void RenderImage(VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics,
 	                 const RenderState* render_state, UChar4Image* output_image,
-	                 IRenderingEngine::RenderImageType type = IRenderingEngine::RENDER_SHADED_GREYSCALE,
-	                 IRenderingEngine::RenderRaycastSelection raycast_type = IRenderingEngine::RENDER_FROM_NEW_RAYCAST) override;
+	                 IRenderingEngine::RenderImageType type, IRenderingEngine::RenderRaycastSelection raycast_type) const override;
 	void FindSurface(VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics,
-	                 const RenderState* render_state) override;
+	                 const RenderState* render_state) const override;
 	void CreatePointCloud(VoxelVolume<TVoxel, TIndex>* volume, const View* view, CameraTrackingState* camera_tracking_state,
-	                      RenderState* render_state, bool skipPoints) override;
+	                      RenderState* render_state, bool skipPoints) const override;
 	void CreateICPMaps(VoxelVolume<TVoxel, TIndex>* volume, const View* view, CameraTrackingState* camera_tracking_state,
-	                   RenderState* render_state) override;
+	                   RenderState* render_state) const override;
 	void ForwardRender(const VoxelVolume<TVoxel, TIndex>* volume, const View* view, CameraTrackingState* camera_tracking_state,
-	                   RenderState* render_state) override;
+	                   RenderState* render_state) const override;
 
 };
 
