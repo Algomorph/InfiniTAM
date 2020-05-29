@@ -6,7 +6,7 @@
 
 #include "../../Objects/Volume/LocalMap.h"
 #include "../Main/Mappers/DenseMapper.h"
-#include "../Rendering/Interface/RenderingEngine.h"
+#include "../Rendering/Interface/RenderingEngineInterface.h"
 
 namespace ITMLib
 {

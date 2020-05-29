@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "../Interface/RenderingEngine.h"
+#include "../Interface/RenderingEngineInterface.h"
 
 namespace ITMLib
 {

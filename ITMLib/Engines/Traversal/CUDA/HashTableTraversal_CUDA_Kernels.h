@@ -29,10 +29,10 @@ __global__ void hashTableAllEntryTraversalWithHashCode_device (THashEntry* hash_
 }
 
 template <typename THashEntry, typename TFunctor>
-__global__ void hashTableUtilizedEntryTraversalWithHashCode_device (THashEntry* hash_table, const int* utilized_hash_codes, const int utilized_entry_count, TFunctor* functor_device){
+__global__ void hashTableSubarrayEntryTraversalWithHashCode_device (THashEntry* hash_table, const int* subarray_hash_codes, const int subarray_entry_count, TFunctor* functor_device){
 	int hash_code_index = threadIdx.x + blockIdx.x * blockDim.x;
-	if (hash_code_index >= utilized_entry_count) return;
-	int hash_code = utilized_hash_codes[hash_code_index];
+	if (hash_code_index >= subarray_entry_count) return;
+	int hash_code = subarray_hash_codes[hash_code_index];
 	(*functor_device)(hash_table[hash_code], hash_code);
 }
 

@@ -32,7 +32,7 @@
 #include "../ITMLib/GlobalTemplateDefines.h"
 #include "../ITMLib/Engines/Analytics/AnalyticsEngineInterface.h"
 #include "../ITMLib/Objects/Volume/RepresentationAccess.h"
-#include "../ITMLib/Utils/MemoryBlock_StdContainer_Convertions.h"
+#include "../ITMLib/Utils/Collections/MemoryBlock_StdContainer_Convertions.h"
 //(CPU)
 #include "../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_VoxelBlockHash_CPU.h"
 #include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"

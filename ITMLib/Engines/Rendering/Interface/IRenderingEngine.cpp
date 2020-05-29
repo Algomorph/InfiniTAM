@@ -1,6 +1,6 @@
 // Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
 
-#include "RenderingEngine.h"
+#include "RenderingEngineInterface.h"
 
 using namespace ITMLib;
 

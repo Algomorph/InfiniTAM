@@ -161,6 +161,12 @@ int ceil_of_integer_quotient(int dividend, int divisor) {
 }
 
 inline
+int ceil_of_integer_quotient(int dividend, unsigned int divisor) {
+	int divisor_int = static_cast<int>(divisor);
+	return ceil_of_integer_quotient(dividend, divisor_int);
+}
+
+inline
 unsigned int ceil_of_integer_quotient(unsigned int dividend, unsigned int divisor) {
 	return dividend / divisor + (dividend % divisor != 0);
 }

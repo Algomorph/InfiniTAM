@@ -13,6 +13,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
+#pragma once
 //local
 #include "../Interface/HashTableTraversal.h"
 #include "../../../Objects/Volume/VoxelBlockHash.h"
@@ -48,6 +49,20 @@ private: // static functions
 		}
 	}
 
+	template<typename TVoxelBlockHash, typename THashEntry, typename TFunctor>
+	inline static void TraverseVisibleWithHashCode_Generic(TVoxelBlockHash& index, TFunctor& functor){
+		THashEntry* hash_table = index.GetEntries();
+		const int visible_entry_count = index.GetVisibleBlockCount();
+		const int* visible_entry_codes = index.GetVisibleBlockHashCodes();
+#ifdef WITH_OPENMP
+#pragma omp parallel for default(none) shared(functor, hash_table, visible_entry_codes)
+#endif
+		for (int hash_code_index = 0; hash_code_index < visible_entry_count; hash_code_index++){
+			int hash_code = visible_entry_codes[hash_code_index];
+			functor(hash_table[hash_code], hash_code);
+		}
+	}
+
 public: // static functions
 	template<typename TFunctor>
 	inline static void
@@ -71,6 +86,18 @@ public: // static functions
 	inline static void
 	TraverseUtilizedWithHashCode(const VoxelBlockHash& index, TFunctor& functor){
 		TraverseUtilizedWithHashCode_Generic<const VoxelBlockHash, const HashEntry, TFunctor>(index, functor);
+	}
+
+	template<typename TFunctor>
+	inline static void
+	TraverseVisibleWithHashCode(VoxelBlockHash& index, TFunctor& functor){
+		TraverseVisibleWithHashCode_Generic<VoxelBlockHash, HashEntry, TFunctor>(index, functor);
+	}
+
+	template<typename TFunctor>
+	inline static void
+	TraverseVisibleWithHashCode(const VoxelBlockHash& index, TFunctor& functor){
+		TraverseVisibleWithHashCode_Generic<const VoxelBlockHash, const HashEntry, TFunctor>(index, functor);
 	}
 };
 

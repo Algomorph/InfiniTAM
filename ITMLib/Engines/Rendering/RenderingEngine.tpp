@@ -15,109 +15,79 @@
 //  ================================================================
 #pragma once
 
-#include "Interface/RenderingEngine.h"
-#include "../../Utils/Geometry/CheckBlockVisibility.h"
+#include "RenderingEngine.h"
+#include "Shared/RenderingEngine_Functors.h"
 
 using namespace ITMLib;
 
-namespace ITMLib{
-namespace internal{
+namespace ITMLib {
+namespace internal {
 
-	template<class TVoxel, MemoryDeviceType TMemoryDeviceType>
-	struct RenderingEngine_IndexSpecialized<TVoxel, PlainVoxelArray, TMemoryDeviceType>{
-		void FindVisibleBlocks(VoxelVolume<TVoxel,PlainVoxelArray> *volume, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics,
-		                       RenderState *render_state) const {
+template<class TVoxel, MemoryDeviceType TMemoryDeviceType>
+void RenderingEngine_Specialized<TVoxel, VoxelBlockHash, TMemoryDeviceType>::FindVisibleBlocks(
+		VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics, RenderState* render_state) const {
+	specialized_engine.FindVisibleBlocks(volume, pose, intrinsics, render_state);
 
-		}
-	};
+}
 
-	template<class TVoxel, MemoryDeviceType TMemoryDeviceType>
-	struct RenderingEngine_IndexSpecialized<TVoxel, VoxelBlockHash, TMemoryDeviceType>{
-		void FindVisibleBlocks(VoxelVolume<TVoxel,VoxelBlockHash> *volume, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics,
-		                       RenderState *render_state) const {
-			const HashEntry* hash_table = volume->index.GetEntries();
-			int hash_entry_count = volume->index.hash_entry_count;
-			float voxel_size = volume->GetParameters().voxel_size;
-			Vector2i image_size = render_state->renderingRangeImage->dimensions;
+template<class TVoxel, MemoryDeviceType TMemoryDeviceType>
+int RenderingEngine_Specialized<TVoxel, VoxelBlockHash, TMemoryDeviceType>::CountVisibleBlocks(
+		const VoxelVolume<TVoxel, VoxelBlockHash>* volume, int min_block_id, int max_block_id) const {
+	CountVisibleBlocksInListIdRangeFunctor<TMemoryDeviceType> functor(min_block_id, max_block_id);
+	HashTableTraversalEngine<TMemoryDeviceType>::TraverseVisibleWithHashCode(volume->index, functor);
+	return functor.GetCurrentVisibleBlockInIDRangeCount();
+}
 
-			Matrix4f M = pose->GetM();
-			Vector4f projParams = intrinsics->projectionParamsSimple.all;
-
-			int visible_block_count = 0;
-			int* visible_block_hash_codes = volume->index.GetVisibleBlockHashCodes();
-
-
-
-			//build visible list
-			for (int hash_code = 0; hash_code < hash_entry_count; hash_code++) {
-				unsigned char block_visibility_type = 0;// = blockVisibilityTypes[targetIdx];
-				const HashEntry& hash_entry = hash_table[hash_code];
-
-				if (hash_entry.ptr >= 0) {
-					bool is_visible, is_visible_enlarged;
-					CheckVoxelHashBlockVisibility<false>(is_visible, is_visible_enlarged, hash_entry.pos, M, projParams,
-					                                     voxel_size,image_size);
-					block_visibility_type = is_visible;
-				}
-
-				if (block_visibility_type > 0) {
-					visible_block_hash_codes[visible_block_count] = hash_code;
-					visible_block_count++;
-				}
-			}
-			volume->index.SetVisibleBlockCount(visible_block_count);
-		}
-
-	};
 } // namespace internal
 } // namespace ITMLib
 template<class TVoxel, class TIndex, MemoryDeviceType TMemoryDeviceType>
 void RenderingEngine<TVoxel, TIndex, TMemoryDeviceType>::FindVisibleBlocks(VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::SE3Pose* pose,
                                                                            const Intrinsics* intrinsics, RenderState* render_state) const {
-	index_specialized_engine.FindVisibleBlocks(volume, pose, intrinsics, render_state);
+	specialized_engine.FindVisibleBlocks(volume, pose, intrinsics, render_state);
 }
 
 template<class TVoxel, class TIndex, MemoryDeviceType TMemoryDeviceType>
 int RenderingEngine<TVoxel, TIndex, TMemoryDeviceType>::CountVisibleBlocks(
-		const VoxelVolume<TVoxel, TIndex>* volume, const RenderState* render_state, int min_block_index, int max_block_index) const {
-	return 0;
+		const VoxelVolume<TVoxel, TIndex>* volume, const RenderState* render_state, int min_block_list_id, int max_block_list_id) const {
+	return specialized_engine.CountVisibleBlocks(volume, min_block_list_id, max_block_list_id);
 }
 
 
 template<class TVoxel, class TIndex, MemoryDeviceType TMemoryDeviceType>
 void RenderingEngine<TVoxel, TIndex, TMemoryDeviceType>::CreateExpectedDepths(
 		const VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics, RenderState* render_state) const {
-
+	DIEWITHEXCEPTION_REPORTLOCATION("Not implemented");
 }
 
 template<class TVoxel, class TIndex, MemoryDeviceType TMemoryDeviceType>
 void RenderingEngine<TVoxel, TIndex, TMemoryDeviceType>::RenderImage(
 		VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics, const RenderState* render_state,
 		UChar4Image* output_image, IRenderingEngine::RenderImageType type, IRenderingEngine::RenderRaycastSelection raycast_type) const {
-
+	DIEWITHEXCEPTION_REPORTLOCATION("Not implemented");
 }
 
 template<class TVoxel, class TIndex, MemoryDeviceType TMemoryDeviceType>
 void
 RenderingEngine<TVoxel, TIndex, TMemoryDeviceType>::FindSurface(
-		VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics, const RenderState* render_state) const  {
-
+		VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics, const RenderState* render_state) const {
+	DIEWITHEXCEPTION_REPORTLOCATION("Not implemented");
 }
 
 template<class TVoxel, class TIndex, MemoryDeviceType TMemoryDeviceType>
 void RenderingEngine<TVoxel, TIndex, TMemoryDeviceType>::CreatePointCloud(
-		VoxelVolume<TVoxel, TIndex>* volume, const View* view, CameraTrackingState* camera_tracking_state, RenderState* render_state, bool skipPoints) const {
-
+		VoxelVolume<TVoxel, TIndex>* volume, const View* view, CameraTrackingState* camera_tracking_state, RenderState* render_state,
+		bool skipPoints) const {
+	DIEWITHEXCEPTION_REPORTLOCATION("Not implemented");
 }
 
 template<class TVoxel, class TIndex, MemoryDeviceType TMemoryDeviceType>
 void RenderingEngine<TVoxel, TIndex, TMemoryDeviceType>::CreateICPMaps(
 		VoxelVolume<TVoxel, TIndex>* volume, const View* view, CameraTrackingState* camera_tracking_state, RenderState* render_state) const {
-
+	DIEWITHEXCEPTION_REPORTLOCATION("Not implemented");
 }
 
 template<class TVoxel, class TIndex, MemoryDeviceType TMemoryDeviceType>
 void RenderingEngine<TVoxel, TIndex, TMemoryDeviceType>::ForwardRender(
 		const VoxelVolume<TVoxel, TIndex>* volume, const View* view, CameraTrackingState* camera_tracking_state, RenderState* render_state) const {
-
+	DIEWITHEXCEPTION_REPORTLOCATION("Not implemented");
 }

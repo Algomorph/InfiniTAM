@@ -199,14 +199,14 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CPU) {
 
 	CameraTrackingState tracking_state(image_size, MEMORYDEVICE_CPU);
 
-	RenderingEngineBase <TSDFVoxel, VoxelBlockHash>* visualization_engine =
+	RenderingEngineBase <TSDFVoxel, VoxelBlockHash>* visualization_engine_legacy =
 			VisualizationEngineFactory::MakeVisualizationEngine<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CPU);
 
 	RenderState render_state(image_size, configuration::get().general_voxel_volume_parameters.near_clipping_distance,
 							 configuration::get().general_voxel_volume_parameters.far_clipping_distance,
 							 MEMORYDEVICE_CPU);
 
-	visualization_engine->CreateICPMaps(canonical_volume, view, &tracking_state, &render_state);
+	visualization_engine_legacy->CreateICPMaps(canonical_volume, view, &tracking_state, &render_state);
 
 	updateView(&view, "TestData/snoopy_depth_000017.png",
 			   "TestData/snoopy_color_000017.png", "TestData/snoopy_omask_000017.png",
@@ -301,7 +301,7 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CPU) {
 
 	bench::PrintAllCumulativeTimes();
 
-	delete visualization_engine;
+	delete visualization_engine_legacy;
 	delete view;
 	delete canonical_volume;
 	delete live_volumes[0];
@@ -350,14 +350,14 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CUDA) {
 
 	CameraTrackingState tracking_state(image_size, MEMORYDEVICE_CUDA);
 
-	RenderingEngineBase <TSDFVoxel, VoxelBlockHash>* visualization_engine =
+	RenderingEngineBase <TSDFVoxel, VoxelBlockHash>* visualization_engine_legacy =
 			VisualizationEngineFactory::MakeVisualizationEngine<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CUDA);
 
 	RenderState render_state(image_size, configuration::get().general_voxel_volume_parameters.near_clipping_distance,
 							 configuration::get().general_voxel_volume_parameters.far_clipping_distance,
 							 MEMORYDEVICE_CUDA);
 
-	visualization_engine->CreateICPMaps(canonical_volume, view, &tracking_state, &render_state);
+	visualization_engine_legacy->CreateICPMaps(canonical_volume, view, &tracking_state, &render_state);
 
 	updateView(&view, "TestData/snoopy_depth_000017.png",
 			   "TestData/snoopy_color_000017.png", "TestData/snoopy_omask_000017.png",
@@ -416,7 +416,7 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CUDA) {
 
 	bench::PrintAllCumulativeTimes();
 
-	delete visualization_engine;
+	delete visualization_engine_legacy;
 	delete view;
 	delete canonical_volume;
 	delete live_volumes[0];

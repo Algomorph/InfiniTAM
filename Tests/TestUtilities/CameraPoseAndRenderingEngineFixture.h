@@ -17,6 +17,7 @@
 
 #include "../../ITMLib/Objects/RenderStates/RenderState.h"
 #include "../../ITMLib/Engines/Rendering/RenderingEngineFactory.h"
+#include "../../ITMLib/Engines/Rendering/RenderingEngine.h"
 #include "SnoopyTestUtilities.h"
 
 using namespace ITMLib;
@@ -31,7 +32,8 @@ public: // member variables
 	const Vector3f original_viewpoint;
 	const int degree_increment;
 	std::vector<std::shared_ptr<CameraTrackingState>> tracking_states;
-	RenderingEngineBase<TSDFVoxel, VoxelBlockHash>* visualization_engine;
+	RenderingEngineBase<TSDFVoxel, VoxelBlockHash>* visualization_engine_legacy;
+	RenderingEngineBase<TSDFVoxel, VoxelBlockHash>* rendering_engine;
 	View* view_17;
 
 public: // member functions
@@ -53,8 +55,9 @@ public: // member functions
 				  }
 				  return camera_tracking_states;
 			  }()),
-			  visualization_engine(RenderingEngineFactory::MakeVisualizationEngine<TSDFVoxel, VoxelBlockHash>(
+			  visualization_engine_legacy(RenderingEngineFactory::MakeVisualizationEngine<TSDFVoxel, VoxelBlockHash>(
 					  TMemoryDeviceType)),
+			  rendering_engine(new RenderingEngine<TSDFVoxel,VoxelBlockHash,TMemoryDeviceType>()),
 			  view_17(nullptr) {
 		readRGBDCalib(snoopy_test_utilities::SnoopyCalibrationPath().c_str(), calibration_data);
 		UpdateView(&view_17,
@@ -78,7 +81,7 @@ public: // member functions
 
 	~CameraPoseAndRenderingEngineFixture() {
 		delete view_17;
-		delete visualization_engine;
+		delete visualization_engine_legacy;
 		delete render_state;
 	}
 };

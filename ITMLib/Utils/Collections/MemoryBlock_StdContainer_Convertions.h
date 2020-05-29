@@ -18,7 +18,7 @@
 
 #include <vector>
 #include <unordered_set>
-#include "../../ORUtils/MemoryBlock.h"
+#include "../../../ORUtils/MemoryBlock.h"
 
 namespace ITMLib {
 template<typename T>
@@ -102,6 +102,13 @@ raw_block_to_std_vector(const T* block, MemoryDeviceType device_type, int elemen
 	return vector;
 }
 
+template<typename T>
+inline std::unordered_set<T>
+raw_block_to_std_unordered_set(const T* block, MemoryDeviceType device_type, int element_count) {
+	std::vector<T> vector = raw_block_to_std_vector(block, device_type, element_count);
+	std::unordered_set<T> set(vector.begin(), vector.end());
+	return set;
+}
 
 template<typename T>
 static ORUtils::MemoryBlock<T>
@@ -125,5 +132,7 @@ std_vector_to_ORUtils_MemoryBlock(std::vector<T> vector, MemoryDeviceType memory
 	}
 	return block;
 }
+
+
 
 } // namespace ITMLib

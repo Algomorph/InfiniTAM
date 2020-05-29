@@ -57,19 +57,21 @@ struct IndexToRenderState<VoxelBlockHash> {
 template<class TVoxel, class TIndex>
 class RenderingEngineBase : public IRenderingEngine {
 public:
-
+	//TODO: this routine looks (and is implemented) awfully similar to RebuildVisibleBlockList in IndexingEngine.
+	//  find out how can the two methods be differentiated (and refactor the names to be more descriptive), but
+	//  maximize code-sharing between the two via some common function.
 	/** Given a scene, pose and intrinsics, compute_allocated the
 	visible subset of the scene and store it in an
 	appropriate RenderState object.
 	*/
-	virtual void FindVisibleBlocks(VoxelVolume<TVoxel, TIndex>* scene, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics,
-	                               RenderState* renderState) const = 0;
+	virtual void FindVisibleBlocks(VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics,
+	                               RenderState* render_state) const = 0;
 
 	/** Given a render state, Count the number of visible blocks
 	with minBlockId <= blockID <= maxBlockId .
 	*/
 	virtual int
-	CountVisibleBlocks(const VoxelVolume<TVoxel, TIndex>* scene, const RenderState* renderState, int minBlockId, int maxBlockId) const = 0;
+	CountVisibleBlocks(const VoxelVolume<TVoxel, TIndex>* volume, const RenderState* render_state, int min_block_list_id, int max_block_list_id) const = 0;
 
 	/** Given scene, pose and intrinsics, create an estimate
 	of the minimum and maximum depths at each pixel of
@@ -114,35 +116,6 @@ public:
 	*/
 	virtual void ForwardRender(const VoxelVolume<TVoxel, TIndex>* scene, const View* view, CameraTrackingState* trackingState,
 	                           RenderState* renderState) const = 0;
-};
-
-namespace internal{
-	template<class TVoxel, class TIndex, MemoryDeviceType TMemoryDeviceType>
-	struct RenderingEngine_IndexSpecialized;
-} // namespace internal
-
-template<class TVoxel, class TIndex, MemoryDeviceType TMemoryDeviceType>
-class RenderingEngine : public RenderingEngineBase<TVoxel, TIndex> {
-private: // member variables
-	internal::RenderingEngine_IndexSpecialized<TVoxel, TIndex, TMemoryDeviceType> index_specialized_engine;
-public: // member functions
-	void FindVisibleBlocks(VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics,
-	                       RenderState* render_state) const override;
-	int CountVisibleBlocks(const VoxelVolume<TVoxel, TIndex>* volume, const RenderState* render_state, int min_block_index, int max_block_index) const override;
-	void CreateExpectedDepths(const VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics,
-	                          RenderState* render_state) const override;
-	void RenderImage(VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics,
-	                 const RenderState* render_state, UChar4Image* output_image,
-	                 IRenderingEngine::RenderImageType type, IRenderingEngine::RenderRaycastSelection raycast_type) const override;
-	void FindSurface(VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics,
-	                 const RenderState* render_state) const override;
-	void CreatePointCloud(VoxelVolume<TVoxel, TIndex>* volume, const View* view, CameraTrackingState* camera_tracking_state,
-	                      RenderState* render_state, bool skipPoints) const override;
-	void CreateICPMaps(VoxelVolume<TVoxel, TIndex>* volume, const View* view, CameraTrackingState* camera_tracking_state,
-	                   RenderState* render_state) const override;
-	void ForwardRender(const VoxelVolume<TVoxel, TIndex>* volume, const View* view, CameraTrackingState* camera_tracking_state,
-	                   RenderState* render_state) const override;
-
 };
 
 

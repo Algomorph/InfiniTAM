@@ -556,6 +556,9 @@ set(ITMLIB_ENGINES_VIEWBUILDING_SHARED_HEADERS
 set(
         ITMLIB_ENGINES_RENDERING_HEADERS
 
+        Engines/Rendering/RenderingEngine.h
+        Engines/Rendering/RenderingEngine_Specialized.h
+
         Engines/Rendering/MultiVisualizationEngineFactory.h
         Engines/Rendering/SurfelVisualizationEngineFactory.h
         Engines/Rendering/RenderingEngineFactory.h
@@ -571,7 +574,7 @@ set(
 
         Engines/Rendering/Interface/MultiVisualizationEngine.h
         Engines/Rendering/Interface/SurfelVisualizationEngine.h
-        Engines/Rendering/Interface/RenderingEngine.h
+        Engines/Rendering/Interface/RenderingEngineInterface.h
 
         Engines/Rendering/Shared/RenderingEngine_Functors.h
         Engines/Rendering/Shared/SurfelVisualizationEngine_Settings.h
@@ -587,6 +590,8 @@ set(
         Engines/Rendering/RenderingEngine.tpp
         Engines/Rendering/RenderingEngine.cpp
         Engines/Rendering/RenderingEngine.cu
+        Engines/Rendering/RenderingEngine_CPU.tpp
+        Engines/Rendering/RenderingEngine_CUDA.tcu
 
         Engines/Rendering/CPU/MultiVisualizationEngine_CPU.tpp
         Engines/Rendering/CPU/MultiVisualizationEngine_CPU_PlainVoxelArray.cpp
@@ -970,7 +975,7 @@ set(
         Utils/VoxelFlags.h
         Utils/WarpType.h
         Utils/Math.h
-        Utils/MemoryBlock_StdContainer_Convertions.h
+        Utils/Collections/MemoryBlock_StdContainer_Convertions.h
         Utils/MemoryBlockTypes.h
         Utils/PixelUtils.h
         Utils/ProjectionUtils.h

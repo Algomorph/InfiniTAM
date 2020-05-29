@@ -65,6 +65,31 @@ public:
 	}
 
 	/**
+	 * \brief Loads data from an input stream.
+	 *
+	 * \param file          	Successfully-opened handle to the file.
+	 * \param memory_type       The type of memory device on which to load the data.
+	 */
+	template<typename T>
+	static ORUtils::MemoryBlock<T>
+	LoadMemoryBlock(ORUtils::IStreamWrapper& file, MemoryDeviceType memory_type = MEMORYDEVICE_CPU) {
+		size_t block_size = ReadBlockSize(file.IStream());
+		ORUtils::MemoryBlock<T> block(block_size, memory_type);
+		if (memory_type == MEMORYDEVICE_CUDA) {
+			// If we're loading into a block on the CUDA, first try and read the data into a temporary block on the CPU.
+			ORUtils::MemoryBlock<T> cpu_block(block.size(), MEMORYDEVICE_CPU);
+			ReadArray<T,ORUtils::MemoryBlock<T>>(file.IStream(), cpu_block, block_size);
+
+			// Then copy the data across to the CUDA.
+			block.SetFrom(cpu_block, MemoryCopyDirection::CPU_TO_CUDA);
+		} else {
+			// If we're loading into a block on the CPU, read the data directly into the block.
+			ReadArray<T,ORUtils::MemoryBlock<T>>(file.IStream(), block, block_size);
+		}
+		return block;
+	}
+
+	/**
 	 * \brief Loads image from an input stream.
 	 *
 	 * \param file          	Successfully-opened handle to the file.

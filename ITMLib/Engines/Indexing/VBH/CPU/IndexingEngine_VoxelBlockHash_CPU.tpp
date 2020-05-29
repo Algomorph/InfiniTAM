@@ -27,7 +27,7 @@
 #include "../../../../Utils/Geometry/CheckBlockVisibility.h"
 #include "../../../../Utils/Configuration/Configuration.h"
 #include "../../../../Utils/Geometry/FrustumTrigonometry.h"
-#include "../../../../Utils/MemoryBlock_StdContainer_Convertions.h"
+#include "../../../../Utils/Collections/MemoryBlock_StdContainer_Convertions.h"
 
 
 using namespace ITMLib;

@@ -26,7 +26,7 @@
 #include "../../../Traversal/Interface/HashTableTraversal.h"
 #include "../../../../Engines/Analytics/AnalyticsEngine.h"
 #include "../../../../Engines/Analytics/AnalyticsEngineFactory.h"
-#include "../../../../Utils/MemoryBlock_StdContainer_Convertions.h"
+#include "../../../../Utils/Collections/MemoryBlock_StdContainer_Convertions.h"
 
 //Thrust
 #include <thrust/device_ptr.h>

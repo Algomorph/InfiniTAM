@@ -1,0 +1,51 @@
+//  ================================================================
+//  Created by Gregory Kramida (https://github.com/Algomorph) on 5/26/20.
+//  Copyright (c) 2020 Gregory Kramida
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+
+//  http://www.apache.org/licenses/LICENSE-2.0
+
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//  ================================================================
+#pragma once
+
+#include "RenderingEngine.h"
+#include "../../Objects/Volume/VoxelBlockHash.h"
+#include "RenderingEngine_CUDA_Kernels.h"
+#include "../../Utils/Math.h"
+
+namespace ITMLib {
+namespace internal {
+
+template<class TVoxel>
+void RenderingEngine_VoxelBlockHash_Specialized<TVoxel, MEMORYDEVICE_CUDA>::FindVisibleBlocks(
+		VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics, RenderState* render_state) const {
+	const HashEntry* hash_table = volume->index.GetEntries();
+	int hash_entry_count = volume->index.hash_entry_count;
+	float voxel_size = volume->GetParameters().voxel_size;
+	Vector2i imgSize = render_state->renderingRangeImage->dimensions;
+
+	Matrix4f M = pose->GetM();
+	Vector4f projParams = intrinsics->projectionParamsSimple.all;
+	ORUtils::MemoryBlock<int> visible_block_count(1, true, true);
+	*visible_block_count.GetData(MEMORYDEVICE_CPU) = 0;
+	visible_block_count.UpdateDeviceFromHost();
+
+	dim3 cudaBlockSizeAL(256, 1);
+	dim3 gridSizeAL(ceil_of_integer_quotient(hash_entry_count, cudaBlockSizeAL.x));
+	buildCompleteVisibleList_device <<<gridSizeAL, cudaBlockSizeAL>>>(
+			hash_table, hash_entry_count, volume->index.GetVisibleBlockHashCodes(), visible_block_count.GetData(MEMORYDEVICE_CUDA),
+			volume->index.GetBlockVisibilityTypes(), M, projParams, imgSize, voxel_size);
+	ORcudaKernelCheck;
+
+	visible_block_count.UpdateHostFromDevice();
+	volume->index.SetVisibleBlockCount(*visible_block_count.GetData(MEMORYDEVICE_CPU));
+}
+} // namespace internal
+} // namespace ITMLib

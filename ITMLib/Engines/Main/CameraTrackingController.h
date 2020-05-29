@@ -5,7 +5,7 @@
 #include <stdexcept>
 
 #include "../Rendering/Interface/SurfelVisualizationEngine.h"
-#include "../Rendering/Interface/RenderingEngine.h"
+#include "../Rendering/Interface/RenderingEngineInterface.h"
 #include "../../CameraTrackers/Interface/CameraTracker.h"
 #include "../../Utils/Configuration/Configuration.h"
 #include "../../CameraTrackers/Interface/CameraTracker.h"
