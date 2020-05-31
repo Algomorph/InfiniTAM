@@ -21,6 +21,7 @@
 #include "../../../Objects/Volume/VoxelBlockHash.h"
 #include "../../../Utils/Geometry/CheckBlockVisibility.h"
 #include "../../../../ORUtils/PlatformIndependedParallelSum.h"
+#include "RenderingEngine_Shared.h"
 
 namespace ITMLib {
 
@@ -52,7 +53,7 @@ public: // member functions
 
 	_DEVICE_WHEN_AVAILABLE_
 	void operator()(const HashEntry& hash_entry, int hash_code) {
-		unsigned char block_visibility_type = 0;// = blockVisibilityTypes[targetIdx];
+		unsigned char block_visibility_type = 0;
 
 		bool is_visible, is_visible_enlarged;
 		CheckVoxelHashBlockVisibility<false>(is_visible, is_visible_enlarged, hash_entry.pos, depth_camera_pose,
@@ -61,7 +62,7 @@ public: // member functions
 
 
 		if (block_visibility_type > 0) {
-			int visible_block_index = ATOMIC_ADD(visible_block_count, 1);
+			int visible_block_index = ORUtils::ParallelSum<TMemoryDeviceType>::template Add1D<int>(1, visible_block_count);
 			visible_block_hash_codes[visible_block_index] = hash_code;
 		}
 	}
@@ -121,31 +122,41 @@ public: // member functions
 template<MemoryDeviceType TMemoryDeviceType>
 struct ProjectAndSplitBlocksFunctor {
 private: // member variables
-public: // member functions
-	ProjectAndSplitBlocksFunctor(){
+	const Matrix4f depth_camera_pose;
+	const Vector4f depth_camera_projection_parameters;
+	const Vector2i depth_image_size;
+	const float voxel_size;
 
+	DECLARE_ATOMIC(unsigned int, total_rendering_block_count);
+	RenderingBlock* rendering_blocks;
+
+public: // member functions
+	ProjectAndSplitBlocksFunctor(
+			const Matrix4f& depth_camera_pose,
+			const Vector4f& depth_camera_projection_parameters,
+			const Vector2i& depth_image_size,
+			const float voxel_size)
+			: depth_camera_pose(depth_camera_pose),
+			  depth_camera_projection_parameters(depth_camera_projection_parameters),
+			  depth_image_size(depth_image_size),
+			  voxel_size(voxel_size){
+		INITIALIZE_ATOMIC(unsigned int, total_rendering_block_count, 0u);
 	}
 	_DEVICE_WHEN_AVAILABLE_
 	void operator()(const HashEntry& hash_entry, const int hash_code){
-//		Vector2i upperLeft, lowerRight;
-//		Vector2f zRange;
-//		bool validProjection = false;
-//		if (in_offset < block_count)
-//			if (blockData.ptr >= 0)
-//				validProjection = ProjectSingleBlock(blockData.pos, depth_camera_pose, depth_camera_projection_parameters, depth_image_size, voxel_size,
-//				                                     upperLeft, lowerRight, zRange);
-//
-//		Vector2i requiredRenderingBlocks(ceilf((float) (lowerRight.x - upperLeft.x + 1) / rendering_block_size_x),
-//		                                 ceilf((float) (lowerRight.y - upperLeft.y + 1) / rendering_block_size_y));
-//
-//		size_t requiredNumBlocks = requiredRenderingBlocks.x * requiredRenderingBlocks.y;
-//		if (!validProjection) requiredNumBlocks = 0;
-//
-//		int out_offset = ORUtils::ParallelSum<MEMORYDEVICE_CUDA>::Add1D<int>(requiredNumBlocks, rendering_block_count);
-//		if (!validProjection) return;
-//		if ((out_offset == -1) || (out_offset + requiredNumBlocks > MAX_RENDERING_BLOCKS)) return;
-//
-//		CreateRenderingBlocks(rendering_blocks, out_offset, upperLeft, lowerRight, zRange);
+		Vector2f z_range;
+		Vector2i upper_left, lower_right;
+		if(ProjectSingleBlock(hash_entry.pos, depth_camera_pose, depth_camera_projection_parameters, depth_image_size, voxel_size,
+		                      upper_left, lower_right, z_range)){
+			Vector2i new_rednering_block_dimensions(ceilf((float) (lower_right.x - upper_left.x + 1) / rendering_block_size_x),
+			                                        ceilf((float) (lower_right.y - upper_left.y + 1) / rendering_block_size_y));
+
+			size_t new_rendering_block_count = new_rednering_block_dimensions.x * new_rednering_block_dimensions.y;
+			int current_rendering_block_count = ORUtils::ParallelSum<TMemoryDeviceType>::template Add1D<unsigned int>(new_rendering_block_count, total_rendering_block_count);
+			CreateRenderingBlocks(rendering_blocks, current_rendering_block_count, upper_left, lower_right, z_range);
+		}else{
+			ORUtils::ParallelSum<TMemoryDeviceType>::template Add1D<unsigned int>(0u, total_rendering_block_count);
+		}
 	}
 
 };

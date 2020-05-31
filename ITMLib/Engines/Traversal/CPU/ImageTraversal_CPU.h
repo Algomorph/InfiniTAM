@@ -71,6 +71,18 @@ public:
 	TraverseWithPosition(const ORUtils::Image<TImageElement>* image, TFunctor& functor) {
 		TraverseWithPosition_Generic<const TImageElement>(image, functor);
 	}
+
+	template<typename TImageElement, typename TFunctor>
+	inline static void
+	Traverse(ORUtils::Image<TImageElement>* image, TFunctor& functor) {
+		TraverseWithoutPosition_Generic<TImageElement>(image, functor);
+	}
+
+	template<typename TImageElement, typename TFunctor>
+	inline static void
+	Traverse(const ORUtils::Image<TImageElement>* image, TFunctor& functor) {
+		TraverseWithoutPosition_Generic<const TImageElement>(image, functor);
+	}
 };
 
 } // namespace ITMLib

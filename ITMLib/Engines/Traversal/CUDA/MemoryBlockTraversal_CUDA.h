@@ -22,7 +22,39 @@ namespace ITMLib {
 
 template<>
 class MemoryBlockTraversalEngine<MEMORYDEVICE_CUDA> {
-private: // static functions
+protected: // static functions
+	template<typename TData, typename TFunctor,
+			typename TGetSubElementStartX,
+			typename TGetSubElementEndX,
+			typename TGetSubElementStartY,
+			typename TGetSubElementEndY,
+			int TMaxSubElementCountX,
+			int TMaxSubElementCountY>
+	inline static void
+	TraverseRawSubCollections2D_Generic(
+			TData* data, const unsigned int element_count, TFunctor& functor,
+			TGetSubElementStartX get_start_x,
+			TGetSubElementEndX get_start_y,
+			TGetSubElementStartY get_end_x,
+			TGetSubElementEndY get_end_y
+	){
+#ifdef WITH_OPENMP
+#pragma omp parallel for default(none) shared(data, functor)
+#endif
+		dim3 cuda_block_size(256, 1);
+		dim3 cuda_grid_size((int) ceil((float) element_count / (float) cuda_block_size.x));
+
+		TFunctor* functor_device;
+
+		ORcudaSafeCall(cudaMalloc((void**) &functor_device, sizeof(TFunctor)));
+		ORcudaSafeCall(cudaMemcpy(functor_device, &functor, sizeof(TFunctor), cudaMemcpyHostToDevice));
+
+		memoryBlockTraversalWithItemIndex_device < TData, TFunctor > <<< cuda_grid_size, cuda_block_size >>>(data, element_count, functor_device);
+		ORcudaKernelCheck;
+
+		ORcudaSafeCall(cudaMemcpy(&functor, functor_device, sizeof(TFunctor), cudaMemcpyDeviceToHost));
+		ORcudaSafeCall(cudaFree(functor_device));
+	}
 	template<typename TData, typename TFunctor>
 	inline static void TraverseRaw_Generic(TData* data, const unsigned int element_count, TFunctor& functor){
 		dim3 cuda_block_size(256, 1);

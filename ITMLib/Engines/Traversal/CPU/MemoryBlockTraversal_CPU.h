@@ -21,7 +21,34 @@ namespace ITMLib {
 
 template<>
 class MemoryBlockTraversalEngine<MEMORYDEVICE_CPU> {
-private: // static functions
+protected: // static functions
+	template<typename TData, typename TFunctor,
+			typename TGetSubElementStartX,
+			typename TGetSubElementEndX,
+			typename TGetSubElementStartY,
+			typename TGetSubElementEndY,
+	        int TMaxSubElementCountX,
+	        int TMaxSubElementCountY>
+	inline static void
+	TraverseRawSubCollections2D_Generic(
+			TData* data, const unsigned int element_count, TFunctor& functor,
+			TGetSubElementStartX get_start_x,
+			TGetSubElementEndX get_start_y,
+			TGetSubElementStartY get_end_x,
+			TGetSubElementEndY get_end_y
+	){
+#ifdef WITH_OPENMP
+#pragma omp parallel for default(none) shared(data, functor)
+#endif
+		for (int i_item = 0; i_item < element_count; i_item++){
+			TData& item = data[i_item];
+			for(int y = get_start_y(item); y < get_end_y(item); y++){
+				for(int x = get_start_x(item); x < get_end_x(item); x++){
+					functor(item, i_item, x, y);
+				}
+			}
+		}
+	}
 
 	template<typename TData, typename TFunctor>
 	inline static void

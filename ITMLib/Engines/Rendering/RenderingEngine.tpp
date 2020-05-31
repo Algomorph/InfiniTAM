@@ -38,7 +38,7 @@ int RenderingEngine<TVoxel, TIndex, TMemoryDeviceType>::CountVisibleBlocks(
 template<class TVoxel, class TIndex, MemoryDeviceType TMemoryDeviceType>
 void RenderingEngine<TVoxel, TIndex, TMemoryDeviceType>::CreateExpectedDepths(
 		const VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics, RenderState* render_state) const {
-	DIEWITHEXCEPTION_REPORTLOCATION("Not implemented");
+	return specialized_engine.CreateExpectedDepths(volume, pose, intrinsics, render_state);
 }
 
 template<class TVoxel, class TIndex, MemoryDeviceType TMemoryDeviceType>

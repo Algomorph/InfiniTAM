@@ -38,8 +38,16 @@ void RenderingEngine_Specialized<TVoxel, PlainVoxelArray, TMemoryDeviceType>::Cr
 template<class TVoxel, MemoryDeviceType TMemoryDeviceType>
 void RenderingEngine_Specialized<TVoxel, VoxelBlockHash, TMemoryDeviceType>::FindVisibleBlocks(
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics, RenderState* render_state) const {
-	specialized_engine.FindVisibleBlocks(volume, pose, intrinsics, render_state);
+	FindVisibleBlocksFunctor<TMemoryDeviceType> functor(
+			volume->index.GetVisibleBlockHashCodes(),
+			volume->GetParameters().voxel_size,
+			render_state->renderingRangeImage->dimensions,
+			pose->GetM(),
+			intrinsics->projectionParamsSimple.all
+	);
 
+	HashTableTraversalEngine<TMemoryDeviceType>::TraverseUtilizedWithHashCode(volume->index, functor);
+	volume->index.SetVisibleBlockCount(functor.GetVisibleBlockCount());
 }
 
 template<class TVoxel, MemoryDeviceType TMemoryDeviceType>
@@ -54,59 +62,43 @@ template<class TVoxel, MemoryDeviceType TMemoryDeviceType>
 void RenderingEngine_Specialized<TVoxel, VoxelBlockHash, TMemoryDeviceType>::CreateExpectedDepths(
 		const VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics,
 		RenderState* render_state) const {
-	auto depth_image_size = render_state->renderingRangeImage->dimensions;
+
 	Vector2f* ray_bound_data = render_state->renderingRangeImage->GetData(MEMORYDEVICE_CPU);
 
 	// initialize with very large value for "min" and small value for "max" ray distance
-	FillExpectedDepthsWithClippingDistancesFunctor<TMemoryDeviceType> functor(FAR_AWAY, VERY_CLOSE);
-	ImageTraversalEngine<TMemoryDeviceType>::Traverse(render_state->renderingRangeImage, functor);
+	FillExpectedDepthsWithClippingDistancesFunctor<TMemoryDeviceType> fill_with_clipping_planes_functor(FAR_AWAY, VERY_CLOSE);
+	ImageTraversalEngine<TMemoryDeviceType>::Traverse(render_state->renderingRangeImage, fill_with_clipping_planes_functor);
 
+	DECLARE_ATOMIC(unsigned int, rendered_block_count);
+	INITIALIZE_ATOMIC(unsigned int, rendered_block_count, 0u);
+//	projectAndSplitBlocks_device <<<cuda_grid_size, cuda_block_size >>>(hash_entries, visible_block_hash_codes, visible_block_count, pose->GetM(),
+//			intrinsics->projectionParamsSimple.all, imgSize, voxelSize, rendering_block_list_device, block_count_device);
+	auto depth_image_size = render_state->renderingRangeImage->dimensions;
 	float voxel_size = volume->GetParameters().voxel_size;
 
-	std::vector<RenderingBlock> render_blocks(MAX_RENDERING_BLOCKS);
-	int rendered_block_count = 0;
+	ProjectAndSplitBlocksFunctor<TMemoryDeviceType> project_and_split_blocks_functor(pose->GetM(), intrinsics->projectionParamsSimple.all, depth_image_size, voxel_size);
 
 	//TODO: (potential optimization) figure out whether using the "Visible" list instead of the "Utilized" list makes more sense here.
 	// the visible list is only reliable if it's up-to-date. If you can ensure that it is, and keeping it up-to-date takes less resources than using the
 	// bigger "utilized" list, change this back to "Visible" list like it was in the original InfiniTAM repo.
-	const int* utilized_block_hash_codes = volume->index.GetUtilizedBlockHashCodes();
-	int utilized_block_count = volume->index.GetUtilizedBlockCount();
 
-	for (int i_utilized_block = 0; i_utilized_block < utilized_block_count; ++i_utilized_block) {
-		const HashEntry& hash_entry = volume->index.GetEntries()[utilized_block_hash_codes[i_utilized_block]];
+	HashTableTraversalEngine<TMemoryDeviceType>::TraverseUtilizedWithHashCode(volume->index, project_and_split_blocks_functor);
 
-		Vector2i upper_left_pixel, lower_right_pixel;
-		Vector2f z_range;
-		bool valid_projection = false;
-		if (hash_entry.ptr >= 0) {
-			valid_projection = ProjectSingleBlock(hash_entry.pos, pose->GetM(), intrinsics->projectionParamsSimple.all,
-			                                      depth_image_size, voxel_size, upper_left_pixel, lower_right_pixel, z_range);
-		}
-		if (!valid_projection) continue;
-
-		Vector2i required_rendering_blocks(
-				ceil_of_integer_quotient((lower_right_pixel.x - upper_left_pixel.x + 1), rendering_block_size_x),
-				ceil_of_integer_quotient((lower_right_pixel.y - upper_left_pixel.y + 1), rendering_block_size_y));
-		int required_rendering_block_count = required_rendering_blocks.x * required_rendering_blocks.y;
-
-		if (rendered_block_count + required_rendering_block_count >= MAX_RENDERING_BLOCKS) continue;
-		int offset = rendered_block_count;
-		rendered_block_count += required_rendering_block_count;
-
-		CreateRenderingBlocks(&(render_blocks[0]), offset, upper_left_pixel, lower_right_pixel, z_range);
-	}
-
+	//TODO
+	DIEWITHEXCEPTION_REPORTLOCATION("Not finished");
 	// go through rendering blocks
-	for (int i_rendered_block = 0; i_rendered_block < rendered_block_count; ++i_rendered_block) {
+//	for (int i_rendered_block = 0; i_rendered_block < rendered_block_count; ++i_rendered_block) {
 		// fill pixel ray bound data
-		const RenderingBlock& rendering_block = render_blocks[i_rendered_block];
+//		const RenderingBlock& rendering_block = render_blocks[i_rendered_block];
+//
+//		for (int y = rendering_block.upper_left.y; y <= rendering_block.lower_right.y; ++y) {
+//			for (int x = rendering_block.upper_left.x; x <= rendering_block.lower_right.x; ++x) {
+//				Vector2f& pixel_ray_bound = ray_bound_data[x + y * depth_image_size.x];
+//				if (pixel_ray_bound.x > rendering_block.z_range.x) pixel_ray_bound.x = rendering_block.z_range.x;
+//				if (pixel_ray_bound.y < rendering_block.z_range.y) pixel_ray_bound.y = rendering_block.z_range.y;
+//			}
+//		}
+//	}
 
-		for (int y = rendering_block.upper_left.y; y <= rendering_block.lower_right.y; ++y) {
-			for (int x = rendering_block.upper_left.x; x <= rendering_block.lower_right.x; ++x) {
-				Vector2f& pixel_ray_bound = ray_bound_data[x + y * depth_image_size.x];
-				if (pixel_ray_bound.x > rendering_block.z_range.x) pixel_ray_bound.x = rendering_block.z_range.x;
-				if (pixel_ray_bound.y < rendering_block.z_range.y) pixel_ray_bound.y = rendering_block.z_range.y;
-			}
-		}
-	}
+	CLEAN_UP_ATOMIC(rendered_block_count);
 }

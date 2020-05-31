@@ -590,8 +590,6 @@ set(
         Engines/Rendering/RenderingEngine.tpp
         Engines/Rendering/RenderingEngine.cpp
         Engines/Rendering/RenderingEngine.cu
-        Engines/Rendering/RenderingEngine_CPU.tpp
-        Engines/Rendering/RenderingEngine_CUDA.tcu
         Engines/Rendering/RenderingEngine_Specialized.tpp
 
         Engines/Rendering/CPU/MultiVisualizationEngine_CPU.tpp

@@ -20,21 +20,6 @@
 namespace ITMLib {
 namespace internal {
 
-template<class TVoxel, MemoryDeviceType TMemoryDeviceType>
-struct RenderingEngine_VoxelBlockHash_Specialized;
-
-template<class TVoxel>
-struct RenderingEngine_VoxelBlockHash_Specialized<TVoxel, MEMORYDEVICE_CPU> {
-	inline void FindVisibleBlocks(VoxelVolume <TVoxel, VoxelBlockHash>* volume, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics,
-	                              RenderState* render_state) const;
-};
-
-template<class TVoxel>
-struct RenderingEngine_VoxelBlockHash_Specialized<TVoxel, MEMORYDEVICE_CUDA> {
-	inline void FindVisibleBlocks(VoxelVolume <TVoxel, VoxelBlockHash>* volume, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics,
-	                              RenderState* render_state) const;
-};
-
 template<class TVoxel, class TIndex, MemoryDeviceType TMemoryDeviceType>
 struct RenderingEngine_Specialized;
 
@@ -52,7 +37,6 @@ struct RenderingEngine_Specialized<TVoxel, PlainVoxelArray, TMemoryDeviceType> {
 template<class TVoxel, MemoryDeviceType TMemoryDeviceType>
 struct RenderingEngine_Specialized<TVoxel, VoxelBlockHash, TMemoryDeviceType> {
 private: // member variables
-	RenderingEngine_VoxelBlockHash_Specialized<TVoxel, TMemoryDeviceType> specialized_engine;
 	ORUtils::MemoryBlock<RenderingBlock> rendering_blocks;
 public: // member functions
 	RenderingEngine_Specialized() : rendering_blocks(ITMLib::MAX_RENDERING_BLOCKS, TMemoryDeviceType){};

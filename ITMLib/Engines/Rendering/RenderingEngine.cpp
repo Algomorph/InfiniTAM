@@ -15,7 +15,6 @@
 //  ================================================================
 #include "../Traversal/CPU/HashTableTraversal_CPU.h"
 #include "../Traversal/CPU/ImageTraversal_CPU.h"
-#include "RenderingEngine_CPU.tpp"
 #include "RenderingEngine.tpp"
 #include "../../GlobalTemplateDefines.h"
 

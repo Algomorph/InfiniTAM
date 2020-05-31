@@ -25,6 +25,7 @@ constexpr int thread_group_size = 256;
 template<MemoryDeviceType TMemoryDeviceType>
 struct ParallelSum;
 
+//TODO: refactor method signatures to flip arguments after #225 is resolved
 template<>
 struct ParallelSum<MEMORYDEVICE_CPU>{
 	template<typename TElement>
