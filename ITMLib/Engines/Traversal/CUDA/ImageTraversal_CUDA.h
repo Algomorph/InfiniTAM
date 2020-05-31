@@ -26,7 +26,7 @@ class ImageTraversalEngine<MEMORYDEVICE_CUDA> {
 private: // member functions
 	template<typename TImageElement, typename TImage, typename TFunctor, typename TCudaCall>
 	inline static void
-	Traverse_Generic(TImage* image, TFunctor& functor, TCudaCall&& t_cuda_call) {
+	Traverse_Generic(TImage* image, TFunctor& functor, TCudaCall&& cuda_call) {
 		const Vector2i resolution = image->dimensions;
 		TImageElement* image_data = image->GetData(MEMORYDEVICE_CUDA);
 
@@ -35,7 +35,7 @@ private: // member functions
 		ORcudaSafeCall(cudaMalloc((void**) &functor_device, sizeof(TFunctor)));
 		ORcudaSafeCall(cudaMemcpy(functor_device, &functor, sizeof(TFunctor), cudaMemcpyHostToDevice));
 
-		t_cuda_call(image_data, resolution, functor_device);
+		cuda_call(image_data, resolution, functor_device);
 		ORcudaKernelCheck;
 
 		ORcudaSafeCall(cudaMemcpy(&functor, functor_device, sizeof(TFunctor), cudaMemcpyDeviceToHost));

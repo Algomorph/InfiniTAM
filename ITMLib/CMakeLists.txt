@@ -112,6 +112,7 @@ set(ITMLIB_ENGINES_TRAVERSAL_INTERFACE_HEADERS
     Engines/Traversal/Interface/ImageTraversal.h
     Engines/Traversal/Interface/TwoImageTraversal.h
     Engines/Traversal/Interface/MemoryBlockTraversal.h
+    Engines/Traversal/Interface/Regular2DCollectionArrayTraversal.h
     Engines/Traversal/Interface/VolumeTraversal.h
     Engines/Traversal/Interface/TwoVolumeTraversal.h
     Engines/Traversal/Interface/ThreeVolumeTraversal.h
@@ -127,7 +128,7 @@ set(ITMLIB_ENGINES_TRAVERSAL_CPU_HEADERS
     Engines/Traversal/CPU/TwoImageTraversal_CPU.h
 
     Engines/Traversal/CPU/MemoryBlockTraversal_CPU.h
-
+    Engines/Traversal/CPU/Regular2DCollectionArrayTraversal_CPU.h
     Engines/Traversal/CPU/HashTableTraversal_CPU.h
 
     Engines/Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h
@@ -148,6 +149,8 @@ set(ITMLIB_ENGINES_TRAVERSAL_CUDA_HEADERS
 
     Engines/Traversal/CUDA/MemoryBlockTraversal_CUDA.h
     Engines/Traversal/CUDA/MemoryBlockTraversal_CUDA_Kernels.h
+    Engines/Traversal/CUDA/Regular2DCollectionArrayTraversal_CUDA.cuh
+    Engines/Traversal/CUDA/Regular2DCollectionArrayTraversal_CUDA_Kernels.cuh
 
     Engines/Traversal/CUDA/HashTableTraversal_CUDA.h
     Engines/Traversal/CUDA/HashTableTraversal_CUDA_Kernels.h

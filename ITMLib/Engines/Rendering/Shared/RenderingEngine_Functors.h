@@ -113,7 +113,7 @@ public: // member functions
 			: FillExpectedDepthsWithClippingDistancesFunctor(Vector2f(near_clipping_distance, far_clipping_distance)) {}
 
 	_DEVICE_WHEN_AVAILABLE_
-	void operator()(Vector2f& pixel_ray_bound){
+	void operator()(Vector2f& pixel_ray_bound) {
 		pixel_ray_bound.from = clipping_bounds.from;
 		pixel_ray_bound.to = clipping_bounds.to;
 	}
@@ -139,22 +139,24 @@ public: // member functions
 			: depth_camera_pose(depth_camera_pose),
 			  depth_camera_projection_parameters(depth_camera_projection_parameters),
 			  depth_image_size(depth_image_size),
-			  voxel_size(voxel_size){
+			  voxel_size(voxel_size) {
 		INITIALIZE_ATOMIC(unsigned int, total_rendering_block_count, 0u);
 	}
+
 	_DEVICE_WHEN_AVAILABLE_
-	void operator()(const HashEntry& hash_entry, const int hash_code){
+	void operator()(const HashEntry& hash_entry, const int hash_code) {
 		Vector2f z_range;
 		Vector2i upper_left, lower_right;
-		if(ProjectSingleBlock(hash_entry.pos, depth_camera_pose, depth_camera_projection_parameters, depth_image_size, voxel_size,
-		                      upper_left, lower_right, z_range)){
-			Vector2i new_rednering_block_dimensions(ceilf((float) (lower_right.x - upper_left.x + 1) / rendering_block_size_x),
-			                                        ceilf((float) (lower_right.y - upper_left.y + 1) / rendering_block_size_y));
+		if (ProjectSingleBlock(hash_entry.pos, depth_camera_pose, depth_camera_projection_parameters, depth_image_size, voxel_size,
+		                       upper_left, lower_right, z_range)) {
+			Vector2i new_rednering_block_dimensions(ceil_of_integer_quotient(lower_right.x - upper_left.x + 1, rendering_block_size_x),
+			                                        ceil_of_integer_quotient(lower_right.y - upper_left.y + 1, rendering_block_size_y));
 
 			size_t new_rendering_block_count = new_rednering_block_dimensions.x * new_rednering_block_dimensions.y;
-			int current_rendering_block_count = ORUtils::ParallelSum<TMemoryDeviceType>::template Add1D<unsigned int>(new_rendering_block_count, total_rendering_block_count);
-			CreateRenderingBlocks(rendering_blocks, current_rendering_block_count, upper_left, lower_right, z_range);
-		}else{
+			int current_rendering_block_count = ORUtils::ParallelSum<TMemoryDeviceType>::template Add1D<unsigned int>(new_rendering_block_count,
+			                                                                                                          total_rendering_block_count);
+			CreateRenderingBlocks2(rendering_blocks, current_rendering_block_count, upper_left, lower_right, z_range);
+		} else {
 			ORUtils::ParallelSum<TMemoryDeviceType>::template Add1D<unsigned int>(0u, total_rendering_block_count);
 		}
 	}

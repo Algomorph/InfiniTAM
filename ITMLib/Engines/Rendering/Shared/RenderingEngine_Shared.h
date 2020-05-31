@@ -21,9 +21,6 @@ static const CONSTPTR(int) minmaximg_subsample = 8;
 #define VERY_CLOSE 0.05f
 #endif
 
-static const CONSTPTR(int) rendering_block_size_x = 16;
-static const CONSTPTR(int) rendering_block_size_y = 16;
-
 _CPU_AND_GPU_CODE_ inline Vector4f InvertProjectionParams(const THREADPTR(Vector4f)& projParams)
 {
 	return Vector4f(1.0f / projParams.x, 1.0f / projParams.y, -projParams.z, -projParams.w);
@@ -86,6 +83,25 @@ _CPU_AND_GPU_CODE_ inline void CreateRenderingBlocks(DEVICEPTR(RenderingBlock) *
 			b.upper_left.y = upper_left.y + by * rendering_block_size_y;
 			b.lower_right.x = upper_left.x + (bx + 1) * rendering_block_size_x - 1;
 			b.lower_right.y = upper_left.y + (by + 1) * rendering_block_size_y - 1;
+			if (b.lower_right.x > lower_right.x) b.lower_right.x = lower_right.x;
+			if (b.lower_right.y > lower_right.y) b.lower_right.y = lower_right.y;
+			b.z_range = z_range;
+		}
+	}
+}
+_CPU_AND_GPU_CODE_ inline void CreateRenderingBlocks2(DEVICEPTR(RenderingBlock) *rendering_block_list, int offset,
+                                                     const THREADPTR(Vector2i) & upper_left, const THREADPTR(Vector2i) & lower_right, const THREADPTR(Vector2f) & z_range)
+{
+	// split bounding box into 16x16 pixel rendering blocks
+	for (int by = 0; by < ceil_of_integer_quotient(1 + lower_right.y - upper_left.y, rendering_block_size_y); ++by) {
+		for (int bx = 0; bx < ceil_of_integer_quotient(1 + lower_right.x - upper_left.x, rendering_block_size_x); ++bx) {
+			if (offset >= MAX_RENDERING_BLOCKS) return;
+			//for each rendering block: add it to the list
+			DEVICEPTR(RenderingBlock) & b(rendering_block_list[offset++]);
+			b.upper_left.x = upper_left.x + bx * rendering_block_size_x;
+			b.upper_left.y = upper_left.y + by * rendering_block_size_y;
+			b.lower_right.x = upper_left.x + (bx + 1) * rendering_block_size_x;
+			b.lower_right.y = upper_left.y + (by + 1) * rendering_block_size_y;
 			if (b.lower_right.x > lower_right.x) b.lower_right.x = lower_right.x;
 			if (b.lower_right.y > lower_right.y) b.lower_right.y = lower_right.y;
 			b.z_range = z_range;

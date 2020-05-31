@@ -22,78 +22,94 @@ namespace ITMLib {
 template<>
 class MemoryBlockTraversalEngine<MEMORYDEVICE_CPU> {
 protected: // static functions
-	template<typename TData, typename TFunctor,
-			typename TGetSubElementStartX,
-			typename TGetSubElementEndX,
-			typename TGetSubElementStartY,
-			typename TGetSubElementEndY,
-	        int TMaxSubElementCountX,
-	        int TMaxSubElementCountY>
+	template<typename TData, typename TApplyFunction>
 	inline static void
-	TraverseRawSubCollections2D_Generic(
-			TData* data, const unsigned int element_count, TFunctor& functor,
-			TGetSubElementStartX get_start_x,
-			TGetSubElementEndX get_start_y,
-			TGetSubElementStartY get_end_x,
-			TGetSubElementEndY get_end_y
-	){
+	Traverse_Generic(TData* data, const unsigned int element_count,  TApplyFunction&& apply_function){
 #ifdef WITH_OPENMP
-#pragma omp parallel for default(none) shared(data, functor)
+#pragma omp parallel for default(none) shared(data, apply_function)
 #endif
 		for (int i_item = 0; i_item < element_count; i_item++){
-			TData& item = data[i_item];
-			for(int y = get_start_y(item); y < get_end_y(item); y++){
-				for(int x = get_start_x(item); x < get_end_x(item); x++){
-					functor(item, i_item, x, y);
-				}
-			}
+			apply_function(data[i_item], i_item);
 		}
 	}
 
 	template<typename TData, typename TFunctor>
 	inline static void
-	TraverseRaw_Generic(TData* data, const unsigned int element_count, TFunctor& functor){
-#ifdef WITH_OPENMP
-#pragma omp parallel for default(none) shared(data, functor)
-#endif
-		for (int i_item = 0; i_item < element_count; i_item++){
-			functor(data[i_item], i_item);
-		}
+	TraverseRawWithIndex_Generic(TData* data, const unsigned int element_count, TFunctor& functor){
+		Traverse_Generic<TData>(data, element_count, [&functor,&data](int i_item){functor(data[i_item], i_item); });
+	}
+	
+	template<typename TData, typename TFunctor>
+	inline static void
+	TraverseRawWithoutIndex_Generic(TData* data, const unsigned int element_count, TFunctor& functor){
+		Traverse_Generic<TData>(data, element_count, [&functor,&data](int i_item){functor(data[i_item]); });
 	}
 
 	template<typename TData, typename TMemoryBlock, typename TFunctor>
 	inline static void
-	Traverse_Generic(TMemoryBlock& memory_block, const unsigned int element_count, TFunctor& functor){
+	TraverseWithIndex_Generic(TMemoryBlock& memory_block, unsigned int element_count, TFunctor& functor){
 		TData* data = memory_block.GetData(MEMORYDEVICE_CPU);
 		assert(element_count <= memory_block.size());
-		TraverseRaw_Generic(data, element_count, functor);
+		TraverseRawWithIndex_Generic(data, element_count, functor);
+	}
+	template<typename TData, typename TMemoryBlock, typename TFunctor>
+	inline static void
+	TraverseWithoutIndex_Generic(TMemoryBlock& memory_block, unsigned int element_count, TFunctor& functor){
+		TData* data = memory_block.GetData(MEMORYDEVICE_CPU);
+		assert(element_count <= memory_block.size());
+		TraverseRawWithoutIndex_Generic(data, element_count, functor);
 	}
 
 public: // static functions
-
+	
 	template<typename T, typename TFunctor>
 	inline static void
 	TraverseRaw(T* data, const unsigned int element_count, TFunctor& functor){
-		TraverseRaw_Generic<T, TFunctor>(data, element_count, functor);
+		TraverseRawWithoutIndex_Generic<T, TFunctor>(data, element_count, functor);
 	}
 
 	template<typename T, typename TFunctor>
 	inline static void
 	TraverseRaw(const T* data, const unsigned int element_count, TFunctor& functor){
-		TraverseRaw_Generic<const T, TFunctor>(data, element_count, functor);
+		TraverseRawWithoutIndex_Generic<const T, TFunctor>(data, element_count, functor);
+	}
+	
+	template<typename T, typename TFunctor>
+	inline static void
+	TraverseWithIndexRaw(T* data, const unsigned int element_count, TFunctor& functor){
+		TraverseRawWithIndex_Generic<T, TFunctor>(data, element_count, functor);
+	}
+
+	template<typename T, typename TFunctor>
+	inline static void
+	TraverseWithIndexRaw(const T* data, const unsigned int element_count, TFunctor& functor){
+		TraverseRawWithIndex_Generic<const T, TFunctor>(data, element_count, functor);
 	}
 
 	template<typename T, typename TFunctor>
 	inline static void
 	Traverse(ORUtils::MemoryBlock<T>& memory_block, const unsigned int element_count, TFunctor& functor){
-		Traverse_Generic<T, ORUtils::MemoryBlock<T>, TFunctor>(memory_block, element_count, functor);
+		TraverseWithoutIndex_Generic<T, ORUtils::MemoryBlock<T>, TFunctor>(memory_block, element_count, functor);
 	}
 
 	template<typename T, typename TFunctor>
 	inline static void
 	Traverse(const ORUtils::MemoryBlock<T>& memory_block, const unsigned int element_count, TFunctor& functor){
-		Traverse_Generic<const T, const ORUtils::MemoryBlock<T>, TFunctor>(memory_block, element_count, functor);
+		TraverseWithoutIndex_Generic<const T, const ORUtils::MemoryBlock<T>, TFunctor>(memory_block, element_count, functor);
 	}
+
+	template<typename T, typename TFunctor>
+	inline static void
+	TraverseWithIndex(ORUtils::MemoryBlock<T>& memory_block, const unsigned int element_count, TFunctor& functor){
+		TraverseWithIndex_Generic<T, ORUtils::MemoryBlock<T>, TFunctor>(memory_block, element_count, functor);
+	}
+
+	template<typename T, typename TFunctor>
+	inline static void
+	TraverseWithIndex(const ORUtils::MemoryBlock<T>& memory_block, const unsigned int element_count, TFunctor& functor){
+		TraverseWithIndex_Generic<const T, const ORUtils::MemoryBlock<T>, TFunctor>(memory_block, element_count, functor);
+	}
+
 };
 
 } // namespace ITMLib

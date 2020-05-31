@@ -36,9 +36,9 @@ AllocateHashEntriesUsingAllocationStateList_Generic(VoxelVolume<TVoxel, VoxelBlo
 
 	HashEntryAllocationState* hash_entry_allocation_states = volume->index.GetHashEntryAllocationStates();
 	const int hash_entry_count = volume->index.hash_entry_count;
-	MemoryBlockTraversalEngine<TMemoryDeviceType>::TraverseRaw(hash_entry_allocation_states,
-	                                                           static_cast<unsigned int>(hash_entry_count),
-	                                                           allocation_functor);
+	MemoryBlockTraversalEngine<TMemoryDeviceType>::TraverseWithIndexRaw(hash_entry_allocation_states,
+	                                                                    static_cast<unsigned int>(hash_entry_count),
+	                                                                    allocation_functor);
 	allocation_functor.UpdateIndexCounters(volume->index);
 }
 
@@ -205,8 +205,8 @@ void IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType, TExecutionMode>::
 		marker_functor.SetCollidingBlockCount(0);
 		volume->index.ClearHashEntryAllocationStates();
 
-		MemoryBlockTraversalEngine<TMemoryDeviceType>::TraverseRaw(new_positions_device, new_block_count,
-		                                                           marker_functor);
+		MemoryBlockTraversalEngine<TMemoryDeviceType>::TraverseWithIndexRaw(new_positions_device, new_block_count,
+		                                                                    marker_functor);
 
 		AllocateHashEntriesUsingAllocationStateList(volume);
 
@@ -244,8 +244,8 @@ void IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType, TExecutionMode>::
 		deallocation_functor.SetCollidingBlockCount(0);
 		volume->index.ClearHashEntryAllocationStates();
 
-		MemoryBlockTraversalEngine<TMemoryDeviceType>::TraverseRaw(blocks_to_remove_device,
-		                                                           count_of_blocks_to_remove, deallocation_functor);
+		MemoryBlockTraversalEngine<TMemoryDeviceType>::TraverseWithIndexRaw(blocks_to_remove_device,
+		                                                                    count_of_blocks_to_remove, deallocation_functor);
 
 		count_of_blocks_to_remove = deallocation_functor.GetCollidingBlockCount();
 		std::swap(blocks_to_remove_device, deallocation_functor.colliding_positions_device);
@@ -283,9 +283,9 @@ template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExe
 static inline void ChangeVisibleBlockVisibility_Aux(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 	const int* visible_block_hash_codes = volume->index.GetVisibleBlockHashCodes();
 	BlockVisibilitySetFunctor<TVoxel, TMemoryDeviceType, THashBlockVisibility> visibility_functor(volume);
-	MemoryBlockTraversalEngine<TMemoryDeviceType>::TraverseRaw(visible_block_hash_codes,
-	                                                           volume->index.GetVisibleBlockCount(),
-	                                                           visibility_functor);
+	MemoryBlockTraversalEngine<TMemoryDeviceType>::TraverseWithIndexRaw(visible_block_hash_codes,
+	                                                                    volume->index.GetVisibleBlockCount(),
+	                                                                    visibility_functor);
 }
 
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
