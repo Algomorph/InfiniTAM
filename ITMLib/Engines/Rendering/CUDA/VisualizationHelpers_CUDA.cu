@@ -2,6 +2,7 @@
 
 #include "VisualizationHelpers_CUDA.h"
 #include "../../../Utils/Geometry/CheckBlockVisibility.h"
+#include "../../../../ORUtils/PlatformIndependedParallelSum.h"
 
 using namespace ITMLib;
 
@@ -48,36 +49,38 @@ __global__ void ITMLib::buildCompleteVisibleList_device(const HashEntry *hashTab
 
 	if (shouldPrefix)
 	{
-		int offset = computePrefixSum_device<int>(hashVisibleType > 0, visibleBlockCount, blockDim.x * blockDim.y, threadIdx.x);
+		int offset = ORUtils::ParallelSum<MEMORYDEVICE_CUDA>::Add1D<int>(hashVisibleType > 0, visibleBlockCount);
 		if (offset != -1) visibleBlockHashCodes[offset] = targetIdx;
 	}
 }
 
-__global__ void ITMLib::projectAndSplitBlocks_device(const HashEntry *hashEntries, const int *visibleEntryIDs, int visibleBlockCount,
-                                                     const Matrix4f pose_M, const Vector4f intrinsics, const Vector2i imgSize, float voxelSize, RenderingBlock *renderingBlocks,
-                                                     uint *noTotalBlocks)
-{
+__global__ void ITMLib::projectAndSplitBlocks_device(const HashEntry* hash_table, const int* hash_codes, int block_count,
+                                                     const Matrix4f depth_camera_pose, const Vector4f depth_camera_projection_parameters,
+                                                     const Vector2i depth_image_size, float voxel_size, RenderingBlock* rendering_blocks,
+                                                     uint* total_rendering_block_count) {
 	int in_offset = threadIdx.x + blockDim.x * blockIdx.x;
 
-	const HashEntry & blockData(hashEntries[visibleEntryIDs[in_offset]]);
+	const HashEntry& blockData(hash_table[hash_codes[in_offset]]);
 
 	Vector2i upperLeft, lowerRight;
 	Vector2f zRange;
 	bool validProjection = false;
-	if (in_offset < visibleBlockCount) if (blockData.ptr >= 0)
-		validProjection = ProjectSingleBlock(blockData.pos, pose_M, intrinsics, imgSize, voxelSize, upperLeft, lowerRight, zRange);
+	if (in_offset < block_count)
+		if (blockData.ptr >= 0)
+			validProjection = ProjectSingleBlock(blockData.pos, depth_camera_pose, depth_camera_projection_parameters, depth_image_size, voxel_size,
+			                                     upperLeft, lowerRight, zRange);
 
-	Vector2i requiredRenderingBlocks(ceilf((float)(lowerRight.x - upperLeft.x + 1) / renderingBlockSizeX),
-		ceilf((float)(lowerRight.y - upperLeft.y + 1) / renderingBlockSizeY));
+	Vector2i requiredRenderingBlocks(ceilf((float) (lowerRight.x - upperLeft.x + 1) / rendering_block_size_x),
+	                                 ceilf((float) (lowerRight.y - upperLeft.y + 1) / rendering_block_size_y));
 
-	size_t requiredNumBlocks = requiredRenderingBlocks.x * requiredRenderingBlocks.y;
-	if (!validProjection) requiredNumBlocks = 0;
+	size_t required_local_rendering_block_count = requiredRenderingBlocks.x * requiredRenderingBlocks.y;
+	if (!validProjection) required_local_rendering_block_count = 0;
 
-	int out_offset = computePrefixSum_device<uint>(requiredNumBlocks, noTotalBlocks, blockDim.x, threadIdx.x);
+	int out_offset = ORUtils::ParallelSum<MEMORYDEVICE_CUDA>::Add1D<uint>(required_local_rendering_block_count, total_rendering_block_count);
 	if (!validProjection) return;
-	if ((out_offset == -1) || (out_offset + requiredNumBlocks > MAX_RENDERING_BLOCKS)) return;
+	if ((out_offset == -1) || (out_offset + required_local_rendering_block_count > MAX_RENDERING_BLOCKS)) return;
 
-	CreateRenderingBlocks(renderingBlocks, out_offset, upperLeft, lowerRight, zRange);
+	CreateRenderingBlocks(rendering_blocks, out_offset, upperLeft, lowerRight, zRange);
 }
 
 __global__ void ITMLib::checkProjectAndSplitBlocks_device(const HashEntry *hashEntries, int noHashEntries,
@@ -94,12 +97,12 @@ __global__ void ITMLib::checkProjectAndSplitBlocks_device(const HashEntry *hashE
 	bool validProjection = false;
 	if (hashEntry.ptr >= 0) validProjection = ProjectSingleBlock(hashEntry.pos, pose_M, intrinsics, imgSize, voxelSize, upperLeft, lowerRight, zRange);
 
-	Vector2i requiredRenderingBlocks(ceilf((float)(lowerRight.x - upperLeft.x + 1) / renderingBlockSizeX),
-		ceilf((float)(lowerRight.y - upperLeft.y + 1) / renderingBlockSizeY));
+	Vector2i requiredRenderingBlocks(ceilf((float)(lowerRight.x - upperLeft.x + 1) / rendering_block_size_x),
+		ceilf((float)(lowerRight.y - upperLeft.y + 1) / rendering_block_size_y));
 	size_t requiredNumBlocks = requiredRenderingBlocks.x * requiredRenderingBlocks.y;
 	if (!validProjection) requiredNumBlocks = 0;
 
-	int out_offset = computePrefixSum_device<uint>(requiredNumBlocks, noTotalBlocks, blockDim.x, threadIdx.x);
+	int out_offset = ORUtils::ParallelSum<MEMORYDEVICE_CUDA>::Add1D<uint>(requiredNumBlocks, noTotalBlocks);
 	if (requiredNumBlocks == 0) return;
 	if ((out_offset == -1) || (out_offset + requiredNumBlocks > MAX_RENDERING_BLOCKS)) return;
 
@@ -115,13 +118,13 @@ __global__ void ITMLib::fillBlocks_device(uint noTotalBlocks, const RenderingBlo
 	if (block >= noTotalBlocks) return;
 
 	const RenderingBlock & b(renderingBlocks[block]);
-	int xpos = b.upperLeft.x + x;
-	if (xpos > b.lowerRight.x) return;
-	int ypos = b.upperLeft.y + y;
-	if (ypos > b.lowerRight.y) return;
+	int xpos = b.upper_left.x + x;
+	if (xpos > b.lower_right.x) return;
+	int ypos = b.upper_left.y + y;
+	if (ypos > b.lower_right.y) return;
 
 	Vector2f & pixel(minmaxData[xpos + ypos*imgSize.x]);
-	atomicMin(&pixel.x, b.zRange.x); atomicMax(&pixel.y, b.zRange.y);
+	atomicMin(&pixel.x, b.z_range.x); atomicMax(&pixel.y, b.z_range.y);
 }
 
 __global__ void ITMLib::findMissingPoints_device(int *fwdProjMissingPoints, uint *noMissingPoints, const Vector2f *minmaximg,
@@ -154,7 +157,7 @@ __global__ void ITMLib::findMissingPoints_device(int *fwdProjMissingPoints, uint
 
 	if (shouldPrefix)
 	{
-		int offset = computePrefixSum_device(hasPoint, noMissingPoints, blockDim.x * blockDim.y, threadIdx.x + threadIdx.y * blockDim.x);
+		int offset = ORUtils::ParallelSum<MEMORYDEVICE_CUDA>::Add2D<uint>(hasPoint, noMissingPoints);
 		if (offset != -1) fwdProjMissingPoints[offset] = locId;
 	}
 }

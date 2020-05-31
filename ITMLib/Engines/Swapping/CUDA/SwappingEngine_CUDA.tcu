@@ -4,6 +4,7 @@
 
 #include "../Shared/SwappingEngine_Shared.h"
 #include "../../../Utils/CUDAUtils.h"
+#include "../../../../ORUtils/PlatformIndependedParallelSum.h"
 
 using namespace ITMLib;
 
@@ -278,7 +279,7 @@ namespace
 
 		if (shouldPrefix)
 		{
-			int offset = computePrefixSum_device<int>(isNeededId, noNeededEntries, blockDim.x * blockDim.y, threadIdx.x);
+			int offset = ORUtils::ParallelSum<MEMORYDEVICE_CUDA>::Add1D<int>(isNeededId, noNeededEntries);
 			if (offset != -1 && offset < SWAP_OPERATION_BLOCK_COUNT) neededEntryIDs[offset] = targetIdx;
 		}
 	}
@@ -305,7 +306,7 @@ namespace
 
 		if (shouldPrefix)
 		{
-			int offset = computePrefixSum_device<int>(isNeededId, noNeededEntries, blockDim.x * blockDim.y, threadIdx.x);
+			int offset = ORUtils::ParallelSum<MEMORYDEVICE_CUDA>::Add1D<int>(isNeededId, noNeededEntries);
 			if (offset != -1 && offset < SWAP_OPERATION_BLOCK_COUNT) neededEntryIDs[offset] = targetIdx;
 		}
 	}
@@ -348,7 +349,7 @@ namespace
 
 		if (shouldPrefix)
 		{
-			int offset = computePrefixSum_device<int>(isNeededId, noNeededEntries, blockDim.x * blockDim.y, threadIdx.x);
+			int offset = ORUtils::ParallelSum<MEMORYDEVICE_CUDA>::Add1D<int>(isNeededId, noNeededEntries);
 			if (offset != -1 && offset < SWAP_OPERATION_BLOCK_COUNT) neededEntryIDs[offset] = targetIdx;
 		}
 	}

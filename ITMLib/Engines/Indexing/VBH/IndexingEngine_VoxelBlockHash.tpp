@@ -96,7 +96,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType, TExecutionMode>::
 	do {
 		volume->index.ClearHashEntryAllocationStates();
 		depth_based_allocator.ResetFlagsAndCounters();
-		ImageTraversalEngine<float, TMemoryDeviceType>::TraverseWithPosition(view->depth, depth_based_allocator);
+		ImageTraversalEngine<TMemoryDeviceType>::TraverseWithPosition(view->depth, depth_based_allocator);
 		this->AllocateHashEntriesUsingAllocationStateList(volume);
 		this->AllocateBlockList(volume, depth_based_allocator.colliding_block_positions,
 		                        depth_based_allocator.GetCollidingBlockCount());

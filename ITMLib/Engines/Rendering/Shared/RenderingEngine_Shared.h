@@ -4,18 +4,14 @@
 
 #include "../../../Objects/Volume/RepresentationAccess.h"
 #include "../../../Utils/HashBlockProperties.h"
+#include "RenderingBlock.h"
 
-static const CONSTPTR(int) MAX_RENDERING_BLOCKS = 65536*4;
-//static const int MAX_RENDERING_BLOCKS = 16384;
+namespace ITMLib{
+
+
 static const CONSTPTR(int) minmaximg_subsample = 8;
 
 #if !(defined __METALC__)
-
-struct RenderingBlock {
-	Vector2s upperLeft;
-	Vector2s lowerRight;
-	Vector2f zRange;
-};
 
 #ifndef FAR_AWAY
 #define FAR_AWAY 999999.9f
@@ -25,8 +21,8 @@ struct RenderingBlock {
 #define VERY_CLOSE 0.05f
 #endif
 
-static const CONSTPTR(int) renderingBlockSizeX = 16;
-static const CONSTPTR(int) renderingBlockSizeY = 16;
+static const CONSTPTR(int) rendering_block_size_x = 16;
+static const CONSTPTR(int) rendering_block_size_y = 16;
 
 _CPU_AND_GPU_CODE_ inline Vector4f InvertProjectionParams(const THREADPTR(Vector4f)& projParams)
 {
@@ -77,22 +73,22 @@ _CPU_AND_GPU_CODE_ inline bool ProjectSingleBlock(const THREADPTR(Vector3s) & bl
 	return true;
 }
 
-_CPU_AND_GPU_CODE_ inline void CreateRenderingBlocks(DEVICEPTR(RenderingBlock) *renderingBlockList, int offset,
-	const THREADPTR(Vector2i) & upperLeft, const THREADPTR(Vector2i) & lowerRight, const THREADPTR(Vector2f) & zRange)
+_CPU_AND_GPU_CODE_ inline void CreateRenderingBlocks(DEVICEPTR(RenderingBlock) *rendering_block_list, int offset,
+                                                     const THREADPTR(Vector2i) & upper_left, const THREADPTR(Vector2i) & lower_right, const THREADPTR(Vector2f) & z_range)
 {
 	// split bounding box into 16x16 pixel rendering blocks
-	for (int by = 0; by < ceil((float)(1 + lowerRight.y - upperLeft.y) / renderingBlockSizeY); ++by) {
-		for (int bx = 0; bx < ceil((float)(1 + lowerRight.x - upperLeft.x) / renderingBlockSizeX); ++bx) {
+	for (int by = 0; by < ceil((float)(1 + lower_right.y - upper_left.y) / rendering_block_size_y); ++by) {
+		for (int bx = 0; bx < ceil((float)(1 + lower_right.x - upper_left.x) / rendering_block_size_x); ++bx) {
 			if (offset >= MAX_RENDERING_BLOCKS) return;
 			//for each rendering block: add it to the list
-			DEVICEPTR(RenderingBlock) & b(renderingBlockList[offset++]);
-			b.upperLeft.x = upperLeft.x + bx*renderingBlockSizeX;
-			b.upperLeft.y = upperLeft.y + by*renderingBlockSizeY;
-			b.lowerRight.x = upperLeft.x + (bx + 1)*renderingBlockSizeX - 1;
-			b.lowerRight.y = upperLeft.y + (by + 1)*renderingBlockSizeY - 1;
-			if (b.lowerRight.x>lowerRight.x) b.lowerRight.x = lowerRight.x;
-			if (b.lowerRight.y>lowerRight.y) b.lowerRight.y = lowerRight.y;
-			b.zRange = zRange;
+			DEVICEPTR(RenderingBlock) & b(rendering_block_list[offset++]);
+			b.upper_left.x = upper_left.x + bx * rendering_block_size_x;
+			b.upper_left.y = upper_left.y + by * rendering_block_size_y;
+			b.lower_right.x = upper_left.x + (bx + 1) * rendering_block_size_x - 1;
+			b.lower_right.y = upper_left.y + (by + 1) * rendering_block_size_y - 1;
+			if (b.lower_right.x > lower_right.x) b.lower_right.x = lower_right.x;
+			if (b.lower_right.y > lower_right.y) b.lower_right.y = lower_right.y;
+			b.z_range = z_range;
 		}
 	}
 }
@@ -578,3 +574,4 @@ _CPU_AND_GPU_CODE_ inline void processPixelConfidence(DEVICEPTR(Vector4u) &outRe
 	else outRendering = Vector4u((uchar)0);
 }
 
+} // namespace ITMLib

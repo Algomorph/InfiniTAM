@@ -17,29 +17,11 @@
 
 #include "RenderingEngine.h"
 #include "Shared/RenderingEngine_Functors.h"
+#include "Shared/RenderingEngine_Shared.h"
+#include "RenderingEngine_Specialized.tpp"
 
 using namespace ITMLib;
 
-namespace ITMLib {
-namespace internal {
-
-template<class TVoxel, MemoryDeviceType TMemoryDeviceType>
-void RenderingEngine_Specialized<TVoxel, VoxelBlockHash, TMemoryDeviceType>::FindVisibleBlocks(
-		VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics, RenderState* render_state) const {
-	specialized_engine.FindVisibleBlocks(volume, pose, intrinsics, render_state);
-
-}
-
-template<class TVoxel, MemoryDeviceType TMemoryDeviceType>
-int RenderingEngine_Specialized<TVoxel, VoxelBlockHash, TMemoryDeviceType>::CountVisibleBlocks(
-		const VoxelVolume<TVoxel, VoxelBlockHash>* volume, int min_block_id, int max_block_id) const {
-	CountVisibleBlocksInListIdRangeFunctor<TMemoryDeviceType> functor(min_block_id, max_block_id);
-	HashTableTraversalEngine<TMemoryDeviceType>::TraverseVisibleWithHashCode(volume->index, functor);
-	return functor.GetCurrentVisibleBlockInIDRangeCount();
-}
-
-} // namespace internal
-} // namespace ITMLib
 template<class TVoxel, class TIndex, MemoryDeviceType TMemoryDeviceType>
 void RenderingEngine<TVoxel, TIndex, TMemoryDeviceType>::FindVisibleBlocks(VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::SE3Pose* pose,
                                                                            const Intrinsics* intrinsics, RenderState* render_state) const {

@@ -18,6 +18,7 @@
 #include "../../Utils/Math.h"
 #include "../../Utils/Geometry/CheckBlockVisibility.h"
 #include "../../Utils/CUDAUtils.h"
+#include "../../../ORUtils/PlatformIndependedParallelSum.h"
 
 namespace {
 //anonymous namespace (Cuda global kernels)
@@ -51,7 +52,7 @@ buildCompleteVisibleList_device(const ITMLib::HashEntry* hashTable, /*ITMHashCac
 	__syncthreads();
 
 	if (shouldPrefix) {
-		int offset = computePrefixSum_device<int>(hashVisibleType > 0, visibleBlockCount, blockDim.x * blockDim.y, threadIdx.x);
+		int offset = ORUtils::ParallelSum<MEMORYDEVICE_CUDA>::Add1D<int>(hashVisibleType > 0, visibleBlockCount);
 		if (offset != -1) visibleBlockHashCodes[offset] = targetIdx;
 	}
 }

@@ -9,7 +9,7 @@
 #include "../../../Objects/RenderStates/RenderStateMultiScene.h"
 #include "../../../Objects/Volume/MultiSceneAccess.h"
 
-#include "../Shared/VisualizationEngine_Shared.h"
+#include "../Shared/RenderingEngine_Shared.h"
 
 using namespace ITMLib;
 
@@ -71,8 +71,8 @@ void MultiVisualizationEngine_CPU<TVoxel, VoxelBlockHash>::CreateExpectedDepths(
 			}
 			if (!validProjection) continue;
 
-			Vector2i requiredRenderingBlocks((int)ceilf((float)(lowerRight.x - upperLeft.x + 1) / (float)renderingBlockSizeX),
-				(int)ceilf((float)(lowerRight.y - upperLeft.y + 1) / (float)renderingBlockSizeY));
+			Vector2i requiredRenderingBlocks((int)ceilf((float)(lowerRight.x - upperLeft.x + 1) / (float)rendering_block_size_x),
+				(int)ceilf((float)(lowerRight.y - upperLeft.y + 1) / (float)rendering_block_size_y));
 			int requiredNumBlocks = requiredRenderingBlocks.x * requiredRenderingBlocks.y;
 
 			if (numRenderingBlocks + requiredNumBlocks >= MAX_RENDERING_BLOCKS) continue;
@@ -88,11 +88,11 @@ void MultiVisualizationEngine_CPU<TVoxel, VoxelBlockHash>::CreateExpectedDepths(
 			// fill minmaxData
 			const RenderingBlock & b(renderingBlocks[blockNo]);
 
-			for (int y = b.upperLeft.y; y <= b.lowerRight.y; ++y) {
-				for (int x = b.upperLeft.x; x <= b.lowerRight.x; ++x) {
+			for (int y = b.upper_left.y; y <= b.lower_right.y; ++y) {
+				for (int x = b.upper_left.x; x <= b.lower_right.x; ++x) {
 					Vector2f & pixel(minmaxData[x + y*imgSize.x]);
-					if (pixel.x > b.zRange.x) pixel.x = b.zRange.x;
-					if (pixel.y < b.zRange.y) pixel.y = b.zRange.y;
+					if (pixel.x > b.z_range.x) pixel.x = b.z_range.x;
+					if (pixel.y < b.z_range.y) pixel.y = b.z_range.y;
 				}
 			}
 		}

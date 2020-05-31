@@ -576,11 +576,11 @@ set(
         Engines/Rendering/Interface/SurfelVisualizationEngine.h
         Engines/Rendering/Interface/RenderingEngineInterface.h
 
+        Engines/Rendering/Shared/RenderingBlock.h
         Engines/Rendering/Shared/RenderingEngine_Functors.h
         Engines/Rendering/Shared/SurfelVisualizationEngine_Settings.h
         Engines/Rendering/Shared/SurfelVisualizationEngine_Shared.h
-        Engines/Rendering/Shared/VisualizationEngine_Shared.h
-
+        Engines/Rendering/Shared/RenderingEngine_Shared.h
 )
 
 ##
@@ -592,6 +592,7 @@ set(
         Engines/Rendering/RenderingEngine.cu
         Engines/Rendering/RenderingEngine_CPU.tpp
         Engines/Rendering/RenderingEngine_CUDA.tcu
+        Engines/Rendering/RenderingEngine_Specialized.tpp
 
         Engines/Rendering/CPU/MultiVisualizationEngine_CPU.tpp
         Engines/Rendering/CPU/MultiVisualizationEngine_CPU_PlainVoxelArray.cpp

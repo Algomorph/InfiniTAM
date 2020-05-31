@@ -5,9 +5,10 @@
 #include "../../../Objects/Tracking/CameraTrackingState.h"
 #include "../../../Objects/Views/View.h"
 
-#include "../Shared/VisualizationEngine_Shared.h"
+#include "../Shared/RenderingEngine_Shared.h"
 #include "../../Reconstruction/Shared/SceneReconstructionEngine_Shared.h"
 #include "../../../Utils/CUDAUtils.h"
+#include "../../../../ORUtils/PlatformIndependedParallelSum.h"
 
 namespace ITMLib {
 // declaration of device functions
@@ -22,9 +23,9 @@ countVisibleBlocks_device(const int* visibleEntryIDs, int visibleBlockCount, con
                           uint* noBlocks, int minBlockId, int maxBlockId);
 
 __global__ void
-projectAndSplitBlocks_device(const HashEntry* hashEntries, const int* visibleEntryIDs, int visibleBlockCount,
-                             const Matrix4f pose_M, const Vector4f intrinsics, const Vector2i imgSize, float voxelSize,
-                             RenderingBlock* renderingBlocks, uint* noTotalBlocks);
+projectAndSplitBlocks_device(const HashEntry* hash_table, const int* hash_codes, int block_count,
+                             const Matrix4f depth_camera_pose, const Vector4f depth_camera_projection_parameters, const Vector2i depth_image_size, float voxel_size,
+                             RenderingBlock* rendering_blocks, uint* total_rendering_block_count);
 
 __global__ void checkProjectAndSplitBlocks_device(const HashEntry* hashEntries, int noHashEntries,
                                                   const Matrix4f pose_M, const Vector4f intrinsics,
@@ -206,8 +207,7 @@ renderPointCloud_device(/*Vector4u *outRendering, */Vector4f* locations, Vector4
 	__syncthreads();
 
 	if (shouldPrefix) {
-		int offset = computePrefixSum_device<uint>(foundPoint, noTotalPoints, blockDim.x * blockDim.y,
-		                                           threadIdx.x + threadIdx.y * blockDim.x);
+		int offset = ORUtils::ParallelSum<MEMORYDEVICE_CUDA>::Add2D<uint>(foundPoint, noTotalPoints);
 
 		if (offset != -1) {
 			Vector4f tmp;

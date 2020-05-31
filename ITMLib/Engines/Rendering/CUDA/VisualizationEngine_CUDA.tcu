@@ -130,10 +130,10 @@ void VisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::CreateExpectedDepths(cons
 		int visible_block_count = volume->index.GetUtilizedBlockCount();
 		if (visible_block_count == 0) return;
 
-		dim3 blockSize(256);
-		dim3 gridSize((int)ceil((float)visible_block_count / (float)blockSize.x));
+		dim3 cuda_block_size(256);
+		dim3 cuda_grid_size(ceil_of_integer_quotient(visible_block_count, cuda_block_size.x));
 		ORcudaSafeCall(cudaMemset(block_count_device, 0, sizeof(uint)));
-		projectAndSplitBlocks_device <<<gridSize, blockSize >>>(hash_entries, visible_block_hash_codes, visible_block_count, pose->GetM(),
+		projectAndSplitBlocks_device <<<cuda_grid_size, cuda_block_size >>>(hash_entries, visible_block_hash_codes, visible_block_count, pose->GetM(),
 			intrinsics->projectionParamsSimple.all, imgSize, voxelSize, rendering_block_list_device, block_count_device);
 		ORcudaKernelCheck;
 	}
@@ -371,7 +371,7 @@ static void ForwardRender_common(const VoxelVolume<TVoxel, TIndex> *volume, cons
 		blockSize = dim3(256);
 		gridSize = dim3((int)ceil((float)renderState->noFwdProjMissingPoints / blockSize.x));
 
-		genericRaycastMissingPoints_device<TVoxel, TIndex, false> <<<gridSize, blockSize >> >(
+		genericRaycastMissingPoints_device<TVoxel, TIndex, false> <<<gridSize, blockSize >>>(
 				forwardProjection, NULL, voxelData, voxelIndex, imgSize, invM,
 				InvertProjectionParams(projParams), oneOverVoxelSize, fwdProjMissingPoints,
 				renderState->noFwdProjMissingPoints, minmaximg, volume->GetParameters().narrow_band_half_width);

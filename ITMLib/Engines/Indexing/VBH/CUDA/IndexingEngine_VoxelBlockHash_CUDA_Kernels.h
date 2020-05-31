@@ -15,6 +15,7 @@
 //  ================================================================
 #pragma once
 
+#include "../../../../../ORUtils/PlatformIndependedParallelSum.h"
 #include "../../../../Utils/CUDAUtils.h"
 #include "../../../../Objects/Volume/GlobalCache.h"
 #include "../../../EditAndCopy/Shared/EditAndCopyEngine_Shared.h"
@@ -78,8 +79,7 @@ buildVisibilityList_device(ITMLib::HashEntry* hashTable, ITMLib::HashSwapState* 
 	__syncthreads();
 
 	if (shouldPrefix) {
-		int offset = computePrefixSum_device<int>(hash_block_visibility_type > 0, visible_block_count,
-		                                          blockDim.x * blockDim.y, threadIdx.x);
+		int offset = ORUtils::ParallelSum<MEMORYDEVICE_CUDA>::Add1D<int>(hash_block_visibility_type > 0, visible_block_count);
 		if (offset != -1) visibleEntryIDs[offset] = hash_code;
 	}
 

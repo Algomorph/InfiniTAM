@@ -3,7 +3,7 @@
 #include <metal_stdlib>
 using namespace metal;
 
-#include "../Shared/VisualizationEngine_Shared.h"
+#include "../Shared/RenderingEngine_Shared.h"
 #include "VisualizationEngine_Metal.h"
 #include "../../../GlobalTemplateDefines.h"
 

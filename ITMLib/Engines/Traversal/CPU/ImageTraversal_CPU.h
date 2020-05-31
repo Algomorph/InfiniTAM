@@ -20,23 +20,56 @@
 
 namespace ITMLib {
 
-template<typename TImageElement>
-class ImageTraversalEngine<TImageElement, MEMORYDEVICE_CPU> {
-public:
-	template<typename TFunctor>
+template<>
+class ImageTraversalEngine<MEMORYDEVICE_CPU> {
+
+	template<typename TImageElement, typename TImage, typename TApplyFunction>
 	inline static void
-	TraverseWithPosition(ORUtils::Image<TImageElement>* image, TFunctor& functor){
+	Traverse_Generic(TImage* image, TApplyFunction&& apply_function) {
 		const Vector2i resolution = image->dimensions;
 		const int element_count = resolution.x * resolution.y;
-		const TImageElement* image_data = image->GetData(MEMORYDEVICE_CPU);
+		TImageElement* image_data = image->GetData(MEMORYDEVICE_CPU);
 #ifdef WITH_OPENMP
-	#pragma omp parallel for default(none) shared(functor, image_data)
+#pragma omp parallel for default(none) shared(apply_function, image_data)
 #endif
-		for (int i_element = 0; i_element < element_count; i_element++){
-			int y = i_element / resolution.x;
-			int x = i_element - y * resolution.x;
-			functor(image_data[i_element], x, y);
+		for (int i_element = 0; i_element < element_count; i_element++) {
+			apply_function(image_data, i_element, resolution);
 		}
+	}
+
+	template<typename TImageElement, typename TImage, typename TFunctor>
+	inline static void
+	TraverseWithPosition_Generic(TImage* image, TFunctor& functor) {
+		Traverse_Generic<TImageElement>(
+				image,
+				[&functor](TImageElement* image_data, int i_element, const Vector2i& resolution) {
+					int y = i_element / resolution.x;
+					int x = i_element - y * resolution.x;
+					functor(image_data[i_element], x, y);
+				});
+	}
+
+	template<typename TImageElement, typename TImage, typename TFunctor>
+	inline static void
+	TraverseWithoutPosition_Generic(TImage* image, TFunctor& functor) {
+		Traverse_Generic<TImageElement>(
+				image,
+				[&functor](TImageElement* image_data, int i_element, const Vector2i& resolution) {
+					functor(image_data[i_element]);
+				});
+	}
+
+public:
+	template<typename TImageElement, typename TFunctor>
+	inline static void
+	TraverseWithPosition(ORUtils::Image<TImageElement>* image, TFunctor& functor) {
+		TraverseWithPosition_Generic<TImageElement>(image, functor);
+	}
+
+	template<typename TImageElement, typename TFunctor>
+	inline static void
+	TraverseWithPosition(const ORUtils::Image<TImageElement>* image, TFunctor& functor) {
+		TraverseWithPosition_Generic<const TImageElement>(image, functor);
 	}
 };
 

@@ -20,6 +20,7 @@
 #include "../../../../ORUtils/CrossPlatformMacros.h"
 #include "../../../Objects/Volume/VoxelBlockHash.h"
 #include "../../../Utils/Geometry/CheckBlockVisibility.h"
+#include "../../../../ORUtils/PlatformIndependedParallelSum.h"
 
 namespace ITMLib {
 
@@ -71,29 +72,82 @@ public: // member functions
 };
 
 template<MemoryDeviceType TMemoryDeviceType>
-struct CountVisibleBlocksInListIdRangeFunctor{
+struct CountVisibleBlocksInListIdRangeFunctor {
 private: // member variables
 	const Vector2i range;
 	DECLARE_ATOMIC(int, visible_block_in_id_range_count);
 public: // member functions
-	explicit CountVisibleBlocksInListIdRangeFunctor(Vector2i list_id_range) : range(list_id_range){
+	explicit CountVisibleBlocksInListIdRangeFunctor(Vector2i list_id_range) : range(list_id_range) {
 		assert(list_id_range.from <= list_id_range.to);
 		INITIALIZE_ATOMIC(int, visible_block_in_id_range_count, 0);
 	}
+
 	CountVisibleBlocksInListIdRangeFunctor(int min_block_id, int max_block_id) :
-		CountVisibleBlocksInListIdRangeFunctor(Vector2i(min_block_id, max_block_id)) {};
+			CountVisibleBlocksInListIdRangeFunctor(Vector2i(min_block_id, max_block_id)) {};
+
 	~CountVisibleBlocksInListIdRangeFunctor() {
 		CLEAN_UP_ATOMIC(visible_block_in_id_range_count);
 	}
+
 	_DEVICE_WHEN_AVAILABLE_
 	void operator()(const HashEntry& hash_entry, int hash_code) {
-		if(hash_entry.ptr >= range.from && hash_entry.ptr <= range.to){
+		if (hash_entry.ptr >= range.from && hash_entry.ptr <= range.to) {
 			ATOMIC_ADD(visible_block_in_id_range_count, 1);
 		}
 	}
+
 	int GetCurrentVisibleBlockInIDRangeCount() {
 		return GET_ATOMIC_VALUE_CPU(visible_block_in_id_range_count);
 	}
+};
+
+template<MemoryDeviceType TMemoryDeviceType>
+struct FillExpectedDepthsWithClippingDistancesFunctor {
+private: // member variables
+	const Vector2f clipping_bounds;
+public: // member functions
+	explicit FillExpectedDepthsWithClippingDistancesFunctor(const Vector2f& clipping_bounds) : clipping_bounds(clipping_bounds) {}
+
+	FillExpectedDepthsWithClippingDistancesFunctor(float near_clipping_distance, float far_clipping_distance)
+			: FillExpectedDepthsWithClippingDistancesFunctor(Vector2f(near_clipping_distance, far_clipping_distance)) {}
+
+	_DEVICE_WHEN_AVAILABLE_
+	void operator()(Vector2f& pixel_ray_bound){
+		pixel_ray_bound.from = clipping_bounds.from;
+		pixel_ray_bound.to = clipping_bounds.to;
+	}
+};
+
+template<MemoryDeviceType TMemoryDeviceType>
+struct ProjectAndSplitBlocksFunctor {
+private: // member variables
+public: // member functions
+	ProjectAndSplitBlocksFunctor(){
+
+	}
+	_DEVICE_WHEN_AVAILABLE_
+	void operator()(const HashEntry& hash_entry, const int hash_code){
+//		Vector2i upperLeft, lowerRight;
+//		Vector2f zRange;
+//		bool validProjection = false;
+//		if (in_offset < block_count)
+//			if (blockData.ptr >= 0)
+//				validProjection = ProjectSingleBlock(blockData.pos, depth_camera_pose, depth_camera_projection_parameters, depth_image_size, voxel_size,
+//				                                     upperLeft, lowerRight, zRange);
+//
+//		Vector2i requiredRenderingBlocks(ceilf((float) (lowerRight.x - upperLeft.x + 1) / rendering_block_size_x),
+//		                                 ceilf((float) (lowerRight.y - upperLeft.y + 1) / rendering_block_size_y));
+//
+//		size_t requiredNumBlocks = requiredRenderingBlocks.x * requiredRenderingBlocks.y;
+//		if (!validProjection) requiredNumBlocks = 0;
+//
+//		int out_offset = ORUtils::ParallelSum<MEMORYDEVICE_CUDA>::Add1D<int>(requiredNumBlocks, rendering_block_count);
+//		if (!validProjection) return;
+//		if ((out_offset == -1) || (out_offset + requiredNumBlocks > MAX_RENDERING_BLOCKS)) return;
+//
+//		CreateRenderingBlocks(rendering_blocks, out_offset, upperLeft, lowerRight, zRange);
+	}
+
 };
 
 

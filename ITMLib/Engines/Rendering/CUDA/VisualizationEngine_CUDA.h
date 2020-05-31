@@ -4,10 +4,9 @@
 
 #include "../Interface/RenderingEngineInterface.h"
 
-struct RenderingBlock;
-
 namespace ITMLib
 {
+	struct RenderingBlock;
 	template<class TVoxel, class TIndex>
 	class VisualizationEngine_CUDA : public RenderingEngineBase < TVoxel, TIndex >
 	{

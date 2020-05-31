@@ -7,6 +7,7 @@
 #include "../../../Utils/Geometry/CheckBlockVisibility.h"
 #include "../../Common/AllocationTempData.h"
 #include "../../../Utils/Configuration/Configuration.h"
+#include "../../../../ORUtils/PlatformIndependedParallelSum.h"
 
 
 using namespace ITMLib;
@@ -516,8 +517,7 @@ __global__ void buildVisibleList_device(HashEntry* hashTable, HashSwapState* swa
 	__syncthreads();
 
 	if (shouldPrefix) {
-		int offset = computePrefixSum_device<int>(hashVisibleType > 0, &allocData->utilized_block_count,
-		                                          blockDim.x * blockDim.y, threadIdx.x);
+		int offset = ORUtils::ParallelSum<MEMORYDEVICE_CUDA>::Add1D<int>(hashVisibleType > 0, &allocData->utilized_block_count);
 		if (offset != -1) visibleEntryIDs[offset] = hashCode;
 	}
 
@@ -528,7 +528,7 @@ __global__ void buildVisibleList_device(HashEntry* hashTable, HashSwapState* swa
 
 	if (shouldPrefix)
 	{
-		int offset = computePrefixSum_device<int>(hashVisibleType == 1, noActiveEntries, blockDim.x * blockDim.y, threadIdx.x);
+		int offset = ORUtils::ParallelSum<MEMORYDEVICE_CUDA>::Add1D<int>(hashVisibleType == 1, noActiveEntries);
 		if (offset != -1) activeEntryIDs[offset] = hash_code;
 	}
 #endif

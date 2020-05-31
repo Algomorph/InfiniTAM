@@ -27,4 +27,11 @@ __global__ void imageTraversalWithPosition_device (const TImageElement* image_da
 	(*functor_device)(image_data[x + y * resolution.x], x, y);
 }
 
+template <typename TImageElement, typename TFunctor >
+__global__ void imageTraversalWithoutPosition_device (const TImageElement* image_data, const int pixel_count, TFunctor* functor_device){
+	int i_pixel = threadIdx.x + blockIdx.x * blockDim.x;
+	if (i_pixel >= pixel_count) return;
+	(*functor_device)(image_data[i_pixel]);
+}
+
 } // end anonymous namespace (CUDA global kernels)

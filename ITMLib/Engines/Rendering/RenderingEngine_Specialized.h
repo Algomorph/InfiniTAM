@@ -15,8 +15,9 @@
 //  ================================================================
 #pragma once
 
-namespace ITMLib {
+#include "Shared/RenderingBlock.h"
 
+namespace ITMLib {
 namespace internal {
 
 template<class TVoxel, MemoryDeviceType TMemoryDeviceType>
@@ -43,16 +44,25 @@ struct RenderingEngine_Specialized<TVoxel, PlainVoxelArray, TMemoryDeviceType> {
 	                              RenderState* render_state) const {}
 
 	inline int CountVisibleBlocks(const VoxelVolume <TVoxel, PlainVoxelArray>* volume, int min_block_id, int max_block_id) const { return 1; }
+
+	inline void CreateExpectedDepths(const VoxelVolume <TVoxel, PlainVoxelArray>* volume, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics,
+	                                 RenderState* render_state) const;
 };
 
 template<class TVoxel, MemoryDeviceType TMemoryDeviceType>
 struct RenderingEngine_Specialized<TVoxel, VoxelBlockHash, TMemoryDeviceType> {
+private: // member variables
 	RenderingEngine_VoxelBlockHash_Specialized<TVoxel, TMemoryDeviceType> specialized_engine;
-
+	ORUtils::MemoryBlock<RenderingBlock> rendering_blocks;
+public: // member functions
+	RenderingEngine_Specialized() : rendering_blocks(ITMLib::MAX_RENDERING_BLOCKS, TMemoryDeviceType){};
 	inline void FindVisibleBlocks(VoxelVolume <TVoxel, VoxelBlockHash>* volume, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics,
 	                              RenderState* render_state) const;
 
 	inline int CountVisibleBlocks(const VoxelVolume <TVoxel, VoxelBlockHash>* volume, int min_block_id, int max_block_id) const;
+
+	inline void CreateExpectedDepths(const VoxelVolume <TVoxel, VoxelBlockHash>* volume, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics,
+	                                 RenderState* render_state) const;
 };
 
 } // namespace internal

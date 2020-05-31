@@ -1,5 +1,5 @@
 //  ================================================================
-//  Created by Gregory Kramida on 2/4/20.
+//  Created by Gregory Kramida (https://github.com/Algomorph) on 5/29/20.
 //  Copyright (c) 2020 Gregory Kramida
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -15,9 +15,16 @@
 //  ================================================================
 #pragma once
 
-#include "../../../../ORUtils/MemoryDeviceType.h"
+#include "../../../Utils/Math.h"
 
-namespace ITMLib {
-template<MemoryDeviceType TDeviceType>
-class ImageTraversalEngine;
+namespace ITMLib{
+
+static const CONSTPTR(int) MAX_RENDERING_BLOCKS = 65536*4;
+
+struct RenderingBlock {
+	Vector2s upper_left;
+	Vector2s lower_right;
+	Vector2f z_range;
+};
+
 } // namespace ITMLib

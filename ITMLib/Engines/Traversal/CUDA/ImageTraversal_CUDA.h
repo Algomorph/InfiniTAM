@@ -21,31 +21,81 @@
 
 namespace ITMLib {
 
-template<typename TImageElement>
-class ImageTraversalEngine<TImageElement, MEMORYDEVICE_CUDA> {
-public:
-	template<typename TFunctor>
+template<>
+class ImageTraversalEngine<MEMORYDEVICE_CUDA> {
+private: // member functions
+	template<typename TImageElement, typename TImage, typename TFunctor, typename TCudaCall>
 	inline static void
-	TraverseWithPosition(ORUtils::Image<TImageElement>* image, TFunctor& functor) {
+	Traverse_Generic(TImage* image, TFunctor& functor, TCudaCall&& t_cuda_call) {
 		const Vector2i resolution = image->dimensions;
-		const TImageElement* image_data = image->GetData(MEMORYDEVICE_CUDA);
+		TImageElement* image_data = image->GetData(MEMORYDEVICE_CUDA);
 
 		TFunctor* functor_device = nullptr;
-
-		dim3 cuda_block_size(16, 16);
-		dim3 cuda_grid_size((int) ceil((float) resolution.x / (float) cuda_block_size.x),
-		                    (int) ceil((float) resolution.y / (float) cuda_block_size.y));
 
 		ORcudaSafeCall(cudaMalloc((void**) &functor_device, sizeof(TFunctor)));
 		ORcudaSafeCall(cudaMemcpy(functor_device, &functor, sizeof(TFunctor), cudaMemcpyHostToDevice));
 
-		imageTraversalWithPosition_device<TImageElement, TFunctor>
-				<<< cuda_grid_size, cuda_block_size >>>
-		                             (image_data, resolution, functor_device);
+		t_cuda_call(image_data, resolution, functor_device);
 		ORcudaKernelCheck;
 
 		ORcudaSafeCall(cudaMemcpy(&functor, functor_device, sizeof(TFunctor), cudaMemcpyDeviceToHost));
 		ORcudaSafeCall(cudaFree(functor_device));
+	}
+
+	template<typename TImageElement, typename TImage, typename TFunctor>
+	inline static void
+	TraverseWithPosition_Generic(TImage* image, TFunctor& functor) {
+		Traverse_Generic<TImageElement>(
+				image, functor,
+				[](TImageElement* image_data, const Vector2i resolution, TFunctor* functor_device) {
+					dim3 cuda_block_size(16, 16);
+					dim3 cuda_grid_size(ceil_of_integer_quotient(resolution.x, cuda_block_size.x),
+					                    ceil_of_integer_quotient(resolution.y, cuda_block_size.y));
+					imageTraversalWithPosition_device<TImageElement, TFunctor>
+					<<< cuda_grid_size, cuda_block_size >>>
+							(image_data, resolution, functor_device);
+				}
+		);
+	}
+
+	template<typename TImageElement, typename TImage, typename TFunctor>
+	inline static void
+	TraverseWithoutPosition_Generic(TImage* image, TFunctor& functor) {
+		Traverse_Generic<TImageElement>(
+				image, functor,
+				[](TImageElement* image_data, const Vector2i resolution, TFunctor* functor_device) {
+					const int pixel_count = resolution.width * resolution.height;
+					dim3 cuda_block_size(256);
+					dim3 cuda_grid_size(ceil_of_integer_quotient(pixel_count, cuda_block_size.x));
+					imageTraversalWithoutPosition_device<TImageElement, TFunctor>
+					<<< cuda_grid_size, cuda_block_size >>>
+							(image_data, pixel_count, functor_device);
+				}
+		);
+	}
+
+public:
+	template<typename TImageElement, typename TFunctor>
+	inline static void
+	TraverseWithPosition(ORUtils::Image<TImageElement>* image, TFunctor& functor) {
+		TraverseWithPosition_Generic<TImageElement>(image, functor);
+	}
+
+	template<typename TImageElement, typename TFunctor>
+	inline static void
+	TraverseWithPosition(const ORUtils::Image<TImageElement>* image, TFunctor& functor) {
+		TraverseWithPosition_Generic<const TImageElement>(image, functor);
+	}
+	template<typename TImageElement, typename TFunctor>
+	inline static void
+	Traverse(ORUtils::Image<TImageElement>* image, TFunctor& functor) {
+		TraverseWithoutPosition_Generic<TImageElement>(image, functor);
+	}
+
+	template<typename TImageElement, typename TFunctor>
+	inline static void
+	Traverse(const ORUtils::Image<TImageElement>* image, TFunctor& functor) {
+		TraverseWithoutPosition_Generic<const TImageElement>(image, functor);
 	}
 };
 
