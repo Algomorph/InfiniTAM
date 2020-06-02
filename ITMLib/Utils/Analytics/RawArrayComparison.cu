@@ -1,5 +1,5 @@
 //  ================================================================
-//  Created by Gregory Kramida (https://github.com/Algomorph) on 5/31/20.
+//  Created by Gregory Kramida (https://github.com/Algomorph) on 5/22/20.
 //  Copyright (c) 2020 Gregory Kramida
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -13,10 +13,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#pragma once
-#include "../../../../ORUtils/MemoryDeviceType.h"
+#include "RawArrayComparison.cuh"
 
-namespace ITMLib {
-template<MemoryDeviceType TDeviceType>
-class Regular2DCollectionArrayTraversal;
-} // namespace ITMLib
+#ifndef COMPILE_WITHOUT_CUDA
+#include "RawArrayComparisonTemplateInstantiations.h"
+#endif // #ifndef COMPILE_WITHOUT_CUDA

@@ -36,10 +36,6 @@ struct RenderingEngine_Specialized<TVoxel, PlainVoxelArray, TMemoryDeviceType> {
 
 template<class TVoxel, MemoryDeviceType TMemoryDeviceType>
 struct RenderingEngine_Specialized<TVoxel, VoxelBlockHash, TMemoryDeviceType> {
-private: // member variables
-	ORUtils::MemoryBlock<RenderingBlock> rendering_blocks;
-public: // member functions
-	RenderingEngine_Specialized() : rendering_blocks(ITMLib::MAX_RENDERING_BLOCKS, TMemoryDeviceType){};
 	inline void FindVisibleBlocks(VoxelVolume <TVoxel, VoxelBlockHash>* volume, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics,
 	                              RenderState* render_state) const;
 

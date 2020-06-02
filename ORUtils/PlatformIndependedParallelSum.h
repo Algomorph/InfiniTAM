@@ -20,7 +20,7 @@
 
 namespace ORUtils {
 
-constexpr int thread_group_size = 256;
+constexpr int parallel_prefix_sum_block_size = 256;
 
 template<MemoryDeviceType TMemoryDeviceType>
 struct ParallelSum;
@@ -56,9 +56,9 @@ struct ParallelSum<MEMORYDEVICE_CPU>{
 #if !defined(COMPILE_WITHOUT_CUDA) && defined(__CUDACC__)
 
 template <typename T>
-__device__ inline static int ComputePrefixSum_GS256(T element, T *sum, int thread_id)
+__device__ inline static int ComputePrefixSum_MBS256(T element, T *sum, int thread_id)
 {
-	__shared__ unsigned int prefix_buffer[thread_group_size];
+	__shared__ unsigned int prefix_buffer[parallel_prefix_sum_block_size];
 	__shared__ unsigned int prior_thread_group_sum; // "groupOffset" in legacy InfiniTAM/ORUtils code.
 
 	prefix_buffer[thread_id] = element;
@@ -74,7 +74,7 @@ __device__ inline static int ComputePrefixSum_GS256(T element, T *sum, int threa
 	//                               it. 1: prefix_buffer[7] += prefix_buffer[5]
 	//                               it. 2: prefix_buffer[7] += prefix_buffer[3] (final result: sum of prefix_buffer from 0 to 8)
 	//for localId == 0x00001001 (9), it. 0: prefix_buffer[9] += prefix_buffer[8] (final result: prefix_buffer[8] + prefix_buffer[9])
-	for (s1 = 1, s2 = 1; s1 < thread_group_size; s1 <<= 1)
+	for (s1 = 1, s2 = 1; s1 < parallel_prefix_sum_block_size; s1 <<= 1)
 	{
 		s2 |= s1;
 		if ((thread_id & s2) == s2) prefix_buffer[thread_id] += prefix_buffer[thread_id - s1];
@@ -95,13 +95,13 @@ __device__ inline static int ComputePrefixSum_GS256(T element, T *sum, int threa
 	{
 		//for localSize = 256, if localId = 255, then localId + 1 goes outside the block
 		// (and s2 of 0x1 would trigger that), hence, skip it
-		if (thread_id != thread_group_size - 1 && (thread_id & s2) == s2) prefix_buffer[thread_id + s1] += prefix_buffer[thread_id];
+		if (thread_id != parallel_prefix_sum_block_size - 1 && (thread_id & s2) == s2) prefix_buffer[thread_id + s1] += prefix_buffer[thread_id];
 		__syncthreads();
 	}
 	// at this point, prefix_buffer[localSize-1] has to contain the sum of the whole "group",
 	// i.e. sum of elements from x localSize (256?) threads
 	// then, groupOffset is the sum across the blocks of all elements before this "group", i.e. thread block
-	if (thread_id == 0 && prefix_buffer[thread_group_size - 1] > 0) prior_thread_group_sum = atomicAdd(sum, prefix_buffer[thread_group_size - 1]);
+	if (thread_id == 0 && prefix_buffer[parallel_prefix_sum_block_size - 1] > 0) prior_thread_group_sum = atomicAdd(sum, prefix_buffer[parallel_prefix_sum_block_size - 1]);
 	__syncthreads();
 
 	int current_sum;// = prior_thread_group_sum + prefix_buffer[localId] - 1;
@@ -126,25 +126,25 @@ struct ParallelSum<MEMORYDEVICE_CUDA>{
 	__device__
 	static inline TElement Add(TElement addend, ATOMIC_ARGUMENT(TElement) sum){
 		int thread_id = threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * (blockDim.x * blockDim.y);
-		return ComputePrefixSum_GS256(addend, sum, thread_id);
+		return ComputePrefixSum_MBS256(addend, sum, thread_id);
 	}
 	template<typename TElement>
 	__device__
 	static inline TElement Add1D(TElement addend, ATOMIC_ARGUMENT(TElement) sum){
 		int thread_id = threadIdx.x;
-		return ComputePrefixSum_GS256(addend, sum, thread_id);
+		return ComputePrefixSum_MBS256(addend, sum, thread_id);
 	}
 	template<typename TElement>
 	__device__
 	static inline TElement Add2D(TElement addend, ATOMIC_ARGUMENT(TElement) sum){
 		int thread_id = threadIdx.x + threadIdx.y * blockDim.x;
-		return ComputePrefixSum_GS256(addend, sum, thread_id);
+		return ComputePrefixSum_MBS256(addend, sum, thread_id);
 	}
 	template<typename TElement>
 	__device__
 	static inline TElement Add3D(TElement addend, ATOMIC_ARGUMENT(TElement) sum){
 		int thread_id = threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * (blockDim.x * blockDim.y);
-		return ComputePrefixSum_GS256(addend, sum, thread_id);
+		return ComputePrefixSum_MBS256(addend, sum, thread_id);
 	}
 };
 #endif // #ifndef COMPILE_WITHOUT_CUDA !defined(COMPILE_WITHOUT_CUDA) && defined(__CUDACC__)

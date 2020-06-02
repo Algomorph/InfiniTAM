@@ -32,19 +32,18 @@ public: // inner classes / structs
 		_CPU_AND_GPU_CODE_
 		friend bool AlmostEqual(const Triangle& triangle1, const Triangle& triangle2, const float tolerance);
 
-		inline static bool CoordinateLess(const Triangle& a, const Triangle& b) {
+		_CPU_AND_GPU_CODE_
+		friend bool operator<(const Triangle& a, const Triangle& b) {
 			if (a.p2 == b.p2) {
 				if (a.p1 == b.p1) {
-					return Vector3CoordinateLess(a.p0, b.p0);
+					return a.p0 < b.p0;
 				} else {
-					return Vector3CoordinateLess(a.p1, b.p1);
+					return a.p1 < b.p1;
 				}
 			} else {
-				return Vector3CoordinateLess(a.p2, b.p2);
+				return a.p2 < b.p2;
 			}
 		}
-
-
 	};
 public: // member variables
 

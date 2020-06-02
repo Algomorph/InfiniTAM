@@ -1,5 +1,5 @@
 //  ================================================================
-//  Created by Gregory Kramida (https://github.com/Algomorph) on 5/26/20.
+//  Created by Gregory Kramida (https://github.com/Algomorph) on 5/22/20.
 //  Copyright (c) 2020 Gregory Kramida
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -13,15 +13,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "../Traversal/CPU/HashTableTraversal_CPU.h"
-#include "../Traversal/CPU/ImageTraversal_CPU.h"
-#include "../Traversal/CPU/Regular2DSubGridArrayTraversal_CPU.h"
-#include "RenderingEngine.tpp"
-#include "../../GlobalTemplateDefines.h"
+#include "RawArrayComparison.h"
 
-namespace ITMLib {
-template
-class RenderingEngine<TSDFVoxel, PlainVoxelArray, MEMORYDEVICE_CPU>;
-template
-class RenderingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>;
-} // namespace ITMLib
+#ifdef COMPILE_WITHOUT_CUDA
+#include "RawArrayComparisonTemplateSpecializations.h"
+#endif //#ifdef COMPILE_WITHOUT_CUDA

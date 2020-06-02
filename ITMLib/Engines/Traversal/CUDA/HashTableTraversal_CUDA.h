@@ -31,7 +31,7 @@ private: // member functions
 		const int hash_entry_count = index.hash_entry_count;
 		TFunctor* functor_device = nullptr;
 
-		dim3 cuda_block_size(256, 1);
+		dim3 cuda_block_size(256);
 		dim3 cuda_grid_size((int) ceil((float) hash_entry_count / (float) cuda_block_size.x));
 
 		ORcudaSafeCall(cudaMalloc((void**) &functor_device, sizeof(TFunctor)));
@@ -55,7 +55,7 @@ private: // member functions
 		const int* subarray_entry_codes = std::forward<TGetSubarrayFunction>(get_subarray)();
 		TFunctor* functor_device = nullptr;
 
-		dim3 cuda_block_size(256, 1);
+		dim3 cuda_block_size(256);
 		dim3 cuda_grid_size((int) ceil((float) subarray_entry_count / (float) cuda_block_size.x));
 
 		ORcudaSafeCall(cudaMalloc((void**) &functor_device, sizeof(TFunctor)));

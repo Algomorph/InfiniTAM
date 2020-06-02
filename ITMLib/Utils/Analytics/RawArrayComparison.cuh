@@ -31,7 +31,7 @@ struct RawArrayComparisonData {
 };
 
 template<typename TElement, typename TComparisonFunction>
-__global__ void TwoRawMemoryArrayItemGenericComparison(RawArrayComparisonData<TElement>* output_data,
+__global__ void TwoRawArrayItemGenericComparison(RawArrayComparisonData<TElement>* output_data,
                                                        const TElement* l, const TElement* r,
                                                        const int element_count,
                                                        TComparisonFunction&& compare_elements) {
@@ -50,8 +50,8 @@ __global__ void TwoRawMemoryArrayItemGenericComparison(RawArrayComparisonData<TE
 namespace internal {
 
 template<typename TElement, typename TComparisonFunction, typename TReportMismatchFunction>
-bool CompareRawMemoryArrays_Generic_CUDA(const TElement* left, const TElement* right, const int element_count,
-                                         TComparisonFunction&& compare_elements, TReportMismatchFunction&& report_mismatch) {
+bool CompareRawArrays_Generic_CUDA(const TElement* left, const TElement* right, const int element_count,
+                                   TComparisonFunction&& compare_elements, TReportMismatchFunction&& report_mismatch) {
 	assert(element_count > 0);
 	dim3 cuda_block_dimensions(256);
 	dim3 cuda_grid_dimensions(ceil_of_integer_quotient((unsigned) element_count, cuda_block_dimensions.x));
@@ -59,7 +59,7 @@ bool CompareRawMemoryArrays_Generic_CUDA(const TElement* left, const TElement* r
 	raw_array_comparison_data.GetData(MEMORYDEVICE_CPU)->mismatch_found = false;
 	raw_array_comparison_data.UpdateDeviceFromHost();
 
-	TwoRawMemoryArrayItemGenericComparison <<< cuda_grid_dimensions, cuda_block_dimensions >>>
+	TwoRawArrayItemGenericComparison <<< cuda_grid_dimensions, cuda_block_dimensions >>>
 			(raw_array_comparison_data.GetData(MEMORYDEVICE_CUDA), left, right, element_count, compare_elements);
 
 	ORcudaKernelCheck;

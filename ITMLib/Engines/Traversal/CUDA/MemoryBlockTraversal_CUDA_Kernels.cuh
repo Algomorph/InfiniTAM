@@ -16,22 +16,8 @@
 //local
 #include "../../../Utils/Math.h"
 #include "../../../Objects/Volume/VoxelBlockHash.h"
+#include "../Shared/JobCountPolicy.h"
 
 namespace {
-// CUDA global kernels
-
-template<typename TData, typename TFunctor>
-__global__ void memoryBlockTraversalWithoutItemIndex_device(TData* data, const unsigned int element_count, TFunctor* functor_device){
-	unsigned int i_item = threadIdx.x + blockIdx.x * blockDim.x;
-	if (i_item >= element_count) return;
-	(*functor_device)(data[i_item]);
-}
-
-template<typename TData, typename TFunctor>
-__global__ void memoryBlockTraversalWithItemIndex_device(TData* data, const unsigned int element_count, TFunctor* functor_device){
-	unsigned int i_item = threadIdx.x + blockIdx.x * blockDim.x;
-	if (i_item >= element_count) return;
-	(*functor_device)(data[i_item], i_item);
-}
 
 } // end anonymous namespace: CUDA global kernels

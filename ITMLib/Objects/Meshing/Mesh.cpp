@@ -189,10 +189,8 @@ bool AlmostEqual(const Mesh& mesh1, const Mesh& mesh2, const float tolerance, bo
 
 	if (presort_triangles) {
 		//TODO: uncomment when officially-supported compilers supply C++17 parallel execution policies for sorting
-		std::sort(/*std::execution::parallel_unsequenced_policy,*/ triangles1.begin(), triangles1.end(),
-		                                                           Mesh::Triangle::CoordinateLess);
-		std::sort(/*std::execution::parallel_unsequenced_policy,*/ triangles2.begin(), triangles2.end(),
-		                                                           Mesh::Triangle::CoordinateLess);
+		std::sort(/*std::execution::parallel_unsequenced_policy,*/ triangles1.begin(), triangles1.end());
+		std::sort(/*std::execution::parallel_unsequenced_policy,*/ triangles2.begin(), triangles2.end());
 	}
 
 	volatile bool mismatch_found = false;

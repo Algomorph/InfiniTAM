@@ -38,17 +38,17 @@ namespace internal {
 
 #ifndef COMPILE_WITHOUT_CUDA
 template<typename TElement, typename TComparisonFunction, typename TReportMismatchFunction>
-bool CompareRawMemoryArrays_Generic_CUDA(const TElement* left, const TElement* right, const int element_count,
-                                         TComparisonFunction&& compare_elements, TReportMismatchFunction&& report_mismatch);
+bool CompareRawArrays_Generic_CUDA(const TElement* left, const TElement* right, const int element_count,
+                                   TComparisonFunction&& compare_elements, TReportMismatchFunction&& report_mismatch);
 #endif
 
 template<typename TElement, typename TCompareElementsFunction, /*typename TCompareArraysCUDAFunction,*/ typename TReportMismatchFunction>
-bool CompareRawMemoryArrays_Generic(const TElement* left, MemoryDeviceType memory_device_type_left,
-                                    const TElement* right, MemoryDeviceType memory_device_type_right,
-                                    const int element_count,
-                                    TCompareElementsFunction&& compare_elements,
-                                    TReportMismatchFunction&& report_mismatch,
-                                    bool presort = false) {
+bool CompareRawArrays_Generic(const TElement* left, MemoryDeviceType memory_device_type_left,
+                              const TElement* right, MemoryDeviceType memory_device_type_right,
+                              const int element_count,
+                              TCompareElementsFunction&& compare_elements,
+                              TReportMismatchFunction&& report_mismatch,
+                              bool presort = false) {
 	assert(element_count >= 0);
 	if (element_count == 0) return true;
 
@@ -101,7 +101,7 @@ bool CompareRawMemoryArrays_Generic(const TElement* left, MemoryDeviceType memor
 			TElement* left_CPU = new TElement[element_count];
 			ORcudaSafeCall(cudaMemcpy(left_CPU, left, element_count * sizeof(TElement), cudaMemcpyDeviceToHost));
 			//TODO: presort here and make recursive call w/o sorting to avoid unnecessary copying
-			bool result = CompareRawMemoryArrays_Generic
+			bool result = CompareRawArrays_Generic
 					(left_CPU, MEMORYDEVICE_CPU, right, MEMORYDEVICE_CPU,
 					 element_count, compare_elements, report_mismatch, presort);
 			delete[] left_CPU;
@@ -117,7 +117,7 @@ bool CompareRawMemoryArrays_Generic(const TElement* left, MemoryDeviceType memor
 			auto* right_CPU = new TElement[element_count];
 			ORcudaSafeCall(cudaMemcpy(right_CPU, right, element_count * sizeof(TElement), cudaMemcpyDeviceToHost));
 			//TODO: presort here and make recursive call w/o sorting to avoid unnecessary copying
-			bool result = CompareRawMemoryArrays_Generic
+			bool result = CompareRawArrays_Generic
 					(left, MEMORYDEVICE_CPU, right_CPU, MEMORYDEVICE_CPU,
 					 element_count, compare_elements, report_mismatch, presort);
 			delete[] right_CPU;
@@ -146,7 +146,7 @@ bool CompareRawMemoryArrays_Generic(const TElement* left, MemoryDeviceType memor
 				left_prepared = left;
 				right_prepared = right;
 			}
-			internal::CompareRawMemoryArrays_Generic_CUDA(left_prepared, right_prepared, element_count, compare_elements, report_mismatch);
+			internal::CompareRawArrays_Generic_CUDA(left_prepared, right_prepared, element_count, compare_elements, report_mismatch);
 #endif
 			if (presort) {
 				ORcudaSafeCall(cudaFree(left_sorted));
@@ -163,12 +163,12 @@ bool CompareRawMemoryArrays_Generic(const TElement* left, MemoryDeviceType memor
 } // namespace internal
 
 template<typename TElement>
-bool RawMemoryArraysEqual(const TElement* a, MemoryDeviceType memory_device_type_l,
-                          const TElement* b, MemoryDeviceType memory_device_type_r,
-                          const int element_count, bool presort = false) {
-	return internal::CompareRawMemoryArrays_Generic(
+bool RawArraysEqual(const TElement* a, MemoryDeviceType memory_device_type_l,
+                    const TElement* b, MemoryDeviceType memory_device_type_r,
+                    const int element_count, bool presort = false) {
+	return internal::CompareRawArrays_Generic(
 			a, memory_device_type_l, b, memory_device_type_r, element_count,
-			CPU_AND_GPU_LAMBDA()(const TElement& element_a, const TElement& element_b) {
+			CPU_AND_GPU_CAPTURE_LAMBDA()(const TElement& element_a, const TElement& element_b) {
 				return element_a == element_b;
 			},
 			[](const TElement& element_a, const TElement& element_b, const int mismatch_index) {},
@@ -177,12 +177,12 @@ bool RawMemoryArraysEqual(const TElement* a, MemoryDeviceType memory_device_type
 }
 
 template<typename TElement>
-bool RawMemoryArraysEqual_Verbose(const TElement* a, MemoryDeviceType memory_device_type_l,
+bool RawArraysEqual_Verbose(const TElement* a, MemoryDeviceType memory_device_type_l,
                                   const TElement* b, MemoryDeviceType memory_device_type_r,
                                   const int element_count, bool presort = false) {
-	return internal::CompareRawMemoryArrays_Generic(
+	return internal::CompareRawArrays_Generic(
 			a, memory_device_type_l, b, memory_device_type_r, element_count,
-			CPU_AND_GPU_LAMBDA()(const TElement& element_a, const TElement& element_b) {
+			CPU_AND_GPU_CAPTURE_LAMBDA()(const TElement& element_a, const TElement& element_b) {
 				return element_a == element_b;
 			},
 			[](const TElement& element_a, const TElement& element_b, const int mismatch_index) {
@@ -194,12 +194,12 @@ bool RawMemoryArraysEqual_Verbose(const TElement* a, MemoryDeviceType memory_dev
 }
 
 template<typename TElement>
-bool RawMemoryArraysAlmostEqual(const TElement* a, MemoryDeviceType memory_device_type_l,
+bool RawArraysAlmostEqual(const TElement* a, MemoryDeviceType memory_device_type_l,
                                 const TElement* b, MemoryDeviceType memory_device_type_r,
                                 const int element_count, const float absolute_tolerance = 1e-6, bool presort = false) {
-	return internal::CompareRawMemoryArrays_Generic(
+	return internal::CompareRawArrays_Generic(
 			a, memory_device_type_l, b, memory_device_type_r, element_count,
-			CPU_AND_GPU_LAMBDA(&absolute_tolerance)(
+			CPU_AND_GPU_CAPTURE_LAMBDA(&absolute_tolerance)(
 					const TElement& element_a,
 					const TElement& element_b) {
 				return AlmostEqual(element_a, element_b, absolute_tolerance);
@@ -210,12 +210,12 @@ bool RawMemoryArraysAlmostEqual(const TElement* a, MemoryDeviceType memory_devic
 }
 
 template<typename TElement>
-bool RawMemoryArraysAlmostEqual_Verbose(const TElement* a, MemoryDeviceType memory_device_type_l,
+bool RawArraysAlmostEqual_Verbose(const TElement* a, MemoryDeviceType memory_device_type_l,
                                         const TElement* b, MemoryDeviceType memory_device_type_r,
                                         const int element_count, const float absolute_tolerance = 1e-6, bool presort = false) {
-	return internal::CompareRawMemoryArrays_Generic(
+	return internal::CompareRawArrays_Generic(
 			a, memory_device_type_l, b, memory_device_type_r, element_count,
-			CPU_AND_GPU_LAMBDA(&absolute_tolerance)(
+			CPU_AND_GPU_CAPTURE_LAMBDA(&absolute_tolerance)(
 					const TElement& element_a,
 					const TElement& element_b) {
 				return AlmostEqual(element_a, element_b, absolute_tolerance);
@@ -233,205 +233,205 @@ bool RawMemoryArraysAlmostEqual_Verbose(const TElement* a, MemoryDeviceType memo
 // *** exact comparisons ***
 // primitive specializations
 extern template bool
-RawMemoryArraysEqual<bool>(const bool* l, MemoryDeviceType memory_device_type_l, const bool* r,
+RawArraysEqual<bool>(const bool* l, MemoryDeviceType memory_device_type_l, const bool* r,
                            MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
 
 extern template bool
-RawMemoryArraysEqual<short>(const short* l, MemoryDeviceType memory_device_type_l, const short* r,
+RawArraysEqual<short>(const short* l, MemoryDeviceType memory_device_type_l, const short* r,
                             MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
 
 extern template bool
-RawMemoryArraysEqual<int>(const int* l, MemoryDeviceType memory_device_type_l, const int* r,
+RawArraysEqual<int>(const int* l, MemoryDeviceType memory_device_type_l, const int* r,
                           MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
 
 
 // Vector specializations
 extern template bool
-RawMemoryArraysEqual<Vector3u>(const Vector3u* l, MemoryDeviceType memory_device_type_l, const Vector3u* r,
+RawArraysEqual<Vector3u>(const Vector3u* l, MemoryDeviceType memory_device_type_l, const Vector3u* r,
                                MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
 extern template bool
-RawMemoryArraysEqual<Vector4u>(const Vector4u* l, MemoryDeviceType memory_device_type_l, const Vector4u* r,
-                               MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
-
-extern template bool
-RawMemoryArraysEqual<Vector2s>(const Vector2s* l, MemoryDeviceType memory_device_type_l, const Vector2s* r,
-                               MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
-extern template bool
-RawMemoryArraysEqual<Vector3s>(const Vector3s* l, MemoryDeviceType memory_device_type_l, const Vector3s* r,
-                               MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
-extern template bool
-RawMemoryArraysEqual<Vector4s>(const Vector4s* l, MemoryDeviceType memory_device_type_l, const Vector4s* r,
+RawArraysEqual<Vector4u>(const Vector4u* l, MemoryDeviceType memory_device_type_l, const Vector4u* r,
                                MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
 
 extern template bool
-RawMemoryArraysEqual<Vector2i>(const Vector2i* l, MemoryDeviceType memory_device_type_l, const Vector2i* r,
+RawArraysEqual<Vector2s>(const Vector2s* l, MemoryDeviceType memory_device_type_l, const Vector2s* r,
                                MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
 extern template bool
-RawMemoryArraysEqual<Vector3i>(const Vector3i* l, MemoryDeviceType memory_device_type_l, const Vector3i* r,
+RawArraysEqual<Vector3s>(const Vector3s* l, MemoryDeviceType memory_device_type_l, const Vector3s* r,
                                MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
 extern template bool
-RawMemoryArraysEqual<Vector4i>(const Vector4i* l, MemoryDeviceType memory_device_type_l, const Vector4i* r,
-                               MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
-extern template bool
-RawMemoryArraysEqual<Vector6i>(const Vector6i* l, MemoryDeviceType memory_device_type_l, const Vector6i* r,
+RawArraysEqual<Vector4s>(const Vector4s* l, MemoryDeviceType memory_device_type_l, const Vector4s* r,
                                MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
 
 extern template bool
-RawMemoryArraysEqual<Vector2f>(const Vector2f* l, MemoryDeviceType memory_device_type_l, const Vector2f* r,
+RawArraysEqual<Vector2i>(const Vector2i* l, MemoryDeviceType memory_device_type_l, const Vector2i* r,
                                MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
 extern template bool
-RawMemoryArraysEqual<Vector3f>(const Vector3f* l, MemoryDeviceType memory_device_type_l, const Vector3f* r,
+RawArraysEqual<Vector3i>(const Vector3i* l, MemoryDeviceType memory_device_type_l, const Vector3i* r,
                                MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
 extern template bool
-RawMemoryArraysEqual<Vector4f>(const Vector4f* l, MemoryDeviceType memory_device_type_l, const Vector4f* r,
+RawArraysEqual<Vector4i>(const Vector4i* l, MemoryDeviceType memory_device_type_l, const Vector4i* r,
                                MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
 extern template bool
-RawMemoryArraysEqual<Vector6f>(const Vector6f* l, MemoryDeviceType memory_device_type_l, const Vector6f* r,
+RawArraysEqual<Vector6i>(const Vector6i* l, MemoryDeviceType memory_device_type_l, const Vector6i* r,
                                MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
 
 extern template bool
-RawMemoryArraysEqual<Vector2d>(const Vector2d* l, MemoryDeviceType memory_device_type_l, const Vector2d* r,
+RawArraysEqual<Vector2f>(const Vector2f* l, MemoryDeviceType memory_device_type_l, const Vector2f* r,
                                MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
 extern template bool
-RawMemoryArraysEqual<Vector3d>(const Vector3d* l, MemoryDeviceType memory_device_type_l, const Vector3d* r,
+RawArraysEqual<Vector3f>(const Vector3f* l, MemoryDeviceType memory_device_type_l, const Vector3f* r,
                                MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
 extern template bool
-RawMemoryArraysEqual<Vector4d>(const Vector4d* l, MemoryDeviceType memory_device_type_l, const Vector4d* r,
+RawArraysEqual<Vector4f>(const Vector4f* l, MemoryDeviceType memory_device_type_l, const Vector4f* r,
+                               MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
+extern template bool
+RawArraysEqual<Vector6f>(const Vector6f* l, MemoryDeviceType memory_device_type_l, const Vector6f* r,
+                               MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
+
+extern template bool
+RawArraysEqual<Vector2d>(const Vector2d* l, MemoryDeviceType memory_device_type_l, const Vector2d* r,
+                               MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
+extern template bool
+RawArraysEqual<Vector3d>(const Vector3d* l, MemoryDeviceType memory_device_type_l, const Vector3d* r,
+                               MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
+extern template bool
+RawArraysEqual<Vector4d>(const Vector4d* l, MemoryDeviceType memory_device_type_l, const Vector4d* r,
                                MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
 
 // Matrix specializations
 extern template bool
-RawMemoryArraysEqual<Matrix3f>(const Matrix3f* l, MemoryDeviceType memory_device_type_l, const Matrix3f* r,
+RawArraysEqual<Matrix3f>(const Matrix3f* l, MemoryDeviceType memory_device_type_l, const Matrix3f* r,
                                MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
 extern template bool
-RawMemoryArraysEqual<Matrix4f>(const Matrix4f* l, MemoryDeviceType memory_device_type_l, const Matrix4f* r,
+RawArraysEqual<Matrix4f>(const Matrix4f* l, MemoryDeviceType memory_device_type_l, const Matrix4f* r,
                                MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
 
 // *** verbose exact comparisons ***
 // primitive specializations
 extern template bool
-RawMemoryArraysEqual_Verbose<bool>(const bool* l, MemoryDeviceType memory_device_type_l, const bool* r,
+RawArraysEqual_Verbose<bool>(const bool* l, MemoryDeviceType memory_device_type_l, const bool* r,
                                    MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
 
 extern template bool
-RawMemoryArraysEqual_Verbose<short>(const short* l, MemoryDeviceType memory_device_type_l, const short* r,
+RawArraysEqual_Verbose<short>(const short* l, MemoryDeviceType memory_device_type_l, const short* r,
                                     MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
 
 extern template bool
-RawMemoryArraysEqual_Verbose<int>(const int* l, MemoryDeviceType memory_device_type_l, const int* r,
+RawArraysEqual_Verbose<int>(const int* l, MemoryDeviceType memory_device_type_l, const int* r,
                                   MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
 
 // Vector specializations
 extern template bool
-RawMemoryArraysEqual_Verbose<Vector3u>(const Vector3u* l, MemoryDeviceType memory_device_type_l, const Vector3u* r,
+RawArraysEqual_Verbose<Vector3u>(const Vector3u* l, MemoryDeviceType memory_device_type_l, const Vector3u* r,
                                        MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
 extern template bool
-RawMemoryArraysEqual_Verbose<Vector4u>(const Vector4u* l, MemoryDeviceType memory_device_type_l, const Vector4u* r,
-                                       MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
-
-extern template bool
-RawMemoryArraysEqual_Verbose<Vector2s>(const Vector2s* l, MemoryDeviceType memory_device_type_l, const Vector2s* r,
-                                       MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
-extern template bool
-RawMemoryArraysEqual_Verbose<Vector3s>(const Vector3s* l, MemoryDeviceType memory_device_type_l, const Vector3s* r,
-                                       MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
-extern template bool
-RawMemoryArraysEqual_Verbose<Vector4s>(const Vector4s* l, MemoryDeviceType memory_device_type_l, const Vector4s* r,
+RawArraysEqual_Verbose<Vector4u>(const Vector4u* l, MemoryDeviceType memory_device_type_l, const Vector4u* r,
                                        MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
 
 extern template bool
-RawMemoryArraysEqual_Verbose<Vector2i>(const Vector2i* l, MemoryDeviceType memory_device_type_l, const Vector2i* r,
+RawArraysEqual_Verbose<Vector2s>(const Vector2s* l, MemoryDeviceType memory_device_type_l, const Vector2s* r,
                                        MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
 extern template bool
-RawMemoryArraysEqual_Verbose<Vector3i>(const Vector3i* l, MemoryDeviceType memory_device_type_l, const Vector3i* r,
+RawArraysEqual_Verbose<Vector3s>(const Vector3s* l, MemoryDeviceType memory_device_type_l, const Vector3s* r,
                                        MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
 extern template bool
-RawMemoryArraysEqual_Verbose<Vector4i>(const Vector4i* l, MemoryDeviceType memory_device_type_l, const Vector4i* r,
-                                       MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
-extern template bool
-RawMemoryArraysEqual_Verbose<Vector6i>(const Vector6i* l, MemoryDeviceType memory_device_type_l, const Vector6i* r,
+RawArraysEqual_Verbose<Vector4s>(const Vector4s* l, MemoryDeviceType memory_device_type_l, const Vector4s* r,
                                        MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
 
 extern template bool
-RawMemoryArraysEqual_Verbose<Vector2f>(const Vector2f* l, MemoryDeviceType memory_device_type_l, const Vector2f* r,
+RawArraysEqual_Verbose<Vector2i>(const Vector2i* l, MemoryDeviceType memory_device_type_l, const Vector2i* r,
                                        MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
 extern template bool
-RawMemoryArraysEqual_Verbose<Vector3f>(const Vector3f* l, MemoryDeviceType memory_device_type_l, const Vector3f* r,
+RawArraysEqual_Verbose<Vector3i>(const Vector3i* l, MemoryDeviceType memory_device_type_l, const Vector3i* r,
                                        MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
 extern template bool
-RawMemoryArraysEqual_Verbose<Vector4f>(const Vector4f* l, MemoryDeviceType memory_device_type_l, const Vector4f* r,
+RawArraysEqual_Verbose<Vector4i>(const Vector4i* l, MemoryDeviceType memory_device_type_l, const Vector4i* r,
                                        MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
 extern template bool
-RawMemoryArraysEqual_Verbose<Vector6f>(const Vector6f* l, MemoryDeviceType memory_device_type_l, const Vector6f* r,
+RawArraysEqual_Verbose<Vector6i>(const Vector6i* l, MemoryDeviceType memory_device_type_l, const Vector6i* r,
                                        MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
 
 extern template bool
-RawMemoryArraysEqual_Verbose<Vector2d>(const Vector2d* l, MemoryDeviceType memory_device_type_l, const Vector2d* r,
+RawArraysEqual_Verbose<Vector2f>(const Vector2f* l, MemoryDeviceType memory_device_type_l, const Vector2f* r,
                                        MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
 extern template bool
-RawMemoryArraysEqual_Verbose<Vector3d>(const Vector3d* l, MemoryDeviceType memory_device_type_l, const Vector3d* r,
+RawArraysEqual_Verbose<Vector3f>(const Vector3f* l, MemoryDeviceType memory_device_type_l, const Vector3f* r,
                                        MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
 extern template bool
-RawMemoryArraysEqual_Verbose<Vector4d>(const Vector4d* l, MemoryDeviceType memory_device_type_l, const Vector4d* r,
+RawArraysEqual_Verbose<Vector4f>(const Vector4f* l, MemoryDeviceType memory_device_type_l, const Vector4f* r,
+                                       MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
+extern template bool
+RawArraysEqual_Verbose<Vector6f>(const Vector6f* l, MemoryDeviceType memory_device_type_l, const Vector6f* r,
+                                       MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
+
+extern template bool
+RawArraysEqual_Verbose<Vector2d>(const Vector2d* l, MemoryDeviceType memory_device_type_l, const Vector2d* r,
+                                       MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
+extern template bool
+RawArraysEqual_Verbose<Vector3d>(const Vector3d* l, MemoryDeviceType memory_device_type_l, const Vector3d* r,
+                                       MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
+extern template bool
+RawArraysEqual_Verbose<Vector4d>(const Vector4d* l, MemoryDeviceType memory_device_type_l, const Vector4d* r,
                                        MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
 
 // Matrix specializations
 extern template bool
-RawMemoryArraysEqual_Verbose<Matrix3f>(const Matrix3f* l, MemoryDeviceType memory_device_type_l, const Matrix3f* r,
+RawArraysEqual_Verbose<Matrix3f>(const Matrix3f* l, MemoryDeviceType memory_device_type_l, const Matrix3f* r,
                                        MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
 extern template bool
-RawMemoryArraysEqual_Verbose<Matrix4f>(const Matrix4f* l, MemoryDeviceType memory_device_type_l, const Matrix4f* r,
+RawArraysEqual_Verbose<Matrix4f>(const Matrix4f* l, MemoryDeviceType memory_device_type_l, const Matrix4f* r,
                                        MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
 
 // *** approximate comparisons *** 
 
 // Vector specializations
 extern template bool
-RawMemoryArraysAlmostEqual<Vector3u>(const Vector3u* l, MemoryDeviceType memory_device_type_l, const Vector3u* r,
+RawArraysAlmostEqual<Vector3u>(const Vector3u* l, MemoryDeviceType memory_device_type_l, const Vector3u* r,
                                      MemoryDeviceType memory_device_type_r, const int element_count,
                                      const float absolute_tolerance, bool presort);
 extern template bool
-RawMemoryArraysAlmostEqual<Vector4u>(const Vector4u* l, MemoryDeviceType memory_device_type_l, const Vector4u* r,
-                                     MemoryDeviceType memory_device_type_r, const int element_count,
-                                     const float absolute_tolerance, bool presort);
-
-extern template bool
-RawMemoryArraysAlmostEqual<Vector2f>(const Vector2f* l, MemoryDeviceType memory_device_type_l, const Vector2f* r,
-                                     MemoryDeviceType memory_device_type_r, const int element_count,
-                                     const float absolute_tolerance, bool presort);
-extern template bool
-RawMemoryArraysAlmostEqual<Vector3f>(const Vector3f* l, MemoryDeviceType memory_device_type_l, const Vector3f* r,
-                                     MemoryDeviceType memory_device_type_r, const int element_count,
-                                     const float absolute_tolerance, bool presort);
-extern template bool
-RawMemoryArraysAlmostEqual<Vector4f>(const Vector4f* l, MemoryDeviceType memory_device_type_l, const Vector4f* r,
-                                     MemoryDeviceType memory_device_type_r, const int element_count,
-                                     const float absolute_tolerance, bool presort);
-extern template bool
-RawMemoryArraysAlmostEqual<Vector6f>(const Vector6f* l, MemoryDeviceType memory_device_type_l, const Vector6f* r,
+RawArraysAlmostEqual<Vector4u>(const Vector4u* l, MemoryDeviceType memory_device_type_l, const Vector4u* r,
                                      MemoryDeviceType memory_device_type_r, const int element_count,
                                      const float absolute_tolerance, bool presort);
 
 extern template bool
-RawMemoryArraysAlmostEqual<Vector2d>(const Vector2d* l, MemoryDeviceType memory_device_type_l, const Vector2d* r,
+RawArraysAlmostEqual<Vector2f>(const Vector2f* l, MemoryDeviceType memory_device_type_l, const Vector2f* r,
                                      MemoryDeviceType memory_device_type_r, const int element_count,
                                      const float absolute_tolerance, bool presort);
 extern template bool
-RawMemoryArraysAlmostEqual<Vector3d>(const Vector3d* l, MemoryDeviceType memory_device_type_l, const Vector3d* r,
+RawArraysAlmostEqual<Vector3f>(const Vector3f* l, MemoryDeviceType memory_device_type_l, const Vector3f* r,
                                      MemoryDeviceType memory_device_type_r, const int element_count,
                                      const float absolute_tolerance, bool presort);
 extern template bool
-RawMemoryArraysAlmostEqual<Vector4d>(const Vector4d* l, MemoryDeviceType memory_device_type_l, const Vector4d* r,
+RawArraysAlmostEqual<Vector4f>(const Vector4f* l, MemoryDeviceType memory_device_type_l, const Vector4f* r,
+                                     MemoryDeviceType memory_device_type_r, const int element_count,
+                                     const float absolute_tolerance, bool presort);
+extern template bool
+RawArraysAlmostEqual<Vector6f>(const Vector6f* l, MemoryDeviceType memory_device_type_l, const Vector6f* r,
+                                     MemoryDeviceType memory_device_type_r, const int element_count,
+                                     const float absolute_tolerance, bool presort);
+
+extern template bool
+RawArraysAlmostEqual<Vector2d>(const Vector2d* l, MemoryDeviceType memory_device_type_l, const Vector2d* r,
+                                     MemoryDeviceType memory_device_type_r, const int element_count,
+                                     const float absolute_tolerance, bool presort);
+extern template bool
+RawArraysAlmostEqual<Vector3d>(const Vector3d* l, MemoryDeviceType memory_device_type_l, const Vector3d* r,
+                                     MemoryDeviceType memory_device_type_r, const int element_count,
+                                     const float absolute_tolerance, bool presort);
+extern template bool
+RawArraysAlmostEqual<Vector4d>(const Vector4d* l, MemoryDeviceType memory_device_type_l, const Vector4d* r,
                                      MemoryDeviceType memory_device_type_r, const int element_count,
                                      const float absolute_tolerance, bool presort);
 
 // Matrix specializations
 extern template bool
-RawMemoryArraysAlmostEqual<Matrix3f>(const Matrix3f* l, MemoryDeviceType memory_device_type_l, const Matrix3f* r,
+RawArraysAlmostEqual<Matrix3f>(const Matrix3f* l, MemoryDeviceType memory_device_type_l, const Matrix3f* r,
                                      MemoryDeviceType memory_device_type_r, const int element_count,
                                      const float absolute_tolerance, bool presort);
 extern template bool
-RawMemoryArraysAlmostEqual<Matrix4f>(const Matrix4f* l, MemoryDeviceType memory_device_type_l, const Matrix4f* r,
+RawArraysAlmostEqual<Matrix4f>(const Matrix4f* l, MemoryDeviceType memory_device_type_l, const Matrix4f* r,
                                      MemoryDeviceType memory_device_type_r, const int element_count,
                                      const float absolute_tolerance, bool presort);
 
@@ -439,51 +439,51 @@ RawMemoryArraysAlmostEqual<Matrix4f>(const Matrix4f* l, MemoryDeviceType memory_
 
 // Vector specializations
 extern template bool
-RawMemoryArraysAlmostEqual_Verbose<Vector3u>(const Vector3u* l, MemoryDeviceType memory_device_type_l, const Vector3u* r,
+RawArraysAlmostEqual_Verbose<Vector3u>(const Vector3u* l, MemoryDeviceType memory_device_type_l, const Vector3u* r,
                                              MemoryDeviceType memory_device_type_r, const int element_count,
                                              const float absolute_tolerance, bool presort);
 extern template bool
-RawMemoryArraysAlmostEqual_Verbose<Vector4u>(const Vector4u* l, MemoryDeviceType memory_device_type_l, const Vector4u* r,
-                                             MemoryDeviceType memory_device_type_r, const int element_count,
-                                             const float absolute_tolerance, bool presort);
-
-extern template bool
-RawMemoryArraysAlmostEqual_Verbose<Vector2f>(const Vector2f* l, MemoryDeviceType memory_device_type_l, const Vector2f* r,
-                                             MemoryDeviceType memory_device_type_r, const int element_count,
-                                             const float absolute_tolerance, bool presort);
-extern template bool
-RawMemoryArraysAlmostEqual_Verbose<Vector3f>(const Vector3f* l, MemoryDeviceType memory_device_type_l, const Vector3f* r,
-                                             MemoryDeviceType memory_device_type_r, const int element_count,
-                                             const float absolute_tolerance, bool presort);
-extern template bool
-RawMemoryArraysAlmostEqual_Verbose<Vector4f>(const Vector4f* l, MemoryDeviceType memory_device_type_l, const Vector4f* r,
-                                             MemoryDeviceType memory_device_type_r, const int element_count,
-                                             const float absolute_tolerance, bool presort);
-extern template bool
-RawMemoryArraysAlmostEqual_Verbose<Vector6f>(const Vector6f* l, MemoryDeviceType memory_device_type_l, const Vector6f* r,
+RawArraysAlmostEqual_Verbose<Vector4u>(const Vector4u* l, MemoryDeviceType memory_device_type_l, const Vector4u* r,
                                              MemoryDeviceType memory_device_type_r, const int element_count,
                                              const float absolute_tolerance, bool presort);
 
 extern template bool
-RawMemoryArraysAlmostEqual_Verbose<Vector2d>(const Vector2d* l, MemoryDeviceType memory_device_type_l, const Vector2d* r,
+RawArraysAlmostEqual_Verbose<Vector2f>(const Vector2f* l, MemoryDeviceType memory_device_type_l, const Vector2f* r,
                                              MemoryDeviceType memory_device_type_r, const int element_count,
                                              const float absolute_tolerance, bool presort);
 extern template bool
-RawMemoryArraysAlmostEqual_Verbose<Vector3d>(const Vector3d* l, MemoryDeviceType memory_device_type_l, const Vector3d* r,
+RawArraysAlmostEqual_Verbose<Vector3f>(const Vector3f* l, MemoryDeviceType memory_device_type_l, const Vector3f* r,
                                              MemoryDeviceType memory_device_type_r, const int element_count,
                                              const float absolute_tolerance, bool presort);
 extern template bool
-RawMemoryArraysAlmostEqual_Verbose<Vector4d>(const Vector4d* l, MemoryDeviceType memory_device_type_l, const Vector4d* r,
+RawArraysAlmostEqual_Verbose<Vector4f>(const Vector4f* l, MemoryDeviceType memory_device_type_l, const Vector4f* r,
+                                             MemoryDeviceType memory_device_type_r, const int element_count,
+                                             const float absolute_tolerance, bool presort);
+extern template bool
+RawArraysAlmostEqual_Verbose<Vector6f>(const Vector6f* l, MemoryDeviceType memory_device_type_l, const Vector6f* r,
+                                             MemoryDeviceType memory_device_type_r, const int element_count,
+                                             const float absolute_tolerance, bool presort);
+
+extern template bool
+RawArraysAlmostEqual_Verbose<Vector2d>(const Vector2d* l, MemoryDeviceType memory_device_type_l, const Vector2d* r,
+                                             MemoryDeviceType memory_device_type_r, const int element_count,
+                                             const float absolute_tolerance, bool presort);
+extern template bool
+RawArraysAlmostEqual_Verbose<Vector3d>(const Vector3d* l, MemoryDeviceType memory_device_type_l, const Vector3d* r,
+                                             MemoryDeviceType memory_device_type_r, const int element_count,
+                                             const float absolute_tolerance, bool presort);
+extern template bool
+RawArraysAlmostEqual_Verbose<Vector4d>(const Vector4d* l, MemoryDeviceType memory_device_type_l, const Vector4d* r,
                                              MemoryDeviceType memory_device_type_r, const int element_count,
                                              const float absolute_tolerance, bool presort);
 
 // Matrix specializations
 extern template bool
-RawMemoryArraysAlmostEqual_Verbose<Matrix3f>(const Matrix3f* l, MemoryDeviceType memory_device_type_l, const Matrix3f* r,
+RawArraysAlmostEqual_Verbose<Matrix3f>(const Matrix3f* l, MemoryDeviceType memory_device_type_l, const Matrix3f* r,
                                              MemoryDeviceType memory_device_type_r, const int element_count,
                                              const float absolute_tolerance, bool presort);
 extern template bool
-RawMemoryArraysAlmostEqual_Verbose<Matrix4f>(const Matrix4f* l, MemoryDeviceType memory_device_type_l, const Matrix4f* r,
+RawArraysAlmostEqual_Verbose<Matrix4f>(const Matrix4f* l, MemoryDeviceType memory_device_type_l, const Matrix4f* r,
                                              MemoryDeviceType memory_device_type_r, const int element_count,
                                              const float absolute_tolerance, bool presort);
 

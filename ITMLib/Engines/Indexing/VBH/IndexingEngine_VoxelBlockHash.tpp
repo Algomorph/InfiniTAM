@@ -18,6 +18,7 @@
 //local
 #include "IndexingEngine_VoxelBlockHash.h"
 #include "../../Traversal/Interface/ImageTraversal.h"
+#include "../../Traversal/Interface/RawArrayTraversal.h"
 #include "../../Traversal/Interface/MemoryBlockTraversal.h"
 #include "../../Traversal/Interface/TwoImageTraversal.h"
 #include "../../Traversal/Interface/HashTableTraversal.h"
@@ -36,9 +37,9 @@ AllocateHashEntriesUsingAllocationStateList_Generic(VoxelVolume<TVoxel, VoxelBlo
 
 	HashEntryAllocationState* hash_entry_allocation_states = volume->index.GetHashEntryAllocationStates();
 	const int hash_entry_count = volume->index.hash_entry_count;
-	MemoryBlockTraversalEngine<TMemoryDeviceType>::TraverseWithIndexRaw(hash_entry_allocation_states,
-	                                                                    static_cast<unsigned int>(hash_entry_count),
-	                                                                    allocation_functor);
+	RawArrayTraversalEngine<TMemoryDeviceType>::TraverseWithIndexRaw(hash_entry_allocation_states,
+	                                                                 static_cast<unsigned int>(hash_entry_count),
+	                                                                 allocation_functor);
 	allocation_functor.UpdateIndexCounters(volume->index);
 }
 
@@ -205,8 +206,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType, TExecutionMode>::
 		marker_functor.SetCollidingBlockCount(0);
 		volume->index.ClearHashEntryAllocationStates();
 
-		MemoryBlockTraversalEngine<TMemoryDeviceType>::TraverseWithIndexRaw(new_positions_device, new_block_count,
-		                                                                    marker_functor);
+		RawArrayTraversalEngine<TMemoryDeviceType>::TraverseWithIndexRaw(new_positions_device, new_block_count, marker_functor);
 
 		AllocateHashEntriesUsingAllocationStateList(volume);
 
@@ -244,8 +244,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType, TExecutionMode>::
 		deallocation_functor.SetCollidingBlockCount(0);
 		volume->index.ClearHashEntryAllocationStates();
 
-		MemoryBlockTraversalEngine<TMemoryDeviceType>::TraverseWithIndexRaw(blocks_to_remove_device,
-		                                                                    count_of_blocks_to_remove, deallocation_functor);
+		RawArrayTraversalEngine<TMemoryDeviceType>::TraverseWithIndexRaw(blocks_to_remove_device, count_of_blocks_to_remove, deallocation_functor);
 
 		count_of_blocks_to_remove = deallocation_functor.GetCollidingBlockCount();
 		std::swap(blocks_to_remove_device, deallocation_functor.colliding_positions_device);
@@ -283,9 +282,7 @@ template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExe
 static inline void ChangeVisibleBlockVisibility_Aux(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 	const int* visible_block_hash_codes = volume->index.GetVisibleBlockHashCodes();
 	BlockVisibilitySetFunctor<TVoxel, TMemoryDeviceType, THashBlockVisibility> visibility_functor(volume);
-	MemoryBlockTraversalEngine<TMemoryDeviceType>::TraverseWithIndexRaw(visible_block_hash_codes,
-	                                                                    volume->index.GetVisibleBlockCount(),
-	                                                                    visibility_functor);
+	RawArrayTraversalEngine<TMemoryDeviceType>::TraverseWithIndexRaw(visible_block_hash_codes, volume->index.GetVisibleBlockCount(), visibility_functor);
 }
 
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>

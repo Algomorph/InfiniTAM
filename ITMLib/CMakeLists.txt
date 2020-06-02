@@ -112,7 +112,8 @@ set(ITMLIB_ENGINES_TRAVERSAL_INTERFACE_HEADERS
     Engines/Traversal/Interface/ImageTraversal.h
     Engines/Traversal/Interface/TwoImageTraversal.h
     Engines/Traversal/Interface/MemoryBlockTraversal.h
-    Engines/Traversal/Interface/Regular2DCollectionArrayTraversal.h
+    Engines/Traversal/Interface/RawArrayTraversal.h
+    Engines/Traversal/Interface/Regular2DSubGridArrayTraversal.h
     Engines/Traversal/Interface/VolumeTraversal.h
     Engines/Traversal/Interface/TwoVolumeTraversal.h
     Engines/Traversal/Interface/ThreeVolumeTraversal.h
@@ -120,6 +121,7 @@ set(ITMLIB_ENGINES_TRAVERSAL_INTERFACE_HEADERS
 ##
 set(ITMLIB_ENGINES_TRAVERSAL_SHARED_HEADERS
     Engines/Traversal/Shared/VolumeTraversal_Shared.h
+    Engines/Traversal/Shared/JobCountPolicy.h
     )
 
 ##
@@ -128,7 +130,11 @@ set(ITMLIB_ENGINES_TRAVERSAL_CPU_HEADERS
     Engines/Traversal/CPU/TwoImageTraversal_CPU.h
 
     Engines/Traversal/CPU/MemoryBlockTraversal_CPU.h
-    Engines/Traversal/CPU/Regular2DCollectionArrayTraversal_CPU.h
+
+    Engines/Traversal/CPU/RawArrayTraversal_CPU.h
+
+    Engines/Traversal/CPU/Regular2DSubGridArrayTraversal_CPU.h
+
     Engines/Traversal/CPU/HashTableTraversal_CPU.h
 
     Engines/Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h
@@ -148,9 +154,13 @@ set(ITMLIB_ENGINES_TRAVERSAL_CUDA_HEADERS
     Engines/Traversal/CUDA/TwoImageTraversal_CUDA_Kernels.h
 
     Engines/Traversal/CUDA/MemoryBlockTraversal_CUDA.h
-    Engines/Traversal/CUDA/MemoryBlockTraversal_CUDA_Kernels.h
-    Engines/Traversal/CUDA/Regular2DCollectionArrayTraversal_CUDA.cuh
-    Engines/Traversal/CUDA/Regular2DCollectionArrayTraversal_CUDA_Kernels.cuh
+    Engines/Traversal/CUDA/MemoryBlockTraversal_CUDA_Kernels.cuh
+
+    Engines/Traversal/CUDA/RawArrayTraversal_CUDA.cuh
+    Engines/Traversal/CUDA/RawArrayTraversal_CUDA_Kernels.cuh
+
+    Engines/Traversal/CUDA/Regular2DSubGridArrayTraversal_CUDA.cuh
+    Engines/Traversal/CUDA/Regular2DSubGridArrayTraversal_CUDA_Kernels.cuh
 
     Engines/Traversal/CUDA/HashTableTraversal_CUDA.h
     Engines/Traversal/CUDA/HashTableTraversal_CUDA_Kernels.h
@@ -875,8 +885,8 @@ set(
         Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CUDA.tcu
         Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CUDA.cu
         Utils/Analytics/NeighborVoxelIterationInfo.cpp
-        Utils/Analytics/RawMemoryArrayComparison.cpp
-        Utils/Analytics/RawMemoryArrayComparison.cu
+        Utils/Analytics/RawArrayComparison.cpp
+        Utils/Analytics/RawArrayComparison.cu
         Utils/Analytics/BenchmarkUtilities.cpp
 
         Utils/Collections/NestedMap3DOfArrays.tpp
@@ -917,9 +927,9 @@ set(
         Utils/Analytics/AlmostEqual.h
         Utils/Analytics/IsAltered.h
         Utils/Analytics/NeighborVoxelIterationInfo.h
-        Utils/Analytics/RawMemoryArrayComparison.h
-        Utils/Analytics/RawMemoryArrayComparison.cuh
-        Utils/Analytics/RawMemoryArrayComparisonTemplateInstantiations.h
+        Utils/Analytics/RawArrayComparison.h
+        Utils/Analytics/RawArrayComparison.cuh
+        Utils/Analytics/RawArrayComparisonTemplateInstantiations.h
         Utils/Analytics/Statistics.h
 
         Utils/Collections/NestedMap3DOfArrays.h

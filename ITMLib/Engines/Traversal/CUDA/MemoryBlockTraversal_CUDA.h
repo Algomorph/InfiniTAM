@@ -15,90 +15,30 @@
 //  ================================================================
 //local
 #include "../Interface/MemoryBlockTraversal.h"
+#include "RawArrayTraversal_CUDA.cuh"
 #include "../../../../ORUtils/MemoryBlock.h"
-#include "MemoryBlockTraversal_CUDA_Kernels.h"
+#include "MemoryBlockTraversal_CUDA_Kernels.cuh"
 
 namespace ITMLib {
 
 template<>
-class MemoryBlockTraversalEngine<MEMORYDEVICE_CUDA> {
+class MemoryBlockTraversalEngine<MEMORYDEVICE_CUDA> : private RawArrayTraversalEngine<MEMORYDEVICE_CUDA> {
 protected: // static functions
-	template<typename TData, typename TFunctor, typename TCudaCall>
-	inline static void TraverseRaw_Generic(TData* data, TFunctor& functor, TCudaCall&& cuda_call) {
-		TFunctor* functor_device;
-
-		ORcudaSafeCall(cudaMalloc((void**) &functor_device, sizeof(TFunctor)));
-		ORcudaSafeCall(cudaMemcpy(functor_device, &functor, sizeof(TFunctor), cudaMemcpyHostToDevice));
-
-		cuda_call(data, functor_device);
-		ORcudaKernelCheck;
-
-		ORcudaSafeCall(cudaMemcpy(&functor, functor_device, sizeof(TFunctor), cudaMemcpyDeviceToHost));
-		ORcudaSafeCall(cudaFree(functor_device));
-	}
-
-	template<typename TData, typename TFunctor>
-	inline static void TraverseRawWithIndex_Generic(TData* data, const unsigned int element_count, TFunctor& functor) {
-		TraverseRaw_Generic(data,
-		                    [&element_count](TData* data, TFunctor* functor_device) {
-			                    dim3 cuda_block_size(256);
-			                    dim3 cuda_grid_size(ceil_of_integer_quotient(element_count, cuda_block_size.x));
-			                    memoryBlockTraversalWithItemIndex_device<TData, TFunctor> <<< cuda_grid_size, cuda_block_size >>>
-					                    (data, element_count, functor_device);
-		                    }
-		);
-	}
-
-	template<typename TData, typename TFunctor>
-	inline static void TraverseRawWithoutIndex_Generic(TData* data, const unsigned int element_count, TFunctor& functor) {
-		TraverseRaw_Generic(data,
-		                    [&element_count](TData* data, TFunctor* functor_device) {
-			                    dim3 cuda_block_size(256);
-			                    dim3 cuda_grid_size(ceil_of_integer_quotient(element_count, cuda_block_size.x));
-			                    memoryBlockTraversalWithoutItemIndex_device<TData, TFunctor> <<< cuda_grid_size, cuda_block_size >>>
-					                    (data, element_count, functor_device);
-		                    }
-		);
-	}
-
 	template<typename TData, typename TMemoryBlock, typename TFunctor>
 	inline static void TraverseWithIndex_Generic(TMemoryBlock& memory_block, unsigned int element_count, TFunctor& functor) {
 		TData* data = memory_block.GetData(MEMORYDEVICE_CUDA);
 		assert(element_count <= memory_block.size());
-		TraverseRawWithIndex_Generic(data, element_count, functor);
+		RawArrayTraversalEngine<MEMORYDEVICE_CUDA>::TraverseRawWithIndex_Generic(data, element_count, functor);
 	}
 
 	template<typename TData, typename TMemoryBlock, typename TFunctor>
 	inline static void TraverseWithoutIndex_Generic(TMemoryBlock& memory_block, unsigned int element_count, TFunctor& functor) {
 		TData* data = memory_block.GetData(MEMORYDEVICE_CUDA);
 		assert(element_count <= memory_block.size());
-		TraverseRawWithoutIndex_Generic(data, element_count, functor);
+		RawArrayTraversalEngine<MEMORYDEVICE_CUDA>::TraverseRawWithoutIndex_Generic(data, element_count, functor);
 	}
 
 public: // static functions
-	template<typename T, typename TFunctor>
-	inline static void
-	TraverseRaw(T* data, const unsigned int element_count, TFunctor& functor) {
-		TraverseRawWithoutIndex_Generic<T, TFunctor>(data, element_count, functor);
-	}
-
-	template<typename T, typename TFunctor>
-	inline static void
-	TraverseRaw(const T* data, const unsigned int element_count, TFunctor& functor) {
-		TraverseRawWithoutIndex_Generic<const T, TFunctor>(data, element_count, functor);
-	}
-
-	template<typename T, typename TFunctor>
-	inline static void
-	TraverseWithIndexRaw(T* data, const unsigned int element_count, TFunctor& functor) {
-		TraverseRawWithIndex_Generic<T, TFunctor>(data, element_count, functor);
-	}
-
-	template<typename T, typename TFunctor>
-	inline static void
-	TraverseWithIndexRaw(const T* data, const unsigned int element_count, TFunctor& functor) {
-		TraverseRawWithIndex_Generic<const T, TFunctor>(data, element_count, functor);
-	}
 
 	template<typename T, typename TFunctor>
 	inline static void

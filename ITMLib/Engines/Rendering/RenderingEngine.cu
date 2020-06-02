@@ -15,6 +15,7 @@
 //  ================================================================
 #include "../Traversal/CUDA/HashTableTraversal_CUDA.h"
 #include "../Traversal/CUDA/ImageTraversal_CUDA.h"
+#include "../Traversal/CUDA/Regular2DSubGridArrayTraversal_CUDA.cuh"
 #include "RenderingEngine.tpp"
 #include "../../GlobalTemplateDefines.h"
 

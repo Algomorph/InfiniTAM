@@ -99,5 +99,18 @@ VoxelBlockHash::VoxelBlockHash(VoxelBlockHashParameters parameters, MemoryDevice
 
 }
 
+void VoxelBlockHash::SetFrom(const VoxelBlockHash& other) {
+	MemoryCopyDirection memory_copy_direction = DetermineMemoryCopyDirection(this->memory_type, other.memory_type);
+	this->hash_entry_allocation_states.SetFrom(other.hash_entry_allocation_states, memory_copy_direction);
+	this->hash_entries.SetFrom(other.hash_entries, memory_copy_direction);
+	this->block_allocation_list.SetFrom(other.block_allocation_list, memory_copy_direction);
+	this->excess_entry_list.SetFrom(other.excess_entry_list, memory_copy_direction);
+	this->utilized_block_hash_codes.SetFrom(other.utilized_block_hash_codes, memory_copy_direction);
+	this->visible_block_hash_codes.SetFrom(other.visible_block_hash_codes, memory_copy_direction);
+	this->last_free_block_list_id = other.last_free_block_list_id;
+	this->last_free_excess_list_id = other.last_free_excess_list_id;
+	this->utilized_block_count = other.utilized_block_count;
+}
+
 
 }// namespace ITMLib

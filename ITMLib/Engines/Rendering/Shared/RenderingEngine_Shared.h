@@ -102,8 +102,8 @@ _CPU_AND_GPU_CODE_ inline void CreateRenderingBlocks2(DEVICEPTR(RenderingBlock) 
 			b.upper_left.y = upper_left.y + by * rendering_block_size_y;
 			b.lower_right.x = upper_left.x + (bx + 1) * rendering_block_size_x;
 			b.lower_right.y = upper_left.y + (by + 1) * rendering_block_size_y;
-			if (b.lower_right.x > lower_right.x) b.lower_right.x = lower_right.x;
-			if (b.lower_right.y > lower_right.y) b.lower_right.y = lower_right.y;
+			if (b.lower_right.x > lower_right.x + 1) b.lower_right.x = lower_right.x + 1;
+			if (b.lower_right.y > lower_right.y + 1) b.lower_right.y = lower_right.y + 1;
 			b.z_range = z_range;
 		}
 	}

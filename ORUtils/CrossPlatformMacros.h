@@ -16,9 +16,11 @@
 #pragma once
 // lambdas
 #ifdef __CUDACC__
-#define CPU_AND_GPU_LAMBDA(...) [=] __host__ __device__
+#define CPU_AND_GPU_CAPTURE_LAMBDA(...) [=] __host__ __device__
+#define CPU_AND_GPU_NONCAPTURE_LAMBDA() [] __host__ __device__
 #else
-#define CPU_AND_GPU_LAMBDA(...) [__VA_ARGS__]
+#define CPU_AND_GPU_CAPTURE_LAMBDA(...) [__VA_ARGS__]
+#define CPU_AND_GPU_NONCAPTURE_LAMBDA() []
 #endif
 
 // code that should always be compiled for the GPU if the CUDA compiler is involved

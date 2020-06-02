@@ -15,7 +15,8 @@
 //  ================================================================
 #pragma once
 
-
+#include "../Traversal/Interface/Regular2DSubGridArrayTraversal.h"
+#include "../../../ORUtils/CrossPlatformMacros.h"
 #include "RenderingEngine_Specialized.h"
 #include "Shared/RenderingEngine_Shared.h"
 #include "Shared/RenderingEngine_Functors.h"
@@ -63,42 +64,30 @@ void RenderingEngine_Specialized<TVoxel, VoxelBlockHash, TMemoryDeviceType>::Cre
 		const VoxelVolume<TVoxel, VoxelBlockHash>* volume, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics,
 		RenderState* render_state) const {
 
-	Vector2f* ray_bound_data = render_state->renderingRangeImage->GetData(MEMORYDEVICE_CPU);
-
 	// initialize with very large value for "min" and small value for "max" ray distance
 	FillExpectedDepthsWithClippingDistancesFunctor<TMemoryDeviceType> fill_with_clipping_planes_functor(FAR_AWAY, VERY_CLOSE);
 	ImageTraversalEngine<TMemoryDeviceType>::Traverse(render_state->renderingRangeImage, fill_with_clipping_planes_functor);
 
-	DECLARE_ATOMIC(unsigned int, rendered_block_count);
-	INITIALIZE_ATOMIC(unsigned int, rendered_block_count, 0u);
-//	projectAndSplitBlocks_device <<<cuda_grid_size, cuda_block_size >>>(hash_entries, visible_block_hash_codes, visible_block_count, pose->GetM(),
-//			intrinsics->projectionParamsSimple.all, imgSize, voxelSize, rendering_block_list_device, block_count_device);
 	auto depth_image_size = render_state->renderingRangeImage->dimensions;
 	float voxel_size = volume->GetParameters().voxel_size;
-
-	ProjectAndSplitBlocksFunctor<TMemoryDeviceType> project_and_split_blocks_functor(pose->GetM(), intrinsics->projectionParamsSimple.all, depth_image_size, voxel_size);
+	//TODO: optimize by making rendering_blocks a member variable to avoid repeated allocations & deallocations (requires converting it to raw pointer or removing const-ness from the function)
+	ORUtils::MemoryBlock<RenderingBlock> rendering_blocks(ITMLib::MAX_RENDERING_BLOCKS, TMemoryDeviceType);
+	ProjectAndSplitBlocksFunctor<TMemoryDeviceType> project_and_split_blocks_functor(
+			rendering_blocks, pose->GetM(), intrinsics->projectionParamsSimple.all, depth_image_size, voxel_size);
 
 	//TODO: (potential optimization) figure out whether using the "Visible" list instead of the "Utilized" list makes more sense here.
 	// the visible list is only reliable if it's up-to-date. If you can ensure that it is, and keeping it up-to-date takes less resources than using the
 	// bigger "utilized" list, change this back to "Visible" list like it was in the original InfiniTAM repo.
 
 	HashTableTraversalEngine<TMemoryDeviceType>::TraverseUtilizedWithHashCode(volume->index, project_and_split_blocks_functor);
+	unsigned int final_rendering_block_count = project_and_split_blocks_functor.GetRenderingBlockCount();
 
-	//TODO
-	DIEWITHEXCEPTION_REPORTLOCATION("Not finished");
+	FillBlocksFunctor<TMemoryDeviceType> fill_blocks_functor(*render_state->renderingRangeImage);
 	// go through rendering blocks
-//	for (int i_rendered_block = 0; i_rendered_block < rendered_block_count; ++i_rendered_block) {
-		// fill pixel ray bound data
-//		const RenderingBlock& rendering_block = render_blocks[i_rendered_block];
-//
-//		for (int y = rendering_block.upper_left.y; y <= rendering_block.lower_right.y; ++y) {
-//			for (int x = rendering_block.upper_left.x; x <= rendering_block.lower_right.x; ++x) {
-//				Vector2f& pixel_ray_bound = ray_bound_data[x + y * depth_image_size.x];
-//				if (pixel_ray_bound.x > rendering_block.z_range.x) pixel_ray_bound.x = rendering_block.z_range.x;
-//				if (pixel_ray_bound.y < rendering_block.z_range.y) pixel_ray_bound.y = rendering_block.z_range.y;
-//			}
-//		}
-//	}
+	Regular2DSubGridArrayTraversal<TMemoryDeviceType>::template Traverse<rendering_block_size_x, rendering_block_size_y>(
+			rendering_blocks, final_rendering_block_count, fill_blocks_functor,
+			CPU_AND_GPU_NONCAPTURE_LAMBDA()(const RenderingBlock& block, int& start_x, int& end_x, int& start_y, int& end_y) {
+				start_x = block.upper_left.x, end_x = block.lower_right.x, start_y = block.upper_left.y, end_y = block.lower_right.y;
+			});
 
-	CLEAN_UP_ATOMIC(rendered_block_count);
 }
