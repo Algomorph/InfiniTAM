@@ -77,6 +77,8 @@ _CPU_AND_GPU_CODE_ inline void CreateRenderingBlocks(DEVICEPTR(RenderingBlock) *
 	for (int by = 0; by < ceil((float)(1 + lower_right.y - upper_left.y) / rendering_block_size_y); ++by) {
 		for (int bx = 0; bx < ceil((float)(1 + lower_right.x - upper_left.x) / rendering_block_size_x); ++bx) {
 			if (offset >= MAX_RENDERING_BLOCKS) return;
+
+
 			//for each rendering block: add it to the list
 			DEVICEPTR(RenderingBlock) & b(rendering_block_list[offset++]);
 			b.upper_left.x = upper_left.x + bx * rendering_block_size_x;

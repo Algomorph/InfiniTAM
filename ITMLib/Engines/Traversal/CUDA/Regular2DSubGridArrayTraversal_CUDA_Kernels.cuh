@@ -23,7 +23,7 @@ template<typename TData,
 __device__ void SubElement2DTraversal_Generic_device(
 		TData* data, const unsigned int element_count,
 		TGetSubElementBoundsFunction&& get_sub_element_bounds, TApplyFunction&& apply_function) {
-	unsigned int i_item = blockIdx.x * gridDim.x + blockIdx.y;
+	unsigned int i_item = blockIdx.x * gridDim.y + blockIdx.y;
 	if (i_item >= element_count) return;
 	TData& item = data[i_item];
 	int x_local = threadIdx.x;
@@ -31,9 +31,11 @@ __device__ void SubElement2DTraversal_Generic_device(
 	int start_x, end_x, start_y, end_y;
 	get_sub_element_bounds(item, start_x, end_x, start_y, end_y);
 	int y = start_y + y_local;
-	if (y > end_y) return;
+
+	if (y >= end_y) return;
 	int x = start_x + x_local;
-	if (x > end_x) return;
+	if (x >= end_x) return;
+
 	apply_function(i_item, x, y);
 }
 

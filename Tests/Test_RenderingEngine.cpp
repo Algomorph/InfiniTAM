@@ -112,8 +112,6 @@ void GenericFindAndCountVisibleBlocksTest() {
 	std::vector<int> pose_range_visible_block_counts3;
 
 	CameraPoseAndRenderingEngineFixture<TMemoryDeviceType> fixture;
-	//_DEBUG alloc
-	int i_pose = 0;
 
 	for (auto& tracking_state : fixture.tracking_states) {
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume;
@@ -141,19 +139,6 @@ void GenericFindAndCountVisibleBlocksTest() {
 		if (visible_block_count == 0) continue; // skip shots without results
 
 		int* visible_codes_device = volume->index.GetVisibleBlockHashCodes();
-
-		//_DEBUG alloc
-		if (i_pose == 0) {
-			VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_cpu(*volume, MEMORYDEVICE_CPU);
-			int* codes_cpu = volume_cpu.index.GetVisibleBlockHashCodes();
-			std::vector<int> codes_sorted;
-			for (int i_code = 0; i_code < visible_block_count; i_code++) {
-				codes_sorted.push_back(codes_cpu[i_code]);
-			}
-			std::sort(codes_sorted.begin(), codes_sorted.end());
-//			std::cout << codes_sorted << std::endl;
-		}
-		i_pose++;
 
 		ORUtils::MemoryBlock<int> visible_codes_ground_truth =
 				ORUtils::MemoryBlockPersistence::LoadMemoryBlock<int>(visible_blocks_file, MEMORYDEVICE_CPU);
@@ -220,6 +205,7 @@ void GenericCreateExpectedDepthsTest() {
 		const int visible_block_count = volume->index.GetVisibleBlockCount();
 		if (visible_block_count == 0) continue; // skip shots without results
 		std::shared_ptr<RenderState> render_state = fixture.MakeRenderState();
+
 		fixture.rendering_engine->CreateExpectedDepths(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get());
 		ORUtils::Image<Vector2f>& range_image = *render_state->renderingRangeImage;
 		ORUtils::Image<Vector2f> range_image_ground_truth = ORUtils::MemoryBlockPersistence::LoadImage<Vector2f>(range_images_file, MEMORYDEVICE_CPU);
@@ -446,11 +432,6 @@ BOOST_AUTO_TEST_CASE(Test_FindAndCountVisibleBlocks_CPU) {
 	GenericFindAndCountVisibleBlocksTest<MEMORYDEVICE_CPU>();
 }
 
-BOOST_AUTO_TEST_CASE(Test_CreateExpectedDepths_Legacy_CPU) {
-	GenericCreateExpectedDepthsTest_Legacy<MEMORYDEVICE_CPU>();
-}
-
-
 BOOST_AUTO_TEST_CASE(Test_CreateExpectedDepths_CPU) {
 	GenericCreateExpectedDepthsTest<MEMORYDEVICE_CPU>();
 }
@@ -477,16 +458,8 @@ BOOST_AUTO_TEST_CASE(Test_ForwardRender_CPU) {
 
 #ifndef COMPILE_WITHOUT_CUDA
 
-BOOST_AUTO_TEST_CASE(Test_FindAndCountVisibleBlocks_CUDA_Legacy) {
-	GenericFindAndCountVisibleBlocksTest_Legacy<MEMORYDEVICE_CUDA>();
-}
-
 BOOST_AUTO_TEST_CASE(Test_FindAndCountVisibleBlocks_CUDA) {
 	GenericFindAndCountVisibleBlocksTest<MEMORYDEVICE_CUDA>();
-}
-
-BOOST_AUTO_TEST_CASE(Test_CreateExpectedDepths_CUDA_Legacy) {
-	GenericCreateExpectedDepthsTest_Legacy<MEMORYDEVICE_CUDA>();
 }
 
 BOOST_AUTO_TEST_CASE(Test_CreateExpectedDepths_CUDA) {

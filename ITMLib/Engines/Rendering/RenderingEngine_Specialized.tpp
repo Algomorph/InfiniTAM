@@ -76,7 +76,8 @@ void RenderingEngine_Specialized<TVoxel, VoxelBlockHash, TMemoryDeviceType>::Cre
 	ProjectAndSplitBlocksFunctor<TMemoryDeviceType> project_and_split_blocks_functor(
 			rendering_blocks, pose->GetM(), intrinsics->projectionParamsSimple.all, depth_image_size, voxel_size);
 
-	//TODO: (potential optimization) figure out whether using the "Visible" list instead of the "Utilized" list makes more sense here.
+	//TODO: (potential optimization) figure out whether using the "Visible" list instead of the "Utilized" list makes more sense here (and how to account for visible
+	// list staying up-to-date in canonical.
 	// the visible list is only reliable if it's up-to-date. If you can ensure that it is, and keeping it up-to-date takes less resources than using the
 	// bigger "utilized" list, change this back to "Visible" list like it was in the original InfiniTAM repo.
 

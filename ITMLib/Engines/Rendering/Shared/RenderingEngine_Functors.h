@@ -180,24 +180,25 @@ public: // member functions
 			: pixel_ray_bound_data(pixel_ray_bounds.GetData(TMemoryDeviceType)),
 			  image_width(pixel_ray_bounds.dimensions.width) {}
 
-#ifdef __CUDACC__
-	__device__ void operator()(const RenderingBlock& block, const int x, const int y){
-		Vector2f& pixel = pixel_ray_bound_data[x + y*image_width];
-		atomicMin(&pixel.from, block.z_range.from); atomicMax(&pixel.to, block.z_range.to);
-	}
-#else
 
+	_DEVICE_WHEN_AVAILABLE_
 	void operator()(const RenderingBlock& block, const int x, const int y) {
 		Vector2f& pixel = pixel_ray_bound_data[x + y * image_width];
+#ifdef __CUDACC__
+		atomicMin(&pixel.from, block.z_range.from); atomicMax(&pixel.to, block.z_range.to);
+#else
+#ifdef WITH_OPENMP
 #pragma omp critical
+#endif
 		{
 //TODO: figure out a parallel way to set this or to do single-threaded traversal in all cases instead (see issue #234)
 			if (pixel.from > block.z_range.x) pixel.from = block.z_range.from;
 			if (pixel.to < block.z_range.y) pixel.to = block.z_range.to;
 		};
+#endif
 	}
 
-#endif
+
 };
 
 
