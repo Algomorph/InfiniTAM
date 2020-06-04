@@ -50,12 +50,6 @@ __global__ void ITMLib::buildCompleteVisibleList_device(const HashEntry *hashTab
 	if (shouldPrefix)
 	{
 		int offset = ORUtils::ParallelSum<MEMORYDEVICE_CUDA>::Add1D<int>(hashVisibleType > 0, visibleBlockCount);
-		if(targetIdx == 296903){
-			printf("offset 296903: %d\n", offset);
-		}
-		if(targetIdx == 123480){
-			printf("offset 123480: %d\n", offset);
-		}
 		if (offset != -1) visibleBlockHashCodes[offset] = targetIdx;
 	}
 }

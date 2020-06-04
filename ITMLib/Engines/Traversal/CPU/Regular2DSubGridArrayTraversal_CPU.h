@@ -17,10 +17,11 @@
 
 #include "../Interface/Regular2DSubGridArrayTraversal.h"
 #include "RawArrayTraversal_CPU.h"
+#include "../Shared/TraversalMethod.h"
 
 namespace ITMLib {
 template<>
-class Regular2DSubGridArrayTraversal<MEMORYDEVICE_CPU> : private RawArrayTraversalEngine<MEMORYDEVICE_CPU> {
+class Regular2DSubGridArrayTraversal<MEMORYDEVICE_CPU> : private internal::RawArrayTraversalEngine_Internal<MEMORYDEVICE_CPU, EXACT, CONTIGUOUS> {
 protected: // static functions
 
 	template<typename TAppyFunction>
@@ -36,7 +37,7 @@ protected: // static functions
 	inline static void
 	TraverseRaw_Generic(TData* data, const unsigned int element_count, TApplyFunction&& apply,
 	                    TGetSubGridBoundsFunction&& get_sub_element_bounds){
-		RawArrayTraversalEngine<MEMORYDEVICE_CPU>::TraverseRaw_Generic(
+		RawArrayTraversalEngine_Internal<MEMORYDEVICE_CPU, EXACT, CONTIGUOUS>::Traverse_Generic(
 				element_count,
 				[&data, &get_sub_element_bounds, &apply](int i_item) {
 					TData& item = data[i_item];

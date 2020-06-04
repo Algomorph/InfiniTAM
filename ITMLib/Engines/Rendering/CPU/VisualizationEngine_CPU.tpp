@@ -148,6 +148,8 @@ VisualizationEngine_CPU<TVoxel, VoxelBlockHash>::CreateExpectedDepths(const Voxe
 
 		CreateRenderingBlocks(&(render_blocks[0]), offset, upperLeft, lowerRight, zRange);
 	}
+	//_DEBUG alloc
+	std::cout << "final_rendering_block_count: " << render_block_count << std::endl;
 
 	// go through rendering blocks
 	for (int blockNo = 0; blockNo < render_block_count; ++blockNo) {

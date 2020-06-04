@@ -37,9 +37,8 @@ AllocateHashEntriesUsingAllocationStateList_Generic(VoxelVolume<TVoxel, VoxelBlo
 
 	HashEntryAllocationState* hash_entry_allocation_states = volume->index.GetHashEntryAllocationStates();
 	const int hash_entry_count = volume->index.hash_entry_count;
-	RawArrayTraversalEngine<TMemoryDeviceType>::TraverseWithIndexRaw(hash_entry_allocation_states,
-	                                                                 static_cast<unsigned int>(hash_entry_count),
-	                                                                 allocation_functor);
+	RawArrayTraversalEngine<TMemoryDeviceType>::TraverseWithIndex(hash_entry_allocation_states, allocation_functor,
+	                                                              static_cast<unsigned int>(hash_entry_count));
 	allocation_functor.UpdateIndexCounters(volume->index);
 }
 
@@ -139,7 +138,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType, TExecutionMode>::
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 
 	ReallocateDeletedHashBlocksFunctor<TVoxel, TMemoryDeviceType> reallocation_functor(volume);
-	HashTableTraversalEngine<TMemoryDeviceType>::TraverseAllWithHashCode(volume->index, reallocation_functor);
+	HashTableTraversalEngine<TMemoryDeviceType>::TraverseAllWithIndex(volume->index, reallocation_functor);
 	volume->index.SetLastFreeBlockListId(GET_ATOMIC_VALUE_CPU(reallocation_functor.last_free_voxel_block_id));
 }
 
@@ -175,7 +174,7 @@ template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExe
 void IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType, TExecutionMode>::RebuildUtilizedBlockList(
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 	BuildUtilizedBlockListFunctor<TVoxel, TMemoryDeviceType> utilized_block_list_functor(volume);
-	HashTableTraversalEngine<TMemoryDeviceType>::TraverseAllWithHashCode(volume->index, utilized_block_list_functor);
+	HashTableTraversalEngine<TMemoryDeviceType>::TraverseAllWithIndex(volume->index, utilized_block_list_functor);
 	volume->index.SetUtilizedBlockCount(GET_ATOMIC_VALUE_CPU(utilized_block_list_functor.utilized_block_count));
 }
 
@@ -206,7 +205,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType, TExecutionMode>::
 		marker_functor.SetCollidingBlockCount(0);
 		volume->index.ClearHashEntryAllocationStates();
 
-		RawArrayTraversalEngine<TMemoryDeviceType>::TraverseWithIndexRaw(new_positions_device, new_block_count, marker_functor);
+		RawArrayTraversalEngine<TMemoryDeviceType>::TraverseWithIndex(new_positions_device, marker_functor, new_block_count);
 
 		AllocateHashEntriesUsingAllocationStateList(volume);
 
@@ -244,7 +243,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType, TExecutionMode>::
 		deallocation_functor.SetCollidingBlockCount(0);
 		volume->index.ClearHashEntryAllocationStates();
 
-		RawArrayTraversalEngine<TMemoryDeviceType>::TraverseWithIndexRaw(blocks_to_remove_device, count_of_blocks_to_remove, deallocation_functor);
+		RawArrayTraversalEngine<TMemoryDeviceType>::TraverseWithIndex(blocks_to_remove_device, deallocation_functor, count_of_blocks_to_remove);
 
 		count_of_blocks_to_remove = deallocation_functor.GetCollidingBlockCount();
 		std::swap(blocks_to_remove_device, deallocation_functor.colliding_positions_device);
@@ -282,7 +281,7 @@ template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExe
 static inline void ChangeVisibleBlockVisibility_Aux(VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 	const int* visible_block_hash_codes = volume->index.GetVisibleBlockHashCodes();
 	BlockVisibilitySetFunctor<TVoxel, TMemoryDeviceType, THashBlockVisibility> visibility_functor(volume);
-	RawArrayTraversalEngine<TMemoryDeviceType>::TraverseWithIndexRaw(visible_block_hash_codes, volume->index.GetVisibleBlockCount(), visibility_functor);
+	RawArrayTraversalEngine<TMemoryDeviceType>::TraverseWithIndex(visible_block_hash_codes, visibility_functor, volume->index.GetVisibleBlockCount());
 }
 
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
@@ -329,7 +328,7 @@ void AllocateUsingOtherVolume_Generic(
 	do {
 		marker_functor.resetFlagsAndCounters();
 		target_volume->index.ClearHashEntryAllocationStates();
-		HashTableTraversalEngine<TMemoryDeviceType>::TraverseUtilizedWithHashCode(
+		HashTableTraversalEngine<TMemoryDeviceType>::TraverseUtilizedWithIndex(
 				source_volume->index, marker_functor);
 		indexer.AllocateHashEntriesUsingAllocationStateList(target_volume);
 		indexer.AllocateBlockList(target_volume, marker_functor.colliding_block_positions,

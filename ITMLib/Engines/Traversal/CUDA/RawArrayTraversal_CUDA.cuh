@@ -18,76 +18,118 @@
 #include "../Interface/RawArrayTraversal.h"
 #include "../../../../ORUtils/MemoryBlock.h"
 #include "RawArrayTraversal_CUDA_Kernels.cuh"
+#include "../Shared/CudaCallWrappers.cuh"
 
 namespace ITMLib {
 
+namespace internal {
+
 template<>
-class RawArrayTraversalEngine<MEMORYDEVICE_CUDA> {
+class RawArrayTraversalEngine_Internal<MEMORYDEVICE_CUDA, JobCountPolicy::EXACT, CONTIGUOUS> {
+	friend class RawArrayTraversalEngine<MEMORYDEVICE_CUDA>;
 protected: // static functions
-	template<typename TFunctor, typename TCudaCall>
-	inline static void TraverseRaw_Generic(TFunctor& functor, TCudaCall&& cuda_call) {
-		TFunctor* functor_device;
-
-		ORcudaSafeCall(cudaMalloc((void**) &functor_device, sizeof(TFunctor)));
-		ORcudaSafeCall(cudaMemcpy(functor_device, &functor, sizeof(TFunctor), cudaMemcpyHostToDevice));
-
-		cuda_call(functor_device);
-		ORcudaKernelCheck;
-
-		ORcudaSafeCall(cudaMemcpy(&functor, functor_device, sizeof(TFunctor), cudaMemcpyDeviceToHost));
-		ORcudaSafeCall(cudaFree(functor_device));
-	}
-
-	template<typename TData, typename TFunctor>
-	inline static void TraverseRawWithIndex_Generic(TData* data, const unsigned int element_count, TFunctor& functor) {
-		TraverseRaw_Generic(
+	template<typename TData, typename TFunctor, int TBlockSize = 256>
+	inline static void TraverseWithIndex_Generic(TData* data, TFunctor& functor, const unsigned int element_count) {
+		CUDA_CallWithFunctor_Generic(
 				functor,
 				[&element_count, &data](TFunctor* functor_device) {
-					dim3 cuda_block_size(256);
+					dim3 cuda_block_size(TBlockSize);
 					dim3 cuda_grid_size(ceil_of_integer_quotient(element_count, cuda_block_size.x));
-					RawArrayTraversalWithItemIndex_Exact_device<TData, TFunctor> <<<cuda_grid_size, cuda_block_size>>>
+					TraverseContiguousWithIndex_Exact_device<TData, TFunctor> <<<cuda_grid_size, cuda_block_size>>>
 							(data, element_count, functor_device);
 				}
 		);
 	}
 
-	template<typename TData, typename TFunctor>
-	inline static void TraverseRawWithoutIndex_Generic(TData* data, const unsigned int element_count, TFunctor& functor) {
-		TraverseRaw_Generic(
+	template<typename TData, typename TFunctor, int TBlockSize = 256>
+	inline static void TraverseWithoutIndex_Generic(TData* data, TFunctor& functor, const unsigned int element_count) {
+		CUDA_CallWithFunctor_Generic(
 				functor,
 				[&element_count, &data](TFunctor* functor_device) {
-					dim3 cuda_block_size(256);
+					dim3 cuda_block_size(TBlockSize);
 					dim3 cuda_grid_size(ceil_of_integer_quotient(element_count, cuda_block_size.x));
-					RawArrayTraversalWithoutItemIndex_Exact_device<TData, TFunctor> <<<cuda_grid_size, cuda_block_size>>>
+					TraverseContiguousWithoutItemIndex_Exact_device<TData, TFunctor> <<<cuda_grid_size, cuda_block_size>>>
 							(data, element_count, functor_device);
 				}
 		);
-	}
-
-public: // static functions
-	template<typename T, typename TFunctor>
-	inline static void
-	TraverseRaw(T* data, const unsigned int element_count, TFunctor& functor) {
-		TraverseRawWithoutIndex_Generic<T, TFunctor>(data, element_count, functor);
-	}
-
-	template<typename T, typename TFunctor>
-	inline static void
-	TraverseRaw(const T* data, const unsigned int element_count, TFunctor& functor) {
-		TraverseRawWithoutIndex_Generic<const T, TFunctor>(data, element_count, functor);
-	}
-
-	template<typename T, typename TFunctor>
-	inline static void
-	TraverseWithIndexRaw(T* data, const unsigned int element_count, TFunctor& functor) {
-		TraverseRawWithIndex_Generic<T, TFunctor>(data, element_count, functor);
-	}
-
-	template<typename T, typename TFunctor>
-	inline static void
-	TraverseWithIndexRaw(const T* data, const unsigned int element_count, TFunctor& functor) {
-		TraverseRawWithIndex_Generic<const T, TFunctor>(data, element_count, functor);
 	}
 };
 
+template<>
+class RawArrayTraversalEngine_Internal<MEMORYDEVICE_CUDA, JobCountPolicy::EXACT, INDEX_SAMPLE> {
+	friend class RawArrayTraversalEngine<MEMORYDEVICE_CUDA>;
+protected: // static functions
+	template<typename TData, typename TFunctor, typename TGetSampleSizeFunction, typename TGetSampleIndicesFunction, int TBlockSize = 256>
+	inline static void TraverseWithIndex_Generic(TData* data, TFunctor& functor,
+	                                             TGetSampleSizeFunction&& get_sample_size, TGetSampleIndicesFunction&& get_sample_indices) {
+		const int sample_size = std::forward<TGetSampleSizeFunction>(get_sample_size)();
+		const int* sample_indices = std::forward<TGetSampleIndicesFunction>(get_sample_indices)();
+		CUDA_CallWithFunctor_Generic(
+				functor,
+				[&sample_size, &sample_indices, &data](TFunctor* functor_device) {
+					dim3 cuda_block_size(TBlockSize);
+					dim3 cuda_grid_size(ceil_of_integer_quotient(sample_size, cuda_block_size.x));
+					TraverseSampleWithIndex_Exact_device<TData, TFunctor> <<<cuda_grid_size, cuda_block_size>>>
+							(data, sample_indices, sample_size, functor_device);
+				}
+		);
+	}
+
+	template<typename TData, typename TFunctor, typename TGetSampleSizeFunction, typename TGetSampleIndicesFunction, int TBlockSize = 256>
+	inline static void TraverseWithoutIndex_Generic(TData* data, TFunctor& functor,
+	                                                TGetSampleSizeFunction&& get_sample_size, TGetSampleIndicesFunction&& get_sample_indices) {
+		const int sample_size = std::forward<TGetSampleSizeFunction>(get_sample_size)();
+		const int* sample_indices = std::forward<TGetSampleIndicesFunction>(get_sample_indices)();
+		CUDA_CallWithFunctor_Generic(
+				functor,
+				[&sample_size, &sample_indices, &data](TFunctor* functor_device) {
+					dim3 cuda_block_size(TBlockSize);
+					dim3 cuda_grid_size(ceil_of_integer_quotient(sample_size, cuda_block_size.x));
+					TraverseSampleWithoutIndex_Exact_device<TData, TFunctor> <<<cuda_grid_size, cuda_block_size>>>
+							(data, sample_indices, sample_size, functor_device);
+				}
+		);
+	}
+
+};
+template<>
+class RawArrayTraversalEngine_Internal<MEMORYDEVICE_CUDA, JobCountPolicy::PADDED, CONTIGUOUS> {
+	friend class RawArrayTraversalEngine<MEMORYDEVICE_CUDA>;
+protected: // static functions
+	template<typename TData, typename TFunctor>
+	inline static void Traverse_Generic(TData* data, TFunctor& functor, const unsigned int element_count) {
+		CUDA_CallWithFunctor_Generic(
+				functor,
+				[&element_count, &data](TFunctor* functor_device) {
+					dim3 cuda_block_size(256);
+					dim3 cuda_grid_size(ceil_of_integer_quotient(element_count, cuda_block_size.x));
+					TraverseContiguous_Padded_Generic_device<TData, TFunctor> <<<cuda_grid_size, cuda_block_size>>>
+							(data, element_count, functor_device);
+				}
+		);
+	}
+
+};
+template<>
+class RawArrayTraversalEngine_Internal<MEMORYDEVICE_CUDA, JobCountPolicy::PADDED, INDEX_SAMPLE> {
+	friend class RawArrayTraversalEngine<MEMORYDEVICE_CUDA>;
+protected: // static functions
+	template<typename TData, typename TFunctor, typename TGetSampleSizeFunction, typename TGetSampleIndicesFunction, int TBlockSize = 256>
+	inline static void Traverse_Generic(TData* data, TFunctor& functor,
+	                                             TGetSampleSizeFunction&& get_sample_size, TGetSampleIndicesFunction&& get_sample_indices) {
+		const int sample_size = std::forward<TGetSampleSizeFunction>(get_sample_size)();
+		const int* sample_indices = std::forward<TGetSampleIndicesFunction>(get_sample_indices)();
+		CUDA_CallWithFunctor_Generic(
+				functor,
+				[&sample_size, &sample_indices, &data](TFunctor* functor_device) {
+					dim3 cuda_block_size(TBlockSize);
+					dim3 cuda_grid_size(ceil_of_integer_quotient(sample_size, cuda_block_size.x));
+					TraverseSample_Padded_Generic_device<TData, TFunctor> <<<cuda_grid_size, cuda_block_size>>>
+							(data, sample_indices, sample_size, functor_device);
+				}
+		);
+	}
+
+};
+} // namespace internal
 } // namespace ITMLib

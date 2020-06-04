@@ -15,27 +15,26 @@
 //  ================================================================
 //local
 #include "../Interface/MemoryBlockTraversal.h"
-#include "../Interface/RawArrayTraversal.h"
+#include "RawArrayTraversal_CUDA.cuh"
 #include "../../../../ORUtils/MemoryBlock.h"
-#include "RawArrayTraversal_CPU.h"
 
 namespace ITMLib {
 namespace internal{
 template<>
-class MemoryBlockTraversalEngine_Internal<MEMORYDEVICE_CPU> : private internal::RawArrayTraversalEngine_Internal<MEMORYDEVICE_CPU, EXACT, CONTIGUOUS> {
+class MemoryBlockTraversalEngine_Internal<MEMORYDEVICE_CUDA> : private internal::RawArrayTraversalEngine_Internal<MEMORYDEVICE_CUDA, EXACT, CONTIGUOUS> {
 protected: // static functions
 	template<typename TData, typename TMemoryBlock, typename TFunctor>
-	inline static void TraverseWithIndex_Generic(TMemoryBlock& memory_block, TFunctor& functor, unsigned int element_count){
-		TData* data = memory_block.GetData(MEMORYDEVICE_CPU);
+	inline static void TraverseWithIndex_Generic(TMemoryBlock& memory_block, TFunctor& functor, unsigned int element_count) {
+		TData* data = memory_block.GetData(MEMORYDEVICE_CUDA);
 		assert(element_count <= memory_block.size());
-		RawArrayTraversalEngine_Internal<MEMORYDEVICE_CPU, EXACT, CONTIGUOUS>::Traverse_Generic(data, functor, element_count);
+		RawArrayTraversalEngine_Internal<MEMORYDEVICE_CUDA, EXACT, CONTIGUOUS>::TraverseWithIndex_Generic(data, functor, element_count);
 	}
 
 	template<typename TData, typename TMemoryBlock, typename TFunctor>
-	inline static void TraverseWithoutIndex_Generic(TMemoryBlock& memory_block, TFunctor& functor, unsigned int element_count){
-		TData* data = memory_block.GetData(MEMORYDEVICE_CPU);
+	inline static void TraverseWithoutIndex_Generic(TMemoryBlock& memory_block, TFunctor& functor, unsigned int element_count) {
+		TData* data = memory_block.GetData(MEMORYDEVICE_CUDA);
 		assert(element_count <= memory_block.size());
-		RawArrayTraversalEngine_Internal<MEMORYDEVICE_CPU, EXACT, CONTIGUOUS>::TraverseWithoutIndex_Generic(data, functor, element_count);
+		RawArrayTraversalEngine_Internal<MEMORYDEVICE_CUDA, EXACT, CONTIGUOUS>::TraverseWithoutIndex_Generic(data, functor, element_count);
 	}
 };
 } // namespace internal

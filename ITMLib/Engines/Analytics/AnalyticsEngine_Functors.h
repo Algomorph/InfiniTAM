@@ -690,7 +690,7 @@ struct HashOnlyAnalysisFunctor<TVoxel, VoxelBlockHash, TMemoryDeviceType> {
 	static std::vector<int> GetAllocatedHashCodes(const VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 		unsigned int allocated_count = ComputeAllocatedHashBlockCount(volume);
 		AllocatedHashesAggregationFunctor<TMemoryDeviceType> aggregator_functor(allocated_count);
-		HashTableTraversalEngine<TMemoryDeviceType>::TraverseAllWithHashCode(volume->index, aggregator_functor);
+		HashTableTraversalEngine<TMemoryDeviceType>::TraverseAllWithIndex(volume->index, aggregator_functor);
 		return aggregator_functor.data();
 	}
 
@@ -700,7 +700,7 @@ struct HashOnlyAnalysisFunctor<TVoxel, VoxelBlockHash, TMemoryDeviceType> {
 			return std::vector<Vector3s>();
 		}
 		BlockPositionAggregationFunctor<TMemoryDeviceType> aggregator_functor(allocated_count);
-		HashTableTraversalEngine<TMemoryDeviceType>::TraverseAllWithHashCode(volume->index, aggregator_functor);
+		HashTableTraversalEngine<TMemoryDeviceType>::TraverseAllWithIndex(volume->index, aggregator_functor);
 		return aggregator_functor.data();
 	}
 
@@ -715,7 +715,7 @@ struct HashOnlyAnalysisFunctor<TVoxel, VoxelBlockHash, TMemoryDeviceType> {
 			return std::vector<Vector3s>();
 		}
 		BlockPositionAggregationFunctor<TMemoryDeviceType> aggregator_functor(utilized_count);
-		HashTableTraversalEngine<TMemoryDeviceType>::TraverseUtilizedWithHashCode(volume->index, aggregator_functor);
+		HashTableTraversalEngine<TMemoryDeviceType>::TraverseUtilizedWithIndex(volume->index, aggregator_functor);
 		return aggregator_functor.data();
 	}
 
@@ -731,7 +731,7 @@ struct HashOnlyAnalysisFunctor<TVoxel, VoxelBlockHash, TMemoryDeviceType> {
 
 	static unsigned int ComputeAllocatedHashBlockCount(const VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 		AllocatedHashBlockCountFunctor<TMemoryDeviceType> count_functor;
-		HashTableTraversalEngine<TMemoryDeviceType>::TraverseAllWithHashCode(volume->index, count_functor);
+		HashTableTraversalEngine<TMemoryDeviceType>::TraverseAllWithIndex(volume->index, count_functor);
 		return count_functor.get_count();
 	}
 

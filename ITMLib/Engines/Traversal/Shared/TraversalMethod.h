@@ -1,5 +1,5 @@
 //  ================================================================
-//  Created by Gregory Kramida on 2/4/20.
+//  Created by Gregory Kramida (https://github.com/Algomorph) on 6/3/20.
 //  Copyright (c) 2020 Gregory Kramida
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -13,11 +13,11 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-//local
-#include "../../../Utils/Math.h"
-#include "../../../Objects/Volume/VoxelBlockHash.h"
-#include "../Shared/JobCountPolicy.h"
-
-namespace {
-
-} // end anonymous namespace: CUDA global kernels
+#pragma once
+#include "../../../Utils/Metacoding/SerializableEnum.h"
+namespace ITMLib{
+#define TRAVERSAL_METHOD_ENUM_DESCRIPTION TraversalMethod, \
+    (CONTIGUOUS, "contiguous", "CONTIGUOUS"), \
+    (INDEX_SAMPLE, "index_sample", "INDEX_SAMPLE")
+DECLARE_SERIALIZABLE_ENUM(TRAVERSAL_METHOD_ENUM_DESCRIPTION);
+} // namespace ITMLib

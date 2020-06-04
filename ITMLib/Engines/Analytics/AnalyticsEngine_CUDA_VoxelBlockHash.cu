@@ -15,7 +15,7 @@
 //  ================================================================
 #include "../Traversal/CUDA/VolumeTraversal_CUDA_VoxelBlockHash.h"
 #include "../Reduction/CUDA/VolumeReduction_CUDA_VoxelBlockHash.h"
-#include "../Traversal/CUDA/HashTableTraversal_CUDA.h"
+#include "../Traversal/CUDA/HashTableTraversal_CUDA.cuh"
 #include "../../GlobalTemplateDefines.h"
 #include "AnalyticsEngine.tpp"
 

@@ -14,7 +14,7 @@
 //  limitations under the License.
 //  ================================================================
 //local
-#include "ImageTraversal_CUDA_Kernels.h"
+#include "ImageTraversal_CUDA_Kernels.cuh"
 #include "../Interface/ImageTraversal.h"
 #include "../../../Utils/Math.h"
 #include "../../../../ORUtils/Image.h"

@@ -1,5 +1,5 @@
 //  ================================================================
-//  Created by Gregory Kramida (https://github.com/Algomorph) on 6/2/20.
+//  Created by Gregory Kramida (https://github.com/Algomorph) on 6/3/20.
 //  Copyright (c) 2020 Gregory Kramida
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -14,10 +14,23 @@
 //  limitations under the License.
 //  ================================================================
 #pragma once
-#include "../../../Utils/Metacoding/SerializableEnum.h"
-namespace ITMLib{
-#define JOB_COUNT_POLICY_ENUM_DESCRIPTION JobCountPolicy, \
-    (PADDED, "padded", "PADDED", "padded_to_thread_count", "collection_size_padded_to_thread_count"), \
-    (EXACT, "exact", "EXACT", "collection_size")
-DECLARE_SERIALIZABLE_ENUM(JOB_COUNT_POLICY_ENUM_DESCRIPTION);
-}// namespace ITMLib
+
+#include "../../../../ORUtils/CUDADefines.h"
+
+namespace ITMLib {
+namespace internal {
+template<typename TFunctor, typename TCudaCall>
+inline static void CUDA_CallWithFunctor_Generic(TFunctor& functor, TCudaCall&& cuda_call) {
+	TFunctor* functor_device;
+
+	ORcudaSafeCall(cudaMalloc((void**) &functor_device, sizeof(TFunctor)));
+	ORcudaSafeCall(cudaMemcpy(functor_device, &functor, sizeof(TFunctor), cudaMemcpyHostToDevice));
+
+	cuda_call(functor_device);
+	ORcudaKernelCheck;
+
+	ORcudaSafeCall(cudaMemcpy(&functor, functor_device, sizeof(TFunctor), cudaMemcpyDeviceToHost));
+	ORcudaSafeCall(cudaFree(functor_device));
+}
+} // namespace internal
+} // namespace ITMLib

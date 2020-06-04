@@ -13,8 +13,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "../Traversal/CUDA/HashTableTraversal_CUDA.h"
-#include "../Traversal/CUDA/ImageTraversal_CUDA.h"
+#include "../Traversal/CUDA/HashTableTraversal_CUDA.cuh"
+#include "../Traversal/CUDA/ImageTraversal_CUDA.cuh"
 #include "../Traversal/CUDA/Regular2DSubGridArrayTraversal_CUDA.cuh"
 #include "RenderingEngine.tpp"
 #include "../../GlobalTemplateDefines.h"

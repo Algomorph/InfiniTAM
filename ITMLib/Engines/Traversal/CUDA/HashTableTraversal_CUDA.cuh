@@ -1,5 +1,5 @@
 //  ================================================================
-//  Created by Gregory Kramida (https://github.com/Algomorph) on 6/2/20.
+//  Created by Gregory Kramida on 2/4/20.
 //  Copyright (c) 2020 Gregory Kramida
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -14,10 +14,7 @@
 //  limitations under the License.
 //  ================================================================
 #pragma once
-#include "../../../Utils/Metacoding/SerializableEnum.h"
-namespace ITMLib{
-#define JOB_COUNT_POLICY_ENUM_DESCRIPTION JobCountPolicy, \
-    (PADDED, "padded", "PADDED", "padded_to_thread_count", "collection_size_padded_to_thread_count"), \
-    (EXACT, "exact", "EXACT", "collection_size")
-DECLARE_SERIALIZABLE_ENUM(JOB_COUNT_POLICY_ENUM_DESCRIPTION);
-}// namespace ITMLib
+//local
+#include "../Interface/HashTableTraversal.h"
+#include "HashTableTraversal_CUDA_Kernels.cuh"
+#include "RawArrayTraversal_CUDA.cuh"

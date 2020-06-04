@@ -14,64 +14,116 @@
 //  limitations under the License.
 //  ================================================================
 #pragma once
+#ifdef WITH_OPENMP
+
+#include <omp.h>
+
+#endif
 //local
 #include "../Interface/RawArrayTraversal.h"
 #include "../../../../ORUtils/MemoryBlock.h"
 
+
 namespace ITMLib {
 
+namespace internal {
+
 template<>
-class RawArrayTraversalEngine<MEMORYDEVICE_CPU> {
+class RawArrayTraversalEngine_Internal<MEMORYDEVICE_CPU, JobCountPolicy::EXACT, CONTIGUOUS> {
+	friend class RawArrayTraversalEngine<MEMORYDEVICE_CPU>;
 protected: // static functions
 	template<typename TApplyFunction>
-	inline static void
-	TraverseRaw_Generic(const unsigned int element_count, TApplyFunction&& apply_function){
+	inline static void Traverse_Generic(const unsigned int element_count, TApplyFunction&& apply_function) {
 #ifdef WITH_OPENMP
 #pragma omp parallel for default(none) shared(apply_function)
 #endif
-		for (int i_item = 0; i_item < element_count; i_item++){
+		for (int i_item = 0; i_item < element_count; i_item++) {
 			apply_function(i_item);
 		}
 	}
 
 	template<typename TData, typename TFunctor>
-	inline static void
-	TraverseRawWithIndex_Generic(TData* data, const unsigned int element_count, TFunctor& functor){
-		TraverseRaw_Generic(element_count, [&functor, &data](int i_item) { functor(data[i_item], i_item); });
+	inline static void TraverseWithIndex_Generic(TData* data, TFunctor& functor, const unsigned int element_count) {
+		Traverse_Generic(element_count, [&functor, &data](int i_item) { functor(data[i_item], i_item); });
 	}
-	
+
 	template<typename TData, typename TFunctor>
-	inline static void
-	TraverseRawWithoutIndex_Generic(TData* data, const unsigned int element_count, TFunctor& functor){
-		TraverseRaw_Generic(element_count, [&functor, &data](int i_item) { functor(data[i_item]); });
+	inline static void TraverseWithoutIndex_Generic(TData* data, TFunctor& functor, const unsigned int element_count) {
+		Traverse_Generic(element_count, [&functor, &data](int i_item) { functor(data[i_item]); });
 	}
-
-public: // static functions
-	
-	template<typename T, typename TFunctor>
-	inline static void
-	TraverseRaw(T* data, const unsigned int element_count, TFunctor& functor){
-		TraverseRawWithoutIndex_Generic<T, TFunctor>(data, element_count, functor);
-	}
-
-	template<typename T, typename TFunctor>
-	inline static void
-	TraverseRaw(const T* data, const unsigned int element_count, TFunctor& functor){
-		TraverseRawWithoutIndex_Generic<const T, TFunctor>(data, element_count, functor);
-	}
-	
-	template<typename T, typename TFunctor>
-	inline static void
-	TraverseWithIndexRaw(T* data, const unsigned int element_count, TFunctor& functor){
-		TraverseRawWithIndex_Generic<T, TFunctor>(data, element_count, functor);
-	}
-
-	template<typename T, typename TFunctor>
-	inline static void
-	TraverseWithIndexRaw(const T* data, const unsigned int element_count, TFunctor& functor){
-		TraverseRawWithIndex_Generic<const T, TFunctor>(data, element_count, functor);
-	}
-
 };
+template<>
+class RawArrayTraversalEngine_Internal<MEMORYDEVICE_CPU, JobCountPolicy::EXACT, INDEX_SAMPLE> {
+	friend class RawArrayTraversalEngine<MEMORYDEVICE_CPU>;
+protected: // static functions
+	template<typename TApplyFunction, typename TGetSampleSizeFunction, typename TGetSampleIndicesFunction>
+	inline static void Traverse_Generic(TGetSampleSizeFunction&& get_sample_size, TGetSampleIndicesFunction&& get_sample_indices,
+	                                          TApplyFunction&& apply_function) {
+		const int sample_size = std::forward<TGetSampleSizeFunction>(get_sample_size)();
+		const int* sample_indices = std::forward<TGetSampleIndicesFunction>(get_sample_indices)();
+#ifdef WITH_OPENMP
+#pragma omp parallel for default(none) shared(apply_function, sample_indices)
+#endif
+		for (int i_index = 0; i_index < sample_size; i_index++) {
+			const int i_item = sample_indices[i_index];
+			apply_function(i_item);
+		}
+	}
 
+	template<typename TData, typename TFunctor, typename TGetSampleSizeFunction, typename TGetSampleIndicesFunction>
+	inline static void TraverseWithIndex_Generic(TData* data, TFunctor& functor,
+	                                             TGetSampleSizeFunction&& get_sample_size, TGetSampleIndicesFunction&& get_sample_indices) {
+		Traverse_Generic(get_sample_size, get_sample_indices, [&functor, &data](int i_item) { functor(data[i_item], i_item); });
+	}
+
+	template<typename TData, typename TFunctor, typename TGetSampleSizeFunction, typename TGetSampleIndicesFunction>
+	inline static void TraverseWithoutIndex_Generic(TData* data, TFunctor& functor,
+	                                                TGetSampleSizeFunction&& get_sample_size, TGetSampleIndicesFunction&& get_sample_indices) {
+		Traverse_Generic(get_sample_size, get_sample_indices, [&functor, &data](int i_item) { functor(data[i_item]); });
+	}
+};
+template<>
+class RawArrayTraversalEngine_Internal<MEMORYDEVICE_CPU, JobCountPolicy::PADDED, CONTIGUOUS> {
+	friend class RawArrayTraversalEngine<MEMORYDEVICE_CPU>;
+protected: // static functions
+	template<typename TData, typename TFunctor>
+	inline static void Traverse_Generic(TData* data, TFunctor& functor, const unsigned int element_count) {
+#ifdef WITH_OPENMP
+		unsigned int thread_count = omp_get_max_threads();
+		unsigned int job_count = ceil_of_integer_quotient(element_count, thread_count) * thread_count;
+#pragma omp parallel for default(none) shared(data, functor)
+		for (int i_item = 0; i_item < job_count; i_item++) {
+			functor(data, i_item, i_item >= element_count);
+		}
+#else
+		for (int i_item = 0; i_item < element_count; i_item++) {
+			functor(data, i_item, false);
+		}
+#endif
+	}
+};
+template<>
+class RawArrayTraversalEngine_Internal<MEMORYDEVICE_CPU, JobCountPolicy::PADDED, INDEX_SAMPLE> {
+	friend class RawArrayTraversalEngine<MEMORYDEVICE_CPU>;
+protected: // static functions
+	template<typename TData, typename TFunctor, typename TGetSampleSizeFunction, typename TGetSampleIndicesFunction>
+	inline static void Traverse_Generic(TData* data, TFunctor& functor,
+	                                          TGetSampleSizeFunction&& get_sample_size, TGetSampleIndicesFunction&& get_sample_indices) {
+		const int sample_size = std::forward<TGetSampleSizeFunction>(get_sample_size)();
+		const int* sample_indices = std::forward<TGetSampleIndicesFunction>(get_sample_indices)();
+#ifdef WITH_OPENMP
+		const int thread_count = omp_get_max_threads();
+		const int job_count = ceil_of_integer_quotient(sample_size, thread_count) * thread_count;
+#pragma omp parallel for default(none) shared(sample_indices, data, functor)
+		for (int i_index = 0; i_index < job_count; i_index++) {
+			functor(data, sample_indices[i_index], i_index >= sample_size);
+		}
+#else
+		for (int i_index = 0; i_index < sample_size; i_index++) {
+			functor(data, sample_indices[i_index], false);
+		}
+#endif
+	}
+};
+} // namespace internal
 } // namespace ITMLib

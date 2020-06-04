@@ -15,8 +15,47 @@
 //  ================================================================
 #pragma once
 #include "../../../../ORUtils/MemoryDeviceType.h"
+#include "../../../../ORUtils/MemoryBlock.h"
+#include "../Shared/ContiguousCollectionTraversal_Shared.h"
 
 namespace ITMLib {
-template<MemoryDeviceType TDeviceType>
-class MemoryBlockTraversalEngine;
+
+namespace internal{
+	template<MemoryDeviceType TDeviceType>
+	class MemoryBlockTraversalEngine_Internal;
+} // namespace internal
+template<MemoryDeviceType TMemoryDeviceType>
+class MemoryBlockTraversalEngine : private internal::MemoryBlockTraversalEngine_Internal<TMemoryDeviceType>{
+private: // static functions
+
+public: // static functions
+	template<typename T, typename TFunctor>
+	inline static void
+	Traverse(ORUtils::MemoryBlock<T>& memory_block, TFunctor& functor, unsigned int element_count = static_cast<unsigned int>(SpecialValue::USE_MAX)){
+		HandleDefaultElementCount(element_count, memory_block);
+		internal::MemoryBlockTraversalEngine_Internal<TMemoryDeviceType>::template TraverseWithoutIndex_Generic<T, ORUtils::MemoryBlock<T>, TFunctor>(memory_block, element_count, functor);
+	}
+
+	template<typename T, typename TFunctor>
+	inline static void
+	Traverse(const ORUtils::MemoryBlock<T>& memory_block, TFunctor& functor, const unsigned int element_count = static_cast<unsigned int>(SpecialValue::USE_MAX)){
+		HandleDefaultElementCount(element_count, memory_block);
+		internal::MemoryBlockTraversalEngine_Internal<TMemoryDeviceType>::template TraverseWithoutIndex_Generic<const T, const ORUtils::MemoryBlock<T>, TFunctor>(memory_block, element_count, functor);
+	}
+
+	template<typename T, typename TFunctor>
+	inline static void
+	TraverseWithIndex(ORUtils::MemoryBlock<T>& memory_block, TFunctor& functor, const unsigned int element_count = static_cast<unsigned int>(SpecialValue::USE_MAX)){
+		HandleDefaultElementCount(element_count, memory_block);
+		internal::MemoryBlockTraversalEngine_Internal<TMemoryDeviceType>::template TraverseWithIndex_Generic<T, ORUtils::MemoryBlock<T>, TFunctor>(memory_block, element_count, functor);
+	}
+
+	template<typename T, typename TFunctor>
+	inline static void
+	TraverseWithIndex(const ORUtils::MemoryBlock<T>& memory_block, TFunctor& functor, const unsigned int element_count = static_cast<unsigned int>(SpecialValue::USE_MAX)){
+		HandleDefaultElementCount(element_count, memory_block);
+		internal::MemoryBlockTraversalEngine_Internal<TMemoryDeviceType>::template TraverseWithIndex_Generic<const T, const ORUtils::MemoryBlock<T>, TFunctor>(memory_block, element_count, functor);
+	}
+
+};
 } // namespace ITMLib

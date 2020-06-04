@@ -16,7 +16,7 @@
 #include "../../GlobalTemplateDefines.h"
 #include "../Reduction/CUDA/VolumeReduction_CUDA_PlainVoxelArray.h"
 #include "../Traversal/CUDA/VolumeTraversal_CUDA_PlainVoxelArray.h"
-#include "../Traversal/CUDA/HashTableTraversal_CUDA.h"
+#include "../Traversal/CUDA/HashTableTraversal_CUDA.cuh"
 #include "AnalyticsEngine.tpp"
 
 namespace ITMLib {

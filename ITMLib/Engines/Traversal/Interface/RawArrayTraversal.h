@@ -14,9 +14,38 @@
 //  limitations under the License.
 //  ================================================================
 #pragma once
+
 #include "../../../../ORUtils/MemoryDeviceType.h"
+#include "../Shared/JobCountPolicy.h"
+#include "../Shared/TraversalMethod.h"
 
 namespace ITMLib {
+namespace internal {
+template<MemoryDeviceType TDeviceType, JobCountPolicy TJobCountPolicy, TraversalMethod TTraversalMethod>
+class RawArrayTraversalEngine_Internal;
+} // namespace internal
 template<MemoryDeviceType TDeviceType>
-class RawArrayTraversalEngine;
+class RawArrayTraversalEngine{
+public: // static functions
+	template<JobCountPolicy TJobCountPolicy = JobCountPolicy::EXACT, typename T, typename TFunctor>
+	inline static void Traverse(T* data, TFunctor& functor, const unsigned int element_count) {
+		internal::RawArrayTraversalEngine_Internal<TDeviceType, TJobCountPolicy, CONTIGUOUS>::template TraverseWithoutIndex_Generic<T, TFunctor>(data, functor, element_count);
+	}
+
+	template<JobCountPolicy TJobCountPolicy = JobCountPolicy::EXACT, typename T, typename TFunctor>
+	inline static void Traverse(const T* data, TFunctor& functor, const unsigned int element_count) {
+		internal::RawArrayTraversalEngine_Internal<TDeviceType, TJobCountPolicy, CONTIGUOUS>::template TraverseWithoutIndex_Generic<const T, TFunctor>(data, functor, element_count);
+	}
+
+	template<JobCountPolicy TJobCountPolicy = JobCountPolicy::EXACT, typename T, typename TFunctor>
+	inline static void TraverseWithIndex(T* data, TFunctor& functor, const unsigned int element_count) {
+		internal::RawArrayTraversalEngine_Internal<TDeviceType, TJobCountPolicy, CONTIGUOUS>::template TraverseWithIndex_Generic<T, TFunctor>(data, functor, element_count);
+	}
+
+	template<JobCountPolicy TJobCountPolicy = JobCountPolicy::EXACT, typename T, typename TFunctor>
+	inline static void TraverseWithIndex(const T* data, TFunctor& functor, const unsigned int element_count) {
+		internal::RawArrayTraversalEngine_Internal<TDeviceType, TJobCountPolicy, CONTIGUOUS>::template TraverseWithIndex_Generic<const T, TFunctor>(data, functor, element_count);
+	}
+};
+
 } // namespace ITMLib

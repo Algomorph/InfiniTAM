@@ -14,10 +14,18 @@
 //  limitations under the License.
 //  ================================================================
 #pragma once
-#include "../../../Utils/Metacoding/SerializableEnum.h"
+#include <climits>
+#include "../../../../ORUtils/MemoryBlock.h"
+
 namespace ITMLib{
-#define JOB_COUNT_POLICY_ENUM_DESCRIPTION JobCountPolicy, \
-    (PADDED, "padded", "PADDED", "padded_to_thread_count", "collection_size_padded_to_thread_count"), \
-    (EXACT, "exact", "EXACT", "collection_size")
-DECLARE_SERIALIZABLE_ENUM(JOB_COUNT_POLICY_ENUM_DESCRIPTION);
-}// namespace ITMLib
+enum class SpecialValue : unsigned int{
+	USE_MAX = UINT_MAX
+};
+template<typename TCollection>
+inline static void HandleDefaultElementCount(unsigned int& element_count, const TCollection& collection){
+	if(element_count == static_cast<unsigned int>(SpecialValue::USE_MAX)){
+		element_count =  static_cast<unsigned int>(collection.size());
+	}
+}
+
+} // namespace ITMLib

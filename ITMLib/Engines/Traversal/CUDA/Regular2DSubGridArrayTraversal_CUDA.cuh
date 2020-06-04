@@ -16,12 +16,13 @@
 #pragma once
 
 #include "../Interface/Regular2DSubGridArrayTraversal.h"
-#include "Regular2DSubGridArrayTraversal_CUDA_Kernels.cuh"
 #include "RawArrayTraversal_CUDA.cuh"
+#include "../Shared/CudaCallWrappers.cuh"
+#include "Regular2DSubGridArrayTraversal_CUDA_Kernels.cuh"
 
 namespace ITMLib {
 template<>
-class Regular2DSubGridArrayTraversal<MEMORYDEVICE_CUDA> : private RawArrayTraversalEngine<MEMORYDEVICE_CUDA> {
+class Regular2DSubGridArrayTraversal<MEMORYDEVICE_CUDA>{
 protected: // static functions
 	template<int TMaxSubGridX,
 			int TMaxSubGridY,
@@ -32,7 +33,7 @@ protected: // static functions
 			TData* data, const unsigned int element_count, TFunctor& functor,
 			TGetSubGridBoundsFunction&& get_sub_element_bounds
 	) {
-		RawArrayTraversalEngine<MEMORYDEVICE_CUDA>::TraverseRaw_Generic(
+		internal::CUDA_CallWithFunctor_Generic(
 				functor,
 				[&data, &element_count, &get_sub_element_bounds](TFunctor* functor_device) {
 					dim3 cuda_block_size(TMaxSubGridX, TMaxSubGridY);
@@ -50,7 +51,7 @@ protected: // static functions
 			TData* data, const unsigned int element_count, TFunctor& functor,
 			TGetSubGridBoundsFunction&& get_sub_element_bounds
 	) {
-		RawArrayTraversalEngine<MEMORYDEVICE_CUDA>::TraverseRaw_Generic(
+		internal::CUDA_CallWithFunctor_Generic(
 				functor,
 				[&data, &element_count, &get_sub_element_bounds] (TFunctor* functor_device) {
 					dim3 cuda_block_size(TMaxSubGridX, TMaxSubGridY);
@@ -66,7 +67,7 @@ protected: // static functions
 	inline static void
 	TraverseWithIndex_Generic(TMemoryBlock& memory_block, const unsigned int element_count, TFunctor& functor,
 	                          TGetSubGridBoundsFunction&& get_sub_element_bounds) {
-		TData* data = memory_block.GetData(MEMORYDEVICE_CPU);
+		TData* data = memory_block.GetData(MEMORYDEVICE_CUDA);
 		assert(element_count <= memory_block.size());
 		TraverseRawWithIndex_Generic<TMaxSubGridX, TMaxSubGridY>(data, element_count, functor, get_sub_element_bounds);
 	}
@@ -75,7 +76,7 @@ protected: // static functions
 	inline static void
 	TraverseWithoutIndex_Generic(TMemoryBlock& memory_block, const unsigned int element_count, TFunctor& functor,
 	                             TGetSubGridBoundsFunction&& get_sub_element_bounds) {
-		TData* data = memory_block.GetData(MEMORYDEVICE_CPU);
+		TData* data = memory_block.GetData(MEMORYDEVICE_CUDA);
 		assert(element_count <= memory_block.size());
 		TraverseRawWithoutIndex_Generic<TMaxSubGridX, TMaxSubGridY>(data, element_count, functor, get_sub_element_bounds);
 	}

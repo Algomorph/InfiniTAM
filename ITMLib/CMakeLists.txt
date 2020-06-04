@@ -120,8 +120,11 @@ set(ITMLIB_ENGINES_TRAVERSAL_INTERFACE_HEADERS
     )
 ##
 set(ITMLIB_ENGINES_TRAVERSAL_SHARED_HEADERS
-    Engines/Traversal/Shared/VolumeTraversal_Shared.h
+    Engines/Traversal/Shared/ContiguousCollectionTraversal_Shared.h
+    Engines/Traversal/Shared/CudaCallWrappers.cuh
     Engines/Traversal/Shared/JobCountPolicy.h
+    Engines/Traversal/Shared/TraversalMethod.h
+    Engines/Traversal/Shared/VolumeTraversal_Shared.h
     )
 
 ##
@@ -148,13 +151,12 @@ set(ITMLIB_ENGINES_TRAVERSAL_CPU_HEADERS
     Engines/Traversal/CPU/ThreeVolumeTraversal_CPU_VoxelBlockHash.h)
 ##
 set(ITMLIB_ENGINES_TRAVERSAL_CUDA_HEADERS
-    Engines/Traversal/CUDA/ImageTraversal_CUDA.h
-    Engines/Traversal/CUDA/ImageTraversal_CUDA_Kernels.h
+    Engines/Traversal/CUDA/ImageTraversal_CUDA.cuh
+    Engines/Traversal/CUDA/ImageTraversal_CUDA_Kernels.cuh
     Engines/Traversal/CUDA/TwoImageTraversal_CUDA.h
     Engines/Traversal/CUDA/TwoImageTraversal_CUDA_Kernels.h
 
-    Engines/Traversal/CUDA/MemoryBlockTraversal_CUDA.h
-    Engines/Traversal/CUDA/MemoryBlockTraversal_CUDA_Kernels.cuh
+    Engines/Traversal/CUDA/MemoryBlockTraversal_CUDA.cuh
 
     Engines/Traversal/CUDA/RawArrayTraversal_CUDA.cuh
     Engines/Traversal/CUDA/RawArrayTraversal_CUDA_Kernels.cuh
@@ -162,8 +164,8 @@ set(ITMLIB_ENGINES_TRAVERSAL_CUDA_HEADERS
     Engines/Traversal/CUDA/Regular2DSubGridArrayTraversal_CUDA.cuh
     Engines/Traversal/CUDA/Regular2DSubGridArrayTraversal_CUDA_Kernels.cuh
 
-    Engines/Traversal/CUDA/HashTableTraversal_CUDA.h
-    Engines/Traversal/CUDA/HashTableTraversal_CUDA_Kernels.h
+    Engines/Traversal/CUDA/HashTableTraversal_CUDA.cuh
+    Engines/Traversal/CUDA/HashTableTraversal_CUDA_Kernels.cuh
 
 
     Engines/Traversal/CUDA/VolumeTraversal_CUDA_PlainVoxelArray.h

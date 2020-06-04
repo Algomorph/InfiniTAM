@@ -21,19 +21,6 @@
 namespace {
 // CUDA global kernels
 
-template <typename THashEntry, typename TFunctor>
-__global__ void hashTableAllEntryTraversalWithHashCode_device (THashEntry* hash_table, const int hash_entry_count, TFunctor* functor_device){
-	int hash_code = threadIdx.x + blockIdx.x * blockDim.x;
-	if (hash_code >= hash_entry_count) return;
-	(*functor_device)(hash_table[hash_code], hash_code);
-}
 
-template <typename THashEntry, typename TFunctor>
-__global__ void hashTableSubarrayEntryTraversalWithHashCode_device (THashEntry* hash_table, const int* subarray_hash_codes, const int subarray_entry_count, TFunctor* functor_device){
-	int hash_code_index = threadIdx.x + blockIdx.x * blockDim.x;
-	if (hash_code_index >= subarray_entry_count) return;
-	int hash_code = subarray_hash_codes[hash_code_index];
-	(*functor_device)(hash_table[hash_code], hash_code);
-}
 
 } // end anonymous namespace (CUDA global kernels)

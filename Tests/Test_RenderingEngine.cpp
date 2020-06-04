@@ -485,8 +485,12 @@ BOOST_AUTO_TEST_CASE(Test_FindAndCountVisibleBlocks_CUDA) {
 	GenericFindAndCountVisibleBlocksTest<MEMORYDEVICE_CUDA>();
 }
 
-BOOST_AUTO_TEST_CASE(Test_CreateExpectedDepths_CUDA) {
+BOOST_AUTO_TEST_CASE(Test_CreateExpectedDepths_CUDA_Legacy) {
 	GenericCreateExpectedDepthsTest_Legacy<MEMORYDEVICE_CUDA>();
+}
+
+BOOST_AUTO_TEST_CASE(Test_CreateExpectedDepths_CUDA) {
+	GenericCreateExpectedDepthsTest<MEMORYDEVICE_CUDA>();
 }
 
 BOOST_AUTO_TEST_CASE(Test_RenderImage_CUDA) {

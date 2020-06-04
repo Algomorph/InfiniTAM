@@ -20,6 +20,7 @@
 #include "RenderingEngine_Specialized.h"
 #include "Shared/RenderingEngine_Shared.h"
 #include "Shared/RenderingEngine_Functors.h"
+#include "../Traversal/Shared/JobCountPolicy.h"
 
 using namespace ITMLib;
 using namespace ITMLib::internal;
@@ -47,7 +48,7 @@ void RenderingEngine_Specialized<TVoxel, VoxelBlockHash, TMemoryDeviceType>::Fin
 			intrinsics->projectionParamsSimple.all
 	);
 
-	HashTableTraversalEngine<TMemoryDeviceType>::TraverseUtilizedWithHashCode(volume->index, functor);
+	HashTableTraversalEngine<TMemoryDeviceType>::template TraverseUtilized_Padded(volume->index, functor);
 	volume->index.SetVisibleBlockCount(functor.GetVisibleBlockCount());
 }
 
@@ -55,7 +56,7 @@ template<class TVoxel, MemoryDeviceType TMemoryDeviceType>
 int RenderingEngine_Specialized<TVoxel, VoxelBlockHash, TMemoryDeviceType>::CountVisibleBlocks(
 		const VoxelVolume<TVoxel, VoxelBlockHash>* volume, int min_block_id, int max_block_id) const {
 	CountVisibleBlocksInListIdRangeFunctor<TMemoryDeviceType> functor(min_block_id, max_block_id);
-	HashTableTraversalEngine<TMemoryDeviceType>::TraverseVisibleWithHashCode(volume->index, functor);
+	HashTableTraversalEngine<TMemoryDeviceType>::template TraverseVisible(volume->index, functor);
 	return functor.GetCurrentVisibleBlockInIDRangeCount();
 }
 
@@ -79,7 +80,7 @@ void RenderingEngine_Specialized<TVoxel, VoxelBlockHash, TMemoryDeviceType>::Cre
 	// the visible list is only reliable if it's up-to-date. If you can ensure that it is, and keeping it up-to-date takes less resources than using the
 	// bigger "utilized" list, change this back to "Visible" list like it was in the original InfiniTAM repo.
 
-	HashTableTraversalEngine<TMemoryDeviceType>::TraverseUtilizedWithHashCode(volume->index, project_and_split_blocks_functor);
+	HashTableTraversalEngine<TMemoryDeviceType>::template TraverseUtilized_Padded(volume->index, project_and_split_blocks_functor);
 	unsigned int final_rendering_block_count = project_and_split_blocks_functor.GetRenderingBlockCount();
 
 	FillBlocksFunctor<TMemoryDeviceType> fill_blocks_functor(*render_state->renderingRangeImage);
