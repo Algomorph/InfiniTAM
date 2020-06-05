@@ -9,7 +9,7 @@
         "voxel_size": 0.00499999989,
         "near_clipping_distance": 0.119999997,
         "far_clipping_distance": 4.11999989,
-        "narrow_band_half_width": 0.0500000007,
+        "truncation_distance": 0.0500000007,
         "max_integration_weight": 200,
         "stop_integration_at_max_weight": true,
         "block_allocation_band_factor": 1.20000005

@@ -24,7 +24,7 @@ namespace ITMLib{
 		const float weight_smoothing_term;// = 0.2f; //0.2 is default for SobolevFusion, 0.5 is default for KillingFusion
 		const float weight_level_set_term;// = 0.2f;
 		const float epsilon;// = 1e-5f;
-		const float unity; // voxel_size / narrow_band_half_width, i.e. 1 / [narrow-band half-width in voxels] or [voxel size in metric units] / [narrow-band half-width in metric units]
+		const float unity; // voxel_size / truncation_distance, i.e. 1 / [narrow-band half-width in voxels] or [voxel size in metric units] / [narrow-band half-width in metric units]
 	};
 
 	struct ITMSceneMotionOptimizationSwitches {

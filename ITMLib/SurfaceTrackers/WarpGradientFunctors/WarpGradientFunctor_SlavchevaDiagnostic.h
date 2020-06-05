@@ -112,7 +112,7 @@ public:
 	                    VoxelVolume<TWarpVoxel,TIndex>* warp_field,
 	                    VoxelVolume<TTSDFVoxel,TIndex>* canonical_volume,
 	                    VoxelVolume<TTSDFVoxel,TIndex>* live_volume,
-	                    float voxel_size, float narrow_band_half_width) :
+	                    float voxel_size, float truncation_distance) :
 			parameters(parameters), switches(switches),
 			live_voxels(live_volume->GetVoxels()), live_index_data(live_volume->index.GetIndexData()),
 			warp_voxels(warp_field->GetVoxels()), warp_index_data(warp_field->index.GetIndexData()),
@@ -120,7 +120,7 @@ public:
 			live_cache(), canonical_cache(),
 			use_focus_coordinates(configuration::get().logging_settings.verbosity_level >= VERBOSITY_FOCUS_SPOTS),
 			focus_coordinates(configuration::get().focus_coordinates),
-			sdf_unity(voxel_size / narrow_band_half_width),
+			sdf_unity(voxel_size / truncation_distance),
 			verbosity_level(configuration::get().logging_settings.verbosity_level)
 			{}
 

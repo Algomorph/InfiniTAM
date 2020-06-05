@@ -29,7 +29,7 @@ void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::IntegrateIntoScene(V
 	projParams_d = view->calib.intrinsics_d.projectionParamsSimple.all;
 	projParams_rgb = view->calib.intrinsics_rgb.projectionParamsSimple.all;
 
-	float mu = volume->GetParameters().narrow_band_half_width; int maxW = volume->GetParameters().max_integration_weight;
+	float mu = volume->GetParameters().truncation_distance; int maxW = volume->GetParameters().max_integration_weight;
 
 	float *depth = view->depth->GetData(MEMORYDEVICE_CPU);
 	float *confidence = view->depthConfidence->GetData(MEMORYDEVICE_CPU);
@@ -103,7 +103,7 @@ void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::AllocateSceneFromDep
 	invProjParams_d.x = 1.0f / invProjParams_d.x;
 	invProjParams_d.y = 1.0f / invProjParams_d.y;
 
-	float mu = volume->GetParameters().narrow_band_half_width;
+	float mu = volume->GetParameters().truncation_distance;
 
 	float *depth = view->depth->GetData(MEMORYDEVICE_CPU);
 	int *voxelAllocationList = volume->index.GetBlockAllocationList();
@@ -309,7 +309,7 @@ void SceneReconstructionEngine_CPU<TVoxel, PlainVoxelArray>::IntegrateIntoScene(
 	const Vector4f projParams_d = view->calib.intrinsics_d.projectionParamsSimple.all;
 	const Vector4f projParams_rgb = view->calib.intrinsics_rgb.projectionParamsSimple.all;
 
-	const float mu = volume->GetParameters().narrow_band_half_width;
+	const float mu = volume->GetParameters().truncation_distance;
 	const int maxW = volume->GetParameters().max_integration_weight;
 
 	float *depth = view->depth->GetData(MEMORYDEVICE_CPU);

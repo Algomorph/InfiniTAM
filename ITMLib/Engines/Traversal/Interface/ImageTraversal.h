@@ -18,6 +18,37 @@
 #include "../../../../ORUtils/MemoryDeviceType.h"
 
 namespace ITMLib {
-template<MemoryDeviceType TDeviceType>
-class ImageTraversalEngine;
+namespace internal {
+template<MemoryDeviceType TMemoryDeviceType>
+class ImageTraversalEngine_Internal;
+} // namespace internal
+
+template<MemoryDeviceType TMemoryDeviceType>
+class ImageTraversalEngine{
+public: // static functions
+	template<typename TImageElement, typename TFunctor>
+	inline static void
+	Traverse(ORUtils::Image<TImageElement>* image, TFunctor& functor) {
+		internal::ImageTraversalEngine_Internal<TMemoryDeviceType>::template TraverseWithoutPosition_Generic<TImageElement>(image, functor);
+	}
+
+	template<typename TImageElement, typename TFunctor>
+	inline static void
+	Traverse(const ORUtils::Image<TImageElement>* image, TFunctor& functor) {
+		internal::ImageTraversalEngine_Internal<TMemoryDeviceType>::template TraverseWithoutPosition_Generic<const TImageElement>(image, functor);
+	}
+
+	template<int TCudaBlockSizeX = 16, int TCudaBlockSizeY = 16, typename TImageElement, typename TFunctor>
+	inline static void
+	TraverseWithPosition(ORUtils::Image<TImageElement>* image, TFunctor& functor) {
+		internal::ImageTraversalEngine_Internal<TMemoryDeviceType>::template TraverseWithPosition_Generic<TCudaBlockSizeX, TCudaBlockSizeY, TImageElement>(image, functor);
+	}
+
+	template<int TCudaBlockSizeX = 16, int TCudaBlockSizeY = 16, typename TImageElement, typename TFunctor>
+	inline static void
+	TraverseWithPosition(const ORUtils::Image<TImageElement>* image, TFunctor& functor) {
+		internal::ImageTraversalEngine_Internal<TMemoryDeviceType>::template TraverseWithPosition_Generic<TCudaBlockSizeX, TCudaBlockSizeY, const TImageElement>(image, functor);
+	}
+
+};
 } // namespace ITMLib

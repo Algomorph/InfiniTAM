@@ -111,7 +111,7 @@ void SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::AllocateSceneFromDe
 	invProjParams_d.x = 1.0f / invProjParams_d.x;
 	invProjParams_d.y = 1.0f / invProjParams_d.y;
 
-	float mu = volume->GetParameters().narrow_band_half_width;
+	float mu = volume->GetParameters().truncation_distance;
 
 	float* depth = view->depth->GetData(MEMORYDEVICE_CUDA);
 	int* voxelAllocationList = volume->index.GetBlockAllocationList();
@@ -221,7 +221,7 @@ void SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::IntegrateIntoScene(
 	depth_camera_projection_parameters = view->calib.intrinsics_d.projectionParamsSimple.all;
 	rgb_camera_projection_parameters = view->calib.intrinsics_rgb.projectionParamsSimple.all;
 
-	float mu = volume->GetParameters().narrow_band_half_width;
+	float mu = volume->GetParameters().truncation_distance;
 	int maxW = volume->GetParameters().max_integration_weight;
 
 	float* depth = view->depth->GetData(MEMORYDEVICE_CUDA);
@@ -279,7 +279,7 @@ void SceneReconstructionEngine_CUDA<TVoxel, PlainVoxelArray>::IntegrateIntoScene
 	projParams_d = view->calib.intrinsics_d.projectionParamsSimple.all;
 	projParams_rgb = view->calib.intrinsics_rgb.projectionParamsSimple.all;
 
-	float mu = volume->GetParameters().narrow_band_half_width;
+	float mu = volume->GetParameters().truncation_distance;
 	int maxW = volume->GetParameters().max_integration_weight;
 
 	float* depth = view->depth->GetData(MEMORYDEVICE_CUDA);

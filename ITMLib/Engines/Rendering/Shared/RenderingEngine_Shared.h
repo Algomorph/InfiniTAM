@@ -9,7 +9,7 @@
 namespace ITMLib{
 
 
-static const CONSTPTR(int) minmaximg_subsample = 8;
+static const CONSTPTR(int) ray_depth_image_subsampling_factor = 8;
 
 #if !(defined __METALC__)
 
@@ -26,10 +26,10 @@ _CPU_AND_GPU_CODE_ inline Vector4f InvertProjectionParams(const THREADPTR(Vector
 	return Vector4f(1.0f / projParams.x, 1.0f / projParams.y, -projParams.z, -projParams.w);
 }
 
-_CPU_AND_GPU_CODE_ inline bool ProjectSingleBlock(const THREADPTR(Vector3s) & blockPos, const THREADPTR(Matrix4f) & pose, const THREADPTR(Vector4f) & intrinsics, 
+_CPU_AND_GPU_CODE_ inline bool ProjectSingleBlock(const THREADPTR(Vector3s) & blockPos, const THREADPTR(Matrix4f) & pose, const THREADPTR(Vector4f) & intrinsics,
 	const THREADPTR(Vector2i) & imgSize, float voxelSize, THREADPTR(Vector2i) & upperLeft, THREADPTR(Vector2i) & lowerRight, THREADPTR(Vector2f) & zRange)
 {
-	upperLeft = imgSize / minmaximg_subsample;
+	upperLeft = imgSize / ray_depth_image_subsampling_factor;
 	lowerRight = Vector2i(-1, -1);
 	zRange = Vector2f(FAR_AWAY, VERY_CLOSE);
 	for (int corner = 0; corner < 8; ++corner)
@@ -44,8 +44,8 @@ _CPU_AND_GPU_CODE_ inline bool ProjectSingleBlock(const THREADPTR(Vector3s) & bl
 		if (pt3d.z < 1e-6) continue;
 
 		Vector2f pt2d;
-		pt2d.x = (intrinsics.x * pt3d.x / pt3d.z + intrinsics.z) / minmaximg_subsample;
-		pt2d.y = (intrinsics.y * pt3d.y / pt3d.z + intrinsics.w) / minmaximg_subsample;
+		pt2d.x = (intrinsics.x * pt3d.x / pt3d.z + intrinsics.z) / ray_depth_image_subsampling_factor;
+		pt2d.y = (intrinsics.y * pt3d.y / pt3d.z + intrinsics.w) / ray_depth_image_subsampling_factor;
 
 		// remember bounding box, zmin and zmax
 		if (upperLeft.x > floor(pt2d.x)) upperLeft.x = (int)floor(pt2d.x);
@@ -117,104 +117,108 @@ template <bool hasWeightInformation, bool hasSemanticInformation, typename TVoxe
 struct ReadWithConfidenceFromSdfFloatInterpolated;
 
 
-template <typename TVoxel, typename TIndex, typename TCache>
-struct ReadWithConfidenceFromSdfFloatInterpolated<true,false, TVoxel,TIndex,TCache>{
-	_CPU_AND_GPU_CODE_ static float compute(THREADPTR(float) &confidence, const CONSTPTR(TVoxel) *voxelData,
-	                     const CONSTPTR(TIndex) *voxelIndex, Vector3f point, THREADPTR(int) &vmIndex, THREADPTR(TCache) & cache){
-		return readWithConfidenceFromSDF_float_interpolated(confidence,voxelData, voxelIndex, point, vmIndex, cache);
-	}
-};
-template <typename TVoxel, typename TIndex, typename TCache>
-struct ReadWithConfidenceFromSdfFloatInterpolated<true,true, TVoxel,TIndex,TCache>{
-	_CPU_AND_GPU_CODE_ static float compute(THREADPTR(float) &confidence, const CONSTPTR(TVoxel) *voxelData,
-	                     const CONSTPTR(TIndex) *voxelIndex, Vector3f point, THREADPTR(int) &vmIndex, THREADPTR(TCache) & cache){
+template<typename TVoxel, typename TIndex, typename TCache>
+struct ReadWithConfidenceFromSdfFloatInterpolated<true, false, TVoxel, TIndex, TCache> {
+	_CPU_AND_GPU_CODE_ static float compute(THREADPTR(float)& confidence, const CONSTPTR(TVoxel)* voxelData,
+	                                        const CONSTPTR(TIndex)* voxelIndex, Vector3f point, THREADPTR(int)& vmIndex, THREADPTR(TCache)& cache) {
 		return readWithConfidenceFromSDF_float_interpolated(confidence, voxelData, voxelIndex, point, vmIndex, cache);
 	}
 };
-template <typename TVoxel, typename TIndex, typename TCache>
-struct ReadWithConfidenceFromSdfFloatInterpolated<false,true, TVoxel,TIndex,TCache>{
-	_CPU_AND_GPU_CODE_ static float compute(THREADPTR(float) &confidence, const CONSTPTR(TVoxel) *voxelData,
-	                     const CONSTPTR(TIndex) *voxelIndex, Vector3f point, THREADPTR(int) &vmIndex, THREADPTR(TCache) & cache){
+template<typename TVoxel, typename TIndex, typename TCache>
+struct ReadWithConfidenceFromSdfFloatInterpolated<true, true, TVoxel, TIndex, TCache> {
+	_CPU_AND_GPU_CODE_ static float compute(THREADPTR(float)& confidence, const CONSTPTR(TVoxel)* voxelData,
+	                                        const CONSTPTR(TIndex)* voxelIndex, Vector3f point, THREADPTR(int)& vmIndex, THREADPTR(TCache)& cache) {
+		return readWithConfidenceFromSDF_float_interpolated(confidence, voxelData, voxelIndex, point, vmIndex, cache);
+	}
+};
+template<typename TVoxel, typename TIndex, typename TCache>
+struct ReadWithConfidenceFromSdfFloatInterpolated<false, true, TVoxel, TIndex, TCache> {
+	_CPU_AND_GPU_CODE_ static float compute(THREADPTR(float)& confidence, const CONSTPTR(TVoxel)* voxelData,
+	                                        const CONSTPTR(TIndex)* voxelIndex, Vector3f point, THREADPTR(int)& vmIndex, THREADPTR(TCache)& cache) {
 		return readWithConfidenceFromSDF_float_interpolated_semantic(confidence, voxelData, voxelIndex, point, vmIndex, cache);
 	}
 };
 
 
-template<class TVoxel, class TIndex, bool modifyVisibleEntries>
-_CPU_AND_GPU_CODE_ inline bool castRay(DEVICEPTR(Vector4f) &pt_out, DEVICEPTR(ITMLib::HashBlockVisibility)* blockVisibilityTypes,
-	int x, int y, const CONSTPTR(TVoxel) *voxelData, const CONSTPTR(typename TIndex::IndexData) *voxelIndex, 
-	Matrix4f invM, Vector4f invProjParams, float oneOverVoxelSize, float mu, const CONSTPTR(Vector2f) & viewFrustum_minmax)
-{
-	Vector4f pt_camera_f; Vector3f pt_block_s, pt_block_e, rayDirection, pt_result;
+template<class TVoxel, class TIndex, bool TModifyVisibleEntries>
+_CPU_AND_GPU_CODE_ inline bool CastRay(DEVICEPTR(Vector4f)& point, DEVICEPTR(ITMLib::HashBlockVisibility)* block_visibility_types,
+                                       int x, int y, const CONSTPTR(TVoxel)* voxel_data, const CONSTPTR(typename TIndex::IndexData)* voxel_index,
+                                       Matrix4f inverted_depth_camera_matrix, Vector4f inverted_depth_camera_projection_parameters,
+                                       float voxel_size_reciprocal, float mu, const CONSTPTR(Vector2f)& ray_depth_range) {
+	Vector4f& inverted_projection = inverted_depth_camera_projection_parameters;
+
+	Vector4f point_in_camera_space;
+	Vector3f march_start_world_space_voxels, march_end_world_space_voxels, march_vector, pt_result;
 	bool pt_found;
 	int vmIndex;
-	float sdfValue = 1.0f, confidence;
-	float totalLength, stepLength, totalLengthMax, stepScale;
+	float sdf_value = 1.0f, confidence;
+	float distance_along_ray_voxels, step_length_voxels, distance_to_ray_end_length_voxels, stepScale;
 
-	stepScale = mu * oneOverVoxelSize;
+	stepScale = mu * voxel_size_reciprocal;
 
-	pt_camera_f.z = viewFrustum_minmax.x;
-	pt_camera_f.x = pt_camera_f.z * ((float(x) + invProjParams.z) * invProjParams.x);
-	pt_camera_f.y = pt_camera_f.z * ((float(y) + invProjParams.w) * invProjParams.y);
-	pt_camera_f.w = 1.0f;
-	totalLength = length(TO_VECTOR3(pt_camera_f)) * oneOverVoxelSize;
-	pt_block_s = TO_VECTOR3(invM * pt_camera_f) * oneOverVoxelSize;
+	point_in_camera_space.z = ray_depth_range.from;
+	point_in_camera_space.x = point_in_camera_space.z * ((float(x) + inverted_projection.cx) * inverted_projection.fx);
+	point_in_camera_space.y = point_in_camera_space.z * ((float(y) + inverted_projection.cy) * inverted_projection.fy);
+	point_in_camera_space.w = 1.0f;
+	distance_along_ray_voxels = length(TO_VECTOR3(point_in_camera_space)) * voxel_size_reciprocal;
+	march_start_world_space_voxels = TO_VECTOR3(inverted_depth_camera_matrix * point_in_camera_space) * voxel_size_reciprocal;
 
-	pt_camera_f.z = viewFrustum_minmax.y;
-	pt_camera_f.x = pt_camera_f.z * ((float(x) + invProjParams.z) * invProjParams.x);
-	pt_camera_f.y = pt_camera_f.z * ((float(y) + invProjParams.w) * invProjParams.y);
-	pt_camera_f.w = 1.0f;
-	totalLengthMax = length(TO_VECTOR3(pt_camera_f)) * oneOverVoxelSize;
-	pt_block_e = TO_VECTOR3(invM * pt_camera_f) * oneOverVoxelSize;
+	point_in_camera_space.z = ray_depth_range.to;
+	point_in_camera_space.x = point_in_camera_space.z * ((float(x) + inverted_projection.cx) * inverted_projection.fx);
+	point_in_camera_space.y = point_in_camera_space.z * ((float(y) + inverted_projection.cy) * inverted_projection.fy);
+	point_in_camera_space.w = 1.0f;
+	distance_to_ray_end_length_voxels = length(TO_VECTOR3(point_in_camera_space)) * voxel_size_reciprocal;
+	march_end_world_space_voxels = TO_VECTOR3(inverted_depth_camera_matrix * point_in_camera_space) * voxel_size_reciprocal;
 
-	rayDirection = pt_block_e - pt_block_s;
-	float direction_norm = 1.0f / sqrt(rayDirection.x * rayDirection.x + rayDirection.y * rayDirection.y + rayDirection.z * rayDirection.z);
-	rayDirection *= direction_norm;
+	march_vector = march_end_world_space_voxels - march_start_world_space_voxels;
+	float direction_norm = 1.0f / sqrt(march_vector.x * march_vector.x + march_vector.y * march_vector.y + march_vector.z * march_vector.z);
+	march_vector *= direction_norm;
 
-	pt_result = pt_block_s;
+	pt_result = march_start_world_space_voxels;
 
 	typename TIndex::IndexCache cache;
 
-	while (totalLength < totalLengthMax) {
-		sdfValue = readFromSDF_float_uninterpolated(voxelData, voxelIndex, pt_result, vmIndex, cache);
+	while (distance_along_ray_voxels < distance_to_ray_end_length_voxels) {
+		sdf_value = readFromSDF_float_uninterpolated(voxel_data, voxel_index, pt_result, vmIndex, cache);
 
-		if (modifyVisibleEntries)
-		{
-			if (vmIndex) blockVisibilityTypes[vmIndex - 1] = ITMLib::HashBlockVisibility::IN_MEMORY_AND_VISIBLE;
+		if (TModifyVisibleEntries) {
+			if (vmIndex) block_visibility_types[vmIndex - 1] = ITMLib::HashBlockVisibility::IN_MEMORY_AND_VISIBLE;
 		}
 
 		if (!vmIndex) {
-			stepLength = VOXEL_BLOCK_SIZE;
+			step_length_voxels = VOXEL_BLOCK_SIZE;
 		} else {
-			if ((sdfValue <= 0.1f) && (sdfValue >= -0.5f)) {
-				sdfValue = readFromSDF_float_interpolated(voxelData, voxelIndex, pt_result, vmIndex, cache);
+			if ((sdf_value <= 0.1f) && (sdf_value >= -0.5f)) {
+				sdf_value = readFromSDF_float_interpolated(voxel_data, voxel_index, pt_result, vmIndex, cache);
 			}
-			if (sdfValue <= 0.0f) break;
-			stepLength = ORUTILS_MAX(sdfValue * stepScale, 1.0f);
+			if (sdf_value <= 0.0f) break;
+			step_length_voxels = ORUTILS_MAX(sdf_value * stepScale, 1.0f);
 		}
 
-		pt_result += stepLength * rayDirection; totalLength += stepLength;
+		pt_result += step_length_voxels * march_vector;
+		distance_along_ray_voxels += step_length_voxels;
 	}
 
-	if (sdfValue <= 0.0f)
-	{
-		stepLength = sdfValue * stepScale;
-		pt_result += stepLength * rayDirection;
+	if (sdf_value <= 0.0f) {
+		step_length_voxels = sdf_value * stepScale;
+		pt_result += step_length_voxels * march_vector;
 
-		sdfValue = ReadWithConfidenceFromSdfFloatInterpolated
+		sdf_value = ReadWithConfidenceFromSdfFloatInterpolated
 				<TVoxel::hasWeightInformation,
-				TVoxel::hasSemanticInformation,
-				TVoxel, typename TIndex::IndexData, typename TIndex::IndexCache>
-		::compute(confidence, voxelData, voxelIndex, pt_result, vmIndex, cache);
+						TVoxel::hasSemanticInformation,
+						TVoxel, typename TIndex::IndexData, typename TIndex::IndexCache>
+		::compute(confidence, voxel_data, voxel_index, pt_result, vmIndex, cache);
 
-		stepLength = sdfValue * stepScale;
-		pt_result += stepLength * rayDirection;
+		step_length_voxels = sdf_value * stepScale;
+		pt_result += step_length_voxels * march_vector;
 
 		pt_found = true;
 	} else pt_found = false;
 
-	pt_out.x = pt_result.x; pt_out.y = pt_result.y; pt_out.z = pt_result.z;
-	if (pt_found) pt_out.w = confidence + 1.0f; else pt_out.w = 0.0f;
+	point.x = pt_result.x;
+	point.y = pt_result.y;
+	point.z = pt_result.z;
+	if (pt_found) point.w = confidence + 1.0f; else point.w = 0.0f;
 
 	return pt_found;
 }
@@ -368,7 +372,7 @@ _CPU_AND_GPU_CODE_ inline void drawPixelConfidence(DEVICEPTR(Vector4u) & dest, c
 
 	Vector4f color;
 	color.r = (uchar)(baseCol(confidenceNorm) * 255.0f);
-	color.g = (uchar)(baseCol(confidenceNorm - 0.5f) * 255.0f); 
+	color.g = (uchar)(baseCol(confidenceNorm - 0.5f) * 255.0f);
 	color.b = (uchar)(baseCol(confidenceNorm + 0.5f) * 255.0f);
 	color.a = 255;
 
@@ -384,7 +388,7 @@ _CPU_AND_GPU_CODE_ inline void drawPixelNormal(DEVICEPTR(Vector4u) & dest, const
 }
 
 template<class TVoxel, class TIndex>
-_CPU_AND_GPU_CODE_ inline void drawPixelColour(DEVICEPTR(Vector4u) & dest, const CONSTPTR(Vector3f) & point, 
+_CPU_AND_GPU_CODE_ inline void drawPixelColour(DEVICEPTR(Vector4u) & dest, const CONSTPTR(Vector3f) & point,
 	const CONSTPTR(TVoxel) *voxelBlockData, const CONSTPTR(typename TIndex::IndexData) *indexData)
 {
 	Vector4f clr = VoxelColorReader<TVoxel::hasColorInformation, TVoxel, TIndex>::interpolate(voxelBlockData, indexData, point);
@@ -462,7 +466,7 @@ _CPU_AND_GPU_CODE_ inline void processPixelICP(DEVICEPTR(Vector4f) *pointsMap, D
 }
 
 template<bool useSmoothing, bool flipNormals>
-_CPU_AND_GPU_CODE_ inline void processPixelGrey_ImageNormals(DEVICEPTR(Vector4u) *outRendering, const CONSTPTR(Vector4f) *pointsRay, 
+_CPU_AND_GPU_CODE_ inline void processPixelGrey_ImageNormals(DEVICEPTR(Vector4u) *outRendering, const CONSTPTR(Vector4f) *pointsRay,
 	const THREADPTR(Vector2i) &imgSize, const THREADPTR(int) &x, const THREADPTR(int) &y, const float voxelSize, const THREADPTR(Vector3f) &lightSource)
 {
 	Vector3f outNormal;
@@ -513,8 +517,8 @@ _CPU_AND_GPU_CODE_ inline void processPixelConfidence_ImageNormals(DEVICEPTR(Vec
 }
 
 template<class TVoxel, class TIndex>
-_CPU_AND_GPU_CODE_ inline void processPixelGrey(DEVICEPTR(Vector4u) &outRendering, const CONSTPTR(Vector3f) & point, 
-	bool foundPoint, const CONSTPTR(TVoxel) *voxelData, const CONSTPTR(typename TIndex::IndexData) *voxelIndex, 
+_CPU_AND_GPU_CODE_ inline void processPixelGrey(DEVICEPTR(Vector4u) &outRendering, const CONSTPTR(Vector3f) & point,
+	bool foundPoint, const CONSTPTR(TVoxel) *voxelData, const CONSTPTR(typename TIndex::IndexData) *voxelIndex,
 	Vector3f lightSource)
 {
 	Vector3f outNormal;
@@ -579,8 +583,8 @@ _CPU_AND_GPU_CODE_ inline void processPixelNormal(DEVICEPTR(Vector4u) &outRender
 }
 
 template<class TVoxel, class TIndex>
-_CPU_AND_GPU_CODE_ inline void processPixelConfidence(DEVICEPTR(Vector4u) &outRendering, const CONSTPTR(Vector4f) & point, 
-	bool foundPoint, const CONSTPTR(TVoxel) *voxelData, const CONSTPTR(typename TIndex::IndexData) *voxelIndex, 
+_CPU_AND_GPU_CODE_ inline void processPixelConfidence(DEVICEPTR(Vector4u) &outRendering, const CONSTPTR(Vector4f) & point,
+	bool foundPoint, const CONSTPTR(TVoxel) *voxelData, const CONSTPTR(typename TIndex::IndexData) *voxelIndex,
 	Vector3f lightSource)
 {
 	Vector3f outNormal;

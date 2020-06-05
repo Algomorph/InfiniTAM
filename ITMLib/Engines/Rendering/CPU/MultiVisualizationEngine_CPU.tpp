@@ -127,9 +127,10 @@ static void RenderImage_common(const ORUtils::SE3Pose *pose, const Intrinsics *i
 		{
 			int y = locId / imgSize.x;
 			int x = locId - y*imgSize.x;
-			int locId2 = (int)floor((float)x / minmaximg_subsample) + (int)floor((float)y / minmaximg_subsample) * imgSize.x;
+			int locId2 = (int)floor((float)x / ray_depth_image_subsampling_factor) + (int)floor((float)y / ray_depth_image_subsampling_factor) * imgSize.x;
 
-			castRay<VD, ID, false>(pointsRay[locId], NULL, x, y, &renderState->voxelData_host, &renderState->indexData_host, invM, invProjParams, oneOverVoxelSize, mu, minmaximg[locId2]);
+			CastRay<VD, ID, false>(pointsRay[locId], NULL, x, y, &renderState->voxelData_host, &renderState->indexData_host, invM, invProjParams,
+			                       oneOverVoxelSize, mu, minmaximg[locId2]);
 		}
 	}
 

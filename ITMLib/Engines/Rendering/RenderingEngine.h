@@ -41,7 +41,8 @@ public: // member functions
 	                   RenderState* render_state) const override;
 	void ForwardRender(const VoxelVolume<TVoxel, TIndex>* volume, const View* view, CameraTrackingState* camera_tracking_state,
 	                   RenderState* render_state) const override;
-
+private: // member functions
+	void GenericRaycast(VoxelVolume<TVoxel, TIndex>* volume, const Vector2i& depth_image_size, const Matrix4f& depth_camera_inverse_pose, const Vector4f& depth_camera_projection_parameters, const RenderState* render_state, bool update_visible_list) const;
 };
 
 } // namespace ITMLib

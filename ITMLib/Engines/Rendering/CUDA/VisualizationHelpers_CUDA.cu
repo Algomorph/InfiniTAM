@@ -135,7 +135,7 @@ __global__ void ITMLib::findMissingPoints_device(int *fwdProjMissingPoints, uint
 	if (x >= imgSize.x || y >= imgSize.y) return;
 
 	int locId = x + y * imgSize.x;
-	int locId2 = (int)floor((float)x / minmaximg_subsample) + (int)floor((float)y / minmaximg_subsample) * imgSize.x;
+	int locId2 = (int)floor((float)x / ray_depth_image_subsampling_factor) + (int)floor((float)y / ray_depth_image_subsampling_factor) * imgSize.x;
 
 	Vector4f fwdPoint = forwardProjection[locId];
 	Vector2f minmaxval = minmaximg[locId2];

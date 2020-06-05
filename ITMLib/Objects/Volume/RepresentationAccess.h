@@ -209,54 +209,74 @@ _CPU_AND_GPU_CODE_ inline float readFromSDF_float_uninterpolated(const CONSTPTR(
 	return TVoxel::valueToFloat(res.sdf);
 }
 
-template<class TVoxel, class TIndex, class TCache>
-_CPU_AND_GPU_CODE_ inline float readFromSDF_float_interpolated(const CONSTPTR(TVoxel) *voxelData,
-	const CONSTPTR(TIndex) *voxelIndex, Vector3f point, THREADPTR(int) &vmIndex, THREADPTR(TCache) & cache)
+
+template<typename TVoxel, typename TReadVoxelFunction>
+_CPU_AND_GPU_CODE_ inline float readFromSDF_float_interpolated_Generic(Vector3f point, THREADPTR(int) &vm_index, TReadVoxelFunction&& read_voxel)
 {
 	float res1, res2, v1, v2;
 	Vector3f coeff; Vector3i pos; TO_INT_FLOOR3(pos, coeff, point);
 
 	{
-		const TVoxel& voxel = readVoxel(voxelData, voxelIndex, pos + Vector3i(0, 0, 0), vmIndex, cache);
+		const TVoxel& voxel = read_voxel(pos + Vector3i(0, 0, 0));
 		v1 = voxel.sdf;
 	}
 	{
-		const TVoxel& voxel = readVoxel(voxelData, voxelIndex, pos + Vector3i(1, 0, 0), vmIndex, cache);
+		const TVoxel& voxel = read_voxel(pos + Vector3i(1, 0, 0));
 		v2 = voxel.sdf;
 	}
 	res1 = (1.0f - coeff.x) * v1 + coeff.x * v2;
 
 	{
-		const TVoxel& voxel = readVoxel(voxelData, voxelIndex, pos + Vector3i(0, 1, 0), vmIndex, cache);
+		const TVoxel& voxel = read_voxel(pos + Vector3i(0, 1, 0));
 		v1 = voxel.sdf;
 	}
 	{
-		const TVoxel& voxel = readVoxel(voxelData, voxelIndex, pos + Vector3i(1, 1, 0), vmIndex, cache);
+		const TVoxel& voxel = read_voxel(pos + Vector3i(1, 1, 0));
 		v2 = voxel.sdf;
 	}
 	res1 = (1.0f - coeff.y) * res1 + coeff.y * ((1.0f - coeff.x) * v1 + coeff.x * v2);
 	{
-		const TVoxel& voxel = readVoxel(voxelData, voxelIndex, pos + Vector3i(0, 0, 1), vmIndex, cache);
+		const TVoxel& voxel = read_voxel(pos + Vector3i(0, 0, 1));
 		v1 = voxel.sdf;
 	}
 	{
-		const TVoxel& voxel = readVoxel(voxelData, voxelIndex, pos + Vector3i(1, 0, 1), vmIndex, cache);
+		const TVoxel& voxel = read_voxel(pos + Vector3i(1, 0, 1));
 		v2 = voxel.sdf;
 	}
 	res2 = (1.0f - coeff.x) * v1 + coeff.x * v2;
 
 	{
-		const TVoxel& voxel = readVoxel(voxelData, voxelIndex, pos + Vector3i(0, 1, 1), vmIndex, cache);
+		const TVoxel& voxel = read_voxel(pos + Vector3i(0, 1, 1));
 		v1 = voxel.sdf;
 	}
 	{
-		const TVoxel& voxel = readVoxel(voxelData, voxelIndex, pos + Vector3i(1, 1, 1), vmIndex, cache);
+		const TVoxel& voxel = read_voxel(pos + Vector3i(1, 1, 1));
 		v2 = voxel.sdf;
 	}
 	res2 = (1.0f - coeff.y) * res2 + coeff.y * ((1.0f - coeff.x) * v1 + coeff.x * v2);
 
-	vmIndex = true;
+	vm_index = true;
 	return TVoxel::valueToFloat((1.0f - coeff.z) * res1 + coeff.z * res2);
+}
+
+template<class TVoxel, class TIndex, class TCache>
+_CPU_AND_GPU_CODE_ inline float readFromSDF_float_interpolated(
+		const CONSTPTR(TVoxel)* voxels, const CONSTPTR(TIndex)* index_data, Vector3f point, THREADPTR(int)& vm_index, THREADPTR(TCache)& cache) {
+
+	return readFromSDF_float_interpolated_Generic<TVoxel>(point, vm_index,
+	                                                      [&voxels, &index_data, &point, &vm_index, &cache](const Vector3i& position) {
+		                                                      return readVoxel(voxels, index_data, position, vm_index, cache);
+	                                                      });
+}
+
+template<class TVoxel, class TIndex>
+_CPU_AND_GPU_CODE_ inline float readFromSDF_float_interpolated(
+		const CONSTPTR(TVoxel)* voxels, const CONSTPTR(TIndex)* index_data, Vector3f point, THREADPTR(int)& vm_index) {
+
+	return readFromSDF_float_interpolated_Generic(point, vm_index,
+	                                              [&voxels, &index_data, &point, &vm_index](const Vector3i& position) {
+		                                              return readVoxel(voxels, index_data, position, vm_index);
+	                                              });
 }
 
 template<class TVoxel, class TIndex, class TCache>

@@ -43,65 +43,6 @@ using namespace test_utilities;
 namespace snoopy = snoopy_test_utilities;
 
 template<MemoryDeviceType TMemoryDeviceType>
-void GenericFindAndCountVisibleBlocksTest_Legacy() {
-	ORUtils::IStreamWrapper visible_blocks_file("TestData/arrays/visible_blocks.dat", true);
-
-	std::vector<int> block_address_range_bounds = ReadStdVectorFromFile<int>(visible_blocks_file);
-
-	std::vector<int> pose_range_visible_block_counts1;
-	std::vector<int> pose_range_visible_block_counts2;
-	std::vector<int> pose_range_visible_block_counts3;
-
-	CameraPoseAndRenderingEngineFixture<TMemoryDeviceType> fixture;
-
-	for (auto& tracking_state : fixture.tracking_states) {
-		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume;
-		LoadVolume(&volume, snoopy::PartialVolume17Path<VoxelBlockHash>(), TMemoryDeviceType,
-		           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
-
-		ORUtils::SE3Pose& pose = *tracking_state->pose_d;
-
-		fixture.visualization_engine_legacy->FindVisibleBlocks(volume, &pose, &fixture.calibration_data.intrinsics_d, fixture.render_state);
-		int range_visible_block_count1 = fixture.visualization_engine_legacy->CountVisibleBlocks(volume, fixture.render_state,
-		                                                                                         block_address_range_bounds[0],
-		                                                                                         block_address_range_bounds[1]);
-		int range_visible_block_count2 = fixture.visualization_engine_legacy->CountVisibleBlocks(volume, fixture.render_state,
-		                                                                                         block_address_range_bounds[2],
-		                                                                                         block_address_range_bounds[3]);
-		int range_visible_block_count3 = fixture.visualization_engine_legacy->CountVisibleBlocks(volume, fixture.render_state,
-		                                                                                         block_address_range_bounds[4],
-		                                                                                         block_address_range_bounds[5]);
-
-		pose_range_visible_block_counts1.push_back(range_visible_block_count1);
-		pose_range_visible_block_counts2.push_back(range_visible_block_count2);
-		pose_range_visible_block_counts3.push_back(range_visible_block_count3);
-
-		const int visible_block_count = volume->index.GetVisibleBlockCount();
-		if (visible_block_count == 0) continue; // skip shots without results
-
-		int* visible_codes_device = volume->index.GetVisibleBlockHashCodes();
-		ORUtils::MemoryBlock<int> visible_codes_ground_truth(visible_block_count, MEMORYDEVICE_CPU);
-		ORUtils::MemoryBlockPersistence::LoadMemoryBlock(visible_blocks_file, visible_codes_ground_truth,
-		                                                 MEMORYDEVICE_CPU);
-
-		BOOST_REQUIRE_EQUAL(visible_block_count, visible_codes_ground_truth.size());
-
-		BOOST_REQUIRE(RawArraysEqual_Verbose(visible_codes_ground_truth.GetData(MEMORYDEVICE_CPU), MEMORYDEVICE_CPU,
-		                                           visible_codes_device, TMemoryDeviceType, visible_block_count, true));
-
-		delete volume;
-	}
-
-	std::vector<int> pose_range_visible_block_counts1_ground_truth = ReadStdVectorFromFile<int>(visible_blocks_file);
-	std::vector<int> pose_range_visible_block_counts2_ground_truth = ReadStdVectorFromFile<int>(visible_blocks_file);
-	std::vector<int> pose_range_visible_block_counts3_ground_truth = ReadStdVectorFromFile<int>(visible_blocks_file);
-
-	BOOST_REQUIRE_EQUAL(pose_range_visible_block_counts1, pose_range_visible_block_counts1_ground_truth);
-	BOOST_REQUIRE_EQUAL(pose_range_visible_block_counts2, pose_range_visible_block_counts2_ground_truth);
-	BOOST_REQUIRE_EQUAL(pose_range_visible_block_counts3, pose_range_visible_block_counts3_ground_truth);
-}
-
-template<MemoryDeviceType TMemoryDeviceType>
 void GenericFindAndCountVisibleBlocksTest() {
 	ORUtils::IStreamWrapper visible_blocks_file("TestData/arrays/visible_blocks.dat", true);
 
@@ -161,33 +102,6 @@ void GenericFindAndCountVisibleBlocksTest() {
 }
 
 template<MemoryDeviceType TMemoryDeviceType>
-void GenericCreateExpectedDepthsTest_Legacy() {
-	CameraPoseAndRenderingEngineFixture<TMemoryDeviceType> fixture;
-
-	ORUtils::IStreamWrapper range_images_file("TestData/arrays/range_images.dat", true);
-
-	for (auto& tracking_state : fixture.tracking_states) {
-		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume;
-		LoadVolume(&volume, snoopy::PartialVolume17Path<VoxelBlockHash>(), TMemoryDeviceType,
-		           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
-
-		ORUtils::SE3Pose& pose = *tracking_state->pose_d;
-
-		fixture.visualization_engine_legacy->FindVisibleBlocks(volume, &pose, &fixture.calibration_data.intrinsics_d, fixture.render_state);
-
-		const int visible_block_count = volume->index.GetVisibleBlockCount();
-		if (visible_block_count == 0) continue; // skip shots without results
-		std::shared_ptr<RenderState> render_state = fixture.MakeRenderState();
-		fixture.visualization_engine_legacy->CreateExpectedDepths(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get());
-		ORUtils::Image<Vector2f>& range_image = *render_state->renderingRangeImage;
-		ORUtils::Image<Vector2f> range_image_ground_truth = ORUtils::MemoryBlockPersistence::LoadImage<Vector2f>(range_images_file, MEMORYDEVICE_CPU);
-		BOOST_REQUIRE(RawArraysEqual(range_image_ground_truth.GetData(MEMORYDEVICE_CPU), MEMORYDEVICE_CPU,
-		                             range_image.GetData(TMemoryDeviceType), TMemoryDeviceType, range_image.size()));
-		delete volume;
-	}
-}
-
-template<MemoryDeviceType TMemoryDeviceType>
 void GenericCreateExpectedDepthsTest() {
 	CameraPoseAndRenderingEngineFixture<TMemoryDeviceType> fixture;
 
@@ -215,9 +129,8 @@ void GenericCreateExpectedDepthsTest() {
 	}
 }
 
-
 template<MemoryDeviceType TMemoryDeviceType>
-void GenericFindSurfaceTest() {
+void GenericFindSurfaceTest_Legacy() {
 	CameraPoseAndRenderingEngineFixture<TMemoryDeviceType> fixture;
 
 	ORUtils::IStreamWrapper raycast_images_file("TestData/arrays/raycast_images.dat", true);
@@ -236,6 +149,36 @@ void GenericFindSurfaceTest() {
 		std::shared_ptr<RenderState> render_state = fixture.MakeRenderState();
 		fixture.visualization_engine_legacy->CreateExpectedDepths(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get());
 		fixture.visualization_engine_legacy->FindSurface(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get());
+		ORUtils::Image<Vector4f>& raycast_image = *render_state->raycastResult;
+		ORUtils::Image<Vector4f> raycast_image_ground_truth = ORUtils::MemoryBlockPersistence::LoadImage<Vector4f>(raycast_images_file,
+		                                                                                                           MEMORYDEVICE_CPU);
+		BOOST_REQUIRE(RawArraysAlmostEqual_Verbose(raycast_image_ground_truth.GetData(MEMORYDEVICE_CPU), MEMORYDEVICE_CPU,
+		                                           raycast_image.GetData(TMemoryDeviceType), TMemoryDeviceType, raycast_image.size(), 0.2));
+
+		delete volume;
+	}
+}
+
+template<MemoryDeviceType TMemoryDeviceType>
+void GenericFindSurfaceTest() {
+	CameraPoseAndRenderingEngineFixture<TMemoryDeviceType> fixture;
+
+	ORUtils::IStreamWrapper raycast_images_file("TestData/arrays/raycast_images.dat", true);
+
+	for (auto& tracking_state : fixture.tracking_states) {
+		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume;
+		LoadVolume(&volume, snoopy::PartialVolume17Path<VoxelBlockHash>(), TMemoryDeviceType,
+		           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
+
+		ORUtils::SE3Pose& pose = *tracking_state->pose_d;
+
+		fixture.rendering_engine->FindVisibleBlocks(volume, &pose, &fixture.calibration_data.intrinsics_d, fixture.render_state);
+
+		const int visible_block_count = volume->index.GetVisibleBlockCount();
+		if (visible_block_count == 0) continue; // skip shots without results
+		std::shared_ptr<RenderState> render_state = fixture.MakeRenderState();
+		fixture.rendering_engine->CreateExpectedDepths(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get());
+		fixture.rendering_engine->FindSurface(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get());
 		ORUtils::Image<Vector4f>& raycast_image = *render_state->raycastResult;
 		ORUtils::Image<Vector4f> raycast_image_ground_truth = ORUtils::MemoryBlockPersistence::LoadImage<Vector4f>(raycast_images_file,
 		                                                                                                           MEMORYDEVICE_CPU);
@@ -438,6 +381,10 @@ BOOST_AUTO_TEST_CASE(Test_CreateExpectedDepths_CPU) {
 
 BOOST_AUTO_TEST_CASE(Test_RenderImage_CPU) {
 	GenericRenderImageTest<MEMORYDEVICE_CPU>();
+}
+
+BOOST_AUTO_TEST_CASE(Test_FindSurface_CPU_Legacy) {
+	GenericFindSurfaceTest_Legacy<MEMORYDEVICE_CPU>();
 }
 
 BOOST_AUTO_TEST_CASE(Test_FindSurface_CPU) {

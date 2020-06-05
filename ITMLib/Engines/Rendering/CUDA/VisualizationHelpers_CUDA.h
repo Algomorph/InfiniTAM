@@ -45,18 +45,18 @@ forwardProject_device(Vector4f* forwardProjection, const Vector4f* pointsRay, Ve
 
 template<class TVoxel, class TIndex, bool modifyVisibleEntries>
 __global__ void genericRaycast_device(Vector4f* out_ptsRay, HashBlockVisibility* blockVisibilityTypes, const TVoxel* voxelData,
-                                      const typename TIndex::IndexData* voxelIndex, Vector2i imgSize, Matrix4f invM,
+                                      const typename TIndex::IndexData* voxelIndex, Vector2i depth_image_size, Matrix4f invM,
                                       Vector4f invProjParams,
                                       float oneOverVoxelSize, const Vector2f* minmaximg, float mu) {
 	int x = (threadIdx.x + blockIdx.x * blockDim.x), y = (threadIdx.y + blockIdx.y * blockDim.y);
 
-	if (x >= imgSize.x || y >= imgSize.y) return;
+	if (x >= depth_image_size.width || y >= depth_image_size.height) return;
 
-	int locId = x + y * imgSize.x;
+	int locId = x + y * depth_image_size.width;
 	int locId2 =
-			(int) floor((float) x / minmaximg_subsample) + (int) floor((float) y / minmaximg_subsample) * imgSize.x;
+			(int) floor((float) x / ray_depth_image_subsampling_factor) + (int) floor((float) y / ray_depth_image_subsampling_factor) * depth_image_size.width;
 
-	castRay<TVoxel, TIndex, modifyVisibleEntries>(out_ptsRay[locId], blockVisibilityTypes, x, y, voxelData, voxelIndex,
+	CastRay<TVoxel, TIndex, modifyVisibleEntries>(out_ptsRay[locId], blockVisibilityTypes, x, y, voxelData, voxelIndex,
 	                                              invM, invProjParams, oneOverVoxelSize, mu, minmaximg[locId2]);
 }
 
@@ -74,9 +74,9 @@ genericRaycastMissingPoints_device(Vector4f* forwardProjection, HashBlockVisibil
 	int locId = fwdProjMissingPoints[pointId];
 	int y = locId / imgSize.x, x = locId - y * imgSize.x;
 	int locId2 =
-			(int) floor((float) x / minmaximg_subsample) + (int) floor((float) y / minmaximg_subsample) * imgSize.x;
+			(int) floor((float) x / ray_depth_image_subsampling_factor) + (int) floor((float) y / ray_depth_image_subsampling_factor) * imgSize.x;
 
-	castRay<TVoxel, TIndex, modifyVisibleEntries>(forwardProjection[locId], blockVisibilityTypes, x, y, voxelData,
+	CastRay<TVoxel, TIndex, modifyVisibleEntries>(forwardProjection[locId], blockVisibilityTypes, x, y, voxelData,
 	                                              voxelIndex, invM, invProjParams, oneOverVoxelSize, mu,
 	                                              minmaximg[locId2]);
 }

@@ -100,11 +100,11 @@ private:
 
 		auto voxel_block_size = static_cast<float>(volume_parameters.voxel_size * VOXEL_BLOCK_SIZE);
 		auto first_line_of_blocks_z = static_cast<int>(std::ceil((distance_to_first_square -
-		                                                          volume_parameters.narrow_band_half_width *
+		                                                          volume_parameters.truncation_distance *
 		                                                          volume_parameters.block_allocation_band_factor) /
 		                                                         voxel_block_size));
 		auto last_line_of_blocks_z = static_cast<int>(std::ceil((distance_to_second_square +
-		                                                          volume_parameters.narrow_band_half_width *
+		                                                          volume_parameters.truncation_distance *
 		                                                          volume_parameters.block_allocation_band_factor) /
 		                                                         voxel_block_size));
 		auto horizontal_block_span = static_cast<int>(std::ceil(((square_size_px / 2.0f) * distance_to_first_square /

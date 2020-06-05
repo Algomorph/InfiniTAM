@@ -45,14 +45,13 @@ template<class TVoxel, class TIndex, MemoryDeviceType TMemoryDeviceType>
 void RenderingEngine<TVoxel, TIndex, TMemoryDeviceType>::RenderImage(
 		VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics, const RenderState* render_state,
 		UChar4Image* output_image, IRenderingEngine::RenderImageType type, IRenderingEngine::RenderRaycastSelection raycast_type) const {
-	DIEWITHEXCEPTION_REPORTLOCATION("Not implemented");
+
 }
 
 template<class TVoxel, class TIndex, MemoryDeviceType TMemoryDeviceType>
-void
-RenderingEngine<TVoxel, TIndex, TMemoryDeviceType>::FindSurface(
+void RenderingEngine<TVoxel, TIndex, TMemoryDeviceType>::FindSurface(
 		VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics, const RenderState* render_state) const {
-	DIEWITHEXCEPTION_REPORTLOCATION("Not implemented");
+	GenericRaycast(volume, render_state->raycastResult->dimensions, pose->GetInvM(), intrinsics->projectionParamsSimple.all, render_state, false);
 }
 
 template<class TVoxel, class TIndex, MemoryDeviceType TMemoryDeviceType>
@@ -72,4 +71,33 @@ template<class TVoxel, class TIndex, MemoryDeviceType TMemoryDeviceType>
 void RenderingEngine<TVoxel, TIndex, TMemoryDeviceType>::ForwardRender(
 		const VoxelVolume<TVoxel, TIndex>* volume, const View* view, CameraTrackingState* camera_tracking_state, RenderState* render_state) const {
 	DIEWITHEXCEPTION_REPORTLOCATION("Not implemented");
+}
+
+template<typename TIndex>
+struct RaycastingTraits;
+template<>
+struct RaycastingTraits<VoxelBlockHash> {
+	static constexpr bool has_visibility_information = true;
+};
+template<>
+struct RaycastingTraits<PlainVoxelArray> {
+	static constexpr bool has_visibility_information = false;
+};
+
+template<class TVoxel, class TIndex, MemoryDeviceType TMemoryDeviceType>
+void RenderingEngine<TVoxel, TIndex, TMemoryDeviceType>::GenericRaycast (
+		VoxelVolume<TVoxel, TIndex>* volume, const Vector2i& depth_image_size, const Matrix4f& depth_camera_inverse_pose,
+		const Vector4f& depth_camera_projection_parameters, const RenderState* render_state, bool update_visible_list) const{
+
+	bool update_visibility_information = update_visible_list && RaycastingTraits<TIndex>::has_visibility_information;
+
+	if (update_visibility_information) {
+		RaycastFunctor<TVoxel, TIndex, TMemoryDeviceType, true> functor(
+				*volume, *render_state->renderingRangeImage, InvertProjectionParams(depth_camera_projection_parameters), depth_camera_inverse_pose);
+		ImageTraversalEngine<TMemoryDeviceType>::template TraverseWithPosition<16, 12>(render_state->raycastResult, functor);
+	} else {
+		RaycastFunctor<TVoxel, TIndex, TMemoryDeviceType, false> functor(
+				*volume, *render_state->renderingRangeImage, InvertProjectionParams(depth_camera_projection_parameters), depth_camera_inverse_pose);
+		ImageTraversalEngine<TMemoryDeviceType>::template TraverseWithPosition<16, 12>(render_state->raycastResult, functor);
+	}
 }

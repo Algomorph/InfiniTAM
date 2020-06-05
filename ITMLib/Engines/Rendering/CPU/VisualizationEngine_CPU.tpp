@@ -148,8 +148,6 @@ VisualizationEngine_CPU<TVoxel, VoxelBlockHash>::CreateExpectedDepths(const Voxe
 
 		CreateRenderingBlocks(&(render_blocks[0]), offset, upperLeft, lowerRight, zRange);
 	}
-	//_DEBUG alloc
-	std::cout << "final_rendering_block_count: " << render_block_count << std::endl;
 
 	// go through rendering blocks
 	for (int blockNo = 0; blockNo < render_block_count; ++blockNo) {
@@ -183,7 +181,7 @@ template<class TVoxel, class TIndex>
 static void GenericRaycast(VoxelVolume<TVoxel, TIndex>* volume, const Vector2i& imgSize, const Matrix4f& invM,
                            const Vector4f& projParams, const RenderState* renderState, bool updateVisibleList) {
 	const Vector2f* minmaximg = renderState->renderingRangeImage->GetData(MEMORYDEVICE_CPU);
-	const float mu = volume->GetParameters().narrow_band_half_width;
+	const float mu = volume->GetParameters().truncation_distance;
 	const float oneOverVoxelSize = 1.0f / volume->GetParameters().voxel_size;
 	Vector4f* pointsRay = renderState->raycastResult->GetData(MEMORYDEVICE_CPU);
 	const TVoxel* voxelData = volume->GetVoxels();
@@ -199,10 +197,10 @@ static void GenericRaycast(VoxelVolume<TVoxel, TIndex>* volume, const Vector2i& 
 		int x = locId - y * imgSize.x;
 
 		int locId2 =
-				(int) floor((float) x / minmaximg_subsample) + (int) floor((float) y / minmaximg_subsample) * imgSize.x;
+				(int) floor((float) x / ray_depth_image_subsampling_factor) + (int) floor((float) y / ray_depth_image_subsampling_factor) * imgSize.x;
 
 		if (blockVisibilityTypes != nullptr)
-			castRay<TVoxel, TIndex, true>(
+			CastRay<TVoxel, TIndex, true>(
 					pointsRay[locId],
 					blockVisibilityTypes,
 					x, y,
@@ -215,7 +213,7 @@ static void GenericRaycast(VoxelVolume<TVoxel, TIndex>* volume, const Vector2i& 
 					minmaximg[locId2]
 			);
 		else
-			castRay<TVoxel, TIndex, false>(
+			CastRay<TVoxel, TIndex, false>(
 					pointsRay[locId],
 					NULL,
 					x, y,
@@ -434,8 +432,8 @@ ForwardRender_common(const VoxelVolume<TVoxel, TIndex>* volume, const View* view
 	for (int y = 0; y < imgSize.y; y++)
 		for (int x = 0; x < imgSize.x; x++) {
 			int locId = x + y * imgSize.x;
-			int locId2 = (int) floor((float) x / minmaximg_subsample) +
-			             (int) floor((float) y / minmaximg_subsample) * imgSize.x;
+			int locId2 = (int) floor((float) x / ray_depth_image_subsampling_factor) +
+			             (int) floor((float) y / ray_depth_image_subsampling_factor) * imgSize.x;
 
 			Vector4f fwdPoint = forwardProjection[locId];
 			Vector2f minmaxval = minmaximg[locId2];
@@ -457,11 +455,11 @@ ForwardRender_common(const VoxelVolume<TVoxel, TIndex>* volume, const View* view
 		int locId = fwdProjMissingPoints[pointId];
 		int y = locId / imgSize.x, x = locId - y * imgSize.x;
 		int locId2 =
-				(int) floor((float) x / minmaximg_subsample) + (int) floor((float) y / minmaximg_subsample) * imgSize.x;
+				(int) floor((float) x / ray_depth_image_subsampling_factor) + (int) floor((float) y / ray_depth_image_subsampling_factor) * imgSize.x;
 
-		castRay<TVoxel, TIndex, false>(forwardProjection[locId], NULL, x, y, voxelData, voxelIndex, invM, invProjParams,
+		CastRay<TVoxel, TIndex, false>(forwardProjection[locId], NULL, x, y, voxelData, voxelIndex, invM, invProjParams,
 		                               1.0f / volume->GetParameters().voxel_size,
-		                               volume->GetParameters().narrow_band_half_width, minmaximg[locId2]);
+		                               volume->GetParameters().truncation_distance, minmaximg[locId2]);
 	}
 }
 

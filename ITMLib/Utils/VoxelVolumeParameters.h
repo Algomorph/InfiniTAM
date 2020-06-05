@@ -41,10 +41,10 @@ namespace ITMLib {
         "Consider only depth values between near_clipping_distance to far_clipping_distance."), \
         (float, far_clipping_distance, 3.0f, PRIMITIVE, \
         "Consider only depth values between near_clipping_distance to far_clipping_distance."), \
-        (float, narrow_band_half_width, 0.04f, PRIMITIVE, \
+        (float, truncation_distance, 0.04f, PRIMITIVE, \
         "Encodes the width of the band of the truncated signed distance transform that is actually stored in the " \
         "volume. This is again usually specified in meters. " \
-        "The resulting width in voxels isnarrow_band_half_width divided by voxel_size."), \
+        "The resulting width in voxels istruncation_distance divided by voxel_size."), \
         (int, max_integration_weight, 100, PRIMITIVE, \
         "Up to max_integration_weight observations per voxel are averaged. " \
         "Beyond that a sliding average is computed."), \

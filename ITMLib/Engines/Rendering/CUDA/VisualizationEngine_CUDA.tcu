@@ -162,38 +162,38 @@ template<> inline HashBlockVisibility* GetBlockVisibilityTypes<PlainVoxelArray>(
 }
 
 template <class TVoxel, class TIndex>
-static void GenericRaycast(VoxelVolume<TVoxel, TIndex> *volume, const Vector2i& imgSize, const Matrix4f& invM, const Vector4f& projParams, const RenderState *renderState, bool updateVisibleList)
+static void GenericRaycast(VoxelVolume<TVoxel, TIndex>* volume, const Vector2i& depth_image_size, const Matrix4f& depth_camera_inverse_pose, const Vector4f& depth_camera_projection_parameters, const RenderState* render_state, bool update_visible_list)
 {
-	float voxelSize = volume->GetParameters().voxel_size;
-	float oneOverVoxelSize = 1.0f / voxelSize;
+	float voxel_size = volume->GetParameters().voxel_size;
+	float voxel_size_reciprocal = 1.0f / voxel_size;
 
-	HashBlockVisibility* blockVisibilityTypes = GetBlockVisibilityTypes(volume->index);
+	HashBlockVisibility* block_visibility_types = GetBlockVisibilityTypes(volume->index);
 
-	dim3 cudaBlockSize(16, 12);
-	dim3 gridSize((int)ceil((float)imgSize.x / (float)cudaBlockSize.x), (int)ceil((float)imgSize.y / (float)cudaBlockSize.y));
-	if (blockVisibilityTypes != nullptr) genericRaycast_device<TVoxel, TIndex, true> <<< gridSize, cudaBlockSize >>> (
-				renderState->raycastResult->GetData(MEMORYDEVICE_CUDA),
-				blockVisibilityTypes,
+	dim3 cuda_block_size(16, 12);
+	dim3 cuda_grid_size(ceil_of_integer_quotient(depth_image_size.x, cuda_block_size.x), ceil_of_integer_quotient(depth_image_size.y, cuda_block_size.y));
+	if (update_visible_list && block_visibility_types != nullptr) genericRaycast_device<TVoxel, TIndex, true> <<< cuda_grid_size, cuda_block_size >>> (
+				render_state->raycastResult->GetData(MEMORYDEVICE_CUDA),
+				block_visibility_types,
 				volume->GetVoxels(),
 				volume->index.GetIndexData(),
-				imgSize,
-				invM,
-				InvertProjectionParams(projParams),
-				oneOverVoxelSize,
-				renderState->renderingRangeImage->GetData(MEMORYDEVICE_CUDA),
-				volume->GetParameters().narrow_band_half_width
+				depth_image_size,
+				depth_camera_inverse_pose,
+				InvertProjectionParams(depth_camera_projection_parameters),
+				voxel_size_reciprocal,
+				render_state->renderingRangeImage->GetData(MEMORYDEVICE_CUDA),
+				volume->GetParameters().truncation_distance
 		);
-	else genericRaycast_device<TVoxel, TIndex, false> <<<gridSize, cudaBlockSize >>>(
-				renderState->raycastResult->GetData(MEMORYDEVICE_CUDA),
+	else genericRaycast_device<TVoxel, TIndex, false> <<<cuda_grid_size, cuda_block_size >>>(
+				render_state->raycastResult->GetData(MEMORYDEVICE_CUDA),
 				nullptr,
 				volume->GetVoxels(),
 				volume->index.GetIndexData(),
-				imgSize,
-				invM,
-				InvertProjectionParams(projParams),
-				oneOverVoxelSize,
-				renderState->renderingRangeImage->GetData(MEMORYDEVICE_CUDA),
-				volume->GetParameters().narrow_band_half_width
+				depth_image_size,
+				depth_camera_inverse_pose,
+				InvertProjectionParams(depth_camera_projection_parameters),
+				voxel_size_reciprocal,
+				render_state->renderingRangeImage->GetData(MEMORYDEVICE_CUDA),
+				volume->GetParameters().truncation_distance
 		);
 	ORcudaKernelCheck;
 }
@@ -374,7 +374,7 @@ static void ForwardRender_common(const VoxelVolume<TVoxel, TIndex> *volume, cons
 		genericRaycastMissingPoints_device<TVoxel, TIndex, false> <<<gridSize, blockSize >>>(
 				forwardProjection, NULL, voxelData, voxelIndex, imgSize, invM,
 				InvertProjectionParams(projParams), oneOverVoxelSize, fwdProjMissingPoints,
-				renderState->noFwdProjMissingPoints, minmaximg, volume->GetParameters().narrow_band_half_width);
+				renderState->noFwdProjMissingPoints, minmaximg, volume->GetParameters().truncation_distance);
 		ORcudaKernelCheck;
 	}
 }

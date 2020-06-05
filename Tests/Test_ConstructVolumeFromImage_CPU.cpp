@@ -325,9 +325,9 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
 	}
 
 	float tolerance = 1e-4;
-	int narrow_band_half_width_voxels = static_cast<int>(std::round(
-			volume1.GetParameters().narrow_band_half_width / volume1.GetParameters().voxel_size));
-	float max_SDF_step = 1.0f / narrow_band_half_width_voxels;
+	int truncation_distance_voxels = static_cast<int>(std::round(
+			volume1.GetParameters().truncation_distance / volume1.GetParameters().voxel_size));
+	float max_SDF_step = 1.0f / truncation_distance_voxels;
 
 	// check constructed volume integrity
 	Vector3i bad_coordinate;
@@ -354,8 +354,8 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
 		if (i_coordinate > 17) {
 			// don't go into low negative sdf values, since those will be overwritten by positive values
 			// during sdf construction in certain cases
-			for (int i_level_set = -narrow_band_half_width_voxels;
-			     i_level_set < (narrow_band_half_width_voxels / 2); i_level_set++) {
+			for (int i_level_set = -truncation_distance_voxels;
+			     i_level_set < (truncation_distance_voxels / 2); i_level_set++) {
 				Vector3i augmented_coord(coord.x, coord.y, coord.z + i_level_set);
 				float expected_sdf = -static_cast<float>(i_level_set) * max_SDF_step;
 				voxel = ManipulationEngine_CPU_PVA_Voxel::Inst().ReadVoxel(&volume1, augmented_coord);

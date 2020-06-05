@@ -64,7 +64,7 @@ _CPU_AND_GPU_CODE_ inline void updateSdfAndFlagsBasedOnDistanceSurfaceToVoxel(
  * \param voxel_in_scene_coordinates
  * \param depth_camera_pose
  * \param depth_camera_projection_parameters
- * \param narrow_band_half_width
+ * \param truncation_distance
  * \param depth_image an array of float depths corresponding to the depth image
  * \param depth_image_size
  * \return -1 if voxel point is behind camera or depth value is invalid (0.0f),
@@ -76,7 +76,7 @@ _CPU_AND_GPU_CODE_ inline float computeUpdatedLiveVoxelDepthInfo(
 		const THREADPTR(Vector4f)& voxel_in_scene_coordinates,
 		const CONSTPTR(Matrix4f)& depth_camera_pose,
 		const CONSTPTR(Vector4f)& depth_camera_projection_parameters,
-		float narrow_band_half_width,
+		float truncation_distance,
 		const CONSTPTR(float)* depth_image,
 		const CONSTPTR(Vector2i)& depth_image_size,
 		float effective_range_cutoff = 0.08f) {
@@ -115,7 +115,7 @@ _CPU_AND_GPU_CODE_ inline float computeUpdatedLiveVoxelDepthInfo(
 	// effectively, eta is the distance between measured surface & voxel point
 	float signed_distance_surface_to_voxel_along_camera_ray = depth_measure - voxel_point_in_camera_coordinates.z;
 	updateSdfAndFlagsBasedOnDistanceSurfaceToVoxel(voxel, signed_distance_surface_to_voxel_along_camera_ray,
-	                                               narrow_band_half_width, effective_range_cutoff);
+	                                               truncation_distance, effective_range_cutoff);
 	return signed_distance_surface_to_voxel_along_camera_ray;
 }
 
@@ -312,7 +312,7 @@ public:
 			rgb_camera_projection_parameters(view->calib.intrinsics_rgb.projectionParamsSimple.all),
 			rgb_camera_extrinsic_matrix(TTSDFVoxel::hasColorInformation ?  view->calib.trafo_rgb_to_depth.calib_inv * depth_camera_extrinsic_matrix : Matrix4f()),
 
-			narrow_band_half_width(volume_parameters.narrow_band_half_width),
+			truncation_distance(volume_parameters.truncation_distance),
 			max_integration_weight(volume_parameters.max_integration_weight),
 			voxel_size(volume_parameters.voxel_size),
 
@@ -331,7 +331,7 @@ public:
 		pt_model.w = 1.0f;
 		ComputeUpdatedLiveVoxelInfo<TTSDFVoxel::hasColorInformation, TTSDFVoxel::hasConfidenceInformation, TTSDFVoxel::hasSemanticInformation, TTSDFVoxel>::compute(
 				voxel, pt_model, depth_camera_extrinsic_matrix,
-				depth_camera_projection_parameters, rgb_camera_extrinsic_matrix, rgb_camera_projection_parameters, narrow_band_half_width, max_integration_weight, depth, confidence,
+				depth_camera_projection_parameters, rgb_camera_extrinsic_matrix, rgb_camera_projection_parameters, truncation_distance, max_integration_weight, depth, confidence,
 				depth_image_size, rgb, rgb_image_size);
 	}
 
@@ -343,7 +343,7 @@ private:
 	Vector4f rgb_camera_projection_parameters;
 	Matrix4f rgb_camera_extrinsic_matrix;
 
-	const float narrow_band_half_width;
+	const float truncation_distance;
 	const int max_integration_weight;
 	const float voxel_size;
 

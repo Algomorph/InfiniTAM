@@ -214,7 +214,7 @@ SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorType>::
 	WarpGradientFunctor<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorType>
 			calculate_gradient_functor(this->parameters, this->switches, warp_field, canonical_volume, live_volume,
 			                           canonical_volume->GetParameters().voxel_size,
-			                           canonical_volume->GetParameters().narrow_band_half_width);
+			                           canonical_volume->GetParameters().truncation_distance);
 
 	ThreeVolumeTraversalEngine<TWarp, TVoxel, TVoxel, TIndex, TMemoryDeviceType>::
 	TraverseUtilizedWithPosition(warp_field, canonical_volume, live_volume, calculate_gradient_functor);
