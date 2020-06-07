@@ -45,7 +45,7 @@ template<class TVoxel, class TIndex, MemoryDeviceType TMemoryDeviceType>
 void RenderingEngine<TVoxel, TIndex, TMemoryDeviceType>::RenderImage(
 		VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics, const RenderState* render_state,
 		UChar4Image* output_image, IRenderingEngine::RenderImageType type, IRenderingEngine::RenderRaycastSelection raycast_type) const {
-
+	DIEWITHEXCEPTION_REPORTLOCATION("Not implemented");
 }
 
 template<class TVoxel, class TIndex, MemoryDeviceType TMemoryDeviceType>
@@ -56,21 +56,78 @@ void RenderingEngine<TVoxel, TIndex, TMemoryDeviceType>::FindSurface(
 
 template<class TVoxel, class TIndex, MemoryDeviceType TMemoryDeviceType>
 void RenderingEngine<TVoxel, TIndex, TMemoryDeviceType>::CreatePointCloud(
-		VoxelVolume<TVoxel, TIndex>* volume, const View* view, CameraTrackingState* camera_tracking_state, RenderState* render_state,
-		bool skipPoints) const {
-	DIEWITHEXCEPTION_REPORTLOCATION("Not implemented");
+		VoxelVolume<TVoxel, TIndex>* volume, const View* view, CameraTrackingState* camera_tracking_state, RenderState* render_state) const {
+
+	Matrix4f inverted_rgb_camera_matrix = camera_tracking_state->pose_d->GetInvM() * view->calib.trafo_rgb_to_depth.calib;
+	GenericRaycast(volume, render_state->raycastResult->dimensions, inverted_rgb_camera_matrix, view->calib.intrinsics_rgb.projectionParamsSimple.all,
+	               render_state, true);
+	const Vector3f light_source = -Vector3f(inverted_rgb_camera_matrix.getColumn(2));
+	RenderPointCloudFunctor<TVoxel, TIndex, TMemoryDeviceType> functor(*camera_tracking_state->pointCloud, *volume, light_source,
+	                                                                   this->parameters.skip_points);
+	ImageTraversalEngine<TMemoryDeviceType>::template TraverseWithPosition(render_state->raycastResult, functor);
+	camera_tracking_state->pointCloud->noTotalPoints = functor.GetPointCount();
 }
 
 template<class TVoxel, class TIndex, MemoryDeviceType TMemoryDeviceType>
 void RenderingEngine<TVoxel, TIndex, TMemoryDeviceType>::CreateICPMaps(
 		VoxelVolume<TVoxel, TIndex>* volume, const View* view, CameraTrackingState* camera_tracking_state, RenderState* render_state) const {
-	DIEWITHEXCEPTION_REPORTLOCATION("Not implemented");
+	Vector2i map_dimensions = render_state->raycastResult->dimensions;
+	Matrix4f inverted_depth_camera_pose = camera_tracking_state->pose_d->GetInvM();
+
+	GenericRaycast(volume, map_dimensions, inverted_depth_camera_pose, view->calib.intrinsics_d.projectionParamsSimple.all, render_state, true);
+	camera_tracking_state->pose_pointCloud->SetFrom(camera_tracking_state->pose_d);
+	Vector3f light_source = -Vector3f(inverted_depth_camera_pose.getColumn(2));
+	if (view->calib.intrinsics_d.FocalLengthSignsDiffer()) {
+		ICPMapRenderFunctor<TMemoryDeviceType, true, true> functor(
+				*camera_tracking_state, volume->GetParameters().voxel_size, *render_state, light_source);
+		ImageTraversalEngine<TMemoryDeviceType>::template TraversePositionOnly<16, 12>(render_state->raycastResult, functor);
+	} else {
+		ICPMapRenderFunctor<TMemoryDeviceType, true, false> functor(
+				*camera_tracking_state, volume->GetParameters().voxel_size, *render_state, light_source);
+		ImageTraversalEngine<TMemoryDeviceType>::template TraversePositionOnly<16, 12>(render_state->raycastResult, functor);
+	}
 }
 
 template<class TVoxel, class TIndex, MemoryDeviceType TMemoryDeviceType>
 void RenderingEngine<TVoxel, TIndex, TMemoryDeviceType>::ForwardRender(
 		const VoxelVolume<TVoxel, TIndex>* volume, const View* view, CameraTrackingState* camera_tracking_state, RenderState* render_state) const {
-	DIEWITHEXCEPTION_REPORTLOCATION("Not implemented");
+	Vector2i imgSize = render_state->raycastResult->dimensions;
+	const Matrix4f depth_camera_pose = camera_tracking_state->pose_d->GetM();
+	const Matrix4f inverse_depth_camera_pose = camera_tracking_state->pose_d->GetInvM();
+	const Vector4f& depth_camera_projection_parameters = view->calib.intrinsics_d.projectionParamsSimple.all;
+
+	float* depth = view->depth->GetData(MEMORYDEVICE_CUDA);
+	Vector4f* forward_projected_points = render_state->forwardProjection->GetData(MEMORYDEVICE_CUDA);
+	int* missing_point_indices = render_state->fwdProjMissingPoints->GetData(MEMORYDEVICE_CUDA);
+	const Vector2f* pixel_depth_range_data = render_state->renderingRangeImage->GetData(MEMORYDEVICE_CUDA);
+	float voxel_size_reciprocal = 1.0f / volume->GetParameters().voxel_size;
+	float voxel_size = volume->GetParameters().voxel_size;
+	const TVoxel* voxels = volume->GetVoxels();
+	const typename TIndex::IndexData* index_data = volume->index.GetIndexData();
+
+	render_state->forwardProjection->Clear();
+
+	ForwardProjectFunctor<TMemoryDeviceType> project_functor(*render_state->forwardProjection, voxel_size, depth_camera_projection_parameters,
+	                                                         depth_camera_pose);
+	ImageTraversalEngine<TMemoryDeviceType>::template Traverse(*render_state->raycastResult, project_functor);
+
+	FindMissingProjectionPointsFunctor<TMemoryDeviceType> find_missing_points_functor(*render_state->fwdProjMissingPoints,
+	                                                                                  *render_state->forwardProjection,
+	                                                                                  *render_state->renderingRangeImage);
+
+	ImageTraversalEngine<TMemoryDeviceType>::template TraversePositionOnly(*render_state->raycastResult, find_missing_points_functor);
+	render_state->noFwdProjMissingPoints = find_missing_points_functor.GetMissingPointCount();
+
+	{ // render missing points
+		blockSize = dim3(256);
+		gridSize = dim3((int) ceil((float) render_state->noFwdProjMissingPoints / blockSize.x));
+
+		genericRaycastMissingPoints_device < TVoxel, TIndex, false > <<<gridSize, blockSize >> > (
+				forward_projected_points, NULL, voxels, index_data, imgSize, inverse_depth_camera_pose,
+						InvertProjectionParams(depth_camera_projection_parameters), voxel_size_reciprocal, missing_point_indices,
+						render_state->noFwdProjMissingPoints, pixel_depth_range_data, volume->GetParameters().truncation_distance);
+		ORcudaKernelCheck;
+	}
 }
 
 template<typename TIndex>
@@ -85,19 +142,19 @@ struct RaycastingTraits<PlainVoxelArray> {
 };
 
 template<class TVoxel, class TIndex, MemoryDeviceType TMemoryDeviceType>
-void RenderingEngine<TVoxel, TIndex, TMemoryDeviceType>::GenericRaycast (
-		VoxelVolume<TVoxel, TIndex>* volume, const Vector2i& depth_image_size, const Matrix4f& depth_camera_inverse_pose,
-		const Vector4f& depth_camera_projection_parameters, const RenderState* render_state, bool update_visible_list) const{
+void RenderingEngine<TVoxel, TIndex, TMemoryDeviceType>::GenericRaycast(
+		VoxelVolume<TVoxel, TIndex>* volume, const Vector2i& depth_image_size, const Matrix4f& camera_inverse_pose,
+		const Vector4f& camera_projection_parameters, const RenderState* render_state, bool update_visible_list) const {
 
 	bool update_visibility_information = update_visible_list && RaycastingTraits<TIndex>::has_visibility_information;
 
 	if (update_visibility_information) {
 		RaycastFunctor<TVoxel, TIndex, TMemoryDeviceType, true> functor(
-				*volume, *render_state->renderingRangeImage, InvertProjectionParams(depth_camera_projection_parameters), depth_camera_inverse_pose);
+				*volume, *render_state->renderingRangeImage, InvertProjectionParams(camera_projection_parameters), camera_inverse_pose);
 		ImageTraversalEngine<TMemoryDeviceType>::template TraverseWithPosition<16, 12>(render_state->raycastResult, functor);
 	} else {
 		RaycastFunctor<TVoxel, TIndex, TMemoryDeviceType, false> functor(
-				*volume, *render_state->renderingRangeImage, InvertProjectionParams(depth_camera_projection_parameters), depth_camera_inverse_pose);
+				*volume, *render_state->renderingRangeImage, InvertProjectionParams(camera_projection_parameters), camera_inverse_pose);
 		ImageTraversalEngine<TMemoryDeviceType>::template TraverseWithPosition<16, 12>(render_state->raycastResult, functor);
 	}
 }

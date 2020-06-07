@@ -18,17 +18,23 @@
 #include "../../../Utils/Math.h"
 
 namespace {
-
 // CUDA global kernels
 template <typename TImageElement, typename TFunctor >
-__global__ void imageTraversalWithPosition_device (TImageElement* image_data, const Vector2i resolution, TFunctor* functor_device){
+__global__ void ImagePositionOnlyTraversal_device (const Vector2i resolution, TFunctor* functor_device){
+	int x = threadIdx.x + blockIdx.x * blockDim.x, y = threadIdx.y + blockIdx.y * blockDim.y;
+	if (x >= resolution.x || y >= resolution.y) return;
+	(*functor_device)(x + y * resolution.x, x, y);
+}
+
+template <typename TImageElement, typename TFunctor >
+__global__ void ImageTraversalWithPosition_device (TImageElement* image_data, const Vector2i resolution, TFunctor* functor_device){
 	int x = threadIdx.x + blockIdx.x * blockDim.x, y = threadIdx.y + blockIdx.y * blockDim.y;
 	if (x >= resolution.x || y >= resolution.y) return;
 	(*functor_device)(image_data[x + y * resolution.x], x, y);
 }
 
 template <typename TImageElement, typename TFunctor >
-__global__ void imageTraversalWithoutPosition_device (TImageElement* image_data, const int pixel_count, TFunctor* functor_device){
+__global__ void ImageTraversalWithoutPosition_device (TImageElement* image_data, const int pixel_count, TFunctor* functor_device){
 	int i_pixel = threadIdx.x + blockIdx.x * blockDim.x;
 	if (i_pixel >= pixel_count) return;
 	(*functor_device)(image_data[i_pixel]);

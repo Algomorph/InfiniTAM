@@ -412,7 +412,6 @@ configuration::Configuration GenerateDefaultSnoopyConfiguration() {
 					300,
 					1e-06,
 					0.5f),
-			false,
 			true,
 			MEMORYDEVICE_CUDA,
 			false,
@@ -428,8 +427,10 @@ configuration::Configuration GenerateDefaultSnoopyConfiguration() {
 	default_snoopy_configuration.source_tree = default_snoopy_configuration.ToPTree();
 	TelemetrySettings default_snoopy_telemetry_settings;
 	IndexingSettings default_snoopy_indexing_settings;
+	RenderingSettings default_snoopy_rendering_settings;
 	AddDeferrableToSourceTree(default_snoopy_configuration, default_snoopy_telemetry_settings);
 	AddDeferrableToSourceTree(default_snoopy_configuration, default_snoopy_indexing_settings);
+	AddDeferrableToSourceTree(default_snoopy_configuration, default_snoopy_rendering_settings);
 	return default_snoopy_configuration;
 }
 
@@ -543,8 +544,7 @@ void GenerateRenderingTestData_VoxelBlockHash() {
 			std::shared_ptr<RenderState> render_state_create_point_cloud = fixture.MakeRenderState();
 			fixture.visualization_engine_legacy->CreateExpectedDepths(volume, &pose, &fixture.calibration_data.intrinsics_d,
 			                                                          render_state_create_point_cloud.get());
-			fixture.visualization_engine_legacy->CreatePointCloud(volume, fixture.view_17, tracking_state.get(), render_state_create_point_cloud.get(),
-			                                                      false);
+			fixture.visualization_engine_legacy->CreatePointCloud(volume, fixture.view_17, tracking_state.get(), render_state_create_point_cloud.get());
 
 			point_cloud_images_file.OStream().write(reinterpret_cast<const char*>(&(tracking_state->pointCloud->noTotalPoints)),
 			                                        sizeof(unsigned int));

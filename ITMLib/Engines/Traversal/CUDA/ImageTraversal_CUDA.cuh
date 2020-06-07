@@ -16,43 +16,28 @@
 //local
 #include "ImageTraversal_CUDA_Kernels.cuh"
 #include "../Interface/ImageTraversal.h"
+#include "../Shared/CudaCallWrappers.cuh"
 #include "../../../Utils/Math.h"
 #include "../../../../ORUtils/Image.h"
 
 namespace ITMLib {
-namespace internal{
+namespace internal {
 template<>
-class ImageTraversalEngine_Internal<MEMORYDEVICE_CUDA> {
+class ImageTraversalEngine_Internal<MEMORYDEVICE_CUDA, EXACT> {
 	friend class ImageTraversalEngine<MEMORYDEVICE_CUDA>;
 protected: // static functions
-	template<typename TImageElement, typename TImage, typename TFunctor, typename TCudaCall>
-	inline static void
-	Traverse_Generic(TImage* image, TFunctor& functor, TCudaCall&& cuda_call) {
-		const Vector2i resolution = image->dimensions;
-		TImageElement* image_data = image->GetData(MEMORYDEVICE_CUDA);
-
-		TFunctor* functor_device = nullptr;
-
-		ORcudaSafeCall(cudaMalloc((void**) &functor_device, sizeof(TFunctor)));
-		ORcudaSafeCall(cudaMemcpy(functor_device, &functor, sizeof(TFunctor), cudaMemcpyHostToDevice));
-
-		cuda_call(image_data, resolution, functor_device);
-		ORcudaKernelCheck;
-
-		ORcudaSafeCall(cudaMemcpy(&functor, functor_device, sizeof(TFunctor), cudaMemcpyDeviceToHost));
-		ORcudaSafeCall(cudaFree(functor_device));
-	}
 
 	template<int TCudaBlockSizeX = 16, int TCudaBlockSizeY = 16, typename TImageElement, typename TImage, typename TFunctor>
 	inline static void
 	TraverseWithPosition_Generic(TImage* image, TFunctor& functor) {
-		Traverse_Generic<TImageElement>(
-				image, functor,
-				[](TImageElement* image_data, const Vector2i resolution, TFunctor* functor_device) {
+		TImageElement* image_data = image->GetData(MEMORYDEVICE_CUDA);
+		const Vector2i resolution = image->dimensions;
+		CallCUDAonUploadedFunctor(functor,
+				[&image_data, &resolution](TFunctor* functor_device) {
 					dim3 cuda_block_size(TCudaBlockSizeX, TCudaBlockSizeY);
 					dim3 cuda_grid_size(ceil_of_integer_quotient(resolution.x, cuda_block_size.x),
 					                    ceil_of_integer_quotient(resolution.y, cuda_block_size.y));
-					imageTraversalWithPosition_device<TImageElement, TFunctor>
+					ImageTraversalWithPosition_device<TImageElement, TFunctor>
 					<<< cuda_grid_size, cuda_block_size >>>
 							(image_data, resolution, functor_device);
 				}
@@ -62,15 +47,30 @@ protected: // static functions
 	template<typename TImageElement, typename TImage, typename TFunctor>
 	inline static void
 	TraverseWithoutPosition_Generic(TImage* image, TFunctor& functor) {
-		Traverse_Generic<TImageElement>(
-				image, functor,
-				[](TImageElement* image_data, const Vector2i resolution, TFunctor* functor_device) {
-					const int pixel_count = resolution.width * resolution.height;
+		TImageElement* image_data = image->GetData(MEMORYDEVICE_CUDA);
+		const int pixel_count = image->size();
+		CallCUDAonUploadedFunctor(functor,
+				[&image_data, &pixel_count](TFunctor* functor_device) {
 					dim3 cuda_block_size(256);
 					dim3 cuda_grid_size(ceil_of_integer_quotient(pixel_count, cuda_block_size.x));
-					imageTraversalWithoutPosition_device<TImageElement, TFunctor>
+					ImageTraversalWithoutPosition_device<TImageElement, TFunctor>
 					<<< cuda_grid_size, cuda_block_size >>>
 							(image_data, pixel_count, functor_device);
+				}
+		);
+	}
+
+	template<int TCudaBlockSizeX = 16, int TCudaBlockSizeY = 16, typename TImageElement, typename TImage, typename TFunctor>
+	inline static void
+	TraversePositionOnly_Generic(TImage* image, TFunctor& functor) {
+		const Vector2i resolution = image->dimensions;
+		CallCUDAonUploadedFunctor(
+				functor,
+				[&resolution](TFunctor* functor_device) {
+					dim3 cuda_block_size(TCudaBlockSizeX, TCudaBlockSizeY);
+					dim3 cuda_grid_size(ceil_of_integer_quotient(resolution.x, cuda_block_size.x),
+					                    ceil_of_integer_quotient(resolution.y, cuda_block_size.y));
+					ImagePositionOnlyTraversal_device<TImageElement, TFunctor> <<< cuda_grid_size, cuda_block_size >>>(resolution, functor_device);
 				}
 		);
 	}

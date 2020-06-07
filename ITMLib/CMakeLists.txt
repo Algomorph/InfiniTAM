@@ -573,10 +573,11 @@ set(
 
         Engines/Rendering/RenderingEngine.h
         Engines/Rendering/RenderingEngine_Specialized.h
-
+        Engines/Rendering/RenderingEngineFactory.h
+        Engines/Rendering/RenderingSettings.h
         Engines/Rendering/MultiVisualizationEngineFactory.h
         Engines/Rendering/SurfelVisualizationEngineFactory.h
-        Engines/Rendering/RenderingEngineFactory.h
+
 
         Engines/Rendering/CPU/MultiVisualizationEngine_CPU.h
         Engines/Rendering/CPU/SurfelVisualizationEngine_CPU.h
@@ -606,6 +607,7 @@ set(
         Engines/Rendering/RenderingEngine.cpp
         Engines/Rendering/RenderingEngine.cu
         Engines/Rendering/RenderingEngine_Specialized.tpp
+        Engines/Rendering/RenderingSettings.cpp
 
         Engines/Rendering/CPU/MultiVisualizationEngine_CPU.tpp
         Engines/Rendering/CPU/MultiVisualizationEngine_CPU_PlainVoxelArray.cpp

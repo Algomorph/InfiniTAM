@@ -266,115 +266,112 @@ static void RenderImage_common(VoxelVolume<TVoxel, TIndex> *volume, const ORUtil
 }
 
 template<class TVoxel, class TIndex>
-static void CreatePointCloud_common(VoxelVolume<TVoxel, TIndex> *volume, const View *view, CameraTrackingState *trackingState, RenderState *renderState,
-                                    bool skipPoints, uint *noTotalPoints_device)
+static void CreatePointCloud_common(VoxelVolume<TVoxel, TIndex>* volume, const View*view, CameraTrackingState* camera_tracking_state, RenderState* render_state,
+                                    bool skipPoints, uint* point_count)
 {
-	Vector2i imgSize = renderState->raycastResult->dimensions;
-	Matrix4f invM = trackingState->pose_d->GetInvM() * view->calib.trafo_rgb_to_depth.calib;
+	Vector2i raycast_image_dimensions = render_state->raycastResult->dimensions;
+	Matrix4f inverted_rgb_camera_matrix = camera_tracking_state->pose_d->GetInvM() * view->calib.trafo_rgb_to_depth.calib;
 
-	GenericRaycast(volume, imgSize, invM, view->calib.intrinsics_rgb.projectionParamsSimple.all, renderState, true);
-	trackingState->pose_pointCloud->SetFrom(trackingState->pose_d);
+	GenericRaycast(volume, raycast_image_dimensions, inverted_rgb_camera_matrix, view->calib.intrinsics_rgb.projectionParamsSimple.all, render_state, true);
+	camera_tracking_state->pose_pointCloud->SetFrom(camera_tracking_state->pose_d);
 
-	ORcudaSafeCall(cudaMemsetAsync(noTotalPoints_device, 0, sizeof(uint)));
+	ORcudaSafeCall(cudaMemsetAsync(point_count, 0, sizeof(uint)));
 
-	Vector3f lightSource = -Vector3f(invM.getColumn(2));
-	Vector4f *locations = trackingState->pointCloud->locations->GetData(MEMORYDEVICE_CUDA);
-	Vector4f *colours = trackingState->pointCloud->colours->GetData(MEMORYDEVICE_CUDA);
-	Vector4f *pointsRay = renderState->raycastResult->GetData(MEMORYDEVICE_CUDA);
+	Vector3f light_source = -Vector3f(inverted_rgb_camera_matrix.getColumn(2));
+	Vector4f* locations = camera_tracking_state->pointCloud->locations->GetData(MEMORYDEVICE_CUDA);
+	Vector4f* colours = camera_tracking_state->pointCloud->colours->GetData(MEMORYDEVICE_CUDA);
+	Vector4f* raycast_points = render_state->raycastResult->GetData(MEMORYDEVICE_CUDA);
 
-	dim3 cudaBlockSize(16, 16);
-	dim3 gridSize = getGridSize(imgSize, cudaBlockSize);
-	renderPointCloud_device<TVoxel, TIndex> <<<gridSize, cudaBlockSize >>>
-			(locations, colours, noTotalPoints_device,
-			 pointsRay, volume->GetVoxels(), volume->index.GetIndexData(), skipPoints, volume->GetParameters().voxel_size,
-			 imgSize, lightSource);
+	dim3 cuda_block_size(16, 16);
+	dim3 cuda_grid_size = getGridSize(raycast_image_dimensions, cuda_block_size);
+	renderPointCloud_device<TVoxel, TIndex> <<<cuda_grid_size, cuda_block_size >>>
+			(locations, colours, point_count,
+			 raycast_points, volume->GetVoxels(), volume->index.GetIndexData(), skipPoints, volume->GetParameters().voxel_size,
+			 raycast_image_dimensions, light_source);
 	ORcudaKernelCheck;
 
-	ORcudaSafeCall(cudaMemcpy(&trackingState->pointCloud->noTotalPoints, noTotalPoints_device, sizeof(uint), cudaMemcpyDeviceToHost));
+	ORcudaSafeCall(cudaMemcpy(&camera_tracking_state->pointCloud->noTotalPoints, point_count, sizeof(uint), cudaMemcpyDeviceToHost));
 }
 
 template<class TVoxel, class TIndex>
-void CreateICPMaps_common(VoxelVolume<TVoxel, TIndex> *volume, const View *view, CameraTrackingState *trackingState, RenderState *renderState)
-{
-	Vector2i imgSize = renderState->raycastResult->dimensions;
-	Matrix4f invM = trackingState->pose_d->GetInvM();
+void
+CreateICPMaps_common(VoxelVolume<TVoxel, TIndex>* volume, const View* view, CameraTrackingState* camera_tracking_state, RenderState* render_state) {
+	Vector2i map_dimensions = render_state->raycastResult->dimensions;
+	Matrix4f inverted_depth_camera_pose = camera_tracking_state->pose_d->GetInvM();
 
-	GenericRaycast(volume, imgSize, invM, view->calib.intrinsics_d.projectionParamsSimple.all, renderState, true);
-	trackingState->pose_pointCloud->SetFrom(trackingState->pose_d);
+	GenericRaycast(volume, map_dimensions, inverted_depth_camera_pose, view->calib.intrinsics_d.projectionParamsSimple.all, render_state, true);
+	camera_tracking_state->pose_pointCloud->SetFrom(camera_tracking_state->pose_d);
 
-	Vector4f *pointsMap = trackingState->pointCloud->locations->GetData(MEMORYDEVICE_CUDA);
-	Vector4f *normalsMap = trackingState->pointCloud->colours->GetData(MEMORYDEVICE_CUDA);
-	Vector4f *pointsRay = renderState->raycastResult->GetData(MEMORYDEVICE_CUDA);
-	Vector3f lightSource = -Vector3f(invM.getColumn(2));
+	Vector4f* pointsMap = camera_tracking_state->pointCloud->locations->GetData(MEMORYDEVICE_CUDA);
+	Vector4f* normalsMap = camera_tracking_state->pointCloud->colours->GetData(MEMORYDEVICE_CUDA);
+	Vector4f* pointsRay = render_state->raycastResult->GetData(MEMORYDEVICE_CUDA);
+	Vector3f lightSource = -Vector3f(inverted_depth_camera_pose.getColumn(2));
 
 	dim3 cudaBlockSize(16, 12);
-	dim3 gridSize((int)ceil((float)imgSize.x / (float)cudaBlockSize.x), (int)ceil((float)imgSize.y / (float)cudaBlockSize.y));
+	dim3 gridSize((int) ceil((float) map_dimensions.x / (float) cudaBlockSize.x), (int) ceil((float) map_dimensions.y / (float) cudaBlockSize.y));
 
-	if (view->calib.intrinsics_d.FocalLengthSignsDiffer())
-	{
+	if (view->calib.intrinsics_d.FocalLengthSignsDiffer()) {
 		renderICP_device<true> <<<gridSize, cudaBlockSize>>>(pointsMap, normalsMap, pointsRay,
-		                                                     volume->GetParameters().voxel_size, imgSize, lightSource);
-	}
-	else
-	{
+		                                                     volume->GetParameters().voxel_size, map_dimensions, lightSource);
+	} else {
 		renderICP_device<false> <<<gridSize, cudaBlockSize>>>(pointsMap, normalsMap, pointsRay,
-		                                                      volume->GetParameters().voxel_size, imgSize, lightSource);
+		                                                      volume->GetParameters().voxel_size, map_dimensions, lightSource);
 	}
 	ORcudaKernelCheck;
 }
 
 template<class TVoxel, class TIndex>
-static void ForwardRender_common(const VoxelVolume<TVoxel, TIndex> *volume, const View *view, CameraTrackingState *trackingState, RenderState *renderState,
-                                 uint *noTotalPoints_device)
+static void ForwardRender_common(const VoxelVolume<TVoxel, TIndex> *volume, const View *view, CameraTrackingState *tracking_state, RenderState *render_state,
+                                 uint *point_count)
 {
-	Vector2i imgSize = renderState->raycastResult->dimensions;
-	Matrix4f M = trackingState->pose_d->GetM();
-	Matrix4f invM = trackingState->pose_d->GetInvM();
-	const Vector4f& projParams = view->calib.intrinsics_d.projectionParamsSimple.all;
+	Vector2i imgSize = render_state->raycastResult->dimensions;
+	Matrix4f M = tracking_state->pose_d->GetM();
+	Matrix4f invM = tracking_state->pose_d->GetInvM();
+	const Vector4f& depth_camera_projection_parameters = view->calib.intrinsics_d.projectionParamsSimple.all;
 
-	const Vector4f *pointsRay = renderState->raycastResult->GetData(MEMORYDEVICE_CUDA);
-	float *currentDepth = view->depth->GetData(MEMORYDEVICE_CUDA);
-	Vector4f *forwardProjection = renderState->forwardProjection->GetData(MEMORYDEVICE_CUDA);
-	int *fwdProjMissingPoints = renderState->fwdProjMissingPoints->GetData(MEMORYDEVICE_CUDA);
-	const Vector2f *minmaximg = renderState->renderingRangeImage->GetData(MEMORYDEVICE_CUDA);
-	float oneOverVoxelSize = 1.0f / volume->GetParameters().voxel_size;
-	float voxelSize = volume->GetParameters().voxel_size;
-	const TVoxel *voxelData = volume->GetVoxels();
-	const typename TIndex::IndexData *voxelIndex = volume->index.GetIndexData();
+	const Vector4f* pointsRay = render_state->raycastResult->GetData(MEMORYDEVICE_CUDA);
+	float* depth = view->depth->GetData(MEMORYDEVICE_CUDA);
+	Vector4f* forward_projected_points = render_state->forwardProjection->GetData(MEMORYDEVICE_CUDA);
+	int* missing_point_indices = render_state->fwdProjMissingPoints->GetData(MEMORYDEVICE_CUDA);
+	const Vector2f* pixel_depth_range_data = render_state->renderingRangeImage->GetData(MEMORYDEVICE_CUDA);
+	float voxel_size_reciprocal = 1.0f / volume->GetParameters().voxel_size;
+	float voxel_size = volume->GetParameters().voxel_size;
+	const TVoxel* voxels = volume->GetVoxels();
+	const typename TIndex::IndexData* index_data = volume->index.GetIndexData();
 
-	renderState->forwardProjection->Clear();
+	render_state->forwardProjection->Clear();
 
 	dim3 blockSize, gridSize;
 
 	{ // forward projection
 		blockSize = dim3(16, 16);
-		gridSize = dim3((int)ceil((float)imgSize.x / (float)blockSize.x), (int)ceil((float)imgSize.y / (float)blockSize.y));
+		gridSize = dim3((int) ceil((float) imgSize.x / (float) blockSize.x), (int) ceil((float) imgSize.y / (float) blockSize.y));
 
-		forwardProject_device <<<gridSize, blockSize >>>(forwardProjection, pointsRay, imgSize, M, projParams, voxelSize);
+		forwardProject_device <<<gridSize, blockSize >>>(forward_projected_points, pointsRay, imgSize, M, depth_camera_projection_parameters, voxel_size);
 		ORcudaKernelCheck;
 	}
 
-	ORcudaSafeCall(cudaMemset(noTotalPoints_device, 0, sizeof(uint)));
+	ORcudaSafeCall(cudaMemset(point_count, 0, sizeof(uint)));
 
 	{ // find missing points
 		blockSize = dim3(16, 16);
-		gridSize = dim3((int)ceil((float)imgSize.x / (float)blockSize.x), (int)ceil((float)imgSize.y / (float)blockSize.y));
+		gridSize = dim3((int) ceil((float) imgSize.x / (float) blockSize.x), (int) ceil((float) imgSize.y / (float) blockSize.y));
 
-		findMissingPoints_device <<<gridSize, blockSize >>>(fwdProjMissingPoints, noTotalPoints_device, minmaximg,
-			forwardProjection, currentDepth, imgSize);
+		findMissingPoints_device <<<gridSize, blockSize >>>(missing_point_indices, point_count, pixel_depth_range_data,
+		                                                    forward_projected_points, depth, imgSize);
 		ORcudaKernelCheck;
 	}
 
-	ORcudaSafeCall(cudaMemcpy(&renderState->noFwdProjMissingPoints, noTotalPoints_device, sizeof(uint), cudaMemcpyDeviceToHost));
+	ORcudaSafeCall(cudaMemcpy(&render_state->noFwdProjMissingPoints, point_count, sizeof(uint), cudaMemcpyDeviceToHost));
 
 	{ // render missing points
 		blockSize = dim3(256);
-		gridSize = dim3((int)ceil((float)renderState->noFwdProjMissingPoints / blockSize.x));
+		gridSize = dim3((int) ceil((float) render_state->noFwdProjMissingPoints / blockSize.x));
 
 		genericRaycastMissingPoints_device<TVoxel, TIndex, false> <<<gridSize, blockSize >>>(
-				forwardProjection, NULL, voxelData, voxelIndex, imgSize, invM,
-				InvertProjectionParams(projParams), oneOverVoxelSize, fwdProjMissingPoints,
-				renderState->noFwdProjMissingPoints, minmaximg, volume->GetParameters().truncation_distance);
+				forward_projected_points, NULL, voxels, index_data, imgSize, invM,
+				InvertProjectionParams(depth_camera_projection_parameters), voxel_size_reciprocal, missing_point_indices,
+				render_state->noFwdProjMissingPoints, pixel_depth_range_data, volume->GetParameters().truncation_distance);
 		ORcudaKernelCheck;
 	}
 }
@@ -409,17 +406,16 @@ void VisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::FindSurface(VoxelVolume<T
 }
 
 template<class TVoxel, class TIndex>
-void VisualizationEngine_CUDA<TVoxel, TIndex>::CreatePointCloud(VoxelVolume<TVoxel,TIndex> *scene, const View *view, CameraTrackingState *trackingState, RenderState *renderState,
-                                                                bool skipPoints) const
+void VisualizationEngine_CUDA<TVoxel, TIndex>::CreatePointCloud(VoxelVolume<TVoxel,TIndex> *scene, const View *view, CameraTrackingState *trackingState, RenderState *renderState) const
 {
-	CreatePointCloud_common(scene, view, trackingState, renderState, skipPoints, noTotalPoints_device);
+	CreatePointCloud_common(scene, view, trackingState, renderState, false, noTotalPoints_device);
 }
 
 template<class TVoxel>
 void VisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::CreatePointCloud(VoxelVolume<TVoxel,VoxelBlockHash> *scene, const View *view, CameraTrackingState *trackingState,
-                                                                        RenderState *renderState, bool skipPoints) const
+                                                                        RenderState *renderState) const
 {
-	CreatePointCloud_common(scene, view, trackingState, renderState, skipPoints, noTotalPoints_device);
+	CreatePointCloud_common(scene, view, trackingState, renderState, false, noTotalPoints_device);
 }
 
 template<class TVoxel, class TIndex>

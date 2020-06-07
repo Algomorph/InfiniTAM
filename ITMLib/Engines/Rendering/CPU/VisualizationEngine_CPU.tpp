@@ -509,17 +509,16 @@ void VisualizationEngine_CPU<TVoxel, VoxelBlockHash>::FindSurface(VoxelVolume<TV
 template<class TVoxel, class TIndex>
 void VisualizationEngine_CPU<TVoxel, TIndex>::CreatePointCloud(VoxelVolume<TVoxel, TIndex>* scene, const View* view,
                                                                CameraTrackingState* trackingState,
-                                                               RenderState* renderState, bool skipPoints) const {
-	CreatePointCloud_common(scene, view, trackingState, renderState, skipPoints);
+                                                               RenderState* renderState) const {
+	CreatePointCloud_common(scene, view, trackingState, renderState, false);
 }
 
 template<class TVoxel>
 void VisualizationEngine_CPU<TVoxel, VoxelBlockHash>::CreatePointCloud(VoxelVolume<TVoxel, VoxelBlockHash>* scene,
                                                                        const View* view,
                                                                        CameraTrackingState* trackingState,
-                                                                       RenderState* renderState,
-                                                                       bool skipPoints) const {
-	CreatePointCloud_common(scene, view, trackingState, renderState, skipPoints);
+                                                                       RenderState* renderState) const {
+	CreatePointCloud_common(scene, view, trackingState, renderState, false);
 }
 
 template<class TVoxel, class TIndex>

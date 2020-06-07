@@ -221,8 +221,8 @@ inline HashBlockVisibility* GetBlockVisibilityTypesIfAvailable<PlainVoxelArray>(
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType, bool TModifyVisibilityInformation>
 struct RaycastFunctor {
-	const Vector4f inverted_depth_camera_projection_parameters;
-	const Matrix4f inverted_depth_camera_matrix;
+	const Vector4f inverted_camera_projection_parameters;
+	const Matrix4f inverted_camera_pose;
 	const float truncation_distance; //"mu" / μ in many fusion-type-reconstruction articles
 	const float voxel_size_reciprocal;
 	const TVoxel* voxels;
@@ -236,9 +236,9 @@ struct RaycastFunctor {
 
 public: // member functions
 	RaycastFunctor(VoxelVolume<TVoxel, TIndex>& volume, const ORUtils::Image<Vector2f>& ray_depth_range_image,
-	               const Vector4f& inverted_depth_camera_projection_parameters, const Matrix4f inverted_depth_camera_matrix)
-			: inverted_depth_camera_projection_parameters(inverted_depth_camera_projection_parameters),
-			  inverted_depth_camera_matrix(inverted_depth_camera_matrix),
+	               const Vector4f& inverted_camera_projection_parameters, const Matrix4f inverted_camera_pose)
+			: inverted_camera_projection_parameters(inverted_camera_projection_parameters),
+			  inverted_camera_pose(inverted_camera_pose),
 			  truncation_distance(volume.GetParameters().truncation_distance),
 			  voxel_size_reciprocal(1.0f / volume.GetParameters().voxel_size),
 			  voxels(volume.GetVoxels()),
@@ -249,84 +249,222 @@ public: // member functions
 
 	_DEVICE_WHEN_AVAILABLE_
 	inline void operator()(Vector4f& point, const int x, const int y) {
-		const Vector2f& ray_depth_range = ray_depth_range_image[x / ray_depth_image_subsampling_factor + (y / ray_depth_image_subsampling_factor) * ray_depth_image_width ];
-		const Vector4f& inverted_projection = inverted_depth_camera_projection_parameters;
-
-		Vector4f point_in_camera_space;
-		Vector3f march_start_world_space_voxels, march_end_world_space_voxels, march_vector, march_point_world_space_voxels;
-		bool pt_found;
-		int index_identifier;
-		float sdf_value = 1.0f, confidence;
-		float distance_along_ray_voxels, step_length_voxels;
-
-		const float step_scale = truncation_distance * voxel_size_reciprocal;
-
-		point_in_camera_space.z = ray_depth_range.from;
-		point_in_camera_space.x = point_in_camera_space.z * ((float(x) + inverted_projection.cx) * inverted_projection.fx);
-		point_in_camera_space.y = point_in_camera_space.z * ((float(y) + inverted_projection.cy) * inverted_projection.fy);
-		point_in_camera_space.w = 1.0f;
-		distance_along_ray_voxels = length(TO_VECTOR3(point_in_camera_space)) * voxel_size_reciprocal;
-		march_start_world_space_voxels = TO_VECTOR3(inverted_depth_camera_matrix * point_in_camera_space) * voxel_size_reciprocal;
-
-		point_in_camera_space.z = ray_depth_range.to;
-		point_in_camera_space.x = point_in_camera_space.z * ((float(x) + inverted_projection.cx) * inverted_projection.fx);
-		point_in_camera_space.y = point_in_camera_space.z * ((float(y) + inverted_projection.cy) * inverted_projection.fy);
-		point_in_camera_space.w = 1.0f;
-		const float distance_to_ray_end_length_voxels = length(TO_VECTOR3(point_in_camera_space)) * voxel_size_reciprocal;
-		march_end_world_space_voxels = TO_VECTOR3(inverted_depth_camera_matrix * point_in_camera_space) * voxel_size_reciprocal;
-
-		march_vector = march_end_world_space_voxels - march_start_world_space_voxels;
-		float direction_norm = 1.0f / sqrt(march_vector.x * march_vector.x + march_vector.y * march_vector.y + march_vector.z * march_vector.z);
-		march_vector *= direction_norm;
-
-		march_point_world_space_voxels = march_start_world_space_voxels;
-
-#ifndef SINGLE_THREADED
-		typename TIndex::IndexCache cache;
-#endif
-		while (distance_along_ray_voxels < distance_to_ray_end_length_voxels) {
-			sdf_value = readFromSDF_float_uninterpolated(voxels, index_data, march_point_world_space_voxels, index_identifier, cache);
-
-			if (TModifyVisibilityInformation) {
-				if (index_identifier) block_visibility_types[index_identifier - 1] = ITMLib::HashBlockVisibility::IN_MEMORY_AND_VISIBLE;
-			}
-
-			if (!index_identifier) {
-				step_length_voxels = VOXEL_BLOCK_SIZE;
-			} else {
-				if ((sdf_value <= 0.1f) && (sdf_value >= -0.5f)) {
-					sdf_value = readFromSDF_float_interpolated(voxels, index_data, march_point_world_space_voxels, index_identifier, cache);
-				}
-				if (sdf_value <= 0.0f) break;
-				step_length_voxels = ORUTILS_MAX(sdf_value * step_scale, 1.0f);
-			}
-
-			march_point_world_space_voxels += step_length_voxels * march_vector;
-			distance_along_ray_voxels += step_length_voxels;
-		}
-
-		if (sdf_value <= 0.0f) {
-			step_length_voxels = sdf_value * step_scale;
-			march_point_world_space_voxels += step_length_voxels * march_vector;
-
-			sdf_value = ReadWithConfidenceFromSdfFloatInterpolated
-					<TVoxel::hasWeightInformation,
-							TVoxel::hasSemanticInformation,
-							TVoxel, typename TIndex::IndexData, typename TIndex::IndexCache>
-			::compute(confidence, voxels, index_data, march_point_world_space_voxels, index_identifier, cache);
-
-			step_length_voxels = sdf_value * step_scale;
-			march_point_world_space_voxels += step_length_voxels * march_vector;
-
-			pt_found = true;
-		} else pt_found = false;
-
-		point.x = march_point_world_space_voxels.x;
-		point.y = march_point_world_space_voxels.y;
-		point.z = march_point_world_space_voxels.z;
-		if (pt_found) point.w = confidence + 1.0f; else point.w = 0.0f;
+		const Vector2f& ray_depth_range = ray_depth_range_image[x / ray_depth_image_subsampling_factor +
+		                                                        (y / ray_depth_image_subsampling_factor) * ray_depth_image_width];
+		CastRay<TVoxel, TIndex, TModifyVisibilityInformation>(
+				point, block_visibility_types, x, y, voxels, index_data, inverted_camera_pose, inverted_camera_projection_parameters,
+				voxel_size_reciprocal, truncation_distance, ray_depth_range);
 	}
 };
 
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+struct RenderPointCloudFunctor {
+private: // member variables
+	const bool point_skipping_enabled;
+	const TVoxel* voxels;
+	const typename TIndex::IndexData* index_data;
+	const float voxel_size;
+	Vector4f* colors;
+	Vector4f* locations;
+	const Vector3f light_source;
+
+	DECLARE_ATOMIC(unsigned int, point_count);
+
+public: // member functions
+	RenderPointCloudFunctor(PointCloud& point_cloud, const VoxelVolume<TVoxel, TIndex>& volume, Vector3f light_source, bool point_skipping_enabled)
+			: point_skipping_enabled(point_skipping_enabled),
+			  voxels(volume.GetVoxels()),
+			  index_data(volume.index.GetIndexData()),
+			  voxel_size(volume.GetParameters().voxel_size),
+			  colors(point_cloud.colours->GetData(TMemoryDeviceType)),
+			  locations(point_cloud.locations->GetData(TMemoryDeviceType)),
+			  light_source(light_source) {
+		INITIALIZE_ATOMIC(unsigned int, point_count, 0u);
+	}
+
+	~RenderPointCloudFunctor() { CLEAN_UP_ATOMIC(point_count); }
+
+	_DEVICE_WHEN_AVAILABLE_
+	inline void operator()(const Vector4f& raycast_point, const int x, const int y) {
+
+		bool found_point = raycast_point.w > 0;
+		Vector3f point = raycast_point.toVector3();
+		Vector3f normal;
+		float angle;
+
+		computeNormalAndAngle<TVoxel, TIndex>(found_point, point, voxels, index_data, light_source, normal, angle);
+
+		if (point_skipping_enabled && ((x % 2 == 0) || (y % 2 == 0))) found_point = false;
+
+		int offset = ORUtils::ParallelSum<TMemoryDeviceType>::template Add2D<uint>(found_point, point_count);
+
+		if (found_point && offset != -1) {
+			Vector4f tmp;
+			tmp = VoxelColorReader<TVoxel::hasColorInformation, TVoxel, TIndex>::interpolate(voxels, index_data, point);
+			if (tmp.w > 0.0f) {
+				tmp.x /= tmp.w;
+				tmp.y /= tmp.w;
+				tmp.z /= tmp.w;
+				tmp.w = 1.0f;
+			}
+			colors[offset] = tmp;
+
+			Vector4f pt_ray_out;
+			pt_ray_out.x = point.x * voxel_size;
+			pt_ray_out.y = point.y * voxel_size;
+			pt_ray_out.z = point.z * voxel_size;
+			pt_ray_out.w = 1.0f;
+			locations[offset] = pt_ray_out;
+		}
+	}
+
+	unsigned int GetPointCount() {
+		return GET_ATOMIC_VALUE_CPU(point_count);
+	}
+};
+
+template<MemoryDeviceType TMemoryDeviceType, bool TUseSmoothing, bool TFlipNormals>
+struct ICPMapRenderFunctor {
+private: // member variables
+	Vector4f* locations;
+	Vector4f* normals;
+	const float voxel_size;
+	const Vector2i map_dimensions;
+	const Vector4f* raycast_points;
+	const Vector3f light_source;
+
+public: // member functions
+	ICPMapRenderFunctor(CameraTrackingState& camera_tracking_state, const float voxel_size, const RenderState& render_state,
+	                    const Vector3f light_source)
+			: locations(camera_tracking_state.pointCloud->locations->GetData(TMemoryDeviceType)),
+			  normals(camera_tracking_state.pointCloud->colours->GetData(TMemoryDeviceType)),
+			  voxel_size(voxel_size),
+			  map_dimensions(render_state.raycastResult->dimensions),
+			  raycast_points(render_state.raycastResult->GetData(TMemoryDeviceType)),
+			  light_source(light_source) {}
+
+	_DEVICE_WHEN_AVAILABLE_
+	inline void operator()(const int pixel_index, const int x, const int y) {
+		Vector3f normal;
+		float angle;
+
+		Vector4f raycast_point = raycast_points[pixel_index];
+		bool point_found = raycast_point.w > 0.0f;
+
+		computeNormalAndAngle<TUseSmoothing, TFlipNormals>(
+				point_found, x, y, raycast_points, light_source, voxel_size, map_dimensions, normal, angle);
+
+		if (point_found) {
+			locations[pixel_index] =
+					Vector4f(raycast_point.x * voxel_size, raycast_point.y * voxel_size, raycast_point.z * voxel_size, raycast_point.w);
+			normals[pixel_index] = Vector4f(normal.x, normal.y, normal.z, 0.0f);
+		} else {
+			Vector4f blank(0.0f, 0.0f, 0.0f, -1.0f);
+			locations[pixel_index] = blank;
+			normals[pixel_index] = blank;
+		}
+	}
+
+};
+
+template<MemoryDeviceType TMemoryDeviceType>
+struct ForwardProjectFunctor {
+private: // member variables
+
+	Vector4f* forward_projection;
+	const int projection_image_width;
+	const float voxel_size;
+	const Vector4f depth_camera_projection_parameters;
+	const Matrix4f depth_camera_pose;
+
+public: // member functions
+	ForwardProjectFunctor(ORUtils::Image<Vector4f>& forward_projection, const float voxel_size, const Vector4f& depth_camera_projection_parameters,
+	                      const Matrix4f& depth_camera_pose)
+			: forward_projection(forward_projection.GetData(TMemoryDeviceType)),
+			  projection_image_width(forward_projection.dimensions.x),
+			  voxel_size(voxel_size),
+			  depth_camera_projection_parameters(depth_camera_projection_parameters),
+			  depth_camera_pose(depth_camera_pose) {}
+
+	_DEVICE_WHEN_AVAILABLE_
+	inline void operator()(const Vector4f& raycast_point) {
+		Vector4f pixel = raycast_point * voxel_size;
+		pixel.w = 1.0f;
+		pixel = depth_camera_pose * pixel;
+
+		Vector2f point_image_space;
+		point_image_space.x = depth_camera_projection_parameters.x * pixel.x / pixel.z + depth_camera_projection_parameters.z;
+		point_image_space.y = depth_camera_projection_parameters.y * pixel.y / pixel.z + depth_camera_projection_parameters.w;
+
+		int new_index = static_cast<int>(point_image_space.x + 0.5f) + static_cast<int>(point_image_space.y + 0.5f) * projection_image_width;
+		forward_projection[new_index] = pixel;
+	}
+};
+
+template<MemoryDeviceType TMemoryDeviceType>
+struct FindMissingProjectionPointsFunctor {
+private: // member variables
+	int* projection_missing_point_indices;
+	const Vector4f* forward_projection;
+	const Vector2f* pixel_ray_depth_data;
+	const int ray_depth_range_image_width;
+	const float* depth;
+
+	DECLARE_ATOMIC(unsigned int, missing_point_count);
+public: // member functions
+	FindMissingProjectionPointsFunctor(ORUtils::Image<int>& projection_missing_point_indices,
+	                                   const ORUtils::Image<Vector4f>& forward_projection,
+	                                   const ORUtils::Image<Vector2f>& pixel_ray_depth)
+			: projection_missing_point_indices(projection_missing_point_indices.GetData(TMemoryDeviceType)),
+			  forward_projection(forward_projection.GetData(TMemoryDeviceType)),
+			  pixel_ray_depth_data(pixel_ray_depth.GetData(TMemoryDeviceType)),
+			  ray_depth_range_image_width(pixel_ray_depth.dimensions.x) {
+		INITIALIZE_ATOMIC(unsigned int, missing_point_count, 0u);
+	}
+
+	~FindMissingProjectionPointsFunctor() {
+		CLEAN_UP_ATOMIC(missing_point_count);
+	}
+
+	_DEVICE_WHEN_AVAILABLE_
+	inline void operator()(const int pixel_index, const int x, const int y) {
+
+		int ray_ranges_pixel_index =
+				(int) floor((float) x / ray_depth_image_subsampling_factor) +
+				(int) floor((float) y / ray_depth_image_subsampling_factor) * ray_depth_range_image_width;
+
+		Vector4f forward_projected_point = forward_projection[pixel_index];
+		Vector2f pixel_ray_depth = pixel_ray_depth_data[ray_ranges_pixel_index];
+		float depth_at_pixel = depth[pixel_index];
+
+		bool has_point = false;
+#ifdef __CUDACC__
+		__shared__
+#endif
+		bool should_prefix;
+		should_prefix = false;
+#ifdef __CUDACC__
+		__syncthreads();
+#endif
+
+		if ((forward_projected_point.w <= 0) &&
+		    ((forward_projected_point.x == 0 && forward_projected_point.y == 0 && forward_projected_point.z == 0) || (depth_at_pixel > 0)) &&
+		    (pixel_ray_depth.x < pixel_ray_depth.y)) {
+			should_prefix = true;
+			has_point = true;
+		}
+#ifdef __CUDACC__
+		__syncthreads();
+#endif
+		if (should_prefix) {
+			int offset = ORUtils::ParallelSum<TMemoryDeviceType>::template Add2D<uint>(has_point, missing_point_count);
+			if (offset != -1) projection_missing_point_indices[offset] = pixel_index;
+		}
+	}
+
+	unsigned int GetMissingPointCount() {
+		return GET_ATOMIC_VALUE_CPU(missing_point_count);
+	}
+};
 
 } // namespace ITMLib

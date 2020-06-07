@@ -30,7 +30,7 @@ class RawArrayTraversalEngine_Internal<MEMORYDEVICE_CUDA, JobCountPolicy::EXACT,
 protected: // static functions
 	template<typename TData, typename TFunctor, int TBlockSize = 256>
 	inline static void TraverseWithIndex_Generic(TData* data, TFunctor& functor, const unsigned int element_count) {
-		CUDA_CallWithFunctor_Generic(
+		CallCUDAonUploadedFunctor(
 				functor,
 				[&element_count, &data](TFunctor* functor_device) {
 					dim3 cuda_block_size(TBlockSize);
@@ -43,7 +43,7 @@ protected: // static functions
 
 	template<typename TData, typename TFunctor, int TBlockSize = 256>
 	inline static void TraverseWithoutIndex_Generic(TData* data, TFunctor& functor, const unsigned int element_count) {
-		CUDA_CallWithFunctor_Generic(
+		CallCUDAonUploadedFunctor(
 				functor,
 				[&element_count, &data](TFunctor* functor_device) {
 					dim3 cuda_block_size(TBlockSize);
@@ -64,7 +64,7 @@ protected: // static functions
 	                                             TGetSampleSizeFunction&& get_sample_size, TGetSampleIndicesFunction&& get_sample_indices) {
 		const int sample_size = std::forward<TGetSampleSizeFunction>(get_sample_size)();
 		const int* sample_indices = std::forward<TGetSampleIndicesFunction>(get_sample_indices)();
-		CUDA_CallWithFunctor_Generic(
+		CallCUDAonUploadedFunctor(
 				functor,
 				[&sample_size, &sample_indices, &data](TFunctor* functor_device) {
 					dim3 cuda_block_size(TBlockSize);
@@ -80,7 +80,7 @@ protected: // static functions
 	                                                TGetSampleSizeFunction&& get_sample_size, TGetSampleIndicesFunction&& get_sample_indices) {
 		const int sample_size = std::forward<TGetSampleSizeFunction>(get_sample_size)();
 		const int* sample_indices = std::forward<TGetSampleIndicesFunction>(get_sample_indices)();
-		CUDA_CallWithFunctor_Generic(
+		CallCUDAonUploadedFunctor(
 				functor,
 				[&sample_size, &sample_indices, &data](TFunctor* functor_device) {
 					dim3 cuda_block_size(TBlockSize);
@@ -98,7 +98,7 @@ class RawArrayTraversalEngine_Internal<MEMORYDEVICE_CUDA, JobCountPolicy::PADDED
 protected: // static functions
 	template<typename TData, typename TFunctor>
 	inline static void Traverse_Generic(TData* data, TFunctor& functor, const unsigned int element_count) {
-		CUDA_CallWithFunctor_Generic(
+		CallCUDAonUploadedFunctor(
 				functor,
 				[&element_count, &data](TFunctor* functor_device) {
 					dim3 cuda_block_size(256);
@@ -119,7 +119,7 @@ protected: // static functions
 	                                             TGetSampleSizeFunction&& get_sample_size, TGetSampleIndicesFunction&& get_sample_indices) {
 		const int sample_size = std::forward<TGetSampleSizeFunction>(get_sample_size)();
 		const int* sample_indices = std::forward<TGetSampleIndicesFunction>(get_sample_indices)();
-		CUDA_CallWithFunctor_Generic(
+		CallCUDAonUploadedFunctor(
 				functor,
 				[&sample_size, &sample_indices, &data](TFunctor* functor_device) {
 					dim3 cuda_block_size(TBlockSize);

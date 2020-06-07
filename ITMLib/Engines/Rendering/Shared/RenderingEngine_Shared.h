@@ -140,84 +140,89 @@ struct ReadWithConfidenceFromSdfFloatInterpolated<false, true, TVoxel, TIndex, T
 };
 
 
-template<class TVoxel, class TIndex, bool TModifyVisibleEntries>
+#if !defined(WITH_OPENMP) && !defined(__CUDACC__)
+#define SINGLE_THREADED
+#endif
+
+template<class TVoxel, class TIndex, bool TModifyVisibilityInformation>
 _CPU_AND_GPU_CODE_ inline bool CastRay(DEVICEPTR(Vector4f)& point, DEVICEPTR(ITMLib::HashBlockVisibility)* block_visibility_types,
-                                       int x, int y, const CONSTPTR(TVoxel)* voxel_data, const CONSTPTR(typename TIndex::IndexData)* voxel_index,
-                                       Matrix4f inverted_depth_camera_matrix, Vector4f inverted_depth_camera_projection_parameters,
-                                       float voxel_size_reciprocal, float mu, const CONSTPTR(Vector2f)& ray_depth_range) {
-	Vector4f& inverted_projection = inverted_depth_camera_projection_parameters;
+                                       int x, int y, const CONSTPTR(TVoxel)* voxels, const CONSTPTR(typename TIndex::IndexData)* index_data,
+                                       Matrix4f inverted_camera_matrix, Vector4f inverted_camera_projection_parameters,
+                                       float voxel_size_reciprocal, float truncation_distance, const CONSTPTR(Vector2f)& ray_depth_range) {
+	const Vector4f& inverted_projection = inverted_camera_projection_parameters;
 
 	Vector4f point_in_camera_space;
-	Vector3f march_start_world_space_voxels, march_end_world_space_voxels, march_vector, pt_result;
+	Vector3f march_start_world_space_voxels, march_end_world_space_voxels, march_vector, march_point_world_space_voxels;
 	bool pt_found;
-	int vmIndex;
+	int index_identifier;
 	float sdf_value = 1.0f, confidence;
-	float distance_along_ray_voxels, step_length_voxels, distance_to_ray_end_length_voxels, stepScale;
+	float distance_along_ray_voxels, step_length_voxels;
 
-	stepScale = mu * voxel_size_reciprocal;
+	const float step_scale = truncation_distance * voxel_size_reciprocal;
 
 	point_in_camera_space.z = ray_depth_range.from;
 	point_in_camera_space.x = point_in_camera_space.z * ((float(x) + inverted_projection.cx) * inverted_projection.fx);
 	point_in_camera_space.y = point_in_camera_space.z * ((float(y) + inverted_projection.cy) * inverted_projection.fy);
 	point_in_camera_space.w = 1.0f;
 	distance_along_ray_voxels = length(TO_VECTOR3(point_in_camera_space)) * voxel_size_reciprocal;
-	march_start_world_space_voxels = TO_VECTOR3(inverted_depth_camera_matrix * point_in_camera_space) * voxel_size_reciprocal;
+	march_start_world_space_voxels = TO_VECTOR3(inverted_camera_matrix * point_in_camera_space) * voxel_size_reciprocal;
 
 	point_in_camera_space.z = ray_depth_range.to;
 	point_in_camera_space.x = point_in_camera_space.z * ((float(x) + inverted_projection.cx) * inverted_projection.fx);
 	point_in_camera_space.y = point_in_camera_space.z * ((float(y) + inverted_projection.cy) * inverted_projection.fy);
 	point_in_camera_space.w = 1.0f;
-	distance_to_ray_end_length_voxels = length(TO_VECTOR3(point_in_camera_space)) * voxel_size_reciprocal;
-	march_end_world_space_voxels = TO_VECTOR3(inverted_depth_camera_matrix * point_in_camera_space) * voxel_size_reciprocal;
+	const float distance_to_ray_end_length_voxels = length(TO_VECTOR3(point_in_camera_space)) * voxel_size_reciprocal;
+	march_end_world_space_voxels = TO_VECTOR3(inverted_camera_matrix * point_in_camera_space) * voxel_size_reciprocal;
 
 	march_vector = march_end_world_space_voxels - march_start_world_space_voxels;
 	float direction_norm = 1.0f / sqrt(march_vector.x * march_vector.x + march_vector.y * march_vector.y + march_vector.z * march_vector.z);
 	march_vector *= direction_norm;
 
-	pt_result = march_start_world_space_voxels;
+	march_point_world_space_voxels = march_start_world_space_voxels;
 
+#ifndef SINGLE_THREADED
 	typename TIndex::IndexCache cache;
-
+#endif
 	while (distance_along_ray_voxels < distance_to_ray_end_length_voxels) {
-		sdf_value = readFromSDF_float_uninterpolated(voxel_data, voxel_index, pt_result, vmIndex, cache);
+		sdf_value = readFromSDF_float_uninterpolated(voxels, index_data, march_point_world_space_voxels, index_identifier, cache);
 
-		if (TModifyVisibleEntries) {
-			if (vmIndex) block_visibility_types[vmIndex - 1] = ITMLib::HashBlockVisibility::IN_MEMORY_AND_VISIBLE;
+		if (TModifyVisibilityInformation) {
+			if (index_identifier) block_visibility_types[index_identifier - 1] = ITMLib::HashBlockVisibility::IN_MEMORY_AND_VISIBLE;
 		}
 
-		if (!vmIndex) {
+		if (!index_identifier) {
 			step_length_voxels = VOXEL_BLOCK_SIZE;
 		} else {
 			if ((sdf_value <= 0.1f) && (sdf_value >= -0.5f)) {
-				sdf_value = readFromSDF_float_interpolated(voxel_data, voxel_index, pt_result, vmIndex, cache);
+				sdf_value = readFromSDF_float_interpolated(voxels, index_data, march_point_world_space_voxels, index_identifier, cache);
 			}
 			if (sdf_value <= 0.0f) break;
-			step_length_voxels = ORUTILS_MAX(sdf_value * stepScale, 1.0f);
+			step_length_voxels = ORUTILS_MAX(sdf_value * step_scale, 1.0f);
 		}
 
-		pt_result += step_length_voxels * march_vector;
+		march_point_world_space_voxels += step_length_voxels * march_vector;
 		distance_along_ray_voxels += step_length_voxels;
 	}
 
 	if (sdf_value <= 0.0f) {
-		step_length_voxels = sdf_value * stepScale;
-		pt_result += step_length_voxels * march_vector;
+		step_length_voxels = sdf_value * step_scale;
+		march_point_world_space_voxels += step_length_voxels * march_vector;
 
 		sdf_value = ReadWithConfidenceFromSdfFloatInterpolated
 				<TVoxel::hasWeightInformation,
 						TVoxel::hasSemanticInformation,
 						TVoxel, typename TIndex::IndexData, typename TIndex::IndexCache>
-		::compute(confidence, voxel_data, voxel_index, pt_result, vmIndex, cache);
+		::compute(confidence, voxels, index_data, march_point_world_space_voxels, index_identifier, cache);
 
-		step_length_voxels = sdf_value * stepScale;
-		pt_result += step_length_voxels * march_vector;
+		step_length_voxels = sdf_value * step_scale;
+		march_point_world_space_voxels += step_length_voxels * march_vector;
 
 		pt_found = true;
 	} else pt_found = false;
 
-	point.x = pt_result.x;
-	point.y = pt_result.y;
-	point.z = pt_result.z;
+	point.x = march_point_world_space_voxels.x;
+	point.y = march_point_world_space_voxels.y;
+	point.z = march_point_world_space_voxels.z;
 	if (pt_found) point.w = confidence + 1.0f; else point.w = 0.0f;
 
 	return pt_found;
@@ -430,38 +435,39 @@ _CPU_AND_GPU_CODE_ inline void processPixelICP(DEVICEPTR(Vector4f) &pointsMap, D
 	}
 }
 
-template<bool useSmoothing, bool flipNormals>
-_CPU_AND_GPU_CODE_ inline void processPixelICP(DEVICEPTR(Vector4f) *pointsMap, DEVICEPTR(Vector4f) *normalsMap,
-	const CONSTPTR(Vector4f) *pointsRay, const THREADPTR(Vector2i) &imgSize, const THREADPTR(int) &x, const THREADPTR(int) &y, const float voxelSize,
-	const THREADPTR(Vector3f) &lightSource)
+template<bool TUseSmoothing, bool TFlipNormals>
+_CPU_AND_GPU_CODE_ inline void processPixelICP(DEVICEPTR(Vector4f)* locations, DEVICEPTR(Vector4f) *normals,
+                                               const CONSTPTR(Vector4f) *raycast_points, const THREADPTR(Vector2i) &raycast_image_size,
+                                               const THREADPTR(int) &x, const THREADPTR(int) &y, const float voxel_size,
+                                               const THREADPTR(Vector3f) &light_source)
 {
-	Vector3f outNormal;
+	Vector3f normal;
 	float angle;
 
-	int locId = x + y * imgSize.x;
-	Vector4f point = pointsRay[locId];
+	int locId = x + y * raycast_image_size.x;
+	Vector4f point = raycast_points[locId];
 
-	bool foundPoint = point.w > 0.0f;
+	bool point_found = point.w > 0.0f;
 
-	computeNormalAndAngle<useSmoothing, flipNormals>(foundPoint, x, y, pointsRay, lightSource, voxelSize, imgSize, outNormal, angle);
+	computeNormalAndAngle<TUseSmoothing, TFlipNormals>(point_found, x, y, raycast_points, light_source, voxel_size, raycast_image_size, normal, angle);
 
-	if (foundPoint)
+	if (point_found)
 	{
 		Vector4f outPoint4;
-		outPoint4.x = point.x * voxelSize; outPoint4.y = point.y * voxelSize;
-		outPoint4.z = point.z * voxelSize; outPoint4.w = point.w;//outPoint4.w = 1.0f;
-		pointsMap[locId] = outPoint4;
+		outPoint4.x = point.x * voxel_size; outPoint4.y = point.y * voxel_size;
+		outPoint4.z = point.z * voxel_size; outPoint4.w = point.w;//outPoint4.w = 1.0f;
+		locations[locId] = outPoint4;
 
 		Vector4f outNormal4;
-		outNormal4.x = outNormal.x; outNormal4.y = outNormal.y; outNormal4.z = outNormal.z; outNormal4.w = 0.0f;
-		normalsMap[locId] = outNormal4;
+		outNormal4.x = normal.x; outNormal4.y = normal.y; outNormal4.z = normal.z; outNormal4.w = 0.0f;
+		normals[locId] = outNormal4;
 	}
 	else
 	{
 		Vector4f out4;
 		out4.x = 0.0f; out4.y = 0.0f; out4.z = 0.0f; out4.w = -1.0f;
 
-		pointsMap[locId] = out4; normalsMap[locId] = out4;
+		locations[locId] = out4; normals[locId] = out4;
 	}
 }
 

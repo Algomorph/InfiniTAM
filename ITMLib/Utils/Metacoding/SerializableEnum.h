@@ -16,9 +16,10 @@
 #pragma once
 
 #include "SerializableEnum_Impl.h"
-
+#ifndef MACRO_END
 #define MACRO_END() static_assert(true, "")
 #define ITM_METACODING_OUTER_EXPAND(x) x
+#endif
 
 #ifdef _MSC_VER
 #define GENERATE_SERIALIZABLE_ENUM(...) ITM_METACODING_OUTER_EXPAND(SERIALIZABLE_ENUM_IMPL( __VA_ARGS__ )) MACRO_END()

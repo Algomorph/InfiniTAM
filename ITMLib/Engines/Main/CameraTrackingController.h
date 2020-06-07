@@ -88,7 +88,7 @@ namespace ITMLib
 			{
 				ORUtils::SE3Pose pose_rgb(view->calib.trafo_rgb_to_depth.calib_inv * tracking_state->pose_d->GetM());
 				visualization_engine->CreateExpectedDepths(volume, &pose_rgb, &(view->calib.intrinsics_rgb), render_state);
-				visualization_engine->CreatePointCloud(volume, view, tracking_state, render_state, settings->skip_points);
+				visualization_engine->CreatePointCloud(volume, view, tracking_state, render_state);
 				tracking_state->point_cloud_age = 0;
 			}
 			else

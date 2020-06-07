@@ -33,7 +33,7 @@ protected: // static functions
 			TData* data, const unsigned int element_count, TFunctor& functor,
 			TGetSubGridBoundsFunction&& get_sub_element_bounds
 	) {
-		internal::CUDA_CallWithFunctor_Generic(
+		internal::CallCUDAonUploadedFunctor(
 				functor,
 				[&data, &element_count, &get_sub_element_bounds](TFunctor* functor_device) {
 					dim3 cuda_block_size(TMaxSubGridX, TMaxSubGridY);
@@ -51,9 +51,9 @@ protected: // static functions
 			TData* data, const unsigned int element_count, TFunctor& functor,
 			TGetSubGridBoundsFunction&& get_sub_element_bounds
 	) {
-		internal::CUDA_CallWithFunctor_Generic(
+		internal::CallCUDAonUploadedFunctor(
 				functor,
-				[&data, &element_count, &get_sub_element_bounds] (TFunctor* functor_device) {
+				[&data, &element_count, &get_sub_element_bounds](TFunctor* functor_device) {
 					dim3 cuda_block_size(TMaxSubGridX, TMaxSubGridY);
 					dim3 cuda_grid_size(ceil_of_integer_quotient(element_count, 4u), 4u);
 					SubGrid2DTraversalWithoutItemIndex_device<TData, TFunctor>

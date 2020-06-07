@@ -17,35 +17,31 @@
 #include "../Interface/ImageTraversal.h"
 #include "../../../Utils/Math.h"
 #include "../../../../ORUtils/Image.h"
+#include "RawArrayTraversal_CPU.h"
+#include "../Shared/JobCountPolicy.h"
 
 namespace ITMLib {
 namespace internal {
-template<>
-class ImageTraversalEngine_Internal<MEMORYDEVICE_CPU> {
+
+template<JobCountPolicy TJobCountPolicy>
+using BasicMemoryTraversalEngine = RawArrayTraversalEngine_Internal<MEMORYDEVICE_CPU, TJobCountPolicy, CONTIGUOUS>;
+
+template<JobCountPolicy TJobCountPolicy>
+class ImageTraversalEngine_Internal<MEMORYDEVICE_CPU, TJobCountPolicy>
+		: private BasicMemoryTraversalEngine<TJobCountPolicy> {
 	friend class ImageTraversalEngine<MEMORYDEVICE_CPU>;
 protected: // static functions
-	template<typename TImageElement, typename TImage, typename TApplyFunction>
-	inline static void
-	Traverse_Generic(TImage* image, TApplyFunction&& apply_function) {
-		const Vector2i resolution = image->dimensions;
-		const int element_count = resolution.x * resolution.y;
-		TImageElement* image_data = image->GetData(MEMORYDEVICE_CPU);
-#ifdef WITH_OPENMP
-#pragma omp parallel for default(none) shared(apply_function, image_data)
-#endif
-		for (int i_element = 0; i_element < element_count; i_element++) {
-			apply_function(image_data, i_element, resolution);
-		}
-	}
-
 	template<int TCudaBlockSizeX = 16, int TCudaBlockSizeY = 16, typename TImageElement, typename TImage, typename TFunctor>
 	inline static void
 	TraverseWithPosition_Generic(TImage* image, TFunctor& functor) {
-		Traverse_Generic<TImageElement>(
-				image,
-				[&functor](TImageElement* image_data, int i_element, const Vector2i& resolution) {
-					int y = i_element / resolution.x;
-					int x = i_element - y * resolution.x;
+		TImageElement* image_data = image->GetData(MEMORYDEVICE_CPU);
+		const Vector2i& resolution = image->dimensions;
+		const unsigned int element_count = image->size();
+		BasicMemoryTraversalEngine<TJobCountPolicy>::Traverse_Generic(
+				element_count,
+				[&functor, &image_data, &resolution](const int i_element) {
+					const int y = i_element / resolution.x;
+					const int x = i_element - y * resolution.x;
 					functor(image_data[i_element], x, y);
 				});
 	}
@@ -53,12 +49,29 @@ protected: // static functions
 	template<typename TImageElement, typename TImage, typename TFunctor>
 	inline static void
 	TraverseWithoutPosition_Generic(TImage* image, TFunctor& functor) {
-		Traverse_Generic<TImageElement>(
-				image,
-				[&functor](TImageElement* image_data, int i_element, const Vector2i& resolution) {
+		TImageElement* image_data = image->GetData(MEMORYDEVICE_CPU);
+		const unsigned int element_count = image->size();
+		BasicMemoryTraversalEngine<TJobCountPolicy>::Traverse_Generic(
+				element_count,
+				[&functor, &image_data](const int i_element) {
 					functor(image_data[i_element]);
 				});
 	}
+
+	template<int TCudaBlockSizeX = 16, int TCudaBlockSizeY = 16, typename TImageElement, typename TImage, typename TFunctor>
+	inline static void
+	TraversePositionOnly_Generic(TImage* image, TFunctor& functor) {
+		const Vector2i& resolution = image->dimensions;
+		const unsigned int element_count = image->size();
+		BasicMemoryTraversalEngine<TJobCountPolicy>::Traverse_Generic(
+				element_count,
+				[&functor, &resolution](const int i_element) {
+					int y = i_element / resolution.x;
+					int x = i_element - y * resolution.x;
+					functor(i_element, x, y);
+				});
+	}
 };
+
 } // namespace internal
 } // namespace ITMLib

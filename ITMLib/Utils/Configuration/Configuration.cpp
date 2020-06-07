@@ -30,6 +30,7 @@
 #include "../FileIO/JSON_Utilities.h"
 #include "TelemetrySettings.h"
 #include "../../Engines/Indexing/IndexingSettings.h"
+#include "../../Engines/Rendering/RenderingSettings.h"
 
 using namespace ITMLib::configuration;
 
@@ -160,6 +161,7 @@ void load_configuration_from_json_file(const std::string& path) {
 static void AddAllDeferrableStructsFromSourceToTargetRootConfiguration(pt::ptree& target_tree, const pt::ptree& origin_tree, std::string origin){
 	AddDeferrableFromSourceToTargetTree<TelemetrySettings>(target_tree, origin_tree, origin);
 	AddDeferrableFromSourceToTargetTree<IndexingSettings>(target_tree, origin_tree, origin);
+	AddDeferrableFromSourceToTargetTree<RenderingSettings>(target_tree, origin_tree, origin);
 }
 
 void save_configuration_to_json_file(const std::string& path) {

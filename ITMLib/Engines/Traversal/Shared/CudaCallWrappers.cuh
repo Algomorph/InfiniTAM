@@ -20,7 +20,7 @@
 namespace ITMLib {
 namespace internal {
 template<typename TFunctor, typename TCudaCall>
-inline static void CUDA_CallWithFunctor_Generic(TFunctor& functor, TCudaCall&& cuda_call) {
+inline static void CallCUDAonUploadedFunctor(TFunctor& functor, TCudaCall&& cuda_call) {
 	TFunctor* functor_device;
 
 	ORcudaSafeCall(cudaMalloc((void**) &functor_device, sizeof(TFunctor)));

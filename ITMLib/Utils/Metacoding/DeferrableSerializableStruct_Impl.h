@@ -16,6 +16,11 @@
 #pragma once
 #include "SerializableStruct_Impl.h"
 
+#ifndef MACRO_END
+#define MACRO_END() static_assert(true, "")
+#define ITM_METACODING_OUTER_EXPAND(x) x
+#endif
+
 // *** declaration-only ***
 #define DEFERRABLE_SERIALIZABLE_STRUCT_DECL_IMPL(struct_name, parse_path,  ...) \
     DEFERRABLE_SERIALIZABLE_STRUCT_DECL_IMPL_2(struct_name, parse_path, ITM_METACODING_IMPL_NARG(__VA_ARGS__), __VA_ARGS__)

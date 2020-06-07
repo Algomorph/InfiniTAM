@@ -1,5 +1,5 @@
 //  ================================================================
-//  Created by Gregory Kramida (https://github.com/Algomorph) on 5/14/20.
+//  Created by Gregory Kramida (https://github.com/Algomorph) on 6/5/20.
 //  Copyright (c) 2020 Gregory Kramida
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -16,12 +16,13 @@
 #pragma once
 
 #include "../../Utils/Metacoding/DeferrableSerializableStruct.h"
-#include "../../Utils/ExecutionMode.h"
 
 namespace ITMLib {
-#define INDEXING_SETTINGS_STRUCT_DESCRIPTION IndexingSettings, "indexing_settings", \
-    (ExecutionMode, execution_mode, OPTIMIZED, ENUM, "Set to \"diagnostic\" for recording telemetry while performing " \
-	 "index allocations, or \"optimized\" for unhindered, optimized execution of index allocations.")
+#define RENDERING_SETTINGS_STRUCT_DESCRIPTION RenderingSettings, "rendering_settings", \
+    (bool, skip_points, false, PRIMITIVE, "Skips every other point when using the color renderer for creating a point cloud")
 
-DECLARE_DEFERRABLE_SERIALIZABLE_STRUCT(INDEXING_SETTINGS_STRUCT_DESCRIPTION);
+
+DECLARE_DEFERRABLE_SERIALIZABLE_STRUCT(RENDERING_SETTINGS_STRUCT_DESCRIPTION);
 }
+
+

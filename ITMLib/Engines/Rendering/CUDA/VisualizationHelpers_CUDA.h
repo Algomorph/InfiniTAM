@@ -44,10 +44,10 @@ forwardProject_device(Vector4f* forwardProjection, const Vector4f* pointsRay, Ve
                       Vector4f projParams, float voxelSize);
 
 template<class TVoxel, class TIndex, bool modifyVisibleEntries>
-__global__ void genericRaycast_device(Vector4f* out_ptsRay, HashBlockVisibility* blockVisibilityTypes, const TVoxel* voxelData,
-                                      const typename TIndex::IndexData* voxelIndex, Vector2i depth_image_size, Matrix4f invM,
-                                      Vector4f invProjParams,
-                                      float oneOverVoxelSize, const Vector2f* minmaximg, float mu) {
+__global__ void genericRaycast_device(Vector4f* out_ptsRay, HashBlockVisibility* block_visibility_types, const TVoxel* voxels,
+                                      const typename TIndex::IndexData* index_data, Vector2i depth_image_size, Matrix4f inverted_camera_pose,
+                                      Vector4f inverted_camera_projection_parameters,
+                                      float voxel_size_reciprocal, const Vector2f* ray_depth_range_image, float truncation_distance) {
 	int x = (threadIdx.x + blockIdx.x * blockDim.x), y = (threadIdx.y + blockIdx.y * blockDim.y);
 
 	if (x >= depth_image_size.width || y >= depth_image_size.height) return;
@@ -56,8 +56,8 @@ __global__ void genericRaycast_device(Vector4f* out_ptsRay, HashBlockVisibility*
 	int locId2 =
 			(int) floor((float) x / ray_depth_image_subsampling_factor) + (int) floor((float) y / ray_depth_image_subsampling_factor) * depth_image_size.width;
 
-	CastRay<TVoxel, TIndex, modifyVisibleEntries>(out_ptsRay[locId], blockVisibilityTypes, x, y, voxelData, voxelIndex,
-	                                              invM, invProjParams, oneOverVoxelSize, mu, minmaximg[locId2]);
+	CastRay<TVoxel, TIndex, modifyVisibleEntries>(out_ptsRay[locId], block_visibility_types, x, y, voxels, index_data,
+	                                              inverted_camera_pose, inverted_camera_projection_parameters, voxel_size_reciprocal, truncation_distance, ray_depth_range_image[locId2]);
 }
 
 template<class TVoxel, class TIndex, bool modifyVisibleEntries>
@@ -174,44 +174,44 @@ renderColourFromConfidence_device(Vector4u* outRendering, const Vector4f* ptsRay
 
 template<class TVoxel, class TIndex>
 __global__ void
-renderPointCloud_device(/*Vector4u *outRendering, */Vector4f* locations, Vector4f* colours, uint* noTotalPoints,
-                                                    const Vector4f* ptsRay, const TVoxel* voxelData,
-                                                    const typename TIndex::IndexData* voxelIndex, bool skipPoints,
-                                                    float voxelSize, Vector2i imgSize, Vector3f lightSource) {
-	__shared__ bool shouldPrefix;
-	shouldPrefix = false;
+renderPointCloud_device(/*Vector4u *outRendering, */Vector4f* locations, Vector4f* colours, uint* point_count,
+                                                    const Vector4f* raycast_points, const TVoxel* voxels,
+                                                    const typename TIndex::IndexData* index_data, bool point_skipping_enabled,
+                                                    float voxel_size, Vector2i raycast_image_size, Vector3f light_source) {
+	__shared__ bool should_prefix;
+	should_prefix = false;
 	__syncthreads();
 
-	bool foundPoint = false;
+	bool found_point = false;
 	Vector3f point(0.0f);
 
 	int x = (threadIdx.x + blockIdx.x * blockDim.x), y = (threadIdx.y + blockIdx.y * blockDim.y);
 
-	if (x < imgSize.x && y < imgSize.y) {
-		int locId = x + y * imgSize.x;
-		Vector3f outNormal;
+	if (x < raycast_image_size.x && y < raycast_image_size.y) {
+		const int raycast_pixel_index = x + y * raycast_image_size.x;
+		Vector3f normal;
 		float angle;
-		Vector4f pointRay;
+		Vector4f raycast_point;
 
-		pointRay = ptsRay[locId];
-		point = pointRay.toVector3();
-		foundPoint = pointRay.w > 0;
+		raycast_point = raycast_points[raycast_pixel_index];
+		point = raycast_point.toVector3();
+		found_point = raycast_point.w > 0;
 
-		computeNormalAndAngle<TVoxel, TIndex>(foundPoint, point, voxelData, voxelIndex, lightSource, outNormal, angle);
+		computeNormalAndAngle<TVoxel, TIndex>(found_point, point, voxels, index_data, light_source, normal, angle);
 
-		if (skipPoints && ((x % 2 == 0) || (y % 2 == 0))) foundPoint = false;
+		if (point_skipping_enabled && ((x % 2 == 0) || (y % 2 == 0))) found_point = false;
 
-		if (foundPoint) shouldPrefix = true;
+		if (found_point) should_prefix = true;
 	}
 
 	__syncthreads();
 
-	if (shouldPrefix) {
-		int offset = ORUtils::ParallelSum<MEMORYDEVICE_CUDA>::Add2D<uint>(foundPoint, noTotalPoints);
+	if (should_prefix) {
+		int offset = ORUtils::ParallelSum<MEMORYDEVICE_CUDA>::Add2D<uint>(found_point, point_count);
 
 		if (offset != -1) {
 			Vector4f tmp;
-			tmp = VoxelColorReader<TVoxel::hasColorInformation, TVoxel, TIndex>::interpolate(voxelData, voxelIndex,
+			tmp = VoxelColorReader<TVoxel::hasColorInformation, TVoxel, TIndex>::interpolate(voxels, index_data,
 			                                                                                 point);
 			if (tmp.w > 0.0f) {
 				tmp.x /= tmp.w;
@@ -222,9 +222,9 @@ renderPointCloud_device(/*Vector4u *outRendering, */Vector4f* locations, Vector4
 			colours[offset] = tmp;
 
 			Vector4f pt_ray_out;
-			pt_ray_out.x = point.x * voxelSize;
-			pt_ray_out.y = point.y * voxelSize;
-			pt_ray_out.z = point.z * voxelSize;
+			pt_ray_out.x = point.x * voxel_size;
+			pt_ray_out.y = point.y * voxel_size;
+			pt_ray_out.z = point.z * voxel_size;
 			pt_ray_out.w = 1.0f;
 			locations[offset] = pt_ray_out;
 		}

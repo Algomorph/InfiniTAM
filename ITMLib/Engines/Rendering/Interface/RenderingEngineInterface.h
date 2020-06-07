@@ -6,9 +6,11 @@
 #include "../../../Objects/Volume/VoxelVolume.h"
 #include "../../../Objects/Tracking/CameraTrackingState.h"
 #include "../../../Objects/Views/View.h"
+#include "../../Common/Configurable.h"
+#include "../RenderingSettings.h"
 
 namespace ITMLib {
-class IRenderingEngine {
+class IRenderingEngine : public Configurable<RenderingSettings> {
 public:
 	enum RenderImageType {
 		RENDER_SHADED_GREYSCALE,
@@ -101,7 +103,7 @@ public:
 	ITMLib::Engine::ITMColorTracker classes.
 	*/
 	virtual void CreatePointCloud(VoxelVolume<TVoxel, TIndex>* scene, const View* view, CameraTrackingState* trackingState,
-	                              RenderState* renderState, bool skipPoints) const = 0;
+	                              RenderState* renderState) const = 0;
 
 	/** Create an image of reference points and normals as
 	required by the ITMLib::Engine::ITMDepthTracker classes.

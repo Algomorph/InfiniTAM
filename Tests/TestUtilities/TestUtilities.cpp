@@ -383,7 +383,6 @@ configuration::Configuration GenerateChangedUpConfiguration(){
 			AutomaticRunSettings(50, 16, true, true, true),
 			NonRigidTrackingParameters(ITMLib::TRACKER_SLAVCHEVA_DIAGNOSTIC, 300, 0.0002f, 0.4f),
 			true,
-			false,
 			MEMORYDEVICE_CPU,
 			true,
 			true,
@@ -411,8 +410,10 @@ configuration::Configuration GenerateChangedUpConfiguration(){
 			true,
 			true);
 	IndexingSettings changed_up_indexing_settings(DIAGNOSTIC);
+	RenderingSettings changed_up_rendering_settings(true);
 	AddDeferrableToSourceTree(changed_up_configuration, changed_up_telemetry_settings);
 	AddDeferrableToSourceTree(changed_up_configuration, changed_up_indexing_settings);
+	AddDeferrableToSourceTree(changed_up_configuration, changed_up_rendering_settings);
 	return changed_up_configuration;
 }
 
