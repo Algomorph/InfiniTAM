@@ -348,7 +348,7 @@ void BuildSdfVolumeFromImage_SurfaceSpanAllocation(VoxelVolume<TVoxel, TIndex>**
 	depth_fusion_engine->IntegrateDepthImageIntoTsdfVolume(*volume1, *view, &tracking_state);
 
 	RenderingEngineBase<TSDFVoxel, TIndex>* visualization_engine =
-			RenderingEngineFactory::MakeVisualizationEngine<TSDFVoxel, TIndex>(memory_device);
+			RenderingEngineFactory::Build<TSDFVoxel, TIndex>(memory_device);
 	visualization_engine->CreateICPMaps(*volume1, *view, &tracking_state, &render_state);
 
 	UpdateView(view, depth2_path, color2_path, mask2_path, calibration_path, memory_device);

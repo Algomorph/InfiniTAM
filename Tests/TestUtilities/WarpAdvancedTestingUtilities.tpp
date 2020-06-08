@@ -88,7 +88,7 @@ void GenerateRawLiveAndCanonicalVolumes(VoxelVolume<TSDFVoxel, TIndex>** canonic
 	CameraTrackingState tracking_state(image_size, TMemoryDeviceType);
 
 	RenderingEngineBase<TSDFVoxel, TIndex>* visualization_engine =
-			RenderingEngineFactory::MakeVisualizationEngine<TSDFVoxel, TIndex>(TMemoryDeviceType);
+			RenderingEngineFactory::Build<TSDFVoxel, TIndex>(TMemoryDeviceType);
 
 	RenderState render_state(image_size, configuration::get().general_voxel_volume_parameters.near_clipping_distance,
 	                         configuration::get().general_voxel_volume_parameters.far_clipping_distance,

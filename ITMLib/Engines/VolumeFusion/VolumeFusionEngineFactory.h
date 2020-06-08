@@ -28,9 +28,9 @@ class VolumeFusionEngineFactory{
 public:
 	template<typename TVoxel, typename TIndex>
 	static VolumeFusionEngineInterface<TVoxel, TIndex>*
-	Build(MemoryDeviceType memoryDeviceType = configuration::get().device_type){
+	Build(MemoryDeviceType memory_device_type = configuration::get().device_type){
 		VolumeFusionEngineInterface<TVoxel, TIndex>* volume_fusion_engine = nullptr;
-		switch (memoryDeviceType) {
+		switch (memory_device_type) {
 			case MEMORYDEVICE_CPU:
 				volume_fusion_engine = new VolumeFusionEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>();
 				break;

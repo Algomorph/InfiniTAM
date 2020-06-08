@@ -34,7 +34,7 @@ MultiEngine<TVoxel, TIndex>::MultiEngine(const RGBDCalib& calib, Vector2i imgSiz
 	const MemoryDeviceType deviceType = settings.device_type;
 	lowLevelEngine = LowLevelEngineFactory::MakeLowLevelEngine(deviceType);
 	viewBuilder = ViewBuilderFactory::Build(calib, deviceType);
-	visualization_engine = RenderingEngineFactory::MakeVisualizationEngine<TVoxel, TIndex>(deviceType);
+	visualization_engine = RenderingEngineFactory::Build<TVoxel, TIndex>(deviceType);
 
 	tracker = CameraTrackerFactory::Instance().Make(imgSize_rgb, imgSize_d, lowLevelEngine, imuCalibrator,
 	                                                settings.general_voxel_volume_parameters);

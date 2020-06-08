@@ -581,11 +581,9 @@ set(
 
         Engines/Rendering/CPU/MultiVisualizationEngine_CPU.h
         Engines/Rendering/CPU/SurfelVisualizationEngine_CPU.h
-        Engines/Rendering/CPU/VisualizationEngine_CPU.h
 
         Engines/Rendering/CUDA/MultiVisualizationEngine_CUDA.h
         Engines/Rendering/CUDA/SurfelVisualizationEngine_CUDA.h
-        Engines/Rendering/CUDA/VisualizationEngine_CUDA.h
         Engines/Rendering/CUDA/VisualizationHelpers_CUDA.h
 
         Engines/Rendering/Interface/MultiVisualizationEngine.h
@@ -614,19 +612,13 @@ set(
         Engines/Rendering/CPU/MultiVisualizationEngine_CPU_VoxelBlockHash.cpp
         Engines/Rendering/CPU/SurfelVisualizationEngine_CPU.tpp
         Engines/Rendering/CPU/SurfelVisualizationEngine_CPU.cpp
-        Engines/Rendering/CPU/VisualizationEngine_CPU.tpp
-        Engines/Rendering/CPU/VisualizationEngine_CPU_VoxelBlockHash.cpp
-        Engines/Rendering/CPU/VisualizationEngine_CPU_PlainVoxelArray.cpp
 
         Engines/Rendering/CUDA/MultiVisualizationEngine_CUDA.tcu
         Engines/Rendering/CUDA/MultiVisualizationEngine_CUDA_PlainVoxelArray.cu
         Engines/Rendering/CUDA/MultiVisualizationEngine_CUDA_VoxelBlockHash.cu
         Engines/Rendering/CUDA/SurfelVisualizationEngine_CUDA.tcu
         Engines/Rendering/CUDA/SurfelVisualizationEngine_CUDA.cu
-        Engines/Rendering/CUDA/VisualizationEngine_CUDA.tcu
         Engines/Rendering/CUDA/VisualizationHelpers_CUDA.cu
-        Engines/Rendering/CUDA/VisualizationEngine_CUDA_VoxelBlockHash.cu
-        Engines/Rendering/CUDA/VisualizationEngine_CUDA_PlainVoxelArray.cu
 
         Engines/Rendering/Interface/SurfelVisualizationEngine.tpp
         Engines/Rendering/Interface/SurfelVisualizationEngine.cpp

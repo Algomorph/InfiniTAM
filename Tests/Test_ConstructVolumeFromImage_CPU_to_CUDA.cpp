@@ -181,9 +181,9 @@ BOOST_AUTO_TEST_CASE(Test_SceneConstruct17_VBH_CPU_CUDA_SurfaceSpan){
 		depth_fusion_engine_VBH_CUDA->IntegrateDepthImageIntoTsdfVolume(&volume_VBH_16_CUDA, view_16_CUDA);
 		
 		RenderingEngineBase<TSDFVoxel, VoxelBlockHash>* visualization_engine_CPU =
-				RenderingEngineFactory::MakeVisualizationEngine<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CPU);
+				RenderingEngineFactory::Build<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CPU);
 		RenderingEngineBase<TSDFVoxel, VoxelBlockHash>* visualization_engine_CUDA =
-				RenderingEngineFactory::MakeVisualizationEngine<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CUDA);
+				RenderingEngineFactory::Build<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CUDA);
 		
 		visualization_engine_CPU->CreateICPMaps(&volume_VBH_16_CPU, view_16_CPU, &tracking_state_CPU, &render_state_CPU);
 		visualization_engine_CUDA->CreateICPMaps(&volume_VBH_16_CUDA, view_16_CUDA, &tracking_state_CUDA, &render_state_CUDA);

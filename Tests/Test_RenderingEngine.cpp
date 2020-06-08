@@ -280,69 +280,6 @@ void GenericForwardRenderTest() {
 }
 
 template<MemoryDeviceType TMemoryDeviceType>
-void GenericRenderImageTest_Legacy() {
-	CameraPoseAndRenderingEngineFixture<TMemoryDeviceType> fixture;
-
-	ORUtils::IStreamWrapper rendered_images_file("TestData/arrays/rendered_images.dat", true);
-
-	for (auto& tracking_state : fixture.tracking_states) {
-		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume;
-		LoadVolume(&volume, snoopy::PartialVolume17Path<VoxelBlockHash>(), TMemoryDeviceType,
-		           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
-		ORUtils::SE3Pose& pose = *tracking_state->pose_d;
-
-		fixture.visualization_engine_legacy->FindVisibleBlocks(volume, &pose, &fixture.calibration_data.intrinsics_d, fixture.render_state);
-
-		const int visible_block_count = volume->index.GetVisibleBlockCount();
-		if (visible_block_count == 0) continue; // skip shots without results
-		std::shared_ptr<RenderState> render_state = fixture.MakeRenderState();
-		fixture.visualization_engine_legacy->CreateExpectedDepths(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get());
-		fixture.visualization_engine_legacy->FindSurface(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get());
-
-		UChar4Image output_image(snoopy::frame_image_size, TMemoryDeviceType);
-		fixture.visualization_engine_legacy->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get(),
-		                                                 &output_image, IRenderingEngine::RenderImageType::RENDER_COLOUR_FROM_VOLUME,
-		                                                 IRenderingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
-		UChar4Image output_image_ground_truth = ORUtils::MemoryBlockPersistence::LoadImage<Vector4u>(rendered_images_file, MEMORYDEVICE_CPU);
-		BOOST_REQUIRE(RawArraysAlmostEqual_Verbose(output_image_ground_truth.GetData(MEMORYDEVICE_CPU), MEMORYDEVICE_CPU,
-		                                                 output_image.GetData(TMemoryDeviceType), TMemoryDeviceType, output_image.size(), 1u));
-		// render again re-doing the raycast internally, make sure the results match again
-		fixture.visualization_engine_legacy->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get(),
-		                                                 &output_image, IRenderingEngine::RenderImageType::RENDER_COLOUR_FROM_VOLUME,
-		                                                 IRenderingEngine::RenderRaycastSelection::RENDER_FROM_NEW_RAYCAST);
-		BOOST_REQUIRE(RawArraysAlmostEqual_Verbose(output_image_ground_truth.GetData(MEMORYDEVICE_CPU), MEMORYDEVICE_CPU,
-		                                                 output_image.GetData(TMemoryDeviceType), TMemoryDeviceType, output_image.size(), 1u));
-		fixture.visualization_engine_legacy->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get(),
-		                                                 &output_image, IRenderingEngine::RenderImageType::RENDER_COLOUR_FROM_NORMAL,
-		                                                 IRenderingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
-		output_image_ground_truth = ORUtils::MemoryBlockPersistence::LoadImage<Vector4u>(rendered_images_file, MEMORYDEVICE_CPU);
-		BOOST_REQUIRE(RawArraysAlmostEqual_Verbose(output_image_ground_truth.GetData(MEMORYDEVICE_CPU), MEMORYDEVICE_CPU,
-		                                                 output_image.GetData(TMemoryDeviceType), TMemoryDeviceType, output_image.size(), 1u));
-		fixture.visualization_engine_legacy->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get(),
-		                                                 &output_image, IRenderingEngine::RenderImageType::RENDER_SHADED_GREYSCALE_IMAGENORMALS,
-		                                                 IRenderingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
-		output_image_ground_truth = ORUtils::MemoryBlockPersistence::LoadImage<Vector4u>(rendered_images_file, MEMORYDEVICE_CPU);
-		BOOST_REQUIRE(RawArraysAlmostEqual_Verbose(output_image_ground_truth.GetData(MEMORYDEVICE_CPU), MEMORYDEVICE_CPU,
-		                                                 output_image.GetData(TMemoryDeviceType), TMemoryDeviceType, output_image.size(), 1u));
-		fixture.visualization_engine_legacy->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get(),
-		                                                 &output_image, IRenderingEngine::RenderImageType::RENDER_SHADED_GREEN,
-		                                                 IRenderingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
-		output_image_ground_truth = ORUtils::MemoryBlockPersistence::LoadImage<Vector4u>(rendered_images_file, MEMORYDEVICE_CPU);
-		BOOST_REQUIRE(RawArraysAlmostEqual_Verbose(output_image_ground_truth.GetData(MEMORYDEVICE_CPU), MEMORYDEVICE_CPU,
-		                                                 output_image.GetData(TMemoryDeviceType), TMemoryDeviceType, output_image.size(), 1u));
-		fixture.visualization_engine_legacy->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get(),
-		                                                 &output_image, IRenderingEngine::RenderImageType::RENDER_SHADED_OVERLAY,
-		                                                 IRenderingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
-		output_image_ground_truth = ORUtils::MemoryBlockPersistence::LoadImage<Vector4u>(rendered_images_file, MEMORYDEVICE_CPU);
-		BOOST_REQUIRE(RawArraysAlmostEqual_Verbose(output_image_ground_truth.GetData(MEMORYDEVICE_CPU), MEMORYDEVICE_CPU,
-		                                                 output_image.GetData(TMemoryDeviceType), TMemoryDeviceType, output_image.size(), 1u));
-
-		delete volume;
-	}
-}
-
-
-template<MemoryDeviceType TMemoryDeviceType>
 void GenericRenderImageTest() {
 	CameraPoseAndRenderingEngineFixture<TMemoryDeviceType> fixture;
 
@@ -412,10 +349,6 @@ BOOST_AUTO_TEST_CASE(Test_CreateExpectedDepths_CPU) {
 	GenericCreateExpectedDepthsTest<MEMORYDEVICE_CPU>();
 }
 
-BOOST_AUTO_TEST_CASE(Test_RenderImage_CPU_Legacy) {
-	GenericRenderImageTest_Legacy<MEMORYDEVICE_CPU>();
-}
-
 BOOST_AUTO_TEST_CASE(Test_RenderImage_CPU) {
 	GenericRenderImageTest<MEMORYDEVICE_CPU>();
 }
@@ -445,11 +378,6 @@ BOOST_AUTO_TEST_CASE(Test_FindAndCountVisibleBlocks_CUDA) {
 BOOST_AUTO_TEST_CASE(Test_CreateExpectedDepths_CUDA) {
 	GenericCreateExpectedDepthsTest<MEMORYDEVICE_CUDA>();
 }
-
-BOOST_AUTO_TEST_CASE(Test_RenderImage_CUDA_Legacy) {
-	GenericRenderImageTest_Legacy<MEMORYDEVICE_CUDA>();
-}
-
 BOOST_AUTO_TEST_CASE(Test_RenderImage_CUDA) {
 	GenericRenderImageTest<MEMORYDEVICE_CUDA>();
 }

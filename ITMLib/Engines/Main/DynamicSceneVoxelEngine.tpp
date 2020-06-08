@@ -69,7 +69,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(const RG
 		  low_level_engine(LowLevelEngineFactory::MakeLowLevelEngine(configuration::get().device_type)),
 		  telemetry_recorder(TelemetryRecorderFactory::GetDefault<TVoxel, TWarp, TIndex>(configuration::get().device_type)),
 		  view_builder(ViewBuilderFactory::Build(calibration_info, configuration::get().device_type)),
-		  visualization_engine(RenderingEngineFactory::MakeVisualizationEngine<TVoxel, TIndex>(
+		  visualization_engine(RenderingEngineFactory::Build<TVoxel, TIndex>(
 				  configuration::get().device_type)),
 		  meshing_engine(config.create_meshing_engine ? MeshingEngineFactory::Build<TVoxel, TIndex>(
 		  		configuration::get().device_type) : nullptr) {

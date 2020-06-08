@@ -142,7 +142,7 @@ static void SetUpTrackingState16(CameraTrackingState& tracking_state,
 	indexer_VBH.AllocateNearSurface(&volume_VBH_16, view_16);
 	depth_fusion_engine_VBH->IntegrateDepthImageIntoTsdfVolume(&volume_VBH_16, view_16);
 	RenderingEngineBase<TSDFVoxel, VoxelBlockHash>* visualization_engine =
-			RenderingEngineFactory::MakeVisualizationEngine<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CPU);
+			RenderingEngineFactory::Build<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CPU);
 	visualization_engine->CreateICPMaps(&volume_VBH_16, view_16, &tracking_state, &render_state);
 	delete visualization_engine;
 	delete view_16;
