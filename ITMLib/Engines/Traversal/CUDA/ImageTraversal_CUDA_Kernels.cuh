@@ -29,7 +29,7 @@ __global__ static void TraverseWithPosition_device(TImageElement* image_data, co
 	(*functor_device)(image_data[x + y * resolution.x], x, y);
 }
 
-template<typename TImageElement, typename TFunctor>
+template<typename TFunctor>
 __global__ static void TraversePositionOnly_device(const Vector2i resolution, TFunctor* functor_device) {
 	int x = threadIdx.x + blockIdx.x * blockDim.x, y = threadIdx.y + blockIdx.y * blockDim.y;
 	if (x >= resolution.x || y >= resolution.y) return;
@@ -46,7 +46,7 @@ __global__ static void TraverseWithPosition_device(TImageElement* image_data, co
 	(*functor_device)(image_data[pixel_index], x, y);
 }
 
-template<typename TImageElement, typename TFunctor>
+template<typename TFunctor>
 __global__ static void TraversePositionOnly_device(const int* sample_pixel_indices, const int sample_size, const int image_width,
                                                    TFunctor* functor_device) {
 	const int i_index = threadIdx.x + blockIdx.x * blockDim.x;

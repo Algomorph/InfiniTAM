@@ -223,7 +223,7 @@ public: // member functions
 	}
 
 	_DEVICE_WHEN_AVAILABLE_
-	void operator()(const Vector3s& desired_block_position, int i_new_block) {
+	void operator()(const Vector3s& desired_block_position) {
 		MarkAsNeedingAllocationIfNotFound<false>(hash_entry_states, allocation_block_coordinates,
 		                                         desired_block_position, hash_table, colliding_positions_device,
 		                                         colliding_block_count);

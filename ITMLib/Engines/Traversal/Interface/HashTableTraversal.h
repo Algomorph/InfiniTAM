@@ -35,20 +35,19 @@ class HashTableTraversalEngine :
 		private internal::RawArrayTraversalEngine_Internal<TMemoryDeviceType, EXACT, INDEX_SAMPLE>,
 		private internal::RawArrayTraversalEngine_Internal<TMemoryDeviceType, PADDED, INDEX_SAMPLE> {
 protected: // static functions
-	//TODO: get rid of THashEntry for all protected static functions & their usages (?)
-	template<JobCountPolicy TJobCountPolicy = JobCountPolicy::EXACT, typename THashEntry, typename TVoxelBlockHash, typename TFunctor>
+	template<JobCountPolicy TJobCountPolicy = JobCountPolicy::EXACT, typename TVoxelBlockHash, typename TFunctor>
 	inline static void TraverseAllWithIndex_Generic(TVoxelBlockHash& index, TFunctor& functor) {
 		internal::RawArrayTraversalEngine_Internal<TMemoryDeviceType, TJobCountPolicy, CONTIGUOUS>::template TraverseWithIndex_Generic
 				(index.GetEntries(), functor, index.hash_entry_count);
 	}
 
-	template<JobCountPolicy TJobCountPolicy = JobCountPolicy::EXACT, typename THashEntry, typename TVoxelBlockHash, typename TFunctor>
+	template<JobCountPolicy TJobCountPolicy = JobCountPolicy::EXACT, typename TVoxelBlockHash, typename TFunctor>
 	inline static void TraverseAllWithoutIndex_Generic(TVoxelBlockHash& index, TFunctor& functor) {
 		internal::RawArrayTraversalEngine_Internal<TMemoryDeviceType, TJobCountPolicy, CONTIGUOUS>::template TraverseWithoutIndex_Generic
 				(index.GetEntries(), functor, index.hash_entry_count);
 	}
 
-	template<JobCountPolicy TJobCountPolicy = JobCountPolicy::EXACT, typename THashEntry, typename TVoxelBlockHash, typename TFunctor>
+	template<JobCountPolicy TJobCountPolicy = JobCountPolicy::EXACT, typename TVoxelBlockHash, typename TFunctor>
 	inline static void TraverseUtilizedWithIndex_Generic(TVoxelBlockHash& index, TFunctor& functor) {
 		const int block_count = index.GetUtilizedBlockCount();
 		const int* block_indices = index.GetUtilizedBlockHashCodes();
@@ -56,7 +55,7 @@ protected: // static functions
 				(block_count, block_indices, index.GetEntries(), functor);
 	}
 
-	template<JobCountPolicy TJobCountPolicy = JobCountPolicy::EXACT, typename THashEntry, typename TVoxelBlockHash, typename TFunctor>
+	template<JobCountPolicy TJobCountPolicy = JobCountPolicy::EXACT, typename TVoxelBlockHash, typename TFunctor>
 	inline static void TraverseUtilizedWithoutIndex_Generic(TVoxelBlockHash& index, TFunctor& functor) {
 		const int block_count = index.GetUtilizedBlockCount();
 		const int* block_indices = index.GetUtilizedBlockHashCodes();
@@ -64,7 +63,7 @@ protected: // static functions
 				(block_count, block_indices, index.GetEntries(), functor);
 	}
 
-	template<JobCountPolicy TJobCountPolicy = JobCountPolicy::EXACT, typename THashEntry, typename TVoxelBlockHash, typename TFunctor>
+	template<JobCountPolicy TJobCountPolicy = JobCountPolicy::EXACT, typename TVoxelBlockHash, typename TFunctor>
 	inline static void TraverseVisibleWithIndex_Generic(TVoxelBlockHash& index, TFunctor& functor) {
 		const int block_count =   index.GetVisibleBlockCount();
 		const int* block_indices = index.GetVisibleBlockHashCodes();
@@ -72,7 +71,7 @@ protected: // static functions
 				(block_count, block_indices, index.GetEntries(), functor);
 	}
 
-	template<JobCountPolicy TJobCountPolicy = JobCountPolicy::EXACT, typename THashEntry, typename TVoxelBlockHash, typename TFunctor>
+	template<JobCountPolicy TJobCountPolicy = JobCountPolicy::EXACT, typename TVoxelBlockHash, typename TFunctor>
 	inline static void TraverseVisibleWithoutIndex_Generic(TVoxelBlockHash& index, TFunctor& functor) {
 		const int block_count =   index.GetVisibleBlockCount();
 		const int* block_indices = index.GetVisibleBlockHashCodes();
@@ -83,95 +82,95 @@ protected: // static functions
 public: // static functions
 	template<typename TFunctor>
 	inline static void TraverseAll(VoxelBlockHash& index, TFunctor& functor) {
-		TraverseAllWithoutIndex_Generic<EXACT, HashEntry>(index, functor);
+		TraverseAllWithoutIndex_Generic<EXACT>(index, functor);
 	}
 
 	template<typename TFunctor>
 	inline static void TraverseAll(const VoxelBlockHash& index, TFunctor& functor) {
-		TraverseAllWithoutIndex_Generic<EXACT, const HashEntry>(index, functor);
+		TraverseAllWithoutIndex_Generic<EXACT>(index, functor);
 	}
 
 	template<typename TFunctor>
 	inline static void TraverseUtilized(VoxelBlockHash& index, TFunctor& functor) {
-		TraverseUtilizedWithoutIndex_Generic<EXACT, HashEntry>(index, functor);
+		TraverseUtilizedWithoutIndex_Generic<EXACT>(index, functor);
 	}
 
 	template<typename TFunctor>
 	inline static void TraverseUtilized(const VoxelBlockHash& index, TFunctor& functor) {
-		TraverseUtilizedWithoutIndex_Generic<EXACT, const HashEntry>(index, functor);
+		TraverseUtilizedWithoutIndex_Generic<EXACT>(index, functor);
 	}
 
 	template<typename TFunctor>
 	inline static void TraverseVisible(VoxelBlockHash& index, TFunctor& functor) {
-		TraverseVisibleWithoutIndex_Generic<EXACT, HashEntry>(index, functor);
+		TraverseVisibleWithoutIndex_Generic<EXACT>(index, functor);
 	}
 
 	template<typename TFunctor>
 	inline static void TraverseVisible(const VoxelBlockHash& index, TFunctor& functor) {
-		TraverseVisibleWithoutIndex_Generic<EXACT, const HashEntry>(index, functor);
+		TraverseVisibleWithoutIndex_Generic<EXACT>(index, functor);
 	}
 
 	// *** with index ***
 
 	template<typename TFunctor>
 	inline static void TraverseAllWithIndex(VoxelBlockHash& index, TFunctor& functor) {
-		TraverseAllWithIndex_Generic<EXACT, HashEntry>(index, functor);
+		TraverseAllWithIndex_Generic<EXACT>(index, functor);
 	}
 
 	template<typename TFunctor>
 	inline static void TraverseAllWithIndex(const VoxelBlockHash& index, TFunctor& functor) {
-		TraverseAllWithIndex_Generic<EXACT, const HashEntry>(index, functor);
+		TraverseAllWithIndex_Generic<EXACT>(index, functor);
 	}
 
 	template<typename TFunctor>
 	inline static void TraverseUtilizedWithIndex(VoxelBlockHash& index, TFunctor& functor) {
-		TraverseUtilizedWithIndex_Generic<EXACT, HashEntry>(index, functor);
+		TraverseUtilizedWithIndex_Generic<EXACT>(index, functor);
 	}
 
 	template<typename TFunctor>
 	inline static void TraverseUtilizedWithIndex(const VoxelBlockHash& index, TFunctor& functor) {
-		TraverseUtilizedWithIndex_Generic<EXACT, const HashEntry>(index, functor);
+		TraverseUtilizedWithIndex_Generic<EXACT>(index, functor);
 	}
 
 	template<typename TFunctor>
 	inline static void TraverseVisibleWithIndex(VoxelBlockHash& index, TFunctor& functor) {
-		TraverseVisibleWithIndex_Generic<EXACT, HashEntry>(index, functor);
+		TraverseVisibleWithIndex_Generic<EXACT>(index, functor);
 	}
 
 	template<typename TFunctor>
 	inline static void TraverseVisibleWithIndex(const VoxelBlockHash& index, TFunctor& functor) {
-		TraverseVisibleWithIndex_Generic<EXACT, const HashEntry>(index, functor);
+		TraverseVisibleWithIndex_Generic<EXACT>(index, functor);
 	}
 
 	// *** padded ***
 	template<typename TFunctor>
 	inline static void TraverseAll_Padded(VoxelBlockHash& index, TFunctor& functor) {
-		TraverseAllWithIndex_Generic<PADDED, HashEntry>(index, functor);
+		TraverseAllWithIndex_Generic<PADDED>(index, functor);
 	}
 
 	template<typename TFunctor>
 	inline static void TraverseAll_Padded(const VoxelBlockHash& index, TFunctor& functor) {
-		TraverseAllWithIndex_Generic<PADDED, const HashEntry>(index, functor);
+		TraverseAllWithIndex_Generic<PADDED>(index, functor);
 	}
 
 	template<typename TFunctor>
 	inline static void TraverseUtilized_Padded(VoxelBlockHash& index, TFunctor& functor) {
-		TraverseUtilizedWithIndex_Generic<PADDED, HashEntry>(index, functor);
+		TraverseUtilizedWithIndex_Generic<PADDED>(index, functor);
 	}
 
 	template<typename TFunctor>
 	inline static void TraverseUtilized_Padded(const VoxelBlockHash& index, TFunctor& functor) {
-		TraverseUtilizedWithIndex_Generic<PADDED, const HashEntry>(index, functor);
+		TraverseUtilizedWithIndex_Generic<PADDED>(index, functor);
 	}
 
 	template<typename TFunctor>
 	inline static void TraverseVisible_Padded(VoxelBlockHash& index, TFunctor& functor) {
-		TraverseVisibleWithIndex_Generic<PADDED, HashEntry>(index, functor);
+		TraverseVisibleWithIndex_Generic<PADDED>(index, functor);
 	}
 
 	template<typename TFunctor>
 	inline static void TraverseVisible_Padded(const VoxelBlockHash& index, TFunctor& functor) {
-		TraverseVisibleWithIndex_Generic<PADDED, const HashEntry>(index, functor);
+		TraverseVisibleWithIndex_Generic<PADDED>(index, functor);
 	}
 };
 } // namespace ITMLib

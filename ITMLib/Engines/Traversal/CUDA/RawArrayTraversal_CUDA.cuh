@@ -28,24 +28,24 @@ template<>
 class RawArrayTraversalEngine_Internal<MEMORYDEVICE_CUDA, JobCountPolicy::EXACT, CONTIGUOUS> {
 	friend class RawArrayTraversalEngine<MEMORYDEVICE_CUDA>;
 protected: // static functions
-	template<int TBlockSize = 256, typename TData, typename TFunctor>
+	template<typename TData, typename TFunctor>
 	inline static void TraverseWithoutIndex_Generic(TData* data, TFunctor& functor, const unsigned int element_count) {
 		CallCUDAonUploadedFunctor(
 				functor,
 				[&element_count, &data](TFunctor* functor_device) {
-					dim3 cuda_block_size(TBlockSize);
+					dim3 cuda_block_size(256);
 					dim3 cuda_grid_size(ceil_of_integer_quotient(element_count, cuda_block_size.x));
 					TraverseWithoutItemIndex_device<<<cuda_grid_size, cuda_block_size >>>(data, element_count, functor_device);
 				}
 		);
 	}
 
-	template<int TBlockSize = 256, typename TData, typename TFunctor>
+	template<typename TData, typename TFunctor>
 	inline static void TraverseWithIndex_Generic(TData* data, TFunctor& functor, const unsigned int element_count) {
 		CallCUDAonUploadedFunctor(
 				functor,
 				[&element_count, &data](TFunctor* functor_device) {
-					dim3 cuda_block_size(TBlockSize);
+					dim3 cuda_block_size(256);
 					dim3 cuda_grid_size(ceil_of_integer_quotient(element_count, cuda_block_size.x));
 					TraverseWithIndex_device<<<cuda_grid_size, cuda_block_size >>>(data, element_count, functor_device);
 				}

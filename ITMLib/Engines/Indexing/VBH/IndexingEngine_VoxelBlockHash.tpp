@@ -205,7 +205,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType, TExecutionMode>::
 		marker_functor.SetCollidingBlockCount(0);
 		volume->index.ClearHashEntryAllocationStates();
 
-		RawArrayTraversalEngine<TMemoryDeviceType>::TraverseWithIndex(new_positions_device, marker_functor, new_block_count);
+		RawArrayTraversalEngine<TMemoryDeviceType>::Traverse(new_positions_device, marker_functor, new_block_count);
 
 		AllocateHashEntriesUsingAllocationStateList(volume);
 
