@@ -221,6 +221,7 @@ inline HashBlockVisibility* GetBlockVisibilityTypesIfAvailable<PlainVoxelArray>(
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType, bool TModifyVisibilityInformation>
 struct RaycastFunctor {
+	HashBlockVisibility* block_visibility_types;
 	const Vector4f inverted_camera_projection_parameters;
 	const Matrix4f inverted_camera_pose;
 	const float truncation_distance; //"mu" / μ in many fusion-type-reconstruction articles
@@ -232,7 +233,7 @@ struct RaycastFunctor {
 #endif
 	const Vector2f* ray_depth_range_image;
 	const int ray_depth_image_width;
-	HashBlockVisibility* block_visibility_types;
+
 
 public: // member functions
 	RaycastFunctor(VoxelVolume<TVoxel, TIndex>& volume, const ORUtils::Image<Vector2f>& ray_depth_range_image,
@@ -406,7 +407,7 @@ struct FindMissingProjectionPointsFunctor {
 private: // member variables
 	int* projection_missing_point_indices;
 	const Vector4f* forward_projection;
-	const Vector2f* pixel_ray_depth_data;
+	const Vector2f* pixel_ray_depth_range_data;
 	const int ray_depth_range_image_width;
 	const float* depth;
 
@@ -414,11 +415,11 @@ private: // member variables
 public: // member functions
 	FindMissingProjectionPointsFunctor(ORUtils::Image<int>& projection_missing_point_indices,
 	                                   const ORUtils::Image<Vector4f>& forward_projection,
-	                                   const ORUtils::Image<Vector2f>& pixel_ray_depth)
+	                                   const ORUtils::Image<Vector2f>& pixel_ray_depth_range_image)
 			: projection_missing_point_indices(projection_missing_point_indices.GetData(TMemoryDeviceType)),
 			  forward_projection(forward_projection.GetData(TMemoryDeviceType)),
-			  pixel_ray_depth_data(pixel_ray_depth.GetData(TMemoryDeviceType)),
-			  ray_depth_range_image_width(pixel_ray_depth.dimensions.x) {
+			  pixel_ray_depth_range_data(pixel_ray_depth_range_image.GetData(TMemoryDeviceType)),
+			  ray_depth_range_image_width(pixel_ray_depth_range_image.dimensions.x) {
 		INITIALIZE_ATOMIC(unsigned int, missing_point_count, 0u);
 	}
 
@@ -434,7 +435,7 @@ public: // member functions
 				(int) floor((float) y / ray_depth_image_subsampling_factor) * ray_depth_range_image_width;
 
 		Vector4f forward_projected_point = forward_projection[pixel_index];
-		Vector2f pixel_ray_depth = pixel_ray_depth_data[ray_ranges_pixel_index];
+		Vector2f pixel_ray_depth_range = pixel_ray_depth_range_data[ray_ranges_pixel_index];
 		float depth_at_pixel = depth[pixel_index];
 
 		bool has_point = false;
@@ -449,7 +450,7 @@ public: // member functions
 
 		if ((forward_projected_point.w <= 0) &&
 		    ((forward_projected_point.x == 0 && forward_projected_point.y == 0 && forward_projected_point.z == 0) || (depth_at_pixel > 0)) &&
-		    (pixel_ray_depth.x < pixel_ray_depth.y)) {
+		    (pixel_ray_depth_range.x < pixel_ray_depth_range.y)) {
 			should_prefix = true;
 			has_point = true;
 		}
@@ -464,6 +465,43 @@ public: // member functions
 
 	unsigned int GetMissingPointCount() {
 		return GET_ATOMIC_VALUE_CPU(missing_point_count);
+	}
+};
+
+template<typename TVoxel, typename TIndex, bool TModifyVisibilityInformation, MemoryDeviceType TMemoryDeviceType>
+struct RaycastMissingPointsFunctor {
+private: // member variables
+	const Vector4f inverted_camera_projection_parameters;
+	const Matrix4f inverted_camera_pose;
+	const float truncation_distance; //"mu" / μ in many fusion-type-reconstruction articles
+	const float voxel_size_reciprocal;
+	const TVoxel* voxels;
+	const typename TIndex::IndexData* index_data;
+	const Vector2f* pixel_ray_depth_range_data;
+	const int ray_depth_range_image_width;
+
+public: // member functions
+	RaycastMissingPointsFunctor(const VoxelVolume<TVoxel, TIndex>& volume,
+	                            const Vector4f& inverted_camera_projection_parameters, const Matrix4f inverted_camera_pose,
+	                            const ORUtils::Image<Vector2f>& pixel_ray_depth_range_image)
+			: inverted_camera_projection_parameters(inverted_camera_projection_parameters),
+			  inverted_camera_pose(inverted_camera_pose),
+			  truncation_distance(volume.GetParameters().truncation_distance),
+			  voxel_size_reciprocal(1.0f / volume.GetParameters().voxel_size),
+			  voxels(volume.GetVoxels()),
+			  index_data(volume.index.GetIndexData()),
+			  pixel_ray_depth_range_data(pixel_ray_depth_range_image.GetData(TMemoryDeviceType)),
+			  ray_depth_range_image_width(pixel_ray_depth_range_image.dimensions.x) {}
+
+	_DEVICE_WHEN_AVAILABLE_
+	inline void operator()(Vector4f& point, const int x, const int y) {
+		int ray_ranges_pixel_index =
+				(int) floor((float) x / ray_depth_image_subsampling_factor) +
+				(int) floor((float) y / ray_depth_image_subsampling_factor) * ray_depth_range_image_width;
+		CastRay<TVoxel, TIndex, false>(point, nullptr, x, y, voxels,
+		                               index_data, inverted_camera_pose, inverted_camera_projection_parameters,
+		                               voxel_size_reciprocal, truncation_distance,
+		                               pixel_ray_depth_range_data[ray_ranges_pixel_index]);
 	}
 };
 

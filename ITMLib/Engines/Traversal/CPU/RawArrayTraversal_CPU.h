@@ -29,8 +29,12 @@ namespace ITMLib {
 namespace internal {
 
 template<>
+class RawArrayTraversalEngine_Internal<MEMORYDEVICE_CPU, JobCountPolicy::EXACT, INDEX_SAMPLE>;
+
+template<>
 class RawArrayTraversalEngine_Internal<MEMORYDEVICE_CPU, JobCountPolicy::EXACT, CONTIGUOUS> {
 	friend class RawArrayTraversalEngine<MEMORYDEVICE_CPU>;
+	friend class RawArrayTraversalEngine_Internal<MEMORYDEVICE_CPU, JobCountPolicy::EXACT, INDEX_SAMPLE>;
 protected: // static functions
 	template<typename TApplyFunction>
 	inline static void Traverse_Generic(const unsigned int element_count, TApplyFunction&& apply_function) {
@@ -56,30 +60,32 @@ template<>
 class RawArrayTraversalEngine_Internal<MEMORYDEVICE_CPU, JobCountPolicy::EXACT, INDEX_SAMPLE> {
 	friend class RawArrayTraversalEngine<MEMORYDEVICE_CPU>;
 protected: // static functions
-	template<typename TApplyFunction, typename TGetSampleSizeFunction, typename TGetSampleIndicesFunction>
-	inline static void Traverse_Generic(TGetSampleSizeFunction&& get_sample_size, TGetSampleIndicesFunction&& get_sample_indices,
-	                                          TApplyFunction&& apply_function) {
-		const int sample_size = std::forward<TGetSampleSizeFunction>(get_sample_size)();
-		const int* sample_indices = std::forward<TGetSampleIndicesFunction>(get_sample_indices)();
-#ifdef WITH_OPENMP
-#pragma omp parallel for default(none) shared(apply_function, sample_indices)
-#endif
-		for (int i_index = 0; i_index < sample_size; i_index++) {
+	template<typename TApplyFunction>
+	inline static void Traverse_Generic(const int sample_size, const int* sample_indices, TApplyFunction&& apply_function) {
+		RawArrayTraversalEngine_Internal<MEMORYDEVICE_CPU, JobCountPolicy::EXACT, CONTIGUOUS>::
+		Traverse_Generic(sample_size, [&sample_indices, &apply_function](const int i_index) {
 			const int i_item = sample_indices[i_index];
 			apply_function(i_item);
-		}
+		});
 	}
 
-	template<typename TData, typename TFunctor, typename TGetSampleSizeFunction, typename TGetSampleIndicesFunction>
-	inline static void TraverseWithIndex_Generic(TData* data, TFunctor& functor,
-	                                             TGetSampleSizeFunction&& get_sample_size, TGetSampleIndicesFunction&& get_sample_indices) {
-		Traverse_Generic(get_sample_size, get_sample_indices, [&functor, &data](int i_item) { functor(data[i_item], i_item); });
+	//TODO: not sure if this is at all useful
+	template<typename TApplyFunction, typename TGetSampleSizeFunction, typename TGetSampleIndicesFunction>
+	inline static void Traverse_Generic_Functional(TGetSampleSizeFunction&& get_sample_size, TGetSampleIndicesFunction&& get_sample_indices,
+	                                               TApplyFunction&& apply_function) {
+		const int sample_size = std::forward<TGetSampleSizeFunction>(get_sample_size)();
+		const int* sample_indices = std::forward<TGetSampleIndicesFunction>(get_sample_indices)();
+		Traverse_Generic(sample_size, sample_indices, apply_function);
 	}
 
-	template<typename TData, typename TFunctor, typename TGetSampleSizeFunction, typename TGetSampleIndicesFunction>
-	inline static void TraverseWithoutIndex_Generic(TData* data, TFunctor& functor,
-	                                                TGetSampleSizeFunction&& get_sample_size, TGetSampleIndicesFunction&& get_sample_indices) {
-		Traverse_Generic(get_sample_size, get_sample_indices, [&functor, &data](int i_item) { functor(data[i_item]); });
+	template<typename TData, typename TFunctor>
+	inline static void TraverseWithoutIndex_Generic(const int sample_size, const int* sample_indices, TData* data, TFunctor& functor) {
+		Traverse_Generic(sample_size, sample_indices, [&functor, &data](int i_item) { functor(data[i_item]); });
+	}
+
+	template<typename TData, typename TFunctor>
+	inline static void TraverseWithIndex_Generic(const int sample_size, const int* sample_indices, TData* data, TFunctor& functor) {
+		Traverse_Generic(sample_size, sample_indices, [&functor, &data](int i_item) { functor(data[i_item], i_item); });
 	}
 };
 template<>
@@ -101,16 +107,21 @@ protected: // static functions
 		}
 #endif
 	}
+	template<typename TData, typename TFunctor>
+	inline static void TraverseWithIndex_Generic(TData* data, TFunctor& functor, const unsigned int element_count) {
+		Traverse_Generic(data, functor, element_count);
+	}
+	template<typename TData, typename TFunctor>
+	inline static void TraverseWithoutIndex_Generic(TData* data, TFunctor& functor, const unsigned int element_count) {
+		Traverse_Generic(data, functor, element_count);
+	}
 };
 template<>
 class RawArrayTraversalEngine_Internal<MEMORYDEVICE_CPU, JobCountPolicy::PADDED, INDEX_SAMPLE> {
 	friend class RawArrayTraversalEngine<MEMORYDEVICE_CPU>;
 protected: // static functions
-	template<typename TData, typename TFunctor, typename TGetSampleSizeFunction, typename TGetSampleIndicesFunction>
-	inline static void Traverse_Generic(TData* data, TFunctor& functor,
-	                                          TGetSampleSizeFunction&& get_sample_size, TGetSampleIndicesFunction&& get_sample_indices) {
-		const int sample_size = std::forward<TGetSampleSizeFunction>(get_sample_size)();
-		const int* sample_indices = std::forward<TGetSampleIndicesFunction>(get_sample_indices)();
+	template<typename TData, typename TFunctor>
+	inline static void Traverse_Generic(const int sample_size, const int* sample_indices, TData* data, TFunctor& functor) {
 #ifdef WITH_OPENMP
 		const int thread_count = omp_get_max_threads();
 		const int job_count = ceil_of_integer_quotient(sample_size, thread_count) * thread_count;
@@ -123,6 +134,21 @@ protected: // static functions
 			functor(data, sample_indices[i_index], false);
 		}
 #endif
+	}
+	template<typename TData, typename TFunctor, typename TGetSampleSizeFunction, typename TGetSampleIndicesFunction>
+	inline static void Traverse_Generic_Functional(TData* data, TFunctor& functor,
+	                                    TGetSampleSizeFunction&& get_sample_size, TGetSampleIndicesFunction&& get_sample_indices) {
+		const int sample_size = std::forward<TGetSampleSizeFunction>(get_sample_size)();
+		const int* sample_indices = std::forward<TGetSampleIndicesFunction>(get_sample_indices)();
+		Traverse_Generic(sample_size, sample_indices, data, functor);
+	}
+	template<typename TData, typename TFunctor>
+	inline static void TraverseWithIndex_Generic(const int sample_size, const int* sample_indices, TData* data, TFunctor& functor) {
+		Traverse_Generic(sample_size, sample_indices, data, functor);
+	}
+	template<typename TData, typename TFunctor>
+	inline static void TraverseWithoutIndex_Generic(const int sample_size, const int* sample_indices, TData* data, TFunctor& functor) {
+		Traverse_Generic(sample_size, sample_indices, data, functor);
 	}
 };
 } // namespace internal

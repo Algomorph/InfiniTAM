@@ -22,91 +22,64 @@
 #include "RawArrayTraversal.h"
 
 namespace ITMLib {
-template<MemoryDeviceType TMemoryDeviceType>
-class HashTableTraversalEngine;
-namespace internal {
-template<MemoryDeviceType TMemoryDeviceType, JobCountPolicy TJobCountPolicy, TraversalMethod TTraversalMethod>
-class HashTableTraversalEngine_Internal;
-template<MemoryDeviceType TMemoryDeviceType, JobCountPolicy TJobCountPolicy>
-class HashTableTraversalEngine_Internal<TMemoryDeviceType, TJobCountPolicy, CONTIGUOUS> :
-		private internal::RawArrayTraversalEngine_Internal<TMemoryDeviceType, TJobCountPolicy, CONTIGUOUS>{
-	friend class HashTableTraversalEngine<TMemoryDeviceType>;
-	using internal::RawArrayTraversalEngine_Internal<TMemoryDeviceType, TJobCountPolicy, CONTIGUOUS>::TraverseWithIndex_Generic;
-	using internal::RawArrayTraversalEngine_Internal<TMemoryDeviceType, TJobCountPolicy, CONTIGUOUS>::TraverseWithoutIndex_Generic;
-};
-template<MemoryDeviceType TMemoryDeviceType>
-class HashTableTraversalEngine_Internal<TMemoryDeviceType, EXACT, INDEX_SAMPLE> :
-private internal::RawArrayTraversalEngine_Internal<TMemoryDeviceType, EXACT, INDEX_SAMPLE>{
-	friend class HashTableTraversalEngine<TMemoryDeviceType>;
-	template<typename THashEntry, typename TVoxelBlockHash, typename TFunctor, typename TGetIndexCountFunction, typename TGetIndexSubarrayFunction>
-	inline static void TraverseWithIndex_Generic(TVoxelBlockHash& index, TFunctor& functor, TGetIndexCountFunction&& get_index_count,
-	                                                   TGetIndexSubarrayFunction&& get_index_subarray) {
-		internal::RawArrayTraversalEngine_Internal<TMemoryDeviceType, EXACT, INDEX_SAMPLE>::template TraverseWithIndex_Generic(
-				index.GetEntries(), functor, get_index_count, get_index_subarray);
-	}
 
-	template<typename THashEntry, typename TVoxelBlockHash, typename TFunctor, typename TGetIndexSubarrayFunction, typename TGetSubarrayFunction>
-	inline static void TraverseWithoutIndex_Generic(TVoxelBlockHash& index, TFunctor& functor, TGetIndexSubarrayFunction&& get_index_count,
-	                                                      TGetSubarrayFunction&& get_index_subarray) {
-		internal::RawArrayTraversalEngine_Internal<TMemoryDeviceType, EXACT, INDEX_SAMPLE>::template TraverseWithoutIndex_Generic(
-				index.GetEntries(), functor, get_index_count, get_index_subarray);
-	}
-};
-template<MemoryDeviceType TMemoryDeviceType>
-class HashTableTraversalEngine_Internal<TMemoryDeviceType, PADDED, INDEX_SAMPLE> :
-		private internal::RawArrayTraversalEngine_Internal<TMemoryDeviceType, PADDED, INDEX_SAMPLE>{
-	friend class HashTableTraversalEngine<TMemoryDeviceType>;
-	template<typename THashEntry, typename TVoxelBlockHash, typename TFunctor, typename TGetIndexCountFunction, typename TGetIndexSubarrayFunction>
-	inline static void TraverseWithIndex_Generic(TVoxelBlockHash& index, TFunctor& functor, TGetIndexCountFunction&& get_index_count,
-	                                             TGetIndexSubarrayFunction&& get_index_subarray) {
-		internal::RawArrayTraversalEngine_Internal<TMemoryDeviceType, PADDED, INDEX_SAMPLE>::template Traverse_Generic(
-				index.GetEntries(), functor, get_index_count, get_index_subarray);
-	}
-};
+//	namespace internal {
+//	template<MemoryDeviceType TMemoryDeviceType, JobCountPolicy TJobCountPolicy, TraversalMethod TTraversalMethod>
+//	class RawArrayTraversalEngine_Internal;
+//	} // namespace internal
 
-} // namespace internal
 template<MemoryDeviceType TMemoryDeviceType>
-class HashTableTraversalEngine {
+class HashTableTraversalEngine :
+		private internal::RawArrayTraversalEngine_Internal<TMemoryDeviceType, EXACT, CONTIGUOUS>,
+		private internal::RawArrayTraversalEngine_Internal<TMemoryDeviceType, PADDED, CONTIGUOUS>,
+		private internal::RawArrayTraversalEngine_Internal<TMemoryDeviceType, EXACT, INDEX_SAMPLE>,
+		private internal::RawArrayTraversalEngine_Internal<TMemoryDeviceType, PADDED, INDEX_SAMPLE> {
 protected: // static functions
-	template<JobCountPolicy TJobCountPolicy = JobCountPolicy::EXACT, typename THashEntry, typename TVoxelBlockHash,  typename TFunctor>
+	//TODO: get rid of THashEntry for all protected static functions & their usages (?)
+	template<JobCountPolicy TJobCountPolicy = JobCountPolicy::EXACT, typename THashEntry, typename TVoxelBlockHash, typename TFunctor>
 	inline static void TraverseAllWithIndex_Generic(TVoxelBlockHash& index, TFunctor& functor) {
-		internal::HashTableTraversalEngine_Internal<TMemoryDeviceType, TJobCountPolicy, CONTIGUOUS>::template TraverseWithIndex_Generic<THashEntry>
-				(index.GetEntries(), functor, index.hash_entry_count);
-	}
-	template<JobCountPolicy TJobCountPolicy = JobCountPolicy::EXACT, typename THashEntry, typename TVoxelBlockHash,  typename TFunctor>
-	inline static void TraverseAllWithoutIndex_Generic(TVoxelBlockHash& index, TFunctor& functor) {
-		internal::HashTableTraversalEngine_Internal<TMemoryDeviceType, TJobCountPolicy, CONTIGUOUS>::template TraverseWithoutIndex_Generic<THashEntry>
+		internal::RawArrayTraversalEngine_Internal<TMemoryDeviceType, TJobCountPolicy, CONTIGUOUS>::template TraverseWithIndex_Generic
 				(index.GetEntries(), functor, index.hash_entry_count);
 	}
 
-	template<JobCountPolicy TJobCountPolicy = JobCountPolicy::EXACT,  typename THashEntry, typename TVoxelBlockHash, typename TFunctor>
+	template<JobCountPolicy TJobCountPolicy = JobCountPolicy::EXACT, typename THashEntry, typename TVoxelBlockHash, typename TFunctor>
+	inline static void TraverseAllWithoutIndex_Generic(TVoxelBlockHash& index, TFunctor& functor) {
+		internal::RawArrayTraversalEngine_Internal<TMemoryDeviceType, TJobCountPolicy, CONTIGUOUS>::template TraverseWithoutIndex_Generic
+				(index.GetEntries(), functor, index.hash_entry_count);
+	}
+
+	template<JobCountPolicy TJobCountPolicy = JobCountPolicy::EXACT, typename THashEntry, typename TVoxelBlockHash, typename TFunctor>
 	inline static void TraverseUtilizedWithIndex_Generic(TVoxelBlockHash& index, TFunctor& functor) {
-		internal::HashTableTraversalEngine_Internal<TMemoryDeviceType, TJobCountPolicy, INDEX_SAMPLE>::template TraverseWithIndex_Generic<THashEntry>
-				(index, functor,
-				 [&index]() { return index.GetUtilizedBlockCount(); },
-				 [&index]() { return index.GetUtilizedBlockHashCodes(); });
+		const int block_count = index.GetUtilizedBlockCount();
+		const int* block_indices = index.GetUtilizedBlockHashCodes();
+		internal::RawArrayTraversalEngine_Internal<TMemoryDeviceType, TJobCountPolicy, INDEX_SAMPLE>::template TraverseWithIndex_Generic
+				(block_count, block_indices, index.GetEntries(), functor);
 	}
-	template<JobCountPolicy TJobCountPolicy = JobCountPolicy::EXACT,  typename THashEntry, typename TVoxelBlockHash, typename TFunctor>
+
+	template<JobCountPolicy TJobCountPolicy = JobCountPolicy::EXACT, typename THashEntry, typename TVoxelBlockHash, typename TFunctor>
 	inline static void TraverseUtilizedWithoutIndex_Generic(TVoxelBlockHash& index, TFunctor& functor) {
-		internal::HashTableTraversalEngine_Internal<TMemoryDeviceType, TJobCountPolicy, INDEX_SAMPLE>::template TraverseWithoutIndex_Generic<THashEntry>
-				(index, functor,
-				 [&index]() { return index.GetUtilizedBlockCount(); },
-				 [&index]() { return index.GetUtilizedBlockHashCodes(); });
+		const int block_count = index.GetUtilizedBlockCount();
+		const int* block_indices = index.GetUtilizedBlockHashCodes();
+		internal::RawArrayTraversalEngine_Internal<TMemoryDeviceType, TJobCountPolicy, INDEX_SAMPLE>::template TraverseWithoutIndex_Generic
+				(block_count, block_indices, index.GetEntries(), functor);
 	}
+
 	template<JobCountPolicy TJobCountPolicy = JobCountPolicy::EXACT, typename THashEntry, typename TVoxelBlockHash, typename TFunctor>
 	inline static void TraverseVisibleWithIndex_Generic(TVoxelBlockHash& index, TFunctor& functor) {
-		internal::HashTableTraversalEngine_Internal<TMemoryDeviceType, TJobCountPolicy, INDEX_SAMPLE>::template TraverseWithIndex_Generic<THashEntry>
-				(index, functor,
-				 [&index]() { return index.GetVisibleBlockCount(); },
-				 [&index]() { return index.GetVisibleBlockHashCodes(); });
+		const int block_count =   index.GetVisibleBlockCount();
+		const int* block_indices = index.GetVisibleBlockHashCodes();
+		internal::RawArrayTraversalEngine_Internal<TMemoryDeviceType, TJobCountPolicy, INDEX_SAMPLE>::template TraverseWithIndex_Generic
+				(block_count, block_indices, index.GetEntries(), functor);
 	}
+
 	template<JobCountPolicy TJobCountPolicy = JobCountPolicy::EXACT, typename THashEntry, typename TVoxelBlockHash, typename TFunctor>
 	inline static void TraverseVisibleWithoutIndex_Generic(TVoxelBlockHash& index, TFunctor& functor) {
-		internal::HashTableTraversalEngine_Internal<TMemoryDeviceType, TJobCountPolicy, INDEX_SAMPLE>::template TraverseWithoutIndex_Generic<THashEntry>
-				(index, functor,
-				 [&index]() { return index.GetVisibleBlockCount(); },
-				 [&index]() { return index.GetVisibleBlockHashCodes(); });
+		const int block_count =   index.GetVisibleBlockCount();
+		const int* block_indices = index.GetVisibleBlockHashCodes();
+		internal::RawArrayTraversalEngine_Internal<TMemoryDeviceType, TJobCountPolicy, INDEX_SAMPLE>::template TraverseWithoutIndex_Generic
+				(block_count, block_indices, index.GetEntries(), functor);
 	}
+
 public: // static functions
 	template<typename TFunctor>
 	inline static void TraverseAll(VoxelBlockHash& index, TFunctor& functor) {
@@ -169,7 +142,7 @@ public: // static functions
 	inline static void TraverseVisibleWithIndex(const VoxelBlockHash& index, TFunctor& functor) {
 		TraverseVisibleWithIndex_Generic<EXACT, const HashEntry>(index, functor);
 	}
-	
+
 	// *** padded ***
 	template<typename TFunctor>
 	inline static void TraverseAll_Padded(VoxelBlockHash& index, TFunctor& functor) {

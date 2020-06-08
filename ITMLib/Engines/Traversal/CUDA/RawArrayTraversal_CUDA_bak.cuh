@@ -35,6 +35,7 @@ protected: // static functions
 				[&element_count, &data](TFunctor* functor_device) {
 					dim3 cuda_block_size(TBlockSize);
 					dim3 cuda_grid_size(ceil_of_integer_quotient(element_count, cuda_block_size.x));
+					RawTraversal_CUDA_globals<EXACT, CONTIGUOUS>::
 					TraverseWithoutItemIndex_device<<<cuda_grid_size, cuda_block_size >>>(data, element_count, functor_device);
 				}
 		);
@@ -47,6 +48,7 @@ protected: // static functions
 				[&element_count, &data](TFunctor* functor_device) {
 					dim3 cuda_block_size(TBlockSize);
 					dim3 cuda_grid_size(ceil_of_integer_quotient(element_count, cuda_block_size.x));
+					RawTraversal_CUDA_globals<EXACT, CONTIGUOUS>::
 					TraverseWithIndex_device<<<cuda_grid_size, cuda_block_size >>>(data, element_count, functor_device);
 				}
 		);
@@ -64,6 +66,7 @@ protected: // static functions
 				[&sample_size, &sample_indices, &data](TFunctor* functor_device) {
 					dim3 cuda_block_size(TBlockSize);
 					dim3 cuda_grid_size(ceil_of_integer_quotient(sample_size, cuda_block_size.x));
+					RawTraversal_CUDA_globals<EXACT, INDEX_SAMPLE>::
 					TraverseWithoutIndex_device<<<cuda_grid_size, cuda_block_size>>>(data, sample_indices, sample_size, functor_device);
 				}
 		);
@@ -75,6 +78,7 @@ protected: // static functions
 				[&sample_size, &sample_indices, &data](TFunctor* functor_device) {
 					dim3 cuda_block_size(TBlockSize);
 					dim3 cuda_grid_size(ceil_of_integer_quotient(sample_size, cuda_block_size.x));
+					RawTraversal_CUDA_globals<EXACT, INDEX_SAMPLE>::
 					TraverseWithIndex_device<<<cuda_grid_size, cuda_block_size>>>(data, sample_indices, sample_size, functor_device);
 				}
 		);
@@ -107,6 +111,7 @@ protected: // static functions
 				[&element_count, &data](TFunctor* functor_device) {
 					dim3 cuda_block_size(TBlockSize);
 					dim3 cuda_grid_size(ceil_of_integer_quotient(element_count, cuda_block_size.x));
+					RawTraversal_CUDA_globals<PADDED, CONTIGUOUS>::
 					Traverse_device<<<cuda_grid_size, cuda_block_size>>>(data, element_count, functor_device);
 				}
 		);
@@ -131,6 +136,7 @@ protected: // static functions
 				[&sample_size, &sample_indices, &data](TFunctor* functor_device) {
 					dim3 cuda_block_size(TBlockSize);
 					dim3 cuda_grid_size(ceil_of_integer_quotient(sample_size, cuda_block_size.x));
+					RawTraversal_CUDA_globals<PADDED, INDEX_SAMPLE>::
 					Traverse_device<<<cuda_grid_size, cuda_block_size>>>(data, sample_indices, sample_size, functor_device);
 				}
 		);

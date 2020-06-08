@@ -16,28 +16,45 @@
 #pragma once
 
 #include "../../../Utils/Math.h"
+#include "../Shared/TraversalMethod.h"
+#include "../Shared/JobCountPolicy.h"
 
 namespace {
 // CUDA global kernels
-template <typename TImageElement, typename TFunctor >
-__global__ void ImagePositionOnlyTraversal_device (const Vector2i resolution, TFunctor* functor_device){
-	int x = threadIdx.x + blockIdx.x * blockDim.x, y = threadIdx.y + blockIdx.y * blockDim.y;
-	if (x >= resolution.x || y >= resolution.y) return;
-	(*functor_device)(x + y * resolution.x, x, y);
-}
 
-template <typename TImageElement, typename TFunctor >
-__global__ void ImageTraversalWithPosition_device (TImageElement* image_data, const Vector2i resolution, TFunctor* functor_device){
+template<typename TImageElement, typename TFunctor>
+__global__ static void TraverseWithPosition_device(TImageElement* image_data, const Vector2i resolution, TFunctor* functor_device) {
 	int x = threadIdx.x + blockIdx.x * blockDim.x, y = threadIdx.y + blockIdx.y * blockDim.y;
 	if (x >= resolution.x || y >= resolution.y) return;
 	(*functor_device)(image_data[x + y * resolution.x], x, y);
 }
 
-template <typename TImageElement, typename TFunctor >
-__global__ void ImageTraversalWithoutPosition_device (TImageElement* image_data, const int pixel_count, TFunctor* functor_device){
-	int i_pixel = threadIdx.x + blockIdx.x * blockDim.x;
-	if (i_pixel >= pixel_count) return;
-	(*functor_device)(image_data[i_pixel]);
+template<typename TImageElement, typename TFunctor>
+__global__ static void TraversePositionOnly_device(const Vector2i resolution, TFunctor* functor_device) {
+	int x = threadIdx.x + blockIdx.x * blockDim.x, y = threadIdx.y + blockIdx.y * blockDim.y;
+	if (x >= resolution.x || y >= resolution.y) return;
+	(*functor_device)(x + y * resolution.x, x, y);
+}
+template<typename TImageElement, typename TFunctor>
+__global__ static void TraverseWithPosition_device(TImageElement* image_data, const int* sample_pixel_indices, const int sample_size,
+                                                   const int image_width, TFunctor* functor_device) {
+	const int i_index = threadIdx.x + blockIdx.x * blockDim.x;
+	if (i_index >= sample_size) return;
+	const int pixel_index = sample_pixel_indices[i_index];
+	const int y = pixel_index / image_width;
+	const int x = pixel_index % image_width;
+	(*functor_device)(image_data[pixel_index], x, y);
+}
+
+template<typename TImageElement, typename TFunctor>
+__global__ static void TraversePositionOnly_device(const int* sample_pixel_indices, const int sample_size, const int image_width,
+                                                   TFunctor* functor_device) {
+	const int i_index = threadIdx.x + blockIdx.x * blockDim.x;
+	if (i_index >= sample_size) return;
+	const int pixel_index = sample_pixel_indices[i_index];
+	const int y = pixel_index / image_width;
+	const int x = pixel_index % image_width;
+	(*functor_device)(pixel_index, x, y);
 }
 
 } // end anonymous namespace (CUDA global kernels)

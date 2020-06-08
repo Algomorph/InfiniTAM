@@ -62,23 +62,23 @@ __global__ void genericRaycast_device(Vector4f* out_ptsRay, HashBlockVisibility*
 
 template<class TVoxel, class TIndex, bool modifyVisibleEntries>
 __global__ void
-genericRaycastMissingPoints_device(Vector4f* forwardProjection, HashBlockVisibility* blockVisibilityTypes, const TVoxel* voxelData,
-                                   const typename TIndex::IndexData* voxelIndex, Vector2i imgSize, Matrix4f invM,
-                                   Vector4f invProjParams, float oneOverVoxelSize,
-                                   int* fwdProjMissingPoints, int noMissingPoints, const Vector2f* minmaximg,
-                                   float mu) {
-	int pointId = threadIdx.x + blockIdx.x * blockDim.x;
+genericRaycastMissingPoints_device(Vector4f* forward_projection, HashBlockVisibility* block_visibility_types, const TVoxel* voxels,
+                                   const typename TIndex::IndexData* index_data, Vector2i imgSize, Matrix4f inverted_camera_pose,
+                                   Vector4f inverted_camera_projection_parameters, float voxel_size_reciprocal,
+                                   int* missing_projection_point_indices, int noMissingPoints, const Vector2f* pixel_ray_depth_data,
+                                   float truncation_distance) {
+	int i_pixel_index = threadIdx.x + blockIdx.x * blockDim.x;
 
-	if (pointId >= noMissingPoints) return;
+	if (i_pixel_index >= noMissingPoints) return;
 
-	int locId = fwdProjMissingPoints[pointId];
-	int y = locId / imgSize.x, x = locId - y * imgSize.x;
-	int locId2 =
+	int pixel_index = missing_projection_point_indices[i_pixel_index];
+	int y = pixel_index / imgSize.x, x = pixel_index - y * imgSize.x;
+	int ray_ranges_pixel_index =
 			(int) floor((float) x / ray_depth_image_subsampling_factor) + (int) floor((float) y / ray_depth_image_subsampling_factor) * imgSize.x;
 
-	CastRay<TVoxel, TIndex, modifyVisibleEntries>(forwardProjection[locId], blockVisibilityTypes, x, y, voxelData,
-	                                              voxelIndex, invM, invProjParams, oneOverVoxelSize, mu,
-	                                              minmaximg[locId2]);
+	CastRay<TVoxel, TIndex, modifyVisibleEntries>(forward_projection[pixel_index], block_visibility_types, x, y, voxels,
+	                                              index_data, inverted_camera_pose, inverted_camera_projection_parameters, voxel_size_reciprocal, truncation_distance,
+	                                              pixel_ray_depth_data[ray_ranges_pixel_index]);
 }
 
 template<bool flipNormals>

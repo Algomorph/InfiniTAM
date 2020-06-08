@@ -17,52 +17,78 @@
 
 #include "../../../../ORUtils/MemoryDeviceType.h"
 #include "../Shared/JobCountPolicy.h"
+#include "../Shared/TraversalMethod.h"
 
 namespace ITMLib {
 namespace internal {
-template<MemoryDeviceType TMemoryDeviceType, JobCountPolicy TJobCountPoicy>
+template<MemoryDeviceType TMemoryDeviceType, JobCountPolicy TJobCountPoicy, TraversalMethod TTraversalMethod>
 class ImageTraversalEngine_Internal;
 } // namespace internal
 
 template<MemoryDeviceType TMemoryDeviceType>
-class ImageTraversalEngine{
+class ImageTraversalEngine {
 public: // static functions
 	template<typename TImageElement, typename TFunctor>
 	inline static void
 	Traverse(ORUtils::Image<TImageElement>* image, TFunctor& functor) {
-		internal::ImageTraversalEngine_Internal<TMemoryDeviceType, EXACT>::template TraverseWithoutPosition_Generic<TImageElement>(image, functor);
+		internal::ImageTraversalEngine_Internal<TMemoryDeviceType, EXACT, CONTIGUOUS>::
+		        template TraverseWithoutPosition_Generic<TImageElement>(image, functor);
 	}
 
 	template<typename TImageElement, typename TFunctor>
 	inline static void
 	Traverse(const ORUtils::Image<TImageElement>* image, TFunctor& functor) {
-		internal::ImageTraversalEngine_Internal<TMemoryDeviceType, EXACT>::template TraverseWithoutPosition_Generic<const TImageElement>(image, functor);
+		internal::ImageTraversalEngine_Internal<TMemoryDeviceType, EXACT, CONTIGUOUS>::template TraverseWithoutPosition_Generic<const TImageElement>(
+				image, functor);
 	}
-
+	//TODO: for clarity, refactor TraverseWithPosition --> TraverseWithPixelCoordinates (also in internal classes employed here)
 	template<int TCudaBlockSizeX = 16, int TCudaBlockSizeY = 16, typename TImageElement, typename TFunctor>
 	inline static void
 	TraverseWithPosition(ORUtils::Image<TImageElement>* image, TFunctor& functor) {
-		internal::ImageTraversalEngine_Internal<TMemoryDeviceType, EXACT>::template TraverseWithPosition_Generic<TCudaBlockSizeX, TCudaBlockSizeY, TImageElement>(image, functor);
+		internal::ImageTraversalEngine_Internal<TMemoryDeviceType, EXACT, CONTIGUOUS>::template TraverseWithPosition_Generic<TCudaBlockSizeX, TCudaBlockSizeY, TImageElement>(
+				image, functor);
 	}
 
 	template<int TCudaBlockSizeX = 16, int TCudaBlockSizeY = 16, typename TImageElement, typename TFunctor>
 	inline static void
 	TraverseWithPosition(const ORUtils::Image<TImageElement>* image, TFunctor& functor) {
-		internal::ImageTraversalEngine_Internal<TMemoryDeviceType, EXACT>::template TraverseWithPosition_Generic<TCudaBlockSizeX, TCudaBlockSizeY, const TImageElement>(image, functor);
+		internal::ImageTraversalEngine_Internal<TMemoryDeviceType, EXACT, CONTIGUOUS>::template TraverseWithPosition_Generic<TCudaBlockSizeX, TCudaBlockSizeY, const TImageElement>(
+				image, functor);
 	}
 
+	//TODO: for clarity, refactor TraversePositionOnly --> TraversePixelIndexAndCoordinatesOnly (also in internal classes employed here)
 	template<int TCudaBlockSizeX = 16, int TCudaBlockSizeY = 16, typename TImageElement, typename TFunctor>
 	inline static void
 	TraversePositionOnly(ORUtils::Image<TImageElement>* image, TFunctor& functor) {
-		internal::ImageTraversalEngine_Internal<TMemoryDeviceType, EXACT>::template TraversePositionOnly_Generic<TCudaBlockSizeX, TCudaBlockSizeY, TImageElement>(
+		internal::ImageTraversalEngine_Internal<TMemoryDeviceType, EXACT, CONTIGUOUS>::template TraversePositionOnly_Generic<TCudaBlockSizeX, TCudaBlockSizeY, TImageElement>(
 				image, functor);
 	}
 
 	template<int TCudaBlockSizeX = 16, int TCudaBlockSizeY = 16, typename TImageElement, typename TFunctor>
 	inline static void
 	TraversePositionOnly(const ORUtils::Image<TImageElement>* image, TFunctor& functor) {
-		internal::ImageTraversalEngine_Internal<TMemoryDeviceType, EXACT>::template TraversePositionOnly_Generic<TCudaBlockSizeX, TCudaBlockSizeY, const TImageElement>(
+		internal::ImageTraversalEngine_Internal<TMemoryDeviceType, EXACT, CONTIGUOUS>::template TraversePositionOnly_Generic<TCudaBlockSizeX, TCudaBlockSizeY, const TImageElement>(
 				image, functor);
+	}
+
+	template<typename TImageElement, typename TFunctor>
+	inline static void
+	TraverseSample(const int sample_size, const int* sample_pixel_indices, ORUtils::Image<TImageElement>* image, TFunctor& functor) {
+		internal::ImageTraversalEngine_Internal<TMemoryDeviceType, EXACT, INDEX_SAMPLE>::template
+		TraverseWithoutPosition_Generic<TImageElement>(sample_size, sample_pixel_indices, image, functor);
+	}
+	template<typename TImageElement, typename TFunctor>
+	inline static void
+	TraverseSampleWithPixelCoordinates(const int sample_size, const int* sample_pixel_indices, ORUtils::Image<TImageElement>* image, TFunctor& functor) {
+		internal::ImageTraversalEngine_Internal<TMemoryDeviceType, EXACT, INDEX_SAMPLE>::template
+		TraverseWithPosition_Generic<TImageElement>(sample_size, sample_pixel_indices, image, functor);
+	}
+
+	template<typename TImageElement, typename TFunctor>
+	inline static void
+	TraverseSamplePixelIndexAndCoordinatesOnly(const int sample_size, const int* sample_pixel_indices, const ORUtils::Image<TImageElement>* image, TFunctor& functor) {
+		internal::ImageTraversalEngine_Internal<TMemoryDeviceType, EXACT, INDEX_SAMPLE>::template
+		TraversePositionOnly_Generic<const TImageElement>(sample_size, sample_pixel_indices, image, functor);
 	}
 
 };
