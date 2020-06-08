@@ -43,9 +43,73 @@ void RenderingEngine<TVoxel, TIndex, TMemoryDeviceType>::CreateExpectedDepths(
 
 template<class TVoxel, class TIndex, MemoryDeviceType TMemoryDeviceType>
 void RenderingEngine<TVoxel, TIndex, TMemoryDeviceType>::RenderImage(
-		VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics, const RenderState* render_state,
-		UChar4Image* output_image, IRenderingEngine::RenderImageType type, IRenderingEngine::RenderRaycastSelection raycast_type) const {
-	DIEWITHEXCEPTION_REPORTLOCATION("Not implemented");
+		VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::SE3Pose* camera_pose, const Intrinsics* intrinsics, const RenderState* render_state,
+		UChar4Image* output_image, IRenderingEngine::RenderImageType render_image_type,
+		IRenderingEngine::RenderRaycastSelection raycast_source) const {
+
+	Vector2i output_image_size = output_image->dimensions;
+	Matrix4f inverted_camera_pose = camera_pose->GetInvM();
+
+	ORUtils::Image<Vector4f>* raycast_image;
+
+	switch (raycast_source) {
+		case IRenderingEngine::RENDER_FROM_OLD_RAYCAST:
+			raycast_image = render_state->raycastResult;
+			break;
+		case IRenderingEngine::RENDER_FROM_OLD_FORWARDPROJ:
+			raycast_image = render_state->forwardProjection;
+			break;
+		case IRenderingEngine::RENDER_FROM_NEW_RAYCAST:
+			GenericRaycast(volume, output_image_size, inverted_camera_pose, intrinsics->projectionParamsSimple.all, render_state, false);
+			raycast_image = render_state->raycastResult;
+			break;
+	}
+
+	Vector3f light_source = -Vector3f(inverted_camera_pose.getColumn(2));
+
+	if ((render_image_type == IRenderingEngine::RENDER_COLOUR_FROM_VOLUME) &&
+	    (!TVoxel::hasColorInformation))
+		render_image_type = IRenderingEngine::RENDER_SHADED_GREYSCALE;
+
+	switch (render_image_type) {
+		case IRenderingEngine::RENDER_COLOUR_FROM_VOLUME:{
+			RenderFromVolumeFunctor<TVoxel, TIndex, TMemoryDeviceType, IRenderingEngine::RENDER_COLOUR_FROM_VOLUME>
+					functor(*output_image,*raycast_image,*volume,light_source);
+			ImageTraversalEngine<TMemoryDeviceType>::template TraversePositionOnly<8, 8>(output_image, functor);
+		}
+			break;
+		case IRenderingEngine::RENDER_COLOUR_FROM_NORMAL:{
+			RenderFromVolumeFunctor<TVoxel, TIndex, TMemoryDeviceType, IRenderingEngine::RENDER_COLOUR_FROM_NORMAL>
+					functor(*output_image,*raycast_image,*volume,light_source);
+			ImageTraversalEngine<TMemoryDeviceType>::template TraversePositionOnly<8, 8>(output_image, functor);
+		}
+			break;
+		case IRenderingEngine::RENDER_COLOUR_FROM_CONFIDENCE: {
+			RenderFromVolumeFunctor<TVoxel, TIndex, TMemoryDeviceType, IRenderingEngine::RENDER_COLOUR_FROM_CONFIDENCE>
+					functor(*output_image,*raycast_image,*volume,light_source);
+			ImageTraversalEngine<TMemoryDeviceType>::template TraversePositionOnly<8, 8>(output_image, functor);
+		}
+			break;
+		case IRenderingEngine::RENDER_SHADED_GREYSCALE_IMAGENORMALS:
+			if (intrinsics->FocalLengthSignsDiffer()) {
+				RenderFromRaycastFunctor<TMemoryDeviceType, true, IRenderingEngine::RENDER_SHADED_GREYSCALE_IMAGENORMALS>
+				        functor(*output_image,*raycast_image,volume->GetParameters().voxel_size,light_source);
+				ImageTraversalEngine<TMemoryDeviceType>::template TraversePositionOnly<8, 8>(output_image, functor);
+			} else {
+				RenderFromRaycastFunctor<TMemoryDeviceType, false, IRenderingEngine::RENDER_SHADED_GREYSCALE_IMAGENORMALS>
+				        functor(*output_image,*raycast_image,volume->GetParameters().voxel_size,light_source);
+				ImageTraversalEngine<TMemoryDeviceType>::template TraversePositionOnly<8, 8>(output_image, functor);
+			}
+			ORcudaKernelCheck;
+			break;
+		case IRenderingEngine::RENDER_SHADED_GREYSCALE:
+		default:{
+			RenderFromVolumeFunctor<TVoxel, TIndex, TMemoryDeviceType, IRenderingEngine::RENDER_SHADED_GREYSCALE>
+			        functor(*output_image,*raycast_image,*volume,light_source);
+			ImageTraversalEngine<TMemoryDeviceType>::template TraversePositionOnly<8, 8>(output_image, functor);
+		}
+			break;
+	}
 }
 
 template<class TVoxel, class TIndex, MemoryDeviceType TMemoryDeviceType>
@@ -109,11 +173,9 @@ void RenderingEngine<TVoxel, TIndex, TMemoryDeviceType>::ForwardRender(
 	ImageTraversalEngine<TMemoryDeviceType>::template TraversePositionOnly(render_state->raycastResult, find_missing_points_functor);
 	render_state->noFwdProjMissingPoints = find_missing_points_functor.GetMissingPointCount();
 
-
-	RaycastMissingPointsFunctor<TVoxel, TIndex, false, TMemoryDeviceType> raycast_missing_points_functor(*volume,
-	                                                                                                     view->calib.intrinsics_d.projectionParamsSimple.all,
-	                                                                                                     camera_tracking_state->pose_d->GetInvM(),
-	                                                                                                     *render_state->renderingRangeImage);
+	RaycastMissingPointsFunctor<TVoxel, TIndex, TMemoryDeviceType> raycast_missing_points_functor(
+			*volume, view->calib.intrinsics_d.projectionParamsSimple.all, camera_tracking_state->pose_d->GetInvM(),
+			*render_state->renderingRangeImage);
 
 	ImageTraversalEngine<TMemoryDeviceType>::template TraverseSampleWithPixelCoordinates(
 			render_state->noFwdProjMissingPoints, missing_point_indices, render_state->forwardProjection, raycast_missing_points_functor);

@@ -468,7 +468,7 @@ public: // member functions
 	}
 };
 
-template<typename TVoxel, typename TIndex, bool TModifyVisibilityInformation, MemoryDeviceType TMemoryDeviceType>
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 struct RaycastMissingPointsFunctor {
 private: // member variables
 	const Vector4f inverted_camera_projection_parameters;
@@ -502,6 +502,100 @@ public: // member functions
 		                               index_data, inverted_camera_pose, inverted_camera_projection_parameters,
 		                               voxel_size_reciprocal, truncation_distance,
 		                               pixel_ray_depth_range_data[ray_ranges_pixel_index]);
+	}
+};
+
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType, IRenderingEngine::RenderImageType TRenderImageType>
+struct RenderFromVolumeFunctor;
+
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+struct RenderFromVolumeFunctor_Base {
+protected: // member variables
+	Vector4u* pixels;
+	const Vector4f* raycast_points;
+	const TVoxel* voxels;
+	const typename TIndex::IndexData* index_data;
+	const Vector3f light_source;
+public: // member functions
+	RenderFromVolumeFunctor_Base(ORUtils::Image<Vector4u>& output_image, const ORUtils::Image<Vector4f>& raycast_points,
+	                             const VoxelVolume<TVoxel, TIndex>& volume, const Vector3f light_source)
+			: pixels(output_image.GetData(TMemoryDeviceType)), raycast_points(raycast_points.GetData(TMemoryDeviceType)),
+			  voxels(volume.GetVoxels()), index_data(volume.index.GetIndexData()), light_source(light_source) {}
+};
+
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+struct RenderFromVolumeFunctor<TVoxel, TIndex, TMemoryDeviceType, IRenderingEngine::RENDER_SHADED_GREYSCALE>
+		: public RenderFromVolumeFunctor_Base<TVoxel, TIndex, TMemoryDeviceType> {
+	using RenderFromVolumeFunctor_Base<TVoxel, TIndex, TMemoryDeviceType>::RenderFromVolumeFunctor_Base;
+	_DEVICE_WHEN_AVAILABLE_
+	inline void operator()(const int pixel_index, const int x, const int y) {
+		const Vector4f& raycast_point = this->raycast_points[pixel_index];
+		processPixelGrey<TVoxel, TIndex>(this->pixels[pixel_index], raycast_point.toVector3(), raycast_point.w > 0, this->voxels, this->index_data,
+		                                 this->light_source);
+	}
+};
+
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+struct RenderFromVolumeFunctor<TVoxel, TIndex, TMemoryDeviceType, IRenderingEngine::RENDER_COLOUR_FROM_VOLUME>
+		: public RenderFromVolumeFunctor_Base<TVoxel, TIndex, TMemoryDeviceType> {
+	using RenderFromVolumeFunctor_Base<TVoxel, TIndex, TMemoryDeviceType>::RenderFromVolumeFunctor_Base;
+	_DEVICE_WHEN_AVAILABLE_
+	inline void operator()(const int pixel_index, const int x, const int y) {
+		const Vector4f& raycast_point = this->raycast_points[pixel_index];
+		processPixelColour<TVoxel, TIndex>(this->pixels[pixel_index], raycast_point.toVector3(), raycast_point.w > 0, this->voxels, this->index_data);
+	}
+};
+
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+struct RenderFromVolumeFunctor<TVoxel, TIndex, TMemoryDeviceType, IRenderingEngine::RENDER_COLOUR_FROM_NORMAL>
+		: public RenderFromVolumeFunctor_Base<TVoxel, TIndex, TMemoryDeviceType> {
+	using RenderFromVolumeFunctor_Base<TVoxel, TIndex, TMemoryDeviceType>::RenderFromVolumeFunctor_Base;
+	_DEVICE_WHEN_AVAILABLE_
+	inline void operator()(const int pixel_index, const int x, const int y) {
+		const Vector4f& raycast_point = this->raycast_points[pixel_index];
+		processPixelNormal<TVoxel, TIndex>(this->pixels[pixel_index], raycast_point.toVector3(), raycast_point.w > 0, this->voxels, this->index_data,
+		                                   this->light_source);
+	}
+};
+
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+struct RenderFromVolumeFunctor<TVoxel, TIndex, TMemoryDeviceType, IRenderingEngine::RENDER_COLOUR_FROM_CONFIDENCE>
+		: public RenderFromVolumeFunctor_Base<TVoxel, TIndex, TMemoryDeviceType> {
+	using RenderFromVolumeFunctor_Base<TVoxel, TIndex, TMemoryDeviceType>::RenderFromVolumeFunctor_Base;
+	_DEVICE_WHEN_AVAILABLE_
+	inline void operator()(const int pixel_index, const int x, const int y) {
+		const Vector4f& raycast_point = this->raycast_points[pixel_index];
+		processPixelConfidence<TVoxel, TIndex>(this->pixels[pixel_index], raycast_point, raycast_point.w > 0, this->voxels, this->index_data,
+		                                       this->light_source);
+	}
+};
+
+template<MemoryDeviceType TMemoryDeviceType, bool TFlipNormals, IRenderingEngine::RenderImageType TRenderImageType>
+struct RenderFromRaycastFunctor;
+
+template<MemoryDeviceType TMemoryDeviceType, bool TFlipNormals>
+struct RenderFromRaycastFunctor_Base {
+protected: // member variables
+	Vector4u* pixels;
+	const Vector2i image_dimensions;
+	const Vector4f* raycast_points;
+	const float voxel_size;
+	const Vector3f light_source;
+public: // member functions
+	RenderFromRaycastFunctor_Base(ORUtils::Image<Vector4u>& output_image, const ORUtils::Image<Vector4f>& raycast_points,
+	                              float voxel_size, const Vector3f light_source)
+			: pixels(output_image.GetData(TMemoryDeviceType)), image_dimensions(output_image.dimensions),
+			  raycast_points(raycast_points.GetData(TMemoryDeviceType)),
+			  voxel_size(voxel_size), light_source(light_source) {}
+};
+
+template<MemoryDeviceType TMemoryDeviceType, bool TFlipNormals>
+struct RenderFromRaycastFunctor<TMemoryDeviceType, TFlipNormals, IRenderingEngine::RENDER_SHADED_GREYSCALE_IMAGENORMALS>
+		: public RenderFromRaycastFunctor_Base<TMemoryDeviceType, TFlipNormals> {
+	using RenderFromRaycastFunctor_Base<TMemoryDeviceType, TFlipNormals>::RenderFromRaycastFunctor_Base;
+	_DEVICE_WHEN_AVAILABLE_
+	inline void operator()(const int pixel_index, const int x, const int y) {
+		processPixelGrey_ImageNormals<true, TFlipNormals>(this->pixels, this->raycast_points, this->image_dimensions, x, y, this->voxel_size, this->light_source);
 	}
 };
 

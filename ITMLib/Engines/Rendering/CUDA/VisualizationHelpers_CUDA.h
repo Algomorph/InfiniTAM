@@ -152,8 +152,7 @@ __global__ void renderColourFromNormal_device(Vector4u* outRendering, const Vect
 
 	Vector4f ptRay = ptsRay[locId];
 
-	processPixelNormal<TVoxel, TIndex>(outRendering[locId], ptRay.toVector3(), ptRay.w > 0, voxelData, voxelIndex,
-	                                   lightSource);
+	processPixelNormal<TVoxel, TIndex>(outRendering[locId], ptRay.toVector3(), ptRay.w > 0, voxelData, voxelIndex, lightSource);
 }
 
 template<class TVoxel, class TIndex>

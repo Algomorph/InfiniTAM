@@ -30,9 +30,9 @@ public: // member functions
 	int CountVisibleBlocks(const VoxelVolume<TVoxel, TIndex>* volume, const RenderState* render_state, int min_block_list_id, int max_block_list_id) const override;
 	void CreateExpectedDepths(const VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics,
 	                          RenderState* render_state) const override;
-	void RenderImage(VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics,
+	void RenderImage(VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::SE3Pose* camera_pose, const Intrinsics* intrinsics,
 	                 const RenderState* render_state, UChar4Image* output_image,
-	                 IRenderingEngine::RenderImageType type, IRenderingEngine::RenderRaycastSelection raycast_type) const override;
+	                 IRenderingEngine::RenderImageType render_image_type, IRenderingEngine::RenderRaycastSelection raycast_source) const override;
 	void FindSurface(VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics,
 	                 const RenderState* render_state) const override;
 	void CreatePointCloud(VoxelVolume<TVoxel, TIndex>* volume, const View* view, CameraTrackingState* camera_tracking_state,

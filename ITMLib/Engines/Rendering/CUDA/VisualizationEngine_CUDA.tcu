@@ -199,67 +199,67 @@ static void GenericRaycast(VoxelVolume<TVoxel, TIndex>* volume, const Vector2i& 
 }
 
 template<class TVoxel, class TIndex>
-static void RenderImage_common(VoxelVolume<TVoxel, TIndex> *volume, const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, const RenderState *renderState,
-                               UChar4Image *outputImage, IRenderingEngine::RenderImageType type, IRenderingEngine::RenderRaycastSelection raycastType)
+static void RenderImage_common(VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::SE3Pose* camera_pose, const Intrinsics* intrinsics, const RenderState* render_state,
+                               UChar4Image* output_image, IRenderingEngine::RenderImageType render_type, IRenderingEngine::RenderRaycastSelection raycast_source)
 {
-	Vector2i imgSize = outputImage->dimensions;
-	Matrix4f invM = pose->GetInvM();
+	Vector2i output_image_size = output_image->dimensions;
+	Matrix4f inverted_camera_pose = camera_pose->GetInvM();
 
-	Vector4f *pointsRay;
-	if (raycastType == IRenderingEngine::RENDER_FROM_OLD_RAYCAST) {
-		pointsRay = renderState->raycastResult->GetData(MEMORYDEVICE_CUDA);
-	} else if (raycastType == IRenderingEngine::RENDER_FROM_OLD_FORWARDPROJ) {
-		pointsRay = renderState->forwardProjection->GetData(MEMORYDEVICE_CUDA);
+	Vector4f* raycast_points;
+	if (raycast_source == IRenderingEngine::RENDER_FROM_OLD_RAYCAST) {
+		raycast_points = render_state->raycastResult->GetData(MEMORYDEVICE_CUDA);
+	} else if (raycast_source == IRenderingEngine::RENDER_FROM_OLD_FORWARDPROJ) {
+		raycast_points = render_state->forwardProjection->GetData(MEMORYDEVICE_CUDA);
 	} else {
-		GenericRaycast(volume, imgSize, invM, intrinsics->projectionParamsSimple.all, renderState, false);
-		pointsRay = renderState->raycastResult->GetData(MEMORYDEVICE_CUDA);
+		GenericRaycast(volume, output_image_size, inverted_camera_pose, intrinsics->projectionParamsSimple.all, render_state, false);
+		raycast_points = render_state->raycastResult->GetData(MEMORYDEVICE_CUDA);
 	}
 
-	Vector3f lightSource = -Vector3f(invM.getColumn(2));
+	Vector3f light_source = -Vector3f(inverted_camera_pose.getColumn(2));
 
-	Vector4u *outRendering = outputImage->GetData(MEMORYDEVICE_CUDA);
+	Vector4u* rendered_pixels = output_image->GetData(MEMORYDEVICE_CUDA);
 
 	dim3 cudaBlockSize(8, 8);
-	dim3 gridSize((int)ceil((float)imgSize.x / (float)cudaBlockSize.x), (int)ceil((float)imgSize.y / (float)cudaBlockSize.y));
+	dim3 gridSize((int)ceil((float)output_image_size.x / (float)cudaBlockSize.x), (int)ceil((float)output_image_size.y / (float)cudaBlockSize.y));
 
-	if ((type == IRenderingEngine::RENDER_COLOUR_FROM_VOLUME) &&
-	    (!TVoxel::hasColorInformation)) type = IRenderingEngine::RENDER_SHADED_GREYSCALE;
+	if ((render_type == IRenderingEngine::RENDER_COLOUR_FROM_VOLUME) &&
+	    (!TVoxel::hasColorInformation)) render_type = IRenderingEngine::RENDER_SHADED_GREYSCALE;
 
-	switch (type) {
+	switch (render_type) {
 	case IRenderingEngine::RENDER_COLOUR_FROM_VOLUME:
-		renderColour_device<TVoxel, TIndex> <<<gridSize, cudaBlockSize>>>(outRendering, pointsRay, volume->GetVoxels(),
-		                                                                  volume->index.GetIndexData(), imgSize);
+		renderColour_device<TVoxel, TIndex> <<<gridSize, cudaBlockSize>>>(rendered_pixels, raycast_points, volume->GetVoxels(),
+		                                                                  volume->index.GetIndexData(), output_image_size);
 		ORcudaKernelCheck;
 		break;
 	case IRenderingEngine::RENDER_COLOUR_FROM_NORMAL:
-		renderColourFromNormal_device<TVoxel, TIndex> <<<gridSize, cudaBlockSize>>>(outRendering, pointsRay,
+		renderColourFromNormal_device<TVoxel, TIndex> <<<gridSize, cudaBlockSize>>>(rendered_pixels, raycast_points,
 		                                                                            volume->GetVoxels(),
-		                                                                            volume->index.GetIndexData(), imgSize, lightSource);
+		                                                                            volume->index.GetIndexData(), output_image_size, light_source);
 		ORcudaKernelCheck;
 		break;
 	case IRenderingEngine::RENDER_COLOUR_FROM_CONFIDENCE:
-		renderColourFromConfidence_device<TVoxel, TIndex> <<<gridSize, cudaBlockSize>>>(outRendering, pointsRay,
+		renderColourFromConfidence_device<TVoxel, TIndex> <<<gridSize, cudaBlockSize>>>(rendered_pixels, raycast_points,
 		                                                                                volume->GetVoxels(),
-		                                                                                volume->index.GetIndexData(), imgSize, lightSource);
+		                                                                                volume->index.GetIndexData(), output_image_size, light_source);
 		ORcudaKernelCheck;
 		break;
 	case IRenderingEngine::RENDER_SHADED_GREYSCALE_IMAGENORMALS:
 		if (intrinsics->FocalLengthSignsDiffer())
 		{
-			renderGrey_ImageNormals_device<true> <<<gridSize, cudaBlockSize>>>(outRendering, pointsRay, volume->GetParameters().voxel_size,
-			                                                                   imgSize, lightSource);
+			renderGrey_ImageNormals_device<true> <<<gridSize, cudaBlockSize>>>(rendered_pixels, raycast_points, volume->GetParameters().voxel_size,
+			                                                                   output_image_size, light_source);
 		}
 		else
 		{
-			renderGrey_ImageNormals_device<false> <<<gridSize, cudaBlockSize>>>(outRendering, pointsRay, volume->GetParameters().voxel_size,
-			                                                                    imgSize, lightSource);
+			renderGrey_ImageNormals_device<false> <<<gridSize, cudaBlockSize>>>(rendered_pixels, raycast_points, volume->GetParameters().voxel_size,
+			                                                                    output_image_size, light_source);
 		}
 		ORcudaKernelCheck;
 		break;
 	case IRenderingEngine::RENDER_SHADED_GREYSCALE:
 	default:
-		renderGrey_device<TVoxel, TIndex> <<<gridSize, cudaBlockSize>>>(outRendering, pointsRay, volume->GetVoxels(),
-		                                                                volume->index.GetIndexData(), imgSize, lightSource);
+		renderGrey_device<TVoxel, TIndex> <<<gridSize, cudaBlockSize>>>(rendered_pixels, raycast_points, volume->GetVoxels(),
+		                                                                volume->index.GetIndexData(), output_image_size, light_source);
 		ORcudaKernelCheck;
 		break;
 	}
