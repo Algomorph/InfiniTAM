@@ -368,8 +368,8 @@ set(
         Engines/Indexing/VBH/IndexingEngine_VoxelBlockHash_Internal.h
         Engines/Indexing/VBH/CPU/IndexingEngine_VoxelBlockHash_CPU.h
         Engines/Indexing/VBH/CUDA/IndexingEngine_VoxelBlockHash_CUDA_Kernels.h
-        Engines/Indexing/VBH/DIAGNOSTIC/IndexingEngine_VoxelBlockHash_DIAGNOSTIC.h
-        Engines/Indexing/VBH/OPTIMIZED/IndexingEngine_VoxelBlockHash_OPTIMIZED.h
+        Engines/Indexing/VBH/IndexingEngine_VoxelBlockHash_DIAGNOSTIC.h
+        Engines/Indexing/VBH/IndexingEngine_VoxelBlockHash_OPTIMIZED.h
 
         Engines/Indexing/IndexingEngineFactory.h
         Engines/Indexing/IndexingSettings.h

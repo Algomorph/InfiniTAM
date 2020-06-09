@@ -15,8 +15,8 @@
 //  ================================================================
 #pragma once
 
-#include "../IndexingEngine_VoxelBlockHash_Internal.h"
-#include "../../Shared/IndexingEngine_DiagnosticData.h"
+#include "IndexingEngine_VoxelBlockHash_Internal.h"
+#include "../Shared/IndexingEngine_DiagnosticData.h"
 
 namespace ITMLib{
 namespace internal{

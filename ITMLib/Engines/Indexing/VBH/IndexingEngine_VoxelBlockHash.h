@@ -18,8 +18,8 @@
 #include "../Interface/IndexingEngine.h"
 #include "../../../Utils/WarpType.h"
 #include "IndexingEngine_VoxelBlockHash_Internal.h"
-#include "DIAGNOSTIC/IndexingEngine_VoxelBlockHash_DIAGNOSTIC.h"
-#include "OPTIMIZED/IndexingEngine_VoxelBlockHash_OPTIMIZED.h"
+#include "IndexingEngine_VoxelBlockHash_DIAGNOSTIC.h"
+#include "IndexingEngine_VoxelBlockHash_OPTIMIZED.h"
 
 namespace ITMLib {
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
