@@ -13,8 +13,8 @@ This is an ongoing project that aims to integrate voxel hashing techniques for r
 
 ## How do I try this code out?
 
-1. You need to be somewhat well-versed in using CMake. 3rd-party requirements are all open-source, and you can glean what you're missing by running the CMake generator. The one mandatory requirement that I've added is Boost, which should be [compiled with zlib](https://stackoverflow.com/questions/23107703/compiling-boost-with-zlib-on-windows) if you're building on windows.
-2. Linux currently is the only officially supported OS, but I've recently fixed & tested the Windows build. All of the required CMake packages and this code in theory should work on any major platform, so you can try on MacOS at your own risk. Let me know if you'd like to fix things that are not working on your platform.
+1. The primary mandatory 3rd-party requirement that I've added is Boost. The Boost modules the code currently relies on are iostreams, program_options, and property_tree. The Boost library might be a bit of a hassle to build on Windows if you haven't done it before. All other dependeincies are handled automatically via CMake and shouldn't pose a problem. If you're building on a system without internet, there are CMake options to configure the system to build 3rd-party requirements directly from sources included in the repository.
+2. Linux currently is the only officially-supported OS, but I've recently fixed & tested the Windows build. All of the required CMake packages and this code in theory should work on any major platform, so you can try on MacOS at your own risk. Let me know if you'd like to fix things that are not working on your platform.
 3. I recommend building with FFMPEG, since that will enable visual debugging/video recording.
 4. To get some test data and try the code on it, download the [original Snoopy sequence](http://campar.in.tum.de/personal/slavcheva/deformable-dataset/index.html), modify Files/infinitam_snoopy_config.json with proper paths for input_and_output_settings_paths, and run like this (modify the path to point to infinitam_snoopy_config.json):
 
@@ -28,12 +28,12 @@ Yes, after a looong break, I'm officially switching to try to do something with 
 
 ## Will I merge this back into InfiniTAM?
 
-TLDR: Maybe.
+~TLDR: Maybe.~ NO.
 
-Originally, that was the plan. However, at the time of writing I'm exhausted from trying to stick to the open(for extension)-closed(for modification) principle. The code wasn't originally designed for dynamic-volume fusion, so some things really do need to change to make the new things more maintainable. I've already changed a lot of code from the original InfiniTAM codebase, IMHO, for the better.
+Originally, that was the plan. However, things have changed. A lot of things. The main and supporting libraries (right now still called, historically, ITMLib, ORUtils, and InputSource) contain at this point about 78000 lines of code. Only about 31000 of these come originally by the Oxford lab authors or people who derived from their code, or are not too heavily modified by yours truly. About 4000 of those are deprecated and are due for removal replacement by already-existing, newer and better code. Executables only contain about 500 or so lines of code that haven't been heavily modified or thrown out.
 
-If this fork achieves reasonable success, I'll reach out to the InfiniTAM authors and ask whether they'd like to work on integrating my changes into their codebase. I (hope that I) didn't break anything so far, but the original code lacks any hint of continuous integration, which I plan to add to it, at least for my code, shortly.
+~Many~Some portions of this code are still privy to the original Oxford University Innovation Academic License included within, please consult file headers for which license is used for which part of the code when considering reuse.
 
-Many portions of this code are still privy to the original Oxford University Innovation Academic License included within, consult file headers for which license is used for which part of the code.
+The current plan is to launch a separate repository based on all these sources, restructure and rename all the libraries within, and release everything under the Apache v2 license (almost no usage restrictions, mainly for proper attributions) and under my own copyright.
 
 Original InfiniTAM Repo & README: https://github.com/victorprad/InfiniTAM
