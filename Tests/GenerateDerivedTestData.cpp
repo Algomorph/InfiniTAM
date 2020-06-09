@@ -691,7 +691,7 @@ int main(int argc, char* argv[]) {
 			}
 			std::cout << std::endl;
 			std::cout << "For any of these, shorthands can be used, which are typically acronyms with some words omitted"
-			             ", e.g. \"suv\" can be used instead of \"SNOOPY_UNMASKED_VOLUMES\" and \"pva_mw\" instead of \"PVA_WARPED_VOLUMES\". "
+			             ", e.g. \"suv\" can be used instead of \"SNOOPY_UNMASKED_VOLUMES\" and \"pva_wv\" instead of \"PVA_WARPED_VOLUMES\". "
 			             "Don't be afraid to experiment." << std::endl;
 		} else {
 			GeneratedTestDataType chosen = string_to_enumerator<GeneratedTestDataType>(generated_data_type_argument);
