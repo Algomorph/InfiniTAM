@@ -91,7 +91,7 @@ protected: // static functions
 	template<typename TImageElement, typename TImage, typename TFunctor>
 	inline static void
 	TraverseWithPosition_Generic(const int sample_size, const int* sample_pixel_indices, TImage* image, TFunctor& functor) {
-		TImageElement* image_data = image->GetData(MEMORYDEVICE_CUDA);
+		TImageElement* image_data = image->GetData(MEMORYDEVICE_CPU);
 		const int image_width = image->dimensions.width;
 		BasicMemoryTraversalEngine<TJobCountPolicy, INDEX_SAMPLE>::Traverse_Generic(
 				sample_size, sample_pixel_indices,
@@ -105,7 +105,6 @@ protected: // static functions
 	template<typename TImageElement, typename TImage, typename TFunctor>
 	inline static void
 	TraversePositionOnly_Generic(const int sample_size, const int* sample_pixel_indices, TImage* image, TFunctor& functor) {
-		TImageElement* image_data = image->GetData(MEMORYDEVICE_CUDA);
 		const int image_width = image->dimensions.width;
 		BasicMemoryTraversalEngine<TJobCountPolicy, INDEX_SAMPLE>::Traverse_Generic(
 				sample_size, sample_pixel_indices,

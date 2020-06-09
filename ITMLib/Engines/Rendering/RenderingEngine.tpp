@@ -158,7 +158,7 @@ void RenderingEngine<TVoxel, TIndex, TMemoryDeviceType>::ForwardRender(
 
 	const Matrix4f depth_camera_pose = camera_tracking_state->pose_d->GetM();
 	const Vector4f& depth_camera_projection_parameters = view->calib.intrinsics_d.projectionParamsSimple.all;
-	int* missing_point_indices = render_state->fwdProjMissingPoints->GetData(MEMORYDEVICE_CUDA);
+	int* missing_point_indices = render_state->fwdProjMissingPoints->GetData(TMemoryDeviceType);
 	render_state->forwardProjection->Clear();
 
 	float voxel_size = volume->GetParameters().voxel_size;
