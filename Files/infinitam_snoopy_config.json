@@ -104,7 +104,7 @@
         "log_to_disk": true,
         "log_to_stdout": true,
         "log_benchmarks": true,
-        "log_volume_statistics": true,
+        "log_volume_statistics": false,
         "log_trajectory_quaternions": false,
         "log_surface_tracking_optimization_energies": false
     },
@@ -132,7 +132,6 @@
         "max_update_length_threshold": "9.99999997e-07",
         "momentum_weight": 0.5
     },
-    "skip_points": false,
     "create_meshing_engine": true,
     "device_type": "cuda",
     "use_approximate_raycast": false,
@@ -161,5 +160,8 @@
     },
     "indexing_settings": {
         "execution_mode": "optimized"
+    },
+    "rendering_settings": {
+        "skip_points": false
     }
 }

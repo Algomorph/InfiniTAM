@@ -132,8 +132,7 @@
         "max_update_length_threshold": 0.000199999995,
         "momentum_weight": 0.400000006
     },
-    "skip_points": true,
-    "create_meshing_engine": false,
+    "create_meshing_engine": true,
     "device_type": "cpu",
     "use_approximate_raycast": true,
     "use_threshold_filter": true,
@@ -161,5 +160,8 @@
     },
     "indexing_settings": {
         "execution_mode": "diagnostic"
+    },
+    "rendering_settings": {
+        "skip_points": true
     }
 }

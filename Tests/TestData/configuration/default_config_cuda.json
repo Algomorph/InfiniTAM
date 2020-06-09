@@ -132,7 +132,6 @@
         "max_update_length_threshold": "9.99999975e-05",
         "momentum_weight": 0.5
     },
-    "skip_points": false,
     "create_meshing_engine": true,
     "device_type": "cuda",
     "use_approximate_raycast": false,
@@ -161,5 +160,8 @@
     },
     "indexing_settings": {
         "execution_mode": "optimized"
+    },
+    "rendering_settings": {
+        "skip_points": false
     }
 }

@@ -128,8 +128,6 @@ BOOST_AUTO_TEST_CASE(Test_VolumeReduction_CountWeightRange_VBH_CUDA) {
 	GenerateRandomDepthWeightSubVolume<MEMORYDEVICE_CUDA>(&volume, different_weight_sub_volume_bounds,
 	                                                      different_range2);
 
-	volume.GetValueAt(0, 0, 0).print_self();
-
 	voxels_in_range = AnalyticsEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance()
 			.CountVoxelsWithDepthWeightInRange(&volume, different_range2);
 
@@ -187,8 +185,6 @@ BOOST_AUTO_TEST_CASE(Test_VolumeReduction_CountWeightRange_VBH_CUDA2) {
 			sub_volume_block_size.x * sub_volume_block_size.y * sub_volume_block_size.z;
 	GenerateRandomDepthWeightSubVolume<MEMORYDEVICE_CUDA>(&volume, different_weight_sub_volume_bounds,
 	                                                      different_range2);
-
-	volume.GetValueAt(0, 0, 0).print_self();
 
 	voxels_in_range = AnalyticsEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance()
 			.CountVoxelsWithDepthWeightInRange(&volume, different_range2);

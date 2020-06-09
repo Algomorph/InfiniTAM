@@ -30,6 +30,7 @@
 #include "../ITMLib/Utils/Configuration/Configuration.h"
 #include "../ITMLib/Engines/Indexing/IndexingSettings.h"
 #include "../ITMLib/Utils/Metacoding/DeferrableStructUtilities.h"
+#include "../ITMLib/Engines/Rendering/RenderingSettings.h"
 
 namespace pt = boost::property_tree;
 
@@ -40,14 +41,17 @@ using namespace test_utilities;
 struct DeferrableStructCollection {
 	TelemetrySettings telemetry_settings;
 	IndexingSettings indexing_settings;
+	RenderingSettings rendering_settings;
 
 	DeferrableStructCollection(const configuration::Configuration& source_configuration = configuration::get()) :
 			telemetry_settings(BuildDeferrableFromParentIfPresent<TelemetrySettings>(source_configuration)),
-			indexing_settings(BuildDeferrableFromParentIfPresent<IndexingSettings>(source_configuration)) {}
+			indexing_settings(BuildDeferrableFromParentIfPresent<IndexingSettings>(source_configuration)),
+			rendering_settings(BuildDeferrableFromParentIfPresent<RenderingSettings>(source_configuration)) {}
 
 	friend void RequireEqualDeferrables(const DeferrableStructCollection& l, const DeferrableStructCollection& r){
 		BOOST_REQUIRE_EQUAL(l.telemetry_settings, r.telemetry_settings);
 		BOOST_REQUIRE_EQUAL(l.indexing_settings, r.indexing_settings);
+		BOOST_REQUIRE_EQUAL(l.rendering_settings, r.rendering_settings);
 	}
 
 };
