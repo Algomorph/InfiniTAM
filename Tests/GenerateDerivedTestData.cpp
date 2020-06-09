@@ -506,11 +506,11 @@ void GenerateRenderingTestData_VoxelBlockHash() {
 		// find visible blocks, count visible blocks
 		fixture.rendering_engine->FindVisibleBlocks(volume, &pose, &fixture.calibration_data.intrinsics_d, fixture.render_state);
 		int range_visible_block_count1 = fixture.rendering_engine->CountVisibleBlocks(volume, fixture.render_state, block_address_range_bounds[0],
-		                                                                                         block_address_range_bounds[1]);
+		                                                                              block_address_range_bounds[1]);
 		int range_visible_block_count2 = fixture.rendering_engine->CountVisibleBlocks(volume, fixture.render_state, block_address_range_bounds[2],
-		                                                                                         block_address_range_bounds[3]);
+		                                                                              block_address_range_bounds[3]);
 		int range_visible_block_count3 = fixture.rendering_engine->CountVisibleBlocks(volume, fixture.render_state, block_address_range_bounds[4],
-		                                                                                         block_address_range_bounds[5]);
+		                                                                              block_address_range_bounds[5]);
 
 		pose_range_visible_block_counts1.push_back(range_visible_block_count1);
 		pose_range_visible_block_counts2.push_back(range_visible_block_count2);
@@ -526,7 +526,7 @@ void GenerateRenderingTestData_VoxelBlockHash() {
 		{
 			std::shared_ptr<RenderState> render_state_expected_depths = fixture.MakeRenderState();
 			fixture.rendering_engine->CreateExpectedDepths(volume, &pose, &fixture.calibration_data.intrinsics_d,
-			                                                          render_state_expected_depths.get());
+			                                               render_state_expected_depths.get());
 			ORUtils::MemoryBlockPersistence::SaveImage(range_images_file, *render_state_expected_depths->renderingRangeImage);
 		}
 
@@ -534,7 +534,7 @@ void GenerateRenderingTestData_VoxelBlockHash() {
 		{
 			std::shared_ptr<RenderState> render_state_find_surface = fixture.MakeRenderState();
 			fixture.rendering_engine->CreateExpectedDepths(volume, &pose, &fixture.calibration_data.intrinsics_d,
-			                                                          render_state_find_surface.get());
+			                                               render_state_find_surface.get());
 			fixture.rendering_engine->FindSurface(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state_find_surface.get());
 			ORUtils::MemoryBlockPersistence::SaveImage(raycast_images_file, *render_state_find_surface->raycastResult);
 		}
@@ -543,7 +543,7 @@ void GenerateRenderingTestData_VoxelBlockHash() {
 
 			std::shared_ptr<RenderState> render_state_create_point_cloud = fixture.MakeRenderState();
 			fixture.rendering_engine->CreateExpectedDepths(volume, &pose, &fixture.calibration_data.intrinsics_d,
-			                                                          render_state_create_point_cloud.get());
+			                                               render_state_create_point_cloud.get());
 			fixture.rendering_engine->CreatePointCloud(volume, fixture.view_17, tracking_state.get(), render_state_create_point_cloud.get());
 
 			point_cloud_images_file.OStream().write(reinterpret_cast<const char*>(&(tracking_state->pointCloud->noTotalPoints)),
@@ -557,7 +557,7 @@ void GenerateRenderingTestData_VoxelBlockHash() {
 			// colors -- interpreted as normals -- honestly, WTF, Oxford? Yeah, I'm blaming you, Oxford, you heard me! -- of the point cloud in the "tracking state")
 			std::shared_ptr<RenderState> render_state_create_ICP_maps = fixture.MakeRenderState();
 			fixture.rendering_engine->CreateExpectedDepths(volume, &pose, &fixture.calibration_data.intrinsics_d,
-			                                                          render_state_create_ICP_maps.get());
+			                                               render_state_create_ICP_maps.get());
 			fixture.rendering_engine->CreateICPMaps(volume, fixture.view_17, tracking_state.get(), render_state_create_ICP_maps.get());
 			ORUtils::MemoryBlockPersistence::SaveImage(ICP_images_file, *tracking_state->pointCloud->locations);
 			ORUtils::MemoryBlockPersistence::SaveImage(ICP_images_file, *tracking_state->pointCloud->colours);
@@ -578,11 +578,11 @@ void GenerateRenderingTestData_VoxelBlockHash() {
 			adjusted_pose.MultiplyWith(&adjustment);
 
 			fixture.rendering_engine->CreateExpectedDepths(volume, &adjusted_pose, &fixture.calibration_data.intrinsics_d,
-			                                                          render_state_forward_render.get());
+			                                               render_state_forward_render.get());
 			fixture.rendering_engine->FindSurface(volume, &adjusted_pose, &fixture.calibration_data.intrinsics_d,
-			                                                 render_state_forward_render.get());
+			                                      render_state_forward_render.get());
 			fixture.rendering_engine->ForwardRender(volume, fixture.view_17, tracking_state_forward_render.get(),
-			                                                   render_state_forward_render.get());
+			                                        render_state_forward_render.get());
 			forward_render_images_file.OStream().write(reinterpret_cast<const char*>(&(render_state_forward_render->noFwdProjMissingPoints)),
 			                                           sizeof(int));
 			ORUtils::MemoryBlockPersistence::SaveImage(forward_render_images_file, *render_state_forward_render->fwdProjMissingPoints);
@@ -593,30 +593,30 @@ void GenerateRenderingTestData_VoxelBlockHash() {
 		{
 			std::shared_ptr<RenderState> render_state_render_image = fixture.MakeRenderState();
 			fixture.rendering_engine->CreateExpectedDepths(volume, &pose, &fixture.calibration_data.intrinsics_d,
-			                                                          render_state_render_image.get());
+			                                               render_state_render_image.get());
 			fixture.rendering_engine->FindSurface(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state_render_image.get());
 
 
 			UChar4Image output_image(snoopy::frame_image_size, TMemoryDeviceType);
 			fixture.rendering_engine->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state_render_image.get(),
-			                                                 &output_image, IRenderingEngine::RenderImageType::RENDER_COLOUR_FROM_VOLUME,
-			                                                 IRenderingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
+			                                      &output_image, IRenderingEngine::RenderImageType::RENDER_COLOUR_FROM_VOLUME,
+			                                      IRenderingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
 			ORUtils::MemoryBlockPersistence::SaveImage(rendered_images_file, output_image);
 			fixture.rendering_engine->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state_render_image.get(),
-			                                                 &output_image, IRenderingEngine::RenderImageType::RENDER_COLOUR_FROM_NORMAL,
-			                                                 IRenderingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
+			                                      &output_image, IRenderingEngine::RenderImageType::RENDER_COLOUR_FROM_NORMAL,
+			                                      IRenderingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
 			ORUtils::MemoryBlockPersistence::SaveImage(rendered_images_file, output_image);
 			fixture.rendering_engine->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state_render_image.get(),
-			                                                 &output_image, IRenderingEngine::RenderImageType::RENDER_SHADED_GREYSCALE_IMAGENORMALS,
-			                                                 IRenderingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
+			                                      &output_image, IRenderingEngine::RenderImageType::RENDER_SHADED_GREYSCALE_IMAGENORMALS,
+			                                      IRenderingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
 			ORUtils::MemoryBlockPersistence::SaveImage(rendered_images_file, output_image);
 			fixture.rendering_engine->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state_render_image.get(),
-			                                                 &output_image, IRenderingEngine::RenderImageType::RENDER_SHADED_GREEN,
-			                                                 IRenderingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
+			                                      &output_image, IRenderingEngine::RenderImageType::RENDER_SHADED_GREEN,
+			                                      IRenderingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
 			ORUtils::MemoryBlockPersistence::SaveImage(rendered_images_file, output_image);
 			fixture.rendering_engine->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state_render_image.get(),
-			                                                 &output_image, IRenderingEngine::RenderImageType::RENDER_SHADED_OVERLAY,
-			                                                 IRenderingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
+			                                      &output_image, IRenderingEngine::RenderImageType::RENDER_SHADED_OVERLAY,
+			                                      IRenderingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
 			ORUtils::MemoryBlockPersistence::SaveImage(rendered_images_file, output_image);
 		}
 
@@ -632,10 +632,10 @@ void GenerateRenderingTestData_VoxelBlockHash() {
 
 #define GENERATED_TEST_DATA_TYPE_ENUM_DESCRIPTION GeneratedTestDataType, \
     (SNOOPY_UNMASKED_VOLUMES,    "SNOOPY_UNMASKED_VOLUMES", "snoopy_unmasked_volumes", "unmasked_volumes", "unmasked", "u", "su", "suv"), \
-    (MASKED_VOLUMES,             "SNOOPY_MASKED_VOLUMES", "snoopy_masked_volumes", "masked_volumes", "masked", "m", "sm", "smv"), \
-    (PVA_WARP_GRADIENTS,         "PVA_WARP_GRADIENTS", "pva_warp_gradients", "pva_warps", "pw", "pva_w"), \
-    (VBH_WARP_GRADIENTS,         "VBH_WARP_GRADIENTS", "vbh_warp_gradients", "vbh_warps", "vw", "vbh_w"), \
-    (COMPARATIVE_WARP_GRADIENTS, "COMPARATIVE_WARP_GRADIENTS", "comparative_warp_gradients", "warps", "comparative_warps", "w"), \
+    (MASKED_VOLUMES,             "SNOOPY_MASKED_VOLUMES", "snoopy_masked_volumes", "masked_volumes", "masked", "m", "sm", "smv", "mv"), \
+    (PVA_WARP_GRADIENTS,         "PVA_WARP_GRADIENTS", "pva_warp_gradients", "pva_warps", "pw", "pva_w", "pva_wg"), \
+    (VBH_WARP_GRADIENTS,         "VBH_WARP_GRADIENTS", "vbh_warp_gradients", "vbh_warps", "vw", "vbh_w", "pva_wg"), \
+    (COMPARATIVE_WARP_GRADIENTS, "COMPARATIVE_WARP_GRADIENTS", "comparative_warp_gradients", "warps", "comparative_warps", "w", "cw"), \
     (PVA_WARPED_VOLUMES,         "PVA_WARPED_VOLUMES", "pva_warped_volumes", "pva_wv"), \
     (VBH_WARPED_VOLUMES,         "VBH_WARPED_VOLUMES", "vbh_warped_volumes", "vbh_wv"), \
     (PVA_FUSED_VOLUMES,          "PVA_FUSED_VOLUMES", "pva_fused_volumes", "pva_fv"), \
@@ -674,10 +674,30 @@ int main(int argc, char* argv[]) {
 		}
 	} else {
 		std::string generated_data_type_argument = argv[1];
-		GeneratedTestDataType chosen = string_to_enumerator<GeneratedTestDataType>(generated_data_type_argument);
-		std::cout << "Generating data using the " << enumerator_to_string(chosen) << " generator." << std::endl;
-		generator_by_string[chosen]();
-
+		if (generated_data_type_argument == "h" || generated_data_type_argument == "help" || generated_data_type_argument == "-h" ||
+		    generated_data_type_argument == "-help") {
+			std::cout << "Generates derived data used for testing the library. " << std::endl;
+			std::cout << "Usage:" << std::endl << "generate_derived_test_data " << std::endl << "(runs all modes)  -- OR -- "
+			          << std::endl << "generate_derived_test_data <mode>" << std::endl <<
+			          ", where <mode> can be one of: " << std::endl;
+			int i_pair = 0;
+			for (auto& pair : generator_by_string) {
+				if (i_pair < generator_by_string.size() - 1) {
+					std::cout << enumerator_to_string(pair.first) << ", " << std::endl;
+				} else {
+					std::cout << "or " << enumerator_to_string(pair.first) << ".";
+				}
+				i_pair++;
+			}
+			std::cout << std::endl;
+			std::cout << "For any of these, shorthands can be used, which are typically acronyms with some words omitted"
+			             ", e.g. \"suv\" can be used instead of \"SNOOPY_UNMASKED_VOLUMES\" and \"pva_mw\" instead of \"PVA_WARPED_VOLUMES\". "
+			             "Don't be afraid to experiment." << std::endl;
+		} else {
+			GeneratedTestDataType chosen = string_to_enumerator<GeneratedTestDataType>(generated_data_type_argument);
+			std::cout << "Generating data using the " << enumerator_to_string(chosen) << " generator." << std::endl;
+			generator_by_string[chosen]();
+		}
 	}
 	return 0;
 }
