@@ -162,10 +162,6 @@ public: // member functions
 
 	_DEVICE_WHEN_AVAILABLE_
 	void operator()(const HashEntryAllocationState& hash_entry_state, const int hash_code) {
-		//_DEBUG alloc
-//		if(this->block_coordinates[hash_code] == Vector3s(153, 12, 14)){
-//			printf("Hello!");
-//		}
 		AllocateBlockBasedOnState<TMemoryDeviceType>(
 				hash_entry_state, hash_code, this->block_coordinates, this->hash_table,
 				this->last_free_voxel_block_id, this->last_free_excess_list_id, this->utilized_block_count,
@@ -281,10 +277,6 @@ public: // member functions
 		unresolvable_collision_encountered.UpdateDeviceFromHost();
 		colliding_block_positions_device = colliding_block_positions.GetData(TMemoryDeviceType);
 		INITIALIZE_ATOMIC(int, colliding_block_count, 0);
-		//DEBUG alloc
-		//inverted_depth_camera_pose.inv(inverted_camera_pose);
-//		inverted_projection_parameters.fx = 1.0f / inverted_projection_parameters.fx;
-//		inverted_projection_parameters.fy = 1.0f / inverted_projection_parameters.fy;
 	}
 
 	virtual ~DepthBasedAllocationStateMarkerFunctor() {
@@ -293,11 +285,6 @@ public: // member functions
 
 	_DEVICE_WHEN_AVAILABLE_
 	void operator()(const float& depth_measure, int x, int y) {
-		//DEBUG alloc
-//		if(x == 226 && y == 332){
-//			int i = 10;
-//		}
-
 		if (depth_measure <= 0 || (depth_measure - surface_distance_cutoff) < 0 ||
 		    (depth_measure - surface_distance_cutoff) < near_clipping_distance ||
 		    (depth_measure + surface_distance_cutoff) > far_clipping_distance)
@@ -436,11 +423,6 @@ public: // member functions
 	_DEVICE_WHEN_AVAILABLE_
 	void operator()(const float& surface1_depth, const Vector4f& surface2_point_world_space, const int x, const int y) {
 
-		//_DEBUG alloc
-//		if(x == 226 && y == 332){
-//			int i = 10;
-//		}
-
 		ITMLib::Segment march_segment;
 		if (!this->ComputeMarchSegment(march_segment, surface1_depth, surface2_point_world_space, x, y)) {
 			return;
@@ -491,28 +473,11 @@ public: // member functions
 		Vector4f surface1_point_camera_space(0.0f), surface2_point_camera_space(0.0f);
 		bool has_surface1, has_surface2;
 
-		//_DEBUG alloc
-//		if (x == 319 && y == 385) {
-//			int i = 10;
-//		}
-
 		if (!this->ComputeMarchSegment(march_segment, surface1_point_camera_space, surface2_point_camera_space,
 		                               has_surface1, has_surface2, surface1_depth, surface2_point_world_space, x, y)) {
 			device_diagnostic_data->SetPixelData(x, y, has_surface1, has_surface2, surface1_point_camera_space,
 			                                     surface2_point_world_space, march_segment);
 			return;
-		}
-
-		//_DEBUG alloc
-		if (x == 263 && y == 313) {
-			printf("Surface points for px 319, 385 while processing: %f, %f, %f to %f, %f, %f\n",
-			       surface1_point_camera_space.values[0], surface1_point_camera_space.values[1],
-			       surface1_point_camera_space.values[2],
-			       surface2_point_camera_space.values[0], surface2_point_camera_space.values[1],
-			       surface2_point_camera_space.values[2]);
-			printf("March segment for px 319, 385 while processing: %f, %f, %f to %f, %f, %f\n",
-			       march_segment.origin[0], march_segment.origin[1], march_segment.origin[2],
-			       march_segment.destination()[0], march_segment.destination()[1], march_segment.destination()[2]);
 		}
 
 		device_diagnostic_data->SetPixelData(x, y, has_surface1, has_surface2, surface1_point_camera_space,

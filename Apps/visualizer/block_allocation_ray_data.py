@@ -55,8 +55,6 @@ def read_block_allocation_ray_data(inverse_camera_matrices,
                                   dtype=np.float32).reshape(-1, float_layer_shape[-1])
             layers.append(layer)
 
-        # index = layers[1][:, 2] > 0.0
-        # _DEBUG alloc
         point_mask1 = layers[0]
         point_mask2 = layers[1]
         segment_mask = np.logical_or(layers[0], layers[1])
@@ -76,11 +74,6 @@ def read_block_allocation_ray_data(inverse_camera_matrices,
         # index_cols = [2, 0, 1] [:, index_cols]
         march_segment_endpoints = np.hstack((convert_block_to_metric(layers[4][segment_mask]),
                                              convert_block_to_metric(layers[5][segment_mask])))
-
-        # _DEBUG alloc
-        # over_24_cm = np.where(
-        #     (np.linalg.norm(march_segment_endpoints[:, 0:3] - march_segment_endpoints[:, 3:6], axis=1)) > 0.24)[0]
-        # print(len(over_24_cm))
 
         frame_ray_datasets.append(FrameBlockAllocationRayData(point_cloud1, point_cloud2,
                                                               march_segment_endpoints))

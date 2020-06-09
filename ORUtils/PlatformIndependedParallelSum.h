@@ -46,13 +46,6 @@ struct ParallelSum<MEMORYDEVICE_CPU>{
 	}
 };
 
-////_DEBUG alloc
-//#define __CUDACC__
-//#define __device__
-//#define __shared__
-//static int dummy() {}
-//#define __syncthreads dummy
-
 #if !defined(COMPILE_WITHOUT_CUDA) && defined(__CUDACC__)
 
 template <typename T>

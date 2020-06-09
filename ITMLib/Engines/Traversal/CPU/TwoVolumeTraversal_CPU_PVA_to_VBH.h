@@ -347,21 +347,6 @@ private:
 		Extent3Di central_extent;
 		std::vector<Extent3Di> border_extents = ComputeBoxSetOfHashAlignedCenterAndNonHashBlockAlignedArrayMargins(
 				*array_info, central_extent);
-		//_DEBUG alloc
-		int i_extent = 0;
-		int in_extent = -1;
-		Vector3i point(305, 314, 167);
-
-		for (auto& extent : border_extents) {
-			if (margin_extent_has_mismatch(extent)) return false;
-			in_extent = IsPointInBounds(point, extent) ? i_extent : in_extent;
-			i_extent++;
-		}
-
-		//_DEBUG alloc
-		bool in_central_extent = IsPointInBounds(point, central_extent);
-		Extent3Di array_extent = PVA_InfoToExtent(*array_info);
-		bool in_array = IsPointInBounds(point, array_extent);
 
 		return !central_extent_has_mismatch(central_extent);
 	}

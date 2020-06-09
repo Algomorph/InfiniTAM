@@ -49,29 +49,10 @@ TryToMarkBlockForAllocation(const Vector3s& block_position,
 			hash_entry_allocation_states,
 			hash_block_coordinates, block_position,
 			hash_table, colliding_block_positions, colliding_block_count);
-//_DEBUG allocation
-//#ifndef __CUDACC__
-//	std::unordered_set<Vector3s> debug_locations =
-//	{
-////	Vector3s(0,6,38), Vector3s(1,6,38)
-////	Vector3s(3,-1,73), Vector3s(10,-4,31), Vector3s(-3,3,24)
-////		Vector3s(10, -4, 31)
-//		Vector3s(-4, 3, 21)
-//	};
-//#endif
 
 	if (resulting_status == BEING_MODIFIED_BY_ANOTHER_THREAD) {
 		unresolvable_collision_encountered = true;
 	}
-
-//_DEBUG allocation
-//#ifndef __CUDACC__
-//	else if (debug_locations.find(block_position) != debug_locations.end() &&
-//	         (resulting_status == MARK_FOR_ALLOCATION_IN_EXCESS_LIST ||
-//	          resulting_status == MARK_FOR_ALLOCATION_IN_ORDERED_LIST)) {
-//		int i = 0;
-//	}
-//#endif
 }
 
 _DEVICE_WHEN_AVAILABLE_ inline void

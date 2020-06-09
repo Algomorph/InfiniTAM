@@ -60,10 +60,10 @@ public:
 				}
 				std::vector<Vector3s>& position_for_hash_list = position_by_hash[hash_code];
 				int position_count = (static_cast<int>((*row_iter).size()) - 1) / 3;
-				for (int i_positon = 0; i_positon < position_count; i_positon++) {
-					Vector3s block_position(std::stoi((*row_iter)[(i_positon * 3 + 0) + 1]),
-					                        std::stoi((*row_iter)[(i_positon * 3 + 1) + 1]),
-					                        std::stoi((*row_iter)[(i_positon * 3 + 2) + 1]));
+				for (int i_position = 0; i_position < position_count; i_position++) {
+					Vector3s block_position(std::stoi((*row_iter)[(i_position * 3 + 0) + 1]),
+					                        std::stoi((*row_iter)[(i_position * 3 + 1) + 1]),
+					                        std::stoi((*row_iter)[(i_position * 3 + 2) + 1]));
 					if (hash_bucket_by_position.find(block_position) != hash_bucket_by_position.end()) {
 						std::cerr << "Filtering duplicate position " << block_position
 						          << ", currently listed under hash code " << hash_code
@@ -86,9 +86,8 @@ public:
 		}
 
 		std::random_device rd;
-		//_DEBUG alloc
-		//seed = rd();
-		seed = 2567557357;
+
+		seed = rd();
 		std::mt19937 gen(seed);
 		std::shuffle(block_positions.begin(), block_positions.end(), gen);
 
