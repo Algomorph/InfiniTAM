@@ -30,7 +30,7 @@ Yes, after a looong break, I'm officially switching to try to do something with 
 
 ~TLDR: Maybe.~ NO.
 
-Originally, that was the plan. However, things have changed. A lot of things. The main and supporting libraries (right now still called, historically, ITMLib, ORUtils, and InputSource) contain at this point about 78000 lines of code. Only about 31000 of these come originally by the Oxford lab authors or people who derived from their code, or are not too heavily modified by yours truly. About 4000 of those are deprecated and are due for removal replacement by already-existing, newer and better code. Executables only contain about 500 or so lines of code that haven't been heavily modified or thrown out.
+Originally, that was the plan. However, things have changed. A lot of things. The main and supporting libraries (right now still called, historically, ITMLib, ORUtils, and InputSource) contain at this point about 78000 lines of code. Only about 31000 of these come originally by the Oxford lab authors or people who derived from their code, or are not too heavily modified by yours truly. About 4000 of those are deprecated and are due for removal replacement by already-existing, newer and better code. Executables only contain about 500 or so lines of code that haven't been heavily modified or thrown out. In addition, the repository includes about 9000 lines of test code (at time of writing) and some Python-based tools for visual debugging, which are entirely new.
 
 ~Many~Some portions of this code are still privy to the original Oxford University Innovation Academic License included within, please consult file headers for which license is used for which part of the code when considering reuse.
 
