@@ -1,4 +1,5 @@
 // Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
+// Modified code: Copyright 2020 Gregory Kramida
 
 #pragma once
 
@@ -20,8 +21,7 @@ namespace ORUtils {
  * \brief This class provides functions for loading and saving memory blocks.
  */
 class MemoryBlockPersistence {
-	//#################### PUBLIC STATIC MEMBER FUNCTIONS ####################
-public:
+public: // static functions
 	/**
 	 * \brief Loads data from a file on disk into a memory block.
 	 *
@@ -186,19 +186,6 @@ public:
 	 * \param block             The memory block to save.
 	 * \param memory_type       The type of memory device from which to save the data.
 	 */
-	template<typename T, typename TOStreamWrapper>
-	static void SaveMemoryBlock(TOStreamWrapper& file, const ORUtils::MemoryBlock<T>& block,
-	                            MemoryDeviceType memory_type) {
-		SaveArray<T, ORUtils::MemoryBlock<T>, TOStreamWrapper>(file, block, memory_type);
-	}
-
-	/**
-	 * \brief Saves a memory block to a file on disk.
-	 *
-	 * \param file          	Successfully-opened handle to the file
-	 * \param block             The memory block to save.
-	 * \param memory_type       The type of memory device from which to save the data.
-	 */
 	template<typename T>
 	static void SaveMemoryBlock(OStreamWrapper& file, const ORUtils::MemoryBlock<T>& block) {
 		SaveArray<T, ORUtils::MemoryBlock<T>>(file, block, block.GetAccessMode());
@@ -216,11 +203,7 @@ public:
 		SaveArray<T, ORUtils::Image<T>>(file, image, image.GetAccessMode());
 	}
 
-
-	//#################### PRIVATE STATIC MEMBER FUNCTIONS ####################
-private:
-
-
+private: // static functions
 	/**
 	 * \brief Attempts to read data into a memory block or image allocated on the CPU from an input stream.
 	 *
@@ -356,4 +339,127 @@ private:
 		}
 	}
 };
-}
+
+
+template<typename T> class Vector2;
+template<typename T> class Vector3;
+template<typename T> class Vector4;
+template<typename T> class Vector6;
+
+extern template void MemoryBlockPersistence::SaveImage<bool>(OStreamWrapper& file, const ORUtils::Image<bool>& image);
+extern template void MemoryBlockPersistence::SaveImage<char>(OStreamWrapper& file, const ORUtils::Image<char>& image);
+extern template void MemoryBlockPersistence::SaveImage<unsigned char>(OStreamWrapper& file, const ORUtils::Image<unsigned char>& image);
+extern template void MemoryBlockPersistence::SaveImage<short>(OStreamWrapper& file, const ORUtils::Image<short>& image);
+extern template void MemoryBlockPersistence::SaveImage<unsigned short>(OStreamWrapper& file, const ORUtils::Image<unsigned short>& image);
+extern template void MemoryBlockPersistence::SaveImage<int>(OStreamWrapper& file, const ORUtils::Image<int>& image);
+extern template void MemoryBlockPersistence::SaveImage<unsigned int>(OStreamWrapper& file, const ORUtils::Image<unsigned int>& image);
+extern template void MemoryBlockPersistence::SaveImage<long>(OStreamWrapper& file, const ORUtils::Image<long>& image);
+extern template void MemoryBlockPersistence::SaveImage<unsigned long>(OStreamWrapper& file, const ORUtils::Image<unsigned long>& image);
+extern template void MemoryBlockPersistence::SaveImage<long long>(OStreamWrapper& file, const ORUtils::Image<long long>& image);
+extern template void MemoryBlockPersistence::SaveImage<unsigned long long>(OStreamWrapper& file, const ORUtils::Image<unsigned long long>& image);
+extern template void MemoryBlockPersistence::SaveImage<float>(OStreamWrapper& file, const ORUtils::Image<float>& image);
+extern template void MemoryBlockPersistence::SaveImage<double>(OStreamWrapper& file, const ORUtils::Image<double>& image);
+
+extern template void MemoryBlockPersistence::SaveImage<Vector2<unsigned char>>(OStreamWrapper& file, const ORUtils::Image<Vector2<unsigned char>>& image);
+extern template void MemoryBlockPersistence::SaveImage<Vector2<short>>(OStreamWrapper& file, const ORUtils::Image<Vector2<short>>& image);
+extern template void MemoryBlockPersistence::SaveImage<Vector2<int>>(OStreamWrapper& file, const ORUtils::Image<Vector2<int>>& image);
+extern template void MemoryBlockPersistence::SaveImage<Vector2<float>>(OStreamWrapper& file, const ORUtils::Image<Vector2<float>>& image);
+
+extern template void MemoryBlockPersistence::SaveImage<Vector3<unsigned char>>(OStreamWrapper& file, const ORUtils::Image<Vector3<unsigned char>>& image);
+extern template void MemoryBlockPersistence::SaveImage<Vector3<short>>(OStreamWrapper& file, const ORUtils::Image<Vector3<short>>& image);
+extern template void MemoryBlockPersistence::SaveImage<Vector3<int>>(OStreamWrapper& file, const ORUtils::Image<Vector3<int>>& image);
+extern template void MemoryBlockPersistence::SaveImage<Vector3<float>>(OStreamWrapper& file, const ORUtils::Image<Vector3<float>>& image);
+
+extern template void MemoryBlockPersistence::SaveImage<Vector4<unsigned char>>(OStreamWrapper& file, const ORUtils::Image<Vector4<unsigned char>>& image);
+extern template void MemoryBlockPersistence::SaveImage<Vector4<short>>(OStreamWrapper& file, const ORUtils::Image<Vector4<short>>& image);
+extern template void MemoryBlockPersistence::SaveImage<Vector4<int>>(OStreamWrapper& file, const ORUtils::Image<Vector4<int>>& image);
+extern template void MemoryBlockPersistence::SaveImage<Vector4<float>>(OStreamWrapper& file, const ORUtils::Image<Vector4<float>>& image);
+
+extern template ORUtils::Image<bool> MemoryBlockPersistence::LoadImage<bool>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+extern template ORUtils::Image<char> MemoryBlockPersistence::LoadImage<char>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+extern template ORUtils::Image<unsigned char> MemoryBlockPersistence::LoadImage<unsigned char>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+extern template ORUtils::Image<short> MemoryBlockPersistence::LoadImage<short>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+extern template ORUtils::Image<unsigned short> MemoryBlockPersistence::LoadImage<unsigned short>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+extern template ORUtils::Image<int> MemoryBlockPersistence::LoadImage<int>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+extern template ORUtils::Image<unsigned int> MemoryBlockPersistence::LoadImage<unsigned int>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+extern template ORUtils::Image<long> MemoryBlockPersistence::LoadImage<long>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+extern template ORUtils::Image<unsigned long> MemoryBlockPersistence::LoadImage<unsigned long>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+extern template ORUtils::Image<long long> MemoryBlockPersistence::LoadImage<long long>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+extern template ORUtils::Image<unsigned long long> MemoryBlockPersistence::LoadImage<unsigned long long>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+extern template ORUtils::Image<float> MemoryBlockPersistence::LoadImage<float>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+extern template ORUtils::Image<double> MemoryBlockPersistence::LoadImage<double>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+
+extern template ORUtils::Image<Vector2<unsigned char>> MemoryBlockPersistence::LoadImage<Vector2<unsigned char>>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+extern template ORUtils::Image<Vector2<short>> MemoryBlockPersistence::LoadImage<Vector2<short>>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+extern template ORUtils::Image<Vector2<int>> MemoryBlockPersistence::LoadImage<Vector2<int>>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+extern template ORUtils::Image<Vector2<float>> MemoryBlockPersistence::LoadImage<Vector2<float>>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+
+extern template ORUtils::Image<Vector3<unsigned char>> MemoryBlockPersistence::LoadImage<Vector3<unsigned char>>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+extern template ORUtils::Image<Vector3<short>> MemoryBlockPersistence::LoadImage<Vector3<short>>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+extern template ORUtils::Image<Vector3<int>> MemoryBlockPersistence::LoadImage<Vector3<int>>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+extern template ORUtils::Image<Vector3<float>> MemoryBlockPersistence::LoadImage<Vector3<float>>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+
+extern template ORUtils::Image<Vector4<unsigned char>> MemoryBlockPersistence::LoadImage<Vector4<unsigned char>>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+extern template ORUtils::Image<Vector4<short>> MemoryBlockPersistence::LoadImage<Vector4<short>>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+extern template ORUtils::Image<Vector4<int>> MemoryBlockPersistence::LoadImage<Vector4<int>>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+extern template ORUtils::Image<Vector4<float>> MemoryBlockPersistence::LoadImage<Vector4<float>>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+
+extern template void MemoryBlockPersistence::SaveMemoryBlock<bool>(OStreamWrapper& file, const ORUtils::MemoryBlock<bool>& image);
+extern template void MemoryBlockPersistence::SaveMemoryBlock<char>(OStreamWrapper& file, const ORUtils::MemoryBlock<char>& image);
+extern template void MemoryBlockPersistence::SaveMemoryBlock<unsigned char>(OStreamWrapper& file, const ORUtils::MemoryBlock<unsigned char>& image);
+extern template void MemoryBlockPersistence::SaveMemoryBlock<short>(OStreamWrapper& file, const ORUtils::MemoryBlock<short>& image);
+extern template void MemoryBlockPersistence::SaveMemoryBlock<unsigned short>(OStreamWrapper& file, const ORUtils::MemoryBlock<unsigned short>& image);
+extern template void MemoryBlockPersistence::SaveMemoryBlock<int>(OStreamWrapper& file, const ORUtils::MemoryBlock<int>& image);
+extern template void MemoryBlockPersistence::SaveMemoryBlock<unsigned int>(OStreamWrapper& file, const ORUtils::MemoryBlock<unsigned int>& image);
+extern template void MemoryBlockPersistence::SaveMemoryBlock<long>(OStreamWrapper& file, const ORUtils::MemoryBlock<long>& image);
+extern template void MemoryBlockPersistence::SaveMemoryBlock<unsigned long>(OStreamWrapper& file, const ORUtils::MemoryBlock<unsigned long>& image);
+extern template void MemoryBlockPersistence::SaveMemoryBlock<long long>(OStreamWrapper& file, const ORUtils::MemoryBlock<long long>& image);
+extern template void MemoryBlockPersistence::SaveMemoryBlock<unsigned long long>(OStreamWrapper& file, const ORUtils::MemoryBlock<unsigned long long>& image);
+extern template void MemoryBlockPersistence::SaveMemoryBlock<float>(OStreamWrapper& file, const ORUtils::MemoryBlock<float>& image);
+extern template void MemoryBlockPersistence::SaveMemoryBlock<double>(OStreamWrapper& file, const ORUtils::MemoryBlock<double>& image);
+
+extern template void MemoryBlockPersistence::SaveMemoryBlock<Vector2<unsigned char>>(OStreamWrapper& file, const ORUtils::MemoryBlock<Vector2<unsigned char>>& image);
+extern template void MemoryBlockPersistence::SaveMemoryBlock<Vector2<short>>(OStreamWrapper& file, const ORUtils::MemoryBlock<Vector2<short>>& image);
+extern template void MemoryBlockPersistence::SaveMemoryBlock<Vector2<int>>(OStreamWrapper& file, const ORUtils::MemoryBlock<Vector2<int>>& image);
+extern template void MemoryBlockPersistence::SaveMemoryBlock<Vector2<float>>(OStreamWrapper& file, const ORUtils::MemoryBlock<Vector2<float>>& image);
+
+extern template void MemoryBlockPersistence::SaveMemoryBlock<Vector3<unsigned char>>(OStreamWrapper& file, const ORUtils::MemoryBlock<Vector3<unsigned char>>& image);
+extern template void MemoryBlockPersistence::SaveMemoryBlock<Vector3<short>>(OStreamWrapper& file, const ORUtils::MemoryBlock<Vector3<short>>& image);
+extern template void MemoryBlockPersistence::SaveMemoryBlock<Vector3<int>>(OStreamWrapper& file, const ORUtils::MemoryBlock<Vector3<int>>& image);
+extern template void MemoryBlockPersistence::SaveMemoryBlock<Vector3<float>>(OStreamWrapper& file, const ORUtils::MemoryBlock<Vector3<float>>& image);
+
+extern template void MemoryBlockPersistence::SaveMemoryBlock<Vector4<unsigned char>>(OStreamWrapper& file, const ORUtils::MemoryBlock<Vector4<unsigned char>>& image);
+extern template void MemoryBlockPersistence::SaveMemoryBlock<Vector4<short>>(OStreamWrapper& file, const ORUtils::MemoryBlock<Vector4<short>>& image);
+extern template void MemoryBlockPersistence::SaveMemoryBlock<Vector4<int>>(OStreamWrapper& file, const ORUtils::MemoryBlock<Vector4<int>>& image);
+extern template void MemoryBlockPersistence::SaveMemoryBlock<Vector4<float>>(OStreamWrapper& file, const ORUtils::MemoryBlock<Vector4<float>>& image);
+
+extern template ORUtils::MemoryBlock<bool> MemoryBlockPersistence::LoadMemoryBlock<bool>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+extern template ORUtils::MemoryBlock<char> MemoryBlockPersistence::LoadMemoryBlock<char>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+extern template ORUtils::MemoryBlock<unsigned char> MemoryBlockPersistence::LoadMemoryBlock<unsigned char>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+extern template ORUtils::MemoryBlock<short> MemoryBlockPersistence::LoadMemoryBlock<short>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+extern template ORUtils::MemoryBlock<unsigned short> MemoryBlockPersistence::LoadMemoryBlock<unsigned short>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+extern template ORUtils::MemoryBlock<int> MemoryBlockPersistence::LoadMemoryBlock<int>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+extern template ORUtils::MemoryBlock<unsigned int> MemoryBlockPersistence::LoadMemoryBlock<unsigned int>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+extern template ORUtils::MemoryBlock<long> MemoryBlockPersistence::LoadMemoryBlock<long>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+extern template ORUtils::MemoryBlock<unsigned long> MemoryBlockPersistence::LoadMemoryBlock<unsigned long>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+extern template ORUtils::MemoryBlock<long long> MemoryBlockPersistence::LoadMemoryBlock<long long>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+extern template ORUtils::MemoryBlock<unsigned long long> MemoryBlockPersistence::LoadMemoryBlock<unsigned long long>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+extern template ORUtils::MemoryBlock<float> MemoryBlockPersistence::LoadMemoryBlock<float>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+extern template ORUtils::MemoryBlock<double> MemoryBlockPersistence::LoadMemoryBlock<double>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+
+extern template ORUtils::MemoryBlock<Vector2<unsigned char>> MemoryBlockPersistence::LoadMemoryBlock<Vector2<unsigned char>>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+extern template ORUtils::MemoryBlock<Vector2<short>> MemoryBlockPersistence::LoadMemoryBlock<Vector2<short>>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+extern template ORUtils::MemoryBlock<Vector2<int>> MemoryBlockPersistence::LoadMemoryBlock<Vector2<int>>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+extern template ORUtils::MemoryBlock<Vector2<float>> MemoryBlockPersistence::LoadMemoryBlock<Vector2<float>>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+
+extern template ORUtils::MemoryBlock<Vector3<unsigned char>> MemoryBlockPersistence::LoadMemoryBlock<Vector3<unsigned char>>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+extern template ORUtils::MemoryBlock<Vector3<short>> MemoryBlockPersistence::LoadMemoryBlock<Vector3<short>>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+extern template ORUtils::MemoryBlock<Vector3<int>> MemoryBlockPersistence::LoadMemoryBlock<Vector3<int>>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+extern template ORUtils::MemoryBlock<Vector3<float>> MemoryBlockPersistence::LoadMemoryBlock<Vector3<float>>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+
+extern template ORUtils::MemoryBlock<Vector4<unsigned char>> MemoryBlockPersistence::LoadMemoryBlock<Vector4<unsigned char>>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+extern template ORUtils::MemoryBlock<Vector4<short>> MemoryBlockPersistence::LoadMemoryBlock<Vector4<short>>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+extern template ORUtils::MemoryBlock<Vector4<int>> MemoryBlockPersistence::LoadMemoryBlock<Vector4<int>>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+extern template ORUtils::MemoryBlock<Vector4<float>> MemoryBlockPersistence::LoadMemoryBlock<Vector4<float>>(IStreamWrapper& file,  MemoryDeviceType memory_device_type);
+
+} // namespace ORUtils

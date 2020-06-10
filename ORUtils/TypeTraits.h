@@ -26,13 +26,55 @@ struct TypeTraits<bool>{
 	static constexpr int element_count = 1;
 };
 template<>
+struct TypeTraits<char>{
+	static constexpr int element_count = 1;
+};
+template<>
+struct TypeTraits<unsigned char>{
+	static constexpr int element_count = 1;
+};
+template<>
 struct TypeTraits<short>{
+	static constexpr int element_count = 1;
+};
+template<>
+struct TypeTraits<unsigned short>{
 	static constexpr int element_count = 1;
 };
 template<>
 struct TypeTraits<int>{
 	static constexpr int element_count = 1;
 };
+template<>
+struct TypeTraits<unsigned int>{
+	static constexpr int element_count = 1;
+};
+template<>
+struct TypeTraits<long>{
+	static constexpr int element_count = 1;
+};
+template<>
+struct TypeTraits<unsigned long>{
+	static constexpr int element_count = 1;
+};
+template<>
+struct TypeTraits<long long>{
+	static constexpr int element_count = 1;
+};
+template<>
+struct TypeTraits<unsigned long long>{
+	static constexpr int element_count = 1;
+};
+template<>
+struct TypeTraits<float>{
+	static constexpr int element_count = 1;
+};
+template<>
+struct TypeTraits<double>{
+	static constexpr int element_count = 1;
+};
+
+
 
 template<typename T>
 struct TypeTraits<Vector2<T>>{
