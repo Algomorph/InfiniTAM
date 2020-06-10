@@ -34,6 +34,7 @@
 #include "../../ITMLib/Utils/Analytics/BenchmarkUtilities.h"
 #include "../../ITMLib/Utils/Logging/Logging.h"
 #include "../../ITMLib/Engines/Telemetry/TelemetryRecorderLegacy.h"
+#include "../../ITMLib/Utils/Configuration/AutomaticRunSettings.h"
 
 #ifdef WITH_OPENCV
 #include <opencv2/imgcodecs.hpp>
@@ -74,13 +75,18 @@ void UIEngine_BPO::Initialize(int& argc, char** argv,
                               const configuration::Configuration& configuration) {
 	this->indexing_method = configuration.indexing_method;
 
-	this->save_after_automatic_run = configuration.automatic_run_settings.save_volumes_after_processing;
-	this->exit_after_automatic_run = configuration.automatic_run_settings.exit_after_automatic_processing;
+	//TODO: just use automatic_run_settings as member directly instead of copying stuff over.
+	AutomaticRunSettings automatic_run_settings = ExtractSerializableStructFromPtreeIfPresent<AutomaticRunSettings>(configuration.source_tree,
+	                                                                                                                AutomaticRunSettings::default_parse_path,
+	                                                                                                                configuration.origin);
+
+	this->save_after_automatic_run = automatic_run_settings.save_volumes_and_camera_matrix_after_processing;
+	this->exit_after_automatic_run = automatic_run_settings.exit_after_automatic_processing;
 
 	this->freeview_active = true;
 	this->integration_active = true;
 	this->current_colour_mode = 0;
-	this->number_of_frames_to_process_after_launch = configuration.automatic_run_settings.number_of_frames_to_process;
+	this->number_of_frames_to_process_after_launch = automatic_run_settings.number_of_frames_to_process;
 
 	this->colourModes_main.emplace_back("shaded greyscale", MainEngine::InfiniTAM_IMAGE_SCENERAYCAST);
 	this->colourModes_main.emplace_back("integrated colours", MainEngine::InfiniTAM_IMAGE_COLOUR_FROM_VOLUME);
@@ -165,9 +171,9 @@ void UIEngine_BPO::Initialize(int& argc, char** argv,
 	sdkCreateTimer(&timer_average);
 
 	sdkResetTimer(&timer_average);
-	if (configuration.automatic_run_settings.index_of_frame_to_start_at > 0) {
-		printf("Skipping the first %d frames.\n", configuration.automatic_run_settings.index_of_frame_to_start_at);
-		SkipFrames(configuration.automatic_run_settings.index_of_frame_to_start_at);
+	if (automatic_run_settings.index_of_frame_to_start_at > 0) {
+		printf("Skipping the first %d frames.\n", automatic_run_settings.index_of_frame_to_start_at);
+		SkipFrames(automatic_run_settings.index_of_frame_to_start_at);
 	}
 
 	mainLoopAction = number_of_frames_to_process_after_launch ? PROCESS_N_FRAMES : PROCESS_PAUSED;
@@ -178,7 +184,7 @@ void UIEngine_BPO::Initialize(int& argc, char** argv,
 		this->reconstructionVideoWriter = new FFMPEGWriter();
 	}
 
-	if (configuration.automatic_run_settings.load_volume_before_processing) {
+	if (automatic_run_settings.load_volume_and_camera_matrix_before_processing) {
 		std::string frame_path = this->GenerateCurrentFrameOutputPath();
 		main_engine->LoadFromFile(frame_path);
 		SkipFrames(1);

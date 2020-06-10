@@ -102,14 +102,7 @@ DECLARE_SERIALIZABLE_ENUM(VOLUME_ROLE_ENUM_DESCRIPTION);
 DECLARE_SERIALIZABLE_STRUCT(PATHS_STRUCT_DESCRIPTION);
 
 
-#define AUTOMATIC_RUN_SETTINGS_STRUCT_DESCRIPTION AutomaticRunSettings, \
-    (int, number_of_frames_to_process, 0, PRIMITIVE, "This number of frames will be processed automatically after the program is launched (launches automatic run)."), \
-    (int, index_of_frame_to_start_at, 0, PRIMITIVE, "Index of the first frame (or frame set) to read from disk (or, how many frames to skip). The remaining frames will be read in order."), \
-    (bool, load_volume_before_processing, false, PRIMITIVE, "When this is set to true, the program will attempt to load the volume for the index_of_frame_to_start_with from the corresponding subfolder within output_folder."), \
-    (bool, save_volumes_after_processing, false, PRIMITIVE, "Whether to save volume(s) after automatic processing"), \
-    (bool, exit_after_automatic_processing, false, PRIMITIVE, "Whether to exit the program after the automatic run.")
 
-DECLARE_SERIALIZABLE_STRUCT(AUTOMATIC_RUN_SETTINGS_STRUCT_DESCRIPTION);
 
 
 struct TrackerConfigurationStringPresets {
@@ -167,7 +160,6 @@ DECLARE_SERIALIZABLE_STRUCT(SPECIFIC_VOLUME_PARAMETERS_STRUCT_DESCRIPTION);
     (SlavchevaSurfaceTracker::Switches, slavcheva_switches, SlavchevaSurfaceTracker::Switches(), STRUCT,"Switches pertaining to optimization for dynamic surface tracking."),\
     (LoggingSettings, logging_settings, LoggingSettings(), STRUCT, "Logging settings"),\
     (Paths, paths, Paths(), STRUCT,"Input / output paths"),\
-    (AutomaticRunSettings, automatic_run_settings, AutomaticRunSettings(), STRUCT, "Settings that dictate how the experiment is run, i.e. such as how much data to process automatically, how to behave after the automatic run, etc."),\
     (NonRigidTrackingParameters, non_rigid_tracking_parameters, NonRigidTrackingParameters(), STRUCT,"Parameters pertaining to stopping conditions, gradient functor type, and momentum weight that are used for dynamic surface tracking."),\
     (bool, create_meshing_engine, true, PRIMITIVE, "Create all the things required for marching cubes and mesh extraction (uses lots of additional memory)"),\
     (MemoryDeviceType, device_type, DEFAULT_DEVICE, ENUM, "Type of device to use, i.e. CPU/GPU/Metal"),\

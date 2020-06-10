@@ -31,6 +31,7 @@
 #include "TelemetrySettings.h"
 #include "../../Engines/Indexing/IndexingSettings.h"
 #include "../../Engines/Rendering/RenderingSettings.h"
+#include "AutomaticRunSettings.h"
 
 using namespace ITMLib::configuration;
 
@@ -59,8 +60,6 @@ namespace configuration {
 // *** serializable struct definitions ***
 
 DEFINE_SERIALIZABLE_STRUCT(PATHS_STRUCT_DESCRIPTION);
-
-DEFINE_SERIALIZABLE_STRUCT(AUTOMATIC_RUN_SETTINGS_STRUCT_DESCRIPTION);
 
 DEFINE_SERIALIZABLE_STRUCT(ARRAY_VOLUME_PARAMETERS_STRUCT_DESCRIPTION);
 
@@ -162,6 +161,7 @@ static void AddAllDeferrableStructsFromSourceToTargetRootConfiguration(pt::ptree
 	AddDeferrableFromSourceToTargetTree<TelemetrySettings>(target_tree, origin_tree, origin);
 	AddDeferrableFromSourceToTargetTree<IndexingSettings>(target_tree, origin_tree, origin);
 	AddDeferrableFromSourceToTargetTree<RenderingSettings>(target_tree, origin_tree, origin);
+	AddDeferrableFromSourceToTargetTree<AutomaticRunSettings>( target_tree, origin_tree, origin);
 }
 
 void save_configuration_to_json_file(const std::string& path) {

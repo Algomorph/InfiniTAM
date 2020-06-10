@@ -159,7 +159,13 @@ public: // member functions
 			                                        ceil_of_integer_quotient(lower_right.y - upper_left.y + 1, rendering_block_size_y));
 
 			new_rendering_block_count = new_rednering_block_dimensions.x * new_rednering_block_dimensions.y;
+			if(GET_ATOMIC_VALUE(total_rendering_block_count) + new_rendering_block_count >= ITMLib::MAX_RENDERING_BLOCKS){
+				new_rendering_block_count = 0;
+			}
 		}
+#ifdef __CUDACC__
+		__syncthreads();
+#endif
 		int current_rendering_block_count = ORUtils::ParallelSum<TMemoryDeviceType>::template Add1D<unsigned int>(new_rendering_block_count,
 		                                                                                                          total_rendering_block_count);
 		if (new_rendering_block_count != 0) CreateRenderingBlocks2(rendering_blocks, current_rendering_block_count, upper_left, lower_right, z_range);

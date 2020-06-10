@@ -55,6 +55,9 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(const RG
                                                                         Vector2i rgb_image_size,
                                                                         Vector2i depth_image_size)
 		: config(configuration::get()),
+		  automatic_run_settings(ExtractSerializableStructFromPtreeIfPresent<AutomaticRunSettings>(configuration::get().source_tree,
+		                                                                                           AutomaticRunSettings::default_parse_path,
+		                                                                                           configuration::get().origin)),
 		  indexing_engine(IndexingEngineFactory::Build<TVoxel, TIndex>(configuration::get().device_type)),
 		  depth_fusion_engine(
 				  DepthFusionEngineFactory::Build<TVoxel, TWarp, TIndex>
@@ -196,7 +199,8 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::SaveToFile(const std::strin
 	if (relocalizer) relocalizer->SaveToDirectory(relocalizer_output_path);
 	canonical_volume->SaveToDisk(path + "/canonical_volume.dat");
 	live_volumes[0]->SaveToDisk(path + "/live_volume.dat");
-	std::cout << "Saving scenes in a compact way to '" << path << "'." << std::endl;
+//	tracking_state->
+	std::cout << "Saving volumes & camera matrices in a compact way to '" << path << "'." << std::endl;
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
@@ -285,7 +289,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(UChar4Image* rgb_im
 	if (!main_processing_active) return CameraTrackingState::TRACKING_FAILED;
 	bool fusion_succeeded = false;
 
-	auto frame_index = [this]{ return config.automatic_run_settings.index_of_frame_to_start_at + frames_processed;};
+	auto frame_index = [this]{ return automatic_run_settings.index_of_frame_to_start_at + frames_processed;};
 	telemetry::SetGlobalFrameIndex(frame_index());
 	if ((last_tracking_result == CameraTrackingState::TRACKING_GOOD || !tracking_initialised) && (fusion_active) &&
 	    (relocalization_count == 0)) {

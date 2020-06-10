@@ -1,9 +1,15 @@
 // Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
+// Modified code: Copyright 2020 Gregory Kramida
 #pragma once
 
+// stdlib
 #include <string.h>
 #include <ostream>
 #include <numeric>
+
+// local
+#include "PlatformIndependence.h"
+#include "Vector.h"
 
 /************************************************************************/
 /* WARNING: the following 3x3 and 4x4 matrix are using column major, to	*/
@@ -12,11 +18,6 @@
 /************************************************************************/
 
 namespace ORUtils {
-	template <class T> class Vector2;
-	template <class T> class Vector3;
-	template <class T> class Vector4;
-	template <class T, int s> class VectorX;
-
 	//////////////////////////////////////////////////////////////////////////
 	//						Basic Matrix Structure
 	//////////////////////////////////////////////////////////////////////////
@@ -67,6 +68,7 @@ namespace ORUtils {
 	class Matrix4 : public Matrix4_ < T >
 	{
 	public:
+		static constexpr int element_count = 16;
 		_CPU_AND_GPU_CODE_ Matrix4() {}
 		_CPU_AND_GPU_CODE_ Matrix4(T t) { setValues(t); }
 		_CPU_AND_GPU_CODE_ Matrix4(const T *m)	{ setValues(m); }
@@ -276,6 +278,7 @@ namespace ORUtils {
 	template<class T>
 	class Matrix3 : public Matrix3_ < T >
 	{
+		static constexpr int element_count = 9;
 	public:
 		_CPU_AND_GPU_CODE_ Matrix3() {}
 		_CPU_AND_GPU_CODE_ Matrix3(T t) { setValues(t); }
@@ -426,6 +429,7 @@ namespace ORUtils {
 	class MatrixSQX : public MatrixSQX_ < T, s >
 	{
 	public:
+		static constexpr int element_count = s*s;
 		_CPU_AND_GPU_CODE_ MatrixSQX() { this->dim = s; this->sq = s*s; }
 		_CPU_AND_GPU_CODE_ MatrixSQX(T t) { this->dim = s; this->sq = s*s; setValues(t); }
 		_CPU_AND_GPU_CODE_ MatrixSQX(const T *m)	{ this->dim = s; this->sq = s*s; setValues(m); }

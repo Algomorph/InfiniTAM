@@ -34,6 +34,7 @@
 #include "../../CameraTrackers/Interface/CameraTracker.h"
 #include "../../SurfaceTrackers/Interface/SurfaceTracker.h"
 #include "../../../FernRelocLib/Relocaliser.h"
+#include "../../Utils/Configuration/AutomaticRunSettings.h"
 
 
 namespace ITMLib {
@@ -47,6 +48,7 @@ private: // member variables
 	int frames_processed, relocalization_count;
 
 	configuration::Configuration config;
+	const AutomaticRunSettings automatic_run_settings;
 
 	// engines
 	LowLevelEngine* low_level_engine;

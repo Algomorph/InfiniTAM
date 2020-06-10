@@ -12,6 +12,7 @@
 
 //ITMLib
 #include "../../ITMLib/Utils/Configuration/Configuration.h"
+#include "../../ITMLib/Utils/Configuration/AutomaticRunSettings.h"
 
 using namespace InfiniTAM::Engine;
 using namespace InputSource;
@@ -23,6 +24,10 @@ void CLIEngine::Initialise(ImageSourceEngine *image_source, IMUSourceEngine *imu
                            MemoryDeviceType device_type)
 {
 	ITMLib::configuration::Configuration& configuration = ITMLib::configuration::get();
+	//TODO: just use automatic_run_settings as member directly instead of copying stuff over.
+	AutomaticRunSettings automatic_run_settings = ExtractSerializableStructFromPtreeIfPresent<AutomaticRunSettings>(configuration.source_tree,
+	                                                                                                                AutomaticRunSettings::default_parse_path,
+	                                                                                                                configuration.origin);
 	this->output_path = configuration.paths.output_path;
 
 	this->image_source = image_source;
@@ -41,17 +46,17 @@ void CLIEngine::Initialise(ImageSourceEngine *image_source, IMUSourceEngine *imu
 	input_IMU_measurement = new IMUMeasurement();
 
 	this->current_frame_index = 0;
-	if (configuration.automatic_run_settings.index_of_frame_to_start_at > 0) {
-		printf("Skipping the first %d frames.\n", configuration.automatic_run_settings.index_of_frame_to_start_at);
-		SkipFrames(configuration.automatic_run_settings.index_of_frame_to_start_at);
+	if (automatic_run_settings.index_of_frame_to_start_at > 0) {
+		printf("Skipping the first %d frames.\n", automatic_run_settings.index_of_frame_to_start_at);
+		SkipFrames(automatic_run_settings.index_of_frame_to_start_at);
 	}
 	this->start_frame_index = this->current_frame_index;
 
-	this->save_after_automatic_run = configuration.automatic_run_settings.save_volumes_after_processing;
-	this->exit_after_automatic_run = configuration.automatic_run_settings.exit_after_automatic_processing;
-	this->number_of_frames_to_process_after_launch = configuration.automatic_run_settings.number_of_frames_to_process;
+	this->save_after_automatic_run = automatic_run_settings.save_volumes_and_camera_matrix_after_processing;
+	this->exit_after_automatic_run = automatic_run_settings.exit_after_automatic_processing;
+	this->number_of_frames_to_process_after_launch = automatic_run_settings.number_of_frames_to_process;
 
-	if (configuration.automatic_run_settings.load_volume_before_processing) {
+	if (automatic_run_settings.load_volume_and_camera_matrix_before_processing) {
 		std::string frame_path = this->GenerateCurrentFrameOutputPath();
 		printf("Loading volume from %s.\n", frame_path.c_str());
 		main_engine->LoadFromFile(frame_path);

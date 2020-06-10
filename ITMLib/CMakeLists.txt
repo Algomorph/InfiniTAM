@@ -891,6 +891,7 @@ set(
         Utils/Collections/NestedMap3D.cpp
         Utils/Collections/OperationsOnSTLContainers.cpp
 
+        Utils/Configuration/AutomaticRunSettings.cpp
         Utils/Configuration/Configuration.cpp
         Utils/Configuration/LoggingSettings.cpp
         Utils/Configuration/TelemetrySettings.cpp
@@ -932,6 +933,7 @@ set(
         Utils/Collections/NestedMap3D.h
         Utils/Collections/OperationsOnSTLContainers.h
 
+        Utils/Configuration/AutomaticRunSettings.h
         Utils/Configuration/Configuration.h
         Utils/Configuration/LoggingSettings.h
         Utils/Configuration/TelemetrySettings.h

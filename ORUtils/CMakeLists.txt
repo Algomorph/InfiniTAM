@@ -27,6 +27,7 @@ set(
         FileUtils.cpp
         IStreamWrapper.cpp
         KeyValueConfig.cpp
+        VectorAndMatrixPersistence.cpp
         MemoryBlockPersistence.cpp
         OStreamWrapper.cpp
         SE3Pose.cpp
@@ -46,6 +47,7 @@ set(
         LexicalCast.h
         MathUtils.h
         Matrix.h
+        VectorAndMatrixPersistence.h
         MemoryBlock.h
         MemoryBlockPersistence.h
         MemoryBlockComparison.h
