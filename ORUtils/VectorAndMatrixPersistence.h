@@ -17,23 +17,27 @@
 
 #include "Matrix.h"
 #include "OStreamWrapper.h"
+#include "IStreamWrapper.h"
 
 namespace ORUtils {
 
 template<typename TMatrix>
-void SaveMatrix(OStreamWrapper& file, const TMatrix& matrix){
+void SaveMatrix(OStreamWrapper& file, const TMatrix& matrix) {
 	for (int i_value = 0; i_value < TMatrix::element_count; i_value++) {
 		float value = matrix.getValues()[i_value];
-		file.OStream().write(reinterpret_cast<const char*>(&value),sizeof(float));
+		file.OStream().write(reinterpret_cast<const char*>(&value), sizeof(typename TMatrix::value_type));
 	}
 }
+
 template<typename TMatrix>
-void LoadMatrix(OStreamWrapper& file, const TMatrix& matrix){
+TMatrix LoadMatrix(IStreamWrapper& file) {
+	TMatrix matrix;
 	for (int i_value = 0; i_value < TMatrix::element_count; i_value++) {
-		float value = matrix.getValues()[i_value];
-		file.OStream().write(reinterpret_cast<const char*>(&value),sizeof(float));
+		file.IStream().read(reinterpret_cast<char*>(matrix.m + i_value), sizeof(typename TMatrix::value_type));
 	}
+	return matrix;
 }
+
 template<typename TVector>
 const auto SaveVector = SaveMatrix<TVector>;
 template<typename TVector>
@@ -47,5 +51,14 @@ extern template void SaveMatrix<Matrix4<short>>(OStreamWrapper& file, const Matr
 extern template void SaveMatrix<Matrix4<unsigned short>>(OStreamWrapper& file, const Matrix4<unsigned short>& matrix);
 extern template void SaveMatrix<Matrix4<char>>(OStreamWrapper& file, const Matrix4<char>& matrix);
 extern template void SaveMatrix<Matrix4<unsigned char>>(OStreamWrapper& file, const Matrix4<unsigned char>& matrix);
+
+extern template Matrix4<float> LoadMatrix<Matrix4<float>>(IStreamWrapper& file);
+extern template Matrix4<double> LoadMatrix<Matrix4<double>>(IStreamWrapper& file);
+extern template Matrix4<int> LoadMatrix<Matrix4<int>>(IStreamWrapper& file);
+extern template Matrix4<unsigned int> LoadMatrix<Matrix4<unsigned int>>(IStreamWrapper& file);
+extern template Matrix4<short> LoadMatrix<Matrix4<short>>(IStreamWrapper& file);
+extern template Matrix4<unsigned short> LoadMatrix<Matrix4<unsigned short>>(IStreamWrapper& file);
+extern template Matrix4<char> LoadMatrix<Matrix4<char>>(IStreamWrapper& file);
+extern template Matrix4<unsigned char> LoadMatrix<Matrix4<unsigned char>>(IStreamWrapper& file);
 
 } // namespace ORUtils

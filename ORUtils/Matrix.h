@@ -69,6 +69,8 @@ namespace ORUtils {
 	{
 	public:
 		static constexpr int element_count = 16;
+		typedef T value_type;
+
 		_CPU_AND_GPU_CODE_ Matrix4() {}
 		_CPU_AND_GPU_CODE_ Matrix4(T t) { setValues(t); }
 		_CPU_AND_GPU_CODE_ Matrix4(const T *m)	{ setValues(m); }
@@ -278,8 +280,10 @@ namespace ORUtils {
 	template<class T>
 	class Matrix3 : public Matrix3_ < T >
 	{
-		static constexpr int element_count = 9;
 	public:
+		static constexpr int element_count = 9;
+		typedef T value_type;
+
 		_CPU_AND_GPU_CODE_ Matrix3() {}
 		_CPU_AND_GPU_CODE_ Matrix3(T t) { setValues(t); }
 		_CPU_AND_GPU_CODE_ Matrix3(const T *m)	{ setValues(m); }

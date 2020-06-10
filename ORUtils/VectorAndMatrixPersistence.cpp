@@ -24,4 +24,12 @@ template void SaveMatrix<Matrix4<short>>(OStreamWrapper& file, const Matrix4<sho
 template void SaveMatrix<Matrix4<unsigned short>>(OStreamWrapper& file, const Matrix4<unsigned short>& matrix);
 template void SaveMatrix<Matrix4<char>>(OStreamWrapper& file, const Matrix4<char>& matrix);
 template void SaveMatrix<Matrix4<unsigned char>>(OStreamWrapper& file, const Matrix4<unsigned char>& matrix);
+template Matrix4<float> LoadMatrix<Matrix4<float>>(IStreamWrapper& file);
+template Matrix4<double> LoadMatrix<Matrix4<double>>(IStreamWrapper& file);
+template Matrix4<int> LoadMatrix<Matrix4<int>>(IStreamWrapper& file);
+template Matrix4<unsigned int> LoadMatrix<Matrix4<unsigned int>>(IStreamWrapper& file);
+template Matrix4<short> LoadMatrix<Matrix4<short>>(IStreamWrapper& file);
+template Matrix4<unsigned short> LoadMatrix<Matrix4<unsigned short>>(IStreamWrapper& file);
+template Matrix4<char> LoadMatrix<Matrix4<char>>(IStreamWrapper& file);
+template Matrix4<unsigned char> LoadMatrix<Matrix4<unsigned char>>(IStreamWrapper& file);
 } // namespace ORUtils
