@@ -179,6 +179,20 @@ public: // static functions
 		}
 	}
 
+
+	/**
+	 * \brief Saves a memory block to a file on disk.
+	 *
+	 * \param file          	Successfully-opened handle to the file
+	 * \param block             The memory block to save.
+	 * \param memory_type       The type of memory device from which to save the data.
+	 */
+	template<typename T>
+	static void SaveMemoryBlock(OStreamWrapper& file, const ORUtils::MemoryBlock<T>& block,
+	                            MemoryDeviceType memory_type) {
+		SaveArray<T, ORUtils::MemoryBlock<T>>(file, block, memory_type);
+	}
+
 	/**
 	 * \brief Saves a memory block to a file on disk.
 	 *
