@@ -33,15 +33,15 @@ set(
         sources
 
         InfiniTAM.cpp
-        UIEngine_BPO.cpp
-        UIEngine_BPO_GlutFunctions.cpp
+        UIEngine.cpp
+        UIEngine_GlutFunctions.cpp
         CreateDefaultImageSource.cpp
 )
 
 set(
         headers
 
-        UIEngine_BPO.h
+        UIEngine.h
         prettyprint.hpp
         CreateDefaultImageSource.h
 )

@@ -83,6 +83,8 @@ void RenderingEngine_Specialized<TVoxel, VoxelBlockHash, TMemoryDeviceType>::Cre
 
 	HashTableTraversalEngine<TMemoryDeviceType>::template TraverseUtilized_Padded(volume->index, project_and_split_blocks_functor);
 	unsigned int final_rendering_block_count = project_and_split_blocks_functor.GetRenderingBlockCount();
+	// this bounding is necessary due to prefix sums potentially used when parallelization is on (see comment in functor)
+	if(final_rendering_block_count >= MAX_RENDERING_BLOCKS) final_rendering_block_count = MAX_RENDERING_BLOCKS;
 
 	FillBlocksFunctor<TMemoryDeviceType> fill_blocks_functor(*render_state->renderingRangeImage);
 	// go through rendering blocks

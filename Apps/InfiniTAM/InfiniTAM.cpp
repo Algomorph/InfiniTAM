@@ -36,7 +36,7 @@
 #include "../../ITMLib/Engines/Main/MainEngineFactory.h"
 
 //local
-#include "UIEngine_BPO.h"
+#include "UIEngine.h"
 #include "prettyprint.hpp"
 #include "CreateDefaultImageSource.h"
 
@@ -131,14 +131,14 @@ int main(int argc, char** argv) {
 #if !defined(WIN32) && defined(WITH_VTK)
 		XInitThreads();
 #endif
-		UIEngine_BPO::Instance().Initialize(argc, argv, imageSource, imuSource, mainEngine, configuration);
+		UIEngine::Instance().Initialize(argc, argv, imageSource, imuSource, mainEngine, configuration);
 
 
 // endregion ===========================================================================================================
 
 		//VisualizationWindowManager::get().Run();
-		UIEngine_BPO::Instance().Run();
-		UIEngine_BPO::Instance().Shutdown();
+		UIEngine::Instance().Run();
+		UIEngine::Instance().Shutdown();
 
 // region ========================================= CLEANUP ============================================================
 

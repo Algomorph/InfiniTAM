@@ -13,7 +13,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "UIEngine_BPO.h"
+#include "UIEngine.h"
 #include "../../ITMLib/Utils/Analytics/BenchmarkUtilities.h"
 #include "../../ITMLib/Engines/Main/MultiEngine.h"
 #include "../../ITMLib/Engines/Main/BasicVoxelEngine.h"
@@ -54,15 +54,15 @@ static void Safe_GlutBitmapString(void* font, const char* str) {
 	}
 }
 
-void UIEngine_BPO::GlutDisplayFunction() {
-	UIEngine_BPO& uiEngine = UIEngine_BPO::Instance();
+void UIEngine::GlutDisplayFunction() {
+	UIEngine& uiEngine = UIEngine::Instance();
 
 	// get updated images from processing thread
-	uiEngine.mainEngine->GetImage(uiEngine.outImage[0], uiEngine.outImageType[0], &uiEngine.freeviewPose,
-	                              &uiEngine.freeviewIntrinsics);
+	uiEngine.main_engine->GetImage(uiEngine.outImage[0], uiEngine.outImageType[0], &uiEngine.freeview_pose,
+	                               &uiEngine.freeviewIntrinsics);
 
 	for (int w = 1; w < NUM_WIN; w++) {
-		uiEngine.mainEngine->GetImage(uiEngine.outImage[w], uiEngine.outImageType[w]);
+		uiEngine.main_engine->GetImage(uiEngine.outImage[w], uiEngine.outImageType[w]);
 	}
 
 	// do the actual drawing
@@ -128,16 +128,16 @@ void UIEngine_BPO::GlutDisplayFunction() {
 	char str[200];
 
 	//print previous frame index
-	int lastFrameIx = uiEngine.start_frame_index + uiEngine.processedFrameNo - 1;
-	if (lastFrameIx >= 0) {
+	int previous_frame_index = uiEngine.currently_processed_frame_index - 1;
+	if (previous_frame_index >= 0) {
 		glRasterPos2f(0.775f, -0.900f);
-		sprintf(str, "Frame %5d", lastFrameIx);
+		sprintf(str, "Frame %5d", previous_frame_index);
 		Safe_GlutBitmapString(GLUT_BITMAP_HELVETICA_18, (const char*) str);
 	}
 
 	//print frame rate
 	glRasterPos2f(0.85f, -0.962f);
-	sprintf(str, "%04.2lf", uiEngine.processedTime);
+	sprintf(str, "%04.2lf", uiEngine.current_frame_processing_time);
 	Safe_GlutBitmapString(GLUT_BITMAP_HELVETICA_18, (const char*) str);
 
 	glColor3f(1.0f, 0.0f, 0.0f);
@@ -161,44 +161,39 @@ void UIEngine_BPO::GlutDisplayFunction() {
 	glRasterPos2f(-0.98f, -0.95f);
 	sprintf(str,
 	        "i: %d frames \t d: one step \t p: pause \t v: write video %s \t ",
-	        uiEngine.number_of_frames_to_process_after_launch,
+	        uiEngine.index_of_frame_to_end_before,
 	        uiEngine.depthVideoWriter != nullptr ? "off" : "on");
 	Safe_GlutBitmapString(GLUT_BITMAP_HELVETICA_12, (const char*) str);
 
 	glutSwapBuffers();
-	uiEngine.needsRefresh = false;
+	uiEngine.needs_refresh = false;
 }
-
-void handle_check_end_automatic_run(UIEngine_BPO& engine) {
-
-}
-
-void UIEngine_BPO::GlutIdleFunction() {
-	UIEngine_BPO& uiEngine = UIEngine_BPO::Instance();
-	if (uiEngine.shutdownRequested) {
-		uiEngine.mainLoopAction = UIEngine_BPO::EXIT;
+void UIEngine::GlutIdleFunction() {
+	UIEngine& ui_engine = UIEngine::Instance();
+	if (ui_engine.shutdown_requested) {
+		ui_engine.main_loop_action = UIEngine::EXIT;
 	}
-	switch (uiEngine.mainLoopAction) {
+	switch (ui_engine.main_loop_action) {
 		case PROCESS_FRAME:
-			uiEngine.ProcessFrame();
-			uiEngine.processedFrameNo++; //done with current frame, increment the frame counter
-			uiEngine.mainLoopAction = PROCESS_PAUSED;
-			uiEngine.needsRefresh = true;
+			ui_engine.ProcessFrame();
+			ui_engine.currently_processed_frame_index++; //done with current frame, increment the frame counter
+			ui_engine.main_loop_action = PROCESS_PAUSED;
+			ui_engine.needs_refresh = true;
 			break;
 		case PROCESS_VIDEO:
-			uiEngine.ProcessFrame();
-			uiEngine.processedFrameNo++;
-			uiEngine.needsRefresh = true;
+			ui_engine.ProcessFrame();
+			ui_engine.currently_processed_frame_index++;
+			ui_engine.needs_refresh = true;
 			break;
 		case PROCESS_N_FRAMES:
-			uiEngine.ProcessFrame();
-			uiEngine.processedFrameNo++;
-			uiEngine.needsRefresh = true;
-			if ((uiEngine.processedFrameNo - uiEngine.auto_interval_frame_start) >=
-			    uiEngine.number_of_frames_to_process_after_launch) {
-				uiEngine.mainLoopAction = uiEngine.exit_after_automatic_run ? EXIT : PROCESS_PAUSED;
-				if (uiEngine.save_after_automatic_run) {
-					uiEngine.mainEngine->SaveToFile(uiEngine.GeneratePreviousFrameOutputPath());
+			ui_engine.ProcessFrame();
+			ui_engine.currently_processed_frame_index++;
+			ui_engine.needs_refresh = true;
+			if (ui_engine.currently_processed_frame_index >=
+			    ui_engine.index_of_frame_to_end_before) {
+				ui_engine.main_loop_action = ui_engine.exit_after_automatic_run ? EXIT : PROCESS_PAUSED;
+				if (ui_engine.save_after_automatic_run) {
+					ui_engine.main_engine->SaveToFile(ui_engine.GeneratePreviousFrameOutputPath());
 				}
 				if (configuration::get().logging_settings.log_benchmarks) {
 					benchmarking::log_all_timers();
@@ -217,61 +212,61 @@ void UIEngine_BPO::GlutIdleFunction() {
 			break;
 	}
 
-	if (uiEngine.needsRefresh) {
+	if (ui_engine.needs_refresh) {
 		glutPostRedisplay();
 	}
 }
 
-void UIEngine_BPO::GlutKeyUpFunction(unsigned char key, int x, int y) {
-	UIEngine_BPO& uiEngine = UIEngine_BPO::Instance();
+void UIEngine::GlutKeyUpFunction(unsigned char key, int x, int y) {
+	UIEngine& ui_engine = UIEngine::Instance();
 	int modifiers = glutGetModifiers();
 
 	switch (key) {
 		//TODO: rearrange in asciibeditc order (except fall-through cases) to make maintenance easier
 		case 'i':
-			printf("processing %d frames ...\n", uiEngine.number_of_frames_to_process_after_launch);
-			uiEngine.auto_interval_frame_start = uiEngine.processedFrameNo;
-			uiEngine.mainLoopAction = UIEngine_BPO::PROCESS_N_FRAMES;
+			printf("processing %d frames ...\n", ui_engine.index_of_frame_to_end_before);
+			ui_engine.auto_interval_frame_start = ui_engine.currently_processed_frame_index;
+			ui_engine.main_loop_action = UIEngine::PROCESS_N_FRAMES;
 			break;
 		case 'b':
 			printf("processing input source ...\n");
-			uiEngine.mainLoopAction = UIEngine_BPO::PROCESS_VIDEO;
+			ui_engine.main_loop_action = UIEngine::PROCESS_VIDEO;
 			break;
 		case 'n':
-			uiEngine.PrintProcessingFrameHeader();
-			uiEngine.mainLoopAction = UIEngine_BPO::PROCESS_FRAME;
+			ui_engine.PrintProcessingFrameHeader();
+			ui_engine.main_loop_action = UIEngine::PROCESS_FRAME;
 			break;
 		case 'k':
-			if (uiEngine.isRecordingImages) {
+			if (ui_engine.image_recording_enabled) {
 				printf("stopped recoding to disk ...\n");
-				uiEngine.isRecordingImages = false;
+				ui_engine.image_recording_enabled = false;
 			} else {
 				printf("started recoding to disk ...\n");
-				uiEngine.processed_frame_count = 0;
-				uiEngine.isRecordingImages = true;
+				ui_engine.processed_frame_count = 0;
+				ui_engine.image_recording_enabled = true;
 			}
 			break;
 		case 'v':
 			if (modifiers & GLUT_ACTIVE_ALT) {
-				if ((uiEngine.reconstructionVideoWriter != nullptr)) {
+				if ((ui_engine.reconstructionVideoWriter != nullptr)) {
 					printf("stopped recoding reconstruction video\n");
-					delete uiEngine.reconstructionVideoWriter;
-					uiEngine.reconstructionVideoWriter = nullptr;
+					delete ui_engine.reconstructionVideoWriter;
+					ui_engine.reconstructionVideoWriter = nullptr;
 				} else {
 					printf("started recoding reconstruction video\n");
-					uiEngine.reconstructionVideoWriter = new FFMPEGWriter();
+					ui_engine.reconstructionVideoWriter = new FFMPEGWriter();
 				}
 			} else {
-				if ((uiEngine.rgbVideoWriter != nullptr) || (uiEngine.depthVideoWriter != nullptr)) {
+				if ((ui_engine.rgbVideoWriter != nullptr) || (ui_engine.depthVideoWriter != nullptr)) {
 					printf("stopped recoding input video\n");
-					delete uiEngine.rgbVideoWriter;
-					delete uiEngine.depthVideoWriter;
-					uiEngine.rgbVideoWriter = nullptr;
-					uiEngine.depthVideoWriter = nullptr;
+					delete ui_engine.rgbVideoWriter;
+					delete ui_engine.depthVideoWriter;
+					ui_engine.rgbVideoWriter = nullptr;
+					ui_engine.depthVideoWriter = nullptr;
 				} else {
 					printf("started recoding input video\n");
-					uiEngine.rgbVideoWriter = new FFMPEGWriter();
-					uiEngine.depthVideoWriter = new FFMPEGWriter();
+					ui_engine.rgbVideoWriter = new FFMPEGWriter();
+					ui_engine.depthVideoWriter = new FFMPEGWriter();
 				}
 			}
 			break;
@@ -279,29 +274,29 @@ void UIEngine_BPO::GlutKeyUpFunction(unsigned char key, int x, int y) {
 		case 'e':
 		case 27: // esc key
 			printf("exiting ...\n");
-			uiEngine.mainLoopAction = UIEngine_BPO::EXIT;
+			ui_engine.main_loop_action = UIEngine::EXIT;
 			break;
 		case 'f':
-			uiEngine.current_colour_mode = 0;
+			ui_engine.current_colour_mode = 0;
 			//TODO: replace this whole if/else block with a separate function, use this function during initialization as well -Greg (Github: Algomorph)
-			if (uiEngine.freeview_active) {
-				uiEngine.outImageType[0] = MainEngine::InfiniTAM_IMAGE_SCENERAYCAST;
-				uiEngine.outImageType[1] = MainEngine::InfiniTAM_IMAGE_ORIGINAL_DEPTH;
+			if (ui_engine.freeview_active) {
+				ui_engine.outImageType[0] = MainEngine::InfiniTAM_IMAGE_SCENERAYCAST;
+				ui_engine.outImageType[1] = MainEngine::InfiniTAM_IMAGE_ORIGINAL_DEPTH;
 
-				uiEngine.freeview_active = false;
+				ui_engine.freeview_active = false;
 			} else {
-				uiEngine.outImageType[0] = MainEngine::InfiniTAM_IMAGE_FREECAMERA_SHADED;
-				uiEngine.outImageType[1] = MainEngine::InfiniTAM_IMAGE_SCENERAYCAST;
+				ui_engine.outImageType[0] = MainEngine::InfiniTAM_IMAGE_FREECAMERA_SHADED;
+				ui_engine.outImageType[1] = MainEngine::InfiniTAM_IMAGE_SCENERAYCAST;
 
-				uiEngine.freeviewPose.SetFrom(uiEngine.mainEngine->GetTrackingState()->pose_d);
-				if (uiEngine.mainEngine->GetView() != nullptr) {
-					uiEngine.freeviewIntrinsics = uiEngine.mainEngine->GetView()->calib.intrinsics_d;
-					uiEngine.outImage[0]->ChangeDims(uiEngine.mainEngine->GetView()->depth->dimensions);
+				ui_engine.freeview_pose.SetFrom(ui_engine.main_engine->GetTrackingState()->pose_d);
+				if (ui_engine.main_engine->GetView() != nullptr) {
+					ui_engine.freeviewIntrinsics = ui_engine.main_engine->GetView()->calib.intrinsics_d;
+					ui_engine.outImage[0]->ChangeDims(ui_engine.main_engine->GetView()->depth->dimensions);
 				}
 
-				switch (uiEngine.indexing_method) {
+				switch (ui_engine.indexing_method) {
 					case configuration::INDEX_HASH: {
-						auto* multiEngine = dynamic_cast<MultiEngine<TSDFVoxel, VoxelBlockHash>*>(uiEngine.mainEngine);
+						auto* multiEngine = dynamic_cast<MultiEngine<TSDFVoxel, VoxelBlockHash>*>(ui_engine.main_engine);
 						if (multiEngine != nullptr) {
 							int idx = multiEngine->findPrimaryLocalMapIdx();
 							if (idx < 0) idx = 0;
@@ -310,7 +305,7 @@ void UIEngine_BPO::GlutKeyUpFunction(unsigned char key, int x, int y) {
 					}
 						break;
 					case configuration::INDEX_ARRAY:
-						auto* multiEngine = dynamic_cast<MultiEngine<TSDFVoxel, PlainVoxelArray>*>(uiEngine.mainEngine);
+						auto* multiEngine = dynamic_cast<MultiEngine<TSDFVoxel, PlainVoxelArray>*>(ui_engine.main_engine);
 						if (multiEngine != nullptr) {
 							int idx = multiEngine->findPrimaryLocalMapIdx();
 							if (idx < 0) idx = 0;
@@ -320,37 +315,37 @@ void UIEngine_BPO::GlutKeyUpFunction(unsigned char key, int x, int y) {
 				}
 
 
-				uiEngine.freeview_active = true;
+				ui_engine.freeview_active = true;
 			}
-			uiEngine.needsRefresh = true;
+			ui_engine.needs_refresh = true;
 			break;
 		case 'c':
-			uiEngine.current_colour_mode++;
-			if (((uiEngine.freeview_active) &&
-			     ((unsigned) uiEngine.current_colour_mode >= uiEngine.colourModes_freeview.size())) ||
-			    ((!uiEngine.freeview_active) &&
-			     ((unsigned) uiEngine.current_colour_mode >= uiEngine.colourModes_main.size())))
-				uiEngine.current_colour_mode = 0;
-			uiEngine.needsRefresh = true;
+			ui_engine.current_colour_mode++;
+			if (((ui_engine.freeview_active) &&
+			     ((unsigned) ui_engine.current_colour_mode >= ui_engine.colourModes_freeview.size())) ||
+			    ((!ui_engine.freeview_active) &&
+			     ((unsigned) ui_engine.current_colour_mode >= ui_engine.colourModes_main.size())))
+				ui_engine.current_colour_mode = 0;
+			ui_engine.needs_refresh = true;
 			break;
 		case 't': {
-			uiEngine.integration_active = !uiEngine.integration_active;
-			uiEngine.mainEngine->TurnOffIntegration();
+			ui_engine.integration_active = !ui_engine.integration_active;
+			ui_engine.main_engine->TurnOffIntegration();
 		}
 			break;
 		case 'r': {
-			uiEngine.mainEngine->ResetAll();
+			ui_engine.main_engine->ResetAll();
 		}
 			break;
 		case 's': {
 			if (modifiers && GLUT_ACTIVE_ALT) {
 				printf("saving scene to model ... ");
-				uiEngine.mainEngine->SaveSceneToMesh("mesh.stl");
+				ui_engine.main_engine->SaveSceneToMesh("mesh.stl");
 				printf("done\n");
 			} else {
 				printf("saving scene to disk ... ");
 				try {
-					uiEngine.mainEngine->SaveToFile();
+					ui_engine.main_engine->SaveToFile();
 					printf("done\n");
 				}
 				catch (const std::runtime_error& e) {
@@ -363,7 +358,7 @@ void UIEngine_BPO::GlutKeyUpFunction(unsigned char key, int x, int y) {
 			printf("loading scene from disk ... ");
 
 			try {
-				uiEngine.mainEngine->LoadFromFile(uiEngine.GenerateCurrentFrameOutputPath());
+				ui_engine.main_engine->LoadFromFile(ui_engine.GenerateCurrentFrameOutputPath());
 				printf("done\n");
 			}
 			catch (const std::runtime_error& e) {
@@ -372,56 +367,56 @@ void UIEngine_BPO::GlutKeyUpFunction(unsigned char key, int x, int y) {
 		}
 			break;
 		case 'p':
-			uiEngine.mainLoopAction = PROCESS_PAUSED;
+			ui_engine.main_loop_action = PROCESS_PAUSED;
 			break;
 		case '[':
 		case ']': {
-			auto* multiEngineVBH = dynamic_cast<MultiEngine<TSDFVoxel, VoxelBlockHash>*>(uiEngine.mainEngine);
+			auto* multiEngineVBH = dynamic_cast<MultiEngine<TSDFVoxel, VoxelBlockHash>*>(ui_engine.main_engine);
 			if (multiEngineVBH != nullptr) {
 				int idx = multiEngineVBH->getFreeviewLocalMapIdx();
 				if (key == '[') idx--;
 				else idx++;
-				multiEngineVBH->changeFreeviewLocalMapIdx(&(uiEngine.freeviewPose), idx);
-				uiEngine.needsRefresh = true;
+				multiEngineVBH->changeFreeviewLocalMapIdx(&(ui_engine.freeview_pose), idx);
+				ui_engine.needs_refresh = true;
 			}
-			auto* multiEnginePVA = dynamic_cast<MultiEngine<TSDFVoxel, PlainVoxelArray>*>(uiEngine.mainEngine);
+			auto* multiEnginePVA = dynamic_cast<MultiEngine<TSDFVoxel, PlainVoxelArray>*>(ui_engine.main_engine);
 			if (multiEnginePVA != nullptr) {
 				int idx = multiEnginePVA->getFreeviewLocalMapIdx();
 				if (key == '[') idx--;
 				else idx++;
-				multiEnginePVA->changeFreeviewLocalMapIdx(&(uiEngine.freeviewPose), idx);
-				uiEngine.needsRefresh = true;
+				multiEnginePVA->changeFreeviewLocalMapIdx(&(ui_engine.freeview_pose), idx);
+				ui_engine.needs_refresh = true;
 			}
 		}
 			break;
 	}
-	if (uiEngine.freeview_active) uiEngine.outImageType[0] = uiEngine.colourModes_freeview[uiEngine.current_colour_mode].type;
-	else uiEngine.outImageType[0] = uiEngine.colourModes_main[uiEngine.current_colour_mode].type;
+	if (ui_engine.freeview_active) ui_engine.outImageType[0] = ui_engine.colourModes_freeview[ui_engine.current_colour_mode].type;
+	else ui_engine.outImageType[0] = ui_engine.colourModes_main[ui_engine.current_colour_mode].type;
 }
 
-void UIEngine_BPO::GlutMouseButtonFunction(int button, int state, int x, int y) {
-	UIEngine_BPO& uiEngine = UIEngine_BPO::Instance();
+void UIEngine::GlutMouseButtonFunction(int button, int state, int x, int y) {
+	UIEngine& uiEngine = UIEngine::Instance();
 
 	if (state == GLUT_DOWN) {
 		switch (button) {
 			case GLUT_LEFT_BUTTON:
-				uiEngine.mouseState = 1;
+				uiEngine.current_mouse_operation = VIEW_ROTATION;
 				break;
 			case GLUT_MIDDLE_BUTTON:
-				uiEngine.mouseState = 3;
+				uiEngine.current_mouse_operation = VIEW_PANNING;
 				break;
 			case GLUT_RIGHT_BUTTON:
-				uiEngine.mouseState = 2;
+				uiEngine.current_mouse_operation = VIEW_DOLLYING;
 				break;
 			default:
 				break;
 		}
-		uiEngine.mouseLastClick.x = x;
-		uiEngine.mouseLastClick.y = y;
+		uiEngine.last_mouse_click_position.x = x;
+		uiEngine.last_mouse_click_position.y = y;
 
 		glutSetCursor(GLUT_CURSOR_NONE);
-	} else if (state == GLUT_UP && !uiEngine.mouseWarped) {
-		uiEngine.mouseState = 0;
+	} else if (state == GLUT_UP && !uiEngine.mouse_warped) {
+		uiEngine.current_mouse_operation = IDLE;
 		glutSetCursor(GLUT_CURSOR_INHERIT);
 	}
 }
@@ -451,19 +446,19 @@ static inline Matrix3f createRotation(const Vector3f& _axis, float angle) {
 	return ret;
 }
 
-void UIEngine_BPO::GlutMouseMoveFunction(int x, int y) {
-	UIEngine_BPO& uiEngine = UIEngine_BPO::Instance();
+void UIEngine::GlutMouseMoveFunction(int x, int y) {
+	UIEngine& ui_engine = UIEngine::Instance();
 
-	if (uiEngine.mouseWarped) {
-		uiEngine.mouseWarped = false;
+	if (ui_engine.mouse_warped) {
+		ui_engine.mouse_warped = false;
 		return;
 	}
 
-	if (!uiEngine.freeview_active || uiEngine.mouseState == 0) return;
+	if (!ui_engine.freeview_active || ui_engine.current_mouse_operation == IDLE) return;
 
 	Vector2i movement;
-	movement.x = x - uiEngine.mouseLastClick.x;
-	movement.y = y - uiEngine.mouseLastClick.y;
+	movement.x = x - ui_engine.last_mouse_click_position.x;
+	movement.y = y - ui_engine.last_mouse_click_position.y;
 
 	Vector2i realWinSize(glutGet(GLUT_WINDOW_WIDTH), glutGet(GLUT_WINDOW_HEIGHT));
 	// Does not work if the window is smaller than 40x40
@@ -491,40 +486,40 @@ void UIEngine_BPO::GlutMouseMoveFunction(int x, int y) {
 
 	if (warpNeeded) {
 		glutWarpPointer(x, y);
-		uiEngine.mouseWarped = true;
+		ui_engine.mouse_warped = true;
 	}
 
-	uiEngine.mouseLastClick.x = x;
-	uiEngine.mouseLastClick.y = y;
+	ui_engine.last_mouse_click_position.x = x;
+	ui_engine.last_mouse_click_position.y = y;
 
 	if ((movement.x == 0) && (movement.y == 0)) return;
 
 	static const float scale_rotation = 0.005f;
 	static const float scale_translation = 0.0025f;
 
-	switch (uiEngine.mouseState) {
-		case 1: {
+	switch (ui_engine.current_mouse_operation) {
+		case VIEW_ROTATION: {
 			// left button: rotation
 			Vector3f axis((float) -movement.y, (float) -movement.x, 0.0f);
 			float angle = scale_rotation * sqrtf((float) (movement.x * movement.x + movement.y * movement.y));
 			Matrix3f rot = createRotation(axis, angle);
-			uiEngine.freeviewPose.SetRT(rot * uiEngine.freeviewPose.GetR(), rot * uiEngine.freeviewPose.GetT());
-			uiEngine.freeviewPose.Coerce();
-			uiEngine.needsRefresh = true;
+			ui_engine.freeview_pose.SetRT(rot * ui_engine.freeview_pose.GetR(), rot * ui_engine.freeview_pose.GetT());
+			ui_engine.freeview_pose.Coerce();
+			ui_engine.needs_refresh = true;
 			break;
 		}
-		case 2: {
+		case VIEW_PANNING: {
 			// right button: translation in x and y direction
-			uiEngine.freeviewPose.SetT(uiEngine.freeviewPose.GetT() +
+			ui_engine.freeview_pose.SetT(ui_engine.freeview_pose.GetT() +
 			                           scale_translation * Vector3f((float) movement.x, (float) movement.y, 0.0f));
-			uiEngine.needsRefresh = true;
+			ui_engine.needs_refresh = true;
 			break;
 		}
-		case 3: {
+		case VIEW_DOLLYING: {
 			// middle button: translation along z axis
-			uiEngine.freeviewPose.SetT(
-					uiEngine.freeviewPose.GetT() + scale_translation * Vector3f(0.0f, 0.0f, (float) movement.y));
-			uiEngine.needsRefresh = true;
+			ui_engine.freeview_pose.SetT(
+					ui_engine.freeview_pose.GetT() + scale_translation * Vector3f(0.0f, 0.0f, (float) movement.y));
+			ui_engine.needs_refresh = true;
 			break;
 		}
 		default:
@@ -532,12 +527,12 @@ void UIEngine_BPO::GlutMouseMoveFunction(int x, int y) {
 	}
 }
 
-void UIEngine_BPO::GlutMouseWheelFunction(int button, int dir, int x, int y) {
-	UIEngine_BPO& uiEngine = UIEngine_BPO::Instance();
+void UIEngine::GlutMouseWheelFunction(int button, int dir, int x, int y) {
+	UIEngine& uiEngine = UIEngine::Instance();
 
 	static const float scale_translation = 0.05f;
 
-	uiEngine.freeviewPose.SetT(
-			uiEngine.freeviewPose.GetT() + scale_translation * Vector3f(0.0f, 0.0f, (dir > 0) ? -1.0f : 1.0f));
-	uiEngine.needsRefresh = true;
+	uiEngine.freeview_pose.SetT(
+			uiEngine.freeview_pose.GetT() + scale_translation * Vector3f(0.0f, 0.0f, (dir > 0) ? -1.0f : 1.0f));
+	uiEngine.needs_refresh = true;
 }

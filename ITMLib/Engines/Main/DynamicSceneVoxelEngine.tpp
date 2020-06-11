@@ -47,6 +47,7 @@ namespace fs = std::filesystem;
 #include "../../../ORUtils/FileUtils.h"
 #include "../../../ORUtils/FileUtils.h"
 #include "../../Utils/Telemetry/TelemetryUtilities.h"
+#include "../../../ORUtils/VectorAndMatrixPersistence.h"
 
 using namespace ITMLib;
 
@@ -197,10 +198,11 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::SaveToFile(const std::strin
 	std::string relocalizer_output_path = path + "Relocaliser/";
 	// throws error if any of the saves fail
 	if (relocalizer) relocalizer->SaveToDirectory(relocalizer_output_path);
+	std::cout << "Saving volumes & camera matrices in a compact way to '" << path << "'." << std::endl;
 	canonical_volume->SaveToDisk(path + "/canonical_volume.dat");
 	live_volumes[0]->SaveToDisk(path + "/live_volume.dat");
-//	tracking_state->
-	std::cout << "Saving volumes & camera matrices in a compact way to '" << path << "'." << std::endl;
+	ORUtils::OStreamWrapper camera_matrix_file(path + "/camera_matrix.dat");
+	ORUtils::SaveMatrix(camera_matrix_file,tracking_state->pose_d->GetM());
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
@@ -235,6 +237,9 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::LoadFromFile(const std::str
 			throw std::runtime_error("Could not load relocalizer: " + std::string(e.what()));
 		}
 	}
+
+	ORUtils::IStreamWrapper camera_matrix_file(path + "/camera_matrix.dat");
+	tracking_state->pose_d->SetM(ORUtils::LoadMatrix<Matrix4f>(camera_matrix_file));
 
 	try // load scene
 	{

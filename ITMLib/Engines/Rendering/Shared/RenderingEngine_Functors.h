@@ -160,15 +160,17 @@ public: // member functions
 
 			new_rendering_block_count = new_rednering_block_dimensions.x * new_rednering_block_dimensions.y;
 			if(GET_ATOMIC_VALUE(total_rendering_block_count) + new_rendering_block_count >= ITMLib::MAX_RENDERING_BLOCKS){
+				//TODO: not sure if this check is worth the performance improvement from skipped work... test...
 				new_rendering_block_count = 0;
 			}
 		}
-#ifdef __CUDACC__
-		__syncthreads();
-#endif
 		int current_rendering_block_count = ORUtils::ParallelSum<TMemoryDeviceType>::template Add1D<unsigned int>(new_rendering_block_count,
 		                                                                                                          total_rendering_block_count);
-		if (new_rendering_block_count != 0) CreateRenderingBlocks2(rendering_blocks, current_rendering_block_count, upper_left, lower_right, z_range);
+		if (new_rendering_block_count != 0 && current_rendering_block_count + new_rendering_block_count <= ITMLib::MAX_RENDERING_BLOCKS){
+			//counters need to be re-checked here (second condition above), because parallel sum will still work for all thread blocks
+			// that reach it before the total exceeds the bound in previous check
+			CreateRenderingBlocks2(rendering_blocks, current_rendering_block_count, upper_left, lower_right, z_range);
+		}
 	}
 
 	unsigned int GetRenderingBlockCount() {
