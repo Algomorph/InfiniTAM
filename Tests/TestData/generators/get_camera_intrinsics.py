@@ -20,12 +20,10 @@ import sys
 import argparse
 import os
 
-bcontext = bpy.context
-
 parser = argparse.ArgumentParser("A script that computes the camera intrinsic matrix from a blender file.")
 
 parser.add_argument("-i", "--input", help="The input blender file.",
-                    default="/home/algomorph/Factory/priors/test_data/coffee_cup/CoffeeCup_Depth.blend")
+                    default="CoffeeCup_Depth.blend")
 
 
 def get_sensor_size(sensor_fit, sensor_x, sensor_y):
@@ -49,37 +47,37 @@ def get_sensor_fit(sensor_fit, size_x, size_y):
 # blender.stackexchange.com/questions/15102/what-is-blenders-camera-projection-matrix-model
 # as well as
 # https://blender.stackexchange.com/a/120063/3581
-def get_calibration_matrix_K_from_blender(camd):
-    if camd.type != 'PERSP':
+def get_camera_projection_from_blender(camera_data):
+    if camera_data.type != 'PERSP':
         raise ValueError('Non-perspective cameras not supported')
     scene = bpy.context.scene
-    f_in_mm = camd.lens
+    f_in_mm = camera_data.lens
     scale = scene.render.resolution_percentage / 100
     resolution_x_in_px = scale * scene.render.resolution_x
     resolution_y_in_px = scale * scene.render.resolution_y
-    sensor_size_in_mm = get_sensor_size(camd.sensor_fit, camd.sensor_width, camd.sensor_height)
+    sensor_size_in_mm = get_sensor_size(camera_data.sensor_fit, camera_data.sensor_width, camera_data.sensor_height)
     sensor_fit = get_sensor_fit(
-        camd.sensor_fit,
+        camera_data.sensor_fit,
         scene.render.pixel_aspect_x * resolution_x_in_px,
         scene.render.pixel_aspect_y * resolution_y_in_px
     )
     pixel_aspect_ratio = scene.render.pixel_aspect_y / scene.render.pixel_aspect_x
     if sensor_fit == 'HORIZONTAL':
-        view_fac_in_px = resolution_x_in_px
+        view_factor_in_px = resolution_x_in_px
     else:
-        view_fac_in_px = pixel_aspect_ratio * resolution_y_in_px
-    pixel_size_mm_per_px = sensor_size_in_mm / f_in_mm / view_fac_in_px
-    s_u = 1 / pixel_size_mm_per_px
-    s_v = 1 / pixel_size_mm_per_px / pixel_aspect_ratio
+        view_factor_in_px = pixel_aspect_ratio * resolution_y_in_px
+    pixel_size_mm_per_px = sensor_size_in_mm / f_in_mm / view_factor_in_px
+    f_x = 1 / pixel_size_mm_per_px
+    f_y = 1 / pixel_size_mm_per_px / pixel_aspect_ratio
 
-    # Parameters of intrinsic calibration matrix K
-    u_0 = resolution_x_in_px / 2 - camd.shift_x * view_fac_in_px
-    v_0 = resolution_y_in_px / 2 + camd.shift_y * view_fac_in_px / pixel_aspect_ratio
+    # Parameters of intrinsic projection matrix
+    c_x = resolution_x_in_px / 2 - camera_data.shift_x * view_factor_in_px
+    c_y = resolution_y_in_px / 2 + camera_data.shift_y * view_factor_in_px / pixel_aspect_ratio
     skew = 0  # only use rectangular pixels
 
-    K = np.array([[s_u, skew, u_0], [0, s_v, v_0], [0, 0, 1]])
+    camera_projection = np.array([[f_x, skew, c_x], [0, f_y, c_y], [0, 0, 1]])
 
-    return K
+    return camera_projection
 
 
 EXIT_CODE_FAILURE = 1
@@ -94,10 +92,10 @@ def main():
         print("Warning: the blender filename does not end with .blend. " +
               "Only valid blender files are supported.")
     bpy.ops.wm.open_mainfile(filepath=args.input)
-    scene = bcontext.scene
+    scene = bpy.context.scene
     camera_data = scene.camera.data
-    K = get_calibration_matrix_K_from_blender(camera_data)
-    print(K)
+    camera_projection = get_camera_projection_from_blender(camera_data)
+    print(camera_projection)
 
     return exit_code
 

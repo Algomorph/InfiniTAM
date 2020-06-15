@@ -10,6 +10,7 @@ import os
 import struct
 from math import pi
 import shutil
+import enum
 
 # math libs
 import numpy as np
@@ -29,13 +30,37 @@ else:
     from utils import draw_contours, make_labeling_consistent
 
 
+class SceneNameSource(enum.Enum):
+    CURRENT_FILE = 0
+    CURRENT_FOLDER = 1
+    FOLDER_ABOVE_CURRENT = 2
+
+
+class BlenderRenderEngine(enum.Enum):
+    BLENDER_WORKBENCH = 0
+    BLENDER_EEVEE = 1
+    CYCLES = 2
+
+
+# TODO: make frame count a customizable argument as well
+class CameraTrajectoryPreset(enum.Enum):
+    FIGURE_EIGHT_720 = 0
+    CIRCULAR_120 = 1
+
+
 class RGBDCameraEmulatorApplication:
     # depth of mist, in meters: this will translate into total range of depth
     MIST_DEPTH_M = 10.0
 
+    # noinspection PyProtectedMember
+    def process_enum_args(self, args):
+        self.args.render_engine = BlenderRenderEngine._member_map_[args.render_engine]
+        self.args.camera_trajectory_preset = CameraTrajectoryPreset._member_map_[args.camera_trajectory_preset]
+
     def __init__(self, args):
         self.scene_name = ""
         self.args = args
+        self.process_enum_args(args)
 
     def get_output_folder_name(self, use_scene_name=False):
         if use_scene_name:
@@ -44,9 +69,15 @@ class RGBDCameraEmulatorApplication:
             return "../input"
 
     @staticmethod
-    def set_up_scene_timeframe():
-        bpy.context.scene.frame_start = 0
-        bpy.context.scene.frame_end = 719
+    def set_up_scene_time_frame(camera_trajectory: CameraTrajectoryPreset):
+        if camera_trajectory == CameraTrajectoryPreset.FIGURE_EIGHT_720:
+            bpy.context.scene.frame_start = 0
+            bpy.context.scene.frame_end = 719
+        elif camera_trajectory == CameraTrajectoryPreset.CIRCULAR_120:
+            bpy.context.scene.frame_start = 0
+            bpy.context.scene.frame_end = 119
+        else:
+            raise ValueError("Unrecognized camera_trajectory value: " + camera_trajectory.name)
 
     @staticmethod
     def set_up_sky():
@@ -134,10 +165,10 @@ class RGBDCameraEmulatorApplication:
         camera_data.display_size = 2.84
 
         if self.args.make_camera_and_animate:
-            self.animate_camera(camera_object)
+            self.animate_camera(camera_object, self.args.camera_trajectory_preset)
 
     @staticmethod
-    def animate_camera(camera_object):
+    def animate_camera(camera_object, camera_trajectory_preset: CameraTrajectoryPreset):
         # make a pivot empty for the camera at the center of the coordinate system
         scene = bpy.context.scene
         scene.cursor.location = (0.0, 0.0, 0.0)
@@ -148,36 +179,46 @@ class RGBDCameraEmulatorApplication:
         # parent the cam to the empty
         camera_object.parent = empty_object
 
-        # animate the camera by rotating the empty
         bpy.context.scene.frame_set(0)
         empty_object.keyframe_insert(data_path="rotation_euler", index=2)
         empty_object.keyframe_insert(data_path="rotation_euler", index=1)
-        for frame in range(179, 720, 180):
-            bpy.context.scene.frame_set(frame)
-            # keyframe rotation to 0 around Y axis at quarter-turns
-            empty_object.keyframe_insert(data_path="rotation_euler", index=1)
 
-        y_up = True
-        # around Y-axis
-        for frame in range(89, 720, 180):
-            bpy.context.scene.frame_set(frame)
-            if y_up:
-                empty_object.rotation_euler[1] = pi / 2
-            else:
-                empty_object.rotation_euler[1] = - pi / 2
-            empty_object.keyframe_insert(data_path="rotation_euler", index=1)
-            y_up = not y_up
+        if camera_trajectory_preset == CameraTrajectoryPreset.FIGURE_EIGHT_720:
+            # animate the camera by rotating the empty
+            for frame in range(179, 720, 180):
+                bpy.context.scene.frame_set(frame)
+                # keyframe rotation to 0 around Y axis at quarter-turns
+                empty_object.keyframe_insert(data_path="rotation_euler", index=1)
 
-        bpy.context.scene.frame_set(719)
-        empty_object.rotation_euler[2] = pi * 2  # 360 degrees around z-axis
-        empty_object.keyframe_insert(data_path="rotation_euler", index=2)
+            y_up = True
+            # around Y-axis
+            for frame in range(89, 720, 180):
+                bpy.context.scene.frame_set(frame)
+                if y_up:
+                    empty_object.rotation_euler[1] = pi / 2
+                else:
+                    empty_object.rotation_euler[1] = - pi / 2
+                empty_object.keyframe_insert(data_path="rotation_euler", index=1)
+                y_up = not y_up
 
-        # set interpolation of Z-axis rotation to linear
-        empty_object.animation_data.action.fcurves[0].keyframe_points[0].interpolation = 'LINEAR'
-        empty_object.animation_data.action.fcurves[0].keyframe_points[1].interpolation = 'LINEAR'
-        # set the keyframe endpoints
-        empty_object.animation_data.action.fcurves[1].keyframe_points[0].handle_right = (19, -.17)
-        empty_object.animation_data.action.fcurves[1].keyframe_points[8].handle_left = (700, .17)
+            bpy.context.scene.frame_set(719)
+            empty_object.rotation_euler[2] = pi * 2  # 360 degrees around z-axis
+            empty_object.keyframe_insert(data_path="rotation_euler", index=2)
+
+            # set interpolation of Z-axis rotation to linear
+            empty_object.animation_data.action.fcurves[0].keyframe_points[0].interpolation = 'LINEAR'
+            empty_object.animation_data.action.fcurves[0].keyframe_points[1].interpolation = 'LINEAR'
+            # set the keyframe endpoints
+            empty_object.animation_data.action.fcurves[1].keyframe_points[0].handle_right = (19, -.17)
+            empty_object.animation_data.action.fcurves[1].keyframe_points[8].handle_left = (700, .17)
+        elif camera_trajectory_preset == CameraTrajectoryPreset.CIRCULAR_120:
+            bpy.context.scene.frame_set(119)
+            empty_object.rotation_euler[2] = (pi * 2) * 119 / 120  # back at frame 0 would make it 360 degrees around z-axis
+            empty_object.keyframe_insert(data_path="rotation_euler", index=2)
+            empty_object.animation_data.action.fcurves[0].keyframe_points[0].interpolation = 'LINEAR'
+            empty_object.animation_data.action.fcurves[0].keyframe_points[1].interpolation = 'LINEAR'
+        else:
+            raise ValueError("Unsupported camera_trajectory_preset: " + camera_trajectory_preset.name)
 
     @staticmethod
     def set_up_object_materials():
@@ -190,8 +231,6 @@ class RGBDCameraEmulatorApplication:
     @staticmethod
     def set_up_cycles():
         scene = bpy.context.scene
-        render_settings = scene.render
-        render_settings.engine = 'CYCLES'
         scene.cycles.feature_set = 'SUPPORTED'
         scene.cycles.device = 'GPU'
 
@@ -211,12 +250,14 @@ class RGBDCameraEmulatorApplication:
             device.use = True
 
     @staticmethod
-    def set_up_render_settings():
+    def set_up_render_settings(render_engine: BlenderRenderEngine = BlenderRenderEngine.BLENDER_EEVEE):
         scene = bpy.context.scene
 
         # correct render settings
         render_settings = scene.render
-        render_settings.engine = 'BLENDER_EEVEE'
+        render_settings.engine = render_engine.name
+        if render_engine == BlenderRenderEngine.CYCLES:
+            RGBDCameraEmulatorApplication.set_up_cycles()
 
         scene.use_nodes = True
 
@@ -253,20 +294,21 @@ class RGBDCameraEmulatorApplication:
         """
         if self.args.make_camera_and_animate:
             # set up timeline bounds
-            self.set_up_scene_timeframe()
+            self.set_up_scene_time_frame(self.args.camera_trajectory_preset)
 
         self.set_up_sky()
         self.set_up_mist()
         self.set_up_lights()
         self.set_up_camera()
-        self.set_up_render_settings()
+        self.set_up_render_settings(self.args.render_engine)
         self.set_up_object_materials()
 
     @staticmethod
-    def rename_frames(folder, extension, new_filename_pattern):
+    def rename_frames(folder, extension, new_filename_pattern, offset=0):
         """
         Rename the frames at the specified folder, assuming they all have format <frame_number>.<extension>,
         using the given filename pattern
+        :param offset: offset in frame number/index to use during renaming. The first existing frame number must be at least abs(offset).
         :param extension: extension of the frame files
         :param folder: folder where to perform the operation
         :param new_filename_pattern: a string finelame pattern, which should include a single number format
@@ -275,7 +317,7 @@ class RGBDCameraEmulatorApplication:
         """
         for path in glob.iglob(os.path.join(folder, "*" + extension)):
             name, ext = os.path.splitext(os.path.basename(path))
-            number = int(name)
+            number = int(name) + offset
 
             os.rename(path,
                       os.path.join(folder, new_filename_pattern.format(number) + ext))
@@ -314,8 +356,7 @@ class RGBDCameraEmulatorApplication:
         :return: True on operation success, False otherwise
         """
         # === prepare the folder where we're going to be saving the data ===
-        scene_name = os.path.basename(scene_folder)
-        pose_folder = os.path.join(scene_folder, scene_name + "_camera_poses")
+        pose_folder = os.path.join(scene_folder, self.scene_name + "_camera_poses")
 
         if not self.check_folder_helper("generate camera poses", pose_folder):
             return False
@@ -421,7 +462,7 @@ class RGBDCameraEmulatorApplication:
         bops.render.render(animation=True)
 
         # === rename & move the files ===
-        self.rename_frames(rgb_folder, ".png", "color_{:05d}")
+        self.rename_frames(rgb_folder, ".png", "color_{:05d}", -bpy.context.scene.frame_start)
         filelist = glob.glob(os.path.join(rgb_folder, "*.png"))
         for path in filelist:
             name = os.path.basename(path)
@@ -501,11 +542,10 @@ class RGBDCameraEmulatorApplication:
         # assumes the camera has already been set up and it's in horizontal mode
         # == precompute cosines of angle to each pixel from optical axis
         scene = bpy.context.scene
-        camd = scene.camera.data
+        camera_data = scene.camera.data
         # otherwise known as f_{x} in the intrinsic matrix:
-        focal_length_ratio = render_settings.resolution_x / camd.sensor_width * camd.lens
-        cosines = self.precompute_cosines(cv2.imread(depth_render_filenames[0],
-                                                     cv2.IMREAD_ANYCOLOR | cv2.IMREAD_ANYDEPTH)[:, :, 0],
+        focal_length_ratio = render_settings.resolution_x / camera_data.sensor_width * camera_data.lens
+        cosines = self.precompute_cosines(cv2.imread(depth_render_filenames[0], cv2.IMREAD_ANYCOLOR | cv2.IMREAD_ANYDEPTH)[:, :, 0],
                                           focal_length_ratio)
         i_frame = 0
         for filename in depth_render_filenames:
@@ -525,32 +565,40 @@ class RGBDCameraEmulatorApplication:
 
         return True
 
+    def initialize_scene_name(self):
+        scene_folder = os.path.dirname(self.args.input)
+        scene_name_source = self.args.scene_name_source
+        if scene_name_source == SceneNameSource.FOLDER_ABOVE_CURRENT:
+            scene_name = os.path.basename(os.path.dirname(scene_folder))
+        elif scene_name_source == SceneNameSource.CURRENT_FOLDER:
+            scene_name = os.path.basename(scene_folder)
+        elif scene_name_source == SceneNameSource.CURRENT_FILE:
+            scene_name = os.path.splitext(os.path.basename(self.args.input))[0]
+        else:
+            raise ValueError("Unsupported scene_name_source value: " + str(scene_name_source))
+        self.scene_name = scene_name
+
     def run(self):
         # tune based on preferences
         # TODO: make input args
         store_depth_and_rgb_frames_in_same_folder = True
-        scene_name_up_two_levels = False
+        # TODO: make input args for render resolution
 
         blender_filename = os.path.basename(self.args.input)
         if not blender_filename.endswith(".blend"):
             print("Warning: the blender filename does not end with .blend. " +
                   "Only valid blender files with only geometry object(s) in the first layer are supported.")
-        scene_folder = os.path.dirname(self.args.input)
-        bpy.ops.wm.open_mainfile(filepath=self.args.input)
-        self.set_up_scene()
 
-        if scene_name_up_two_levels:
-            scene_name = os.path.basename(os.path.dirname(scene_folder))
-        else:
-            # assume 1 level
-            scene_name = os.path.basename(scene_folder)
-        self.scene_name = scene_name
+        bpy.ops.wm.open_mainfile(filepath=self.args.input)
+        scene_folder = os.path.dirname(self.args.input)
+        self.initialize_scene_name()
+        self.set_up_scene()
 
         # === prepare the folder where we're going to be saving the renders ===
         if store_depth_and_rgb_frames_in_same_folder:
             frames_folder = os.path.join(scene_folder, self.get_output_folder_name(True))
         else:
-            frames_folder = os.path.join(scene_folder, scene_name + "_color")
+            frames_folder = os.path.join(scene_folder, self.scene_name + "_color")
         color_frames_folder = frames_folder
         if not self.check_folder_helper("render rgb images / composite pass", frames_folder):
             return 1
@@ -559,17 +607,17 @@ class RGBDCameraEmulatorApplication:
             self.generate_rgb_frames(scene_folder, frames_folder)
         if self.args.depth:
             if not store_depth_and_rgb_frames_in_same_folder:
-                frames_folder = os.path.join(scene_folder, scene_name + "_depth")
+                frames_folder = os.path.join(scene_folder, self.scene_name + "_depth")
             self.generate_depth_frames(scene_folder, frames_folder)
         if self.args.poses:
             self.generate_camera_poses(scene_folder)
         if self.args.process_segmentation:
             if not self.args.rgb and not os.path.isdir(color_frames_folder):
                 raise ValueError("Turn on rgb frame rendering to also generate label segments and contours.")
-            labels_folder = os.path.join(scene_folder, scene_name + "_labels")
+            labels_folder = os.path.join(scene_folder, self.scene_name + "_labels")
             if not self.check_folder_helper("render label segmentation images / label pass", labels_folder):
                 return 1
-            contours_folder = os.path.join(scene_folder, scene_name + "_contours")
+            contours_folder = os.path.join(scene_folder, self.scene_name + "_contours")
             if not self.check_folder_helper("render label segmentation images / label pass", contours_folder):
                 return 1
             color_frame_regex = re.compile(r'color_(\d\d\d\d\d).png')
@@ -597,6 +645,7 @@ EXIT_CODE_FAILURE = 1
 EXIT_CODE_SUCCESS = 0
 
 
+# noinspection PyProtectedMember
 def main():
     parser = argparse.ArgumentParser("A script that renders a blender file using the Mist pass, " +
                                      "converts that to OpenNi-compatible depth frame format, renders" +
@@ -619,6 +668,15 @@ def main():
                         help="Assumes the scene is colored with shadeless materials (!): process segmentations separately,"
                              " producing a contour image set and a set of greyscale images with segment pixels colored by"
                              " increasing values, i.e. 0, 1, 2, 3...")
+    parser.add_argument("-re", "--render_engine", type=str,
+                        help="Render engine to use in Blender. Can be one of: " + str(BlenderRenderEngine._member_names_),
+                        default=BlenderRenderEngine.BLENDER_EEVEE.name)
+    parser.add_argument("-ctp", "--camera_trajectory_preset", type=str,
+                        help="Which camera trajectory preset to use. Can be one of: " + str(CameraTrajectoryPreset._member_names_),
+                        default=CameraTrajectoryPreset.FIGURE_EIGHT_720.name)
+    parser.add_argument("-sns", "--scene_name_source", type=str,
+                        help="Source of the scene name (to use for folder naming). Can be one of: " + str(SceneNameSource._member_names_),
+                        default=SceneNameSource.CURRENT_FILE)
     exit_code = EXIT_CODE_SUCCESS
     args = parser.parse_args()
     app = RGBDCameraEmulatorApplication(args)
