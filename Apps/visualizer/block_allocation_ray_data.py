@@ -13,9 +13,9 @@ from Apps.visualizer.utilities import get_output_frame_count, get_frame_output_p
 
 
 class FrameBlockAllocationRayData:
-    def __init__(self, point_cloud1, point_cloud2, march_segment_endpoints):
-        self.surface1_points = point_cloud1
-        self.surface2_points = point_cloud2
+    def __init__(self, live_surface_points, canonical_surface_points, march_segment_endpoints):
+        self.live_surface_points = live_surface_points
+        self.canonical_surface_points = canonical_surface_points
         self.march_segment_endpoints = march_segment_endpoints
 
 
@@ -41,7 +41,7 @@ def read_block_allocation_ray_data(inverse_camera_matrices,
             channel_count = int(np.frombuffer(file.read(size=1 * np.dtype(np.int32).itemsize), dtype=np.int32)[0])
             if channel_count != 1:
                 raise ValueError("Expected a a channel_count of 1, got {:d}".format(channel_count))
-            layer_element_count = bool_layer_shape[0] * bool_layer_shape[0]
+            layer_element_count = bool_layer_shape[0] * bool_layer_shape[1]
             layer = np.frombuffer(file.read(layer_element_count * np.dtype(np.bool).itemsize),
                                   dtype=np.bool)
             layers.append(layer)
@@ -49,33 +49,36 @@ def read_block_allocation_ray_data(inverse_camera_matrices,
         num_float_layers = int(np.frombuffer(file.read(size=np.dtype(np.int32).itemsize), dtype=np.int32)[0])
         for i_layer in range(0, num_float_layers):
             float_layer_shape = tuple(np.frombuffer(file.read(size=3 * np.dtype(np.int32).itemsize), dtype=np.int32))
-            channel_count = int(np.frombuffer(file.read(size=1 * np.dtype(np.int32).itemsize), dtype=np.int32)[0])
-            value_count = int(bool_layer_shape[0] * bool_layer_shape[0] * channel_count)
+            channel_count = float_layer_shape[2]
+            value_count = int(float_layer_shape[0] * float_layer_shape[1] * channel_count)
             layer = np.frombuffer(file.read(value_count * np.dtype(np.float32).itemsize),
-                                  dtype=np.float32).reshape(-1, float_layer_shape[-1])
+                                  dtype=np.float32).reshape(-1, channel_count)
             layers.append(layer)
 
         point_mask1 = layers[0]
         point_mask2 = layers[1]
         segment_mask = np.logical_or(layers[0], layers[1])
 
-        camera_matrix_current = inverse_camera_matrices[i_frame - initial_frame_index]
-        camera_matrix_prev = inverse_camera_matrices[i_frame - initial_frame_index - 1]
-        #camera_matrix_next = inverse_camera_matrices[i_frame - initial_frame_index + 1]
-        point_cloud1 = layers[2][point_mask1]
-        one_col = np.ones((point_cloud1.shape[0], 1), dtype=np.float32)
-        point_cloud1 = camera_matrix_current.dot(np.hstack((point_cloud1, one_col)).T).T[:, 0:3]
+        inverse_camera_matrix_current = inverse_camera_matrices[i_frame - initial_frame_index]
+        inverse_camera_matrix_prev = inverse_camera_matrices[i_frame - initial_frame_index - 1]
+        # inverse_camera_matrix_next = inverse_camera_matrices[i_frame - initial_frame_index + 1]
+        camera_matrix_current = np.linalg.inv(inverse_camera_matrix_current)
+        identity_matrix = np.identity(4, dtype=np.float32)
+        camera_matrix_canonical = identity_matrix
 
-        point_cloud2 = layers[3][point_mask2]
-        one_col = np.ones((point_cloud2.shape[0], 1), dtype=np.float32)
-        # cm = np.linalg.inv(camera_matrix_current)
-        point_cloud2 = camera_matrix_current.dot(np.hstack((point_cloud2, one_col)).T).T[:, 0:3]
+        live_based_point_cloud = layers[2][point_mask1]
+        one_col = np.ones((live_based_point_cloud.shape[0], 1), dtype=np.float32)
+        live_based_point_cloud = inverse_camera_matrix_current.dot(np.hstack((live_based_point_cloud, one_col)).T).T[:, 0:3]
+
+        canonical_based_point_cloud = layers[3][point_mask2]
+        one_col = np.ones((canonical_based_point_cloud.shape[0], 1), dtype=np.float32)
+        canonical_based_point_cloud = camera_matrix_canonical.dot(np.hstack((canonical_based_point_cloud, one_col)).T).T[:, 0:3]
 
         # index_cols = [2, 0, 1] [:, index_cols]
         march_segment_endpoints = np.hstack((convert_block_to_metric(layers[4][segment_mask]),
                                              convert_block_to_metric(layers[5][segment_mask])))
 
-        frame_ray_datasets.append(FrameBlockAllocationRayData(point_cloud1, point_cloud2,
+        frame_ray_datasets.append(FrameBlockAllocationRayData(live_based_point_cloud, canonical_based_point_cloud,
                                                               march_segment_endpoints))
 
     return frame_ray_datasets
@@ -127,10 +130,10 @@ class AllocationRays:
     def set_frame(self, frame_index):
         print(frame_index, len(self.frame_ray_datasets), self.initial_frame_index)
         if self.initial_frame_index < frame_index != self.current_frame_index:
-            dataset = self.frame_ray_datasets[frame_index-self.initial_frame_index]
+            dataset = self.frame_ray_datasets[frame_index - self.initial_frame_index]
 
             point_cloud1_points = vtk.vtkPoints()
-            for x, y, z in dataset.surface1_points:
+            for x, y, z in dataset.live_surface_points:
                 point_cloud1_points.InsertNextPoint(x, -y, z)
 
             self.point_cloud1_data.SetPoints(point_cloud1_points)
@@ -139,7 +142,7 @@ class AllocationRays:
             self.point_cloud1_mapper.Modified()
 
             point_cloud2_points = vtk.vtkPoints()
-            for x, y, z in dataset.surface2_points:
+            for x, y, z in dataset.canonical_surface_points:
                 point_cloud2_points.InsertNextPoint(x, -y, z)
 
             self.point_cloud2_data.SetPoints(point_cloud2_points)

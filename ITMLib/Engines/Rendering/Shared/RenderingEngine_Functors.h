@@ -155,10 +155,10 @@ public: // member functions
 		if (!padding_job &&
 		    ProjectSingleBlock(hash_entries[i_item].pos, depth_camera_pose, depth_camera_projection_parameters, depth_image_size, voxel_size,
 		                       upper_left, lower_right, z_range)) {
-			Vector2i new_rednering_block_dimensions(ceil_of_integer_quotient(lower_right.x - upper_left.x + 1, rendering_block_size_x),
+			Vector2i new_rendering_block_dimensions(ceil_of_integer_quotient(lower_right.x - upper_left.x + 1, rendering_block_size_x),
 			                                        ceil_of_integer_quotient(lower_right.y - upper_left.y + 1, rendering_block_size_y));
 
-			new_rendering_block_count = new_rednering_block_dimensions.x * new_rednering_block_dimensions.y;
+			new_rendering_block_count = new_rendering_block_dimensions.x * new_rendering_block_dimensions.y;
 			if(GET_ATOMIC_VALUE(total_rendering_block_count) + new_rendering_block_count >= ITMLib::MAX_RENDERING_BLOCKS){
 				//TODO: not sure if this check is worth the performance improvement from skipped work... test...
 				new_rendering_block_count = 0;
@@ -223,9 +223,9 @@ inline HashBlockVisibility* GetBlockVisibilityTypesIfAvailable<PlainVoxelArray>(
 }
 } // namespace internal
 
-#if !defined(WITH_OPENMP) && !defined(__CUDACC__)
-#define SINGLE_THREADED
-#endif
+//#if !defined(WITH_OPENMP) && !defined(__CUDACC__)
+//#define SINGLE_THREADED
+//#endif
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType, bool TModifyVisibilityInformation>
 struct RaycastFunctor {
@@ -236,9 +236,9 @@ struct RaycastFunctor {
 	const float voxel_size_reciprocal;
 	const TVoxel* voxels;
 	const typename TIndex::IndexData* index_data;
-#ifdef SINGLE_THREADED
-	typename TIndex::IndexCache cache;
-#endif
+//#ifdef SINGLE_THREADED
+//	typename TIndex::IndexCache cache;
+//#endif
 	const Vector2f* ray_depth_range_image;
 	const int ray_depth_image_width;
 
@@ -262,7 +262,11 @@ public: // member functions
 		                                                        (y / ray_depth_image_subsampling_factor) * ray_depth_image_width];
 		CastRay<TVoxel, TIndex, TModifyVisibilityInformation>(
 				point, block_visibility_types, x, y, voxels, index_data, inverted_camera_pose, inverted_camera_projection_parameters,
-				voxel_size_reciprocal, truncation_distance, ray_depth_range);
+				voxel_size_reciprocal, truncation_distance, ray_depth_range
+//#ifdef SINGLE_THREADED
+//				, cache
+//#endif
+				);
 	}
 };
 

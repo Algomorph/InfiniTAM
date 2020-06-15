@@ -105,7 +105,7 @@ public: // member functions
 	}
 
 	_DEVICE_WHEN_AVAILABLE_
-	void operator()(const Vector3s& block_position_to_clear, int i_new_block) {
+	void operator()(const Vector3s& block_position_to_clear) {
 		DeallocateBlock(block_position_to_clear, hash_entry_states, hash_table, voxels, colliding_positions_device,
 		                colliding_block_count, last_free_voxel_block_id, last_free_excess_list_id,
 		                block_allocation_list, excess_entry_list, empty_voxel_block_device);
@@ -359,6 +359,7 @@ protected: // member functions
 
 		surface2_point_in_camera_space = WorldSpacePointToCameraSpace(surface2_point_in_world_space,
 		                                                              this->depth_camera_pose);
+//		surface2_point_in_camera_space = Vector4f(surface2_point_in_world_space);
 
 		if (surface2_point_in_camera_space.z > 0.0f) has_surface2 = true;
 

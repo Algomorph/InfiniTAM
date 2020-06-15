@@ -39,6 +39,11 @@ CMakeLists.txt.user*
 /Tests/TestData/volumes/VBH/*
 /Tests/TestData/meshes/*
 /Tests/TestData/arrays/*
+/Tests/TestData/synthetic input/plane/*.blend1
+/Tests/TestData/synthetic input/plane/plane_frames/*
+/Tests/TestData/synthetic input/suzanne/*.blend1
+/Tests/TestData/synthetic input/suzanne/suzanne_frames/*
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -178,3 +183,4 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+

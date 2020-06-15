@@ -99,13 +99,18 @@ void MultiVisualizationEngine_CPU<TVoxel, VoxelBlockHash>::CreateExpectedDepths(
 	}
 }
 
+//#if !defined(WITH_OPENMP) && !defined(__CUDACC__)
+//#define SINGLE_THREADED
+//#endif
 template<typename TVoxel, typename TIndex>
 static void RenderImage_common(const ORUtils::SE3Pose *pose, const Intrinsics *intrinsics, RenderState *_renderState, UChar4Image *outputImage, IRenderingEngine::RenderImageType type){
 	RenderStateMultiScene<TVoxel, TIndex> *renderState = (RenderStateMultiScene<TVoxel, TIndex>*)_renderState;
 
 	Vector2i imgSize = outputImage->dimensions;
 	Matrix4f invM = pose->GetInvM();
-
+//#ifdef SINGLE_THREADED
+//	typename TIndex::IndexCache cache;
+//#endif
 	// Generic Raycast
 	float voxelSize = renderState->voxelSize;
 	{
@@ -130,7 +135,11 @@ static void RenderImage_common(const ORUtils::SE3Pose *pose, const Intrinsics *i
 			int locId2 = (int)floor((float)x / ray_depth_image_subsampling_factor) + (int)floor((float)y / ray_depth_image_subsampling_factor) * imgSize.x;
 
 			CastRay<VD, ID, false>(pointsRay[locId], NULL, x, y, &renderState->voxelData_host, &renderState->indexData_host, invM, invProjParams,
-			                       oneOverVoxelSize, mu, minmaximg[locId2]);
+			                       oneOverVoxelSize, mu, minmaximg[locId2]
+//#ifdef SINGLE_THREADED
+//				  				   , cache
+//#endif
+			                       );
 		}
 	}
 

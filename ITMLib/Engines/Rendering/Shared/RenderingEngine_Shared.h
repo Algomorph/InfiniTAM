@@ -140,11 +140,12 @@ struct ReadWithConfidenceFromSdfFloatInterpolated<false, true, TVoxel, TIndex, T
 };
 
 
-#if !defined(WITH_OPENMP) && !defined(__CUDACC__)
-#define SINGLE_THREADED
-#endif
+//#if !defined(WITH_OPENMP) && !defined(__CUDACC__)
+//#define SINGLE_THREADED
+//#endif
 
-template<class TVoxel, class TIndex, bool TModifyVisibilityInformation>
+template<typename TVoxel, typename TIndex,
+		bool TModifyVisibilityInformation>
 _CPU_AND_GPU_CODE_ inline bool CastRay(DEVICEPTR(Vector4f)& point, DEVICEPTR(ITMLib::HashBlockVisibility)* block_visibility_types,
                                        int x, int y, const CONSTPTR(TVoxel)* voxels, const CONSTPTR(typename TIndex::IndexData)* index_data,
                                        Matrix4f inverted_camera_matrix, Vector4f inverted_camera_projection_parameters,
@@ -180,9 +181,9 @@ _CPU_AND_GPU_CODE_ inline bool CastRay(DEVICEPTR(Vector4f)& point, DEVICEPTR(ITM
 
 	march_point_world_space_voxels = march_start_world_space_voxels;
 
-#ifndef SINGLE_THREADED
+//#ifndef SINGLE_THREADED
 	typename TIndex::IndexCache cache;
-#endif
+//#endif
 	while (distance_along_ray_voxels < distance_to_ray_end_length_voxels) {
 		sdf_value = readFromSDF_float_uninterpolated(voxels, index_data, march_point_world_space_voxels, index_identifier, cache);
 

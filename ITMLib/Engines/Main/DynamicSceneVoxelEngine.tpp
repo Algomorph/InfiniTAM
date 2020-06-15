@@ -73,7 +73,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(const RG
 		  low_level_engine(LowLevelEngineFactory::MakeLowLevelEngine(configuration::get().device_type)),
 		  telemetry_recorder(TelemetryRecorderFactory::GetDefault<TVoxel, TWarp, TIndex>(configuration::get().device_type)),
 		  view_builder(ViewBuilderFactory::Build(calibration_info, configuration::get().device_type)),
-		  visualization_engine(RenderingEngineFactory::Build<TVoxel, TIndex>(
+		  rendering_engine(RenderingEngineFactory::Build<TVoxel, TIndex>(
 				  configuration::get().device_type)),
 		  meshing_engine(config.create_meshing_engine ? MeshingEngineFactory::Build<TVoxel, TIndex>(
 		  		configuration::get().device_type) : nullptr) {
@@ -156,7 +156,7 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::InitializeScenes() {
 template<typename TVoxel, typename TWarp, typename TIndex>
 DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::~DynamicSceneVoxelEngine() {
 
-	delete visualization_engine;
+	delete rendering_engine;
 	delete meshing_engine;
 	delete depth_fusion_engine;
 	delete swapping_engine;
@@ -299,6 +299,8 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(UChar4Image* rgb_im
 	if ((last_tracking_result == CameraTrackingState::TRACKING_GOOD || !tracking_initialised) && (fusion_active) &&
 	    (relocalization_count == 0)) {
 		if (frames_processed > 0) {
+			//rendering_engine->FindSurface(canonical_volume, tracking_state->pose_d->GetM(), view->calib.intrinsics_d.projectionParamsSimple.all, canonical_render_state);
+			camera_tracking_controller->Prepare(tracking_state, canonical_volume, view, rendering_engine, canonical_render_state);
 			LOG4CPLUS_PER_FRAME(logging::get_logger(), bright_cyan << "Generating raw live TSDF from view..." << reset);
 			benchmarking::start_timer("GenerateRawLiveVolume");
 			live_volumes[0]->Reset();
@@ -320,7 +322,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(UChar4Image* rgb_im
 			LOG4CPLUS_PER_FRAME(logging::get_logger(), bright_cyan
 					<< "*** Optimizing warp based on difference between canonical and live SDF. ***" << reset);
 			VoxelVolume<TVoxel, TIndex>* target_warped_live_volume =
-					surface_tracker->TrackFrameMotion(canonical_volume, live_volumes, warp_field);
+					surface_tracker->TrackNonRigidMotion(canonical_volume, live_volumes, warp_field);
 			LOG4CPLUS_PER_FRAME(logging::get_logger(),
 			                    bright_cyan << "*** Warping optimization finished for current frame. ***" << reset);
 			benchmarking::stop_timer("TrackMotion");
@@ -372,8 +374,8 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(UChar4Image* rgb_im
 		//TODO: FIXME (See issue #214 at https://github.com/Algomorph/InfiniTAM/issues/214)
 		//if (!fusion_succeeded) indexing_engine->UpdateVisibleList(view, tracking_state, canonical_volume, canonical_render_state);
 
-		// raycast to renderState_canonical for tracking and free Rendering
-		camera_tracking_controller->Prepare(tracking_state, canonical_volume, view, visualization_engine,
+		// raycast to renderState_canonical for tracking and "freeview" rendering
+		camera_tracking_controller->Prepare(tracking_state, canonical_volume, view, rendering_engine,
 		                                    canonical_render_state);
 	} else *tracking_state->pose_d = previous_frame_pose;
 
@@ -436,9 +438,9 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(UChar4Image* out, 
 					render_type = IRenderingEngine::RENDER_SHADED_GREYSCALE_IMAGENORMALS;
 			}
 
-			visualization_engine->RenderImage(live_volumes[0], tracking_state->pose_d, &view->calib.intrinsics_d,
-			                                  live_render_state, live_render_state->raycastImage, render_type,
-			                                  raycastType);
+			rendering_engine->RenderImage(live_volumes[0], tracking_state->pose_d, &view->calib.intrinsics_d,
+			                              live_render_state, live_render_state->raycastImage, render_type,
+			                              raycastType);
 
 
 			ORUtils::Image<Vector4u>* srcImage = nullptr;
@@ -478,10 +480,10 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(UChar4Image* out, 
 				                                        settings.device_type);
 			}
 
-			visualization_engine->FindVisibleBlocks(live_volumes[0], pose, intrinsics, freeview_render_state);
-			visualization_engine->CreateExpectedDepths(live_volumes[0], pose, intrinsics, freeview_render_state);
-			visualization_engine->RenderImage(live_volumes[0], pose, intrinsics, freeview_render_state,
-			                                  freeview_render_state->raycastImage, render_type);
+			rendering_engine->FindVisibleBlocks(live_volumes[0], pose, intrinsics, freeview_render_state);
+			rendering_engine->CreateExpectedDepths(live_volumes[0], pose, intrinsics, freeview_render_state);
+			rendering_engine->RenderImage(live_volumes[0], pose, intrinsics, freeview_render_state,
+			                              freeview_render_state->raycastImage, render_type);
 
 			if (settings.device_type == MEMORYDEVICE_CUDA)
 				out->SetFrom(*freeview_render_state->raycastImage, MemoryCopyDirection::CUDA_TO_CPU);
@@ -498,10 +500,10 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(UChar4Image* out, 
 				                                        settings.device_type);
 			}
 
-			visualization_engine->FindVisibleBlocks(canonical_volume, pose, intrinsics, freeview_render_state);
-			visualization_engine->CreateExpectedDepths(canonical_volume, pose, intrinsics, freeview_render_state);
-			visualization_engine->RenderImage(canonical_volume, pose, intrinsics, freeview_render_state,
-			                                  freeview_render_state->raycastImage, type);
+			rendering_engine->FindVisibleBlocks(canonical_volume, pose, intrinsics, freeview_render_state);
+			rendering_engine->CreateExpectedDepths(canonical_volume, pose, intrinsics, freeview_render_state);
+			rendering_engine->RenderImage(canonical_volume, pose, intrinsics, freeview_render_state,
+			                              freeview_render_state->raycastImage, type);
 
 			if (settings.device_type == MEMORYDEVICE_CUDA)
 				out->SetFrom(*freeview_render_state->raycastImage, MemoryCopyDirection::CUDA_TO_CPU);
@@ -572,7 +574,7 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::HandlePotentialCameraTracki
 					//TODO: FIXME (See issue #214 at https://github.com/Algomorph/InfiniTAM/issues/214)
 					//indexing_engine->UpdateVisibleList(view, tracking_state, live_volumes[0], canonical_render_state, true);
 
-					camera_tracking_controller->Prepare(tracking_state, live_volumes[0], view, visualization_engine,
+					camera_tracking_controller->Prepare(tracking_state, live_volumes[0], view, rendering_engine,
 					                                    canonical_render_state);
 					camera_tracking_controller->Track(tracking_state, view);
 

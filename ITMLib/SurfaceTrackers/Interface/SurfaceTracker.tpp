@@ -128,7 +128,7 @@ inline static void PrintVolumeStatistics(
  */
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, GradientFunctorType TGradientFunctorType>
 VoxelVolume<TVoxel, TIndex>*
-SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorType>::TrackFrameMotion(
+SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorType>::TrackNonRigidMotion(
 		VoxelVolume<TVoxel, TIndex>* canonical_volume,
 		VoxelVolume<TVoxel, TIndex>** live_volume_pair,
 		VoxelVolume<TWarp, TIndex>* warp_field) {

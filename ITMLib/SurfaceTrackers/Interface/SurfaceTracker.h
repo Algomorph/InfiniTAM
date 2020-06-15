@@ -50,7 +50,7 @@ public: // member functions
 	virtual ~SurfaceTracker();
 
 
-	VoxelVolume<TVoxel, TIndex>* TrackFrameMotion(
+	VoxelVolume<TVoxel, TIndex>* TrackNonRigidMotion(
 			VoxelVolume<TVoxel, TIndex>* canonical_volume,
 			VoxelVolume<TVoxel, TIndex>** live_volume_pair,
 			VoxelVolume<TWarp, TIndex>* warp_field) override;

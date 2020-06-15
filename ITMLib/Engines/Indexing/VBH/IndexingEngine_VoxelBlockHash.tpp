@@ -243,7 +243,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType, TExecutionMode>::
 		deallocation_functor.SetCollidingBlockCount(0);
 		volume->index.ClearHashEntryAllocationStates();
 
-		RawArrayTraversalEngine<TMemoryDeviceType>::TraverseWithIndex(blocks_to_remove_device, deallocation_functor, count_of_blocks_to_remove);
+		RawArrayTraversalEngine<TMemoryDeviceType>::Traverse(blocks_to_remove_device, deallocation_functor, count_of_blocks_to_remove);
 
 		count_of_blocks_to_remove = deallocation_functor.GetCollidingBlockCount();
 		std::swap(blocks_to_remove_device, deallocation_functor.colliding_positions_device);

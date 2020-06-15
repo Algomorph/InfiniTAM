@@ -97,7 +97,6 @@ public: // member functions
 
 	void SaveToDisk(std::string output_folder_path) {
 		ORUtils::OStreamWrapper file(output_folder_path + "/voxel_block_hash_diagnostic_data.dat", true);
-		Vector2i& image_dimensions = *this->depth_image_dimensions.GetData(MEMORYDEVICE_CPU);
 		const int num_bool_layers = 2;
 		file.OStream().write(reinterpret_cast<const char*>(&num_bool_layers), sizeof(int));
 		ORUtils::MemoryBlockPersistence::SaveImage(file, surface1_point_mask);

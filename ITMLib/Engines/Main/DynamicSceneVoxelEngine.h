@@ -52,7 +52,7 @@ private: // member variables
 
 	// engines
 	LowLevelEngine* low_level_engine;
-	RenderingEngineBase<TVoxel, TIndex>* visualization_engine;
+	RenderingEngineBase<TVoxel, TIndex>* rendering_engine;
 	MeshingEngine<TVoxel, TIndex>* meshing_engine;
 	IndexingEngineInterface<TVoxel, TIndex>* indexing_engine;
 	DepthFusionEngineInterface<TVoxel, TWarp, TIndex>* depth_fusion_engine;
