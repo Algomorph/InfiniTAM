@@ -42,8 +42,6 @@ class VisualizerApp:
         self.meshes = [self.raw_live_mesh, self.warped_live_mesh, self.canonical_mesh]
         self.mesh_names = ["canonical_mesh", "raw_live_mesh", "warped_live_mesh"]
 
-        # Add the actors to the renderer, set the background and size
-
         self.renderer.SetBackground(colors.GetColor3d("Black"))
         self.render_window.SetSize(1400, 900)
         self.render_window.SetWindowName('Allocation')
@@ -81,8 +79,6 @@ class VisualizerApp:
         widget.SetEnabled(1)
         widget.InteractiveOn()
 
-        # We'll zoom in a little by accessing the camera and invoking a "Zoom"
-        # method on it.
         self.camera = camera = self.renderer.GetActiveCamera()
 
         camera.SetPosition(self.offset_cam[0], self.offset_cam[1], self.offset_cam[2])
@@ -99,9 +95,10 @@ class VisualizerApp:
         self.render_window.SetSize(self.render_window.GetScreenSize())
         self.set_frame(self.current_frame)
         self.show_mesh_at_index(0)
-        # _DEBUG alloc
-        self.meshes[self.shown_mesh_index].toggle_visibility()
+        # uncomment to start out with meshes invisible
+        # self.meshes[self.shown_mesh_index].toggle_visibility()
         self.blocks.toggle_labels()
+        self.blocks.toggle_visibility()
         self.render_window.Render()
 
     def load_frame_meshes(self, i_frame):

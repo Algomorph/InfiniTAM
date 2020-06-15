@@ -163,6 +163,7 @@ class RGBDCameraEmulatorApplication:
         camera_data.sensor_width = 32.0
         camera_data.dof.aperture_fstop = 128
         camera_data.display_size = 2.84
+        camera_data.lens = 25.85
 
         if self.args.make_camera_and_animate:
             self.animate_camera(camera_object, self.args.camera_trajectory_preset)

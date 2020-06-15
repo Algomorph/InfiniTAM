@@ -65,10 +65,11 @@ def read_block_allocation_ray_data(inverse_camera_matrices,
         camera_matrix_current = np.linalg.inv(inverse_camera_matrix_current)
         identity_matrix = np.identity(4, dtype=np.float32)
         camera_matrix_canonical = identity_matrix
+        camera_matrix_live = inverse_camera_matrix_current
 
         live_based_point_cloud = layers[2][point_mask1]
         one_col = np.ones((live_based_point_cloud.shape[0], 1), dtype=np.float32)
-        live_based_point_cloud = inverse_camera_matrix_current.dot(np.hstack((live_based_point_cloud, one_col)).T).T[:, 0:3]
+        live_based_point_cloud = camera_matrix_live.dot(np.hstack((live_based_point_cloud, one_col)).T).T[:, 0:3]
 
         canonical_based_point_cloud = layers[3][point_mask2]
         one_col = np.ones((canonical_based_point_cloud.shape[0], 1), dtype=np.float32)

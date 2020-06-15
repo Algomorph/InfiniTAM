@@ -33,7 +33,7 @@ void ITMLib::EditAndCopyEngine_CPU<TVoxel, PlainVoxelArray>::ResetVolume(
 	const unsigned int voxel_count = volume->index.GetMaxVoxelCount();
 	TVoxel* voxels = volume->GetVoxels();
 #ifdef WITH_OPENMP
-#pragma omp parallel for default(none) shared(voxels)
+#pragma omp parallel for default(none) shared(voxels, voxel_count)
 #endif
 	for (unsigned int i_voxel = 0; i_voxel < voxel_count; ++i_voxel) voxels[i_voxel] = TVoxel();
 }

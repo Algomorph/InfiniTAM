@@ -52,6 +52,7 @@ def get_camera_projection_from_blender(camera_data):
         raise ValueError('Non-perspective cameras not supported')
     scene = bpy.context.scene
     f_in_mm = camera_data.lens
+    print(f_in_mm)
     scale = scene.render.resolution_percentage / 100
     resolution_x_in_px = scale * scene.render.resolution_x
     resolution_y_in_px = scale * scene.render.resolution_y
@@ -66,6 +67,7 @@ def get_camera_projection_from_blender(camera_data):
         view_factor_in_px = resolution_x_in_px
     else:
         view_factor_in_px = pixel_aspect_ratio * resolution_y_in_px
+
     pixel_size_mm_per_px = sensor_size_in_mm / f_in_mm / view_factor_in_px
     f_x = 1 / pixel_size_mm_per_px
     f_y = 1 / pixel_size_mm_per_px / pixel_aspect_ratio

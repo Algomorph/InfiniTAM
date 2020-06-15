@@ -357,9 +357,9 @@ protected: // member functions
 		      (surface1_depth_metric + this->surface_distance_cutoff) > this->far_clipping_distance))
 			has_surface1 = true;
 
-		surface2_point_in_camera_space = WorldSpacePointToCameraSpace(surface2_point_in_world_space,
-		                                                              this->depth_camera_pose);
-//		surface2_point_in_camera_space = Vector4f(surface2_point_in_world_space);
+//		surface2_point_in_camera_space = WorldSpacePointToCameraSpace(surface2_point_in_world_space,
+//		                                                              this->depth_camera_pose);
+		surface2_point_in_camera_space = Vector4f(surface2_point_in_world_space);
 
 		if (surface2_point_in_camera_space.z > 0.0f) has_surface2 = true;
 

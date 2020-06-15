@@ -56,7 +56,7 @@ public: // member functions
 	Mesh(ORUtils::MemoryBlock<Triangle>& triangles, unsigned int triangle_count);
 	MemoryDeviceType GetMemoryDeviceType() const;
 
-	friend bool AlmostEqual(const Mesh& mesh1, const Mesh& mesh2, const float tolerance, bool presort_triangles = true);
+	friend bool AlmostEqual(const Mesh& mesh1, const Mesh& mesh2, const float tolerance, bool presort_triangles);
 
 	void WriteOBJ(const std::string& path);
 
@@ -68,6 +68,8 @@ private: // member functions
 	template<typename TWriteTriangleArrayFunction>
 	void GenericWriteToDisk(TWriteTriangleArrayFunction&& write_triangle_array);
 };
+
+bool AlmostEqual(const Mesh& mesh1, const Mesh& mesh2, const float tolerance, bool presort_triangles = true);
 
 } // namespace ITMLib
 
