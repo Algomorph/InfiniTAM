@@ -36,12 +36,12 @@ void EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::ResetVolume(
 
 	TVoxel* voxels = volume->GetVoxels();
 #ifdef WITH_OPENMP
-#pragma omp parallel for default(none) shared(voxels)
+#pragma omp parallel for default(none) shared(voxels, block_count, block_size)
 #endif
 	for (int i_voxel = 0; i_voxel < block_count * block_size; i_voxel++) voxels[i_voxel] = TVoxel();
 	int* block_allocation_list = volume->index.GetBlockAllocationList();
 #ifdef WITH_OPENMP
-#pragma omp parallel for default(none) shared(block_allocation_list)
+#pragma omp parallel for default(none) shared(block_allocation_list, block_count)
 #endif
 	for (int i_block_index = 0; i_block_index < block_count; i_block_index++)
 		block_allocation_list[i_block_index] = i_block_index;
@@ -58,13 +58,13 @@ void EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::ResetVolume(
 	HashEntry* hash_table = volume->index.GetEntries();
 	const int entry_count = volume->index.hash_entry_count;
 #ifdef WITH_OPENMP
-#pragma omp parallel for default(none) shared(hash_table)
+#pragma omp parallel for default(none) shared(hash_table) firstprivate(entry_count, default_entry)
 #endif
 	for (int i_entry = 0; i_entry < entry_count; i_entry++) hash_table[i_entry] = default_entry;
 	int* excess_entry_list = volume->index.GetExcessEntryList();
 	const int excess_list_size = volume->index.GetExcessListSize();
 #ifdef WITH_OPENMP
-#pragma omp parallel for default(none) shared(excess_entry_list)
+#pragma omp parallel for default(none) shared(excess_entry_list) firstprivate(excess_list_size)
 #endif
 	for (int i_excess_entry = 0; i_excess_entry < excess_list_size; i_excess_entry++)
 		excess_entry_list[i_excess_entry] = i_excess_entry;
@@ -253,7 +253,8 @@ bool EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::CopyVolume(
 	if (offset == Vector3i(0)) {
 		internal::AllocateUsingOtherVolume<MEMORYDEVICE_CPU>(target_volume, source_volume);
 #ifdef WITH_OPENMP
-#pragma omp parallel for default(none) shared(source_hash_table, destination_hash_table, source_voxels, destination_voxels, voxels_were_copied)
+#pragma omp parallel for default(none) shared(source_hash_table, destination_hash_table, source_voxels, destination_voxels, voxels_were_copied) \
+firstprivate(hash_entry_count)
 #endif
 		for (int sourceHash = 0; sourceHash < hash_entry_count; sourceHash++) {
 			const HashEntry& sourceHashEntry = source_hash_table[sourceHash];
@@ -271,7 +272,8 @@ bool EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::CopyVolume(
 		}
 	} else {
 #ifdef WITH_OPENMP
-#pragma omp parallel for default(none) shared(source_hash_table, source_voxels, voxels_were_copied, offset, target_volume)
+#pragma omp parallel for default(none) shared(source_hash_table, source_voxels, voxels_were_copied, offset, target_volume) \
+firstprivate(hash_entry_count)
 #endif
 		// traverse source hash blocks
 		for (int sourceHash = 0; sourceHash < hash_entry_count; sourceHash++) {

@@ -39,7 +39,7 @@ protected: // static functions
 	template<typename TApplyFunction>
 	inline static void Traverse_Generic(const unsigned int element_count, TApplyFunction&& apply_function) {
 #ifdef WITH_OPENMP
-#pragma omp parallel for default(none) shared(apply_function)
+#pragma omp parallel for default(none) shared(apply_function, element_count)
 #endif
 		for (int i_item = 0; i_item < element_count; i_item++) {
 			apply_function(i_item);
@@ -125,7 +125,7 @@ protected: // static functions
 #ifdef WITH_OPENMP
 		const int thread_count = omp_get_max_threads();
 		const int job_count = ceil_of_integer_quotient(sample_size, thread_count) * thread_count;
-#pragma omp parallel for default(none) shared(sample_indices, data, functor)
+#pragma omp parallel for default(none) shared(sample_indices, data, functor) firstprivate(job_count, sample_size)
 		for (int i_index = 0; i_index < job_count; i_index++) {
 			functor(data, sample_indices[i_index], i_index >= sample_size);
 		}

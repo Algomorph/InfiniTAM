@@ -323,7 +323,8 @@ void SceneReconstructionEngine_CPU<TVoxel, PlainVoxelArray>::IntegrateIntoScene(
 	//bool approximateIntegration = !trackingState->requiresFullRendering;
 
 #ifdef WITH_OPENMP
-	#pragma omp parallel for default(none) shared(volume, voxelArray, arrayInfo, rgb, depth, confidence)
+	#pragma omp parallel for default(none) shared(volume, voxelArray, arrayInfo, rgb, depth, confidence)\
+	firstprivate(rgbImgSize, depthImgSize, voxelSize, M_d, M_rgb, projParams_d, projParams_rgb, mu, maxW, stopIntegratingAtMaxW)
 #endif
 	for (int locId = 0; locId < volume->index.GetVolumeSize().x * volume->index.GetVolumeSize().y *
 	                            volume->index.GetVolumeSize().z; ++locId)

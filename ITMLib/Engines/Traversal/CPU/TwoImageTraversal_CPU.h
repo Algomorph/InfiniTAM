@@ -33,7 +33,8 @@ public:
 		const TImage1Element* image1_data = image1->GetData(MEMORYDEVICE_CPU);
 		const TImage2Element* image2_data = image2->GetData(MEMORYDEVICE_CPU);
 #ifdef WITH_OPENMP
-	#pragma omp parallel for default(none) shared(functor, image1_data, image2_data)
+	#pragma omp parallel for default(none) shared(functor, image1_data, image2_data) firstprivate(element_count) \
+	firstprivate(resolution)
 #endif
 		for (int i_element = 0; i_element < element_count; i_element++){
 			int y = i_element / resolution.x;

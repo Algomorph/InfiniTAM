@@ -195,7 +195,8 @@ bool AlmostEqual(const Mesh& mesh1, const Mesh& mesh2, const float tolerance, bo
 
 	volatile bool mismatch_found = false;
 #ifdef WITH_OPENMP
-#pragma omp parallel for default(none) shared(triangles1, triangles2, mismatch_found)
+#pragma omp parallel for default(none) shared(triangles1, triangles2, mismatch_found) \
+firstprivate(triangle_count, tolerance)
 #endif
 	for (int i_triangle = 0; i_triangle < triangle_count; i_triangle++) {
 		if (mismatch_found) continue;

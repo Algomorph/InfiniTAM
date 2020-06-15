@@ -158,7 +158,8 @@ void IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType, TExecutionMode>::
 
 	const GridAlignedBox ga_box(box_size_blocks, box_min_blocks);
 #ifdef WITH_OPENMP
-#pragma omp parallel for default(none) shared(block_positions_CPU)
+#pragma omp parallel for default(none) shared(block_positions_CPU) \
+firstprivate(block_count, ga_box)
 #endif
 	for (int i_block = 0; i_block < block_count; i_block++) {
 		Vector3i position;
