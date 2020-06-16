@@ -55,7 +55,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 # Some compiler fixes    #
 ##########################
 
-if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" AND ${CMAKE_CXX_STANDARD} STREQUAL "17")
+if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" AND ${CMAKE_CXX_STANDARD} STREQUAL "17" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0.1)
     # fix filesystem "bug" with GCC < 9.0.1 (see https://gcc.gnu.org/bugzilla/show_bug.cgi?id=90050)
     link_libraries(stdc++fs)
 endif()
