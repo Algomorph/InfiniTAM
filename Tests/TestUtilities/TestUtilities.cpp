@@ -411,7 +411,7 @@ configuration::Configuration GenerateChangedUpConfiguration(){
 			true);
 	IndexingSettings changed_up_indexing_settings(DIAGNOSTIC);
 	RenderingSettings changed_up_rendering_settings(true);
-	AutomaticRunSettings changed_up_automatic_run_settings(50, 16, true, true, true),
+	AutomaticRunSettings changed_up_automatic_run_settings(50, 16, true, true, true);
 	AddDeferrableToSourceTree(changed_up_configuration, changed_up_telemetry_settings);
 	AddDeferrableToSourceTree(changed_up_configuration, changed_up_indexing_settings);
 	AddDeferrableToSourceTree(changed_up_configuration, changed_up_rendering_settings);

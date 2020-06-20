@@ -1,52 +1,30 @@
-import gzip
-import os
-import vtk
+#!/usr/bin/python3
 import sys
+import vtk
 import numpy as np
 
-from Apps.python_shared import trajectory_loading
-from Apps.visualizer.block_allocation_ray_data import AllocationRays
-from Apps.visualizer.mesh import Mesh
-from Apps.visualizer.allocated_blocks import AllocatedBlocks
-from Apps.visualizer.utilities import get_frame_output_path
+from Apps.Python.visualizer import Mesh
+
+PROGRAM_EXIT_SUCCESS = 0
+PROGRAM_EXIT_FAILURE = -1
 
 
-class VisualizerApp:
-
-    def __init__(self, output_path="/mnt/Data/Reconstruction/experiment_output/2020-05-04/recording",
-                 start_frame_ix=16):
-        self.inverse_camera_matrices = trajectory_loading.load_inverse_matrices(output_path)
-        # self.camera_matrices = trajectory_loading.load_matrices(output_path)
-        self.start_frame_ix = start_frame_ix
-        self.output_path = output_path
-        self.offset_cam = (0.2562770766576, 0.13962609403401335, -0.2113334598208764)
+class TestApp:
+    def __init__(self):
         colors = vtk.vtkNamedColors()
-        self.current_frame = start_frame_ix
+        self._colors = colors
 
-        # renderer & render window initialization
+        # a renderer and render window
         self.renderer = vtk.vtkRenderer()
-        self.render_window = vtk.vtkRenderWindow()
-        self.render_window.AddRenderer(self.renderer)
-
-        # allocated blocks & labels
-        self.blocks = AllocatedBlocks(self.renderer, output_path, start_frame_ix)
-        self.rays = AllocationRays(self.renderer, output_path, start_frame_ix, self.inverse_camera_matrices)
-        self.frame_index_upper_bound = start_frame_ix + self.blocks.frame_count
-
-        # mesh setup
-        self.canonical_mesh = Mesh(self.renderer, self.render_window, colors.GetColor3d("Peacock"))
-        self.raw_live_mesh = Mesh(self.renderer, self.render_window, colors.GetColor3d("Orange"))
-        self.warped_live_mesh = Mesh(self.renderer, self.render_window, colors.GetColor3d("Green"))
-        self.shown_mesh_index = 0
-
-        self.meshes = [self.raw_live_mesh, self.warped_live_mesh, self.canonical_mesh]
-        self.mesh_names = ["canonical_mesh", "raw_live_mesh", "warped_live_mesh"]
-
         self.renderer.SetBackground(colors.GetColor3d("Black"))
-        self.render_window.SetSize(1400, 900)
-        self.render_window.SetWindowName('Allocation')
+        self.render_window = vtk.vtkRenderWindow()
+        self.render_window.SetWindowName("Test")
+        self.render_window.AddRenderer(self.renderer)
+        self.render_window.SetPosition(5121, 75)
+        # fullscreen
+        self.render_window.SetSize(self.render_window.GetScreenSize())
 
-        # Interactor setup
+        # an interactor
         self.interactor = vtk.vtkRenderWindowInteractor()
         self.interactor.SetInteractorStyle(None)
         self.interactor.SetRenderWindow(self.render_window)
@@ -68,6 +46,12 @@ class VisualizerApp:
         self.panning = False
         self.zooming = False
 
+        # add the actors to the scene
+        self.draw_trajectory()
+
+        self.mesh = Mesh(self.renderer, self.render_window, colors.GetColor3d("Peacock"))
+        self.mesh.update("/mnt/Data/Reconstruction/experiment_output/2020-05-19/recording/Frame_17/canonical.ply")
+
         # axes actor
         self.axes = vtk.vtkAxesActor()
         self.axes_widget = widget = vtk.vtkOrientationMarkerWidget()
@@ -80,79 +64,100 @@ class VisualizerApp:
         widget.InteractiveOn()
 
         self.camera = camera = self.renderer.GetActiveCamera()
-
-        camera.SetPosition(self.offset_cam[0], self.offset_cam[1], self.offset_cam[2])
+        camera.SetPosition(0.2090549895511249, 1.213523311640004, -1.1883496392331843)
         camera.SetViewUp(0, 0, 0)
         camera.SetFocalPoint(0, 0, 0.512)
         camera.SetClippingRange(0.01, 10.0)
+        # self.renderer.SetLightFollowCamera(False)
+        # self.light = vtk.vtkLight()
+        # self.light.SetLightTypeToSceneLight()
+        # self.light.SetPosition(0.2090549895511249 - 0.5, 1.213523311640004, -1.1883496392331843)
+        # self.light.SetPositional(True)
+        # self.light.SetFocalPoint(0, 0, 0.512)
+        # self.light_actor = vtk.vtkLightActor()
+        # self.light_actor.SetLight(self.light)
+        # self.renderer.AddViewProp(self.light_actor)
+
 
         self.render_window.Render()
-        # 2nd monitor from left
-        # self.render_window.SetPosition(1281, 187)
-        # 4th monitor
-        self.render_window.SetPosition(5121, 75)
-        # fullscreen
-        self.render_window.SetSize(self.render_window.GetScreenSize())
-        self.set_frame(self.current_frame)
-        self.show_mesh_at_index(0)
-        # uncomment to start out with meshes invisible
-        # self.meshes[self.shown_mesh_index].toggle_visibility()
-        self.blocks.toggle_labels()
-        self.blocks.toggle_visibility()
-        self.render_window.Render()
 
-    def load_frame_meshes(self, i_frame):
-        frame_path = get_frame_output_path(self.output_path, i_frame)
-        canonical_path = os.path.join(frame_path, "canonical.ply")
-        raw_live_path = os.path.join(frame_path, "live_raw.ply")
-        warped_live_path = os.path.join(frame_path, "live_warped.ply")
-        self.canonical_mesh.update(canonical_path)
-        self.raw_live_mesh.update(raw_live_path)
-        self.warped_live_mesh.update(warped_live_path)
+    def draw_trajectory(self):
+        viewpoints = np.array(
+            [[0, 0, 0],
+             [-0.588401, 0.0153606, 0.167214],
+             [-0.885727, 0.0642821, 0.69977],
+             [-0.717809, 0.118107, 1.2857],
+             [-0.183011, 0.145305, 1.58178],
+             [0.40539, 0.129945, 1.41457],
+             [0.702716, 0.0810233, 0.882013],
+             [0.534798, 0.0271984, 0.29608]], dtype=np.float32
+        )
+        self.draw_axes_array(viewpoints, self._colors.GetColor3d("Green"))
+        directions = np.array(
+            [[-0.114457, 0.0908755, 0.989263],
+             [0.0331258, 0.0870227, 0.947322],
+             [0.107701, 0.0747522, 0.813747],
+             [0.065584, 0.0612519, 0.666783],
+             [-0.0685541, 0.05443, 0.59252],
+             [-0.216137, 0.0582827, 0.634461],
+             [-0.290712, 0.0705532, 0.768036],
+             [-0.248595, 0.0840536, 0.915]], dtype=np.float32
+        )
+        self.draw_point_array(directions, self._colors.GetColor3d("Orange"))
+
+    def draw_point_array(self, point_array, color):
+        points_vtk = vtk.vtkPoints()
+        for x, y, z in point_array:
+            points_vtk.InsertNextPoint(x, -y, z)
+
+        points_polydata = vtk.vtkPolyData()
+        points_polydata.SetPoints(points_vtk)
+
+        points_filter = vtk.vtkVertexGlyphFilter()
+        points_filter.SetInputData(points_polydata)
+
+        points_mapper = vtk.vtkPolyDataMapper()
+        points_mapper.SetInputConnection(points_filter.GetOutputPort())
+
+        points_actor = vtk.vtkActor()
+        points_actor.SetMapper(points_mapper)
+        points_actor.GetProperty().SetPointSize(6)
+        points_actor.GetProperty().SetColor(color)
+
+        self.renderer.AddActor(points_actor)
+
+    def draw_axes_array(self, point_array, color):
+        points_vtk = vtk.vtkPoints()
+        for x, y, z in point_array:
+            points_vtk.InsertNextPoint(x, -y, z)
+
+        points_polydata = vtk.vtkPolyData()
+        points_polydata.SetPoints(points_vtk)
+
+        axes = vtk.vtkAxes()
+        axes.SetScaleFactor(0.5)
+        sphere = vtk.vtkSphereSource()
+        sphere.SetRadius(0.01)
+        normals_filter = vtk.vtkPolyDataNormals()
+        normals_filter.FlipNormalsOn()
+        normals_filter.SetInputConnection(axes.GetOutputPort())
+
+        axes_glyph_mapper = vtk.vtkGlyph3DMapper()
+        axes_glyph_mapper.SetInputData(points_polydata)
+        axes_glyph_mapper.SetSourceConnection(axes.GetOutputPort())
+
+        axes_glyph_actor = vtk.vtkActor()
+        axes_glyph_actor.SetMapper(axes_glyph_mapper)
+        axes_glyph_actor.GetProperty().SetPointSize(6)
+        axes_glyph_actor.GetProperty().SetColor(color)
+        axes_glyph_actor.GetProperty().SetRepresentationToWireframe()
+
+        self.renderer.AddActor(axes_glyph_actor)
 
     def launch(self):
-        # Start the event loop.
+        # begin mouse interaction
         self.interactor.Start()
 
-    def show_mesh_at_index(self, i_mesh_to_show):
-        print("Mesh:", self.mesh_names[i_mesh_to_show])
-        self.shown_mesh_index = i_mesh_to_show
-        i_mesh = 0
-        for mesh in self.meshes:
-            if i_mesh_to_show == i_mesh:
-                mesh.show()
-            else:
-                mesh.hide()
-            i_mesh += 1
-        self.render_window.Render()
-
-    def set_frame(self, i_frame):
-        print("Frame:", i_frame)
-
-        self.load_frame_meshes(i_frame)
-        self.blocks.set_frame(i_frame)
-        self.rays.set_frame(i_frame)
-        self.current_frame = i_frame
-
-        self.render_window.Render()
-
-    def advance_view(self):
-        if self.shown_mesh_index == len(self.meshes) - 1:
-            if self.current_frame < self.frame_index_upper_bound - 1:
-                self.set_frame(self.current_frame + 1)
-                self.show_mesh_at_index(0)
-        else:
-            self.show_mesh_at_index(self.shown_mesh_index + 1)
-
-    def retreat_view(self):
-        if self.shown_mesh_index == 0:
-            if self.current_frame > 0:
-                self.set_frame(self.current_frame - 1)
-                self.show_mesh_at_index(len(self.meshes) - 1)
-        else:
-            self.show_mesh_at_index(self.shown_mesh_index - 1)
-
-    # Handle the mouse button events.
     def button_event(self, obj, event):
         if event == "LeftButtonPressEvent":
             self.rotating = True
@@ -271,27 +276,22 @@ class VisualizerApp:
         if key == "q" or key == "Escape":
             obj.InvokeEvent("DeleteAllObjects")
             sys.exit()
-        elif key == "bracketright":
-            if self.current_frame < self.frame_index_upper_bound - 1:
-                self.set_frame(self.current_frame + 1)
-        elif key == "bracketleft":
-            if self.current_frame > 0:
-                self.set_frame(self.current_frame - 1)
         elif key == "c":
+            print("Active camera position & orientation:")
             print(self.renderer.GetActiveCamera().GetPosition())
-        elif key == "Right":
-            self.advance_view()
-        elif key == "Left":
-            self.retreat_view()
+            print(self.renderer.GetActiveCamera().GetOrientation())
         elif key == "p":
             print(self.render_window.GetPosition())
         elif key == "m":
-            self.meshes[self.shown_mesh_index].toggle_visibility()
-            self.render_window.Render()
-        elif key == "l":
-            self.blocks.toggle_labels()
-            self.render_window.Render()
-        elif key == "g":
-            self.blocks.toggle_visibility()
+            self.mesh.toggle_visibility()
             self.render_window.Render()
 
+
+def main():
+    app = TestApp()
+    app.launch()
+    return PROGRAM_EXIT_SUCCESS
+
+
+if __name__ == "__main__":
+    sys.exit(main())

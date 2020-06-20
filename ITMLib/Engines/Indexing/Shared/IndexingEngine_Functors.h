@@ -345,40 +345,40 @@ protected: // member functions
 	_DEVICE_WHEN_AVAILABLE_
 	inline bool
 	ComputeMarchSegment(ITMLib::Segment& march_segment,
-	                    Vector4f& surface1_point_in_camera_space,
-	                    Vector4f& surface2_point_in_camera_space,
-	                    bool& has_surface1, bool& has_surface2,
-	                    const float& surface1_depth_metric,
-	                    const Vector4f& surface2_point_in_world_space,
+	                    Vector4f& live_surface_point_in_camera_space,
+	                    Vector4f& canonical_surface_point_in_camera_space,
+	                    bool& has_live_surface, bool& has_canonical_surface,
+	                    const float& live_frame_depth_meters,
+	                    Vector4f canonical_surface_point_in_world_space,
 	                    const int x, const int y) {
-		has_surface1 = has_surface2 = false;
-		if (!(surface1_depth_metric <= 0 || (surface1_depth_metric - this->surface_distance_cutoff) < 0 ||
-		      (surface1_depth_metric - this->surface_distance_cutoff) < this->near_clipping_distance ||
-		      (surface1_depth_metric + this->surface_distance_cutoff) > this->far_clipping_distance))
-			has_surface1 = true;
+		has_live_surface = has_canonical_surface = false;
+		if (!(live_frame_depth_meters <= 0 || (live_frame_depth_meters - this->surface_distance_cutoff) < 0 ||
+		      (live_frame_depth_meters - this->surface_distance_cutoff) < this->near_clipping_distance ||
+		      (live_frame_depth_meters + this->surface_distance_cutoff) > this->far_clipping_distance))
+			has_live_surface = true;
 
-//		surface2_point_in_camera_space = WorldSpacePointToCameraSpace(surface2_point_in_world_space,
-//		                                                              this->depth_camera_pose);
-		surface2_point_in_camera_space = Vector4f(surface2_point_in_world_space);
+		if (canonical_surface_point_in_world_space.w > 0.0f){
+			has_canonical_surface = true;
+			canonical_surface_point_in_world_space[3] = 1.0;
+			canonical_surface_point_in_camera_space = WorldSpacePointToCameraSpace(canonical_surface_point_in_world_space, this->depth_camera_pose);
+		}
 
-		if (surface2_point_in_camera_space.z > 0.0f) has_surface2 = true;
-
-		if (has_surface1 && has_surface2) {
-			surface1_point_in_camera_space = ImageSpacePointToCameraSpace(surface1_depth_metric, x, y,
-			                                                              this->inverted_projection_parameters);
+		if (has_live_surface && has_canonical_surface) {
+			live_surface_point_in_camera_space = ImageSpacePointToCameraSpace(live_frame_depth_meters, x, y,
+			                                                                  this->inverted_projection_parameters);
 			march_segment = FindHashBlockSegmentAlongCameraRayWithinRangeFromAndBetweenTwoPoints(
-					this->surface_distance_cutoff, surface1_point_in_camera_space, surface2_point_in_camera_space,
+					this->surface_distance_cutoff, live_surface_point_in_camera_space, canonical_surface_point_in_camera_space,
 					this->inverted_camera_pose,
 					this->hash_block_size_reciprocal);
 		} else {
-			if (has_surface1) {
+			if (has_live_surface) {
 				march_segment = FindHashBlockSegmentAlongCameraRayWithinRangeFromDepth(
-						surface1_point_in_camera_space, this->surface_distance_cutoff, surface1_depth_metric, x, y,
+						live_surface_point_in_camera_space, this->surface_distance_cutoff, live_frame_depth_meters, x, y,
 						this->inverted_camera_pose, this->inverted_projection_parameters,
 						this->hash_block_size_reciprocal);
-			} else if (has_surface2) {
+			} else if (has_canonical_surface) {
 				march_segment = FindHashBlockSegmentAlongCameraRayWithinRangeFromPoint(
-						this->surface_distance_cutoff, surface2_point_in_camera_space, this->inverted_camera_pose,
+						this->surface_distance_cutoff, canonical_surface_point_in_camera_space, this->inverted_camera_pose,
 						this->hash_block_size_reciprocal);
 			} else {
 				return false; // neither surface is defined at this point, nothing to do.

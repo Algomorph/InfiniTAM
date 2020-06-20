@@ -104,7 +104,7 @@ public:
 	const Vector2i& GetWindowSize() const { return window_size; }
 
 	float current_frame_processing_time;
-	int currently_processed_frame_index;
+	int current_frame_index;
 	ITMLib::CameraTrackingState::TrackingResult trackingResult;
 	std::string output_path;
 	bool needs_refresh;

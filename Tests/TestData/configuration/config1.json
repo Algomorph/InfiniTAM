@@ -119,13 +119,6 @@
         "mask_image_path_mask": "TestData\/frame_mask_%%06i.png",
         "imu_input_path": ""
     },
-    "automatic_run_settings": {
-        "number_of_frames_to_process": 50,
-        "index_of_frame_to_start_at": 16,
-        "load_volume_and_camera_matrix_before_processing": true,
-        "save_volumes_and_camera_matrix_after_processing": true,
-        "exit_after_automatic_processing": true
-    },
     "non_rigid_tracking_parameters": {
         "functor_type": "slavcheva_diagnostic",
         "max_iteration_threshold": 300,
@@ -163,5 +156,12 @@
     },
     "rendering_settings": {
         "skip_points": true
+    },
+    "automatic_run_settings": {
+        "index_of_frame_to_end_before": 50,
+        "index_of_frame_to_start_at": 16,
+        "load_volume_and_camera_matrix_before_processing": true,
+        "save_volumes_and_camera_matrix_after_processing": true,
+        "exit_after_automatic_processing": true
     }
 }

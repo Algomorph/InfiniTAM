@@ -15,6 +15,7 @@
 //  ================================================================
 //stdlib
 #include <filesystem>
+#include <map>
 
 //log4cplus
 #include <log4cplus/loggingmacros.h>
@@ -27,7 +28,6 @@
 #include "TestUtilities/CameraPoseAndRenderingEngineFixture.h"
 
 //ORUtils
-#include "../ORUtils/OStreamWrapper.h"
 #include "../ORUtils/FileUtils.h"
 
 //ITMLib
@@ -59,6 +59,7 @@
 #include "../ITMLib/Objects/Meshing/Mesh.h"
 #include "../ITMLib/Utils/Configuration/TelemetrySettings.h"
 #include "../ITMLib/Engines/Rendering/RenderingEngineFactory.h"
+#include "../ITMLib/Utils/Configuration/AutomaticRunSettings.h"
 
 
 using namespace ITMLib;
@@ -68,6 +69,8 @@ namespace snoopy = snoopy_test_utilities;
 namespace fs = std::filesystem;
 
 void ConstructSnoopyUnmaskedVolumes00() {
+	LOG4CPLUS_DEBUG(log4cplus::Logger::getRoot(), "Constructing snoopy unmasked full volumes at frame 0...");
+
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* volume_PVA_00;
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume_VBH_00;
 
@@ -175,6 +178,7 @@ void ConstructSnoopyMaskedVolumes16and17() {
 }
 
 void ConstructStripesTestVolumes() {
+	LOG4CPLUS_DEBUG(log4cplus::Logger::getRoot(), "Constructing stripe test volumes...");
 	// region ================================= CONSTRUCT VIEW =========================================================
 
 	RGBDCalib calibration_data;
@@ -368,8 +372,6 @@ void GenerateWarpedVolumeTestData() {
 
 configuration::Configuration GenerateDefaultSnoopyConfiguration() {
 	using namespace configuration;
-
-
 	configuration::Configuration
 			default_snoopy_configuration(
 			Vector3i(0, 0, 0),
@@ -406,7 +408,6 @@ configuration::Configuration GenerateDefaultSnoopyConfiguration() {
 			      "<CONFIGURATION_DIRECTORY>/frames/depth_%06i.png",
 			      "<CONFIGURATION_DIRECTORY>/frames/omask_%06i.png",
 			      ""),
-			AutomaticRunSettings(50, 16, false, false, false),
 			NonRigidTrackingParameters(
 					ITMLib::TRACKER_SLAVCHEVA_OPTIMIZED,
 					300,
@@ -428,9 +429,12 @@ configuration::Configuration GenerateDefaultSnoopyConfiguration() {
 	TelemetrySettings default_snoopy_telemetry_settings;
 	IndexingSettings default_snoopy_indexing_settings;
 	RenderingSettings default_snoopy_rendering_settings;
+	AutomaticRunSettings default_snoopy_automatic_run_settings(50, 16, false, false, false);
+
 	AddDeferrableToSourceTree(default_snoopy_configuration, default_snoopy_telemetry_settings);
 	AddDeferrableToSourceTree(default_snoopy_configuration, default_snoopy_indexing_settings);
 	AddDeferrableToSourceTree(default_snoopy_configuration, default_snoopy_rendering_settings);
+	AddDeferrableToSourceTree(default_snoopy_configuration, default_snoopy_automatic_run_settings);
 	return default_snoopy_configuration;
 }
 
@@ -458,6 +462,8 @@ void GenerateConfigurationTestData() {
 
 template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void GenerateMeshingTestData() {
+	LOG4CPLUS_DEBUG(log4cplus::Logger::getRoot(),
+	                "Generating meshing test data (" << IndexString<TIndex>() << ") ...");
 	VoxelVolume<TSDFVoxel, TIndex>* canonical_volume;
 	LoadVolume(&canonical_volume, snoopy::PartialVolume16Path<TIndex>(),
 	           TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
@@ -474,7 +480,8 @@ void GenerateMeshingTestData() {
 
 template<MemoryDeviceType TMemoryDeviceType>
 void GenerateRenderingTestData_VoxelBlockHash() {
-
+	LOG4CPLUS_DEBUG(log4cplus::Logger::getRoot(),
+	                "Generating VBH rendering test data ... ");
 	CameraPoseAndRenderingEngineFixture<TMemoryDeviceType> fixture;
 
 	ORUtils::OStreamWrapper visible_blocks_file(GENERATED_TEST_DATA_PREFIX "TestData/arrays/visible_blocks.dat", true);
@@ -652,7 +659,7 @@ int main(int argc, char* argv[]) {
 	log4cplus::Logger::getRoot().addAppender(console_appender);
 	log4cplus::Logger::getRoot().setLogLevel(log4cplus::DEBUG_LOG_LEVEL);
 
-	std::unordered_map<GeneratedTestDataType, std::function<void()>> generator_by_string(
+	std::map<GeneratedTestDataType, std::function<void()>> generator_by_string(
 			{
 					{SNOOPY_UNMASKED_VOLUMES,    ConstructSnoopyUnmaskedVolumes00},
 					{MASKED_VOLUMES,             ConstructSnoopyMaskedVolumes16and17},

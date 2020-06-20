@@ -105,9 +105,17 @@ public:
 	virtual void CreatePointCloud(VoxelVolume<TVoxel, TIndex>* scene, const View* view, CameraTrackingState* trackingState,
 	                              RenderState* renderState) const = 0;
 
-	/** Create an image of reference points and normals as
-	required by the ITMLib::Engine::ITMDepthTracker classes.
-	*/
+	//TODO: insert some documentation about how the ("smoothed") normals are computed
+	/**
+	 * \brief Render an image (dense ponit cloud) of reference points and normals
+	 * as required by the ITMLib::Engine::ITMDepthTracker classes.
+	 * \details the output is stored in the pointCloud member of the trackingState.
+	 * The "locations" of the output PointCloud are points in world space, expressed in meters.
+	 * The points are weighed, i.e. x, y, z / first three channels are the actual coordinates, while the
+	 * fourth channel, i.e. "w", is the number of measurements at the relevant voxel(s), which represent the
+	 * confidence that the point is correct.
+	 * The "colours" field of the output PointCloud actually contain the normals.
+	 **/
 	virtual void CreateICPMaps(VoxelVolume<TVoxel, TIndex>* scene, const View* view, CameraTrackingState* trackingState,
 	                           RenderState* renderState) const = 0;
 

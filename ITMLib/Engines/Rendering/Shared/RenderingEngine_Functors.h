@@ -258,6 +258,7 @@ public: // member functions
 
 	_DEVICE_WHEN_AVAILABLE_
 	inline void operator()(Vector4f& point, const int x, const int y) {
+
 		const Vector2f& ray_depth_range = ray_depth_range_image[x / ray_depth_image_subsampling_factor +
 		                                                        (y / ray_depth_image_subsampling_factor) * ray_depth_image_width];
 		CastRay<TVoxel, TIndex, TModifyVisibilityInformation>(

@@ -4,7 +4,7 @@ import vtk
 import gzip
 import numpy as np
 
-from Apps.visualizer.geometric_conversions import convert_block_to_metric, VoxelVolumeParameters
+from Apps.Python.visualizer.geometric_conversions import convert_block_to_metric, VoxelVolumeParameters
 
 
 def read_allocation_data(data_path, i_frame):

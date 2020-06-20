@@ -171,7 +171,7 @@ void UIEngine::Initialize(int& argc, char** argv,
 	sdkCreateTimer(&timer_average);
 
 	sdkResetTimer(&timer_average);
-	currently_processed_frame_index = 0;
+	current_frame_index = 0;
 	if (automatic_run_settings.index_of_frame_to_start_at > 0) {
 		printf("Skipping the first %d frames.\n", automatic_run_settings.index_of_frame_to_start_at);
 		SkipFrames(automatic_run_settings.index_of_frame_to_start_at);
@@ -209,13 +209,13 @@ void UIEngine::SkipFrames(int number_of_frames_to_skip) {
 		image_source_engine->GetImages(*inputRGBImage, *inputRawDepthImage);
 	}
 	this->start_frame_index += number_of_frames_to_skip;
-	this->currently_processed_frame_index += number_of_frames_to_skip;
+	this->current_frame_index += number_of_frames_to_skip;
 }
 
 
 void UIEngine::ProcessFrame() {
 	LOG4CPLUS_TOP_LEVEL(logging::get_logger(),
-	                    yellow << "***" << bright_cyan << "PROCESSING FRAME " << GetCurrentFrameIndex() << yellow
+	                    yellow << "***" << bright_cyan << "PROCESSING FRAME " << current_frame_index << yellow
 	                           << "***" << reset);
 
 	if (!image_source_engine->HasMoreImages()) return;
@@ -253,7 +253,7 @@ void UIEngine::ProcessFrame() {
 }
 
 int UIEngine::GetCurrentFrameIndex() const {
-	return start_frame_index + processed_frame_count;
+	return current_frame_index;
 }
 
 void UIEngine::Run() { glutMainLoop(); }
@@ -280,15 +280,15 @@ void UIEngine::Shutdown() {
 
 
 std::string UIEngine::GenerateNextFrameOutputPath() const {
-	return ITMLib::telemetry::CreateAndGetOutputPathForFrame(GetCurrentFrameIndex() + 1);
+	return ITMLib::telemetry::CreateAndGetOutputPathForFrame(current_frame_index + 1);
 }
 
 std::string UIEngine::GenerateCurrentFrameOutputPath() const {
-	return ITMLib::telemetry::CreateAndGetOutputPathForFrame(GetCurrentFrameIndex());
+	return ITMLib::telemetry::CreateAndGetOutputPathForFrame(current_frame_index);
 }
 
 std::string UIEngine::GeneratePreviousFrameOutputPath() const {
-	return ITMLib::telemetry::CreateAndGetOutputPathForFrame(GetCurrentFrameIndex() - 1);
+	return ITMLib::telemetry::CreateAndGetOutputPathForFrame(current_frame_index - 1);
 }
 
 //TODO: Group all recording & make it toggleable with a single keystroke / command flag
@@ -352,6 +352,6 @@ void UIEngine::RecordDepthAndRGBInputToImages() {
 
 void UIEngine::PrintProcessingFrameHeader() const {
 	LOG4CPLUS_PER_FRAME(logging::get_logger(),
-	                    bright_cyan << "PROCESSING FRAME " << GetCurrentFrameIndex() + 1 << reset);
+	                    bright_cyan << "PROCESSING FRAME " << current_frame_index + 1 << reset);
 }
 

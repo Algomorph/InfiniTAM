@@ -29,10 +29,8 @@ namespace InfiniTAM
 			ITMLib::IMUMeasurement *input_IMU_measurement;
 
 			int current_frame_index;
-			int number_of_frames_to_process_after_launch = 0;
-			bool exit_after_automatic_run = false;
+			int index_of_frame_to_end_before = 0;
 			bool save_after_automatic_run = false;
-			int start_frame_index = 0;
 
 			std::string output_path;
 

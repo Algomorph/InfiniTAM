@@ -119,13 +119,6 @@
         "mask_image_path_mask": "",
         "imu_input_path": ""
     },
-    "automatic_run_settings": {
-        "number_of_frames_to_process": 0,
-        "index_of_frame_to_start_at": 0,
-        "load_volume_and_camera_matrix_before_processing": false,
-        "save_volumes_and_camera_matrix_after_processing": false,
-        "exit_after_automatic_processing": false
-    },
     "non_rigid_tracking_parameters": {
         "functor_type": "slavcheva_diagnostic",
         "max_iteration_threshold": 200,
@@ -163,5 +156,12 @@
     },
     "rendering_settings": {
         "skip_points": false
+    },
+    "automatic_run_settings": {
+        "index_of_frame_to_end_before": 0,
+        "index_of_frame_to_start_at": 0,
+        "load_volume_and_camera_matrix_before_processing": false,
+        "save_volumes_and_camera_matrix_after_processing": false,
+        "exit_after_automatic_processing": false
     }
 }

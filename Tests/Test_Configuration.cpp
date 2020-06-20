@@ -31,6 +31,7 @@
 #include "../ITMLib/Engines/Indexing/IndexingSettings.h"
 #include "../ITMLib/Utils/Metacoding/DeferrableStructUtilities.h"
 #include "../ITMLib/Engines/Rendering/RenderingSettings.h"
+#include "../ITMLib/Utils/Configuration/AutomaticRunSettings.h"
 
 namespace pt = boost::property_tree;
 
@@ -42,11 +43,13 @@ struct DeferrableStructCollection {
 	TelemetrySettings telemetry_settings;
 	IndexingSettings indexing_settings;
 	RenderingSettings rendering_settings;
+	AutomaticRunSettings automatic_run_settings;
 
 	DeferrableStructCollection(const configuration::Configuration& source_configuration = configuration::get()) :
 			telemetry_settings(BuildDeferrableFromParentIfPresent<TelemetrySettings>(source_configuration)),
 			indexing_settings(BuildDeferrableFromParentIfPresent<IndexingSettings>(source_configuration)),
-			rendering_settings(BuildDeferrableFromParentIfPresent<RenderingSettings>(source_configuration)) {}
+			rendering_settings(BuildDeferrableFromParentIfPresent<RenderingSettings>(source_configuration)),
+			automatic_run_settings(BuildDeferrableFromParentIfPresent<AutomaticRunSettings>(source_configuration)){}
 
 	friend void RequireEqualDeferrables(const DeferrableStructCollection& l, const DeferrableStructCollection& r){
 		BOOST_REQUIRE_EQUAL(l.telemetry_settings, r.telemetry_settings);
@@ -82,7 +85,6 @@ BOOST_AUTO_TEST_CASE(ConfigurationTest) {
 	BOOST_REQUIRE_EQUAL(default_configuration.logging_settings, configuration::get().logging_settings);
 	RequireEqualDeferrables(default_deferrables, loaded_deferrables);
 	BOOST_REQUIRE_EQUAL(default_configuration.paths, configuration::get().paths);
-	BOOST_REQUIRE_EQUAL(default_configuration.automatic_run_settings, configuration::get().automatic_run_settings);
 	BOOST_REQUIRE_EQUAL(default_configuration.non_rigid_tracking_parameters,
 	                    configuration::get().non_rigid_tracking_parameters);
 	BOOST_REQUIRE_EQUAL(default_configuration, configuration::get());
@@ -99,7 +101,6 @@ BOOST_AUTO_TEST_CASE(ConfigurationTest) {
 	BOOST_REQUIRE_EQUAL(configuration1.logging_settings, configuration::get().logging_settings);
 	RequireEqualDeferrables(deferrables1, loaded_deferrables);
 	BOOST_REQUIRE_EQUAL(configuration1.paths, configuration::get().paths);
-	BOOST_REQUIRE_EQUAL(configuration1.automatic_run_settings, configuration::get().automatic_run_settings);
 	BOOST_REQUIRE_EQUAL(configuration1.non_rigid_tracking_parameters,
 	                    configuration::get().non_rigid_tracking_parameters);
 	BOOST_REQUIRE_EQUAL(configuration1, configuration::get());
@@ -116,7 +117,6 @@ BOOST_AUTO_TEST_CASE(ConfigurationTest) {
 	BOOST_REQUIRE_EQUAL(configuration1.logging_settings, configuration::get().logging_settings);
 	RequireEqualDeferrables(deferrables1, loaded_deferrables);
 	BOOST_REQUIRE_EQUAL(configuration1.paths, configuration::get().paths);
-	BOOST_REQUIRE_EQUAL(configuration1.automatic_run_settings, configuration::get().automatic_run_settings);
 	BOOST_REQUIRE_EQUAL(configuration1.non_rigid_tracking_parameters,
 	                    configuration::get().non_rigid_tracking_parameters);
 	BOOST_REQUIRE_EQUAL(configuration1, configuration::get());

@@ -3,8 +3,9 @@ import sys
 import argparse
 
 # Note: the current intent is for this script to be run (perhaps from within a python IDE) with the repository root in the PYTHONPATH. If you try
-# to run the scripts from its own directory it won't work. Try running from repository root instead.
-from Apps.visualizer.visualizerapp import VisualizerApp
+# to run the scripts from its own directory it won't work. Try running from repository root instead, after adding the repository root to the
+# PYTHONPATH environment variable. CLion IDE that I work does not provide adequate options on how to handle this more elegantly at the moment.
+from Apps.Python.visualizer.visualizerapp import VisualizerApp
 
 PROGRAM_EXIT_SUCCESS = 0
 PROGRAM_EXIT_FAILURE = -1

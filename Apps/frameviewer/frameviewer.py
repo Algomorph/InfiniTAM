@@ -9,7 +9,7 @@ import vtk
 import numpy as np
 
 from Apps.frameviewer import frameloading, image_conversion
-from Apps.python_shared import trajectory_loading
+from Apps.Python.python_shared import trajectory_loading
 from Apps.frameviewer.pixel_highlighter import PixelHighlighter
 
 PROGRAM_EXIT_SUCCESS = 0

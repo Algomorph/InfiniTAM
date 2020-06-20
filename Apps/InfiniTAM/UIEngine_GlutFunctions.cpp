@@ -128,7 +128,7 @@ void UIEngine::GlutDisplayFunction() {
 	char str[200];
 
 	//print previous frame index
-	int previous_frame_index = uiEngine.currently_processed_frame_index - 1;
+	int previous_frame_index = uiEngine.current_frame_index - 1;
 	if (previous_frame_index >= 0) {
 		glRasterPos2f(0.775f, -0.900f);
 		sprintf(str, "Frame %5d", previous_frame_index);
@@ -176,20 +176,20 @@ void UIEngine::GlutIdleFunction() {
 	switch (ui_engine.main_loop_action) {
 		case PROCESS_FRAME:
 			ui_engine.ProcessFrame();
-			ui_engine.currently_processed_frame_index++; //done with current frame, increment the frame counter
+			ui_engine.current_frame_index++; //done with current frame, increment the frame counter
 			ui_engine.main_loop_action = PROCESS_PAUSED;
 			ui_engine.needs_refresh = true;
 			break;
 		case PROCESS_VIDEO:
 			ui_engine.ProcessFrame();
-			ui_engine.currently_processed_frame_index++;
+			ui_engine.current_frame_index++;
 			ui_engine.needs_refresh = true;
 			break;
 		case PROCESS_N_FRAMES:
 			ui_engine.ProcessFrame();
-			ui_engine.currently_processed_frame_index++;
+			ui_engine.current_frame_index++;
 			ui_engine.needs_refresh = true;
-			if (ui_engine.currently_processed_frame_index >=
+			if (ui_engine.current_frame_index >=
 			    ui_engine.index_of_frame_to_end_before) {
 				ui_engine.main_loop_action = ui_engine.exit_after_automatic_run ? EXIT : PROCESS_PAUSED;
 				if (ui_engine.save_after_automatic_run) {
@@ -224,8 +224,8 @@ void UIEngine::GlutKeyUpFunction(unsigned char key, int x, int y) {
 	switch (key) {
 		//TODO: rearrange in asciibeditc order (except fall-through cases) to make maintenance easier
 		case 'i':
-			printf("processing %d frames ...\n", ui_engine.index_of_frame_to_end_before);
-			ui_engine.auto_interval_frame_start = ui_engine.currently_processed_frame_index;
+			//TODO: fix repeated interval functionality
+			printf("processing %d frames ...\n", ui_engine.index_of_frame_to_end_before - ui_engine.auto_interval_frame_start);
 			ui_engine.main_loop_action = UIEngine::PROCESS_N_FRAMES;
 			break;
 		case 'b':

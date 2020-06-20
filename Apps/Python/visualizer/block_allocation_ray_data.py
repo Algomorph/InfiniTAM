@@ -1,15 +1,13 @@
-import math
 import os
 
 import vtk
 import gzip
 import numpy as np
-from vtk.util import numpy_support as ns
 from typing import List
 
-from Apps.python_shared import trajectory_loading
-from Apps.visualizer.geometric_conversions import convert_block_to_metric
-from Apps.visualizer.utilities import get_output_frame_count, get_frame_output_path
+from Apps.Python.python_shared import trajectory_loading
+from Apps.Python.visualizer.geometric_conversions import convert_block_to_metric
+from Apps.Python.visualizer.utilities import get_output_frame_count, get_frame_output_path
 
 
 class FrameBlockAllocationRayData:
@@ -64,8 +62,8 @@ def read_block_allocation_ray_data(inverse_camera_matrices,
         # inverse_camera_matrix_next = inverse_camera_matrices[i_frame - initial_frame_index + 1]
         camera_matrix_current = np.linalg.inv(inverse_camera_matrix_current)
         identity_matrix = np.identity(4, dtype=np.float32)
-        camera_matrix_canonical = identity_matrix
         camera_matrix_live = inverse_camera_matrix_current
+        camera_matrix_canonical = inverse_camera_matrix_current
 
         live_based_point_cloud = layers[2][point_mask1]
         one_col = np.ones((live_based_point_cloud.shape[0], 1), dtype=np.float32)
@@ -84,6 +82,34 @@ def read_block_allocation_ray_data(inverse_camera_matrices,
 
     return frame_ray_datasets
 
+class AllocationRaySourcePointCloud:
+    def __init__(self, color_name):
+        colors = vtk.vtkNamedColors()
+        self.__point_cloud_data = vtk.vtkPolyData()
+        self.__point_cloud_glyph_filter = vtk.vtkVertexGlyphFilter()
+        self.__point_cloud_glyph_filter.SetInputData(self.__point_cloud_data)
+        self.__point_cloud_mapper = vtk.vtkPolyDataMapper()
+        self.__point_cloud_mapper.SetInputConnection(self.__point_cloud_glyph_filter.GetOutputPort())
+        self.__point_cloud_actor = vtk.vtkActor()
+        self.__point_cloud_actor.GetProperty().SetColor(colors.GetColor3d(color_name))
+        self.__point_cloud_actor.GetProperty().SetPointSize(2)
+        self.__point_cloud_actor.SetMapper(self.__point_cloud_mapper)
+        
+    def update_points(self, point_array):
+        point_cloud_points = vtk.vtkPoints()
+        for x, y, z in point_array:
+            point_cloud_points.InsertNextPoint(x, -y, z)
+
+        self.__point_cloud_data.SetPoints(point_cloud_points)
+        self.__point_cloud_glyph_filter.SetInputData(self.__point_cloud_data)
+        self.__point_cloud_glyph_filter.Update()
+        self.__point_cloud_mapper.Modified()
+    
+    def get_actor(self):
+        return self.__point_cloud_actor
+
+    def toggle_visibility(self):
+        self.__point_cloud_actor.SetVisibility(not self.__point_cloud_actor.GetVisibility())
 
 class AllocationRays:
 
@@ -97,25 +123,8 @@ class AllocationRays:
 
         self.current_frame_index = initial_frame_index
 
-        self.point_cloud1_data = vtk.vtkPolyData()
-        self.point_cloud1_glyph_filter = vtk.vtkVertexGlyphFilter()
-        self.point_cloud1_glyph_filter.SetInputData(self.point_cloud1_data)
-        self.point_cloud1_mapper = vtk.vtkPolyDataMapper()
-        self.point_cloud1_mapper.SetInputConnection(self.point_cloud1_glyph_filter.GetOutputPort())
-        self.point_cloud1_actor = vtk.vtkActor()
-        self.point_cloud1_actor.GetProperty().SetColor(colors.GetColor3d("Orange"))
-        self.point_cloud1_actor.GetProperty().SetPointSize(2)
-        self.point_cloud1_actor.SetMapper(self.point_cloud1_mapper)
-
-        self.point_cloud2_data = vtk.vtkPolyData()
-        self.point_cloud2_glyph_filter = vtk.vtkVertexGlyphFilter()
-        self.point_cloud2_glyph_filter.SetInputData(self.point_cloud2_data)
-        self.point_cloud2_mapper = vtk.vtkPolyDataMapper()
-        self.point_cloud2_mapper.SetInputConnection(self.point_cloud2_glyph_filter.GetOutputPort())
-        self.point_cloud2_actor = vtk.vtkActor()
-        self.point_cloud2_actor.GetProperty().SetColor(colors.GetColor3d("Peacock"))
-        self.point_cloud2_actor.GetProperty().SetPointSize(2)
-        self.point_cloud2_actor.SetMapper(self.point_cloud2_mapper)
+        self.live_source_point_cloud = AllocationRaySourcePointCloud("Orange")
+        self.canonical_source_point_cloud = AllocationRaySourcePointCloud("Peacock")
 
         self.segment_data = vtk.vtkPolyData()
         self.segment_mapper = vtk.vtkPolyDataMapper()
@@ -123,33 +132,22 @@ class AllocationRays:
         self.segment_actor = vtk.vtkActor()
         self.segment_actor.SetMapper(self.segment_mapper)
 
+        # TODO
         # renderer.AddActor(self.segment_actor)
-        renderer.AddActor(self.point_cloud1_actor)
-        renderer.AddActor(self.point_cloud2_actor)
+        renderer.AddActor(self.live_source_point_cloud.get_actor())
+        renderer.AddActor(self.canonical_source_point_cloud.get_actor())
         self.renderer = renderer
+
+        # customizable initial visibility toggles
+        self.live_source_point_cloud.toggle_visibility()
 
     def set_frame(self, frame_index):
         print(frame_index, len(self.frame_ray_datasets), self.initial_frame_index)
         if self.initial_frame_index < frame_index != self.current_frame_index:
             dataset = self.frame_ray_datasets[frame_index - self.initial_frame_index]
 
-            point_cloud1_points = vtk.vtkPoints()
-            for x, y, z in dataset.live_surface_points:
-                point_cloud1_points.InsertNextPoint(x, -y, z)
-
-            self.point_cloud1_data.SetPoints(point_cloud1_points)
-            self.point_cloud1_glyph_filter.SetInputData(self.point_cloud1_data)
-            self.point_cloud1_glyph_filter.Update()
-            self.point_cloud1_mapper.Modified()
-
-            point_cloud2_points = vtk.vtkPoints()
-            for x, y, z in dataset.canonical_surface_points:
-                point_cloud2_points.InsertNextPoint(x, -y, z)
-
-            self.point_cloud2_data.SetPoints(point_cloud2_points)
-            self.point_cloud2_glyph_filter.SetInputData(self.point_cloud2_data)
-            self.point_cloud2_glyph_filter.Update()
-            self.point_cloud2_mapper.Modified()
+            self.live_source_point_cloud.update_points(dataset.live_surface_points)
+            self.canonical_source_point_cloud.update_points(dataset.canonical_surface_points)
 
             segment_points = vtk.vtkPoints()
             lines = vtk.vtkCellArray()

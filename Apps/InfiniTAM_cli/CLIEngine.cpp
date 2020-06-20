@@ -50,11 +50,9 @@ void CLIEngine::Initialise(ImageSourceEngine *image_source, IMUSourceEngine *imu
 		printf("Skipping the first %d frames.\n", automatic_run_settings.index_of_frame_to_start_at);
 		SkipFrames(automatic_run_settings.index_of_frame_to_start_at);
 	}
-	this->start_frame_index = this->current_frame_index;
 
 	this->save_after_automatic_run = automatic_run_settings.save_volumes_and_camera_matrix_after_processing;
-	this->exit_after_automatic_run = automatic_run_settings.exit_after_automatic_processing;
-	this->number_of_frames_to_process_after_launch = automatic_run_settings.number_of_frames_to_process;
+	this->index_of_frame_to_end_before = automatic_run_settings.index_of_frame_to_end_before;
 
 	if (automatic_run_settings.load_volume_and_camera_matrix_before_processing) {
 		std::string frame_path = this->GenerateCurrentFrameOutputPath();
@@ -97,15 +95,16 @@ bool CLIEngine::ProcessFrame()
 
 	printf("frame %i: time %.2f, avg %.2f\n", current_frame_index, processedTime_inst, processedTime_avg);
 
-	current_frame_index++;
+
 
 	return true;
 }
 
 void CLIEngine::Run()
 {
-	while (this->number_of_frames_to_process_after_launch <= 0 || (this->current_frame_index - this->start_frame_index) < this->number_of_frames_to_process_after_launch) {
+	while (this->index_of_frame_to_end_before <= 0 || this->current_frame_index < this->index_of_frame_to_end_before) {
 		if (!ProcessFrame()) break;
+		current_frame_index++;
 	}
 }
 
