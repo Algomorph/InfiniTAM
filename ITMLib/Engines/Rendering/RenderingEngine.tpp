@@ -100,7 +100,6 @@ void RenderingEngine<TVoxel, TIndex, TMemoryDeviceType>::RenderImage(
 				        functor(*output_image,*raycast_image,volume->GetParameters().voxel_size,light_source);
 				ImageTraversalEngine<TMemoryDeviceType>::template TraversePositionOnly<8, 8>(output_image, functor);
 			}
-			ORcudaKernelCheck;
 			break;
 		case IRenderingEngine::RENDER_SHADED_GREYSCALE:
 		default:{

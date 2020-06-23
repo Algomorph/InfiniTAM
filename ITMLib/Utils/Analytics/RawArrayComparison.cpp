@@ -16,5 +16,5 @@
 #include "RawArrayComparison.h"
 
 #ifdef COMPILE_WITHOUT_CUDA
-#include "RawArrayComparisonTemplateSpecializations.h"
+#include "RawArrayComparisonTemplateInstantiations.h"
 #endif //#ifdef COMPILE_WITHOUT_CUDA

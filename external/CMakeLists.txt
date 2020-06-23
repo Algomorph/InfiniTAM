@@ -6,7 +6,7 @@ include(ExternalProject)
 
 function(handle_external_package)
     set(options PACKAGED)
-    set(oneValueArgs NAME SOURCE GIT_REPOSITORY GIT_TAG INCLUDE_TARGET LIBRARY_TARGET_POSIX LIBRARY_TARGET_MSVC ALTERNATIVE_LOCAL_NAME)
+    set(oneValueArgs NAME SOURCE GIT_REPOSITORY GIT_TAG INCLUDE_TARGET LIBRARY_TARGET_POSIX LIBRARY_TARGET_MSVC_DEBUG LIBRARY_TARGET_MSVC_RELEASE ALTERNATIVE_LOCAL_NAME)
     set(multiValueArgs CMAKE_ARGS)
     cmake_parse_arguments(HEP "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
@@ -58,10 +58,12 @@ function(handle_external_package)
         file(MAKE_DIRECTORY ${${HEP_UC_NAME}_PREFIX}/${HEP_INCLUDE_TARGET})
         if (MSVC)
             set_target_properties(${HEP_NAME} PROPERTIES
+                                  IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "CXX;RC"
+                                  IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "CXX;RC"
                                   INTERFACE_INCLUDE_DIRECTORIES ${${HEP_UC_NAME}_PREFIX}/${HEP_INCLUDE_TARGET}
-                                  IMPORTED_LOCATION_RELWITHDEBINFO ${${HEP_UC_NAME}_PREFIX}/${HEP_LIBRARY_TARGET_MSVC}
-                                  IMPORTED_LOCATION_RELEASE ${${HEP_UC_NAME}_PREFIX}/${HEP_LIBRARY_TARGET_MSVC}
-                                  IMPORTED_LOCATION_DEBUG ${${HEP_UC_NAME}_PREFIX}/${HEP_LIBRARY_TARGET_MSVC}
+                                  IMPORTED_LOCATION_RELWITHDEBINFO ${${HEP_UC_NAME}_PREFIX}/${HEP_LIBRARY_TARGET_MSVC_DEBUG}
+                                  IMPORTED_LOCATION_RELEASE ${${HEP_UC_NAME}_PREFIX}/${HEP_LIBRARY_TARGET_MSVC_RELEASE}
+                                  IMPORTED_LOCATION_DEBUG ${${HEP_UC_NAME}_PREFIX}/${HEP_LIBRARY_TARGET_MSVC_DEBUG}
                                   )
         else ()
             set_target_properties(${HEP_NAME} PROPERTIES
@@ -82,7 +84,8 @@ handle_external_package(NAME log4cplus
                         CMAKE_ARGS -DWITH_UNIT_TESTS=OFF -DBUILD_SHARED_LIBS=OFF
                         PACKAGED
                         INCLUDE_TARGET include
-                        LIBRARY_TARGET_MSVC lib/log4cplusS.lib
+                        LIBRARY_TARGET_MSVC_DEBUG lib/log4cplusSUD.lib
+                        LIBRARY_TARGET_MSVC_RELEASE lib/log4cplusSU.lib 
                         LIBRARY_TARGET_POSIX lib/liblog4cplusS.a
                         )
 
@@ -92,7 +95,8 @@ handle_external_package(NAME zlib
                         GIT_TAG cacf7f1d4e3d44d871b605da3b647f07d718623f
                         PACKAGED
                         INCLUDE_TARGET include
-                        LIBRARY_TARGET_MSVC lib/libz.lib
+                        LIBRARY_TARGET_MSVC_DEBUG lib/zlibd.lib
+                        LIBRARY_TARGET_MSVC_RELEASE lib/zlib.lib
                         LIBRARY_TARGET_POSIX lib/libz.a
                         ALTERNATIVE_LOCAL_NAME ZLIB
                         )

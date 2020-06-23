@@ -541,13 +541,13 @@ FFMPEGReader::FFMPEGReader(const char *calibFilename, const char *filename1, con
 }
 FFMPEGReader::~FFMPEGReader()
 {}
-void FFMPEGReader::getImages(UChar4Image *rgbImage, ShortImage *rawDepthImage)
+void FFMPEGReader::GetImages(UChar4Image& rgbImage, ShortImage& rawDepthImage)
 { return; }
-bool FFMPEGReader::hasMoreImages() const
+bool FFMPEGReader::HasMoreImages() const
 { return false; }
-Vector2i FFMPEGReader::getDepthImageSize() const
+Vector2i FFMPEGReader::GetDepthImageSize() const
 { return Vector2i(0,0); }
-Vector2i FFMPEGReader::getRGBImageSize() const
+Vector2i FFMPEGReader::GetRGBImageSize() const
 { return Vector2i(0,0); }
 
 #endif

@@ -20,10 +20,8 @@
 
 //thrust
 #ifndef COMPILE_WITHOUT_CUDA
-
 #include <thrust/sort.h>
 #include <thrust/execution_policy.h>
-
 #endif
 
 #include "../../../ORUtils/PlatformIndependence.h"
@@ -95,7 +93,7 @@ bool CompareRawArrays_Generic(const TElement* left, MemoryDeviceType memory_devi
 			break;
 		case CUDA_TO_CPU: {
 #ifdef COMPILE_WITHOUT_CUDA
-			DIEWITHEXCEPTIONREPORTLOCATION("Raw memory array comparison called on CPU & CUDA array while code build without CUDA support.");
+			DIEWITHEXCEPTION_REPORTLOCATION("Raw memory array comparison called on CPU & CUDA array while code build without CUDA support.");
 		return false;
 #else
 			TElement* left_CPU = new TElement[element_count];
@@ -111,7 +109,7 @@ bool CompareRawArrays_Generic(const TElement* left, MemoryDeviceType memory_devi
 		}
 		case CPU_TO_CUDA: {
 #ifdef COMPILE_WITHOUT_CUDA
-			DIEWITHEXCEPTIONREPORTLOCATION("Raw memory array comparison called on CPU & CUDA array while code build without CUDA support.");
+			DIEWITHEXCEPTION_REPORTLOCATION("Raw memory array comparison called on CPU & CUDA array while code build without CUDA support.");
 		return false;
 #else
 			auto* right_CPU = new TElement[element_count];
@@ -126,7 +124,7 @@ bool CompareRawArrays_Generic(const TElement* left, MemoryDeviceType memory_devi
 		}
 		case CUDA_TO_CUDA:
 #ifdef COMPILE_WITHOUT_CUDA
-			DIEWITHEXCEPTIONREPORTLOCATION("Raw memory array comparison called on two CUDA arrays while code build without CUDA support.");
+			DIEWITHEXCEPTION_REPORTLOCATION("Raw memory array comparison called on two CUDA arrays while code build without CUDA support.");
 		return false;
 #else
 			const TElement* left_prepared;
@@ -147,11 +145,11 @@ bool CompareRawArrays_Generic(const TElement* left, MemoryDeviceType memory_devi
 				right_prepared = right;
 			}
 			internal::CompareRawArrays_Generic_CUDA(left_prepared, right_prepared, element_count, compare_elements, report_mismatch);
-#endif
 			if (presort) {
 				ORcudaSafeCall(cudaFree(left_sorted));
 				ORcudaSafeCall(cudaFree(right_sorted));
 			}
+#endif
 			break;
 		default:
 			// unsupported MemoryCopyDirection

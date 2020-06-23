@@ -30,12 +30,12 @@ using namespace ITMLib;
 template<typename TVoxel>
 void ITMLib::EditAndCopyEngine_CPU<TVoxel, PlainVoxelArray>::ResetVolume(
 		ITMLib::VoxelVolume<TVoxel, ITMLib::PlainVoxelArray>* volume) {
-	const unsigned int voxel_count = volume->index.GetMaxVoxelCount();
+	const int voxel_count = static_cast<int>(volume->index.GetMaxVoxelCount());
 	TVoxel* voxels = volume->GetVoxels();
 #ifdef WITH_OPENMP
 #pragma omp parallel for default(none) shared(voxels, voxel_count)
 #endif
-	for (unsigned int i_voxel = 0; i_voxel < voxel_count; ++i_voxel) voxels[i_voxel] = TVoxel();
+	for (int i_voxel = 0; i_voxel < voxel_count; ++i_voxel) voxels[i_voxel] = TVoxel();
 }
 
 template<typename TVoxel>

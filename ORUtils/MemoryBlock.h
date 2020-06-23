@@ -154,8 +154,9 @@ public:
 #ifdef COMPILE_WITHOUT_CUDA
 			access_mode(allocate_CPU ? MEMORYDEVICE_CPU : MEMORYDEVICE_NONE)
 #else
-              access_mode(allocate_CPU ? MEMORYDEVICE_CPU : allocate_CUDA ? MEMORYDEVICE_CUDA : MEMORYDEVICE_NONE) {
+              access_mode(allocate_CPU ? MEMORYDEVICE_CPU : allocate_CUDA ? MEMORYDEVICE_CUDA : MEMORYDEVICE_NONE)
 #endif
+	{
 		Allocate(element_count, allocate_CPU, allocate_CUDA, make_metal_compatible);
 		Clear();
 	}
@@ -175,9 +176,9 @@ public:
 #ifdef COMPILE_WITHOUT_CUDA
 			access_mode(memory_type == MEMORYDEVICE_NONE ? MEMORYDEVICE_NONE : MEMORYDEVICE_CPU)
 #else
-			access_mode(memory_type) {
+			access_mode(memory_type)
 #endif
-
+	{
 		switch (memory_type) {
 			case MEMORYDEVICE_METAL:
 			case MEMORYDEVICE_CPU:
