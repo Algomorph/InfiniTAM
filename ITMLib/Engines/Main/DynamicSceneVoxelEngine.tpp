@@ -18,6 +18,7 @@
 #include <unordered_set>
 #include <vector>
 #include <filesystem>
+
 namespace fs = std::filesystem;
 
 //log4cplus
@@ -76,7 +77,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(const RG
 		  rendering_engine(RenderingEngineFactory::Build<TVoxel, TIndex>(
 				  configuration::get().device_type)),
 		  meshing_engine(config.create_meshing_engine ? MeshingEngineFactory::Build<TVoxel, TIndex>(
-		  		configuration::get().device_type) : nullptr) {
+				  configuration::get().device_type) : nullptr) {
 	logging::initialize_logging();
 
 
@@ -202,7 +203,7 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::SaveToFile(const std::strin
 	canonical_volume->SaveToDisk(path + "/canonical_volume.dat");
 	live_volumes[0]->SaveToDisk(path + "/live_volume.dat");
 	ORUtils::OStreamWrapper camera_matrix_file(path + "/camera_matrix.dat");
-	ORUtils::SaveMatrix(camera_matrix_file,tracking_state->pose_d->GetM());
+	ORUtils::SaveMatrix(camera_matrix_file, tracking_state->pose_d->GetM());
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
@@ -294,12 +295,11 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(UChar4Image* rgb_im
 	if (!main_processing_active) return CameraTrackingState::TRACKING_FAILED;
 	bool fusion_succeeded = false;
 
-	auto frame_index = [this]{ return automatic_run_settings.index_of_frame_to_start_at + frames_processed;};
+	auto frame_index = [this] { return automatic_run_settings.index_of_frame_to_start_at + frames_processed; };
 	telemetry::SetGlobalFrameIndex(frame_index());
-	if ((last_tracking_result == CameraTrackingState::TRACKING_GOOD || !tracking_initialised) && (fusion_active) &&
-	    (relocalization_count == 0)) {
+	if ((last_tracking_result == CameraTrackingState::TRACKING_GOOD || !tracking_initialised) &&
+	    (fusion_active) && (relocalization_count == 0)) {
 		if (frames_processed > 0) {
-			//rendering_engine->FindSurface(canonical_volume, tracking_state->pose_d->GetM(), view->calib.intrinsics_d.projectionParamsSimple.all, canonical_render_state);
 			camera_tracking_controller->Prepare(tracking_state, canonical_volume, view, rendering_engine, canonical_render_state);
 			LOG4CPLUS_PER_FRAME(logging::get_logger(), bright_cyan << "Generating raw live TSDF from view..." << reset);
 			benchmarking::start_timer("GenerateRawLiveVolume");
@@ -603,7 +603,6 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::Reset() {
 	warp_field->Reset();
 	tracking_state->Reset();
 }
-
 
 
 template<typename TVoxel, typename TWarp, typename TIndex>
