@@ -59,7 +59,7 @@ void UIEngine::GlutDisplayFunction() {
 
 	// get updated images from processing thread
 	uiEngine.main_engine->GetImage(uiEngine.outImage[0], uiEngine.outImageType[0], &uiEngine.freeview_pose,
-	                               &uiEngine.freeviewIntrinsics);
+	                               &uiEngine.freeview_intrinsics);
 
 	for (int w = 1; w < NUM_WIN; w++) {
 		uiEngine.main_engine->GetImage(uiEngine.outImage[w], uiEngine.outImageType[w]);
@@ -161,13 +161,14 @@ void UIEngine::GlutDisplayFunction() {
 	glRasterPos2f(-0.98f, -0.95f);
 	sprintf(str,
 	        "i: %d frames \t d: one step \t p: pause \t v: write video %s \t ",
-	        uiEngine.index_of_frame_to_end_before,
+	        uiEngine.automatic_run_settings.index_of_frame_to_end_before,
 	        uiEngine.depthVideoWriter != nullptr ? "off" : "on");
 	Safe_GlutBitmapString(GLUT_BITMAP_HELVETICA_12, (const char*) str);
 
 	glutSwapBuffers();
 	uiEngine.needs_refresh = false;
 }
+
 void UIEngine::GlutIdleFunction() {
 	UIEngine& ui_engine = UIEngine::Instance();
 	if (ui_engine.shutdown_requested) {
@@ -190,9 +191,9 @@ void UIEngine::GlutIdleFunction() {
 			ui_engine.current_frame_index++;
 			ui_engine.needs_refresh = true;
 			if (ui_engine.current_frame_index >=
-			    ui_engine.index_of_frame_to_end_before) {
-				ui_engine.main_loop_action = ui_engine.exit_after_automatic_run ? EXIT : PROCESS_PAUSED;
-				if (ui_engine.save_after_automatic_run) {
+			    ui_engine.automatic_run_settings.index_of_frame_to_end_before) {
+				ui_engine.main_loop_action = ui_engine.automatic_run_settings.exit_after_automatic_processing ? EXIT : PROCESS_PAUSED;
+				if (ui_engine.automatic_run_settings.save_volumes_and_camera_matrix_after_processing) {
 					ui_engine.main_engine->SaveToFile(ui_engine.GeneratePreviousFrameOutputPath());
 				}
 				if (configuration::get().logging_settings.log_benchmarks) {
@@ -223,9 +224,13 @@ void UIEngine::GlutKeyUpFunction(unsigned char key, int x, int y) {
 
 	switch (key) {
 		//TODO: rearrange in asciibeditc order (except fall-through cases) to make maintenance easier
-		case 'i':
-			//TODO: fix repeated interval functionality
-			printf("processing %d frames ...\n", ui_engine.index_of_frame_to_end_before - ui_engine.auto_interval_frame_start);
+		case 'i': {
+			int interval_frame_count =
+					ui_engine.automatic_run_settings.index_of_frame_to_end_before - ui_engine.automatic_run_settings.index_of_frame_to_start_at;
+			printf("processing %d frames ...\n", interval_frame_count);
+			ui_engine.automatic_run_settings.index_of_frame_to_start_at = ui_engine.current_frame_index;
+			ui_engine.automatic_run_settings.index_of_frame_to_end_before = ui_engine.current_frame_index + interval_frame_count;
+		}
 			ui_engine.main_loop_action = UIEngine::PROCESS_N_FRAMES;
 			break;
 		case 'b':
@@ -290,7 +295,7 @@ void UIEngine::GlutKeyUpFunction(unsigned char key, int x, int y) {
 
 				ui_engine.freeview_pose.SetFrom(ui_engine.main_engine->GetTrackingState()->pose_d);
 				if (ui_engine.main_engine->GetView() != nullptr) {
-					ui_engine.freeviewIntrinsics = ui_engine.main_engine->GetView()->calib.intrinsics_d;
+					ui_engine.freeview_intrinsics = ui_engine.main_engine->GetView()->calib.intrinsics_d;
 					ui_engine.outImage[0]->ChangeDims(ui_engine.main_engine->GetView()->depth->dimensions);
 				}
 
@@ -511,7 +516,7 @@ void UIEngine::GlutMouseMoveFunction(int x, int y) {
 		case VIEW_PANNING: {
 			// right button: translation in x and y direction
 			ui_engine.freeview_pose.SetT(ui_engine.freeview_pose.GetT() +
-			                           scale_translation * Vector3f((float) movement.x, (float) movement.y, 0.0f));
+			                             scale_translation * Vector3f((float) movement.x, (float) movement.y, 0.0f));
 			ui_engine.needs_refresh = true;
 			break;
 		}

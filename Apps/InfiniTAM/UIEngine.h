@@ -1,7 +1,12 @@
 // Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
 // Modified code: Copyright 2020 Gregory Kramida
-
 #pragma once
+
+//stdlib
+#include <vector>
+
+//boost
+#include <boost/filesystem.hpp>
 
 //local
 #include "../../InputSource/ImageSourceEngine.h"
@@ -13,13 +18,7 @@
 #include "../../ORUtils/FileUtils.h"
 #include "../../ORUtils/NVTimer.h"
 #include "../../ITMLib/Engines/Telemetry/TelemetryRecorderLegacy.h"
-
-//stdlib
-#include <vector>
-
-//boost
-#include <boost/filesystem.hpp>
-
+#include "../../ITMLib/Utils/Configuration/AutomaticRunSettings.h"
 
 namespace InfiniTAM {
 namespace Engine { //TODO: retching from the overuse of the word "Engine"
@@ -48,11 +47,7 @@ private:
 
 	int current_colour_mode;
 
-	int auto_interval_frame_start;
-	int index_of_frame_to_end_before;
-	bool exit_after_automatic_run = false;
-	bool save_after_automatic_run = false;
-	int start_frame_index = 0;
+	ITMLib::AutomaticRunSettings automatic_run_settings;
 
 	InputSource::ImageSourceEngine* image_source_engine;
 	InputSource::IMUSourceEngine* imu_source_engine;
@@ -69,14 +64,14 @@ private:
 	UChar4Image* outImage[NUM_WIN];
 	ITMLib::MainEngine::GetImageType outImageType[NUM_WIN];
 
-	UChar4Image* inputRGBImage;
-	ShortImage* inputRawDepthImage;
-	ITMLib::IMUMeasurement* inputIMUMeasurement;
+	UChar4Image* input_RGB_image;
+	ShortImage* input_raw_depth_image;
+	ITMLib::IMUMeasurement* input_IMU_measurement;
 
 	bool freeview_active;
 	bool integration_active;
 	ORUtils::SE3Pose freeview_pose;
-	ITMLib::Intrinsics freeviewIntrinsics;
+	ITMLib::Intrinsics freeview_intrinsics;
 
 	MouseOperation current_mouse_operation;
 	Vector2i last_mouse_click_position;

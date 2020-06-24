@@ -34,7 +34,6 @@
 #include "../../ITMLib/Utils/Analytics/BenchmarkUtilities.h"
 #include "../../ITMLib/Utils/Logging/Logging.h"
 #include "../../ITMLib/Engines/Telemetry/TelemetryRecorderLegacy.h"
-#include "../../ITMLib/Utils/Configuration/AutomaticRunSettings.h"
 
 #ifdef WITH_OPENCV
 #include <opencv2/imgcodecs.hpp>
@@ -71,22 +70,16 @@ void UIEngine::Initialize(int& argc, char** argv,
                           InputSource::ImageSourceEngine* imageSource,
                           InputSource::IMUSourceEngine* imuSource,
                           ITMLib::MainEngine* main_engine,
-
                           const configuration::Configuration& configuration) {
 	this->indexing_method = configuration.indexing_method;
 
 	//TODO: just use automatic_run_settings as member directly instead of copying stuff over.
-	AutomaticRunSettings automatic_run_settings = ExtractSerializableStructFromPtreeIfPresent<AutomaticRunSettings>(configuration.source_tree,
+	automatic_run_settings = ExtractSerializableStructFromPtreeIfPresent<AutomaticRunSettings>(configuration.source_tree,
 	                                                                                                                AutomaticRunSettings::default_parse_path,
 	                                                                                                                configuration.origin);
-
-	this->save_after_automatic_run = automatic_run_settings.save_volumes_and_camera_matrix_after_processing;
-	this->exit_after_automatic_run = automatic_run_settings.exit_after_automatic_processing;
-
 	this->freeview_active = true;
 	this->integration_active = true;
 	this->current_colour_mode = 0;
-	this->index_of_frame_to_end_before = automatic_run_settings.index_of_frame_to_end_before;
 
 	this->colourModes_main.emplace_back("shaded greyscale", MainEngine::InfiniTAM_IMAGE_SCENERAYCAST);
 	this->colourModes_main.emplace_back("integrated colours", MainEngine::InfiniTAM_IMAGE_COLOUR_FROM_VOLUME);
@@ -144,19 +137,17 @@ void UIEngine::Initialize(int& argc, char** argv,
 		outImage[w] = new UChar4Image(imageSource->GetDepthImageSize(), true, allocateGPU);
 	}
 
-	inputRGBImage = new UChar4Image(imageSource->GetRGBImageSize(), true, allocateGPU);
-	inputRawDepthImage = new ShortImage(imageSource->GetDepthImageSize(), true, allocateGPU);
-	inputIMUMeasurement = new IMUMeasurement();
+	input_RGB_image = new UChar4Image(imageSource->GetRGBImageSize(), true, allocateGPU);
+	input_raw_depth_image = new ShortImage(imageSource->GetDepthImageSize(), true, allocateGPU);
+	input_IMU_measurement = new IMUMeasurement();
 
 	saveImage = new UChar4Image(imageSource->GetDepthImageSize(), true, false);
 
 
 	outImageType[1] = MainEngine::InfiniTAM_IMAGE_ORIGINAL_DEPTH;
 	outImageType[2] = MainEngine::InfiniTAM_IMAGE_ORIGINAL_RGB;
-	if (inputRGBImage->dimensions == Vector2i(0, 0)) outImageType[2] = MainEngine::InfiniTAM_IMAGE_UNKNOWN;
+	if (input_RGB_image->dimensions == Vector2i(0, 0)) outImageType[2] = MainEngine::InfiniTAM_IMAGE_UNKNOWN;
 
-
-	auto_interval_frame_start = 0;
 	current_mouse_operation = IDLE;
 	mouse_warped = false;
 	needs_refresh = false;
@@ -177,7 +168,7 @@ void UIEngine::Initialize(int& argc, char** argv,
 		SkipFrames(automatic_run_settings.index_of_frame_to_start_at);
 	}
 
-	main_loop_action = index_of_frame_to_end_before > 0 ? PROCESS_N_FRAMES : PROCESS_PAUSED;
+	main_loop_action = automatic_run_settings.index_of_frame_to_end_before > 0 ? PROCESS_N_FRAMES : PROCESS_PAUSED;
 	outImageType[0] = this->freeview_active ? this->colourModes_freeview[this->current_colour_mode].type
 	                                        : this->colourModes_main[this->current_colour_mode].type;
 
@@ -206,9 +197,8 @@ void UIEngine::GetScreenshot(UChar4Image* dest) const {
 
 void UIEngine::SkipFrames(int number_of_frames_to_skip) {
 	for (int i_frame = 0; i_frame < number_of_frames_to_skip && image_source_engine->HasMoreImages(); i_frame++) {
-		image_source_engine->GetImages(*inputRGBImage, *inputRawDepthImage);
+		image_source_engine->GetImages(*input_RGB_image, *input_raw_depth_image);
 	}
-	this->start_frame_index += number_of_frames_to_skip;
 	this->current_frame_index += number_of_frames_to_skip;
 }
 
@@ -219,11 +209,11 @@ void UIEngine::ProcessFrame() {
 	                           << "***" << reset);
 
 	if (!image_source_engine->HasMoreImages()) return;
-	image_source_engine->GetImages(*inputRGBImage, *inputRawDepthImage);
+	image_source_engine->GetImages(*input_RGB_image, *input_raw_depth_image);
 
 	if (imu_source_engine != nullptr) {
 		if (!imu_source_engine->hasMoreMeasurements()) return;
-		else imu_source_engine->getMeasurement(inputIMUMeasurement);
+		else imu_source_engine->getMeasurement(input_IMU_measurement);
 	}
 
 	RecordDepthAndRGBInputToImages();
@@ -235,8 +225,8 @@ void UIEngine::ProcessFrame() {
 
 	//actual processing on the main_engine
 	if (imu_source_engine != nullptr)
-		this->trackingResult = main_engine->ProcessFrame(inputRGBImage, inputRawDepthImage, inputIMUMeasurement);
-	else trackingResult = main_engine->ProcessFrame(inputRGBImage, inputRawDepthImage);
+		this->trackingResult = main_engine->ProcessFrame(input_RGB_image, input_raw_depth_image, input_IMU_measurement);
+	else trackingResult = main_engine->ProcessFrame(input_RGB_image, input_raw_depth_image);
 
 #ifndef COMPILE_WITHOUT_CUDA
 	ORcudaSafeCall(cudaDeviceSynchronize());
@@ -271,9 +261,9 @@ void UIEngine::Shutdown() {
 	for (int w = 0; w < NUM_WIN; w++)
 		delete outImage[w];
 
-	delete inputRGBImage;
-	delete inputRawDepthImage;
-	delete inputIMUMeasurement;
+	delete input_RGB_image;
+	delete input_raw_depth_image;
+	delete input_IMU_measurement;
 
 	delete saveImage;
 }
@@ -294,7 +284,7 @@ std::string UIEngine::GeneratePreviousFrameOutputPath() const {
 //TODO: Group all recording & make it toggleable with a single keystroke / command flag
 void UIEngine::RecordCurrentReconstructionFrameToVideo() {
 	if ((reconstructionVideoWriter != nullptr)) {
-		main_engine->GetImage(outImage[0], outImageType[0], &this->freeview_pose, &freeviewIntrinsics);
+		main_engine->GetImage(outImage[0], outImageType[0], &this->freeview_pose, &freeview_intrinsics);
 		if (outImage[0]->dimensions.x != 0) {
 			if (!reconstructionVideoWriter->isOpen())
 				reconstructionVideoWriter->open((std::string(this->output_path) + "/out_reconstruction.avi").c_str(),
@@ -322,17 +312,17 @@ void UIEngine::RecordCurrentReconstructionFrameToVideo() {
 }
 
 void UIEngine::RecordDepthAndRGBInputToVideo() {
-	if ((rgbVideoWriter != nullptr) && (inputRGBImage->dimensions.x != 0)) {
+	if ((rgbVideoWriter != nullptr) && (input_RGB_image->dimensions.x != 0)) {
 		if (!rgbVideoWriter->isOpen())
 			rgbVideoWriter->open((std::string(this->output_path) + "/out_rgb.avi").c_str(),
-			                     inputRGBImage->dimensions.x, inputRGBImage->dimensions.y, false, 30);
-		rgbVideoWriter->writeFrame(inputRGBImage);
+			                     input_RGB_image->dimensions.x, input_RGB_image->dimensions.y, false, 30);
+		rgbVideoWriter->writeFrame(input_RGB_image);
 	}
-	if ((depthVideoWriter != nullptr) && (inputRawDepthImage->dimensions.x != 0)) {
+	if ((depthVideoWriter != nullptr) && (input_raw_depth_image->dimensions.x != 0)) {
 		if (!depthVideoWriter->isOpen())
 			depthVideoWriter->open((std::string(this->output_path) + "/out_depth.avi").c_str(),
-			                       inputRawDepthImage->dimensions.x, inputRawDepthImage->dimensions.y, true, 30);
-		depthVideoWriter->writeFrame(inputRawDepthImage);
+			                       input_raw_depth_image->dimensions.x, input_raw_depth_image->dimensions.y, true, 30);
+		depthVideoWriter->writeFrame(input_raw_depth_image);
 	}
 }
 
@@ -341,11 +331,11 @@ void UIEngine::RecordDepthAndRGBInputToImages() {
 		char str[250];
 
 		sprintf(str, "%s/%04d.pgm", output_path.c_str(), processed_frame_count);
-		SaveImageToFile(*inputRawDepthImage, str);
+		SaveImageToFile(*input_raw_depth_image, str);
 
-		if (inputRGBImage->dimensions != Vector2i(0, 0)) {
+		if (input_RGB_image->dimensions != Vector2i(0, 0)) {
 			sprintf(str, "%s/%04d.ppm", output_path.c_str(), processed_frame_count);
-			SaveImageToFile(*inputRGBImage, str);
+			SaveImageToFile(*input_RGB_image, str);
 		}
 	}
 }
