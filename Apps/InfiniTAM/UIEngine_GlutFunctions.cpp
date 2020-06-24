@@ -340,7 +340,7 @@ void UIEngine::GlutKeyUpFunction(unsigned char key, int x, int y) {
 		case 's': {
 			if (modifiers && GLUT_ACTIVE_ALT) {
 				printf("saving scene to model ... ");
-				ui_engine.main_engine->SaveSceneToMesh("mesh.stl");
+				ui_engine.main_engine->SaveVolumeToMesh("mesh.stl");
 				printf("done\n");
 			} else {
 				printf("saving scene to disk ... ");

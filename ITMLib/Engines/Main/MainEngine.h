@@ -77,8 +77,8 @@ namespace ITMLib
 
 		virtual void GetImage(UChar4Image *out, GetImageType getImageType, ORUtils::SE3Pose *pose = NULL, Intrinsics *intrinsics = NULL) = 0;
 
-		/// Extracts a mesh from the current scene and saves it to the model file specified by the file name
-		virtual void SaveSceneToMesh(const char *fileName) { };
+		/// Extracts a mesh from the current volume and saves it to the model file specified by the file name
+		virtual void SaveVolumeToMesh(const std::string& path) { };
 
 		/// save and load the full scene and relocaliser (if any) to/from file
 		virtual void SaveToFile() { };

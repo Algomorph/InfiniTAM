@@ -90,18 +90,21 @@ BasicSurfelEngine<TSurfel>::~BasicSurfelEngine() {
 }
 
 template<typename TSurfel>
-void BasicSurfelEngine<TSurfel>::SaveSceneToMesh(const char* objFileName) {
-	// Not yet implemented for surfel scenes
+void BasicSurfelEngine<TSurfel>::SaveVolumeToMesh(const std::string& path) {
+	// Not yet implemented for surfel volumes
+	DIEWITHEXCEPTION_REPORTLOCATION("Not implemented");
 }
 
 template<typename TSurfel>
 void BasicSurfelEngine<TSurfel>::SaveToFile() {
-	// Not yet implemented for surfel scenes
+	// Not yet implemented for surfel volumes
+	DIEWITHEXCEPTION_REPORTLOCATION("Not implemented");
 }
 
 template<typename TSurfel>
 void BasicSurfelEngine<TSurfel>::LoadFromFile() {
-	// Not yet implemented for surfel scenes
+	// Not yet implemented for surfel volumes
+	DIEWITHEXCEPTION_REPORTLOCATION("Not implemented");
 }
 
 template<typename TSurfel>

@@ -99,7 +99,7 @@ public: // member functions
 	                                                 IMUMeasurement* imu_measurement = nullptr) override;
 
 	/// Extracts a mesh from the current volume and saves it to the disk at the specified path
-	void SaveSceneToMesh(const char* path) override;
+	void SaveVolumeToMesh(const std::string& path) override;
 
 	/// save and load the full volume and relocalizer (if any) to/from file
 	void SaveToFile() override;

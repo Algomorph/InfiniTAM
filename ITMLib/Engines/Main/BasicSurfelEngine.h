@@ -53,7 +53,7 @@ namespace ITMLib
 		CameraTrackingState::TrackingResult ProcessFrame(UChar4Image *rgbImage, ShortImage *rawDepthImage, IMUMeasurement *imuMeasurement = NULL);
 
 		/// Extracts a mesh from the current scene and saves it to the model file specified by the file name
-		void SaveSceneToMesh(const char *fileName);
+		void SaveVolumeToMesh(const std::string& path);
 
 		/// save and load the full scene and relocaliser (if any) to/from file
 		void SaveToFile();

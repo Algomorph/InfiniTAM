@@ -305,11 +305,11 @@ CameraTrackingState::TrackingResult MultiEngine<TVoxel, TIndex>::ProcessFrame(UC
 }
 
 template <typename TVoxel, typename TIndex>
-void MultiEngine<TVoxel, TIndex>::SaveSceneToMesh(const char *modelFileName)
+void MultiEngine<TVoxel, TIndex>::SaveVolumeToMesh(const std::string& path)
 {
 	if (meshingEngine == NULL) return;
 	Mesh mesh = meshingEngine->MeshVolume(*mapManager);
-	mesh.WriteSTL(modelFileName);
+	mesh.WriteSTL(path);
 }
 
 template <typename TVoxel, typename TIndex>

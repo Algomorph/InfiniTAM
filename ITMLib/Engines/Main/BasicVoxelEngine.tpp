@@ -71,7 +71,7 @@ template <typename TVoxel, typename TIndex>
 BasicVoxelEngine<TVoxel,TIndex>::~BasicVoxelEngine()
 {
 	delete render_state;
-	if (renderState_freeview != NULL) delete renderState_freeview;
+	if (renderState_freeview != nullptr) delete renderState_freeview;
 
 	delete volume;
 
@@ -85,22 +85,22 @@ BasicVoxelEngine<TVoxel,TIndex>::~BasicVoxelEngine()
 	delete viewBuilder;
 
 	delete trackingState;
-	if (view != NULL) delete view;
+	if (view != nullptr) delete view;
 
 	delete visualizationEngine;
 
-	if (relocaliser != NULL) delete relocaliser;
+	if (relocaliser != nullptr) delete relocaliser;
 	delete kfRaycast;
 
-	if (meshingEngine != NULL) delete meshingEngine;
+	if (meshingEngine != nullptr) delete meshingEngine;
 }
 
 template <typename TVoxel, typename TIndex>
-void BasicVoxelEngine<TVoxel,TIndex>::SaveSceneToMesh(const char *objFileName)
+void BasicVoxelEngine<TVoxel,TIndex>::SaveVolumeToMesh(const std::string& path)
 {
-	if (meshingEngine == NULL) return;
+	if (meshingEngine == nullptr) return;
 	Mesh mesh = meshingEngine->MeshVolume(volume);
-	mesh.WriteSTL(objFileName);
+	mesh.WriteSTL(path);
 }
 
 template <typename TVoxel, typename TIndex>
@@ -242,7 +242,7 @@ CameraTrackingState::TrackingResult BasicVoxelEngine<TVoxel,TIndex>::ProcessFram
 {
 	auto& settings = configuration::get();
 	// prepare image and turn it into a depth image
-	if (imuMeasurement == NULL)
+	if (imuMeasurement == nullptr)
 		viewBuilder->UpdateView(&view, rgbImage, rawDepthImage, settings.use_threshold_filter,
 		                        settings.use_bilateral_filter, false, true);
 	else
@@ -351,7 +351,7 @@ Vector2i BasicVoxelEngine<TVoxel,TIndex>::GetImageSize() const
 template <typename TVoxel, typename TIndex>
 void BasicVoxelEngine<TVoxel,TIndex>::GetImage(UChar4Image *out, GetImageType getImageType, ORUtils::SE3Pose *pose, Intrinsics *intrinsics)
 {
-	if (view == NULL) return;
+	if (view == nullptr) return;
 
 	auto& settings = configuration::get();
 
@@ -399,14 +399,14 @@ void BasicVoxelEngine<TVoxel,TIndex>::GetImage(UChar4Image *out, GetImageType ge
 
 		visualizationEngine->RenderImage(volume, trackingState->pose_d, &view->calib.intrinsics_d, render_state, render_state->raycastImage, imageType, raycastType);
 
-		ORUtils::Image<Vector4u> *srcImage = nullptr;
-		if (relocalisationCount != 0) srcImage = kfRaycast;
-		else srcImage = render_state->raycastImage;
+		ORUtils::Image<Vector4u>* source_image = nullptr;
+		if (relocalisationCount != 0) source_image = kfRaycast;
+		else source_image = render_state->raycastImage;
 
-		out->ChangeDims(srcImage->dimensions);
+		out->ChangeDims(source_image->dimensions);
 		if (settings.device_type == MEMORYDEVICE_CUDA)
-			out->SetFrom(*srcImage, MemoryCopyDirection::CUDA_TO_CPU);
-		else out->SetFrom(*srcImage, MemoryCopyDirection::CPU_TO_CPU);
+			out->SetFrom(*source_image, MemoryCopyDirection::CUDA_TO_CPU);
+		else out->SetFrom(*source_image, MemoryCopyDirection::CPU_TO_CPU);
 
 		break;
 		}
@@ -420,7 +420,7 @@ void BasicVoxelEngine<TVoxel,TIndex>::GetImage(UChar4Image *out, GetImageType ge
 		else if (getImageType == BasicVoxelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_NORMAL) type = IRenderingEngine::RENDER_COLOUR_FROM_NORMAL;
 		else if (getImageType == BasicVoxelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_CONFIDENCE) type = IRenderingEngine::RENDER_COLOUR_FROM_CONFIDENCE;
 
-		if (renderState_freeview == NULL)
+		if (renderState_freeview == nullptr)
 		{
 			renderState_freeview = new RenderState(out->dimensions, volume->GetParameters().near_clipping_distance, volume->GetParameters().far_clipping_distance, settings.device_type);
 		}

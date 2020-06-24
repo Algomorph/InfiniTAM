@@ -188,10 +188,10 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::~DynamicSceneVoxelEngine() {
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::SaveSceneToMesh(const char* path) {
+void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::SaveVolumeToMesh(const std::string& path) {
 	if (meshing_engine == nullptr) return;
 	Mesh mesh = meshing_engine->MeshVolume(canonical_volume);
-	mesh.WriteSTL(path);
+	mesh.WritePLY(path);
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
