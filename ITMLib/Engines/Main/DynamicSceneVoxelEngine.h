@@ -69,6 +69,7 @@ private: // member variables
 
 	VoxelVolume<TVoxel, TIndex>* canonical_volume;
 	VoxelVolume<TVoxel, TIndex>** live_volumes;
+	VoxelVolume<TVoxel, TIndex>* target_warped_live_volume = nullptr;
 	VoxelVolume<TWarp, TIndex>* warp_field;
 	RenderState* canonical_render_state;
 	RenderState* live_render_state;

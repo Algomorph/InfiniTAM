@@ -190,8 +190,15 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::~DynamicSceneVoxelEngine() {
 template<typename TVoxel, typename TWarp, typename TIndex>
 void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::SaveVolumeToMesh(const std::string& path) {
 	if (meshing_engine == nullptr) return;
-	Mesh mesh = meshing_engine->MeshVolume(canonical_volume);
-	mesh.WritePLY(path);
+	{
+		Mesh mesh = meshing_engine->MeshVolume(canonical_volume);
+		mesh.WritePLY(path);
+	}
+	if(target_warped_live_volume != nullptr){
+		Mesh mesh = meshing_engine->MeshVolume(target_warped_live_volume);
+		fs::path p(path);
+		mesh.WritePLY((p.parent_path() / "live_mesh.ply").string());
+	}
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
@@ -321,8 +328,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(UChar4Image* rgb_im
 			benchmarking::start_timer("TrackMotion");
 			LOG4CPLUS_PER_FRAME(logging::get_logger(), bright_cyan
 					<< "*** Optimizing warp based on difference between canonical and live SDF. ***" << reset);
-			VoxelVolume<TVoxel, TIndex>* target_warped_live_volume =
-					surface_tracker->TrackNonRigidMotion(canonical_volume, live_volumes, warp_field);
+			target_warped_live_volume = surface_tracker->TrackNonRigidMotion(canonical_volume, live_volumes, warp_field);
 			LOG4CPLUS_PER_FRAME(logging::get_logger(),
 			                    bright_cyan << "*** Warping optimization finished for current frame. ***" << reset);
 			benchmarking::stop_timer("TrackMotion");

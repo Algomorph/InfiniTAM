@@ -197,7 +197,9 @@ void UIEngine::GlutIdleFunction() {
 					ui_engine.main_engine->SaveToFile(ui_engine.GeneratePreviousFrameOutputPath());
 				}
 				if (ui_engine.automatic_run_settings.save_meshes_after_processing){
-					ui_engine.main_engine->SaveVolumeToMesh(ui_engine.GeneratePreviousFrameOutputPath() + "/canonical.ply");
+					printf("Converting volume to mesh and saving to disk... ");
+					ui_engine.main_engine->SaveVolumeToMesh(ui_engine.GeneratePreviousFrameOutputPath() + "/mesh.ply");
+					printf("Done.\n");
 				}
 				if (configuration::get().logging_settings.log_benchmarks) {
 					benchmarking::log_all_timers();
@@ -347,23 +349,23 @@ void UIEngine::GlutKeyUpFunction(unsigned char key, int x, int y) {
 			break;
 		case 's': {
 			if (modifiers && GLUT_ACTIVE_ALT) {
-				printf("saving scene to model ... ");
-				ui_engine.main_engine->SaveVolumeToMesh("mesh.stl");
-				printf("done\n");
+				printf("Converting volume to mesh and saving to disk... ");
+				ui_engine.main_engine->SaveVolumeToMesh(ui_engine.GenerateCurrentFrameOutputPath() + "mesh.ply");
+				printf("Done.\n");
 			} else {
-				printf("saving scene to disk ... ");
+				printf("Saving volume to disk... ");
 				try {
 					ui_engine.main_engine->SaveToFile();
-					printf("done\n");
+					printf("Done.\n");
 				}
 				catch (const std::runtime_error& e) {
-					printf("failed: %s\n", e.what());
+					printf("Failed: %s\n", e.what());
 				}
 			}
 		}
 			break;
 		case 'l': {
-			printf("loading scene from disk ... ");
+			printf("Loading volume from disk ... ");
 
 			try {
 				ui_engine.main_engine->LoadFromFile(ui_engine.GenerateCurrentFrameOutputPath());
