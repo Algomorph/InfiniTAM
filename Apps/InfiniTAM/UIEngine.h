@@ -80,9 +80,9 @@ private:
 	int processed_frame_count;
 	bool image_recording_enabled;
 
-	InputSource::FFMPEGWriter* reconstructionVideoWriter = nullptr;
-	InputSource::FFMPEGWriter* rgbVideoWriter = nullptr;
-	InputSource::FFMPEGWriter* depthVideoWriter = nullptr;
+	InputSource::FFMPEGWriter* reconstruction_video_writer = nullptr;
+	InputSource::FFMPEGWriter* RGB_video_writer = nullptr;
+	InputSource::FFMPEGWriter* depth_video_writer = nullptr;
 public:
 	static UIEngine& Instance() {
 		static UIEngine instance;
@@ -104,7 +104,6 @@ public:
 	std::string output_path;
 	bool needs_refresh;
 
-	bool allocateGPU;
 	bool shutdown_requested = false;
 	UChar4Image* saveImage;
 	ITMLib::configuration::IndexingMethod indexing_method;
@@ -124,7 +123,7 @@ public:
 	void RecordCurrentReconstructionFrameToVideo();
 	void RecordDepthAndRGBInputToVideo();
 	void RecordDepthAndRGBInputToImages();
-	int GetCurrentFrameIndex() const;
+
 	std::string GenerateNextFrameOutputPath() const;
 	std::string GenerateCurrentFrameOutputPath() const;
 	std::string GeneratePreviousFrameOutputPath() const;

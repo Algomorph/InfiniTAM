@@ -162,7 +162,7 @@ void UIEngine::GlutDisplayFunction() {
 	sprintf(str,
 	        "i: %d frames \t d: one step \t p: pause \t v: write video %s \t ",
 	        uiEngine.automatic_run_settings.index_of_frame_to_end_before,
-	        uiEngine.depthVideoWriter != nullptr ? "off" : "on");
+	        uiEngine.depth_video_writer != nullptr ? "off" : "on");
 	Safe_GlutBitmapString(GLUT_BITMAP_HELVETICA_12, (const char*) str);
 
 	glutSwapBuffers();
@@ -195,6 +195,9 @@ void UIEngine::GlutIdleFunction() {
 				ui_engine.main_loop_action = ui_engine.automatic_run_settings.exit_after_automatic_processing ? EXIT : PROCESS_PAUSED;
 				if (ui_engine.automatic_run_settings.save_volumes_and_camera_matrix_after_processing) {
 					ui_engine.main_engine->SaveToFile(ui_engine.GeneratePreviousFrameOutputPath());
+				}
+				if (ui_engine.automatic_run_settings.save_meshes_after_processing){
+					ui_engine.main_engine->SaveVolumeToMesh(ui_engine.GeneratePreviousFrameOutputPath() + "/canonical.ply");
 				}
 				if (configuration::get().logging_settings.log_benchmarks) {
 					benchmarking::log_all_timers();
@@ -253,25 +256,25 @@ void UIEngine::GlutKeyUpFunction(unsigned char key, int x, int y) {
 			break;
 		case 'v':
 			if (modifiers & GLUT_ACTIVE_ALT) {
-				if ((ui_engine.reconstructionVideoWriter != nullptr)) {
+				if ((ui_engine.reconstruction_video_writer != nullptr)) {
 					printf("stopped recoding reconstruction video\n");
-					delete ui_engine.reconstructionVideoWriter;
-					ui_engine.reconstructionVideoWriter = nullptr;
+					delete ui_engine.reconstruction_video_writer;
+					ui_engine.reconstruction_video_writer = nullptr;
 				} else {
 					printf("started recoding reconstruction video\n");
-					ui_engine.reconstructionVideoWriter = new FFMPEGWriter();
+					ui_engine.reconstruction_video_writer = new FFMPEGWriter();
 				}
 			} else {
-				if ((ui_engine.rgbVideoWriter != nullptr) || (ui_engine.depthVideoWriter != nullptr)) {
+				if ((ui_engine.RGB_video_writer != nullptr) || (ui_engine.depth_video_writer != nullptr)) {
 					printf("stopped recoding input video\n");
-					delete ui_engine.rgbVideoWriter;
-					delete ui_engine.depthVideoWriter;
-					ui_engine.rgbVideoWriter = nullptr;
-					ui_engine.depthVideoWriter = nullptr;
+					delete ui_engine.RGB_video_writer;
+					delete ui_engine.depth_video_writer;
+					ui_engine.RGB_video_writer = nullptr;
+					ui_engine.depth_video_writer = nullptr;
 				} else {
 					printf("started recoding input video\n");
-					ui_engine.rgbVideoWriter = new FFMPEGWriter();
-					ui_engine.depthVideoWriter = new FFMPEGWriter();
+					ui_engine.RGB_video_writer = new FFMPEGWriter();
+					ui_engine.depth_video_writer = new FFMPEGWriter();
 				}
 			}
 			break;

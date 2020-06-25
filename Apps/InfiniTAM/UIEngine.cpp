@@ -74,9 +74,8 @@ void UIEngine::Initialize(int& argc, char** argv,
 	this->indexing_method = configuration.indexing_method;
 
 	//TODO: just use automatic_run_settings as member directly instead of copying stuff over.
-	automatic_run_settings = ExtractSerializableStructFromPtreeIfPresent<AutomaticRunSettings>(configuration.source_tree,
-	                                                                                                                AutomaticRunSettings::default_parse_path,
-	                                                                                                                configuration.origin);
+	automatic_run_settings = ExtractSerializableStructFromPtreeIfPresent<AutomaticRunSettings>(
+			configuration.source_tree, AutomaticRunSettings::default_parse_path, configuration.origin);
 	this->freeview_active = true;
 	this->integration_active = true;
 	this->current_colour_mode = 0;
@@ -111,8 +110,8 @@ void UIEngine::Initialize(int& argc, char** argv,
 
 	this->image_recording_enabled = false;
 	this->processed_frame_count = 0;
-	this->rgbVideoWriter = nullptr;
-	this->depthVideoWriter = nullptr;
+	this->RGB_video_writer = nullptr;
+	this->depth_video_writer = nullptr;
 
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
@@ -131,14 +130,14 @@ void UIEngine::Initialize(int& argc, char** argv,
 	glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, 1);
 #endif
 
-	allocateGPU = configuration.device_type == MEMORYDEVICE_CUDA;
+	bool allocate_GPU = configuration.device_type == MEMORYDEVICE_CUDA;
 
 	for (int w = 0; w < NUM_WIN; w++) {
-		outImage[w] = new UChar4Image(imageSource->GetDepthImageSize(), true, allocateGPU);
+		outImage[w] = new UChar4Image(imageSource->GetDepthImageSize(), true, allocate_GPU);
 	}
 
-	input_RGB_image = new UChar4Image(imageSource->GetRGBImageSize(), true, allocateGPU);
-	input_raw_depth_image = new ShortImage(imageSource->GetDepthImageSize(), true, allocateGPU);
+	input_RGB_image = new UChar4Image(imageSource->GetRGBImageSize(), true, allocate_GPU);
+	input_raw_depth_image = new ShortImage(imageSource->GetDepthImageSize(), true, allocate_GPU);
 	input_IMU_measurement = new IMUMeasurement();
 
 	saveImage = new UChar4Image(imageSource->GetDepthImageSize(), true, false);
@@ -173,7 +172,7 @@ void UIEngine::Initialize(int& argc, char** argv,
 	                                        : this->colourModes_main[this->current_colour_mode].type;
 
 	if (configuration.record_reconstruction_video) {
-		this->reconstructionVideoWriter = new FFMPEGWriter();
+		this->reconstruction_video_writer = new FFMPEGWriter();
 	}
 
 	if (automatic_run_settings.load_volume_and_camera_matrix_before_processing) {
@@ -242,10 +241,6 @@ void UIEngine::ProcessFrame() {
 	processed_frame_count++;
 }
 
-int UIEngine::GetCurrentFrameIndex() const {
-	return current_frame_index;
-}
-
 void UIEngine::Run() { glutMainLoop(); }
 
 
@@ -254,9 +249,9 @@ void UIEngine::Shutdown() {
 	sdkDeleteTimer(&timer_instant);
 	sdkDeleteTimer(&timer_average);
 
-	delete rgbVideoWriter;
-	delete depthVideoWriter;
-	delete reconstructionVideoWriter;
+	delete RGB_video_writer;
+	delete depth_video_writer;
+	delete reconstruction_video_writer;
 
 	for (int w = 0; w < NUM_WIN; w++)
 		delete outImage[w];
@@ -283,13 +278,13 @@ std::string UIEngine::GeneratePreviousFrameOutputPath() const {
 
 //TODO: Group all recording & make it toggleable with a single keystroke / command flag
 void UIEngine::RecordCurrentReconstructionFrameToVideo() {
-	if ((reconstructionVideoWriter != nullptr)) {
+	if ((reconstruction_video_writer != nullptr)) {
 		main_engine->GetImage(outImage[0], outImageType[0], &this->freeview_pose, &freeview_intrinsics);
 		if (outImage[0]->dimensions.x != 0) {
-			if (!reconstructionVideoWriter->isOpen())
-				reconstructionVideoWriter->open((std::string(this->output_path) + "/out_reconstruction.avi").c_str(),
-				                                outImage[0]->dimensions.x, outImage[0]->dimensions.y,
-				                                false, 30);
+			if (!reconstruction_video_writer->isOpen())
+				reconstruction_video_writer->open((std::string(this->output_path) + "/out_reconstruction.avi").c_str(),
+				                                  outImage[0]->dimensions.x, outImage[0]->dimensions.y,
+				                                  false, 30);
 			//TODO This image saving/reading/saving is a production hack -Greg (GitHub:Algomorph)
 			//TODO move to a separate function and apply to all recorded video
 			//TODO write alternative without OpenCV dependency
@@ -300,29 +295,29 @@ void UIEngine::RecordCurrentReconstructionFrameToVideo() {
 			cv::putText(img, std::to_string(GetCurrentFrameIndex()), cv::Size(10, 50), cv::FONT_HERSHEY_SIMPLEX,
 						1, cv::Scalar(128, 255, 128), 1, cv::LINE_AA);
 			cv::imwrite(fileName, img);
-			UChar4Image* imageWithText = new UChar4Image(image_source->getDepthImageSize(), true, allocateGPU);
+			UChar4Image* imageWithText = new UChar4Image(image_source->getDepthImageSize(), true, allocate_GPU);
 			ReadImageFromFile(imageWithText, fileName.c_str());
-			reconstructionVideoWriter->writeFrame(imageWithText);
+			reconstruction_video_writer->writeFrame(imageWithText);
 			delete imageWithText;
 #else
-			reconstructionVideoWriter->writeFrame(outImage[0]);
+			reconstruction_video_writer->writeFrame(outImage[0]);
 #endif
 		}
 	}
 }
 
 void UIEngine::RecordDepthAndRGBInputToVideo() {
-	if ((rgbVideoWriter != nullptr) && (input_RGB_image->dimensions.x != 0)) {
-		if (!rgbVideoWriter->isOpen())
-			rgbVideoWriter->open((std::string(this->output_path) + "/out_rgb.avi").c_str(),
-			                     input_RGB_image->dimensions.x, input_RGB_image->dimensions.y, false, 30);
-		rgbVideoWriter->writeFrame(input_RGB_image);
+	if ((RGB_video_writer != nullptr) && (input_RGB_image->dimensions.x != 0)) {
+		if (!RGB_video_writer->isOpen())
+			RGB_video_writer->open((std::string(this->output_path) + "/out_rgb.avi").c_str(),
+			                       input_RGB_image->dimensions.x, input_RGB_image->dimensions.y, false, 30);
+		RGB_video_writer->writeFrame(input_RGB_image);
 	}
-	if ((depthVideoWriter != nullptr) && (input_raw_depth_image->dimensions.x != 0)) {
-		if (!depthVideoWriter->isOpen())
-			depthVideoWriter->open((std::string(this->output_path) + "/out_depth.avi").c_str(),
-			                       input_raw_depth_image->dimensions.x, input_raw_depth_image->dimensions.y, true, 30);
-		depthVideoWriter->writeFrame(input_raw_depth_image);
+	if ((depth_video_writer != nullptr) && (input_raw_depth_image->dimensions.x != 0)) {
+		if (!depth_video_writer->isOpen())
+			depth_video_writer->open((std::string(this->output_path) + "/out_depth.avi").c_str(),
+			                         input_raw_depth_image->dimensions.x, input_raw_depth_image->dimensions.y, true, 30);
+		depth_video_writer->writeFrame(input_raw_depth_image);
 	}
 }
 

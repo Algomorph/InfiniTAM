@@ -309,7 +309,7 @@ void MultiEngine<TVoxel, TIndex>::SaveVolumeToMesh(const std::string& path)
 {
 	if (meshingEngine == NULL) return;
 	Mesh mesh = meshingEngine->MeshVolume(*mapManager);
-	mesh.WriteSTL(path);
+	mesh.WritePLY(path);
 }
 
 template <typename TVoxel, typename TIndex>

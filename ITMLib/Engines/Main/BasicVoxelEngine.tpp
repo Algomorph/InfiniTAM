@@ -100,7 +100,7 @@ void BasicVoxelEngine<TVoxel,TIndex>::SaveVolumeToMesh(const std::string& path)
 {
 	if (meshingEngine == nullptr) return;
 	Mesh mesh = meshingEngine->MeshVolume(volume);
-	mesh.WriteSTL(path);
+	mesh.WritePLY(path);
 }
 
 template <typename TVoxel, typename TIndex>
