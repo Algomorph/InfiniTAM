@@ -45,12 +45,12 @@ public: // inner classes / structs
 			}
 		}
 	};
-public: // member variables
+public: // instance variables
 
-private: // member variables
+private: // instance variables
 	ORUtils::MemoryBlock<Triangle> triangles;
 	unsigned int triangle_count;
-public: // member functions
+public: // instance functions
 	Mesh();
 	Mesh(const Mesh& other, MemoryDeviceType memory_type);
 	Mesh(ORUtils::MemoryBlock<Triangle>& triangles, unsigned int triangle_count);
@@ -64,7 +64,7 @@ public: // member functions
 
 	void WritePLY(const std::string& path, bool ascii = false, bool use_compression = false);
 
-private: // member functions
+private: // instance functions
 	template<typename TWriteTriangleArrayFunction>
 	void GenericWriteToDisk(TWriteTriangleArrayFunction&& write_triangle_array);
 };

@@ -100,6 +100,18 @@ handle_external_package(NAME zlib
                         LIBRARY_TARGET_POSIX lib/libz.a
                         ALTERNATIVE_LOCAL_NAME ZLIB
                         )
+#TODO
+#handle_external_package(NAME png
+#                        SOURCE ${PNG_SOURCE}
+#                        GIT_REPOSITORY https://github.com/madler/zlib.git
+#                        GIT_TAG cacf7f1d4e3d44d871b605da3b647f07d718623f
+#                        PACKAGED
+#                        INCLUDE_TARGET include
+#                        LIBRARY_TARGET_MSVC_DEBUG lib/zlibd.lib
+#                        LIBRARY_TARGET_MSVC_RELEASE lib/zlib.lib
+#                        LIBRARY_TARGET_POSIX lib/libz.a
+#                        ALTERNATIVE_LOCAL_NAME ZLIB
+#                        )
 
 add_library(tinyply ${CMAKE_CURRENT_SOURCE_DIR}/packaged/tinyply/tinyply.h ${CMAKE_CURRENT_SOURCE_DIR}/packaged/tinyply/tinyply.cpp)
 target_include_directories(tinyply INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/packaged)

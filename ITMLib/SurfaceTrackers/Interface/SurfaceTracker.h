@@ -29,14 +29,14 @@ namespace ITMLib {
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, GradientFunctorType TGradientFunctorType>
 class SurfaceTracker :
 		public SurfaceTrackerInterface<TVoxel, TWarp, TIndex>, public SlavchevaSurfaceTracker {
-public: // member variables
+public: // instance variables
 #ifndef __CUDACC__
 	bool const histograms_enabled = configuration::get().logging_settings.verbosity_level >= VERBOSITY_PER_ITERATION;
 #else
 	bool const histograms_enabled = false;
 #endif
 
-private: // member variables
+private: // instance variables
 
 	WarpingEngineInterface<TVoxel, TWarp, TIndex>* warping_engine;
 	const NonRigidTrackingParameters parameters_nr;
@@ -44,7 +44,7 @@ private: // member variables
 	const float max_vector_update_threshold_in_voxels;
 	const bool log_settings = false;
 
-public: // member functions
+public: // instance functions
 	SurfaceTracker(Switches switches, Parameters parameters = Parameters());
 	SurfaceTracker();
 	virtual ~SurfaceTracker();
@@ -70,7 +70,7 @@ public: // member functions
 	                  VoxelVolume <TVoxel, TIndex>* canonical_volume,
 	                  VoxelVolume <TVoxel, TIndex>* live_volume) override;
 
-private: // member functions
+private: // instance functions
 	void PerformSingleOptimizationStep(
 			VoxelVolume<TVoxel, TIndex>* canonical_volume,
 			VoxelVolume<TVoxel, TIndex>* source_live_volume,

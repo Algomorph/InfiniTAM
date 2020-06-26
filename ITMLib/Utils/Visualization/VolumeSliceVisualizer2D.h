@@ -30,8 +30,8 @@ namespace ITMLib {
 template<typename TVoxel, typename TWarp, typename TIndex>
 class VolumeSliceVisualizer2D {
 
-	//TODO: positions of voxels to highlight / draw around should be defined extenally in the user code, not as class static members. Static functions should be probably changed to become member functions, with focus coordinates (testPos1, testPos2...) being set in user code during construction. -Greg (GitHub: Algomorph)
-private: // member variables
+	//TODO: positions of voxels to highlight / draw around should be defined extenally in the user code, not as class static members. Static functions should be probably changed to become instance functions, with focus coordinates (testPos1, testPos2...) being set in user code during construction. -Greg (GitHub: Algomorph)
+private: // instance variables
 	cv::Mat blank;
 	cv::Mat liveImgTemplate;
 
@@ -57,7 +57,7 @@ private: // member variables
 	const std::string outputDirectory;
 	const float pixelsPerVoxel;
 
-public: // member functions
+public: // instance functions
 
 	static float SdfToShadeValue(float sdf);
 
@@ -84,7 +84,7 @@ public: // member functions
 	void RecordWarpUpdates();
 
 
-private: // member functions
+private: // instance functions
 	void InitializeWarp2DSliceRecording(VoxelVolume<TVoxel, TIndex>* canonicalScene,
 	                                    VoxelVolume<TVoxel, TIndex>* sourceLiveScene);
 

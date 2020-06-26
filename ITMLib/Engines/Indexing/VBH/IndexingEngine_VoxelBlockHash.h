@@ -25,12 +25,12 @@ namespace ITMLib {
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
 class IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType, TExecutionMode> :
 		public IndexingEngineInterface<TVoxel, VoxelBlockHash>{
-private: // member variables
+private: // instance variables
 	internal::IndexingEngine_VoxelBlockHash_ExecutionModeSpecialized<TMemoryDeviceType, TExecutionMode> execution_mode_specialized_engine;
 
-protected: // member variables
+protected: // instance variables
 	using IndexingEngineInterface<TVoxel,VoxelBlockHash>::parameters;
-public: // member functions
+public: // instance functions
 	using IndexingEngineInterface<TVoxel,VoxelBlockHash>::GetParameters;
 	using  IndexingEngineInterface<TVoxel,VoxelBlockHash>::IndexingEngineInterface;
 
@@ -64,7 +64,7 @@ public: // member functions
 	void AllocateHashEntriesUsingAllocationStateList_SetVisibility(VoxelVolume<TVoxel, VoxelBlockHash>* volume);
 	void AllocateGridAlignedBox(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const Extent3Di& box) override;
 
-private: // member functions
+private: // instance functions
 	void ReallocateDeletedHashBlocks(VoxelVolume<TVoxel, VoxelBlockHash>* volume);
 	void ChangeVisibleBlockVisibility(VoxelVolume<TVoxel, VoxelBlockHash>* volume, HashBlockVisibility visibility);
 	template<typename TAllocationFunctor>

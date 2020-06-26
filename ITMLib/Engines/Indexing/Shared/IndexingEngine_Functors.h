@@ -34,9 +34,9 @@ namespace ITMLib {
 
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, HashBlockVisibility THashBlockVisibility>
 struct BlockVisibilitySetFunctor {
-private: // member variables
+private: // instance variables
 	HashBlockVisibility* block_visibility_types;
-public: // member functions
+public: // instance functions
 	explicit BlockVisibilitySetFunctor(VoxelVolume<TVoxel, VoxelBlockHash>* volume) :
 			block_visibility_types(volume->index.GetBlockVisibilityTypes()) {}
 
@@ -51,7 +51,7 @@ struct BlockListDeallocationFunctor {
 public:
 	Vector3s* colliding_positions_device = nullptr;
 
-private: // member variables
+private: // instance variables
 	VoxelBlockHash& index;
 	TVoxel* voxels;
 	HashEntryAllocationState* hash_entry_states;
@@ -64,7 +64,7 @@ private: // member variables
 	DECLARE_ATOMIC(int, last_free_voxel_block_id);
 	DECLARE_ATOMIC(int, last_free_excess_list_id);
 
-public: // member functions
+public: // instance functions
 	explicit BlockListDeallocationFunctor(VoxelVolume<TVoxel, VoxelBlockHash>* volume)
 			: index(volume->index),
 			  voxels(volume->GetVoxels()),
@@ -115,7 +115,7 @@ public: // member functions
 
 template<MemoryDeviceType TMemoryDeviceType>
 struct HashEntryStateBasedAllocationFunctor_Base {
-protected: // member variables
+protected: // instance variables
 	HashEntryAllocationState* hash_entry_states;
 	Vector3s* block_coordinates;
 
@@ -127,7 +127,7 @@ protected: // member variables
 	DECLARE_ATOMIC(int, last_free_voxel_block_id);
 	DECLARE_ATOMIC(int, last_free_excess_list_id);
 	DECLARE_ATOMIC(int, utilized_block_count);
-public: // member functions
+public: // instance functions
 	HashEntryStateBasedAllocationFunctor_Base(VoxelBlockHash& index)
 			: hash_entry_states(index.GetHashEntryAllocationStates()),
 			  block_coordinates(index.GetAllocationBlockCoordinates()),
@@ -156,7 +156,7 @@ public: // member functions
 template<MemoryDeviceType TMemoryDeviceType>
 struct HashEntryStateBasedAllocationFunctor
 		: public HashEntryStateBasedAllocationFunctor_Base<TMemoryDeviceType> {
-public: // member functions
+public: // instance functions
 	HashEntryStateBasedAllocationFunctor(VoxelBlockHash& index)
 			: HashEntryStateBasedAllocationFunctor_Base<TMemoryDeviceType>(index) {}
 
@@ -172,9 +172,9 @@ public: // member functions
 template<MemoryDeviceType TMemoryDeviceType>
 struct HashEntryStateBasedAllocationFunctor_SetVisibility
 		: public HashEntryStateBasedAllocationFunctor_Base<TMemoryDeviceType> {
-protected: // member variables
+protected: // instance variables
 	HashBlockVisibility* block_visibility_types;
-public: // member functions
+public: // instance functions
 	HashEntryStateBasedAllocationFunctor_SetVisibility(VoxelBlockHash& index)
 			: HashEntryStateBasedAllocationFunctor_Base<TMemoryDeviceType>(index),
 			  block_visibility_types(index.GetBlockVisibilityTypes()) {}
@@ -193,12 +193,12 @@ struct BlockListAllocationStateMarkerFunctor {
 public:
 	Vector3s* colliding_positions_device = nullptr;
 
-private: // member variables
+private: // instance variables
 	HashEntryAllocationState* hash_entry_states;
 	Vector3s* allocation_block_coordinates;
 	HashEntry* hash_table;
 	DECLARE_ATOMIC(int, colliding_block_count);
-public: // member functions
+public: // instance functions
 	explicit BlockListAllocationStateMarkerFunctor(VoxelBlockHash& index)
 			: hash_entry_states(index.GetHashEntryAllocationStates()),
 			  allocation_block_coordinates(index.GetAllocationBlockCoordinates()),
@@ -228,9 +228,9 @@ public: // member functions
 
 template<MemoryDeviceType TMemoryDeviceType>
 struct DepthBasedAllocationStateMarkerFunctor {
-public: // member variables
+public: // instance variables
 	ORUtils::MemoryBlock<Vector3s> colliding_block_positions;
-protected: // member variables
+protected: // instance variables
 
 	const float near_clipping_distance;
 	const float far_clipping_distance;
@@ -249,7 +249,7 @@ protected: // member variables
 
 	ORUtils::MemoryBlock<bool> unresolvable_collision_encountered;
 	bool* unresolvable_collision_encountered_device;
-public: // member functions
+public: // instance functions
 	DepthBasedAllocationStateMarkerFunctor(VoxelBlockHash& index,
 	                                       const VoxelVolumeParameters& volume_parameters, const ITMLib::View* view,
 	                                       Matrix4f inverted_depth_camera_pose, float surface_distance_cutoff) :
@@ -327,9 +327,9 @@ public: // member functions
 template<MemoryDeviceType TMemoryDeviceType>
 struct TwoSurfaceBasedAllocationStateMarkerFunctor_Base
 		: public DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType> {
-protected: // member variables
+protected: // instance variables
 	const Matrix4f depth_camera_pose;
-public: // member functions
+public: // instance functions
 	TwoSurfaceBasedAllocationStateMarkerFunctor_Base(VoxelBlockHash& index,
 	                                                 const VoxelVolumeParameters& volume_parameters,
 	                                                 const ITMLib::View* view,
@@ -340,7 +340,7 @@ public: // member functions
 			                                                          surface_distance_cutoff),
 			depth_camera_pose(tracking_state->pose_d->GetM()) {}
 
-protected: // member functions
+protected: // instance functions
 
 	_DEVICE_WHEN_AVAILABLE_
 	inline bool
@@ -405,7 +405,7 @@ struct TwoSurfaceBasedAllocationStateMarkerFunctor;
 template<MemoryDeviceType TMemoryDeviceType>
 struct TwoSurfaceBasedAllocationStateMarkerFunctor<TMemoryDeviceType, OPTIMIZED>
 		: public TwoSurfaceBasedAllocationStateMarkerFunctor_Base<TMemoryDeviceType> {
-public: // member functions
+public: // instance functions
 	TwoSurfaceBasedAllocationStateMarkerFunctor(VoxelBlockHash& index,
 	                                            const VoxelVolumeParameters& volume_parameters,
 	                                            const ITMLib::View* view,
@@ -441,11 +441,11 @@ public: // member functions
 template<MemoryDeviceType TMemoryDeviceType>
 struct TwoSurfaceBasedAllocationStateMarkerFunctor<TMemoryDeviceType, DIAGNOSTIC>
 		: public TwoSurfaceBasedAllocationStateMarkerFunctor_Base<TMemoryDeviceType> {
-private: // member variables
+private: // instance variables
 	IndexingDiagnosticData<VoxelBlockHash, TMemoryDeviceType>& diagnostic_data;
 	typename IndexingDiagnosticData<VoxelBlockHash, TMemoryDeviceType>::DataDevice* device_diagnostic_data;
 
-public: // member functions
+public: // instance functions
 	TwoSurfaceBasedAllocationStateMarkerFunctor(VoxelBlockHash& index,
 	                                            const VoxelVolumeParameters& volume_parameters,
 	                                            const ITMLib::View* view,

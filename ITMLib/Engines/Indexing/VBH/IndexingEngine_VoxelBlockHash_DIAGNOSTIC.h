@@ -23,7 +23,7 @@ namespace internal{
 
 template<MemoryDeviceType TMemoryDeviceType>
 struct IndexingEngine_VoxelBlockHash_ExecutionModeSpecialized<TMemoryDeviceType, DIAGNOSTIC>{
-public: // member variables
+public: // instance variables
 	IndexingDiagnosticData<VoxelBlockHash, TMemoryDeviceType> diagnostic_data;
 };
 

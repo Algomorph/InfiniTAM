@@ -25,7 +25,7 @@ namespace ITMLib {
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 class TelemetryRecorderInterface : public Configurable<TelemetrySettings> {
-protected: // member variables
+protected: // instance variables
 	using Configurable<TelemetrySettings>::parameters;
 public:
 	using Configurable<TelemetrySettings>::Configurable;
@@ -39,12 +39,12 @@ public:
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 class TelemetryRecorder : public TelemetryRecorderInterface<TVoxel, TWarp, TIndex> {
-private: // member variables
+private: // instance variables
 	ORUtils::OStreamWrapper canonical_volume_memory_usage_file;
 	ORUtils::OStreamWrapper camera_trajectory_file;
-protected: // member variables
+protected: // instance variables
 	using TelemetryRecorderInterface<TVoxel,TWarp,TIndex>::parameters;
-public: // member functions
+public: // instance functions
 	using TelemetryRecorderInterface<TVoxel,TWarp,TIndex>::GetParameters;
 
 	static TelemetryRecorder& GetDefaultInstance() {
@@ -56,7 +56,7 @@ public: // member functions
 	void RecordPreSurfaceTrackingData(const VoxelVolume <TVoxel, TIndex>& raw_live_volume, const Matrix4f camera_matrix, int frame_index) override;
 	void RecordPostSurfaceTrackingData(const VoxelVolume <TVoxel, TIndex>& warped_live_volume, int frame_index) override;
 	void RecordPostFusionData(const VoxelVolume <TVoxel, TIndex>& canonical_volume, int frame_index) override;
-private: // member functions
+private: // instance functions
 	void RecordVolumeMemoryUsageInfo(const VoxelVolume <TVoxel, TIndex>& canonical_volume);
 	void RecordFrameMeshFromVolume(const VoxelVolume <TVoxel, TIndex>& volume, const std::string& filename, int frame_index);
 	void RecordCameraPose(const Matrix4f& camera_pose);

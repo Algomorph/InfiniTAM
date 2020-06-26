@@ -42,7 +42,7 @@ namespace ITMLib {
  */
 template<typename TVoxel, typename TIndex>
 class IndexingEngineInterface : public Configurable<IndexingSettings> {
-protected: // member variables
+protected: // instance variables
 	using Configurable<IndexingSettings>::parameters;
 public:
 	using Configurable<IndexingSettings>::Configurable;

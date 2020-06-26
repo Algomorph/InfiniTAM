@@ -24,7 +24,7 @@ using namespace ITMLib;
 namespace test_utilities {
 template<MemoryDeviceType TMemoryDeviceType>
 struct CameraPoseAndRenderingEngineFixture {
-public: // member variables
+public: // instance variables
 	RGBDCalib calibration_data;
 	RenderState* render_state;
 	const Vector3f target;
@@ -34,7 +34,7 @@ public: // member variables
 	RenderingEngineBase<TSDFVoxel, VoxelBlockHash>* rendering_engine;
 	View* view_17;
 
-public: // member functions
+public: // instance functions
 	CameraPoseAndRenderingEngineFixture()
 			: render_state(new RenderState(Vector2i(snoopy_test_utilities::frame_image_size),
 			                               configuration::get().general_voxel_volume_parameters.near_clipping_distance,

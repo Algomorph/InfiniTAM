@@ -22,7 +22,7 @@ template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExe
 class IndexingEngine<TVoxel, PlainVoxelArray, TMemoryDeviceType, TExecutionMode>:
 		public IndexingEngineInterface<TVoxel, PlainVoxelArray> {
 
-public: // member functions
+public: // instance functions
 	IndexingEngine() = default;
 	static IndexingEngine& Instance() {
 		static IndexingEngine instance;

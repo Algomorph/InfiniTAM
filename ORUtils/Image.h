@@ -30,9 +30,10 @@ namespace ORUtils {
  * */
 template<typename T>
 class Image : private MemoryBlock<T> {
-private: // member variables
+private: // instance variables
 	using MemoryBlock<T>::element_count;
-public: // member functions
+public: // static functions
+public: // instance functions
 	using MemoryBlock<T>::size;
 	using MemoryBlock<T>::Clear;
 	using MemoryBlock<T>::GetData;

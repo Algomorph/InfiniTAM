@@ -113,7 +113,7 @@ class StopWatchWin : public StopWatchInterface
         inline float getAverageTime();
 
     private:
-        // member variables
+        // instance variables
 
         //! Start of measurement
         LARGE_INTEGER  start_time;
@@ -266,7 +266,7 @@ class StopWatchLinux : public StopWatchInterface
 
     private:
 
-        // member variables
+        // instance variables
 
         //! Start of measurement
         struct timeval  start_time;

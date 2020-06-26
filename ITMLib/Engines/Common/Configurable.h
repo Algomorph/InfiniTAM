@@ -22,7 +22,7 @@ template<typename TParameters>
 class Configurable {
 protected:
 	const TParameters parameters;
-public: // member functions
+public: // instance functions
 	Configurable() :
 			parameters(
 					ExtractSerializableStructFromPtreeIfPresent<TParameters>(

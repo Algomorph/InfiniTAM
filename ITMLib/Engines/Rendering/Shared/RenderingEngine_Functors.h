@@ -31,7 +31,7 @@ namespace ITMLib {
 
 template<MemoryDeviceType TMemoryDeviceType>
 struct FindVisibleBlocksFunctor {
-private: // member variables
+private: // instance variables
 	int* visible_block_hash_codes;
 	const float voxel_size;
 	const Vector2i depth_image_size;
@@ -40,7 +40,7 @@ private: // member variables
 
 
 	DECLARE_ATOMIC(int, visible_block_count);
-public: // member functions
+public: // instance functions
 	FindVisibleBlocksFunctor(int* visible_block_hash_codes, float voxel_size, const Vector2i& depth_image_size,
 	                         const Matrix4f& depth_camera_pose, const Vector4f depth_camera_projection_parameters)
 			: visible_block_hash_codes(visible_block_hash_codes),
@@ -75,10 +75,10 @@ public: // member functions
 
 template<MemoryDeviceType TMemoryDeviceType>
 struct CountVisibleBlocksInListIdRangeFunctor {
-private: // member variables
+private: // instance variables
 	const Vector2i range;
 	DECLARE_ATOMIC(int, visible_block_in_id_range_count);
-public: // member functions
+public: // instance functions
 	explicit CountVisibleBlocksInListIdRangeFunctor(Vector2i list_id_range) : range(list_id_range) {
 		assert(list_id_range.from <= list_id_range.to);
 		INITIALIZE_ATOMIC(int, visible_block_in_id_range_count, 0);
@@ -105,9 +105,9 @@ public: // member functions
 
 template<MemoryDeviceType TMemoryDeviceType>
 struct FillExpectedDepthsWithClippingDistancesFunctor {
-private: // member variables
+private: // instance variables
 	const Vector2f clipping_bounds;
-public: // member functions
+public: // instance functions
 	explicit FillExpectedDepthsWithClippingDistancesFunctor(const Vector2f& clipping_bounds) : clipping_bounds(clipping_bounds) {}
 
 	FillExpectedDepthsWithClippingDistancesFunctor(float near_clipping_distance, float far_clipping_distance)
@@ -122,7 +122,7 @@ public: // member functions
 
 template<MemoryDeviceType TMemoryDeviceType>
 struct ProjectAndSplitBlocksFunctor {
-private: // member variables
+private: // instance variables
 	const Matrix4f depth_camera_pose;
 	const Vector4f depth_camera_projection_parameters;
 	const Vector2i depth_image_size;
@@ -131,7 +131,7 @@ private: // member variables
 	DECLARE_ATOMIC(unsigned int, total_rendering_block_count);
 	RenderingBlock* rendering_blocks;
 
-public: // member functions
+public: // instance functions
 	ProjectAndSplitBlocksFunctor(
 			ORUtils::MemoryBlock<RenderingBlock>& rendering_blocks,
 			const Matrix4f& depth_camera_pose,
@@ -181,10 +181,10 @@ public: // member functions
 
 template<MemoryDeviceType TMemoryDeviceType>
 struct FillBlocksFunctor {
-private: // member variables
+private: // instance variables
 	Vector2f* pixel_ray_bound_data;
 	const int image_width;
-public: // member functions
+public: // instance functions
 	explicit FillBlocksFunctor(ORUtils::Image<Vector2f>& pixel_ray_bounds)
 			: pixel_ray_bound_data(pixel_ray_bounds.GetData(TMemoryDeviceType)),
 			  image_width(pixel_ray_bounds.dimensions.width) {}
@@ -243,7 +243,7 @@ struct RaycastFunctor {
 	const int ray_depth_image_width;
 
 
-public: // member functions
+public: // instance functions
 	RaycastFunctor(VoxelVolume<TVoxel, TIndex>& volume, const ORUtils::Image<Vector2f>& ray_depth_range_image,
 	               const Vector4f& inverted_camera_projection_parameters, const Matrix4f inverted_camera_pose)
 			: inverted_camera_projection_parameters(inverted_camera_projection_parameters),
@@ -273,7 +273,7 @@ public: // member functions
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 struct RenderPointCloudFunctor {
-private: // member variables
+private: // instance variables
 	const bool point_skipping_enabled;
 	const TVoxel* voxels;
 	const typename TIndex::IndexData* index_data;
@@ -284,7 +284,7 @@ private: // member variables
 
 	DECLARE_ATOMIC(unsigned int, point_count);
 
-public: // member functions
+public: // instance functions
 	RenderPointCloudFunctor(PointCloud& point_cloud, const VoxelVolume<TVoxel, TIndex>& volume, Vector3f light_source, bool point_skipping_enabled)
 			: point_skipping_enabled(point_skipping_enabled),
 			  voxels(volume.GetVoxels()),
@@ -339,7 +339,7 @@ public: // member functions
 
 template<MemoryDeviceType TMemoryDeviceType, bool TUseSmoothing, bool TFlipNormals>
 struct ICPMapRenderFunctor {
-private: // member variables
+private: // instance variables
 	Vector4f* locations;
 	Vector4f* normals;
 	const float voxel_size;
@@ -347,7 +347,7 @@ private: // member variables
 	const Vector4f* raycast_points;
 	const Vector3f light_source;
 
-public: // member functions
+public: // instance functions
 	ICPMapRenderFunctor(CameraTrackingState& camera_tracking_state, const float voxel_size, const RenderState& render_state,
 	                    const Vector3f light_source)
 			: locations(camera_tracking_state.pointCloud->locations->GetData(TMemoryDeviceType)),
@@ -383,7 +383,7 @@ public: // member functions
 
 template<MemoryDeviceType TMemoryDeviceType>
 struct ForwardProjectFunctor {
-private: // member variables
+private: // instance variables
 
 	Vector4f* forward_projection;
 	const int projection_image_width;
@@ -391,7 +391,7 @@ private: // member variables
 	const Vector4f depth_camera_projection_parameters;
 	const Matrix4f depth_camera_pose;
 
-public: // member functions
+public: // instance functions
 	ForwardProjectFunctor(ORUtils::Image<Vector4f>& forward_projection, const float voxel_size, const Vector4f& depth_camera_projection_parameters,
 	                      const Matrix4f& depth_camera_pose)
 			: forward_projection(forward_projection.GetData(TMemoryDeviceType)),
@@ -417,7 +417,7 @@ public: // member functions
 
 template<MemoryDeviceType TMemoryDeviceType>
 struct FindMissingProjectionPointsFunctor {
-private: // member variables
+private: // instance variables
 	int* projection_missing_point_indices;
 	const Vector4f* forward_projection;
 	const Vector2f* pixel_ray_depth_range_data;
@@ -425,7 +425,7 @@ private: // member variables
 	const float* depth;
 
 	DECLARE_ATOMIC(unsigned int, missing_point_count);
-public: // member functions
+public: // instance functions
 	FindMissingProjectionPointsFunctor(ORUtils::Image<int>& projection_missing_point_indices,
 	                                   const ORUtils::Image<Vector4f>& forward_projection,
 	                                   const ORUtils::Image<Vector2f>& pixel_ray_depth_range_image)
@@ -483,7 +483,7 @@ public: // member functions
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 struct RaycastMissingPointsFunctor {
-private: // member variables
+private: // instance variables
 	const Vector4f inverted_camera_projection_parameters;
 	const Matrix4f inverted_camera_pose;
 	const float truncation_distance; //"mu" / μ in many fusion-type-reconstruction articles
@@ -493,7 +493,7 @@ private: // member variables
 	const Vector2f* pixel_ray_depth_range_data;
 	const int ray_depth_range_image_width;
 
-public: // member functions
+public: // instance functions
 	RaycastMissingPointsFunctor(const VoxelVolume<TVoxel, TIndex>& volume,
 	                            const Vector4f& inverted_camera_projection_parameters, const Matrix4f inverted_camera_pose,
 	                            const ORUtils::Image<Vector2f>& pixel_ray_depth_range_image)
@@ -523,13 +523,13 @@ struct RenderFromVolumeFunctor;
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 struct RenderFromVolumeFunctor_Base {
-protected: // member variables
+protected: // instance variables
 	Vector4u* pixels;
 	const Vector4f* raycast_points;
 	const TVoxel* voxels;
 	const typename TIndex::IndexData* index_data;
 	const Vector3f light_source;
-public: // member functions
+public: // instance functions
 	RenderFromVolumeFunctor_Base(ORUtils::Image<Vector4u>& output_image, const ORUtils::Image<Vector4f>& raycast_points,
 	                             const VoxelVolume<TVoxel, TIndex>& volume, const Vector3f light_source)
 			: pixels(output_image.GetData(TMemoryDeviceType)), raycast_points(raycast_points.GetData(TMemoryDeviceType)),
@@ -588,13 +588,13 @@ struct RenderFromRaycastFunctor;
 
 template<MemoryDeviceType TMemoryDeviceType, bool TFlipNormals>
 struct RenderFromRaycastFunctor_Base {
-protected: // member variables
+protected: // instance variables
 	Vector4u* pixels;
 	const Vector2i image_dimensions;
 	const Vector4f* raycast_points;
 	const float voxel_size;
 	const Vector3f light_source;
-public: // member functions
+public: // instance functions
 	RenderFromRaycastFunctor_Base(ORUtils::Image<Vector4u>& output_image, const ORUtils::Image<Vector4f>& raycast_points,
 	                              float voxel_size, const Vector3f light_source)
 			: pixels(output_image.GetData(TMemoryDeviceType)), image_dimensions(output_image.dimensions),

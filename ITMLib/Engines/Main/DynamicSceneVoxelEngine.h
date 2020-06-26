@@ -41,7 +41,7 @@ namespace ITMLib {
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 class DynamicSceneVoxelEngine : public MainEngine {
-private: // member variables
+private: // instance variables
 	static constexpr int live_volume_count = 2;
 
 	bool camera_tracking_enabled, fusion_active, main_processing_active, tracking_initialised;
@@ -87,7 +87,7 @@ private: // member variables
 	CameraTrackingState::TrackingResult last_tracking_result;
 	ORUtils::SE3Pose previous_frame_pose;
 
-public: // member functions
+public: // instance functions
 
 	DynamicSceneVoxelEngine(const RGBDCalib& calibration_info, Vector2i rgb_image_size, Vector2i depth_image_size);
 	~DynamicSceneVoxelEngine() override;
@@ -126,7 +126,7 @@ public: // member functions
 	void TurnOnMainProcessing() override;
 	void TurnOffMainProcessing() override;
 
-private: // member functions
+private: // instance functions
 	void Reset();
 	void InitializeScenes();
 	//TODO: move to SwappingEngine itself.

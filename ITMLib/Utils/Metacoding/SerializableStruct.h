@@ -32,7 +32,7 @@
  * one for each field. Each triplet should have the form (<type>, <name>, <default value>).
  *
  * @ref GENERATE_SERIALIZABLE_STRUCT( MyWonderfulUnicorn, (float, age, 5.0f), (float, horn_length, 0.33f) )
- * Generates a struct called "MyWonderfulUnicorn" with two fields, i.e. public member variables, called
+ * Generates a struct called "MyWonderfulUnicorn" with two fields, i.e. public instance variables, called
  * "age" and "horn_length". Both are typed as floats and have their respective default values set at 5.0f and 0.33f.
  */
 #ifdef _MSC_VER

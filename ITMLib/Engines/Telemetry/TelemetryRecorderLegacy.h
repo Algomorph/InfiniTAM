@@ -39,12 +39,12 @@ class TelemetryRecorderLegacy{
 public: // static variables
 
 
-public: // member variables
+public: // instance variables
 	const TelemetrySettings settings;
 	const std::string output_path;
 	const bool focus_spots_enabled;
 
-private: // member variables
+private: // instance variables
 	// various loggers & visualizers
 #ifdef WITH_OPENCV
 	std::unique_ptr<VolumeSliceVisualizer2D<TVoxel, TWarp, TIndex>> volume_2D_slice_visualizer;
@@ -60,7 +60,7 @@ private: // member variables
 	int current_frame_index;
 	std::string current_frame_output_path;
 
-public: // member functions
+public: // instance functions
 	TelemetryRecorderLegacy();
 	TelemetryRecorderLegacy(const TelemetrySettings& settings, const std::string& output_path,
 	                        bool focus_spots_enabled = true);
@@ -92,7 +92,7 @@ public: // member functions
 	TelemetryRecorderLegacy(TelemetryRecorderLegacy const&) = delete;
 	void operator=(TelemetryRecorderLegacy const&) = delete;
 
-private: // member functions
+private: // instance functions
 
 
 

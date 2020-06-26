@@ -546,7 +546,7 @@ _CPU_AND_GPU_CODE_ inline bool operator==(const Vector3<T1>& lhs, const Vector3<
 }
 
 ////////////////////////////////////////////////////////
-//  Non-member functions
+//  Non-instance functions
 ////////////////////////////////////////////////////////
 
 // cross product

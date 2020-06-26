@@ -22,9 +22,9 @@ namespace ITMLib{
 
 template<class TVoxel, class TIndex, MemoryDeviceType TMemoryDeviceType>
 class RenderingEngine : public RenderingEngineBase<TVoxel, TIndex> {
-private: // member variables
+private: // instance variables
 	internal::RenderingEngine_Specialized<TVoxel, TIndex, TMemoryDeviceType> specialized_engine;
-public: // member functions
+public: // instance functions
 	void FindVisibleBlocks(VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics,
 	                       RenderState* render_state) const override;
 	int CountVisibleBlocks(const VoxelVolume<TVoxel, TIndex>* volume, const RenderState* render_state, int min_block_list_id, int max_block_list_id) const override;
@@ -41,7 +41,7 @@ public: // member functions
 	                   RenderState* render_state) const override;
 	void ForwardRender(const VoxelVolume<TVoxel, TIndex>* volume, const View* view, CameraTrackingState* camera_tracking_state,
 	                   RenderState* render_state) const override;
-private: // member functions
+private: // instance functions
 	void GenericRaycast(VoxelVolume<TVoxel, TIndex>* volume, const Vector2i& depth_image_size, const Matrix4f& camera_inverse_pose, const Vector4f& camera_projection_parameters, const RenderState* render_state, bool update_visible_list) const;
 };
 

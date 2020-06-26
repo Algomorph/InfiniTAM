@@ -29,7 +29,7 @@ struct IndexingDiagnosticData;
 
 template<MemoryDeviceType TMemoryDeviceType>
 struct IndexingDiagnosticData<VoxelBlockHash, TMemoryDeviceType> {
-public: // member variables
+public: // instance variables
 	// ** indexing engine diagnostics **
 	BoolImage surface1_point_mask;
 	BoolImage surface2_point_mask;
@@ -76,7 +76,7 @@ public: // member variables
 	ORUtils::MemoryBlock<DataDevice> data_device;
 
 
-public: // member functions
+public: // instance functions
 
 	IndexingDiagnosticData(const Vector2i& depth_image_dimensions) :
 			surface1_point_mask(depth_image_dimensions, TMemoryDeviceType),
