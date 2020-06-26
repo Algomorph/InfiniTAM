@@ -7,7 +7,7 @@ include(ExternalProject)
 function(handle_external_package)
     set(options PACKAGED)
     set(oneValueArgs NAME SOURCE GIT_REPOSITORY GIT_TAG INCLUDE_TARGET LIBRARY_TARGET_POSIX LIBRARY_TARGET_MSVC_DEBUG LIBRARY_TARGET_MSVC_RELEASE ALTERNATIVE_LOCAL_NAME)
-    set(multiValueArgs CMAKE_ARGS)
+    set(multiValueArgs CMAKE_ARGS LIBRARY_TARGET_MSVC_INTERFACE_LINK_LIBRARIES)
     cmake_parse_arguments(HEP "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     string(TOUPPER ${HEP_NAME} HEP_UC_NAME)
@@ -65,6 +65,10 @@ function(handle_external_package)
                                   IMPORTED_LOCATION_RELEASE ${${HEP_UC_NAME}_PREFIX}/${HEP_LIBRARY_TARGET_MSVC_RELEASE}
                                   IMPORTED_LOCATION_DEBUG ${${HEP_UC_NAME}_PREFIX}/${HEP_LIBRARY_TARGET_MSVC_DEBUG}
                                   )
+            if(HEP_LIBRARY_TARGET_MSVC_INTERFACE_LINK_LIBRARIES)
+                set_target_properties(${HEP_NAME} PROPERTIES
+                                      INTERFACE_LINK_LIBRARIES "${HEP_LIBRARY_TARGET_MSVC_INTERFACE_LINK_LIBRARIES}")
+            endif()
         else ()
             set_target_properties(${HEP_NAME} PROPERTIES
                                   INTERFACE_INCLUDE_DIRECTORIES ${${HEP_UC_NAME}_PREFIX}/${HEP_INCLUDE_TARGET}
@@ -81,11 +85,12 @@ handle_external_package(NAME log4cplus
                         SOURCE ${LOG4CPLUS_SOURCE}
                         GIT_REPOSITORY https://github.com/log4cplus/log4cplus.git
                         GIT_TAG 3b9d98fb5fd72298745cf21620ace8f2b6d770ad
-                        CMAKE_ARGS -DWITH_UNIT_TESTS=OFF -DBUILD_SHARED_LIBS=OFF
+                        CMAKE_ARGS -DWITH_UNIT_TESTS=OFF -DBUILD_SHARED_LIBS=OFF -DUNICODE=OFF -DLOG4CPLUS_BUILD_TESTING=OFF -DLOG4CPLUS_BUILD_LOGGINGSERVER=OFF
                         PACKAGED
                         INCLUDE_TARGET include
-                        LIBRARY_TARGET_MSVC_DEBUG lib/log4cplusSUD.lib
-                        LIBRARY_TARGET_MSVC_RELEASE lib/log4cplusSU.lib 
+                        LIBRARY_TARGET_MSVC_DEBUG lib/log4cplusSD.lib
+                        LIBRARY_TARGET_MSVC_RELEASE lib/log4cplusS.lib
+                        LIBRARY_TARGET_MSVC_INTERFACE_LINK_LIBRARIES "ws2_32;advapi32" 
                         LIBRARY_TARGET_POSIX lib/liblog4cplusS.a
                         )
 
