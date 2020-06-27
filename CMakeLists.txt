@@ -60,9 +60,7 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" AND ${CMAKE_CXX_STANDARD} STREQUAL "1
     link_libraries(stdc++fs)
 endif()
 
-#########################
-# Suppress auto-linking #
-#########################
+# Suppress auto-linking
 
 if (MSVC_IDE)
     add_definitions(-DUSING_CMAKE=1)
@@ -73,24 +71,6 @@ endif ()
 file(GLOB_RECURSE CMAKE_SOURCES "cmake/*")
 add_custom_target(cmake SOURCES ${CMAKE_SOURCES})
 source_group(CMake FILES ${CMAKE_SOURCES})
-
-######################
-# Dependency options
-######################
-set(FULL_SOURCE_OPTIONS
-    BUILD_EXTERNAL
-    BUILD_PACKAGED
-    FIND_LOCAL)
-
-# log4cplus
-list(GET FULL_SOURCE_OPTIONS 0 LOG4CPLUS_SOURCE_DEFAULT_OPTION)
-set(LOG4CPLUS_SOURCE "${LOG4CPLUS_SOURCE_DEFAULT_OPTION}" CACHE STRING "How to obtain the log4cplus dependency. Can be one of: [ ${FULL_SOURCE_OPTIONS}]")
-set_property(CACHE LOG4CPLUS_SOURCE PROPERTY STRINGS ${FULL_SOURCE_OPTIONS})
-
-# zlib
-list(GET FULL_SOURCE_OPTIONS 0 ZLIB_SOURCE_DEFAULT_OPTION)
-set(ZLIB_SOURCE "${ZLIB_SOURCE_DEFAULT_OPTION}" CACHE STRING "How to obtain the zlib dependency. Can be one of: [ ${FULL_SOURCE_OPTIONS}]")
-set_property(CACHE ZLIB_SOURCE PROPERTY STRINGS ${FULL_SOURCE_OPTIONS})
 
 ######################
 # Add subdirectories #
