@@ -153,7 +153,12 @@ void AllocateUsingOtherVolume(VoxelVolume<TVoxelTarget, TIndex>* target_volume,
 			internal::AllocateUsingOtherVolume<MEMORYDEVICE_CPU>(target_volume, source_volume);
 			break;
 		case MEMORYDEVICE_CUDA:
+#ifndef COMPILE_WITHOUT_CUDA
 			internal::AllocateUsingOtherVolume<MEMORYDEVICE_CUDA>(target_volume, source_volume);
+#else
+			DIEWITHEXCEPTION_REPORTLOCATION("Tried to invoke the CUDA version of 'AllocateUsingOtherVolume' while code built "
+			                                "without CUDA support (WITH_CUDA=OFF CMake option).");
+#endif
 			break;
 		default:
 			DIEWITHEXCEPTION_REPORTLOCATION("Unsupported device type.");
@@ -169,7 +174,12 @@ void AllocateUsingOtherVolume_Bounded(VoxelVolume<TVoxelTarget, TIndex>* target_
 			internal::AllocateUsingOtherVolume_Bounded<MEMORYDEVICE_CPU>(target_volume, source_volume);
 			break;
 		case MEMORYDEVICE_CUDA:
+#ifndef COMPILE_WITHOUT_CUDA
 			internal::AllocateUsingOtherVolume_Bounded<MEMORYDEVICE_CUDA>(target_volume, source_volume);
+#else
+			DIEWITHEXCEPTION_REPORTLOCATION("Tried to invoke the CUDA version of 'AllocateUsingOtherVolume_Bounded' while code built "
+			                                "without CUDA support (WITH_CUDA=OFF CMake option).");
+#endif
 			break;
 		default:
 			DIEWITHEXCEPTION_REPORTLOCATION("Unsupported device type.");
@@ -185,7 +195,12 @@ void AllocateUsingOtherVolume_OffsetAndBounded(VoxelVolume<TVoxelTarget, TIndex>
 			internal::AllocateUsingOtherVolume_OffsetAndBounded<MEMORYDEVICE_CPU>(target_volume, source_volume);
 			break;
 		case MEMORYDEVICE_CUDA:
+#ifndef COMPILE_WITHOUT_CUDA
 			internal::AllocateUsingOtherVolume_OffsetAndBounded<MEMORYDEVICE_CUDA>(target_volume, source_volume);
+#else
+			DIEWITHEXCEPTION_REPORTLOCATION("Tried to invoke the CUDA version of 'AllocateUsingOtherVolume_OffsetAndBounded'"
+			                                "while code built without CUDA support (WITH_CUDA=OFF CMake option).");
+#endif
 			break;
 		default:
 			DIEWITHEXCEPTION_REPORTLOCATION("Unsupported device type.");
