@@ -50,7 +50,8 @@ Mesh MeshingEngine_CPU<TVoxel, VoxelBlockHash>::MeshVolume(const VoxelVolume<TVo
 
 
 #ifdef WITH_OPENMP
-#pragma omp parallel for default(none) shared(hash_table, voxels, utilized_block_indices, triangle_count, triangle_table, triangles_device, utilized_block_count, voxel_size)
+#pragma omp parallel for default(none) shared(hash_table, voxels, utilized_block_indices, triangle_count, triangle_table, triangles_device) \
+firstprivate(utilized_block_count, voxel_size)
 #endif
 	for (int utilized_entry_index = 0; utilized_entry_index < utilized_block_count; utilized_entry_index++) {
 		const HashEntry& hash_entry = hash_table[utilized_block_indices[utilized_entry_index]];

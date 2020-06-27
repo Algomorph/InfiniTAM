@@ -36,12 +36,12 @@ void EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::ResetVolume(
 
 	TVoxel* voxels = volume->GetVoxels();
 #ifdef WITH_OPENMP
-#pragma omp parallel for default(none) shared(voxels, block_count, block_size)
+#pragma omp parallel for default(none) shared(voxels) firstprivate(block_count, block_size)
 #endif
 	for (int i_voxel = 0; i_voxel < block_count * block_size; i_voxel++) voxels[i_voxel] = TVoxel();
 	int* block_allocation_list = volume->index.GetBlockAllocationList();
 #ifdef WITH_OPENMP
-#pragma omp parallel for default(none) shared(block_allocation_list, block_count)
+#pragma omp parallel for default(none) shared(block_allocation_list) firstprivate(block_count)
 #endif
 	for (int i_block_index = 0; i_block_index < block_count; i_block_index++)
 		block_allocation_list[i_block_index] = i_block_index;

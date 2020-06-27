@@ -1,4 +1,5 @@
 include(ExternalProject)
+include(${CMAKE_CURRENT_SOURCE_DIR}/utils.cmake)
 #########################################################
 # LOG4CPLUS
 #########################################################

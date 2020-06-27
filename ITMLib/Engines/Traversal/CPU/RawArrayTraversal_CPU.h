@@ -39,7 +39,7 @@ protected: // static functions
 	template<typename TApplyFunction>
 	inline static void Traverse_Generic(const unsigned int element_count, TApplyFunction&& apply_function) {
 #ifdef WITH_OPENMP
-#pragma omp parallel for default(none) shared(apply_function, element_count)
+#pragma omp parallel for default(none) shared(apply_function) firstprivate(element_count)
 #endif
 		for (int i_item = 0; i_item < element_count; i_item++) {
 			apply_function(i_item);
