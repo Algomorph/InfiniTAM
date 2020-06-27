@@ -23,9 +23,10 @@ namespace ITMLib {
 
 GENERATE_SERIALIZABLE_STRUCT(NonRigidTrackingParameters,
                              (GradientFunctorType, functor_type, ITMLib::TRACKER_SLAVCHEVA_DIAGNOSTIC, ENUM,
-                             		"blah"),
-                             (unsigned int, max_iteration_threshold, 200, PRIMITIVE, "blah"),
-                             (float, max_update_length_threshold, 0.0001f, PRIMITIVE, "blah"),
+                             		"blah"),\
+                             (int, max_iteration_threshold, 200, PRIMITIVE, "Maximum iteration count, after which the non-rigid alignment is cut off."),\
+                             (float, max_update_length_threshold, 0.0001f, PRIMITIVE, "Maximum update length threshold, in meters. When the greatest"\
+                                 " vector update in calculating voxel motion doesn't exceed this threshold, the non-rigid alignment optimization is terminated."),\
                              (float, momentum_weight, 0.5f, PRIMITIVE, "blah"));
 
 } // namespace ITMLib

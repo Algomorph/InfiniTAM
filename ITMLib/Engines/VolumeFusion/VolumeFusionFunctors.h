@@ -46,7 +46,7 @@ struct TSDFFusionFunctor {
 		// (voxel size, m) / (narrow-band half-width eta, m) * -("2-3 voxels")
 		// we use .3 for the latter value, which means 3 voxels if the max SDF value is 1.0 and values are truncated
 		// after 10 voxels in each direction.
-		const float threshold = -0.3;
+		const float threshold = -0.3f;
 
 		//fusion condition "THRESHOLD"
 		if (live_sdf < threshold)

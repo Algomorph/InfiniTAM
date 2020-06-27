@@ -62,9 +62,9 @@ include(${PROJECT_SOURCE_DIR}/cmake/SetCUDAAppTarget.cmake)
 # Specify the libraries to link #
 #################################
 
-target_link_libraries(${targetname} InputSource ITMLib MiniSlamGraphLib ORUtils FernRelocLib)
+target_link_libraries(${targetname} InputSource ITMLib MiniSlamGraphLib ORUtils FernRelocLib glut)
+
 include(${PROJECT_SOURCE_DIR}/cmake/LinkFFmpeg.cmake)
-include(${PROJECT_SOURCE_DIR}/cmake/LinkGLUT.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/LinkLibRoyale.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/LinkOpenGL.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/LinkOpenNI.cmake)

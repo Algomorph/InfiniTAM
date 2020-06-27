@@ -191,7 +191,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType, TExecutionMode>::
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume,
 		const ORUtils::MemoryBlock<Vector3s>& new_block_positions,
 		int new_block_count) {
-	if (new_block_count == -1) new_block_count = new_block_positions.size();
+	if (new_block_count == -1) new_block_count = static_cast<int>(new_block_positions.size());
 	if (new_block_count == 0) return;
 
 	ORUtils::MemoryBlock<Vector3s> new_positions_local(new_block_count, TMemoryDeviceType);
@@ -228,7 +228,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType, TExecutionMode>::
 		const ORUtils::MemoryBlock<Vector3s>& coordinates_of_blocks_to_remove,
 		int count_of_blocks_to_remove) {
 
-	if (count_of_blocks_to_remove == -1) count_of_blocks_to_remove = coordinates_of_blocks_to_remove.size();
+	if (count_of_blocks_to_remove == -1) count_of_blocks_to_remove = static_cast<int>(coordinates_of_blocks_to_remove.size());
 	if (count_of_blocks_to_remove == 0) return;
 
 	// *** locally-manipulated memory blocks of hash codes & counters *** /

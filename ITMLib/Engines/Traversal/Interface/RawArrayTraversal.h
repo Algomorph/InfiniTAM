@@ -28,22 +28,22 @@ template<MemoryDeviceType TDeviceType>
 class RawArrayTraversalEngine{
 public: // static functions
 	template<JobCountPolicy TJobCountPolicy = JobCountPolicy::EXACT, typename T, typename TFunctor>
-	inline static void Traverse(T* data, TFunctor& functor, const unsigned int element_count) {
+	inline static void Traverse(T* data, TFunctor& functor, const int element_count) {
 		internal::RawArrayTraversalEngine_Internal<TDeviceType, TJobCountPolicy, CONTIGUOUS>::template TraverseWithoutIndex_Generic(data, functor, element_count);
 	}
 
 	template<JobCountPolicy TJobCountPolicy = JobCountPolicy::EXACT, typename T, typename TFunctor>
-	inline static void Traverse(const T* data, TFunctor& functor, const unsigned int element_count) {
+	inline static void Traverse(const T* data, TFunctor& functor, const int element_count) {
 		internal::RawArrayTraversalEngine_Internal<TDeviceType, TJobCountPolicy, CONTIGUOUS>::template TraverseWithoutIndex_Generic(data, functor, element_count);
 	}
 
 	template<JobCountPolicy TJobCountPolicy = JobCountPolicy::EXACT, typename T, typename TFunctor>
-	inline static void TraverseWithIndex(T* data, TFunctor& functor, const unsigned int element_count) {
+	inline static void TraverseWithIndex(T* data, TFunctor& functor, const int element_count) {
 		internal::RawArrayTraversalEngine_Internal<TDeviceType, TJobCountPolicy, CONTIGUOUS>::template TraverseWithIndex_Generic(data, functor, element_count);
 	}
 
 	template<JobCountPolicy TJobCountPolicy = JobCountPolicy::EXACT, typename T, typename TFunctor>
-	inline static void TraverseWithIndex(const T* data, TFunctor& functor, const unsigned int element_count) {
+	inline static void TraverseWithIndex(const T* data, TFunctor& functor, const int element_count) {
 		internal::RawArrayTraversalEngine_Internal<TDeviceType, TJobCountPolicy, CONTIGUOUS>::template TraverseWithIndex_Generic(data, functor, element_count);
 	}
 };

@@ -36,7 +36,7 @@ protected: // static functions
 	inline static void
 	TraverseWithoutPosition_Generic(TImage* image, TFunctor& functor) {
 		TImageElement* image_data = image->GetData(MEMORYDEVICE_CPU);
-		const unsigned int element_count = image->size();
+		const int element_count = static_cast<int>(image->size());
 		BasicMemoryTraversalEngine<TJobCountPolicy, CONTIGUOUS>::Traverse_Generic(
 				element_count,
 				[&functor, &image_data](const int i_element) {
@@ -48,7 +48,7 @@ protected: // static functions
 	inline static void
 	TraverseWithPosition_Generic(TImage* image, TFunctor& functor) {
 		TImageElement* image_data = image->GetData(MEMORYDEVICE_CPU);
-		const unsigned int element_count = image->size();
+		const int element_count = static_cast<int>(image->size());
 		const int image_width = image->dimensions.width;
 		BasicMemoryTraversalEngine<TJobCountPolicy, CONTIGUOUS>::Traverse_Generic(
 				element_count,
@@ -62,7 +62,7 @@ protected: // static functions
 	template<int TCudaBlockSizeX = 16, int TCudaBlockSizeY = 16, typename TImageElement, typename TImage, typename TFunctor>
 	inline static void
 	TraversePositionOnly_Generic(TImage* image, TFunctor& functor) {
-		const unsigned int element_count = image->size();
+		const int element_count = static_cast<int>(image->size());
 		const int image_width = image->dimensions.width;
 		BasicMemoryTraversalEngine<TJobCountPolicy, CONTIGUOUS>::Traverse_Generic(
 				element_count,

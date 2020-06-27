@@ -36,7 +36,7 @@ inline Mesh MultiMeshingEngine_CPU<TVoxel, VoxelBlockHash>::MeshVolume(const Mul
 	ORUtils::MemoryBlock<Mesh::Triangle> triangles(max_triangle_count, MEMORYDEVICE_CUDA);
 	Mesh::Triangle *triangles_device = triangles.GetData(MEMORYDEVICE_CPU);
 
-	int triangle_count = 0;
+	unsigned int triangle_count = 0;
 	int noTotalEntriesPerLocalMap = manager.getLocalMap(0)->volume->index.hash_entry_count;
 	float factor = sceneParams.voxel_size;
 

@@ -24,7 +24,7 @@ namespace ORUtils {
 template<typename TMatrix>
 void SaveMatrix(OStreamWrapper& file, const TMatrix& matrix) {
 	for (int i_value = 0; i_value < TMatrix::element_count; i_value++) {
-		float value = matrix.getValues()[i_value];
+		typename TMatrix::value_type value = matrix.getValues()[i_value];
 		file.OStream().write(reinterpret_cast<const char*>(&value), sizeof(typename TMatrix::value_type));
 	}
 }

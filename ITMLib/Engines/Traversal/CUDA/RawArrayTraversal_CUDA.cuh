@@ -29,7 +29,7 @@ class RawArrayTraversalEngine_Internal<MEMORYDEVICE_CUDA, JobCountPolicy::EXACT,
 	friend class RawArrayTraversalEngine<MEMORYDEVICE_CUDA>;
 protected: // static functions
 	template<typename TData, typename TFunctor>
-	inline static void TraverseWithoutIndex_Generic(TData* data, TFunctor& functor, const unsigned int element_count) {
+	inline static void TraverseWithoutIndex_Generic(TData* data, TFunctor& functor, const int element_count) {
 		CallCUDAonUploadedFunctor(
 				functor,
 				[&element_count, &data](TFunctor* functor_device) {
@@ -41,7 +41,7 @@ protected: // static functions
 	}
 
 	template<typename TData, typename TFunctor>
-	inline static void TraverseWithIndex_Generic(TData* data, TFunctor& functor, const unsigned int element_count) {
+	inline static void TraverseWithIndex_Generic(TData* data, TFunctor& functor, const int element_count) {
 		CallCUDAonUploadedFunctor(
 				functor,
 				[&element_count, &data](TFunctor* functor_device) {
@@ -101,7 +101,7 @@ class RawArrayTraversalEngine_Internal<MEMORYDEVICE_CUDA, JobCountPolicy::PADDED
 	friend class RawArrayTraversalEngine<MEMORYDEVICE_CUDA>;
 protected: // static functions
 	template< int TBlockSize = 256, typename TData, typename TFunctor>
-	inline static void Traverse_Generic(TData* data, TFunctor& functor, const unsigned int element_count) {
+	inline static void Traverse_Generic(TData* data, TFunctor& functor, const int element_count) {
 		CallCUDAonUploadedFunctor(
 				functor,
 				[&element_count, &data](TFunctor* functor_device) {
@@ -112,11 +112,11 @@ protected: // static functions
 		);
 	}
 	template<typename TData, typename TFunctor>
-	inline static void TraverseWithIndex_Generic(TData* data, TFunctor& functor, const unsigned int element_count) {
+	inline static void TraverseWithIndex_Generic(TData* data, TFunctor& functor, const int element_count) {
 		Traverse_Generic(data, functor, element_count);
 	}
 	template<typename TData, typename TFunctor>
-	inline static void TraverseWithoutIndex_Generic(TData* data, TFunctor& functor, const unsigned int element_count) {
+	inline static void TraverseWithoutIndex_Generic(TData* data, TFunctor& functor, const int element_count) {
 		Traverse_Generic(data, functor, element_count);
 	}
 };

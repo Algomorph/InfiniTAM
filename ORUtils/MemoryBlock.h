@@ -39,6 +39,8 @@
 #include <iterator>
 
 namespace ORUtils {
+
+
 /** \brief
 Represents memory blocks, templated on the data type
 */
@@ -50,10 +52,6 @@ public:
 // region =================== TYPEDEFS =================================================================================
 
 	typedef A allocator_type;
-	typedef typename A::reference reference;
-	typedef typename A::const_reference const_reference;
-	typedef typename A::difference_type difference_type;
-	typedef typename A::value_type value_type;
 	typedef typename A::size_type size_type;
 // endregion ===========================================================================================================
 // region =================== ITERATORS ================================================================================

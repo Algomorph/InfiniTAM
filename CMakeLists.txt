@@ -2,7 +2,7 @@
 # Top-level CMakeLists.txt for InfiniTAM #
 ##########################################
 
-cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 
 project(InfiniTAM)
 

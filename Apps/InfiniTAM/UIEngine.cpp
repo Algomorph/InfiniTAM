@@ -2,24 +2,15 @@
 
 #include "UIEngine.h"
 
-#include <string.h>
-
 #ifdef __APPLE__
-#include <GLUT/glut.h>
+	#include <GLUT/glut.h>
 #else
-
-#include <GL/glut.h>
-
-#endif
-
-#ifdef FREEGLUT
-
-#include <GL/freeglut.h>
-
-#else
-#if (!defined USING_CMAKE) && (defined _MSC_VER)
-#pragma comment(lib, "glut64")
-#endif
+	#ifndef FREEGLUT_STATIC
+		#include <GL/glut.h>
+	#endif
+	#if defined(FREEGLUT) || defined(FREEGLUT_STATIC)
+		#include <GL/freeglut.h>
+	#endif 
 #endif
 
 #ifdef WITH_VTK

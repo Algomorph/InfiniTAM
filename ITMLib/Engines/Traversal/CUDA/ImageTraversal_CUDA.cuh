@@ -36,7 +36,7 @@ protected: // static functions
 	inline static void
 	TraverseWithoutPosition_Generic(TImage* image, TFunctor& functor) {
 		TImageElement* image_data = image->GetData(MEMORYDEVICE_CUDA);
-		const int pixel_count = image->size();
+		const int pixel_count = static_cast<int>(image->size());
 		BasicMemoryTraversalEngine<EXACT, CONTIGUOUS>::TraverseWithoutIndex_Generic(image_data, functor, pixel_count);
 	}
 

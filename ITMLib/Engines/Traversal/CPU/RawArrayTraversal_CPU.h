@@ -37,7 +37,7 @@ class RawArrayTraversalEngine_Internal<MEMORYDEVICE_CPU, JobCountPolicy::EXACT, 
 	friend class RawArrayTraversalEngine_Internal<MEMORYDEVICE_CPU, JobCountPolicy::EXACT, INDEX_SAMPLE>;
 protected: // static functions
 	template<typename TApplyFunction>
-	inline static void Traverse_Generic(const unsigned int element_count, TApplyFunction&& apply_function) {
+	inline static void Traverse_Generic(const int element_count, TApplyFunction&& apply_function) {
 #ifdef WITH_OPENMP
 #pragma omp parallel for default(none) shared(apply_function) firstprivate(element_count)
 #endif
@@ -47,12 +47,12 @@ protected: // static functions
 	}
 
 	template<typename TData, typename TFunctor>
-	inline static void TraverseWithIndex_Generic(TData* data, TFunctor& functor, const unsigned int element_count) {
+	inline static void TraverseWithIndex_Generic(TData* data, TFunctor& functor, const int element_count) {
 		Traverse_Generic(element_count, [&functor, &data](int i_item) { functor(data[i_item], i_item); });
 	}
 
 	template<typename TData, typename TFunctor>
-	inline static void TraverseWithoutIndex_Generic(TData* data, TFunctor& functor, const unsigned int element_count) {
+	inline static void TraverseWithoutIndex_Generic(TData* data, TFunctor& functor, const int element_count) {
 		Traverse_Generic(element_count, [&functor, &data](int i_item) { functor(data[i_item]); });
 	}
 };
@@ -93,7 +93,7 @@ class RawArrayTraversalEngine_Internal<MEMORYDEVICE_CPU, JobCountPolicy::PADDED,
 	friend class RawArrayTraversalEngine<MEMORYDEVICE_CPU>;
 protected: // static functions
 	template<typename TData, typename TFunctor>
-	inline static void Traverse_Generic(TData* data, TFunctor& functor, const unsigned int element_count) {
+	inline static void Traverse_Generic(TData* data, TFunctor& functor, const int element_count) {
 #ifdef WITH_OPENMP
 		unsigned int thread_count = omp_get_max_threads();
 		unsigned int job_count = ceil_of_integer_quotient(element_count, thread_count) * thread_count;
@@ -108,11 +108,11 @@ protected: // static functions
 #endif
 	}
 	template<typename TData, typename TFunctor>
-	inline static void TraverseWithIndex_Generic(TData* data, TFunctor& functor, const unsigned int element_count) {
+	inline static void TraverseWithIndex_Generic(TData* data, TFunctor& functor, const int element_count) {
 		Traverse_Generic(data, functor, element_count);
 	}
 	template<typename TData, typename TFunctor>
-	inline static void TraverseWithoutIndex_Generic(TData* data, TFunctor& functor, const unsigned int element_count) {
+	inline static void TraverseWithoutIndex_Generic(TData* data, TFunctor& functor, const int element_count) {
 		Traverse_Generic(data, functor, element_count);
 	}
 };
