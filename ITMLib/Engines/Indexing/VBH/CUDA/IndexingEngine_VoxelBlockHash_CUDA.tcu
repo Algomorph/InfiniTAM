@@ -19,7 +19,6 @@
 #include "IndexingEngine_VoxelBlockHash_CUDA.h"
 #include "IndexingEngine_VoxelBlockHash_CUDA_Kernels.h"
 #include "../../Interface/IndexingEngine.h"
-#include "../../../../Utils/Configuration/Configuration.h"
 #include "../CPU/IndexingEngine_VoxelBlockHash_CPU.h"
 #include "../../../../../ORUtils/PlatformIndependence.h"
 #include "../../Shared/IndexingEngine_Functors.h"
@@ -28,9 +27,6 @@
 #include "../../../../Engines/Analytics/AnalyticsEngineFactory.h"
 #include "../../../../Utils/Collections/MemoryBlock_StdContainer_Convertions.h"
 
-//Thrust
-#include <thrust/device_ptr.h>
-#include <thrust/set_operations.h>
 
 using namespace ITMLib;
 
