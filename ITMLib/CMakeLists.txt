@@ -904,7 +904,7 @@ set(
 
         Utils/Logging/LoggingUtilities.cpp
         Utils/Logging/Logging.cpp
-        Utils/Logging/LoggingCUDAWrapper.cpp
+        Utils/Logging/Logger.cpp
 
         Utils/Metacoding/SerializableStruct_Impl.cpp
         Utils/Quaternions/QuaternionFromMatrix.cpp
@@ -973,7 +973,7 @@ set(
 
         Utils/Logging/Logging.cpp
         Utils/Logging/LoggingUtilities.h
-        Utils/Logging/LoggingCUDAWrapper.h
+        Utils/Logging/Logger.h
 
         Utils/CPPPrintHelpers.h
         Utils/CPrintHelpers.h

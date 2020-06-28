@@ -14,36 +14,38 @@
 //  limitations under the License.
 //  ================================================================
 
-#include <cstdlib>
-#include <cstring>
+#pragma once
 
-//log4cplus
-#include <log4cplus/logger.h>
+#include <iosfwd>
+#include <string>
 
-#include "LoggingCUDAWrapper.h"
+namespace ITMLib{
+namespace logging{
 
-namespace l4c = log4cplus;
+#if defined (UNICODE)
+typedef wchar_t tchar;
 
-namespace ITMLib::logging::CUDA::log4cplus {
+#else
+typedef char tchar;
 
-Logger::Logger()  {
-}
+#endif
+//TODO: revise to use a shared pointer to the root logger somehow, to enable multiple instances.
+// The pointer has to use some dummy type, i.e. cannot use log4cpp headers directly. Raw pointers don't work well with log4cpp's internal pointers.
 
-Logger::~Logger() { }
+typedef int LogLevel;
+typedef std::basic_ostringstream<tchar> tostringstream;
+class Logger{
+public:
+	static Logger getRoot();
 
-bool Logger::isEnabledFor(LogLevel level) const {
-	return l4c::Logger::getRoot().isEnabledFor(level);
-}
+	Logger();
+	~Logger();
+	bool isEnabledFor(LogLevel level) const;
+	void forcedLog(LogLevel ll, const std::string& message,
+	               const char* file,
+	               int line);
+};
 
-void Logger::forcedLog(LogLevel ll, const std::string& message, const char* file, int line) {
-	return l4c::Logger::getRoot().forcedLog(ll, message, file, line);
-}
-
-Logger Logger::getRoot() {
-	return Logger();
-}
-
+} // namespace logging
 } // namespace ITMLib
-
-
 

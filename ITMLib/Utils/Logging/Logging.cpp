@@ -18,6 +18,7 @@
 #include <log4cplus/loggingmacros.h>
 #include <log4cplus/initializer.h>
 #include <log4cplus/fileappender.h>
+#include <log4cplus/logger.h>
 
 //boost
 #include <boost/filesystem.hpp>
@@ -36,7 +37,7 @@ static void handle_possible_existing_logs(const std::string& log_path) {
 	fs::path fs_log_path(log_path);
 	if (fs::exists(fs_log_path)) {
 		if (!fs::is_regular_file(fs_log_path)) {
-			Logger root = get_logger();
+			auto root = log4cplus::Logger::getRoot();
 			LOG4CPLUS_FATAL(root, "Log file path," << log_path
 			                                       << ", occupied by a non-file, i.e. directory or symlink! Aborting.");
 			DIEWITHEXCEPTION_REPORTLOCATION(
@@ -68,7 +69,7 @@ void initialize_logging() {
 	log4cplus::getLogLevelManager().pushLogLevel(TOP_LOG_LEVEL, LOG4CPLUS_TEXT("TOP_LEVEL"));
 #endif
 
-	Logger root = get_logger();
+	auto root = log4cplus::Logger::getRoot();
 
 	switch (configuration::get().logging_settings.verbosity_level) {
 		case VERBOSITY_SILENT:
@@ -120,7 +121,7 @@ void initialize_logging() {
 
 }
 
-log4cplus::Logger get_logger() {
+Logger get_logger() {
 	return Logger::getRoot();
 }
 
