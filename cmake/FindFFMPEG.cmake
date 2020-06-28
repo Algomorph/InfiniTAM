@@ -95,7 +95,7 @@ function (_ffmpeg_find component headername)
                         INTERFACE_INCLUDE_DIRECTORIES "${FFMPEG_${component}_INCLUDE_DIR}"
                         IMPORTED_LINK_INTERFACE_LIBRARIES "${_deps_link}")
             endif ()
-            set("FFMPEG_${component}_FOUND" 1
+            set(FFMPEG_${component}_FOUND 1
                     PARENT_SCOPE)
 
             set(version_header_path "${FFMPEG_${component}_INCLUDE_DIR}/lib${component}/version.h")
@@ -114,7 +114,7 @@ function (_ffmpeg_find component headername)
                 endif ()
             endif ()
         else ()
-            set("FFMPEG_${component}_FOUND" 0
+            set(FFMPEG_${component}_FOUND 0
                     PARENT_SCOPE)
             set(what)
             if (NOT FFMPEG_${component}_LIBRARY)
@@ -127,7 +127,7 @@ function (_ffmpeg_find component headername)
                     set(what "headers")
                 endif ()
             endif ()
-            set("FFMPEG_${component}_NOT_FOUND_MESSAGE"
+            set(FFMPEG_${component}_NOT_FOUND_MESSAGE
                     "Could not find the ${what} for ${component}."
                     PARENT_SCOPE)
         endif ()

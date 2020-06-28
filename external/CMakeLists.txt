@@ -4,26 +4,21 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/utils.cmake)
 ######################
 # Dependency options
 ######################
-# to avoid magic strings
-set(FIND_LOCAL_SOURCE FIND_LOCAL)
-set(BUILD_EXTERNAL_SOURCE BUILD_EXTERNAL)
-set(BUILD_PACKAGED_SOURCE BUILD_PACKAGED)
-
-set(ALL_PACKAGE_SOURCE_OPTIONS
+set(STANDARD_PACKAGE_SOURCE_OPTIONS
     ${FIND_LOCAL_SOURCE}
     ${BUILD_EXTERNAL_SOURCE}
     ${BUILD_PACKAGED_SOURCE})
 
-set(LARGE_PACKAGE_SOURCE_OPTIONS
+set(NO_PACKAGED_SOURCE_OPTIONS
     ${FIND_LOCAL_SOURCE}
     ${BUILD_EXTERNAL_SOURCE})
 
-set(BAD_REPO_PACKAGE_SOURCE_OPTIONS
+set(DOWNLOAD_PREBUILT_SOURCE_OPTIONS
     ${FIND_LOCAL_SOURCE}
-    ${BUILD_PACKAGED_SOURCE})
+    ${DOWNLOAD_PREBUILT_SOURCE})
 
 # log4cplus
-provide_dependency_source_option(log4cplus DEFAULT_INDEX 1 OPTIONS ${ALL_PACKAGE_SOURCE_OPTIONS})
+provide_dependency_source_option(log4cplus DEFAULT_INDEX 1 OPTIONS ${STANDARD_PACKAGE_SOURCE_OPTIONS})
 
 # zlib
 if(MSVC)
@@ -31,17 +26,17 @@ if(MSVC)
 else()
     set(ZLIB_DEFAULT_SOURCE_OPTION_INDEX 0)
 endif()
-provide_dependency_source_option(zlib DEFAULT_INDEX ${ZLIB_DEFAULT_SOURCE_OPTION_INDEX} OPTIONS ${ALL_PACKAGE_SOURCE_OPTIONS})
+provide_dependency_source_option(zlib DEFAULT_INDEX ${ZLIB_DEFAULT_SOURCE_OPTION_INDEX} OPTIONS ${STANDARD_PACKAGE_SOURCE_OPTIONS})
 
 # libpng
 option(WITH_PNG "Build with libpng support?" ON)
-if(MSVC)
-    set(PNG_DEFAULT_SOURCE_OPTION_INDEX 1)
-else()
-    set(PNG_DEFAULT_SOURCE_OPTION_INDEX 0)
-endif()
 if(WITH_PNG)
-    provide_dependency_source_option(png DEFAULT_INDEX ${PNG_DEFAULT_SOURCE_OPTION_INDEX} OPTIONS ${LARGE_PACKAGE_SOURCE_OPTIONS})
+    if(MSVC)
+        set(PNG_DEFAULT_SOURCE_OPTION_INDEX 1)
+    else()
+        set(PNG_DEFAULT_SOURCE_OPTION_INDEX 0)
+    endif()
+    provide_dependency_source_option(png DEFAULT_INDEX ${PNG_DEFAULT_SOURCE_OPTION_INDEX} OPTIONS ${NO_PACKAGED_SOURCE_OPTIONS})
 endif()
 
 # glut
@@ -50,7 +45,18 @@ if(MSVC)
 else()
     set(GLUT_DEFAULT_SOURCE_OPTION_INDEX 0)
 endif()
-provide_dependency_source_option(glut DEFAULT_INDEX ${GLUT_DEFAULT_SOURCE_OPTION_INDEX} OPTIONS ${ALL_PACKAGE_SOURCE_OPTIONS})
+provide_dependency_source_option(glut DEFAULT_INDEX ${GLUT_DEFAULT_SOURCE_OPTION_INDEX} OPTIONS ${STANDARD_PACKAGE_SOURCE_OPTIONS})
+
+# ffmpeg
+
+option(WITH_FFMPEG "Build with FFmpeg support?" ON)
+if(WITH_FFMPEG)
+    if(MSVC)
+        provide_dependency_source_option(ffmpeg DEFAULT_INDEX ${GLUT_DEFAULT_SOURCE_OPTION_INDEX} OPTIONS ${DOWNLOAD_PREBUILT_SOURCE_OPTIONS})
+    else()
+        provide_dependency_source_option(ffmpeg DEFAULT_INDEX ${GLUT_DEFAULT_SOURCE_OPTION_INDEX} OPTIONS ${FIND_LOCAL_SOURCE})
+    endif()
+endif()
 
 
 #######################
@@ -134,10 +140,22 @@ handle_external_package(NAME glut
                         LIBRARY_TARGET_POSIX lib/freeglut.a
                         ALTERNATIVE_LOCAL_NAME GLUT
                         )
-
 if(NOT GLUT_SOURCE STREQUAL FIND_LOCAL_SOURCE)
     set_target_properties(glut PROPERTIES INTERFACE_COMPILE_DEFINITIONS FREEGLUT_STATIC)
 endif()
+
+if(WITH_FFMPEG)
+    handle_external_package(NAME ffmpeg
+                            PREFERRED_SOURCE ${FFMPEG_PREFERRED_SOURCE}
+                            SOURCE_OPTIONS ${FFMPEG_SOURCE_OPTIONS}
+                            FORCE_PREFERRED_SOURCE ${FFMPEG_FORCE_PREFERRED_SOURCE}
+                            ALTERNATIVE_LOCAL_NAME FFMPEG
+                            COMPONENTS avcodec;avformat;avfilter;avutil
+                            OPTIONAL_COMPONENTS avresample;avdevice;swresample;swscale)
+    set_target_properties(ffmpeg PROPERTIES INTERFACE_COMPILE_DEFINITIONS COMPILE_WITH_FFMPEG)      
+endif()
+
+
 
 # tinyply (for .ply mesh input/output)
 add_library(tinyply ${CMAKE_CURRENT_SOURCE_DIR}/packaged/tinyply/tinyply.h ${CMAKE_CURRENT_SOURCE_DIR}/packaged/tinyply/tinyply.cpp)

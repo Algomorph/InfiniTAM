@@ -33,28 +33,28 @@ namespace logging {
 	const int PER_FRAME_LOG_LEVEL = 5002;
 	const int TOP_LOG_LEVEL = 5003;
 
-	#define LOG4CPLUS_FOCUS_SPOTS(logger, logEvent)                               \
-	if(logger.isEnabledFor(ITMLib::logging::FOCUS_SPOTS_LOG_LEVEL)) {   \
-	std::basic_ostringstream<tchar> _log4cplus_buf;                       \
-	_log4cplus_buf << logEvent;                                     \
+	#define LOG4CPLUS_FOCUS_SPOTS(logger, logEvent) \
+	if(logger.isEnabledFor(ITMLib::logging::FOCUS_SPOTS_LOG_LEVEL)) { \
+	std::basic_ostringstream<tchar> _log4cplus_buf; \
+	_log4cplus_buf << logEvent; \
 	logger.forcedLog(ITMLib::logging::FOCUS_SPOTS_LOG_LEVEL, _log4cplus_buf.str(), __FILE__, __LINE__); \
 	}
-	#define LOG4CPLUS_PER_ITERATION(logger, logEvent)                             \
+	#define LOG4CPLUS_PER_ITERATION(logger, logEvent) \
 	if(logger.isEnabledFor(ITMLib::logging::PER_ITERATION_LOG_LEVEL)) { \
-	std::basic_ostringstream<tchar> _log4cplus_buf;                       \
-	_log4cplus_buf << logEvent;                                     \
+	std::basic_ostringstream<tchar> _log4cplus_buf; \
+	_log4cplus_buf << logEvent; \
 	logger.forcedLog(ITMLib::logging::PER_ITERATION_LOG_LEVEL, _log4cplus_buf.str(), __FILE__, __LINE__); \
 	}
-	#define LOG4CPLUS_PER_FRAME(logger, logEvent)                                 \
-	if(logger.isEnabledFor(ITMLib::logging::PER_FRAME_LOG_LEVEL)) {     \
-	std::basic_ostringstream<tchar> _log4cplus_buf;                       \
-	_log4cplus_buf << logEvent;                                     \
+	#define LOG4CPLUS_PER_FRAME(logger, logEvent) \
+	if(logger.isEnabledFor(ITMLib::logging::PER_FRAME_LOG_LEVEL)) { \
+	std::basic_ostringstream<tchar> _log4cplus_buf; \
+	_log4cplus_buf << logEvent; \
 	logger.forcedLog(ITMLib::logging::PER_FRAME_LOG_LEVEL, _log4cplus_buf.str(), __FILE__, __LINE__); \
 	}
-	#define LOG4CPLUS_TOP_LEVEL(logger, logEvent)                                 \
-	if(logger.isEnabledFor(ITMLib::logging::TOP_LOG_LEVEL)) {           \
-	std::basic_ostringstream<tchar> _log4cplus_buf;                       \
-	_log4cplus_buf << logEvent;                                     \
+	#define LOG4CPLUS_TOP_LEVEL(logger, logEvent) \
+	if(logger.isEnabledFor(ITMLib::logging::TOP_LOG_LEVEL)) { \
+	std::basic_ostringstream<tchar> _log4cplus_buf; \
+	_log4cplus_buf << logEvent; \
 	logger.forcedLog(ITMLib::logging::TOP_LOG_LEVEL, _log4cplus_buf.str(), __FILE__, __LINE__); \
 	}
 
