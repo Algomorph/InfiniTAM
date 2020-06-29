@@ -34,8 +34,8 @@ function (_ffmpeg_find component headername)
             NAMES
             "lib${component}/${headername}"
             PATHS
-            "$ENV{FFMPEG_ROOT}/include"
             "${FFMPEG_ROOT}/include"
+            "$ENV{FFMPEG_ROOT}/include"
             ~/Library/Frameworks
             /Library/Frameworks
             /usr/local/include
@@ -60,8 +60,8 @@ function (_ffmpeg_find component headername)
             NAMES
             "${component}"
             PATHS
-            "$ENV{FFMPEG_ROOT}/lib"
             "${FFMPEG_ROOT}/lib"
+            "$ENV{FFMPEG_ROOT}/lib"
             ~/Library/Frameworks
             /Library/Frameworks
             /usr/local/lib
@@ -74,6 +74,7 @@ function (_ffmpeg_find component headername)
             /opt/lib
             /usr/freeware/lib64
             "${FFMPEG_ROOT}/bin"
+            "$ENV{FFMPEG_ROOT}/bin"
             DOC "FFMPEG's ${component} library")
     mark_as_advanced("FFMPEG_${component}_LIBRARY")
 

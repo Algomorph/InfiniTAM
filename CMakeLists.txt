@@ -1,13 +1,12 @@
 ##########################################
-# Top-level CMakeLists.txt for InfiniTAM #
+# Top-level CMakeLists.txt               #
 ##########################################
-
 cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 
 project(InfiniTAM)
 
 #################################
-# CMake policies #
+# CMake policies                #
 #################################
 if (POLICY CMP0020)
     cmake_policy(SET CMP0020 NEW)
@@ -20,7 +19,7 @@ if (POLICY CMP0074)
 endif()
 
 #################################
-# Enforce C++ language standards
+# Enforce language standards    #
 #################################
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
@@ -31,7 +30,10 @@ set(CMAKE_CUDA_STANDARD_REQUIRED TRUE)
 # Specify the CMake module path #
 #################################
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
+list(APPEND CMAKE_MODULE_PATH 
+    "${CMAKE_SOURCE_DIR}/cmake/"
+    "${CMAKE_SOURCE_DIR}/cmake/debugging/"
+    "${CMAKE_SOURCE_DIR}/cmake/dependency_setup/")
 
 #################################
 # Add additional compiler flags #

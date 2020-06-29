@@ -1,5 +1,7 @@
 include(ExternalProject)
-include(${CMAKE_CURRENT_SOURCE_DIR}/utils.cmake)
+include(SetUpDependency)
+include(ProvideDependencySourceOption)
+
 
 ######################
 # Dependency options
@@ -64,35 +66,35 @@ endif()
 #######################
 
 # log4cplus
-handle_external_package(NAME log4cplus
-                        PREFERRED_SOURCE ${LOG4CPLUS_PREFERRED_SOURCE}
-                        SOURCE_OPTIONS ${LOG4CPLUS_SOURCE_OPTIONS}
-                        FORCE_PREFERRED_SOURCE ${LOG4CPLUS_FORCE_PREFERRED_SOURCE}
-                        GIT_REPOSITORY https://github.com/log4cplus/log4cplus.git
-                        GIT_TAG 3b9d98fb5fd72298745cf21620ace8f2b6d770ad
-                        CMAKE_ARGS -DWITH_UNIT_TESTS=OFF -DBUILD_SHARED_LIBS=OFF -DUNICODE=OFF -DLOG4CPLUS_BUILD_TESTING=OFF -DLOG4CPLUS_BUILD_LOGGINGSERVER=OFF
-                        PACKAGED
-                        INCLUDE_TARGET include
-                        LIBRARY_TARGET_MSVC_DEBUG lib/log4cplusSD.lib
-                        LIBRARY_TARGET_MSVC_RELEASE lib/log4cplusS.lib
-                        LIBRARY_TARGET_MSVC_INTERFACE_LINK_LIBRARIES "ws2_32;advapi32" 
-                        LIBRARY_TARGET_POSIX lib/liblog4cplusS.a
-                        )
+set_up_dependency(NAME log4cplus
+                    PREFERRED_SOURCE ${LOG4CPLUS_PREFERRED_SOURCE}
+                    SOURCE_OPTIONS ${LOG4CPLUS_SOURCE_OPTIONS}
+                    FORCE_PREFERRED_SOURCE ${LOG4CPLUS_FORCE_PREFERRED_SOURCE}
+                    GIT_REPOSITORY https://github.com/log4cplus/log4cplus.git
+                    GIT_TAG 3b9d98fb5fd72298745cf21620ace8f2b6d770ad
+                    CMAKE_ARGS -DWITH_UNIT_TESTS=OFF -DBUILD_SHARED_LIBS=OFF -DUNICODE=OFF -DLOG4CPLUS_BUILD_TESTING=OFF -DLOG4CPLUS_BUILD_LOGGINGSERVER=OFF
+                    PACKAGED
+                    INCLUDE_TARGET include
+                    LIBRARY_TARGET_MSVC_DEBUG lib/log4cplusSD.lib
+                    LIBRARY_TARGET_MSVC_RELEASE lib/log4cplusS.lib
+                    LIBRARY_TARGET_MSVC_INTERFACE_LINK_LIBRARIES "ws2_32;advapi32" 
+                    LIBRARY_TARGET_POSIX lib/liblog4cplusS.a
+                    )
 
 # zlib
-handle_external_package(NAME zlib
-                        PREFERRED_SOURCE ${ZLIB_PREFERRED_SOURCE}
-                        SOURCE_OPTIONS ${ZLIB_SOURCE_OPTIONS}
-                        FORCE_PREFERRED_SOURCE ${LOG4CPLUS_FORCE_PREFERRED_SOURCE}
-                        GIT_REPOSITORY https://github.com/madler/zlib.git
-                        GIT_TAG cacf7f1d4e3d44d871b605da3b647f07d718623f
-                        PACKAGED
-                        INCLUDE_TARGET include
-                        LIBRARY_TARGET_MSVC_DEBUG lib/zlibd.lib
-                        LIBRARY_TARGET_MSVC_RELEASE lib/zlib.lib
-                        LIBRARY_TARGET_POSIX lib/libz.a
-                        ALTERNATIVE_LOCAL_NAME ZLIB
-                        )
+set_up_dependency(NAME zlib
+                    PREFERRED_SOURCE ${ZLIB_PREFERRED_SOURCE}
+                    SOURCE_OPTIONS ${ZLIB_SOURCE_OPTIONS}
+                    FORCE_PREFERRED_SOURCE ${LOG4CPLUS_FORCE_PREFERRED_SOURCE}
+                    GIT_REPOSITORY https://github.com/madler/zlib.git
+                    GIT_TAG cacf7f1d4e3d44d871b605da3b647f07d718623f
+                    PACKAGED
+                    INCLUDE_TARGET include
+                    LIBRARY_TARGET_MSVC_DEBUG lib/zlibd.lib
+                    LIBRARY_TARGET_MSVC_RELEASE lib/zlib.lib
+                    LIBRARY_TARGET_POSIX lib/libz.a
+                    ALTERNATIVE_LOCAL_NAME ZLIB
+                    )
 
 if(WITH_PNG)
     if(ZLIB_SOURCE STREQUAL FIND_LOCAL_SOURCE)
@@ -105,19 +107,19 @@ if(WITH_PNG)
     endif()
 
     # libpng
-    handle_external_package(NAME png
-                           PREFERRED_SOURCE ${PNG_PREFERRED_SOURCE}
-                           SOURCE_OPTIONS ${PNG_SOURCE_OPTIONS}
-                           FORCE_PREFERRED_SOURCE ${PNG_FORCE_PREFERRED_SOURCE}
-                           GIT_REPOSITORY git@github.com:glennrp/libpng.git
-                           GIT_TAG dbe3e0c43e549a1602286144d94b0666549b18e6
-                           CMAKE_ARGS ${PNG_ZLIB_CMAKE_ARGS} -DPNG_SHARED=OFF -DPNG_STATIC=ON -DPNG_EXECUTABLES=OFF -DPNG_TESTS=OFF
-                           INCLUDE_TARGET include
-                           LIBRARY_TARGET_MSVC_DEBUG lib/libpng16_staticd.lib
-                           LIBRARY_TARGET_MSVC_RELEASE lib/libpng_static16.lib
-                           LIBRARY_TARGET_POSIX lib/libpng16.a
-                           ALTERNATIVE_LOCAL_NAME PNG
-                           )
+    set_up_dependency(NAME png
+                       PREFERRED_SOURCE ${PNG_PREFERRED_SOURCE}
+                       SOURCE_OPTIONS ${PNG_SOURCE_OPTIONS}
+                       FORCE_PREFERRED_SOURCE ${PNG_FORCE_PREFERRED_SOURCE}
+                       GIT_REPOSITORY git@github.com:glennrp/libpng.git
+                       GIT_TAG dbe3e0c43e549a1602286144d94b0666549b18e6
+                       CMAKE_ARGS ${PNG_ZLIB_CMAKE_ARGS} -DPNG_SHARED=OFF -DPNG_STATIC=ON -DPNG_EXECUTABLES=OFF -DPNG_TESTS=OFF
+                       INCLUDE_TARGET include
+                       LIBRARY_TARGET_MSVC_DEBUG lib/libpng16_staticd.lib
+                       LIBRARY_TARGET_MSVC_RELEASE lib/libpng_static16.lib
+                       LIBRARY_TARGET_POSIX lib/libpng16.a
+                       ALTERNATIVE_LOCAL_NAME PNG
+                       )
     if(NOT PNG_SOURCE STREQUAL FIND_LOCAL_SOURCE AND NOT ZLIB_SOURCE STREQUAL FIND_LOCAL_SOURCE)
         add_dependencies(__png __zlib)
     endif()
@@ -125,33 +127,33 @@ endif()
 
 
 
-handle_external_package(NAME glut
-                        PREFERRED_SOURCE ${GLUT_PREFERRED_SOURCE}
-                        SOURCE_OPTIONS ${GLUT_SOURCE_OPTIONS}
-                        FORCE_PREFERRED_SOURCE ${GLUT_FORCE_PREFERRED_SOURCE}
-                        GIT_REPOSITORY git@github.com:dcnieho/FreeGLUT.git
-                        GIT_TAG 349a23dcc1264a76deb79962d1c90462ad0c6f50
-                        SOURCE_SUBDIR freeglut/freeglut
-                        CMAKE_ARGS -DFREEGLUT_BUILD_STATIC_LIBS=ON -DFREEGLUT_BUILD_SHARED_LIBS=OFF -DFREEGLUT_BUILD_DEMOS=OFF -DFREEGLUT_REPLACE_GLUT=OFF
-                        PACKAGED
-                        INCLUDE_TARGET include
-                        LIBRARY_TARGET_MSVC_DEBUG lib/freeglut_staticd.lib
-                        LIBRARY_TARGET_MSVC_RELEASE lib/freeglut_static.lib
-                        LIBRARY_TARGET_POSIX lib/freeglut.a
-                        ALTERNATIVE_LOCAL_NAME GLUT
-                        )
+set_up_dependency(NAME glut
+                    PREFERRED_SOURCE ${GLUT_PREFERRED_SOURCE}
+                    SOURCE_OPTIONS ${GLUT_SOURCE_OPTIONS}
+                    FORCE_PREFERRED_SOURCE ${GLUT_FORCE_PREFERRED_SOURCE}
+                    GIT_REPOSITORY git@github.com:dcnieho/FreeGLUT.git
+                    GIT_TAG 349a23dcc1264a76deb79962d1c90462ad0c6f50
+                    SOURCE_SUBDIR freeglut/freeglut
+                    CMAKE_ARGS -DFREEGLUT_BUILD_STATIC_LIBS=ON -DFREEGLUT_BUILD_SHARED_LIBS=OFF -DFREEGLUT_BUILD_DEMOS=OFF -DFREEGLUT_REPLACE_GLUT=OFF
+                    PACKAGED
+                    INCLUDE_TARGET include
+                    LIBRARY_TARGET_MSVC_DEBUG lib/freeglut_staticd.lib
+                    LIBRARY_TARGET_MSVC_RELEASE lib/freeglut_static.lib
+                    LIBRARY_TARGET_POSIX lib/freeglut.a
+                    ALTERNATIVE_LOCAL_NAME GLUT
+                    )
 if(NOT GLUT_SOURCE STREQUAL FIND_LOCAL_SOURCE)
     set_target_properties(glut PROPERTIES INTERFACE_COMPILE_DEFINITIONS FREEGLUT_STATIC)
 endif()
 
 if(WITH_FFMPEG)
-    handle_external_package(NAME ffmpeg
-                            PREFERRED_SOURCE ${FFMPEG_PREFERRED_SOURCE}
-                            SOURCE_OPTIONS ${FFMPEG_SOURCE_OPTIONS}
-                            FORCE_PREFERRED_SOURCE ${FFMPEG_FORCE_PREFERRED_SOURCE}
-                            ALTERNATIVE_LOCAL_NAME FFMPEG
-                            COMPONENTS avcodec;avformat;avfilter;avutil
-                            OPTIONAL_COMPONENTS avresample;avdevice;swresample;swscale)
+    set_up_dependency(NAME ffmpeg
+                        PREFERRED_SOURCE ${FFMPEG_PREFERRED_SOURCE}
+                        SOURCE_OPTIONS ${FFMPEG_SOURCE_OPTIONS}
+                        FORCE_PREFERRED_SOURCE ${FFMPEG_FORCE_PREFERRED_SOURCE}
+                        ALTERNATIVE_LOCAL_NAME FFMPEG
+                        COMPONENTS avcodec;avformat;avfilter;avutil
+                        OPTIONAL_COMPONENTS avresample;avdevice;swresample;swscale)
     set_target_properties(ffmpeg PROPERTIES INTERFACE_COMPILE_DEFINITIONS COMPILE_WITH_FFMPEG)      
 endif()
 
