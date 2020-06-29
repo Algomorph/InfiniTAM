@@ -14,7 +14,6 @@ set(targetname ORUtils)
 
 include(${PROJECT_SOURCE_DIR}/cmake/UseCUDA.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/UseOpenMP.cmake)
-include(${PROJECT_SOURCE_DIR}/cmake/UsePNG.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/UseBoost.cmake)
 
 #############################
@@ -80,6 +79,5 @@ include(${PROJECT_SOURCE_DIR}/cmake/SetCUDALibTarget.cmake)
 # Link external dependency libraries     #
 ##########################################
 
-include(${PROJECT_SOURCE_DIR}/cmake/LinkPNG.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/LinkBoost.cmake)
-target_link_libraries(${targetname} zstr)
+target_link_libraries(${targetname} zstr png)

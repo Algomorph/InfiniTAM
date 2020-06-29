@@ -119,13 +119,13 @@ void Load(VoxelVolume<TSDFVoxel, TIndex>** volume, Frame frame, MemoryDeviceType
 extern template void
 Load<PlainVoxelArray>(VoxelVolume<TSDFVoxel, PlainVoxelArray>** volume, Frame frame,
                                              MemoryDeviceType device_type,
-                                             PlainVoxelArray::InitializationParameters initialization_parameters = InitializationParameters_Fr16andFr17<PlainVoxelArray>(),
-                                             configuration::SwappingMode swapping_mode = configuration::SWAPPINGMODE_DISABLED);
+                                             PlainVoxelArray::InitializationParameters initialization_parameters,
+                                             configuration::SwappingMode swapping_mode);
 extern template void
 Load<VoxelBlockHash>(VoxelVolume<TSDFVoxel, VoxelBlockHash>** volume, Frame frame,
                                             MemoryDeviceType device_type,
-                                            VoxelBlockHash::InitializationParameters initialization_parameters = InitializationParameters_Fr16andFr17<VoxelBlockHash>(),
-                                            configuration::SwappingMode swapping_mode = configuration::SWAPPINGMODE_DISABLED);
+                                            VoxelBlockHash::InitializationParameters initialization_parameters,
+                                            configuration::SwappingMode swapping_mode);
 
 } // namespace snoopy16and17utilities
 

@@ -259,7 +259,7 @@ void Warp_PVA_VBH_simple_subtest(int iteration, SlavchevaSurfaceTracker::Switche
 	std::string path_frame_17_VBH = snoopy::PartialVolume17Path<VoxelBlockHash>();
 
 	std::string prefix = SwitchesToPrefix(trackerSwitches);
-	float absolute_tolerance = 1e-7;
+	float absolute_tolerance = 1e-7f;
 
 	// *** initialize/load warps
 	VoxelVolume<WarpVoxel, PlainVoxelArray>* warps_PVA;

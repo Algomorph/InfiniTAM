@@ -19,7 +19,6 @@ INCLUDE(${PROJECT_SOURCE_DIR}/cmake/OfferInputMirroring.cmake)
 ################################
 
 include(${PROJECT_SOURCE_DIR}/cmake/UseCUDA.cmake)
-include(${PROJECT_SOURCE_DIR}/cmake/UseGLUT.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/UseKinect2.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/UseLibRoyale.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/UseOpenGL.cmake)
@@ -76,5 +75,5 @@ include(${PROJECT_SOURCE_DIR}/cmake/SetCUDALibTarget.cmake)
 # Link external dependency libraries     #
 ##########################################
 target_link_libraries(InputSource ffmpeg)
-get_target_property(ffmpeg_ICD ffmpeg INTERFACE_INCLUDE_DIRECTORIES)
+
 include(${PROJECT_SOURCE_DIR}/cmake/LinkBoost.cmake)

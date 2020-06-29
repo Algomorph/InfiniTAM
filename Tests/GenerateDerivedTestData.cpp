@@ -429,7 +429,7 @@ configuration::Configuration GenerateDefaultSnoopyConfiguration() {
 	TelemetrySettings default_snoopy_telemetry_settings;
 	IndexingSettings default_snoopy_indexing_settings;
 	RenderingSettings default_snoopy_rendering_settings;
-	AutomaticRunSettings default_snoopy_automatic_run_settings(50, 16, false, false, false);
+	AutomaticRunSettings default_snoopy_automatic_run_settings(50, 16, false, false, false, false);
 
 	AddDeferrableToSourceTree(default_snoopy_configuration, default_snoopy_telemetry_settings);
 	AddDeferrableToSourceTree(default_snoopy_configuration, default_snoopy_indexing_settings);
@@ -578,7 +578,7 @@ void GenerateRenderingTestData_VoxelBlockHash() {
 			ORUtils::SE3Pose& adjusted_pose = *tracking_state_forward_render->pose_d;
 			adjusted_pose.SetFrom(&pose);
 			// nudge the pose a bit to imitate tracking result
-			std::vector<float> adjustment_values = {0.02, 0.02, -0.02, 1.f * PI / 180.f, 3.f * PI / 180.f, 0.0f};
+			std::vector<float> adjustment_values = {0.02f, 0.02f, -0.02f, 1.f * PI / 180.f, 3.f * PI / 180.f, 0.0f};
 			SaveRawDataToFile<float>(forward_render_images_file, adjustment_values.data(), adjustment_values.size(), MEMORYDEVICE_CPU);
 			ORUtils::SE3Pose adjustment(adjustment_values[0], adjustment_values[1], adjustment_values[2], adjustment_values[3], adjustment_values[4],
 			                            adjustment_values[5]);

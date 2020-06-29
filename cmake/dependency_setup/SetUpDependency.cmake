@@ -140,7 +140,7 @@ ${CMAKE_CURRENT_PREFERRED_SOURCE_DIR}/packaged/${SUD_NAME}. Will try other sourc
                         set(${SUD_UC_NAME}_SOURCE ${SOURCE_OPTION} PARENT_SCOPE)
                     else ()
                         message(WARNING "Unable to find the downloaded prebuilt package for dependency '${SUD_NAME}' (trying name \
-'${SUD_ALTERNATIVE_LOCAL_NAME}'). Possibly, either download is not set up correctly or links / content are broken. \
+'${SUD_ALTERNATIVE_LOCAL_NAME}'). Possibly, either download is not set up correctly or links / content are broken/altered. \
 Will try other sources if possible...")
                     endif ()
                 else()

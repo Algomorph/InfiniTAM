@@ -123,6 +123,7 @@ if(WITH_PNG)
     if(NOT PNG_SOURCE STREQUAL FIND_LOCAL_SOURCE AND NOT ZLIB_SOURCE STREQUAL FIND_LOCAL_SOURCE)
         add_dependencies(__png __zlib)
     endif()
+    set_target_properties(png PROPERTIES INTERFACE_COMPILE_DEFINITIONS USE_LIBPNG)
 endif()
 
 

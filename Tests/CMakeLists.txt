@@ -6,20 +6,15 @@ option(BUILD_TESTS "Build automated tests with the project (Boost-test required)
 
 macro(load_use_includes)
     include(${PROJECT_SOURCE_DIR}/cmake/UseCUDA.cmake)
-    include(${PROJECT_SOURCE_DIR}/cmake/UseFFmpeg.cmake)
-    include(${PROJECT_SOURCE_DIR}/cmake/UseGLUT.cmake)
     include(${PROJECT_SOURCE_DIR}/cmake/UseLibRoyale.cmake)
     include(${PROJECT_SOURCE_DIR}/cmake/UseOpenGL.cmake)
     include(${PROJECT_SOURCE_DIR}/cmake/UseOpenMP.cmake)
     include(${PROJECT_SOURCE_DIR}/cmake/UseOpenNI.cmake)
-    include(${PROJECT_SOURCE_DIR}/cmake/UsePNG.cmake)
     include(${PROJECT_SOURCE_DIR}/cmake/UseRealSense.cmake)
     include(${PROJECT_SOURCE_DIR}/cmake/UseUVC.cmake)
 endmacro()
 
 macro(load_target_link_includes)
-    include(${PROJECT_SOURCE_DIR}/cmake/LinkFFmpeg.cmake)
-    include(${PROJECT_SOURCE_DIR}/cmake/LinkGLUT.cmake)
     include(${PROJECT_SOURCE_DIR}/cmake/LinkLibRoyale.cmake)
     include(${PROJECT_SOURCE_DIR}/cmake/LinkOpenGL.cmake)
     include(${PROJECT_SOURCE_DIR}/cmake/LinkOpenNI.cmake)
@@ -93,7 +88,6 @@ if (BUILD_TESTS)
     target_link_libraries(${targetname} ITMLib ORUtils
                           ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
     target_include_directories(${targetname} PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/TestUtilities)
-    include(${PROJECT_SOURCE_DIR}/cmake/LinkPNG.cmake)
 
     #######################################################
     # generator executable for derived test data library  #

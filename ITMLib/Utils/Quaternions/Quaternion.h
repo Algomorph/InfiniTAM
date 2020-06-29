@@ -41,6 +41,8 @@
 #include <iterator>
 #include <cassert>
 #include <boost/mpl/bool.hpp>
+#include <algorithm>
+#include <functional>
 
 #include "QuaternionUtils.h"
 
@@ -456,6 +458,17 @@ public:
 		return *this;
 	}
 
+	/**
+	* Comparison for sorting in lexicographic order on quaternions, which is a total order, 
+	* but not compatible with the field structure.
+	*/
+	friend bool operator<(const Quaternion<T>& x, const Quaternion<T>& y) {
+		return x.a() < y.a()
+			|| (x.a() == y.a() && x.b() < y.b())
+			|| (x.a() == y.a() && x.b() == y.b() && x.c() < y.c())
+			|| (x.a() == y.a() && x.b() == y.b() && x.c() == y.c() && x.d() < y.d());
+	}
+
 private:
 	T _a, _b, _c, _d; // the full state for a Quaternion
 };
@@ -759,59 +772,6 @@ inline Quaternion<T> from_euler(const std::array<T, 3>& x) {
 	T c0c1 = c0*c1, s0s1 = s0*s1, s0c1 = s0*c1, c0s1 = c0*s1;
 	return {c0c1*c2+s0s1*s2,s0c1*c2-c0c1*s2,c0s1*c2+s0c1*s2,c0c1*s2-s0s1*c2};
 }
-
-/**
- * Hash of a quaternion - that makes it possible to use quaternions
- * as keys in std::set/std::map, if ever needed.
- *
- * fash-hash.
- *
- * TODO: try xxhash
- * TODO: is that useful??
- * TODO: provide lexicographic order on quaternions?
- */
-template <typename T>
-struct hash : public std::unary_function<Quaternion<T>, size_t> {
-
-	inline size_t operator()(const Quaternion<T>& x) const {
-
-		auto mix = [](uint64_t h) {
-			(h) ^= (h) >> 23;
-			(h) *= 0x2127599bf4325c37ULL;
-			(h) ^= (h) >> 47;
-			return h;
-		};
-
-		const uint64_t len = 4 * sizeof(T); // in bytes, Qf is 4*4, Qd is 4*8, and Qld 4*16
-		const uint64_t m = 0x880355f21e6d1965ULL;
-		const uint64_t *pos = (const uint64_t *) &x;
-		const uint64_t *end = pos + (len / 8);
-		uint64_t h = 31 ^(len * m);
-		uint64_t v;
-
-		while (pos != end) {
-			v = *pos++;
-			h ^= mix(v);
-			h *= m;
-		}
-
-		return mix(h);
-	}
-};
-
-/**
- * Lexicographic order on quaternions, which is a total order, but not compatible
- * with the field structure.
- */
-template <typename T>
-struct lexicographic_order : std::binary_function<Quaternion<T>, Quaternion<T>, bool> {
-	inline constexpr bool operator()(const Quaternion<T>& x, const Quaternion<T>& y) const {
-		return x.a() < y.a()
-		       || (x.a() == y.a() && x.b() < y.b())
-		       || (x.a() == y.a() && x.b() == y.b() && x.c() < y.c())
-		       || (x.a() == y.a() && x.b() == y.b() && x.c() == y.c() && x.d() < y.d());
-	}
-};
 
 /** +
  * Returns the conjugate of x, as a new Quaternion (x is unchanged).
@@ -1296,8 +1256,9 @@ inline Quaternion<T> pow(const Quaternion<T>& x, int expt) {
 		y *= pow3(x);
 	if (expt % 4 == 2)
 		y *= pow2(x);
-	if (expt % 4 == 1)
+	if (expt % 4 == 1){
 		y *= x; std::pow(3,4);
+	}
 	return y;
 }
 
@@ -1396,5 +1357,46 @@ inline Quaternion<T> axby(K k1, const Quaternion<T>& x, K k2, const Quaternion<T
 
 // TODO: operator<< and operator>>
 } // end namespace quaternion
+
+
+  /**
+  * Hash of a quaternion - that makes it possible to use quaternions
+  * as keys in std::set/std::map, if ever needed.
+  *
+  * fash-hash.
+  *
+  * TODO: try xxhash
+  * TODO: is that useful??
+  */
+namespace std {
+
+template<typename T>
+struct hash<quaternion::Quaternion<T>> {
+	inline size_t operator()(const quaternion::Quaternion<T>& x) const {
+		auto mix = [](uint64_t h) {
+			(h) ^= (h) >> 23;
+			(h) *= 0x2127599bf4325c37ULL;
+			(h) ^= (h) >> 47;
+			return h;
+		};
+
+		const uint64_t len = 4 * sizeof(T); // in bytes, Qf is 4*4, Qd is 4*8, and Qld 4*16
+		const uint64_t m = 0x880355f21e6d1965ULL;
+		const uint64_t* pos = (const uint64_t*)&x;
+		const uint64_t* end = pos + (len / 8);
+		uint64_t h = 31 ^ (len * m);
+		uint64_t v;
+
+		while (pos != end) {
+			v = *pos++;
+			h ^= mix(v);
+			h *= m;
+		}
+		return mix(h);
+	}
+};
+
+
+} // namespace std
 
 #endif //QUATERNIONS_QUATERNION_H
