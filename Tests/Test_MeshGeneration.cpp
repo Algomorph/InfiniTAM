@@ -48,8 +48,8 @@ void GenericMeshSavingTest() {
 	MeshingEngine<TSDFVoxel, TIndex>* meshing_engine =
 			MeshingEngineFactory::Build<TSDFVoxel, TIndex>(TMemoryDeviceType);
 	Mesh mesh = meshing_engine->MeshVolume( volume);
-	fs::create_directories("TestData/meshes");
-	mesh.WriteOBJ("TestData/meshes/mesh_partial_16_" + DeviceString<TMemoryDeviceType>() + ".obj");
+	fs::create_directories(GENERATED_TEST_DATA_PREFIX "TestData/meshes");
+	mesh.WriteOBJ(GENERATED_TEST_DATA_PREFIX "TestData/meshes/mesh_partial_16_" + DeviceString<TMemoryDeviceType>() + ".obj");
 	
 	delete volume;
 	delete meshing_engine;

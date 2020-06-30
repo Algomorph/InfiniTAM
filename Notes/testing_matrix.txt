@@ -1,0 +1,27 @@
+Not all matrix branches need to be tested.
+For instance, for dependency source options, if no other 3rd-party package B depends on a certain package A,
+then I don't care about trying out every single option for B with every single option for A. Just going through the
+configurations for A is enough to test it. However, if some package B depends on A, then all those options must be tested.
+
+Generators:
+
+1. Microsoft Visual Studio 2019 x64
+2. gcc / Makefiles
+3. (?) gcc / Ninja
+
+Note: Set <NAME>_FORCE_PREFERRED_SOURCE=TRUE for all dependencies when setting <NAME>_PREFERRED_SOURCE
+(Read the following table using monospace font, plz)
+
+**CMAKE OPTION**            **[VALUE TO TEST ...]**
+
+LOG4CPLUS_PREFERRED_SOURCE  BUILD_EXTERNAL, BUILD_PACKAGED
+ZLIB_PREFERRED_SOURCE       BUILD_EXTERNAL, BUILD_PACKAGED, FIND_LOCAL
+PNG_PREFERRED_SOURCE        BUILD_EXTERNAL, FIND_LOCAL
+GLUT_PREFERRED_SOURCE       FIND_LOCAL
+FFMPEG_PREFERRED_SOURCE     FIND_LOCAL, DOWNLOAD_PACKAGED
+
+CMAKE
+WITH_CUDA                   ON, OFF
+WITH_FFMPEG                 ON, OFF
+WITH_PNG                    ON, OFF
+WITH_OPENMP                 ON, OFF

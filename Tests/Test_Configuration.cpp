@@ -69,9 +69,9 @@ BOOST_AUTO_TEST_CASE(ConfigurationTest) {
 	DeferrableStructCollection deferrables1(configuration1);
 
 #ifdef COMPILE_WITHOUT_CUDA
-	configuration::load_configuration_from_json_file("TestData/configuration/default_config_cpu.json");
+	configuration::load_configuration_from_json_file( GENERATED_TEST_DATA_PREFIX "TestData/configuration/default_config_cpu.json");
 #else
-	configuration::load_configuration_from_json_file("TestData/configuration/default_config_cuda.json");
+	configuration::load_configuration_from_json_file( GENERATED_TEST_DATA_PREFIX "TestData/configuration/default_config_cuda.json");
 #endif
 
 	DeferrableStructCollection loaded_deferrables;
@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE(ConfigurationTest) {
 	                    configuration::get().non_rigid_tracking_parameters);
 	BOOST_REQUIRE_EQUAL(default_configuration, configuration::get());
 
-	configuration::load_configuration_from_json_file("TestData/configuration/config1.json");
+	configuration::load_configuration_from_json_file( GENERATED_TEST_DATA_PREFIX "TestData/configuration/config1.json");
 	loaded_deferrables = DeferrableStructCollection();
 
 	BOOST_REQUIRE_EQUAL(configuration1.general_voxel_volume_parameters,
@@ -104,8 +104,8 @@ BOOST_AUTO_TEST_CASE(ConfigurationTest) {
 	BOOST_REQUIRE_EQUAL(configuration1.non_rigid_tracking_parameters,
 	                    configuration::get().non_rigid_tracking_parameters);
 	BOOST_REQUIRE_EQUAL(configuration1, configuration::get());
-	configuration::save_configuration_to_json_file("TestData/configuration/config2.json", configuration1);
-	configuration::load_configuration_from_json_file("TestData/configuration/config2.json");
+	configuration::save_configuration_to_json_file(GENERATED_TEST_DATA_PREFIX "TestData/configuration/config2.json", configuration1);
+	configuration::load_configuration_from_json_file(GENERATED_TEST_DATA_PREFIX "TestData/configuration/config2.json");
 	loaded_deferrables = DeferrableStructCollection();
 
 	BOOST_REQUIRE_EQUAL(configuration1.general_voxel_volume_parameters,

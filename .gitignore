@@ -34,6 +34,7 @@ x64/
 # QtCreator CMake
 CMakeLists.txt.user*
 
+# TODO: remove when these folders are cleared of generated test data in local builds. Test data is now generated directly in the build directory.
 # generated test data
 /Tests/TestData/volumes/PVA/*
 /Tests/TestData/volumes/VBH/*

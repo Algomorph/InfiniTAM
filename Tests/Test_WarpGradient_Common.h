@@ -49,7 +49,7 @@ struct WarpGradientDataFixture {
 	WarpGradientDataFixture() :
 			settings(nullptr),
 			warp_field_data_term(nullptr), canonical_volume(nullptr), live_volume(nullptr),
-			path_to_data("TestData/volumes/" + IndexString<TIndex>() + "/"),
+			path_to_data(GENERATED_TEST_DATA_PREFIX "TestData/volumes/" + IndexString<TIndex>() + "/"),
 			index_parameters(snoopy::InitializationParameters_Fr16andFr17<TIndex>()),
 			indexing_engine(IndexingEngine<TSDFVoxel, TIndex, TMemoryDeviceType>::Instance()){
 		configuration::load_default();

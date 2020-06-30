@@ -52,7 +52,7 @@ namespace test_utilities {
 
 template<typename TIndex>
 std::string GetPathBase(std::string prefix, int iteration) {
-	return "TestData/volumes/" + IndexString<TIndex>() + "/" + prefix + "_iter_" + std::to_string(iteration) + "_";
+	return GENERATED_TEST_DATA_PREFIX "TestData/volumes/" + IndexString<TIndex>() + "/" + prefix + "_iter_" + std::to_string(iteration) + "_";
 }
 
 template<typename TIndex>

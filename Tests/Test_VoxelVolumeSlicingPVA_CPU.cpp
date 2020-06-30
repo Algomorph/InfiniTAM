@@ -40,24 +40,26 @@ using namespace test_utilities;
 namespace snoopy = snoopy_test_utilities;
 
 //#define GET_SCENE_BOUNDS
+//TODO: turn into full-fledged test case (in a separate test suite, run before other tests), which tests bounds against
+// real numeric values. Values can be hard-coded, I think.
 #ifdef GET_SCENE_BOUNDS
 BOOST_AUTO_TEST_CASE(GetSceneBounds){
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_vbh_CPU(MEMORYDEVICE_CPU);
 	volume_vbh_CPU.Reset();
-	volume_vbh_CPU.LoadFromDirectory("TestData/snoopy_result_fr16-17_full/snoopy_full_frame_16_");
+	volume_vbh_CPU.LoadFromDirectory(GENERATED_TEST_DATA_PREFIX "TestData/snoopy_result_fr16-17_full/snoopy_full_frame_16_");
 	std::cout << "BOUNDS(16/VBH):  " << Analytics_CPU_VBH_Voxel::Instance().ComputeVoxelBounds(&volume_vbh_CPU) << std::endl;
 	volume_vbh_CPU.Reset();
-	volume_vbh_CPU.LoadFromDirectory("TestData/snoopy_result_fr16-17_full/snoopy_full_frame_17_");
+	volume_vbh_CPU.LoadFromDirectory(GENERATED_TEST_DATA_PREFIX "TestData/snoopy_result_fr16-17_full/snoopy_full_frame_17_");
 	std::cout << "BOUNDS(17/VBH):  " << Analytics_CPU_VBH_Voxel::Instance().ComputeVoxelBounds(&volume_vbh_CPU) << std::endl;
 	#ifndef COMPILE_WITHOUT_CUDA
 	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_pva_CUDA(MEMORYDEVICE_CUDA);
 	volume_pva_CUDA.Reset();
-	volume_pva_CUDA.LoadFromDirectory("TestData/snoopy_result_fr16-17_full/snoopy_full_frame_16_");
+	volume_pva_CUDA.LoadFromDirectory(GENERATED_TEST_DATA_PREFIX "TestData/snoopy_result_fr16-17_full/snoopy_full_frame_16_");
 	std::cout << "ALTERED BOUNDS(16/PVA): " << Analytics_CUDA_PVA_Voxel::Instance().ComputeAlteredVoxelBounds(&volume_pva_CUDA) << std::endl;
 	#else
 	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_pva_CPU(MEMORYDEVICE_CPU);
 	volume_pva_CPU.Reset();
-	volume_pva_CPU.LoadFromDirectory("TestData/snoopy_result_fr16-17_full/snoopy_full_frame_16_");
+	volume_pva_CPU.LoadFromDirectory(GENERATED_TEST_DATA_PREFIX "TestData/snoopy_result_fr16-17_full/snoopy_full_frame_16_");
 	std::cout << "ALTERED BOUNDS(16/PVA): " << Analytics_CPU_PVA_Voxel::Instance().ComputeAlteredVoxelBounds(&volume_pva_CPU) << std::endl;
 	#endif
 }

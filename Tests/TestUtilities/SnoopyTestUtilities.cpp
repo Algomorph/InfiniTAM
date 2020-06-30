@@ -14,47 +14,48 @@
 //  limitations under the License.
 //  ================================================================
 #include "SnoopyTestUtilities.h"
+#include "TestUtilities.h"
 
 namespace snoopy_test_utilities {
 
 std::string SnoopyCalibrationPath() {
-	return "TestData/calibration/snoopy_calib.txt";
+	return GENERATED_TEST_DATA_PREFIX "TestData/calibration/snoopy_calib.txt";
 }
 
 std::string Frame00DepthPath() {
-	return "TestData/frames/snoopy_depth_000000.png";
+	return GENERATED_TEST_DATA_PREFIX "TestData/frames/snoopy_depth_000000.png";
 }
 
 std::string Frame00ColorPath() {
-	return "TestData/frames/snoopy_color_000000.png";
+	return GENERATED_TEST_DATA_PREFIX "TestData/frames/snoopy_color_000000.png";
 }
 
 std::string Frame00MaskPath() {
-	return "TestData/frames/snoopy_omask_000000.png";
+	return GENERATED_TEST_DATA_PREFIX "TestData/frames/snoopy_omask_000000.png";
 }
 
 std::string Frame16DepthPath() {
-	return "TestData/frames/snoopy_depth_000016.png";
+	return GENERATED_TEST_DATA_PREFIX "TestData/frames/snoopy_depth_000016.png";
 }
 
 std::string Frame16ColorPath() {
-	return "TestData/frames/snoopy_color_000016.png";
+	return GENERATED_TEST_DATA_PREFIX "TestData/frames/snoopy_color_000016.png";
 }
 
 std::string Frame16MaskPath() {
-	return "TestData/frames/snoopy_omask_000016.png";
+	return GENERATED_TEST_DATA_PREFIX "TestData/frames/snoopy_omask_000016.png";
 }
 
 std::string Frame17DepthPath() {
-	return "TestData/frames/snoopy_depth_000017.png";
+	return GENERATED_TEST_DATA_PREFIX "TestData/frames/snoopy_depth_000017.png";
 }
 
 std::string Frame17ColorPath() {
-	return "TestData/frames/snoopy_color_000017.png";
+	return GENERATED_TEST_DATA_PREFIX "TestData/frames/snoopy_color_000017.png";
 }
 
 std::string Frame17MaskPath() {
-	return "TestData/frames/snoopy_omask_000017.png";
+	return GENERATED_TEST_DATA_PREFIX "TestData/frames/snoopy_omask_000017.png";
 }
 
 template std::string PartialVolume00Path<PlainVoxelArray>();

@@ -114,7 +114,7 @@ template<typename TVoxel, typename TIndex>
 void BuildSdfVolumeFromImage_NearSurfaceAllocation(VoxelVolume<TVoxel, TIndex>** volume,
                                                    const std::string& depth_path,
                                                    const std::string& color_path,
-                                                   const std::string& calibration_path = "TestData/snoopy_calib.txt",
+                                                   const std::string& calibration_path = GENERATED_TEST_DATA_PREFIX "TestData/snoopy_calib.txt",
                                                    MemoryDeviceType memory_device = MEMORYDEVICE_CUDA,
                                                    typename TIndex::InitializationParameters initialization_parameters = GetStandard512IndexParameters<TIndex>(),
                                                    configuration::SwappingMode swapping_mode = configuration::SWAPPINGMODE_DISABLED);
@@ -124,7 +124,7 @@ void BuildSdfVolumeFromImage_NearSurfaceAllocation(VoxelVolume<TVoxel, TIndex>**
                                                    View** view,
                                                    const std::string& depth_path,
                                                    const std::string& color_path,
-                                                   const std::string& calibration_path = "TestData/snoopy_calib.txt",
+                                                   const std::string& calibration_path = GENERATED_TEST_DATA_PREFIX "TestData/snoopy_calib.txt",
                                                    MemoryDeviceType memory_device = MEMORYDEVICE_CUDA,
                                                    typename TIndex::InitializationParameters initialization_parameters = GetStandard512IndexParameters<TIndex>(),
                                                    configuration::SwappingMode swapping_mode = configuration::SWAPPINGMODE_DISABLED);
@@ -135,7 +135,7 @@ void BuildSdfVolumeFromImage_NearSurfaceAllocation(VoxelVolume<TVoxel, TIndex>**
                                                    const std::string& depth_path,
                                                    const std::string& color_path,
                                                    const std::string& mask_path,
-                                                   const std::string& calibration_path = "TestData/snoopy_calib.txt",
+                                                   const std::string& calibration_path = GENERATED_TEST_DATA_PREFIX "TestData/snoopy_calib.txt",
                                                    MemoryDeviceType memory_device = MEMORYDEVICE_CUDA,
                                                    typename TIndex::InitializationParameters initialization_parameters = GetStandard512IndexParameters<TIndex>(),
                                                    configuration::SwappingMode swapping_mode = configuration::SWAPPINGMODE_DISABLED);
@@ -145,7 +145,7 @@ void BuildSdfVolumeFromImage_NearSurfaceAllocation(VoxelVolume<TVoxel, TIndex>**
                                                    const std::string& depth_path,
                                                    const std::string& color_path,
                                                    const std::string& mask_path,
-                                                   const std::string& calibration_path = "TestData/snoopy_calib.txt",
+                                                   const std::string& calibration_path = GENERATED_TEST_DATA_PREFIX "TestData/snoopy_calib.txt",
                                                    MemoryDeviceType memory_device = MEMORYDEVICE_CUDA,
                                                    typename TIndex::InitializationParameters initialization_parameters = GetStandard512IndexParameters<TIndex>(),
                                                    configuration::SwappingMode swapping_mode = configuration::SWAPPINGMODE_DISABLED);
@@ -160,7 +160,7 @@ void BuildSdfVolumeFromImage_SurfaceSpanAllocation(VoxelVolume<TVoxel, TIndex>**
                                                    const std::string& depth2_path,
                                                    const std::string& color2_path,
                                                    const std::string& mask2_path,
-                                                   const std::string& calibration_path = "TestData/snoopy_calib.txt",
+                                                   const std::string& calibration_path = GENERATED_TEST_DATA_PREFIX "TestData/snoopy_calib.txt",
                                                    MemoryDeviceType memoryDevice = MEMORYDEVICE_CUDA,
                                                    typename TIndex::InitializationParameters initialization_parameters = GetStandard512IndexParameters<TIndex>(),
                                                    configuration::SwappingMode swapping_mode = configuration::SWAPPINGMODE_DISABLED);
@@ -173,7 +173,7 @@ void BuildSdfVolumeFromImage_SurfaceSpanAllocation(VoxelVolume<TVoxel, TIndex>**
                                                    const std::string& depth2_path,
                                                    const std::string& color2_path,
                                                    const std::string& mask2_path,
-                                                   const std::string& calibration_path = "TestData/snoopy_calib.txt",
+                                                   const std::string& calibration_path = GENERATED_TEST_DATA_PREFIX "TestData/snoopy_calib.txt",
                                                    MemoryDeviceType memoryDevice = MEMORYDEVICE_CUDA,
                                                    typename TIndex::InitializationParameters initializationParameters = GetStandard512IndexParameters<TIndex>(),
                                                    configuration::SwappingMode swapping_mode = configuration::SWAPPINGMODE_DISABLED);

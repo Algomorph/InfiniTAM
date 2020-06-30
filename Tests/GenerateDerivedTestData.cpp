@@ -36,10 +36,8 @@
 #include "../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_VoxelBlockHash_CPU.h"
 //(CUDA)
 #ifndef COMPILE_WITHOUT_CUDA
-
 #include "../ITMLib/Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
 #include "../ITMLib/Engines/Indexing/VBH/CUDA/IndexingEngine_VoxelBlockHash_CUDA.h"
-
 #endif
 //(misc)
 #include "../ITMLib/SurfaceTrackers/Interface/SurfaceTracker.h"
@@ -190,8 +188,8 @@ void ConstructStripesTestVolumes() {
 
 	UChar4Image rgb(true, false);
 	ShortImage depth(true, false);
-	ReadImageFromFile(rgb, "TestData/frames/stripes_color.png");
-	ReadImageFromFile(depth, "TestData/frames/stripes_depth.png");
+	ReadImageFromFile(rgb, GENERATED_TEST_DATA_PREFIX "TestData/frames/stripes_color.png");
+	ReadImageFromFile(depth, GENERATED_TEST_DATA_PREFIX "TestData/frames/stripes_depth.png");
 
 	view_builder->UpdateView(&view, &rgb, &depth, false, false, false, true);
 
@@ -206,7 +204,7 @@ void ConstructStripesTestVolumes() {
 	auto depth_fusion_engine_VBH = DepthFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, VoxelBlockHash>(
 			MEMORYDEVICE_CPU);
 	depth_fusion_engine_VBH->IntegrateDepthImageIntoTsdfVolume(&volume4, view, &tracking_state);
-	std::string path = "TestData/volumes/VBH/stripes.dat";
+	std::string path =  GENERATED_TEST_DATA_PREFIX "TestData/volumes/VBH/stripes.dat";
 	volume4.SaveToDisk(path);
 
 	delete depth_fusion_engine_VBH;

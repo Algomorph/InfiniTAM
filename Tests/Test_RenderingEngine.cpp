@@ -44,7 +44,7 @@ namespace snoopy = snoopy_test_utilities;
 
 template<MemoryDeviceType TMemoryDeviceType>
 void GenericFindAndCountVisibleBlocksTest() {
-	ORUtils::IStreamWrapper visible_blocks_file("TestData/arrays/visible_blocks.dat", true);
+	ORUtils::IStreamWrapper visible_blocks_file(GENERATED_TEST_DATA_PREFIX "TestData/arrays/visible_blocks.dat", true);
 
 	std::vector<int> block_address_range_bounds = ReadStdVectorFromFile<int>(visible_blocks_file);
 
@@ -105,7 +105,7 @@ template<MemoryDeviceType TMemoryDeviceType>
 void GenericCreateExpectedDepthsTest() {
 	CameraPoseAndRenderingEngineFixture<TMemoryDeviceType> fixture;
 
-	ORUtils::IStreamWrapper range_images_file("TestData/arrays/range_images.dat", true);
+	ORUtils::IStreamWrapper range_images_file(GENERATED_TEST_DATA_PREFIX "TestData/arrays/range_images.dat", true);
 
 	for (auto& tracking_state : fixture.tracking_states) {
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume;
@@ -133,7 +133,7 @@ template<MemoryDeviceType TMemoryDeviceType>
 void GenericFindSurfaceTest() {
 	CameraPoseAndRenderingEngineFixture<TMemoryDeviceType> fixture;
 
-	ORUtils::IStreamWrapper raycast_images_file("TestData/arrays/raycast_images.dat", true);
+	ORUtils::IStreamWrapper raycast_images_file(GENERATED_TEST_DATA_PREFIX "TestData/arrays/raycast_images.dat", true);
 
 	for (auto& tracking_state : fixture.tracking_states) {
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume;
@@ -163,7 +163,7 @@ template<MemoryDeviceType TMemoryDeviceType>
 void GenericCreatePointCloudTest() {
 	CameraPoseAndRenderingEngineFixture<TMemoryDeviceType> fixture;
 
-	ORUtils::IStreamWrapper point_cloud_images_file("TestData/arrays/point_cloud_images.dat", true);
+	ORUtils::IStreamWrapper point_cloud_images_file(GENERATED_TEST_DATA_PREFIX "TestData/arrays/point_cloud_images.dat", true);
 
 	for (auto& tracking_state : fixture.tracking_states) {
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume;
@@ -202,7 +202,7 @@ template<MemoryDeviceType TMemoryDeviceType>
 void GenericCreateICPMapsTest() {
 	CameraPoseAndRenderingEngineFixture<TMemoryDeviceType> fixture;
 
-	ORUtils::IStreamWrapper ICP_images_file("TestData/arrays/ICP_images.dat", true);
+	ORUtils::IStreamWrapper ICP_images_file(GENERATED_TEST_DATA_PREFIX "TestData/arrays/ICP_images.dat", true);
 
 	for (auto& tracking_state : fixture.tracking_states) {
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume;
@@ -234,7 +234,7 @@ template<MemoryDeviceType TMemoryDeviceType>
 void GenericForwardRenderTest() {
 	CameraPoseAndRenderingEngineFixture<TMemoryDeviceType> fixture;
 
-	ORUtils::IStreamWrapper forward_render_images_file("TestData/arrays/forward_render_images.dat", true);
+	ORUtils::IStreamWrapper forward_render_images_file(GENERATED_TEST_DATA_PREFIX "TestData/arrays/forward_render_images.dat", true);
 
 	for (auto& tracking_state : fixture.tracking_states) {
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume;
@@ -283,7 +283,7 @@ template<MemoryDeviceType TMemoryDeviceType>
 void GenericRenderImageTest() {
 	CameraPoseAndRenderingEngineFixture<TMemoryDeviceType> fixture;
 
-	ORUtils::IStreamWrapper rendered_images_file("TestData/arrays/rendered_images.dat", true);
+	ORUtils::IStreamWrapper rendered_images_file(GENERATED_TEST_DATA_PREFIX "TestData/arrays/rendered_images.dat", true);
 
 	for (auto& tracking_state : fixture.tracking_states) {
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume;

@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(testSaveSceneCompact_CUDA) {
 			MEMORYDEVICE_CUDA, {volumeSize, volumeOffset});
 
 	GenerateSimpleSurfaceTestVolume<MEMORYDEVICE_CUDA>(&volume_PVA_saved_to_disk);
-	std::string path = "TestData/volumes/PVA/generated_test_volume_CUDA.dat";
+	std::string path = GENERATED_TEST_DATA_PREFIX "TestData/volumes/PVA/generated_test_volume_CUDA.dat";
 	volume_PVA_saved_to_disk.SaveToDisk(path);
 	volume_PVA_loaded_from_disk.Reset();
 	volume_PVA_loaded_from_disk.LoadFromDisk(path);
@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(testSaveSceneCompact_CUDA) {
 			MEMORYDEVICE_CUDA, {0x800, 0x20000});
 
 	GenerateSimpleSurfaceTestVolume<MEMORYDEVICE_CUDA>(&volume_VBH_saved_to_disk);
-	path = "TestData/volumes/VBH/generated_test_volume_CUDA.dat";
+	path = GENERATED_TEST_DATA_PREFIX "TestData/volumes/VBH/generated_test_volume_CUDA.dat";
 	volume_VBH_saved_to_disk.SaveToDisk(path);
 	volume_VBH_loaded_from_disk.Reset();
 	volume_VBH_loaded_from_disk.LoadFromDisk(path);

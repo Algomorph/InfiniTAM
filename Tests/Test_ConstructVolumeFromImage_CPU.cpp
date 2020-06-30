@@ -78,10 +78,10 @@ BOOST_AUTO_TEST_CASE(Test_SceneConstruct16_PVA_VBH_Near_CPU) {
 	                                              snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
 #ifdef SAVE_TEST_DATA
-	std::string path_PVA = "TestData/snoopy_result_fr16-17_partial_PVA/snoopy_partial_frame_16_near.dat";
-	volume_PVA_16->SaveToDisk(std::string("../../Tests/") +path_PVA);
-	std::string path_VBH = "TestData/snoopy_result_fr16-17_partial_VBH/snoopy_partial_frame_16_near.dat";
-	volume_VBH_16->SaveToDisk(std::string("../../Tests/") +path_VBH);
+	std::string path_PVA = GENERATED_TEST_DATA_PREFIX "TestData/snoopy_result_fr16-17_partial_PVA/snoopy_partial_frame_16_near.dat";
+	volume_PVA_16->SaveToDisk(path_PVA);
+	std::string path_VBH = GENERATED_TEST_DATA_PREFIX "TestData/snoopy_result_fr16-17_partial_VBH/snoopy_partial_frame_16_near.dat";
+	volume_VBH_16->SaveToDisk(path_VBH);
 #endif
 
 	float absoluteTolerance = 1e-7;
@@ -273,8 +273,8 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
 
 	UChar4Image rgb(true, false);
 	ShortImage depth(true, false);
-	BOOST_REQUIRE(ReadImageFromFile(rgb, "TestData/frames/stripes_color.png"));
-	BOOST_REQUIRE(ReadImageFromFile(depth, "TestData/frames/stripes_depth.png"));
+	BOOST_REQUIRE(ReadImageFromFile(rgb, GENERATED_TEST_DATA_PREFIX "TestData/frames/stripes_color.png"));
+	BOOST_REQUIRE(ReadImageFromFile(depth, GENERATED_TEST_DATA_PREFIX "TestData/frames/stripes_depth.png"));
 
 	view_builder->UpdateView(&view, &rgb, &depth, false, false, false, true);
 
@@ -412,7 +412,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume5(
 			MEMORYDEVICE_CPU);
 	ManipulationEngine_CPU_VBH_Voxel::Inst().ResetVolume(&volume5);
-	std::string path = "TestData/volumes/VBH/stripes_CPU.dat";
+	std::string path = GENERATED_TEST_DATA_PREFIX "TestData/volumes/VBH/stripes_CPU.dat";
 	volume4.SaveToDisk(path);
 	volume5.LoadFromDisk(path);
 	BOOST_REQUIRE(allocatedContentAlmostEqual_CPU(&volume1, &volume5, tolerance));

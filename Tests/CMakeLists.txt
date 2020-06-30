@@ -56,7 +56,7 @@ if (BUILD_TESTS)
     ###########################
     # test_utilities library  #
     ###########################
-    set(GENERATED_TEST_DATA_PREFIX ${CMAKE_CURRENT_SOURCE_DIR})
+    set(GENERATED_TEST_DATA_PREFIX ${CMAKE_CURRENT_BINARY_DIR}/TestData)
     configure_file(TestUtilities/TestUtilitiesConfig.h.in TestUtilities/TestUtilitiesConfig.h @ONLY)
 
     set(TEST_UTILITIES_SOURCES
@@ -152,16 +152,20 @@ if (BUILD_TESTS)
          "${CMAKE_CURRENT_SOURCE_DIR}/TestData/*.json"
          )
     set(TEST_DATA_DIRS)
-    if(MSVC_IDE)
-        foreach (CONFIGURATION_TYPE ${CMAKE_CONFIGURATION_TYPES})
-            file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${CONFIGURATION_TYPE}")
-            file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${CONFIGURATION_TYPE}/TestData")
-            list(APPEND TEST_DATA_DIRS "${CMAKE_CURRENT_BINARY_DIR}/${CONFIGURATION_TYPE}/TestData")
-        endforeach (CONFIGURATION_TYPE)
-    else()
-        file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/TestData")
-        list(APPEND TEST_DATA_DIRS "${CMAKE_CURRENT_BINARY_DIR}/TestData")
-    endif()
+    #TODO: remove or revive
+#    if(MSVC_IDE)
+#        foreach (CONFIGURATION_TYPE ${CMAKE_CONFIGURATION_TYPES})
+#            file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${CONFIGURATION_TYPE}")
+#            file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${CONFIGURATION_TYPE}/TestData")
+#            list(APPEND TEST_DATA_DIRS "${CMAKE_CURRENT_BINARY_DIR}/${CONFIGURATION_TYPE}/TestData")
+#        endforeach (CONFIGURATION_TYPE)
+#    else()
+#        file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/TestData")
+#        list(APPEND TEST_DATA_DIRS "${CMAKE_CURRENT_BINARY_DIR}/TestData")
+#    endif()
+
+    file(MAKE_DIRECTORY ${GENERATED_TEST_DATA_PREFIX})
+    list(APPEND TEST_DATA_DIRS ${GENERATED_TEST_DATA_PREFIX})
     foreach (TEST_DATA_DIR ${TEST_DATA_DIRS})
         foreach (TEST_DATA_FILE ${TEST_DATA_FILES})
             string(REPLACE ${CMAKE_CURRENT_SOURCE_DIR}/TestData ${TEST_DATA_DIR} NEW_FILE ${TEST_DATA_FILE})

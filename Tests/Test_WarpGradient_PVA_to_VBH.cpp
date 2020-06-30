@@ -188,10 +188,10 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CPU) {
 
 	View* view = nullptr;
 	buildSdfVolumeFromImage_NearSurfaceAllocation(&canonical_volume, &view,
-												  "TestData/snoopy_depth_000016.png",
-												  "TestData/snoopy_color_000016.png",
-												  "TestData/snoopy_omask_000016.png",
-												  "TestData/snoopy_calib.txt",
+												  GENERATED_TEST_DATA_PREFIX "TestData/snoopy_depth_000016.png",
+												  GENERATED_TEST_DATA_PREFIX "TestData/snoopy_color_000016.png",
+												  GENERATED_TEST_DATA_PREFIX "TestData/snoopy_omask_000016.png",
+												  GENERATED_TEST_DATA_PREFIX "TestData/snoopy_calib.txt",
 												  MEMORYDEVICE_CPU,
 												  snoopy::InitializationParameters<VoxelBlockHash>());
 
@@ -208,9 +208,9 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CPU) {
 
 	visualization_engine_legacy->CreateICPMaps(canonical_volume, view, &tracking_state, &render_state);
 
-	updateView(&view, "TestData/snoopy_depth_000017.png",
-			   "TestData/snoopy_color_000017.png", "TestData/snoopy_omask_000017.png",
-			   "TestData/snoopy_calib.txt", MEMORYDEVICE_CPU);
+	updateView(&view, GENERATED_TEST_DATA_PREFIX "TestData/snoopy_depth_000017.png",
+			   GENERATED_TEST_DATA_PREFIX "TestData/snoopy_color_000017.png", GENERATED_TEST_DATA_PREFIX "TestData/snoopy_omask_000017.png",
+			   GENERATED_TEST_DATA_PREFIX "TestData/snoopy_calib.txt", MEMORYDEVICE_CPU);
 
 	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, VoxelBlockHash>* reconstructionEngine =
 			DepthFusionEngineFactory
@@ -339,10 +339,10 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CUDA) {
 
 	View* view = nullptr;
 	buildSdfVolumeFromImage_NearSurfaceAllocation(&canonical_volume, &view,
-												  "TestData/snoopy_depth_000016.png",
-												  "TestData/snoopy_color_000016.png",
-												  "TestData/snoopy_omask_000016.png",
-												  "TestData/snoopy_calib.txt",
+												  GENERATED_TEST_DATA_PREFIX "TestData/snoopy_depth_000016.png",
+												  GENERATED_TEST_DATA_PREFIX "TestData/snoopy_color_000016.png",
+												  GENERATED_TEST_DATA_PREFIX "TestData/snoopy_omask_000016.png",
+												  GENERATED_TEST_DATA_PREFIX "TestData/snoopy_calib.txt",
 												  MEMORYDEVICE_CUDA,
 												  snoopy::InitializationParameters<VoxelBlockHash>());
 
@@ -359,9 +359,9 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CUDA) {
 
 	visualization_engine_legacy->CreateICPMaps(canonical_volume, view, &tracking_state, &render_state);
 
-	updateView(&view, "TestData/snoopy_depth_000017.png",
-			   "TestData/snoopy_color_000017.png", "TestData/snoopy_omask_000017.png",
-			   "TestData/snoopy_calib.txt", MEMORYDEVICE_CUDA);
+	updateView(&view, GENERATED_TEST_DATA_PREFIX "TestData/snoopy_depth_000017.png",
+			   GENERATED_TEST_DATA_PREFIX "TestData/snoopy_color_000017.png", GENERATED_TEST_DATA_PREFIX "TestData/snoopy_omask_000017.png",
+			   GENERATED_TEST_DATA_PREFIX "TestData/snoopy_calib.txt", MEMORYDEVICE_CUDA);
 
 	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, VoxelBlockHash>* reconstructionEngine =
 			DepthFusionEngineFactory

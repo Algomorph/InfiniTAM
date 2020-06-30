@@ -131,8 +131,8 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CUDA) {
 
 	UChar4Image rgb(true, true);
 	ShortImage depth(true, true);
-	BOOST_REQUIRE(ReadImageFromFile(rgb, "TestData/frames/stripes_color.png"));
-	BOOST_REQUIRE(ReadImageFromFile(depth, "TestData/frames/stripes_depth.png"));
+	BOOST_REQUIRE(ReadImageFromFile(rgb, GENERATED_TEST_DATA_PREFIX "TestData/frames/stripes_color.png"));
+	BOOST_REQUIRE(ReadImageFromFile(depth, GENERATED_TEST_DATA_PREFIX "TestData/frames/stripes_depth.png"));
 	rgb.UpdateDeviceFromHost();
 	depth.UpdateDeviceFromHost();
 
@@ -275,7 +275,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CUDA) {
 
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume5(settings->device_type, {0x800, 0x20000});
 	ManipulationEngine_CUDA_VBH_Voxel::Inst().ResetVolume(&volume5);
-	std::string path = "TestData/volumes/VBH/stripes_CUDA.dat";
+	std::string path = GENERATED_TEST_DATA_PREFIX "TestData/volumes/VBH/stripes_CUDA.dat";
 	volume4.SaveToDisk(path);
 	volume5.LoadFromDisk(path);
 	BOOST_REQUIRE(allocatedContentAlmostEqual_CUDA(&volume1, &volume5, tolerance));

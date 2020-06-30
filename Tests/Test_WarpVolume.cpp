@@ -54,7 +54,7 @@ namespace snoopy = snoopy_test_utilities;
 template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void GenericWarpVolumeTest() {
 	VoxelVolume<WarpVoxel, TIndex>* warps;
-	LoadVolume(&warps, "TestData/volumes/" + IndexString<TIndex>() + "/warp_field_0_complete.dat",
+	LoadVolume(&warps, GENERATED_TEST_DATA_PREFIX "TestData/volumes/" + IndexString<TIndex>() + "/warp_field_0_complete.dat",
 	           TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 	VoxelVolume<TSDFVoxel, TIndex>* live_volume;
 	LoadVolume(&live_volume, snoopy::PartialVolume17Path<TIndex>(),
@@ -70,7 +70,7 @@ void GenericWarpVolumeTest() {
 	warping_engine->WarpVolume_WarpUpdates(warps, live_volume, warped_live_volume);
 
 	VoxelVolume<TSDFVoxel, TIndex>* warped_live_volume_gt;
-	LoadVolume(&warped_live_volume_gt, "TestData/volumes/" + IndexString<TIndex>() + "/warped_live.dat",
+	LoadVolume(&warped_live_volume_gt, GENERATED_TEST_DATA_PREFIX "TestData/volumes/" + IndexString<TIndex>() + "/warped_live.dat",
 	           TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 
 	float absolute_tolerance = 1e-6;

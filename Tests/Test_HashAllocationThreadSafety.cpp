@@ -25,6 +25,9 @@
 #include <boost/test/unit_test.hpp>
 #include <random>
 
+//test utilities
+#include "TestUtilities/TestUtilities.h"
+
 //ITMLib
 #include "../ITMLib/Utils/FileIO/CSV_Utilities.h"
 #include "../ITMLib/Utils/Math.h"
@@ -38,11 +41,11 @@
 #include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
 //(CUDA)
 #ifndef COMPILE_WITHOUT_CUDA
-
 #include "../ITMLib/Engines/Indexing/VBH/CUDA/IndexingEngine_VoxelBlockHash_CUDA.h"
 #include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
-
 #endif
+
+
 
 using namespace ITMLib;
 
@@ -50,7 +53,7 @@ using namespace ITMLib;
 class CollisionHashFixture {
 public:
 	CollisionHashFixture() {
-		std::ifstream file("TestData/collision_hash_coordinates.csv");
+		std::ifstream file(GENERATED_TEST_DATA_PREFIX "TestData/collision_hash_coordinates.csv");
 
 		for (CSV_Iterator row_iter(file); row_iter != CSV_Iterator(); ++row_iter) {
 			if ((*row_iter).size() > 0) {

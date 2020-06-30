@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(testSaveSceneCompact_CPU) {
 
 	GenerateSimpleSurfaceTestVolume<MEMORYDEVICE_CPU>(&generated_test_volume_PVA);
 
-	std::string path = "TestData/volumes/PVA/generated_test_volume_CPU.dat";
+	std::string path = GENERATED_TEST_DATA_PREFIX "TestData/volumes/PVA/generated_test_volume_CPU.dat";
 	generated_test_volume_PVA.SaveToDisk(path);
 	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetVolume(&loaded_test_volume_PVA);
 	loaded_test_volume_PVA.LoadFromDisk(path);
@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(testSaveSceneCompact_CPU) {
 			MEMORYDEVICE_CPU);
 
 	GenerateSimpleSurfaceTestVolume<MEMORYDEVICE_CPU>(&generated_test_scene_VBH);
-	path = "TestData/volumes/VBH/generated_test_volume_CPU.dat";
+	path = GENERATED_TEST_DATA_PREFIX "TestData/volumes/VBH/generated_test_volume_CPU.dat";
 	generated_test_scene_VBH.SaveToDisk(path);
 
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> loaded_test_scene_VBH(
