@@ -702,6 +702,7 @@ int main(int argc, char* argv[]) {
 			             "Don't be afraid to experiment." << std::endl;
 		} else {
 			GeneratedTestDataType chosen = string_to_enumerator<GeneratedTestDataType>(generated_data_type_argument);
+			std::cout << "current path: " << std::filesystem::current_path() << std::endl;
 			std::cout << "Generating data using the " << enumerator_to_string(chosen) << " generator." << std::endl;
 			generator_by_string[chosen]();
 		}

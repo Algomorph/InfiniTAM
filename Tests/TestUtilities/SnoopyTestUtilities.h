@@ -26,6 +26,16 @@ namespace snoopy_test_utilities {
 
 static const Vector2i frame_image_size = Vector2i(640, 480);
 
+#ifdef _MSC_VER
+#ifdef NDEBUG
+constexpr const char* configuration_subfolder = "Release/";
+#else
+constexpr const char* configuration_subfolder = "Debug/";
+#endif
+#else
+constexpr const char* configuration_subfolder = "";
+#endif
+
 enum Frame {
 	FRAME00,
 	FRAME16,
@@ -48,21 +58,21 @@ std::string Frame17MaskPath();
 
 template<typename TIndex>
 std::string PartialVolume00Path() {
-	return "TestData/volumes/" + test_utilities::IndexString<TIndex>() + "/snoopy_partial_frame_00.dat";
+	return std::string(configuration_subfolder) + "TestData/volumes/" + test_utilities::IndexString<TIndex>() + "/snoopy_partial_frame_00.dat";
 }
 extern template std::string PartialVolume00Path<PlainVoxelArray>();
 extern template std::string PartialVolume00Path<VoxelBlockHash>();
 
 template<typename TIndex>
 std::string PartialVolume16Path() {
-	return "TestData/volumes/" + test_utilities::IndexString<TIndex>() + "/snoopy_partial_frame_16.dat";
+	return std::string(configuration_subfolder) + "TestData/volumes/" + test_utilities::IndexString<TIndex>() + "/snoopy_partial_frame_16.dat";
 }
 extern template std::string PartialVolume16Path<PlainVoxelArray>();
 extern template std::string PartialVolume16Path<VoxelBlockHash>();
 
 template<typename TIndex>
 std::string PartialVolume17Path() {
-	return "TestData/volumes/" + test_utilities::IndexString<TIndex>() + "/snoopy_partial_frame_17.dat";
+	return std::string(configuration_subfolder) + "TestData/volumes/" + test_utilities::IndexString<TIndex>() + "/snoopy_partial_frame_17.dat";
 }
 extern template std::string PartialVolume17Path<PlainVoxelArray>();
 extern template std::string PartialVolume17Path<VoxelBlockHash>();
@@ -71,14 +81,14 @@ extern template std::string PartialVolume17Path<VoxelBlockHash>();
 
 template<typename TIndex>
 std::string FullVolume16Path() {
-	return "TestData/volumes/" + test_utilities::IndexString<TIndex>() + "/snoopy_full_frame_16.dat";
+	return std::string(configuration_subfolder) + "TestData/volumes/" + test_utilities::IndexString<TIndex>() + "/snoopy_full_frame_16.dat";
 }
 extern template std::string FullVolume16Path<PlainVoxelArray>();
 extern template std::string FullVolume16Path<VoxelBlockHash>();
 
 template<typename TIndex>
 std::string FullVolume17Path() {
-	return "TestData/volumes/" + test_utilities::IndexString<TIndex>() + "/snoopy_full_frame_17.dat";
+	return std::string(configuration_subfolder) + "TestData/volumes/" + test_utilities::IndexString<TIndex>() + "/snoopy_full_frame_17.dat";
 }
 extern template std::string FullVolume17Path<PlainVoxelArray>();
 extern template std::string FullVolume17Path<VoxelBlockHash>();

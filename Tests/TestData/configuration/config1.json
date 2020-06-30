@@ -162,6 +162,7 @@
         "index_of_frame_to_start_at": 16,
         "load_volume_and_camera_matrix_before_processing": true,
         "save_volumes_and_camera_matrix_after_processing": true,
+        "save_meshes_after_processing": true,
         "exit_after_automatic_processing": true
     }
 }

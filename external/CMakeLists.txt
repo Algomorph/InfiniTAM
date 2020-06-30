@@ -90,8 +90,8 @@ set_up_dependency(NAME zlib
                     GIT_TAG cacf7f1d4e3d44d871b605da3b647f07d718623f
                     PACKAGED
                     INCLUDE_TARGET include
-                    LIBRARY_TARGET_MSVC_DEBUG lib/zlibd.lib
-                    LIBRARY_TARGET_MSVC_RELEASE lib/zlib.lib
+                    LIBRARY_TARGET_MSVC_DEBUG lib/zlibstaticd.lib
+                    LIBRARY_TARGET_MSVC_RELEASE lib/zlibstatic.lib
                     LIBRARY_TARGET_POSIX lib/libz.a
                     ALTERNATIVE_LOCAL_NAME ZLIB
                     )
@@ -116,7 +116,7 @@ if(WITH_PNG)
                        CMAKE_ARGS ${PNG_ZLIB_CMAKE_ARGS} -DPNG_SHARED=OFF -DPNG_STATIC=ON -DPNG_EXECUTABLES=OFF -DPNG_TESTS=OFF
                        INCLUDE_TARGET include
                        LIBRARY_TARGET_MSVC_DEBUG lib/libpng16_staticd.lib
-                       LIBRARY_TARGET_MSVC_RELEASE lib/libpng_static16.lib
+                       LIBRARY_TARGET_MSVC_RELEASE lib/libpng16_static.lib
                        LIBRARY_TARGET_POSIX lib/libpng16.a
                        ALTERNATIVE_LOCAL_NAME PNG
                        )
