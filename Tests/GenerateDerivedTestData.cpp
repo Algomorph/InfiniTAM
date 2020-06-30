@@ -67,7 +67,7 @@ namespace snoopy = snoopy_test_utilities;
 namespace fs = std::filesystem;
 
 void ConstructSnoopyUnmaskedVolumes00() {
-	LOG4CPLUS_DEBUG(log4cplus::Logger::getRoot(), "Constructing snoopy unmasked full volumes at frame 0...");
+	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(), "Constructing snoopy unmasked full volumes at frame 0...");
 
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* volume_PVA_00;
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume_VBH_00;
@@ -84,15 +84,15 @@ void ConstructSnoopyUnmaskedVolumes00() {
 	                                              snoopy::SnoopyCalibrationPath(),
 	                                              MEMORYDEVICE_CPU,
 	                                              snoopy::InitializationParameters_Fr00<VoxelBlockHash>());
-	volume_PVA_00->SaveToDisk(GENERATED_TEST_DATA_PREFIX + snoopy::PartialVolume00Path<PlainVoxelArray>());
-	volume_VBH_00->SaveToDisk(GENERATED_TEST_DATA_PREFIX + snoopy::PartialVolume00Path<VoxelBlockHash>());
+	volume_PVA_00->SaveToDisk(snoopy::PartialVolume00Path<PlainVoxelArray>());
+	volume_VBH_00->SaveToDisk(snoopy::PartialVolume00Path<VoxelBlockHash>());
 
 	delete volume_PVA_00;
 	delete volume_VBH_00;
 }
 
 void ConstructSnoopyMaskedVolumes16and17() {
-	LOG4CPLUS_DEBUG(log4cplus::Logger::getRoot(), "Constructing snoopy masked partial volumes 16 & 17...");
+	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(), "Constructing snoopy masked partial volumes 16 & 17...");
 
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* volume_PVA_16;
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* volume_PVA_17;
@@ -122,19 +122,19 @@ void ConstructSnoopyMaskedVolumes16and17() {
 	                                              MEMORYDEVICE_CPU,
 	                                              snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
-	LOG4CPLUS_DEBUG(log4cplus::Logger::getRoot(), "Saving snoopy masked partial volumes 16 & 17...");
+	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(), "Saving snoopy masked partial volumes 16 & 17...");
 
-	volume_PVA_16->SaveToDisk(GENERATED_TEST_DATA_PREFIX + snoopy::PartialVolume16Path<PlainVoxelArray>());
-	volume_VBH_16->SaveToDisk(GENERATED_TEST_DATA_PREFIX + snoopy::PartialVolume16Path<VoxelBlockHash>());
-	volume_PVA_17->SaveToDisk(GENERATED_TEST_DATA_PREFIX + snoopy::PartialVolume17Path<PlainVoxelArray>());
-	volume_VBH_17->SaveToDisk(GENERATED_TEST_DATA_PREFIX + snoopy::PartialVolume17Path<VoxelBlockHash>());
+	volume_PVA_16->SaveToDisk(snoopy::PartialVolume16Path<PlainVoxelArray>());
+	volume_VBH_16->SaveToDisk(snoopy::PartialVolume16Path<VoxelBlockHash>());
+	volume_PVA_17->SaveToDisk(snoopy::PartialVolume17Path<PlainVoxelArray>());
+	volume_VBH_17->SaveToDisk(snoopy::PartialVolume17Path<VoxelBlockHash>());
 
 	volume_PVA_16->Reset();
 	volume_VBH_16->Reset();
 	volume_PVA_17->Reset();
 	volume_VBH_17->Reset();
 
-	LOG4CPLUS_DEBUG(log4cplus::Logger::getRoot(), "Constructing snoopy masked full volumes 16 & 17 PVA...");
+	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(), "Constructing snoopy masked full volumes 16 & 17 PVA...");
 
 	BuildSdfVolumeFromImage_SurfaceSpanAllocation(&volume_PVA_16,
 	                                              &volume_PVA_17,
@@ -147,7 +147,7 @@ void ConstructSnoopyMaskedVolumes16and17() {
 	                                              snoopy::SnoopyCalibrationPath(),
 	                                              MEMORYDEVICE_CPU);
 
-	LOG4CPLUS_DEBUG(log4cplus::Logger::getRoot(), "Constructing snoopy masked full volumes 16 & 17 VBH...");
+	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(), "Constructing snoopy masked full volumes 16 & 17 VBH...");
 
 	BuildSdfVolumeFromImage_SurfaceSpanAllocation(&volume_VBH_16,
 	                                              &volume_VBH_17,
@@ -160,14 +160,14 @@ void ConstructSnoopyMaskedVolumes16and17() {
 	                                              snoopy::SnoopyCalibrationPath(),
 	                                              MEMORYDEVICE_CPU);
 
-	LOG4CPLUS_DEBUG(log4cplus::Logger::getRoot(), "Saving snoopy masked full volume 16 PVA...");
-	volume_PVA_16->SaveToDisk(GENERATED_TEST_DATA_PREFIX + snoopy::FullVolume16Path<PlainVoxelArray>());
-	LOG4CPLUS_DEBUG(log4cplus::Logger::getRoot(), "Saving snoopy masked full volume 16 VBH...");
-	volume_VBH_16->SaveToDisk(GENERATED_TEST_DATA_PREFIX + snoopy::FullVolume16Path<VoxelBlockHash>());
-	LOG4CPLUS_DEBUG(log4cplus::Logger::getRoot(), "Saving snoopy masked full volume 17 PVA...");
-	volume_PVA_17->SaveToDisk(GENERATED_TEST_DATA_PREFIX + snoopy::FullVolume17Path<PlainVoxelArray>());
-	LOG4CPLUS_DEBUG(log4cplus::Logger::getRoot(), "Saving snoopy masked full volume 17 VBH...");
-	volume_VBH_17->SaveToDisk(GENERATED_TEST_DATA_PREFIX + snoopy::FullVolume17Path<VoxelBlockHash>());
+	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(), "Saving snoopy masked full volume 16 PVA...");
+	volume_PVA_16->SaveToDisk(snoopy::FullVolume16Path<PlainVoxelArray>());
+	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(), "Saving snoopy masked full volume 16 VBH...");
+	volume_VBH_16->SaveToDisk(snoopy::FullVolume16Path<VoxelBlockHash>());
+	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(), "Saving snoopy masked full volume 17 PVA...");
+	volume_PVA_17->SaveToDisk(snoopy::FullVolume17Path<PlainVoxelArray>());
+	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(), "Saving snoopy masked full volume 17 VBH...");
+	volume_VBH_17->SaveToDisk(snoopy::FullVolume17Path<VoxelBlockHash>());
 
 	delete volume_PVA_16;
 	delete volume_VBH_16;
@@ -176,7 +176,7 @@ void ConstructSnoopyMaskedVolumes16and17() {
 }
 
 void ConstructStripesTestVolumes() {
-	LOG4CPLUS_DEBUG(log4cplus::Logger::getRoot(), "Constructing stripe test volumes...");
+	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(), "Constructing stripe test volumes...");
 	// region ================================= CONSTRUCT VIEW =========================================================
 
 	RGBDCalib calibration_data;
@@ -188,8 +188,8 @@ void ConstructStripesTestVolumes() {
 
 	UChar4Image rgb(true, false);
 	ShortImage depth(true, false);
-	ReadImageFromFile(rgb, GENERATED_TEST_DATA_PREFIX "TestData/frames/stripes_color.png");
-	ReadImageFromFile(depth, GENERATED_TEST_DATA_PREFIX "TestData/frames/stripes_depth.png");
+	ReadImageFromFile(rgb, STATIC_TEST_DATA_PREFIX "TestData/frames/stripes_color.png");
+	ReadImageFromFile(depth, STATIC_TEST_DATA_PREFIX "TestData/frames/stripes_depth.png");
 
 	view_builder->UpdateView(&view, &rgb, &depth, false, false, false, true);
 
@@ -204,7 +204,7 @@ void ConstructStripesTestVolumes() {
 	auto depth_fusion_engine_VBH = DepthFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, VoxelBlockHash>(
 			MEMORYDEVICE_CPU);
 	depth_fusion_engine_VBH->IntegrateDepthImageIntoTsdfVolume(&volume4, view, &tracking_state);
-	std::string path =  GENERATED_TEST_DATA_PREFIX "TestData/volumes/VBH/stripes.dat";
+	std::string path =  STATIC_TEST_DATA_PREFIX "TestData/volumes/VBH/stripes.dat";
 	volume4.SaveToDisk(path);
 
 	delete depth_fusion_engine_VBH;
@@ -214,7 +214,7 @@ void ConstructStripesTestVolumes() {
 
 template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void GenerateWarpGradientTestData() {
-	LOG4CPLUS_DEBUG(log4cplus::Logger::getRoot(),
+	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(),
 	                "Generating warp field data from snoopy masked partial volumes 16 & 17 "
 			                << IndexString<TIndex>() << "...");
 
@@ -294,7 +294,7 @@ void GenerateWarpGradientTestData() {
 }
 
 void GenerateWarpGradient_PVA_to_VBH_TestData() {
-	LOG4CPLUS_DEBUG(log4cplus::Logger::getRoot(),
+	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(),
 	                "Generating multi-iteration warp field data from snoopy masked partial volumes 16 & 17 (PVA & VBH)... ");
 	SlavchevaSurfaceTracker::Switches switches_data_only(true, false, false, false, false);
 	GenericWarpTest<MEMORYDEVICE_CPU>(switches_data_only, 10, SAVE_SUCCESSIVE_ITERATIONS);
@@ -309,17 +309,16 @@ void GenerateWarpGradient_PVA_to_VBH_TestData() {
 template<typename TIndex>
 void GenerateFusedVolumeTestData() {
 	const int iteration = 4;
-	LOG4CPLUS_DEBUG(log4cplus::Logger::getRoot(),
+	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(),
 	                "Generating fused volume data from snoopy masked partial volume 16 & 17 warps ("
 			                << IndexString<TIndex>() << ") ... ");
 	VoxelVolume<TSDFVoxel, TIndex>* warped_live_volume;
 	SlavchevaSurfaceTracker::Switches data_tikhonov_sobolev_switches(true, false, true, false, true);
 	LoadVolume(&warped_live_volume,
-	           GENERATED_TEST_DATA_PREFIX +
 	           GetWarpedLivePath<TIndex>(SwitchesToPrefix(data_tikhonov_sobolev_switches), iteration),
 	           MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 	VoxelVolume<TSDFVoxel, TIndex>* canonical_volume;
-	LoadVolume(&canonical_volume, GENERATED_TEST_DATA_PREFIX + snoopy::PartialVolume16Path<TIndex>(),
+	LoadVolume(&canonical_volume, snoopy::PartialVolume16Path<TIndex>(),
 	           MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 	AllocateUsingOtherVolume(canonical_volume, warped_live_volume, MEMORYDEVICE_CPU);
 
@@ -338,7 +337,7 @@ void GenerateFusedVolumeTestData() {
 
 template<typename TIndex>
 void GenerateWarpedVolumeTestData() {
-	LOG4CPLUS_DEBUG(log4cplus::Logger::getRoot(),
+	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(),
 	                "Generating warped volume data from snoopy masked partial volume 16 & 17 warps ("
 			                << IndexString<TIndex>() << ") ... ");
 	VoxelVolume<WarpVoxel, TIndex>* warps;
@@ -346,7 +345,7 @@ void GenerateWarpedVolumeTestData() {
 	           GENERATED_TEST_DATA_PREFIX "TestData/volumes/" + IndexString<TIndex>() + "/warp_field_0_complete.dat",
 	           MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 	VoxelVolume<TSDFVoxel, TIndex>* live_volume;
-	LoadVolume(&live_volume, GENERATED_TEST_DATA_PREFIX + snoopy::PartialVolume17Path<TIndex>(),
+	LoadVolume(&live_volume, snoopy::PartialVolume17Path<TIndex>(),
 	           MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 	auto warped_live_volume = new VoxelVolume<TSDFVoxel, TIndex>(MEMORYDEVICE_CPU,
 	                                                             snoopy::InitializationParameters_Fr16andFr17<TIndex>());
@@ -439,7 +438,7 @@ configuration::Configuration GenerateDefaultSnoopyConfiguration() {
 void GenerateConfigurationTestData() {
 	using namespace configuration;
 	configuration::Configuration changed_up_configuration = GenerateChangedUpConfiguration();
-	LOG4CPLUS_DEBUG(log4cplus::Logger::getRoot(),
+	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(),
 	                "Generating configuration test data ... ");
 	configuration::Configuration default_snoopy_configuration = GenerateDefaultSnoopyConfiguration();
 	configuration::save_configuration_to_json_file(GENERATED_TEST_DATA_PREFIX
@@ -460,7 +459,7 @@ void GenerateConfigurationTestData() {
 
 template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void GenerateMeshingTestData() {
-	LOG4CPLUS_DEBUG(log4cplus::Logger::getRoot(),
+	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(),
 	                "Generating meshing test data (" << IndexString<TIndex>() << ") ...");
 	VoxelVolume<TSDFVoxel, TIndex>* canonical_volume;
 	LoadVolume(&canonical_volume, snoopy::PartialVolume16Path<TIndex>(),
@@ -478,7 +477,7 @@ void GenerateMeshingTestData() {
 
 template<MemoryDeviceType TMemoryDeviceType>
 void GenerateRenderingTestData_VoxelBlockHash() {
-	LOG4CPLUS_DEBUG(log4cplus::Logger::getRoot(),
+	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(),
 	                "Generating VBH rendering test data ... ");
 	CameraPoseAndRenderingEngineFixture<TMemoryDeviceType> fixture;
 
@@ -490,9 +489,7 @@ void GenerateRenderingTestData_VoxelBlockHash() {
 	ORUtils::OStreamWrapper forward_render_images_file(GENERATED_TEST_DATA_PREFIX "TestData/arrays/forward_render_images.dat", true);
 	ORUtils::OStreamWrapper rendered_images_file(GENERATED_TEST_DATA_PREFIX "TestData/arrays/rendered_images.dat", true);
 
-	std::vector<int> pose_range_visible_block_counts1;
-	std::vector<int> pose_range_visible_block_counts2;
-	std::vector<int> pose_range_visible_block_counts3;
+	std::vector<int> pose_range_visible_block_counts1, pose_range_visible_block_counts2, pose_range_visible_block_counts3;
 
 	std::vector<int> block_address_range_bounds =
 			{1250, 1500,
@@ -501,13 +498,18 @@ void GenerateRenderingTestData_VoxelBlockHash() {
 	size_t range_bound_count = block_address_range_bounds.size();
 	SaveRawDataToFile<int>(visible_blocks_file, block_address_range_bounds.data(), range_bound_count, MEMORYDEVICE_CPU);
 
+	int i_pose = 0;
+	const int pose_count = static_cast<int>(fixture.tracking_states.size());
 	for (auto& tracking_state : fixture.tracking_states) {
+		LOG4CPLUS_INFO(log4cplus::Logger::getRoot(), "Generating rendering test data for camera pose " << i_pose + 1 << "/" << pose_count);
+		i_pose++;
+
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume;
 		LoadVolume(&volume, snoopy::PartialVolume17Path<VoxelBlockHash>(), TMemoryDeviceType,
 		           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
 		ORUtils::SE3Pose& pose = *tracking_state->pose_d;
-
+		LOG4CPLUS_INFO(log4cplus::Logger::getRoot(), "Generating raycast/TSDF-surface-finding test data ... ");
 		// find visible blocks, count visible blocks
 		fixture.rendering_engine->FindVisibleBlocks(volume, &pose, &fixture.calibration_data.intrinsics_d, fixture.render_state);
 		int range_visible_block_count1 = fixture.rendering_engine->CountVisibleBlocks(volume, fixture.render_state, block_address_range_bounds[0],
@@ -527,6 +529,7 @@ void GenerateRenderingTestData_VoxelBlockHash() {
 		int* visible_codes_device = volume->index.GetVisibleBlockHashCodes();
 		SaveRawDataToFile<int>(visible_blocks_file, visible_codes_device, visible_block_count, TMemoryDeviceType);
 
+		LOG4CPLUS_INFO(log4cplus::Logger::getRoot(), "Generating expected depth estimation test data ... ");
 		// create expected depths (in legacy InfiniTAM, fills "renderingRangeImage" of the "render state")
 		{
 			std::shared_ptr<RenderState> render_state_expected_depths = fixture.MakeRenderState();
@@ -535,6 +538,7 @@ void GenerateRenderingTestData_VoxelBlockHash() {
 			ORUtils::MemoryBlockPersistence::SaveImage(range_images_file, *render_state_expected_depths->renderingRangeImage);
 		}
 
+		LOG4CPLUS_INFO(log4cplus::Logger::getRoot(), "Generating raycast/TSDF-surface-finding test data ... ");
 		// find surface (in legacy InfiniTAM, fills "raycastResult" of the render state)
 		{
 			std::shared_ptr<RenderState> render_state_find_surface = fixture.MakeRenderState();
@@ -543,6 +547,7 @@ void GenerateRenderingTestData_VoxelBlockHash() {
 			fixture.rendering_engine->FindSurface(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state_find_surface.get());
 			ORUtils::MemoryBlockPersistence::SaveImage(raycast_images_file, *render_state_find_surface->raycastResult);
 		}
+		LOG4CPLUS_INFO(log4cplus::Logger::getRoot(), "Generating raycast-to-point-cloud conversion test data ... ");
 		// create point cloud (in legacy InfiniTAM, fills "raycastResult" of "render state", locations & colors of the point cloud in the "tracking state")
 		{
 
@@ -557,7 +562,8 @@ void GenerateRenderingTestData_VoxelBlockHash() {
 			ORUtils::MemoryBlockPersistence::SaveImage(point_cloud_images_file, *tracking_state->pointCloud->colours);
 		}
 
-		// create icp maps (in legacy InfiniTAM, fills "raycastResult" of "render state", locations and
+		LOG4CPLUS_INFO(log4cplus::Logger::getRoot(), "Generating raycast-to-ICP-map (projected point cloud) conversion test data ... ");
+		// create icp maps (in legacy InfiniTAM, fills "raycastResult" of "render state", locations and "normals" of pointCloud)
 		{
 			// colors -- interpreted as normals -- honestly, WTF, Oxford? Yeah, I'm blaming you, Oxford, you heard me! -- of the point cloud in the "tracking state")
 			std::shared_ptr<RenderState> render_state_create_ICP_maps = fixture.MakeRenderState();
@@ -568,6 +574,7 @@ void GenerateRenderingTestData_VoxelBlockHash() {
 			ORUtils::MemoryBlockPersistence::SaveImage(ICP_images_file, *tracking_state->pointCloud->colours);
 		}
 
+		LOG4CPLUS_INFO(log4cplus::Logger::getRoot(), "Generating 'forward-rendering' test data ('forward-rendering' is rendering a new point cloud from a different camera vantage point while reusing previous data as much as possible) ... ");
 		//forward-render
 		{
 			std::shared_ptr<RenderState> render_state_forward_render = fixture.MakeRenderState();
@@ -594,6 +601,7 @@ void GenerateRenderingTestData_VoxelBlockHash() {
 			ORUtils::MemoryBlockPersistence::SaveImage(forward_render_images_file, *render_state_forward_render->forwardProjection);
 		}
 
+		LOG4CPLUS_INFO(log4cplus::Logger::getRoot(), "Generating test data for render actual images based on raycasting in the TSDF (with various settings)...");
 		// render image
 		{
 			std::shared_ptr<RenderState> render_state_render_image = fixture.MakeRenderState();
@@ -628,7 +636,6 @@ void GenerateRenderingTestData_VoxelBlockHash() {
 		delete volume;
 	}
 
-	size_t pose_count = fixture.tracking_states.size();
 	SaveRawDataToFile<int>(visible_blocks_file, pose_range_visible_block_counts1.data(), pose_count, MEMORYDEVICE_CPU);
 	SaveRawDataToFile<int>(visible_blocks_file, pose_range_visible_block_counts2.data(), pose_count, MEMORYDEVICE_CPU);
 	SaveRawDataToFile<int>(visible_blocks_file, pose_range_visible_block_counts3.data(), pose_count, MEMORYDEVICE_CPU);
@@ -637,7 +644,7 @@ void GenerateRenderingTestData_VoxelBlockHash() {
 
 #define GENERATED_TEST_DATA_TYPE_ENUM_DESCRIPTION GeneratedTestDataType, \
     (SNOOPY_UNMASKED_VOLUMES,    "SNOOPY_UNMASKED_VOLUMES", "snoopy_unmasked_volumes", "unmasked_volumes", "unmasked", "u", "su", "suv"), \
-    (MASKED_VOLUMES,             "SNOOPY_MASKED_VOLUMES", "snoopy_masked_volumes", "masked_volumes", "masked", "m", "sm", "smv", "mv"), \
+    (MASKED_VOLUMES,             "SNOOPY_MASKED_VOLUMES", "snoopy_masked_volumes", "masked_volumes", "masked", "sm", "smv", "mv"), \
     (PVA_WARP_GRADIENTS,         "PVA_WARP_GRADIENTS", "pva_warp_gradients", "pva_warps", "pw", "pva_w", "pva_wg"), \
     (VBH_WARP_GRADIENTS,         "VBH_WARP_GRADIENTS", "vbh_warp_gradients", "vbh_warps", "vw", "vbh_w", "pva_wg"), \
     (COMPARATIVE_WARP_GRADIENTS, "COMPARATIVE_WARP_GRADIENTS", "comparative_warp_gradients", "warps", "comparative_warps", "w", "cw"), \

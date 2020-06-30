@@ -131,8 +131,8 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CUDA) {
 
 	UChar4Image rgb(true, true);
 	ShortImage depth(true, true);
-	BOOST_REQUIRE(ReadImageFromFile(rgb, GENERATED_TEST_DATA_PREFIX "TestData/frames/stripes_color.png"));
-	BOOST_REQUIRE(ReadImageFromFile(depth, GENERATED_TEST_DATA_PREFIX "TestData/frames/stripes_depth.png"));
+	BOOST_REQUIRE(ReadImageFromFile(rgb, STATIC_TEST_DATA_PREFIX "TestData/frames/stripes_color.png"));
+	BOOST_REQUIRE(ReadImageFromFile(depth, STATIC_TEST_DATA_PREFIX "TestData/frames/stripes_depth.png"));
 	rgb.UpdateDeviceFromHost();
 	depth.UpdateDeviceFromHost();
 

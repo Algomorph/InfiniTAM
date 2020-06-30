@@ -19,43 +19,43 @@
 namespace snoopy_test_utilities {
 
 std::string SnoopyCalibrationPath() {
-	return GENERATED_TEST_DATA_PREFIX "TestData/calibration/snoopy_calib.txt";
+	return STATIC_TEST_DATA_PREFIX "TestData/calibration/snoopy_calib.txt";
 }
 
 std::string Frame00DepthPath() {
-	return GENERATED_TEST_DATA_PREFIX "TestData/frames/snoopy_depth_000000.png";
+	return STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_depth_000000.png";
 }
 
 std::string Frame00ColorPath() {
-	return GENERATED_TEST_DATA_PREFIX "TestData/frames/snoopy_color_000000.png";
+	return STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_color_000000.png";
 }
 
 std::string Frame00MaskPath() {
-	return GENERATED_TEST_DATA_PREFIX "TestData/frames/snoopy_omask_000000.png";
+	return STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_omask_000000.png";
 }
 
 std::string Frame16DepthPath() {
-	return GENERATED_TEST_DATA_PREFIX "TestData/frames/snoopy_depth_000016.png";
+	return STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_depth_000016.png";
 }
 
 std::string Frame16ColorPath() {
-	return GENERATED_TEST_DATA_PREFIX "TestData/frames/snoopy_color_000016.png";
+	return STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_color_000016.png";
 }
 
 std::string Frame16MaskPath() {
-	return GENERATED_TEST_DATA_PREFIX "TestData/frames/snoopy_omask_000016.png";
+	return STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_omask_000016.png";
 }
 
 std::string Frame17DepthPath() {
-	return GENERATED_TEST_DATA_PREFIX "TestData/frames/snoopy_depth_000017.png";
+	return STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_depth_000017.png";
 }
 
 std::string Frame17ColorPath() {
-	return GENERATED_TEST_DATA_PREFIX "TestData/frames/snoopy_color_000017.png";
+	return STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_color_000017.png";
 }
 
 std::string Frame17MaskPath() {
-	return GENERATED_TEST_DATA_PREFIX "TestData/frames/snoopy_omask_000017.png";
+	return STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_omask_000017.png";
 }
 
 template std::string PartialVolume00Path<PlainVoxelArray>();

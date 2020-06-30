@@ -49,31 +49,31 @@ BOOST_AUTO_TEST_CASE(testImageMaskReader) {
 	UCharImage mask(true, false);
 
 	InputSource::ImageMaskPathGenerator pathGenerator(
-			GENERATED_TEST_DATA_PREFIX "TestData/frames/snoopy_color_%06i.png",
-			GENERATED_TEST_DATA_PREFIX "TestData/frames/snoopy_depth_%06i.png",
-			GENERATED_TEST_DATA_PREFIX "TestData/frames/snoopy_omask_%06i.png");
+			STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_color_%06i.png",
+			STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_depth_%06i.png",
+			STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_omask_%06i.png");
 	InputSource::ImageSourceEngine* image_source =
 			new InputSource::ImageFileReader<InputSource::ImageMaskPathGenerator>(
 			snoopy::SnoopyCalibrationPath().c_str(), pathGenerator);
 	image_source->GetImages(rgb, depth);
 
 #ifdef GENERATE_GT_MASKED_IMAGES
-	BOOST_REQUIRE(ReadImageFromFile(rgb, GENERATED_TEST_DATA_PREFIX "TestData/snoopy_color_000000.png"));
-	BOOST_REQUIRE(ReadImageFromFile(depth, GENERATED_TEST_DATA_PREFIX "TestData/snoopy_depth_000000.png"));
+	BOOST_REQUIRE(ReadImageFromFile(rgb, STATIC_TEST_DATA_PREFIX "TestData/snoopy_color_000000.png"));
+	BOOST_REQUIRE(ReadImageFromFile(depth, STATIC_TEST_DATA_PREFIX "TestData/snoopy_depth_000000.png"));
 #endif
-	BOOST_REQUIRE(ReadImageFromFile(mask, GENERATED_TEST_DATA_PREFIX "TestData/frames/snoopy_omask_000000.png"));
+	BOOST_REQUIRE(ReadImageFromFile(mask, STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_omask_000000.png"));
 
 	rgb.ApplyMask(mask,Vector4u((unsigned char)0));
 	depth.ApplyMask(mask,0);
 
 #ifdef GENERATE_GT_MASKED_IMAGES
-	SaveImageToFile(rgb, GENERATED_TEST_DATA_PREFIX "TestData/frames/snoopy_color_000000_masked.pnm");
-	SaveImageToFile(depth, GENERATED_TEST_DATA_PREFIX "TestData/frames/snoopy_depth_000000_masked.pnm");
+	SaveImageToFile(rgb, STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_color_000000_masked.pnm");
+	SaveImageToFile(depth, STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_depth_000000_masked.pnm");
 #endif
 
-BOOST_REQUIRE(ReadImageFromFile(masked_rgb_ground_truth, GENERATED_TEST_DATA_PREFIX "TestData/frames/snoopy_color_000000.png"));
+BOOST_REQUIRE(ReadImageFromFile(masked_rgb_ground_truth, STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_color_000000.png"));
 	masked_rgb_ground_truth.ApplyMask(mask, Vector4u((unsigned char) 0));
-	BOOST_REQUIRE(ReadImageFromFile(masked_depth_ground_truth, GENERATED_TEST_DATA_PREFIX "TestData/frames/snoopy_depth_000000_masked.pnm"));
+	BOOST_REQUIRE(ReadImageFromFile(masked_depth_ground_truth, STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_depth_000000_masked.pnm"));
 
 	BOOST_REQUIRE(rgb == masked_rgb_ground_truth);
 	BOOST_REQUIRE(depth == masked_depth_ground_truth);

@@ -80,10 +80,10 @@ struct TestData {
 	}
 
 	const std::string calibration_path = snoopy::SnoopyCalibrationPath();
-	const std::string square_1_depth_path = GENERATED_TEST_DATA_PREFIX "TestData/frames/square1_depth.png";
-	const std::string square_2_depth_path = GENERATED_TEST_DATA_PREFIX "TestData/frames/square2_depth.png";
-	const std::string square_1_color_path = GENERATED_TEST_DATA_PREFIX "TestData/frames/square1_color.png";
-	const std::string square_2_color_path = GENERATED_TEST_DATA_PREFIX "TestData/frames/square2_color.png";
+	const std::string square_1_depth_path = STATIC_TEST_DATA_PREFIX "TestData/frames/square1_depth.png";
+	const std::string square_2_depth_path = STATIC_TEST_DATA_PREFIX "TestData/frames/square2_depth.png";
+	const std::string square_1_color_path = STATIC_TEST_DATA_PREFIX "TestData/frames/square1_color.png";
+	const std::string square_2_color_path = STATIC_TEST_DATA_PREFIX "TestData/frames/square2_color.png";
 	ViewBuilder* view_builder;
 	View* view_square_1 = nullptr;
 	View* view_square_2 = nullptr;

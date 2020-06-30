@@ -183,9 +183,8 @@ void GenericWarpConsistencySubtest(const SlavchevaSurfaceTracker::Switches& swit
 		std::string path_warped_live = GetWarpedLivePath<TIndex>(volume_filename_prefix, iteration);
 		switch (mode) {
 			case SAVE_SUCCESSIVE_ITERATIONS:
-				live_volumes[target_warped_field_ix]->SaveToDisk(
-						std::string(GENERATED_TEST_DATA_PREFIX) + path_warped_live);
-				warp_field.SaveToDisk(std::string(GENERATED_TEST_DATA_PREFIX) + path);
+				live_volumes[target_warped_field_ix]->SaveToDisk(path_warped_live);
+				warp_field.SaveToDisk(path);
 				break;
 			case TEST_SUCCESSIVE_ITERATIONS:
 				EditAndCopyEngineFactory::Instance<WarpVoxel, TIndex, TMemoryDeviceType>().ResetVolume(
@@ -207,16 +206,10 @@ void GenericWarpConsistencySubtest(const SlavchevaSurfaceTracker::Switches& swit
 	std::cout << IndexString<TIndex>() << " fusion test" << std::endl;
 	switch (mode) {
 		case SAVE_FINAL_ITERATION_AND_FUSION:
-			warp_field.SaveToDisk(std::string(GENERATED_TEST_DATA_PREFIX) +
-			                      GetWarpsPath<TIndex>(volume_filename_prefix, iteration_limit - 1));
-			live_volumes[target_warped_field_ix]->SaveToDisk(
-					std::string(GENERATED_TEST_DATA_PREFIX) +
-					GetWarpedLivePath<TIndex>(volume_filename_prefix, iteration_limit - 1));
-			volume_fusion_engine->FuseOneTsdfVolumeIntoAnother(canonical_volume, live_volumes[target_warped_field_ix],
-			                                                   0);
-			canonical_volume->SaveToDisk(
-					std::string(GENERATED_TEST_DATA_PREFIX) +
-					GetFusedPath<TIndex>(volume_filename_prefix, iteration_limit - 1));
+			warp_field.SaveToDisk(GetWarpsPath<TIndex>(volume_filename_prefix, iteration_limit - 1));
+			live_volumes[target_warped_field_ix]->SaveToDisk(GetWarpedLivePath<TIndex>(volume_filename_prefix, iteration_limit - 1));
+			volume_fusion_engine->FuseOneTsdfVolumeIntoAnother(canonical_volume, live_volumes[target_warped_field_ix], 0);
+			canonical_volume->SaveToDisk(GetFusedPath<TIndex>(volume_filename_prefix, iteration_limit - 1));
 			break;
 		case TEST_FINAL_ITERATION_AND_FUSION:
 			EditAndCopyEngineFactory::Instance<WarpVoxel, TIndex, TMemoryDeviceType>().ResetVolume(
@@ -228,8 +221,7 @@ void GenericWarpConsistencySubtest(const SlavchevaSurfaceTracker::Switches& swit
 					GetWarpedLivePath<TIndex>(volume_filename_prefix, iteration_limit - 1));
 			BOOST_REQUIRE(contentAlmostEqual_Verbose(live_volumes[target_warped_field_ix], &ground_truth_sdf_volume,
 			                                         absolute_tolerance, TMemoryDeviceType));
-			volume_fusion_engine->FuseOneTsdfVolumeIntoAnother(canonical_volume, live_volumes[target_warped_field_ix],
-			                                                   0);
+			volume_fusion_engine->FuseOneTsdfVolumeIntoAnother(canonical_volume, live_volumes[target_warped_field_ix], 0);
 			ground_truth_sdf_volume.LoadFromDisk(GetFusedPath<TIndex>(volume_filename_prefix, iteration_limit - 1));
 			BOOST_REQUIRE(contentAlmostEqual(canonical_volume, &ground_truth_sdf_volume, absolute_tolerance,
 			                                 TMemoryDeviceType));

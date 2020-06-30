@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE(ConfigurationTest) {
 	                    configuration::get().non_rigid_tracking_parameters);
 	BOOST_REQUIRE_EQUAL(default_configuration, configuration::get());
 
-	configuration::load_configuration_from_json_file( GENERATED_TEST_DATA_PREFIX "TestData/configuration/config1.json");
+	configuration::load_configuration_from_json_file(GENERATED_TEST_DATA_PREFIX "TestData/configuration/config1.json");
 	loaded_deferrables = DeferrableStructCollection();
 
 	BOOST_REQUIRE_EQUAL(configuration1.general_voxel_volume_parameters,
