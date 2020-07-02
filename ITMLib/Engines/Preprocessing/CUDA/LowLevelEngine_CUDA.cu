@@ -38,37 +38,37 @@ __global__ void countValidDepths_device(const float *imageData_in, int imgSizeTo
 
 // host methods
 
-void LowLevelEngine_CUDA::CopyImage(UChar4Image *image_out, const UChar4Image *image_in) const
+void LowLevelEngine_CUDA::CopyImage(UChar4Image& image_out, const UChar4Image& image_in) const
 {
-	Vector4u *dest = image_out->GetData(MEMORYDEVICE_CUDA);
-	const Vector4u *src = image_in->GetData(MEMORYDEVICE_CUDA);
+	Vector4u *dest = image_out.GetData(MEMORYDEVICE_CUDA);
+	const Vector4u *src = image_in.GetData(MEMORYDEVICE_CUDA);
 
-	ORcudaSafeCall(cudaMemcpy(dest, src, image_in->size() * sizeof(Vector4u), cudaMemcpyDeviceToDevice));
+	ORcudaSafeCall(cudaMemcpy(dest, src, image_in.size() * sizeof(Vector4u), cudaMemcpyDeviceToDevice));
 }
 
-void LowLevelEngine_CUDA::CopyImage(FloatImage *image_out, const FloatImage *image_in) const
+void LowLevelEngine_CUDA::CopyImage(FloatImage& image_out, const FloatImage& image_in) const
 {
-	float *dest = image_out->GetData(MEMORYDEVICE_CUDA);
-	const float *src = image_in->GetData(MEMORYDEVICE_CUDA);
+	float *dest = image_out.GetData(MEMORYDEVICE_CUDA);
+	const float *src = image_in.GetData(MEMORYDEVICE_CUDA);
 
-	ORcudaSafeCall(cudaMemcpy(dest, src, image_in->size() * sizeof(float), cudaMemcpyDeviceToDevice));
+	ORcudaSafeCall(cudaMemcpy(dest, src, image_in.size() * sizeof(float), cudaMemcpyDeviceToDevice));
 }
 
-void LowLevelEngine_CUDA::CopyImage(Float4Image *image_out, const Float4Image *image_in) const
+void LowLevelEngine_CUDA::CopyImage(Float4Image& image_out, const Float4Image& image_in) const
 {
-	Vector4f *dest = image_out->GetData(MEMORYDEVICE_CUDA);
-	const Vector4f *src = image_in->GetData(MEMORYDEVICE_CUDA);
+	Vector4f *dest = image_out.GetData(MEMORYDEVICE_CUDA);
+	const Vector4f *src = image_in.GetData(MEMORYDEVICE_CUDA);
 
-	ORcudaSafeCall(cudaMemcpy(dest, src, image_in->size() * sizeof(Vector4f), cudaMemcpyDeviceToDevice));
+	ORcudaSafeCall(cudaMemcpy(dest, src, image_in.size() * sizeof(Vector4f), cudaMemcpyDeviceToDevice));
 }
 
-void LowLevelEngine_CUDA::ConvertColourToIntensity(FloatImage *image_out, const UChar4Image *image_in) const
+void LowLevelEngine_CUDA::ConvertColourToIntensity(FloatImage& image_out, const UChar4Image& image_in) const
 {
-	const Vector2i dims = image_in->dimensions;
-	image_out->ChangeDims(dims);
+	const Vector2i dims = image_in.dimensions;
+	image_out.ChangeDims(dims);
 
-	float *dest = image_out->GetData(MEMORYDEVICE_CUDA);
-	const Vector4u *src = image_in->GetData(MEMORYDEVICE_CUDA);
+	float *dest = image_out.GetData(MEMORYDEVICE_CUDA);
+	const Vector4u *src = image_in.GetData(MEMORYDEVICE_CUDA);
 
 	dim3 blockSize(16, 16);
 	dim3 gridSize((int)ceil((float)dims.x / (float)blockSize.x), (int)ceil((float)dims.y / (float)blockSize.y));
@@ -77,15 +77,15 @@ void LowLevelEngine_CUDA::ConvertColourToIntensity(FloatImage *image_out, const 
 	ORcudaKernelCheck;
 }
 
-void LowLevelEngine_CUDA::FilterIntensity(FloatImage *image_out, const FloatImage *image_in) const
+void LowLevelEngine_CUDA::FilterIntensity(FloatImage& image_out, const FloatImage& image_in) const
 {
-	Vector2i dims = image_in->dimensions;
+	Vector2i dims = image_in.dimensions;
 
-	image_out->ChangeDims(dims);
-	image_out->Clear(0);
+	image_out.ChangeDims(dims);
+	image_out.Clear(0);
 
-	const float *imageData_in = image_in->GetData(MEMORYDEVICE_CUDA);
-	float *imageData_out = image_out->GetData(MEMORYDEVICE_CUDA);
+	const float *imageData_in = image_in.GetData(MEMORYDEVICE_CUDA);
+	float *imageData_out = image_out.GetData(MEMORYDEVICE_CUDA);
 
 	dim3 blockSize(16, 16);
 	dim3 gridSize((int)ceil((float)dims.x / (float)blockSize.x), (int)ceil((float)dims.y / (float)blockSize.y));
@@ -94,15 +94,15 @@ void LowLevelEngine_CUDA::FilterIntensity(FloatImage *image_out, const FloatImag
 	ORcudaKernelCheck;
 }
 
-void LowLevelEngine_CUDA::FilterSubsample(UChar4Image *image_out, const UChar4Image *image_in) const
+void LowLevelEngine_CUDA::FilterSubsample(UChar4Image& image_out, const UChar4Image& image_in) const
 {
-	Vector2i oldDims = image_in->dimensions;
-	Vector2i newDims; newDims.x = image_in->dimensions.x / 2; newDims.y = image_in->dimensions.y / 2;
+	Vector2i oldDims = image_in.dimensions;
+	Vector2i newDims; newDims.x = image_in.dimensions.x / 2; newDims.y = image_in.dimensions.y / 2;
 
-	image_out->ChangeDims(newDims);
+	image_out.ChangeDims(newDims);
 
-	const Vector4u *imageData_in = image_in->GetData(MEMORYDEVICE_CUDA);
-	Vector4u *imageData_out = image_out->GetData(MEMORYDEVICE_CUDA);
+	const Vector4u *imageData_in = image_in.GetData(MEMORYDEVICE_CUDA);
+	Vector4u *imageData_out = image_out.GetData(MEMORYDEVICE_CUDA);
 
 	dim3 blockSize(16, 16);
 	dim3 gridSize((int)ceil((float)newDims.x / (float)blockSize.x), (int)ceil((float)newDims.y / (float)blockSize.y));
@@ -111,16 +111,16 @@ void LowLevelEngine_CUDA::FilterSubsample(UChar4Image *image_out, const UChar4Im
 	ORcudaKernelCheck;
 }
 
-void LowLevelEngine_CUDA::FilterSubsample(FloatImage *image_out, const FloatImage *image_in) const
+void LowLevelEngine_CUDA::FilterSubsample(FloatImage& image_out, const FloatImage& image_in) const
 {
-	Vector2i oldDims = image_in->dimensions;
-	Vector2i newDims; newDims.x = image_in->dimensions.x / 2; newDims.y = image_in->dimensions.y / 2;
+	Vector2i oldDims = image_in.dimensions;
+	Vector2i newDims; newDims.x = image_in.dimensions.x / 2; newDims.y = image_in.dimensions.y / 2;
 
-	image_out->ChangeDims(newDims);
-	image_out->Clear(0);
+	image_out.ChangeDims(newDims);
+	image_out.Clear(0);
 
-	const float *imageData_in = image_in->GetData(MEMORYDEVICE_CUDA);
-	float *imageData_out = image_out->GetData(MEMORYDEVICE_CUDA);
+	const float *imageData_in = image_in.GetData(MEMORYDEVICE_CUDA);
+	float *imageData_out = image_out.GetData(MEMORYDEVICE_CUDA);
 
 	dim3 blockSize(16, 16);
 	dim3 gridSize((int)ceil((float)newDims.x / (float)blockSize.x), (int)ceil((float)newDims.y / (float)blockSize.y));
@@ -129,15 +129,15 @@ void LowLevelEngine_CUDA::FilterSubsample(FloatImage *image_out, const FloatImag
 	ORcudaKernelCheck;
 }
 
-void LowLevelEngine_CUDA::FilterSubsampleWithHoles(FloatImage *image_out, const FloatImage *image_in) const
+void LowLevelEngine_CUDA::FilterSubsampleWithHoles(FloatImage& image_out, const FloatImage& image_in) const
 {
-	Vector2i oldDims = image_in->dimensions;
-	Vector2i newDims; newDims.x = image_in->dimensions.x / 2; newDims.y = image_in->dimensions.y / 2;
+	Vector2i oldDims = image_in.dimensions;
+	Vector2i newDims; newDims.x = image_in.dimensions.x / 2; newDims.y = image_in.dimensions.y / 2;
 
-	image_out->ChangeDims(newDims);
+	image_out.ChangeDims(newDims);
 
-	const float *imageData_in = image_in->GetData(MEMORYDEVICE_CUDA);
-	float *imageData_out = image_out->GetData(MEMORYDEVICE_CUDA);
+	const float *imageData_in = image_in.GetData(MEMORYDEVICE_CUDA);
+	float *imageData_out = image_out.GetData(MEMORYDEVICE_CUDA);
 
 	dim3 blockSize(16, 16);
 	dim3 gridSize((int)ceil((float)newDims.x / (float)blockSize.x), (int)ceil((float)newDims.y / (float)blockSize.y));
@@ -146,15 +146,15 @@ void LowLevelEngine_CUDA::FilterSubsampleWithHoles(FloatImage *image_out, const 
 	ORcudaKernelCheck;
 }
 
-void LowLevelEngine_CUDA::FilterSubsampleWithHoles(Float4Image *image_out, const Float4Image *image_in) const
+void LowLevelEngine_CUDA::FilterSubsampleWithHoles(Float4Image& image_out, const Float4Image& image_in) const
 {
-	Vector2i oldDims = image_in->dimensions;
-	Vector2i newDims; newDims.x = image_in->dimensions.x / 2; newDims.y = image_in->dimensions.y / 2;
+	Vector2i oldDims = image_in.dimensions;
+	Vector2i newDims; newDims.x = image_in.dimensions.x / 2; newDims.y = image_in.dimensions.y / 2;
 
-	image_out->ChangeDims(newDims);
+	image_out.ChangeDims(newDims);
 
-	const Vector4f *imageData_in = image_in->GetData(MEMORYDEVICE_CUDA);
-	Vector4f *imageData_out = image_out->GetData(MEMORYDEVICE_CUDA);
+	const Vector4f *imageData_in = image_in.GetData(MEMORYDEVICE_CUDA);
+	Vector4f *imageData_out = image_out.GetData(MEMORYDEVICE_CUDA);
 
 	dim3 blockSize(16, 16);
 	dim3 gridSize((int)ceil((float)newDims.x / (float)blockSize.x), (int)ceil((float)newDims.y / (float)blockSize.y));
@@ -163,13 +163,13 @@ void LowLevelEngine_CUDA::FilterSubsampleWithHoles(Float4Image *image_out, const
 	ORcudaKernelCheck;
 }
 
-void LowLevelEngine_CUDA::GradientX(Short4Image *grad_out, const UChar4Image *image_in) const
+void LowLevelEngine_CUDA::GradientX(Short4Image& grad_out, const UChar4Image& image_in) const
 {
-	grad_out->ChangeDims(image_in->dimensions);
-	Vector2i imgSize = image_in->dimensions;
+	grad_out.ChangeDims(image_in.dimensions);
+	Vector2i imgSize = image_in.dimensions;
 
-	Vector4s *grad = grad_out->GetData(MEMORYDEVICE_CUDA);
-	const Vector4u *image = image_in->GetData(MEMORYDEVICE_CUDA);
+	Vector4s *grad = grad_out.GetData(MEMORYDEVICE_CUDA);
+	const Vector4u *image = image_in.GetData(MEMORYDEVICE_CUDA);
 
 	dim3 blockSize(16, 16);
 	dim3 gridSize((int)ceil((float)imgSize.x / (float)blockSize.x), (int)ceil((float)imgSize.y / (float)blockSize.y));
@@ -180,13 +180,13 @@ void LowLevelEngine_CUDA::GradientX(Short4Image *grad_out, const UChar4Image *im
 	ORcudaKernelCheck;
 }
 
-void LowLevelEngine_CUDA::GradientY(Short4Image *grad_out, const UChar4Image *image_in) const
+void LowLevelEngine_CUDA::GradientY(Short4Image& grad_out, const UChar4Image& image_in) const
 {
-	grad_out->ChangeDims(image_in->dimensions);
-	Vector2i imgSize = image_in->dimensions;
+	grad_out.ChangeDims(image_in.dimensions);
+	Vector2i imgSize = image_in.dimensions;
 
-	Vector4s *grad = grad_out->GetData(MEMORYDEVICE_CUDA);
-	const Vector4u *image = image_in->GetData(MEMORYDEVICE_CUDA);
+	Vector4s *grad = grad_out.GetData(MEMORYDEVICE_CUDA);
+	const Vector4u *image = image_in.GetData(MEMORYDEVICE_CUDA);
 
 	dim3 blockSize(16, 16);
 	dim3 gridSize((int)ceil((float)imgSize.x / (float)blockSize.x), (int)ceil((float)imgSize.y / (float)blockSize.y));
@@ -197,14 +197,14 @@ void LowLevelEngine_CUDA::GradientY(Short4Image *grad_out, const UChar4Image *im
 	ORcudaKernelCheck;
 }
 
-void LowLevelEngine_CUDA::GradientXY(Float2Image *grad_out, const FloatImage *image_in) const
+void LowLevelEngine_CUDA::GradientXY(Float2Image& grad_out, const FloatImage& image_in) const
 {
-	Vector2i imgSize = image_in->dimensions;
-	grad_out->ChangeDims(imgSize);
-	grad_out->Clear();
+	Vector2i imgSize = image_in.dimensions;
+	grad_out.ChangeDims(imgSize);
+	grad_out.Clear();
 
-	Vector2f *grad = grad_out->GetData(MEMORYDEVICE_CUDA);
-	const float *image = image_in->GetData(MEMORYDEVICE_CUDA);
+	Vector2f *grad = grad_out.GetData(MEMORYDEVICE_CUDA);
+	const float *image = image_in.GetData(MEMORYDEVICE_CUDA);
 
 	dim3 blockSize(16, 16);
 	dim3 gridSize((int)ceil((float)imgSize.x / (float)blockSize.x), (int)ceil((float)imgSize.y / (float)blockSize.y));
@@ -213,10 +213,10 @@ void LowLevelEngine_CUDA::GradientXY(Float2Image *grad_out, const FloatImage *im
 	ORcudaKernelCheck;
 }
 
-int LowLevelEngine_CUDA::CountValidDepths(const FloatImage *image_in) const
+int LowLevelEngine_CUDA::CountValidDepths(const FloatImage& image_in) const
 {
-	const float *imageData_in = image_in->GetData(MEMORYDEVICE_CUDA);
-	Vector2i imgSize = image_in->dimensions;
+	const float *imageData_in = image_in.GetData(MEMORYDEVICE_CUDA);
+	Vector2i imgSize = image_in.dimensions;
 
 	dim3 blockSize(256);
 	dim3 gridSize((int)ceil((float)imgSize.x*imgSize.y / (float)blockSize.x));

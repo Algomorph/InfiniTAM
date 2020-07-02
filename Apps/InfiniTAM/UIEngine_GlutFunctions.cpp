@@ -294,7 +294,7 @@ void UIEngine::GlutKeyUpFunction(unsigned char key, int x, int y) {
 				ui_engine.freeview_pose.SetFrom(ui_engine.main_engine->GetTrackingState()->pose_d);
 				if (ui_engine.main_engine->GetView() != nullptr) {
 					ui_engine.freeview_intrinsics = ui_engine.main_engine->GetView()->calibration_information.intrinsics_d;
-					ui_engine.outImage[0]->ChangeDims(ui_engine.main_engine->GetView()->depth->dimensions);
+					ui_engine.outImage[0]->ChangeDims(ui_engine.main_engine->GetView()->depth.dimensions);
 				}
 
 				switch (ui_engine.indexing_method) {

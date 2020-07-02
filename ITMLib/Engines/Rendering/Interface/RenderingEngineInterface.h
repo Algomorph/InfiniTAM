@@ -30,9 +30,9 @@ public:
 
 	virtual ~IRenderingEngine() {}
 
-	static void DepthToUchar4(UChar4Image* dst, const FloatImage* src);
-	static void NormalToUchar4(UChar4Image* dst, const Float4Image* src);
-	static void WeightToUchar4(UChar4Image* dst, const FloatImage* src);
+	static void DepthToUchar4(UChar4Image* dst, const FloatImage& src);
+	static void NormalToUchar4(UChar4Image* dst, const Float4Image& src);
+	static void WeightToUchar4(UChar4Image* dst, const FloatImage& src);
 };
 
 template<class TIndex>

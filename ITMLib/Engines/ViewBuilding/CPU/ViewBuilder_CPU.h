@@ -9,13 +9,13 @@ namespace ITMLib
 	class ViewBuilder_CPU : public ViewBuilder
 	{
 	public:
-		void ConvertDisparityToDepth(FloatImage *depth_out, const ShortImage *disp_in, const Intrinsics *depthIntrinsics,
+		void ConvertDisparityToDepth(FloatImage& depth_out, const ShortImage& disp_in, const Intrinsics& depthIntrinsics,
 		                             Vector2f disparityCalibParams);
-		void ConvertDepthAffineToFloat(FloatImage *depth_out, const ShortImage *depth_in, Vector2f depthCalibParams);
+		void ConvertDepthAffineToFloat(FloatImage& depth_out, const ShortImage& depth_in, Vector2f depthCalibParams);
 
-		void ThresholdFiltering(FloatImage *image_out, const FloatImage *image_in) override;
-		void DepthFiltering(FloatImage *image_out, const FloatImage *image_in);
-		void ComputeNormalAndWeights(Float4Image *normal_out, FloatImage *sigmaZ_out, const FloatImage *depth_in, Vector4f intrinsic);
+		void ThresholdFiltering(FloatImage& image_out, const FloatImage& image_in) override;
+		void DepthFiltering(FloatImage& image_out, const FloatImage& image_in);
+		void ComputeNormalAndWeights(Float4Image& normal_out, FloatImage& sigma_z_out, const FloatImage& depth_in, Vector4f camera_projection_parameters);
 
 		void UpdateView(View** view, UChar4Image* rgbImage, ShortImage* rawDepthImage, bool useThresholdFilter,
 		                bool useBilateralFilter, bool modelSensorNoise, bool storePreviousImage);

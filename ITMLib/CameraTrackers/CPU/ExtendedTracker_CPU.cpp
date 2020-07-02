@@ -57,7 +57,7 @@ int ExtendedTracker_CPU::ComputeGandH_Depth(float &f, float *nabla, float *hessi
 	Vector4f sceneIntrinsics = sceneHierarchyLevel_Depth->intrinsics;
 	Vector2i sceneImageSize = sceneHierarchyLevel_Depth->pointsMap->dimensions;
 
-	float *depth = viewHierarchyLevel_Depth->depth->GetData(MEMORYDEVICE_CPU);
+	const float *depth = viewHierarchyLevel_Depth->depth->GetData(MEMORYDEVICE_CPU);
 	Vector4f viewIntrinsics = viewHierarchyLevel_Depth->intrinsics;
 	Vector2i viewImageSize = viewHierarchyLevel_Depth->depth->dimensions;
 

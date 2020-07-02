@@ -45,20 +45,20 @@ namespace FernRelocLib
 			delete processedImage2;
 		}
 
-		bool ProcessFrame(const ORUtils::Image<ElementType> *img, const ORUtils::SE3Pose *pose, int sceneId, int k, int nearestNeighbours[], float *distances, bool harvestKeyframes) const
+		bool ProcessFrame(const ORUtils::Image<ElementType>& img, const ORUtils::SE3Pose *pose, int sceneId, int k, int nearestNeighbours[], float *distances, bool harvestKeyframes) const
 		{
 			// downsample and preprocess image => processedImage1
-			filterSubsample(img, processedImage1); // 320x240
-			filterSubsample(processedImage1, processedImage2); // 160x120
-			filterSubsample(processedImage2, processedImage1); // 80x60
-			filterSubsample(processedImage1, processedImage2); // 40x30
+			filterSubsample(img, *processedImage1); // 320x240
+			filterSubsample(*processedImage1, *processedImage2); // 160x120
+			filterSubsample(*processedImage2, *processedImage1); // 80x60
+			filterSubsample(*processedImage1, *processedImage2); // 40x30
 
-			filterGaussian(processedImage2, processedImage1, 2.5f);
+			filterGaussian(*processedImage2, *processedImage1, 2.5f);
 
 			// compute_allocated code
 			int codeLength = encoding->getNumFerns();
 			char *code = new char[codeLength];
-			encoding->computeCode(processedImage1, code);
+			encoding->computeCode(*processedImage1, code);
 
 			// prepare outputs
 			int ret = -1;

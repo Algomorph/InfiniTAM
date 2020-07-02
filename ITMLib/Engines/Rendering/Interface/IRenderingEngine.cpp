@@ -16,10 +16,10 @@ inline float base(float val) {
 	else return 0.0;
 }
 
-void IRenderingEngine::DepthToUchar4(UChar4Image *dst, const FloatImage *src)
+void IRenderingEngine::DepthToUchar4(UChar4Image *dst, const FloatImage& src)
 {
 	Vector4u *dest = dst->GetData(MEMORYDEVICE_CPU);
-	const float *source = src->GetData(MEMORYDEVICE_CPU);
+	const float *source = src.GetData(MEMORYDEVICE_CPU);
 	int dataSize = static_cast<int>(dst->size());
 
 	memset(dst->GetData(MEMORYDEVICE_CPU), 0, dataSize * 4);
@@ -56,10 +56,10 @@ void IRenderingEngine::DepthToUchar4(UChar4Image *dst, const FloatImage *src)
 	}
 }
 
-void IRenderingEngine::NormalToUchar4(UChar4Image *dst, const Float4Image *src)
+void IRenderingEngine::NormalToUchar4(UChar4Image *dst, const Float4Image& src)
 {
 	Vector4u *dest = dst->GetData(MEMORYDEVICE_CPU);
-	const Vector4f *source = src->GetData(MEMORYDEVICE_CPU);
+	const Vector4f *source = src.GetData(MEMORYDEVICE_CPU);
 	int dataSize = static_cast<int>(dst->size());
 
 	memset(dst->GetData(MEMORYDEVICE_CPU), 0, dataSize * 4);
@@ -78,14 +78,14 @@ void IRenderingEngine::NormalToUchar4(UChar4Image *dst, const Float4Image *src)
 	}
 }
 
-void IRenderingEngine::WeightToUchar4(UChar4Image *dst, const FloatImage *src)
+void IRenderingEngine::WeightToUchar4(UChar4Image *dst, const FloatImage& src)
 {
 	Vector4u *dest = dst->GetData(MEMORYDEVICE_CPU);
-	const float *source = src->GetData(MEMORYDEVICE_CPU);
+	const float *source = src.GetData(MEMORYDEVICE_CPU);
 	int dataSize = static_cast<int>(dst->size());
 
 	float mindepth = 1000;
-	for (size_t i = 0; i < src->size(); i++)
+	for (size_t i = 0; i < src.size(); i++)
 		if (source[i]>0) mindepth = ORUTILS_MIN(mindepth, source[i]);
 
 	memset(dst->GetData(MEMORYDEVICE_CPU), 0, dataSize * 4);

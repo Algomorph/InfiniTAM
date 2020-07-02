@@ -85,7 +85,7 @@ void IndexingEngine_VoxelBlockHash_MemoryDeviceTypeSpecialized<MEMORYDEVICE_CPU,
 
 	// ** view data **
 	Vector4f depth_camera_projection_parameters = view->calibration_information.intrinsics_d.projectionParamsSimple.all;
-	Vector2i depth_image_size = view->depth->dimensions;
+	Vector2i depth_image_size = view->depth.dimensions;
 	float voxel_size = volume->GetParameters().voxel_size;
 
 	int visible_entry_count = 0;

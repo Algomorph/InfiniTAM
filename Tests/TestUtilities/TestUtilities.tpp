@@ -334,10 +334,10 @@ void BuildSdfVolumeFromImage_SurfaceSpanAllocation(VoxelVolume<TVoxel, TIndex>**
 	(*volume2) = new VoxelVolume<TVoxel, TIndex>(memory_device, initialization_parameters);
 	(*volume2)->Reset();
 
-	RenderState render_state((*view)->depth->dimensions,
+	RenderState render_state((*view)->depth.dimensions,
 	                         configuration::get().general_voxel_volume_parameters.near_clipping_distance,
 	                         configuration::get().general_voxel_volume_parameters.far_clipping_distance, memory_device);
-	CameraTrackingState tracking_state((*view)->depth->dimensions, memory_device);
+	CameraTrackingState tracking_state((*view)->depth.dimensions, memory_device);
 	IndexingEngineInterface<TSDFVoxel, TIndex>* indexing_engine = IndexingEngineFactory::Build<TVoxel, TIndex>(
 			memory_device);
 	DepthFusionEngineInterface<TVoxel, WarpVoxel, TIndex>* depth_fusion_engine =

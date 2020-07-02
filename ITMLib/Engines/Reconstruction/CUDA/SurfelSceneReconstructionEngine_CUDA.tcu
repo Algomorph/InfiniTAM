@@ -209,11 +209,11 @@ void SurfelSceneReconstructionEngine_CUDA<TSurfel>::AddNewSurfels(SurfelScene<TS
     this->m_vertexMapMB->GetData(MEMORYDEVICE_CUDA),
     this->m_normalMapMB->GetData(MEMORYDEVICE_CUDA),
     this->m_radiusMapMB->GetData(MEMORYDEVICE_CUDA),
-    view->rgb->GetData(MEMORYDEVICE_CUDA),
-    view->depth->dimensions.x,
-    view->depth->dimensions.y,
-    view->rgb->dimensions.x,
-    view->rgb->dimensions.y,
+    view->rgb.GetData(MEMORYDEVICE_CUDA),
+    view->depth.dimensions.x,
+    view->depth.dimensions.y,
+    view->rgb.dimensions.x,
+    view->rgb.dimensions.y,
     view->calibration_information.trafo_rgb_to_depth.calib_inv,
     view->calibration_information.intrinsics_rgb.projectionParamsSimple.all,
     sceneParams.use_gaussian_sample_confidence,
@@ -232,7 +232,7 @@ template <typename TSurfel>
 void SurfelSceneReconstructionEngine_CUDA<TSurfel>::FindCorrespondingSurfels(const SurfelScene<TSurfel> *scene, const View *view, const CameraTrackingState *trackingState,
                                                                              const SurfelRenderState *renderState) const
 {
-  const int pixelCount = static_cast<int>(view->depth->size());
+  const int pixelCount = static_cast<int>(view->depth.size());
 
   int threadsPerBlock = 256;
   int numBlocks = (pixelCount + threadsPerBlock - 1) / threadsPerBlock;
@@ -240,8 +240,8 @@ void SurfelSceneReconstructionEngine_CUDA<TSurfel>::FindCorrespondingSurfels(con
   ck_find_corresponding_surfel<<<numBlocks,threadsPerBlock>>>(
     pixelCount,
     trackingState->pose_d->GetM(),
-    view->depth->GetData(MEMORYDEVICE_CUDA),
-    view->depth->dimensions.x,
+    view->depth.GetData(MEMORYDEVICE_CUDA),
+    view->depth.dimensions.x,
     this->m_normalMapMB->GetData(MEMORYDEVICE_CUDA),
     renderState->GetIndexImageSuper()->GetData(MEMORYDEVICE_CUDA),
     scene->GetParams().supersampling_factor,
@@ -260,7 +260,7 @@ void SurfelSceneReconstructionEngine_CUDA<TSurfel>::FindCorrespondingSurfels(con
 template <typename TSurfel>
 void SurfelSceneReconstructionEngine_CUDA<TSurfel>::FuseMatchedPoints(SurfelScene<TSurfel> *scene, const View *view, const CameraTrackingState *trackingState) const
 {
-  const int pixelCount = static_cast<int>(view->depth->size());
+  const int pixelCount = static_cast<int>(view->depth.size());
 
   int threadsPerBlock = 256;
   int numBlocks = (pixelCount + threadsPerBlock - 1) / threadsPerBlock;
@@ -275,11 +275,11 @@ void SurfelSceneReconstructionEngine_CUDA<TSurfel>::FuseMatchedPoints(SurfelScen
     this->m_vertexMapMB->GetData(MEMORYDEVICE_CUDA),
     this->m_normalMapMB->GetData(MEMORYDEVICE_CUDA),
     this->m_radiusMapMB->GetData(MEMORYDEVICE_CUDA),
-    view->rgb->GetData(MEMORYDEVICE_CUDA),
-    view->depth->dimensions.x,
-    view->depth->dimensions.y,
-    view->rgb->dimensions.x,
-    view->rgb->dimensions.y,
+    view->rgb.GetData(MEMORYDEVICE_CUDA),
+    view->depth.dimensions.x,
+    view->depth.dimensions.y,
+    view->rgb.dimensions.x,
+    view->rgb.dimensions.y,
     view->calibration_information.trafo_rgb_to_depth.calib_inv,
     view->calibration_information.intrinsics_rgb.projectionParamsSimple.all,
     sceneParams.delta_radius,
@@ -378,14 +378,14 @@ void SurfelSceneReconstructionEngine_CUDA<TSurfel>::MergeSimilarSurfels(SurfelSc
 template <typename TSurfel>
 void SurfelSceneReconstructionEngine_CUDA<TSurfel>::PreprocessDepthMap(const View *view, const SurfelVolumeParameters& sceneParams) const
 {
-  const float *depthMap = view->depth->GetData(MEMORYDEVICE_CUDA);
-  const int height = view->depth->dimensions.y;
+  const float *depthMap = view->depth.GetData(MEMORYDEVICE_CUDA);
+  const int height = view->depth.dimensions.y;
   const Intrinsics& intrinsics = view->calibration_information.intrinsics_d;
   Vector3f *normalMap = this->m_normalMapMB->GetData(MEMORYDEVICE_CUDA);
-  const int pixelCount = static_cast<int>(view->depth->size());
+  const int pixelCount = static_cast<int>(view->depth.size());
   float *radiusMap = this->m_radiusMapMB->GetData(MEMORYDEVICE_CUDA);
   Vector4f *vertexMap = this->m_vertexMapMB->GetData(MEMORYDEVICE_CUDA);
-  const int width = view->depth->dimensions.x;
+  const int width = view->depth.dimensions.x;
 
   // Calculate the vertex map.
   int threadsPerBlock = 256;

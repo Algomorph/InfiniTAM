@@ -95,7 +95,7 @@ void SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::AllocateSceneFromDe
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume, const View* view,
 		const CameraTrackingState* trackingState, const RenderState* renderState, bool onlyUpdateVisibleList,
 		bool resetVisibleList) {
-	Vector2i depthImgSize = view->depth->dimensions;
+	Vector2i depthImgSize = view->depth.dimensions;
 	float voxelSize = volume->GetParameters().voxel_size;
 
 	Matrix4f M_d, invM_d;
@@ -113,7 +113,7 @@ void SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::AllocateSceneFromDe
 
 	float mu = volume->GetParameters().truncation_distance;
 
-	float* depth = view->depth->GetData(MEMORYDEVICE_CUDA);
+	const float* depth = view->depth.GetData(MEMORYDEVICE_CUDA);
 	int* voxelAllocationList = volume->index.GetBlockAllocationList();
 	int* excessAllocationList = volume->index.GetExcessEntryList();
 	HashEntry* hashTable = volume->index.GetEntries();
@@ -150,25 +150,25 @@ void SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::AllocateSceneFromDe
 
 	if (gridSizeVS.x > 0) {
 		setVisibleEntriesToVisibleAtPreviousFrameAndUnstreamed <<< gridSizeVS, cudaBlockSizeVS >>>
-		                                                                        (blockVisibilityTypes, visibleBlockHashCodes,
-		                                                                         volume->index.GetUtilizedBlockCount());
+				(blockVisibilityTypes, visibleBlockHashCodes,
+				 volume->index.GetUtilizedBlockCount());
 		ORcudaKernelCheck;
 	}
 
 	buildHashAllocAndVisibleType_device <<< gridSizeHV, cudaBlockSizeHV >>>
-	                                                     (hashEntryStates_device, blockVisibilityTypes,
-	                                                      blockCoordinates_device, depth, invM_d, invProjParams_d, surface_cutoff_distance, depthImgSize, oneOverHashBlockSize, hashTable,
-	                                                      volume->GetParameters().near_clipping_distance, volume->GetParameters().far_clipping_distance);
+			(hashEntryStates_device, blockVisibilityTypes,
+			 blockCoordinates_device, depth, invM_d, invProjParams_d, surface_cutoff_distance, depthImgSize, oneOverHashBlockSize, hashTable,
+			 volume->GetParameters().near_clipping_distance, volume->GetParameters().far_clipping_distance);
 	ORcudaKernelCheck;
 
 	bool useSwapping = volume->SwappingEnabled();
 	if (onlyUpdateVisibleList) useSwapping = false;
 	if (!onlyUpdateVisibleList) {
-		allocateVoxelBlocksList_device <<< gridSizeAL, cudaBlockSizeAL >>> (
+		allocateVoxelBlocksList_device <<< gridSizeAL, cudaBlockSizeAL >>>(
 				voxelAllocationList, excessAllocationList, hashTable,
-						hashEntryCount, (AllocationTempData*) allocationTempData_device,
-						hashEntryStates_device, blockVisibilityTypes,
-						blockCoordinates_device);
+				hashEntryCount, (AllocationTempData*) allocationTempData_device,
+				hashEntryStates_device, blockVisibilityTypes,
+				blockCoordinates_device);
 		ORcudaKernelCheck;
 	}
 
@@ -177,20 +177,20 @@ void SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::AllocateSceneFromDe
 
 	if (useSwapping) {
 		buildVisibleList_device<true> <<< gridSizeAL, cudaBlockSizeAL >>>
-		                                               (hashTable, swapStates, hashEntryCount, visibleBlockHashCodes,
-				                                               (AllocationTempData*) allocationTempData_device, blockVisibilityTypes, M_d, projParams_d, depthImgSize, voxelSize);
+				(hashTable, swapStates, hashEntryCount, visibleBlockHashCodes,
+				 (AllocationTempData*) allocationTempData_device, blockVisibilityTypes, M_d, projParams_d, depthImgSize, voxelSize);
 		ORcudaKernelCheck;
 	} else {
 		buildVisibleList_device<false> <<< gridSizeAL, cudaBlockSizeAL >>>
-		                                                (hashTable, swapStates, hashEntryCount, visibleBlockHashCodes,
-				                                                (AllocationTempData*) allocationTempData_device, blockVisibilityTypes, M_d, projParams_d, depthImgSize, voxelSize);
+				(hashTable, swapStates, hashEntryCount, visibleBlockHashCodes,
+				 (AllocationTempData*) allocationTempData_device, blockVisibilityTypes, M_d, projParams_d, depthImgSize, voxelSize);
 		ORcudaKernelCheck;
 	}
 
 	if (useSwapping) {
 		reAllocateSwappedOutVoxelBlocks_device <<< gridSizeAL, cudaBlockSizeAL >>>
-		                                                        (voxelAllocationList, hashTable, hashEntryCount,
-				                                                        (AllocationTempData*) allocationTempData_device, blockVisibilityTypes);
+				(voxelAllocationList, hashTable, hashEntryCount,
+				 (AllocationTempData*) allocationTempData_device, blockVisibilityTypes);
 		ORcudaKernelCheck;
 	}
 
@@ -205,8 +205,8 @@ template<class TVoxel>
 void SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::IntegrateIntoScene(
 		VoxelVolume<TVoxel, VoxelBlockHash>* volume, const View* view,
 		const CameraTrackingState* tracking_state, const RenderState* render_state) {
-	Vector2i rgb_image_size = view->rgb->dimensions;
-	Vector2i depth_image_size = view->depth->dimensions;
+	Vector2i rgb_image_size = view->rgb.dimensions;
+	Vector2i depth_image_size = view->depth.dimensions;
 	float voxel_size = volume->GetParameters().voxel_size;
 
 	Matrix4f depth_camera_extrinsic_matrix, rgb_camera_extrinsic_matrix;
@@ -216,7 +216,8 @@ void SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::IntegrateIntoScene(
 
 	depth_camera_extrinsic_matrix = tracking_state->pose_d->GetM();
 	// compute_allocated modelview matrix of the RGB camera
-	if (TVoxel::hasColorInformation) rgb_camera_extrinsic_matrix = view->calibration_information.trafo_rgb_to_depth.calib_inv * depth_camera_extrinsic_matrix;
+	if (TVoxel::hasColorInformation)
+		rgb_camera_extrinsic_matrix = view->calibration_information.trafo_rgb_to_depth.calib_inv * depth_camera_extrinsic_matrix;
 
 	depth_camera_projection_parameters = view->calibration_information.intrinsics_d.projectionParamsSimple.all;
 	rgb_camera_projection_parameters = view->calibration_information.intrinsics_rgb.projectionParamsSimple.all;
@@ -224,9 +225,9 @@ void SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::IntegrateIntoScene(
 	float mu = volume->GetParameters().truncation_distance;
 	int maxW = volume->GetParameters().max_integration_weight;
 
-	float* depth = view->depth->GetData(MEMORYDEVICE_CUDA);
-	float* confidence = view->depthConfidence->GetData(MEMORYDEVICE_CUDA);
-	Vector4u* rgb = view->rgb->GetData(MEMORYDEVICE_CUDA);
+	const float* depth = view->depth.GetData(MEMORYDEVICE_CUDA);
+	const float* confidence = view->depth_confidence.GetData(MEMORYDEVICE_CUDA);
+	const Vector4u* rgb = view->rgb.GetData(MEMORYDEVICE_CUDA);
 	TVoxel* localVBA = volume->GetVoxels();
 	HashEntry* hash_table = volume->index.GetEntries();
 
@@ -236,13 +237,17 @@ void SceneReconstructionEngine_CUDA<TVoxel, VoxelBlockHash>::IntegrateIntoScene(
 	dim3 gridSize(volume->index.GetUtilizedBlockCount());
 
 	if (volume->GetParameters().stop_integration_at_max_weight) {
-		integrateIntoScene_device<TVoxel, true> <<< gridSize, cudaBlockSize >>> (localVBA, hash_table, visibleBlockHashCodes,
-				rgb, rgb_image_size, depth, confidence, depth_image_size, depth_camera_extrinsic_matrix, rgb_camera_extrinsic_matrix, depth_camera_projection_parameters, rgb_camera_projection_parameters, voxel_size, mu, maxW);
+		integrateIntoScene_device<TVoxel, true> <<< gridSize, cudaBlockSize >>>(localVBA, hash_table, visibleBlockHashCodes,
+		                                                                        rgb, rgb_image_size, depth, confidence, depth_image_size,
+		                                                                        depth_camera_extrinsic_matrix, rgb_camera_extrinsic_matrix,
+		                                                                        depth_camera_projection_parameters, rgb_camera_projection_parameters,
+		                                                                        voxel_size, mu, maxW);
 		ORcudaKernelCheck;
 	} else {
 		integrateIntoScene_device<TVoxel, false> <<< gridSize, cudaBlockSize >>>
-		                                                        (localVBA, hash_table, visibleBlockHashCodes,
-				                                                        rgb, rgb_image_size, depth, confidence, depth_image_size, depth_camera_extrinsic_matrix, rgb_camera_extrinsic_matrix, depth_camera_projection_parameters, rgb_camera_projection_parameters, voxel_size, mu, maxW);
+				(localVBA, hash_table, visibleBlockHashCodes,
+				 rgb, rgb_image_size, depth, confidence, depth_image_size, depth_camera_extrinsic_matrix, rgb_camera_extrinsic_matrix,
+				 depth_camera_projection_parameters, rgb_camera_projection_parameters, voxel_size, mu, maxW);
 		ORcudaKernelCheck;
 	}
 }
@@ -266,8 +271,8 @@ template<class TVoxel>
 void SceneReconstructionEngine_CUDA<TVoxel, PlainVoxelArray>::IntegrateIntoScene(
 		VoxelVolume<TVoxel, PlainVoxelArray>* volume, const View* view,
 		const CameraTrackingState* trackingState, const RenderState* renderState) {
-	Vector2i rgbImgSize = view->rgb->dimensions;
-	Vector2i depthImgSize = view->depth->dimensions;
+	Vector2i rgb_image_dimensions = view->rgb.dimensions;
+	Vector2i depthImgSize = view->depth.dimensions;
 	float voxelSize = volume->GetParameters().voxel_size;
 
 	Matrix4f M_d, M_rgb;
@@ -282,9 +287,9 @@ void SceneReconstructionEngine_CUDA<TVoxel, PlainVoxelArray>::IntegrateIntoScene
 	float mu = volume->GetParameters().truncation_distance;
 	int maxW = volume->GetParameters().max_integration_weight;
 
-	float* depth = view->depth->GetData(MEMORYDEVICE_CUDA);
-	float* confidence = view->depthConfidence->GetData(MEMORYDEVICE_CUDA);
-	Vector4u* rgb = view->rgb->GetData(MEMORYDEVICE_CUDA);
+	const float* depth = view->depth.GetData(MEMORYDEVICE_CUDA);
+	const float* confidence = view->depth_confidence.GetData(MEMORYDEVICE_CUDA);
+	const Vector4u* rgb = view->rgb.GetData(MEMORYDEVICE_CUDA);
 	TVoxel* localVBA = volume->GetVoxels();
 	const GridAlignedBox* arrayInfo = volume->index.GetIndexData();
 
@@ -293,12 +298,14 @@ void SceneReconstructionEngine_CUDA<TVoxel, PlainVoxelArray>::IntegrateIntoScene
 	              volume->index.GetVolumeSize().z / cudaBlockSize.z);
 
 	if (volume->GetParameters().stop_integration_at_max_weight) {
-		integrateIntoScene_device<TVoxel, true> <<< gridSize, cudaBlockSize >>> (localVBA, arrayInfo,
-				rgb, rgbImgSize, depth, confidence, depthImgSize, M_d, M_rgb, projParams_d, projParams_rgb, voxelSize, mu, maxW);
+		integrateIntoScene_device<TVoxel, true><<<gridSize, cudaBlockSize>>>(localVBA, arrayInfo,
+		                                                                     rgb, rgb_image_dimensions, depth, confidence, depthImgSize, M_d,
+		                                                                     M_rgb, projParams_d, projParams_rgb, voxelSize, mu, maxW);
 		ORcudaKernelCheck;
 	} else {
-		integrateIntoScene_device<TVoxel, false> <<< gridSize, cudaBlockSize >>> (localVBA, arrayInfo,
-				rgb, rgbImgSize, depth, confidence, depthImgSize, M_d, M_rgb, projParams_d, projParams_rgb, voxelSize, mu, maxW);
+		integrateIntoScene_device<TVoxel, false><<<gridSize, cudaBlockSize>>>(localVBA, arrayInfo,
+		                                                                      rgb, rgb_image_dimensions, depth, confidence, depthImgSize, M_d,
+		                                                                      M_rgb, projParams_d, projParams_rgb, voxelSize, mu, maxW);
 		ORcudaKernelCheck;
 	}
 }
@@ -382,11 +389,11 @@ __global__ void buildHashAllocAndVisibleType_device(
 
 	bool collisionDetected = false;
 	findVoxelBlocksForRayNearSurfaceLegacy_Algomorph(hashEntryStates, blockCoords, blockVisibilityTypes,
-	                                 hashTable, x, y, depth,
-	                                 surface_cutoff_distance, invM_d,
-	                                 projParams_d, oneOverHashBlockSize_Meters, _imgSize, near_clipping_distance,
-	                                 far_clipping_distance,
-	                                 collisionDetected);
+	                                                 hashTable, x, y, depth,
+	                                                 surface_cutoff_distance, invM_d,
+	                                                 projParams_d, oneOverHashBlockSize_Meters, _imgSize, near_clipping_distance,
+	                                                 far_clipping_distance,
+	                                                 collisionDetected);
 }
 
 __global__ void setVisibleEntriesToVisibleAtPreviousFrameAndUnstreamed(HashBlockVisibility* blockVisibilityTypes,

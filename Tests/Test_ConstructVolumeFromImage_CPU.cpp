@@ -132,7 +132,7 @@ static void SetUpTrackingState16(CameraTrackingState& tracking_state,
 	           snoopy::Frame16MaskPath(),
 	           snoopy::SnoopyCalibrationPath(),
 	           MEMORYDEVICE_CPU);
-	RenderState render_state(view_16->depth->dimensions,
+	RenderState render_state(view_16->depth.dimensions,
 	                         configuration::get().general_voxel_volume_parameters.near_clipping_distance,
 	                         configuration::get().general_voxel_volume_parameters.far_clipping_distance,
 	                         MEMORYDEVICE_CPU);

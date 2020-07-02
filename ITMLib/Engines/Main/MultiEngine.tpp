@@ -192,7 +192,7 @@ CameraTrackingState::TrackingResult MultiEngine<TVoxel, TIndex>::ProcessFrame(UC
 			fprintf(stderr, " Reloc(%i)", primaryTrackingSuccess);
 #endif
 			int NN[k_loopcloseneighbours]; float distances[k_loopcloseneighbours];
-			view->depth->UpdateHostFromDevice();
+			view->depth.UpdateHostFromDevice();
 
 			//primary map index
 			int primaryLocalMapIdx = -1;
@@ -341,14 +341,14 @@ void MultiEngine<TVoxel, TIndex>::GetImage(UChar4Image *out, GetImageType getIma
 	switch (getImageType)
 	{
 	case MultiEngine::InfiniTAM_IMAGE_ORIGINAL_RGB:
-		out->ChangeDims(view->rgb->dimensions);
+		out->ChangeDims(view->rgb.dimensions);
 		if (settings.device_type == MEMORYDEVICE_CUDA)
-			out->SetFrom(*view->rgb, MemoryCopyDirection::CUDA_TO_CPU);
-		else out->SetFrom(*view->rgb, MemoryCopyDirection::CPU_TO_CPU);
+			out->SetFrom(view->rgb, MemoryCopyDirection::CUDA_TO_CPU);
+		else out->SetFrom(view->rgb, MemoryCopyDirection::CPU_TO_CPU);
 		break;
 	case MultiEngine::InfiniTAM_IMAGE_ORIGINAL_DEPTH:
-		out->ChangeDims(view->depth->dimensions);
-		if (settings.device_type == MEMORYDEVICE_CUDA) view->depth->UpdateHostFromDevice();
+		out->ChangeDims(view->depth.dimensions);
+		if (settings.device_type == MEMORYDEVICE_CUDA) view->depth.UpdateHostFromDevice();
 		RenderingEngineBase<TVoxel, TIndex>::DepthToUchar4(out, view->depth);
 		break;
     case MultiEngine::InfiniTAM_IMAGE_COLOUR_FROM_VOLUME: //TODO: add colour rendering

@@ -38,7 +38,7 @@ namespace ITMLib
 		void ApplyDelta(const Matrix4f & para_old, const float *delta, Matrix4f & para_new) const;
 		bool HasConverged(float *step) const;
 
-		void SetEvaluationData(CameraTrackingState *trackingState, const View *view);
+		void SetEvaluationData(CameraTrackingState *trackingState, const View* view);
 
 		void UpdatePoseQuality(int old_valid_points_count, float *hessian_good, float f_old);
 

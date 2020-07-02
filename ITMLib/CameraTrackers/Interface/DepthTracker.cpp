@@ -74,7 +74,7 @@ void DepthTracker::SetupLevels(int numIterCoarse, int numIterFine, float distThr
 	}
 }
 
-void DepthTracker::SetEvaluationData(CameraTrackingState *trackingState, const View *view)
+void DepthTracker::SetEvaluationData(CameraTrackingState *trackingState, const View* view)
 {
 	this->trackingState = trackingState;
 	this->view = view;
@@ -83,7 +83,8 @@ void DepthTracker::SetEvaluationData(CameraTrackingState *trackingState, const V
 	viewHierarchy->GetLevel(0)->intrinsics = view->calibration_information.intrinsics_d.projectionParamsSimple.all;
 
 	// the image hierarchy allows pointers to external data at level 0
-	viewHierarchy->GetLevel(0)->data = view->depth;
+	// TODO: somehow fix this cast that removes const modifier... TRAVESTY!
+	viewHierarchy->GetLevel(0)->data = (FloatImage*)&view->depth;
 	sceneHierarchy->GetLevel(0)->pointsMap = trackingState->pointCloud->locations;
 	sceneHierarchy->GetLevel(0)->normalsMap = trackingState->pointCloud->colours;
 
@@ -96,7 +97,7 @@ void DepthTracker::PrepareForEvaluation()
 	{
 		TemplatedHierarchyLevel<FloatImage> *currentLevelView = viewHierarchy->GetLevel(i);
 		TemplatedHierarchyLevel<FloatImage> *previousLevelView = viewHierarchy->GetLevel(i - 1);
-		lowLevelEngine->FilterSubsampleWithHoles(currentLevelView->data, previousLevelView->data);
+		lowLevelEngine->FilterSubsampleWithHoles(*currentLevelView->data, *previousLevelView->data);
 		currentLevelView->intrinsics = previousLevelView->intrinsics * 0.5f;
 
 		VolumeHierarchyLevel *currentLevelScene = sceneHierarchy->GetLevel(i);

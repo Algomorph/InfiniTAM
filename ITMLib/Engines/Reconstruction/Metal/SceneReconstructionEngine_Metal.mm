@@ -45,8 +45,8 @@ void ITMSceneReconstructionEngine_Metal<TVoxel,ITMVoxelBlockHash>::IntegrateInto
     id<MTLComputeCommandEncoder> commandEncoder = [commandBuffer computeCommandEncoder];
 
     IntegrateIntoScene_VH_Params *params = (IntegrateIntoScene_VH_Params*)[sr_metalBits.paramsBuffer contents];
-    params->rgbImgSize = view->rgb->noDims;
-    params->depthImgSize = view->depth->noDims;
+    params->rgbImgSize = view->rgb.noDims;
+    params->depthImgSize = view->depth.noDims;
     params->others.x = scene->GetParameters().voxelSize;
     params->others.y = scene->GetParameters().mu;
     params->others.z = scene->GetParameters().maxW;
@@ -61,8 +61,8 @@ void ITMSceneReconstructionEngine_Metal<TVoxel,ITMVoxelBlockHash>::IntegrateInto
     [commandEncoder setBuffer:(__bridge id<MTLBuffer>) scene->voxels.GetVoxelBlocks_MB()      offset:0 atIndex:0];
     [commandEncoder setBuffer:(__bridge id<MTLBuffer>) scene->index.GetEntries_MB()             offset:0 atIndex:1];
     [commandEncoder setBuffer:(__bridge id<MTLBuffer>) scene->index.GetVisibleBlockHashCodes_MB()  offset:0 atIndex:2];
-    [commandEncoder setBuffer:(__bridge id<MTLBuffer>) view->rgb->GetMetalBuffer()              offset:0 atIndex:3];
-    [commandEncoder setBuffer:(__bridge id<MTLBuffer>) view->depth->GetMetalBuffer()            offset:0 atIndex:4];
+    [commandEncoder setBuffer:(__bridge id<MTLBuffer>) view->rgb.GetMetalBuffer()              offset:0 atIndex:3];
+    [commandEncoder setBuffer:(__bridge id<MTLBuffer>) view->depth.GetMetalBuffer()            offset:0 atIndex:4];
     [commandEncoder setBuffer:sr_metalBits.paramsBuffer                                         offset:0 atIndex:5];
 
     MTLSize blockSize = {SDF_BLOCK_SIZE, SDF_BLOCK_SIZE, SDF_BLOCK_SIZE};
@@ -85,7 +85,7 @@ void ITMSceneReconstructionEngine_Metal<TVoxel,ITMVoxelBlockHash>::BuildAllocAnd
 
     ITMRenderState_VH *renderState_vh = (ITMRenderState_VH*)renderState;
 
-    Vector2i depthImgSize = view->depth->noDims;
+    Vector2i depthImgSize = view->depth.noDims;
     float voxelSize = scene->GetParameters().voxelSize;
 
     Matrix4f invM_d = trackingState->pose_d->GetInvM();
@@ -115,12 +115,12 @@ void ITMSceneReconstructionEngine_Metal<TVoxel,ITMVoxelBlockHash>::BuildAllocAnd
     [commandEncoder setBuffer:(__bridge id<MTLBuffer>) scene->index.GetHashBlockVisibilityTypes_MB()   offset:0 atIndex:1];
     [commandEncoder setBuffer:(__bridge id<MTLBuffer>) this->blockCoords->GetMetalBuffer()          offset:0 atIndex:2];
     [commandEncoder setBuffer:(__bridge id<MTLBuffer>) scene->index.GetEntries_MB()                 offset:0 atIndex:3];
-    [commandEncoder setBuffer:(__bridge id<MTLBuffer>) view->depth->GetMetalBuffer()                offset:0 atIndex:4];
+    [commandEncoder setBuffer:(__bridge id<MTLBuffer>) view->depth.GetMetalBuffer()                offset:0 atIndex:4];
     [commandEncoder setBuffer:sr_metalBits.paramsBuffer                                             offset:0 atIndex:5];
 
     MTLSize blockSize = {16, 16, 1};
-    MTLSize gridSize = {(NSUInteger)ceil((float)view->depth->noDims.x / (float)blockSize.width),
-        (NSUInteger)ceil((float)view->depth->noDims.y / (float)blockSize.height), 1};
+    MTLSize gridSize = {(NSUInteger)ceil((float)view->depth.noDims.x / (float)blockSize.width),
+        (NSUInteger)ceil((float)view->depth.noDims.y / (float)blockSize.height), 1};
 
     [commandEncoder dispatchThreadgroups:gridSize threadsPerThreadgroup:blockSize];
     [commandEncoder endEncoding];
@@ -135,7 +135,7 @@ void ITMSceneReconstructionEngine_Metal<TVoxel, ITMVoxelBlockHash>::AllocateScen
                                                                                            const ITMTrackingState *trackingState, const ITMRenderState *renderState,
                                                                                            bool onlyUpdateVisibleList, bool resetVisibleList)
 {
-    Vector2i depthImgSize = view->depth->noDims;
+    Vector2i depthImgSize = view->depth.noDims;
     float voxelSize = scene->GetParameters().voxelSize;
 
     Matrix4f M_d, invM_d;
@@ -153,7 +153,7 @@ void ITMSceneReconstructionEngine_Metal<TVoxel, ITMVoxelBlockHash>::AllocateScen
 
     float mu = scene->GetParameters().mu;
 
-    float *depth = view->depth->GetData(MEMORYDEVICE_CPU);
+    float *depth = view->depth.GetData(MEMORYDEVICE_CPU);
     int *voxelAllocationList = scene->index.GetBlockAllocationList();
     int *excessAllocationList = scene->index.GetExcessAllocationList();
     ITMHashEntry *hashTable = scene->index.GetEntries();

@@ -72,7 +72,7 @@ void PicoFlexxEngine::PrivateData::onNewData(const DepthData *data)
 		// do not copy if confidence is low. confidence is 0 when bad, 255 when good
 		// it seems there are no intermediate values, still let's cut at 128
 		const DepthPoint &dd = data->points[pointId];
-		this->depthImage.push_back(dd.depthConfidence > 128 ? (short)(dd.z * 1000.0) : 0);
+		this->depthImage.push_back(dd.depth_confidence > 128 ? (short)(dd.z * 1000.0) : 0);
 	}
 }
 

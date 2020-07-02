@@ -113,7 +113,7 @@ int DepthTracker_CUDA::ComputeGandH(float &f, float *nabla, float *hessian, Matr
 // device functions
 
 template<bool shortIteration, bool rotationOnly>
-__device__ void depthTrackerOneLevel_g_rt_device_main(DepthTracker_CUDA::AccuCell *accu, float *depth, Matrix4f approxInvPose, Vector4f *pointsMap,
+__device__ void depthTrackerOneLevel_g_rt_device_main(DepthTracker_CUDA::AccuCell *accu, const float *depth, Matrix4f approxInvPose, Vector4f *pointsMap,
                                                       Vector4f *normalsMap, Vector4f sceneIntrinsics, Vector2i sceneImageSize, Matrix4f scenePose, Vector4f viewIntrinsics, Vector2i viewImageSize,
                                                       float distThresh)
 {

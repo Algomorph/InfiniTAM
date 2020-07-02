@@ -27,7 +27,7 @@ int DepthTracker_CPU::ComputeGandH(float &f, float *nabla, float *hessian, Matri
 	Vector4f sceneIntrinsics = sceneHierarchyLevel->intrinsics;
 	Vector2i sceneImageSize = sceneHierarchyLevel->pointsMap->dimensions;
 
-	float *depth = viewHierarchyLevel->data->GetData(MEMORYDEVICE_CPU);
+	const float *depth = viewHierarchyLevel->data->GetData(MEMORYDEVICE_CPU);
 	Vector4f viewIntrinsics = viewHierarchyLevel->intrinsics;
 	Vector2i viewImageSize = viewHierarchyLevel->data->dimensions;
 

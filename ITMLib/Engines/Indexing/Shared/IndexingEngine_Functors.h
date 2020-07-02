@@ -458,7 +458,7 @@ public: // instance functions
 			                                                                    surface_distance_cutoff),
 			diagnostic_data(specialized_engine.diagnostic_data),
 			device_diagnostic_data(diagnostic_data.data_device.GetData(TMemoryDeviceType)) {
-		if (diagnostic_data.PrepareForFrame(view->depth->dimensions)) {
+		if (diagnostic_data.PrepareForFrame(view->depth.dimensions)) {
 			device_diagnostic_data = diagnostic_data.data_device.GetData(TMemoryDeviceType);
 		}
 	}

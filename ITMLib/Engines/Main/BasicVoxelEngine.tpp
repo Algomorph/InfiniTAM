@@ -134,7 +134,7 @@ void BasicVoxelEngine<TVoxel, TIndex>::LoadFromFile()
 
 	try // load relocaliser
 	{
-		FernRelocLib::Relocaliser<float> *relocaliser_temp = new FernRelocLib::Relocaliser<float>(view->depth->dimensions, Vector2f(settings.general_voxel_volume_parameters.near_clipping_distance, settings.general_voxel_volume_parameters.far_clipping_distance), 0.2f, 500, 4);
+		FernRelocLib::Relocaliser<float> *relocaliser_temp = new FernRelocLib::Relocaliser<float>(view->depth.dimensions, Vector2f(settings.general_voxel_volume_parameters.near_clipping_distance, settings.general_voxel_volume_parameters.far_clipping_distance), 0.2f, 500, 4);
 
 		relocaliser_temp->LoadFromDirectory(relocaliserInputDirectory);
 
@@ -276,7 +276,7 @@ CameraTrackingState::TrackingResult BasicVoxelEngine<TVoxel,TIndex>::ProcessFram
 		if (trackerResult == CameraTrackingState::TRACKING_GOOD && relocalisationCount > 0) relocalisationCount--;
 
 		int NN; float distances;
-		view->depth->UpdateHostFromDevice();
+		view->depth.UpdateHostFromDevice();
 
 		//find and add keyframe, if necessary
 		bool hasAddedKeyframe = relocaliser->ProcessFrame(view->depth, trackingState->pose_d, 0, 1, &NN, &distances, trackerResult == CameraTrackingState::TRACKING_GOOD && relocalisationCount == 0);
@@ -360,14 +360,14 @@ void BasicVoxelEngine<TVoxel,TIndex>::GetImage(UChar4Image *out, GetImageType ge
 	switch (getImageType)
 	{
 	case BasicVoxelEngine::InfiniTAM_IMAGE_ORIGINAL_RGB:
-		out->ChangeDims(view->rgb->dimensions);
+		out->ChangeDims(view->rgb.dimensions);
 		if (settings.device_type == MEMORYDEVICE_CUDA)
-			out->SetFrom(*view->rgb, MemoryCopyDirection::CUDA_TO_CPU);
-		else out->SetFrom(*view->rgb, MemoryCopyDirection::CPU_TO_CPU);
+			out->SetFrom(view->rgb, MemoryCopyDirection::CUDA_TO_CPU);
+		else out->SetFrom(view->rgb, MemoryCopyDirection::CPU_TO_CPU);
 		break;
 	case BasicVoxelEngine::InfiniTAM_IMAGE_ORIGINAL_DEPTH:
-		out->ChangeDims(view->depth->dimensions);
-		if (settings.device_type == MEMORYDEVICE_CUDA) view->depth->UpdateHostFromDevice();
+		out->ChangeDims(view->depth.dimensions);
+		if (settings.device_type == MEMORYDEVICE_CUDA) view->depth.UpdateHostFromDevice();
 		RenderingEngineBase<TVoxel, TIndex>::DepthToUchar4(out, view->depth);
 
 		break;

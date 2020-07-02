@@ -28,16 +28,16 @@ FernConservatory::~FernConservatory()
 	delete[] mEncoders;
 }
 
-void FernConservatory::computeCode(const ORUtils::Image<float> *img, char *codeFragments) const
+void FernConservatory::computeCode(const ORUtils::Image<float>& img, char *codeFragments) const
 {
-	const float *imgData = img->GetData(MEMORYDEVICE_CPU);
+	const float *imgData = img.GetData(MEMORYDEVICE_CPU);
 	for (int f = 0; f < mNumFerns; ++f)
 	{
 		codeFragments[f] = 0;
 		for (int d = 0; d < mNumDecisions; ++d)
 		{
 			const FernTester *tester = &(mEncoders[f*mNumDecisions + d]);
-			int locId = tester->location.x + tester->location.y * img->dimensions.x;
+			int locId = tester->location.x + tester->location.y * img.dimensions.x;
 			float val = imgData[locId];
 
 			/*if (val <= 0.0f) codeFragments[f] = -1;
@@ -46,9 +46,9 @@ void FernConservatory::computeCode(const ORUtils::Image<float> *img, char *codeF
 	}
 }
 
-void FernConservatory::computeCode(const ORUtils::Image< ORUtils::Vector4<unsigned char> > *img, char *codeFragments) const
+void FernConservatory::computeCode(const ORUtils::Image< ORUtils::Vector4<unsigned char> >& img, char *codeFragments) const
 {
-	const ORUtils::Vector4<unsigned char> *imgData = img->GetData(MEMORYDEVICE_CPU);
+	const ORUtils::Vector4<unsigned char> *imgData = img.GetData(MEMORYDEVICE_CPU);
 	int numDecisions = mNumDecisions / 3;
 	for (int f = 0; f < mNumFerns; ++f)
 	{
@@ -58,7 +58,7 @@ void FernConservatory::computeCode(const ORUtils::Image< ORUtils::Vector4<unsign
 			const FernTester *tester = &mEncoders[f * numDecisions + d];
 			unsigned char tester_threshold = static_cast<unsigned char>(tester->threshold);
 
-			int locId = tester->location.x + tester->location.y * img->dimensions.x;
+			int locId = tester->location.x + tester->location.y * img.dimensions.x;
 			for (int c = 0; c < 3; ++c)
 			{
 				unsigned char val = imgData[locId][c];

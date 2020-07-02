@@ -8,22 +8,22 @@
 
 namespace ITMLib
 {
-	template <class T> class ImageHierarchy
+	template <typename TLevelType> class ImageHierarchy
 	{
 	private:
 		int noLevels;
-		T **levels;
+		TLevelType **levels;
 
 	public:
-		ImageHierarchy(Vector2i imgSize, TrackerIterationType *trackingRegime, int noHierarchyLevels,
+		ImageHierarchy(Vector2i imgSize, TrackerIterationType *trackingRegime, int hierarchy_level_count,
 		               MemoryDeviceType memoryType, bool skipAllocationForLevel0 = false)
 		{
-			this->noLevels = noHierarchyLevels;
+			this->noLevels = hierarchy_level_count;
 
-			levels = new T*[noHierarchyLevels];
+			levels = new TLevelType*[hierarchy_level_count];
 
-			for (int i = noHierarchyLevels - 1; i >= 0; i--)
-				levels[i] = new T(imgSize, i, trackingRegime[i], memoryType, (i == 0) && skipAllocationForLevel0);
+			for (int i = hierarchy_level_count - 1; i >= 1; i--)
+				levels[i] = new TLevelType(imgSize, i, trackingRegime[i], memoryType, (i == 0) && skipAllocationForLevel0);
 		}
 
 		void UpdateHostFromDevice()
@@ -34,7 +34,7 @@ namespace ITMLib
 
 		int GetNoLevels() const { return noLevels; }
 
-		T * GetLevel(int level) const
+		TLevelType * GetLevel(int level) const
 		{
 			return level >= 0 && level < noLevels ? levels[level] : NULL;
 		}

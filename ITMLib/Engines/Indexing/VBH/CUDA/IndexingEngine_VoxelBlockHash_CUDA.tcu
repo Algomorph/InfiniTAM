@@ -104,7 +104,7 @@ void IndexingEngine_VoxelBlockHash_MemoryDeviceTypeSpecialized<MEMORYDEVICE_CUDA
 
 	// ** view data **
 	Vector4f depthCameraProjectionParameters = view->calibration_information.intrinsics_d.projectionParamsSimple.all;
-	Vector2i depthImgSize = view->depth->dimensions;
+	Vector2i depthImgSize = view->depth.dimensions;
 	float voxelSize = volume->GetParameters().voxel_size;
 
 

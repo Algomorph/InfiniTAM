@@ -176,19 +176,20 @@ void ExtendedTracker::SetEvaluationData(CameraTrackingState *trackingState, cons
 
 	// Depth image hierarchy is always used
 	viewHierarchy_Depth->GetLevel(0)->intrinsics = view->calibration_information.intrinsics_d.projectionParamsSimple.all;
-	viewHierarchy_Depth->GetLevel(0)->depth = view->depth;
+	// TODO: somehow fix this cast that removes const modifier... TRAVESTY!
+	viewHierarchy_Depth->GetLevel(0)->depth = (ORUtils::Image<float>*)&view->depth;
 
 	if (useColour)
 	{
 		viewHierarchy_Intensity->GetLevel(0)->intrinsics = view->calibration_information.intrinsics_rgb.projectionParamsSimple.all;
 
 		// Convert RGB to intensity
-		lowLevelEngine->ConvertColourToIntensity(viewHierarchy_Intensity->GetLevel(0)->intensity_current, view->rgb);
-		lowLevelEngine->ConvertColourToIntensity(viewHierarchy_Intensity->GetLevel(0)->intensity_prev, view->rgb_prev);
+		lowLevelEngine->ConvertColourToIntensity(*viewHierarchy_Intensity->GetLevel(0)->intensity_current, view->rgb);
+		lowLevelEngine->ConvertColourToIntensity(*viewHierarchy_Intensity->GetLevel(0)->intensity_prev, *view->rgb_prev);
 
 		// Compute first level gradients
-		lowLevelEngine->GradientXY(viewHierarchy_Intensity->GetLevel(0)->gradients,
-								   viewHierarchy_Intensity->GetLevel(0)->intensity_prev);
+		lowLevelEngine->GradientXY(*viewHierarchy_Intensity->GetLevel(0)->gradients,
+								   *viewHierarchy_Intensity->GetLevel(0)->intensity_prev);
 	}
 
 	// Pointclouds are needed only when the depth tracker is enabled
@@ -212,7 +213,7 @@ void ExtendedTracker::PrepareForEvaluation()
 		DepthHierarchyLevel *currentLevel = viewHierarchy_Depth->GetLevel(i);
 		DepthHierarchyLevel *previousLevel = viewHierarchy_Depth->GetLevel(i - 1);
 
-		lowLevelEngine->FilterSubsampleWithHoles(currentLevel->depth, previousLevel->depth);
+		lowLevelEngine->FilterSubsampleWithHoles(*currentLevel->depth, *previousLevel->depth);
 
 		currentLevel->intrinsics = previousLevel->intrinsics * 0.5f;
 	}
@@ -225,13 +226,13 @@ void ExtendedTracker::PrepareForEvaluation()
 			IntensityHierarchyLevel *currentLevel = viewHierarchy_Intensity->GetLevel(i);
 			IntensityHierarchyLevel *previousLevel = viewHierarchy_Intensity->GetLevel(i - 1);
 
-			lowLevelEngine->FilterSubsample(currentLevel->intensity_current, previousLevel->intensity_current);
-			lowLevelEngine->FilterSubsample(currentLevel->intensity_prev, previousLevel->intensity_prev);
+			lowLevelEngine->FilterSubsample(*currentLevel->intensity_current, *previousLevel->intensity_current);
+			lowLevelEngine->FilterSubsample(*currentLevel->intensity_prev, *previousLevel->intensity_prev);
 
 			currentLevel->intrinsics = previousLevel->intrinsics * 0.5f;
 
 			// Also compute_allocated gradients
-			lowLevelEngine->GradientXY(currentLevel->gradients, currentLevel->intensity_prev);
+			lowLevelEngine->GradientXY(*currentLevel->gradients, *currentLevel->intensity_prev);
 		}
 
 		// Project RGB image according to the depth->rgb transform and cache it to speed up the energy computation
@@ -261,8 +262,8 @@ void ExtendedTracker::PrepareForEvaluation()
 			VolumeHierarchyLevel *currentLevel = sceneHierarchy->GetLevel(i);
 			VolumeHierarchyLevel *previousLevel = sceneHierarchy->GetLevel(i - 1);
 
-			lowLevelEngine->FilterSubsampleWithHoles(currentLevel->pointsMap, previousLevel->pointsMap);
-			lowLevelEngine->FilterSubsampleWithHoles(currentLevel->normalsMap, previousLevel->normalsMap);
+			lowLevelEngine->FilterSubsampleWithHoles(*currentLevel->pointsMap, *previousLevel->pointsMap);
+			lowLevelEngine->FilterSubsampleWithHoles(*currentLevel->normalsMap, *previousLevel->normalsMap);
 			currentLevel->intrinsics = previousLevel->intrinsics * 0.5f;
 		}
 	}

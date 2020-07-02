@@ -26,10 +26,10 @@ class TwoImageTraversalEngine<TImage1Element, TImage2Element, MEMORYDEVICE_CUDA>
 public:
 	template<typename TFunctor>
 	inline static void
-	TraverseWithPosition(ORUtils::Image<TImage1Element>* image1, ORUtils::Image<TImage2Element>* image2, TFunctor& functor) {
-		const Vector2i resolution = image1->dimensions;
-		const TImage1Element* image1_data = image1->GetData(MEMORYDEVICE_CUDA);
-		const TImage2Element* image2_data = image2->GetData(MEMORYDEVICE_CUDA);
+	TraverseWithPosition(const ORUtils::Image<TImage1Element>& image1, const ORUtils::Image<TImage2Element>& image2, TFunctor& functor) {
+		const Vector2i resolution = image1.dimensions;
+		const TImage1Element* image1_data = image1.GetData(MEMORYDEVICE_CUDA);
+		const TImage2Element* image2_data = image2.GetData(MEMORYDEVICE_CUDA);
 
 		TFunctor* functor_device = nullptr;
 

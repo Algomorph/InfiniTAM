@@ -230,7 +230,7 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::LoadFromFile(const std::str
 		{
 			auto& settings = configuration::get();
 			FernRelocLib::Relocaliser<float>* relocalizer_temp =
-					new FernRelocLib::Relocaliser<float>(view->depth->dimensions,
+					new FernRelocLib::Relocaliser<float>(view->depth.dimensions,
 					                                     Vector2f(
 							                                     settings.general_voxel_volume_parameters.near_clipping_distance,
 							                                     settings.general_voxel_volume_parameters.far_clipping_distance),
@@ -409,14 +409,14 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(UChar4Image* out, 
 
 	switch (type) {
 		case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_ORIGINAL_RGB:
-			out->ChangeDims(view->rgb->dimensions);
+			out->ChangeDims(view->rgb.dimensions);
 			if (settings.device_type == MEMORYDEVICE_CUDA)
-				out->SetFrom(*view->rgb, MemoryCopyDirection::CUDA_TO_CPU);
-			else out->SetFrom(*view->rgb, MemoryCopyDirection::CPU_TO_CPU);
+				out->SetFrom(view->rgb, MemoryCopyDirection::CUDA_TO_CPU);
+			else out->SetFrom(view->rgb, MemoryCopyDirection::CPU_TO_CPU);
 			break;
 		case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_ORIGINAL_DEPTH:
-			out->ChangeDims(view->depth->dimensions);
-			if (settings.device_type == MEMORYDEVICE_CUDA) view->depth->UpdateHostFromDevice();
+			out->ChangeDims(view->depth.dimensions);
+			if (settings.device_type == MEMORYDEVICE_CUDA) view->depth.UpdateHostFromDevice();
 			RenderingEngineBase<TVoxel, TIndex>::DepthToUchar4(out, view->depth);
 			break;
 		case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_SCENERAYCAST:
@@ -555,7 +555,7 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::HandlePotentialCameraTracki
 			if (last_tracking_result == CameraTrackingState::TRACKING_GOOD && relocalization_count > 0)
 				relocalization_count--;
 
-			view->depth->UpdateHostFromDevice();
+			view->depth.UpdateHostFromDevice();
 
 			{
 				int NN;

@@ -83,8 +83,8 @@ BOOST_AUTO_TEST_CASE(Test_SceneConstruct17_VBH_CPU_CUDA_NearSurface){
 	                                                          snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 	volume_CUDA_to_CPU.Reset();
 
-	CameraTrackingState tracking_state_CPU(view_17_CPU->depth->dimensions, MEMORYDEVICE_CPU);
-	CameraTrackingState tracking_state_CUDA(view_17_CUDA->depth->dimensions, MEMORYDEVICE_CUDA);
+	CameraTrackingState tracking_state_CPU(view_17_CPU->depth.dimensions, MEMORYDEVICE_CPU);
+	CameraTrackingState tracking_state_CUDA(view_17_CUDA->depth.dimensions, MEMORYDEVICE_CUDA);
 // *** allocate hash blocks ***
 	// CPU
 	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>& indexer_CPU =
@@ -145,14 +145,14 @@ BOOST_AUTO_TEST_CASE(Test_SceneConstruct17_VBH_CPU_CUDA_SurfaceSpan){
 	
 	//*** prep engines and tracking states ***
 	// CPU 
-	CameraTrackingState tracking_state_CPU(view_16_CPU->depth->dimensions, MEMORYDEVICE_CPU);
+	CameraTrackingState tracking_state_CPU(view_16_CPU->depth.dimensions, MEMORYDEVICE_CPU);
 	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>& indexer_CPU =
 			IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance();
 	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, VoxelBlockHash>* depth_fusion_engine_VBH_CPU =
 			DepthFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, VoxelBlockHash>(
 					MEMORYDEVICE_CPU);
 	// CUDA
-	CameraTrackingState tracking_state_CUDA(view_16_CUDA->depth->dimensions, MEMORYDEVICE_CUDA);
+	CameraTrackingState tracking_state_CUDA(view_16_CUDA->depth.dimensions, MEMORYDEVICE_CUDA);
 	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>& indexer_CUDA =
 			IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance();
 	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, VoxelBlockHash>* depth_fusion_engine_VBH_CUDA =
@@ -162,13 +162,13 @@ BOOST_AUTO_TEST_CASE(Test_SceneConstruct17_VBH_CPU_CUDA_SurfaceSpan){
 	{
 		// ** scenes & render states
 		// CPU 
-		RenderState render_state_CPU(view_16_CPU->depth->dimensions, configuration::get().general_voxel_volume_parameters.near_clipping_distance,
+		RenderState render_state_CPU(view_16_CPU->depth.dimensions, configuration::get().general_voxel_volume_parameters.near_clipping_distance,
 		                             configuration::get().general_voxel_volume_parameters.far_clipping_distance, MEMORYDEVICE_CPU);
 		VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_16_CPU(MEMORYDEVICE_CPU,
 		                                                         snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 		volume_VBH_16_CPU.Reset();
 		// CUDA
-		RenderState render_state_CUDA(view_16_CUDA->depth->dimensions, configuration::get().general_voxel_volume_parameters.near_clipping_distance,
+		RenderState render_state_CUDA(view_16_CUDA->depth.dimensions, configuration::get().general_voxel_volume_parameters.near_clipping_distance,
 		                              configuration::get().general_voxel_volume_parameters.far_clipping_distance, MEMORYDEVICE_CUDA);
 		VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_16_CUDA(MEMORYDEVICE_CUDA,
 		                                                          snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());

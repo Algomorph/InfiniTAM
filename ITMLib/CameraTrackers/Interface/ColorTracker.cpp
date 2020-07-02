@@ -46,22 +46,22 @@ void ColorTracker::TrackCamera(CameraTrackingState *trackingState, const View *v
 
 void ColorTracker::PrepareForEvaluation(const View *view)
 {
-	lowLevelEngine->CopyImage(viewHierarchy->GetLevel(0)->rgb, view->rgb);
+	lowLevelEngine->CopyImage(*viewHierarchy->GetLevel(0)->rgb, view->rgb);
 
 	ImageHierarchy<ViewHierarchyLevel> *hierarchy = viewHierarchy;
 
 	for (int i = 1; i < hierarchy->GetNoLevels(); i++)
 	{
 		ViewHierarchyLevel *currentLevel = hierarchy->GetLevel(i), *previousLevel = hierarchy->GetLevel(i - 1);
-		lowLevelEngine->FilterSubsample(currentLevel->rgb, previousLevel->rgb);
+		lowLevelEngine->FilterSubsample(*currentLevel->rgb, *previousLevel->rgb);
 	}
 
 	for (int i = 0; i < hierarchy->GetNoLevels(); i++)
 	{
 		ViewHierarchyLevel *currentLevel = hierarchy->GetLevel(i);
 
-		lowLevelEngine->GradientX(currentLevel->gradientX_rgb, currentLevel->rgb);
-		lowLevelEngine->GradientY(currentLevel->gradientY_rgb, currentLevel->rgb);
+		lowLevelEngine->GradientX(*currentLevel->gradientX_rgb, *currentLevel->rgb);
+		lowLevelEngine->GradientY(*currentLevel->gradientY_rgb, *currentLevel->rgb);
 	}
 }
 

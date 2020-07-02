@@ -15,7 +15,7 @@ namespace ITMLib
 
 		TrackerIterationType iterationType;
 
-		ORUtils::Image<float> *depth;
+		ORUtils::Image<float>* depth;
 
 		Vector4f intrinsics;
 		bool manageData;

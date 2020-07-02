@@ -16,8 +16,8 @@ template<class TVoxel>
 void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::IntegrateIntoScene(VoxelVolume<TVoxel, VoxelBlockHash>* volume, const View* view,
                                                                                const CameraTrackingState* trackingState, const RenderState* renderState)
 {
-	Vector2i rgbImgSize = view->rgb->dimensions;
-	Vector2i depthImgSize = view->depth->dimensions;
+	Vector2i rgbImgSize = view->rgb.dimensions;
+	Vector2i depthImgSize = view->depth.dimensions;
 	float voxelSize = volume->GetParameters().voxel_size;
 
 	Matrix4f M_d, M_rgb;
@@ -31,9 +31,9 @@ void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::IntegrateIntoScene(V
 
 	float mu = volume->GetParameters().truncation_distance; int maxW = volume->GetParameters().max_integration_weight;
 
-	float *depth = view->depth->GetData(MEMORYDEVICE_CPU);
-	float *confidence = view->depthConfidence->GetData(MEMORYDEVICE_CPU);
-	Vector4u *rgb = view->rgb->GetData(MEMORYDEVICE_CPU);
+	const float *depth = view->depth.GetData(MEMORYDEVICE_CPU);
+	const float *confidence = view->depth_confidence.GetData(MEMORYDEVICE_CPU);
+	const Vector4u *rgb = view->rgb.GetData(MEMORYDEVICE_CPU);
 	TVoxel *localVBA = volume->GetVoxels();
 	HashEntry *hashTable = volume->index.GetEntries();
 
@@ -88,7 +88,7 @@ template<class TVoxel>
 void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::AllocateSceneFromDepth(VoxelVolume<TVoxel, VoxelBlockHash> *volume, const View *view,
                                                                                    const CameraTrackingState *trackingState, const RenderState *renderState, bool onlyUpdateVisibleList, bool resetVisibleList)
 {
-	Vector2i depthImgSize = view->depth->dimensions;
+	Vector2i depthImgSize = view->depth.dimensions;
 	float voxelSize = volume->GetParameters().voxel_size;
 
 	Matrix4f M_d, invM_d;
@@ -105,7 +105,7 @@ void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::AllocateSceneFromDep
 
 	float mu = volume->GetParameters().truncation_distance;
 
-	float *depth = view->depth->GetData(MEMORYDEVICE_CPU);
+	const float *depth = view->depth.GetData(MEMORYDEVICE_CPU);
 	int *voxelAllocationList = volume->index.GetBlockAllocationList();
 	int *excessAllocationList = volume->index.GetExcessEntryList();
 	HashEntry *hash_table = volume->index.GetEntries();
@@ -299,8 +299,8 @@ template<class TVoxel>
 void SceneReconstructionEngine_CPU<TVoxel, PlainVoxelArray>::IntegrateIntoScene(VoxelVolume<TVoxel, PlainVoxelArray>* volume, const View *view,
                                                                                 const CameraTrackingState *trackingState, const RenderState *renderState)
 {
-	const Vector2i rgbImgSize = view->rgb->dimensions;
-	const Vector2i depthImgSize = view->depth->dimensions;
+	const Vector2i rgbImgSize = view->rgb.dimensions;
+	const Vector2i depthImgSize = view->depth.dimensions;
 	const float voxelSize = volume->GetParameters().voxel_size;
 
 	const Matrix4f M_d = trackingState->pose_d->GetM();
@@ -312,9 +312,9 @@ void SceneReconstructionEngine_CPU<TVoxel, PlainVoxelArray>::IntegrateIntoScene(
 	const float mu = volume->GetParameters().truncation_distance;
 	const int maxW = volume->GetParameters().max_integration_weight;
 
-	float *depth = view->depth->GetData(MEMORYDEVICE_CPU);
-	float *confidence = view->depthConfidence->GetData(MEMORYDEVICE_CPU);
-	Vector4u *rgb = view->rgb->GetData(MEMORYDEVICE_CPU);
+	const float *depth = view->depth.GetData(MEMORYDEVICE_CPU);
+	const float *confidence = view->depth_confidence.GetData(MEMORYDEVICE_CPU);
+	const Vector4u *rgb = view->rgb.GetData(MEMORYDEVICE_CPU);
 	TVoxel *voxelArray = volume->GetVoxels();
 
 	const PlainVoxelArray::IndexData *arrayInfo = volume->index.GetIndexData();

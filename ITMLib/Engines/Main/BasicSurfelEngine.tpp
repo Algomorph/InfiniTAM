@@ -229,7 +229,7 @@ BasicSurfelEngine<TSurfel>::ProcessFrame(UChar4Image* rgbImage, ShortImage* rawD
 
 		int NN;
 		float distances;
-		view->depth->UpdateHostFromDevice();
+		view->depth.UpdateHostFromDevice();
 
 		//find and add keyframe, if necessary
 		bool hasAddedKeyframe = relocaliser->ProcessFrame(view->depth, trackingState->pose_d, 0, 1, &NN, &distances,
@@ -334,14 +334,14 @@ void BasicSurfelEngine<TSurfel>::GetImage(UChar4Image* out, GetImageType getImag
 
 	switch (getImageType) {
 		case BasicSurfelEngine::InfiniTAM_IMAGE_ORIGINAL_RGB:
-			out->ChangeDims(view->rgb->dimensions);
+			out->ChangeDims(view->rgb.dimensions);
 			if (settings.device_type == MEMORYDEVICE_CUDA)
-				out->SetFrom(*view->rgb, MemoryCopyDirection::CUDA_TO_CPU);
-			else out->SetFrom(*view->rgb, MemoryCopyDirection::CPU_TO_CPU);
+				out->SetFrom(view->rgb, MemoryCopyDirection::CUDA_TO_CPU);
+			else out->SetFrom(view->rgb, MemoryCopyDirection::CPU_TO_CPU);
 			break;
 		case BasicSurfelEngine::InfiniTAM_IMAGE_ORIGINAL_DEPTH:
-			out->ChangeDims(view->depth->dimensions);
-			if (settings.device_type == MEMORYDEVICE_CUDA) view->depth->UpdateHostFromDevice();
+			out->ChangeDims(view->depth.dimensions);
+			if (settings.device_type == MEMORYDEVICE_CUDA) view->depth.UpdateHostFromDevice();
 			IRenderingEngine::DepthToUchar4(out, view->depth);
 			break;
 		case BasicSurfelEngine::InfiniTAM_IMAGE_SCENERAYCAST:
@@ -361,7 +361,7 @@ void BasicSurfelEngine<TSurfel>::GetImage(UChar4Image* out, GetImageType getImag
 		case BasicSurfelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_NORMAL:
 		case BasicSurfelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_CONFIDENCE: {
 			if (!surfelRenderState_freeview)
-				surfelRenderState_freeview = new SurfelRenderState(view->depth->dimensions,
+				surfelRenderState_freeview = new SurfelRenderState(view->depth.dimensions,
 				                                                   surfelScene->GetParams().supersampling_factor);
 			const bool useRadii = true;
 			surfelVisualizationEngine->FindSurface(surfelScene, pose, intrinsics, useRadii, USR_DONOTRENDER,

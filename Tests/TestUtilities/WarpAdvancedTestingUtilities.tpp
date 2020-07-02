@@ -83,7 +83,7 @@ void GenerateRawLiveAndCanonicalVolumes(VoxelVolume<TSDFVoxel, TIndex>** canonic
 	                                              TMemoryDeviceType,
 	                                              snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 
-	Vector2i image_size = view->depth->dimensions;
+	Vector2i image_size = view->depth.dimensions;
 
 	CameraTrackingState tracking_state(image_size, TMemoryDeviceType);
 

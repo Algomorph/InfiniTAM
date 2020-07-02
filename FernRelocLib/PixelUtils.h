@@ -12,14 +12,14 @@ namespace FernRelocLib
 		for (int i = 0; i < masksize; ++i) coeff[i] = exp(-(i - halfMaskSize)*(i - halfMaskSize) / (2.0f*sigma*sigma));
 	}
 
-	inline void filterSeparable_x(const ORUtils::Image<float> *input, ORUtils::Image<float> *output, int masksize, const float *coeff)
+	inline void filterSeparable_x(const ORUtils::Image<float>& input, ORUtils::Image<float>& output, int masksize, const float *coeff)
 	{
 		int s2 = masksize / 2;
-		ORUtils::Vector2<int> imgSize = input->dimensions;
-		output->ChangeDims(imgSize);
+		ORUtils::Vector2<int> imgSize = input.dimensions;
+		output.ChangeDims(imgSize);
 
-		const float *imageData_in = input->GetData(MEMORYDEVICE_CPU);
-		float *imageData_out = output->GetData(MEMORYDEVICE_CPU);
+		const float* imageData_in = input.GetData(MEMORYDEVICE_CPU);
+		float* imageData_out = output.GetData(MEMORYDEVICE_CPU);
 
 		for (int y = 0; y < imgSize.y; y++) for (int x = 0; x < imgSize.x; x++)
 		{
@@ -47,14 +47,14 @@ namespace FernRelocLib
 		}
 	}
 
-	inline void filterSeparable_x(const ORUtils::Image< ORUtils::Vector4<unsigned char> > *input, ORUtils::Image<ORUtils::Vector4<unsigned char> > *output, int masksize, const float *coeff)
+	inline void filterSeparable_x(const ORUtils::Image< ORUtils::Vector4<unsigned char> >& input, ORUtils::Image<ORUtils::Vector4<unsigned char> >& output, int masksize, const float *coeff)
 	{
 		int s2 = masksize / 2;
-		ORUtils::Vector2<int> imgSize = input->dimensions;
-		output->ChangeDims(imgSize);
+		ORUtils::Vector2<int> imgSize = input.dimensions;
+		output.ChangeDims(imgSize);
 
-		const ORUtils::Vector4<unsigned char> *imageData_in = input->GetData(MEMORYDEVICE_CPU);
-		ORUtils::Vector4<unsigned char> *imageData_out = output->GetData(MEMORYDEVICE_CPU);
+		const ORUtils::Vector4<unsigned char>* imageData_in = input.GetData(MEMORYDEVICE_CPU);
+		ORUtils::Vector4<unsigned char>* imageData_out = output.GetData(MEMORYDEVICE_CPU);
 
 		for (int y = 0; y < imgSize.y; y++)
 		{
@@ -84,14 +84,14 @@ namespace FernRelocLib
 		}
 	}
 
-	inline void filterSeparable_y(const ORUtils::Image<float> *input, ORUtils::Image<float> *output, int masksize, const float *coeff)
+	inline void filterSeparable_y(const ORUtils::Image<float>& input, ORUtils::Image<float>& output, int masksize, const float *coeff)
 	{
 		int s2 = masksize / 2;
-		ORUtils::Vector2<int> imgSize = input->dimensions;
-		output->ChangeDims(imgSize);
+		ORUtils::Vector2<int> imgSize = input.dimensions;
+		output.ChangeDims(imgSize);
 
-		const float *imageData_in = input->GetData(MEMORYDEVICE_CPU);
-		float *imageData_out = output->GetData(MEMORYDEVICE_CPU);
+		const float* imageData_in = input.GetData(MEMORYDEVICE_CPU);
+		float* imageData_out = output.GetData(MEMORYDEVICE_CPU);
 
 		for (int y = 0; y < imgSize.y; y++) for (int x = 0; x < imgSize.x; x++)
 		{
@@ -118,14 +118,14 @@ namespace FernRelocLib
 		}
 	}
 
-	inline void filterSeparable_y(const ORUtils::Image< ORUtils::Vector4<unsigned char> > *input, ORUtils::Image<ORUtils::Vector4<unsigned char> > *output, int masksize, const float *coeff)
+	inline void filterSeparable_y(const ORUtils::Image< ORUtils::Vector4<unsigned char> >& input, ORUtils::Image<ORUtils::Vector4<unsigned char> >& output, int masksize, const float *coeff)
 	{
 		int s2 = masksize / 2;
-		ORUtils::Vector2<int> imgSize = input->dimensions;
-		output->ChangeDims(imgSize);
+		ORUtils::Vector2<int> imgSize = input.dimensions;
+		output.ChangeDims(imgSize);
 
-		const ORUtils::Vector4<unsigned char> *imageData_in = input->GetData(MEMORYDEVICE_CPU);
-		ORUtils::Vector4<unsigned char> *imageData_out = output->GetData(MEMORYDEVICE_CPU);
+		const ORUtils::Vector4<unsigned char> *imageData_in = input.GetData(MEMORYDEVICE_CPU);
+		ORUtils::Vector4<unsigned char> *imageData_out = output.GetData(MEMORYDEVICE_CPU);
 
 		for (int y = 0; y < imgSize.y; y++)
 		{
@@ -153,26 +153,26 @@ namespace FernRelocLib
 	}
 
 	template <typename T>
-	inline void filterGaussian(const ORUtils::Image<T> *input, ORUtils::Image<T> *output, float sigma)
+	inline void filterGaussian(const ORUtils::Image<T>& input, ORUtils::Image<T>& output, float sigma)
 	{
 		int filtersize = (int)(2.0f*3.5f*sigma);
 		if ((filtersize & 1) == 0) filtersize += 1;
 		float *coeff = new float[filtersize];
-		ORUtils::Image<T> tmpimg(input->dimensions, MEMORYDEVICE_CPU);
+		ORUtils::Image<T> tmpimg(input.dimensions, MEMORYDEVICE_CPU);
 
 		createGaussianFilter(filtersize, sigma, coeff);
-		filterSeparable_x(input, &tmpimg, filtersize, coeff);
-		filterSeparable_y(&tmpimg, output, filtersize, coeff);
+		filterSeparable_x(input, tmpimg, filtersize, coeff);
+		filterSeparable_y(tmpimg, output, filtersize, coeff);
 	}
 
-	inline void filterSubsample(const ORUtils::Image<float> *input, ORUtils::Image<float> *output)
+	inline void filterSubsample(const ORUtils::Image<float>& input, ORUtils::Image<float>& output)
 	{
-		ORUtils::Vector2<int> imgSize_in = input->dimensions;
+		ORUtils::Vector2<int> imgSize_in = input.dimensions;
 		ORUtils::Vector2<int> imgSize_out(imgSize_in.x / 2, imgSize_in.y / 2);
-		output->ChangeDims(imgSize_out, false);
+		output.ChangeDims(imgSize_out, false);
 
-		const float *imageData_in = input->GetData(MEMORYDEVICE_CPU);
-		float *imageData_out = output->GetData(MEMORYDEVICE_CPU);
+		const float *imageData_in = input.GetData(MEMORYDEVICE_CPU);
+		float *imageData_out = output.GetData(MEMORYDEVICE_CPU);
 
 		for (int y = 0; y < imgSize_out.y; y++) for (int x = 0; x < imgSize_out.x; x++)
 		{
@@ -198,13 +198,13 @@ namespace FernRelocLib
 		}
 	}
 
-	inline void filterSubsample(const ORUtils::Image< ORUtils::Vector4<unsigned char> > *input, ORUtils::Image<ORUtils::Vector4<unsigned char> > *output) {
-		ORUtils::Vector2<int> imgSize_in = input->dimensions;
+	inline void filterSubsample(const ORUtils::Image< ORUtils::Vector4<unsigned char> >& input, ORUtils::Image<ORUtils::Vector4<unsigned char> >& output) {
+		ORUtils::Vector2<int> imgSize_in = input.dimensions;
 		ORUtils::Vector2<int> imgSize_out(imgSize_in.x / 2, imgSize_in.y / 2);
-		output->ChangeDims(imgSize_out, false);
+		output.ChangeDims(imgSize_out, false);
 
-		const ORUtils::Vector4<unsigned char> *imageData_in = input->GetData(MEMORYDEVICE_CPU);
-		ORUtils::Vector4<unsigned char> *imageData_out = output->GetData(MEMORYDEVICE_CPU);
+		const ORUtils::Vector4<unsigned char> *imageData_in = input.GetData(MEMORYDEVICE_CPU);
+		ORUtils::Vector4<unsigned char> *imageData_out = output.GetData(MEMORYDEVICE_CPU);
 
 		for (int y = 0; y < imgSize_out.y; y++)
 		{

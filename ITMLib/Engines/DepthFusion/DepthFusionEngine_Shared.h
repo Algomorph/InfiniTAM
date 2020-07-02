@@ -305,10 +305,10 @@ public:
 	VoxelDepthIntegrationFunctor(
 			const ITMLib::VoxelVolumeParameters& volume_parameters,
 			const ITMLib::View* view, Matrix4f depth_camera_extrinsic_matrix) :
-			depth_image_size(view->depth->dimensions),
+			depth_image_size(view->depth.dimensions),
 			depth_camera_projection_parameters(view->calibration_information.intrinsics_d.projectionParamsSimple.all),
 			depth_camera_extrinsic_matrix(depth_camera_extrinsic_matrix),
-			rgb_image_size(view->rgb->dimensions),
+			rgb_image_size(view->rgb.dimensions),
 			rgb_camera_projection_parameters(view->calibration_information.intrinsics_rgb.projectionParamsSimple.all),
 			rgb_camera_extrinsic_matrix(TTSDFVoxel::hasColorInformation ? view->calibration_information.trafo_rgb_to_depth.calib_inv * depth_camera_extrinsic_matrix : Matrix4f()),
 
@@ -316,9 +316,9 @@ public:
 			max_integration_weight(volume_parameters.max_integration_weight),
 			voxel_size(volume_parameters.voxel_size),
 
-			depth(view->depth->GetData(TMemoryDeviceType)),
-			rgb(view->rgb->GetData(TMemoryDeviceType)),
-			confidence(view->depthConfidence->GetData(TMemoryDeviceType))
+			depth(view->depth.GetData(TMemoryDeviceType)),
+			rgb(view->rgb.GetData(TMemoryDeviceType)),
+			confidence(view->depth_confidence.GetData(TMemoryDeviceType))
 			{}
 
 	_CPU_AND_GPU_CODE_
@@ -347,9 +347,9 @@ private:
 	const int max_integration_weight;
 	const float voxel_size;
 
-	float* depth;
-	Vector4u* rgb;
-	float* confidence;
+	const float* depth;
+	const Vector4u* rgb;
+	const float* confidence;
 
 
 };

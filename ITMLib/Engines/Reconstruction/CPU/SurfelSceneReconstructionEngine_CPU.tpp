@@ -35,7 +35,7 @@ void SurfelSceneReconstructionEngine_CPU<TSurfel>::AddNewSurfels(SurfelScene<TSu
   TSurfel *newSurfels = scene->AllocateSurfels(newSurfelCount);
   if(newSurfels == NULL) return;
 
-  const Vector4u *colourMap = view->rgb->GetData(MEMORYDEVICE_CPU);
+  const Vector4u *colourMap = view->rgb.GetData(MEMORYDEVICE_CPU);
   const Matrix4f& depthToRGB = view->calibration_information.trafo_rgb_to_depth.calib_inv;
   const Vector3f *normalMap = this->m_normalMapMB->GetData(MEMORYDEVICE_CPU);
   const Vector4f& projParamsRGB = view->calibration_information.intrinsics_rgb.projectionParamsSimple.all;
@@ -51,7 +51,7 @@ void SurfelSceneReconstructionEngine_CPU<TSurfel>::AddNewSurfels(SurfelScene<TSu
   {
     add_new_surfel(
 		    locId, T, this->m_timestamp, newPointsMask, newPointsPrefixSum, vertexMap, normalMap, radiusMap, colourMap,
-		    view->depth->dimensions.x, view->depth->dimensions.y, view->rgb->dimensions.x, view->rgb->dimensions.y,
+		    view->depth.dimensions.x, view->depth.dimensions.y, view->rgb.dimensions.x, view->rgb.dimensions.y,
 		    depthToRGB, projParamsRGB, sceneParams.use_gaussian_sample_confidence, sceneParams.gaussian_confidence_sigma,
 		    sceneParams.max_surfel_radius, newSurfels
     );
@@ -63,13 +63,13 @@ void SurfelSceneReconstructionEngine_CPU<TSurfel>::FindCorrespondingSurfels(cons
                                                                             const SurfelRenderState *renderState) const
 {
   unsigned int *correspondenceMap = this->m_correspondenceMapMB->GetData(MEMORYDEVICE_CPU);
-  const float *depthMap = view->depth->GetData(MEMORYDEVICE_CPU);
-  const int depthMapWidth = view->depth->dimensions.x;
+  const float *depthMap = view->depth.GetData(MEMORYDEVICE_CPU);
+  const int depthMapWidth = view->depth.dimensions.x;
   const unsigned int *indexImageSuper = renderState->GetIndexImageSuper()->GetData(MEMORYDEVICE_CPU);
   const Matrix4f& invT = trackingState->pose_d->GetM();
   unsigned short *newPointsMask = this->m_newPointsMaskMB->GetData(MEMORYDEVICE_CPU);
   const Vector3f *normalMap = this->m_normalMapMB->GetData(MEMORYDEVICE_CPU);
-  const int pixelCount = static_cast<int>(view->depth->size());
+  const int pixelCount = static_cast<int>(view->depth.size());
   const SurfelVolumeParameters& sceneParams = scene->GetParams();
   const TSurfel *surfels = scene->GetSurfels()->GetData(MEMORYDEVICE_CPU);
 
@@ -85,15 +85,15 @@ void SurfelSceneReconstructionEngine_CPU<TSurfel>::FindCorrespondingSurfels(cons
 template <typename TSurfel>
 void SurfelSceneReconstructionEngine_CPU<TSurfel>::FuseMatchedPoints(SurfelScene<TSurfel> *scene, const View *view, const CameraTrackingState *trackingState) const
 {
-  const Vector4u *colourMap = view->rgb->GetData(MEMORYDEVICE_CPU);
-  const int colourMapHeight = view->rgb->dimensions.y;
-  const int colourMapWidth = view->rgb->dimensions.x;
-  const int depthMapHeight = view->depth->dimensions.y;
-  const int depthMapWidth = view->depth->dimensions.x;
+  const Vector4u *colourMap = view->rgb.GetData(MEMORYDEVICE_CPU);
+  const int colourMapHeight = view->rgb.dimensions.y;
+  const int colourMapWidth = view->rgb.dimensions.x;
+  const int depthMapHeight = view->depth.dimensions.y;
+  const int depthMapWidth = view->depth.dimensions.x;
   const unsigned int *correspondenceMap = this->m_correspondenceMapMB->GetData(MEMORYDEVICE_CPU);
   const Matrix4f& depthToRGB = view->calibration_information.trafo_rgb_to_depth.calib_inv;
   const Vector3f *normalMap = this->m_normalMapMB->GetData(MEMORYDEVICE_CPU);
-  const int pixelCount = static_cast<int>(view->depth->size());
+  const int pixelCount = static_cast<int>(view->depth.size());
   const Vector4f& projParamsRGB = view->calibration_information.intrinsics_rgb.projectionParamsSimple.all;
   const float *radiusMap = this->m_radiusMapMB->GetData(MEMORYDEVICE_CPU);
   const SurfelVolumeParameters& sceneParams = scene->GetParams();
@@ -209,14 +209,14 @@ void SurfelSceneReconstructionEngine_CPU<TSurfel>::MergeSimilarSurfels(SurfelSce
 template <typename TSurfel>
 void SurfelSceneReconstructionEngine_CPU<TSurfel>::PreprocessDepthMap(const View *view, const SurfelVolumeParameters& sceneParams) const
 {
-  const float *depthMap = view->depth->GetData(MEMORYDEVICE_CPU);
-  const int height = view->depth->dimensions.y;
+  const float *depthMap = view->depth.GetData(MEMORYDEVICE_CPU);
+  const int height = view->depth.dimensions.y;
   const Intrinsics& intrinsics = view->calibration_information.intrinsics_d;
   Vector3f *normalMap = this->m_normalMapMB->GetData(MEMORYDEVICE_CPU);
-  const int pixelCount = static_cast<int>(view->depth->size());
+  const int pixelCount = static_cast<int>(view->depth.size());
   float *radiusMap = this->m_radiusMapMB->GetData(MEMORYDEVICE_CPU);
   Vector4f *vertexMap = this->m_vertexMapMB->GetData(MEMORYDEVICE_CPU);
-  const int width = view->depth->dimensions.x;
+  const int width = view->depth.dimensions.x;
 
   // Calculate the vertex map.
 #ifdef WITH_OPENMP
