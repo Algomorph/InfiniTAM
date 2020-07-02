@@ -23,7 +23,7 @@ ITMLib::DynamicCameraTracker_CUDA::DynamicCameraTracker_CUDA(const Vector2i& img
                                                              float failureDetectorThreshold, float viewFrustum_min,
                                                              float viewFrustum_max, float minColourGradient, float tukeyCutOff,
                                                              int framesToSkip, int framesToWeight,
-                                                             const ITMLib::LowLevelEngine* lowLevelEngine)
+                                                             const ITMLib::PreprocessingEngineInterface* lowLevelEngine)
 		: ExtendedTracker(imgSize_d, imgSize_rgb, useDepth, useColour, colourWeight, trackingRegime,
 		                  noHierarchyLevels, terminationThreshold, failureDetectorThreshold, viewFrustum_min,
 		                  viewFrustum_max, minColourGradient, tukeyCutOff, framesToSkip, framesToWeight,

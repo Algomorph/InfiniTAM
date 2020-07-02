@@ -4,7 +4,7 @@
 
 #include "MainEngine.h"
 #include "CameraTrackingController.h"
-#include "../LowLevel/Interface/LowLevelEngine.h"
+#include "../Preprocessing/Interface/PreprocessingEngineInterface.h"
 #include "../ViewBuilding/Interface/ViewBuilder.h"
 #include "../../Objects/Misc/IMUCalibrator.h"
 #include "../../../FernRelocLib/Relocaliser.h"
@@ -26,7 +26,7 @@ namespace ITMLib
 	{
 	private:
 
-		LowLevelEngine *lowLevelEngine;
+		PreprocessingEngineInterface *lowLevelEngine;
 		RenderingEngineBase<TVoxel, TIndex>* visualization_engine;
 		MultiVisualizationEngine<TVoxel, TIndex> *multiVisualizationEngine;
 

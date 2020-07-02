@@ -21,7 +21,7 @@
 //local
 #include "MainEngine.h"
 #include "CameraTrackingController.h"
-#include "../LowLevel/Interface/LowLevelEngine.h"
+#include "../Preprocessing/Interface/PreprocessingEngineInterface.h"
 #include "../Meshing/Interface/MeshingEngine.h"
 #include "../ViewBuilding/Interface/ViewBuilder.h"
 #include "../Rendering/Interface/RenderingEngineInterface.h"
@@ -51,7 +51,7 @@ private: // instance variables
 	const AutomaticRunSettings automatic_run_settings;
 
 	// engines
-	LowLevelEngine* low_level_engine;
+	PreprocessingEngineInterface* low_level_engine;
 	RenderingEngineBase<TVoxel, TIndex>* rendering_engine;
 	MeshingEngine<TVoxel, TIndex>* meshing_engine;
 	IndexingEngineInterface<TVoxel, TIndex>* indexing_engine;

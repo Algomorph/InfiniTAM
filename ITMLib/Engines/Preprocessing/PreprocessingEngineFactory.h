@@ -1,27 +1,24 @@
-// Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
-
 #pragma once
 
-#include "Interface/LowLevelEngine.h"
+#include "Interface/PreprocessingEngineInterface.h"
 #include "../../Utils/Configuration/Configuration.h"
 #include "../../../ORUtils/MemoryDeviceType.h"
 
-namespace ITMLib
-{
+namespace ITMLib{
 
 /**
  * \brief This struct provides functions that can be used to construct low-level engines.
  */
-struct LowLevelEngineFactory
+struct PreprocessingEngineFactory
 {
   //#################### PUBLIC STATIC MEMBER FUNCTIONS ####################
 
   /**
    * \brief Makes a low-level engine.
    *
-   * \param deviceType  The device on which the low-level engine should operate.
+   * \param device_type  The device on which the low-level engine should operate.
    */
-  static LowLevelEngine *MakeLowLevelEngine(MemoryDeviceType deviceType);
+  static PreprocessingEngineInterface *Build(MemoryDeviceType device_type);
 };
 
-}
+} // namespace ITMLib

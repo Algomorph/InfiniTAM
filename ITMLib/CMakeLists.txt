@@ -69,39 +69,39 @@ set(ITMLIB_ENGINES_COMMON_HEADERS
 #======================================= LOW-LEVEL ENGINES =============================================================
 ##
 set(ITMLIB_ENGINES_LOWLEVEL_SOURCES
-    Engines/LowLevel/LowLevelEngineFactory.cpp
+    Engines/Preprocessing/PreprocessingEngineFactory.cpp
     )
 
 set(ITMLIB_ENGINES_LOWLEVEL_HEADERS
-    Engines/LowLevel/LowLevelEngineFactory.h
+    Engines/Preprocessing/PreprocessingEngineFactory.h
     )
 
 ##
 set(ITMLIB_ENGINES_LOWLEVEL_CPU_SOURCES
-    Engines/LowLevel/CPU/LowLevelEngine_CPU.cpp
+    Engines/Preprocessing/CPU/LowLevelEngine_CPU.cpp
     )
 
 set(ITMLIB_ENGINES_LOWLEVEL_CPU_HEADERS
-    Engines/LowLevel/CPU/LowLevelEngine_CPU.h
+    Engines/Preprocessing/CPU/LowLevelEngine_CPU.h
     )
 
 ##
 set(ITMLIB_ENGINES_LOWLEVEL_CUDA_SOURCES
-    Engines/LowLevel/CUDA/LowLevelEngine_CUDA.cu
+    Engines/Preprocessing/CUDA/LowLevelEngine_CUDA.cu
     )
 
 set(ITMLIB_ENGINES_LOWLEVEL_CUDA_HEADERS
-    Engines/LowLevel/CUDA/LowLevelEngine_CUDA.h
+    Engines/Preprocessing/CUDA/LowLevelEngine_CUDA.h
     )
 
 ##
 set(ITMLIB_ENGINES_LOWLEVEL_INTERFACE_HEADERS
-    Engines/LowLevel/Interface/LowLevelEngine.h
+    Engines/Preprocessing/Interface/PreprocessingEngineInterface.h
     )
 
 ##
 set(ITMLIB_ENGINES_LOWLEVEL_SHARED_HEADERS
-    Engines/LowLevel/Shared/LowLevelEngine_Shared.h
+    Engines/Preprocessing/Shared/LowLevelEngine_Shared.h
     )
 
 #====================================== SCENE TRAVERSAL ENGINES ======================================================

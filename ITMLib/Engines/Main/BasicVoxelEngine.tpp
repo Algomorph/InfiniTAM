@@ -2,7 +2,7 @@
 
 #include "BasicVoxelEngine.h"
 
-#include "../LowLevel/LowLevelEngineFactory.h"
+#include "../Preprocessing/PreprocessingEngineFactory.h"
 #include "../Meshing/MeshingEngineFactory.h"
 #include "../ViewBuilding/ViewBuilderFactory.h"
 #include "../Rendering/RenderingEngineFactory.h"
@@ -27,7 +27,7 @@ BasicVoxelEngine<TVoxel,TIndex>::BasicVoxelEngine(const RGBDCalib& calib, Vector
 
 	const MemoryDeviceType deviceType = settings.device_type;
 
-	lowLevelEngine = LowLevelEngineFactory::MakeLowLevelEngine(deviceType);
+	lowLevelEngine = PreprocessingEngineFactory::Build(deviceType);
 	viewBuilder = ViewBuilderFactory::Build(calib, deviceType);
 	visualizationEngine = RenderingEngineFactory::Build<TVoxel, TIndex>(deviceType);
 

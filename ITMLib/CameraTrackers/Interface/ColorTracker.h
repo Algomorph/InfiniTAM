@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CameraTracker.h"
-#include "../../Engines/LowLevel/Interface/LowLevelEngine.h"
+#include "../../Engines/Preprocessing/Interface/PreprocessingEngineInterface.h"
 #include "../../Objects/Tracking/ImageHierarchy.h"
 #include "../../Objects/Tracking/ViewHierarchyLevel.h"
 #include "../../Objects/Tracking/TrackerIterationType.h"
@@ -18,7 +18,7 @@ namespace ITMLib
 	class ColorTracker : public CameraTracker
 	{
 	private:
-		const LowLevelEngine *lowLevelEngine;
+		const PreprocessingEngineInterface *lowLevelEngine;
 
 		void PrepareForEvaluation(const View *view);
 
@@ -80,7 +80,7 @@ namespace ITMLib
 		bool requiresPointCloudRendering() const { return true; }
 
 		ColorTracker(Vector2i imgSize, TrackerIterationType *trackingRegime, int noHierarchyLevels,
-		             const LowLevelEngine *lowLevelEngine, MemoryDeviceType memoryType);
+		             const PreprocessingEngineInterface *lowLevelEngine, MemoryDeviceType memoryType);
 		virtual ~ColorTracker();
 	};
 }

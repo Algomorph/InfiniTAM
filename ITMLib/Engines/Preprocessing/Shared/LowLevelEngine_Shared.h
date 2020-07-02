@@ -1,12 +1,9 @@
-// Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
-
 #pragma once
 
 #include "../../../Utils/Math.h"
 
 _CPU_AND_GPU_CODE_ inline void convertColourToIntensity(DEVICEPTR(float) *imageData_out, int x, int y, Vector2i dims,
-		const CONSTPTR(Vector4u) *imageData_in)
-{
+		const CONSTPTR(Vector4u) *imageData_in){
 	const int linear_pos = y * dims.x + x;
 	const Vector4u colour = imageData_in[linear_pos];
 
@@ -14,8 +11,7 @@ _CPU_AND_GPU_CODE_ inline void convertColourToIntensity(DEVICEPTR(float) *imageD
 }
 
 _CPU_AND_GPU_CODE_ inline void filterSubsample(DEVICEPTR(Vector4u) *imageData_out, int x, int y, Vector2i newDims, 
-	const CONSTPTR(Vector4u) *imageData_in, Vector2i oldDims)
-{
+	const CONSTPTR(Vector4u) *imageData_in, Vector2i oldDims){
 	int src_pos_x = x * 2, src_pos_y = y * 2;
 	Vector4u pixel_out, pixels_in[4];
 
@@ -33,8 +29,7 @@ _CPU_AND_GPU_CODE_ inline void filterSubsample(DEVICEPTR(Vector4u) *imageData_ou
 }
 
 _CPU_AND_GPU_CODE_ inline void boxFilter2x2(DEVICEPTR(float) *imageData_out, int x_out, int y_out, Vector2i newDims,
-	const CONSTPTR(float) *imageData_in, int x_in, int y_in, Vector2i oldDims)
-{
+	const CONSTPTR(float) *imageData_in, int x_in, int y_in, Vector2i oldDims){
 	float pixel_out = 0.f;
 
 	pixel_out += imageData_in[(x_in + 0) + (y_in + 0) * oldDims.x];
@@ -46,8 +41,7 @@ _CPU_AND_GPU_CODE_ inline void boxFilter2x2(DEVICEPTR(float) *imageData_out, int
 }
 
 _CPU_AND_GPU_CODE_ inline void filterSubsampleWithHoles(DEVICEPTR(float) *imageData_out, int x, int y, Vector2i newDims, 
-	const CONSTPTR(float) *imageData_in, Vector2i oldDims)
-{
+	const CONSTPTR(float) *imageData_in, Vector2i oldDims){
 	int src_pos_x = x * 2, src_pos_y = y * 2;
 	float pixel_out = 0.0f, pixel_in, no_good_pixels = 0.0f;
 
@@ -69,8 +63,7 @@ _CPU_AND_GPU_CODE_ inline void filterSubsampleWithHoles(DEVICEPTR(float) *imageD
 }
 
 _CPU_AND_GPU_CODE_ inline void filterSubsampleWithHoles(DEVICEPTR(Vector4f) *imageData_out, int x, int y, Vector2i newDims, 
-	const CONSTPTR(Vector4f) *imageData_in, Vector2i oldDims)
-{
+	const CONSTPTR(Vector4f) *imageData_in, Vector2i oldDims){
 	int src_pos_x = x * 2, src_pos_y = y * 2;
 	Vector4f pixel_out(0.0f), pixel_in; float no_good_pixels = 0.0f;
 

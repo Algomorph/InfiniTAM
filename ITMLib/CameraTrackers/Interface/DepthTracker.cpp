@@ -8,7 +8,7 @@
 using namespace ITMLib;
 
 DepthTracker::DepthTracker(Vector2i imgSize, TrackerIterationType *trackingRegime, int noHierarchyLevels,
-                           float terminationThreshold, float failureDetectorThreshold, const LowLevelEngine *lowLevelEngine, MemoryDeviceType memoryType)
+                           float terminationThreshold, float failureDetectorThreshold, const PreprocessingEngineInterface *lowLevelEngine, MemoryDeviceType memoryType)
 {
 	viewHierarchy = new ImageHierarchy<TemplatedHierarchyLevel<FloatImage> >(imgSize, trackingRegime, noHierarchyLevels, memoryType, true);
 	sceneHierarchy = new ImageHierarchy<VolumeHierarchyLevel>(imgSize, trackingRegime, noHierarchyLevels, memoryType, true);

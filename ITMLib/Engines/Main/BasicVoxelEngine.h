@@ -5,7 +5,7 @@
 #include "Mappers/DenseMapper.h"
 #include "MainEngine.h"
 #include "CameraTrackingController.h"
-#include "../LowLevel/Interface/LowLevelEngine.h"
+#include "../Preprocessing/Interface/PreprocessingEngineInterface.h"
 #include "../Meshing/Interface/MeshingEngine.h"
 #include "../ViewBuilding/Interface/ViewBuilder.h"
 #include "../Rendering/Interface/RenderingEngineInterface.h"
@@ -22,7 +22,7 @@ namespace ITMLib
 		bool trackingActive, fusionActive, mainProcessingActive, trackingInitialised;
 		int framesProcessed, relocalisationCount;
 
-		LowLevelEngine *lowLevelEngine;
+		PreprocessingEngineInterface *lowLevelEngine;
 		RenderingEngineBase<TVoxel, TIndex> *visualizationEngine;
 
 		MeshingEngine<TVoxel, TIndex> *meshingEngine;

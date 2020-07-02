@@ -2,7 +2,7 @@
 
 #include "MultiEngine.h"
 
-#include "../LowLevel/LowLevelEngineFactory.h"
+#include "../Preprocessing/PreprocessingEngineFactory.h"
 #include "../ViewBuilding/ViewBuilderFactory.h"
 #include "../Rendering/RenderingEngineFactory.h"
 #include "../Rendering/MultiVisualizationEngineFactory.h"
@@ -32,7 +32,7 @@ MultiEngine<TVoxel, TIndex>::MultiEngine(const RGBDCalib& calib, Vector2i imgSiz
 	auto& settings = configuration::get();
 
 	const MemoryDeviceType deviceType = settings.device_type;
-	lowLevelEngine = LowLevelEngineFactory::MakeLowLevelEngine(deviceType);
+	lowLevelEngine = PreprocessingEngineFactory::Build(deviceType);
 	viewBuilder = ViewBuilderFactory::Build(calib, deviceType);
 	visualization_engine = RenderingEngineFactory::Build<TVoxel, TIndex>(deviceType);
 

@@ -1,5 +1,3 @@
-// Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
-
 #pragma once
 
 #include "../../../Utils/ImageTypes.h"
@@ -7,7 +5,7 @@
 namespace ITMLib
 {
 	/// Interface to low level image processing engines.
-	class LowLevelEngine
+	class PreprocessingEngineInterface
 	{
 	public:
 		virtual void CopyImage(UChar4Image *image_out, const UChar4Image *image_in) const = 0;
@@ -29,7 +27,7 @@ namespace ITMLib
 
 		virtual int CountValidDepths(const FloatImage *image_in) const = 0;
 
-		LowLevelEngine() { }
-		virtual ~LowLevelEngine() { }
+		PreprocessingEngineInterface() { }
+		virtual ~PreprocessingEngineInterface() { }
 	};
 }

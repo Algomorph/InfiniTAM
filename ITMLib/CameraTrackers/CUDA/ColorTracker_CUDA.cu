@@ -17,7 +17,7 @@ __global__ void colorTrackerOneLevel_g_ro_device(float *g_out, float *h_out, Vec
 
 // host methods
 
-ColorTracker_CUDA::ColorTracker_CUDA(Vector2i imgSize, TrackerIterationType *trackingRegime, int noHierarchyLevels, const LowLevelEngine *lowLevelEngine)
+ColorTracker_CUDA::ColorTracker_CUDA(Vector2i imgSize, TrackerIterationType *trackingRegime, int noHierarchyLevels, const PreprocessingEngineInterface *lowLevelEngine)
 	: ColorTracker(imgSize, trackingRegime, noHierarchyLevels, lowLevelEngine, MEMORYDEVICE_CUDA)
 { 
 	int dim_g = 6;

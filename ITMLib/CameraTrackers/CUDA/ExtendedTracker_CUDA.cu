@@ -74,7 +74,7 @@ ExtendedTracker_CUDA::ExtendedTracker_CUDA(Vector2i imgSize_d,
                                            float tukeyCutOff,
                                            int framesToSkip,
                                            int framesToWeight,
-                                           const LowLevelEngine *lowLevelEngine)
+                                           const PreprocessingEngineInterface *lowLevelEngine)
 	: ExtendedTracker(imgSize_d,
 	                  imgSize_rgb,
 	                  useDepth,
