@@ -10,8 +10,7 @@ namespace ITMLib{
 PreprocessingEngineInterface* PreprocessingEngineFactory::Build(MemoryDeviceType device_type){
   PreprocessingEngineInterface* preprocessing_engine = nullptr;
 
-  switch(device_type)
-  {
+  switch(device_type){
     case MEMORYDEVICE_CPU:
 	    preprocessing_engine = new LowLevelEngine_CPU();
       break;
