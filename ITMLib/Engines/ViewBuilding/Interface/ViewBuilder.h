@@ -12,9 +12,9 @@ namespace ITMLib
 	class ViewBuilder
 	{
 	protected:
-		const RGBDCalib calib;
-		ShortImage *shortImage;
-		FloatImage *floatImage;
+		const RGBDCalib calibration_information;
+		ShortImage *short_raw_disparity_image;
+		FloatImage *float_raw_disparity_image;
 
 	public:
 		virtual void ConvertDisparityToDepth(FloatImage *depth_out, const ShortImage *disp_in, const Intrinsics *depthIntrinsics,
@@ -38,16 +38,16 @@ namespace ITMLib
 		                        bool storePreviousImage) = 0;
 
 		ViewBuilder(const RGBDCalib& calib_)
-		: calib(calib_)
+		: calibration_information(calib_)
 		{
-			this->shortImage = NULL;
-			this->floatImage = NULL;
+			this->short_raw_disparity_image = NULL;
+			this->float_raw_disparity_image = NULL;
 		}
 
 		virtual ~ViewBuilder()
 		{
-			if (this->shortImage != NULL) delete this->shortImage;
-			if (this->floatImage != NULL) delete this->floatImage;
+			if (this->short_raw_disparity_image != NULL) delete this->short_raw_disparity_image;
+			if (this->float_raw_disparity_image != NULL) delete this->float_raw_disparity_image;
 		}
 	};
 }

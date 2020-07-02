@@ -378,7 +378,7 @@ void MultiEngine<TVoxel, TIndex>::GetImage(UChar4Image *out, GetImageType getIma
 			imageType = IRenderingEngine::RENDER_SHADED_GREYSCALE_IMAGENORMALS;
 		}
 
-		visualization_engine->RenderImage(activeLocalMap->volume, activeLocalMap->trackingState->pose_d, &view->calib.intrinsics_d, activeLocalMap->renderState, activeLocalMap->renderState->raycastImage, imageType, raycastType);
+		visualization_engine->RenderImage(activeLocalMap->volume, activeLocalMap->trackingState->pose_d, &view->calibration_information.intrinsics_d, activeLocalMap->renderState, activeLocalMap->renderState->raycastImage, imageType, raycastType);
 
 		ORUtils::Image<Vector4u> *srcImage = activeLocalMap->renderState->raycastImage;
 		out->ChangeDims(srcImage->dimensions);

@@ -1,62 +1,67 @@
-// Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
-
 #pragma once
 
 #include "../Camera/CalibIO.h"
 #include "../../Utils/ImageTypes.h"
 
-namespace ITMLib
-{
-	/** \brief
-	    Represents a single "view", i.e. RGB and depth images along
-	    with all intrinsic and relative calibration information
-	*/
-	class View
-	{
+namespace ITMLib{
+	/**
+	 * \brief
+	 * Represents a single "view", i.e. RGB and depth images along
+	 * with all intrinsic and relative calibration information
+	 * */
+	class View{
 	public:
 		/// Intrinsic calibration information for the view.
-		const RGBDCalib calib;
+		const RGBDCalib calibration_information;
+
+		ShortImage* short_raw_disparity_image = nullptr;
+		FloatImage* float_raw_disparity_image = nullptr;
 
 		/// RGB colour image for the current frame.
-		UChar4Image *rgb;
+		UChar4Image* rgb;
 
 		/// RGB colour image for the previous frame.
-		UChar4Image *rgb_prev;
+		UChar4Image* rgb_prev;
 
 		/// Float valued depth image, if available according to @ref inputImageType.
-		FloatImage *depth;
+		FloatImage* depth;
 
 		/// surface normal of depth image
 		// allocated when needed
-		Float4Image *depthNormal;
+		Float4Image* depth_normal;
 
 		/// uncertainty (std) in each pixel of depth value based on sensor noise model
 		/// allocated when needed
-		FloatImage *depthUncertainty;
+		FloatImage* depthUncertainty;
 
 		// confidence based on distance from center
-		FloatImage *depthConfidence;
+		FloatImage* depthConfidence;
 
-		View(const RGBDCalib& calibration, Vector2i imgSize_rgb, Vector2i imgSize_d, bool useGPU)
-		: calib(calibration)
+		View(const RGBDCalib& calibration_information, Vector2i rgb_image_size, Vector2i depth_image_size, bool use_GPU)
+		: calibration_information(calibration_information)
 		{
-			this->rgb = new UChar4Image(imgSize_rgb, true, useGPU);
-			this->rgb_prev = NULL;
-			this->depth = new FloatImage(imgSize_d, true, useGPU);
-			this->depthNormal = NULL;
-			this->depthUncertainty = NULL;
-			this->depthConfidence = new FloatImage(imgSize_d, true, useGPU);
+			this->short_raw_disparity_image = nullptr;
+			this->float_raw_disparity_image = nullptr;
+			this->rgb = new UChar4Image(rgb_image_size, true, use_GPU);
+			this->rgb_prev = nullptr;
+			this->depth = new FloatImage(depth_image_size, true, use_GPU);
+			this->depth_normal = nullptr;
+			this->depthUncertainty = nullptr;
+			this->depthConfidence = new FloatImage(depth_image_size, true, use_GPU);
 		}
 
 		virtual ~View()
 		{
+			delete short_raw_disparity_image;
+			delete float_raw_disparity_image;
+
 			delete rgb;
 			delete rgb_prev;
 
 			delete depth;
 			delete depthConfidence;
 
-			delete depthNormal;
+			delete depth_normal;
 			delete depthUncertainty;
 		}
 

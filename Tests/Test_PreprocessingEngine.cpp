@@ -44,5 +44,5 @@ void GenericFilterSubsampleTest() {
 }
 
 BOOST_AUTO_TEST_CASE(Test_GenericFilterSubsampleTest_CPU) {
-	GenericFindAndCountVisibleBlocksTest<MEMORYDEVICE_CPU>();
+	GenericFilterSubsampleTest<MEMORYDEVICE_CPU>();
 }

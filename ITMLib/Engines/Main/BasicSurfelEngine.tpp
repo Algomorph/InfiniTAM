@@ -248,7 +248,7 @@ BasicSurfelEngine<TSurfel>::ProcessFrame(UChar4Image* rgbImage, ShortImage* rawD
 
 			trackingController->Prepare(trackingState, surfelScene, view, surfelVisualizationEngine,
 			                            surfelRenderState_live);
-			surfelVisualizationEngine->FindSurfaceSuper(surfelScene, trackingState->pose_d, &view->calib.intrinsics_d,
+			surfelVisualizationEngine->FindSurfaceSuper(surfelScene, trackingState->pose_d, &view->calibration_information.intrinsics_d,
 			                                            USR_RENDER, surfelRenderState_live);
 			trackingController->Track(trackingState, view);
 
@@ -271,7 +271,7 @@ BasicSurfelEngine<TSurfel>::ProcessFrame(UChar4Image* rgbImage, ShortImage* rawD
 		// raycast to renderState_canonical for tracking and free Rendering
 		trackingController->Prepare(trackingState, surfelScene, view, surfelVisualizationEngine,
 		                            surfelRenderState_live);
-		surfelVisualizationEngine->FindSurfaceSuper(surfelScene, trackingState->pose_d, &view->calib.intrinsics_d,
+		surfelVisualizationEngine->FindSurfaceSuper(surfelScene, trackingState->pose_d, &view->calibration_information.intrinsics_d,
 		                                            USR_RENDER, surfelRenderState_live);
 
 #if 0 //TODO: explain not compiled block in comment? --Greg(GitHub:Algomorph)
@@ -349,7 +349,7 @@ void BasicSurfelEngine<TSurfel>::GetImage(UChar4Image* out, GetImageType getImag
 		case BasicSurfelEngine::InfiniTAM_IMAGE_COLOUR_FROM_NORMAL:
 		case BasicSurfelEngine::InfiniTAM_IMAGE_COLOUR_FROM_CONFIDENCE: {
 			const bool useRadii = true;
-			surfelVisualizationEngine->FindSurface(surfelScene, trackingState->pose_d, &view->calib.intrinsics_d,
+			surfelVisualizationEngine->FindSurface(surfelScene, trackingState->pose_d, &view->calibration_information.intrinsics_d,
 			                                       useRadii, USR_DONOTRENDER, surfelRenderState_live);
 			surfelVisualizationEngine->RenderImage(surfelScene, trackingState->pose_d, surfelRenderState_live, out,
 			                                       ToSurfelImageType(getImageType));

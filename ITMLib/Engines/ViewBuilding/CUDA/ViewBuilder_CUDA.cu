@@ -36,15 +36,15 @@ void ViewBuilder_CUDA::UpdateView(View** view_ptr, UChar4Image* rgbImage, ShortI
 {
 	if (*view_ptr == NULL)
 	{
-		*view_ptr = new View(calib, rgbImage->dimensions, rawDepthImage->dimensions, true);
-		if (this->shortImage != NULL) delete this->shortImage;
-		this->shortImage = new ShortImage(rawDepthImage->dimensions, true, true);
-		if (this->floatImage != NULL) delete this->floatImage;
-		this->floatImage = new FloatImage(rawDepthImage->dimensions, true, true);
+		*view_ptr = new View(calibration_information, rgbImage->dimensions, rawDepthImage->dimensions, true);
+		if (this->short_raw_disparity_image != NULL) delete this->short_raw_disparity_image;
+		this->short_raw_disparity_image = new ShortImage(rawDepthImage->dimensions, true, true);
+		if (this->float_raw_disparity_image != NULL) delete this->float_raw_disparity_image;
+		this->float_raw_disparity_image = new FloatImage(rawDepthImage->dimensions, true, true);
 
 		if (modelSensorNoise)
 		{
-			(*view_ptr)->depthNormal = new Float4Image(rawDepthImage->dimensions, true, true);
+			(*view_ptr)->depth_normal = new Float4Image(rawDepthImage->dimensions, true, true);
 			(*view_ptr)->depthUncertainty = new FloatImage(rawDepthImage->dimensions, true, true);
 		}
 	}
@@ -58,15 +58,15 @@ void ViewBuilder_CUDA::UpdateView(View** view_ptr, UChar4Image* rgbImage, ShortI
 	}	
 
 	view->rgb->SetFrom(*rgbImage, MemoryCopyDirection::CPU_TO_CUDA);
-	this->shortImage->SetFrom(*rawDepthImage, MemoryCopyDirection::CPU_TO_CUDA);
+	this->short_raw_disparity_image->SetFrom(*rawDepthImage, MemoryCopyDirection::CPU_TO_CUDA);
 
-	switch (view->calib.disparityCalib.GetType())
+	switch (view->calibration_information.disparityCalib.GetType())
 	{
 	case DisparityCalib::TRAFO_KINECT:
-		this->ConvertDisparityToDepth(view->depth, this->shortImage, &(view->calib.intrinsics_d), view->calib.disparityCalib.GetParams());
+		this->ConvertDisparityToDepth(view->depth, this->short_raw_disparity_image, &(view->calibration_information.intrinsics_d), view->calibration_information.disparityCalib.GetParams());
 		break;
 	case DisparityCalib::TRAFO_AFFINE:
-		this->ConvertDepthAffineToFloat(view->depth, this->shortImage, view->calib.disparityCalib.GetParams());
+		this->ConvertDepthAffineToFloat(view->depth, this->short_raw_disparity_image, view->calibration_information.disparityCalib.GetParams());
 		break;
 	default:
 		break;
@@ -75,17 +75,17 @@ void ViewBuilder_CUDA::UpdateView(View** view_ptr, UChar4Image* rgbImage, ShortI
 	if (useBilateralFilter)
 	{
 		//5 steps of bilateral filtering
-		this->DepthFiltering(this->floatImage, view->depth);
-		this->DepthFiltering(view->depth, this->floatImage);
-		this->DepthFiltering(this->floatImage, view->depth);
-		this->DepthFiltering(view->depth, this->floatImage);
-		this->DepthFiltering(this->floatImage, view->depth);
-		view->depth->SetFrom(*this->floatImage, MemoryCopyDirection::CUDA_TO_CUDA);
+		this->DepthFiltering(this->float_raw_disparity_image, view->depth);
+		this->DepthFiltering(view->depth, this->float_raw_disparity_image);
+		this->DepthFiltering(this->float_raw_disparity_image, view->depth);
+		this->DepthFiltering(view->depth, this->float_raw_disparity_image);
+		this->DepthFiltering(this->float_raw_disparity_image, view->depth);
+		view->depth->SetFrom(*this->float_raw_disparity_image, MemoryCopyDirection::CUDA_TO_CUDA);
 	}
 
 	if (modelSensorNoise)
 	{
-		this->ComputeNormalAndWeights(view->depthNormal, view->depthUncertainty, view->depth, view->calib.intrinsics_d.projectionParamsSimple.all);
+		this->ComputeNormalAndWeights(view->depth_normal, view->depthUncertainty, view->depth, view->calibration_information.intrinsics_d.projectionParamsSimple.all);
 	}
 }
 
@@ -95,15 +95,15 @@ void ViewBuilder_CUDA::UpdateView(View** view_ptr, UChar4Image* rgbImage, ShortI
 {
 	if (*view_ptr == NULL) 
 	{
-		*view_ptr = new ViewIMU(calib, rgbImage->dimensions, depthImage->dimensions, true);
-		if (this->shortImage != NULL) delete this->shortImage;
-		this->shortImage = new ShortImage(depthImage->dimensions, true, true);
-		if (this->floatImage != NULL) delete this->floatImage;
-		this->floatImage = new FloatImage(depthImage->dimensions, true, true);
+		*view_ptr = new ViewIMU(calibration_information, rgbImage->dimensions, depthImage->dimensions, true);
+		if (this->short_raw_disparity_image != NULL) delete this->short_raw_disparity_image;
+		this->short_raw_disparity_image = new ShortImage(depthImage->dimensions, true, true);
+		if (this->float_raw_disparity_image != NULL) delete this->float_raw_disparity_image;
+		this->float_raw_disparity_image = new FloatImage(depthImage->dimensions, true, true);
 
 		if (modelSensorNoise)
 		{
-			(*view_ptr)->depthNormal = new Float4Image(depthImage->dimensions, true, true);
+			(*view_ptr)->depth_normal = new Float4Image(depthImage->dimensions, true, true);
 			(*view_ptr)->depthUncertainty = new FloatImage(depthImage->dimensions, true, true);
 		}
 	}

@@ -306,11 +306,11 @@ public:
 			const ITMLib::VoxelVolumeParameters& volume_parameters,
 			const ITMLib::View* view, Matrix4f depth_camera_extrinsic_matrix) :
 			depth_image_size(view->depth->dimensions),
-			depth_camera_projection_parameters(view->calib.intrinsics_d.projectionParamsSimple.all),
+			depth_camera_projection_parameters(view->calibration_information.intrinsics_d.projectionParamsSimple.all),
 			depth_camera_extrinsic_matrix(depth_camera_extrinsic_matrix),
 			rgb_image_size(view->rgb->dimensions),
-			rgb_camera_projection_parameters(view->calib.intrinsics_rgb.projectionParamsSimple.all),
-			rgb_camera_extrinsic_matrix(TTSDFVoxel::hasColorInformation ?  view->calib.trafo_rgb_to_depth.calib_inv * depth_camera_extrinsic_matrix : Matrix4f()),
+			rgb_camera_projection_parameters(view->calibration_information.intrinsics_rgb.projectionParamsSimple.all),
+			rgb_camera_extrinsic_matrix(TTSDFVoxel::hasColorInformation ? view->calibration_information.trafo_rgb_to_depth.calib_inv * depth_camera_extrinsic_matrix : Matrix4f()),
 
 			truncation_distance(volume_parameters.truncation_distance),
 			max_integration_weight(volume_parameters.max_integration_weight),

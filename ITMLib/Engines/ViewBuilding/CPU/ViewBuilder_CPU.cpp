@@ -14,19 +14,19 @@ ViewBuilder_CPU::~ViewBuilder_CPU() { }
 void ViewBuilder_CPU::UpdateView(View** view_ptr, UChar4Image* rgbImage, ShortImage* rawDepthImage, bool useThresholdFilter,
                                  bool useBilateralFilter, bool modelSensorNoise, bool storePreviousImage)
 {
-	if (*view_ptr == NULL)
+	if (*view_ptr == nullptr)
 	{
-		*view_ptr = new View(calib, rgbImage->dimensions, rawDepthImage->dimensions, false);
+		*view_ptr = new View(calibration_information, rgbImage->dimensions, rawDepthImage->dimensions, false);
 		//TODO: This is very bad coding practice, assumes that there's ever only one ViewBuilder updating a single view... \
-		// Most likely, these "shortImage" and "floatImage" should be a part of View itself, while this class should have no state but parameters
-		if (this->shortImage != NULL) delete this->shortImage;
-		this->shortImage = new ShortImage(rawDepthImage->dimensions, true, false);
-		if (this->floatImage != NULL) delete this->floatImage;
-		this->floatImage = new FloatImage(rawDepthImage->dimensions, true, false);
+		// Most likely, these "short_raw_disparity_image" and "float_raw_disparity_image" should be a part of View itself, while this class should have no state but parameters
+		if (this->short_raw_disparity_image != NULL) delete this->short_raw_disparity_image;
+		this->short_raw_disparity_image = new ShortImage(rawDepthImage->dimensions, true, false);
+		if (this->float_raw_disparity_image != NULL) delete this->float_raw_disparity_image;
+		this->float_raw_disparity_image = new FloatImage(rawDepthImage->dimensions, true, false);
 
 		if (modelSensorNoise)
 		{
-			(*view_ptr)->depthNormal = new Float4Image(rawDepthImage->dimensions, true, false);
+			(*view_ptr)->depth_normal = new Float4Image(rawDepthImage->dimensions, true, false);
 			(*view_ptr)->depthUncertainty = new FloatImage(rawDepthImage->dimensions, true, false);
 		}
 	}
@@ -39,39 +39,39 @@ void ViewBuilder_CPU::UpdateView(View** view_ptr, UChar4Image* rgbImage, ShortIm
 	}
 
 	view->rgb->SetFrom(*rgbImage, MemoryCopyDirection::CPU_TO_CPU);
-	this->shortImage->SetFrom(*rawDepthImage, MemoryCopyDirection::CPU_TO_CPU);
+	this->short_raw_disparity_image->SetFrom(*rawDepthImage, MemoryCopyDirection::CPU_TO_CPU);
 
-	switch (view->calib.disparityCalib.GetType())
+	switch (view->calibration_information.disparityCalib.GetType())
 	{
 	case DisparityCalib::TRAFO_KINECT:
-		this->ConvertDisparityToDepth(view->depth, this->shortImage, &(view->calib.intrinsics_d), view->calib.disparityCalib.GetParams());
+		this->ConvertDisparityToDepth(view->depth, this->short_raw_disparity_image, &(view->calibration_information.intrinsics_d), view->calibration_information.disparityCalib.GetParams());
 		break;
 	case DisparityCalib::TRAFO_AFFINE:
-		this->ConvertDepthAffineToFloat(view->depth, this->shortImage, view->calib.disparityCalib.GetParams());
+		this->ConvertDepthAffineToFloat(view->depth, this->short_raw_disparity_image, view->calibration_information.disparityCalib.GetParams());
 		break;
 	default:
 		break;
 	}
 
 	if (useThresholdFilter){
-		this->ThresholdFiltering(this->floatImage, view->depth);
-		view->depth->SetFrom(*this->floatImage,MemoryCopyDirection::CPU_TO_CPU);
+		this->ThresholdFiltering(this->float_raw_disparity_image, view->depth);
+		view->depth->SetFrom(*this->float_raw_disparity_image, MemoryCopyDirection::CPU_TO_CPU);
 	}
 
 	if (useBilateralFilter)
 	{
 		//5 steps of bilateral filtering
-		this->DepthFiltering(this->floatImage, view->depth);
-		this->DepthFiltering(view->depth, this->floatImage);
-		this->DepthFiltering(this->floatImage, view->depth);
-		this->DepthFiltering(view->depth, this->floatImage);
-		this->DepthFiltering(this->floatImage, view->depth);
-		view->depth->SetFrom(*this->floatImage, MemoryCopyDirection::CPU_TO_CPU);
+		this->DepthFiltering(this->float_raw_disparity_image, view->depth);
+		this->DepthFiltering(view->depth, this->float_raw_disparity_image);
+		this->DepthFiltering(this->float_raw_disparity_image, view->depth);
+		this->DepthFiltering(view->depth, this->float_raw_disparity_image);
+		this->DepthFiltering(this->float_raw_disparity_image, view->depth);
+		view->depth->SetFrom(*this->float_raw_disparity_image, MemoryCopyDirection::CPU_TO_CPU);
 	}
 
 	if (modelSensorNoise)
 	{
-		this->ComputeNormalAndWeights(view->depthNormal, view->depthUncertainty, view->depth, view->calib.intrinsics_d.projectionParamsSimple.all);
+		this->ComputeNormalAndWeights(view->depth_normal, view->depthUncertainty, view->depth, view->calibration_information.intrinsics_d.projectionParamsSimple.all);
 	}
 }
 
@@ -81,15 +81,15 @@ void ViewBuilder_CPU::UpdateView(View** view_ptr, UChar4Image* rgbImage, ShortIm
 {
 	if (*view_ptr == NULL)
 	{
-		*view_ptr = new ViewIMU(calib, rgbImage->dimensions, depthImage->dimensions, false);
-		if (this->shortImage != NULL) delete this->shortImage;
-		this->shortImage = new ShortImage(depthImage->dimensions, true, false);
-		if (this->floatImage != NULL) delete this->floatImage;
-		this->floatImage = new FloatImage(depthImage->dimensions, true, false);
+		*view_ptr = new ViewIMU(calibration_information, rgbImage->dimensions, depthImage->dimensions, false);
+		if (this->short_raw_disparity_image != NULL) delete this->short_raw_disparity_image;
+		this->short_raw_disparity_image = new ShortImage(depthImage->dimensions, true, false);
+		if (this->float_raw_disparity_image != NULL) delete this->float_raw_disparity_image;
+		this->float_raw_disparity_image = new FloatImage(depthImage->dimensions, true, false);
 
 		if (modelSensorNoise)
 		{
-			(*view_ptr)->depthNormal = new Float4Image(depthImage->dimensions, true, false);
+			(*view_ptr)->depth_normal = new Float4Image(depthImage->dimensions, true, false);
 			(*view_ptr)->depthUncertainty = new FloatImage(depthImage->dimensions, true, false);
 		}
 	}

@@ -24,10 +24,10 @@ void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::IntegrateIntoScene(V
 	Vector4f projParams_d, projParams_rgb;
 
 	M_d = trackingState->pose_d->GetM();
-	if (TVoxel::hasColorInformation) M_rgb = view->calib.trafo_rgb_to_depth.calib_inv * M_d;
+	if (TVoxel::hasColorInformation) M_rgb = view->calibration_information.trafo_rgb_to_depth.calib_inv * M_d;
 
-	projParams_d = view->calib.intrinsics_d.projectionParamsSimple.all;
-	projParams_rgb = view->calib.intrinsics_rgb.projectionParamsSimple.all;
+	projParams_d = view->calibration_information.intrinsics_d.projectionParamsSimple.all;
+	projParams_rgb = view->calibration_information.intrinsics_rgb.projectionParamsSimple.all;
 
 	float mu = volume->GetParameters().truncation_distance; int maxW = volume->GetParameters().max_integration_weight;
 
@@ -98,7 +98,7 @@ void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::AllocateSceneFromDep
 
 	M_d = trackingState->pose_d->GetM(); M_d.inv(invM_d);
 
-	projParams_d = view->calib.intrinsics_d.projectionParamsSimple.all;
+	projParams_d = view->calibration_information.intrinsics_d.projectionParamsSimple.all;
 	invProjParams_d = projParams_d;
 	invProjParams_d.x = 1.0f / invProjParams_d.x;
 	invProjParams_d.y = 1.0f / invProjParams_d.y;
@@ -304,10 +304,10 @@ void SceneReconstructionEngine_CPU<TVoxel, PlainVoxelArray>::IntegrateIntoScene(
 	const float voxelSize = volume->GetParameters().voxel_size;
 
 	const Matrix4f M_d = trackingState->pose_d->GetM();
-	const Matrix4f M_rgb = TVoxel::hasColorInformation ? view->calib.trafo_rgb_to_depth.calib_inv * M_d : Matrix4f();
+	const Matrix4f M_rgb = TVoxel::hasColorInformation ? view->calibration_information.trafo_rgb_to_depth.calib_inv * M_d : Matrix4f();
 
-	const Vector4f projParams_d = view->calib.intrinsics_d.projectionParamsSimple.all;
-	const Vector4f projParams_rgb = view->calib.intrinsics_rgb.projectionParamsSimple.all;
+	const Vector4f projParams_d = view->calibration_information.intrinsics_d.projectionParamsSimple.all;
+	const Vector4f projParams_rgb = view->calibration_information.intrinsics_rgb.projectionParamsSimple.all;
 
 	const float mu = volume->GetParameters().truncation_distance;
 	const int maxW = volume->GetParameters().max_integration_weight;

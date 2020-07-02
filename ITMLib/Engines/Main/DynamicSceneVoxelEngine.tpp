@@ -444,7 +444,7 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(UChar4Image* out, 
 					render_type = IRenderingEngine::RENDER_SHADED_GREYSCALE_IMAGENORMALS;
 			}
 
-			rendering_engine->RenderImage(live_volumes[0], tracking_state->pose_d, &view->calib.intrinsics_d,
+			rendering_engine->RenderImage(live_volumes[0], tracking_state->pose_d, &view->calibration_information.intrinsics_d,
 			                              live_render_state, live_render_state->raycastImage, render_type,
 			                              raycastType);
 

@@ -397,7 +397,7 @@ void BasicVoxelEngine<TVoxel,TIndex>::GetImage(UChar4Image *out, GetImageType ge
 			imageType = IRenderingEngine::RENDER_SHADED_GREYSCALE_IMAGENORMALS;
 		}
 
-		visualizationEngine->RenderImage(volume, trackingState->pose_d, &view->calib.intrinsics_d, render_state, render_state->raycastImage, imageType, raycastType);
+		visualizationEngine->RenderImage(volume, trackingState->pose_d, &view->calibration_information.intrinsics_d, render_state, render_state->raycastImage, imageType, raycastType);
 
 		ORUtils::Image<Vector4u>* source_image = nullptr;
 		if (relocalisationCount != 0) source_image = kfRaycast;
