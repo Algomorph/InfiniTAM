@@ -1,3 +1,21 @@
+//  ================================================================
+//  Created by Gregory Kramida on 7/3/20.
+//  Copyright (c) 2020 Gregory Kramida
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+
+//  http://www.apache.org/licenses/LICENSE-2.0
+
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//  ================================================================
+
+// Credits: Inspired by ITMLib/Objects/Views/View.h in original InfiniTAM (https://github.com/victorprad/InfiniTAM/)
+
 #pragma once
 
 #include "../Camera/CalibIO.h"
@@ -6,13 +24,14 @@
 namespace ITMLib {
 /**
  * \brief
- * Represents a single "view", i.e. RGB and depth images along
- * with all intrinsic and relative calibration information
+ * Represents a single frame's worth of data, i.e. RGB and depth images along
+ * with all intrinsic and relative calibration information,
+ * preprocessed and prepared for consumption by ViewBuilder.
  * */
 class View {
-public:
+public: // member variables
 	/// Intrinsic calibration information for the view.
-	const RGBDCalib calibration_information;
+	RGBD_CalibrationInformation calibration_information;
 
 	ShortImage short_raw_disparity_image;
 	FloatImage float_raw_disparity_image;
@@ -31,33 +50,24 @@ public:
 	FloatImage* depth_uncertainty;
 
 	/// RGB colour image for the previous frame.
+	/// allocated when needed
 	UChar4Image* rgb_prev;
 
 	/// surface normal of depth image
-	// allocated when needed
+	/// allocated when needed
 	Float4Image* depth_normal;
 
-	View(const RGBDCalib& calibration_information, Vector2i rgb_image_size, Vector2i depth_image_size, bool use_GPU)
-			: calibration_information(calibration_information),
-			  short_raw_disparity_image(depth_image_size, true, use_GPU),
-			  float_raw_disparity_image(depth_image_size, true, use_GPU),
-			  rgb(rgb_image_size, true, use_GPU),
-			  depth(depth_image_size, true, use_GPU),
-			  depth_confidence(depth_image_size, true, use_GPU) {
-		this->rgb_prev = nullptr;
-		this->depth_normal = nullptr;
-		this->depth_uncertainty = nullptr;
-	}
+public: // member functions
 
-	virtual ~View() {
-		delete rgb_prev;
-		delete depth_normal;
-		delete depth_uncertainty;
-	}
+	View(const RGBD_CalibrationInformation& calibration_information, Vector2i rgb_image_size, Vector2i depth_image_size, bool use_GPU);
+	View(View&& other) noexcept;
+	View(const View& other) noexcept;
+	View& operator=(View other);
+	virtual ~View();
+	void Swap(View& other);
 
-	//TODO: Unsuppress, provide rule of 4.5
-	// Suppress the default copy constructor and assignment operator
-	View(const View&);
-	View& operator=(const View&);
+public: // friend functions
+
+	friend void swap(View& lhs, View& rhs) { lhs.Swap(rhs); }
 };
 }

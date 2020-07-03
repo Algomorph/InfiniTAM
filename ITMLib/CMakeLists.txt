@@ -683,7 +683,7 @@ set(ITMLIB_OBJECTS_CAMERA_HEADERS
     Objects/Camera/DisparityCalib.h
     Objects/Camera/Extrinsics.h
     Objects/Camera/Intrinsics.h
-    Objects/Camera/RGBDCalib.h
+    Objects/Camera/RGBD_CalibrationInformation.h
     )
 
 ##
@@ -758,6 +758,10 @@ set(ITMLIB_OBJECTS_TRACKING_HEADERS
 set(ITMLIB_OBJECTS_VIEWS_HEADERS
     Objects/Views/View.h
     Objects/Views/ViewIMU.h
+    )
+
+set(ITMLIB_OBJECTS_VIEWS_SOURCES
+    Objects/Views/View.cpp
     )
 
 #===================================================== CAMERA TRACKERS =================================================
@@ -1132,6 +1136,7 @@ set(headers
     ${ITMLIB_OBJECTS_VOLUME_HEADERS}
     ${ITMLIB_OBJECTS_TRACKING_HEADERS}
     ${ITMLIB_OBJECTS_VIEWS_HEADERS}
+    ${ITMLIB_OBJECTS_VIEWS_SOURCES}
     ${ITMLIB_CAMERA_TRACKERS_HEADERS}
     ${ITMLIB_CAMERA_TRACKERS_CPU_HEADERS}
     ${ITMLIB_CAMERA_TRACKERS_CUDA_HEADERS}

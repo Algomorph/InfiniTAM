@@ -8,7 +8,7 @@
 using namespace ITMLib;
 using namespace ORUtils;
 
-ViewBuilder_CPU::ViewBuilder_CPU(const RGBDCalib& calib): ViewBuilder(calib) { }
+ViewBuilder_CPU::ViewBuilder_CPU(const RGBD_CalibrationInformation& calib): ViewBuilder(calib) { }
 ViewBuilder_CPU::~ViewBuilder_CPU() { }
 
 void ViewBuilder_CPU::UpdateView(View** view_ptr, UChar4Image* rgbImage, ShortImage* rawDepthImage, bool useThresholdFilter,

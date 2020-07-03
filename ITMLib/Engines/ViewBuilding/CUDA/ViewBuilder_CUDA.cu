@@ -9,7 +9,7 @@
 using namespace ITMLib;
 using namespace ORUtils;
 
-ViewBuilder_CUDA::ViewBuilder_CUDA(const RGBDCalib& calib): ViewBuilder(calib) { }
+ViewBuilder_CUDA::ViewBuilder_CUDA(const RGBD_CalibrationInformation& calib): ViewBuilder(calib) { }
 ViewBuilder_CUDA::~ViewBuilder_CUDA() { }
 
 //---------------------------------------------------------------------------

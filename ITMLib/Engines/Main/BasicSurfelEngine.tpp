@@ -15,7 +15,7 @@
 using namespace ITMLib;
 
 template<typename TSurfel>
-BasicSurfelEngine<TSurfel>::BasicSurfelEngine(const RGBDCalib& calib, Vector2i imgSize_rgb, Vector2i imgSize_d) {
+BasicSurfelEngine<TSurfel>::BasicSurfelEngine(const RGBD_CalibrationInformation& calib, Vector2i imgSize_rgb, Vector2i imgSize_d) {
 	auto& settings = configuration::get();
 
 	if ((imgSize_d.x == -1) || (imgSize_d.y == -1)) imgSize_d = imgSize_rgb;

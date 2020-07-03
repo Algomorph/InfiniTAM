@@ -264,7 +264,7 @@ BOOST_AUTO_TEST_CASE(Test_SceneConstruct17_PVA_VBH_Span_CPU) {
 BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
 	// region ================================= CONSTRUCT VIEW =========================================================
 
-	RGBDCalib calibration_data;
+	RGBD_CalibrationInformation calibration_data;
 	readRGBDCalib(snoopy::SnoopyCalibrationPath().c_str(), calibration_data);
 
 	ViewBuilder* view_builder = ViewBuilderFactory::Build(calibration_data, MEMORYDEVICE_CPU);
@@ -427,7 +427,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
 BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CPU) {
 	// region ================================= CONSTRUCT VIEW =========================================================
 
-	RGBDCalib calibration_data;
+	RGBD_CalibrationInformation calibration_data;
 	readRGBDCalib(snoopy::SnoopyCalibrationPath().c_str(), calibration_data);
 
 	ViewBuilder* viewBuilder = ViewBuilderFactory::Build(calibration_data, MEMORYDEVICE_CPU);

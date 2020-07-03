@@ -179,7 +179,7 @@ void ConstructStripesTestVolumes() {
 	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(), "Constructing stripe test volumes...");
 	// region ================================= CONSTRUCT VIEW =========================================================
 
-	RGBDCalib calibration_data;
+	RGBD_CalibrationInformation calibration_data;
 	readRGBDCalib(snoopy::SnoopyCalibrationPath().c_str(), calibration_data);
 
 	auto view_builder = ViewBuilderFactory::Build(calibration_data, MEMORYDEVICE_CPU);

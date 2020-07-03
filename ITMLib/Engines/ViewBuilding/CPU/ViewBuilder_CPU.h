@@ -23,7 +23,7 @@ namespace ITMLib
 		                bool useBilateralFilter, IMUMeasurement* imuMeasurement, bool modelSensorNoise,
 		                bool storePreviousImage);
 
-		ViewBuilder_CPU(const RGBDCalib& calib);
+		ViewBuilder_CPU(const RGBD_CalibrationInformation& calib);
 		~ViewBuilder_CPU();
 	};
 }

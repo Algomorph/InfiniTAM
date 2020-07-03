@@ -25,7 +25,7 @@ namespace test_utilities {
 template<MemoryDeviceType TMemoryDeviceType>
 struct CameraPoseAndRenderingEngineFixture {
 public: // instance variables
-	RGBDCalib calibration_data;
+	RGBD_CalibrationInformation calibration_data;
 	RenderState* render_state;
 	const Vector3f target;
 	const Vector3f original_viewpoint;

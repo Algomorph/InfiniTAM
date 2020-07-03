@@ -86,7 +86,7 @@ public:
 		Omitting a separate image size for the depth images
 		will assume same resolution as for the RGB images.
 	*/
-	BasicVoxelEngine(const RGBDCalib& calib, Vector2i imgSize_rgb, Vector2i imgSize_d);
+	BasicVoxelEngine(const RGBD_CalibrationInformation& calib, Vector2i imgSize_rgb, Vector2i imgSize_d);
 	~BasicVoxelEngine();
 };
 }

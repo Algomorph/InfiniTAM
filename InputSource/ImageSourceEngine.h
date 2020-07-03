@@ -4,7 +4,7 @@
 
 #include <vector>
 
-#include "../ITMLib/Objects/Camera/RGBDCalib.h"
+#include "../ITMLib/Objects/Camera/RGBD_CalibrationInformation.h"
 #include "../ITMLib/Utils/ImageTypes.h"
 
 namespace InputSource {
@@ -20,7 +20,7 @@ namespace InputSource {
 		 * \pre     HasMoreImages()
 		 * \return  The calibration parameters associated with the next RGB-D image (if any), or the default calibration parameters otherwise.
 		 */
-		virtual ITMLib::RGBDCalib getCalib() const = 0;
+		virtual ITMLib::RGBD_CalibrationInformation getCalib() const = 0;
 
 		/**
 		 * \brief Gets the size of the next depth image (if any).
@@ -69,13 +69,13 @@ namespace InputSource {
 	class BaseImageSourceEngine : public ImageSourceEngine
 	{
 	protected:
-		ITMLib::RGBDCalib calib;
+		ITMLib::RGBD_CalibrationInformation calib;
 
 	public:
 		explicit BaseImageSourceEngine(const char *calibFilename);
 
 		/** Override */
-		virtual ITMLib::RGBDCalib getCalib() const;
+		virtual ITMLib::RGBD_CalibrationInformation getCalib() const;
 	};
 
 	class ImageMaskPathGenerator

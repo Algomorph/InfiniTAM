@@ -1,16 +1,16 @@
 #pragma once
 
-#include "../../../Objects/Camera/RGBDCalib.h"
+#include "../../../Objects/Camera/RGBD_CalibrationInformation.h"
 #include "../../../Objects/Views/ViewIMU.h"
 
 namespace ITMLib{
 	/**
-	 * \brief object that provides functions to construct a view -- i.e. preprocess
+	 * \brief object that provides functions to construct a view -- i.e. preprocess incoming frame data
 	 * */
 	class ViewBuilder
 	{
 	protected:
-		const RGBDCalib calibration_information;
+		const RGBD_CalibrationInformation calibration_information;
 	public:
 		virtual void ConvertDisparityToDepth(FloatImage& depth_out, const ShortImage& disparity_in, const Intrinsics& depth_camera_intrinsics,
 		                                     Vector2f disparity_calibration_parameters) = 0;
@@ -32,7 +32,7 @@ namespace ITMLib{
 		                        bool use_bilateral_filter, IMUMeasurement* imu_measurement, bool model_sensor_noise,
 		                        bool store_previous_image) = 0;
 
-		ViewBuilder(const RGBDCalib& calibration_information)
+		ViewBuilder(const RGBD_CalibrationInformation& calibration_information)
 		: calibration_information(calibration_information){}
 
 		virtual ~ViewBuilder()

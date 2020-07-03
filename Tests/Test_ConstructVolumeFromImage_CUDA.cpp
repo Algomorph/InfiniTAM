@@ -122,7 +122,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CUDA) {
 
 	// region ================================= CONSTRUCT VIEW =========================================================
 
-	RGBDCalib calibrationData;
+	RGBD_CalibrationInformation calibrationData;
 	readRGBDCalib(snoopy::SnoopyCalibrationPath().c_str(), calibrationData);
 
 	ViewBuilder* viewBuilder = ViewBuilderFactory::Build(calibrationData, MEMORYDEVICE_CUDA);
@@ -292,7 +292,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CUDA) {
 
 	// region ================================= CONSTRUCT VIEW =========================================================
 
-	RGBDCalib calibration_data;
+	RGBD_CalibrationInformation calibration_data;
 	readRGBDCalib(snoopy::SnoopyCalibrationPath().c_str(), calibration_data);
 
 	ViewBuilder* view_builder = ViewBuilderFactory::Build(calibration_data, MEMORYDEVICE_CUDA);

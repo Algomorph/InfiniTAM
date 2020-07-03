@@ -25,7 +25,7 @@ static const float F_maxdistattemptreloc = 0.05f;
 static const bool separateThreadGlobalAdjustment = true;
 
 template <typename TVoxel, typename TIndex>
-MultiEngine<TVoxel, TIndex>::MultiEngine(const RGBDCalib& calib, Vector2i imgSize_rgb, Vector2i imgSize_d)
+MultiEngine<TVoxel, TIndex>::MultiEngine(const RGBD_CalibrationInformation& calib, Vector2i imgSize_rgb, Vector2i imgSize_d)
 {
 	if ((imgSize_d.x == -1) || (imgSize_d.y == -1)) imgSize_d = imgSize_rgb;
 

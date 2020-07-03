@@ -11,7 +11,7 @@ namespace ITMLib
 	/** \brief
 	    Represents the joint RGBD calibration parameters
 	*/
-	class RGBDCalib
+	class RGBD_CalibrationInformation
 	{
 	public:
 		/// Intrinsic parameters of the RGB camera.

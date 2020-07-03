@@ -16,7 +16,7 @@
 using namespace ITMLib;
 
 template <typename TVoxel, typename TIndex>
-BasicVoxelEngine<TVoxel,TIndex>::BasicVoxelEngine(const RGBDCalib& calib, Vector2i imgSize_rgb, Vector2i imgSize_d)
+BasicVoxelEngine<TVoxel,TIndex>::BasicVoxelEngine(const RGBD_CalibrationInformation& calib, Vector2i imgSize_rgb, Vector2i imgSize_d)
 {
 	auto& settings = configuration::get();
 

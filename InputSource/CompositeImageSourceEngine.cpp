@@ -27,7 +27,7 @@ void CompositeImageSourceEngine::addSubengine(ImageSourceEngine *subengine)
   m_subengines.push_back(subengine);
 }
 
-ITMLib::RGBDCalib CompositeImageSourceEngine::getCalib() const
+ITMLib::RGBD_CalibrationInformation CompositeImageSourceEngine::getCalib() const
 {
   // There is an assumption being made that the calibrations for all the sub-engines are the same,
   // although this is not currently being enforced.

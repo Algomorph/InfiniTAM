@@ -105,7 +105,7 @@ namespace ITMLib
 			Ommitting a separate image size for the depth images
 			will assume same resolution as for the RGB images.
 		*/
-		MultiEngine(const RGBDCalib& calib, Vector2i imgSize_rgb, Vector2i imgSize_d);
+		MultiEngine(const RGBD_CalibrationInformation& calib, Vector2i imgSize_rgb, Vector2i imgSize_d);
 		~MultiEngine();
 	};
 }

@@ -51,7 +51,7 @@ public:
   void addSubengine(ImageSourceEngine *subengine);
 
   /** Override */
-  virtual ITMLib::RGBDCalib getCalib() const;
+  virtual ITMLib::RGBD_CalibrationInformation getCalib() const;
 
   /**
    * \brief Gets the current sub-engine.

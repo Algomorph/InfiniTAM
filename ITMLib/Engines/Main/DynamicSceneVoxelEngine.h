@@ -89,7 +89,7 @@ private: // instance variables
 
 public: // instance functions
 
-	DynamicSceneVoxelEngine(const RGBDCalib& calibration_info, Vector2i rgb_image_size, Vector2i depth_image_size);
+	DynamicSceneVoxelEngine(const RGBD_CalibrationInformation& calibration_info, Vector2i rgb_image_size, Vector2i depth_image_size);
 	~DynamicSceneVoxelEngine() override;
 
 	View* GetView() override { return view; }

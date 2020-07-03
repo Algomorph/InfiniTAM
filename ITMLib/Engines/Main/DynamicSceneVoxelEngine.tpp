@@ -53,7 +53,7 @@ namespace fs = std::filesystem;
 using namespace ITMLib;
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(const RGBDCalib& calibration_info,
+DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(const RGBD_CalibrationInformation& calibration_info,
                                                                         Vector2i rgb_image_size,
                                                                         Vector2i depth_image_size)
 		: config(configuration::get()),

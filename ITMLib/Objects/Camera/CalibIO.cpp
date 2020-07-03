@@ -86,7 +86,7 @@ bool ITMLib::readDisparityCalib(const char *fileName, DisparityCalib & dest)
 	return ITMLib::readDisparityCalib(f, dest);
 }
 
-bool ITMLib::readRGBDCalib(std::istream & src, RGBDCalib & dest)
+bool ITMLib::readRGBDCalib(std::istream & src, RGBD_CalibrationInformation & dest)
 {
 	if (!ITMLib::readIntrinsics(src, dest.intrinsics_rgb)) return false;
 	if (!ITMLib::readIntrinsics(src, dest.intrinsics_d)) return false;
@@ -95,13 +95,13 @@ bool ITMLib::readRGBDCalib(std::istream & src, RGBDCalib & dest)
 	return true;
 }
 
-bool ITMLib::readRGBDCalib(const char *fileName, RGBDCalib & dest)
+bool ITMLib::readRGBDCalib(const char *fileName, RGBD_CalibrationInformation & dest)
 {
 	std::ifstream f(fileName);
 	return ITMLib::readRGBDCalib(f, dest);
 }
 
-bool ITMLib::readRGBDCalib(const char *rgbIntrinsicsFile, const char *depthIntrinsicsFile, const char *disparityCalibFile, const char *extrinsicsFile, RGBDCalib & dest)
+bool ITMLib::readRGBDCalib(const char *rgbIntrinsicsFile, const char *depthIntrinsicsFile, const char *disparityCalibFile, const char *extrinsicsFile, RGBD_CalibrationInformation & dest)
 {
 	bool ret = true;
 	ret &= ITMLib::readIntrinsics(rgbIntrinsicsFile, dest.intrinsics_rgb);
@@ -144,7 +144,7 @@ void ITMLib::writeDisparityCalib(std::ostream & dest, const DisparityCalib & src
 	}
 }
 
-void ITMLib::writeRGBDCalib(std::ostream & dest, const RGBDCalib & src)
+void ITMLib::writeRGBDCalib(std::ostream & dest, const RGBD_CalibrationInformation & src)
 {
 	writeIntrinsics(dest, src.intrinsics_rgb);
 	dest << '\n';
@@ -155,7 +155,7 @@ void ITMLib::writeRGBDCalib(std::ostream & dest, const RGBDCalib & src)
 	writeDisparityCalib(dest, src.disparityCalib);
 }
 
-void ITMLib::writeRGBDCalib(const char *fileName, const RGBDCalib & src)
+void ITMLib::writeRGBDCalib(const char *fileName, const RGBD_CalibrationInformation & src)
 {
 	std::ofstream f(fileName);
 	writeRGBDCalib(f, src);

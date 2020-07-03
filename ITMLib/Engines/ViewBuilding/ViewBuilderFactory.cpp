@@ -14,7 +14,7 @@ namespace ITMLib {
 
 //#################### PUBLIC STATIC MEMBER FUNCTIONS ####################
 
-ViewBuilder* ViewBuilderFactory::Build(const RGBDCalib& calib, MemoryDeviceType device_type) {
+ViewBuilder* ViewBuilderFactory::Build(const RGBD_CalibrationInformation& calib, MemoryDeviceType device_type) {
 	ViewBuilder* view_builder = nullptr;
 
 	switch (device_type) {
@@ -39,7 +39,7 @@ ViewBuilder* ViewBuilderFactory::Build(const RGBDCalib& calib, MemoryDeviceType 
 ViewBuilder* ViewBuilderFactory::Build(const std::string& calibration_path, MemoryDeviceType device_type) {
 	ViewBuilder* view_builder = nullptr;
 
-	RGBDCalib calibrationData;
+	RGBD_CalibrationInformation calibrationData;
 	readRGBDCalib(calibration_path.c_str(), calibrationData);
 
 	switch (device_type) {
