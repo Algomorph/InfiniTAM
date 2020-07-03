@@ -2,15 +2,12 @@
 
 #pragma once
 
-#include "../Interface/PreprocessingEngineInterface.h"
+#include "../Interface/ImageProcessingEngineInterface.h"
 
 namespace ITMLib
 {
-	class LowLevelEngine_CUDA : public PreprocessingEngineInterface
+	class LowLevelEngine_CPU : public ImageProcessingEngineInterface
 	{
-	private:
-		int *counterTempData_device, *counterTempData_host;
-
 	public:
 		void CopyImage(UChar4Image& image_out, const UChar4Image& image_in) const;
 		void CopyImage(FloatImage& image_out, const FloatImage& image_in) const;
@@ -31,7 +28,7 @@ namespace ITMLib
 
 		int CountValidDepths(const FloatImage& image_in) const;
 
-		LowLevelEngine_CUDA();
-		~LowLevelEngine_CUDA();
+		LowLevelEngine_CPU();
+		~LowLevelEngine_CPU();
 	};
 }

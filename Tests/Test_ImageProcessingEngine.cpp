@@ -13,7 +13,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#define BOOST_TEST_MODULE PreprocessingEngine
+#define BOOST_TEST_MODULE ImageProcessingEngine
 #ifndef WIN32
 #define BOOST_TEST_DYN_LINK
 #endif
@@ -29,7 +29,7 @@
 #include "../ORUtils/IStreamWrapper.h"
 
 //ITMLib
-#include "../ITMLib/Engines/Preprocessing/PreprocessingEngineFactory.h"
+#include "../ITMLib/Engines/ImageProcessing/ImageProcessingEngineFactory.h"
 #include "../ITMLib/Utils/Analytics/RawArrayComparison.h"
 #include "../ITMLib/Utils/Collections/OperationsOnSTLContainers.h"
 #include "../ITMLib/Utils/Collections/MemoryBlock_StdContainer_Convertions.h"

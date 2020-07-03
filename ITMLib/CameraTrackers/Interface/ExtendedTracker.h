@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CameraTracker.h"
-#include "../../Engines/Preprocessing/Interface/PreprocessingEngineInterface.h"
+#include "../../Engines/ImageProcessing/Interface/ImageProcessingEngineInterface.h"
 #include "../../Objects/Tracking/ImageHierarchy.h"
 #include "../../Objects/Tracking/DepthHierarchyLevel.h"
 #include "../../Objects/Tracking/IntensityHierarchyLevel.h"
@@ -26,7 +26,7 @@ namespace ITMLib
 		static const int MIN_VALID_POINTS_DEPTH;
 		static const int MIN_VALID_POINTS_RGB;
 
-		const PreprocessingEngineInterface *lowLevelEngine;
+		const ImageProcessingEngineInterface *lowLevelEngine;
 		ImageHierarchy<VolumeHierarchyLevel> *sceneHierarchy;
 		ImageHierarchy<DepthHierarchyLevel> *viewHierarchy_Depth;
 		ImageHierarchy<IntensityHierarchyLevel> *viewHierarchy_Intensity;
@@ -114,7 +114,7 @@ namespace ITMLib
 		                float tukeyCutOff,
 		                int framesToSkip,
 		                int framesToWeight,
-		                const PreprocessingEngineInterface *lowLevelEngine,
+		                const ImageProcessingEngineInterface *lowLevelEngine,
 		                MemoryDeviceType memoryType
 						   );
 		virtual ~ExtendedTracker();

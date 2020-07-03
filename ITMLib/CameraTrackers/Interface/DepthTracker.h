@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CameraTracker.h"
-#include "../../Engines/Preprocessing/Interface/PreprocessingEngineInterface.h"
+#include "../../Engines/ImageProcessing/Interface/ImageProcessingEngineInterface.h"
 #include "../../Objects/Tracking/ImageHierarchy.h"
 #include "../../Objects/Tracking/TemplatedHierarchyLevel.h"
 #include "../../Objects/Tracking/VolumeHierarchyLevel.h"
@@ -21,7 +21,7 @@ namespace ITMLib
 	class DepthTracker : public CameraTracker
 	{
 	private:
-		const PreprocessingEngineInterface *lowLevelEngine;
+		const ImageProcessingEngineInterface *lowLevelEngine;
 		ImageHierarchy<VolumeHierarchyLevel> *sceneHierarchy;
 		ImageHierarchy<TemplatedHierarchyLevel<FloatImage> > *viewHierarchy;
 
@@ -68,7 +68,7 @@ namespace ITMLib
 
 		DepthTracker(Vector2i imgSize, TrackerIterationType *trackingRegime, int noHierarchyLevels,
 		             float terminationThreshold, float failureDetectorThreshold,
-		             const PreprocessingEngineInterface *lowLevelEngine, MemoryDeviceType memoryType);
+		             const ImageProcessingEngineInterface *lowLevelEngine, MemoryDeviceType memoryType);
 		virtual ~DepthTracker();
 	};
 }

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CameraTracker.h"
-#include "../../Engines/Preprocessing/Interface/PreprocessingEngineInterface.h"
+#include "../../Engines/ImageProcessing/Interface/ImageProcessingEngineInterface.h"
 #include "../../Objects/Misc/IMUCalibrator.h"
 #include "../../Objects/Misc/IMUMeasurement.h"
 

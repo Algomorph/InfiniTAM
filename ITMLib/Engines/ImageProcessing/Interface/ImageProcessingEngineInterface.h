@@ -5,7 +5,7 @@
 namespace ITMLib
 {
 	/// Interface to low level image processing engines.
-	class PreprocessingEngineInterface
+	class ImageProcessingEngineInterface
 	{
 	public:
 		virtual void CopyImage(UChar4Image& image_out, const UChar4Image& image_in) const = 0;
@@ -27,7 +27,7 @@ namespace ITMLib
 
 		virtual int CountValidDepths(const FloatImage& image_in) const = 0;
 
-		PreprocessingEngineInterface() { }
-		virtual ~PreprocessingEngineInterface() { }
+		ImageProcessingEngineInterface() { }
+		virtual ~ImageProcessingEngineInterface() { }
 	};
 }

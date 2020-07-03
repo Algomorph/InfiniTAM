@@ -39,7 +39,7 @@ namespace ITMLib
 				break;
 			case MEMORYDEVICE_METAL:
 #ifdef COMPILE_WITH_METAL
-				meshingEngine = new MultiMeshingEngine_CPU<TVoxelCanonical, TIndex>(index);
+				meshing_engine = new MultiMeshingEngine_CPU<TVoxelCanonical, TIndex>(index);
 #endif
 				break;
 			}

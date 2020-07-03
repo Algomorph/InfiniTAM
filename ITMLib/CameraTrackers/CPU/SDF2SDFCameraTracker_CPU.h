@@ -25,7 +25,7 @@ public:
 	                         float colourWeight, TrackerIterationType* trackingRegime, int noHierarchyLevels,
 	                         float terminationThreshold, float failureDetectorThreshold, float viewFrustum_min,
 	                         float viewFrustum_max, float minColourGradient, float tukeyCutOff, int framesToSkip,
-	                         int framesToWeight, const PreprocessingEngineInterface* lowLevelEngine);
+	                         int framesToWeight, const ImageProcessingEngineInterface* lowLevelEngine);
 
 };
 }//end namespace ITMLib

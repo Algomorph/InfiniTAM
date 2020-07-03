@@ -32,7 +32,7 @@ ExtendedTracker::ExtendedTracker(Vector2i imgSize_d,
                                  float tukeyCutOff,
                                  int framesToSkip,
                                  int framesToWeight,
-                                 const PreprocessingEngineInterface *lowLevelEngine,
+                                 const ImageProcessingEngineInterface *lowLevelEngine,
                                  MemoryDeviceType memoryType
 									   )
 {

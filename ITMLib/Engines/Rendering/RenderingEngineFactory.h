@@ -46,7 +46,7 @@ struct RenderingEngineFactory {
 				break;
 			case MEMORYDEVICE_METAL:
 #ifdef COMPILE_WITH_METAL
-				visualizationEngine = new VisualizationEngine_Metal<TVoxelCanonical,TIndex>;
+				visualization_engine = new VisualizationEngine_Metal<TVoxelCanonical,TIndex>;
 #endif
 				break;
 			default:

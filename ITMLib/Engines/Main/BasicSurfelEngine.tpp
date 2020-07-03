@@ -2,7 +2,7 @@
 
 #include "BasicSurfelEngine.h"
 
-#include "../Preprocessing/PreprocessingEngineFactory.h"
+#include "../ImageProcessing/ImageProcessingEngineFactory.h"
 #include "../ViewBuilding/ViewBuilderFactory.h"
 #include "../Rendering/SurfelVisualizationEngineFactory.h"
 #include "../../CameraTrackers/CameraTrackerFactory.h"
@@ -25,7 +25,7 @@ BasicSurfelEngine<TSurfel>::BasicSurfelEngine(const RGBDCalib& calib, Vector2i i
 
 	const MemoryDeviceType deviceType = settings.device_type;
 
-	lowLevelEngine = PreprocessingEngineFactory::Build(deviceType);
+	lowLevelEngine = ImageProcessingEngineFactory::Build(deviceType);
 	viewBuilder = ViewBuilderFactory::Build(calib, deviceType);
 	surfelVisualizationEngine = SurfelVisualizationEngineFactory::Build<TSurfel>(deviceType);
 

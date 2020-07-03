@@ -265,7 +265,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "28"
             endingLineNumber = "28"
-            landmarkName = "ITMDepthTracker::ITMDepthTracker(Vector2i image_size, TrackerIterationType *trackingRegime, int noHierarchyLevels, int noICPRunTillLevel, float distThresh, float terminationThreshold, const ITMLowLevelEngine *lowLevelEngine, MemoryDeviceType memory_type)"
+            landmarkName = "ITMDepthTracker::ITMDepthTracker(Vector2i image_size, TrackerIterationType *trackingRegime, int noHierarchyLevels, int noICPRunTillLevel, float distThresh, float terminationThreshold, const ITMLowLevelEngine *image_processing_engine, MemoryDeviceType memory_type)"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
@@ -605,7 +605,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "20"
             endingLineNumber = "20"
-            landmarkName = "ITMDepthTracker_Metal::ITMDepthTracker_Metal(Vector2i image_size, TrackerIterationType *trackingRegime, int noHierarchyLevels, int noICPRunTillLevel, float distThresh, float terminationThreshold, const ITMLowLevelEngine *lowLevelEngine)"
+            landmarkName = "ITMDepthTracker_Metal::ITMDepthTracker_Metal(Vector2i image_size, TrackerIterationType *trackingRegime, int noHierarchyLevels, int noICPRunTillLevel, float distThresh, float terminationThreshold, const ITMLowLevelEngine *image_processing_engine)"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
@@ -637,7 +637,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "26"
             endingLineNumber = "26"
-            landmarkName = "ITMDepthTracker_Metal::ITMDepthTracker_Metal(Vector2i image_size, TrackerIterationType *trackingRegime, int noHierarchyLevels, int noICPRunTillLevel, float distThresh, float terminationThreshold, const ITMLowLevelEngine *lowLevelEngine)"
+            landmarkName = "ITMDepthTracker_Metal::ITMDepthTracker_Metal(Vector2i image_size, TrackerIterationType *trackingRegime, int noHierarchyLevels, int noICPRunTillLevel, float distThresh, float terminationThreshold, const ITMLowLevelEngine *image_processing_engine)"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
@@ -829,7 +829,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "13"
             endingLineNumber = "13"
-            landmarkName = "ITMDepthTracker::ITMDepthTracker(Vector2i image_size, TrackerIterationType *trackingRegime, int noHierarchyLevels, int noICPRunTillLevel, float distThresh, float terminationThreshold, const ITMLowLevelEngine *lowLevelEngine, MemoryDeviceType memory_type)"
+            landmarkName = "ITMDepthTracker::ITMDepthTracker(Vector2i image_size, TrackerIterationType *trackingRegime, int noHierarchyLevels, int noICPRunTillLevel, float distThresh, float terminationThreshold, const ITMLowLevelEngine *image_processing_engine, MemoryDeviceType memory_type)"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
@@ -1015,7 +1015,7 @@
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "../../ITMLib/Engines/Rendering/Metal/visualizationEngine.metal"
+            filePath = "../../ITMLib/Engines/Rendering/Metal/visualization_engine.metal"
             timestampString = "482333493.084289"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
@@ -1031,7 +1031,7 @@
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "../../ITMLib/Engines/Rendering/Metal/visualizationEngine.metal"
+            filePath = "../../ITMLib/Engines/Rendering/Metal/visualization_engine.metal"
             timestampString = "482243881.905742"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
@@ -1047,7 +1047,7 @@
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "../../ITMLib/Engines/Rendering/Metal/visualizationEngine.metal"
+            filePath = "../../ITMLib/Engines/Rendering/Metal/visualization_engine.metal"
             timestampString = "482333493.084289"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
@@ -1063,7 +1063,7 @@
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "../../ITMLib/Engines/Rendering/Metal/visualizationEngine.metal"
+            filePath = "../../ITMLib/Engines/Rendering/Metal/visualization_engine.metal"
             timestampString = "482333493.084289"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"

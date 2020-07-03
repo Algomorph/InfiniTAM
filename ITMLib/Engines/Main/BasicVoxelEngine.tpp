@@ -2,7 +2,7 @@
 
 #include "BasicVoxelEngine.h"
 
-#include "../Preprocessing/PreprocessingEngineFactory.h"
+#include "../ImageProcessing/ImageProcessingEngineFactory.h"
 #include "../Meshing/MeshingEngineFactory.h"
 #include "../ViewBuilding/ViewBuilderFactory.h"
 #include "../Rendering/RenderingEngineFactory.h"
@@ -27,26 +27,26 @@ BasicVoxelEngine<TVoxel,TIndex>::BasicVoxelEngine(const RGBDCalib& calib, Vector
 
 	const MemoryDeviceType deviceType = settings.device_type;
 
-	lowLevelEngine = PreprocessingEngineFactory::Build(deviceType);
+	image_processing_engine = ImageProcessingEngineFactory::Build(deviceType);
 	viewBuilder = ViewBuilderFactory::Build(calib, deviceType);
-	visualizationEngine = RenderingEngineFactory::Build<TVoxel, TIndex>(deviceType);
+	visualization_engine = RenderingEngineFactory::Build<TVoxel, TIndex>(deviceType);
 
-	meshingEngine = nullptr;
+	meshing_engine = nullptr;
 	if (settings.create_meshing_engine)
-		meshingEngine = MeshingEngineFactory::Build<TVoxel, TIndex>(deviceType);
+		meshing_engine = MeshingEngineFactory::Build<TVoxel, TIndex>(deviceType);
 
 	denseMapper = new DenseMapper<TVoxel, TIndex>();
 	volume->Reset();
 
-	imuCalibrator = new ITMIMUCalibrator_iPad();
-	tracker = CameraTrackerFactory::Instance().Make(imgSize_rgb, imgSize_d, lowLevelEngine, imuCalibrator,
+	imu_calibrator = new ITMIMUCalibrator_iPad();
+	tracker = CameraTrackerFactory::Instance().Make(imgSize_rgb, imgSize_d, image_processing_engine, imu_calibrator,
 	                                                volume->GetParameters());
 	trackingController = new CameraTrackingController(tracker);
 
 	Vector2i trackedImageSize = trackingController->GetTrackedImageSize(imgSize_rgb, imgSize_d);
 
 	render_state =  new RenderState(imgSize_d, volume->GetParameters().near_clipping_distance, volume->GetParameters().far_clipping_distance, memoryType);
-	renderState_freeview = nullptr; //will be created if needed
+	render_state_freeview = nullptr; //will be created if needed
 
 	trackingState = new CameraTrackingState(trackedImageSize, memoryType);
 	tracker->UpdateInitialPose(trackingState);
@@ -59,19 +59,19 @@ BasicVoxelEngine<TVoxel,TIndex>::BasicVoxelEngine(const RGBDCalib& calib, Vector
 
 	kfRaycast = new UChar4Image(imgSize_d, memoryType);
 
-	trackingActive = true;
-	fusionActive = true;
-	mainProcessingActive = true;
-	trackingInitialised = false;
-	relocalisationCount = 0;
-	framesProcessed = 0;
+	tracking_active = true;
+	fusion_active = true;
+	main_processing_active = true;
+	tracking_initialised = false;
+	relocalization_count = 0;
+	processed_frame_count = 0;
 }
 
 template <typename TVoxel, typename TIndex>
 BasicVoxelEngine<TVoxel,TIndex>::~BasicVoxelEngine()
 {
 	delete render_state;
-	if (renderState_freeview != nullptr) delete renderState_freeview;
+	if (render_state_freeview != nullptr) delete render_state_freeview;
 
 	delete volume;
 
@@ -79,27 +79,27 @@ BasicVoxelEngine<TVoxel,TIndex>::~BasicVoxelEngine()
 	delete trackingController;
 
 	delete tracker;
-	delete imuCalibrator;
+	delete imu_calibrator;
 
-	delete lowLevelEngine;
+	delete image_processing_engine;
 	delete viewBuilder;
 
 	delete trackingState;
 	if (view != nullptr) delete view;
 
-	delete visualizationEngine;
+	delete visualization_engine;
 
 	if (relocaliser != nullptr) delete relocaliser;
 	delete kfRaycast;
 
-	if (meshingEngine != nullptr) delete meshingEngine;
+	if (meshing_engine != nullptr) delete meshing_engine;
 }
 
 template <typename TVoxel, typename TIndex>
 void BasicVoxelEngine<TVoxel,TIndex>::SaveVolumeToMesh(const std::string& path)
 {
-	if (meshingEngine == nullptr) return;
-	Mesh mesh = meshingEngine->MeshVolume(volume);
+	if (meshing_engine == nullptr) return;
+	Mesh mesh = meshing_engine->MeshVolume(volume);
 	mesh.WritePLY(path);
 }
 
@@ -249,11 +249,11 @@ CameraTrackingState::TrackingResult BasicVoxelEngine<TVoxel,TIndex>::ProcessFram
 		viewBuilder->UpdateView(&view, rgbImage, rawDepthImage, settings.use_threshold_filter,
 		                        settings.use_bilateral_filter, imuMeasurement, false, true);
 
-	if (!mainProcessingActive) return CameraTrackingState::TRACKING_FAILED;
+	if (!main_processing_active) return CameraTrackingState::TRACKING_FAILED;
 
 	// tracking
 	ORUtils::SE3Pose oldPose(*(trackingState->pose_d));
-	if (trackingActive) trackingController->Track(trackingState, view);
+	if (tracking_active) trackingController->Track(trackingState, view);
 
 	CameraTrackingState::TrackingResult trackerResult = CameraTrackingState::TRACKING_GOOD;
 	switch (settings.behavior_on_failure) {
@@ -273,18 +273,18 @@ CameraTrackingState::TrackingResult BasicVoxelEngine<TVoxel,TIndex>::ProcessFram
 	int addKeyframeIdx = -1;
 	if (settings.behavior_on_failure == configuration::FAILUREMODE_RELOCALIZE)
 	{
-		if (trackerResult == CameraTrackingState::TRACKING_GOOD && relocalisationCount > 0) relocalisationCount--;
+		if (trackerResult == CameraTrackingState::TRACKING_GOOD && relocalization_count > 0) relocalization_count--;
 
 		int NN; float distances;
 		view->depth.UpdateHostFromDevice();
 
 		//find and add keyframe, if necessary
-		bool hasAddedKeyframe = relocaliser->ProcessFrame(view->depth, trackingState->pose_d, 0, 1, &NN, &distances, trackerResult == CameraTrackingState::TRACKING_GOOD && relocalisationCount == 0);
+		bool hasAddedKeyframe = relocaliser->ProcessFrame(view->depth, trackingState->pose_d, 0, 1, &NN, &distances, trackerResult == CameraTrackingState::TRACKING_GOOD && relocalization_count == 0);
 
 		//frame not added and tracking failed -> we need to relocalise
 		if (!hasAddedKeyframe && trackerResult == CameraTrackingState::TRACKING_FAILED)
 		{
-			relocalisationCount = 10;
+			relocalization_count = 10;
 
 			// Reset previous rgb frame since the rgb image is likely different than the one acquired when setting the keyframe
 			view->rgb_prev->Clear();
@@ -293,7 +293,7 @@ CameraTrackingState::TrackingResult BasicVoxelEngine<TVoxel,TIndex>::ProcessFram
 			trackingState->pose_d->SetFrom(&keyframe.pose);
 
 			denseMapper->UpdateVisibleList(view, trackingState, volume, render_state, true);
-			trackingController->Prepare(trackingState, volume, view, visualizationEngine, render_state);
+			trackingController->Prepare(trackingState, volume, view, visualization_engine, render_state);
 			trackingController->Track(trackingState, view);
 
 			trackerResult = trackingState->trackerResult;
@@ -301,13 +301,13 @@ CameraTrackingState::TrackingResult BasicVoxelEngine<TVoxel,TIndex>::ProcessFram
 	}
 
 	bool didFusion = false;
-	if ((trackerResult == CameraTrackingState::TRACKING_GOOD || !trackingInitialised) && (fusionActive) && (relocalisationCount == 0)) {
+	if ((trackerResult == CameraTrackingState::TRACKING_GOOD || !tracking_initialised) && (fusion_active) && (relocalization_count == 0)) {
 		// fusion
 		denseMapper->ProcessFrame(view, trackingState, volume, render_state);
 		didFusion = true;
-		if (framesProcessed > 50) trackingInitialised = true;
+		if (processed_frame_count > 50) tracking_initialised = true;
 
-		framesProcessed++;
+		processed_frame_count++;
 	}
 
 	if (trackerResult == CameraTrackingState::TRACKING_GOOD || trackerResult == CameraTrackingState::TRACKING_POOR)
@@ -315,7 +315,7 @@ CameraTrackingState::TrackingResult BasicVoxelEngine<TVoxel,TIndex>::ProcessFram
 		if (!didFusion) denseMapper->UpdateVisibleList(view, trackingState, volume, render_state);
 
 		// raycast to renderState_canonical for tracking and free Rendering
-		trackingController->Prepare(trackingState, volume, view, visualizationEngine, render_state);
+		trackingController->Prepare(trackingState, volume, view, visualization_engine, render_state);
 
 		if (addKeyframeIdx >= 0)
 		{
@@ -397,10 +397,10 @@ void BasicVoxelEngine<TVoxel,TIndex>::GetImage(UChar4Image *out, GetImageType ge
 			imageType = IRenderingEngine::RENDER_SHADED_GREYSCALE_IMAGENORMALS;
 		}
 
-		visualizationEngine->RenderImage(volume, trackingState->pose_d, &view->calibration_information.intrinsics_d, render_state, render_state->raycastImage, imageType, raycastType);
+		visualization_engine->RenderImage(volume, trackingState->pose_d, &view->calibration_information.intrinsics_d, render_state, render_state->raycastImage, imageType, raycastType);
 
 		ORUtils::Image<Vector4u>* source_image = nullptr;
-		if (relocalisationCount != 0) source_image = kfRaycast;
+		if (relocalization_count != 0) source_image = kfRaycast;
 		else source_image = render_state->raycastImage;
 
 		out->ChangeDims(source_image->dimensions);
@@ -420,18 +420,18 @@ void BasicVoxelEngine<TVoxel,TIndex>::GetImage(UChar4Image *out, GetImageType ge
 		else if (getImageType == BasicVoxelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_NORMAL) type = IRenderingEngine::RENDER_COLOUR_FROM_NORMAL;
 		else if (getImageType == BasicVoxelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_CONFIDENCE) type = IRenderingEngine::RENDER_COLOUR_FROM_CONFIDENCE;
 
-		if (renderState_freeview == nullptr)
+		if (render_state_freeview == nullptr)
 		{
-			renderState_freeview = new RenderState(out->dimensions, volume->GetParameters().near_clipping_distance, volume->GetParameters().far_clipping_distance, settings.device_type);
+			render_state_freeview = new RenderState(out->dimensions, volume->GetParameters().near_clipping_distance, volume->GetParameters().far_clipping_distance, settings.device_type);
 		}
 
-		visualizationEngine->FindVisibleBlocks(volume, pose, intrinsics, renderState_freeview);
-		visualizationEngine->CreateExpectedDepths(volume, pose, intrinsics, renderState_freeview);
-		visualizationEngine->RenderImage(volume, pose, intrinsics, renderState_freeview, renderState_freeview->raycastImage, type);
+		visualization_engine->FindVisibleBlocks(volume, pose, intrinsics, render_state_freeview);
+		visualization_engine->CreateExpectedDepths(volume, pose, intrinsics, render_state_freeview);
+		visualization_engine->RenderImage(volume, pose, intrinsics, render_state_freeview, render_state_freeview->raycastImage, type);
 
 		if (settings.device_type == MEMORYDEVICE_CUDA)
-			out->SetFrom(*renderState_freeview->raycastImage, MemoryCopyDirection::CUDA_TO_CPU);
-		else out->SetFrom(*renderState_freeview->raycastImage, MemoryCopyDirection::CPU_TO_CPU);
+			out->SetFrom(*render_state_freeview->raycastImage, MemoryCopyDirection::CUDA_TO_CPU);
+		else out->SetFrom(*render_state_freeview->raycastImage, MemoryCopyDirection::CPU_TO_CPU);
 		break;
 	}
 	case MainEngine::InfiniTAM_IMAGE_UNKNOWN:
@@ -441,19 +441,19 @@ void BasicVoxelEngine<TVoxel,TIndex>::GetImage(UChar4Image *out, GetImageType ge
 }
 
 template <typename TVoxel, typename TIndex>
-void BasicVoxelEngine<TVoxel,TIndex>::TurnOnTracking() { trackingActive = true; }
+void BasicVoxelEngine<TVoxel,TIndex>::TurnOnTracking() { tracking_active = true; }
 
 template <typename TVoxel, typename TIndex>
-void BasicVoxelEngine<TVoxel,TIndex>::TurnOffTracking() { trackingActive = false; }
+void BasicVoxelEngine<TVoxel,TIndex>::TurnOffTracking() { tracking_active = false; }
 
 template <typename TVoxel, typename TIndex>
-void BasicVoxelEngine<TVoxel,TIndex>::TurnOnIntegration() { fusionActive = true; }
+void BasicVoxelEngine<TVoxel,TIndex>::TurnOnIntegration() { fusion_active = true; }
 
 template <typename TVoxel, typename TIndex>
-void BasicVoxelEngine<TVoxel,TIndex>::TurnOffIntegration() { fusionActive = false; }
+void BasicVoxelEngine<TVoxel,TIndex>::TurnOffIntegration() { fusion_active = false; }
 
 template <typename TVoxel, typename TIndex>
-void BasicVoxelEngine<TVoxel,TIndex>::TurnOnMainProcessing() { mainProcessingActive = true; }
+void BasicVoxelEngine<TVoxel,TIndex>::TurnOnMainProcessing() { main_processing_active = true; }
 
 template <typename TVoxel, typename TIndex>
-void BasicVoxelEngine<TVoxel,TIndex>::TurnOffMainProcessing() { mainProcessingActive = false; }
+void BasicVoxelEngine<TVoxel,TIndex>::TurnOffMainProcessing() { main_processing_active = false; }

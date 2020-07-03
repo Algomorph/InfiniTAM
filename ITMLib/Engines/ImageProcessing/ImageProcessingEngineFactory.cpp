@@ -1,4 +1,4 @@
-#include "PreprocessingEngineFactory.h"
+#include "ImageProcessingEngineFactory.h"
 
 #include "CPU/LowLevelEngine_CPU.h"
 #ifndef COMPILE_WITHOUT_CUDA
@@ -7,8 +7,8 @@
 
 namespace ITMLib{
 
-PreprocessingEngineInterface* PreprocessingEngineFactory::Build(MemoryDeviceType device_type){
-  PreprocessingEngineInterface* preprocessing_engine = nullptr;
+ImageProcessingEngineInterface* ImageProcessingEngineFactory::Build(MemoryDeviceType device_type){
+  ImageProcessingEngineInterface* preprocessing_engine = nullptr;
 
   switch(device_type){
     case MEMORYDEVICE_CPU:
@@ -16,7 +16,7 @@ PreprocessingEngineInterface* PreprocessingEngineFactory::Build(MemoryDeviceType
       break;
     case MEMORYDEVICE_CUDA:
 #ifdef COMPILE_WITHOUT_CUDA
-		  DIEWITHEXCEPTION_REPORTLOCATION("Trying to instantiate a CUDA-based PreprocessingEngine while code not compiled with CUDA support.");
+		  DIEWITHEXCEPTION_REPORTLOCATION("Trying to instantiate a CUDA-based ImageProcessingEngine while code not compiled with CUDA support.");
 #else
 		  preprocessing_engine = new LowLevelEngine_CUDA();
 #endif
@@ -25,7 +25,7 @@ PreprocessingEngineInterface* PreprocessingEngineFactory::Build(MemoryDeviceType
 #ifdef COMPILE_WITH_METAL
       preprocessing_engine = new LowLevelEngine_CPU();
 #else
-	  DIEWITHEXCEPTION_REPORTLOCATION("Trying to instantiate a Metal-based PreprocessingEngine while code not compiled with Metal support.");
+	  DIEWITHEXCEPTION_REPORTLOCATION("Trying to instantiate a Metal-based ImageProcessingEngine while code not compiled with Metal support.");
 #endif
       break;
       default:

@@ -26,7 +26,7 @@ namespace fs = std::filesystem;
 
 // local
 #include "DynamicSceneVoxelEngine.h"
-#include "../Preprocessing/PreprocessingEngineFactory.h"
+#include "../ImageProcessing/ImageProcessingEngineFactory.h"
 #include "../Meshing/MeshingEngineFactory.h"
 #include "../ViewBuilding/ViewBuilderFactory.h"
 #include "../Rendering/RenderingEngineFactory.h"
@@ -71,7 +71,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(const RG
 				                  configuration::get().device_type,
 				                  configuration::for_volume_role<TIndex>(configuration::VOLUME_CANONICAL)
 		                  ) : nullptr),
-		  low_level_engine(PreprocessingEngineFactory::Build(configuration::get().device_type)),
+		  low_level_engine(ImageProcessingEngineFactory::Build(configuration::get().device_type)),
 		  telemetry_recorder(TelemetryRecorderFactory::GetDefault<TVoxel, TWarp, TIndex>(configuration::get().device_type)),
 		  view_builder(ViewBuilderFactory::Build(calibration_info, configuration::get().device_type)),
 		  rendering_engine(RenderingEngineFactory::Build<TVoxel, TIndex>(

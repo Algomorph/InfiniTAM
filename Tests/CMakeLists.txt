@@ -124,7 +124,7 @@ if (BUILD_TESTS)
     itm_add_test(NAME MeshGeneration SOURCES Test_MeshGeneration.cpp)
     itm_add_test(NAME EnumSerialization SOURCES Test_EnumSerialization.cpp)
     itm_add_test(NAME RenderingEngine SOURCES Test_RenderingEngine.cpp)
-    itm_add_test(NAME PreprocessingEngine SOURCES Test_PreprocessingEngine.cpp)
+    itm_add_test(NAME ImageProcessingEngine SOURCES Test_ImageProcessingEngine.cpp)
 
     # *** tests that require CUDA
     if(WITH_CUDA)

@@ -13,7 +13,7 @@ namespace ITMLib
 
 	public:
 		DepthTracker_CPU(Vector2i imgSize, TrackerIterationType *trackingRegime, int noHierarchyLevels,
-		                 float terminationThreshold, float failureDetectorThreshold, const PreprocessingEngineInterface *lowLevelEngine);
+		                 float terminationThreshold, float failureDetectorThreshold, const ImageProcessingEngineInterface *lowLevelEngine);
 		~DepthTracker_CPU();
 	};
 }

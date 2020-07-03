@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Interface/PreprocessingEngineInterface.h"
+#include "Interface/ImageProcessingEngineInterface.h"
 #include "../../Utils/Configuration/Configuration.h"
 #include "../../../ORUtils/MemoryDeviceType.h"
 
@@ -9,7 +9,7 @@ namespace ITMLib{
 /**
  * \brief This struct provides functions that can be used to construct low-level engines.
  */
-struct PreprocessingEngineFactory
+struct ImageProcessingEngineFactory
 {
   //#################### PUBLIC STATIC MEMBER FUNCTIONS ####################
 
@@ -18,7 +18,7 @@ struct PreprocessingEngineFactory
    *
    * \param device_type  The device on which the low-level engine should operate.
    */
-  static PreprocessingEngineInterface *Build(MemoryDeviceType device_type);
+  static ImageProcessingEngineInterface *Build(MemoryDeviceType device_type);
 };
 
 } // namespace ITMLib

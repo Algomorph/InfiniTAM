@@ -1,14 +1,12 @@
-// Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
-
 #pragma once
 
 #include "../../../Objects/Camera/RGBDCalib.h"
 #include "../../../Objects/Views/ViewIMU.h"
 
-namespace ITMLib
-{
-	/** \brief
-	*/
+namespace ITMLib{
+	/**
+	 * \brief object that provides functions to construct a view -- i.e. preprocess
+	 * */
 	class ViewBuilder
 	{
 	protected:

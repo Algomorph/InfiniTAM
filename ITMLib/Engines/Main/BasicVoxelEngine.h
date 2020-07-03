@@ -5,7 +5,7 @@
 #include "Mappers/DenseMapper.h"
 #include "MainEngine.h"
 #include "CameraTrackingController.h"
-#include "../Preprocessing/Interface/PreprocessingEngineInterface.h"
+#include "../ImageProcessing/Interface/ImageProcessingEngineInterface.h"
 #include "../Meshing/Interface/MeshingEngine.h"
 #include "../ViewBuilding/Interface/ViewBuilder.h"
 #include "../Rendering/Interface/RenderingEngineInterface.h"
@@ -13,81 +13,80 @@
 
 #include "../../../FernRelocLib/Relocaliser.h"
 
-namespace ITMLib
-{
-	template <typename TVoxel, typename TIndex>
-	class BasicVoxelEngine : public MainEngine
-	{
-	private:
-		bool trackingActive, fusionActive, mainProcessingActive, trackingInitialised;
-		int framesProcessed, relocalisationCount;
+namespace ITMLib {
+template<typename TVoxel, typename TIndex>
+class BasicVoxelEngine : public MainEngine {
+private:
+	bool tracking_active, fusion_active, main_processing_active, tracking_initialised;
+	int processed_frame_count, relocalization_count;
 
-		PreprocessingEngineInterface *lowLevelEngine;
-		RenderingEngineBase<TVoxel, TIndex> *visualizationEngine;
+	ImageProcessingEngineInterface* image_processing_engine;
+	RenderingEngineBase<TVoxel, TIndex>* visualization_engine;
 
-		MeshingEngine<TVoxel, TIndex> *meshingEngine;
+	MeshingEngine<TVoxel, TIndex>* meshing_engine;
 
-		ViewBuilder *viewBuilder;
-		DenseMapper<TVoxel, TIndex> *denseMapper;
-		CameraTrackingController *trackingController;
+	ViewBuilder* viewBuilder;
+	DenseMapper<TVoxel, TIndex>* denseMapper;
+	CameraTrackingController* trackingController;
 
-		VoxelVolume<TVoxel, TIndex> *volume;
-		RenderState *render_state;
-		RenderState *renderState_freeview;
+	VoxelVolume<TVoxel, TIndex>* volume;
+	RenderState* render_state;
+	RenderState* render_state_freeview;
 
-		CameraTracker *tracker;
-		IMUCalibrator *imuCalibrator;
+	CameraTracker* tracker;
+	IMUCalibrator* imu_calibrator;
 
-		FernRelocLib::Relocaliser<float> *relocaliser;
-		UChar4Image *kfRaycast;
+	FernRelocLib::Relocaliser<float>* relocaliser;
+	UChar4Image* kfRaycast;
 
-		/// Pointer for storing the current input frame
-		View *view;
+	/// Pointer for storing the current input frame
+	View* view;
 
-		/// Pointer to the current camera pose and additional tracking information
-		CameraTrackingState *trackingState;
+	/// Pointer to the current camera pose and additional tracking information
+	CameraTrackingState* trackingState;
 
-	public:
-		View* GetView() { return view; }
-		CameraTrackingState* GetTrackingState() { return trackingState; }
+public:
+	View* GetView() { return view; }
 
-		/// Gives access to the internal world representation
-		VoxelVolume<TVoxel, TIndex>* GetScene() { return volume; }
+	CameraTrackingState* GetTrackingState() { return trackingState; }
 
-		CameraTrackingState::TrackingResult ProcessFrame(UChar4Image *rgbImage, ShortImage *rawDepthImage, IMUMeasurement *imuMeasurement = NULL);
+	/// Gives access to the internal world representation
+	VoxelVolume<TVoxel, TIndex>* GetScene() { return volume; }
 
-		/// Extracts a mesh from the current scene and saves it to the model file specified by the file name
-		void SaveVolumeToMesh(const std::string& path);
+	CameraTrackingState::TrackingResult ProcessFrame(UChar4Image* rgbImage, ShortImage* rawDepthImage, IMUMeasurement* imuMeasurement = NULL);
 
-		/// save and load the full scene and relocaliser (if any) to/from file
-		void SaveToFile();
-		void LoadFromFile();
+	/// Extracts a mesh from the current scene and saves it to the model file specified by the file name
+	void SaveVolumeToMesh(const std::string& path);
 
-		/// Get a result image as output
-		Vector2i GetImageSize() const;
+	/// save and load the full scene and relocaliser (if any) to/from file
+	void SaveToFile();
+	void LoadFromFile();
 
-		void GetImage(UChar4Image *out, GetImageType getImageType, ORUtils::SE3Pose *pose = NULL, Intrinsics *intrinsics = NULL);
+	/// Get a result image as output
+	Vector2i GetImageSize() const;
 
-		/// switch for turning tracking on/off
-		void TurnOnTracking() override;
-		void TurnOffTracking() override;
+	void GetImage(UChar4Image* out, GetImageType getImageType, ORUtils::SE3Pose* pose = NULL, Intrinsics* intrinsics = NULL);
 
-		/// switch for turning integration on/off
-		void TurnOnIntegration() override;
-		void TurnOffIntegration() override;
+	/// switch for turning tracking on/off
+	void TurnOnTracking() override;
+	void TurnOffTracking() override;
 
-		/// switch for turning main processing on/off
-		void TurnOnMainProcessing() override;
-		void TurnOffMainProcessing() override;
+	/// switch for turning integration on/off
+	void TurnOnIntegration() override;
+	void TurnOffIntegration() override;
 
-		/// resets the scene and the tracker
-		void ResetAll();
+	/// switch for turning main processing on/off
+	void TurnOnMainProcessing() override;
+	void TurnOffMainProcessing() override;
 
-		/** \brief Constructor
-			Omitting a separate image size for the depth images
-			will assume same resolution as for the RGB images.
-		*/
-		BasicVoxelEngine(const RGBDCalib& calib, Vector2i imgSize_rgb, Vector2i imgSize_d);
-		~BasicVoxelEngine();
-	};
+	/// resets the scene and the tracker
+	void ResetAll();
+
+	/** \brief Constructor
+		Omitting a separate image size for the depth images
+		will assume same resolution as for the RGB images.
+	*/
+	BasicVoxelEngine(const RGBDCalib& calib, Vector2i imgSize_rgb, Vector2i imgSize_d);
+	~BasicVoxelEngine();
+};
 }
