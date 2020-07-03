@@ -32,6 +32,7 @@ template<typename T>
 class Image : private MemoryBlock<T> {
 private: // instance variables
 	using MemoryBlock<T>::element_count;
+	using MemoryBlock<T>::Resize;
 public: // static functions
 public: // instance functions
 	using MemoryBlock<T>::size;
@@ -40,7 +41,6 @@ public: // instance functions
 	using MemoryBlock<T>::GetElement;
 	using MemoryBlock<T>::GetAccessMode;
 	using MemoryBlock<T>::SetFrom;
-
 #ifdef COMPILE_WITH_METAL
 	using MemoryBlock<T>::GetMetalBuffer();
 #endif
@@ -86,7 +86,7 @@ public: // instance functions
 	 * Resize the image, losing all old image data if force_reallocation is set to true.
 	 */
 	void ChangeDims(Vector2<int> dimensions, bool force_reallocation = true) {
-		MemoryBlock<T>::Resize(dimensions.x * dimensions.y, force_reallocation);
+		this->Resize(dimensions.x * dimensions.y, force_reallocation);
 		this->dimensions = dimensions;
 	}
 

@@ -22,7 +22,7 @@ namespace ITMLib
 
 			levels = new TLevelType*[hierarchy_level_count];
 
-			for (int i = hierarchy_level_count - 1; i >= 1; i--)
+			for (int i = hierarchy_level_count - 1; i >= 0; i--)
 				levels[i] = new TLevelType(imgSize, i, trackingRegime[i], memoryType, (i == 0) && skipAllocationForLevel0);
 		}
 

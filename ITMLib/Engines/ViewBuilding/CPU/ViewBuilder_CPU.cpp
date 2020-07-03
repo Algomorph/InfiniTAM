@@ -62,6 +62,11 @@ void ViewBuilder_CPU::UpdateView(View** view_ptr, UChar4Image* rgbImage, ShortIm
 		view->depth.SetFrom(view->float_raw_disparity_image, MemoryCopyDirection::CPU_TO_CPU);
 	}
 
+	if (useThresholdFilter) {
+		this->ThresholdFiltering(view->float_raw_disparity_image, view->depth);
+		view->depth.SetFrom(view->float_raw_disparity_image, MemoryCopyDirection::CPU_TO_CPU);
+	}
+
 	if (modelSensorNoise)
 	{
 		this->ComputeNormalAndWeights(*view->depth_normal, *view->depth_uncertainty, view->depth, view->calibration_information.intrinsics_d.projectionParamsSimple.all);
