@@ -1,40 +1,21 @@
-import os
+from typing import List, TypeVar, Generic
 
 import vtk
-import gzip
-import numpy as np
 
-from Apps.Python.visualizer.geometric_conversions import convert_block_to_metric, VoxelVolumeParameters
+from Apps.Python.visualizer.alloction_data_processing import FrameBlockData, FramePixelBlockData
+from Apps.Python.visualizer.geometric_conversions import VoxelVolumeParameters
 
-
-def read_allocation_data(data_path, i_frame):
-    file = gzip.open(data_path, "rb")
-
-    block_sets = []
-    metric_sets = []
-    while file.readable():
-        buffer = file.read(size=8)
-        if not buffer:
-            break
-        count = np.frombuffer(buffer, dtype=np.uint32)[0]
-        print("Reading allocation data for frame:", i_frame, "Block count:", count, "...")
-        block_set = np.resize(np.frombuffer(file.read(size=6 * count), dtype=np.int16), (count, 3))
-        metric_set = convert_block_to_metric(block_set)
-        block_sets.append((block_set, metric_set))
-        i_frame += 1
-    return block_sets
+TFrameBlockData = TypeVar('TFrameBlockData', FrameBlockData, FramePixelBlockData)
 
 
-class AllocatedBlocks:
-
-    def __init__(self, renderer, output_path, start_frame_index):
+class AllocatedBlocks(Generic[TFrameBlockData]):
+    def __init__(self, renderer, output_path, start_frame_index, block_sets: List[TFrameBlockData]):
         self.start_frame_index = start_frame_index
         self.output_path = output_path
         self.renderer = renderer
-        allocated_block_sets = read_allocation_data(os.path.join(output_path, "canonical_volume_memory_usage.dat"),
-                                                    start_frame_index)
-        self.frame_count = len(allocated_block_sets)
-        self.allocated_block_sets = allocated_block_sets
+
+        self.frame_count = len(block_sets)
+        self.block_sets = block_sets
 
         colors = vtk.vtkNamedColors()
 
@@ -84,22 +65,17 @@ class AllocatedBlocks:
         self.renderer.AddActor(self.block_label_actor)
 
     def set_frame(self, i_frame):
-        allocated_block_set, metric_set = self.allocated_block_sets[i_frame - self.start_frame_index]
+        block_set = self.block_sets[i_frame - self.start_frame_index]
         del self.block_locations
         self.block_locations = vtk.vtkPoints()
-        self.block_labels.SetNumberOfValues(len(allocated_block_set))
+        self.block_labels.SetNumberOfValues(len(block_set.block_coordinates))
         del self.verts
         self.verts = vtk.vtkCellArray()
 
         i_block = 0
-        for block_coordinate in allocated_block_set:
-            metric_coord = metric_set[i_block]
+        for metric_coord in block_set.metric_block_coordinates:
             self.block_locations.InsertNextPoint((metric_coord[0], -metric_coord[1], metric_coord[2]))
-
-            label = "({:d}, {:d}, {:d})".format(block_coordinate[0],
-                                                block_coordinate[1],
-                                                block_coordinate[2])
-
+            label = block_set.make_label_text(i_block)
             self.block_labels.SetValue(i_block, label)
             self.verts.InsertNextCell(1)
             self.verts.InsertCellPoint(i_block)
@@ -115,6 +91,23 @@ class AllocatedBlocks:
     def toggle_labels(self):
         self.block_label_actor.SetVisibility(not self.block_label_actor.GetVisibility())
 
+    def hide_labels(self):
+        self.block_label_actor.SetVisibility(False)
+
+    def show_labels(self):
+        self.block_label_actor.SetVisibility(True)
+
+    def labels_visible(self):
+        return self.block_label_actor.GetVisibility()
+
     def toggle_visibility(self):
         self.block_actor.SetVisibility(not self.block_actor.GetVisibility())
-        pass
+
+    def hide_blocks(self):
+        self.block_actor.SetVisibility(False)
+
+    def show_blocks(self):
+        self.block_actor.SetVisibility(True)
+
+    def blocks_visible(self):
+        return self.block_actor.GetVisibility()

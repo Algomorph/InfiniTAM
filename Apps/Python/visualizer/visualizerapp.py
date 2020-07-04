@@ -2,13 +2,12 @@ import os
 import vtk
 import sys
 
-
-from Apps.Python.python_shared import trajectory_loading
+from Apps.Python.shared import trajectory_loading
+from Apps.Python.visualizer.alloction_data_processing import read_live_block_allocation_data, read_canonical_block_allocation_data
 from Apps.Python.visualizer.block_allocation_ray_data import AllocationRays
 from Apps.Python.visualizer.mesh import Mesh
 from Apps.Python.visualizer.allocated_blocks import AllocatedBlocks
 from Apps.Python.visualizer.utilities import get_frame_output_path
-
 
 
 class VisualizerApp:
@@ -16,7 +15,6 @@ class VisualizerApp:
     def __init__(self, output_path, start_frame_ix=16):
         self.__alt_pressed = False
         self.inverse_camera_matrices = trajectory_loading.load_inverse_matrices(output_path)
-        # self.camera_matrices = trajectory_loading.load_matrices(output_path)
         self.start_frame_ix = start_frame_ix
         self.output_path = output_path
         self.offset_cam = (0.2562770766576, 0.13962609403401335, -0.2113334598208764)
@@ -29,9 +27,17 @@ class VisualizerApp:
         self.render_window.AddRenderer(self.renderer)
 
         # allocated blocks & labels
-        self.blocks = AllocatedBlocks(self.renderer, output_path, start_frame_ix)
-        self.rays = AllocationRays(self.renderer, output_path, start_frame_ix, self.inverse_camera_matrices)
-        self.frame_index_upper_bound = start_frame_ix + self.blocks.frame_count
+        frame_ray_datasets, live_block_sets = read_live_block_allocation_data(self.inverse_camera_matrices, output_path,
+                                                                              start_frame_ix)
+        canonical_block_sets = read_canonical_block_allocation_data(os.path.join(output_path, "canonical_volume_memory_usage.dat"),
+                                                                    start_frame_ix)
+        self.canonical_blocks = AllocatedBlocks(self.renderer, output_path, start_frame_ix, canonical_block_sets)
+        self.live_blocks = AllocatedBlocks(self.renderer, output_path, start_frame_ix, live_block_sets)
+        self.active_blocks = self.canonical_blocks
+        self.live_blocks.hide_blocks()
+        self.live_blocks.hide_labels()
+        self.rays = AllocationRays(self.renderer, output_path, start_frame_ix, self.inverse_camera_matrices, frame_ray_datasets)
+        self.frame_index_upper_bound = start_frame_ix + self.canonical_blocks.frame_count
 
         # mesh setup
         self.canonical_mesh = Mesh(self.renderer, self.render_window, colors.GetColor3d("Peacock"))
@@ -93,14 +99,16 @@ class VisualizerApp:
         # 4th monitor
         self.render_window.SetPosition(5121, 75)
         # fullscreen
-        self.render_window.SetSize(self.render_window.GetScreenSize())
+
         self.set_frame(self.current_frame)
         self.show_mesh_at_index(2)
         # uncomment to start out with meshes invisible
         # self.meshes[self.shown_mesh_index].toggle_visibility()
-        self.blocks.toggle_labels()
-        self.blocks.toggle_visibility()
+        # uncomment to start out with blocks invisible
+        # self.active_blocks.toggle_labels()
+        # self.active_blocks.toggle_visibility()
         self.render_window.Render()
+        self._pixel_labels_visible = False
 
     def load_frame_meshes(self, i_frame):
         frame_path = get_frame_output_path(self.output_path, i_frame)
@@ -131,7 +139,8 @@ class VisualizerApp:
         print("Frame:", i_frame)
 
         self.load_frame_meshes(i_frame)
-        self.blocks.set_frame(i_frame)
+        self.canonical_blocks.set_frame(i_frame)
+        self.live_blocks.set_frame(i_frame)
         self.rays.set_frame(i_frame)
         self.current_frame = i_frame
 
@@ -289,7 +298,10 @@ class VisualizerApp:
         elif key == "Left":
             self.retreat_view()
         elif key == "p":
-            print(self.render_window.GetPosition())
+            if self.__alt_pressed:
+                print(self.render_window.GetPosition())
+            else:
+                pass
         elif key == "m":
             self.meshes[self.shown_mesh_index].toggle_visibility()
             self.render_window.Render()
@@ -297,10 +309,23 @@ class VisualizerApp:
             if self.__alt_pressed:
                 self.rays.live_source_point_cloud.toggle_visibility()
             else:
-                self.blocks.toggle_labels()
+                self.active_blocks.toggle_labels()
             self.render_window.Render()
-        elif key == "g":
-            self.blocks.toggle_visibility()
+        elif key == "b":
+            if self.__alt_pressed:
+                blocks_visible = self.active_blocks.blocks_visible()
+                labels_visible = self.active_blocks.labels_visible()
+                if blocks_visible:
+                    self.active_blocks.hide_blocks()
+                if labels_visible:
+                    self.active_blocks.hide_labels()
+                self.active_blocks = self.live_blocks if self.active_blocks == self.canonical_blocks else self.canonical_blocks
+                if blocks_visible:
+                    self.active_blocks.show_blocks()
+                if labels_visible:
+                    self.active_blocks.show_labels()
+            else:
+                self.active_blocks.toggle_visibility()
             self.render_window.Render()
         elif key == "Alt_L" or key == "Alt_R":
             self.__alt_pressed = True

@@ -361,6 +361,7 @@ set(
 
         Engines/Indexing/Shared/IndexingEngine_Shared.h
         Engines/Indexing/Shared/IndexingEngine_RayMarching.h
+        Engines/Indexing/Shared/IndexingEngine_DiagnosticRayMarching.h
         Engines/Indexing/Shared/IndexingEngine_Functors.h
         Engines/Indexing/Shared/IndexingEngine_ConcurrentBlockManagement.h
 

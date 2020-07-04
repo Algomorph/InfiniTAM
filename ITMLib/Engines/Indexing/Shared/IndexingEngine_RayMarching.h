@@ -52,6 +52,7 @@ TryToMarkBlockForAllocation(const Vector3s& block_position,
 	}
 }
 
+
 _DEVICE_WHEN_AVAILABLE_ inline void
 MarkVoxelHashBlocksAlongSegment(ITMLib::HashEntryAllocationState* hash_entry_allocation_states,
                                 Vector3s* hash_block_coordinates,

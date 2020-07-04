@@ -34,8 +34,8 @@ namespace ITMLib {
 enum ThreadAllocationStatus {
 	ALREADY_IN_ORDERED_LIST,
 	ALREADY_IN_EXCESS_LIST,
-	MARK_FOR_ALLOCATION_IN_ORDERED_LIST,
-	MARK_FOR_ALLOCATION_IN_EXCESS_LIST,
+	MARKED_FOR_ALLOCATION_IN_ORDERED_LIST,
+	MARKED_FOR_ALLOCATION_IN_EXCESS_LIST,
 	TAKEN_CARE_OF_BY_ANOTHER_THREAD,
 	BEING_MODIFIED_BY_ANOTHER_THREAD,
 	LOGGED_HASH_COLLISION
@@ -47,10 +47,10 @@ inline const char* ThreadAllocationStatusToString(const ThreadAllocationStatus& 
 			return "ALREADY_IN_ORDERED_LIST";
 		case ALREADY_IN_EXCESS_LIST:
 			return "ALREADY_IN_EXCESS_LIST";
-		case MARK_FOR_ALLOCATION_IN_ORDERED_LIST:
-			return "MARK_FOR_ALLOCATION_IN_ORDERED_LIST";
-		case MARK_FOR_ALLOCATION_IN_EXCESS_LIST:
-			return "MARK_FOR_ALLOCATION_IN_EXCESS_LIST";
+		case MARKED_FOR_ALLOCATION_IN_ORDERED_LIST:
+			return "MARKED_FOR_ALLOCATION_IN_ORDERED_LIST";
+		case MARKED_FOR_ALLOCATION_IN_EXCESS_LIST:
+			return "MARKED_FOR_ALLOCATION_IN_EXCESS_LIST";
 		case TAKEN_CARE_OF_BY_ANOTHER_THREAD:
 			return "TAKEN_CARE_OF_BY_ANOTHER_THREAD";
 		case BEING_MODIFIED_BY_ANOTHER_THREAD:
@@ -121,8 +121,8 @@ inline ThreadAllocationStatus MarkAsNeedingAllocationIfNotFound(ITMLib::HashEntr
 			return LOGGED_HASH_COLLISION;
 		} else {
 			hash_block_coordinates[hash_code] = desired_hash_block_position;
-			return (new_allocation_state == NEEDS_ALLOCATION_IN_EXCESS_LIST) ? MARK_FOR_ALLOCATION_IN_EXCESS_LIST
-																			 : MARK_FOR_ALLOCATION_IN_ORDERED_LIST;
+			return (new_allocation_state == NEEDS_ALLOCATION_IN_EXCESS_LIST) ? MARKED_FOR_ALLOCATION_IN_EXCESS_LIST
+																			 : MARKED_FOR_ALLOCATION_IN_ORDERED_LIST;
 		}
 #else
 	ThreadAllocationStatus status;
@@ -142,8 +142,8 @@ inline ThreadAllocationStatus MarkAsNeedingAllocationIfNotFound(ITMLib::HashEntr
 		} else {
 			hash_entry_states[hash_code] = new_allocation_state;
 			hash_block_coordinates[hash_code] = desired_hash_block_position;
-			status = (new_allocation_state == NEEDS_ALLOCATION_IN_EXCESS_LIST) ? MARK_FOR_ALLOCATION_IN_EXCESS_LIST
-			                                                                   : MARK_FOR_ALLOCATION_IN_ORDERED_LIST;
+			status = (new_allocation_state == NEEDS_ALLOCATION_IN_EXCESS_LIST) ? MARKED_FOR_ALLOCATION_IN_EXCESS_LIST
+			                                                                   : MARKED_FOR_ALLOCATION_IN_ORDERED_LIST;
 		}
 	}
 	return status;

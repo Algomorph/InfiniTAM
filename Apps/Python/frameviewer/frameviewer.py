@@ -8,12 +8,10 @@ import cv2
 import vtk
 import numpy as np
 
-from Apps.frameviewer import frameloading, image_conversion
-from Apps.Python.python_shared import trajectory_loading
-from Apps.frameviewer.pixel_highlighter import PixelHighlighter
-
-PROGRAM_EXIT_SUCCESS = 0
-PROGRAM_EXIT_FAILURE = -1
+from Apps.Python.frameviewer import image_conversion, frameloading
+from Apps.Python.shared import trajectory_loading
+from Apps.Python.frameviewer.pixel_highlighter import PixelHighlighter
+from Apps.Python.shared.screen_management import set_up_render_window_bounds
 
 
 class ViewingMode(Enum):
@@ -79,17 +77,14 @@ class FrameViewerApp:
         self.image_actor.SetPosition(int(state[0]), int(state[1]))
 
         colors = vtk.vtkNamedColors()
-        window_width = 1400
-        window_height = 900
 
         self.renderer_image = vtk.vtkRenderer()
         self.renderer_image.SetBackground(0.1, 0.1, 0.1)
         self.renderer_image.SetLayer(0)
         self.renderer_highlights = vtk.vtkRenderer()
         self.renderer_highlights.SetLayer(1)
-
         self.render_window = vtk.vtkRenderWindow()
-        self.render_window.SetSize(window_width, window_height)
+        set_up_render_window_bounds(self.render_window)
         self.render_window.SetNumberOfLayers(2)
         self.render_window.AddRenderer(self.renderer_image)
         self.render_window.AddRenderer(self.renderer_highlights)
@@ -108,15 +103,16 @@ class FrameViewerApp:
                                   "Camera-space: 0 0 0\nWorld-space: 0 0 0\nBlock-space: 0 0 0"
                                   .format(frame_index_to_start_with, self.scale))
         self.text_mapper.GetInput()
-        number_of_lines = len(self.text_mapper.GetInput().splitlines())
+        self.number_of_lines = len(self.text_mapper.GetInput().splitlines())
         text_property = self.text_mapper.GetTextProperty()
-        font_size = 20
-        text_property.SetFontSize(font_size)
+        self.font_size = 20
+        text_property.SetFontSize(self.font_size)
         text_property.SetColor(colors.GetColor3d('Mint'))
 
         self.text_actor = vtk.vtkActor2D()
         self.text_actor.SetMapper(self.text_mapper)
-        self.text_actor.SetDisplayPosition(window_width - 400, window_height - (number_of_lines + 1) * font_size)
+        self.last_window_width, self.last_window_height = 0, 0
+        self.update_window(None, None)
         self.renderer_image.AddActor(self.text_actor)
 
         self.pixel_highlighter = PixelHighlighter(self.renderer_highlights)
@@ -125,6 +121,7 @@ class FrameViewerApp:
         self.interactor = vtk.vtkRenderWindowInteractor()
         self.interactor.SetInteractorStyle(None)
         self.interactor.SetRenderWindow(self.render_window)
+        self.interactor.AddObserver("ModifiedEvent", self.update_window)
         self.interactor.AddObserver("KeyPressEvent", self.keypress)
         self.interactor.AddObserver("LeftButtonPressEvent", self.button_event)
         self.interactor.AddObserver("LeftButtonReleaseEvent", self.button_event)
@@ -139,6 +136,13 @@ class FrameViewerApp:
         self.interactor.Initialize()
         self.render_window.Render()
         self.interactor.Start()
+
+    def update_window(self, obj, event):
+        (window_width, window_height) = self.render_window.GetSize()
+        if window_width != self.last_window_width or window_height != self.last_window_height:
+            self.text_actor.SetDisplayPosition(window_width - 400, window_height - (self.number_of_lines + 2) * self.font_size)
+            self.last_window_width = window_width
+            self.last_window_height = window_height
 
     def update_active_vtk_image(self, force_reset=False):
         data_by_mode = {
@@ -305,7 +309,7 @@ class FrameViewerApp:
     @staticmethod
     def get_block_coordinate(point_world):
         return (point_world / FrameViewerApp.VOXEL_BLOCK_SIZE_METERS) + 1 / (
-                    2 * FrameViewerApp.VOXEL_BLOCK_SIZE_VOXELS)
+                2 * FrameViewerApp.VOXEL_BLOCK_SIZE_VOXELS)
 
     def update_location_text(self, u, v, depth, color):
         camera_coords = FrameViewerApp.PROJECTION.project_to_camera_space(u, v, depth)
@@ -337,14 +341,3 @@ class FrameViewerApp:
             self.update_location_text(frame_x_int, frame_y_int, depth, color)
         else:
             self.pixel_highlighter.hide()
-
-
-def main():
-    app = FrameViewerApp("/mnt/Data/Reconstruction/experiment_output/2020-05-04/recording", 16)
-    app.launch()
-
-    return PROGRAM_EXIT_SUCCESS
-
-
-if __name__ == "__main__":
-    sys.exit(main())

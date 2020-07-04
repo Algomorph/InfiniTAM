@@ -17,13 +17,14 @@
 
 //local
 #include "IndexingEngine_DiagnosticData.h"
+#include "IndexingEngine_Shared.h"
+#include "IndexingEngine_RayMarching.h"
+#include "IndexingEngine_DiagnosticRayMarching.h"
 #include "../../Telemetry/TelemetryRecorderFactory.h"
 #include "../../../../ORUtils/PlatformIndependence.h"
 #include "../../../../ORUtils/PlatformIndependentAtomics.h"
 #include "../../../../ORUtils/CrossPlatformMacros.h"
 #include "../../../Objects/Volume/VoxelVolume.h"
-#include "IndexingEngine_Shared.h"
-#include "IndexingEngine_RayMarching.h"
 #include "../../../Utils/Geometry/CheckBlockVisibility.h"
 #include "../../../Utils/Geometry/GeometryBooleanOperations.h"
 #include "../../../Utils/VoxelVolumeParameters.h"
@@ -357,7 +358,7 @@ protected: // instance functions
 		      (live_frame_depth_meters + this->surface_distance_cutoff) > this->far_clipping_distance))
 			has_live_surface = true;
 
-		if (canonical_surface_point_in_world_space.w > 0.0f){
+		if (canonical_surface_point_in_world_space.w > 0.0f) {
 			has_canonical_surface = true;
 			canonical_surface_point_in_world_space[3] = 1.0;
 			canonical_surface_point_in_camera_space = WorldSpacePointToCameraSpace(canonical_surface_point_in_world_space, this->depth_camera_pose);
@@ -474,20 +475,28 @@ public: // instance functions
 		Vector4f surface1_point_camera_space(0.0f), surface2_point_camera_space(0.0f);
 		bool has_surface1, has_surface2;
 
+		int pixel_block_count; internal::PixelBlockAllocationRecord pixel_blocks;
+		device_diagnostic_data->GetBlockRecordForPixel(x,y, pixel_block_count, pixel_blocks);
+
 		if (!this->ComputeMarchSegment(march_segment, surface1_point_camera_space, surface2_point_camera_space,
 		                               has_surface1, has_surface2, surface1_depth, surface2_point_world_space, x, y)) {
 			device_diagnostic_data->SetPixelData(x, y, has_surface1, has_surface2, surface1_point_camera_space,
-			                                     surface2_point_world_space, march_segment);
+			                                     surface2_point_world_space, march_segment, pixel_blocks, pixel_block_count);
 			return;
 		}
 
-		device_diagnostic_data->SetPixelData(x, y, has_surface1, has_surface2, surface1_point_camera_space,
-		                                     surface2_point_camera_space, march_segment);
+		MarkVoxelHashBlocksAlongSegment_RecordPixelBlocks(
+				this->hash_entry_allocation_states, this->hash_block_coordinates,
+				*this->unresolvable_collision_encountered_device, this->hash_table,
+				march_segment,
+				this->colliding_block_positions_device, this->colliding_block_count,
 
-		MarkVoxelHashBlocksAlongSegment(this->hash_entry_allocation_states, this->hash_block_coordinates,
-		                                *this->unresolvable_collision_encountered_device, this->hash_table,
-		                                march_segment,
-		                                this->colliding_block_positions_device, this->colliding_block_count);
+				pixel_blocks,
+				pixel_block_count);
+
+		device_diagnostic_data->SetPixelData(x, y, has_surface1, has_surface2, surface1_point_camera_space,
+		                                     surface2_point_camera_space, march_segment, pixel_blocks, pixel_block_count);
+
 	}
 
 	using DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::colliding_block_positions;
