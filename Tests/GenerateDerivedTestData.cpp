@@ -373,7 +373,7 @@ configuration::Configuration GenerateDefaultSnoopyConfiguration() {
 			default_snoopy_configuration(
 			Vector3i(0, 0, 0),
 			true,
-			VoxelVolumeParameters(0.004, 0.2, 3.0, 0.04, 100, false, 1.0f),
+			VoxelVolumeParameters(0.004, 0.2, 1.0, 0.04, 100, false, 1.0f),
 			SurfelVolumeParameters(),
 			SpecificVolumeParameters(
 					ArrayVolumeParameters(),
