@@ -4,6 +4,7 @@
 cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 
 project(InfiniTAM)
+project(InfiniTAM LANGUAGES CXX C CUDA)
 
 #################################
 # CMake policies                #
