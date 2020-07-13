@@ -52,8 +52,15 @@ static inline std::string CreateAndGetOutputPathForFrame_Aux(const std::string& 
 	return path.string();
 }
 
+static std::string pad_with_leading_zeros(const int value, const unsigned total_length)
+{
+	std::ostringstream oss;
+	oss << std::setw(total_length) << std::setfill('0') << value;
+	return oss.str();
+}
+
 std::string CreateAndGetOutputPathForFrame(int frame_index) {
-	return CreateAndGetOutputPathForFrame_Aux(std::to_string(frame_index));
+	return CreateAndGetOutputPathForFrame_Aux(pad_with_leading_zeros(frame_index, 3));
 }
 
 std::string CreateAndGetOutputPathForUnknownFrame() {

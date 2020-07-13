@@ -42,7 +42,8 @@ struct TSDFFusionFunctor {
 
 		float live_sdf = TVoxel::valueToFloat(source_voxel.sdf);
 
-		// parameter eta from SobolevFusion, Sec. 3.1, divided by voxel size
+		// negated parameter eta from 'SDF-2-SDF Registration for Real-Time 3D Reconstruction from RGB-D Data',
+		// Sec. 3.2, and SobolevFusion, Sec. 3.1, as well as 'mu' from original KinectFusion(2011), divided by voxel size
 		// (voxel size, m) / (narrow-band half-width eta, m) * -("2-3 voxels")
 		// we use .3 for the latter value, which means 3 voxels if the max SDF value is 1.0 and values are truncated
 		// after 10 voxels in each direction.

@@ -2,7 +2,7 @@ import os
 
 
 def get_frame_output_path(output_path, i_frame):
-    return os.path.join(output_path, "Frame_{:02}".format(i_frame))
+    return os.path.join(output_path, "Frame_{:03}".format(i_frame))
 
 
 def get_output_frame_count(output_path):
