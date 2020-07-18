@@ -1173,7 +1173,7 @@ if (WITH_VTK)
     target_compile_definitions(${targetname} PUBLIC -DWITH_VTK)
 endif ()
 target_include_directories(${targetname} PUBLIC ${OpenCV_INCLUDE_DIRS})
-target_link_libraries(${targetname} ${OpenCV_LIBS} ${VTK_LIBRARIES} log4cplus tinyply)
+target_link_libraries(${targetname} PUBLIC ${OpenCV_LIBS} ${VTK_LIBRARIES} log4cplus tinyply MiniSlamGraphLib FernRelocLib ORUtils)
 include(${PROJECT_SOURCE_DIR}/cmake/LinkBoost.cmake)
 
 

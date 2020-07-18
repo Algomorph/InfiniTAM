@@ -4,7 +4,7 @@
 
 if(Boost_FOUND)
     target_compile_definitions(${targetname} PUBLIC WITH_BOOST)
-    target_link_libraries(${targetname} ${Boost_LIBRARIES})
+    target_link_libraries(${targetname} PUBLIC ${Boost_LIBRARIES})
     target_include_directories(${targetname} PUBLIC ${Boost_INCLUDE_DIRS})
     # windows-specific stuff
     if (CMAKE_CXX_COMPILER_ID MATCHES MSVC)

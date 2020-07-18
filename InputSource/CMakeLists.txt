@@ -74,6 +74,6 @@ include(${PROJECT_SOURCE_DIR}/cmake/SetCUDALibTarget.cmake)
 ##########################################
 # Link external dependency libraries     #
 ##########################################
-target_link_libraries(InputSource ffmpeg)
+target_link_libraries(InputSource PUBLIC ffmpeg)
 
 include(${PROJECT_SOURCE_DIR}/cmake/LinkBoost.cmake)

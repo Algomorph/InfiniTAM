@@ -132,6 +132,8 @@ private: // instance functions
 	//TODO: move to SwappingEngine itself.
 	void ProcessSwapping(RenderState* render_state);
 	void HandlePotentialCameraTrackingFailure();
+	int FrameIndex();
+	void AddFrameIndexToImage(UChar4Image& out);
 
 };
 } // namespace ITMLib

@@ -16,6 +16,33 @@ include(${PROJECT_SOURCE_DIR}/cmake/UseCUDA.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/UseOpenMP.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/UseBoost.cmake)
 
+###############################
+# Handle resources            #
+###############################
+set(RESOURCE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+
+file(GLOB_RECURSE RESOURCE_FILES
+     "${CMAKE_CURRENT_SOURCE_DIR}/*.ttf"
+     # add other resource file patters here
+     # e.g. organize under ORUtils/images, ORUtils/icons, etc.
+     )
+
+foreach (RESOURCE_FILE ${RESOURCE_FILES})
+    string(REPLACE ${CMAKE_CURRENT_SOURCE_DIR} ${RESOURCE_DIRECTORY} NEW_FILE ${RESOURCE_FILE})
+    get_filename_component(TARGET_DIR ${NEW_FILE} DIRECTORY)
+    file(MAKE_DIRECTORY ${TARGET_DIR})
+    configure_file(
+            ${RESOURCE_FILE}
+            ${NEW_FILE}
+            COPYONLY
+    )
+endforeach (RESOURCE_FILE)
+
+###############################
+# Compile config file         #
+###############################
+configure_file(ORUtilsConfig.h.in ORUtilsConfig.h @ONLY)
+
 #############################
 # Specify the project files #
 #############################
@@ -23,6 +50,7 @@ include(${PROJECT_SOURCE_DIR}/cmake/UseBoost.cmake)
 set(
         sources
 
+        DrawText.cpp
         FileUtils.cpp
         IStreamWrapper.cpp
         KeyValueConfig.cpp
@@ -36,8 +64,10 @@ set(
 set(
         headers
 
+        ${CMAKE_CURRENT_BINARY_DIR}/ORUtilsConfig.h
         Cholesky.h
         CUDADefines.h
+        DrawText.h
         FileUtils.h
         HomkerMap.h
         Image.h
@@ -80,4 +110,6 @@ include(${PROJECT_SOURCE_DIR}/cmake/SetCUDALibTarget.cmake)
 ##########################################
 
 include(${PROJECT_SOURCE_DIR}/cmake/LinkBoost.cmake)
-target_link_libraries(${targetname} zstr png)
+target_link_libraries(${targetname} PUBLIC zstr png )
+target_link_libraries(${targetname} PRIVATE wft freetype)
+target_include_directories(${targetname} PUBLIC ${CMAKE_CURRENT_BINARY_DIR})

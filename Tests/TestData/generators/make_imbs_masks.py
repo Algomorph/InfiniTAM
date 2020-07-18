@@ -1,4 +1,10 @@
 #!/usr/bin/python3
+
+######################################################################
+# Envokes background subtraction.
+# Requires a built & installed CVE (https://github.com/Algomorph/cve)
+######################################################################
+
 import os
 import sys
 import argparse
@@ -24,7 +30,7 @@ class MaskLabel(Enum):
 class ConnectedComponentThreshold(Enum):
     HIDDEN = 1200
     BBOX_THRESH = 6500
-    TRACK_DIST_THRESH = 60.
+    TRACK_DIST_THRESH = 40.
 
 
 def get_paths_with_prefix(prefix: str, directory: str) -> List[str]:
@@ -34,8 +40,19 @@ def get_paths_with_prefix(prefix: str, directory: str) -> List[str]:
     return paths
 
 
+def label_image(image: np.ndarray, label: str) -> None:
+    width = image.shape[1]
+    height = image.shape[0]
+    cv2.putText(image, label, (width - 100, height - 20), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1.0, (255, 255, 255), 1)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser("Generate foreground masks from given color frames using a background subtraction algorithm.")
+
+    parser.add_argument("--frames_directory", "-f", type=str, default="/mnt/Data/Reconstruction/real_data/snoopy/frames",
+                        help="path to the color frames folder. Color frames should have the following format:\n"
+                             "<frames_directory>/color_XXXXXX.png\n"
+                             ", where 'XXXXXX' is a zero-padded 6-digit frame number.")
     parser.add_argument("--background_frames_directory", "-bf", type=str,
                         default="",
                         help="path to extra frames to start the processing (many algorithms need to build a background model, so "
@@ -43,10 +60,11 @@ def main() -> int:
                              "for the background frames. Background frame file names should follow this convention:\n "
                              " <output>/color_bg_XXXXXX.png "
                              ", where 'XXXXXX' is a zero-padded 6-digit frame number.")
-    parser.add_argument("--frames_directory", "-f", type=str, default="/mnt/Data/Reconstruction/real_data/snoopy/frames",
-                        help="path to the frames folder. Color frames should have the following format:\n"
-                             "<frames_directory>/color_XXXXXX.png\n"
-                             ", where 'XXXXXX' is a zero-padded 6-digit frame number.")
+    parser.add_argument("--depth_frames_directory", "-df", type=str, default="/mnt/Data/Reconstruction/real_data/snoopy/frames",
+                        help="path to the depth frames folder. Depth frames should have the following format:\n"
+                             "<frames_directory>/depth_XXXXXX.png\n"
+                             ", where 'XXXXXX' is a zero-padded 6-digit frame number. Depth frames should have a single 16-bit"
+                             " integer channel where depth to the surface at each pixel, in mm, has been recorded.")
     parser.add_argument("--output", "-o", type=str, default="/mnt/Data/Reconstruction/real_data/snoopy/imbs_masks",
                         help="Unless '--output_as_video' option is used, path to the output folder with frame masks as images. "
                              "Otherwise, path to the output video file with masks."
@@ -57,6 +75,17 @@ def main() -> int:
 
     parser.add_argument("--output_as_video", "-v", default=False,
                         action='store_true', help="Save output as video instead of frames.")
+
+    parser.add_argument("--label_frames", "-lf", default=False, action='store_true',
+                        help="Label each output frame image with its frame index")
+
+    parser.add_argument("--clip_depth", "-cd", default=False, action='store_true',
+                        help="Use depth images to clip the mask to a specific depth value range, as specified by the "
+                             "--near_clip and --far_clip arguments.")
+    parser.add_argument("--near_clip", "-nc", type=int, default=0,
+                        help="Distance to the near clipping plane in whole mm (only used with --clip_depth).")
+    parser.add_argument("--far_clip", "-fc", type=int, default=10000,
+                        help="Distance to the far clipping plane in whole mm (only used with --clip_depth).")
 
     # ====================IMBS parameters========================== #
     parser.add_argument("--fps", type=float, default=30.0)
@@ -92,9 +121,14 @@ def main() -> int:
 
     parser.add_argument("--persistence_period", type=float, default=10000.0,
                         help="Duration of the persistence period in ms")
-    parser.add_argument("-m", "--use_morphological_filtering", default=False,
+    parser.add_argument("-m", "--use_morphological_filter", default=False,
                         action='store_true', help="Use morphological filtering (open, close) on the result.")
     # ============================================================= #
+
+    parser.add_argument("-pm", "--use_postprocessing_morphological_filter", default=False,
+                        action='store_true', help="Use morphological filtering (open, close) on the result after postprocessing.")
+    parser.add_argument("-pmks", "--postprocessing_morphological_kernel_size", default=5,
+                        type=int, help="Size of kernel for postprocessing morphological filter.")
 
     args = parser.parse_args()
     if not os.path.exists(args.output):
@@ -111,6 +145,7 @@ def main() -> int:
         args.sampling_interval = len(background_color_frame_paths)
 
     color_frame_paths = get_paths_with_prefix('color_', args.frames_directory)
+    depth_frame_paths = get_paths_with_prefix('depth_', args.depth_frames_directory)
 
     use_pybgs = False
     if use_pybgs:
@@ -121,7 +156,7 @@ def main() -> int:
                                                   args.sampling_interval, args.min_bin_height, args.num_samples,
                                                   args.alpha, args.beta, args.tau_s, args.tau_h,
                                                   args.min_area, args.persistence_period,
-                                                  args.use_morphological_filtering, False)
+                                                  args.use_morphological_filter, False)
 
     for frame_path in background_color_frame_paths:
         background_frame = cv2.imread(frame_path, cv2.IMREAD_UNCHANGED)
@@ -137,8 +172,10 @@ def main() -> int:
                                        args.fps, (color_frame.shape[1], color_frame.shape[0]), False)
 
     prev_frame_centroid = None
+    i_frame = 0
     for frame_path in color_frame_paths:
         no_ext_filename = os.path.splitext(os.path.basename(frame_path))[0]
+        frame_postfix = no_ext_filename[-6:]
         color_frame = cv2.imread(frame_path, cv2.IMREAD_UNCHANGED)
         mask = subtractor.apply(color_frame)
         print("Generating background mask for '{:s}'.".format(frame_path))
@@ -181,13 +218,31 @@ def main() -> int:
 
             output_image = bin_mask * 255
 
+        if args.use_postprocessing_morphological_filter:
+            kernel_open = np.ones((3, 3), np.uint8)
+            kernel_close = np.ones((args.postprocessing_morphological_kernel_size, args.postprocessing_morphological_kernel_size), np.uint8)
+            output_image = cv2.morphologyEx(output_image, cv2.MORPH_OPEN, kernel_open)
+            output_image = cv2.morphologyEx(output_image, cv2.MORPH_CLOSE, kernel_close)
+
+        if args.clip_depth:
+            depth_path = depth_frame_paths[i_frame]
+            depth_frame = cv2.imread(depth_path, cv2.IMREAD_UNCHANGED)
+            # do not erase depth values missing due to occlusion
+            depth_frame[depth_frame == 0] = args.near_clip
+            output_image[depth_frame < args.near_clip] = 0
+            output_image[depth_frame > args.far_clip] = 0
+
+        if args.label_frames:
+            label_image(output_image, frame_postfix)
+
         if args.output_as_video:
             video_writer.write(output_image)
         else:
-            frame_postfix = no_ext_filename[-6:]
             mask_image_path = os.path.join(args.output, "imbs_mask_" + frame_postfix + ".png")
             print("Saving resulting mask to '{:s}'".format(frame_path, mask_image_path))
             cv2.imwrite(mask_image_path, output_image)
+
+        i_frame += 1
 
     if args.output_as_video:
         video_writer.release()

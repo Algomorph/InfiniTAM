@@ -49,6 +49,7 @@ namespace fs = std::filesystem;
 #include "../../../ORUtils/FileUtils.h"
 #include "../../Utils/Telemetry/TelemetryUtilities.h"
 #include "../../../ORUtils/VectorAndMatrixPersistence.h"
+#include "../../../ORUtils/DrawText.h"
 
 using namespace ITMLib;
 
@@ -276,6 +277,11 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ResetAll() {
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
+int DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::FrameIndex(){
+	return automatic_run_settings.index_of_frame_to_start_at + frames_processed;
+}
+
+template<typename TVoxel, typename TWarp, typename TIndex>
 CameraTrackingState::TrackingResult
 DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(UChar4Image* rgb_image,
                                                              ShortImage* depth_image,
@@ -302,8 +308,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(UChar4Image* rgb_im
 	if (!main_processing_active) return CameraTrackingState::TRACKING_FAILED;
 	bool fusion_succeeded = false;
 
-	auto frame_index = [this] { return automatic_run_settings.index_of_frame_to_start_at + frames_processed; };
-	telemetry::SetGlobalFrameIndex(frame_index());
+	telemetry::SetGlobalFrameIndex(FrameIndex());
 	if ((last_tracking_result == CameraTrackingState::TRACKING_GOOD || !tracking_initialised) &&
 	    (fusion_active) && (relocalization_count == 0)) {
 		if (frames_processed > 0) {
@@ -323,7 +328,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(UChar4Image* rgb_im
 
 			//pre-tracking recording
 			LogTSDFVolumeStatistics(live_volumes[0], "[[live TSDF before tracking]]");
-			telemetry_recorder.RecordPreSurfaceTrackingData(*live_volumes[0], tracking_state->pose_d->GetM(), frame_index());
+			telemetry_recorder.RecordPreSurfaceTrackingData(*live_volumes[0], tracking_state->pose_d->GetM(), FrameIndex());
 
 			benchmarking::start_timer("TrackMotion");
 			LOG4CPLUS_PER_FRAME(logging::get_logger(), bright_cyan
@@ -335,7 +340,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(UChar4Image* rgb_im
 
 			//post-tracking recording
 			LogTSDFVolumeStatistics(target_warped_live_volume, "[[live TSDF after tracking]]");
-			telemetry_recorder.RecordPostSurfaceTrackingData(*target_warped_live_volume, frame_index());
+			telemetry_recorder.RecordPostSurfaceTrackingData(*target_warped_live_volume, FrameIndex());
 
 			//fuse warped live into canonical
 			benchmarking::start_timer("FuseOneTsdfVolumeIntoAnother");
@@ -344,7 +349,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(UChar4Image* rgb_im
 			LogTSDFVolumeStatistics(canonical_volume, "[[canonical TSDF after fusion]]");
 
 			//post-fusion recording
-			telemetry_recorder.RecordPostFusionData(*canonical_volume, frame_index());
+			telemetry_recorder.RecordPostFusionData(*canonical_volume, FrameIndex());
 		} else {
 			LOG4CPLUS_PER_FRAME(logging::get_logger(),
 			                    bright_cyan << "Generating raw live frame from view..." << reset);
@@ -354,8 +359,8 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(UChar4Image* rgb_im
 			benchmarking::stop_timer("GenerateRawLiveVolume");
 
 			//post-tracking recording
-			telemetry_recorder.RecordPreSurfaceTrackingData(*live_volumes[0], tracking_state->pose_d->GetM(), frame_index());
-			telemetry_recorder.RecordPostSurfaceTrackingData(*live_volumes[0], frame_index());
+			telemetry_recorder.RecordPreSurfaceTrackingData(*live_volumes[0], tracking_state->pose_d->GetM(), FrameIndex());
+			telemetry_recorder.RecordPostSurfaceTrackingData(*live_volumes[0], FrameIndex());
 
 			//** prepare canonical for new frame
 			LOG4CPLUS_PER_FRAME(logging::get_logger(),
@@ -367,7 +372,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(UChar4Image* rgb_im
 			benchmarking::stop_timer("FuseOneTsdfVolumeIntoAnother");
 
 			//post-fusion recording
-			telemetry_recorder.RecordPostFusionData(*canonical_volume, frame_index());
+			telemetry_recorder.RecordPostFusionData(*canonical_volume, FrameIndex());
 		}
 		fusion_succeeded = true;
 		if (frames_processed > 50) tracking_initialised = true;
@@ -520,6 +525,9 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(UChar4Image* out, 
 		case MainEngine::InfiniTAM_IMAGE_UNKNOWN:
 			break;
 	};
+
+	AddFrameIndexToImage(*out);
+
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
@@ -626,6 +634,14 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessSwapping(RenderState
 		case configuration::SWAPPINGMODE_DISABLED:
 			break;
 	}
+}
+
+template<typename TVoxel, typename TWarp, typename TIndex>
+void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::AddFrameIndexToImage(UChar4Image& out) {
+	int frame_index = FrameIndex();
+	std::stringstream ss;
+	ss << std::setw(6) << std::setfill(' ') << frame_index;
+	ORUtils::DrawText(out, ss.str(), 20, 20, true);
 }
 
 // endregion ===========================================================================================================

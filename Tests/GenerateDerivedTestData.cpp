@@ -403,7 +403,7 @@ configuration::Configuration GenerateDefaultSnoopyConfiguration() {
 			      "", "", "",
 			      "<CONFIGURATION_DIRECTORY>/frames/color_%06i.png",
 			      "<CONFIGURATION_DIRECTORY>/frames/depth_%06i.png",
-			      "<CONFIGURATION_DIRECTORY>/frames/omask_%06i.png",
+			      "<CONFIGURATION_DIRECTORY>/frames/mask_%06i.png",
 			      ""),
 			NonRigidTrackingParameters(
 					ITMLib::TRACKER_SLAVCHEVA_OPTIMIZED,

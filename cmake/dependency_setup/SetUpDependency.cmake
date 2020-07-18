@@ -5,7 +5,7 @@ include(HandleLocalPackage)
 
 function(set_up_dependency)
     set(options PACKAGED)
-    set(oneValueArgs NAME PREFERRED_SOURCE GIT_REPOSITORY GIT_TAG SOURCE_SUBDIR INCLUDE_TARGET LIBRARY_TARGET_POSIX LIBRARY_TARGET_MSVC_DEBUG LIBRARY_TARGET_MSVC_RELEASE ALTERNATIVE_LOCAL_NAME FORCE_PREFERRED_SOURCE)
+    set(oneValueArgs NAME PREFERRED_SOURCE GIT_REPOSITORY GIT_TAG SOURCE_SUBDIR INCLUDE_TARGET LIBRARY_TARGET_POSIX LIBRARY_TARGET_POSIX_DEBUG LIBRARY_TARGET_MSVC_DEBUG LIBRARY_TARGET_MSVC_RELEASE ALTERNATIVE_LOCAL_NAME FORCE_PREFERRED_SOURCE)
     set(multiValueArgs CMAKE_ARGS LIBRARY_TARGET_MSVC_INTERFACE_LINK_LIBRARIES SOURCE_OPTIONS COMPONENTS OPTIONAL_COMPONENTS)
     cmake_parse_arguments(SUD "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
@@ -117,11 +117,14 @@ ${CMAKE_CURRENT_PREFERRED_SOURCE_DIR}/packaged/${SUD_NAME}. Will try other sourc
                                                   INTERFACE_LINK_LIBRARIES "${SUD_LIBRARY_TARGET_MSVC_INTERFACE_LINK_LIBRARIES}")
                         endif ()
                     else ()
+                        if(NOT SUD_LIBRARY_TARGET_POSIX_DEBUG)
+                            set(SUD_LIBRARY_TARGET_POSIX_DEBUG ${SUD_LIBRARY_TARGET_POSIX})
+                        endif()
                         set_target_properties(${SUD_NAME} PROPERTIES
                                               INTERFACE_INCLUDE_DIRECTORIES ${${SUD_UC_NAME}_PREFIX}/${SUD_INCLUDE_TARGET}
                                               IMPORTED_LOCATION_RELWITHDEBINFO ${${SUD_UC_NAME}_PREFIX}/${SUD_LIBRARY_TARGET_POSIX}
                                               IMPORTED_LOCATION_RELEASE ${${SUD_UC_NAME}_PREFIX}/${SUD_LIBRARY_TARGET_POSIX}
-                                              IMPORTED_LOCATION_DEBUG ${${SUD_UC_NAME}_PREFIX}/${SUD_LIBRARY_TARGET_POSIX}
+                                              IMPORTED_LOCATION_DEBUG ${${SUD_UC_NAME}_PREFIX}/${SUD_LIBRARY_TARGET_POSIX_DEBUG}
                                               )
                     endif ()
                     set(PACKAGE_READY TRUE)

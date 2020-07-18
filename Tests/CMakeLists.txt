@@ -37,9 +37,9 @@ macro(itm_add_test)
     ##########################################
     include(${PROJECT_SOURCE_DIR}/cmake/SetCUDAAppTarget.cmake)
 
-    target_link_libraries(${targetname}
-                          InputSource ITMLib MiniSlamGraphLib ORUtils FernRelocLib test_utilities
-                          ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+    target_link_libraries(${targetname} PRIVATE
+                           MiniSlamGraphLib ORUtils FernRelocLib test_utilities
+                          ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} InputSource ITMLib
                           )
 
     load_target_link_includes()
@@ -97,7 +97,7 @@ if (BUILD_TESTS)
     load_use_includes()
     set(sources GenerateDerivedTestData.cpp)
     include(${PROJECT_SOURCE_DIR}/cmake/SetCUDAAppTarget.cmake)
-    target_link_libraries(${targetname} InputSource ITMLib MiniSlamGraphLib ORUtils FernRelocLib test_utilities)
+    target_link_libraries(${targetname} PRIVATE InputSource ITMLib MiniSlamGraphLib ORUtils FernRelocLib test_utilities)
     load_target_link_includes()
 
     ##########################

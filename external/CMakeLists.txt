@@ -1,3 +1,8 @@
+##########################################################
+# external/CMakeLists.txt:
+# Automates dependency handling to a reasonable extent.
+##########################################################
+
 include(ExternalProject)
 include(SetUpDependency)
 include(ProvideDependencySourceOption)
@@ -50,7 +55,6 @@ endif()
 provide_dependency_source_option(glut DEFAULT_INDEX ${GLUT_DEFAULT_SOURCE_OPTION_INDEX} OPTIONS ${STANDARD_PACKAGE_SOURCE_OPTIONS})
 
 # ffmpeg
-
 option(WITH_FFMPEG "Build with FFmpeg support?" ON)
 if(WITH_FFMPEG)
     if(MSVC)
@@ -59,6 +63,15 @@ if(WITH_FFMPEG)
         provide_dependency_source_option(ffmpeg DEFAULT_INDEX ${GLUT_DEFAULT_SOURCE_OPTION_INDEX} OPTIONS ${FIND_LOCAL_SOURCE})
     endif()
 endif()
+
+# freetype
+if(MSVC)
+    set(FREETYPE_DEFAULT_SOURCE_OPTION_INDEX 0)
+else()
+    set(FREETYPE_DEFAULT_SOURCE_OPTION_INDEX 1)
+endif()
+provide_dependency_source_option(freetype DEFAULT_INDEX ${FREETYPE_DEFAULT_SOURCE_OPTION_INDEX} OPTIONS ${NO_PACKAGED_SOURCE_OPTIONS})
+
 
 
 #######################
@@ -96,6 +109,7 @@ set_up_dependency(NAME zlib
                     ALTERNATIVE_LOCAL_NAME ZLIB
                     )
 
+# libPNG
 if(WITH_PNG)
     if(ZLIB_SOURCE STREQUAL FIND_LOCAL_SOURCE)
         set(PNG_ZLIB_CMAKE_ARGS)
@@ -126,8 +140,7 @@ if(WITH_PNG)
     set_target_properties(png PROPERTIES INTERFACE_COMPILE_DEFINITIONS USE_LIBPNG)
 endif()
 
-
-
+# glut
 set_up_dependency(NAME glut
                     PREFERRED_SOURCE ${GLUT_PREFERRED_SOURCE}
                     SOURCE_OPTIONS ${GLUT_SOURCE_OPTIONS}
@@ -147,6 +160,7 @@ if(NOT GLUT_SOURCE STREQUAL FIND_LOCAL_SOURCE)
     set_target_properties(glut PROPERTIES INTERFACE_COMPILE_DEFINITIONS FREEGLUT_STATIC)
 endif()
 
+# ffmpeg
 if(WITH_FFMPEG)
     set_up_dependency(NAME ffmpeg
                         PREFERRED_SOURCE ${FFMPEG_PREFERRED_SOURCE}
@@ -158,6 +172,32 @@ if(WITH_FFMPEG)
     set_target_properties(ffmpeg PROPERTIES INTERFACE_COMPILE_DEFINITIONS COMPILE_WITH_FFMPEG)      
 endif()
 
+# log4cplus
+set_up_dependency(NAME freetype
+                  PREFERRED_SOURCE ${FREETYPE_PREFERRED_SOURCE}
+                  SOURCE_OPTIONS ${FREETYPE_SOURCE_OPTIONS}
+                  FORCE_PREFERRED_SOURCE ${FREETYPE_FORCE_PREFERRED_SOURCE}
+                  ALTERNATIVE_LOCAL_NAME Freetype
+                  GIT_REPOSITORY git://git.sv.nongnu.org/freetype/freetype2.git
+                  GIT_TAG 86bc8a95056c97a810986434a3f268cbe67f2902
+                  CMAKE_ARGS -DFT_WITH_PNG=ON -DFT_WITH_ZLIB=ON -DFT_WITH_BZIP2=OFF
+                  PACKAGED
+                  INCLUDE_TARGET include/freetype2
+                  LIBRARY_TARGET_MSVC_DEBUG lib/libfreetyped.lib
+                  LIBRARY_TARGET_MSVC_RELEASE lib/libfreetype.lib
+                  # LIBRARY_TARGET_MSVC_INTERFACE_LINK_LIBRARIES "ws2_32;advapi32"
+                  LIBRARY_TARGET_POSIX lib/libfreetype.a
+                  LIBRARY_TARGET_POSIX_DEBUG lib/libfreetyped.a
+                  )
+
+if(NOT FREETYPE_SOURCE STREQUAL FIND_LOCAL_SOURCE)
+    if(NOT ZLIB_SOURCE STREQUAL FIND_LOCAL_SOURCE)
+        add_dependencies(__freetype __zlib)
+    endif()
+    if(NOT PNG_SOURCE STREQUAL FIND_LOCAL_SOURCE)
+        add_dependencies(__freetype __png)
+    endif()
+endif()
 
 
 # tinyply (for .ply mesh input/output)
@@ -169,3 +209,10 @@ add_library(zstr ${CMAKE_CURRENT_SOURCE_DIR}/packaged/zstr/zstr.hpp ${CMAKE_CURR
             ${CMAKE_CURRENT_SOURCE_DIR}/packaged/zstr/zstr.cpp)
 target_link_libraries(zstr zlib)
 target_include_directories(zstr INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/packaged)
+
+# wft (freetype C++ wrapper)
+add_library(wft ${CMAKE_CURRENT_SOURCE_DIR}/packaged/wft/wft.hpp ${CMAKE_CURRENT_SOURCE_DIR}/packaged/wft/wft.cpp)
+target_link_libraries(wft freetype)
+#if ( ${CMAKE_SYSTEM_NAME} MATCHES "Linux" )
+#    target_link_libraries(wft dl)
+#endif( ${CMAKE_SYSTEM_NAME} MATCHES "Linux" )

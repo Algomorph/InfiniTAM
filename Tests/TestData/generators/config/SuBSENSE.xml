@@ -3,7 +3,7 @@
     <fRelLBSPThreshold>0.200</fRelLBSPThreshold>
     <DescDistThresholdOffset>3</DescDistThresholdOffset>
     <nMinColorDistThreshold>10</nMinColorDistThreshold>
-    <nBGSamples>100</nBGSamples>
+    <nBGSamples>61</nBGSamples>
     <nRequiredBGSamples>2</nRequiredBGSamples>
     <nSamplesForMovingAvgs>100</nSamplesForMovingAvgs>
     <showOutput>false</showOutput>
