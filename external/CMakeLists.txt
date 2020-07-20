@@ -36,15 +36,13 @@ endif()
 provide_dependency_source_option(zlib DEFAULT_INDEX ${ZLIB_DEFAULT_SOURCE_OPTION_INDEX} OPTIONS ${STANDARD_PACKAGE_SOURCE_OPTIONS})
 
 # libpng
-option(WITH_PNG "Build with libpng support?" ON)
-if(WITH_PNG)
-    if(MSVC)
-        set(PNG_DEFAULT_SOURCE_OPTION_INDEX 1)
-    else()
-        set(PNG_DEFAULT_SOURCE_OPTION_INDEX 0)
-    endif()
-    provide_dependency_source_option(png DEFAULT_INDEX ${PNG_DEFAULT_SOURCE_OPTION_INDEX} OPTIONS ${NO_PACKAGED_SOURCE_OPTIONS})
+if(MSVC)
+    set(PNG_DEFAULT_SOURCE_OPTION_INDEX 1)
+else()
+    set(PNG_DEFAULT_SOURCE_OPTION_INDEX 0)
 endif()
+provide_dependency_source_option(png DEFAULT_INDEX ${PNG_DEFAULT_SOURCE_OPTION_INDEX} OPTIONS ${NO_PACKAGED_SOURCE_OPTIONS})
+
 
 # glut
 if(MSVC)
@@ -110,35 +108,32 @@ set_up_dependency(NAME zlib
                     )
 
 # libPNG
-if(WITH_PNG)
-    if(ZLIB_SOURCE STREQUAL FIND_LOCAL_SOURCE)
-        set(PNG_ZLIB_CMAKE_ARGS)
-    else()
-        get_target_property(ZLIB_INCLUDE_DIR zlib INTERFACE_INCLUDE_DIRECTORIES)
-        get_target_property(ZLIB_LIBRARY_DEBUG zlib IMPORTED_LOCATION_DEBUG)    
-        get_target_property(ZLIB_LIBRARY_RELEASE zlib IMPORTED_LOCATION_RELEASE)
-        set(PNG_ZLIB_CMAKE_ARGS -DZLIB_LIBRARY_DEBUG=${ZLIB_LIBRARY_DEBUG} -DZLIB_LIBRARY_RELEASE=${ZLIB_LIBRARY_RELEASE} -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR})
-    endif()
-
-    # libpng
-    set_up_dependency(NAME png
-                       PREFERRED_SOURCE ${PNG_PREFERRED_SOURCE}
-                       SOURCE_OPTIONS ${PNG_SOURCE_OPTIONS}
-                       FORCE_PREFERRED_SOURCE ${PNG_FORCE_PREFERRED_SOURCE}
-                       GIT_REPOSITORY git@github.com:glennrp/libpng.git
-                       GIT_TAG dbe3e0c43e549a1602286144d94b0666549b18e6
-                       CMAKE_ARGS ${PNG_ZLIB_CMAKE_ARGS} -DPNG_SHARED=OFF -DPNG_STATIC=ON -DPNG_EXECUTABLES=OFF -DPNG_TESTS=OFF
-                       INCLUDE_TARGET include
-                       LIBRARY_TARGET_MSVC_DEBUG lib/libpng16_staticd.lib
-                       LIBRARY_TARGET_MSVC_RELEASE lib/libpng16_static.lib
-                       LIBRARY_TARGET_POSIX lib/libpng16.a
-                       ALTERNATIVE_LOCAL_NAME PNG
-                       )
-    if(NOT PNG_SOURCE STREQUAL FIND_LOCAL_SOURCE AND NOT ZLIB_SOURCE STREQUAL FIND_LOCAL_SOURCE)
-        add_dependencies(__png __zlib)
-    endif()
-    set_target_properties(png PROPERTIES INTERFACE_COMPILE_DEFINITIONS USE_LIBPNG)
+if(ZLIB_SOURCE STREQUAL FIND_LOCAL_SOURCE)
+    set(PNG_ZLIB_CMAKE_ARGS)
+else()
+    get_target_property(ZLIB_INCLUDE_DIR zlib INTERFACE_INCLUDE_DIRECTORIES)
+    get_target_property(ZLIB_LIBRARY_DEBUG zlib IMPORTED_LOCATION_DEBUG)    
+    get_target_property(ZLIB_LIBRARY_RELEASE zlib IMPORTED_LOCATION_RELEASE)
+    set(PNG_ZLIB_CMAKE_ARGS -DZLIB_LIBRARY_DEBUG=${ZLIB_LIBRARY_DEBUG} -DZLIB_LIBRARY_RELEASE=${ZLIB_LIBRARY_RELEASE} -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR})
 endif()
+
+set_up_dependency(NAME png
+                    PREFERRED_SOURCE ${PNG_PREFERRED_SOURCE}
+                    SOURCE_OPTIONS ${PNG_SOURCE_OPTIONS}
+                    FORCE_PREFERRED_SOURCE ${PNG_FORCE_PREFERRED_SOURCE}
+                    GIT_REPOSITORY git@github.com:glennrp/libpng.git
+                    GIT_TAG dbe3e0c43e549a1602286144d94b0666549b18e6
+                    CMAKE_ARGS ${PNG_ZLIB_CMAKE_ARGS} -DPNG_SHARED=OFF -DPNG_STATIC=ON -DPNG_EXECUTABLES=OFF -DPNG_TESTS=OFF
+                    INCLUDE_TARGET include
+                    LIBRARY_TARGET_MSVC_DEBUG lib/libpng16_staticd.lib
+                    LIBRARY_TARGET_MSVC_RELEASE lib/libpng16_static.lib
+                    LIBRARY_TARGET_POSIX lib/libpng16.a
+                    ALTERNATIVE_LOCAL_NAME PNG
+                    )
+if(NOT PNG_SOURCE STREQUAL FIND_LOCAL_SOURCE AND NOT ZLIB_SOURCE STREQUAL FIND_LOCAL_SOURCE)
+    add_dependencies(__png __zlib)
+endif()
+set_target_properties(png PROPERTIES INTERFACE_COMPILE_DEFINITIONS USE_LIBPNG)
 
 # glut
 set_up_dependency(NAME glut
@@ -173,6 +168,20 @@ if(WITH_FFMPEG)
 endif()
 
 # log4cplus
+if(PNG_SOURCE STREQUAL FIND_LOCAL_SOURCE)
+    set(FREETYPE_PNG_CMAKE_ARGS)
+    set(FREETYPE_ZLIB_CMAKE_ARGS)
+else()    
+    get_target_property(PNG_INCLUDE_DIR png INTERFACE_INCLUDE_DIRECTORIES)
+    get_target_property(PNG_LIBRARY_DEBUG png IMPORTED_LOCATION_DEBUG)    
+    get_target_property(PNG_LIBRARY_RELEASE png IMPORTED_LOCATION_RELEASE)
+    set(FREETYPE_PNG_CMAPE_ARGS -DPNG_LIBRARY=${PNG_LIBRARY_RELEASE} -DPNG_LIBRARY_DEBUG=${PNG_LIBRARY_DEBUG} -DPNG_PNG_INCLUDE_DIR=${PNG_INCLUDE_DIR})
+
+    get_target_property(ZLIB_INCLUDE_DIR zlib INTERFACE_INCLUDE_DIRECTORIES)
+    get_target_property(ZLIB_LIBRARY_DEBUG zlib IMPORTED_LOCATION_DEBUG)    
+    get_target_property(ZLIB_LIBRARY_RELEASE zlib IMPORTED_LOCATION_RELEASE)
+    set(FREETYPE_ZLIB_CMAKE_ARGS -DZLIB_LIBRARY_DEBUG=${ZLIB_LIBRARY_DEBUG} -DZLIB_LIBRARY=${ZLIB_LIBRARY_RELEASE} -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR})
+endif()
 set_up_dependency(NAME freetype
                   PREFERRED_SOURCE ${FREETYPE_PREFERRED_SOURCE}
                   SOURCE_OPTIONS ${FREETYPE_SOURCE_OPTIONS}
@@ -180,7 +189,7 @@ set_up_dependency(NAME freetype
                   ALTERNATIVE_LOCAL_NAME Freetype
                   GIT_REPOSITORY git://git.sv.nongnu.org/freetype/freetype2.git
                   GIT_TAG 86bc8a95056c97a810986434a3f268cbe67f2902
-                  CMAKE_ARGS -DFT_WITH_PNG=ON -DFT_WITH_ZLIB=ON -DFT_WITH_BZIP2=OFF
+                  CMAKE_ARGS ${FREETYPE_PNG_CMAPE_ARGS} ${FREETYPE_ZLIB_CMAKE_ARGS} -DFT_WITH_PNG=ON -DFT_WITH_ZLIB=ON -DFT_WITH_BZIP2=OFF
                   PACKAGED
                   INCLUDE_TARGET include/freetype2
                   LIBRARY_TARGET_MSVC_DEBUG lib/libfreetyped.lib
@@ -190,6 +199,7 @@ set_up_dependency(NAME freetype
                   LIBRARY_TARGET_POSIX_DEBUG lib/libfreetyped.a
                   )
 
+# freetype
 if(NOT FREETYPE_SOURCE STREQUAL FIND_LOCAL_SOURCE)
     if(NOT ZLIB_SOURCE STREQUAL FIND_LOCAL_SOURCE)
         add_dependencies(__freetype __zlib)
