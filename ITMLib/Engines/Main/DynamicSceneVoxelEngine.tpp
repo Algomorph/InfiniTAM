@@ -641,7 +641,7 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::AddFrameIndexToImage(UChar4
 	int frame_index = FrameIndex();
 	std::stringstream ss;
 	ss << std::setw(6) << std::setfill(' ') << frame_index;
-	ORUtils::DrawTextOnImage(out, ss.str(), 20, 20, true);
+	ORUtils::DrawTextOnImage(out, ss.str(), 15, 20, 20, true);
 }
 
 // endregion ===========================================================================================================
