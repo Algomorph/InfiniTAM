@@ -64,9 +64,9 @@ endif()
 
 # freetype
 if(MSVC)
-    set(FREETYPE_DEFAULT_SOURCE_OPTION_INDEX 0)
-else()
     set(FREETYPE_DEFAULT_SOURCE_OPTION_INDEX 1)
+else()
+    set(FREETYPE_DEFAULT_SOURCE_OPTION_INDEX 0)
 endif()
 provide_dependency_source_option(freetype DEFAULT_INDEX ${FREETYPE_DEFAULT_SOURCE_OPTION_INDEX} OPTIONS ${NO_PACKAGED_SOURCE_OPTIONS})
 
@@ -121,7 +121,7 @@ set_up_dependency(NAME png
                     PREFERRED_SOURCE ${PNG_PREFERRED_SOURCE}
                     SOURCE_OPTIONS ${PNG_SOURCE_OPTIONS}
                     FORCE_PREFERRED_SOURCE ${PNG_FORCE_PREFERRED_SOURCE}
-                    GIT_REPOSITORY git@github.com:glennrp/libpng.git
+                    GIT_REPOSITORY https://github.com/glennrp/libpng.git
                     GIT_TAG dbe3e0c43e549a1602286144d94b0666549b18e6
                     CMAKE_ARGS ${PNG_ZLIB_CMAKE_ARGS} -DPNG_SHARED=OFF -DPNG_STATIC=ON -DPNG_EXECUTABLES=OFF -DPNG_TESTS=OFF
                     INCLUDE_TARGET include
@@ -140,7 +140,7 @@ set_up_dependency(NAME glut
                     PREFERRED_SOURCE ${GLUT_PREFERRED_SOURCE}
                     SOURCE_OPTIONS ${GLUT_SOURCE_OPTIONS}
                     FORCE_PREFERRED_SOURCE ${GLUT_FORCE_PREFERRED_SOURCE}
-                    GIT_REPOSITORY git@github.com:dcnieho/FreeGLUT.git
+                    GIT_REPOSITORY https://github.com/dcnieho/FreeGLUT.git
                     GIT_TAG 349a23dcc1264a76deb79962d1c90462ad0c6f50
                     SOURCE_SUBDIR freeglut/freeglut
                     CMAKE_ARGS -DFREEGLUT_BUILD_STATIC_LIBS=ON -DFREEGLUT_BUILD_SHARED_LIBS=OFF -DFREEGLUT_BUILD_DEMOS=OFF -DFREEGLUT_REPLACE_GLUT=OFF
