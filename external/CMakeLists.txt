@@ -188,12 +188,12 @@ set_up_dependency(NAME freetype
                   FORCE_PREFERRED_SOURCE ${FREETYPE_FORCE_PREFERRED_SOURCE}
                   ALTERNATIVE_LOCAL_NAME Freetype
                   GIT_REPOSITORY git://git.sv.nongnu.org/freetype/freetype2.git
-                  GIT_TAG 86bc8a95056c97a810986434a3f268cbe67f2902
+                  GIT_TAG 132f19b779828b194b3fede187cee719785db4d8
                   CMAKE_ARGS ${FREETYPE_PNG_CMAPE_ARGS} ${FREETYPE_ZLIB_CMAKE_ARGS} -DFT_WITH_PNG=ON -DFT_WITH_ZLIB=ON -DFT_WITH_BZIP2=OFF
                   PACKAGED
                   INCLUDE_TARGET include/freetype2
-                  LIBRARY_TARGET_MSVC_DEBUG lib/libfreetyped.lib
-                  LIBRARY_TARGET_MSVC_RELEASE lib/libfreetype.lib
+                  LIBRARY_TARGET_MSVC_DEBUG lib/freetyped.lib
+                  LIBRARY_TARGET_MSVC_RELEASE lib/freetype.lib
                   # LIBRARY_TARGET_MSVC_INTERFACE_LINK_LIBRARIES "ws2_32;advapi32"
                   LIBRARY_TARGET_POSIX lib/libfreetype.a
                   LIBRARY_TARGET_POSIX_DEBUG lib/libfreetyped.a

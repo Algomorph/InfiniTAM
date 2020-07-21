@@ -15,10 +15,15 @@
 //  ================================================================
 #pragma once
 #include "Image.h"
+#include "Vector.h"
 
 namespace ORUtils{
 
+
 template<typename T>
-void DrawText(Image<T>& image, const std::string& text, int x, int y, bool lower_right_corner_offset);
+void DrawTextOnImage(Image<T>& image, const std::string& text, int x, int y, bool lower_right_corner_offset);
+
+template<>
+void DrawTextOnImage<Vector4<unsigned char>>(Image<Vector4<unsigned char>>& image, const std::string& text, int x, int y, bool lower_right_corner_offset);
 
 } // namespace ORUtils

@@ -21,7 +21,7 @@
 namespace ORUtils {
 
 template<>
-void DrawText<Vector4<unsigned char>>(Image<Vector4<unsigned char>>& image, const std::string& text, int x, int y, bool lower_right_corner_offset) {
+void DrawTextOnImage<Vector4<unsigned char>>(Image<Vector4<unsigned char>>& image, const std::string& text, int x, int y, bool lower_right_corner_offset) {
 	Image<Vector4<unsigned char>>* image_to_modify;
 	bool allocated_temporary_image = false;
 	if (image.GetAccessMode() == MEMORYDEVICE_CPU) {

@@ -3,9 +3,6 @@
 ##########################################
 cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 
-project(InfiniTAM)
-project(InfiniTAM LANGUAGES CXX C CUDA)
-
 #################################
 # CMake policies                #
 #################################
@@ -19,22 +16,34 @@ if (POLICY CMP0074)
     cmake_policy(SET CMP0074 NEW)
 endif()
 
-#################################
-# Enforce language standards    #
-#################################
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
-set(CMAKE_CUDA_STANDARD 14)
-set(CMAKE_CUDA_STANDARD_REQUIRED TRUE)
-
-#################################
-# Specify the CMake module path #
-#################################
+##################################
+# Specify the CMake module paths #
+##################################
 
 list(APPEND CMAKE_MODULE_PATH 
     "${CMAKE_SOURCE_DIR}/cmake/"
     "${CMAKE_SOURCE_DIR}/cmake/debugging/"
     "${CMAKE_SOURCE_DIR}/cmake/dependency_setup/")
+
+#################################
+# Handle CUDA option            #
+#################################
+
+include(UseCuda)
+if(WITH_CUDA)
+    project(Reco LANGUAGES CXX C CUDA)
+else()
+    project(Reco LANGUAGES CXX C)
+endif()
+
+#################################
+# Enforce language standards    #
+#################################
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+set(CMAKE_CUDA_STANDARD 14)
+set(CMAKE_CUDA_STANDARD_REQUIRED TRUE)
 
 #################################
 # Add additional compiler flags #

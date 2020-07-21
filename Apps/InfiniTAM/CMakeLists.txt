@@ -12,7 +12,6 @@ set(targetname InfiniTAM)
 # Specify the libraries to use #
 ################################
 
-include(${PROJECT_SOURCE_DIR}/cmake/UseCUDA.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/UseLibRoyale.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/UseOpenGL.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/UseOpenMP.cmake)
