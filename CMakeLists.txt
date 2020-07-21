@@ -29,7 +29,7 @@ list(APPEND CMAKE_MODULE_PATH
 # Handle CUDA option            #
 #################################
 
-include(UseCuda)
+include(UseCUDA)
 if(WITH_CUDA)
     project(Reco LANGUAGES CXX C CUDA)
 else()
