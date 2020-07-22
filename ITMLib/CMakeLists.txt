@@ -36,6 +36,7 @@ set(ITMLIB_ENGINES_MAIN_SOURCES
     Engines/Main/BasicSurfelEngine.tpp
     Engines/Main/BasicSufelEngine.cpp
 
+    Engines/Main/MainEngineSettings.cpp
     Engines/Main/MultiEngine.tpp
     Engines/Main/MultiEngine_PlainVoxelArray.cpp
     Engines/Main/MultiEngine_VoxelBlockHash.cpp
@@ -53,7 +54,8 @@ set(ITMLIB_ENGINES_MAIN_HEADERS
     Engines/Main/BasicVoxelEngine.h
     Engines/Main/BasicSurfelEngine.h
 
-    Engines/Main/MainEngine.h
+    Engines/Main/FusionAlgorithm.h
+    Engines/Main/MainEngineSettings.h
     Engines/Main/MultiEngine.h
     Engines/Main/CameraTrackingController.h
     Engines/Main/DynamicSceneVoxelEngine.h
@@ -896,6 +898,8 @@ set(
         Utils/Collections/NestedMap3D.cpp
         Utils/Collections/OperationsOnSTLContainers.cpp
 
+        Utils/Enums/IndexingMethod.cpp
+
         Utils/Configuration/AutomaticRunSettings.cpp
         Utils/Configuration/Configuration.cpp
         Utils/Configuration/LoggingSettings.cpp
@@ -918,6 +922,7 @@ set(
 
         Utils/CPPPrintHelpers.cpp
         Utils/ExecutionMode.cpp
+
 
         Utils/Math.cpp
 )
@@ -942,6 +947,8 @@ set(
         Utils/Configuration/Configuration.h
         Utils/Configuration/LoggingSettings.h
         Utils/Configuration/TelemetrySettings.h
+
+        Utils/Enums/IndexingMethod.h
 
         Utils/FileIO/JSON_Utilities.h
         Utils/FileIO/CSV_Utilities.h

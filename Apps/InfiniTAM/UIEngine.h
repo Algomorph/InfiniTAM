@@ -12,7 +12,7 @@
 #include "../../InputSource/ImageSourceEngine.h"
 #include "../../InputSource/IMUSourceEngine.h"
 #include "../../InputSource/FFMPEGWriter.h"
-#include "../../ITMLib/Engines/Main/MainEngine.h"
+#include "../../ITMLib/Engines/Main/FusionAlgorithm.h"
 #include "../../ITMLib/Objects/Tracking/CameraTrackingState.h"
 #include "../../ITMLib/Utils/Configuration/Configuration.h"
 #include "../../ORUtils/FileUtils.h"
@@ -38,9 +38,9 @@ private:
 
 	struct UIColourMode {
 		const char* name;
-		ITMLib::MainEngine::GetImageType type;
+		ITMLib::FusionAlgorithm::GetImageType type;
 
-		UIColourMode(const char* _name, ITMLib::MainEngine::GetImageType _type)
+		UIColourMode(const char* _name, ITMLib::FusionAlgorithm::GetImageType _type)
 				: name(_name), type(_type) {}
 	};
 	std::vector<UIColourMode> colourModes_main, colourModes_freeview;
@@ -51,7 +51,7 @@ private:
 
 	InputSource::ImageSourceEngine* image_source_engine;
 	InputSource::IMUSourceEngine* imu_source_engine;
-	ITMLib::MainEngine* main_engine;
+	ITMLib::FusionAlgorithm* main_engine;
 
 	StopWatchInterface* timer_instant;
 	StopWatchInterface* timer_average;
@@ -62,7 +62,7 @@ private:
 	Vector2i window_size;
 	uint textureId[NUM_WIN];
 	UChar4Image* outImage[NUM_WIN];
-	ITMLib::MainEngine::GetImageType outImageType[NUM_WIN];
+	ITMLib::FusionAlgorithm::GetImageType outImageType[NUM_WIN];
 
 	UChar4Image* input_RGB_image;
 	ShortImage* input_raw_depth_image;
@@ -106,10 +106,9 @@ public:
 
 	bool shutdown_requested = false;
 	UChar4Image* saveImage;
-	ITMLib::configuration::IndexingMethod indexing_method;
 
 	void Initialize(int& argc, char** argv, InputSource::ImageSourceEngine* imageSource, InputSource::IMUSourceEngine* imuSource,
-	                ITMLib::MainEngine* main_engine, const ITMLib::configuration::Configuration& configuration);
+	                ITMLib::FusionAlgorithm* main_engine, const ITMLib::configuration::Configuration& configuration);
 	void Shutdown();
 
 	void Run();

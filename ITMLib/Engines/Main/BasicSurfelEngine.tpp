@@ -15,7 +15,8 @@
 using namespace ITMLib;
 
 template<typename TSurfel>
-BasicSurfelEngine<TSurfel>::BasicSurfelEngine(const RGBD_CalibrationInformation& calib, Vector2i imgSize_rgb, Vector2i imgSize_d) {
+BasicSurfelEngine<TSurfel>::BasicSurfelEngine(const RGBD_CalibrationInformation& calib, Vector2i imgSize_rgb, Vector2i imgSize_d)
+		: trackingActive(this->parameters.enable_rigid_alignment){
 	auto& settings = configuration::get();
 
 	if ((imgSize_d.x == -1) || (imgSize_d.y == -1)) imgSize_d = imgSize_rgb;
@@ -371,7 +372,7 @@ void BasicSurfelEngine<TSurfel>::GetImage(UChar4Image* out, GetImageType getImag
 			out->UpdateHostFromDevice();
 			break;
 		}
-		case MainEngine::InfiniTAM_IMAGE_UNKNOWN: break;
+		case FusionAlgorithm::InfiniTAM_IMAGE_UNKNOWN: break;
 		case InfiniTAM_IMAGE_FREECAMERA_CANONICAL:break;
 	}
 }

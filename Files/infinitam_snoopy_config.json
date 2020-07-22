@@ -8,7 +8,7 @@
     "general_voxel_volume_parameters": {
         "voxel_size": 0.00400000019,
         "near_clipping_distance": 0.200000003,
-        "far_clipping_distance": 3,
+        "far_clipping_distance": 1,
         "truncation_distance": 0.0399999991,
         "max_integration_weight": 100,
         "stop_integration_at_max_weight": false,
@@ -116,7 +116,7 @@
         "depth_video_file_path": "",
         "rgb_image_path_mask": "<CONFIGURATION_DIRECTORY>\/frames\/color_%06i.png",
         "depth_image_path_mask": "<CONFIGURATION_DIRECTORY>\/frames\/depth_%06i.png",
-        "mask_image_path_mask": "<CONFIGURATION_DIRECTORY>\/frames\/omask_%06i.png",
+        "mask_image_path_mask": "<CONFIGURATION_DIRECTORY>\/frames\/mask_%06i.png",
         "imu_input_path": ""
     },
     "non_rigid_tracking_parameters": {
@@ -130,12 +130,15 @@
     "use_approximate_raycast": false,
     "use_threshold_filter": false,
     "use_bilateral_filter": false,
-    "enable_rigid_tracking": true,
     "behavior_on_failure": "ignore",
     "swapping_mode": "disabled",
-    "library_mode": "dynamic",
-    "indexing_method": "hash",
     "tracker_configuration": "type=extended,levels=bbb,useDepth=1,useColour=1,colourWeight=0.3,minstep=1e-4,outlierColourC=0.175,outlierColourF=0.005,outlierSpaceC=0.1,outlierSpaceF=0.004,numiterC=20,numiterF=50,tukeyCutOff=8,framesToSkip=20,framesToWeight=50,failureDec=20.0",
+    "main_engine_settings": {
+        "draw_frame_index_labels": true,
+        "library_mode": "dynamic",
+        "indexing_method": "hash",
+        "enable_rigid_alignment": true
+    },
     "telemetry_settings": {
         "record_volume_memory_usage": false,
         "record_live_volume_as_2D_slices": false,
@@ -162,6 +165,7 @@
         "index_of_frame_to_start_at": 16,
         "load_volume_and_camera_matrix_before_processing": false,
         "save_volumes_and_camera_matrix_after_processing": false,
+        "save_meshes_after_processing": false,
         "exit_after_automatic_processing": false
     }
 }

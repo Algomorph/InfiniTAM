@@ -87,10 +87,9 @@ int main(int argc, char** argv) {
 		IMUSourceEngine* imuSource = nullptr;
 
 		CreateDefaultImageSource(imageSource, imuSource, configuration.paths);
-		MainEngine* mainEngine = BuildMainEngine(imageSource->getCalib(),
-		                                         imageSource->GetRGBImageSize(),
-		                                         imageSource->GetDepthImageSize(),
-		                                         false);
+		FusionAlgorithm* mainEngine = BuildMainEngine(imageSource->getCalib(),
+		                                              imageSource->GetRGBImageSize(),
+		                                              imageSource->GetDepthImageSize());
 
 		CLIEngine::Instance()->Initialise(imageSource, imuSource, mainEngine, configuration::get().device_type);
 		CLIEngine::Instance()->Run();

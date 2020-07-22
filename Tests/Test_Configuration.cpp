@@ -32,6 +32,7 @@
 #include "../ITMLib/Utils/Metacoding/DeferrableStructUtilities.h"
 #include "../ITMLib/Engines/Rendering/RenderingSettings.h"
 #include "../ITMLib/Utils/Configuration/AutomaticRunSettings.h"
+#include "../ITMLib/Engines/Main/MainEngineSettings.h"
 
 namespace pt = boost::property_tree;
 
@@ -44,8 +45,10 @@ struct DeferrableStructCollection {
 	IndexingSettings indexing_settings;
 	RenderingSettings rendering_settings;
 	AutomaticRunSettings automatic_run_settings;
+	MainEngineSettings main_engine_settings;
 
 	DeferrableStructCollection(const configuration::Configuration& source_configuration = configuration::get()) :
+			main_engine_settings(BuildDeferrableFromParentIfPresent<MainEngineSettings>(source_configuration)),
 			telemetry_settings(BuildDeferrableFromParentIfPresent<TelemetrySettings>(source_configuration)),
 			indexing_settings(BuildDeferrableFromParentIfPresent<IndexingSettings>(source_configuration)),
 			rendering_settings(BuildDeferrableFromParentIfPresent<RenderingSettings>(source_configuration)),

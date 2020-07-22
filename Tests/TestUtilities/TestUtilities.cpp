@@ -28,6 +28,7 @@
 #include "../../ITMLib/Utils/Configuration/TelemetrySettings.h"
 #include "../../ITMLib/Utils/Quaternions/Quaternion.h"
 #include "../../ITMLib/Utils/Configuration/AutomaticRunSettings.h"
+#include "../../ITMLib/Engines/Main/MainEngineSettings.h"
 
 using namespace ITMLib;
 
@@ -387,11 +388,8 @@ configuration::Configuration GenerateChangedUpConfiguration(){
 			true,
 			true,
 			true,
-			false,
 			configuration::FAILUREMODE_RELOCALIZE,
 			configuration::SWAPPINGMODE_ENABLED,
-			configuration::LIBMODE_BASIC,
-			configuration::INDEX_ARRAY,
 			"type=rgb,levels=rrbb"
 	);
 	changed_up_configuration.source_tree = changed_up_configuration.ToPTree();
@@ -409,9 +407,13 @@ configuration::Configuration GenerateChangedUpConfiguration(){
 			true,
 			true,
 			true);
+
+	MainEngineSettings changed_up_main_engine_settings(true, LIBMODE_BASIC, INDEX_ARRAY, false);
 	IndexingSettings changed_up_indexing_settings(DIAGNOSTIC);
 	RenderingSettings changed_up_rendering_settings(true);
 	AutomaticRunSettings changed_up_automatic_run_settings(50, 16, true, true, true, true);
+
+	AddDeferrableToSourceTree(changed_up_configuration, changed_up_main_engine_settings);
 	AddDeferrableToSourceTree(changed_up_configuration, changed_up_telemetry_settings);
 	AddDeferrableToSourceTree(changed_up_configuration, changed_up_indexing_settings);
 	AddDeferrableToSourceTree(changed_up_configuration, changed_up_rendering_settings);
@@ -450,7 +452,7 @@ std::vector<ORUtils::SE3Pose> GenerateCameraTrajectoryAroundPoint(const Vector3f
 		 *               ◢ ----------▶ +x
 		 *             ╱ |
 		 *           ╱   |
-		*          ╱     |
+		 *         ╱     |
 		 *    +z ◣       |
 		 *               |
 		 *               ▼ +y

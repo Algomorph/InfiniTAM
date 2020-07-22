@@ -76,7 +76,7 @@ void UIEngine::GlutDisplayFunction() {
 		{
 			glEnable(GL_TEXTURE_2D);
 			for (int w = 0; w < NUM_WIN; w++) {// Draw each sub window
-				if (uiEngine.outImageType[w] == MainEngine::InfiniTAM_IMAGE_UNKNOWN) continue;
+				if (uiEngine.outImageType[w] == FusionAlgorithm::InfiniTAM_IMAGE_UNKNOWN) continue;
 				glBindTexture(GL_TEXTURE_2D, uiEngine.textureId[w]);
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, showImgs[w]->dimensions.x, showImgs[w]->dimensions.y, 0, GL_RGBA,
 				             GL_UNSIGNED_BYTE, showImgs[w]->GetData(MEMORYDEVICE_CPU));
@@ -283,13 +283,13 @@ void UIEngine::GlutKeyUpFunction(unsigned char key, int x, int y) {
 			ui_engine.current_colour_mode = 0;
 			//TODO: replace this whole if/else block with a separate function, use this function during initialization as well -Greg (Github: Algomorph)
 			if (ui_engine.freeview_active) {
-				ui_engine.outImageType[0] = MainEngine::InfiniTAM_IMAGE_SCENERAYCAST;
-				ui_engine.outImageType[1] = MainEngine::InfiniTAM_IMAGE_ORIGINAL_DEPTH;
+				ui_engine.outImageType[0] = FusionAlgorithm::InfiniTAM_IMAGE_SCENERAYCAST;
+				ui_engine.outImageType[1] = FusionAlgorithm::InfiniTAM_IMAGE_ORIGINAL_DEPTH;
 
 				ui_engine.freeview_active = false;
 			} else {
-				ui_engine.outImageType[0] = MainEngine::InfiniTAM_IMAGE_FREECAMERA_SHADED;
-				ui_engine.outImageType[1] = MainEngine::InfiniTAM_IMAGE_SCENERAYCAST;
+				ui_engine.outImageType[0] = FusionAlgorithm::InfiniTAM_IMAGE_FREECAMERA_SHADED;
+				ui_engine.outImageType[1] = FusionAlgorithm::InfiniTAM_IMAGE_SCENERAYCAST;
 
 				ui_engine.freeview_pose.SetFrom(ui_engine.main_engine->GetTrackingState()->pose_d);
 				if (ui_engine.main_engine->GetView() != nullptr) {
@@ -297,25 +297,26 @@ void UIEngine::GlutKeyUpFunction(unsigned char key, int x, int y) {
 					ui_engine.outImage[0]->ChangeDims(ui_engine.main_engine->GetView()->depth.dimensions);
 				}
 
-				switch (ui_engine.indexing_method) {
-					case configuration::INDEX_HASH: {
-						auto* multiEngine = dynamic_cast<MultiEngine<TSDFVoxel, VoxelBlockHash>*>(ui_engine.main_engine);
-						if (multiEngine != nullptr) {
-							int idx = multiEngine->findPrimaryLocalMapIdx();
-							if (idx < 0) idx = 0;
-							multiEngine->setFreeviewLocalMapIdx(idx);
-						}
-					}
-						break;
-					case configuration::INDEX_ARRAY:
-						auto* multiEngine = dynamic_cast<MultiEngine<TSDFVoxel, PlainVoxelArray>*>(ui_engine.main_engine);
-						if (multiEngine != nullptr) {
-							int idx = multiEngine->findPrimaryLocalMapIdx();
-							if (idx < 0) idx = 0;
-							multiEngine->setFreeviewLocalMapIdx(idx);
-						}
-						break;
-				}
+				//TODO: fix or get rid of this inept use of templates / RTTI
+//				switch (ui_engine.indexing_method) {
+//					case configuration::INDEX_HASH: {
+//						auto* multiEngine = dynamic_cast<MultiEngine<TSDFVoxel, VoxelBlockHash>*>(ui_engine.main_engine);
+//						if (multiEngine != nullptr) {
+//							int idx = multiEngine->findPrimaryLocalMapIdx();
+//							if (idx < 0) idx = 0;
+//							multiEngine->setFreeviewLocalMapIdx(idx);
+//						}
+//					}
+//						break;
+//					case configuration::INDEX_ARRAY:
+//						auto* multiEngine = dynamic_cast<MultiEngine<TSDFVoxel, PlainVoxelArray>*>(ui_engine.main_engine);
+//						if (multiEngine != nullptr) {
+//							int idx = multiEngine->findPrimaryLocalMapIdx();
+//							if (idx < 0) idx = 0;
+//							multiEngine->setFreeviewLocalMapIdx(idx);
+//						}
+//						break;
+//				}
 
 
 				ui_engine.freeview_active = true;

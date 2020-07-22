@@ -19,7 +19,7 @@
 #include <array>
 
 //local
-#include "MainEngine.h"
+#include "FusionAlgorithm.h"
 #include "CameraTrackingController.h"
 #include "../ImageProcessing/Interface/ImageProcessingEngineInterface.h"
 #include "../Meshing/Interface/MeshingEngine.h"
@@ -40,7 +40,7 @@
 namespace ITMLib {
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-class DynamicSceneVoxelEngine : public MainEngine {
+class DynamicSceneVoxelEngine : public FusionAlgorithm {
 private: // instance variables
 	static constexpr int live_volume_count = 2;
 

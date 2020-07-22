@@ -1,7 +1,5 @@
-// Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
-
+#include <filesystem>
 #include "BasicVoxelEngine.h"
-
 #include "../ImageProcessing/ImageProcessingEngineFactory.h"
 #include "../Meshing/MeshingEngineFactory.h"
 #include "../ViewBuilding/ViewBuilderFactory.h"
@@ -17,7 +15,7 @@ using namespace ITMLib;
 
 template <typename TVoxel, typename TIndex>
 BasicVoxelEngine<TVoxel,TIndex>::BasicVoxelEngine(const RGBD_CalibrationInformation& calib, Vector2i imgSize_rgb, Vector2i imgSize_d)
-{
+	: tracking_active(this->parameters.enable_rigid_alignment){
 	auto& settings = configuration::get();
 
 	if ((imgSize_d.x == -1) || (imgSize_d.y == -1)) imgSize_d = imgSize_rgb;
@@ -108,14 +106,14 @@ void BasicVoxelEngine<TVoxel, TIndex>::SaveToFile()
 {
 	// throws error if any of the saves fail
 
-	std::string saveOutputDirectory = "State/";
-	std::string relocaliserOutputDirectory = saveOutputDirectory + "Relocaliser/", sceneOutputDirectory = saveOutputDirectory + "Volume/";
+	std::string output_directory = "State/";
+	std::string relocalizer_output_directory = output_directory + "Relocaliser/", sceneOutputDirectory = output_directory + "Volume/";
 	
-	MakeDir(saveOutputDirectory.c_str());
-	MakeDir(relocaliserOutputDirectory.c_str());
-	MakeDir(sceneOutputDirectory.c_str());
+	std::filesystem::create_directories(output_directory);
+	std::filesystem::create_directories(relocalizer_output_directory);
+	std::filesystem::create_directories(sceneOutputDirectory.c_str());
 
-	if (relocaliser) relocaliser->SaveToDirectory(relocaliserOutputDirectory);
+	if (relocaliser) relocaliser->SaveToDirectory(relocalizer_output_directory);
 
 	volume->SaveToDisk(sceneOutputDirectory);
 }
@@ -434,7 +432,7 @@ void BasicVoxelEngine<TVoxel,TIndex>::GetImage(UChar4Image *out, GetImageType ge
 		else out->SetFrom(*render_state_freeview->raycastImage, MemoryCopyDirection::CPU_TO_CPU);
 		break;
 	}
-	case MainEngine::InfiniTAM_IMAGE_UNKNOWN:
+	case FusionAlgorithm::InfiniTAM_IMAGE_UNKNOWN:
 		break;
 		case InfiniTAM_IMAGE_FREECAMERA_CANONICAL:break;
 	};

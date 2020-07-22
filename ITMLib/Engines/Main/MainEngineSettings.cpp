@@ -1,5 +1,5 @@
 //  ================================================================
-//  Created by Gregory Kramida (https://github.com/Algomorph) on 7/18/20.
+//  Created by Gregory Kramida (https://github.com/Algomorph) on 7/22/20.
 //  Copyright (c) 2020 Gregory Kramida
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -13,17 +13,14 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#pragma once
-#include "Image.h"
-#include "Vector.h"
+//local
+#include "MainEngineSettings.h"
 
-namespace ORUtils{
+using namespace ITMLib;
+
+DEFINE_SERIALIZABLE_ENUM(LIBMODE_ENUM_DESCRIPTION);
 
 
-template<typename T>
-void DrawTextOnImage(Image<T>& image, const std::string& text, int font_size, int offset_x, int offset_y, bool lower_right_corner_offset);
-
-template<>
-void DrawTextOnImage<Vector4<unsigned char>>(Image<Vector4<unsigned char>>& image, const std::string& text, int font_size, int offset_x, int offset_y, bool lower_right_corner_offset);
-
-} // namespace ORUtils
+namespace ITMLib {
+DEFINE_DEFERRABLE_SERIALIZABLE_STRUCT(MAIN_ENGINE_SETTINGS_STRUCT_DESCRIPTION);
+} // namespace ITMLib

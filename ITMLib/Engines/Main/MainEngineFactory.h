@@ -22,59 +22,54 @@
 #include "MultiEngine.h"
 #include "DynamicSceneVoxelEngine.h"
 #include "BasicSurfelEngine.h"
-#include "MainEngine.h"
+#include "FusionAlgorithm.h"
 
 namespace ITMLib{
 
-MainEngine* BuildMainEngine(const RGBD_CalibrationInformation& calib, Vector2i imgSize_rgb, Vector2i imgSize_d, bool fix_camera = false){
+FusionAlgorithm* BuildMainEngine(const RGBD_CalibrationInformation& calib, Vector2i imgSize_rgb, Vector2i imgSize_d){
 	auto& settings = configuration::get();
-	configuration::IndexingMethod chosenIndexingMethod = settings.indexing_method;
-	MainEngine* mainEngine = nullptr;
+	auto main_engine_settings = ExtractDeferrableSerializableStructFromPtreeIfPresent<MainEngineSettings>(settings.source_tree,settings.origin);
+	IndexingMethod& indexing_method = main_engine_settings.indexing_method;
+	FusionAlgorithm* main_engine = nullptr;
 
-	switch (settings.library_mode) {
-		case configuration::LIBMODE_BASIC:
-			switch (chosenIndexingMethod) {
-				case configuration::INDEX_HASH:
-					mainEngine = new BasicVoxelEngine<TSDFVoxel, VoxelBlockHash>(calib, imgSize_rgb, imgSize_d);
+	switch (main_engine_settings.library_mode) {
+		case LIBMODE_BASIC:
+			switch (indexing_method) {
+				case INDEX_HASH:
+					main_engine = new BasicVoxelEngine<TSDFVoxel, VoxelBlockHash>(calib, imgSize_rgb, imgSize_d);
 					break;
-				case configuration::INDEX_ARRAY:
-					mainEngine = new BasicVoxelEngine<TSDFVoxel, PlainVoxelArray>(calib, imgSize_rgb, imgSize_d);
-					break;
-			}
-			break;
-		case configuration::LIBMODE_BASIC_SURFELS:
-			mainEngine = new BasicSurfelEngine<SurfelT>(calib, imgSize_rgb, imgSize_d);
-			break;
-		case configuration::LIBMODE_LOOPCLOSURE:
-			switch (chosenIndexingMethod) {
-				case configuration::INDEX_HASH:
-					mainEngine = new MultiEngine<TSDFVoxel, VoxelBlockHash>(calib, imgSize_rgb, imgSize_d);
-					break;
-				case configuration::INDEX_ARRAY:
-					mainEngine = new MultiEngine<TSDFVoxel, PlainVoxelArray>(calib, imgSize_rgb, imgSize_d);
+				case INDEX_ARRAY:
+					main_engine = new BasicVoxelEngine<TSDFVoxel, PlainVoxelArray>(calib, imgSize_rgb, imgSize_d);
 					break;
 			}
 			break;
-		case configuration::LIBMODE_DYNAMIC:
-			switch (chosenIndexingMethod) {
-				case configuration::INDEX_HASH:
-					mainEngine = new DynamicSceneVoxelEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash>(calib, imgSize_rgb, imgSize_d);
+		case LIBMODE_BASIC_SURFELS:
+			main_engine = new BasicSurfelEngine<SurfelT>(calib, imgSize_rgb, imgSize_d);
+			break;
+		case LIBMODE_LOOPCLOSURE:
+			switch (indexing_method) {
+				case INDEX_HASH:
+					main_engine = new MultiEngine<TSDFVoxel, VoxelBlockHash>(calib, imgSize_rgb, imgSize_d);
 					break;
-				case configuration::INDEX_ARRAY:
-					mainEngine = new DynamicSceneVoxelEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray>(calib, imgSize_rgb, imgSize_d);
+				case INDEX_ARRAY:
+					main_engine = new MultiEngine<TSDFVoxel, PlainVoxelArray>(calib, imgSize_rgb, imgSize_d);
+					break;
+			}
+			break;
+		case LIBMODE_DYNAMIC:
+			switch (indexing_method) {
+				case INDEX_HASH:
+					main_engine = new DynamicSceneVoxelEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash>(calib, imgSize_rgb, imgSize_d);
+					break;
+				case INDEX_ARRAY:
+					main_engine = new DynamicSceneVoxelEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray>(calib, imgSize_rgb, imgSize_d);
 					break;
 			}
 			break;
 		default:
 			throw std::runtime_error("Unsupported library mode!");
 	}
-
-	if (fix_camera) {
-		std::cout << "fix_camera flag passed, automatically locking camera if possible "
-		             "(attempting to disable tracking)." << std::endl;
-		mainEngine->TurnOffTracking();
-	}
-	return mainEngine;
+	return main_engine;
 }
 
 } // namespace ITMLib

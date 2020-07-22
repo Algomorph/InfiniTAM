@@ -17,19 +17,13 @@
 //VTK
 #include <vtkCommand.h>
 #include <vtkRenderWindowInteractor.h>
-
 #endif
 
 //ITMLib
-
 #include "../../ITMLib/Utils/Analytics/BenchmarkUtilities.h"
 #include "../../ITMLib/Utils/Logging/Logging.h"
 #include "../../ITMLib/Engines/Telemetry/TelemetryRecorderLegacy.h"
-
-#ifdef WITH_OPENCV
-#include <opencv2/imgcodecs.hpp>
-#include <opencv2/imgproc.hpp>
-#endif
+#include "../../ORUtils/FileUtils.h"
 
 
 //TODO: we should never have to downcast the main engine to some other engine type, architecture needs to be altered
@@ -60,9 +54,8 @@ namespace bench = ITMLib::benchmarking;
 void UIEngine::Initialize(int& argc, char** argv,
                           InputSource::ImageSourceEngine* imageSource,
                           InputSource::IMUSourceEngine* imuSource,
-                          ITMLib::MainEngine* main_engine,
+                          ITMLib::FusionAlgorithm* main_engine,
                           const configuration::Configuration& configuration) {
-	this->indexing_method = configuration.indexing_method;
 
 	//TODO: just use automatic_run_settings as member directly instead of copying stuff over.
 	automatic_run_settings = ExtractSerializableStructFromPtreeIfPresent<AutomaticRunSettings>(
@@ -71,19 +64,19 @@ void UIEngine::Initialize(int& argc, char** argv,
 	this->integration_active = true;
 	this->current_colour_mode = 0;
 
-	this->colourModes_main.emplace_back("shaded greyscale", MainEngine::InfiniTAM_IMAGE_SCENERAYCAST);
-	this->colourModes_main.emplace_back("integrated colours", MainEngine::InfiniTAM_IMAGE_COLOUR_FROM_VOLUME);
-	this->colourModes_main.emplace_back("surface normals", MainEngine::InfiniTAM_IMAGE_COLOUR_FROM_NORMAL);
-	this->colourModes_main.emplace_back("confidence", MainEngine::InfiniTAM_IMAGE_COLOUR_FROM_CONFIDENCE);
+	this->colourModes_main.emplace_back("shaded greyscale", FusionAlgorithm::InfiniTAM_IMAGE_SCENERAYCAST);
+	this->colourModes_main.emplace_back("integrated colours", FusionAlgorithm::InfiniTAM_IMAGE_COLOUR_FROM_VOLUME);
+	this->colourModes_main.emplace_back("surface normals", FusionAlgorithm::InfiniTAM_IMAGE_COLOUR_FROM_NORMAL);
+	this->colourModes_main.emplace_back("confidence", FusionAlgorithm::InfiniTAM_IMAGE_COLOUR_FROM_CONFIDENCE);
 
-	this->colourModes_freeview.emplace_back("canonical", MainEngine::InfiniTAM_IMAGE_FREECAMERA_CANONICAL);
-	this->colourModes_freeview.emplace_back("shaded greyscale", MainEngine::InfiniTAM_IMAGE_FREECAMERA_SHADED);
+	this->colourModes_freeview.emplace_back("canonical", FusionAlgorithm::InfiniTAM_IMAGE_FREECAMERA_CANONICAL);
+	this->colourModes_freeview.emplace_back("shaded greyscale", FusionAlgorithm::InfiniTAM_IMAGE_FREECAMERA_SHADED);
 	this->colourModes_freeview.emplace_back("integrated colours",
-	                                        MainEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_VOLUME);
+	                                        FusionAlgorithm::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_VOLUME);
 	this->colourModes_freeview.emplace_back("surface normals",
-	                                        MainEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_NORMAL);
+	                                        FusionAlgorithm::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_NORMAL);
 	this->colourModes_freeview.emplace_back("confidence",
-	                                        MainEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_CONFIDENCE);
+	                                        FusionAlgorithm::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_CONFIDENCE);
 
 	this->image_source_engine = imageSource;
 	this->imu_source_engine = imuSource;
@@ -134,9 +127,9 @@ void UIEngine::Initialize(int& argc, char** argv,
 	saveImage = new UChar4Image(imageSource->GetDepthImageSize(), true, false);
 
 
-	outImageType[1] = MainEngine::InfiniTAM_IMAGE_ORIGINAL_DEPTH;
-	outImageType[2] = MainEngine::InfiniTAM_IMAGE_ORIGINAL_RGB;
-	if (input_RGB_image->dimensions == Vector2i(0, 0)) outImageType[2] = MainEngine::InfiniTAM_IMAGE_UNKNOWN;
+	outImageType[1] = FusionAlgorithm::InfiniTAM_IMAGE_ORIGINAL_DEPTH;
+	outImageType[2] = FusionAlgorithm::InfiniTAM_IMAGE_ORIGINAL_RGB;
+	if (input_RGB_image->dimensions == Vector2i(0, 0)) outImageType[2] = FusionAlgorithm::InfiniTAM_IMAGE_UNKNOWN;
 
 	current_mouse_operation = IDLE;
 	mouse_warped = false;
@@ -177,7 +170,7 @@ void UIEngine::Initialize(int& argc, char** argv,
 void UIEngine::SaveScreenshot(const char* filename) const {
 	UChar4Image screenshot(GetWindowSize(), true, false);
 	GetScreenshot(&screenshot);
-	SaveImageToFile(screenshot, filename, true);
+	ORUtils::SaveImageToFile(screenshot, filename, true);
 }
 
 void UIEngine::GetScreenshot(UChar4Image* dest) const {
@@ -276,23 +269,7 @@ void UIEngine::RecordCurrentReconstructionFrameToVideo() {
 				reconstruction_video_writer->open((std::string(this->output_path) + "/out_reconstruction.avi").c_str(),
 				                                  outImage[0]->dimensions.x, outImage[0]->dimensions.y,
 				                                  false, 30);
-			//TODO This image saving/reading/saving is a production hack -Greg (GitHub:Algomorph)
-			//TODO move to a separate function and apply to all recorded video
-			//TODO write alternative without OpenCV dependency
-#ifdef WITH_OPENCV
-			std::string fileName = (std::string(this->output_path) + "/out_reconstruction.png");
-			SaveImageToFile(outImage[0], fileName.c_str());
-			cv::Mat img = cv::imread(fileName, cv::IMREAD_UNCHANGED);
-			cv::putText(img, std::to_string(GetCurrentFrameIndex()), cv::Size(10, 50), cv::FONT_HERSHEY_SIMPLEX,
-						1, cv::Scalar(128, 255, 128), 1, cv::LINE_AA);
-			cv::imwrite(fileName, img);
-			UChar4Image* imageWithText = new UChar4Image(image_source->getDepthImageSize(), true, allocate_GPU);
-			ReadImageFromFile(imageWithText, fileName.c_str());
-			reconstruction_video_writer->writeFrame(imageWithText);
-			delete imageWithText;
-#else
 			reconstruction_video_writer->writeFrame(outImage[0]);
-#endif
 		}
 	}
 }
@@ -317,11 +294,11 @@ void UIEngine::RecordDepthAndRGBInputToImages() {
 		char str[250];
 
 		sprintf(str, "%s/%04d.pgm", output_path.c_str(), processed_frame_count);
-		SaveImageToFile(*input_raw_depth_image, str);
+		ORUtils::SaveImageToFile(*input_raw_depth_image, str);
 
 		if (input_RGB_image->dimensions != Vector2i(0, 0)) {
 			sprintf(str, "%s/%04d.ppm", output_path.c_str(), processed_frame_count);
-			SaveImageToFile(*input_RGB_image, str);
+			ORUtils::SaveImageToFile(*input_RGB_image, str);
 		}
 	}
 }

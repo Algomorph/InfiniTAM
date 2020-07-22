@@ -22,12 +22,12 @@
 namespace ORUtils {
 
 static auto font_hack_regular = [](){
-	return std::make_shared<wft::font>(RESOURCE_DIRECTORY "fonts/Hack-Regular.ttf");}();
+	return std::make_shared<wft::face>(RESOURCE_DIRECTORY "fonts/Hack-Regular.ttf");}();
 static auto font_liberation_mono = [](){
-	return std::make_shared<wft::font>(RESOURCE_DIRECTORY "fonts/LiberationMono-Regular.ttf");}();
+	return std::make_shared<wft::face>(RESOURCE_DIRECTORY "fonts/LiberationMono-Regular.ttf");}();
 
 template<>
-void DrawTextOnImage<Vector4<unsigned char>>(Image<Vector4<unsigned char>>& image, const std::string& text, int font_size, int x, int y, bool lower_right_corner_offset) {
+void DrawTextOnImage<Vector4<unsigned char>>(Image<Vector4<unsigned char>>& image, const std::string& text, int font_size, int offset_x, int offset_y, bool lower_right_corner_offset) {
 	Image<Vector4<unsigned char>>* image_to_modify;
 	bool allocated_temporary_image = false;
 	if (image.GetAccessMode() == MEMORYDEVICE_CPU) {
@@ -43,22 +43,22 @@ void DrawTextOnImage<Vector4<unsigned char>>(Image<Vector4<unsigned char>>& imag
 	font_hack_regular->set_size(0, font_size);
 	auto bitmap = font_hack_regular->make_bitmap_text(text);
 	int i_bit = 0;
-	int& row_image = y;
-	int& col_image = x;
-
 	if (lower_right_corner_offset) {
-		col_image = image_width - bitmap.width - x;
-		row_image = image_height - bitmap.height - y;
+		offset_x = image_width - bitmap.width - offset_x;
+		offset_y = image_height - bitmap.height - offset_y;
 	}
-
-	for (int row_bitmap = 0; row_bitmap < bitmap.height; row_bitmap++, row_image++) {
-		for (int col_bitmap = 0; col_bitmap < bitmap.width; col_bitmap++, i_bit++, col_image++) {
-			if (row_image < image_height && col_image < image_width) {
-				unsigned char bit = bitmap.Bits[i_bit];
-				Vector4<unsigned char>& pixel = image_data[row_image * image_width + col_image];
-				pixel.r = pixel.r + bit < pixel.r ? 255 : pixel.r + bit;
-				pixel.g = pixel.g + bit < pixel.g ? 255 : pixel.g + bit;;
-				pixel.b = pixel.b + bit < pixel.b ? 255 : pixel.b + bit;;
+	int& y_image = offset_y;
+	for (int row_bitmap = 0; row_bitmap < bitmap.height; row_bitmap++, y_image++) {
+		int x_image = offset_x;
+		for (int col_bitmap = 0; col_bitmap < bitmap.width; col_bitmap++, i_bit++, x_image++) {
+			if (offset_y < image_height && offset_x < image_width) {
+				unsigned char bit = bitmap.data[i_bit];
+				if(bit != 0){
+					Vector4<unsigned char>& pixel = image_data[y_image * image_width + x_image];
+					pixel.r = pixel.r + bit < pixel.r ? 255 : pixel.r + bit;
+					pixel.g = pixel.g + bit < pixel.g ? 255 : pixel.g + bit;;
+					pixel.b = pixel.b + bit < pixel.b ? 255 : pixel.b + bit;;
+				}
 			}
 		}
 	}

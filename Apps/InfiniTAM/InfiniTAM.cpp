@@ -1,10 +1,5 @@
 // Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
 
-//TODO: not supported on platforms besides Linux, adjust via CMake -Greg(GitHub: Algomorph)
-#ifndef WIN32
-#include <X11/Xlib.h>
-#endif
-
 //stdlib
 #include <cstdlib>
 #include <iostream>
@@ -115,28 +110,19 @@ int main(int argc, char** argv) {
 		}
 
 // region ================================ BUILD MAIN ENGINE ========================================================
-		configuration::IndexingMethod chosenIndexingMethod = configuration.indexing_method;
 		//TelemetryRecorder_Interface& logger = GetLogger(chosenIndexingMethod);
-		MainEngine* mainEngine = BuildMainEngine(imageSource->getCalib(),
-		                                         imageSource->GetRGBImageSize(),
-		                                         imageSource->GetDepthImageSize(),
-		                                         false);
+		FusionAlgorithm* mainEngine = BuildMainEngine(imageSource->getCalib(),
+		                                              imageSource->GetRGBImageSize(),
+		                                              imageSource->GetDepthImageSize());
 
 // endregion ===========================================================================================================
 
 // region =========================== SET UI ENGINE SETTINGS WITH CLI ARGUMENTS ========================================
 
-
-		//TODO (see top of file)
-#if !defined(WIN32) && defined(WITH_VTK)
-		XInitThreads();
-#endif
 		UIEngine::Instance().Initialize(argc, argv, imageSource, imuSource, mainEngine, configuration);
-
 
 // endregion ===========================================================================================================
 
-		//VisualizationWindowManager::get().Run();
 		UIEngine::Instance().Run();
 		UIEngine::Instance().Shutdown();
 
@@ -146,7 +132,6 @@ int main(int argc, char** argv) {
 		delete imageSource;
 		delete imuSource;
 
-		//VisualizationWindowManager::get().ShutDown();
 // endregion ===========================================================================================================
 		return EXIT_SUCCESS;
 	} catch (std::exception& e) {

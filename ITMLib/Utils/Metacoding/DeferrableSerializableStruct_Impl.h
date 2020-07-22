@@ -21,6 +21,8 @@
 #define ITM_METACODING_OUTER_EXPAND(x) x
 #endif
 
+// ======== MACROS ==========
+
 // *** declaration-only ***
 #define DEFERRABLE_SERIALIZABLE_STRUCT_DECL_IMPL(struct_name, parse_path,  ...) \
     DEFERRABLE_SERIALIZABLE_STRUCT_DECL_IMPL_2(struct_name, parse_path, ITM_METACODING_IMPL_NARG(__VA_ARGS__), __VA_ARGS__)
@@ -58,3 +60,11 @@
         SERIALIZABLE_STRUCT_DEFN_IMPL_3 ( , , struct_name, default_instance.source_tree=tree, friend, static, \
         ITM_METACODING_IMPL_COMMA, origin(std::move(origin)), origin, ="", loop, __VA_ARGS__) \
     };
+
+// ==== template functions ====
+
+template<typename TDeferrableSerializableStruct>
+static TDeferrableSerializableStruct
+ExtractDeferrableSerializableStructFromPtreeIfPresent(const pt::ptree& tree, const std::string& origin) {
+	return ExtractSerializableStructFromPtreeIfPresent<TDeferrableSerializableStruct>(tree, TDeferrableSerializableStruct::default_parse_path, origin);
+}

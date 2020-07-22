@@ -24,9 +24,11 @@ static const float F_maxdistattemptreloc = 0.05f;
 // loop closure global adjustment runs on a separate thread
 static const bool separateThreadGlobalAdjustment = true;
 
+
+//TODO Clean up & spruce up this MultiEngine shitty code if it has any utility for anyone out there.
+
 template <typename TVoxel, typename TIndex>
-MultiEngine<TVoxel, TIndex>::MultiEngine(const RGBD_CalibrationInformation& calib, Vector2i imgSize_rgb, Vector2i imgSize_d)
-{
+MultiEngine<TVoxel, TIndex>::MultiEngine(const RGBD_CalibrationInformation& calib, Vector2i imgSize_rgb, Vector2i imgSize_d){
 	if ((imgSize_d.x == -1) || (imgSize_d.y == -1)) imgSize_d = imgSize_rgb;
 
 	auto& settings = configuration::get();

@@ -67,8 +67,8 @@ BOOST_AUTO_TEST_CASE(testImageMaskReader) {
 	depth.ApplyMask(mask,0);
 
 #ifdef GENERATE_GT_MASKED_IMAGES
-	SaveImageToFile(rgb, STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_color_000000_masked.pnm");
-	SaveImageToFile(depth, STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_depth_000000_masked.pnm");
+	ORUtils::SaveImageToFile(rgb, STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_color_000000_masked.pnm");
+	ORUtils::SaveImageToFile(depth, STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_depth_000000_masked.pnm");
 #endif
 
 BOOST_REQUIRE(ReadImageFromFile(masked_rgb_ground_truth, STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_color_000000.png"));

@@ -1,5 +1,3 @@
-// Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
-
 #include "FileUtils.h"
 
 #include <stdio.h>
@@ -7,7 +5,7 @@
 
 #if defined _MSC_VER
 #include <direct.h>
-#else 
+#else
 #include <sys/types.h>
 #include <sys/stat.h>
 #ifdef __GNUC__
@@ -21,30 +19,35 @@
 
 using namespace std;
 
-static const char *pgm_ascii_id = "P2";
-static const char *ppm_ascii_id = "P3";
-static const char *pgm_id = "P5";
-static const char *ppm_id = "P6";
+namespace ORUtils {
+static const char* pgm_ascii_id = "P2";
+static const char* ppm_ascii_id = "P3";
+static const char* pgm_id = "P5";
+static const char* ppm_id = "P6";
 
-typedef enum { MONO_8u, RGB_8u, MONO_16u, MONO_16s, RGBA_8u, FORMAT_UNKNOWN = -1 } FormatType;
+typedef enum {
+	MONO_8u, RGB_8u, MONO_16u, MONO_16s, RGBA_8u, FORMAT_UNKNOWN = -1
+} FormatType;
 
 struct PNGReaderData {
 #ifdef USE_LIBPNG
 	png_structp png_ptr;
 	png_infop info_ptr;
 
-	PNGReaderData()
-	{ png_ptr = nullptr; info_ptr = nullptr; }
-	~PNGReaderData()
-	{ 
-		if (info_ptr != nullptr) png_destroy_info_struct(png_ptr, &info_ptr);
-		if (png_ptr != nullptr) png_destroy_read_struct(&png_ptr, (png_infopp)nullptr, (png_infopp)nullptr);
+	PNGReaderData() {
+		png_ptr = nullptr;
+		info_ptr = nullptr;
 	}
+
+	~PNGReaderData() {
+		if (info_ptr != nullptr) png_destroy_info_struct(png_ptr, &info_ptr);
+		if (png_ptr != nullptr) png_destroy_read_struct(&png_ptr, (png_infopp) nullptr, (png_infopp) nullptr);
+	}
+
 #endif
 };
 
-static FormatType png_readheader(FILE *fp, int & width, int & height, PNGReaderData & internal)
-{
+static FormatType png_readheader(FILE* fp, int& width, int& height, PNGReaderData& internal) {
 	FormatType type = FORMAT_UNKNOWN;
 
 #ifdef USE_LIBPNG
@@ -105,8 +108,7 @@ static FormatType png_readheader(FILE *fp, int & width, int & height, PNGReaderD
 	return type;
 }
 
-static bool png_readdata(FILE *f, int xsize, int ysize, PNGReaderData & internal, void *data_ext)
-{
+static bool png_readdata(FILE* f, int xsize, int ysize, PNGReaderData& internal, void* data_ext) {
 #ifdef USE_LIBPNG
 	if (setjmp(png_jmpbuf(internal.png_ptr))) return false;
 
@@ -115,11 +117,11 @@ static bool png_readdata(FILE *f, int xsize, int ysize, PNGReaderData & internal
 	/* read file */
 	if (setjmp(png_jmpbuf(internal.png_ptr))) return false;
 
-	int bytesPerRow = (int)png_get_rowbytes(internal.png_ptr, internal.info_ptr);
+	int bytesPerRow = (int) png_get_rowbytes(internal.png_ptr, internal.info_ptr);
 
-	png_byte *data = (png_byte*)data_ext;
-	png_bytep *row_pointers = new png_bytep[ysize];
-	for (int y=0; y<ysize; y++) row_pointers[y] = &(data[bytesPerRow*y]);
+	png_byte* data = (png_byte*) data_ext;
+	png_bytep* row_pointers = new png_bytep[ysize];
+	for (int y = 0; y < ysize; y++) row_pointers[y] = &(data[bytesPerRow * y]);
 
 	png_read_image(internal.png_ptr, row_pointers);
 	png_read_end(internal.png_ptr, nullptr);
@@ -132,8 +134,7 @@ static bool png_readdata(FILE *f, int xsize, int ysize, PNGReaderData & internal
 #endif
 }
 
-static FormatType pnm_readheader(FILE *f, int *xsize, int *ysize, bool *binary)
-{
+static FormatType pnm_readheader(FILE* f, int* xsize, int* ysize, bool* binary) {
 	char tmp[1024];
 	FormatType type = FORMAT_UNKNOWN;
 	int xs = 0, ys = 0, max_i = 0;
@@ -142,9 +143,15 @@ static FormatType pnm_readheader(FILE *f, int *xsize, int *ysize, bool *binary)
 	/* read identifier */
 	if (fscanf(f, "%[^ \n\t]", tmp) != 1) return type;
 	if (!strcmp(tmp, pgm_id)) type = MONO_8u;
-	else if (!strcmp(tmp, pgm_ascii_id)) { type = MONO_8u; isBinary = false; }
+	else if (!strcmp(tmp, pgm_ascii_id)) {
+		type = MONO_8u;
+		isBinary = false;
+	}
 	else if (!strcmp(tmp, ppm_id)) type = RGB_8u;
-	else if (!strcmp(tmp, ppm_ascii_id)) { type = RGB_8u; isBinary = false; }
+	else if (!strcmp(tmp, ppm_ascii_id)) {
+		type = RGB_8u;
+		isBinary = false;
+	}
 	else return type;
 
 	/* read size */
@@ -167,70 +174,93 @@ static FormatType pnm_readheader(FILE *f, int *xsize, int *ysize, bool *binary)
 }
 
 template<class T>
-static bool pnm_readdata_ascii_helper(FILE *f, int xsize, int ysize, int channels, T *data)
-{
-	for (int y = 0; y < ysize; ++y) for (int x = 0; x < xsize; ++x) for (int c = 0; c < channels; ++c) {
-		int v;
-		if (!fscanf(f, "%i", &v)) return false;
-		*data++ = v;
-	}
+static bool pnm_readdata_ascii_helper(FILE* f, int xsize, int ysize, int channels, T* data) {
+	for (int y = 0; y < ysize; ++y)
+		for (int x = 0; x < xsize; ++x)
+			for (int c = 0; c < channels; ++c) {
+				int v;
+				if (!fscanf(f, "%i", &v)) return false;
+				*data++ = v;
+			}
 	return true;
 }
 
-static bool pnm_readdata_ascii(FILE *f, int xsize, int ysize, FormatType type, void *data)
-{
+static bool pnm_readdata_ascii(FILE* f, int xsize, int ysize, FormatType type, void* data) {
 	int channels = 0;
-	switch (type)
-	{
-	case MONO_8u:
-		channels = 1;
-		return pnm_readdata_ascii_helper(f, xsize, ysize, channels, (unsigned char*)data);
-	case RGB_8u:
-		channels = 3;
-		return pnm_readdata_ascii_helper(f, xsize, ysize, channels, (unsigned char*)data);
-	case MONO_16s:
-		channels = 1;
-		return pnm_readdata_ascii_helper(f, xsize, ysize, channels, (short*)data);
-	case MONO_16u:
-		channels = 1;
-		return pnm_readdata_ascii_helper(f, xsize, ysize, channels, (unsigned short*)data);
-	case FORMAT_UNKNOWN:
-	default: break;
+	switch (type) {
+		case MONO_8u:
+			channels = 1;
+			return pnm_readdata_ascii_helper(f, xsize, ysize, channels, (unsigned char*) data);
+		case RGB_8u:
+			channels = 3;
+			return pnm_readdata_ascii_helper(f, xsize, ysize, channels, (unsigned char*) data);
+		case MONO_16s:
+			channels = 1;
+			return pnm_readdata_ascii_helper(f, xsize, ysize, channels, (short*) data);
+		case MONO_16u:
+			channels = 1;
+			return pnm_readdata_ascii_helper(f, xsize, ysize, channels, (unsigned short*) data);
+		case FORMAT_UNKNOWN:
+		default:
+			break;
 	}
 	return false;
 }
 
-static bool pnm_readdata_binary(FILE *f, int xsize, int ysize, FormatType type, void *data)
-{
+static bool pnm_readdata_binary(FILE* f, int xsize, int ysize, FormatType type, void* data) {
 	int channels = 0;
 	int bytesPerSample = 0;
-	switch (type)
-	{
-	case MONO_8u: bytesPerSample = sizeof(unsigned char); channels = 1; break;
-	case RGB_8u: bytesPerSample = sizeof(unsigned char); channels = 3; break;
-	case MONO_16s: bytesPerSample = sizeof(short); channels = 1; break;
-	case MONO_16u: bytesPerSample = sizeof(unsigned short); channels = 1; break;
-	case FORMAT_UNKNOWN:
-	default: break;
+	switch (type) {
+		case MONO_8u:
+			bytesPerSample = sizeof(unsigned char);
+			channels = 1;
+			break;
+		case RGB_8u:
+			bytesPerSample = sizeof(unsigned char);
+			channels = 3;
+			break;
+		case MONO_16s:
+			bytesPerSample = sizeof(short);
+			channels = 1;
+			break;
+		case MONO_16u:
+			bytesPerSample = sizeof(unsigned short);
+			channels = 1;
+			break;
+		case FORMAT_UNKNOWN:
+		default:
+			break;
 	}
 	if (bytesPerSample == 0) return false;
 
-	size_t tmp = fread(data, bytesPerSample, xsize*ysize*channels, f);
-	if (tmp != (size_t)xsize*ysize*channels) return false;
+	size_t tmp = fread(data, bytesPerSample, xsize * ysize * channels, f);
+	if (tmp != (size_t) xsize * ysize * channels) return false;
 	return (data != nullptr);
 }
 
-static bool pnm_writeheader(FILE *f, int xsize, int ysize, FormatType type)
-{
-	const char *pnmid = nullptr;
+static bool pnm_writeheader(FILE* f, int xsize, int ysize, FormatType type) {
+	const char* pnmid = nullptr;
 	int max = 0;
 	switch (type) {
-	case MONO_8u: pnmid = pgm_id; max = 256; break;
-	case RGB_8u: pnmid = ppm_id; max = 255; break;
-	case MONO_16s: pnmid = pgm_id; max = 32767; break;
-	case MONO_16u: pnmid = pgm_id; max = 65535; break;
-	case FORMAT_UNKNOWN:
-	default: return false;
+		case MONO_8u:
+			pnmid = pgm_id;
+			max = 256;
+			break;
+		case RGB_8u:
+			pnmid = ppm_id;
+			max = 255;
+			break;
+		case MONO_16s:
+			pnmid = pgm_id;
+			max = 32767;
+			break;
+		case MONO_16u:
+			pnmid = pgm_id;
+			max = 65535;
+			break;
+		case FORMAT_UNKNOWN:
+		default:
+			return false;
 	}
 	if (pnmid == nullptr) return false;
 
@@ -241,49 +271,57 @@ static bool pnm_writeheader(FILE *f, int xsize, int ysize, FormatType type)
 	return true;
 }
 
-static bool pnm_writedata(FILE *f, int xsize, int ysize, FormatType type, const void *data)
-{
+static bool pnm_writedata(FILE* f, int xsize, int ysize, FormatType type, const void* data) {
 	int channels = 0;
 	int bytesPerSample = 0;
-	switch (type)
-	{
-	case MONO_8u: bytesPerSample = sizeof(unsigned char); channels = 1; break;
-	case RGB_8u: bytesPerSample = sizeof(unsigned char); channels = 3; break;
-	case MONO_16s: bytesPerSample = sizeof(short); channels = 1; break;
-	case MONO_16u: bytesPerSample = sizeof(unsigned short); channels = 1; break;
-	case FORMAT_UNKNOWN:
-	default: break;
+	switch (type) {
+		case MONO_8u:
+			bytesPerSample = sizeof(unsigned char);
+			channels = 1;
+			break;
+		case RGB_8u:
+			bytesPerSample = sizeof(unsigned char);
+			channels = 3;
+			break;
+		case MONO_16s:
+			bytesPerSample = sizeof(short);
+			channels = 1;
+			break;
+		case MONO_16u:
+			bytesPerSample = sizeof(unsigned short);
+			channels = 1;
+			break;
+		case FORMAT_UNKNOWN:
+		default:
+			break;
 	}
-	fwrite(data, bytesPerSample, channels*xsize*ysize, f);
+	fwrite(data, bytesPerSample, channels * xsize * ysize, f);
 	return true;
 }
 
-void SaveImageToFile(const ORUtils::Image<ORUtils::Vector4<unsigned char> >& image, const char* file_name, bool flip_vertical)
-{
-	FILE *f = fopen(file_name, "wb");
+void SaveImageToFile(const ORUtils::Image<ORUtils::Vector4<unsigned char> >& image, const char* file_name, bool flip_vertical) {
+	FILE* f = fopen(file_name, "wb");
 	if (!pnm_writeheader(f, image.dimensions.x, image.dimensions.y, RGB_8u)) {
-		fclose(f); return;
+		fclose(f);
+		return;
 	}
 
-	unsigned char *data = new unsigned char[image.dimensions.x * image.dimensions.y * 3];
+	unsigned char* data = new unsigned char[image.dimensions.x * image.dimensions.y * 3];
 
 	ORUtils::Vector2<int> noDims = image.dimensions;
 
-	if (flip_vertical)
-	{
-		for (int y = 0; y < noDims.y; y++) for (int x = 0; x < noDims.x; x++)
-		{
-			int locId_src, locId_dst;
-			locId_src = x + y * noDims.x;
-			locId_dst = x + (noDims.y - y - 1) * noDims.x;
+	if (flip_vertical) {
+		for (int y = 0; y < noDims.y; y++)
+			for (int x = 0; x < noDims.x; x++) {
+				int locId_src, locId_dst;
+				locId_src = x + y * noDims.x;
+				locId_dst = x + (noDims.y - y - 1) * noDims.x;
 
-			data[locId_dst * 3 + 0] = image.GetData(MEMORYDEVICE_CPU)[locId_src].x;
-			data[locId_dst * 3 + 1] = image.GetData(MEMORYDEVICE_CPU)[locId_src].y;
-			data[locId_dst * 3 + 2] = image.GetData(MEMORYDEVICE_CPU)[locId_src].z;
-		}
-	}
-	else
-	{
+				data[locId_dst * 3 + 0] = image.GetData(MEMORYDEVICE_CPU)[locId_src].x;
+				data[locId_dst * 3 + 1] = image.GetData(MEMORYDEVICE_CPU)[locId_src].y;
+				data[locId_dst * 3 + 2] = image.GetData(MEMORYDEVICE_CPU)[locId_src].z;
+			}
+	} else {
 		for (int i = 0; i < noDims.x * noDims.y; ++i) {
 			data[i * 3 + 0] = image.GetData(MEMORYDEVICE_CPU)[i].x;
 			data[i * 3 + 1] = image.GetData(MEMORYDEVICE_CPU)[i].y;
@@ -296,15 +334,15 @@ void SaveImageToFile(const ORUtils::Image<ORUtils::Vector4<unsigned char> >& ima
 	fclose(f);
 }
 
-void SaveImageToFile(const ORUtils::Image<short>& image, const char* file_name)
-{
-	short *data = (short*)malloc(sizeof(short) * image.size());
-	const short *dataSource = image.GetData(MEMORYDEVICE_CPU);
+void SaveImageToFile(const ORUtils::Image<short>& image, const char* file_name) {
+	short* data = (short*) malloc(sizeof(short) * image.size());
+	const short* dataSource = image.GetData(MEMORYDEVICE_CPU);
 	for (size_t i = 0; i < image.size(); i++) data[i] = (dataSource[i] << 8) | ((dataSource[i] >> 8) & 255);
 
-	FILE *f = fopen(file_name, "wb");
+	FILE* f = fopen(file_name, "wb");
 	if (!pnm_writeheader(f, image.dimensions.x, image.dimensions.y, MONO_16u)) {
-		fclose(f); return;
+		fclose(f);
+		return;
 	}
 	pnm_writedata(f, image.dimensions.x, image.dimensions.y, MONO_16u, data);
 	fclose(f);
@@ -312,18 +350,17 @@ void SaveImageToFile(const ORUtils::Image<short>& image, const char* file_name)
 	delete data;
 }
 
-void SaveImageToFile(const ORUtils::Image<float>& image, const char* file_name)
-{
-	unsigned short *data = new unsigned short[image.size()];
-	for (size_t i = 0; i < image.size(); i++)
-	{
+void SaveImageToFile(const ORUtils::Image<float>& image, const char* file_name) {
+	unsigned short* data = new unsigned short[image.size()];
+	for (size_t i = 0; i < image.size(); i++) {
 		float localData = image.GetData(MEMORYDEVICE_CPU)[i];
-		data[i] = localData >= 0 ? (unsigned short)(localData * 1000.0f) : 0;
+		data[i] = localData >= 0 ? (unsigned short) (localData * 1000.0f) : 0;
 	}
 
-	FILE *f = fopen(file_name, "wb");
+	FILE* f = fopen(file_name, "wb");
 	if (!pnm_writeheader(f, image.dimensions.x, image.dimensions.y, MONO_16u)) {
-		fclose(f); return;
+		fclose(f);
+		return;
 	}
 	pnm_writedata(f, image.dimensions.x, image.dimensions.y, MONO_16u, data);
 	fclose(f);
@@ -331,22 +368,21 @@ void SaveImageToFile(const ORUtils::Image<float>& image, const char* file_name)
 	delete[] data;
 }
 
-bool ReadImageFromFile(ORUtils::Image<ORUtils::Vector4<unsigned char> >& image, const char* file_name)
-{
+bool ReadImageFromFile(ORUtils::Image<ORUtils::Vector4<unsigned char> >& image, const char* file_name) {
 	PNGReaderData pngData;
 	bool usepng = false;
 
 	int xsize, ysize;
 	FormatType type;
 	bool binary;
-	FILE *f = fopen(file_name, "rb");
+	FILE* f = fopen(file_name, "rb");
 	if (f == nullptr) return false;
 	type = pnm_readheader(f, &xsize, &ysize, &binary);
-	if ((type != RGB_8u)&&(type != RGBA_8u)) {
+	if ((type != RGB_8u) && (type != RGBA_8u)) {
 		fclose(f);
 		f = fopen(file_name, "rb");
 		type = png_readheader(f, xsize, ysize, pngData);
-		if ((type != RGB_8u)&&(type != RGBA_8u)) {
+		if ((type != RGB_8u) && (type != RGBA_8u)) {
 			fclose(f);
 			return false;
 		}
@@ -355,27 +391,39 @@ bool ReadImageFromFile(ORUtils::Image<ORUtils::Vector4<unsigned char> >& image, 
 
 	ORUtils::Vector2<int> new_size(xsize, ysize);
 	image.ChangeDims(new_size);
-	ORUtils::Vector4<unsigned char> *dataPtr = image.GetData(MEMORYDEVICE_CPU);
+	ORUtils::Vector4<unsigned char>* dataPtr = image.GetData(MEMORYDEVICE_CPU);
 
-	unsigned char *data;
-	if (type != RGBA_8u) data = new unsigned char[xsize*ysize * 3];
-	else data = (unsigned char*)image.GetData(MEMORYDEVICE_CPU);
+	unsigned char* data;
+	if (type != RGBA_8u) data = new unsigned char[xsize * ysize * 3];
+	else data = (unsigned char*) image.GetData(MEMORYDEVICE_CPU);
 
 	if (usepng) {
-		if (!png_readdata(f, xsize, ysize, pngData, data)) { fclose(f); delete[] data; return false; }
+		if (!png_readdata(f, xsize, ysize, pngData, data)) {
+			fclose(f);
+			delete[] data;
+			return false;
+		}
 	} else if (binary) {
-		if (!pnm_readdata_binary(f, xsize, ysize, RGB_8u, data)) { fclose(f); delete[] data; return false; }
+		if (!pnm_readdata_binary(f, xsize, ysize, RGB_8u, data)) {
+			fclose(f);
+			delete[] data;
+			return false;
+		}
 	} else {
-		if (!pnm_readdata_ascii(f, xsize, ysize, RGB_8u, data)) { fclose(f); delete[] data; return false; }
+		if (!pnm_readdata_ascii(f, xsize, ysize, RGB_8u, data)) {
+			fclose(f);
+			delete[] data;
+			return false;
+		}
 	}
 	fclose(f);
 
-	if (type != RGBA_8u)
-	{
-		for (int i = 0; i < image.dimensions.x * image.dimensions.y; ++i)
-		{
-			dataPtr[i].x = data[i * 3 + 0]; dataPtr[i].y = data[i * 3 + 1];
-			dataPtr[i].z = data[i * 3 + 2]; dataPtr[i].w = 255;
+	if (type != RGBA_8u) {
+		for (int i = 0; i < image.dimensions.x * image.dimensions.y; ++i) {
+			dataPtr[i].x = data[i * 3 + 0];
+			dataPtr[i].y = data[i * 3 + 1];
+			dataPtr[i].z = data[i * 3 + 2];
+			dataPtr[i].w = 255;
 		}
 
 		delete[] data;
@@ -384,14 +432,13 @@ bool ReadImageFromFile(ORUtils::Image<ORUtils::Vector4<unsigned char> >& image, 
 	return true;
 }
 
-bool ReadImageFromFile(ORUtils::Image<short>& image, const char *file_name)
-{
+bool ReadImageFromFile(ORUtils::Image<short>& image, const char* file_name) {
 	PNGReaderData pngData;
 	bool usepng = false;
 
 	int xsize, ysize;
 	bool binary;
-	FILE *f = fopen(file_name, "rb");
+	FILE* f = fopen(file_name, "rb");
 	if (f == nullptr) return false;
 	FormatType type = pnm_readheader(f, &xsize, &ysize, &binary);
 	if ((type != MONO_16s) && (type != MONO_16u)) {
@@ -406,13 +453,25 @@ bool ReadImageFromFile(ORUtils::Image<short>& image, const char *file_name)
 		binary = true;
 	}
 
-	short *data = new short[xsize*ysize];
+	short* data = new short[xsize * ysize];
 	if (usepng) {
-		if (!png_readdata(f, xsize, ysize, pngData, data)) { fclose(f); delete[] data; return false; }
+		if (!png_readdata(f, xsize, ysize, pngData, data)) {
+			fclose(f);
+			delete[] data;
+			return false;
+		}
 	} else if (binary) {
-		if (!pnm_readdata_binary(f, xsize, ysize, type, data)) { fclose(f); delete[] data; return false; }
+		if (!pnm_readdata_binary(f, xsize, ysize, type, data)) {
+			fclose(f);
+			delete[] data;
+			return false;
+		}
 	} else {
-		if (!pnm_readdata_ascii(f, xsize, ysize, type, data)) { fclose(f); delete[] data; return false; }
+		if (!pnm_readdata_ascii(f, xsize, ysize, type, data)) {
+			fclose(f);
+			delete[] data;
+			return false;
+		}
 	}
 	fclose(f);
 
@@ -433,15 +492,14 @@ bool ReadImageFromFile(ORUtils::Image<short>& image, const char *file_name)
 }
 
 
-bool ReadImageFromFile(ORUtils::Image<unsigned char>& image, const char *file_name)
-{
+bool ReadImageFromFile(ORUtils::Image<unsigned char>& image, const char* file_name) {
 	PNGReaderData pngData;
 	bool usepng = false;
 
 	int xsize, ysize;
 	FormatType type;
 	bool binary;
-	FILE *f = fopen(file_name, "rb");
+	FILE* f = fopen(file_name, "rb");
 	if (f == nullptr) return false;
 	type = pnm_readheader(f, &xsize, &ysize, &binary);
 	if (type != MONO_8u) {
@@ -458,24 +516,29 @@ bool ReadImageFromFile(ORUtils::Image<unsigned char>& image, const char *file_na
 	ORUtils::Vector2<int> newSize(xsize, ysize);
 	image.ChangeDims(newSize);
 
-	unsigned char *data = (unsigned char*) image.GetData(MEMORYDEVICE_CPU);
+	unsigned char* data = (unsigned char*) image.GetData(MEMORYDEVICE_CPU);
 
 	if (usepng) {
-		if (!png_readdata(f, xsize, ysize, pngData, data)) { fclose(f); delete[] data; return false; }
+		if (!png_readdata(f, xsize, ysize, pngData, data)) {
+			fclose(f);
+			delete[] data;
+			return false;
+		}
 	} else if (binary) {
-		if (!pnm_readdata_binary(f, xsize, ysize, MONO_8u, data)) { fclose(f); delete[] data; return false; }
+		if (!pnm_readdata_binary(f, xsize, ysize, MONO_8u, data)) {
+			fclose(f);
+			delete[] data;
+			return false;
+		}
 	} else {
-		if (!pnm_readdata_ascii(f, xsize, ysize, MONO_8u, data)) { fclose(f); delete[] data; return false; }
+		if (!pnm_readdata_ascii(f, xsize, ysize, MONO_8u, data)) {
+			fclose(f);
+			delete[] data;
+			return false;
+		}
 	}
 	fclose(f);
 	return true;
 }
 
-void MakeDir(const char *directory_name)
-{
-#if defined _MSC_VER
-		_mkdir(directory_name);
-#else
-		mkdir(directory_name, 0777);
-#endif
-}
+} // namespace ORUtils

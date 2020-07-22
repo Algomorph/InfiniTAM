@@ -58,6 +58,7 @@
 #include "../ITMLib/Utils/Configuration/TelemetrySettings.h"
 #include "../ITMLib/Engines/Rendering/RenderingEngineFactory.h"
 #include "../ITMLib/Utils/Configuration/AutomaticRunSettings.h"
+#include "../ITMLib/Engines/Main/MainEngineSettings.h"
 
 
 using namespace ITMLib;
@@ -415,19 +416,18 @@ configuration::Configuration GenerateDefaultSnoopyConfiguration() {
 			false,
 			false,
 			false,
-			true,
 			configuration::FAILUREMODE_IGNORE,
 			configuration::SWAPPINGMODE_DISABLED,
-			configuration::LIBMODE_DYNAMIC,
-			configuration::INDEX_HASH,
 			configuration::TrackerConfigurationStringPresets::default_intensity_depth_extended_tracker_configuration
 	);
 	default_snoopy_configuration.source_tree = default_snoopy_configuration.ToPTree();
+	MainEngineSettings default_snoopy_main_engine_settings(true, LIBMODE_DYNAMIC, INDEX_HASH, true);
 	TelemetrySettings default_snoopy_telemetry_settings;
 	IndexingSettings default_snoopy_indexing_settings;
 	RenderingSettings default_snoopy_rendering_settings;
-	AutomaticRunSettings default_snoopy_automatic_run_settings(50, 16, false, false, false, false);
+	AutomaticRunSettings default_snoopy_automatic_run_settings(716, 16, false, false, false, false);
 
+	AddDeferrableToSourceTree(default_snoopy_configuration, default_snoopy_main_engine_settings);
 	AddDeferrableToSourceTree(default_snoopy_configuration, default_snoopy_telemetry_settings);
 	AddDeferrableToSourceTree(default_snoopy_configuration, default_snoopy_indexing_settings);
 	AddDeferrableToSourceTree(default_snoopy_configuration, default_snoopy_rendering_settings);
@@ -441,7 +441,7 @@ void GenerateConfigurationTestData() {
 	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(),
 	                "Generating configuration test data ... ");
 	configuration::Configuration default_snoopy_configuration = GenerateDefaultSnoopyConfiguration();
-	configuration::save_configuration_to_json_file(GENERATED_TEST_DATA_PREFIX
+	configuration::save_configuration_to_json_file(STATIC_TEST_DATA_PREFIX
 	                                               "../Files/infinitam_snoopy_config.json",
 	                                               default_snoopy_configuration);
 	configuration::Configuration default_configuration;

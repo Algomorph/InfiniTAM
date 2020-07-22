@@ -102,43 +102,44 @@ void LogTSDFVolumeStatistics(VoxelVolume<TVoxel, TIndex>* volume, std::string vo
 #endif
 #define GET_DEPTH_WEIGHT_STATISTICS
 #ifdef GET_DEPTH_WEIGHT_STATISTICS
-		if (configuration::get().device_type == MEMORYDEVICE_CUDA &&
-			configuration::get().indexing_method == configuration::INDEX_HASH) {
-			//_DEBUG
-			Extent2Di low_weight_range0(0, 50);
-			unsigned int low_weight_range_count0 =
-					calculator.CountVoxelsWithDepthWeightInRange(volume, low_weight_range0);
-			unsigned int low_weight_range_hb_count0 =
-					calculator.CountHashBlocksWithDepthWeightInRange(volume, low_weight_range0);
-			LOG4CPLUS_PER_FRAME(logging::get_logger(), "    [w_depth in [0, 50)] % voxels: "
-					<< 100.0 * static_cast<double>(low_weight_range_count0) / static_cast<double>(utilized_voxel_count)
-					<< "; % hash blocks: "
-					<< 100.0 * static_cast<double>(low_weight_range_hb_count0) /
-					   static_cast<double>(utilized_hash_block_count)
-			);
-			Extent2Di low_weight_range1(0, 20);
-			unsigned int low_weight_range_count1 =
-					calculator.CountVoxelsWithDepthWeightInRange(volume, low_weight_range1);
-			unsigned int low_weight_range_hb_count1 =
-					calculator.CountHashBlocksWithDepthWeightInRange(volume, low_weight_range1);
-			LOG4CPLUS_PER_FRAME(logging::get_logger(), "    [w_depth in [0, 20)] % voxels: "
-					<< 100.0 * static_cast<double>(low_weight_range_count1) / static_cast<double>(utilized_voxel_count)
-					<< "; % hash blocks: "
-					<< 100.0 * static_cast<double>(low_weight_range_hb_count1) /
-					   static_cast<double>(utilized_hash_block_count)
-			);
-			Extent2Di low_weight_range2(0, 10);
-			unsigned int low_weight_range_count2 =
-					calculator.CountVoxelsWithDepthWeightInRange(volume, low_weight_range2);
-			unsigned int low_weight_range_hb_count2 =
-					calculator.CountHashBlocksWithDepthWeightInRange(volume, low_weight_range2);
-			LOG4CPLUS_PER_FRAME(logging::get_logger(), "    [w_depth in [0, 10)] % voxels: "
-					<< 100.0 * static_cast<double>(low_weight_range_count2) / static_cast<double>(utilized_voxel_count)
-					<< "; % hash blocks: "
-					<< 100.0 * static_cast<double>(low_weight_range_hb_count2) /
-					   static_cast<double>(utilized_hash_block_count)
-			);
-		}
+		// TODO: fix (indexing_method now a member of deferrable MainEngineSettings) or remove if this is no longer useful
+//		if (configuration::get().device_type == MEMORYDEVICE_CUDA &&
+//			configuration::get().indexing_method == configuration::INDEX_HASH) {
+//			//_DEBUG
+//			Extent2Di low_weight_range0(0, 50);
+//			unsigned int low_weight_range_count0 =
+//					calculator.CountVoxelsWithDepthWeightInRange(volume, low_weight_range0);
+//			unsigned int low_weight_range_hb_count0 =
+//					calculator.CountHashBlocksWithDepthWeightInRange(volume, low_weight_range0);
+//			LOG4CPLUS_PER_FRAME(logging::get_logger(), "    [w_depth in [0, 50)] % voxels: "
+//					<< 100.0 * static_cast<double>(low_weight_range_count0) / static_cast<double>(utilized_voxel_count)
+//					<< "; % hash blocks: "
+//					<< 100.0 * static_cast<double>(low_weight_range_hb_count0) /
+//					   static_cast<double>(utilized_hash_block_count)
+//			);
+//			Extent2Di low_weight_range1(0, 20);
+//			unsigned int low_weight_range_count1 =
+//					calculator.CountVoxelsWithDepthWeightInRange(volume, low_weight_range1);
+//			unsigned int low_weight_range_hb_count1 =
+//					calculator.CountHashBlocksWithDepthWeightInRange(volume, low_weight_range1);
+//			LOG4CPLUS_PER_FRAME(logging::get_logger(), "    [w_depth in [0, 20)] % voxels: "
+//					<< 100.0 * static_cast<double>(low_weight_range_count1) / static_cast<double>(utilized_voxel_count)
+//					<< "; % hash blocks: "
+//					<< 100.0 * static_cast<double>(low_weight_range_hb_count1) /
+//					   static_cast<double>(utilized_hash_block_count)
+//			);
+//			Extent2Di low_weight_range2(0, 10);
+//			unsigned int low_weight_range_count2 =
+//					calculator.CountVoxelsWithDepthWeightInRange(volume, low_weight_range2);
+//			unsigned int low_weight_range_hb_count2 =
+//					calculator.CountHashBlocksWithDepthWeightInRange(volume, low_weight_range2);
+//			LOG4CPLUS_PER_FRAME(logging::get_logger(), "    [w_depth in [0, 10)] % voxels: "
+//					<< 100.0 * static_cast<double>(low_weight_range_count2) / static_cast<double>(utilized_voxel_count)
+//					<< "; % hash blocks: "
+//					<< 100.0 * static_cast<double>(low_weight_range_hb_count2) /
+//					   static_cast<double>(utilized_hash_block_count)
+//			);
+//		}
 #endif
 	}
 }

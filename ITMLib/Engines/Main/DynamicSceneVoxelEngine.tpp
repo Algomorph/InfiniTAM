@@ -54,10 +54,12 @@ namespace fs = std::filesystem;
 using namespace ITMLib;
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(const RGBD_CalibrationInformation& calibration_info,
-                                                                        Vector2i rgb_image_size,
-                                                                        Vector2i depth_image_size)
+DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(
+		const RGBD_CalibrationInformation& calibration_info,
+		Vector2i rgb_image_size,
+		Vector2i depth_image_size)
 		: config(configuration::get()),
+		  camera_tracking_enabled(this->parameters.enable_rigid_alignment),
 		  automatic_run_settings(ExtractSerializableStructFromPtreeIfPresent<AutomaticRunSettings>(configuration::get().source_tree,
 		                                                                                           AutomaticRunSettings::default_parse_path,
 		                                                                                           configuration::get().origin)),
@@ -83,8 +85,6 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(const RG
 
 
 	this->InitializeScenes();
-
-	camera_tracking_enabled = config.enable_rigid_tracking;
 
 	const MemoryDeviceType device_type = config.device_type;
 	MemoryDeviceType memory_device_type = config.device_type;
@@ -195,7 +195,7 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::SaveVolumeToMesh(const std:
 		Mesh mesh = meshing_engine->MeshVolume(canonical_volume);
 		mesh.WritePLY(path);
 	}
-	if(target_warped_live_volume != nullptr){
+	if (target_warped_live_volume != nullptr) {
 		Mesh mesh = meshing_engine->MeshVolume(target_warped_live_volume);
 		fs::path p(path);
 		mesh.WritePLY((p.parent_path() / "live_mesh.ply").string());
@@ -277,7 +277,7 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ResetAll() {
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
-int DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::FrameIndex(){
+int DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::FrameIndex() {
 	return automatic_run_settings.index_of_frame_to_start_at + frames_processed;
 }
 
@@ -501,7 +501,7 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(UChar4Image* out, 
 			else out->SetFrom(*freeview_render_state->raycastImage, MemoryCopyDirection::CPU_TO_CPU);
 			break;
 		}
-		case MainEngine::InfiniTAM_IMAGE_FREECAMERA_CANONICAL: {
+		case FusionAlgorithm::InfiniTAM_IMAGE_FREECAMERA_CANONICAL: {
 			IRenderingEngine::RenderImageType type = IRenderingEngine::RENDER_SHADED_GREYSCALE;
 
 			if (freeview_render_state == nullptr) {
@@ -522,12 +522,13 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(UChar4Image* out, 
 			break;
 		}
 
-		case MainEngine::InfiniTAM_IMAGE_UNKNOWN:
+		case FusionAlgorithm::InfiniTAM_IMAGE_UNKNOWN:
 			break;
 	};
 
-	AddFrameIndexToImage(*out);
-
+	if(parameters.draw_frame_index_labels){
+		AddFrameIndexToImage(*out);
+	}
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>

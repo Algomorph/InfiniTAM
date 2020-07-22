@@ -20,7 +20,7 @@ using namespace ITMLib;
 
 namespace fs = std::filesystem;
 
-void CLIEngine::Initialise(ImageSourceEngine *image_source, IMUSourceEngine *imu_source, MainEngine *main_engine,
+void CLIEngine::Initialise(ImageSourceEngine *image_source, IMUSourceEngine *imu_source, FusionAlgorithm *main_engine,
                            MemoryDeviceType device_type)
 {
 	ITMLib::configuration::Configuration& configuration = ITMLib::configuration::get();

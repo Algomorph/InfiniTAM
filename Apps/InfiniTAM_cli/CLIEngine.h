@@ -4,7 +4,7 @@
 
 #include "../../InputSource/ImageSourceEngine.h"
 #include "../../InputSource/IMUSourceEngine.h"
-#include "../../ITMLib/Engines/Main/MainEngine.h"
+#include "../../ITMLib/Engines/Main/FusionAlgorithm.h"
 #include "../../ITMLib/Utils/Configuration/Configuration.h"
 #include "../../ORUtils/FileUtils.h"
 #include "../../ORUtils/NVTimer.h"
@@ -19,7 +19,7 @@ namespace InfiniTAM
 			InputSource::ImageSourceEngine *image_source;
 			InputSource::IMUSourceEngine *imu_source;
 
-			ITMLib::MainEngine *main_engine;
+			ITMLib::FusionAlgorithm *main_engine;
 
 			StopWatchInterface *timer_instant;
 			StopWatchInterface *timer_average;
@@ -45,7 +45,7 @@ namespace InfiniTAM
 
 			float processedTime;
 
-			void Initialise(InputSource::ImageSourceEngine *image_source, InputSource::IMUSourceEngine *imu_source, ITMLib::MainEngine *main_engine,
+			void Initialise(InputSource::ImageSourceEngine *image_source, InputSource::IMUSourceEngine *imu_source, ITMLib::FusionAlgorithm *main_engine,
 			                MemoryDeviceType device_type);
 			void Shutdown();
 

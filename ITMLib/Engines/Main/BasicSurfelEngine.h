@@ -3,7 +3,7 @@
 #pragma once
 
 #include "Mappers/DenseSurfelMapper.h"
-#include "MainEngine.h"
+#include "FusionAlgorithm.h"
 #include "CameraTrackingController.h"
 #include "../ImageProcessing/Interface/ImageProcessingEngineInterface.h"
 #include "../ViewBuilding/Interface/ViewBuilder.h"
@@ -12,12 +12,10 @@
 
 #include "../../../FernRelocLib/Relocaliser.h"
 
-namespace ITMLib
-{
+namespace ITMLib{
 	template <typename TSurfel>
-	class BasicSurfelEngine : public MainEngine
-	{
-	private:
+	class BasicSurfelEngine : public FusionAlgorithm{
+	private: // instance variables
 		bool trackingActive, fusionActive, mainProcessingActive, trackingInitialised;
 		int framesProcessed, relocalisationCount;
 

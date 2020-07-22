@@ -61,19 +61,6 @@ DECLARE_SERIALIZABLE_ENUM(FAILUREMODE_ENUM_DESCRIPTION);
 
 DECLARE_SERIALIZABLE_ENUM(SWAPPINGMODE_ENUM_DESCRIPTION);
 
-#define LIBMODE_ENUM_DESCRIPTION LibMode, \
-    (LIBMODE_BASIC, "basic"), \
-    (LIBMODE_BASIC_SURFELS, "surfels"), \
-    (LIBMODE_LOOPCLOSURE, "loop_closure"), \
-    (LIBMODE_DYNAMIC, "dynamic")
-
-DECLARE_SERIALIZABLE_ENUM(LIBMODE_ENUM_DESCRIPTION);
-
-#define INDEXING_METHOD_ENUM_DESCRIPTION IndexingMethod, \
-    (INDEX_HASH, "hash", "HASH"), \
-    (INDEX_ARRAY, "array", "ARRAY")
-
-DECLARE_SERIALIZABLE_ENUM(INDEXING_METHOD_ENUM_DESCRIPTION);
 
 #define VOLUME_ROLE_ENUM_DESCRIPTION VolumeRole, \
     (VOLUME_CANONICAL, "canonical", "CANONICAL"), \
@@ -166,11 +153,8 @@ DECLARE_SERIALIZABLE_STRUCT(SPECIFIC_VOLUME_PARAMETERS_STRUCT_DESCRIPTION);
     (bool, use_approximate_raycast, false, PRIMITIVE, "Enables or disables approximate raycast."),\
     (bool, use_threshold_filter, false, PRIMITIVE, "Enables or disables threshold filtering, i.e. filtering out pixels whose difference from their neighbors exceeds a certain threshold"),\
     (bool, use_bilateral_filter, false, PRIMITIVE, "Enables or disables bilateral filtering on depth input images."),\
-    (bool, enable_rigid_tracking, true, PRIMITIVE, "Enables or disables rigid (camera) tracking."),\
     (FailureMode, behavior_on_failure, FAILUREMODE_IGNORE, ENUM, "What to do on tracker failure: ignore, relocalize or stop integration - not supported in loop closure or dynamic libmode"),\
     (SwappingMode, swapping_mode, SWAPPINGMODE_DISABLED, ENUM, "Determines how swapping works: disabled, fully enabled (still with dragons) and delete what's not visible - not supported in loop closure version"),\
-    (LibMode, library_mode, LIBMODE_DYNAMIC, ENUM, "Switch between various library modes - basic, with loop closure, etc."),\
-    (IndexingMethod, indexing_method, INDEX_HASH, ENUM, "Indexing method to use in the 3D volumes, i.e. array or hash."),\
     (std::string, tracker_configuration, TrackerConfigurationStringPresets::default_depth_only_extended_tracker_configuration, PRIMITIVE, "Tracker configuration. (Better description still needs to be provided for this, already in TODO / issues)")
 
 

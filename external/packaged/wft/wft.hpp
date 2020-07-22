@@ -10,15 +10,19 @@ extern "C" typedef struct FT_LibraryRec_* FT_Library;
 namespace wft {
 
 
-struct mask_bits
+struct glyph_bitmap
 {
-  mask_bits(void) {};
-  mask_bits(const FT_Face& F);
+  glyph_bitmap(void) {};
+  glyph_bitmap(const FT_Face& face, uint32_t symbol_unicode);
 
-  std::vector<unsigned char> Bits {};
-  uint32_t symbol_uncode = 0;
+  std::vector<unsigned char> data {};
+  uint32_t code_unicode = 0;
   int top = 0;
   int left = 0;
+  int advance_x = 0;
+  int advance_y = 0;
+  int lsb_delta = 0;
+  int rsb_delta = 0;
   int width  = 0;
   int height = 0;
 };
@@ -46,26 +50,26 @@ class lib
 ///
 /// \brief The wft_face class
 ///
-class font
+class face
 {
   private:
-    font(const font &) = delete;
-    font &operator =(const font &) = delete;
+    face(const face &) = delete;
+    face &operator =(const face &) = delete;
 
     lib wFtLib {};
     FT_Face FtFace {};
 
     int get_kerning(unsigned int char_first, unsigned int char_second, unsigned int kern_mode = 0);
-    void get_bbox(mask_bits& Image);
+    void get_bbox(glyph_bitmap& Image);
 
   public:
-    font(const char *filename, int face_index = 0);
-    ~font(void);
+    face(const char *filename, int face_index = 0);
+    ~face(void);
     operator FT_Face() const { return FtFace; }
 
     void set_size(unsigned int w, unsigned int h);
-    mask_bits get_symbol(uint32_t symbol_code);
-    mask_bits make_bitmap_text(const std::string& Text);
+    glyph_bitmap get_symbol(uint32_t symbol_code);
+    glyph_bitmap make_bitmap_text(const std::string& Text);
 };
 
 

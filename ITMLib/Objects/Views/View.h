@@ -29,7 +29,7 @@ namespace ITMLib {
  * preprocessed and prepared for consumption by ViewBuilder.
  * */
 class View {
-public: // member variables
+public: // instance variables
 	/// Intrinsic calibration information for the view.
 	RGBD_CalibrationInformation calibration_information;
 
@@ -57,7 +57,7 @@ public: // member variables
 	/// allocated when needed
 	Float4Image* depth_normal;
 
-public: // member functions
+public: // instance functions
 
 	View(const RGBD_CalibrationInformation& calibration_information, Vector2i rgb_image_size, Vector2i depth_image_size, bool use_GPU);
 	View(View&& other) noexcept;

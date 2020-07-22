@@ -16,6 +16,7 @@
 #pragma once
 
 #include "../../Utils/Configuration/Configuration.h"
+#include "../../Utils/Metacoding/DeferrableSerializableStruct.h"
 
 namespace ITMLib {
 template<typename TParameters>
@@ -25,18 +26,16 @@ protected:
 public: // instance functions
 	Configurable() :
 			parameters(
-					ExtractSerializableStructFromPtreeIfPresent<TParameters>(
+					ExtractDeferrableSerializableStructFromPtreeIfPresent<TParameters>(
 							configuration::get().source_tree,
-							TParameters::default_parse_path,
 							configuration::get().origin
 					)
 			) {}
 
 	Configurable(configuration::Configuration& config) :
 			parameters(
-					ExtractSerializableStructFromPtreeIfPresent<TParameters>(
+					ExtractDeferrableSerializableStructFromPtreeIfPresent<TParameters>(
 							config.source_tree,
-							TParameters::default_parse_path,
 							config.origin
 					)
 			) {}

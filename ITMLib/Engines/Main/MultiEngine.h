@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "MainEngine.h"
+#include "FusionAlgorithm.h"
 #include "CameraTrackingController.h"
 #include "../ImageProcessing/Interface/ImageProcessingEngineInterface.h"
 #include "../ViewBuilding/Interface/ViewBuilder.h"
@@ -22,7 +22,7 @@ namespace ITMLib
 	/** \brief
 	*/
 	template <typename TVoxel, typename TIndex>
-	class MultiEngine : public MainEngine
+	class MultiEngine : public FusionAlgorithm
 	{
 	private:
 

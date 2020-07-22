@@ -32,6 +32,7 @@
 #include "../../Engines/Indexing/IndexingSettings.h"
 #include "../../Engines/Rendering/RenderingSettings.h"
 #include "AutomaticRunSettings.h"
+#include "../../Engines/Main/MainEngineSettings.h"
 
 using namespace ITMLib::configuration;
 
@@ -41,9 +42,6 @@ DEFINE_SERIALIZABLE_ENUM(FAILUREMODE_ENUM_DESCRIPTION);
 
 DEFINE_SERIALIZABLE_ENUM(SWAPPINGMODE_ENUM_DESCRIPTION);
 
-DEFINE_SERIALIZABLE_ENUM(LIBMODE_ENUM_DESCRIPTION);
-
-DEFINE_SERIALIZABLE_ENUM(INDEXING_METHOD_ENUM_DESCRIPTION);
 
 // defined in other headers or externally
 DEFINE_SERIALIZABLE_ENUM(MemoryDeviceType,
@@ -158,6 +156,7 @@ void load_configuration_from_json_file(const std::string& path) {
 }
 
 static void AddAllDeferrableStructsFromSourceToTargetRootConfiguration(pt::ptree& target_tree, const pt::ptree& origin_tree, std::string origin){
+	AddDeferrableFromSourceToTargetTree<MainEngineSettings>(target_tree, origin_tree, origin);
 	AddDeferrableFromSourceToTargetTree<TelemetrySettings>(target_tree, origin_tree, origin);
 	AddDeferrableFromSourceToTargetTree<IndexingSettings>(target_tree, origin_tree, origin);
 	AddDeferrableFromSourceToTargetTree<RenderingSettings>(target_tree, origin_tree, origin);

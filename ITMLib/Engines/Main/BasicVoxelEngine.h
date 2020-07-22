@@ -3,7 +3,7 @@
 #pragma once
 
 #include "Mappers/DenseMapper.h"
-#include "MainEngine.h"
+#include "FusionAlgorithm.h"
 #include "CameraTrackingController.h"
 #include "../ImageProcessing/Interface/ImageProcessingEngineInterface.h"
 #include "../Meshing/Interface/MeshingEngine.h"
@@ -15,8 +15,8 @@
 
 namespace ITMLib {
 template<typename TVoxel, typename TIndex>
-class BasicVoxelEngine : public MainEngine {
-private:
+class BasicVoxelEngine : public FusionAlgorithm {
+private: // instance variables
 	bool tracking_active, fusion_active, main_processing_active, tracking_initialised;
 	int processed_frame_count, relocalization_count;
 
@@ -45,7 +45,15 @@ private:
 	/// Pointer to the current camera pose and additional tracking information
 	CameraTrackingState* trackingState;
 
-public:
+public: // instance functions
+
+	/** \brief Constructor
+		Omitting a separate image size for the depth images
+		will assume same resolution as for the RGB images.
+	*/
+	BasicVoxelEngine(const RGBD_CalibrationInformation& calib, Vector2i imgSize_rgb, Vector2i imgSize_d);
+	~BasicVoxelEngine();
+
 	View* GetView() { return view; }
 
 	CameraTrackingState* GetTrackingState() { return trackingState; }
@@ -82,11 +90,6 @@ public:
 	/// resets the scene and the tracker
 	void ResetAll();
 
-	/** \brief Constructor
-		Omitting a separate image size for the depth images
-		will assume same resolution as for the RGB images.
-	*/
-	BasicVoxelEngine(const RGBD_CalibrationInformation& calib, Vector2i imgSize_rgb, Vector2i imgSize_d);
-	~BasicVoxelEngine();
+
 };
 }
