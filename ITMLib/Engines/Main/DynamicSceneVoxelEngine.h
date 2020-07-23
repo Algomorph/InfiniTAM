@@ -51,7 +51,7 @@ private: // instance variables
 	const AutomaticRunSettings automatic_run_settings;
 
 	// engines
-	ImageProcessingEngineInterface* low_level_engine;
+	ImageProcessingEngineInterface* image_processing_engine;
 	RenderingEngineBase<TVoxel, TIndex>* rendering_engine;
 	MeshingEngine<TVoxel, TIndex>* meshing_engine;
 	IndexingEngineInterface<TVoxel, TIndex>* indexing_engine;

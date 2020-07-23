@@ -52,6 +52,7 @@ set(
 
         DrawText.cpp
         FileUtils.cpp
+        ImageCombination.cpp
         IStreamWrapper.cpp
         KeyValueConfig.cpp
         VectorAndMatrixPersistence.cpp
@@ -71,6 +72,7 @@ set(
         FileUtils.h
         HomkerMap.h
         Image.h
+        ImageCombination.h
         IStreamWrapper.h
         KeyValueConfig.h
         LexicalCast.h

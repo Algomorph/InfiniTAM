@@ -19,6 +19,7 @@
 #include "../../ORUtils/NVTimer.h"
 #include "../../ITMLib/Engines/Telemetry/TelemetryRecorderLegacy.h"
 #include "../../ITMLib/Utils/Configuration/AutomaticRunSettings.h"
+#include "../../ITMLib/Engines/ImageProcessing/Interface/ImageProcessingEngineInterface.h"
 
 namespace InfiniTAM {
 namespace Engine { //TODO: retching from the overuse of the word "Engine"
@@ -52,17 +53,18 @@ private:
 	InputSource::ImageSourceEngine* image_source_engine;
 	InputSource::IMUSourceEngine* imu_source_engine;
 	ITMLib::FusionAlgorithm* main_engine;
+	ITMLib::ImageProcessingEngineInterface* image_processing_engine;
 
 	StopWatchInterface* timer_instant;
 	StopWatchInterface* timer_average;
 
 	// For UI layout
 	static const int NUM_WIN = 3;
-	Vector4f winReg[NUM_WIN]; // (x1, y1, x2, y2)
+	Vector4f window_corners[NUM_WIN]; // (x1, y1, x2, y2)
 	Vector2i window_size;
 	uint textureId[NUM_WIN];
-	UChar4Image* outImage[NUM_WIN];
-	ITMLib::FusionAlgorithm::GetImageType outImageType[NUM_WIN];
+	UChar4Image* output_images[NUM_WIN];
+	ITMLib::FusionAlgorithm::GetImageType output_image_types[NUM_WIN];
 
 	UChar4Image* input_RGB_image;
 	ShortImage* input_raw_depth_image;
@@ -81,6 +83,7 @@ private:
 	bool image_recording_enabled;
 
 	InputSource::FFMPEGWriter* reconstruction_video_writer = nullptr;
+	bool add_input_to_reconstruction_video = false;
 	InputSource::FFMPEGWriter* RGB_video_writer = nullptr;
 	InputSource::FFMPEGWriter* depth_video_writer = nullptr;
 public:
@@ -100,12 +103,13 @@ public:
 
 	float current_frame_processing_time;
 	int current_frame_index;
-	ITMLib::CameraTrackingState::TrackingResult trackingResult;
+	int output_image_frame_index = -1;
+	ITMLib::CameraTrackingState::TrackingResult tracking_result;
 	std::string output_path;
 	bool needs_refresh;
 
 	bool shutdown_requested = false;
-	UChar4Image* saveImage;
+	UChar4Image* image_to_save;
 
 	void Initialize(int& argc, char** argv, InputSource::ImageSourceEngine* imageSource, InputSource::IMUSourceEngine* imuSource,
 	                ITMLib::FusionAlgorithm* main_engine, const ITMLib::configuration::Configuration& configuration);
@@ -119,6 +123,7 @@ public:
 	void SaveScreenshot(const char* filename) const;
 
 	void SkipFrames(int number_of_frames_to_skip);
+	void UpdateOutputImages();
 	void RecordCurrentReconstructionFrameToVideo();
 	void RecordDepthAndRGBInputToVideo();
 	void RecordDepthAndRGBInputToImages();

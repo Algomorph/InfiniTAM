@@ -74,7 +74,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(
 				                  configuration::get().device_type,
 				                  configuration::for_volume_role<TIndex>(configuration::VOLUME_CANONICAL)
 		                  ) : nullptr),
-		  low_level_engine(ImageProcessingEngineFactory::Build(configuration::get().device_type)),
+		  image_processing_engine(ImageProcessingEngineFactory::Build(configuration::get().device_type)),
 		  telemetry_recorder(TelemetryRecorderFactory::GetDefault<TVoxel, TWarp, TIndex>(configuration::get().device_type)),
 		  view_builder(ViewBuilderFactory::Build(calibration_info, configuration::get().device_type)),
 		  rendering_engine(RenderingEngineFactory::Build<TVoxel, TIndex>(
@@ -91,7 +91,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(
 	if ((depth_image_size.x == -1) || (depth_image_size.y == -1)) depth_image_size = rgb_image_size;
 
 	imu_calibrator = new ITMIMUCalibrator_iPad();
-	camera_tracker = CameraTrackerFactory::Instance().Make(rgb_image_size, depth_image_size, low_level_engine,
+	camera_tracker = CameraTrackerFactory::Instance().Make(rgb_image_size, depth_image_size, image_processing_engine,
 	                                                       imu_calibrator,
 	                                                       canonical_volume->GetParameters());
 	camera_tracking_controller = new CameraTrackingController(camera_tracker);
@@ -162,7 +162,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::~DynamicSceneVoxelEngine() {
 	delete meshing_engine;
 	delete depth_fusion_engine;
 	delete swapping_engine;
-	delete low_level_engine;
+	delete image_processing_engine;
 	delete view_builder;
 
 	delete camera_tracking_controller;
@@ -412,17 +412,25 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(UChar4Image* out, 
 
 	out->Clear();
 
+	bool might_need_frame_label_index = true;
+
+	MemoryCopyDirection memory_copy_direction;
+	if (settings.device_type == MEMORYDEVICE_CUDA) {
+		memory_copy_direction = MemoryCopyDirection::CUDA_TO_CPU;
+	} else {
+		memory_copy_direction = MemoryCopyDirection::CPU_TO_CPU;
+	}
+
 	switch (type) {
 		case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_ORIGINAL_RGB:
-			out->ChangeDims(view->rgb.dimensions);
-			if (settings.device_type == MEMORYDEVICE_CUDA)
-				out->SetFrom(view->rgb, MemoryCopyDirection::CUDA_TO_CPU);
-			else out->SetFrom(view->rgb, MemoryCopyDirection::CPU_TO_CPU);
+			out->SetFrom(view->rgb, memory_copy_direction);
+			might_need_frame_label_index = false;
 			break;
 		case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_ORIGINAL_DEPTH:
 			out->ChangeDims(view->depth.dimensions);
 			if (settings.device_type == MEMORYDEVICE_CUDA) view->depth.UpdateHostFromDevice();
 			RenderingEngineBase<TVoxel, TIndex>::DepthToUchar4(out, view->depth);
+			might_need_frame_label_index = false;
 			break;
 		case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_SCENERAYCAST:
 		case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_COLOUR_FROM_VOLUME:
@@ -457,12 +465,7 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(UChar4Image* out, 
 			ORUtils::Image<Vector4u>* srcImage = nullptr;
 			if (relocalization_count != 0) srcImage = keyframe_raycast;
 			else srcImage = canonical_render_state->raycastImage;
-
-			out->ChangeDims(srcImage->dimensions);
-			if (settings.device_type == MEMORYDEVICE_CUDA)
-				out->SetFrom(*srcImage, MemoryCopyDirection::CUDA_TO_CPU);
-			else out->SetFrom(*srcImage, MemoryCopyDirection::CPU_TO_CPU);
-
+			out->SetFrom(*srcImage, memory_copy_direction);
 			break;
 		}
 		case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_FREECAMERA_SHADED:
@@ -495,14 +498,11 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(UChar4Image* out, 
 			rendering_engine->CreateExpectedDepths(live_volumes[0], pose, intrinsics, freeview_render_state);
 			rendering_engine->RenderImage(live_volumes[0], pose, intrinsics, freeview_render_state,
 			                              freeview_render_state->raycastImage, render_type);
-
-			if (settings.device_type == MEMORYDEVICE_CUDA)
-				out->SetFrom(*freeview_render_state->raycastImage, MemoryCopyDirection::CUDA_TO_CPU);
-			else out->SetFrom(*freeview_render_state->raycastImage, MemoryCopyDirection::CPU_TO_CPU);
+			out->SetFrom(*freeview_render_state->raycastImage, memory_copy_direction);
 			break;
 		}
 		case FusionAlgorithm::InfiniTAM_IMAGE_FREECAMERA_CANONICAL: {
-			IRenderingEngine::RenderImageType type = IRenderingEngine::RENDER_SHADED_GREYSCALE;
+			IRenderingEngine::RenderImageType render_image_type = IRenderingEngine::RENDER_SHADED_GREYSCALE;
 
 			if (freeview_render_state == nullptr) {
 				freeview_render_state = new RenderState(out->dimensions,
@@ -514,11 +514,9 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(UChar4Image* out, 
 			rendering_engine->FindVisibleBlocks(canonical_volume, pose, intrinsics, freeview_render_state);
 			rendering_engine->CreateExpectedDepths(canonical_volume, pose, intrinsics, freeview_render_state);
 			rendering_engine->RenderImage(canonical_volume, pose, intrinsics, freeview_render_state,
-			                              freeview_render_state->raycastImage, type);
+			                              freeview_render_state->raycastImage, render_image_type);
 
-			if (settings.device_type == MEMORYDEVICE_CUDA)
-				out->SetFrom(*freeview_render_state->raycastImage, MemoryCopyDirection::CUDA_TO_CPU);
-			else out->SetFrom(*freeview_render_state->raycastImage, MemoryCopyDirection::CPU_TO_CPU);
+			out->SetFrom(*freeview_render_state->raycastImage, memory_copy_direction);
 			break;
 		}
 
@@ -526,7 +524,7 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(UChar4Image* out, 
 			break;
 	};
 
-	if(parameters.draw_frame_index_labels){
+	if (parameters.draw_frame_index_labels && might_need_frame_label_index) {
 		AddFrameIndexToImage(*out);
 	}
 }

@@ -48,23 +48,18 @@ static void Safe_GlutBitmapString(void* font, const char* str) {
 }
 
 void UIEngine::GlutDisplayFunction() {
-	UIEngine& uiEngine = UIEngine::Instance();
+	UIEngine& ui_engine = UIEngine::Instance();
 
 	// get updated images from processing thread
-	uiEngine.main_engine->GetImage(uiEngine.outImage[0], uiEngine.outImageType[0], &uiEngine.freeview_pose,
-	                               &uiEngine.freeview_intrinsics);
-
-	for (int w = 1; w < NUM_WIN; w++) {
-		uiEngine.main_engine->GetImage(uiEngine.outImage[w], uiEngine.outImageType[w]);
-	}
+	ui_engine.UpdateOutputImages();
 
 	// do the actual drawing
 	glClear(GL_COLOR_BUFFER_BIT);
 	glColor3f(1.0f, 1.0f, 1.0f);
 	glEnable(GL_TEXTURE_2D);
 
-	UChar4Image** showImgs = uiEngine.outImage;
-	Vector4f* winReg = uiEngine.winReg;
+	UChar4Image** show_images = ui_engine.output_images;
+	Vector4f* window_corners = ui_engine.window_corners;
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	{
@@ -76,22 +71,22 @@ void UIEngine::GlutDisplayFunction() {
 		{
 			glEnable(GL_TEXTURE_2D);
 			for (int w = 0; w < NUM_WIN; w++) {// Draw each sub window
-				if (uiEngine.outImageType[w] == FusionAlgorithm::InfiniTAM_IMAGE_UNKNOWN) continue;
-				glBindTexture(GL_TEXTURE_2D, uiEngine.textureId[w]);
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, showImgs[w]->dimensions.x, showImgs[w]->dimensions.y, 0, GL_RGBA,
-				             GL_UNSIGNED_BYTE, showImgs[w]->GetData(MEMORYDEVICE_CPU));
+				if (ui_engine.output_image_types[w] == FusionAlgorithm::InfiniTAM_IMAGE_UNKNOWN) continue;
+				glBindTexture(GL_TEXTURE_2D, ui_engine.textureId[w]);
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, show_images[w]->dimensions.x, show_images[w]->dimensions.y, 0, GL_RGBA,
+				             GL_UNSIGNED_BYTE, show_images[w]->GetData(MEMORYDEVICE_CPU));
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 				glBegin(GL_QUADS);
 				{
 					glTexCoord2f(0, 1);
-					glVertex2f(winReg[w][0], winReg[w][1]); // glVertex2f(0, 0);
+					glVertex2f(window_corners[w][0], window_corners[w][1]); // glVertex2f(0, 0);
 					glTexCoord2f(1, 1);
-					glVertex2f(winReg[w][2], winReg[w][1]); // glVertex2f(1, 0);
+					glVertex2f(window_corners[w][2], window_corners[w][1]); // glVertex2f(1, 0);
 					glTexCoord2f(1, 0);
-					glVertex2f(winReg[w][2], winReg[w][3]); // glVertex2f(1, 1);
+					glVertex2f(window_corners[w][2], window_corners[w][3]); // glVertex2f(1, 1);
 					glTexCoord2f(0, 0);
-					glVertex2f(winReg[w][0], winReg[w][3]); // glVertex2f(0, 1);
+					glVertex2f(window_corners[w][0], window_corners[w][3]); // glVertex2f(0, 1);
 				}
 				glEnd();
 			}
@@ -102,7 +97,7 @@ void UIEngine::GlutDisplayFunction() {
 	glMatrixMode(GL_PROJECTION);
 	glPopMatrix();
 
-	switch (uiEngine.trackingResult) {
+	switch (ui_engine.tracking_result) {
 		case ITMLib::CameraTrackingState::TrackingResult::TRACKING_FAILED:
 			glColor3f(1.0f, 0.0f, 0.0f);
 			break; // failure
@@ -115,13 +110,13 @@ void UIEngine::GlutDisplayFunction() {
 		default:
 			//TODO: why isn't this a separate value in the TrackingResult enum?
 			glColor3f(1.0f, 1.0f, 1.0f);
-			break; // relocalising
+			break; // relocalizing
 	}
 
 	char str[200];
 
 	//print previous frame index
-	int previous_frame_index = uiEngine.current_frame_index - 1;
+	int previous_frame_index = ui_engine.current_frame_index - 1;
 	if (previous_frame_index >= 0) {
 		glRasterPos2f(0.775f, -0.900f);
 		sprintf(str, "Frame %5d", previous_frame_index);
@@ -130,7 +125,7 @@ void UIEngine::GlutDisplayFunction() {
 
 	//print frame rate
 	glRasterPos2f(0.85f, -0.962f);
-	sprintf(str, "%04.2lf", uiEngine.current_frame_processing_time);
+	sprintf(str, "%04.2lf", ui_engine.current_frame_processing_time);
 	Safe_GlutBitmapString(GLUT_BITMAP_HELVETICA_18, (const char*) str);
 
 	glColor3f(1.0f, 0.0f, 0.0f);
@@ -138,28 +133,28 @@ void UIEngine::GlutDisplayFunction() {
 	glRasterPos2f(-0.98f, -0.90f);
 	const char* modeName;
 	const char* followOrFreeview;
-	if (uiEngine.freeview_active) {
-		modeName = uiEngine.colourModes_freeview[uiEngine.current_colour_mode].name;
+	if (ui_engine.freeview_active) {
+		modeName = ui_engine.colourModes_freeview[ui_engine.current_colour_mode].name;
 		followOrFreeview = "follow camera";
 	} else {
-		modeName = uiEngine.colourModes_main[uiEngine.current_colour_mode].name;
+		modeName = ui_engine.colourModes_main[ui_engine.current_colour_mode].name;
 		followOrFreeview = "free viewpoint";
 	}
 
 	//Draw keyboard shortcut legend
 	sprintf(str, "n: one frame \t b: continuous \t q/e/esc: exit \t r: reset \t s: save scene \t l: load scene\t"
 	             " f: %s \t c: colours (currently %s) \t t: turn fusion %s", followOrFreeview, modeName,
-	        uiEngine.integration_active ? "off" : "on");
+	        ui_engine.integration_active ? "off" : "on");
 	Safe_GlutBitmapString(GLUT_BITMAP_HELVETICA_12, (const char*) str);
 	glRasterPos2f(-0.98f, -0.95f);
 	sprintf(str,
 	        "i: %d frames \t d: one step \t p: pause \t v: write video %s \t ",
-	        uiEngine.automatic_run_settings.index_of_frame_to_end_before,
-	        uiEngine.depth_video_writer != nullptr ? "off" : "on");
+	        ui_engine.automatic_run_settings.index_of_frame_to_end_before,
+	        ui_engine.depth_video_writer != nullptr ? "off" : "on");
 	Safe_GlutBitmapString(GLUT_BITMAP_HELVETICA_12, (const char*) str);
 
 	glutSwapBuffers();
-	uiEngine.needs_refresh = false;
+	ui_engine.needs_refresh = false;
 }
 
 void UIEngine::GlutIdleFunction() {
@@ -283,18 +278,18 @@ void UIEngine::GlutKeyUpFunction(unsigned char key, int x, int y) {
 			ui_engine.current_colour_mode = 0;
 			//TODO: replace this whole if/else block with a separate function, use this function during initialization as well -Greg (Github: Algomorph)
 			if (ui_engine.freeview_active) {
-				ui_engine.outImageType[0] = FusionAlgorithm::InfiniTAM_IMAGE_SCENERAYCAST;
-				ui_engine.outImageType[1] = FusionAlgorithm::InfiniTAM_IMAGE_ORIGINAL_DEPTH;
+				ui_engine.output_image_types[0] = FusionAlgorithm::InfiniTAM_IMAGE_SCENERAYCAST;
+				ui_engine.output_image_types[1] = FusionAlgorithm::InfiniTAM_IMAGE_ORIGINAL_DEPTH;
 
 				ui_engine.freeview_active = false;
 			} else {
-				ui_engine.outImageType[0] = FusionAlgorithm::InfiniTAM_IMAGE_FREECAMERA_SHADED;
-				ui_engine.outImageType[1] = FusionAlgorithm::InfiniTAM_IMAGE_SCENERAYCAST;
+				ui_engine.output_image_types[0] = FusionAlgorithm::InfiniTAM_IMAGE_FREECAMERA_SHADED;
+				ui_engine.output_image_types[1] = FusionAlgorithm::InfiniTAM_IMAGE_SCENERAYCAST;
 
 				ui_engine.freeview_pose.SetFrom(ui_engine.main_engine->GetTrackingState()->pose_d);
 				if (ui_engine.main_engine->GetView() != nullptr) {
 					ui_engine.freeview_intrinsics = ui_engine.main_engine->GetView()->calibration_information.intrinsics_d;
-					ui_engine.outImage[0]->ChangeDims(ui_engine.main_engine->GetView()->depth.dimensions);
+					ui_engine.output_images[0]->ChangeDims(ui_engine.main_engine->GetView()->depth.dimensions);
 				}
 
 				//TODO: fix or get rid of this inept use of templates / RTTI
@@ -394,8 +389,8 @@ void UIEngine::GlutKeyUpFunction(unsigned char key, int x, int y) {
 		}
 			break;
 	}
-	if (ui_engine.freeview_active) ui_engine.outImageType[0] = ui_engine.colourModes_freeview[ui_engine.current_colour_mode].type;
-	else ui_engine.outImageType[0] = ui_engine.colourModes_main[ui_engine.current_colour_mode].type;
+	if (ui_engine.freeview_active) ui_engine.output_image_types[0] = ui_engine.colourModes_freeview[ui_engine.current_colour_mode].type;
+	else ui_engine.output_image_types[0] = ui_engine.colourModes_main[ui_engine.current_colour_mode].type;
 }
 
 void UIEngine::GlutMouseButtonFunction(int button, int state, int x, int y) {

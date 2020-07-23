@@ -138,8 +138,9 @@ DECLARE_SERIALIZABLE_STRUCT(SPECIFIC_VOLUME_PARAMETERS_STRUCT_DESCRIPTION);
     "where to focus telemetry information records). "\
     "Only effective for logging when verbosity_level is set to focus_spots (alt. VERBOSITY_FOCUS_SPOTS) or above."), \
     (bool, record_reconstruction_video, false, PRIMITIVE, \
-            "Whether to record video of the canonical reconstruction during automatic run "\
-            "(see index_of_frame_to_end_before and index_of_frame_to_start_at)."), \
+            "Whether to record video of the canonical reconstruction during automatic run "),\
+	(bool, record_inputs_in_reconstruction_video, false, PRIMITIVE, \
+            "Whether to concatenate input frames to the canonical reconstruction video frames (only useful with  '--record_reconstruction_video')"),\
     (VoxelVolumeParameters, general_voxel_volume_parameters, VoxelVolumeParameters(), STRUCT, "Voxel volume parameters, such as voxel size."),\
     (SurfelVolumeParameters, general_surfel_volume_parameters, SurfelVolumeParameters(), STRUCT, "Surfel volume parameters, such as surfel radius."),\
     (SpecificVolumeParameters, specific_volume_parameters, SpecificVolumeParameters(), STRUCT, "Parameters for specific volumes (multiple volumes are used in dynamic mode), may include information for different indexing methods."), \

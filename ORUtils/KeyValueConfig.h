@@ -5,6 +5,8 @@
 #include <map>
 #include <string.h>
 
+//TODO: replace this homegrown square wheel with utilities for YAML setting parsing (for trackers) and get rid of this code.
+
 namespace ORUtils {
 
 /** Helper class for managing key-value like configuration information. Most

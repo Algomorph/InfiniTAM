@@ -3,20 +3,25 @@
 #include "UIEngine.h"
 
 #ifdef __APPLE__
-	#include <GLUT/glut.h>
+#include <GLUT/glut.h>
 #else
-	#ifndef FREEGLUT_STATIC
-		#include <GL/glut.h>
-	#endif
-	#if defined(FREEGLUT) || defined(FREEGLUT_STATIC)
-		#include <GL/freeglut.h>
-	#endif 
+#ifndef FREEGLUT_STATIC
+
+#include <GL/glut.h>
+
+#endif
+#if defined(FREEGLUT) || defined(FREEGLUT_STATIC)
+
+#include <GL/freeglut.h>
+
+#endif
 #endif
 
 #ifdef WITH_VTK
 //VTK
 #include <vtkCommand.h>
 #include <vtkRenderWindowInteractor.h>
+
 #endif
 
 //ITMLib
@@ -24,6 +29,8 @@
 #include "../../ITMLib/Utils/Logging/Logging.h"
 #include "../../ITMLib/Engines/Telemetry/TelemetryRecorderLegacy.h"
 #include "../../ORUtils/FileUtils.h"
+#include "../../ORUtils/ImageCombination.h"
+#include "../../ITMLib/Engines/ImageProcessing/ImageProcessingEngineFactory.h"
 
 
 //TODO: we should never have to downcast the main engine to some other engine type, architecture needs to be altered
@@ -88,9 +95,9 @@ void UIEngine::Initialize(int& argc, char** argv,
 	window_size.x = (int) (1.5f * (float) (imageSource->GetDepthImageSize().x));
 	window_size.y = imageSource->GetDepthImageSize().y + textHeight;
 	float h1 = textHeight / (float) window_size.y, h2 = (1.f + h1) / 2;
-	winReg[0] = Vector4f(0.0f, h1, 0.665f, 1.0f);   // Main render
-	winReg[1] = Vector4f(0.665f, h2, 1.0f, 1.0f);   // Side sub window 0
-	winReg[2] = Vector4f(0.665f, h1, 1.0f, h2);     // Side sub window 2
+	window_corners[0] = Vector4f(0.0f, h1, 0.665f, 1.0f);   // Main render
+	window_corners[1] = Vector4f(0.665f, h2, 1.0f, 1.0f);   // Side sub window 0
+	window_corners[2] = Vector4f(0.665f, h1, 1.0f, h2);     // Side sub window 2
 
 	this->image_recording_enabled = false;
 	this->processed_frame_count = 0;
@@ -117,19 +124,19 @@ void UIEngine::Initialize(int& argc, char** argv,
 	bool allocate_GPU = configuration.device_type == MEMORYDEVICE_CUDA;
 
 	for (int w = 0; w < NUM_WIN; w++) {
-		outImage[w] = new UChar4Image(imageSource->GetDepthImageSize(), true, allocate_GPU);
+		output_images[w] = new UChar4Image(imageSource->GetDepthImageSize(), true, allocate_GPU);
 	}
 
 	input_RGB_image = new UChar4Image(imageSource->GetRGBImageSize(), true, allocate_GPU);
 	input_raw_depth_image = new ShortImage(imageSource->GetDepthImageSize(), true, allocate_GPU);
 	input_IMU_measurement = new IMUMeasurement();
 
-	saveImage = new UChar4Image(imageSource->GetDepthImageSize(), true, false);
+	image_to_save = new UChar4Image(imageSource->GetDepthImageSize(), true, false);
 
 
-	outImageType[1] = FusionAlgorithm::InfiniTAM_IMAGE_ORIGINAL_DEPTH;
-	outImageType[2] = FusionAlgorithm::InfiniTAM_IMAGE_ORIGINAL_RGB;
-	if (input_RGB_image->dimensions == Vector2i(0, 0)) outImageType[2] = FusionAlgorithm::InfiniTAM_IMAGE_UNKNOWN;
+	output_image_types[1] = FusionAlgorithm::InfiniTAM_IMAGE_ORIGINAL_DEPTH;
+	output_image_types[2] = FusionAlgorithm::InfiniTAM_IMAGE_ORIGINAL_RGB;
+	if (input_RGB_image->dimensions == Vector2i(0, 0)) output_image_types[2] = FusionAlgorithm::InfiniTAM_IMAGE_UNKNOWN;
 
 	current_mouse_operation = IDLE;
 	mouse_warped = false;
@@ -152,11 +159,15 @@ void UIEngine::Initialize(int& argc, char** argv,
 	}
 
 	main_loop_action = automatic_run_settings.index_of_frame_to_end_before > 0 ? PROCESS_N_FRAMES : PROCESS_PAUSED;
-	outImageType[0] = this->freeview_active ? this->colourModes_freeview[this->current_colour_mode].type
-	                                        : this->colourModes_main[this->current_colour_mode].type;
+	output_image_types[0] = this->freeview_active ? this->colourModes_freeview[this->current_colour_mode].type
+	                                              : this->colourModes_main[this->current_colour_mode].type;
 
 	if (configuration.record_reconstruction_video) {
 		this->reconstruction_video_writer = new FFMPEGWriter();
+		if (configuration.record_inputs_in_reconstruction_video) {
+			this->add_input_to_reconstruction_video = true;
+			image_processing_engine = ImageProcessingEngineFactory::Build(MEMORYDEVICE_CPU);
+		}
 	}
 
 	if (automatic_run_settings.load_volume_and_camera_matrix_before_processing) {
@@ -208,8 +219,8 @@ void UIEngine::ProcessFrame() {
 
 	//actual processing on the main_engine
 	if (imu_source_engine != nullptr)
-		this->trackingResult = main_engine->ProcessFrame(input_RGB_image, input_raw_depth_image, input_IMU_measurement);
-	else trackingResult = main_engine->ProcessFrame(input_RGB_image, input_raw_depth_image);
+		this->tracking_result = main_engine->ProcessFrame(input_RGB_image, input_raw_depth_image, input_IMU_measurement);
+	else tracking_result = main_engine->ProcessFrame(input_RGB_image, input_raw_depth_image);
 
 #ifndef COMPILE_WITHOUT_CUDA
 	ORcudaSafeCall(cudaDeviceSynchronize());
@@ -238,13 +249,13 @@ void UIEngine::Shutdown() {
 	delete reconstruction_video_writer;
 
 	for (int w = 0; w < NUM_WIN; w++)
-		delete outImage[w];
+		delete output_images[w];
 
 	delete input_RGB_image;
 	delete input_raw_depth_image;
 	delete input_IMU_measurement;
 
-	delete saveImage;
+	delete image_to_save;
 }
 
 
@@ -260,16 +271,55 @@ std::string UIEngine::GeneratePreviousFrameOutputPath() const {
 	return ITMLib::telemetry::CreateAndGetOutputPathForFrame(current_frame_index - 1);
 }
 
+/**
+ * \brief If the recorded output images refer to a frame other than the current frame, update them with the current images.
+ * \details Note: assumes that the main engine has processed the current frame.
+ */
+void UIEngine::UpdateOutputImages() {
+	if (output_image_frame_index != current_frame_index) {
+		main_engine->GetImage(output_images[0], output_image_types[0], &this->freeview_pose, &freeview_intrinsics);
+		for (int i_output_image = 1; i_output_image < NUM_WIN; i_output_image++) {
+			main_engine->GetImage(output_images[i_output_image], output_image_types[i_output_image]);
+		}
+		output_image_frame_index = current_frame_index;
+	}
+}
+
 //TODO: Group all recording & make it toggleable with a single keystroke / command flag
 void UIEngine::RecordCurrentReconstructionFrameToVideo() {
 	if ((reconstruction_video_writer != nullptr)) {
-		main_engine->GetImage(outImage[0], outImageType[0], &this->freeview_pose, &freeview_intrinsics);
-		if (outImage[0]->dimensions.x != 0) {
-			if (!reconstruction_video_writer->isOpen())
-				reconstruction_video_writer->open((std::string(this->output_path) + "/out_reconstruction.avi").c_str(),
-				                                  outImage[0]->dimensions.x, outImage[0]->dimensions.y,
-				                                  false, 30);
-			reconstruction_video_writer->writeFrame(outImage[0]);
+		UpdateOutputImages();
+		if (output_images[0]->dimensions.x != 0) {
+			if (this->add_input_to_reconstruction_video) {
+				assert(output_image_types[1] == FusionAlgorithm::InfiniTAM_IMAGE_ORIGINAL_DEPTH);
+				Vector2i input_dims_depth = output_images[1]->dimensions;
+				Vector2i reduced_dims_depth(input_dims_depth.x / 2, input_dims_depth.y / 2);
+				UChar4Image reduced_depth(reduced_dims_depth, MEMORYDEVICE_CPU);
+				image_processing_engine->FilterSubsample(reduced_depth, *output_images[1]);
+
+				assert(output_image_types[2] == FusionAlgorithm::InfiniTAM_IMAGE_ORIGINAL_RGB);
+				Vector2i input_dims_RGB = output_images[2]->dimensions;
+				Vector2i reduced_dims_RGB(input_dims_RGB.x / 2, input_dims_RGB.y / 2);
+				UChar4Image reduced_RGB(reduced_dims_RGB, MEMORYDEVICE_CPU);
+				image_processing_engine->FilterSubsample(reduced_RGB, *output_images[2]);
+
+				assert(reduced_dims_RGB.y + reduced_dims_depth.y == output_images[0]->dimensions.y);
+				UChar4Image rgb_and_depth = ORUtils::ConcatenateImages(std::vector<std::reference_wrapper<UChar4Image>>{reduced_depth, reduced_RGB}, 0);
+				UChar4Image video_output_image = ORUtils::ConcatenateImages(std::vector<std::reference_wrapper<UChar4Image>>{*output_images[0], rgb_and_depth}, 1);
+				if (!reconstruction_video_writer->isOpen()) {
+					reconstruction_video_writer->open((std::string(this->output_path) + "/out_reconstruction.avi").c_str(),
+					                                  video_output_image.dimensions.x, video_output_image.dimensions.y,
+					                                  false, 30);
+				}
+				reconstruction_video_writer->writeFrame(&video_output_image);
+			} else {
+				if (!reconstruction_video_writer->isOpen()) {
+					reconstruction_video_writer->open((std::string(this->output_path) + "/out_reconstruction.avi").c_str(),
+					                                  output_images[0]->dimensions.x, output_images[0]->dimensions.y,
+					                                  false, 30);
+				}
+				reconstruction_video_writer->writeFrame(output_images[0]);
+			}
 		}
 	}
 }
