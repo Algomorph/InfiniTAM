@@ -118,7 +118,7 @@ BOOST_AUTO_TEST_CASE(Test_SceneConstruct17_PVA_VBH_Near_CUDA) {
 
 
 BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CUDA) {
-	configuration::Configuration* settings = &configuration::get();
+	configuration::Configuration* settings = &configuration::Get();
 
 	// region ================================= CONSTRUCT VIEW =========================================================
 
@@ -241,8 +241,8 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CUDA) {
 			DepthFusionEngineFactory
 			::Build<TSDFVoxel, WarpVoxel, VoxelBlockHash>(MEMORYDEVICE_CUDA);
 
-	RenderState renderState(imageSize, configuration::get().general_voxel_volume_parameters.near_clipping_distance,
-	                        configuration::get().general_voxel_volume_parameters.far_clipping_distance,
+	RenderState renderState(imageSize, configuration::Get().general_voxel_volume_parameters.near_clipping_distance,
+	                        configuration::Get().general_voxel_volume_parameters.far_clipping_distance,
 	                        settings->device_type);
 	IndexingEngineInterface<TSDFVoxel, VoxelBlockHash>& indexer_VBH
 			= IndexingEngineFactory::GetDefault<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CUDA);
@@ -288,7 +288,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CUDA) {
 }
 
 BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CUDA) {
-	configuration::Configuration* settings = &configuration::get();
+	configuration::Configuration* settings = &configuration::Get();
 
 	// region ================================= CONSTRUCT VIEW =========================================================
 

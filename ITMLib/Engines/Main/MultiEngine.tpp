@@ -31,7 +31,7 @@ template <typename TVoxel, typename TIndex>
 MultiEngine<TVoxel, TIndex>::MultiEngine(const RGBD_CalibrationInformation& calib, Vector2i imgSize_rgb, Vector2i imgSize_d){
 	if ((imgSize_d.x == -1) || (imgSize_d.y == -1)) imgSize_d = imgSize_rgb;
 
-	auto& settings = configuration::get();
+	auto& settings = configuration::Get();
 
 	const MemoryDeviceType deviceType = settings.device_type;
 	lowLevelEngine = ImageProcessingEngineFactory::Build(deviceType);
@@ -146,7 +146,7 @@ struct TodoListEntry {
 template <typename TVoxel, typename TIndex>
 CameraTrackingState::TrackingResult MultiEngine<TVoxel, TIndex>::ProcessFrame(UChar4Image *rgbImage, ShortImage *rawDepthImage, IMUMeasurement *imuMeasurement)
 {
-	auto& settings = configuration::get();
+	auto& settings = configuration::Get();
 	std::vector<TodoListEntry> todoList;
 	CameraTrackingState::TrackingResult primaryLocalMapTrackingResult = CameraTrackingState::TrackingResult::TRACKING_FAILED;
 
@@ -336,7 +336,7 @@ template <typename TVoxel, typename TIndex>
 void MultiEngine<TVoxel, TIndex>::GetImage(UChar4Image *out, GetImageType getImageType, ORUtils::SE3Pose *pose, Intrinsics *intrinsics)
 {
 	if (view == NULL) return;
-	auto& settings = configuration::get();
+	auto& settings = configuration::Get();
 
 	out->Clear();
 

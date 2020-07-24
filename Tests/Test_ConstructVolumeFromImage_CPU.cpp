@@ -133,8 +133,8 @@ static void SetUpTrackingState16(CameraTrackingState& tracking_state,
 	           snoopy::SnoopyCalibrationPath(),
 	           MEMORYDEVICE_CPU);
 	RenderState render_state(view_16->depth.dimensions,
-	                         configuration::get().general_voxel_volume_parameters.near_clipping_distance,
-	                         configuration::get().general_voxel_volume_parameters.far_clipping_distance,
+	                         configuration::Get().general_voxel_volume_parameters.near_clipping_distance,
+	                         configuration::Get().general_voxel_volume_parameters.far_clipping_distance,
 	                         MEMORYDEVICE_CPU);
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_16(MEMORYDEVICE_CPU,
 	                                                     snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
@@ -321,7 +321,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
 				static_cast<float>(zero_level_set_voxel_z_coords_mm[iVoxel]) / 1000.0f
 		);
 		zero_level_set_coordinates.push_back(
-				getVoxelCoord(coordinateMeters, configuration::get().general_voxel_volume_parameters.voxel_size));
+				getVoxelCoord(coordinateMeters, configuration::Get().general_voxel_volume_parameters.voxel_size));
 	}
 
 	float tolerance = 1e-4;

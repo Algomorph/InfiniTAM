@@ -58,29 +58,29 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(
 		const RGBD_CalibrationInformation& calibration_info,
 		Vector2i rgb_image_size,
 		Vector2i depth_image_size)
-		: config(configuration::get()),
+		: config(configuration::Get()),
 		  camera_tracking_enabled(this->parameters.enable_rigid_alignment),
-		  automatic_run_settings(ExtractSerializableStructFromPtreeIfPresent<AutomaticRunSettings>(configuration::get().source_tree,
+		  automatic_run_settings(ExtractSerializableStructFromPtreeIfPresent<AutomaticRunSettings>(configuration::Get().source_tree,
 		                                                                                           AutomaticRunSettings::default_parse_path,
-		                                                                                           configuration::get().origin)),
-		  indexing_engine(IndexingEngineFactory::Build<TVoxel, TIndex>(configuration::get().device_type)),
+		                                                                                           configuration::Get().origin)),
+		  indexing_engine(IndexingEngineFactory::Build<TVoxel, TIndex>(configuration::Get().device_type)),
 		  depth_fusion_engine(
 				  DepthFusionEngineFactory::Build<TVoxel, TWarp, TIndex>
-						  (configuration::get().device_type)),
-		  volume_fusion_engine(VolumeFusionEngineFactory::Build<TVoxel, TIndex>(configuration::get().device_type)),
+						  (configuration::Get().device_type)),
+		  volume_fusion_engine(VolumeFusionEngineFactory::Build<TVoxel, TIndex>(configuration::Get().device_type)),
 		  surface_tracker(SurfaceTrackerFactory::Build<TVoxel, TWarp, TIndex>()),
-		  swapping_engine(configuration::get().swapping_mode != configuration::SWAPPINGMODE_DISABLED ?
+		  swapping_engine(configuration::Get().swapping_mode != configuration::SWAPPINGMODE_DISABLED ?
 		                  SwappingEngineFactory::Build<TVoxel, TIndex>(
-				                  configuration::get().device_type,
-				                  configuration::for_volume_role<TIndex>(configuration::VOLUME_CANONICAL)
+				                  configuration::Get().device_type,
+				                  configuration::ForVolumeRole<TIndex>(configuration::VOLUME_CANONICAL)
 		                  ) : nullptr),
-		  image_processing_engine(ImageProcessingEngineFactory::Build(configuration::get().device_type)),
-		  telemetry_recorder(TelemetryRecorderFactory::GetDefault<TVoxel, TWarp, TIndex>(configuration::get().device_type)),
-		  view_builder(ViewBuilderFactory::Build(calibration_info, configuration::get().device_type)),
+		  image_processing_engine(ImageProcessingEngineFactory::Build(configuration::Get().device_type)),
+		  telemetry_recorder(TelemetryRecorderFactory::GetDefault<TVoxel, TWarp, TIndex>(configuration::Get().device_type)),
+		  view_builder(ViewBuilderFactory::Build(calibration_info, configuration::Get().device_type)),
 		  rendering_engine(RenderingEngineFactory::Build<TVoxel, TIndex>(
-				  configuration::get().device_type)),
+				  configuration::Get().device_type)),
 		  meshing_engine(config.create_meshing_engine ? MeshingEngineFactory::Build<TVoxel, TIndex>(
-				  configuration::get().device_type) : nullptr) {
+				  configuration::Get().device_type) : nullptr) {
 	logging::initialize_logging();
 
 
@@ -136,23 +136,23 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(
 
 template<typename TVoxel, typename TWarp, typename TIndex>
 void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::InitializeScenes() {
-	configuration::Configuration& settings = configuration::get();
+	configuration::Configuration& settings = configuration::Get();
 	MemoryDeviceType memoryType = settings.device_type;
 	this->canonical_volume = new VoxelVolume<TVoxel, TIndex>(
 			settings.general_voxel_volume_parameters, settings.swapping_mode == configuration::SWAPPINGMODE_ENABLED,
-			memoryType, configuration::for_volume_role<TIndex>(configuration::VOLUME_CANONICAL));
+			memoryType, configuration::ForVolumeRole<TIndex>(configuration::VOLUME_CANONICAL));
 	this->live_volumes = new VoxelVolume<TVoxel, TIndex>* [2];
 	for (int iLiveScene = 0;
 	     iLiveScene < DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::live_volume_count; iLiveScene++) {
 		this->live_volumes[iLiveScene] = new VoxelVolume<TVoxel, TIndex>(
 				settings.general_voxel_volume_parameters,
 				settings.swapping_mode == configuration::SWAPPINGMODE_ENABLED,
-				memoryType, configuration::for_volume_role<TIndex>(configuration::VOLUME_LIVE));
+				memoryType, configuration::ForVolumeRole<TIndex>(configuration::VOLUME_LIVE));
 	}
 	this->warp_field = new VoxelVolume<TWarp, TIndex>(
 			settings.general_voxel_volume_parameters,
 			settings.swapping_mode == configuration::SWAPPINGMODE_ENABLED,
-			memoryType, configuration::for_volume_role<TIndex>(configuration::VOLUME_WARP));
+			memoryType, configuration::ForVolumeRole<TIndex>(configuration::VOLUME_WARP));
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
@@ -229,7 +229,7 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::LoadFromFile(const std::str
 	if (view != nullptr) {
 		try // load relocalizer
 		{
-			auto& settings = configuration::get();
+			auto& settings = configuration::Get();
 			FernRelocLib::Relocaliser<float>* relocalizer_temp =
 					new FernRelocLib::Relocaliser<float>(view->depth.dimensions,
 					                                     Vector2f(
@@ -407,7 +407,7 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(UChar4Image* out, 
                                                               Intrinsics* intrinsics) {
 
 
-	auto& settings = configuration::get();
+	auto& settings = configuration::Get();
 	if (view == nullptr) return;
 
 	out->Clear();
@@ -553,7 +553,7 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::TurnOffMainProcessing() { m
 template<typename TVoxel, typename TWarp, typename TIndex>
 void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::HandlePotentialCameraTrackingFailure() {
 
-	auto& settings = configuration::get();
+	auto& settings = configuration::Get();
 	last_tracking_result = CameraTrackingState::TRACKING_GOOD;
 	switch (settings.behavior_on_failure) {
 		case configuration::FAILUREMODE_RELOCALIZE:

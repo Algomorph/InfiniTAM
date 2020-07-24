@@ -23,7 +23,7 @@ namespace fs = std::filesystem;
 void CLIEngine::Initialise(ImageSourceEngine *image_source, IMUSourceEngine *imu_source, FusionAlgorithm *main_engine,
                            MemoryDeviceType device_type)
 {
-	ITMLib::configuration::Configuration& configuration = ITMLib::configuration::get();
+	ITMLib::configuration::Configuration& configuration = ITMLib::configuration::Get();
 	//TODO: just use automatic_run_settings as member directly instead of copying stuff over.
 	AutomaticRunSettings automatic_run_settings = ExtractSerializableStructFromPtreeIfPresent<AutomaticRunSettings>(configuration.source_tree,
 	                                                                                                                AutomaticRunSettings::default_parse_path,

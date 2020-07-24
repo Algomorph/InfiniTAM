@@ -46,7 +46,7 @@ static void handle_possible_existing_logs(const std::string& log_path) {
 			auto write_time = fs::last_write_time(fs_log_path);
 			std::stringstream buffer;
 			buffer << std::put_time(std::localtime(&write_time), "%y%m%d%H%M%S");
-			fs::path backup_directory = fs::path(configuration::get().paths.output_path) / fs::path("older_logs");
+			fs::path backup_directory = fs::path(configuration::Get().paths.output_path) / fs::path("older_logs");
 			fs::create_directories(backup_directory);
 			fs::path move_destination = backup_directory / fs::path(std::string("log_") + buffer.str() + ".ans");
 			fs::rename(fs_log_path, move_destination);
@@ -71,7 +71,7 @@ void initialize_logging() {
 
 	auto root = log4cplus::Logger::getRoot();
 
-	switch (configuration::get().logging_settings.verbosity_level) {
+	switch (configuration::Get().logging_settings.verbosity_level) {
 		case VERBOSITY_SILENT:
 			root.setLogLevel(OFF_LOG_LEVEL);
 			break;
@@ -105,13 +105,13 @@ void initialize_logging() {
 			break;
 	}
 
-	if (configuration::get().logging_settings.log_to_stdout) {
+	if (configuration::Get().logging_settings.log_to_stdout) {
 		log4cplus::SharedAppenderPtr console_appender(new log4cplus::ConsoleAppender(false, true));
 		root.addAppender(console_appender);
 	}
 
-	if (configuration::get().logging_settings.log_to_disk) {
-		std::string log_path = (fs::path(configuration::get().paths.output_path) / fs::path("log.ans")).string();
+	if (configuration::Get().logging_settings.log_to_disk) {
+		std::string log_path = (fs::path(configuration::Get().paths.output_path) / fs::path("log.ans")).string();
 		handle_possible_existing_logs(log_path);
 		log4cplus::SharedFileAppenderPtr file_appender(new RollingFileAppender(
 				LOG4CPLUS_TEXT(log_path), 50 * 1024 * 1024, 5, false, true));

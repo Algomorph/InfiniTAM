@@ -118,10 +118,10 @@ public:
 			warp_voxels(warp_field->GetVoxels()), warp_index_data(warp_field->index.GetIndexData()),
 			canonical_voxels(canonical_volume->GetVoxels()), canonical_index_data(canonical_volume->index.GetIndexData()),
 			live_cache(), canonical_cache(),
-			use_focus_coordinates(configuration::get().logging_settings.verbosity_level >= VERBOSITY_FOCUS_SPOTS),
-			focus_coordinates(configuration::get().focus_coordinates),
+			use_focus_coordinates(configuration::Get().logging_settings.verbosity_level >= VERBOSITY_FOCUS_SPOTS),
+			focus_coordinates(configuration::Get().focus_coordinates),
 			sdf_unity(voxel_size / truncation_distance),
-			verbosity_level(configuration::get().logging_settings.verbosity_level)
+			verbosity_level(configuration::Get().logging_settings.verbosity_level)
 			{}
 
 	// endregion =======================================================================================================

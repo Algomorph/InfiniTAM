@@ -30,7 +30,7 @@ struct RenderingEngineFactory {
 	 * \param device_type  The device on which the Rendering engine should operate.
 	 */
 	template<typename TVoxel, typename TIndex>
-	static RenderingEngineBase<TVoxel, TIndex>* Build(MemoryDeviceType device_type = configuration::get().device_type) {
+	static RenderingEngineBase<TVoxel, TIndex>* Build(MemoryDeviceType device_type = configuration::Get().device_type) {
 		RenderingEngineBase<TVoxel, TIndex>* rendering_engine = nullptr;
 
 		switch (device_type) {

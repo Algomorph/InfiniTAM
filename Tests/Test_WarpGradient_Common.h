@@ -52,8 +52,8 @@ struct WarpGradientDataFixture {
 			path_to_data(GENERATED_TEST_DATA_PREFIX "TestData/volumes/" + IndexString<TIndex>() + "/"),
 			index_parameters(snoopy::InitializationParameters_Fr16andFr17<TIndex>()),
 			indexing_engine(IndexingEngine<TSDFVoxel, TIndex, TMemoryDeviceType>::Instance()){
-		configuration::load_default();
-		settings = &configuration::get();
+		configuration::LoadDefault();
+		settings = &configuration::Get();
 
 		BOOST_TEST_MESSAGE("setup fixture");
 		auto loadSdfVolume = [&](VoxelVolume<TSDFVoxel, TIndex>** volume, const std::string& pathSuffix) {

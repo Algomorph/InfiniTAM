@@ -34,11 +34,11 @@ template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMem
 TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::TelemetryRecorder()
 		:TelemetryRecorderInterface<TVoxel, TWarp, TIndex>(),
 		canonical_volume_memory_usage_file(parameters.record_volume_memory_usage ?
-		ORUtils::OStreamWrapper((fs::path(configuration::get().paths.output_path)
+		ORUtils::OStreamWrapper((fs::path(configuration::Get().paths.output_path)
 		                         / fs::path("canonical_volume_memory_usage.dat")).string(), true)
 		                                                                   : ORUtils::OStreamWrapper()),
 		  camera_trajectory_file(parameters.record_camera_matrices ?
-		                         ORUtils::OStreamWrapper((fs::path(configuration::get().paths.output_path)
+		                         ORUtils::OStreamWrapper((fs::path(configuration::Get().paths.output_path)
 		                                                  / fs::path("camera_matrices.dat")).string(), true)
 		                                                                                        : ORUtils::OStreamWrapper()) {}
 
@@ -69,7 +69,7 @@ void TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::RecordFrameMes
 		if (parameters.use_CPU_for_mesh_recording) {
 			meshing_engine = MeshingEngineFactory::Build<TVoxel, TIndex>(MEMORYDEVICE_CPU);
 		} else {
-			meshing_engine = MeshingEngineFactory::Build<TVoxel, TIndex>(configuration::get().device_type);
+			meshing_engine = MeshingEngineFactory::Build<TVoxel, TIndex>(configuration::Get().device_type);
 		}
 
 		Mesh mesh = meshing_engine->MeshVolume(&volume);

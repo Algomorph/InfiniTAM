@@ -90,8 +90,8 @@ void GenerateRawLiveAndCanonicalVolumes(VoxelVolume<TSDFVoxel, TIndex>** canonic
 	RenderingEngineBase<TSDFVoxel, TIndex>* visualization_engine =
 			RenderingEngineFactory::Build<TSDFVoxel, TIndex>(TMemoryDeviceType);
 
-	RenderState render_state(image_size, configuration::get().general_voxel_volume_parameters.near_clipping_distance,
-	                         configuration::get().general_voxel_volume_parameters.far_clipping_distance,
+	RenderState render_state(image_size, configuration::Get().general_voxel_volume_parameters.near_clipping_distance,
+	                         configuration::Get().general_voxel_volume_parameters.far_clipping_distance,
 	                         TMemoryDeviceType);
 
 	visualization_engine->CreateICPMaps(*canonical_volume, view, &tracking_state, &render_state);

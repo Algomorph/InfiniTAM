@@ -75,12 +75,12 @@ int main(int argc, char** argv) {
 		}
 
 		if (vm["config"].empty()) {
-			configuration::load_configuration_from_variable_map(vm);
+			configuration::LoadConfigurationFromVariableMap(vm);
 		} else {
 			std::string configPath = vm["config"].as<std::string>();
-			configuration::load_configuration_from_json_file(configPath);
+			configuration::LoadConfigurationFromJSONFile(configPath);
 		}
-		auto& configuration = configuration::get();
+		auto& configuration = configuration::Get();
 
 		printf("initialising ...\n");
 		ImageSourceEngine* imageSource = nullptr;
@@ -91,7 +91,7 @@ int main(int argc, char** argv) {
 		                                              imageSource->GetRGBImageSize(),
 		                                              imageSource->GetDepthImageSize());
 
-		CLIEngine::Instance()->Initialise(imageSource, imuSource, mainEngine, configuration::get().device_type);
+		CLIEngine::Instance()->Initialise(imageSource, imuSource, mainEngine, configuration::Get().device_type);
 		CLIEngine::Instance()->Run();
 		CLIEngine::Instance()->Shutdown();
 

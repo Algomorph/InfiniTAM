@@ -36,8 +36,8 @@ using namespace ITMLib;
 
 
 SlavchevaSurfaceTracker::SlavchevaSurfaceTracker() :
-		parameters(configuration::get().slavcheva_parameters),
-		switches(configuration::get().slavcheva_switches) {
+		parameters(configuration::Get().slavcheva_parameters),
+		switches(configuration::Get().slavcheva_switches) {
 	PrintSettings();
 }
 

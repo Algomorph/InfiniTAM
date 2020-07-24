@@ -35,7 +35,7 @@ namespace ITMLib {
 
 template<typename TVoxel, typename TIndex>
 void LogTSDFVolumeStatistics(VoxelVolume<TVoxel, TIndex>* volume, std::string volume_description) {
-	if (configuration::get().logging_settings.log_volume_statistics) {
+	if (configuration::Get().logging_settings.log_volume_statistics) {
 		AnalyticsEngineInterface<TVoxel, TIndex>& calculator =
 				AnalyticsEngineFactory::Get<TVoxel, TIndex>(volume->index.memory_type);
 		LOG4CPLUS_PER_FRAME(logging::get_logger(),
@@ -103,8 +103,8 @@ void LogTSDFVolumeStatistics(VoxelVolume<TVoxel, TIndex>* volume, std::string vo
 #define GET_DEPTH_WEIGHT_STATISTICS
 #ifdef GET_DEPTH_WEIGHT_STATISTICS
 		// TODO: fix (indexing_method now a member of deferrable MainEngineSettings) or remove if this is no longer useful
-//		if (configuration::get().device_type == MEMORYDEVICE_CUDA &&
-//			configuration::get().indexing_method == configuration::INDEX_HASH) {
+//		if (configuration::Get().device_type == MEMORYDEVICE_CUDA &&
+//			configuration::Get().indexing_method == configuration::INDEX_HASH) {
 //			//_DEBUG
 //			Extent2Di low_weight_range0(0, 50);
 //			unsigned int low_weight_range_count0 =

@@ -120,7 +120,7 @@ void SceneReconstructionEngine_CPU<TVoxel, VoxelBlockHash>::AllocateSceneFromDep
 	bool useSwapping = volume->SwappingEnabled();
 
 	float oneOverHashEntrySize = 1.0f / (voxelSize * VOXEL_BLOCK_SIZE);//m
-	float band_factor = configuration::get().general_voxel_volume_parameters.block_allocation_band_factor;
+	float band_factor = configuration::Get().general_voxel_volume_parameters.block_allocation_band_factor;
 	float surface_cutoff_distance = mu * band_factor;
 
 	int lastFreeVoxelBlockId = volume->index.GetLastFreeBlockListId();

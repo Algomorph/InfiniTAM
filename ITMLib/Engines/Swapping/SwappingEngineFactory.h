@@ -26,7 +26,8 @@ struct SwappingEngineFactory
    * \param device_type  The device on which the swapping engine should operate.
    */
   template <typename TVoxel, typename TIndex>
-  static SwappingEngine<TVoxel,TIndex>* Build(MemoryDeviceType device_type, typename TIndex::InitializationParameters index_parameters = configuration::for_volume_role<TIndex>(configuration::VOLUME_CANONICAL))
+  static SwappingEngine<TVoxel,TIndex>* Build(MemoryDeviceType device_type, typename TIndex::InitializationParameters index_parameters = configuration::ForVolumeRole<TIndex>(
+		  configuration::VOLUME_CANONICAL))
   {
     SwappingEngine<TVoxel,TIndex>* swapping_engine = nullptr;
 

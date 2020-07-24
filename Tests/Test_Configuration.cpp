@@ -47,7 +47,7 @@ struct DeferrableStructCollection {
 	AutomaticRunSettings automatic_run_settings;
 	MainEngineSettings main_engine_settings;
 
-	DeferrableStructCollection(const configuration::Configuration& source_configuration = configuration::get()) :
+	DeferrableStructCollection(const configuration::Configuration& source_configuration = configuration::Get()) :
 			main_engine_settings(BuildDeferrableFromParentIfPresent<MainEngineSettings>(source_configuration)),
 			telemetry_settings(BuildDeferrableFromParentIfPresent<TelemetrySettings>(source_configuration)),
 			indexing_settings(BuildDeferrableFromParentIfPresent<IndexingSettings>(source_configuration)),
@@ -74,53 +74,53 @@ BOOST_AUTO_TEST_CASE(ConfigurationTest) {
 #ifdef COMPILE_WITHOUT_CUDA
 	configuration::load_configuration_from_json_file( GENERATED_TEST_DATA_PREFIX "TestData/configuration/default_config_cpu.json");
 #else
-	configuration::load_configuration_from_json_file( GENERATED_TEST_DATA_PREFIX "TestData/configuration/default_config_cuda.json");
+	configuration::LoadConfigurationFromJSONFile(GENERATED_TEST_DATA_PREFIX "TestData/configuration/default_config_cuda.json");
 #endif
 
 	DeferrableStructCollection loaded_deferrables;
 
 	BOOST_REQUIRE_EQUAL(default_configuration.general_voxel_volume_parameters,
-	                    configuration::get().general_voxel_volume_parameters);
+	                    configuration::Get().general_voxel_volume_parameters);
 	BOOST_REQUIRE_EQUAL(default_configuration.general_surfel_volume_parameters,
-	                    configuration::get().general_surfel_volume_parameters);
-	BOOST_REQUIRE_EQUAL(default_configuration.slavcheva_parameters, configuration::get().slavcheva_parameters);
-	BOOST_REQUIRE_EQUAL(default_configuration.slavcheva_switches, configuration::get().slavcheva_switches);
-	BOOST_REQUIRE_EQUAL(default_configuration.logging_settings, configuration::get().logging_settings);
+	                    configuration::Get().general_surfel_volume_parameters);
+	BOOST_REQUIRE_EQUAL(default_configuration.slavcheva_parameters, configuration::Get().slavcheva_parameters);
+	BOOST_REQUIRE_EQUAL(default_configuration.slavcheva_switches, configuration::Get().slavcheva_switches);
+	BOOST_REQUIRE_EQUAL(default_configuration.logging_settings, configuration::Get().logging_settings);
 	RequireEqualDeferrables(default_deferrables, loaded_deferrables);
-	BOOST_REQUIRE_EQUAL(default_configuration.paths, configuration::get().paths);
+	BOOST_REQUIRE_EQUAL(default_configuration.paths, configuration::Get().paths);
 	BOOST_REQUIRE_EQUAL(default_configuration.non_rigid_tracking_parameters,
-	                    configuration::get().non_rigid_tracking_parameters);
-	BOOST_REQUIRE_EQUAL(default_configuration, configuration::get());
+	                    configuration::Get().non_rigid_tracking_parameters);
+	BOOST_REQUIRE_EQUAL(default_configuration, configuration::Get());
 
-	configuration::load_configuration_from_json_file(GENERATED_TEST_DATA_PREFIX "TestData/configuration/config1.json");
+	configuration::LoadConfigurationFromJSONFile(GENERATED_TEST_DATA_PREFIX "TestData/configuration/config1.json");
 	loaded_deferrables = DeferrableStructCollection();
 
 	BOOST_REQUIRE_EQUAL(configuration1.general_voxel_volume_parameters,
-	                    configuration::get().general_voxel_volume_parameters);
+	                    configuration::Get().general_voxel_volume_parameters);
 	BOOST_REQUIRE_EQUAL(configuration1.general_surfel_volume_parameters,
-	                    configuration::get().general_surfel_volume_parameters);
-	BOOST_REQUIRE_EQUAL(configuration1.slavcheva_parameters, configuration::get().slavcheva_parameters);
-	BOOST_REQUIRE_EQUAL(configuration1.slavcheva_switches, configuration::get().slavcheva_switches);
-	BOOST_REQUIRE_EQUAL(configuration1.logging_settings, configuration::get().logging_settings);
+	                    configuration::Get().general_surfel_volume_parameters);
+	BOOST_REQUIRE_EQUAL(configuration1.slavcheva_parameters, configuration::Get().slavcheva_parameters);
+	BOOST_REQUIRE_EQUAL(configuration1.slavcheva_switches, configuration::Get().slavcheva_switches);
+	BOOST_REQUIRE_EQUAL(configuration1.logging_settings, configuration::Get().logging_settings);
 	RequireEqualDeferrables(deferrables1, loaded_deferrables);
-	BOOST_REQUIRE_EQUAL(configuration1.paths, configuration::get().paths);
+	BOOST_REQUIRE_EQUAL(configuration1.paths, configuration::Get().paths);
 	BOOST_REQUIRE_EQUAL(configuration1.non_rigid_tracking_parameters,
-	                    configuration::get().non_rigid_tracking_parameters);
-	BOOST_REQUIRE_EQUAL(configuration1, configuration::get());
-	configuration::save_configuration_to_json_file(GENERATED_TEST_DATA_PREFIX "TestData/configuration/config2.json", configuration1);
-	configuration::load_configuration_from_json_file(GENERATED_TEST_DATA_PREFIX "TestData/configuration/config2.json");
+	                    configuration::Get().non_rigid_tracking_parameters);
+	BOOST_REQUIRE_EQUAL(configuration1, configuration::Get());
+	configuration::SaveConfigurationToJSONFile(GENERATED_TEST_DATA_PREFIX "TestData/configuration/config2.json", configuration1);
+	configuration::LoadConfigurationFromJSONFile(GENERATED_TEST_DATA_PREFIX "TestData/configuration/config2.json");
 	loaded_deferrables = DeferrableStructCollection();
 
 	BOOST_REQUIRE_EQUAL(configuration1.general_voxel_volume_parameters,
-	                    configuration::get().general_voxel_volume_parameters);
+	                    configuration::Get().general_voxel_volume_parameters);
 	BOOST_REQUIRE_EQUAL(configuration1.general_surfel_volume_parameters,
-	                    configuration::get().general_surfel_volume_parameters);
-	BOOST_REQUIRE_EQUAL(configuration1.slavcheva_parameters, configuration::get().slavcheva_parameters);
-	BOOST_REQUIRE_EQUAL(configuration1.slavcheva_switches, configuration::get().slavcheva_switches);
-	BOOST_REQUIRE_EQUAL(configuration1.logging_settings, configuration::get().logging_settings);
+	                    configuration::Get().general_surfel_volume_parameters);
+	BOOST_REQUIRE_EQUAL(configuration1.slavcheva_parameters, configuration::Get().slavcheva_parameters);
+	BOOST_REQUIRE_EQUAL(configuration1.slavcheva_switches, configuration::Get().slavcheva_switches);
+	BOOST_REQUIRE_EQUAL(configuration1.logging_settings, configuration::Get().logging_settings);
 	RequireEqualDeferrables(deferrables1, loaded_deferrables);
-	BOOST_REQUIRE_EQUAL(configuration1.paths, configuration::get().paths);
+	BOOST_REQUIRE_EQUAL(configuration1.paths, configuration::Get().paths);
 	BOOST_REQUIRE_EQUAL(configuration1.non_rigid_tracking_parameters,
-	                    configuration::get().non_rigid_tracking_parameters);
-	BOOST_REQUIRE_EQUAL(configuration1, configuration::get());
+	                    configuration::Get().non_rigid_tracking_parameters);
+	BOOST_REQUIRE_EQUAL(configuration1, configuration::Get());
 }

@@ -161,14 +161,15 @@ DECLARE_SERIALIZABLE_STRUCT(SPECIFIC_VOLUME_PARAMETERS_STRUCT_DESCRIPTION);
 
 DECLARE_SERIALIZABLE_STRUCT(CONFIGURATION_STRUCT_DESCRIPTION);
 
-Configuration& get();
+Configuration& Get();
 template<typename TIndex>
-typename TIndex::InitializationParameters for_volume_role(VolumeRole role);
-void load_configuration_from_variable_map(const po::variables_map& vm);
-void load_default();
-void load_configuration_from_json_file(const std::string& path);
-void save_configuration_to_json_file(const std::string& path);
-void save_configuration_to_json_file(const std::string& path, const Configuration& configuration);
+typename TIndex::InitializationParameters ForVolumeRole(VolumeRole role);
+void LoadConfigurationFromVariableMap(const po::variables_map& vm);
+void LoadDefault();
+void LoadConfigurationFromJSONFile(const std::string& path);
+void UpdateConfigurationFromVariableMap(const po::variables_map& vm);
+void SaveConfigurationToJSONFile(const std::string& path);
+void SaveConfigurationToJSONFile(const std::string& path, const Configuration& configuration);
 
 template<typename TDeferrableStruct>
 static void AddDeferrableToSourceTree(configuration::Configuration& _configuration, const TDeferrableStruct& deferrable_struct){

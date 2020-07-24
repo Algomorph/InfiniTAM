@@ -40,9 +40,9 @@ SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorType>::
 		SlavchevaSurfaceTracker::Switches switches, SlavchevaSurfaceTracker::Parameters parameters)
 		: SlavchevaSurfaceTracker(switches, parameters),
 		 warping_engine(WarpingEngineFactory::Build<TVoxel, TWarp, TIndex>()),
-		 parameters_nr(configuration::get().non_rigid_tracking_parameters),
+		 parameters_nr(configuration::Get().non_rigid_tracking_parameters),
 		 max_vector_update_threshold_in_voxels(parameters_nr.max_update_length_threshold /
-		                                       configuration::get().general_voxel_volume_parameters.voxel_size)
+				                                       configuration::Get().general_voxel_volume_parameters.voxel_size)
 		{}
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, GradientFunctorType TGradientFunctorType>
 SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorType>::SurfaceTracker()
@@ -50,7 +50,7 @@ SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorType>::
 		  warping_engine(WarpingEngineFactory::Build<TVoxel, TWarp, TIndex>()),
 		  parameters_nr(),
 		  max_vector_update_threshold_in_voxels(parameters_nr.max_update_length_threshold /
-		                                        configuration::get().general_voxel_volume_parameters.voxel_size) {}
+				                                        configuration::Get().general_voxel_volume_parameters.voxel_size) {}
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, GradientFunctorType TGradientFunctorType>
 SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorType>::~SurfaceTracker() {
@@ -256,7 +256,7 @@ float SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TGradientFunctorT
 
 	WarpUpdateFunctor<TVoxel, TWarp, TMemoryDeviceType>
 			warp_update_functor(this->parameters.learning_rate,
-			                    ITMLib::configuration::get().non_rigid_tracking_parameters.momentum_weight,
+			                    ITMLib::configuration::Get().non_rigid_tracking_parameters.momentum_weight,
 			                    this->switches.enable_sobolev_gradient_smoothing);
 
 	ThreeVolumeTraversalEngine<TWarp, TVoxel, TVoxel, TIndex, TMemoryDeviceType>::

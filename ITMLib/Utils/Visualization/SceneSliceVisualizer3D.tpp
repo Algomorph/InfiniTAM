@@ -558,9 +558,9 @@ public:
 			smoothingTermVectorStartPoint = iterator->second.second;
 		}
 		Vector3f dataTermVector =
-				-configuration::get().slavcheva_parameters.learning_rate * voxel.data_term_gradient;
+				-configuration::Get().slavcheva_parameters.learning_rate * voxel.data_term_gradient;
 		Vector3f smoothingTermVector =
-				-configuration::get().slavcheva_parameters.learning_rate * voxel.smoothing_term_gradient;
+				-configuration::Get().slavcheva_parameters.learning_rate * voxel.smoothing_term_gradient;
 
 		dataTermPoints->InsertNextPoint(dataTermVectorStartPoint.values);
 		dataTermVectors->InsertNextTuple(dataTermVector.values);

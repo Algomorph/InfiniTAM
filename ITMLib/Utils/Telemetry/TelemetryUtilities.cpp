@@ -45,7 +45,7 @@ void SetGlobalFrameIndex(int frame_index) {
 }
 
 static inline std::string CreateAndGetOutputPathForFrame_Aux(const std::string& frame_folder_postfix) {
-	fs::path path(configuration::get().paths.output_path + frame_folder_prefix + frame_folder_postfix);
+	fs::path path(configuration::Get().paths.output_path + frame_folder_prefix + frame_folder_postfix);
 	if (!fs::exists(path)) {
 		fs::create_directories(path);
 	}

@@ -109,12 +109,12 @@ const std::string TrackerConfigurationStringPresets::default_surfel_tracker_conf
 
 Configuration instance;
 
-Configuration& get() {
+Configuration& Get() {
 	return instance;
 }
 
 template<>
-typename VoxelBlockHash::InitializationParameters for_volume_role<VoxelBlockHash>(VolumeRole role) {
+typename VoxelBlockHash::InitializationParameters ForVolumeRole<VoxelBlockHash>(VolumeRole role) {
 	switch (role) {
 		default:
 		case VOLUME_CANONICAL:
@@ -127,7 +127,7 @@ typename VoxelBlockHash::InitializationParameters for_volume_role<VoxelBlockHash
 }
 
 template<>
-typename PlainVoxelArray::InitializationParameters for_volume_role<PlainVoxelArray>(VolumeRole role) {
+typename PlainVoxelArray::InitializationParameters ForVolumeRole<PlainVoxelArray>(VolumeRole role) {
 	switch (role) {
 		default:
 		case VOLUME_CANONICAL:
@@ -139,37 +139,74 @@ typename PlainVoxelArray::InitializationParameters for_volume_role<PlainVoxelArr
 	}
 }
 
-void load_configuration_from_variable_map(const po::variables_map& vm) {
-	instance = Configuration(vm);
+static void AddAllDeferrableStructsFromVariablesMap(const po::variables_map& vm) {
+	MainEngineSettings main_engine_settings(vm);
+	AddDeferrableToTargetTree(instance.source_tree, main_engine_settings);
+	TelemetrySettings telemetry_settings(vm);
+	AddDeferrableToTargetTree(instance.source_tree, telemetry_settings);
+	IndexingSettings indexing_settings(vm);
+	AddDeferrableToTargetTree(instance.source_tree, indexing_settings);
+	RenderingSettings rendering_settings(vm);
+	AddDeferrableToTargetTree(instance.source_tree, rendering_settings);
+	AutomaticRunSettings automatic_run_settings(vm);
+	AddDeferrableToTargetTree(instance.source_tree, automatic_run_settings);
 }
 
-void load_default() {
+void LoadConfigurationFromVariableMap(const po::variables_map& vm) {
+	instance = Configuration(vm);
+	AddAllDeferrableStructsFromVariablesMap(vm);
+}
+
+void LoadDefault() {
 	instance = Configuration();
 }
 
 namespace fs = boost::filesystem;
 
-void load_configuration_from_json_file(const std::string& path) {
+void LoadConfigurationFromJSONFile(const std::string& path) {
 	pt::ptree tree;
 	pt::read_json(path, tree);
 	instance = Configuration::BuildFromPTree(tree, path);
 }
 
-static void AddAllDeferrableStructsFromSourceToTargetRootConfiguration(pt::ptree& target_tree, const pt::ptree& origin_tree, std::string origin){
+static void UpdateAllDeferrableStructsFromVariablesMap(const po::variables_map& vm) {
+	auto main_engine_settings = BuildDeferrableFromParentIfPresent<MainEngineSettings>(instance);
+	main_engine_settings.UpdateFromVariablesMap(vm);
+	AddDeferrableToTargetTree(instance.source_tree, main_engine_settings);
+	auto telemetry_settings = BuildDeferrableFromParentIfPresent<TelemetrySettings>(instance);
+	telemetry_settings.UpdateFromVariablesMap(vm);
+	AddDeferrableToTargetTree(instance.source_tree, telemetry_settings);
+	auto indexing_settings = BuildDeferrableFromParentIfPresent<IndexingSettings>(instance);
+	indexing_settings.UpdateFromVariablesMap(vm);
+	AddDeferrableToTargetTree(instance.source_tree, indexing_settings);
+	auto rendering_settings = BuildDeferrableFromParentIfPresent<RenderingSettings>(instance);
+	rendering_settings.UpdateFromVariablesMap(vm);
+	AddDeferrableToTargetTree(instance.source_tree, rendering_settings);
+	auto automatic_run_settings = BuildDeferrableFromParentIfPresent<AutomaticRunSettings>(instance);
+	automatic_run_settings.UpdateFromVariablesMap(vm);
+	AddDeferrableToTargetTree(instance.source_tree, automatic_run_settings);
+}
+
+void UpdateConfigurationFromVariableMap(const po::variables_map& vm) {
+	UpdateAllDeferrableStructsFromVariablesMap(vm);
+	instance.UpdateFromVariablesMap(vm);
+}
+
+static void AddAllDeferrableStructsFromSourceToTargetRootConfiguration(pt::ptree& target_tree, const pt::ptree& origin_tree, std::string origin) {
 	AddDeferrableFromSourceToTargetTree<MainEngineSettings>(target_tree, origin_tree, origin);
 	AddDeferrableFromSourceToTargetTree<TelemetrySettings>(target_tree, origin_tree, origin);
 	AddDeferrableFromSourceToTargetTree<IndexingSettings>(target_tree, origin_tree, origin);
 	AddDeferrableFromSourceToTargetTree<RenderingSettings>(target_tree, origin_tree, origin);
-	AddDeferrableFromSourceToTargetTree<AutomaticRunSettings>( target_tree, origin_tree, origin);
+	AddDeferrableFromSourceToTargetTree<AutomaticRunSettings>(target_tree, origin_tree, origin);
 }
 
-void save_configuration_to_json_file(const std::string& path) {
+void SaveConfigurationToJSONFile(const std::string& path) {
 	pt::ptree target_tree = instance.ToPTree(path);
 	AddAllDeferrableStructsFromSourceToTargetRootConfiguration(target_tree, instance.source_tree, instance.origin);
 	pt::write_json_no_quotes(path, target_tree, true);
 }
 
-void save_configuration_to_json_file(const std::string& path, const Configuration& configuration) {
+void SaveConfigurationToJSONFile(const std::string& path, const Configuration& configuration) {
 	pt::ptree target_tree = configuration.ToPTree(path);
 	AddAllDeferrableStructsFromSourceToTargetRootConfiguration(target_tree, configuration.source_tree, configuration.origin);
 	pt::write_json_no_quotes(path, target_tree, true);

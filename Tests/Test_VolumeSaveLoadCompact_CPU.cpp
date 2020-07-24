@@ -40,7 +40,7 @@ typedef VolumeFileIOEngine<TSDFVoxel, VoxelBlockHash> SceneFileIOEngine_VBH;
 
 BOOST_AUTO_TEST_CASE(testSaveSceneCompact_CPU) {
 
-	configuration::Configuration* settings = &configuration::get();
+	configuration::Configuration* settings = &configuration::Get();
 
 	Vector3i volume_size(40, 68, 20);
 	Vector3i volume_offset(-20, 0, 0);

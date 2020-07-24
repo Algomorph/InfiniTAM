@@ -16,7 +16,7 @@ using namespace ITMLib;
 template <typename TVoxel, typename TIndex>
 BasicVoxelEngine<TVoxel,TIndex>::BasicVoxelEngine(const RGBD_CalibrationInformation& calib, Vector2i imgSize_rgb, Vector2i imgSize_d)
 	: tracking_active(this->parameters.enable_rigid_alignment){
-	auto& settings = configuration::get();
+	auto& settings = configuration::Get();
 
 	if ((imgSize_d.x == -1) || (imgSize_d.y == -1)) imgSize_d = imgSize_rgb;
 
@@ -121,7 +121,7 @@ void BasicVoxelEngine<TVoxel, TIndex>::SaveToFile()
 template <typename TVoxel, typename TIndex>
 void BasicVoxelEngine<TVoxel, TIndex>::LoadFromFile()
 {
-	auto& settings = configuration::get();
+	auto& settings = configuration::Get();
 	std::string saveInputDirectory = "State/";
 	std::string relocaliserInputDirectory = saveInputDirectory + "Relocaliser/", sceneInputDirectory = saveInputDirectory + "Volume/";
 
@@ -238,7 +238,7 @@ static void QuaternionFromRotationMatrix(const double *matrix, double *q) {
 template <typename TVoxel, typename TIndex>
 CameraTrackingState::TrackingResult BasicVoxelEngine<TVoxel,TIndex>::ProcessFrame(UChar4Image *rgbImage, ShortImage *rawDepthImage, IMUMeasurement *imuMeasurement)
 {
-	auto& settings = configuration::get();
+	auto& settings = configuration::Get();
 	// prepare image and turn it into a depth image
 	if (imuMeasurement == nullptr)
 		viewBuilder->UpdateView(&view, rgbImage, rawDepthImage, settings.use_threshold_filter,
@@ -351,7 +351,7 @@ void BasicVoxelEngine<TVoxel,TIndex>::GetImage(UChar4Image *out, GetImageType ge
 {
 	if (view == nullptr) return;
 
-	auto& settings = configuration::get();
+	auto& settings = configuration::Get();
 
 	out->Clear();
 

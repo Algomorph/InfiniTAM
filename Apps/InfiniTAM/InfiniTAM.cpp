@@ -91,12 +91,13 @@ int main(int argc, char** argv) {
 		}
 
 		if (vm["config"].empty()) {
-			configuration::load_configuration_from_variable_map(vm);
+			configuration::LoadConfigurationFromVariableMap(vm);
 		} else {
-			std::string configPath = vm["config"].as<std::string>();
-			configuration::load_configuration_from_json_file(configPath);
+			std::string config_path = vm["config"].as<std::string>();
+			configuration::LoadConfigurationFromJSONFile(config_path);
+			configuration::UpdateConfigurationFromVariableMap(vm);
 		}
-		auto& configuration = configuration::get();
+		auto& configuration = configuration::Get();
 
 		printf("initialising ...\n");
 		ImageSourceEngine* imageSource = nullptr;

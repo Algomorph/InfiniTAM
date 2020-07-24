@@ -34,7 +34,7 @@ public:
 	static SurfaceTrackerInterface<TVoxel, TWarp, TIndex>*
 	Build() {
 		SurfaceTrackerInterface<TVoxel, TWarp, TIndex>* surface_tracker = nullptr;
-		auto& settings = configuration::get();
+		auto& settings = configuration::Get();
 		switch (settings.device_type) {
 			case MEMORYDEVICE_CPU:
 				switch (settings.non_rigid_tracking_parameters.functor_type){

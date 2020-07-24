@@ -441,20 +441,20 @@ void GenerateConfigurationTestData() {
 	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(),
 	                "Generating configuration test data ... ");
 	configuration::Configuration default_snoopy_configuration = GenerateDefaultSnoopyConfiguration();
-	configuration::save_configuration_to_json_file(STATIC_TEST_DATA_PREFIX
-	                                               "../Files/infinitam_snoopy_config.json",
-	                                               default_snoopy_configuration);
+	configuration::SaveConfigurationToJSONFile(STATIC_TEST_DATA_PREFIX
+	                                           "../Files/infinitam_snoopy_config.json",
+	                                           default_snoopy_configuration);
 	configuration::Configuration default_configuration;
 	default_configuration.device_type = MEMORYDEVICE_CPU;
-	configuration::save_configuration_to_json_file(GENERATED_TEST_DATA_PREFIX
-	                                               "TestData/configuration/default_config_cpu.json",
-	                                               default_configuration);
+	configuration::SaveConfigurationToJSONFile(GENERATED_TEST_DATA_PREFIX
+	                                           "TestData/configuration/default_config_cpu.json",
+	                                           default_configuration);
 	default_configuration.device_type = MEMORYDEVICE_CUDA;
-	configuration::save_configuration_to_json_file(GENERATED_TEST_DATA_PREFIX
-	                                               "TestData/configuration/default_config_cuda.json",
-	                                               default_configuration);
-	configuration::save_configuration_to_json_file(GENERATED_TEST_DATA_PREFIX
-	                                               "TestData/configuration/config1.json", changed_up_configuration);
+	configuration::SaveConfigurationToJSONFile(GENERATED_TEST_DATA_PREFIX
+	                                           "TestData/configuration/default_config_cuda.json",
+	                                           default_configuration);
+	configuration::SaveConfigurationToJSONFile(GENERATED_TEST_DATA_PREFIX
+	                                           "TestData/configuration/config1.json", changed_up_configuration);
 }
 
 template<typename TIndex, MemoryDeviceType TMemoryDeviceType>

@@ -27,7 +27,7 @@
 namespace ITMLib{
 
 FusionAlgorithm* BuildMainEngine(const RGBD_CalibrationInformation& calib, Vector2i imgSize_rgb, Vector2i imgSize_d){
-	auto& settings = configuration::get();
+	auto& settings = configuration::Get();
 	auto main_engine_settings = ExtractDeferrableSerializableStructFromPtreeIfPresent<MainEngineSettings>(settings.source_tree,settings.origin);
 	IndexingMethod& indexing_method = main_engine_settings.indexing_method;
 	FusionAlgorithm* main_engine = nullptr;

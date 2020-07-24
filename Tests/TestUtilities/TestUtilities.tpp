@@ -173,7 +173,7 @@ void SimulateRandomVoxelAlteration(TVoxel& voxel) {
 //template<typename TVoxelA, typename TIndex>
 //ITMVoxelVolume<TVoxelA, TIndex> LoadVolume (const std::string& path, MemoryDeviceType memoryDeviceType,
 //                    typename TIndex::InitializationParameters_Fr16andFr17 initializationParameters, configuration::SwappingMode swapping_mode){
-//	Configuration& settings = configuration::get();
+//	Configuration& settings = configuration::Get();
 //	ITMVoxelVolume<TVoxelA, TIndex> scene(&settings.general_voxel_volume_parameters,
 //	                                              swapping_mode,
 //	                                              memoryDeviceType,initializationParameters);
@@ -186,7 +186,7 @@ template<typename TVoxel, typename TIndex>
 void LoadVolume(VoxelVolume<TVoxel, TIndex>** volume, const std::string& path, MemoryDeviceType memoryDeviceType,
                 typename TIndex::InitializationParameters initializationParameters,
                 configuration::SwappingMode swappingMode) {
-	configuration::Configuration& settings = configuration::get();
+	configuration::Configuration& settings = configuration::Get();
 	(*volume) = new VoxelVolume<TVoxel, TIndex>(settings.general_voxel_volume_parameters, swappingMode,
 	                                            memoryDeviceType, initializationParameters);
 	PrepareVoxelVolumeForLoading(*volume);
@@ -209,11 +209,11 @@ void BuildSdfVolumeFromImage_NearSurfaceAllocation_Common(VoxelVolume<TVoxel, TI
                                                           typename TIndex::InitializationParameters initialization_parameters,
                                                           configuration::SwappingMode swapping_mode){
 	Vector2i imageSize(640, 480);
-	(*volume) = new VoxelVolume<TVoxel, TIndex>(configuration::get().general_voxel_volume_parameters, swapping_mode,
+	(*volume) = new VoxelVolume<TVoxel, TIndex>(configuration::Get().general_voxel_volume_parameters, swapping_mode,
 	                                            memory_device, initialization_parameters);
 	(*volume)->Reset();
-	RenderState renderState(imageSize, configuration::get().general_voxel_volume_parameters.near_clipping_distance,
-	                        configuration::get().general_voxel_volume_parameters.far_clipping_distance, memory_device);
+	RenderState renderState(imageSize, configuration::Get().general_voxel_volume_parameters.near_clipping_distance,
+	                        configuration::Get().general_voxel_volume_parameters.far_clipping_distance, memory_device);
 	CameraTrackingState tracking_state(imageSize, memory_device);
 
 	DepthFusionEngineInterface<TVoxel, WarpVoxel, TIndex>* depth_fusion_engine =
@@ -335,8 +335,8 @@ void BuildSdfVolumeFromImage_SurfaceSpanAllocation(VoxelVolume<TVoxel, TIndex>**
 	(*volume2)->Reset();
 
 	RenderState render_state((*view)->depth.dimensions,
-	                         configuration::get().general_voxel_volume_parameters.near_clipping_distance,
-	                         configuration::get().general_voxel_volume_parameters.far_clipping_distance, memory_device);
+	                         configuration::Get().general_voxel_volume_parameters.near_clipping_distance,
+	                         configuration::Get().general_voxel_volume_parameters.far_clipping_distance, memory_device);
 	CameraTrackingState tracking_state((*view)->depth.dimensions, memory_device);
 	IndexingEngineInterface<TSDFVoxel, TIndex>* indexing_engine = IndexingEngineFactory::Build<TVoxel, TIndex>(
 			memory_device);

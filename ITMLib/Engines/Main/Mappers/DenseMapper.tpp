@@ -10,10 +10,11 @@ using namespace ITMLib;
 template<class TVoxel, class TIndex>
 DenseMapper<TVoxel, TIndex>::DenseMapper()
 {
-	auto& settings = configuration::get();
+	auto& settings = configuration::Get();
 	sceneRecoEngine = SceneReconstructionEngineFactory::MakeSceneReconstructionEngine<TVoxel,TIndex>(settings.device_type);
 	swappingEngine = settings.swapping_mode != configuration::SWAPPINGMODE_DISABLED ?
-			SwappingEngineFactory::Build<TVoxel, TIndex>(settings.device_type, configuration::for_volume_role<TIndex>(configuration::VOLUME_CANONICAL)) : nullptr;
+	                 SwappingEngineFactory::Build<TVoxel, TIndex>(settings.device_type,
+	                                                              configuration::ForVolumeRole<TIndex>(configuration::VOLUME_CANONICAL)) : nullptr;
 
 	swappingMode = settings.swapping_mode;
 }

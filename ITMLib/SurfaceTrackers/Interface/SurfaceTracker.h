@@ -31,7 +31,7 @@ class SurfaceTracker :
 		public SurfaceTrackerInterface<TVoxel, TWarp, TIndex>, public SlavchevaSurfaceTracker {
 public: // instance variables
 #ifndef __CUDACC__
-	bool const histograms_enabled = configuration::get().logging_settings.verbosity_level >= VERBOSITY_PER_ITERATION;
+	bool const histograms_enabled = configuration::Get().logging_settings.verbosity_level >= VERBOSITY_PER_ITERATION;
 #else
 	bool const histograms_enabled = false;
 #endif

@@ -112,7 +112,7 @@ namespace ITMLib
 
 		CameraTrackingController(CameraTracker* tracker)
 		{
-			this->settings = &configuration::get();
+			this->settings = &configuration::Get();
 			this->tracker = tracker;
 		}
 

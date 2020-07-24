@@ -139,7 +139,7 @@ void print_all_cumulative_times_to_stdout() {
 
 void save_all_cumulative_times_to_disk() {
 	std::ofstream output_file;
-	std::string path = (fs::path(configuration::get().paths.output_path) / "benchmark.txt").string();
+	std::string path = (fs::path(configuration::Get().paths.output_path) / "benchmark.txt").string();
 	output_file.open(path);
 	all_cumulative_times_to_stream(output_file, false);
 	output_file.close();

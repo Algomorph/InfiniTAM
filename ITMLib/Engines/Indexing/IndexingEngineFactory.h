@@ -41,8 +41,8 @@ struct IndexingEngineFactory {
 	 */
 	template<typename TVoxel, typename TIndex>
 	static IndexingEngineInterface<TVoxel, TIndex>*
-	Build(MemoryDeviceType device_type = configuration::get().device_type,
-			IndexingSettings settings = BuildDeferrableFromParentIfPresent<IndexingSettings>(configuration::get())) {
+	Build(MemoryDeviceType device_type = configuration::Get().device_type,
+			IndexingSettings settings = BuildDeferrableFromParentIfPresent<IndexingSettings>(configuration::Get())) {
 		IndexingEngineInterface<TVoxel, TIndex>* indexing_engine = nullptr;
 
 		switch (device_type) {
@@ -88,8 +88,8 @@ struct IndexingEngineFactory {
 
 	template<typename TVoxel, typename TIndex>
 	static IndexingEngineInterface<TVoxel, TIndex>&
-	GetDefault(MemoryDeviceType device_type = configuration::get().device_type,
-	           IndexingSettings settings = BuildDeferrableFromParentIfPresent<IndexingSettings>(configuration::get())) {
+	GetDefault(MemoryDeviceType device_type = configuration::Get().device_type,
+	           IndexingSettings settings = BuildDeferrableFromParentIfPresent<IndexingSettings>(configuration::Get())) {
 		switch (device_type) {
 			case MEMORYDEVICE_CPU:
 				switch(settings.execution_mode){

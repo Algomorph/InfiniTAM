@@ -24,7 +24,7 @@ struct AnalyticsEngineFactory {
 public:
 	template<typename TVoxel, typename TIndex>
 	static AnalyticsEngineInterface<TVoxel, TIndex>&
-	Get(MemoryDeviceType device_type = configuration::get().device_type) {
+	Get(MemoryDeviceType device_type = configuration::Get().device_type) {
 		switch (device_type) {
 			case MEMORYDEVICE_CPU:
 				return AnalyticsEngine<TVoxel,TIndex,MEMORYDEVICE_CPU>::Instance();

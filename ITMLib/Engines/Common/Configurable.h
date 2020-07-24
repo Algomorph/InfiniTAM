@@ -27,8 +27,8 @@ public: // instance functions
 	Configurable() :
 			parameters(
 					ExtractDeferrableSerializableStructFromPtreeIfPresent<TParameters>(
-							configuration::get().source_tree,
-							configuration::get().origin
+							configuration::Get().source_tree,
+							configuration::Get().origin
 					)
 			) {}
 

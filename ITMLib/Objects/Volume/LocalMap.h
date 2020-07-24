@@ -51,7 +51,7 @@ namespace ITMLib {
 
 		LocalMap(const RenderingEngineBase<TVoxel, TIndex>* VisualizationEngine, const Vector2i& trackedImageSize)
 		{
-			auto& settings = configuration::get();
+			auto& settings = configuration::Get();
 			MemoryDeviceType memoryType = settings.device_type == MEMORYDEVICE_CUDA ? MEMORYDEVICE_CUDA : MEMORYDEVICE_CPU;
 			volume = new VoxelVolume<TVoxel, TIndex>(settings.general_voxel_volume_parameters, settings.swapping_mode == configuration::SWAPPINGMODE_ENABLED, memoryType);
 			renderState = new RenderState(trackedImageSize, settings.general_voxel_volume_parameters.near_clipping_distance,

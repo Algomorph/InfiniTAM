@@ -64,8 +64,8 @@ struct TestData {
 		view_builder->UpdateView(&view_square_2, &rgb, &depth, false, false, false, true);
 		tracking_state = new CameraTrackingState(depth.dimensions, TMemoryDeviceType);
 		render_state = new RenderState(depth.dimensions,
-		                               configuration::get().general_voxel_volume_parameters.near_clipping_distance,
-		                               configuration::get().general_voxel_volume_parameters.far_clipping_distance,
+		                               configuration::Get().general_voxel_volume_parameters.near_clipping_distance,
+		                               configuration::Get().general_voxel_volume_parameters.far_clipping_distance,
 		                               TMemoryDeviceType);
 
 		GenerateGroundTruthPositions();
@@ -93,7 +93,7 @@ struct TestData {
 
 private:
 	void GenerateGroundTruthPositions(
-			const VoxelVolumeParameters& volume_parameters = configuration::get().general_voxel_volume_parameters,
+			const VoxelVolumeParameters& volume_parameters = configuration::Get().general_voxel_volume_parameters,
 			const float distance_to_first_square = 2.0f, const float distance_to_second_square = 2.096f,
 			const float square_size_px = 40) {
 

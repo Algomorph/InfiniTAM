@@ -65,8 +65,8 @@ struct TrilinearInterpolationFunctor {
 			warpSourceHashEntries(warpField->index.GetIndexData()),
 			warpSourceCache(),
 
-			useFocusCoordinates(ITMLib::configuration::get().logging_settings.verbosity_level >= VERBOSITY_FOCUS_SPOTS),
-			focusCoordinates(ITMLib::configuration::get().focus_coordinates) {
+			useFocusCoordinates(ITMLib::configuration::Get().logging_settings.verbosity_level >= VERBOSITY_FOCUS_SPOTS),
+			focusCoordinates(ITMLib::configuration::Get().focus_coordinates) {
 	}
 
 

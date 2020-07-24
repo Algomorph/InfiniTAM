@@ -37,8 +37,8 @@ public: // instance variables
 public: // instance functions
 	CameraPoseAndRenderingEngineFixture()
 			: render_state(new RenderState(Vector2i(snoopy_test_utilities::frame_image_size),
-			                               configuration::get().general_voxel_volume_parameters.near_clipping_distance,
-			                               configuration::get().general_voxel_volume_parameters.far_clipping_distance,
+			                               configuration::Get().general_voxel_volume_parameters.near_clipping_distance,
+			                               configuration::Get().general_voxel_volume_parameters.far_clipping_distance,
 			                               TMemoryDeviceType)),
 			  target(-0.09150545, 0.07265271, 0.7908916),
 			  original_viewpoint(0.f),
@@ -66,8 +66,8 @@ public: // instance functions
 
 	std::shared_ptr<RenderState> MakeRenderState() {
 		return std::make_shared<RenderState>(snoopy_test_utilities::frame_image_size,
-		                                     configuration::get().general_voxel_volume_parameters.near_clipping_distance,
-		                                     configuration::get().general_voxel_volume_parameters.far_clipping_distance,
+		                                     configuration::Get().general_voxel_volume_parameters.near_clipping_distance,
+		                                     configuration::Get().general_voxel_volume_parameters.far_clipping_distance,
 		                                     TMemoryDeviceType);
 	}
 

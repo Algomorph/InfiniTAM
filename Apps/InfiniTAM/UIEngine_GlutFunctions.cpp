@@ -189,7 +189,7 @@ void UIEngine::GlutIdleFunction() {
 					ui_engine.main_engine->SaveVolumeToMesh(ui_engine.GeneratePreviousFrameOutputPath() + "/mesh.ply");
 					printf("Done.\n");
 				}
-				if (configuration::get().logging_settings.log_benchmarks) {
+				if (configuration::Get().logging_settings.log_benchmarks) {
 					benchmarking::log_all_timers();
 				}
 			}

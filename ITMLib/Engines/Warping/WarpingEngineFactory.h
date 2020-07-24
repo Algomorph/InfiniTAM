@@ -28,7 +28,7 @@ class WarpingEngineFactory{
 public:
 	template<typename TVoxel, typename TWarp, typename TIndex>
 	static WarpingEngineInterface<TVoxel, TWarp, TIndex>*
-    Build(MemoryDeviceType memoryDeviceType = configuration::get().device_type){
+    Build(MemoryDeviceType memoryDeviceType = configuration::Get().device_type){
 		WarpingEngineInterface<TVoxel, TWarp, TIndex>* warping_engine = nullptr;
 		switch (memoryDeviceType) {
 			case MEMORYDEVICE_CPU:

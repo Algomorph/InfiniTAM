@@ -17,7 +17,7 @@ using namespace ITMLib;
 template<typename TSurfel>
 BasicSurfelEngine<TSurfel>::BasicSurfelEngine(const RGBD_CalibrationInformation& calib, Vector2i imgSize_rgb, Vector2i imgSize_d)
 		: trackingActive(this->parameters.enable_rigid_alignment){
-	auto& settings = configuration::get();
+	auto& settings = configuration::Get();
 
 	if ((imgSize_d.x == -1) || (imgSize_d.y == -1)) imgSize_d = imgSize_rgb;
 
@@ -191,7 +191,7 @@ template<typename TSurfel>
 CameraTrackingState::TrackingResult
 BasicSurfelEngine<TSurfel>::ProcessFrame(UChar4Image* rgbImage, ShortImage* rawDepthImage,
                                          IMUMeasurement* imuMeasurement) {
-	auto& settings = configuration::get();
+	auto& settings = configuration::Get();
 	// prepare image and turn it into a depth image
 	if (imuMeasurement == nullptr)
 		viewBuilder->UpdateView(&view, rgbImage, rawDepthImage, settings.use_threshold_filter,
@@ -328,7 +328,7 @@ template<typename TSurfel>
 void BasicSurfelEngine<TSurfel>::GetImage(UChar4Image* out, GetImageType getImageType, ORUtils::SE3Pose* pose,
                                           Intrinsics* intrinsics) {
 
-	auto& settings = configuration::get();
+	auto& settings = configuration::Get();
 	if (view == nullptr) return;
 
 	out->Clear();

@@ -162,14 +162,14 @@ BOOST_AUTO_TEST_CASE(Test_SceneConstruct17_VBH_CPU_CUDA_SurfaceSpan){
 	{
 		// ** scenes & render states
 		// CPU 
-		RenderState render_state_CPU(view_16_CPU->depth.dimensions, configuration::get().general_voxel_volume_parameters.near_clipping_distance,
-		                             configuration::get().general_voxel_volume_parameters.far_clipping_distance, MEMORYDEVICE_CPU);
+		RenderState render_state_CPU(view_16_CPU->depth.dimensions, configuration::Get().general_voxel_volume_parameters.near_clipping_distance,
+		                             configuration::Get().general_voxel_volume_parameters.far_clipping_distance, MEMORYDEVICE_CPU);
 		VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_16_CPU(MEMORYDEVICE_CPU,
 		                                                         snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 		volume_VBH_16_CPU.Reset();
 		// CUDA
-		RenderState render_state_CUDA(view_16_CUDA->depth.dimensions, configuration::get().general_voxel_volume_parameters.near_clipping_distance,
-		                              configuration::get().general_voxel_volume_parameters.far_clipping_distance, MEMORYDEVICE_CUDA);
+		RenderState render_state_CUDA(view_16_CUDA->depth.dimensions, configuration::Get().general_voxel_volume_parameters.near_clipping_distance,
+		                              configuration::Get().general_voxel_volume_parameters.far_clipping_distance, MEMORYDEVICE_CUDA);
 		VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_16_CUDA(MEMORYDEVICE_CUDA,
 		                                                          snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 		volume_VBH_16_CUDA.Reset();

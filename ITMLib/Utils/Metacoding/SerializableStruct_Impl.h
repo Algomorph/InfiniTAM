@@ -184,19 +184,33 @@ boost::property_tree::ptree serializable_vector_to_ptree(TVector vector) {
 #define SERIALIZABLE_STRUCT_IMPL_INIT_FIELD_ARG(_, type, field_name, ...) field_name ( field_name )
 
 // *** variables_map --> value ***
-#define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_INIT_PRIMITIVE(struct_name, type, field_name, default_value) \
-    field_name(vm[ #field_name ].empty() ? struct_name (). field_name : vm[#field_name].as<type>())
-#define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_INIT_PATH(struct_name, type, field_name, default_value) \
-    field_name(vm[ #field_name ].empty() ? struct_name (). field_name : preprocess_path(vm[ #field_name ].as<std::string>(), origin))
-#define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_INIT_ENUM(struct_name, type, field_name, default_value) \
-    field_name(vm[ #field_name ].empty() ? struct_name (). field_name : string_to_enumerator< type >(vm[ #field_name ].as<std::string>()))
-#define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_INIT_STRUCT(struct_name, type, field_name, default_value) \
+#define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_INIT_PRIMITIVE(type, field_name, default_value) \
+    field_name(vm[ #field_name ].empty() ? default_value : vm[#field_name].as<type>())
+#define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_INIT_PATH(type, field_name, default_value) \
+    field_name(vm[ #field_name ].empty() ? default_value : preprocess_path(vm[ #field_name ].as<std::string>(), origin))
+#define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_INIT_ENUM(type, field_name, default_value) \
+    field_name(vm[ #field_name ].empty() ? default_value : string_to_enumerator< type >(vm[ #field_name ].as<std::string>()))
+#define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_INIT_STRUCT(type, field_name, default_value) \
     field_name(vm)
-#define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_INIT_VECTOR(struct_name, type, field_name, default_value) \
-    field_name(vm[ #field_name ].empty() ? struct_name (). field_name : variables_map_to_vector <type> (vm, #field_name))
+#define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_INIT_VECTOR(type, field_name, default_value) \
+    field_name(vm[ #field_name ].empty() ? default_value : variables_map_to_vector <type> (vm, #field_name))
 
 #define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_INIT(struct_name, type, field_name, default_value, serialization_type, ...) \
-    ITM_METACODING_IMPL_CAT(SERIALIZABLE_STRUCT_IMPL_FIELD_VM_INIT_, serialization_type)(struct_name, type, field_name, default_value)
+    ITM_METACODING_IMPL_CAT(SERIALIZABLE_STRUCT_IMPL_FIELD_VM_INIT_, serialization_type)(type, field_name, default_value)
+
+#define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_UPDATE_PRIMITIVE(type, field_name) \
+    if (!vm[ #field_name ].empty())  this->field_name = vm[#field_name].as<type>()
+#define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_UPDATE_PATH(type, field_name) \
+    if (!vm[ #field_name ].empty())  this->field_name = preprocess_path(vm[ #field_name ].as<std::string>(), origin)
+#define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_UPDATE_ENUM(type, field_name) \
+    if (!vm[ #field_name ].empty())  this->field_name = string_to_enumerator< type >(vm[ #field_name ].as<std::string>())
+#define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_UPDATE_STRUCT(type, field_name) \
+    this->field_name.UpdateFromVariablesMap(vm)
+#define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_UPDATE_VECTOR(type, field_name) \
+    if (!vm[ #field_name ].empty())  this->field_name = variables_map_to_vector <type> (vm, #field_name)
+
+#define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_UPDATE(struct_name, type, field_name, default_value, serialization_type, ...) \
+    ITM_METACODING_IMPL_CAT(SERIALIZABLE_STRUCT_IMPL_FIELD_VM_UPDATE_, serialization_type)(type, field_name)
 
 // *** value --> options_description ***
 #define SERIALIZABLE_STRUCT_IMPL_ADD_FIELD_TO_OPTIONS_DESCRIPTION_PRIMITIVE(type, field_name, default_value_in, description)\
@@ -289,8 +303,9 @@ boost::property_tree::ptree serializable_vector_to_ptree(TVector vector) {
         std::string origin = ""); \
     explicit struct_name (const boost::program_options::variables_map& vm, std::string origin = ""); \
     void SetFromPTree(const boost::property_tree::ptree& tree); \
+    void UpdateFromVariablesMap(const boost::program_options::variables_map& vm); \
     static struct_name BuildFromPTree(const boost::property_tree::ptree& tree, std::string origin = ""); \
-    boost::property_tree::ptree ToPTree(std::string origin = "") const; \
+    boost::property_tree::ptree ToPTree(std::string _origin = "") const; \
     friend bool operator==(const struct_name & instance1, const struct_name & instance2); \
     friend std::ostream& operator<<(std::ostream& out, const struct_name& instance); \
     static void AddToOptionsDescription(boost::program_options::options_description& od);
@@ -337,6 +352,10 @@ boost::property_tree::ptree serializable_vector_to_ptree(TVector vector) {
 		struct_name temporary_instance = BuildFromPTree(tree);\
 		*this = temporary_instance;\
     } \
+    void outer_class inner_qualifier UpdateFromVariablesMap(const boost::program_options::variables_map& vm){ \
+		ITM_METACODING_IMPL_EXPAND(loop(SERIALIZABLE_STRUCT_IMPL_FIELD_VM_UPDATE, struct_name, \
+                                               ITM_METACODING_IMPL_SEMICOLON, __VA_ARGS__)); \
+    } \
     static_qualifier outer_class struct_name outer_class inner_qualifier BuildFromPTree(const boost::property_tree::ptree& tree, \
                                                                     std::string origin default_origin_arg){ \
         struct_name default_instance; \
@@ -350,7 +369,7 @@ boost::property_tree::ptree serializable_vector_to_ptree(TVector vector) {
         source_tree_initializer; \
         return instance; \
     } \
-    boost::property_tree::ptree outer_class inner_qualifier ToPTree(std::string origin default_origin_arg) const { \
+    boost::property_tree::ptree outer_class inner_qualifier ToPTree(std::string _origin default_origin_arg) const { \
         boost::property_tree::ptree tree; \
         ITM_METACODING_IMPL_EXPAND(loop(SERIALIZABLE_STRUCT_IMPL_ADD_FIELD_TO_TREE, _, \
                                            ITM_METACODING_IMPL_NOTHING, __VA_ARGS__)) \

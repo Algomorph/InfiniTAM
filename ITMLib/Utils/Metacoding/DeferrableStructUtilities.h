@@ -39,6 +39,14 @@ inline void AddDeferrableFromSourceToTargetTree(boost::property_tree::ptree& tar
 	target_tree.add_child(TDeferrableSerializableStruct::default_parse_path, deferrable_subtree);
 }
 
+template<typename TDeferrableSerializableStruct>
+inline void AddDeferrableToTargetTree(boost::property_tree::ptree& target_tree,
+                                                const TDeferrableSerializableStruct& deferrable,
+                                                std::string origin = "") {
+	boost::property_tree::ptree deferrable_subtree = deferrable.ToPTree(origin);
+	target_tree.add_child(TDeferrableSerializableStruct::default_parse_path, deferrable_subtree);
+}
+
 template<typename TDeferrableChild, typename TDeferrableParent>
 inline TDeferrableChild BuildDeferrableFromParentIfPresent(const TDeferrableParent& parent) {
 	const boost::property_tree::ptree& source_tree = parent.source_tree;
