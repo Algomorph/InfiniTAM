@@ -379,9 +379,9 @@ configuration::Configuration GenerateDefaultSnoopyConfiguration() {
 			SpecificVolumeParameters(
 					ArrayVolumeParameters(),
 					HashVolumeParameters(
-							VoxelBlockHash::VoxelBlockHashParameters(0x40000, 0x20000),
-							VoxelBlockHash::VoxelBlockHashParameters(0x20000, 0x20000),
-							VoxelBlockHash::VoxelBlockHashParameters(0x20000, 0x20000)
+							VoxelBlockHashParameters(0x40000, 0x20000),
+							VoxelBlockHashParameters(0x20000, 0x20000),
+							VoxelBlockHashParameters(0x20000, 0x20000)
 					)
 			),
 			SlavchevaSurfaceTracker::Parameters(

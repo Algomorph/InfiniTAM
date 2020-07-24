@@ -968,6 +968,8 @@ set(
         Utils/Metacoding/DeferrableSerializableStruct_Impl.h
         Utils/Metacoding/Metacoding.h
         Utils/Metacoding/MetacodingAuxiliaryUtilities.h
+        Utils/Metacoding/PathlessSerializableStruct.h
+        Utils/Metacoding/PathlessSerializableStruct_Impl.h
         Utils/Metacoding/SerializableStruct.h
         Utils/Metacoding/SerializableStruct_Impl.h
         Utils/Metacoding/SerializableEnum.h

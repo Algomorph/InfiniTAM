@@ -5,17 +5,18 @@
 #ifndef __METALC__
 
 #include "../../Utils/Math.h"
-#include "../../Utils/Metacoding/Metacoding.h"
+#include "../../Utils/Metacoding/PathlessSerializableStruct.h"
 #include "../../../ORUtils/MemoryBlock.h"
 #include "../../../ORUtils/MemoryBlockPersistence.h"
 
 namespace ITMLib {
 
-GENERATE_PATHLESS_SERIALIZABLE_STRUCT(
-		GridAlignedBox,
-		(Vector3i, size, Vector3i(512), VECTOR, "Size, in voxels."),
-		(Vector3i, offset, Vector3i(-256, -256, 0), VECTOR, "Offset of the lower left front corner of the volume, in voxels")
-);
+#define GRID_ALIGNED_BOX_STRUCT_DESCRIPTION GridAlignedBox,\
+	(Vector3i, size, Vector3i(512), VECTOR, "Size, in voxels."),\
+	(Vector3i, offset, Vector3i(-256, -256, 0), VECTOR, "Offset of the lower left front corner of the volume, in voxels")
+
+DECLARE_PATHLESS_SERIALIZABLE_STRUCT(GRID_ALIGNED_BOX_STRUCT_DESCRIPTION);
+
 
 /** \brief
 This is the central class for the original fixed size volume

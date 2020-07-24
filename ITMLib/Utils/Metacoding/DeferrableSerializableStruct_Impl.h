@@ -23,7 +23,7 @@
 
 // ======== MACROS ==========
 
-// *** declaration-only ***
+// *** DECLARATION-ONLY ***
 #define DEFERRABLE_SERIALIZABLE_STRUCT_DECL_IMPL(struct_name, parse_path,  ...) \
     DEFERRABLE_SERIALIZABLE_STRUCT_DECL_IMPL_2(struct_name, parse_path, ITM_METACODING_IMPL_NARG(__VA_ARGS__), __VA_ARGS__)
 
@@ -37,13 +37,12 @@
         SERIALIZABLE_STRUCT_DECL_IMPL_BODY(struct_name, loop, __VA_ARGS__) \
     }
 
-// *** definition-only ***
+// *** DEFINITION-ONLY ***
 
 #define DEFERRABLE_SERIALIZABLE_STRUCT_DEFN_IMPL(outer_class, struct_name, parse_path, ...) \
     SERIALIZABLE_STRUCT_DEFN_IMPL_2( outer_class, struct_name, ITM_METACODING_IMPL_NARG(__VA_ARGS__), __VA_ARGS__)
 
-
-
+// *** FULL STRUCT GENERATION ***
 #define DEFERRABLE_SERIALIZABLE_STRUCT_IMPL(struct_name, parse_path, ...) \
     DEFERRABLE_SERIALIZABLE_STRUCT_IMPL_2(struct_name, parse_path, ITM_METACODING_IMPL_NARG(__VA_ARGS__), __VA_ARGS__)
 
@@ -51,14 +50,16 @@
     DEFERRABLE_SERIALIZABLE_STRUCT_IMPL_3(struct_name, parse_path, \
                              ITM_METACODING_IMPL_CAT(ITM_METACODING_IMPL_LOOP_, field_count), __VA_ARGS__)
 
-
 #define DEFERRABLE_SERIALIZABLE_STRUCT_IMPL_3(struct_name, parse_path, loop, ...) \
     struct struct_name { \
-        static constexpr const char* = parse_path;\
+        static constexpr const char* default_parse_path = parse_path;\
+        PARSE_PATH() \
         ORIGIN_AND_SOURCE_TREE() \
         SERIALIZABLE_STRUCT_DECL_IMPL_MEMBER_VARS(loop, __VA_ARGS__) \
         SERIALIZABLE_STRUCT_DEFN_IMPL_3 ( , , struct_name, default_instance.source_tree=tree, friend, static, \
-        ITM_METACODING_IMPL_COMMA, origin(std::move(origin)), origin, ="", loop, __VA_ARGS__) \
+        ITM_METACODING_IMPL_COMMA, origin(std::move(origin)), origin, ="", \
+        ITM_METACODING_IMPL_COMMA, parse_path(std::move(parse_path)), ="", \
+        loop, __VA_ARGS__) \
     };
 
 // ==== template functions ====

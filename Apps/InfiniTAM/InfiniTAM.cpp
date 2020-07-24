@@ -56,7 +56,7 @@ int main(int argc, char** argv) {
 				  "Configuration file in JSON format, e.g.  ./default_config_cuda.json "
 				  "WARNING: using this option will invalidate any other command line arguments.");
 
-		ITMLib::configuration::Configuration::AddToOptionsDescription(arguments);
+		configuration::Get().AddToOptionsDescription(arguments);
 
 		positional_arguments.add("calibration_file", 1);
 		positional_arguments.add("input_path", 3);
@@ -93,6 +93,10 @@ int main(int argc, char** argv) {
 		if (vm["config"].empty()) {
 			configuration::LoadConfigurationFromVariableMap(vm);
 		} else {
+			//_DEBUG
+			bool size_empty = vm["size"].empty();
+			auto size = vm["size"];
+
 			std::string config_path = vm["config"].as<std::string>();
 			configuration::LoadConfigurationFromJSONFile(config_path);
 			configuration::UpdateConfigurationFromVariableMap(vm);

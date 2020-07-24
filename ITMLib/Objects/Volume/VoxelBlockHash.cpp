@@ -21,6 +21,8 @@
 
 namespace ITMLib {
 
+DEFINE_PATHLESS_SERIALIZABLE_STRUCT(VOXEL_BLOCK_HASH_PARAMETERS_STRUCT_DESCRIPTION);
+
 VoxelBlockHash::VoxelBlockHash()
 		: memory_type(MEMORYDEVICE_NONE),
 		  voxel_block_count(0),

@@ -14,7 +14,7 @@
 #include "../../../ORUtils/MemoryBlock.h"
 #include "../../../ORUtils/MemoryBlockPersistence.h"
 #include "../../Utils/HashBlockProperties.h"
-#include "../../Utils/Metacoding/Metacoding.h"
+#include "../../Utils/Metacoding/PathlessSerializableStruct.h"
 
 #define VOXEL_BLOCK_SIZE 8
 // VOXEL_BLOCK_SIZE3 = VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE
@@ -57,14 +57,6 @@ struct HashEntry {
 	}
 };
 
-
-/** \brief
-This is the central class for the voxel block hash
-implementation. It contains all the data needed on the CPU
-and a pointer to the data structure on the GPU.
-*/
-class VoxelBlockHash {
-public:
 #define VOXEL_BLOCK_HASH_PARAMETERS_STRUCT_DESCRIPTION \
     VoxelBlockHashParameters, \
     (int, voxel_block_count, 0x40000, PRIMITIVE, "Total count of voxel hash blocks to preallocate."), \
@@ -72,7 +64,17 @@ public:
     "Total count of voxel hash block entries in excess list of the hash table. " \
     "The excess list is used during hash collisions.")
 
-	GENERATE_PATHLESS_SERIALIZABLE_STRUCT(VOXEL_BLOCK_HASH_PARAMETERS_STRUCT_DESCRIPTION);
+DECLARE_PATHLESS_SERIALIZABLE_STRUCT(VOXEL_BLOCK_HASH_PARAMETERS_STRUCT_DESCRIPTION);
+
+
+/**
+ * \brief
+ * This is the central class for the voxel block hash index
+ * implementation.
+*/
+class VoxelBlockHash {
+public:
+
 	typedef VoxelBlockHashParameters InitializationParameters;
 	typedef HashEntry IndexData;
 

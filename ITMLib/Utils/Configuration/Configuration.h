@@ -119,9 +119,9 @@ DECLARE_SERIALIZABLE_STRUCT(ARRAY_VOLUME_PARAMETERS_STRUCT_DESCRIPTION);
 
 #define HASH_VOLUME_PARAMETERS_STRUCT_DESCRIPTION \
     HashVolumeParameters, \
-    (VoxelBlockHash::VoxelBlockHashParameters, canonical, VoxelBlockHash::VoxelBlockHashParameters(), STRUCT, "Parameters specific to the canonical (target / reference) volume in voxel block hash indexing configuration."), \
-    (VoxelBlockHash::VoxelBlockHashParameters, live, VoxelBlockHash::VoxelBlockHashParameters(), STRUCT, "Parameters specific to the live (source) volume in voxel block hash indexing configuration."), \
-    (VoxelBlockHash::VoxelBlockHashParameters, warp, VoxelBlockHash::VoxelBlockHashParameters(), STRUCT, "Parameters specific to the volume holding warp vectors (motion information) in voxel block hash indexing configuration.")
+    (VoxelBlockHashParameters, canonical, VoxelBlockHashParameters(), STRUCT, "Parameters specific to the canonical (target / reference) volume in voxel block hash indexing configuration."), \
+    (VoxelBlockHashParameters, live, VoxelBlockHashParameters(), STRUCT, "Parameters specific to the live (source) volume in voxel block hash indexing configuration."), \
+    (VoxelBlockHashParameters, warp, VoxelBlockHashParameters(), STRUCT, "Parameters specific to the volume holding warp vectors (motion information) in voxel block hash indexing configuration.")
 
 DECLARE_SERIALIZABLE_STRUCT(HASH_VOLUME_PARAMETERS_STRUCT_DESCRIPTION);
 

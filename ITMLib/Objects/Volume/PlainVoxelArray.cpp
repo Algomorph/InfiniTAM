@@ -18,6 +18,11 @@
 
 namespace ITMLib {
 
+//_DEBUG
+DEFINE_PATHLESS_SERIALIZABLE_STRUCT(GRID_ALIGNED_BOX_STRUCT_DESCRIPTION);
+
+//=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@
+
 PlainVoxelArray::PlainVoxelArray()
 		: memory_type(MEMORYDEVICE_NONE),
 		  index_data() {}
