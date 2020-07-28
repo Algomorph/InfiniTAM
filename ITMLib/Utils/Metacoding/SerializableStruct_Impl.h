@@ -48,38 +48,10 @@ std::ostream& operator<<(std::ostream& os, const std::vector<T>& vec) {
 }
 }//namespace std
 
-static std::string generate_cli_argument_identifiers_snake_case(std::string variable_name,
-                                                                const boost::program_options::options_description& opt) {
-	std::string delimiter = "_";
-
-	size_t pos = 0;
-	std::string token;
-	std::string short_argument_identifier;
-	while ((pos = variable_name.find(delimiter)) != std::string::npos) {
-		token = variable_name.substr(0, pos);
-		short_argument_identifier += token[0];
-		variable_name.erase(0, pos + delimiter.length());
-	}
-	short_argument_identifier += variable_name[0];
-	const int maximum_similar_shorthands_allowed = 5;
-	std::string base_short_argument_identifier = short_argument_identifier;
-	for (int try_count = 0; opt.find_nothrow(short_argument_identifier, false, false, false) != nullptr &&
-	                        try_count < maximum_similar_shorthands_allowed; try_count++) {
-		const std::regex expression_ending_with_digit("\\w+(\\d)");
-		std::smatch match;
-		if (std::regex_match(short_argument_identifier, match, expression_ending_with_digit)) {
-			int index = std::stoi(match[1].str());
-			short_argument_identifier = base_short_argument_identifier + std::to_string(index + 1);
-		} else {
-			short_argument_identifier += "1";
-		}
-	}
-	if (opt.find_nothrow(short_argument_identifier, false, false, false) != nullptr) {
-		DIEWITHEXCEPTION_REPORTLOCATION(
-				"There are too many argument identifiers with similar shorthands, please come up with an alternative argument name.");
-	}
-	return variable_name + "," + short_argument_identifier;
-}
+std::string find_snake_case_lowercase_acronym(const std::string& snake_case_identifier);
+void generate_cli_argument_identifiers_snake_case(const boost::program_options::options_description& options_description,
+                                                  const std::string& parent_long_identifier, const std::string& parent_short_identifier,
+                                                  const std::string& field_name, std::string& long_identifier, std::string& short_identifier);
 
 // endregion
 // region ==== SERIALIZABLE STRUCT FUNCTION DEFINITIONS ==================
@@ -107,9 +79,7 @@ ExtractSerializableStructFromPtreeIfPresent(const pt::ptree& tree, pt::ptree::ke
 	}
 }
 
-// endregion	
-
-
+// endregion
 // region ================== SERIALIZABLE PATH FUNCTION DECLARATIONS ===================================================
 
 std::string preprocess_path(const std::string& path, const std::string& origin);
@@ -174,7 +144,6 @@ boost::property_tree::ptree serializable_vector_to_ptree(TVector vector) {
 }
 
 // endregion
-
 // region ===== SERIALIZABLE STRUCT PER-FIELD MACROS ===================================================================
 
 // *** used to declare fields & defaults ***
@@ -195,55 +164,63 @@ boost::property_tree::ptree serializable_vector_to_ptree(TVector vector) {
 
 // *** variables_map --> value ***
 #define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_INIT_PRIMITIVE(type, field_name, default_value) \
-    field_name(vm[ #field_name ].empty() ? default_value : vm[#field_name].as<type>())
+    field_name(vm[ compile_sub_struct_parse_path(parent_long_identifier, #field_name) ].empty() ? default_value : vm[compile_sub_struct_parse_path(parent_long_identifier, #field_name)].as<type>())
 #define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_INIT_PATH(type, field_name, default_value) \
-    field_name(vm[ #field_name ].empty() ? default_value : preprocess_path(vm[ #field_name ].as<std::string>(), origin))
+    field_name(vm[ compile_sub_struct_parse_path(parent_long_identifier, #field_name)  ].empty() ? default_value : preprocess_path(vm[ compile_sub_struct_parse_path(parent_long_identifier, #field_name)  ].as<std::string>(), origin))
 #define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_INIT_ENUM(type, field_name, default_value) \
-    field_name(vm[ #field_name ].empty() ? default_value : string_to_enumerator< type >(vm[ #field_name ].as<std::string>()))
+    field_name(vm[ compile_sub_struct_parse_path(parent_long_identifier, #field_name)  ].empty() ? default_value : string_to_enumerator< type >(vm[ compile_sub_struct_parse_path(parent_long_identifier, #field_name)  ].as<std::string>()))
 #define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_INIT_STRUCT(type, field_name, default_value) \
-    field_name(vm)
+    field_name(vm, compile_sub_struct_parse_path(parent_long_identifier, #field_name))
 #define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_INIT_VECTOR(type, field_name, default_value) \
-    field_name(vm[ #field_name ].empty() ? default_value : variables_map_to_vector <type> (vm, #field_name))
+    field_name(vm[ compile_sub_struct_parse_path(parent_long_identifier, #field_name)  ].empty() ? default_value : variables_map_to_vector <type> (vm, compile_sub_struct_parse_path(parent_long_identifier, #field_name) ))
 
 #define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_INIT(struct_name, type, field_name, default_value, serialization_type, ...) \
     ITM_METACODING_IMPL_CAT(SERIALIZABLE_STRUCT_IMPL_FIELD_VM_INIT_, serialization_type)(type, field_name, default_value)
 
 #define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_UPDATE_PRIMITIVE(type, field_name) \
-    if (!vm[ #field_name ].empty())  this->field_name = vm[#field_name].as<type>()
+    if (!vm[long_identifier].empty())  this->field_name = vm[long_identifier].as<type>()
 #define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_UPDATE_PATH(type, field_name) \
-    if (!vm[ #field_name ].empty())  this->field_name = preprocess_path(vm[ #field_name ].as<std::string>(), origin)
+    if (!vm[long_identifier].empty())  this->field_name = preprocess_path(vm[long_identifier].as<std::string>(), origin)
 #define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_UPDATE_ENUM(type, field_name) \
-    if (!vm[ #field_name ].empty())  this->field_name = string_to_enumerator< type >(vm[ #field_name ].as<std::string>())
+    if (!vm[long_identifier].empty())  this->field_name = string_to_enumerator< type >(vm[long_identifier].as<std::string>())
 #define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_UPDATE_STRUCT(type, field_name) \
-    this->field_name.UpdateFromVariablesMap(vm)
+    this->field_name.UpdateFromVariablesMap(vm, long_identifier )
 #define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_UPDATE_VECTOR(type, field_name) \
-    if (!vm[ #field_name ].empty())  this->field_name = variables_map_to_vector <type> (vm, #field_name)
+    if (!vm[long_identifier].empty())  this->field_name = variables_map_to_vector <type> (vm, long_identifier)
 
 #define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_UPDATE(struct_name, type, field_name, default_value, serialization_type, ...) \
+	long_identifier = compile_sub_struct_parse_path(parent_long_identifier, #field_name); \
     ITM_METACODING_IMPL_CAT(SERIALIZABLE_STRUCT_IMPL_FIELD_VM_UPDATE_, serialization_type)(type, field_name)
 
 // *** value --> options_description ***
+
 #define SERIALIZABLE_STRUCT_IMPL_ADD_FIELD_TO_OPTIONS_DESCRIPTION_PRIMITIVE(type, field_name, default_value_in, description)\
-    od.add_options()(generate_cli_argument_identifiers_snake_case(#field_name, od).c_str(), \
+    od.add_options()((long_identifier + ", " + short_identifier).c_str(), \
     boost::program_options::value< type >()->default_value( default_value_in ), description);
+
 #define SERIALIZABLE_STRUCT_IMPL_ADD_FIELD_TO_OPTIONS_DESCRIPTION_PATH(type, field_name, default_value_in, description)\
-    od.add_options()(generate_cli_argument_identifiers_snake_case(#field_name, od).c_str(), \
+    od.add_options()((long_identifier + ", " + short_identifier).c_str(), \
     boost::program_options::value< type >()->default_value( default_value_in ), description);
+
 #define SERIALIZABLE_STRUCT_IMPL_ADD_FIELD_TO_OPTIONS_DESCRIPTION_ENUM(type, field_name, default_value_in, description)\
-    od.add_options()(generate_cli_argument_identifiers_snake_case(#field_name, od).c_str(), \
+    od.add_options()((long_identifier + ", " + short_identifier).c_str(), \
     boost::program_options::value< std::string >()->default_value( enumerator_to_string(default_value_in) ), \
     (std::string(description) + enumerator_bracketed_list< type>()).c_str());
+
 #define SERIALIZABLE_STRUCT_IMPL_ADD_FIELD_TO_OPTIONS_DESCRIPTION_STRUCT(type, field_name, default_value, description)\
-    field_name.AddToOptionsDescription(od);
+    type :: AddToOptionsDescription(od, long_identifier, short_identifier);
+
 #define SERIALIZABLE_STRUCT_IMPL_ADD_FIELD_TO_OPTIONS_DESCRIPTION_VECTOR(type, field_name, default_value_in, description)\
-    od.add_options()(generate_cli_argument_identifiers_snake_case(#field_name, od).c_str(), \
+    od.add_options()((long_identifier + ", " + short_identifier).c_str(), \
     boost::program_options::value< std::vector< type::value_type> >()-> \
     multitoken()->default_value(serializable_vector_to_std_vector(default_value_in)), description);
 
 #define SERIALIZABLE_STRUCT_IMPL_ADD_FIELD_TO_OPTIONS_DESCRIPTION(_, type, field_name, default_value, serialization_type, description) \
+    generate_cli_argument_identifiers_snake_case(od, long_identifier, short_identifier, #field_name, field_long_identifier, field_short_identifier); \
     ITM_METACODING_IMPL_CAT(SERIALIZABLE_STRUCT_IMPL_ADD_FIELD_TO_OPTIONS_DESCRIPTION_, serialization_type)(type, field_name, default_value, description)
 
 // *** ptree --> value ***
+
 #define SERIALIZABLE_STRUCT_IMPL_FIELD_OPTIONAL_FROM_TREE_PRIMITIVE(type, field_name, default_value) \
     boost::optional< type > field_name = tree.get_optional< type > ( #field_name );
 #define SERIALIZABLE_STRUCT_IMPL_FIELD_OPTIONAL_FROM_TREE_PATH(type, field_name, default_value) \
@@ -262,6 +239,7 @@ boost::property_tree::ptree serializable_vector_to_ptree(TVector vector) {
     field_name ? field_name.get() : default_instance. field_name
 
 // *** value --> ptree ***
+
 #define SERIALIZABLE_STRUCT_IMPL_ADD_FIELD_TO_TREE_PRIMITIVE(type, field_name) \
     tree.add( #field_name , field_name );
 #define SERIALIZABLE_STRUCT_IMPL_ADD_FIELD_TO_TREE_PATH(type, field_name) \
@@ -282,10 +260,8 @@ boost::property_tree::ptree serializable_vector_to_ptree(TVector vector) {
 
 
 // endregion
-
 // region ==== SERIALIZABLE STRUCT TOP-LEVEL MACROS =======================
-
-// *** DECLARATION-ONLY ***
+// region ******************************************************** DECLARATION-ONLY ******************************************************************
 #define SERIALIZABLE_STRUCT_DECL_IMPL(struct_name, ...) \
     SERIALIZABLE_STRUCT_DECL_IMPL_2(struct_name, ITM_METACODING_IMPL_NARG(__VA_ARGS__), __VA_ARGS__)
 
@@ -298,9 +274,6 @@ boost::property_tree::ptree serializable_vector_to_ptree(TVector vector) {
         SERIALIZABLE_STRUCT_DECL_IMPL_BODY(struct_name, loop, __VA_ARGS__) \
     }
 
-#define PARSE_PATH() \
-    std::string parse_path = "";
-
 #define ORIGIN_AND_SOURCE_TREE() \
     std::string origin = ""; \
     boost::property_tree::ptree source_tree;
@@ -309,28 +282,30 @@ boost::property_tree::ptree serializable_vector_to_ptree(TVector vector) {
     ITM_METACODING_IMPL_EXPAND(loop(SERIALIZABLE_STRUCT_IMPL_FIELD_DECL, _, \
                                            ITM_METACODING_IMPL_NOTHING, __VA_ARGS__))
 
-#define SERIALIZABLE_STRUCT_DECL_IMPL_MEMBER_FUNCS(struct_name, loop, ...) \
+#define SERIALIZABLE_STRUCT_DECL_IMPL_MEMBER_PATH_INDEPENDENT_FUNCS(struct_name, loop, ...) \
     struct_name (); \
-    struct_name ( struct_name& other, const std::string& parse_path); \
     struct_name(ITM_METACODING_IMPL_EXPAND(loop(SERIALIZABLE_STRUCT_IMPL_TYPED_FIELD, _, \
                                                    ITM_METACODING_IMPL_COMMA, __VA_ARGS__)), \
-        std::string origin = "", std::string parse_path = ""); \
-    explicit struct_name (const boost::program_options::variables_map& vm, std::string origin = "", std::string parse_path = ""); \
+        std::string origin = ""); \
     void SetFromPTree(const boost::property_tree::ptree& tree); \
-    void UpdateFromVariablesMap(const boost::program_options::variables_map& vm); \
-    static struct_name BuildFromPTree(const boost::property_tree::ptree& tree, const std::string& origin = "", const std::string& parse_path = ""); \
+    static struct_name BuildFromPTree(const boost::property_tree::ptree& tree, const std::string& origin = ""); \
     boost::property_tree::ptree ToPTree(const std::string& _origin = "") const; \
     friend bool operator==(const struct_name & instance1, const struct_name & instance2); \
-    friend std::ostream& operator<<(std::ostream& out, const struct_name& instance); \
-    void AddToOptionsDescription(boost::program_options::options_description& od);
+    friend std::ostream& operator<<(std::ostream& out, const struct_name& instance);
+
+#define SERIALIZABLE_STRUCT_DECL_IMPL_MEMBER_PATH_DEPENDENT_FUNCS(struct_name) \
+	explicit struct_name (const boost::program_options::variables_map& vm, const std::string& parent_long_identifier = "", std::string origin = ""); \
+	void UpdateFromVariablesMap(const boost::program_options::variables_map& vm, const std::string& parent_long_identifier = ""); \
+	static void AddToOptionsDescription(boost::program_options::options_description& od, const std::string& long_identifier = "", const std::string& short_identifier = "");
 
 #define SERIALIZABLE_STRUCT_DECL_IMPL_BODY(struct_name, loop, ...) \
-		PARSE_PATH() \
         ORIGIN_AND_SOURCE_TREE() \
         SERIALIZABLE_STRUCT_DECL_IMPL_MEMBER_VARS(loop, __VA_ARGS__) \
-        SERIALIZABLE_STRUCT_DECL_IMPL_MEMBER_FUNCS(struct_name, loop, __VA_ARGS__)
+        SERIALIZABLE_STRUCT_DECL_IMPL_MEMBER_PATH_INDEPENDENT_FUNCS(struct_name, loop, __VA_ARGS__) \
+        SERIALIZABLE_STRUCT_DECL_IMPL_MEMBER_PATH_DEPENDENT_FUNCS(struct_name)
 
-// *** DEFINITION-ONLY ***
+// endregion
+// region ********************************************************* DEFINITION-ONLY ******************************************************************
 #define SERIALIZABLE_STRUCT_DEFN_IMPL(outer_class, struct_name, ...) \
     SERIALIZABLE_STRUCT_DEFN_IMPL_2( outer_class, struct_name, ITM_METACODING_IMPL_NARG(__VA_ARGS__), __VA_ARGS__)
 
@@ -343,41 +318,67 @@ boost::property_tree::ptree serializable_vector_to_ptree(TVector vector) {
     SERIALIZABLE_STRUCT_DEFN_IMPL_3(SERIALIZABLE_STRUCT_DEFN_HANDLE_QUALIFIER(outer_class), \
                              SERIALIZABLE_STRUCT_DEFN_HANDLE_QUALIFIER(struct_name), struct_name, instance.source_tree=tree, , ,\
                              ITM_METACODING_IMPL_COMMA, origin(std::move(origin)), origin, , \
-                             ITM_METACODING_IMPL_COMMA, parse_path(std::move(parse_path)), , \
                              ITM_METACODING_IMPL_CAT(ITM_METACODING_IMPL_LOOP_, field_count), __VA_ARGS__)
 
 #define SERIALIZABLE_STRUCT_DEFN_IMPL_3(outer_class, inner_qualifier, struct_name, source_tree_initializer, \
                                         friend_qualifier, static_qualifier, \
-                                        ORIGIN_SEPARATOR, origin_initializer, origin_varname, default_origin_arg, \
-                                        PARSE_PATH_SEPARATOR, parse_path_initializer, default_parse_path_arg, \
+                                        ORIGIN_SEPARATOR, origin_initializer, origin_varname, default_string_arg, \
                                         loop, ...) \
-    outer_class inner_qualifier struct_name () = default; \
-    outer_class inner_qualifier struct_name ( struct_name& other, const std::string& parse_path) : struct_name(other) { this->parse_path = parse_path; } \
-    outer_class inner_qualifier struct_name( \
-        ITM_METACODING_IMPL_EXPAND(loop(SERIALIZABLE_STRUCT_IMPL_TYPED_FIELD, _, ITM_METACODING_IMPL_COMMA, \
-                                           __VA_ARGS__)), \
-        std::string origin default_origin_arg, std::string parse_path default_parse_path_arg): \
-            ITM_METACODING_IMPL_EXPAND(loop(SERIALIZABLE_STRUCT_IMPL_INIT_FIELD_ARG, _, \
-                                               ITM_METACODING_IMPL_COMMA, __VA_ARGS__)) \
-            ORIGIN_SEPARATOR() origin_initializer \
-            PARSE_PATH_SEPARATOR() parse_path_initializer \
-            {} \
-    outer_class inner_qualifier struct_name(const boost::program_options::variables_map& vm, std::string origin default_origin_arg, std::string parse_path default_parse_path_arg) : \
+	SERIALIZABLE_STRUCT_DEFN_IMPL_PATH_INDEPENDENT(outer_class, inner_qualifier, struct_name, source_tree_initializer, \
+										friend_qualifier, static_qualifier, \
+										ORIGIN_SEPARATOR, origin_initializer, origin_varname, default_string_arg, \
+                                        loop, __VA_ARGS__) \
+	SERIALIZABLE_STRUCT_DEFN_IMPL_PATH_DEPENDENT(outer_class, inner_qualifier, struct_name, source_tree_initializer, \
+										friend_qualifier, static_qualifier, \
+										ORIGIN_SEPARATOR, origin_initializer, origin_varname, default_string_arg, \
+                                        loop, __VA_ARGS__)
+
+#define SERIALIZABLE_STRUCT_DEFN_IMPL_PATH_DEPENDENT(outer_class, inner_qualifier, struct_name, source_tree_initializer, \
+                                        friend_qualifier, static_qualifier, \
+                                        ORIGIN_SEPARATOR, origin_initializer, origin_varname, default_string_arg, \
+                                        loop, ...) \
+	outer_class inner_qualifier struct_name(const boost::program_options::variables_map& vm, \
+                                            const std::string& parent_long_identifier default_string_arg, \
+                                            std::string origin default_string_arg) : \
             ITM_METACODING_IMPL_EXPAND(loop(SERIALIZABLE_STRUCT_IMPL_FIELD_VM_INIT, struct_name, \
                                                ITM_METACODING_IMPL_COMMA, __VA_ARGS__)) \
             ORIGIN_SEPARATOR() origin_initializer \
-            PARSE_PATH_SEPARATOR() parse_path_initializer \
         {} \
+	void outer_class inner_qualifier UpdateFromVariablesMap(const boost::program_options::variables_map& vm, \
+                                                            const std::string& parent_long_identifier default_string_arg){ \
+        std::string long_identifier; \
+        ITM_METACODING_IMPL_EXPAND(loop(SERIALIZABLE_STRUCT_IMPL_FIELD_VM_UPDATE, struct_name, \
+                                               ITM_METACODING_IMPL_SEMICOLON, __VA_ARGS__)); \
+    } \
+    static_qualifier void outer_class inner_qualifier AddToOptionsDescription( \
+            boost::program_options::options_description& od, \
+            const std::string& long_identifier default_string_arg, \
+            const std::string& short_identifier default_string_arg) { \
+        std::string field_long_identifier, field_short_identifier; \
+        ITM_METACODING_IMPL_EXPAND(loop(SERIALIZABLE_STRUCT_IMPL_ADD_FIELD_TO_OPTIONS_DESCRIPTION, _, \
+                                           ITM_METACODING_IMPL_NOTHING, __VA_ARGS__)) \
+    }
+
+
+#define SERIALIZABLE_STRUCT_DEFN_IMPL_PATH_INDEPENDENT(outer_class, inner_qualifier, struct_name, source_tree_initializer, \
+                                        friend_qualifier, static_qualifier, \
+                                        ORIGIN_SEPARATOR, origin_initializer, origin_varname, default_string_arg, \
+                                        loop, ...) \
+    outer_class inner_qualifier struct_name () = default; \
+    outer_class inner_qualifier struct_name( \
+        ITM_METACODING_IMPL_EXPAND(loop(SERIALIZABLE_STRUCT_IMPL_TYPED_FIELD, _, ITM_METACODING_IMPL_COMMA, \
+                                           __VA_ARGS__)), \
+        std::string origin default_string_arg): \
+            ITM_METACODING_IMPL_EXPAND(loop(SERIALIZABLE_STRUCT_IMPL_INIT_FIELD_ARG, _, \
+                                               ITM_METACODING_IMPL_COMMA, __VA_ARGS__)) \
+            ORIGIN_SEPARATOR() origin_initializer \
+            {} \
     void outer_class inner_qualifier SetFromPTree(const boost::property_tree::ptree& tree){ \
         struct_name temporary_instance = BuildFromPTree(tree);\
         *this = temporary_instance;\
     } \
-    void outer_class inner_qualifier UpdateFromVariablesMap(const boost::program_options::variables_map& vm){ \
-        ITM_METACODING_IMPL_EXPAND(loop(SERIALIZABLE_STRUCT_IMPL_FIELD_VM_UPDATE, struct_name, \
-                                               ITM_METACODING_IMPL_SEMICOLON, __VA_ARGS__)); \
-    } \
     static_qualifier outer_class struct_name outer_class inner_qualifier BuildFromPTree(const boost::property_tree::ptree& tree, \
-                                                                    const std::string& origin default_origin_arg, const std::string& parse_path default_parse_path_arg){ \
+                                                                    const std::string& origin default_string_arg){ \
         struct_name default_instance; \
         ITM_METACODING_IMPL_EXPAND(loop(SERIALIZABLE_STRUCT_IMPL_FIELD_OPTIONAL_FROM_TREE, _, \
                                            ITM_METACODING_IMPL_NOTHING, __VA_ARGS__)) \
@@ -389,7 +390,7 @@ boost::property_tree::ptree serializable_vector_to_ptree(TVector vector) {
         source_tree_initializer; \
         return instance; \
     } \
-    boost::property_tree::ptree outer_class inner_qualifier ToPTree(const std::string& _origin default_origin_arg) const { \
+    boost::property_tree::ptree outer_class inner_qualifier ToPTree(const std::string& _origin default_string_arg) const { \
         boost::property_tree::ptree tree; \
         ITM_METACODING_IMPL_EXPAND(loop(SERIALIZABLE_STRUCT_IMPL_ADD_FIELD_TO_TREE, _, \
                                            ITM_METACODING_IMPL_NOTHING, __VA_ARGS__)) \
@@ -404,12 +405,9 @@ boost::property_tree::ptree serializable_vector_to_ptree(TVector vector) {
         boost::property_tree::ptree tree(instance.ToPTree()); \
         boost::property_tree::write_json_no_quotes(out, tree, true); \
         return out; \
-    } \
-    void outer_class inner_qualifier AddToOptionsDescription(boost::program_options::options_description& od) { \
-        ITM_METACODING_IMPL_EXPAND(loop(SERIALIZABLE_STRUCT_IMPL_ADD_FIELD_TO_OPTIONS_DESCRIPTION, _, \
-                                           ITM_METACODING_IMPL_NOTHING, __VA_ARGS__)) \
     }
 
+// endregion
 // *** FULL STRUCT GENERATION ***
 #define SERIALIZABLE_STRUCT_IMPL(struct_name, ...) \
     SERIALIZABLE_STRUCT_IMPL_2(struct_name, ITM_METACODING_IMPL_NARG(__VA_ARGS__), __VA_ARGS__)
@@ -424,7 +422,6 @@ boost::property_tree::ptree serializable_vector_to_ptree(TVector vector) {
         SERIALIZABLE_STRUCT_DECL_IMPL_MEMBER_VARS(loop, __VA_ARGS__) \
         SERIALIZABLE_STRUCT_DEFN_IMPL_3 ( , , struct_name, instance.source_tree=tree, friend, static, \
         ITM_METACODING_IMPL_COMMA, origin(std::move(origin)), origin, ="", \
-        ITM_METACODING_IMPL_COMMA, parse_path(std::move(parse_path)), ="", \
         loop, __VA_ARGS__) \
     };
 

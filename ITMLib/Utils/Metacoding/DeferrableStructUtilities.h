@@ -21,23 +21,10 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/optional.hpp>
 
+#include "DeferrableSerializableStruct_Impl.h"
+
 
 namespace ITMLib {
-
-
-template<typename TDeferrableSerializableStruct>
-inline void AddDeferrableFromSourceToTargetTree(boost::property_tree::ptree& target_tree,
-                                                       const boost::property_tree::ptree& source_tree,
-                                                       std::string origin = "") {
-	boost::property_tree::ptree deferrable_subtree;
-	auto subtree = source_tree.get_child_optional(TDeferrableSerializableStruct::default_parse_path);
-	if (subtree) {
-		deferrable_subtree = subtree.get();
-	} else {
-		deferrable_subtree = TDeferrableSerializableStruct().ToPTree(origin);
-	}
-	target_tree.add_child(TDeferrableSerializableStruct::default_parse_path, deferrable_subtree);
-}
 
 template<typename TDeferrableSerializableStruct>
 inline void AddDeferrableToTargetTree(boost::property_tree::ptree& target_tree,
@@ -47,15 +34,23 @@ inline void AddDeferrableToTargetTree(boost::property_tree::ptree& target_tree,
 	target_tree.add_child(TDeferrableSerializableStruct::default_parse_path, deferrable_subtree);
 }
 
-template<typename TDeferrableChild, typename TDeferrableParent>
-inline TDeferrableChild BuildDeferrableFromParentIfPresent(const TDeferrableParent& parent) {
-	const boost::property_tree::ptree& source_tree = parent.source_tree;
-	auto subtree = source_tree.get_child_optional(TDeferrableChild::default_parse_path);
+template<typename TDeferrableChild, typename TSerializableParent>
+inline TDeferrableChild BuildDeferrableFromParentIfPresent(const TSerializableParent& parent) {
+	return ExtractDeferrableSerializableStructFromPtreeIfPresent<TDeferrableChild>(parent.source_tree, parent.origin);
+}
+
+template<typename TDeferrableSerializableStruct>
+inline void AddDeferrableFromSourceToTargetTree(boost::property_tree::ptree& target_tree,
+                                                const boost::property_tree::ptree& source_tree,
+                                                std::string origin = "") {
+	boost::property_tree::ptree deferrable_subtree;
+	auto subtree = source_tree.get_child_optional(TDeferrableSerializableStruct::default_parse_path);
 	if (subtree) {
-		return TDeferrableChild::BuildFromPTree(subtree.get(), parent.origin);
+		deferrable_subtree = subtree.get();
 	} else {
-		return TDeferrableChild();
+		deferrable_subtree = TDeferrableSerializableStruct().ToPTree(origin);
 	}
+	target_tree.add_child(TDeferrableSerializableStruct::default_parse_path, deferrable_subtree);
 }
 
 } // namespace ITMLib

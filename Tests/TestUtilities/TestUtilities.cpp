@@ -361,6 +361,7 @@ configuration::Configuration GenerateChangedUpConfiguration(){
 	configuration::Configuration changed_up_configuration(
 			Vector3i(20, 23, 0),
 			true,
+			true,
 			VoxelVolumeParameters(0.005, 0.12, 4.12, 0.05, 200, true, 1.2f),
 			SurfelVolumeParameters(0.4f, 0.5f, static_cast<float>(22 * M_PI / 180), 0.008f, 0.0003f, 3.4f, 26.0f, 5,
 			                       1.1f, 4.5f, 21, 300, false, false),

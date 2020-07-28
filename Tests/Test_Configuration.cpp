@@ -19,6 +19,10 @@
 #define BOOST_TEST_DYN_LINK
 #endif
 
+//stdlib
+#include <string>
+#include <thread>
+
 //boost
 #include <boost/test/unit_test.hpp>
 
@@ -41,11 +45,11 @@ using namespace ITMLib::configuration;
 using namespace test_utilities;
 
 struct DeferrableStructCollection {
+	MainEngineSettings main_engine_settings;
 	TelemetrySettings telemetry_settings;
 	IndexingSettings indexing_settings;
 	RenderingSettings rendering_settings;
 	AutomaticRunSettings automatic_run_settings;
-	MainEngineSettings main_engine_settings;
 
 	DeferrableStructCollection(const configuration::Configuration& source_configuration = configuration::Get()) :
 			main_engine_settings(BuildDeferrableFromParentIfPresent<MainEngineSettings>(source_configuration)),
@@ -55,16 +59,18 @@ struct DeferrableStructCollection {
 			automatic_run_settings(BuildDeferrableFromParentIfPresent<AutomaticRunSettings>(source_configuration)){}
 
 	friend void RequireEqualDeferrables(const DeferrableStructCollection& l, const DeferrableStructCollection& r){
+		BOOST_REQUIRE_EQUAL(l.main_engine_settings, r.main_engine_settings);
 		BOOST_REQUIRE_EQUAL(l.telemetry_settings, r.telemetry_settings);
 		BOOST_REQUIRE_EQUAL(l.indexing_settings, r.indexing_settings);
 		BOOST_REQUIRE_EQUAL(l.rendering_settings, r.rendering_settings);
+		BOOST_REQUIRE_EQUAL(l.automatic_run_settings, r.automatic_run_settings);
 	}
 
 };
 
 configuration::Configuration GenerateDefaultSnoopyConfiguration();
 
-BOOST_AUTO_TEST_CASE(ConfigurationTest) {
+BOOST_AUTO_TEST_CASE(ConfigurationFileTest) {
 	configuration::Configuration default_configuration;
 	DeferrableStructCollection default_deferrables(default_configuration);
 
@@ -123,4 +129,14 @@ BOOST_AUTO_TEST_CASE(ConfigurationTest) {
 	BOOST_REQUIRE_EQUAL(configuration1.non_rigid_tracking_parameters,
 	                    configuration::Get().non_rigid_tracking_parameters);
 	BOOST_REQUIRE_EQUAL(configuration1, configuration::Get());
+}
+
+void execute_external_process(const std::string& command) {
+	system(command.c_str());
+}
+
+BOOST_AUTO_TEST_CASE(Configuration_CLI_Test) {
+	std::string programName = "test.cpp";
+	std::thread worker (execute_external_process, programName);
+	worker.join(); //wait for the worker to complete
 }

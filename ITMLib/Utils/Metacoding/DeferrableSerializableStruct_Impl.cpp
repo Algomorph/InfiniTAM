@@ -1,5 +1,5 @@
 //  ================================================================
-//  Created by Gregory Kramida (https://github.com/Algomorph) on 5/8/20.
+//  Created by Gregory Kramida (https://github.com/Algomorph) on 7/28/20.
 //  Copyright (c) 2020 Gregory Kramida
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -13,12 +13,20 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "TelemetrySettings.h"
+#include "DeferrableSerializableStruct_Impl.h"
 
+std::string generate_cli_argument_short_identifier_from_long_identifier(const std::string& long_identifier) {
+	size_t pos = 0;
+	std::string token;
+	std::string tmp = long_identifier;
 
-namespace ITMLib {
+	std::string short_identifier;
 
-//_DEBUG
-DEFINE_DEFERRABLE_SERIALIZABLE_STRUCT(TELEMETRY_SETTINGS_STRUCT_DESCRIPTION);
-
-} // namespace ITMLib
+	while ((pos = tmp.find('.')) != std::string::npos) {
+		token = tmp.substr(0, pos);
+		short_identifier = compile_sub_struct_parse_path(short_identifier, find_snake_case_lowercase_acronym(token));
+		tmp.erase(0, pos + 1);
+	}
+	short_identifier = compile_sub_struct_parse_path(short_identifier, find_snake_case_lowercase_acronym(token));
+	return short_identifier;
+}

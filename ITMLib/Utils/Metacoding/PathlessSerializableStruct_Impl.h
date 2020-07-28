@@ -33,13 +33,13 @@
 
 #define PATHLESS_SERIALIZABLE_STRUCT_DECL_IMPL_3(struct_name, loop, ...) \
     struct struct_name { \
-        PARSE_PATH() \
         PATHLESS_SERIALIZABLE_STRUCT_DECL_IMPL_BODY(struct_name, loop, __VA_ARGS__) \
     }
 
 #define PATHLESS_SERIALIZABLE_STRUCT_DECL_IMPL_BODY(struct_name, loop, ...) \
         SERIALIZABLE_STRUCT_DECL_IMPL_MEMBER_VARS(loop, __VA_ARGS__) \
-        SERIALIZABLE_STRUCT_DECL_IMPL_MEMBER_FUNCS(struct_name, loop, __VA_ARGS__)
+        SERIALIZABLE_STRUCT_DECL_IMPL_MEMBER_PATH_INDEPENDENT_FUNCS(struct_name, loop, __VA_ARGS__) \
+		SERIALIZABLE_STRUCT_DECL_IMPL_MEMBER_PATH_DEPENDENT_FUNCS(struct_name)
 
 // *** DEFINITION-ONLY ***
 
@@ -51,7 +51,6 @@
     SERIALIZABLE_STRUCT_DEFN_IMPL_3(SERIALIZABLE_STRUCT_DEFN_HANDLE_QUALIFIER(outer_class), \
                              SERIALIZABLE_STRUCT_DEFN_HANDLE_QUALIFIER(struct_name), struct_name, , , ,\
                              ITM_METACODING_IMPL_NOTHING, , , , \
-                             ITM_METACODING_IMPL_COMMA, parse_path(std::move(parse_path)), ,\
                              ITM_METACODING_IMPL_CAT(ITM_METACODING_IMPL_LOOP_, field_count), __VA_ARGS__)
 
 // *** FULL STRUCT GENERATION ***
@@ -65,9 +64,9 @@
 
 #define PATHLESS_SERIALIZABLE_STRUCT_IMPL_3(struct_name, field_count, loop, ...) \
     struct struct_name { \
-        PARSE_PATH() \
         SERIALIZABLE_STRUCT_DECL_IMPL_MEMBER_VARS(loop, __VA_ARGS__) \
-        SERIALIZABLE_STRUCT_DEFN_IMPL_3( , , struct_name, , friend, static, ITM_METACODING_IMPL_NOTHING, , , ="",\
-        ITM_METACODING_IMPL_COMMA, parse_path(std::move(parse_path)), ="", loop, __VA_ARGS__) \
+        SERIALIZABLE_STRUCT_DEFN_IMPL_3( , , struct_name, , friend, static, \
+        ITM_METACODING_IMPL_NOTHING, , , ="", \
+        loop, __VA_ARGS__) \
     };
 

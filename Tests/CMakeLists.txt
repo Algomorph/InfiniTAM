@@ -96,9 +96,11 @@ if (BUILD_TESTS)
     set(targetname generate_derived_test_data)
     load_use_includes()
     set(sources GenerateDerivedTestData.cpp)
-    include(${PROJECT_SOURCE_DIR}/cmake/SetCUDAAppTarget.cmake)
+    add_executable(${targetname} ${sources})
     target_link_libraries(${targetname} PRIVATE InputSource ITMLib MiniSlamGraphLib ORUtils FernRelocLib test_utilities)
     load_target_link_includes()
+
+
 
     ##########################
     # test suite executables #

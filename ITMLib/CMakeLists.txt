@@ -916,6 +916,7 @@ set(
         Utils/Logging/Logger.cpp
 
         Utils/Metacoding/SerializableStruct_Impl.cpp
+        Utils/Metacoding/DeferrableSerializableStruct_Impl.cpp
         Utils/Quaternions/QuaternionFromMatrix.cpp
 
         Utils/Telemetry/TelemetryUtilities.cpp

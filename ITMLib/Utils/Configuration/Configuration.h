@@ -164,6 +164,7 @@ DECLARE_SERIALIZABLE_STRUCT(CONFIGURATION_STRUCT_DESCRIPTION);
 Configuration& Get();
 template<typename TIndex>
 typename TIndex::InitializationParameters ForVolumeRole(VolumeRole role);
+void CompileOptionDescription(po::options_description& od);
 void LoadConfigurationFromVariableMap(const po::variables_map& vm);
 void LoadDefault();
 void LoadConfigurationFromJSONFile(const std::string& path);

@@ -1,5 +1,5 @@
 //  ================================================================
-//  Created by Gregory Kramida (https://github.com/Algomorph) on 5/8/20.
+//  Created by Gregory Kramida (https://github.com/Algomorph) on 7/28/20.
 //  Copyright (c) 2020 Gregory Kramida
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -13,12 +13,10 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "TelemetrySettings.h"
+#include <boost/program_options.hpp>
 
+namespace po = boost::program_options;
 
-namespace ITMLib {
+int main(int argc, char** argv) {
 
-//_DEBUG
-DEFINE_DEFERRABLE_SERIALIZABLE_STRUCT(TELEMETRY_SETTINGS_STRUCT_DESCRIPTION);
-
-} // namespace ITMLib
+}

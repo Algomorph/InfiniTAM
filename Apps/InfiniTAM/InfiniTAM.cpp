@@ -9,15 +9,8 @@
 #define BOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE
 //boost
 #include <boost/program_options.hpp>
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
 
 #ifdef WITH_VTK
-//VTK
-#include <vtkRenderer.h>
-#include <vtkRenderWindow.h>
-#include <vtkContextScene.h>
-
 //ITMLib/VTK
 #include "../../ITMLib/Utils/Visualization/VisualizationWindowManager.h"
 #endif
@@ -25,8 +18,6 @@
 //ITMLib
 #include "../../ITMLib/GlobalTemplateDefines.h"
 #include "../../ITMLib/Engines/Main/BasicVoxelEngine.h"
-#include "../../ITMLib/Engines/Main/BasicSurfelEngine.h"
-#include "../../ITMLib/Engines/Main/MultiEngine.h"
 #include "../../ITMLib/Engines/Main/DynamicSceneVoxelEngine.h"
 #include "../../ITMLib/Engines/Main/MainEngineFactory.h"
 
@@ -42,35 +33,34 @@ using namespace InputSource;
 using namespace ITMLib;
 
 namespace po = boost::program_options;
-namespace pt = boost::property_tree;
 
 int main(int argc, char** argv) {
 	try {
-		po::options_description arguments{"Arguments"};
+		po::options_description options_description{"Arguments"};
 		po::positional_options_description positional_arguments;
 
-		arguments.add_options()
+		options_description.add_options()
 				("help,h", "Print help screen")
 				("halp,h", "Funkaaay")
 				( "config,cfg", po::value<std::string>(),
 				  "Configuration file in JSON format, e.g.  ./default_config_cuda.json "
 				  "WARNING: using this option will invalidate any other command line arguments.");
 
-		configuration::Get().AddToOptionsDescription(arguments);
+		configuration::CompileOptionDescription(options_description);
 
 		positional_arguments.add("calibration_file", 1);
 		positional_arguments.add("input_path", 3);
 
 		po::variables_map vm;
 
-		po::store(po::command_line_parser(argc, argv).options(arguments).positional(positional_arguments).style(
+		po::store(po::command_line_parser(argc, argv).options(options_description).positional(positional_arguments).style(
 				po::command_line_style::unix_style ^ po::command_line_style::allow_short).run(), vm);
 
 		po::notify(vm);
 
 
-		auto printHelp = [&arguments, &positional_arguments, &argv]() {
-			std::cout << arguments << std::endl;
+		auto print_help = [&options_description, &positional_arguments, &argv]() {
+			std::cout << options_description << std::endl;
 			std::cout << "Positional arguments: " << std::endl;
 			std::cout << "   --" << positional_arguments.name_for_position(0) << std::endl;
 			std::cout << "   --" << positional_arguments.name_for_position(1) << std::endl;
@@ -80,21 +70,19 @@ int main(int argc, char** argv) {
 		};
 
 		if (vm.count("help")) {
-			printHelp();
+			print_help();
 			return EXIT_SUCCESS;
 		}
 
 		if (vm.count("halp")) {
 			printf("Ya didn't think it would work, did ya now?\n");
-			printHelp();
+			print_help();
 			return EXIT_SUCCESS;
 		}
 
 		if (vm["config"].empty()) {
 			configuration::LoadConfigurationFromVariableMap(vm);
 		} else {
-			//_DEBUG
-			bool size_empty = vm["size"].empty();
 			auto size = vm["size"];
 
 			std::string config_path = vm["config"].as<std::string>();
@@ -104,27 +92,26 @@ int main(int argc, char** argv) {
 		auto& configuration = configuration::Get();
 
 		printf("initialising ...\n");
-		ImageSourceEngine* imageSource = nullptr;
-		IMUSourceEngine* imuSource = nullptr;
+		ImageSourceEngine* image_source = nullptr;
+		IMUSourceEngine* imu_source = nullptr;
 
-		CreateDefaultImageSource(imageSource, imuSource, configuration.paths);
-		if (imageSource == nullptr) {
+		CreateDefaultImageSource(image_source, imu_source, configuration.paths);
+		if (image_source == nullptr) {
 			std::cerr << "Failed to open any image stream." << std::endl;
-			printHelp();
+			print_help();
 			return EXIT_FAILURE;
 		}
 
 // region ================================ BUILD MAIN ENGINE ========================================================
-		//TelemetryRecorder_Interface& logger = GetLogger(chosenIndexingMethod);
-		FusionAlgorithm* mainEngine = BuildMainEngine(imageSource->getCalib(),
-		                                              imageSource->GetRGBImageSize(),
-		                                              imageSource->GetDepthImageSize());
+		FusionAlgorithm* main_engine = BuildMainEngine(image_source->getCalib(),
+		                                               image_source->GetRGBImageSize(),
+		                                               image_source->GetDepthImageSize());
 
 // endregion ===========================================================================================================
 
 // region =========================== SET UI ENGINE SETTINGS WITH CLI ARGUMENTS ========================================
 
-		UIEngine::Instance().Initialize(argc, argv, imageSource, imuSource, mainEngine, configuration);
+		UIEngine::Instance().Initialize(argc, argv, image_source, imu_source, main_engine, configuration);
 
 // endregion ===========================================================================================================
 
@@ -133,9 +120,9 @@ int main(int argc, char** argv) {
 
 // region ========================================= CLEANUP ============================================================
 
-		delete mainEngine;
-		delete imageSource;
-		delete imuSource;
+		delete main_engine;
+		delete image_source;
+		delete imu_source;
 
 // endregion ===========================================================================================================
 		return EXIT_SUCCESS;
