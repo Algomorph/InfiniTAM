@@ -50,23 +50,23 @@ void ITMSceneTrackingEnergyPlotter::PreparePlot(Vector3i colorDataEnergy,
                                                Vector3i colorKillingEnergy) {
 	// set up table & columns
 
-	const int _DEBUG_row_count = 10;
+	const int row_count = 10;
 
 	vtkSmartPointer<vtkDoubleArray> dataEnergyValues = vtkSmartPointer<vtkDoubleArray>::New();
 	dataEnergyValues->SetName("Data Energy");
-	dataEnergyValues->SetNumberOfValues(_DEBUG_row_count);
+	dataEnergyValues->SetNumberOfValues(row_count);
 
 	vtkSmartPointer<vtkDoubleArray> smoothingEnergyValues = vtkSmartPointer<vtkDoubleArray>::New();
 	smoothingEnergyValues->SetName("Smoothing Energy");
-	smoothingEnergyValues->SetNumberOfValues(_DEBUG_row_count);
+	smoothingEnergyValues->SetNumberOfValues(row_count);
 
 	vtkSmartPointer<vtkDoubleArray> levelSetEnergyValues = vtkSmartPointer<vtkDoubleArray>::New();
 	levelSetEnergyValues->SetName("Level Set Energy");
-	levelSetEnergyValues->SetNumberOfValues(_DEBUG_row_count);
+	levelSetEnergyValues->SetNumberOfValues(row_count);
 
 	vtkSmartPointer<vtkDoubleArray> killingEnergyValues = vtkSmartPointer<vtkDoubleArray>::New();
 	killingEnergyValues->SetName("Killing Energy");
-	killingEnergyValues->SetNumberOfValues(_DEBUG_row_count);
+	killingEnergyValues->SetNumberOfValues(row_count);
 
 	table = vtkSmartPointer<vtkTable>::New();
 	table->AddColumn(dataEnergyValues);

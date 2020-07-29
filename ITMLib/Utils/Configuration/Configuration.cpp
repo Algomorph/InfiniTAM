@@ -66,7 +66,6 @@ DEFINE_SERIALIZABLE_STRUCT(HASH_VOLUME_PARAMETERS_STRUCT_DESCRIPTION);
 DEFINE_SERIALIZABLE_STRUCT(SPECIFIC_VOLUME_PARAMETERS_STRUCT_DESCRIPTION);
 
 DEFINE_SERIALIZABLE_STRUCT(CONFIGURATION_STRUCT_DESCRIPTION);
-
 // =@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@=@
 
 // region ===================================== TRACKING PRESET DEFINITIONS ============================================
@@ -143,11 +142,11 @@ typename PlainVoxelArray::InitializationParameters ForVolumeRole<PlainVoxelArray
 
 void CompileOptionDescription(po::options_description& od){
 	Configuration::AddToOptionsDescription(od);
-	MainEngineSettings::AddToOptionsDescription(od);
-	TelemetrySettings::AddToOptionsDescription(od);
-	IndexingSettings::AddToOptionsDescription(od);
-	RenderingSettings::AddToOptionsDescription(od);
-	AutomaticRunSettings::AddToOptionsDescription(od);
+	MainEngineSettings::AddDeferredToOptionsDescription(od);
+	TelemetrySettings::AddDeferredToOptionsDescription(od);
+	IndexingSettings::AddDeferredToOptionsDescription(od);
+	RenderingSettings::AddDeferredToOptionsDescription(od);
+	AutomaticRunSettings::AddDeferredToOptionsDescription(od);
 }
 
 static void AddAllDeferrableStructsFromVariablesMap(const po::variables_map& vm) {

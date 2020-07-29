@@ -38,7 +38,6 @@ TryToMarkBlockForAllocation_RecordPixelBlocks(
 			hash_block_coordinates, block_position,
 			hash_table, colliding_block_positions, colliding_block_count);
 
-	//_DEBUG alloc
 	switch (resulting_status) {
 		case BEING_MODIFIED_BY_ANOTHER_THREAD:
 			unresolvable_collision_encountered = true;

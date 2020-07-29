@@ -5,6 +5,7 @@
         0
     ],
     "record_reconstruction_video": true,
+    "record_inputs_in_reconstruction_video": true,
     "general_voxel_volume_parameters": {
         "voxel_size": 0.00400000019,
         "near_clipping_distance": 0.200000003,
@@ -161,7 +162,7 @@
         "skip_points": false
     },
     "automatic_run_settings": {
-        "index_of_frame_to_end_before": 50,
+        "index_of_frame_to_end_before": 716,
         "index_of_frame_to_start_at": 16,
         "load_volume_and_camera_matrix_before_processing": false,
         "save_volumes_and_camera_matrix_after_processing": false,

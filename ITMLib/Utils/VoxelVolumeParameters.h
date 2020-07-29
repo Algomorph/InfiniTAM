@@ -18,19 +18,10 @@
 //  limitations under the License.
 //  ================================================================
 
-
-
 #pragma once
 
 //local
-#include "Metacoding/Metacoding.h"
-
-//boost
-#include <boost/program_options.hpp>
-#include <boost/property_tree/ptree.hpp>
-
-namespace po = boost::program_options;
-namespace pt = boost::property_tree;
+#include "Metacoding/SerializableStruct.h"
 
 namespace ITMLib {
 
@@ -58,5 +49,5 @@ namespace ITMLib {
 /** \brief
 	Stores parameters of a voxel volume, such as voxel size
 */
-GENERATE_SERIALIZABLE_STRUCT(VOXEL_VOLUME_PARAMETERS_STRUCT_DESCRIPTION);
+DECLARE_SERIALIZABLE_STRUCT(VOXEL_VOLUME_PARAMETERS_STRUCT_DESCRIPTION);
 } // namespace ITMLib

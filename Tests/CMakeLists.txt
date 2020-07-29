@@ -101,7 +101,6 @@ if (BUILD_TESTS)
     load_target_link_includes()
 
 
-
     ##########################
     # test suite executables #
     ##########################
@@ -142,6 +141,10 @@ if (BUILD_TESTS)
         itm_add_test(NAME SmoothWarpGradient SOURCES Test_SmoothWarpGradient_CPU_CUDA.cpp)
         itm_add_test(NAME VolumeReduction_VBH_CUDA SOURCES Test_VolumeReduction_VBH_CUDA.cpp)
     endif()
+
+    # *** special executable for CLI testing
+    add_executable(cli_options_subtest TestUtilities/CLI_optionsSubtest.cpp)
+    target_link_libraries(cli_options_subtest PRIVATE ITMLib)
 
     #######################################################
     # Recursively transfer test data to build directories #

@@ -28,7 +28,7 @@ struct TSDFFusionFunctor {
 
 	_CPU_AND_GPU_CODE_
 	void operator()(TVoxel& source_voxel, TVoxel& target_voxel) {
-		//_DEBUG
+		//TODO: remove or utilize dead code
 
 		//fusion condition "HARSH" -- yields results almost identical to "COMBINED"
 //		if(canonicalVoxel.flags != VOXEL_NONTRUNCATED

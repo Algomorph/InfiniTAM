@@ -924,8 +924,9 @@ set(
         Utils/CPPPrintHelpers.cpp
         Utils/ExecutionMode.cpp
 
-
         Utils/Math.cpp
+
+        Utils/VoxelVolumeParameters.cpp
 )
 
 set(
