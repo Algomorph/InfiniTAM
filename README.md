@@ -18,12 +18,12 @@ For a full list of issues & tasks, see the [Dynamic-Scene Project Board](https:/
 
 1. The primary mandatory 3rd-party requirement that I've added is Boost. The Boost modules the code currently relies on are iostreams, program_options, and property_tree. The Boost library might be a bit of a hassle to build on Windows if you haven't done it before. All other dependeincies are handled automatically via CMake and shouldn't pose a problem. If you're building on a system without internet, there are CMake options to configure the system to build 3rd-party requirements directly from sources included in the repository.
 2. Linux currently is the only officially-supported OS, but I've recently fixed & tested the Windows build. All of the required CMake packages and this code in theory should work on any major platform, so you can try on MacOS at your own risk. Let me know if you'd like to fix things that are not working on your platform.
-3. I recommend building with FFMPEG (```WITH_FFMPEG``` CMake flag), since that will enable visual debugging/video recording. Building with CUDA (```WITH_CUDA``` CMake flag) is also highly recommended if you have a good CPU, since CPU runtime has not yet been fully optimized. 
+3. I recommend building with FFmpeg (```WITH_FFMPEG``` CMake flag), since that will enable visual debugging/video recording. Building with CUDA (```WITH_CUDA``` CMake flag) is also highly recommended if you have a good CPU, since CPU runtime has not yet been fully optimized. 
 4. To get some test data and try the code on it, you can download the [original Snoopy sequence](http://campar.in.tum.de/personal/slavcheva/deformable-dataset/index.html) (better masks can be retrieved from http://algomorph.com/storage/reco/snoopy_masks.zip), modify Files/infinitam_snoopy_config.json with proper paths for input_and_output_settings_paths, and run like this (modify the path to point to infinitam_snoopy_config.json):
 
 <build_folder>/Apps/InfiniTAM/InfiniTAM --config=Files/infinitam_snoopy_config.json
 
-**Note**: If you build with FFMPEG, this will also record a video in the output folder (as specified in the config file).
+**Note**: If you build with FFmpeg, this will also record a video in the output folder (as specified in the config file).
 
 ## Is this code being worked on / maintained?
 
