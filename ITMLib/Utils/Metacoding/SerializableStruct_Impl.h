@@ -164,29 +164,29 @@ boost::property_tree::ptree serializable_vector_to_ptree(TVector vector) {
 
 // *** variables_map --> value ***
 #define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_INIT_PRIMITIVE(type, field_name, default_value) \
-    field_name(vm[ compile_sub_struct_parse_path(parent_long_identifier, #field_name) ].empty() ? default_value : vm[compile_sub_struct_parse_path(parent_long_identifier, #field_name)].as<type>())
+    field_name(vm[compile_sub_struct_parse_path(parent_long_identifier, #field_name)].as<type>())
 #define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_INIT_PATH(type, field_name, default_value) \
-    field_name(vm[ compile_sub_struct_parse_path(parent_long_identifier, #field_name)  ].empty() ? default_value : preprocess_path(vm[ compile_sub_struct_parse_path(parent_long_identifier, #field_name)  ].as<std::string>(), origin))
+    field_name(preprocess_path(vm[ compile_sub_struct_parse_path(parent_long_identifier, #field_name)  ].as<std::string>(), origin))
 #define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_INIT_ENUM(type, field_name, default_value) \
-    field_name(vm[ compile_sub_struct_parse_path(parent_long_identifier, #field_name)  ].empty() ? default_value : string_to_enumerator< type >(vm[ compile_sub_struct_parse_path(parent_long_identifier, #field_name)  ].as<std::string>()))
+    field_name(string_to_enumerator< type >(vm[ compile_sub_struct_parse_path(parent_long_identifier, #field_name)  ].as<std::string>()))
 #define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_INIT_STRUCT(type, field_name, default_value) \
     field_name(vm, compile_sub_struct_parse_path(parent_long_identifier, #field_name))
 #define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_INIT_VECTOR(type, field_name, default_value) \
-    field_name(vm[ compile_sub_struct_parse_path(parent_long_identifier, #field_name)  ].empty() ? default_value : variables_map_to_vector <type> (vm, compile_sub_struct_parse_path(parent_long_identifier, #field_name) ))
+    field_name(variables_map_to_vector <type> (vm, compile_sub_struct_parse_path(parent_long_identifier, #field_name) ))
 
 #define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_INIT(struct_name, type, field_name, default_value, serialization_type, ...) \
     ITM_METACODING_IMPL_CAT(SERIALIZABLE_STRUCT_IMPL_FIELD_VM_INIT_, serialization_type)(type, field_name, default_value)
 
 #define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_UPDATE_PRIMITIVE(type, field_name) \
-    if (!vm[long_identifier].empty())  this->field_name = vm[long_identifier].as<type>()
+    if (!vm[long_identifier].defaulted())  this->field_name = vm[long_identifier].as<type>()
 #define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_UPDATE_PATH(type, field_name) \
-    if (!vm[long_identifier].empty())  this->field_name = preprocess_path(vm[long_identifier].as<std::string>(), origin)
+    if (!vm[long_identifier].defaulted())  this->field_name = preprocess_path(vm[long_identifier].as<std::string>(), origin)
 #define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_UPDATE_ENUM(type, field_name) \
-    if (!vm[long_identifier].empty())  this->field_name = string_to_enumerator< type >(vm[long_identifier].as<std::string>())
+    if (!vm[long_identifier].defaulted())  this->field_name = string_to_enumerator< type >(vm[long_identifier].as<std::string>())
 #define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_UPDATE_STRUCT(type, field_name) \
     this->field_name.UpdateFromVariablesMap(vm, long_identifier )
 #define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_UPDATE_VECTOR(type, field_name) \
-    if (!vm[long_identifier].empty())  this->field_name = variables_map_to_vector <type> (vm, long_identifier)
+    if (!vm[long_identifier].defaulted())  this->field_name = variables_map_to_vector <type> (vm, long_identifier)
 
 #define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_UPDATE(struct_name, type, field_name, default_value, serialization_type, ...) \
 	long_identifier = compile_sub_struct_parse_path(parent_long_identifier, #field_name); \
