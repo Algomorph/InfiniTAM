@@ -14,9 +14,9 @@
 //  limitations under the License.
 //  ================================================================
 #include "VoxelVolumeParameters.h"
+
 namespace ITMLib {
 
 DEFINE_SERIALIZABLE_STRUCT(VOXEL_VOLUME_PARAMETERS_STRUCT_DESCRIPTION);
-
 
 } // namespace ITMLib
