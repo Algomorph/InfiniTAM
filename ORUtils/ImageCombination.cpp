@@ -25,6 +25,6 @@
 
 namespace ORUtils {
 
-template Image<Vector4<unsigned char>> ConcatenateImages<Vector4<unsigned char>>(std::vector<std::reference_wrapper<Image<Vector4<unsigned char>>>> images, int axis = 0);
+template Image<Vector4<unsigned char>> ConcatenateImages<Vector4<unsigned char>>(std::vector<std::reference_wrapper<Image<Vector4<unsigned char>>>> images, int axis);
 
 } // namespace ORUtils

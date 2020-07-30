@@ -135,12 +135,24 @@ void execute_external_process(const std::string& command) {
 	system(command.c_str());
 }
 
+static std::string GetCLI_optionsSubtestExecutablePath() {
+#ifdef _MSC_VER
+#ifdef NDEBUG
+	return std::string(GENERATED_TEST_DATA_PREFIX "Release/cli_options_subtest");
+#else
+	return std::string(GENERATED_TEST_DATA_PREFIX "Debug/cli_options_subtest");
+#endif
+#else 
+	return std::string(GENERATED_TEST_DATA_PREFIX "cli_options_subtest");
+#endif
+}
+
 BOOST_AUTO_TEST_CASE(Configuration_CLI_Test_Defaults_Unchanged) {
 	DeferrableStructCollection loaded_deferrables;
 	std::string config_destination;
 
 	config_destination = GENERATED_TEST_DATA_PREFIX "TestData/configuration/cli_test_defaults.json";
-	std::string command = GENERATED_TEST_DATA_PREFIX "cli_options_subtest --config_output=" + config_destination;
+	std::string command = GetCLI_optionsSubtestExecutablePath() + " --config_output=" + config_destination;
 	std::thread thread(execute_external_process, command);
 	thread.join();
 	configuration::LoadConfigurationFromJSONFile(config_destination);
@@ -158,7 +170,7 @@ BOOST_AUTO_TEST_CASE(ConfigurationTestLong_CLI_Only) {
 	std::string config_destination;
 
 	config_destination = GENERATED_TEST_DATA_PREFIX "TestData/configuration/cli_test_long.json";
-	std::string command = GENERATED_TEST_DATA_PREFIX "cli_options_subtest --config_output=" + config_destination +
+	std::string command = GetCLI_optionsSubtestExecutablePath() + " --config_output=" + config_destination +
 	                      " --focus_coordinates=20 23 0"
 	                      " --record_reconstruction_video=true"
 	                      " --record_inputs_in_reconstruction_video=true"
@@ -295,7 +307,7 @@ BOOST_AUTO_TEST_CASE(ConfigurationTestLong_CLI_Only) {
 //	std::string config_destination;
 //
 //	config_destination = GENERATED_TEST_DATA_PREFIX "TestData/configuration/cli_test_short.json";
-//	std::string command = GENERATED_TEST_DATA_PREFIX "cli_options_subtest --config_output=" + config_destination +
+//	std::string command = GetCLI_optionsSubtestExecutablePath() + " --config_output=" + config_destination +
 //	                      " -fc=20 23 0"
 //	                      " -rrv=true"
 //	                      " -riirv=true"
@@ -437,7 +449,7 @@ BOOST_AUTO_TEST_CASE(ConfigurationFileAnd_CLI_Test) {
 	std::string config_destination;
 
 	config_destination = GENERATED_TEST_DATA_PREFIX "TestData/configuration/file_and_cli_test_output.json";
-	std::string command = GENERATED_TEST_DATA_PREFIX "cli_options_subtest --config_output=" + config_destination +
+	std::string command = GetCLI_optionsSubtestExecutablePath() + " --config_output=" + config_destination +
 			" --config=" + input_config_path +
 			" --general_voxel_volume_parameters.voxel_size=0.008"
 			" --general_voxel_volume_parameters.near_clipping_distance=0.16"
@@ -456,9 +468,9 @@ BOOST_AUTO_TEST_CASE(ConfigurationFileAnd_CLI_Test) {
 	configuration::LoadConfigurationFromJSONFile(config_destination);
 	loaded_deferrables = DeferrableStructCollection();
 
-	configuration1.general_voxel_volume_parameters.voxel_size = 0.008;
-	configuration1.general_voxel_volume_parameters.near_clipping_distance = 0.16;
-	configuration1.general_voxel_volume_parameters.far_clipping_distance = 4.14;
+	configuration1.general_voxel_volume_parameters.voxel_size = 0.008f;
+	configuration1.general_voxel_volume_parameters.near_clipping_distance = 0.16f;
+	configuration1.general_voxel_volume_parameters.far_clipping_distance = 4.14f;
 	deferrables1.automatic_run_settings.index_of_frame_to_end_before = 54;
 	deferrables1.automatic_run_settings.index_of_frame_to_start_at = 12;
 	deferrables1.automatic_run_settings.load_volume_and_camera_matrix_before_processing = false;

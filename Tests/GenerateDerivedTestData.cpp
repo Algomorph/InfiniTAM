@@ -85,6 +85,7 @@ void ConstructSnoopyUnmaskedVolumes00() {
 	                                              snoopy::SnoopyCalibrationPath(),
 	                                              MEMORYDEVICE_CPU,
 	                                              snoopy::InitializationParameters_Fr00<VoxelBlockHash>());
+	test_utilities::ConstructGeneratedVolumeSubdirectoriesIfMissing();
 	volume_PVA_00->SaveToDisk(snoopy::PartialVolume00Path<PlainVoxelArray>());
 	volume_VBH_00->SaveToDisk(snoopy::PartialVolume00Path<VoxelBlockHash>());
 
@@ -124,6 +125,8 @@ void ConstructSnoopyMaskedVolumes16and17() {
 	                                              snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
 	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(), "Saving snoopy masked partial volumes 16 & 17...");
+
+	test_utilities::ConstructGeneratedVolumeSubdirectoriesIfMissing();
 
 	volume_PVA_16->SaveToDisk(snoopy::PartialVolume16Path<PlainVoxelArray>());
 	volume_VBH_16->SaveToDisk(snoopy::PartialVolume16Path<VoxelBlockHash>());
@@ -206,6 +209,8 @@ void ConstructStripesTestVolumes() {
 			MEMORYDEVICE_CPU);
 	depth_fusion_engine_VBH->IntegrateDepthImageIntoTsdfVolume(&volume4, view, &tracking_state);
 	std::string path =  STATIC_TEST_DATA_PREFIX "TestData/volumes/VBH/stripes.dat";
+
+	test_utilities::ConstructGeneratedVolumeSubdirectoriesIfMissing();
 	volume4.SaveToDisk(path);
 
 	delete depth_fusion_engine_VBH;
@@ -218,7 +223,7 @@ void GenerateWarpGradientTestData() {
 	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(),
 	                "Generating warp field data from snoopy masked partial volumes 16 & 17 "
 			                << IndexString<TIndex>() << "...");
-
+	test_utilities::ConstructGeneratedVolumeSubdirectoriesIfMissing();
 	std::string output_directory = GENERATED_TEST_DATA_PREFIX "TestData/volumes/" + IndexString<TIndex>() + "/";
 
 	VoxelVolume<TSDFVoxel, TIndex>* canonical_volume;
@@ -328,6 +333,7 @@ void GenerateFusedVolumeTestData() {
 			VolumeFusionEngineFactory::Build<TSDFVoxel, TIndex>(MEMORYDEVICE_CPU);
 	volume_fusion_engine->FuseOneTsdfVolumeIntoAnother(canonical_volume, warped_live_volume, 0);
 
+	test_utilities::ConstructGeneratedVolumeSubdirectoriesIfMissing();
 	canonical_volume->SaveToDisk(GENERATED_TEST_DATA_PREFIX
 	                             "TestData/volumes/" + IndexString<TIndex>() + "/fused.dat");
 
@@ -358,6 +364,7 @@ void GenerateWarpedVolumeTestData() {
 	AllocateUsingOtherVolume(warped_live_volume, live_volume, MEMORYDEVICE_CPU);
 	warping_engine->WarpVolume_WarpUpdates(warps, live_volume, warped_live_volume);
 
+	test_utilities::ConstructGeneratedVolumeSubdirectoriesIfMissing();
 	warped_live_volume->SaveToDisk(
 			GENERATED_TEST_DATA_PREFIX "TestData/volumes/" + IndexString<TIndex>() + "/warped_live.dat");
 
@@ -442,6 +449,7 @@ void GenerateConfigurationTestData() {
 	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(),
 	                "Generating configuration test data ... ");
 	configuration::Configuration default_snoopy_configuration = GenerateDefaultSnoopyConfiguration();
+	test_utilities::ConstructGeneratedConfigurationDirectoryIfMissing();
 	configuration::SaveConfigurationToJSONFile(STATIC_TEST_DATA_PREFIX
 	                                           "../Files/infinitam_snoopy_config.json",
 	                                           default_snoopy_configuration);
@@ -468,7 +476,7 @@ void GenerateMeshingTestData() {
 	MeshingEngine<TSDFVoxel, TIndex>* meshing_engine =
 			MeshingEngineFactory::Build<TSDFVoxel, TIndex>(TMemoryDeviceType);
 	Mesh mesh = meshing_engine->MeshVolume(canonical_volume);
-	fs::create_directories(GENERATED_TEST_DATA_PREFIX "TestData/meshes");
+	ConstructGeneratedMeshDirectoryIfMissing();
 	mesh.WriteOBJ(GENERATED_TEST_DATA_PREFIX "TestData/meshes/mesh_partial_16.obj");
 
 	delete canonical_volume;
@@ -480,6 +488,8 @@ template<MemoryDeviceType TMemoryDeviceType>
 void GenerateRenderingTestData_VoxelBlockHash() {
 	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(),
 	                "Generating VBH rendering test data ... ");
+	test_utilities::ConstructGeneratedArraysDirectoryIfMissing();
+
 	CameraPoseAndRenderingEngineFixture<TMemoryDeviceType> fixture;
 
 	ORUtils::OStreamWrapper visible_blocks_file(GENERATED_TEST_DATA_PREFIX "TestData/arrays/visible_blocks.dat", true);

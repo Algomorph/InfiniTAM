@@ -167,7 +167,8 @@ void RenderingEngine<TVoxel, TIndex, TMemoryDeviceType>::ForwardRender(
 
 	FindMissingProjectionPointsFunctor<TMemoryDeviceType> find_missing_points_functor(*render_state->fwdProjMissingPoints,
 	                                                                                  *render_state->forwardProjection,
-	                                                                                  *render_state->renderingRangeImage);
+	                                                                                  *render_state->renderingRangeImage,
+																					   view->depth);
 
 	ImageTraversalEngine<TMemoryDeviceType>::template TraversePositionOnly(render_state->raycastResult, find_missing_points_functor);
 	render_state->noFwdProjMissingPoints = find_missing_points_functor.GetMissingPointCount();

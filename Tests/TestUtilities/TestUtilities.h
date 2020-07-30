@@ -37,6 +37,16 @@ using namespace ITMLib;
 
 namespace test_utilities {
 
+static constexpr const char* GeneratedVolumeDirectory = GENERATED_TEST_DATA_PREFIX "TestData/volumes/";
+static constexpr const char* GeneratedConfigurationDirectory = GENERATED_TEST_DATA_PREFIX "TestData/configuration/";
+static constexpr const char* GeneratedMeshDirectory = GENERATED_TEST_DATA_PREFIX "TestData/meshes/";
+static constexpr const char* GeneratedArraysDirectory = GENERATED_TEST_DATA_PREFIX "TestData/arrays/";
+
+void ConstructGeneratedVolumeSubdirectoriesIfMissing();
+void ConstructGeneratedConfigurationDirectoryIfMissing();
+void ConstructGeneratedMeshDirectoryIfMissing();
+void ConstructGeneratedArraysDirectoryIfMissing();
+
 template<typename TIndex>
 std::string IndexString();
 

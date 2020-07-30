@@ -1,3 +1,6 @@
+#include "TestUtilities.h"
+#include "TestUtilities.h"
+#include "TestUtilities.h"
 //  ================================================================
 //  Created by Gregory Kramida on 11/3/17.
 //  Copyright (c) 2017-2000 Gregory Kramida
@@ -52,6 +55,23 @@ std::string DeviceString<MEMORYDEVICE_CPU>() {
 template<>
 std::string DeviceString<MEMORYDEVICE_CUDA>() {
 	return "CUDA";
+}
+
+void ConstructGeneratedVolumeSubdirectoriesIfMissing() {
+	fs::create_directories(test_utilities::GeneratedVolumeDirectory + IndexString<VoxelBlockHash>());
+	fs::create_directories(test_utilities::GeneratedVolumeDirectory + IndexString<PlainVoxelArray>());
+}
+
+void ConstructGeneratedConfigurationDirectoryIfMissing(){
+	fs::create_directories(test_utilities::GeneratedConfigurationDirectory);
+}
+
+void ConstructGeneratedMeshDirectoryIfMissing(){
+	fs::create_directories(test_utilities::GeneratedMeshDirectory);
+}
+
+void ConstructGeneratedArraysDirectoryIfMissing(){
+	fs::create_directories(test_utilities::GeneratedArraysDirectory);
 }
 
 template void GenerateSimpleSurfaceTestVolume<MEMORYDEVICE_CPU, TSDFVoxel, VoxelBlockHash>(

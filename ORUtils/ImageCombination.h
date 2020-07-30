@@ -101,6 +101,6 @@ Image<TPixel> ConcatenateImages(std::vector<std::reference_wrapper<Image<TPixel>
 	return concatenated_image;
 }
 
-extern template Image<Vector4<unsigned char>> ConcatenateImages<Vector4<unsigned char>>(std::vector<std::reference_wrapper<Image<Vector4<unsigned char>>>> images, int axis = 0);
+extern template Image<Vector4<unsigned char>> ConcatenateImages<Vector4<unsigned char>>(std::vector<std::reference_wrapper<Image<Vector4<unsigned char>>>> images, int axis);
 
 } // namespace ORUtils

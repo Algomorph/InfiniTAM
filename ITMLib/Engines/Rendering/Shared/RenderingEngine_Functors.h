@@ -428,11 +428,13 @@ private: // instance variables
 public: // instance functions
 	FindMissingProjectionPointsFunctor(ORUtils::Image<int>& projection_missing_point_indices,
 	                                   const ORUtils::Image<Vector4f>& forward_projection,
-	                                   const ORUtils::Image<Vector2f>& pixel_ray_depth_range_image)
+	                                   const ORUtils::Image<Vector2f>& pixel_ray_depth_range_image,
+									   const ORUtils::Image<float>& depth_image)
 			: projection_missing_point_indices(projection_missing_point_indices.GetData(TMemoryDeviceType)),
 			  forward_projection(forward_projection.GetData(TMemoryDeviceType)),
 			  pixel_ray_depth_range_data(pixel_ray_depth_range_image.GetData(TMemoryDeviceType)),
-			  ray_depth_range_image_width(pixel_ray_depth_range_image.dimensions.x) {
+			  ray_depth_range_image_width(pixel_ray_depth_range_image.dimensions.x),
+			  depth(depth_image.GetData(TMemoryDeviceType)){
 		INITIALIZE_ATOMIC(unsigned int, missing_point_count, 0u);
 	}
 
