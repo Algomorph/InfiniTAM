@@ -327,7 +327,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(UChar4Image* rgb_im
 			benchmarking::stop_timer("GenerateRawLiveVolume");
 
 			//pre-tracking recording
-			LogTSDFVolumeStatistics(live_volumes[0], "[[live TSDF before tracking]]");
+			LogTSDFVolumeStatistics(live_volumes[0], "[[live TSDF before tracking]]", this->parameters.indexing_method);
 			telemetry_recorder.RecordPreSurfaceTrackingData(*live_volumes[0], tracking_state->pose_d->GetM(), FrameIndex());
 
 			benchmarking::start_timer("TrackMotion");
@@ -339,17 +339,18 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(UChar4Image* rgb_im
 			benchmarking::stop_timer("TrackMotion");
 
 			//post-tracking recording
-			LogTSDFVolumeStatistics(target_warped_live_volume, "[[live TSDF after tracking]]");
+			LogTSDFVolumeStatistics(target_warped_live_volume, "[[live TSDF after tracking]]", this->parameters.indexing_method);
 			telemetry_recorder.RecordPostSurfaceTrackingData(*target_warped_live_volume, FrameIndex());
 
 			//fuse warped live into canonical
 			benchmarking::start_timer("FuseOneTsdfVolumeIntoAnother");
 			volume_fusion_engine->FuseOneTsdfVolumeIntoAnother(canonical_volume, target_warped_live_volume, frames_processed);
 			benchmarking::stop_timer("FuseOneTsdfVolumeIntoAnother");
-			LogTSDFVolumeStatistics(canonical_volume, "[[canonical TSDF after fusion]]");
+			LogTSDFVolumeStatistics(canonical_volume, "[[canonical TSDF after fusion]]", this->parameters.indexing_method);
 
 			//post-fusion recording
 			telemetry_recorder.RecordPostFusionData(*canonical_volume, FrameIndex());
+			LogVoxelHashBlockUsage(canonical_volume, target_warped_live_volume, warp_field, this->parameters.indexing_method);
 		} else {
 			LOG4CPLUS_PER_FRAME(logging::get_logger(),
 			                    bright_cyan << "Generating raw live frame from view..." << reset);
@@ -373,6 +374,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(UChar4Image* rgb_im
 
 			//post-fusion recording
 			telemetry_recorder.RecordPostFusionData(*canonical_volume, FrameIndex());
+			LogVoxelHashBlockUsage(canonical_volume, live_volumes[0], warp_field, this->parameters.indexing_method);
 		}
 		fusion_succeeded = true;
 		if (frames_processed > 50) tracking_initialised = true;
@@ -392,6 +394,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(UChar4Image* rgb_im
 
 
 	LogCameraTrajectoryQuaternion(tracking_state->pose_d);
+
 
 	return last_tracking_result;
 }

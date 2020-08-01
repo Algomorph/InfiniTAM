@@ -395,7 +395,7 @@ configuration::Configuration GenerateChangedUpConfiguration(){
 			),
 			SlavchevaSurfaceTracker::Parameters(0.11f, 0.09f, 2.0f, 0.3f, 0.1f, 1e-6f),
 			SlavchevaSurfaceTracker::Switches(false, true, false, true, false),
-			LoggingSettings(VERBOSITY_WARNING, true, false, true, true, true, true),
+			LoggingSettings(VERBOSITY_WARNING, true, false, true, true, true, true, false),
 			Paths(GENERATED_TEST_DATA_PREFIX "TestData/output",
 			      STATIC_TEST_DATA_PREFIX "TestData/calibration/snoopy_calib.txt",
 			      "", "", "",

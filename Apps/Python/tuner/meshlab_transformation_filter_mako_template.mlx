@@ -1,0 +1,9 @@
+<!DOCTYPE FilterScript>
+<FilterScript>
+    <filter name="Matrix: Set/Copy Transformation">
+        <Param val5="${val5}" val0="${val0}" name="TransformMatrix" val13="${val13}" val15="${val15}" type="RichMatrix44f" val12="${val12}" val10="${val10}" val3="${val3}" val7="${val7}" val6="${val6}" val11="${val11}" val4="${val4}" val9="${val9}" val8="${val8}" val14="${val14}" val2="${val2}" tooltip="" val1="${val1}" description=""/>
+        <Param type="RichBool" tooltip="If selected, the new matrix will be composed with the current one (matrix=new*old)" value="false" description="Compose with current" name="compose"/>
+        <Param type="RichBool" tooltip="The transformation is explicitly applied, and the vertex coordinates are actually changed" value="true" description="Freeze Matrix" name="Freeze"/>
+        <Param type="RichBool" tooltip="If selected, the filter will be applied to all visible mesh layers" value="false" description="Apply to all visible Layers" name="allLayers"/>
+    </filter>
+</FilterScript>

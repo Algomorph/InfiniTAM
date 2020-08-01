@@ -20,14 +20,12 @@
 #include <regex>
 
 //boost
-#include <boost/filesystem.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/preprocessor/stringize.hpp>
 
 //local
 #include "../Metacoding/DeferrableStructUtilities.h"
 #include "Configuration.h"
-#include "../FileIO/JSON_Utilities.h"
 #include "TelemetrySettings.h"
 #include "../../Engines/Indexing/IndexingSettings.h"
 #include "../../Engines/Rendering/RenderingSettings.h"
@@ -51,8 +49,7 @@ DEFINE_SERIALIZABLE_ENUM(MemoryDeviceType,
 
 DEFINE_SERIALIZABLE_ENUM(VOLUME_ROLE_ENUM_DESCRIPTION);
 
-namespace ITMLib {
-namespace configuration {
+namespace ITMLib::configuration {
 
 // =====
 // *** serializable struct definitions ***
@@ -70,6 +67,7 @@ DEFINE_SERIALIZABLE_STRUCT(CONFIGURATION_STRUCT_DESCRIPTION);
 
 // region ===================================== TRACKING PRESET DEFINITIONS ============================================
 
+//TODO: hide statics behind getter namespace-scope functions to avoid cert-err58-check warnings and defer initialization
 const std::string TrackerConfigurationStringPresets::default_ICP_tracker_configuration =
 		"type=icp,levels=rrrbb,minstep=1e-3,"
 		"outlierC=0.01,outlierF=0.002,"
@@ -212,5 +210,4 @@ void SaveConfigurationToJSONFile(const std::string& path, const Configuration& c
 	pt::write_json_no_quotes(path, target_tree, true);
 }
 // endregion ===========================================================================================================
-} // namespace ITMLib::configuration
 } // namespace ITMLib

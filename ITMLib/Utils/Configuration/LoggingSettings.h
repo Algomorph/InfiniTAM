@@ -44,7 +44,8 @@ DECLARE_SERIALIZABLE_ENUM(VERBOSITY_LEVEL_ENUM_DESCRIPTION);
     (bool, log_trajectory_quaternions, false, PRIMITIVE, "Whether to log estimated camera trajectory quaternions"), \
     (bool, log_surface_tracking_optimization_energies, false, PRIMITIVE, "Whether to log optimization energies " \
     "for each iteration of the surface tracking optimization. Only works when non_rigid_tracking_parameters.functor_type " \
-    "parameter is set to \"slavcheva_diagnostic\"")
+    "parameter is set to \"slavcheva_diagnostic\""),\
+	(bool, log_voxel_hash_block_usage, false, PRIMITIVE, "Whether to log counts of utilized voxel hash blocks for all volumes involved (along with upper bounds).")
 
 DECLARE_SERIALIZABLE_STRUCT(LOGGING_SETTINGS_STRUCT_DESCRIPTION);
 

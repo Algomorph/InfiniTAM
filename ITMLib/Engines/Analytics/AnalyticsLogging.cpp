@@ -18,10 +18,31 @@
 
 namespace ITMLib {
 
+template<>
+void GetMaxBlockCounts<PlainVoxelArray>(int& canonical_max_block_count, int& live_max_block_count, int& warp_max_block_count) {
+	canonical_max_block_count = live_max_block_count = warp_max_block_count = 1;
+}
+
+template<>
+void GetMaxBlockCounts<VoxelBlockHash>(int& canonical_max_block_count, int& live_max_block_count, int& warp_max_block_count) {
+	canonical_max_block_count = configuration::ForVolumeRole<VoxelBlockHash>(configuration::VOLUME_CANONICAL).voxel_block_count;
+	live_max_block_count = configuration::ForVolumeRole<VoxelBlockHash>(configuration::VOLUME_LIVE).voxel_block_count;
+	warp_max_block_count = configuration::ForVolumeRole<VoxelBlockHash>(configuration::VOLUME_WARP).voxel_block_count;
+}
+
+template void LogVoxelHashBlockUsage<TSDFVoxel, WarpVoxel, VoxelBlockHash>(
+		VoxelVolume<TSDFVoxel, VoxelBlockHash>* canonical_volume,
+		VoxelVolume<TSDFVoxel, VoxelBlockHash>* live_volume,
+		VoxelVolume<WarpVoxel, VoxelBlockHash>* warp_volume, IndexingMethod indexing_method);
+template void LogVoxelHashBlockUsage<TSDFVoxel, WarpVoxel, PlainVoxelArray>(
+		VoxelVolume<TSDFVoxel, PlainVoxelArray>* canonical_volume,
+		VoxelVolume<TSDFVoxel, PlainVoxelArray>* live_volume,
+		VoxelVolume<WarpVoxel, PlainVoxelArray>* warp_volume, IndexingMethod indexing_method);
+
 template void LogTSDFVolumeStatistics<TSDFVoxel, VoxelBlockHash>(VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume,
-                                                                 std::string volume_description);
+                                                                 const std::string&, IndexingMethod indexing_method);
 template void LogTSDFVolumeStatistics<TSDFVoxel, PlainVoxelArray>(VoxelVolume<TSDFVoxel, PlainVoxelArray>* volume,
-                                                                  std::string volume_description);
+                                                                  const std::string&, IndexingMethod indexing_method);
 
 void LogCameraTrajectoryQuaternion(const ORUtils::SE3Pose* p) {
 	if (configuration::Get().logging_settings.log_trajectory_quaternions) {
@@ -35,7 +56,7 @@ void LogCameraTrajectoryQuaternion(const ORUtils::SE3Pose* p) {
 		QuaternionFromRotationMatrix(R, q);
 		LOG4CPLUS_PER_FRAME(logging::get_logger(),
 		                    "Camera quaternion: " << t[0] << " " << t[1] << " " << t[2] << " "
-		                         << q[1] << " " << q[2] << " " << q[3] << " " << q[0]);
+		                                          << q[1] << " " << q[2] << " " << q[3] << " " << q[0]);
 	}
 };
 
