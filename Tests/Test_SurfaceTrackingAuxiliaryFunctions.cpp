@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE(Test_ClearOutFramewiseWarp_CPU_PVA){
 	BOOST_REQUIRE_CLOSE(Analytics_CPU_PVA_Warp::Instance().ComputeWarpUpdateMax(warps_PVA), 0.12124350666999817f, relativeTolerance);
 	BOOST_REQUIRE_CLOSE(Analytics_CPU_PVA_Warp::Instance().ComputeWarpUpdateMin(warps_PVA), 0.0f, relativeTolerance);
 
-	auto motionTracker_PVA_CPU = new SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_DIAGNOSTIC>();
+	auto motionTracker_PVA_CPU = new SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU, DIAGNOSTIC>();
 
 	motionTracker_PVA_CPU->ClearOutWarpUpdates(warps_PVA);
 	BOOST_REQUIRE_CLOSE(Analytics_CPU_PVA_Warp::Instance().ComputeWarpUpdateMax(warps_PVA), 0.0f, relativeTolerance);
@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(Test_ClearOutWarpUpdate_CPU_VBH){
 	BOOST_REQUIRE_CLOSE(Analytics_CPU_VBH_Warp::Instance().ComputeWarpUpdateMax(warps_VBH), 0.12124350666999817f, relativeTolerance);
 	BOOST_REQUIRE_CLOSE(Analytics_CPU_VBH_Warp::Instance().ComputeWarpUpdateMin(warps_VBH), 0.0f, relativeTolerance);
 
-	auto motionTracker_VBH_CPU = new SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_DIAGNOSTIC>();
+	auto motionTracker_VBH_CPU = new SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU, DIAGNOSTIC>();
 
 	motionTracker_VBH_CPU->ClearOutWarpUpdates(warps_VBH);
 	BOOST_REQUIRE_CLOSE(Analytics_CPU_VBH_Warp::Instance().ComputeWarpUpdateMax(warps_VBH), 0.0f, relativeTolerance);
@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE(Test_ClearOutWarpUpdate_CUDA_PVA){
 	BOOST_REQUIRE_CLOSE(Analytics_CUDA_PVA_Warp::Instance().ComputeWarpUpdateMax(warps_PVA), 0.12124350666999817, relativeTolerance);
 	BOOST_REQUIRE_CLOSE(Analytics_CUDA_PVA_Warp::Instance().ComputeWarpUpdateMin(warps_PVA), 0.0f, relativeTolerance);
 
-	auto motionTracker_PVA_CUDA = new SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA, TRACKER_SLAVCHEVA_DIAGNOSTIC>();
+	auto motionTracker_PVA_CUDA = new SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA, DIAGNOSTIC>();
 
 	motionTracker_PVA_CUDA->ClearOutWarpUpdates(warps_PVA);
 	BOOST_REQUIRE_CLOSE(Analytics_CUDA_PVA_Warp::Instance().ComputeWarpUpdateMax(warps_PVA), 0.0f, relativeTolerance);
@@ -99,7 +99,7 @@ BOOST_AUTO_TEST_CASE(Test_ClearOutWarpUpdate_CUDA_VBH){
 	BOOST_REQUIRE_CLOSE(Analytics_CUDA_VBH_Warp::Instance().ComputeWarpUpdateMax(warps_VBH), 0.12124350666999817f, relativeTolerance);
 	BOOST_REQUIRE_CLOSE(Analytics_CUDA_VBH_Warp::Instance().ComputeWarpUpdateMin(warps_VBH), 0.0f, relativeTolerance);
 
-	auto motionTracker_VBH_CUDA = new SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA, TRACKER_SLAVCHEVA_DIAGNOSTIC>();
+	auto motionTracker_VBH_CUDA = new SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA, DIAGNOSTIC>();
 
 	motionTracker_VBH_CUDA->ClearOutWarpUpdates(warps_VBH);
 	BOOST_REQUIRE_CLOSE(Analytics_CUDA_VBH_Warp::Instance().ComputeWarpUpdateMax(warps_VBH), 0.0f, relativeTolerance);

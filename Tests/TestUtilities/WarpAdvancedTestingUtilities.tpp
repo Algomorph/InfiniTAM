@@ -118,7 +118,7 @@ void GenerateRawLiveAndCanonicalVolumes(VoxelVolume<TSDFVoxel, TIndex>** canonic
 
 
 template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
-void GenericWarpConsistencySubtest(const SlavchevaSurfaceTracker::Switches& switches, int iteration_limit,
+void GenericWarpConsistencySubtest(const LevelSetEvolutionSwitches& switches, int iteration_limit,
                                    GenericWarpTestMode mode, float absolute_tolerance) {
 
 
@@ -150,8 +150,7 @@ void GenericWarpConsistencySubtest(const SlavchevaSurfaceTracker::Switches& swit
 	AllocateUsingOtherVolume(canonical_volume, live_volumes[live_index_to_start_from], TMemoryDeviceType);
 
 
-	SurfaceTracker<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, TRACKER_SLAVCHEVA_DIAGNOSTIC>
-			motion_tracker(switches);
+	SurfaceTracker<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, DIAGNOSTIC> motion_tracker(switches);
 
 	VoxelVolume<WarpVoxel, TIndex> ground_truth_warp_field(TMemoryDeviceType,
 	                                                       snoopy::InitializationParameters_Fr16andFr17<TIndex>());
@@ -240,7 +239,7 @@ void GenericWarpConsistencySubtest(const SlavchevaSurfaceTracker::Switches& swit
 
 
 template<MemoryDeviceType TMemoryDeviceType>
-void Warp_PVA_VBH_simple_subtest(int iteration, SlavchevaSurfaceTracker::Switches trackerSwitches) {
+void Warp_PVA_VBH_simple_subtest(int iteration, LevelSetEvolutionSwitches trackerSwitches) {
 
 	if (iteration < 0) {
 		DIEWITHEXCEPTION_REPORTLOCATION("Expecting iteration >= 0, got less than that, aborting.");
@@ -302,16 +301,14 @@ void Warp_PVA_VBH_simple_subtest(int iteration, SlavchevaSurfaceTracker::Switche
 	AllocateUsingOtherVolume(volume_16_VBH, warped_live_VBH, TMemoryDeviceType);
 
 	// *** perform the warp gradient computation and warp updates
-	SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, TMemoryDeviceType, TRACKER_SLAVCHEVA_DIAGNOSTIC>
-			motionTracker_PVA(trackerSwitches);
+	SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, TMemoryDeviceType, DIAGNOSTIC> motionTracker_PVA(trackerSwitches);
 
 	std::cout << "==== CALCULATE PVA WARPS === " << std::endl;
 	motionTracker_PVA.CalculateWarpGradient(warps_PVA, volume_16_PVA, warped_live_PVA);
 	motionTracker_PVA.SmoothWarpGradient(warps_PVA, volume_16_PVA, warped_live_PVA);
 	motionTracker_PVA.UpdateWarps(warps_PVA, volume_16_PVA, warped_live_PVA);
 
-	SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, TMemoryDeviceType, TRACKER_SLAVCHEVA_DIAGNOSTIC>
-			motionTracker_VBH(trackerSwitches);
+	SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, TMemoryDeviceType, DIAGNOSTIC> motionTracker_VBH(trackerSwitches);
 
 
 	std::cout << "==== CALCULATE VBH WARPS === " << std::endl;
@@ -345,7 +342,7 @@ void Warp_PVA_VBH_simple_subtest(int iteration, SlavchevaSurfaceTracker::Switche
 }
 
 template<MemoryDeviceType TMemoryDeviceType>
-void GenericWarpTest(const SlavchevaSurfaceTracker::Switches& switches, int iteration_limit,
+void GenericWarpTest(const LevelSetEvolutionSwitches& switches, int iteration_limit,
                      GenericWarpTestMode mode, float absolute_tolerance) {
 
 	std::string prefix = SwitchesToPrefix(switches);

@@ -41,7 +41,6 @@ set(ITMLIB_ENGINES_MAIN_SOURCES
     Engines/Main/MultiEngine_PlainVoxelArray.cpp
     Engines/Main/MultiEngine_VoxelBlockHash.cpp
 
-    Engines/Main/NonRigidTrackingParameters.h
     Engines/Main/DynamicSceneVoxelEngine.tpp
     Engines/Main/DynamicSceneVoxelEngine_PlainVoxelArray.cpp
     Engines/Main/DynamicSceneVoxelEngine_VoxelBlockHash.cpp
@@ -855,19 +854,19 @@ set(ITMLIB_SCENE_MOTION_TRACKERS_CUDA_HEADERS
 ##
 
 set(ITMLIB_SCENE_MOTION_TRACKERS_INTERFACE_SOURCES
-    SurfaceTrackers/Interface/SlavchevaSurfaceTracker.cpp
+    SurfaceTrackers/Interface/LevelSetEvolutionParameters.cpp
     SurfaceTrackers/Interface/SurfaceTracker.tpp
     )
 set(ITMLIB_SCENE_MOTION_TRACKERS_INTERFACE_HEADERS
     SurfaceTrackers/WarpGradientFunctors/WarpGradientFunctor.h
     SurfaceTrackers/Interface/SurfaceTrackerInterface.h
-    SurfaceTrackers/Interface/SlavchevaSurfaceTracker.h
+    SurfaceTrackers/Interface/LevelSetEvolutionParameters.h
     SurfaceTrackers/Interface/SurfaceTracker.h
     )
 ##
 set(ITMLIB_SCENE_MOTION_TRACKERS_SHARED_HEADERS
-    SurfaceTrackers/WarpGradientFunctors/WarpGradientFunctor_SlavchevaDiagnostic.h
-    SurfaceTrackers/WarpGradientFunctors/WarpGradientFunctor_SlavchevaOptimized.h
+    SurfaceTrackers/WarpGradientFunctors/WarpGradientFunctor_Diagnostic.h
+    SurfaceTrackers/WarpGradientFunctors/WarpGradientFunctor_Optimized.h
 
     SurfaceTrackers/Shared/WarpGradientCommon.h
     SurfaceTrackers/Shared/SurfaceTrackerSharedRoutines.h

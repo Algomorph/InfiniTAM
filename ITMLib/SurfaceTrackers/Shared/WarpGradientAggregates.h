@@ -19,53 +19,53 @@
 template<MemoryDeviceType TMemoryDeviceType>
 struct AdditionalGradientAggregates{
 	AdditionalGradientAggregates(){
-		INITIALIZE_ATOMIC(float, cumulativeCanonicalSdf, 0.f);
-		INITIALIZE_ATOMIC(float, cumulativeLiveSdf,0.f);
-		INITIALIZE_ATOMIC(float, cumulativeSdfDiff, 0.f);
-		INITIALIZE_ATOMIC(float, cumulativeWarpDist, 0.f);
+		INITIALIZE_ATOMIC(float, cumulative_canonical_sdf, 0.f);
+		INITIALIZE_ATOMIC(float, cumulative_live_sdf, 0.f);
+		INITIALIZE_ATOMIC(float, cumulative_sdf_diff, 0.f);
+		INITIALIZE_ATOMIC(float, cumulative_warp_dist, 0.f);
 
-		INITIALIZE_ATOMIC(unsigned int, consideredVoxelCount, 0u);
-		INITIALIZE_ATOMIC(unsigned int, dataVoxelCount, 0u);
-		INITIALIZE_ATOMIC(unsigned int, levelSetVoxelCount, 0u);
+		INITIALIZE_ATOMIC(unsigned int, considered_voxel_count, 0u);
+		INITIALIZE_ATOMIC(unsigned int, data_voxel_count, 0u);
+		INITIALIZE_ATOMIC(unsigned int, level_set_voxel_count, 0u);
 	}
 	~AdditionalGradientAggregates(){
-		CLEAN_UP_ATOMIC(cumulativeCanonicalSdf);
-		CLEAN_UP_ATOMIC(cumulativeLiveSdf);
-		CLEAN_UP_ATOMIC(cumulativeSdfDiff);
-		CLEAN_UP_ATOMIC(cumulativeWarpDist);
+		CLEAN_UP_ATOMIC(cumulative_canonical_sdf);
+		CLEAN_UP_ATOMIC(cumulative_live_sdf);
+		CLEAN_UP_ATOMIC(cumulative_sdf_diff);
+		CLEAN_UP_ATOMIC(cumulative_warp_dist);
 
-		CLEAN_UP_ATOMIC(consideredVoxelCount);
-		CLEAN_UP_ATOMIC(dataVoxelCount);
-		CLEAN_UP_ATOMIC(levelSetVoxelCount);
+		CLEAN_UP_ATOMIC(considered_voxel_count);
+		CLEAN_UP_ATOMIC(data_voxel_count);
+		CLEAN_UP_ATOMIC(level_set_voxel_count);
 	}
 
-	DECLARE_ATOMIC_FLOAT(cumulativeCanonicalSdf);
-	DECLARE_ATOMIC_FLOAT(cumulativeLiveSdf);
-	DECLARE_ATOMIC_FLOAT(cumulativeSdfDiff);
-	DECLARE_ATOMIC_FLOAT(cumulativeWarpDist);
+	DECLARE_ATOMIC_FLOAT(cumulative_canonical_sdf);
+	DECLARE_ATOMIC_FLOAT(cumulative_live_sdf);
+	DECLARE_ATOMIC_FLOAT(cumulative_sdf_diff);
+	DECLARE_ATOMIC_FLOAT(cumulative_warp_dist);
 
-	DECLARE_ATOMIC_UINT(consideredVoxelCount);
-	DECLARE_ATOMIC_UINT(dataVoxelCount);
-	DECLARE_ATOMIC_UINT(levelSetVoxelCount);
+	DECLARE_ATOMIC_UINT(considered_voxel_count);
+	DECLARE_ATOMIC_UINT(data_voxel_count);
+	DECLARE_ATOMIC_UINT(level_set_voxel_count);
 };
 
 template<MemoryDeviceType TMemoryDeviceType>
 struct ComponentEnergies{
 	ComponentEnergies(){
-		INITIALIZE_ATOMIC(float, totalDataEnergy, 0.f);
-		INITIALIZE_ATOMIC(float, totalLevelSetEnergy,0.f);
-		INITIALIZE_ATOMIC(float, totalTikhonovEnergy,0.f);
-		INITIALIZE_ATOMIC(float, totalRigidityEnergy,0.f);
+		INITIALIZE_ATOMIC(float, total_data_energy, 0.f);
+		INITIALIZE_ATOMIC(float, total_level_set_energy, 0.f);
+		INITIALIZE_ATOMIC(float, total_Tikhonov_energy, 0.f);
+		INITIALIZE_ATOMIC(float, total_Killing_energy, 0.f);
 	}
 	~ComponentEnergies(){
-		CLEAN_UP_ATOMIC(totalDataEnergy);
-		CLEAN_UP_ATOMIC(totalLevelSetEnergy);
-		CLEAN_UP_ATOMIC(totalTikhonovEnergy);
-		CLEAN_UP_ATOMIC(totalRigidityEnergy);
+		CLEAN_UP_ATOMIC(total_data_energy);
+		CLEAN_UP_ATOMIC(total_level_set_energy);
+		CLEAN_UP_ATOMIC(total_Tikhonov_energy);
+		CLEAN_UP_ATOMIC(total_Killing_energy);
 	}
-	DECLARE_ATOMIC_FLOAT(totalDataEnergy);
-	DECLARE_ATOMIC_FLOAT(totalLevelSetEnergy);
-	DECLARE_ATOMIC_FLOAT(totalTikhonovEnergy);
-	DECLARE_ATOMIC_FLOAT(totalRigidityEnergy);
+	DECLARE_ATOMIC_FLOAT(total_data_energy);
+	DECLARE_ATOMIC_FLOAT(total_level_set_energy);
+	DECLARE_ATOMIC_FLOAT(total_Tikhonov_energy);
+	DECLARE_ATOMIC_FLOAT(total_Killing_energy);
 };
 

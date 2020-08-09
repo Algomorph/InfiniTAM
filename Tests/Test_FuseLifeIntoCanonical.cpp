@@ -51,7 +51,7 @@ namespace snoopy = snoopy_test_utilities;
 template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void GenericFusionTest(const int iteration = 4) {
 	VoxelVolume<TSDFVoxel, TIndex>* warped_live_volume;
-	SlavchevaSurfaceTracker::Switches data_tikhonov_sobolev_switches(true, false, true, false, true);
+	LevelSetEvolutionSwitches data_tikhonov_sobolev_switches(true, false, true, false, true);
 	LoadVolume(&warped_live_volume,
 	           GetWarpedLivePath<TIndex>(SwitchesToPrefix(data_tikhonov_sobolev_switches), iteration),
 	           TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE(Test_FuseLifeIntoCanonical_CUDA_VBH) {
 
 template<MemoryDeviceType TMemoryDeviceType>
 void GenericFusion_PVA_to_VBH_Test(const int iteration = 4) {
-	SlavchevaSurfaceTracker::Switches data_tikhonov_sobolev_switches(true, false, true, false, true);
+	LevelSetEvolutionSwitches data_tikhonov_sobolev_switches(true, false, true, false, true);
 
 	// *** load PVA stuff
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* warped_live_volume_PVA;

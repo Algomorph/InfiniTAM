@@ -519,9 +519,9 @@ template<typename TVoxel>
 struct TransferWarpUpdatesToVtkStructuresFunctor_WithComponents {
 public:
 	TransferWarpUpdatesToVtkStructuresFunctor_WithComponents(
-			vtkSmartPointer<vtkPolyData> updatesData,
-			vtkSmartPointer<vtkPolyData> dataTermData,
-			vtkSmartPointer<vtkPolyData> smoothingTermData,
+			const vtkSmartPointer<vtkPolyData>& updatesData,
+			const vtkSmartPointer<vtkPolyData>& dataTermData,
+			const vtkSmartPointer<vtkPolyData>& smoothingTermData,
 			std::unordered_map<std::string, std::pair<Vector3d, Vector3d>>& componentHedgehogEndpoints,
 			bool currentZebraIndex)
 			:
@@ -534,7 +534,13 @@ public:
 			smoothingTermPoints(smoothingTermData->GetPoints()),
 			smoothingTermVectors(vtkFloatArray::SafeDownCast(smoothingTermData->GetPointData()->GetVectors())),
 			smoothingTermColors(vtkIntArray::SafeDownCast(smoothingTermData->GetPointData()->GetScalars())),
-			componentHedgehogEndpoints(componentHedgehogEndpoints), currentZebraIndex(currentZebraIndex) {}
+			componentHedgehogEndpoints(componentHedgehogEndpoints), currentZebraIndex(currentZebraIndex) {
+		auto level_set_evolution_parameters = ExtractDeferrableSerializableStructFromPtreeIfPresent<LevelSetEvolutionParameters>(
+				configuration::Get().source_tree,
+				configuration::Get().origin
+		);
+		this->learning_rate = level_set_evolution_parameters.weights.learning_rate;
+	}
 
 	void operator()(const TVoxel& voxel, const Vector3i& position) {
 		std::string positionAsString = stringifyVoxelCoordinate(position);
@@ -557,20 +563,20 @@ public:
 			dataTermVectorStartPoint = iterator->second.first;
 			smoothingTermVectorStartPoint = iterator->second.second;
 		}
-		Vector3f dataTermVector =
-				-configuration::Get().slavcheva_parameters.learning_rate * voxel.data_term_gradient;
-		Vector3f smoothingTermVector =
-				-configuration::Get().slavcheva_parameters.learning_rate * voxel.smoothing_term_gradient;
+		Vector3f data_term_vector =
+				-learning_rate * voxel.data_term_gradient;
+		Vector3f smoothing_term_vector =
+				-learning_rate * voxel.smoothing_term_gradient;
 
 		dataTermPoints->InsertNextPoint(dataTermVectorStartPoint.values);
-		dataTermVectors->InsertNextTuple(dataTermVector.values);
+		dataTermVectors->InsertNextTuple(data_term_vector.values);
 		dataTermColors->InsertNextValue(currentZebraIndex);
 		smoothingTermPoints->InsertNextPoint(smoothingTermVectorStartPoint.values);
-		smoothingTermVectors->InsertNextTuple(smoothingTermVector.values);
+		smoothingTermVectors->InsertNextTuple(smoothing_term_vector.values);
 		smoothingTermColors->InsertNextValue(currentZebraIndex);
 		componentHedgehogEndpoints[positionAsString] =
-				std::make_pair(dataTermVectorStartPoint + dataTermVector.toDouble(),
-				               smoothingTermVectorStartPoint + smoothingTermVector.toDouble());
+				std::make_pair(dataTermVectorStartPoint + data_term_vector.toDouble(),
+				               smoothingTermVectorStartPoint + smoothing_term_vector.toDouble());
 	}
 
 private:
@@ -588,6 +594,7 @@ private:
 	vtkPoints* updatePoints;
 	vtkFloatArray* updateVectors;
 	vtkIntArray* updateColors;
+	float learning_rate;
 };
 
 template<typename TVoxelCanonical, typename TIndex, bool hasDebugInfo>

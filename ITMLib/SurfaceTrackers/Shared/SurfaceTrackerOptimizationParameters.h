@@ -19,7 +19,7 @@
 namespace ITMLib{
 	struct SurfaceTrackerOptimizationParameters {
 		const float learning_rate;// = 0.1f;
-		const float rigidity_enforcement_factor;// = 0.1f;
+		const float weight_killing_term;// = 0.1f;
 		const float weight_data_term;
 		const float weight_smoothing_term;// = 0.2f; //0.2 is default for SobolevFusion, 0.5 is default for KillingFusion
 		const float weight_level_set_term;// = 0.2f;

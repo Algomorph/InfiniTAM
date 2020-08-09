@@ -87,7 +87,7 @@ void GenericWarpVolumeTest() {
 template<MemoryDeviceType TMemoryDeviceType>
 void GenericWarpVolume_VBH_to_PVA_Test(const int iteration = 0) {
 	// *** load warps
-	SlavchevaSurfaceTracker::Switches data_only_switches(true, false, false, false, false);
+	LevelSetEvolutionSwitches data_only_switches(true, false, false, false, false);
 	std::string path_warps_PVA = GetWarpsPath<PlainVoxelArray>(SwitchesToPrefix(data_only_switches), iteration);
 	std::string path_warps_VBH = GetWarpsPath<VoxelBlockHash>(SwitchesToPrefix(data_only_switches), iteration);
 

@@ -75,7 +75,7 @@ struct SetGradientFunctor<TWarp, true> {
 
 
 template<typename TTSDFVoxel, typename TWarpVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-struct WarpGradientFunctor<TTSDFVoxel, TWarpVoxel, TIndex, TMemoryDeviceType, TRACKER_SLAVCHEVA_DIAGNOSTIC> {
+struct WarpGradientFunctor<TTSDFVoxel, TWarpVoxel, TIndex, TMemoryDeviceType, DIAGNOSTIC> {
 private:
 
 	_CPU_AND_GPU_CODE_
@@ -99,19 +99,19 @@ private:
 			printf("Warp length: %s%f%s\n", c_green, ORUtils::length(warp_update), c_reset);
 
 			print_voxel_result = true;
+		} else {
+			print_voxel_result = false;
 		}
 	}
-
 
 public:
 
 	// region ========================================= CONSTRUCTOR ====================================================
-
-	WarpGradientFunctor(SlavchevaSurfaceTracker::Parameters parameters,
-	                    SlavchevaSurfaceTracker::Switches switches,
-	                    VoxelVolume<TWarpVoxel,TIndex>* warp_field,
-	                    VoxelVolume<TTSDFVoxel,TIndex>* canonical_volume,
-	                    VoxelVolume<TTSDFVoxel,TIndex>* live_volume,
+	WarpGradientFunctor(LevelSetEvolutionWeights parameters,
+	                    LevelSetEvolutionSwitches switches,
+	                    VoxelVolume<TWarpVoxel, TIndex>* warp_field,
+	                    VoxelVolume<TTSDFVoxel, TIndex>* canonical_volume,
+	                    VoxelVolume<TTSDFVoxel, TIndex>* live_volume,
 	                    float voxel_size, float truncation_distance) :
 			parameters(parameters), switches(switches),
 			live_voxels(live_volume->GetVoxels()), live_index_data(live_volume->index.GetIndexData()),
@@ -121,8 +121,7 @@ public:
 			use_focus_coordinates(configuration::Get().logging_settings.verbosity_level >= VERBOSITY_FOCUS_SPOTS),
 			focus_coordinates(configuration::Get().focus_coordinates),
 			sdf_unity(voxel_size / truncation_distance),
-			verbosity_level(configuration::Get().logging_settings.verbosity_level)
-			{}
+			verbosity_level(configuration::Get().logging_settings.verbosity_level) {}
 
 	// endregion =======================================================================================================
 
@@ -130,52 +129,56 @@ public:
 	void operator()(TWarpVoxel& warp_voxel, TTSDFVoxel& canonical_voxel, TTSDFVoxel& live_voxel, const Vector3i& voxel_position) {
 
 
-		bool print_voxel_result = false;
 		Vector3f& warp_update = warp_voxel.warp_update;
-		bool computeDataAndLevelSetTerms = VoxelIsConsideredForDataTerm(canonical_voxel, live_voxel);
-		this->SetUpFocusVoxelPrinting(print_voxel_result, voxel_position, warp_update, canonical_voxel, live_voxel, computeDataAndLevelSetTerms);
+
+		bool compute_data_and_level_set_terms = VoxelIsConsideredForDataAndLS_Term(canonical_voxel, live_voxel);
+
+		bool print_voxel_result;
+		this->SetUpFocusVoxelPrinting(print_voxel_result, voxel_position, warp_update, canonical_voxel, live_voxel, compute_data_and_level_set_terms);
+
 		if (print_voxel_result) {
 			printf("%sLive 6-connected neighbor information:%s\n", c_blue, c_reset);
-			print6ConnectedNeighborInfo(voxel_position, live_voxels, live_index_data, live_cache);
+			Print6ConnectedNeighborInfo(voxel_position, live_voxels, live_index_data, live_cache);
 		}
+
 		if (!VoxelIsConsideredForTracking(canonical_voxel, live_voxel)) return;
 
 		float live_sdf = TTSDFVoxel::valueToFloat(live_voxel.sdf);
 		float canonical_sdf = TTSDFVoxel::valueToFloat(canonical_voxel.sdf);
 
 		// term gradient results are stored here before being added up
-		Vector3f localSmoothingEnergyGradient(0.0f), localDataEnergyGradient(0.0f), localLevelSetEnergyGradient(0.0f);
+		Vector3f local_smoothing_energy_gradient(0.0f), local_data_energy_gradient(0.0f), local_level_set_energy_gradient(0.0f);
 
 
 
 		// region =============================== DATA TERM ================================================
-		if (computeDataAndLevelSetTerms) {
-			Vector3f liveSdfJacobian;
+		if (compute_data_and_level_set_terms) {
+			Vector3f live_sdf_jacobian;
 			ComputeLiveJacobian_CentralDifferences(
-					liveSdfJacobian, voxel_position, live_voxels, live_index_data, live_cache);
+					live_sdf_jacobian, voxel_position, live_voxels, live_index_data, live_cache);
 			if (switches.enable_data_term) {
 
 				// Compute data term error / energy
-				float sdfDifferenceBetweenLiveAndCanonical = live_sdf - canonical_sdf;
+				float sdf_difference_between_live_and_canonical = live_sdf - canonical_sdf;
 				// (φ_n(Ψ)−φ_{global}) ∇φ_n(Ψ) - also denoted as - (φ_{proj}(Ψ)−φ_{model}) ∇φ_{proj}(Ψ)
 				// φ_n(Ψ) = φ_n(x+u, y+v, z+w), where u = u(x,y,z), v = v(x,y,z), w = w(x,y,z)
 				// φ_{global} = φ_{global}(x, y, z)
-				localDataEnergyGradient =
-						parameters.weight_data_term * sdfDifferenceBetweenLiveAndCanonical * liveSdfJacobian;
+				local_data_energy_gradient =
+						parameters.weight_data_term * sdf_difference_between_live_and_canonical * live_sdf_jacobian;
 
-				ATOMIC_ADD(aggregates.dataVoxelCount, 1u);
+				ATOMIC_ADD(aggregates.data_voxel_count, 1u);
 
-				float localDataEnergy = parameters.weight_data_term * 0.5f *
-				                        (sdfDifferenceBetweenLiveAndCanonical * sdfDifferenceBetweenLiveAndCanonical);
+				float local_data_energy = parameters.weight_data_term * 0.5f *
+				                          (sdf_difference_between_live_and_canonical * sdf_difference_between_live_and_canonical);
 
 
-				ATOMIC_ADD(energies.totalDataEnergy, localDataEnergy);
+				ATOMIC_ADD(energies.total_data_energy, local_data_energy);
 
-				ATOMIC_ADD(aggregates.dataVoxelCount, 1u);
-				ATOMIC_ADD(aggregates.cumulativeSdfDiff, sdfDifferenceBetweenLiveAndCanonical);
+				ATOMIC_ADD(aggregates.data_voxel_count, 1u);
+				ATOMIC_ADD(aggregates.cumulative_sdf_diff, sdf_difference_between_live_and_canonical);
 
 				if (print_voxel_result) {
-					_DEBUG_PrintDataTermStuff(liveSdfJacobian);
+					PrintDataTermInformation(live_sdf_jacobian);
 				}
 			}
 
@@ -184,20 +187,20 @@ public:
 			// region =============================== LEVEL SET TERM ===========================================
 
 			if (switches.enable_level_set_term) {
-				Matrix3f liveSdfHessian;
-				ComputeSdfHessian(liveSdfHessian, voxel_position, live_sdf, live_voxels, live_index_data, live_cache);
+				Matrix3f live_sdf_hessian;
+				ComputeSdfHessian(live_sdf_hessian, voxel_position, live_sdf, live_voxels, live_index_data, live_cache);
 
-				float sdfJacobianNorm = ORUtils::length(liveSdfJacobian);
-				float sdfJacobianNormMinusUnity = sdfJacobianNorm - sdf_unity;
-				localLevelSetEnergyGradient = parameters.weight_level_set_term * sdfJacobianNormMinusUnity *
-				                              (liveSdfHessian * liveSdfJacobian) /
-				                              (sdfJacobianNorm + parameters.epsilon);
-				ATOMIC_ADD(aggregates.levelSetVoxelCount, 1u);
-				float localLevelSetEnergy = parameters.weight_level_set_term *
-						0.5f * (sdfJacobianNormMinusUnity * sdfJacobianNormMinusUnity);
-				ATOMIC_ADD(energies.totalLevelSetEnergy, localLevelSetEnergy);
+				float sdf_jacobian_norm = ORUtils::length(live_sdf_jacobian);
+				float sdf_jacobian_norm_minus_unity = sdf_jacobian_norm - sdf_unity;
+				local_level_set_energy_gradient = parameters.weight_level_set_term * sdf_jacobian_norm_minus_unity *
+				                                  (live_sdf_hessian * live_sdf_jacobian) /
+				                                  (sdf_jacobian_norm + parameters.epsilon);
+				ATOMIC_ADD(aggregates.level_set_voxel_count, 1u);
+				float local_level_set_energy = parameters.weight_level_set_term *
+				                               0.5f * (sdf_jacobian_norm_minus_unity * sdf_jacobian_norm_minus_unity);
+				ATOMIC_ADD(energies.total_level_set_energy, local_level_set_energy);
 				if (print_voxel_result) {
-					_DEBUG_PrintLevelSetTermStuff(liveSdfJacobian, liveSdfHessian, sdfJacobianNormMinusUnity);
+					PrintLevelSetTermInformation(live_sdf_jacobian, live_sdf_hessian, sdf_jacobian_norm_minus_unity);
 				}
 			}
 			// endregion =======================================================================================
@@ -231,16 +234,14 @@ public:
 				Matrix3f warp_update_Hessian[3] = {Matrix3f(0.0f), Matrix3f(0.0f), Matrix3f(0.0f)};
 				ComputePerVoxelWarpJacobianAndHessian(warp_update, neighbor_warp_updates, warp_update_Jacobian,
 				                                      warp_update_Hessian);
-//TODO rewrite function to be used within CUDA code, remove guards
-#ifndef __CUDACC__
-				if (print_voxel_result) {
-					_DEBUG_PrintKillingTermStuff(neighbor_warp_updates, neighbors_known, neighbors_truncated,
-					                             warp_update_Jacobian, warp_update_Hessian);
-				}
-#endif
 
-				float gamma = parameters.rigidity_enforcement_factor;
-				float onePlusGamma = 1.0f + gamma;
+				if (print_voxel_result) {
+					PrintKillingTermInformation(neighbor_warp_updates, neighbors_known, neighbors_truncated,
+					                            warp_update_Jacobian, warp_update_Hessian);
+				}
+
+				float gamma = parameters.weight_killing_term;
+				float one_plus_gamma = 1.0f + gamma;
 				// |0, 3, 6|     |m00, m10, m20|      |u_xx, u_xy, u_xz|
 				// |1, 4, 7|     |m01, m11, m21|      |u_xy, u_yy, u_yz|
 				// |2, 5, 8|     |m02, m12, m22|      |u_xz, u_yz, u_zz|
@@ -249,38 +250,38 @@ public:
 				Matrix3f& H_w = warp_update_Hessian[2];
 
 
-				float KillingDeltaEu = -2.0f *
-				                       ((onePlusGamma) * H_u.xx + (H_u.yy) + (H_u.zz) + gamma * H_v.xy +
-				                        gamma * H_w.xz);
-				float KillingDeltaEv = -2.0f *
-				                       ((onePlusGamma) * H_v.yy + (H_v.zz) + (H_v.xx) + gamma * H_u.xy +
-				                        gamma * H_w.yz);
-				float KillingDeltaEw = -2.0f *
-				                       ((onePlusGamma) * H_w.zz + (H_w.xx) + (H_w.yy) + gamma * H_v.yz +
-				                        gamma * H_u.xz);
+				float Killing_delta_E_u = -2.0f *
+				                          ((one_plus_gamma) * H_u.xx + (H_u.yy) + (H_u.zz) + gamma * H_v.xy +
+				                           gamma * H_w.xz);
+				float Killing_delta_E_v = -2.0f *
+				                          ((one_plus_gamma) * H_v.yy + (H_v.zz) + (H_v.xx) + gamma * H_u.xy +
+				                           gamma * H_w.yz);
+				float killing_delta_E_w = -2.0f *
+				                          ((one_plus_gamma) * H_w.zz + (H_w.xx) + (H_w.yy) + gamma * H_v.yz +
+				                           gamma * H_u.xz);
 
-				localSmoothingEnergyGradient =
-						parameters.weight_smoothing_term * Vector3f(KillingDeltaEu, KillingDeltaEv, KillingDeltaEw);
+				local_smoothing_energy_gradient =
+						parameters.weight_smoothing_term * Vector3f(Killing_delta_E_u, Killing_delta_E_v, killing_delta_E_w);
 				//=================================== ENERGY ===============================================
-				// KillingTerm Energy
-				Matrix3f warpJacobianTranspose = warp_update_Jacobian.t();
+				//dampened approximately-Killing energy
+				Matrix3f warp_Jacobian_transpose = warp_update_Jacobian.t();
 
-				float local_tikhonov_energy = parameters.weight_smoothing_term *
+				float local_Tikhonov_energy = parameters.weight_smoothing_term *
 				                              dot(warp_update_Jacobian.getColumn(0),
-				                                warp_update_Jacobian.getColumn(0)) +
+				                                  warp_update_Jacobian.getColumn(0)) +
 				                              dot(warp_update_Jacobian.getColumn(1),
-				                                warp_update_Jacobian.getColumn(1)) +
+				                                  warp_update_Jacobian.getColumn(1)) +
 				                              dot(warp_update_Jacobian.getColumn(2), warp_update_Jacobian.getColumn(2));
 
-				float localRigidityEnergy = gamma * parameters.weight_smoothing_term *
-				                            (dot(warpJacobianTranspose.getColumn(0),
-				                                 warp_update_Jacobian.getColumn(0)) +
-				                             dot(warpJacobianTranspose.getColumn(1),
+				float local_Killing_energy = gamma * parameters.weight_smoothing_term *
+				                             (dot(warp_Jacobian_transpose.getColumn(0),
+				                                  warp_update_Jacobian.getColumn(0)) +
+				                             dot(warp_Jacobian_transpose.getColumn(1),
 				                                 warp_update_Jacobian.getColumn(1)) +
-				                             dot(warpJacobianTranspose.getColumn(2),
+				                             dot(warp_Jacobian_transpose.getColumn(2),
 				                                 warp_update_Jacobian.getColumn(2)));
-				ATOMIC_ADD(energies.totalTikhonovEnergy, local_tikhonov_energy);
-				ATOMIC_ADD(energies.totalRigidityEnergy, localRigidityEnergy);
+				ATOMIC_ADD(energies.total_Tikhonov_energy, local_Tikhonov_energy);
+				ATOMIC_ADD(energies.total_Killing_energy, local_Killing_energy);
 			} else {
 				Matrix3f warp_updateJacobian(0.0f);
 				Vector3f warp_updateLaplacian;
@@ -289,22 +290,22 @@ public:
 
 
 				if (print_voxel_result) {
-					_DEBUG_PrintTikhonovTermStuff(neighbor_warp_updates, warp_updateLaplacian);
+					PrintTikhonovTermInformation(neighbor_warp_updates, warp_updateLaplacian);
 				}
 
 				//∇E_{reg}(Ψ) = −[∆U ∆V ∆W]' ,
-				localSmoothingEnergyGradient = -parameters.weight_smoothing_term * warp_updateLaplacian;
-				float localTikhonovEnergy = parameters.weight_smoothing_term *
-						dot(warp_updateJacobian.getColumn(0), warp_updateJacobian.getColumn(0)) +
-						dot(warp_updateJacobian.getColumn(1), warp_updateJacobian.getColumn(1)) +
-						dot(warp_updateJacobian.getColumn(2), warp_updateJacobian.getColumn(2));
-				ATOMIC_ADD(energies.totalTikhonovEnergy, localTikhonovEnergy);
+				local_smoothing_energy_gradient = -parameters.weight_smoothing_term * warp_updateLaplacian;
+				float local_Tikhonov_energy = parameters.weight_smoothing_term *
+				                              dot(warp_updateJacobian.getColumn(0), warp_updateJacobian.getColumn(0)) +
+				                              dot(warp_updateJacobian.getColumn(1), warp_updateJacobian.getColumn(1)) +
+				                              dot(warp_updateJacobian.getColumn(2), warp_updateJacobian.getColumn(2));
+				ATOMIC_ADD(energies.total_Tikhonov_energy, local_Tikhonov_energy);
 			}
 		}
 		// endregion
 		// region =============================== COMPUTE ENERGY GRADIENT ==================================
 		SetGradientFunctor<TWarpVoxel, TWarpVoxel::hasDebugInformation>::SetGradient(
-				warp_voxel, localDataEnergyGradient, localLevelSetEnergyGradient, localSmoothingEnergyGradient);
+				warp_voxel, local_data_energy_gradient, local_level_set_energy_gradient, local_smoothing_energy_gradient);
 
 		// endregion
 		// region =============================== AGGREGATE VOXEL STATISTICS ===============================
@@ -312,29 +313,29 @@ public:
 
 		float warpLength = ORUtils::length(warp_voxel.warp_update);
 
-		ATOMIC_ADD(aggregates.cumulativeCanonicalSdf, canonical_sdf);
-		ATOMIC_ADD(aggregates.cumulativeLiveSdf, live_sdf);
-		ATOMIC_ADD(aggregates.cumulativeWarpDist, warpLength);
-		ATOMIC_ADD(aggregates.consideredVoxelCount, 1u);
+		ATOMIC_ADD(aggregates.cumulative_canonical_sdf, canonical_sdf);
+		ATOMIC_ADD(aggregates.cumulative_live_sdf, live_sdf);
+		ATOMIC_ADD(aggregates.cumulative_warp_dist, warpLength);
+		ATOMIC_ADD(aggregates.considered_voxel_count, 1u);
 		// endregion
 
 		// region ======================== FINALIZE RESULT PRINTING / RECORDING ========================================
 
 		if (print_voxel_result) {
 			float energyGradientLength = ORUtils::length(warp_voxel.gradient0);
-			_DEBUG_printLocalEnergyGradients(localDataEnergyGradient, localLevelSetEnergyGradient,
-			                                 localSmoothingEnergyGradient, warp_voxel.gradient0, energyGradientLength);
+			PrintLocalEnergyGradients(local_data_energy_gradient, local_level_set_energy_gradient,
+			                          local_smoothing_energy_gradient, warp_voxel.gradient0, energyGradientLength);
 		}
 		// endregion ===================================================================================================
 	}
 
 
 	void PrintStatistics() {
-		if(verbosity_level < VERBOSITY_PER_ITERATION) return;
+		if (verbosity_level < VERBOSITY_PER_ITERATION) return;
 		std::cout << bright_cyan << "*** Non-rigid Alignment Iteration Statistics ***" << reset << std::endl;
 		PrintEnergyStatistics(this->switches.enable_data_term, this->switches.enable_level_set_term,
 		                      this->switches.enable_smoothing_term, this->switches.enable_killing_rigidity_enforcement_term,
-		                      this->parameters.rigidity_enforcement_factor, energies);
+		                      this->parameters.weight_killing_term, energies);
 		CalculateAndPrintAdditionalStatistics(
 				this->switches.enable_data_term, this->switches.enable_level_set_term, aggregates);
 	}
@@ -364,8 +365,8 @@ private:
 	bool use_focus_coordinates{};
 	Vector3i focus_coordinates;
 
-	const SlavchevaSurfaceTracker::Parameters parameters;
-	const SlavchevaSurfaceTracker::Switches switches;
+	const LevelSetEvolutionWeights parameters;
+	const LevelSetEvolutionSwitches switches;
 
 	const VerbosityLevel verbosity_level;
 };

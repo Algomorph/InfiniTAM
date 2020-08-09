@@ -63,16 +63,14 @@ void PrintEnergyStatistics(const bool& enable_data_term,
                            const bool& enableRigidityTerm,
                            const float& gamma,
                            ComponentEnergies<TMemoryDeviceType>& energies) {
-	float totalDataEnergy = GET_ATOMIC_VALUE_CPU(energies.totalDataEnergy);
-	float totalLevelSetEnergy = GET_ATOMIC_VALUE_CPU(energies.totalLevelSetEnergy);
-	float totalTikhonovEnergy = GET_ATOMIC_VALUE_CPU(energies.totalTikhonovEnergy);
-	float totalRigidityEnergy = GET_ATOMIC_VALUE_CPU(energies.totalRigidityEnergy);
+	float totalDataEnergy = GET_ATOMIC_VALUE_CPU(energies.total_data_energy);
+	float totalLevelSetEnergy = GET_ATOMIC_VALUE_CPU(energies.total_level_set_energy);
+	float totalTikhonovEnergy = GET_ATOMIC_VALUE_CPU(energies.total_Tikhonov_energy);
+	float totalRigidityEnergy = GET_ATOMIC_VALUE_CPU(energies.total_Killing_energy);
 	PrintEnergyStatistics(enable_data_term, enable_level_set_term, enable_smoothing_term, enableRigidityTerm, gamma,
 	                      totalDataEnergy, totalLevelSetEnergy, totalTikhonovEnergy, totalRigidityEnergy);
 }
 
-
-//cumulativeLiveSdf, cumulativeWarpDist, cumulativeSdfDiff, consideredVoxelCount, dataVoxelCount, levelSetVoxelCount;
 
 inline static
 void CalculateAndPrintAdditionalStatistics(const bool& enable_data_term,
@@ -122,13 +120,13 @@ void CalculateAndPrintAdditionalStatistics(const bool& enable_data_term,
                                            AdditionalGradientAggregates<TMemoryDeviceType>& aggregates,
                                            const unsigned int usedHashblockCount = 0) {
 
-	unsigned int consideredVoxelCount = GET_ATOMIC_VALUE_CPU(aggregates.consideredVoxelCount);
-	unsigned int dataVoxelCount = GET_ATOMIC_VALUE_CPU(aggregates.dataVoxelCount);
-	unsigned int levelSetVoxelCount = GET_ATOMIC_VALUE_CPU(aggregates.levelSetVoxelCount);
-	double cumulativeCanonicalSdf = GET_ATOMIC_VALUE_CPU(aggregates.cumulativeCanonicalSdf);
-	double cumulativeLiveSdf = GET_ATOMIC_VALUE_CPU(aggregates.cumulativeLiveSdf);
-	double cumulativeWarpDist = GET_ATOMIC_VALUE_CPU(aggregates.cumulativeWarpDist);
-	double cumulativeSdfDiff = GET_ATOMIC_VALUE_CPU(aggregates.cumulativeSdfDiff);
+	unsigned int consideredVoxelCount = GET_ATOMIC_VALUE_CPU(aggregates.considered_voxel_count);
+	unsigned int dataVoxelCount = GET_ATOMIC_VALUE_CPU(aggregates.data_voxel_count);
+	unsigned int levelSetVoxelCount = GET_ATOMIC_VALUE_CPU(aggregates.level_set_voxel_count);
+	double cumulativeCanonicalSdf = GET_ATOMIC_VALUE_CPU(aggregates.cumulative_canonical_sdf);
+	double cumulativeLiveSdf = GET_ATOMIC_VALUE_CPU(aggregates.cumulative_live_sdf);
+	double cumulativeWarpDist = GET_ATOMIC_VALUE_CPU(aggregates.cumulative_warp_dist);
+	double cumulativeSdfDiff = GET_ATOMIC_VALUE_CPU(aggregates.cumulative_sdf_diff);
 
 	CalculateAndPrintAdditionalStatistics(enable_data_term, enable_level_set_term, cumulativeCanonicalSdf,
 	                                      cumulativeLiveSdf, cumulativeWarpDist, cumulativeSdfDiff,

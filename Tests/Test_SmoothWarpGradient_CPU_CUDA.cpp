@@ -42,7 +42,7 @@ namespace snoopy = snoopy_test_utilities;
 BOOST_AUTO_TEST_CASE(testSmoothWarpGradient_PVA){
 	const int iteration = 0;
 
-	SlavchevaSurfaceTracker::Switches data_only_switches(true, false, false, false, false);
+	LevelSetEvolutionSwitches data_only_switches(true, false, false, false, false);
 	std::string path_warps = GetWarpsPath<PlainVoxelArray>(SwitchesToPrefix(data_only_switches), iteration);
 	std::string path_frame_16_PVA = snoopy::PartialVolume16Path<PlainVoxelArray>();
 	std::string path_frame_17_PVA = snoopy::PartialVolume17Path<PlainVoxelArray>();
@@ -68,22 +68,22 @@ BOOST_AUTO_TEST_CASE(testSmoothWarpGradient_PVA){
 	           snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 
 
-	auto motionTracker_PVA_CPU = new SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_DIAGNOSTIC>(
-			SlavchevaSurfaceTracker::Switches(false, false, false, false, true));
-	auto motionTracker_PVA_CUDA = new SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA , TRACKER_SLAVCHEVA_DIAGNOSTIC>(
-			SlavchevaSurfaceTracker::Switches(false, false, false, false, true)
+	auto motion_tracker_PVA_CPU = new SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU, DIAGNOSTIC>(
+			LevelSetEvolutionSwitches(false, false, false, false, true));
+	auto motion_tracker_PVA_CUDA = new SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA , DIAGNOSTIC>(
+			LevelSetEvolutionSwitches(false, false, false, false, true)
 	);
 
-	motionTracker_PVA_CPU->SmoothWarpGradient(warp_field_CPU, canonical_volume_CPU, live_volume_CPU);
-	motionTracker_PVA_CUDA->SmoothWarpGradient(warp_field_CUDA, canonical_volume_CUDA, live_volume_CUDA);
+	motion_tracker_PVA_CPU->SmoothWarpGradient(warp_field_CPU, canonical_volume_CPU, live_volume_CPU);
+	motion_tracker_PVA_CUDA->SmoothWarpGradient(warp_field_CUDA, canonical_volume_CUDA, live_volume_CUDA);
 
 	VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field_CUDA_copy(*warp_field_CUDA, MEMORYDEVICE_CPU);
 
 	float tolerance = 1e-6;
 	BOOST_REQUIRE(contentAlmostEqual_CPU(&warp_field_CUDA_copy, warp_field_CPU, tolerance));
 
-	delete motionTracker_PVA_CPU;
-	delete motionTracker_PVA_CUDA;
+	delete motion_tracker_PVA_CPU;
+	delete motion_tracker_PVA_CUDA;
 
 	delete warp_field_CPU;
 	delete warp_field_CUDA;

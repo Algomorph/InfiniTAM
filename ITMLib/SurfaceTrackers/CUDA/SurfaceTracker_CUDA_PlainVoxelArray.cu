@@ -17,14 +17,14 @@
 #include "../../Engines/Traversal/CUDA/ThreeVolumeTraversal_CUDA_PlainVoxelArray.h"
 #include "../../Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
 #include "../../Engines/Analytics/AnalyticsEngine.h"
-#include "../WarpGradientFunctors/WarpGradientFunctor_SlavchevaOptimized.h"
-#include "../WarpGradientFunctors/WarpGradientFunctor_SlavchevaDiagnostic.h"
+#include "../WarpGradientFunctors/WarpGradientFunctor_Optimized.h"
+#include "../WarpGradientFunctors/WarpGradientFunctor_Diagnostic.h"
 #include "../../GlobalTemplateDefines.h"
 #include "../Interface/SurfaceTracker.tpp"
 
 namespace ITMLib {
 template
-class SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA, TRACKER_SLAVCHEVA_OPTIMIZED>;
+class SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA, OPTIMIZED>;
 template
-class SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA, TRACKER_SLAVCHEVA_DIAGNOSTIC>;
+class SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA, DIAGNOSTIC>;
 } // namespace ITMLib

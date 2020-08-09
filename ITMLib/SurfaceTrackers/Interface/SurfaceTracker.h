@@ -15,10 +15,12 @@
 //  ================================================================
 #pragma once
 
+//temporary
+#include "../Interface/LevelSetEvolutionParameters.h"
+
 #include "SurfaceTrackerInterface.h"
 #include "../WarpGradientFunctors/WarpGradientFunctor.h"
 #include "../../Engines/Warping/WarpingEngine.h"
-#include "../../Engines/Main/NonRigidTrackingParameters.h"
 #include "../../Utils/Configuration/Configuration.h"
 #include "../../Utils/WarpType.h"
 
@@ -26,9 +28,8 @@
 namespace ITMLib {
 
 
-template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, GradientFunctorType TGradientFunctorType>
-class SurfaceTracker :
-		public SurfaceTrackerInterface<TVoxel, TWarp, TIndex>, public SlavchevaSurfaceTracker {
+template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
+class SurfaceTracker : public SurfaceTrackerInterface<TVoxel, TWarp, TIndex> {
 public: // instance variables
 #ifndef __CUDACC__
 	bool const histograms_enabled = configuration::Get().logging_settings.verbosity_level >= VERBOSITY_PER_ITERATION;
@@ -39,14 +40,20 @@ public: // instance variables
 private: // instance variables
 
 	WarpingEngineInterface<TVoxel, TWarp, TIndex>* warping_engine;
-	const NonRigidTrackingParameters parameters_nr;
 	// needs to be declared after "parameters", derives value from it during initialization
-	const float max_vector_update_threshold_in_voxels;
+	const float mean_vector_update_threshold_in_voxels;
 	const bool log_settings = false;
 
+	//TODO: for auto-completion in Clion, remove when CLion is fixed and this is no longer necessary
+	const LevelSetEvolutionWeights& weights;
+	const LevelSetEvolutionSwitches& switches;
+	const LevelSetEvolutionTerminationConditions& termination;
+
+
 public: // instance functions
-	SurfaceTracker(Switches switches, Parameters parameters = Parameters());
+
 	SurfaceTracker();
+	SurfaceTracker(const LevelSetEvolutionSwitches& switches);
 	virtual ~SurfaceTracker();
 
 

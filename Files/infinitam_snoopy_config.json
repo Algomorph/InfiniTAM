@@ -85,21 +85,6 @@
             }
         }
     },
-    "slavcheva_parameters": {
-        "learning_rate": 0.200000003,
-        "rigidity_enforcement_factor": 0.100000001,
-        "weight_data_term": 2,
-        "weight_smoothing_term": 0.200000003,
-        "weight_level_set_term": 0.200000003,
-        "epsilon": "9.99999975e-06"
-    },
-    "slavcheva_switches": {
-        "enable_data_term": true,
-        "enable_level_set_term": false,
-        "enable_smoothing_term": true,
-        "enable_killing_rigidity_enforcement_term": false,
-        "enable_sobolev_gradient_smoothing": true
-    },
     "logging_settings": {
         "verbosity_level": "warning",
         "log_to_disk": true,
@@ -107,7 +92,8 @@
         "log_benchmarks": true,
         "log_volume_statistics": false,
         "log_trajectory_quaternions": false,
-        "log_surface_tracking_optimization_energies": false
+        "log_surface_tracking_optimization_energies": false,
+        "log_voxel_hash_block_usage": true
     },
     "paths": {
         "output_path": "<CONFIGURATION_DIRECTORY>",
@@ -119,12 +105,6 @@
         "depth_image_path_mask": "<CONFIGURATION_DIRECTORY>\/frames\/depth_%06i.png",
         "mask_image_path_mask": "<CONFIGURATION_DIRECTORY>\/frames\/mask_%06i.png",
         "imu_input_path": ""
-    },
-    "non_rigid_tracking_parameters": {
-        "functor_type": "slavcheva_optimized",
-        "max_iteration_threshold": 300,
-        "max_update_length_threshold": "9.99999997e-07",
-        "momentum_weight": 0.5
     },
     "create_meshing_engine": true,
     "device_type": "cuda",
@@ -168,5 +148,28 @@
         "save_volumes_and_camera_matrix_after_processing": false,
         "save_meshes_after_processing": false,
         "exit_after_automatic_processing": false
+    },
+    "level_set_evolution": {
+        "execution_mode": "optimized",
+        "weights": {
+            "learning_rate": 0.200000003,
+            "weight_killing_term": 0.100000001,
+            "weight_data_term": 2,
+            "weight_smoothing_term": 0.200000003,
+            "weight_level_set_term": 0.200000003,
+            "epsilon": "9.99999975e-06",
+            "momentum_weight": 0.5
+        },
+        "switches": {
+            "enable_data_term": true,
+            "enable_level_set_term": false,
+            "enable_smoothing_term": true,
+            "enable_killing_rigidity_enforcement_term": false,
+            "enable_sobolev_gradient_smoothing": true
+        },
+        "termination": {
+            "max_iteration_count": 300,
+            "mean_update_length_threshold": "9.99999997e-07"
+        }
     }
 }

@@ -1,6 +1,6 @@
 //  ================================================================
-//  Created by Gregory Kramida on 11/18/19.
-//  Copyright (c) 2019 Gregory Kramida
+//  Created by Gregory Kramida on 11/8/19.
+//  Copyright (c)  2019 Gregory Kramida
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
 //  You may obtain a copy of the License at
@@ -13,15 +13,22 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#pragma once
 
-#include "../../Utils/Metacoding/Metacoding.h"
-#include "../../../ORUtils/MemoryDeviceType.h"
-#include "../../Utils/ExecutionMode.h"
+//stdlib
+#include <unordered_map>
+#include <string>
 
-namespace ITMLib {
+//local
+#include "LevelSetEvolutionParameters.h"
+#include "../../Utils/Configuration/Configuration.h"
+#include "../../Utils/FileIO/JSON_Utilities.h"
+#include "../../Utils/CPPPrintHelpers.h"
 
-template< typename TTSDFVoxel, typename TWarpVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType, ExecutionMode TGradientFunctorType>
-struct WarpGradientFunctor;
+namespace ITMLib{
+
+DEFINE_SERIALIZABLE_STRUCT(WEIGHTS_STRUCT_DESCRIPTION);
+DEFINE_SERIALIZABLE_STRUCT(SWITCHES_STRUCT_DESCRIPTION);
+DEFINE_SERIALIZABLE_STRUCT(TERMINATION_CONDITIONS_STRUCT_DESCRIPTION);
+DEFINE_DEFERRABLE_SERIALIZABLE_STRUCT(LEVEL_SET_EVOLUTION_PARAMETERS_STRUCT_DESCRIPTION);
 
 } // namespace ITMLib

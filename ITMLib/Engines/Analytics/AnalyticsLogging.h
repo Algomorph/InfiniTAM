@@ -44,11 +44,9 @@ void LogVoxelHashBlockUsage(VoxelVolume<TVoxel, TIndex>* canonical_volume,
                             VoxelVolume<TVoxel, TIndex>* live_volume,
                             VoxelVolume<TWarp, TIndex>* warp_volume, IndexingMethod indexing_method) {
 	if (configuration::Get().logging_settings.log_voxel_hash_block_usage) {
-		auto& calculator =
-				AnalyticsEngineFactory::Get<TVoxel, TIndex>(canonical_volume->index.memory_type);
+		auto& calculator = AnalyticsEngineFactory::Get<TVoxel, TIndex>(canonical_volume->index.memory_type);
 
-		auto& calculator_warp =
-				AnalyticsEngineFactory::Get<TWarp, TIndex>(warp_volume->index.memory_type);
+		auto& calculator_warp = AnalyticsEngineFactory::Get<TWarp, TIndex>(warp_volume->index.memory_type);
 
 		unsigned int utilized_canonical_hash_block_count = calculator.CountUtilizedHashBlocks(canonical_volume);
 		unsigned int utilized_live_hash_block_count = calculator.CountUtilizedHashBlocks(live_volume);

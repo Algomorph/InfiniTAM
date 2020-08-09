@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_CASE(Test_VolumeReduction_MaxWarpUpdate_VBH_CUDA) {
 	const int iteration = 1;
 
 	// *** load warps
-	SlavchevaSurfaceTracker::Switches data_tikhonov_sobolev_switches(true, false, true, false, true);
+	LevelSetEvolutionSwitches data_tikhonov_sobolev_switches(true, false, true, false, true);
 	std::string path_warps = GetWarpsPath<VoxelBlockHash>(SwitchesToPrefix(data_tikhonov_sobolev_switches),
 	                                                           iteration);
 	VoxelVolume<WarpVoxel, VoxelBlockHash>* warps;

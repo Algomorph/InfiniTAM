@@ -40,7 +40,7 @@ bool VoxelIsConsideredForTracking(const TVoxel& voxelCanonical, const TVoxel& vo
 #define DATA_CONDITION_IGNORE_ANY_UNKNOWN
 template<typename TVoxel>
 _CPU_AND_GPU_CODE_ inline
-bool VoxelIsConsideredForDataTerm(const TVoxel& canonicalVoxel, const TVoxel& liveVoxel) {
+bool VoxelIsConsideredForDataAndLS_Term(const TVoxel& canonicalVoxel, const TVoxel& liveVoxel) {
 //_DEBUG preprocessor options
 #if defined(DATA_CONDITION_ALWAYS)
 	return true;

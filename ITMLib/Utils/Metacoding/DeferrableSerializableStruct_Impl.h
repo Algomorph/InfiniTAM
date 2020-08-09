@@ -77,9 +77,10 @@ ExtractDeferrableSerializableStructFromPtreeIfPresent(const pt::ptree& tree, con
 		target_tree.add_child(struct_name :: default_parse_path, deferrable_subtree);\
 	}\
 	static_qualifier void outer_class inner_qualifier UpdateDeferredFromVariablesMap(boost::property_tree::ptree& target_tree, const boost::program_options::variables_map& vm, const std::string& origin default_string_arg){\
-		struct_name deferrable = ExtractDeferrableSerializableStructFromPtreeIfPresent< struct_name > (target_tree, origin);\
+		auto deferrable = ExtractDeferrableSerializableStructFromPtreeIfPresent< struct_name > (target_tree, origin);\
 		deferrable.UpdateFromVariablesMap(vm, struct_name :: default_parse_path);\
 		auto deferrable_subtree = deferrable.ToPTree(origin);\
+        target_tree.erase(struct_name :: default_parse_path);\
 		target_tree.add_child(struct_name :: default_parse_path, deferrable_subtree);\
 	}\
 	static_qualifier void outer_class inner_qualifier AddDeferredToOptionsDescription(boost::program_options::options_description& od){\

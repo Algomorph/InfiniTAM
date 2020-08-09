@@ -50,13 +50,15 @@ struct DeferrableStructCollection {
 	IndexingSettings indexing_settings;
 	RenderingSettings rendering_settings;
 	AutomaticRunSettings automatic_run_settings;
+	LevelSetEvolutionParameters level_set_evolution_parameters;
 
 	DeferrableStructCollection(const configuration::Configuration& source_configuration = configuration::Get()) :
 			main_engine_settings(BuildDeferrableFromParentIfPresent<MainEngineSettings>(source_configuration)),
 			telemetry_settings(BuildDeferrableFromParentIfPresent<TelemetrySettings>(source_configuration)),
 			indexing_settings(BuildDeferrableFromParentIfPresent<IndexingSettings>(source_configuration)),
 			rendering_settings(BuildDeferrableFromParentIfPresent<RenderingSettings>(source_configuration)),
-			automatic_run_settings(BuildDeferrableFromParentIfPresent<AutomaticRunSettings>(source_configuration)) {}
+			automatic_run_settings(BuildDeferrableFromParentIfPresent<AutomaticRunSettings>(source_configuration)),
+			level_set_evolution_parameters(BuildDeferrableFromParentIfPresent<LevelSetEvolutionParameters>(source_configuration)){}
 
 	friend void RequireEqualDeferrables(const DeferrableStructCollection& l, const DeferrableStructCollection& r) {
 		BOOST_REQUIRE_EQUAL(l.main_engine_settings, r.main_engine_settings);
@@ -64,6 +66,7 @@ struct DeferrableStructCollection {
 		BOOST_REQUIRE_EQUAL(l.indexing_settings, r.indexing_settings);
 		BOOST_REQUIRE_EQUAL(l.rendering_settings, r.rendering_settings);
 		BOOST_REQUIRE_EQUAL(l.automatic_run_settings, r.automatic_run_settings);
+		BOOST_REQUIRE_EQUAL(l.level_set_evolution_parameters, r.level_set_evolution_parameters);
 	}
 
 };
@@ -89,13 +92,9 @@ BOOST_AUTO_TEST_CASE(ConfigurationFileTest) {
 	                    configuration::Get().general_voxel_volume_parameters);
 	BOOST_REQUIRE_EQUAL(default_configuration.general_surfel_volume_parameters,
 	                    configuration::Get().general_surfel_volume_parameters);
-	BOOST_REQUIRE_EQUAL(default_configuration.slavcheva_parameters, configuration::Get().slavcheva_parameters);
-	BOOST_REQUIRE_EQUAL(default_configuration.slavcheva_switches, configuration::Get().slavcheva_switches);
 	BOOST_REQUIRE_EQUAL(default_configuration.logging_settings, configuration::Get().logging_settings);
 	RequireEqualDeferrables(default_deferrables, loaded_deferrables);
 	BOOST_REQUIRE_EQUAL(default_configuration.paths, configuration::Get().paths);
-	BOOST_REQUIRE_EQUAL(default_configuration.non_rigid_tracking_parameters,
-	                    configuration::Get().non_rigid_tracking_parameters);
 	BOOST_REQUIRE_EQUAL(default_configuration, configuration::Get());
 
 	configuration::LoadConfigurationFromJSONFile(GENERATED_TEST_DATA_PREFIX "TestData/configuration/config1.json");
@@ -105,13 +104,9 @@ BOOST_AUTO_TEST_CASE(ConfigurationFileTest) {
 	                    configuration::Get().general_voxel_volume_parameters);
 	BOOST_REQUIRE_EQUAL(configuration1.general_surfel_volume_parameters,
 	                    configuration::Get().general_surfel_volume_parameters);
-	BOOST_REQUIRE_EQUAL(configuration1.slavcheva_parameters, configuration::Get().slavcheva_parameters);
-	BOOST_REQUIRE_EQUAL(configuration1.slavcheva_switches, configuration::Get().slavcheva_switches);
 	BOOST_REQUIRE_EQUAL(configuration1.logging_settings, configuration::Get().logging_settings);
 	RequireEqualDeferrables(deferrables1, loaded_deferrables);
 	BOOST_REQUIRE_EQUAL(configuration1.paths, configuration::Get().paths);
-	BOOST_REQUIRE_EQUAL(configuration1.non_rigid_tracking_parameters,
-	                    configuration::Get().non_rigid_tracking_parameters);
 	BOOST_REQUIRE_EQUAL(configuration1, configuration::Get());
 	configuration::SaveConfigurationToJSONFile(GENERATED_TEST_DATA_PREFIX "TestData/configuration/config2.json", configuration1);
 	configuration::LoadConfigurationFromJSONFile(GENERATED_TEST_DATA_PREFIX "TestData/configuration/config2.json");
@@ -121,13 +116,9 @@ BOOST_AUTO_TEST_CASE(ConfigurationFileTest) {
 	                    configuration::Get().general_voxel_volume_parameters);
 	BOOST_REQUIRE_EQUAL(configuration1.general_surfel_volume_parameters,
 	                    configuration::Get().general_surfel_volume_parameters);
-	BOOST_REQUIRE_EQUAL(configuration1.slavcheva_parameters, configuration::Get().slavcheva_parameters);
-	BOOST_REQUIRE_EQUAL(configuration1.slavcheva_switches, configuration::Get().slavcheva_switches);
 	BOOST_REQUIRE_EQUAL(configuration1.logging_settings, configuration::Get().logging_settings);
 	RequireEqualDeferrables(deferrables1, loaded_deferrables);
 	BOOST_REQUIRE_EQUAL(configuration1.paths, configuration::Get().paths);
-	BOOST_REQUIRE_EQUAL(configuration1.non_rigid_tracking_parameters,
-	                    configuration::Get().non_rigid_tracking_parameters);
 	BOOST_REQUIRE_EQUAL(configuration1, configuration::Get());
 }
 
@@ -207,18 +198,24 @@ BOOST_AUTO_TEST_CASE(ConfigurationTestLong_CLI_Only) {
 	                      " --specific_volume_parameters.hash.warp.voxel_block_count=131072"
 	                      " --specific_volume_parameters.hash.warp.excess_list_size=131072"
 
-	                      " --slavcheva_parameters.learning_rate=0.11"
-	                      " --slavcheva_parameters.rigidity_enforcement_factor=0.09"
-	                      " --slavcheva_parameters.weight_data_term=2"
-	                      " --slavcheva_parameters.weight_smoothing_term=0.3"
-	                      " --slavcheva_parameters.weight_level_set_term=0.1"
-	                      " --slavcheva_parameters.epsilon=1e-06"
+	                      " --level_set_evolution.execution_mode=diagnostic"
 
-	                      " --slavcheva_switches.enable_data_term=false"
-	                      " --slavcheva_switches.enable_level_set_term=true"
-	                      " --slavcheva_switches.enable_smoothing_term=false"
-	                      " --slavcheva_switches.enable_killing_rigidity_enforcement_term=true"
-	                      " --slavcheva_switches.enable_sobolev_gradient_smoothing=false"
+	                      " --level_set_evolution.weights.learning_rate=0.11"
+	                      " --level_set_evolution.weights.weight_killing_term=0.09"
+	                      " --level_set_evolution.weights.weight_data_term=2"
+	                      " --level_set_evolution.weights.weight_smoothing_term=0.3"
+	                      " --level_set_evolution.weights.weight_level_set_term=0.1"
+	                      " --level_set_evolution.weights.epsilon=1e-06"
+	                      " --level_set_evolution.weights.momentum_weight=0.4"
+
+	                      " --level_set_evolution.switches.enable_data_term=false"
+	                      " --level_set_evolution.switches.enable_level_set_term=true"
+	                      " --level_set_evolution.switches.enable_smoothing_term=false"
+	                      " --level_set_evolution.switches.enable_killing_rigidity_enforcement_term=true"
+	                      " --level_set_evolution.switches.enable_sobolev_gradient_smoothing=false"
+
+	                      " --level_set_evolution.termination.max_iteration_count=300"
+	                      " --level_set_evolution.termination.mean_update_length_threshold=0.0002"
 
 					      " --logging_settings.verbosity_level=warning"
 	                      " --logging_settings.log_to_disk=true"
@@ -233,11 +230,6 @@ BOOST_AUTO_TEST_CASE(ConfigurationTestLong_CLI_Only) {
 	                      " --paths.rgb_image_path_mask=" STATIC_TEST_DATA_PREFIX "TestData/frames/frame_color_%%06i.png"
 	                      " --paths.depth_image_path_mask=" STATIC_TEST_DATA_PREFIX "TestData/frames/frame_depth_%%06i.png"
 	                      " --paths.mask_image_path_mask=" STATIC_TEST_DATA_PREFIX "TestData/frames/frame_mask_%%06i.png"
-
-						  " --non_rigid_tracking_parameters.functor_type=slavcheva_diagnostic"
-	                      " --non_rigid_tracking_parameters.max_iteration_threshold=300"
-	                      " --non_rigid_tracking_parameters.max_update_length_threshold=0.0002"
-					      " --non_rigid_tracking_parameters.momentum_weight=0.4"
 
 		                  " --create_meshing_engine=true"
 	                      " --device_type=cpu"
@@ -292,11 +284,8 @@ BOOST_AUTO_TEST_CASE(ConfigurationTestLong_CLI_Only) {
 	BOOST_REQUIRE_EQUAL(configuration1.general_voxel_volume_parameters, configuration::Get().general_voxel_volume_parameters);
 	BOOST_REQUIRE_EQUAL(configuration1.general_surfel_volume_parameters, configuration::Get().general_surfel_volume_parameters);
 	BOOST_REQUIRE_EQUAL(configuration1.specific_volume_parameters, configuration::Get().specific_volume_parameters);
-	BOOST_REQUIRE_EQUAL(configuration1.slavcheva_parameters, configuration::Get().slavcheva_parameters);
-	BOOST_REQUIRE_EQUAL(configuration1.slavcheva_switches, configuration::Get().slavcheva_switches);
 	BOOST_REQUIRE_EQUAL(configuration1.logging_settings, configuration::Get().logging_settings);
 	BOOST_REQUIRE_EQUAL(configuration1.paths, configuration::Get().paths);
-	BOOST_REQUIRE_EQUAL(configuration1.non_rigid_tracking_parameters, configuration::Get().non_rigid_tracking_parameters);
 	BOOST_REQUIRE_EQUAL(configuration1, configuration::Get());
 	RequireEqualDeferrables(deferrables1, loaded_deferrables);
 }
@@ -344,18 +333,9 @@ BOOST_AUTO_TEST_CASE(ConfigurationTestLong_CLI_Only) {
 //	                      " -svp.h.w.vbc=131072"
 //	                      " -svp.h.w.els=131072"
 //
-//	                      " -sp.lr=0.11"
-//	                      " -sp.ref=0.09"
-//	                      " -sp.wdt=2"
-//	                      " -sp.wst=0.3"
-//	                      " -sp.wlst=0.1"
-//	                      " -sp.e=1e-06"
-//
-//	                      " -ss.edt=false"
-//	                      " -ss.elst=true"
-//	                      " -ss.est=false"
-//	                      " -ss.ekret=true"
-//	                      " -ss.esgs=false"
+
+// TODO: here the new level_set_evolution.* flags
+
 //
 //	                      " -ls.vl=warning"
 //	                      " -ls.ltd=true"
@@ -371,10 +351,6 @@ BOOST_AUTO_TEST_CASE(ConfigurationTestLong_CLI_Only) {
 //	                      " -p.dipm=" STATIC_TEST_DATA_PREFIX "TestData/frames/frame_depth_%%06i.png"
 //	                      " -p.mipm=" STATIC_TEST_DATA_PREFIX "TestData/frames/frame_mask_%%06i.png"
 //
-//	                      " -nrtp.ft=slavcheva_diagnostic"
-//	                      " -nrtp.mit=300"
-//	                      " -nrtp.mult=0.0002"
-//	                      " -nrtp.mw=0.4"
 //
 //	                      " -cme=true"
 //	                      " -dt=cpu"
@@ -429,11 +405,8 @@ BOOST_AUTO_TEST_CASE(ConfigurationTestLong_CLI_Only) {
 //	BOOST_REQUIRE_EQUAL(configuration1.general_voxel_volume_parameters, configuration::Get().general_voxel_volume_parameters);
 //	BOOST_REQUIRE_EQUAL(configuration1.general_surfel_volume_parameters, configuration::Get().general_surfel_volume_parameters);
 //	BOOST_REQUIRE_EQUAL(configuration1.specific_volume_parameters, configuration::Get().specific_volume_parameters);
-//	BOOST_REQUIRE_EQUAL(configuration1.slavcheva_parameters, configuration::Get().slavcheva_parameters);
-//	BOOST_REQUIRE_EQUAL(configuration1.slavcheva_switches, configuration::Get().slavcheva_switches);
 //	BOOST_REQUIRE_EQUAL(configuration1.logging_settings, configuration::Get().logging_settings);
 //	BOOST_REQUIRE_EQUAL(configuration1.paths, configuration::Get().paths);
-//	BOOST_REQUIRE_EQUAL(configuration1.non_rigid_tracking_parameters, configuration::Get().non_rigid_tracking_parameters);
 //	BOOST_REQUIRE_EQUAL(configuration1, configuration::Get());
 //	RequireEqualDeferrables(deferrables1, loaded_deferrables);
 //}
@@ -480,11 +453,8 @@ BOOST_AUTO_TEST_CASE(ConfigurationFileAnd_CLI_Test) {
 	BOOST_REQUIRE_EQUAL(configuration1.general_voxel_volume_parameters, configuration::Get().general_voxel_volume_parameters);
 	BOOST_REQUIRE_EQUAL(configuration1.general_surfel_volume_parameters, configuration::Get().general_surfel_volume_parameters);
 	BOOST_REQUIRE_EQUAL(configuration1.specific_volume_parameters, configuration::Get().specific_volume_parameters);
-	BOOST_REQUIRE_EQUAL(configuration1.slavcheva_parameters, configuration::Get().slavcheva_parameters);
-	BOOST_REQUIRE_EQUAL(configuration1.slavcheva_switches, configuration::Get().slavcheva_switches);
 	BOOST_REQUIRE_EQUAL(configuration1.logging_settings, configuration::Get().logging_settings);
 	BOOST_REQUIRE_EQUAL(configuration1.paths, configuration::Get().paths);
-	BOOST_REQUIRE_EQUAL(configuration1.non_rigid_tracking_parameters, configuration::Get().non_rigid_tracking_parameters);
 	BOOST_REQUIRE_EQUAL(configuration1, configuration::Get());
 	RequireEqualDeferrables(deferrables1, loaded_deferrables);
 }
