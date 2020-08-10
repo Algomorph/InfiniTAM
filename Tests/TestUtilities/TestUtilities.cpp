@@ -417,14 +417,6 @@ configuration::Configuration GenerateChangedUpConfiguration(){
 			true,
 			true,
 			true,
-			true,
-			PLANE_XY,
-			true,
-			4,
-			true,
-			true,
-			true,
-			true,
 			true);
 	MainEngineSettings changed_up_main_engine_settings(true, LIBMODE_BASIC, INDEX_ARRAY, false);
 	IndexingSettings changed_up_indexing_settings(DIAGNOSTIC);
