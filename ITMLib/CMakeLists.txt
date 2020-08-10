@@ -902,7 +902,7 @@ set(
         Utils/Configuration/AutomaticRunSettings.cpp
         Utils/Configuration/Configuration.cpp
         Utils/Configuration/LoggingSettings.cpp
-        Utils/Configuration/TelemetrySettings.cpp
+        Engines/Telemetry/TelemetrySettings.cpp
 
         Utils/FileIO/JSON_Utilities.cpp
         Utils/FileIO/CSV_Utilities.cpp
@@ -947,7 +947,7 @@ set(
         Utils/Configuration/AutomaticRunSettings.h
         Utils/Configuration/Configuration.h
         Utils/Configuration/LoggingSettings.h
-        Utils/Configuration/TelemetrySettings.h
+        Engines/Telemetry/TelemetrySettings.h
 
         Utils/Enums/IndexingMethod.h
 
@@ -1014,46 +1014,6 @@ set(
         Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_Functors.h
 )
 
-
-## ================================================ UTILS - VISUALIZATION ==============================================
-
-
-set(ITMLIB_UTILS_VISUALIZATION_SOURCES
-    # TODO: FIXME
-    #Utils/Rendering/VolumeSliceVisualizer2D.tpp
-    #Utils/Rendering/SceneSliceVisualizer2D_PlainVoxelArray.cpp
-    #Utils/Rendering/SceneSliceVisualizer2D_VoxelBlockHash.cpp
-    )
-
-if (WITH_VTK)
-    list(APPEND ITMLIB_UTILS_VISUALIZATION_SOURCES
-         #TODO: fixme
-         #         Utils/Rendering/VoxelValueGrapher.cpp
-         #         Utils/Rendering/SceneSliceVisualizer1D.tpp
-         Utils/Visualization/SceneSliceVisualizer3D.tpp
-         Utils/Visualization/SceneSliceVisualizer3DInteractorStyle.tpp
-         Utils/Visualization/SceneSliceVisualizer3DCommon.cpp
-         Utils/Visualization/SceneSliceVisualizer3D_PlainVoxelArray.cpp
-         Utils/Visualization/SceneSliceVisualizer3D_VoxelBlockHash.cpp
-         Utils/Visualization/SceneTrackingEnergyPlotter.cpp
-         Utils/Visualization/VisualizationWindowManager.cpp
-         )
-endif ()
-
-set(ITMLIB_UTILS_VISUALIZATION_HEADERS
-    Utils/Visualization/SceneSliceVisualizerCommon.h
-    #    Utils/Rendering/VolumeSliceVisualizer2D.h
-    )
-if (WITH_VTK)
-    list(APPEND ITMLIB_UTILS_VISUALIZATION_HEADERS
-         #         Utils/Rendering/VoxelValueGrapher.h
-         Utils/Visualization/SceneSliceVisualizer3D.h
-         Utils/Visualization/SceneSliceVisualizer3DInteractorStyle.h
-         Utils/Visualization/SceneSliceVisualizer3DCommon.h
-         Utils/Visualization/SceneTrackingEnergyPlotter.h
-         Utils/Visualization/VisualizationWindowManager.h
-         )
-endif ()
 #################################################################
 # Collect the project files into sources, headers and templates #
 #################################################################
@@ -1095,7 +1055,6 @@ set(sources
     ${ITMLIB_SCENE_MOTION_TRACKERS_INTERFACE_SOURCES}
     ${ITMLIB_SCENE_MOTION_TRACKERS_SHARED_SOURCES}
     ${ITMLIB_UTILS_SOURCES}
-    ${ITMLIB_UTILS_VISUALIZATION_SOURCES}
     )
 
 set(headers
@@ -1159,7 +1118,6 @@ set(headers
     ${ITMLIB_SCENE_MOTION_TRACKERS_INTERFACE_HEADERS}
     ${ITMLIB_SCENE_MOTION_TRACKERS_SHARED_HEADERS}
     ${ITMLIB_UTILS_HEADERS}
-    ${ITMLIB_UTILS_VISUALIZATION_HEADERS}
     )
 
 #############################

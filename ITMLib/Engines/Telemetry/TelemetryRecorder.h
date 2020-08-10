@@ -18,7 +18,7 @@
 //local
 #include "../Common/Configurable.h"
 #include "../../Objects/Volume/VoxelVolume.h"
-#include "../../Utils/Configuration/TelemetrySettings.h"
+#include "TelemetrySettings.h"
 #include "../../../ORUtils/PlatformIndependentAtomics.h"
 
 namespace ITMLib {

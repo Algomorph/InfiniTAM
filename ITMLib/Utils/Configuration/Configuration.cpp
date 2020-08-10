@@ -26,7 +26,7 @@
 //local
 #include "../Metacoding/DeferrableStructUtilities.h"
 #include "Configuration.h"
-#include "TelemetrySettings.h"
+#include "../../Engines/Telemetry/TelemetrySettings.h"
 #include "../../Engines/Indexing/IndexingSettings.h"
 #include "../../Engines/Rendering/RenderingSettings.h"
 #include "AutomaticRunSettings.h"

@@ -17,7 +17,7 @@
 #include "../../ITMLib/Utils/Analytics/BenchmarkUtilities.h"
 #include "../../ITMLib/Engines/Main/MultiEngine.h"
 #include "../../ITMLib/Engines/Main/BasicVoxelEngine.h"
-#include "../../ITMLib/Engines/Telemetry/TelemetryRecorderLegacy.h"
+#include "../../ITMLib/GlobalTemplateDefines.h"
 
 
 //TODO: we should never have to downcast the main engine to some other engine type, architecture needs to be altered

@@ -16,8 +16,8 @@
 #pragma once
 
 //local
-#include "../Metacoding/DeferrableSerializableStruct.h"
-#include "../Geometry/CardinalAxesAndPlanes.h"
+#include "../../Utils/Metacoding/DeferrableSerializableStruct.h"
+#include "../../Utils/Geometry/CardinalAxesAndPlanes.h"
 
 namespace ITMLib{
 

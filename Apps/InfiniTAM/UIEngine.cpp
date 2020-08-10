@@ -27,10 +27,11 @@
 //ITMLib
 #include "../../ITMLib/Utils/Analytics/BenchmarkUtilities.h"
 #include "../../ITMLib/Utils/Logging/Logging.h"
-#include "../../ITMLib/Engines/Telemetry/TelemetryRecorderLegacy.h"
 #include "../../ORUtils/FileUtils.h"
 #include "../../ORUtils/ImageCombination.h"
 #include "../../ITMLib/Engines/ImageProcessing/ImageProcessingEngineFactory.h"
+#include "../../ITMLib/Utils/CPPPrintHelpers.h"
+#include "../../ITMLib/Utils/Telemetry/TelemetryUtilities.h"
 
 
 //TODO: we should never have to downcast the main engine to some other engine type, architecture needs to be altered

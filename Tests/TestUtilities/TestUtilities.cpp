@@ -28,7 +28,7 @@
 #include "../../ITMLib/Engines/Analytics/AnalyticsEngine.h"
 #include "../../ITMLib/Engines/ViewBuilding/Interface/ViewBuilder.h"
 #include "../../ITMLib/Engines/ViewBuilding/ViewBuilderFactory.h"
-#include "../../ITMLib/Utils/Configuration/TelemetrySettings.h"
+#include "../../ITMLib/Engines/Telemetry/TelemetrySettings.h"
 #include "../../ITMLib/Utils/Quaternions/Quaternion.h"
 #include "../../ITMLib/Utils/Configuration/AutomaticRunSettings.h"
 #include "../../ITMLib/Engines/Main/MainEngineSettings.h"

@@ -28,7 +28,7 @@
 
 //test_utilities
 #include "TestUtilities/TestUtilities.h"
-#include "../ITMLib/Utils/Configuration/TelemetrySettings.h"
+#include "../ITMLib/Engines/Telemetry/TelemetrySettings.h"
 
 //ITMLib
 #include "../ITMLib/Utils/Configuration/Configuration.h"

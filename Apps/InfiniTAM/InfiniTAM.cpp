@@ -10,11 +10,6 @@
 //boost
 #include <boost/program_options.hpp>
 
-#ifdef WITH_VTK
-//ITMLib/VTK
-#include "../../ITMLib/Utils/Visualization/VisualizationWindowManager.h"
-#endif
-
 //ITMLib
 #include "../../ITMLib/GlobalTemplateDefines.h"
 #include "../../ITMLib/Engines/Main/BasicVoxelEngine.h"

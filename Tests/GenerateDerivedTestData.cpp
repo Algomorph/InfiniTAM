@@ -57,7 +57,7 @@
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
 #include "../ITMLib/Engines/Meshing/MeshingEngineFactory.h"
 #include "../ITMLib/Objects/Meshing/Mesh.h"
-#include "../ITMLib/Utils/Configuration/TelemetrySettings.h"
+#include "../ITMLib/Engines/Telemetry/TelemetrySettings.h"
 #include "../ITMLib/Engines/Rendering/RenderingEngineFactory.h"
 #include "../ITMLib/Utils/Configuration/AutomaticRunSettings.h"
 #include "../ITMLib/Engines/Main/MainEngineSettings.h"
