@@ -38,17 +38,15 @@ public: // instance variables
 #endif
 
 private: // instance variables
-
-	WarpingEngineInterface<TVoxel, TWarp, TIndex>* warping_engine;
-	// needs to be declared after "parameters", derives value from it during initialization
-	const float mean_vector_update_threshold_in_voxels;
-	const bool log_settings = false;
-
 	//TODO: for auto-completion in Clion, remove when CLion is fixed and this is no longer necessary
 	const LevelSetEvolutionWeights& weights;
 	const LevelSetEvolutionSwitches& switches;
 	const LevelSetEvolutionTerminationConditions& termination;
 
+	WarpingEngineInterface<TVoxel, TWarp, TIndex>* warping_engine;
+	// needs to be declared after "parameters", derives value from it during initialization
+	const float mean_vector_update_threshold_in_voxels;
+	const bool log_settings = false;
 
 public: // instance functions
 

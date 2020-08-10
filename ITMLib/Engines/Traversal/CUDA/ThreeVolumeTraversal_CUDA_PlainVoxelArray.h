@@ -133,13 +133,14 @@ public:
 				static_cast<int>(ceil(static_cast<float>(volume1->index.GetVolumeSize().z) / cudaBlockSize.z))
 		);
 
-		threeVolumeTraversalWithPosition_device<TFunctor, TVoxel1, TVoxel2, TVoxel3>
-				<<< gridSize, cudaBlockSize >>>
-		                       (voxels1, voxels2, voxels3, arrayInfo, functor_device);
+		ThreeVolumeTraversalWithPosition_device<TFunctor, TVoxel1, TVoxel2, TVoxel3>
+		<<< gridSize, cudaBlockSize >>>
+				(voxels1, voxels2, voxels3, arrayInfo, functor_device);
+		ORcudaKernelCheck;
+
 		// transfer functor from VRAM back to RAM
 		ORcudaSafeCall(cudaMemcpy(&functor, functor_device, sizeof(TFunctor), cudaMemcpyDeviceToHost));
 		ORcudaSafeCall(cudaFree(functor_device));
-		ORcudaKernelCheck;
 	}
 
 	template<typename TFunctor>

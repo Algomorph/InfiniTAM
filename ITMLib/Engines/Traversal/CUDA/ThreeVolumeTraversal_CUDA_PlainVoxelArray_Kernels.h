@@ -91,7 +91,7 @@ threeVolumeTraversal_device(TVoxel1* voxels1, TVoxel2* voxels2, TVoxel3* voxels3
 
 template<typename TFunctor, typename TVoxel1, typename TVoxel2, typename TVoxel3>
 __global__ void
-threeVolumeTraversalWithPosition_device(TVoxel1* voxels1, TVoxel2* voxels2, TVoxel3* voxels3,
+ThreeVolumeTraversalWithPosition_device(TVoxel1* voxels1, TVoxel2* voxels2, TVoxel3* voxels3,
                                         const ITMLib::GridAlignedBox* arrayInfo,
                                         TFunctor* functor) {
 	int x = blockIdx.x * blockDim.x + threadIdx.x;

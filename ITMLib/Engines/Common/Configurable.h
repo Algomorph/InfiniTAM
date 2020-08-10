@@ -40,7 +40,7 @@ public: // instance functions
 					)
 			) {}
 
-	Configurable(TParameters) : parameters(parameters) {};
+	Configurable(const TParameters& parameters) : parameters(parameters) {};
 
 	const TParameters GetParameters() const { return this->parameters; }
 };
