@@ -190,46 +190,60 @@ inline void PrintKillingTermInformation(const CONSTPTR(Vector3f*) neighbor_warps
 		}
 	}
 	printf("\n\n");
-	Matrix3f& H_u = warp_update_Hessian[0];
-	Matrix3f& H_v = warp_update_Hessian[1];
-	Matrix3f& H_w = warp_update_Hessian[2];
 
+//TODO: figure out how to properly print this on CUDA & remove header guards
+#ifdef __CUDACC__
+	printf("Cannot print warp update Jacobian & Hessian from CUDA device. Set device to 'cpu' for more info here.\n\n");
+#else
 	printf("Jacobian of warp updates at current warp: %s\n"
 	       "%E %E %E\n"
 	       "%E %E %E\n"
 	       "%E %E %E\n"
-	       "%s\n"
-	       "*** Hessian of warp updates at current warp *** \n"
-	       "U-component:\n%s"
-	       "%E %E %E\n"
-	       "%E %E %E\n"
-	       "%E %E %E\n"
-	       "%sV-component:\n%s"
-	       "%E %E %E\n"
-	       "%E %E %E\n"
-	       "%E %E %E\n"
-	       "%sW-component:\n%s"
-	       "%E %E %E\n"
-	       "%E %E %E\n"
-	       "%E %E %E\n"
-	       "%s",
+	       "%s\n",
 	       c_yellow,
 	       warp_update_Jacobian.xx, warp_update_Jacobian.xy, warp_update_Jacobian.xz,
 	       warp_update_Jacobian.yx, warp_update_Jacobian.yy, warp_update_Jacobian.yz,
 	       warp_update_Jacobian.zx, warp_update_Jacobian.zy, warp_update_Jacobian.zz,
-	       c_reset, c_cyan,
+	       c_reset);
+
+	Matrix3f& H_u = warp_update_Hessian[0];
+	Matrix3f& H_v = warp_update_Hessian[1];
+	Matrix3f& H_w = warp_update_Hessian[2];
+
+	printf("*** Hessian of warp updates at current warp *** \n"
+	       "U-component:\n%s"
+	       "%E %E %E\n"
+	       "%E %E %E\n"
+	       "%E %E %E\n"
+	       "%s",
+	       c_cyan,
 	       H_u.xx, H_u.xy, H_u.xz,
 	       H_u.yx, H_u.yy, H_u.yz,
 	       H_u.zx, H_u.zy, H_u.zz,
-	       c_reset, c_cyan,
+	       c_reset);
+
+	printf("V-component:\n%s"
+	       "%E %E %E\n"
+	       "%E %E %E\n"
+	       "%E %E %E\n"
+	       "%s",
+	       c_cyan,
 	       H_v.xx, H_v.xy, H_v.xz,
 	       H_v.yx, H_v.yy, H_v.yz,
 	       H_v.zx, H_v.zy, H_v.zz,
-	       c_reset, c_cyan,
+	       c_reset);
+
+	printf("W-component:\n%s"
+	       "%E %E %E\n"
+	       "%E %E %E\n"
+	       "%E %E %E\n"
+	       "%s\n",
+	       c_cyan,
 	       H_w.xx, H_w.xy, H_w.xz,
 	       H_w.yx, H_w.yy, H_w.yz,
 	       H_w.zx, H_w.zy, H_w.zz,
 	       c_reset);
+#endif
 };
 
 _CPU_AND_GPU_CODE_
