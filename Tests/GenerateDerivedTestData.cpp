@@ -706,7 +706,7 @@ int main(int argc, char* argv[]) {
 	} else {
 		std::string generated_data_type_argument = argv[1];
 		if (generated_data_type_argument == "h" || generated_data_type_argument == "help" || generated_data_type_argument == "-h" ||
-		    generated_data_type_argument == "-help") {
+		    generated_data_type_argument == "-help" || generated_data_type_argument == "--help") {
 			std::cout << "Generates derived data used for testing the library. " << std::endl;
 			std::cout << "Usage:" << std::endl << "generate_derived_test_data " << std::endl << "(runs all modes)  -- OR -- "
 			          << std::endl << "generate_derived_test_data <mode>" << std::endl <<
