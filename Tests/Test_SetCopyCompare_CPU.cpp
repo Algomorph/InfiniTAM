@@ -258,15 +258,15 @@ BOOST_AUTO_TEST_CASE(testCompareVoxelVolumes_CPU_ITMVoxel) {
 
 BOOST_AUTO_TEST_CASE(testCompareVoxelVolumes_CPU_ITMWarp) {
 	float tolerance = 1e-6;
-	Vector3i volumeSize(40);
-	Vector3i volumeOffset(-20, -20, 0);
-	Vector3i extentEndVoxel = volumeOffset + volumeSize;
+	Vector3i volume_size(40);
+	Vector3i volume_offset(-20, -20, 0);
+	Vector3i extentEndVoxel = volume_offset + volume_size;
 
 	VoxelVolume<WarpVoxel, PlainVoxelArray> scene1(MEMORYDEVICE_CPU,
-	                                               {volumeSize, volumeOffset});
+	                                               {volume_size, volume_offset});
 	ManipulationEngine_CPU_PVA_Warp::Inst().ResetVolume(&scene1);
 	VoxelVolume<WarpVoxel, PlainVoxelArray> scene2(MEMORYDEVICE_CPU,
-	                                               {volumeSize, volumeOffset});
+	                                               {volume_size, volume_offset});
 	ManipulationEngine_CPU_PVA_Warp::Inst().ResetVolume(&scene2);
 	VoxelVolume<WarpVoxel, VoxelBlockHash> scene3(MEMORYDEVICE_CPU,
 	                                              {0x800, 0x20000});
@@ -278,8 +278,8 @@ BOOST_AUTO_TEST_CASE(testCompareVoxelVolumes_CPU_ITMWarp) {
 	std::random_device random_device;
 	std::mt19937 generator(random_device());
 
-	auto singleVoxelTests = [&]() {
-		std::uniform_int_distribution<int> coordinate_distribution2(volumeOffset.x, 0);
+	auto single_voxel_tests = [&]() {
+		std::uniform_int_distribution<int> coordinate_distribution2(volume_offset.x, 0);
 		WarpVoxel warp;
 		warp.warp_update = Vector3f(-0.1);
 
@@ -291,13 +291,13 @@ BOOST_AUTO_TEST_CASE(testCompareVoxelVolumes_CPU_ITMWarp) {
 		BOOST_REQUIRE(!contentAlmostEqual_CPU(&scene3, &scene4, tolerance));
 		BOOST_REQUIRE(!contentAlmostEqual_CPU(&scene1, &scene4, tolerance));
 
-		WarpVoxel defaultVoxel;
-		ManipulationEngine_CPU_PVA_Warp::Inst().SetVoxel(&scene2, coordinate, defaultVoxel);
-		ManipulationEngine_CPU_VBH_Warp::Inst().SetVoxel(&scene4, coordinate, defaultVoxel);
+		WarpVoxel default_voxel;
+		ManipulationEngine_CPU_PVA_Warp::Inst().SetVoxel(&scene2, coordinate, default_voxel);
+		ManipulationEngine_CPU_VBH_Warp::Inst().SetVoxel(&scene4, coordinate, default_voxel);
 		BOOST_REQUIRE(contentAlmostEqual_CPU(&scene1, &scene2, tolerance));
 		BOOST_REQUIRE(contentAlmostEqual_CPU(&scene3, &scene4, tolerance));
 
-		coordinate = volumeOffset + volumeSize - Vector3i(1);
+		coordinate = volume_offset + volume_size - Vector3i(1);
 		warp = ManipulationEngine_CPU_PVA_Warp::Inst().ReadVoxel(&scene2, coordinate);
 		warp.warp_update += Vector3f(0.1);
 		ManipulationEngine_CPU_PVA_Warp::Inst().SetVoxel(&scene2, coordinate, warp);
@@ -306,19 +306,19 @@ BOOST_AUTO_TEST_CASE(testCompareVoxelVolumes_CPU_ITMWarp) {
 		BOOST_REQUIRE(!contentAlmostEqual_CPU(&scene3, &scene4, tolerance));
 		BOOST_REQUIRE(!contentAlmostEqual_CPU(&scene1, &scene4, tolerance));
 
-		ManipulationEngine_CPU_PVA_Warp::Inst().SetVoxel(&scene2, coordinate, defaultVoxel);
-		ManipulationEngine_CPU_VBH_Warp::Inst().SetVoxel(&scene4, coordinate, defaultVoxel);
+		ManipulationEngine_CPU_PVA_Warp::Inst().SetVoxel(&scene2, coordinate, default_voxel);
+		ManipulationEngine_CPU_VBH_Warp::Inst().SetVoxel(&scene4, coordinate, default_voxel);
 	};
 
 	std::uniform_real_distribution<float> warp_distribution(-1.0f, 1.0f);
 	std::uniform_int_distribution<int> coordinate_distribution(0, extentEndVoxel.x - 1);
 
-	const int modifiedWarpCount = 120;
+	const int modified_warp_count = 120;
 
-	singleVoxelTests();
+	single_voxel_tests();
 
 //	generate only in the positive coordinates' volume, to make sure that the unneeded voxel hash blocks are properly dismissed
-	for (int iWarp = 0; iWarp < modifiedWarpCount; iWarp++) {
+	for (int iWarp = 0; iWarp < modified_warp_count; iWarp++) {
 		WarpVoxel warp;
 		Vector3f framewise_warp(warp_distribution(generator), warp_distribution(generator), warp_distribution(generator));
 		warp.warp_update = framewise_warp;
@@ -337,5 +337,5 @@ BOOST_AUTO_TEST_CASE(testCompareVoxelVolumes_CPU_ITMWarp) {
 	BOOST_REQUIRE(contentAlmostEqual_CPU(&scene3, &scene4, tolerance));
 	BOOST_REQUIRE(contentAlmostEqual_CPU(&scene1, &scene3, tolerance));
 
-	singleVoxelTests();
+	single_voxel_tests();
 }

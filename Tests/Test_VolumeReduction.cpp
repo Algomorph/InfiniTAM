@@ -35,14 +35,13 @@ using namespace test_utilities;
 namespace snoopy = snoopy_test_utilities;
 
 
-
 BOOST_AUTO_TEST_CASE(Test_VolumeReduction_MaxWarpUpdate_VBH_CUDA) {
 	const int iteration = 1;
 
 	// *** load warps
 	LevelSetEvolutionSwitches data_tikhonov_sobolev_switches(true, false, true, false, true);
 	std::string path_warps = GetWarpsPath<VoxelBlockHash>(SwitchesToPrefix(data_tikhonov_sobolev_switches),
-	                                                           iteration);
+	                                                      iteration);
 	VoxelVolume<WarpVoxel, VoxelBlockHash>* warps;
 	LoadVolume(&warps, path_warps, MEMORYDEVICE_CUDA, snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
@@ -89,7 +88,7 @@ VoxelBlockHash::InitializationParameters GetTestSpecificInitializationParameters
 
 
 template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
-void GenericVolumeReductionCountWeightRangeTest1(){
+void GenericVolumeReductionCountWeightRangeTest1() {
 	VoxelVolume<TSDFVoxel, TIndex> volume(TMemoryDeviceType, GetTestSpecificInitializationParameters<TIndex>());
 	volume.Reset();
 
@@ -144,52 +143,50 @@ void GenericVolumeReductionCountWeightRangeTest1(){
 	BOOST_REQUIRE_EQUAL(sub_volume_voxel_count, voxels_in_range);
 }
 
-BOOST_AUTO_TEST_CASE(Test_VolumeReduction_CountWeightRange_VBH_CUDA) {
 
-}
 
-BOOST_AUTO_TEST_CASE(Test_VolumeReduction_CountWeightRange_VBH_CUDA2) {
-	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume(MEMORYDEVICE_CUDA, {65536, 32768});
+
+template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
+void GenericVolumeReductionCountWeightRangeTest2() {
+	VoxelVolume<TSDFVoxel, TIndex> volume(TMemoryDeviceType, GetTestSpecificInitializationParameters<TIndex>());
 	volume.Reset();
 
 	Extent3Di filled_voxel_bounds(0, 0, 0, 256, 256, 256);
 	Extent2Di general_range(0, 50);
-	GenerateRandomDepthWeightSubVolume<MEMORYDEVICE_CUDA>(&volume, filled_voxel_bounds, general_range);
-
-	// !!!Attn: ready to overwrite?!!! volume.SaveToDisk(GENERATED_TEST_DATA_PREFIX "TestData/volumes/tmp.dat");
-	//volume.LoadFromDisk(GENERATED_TEST_DATA_PREFIX "TestData/volumes/tmp.dat");
+	GenerateRandomDepthWeightSubVolume<TMemoryDeviceType>(&volume, filled_voxel_bounds, general_range);
 
 	const unsigned int voxel_count = filled_voxel_bounds.max_x * filled_voxel_bounds.max_y * filled_voxel_bounds.max_z;
 
 	unsigned int voxels_in_range;
-	voxels_in_range = AnalyticsEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance()
+	voxels_in_range = AnalyticsEngine<TSDFVoxel, TIndex, TMemoryDeviceType>::Instance()
 			.CountVoxelsWithDepthWeightInRange(&volume, general_range);
+
 	BOOST_REQUIRE_EQUAL(voxel_count, voxels_in_range);
 
 	Extent2Di different_range1(50, 56);
 
-	voxels_in_range = AnalyticsEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance()
+	voxels_in_range = AnalyticsEngine<TSDFVoxel, TIndex, TMemoryDeviceType>::Instance()
 			.CountVoxelsWithDepthWeightInRange(&volume, different_range1);
 	BOOST_REQUIRE_EQUAL(0, voxels_in_range);
 
 	Extent2Di different_range2(56, 67);
-	voxels_in_range = AnalyticsEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance()
+	voxels_in_range = AnalyticsEngine<TSDFVoxel, TIndex, TMemoryDeviceType>::Instance()
 			.CountVoxelsWithDepthWeightInRange(&volume, different_range2);
 	BOOST_REQUIRE_EQUAL(0, voxels_in_range);
 
 	TSDFVoxel alternative_weight_voxel;
 	alternative_weight_voxel.w_depth = 55;
 	Vector3i insert_position(12, 12, 12);
-	EditAndCopyEngineFactory::Instance<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>()
+	EditAndCopyEngineFactory::Instance<TSDFVoxel, TIndex, TMemoryDeviceType>()
 			.SetVoxel(&volume, insert_position, alternative_weight_voxel);
 	insert_position = {17, 0, 14};
-	EditAndCopyEngineFactory::Instance<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>()
+	EditAndCopyEngineFactory::Instance<TSDFVoxel, TIndex, TMemoryDeviceType>()
 			.SetVoxel(&volume, insert_position, alternative_weight_voxel);
 	insert_position = {123, 53, 234};
-	EditAndCopyEngineFactory::Instance<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>()
+	EditAndCopyEngineFactory::Instance<TSDFVoxel, TIndex, TMemoryDeviceType>()
 			.SetVoxel(&volume, insert_position, alternative_weight_voxel);
 
-	voxels_in_range = AnalyticsEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance()
+	voxels_in_range = AnalyticsEngine<TSDFVoxel, TIndex, TMemoryDeviceType>::Instance()
 			.CountVoxelsWithDepthWeightInRange(&volume, different_range1);
 
 	BOOST_REQUIRE_EQUAL(3, voxels_in_range);
@@ -200,38 +197,58 @@ BOOST_AUTO_TEST_CASE(Test_VolumeReduction_CountWeightRange_VBH_CUDA2) {
 	Vector3i sub_volume_block_size = sub_volume_size / VOXEL_BLOCK_SIZE;
 	const unsigned int sub_volume_hash_block_count =
 			sub_volume_block_size.x * sub_volume_block_size.y * sub_volume_block_size.z;
-	GenerateRandomDepthWeightSubVolume<MEMORYDEVICE_CUDA>(&volume, different_weight_sub_volume_bounds,
+	GenerateRandomDepthWeightSubVolume<TMemoryDeviceType>(&volume, different_weight_sub_volume_bounds,
 	                                                      different_range2);
 
-	voxels_in_range = AnalyticsEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance()
+	voxels_in_range = AnalyticsEngine<TSDFVoxel, TIndex, TMemoryDeviceType>::Instance()
 			.CountVoxelsWithDepthWeightInRange(&volume, different_range2);
 	BOOST_REQUIRE_EQUAL(sub_volume_voxel_count, voxels_in_range);
 
-	unsigned int blocks_in_range = AnalyticsEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance()
+	unsigned int blocks_in_range = AnalyticsEngine<TSDFVoxel, TIndex, TMemoryDeviceType>::Instance()
 			.CountHashBlocksWithDepthWeightInRange(&volume, different_range2);
 
 	BOOST_REQUIRE_EQUAL(sub_volume_hash_block_count, blocks_in_range);
 
 	alternative_weight_voxel.w_depth = 100;
 	insert_position = {128, 128, 128};
-	EditAndCopyEngineFactory::Instance<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>()
+	EditAndCopyEngineFactory::Instance<TSDFVoxel, TIndex, TMemoryDeviceType>()
 			.SetVoxel(&volume, insert_position, alternative_weight_voxel);
 
 	insert_position = {167, 184, 135};
-	EditAndCopyEngineFactory::Instance<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>()
+	EditAndCopyEngineFactory::Instance<TSDFVoxel, TIndex, TMemoryDeviceType>()
 			.SetVoxel(&volume, insert_position, alternative_weight_voxel);
 	insert_position = {189, 200, 234};
-	EditAndCopyEngineFactory::Instance<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>()
+	EditAndCopyEngineFactory::Instance<TSDFVoxel, TIndex, TMemoryDeviceType>()
 			.SetVoxel(&volume, insert_position, alternative_weight_voxel);
 
 	Extent2Di different_range3(100, 101);
-	blocks_in_range = AnalyticsEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance()
+	blocks_in_range = AnalyticsEngine<TSDFVoxel, TIndex, TMemoryDeviceType>::Instance()
 			.CountHashBlocksWithDepthWeightInRange(&volume, different_range3);
 
 	BOOST_REQUIRE_EQUAL(0u, blocks_in_range);
 
-	blocks_in_range = AnalyticsEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance()
+	blocks_in_range = AnalyticsEngine<TSDFVoxel, TIndex, TMemoryDeviceType>::Instance()
 			.CountHashBlocksWithDepthWeightInRange(&volume, different_range2);
 
 	BOOST_REQUIRE_EQUAL(sub_volume_hash_block_count - 3u, blocks_in_range);
 }
+
+BOOST_AUTO_TEST_CASE(Test_VolumeReduction_CountWeightRange1_VBH_CPU) {
+	GenericVolumeReductionCountWeightRangeTest1<VoxelBlockHash, MEMORYDEVICE_CPU>();
+}
+
+BOOST_AUTO_TEST_CASE(Test_VolumeReduction_CountWeightRange2_VBH_CPU) {
+	GenericVolumeReductionCountWeightRangeTest2<VoxelBlockHash, MEMORYDEVICE_CPU>();
+}
+
+#ifndef COMPILE_WITHOUT_CUDA
+
+BOOST_AUTO_TEST_CASE(Test_VolumeReduction_CountWeightRange1_VBH_CUDA) {
+	GenericVolumeReductionCountWeightRangeTest1<VoxelBlockHash, MEMORYDEVICE_CUDA>();
+}
+
+BOOST_AUTO_TEST_CASE(Test_VolumeReduction_CountWeightRange2_VBH_CUDA) {
+	GenericVolumeReductionCountWeightRangeTest2<VoxelBlockHash, MEMORYDEVICE_CUDA>();
+}
+
+#endif

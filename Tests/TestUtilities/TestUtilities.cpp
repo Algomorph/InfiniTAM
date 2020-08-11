@@ -24,6 +24,7 @@
 #include "../../ITMLib/Utils/Configuration/Configuration.h"
 #include "../../ITMLib/Utils/Geometry/CardinalAxesAndPlanes.h"
 #include "../../ITMLib/Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
+#include "../../ITMLib/Engines/Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
 #include "../../ITMLib/Engines/Telemetry/VolumeSequenceRecorder.h"
 #include "../../ITMLib/Engines/Analytics/AnalyticsEngine.h"
 #include "../../ITMLib/Engines/ViewBuilding/Interface/ViewBuilder.h"
@@ -78,6 +79,9 @@ template void GenerateSimpleSurfaceTestVolume<MEMORYDEVICE_CPU, TSDFVoxel, Voxel
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume);
 template void GenerateSimpleSurfaceTestVolume<MEMORYDEVICE_CPU, TSDFVoxel, PlainVoxelArray>(
 		VoxelVolume<TSDFVoxel, PlainVoxelArray>* volume);
+template void GenerateRandomDepthWeightSubVolume<MEMORYDEVICE_CPU, TSDFVoxel, VoxelBlockHash>(
+		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume, const Extent3Di& bounds, const Extent2Di&
+weight_range);
 
 template void SimulateVoxelAlteration<TSDFVoxel>(TSDFVoxel& voxel, float newSdfValue);
 template void SimulateRandomVoxelAlteration<TSDFVoxel>(TSDFVoxel& voxel);
@@ -492,5 +496,8 @@ std::vector<ORUtils::SE3Pose> GenerateCameraTrajectoryAroundPoint(const Vector3f
 	}
 	return poses;
 }
+
+
+
 
 } // namespace test_utilities

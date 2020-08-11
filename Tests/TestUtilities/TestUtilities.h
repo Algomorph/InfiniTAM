@@ -60,6 +60,12 @@ template<MemoryDeviceType TMemoryDeviceType, typename TVoxel, typename TIndex>
 void GenerateRandomDepthWeightSubVolume(VoxelVolume<TVoxel, TIndex>* volume, const Extent3Di& bounds,
                                         const Extent2Di& weight_range);
 
+// for debugging / analysis purposes
+template<MemoryDeviceType TMemoryDeviceType, typename TVoxel, typename TIndex>
+void FindAllVoxelsNotInDepthWeightRange(VoxelVolume<TVoxel, TIndex>* volume, const Extent2Di& weight_range);
+template<MemoryDeviceType TMemoryDeviceType, typename TVoxel, typename TIndex>
+void FindAllVoxelsNotInDepthWeightRange(VoxelVolume<TVoxel, TIndex>* volume, const Extent3Di& bounds, const Extent2Di& weight_range);
+
 
 template<typename TVoxel>
 void SimulateVoxelAlteration(TVoxel& voxel, float newSdfValue);
