@@ -102,9 +102,9 @@ typename TIndex::InitializationParameters GetStandard128IndexParameters();
 
 struct Frame16And17Utilities;
 template<typename TVoxel, typename TIndex>
-void LoadVolume(VoxelVolume<TVoxel, TIndex>** volume, const std::string& path, MemoryDeviceType memoryDeviceType,
-                typename TIndex::InitializationParameters initializationParameters = GetStandard512IndexParameters<TIndex>(),
-                configuration::SwappingMode swappingMode = configuration::SWAPPINGMODE_DISABLED);
+void LoadVolume(VoxelVolume<TVoxel, TIndex>** volume, const std::string& path, MemoryDeviceType memory_device_type,
+                typename TIndex::InitializationParameters initialization_parameters = GetStandard512IndexParameters<TIndex>(),
+                configuration::SwappingMode swapping_mode = configuration::SWAPPINGMODE_DISABLED);
 
 void
 UpdateView(View** view, const std::string& depth_path, const std::string& color_path,

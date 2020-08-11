@@ -19,10 +19,8 @@
 #include "../../ORUtils/MemoryDeviceType.h"
 
 #ifdef __CUDACC__
-
 #include "TestUtilityKernels.h"
 #include "../../ITMLib/Utils/Geometry/GeometryBooleanOperations.h"
-
 #endif
 
 

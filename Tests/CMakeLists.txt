@@ -108,6 +108,7 @@ if (BUILD_TESTS)
     # *** CPU-only tests
     itm_add_test(NAME SetCopyCompare_CPU SOURCES Test_SetCopyCompare_CPU.cpp)
     itm_add_test(NAME ConstructVolumeFromImage_CPU SOURCES Test_ConstructVolumeFromImage_CPU.cpp)
+    itm_add_test(NAME VolumeReduction SOURCES Test_VolumeReduction.cpp)
     itm_add_test(NAME VolumeSaveLoadCompact_CPU SOURCES Test_VolumeSaveLoadCompact_CPU.cpp)
     itm_add_test(NAME IntArrayMap3D SOURCES Test_IntArrayMap3D.cpp)
     itm_add_test(NAME ImageMaskReader SOURCES Test_ImageMaskReader.cpp)
@@ -139,7 +140,7 @@ if (BUILD_TESTS)
         itm_add_test(NAME CUDA_Atomics SOURCES Test_CUDA_Atomics.cpp CUDAAtomicTesting.h
                      CUDAAtomicTesting.cu TemporaryCUDA_Atomics.h)
         itm_add_test(NAME SmoothWarpGradient SOURCES Test_SmoothWarpGradient_CPU_CUDA.cpp)
-        itm_add_test(NAME VolumeReduction_VBH_CUDA SOURCES Test_VolumeReduction_VBH_CUDA.cpp)
+
     endif()
 
     # *** special executable for CLI testing

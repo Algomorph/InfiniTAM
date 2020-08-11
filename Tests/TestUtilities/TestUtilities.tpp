@@ -183,12 +183,12 @@ void SimulateRandomVoxelAlteration(TVoxel& voxel) {
 //};
 
 template<typename TVoxel, typename TIndex>
-void LoadVolume(VoxelVolume<TVoxel, TIndex>** volume, const std::string& path, MemoryDeviceType memoryDeviceType,
-                typename TIndex::InitializationParameters initializationParameters,
-                configuration::SwappingMode swappingMode) {
+void LoadVolume(VoxelVolume<TVoxel, TIndex>** volume, const std::string& path, MemoryDeviceType memory_device_type,
+                typename TIndex::InitializationParameters initialization_parameters,
+                configuration::SwappingMode swapping_mode) {
 	configuration::Configuration& settings = configuration::Get();
-	(*volume) = new VoxelVolume<TVoxel, TIndex>(settings.general_voxel_volume_parameters, swappingMode,
-	                                            memoryDeviceType, initializationParameters);
+	(*volume) = new VoxelVolume<TVoxel, TIndex>(settings.general_voxel_volume_parameters, swapping_mode,
+	                                            memory_device_type, initialization_parameters);
 	PrepareVoxelVolumeForLoading(*volume);
 	(*volume)->LoadFromDisk(path);
 }
