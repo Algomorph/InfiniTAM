@@ -22,6 +22,8 @@
 #include <algorithm>
 #include <future>
 #include <vector>
+//__DEBUG
+#include <iostream>
 
 namespace threadpool11 {
 
@@ -54,6 +56,8 @@ void pool::increase_worker_count(size_type n) {
     thread.detach();
   }
 }
+
+
 
 void pool::decrease_worker_count(size_type n, method_t method) {
   std::vector<std::future<void>> futures;

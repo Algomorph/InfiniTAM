@@ -29,12 +29,21 @@ struct ReductionResult<TValue, VoxelBlockHash> {
 	TValue value;
 	unsigned int index_within_block;
 	int hash_code;
+	friend inline std::ostream& operator << (std::ostream& stream, const ReductionResult<TValue, VoxelBlockHash>& result){
+		stream << result.hash_code << " / " << result.index_within_block << ": " << result.value;
+		return stream;
+	}
 };
+
 
 template<typename TValue>
 struct ReductionResult<TValue, PlainVoxelArray> {
 	TValue value;
 	unsigned int index_within_array;
+	friend inline std::ostream& operator << (std::ostream& stream, const ReductionResult<TValue, PlainVoxelArray>& result){
+		stream << result.index_within_array << ": " << result.value;
+		return stream;
+	}
 };
 
 }// namespace ITMLib
