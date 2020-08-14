@@ -47,6 +47,35 @@ struct AdditionalGradientAggregates{
 	DECLARE_ATOMIC_UINT(considered_voxel_count);
 	DECLARE_ATOMIC_UINT(data_voxel_count);
 	DECLARE_ATOMIC_UINT(level_set_voxel_count);
+
+	float GetAverageCanonicalSdf() const{
+		return GET_ATOMIC_VALUE_CPU(cumulative_canonical_sdf) / GET_ATOMIC_VALUE_CPU(considered_voxel_count);
+	}
+	float GetAverageLiveSdf() const{
+		return GET_ATOMIC_VALUE_CPU(cumulative_live_sdf) / GET_ATOMIC_VALUE_CPU(considered_voxel_count);
+	}
+	float GetAverageSdfDifference() const{
+		return GET_ATOMIC_VALUE_CPU(cumulative_sdf_diff) / GET_ATOMIC_VALUE_CPU(considered_voxel_count);
+	}
+	float GetAverageWarpDistance() const{
+		unsigned int data_voxel_count_CPU = GET_ATOMIC_VALUE_CPU(data_voxel_count);
+		if(data_voxel_count_CPU > 0){
+			return GET_ATOMIC_VALUE_CPU(cumulative_warp_dist) / data_voxel_count_CPU;
+		}else{
+			return 0.0f;
+		}
+	}
+	unsigned int GetConsideredVoxelCount() const{
+		return GET_ATOMIC_VALUE_CPU(considered_voxel_count);
+	}
+
+	unsigned int GetDataVoxelCount() const{
+		return GET_ATOMIC_VALUE_CPU(data_voxel_count);
+	}
+	unsigned int GetLevelSetVoxelCount() const{
+		return GET_ATOMIC_VALUE_CPU(level_set_voxel_count);
+	}
+
 };
 
 template<MemoryDeviceType TMemoryDeviceType>
@@ -67,5 +96,18 @@ struct ComponentEnergies{
 	DECLARE_ATOMIC_FLOAT(total_level_set_energy);
 	DECLARE_ATOMIC_FLOAT(total_Tikhonov_energy);
 	DECLARE_ATOMIC_FLOAT(total_Killing_energy);
+
+	float GetTotalDataEnergy() const{
+		return GET_ATOMIC_VALUE_CPU(total_data_energy);
+	}
+	float GetTotalLevelSetEnergy() const{
+		return GET_ATOMIC_VALUE_CPU(total_level_set_energy);
+	}
+	float GetTotalTikhonovEnergy() const{
+		return GET_ATOMIC_VALUE_CPU(total_Tikhonov_energy);
+	}
+	float GetTotalKillingEnergy() const{
+		return GET_ATOMIC_VALUE_CPU(total_Killing_energy);
+	}
 };
 

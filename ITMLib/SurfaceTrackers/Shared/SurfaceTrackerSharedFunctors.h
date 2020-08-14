@@ -50,22 +50,23 @@ struct ClearOutGradientStaticFunctor {
 
 template<typename TTSDFVoxel, typename TWarpVoxel, MemoryDeviceType TMemoryDeviceType>
 struct WarpUpdateFunctor {
-	WarpUpdateFunctor(float learningRate, float momentumWeight, bool gradientSmoothingEnabled) :
-			gradient_weight(learningRate * (1.0f - momentumWeight)), momentum_weight(momentumWeight),
-			gradient_smoothing_enabled(gradientSmoothingEnabled),
-			max_warp_update_position(0) {
-		INITIALIZE_ATOMIC(float, max_framewise_warp_length, 0.0f);
-		INITIALIZE_ATOMIC(float, max_warp_update_length, 0.0f);
+	WarpUpdateFunctor(float learning_rate, float momentum_weight, bool gradient_smoothing_enabled) :
+			gradient_weight(learning_rate * (1.0f - momentum_weight)), momentum_weight(momentum_weight),
+			gradient_smoothing_enabled(gradient_smoothing_enabled) {
+		INITIALIZE_ATOMIC(float, aggregate_warp_update_length, 0.0f);
+		INITIALIZE_ATOMIC(unsigned int, affected_voxel_count, 0u);
 	}
 
 	~WarpUpdateFunctor() {
-		CLEAN_UP_ATOMIC(max_framewise_warp_length);CLEAN_UP_ATOMIC(max_warp_update_length);
+		CLEAN_UP_ATOMIC(aggregate_warp_update_length);
+		CLEAN_UP_ATOMIC(affected_voxel_count);
 	}
 
 	_DEVICE_WHEN_AVAILABLE_
 	void
 	operator()(TWarpVoxel& warp_voxel, TTSDFVoxel& canonical_voxel, TTSDFVoxel& live_voxel, const Vector3i& position) {
 		if (!VoxelIsConsideredForTracking(canonical_voxel, live_voxel)) return;
+
 		Vector3f warp_update = -gradient_weight * (gradient_smoothing_enabled ?
 		                                           warp_voxel.gradient1 : warp_voxel.gradient0);
 
@@ -74,62 +75,38 @@ struct WarpUpdateFunctor {
 		// update stats
 		float warp_update_length = ORUtils::length(warp_update);
 
-#if !defined(__CUDACC__) && !defined(WITH_OPENMP)
-		//single-threaded CPU version (for debugging max warp_voxel position)
-		if (warp_update_length > max_warp_update_length.load()) {
-			max_warp_update_length.store(warp_update_length);
-			max_warp_update_position = position;
-		}
-#else
-		ATOMIC_MAX(max_warp_update_length, warp_update_length);
-#endif
+		ATOMIC_ADD(aggregate_warp_update_length, warp_update_length);
+		ATOMIC_ADD(affected_voxel_count, 1u);
 	}
 
-	float GetMaxWarpUpdateLength() {
-		return GET_ATOMIC_VALUE_CPU(max_warp_update_length);
-	}
-
-	Vector3i max_warp_update_position;
-
-	_DEVICE_WHEN_AVAILABLE_
-	void PrintWarp() {
-#if !defined(__CUDACC__) && !defined(WITH_OPENMP)
-		std::cout << ITMLib::green << " Max update: [" << max_warp_update_length << " at " << max_warp_update_position << "]."
-				  << ITMLib::reset<< std::endl;
-#else
-#endif
+	float GetAverageWarpUpdateLength() {
+		return GET_ATOMIC_VALUE_CPU(aggregate_warp_update_length) / GET_ATOMIC_VALUE_CPU(affected_voxel_count);
 	}
 
 
 private:
-	DECLARE_ATOMIC_FLOAT(max_framewise_warp_length);
-	DECLARE_ATOMIC_FLOAT(max_warp_update_length);
+	DECLARE_ATOMIC_FLOAT(aggregate_warp_update_length);
+	DECLARE_ATOMIC(unsigned int, affected_voxel_count);
 	const float gradient_weight;
 	const float momentum_weight;
 	const bool gradient_smoothing_enabled;
 };
 
 
-//TODO: clean out dead code, potentially make versions for warps w/ framewise warp separately
 
-template<typename TVoxel, typename TWarpVoxel>
+template<typename TWarpVoxel, MemoryDeviceType TMemoryDeviceType>
 struct WarpHistogramFunctor {
-	WarpHistogramFunctor(/*float max_framewise_warp_length, */float max_warp_update_length) :
-	/*maxFramewiseWarpLength(max_framewise_warp_length),*/ max_warp_update_length(max_warp_update_length) {
+	WarpHistogramFunctor(float max_warp_update_length) :
+	 max_warp_update_length(max_warp_update_length) {
 	}
 
 	static const int histogram_bin_count = 10;
 
-	void operator()(TWarpVoxel& warp, TVoxel& canonicalVoxel, TVoxel& liveVoxel) {
-		if (!VoxelIsConsideredForTracking(canonicalVoxel, liveVoxel)) return;
-//		float framewiseWarpLength = ORUtils::length(warp.framewise_warp);
+	_DEVICE_WHEN_AVAILABLE_
+	void operator()(TWarpVoxel& warp) {
 		float warp_update_length = ORUtils::length(warp.warp_update);
-		const int histogram_bin_count = WarpHistogramFunctor<TVoxel, TWarpVoxel>::histogram_bin_count;
 		int bin_index = 0;
-//		if (maxFramewiseWarpLength > 0) {
-//			bin_index = ORUTILS_MIN(histogram_bin_count - 1, (int) (framewiseWarpLength * histogram_bin_count / maxFramewiseWarpLength));
-//		}
-//		framewiseWarpBins[bin_index]++;
+
 		if (max_warp_update_length > 0) {
 			bin_index = ORUTILS_MIN(histogram_bin_count - 1,
 			                        (int) (warp_update_length * histogram_bin_count / max_warp_update_length));
@@ -138,11 +115,6 @@ struct WarpHistogramFunctor {
 	}
 
 	void PrintHistogram() {
-//		std::cout << "FW warp length histogram: ";
-//		for (int iBin = 0; iBin < histogram_bin_count; iBin++) {
-//			std::cout << std::setfill(' ') << std::setw(7) << framewiseWarpBins[iBin] << "  ";
-//		}
-//		std::cout << std::endl;
 		std::cout << "Update length histogram: ";
 		for (int iBin = 0; iBin < histogram_bin_count; iBin++) {
 			std::cout << std::setfill(' ') << std::setw(7) << warp_update_bins[iBin] << "  ";
@@ -152,11 +124,9 @@ struct WarpHistogramFunctor {
 
 
 private:
-//	const float maxFramewiseWarpLength;
 	const float max_warp_update_length;
 
 	// <20%, 40%, 60%, 80%, 100%
-//	int framewiseWarpBins[histogram_bin_count] = {0};
 	int warp_update_bins[histogram_bin_count] = {0};
 };
 
@@ -197,7 +167,7 @@ struct GradientSmoothingPassFunctor {
 
 		for (int iVoxel = 0; iVoxel < sobolev_filter_size; iVoxel++, receptive_voxel_position[directionIndex]++) {
 #if !defined(__CUDACC__) && !defined(WITH_OPENMP)
-			const TWarpVoxel& receptiveVoxel = readVoxel(warp_voxels, warp_index_data,
+			const TWarp& receptiveVoxel = readVoxel(warp_voxels, warp_index_data,
 													receptive_voxel_position, vmIndex, warp_field_cache);
 #else
 			const TWarpVoxel& receptiveVoxel = readVoxel(warp_voxels, warp_index_data,

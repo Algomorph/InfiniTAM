@@ -75,14 +75,31 @@ public: // instance functions
 	                  VoxelVolume <TVoxel, TIndex>* canonical_volume,
 	                  VoxelVolume <TVoxel, TIndex>* live_volume) override;
 
+	void ComputeWarpHistogram(VoxelVolume <TWarp, TIndex>* warp_field);
+
 private: // instance functions
 	void PerformSingleOptimizationStep(
 			VoxelVolume<TVoxel, TIndex>* canonical_volume,
 			VoxelVolume<TVoxel, TIndex>* source_live_volume,
 			VoxelVolume<TVoxel, TIndex>* target_live_volume,
 			VoxelVolume<TWarp, TIndex>* warp_field,
-			float& max_update_vector_length,
+			float& average_update_vector_length,
 			int iteration);
+
+	void PerformSingleOptimizationStep_Diagnostic(
+			VoxelVolume<TVoxel, TIndex>* canonical_volume,
+			VoxelVolume<TVoxel, TIndex>* source_live_volume,
+			VoxelVolume<TVoxel, TIndex>* target_live_volume,
+			VoxelVolume<TWarp, TIndex>* warp_field,
+			float& average_update_vector_length,
+			int iteration);
+
+	void PerformSingleOptimizationStep_Optimized(
+			VoxelVolume<TVoxel, TIndex>* canonical_volume,
+			VoxelVolume<TVoxel, TIndex>* source_live_volume,
+			VoxelVolume<TVoxel, TIndex>* target_live_volume,
+			VoxelVolume<TWarp, TIndex>* warp_field,
+			float& average_update_vector_length);
 
 	template<WarpType TWarpType>
 	void ClearOutWarps(VoxelVolume <TWarp, TIndex>* warp_field);

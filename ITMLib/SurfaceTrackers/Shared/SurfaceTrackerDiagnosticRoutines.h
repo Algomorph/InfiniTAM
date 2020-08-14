@@ -64,6 +64,8 @@ ReadVoxelAndLinearIndex(const CONSTPTR(TVoxel)* voxelData,
 }
 
 
+
+
 template<class TVoxel>
 _CPU_AND_GPU_CODE_ inline TVoxel
 ReadVoxelAndLinearIndex(const CONSTPTR(TVoxel)* voxel_data,
@@ -137,7 +139,7 @@ inline void PrintLevelSetTermInformation(const CONSTPTR(Vector3f)& liveSdfJacobi
 	       "%E %E %E\n"
 	       "%E %E %E\n"
 	       "%E %E %E\n"
-	       "%sJacobian norm minus unity: %s%E%s",
+	       "%sJacobian norm minus unity: %s%E%s\n",
 	       c_cyan, liveSdfJacobian.x, liveSdfJacobian.y, liveSdfJacobian.z, c_reset, c_green,
 	       liveSdfHessian.xx, liveSdfHessian.xy, liveSdfHessian.xz,
 	       liveSdfHessian.yx, liveSdfHessian.yy, liveSdfHessian.yz,
@@ -194,6 +196,12 @@ inline void PrintKillingTermInformation(const CONSTPTR(Vector3f*) neighbor_warps
 //TODO: figure out how to properly print this on CUDA & remove header guards
 #ifdef __CUDACC__
 	printf("Cannot print warp update Jacobian & Hessian from CUDA device. Set device to 'cpu' for more info here.\n\n");
+	printf("Jacobian of warp updates at current warp (U-component only): %s\n"
+	       "%E %E %E\n"
+	       "%s\n",
+	       c_yellow,
+	       warp_update_Jacobian.xx, warp_update_Jacobian.xy, warp_update_Jacobian.xz,
+	       c_reset);
 #else
 	printf("Jacobian of warp updates at current warp: %s\n"
 	       "%E %E %E\n"
@@ -267,20 +275,20 @@ inline void PrintTikhonovTermInformation(const CONSTPTR(Vector3f*) neighborWarps
 
 _CPU_AND_GPU_CODE_
 inline
-void PrintLocalEnergyGradients(const Vector3f& localDataEnergyGradient,
-                               const Vector3f& localLevelSetEnergyGradient,
-                               const Vector3f& localSmoothnessEnergyGradient,
-                               const Vector3f& localCompleteEnergyGradient,
-                               float energyGradientLength
+void PrintLocalEnergyGradients(const Vector3f& local_data_energy_gradient,
+                               const Vector3f& local_level_set_energy_gradient,
+                               const Vector3f& local_smoothing_energy_gradient,
+                               const Vector3f& local_complete_energy_gradient,
+                               float energy_gradient_length
 ) {
 
-	printf("%s(Gradients) Data: %E, %E, %E %sLevel set: %E, %E, %E %sSmoothing: %E %E %E\n"
+	printf("%s(Gradients) Data: %E, %E, %E %sLevel set: %E, %E, %E %sSmoothing: %E, %E, %E\n"
 	       "%sCombined: %E, %E, %E%s Combined length: %E\n",
-	       c_blue, localDataEnergyGradient.x, localDataEnergyGradient.y, localDataEnergyGradient.z,
-	       c_cyan, localLevelSetEnergyGradient.x, localLevelSetEnergyGradient.y, localLevelSetEnergyGradient.z,
-	       c_yellow, localSmoothnessEnergyGradient.x, localSmoothnessEnergyGradient.y, localSmoothnessEnergyGradient.z,
-	       c_green, localCompleteEnergyGradient.x, localCompleteEnergyGradient.y, localCompleteEnergyGradient.z,
-	       c_reset, energyGradientLength);
+	       c_blue, local_data_energy_gradient.x, local_data_energy_gradient.y, local_data_energy_gradient.z,
+	       c_cyan, local_level_set_energy_gradient.x, local_level_set_energy_gradient.y, local_level_set_energy_gradient.z,
+	       c_yellow, local_smoothing_energy_gradient.x, local_smoothing_energy_gradient.y, local_smoothing_energy_gradient.z,
+	       c_green, local_complete_energy_gradient.x, local_complete_energy_gradient.y, local_complete_energy_gradient.z,
+	       c_reset, energy_gradient_length);
 }
 
 

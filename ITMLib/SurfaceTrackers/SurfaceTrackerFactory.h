@@ -29,10 +29,10 @@ template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMem
 static SurfaceTrackerInterface<TVoxel, TWarp, TIndex>* BuildSurfaceTrackerAux(const ExecutionMode& execution_mode){
 	switch (execution_mode){
 		case OPTIMIZED:
-			return new SurfaceTracker<TVoxel, TWarp, TIndex, MEMORYDEVICE_CPU, OPTIMIZED>();
+			return new SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, OPTIMIZED>();
 			break;
 		case DIAGNOSTIC:
-			return new SurfaceTracker<TVoxel, TWarp, TIndex, MEMORYDEVICE_CPU, DIAGNOSTIC>();
+			return new SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, DIAGNOSTIC>();
 			break;
 	}
 	return nullptr;
@@ -63,7 +63,7 @@ public:
 				break;
 			case MEMORYDEVICE_CUDA:
 #ifndef COMPILE_WITHOUT_CUDA
-				surface_tracker = internal::BuildSurfaceTrackerAux<TVoxel, TWarp, TIndex, MEMORYDEVICE_METAL>(level_set_evolution_parameters.execution_mode);
+				surface_tracker = internal::BuildSurfaceTrackerAux<TVoxel, TWarp, TIndex, MEMORYDEVICE_CUDA>(level_set_evolution_parameters.execution_mode);
 #else
 				DIEWITHEXCEPTION_REPORTLOCATION("Libary not built with CUDA, but construction of CUDA-based surface tracker requested, aborting!");
 #endif

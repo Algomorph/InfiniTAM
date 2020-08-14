@@ -92,7 +92,10 @@
         "log_benchmarks": true,
         "log_volume_statistics": false,
         "log_trajectory_quaternions": false,
+        "log_surface_tracking_procedure_names": false,
+        "log_average_warp_update": false,
         "log_surface_tracking_optimization_energies": false,
+        "log_additional_surface_tracking_stats": false,
         "log_voxel_hash_block_usage": true
     },
     "paths": {

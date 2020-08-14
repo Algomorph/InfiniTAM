@@ -19,6 +19,7 @@
 #include <iostream>
 #include "../../Utils/CPPPrintHelpers.h"
 #include "WarpGradientAggregates.h"
+#include "../../Utils/Logging/Logging.h"
 
 namespace ITMLib {
 // region ==================================== STATIC PRINTING / STATISTICS FUNCTIONS ==================================
@@ -27,90 +28,94 @@ inline static
 void PrintEnergyStatistics(const bool& enable_data_term,
                            const bool& enable_level_set_term,
                            const bool& enable_smoothing_term,
-                           const bool& enableRigidityTerm,
+                           const bool& enable_Killing_term,
                            const float& gamma,
-                           float totalDataEnergy,
-                           float totalLevelSetEnergy,
-                           float totalTikhonovEnergy,
-                           float totalRigidityEnergy) {
-	std::cout << " [ENERGY]";
+                           float total_data_energy,
+                           float total_level_set_energy,
+                           float total_tikhonov_energy,
+                           float total_killing_energy) {
+	std::stringstream stringstream;
+	stringstream << "[ENERGY]";
 
-	double totalEnergy = 0.f;
+	double total_energy = 0.f;
 	if (enable_data_term) {
-		std::cout << blue << " Data term: " << totalDataEnergy;
-		totalEnergy += totalDataEnergy;
+		stringstream << blue << " Data term: " << total_data_energy;
+		total_energy += total_data_energy;
 	}
 	if (enable_level_set_term) {
-		std::cout << red << " Level set term: " << totalLevelSetEnergy;
-		totalEnergy += totalLevelSetEnergy;
+		stringstream << red << " Level set term: " << total_level_set_energy;
+		total_energy += total_level_set_energy;
 	}
 	if (enable_smoothing_term) {
-		if (enableRigidityTerm) {
-			std::cout << yellow << " Tikhonov term: " << totalTikhonovEnergy;
-			std::cout << yellow << " Killing term: " << totalRigidityEnergy;
+		if (enable_Killing_term) {
+			stringstream << yellow << " Tikhonov sub-term: " << total_tikhonov_energy;
+			stringstream << yellow << " Killing sub-term: " << total_killing_energy;
 		}
-		double totalSmoothingEnergy = totalTikhonovEnergy + totalRigidityEnergy;
-		std::cout << cyan << " Smoothing term: " << totalSmoothingEnergy;
-		totalEnergy += totalSmoothingEnergy;
+		double total_smoothing_energy = total_tikhonov_energy + total_killing_energy;
+		stringstream << cyan << " Smoothing term (total): " << total_smoothing_energy;
+		total_energy += total_smoothing_energy;
 	}
-	std::cout << green << " Total: " << totalEnergy << reset << std::endl;
+	stringstream << green << " Total: " << total_energy << reset;
+	LOG4CPLUS_PER_ITERATION(logging::get_logger(), stringstream.str());
 }
 template <MemoryDeviceType TMemoryDeviceType>
 inline static
 void PrintEnergyStatistics(const bool& enable_data_term,
                            const bool& enable_level_set_term,
                            const bool& enable_smoothing_term,
-                           const bool& enableRigidityTerm,
+                           const bool& enable_killing_term,
                            const float& gamma,
                            ComponentEnergies<TMemoryDeviceType>& energies) {
-	float totalDataEnergy = GET_ATOMIC_VALUE_CPU(energies.total_data_energy);
-	float totalLevelSetEnergy = GET_ATOMIC_VALUE_CPU(energies.total_level_set_energy);
-	float totalTikhonovEnergy = GET_ATOMIC_VALUE_CPU(energies.total_Tikhonov_energy);
-	float totalRigidityEnergy = GET_ATOMIC_VALUE_CPU(energies.total_Killing_energy);
-	PrintEnergyStatistics(enable_data_term, enable_level_set_term, enable_smoothing_term, enableRigidityTerm, gamma,
-	                      totalDataEnergy, totalLevelSetEnergy, totalTikhonovEnergy, totalRigidityEnergy);
+	float total_data_energy = GET_ATOMIC_VALUE_CPU(energies.total_data_energy);
+	float total_level_set_energy = GET_ATOMIC_VALUE_CPU(energies.total_level_set_energy);
+	float total_tikhonov_energy = GET_ATOMIC_VALUE_CPU(energies.total_Tikhonov_energy);
+	float total_rigidity_energy = GET_ATOMIC_VALUE_CPU(energies.total_Killing_energy);
+	PrintEnergyStatistics(enable_data_term, enable_level_set_term, enable_smoothing_term, enable_killing_term, gamma,
+	                      total_data_energy, total_level_set_energy, total_tikhonov_energy, total_rigidity_energy);
 }
 
 
 inline static
 void CalculateAndPrintAdditionalStatistics(const bool& enable_data_term,
-                                           const bool& enable_level_set_term, double cumulativeCanonicalSdf,
-                                           double cumulativeLiveSdf, double cumulativeWarpDist,
-                                           double cumulativeSdfDiff,
-                                           unsigned int consideredVoxelCount, unsigned int dataVoxelCount,
-                                           unsigned int levelSetVoxelCount, unsigned int usedHashblockCount = 0) {
+                                           const bool& enable_level_set_term,
+                                           double cumulative_canonical_sdf,
+                                           double cumulative_live_sdf,
+                                           double cumulative_warp_dist,
+                                           double cumulative_sdf_diff,
+                                           unsigned int considered_voxel_count,
+                                           unsigned int data_voxel_count,
+                                           unsigned int level_set_voxel_count,
+                                           unsigned int used_hash_block_count = 0) {
 
-	double averageCanonicalSdf = cumulativeCanonicalSdf / consideredVoxelCount;
-	double averageLiveSdf = cumulativeLiveSdf / consideredVoxelCount;
-	double averageWarpDist = cumulativeWarpDist / consideredVoxelCount;
-	double averageSdfDiff = 0.0;
+	double average_canonical_sdf = cumulative_canonical_sdf / considered_voxel_count;
+	double average_live_sdf = cumulative_live_sdf / considered_voxel_count;
+	double average_warp_distance = cumulative_warp_dist / considered_voxel_count;
+	double average_sdf_difference = 0.0;
 
 	if (enable_data_term) {
-		averageSdfDiff = cumulativeSdfDiff / dataVoxelCount;
+		average_sdf_difference = cumulative_sdf_diff / data_voxel_count;
 	}
 
-	std::cout << " Ave canonical SDF: " << averageCanonicalSdf
+	std::cout << " Ave canonical SDF: " << average_canonical_sdf
 	          << " Ave live SDF: " <<
-	          averageLiveSdf;
+	          average_live_sdf;
 	if (enable_data_term) {
 		std::cout << " Ave SDF diff: " <<
-		          averageSdfDiff;
+		          average_sdf_difference;
 	}
-	std::cout << " Used voxel count: " << consideredVoxelCount
-	          << " Data term v-count: " << dataVoxelCount;
+	std::cout << " Used voxel count: " << considered_voxel_count
+	          << " Data term v-count: " << data_voxel_count;
 	if (enable_level_set_term) {
-		std::cout << " LS term v-count: " << levelSetVoxelCount;
+		std::cout << " LS term v-count: " << level_set_voxel_count;
 	}
-	std::cout << " Ave warp distance: " <<
-	          averageWarpDist;
+	std::cout << " Ave warp distance: " << average_warp_distance;
 
 
-	if (usedHashblockCount > 0) {
+	if (used_hash_block_count > 0) {
 		std::cout << " Used hash block count: " <<
-		          usedHashblockCount;
+		          used_hash_block_count;
 	}
-	std::cout <<
-	          std::endl;
+	std::cout << std::endl;
 }
 
 template<MemoryDeviceType TMemoryDeviceType>
@@ -120,18 +125,18 @@ void CalculateAndPrintAdditionalStatistics(const bool& enable_data_term,
                                            AdditionalGradientAggregates<TMemoryDeviceType>& aggregates,
                                            const unsigned int usedHashblockCount = 0) {
 
-	unsigned int consideredVoxelCount = GET_ATOMIC_VALUE_CPU(aggregates.considered_voxel_count);
-	unsigned int dataVoxelCount = GET_ATOMIC_VALUE_CPU(aggregates.data_voxel_count);
-	unsigned int levelSetVoxelCount = GET_ATOMIC_VALUE_CPU(aggregates.level_set_voxel_count);
-	double cumulativeCanonicalSdf = GET_ATOMIC_VALUE_CPU(aggregates.cumulative_canonical_sdf);
-	double cumulativeLiveSdf = GET_ATOMIC_VALUE_CPU(aggregates.cumulative_live_sdf);
-	double cumulativeWarpDist = GET_ATOMIC_VALUE_CPU(aggregates.cumulative_warp_dist);
-	double cumulativeSdfDiff = GET_ATOMIC_VALUE_CPU(aggregates.cumulative_sdf_diff);
+	unsigned int considered_voxel_count = GET_ATOMIC_VALUE_CPU(aggregates.considered_voxel_count);
+	unsigned int data_voxel_count = GET_ATOMIC_VALUE_CPU(aggregates.data_voxel_count);
+	unsigned int level_set_voxel_count = GET_ATOMIC_VALUE_CPU(aggregates.level_set_voxel_count);
+	double cumulative_canonical_sdf = GET_ATOMIC_VALUE_CPU(aggregates.cumulative_canonical_sdf);
+	double cumulative_live_sdf = GET_ATOMIC_VALUE_CPU(aggregates.cumulative_live_sdf);
+	double cumulative_warp_dist = GET_ATOMIC_VALUE_CPU(aggregates.cumulative_warp_dist);
+	double cumulative_sdf_diff = GET_ATOMIC_VALUE_CPU(aggregates.cumulative_sdf_diff);
 
-	CalculateAndPrintAdditionalStatistics(enable_data_term, enable_level_set_term, cumulativeCanonicalSdf,
-	                                      cumulativeLiveSdf, cumulativeWarpDist, cumulativeSdfDiff,
-	                                      consideredVoxelCount, dataVoxelCount,
-	                                      levelSetVoxelCount, usedHashblockCount);
+	CalculateAndPrintAdditionalStatistics(enable_data_term, enable_level_set_term, cumulative_canonical_sdf,
+	                                      cumulative_live_sdf, cumulative_warp_dist, cumulative_sdf_diff,
+	                                      considered_voxel_count, data_voxel_count,
+	                                      level_set_voxel_count, usedHashblockCount);
 }
 
 // endregion ===========================================================================================================

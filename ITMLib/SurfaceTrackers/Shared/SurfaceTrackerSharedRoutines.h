@@ -462,8 +462,8 @@ inline void ComputeWarpLaplacianAndJacobian(THREADPTR(Vector3f)& laplacian,
 // region =================================== WARP JACOBIAN AND HESSIAN (SMOOTHING/KILLING TERM) =======================
 //Computes the jacobian and hessian approximation for the warp vectors themselves in a given neighborhood
 _CPU_AND_GPU_CODE_
-inline void ComputePerVoxelWarpJacobianAndHessian(const CONSTPTR(Vector3f)& voxelFramewiseWarp,
-                                                  const CONSTPTR(Vector3f*) neighborFramewiseWarps, //in, x9
+inline void ComputePerVoxelWarpJacobianAndHessian(const CONSTPTR(Vector3f)& voxel_framewise_warp,
+                                                  const CONSTPTR(Vector3f*) neighbor_framewise_warps, //in, x9
                                                   THREADPTR(Matrix3f)& jacobian, //out
                                                   THREADPTR(Matrix3f)* hessian //out, x3
 ) {
@@ -473,28 +473,28 @@ inline void ComputePerVoxelWarpJacobianAndHessian(const CONSTPTR(Vector3f)& voxe
 	// |u_x, u_y, u_z|       |m00, m10, m20|
 	// |v_x, v_y, v_z|       |m01, m11, m21|
 	// |w_x, w_y, w_z|       |m02, m12, m22|
-	jacobian.setColumn(0, neighborFramewiseWarps[3] - voxelFramewiseWarp);//1st derivative in x
-	jacobian.setColumn(1, neighborFramewiseWarps[4] - voxelFramewiseWarp);//1st derivative in y
-	jacobian.setColumn(2, neighborFramewiseWarps[5] - voxelFramewiseWarp);//1st derivative in z
+	jacobian.setColumn(0, neighbor_framewise_warps[3] - voxel_framewise_warp);//1st derivative in x
+	jacobian.setColumn(1, neighbor_framewise_warps[4] - voxel_framewise_warp);//1st derivative in y
+	jacobian.setColumn(2, neighbor_framewise_warps[5] - voxel_framewise_warp);//1st derivative in z
 
-	Matrix3f backwardDifferences;
+	Matrix3f backward_differences;
 	// |u_x, u_y, u_z|
 	// |v_x, v_y, v_z|
 	// |w_x, w_y, w_z|
-	backwardDifferences.setColumn(0, voxelFramewiseWarp - neighborFramewiseWarps[0]);//1st derivative in x
-	backwardDifferences.setColumn(1, voxelFramewiseWarp - neighborFramewiseWarps[1]);//1st derivative in y
-	backwardDifferences.setColumn(2, voxelFramewiseWarp - neighborFramewiseWarps[2]);//1st derivative in z
+	backward_differences.setColumn(0, voxel_framewise_warp - neighbor_framewise_warps[0]);//1st derivative in x
+	backward_differences.setColumn(1, voxel_framewise_warp - neighbor_framewise_warps[1]);//1st derivative in y
+	backward_differences.setColumn(2, voxel_framewise_warp - neighbor_framewise_warps[2]);//1st derivative in z
 
 	//second derivatives in same direction
 	// |u_xx, u_yy, u_zz|       |m00, m10, m20|
 	// |v_xx, v_yy, v_zz|       |m01, m11, m21|
 	// |w_xx, w_yy, w_zz|       |m02, m12, m22|
-	Matrix3f dd_XX_YY_ZZ = jacobian - backwardDifferences;
+	Matrix3f dd_XX_YY_ZZ = jacobian - backward_differences;
 
 	Matrix3f neighborDifferences;
-	neighborDifferences.setColumn(0, neighborFramewiseWarps[6] - neighborFramewiseWarps[4]);//(0,1,0)->(1,1,0)
-	neighborDifferences.setColumn(1, neighborFramewiseWarps[7] - neighborFramewiseWarps[5]);//(0,0,1)->(0,1,1)
-	neighborDifferences.setColumn(2, neighborFramewiseWarps[8] - neighborFramewiseWarps[3]);//(1,0,0)->(1,0,1)
+	neighborDifferences.setColumn(0, neighbor_framewise_warps[6] - neighbor_framewise_warps[4]);//(0,1,0)->(1,1,0)
+	neighborDifferences.setColumn(1, neighbor_framewise_warps[7] - neighbor_framewise_warps[5]);//(0,0,1)->(0,1,1)
+	neighborDifferences.setColumn(2, neighbor_framewise_warps[8] - neighbor_framewise_warps[3]);//(1,0,0)->(1,0,1)
 
 	//second derivatives in different directions
 	// |u_xy, u_yz, u_zx|      |m00, m10, m20|

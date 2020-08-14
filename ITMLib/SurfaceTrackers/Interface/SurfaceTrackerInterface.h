@@ -52,6 +52,7 @@ public:
 	virtual float UpdateWarps(VoxelVolume<TWarp, TIndex>* warpField,
 	                          VoxelVolume<TVoxel, TIndex>* canonicalScene,
 	                          VoxelVolume<TVoxel, TIndex>* liveScene) = 0;
+
 	virtual void ClearOutFramewiseWarps(VoxelVolume<TWarp, TIndex>* warpField) = 0;
 	virtual void ClearOutCumulativeWarps(VoxelVolume<TWarp, TIndex>* warpField) = 0;
 	virtual void ClearOutWarpUpdates(VoxelVolume<TWarp, TIndex>* warpField) = 0;

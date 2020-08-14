@@ -19,12 +19,15 @@
 #include "../../Utils/Metacoding/DeferrableSerializableStruct.h"
 #include "../../Utils/Geometry/CardinalAxesAndPlanes.h"
 
-namespace ITMLib{
+namespace ITMLib {
 
 #define TELEMETRY_SETTINGS_STRUCT_DESCRIPTION TelemetrySettings, "telemetry_settings", \
     (bool, record_volume_memory_usage, false, PRIMITIVE, "Whether to record information required to debug memory" \
     " usage, e.g. used block locations for the VoxelBlockHash index."), \
     (bool, record_surface_tracking_optimization_energies, false, PRIMITIVE, "Whether to record optimization energies " \
+    "for each iteration of the surface tracking optimization in a separate file. Only works when non_rigid_tracking_parameters.functor_type " \
+    "parameter is set to \"slavcheva_diagnostic\""),                                   \
+    (bool, record_surface_tracking_additional_statistics, false, PRIMITIVE, "Whether to additional statistics (warp update length, etc.) " \
     "for each iteration of the surface tracking optimization in a separate file. Only works when non_rigid_tracking_parameters.functor_type " \
     "parameter is set to \"slavcheva_diagnostic\""), \
     (bool, record_frame_meshes, false, PRIMITIVE, "Whether to log three meshes at every frame: (a) from live volume " \

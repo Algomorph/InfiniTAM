@@ -31,7 +31,7 @@
 #include "../../Utils/CPrintHelpers.h"
 #include "../../Utils/Configuration/Configuration.h"
 #include "../../Engines/EditAndCopy/Shared/EditAndCopyEngine_Shared.h"
-
+#include "../../Engines/Telemetry/TelemetryRecorder.h"
 
 namespace ITMLib {
 
@@ -74,13 +74,13 @@ struct SetGradientFunctor<TWarp, true> {
 };
 
 
-template<typename TTSDFVoxel, typename TWarpVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-struct WarpGradientFunctor<TTSDFVoxel, TWarpVoxel, TIndex, TMemoryDeviceType, DIAGNOSTIC> {
+template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+struct WarpGradientFunctor<TVoxel, TWarp, TIndex, TMemoryDeviceType, DIAGNOSTIC> {
 private:
 
 	_CPU_AND_GPU_CODE_
 	void SetUpFocusVoxelPrinting(bool& print_voxel_result, const Vector3i& voxel_position,
-	                             const Vector3f& warp_update, const TTSDFVoxel& canonical_voxel, const TTSDFVoxel& live_voxel,
+	                             const Vector3f& warp_update, const TVoxel& canonical_voxel, const TVoxel& live_voxel,
 	                             bool compute_data_term) {
 		if (use_focus_coordinates && voxel_position == focus_coordinates) {
 			int x = 0, y = 0, z = 0, vmIndex = 0, locId = 0;
@@ -109,9 +109,9 @@ public:
 	// region ========================================= CONSTRUCTOR ====================================================
 	WarpGradientFunctor(LevelSetEvolutionWeights parameters,
 	                    LevelSetEvolutionSwitches switches,
-	                    VoxelVolume<TWarpVoxel, TIndex>* warp_field,
-	                    VoxelVolume<TTSDFVoxel, TIndex>* canonical_volume,
-	                    VoxelVolume<TTSDFVoxel, TIndex>* live_volume,
+	                    VoxelVolume<TWarp, TIndex>* warp_field,
+	                    VoxelVolume<TVoxel, TIndex>* canonical_volume,
+	                    VoxelVolume<TVoxel, TIndex>* live_volume,
 	                    float voxel_size, float truncation_distance) :
 			parameters(parameters), switches(switches),
 			live_voxels(live_volume->GetVoxels()), live_index_data(live_volume->index.GetIndexData()),
@@ -126,7 +126,7 @@ public:
 	// endregion =======================================================================================================
 
 	_DEVICE_WHEN_AVAILABLE_
-	void operator()(TWarpVoxel& warp_voxel, TTSDFVoxel& canonical_voxel, TTSDFVoxel& live_voxel, const Vector3i& voxel_position) {
+	void operator()(TWarp& warp_voxel, TVoxel& canonical_voxel, TVoxel& live_voxel, const Vector3i& voxel_position) {
 
 
 		Vector3f& warp_update = warp_voxel.warp_update;
@@ -143,8 +143,8 @@ public:
 
 		if (!VoxelIsConsideredForTracking(canonical_voxel, live_voxel)) return;
 
-		float live_sdf = TTSDFVoxel::valueToFloat(live_voxel.sdf);
-		float canonical_sdf = TTSDFVoxel::valueToFloat(canonical_voxel.sdf);
+		float live_sdf = TVoxel::valueToFloat(live_voxel.sdf);
+		float canonical_sdf = TVoxel::valueToFloat(canonical_voxel.sdf);
 
 		// term gradient results are stored here before being added up
 		Vector3f local_smoothing_energy_gradient(0.0f), local_data_energy_gradient(0.0f), local_level_set_energy_gradient(0.0f);
@@ -179,6 +179,8 @@ public:
 
 				if (print_voxel_result) {
 					PrintDataTermInformation(live_sdf_jacobian);
+					printf("local data energy: %s%E%s\n",
+					       c_yellow, local_data_energy, c_reset);
 				}
 			}
 
@@ -192,8 +194,8 @@ public:
 
 				float sdf_jacobian_norm = ORUtils::length(live_sdf_jacobian);
 				float sdf_jacobian_norm_minus_unity = sdf_jacobian_norm - sdf_unity;
-				local_level_set_energy_gradient = parameters.weight_level_set_term * sdf_jacobian_norm_minus_unity *
-				                                  (live_sdf_hessian * live_sdf_jacobian) /
+				local_level_set_energy_gradient = parameters.weight_level_set_term *
+						sdf_jacobian_norm_minus_unity * (live_sdf_hessian * live_sdf_jacobian) /
 				                                  (sdf_jacobian_norm + parameters.epsilon);
 				ATOMIC_ADD(aggregates.level_set_voxel_count, 1u);
 				float local_level_set_energy = parameters.weight_level_set_term *
@@ -201,6 +203,8 @@ public:
 				ATOMIC_ADD(energies.total_level_set_energy, local_level_set_energy);
 				if (print_voxel_result) {
 					PrintLevelSetTermInformation(live_sdf_jacobian, live_sdf_hessian, sdf_jacobian_norm_minus_unity);
+					printf("local level set energy: %s%E%s\n",
+					       c_yellow, local_level_set_energy, c_reset);
 				}
 			}
 			// endregion =======================================================================================
@@ -271,15 +275,20 @@ public:
 				                                  warp_update_Jacobian.getColumn(0)) +
 				                              dot(warp_update_Jacobian.getColumn(1),
 				                                  warp_update_Jacobian.getColumn(1)) +
-				                              dot(warp_update_Jacobian.getColumn(2), warp_update_Jacobian.getColumn(2));
+				                              dot(warp_update_Jacobian.getColumn(2),
+				                                  warp_update_Jacobian.getColumn(2));
 
 				float local_Killing_energy = gamma * parameters.weight_smoothing_term *
 				                             (dot(warp_Jacobian_transpose.getColumn(0),
 				                                  warp_update_Jacobian.getColumn(0)) +
-				                             dot(warp_Jacobian_transpose.getColumn(1),
-				                                 warp_update_Jacobian.getColumn(1)) +
-				                             dot(warp_Jacobian_transpose.getColumn(2),
-				                                 warp_update_Jacobian.getColumn(2)));
+				                              dot(warp_Jacobian_transpose.getColumn(1),
+				                                  warp_update_Jacobian.getColumn(1)) +
+				                              dot(warp_Jacobian_transpose.getColumn(2),
+				                                  warp_update_Jacobian.getColumn(2)));
+				if(print_voxel_result){
+					printf("local Tikhonov energy: %s%E%s\nlocal Killing energy: %s%E%s\n",
+					       c_yellow, local_Tikhonov_energy, c_reset, c_yellow, local_Killing_energy, c_reset);
+				}
 				ATOMIC_ADD(energies.total_Tikhonov_energy, local_Tikhonov_energy);
 				ATOMIC_ADD(energies.total_Killing_energy, local_Killing_energy);
 			} else {
@@ -304,27 +313,27 @@ public:
 		}
 		// endregion
 		// region =============================== COMPUTE ENERGY GRADIENT ==================================
-		SetGradientFunctor<TWarpVoxel, TWarpVoxel::hasDebugInformation>::SetGradient(
+		SetGradientFunctor<TWarp, TWarp::hasDebugInformation>::SetGradient(
 				warp_voxel, local_data_energy_gradient, local_level_set_energy_gradient, local_smoothing_energy_gradient);
 
 		// endregion
 		// region =============================== AGGREGATE VOXEL STATISTICS ===============================
 
 
-		float warpLength = ORUtils::length(warp_voxel.warp_update);
+		float warp_length = ORUtils::length(warp_voxel.warp_update);
 
 		ATOMIC_ADD(aggregates.cumulative_canonical_sdf, canonical_sdf);
 		ATOMIC_ADD(aggregates.cumulative_live_sdf, live_sdf);
-		ATOMIC_ADD(aggregates.cumulative_warp_dist, warpLength);
+		ATOMIC_ADD(aggregates.cumulative_warp_dist, warp_length);
 		ATOMIC_ADD(aggregates.considered_voxel_count, 1u);
 		// endregion
 
 		// region ======================== FINALIZE RESULT PRINTING / RECORDING ========================================
 
 		if (print_voxel_result) {
-			float energyGradientLength = ORUtils::length(warp_voxel.gradient0);
+			float energy_gradient_length = ORUtils::length(warp_voxel.gradient0);
 			PrintLocalEnergyGradients(local_data_energy_gradient, local_level_set_energy_gradient,
-			                          local_smoothing_energy_gradient, warp_voxel.gradient0, energyGradientLength);
+			                          local_smoothing_energy_gradient, warp_voxel.gradient0, energy_gradient_length);
 		}
 		// endregion ===================================================================================================
 	}
@@ -332,12 +341,21 @@ public:
 
 	void PrintStatistics() {
 		if (verbosity_level < VERBOSITY_PER_ITERATION) return;
-		std::cout << bright_cyan << "*** Non-rigid Alignment Iteration Statistics ***" << reset << std::endl;
-		PrintEnergyStatistics(this->switches.enable_data_term, this->switches.enable_level_set_term,
-		                      this->switches.enable_smoothing_term, this->switches.enable_killing_rigidity_enforcement_term,
-		                      this->parameters.weight_killing_term, energies);
-		CalculateAndPrintAdditionalStatistics(
-				this->switches.enable_data_term, this->switches.enable_level_set_term, aggregates);
+		if (configuration::Get().logging_settings.log_surface_tracking_optimization_energies) {
+			PrintEnergyStatistics(this->switches.enable_data_term, this->switches.enable_level_set_term,
+			                      this->switches.enable_smoothing_term, this->switches.enable_killing_rigidity_enforcement_term,
+			                      this->parameters.weight_killing_term, energies);
+		}
+		if (configuration::Get().logging_settings.log_additional_surface_tracking_stats) {
+			CalculateAndPrintAdditionalStatistics(
+					this->switches.enable_data_term, this->switches.enable_level_set_term, aggregates);
+		}
+	}
+
+	void SaveStatistics() {
+		auto& recorder = TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::GetDefaultInstance();
+		recorder.RecordSurfaceTrackingEnergies(energies);
+		recorder.RecordSurfaceTrackingStatistics(aggregates);
 	}
 
 
@@ -346,15 +364,15 @@ private:
 	const float sdf_unity;
 
 	// *** data structure accessors
-	const TTSDFVoxel* live_voxels;
+	const TVoxel* live_voxels;
 	const typename TIndex::IndexData* live_index_data;
 	typename TIndex::IndexCache live_cache;
 
-	const TTSDFVoxel* canonical_voxels;
+	const TVoxel* canonical_voxels;
 	const typename TIndex::IndexData* canonical_index_data;
 	typename TIndex::IndexCache canonical_cache;
 
-	TWarpVoxel* warp_voxels;
+	TWarp* warp_voxels;
 	const typename TIndex::IndexData* warp_index_data;
 	typename TIndex::IndexCache warp_cache;
 

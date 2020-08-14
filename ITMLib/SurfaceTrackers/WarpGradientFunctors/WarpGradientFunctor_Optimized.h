@@ -39,8 +39,8 @@
 namespace ITMLib {
 
 
-template<typename TTSDFVoxel, typename TWarpVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-struct WarpGradientFunctor<TTSDFVoxel, TWarpVoxel, TIndex, TMemoryDeviceType, OPTIMIZED> {
+template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+struct WarpGradientFunctor<TVoxel, TWarp, TIndex, TMemoryDeviceType, OPTIMIZED> {
 private:
 
 
@@ -49,9 +49,9 @@ public:
 	// region ========================================= CONSTRUCTOR ====================================================
 	WarpGradientFunctor(LevelSetEvolutionWeights parameters,
 	                    LevelSetEvolutionSwitches switches,
-	                    VoxelVolume<TWarpVoxel, TIndex>* warp_field,
-	                    VoxelVolume<TTSDFVoxel, TIndex>* canonical_volume,
-	                    VoxelVolume<TTSDFVoxel, TIndex>* live_volume,
+	                    VoxelVolume<TWarp, TIndex>* warp_field,
+	                    VoxelVolume<TVoxel, TIndex>* canonical_volume,
+	                    VoxelVolume<TVoxel, TIndex>* live_volume,
 	                    float voxelSize, float narrowBandHalfWidth) :
 			parameters(parameters), switches(switches),
 			live_voxels(live_volume->GetVoxels()), live_index_data(live_volume->index.GetIndexData()),
@@ -63,14 +63,14 @@ public:
 	// endregion =======================================================================================================
 
 	_DEVICE_WHEN_AVAILABLE_
-	void operator()(TWarpVoxel& warp_voxel, TTSDFVoxel& canonical_voxel, TTSDFVoxel& live_voxel, const Vector3i& voxel_position) {
+	void operator()(TWarp& warp_voxel, TVoxel& canonical_voxel, TVoxel& live_voxel, const Vector3i& voxel_position) {
 
 		if (!VoxelIsConsideredForTracking(canonical_voxel, live_voxel)) return;
 		bool compute_data_and_level_set_terms = VoxelIsConsideredForDataAndLS_Term(canonical_voxel, live_voxel);
 
 		Vector3f& warp_update = warp_voxel.warp_update;
-		float live_sdf = TTSDFVoxel::valueToFloat(live_voxel.sdf);
-		float canonical_sdf = TTSDFVoxel::valueToFloat(canonical_voxel.sdf);
+		float live_sdf = TVoxel::valueToFloat(live_voxel.sdf);
+		float canonical_sdf = TVoxel::valueToFloat(canonical_voxel.sdf);
 
 		// region =============================== DECLARATIONS & DEFAULTS FOR ALL TERMS ====================
 
@@ -185,21 +185,25 @@ public:
 
 	}
 
+	void SaveStatistics(){
+
+	}
+
 
 private:
 
 	const float sdf_unity;
 
 	// *** data structure accessors
-	const TTSDFVoxel* live_voxels;
+	const TVoxel* live_voxels;
 	const typename TIndex::IndexData* live_index_data;
 	typename TIndex::IndexCache live_cache;
 
-	const TTSDFVoxel* canonical_voxels;
+	const TVoxel* canonical_voxels;
 	const typename TIndex::IndexData* canonical_index_data;
 	typename TIndex::IndexCache canonical_cache;
 
-	TWarpVoxel* warp_voxels;
+	TWarp* warp_voxels;
 	const typename TIndex::IndexData* warp_index_data;
 	typename TIndex::IndexCache warp_cache;
 

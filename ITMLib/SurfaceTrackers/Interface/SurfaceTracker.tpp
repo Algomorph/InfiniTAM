@@ -27,6 +27,7 @@
 #include "../../Utils/Analytics/BenchmarkUtilities.h"
 #include "../../Utils/Logging/Logging.h"
 #include "../../Engines/Warping/WarpingEngineFactory.h"
+#include "../../Engines/Analytics/AnalyticsEngineFactory.h"
 
 using namespace ITMLib;
 
@@ -56,7 +57,7 @@ SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode>::Surfac
 		termination(this->parameters.termination),
 		warping_engine(WarpingEngineFactory::Build<TVoxel, TWarp, TIndex>()),
 		mean_vector_update_threshold_in_voxels(termination.mean_update_length_threshold /
-		                                       configuration::Get().general_voxel_volume_parameters.voxel_size){}
+		                                       configuration::Get().general_voxel_volume_parameters.voxel_size) {}
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
 SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode>::~SurfaceTracker() {
@@ -156,6 +157,73 @@ SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode>::TrackN
 	return live_volume_pair[target_live_volume_index];
 }
 
+template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
+void SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode>::PerformSingleOptimizationStep_Diagnostic(
+		VoxelVolume<TVoxel, TIndex>* canonical_volume, VoxelVolume<TVoxel, TIndex>* source_live_volume,
+		VoxelVolume<TVoxel, TIndex>* target_live_volume, VoxelVolume<TWarp, TIndex>* warp_field, float& average_update_vector_length,
+		int iteration) {
+	auto& config = configuration::Get();
+	if (config.logging_settings.log_iteration_number) {
+		LOG4CPLUS_PER_ITERATION(logging::get_logger(), red << "Iteration: " << iteration << reset);
+	}
+
+
+	if (config.logging_settings.log_surface_tracking_procedure_names) {
+		LOG4CPLUS_PER_ITERATION(logging::get_logger(), bright_cyan << "Calculating warp energy gradient..." << reset);
+	}
+
+	bench::start_timer("TrackMotion_1_CalculateWarpUpdate");
+	CalculateWarpGradient(warp_field, canonical_volume, source_live_volume);
+	bench::stop_timer("TrackMotion_1_CalculateWarpUpdate");
+
+	if (this->switches.enable_sobolev_gradient_smoothing && config.logging_settings.log_surface_tracking_procedure_names) {
+		LOG4CPLUS_PER_ITERATION(logging::get_logger(),
+		                        bright_cyan << "Applying Sobolev smoothing to energy gradient..." << reset);
+	}
+
+	bench::start_timer("TrackMotion_2_ApplySmoothingToGradient");
+	SmoothWarpGradient(warp_field, canonical_volume, source_live_volume);
+	bench::stop_timer("TrackMotion_2_ApplySmoothingToGradient");
+
+	if (config.logging_settings.log_surface_tracking_procedure_names) {
+		LOG4CPLUS_PER_ITERATION(logging::get_logger(),
+		                        bright_cyan << "Applying warp update (based on energy gradient) to the cumulative warp..."
+		                                    << reset);
+	}
+
+	bench::start_timer("TrackMotion_3_UpdateWarps");
+	average_update_vector_length = UpdateWarps(warp_field, canonical_volume, source_live_volume);
+	bench::stop_timer("TrackMotion_3_UpdateWarps");
+
+	TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::GetDefaultInstance()
+			.RecordSurfaceTrackingMeanUpdate(average_update_vector_length);
+
+	if (config.logging_settings.log_average_warp_update) {
+		LOG4CPLUS_PER_ITERATION(logging::get_logger(), "Average update vector length:" << yellow << average_update_vector_length << reset);
+	}
+
+	if (config.logging_settings.log_surface_tracking_procedure_names) {
+		LOG4CPLUS_PER_ITERATION(logging::get_logger(),
+		                        bright_cyan << "Updating live frame SDF by mapping from raw live SDF "
+		                                       "to new warped SDF based on latest warp..." << reset);
+	}
+
+	bench::start_timer("TrackMotion_4_WarpLiveScene");
+	warping_engine->WarpVolume_WarpUpdates(warp_field, source_live_volume, target_live_volume);
+	bench::stop_timer("TrackMotion_4_WarpLiveScene");
+}
+
+template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
+void SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode>::PerformSingleOptimizationStep_Optimized(
+		VoxelVolume<TVoxel, TIndex>* canonical_volume, VoxelVolume<TVoxel, TIndex>* source_live_volume,
+		VoxelVolume<TVoxel, TIndex>* target_live_volume, VoxelVolume<TWarp, TIndex>* warp_field, float& average_update_vector_length) {
+
+	CalculateWarpGradient(warp_field, canonical_volume, source_live_volume);
+	SmoothWarpGradient(warp_field, canonical_volume, source_live_volume);
+	average_update_vector_length = UpdateWarps(warp_field, canonical_volume, source_live_volume);
+	warping_engine->WarpVolume_WarpUpdates(warp_field, source_live_volume, target_live_volume);
+}
+
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
 void SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode>::PerformSingleOptimizationStep(
@@ -163,44 +231,14 @@ void SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode>::P
 		VoxelVolume<TVoxel, TIndex>* source_live_volume,
 		VoxelVolume<TVoxel, TIndex>* target_live_volume,
 		VoxelVolume<TWarp, TIndex>* warp_field,
-		float& max_update_vector_length,
+		float& average_update_vector_length,
 		int iteration) {
-
-
-	LOG4CPLUS_PER_ITERATION(logging::get_logger(), red << "Iteration: " << iteration << reset);
-	//** warp update gradient computation
-	LOG4CPLUS_PER_ITERATION(logging::get_logger(), bright_cyan << "Calculating warp energy gradient..." << reset);
-
-	bench::start_timer("TrackMotion_1_CalculateWarpUpdate");
-	CalculateWarpGradient(warp_field, canonical_volume, source_live_volume);
-	bench::stop_timer("TrackMotion_1_CalculateWarpUpdate");
-
-
-	LOG4CPLUS_PER_ITERATION(logging::get_logger(),
-	                        bright_cyan << "Applying Sobolev smoothing to energy gradient..." << reset);
-
-
-	bench::start_timer("TrackMotion_2_ApplySmoothingToGradient");
-	SmoothWarpGradient(warp_field, canonical_volume, source_live_volume);
-	bench::stop_timer("TrackMotion_2_ApplySmoothingToGradient");
-
-
-	LOG4CPLUS_PER_ITERATION(logging::get_logger(),
-	                        bright_cyan << "Applying warp update (based on energy gradient) to the cumulative warp..."
-	                                    << reset);
-
-	bench::start_timer("TrackMotion_3_UpdateWarps");
-	max_update_vector_length = UpdateWarps(warp_field, canonical_volume, source_live_volume);
-	bench::stop_timer("TrackMotion_3_UpdateWarps");
-
-
-	LOG4CPLUS_PER_ITERATION(logging::get_logger(),
-	                        bright_cyan << "Updating live frame SDF by mapping from raw live SDF "
-	                                       "to new warped SDF based on latest warp..." << reset);
-
-	bench::start_timer("TrackMotion_4_WarpLiveScene");
-	warping_engine->WarpVolume_WarpUpdates(warp_field, source_live_volume, target_live_volume);
-	bench::stop_timer("TrackMotion_4_WarpLiveScene");
+	if (TExecutionMode == OPTIMIZED) {
+		PerformSingleOptimizationStep_Optimized(canonical_volume, source_live_volume, target_live_volume, warp_field, average_update_vector_length);
+	} else {
+		PerformSingleOptimizationStep_Diagnostic(canonical_volume, source_live_volume, target_live_volume, warp_field, average_update_vector_length,
+		                                         iteration);
+	}
 }
 
 // region ===================================== CALCULATE WARPS ========================================================
@@ -225,6 +263,7 @@ SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode>::Calcul
 	ThreeVolumeTraversalEngine<TWarp, TVoxel, TVoxel, TIndex, TMemoryDeviceType>::
 	TraverseUtilizedWithPosition(warp_field, canonical_volume, live_volume, calculate_gradient_functor);
 	calculate_gradient_functor.PrintStatistics();
+	calculate_gradient_functor.SaveStatistics();
 }
 
 // endregion ===========================================================================================================
@@ -268,21 +307,8 @@ float SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode>::
 	ThreeVolumeTraversalEngine<TWarp, TVoxel, TVoxel, TIndex, TMemoryDeviceType>::
 	TraverseUtilizedWithPosition(warp_field, canonical_volume, live_volume, warp_update_functor);
 
-	//TODO: move histogram printing / logging to a separate function
-	//don't compute_allocated histogram in CUDA version
-#ifndef __CUDACC__
-	if (histograms_enabled) {
-		WarpHistogramFunctor<TVoxel, TWarp>
-				warp_histogram_functor(/*warp_update_functor.GetMaxFramewiseWarpLength(),*/
-				warp_update_functor.GetMaxWarpUpdateLength());
-		ThreeVolumeTraversalEngine<TWarp, TVoxel, TVoxel, TIndex, TMemoryDeviceType>::
-		TraverseUtilized(warp_field, canonical_volume, live_volume, warp_histogram_functor);
-		warp_histogram_functor.PrintHistogram();
-		warp_update_functor.PrintWarp();
-	}
-#endif
-	//return warp_update_functor.max_warp_update_length;
-	return warp_update_functor.GetMaxWarpUpdateLength();
+	// return average warp update length
+	return warp_update_functor.GetAverageWarpUpdateLength();
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
@@ -295,6 +321,25 @@ void SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode>::A
 	} else {
 		VolumeTraversalEngine<TWarp, TIndex, TMemoryDeviceType>::
 		template TraverseUtilized<AddFramewiseWarpToWarpStaticFunctor<TWarp, TWarp::hasCumulativeWarp>>(warp_field);
+
+	}
+}
+
+template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
+void SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode>::ComputeWarpHistogram(VoxelVolume<TWarp, TIndex>* warp_field) {
+	if (histograms_enabled) {
+		auto& analytics_engine = AnalyticsEngine<TWarp, TIndex, TMemoryDeviceType>::Instance();
+		float max_update;
+		Vector3i max_update_position;
+		analytics_engine.ComputeWarpUpdateMaxAndPosition(max_update, max_update_position, warp_field);
+
+		WarpHistogramFunctor<TWarp, TMemoryDeviceType> warp_histogram_functor(max_update);
+		VolumeTraversalEngine<TWarp, TIndex, TMemoryDeviceType>::
+		TraverseUtilized(warp_field, warp_histogram_functor);
+		warp_histogram_functor.PrintHistogram();
+
+		std::cout << ITMLib::green << " Max update: [" << max_update << " at " << max_update_position << "]."
+		          << ITMLib::reset << std::endl;
 
 	}
 }
