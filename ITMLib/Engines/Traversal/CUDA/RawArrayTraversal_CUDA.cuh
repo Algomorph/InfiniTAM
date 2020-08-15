@@ -126,6 +126,7 @@ class RawArrayTraversalEngine_Internal<MEMORYDEVICE_CUDA, JobCountPolicy::PADDED
 protected: // static functions
 	template<int TBlockSize = 256, typename TData, typename TFunctor>
 	inline static void Traverse_Generic(const int sample_size, const int* sample_indices, TData* data, TFunctor& functor) {
+		if(sample_size <= 0) return;
 		CallCUDAonUploadedFunctor(
 				functor,
 				[&sample_size, &sample_indices, &data](TFunctor* functor_device) {

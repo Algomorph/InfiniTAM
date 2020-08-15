@@ -51,6 +51,7 @@ protected: // static functions
 			TData* data, const unsigned int element_count, TFunctor& functor,
 			TGetSubGridBoundsFunction&& get_sub_element_bounds
 	) {
+		if (element_count <= 0) return;
 		internal::CallCUDAonUploadedFunctor(
 				functor,
 				[&data, &element_count, &get_sub_element_bounds](TFunctor* functor_device) {
