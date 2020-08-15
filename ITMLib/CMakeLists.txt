@@ -898,6 +898,7 @@ set(
         Utils/Collections/OperationsOnSTLContainers.cpp
 
         Utils/Enums/IndexingMethod.cpp
+        Utils/Enums/ExecutionMode.cpp
 
         Utils/Configuration/AutomaticRunSettings.cpp
         Utils/Configuration/Configuration.cpp
@@ -919,9 +920,6 @@ set(
         Utils/Quaternions/QuaternionFromMatrix.cpp
 
         Utils/Telemetry/TelemetryUtilities.cpp
-
-        Utils/CPPPrintHelpers.cpp
-        Utils/ExecutionMode.cpp
 
         Utils/Math.cpp
 
@@ -950,6 +948,7 @@ set(
         Engines/Telemetry/TelemetrySettings.h
 
         Utils/Enums/IndexingMethod.h
+        Utils/Enums/ExecutionMode.h
 
         Utils/FileIO/JSON_Utilities.h
         Utils/FileIO/CSV_Utilities.h
@@ -986,19 +985,19 @@ set(
 
         Utils/Telemetry/TelemetryUtilities.h
 
+        Utils/Logging/ConsolePrintColors.h
         Utils/Logging/Logging.cpp
         Utils/Logging/LoggingUtilities.h
         Utils/Logging/Logger.h
+        Utils/Logging/PrettyPrinters.h
+        Utils/Logging/PrettyPrinters.cpp
 
-        Utils/CPPPrintHelpers.h
-        Utils/CPrintHelpers.h
         Utils/CUDAUtils.h
-        Utils/ExecutionMode.h
         Utils/ValuePosition.h
         Utils/ImageTypes.h
-        Utils/HashBlockProperties.h
-        Utils/VoxelFlags.h
-        Utils/WarpType.h
+        Utils/Enums/HashBlockProperties.h
+        Utils/Enums/VoxelFlags.h
+        Utils/Enums/WarpType.h
         Utils/Math.h
         Utils/Collections/MemoryBlock_StdContainer_Convertions.h
         Utils/MemoryBlockTypes.h

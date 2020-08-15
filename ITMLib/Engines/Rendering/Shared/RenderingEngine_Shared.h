@@ -3,7 +3,7 @@
 #pragma once
 
 #include "../../../Objects/Volume/RepresentationAccess.h"
-#include "../../../Utils/HashBlockProperties.h"
+#include "../../../Utils/Enums/HashBlockProperties.h"
 #include "RenderingBlock.h"
 
 namespace ITMLib{

@@ -16,10 +16,10 @@
 #pragma once
 
 #include "../../Objects/Volume/RepresentationAccess.h"
-#include "../../Utils/HashBlockProperties.h"
+#include "../../Utils/Enums/HashBlockProperties.h"
 #include "../../Utils/Analytics/NeighborVoxelIterationInfo.h"
-#include "../../Utils/CPPPrintHelpers.h"
-#include "../../Utils/CPrintHelpers.h"
+#include "../../Utils/Logging/ConsolePrintColors.h"
+#include "../../Utils/Logging/ConsolePrintColors.h"
 #include "../../Objects/Volume/TrilinearInterpolation.h"
 #include "../../Utils/Geometry/SpatialIndexConversions.h"
 
@@ -128,7 +128,7 @@ inline void FindHighlightNeighborInfo(std::array<ITMLib::NeighborVoxelIterationI
 _CPU_AND_GPU_CODE_
 inline void PrintDataTermInformation(const CONSTPTR(Vector3f)& live_sdf_gradient) {
 	printf("Gradient of live SDF at current warp: %s%E,%E,%E%s\n",
-	       c_cyan, live_sdf_gradient.x, live_sdf_gradient.y, live_sdf_gradient.z, c_reset);
+	       cyan, live_sdf_gradient.x, live_sdf_gradient.y, live_sdf_gradient.z, reset);
 }
 
 _CPU_AND_GPU_CODE_
@@ -140,11 +140,11 @@ inline void PrintLevelSetTermInformation(const CONSTPTR(Vector3f)& live_sdf_grad
 	       "%E, %E, %E,\n"
 	       "%E, %E, %E\n"
 	       "%sGradient norm minus unity: %s%E%s\n",
-	       c_cyan, live_sdf_gradient.x, live_sdf_gradient.y, live_sdf_gradient.z, c_reset, c_green,
+	       cyan, live_sdf_gradient.x, live_sdf_gradient.y, live_sdf_gradient.z, reset, green,
 	       live_sdf_2nd_derivative.xx, live_sdf_2nd_derivative.xy, live_sdf_2nd_derivative.xz,
 	       live_sdf_2nd_derivative.yx, live_sdf_2nd_derivative.yy, live_sdf_2nd_derivative.yz,
 	       live_sdf_2nd_derivative.zx, live_sdf_2nd_derivative.zy, live_sdf_2nd_derivative.zz,
-	       c_reset, c_blue, sdf_gradient_norm_minus_unity, c_reset);
+	       reset, blue, sdf_gradient_norm_minus_unity, reset);
 }
 
 _CPU_AND_GPU_CODE_
@@ -160,14 +160,14 @@ inline void PrintKillingTermInformation(const CONSTPTR(Vector3f*) neighbor_warps
 	Vector3i neighbor_positions[] = {Vector3i(-1, 0, 0), Vector3i(0, -1, 0), Vector3i(0, 0, -1), Vector3i(1, 0, 0),
 	                                 Vector3i(0, 1, 0), Vector3i(0, 0, 1), Vector3i(1, 1, 0), Vector3i(0, 1, 1),
 	                                 Vector3i(1, 0, 1),};
-	printf("%sNeighbors' warps: \n", c_green);
+	printf("%sNeighbors' warps: \n", green);
 
 	for (int i_neighbor = 0; i_neighbor < neighborhood_size; i_neighbor++) {
 		printf("%s%d, %d, %d (Neighbor %d): %s%E, %E, %E\n",
-		       c_reset, neighbor_positions[i_neighbor].x, neighbor_positions[i_neighbor].y, neighbor_positions[i_neighbor].z, i_neighbor, c_green,
+		       reset, neighbor_positions[i_neighbor].x, neighbor_positions[i_neighbor].y, neighbor_positions[i_neighbor].z, i_neighbor, green,
 		       neighbor_warps[i_neighbor].x, neighbor_warps[i_neighbor].y, neighbor_warps[i_neighbor].z);
 	}
-	printf("%sUnallocated neighbors: ", c_reset);
+	printf("%sUnallocated neighbors: ", reset);
 	bool first = true;
 	for (int i_neighbor = 0; i_neighbor < neighborhood_size; i_neighbor++) {
 		if (!neighbor_allocated[i_neighbor]) {
@@ -199,20 +199,20 @@ inline void PrintKillingTermInformation(const CONSTPTR(Vector3f*) neighbor_warps
 	printf("Jacobian of warp updates at current warp (U-component only): %s\n"
 	       "%E %E %E\n"
 	       "%s\n",
-	       c_yellow,
+	       yellow,
 	       warp_update_Jacobian.xx, warp_update_Jacobian.xy, warp_update_Jacobian.xz,
-	       c_reset);
+	       reset);
 #else
 	printf("Jacobian of warp updates at current warp: %s\n"
 	       "%E %E %E\n"
 	       "%E %E %E\n"
 	       "%E %E %E\n"
 	       "%s\n",
-	       c_yellow,
+	       yellow,
 	       warp_update_Jacobian.xx, warp_update_Jacobian.xy, warp_update_Jacobian.xz,
 	       warp_update_Jacobian.yx, warp_update_Jacobian.yy, warp_update_Jacobian.yz,
 	       warp_update_Jacobian.zx, warp_update_Jacobian.zy, warp_update_Jacobian.zz,
-	       c_reset);
+	       reset);
 
 	Matrix3f& H_u = warp_update_Hessian[0];
 	Matrix3f& H_v = warp_update_Hessian[1];
@@ -224,33 +224,33 @@ inline void PrintKillingTermInformation(const CONSTPTR(Vector3f*) neighbor_warps
 	       "%E %E %E\n"
 	       "%E %E %E\n"
 	       "%s",
-	       c_cyan,
+	       cyan,
 	       H_u.xx, H_u.xy, H_u.xz,
 	       H_u.yx, H_u.yy, H_u.yz,
 	       H_u.zx, H_u.zy, H_u.zz,
-	       c_reset);
+	       reset);
 
 	printf("V-component:\n%s"
 	       "%E %E %E\n"
 	       "%E %E %E\n"
 	       "%E %E %E\n"
 	       "%s",
-	       c_cyan,
+	       cyan,
 	       H_v.xx, H_v.xy, H_v.xz,
 	       H_v.yx, H_v.yy, H_v.yz,
 	       H_v.zx, H_v.zy, H_v.zz,
-	       c_reset);
+	       reset);
 
 	printf("W-component:\n%s"
 	       "%E %E %E\n"
 	       "%E %E %E\n"
 	       "%E %E %E\n"
 	       "%s\n",
-	       c_cyan,
+	       cyan,
 	       H_w.xx, H_w.xy, H_w.xz,
 	       H_w.yx, H_w.yy, H_w.yz,
 	       H_w.zx, H_w.zy, H_w.zz,
-	       c_reset);
+	       reset);
 #endif
 };
 
@@ -263,14 +263,14 @@ inline void PrintTikhonovTermInformation(const CONSTPTR(Vector3f*) neighbor_warp
 	const Vector3i neighbor_positions[] = {Vector3i(-1, 0, 0), Vector3i(0, -1, 0), Vector3i(0, 0, -1), Vector3i(1, 0, 0),
 	                                       Vector3i(0, 1, 0), Vector3i(0, 0, 1)};
 
-	printf("%sNeighbors' warps: \n ", c_green);
+	printf("%sNeighbors' warps: \n ", green);
 	for (int i_neightbor = 0; i_neightbor < neighborhood_size; i_neightbor++) {
 		const Vector3i& pos = neighbor_positions[i_neightbor];
 		const Vector3f& warp = neighbor_warps[i_neightbor];
-		printf("%s%d, %d, %d  (Neighbor %d): %s%f, %f, %f\n", c_reset, pos.x, pos.y, pos.z,
-		       i_neightbor, c_green, warp.x, warp.y, warp.z);
+		printf("%s%d, %d, %d  (Neighbor %d): %s%f, %f, %f\n", reset, pos.x, pos.y, pos.z,
+		       i_neightbor, green, warp.x, warp.y, warp.z);
 	}
-	printf("\nLaplacian:\n%E, %E, %E%s\n", laplacian.x, laplacian.y, laplacian.z, c_reset);
+	printf("\nLaplacian:\n%E, %E, %E%s\n", laplacian.x, laplacian.y, laplacian.z, reset);
 };
 
 _CPU_AND_GPU_CODE_
@@ -284,11 +284,11 @@ void PrintLocalEnergyGradients(const Vector3f& local_data_energy_gradient,
 
 	printf("%s(Gradients) Data: %E, %E, %E %sLevel set: %E, %E, %E %sSmoothing: %E, %E, %E\n"
 	       "%sCombined: %E, %E, %E%s Combined length: %E\n",
-	       c_blue, local_data_energy_gradient.x, local_data_energy_gradient.y, local_data_energy_gradient.z,
-	       c_cyan, local_level_set_energy_gradient.x, local_level_set_energy_gradient.y, local_level_set_energy_gradient.z,
-	       c_yellow, local_smoothing_energy_gradient.x, local_smoothing_energy_gradient.y, local_smoothing_energy_gradient.z,
-	       c_green, local_complete_energy_gradient.x, local_complete_energy_gradient.y, local_complete_energy_gradient.z,
-	       c_reset, energy_gradient_length);
+	       blue, local_data_energy_gradient.x, local_data_energy_gradient.y, local_data_energy_gradient.z,
+	       cyan, local_level_set_energy_gradient.x, local_level_set_energy_gradient.y, local_level_set_energy_gradient.z,
+	       yellow, local_smoothing_energy_gradient.x, local_smoothing_energy_gradient.y, local_smoothing_energy_gradient.z,
+	       green, local_complete_energy_gradient.x, local_complete_energy_gradient.y, local_complete_energy_gradient.z,
+	       reset, energy_gradient_length);
 }
 
 
@@ -344,8 +344,8 @@ inline void Print6ConnectedNeighborInfo(
 
 	for (int i_neighbor = 0; i_neighbor < 6; i_neighbor++) {
 		const Vector3i& position = positions[i_neighbor];
-		printf("%s[%d,%d,%d]%s allocated: %s truncated: %s known: %s tsdf: %f\n", c_yellow, position.x, position.y,
-		       position.z, c_reset,
+		printf("%s[%d,%d,%d]%s allocated: %s truncated: %s known: %s tsdf: %f\n", yellow, position.x, position.y,
+		       position.z, reset,
 		       neighbor_allocated[i_neighbor] ? "true" : "false", neighbor_truncated[i_neighbor] ? "true" : "false",
 		       neighbor_known[i_neighbor] ? "true" : "false", neighbor_sdf[i_neighbor]);
 	}

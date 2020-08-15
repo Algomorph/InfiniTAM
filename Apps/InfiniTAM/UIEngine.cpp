@@ -30,7 +30,7 @@
 #include "../../ORUtils/FileUtils.h"
 #include "../../ORUtils/ImageCombination.h"
 #include "../../ITMLib/Engines/ImageProcessing/ImageProcessingEngineFactory.h"
-#include "../../ITMLib/Utils/CPPPrintHelpers.h"
+#include "../../ITMLib/Utils/Logging/ConsolePrintColors.h"
 #include "../../ITMLib/Utils/Telemetry/TelemetryUtilities.h"
 
 

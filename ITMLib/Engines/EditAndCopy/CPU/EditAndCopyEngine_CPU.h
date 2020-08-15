@@ -18,8 +18,8 @@
 #include "../../../Objects/Volume/VoxelVolume.h"
 #include "../../../Objects/Volume/RepresentationAccess.h"
 #include "../../../GlobalTemplateDefines.h"
-#include "../../../Utils/HashBlockProperties.h"
-#include "../../../Utils/CPPPrintHelpers.h"
+#include "../../../Utils/Enums/HashBlockProperties.h"
+#include "../../../Utils/Logging/ConsolePrintColors.h"
 #include "../Interface/EditAndCopyEngineInterface.h"
 
 

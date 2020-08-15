@@ -22,7 +22,7 @@
 #include "../../../Objects/Volume/RepresentationAccess.h"
 #include "../../../Utils/Geometry/SpatialIndexConversions.h"
 #include "../../../Utils/Geometry/GeometryBooleanOperations.h"
-#include "../../../Utils/ExecutionMode.h"
+#include "../../../Utils/Enums/ExecutionMode.h"
 
 namespace ITMLib {
 

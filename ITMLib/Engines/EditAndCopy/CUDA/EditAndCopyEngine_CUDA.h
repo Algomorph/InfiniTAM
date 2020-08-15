@@ -18,7 +18,7 @@
 #include "../../../Objects/Volume/PlainVoxelArray.h"
 #include "../../../Objects/Volume/VoxelVolume.h"
 #include "../Interface/EditAndCopyEngineInterface.h"
-#include "../../../Utils/HashBlockProperties.h"
+#include "../../../Utils/Enums/HashBlockProperties.h"
 #include "../../../GlobalTemplateDefines.h"
 
 

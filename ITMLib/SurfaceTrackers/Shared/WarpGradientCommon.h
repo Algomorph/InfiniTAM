@@ -17,7 +17,7 @@
 
 
 #include <iostream>
-#include "../../Utils/CPPPrintHelpers.h"
+#include "../../Utils/Logging/ConsolePrintColors.h"
 #include "WarpGradientAggregates.h"
 #include "../../Utils/Logging/Logging.h"
 

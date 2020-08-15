@@ -28,7 +28,7 @@
 #include "../../Utils/Logging/Logging.h"
 #include "AnalyticsEngineFactory.h"
 #include "../../Utils/Collections/OperationsOnSTLContainers.h"
-#include "../../Utils/CPPPrintHelpers.h"
+#include "../../Utils/Logging/ConsolePrintColors.h"
 #include "../../../ORUtils/SE3Pose.h"
 #include "../../Utils/Enums/IndexingMethod.h"
 

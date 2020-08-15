@@ -13,7 +13,7 @@
 #include "../../Utils/Math.h"
 #include "../../../ORUtils/MemoryBlock.h"
 #include "../../../ORUtils/MemoryBlockPersistence.h"
-#include "../../Utils/HashBlockProperties.h"
+#include "../../Utils/Enums/HashBlockProperties.h"
 #include "../../Utils/Metacoding/PathlessSerializableStruct.h"
 
 #define VOXEL_BLOCK_SIZE 8

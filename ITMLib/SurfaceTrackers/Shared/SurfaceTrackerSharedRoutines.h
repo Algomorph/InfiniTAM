@@ -15,10 +15,10 @@
 //  ================================================================
 #pragma once
 
-#include "../../Utils/VoxelFlags.h"
+#include "../../Utils/Enums/VoxelFlags.h"
 #include "../../Objects/Volume/RepresentationAccess.h"
 #include "../../../ORUtils/PlatformIndependence.h"
-#include "../../Utils/CPPPrintHelpers.h"
+#include "../../Utils/Logging/ConsolePrintColors.h"
 
 
 template<typename TVoxel>

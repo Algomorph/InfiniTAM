@@ -1,6 +1,6 @@
 //  ================================================================
-//  Created by Gregory Kramida (https://github.com/Algomorph) on 5/13/20.
-//  Copyright (c) 2020 Gregory Kramida
+//  Created by Gregory Kramida on 10/16/19.
+//  Copyright (c) 2019 Gregory Kramida
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
 //  You may obtain a copy of the License at
@@ -14,14 +14,27 @@
 //  limitations under the License.
 //  ================================================================
 #pragma once
-#include "Metacoding/SerializableEnum.h"
+
+#include "../../../ORUtils/PlatformIndependence.h"
 
 namespace ITMLib{
 
-#define EXECUTION_MODE_ENUM_DESCRIPTION ExecutionMode, \
-    (DIAGNOSTIC, "diagnostic", "DIAGNOSTIC"), \
-    (OPTIMIZED, "optimized", "OPTIMIZED")
+//_CPU_AND_GPU_CONSTANT_
+constexpr const char* red = "\033[0;31m";
+//_CPU_AND_GPU_CONSTANT_
+constexpr const char* green = "\033[0;32m";
+//_CPU_AND_GPU_CONSTANT_
+constexpr const char* blue = "\033[0;34m";
+//_CPU_AND_GPU_CONSTANT_
+constexpr const char* yellow = "\033[0;33m";
+//_CPU_AND_GPU_CONSTANT_
+constexpr const char* cyan = "\033[0;36m";
 
-DECLARE_SERIALIZABLE_ENUM(EXECUTION_MODE_ENUM_DESCRIPTION);
+//_CPU_AND_GPU_CONSTANT_
+constexpr const char* bright_red = "\033[0;91m";
+//_CPU_AND_GPU_CONSTANT_
+constexpr const char* bright_cyan = "\033[0;96m";
+//_CPU_AND_GPU_CONSTANT_
+constexpr const char* reset = "\033[0m";
 
 } // namespace ITMLib

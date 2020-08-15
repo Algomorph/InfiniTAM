@@ -16,7 +16,7 @@
 #pragma once
 
 #include "../../Utils/Metacoding/DeferrableSerializableStruct.h"
-#include "../../Utils/ExecutionMode.h"
+#include "../../Utils/Enums/ExecutionMode.h"
 
 namespace ITMLib {
 #define INDEXING_SETTINGS_STRUCT_DESCRIPTION IndexingSettings, "indexing_settings", \

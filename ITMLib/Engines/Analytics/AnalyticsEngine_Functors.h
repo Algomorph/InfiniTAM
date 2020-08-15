@@ -33,7 +33,7 @@
 #include "../Traversal/Interface/HashTableTraversal.h"
 #include "../Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
 #include "../Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
-#include "../../Utils/WarpType.h"
+#include "../../Utils/Enums/WarpType.h"
 #include "../../Utils/Analytics/Statistics.h"
 #include "../../Utils/Collections/MemoryBlock_StdContainer_Convertions.h"
 #include "../../Utils/Configuration/Configuration.h"

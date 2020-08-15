@@ -22,7 +22,7 @@
 //local
 #include "../../Utils/Metacoding/DeferrableSerializableStruct.h"
 #include "../../Utils/Metacoding/SerializableStruct.h"
-#include "../../Utils/ExecutionMode.h"
+#include "../../Utils/Enums/ExecutionMode.h"
 
 namespace ITMLib {
 

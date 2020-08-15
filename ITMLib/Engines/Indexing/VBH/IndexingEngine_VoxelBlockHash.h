@@ -16,7 +16,7 @@
 #pragma once
 
 #include "../Interface/IndexingEngine.h"
-#include "../../../Utils/WarpType.h"
+#include "../../../Utils/Enums/WarpType.h"
 #include "IndexingEngine_VoxelBlockHash_Internal.h"
 #include "IndexingEngine_VoxelBlockHash_DIAGNOSTIC.h"
 #include "IndexingEngine_VoxelBlockHash_OPTIMIZED.h"

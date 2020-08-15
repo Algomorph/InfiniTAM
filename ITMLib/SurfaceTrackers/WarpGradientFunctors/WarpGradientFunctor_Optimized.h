@@ -30,8 +30,8 @@
 #include "../Shared/SurfaceTrackerDiagnosticRoutines.h"
 #include "../Shared/WarpGradientAggregates.h"
 #include "../Shared/WarpGradientCommon.h"
-#include "../../Utils/VoxelFlags.h"
-#include "../../Utils/CPrintHelpers.h"
+#include "../../Utils/Enums/VoxelFlags.h"
+#include "../../Utils/Logging/ConsolePrintColors.h"
 #include "../../Engines/EditAndCopy/Shared/EditAndCopyEngine_Shared.h"
 #include "../../Objects/Volume/VoxelVolume.h"
 

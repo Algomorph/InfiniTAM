@@ -27,8 +27,8 @@
 #include "../Shared/SurfaceTrackerDiagnosticRoutines.h"
 #include "../Shared/WarpGradientAggregates.h"
 #include "../Shared/WarpGradientCommon.h"
-#include "../../Utils/VoxelFlags.h"
-#include "../../Utils/CPrintHelpers.h"
+#include "../../Utils/Enums/VoxelFlags.h"
+#include "../../Utils/Logging/ConsolePrintColors.h"
 #include "../../Utils/Configuration/Configuration.h"
 #include "../../Engines/EditAndCopy/Shared/EditAndCopyEngine_Shared.h"
 #include "../../Engines/Telemetry/TelemetryRecorder.h"
@@ -86,8 +86,8 @@ private:
 			int x = 0, y = 0, z = 0, vmIndex = 0, locId = 0;
 			GetVoxelHashLocals(vmIndex, locId, x, y, z, live_index_data, live_cache, voxel_position);
 
-			printf("\n%s *** Printing gradient computation data for voxel at (%d, %d, %d) ***%s\n", c_bright_cyan,
-			       voxel_position.x, voxel_position.y, voxel_position.z, c_reset);
+			printf("\n%s *** Printing gradient computation data for voxel at (%d, %d, %d) ***%s\n", bright_cyan,
+			       voxel_position.x, voxel_position.y, voxel_position.z, reset);
 			printf("Computing data term: %s\n", (compute_data_term ? "true" : "false"));
 			printf("Position within block (x,y,z): (%d, %d, %d)\n", x, y, z);
 			printf("Canonical vs. Live: \n");
@@ -95,8 +95,8 @@ private:
 			printf("Flags: %s vs. %s\n", VoxelFlagsAsCString(static_cast<VoxelFlags>(canonical_voxel.flags)),
 			       VoxelFlagsAsCString(static_cast<VoxelFlags>(live_voxel.flags)));
 			printf("===================\n");
-			printf("Warp: %s%f, %f, %f%s\n", c_green, warp_update.x, warp_update.y, warp_update.z, c_reset);
-			printf("Warp length: %s%f%s\n", c_green, ORUtils::length(warp_update), c_reset);
+			printf("Warp: %s%f, %f, %f%s\n", green, warp_update.x, warp_update.y, warp_update.z, reset);
+			printf("Warp length: %s%f%s\n", green, ORUtils::length(warp_update), reset);
 
 			print_voxel_result = true;
 		} else {
@@ -138,7 +138,7 @@ public:
 		this->SetUpFocusVoxelPrinting(print_voxel_result, voxel_position, warp_update, canonical_voxel, live_voxel, compute_data_term);
 
 		if (print_voxel_result) {
-			printf("%sLive 6-connected neighbor information:%s\n", c_blue, c_reset);
+			printf("%sLive 6-connected neighbor information:%s\n", blue, reset);
 			Print6ConnectedNeighborInfo(voxel_position, live_voxels, live_index_data, live_cache);
 		}
 
@@ -178,7 +178,7 @@ public:
 			if (print_voxel_result) {
 				PrintDataTermInformation(live_sdf_gradient);
 				printf("local data energy: %s%E%s\n",
-				       c_yellow, local_data_energy, c_reset);
+				       yellow, local_data_energy, reset);
 			}
 		}
 		// endregion
@@ -205,7 +205,7 @@ public:
 			if (print_voxel_result) {
 				PrintLevelSetTermInformation(live_sdf_gradient, live_sdf_2nd_derivative, live_sdf_gradient_norm_minus_unity);
 				printf("local level set energy: %s%E%s\n",
-				       c_yellow, local_level_set_energy, c_reset);
+				       yellow, local_level_set_energy, reset);
 			}
 		}
 		// endregion =======================================================================================
@@ -289,7 +289,7 @@ public:
 				                                  warp_update_Jacobian.getColumn(2)));
 				if (print_voxel_result) {
 					printf("local Tikhonov energy: %s%E%s\nlocal Killing energy: %s%E%s\n",
-					       c_yellow, local_Tikhonov_energy, c_reset, c_yellow, local_Killing_energy, c_reset);
+					       yellow, local_Tikhonov_energy, reset, yellow, local_Killing_energy, reset);
 				}
 				ATOMIC_ADD(energies.total_Tikhonov_energy, local_Tikhonov_energy);
 				ATOMIC_ADD(energies.total_Killing_energy, local_Killing_energy);

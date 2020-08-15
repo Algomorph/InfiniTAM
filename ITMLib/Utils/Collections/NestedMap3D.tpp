@@ -16,7 +16,8 @@
 #include <fstream>
 #include <iostream>
 #include "NestedMap3D.h"
-#include "../CPPPrintHelpers.h"
+#include "../Logging/ConsolePrintColors.h"
+#include "../Logging/PrettyPrinters.h"
 
 using namespace ITMLib;
 

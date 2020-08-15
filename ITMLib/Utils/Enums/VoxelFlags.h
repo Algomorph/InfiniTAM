@@ -16,7 +16,7 @@
 #pragma once
 
 #include <iostream>
-#include "../../ORUtils/PlatformIndependence.h"
+#include "../../../ORUtils/PlatformIndependence.h"
 
 namespace ITMLib {
 /**

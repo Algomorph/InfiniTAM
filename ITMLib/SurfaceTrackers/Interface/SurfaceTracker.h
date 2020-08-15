@@ -22,7 +22,7 @@
 #include "../WarpGradientFunctors/WarpGradientFunctor.h"
 #include "../../Engines/Warping/WarpingEngine.h"
 #include "../../Utils/Configuration/Configuration.h"
-#include "../../Utils/WarpType.h"
+#include "../../Utils/Enums/WarpType.h"
 
 
 namespace ITMLib {

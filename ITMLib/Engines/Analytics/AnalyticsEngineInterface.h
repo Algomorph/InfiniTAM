@@ -18,8 +18,8 @@
 
 #include <vector>
 #include "../../Objects/Volume/VoxelVolume.h"
-#include "../../Utils/WarpType.h"
-#include "../../Utils/VoxelFlags.h"
+#include "../../Utils/Enums/WarpType.h"
+#include "../../Utils/Enums/VoxelFlags.h"
 
 namespace ITMLib {
 template<typename TVoxel, typename TIndex>

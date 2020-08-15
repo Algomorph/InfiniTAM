@@ -17,7 +17,7 @@
 
 #include "../../Utils/Metacoding/Metacoding.h"
 #include "../../../ORUtils/MemoryDeviceType.h"
-#include "../../Utils/ExecutionMode.h"
+#include "../../Utils/Enums/ExecutionMode.h"
 
 namespace ITMLib {
 

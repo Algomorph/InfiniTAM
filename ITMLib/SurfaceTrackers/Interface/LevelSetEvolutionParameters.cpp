@@ -22,7 +22,7 @@
 #include "LevelSetEvolutionParameters.h"
 #include "../../Utils/Configuration/Configuration.h"
 #include "../../Utils/FileIO/JSON_Utilities.h"
-#include "../../Utils/CPPPrintHelpers.h"
+#include "../../Utils/Logging/ConsolePrintColors.h"
 
 namespace ITMLib{
 

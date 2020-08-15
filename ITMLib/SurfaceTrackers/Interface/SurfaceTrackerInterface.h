@@ -17,8 +17,8 @@
 
 //local
 #include "../../Objects/Volume/VoxelVolume.h"
-#include "../../Utils/CPPPrintHelpers.h"
-#include "../../Utils/VoxelFlags.h"
+#include "../../Utils/Logging/ConsolePrintColors.h"
+#include "../../Utils/Enums/VoxelFlags.h"
 #include "LevelSetEvolutionParameters.h"
 #include "../../Engines/Common/Configurable.h"
 

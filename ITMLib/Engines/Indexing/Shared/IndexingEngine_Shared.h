@@ -28,8 +28,8 @@
 #include "../../Common/AllocationTempData.h"
 #include "../../../Utils/Math.h"
 #include "../../../Utils/PixelUtils.h"
-#include "../../../Utils/VoxelFlags.h"
-#include "../../../Utils/HashBlockProperties.h"
+#include "../../../Utils/Enums/VoxelFlags.h"
+#include "../../../Utils/Enums/HashBlockProperties.h"
 
 
 
