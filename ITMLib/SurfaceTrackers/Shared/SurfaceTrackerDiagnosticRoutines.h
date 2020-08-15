@@ -26,7 +26,7 @@
 using namespace ITMLib;
 
 //======================================================================================================================
-// region ==================================== ROUTINES FOR SAVING DIAGNOSITC INFORMATION DURING OPTIMIZATION ==========
+// region ==================================== ROUTINES FOR SAVING DIAGNOSTIC INFORMATION DURING OPTIMIZATION ==========
 //======================================================================================================================
 
 template<class TVoxel>
@@ -126,25 +126,25 @@ inline void FindHighlightNeighborInfo(std::array<ITMLib::NeighborVoxelIterationI
 //======================================================================================================================
 
 _CPU_AND_GPU_CODE_
-inline void PrintDataTermInformation(const CONSTPTR(Vector3f)& liveSdfJacobian) {
-	printf("Jacobian of live SDF at current warp: %s%E,%E,%E%s\n",
-	       c_cyan, liveSdfJacobian.x, liveSdfJacobian.y, liveSdfJacobian.z, c_reset);
+inline void PrintDataTermInformation(const CONSTPTR(Vector3f)& live_sdf_gradient) {
+	printf("Gradient of live SDF at current warp: %s%E,%E,%E%s\n",
+	       c_cyan, live_sdf_gradient.x, live_sdf_gradient.y, live_sdf_gradient.z, c_reset);
 }
 
 _CPU_AND_GPU_CODE_
-inline void PrintLevelSetTermInformation(const CONSTPTR(Vector3f)& liveSdfJacobian,
-                                         const CONSTPTR(Matrix3f)& liveSdfHessian,
-                                         const CONSTPTR(float)& sdfJacobianNormMinusUnity) {
-	printf("Jacobian of live SDF at current warp: %s%E,%E,%E%s\nHessian of live SDF at current warp: %s\n"
-	       "%E %E %E\n"
-	       "%E %E %E\n"
-	       "%E %E %E\n"
-	       "%sJacobian norm minus unity: %s%E%s\n",
-	       c_cyan, liveSdfJacobian.x, liveSdfJacobian.y, liveSdfJacobian.z, c_reset, c_green,
-	       liveSdfHessian.xx, liveSdfHessian.xy, liveSdfHessian.xz,
-	       liveSdfHessian.yx, liveSdfHessian.yy, liveSdfHessian.yz,
-	       liveSdfHessian.zx, liveSdfHessian.zy, liveSdfHessian.zz,
-	       c_reset, c_blue, sdfJacobianNormMinusUnity, c_reset);
+inline void PrintLevelSetTermInformation(const CONSTPTR(Vector3f)& live_sdf_gradient,
+                                         const CONSTPTR(Matrix3f)& live_sdf_2nd_derivative,
+                                         const CONSTPTR(float)& sdf_gradient_norm_minus_unity) {
+	printf("Gradient of live SDF at current warp: %s%E,%E,%E%s\n2nd derivative of live SDF at current warp: %s\n"
+	       "%E, %E, %E,\n"
+	       "%E, %E, %E,\n"
+	       "%E, %E, %E\n"
+	       "%sGradient norm minus unity: %s%E%s\n",
+	       c_cyan, live_sdf_gradient.x, live_sdf_gradient.y, live_sdf_gradient.z, c_reset, c_green,
+	       live_sdf_2nd_derivative.xx, live_sdf_2nd_derivative.xy, live_sdf_2nd_derivative.xz,
+	       live_sdf_2nd_derivative.yx, live_sdf_2nd_derivative.yy, live_sdf_2nd_derivative.yz,
+	       live_sdf_2nd_derivative.zx, live_sdf_2nd_derivative.zy, live_sdf_2nd_derivative.zz,
+	       c_reset, c_blue, sdf_gradient_norm_minus_unity, c_reset);
 }
 
 _CPU_AND_GPU_CODE_
@@ -163,7 +163,7 @@ inline void PrintKillingTermInformation(const CONSTPTR(Vector3f*) neighbor_warps
 	printf("%sNeighbors' warps: \n", c_green);
 
 	for (int i_neighbor = 0; i_neighbor < neighborhood_size; i_neighbor++) {
-		printf("%s%d, %d, %d (Neighbor %d): %s%E %E %E\n",
+		printf("%s%d, %d, %d (Neighbor %d): %s%E, %E, %E\n",
 		       c_reset, neighbor_positions[i_neighbor].x, neighbor_positions[i_neighbor].y, neighbor_positions[i_neighbor].z, i_neighbor, c_green,
 		       neighbor_warps[i_neighbor].x, neighbor_warps[i_neighbor].y, neighbor_warps[i_neighbor].z);
 	}
@@ -255,22 +255,22 @@ inline void PrintKillingTermInformation(const CONSTPTR(Vector3f*) neighbor_warps
 };
 
 _CPU_AND_GPU_CODE_
-inline void PrintTikhonovTermInformation(const CONSTPTR(Vector3f*) neighborWarps,
+inline void PrintTikhonovTermInformation(const CONSTPTR(Vector3f*) neighbor_warps,
                                          const CONSTPTR(Vector3f)& laplacian) {
 
-	const int neighborhoodSize = 6;
+	const int neighborhood_size = 6;
 	//(-1,0,0) (0,-1,0) (0,0,-1)   (1, 0, 0) (0, 1, 0) (0, 0, 1)   (1, 1, 0) (0, 1, 1) (1, 0, 1)
-	const Vector3i neighborPositions[] = {Vector3i(-1, 0, 0), Vector3i(0, -1, 0), Vector3i(0, 0, -1), Vector3i(1, 0, 0),
-	                                      Vector3i(0, 1, 0), Vector3i(0, 0, 1)};
+	const Vector3i neighbor_positions[] = {Vector3i(-1, 0, 0), Vector3i(0, -1, 0), Vector3i(0, 0, -1), Vector3i(1, 0, 0),
+	                                       Vector3i(0, 1, 0), Vector3i(0, 0, 1)};
 
 	printf("%sNeighbors' warps: \n ", c_green);
-	for (int iNeightbor = 0; iNeightbor < neighborhoodSize; iNeightbor++) {
-		const Vector3i& pos = neighborPositions[iNeightbor];
-		const Vector3f& warp = neighborWarps[iNeightbor];
-		printf("%s%d, %d, %d  (Neighbor %d): %s%f %f %f\n", c_reset, pos.x, pos.y, pos.z,
-		       iNeightbor, c_green, warp.x, warp.y, warp.z);
+	for (int i_neightbor = 0; i_neightbor < neighborhood_size; i_neightbor++) {
+		const Vector3i& pos = neighbor_positions[i_neightbor];
+		const Vector3f& warp = neighbor_warps[i_neightbor];
+		printf("%s%d, %d, %d  (Neighbor %d): %s%f, %f, %f\n", c_reset, pos.x, pos.y, pos.z,
+		       i_neightbor, c_green, warp.x, warp.y, warp.z);
 	}
-	printf("\nLaplacian:\n%E %E %E%s\n", laplacian.x, laplacian.y, laplacian.z, c_reset);
+	printf("\nLaplacian:\n%E, %E, %E%s\n", laplacian.x, laplacian.y, laplacian.z, c_reset);
 };
 
 _CPU_AND_GPU_CODE_

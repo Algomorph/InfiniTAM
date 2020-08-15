@@ -52,13 +52,13 @@ public:
 	                    VoxelVolume<TWarp, TIndex>* warp_field,
 	                    VoxelVolume<TVoxel, TIndex>* canonical_volume,
 	                    VoxelVolume<TVoxel, TIndex>* live_volume,
-	                    float voxelSize, float narrowBandHalfWidth) :
+	                    float voxelSize, float narrowBandHalfWidth, int iteration_index) :
 			parameters(parameters), switches(switches),
 			live_voxels(live_volume->GetVoxels()), live_index_data(live_volume->index.GetIndexData()),
 			warp_voxels(warp_field->GetVoxels()), warp_index_data(warp_field->index.GetIndexData()),
 			canonical_voxels(canonical_volume->GetVoxels()), canonical_index_data(canonical_volume->index.GetIndexData()),
 			live_cache(), canonical_cache(),
-			sdf_unity(voxelSize / narrowBandHalfWidth) {}
+			sdf_unity(voxelSize / narrowBandHalfWidth), iteration_index(iteration_index) {}
 
 	// endregion =======================================================================================================
 
@@ -66,7 +66,7 @@ public:
 	void operator()(TWarp& warp_voxel, TVoxel& canonical_voxel, TVoxel& live_voxel, const Vector3i& voxel_position) {
 
 		if (!VoxelIsConsideredForTracking(canonical_voxel, live_voxel)) return;
-		bool compute_data_and_level_set_terms = VoxelIsConsideredForDataAndLS_Term(canonical_voxel, live_voxel);
+		bool compute_data_term = VoxelIsConsideredForDataTerm(canonical_voxel, live_voxel);
 
 		Vector3f& warp_update = warp_voxel.warp_update;
 		float live_sdf = TVoxel::valueToFloat(live_voxel.sdf);
@@ -77,38 +77,34 @@ public:
 		Vector3f local_smoothing_energy_gradient(0.0f), local_data_energy_gradient(0.0f), local_level_set_energy_gradient(0.0f);
 		// endregion
 
-		if (compute_data_and_level_set_terms) {
-			// region =============================== DATA TERM ================================================
+		Vector3f live_sdf_gradient;
+		ComputeGradient_CentralDifferences_ZeroIfTruncated(live_sdf_gradient, voxel_position, live_voxels, live_index_data, live_cache);
+		// region =============================== DATA TERM ================================================
+		if (compute_data_term && switches.enable_data_term) {
 
-			Vector3f live_sdf_Jacobian;
-			ComputeLiveJacobian_CentralDifferences(
-					live_sdf_Jacobian, voxel_position, live_voxels, live_index_data, live_cache);
-			if (switches.enable_data_term) {
 
-				// Compute data term error / energy
-				float sdf_difference_between_live_and_canonical = live_sdf - canonical_sdf;
-				// (φ_n(Ψ)−φ_{global}) ∇φ_n(Ψ) - also denoted as - (φ_{proj}(Ψ)−φ_{model}) ∇φ_{proj}(Ψ)
-				// φ_n(Ψ) = φ_n(x+u, y+v, z+w), where u = u(x,y,z), v = v(x,y,z), w = w(x,y,z)
-				// φ_{global} = φ_{global}(x, y, z)
-				local_data_energy_gradient =
-						parameters.weight_data_term * sdf_difference_between_live_and_canonical * live_sdf_Jacobian;
-			}
-
-			// endregion =======================================================================================
-			// region =============================== LEVEL SET TERM ===========================================
-
-			if (switches.enable_level_set_term) {
-				Matrix3f live_sdf_Hessian;
-				ComputeSdfHessian(live_sdf_Hessian, voxel_position, live_sdf, live_voxels, live_index_data, live_cache);
-
-				float sdf_Jacobian_norm = ORUtils::length(live_sdf_Jacobian);
-				float sdf_Jacobian_norm_minus_unity = sdf_Jacobian_norm - sdf_unity;
-				local_level_set_energy_gradient = parameters.weight_level_set_term * sdf_Jacobian_norm_minus_unity *
-				                                  (live_sdf_Hessian * live_sdf_Jacobian) /
-				                                  (sdf_Jacobian_norm + parameters.epsilon);
-			}
-			// endregion =======================================================================================
+			// Compute data term error / energy
+			float sdf_difference_between_live_and_canonical = live_sdf - canonical_sdf;
+			// (φ_n(Ψ)−φ_{global}) ∇φ_n(Ψ) - also denoted as - (φ_{proj}(Ψ)−φ_{model}) ∇φ_{proj}(Ψ)
+			// φ_n(Ψ) = φ_n(x+u, y+v, z+w), where u = u(x,y,z), v = v(x,y,z), w = w(x,y,z)
+			// φ_{global} = φ_{global}(x, y, z)
+			local_data_energy_gradient =
+					parameters.weight_data_term * sdf_difference_between_live_and_canonical * live_sdf_gradient;
 		}
+
+		// endregion =======================================================================================
+		// region =============================== LEVEL SET TERM ===========================================
+		if (switches.enable_level_set_term) {
+			Matrix3f live_sdf_2nd_derivative;
+			ComputeSdf2ndDerivative(live_sdf_2nd_derivative, voxel_position, live_sdf, live_voxels, live_index_data, live_cache);
+
+			float sdf_Jacobian_norm = ORUtils::length(live_sdf_gradient);
+			float sdf_Jacobian_norm_minus_unity = sdf_Jacobian_norm - sdf_unity;
+			local_level_set_energy_gradient = parameters.weight_level_set_term * sdf_Jacobian_norm_minus_unity *
+			                                  (live_sdf_2nd_derivative * live_sdf_gradient) /
+			                                  (sdf_Jacobian_norm + parameters.epsilon);
+		}
+		// endregion =======================================================================================
 
 		// region =============================== SMOOTHING TERM (TIKHONOV & KILLING) ======================
 
@@ -185,7 +181,7 @@ public:
 
 	}
 
-	void SaveStatistics(){
+	void SaveStatistics() {
 
 	}
 
@@ -193,6 +189,7 @@ public:
 private:
 
 	const float sdf_unity;
+	const int iteration_index;
 
 	// *** data structure accessors
 	const TVoxel* live_voxels;

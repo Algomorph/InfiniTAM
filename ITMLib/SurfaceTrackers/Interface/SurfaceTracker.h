@@ -42,6 +42,7 @@ private: // instance variables
 	const LevelSetEvolutionWeights& weights;
 	const LevelSetEvolutionSwitches& switches;
 	const LevelSetEvolutionTerminationConditions& termination;
+	int iteration;
 
 	WarpingEngineInterface<TVoxel, TWarp, TIndex>* warping_engine;
 	// needs to be declared after "parameters", derives value from it during initialization

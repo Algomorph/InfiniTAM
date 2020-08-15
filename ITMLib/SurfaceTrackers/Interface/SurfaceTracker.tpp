@@ -144,13 +144,17 @@ SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode>::TrackN
 
 	int source_live_volume_index = 0;
 	int target_live_volume_index = 1;
-	for (int iteration = 0; max_vector_update_length_in_voxels > this->mean_vector_update_threshold_in_voxels
-	                        && iteration < termination.max_iteration_count; iteration++) {
+	for (iteration = 0; max_vector_update_length_in_voxels > this->mean_vector_update_threshold_in_voxels
+	                    && iteration < termination.max_iteration_count; iteration++) {
 		PerformSingleOptimizationStep(canonical_volume, live_volume_pair[source_live_volume_index],
 		                              live_volume_pair[target_live_volume_index], warp_field,
 		                              max_vector_update_length_in_voxels, iteration);
 
 		std::swap(source_live_volume_index, target_live_volume_index);
+	}
+
+	if (TExecutionMode == DIAGNOSTIC) {
+		LOG4CPLUS_PER_FRAME(logging::get_logger(),  "Level set evolution iteration count: " << yellow << iteration << reset);
 	}
 
 
@@ -163,6 +167,7 @@ void SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode>::P
 		VoxelVolume<TVoxel, TIndex>* target_live_volume, VoxelVolume<TWarp, TIndex>* warp_field, float& average_update_vector_length,
 		int iteration) {
 	auto& config = configuration::Get();
+
 	if (config.logging_settings.log_iteration_number) {
 		LOG4CPLUS_PER_ITERATION(logging::get_logger(), red << "Iteration: " << iteration << reset);
 	}
@@ -258,7 +263,7 @@ SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode>::Calcul
 	WarpGradientFunctor<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode>
 			calculate_gradient_functor(this->weights, this->switches, warp_field, canonical_volume, live_volume,
 			                           canonical_volume->GetParameters().voxel_size,
-			                           canonical_volume->GetParameters().truncation_distance);
+			                           canonical_volume->GetParameters().truncation_distance, this->iteration);
 
 	ThreeVolumeTraversalEngine<TWarp, TVoxel, TVoxel, TIndex, TMemoryDeviceType>::
 	TraverseUtilizedWithPosition(warp_field, canonical_volume, live_volume, calculate_gradient_functor);

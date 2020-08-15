@@ -199,9 +199,9 @@ void UIEngine::SkipFrames(int number_of_frames_to_skip) {
 
 
 void UIEngine::ProcessFrame() {
-	LOG4CPLUS_TOP_LEVEL(logging::get_logger(),
-	                    yellow << "***" << bright_cyan << "PROCESSING FRAME " << current_frame_index << yellow
-	                           << "***" << reset);
+	LOG4CPLUS_PER_FRAME(logging::get_logger(),
+	                    yellow << "***" << bright_cyan << " PROCESSING FRAME " << current_frame_index << yellow
+	                           << " ***" << reset);
 
 	if (!image_source_engine->HasMoreImages()) return;
 	image_source_engine->GetImages(*input_RGB_image, *input_raw_depth_image);

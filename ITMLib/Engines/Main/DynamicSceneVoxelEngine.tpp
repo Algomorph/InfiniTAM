@@ -313,7 +313,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(UChar4Image* rgb_im
 	    (fusion_active) && (relocalization_count == 0)) {
 		if (frames_processed > 0) {
 			camera_tracking_controller->Prepare(tracking_state, canonical_volume, view, rendering_engine, canonical_render_state);
-			LOG4CPLUS_PER_FRAME(logging::get_logger(), bright_cyan << "Generating raw live TSDF from view..." << reset);
+			LOG4CPLUS_PER_FRAME(logging::get_logger(), bright_cyan << "*** Generating raw live TSDF from view... ***" << reset);
 			benchmarking::start_timer("GenerateRawLiveVolume");
 			live_volumes[0]->Reset();
 			live_volumes[1]->Reset();

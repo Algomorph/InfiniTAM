@@ -112,7 +112,7 @@ public:
 	                    VoxelVolume<TWarp, TIndex>* warp_field,
 	                    VoxelVolume<TVoxel, TIndex>* canonical_volume,
 	                    VoxelVolume<TVoxel, TIndex>* live_volume,
-	                    float voxel_size, float truncation_distance) :
+	                    float voxel_size, float truncation_distance, int iteration_index) :
 			parameters(parameters), switches(switches),
 			live_voxels(live_volume->GetVoxels()), live_index_data(live_volume->index.GetIndexData()),
 			warp_voxels(warp_field->GetVoxels()), warp_index_data(warp_field->index.GetIndexData()),
@@ -121,7 +121,8 @@ public:
 			use_focus_coordinates(configuration::Get().logging_settings.verbosity_level >= VERBOSITY_FOCUS_SPOTS),
 			focus_coordinates(configuration::Get().focus_coordinates),
 			sdf_unity(voxel_size / truncation_distance),
-			verbosity_level(configuration::Get().logging_settings.verbosity_level) {}
+			verbosity_level(configuration::Get().logging_settings.verbosity_level),
+			iteration_index(iteration_index){}
 
 	// endregion =======================================================================================================
 
@@ -131,10 +132,10 @@ public:
 
 		Vector3f& warp_update = warp_voxel.warp_update;
 
-		bool compute_data_and_level_set_terms = VoxelIsConsideredForDataAndLS_Term(canonical_voxel, live_voxel);
+		bool compute_data_term = VoxelIsConsideredForDataTerm(canonical_voxel, live_voxel);
 
 		bool print_voxel_result;
-		this->SetUpFocusVoxelPrinting(print_voxel_result, voxel_position, warp_update, canonical_voxel, live_voxel, compute_data_and_level_set_terms);
+		this->SetUpFocusVoxelPrinting(print_voxel_result, voxel_position, warp_update, canonical_voxel, live_voxel, compute_data_term);
 
 		if (print_voxel_result) {
 			printf("%sLive 6-connected neighbor information:%s\n", c_blue, c_reset);
@@ -150,69 +151,69 @@ public:
 		Vector3f local_smoothing_energy_gradient(0.0f), local_data_energy_gradient(0.0f), local_level_set_energy_gradient(0.0f);
 
 
-
+		Vector3f live_sdf_gradient;
+		ComputeGradient_CentralDifferences_ZeroIfTruncated(live_sdf_gradient, voxel_position, live_voxels, live_index_data, live_cache);
+		// live sdf jacobian is denoted in the text as live gradient ∇φ_proj(Ψ)
 		// region =============================== DATA TERM ================================================
-		if (compute_data_and_level_set_terms) {
-			Vector3f live_sdf_jacobian;
-			ComputeLiveJacobian_CentralDifferences(
-					live_sdf_jacobian, voxel_position, live_voxels, live_index_data, live_cache);
-			if (switches.enable_data_term) {
+		if (compute_data_term && switches.enable_data_term && iteration_index < iteration_bound) {
+			// Compute data term error / energy
+			float sdf_difference_between_live_and_canonical = live_sdf - canonical_sdf;
+			// (φ_n(Ψ)−φ_{global}) ∇φ_n(Ψ) - also denoted as - (φ_{proj}(Ψ)−φ_{model}) ∇φ_{proj}(Ψ)
+			// φ_{proj}(Ψ) = φ_{proj}(x+u, y+v, z+w), where u = u(x,y,z), v = v(x,y,z), w = w(x,y,z)
+			// φ_{global} = φ_{global}(x, y, z)
+			local_data_energy_gradient =
+					parameters.weight_data_term * sdf_difference_between_live_and_canonical * live_sdf_gradient;
 
-				// Compute data term error / energy
-				float sdf_difference_between_live_and_canonical = live_sdf - canonical_sdf;
-				// (φ_n(Ψ)−φ_{global}) ∇φ_n(Ψ) - also denoted as - (φ_{proj}(Ψ)−φ_{model}) ∇φ_{proj}(Ψ)
-				// φ_n(Ψ) = φ_n(x+u, y+v, z+w), where u = u(x,y,z), v = v(x,y,z), w = w(x,y,z)
-				// φ_{global} = φ_{global}(x, y, z)
-				local_data_energy_gradient =
-						parameters.weight_data_term * sdf_difference_between_live_and_canonical * live_sdf_jacobian;
+			ATOMIC_ADD(aggregates.data_voxel_count, 1u);
 
-				ATOMIC_ADD(aggregates.data_voxel_count, 1u);
-
-				float local_data_energy = parameters.weight_data_term * 0.5f *
-				                          (sdf_difference_between_live_and_canonical * sdf_difference_between_live_and_canonical);
+			float local_data_energy = parameters.weight_data_term * 0.5f *
+			                          (sdf_difference_between_live_and_canonical * sdf_difference_between_live_and_canonical);
 
 
-				ATOMIC_ADD(energies.total_data_energy, local_data_energy);
+			ATOMIC_ADD(energies.total_data_energy, local_data_energy);
 
-				ATOMIC_ADD(aggregates.data_voxel_count, 1u);
-				ATOMIC_ADD(aggregates.cumulative_sdf_diff, sdf_difference_between_live_and_canonical);
+			ATOMIC_ADD(aggregates.data_voxel_count, 1u);
+			ATOMIC_ADD(aggregates.cumulative_sdf_diff, sdf_difference_between_live_and_canonical);
 
-				if (print_voxel_result) {
-					PrintDataTermInformation(live_sdf_jacobian);
-					printf("local data energy: %s%E%s\n",
-					       c_yellow, local_data_energy, c_reset);
-				}
+			if (print_voxel_result) {
+				PrintDataTermInformation(live_sdf_gradient);
+				printf("local data energy: %s%E%s\n",
+				       c_yellow, local_data_energy, c_reset);
 			}
-
-			// endregion
-
-			// region =============================== LEVEL SET TERM ===========================================
-
-			if (switches.enable_level_set_term) {
-				Matrix3f live_sdf_hessian;
-				ComputeSdfHessian(live_sdf_hessian, voxel_position, live_sdf, live_voxels, live_index_data, live_cache);
-
-				float sdf_jacobian_norm = ORUtils::length(live_sdf_jacobian);
-				float sdf_jacobian_norm_minus_unity = sdf_jacobian_norm - sdf_unity;
-				local_level_set_energy_gradient = parameters.weight_level_set_term *
-						sdf_jacobian_norm_minus_unity * (live_sdf_hessian * live_sdf_jacobian) /
-				                                  (sdf_jacobian_norm + parameters.epsilon);
-				ATOMIC_ADD(aggregates.level_set_voxel_count, 1u);
-				float local_level_set_energy = parameters.weight_level_set_term *
-				                               0.5f * (sdf_jacobian_norm_minus_unity * sdf_jacobian_norm_minus_unity);
-				ATOMIC_ADD(energies.total_level_set_energy, local_level_set_energy);
-				if (print_voxel_result) {
-					PrintLevelSetTermInformation(live_sdf_jacobian, live_sdf_hessian, sdf_jacobian_norm_minus_unity);
-					printf("local level set energy: %s%E%s\n",
-					       c_yellow, local_level_set_energy, c_reset);
-				}
-			}
-			// endregion =======================================================================================
 		}
+		// endregion
+		// region =============================== LEVEL SET TERM ===========================================
+
+		if (switches.enable_level_set_term) {
+			Matrix3f live_sdf_2nd_derivative;
+			ComputeSdf2ndDerivative(live_sdf_2nd_derivative, voxel_position, live_sdf, live_voxels, live_index_data, live_cache);
+
+
+			// |∇φ_{proj}(Ψ)|
+			float live_sdf_gradient_norm = ORUtils::length(live_sdf_gradient);
+			// ~ |∇φ_{proj}(Ψ)| - 1
+			float live_sdf_gradient_norm_minus_unity = live_sdf_gradient_norm - sdf_unity;
+			// (|∇φ_{proj}(Ψ)| - 1) / |∇φ_{proj}(Ψ)|_{E}  *  ()
+			local_level_set_energy_gradient = parameters.weight_level_set_term *
+			                                  live_sdf_gradient_norm_minus_unity * (live_sdf_2nd_derivative * live_sdf_gradient) /
+			                                  (live_sdf_gradient_norm + parameters.epsilon);
+			ATOMIC_ADD(aggregates.level_set_voxel_count, 1u);
+			// E_{level_set}(Ψ) = 1/2 Σ_{Ψ} (|∇φ_{proj}(Ψ)| - 1)^2
+			float local_level_set_energy = parameters.weight_level_set_term *
+			                               0.5f * (live_sdf_gradient_norm_minus_unity * live_sdf_gradient_norm_minus_unity);
+			ATOMIC_ADD(energies.total_level_set_energy, local_level_set_energy);
+			if (print_voxel_result) {
+				PrintLevelSetTermInformation(live_sdf_gradient, live_sdf_2nd_derivative, live_sdf_gradient_norm_minus_unity);
+				printf("local level set energy: %s%E%s\n",
+				       c_yellow, local_level_set_energy, c_reset);
+			}
+		}
+		// endregion =======================================================================================
+
 
 		// region =============================== SMOOTHING TERM (TIKHONOV & KILLING) ======================
 
-		if (switches.enable_smoothing_term) {
+		if (switches.enable_smoothing_term && iteration_index < iteration_bound) {
 			// region ============================== RETRIEVE NEIGHBOR'S WARPS =========================================
 
 			const int neighborhood_size = 9;
@@ -225,10 +226,10 @@ public:
 					neighbor_warp_updates/*x9*/, neighbors_known, neighbors_truncated, neighbors_allocated, voxel_position,
 					warp_voxels, warp_index_data, warp_cache, canonical_voxels, canonical_index_data, canonical_cache);
 
-			for (int iNeighbor = 0; iNeighbor < neighborhood_size; iNeighbor++) {
-				if (!neighbors_known[iNeighbor]) {
+			for (int i_neighbor = 0; i_neighbor < neighborhood_size; i_neighbor++) {
+				if (!neighbors_known[i_neighbor]) {
 					//assign current warp to neighbor warp if the neighbor is not known
-					neighbor_warp_updates[iNeighbor] = warp_update;
+					neighbor_warp_updates[i_neighbor] = warp_update;
 				}
 			}
 			//endregion=================================================================================================
@@ -240,8 +241,9 @@ public:
 				                                      warp_update_Hessian);
 
 				if (print_voxel_result) {
-					PrintKillingTermInformation(neighbor_warp_updates, neighbors_known, neighbors_truncated,
-					                            warp_update_Jacobian, warp_update_Hessian);
+					//__DEBUG
+//					PrintKillingTermInformation(neighbor_warp_updates, neighbors_known, neighbors_truncated,
+//					                            warp_update_Jacobian, warp_update_Hessian);
 				}
 
 				float gamma = parameters.weight_killing_term;
@@ -285,7 +287,7 @@ public:
 				                                  warp_update_Jacobian.getColumn(1)) +
 				                              dot(warp_Jacobian_transpose.getColumn(2),
 				                                  warp_update_Jacobian.getColumn(2)));
-				if(print_voxel_result){
+				if (print_voxel_result) {
 					printf("local Tikhonov energy: %s%E%s\nlocal Killing energy: %s%E%s\n",
 					       c_yellow, local_Tikhonov_energy, c_reset, c_yellow, local_Killing_energy, c_reset);
 				}
@@ -362,6 +364,9 @@ public:
 private:
 
 	const float sdf_unity;
+	//__DEBUG
+	const int iteration_index;
+	const int iteration_bound = 2000;
 
 	// *** data structure accessors
 	const TVoxel* live_voxels;
