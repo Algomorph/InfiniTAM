@@ -949,6 +949,9 @@ set(
 
         Utils/Enums/IndexingMethod.h
         Utils/Enums/ExecutionMode.h
+        Utils/Enums/HashBlockProperties.h
+        Utils/Enums/VoxelFlags.h
+        Utils/Enums/WarpType.h
 
         Utils/FileIO/JSON_Utilities.h
         Utils/FileIO/CSV_Utilities.h
@@ -993,11 +996,8 @@ set(
         Utils/Logging/PrettyPrinters.cpp
 
         Utils/CUDAUtils.h
-        Utils/ValuePosition.h
         Utils/ImageTypes.h
-        Utils/Enums/HashBlockProperties.h
-        Utils/Enums/VoxelFlags.h
-        Utils/Enums/WarpType.h
+
         Utils/Math.h
         Utils/Collections/MemoryBlock_StdContainer_Convertions.h
         Utils/MemoryBlockTypes.h

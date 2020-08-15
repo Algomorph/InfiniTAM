@@ -397,7 +397,7 @@ configuration::Configuration GenerateChangedUpConfiguration(){
 							VoxelBlockHashParameters(0x20000, 0x20000)
 					)
 			),
-			LoggingSettings(VERBOSITY_WARNING, true, false, true, true, true, true, false),
+			LoggingSettings(VERBOSITY_WARNING, true, false, true, true, true, true, true, true, true, true, true),
 			Paths(GENERATED_TEST_DATA_PREFIX "TestData/output",
 			      STATIC_TEST_DATA_PREFIX "TestData/calibration/snoopy_calib.txt",
 			      "", "", "",
@@ -417,6 +417,7 @@ configuration::Configuration GenerateChangedUpConfiguration(){
 	changed_up_configuration.source_tree = changed_up_configuration.ToPTree();
 
 	TelemetrySettings changed_up_telemetry_settings(
+			true,
 			true,
 			true,
 			true,
