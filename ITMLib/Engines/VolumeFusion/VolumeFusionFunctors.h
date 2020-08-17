@@ -32,13 +32,16 @@ struct TSDFFusionFunctor {
 
 		//fusion condition "HARSH" -- yields results almost identical to "COMBINED"
 //		if(canonicalVoxel.flags != VOXEL_NONTRUNCATED
-//				   && liveVoxel.flag_values[liveSourceFieldIndex] != VOXEL_NONTRUNCATED) return;
+//				   && liveVoxel.flags != VOXEL_NONTRUNCATED) return;
 
 		//fusion condition "COMBINED"
-		if (source_voxel.flags == ITMLib::VoxelFlags::VOXEL_UNKNOWN
-		    || (target_voxel.flags != ITMLib::VoxelFlags::VOXEL_NONTRUNCATED
-		        && source_voxel.flags != ITMLib::VoxelFlags::VOXEL_NONTRUNCATED))
-			return;
+//		if (source_voxel.flags == ITMLib::VoxelFlags::VOXEL_UNKNOWN
+//		    || (target_voxel.flags != ITMLib::VoxelFlags::VOXEL_NONTRUNCATED
+//		        && source_voxel.flags != ITMLib::VoxelFlags::VOXEL_NONTRUNCATED))
+//			return;
+
+		//fusion condition "LIVE_NONTRUNCATED"
+		if(source_voxel.flags != ITMLib::VOXEL_NONTRUNCATED) return;
 
 		float live_sdf = TVoxel::valueToFloat(source_voxel.sdf);
 
@@ -49,7 +52,7 @@ struct TSDFFusionFunctor {
 		// after 10 voxels in each direction.
 		const float threshold = -0.3f;
 
-		//fusion condition "THRESHOLD"
+		//fusion condition "TRUNCATED_THRESHOLD"
 		if (live_sdf < threshold)
 			return;
 
@@ -67,10 +70,10 @@ struct TSDFFusionFunctor {
 		target_voxel.sdf = TVoxel::floatToValue(new_sdf);
 		target_voxel.w_depth = (uchar) new_depth_weight;
 
-		if (target_voxel.flags != ITMLib::VoxelFlags::VOXEL_NONTRUNCATED) {
-			target_voxel.flags = source_voxel.flags;
-		} else if (1.0f - std::abs(new_sdf) < 1e-5f) {
+		if (1.0f - std::abs(new_sdf) < 1e-5f) {
 			target_voxel.flags = ITMLib::VoxelFlags::VOXEL_TRUNCATED;
+		} else {
+			target_voxel.flags = ITMLib::VoxelFlags::VOXEL_NONTRUNCATED;
 		}
 	}
 

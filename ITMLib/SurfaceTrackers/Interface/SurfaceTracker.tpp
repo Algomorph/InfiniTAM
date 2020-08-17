@@ -141,11 +141,12 @@ SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode>::TrackN
 		VoxelVolume<TWarp, TIndex>* warp_field) {
 
 	float max_vector_update_length_in_voxels = std::numeric_limits<float>::infinity();
+	const int min_iteration_count = 10;
 
 	int source_live_volume_index = 0;
 	int target_live_volume_index = 1;
-	for (iteration = 0; max_vector_update_length_in_voxels > this->mean_vector_update_threshold_in_voxels
-	                    && iteration < termination.max_iteration_count; iteration++) {
+	for (iteration = 0; iteration < min_iteration_count || (max_vector_update_length_in_voxels > this->mean_vector_update_threshold_in_voxels
+	                    && iteration < termination.max_iteration_count); iteration++) {
 		PerformSingleOptimizationStep(canonical_volume, live_volume_pair[source_live_volume_index],
 		                              live_volume_pair[target_live_volume_index], warp_field,
 		                              max_vector_update_length_in_voxels, iteration);
@@ -336,11 +337,13 @@ void SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode>::C
 		auto& analytics_engine = AnalyticsEngine<TWarp, TIndex, TMemoryDeviceType>::Instance();
 		float max_update;
 		Vector3i max_update_position;
+		unsigned int utilized_voxel_count = analytics_engine.CountUtilizedVoxels(warp_field);
 		analytics_engine.ComputeWarpUpdateMaxAndPosition(max_update, max_update_position, warp_field);
 
-		WarpHistogramFunctor<TWarp, TMemoryDeviceType> warp_histogram_functor(max_update);
+		WarpHistogramFunctor<TWarp, TMemoryDeviceType> warp_histogram_functor(max_update, utilized_voxel_count, 32);
 		VolumeTraversalEngine<TWarp, TIndex, TMemoryDeviceType>::
 		TraverseUtilized(warp_field, warp_histogram_functor);
+
 		warp_histogram_functor.PrintHistogram();
 
 		std::cout << ITMLib::green << " Max update: [" << max_update << " at " << max_update_position << "]."
