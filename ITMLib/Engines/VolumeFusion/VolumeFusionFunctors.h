@@ -19,6 +19,17 @@
 #include "../../../ORUtils/PlatformIndependence.h"
 #include "../../../ORUtils/MemoryDeviceType.h"
 
+
+//#define FUSION_CONDITION_HARSH
+//#define FUSION_CONDITION_COMBINED
+#define FUSION_CONDITION_LIVE_NONTRUNCATED
+//#define FUSION_CONDITION_LIVE_KNOWN
+
+//#define SET_TRUNCATED_TO_UNKNOWN_DURING_FUSION
+#define TRUNCATE_DURING_FUSION
+
+namespace ITMLib {
+
 // MemoryDeviceType template parameter needed to disambiguate linker symbols for which PlatformIndependence macros are
 // defined differently
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
@@ -30,18 +41,22 @@ struct TSDFFusionFunctor {
 	void operator()(TVoxel& source_voxel, TVoxel& target_voxel) {
 		//TODO: remove or utilize dead code
 
-		//fusion condition "HARSH" -- yields results almost identical to "COMBINED"
-//		if(canonicalVoxel.flags != VOXEL_NONTRUNCATED
-//				   && liveVoxel.flags != VOXEL_NONTRUNCATED) return;
-
-		//fusion condition "COMBINED"
-//		if (source_voxel.flags == ITMLib::VoxelFlags::VOXEL_UNKNOWN
-//		    || (target_voxel.flags != ITMLib::VoxelFlags::VOXEL_NONTRUNCATED
-//		        && source_voxel.flags != ITMLib::VoxelFlags::VOXEL_NONTRUNCATED))
-//			return;
-
-		//fusion condition "LIVE_NONTRUNCATED"
+		// observation: fusion condition "HARSH" yields results almost identical to "COMBINED"
+#if defined(FUSION_CONDITION_HARSH)
+		if(canonicalVoxel.flags != VOXEL_NONTRUNCATED
+				   && liveVoxel.flags != VOXEL_NONTRUNCATED) return;
+#elif defined (FUSION_CONDITION_COMBINED)
+		if (source_voxel.flags == ITMLib::VoxelFlags::VOXEL_UNKNOWN
+		    || (target_voxel.flags != ITMLib::VoxelFlags::VOXEL_NONTRUNCATED
+		        && source_voxel.flags != ITMLib::VoxelFlags::VOXEL_NONTRUNCATED))
+			return;
+		// observation: fusion condition "LIVE_NONTRUNCATED" yields results almost identical to "LIVE_KNOWN"
+#elif defined (FUSION_CONDITION_LIVE_NONTRUNCATED)
+		// fusion condition "LIVE_NONTRUNCATED" is the latest being tested
 		if(source_voxel.flags != ITMLib::VOXEL_NONTRUNCATED) return;
+#elif defined (FUSION_CONDITION_LIVE_KNOWN)
+		if(source_voxel.flags == ITMLib::VOXEL_UNKNOWN) return;
+#endif
 
 		float live_sdf = TVoxel::valueToFloat(source_voxel.sdf);
 
@@ -50,14 +65,11 @@ struct TSDFFusionFunctor {
 		// (voxel size, m) / (narrow-band half-width eta, m) * -("2-3 voxels")
 		// we use .3 for the latter value, which means 3 voxels if the max SDF value is 1.0 and values are truncated
 		// after 10 voxels in each direction.
+		// TODO: this should be a parameter, with VolumeFusionEngine being configurable
 		const float threshold = -0.3f;
 
-		//fusion condition "TRUNCATED_THRESHOLD"
 		if (live_sdf < threshold)
 			return;
-
-		//fusion condition "LIVE_UNKNOWN"
-//		if(liveVoxel.flags == VOXEL_UNKNOWN) return;
 
 		int old_depth_weight = target_voxel.w_depth;
 		float old_sdf = TVoxel::valueToFloat(target_voxel.sdf);
@@ -71,9 +83,17 @@ struct TSDFFusionFunctor {
 		target_voxel.w_depth = (uchar) new_depth_weight;
 
 		if (1.0f - std::abs(new_sdf) < 1e-5f) {
+#if defined(TRUNCATE_DURING_FUSION)
 			target_voxel.flags = ITMLib::VoxelFlags::VOXEL_TRUNCATED;
+#elif defined(SET_TRUNCATED_TO_UNKNOWN_DURING_FUSION)
+			target_voxel.flags = ITMLib::VoxelFlags::VOXEL_UNKNOWN;
+			target_voxel.w_depth = (uchar) 0;
+#endif
 		} else {
+
 			target_voxel.flags = ITMLib::VoxelFlags::VOXEL_NONTRUNCATED;
+
+
 		}
 	}
 
@@ -83,3 +103,4 @@ private:
 };
 
 
+} // namespace ITMLib

@@ -108,8 +108,9 @@ void TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::RecordPostFusi
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void
-TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::RecordSurfaceTrackingEnergies(const ComponentEnergies<TMemoryDeviceType>& energies) {
+TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::RecordSurfaceTrackingEnergies(const ComponentEnergies<TMemoryDeviceType>& energies, int iteration_index) {
 	if (parameters.record_surface_tracking_optimization_energies) {
+		surface_tracking_energy_file.OStream().write(reinterpret_cast<const char*>(&iteration_index), sizeof(int));
 		float total_data_energy = energies.GetTotalDataEnergy();
 		surface_tracking_energy_file.OStream().write(reinterpret_cast<const char*>(&total_data_energy), sizeof(float));
 		float total_level_set_energy = energies.GetTotalLevelSetEnergy();
@@ -123,8 +124,9 @@ TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::RecordSurfaceTracki
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::RecordSurfaceTrackingStatistics(
-		const AdditionalGradientAggregates<TMemoryDeviceType>& aggregates) {
+		const AdditionalGradientAggregates<TMemoryDeviceType>& aggregates, int iteration_index) {
 	if(parameters.record_surface_tracking_additional_statistics){
+		surface_tracking_statistics_file.OStream().write(reinterpret_cast<const char*>(&iteration_index), sizeof(int));
 		float average_canonical_sdf = aggregates.GetAverageCanonicalSdf();
 		surface_tracking_statistics_file.OStream().write(reinterpret_cast<const char*>(&average_canonical_sdf), sizeof(float));
 		float average_live_sdf = aggregates.GetAverageLiveSdf();

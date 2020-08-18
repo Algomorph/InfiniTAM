@@ -94,7 +94,7 @@ public:
 
 		// endregion =======================================================================================
 		// region =============================== LEVEL SET TERM ===========================================
-		if (switches.enable_level_set_term) {
+		if (switches.enable_level_set_term && live_voxel.flags == VOXEL_NONTRUNCATED) {
 			Matrix3f live_sdf_2nd_derivative;
 			ComputeSdf2ndDerivative(live_sdf_2nd_derivative, voxel_position, live_sdf, live_voxels, live_index_data, live_cache);
 

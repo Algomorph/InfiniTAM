@@ -20,6 +20,7 @@
 #include "../../Utils/Logging/ConsolePrintColors.h"
 #include "WarpGradientAggregates.h"
 #include "../../Utils/Logging/Logging.h"
+#include "../../../ORUtils/MemoryDeviceType.h"
 
 namespace ITMLib {
 // region ==================================== STATIC PRINTING / STATISTICS FUNCTIONS ==================================
@@ -57,6 +58,8 @@ void PrintEnergyStatistics(const bool& enable_data_term,
 	}
 	stringstream << green << " Total: " << total_energy << reset;
 	LOG4CPLUS_PER_ITERATION(logging::get_logger(), stringstream.str());
+
+
 }
 template <MemoryDeviceType TMemoryDeviceType>
 inline static
@@ -72,6 +75,18 @@ void PrintEnergyStatistics(const bool& enable_data_term,
 	float total_rigidity_energy = GET_ATOMIC_VALUE_CPU(energies.total_Killing_energy);
 	PrintEnergyStatistics(enable_data_term, enable_level_set_term, enable_smoothing_term, enable_killing_term, gamma,
 	                      total_data_energy, total_level_set_energy, total_tikhonov_energy, total_rigidity_energy);
+	std::stringstream stringstream;
+	stringstream << "[CGL]";
+	if(enable_data_term){
+		stringstream << blue << " Data term: " << energies.GetCombinedDataLength();
+	}
+	if(enable_level_set_term){
+		stringstream << red << " Level set term: " << energies.GetCombinedLevelSetLength();
+	}
+	if(enable_smoothing_term){
+		stringstream << cyan << " Smoothing term: " << energies.GetCombinedSmoothingLength();
+	}
+	LOG4CPLUS_PER_ITERATION(logging::get_logger(), stringstream.str());
 }
 
 
@@ -123,7 +138,7 @@ inline static
 void CalculateAndPrintAdditionalStatistics(const bool& enable_data_term,
                                            const bool& enable_level_set_term,
                                            AdditionalGradientAggregates<TMemoryDeviceType>& aggregates,
-                                           const unsigned int usedHashblockCount = 0) {
+                                           const unsigned int used_hashblock_count = 0) {
 
 	unsigned int considered_voxel_count = GET_ATOMIC_VALUE_CPU(aggregates.considered_voxel_count);
 	unsigned int data_voxel_count = GET_ATOMIC_VALUE_CPU(aggregates.data_voxel_count);
@@ -136,7 +151,7 @@ void CalculateAndPrintAdditionalStatistics(const bool& enable_data_term,
 	CalculateAndPrintAdditionalStatistics(enable_data_term, enable_level_set_term, cumulative_canonical_sdf,
 	                                      cumulative_live_sdf, cumulative_warp_dist, cumulative_sdf_diff,
 	                                      considered_voxel_count, data_voxel_count,
-	                                      level_set_voxel_count, usedHashblockCount);
+	                                      level_set_voxel_count, used_hashblock_count);
 }
 
 // endregion ===========================================================================================================

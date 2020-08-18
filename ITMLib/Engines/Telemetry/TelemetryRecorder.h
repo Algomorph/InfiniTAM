@@ -59,8 +59,8 @@ public: // instance functions
 	void RecordPreSurfaceTrackingData(const VoxelVolume <TVoxel, TIndex>& raw_live_volume, const Matrix4f camera_matrix, int frame_index) override;
 	void RecordPostSurfaceTrackingData(const VoxelVolume <TVoxel, TIndex>& warped_live_volume, int frame_index) override;
 	void RecordPostFusionData(const VoxelVolume <TVoxel, TIndex>& canonical_volume, int frame_index) override;
-	void RecordSurfaceTrackingEnergies(const ComponentEnergies<TMemoryDeviceType>& energies);
-	void RecordSurfaceTrackingStatistics(const AdditionalGradientAggregates<TMemoryDeviceType>& aggregates);
+	void RecordSurfaceTrackingEnergies(const ComponentEnergies<TMemoryDeviceType>& energies, int iteration_index);
+	void RecordSurfaceTrackingStatistics(const AdditionalGradientAggregates<TMemoryDeviceType>& aggregates, int iteration_index);
 	void RecordSurfaceTrackingMeanUpdate(float mean_update);
 private: // instance functions
 	void RecordVolumeMemoryUsageInfo(const VoxelVolume <TVoxel, TIndex>& canonical_volume);

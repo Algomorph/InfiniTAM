@@ -21,14 +21,22 @@
 #include "../../Utils/Logging/ConsolePrintColors.h"
 
 
+#define TRACKING_CONDITION_LIVE_KNOWN
+//#define TRACKING_CONDITION_LIVE_NONTRUNCATED
+
 template<typename TVoxel>
 _CPU_AND_GPU_CODE_ inline
 bool VoxelIsConsideredForTracking(const TVoxel& voxel_canonical, const TVoxel& voxel_live) {
+#if defined(TRACKING_CONDITION_LIVE_KNOWN)
 	return voxel_live.flags != ITMLib::VOXEL_UNKNOWN;
+#elif defined(TRACKING_CONDITION_LIVE_NONTRUNCATED)
+	return voxel_live.flags == ITMLib::VOXEL_NONTRUNCATED;
+#endif
 };
 
 
-#define DATA_CONDITION_IGNORE_ANY_UNKNOWN
+//#define DATA_CONDITION_IGNORE_ANY_UNKNOWN
+#define DATA_CONDITION_LIVE_NONTRUNCATED_CANONICAL_KNOWN
 
 template<typename TVoxel>
 _CPU_AND_GPU_CODE_ inline
@@ -38,6 +46,8 @@ bool VoxelIsConsideredForDataTerm(const TVoxel& canonical_voxel, const TVoxel& l
 	return true;
 #elif defined(DATA_CONDITION_IGNORE_ANY_UNKNOWN)
 	return canonical_voxel.flags != ITMLib::VOXEL_UNKNOWN && live_voxel.flags != ITMLib::VOXEL_UNKNOWN;
+#elif defined(DATA_CONDITION_LIVE_NONTRUNCATED_CANONICAL_KNOWN)
+	return canonical_voxel.flags != ITMLib::VOXEL_UNKNOWN && live_voxel.flags == ITMLib::VOXEL_NONTRUNCATED;
 #elif defined(DATA_CONDITION_ONLY_NONTRUNCATED)
 	return live_voxel.flags == ITMLib::VOXEL_NONTRUNCATED
 						 && canonical_voxel.flags == ITMLib::VOXEL_NONTRUNCATED;
@@ -344,25 +354,29 @@ inline void ComputeGradient_CentralDifferences_ZeroIfTruncated(THREADPTR(Vector3
 
 
 	int vmIndex = 0;
-	auto sdf_at = [&](Vector3i offset) {
+	auto sdf_at = [&](Vector3i offset, bool& nontruncated) {
 #if !defined(__CUDACC__) && !defined(WITH_OPENMP)
-		return TVoxel::valueToFloat(readVoxel(voxels, index_data, voxel_position + (offset), vmIndex, cache).sdf);
+		TVoxel voxel = readVoxel(voxels, index_data, voxel_position + (offset), vmIndex, cache);
+		nontruncated &= voxel.flags == ITMLib::VOXEL_NONTRUNCATED;
+		return TVoxel::valueToFloat(voxel.sdf);
 #else
-		return TVoxel::valueToFloat(readVoxel(voxels, index_data, voxel_position + (offset), vmIndex).sdf);
+		TVoxel voxel = readVoxel(voxels, index_data, voxel_position + (offset), vmIndex);
+		nontruncated &= voxel.flags == ITMLib::VOXEL_NONTRUNCATED;
+		return TVoxel::valueToFloat(voxel.sdf);
 #endif
 	};
 
-	float sdf_at_x_plus_one = sdf_at(Vector3i(1, 0, 0));
-	float sdf_at_y_plus_one = sdf_at(Vector3i(0, 1, 0));
-	float sdf_at_z_plus_one = sdf_at(Vector3i(0, 0, 1));
-	float sdf_at_x_minus_one = sdf_at(Vector3i(-1, 0, 0));
-	float sdf_at_y_minus_one = sdf_at(Vector3i(0, -1, 0));
-	float sdf_at_z_minus_one = sdf_at(Vector3i(0, 0, -1));
+	bool both_x_nontruncated = true;
+	float sdf_at_x_plus_one = sdf_at(Vector3i(1, 0, 0), both_x_nontruncated);
+	float sdf_at_x_minus_one = sdf_at(Vector3i(-1, 0, 0), both_x_nontruncated);
 
+	bool both_y_nontruncated = true;
+	float sdf_at_y_plus_one = sdf_at(Vector3i(0, 1, 0), both_y_nontruncated);
+	float sdf_at_y_minus_one = sdf_at(Vector3i(0, -1, 0), both_y_nontruncated);
 
-	bool both_x_nontruncated = 1.0 - abs(sdf_at_x_plus_one) > 1e-5 && 1.0 - abs(sdf_at_x_minus_one) > 1e-5;
-	bool both_y_nontruncated = 1.0 - abs(sdf_at_y_plus_one) > 1e-5 && 1.0 - abs(sdf_at_y_minus_one) > 1e-5;
-	bool both_z_nontruncated = 1.0 - abs(sdf_at_z_plus_one) > 1e-5 && 1.0 - abs(sdf_at_z_minus_one) > 1e-5;
+	bool both_z_nontruncated = true;
+	float sdf_at_z_plus_one = sdf_at(Vector3i(0, 0, 1), both_z_nontruncated);
+	float sdf_at_z_minus_one = sdf_at(Vector3i(0, 0, -1), both_z_nontruncated);
 
 	gradient[0] = both_x_nontruncated * 0.5f * (sdf_at_x_plus_one - sdf_at_x_minus_one);
 	gradient[1] = both_y_nontruncated * 0.5f * (sdf_at_y_plus_one - sdf_at_y_minus_one);
@@ -380,43 +394,83 @@ inline void ComputeGradient_ChooseStrategyOnTruncation(THREADPTR(Vector3f)& grad
 
 
 	int vmIndex = 0;
-	auto sdf_at = [&](Vector3i offset) {
+	auto sdf_at = [&](Vector3i offset, bool& nontruncated) {
 #if !defined(__CUDACC__) && !defined(WITH_OPENMP)
-		return TVoxel::valueToFloat(readVoxel(voxels, index_data, voxel_position + (offset), vmIndex, cache).sdf);
+		TVoxel voxel = readVoxel(voxels, index_data, voxel_position + (offset), vmIndex, cache);
+		nontruncated = voxel.flags == ITMLib::VOXEL_NONTRUNCATED;
+		return TVoxel::valueToFloat(voxel.sdf);
 #else
-		return TVoxel::valueToFloat(readVoxel(voxels, index_data, voxel_position + (offset), vmIndex).sdf);
+		TVoxel voxel = readVoxel(voxels, index_data, voxel_position + (offset), vmIndex);
+		nontruncated = voxel.flags == ITMLib::VOXEL_NONTRUNCATED;
+		return TVoxel::valueToFloat(voxel.sdf);
 #endif
 	};
 
-	float sdf_at_position = sdf_at(Vector3i(0, 0, 0));
+	bool dummy;
+	float sdf_at_position = sdf_at(Vector3i(0, 0, 0), dummy);
 
-	float sdf_at_x_plus_one = sdf_at(Vector3i(1, 0, 0));
-	float sdf_at_y_plus_one = sdf_at(Vector3i(0, 1, 0));
-	float sdf_at_z_plus_one = sdf_at(Vector3i(0, 0, 1));
-	float sdf_at_x_minus_one = sdf_at(Vector3i(-1, 0, 0));
-	float sdf_at_y_minus_one = sdf_at(Vector3i(0, -1, 0));
-	float sdf_at_z_minus_one = sdf_at(Vector3i(0, 0, -1));
+	bool x_plus_one_nontruncated;
+	float sdf_at_x_plus_one = sdf_at(Vector3i(1, 0, 0), x_plus_one_nontruncated);
+	bool y_plus_one_nontruncated;
+	float sdf_at_y_plus_one = sdf_at(Vector3i(0, 1, 0), y_plus_one_nontruncated);
+	bool z_plus_one_nontruncated;
+	float sdf_at_z_plus_one = sdf_at(Vector3i(0, 0, 1), z_plus_one_nontruncated);
+	bool x_minus_one_nontruncated;
+	float sdf_at_x_minus_one = sdf_at(Vector3i(-1, 0, 0), x_minus_one_nontruncated);
+	bool y_minus_one_nontruncated;
+	float sdf_at_y_minus_one = sdf_at(Vector3i(0, -1, 0), y_minus_one_nontruncated);
+	bool z_minus_one_nontruncated;
+	float sdf_at_z_minus_one = sdf_at(Vector3i(0, 0, -1), z_minus_one_nontruncated);
 
-	bool x_plus_one_nontruncated = 1.0 - abs(sdf_at_x_plus_one) > 1e-5;
-	bool x_minus_one_nontruncated = 1.0 - abs(sdf_at_x_minus_one) > 1e-5;
-	bool y_plus_one_nontruncated = 1.0 - abs(sdf_at_y_plus_one) > 1e-5;
-	bool y_minus_one_nontruncated = 1.0 - abs(sdf_at_y_minus_one) > 1e-5;
-	bool z_plus_one_nontruncated = 1.0 - abs(sdf_at_z_plus_one) > 1e-5;
-	bool z_minus_one_nontruncated = 1.0 - abs(sdf_at_z_minus_one) > 1e-5;
+	if (x_plus_one_nontruncated) {
+		if (x_minus_one_nontruncated) {
+			gradient[0] = 0.5f * (sdf_at_x_plus_one - sdf_at_x_minus_one);
+		} else {
+			gradient[0] = sdf_at_x_plus_one - sdf_at_position;
+		}
+	} else {
+		if (x_minus_one_nontruncated) {
+			gradient[0] = sdf_at_position - sdf_at_x_minus_one;
+		}
+	}
 
-	bool both_x_nontruncated = x_plus_one_nontruncated && x_minus_one_nontruncated;
-	bool both_y_nontruncated = y_plus_one_nontruncated && y_minus_one_nontruncated;
-	bool both_z_nontruncated = z_plus_one_nontruncated && z_minus_one_nontruncated;
+	if (y_plus_one_nontruncated) {
+		if (y_minus_one_nontruncated) {
+			gradient[1] = 0.5f * (sdf_at_y_plus_one - sdf_at_y_minus_one);
+		} else {
+			gradient[1] = sdf_at_y_plus_one - sdf_at_position;
+		}
+	} else {
+		if (y_minus_one_nontruncated) {
+			gradient[1] = sdf_at_position - sdf_at_y_minus_one;
+		}
+	}
 
-	gradient[0] = both_x_nontruncated * 0.5f * (sdf_at_x_plus_one - sdf_at_x_minus_one)
-	              + (!both_x_nontruncated && x_plus_one_nontruncated) * (sdf_at_x_plus_one - sdf_at_position)
-	              + (!both_x_nontruncated && x_minus_one_nontruncated) * (sdf_at_position - sdf_at_x_minus_one);
-	gradient[1] = both_y_nontruncated * 0.5f * (sdf_at_y_plus_one - sdf_at_y_minus_one)
-	              + (!both_y_nontruncated && y_plus_one_nontruncated) * (sdf_at_y_plus_one - sdf_at_position)
-	              + (!both_y_nontruncated && y_minus_one_nontruncated) * (sdf_at_position - sdf_at_y_minus_one);
-	gradient[2] = both_z_nontruncated * 0.5f * (sdf_at_z_plus_one - sdf_at_z_minus_one)
-	              + (!both_z_nontruncated && z_plus_one_nontruncated) * (sdf_at_z_plus_one - sdf_at_position)
-	              + (!both_z_nontruncated && z_minus_one_nontruncated) * (sdf_at_position - sdf_at_z_minus_one);
+	if (z_plus_one_nontruncated) {
+		if (z_minus_one_nontruncated) {
+			gradient[2] = 0.5f * (sdf_at_z_plus_one - sdf_at_z_minus_one);
+		} else {
+			gradient[2] = sdf_at_z_plus_one - sdf_at_position;
+		}
+	} else {
+		if (z_minus_one_nontruncated) {
+			gradient[2] = sdf_at_position - sdf_at_z_minus_one;
+		}
+	}
+
+//	bool both_x_nontruncated = x_plus_one_nontruncated && x_minus_one_nontruncated;
+//	bool both_y_nontruncated = y_plus_one_nontruncated && y_minus_one_nontruncated;
+//	bool both_z_nontruncated = z_plus_one_nontruncated && z_minus_one_nontruncated;
+
+//	gradient[0] = both_x_nontruncated * 0.5f * (sdf_at_x_plus_one - sdf_at_x_minus_one)
+//	              + (!both_x_nontruncated && x_plus_one_nontruncated) * (sdf_at_x_plus_one - sdf_at_position)
+//	              + (!both_x_nontruncated && x_minus_one_nontruncated) * (sdf_at_position - sdf_at_x_minus_one);
+//	gradient[1] = both_y_nontruncated * 0.5f * (sdf_at_y_plus_one - sdf_at_y_minus_one)
+//	              + (!both_y_nontruncated && y_plus_one_nontruncated) * (sdf_at_y_plus_one - sdf_at_position)
+//	              + (!both_y_nontruncated && y_minus_one_nontruncated) * (sdf_at_position - sdf_at_y_minus_one);
+//	gradient[2] = both_z_nontruncated * 0.5f * (sdf_at_z_plus_one - sdf_at_z_minus_one)
+//	              + (!both_z_nontruncated && z_plus_one_nontruncated) * (sdf_at_z_plus_one - sdf_at_position)
+//	              + (!both_z_nontruncated && z_minus_one_nontruncated) * (sdf_at_position - sdf_at_z_minus_one);
 };
 
 // endregion

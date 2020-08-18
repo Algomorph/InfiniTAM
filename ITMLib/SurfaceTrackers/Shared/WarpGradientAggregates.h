@@ -85,17 +85,29 @@ struct ComponentEnergies{
 		INITIALIZE_ATOMIC(float, total_level_set_energy, 0.f);
 		INITIALIZE_ATOMIC(float, total_Tikhonov_energy, 0.f);
 		INITIALIZE_ATOMIC(float, total_Killing_energy, 0.f);
+
+		INITIALIZE_ATOMIC(float, combined_data_length, 0.f);
+		INITIALIZE_ATOMIC(float, combined_level_set_length, 0.f);
+		INITIALIZE_ATOMIC(float, combined_smoothing_length, 0.f);
 	}
 	~ComponentEnergies(){
 		CLEAN_UP_ATOMIC(total_data_energy);
 		CLEAN_UP_ATOMIC(total_level_set_energy);
 		CLEAN_UP_ATOMIC(total_Tikhonov_energy);
 		CLEAN_UP_ATOMIC(total_Killing_energy);
+
+		CLEAN_UP_ATOMIC(combined_data_length);
+		CLEAN_UP_ATOMIC(combined_level_set_length);
+		CLEAN_UP_ATOMIC(combined_smoothing_length);
 	}
 	DECLARE_ATOMIC_FLOAT(total_data_energy);
 	DECLARE_ATOMIC_FLOAT(total_level_set_energy);
 	DECLARE_ATOMIC_FLOAT(total_Tikhonov_energy);
 	DECLARE_ATOMIC_FLOAT(total_Killing_energy);
+
+	DECLARE_ATOMIC_FLOAT(combined_data_length);
+	DECLARE_ATOMIC_FLOAT(combined_level_set_length);
+	DECLARE_ATOMIC_FLOAT(combined_smoothing_length);
 
 	float GetTotalDataEnergy() const{
 		return GET_ATOMIC_VALUE_CPU(total_data_energy);
@@ -108,6 +120,16 @@ struct ComponentEnergies{
 	}
 	float GetTotalKillingEnergy() const{
 		return GET_ATOMIC_VALUE_CPU(total_Killing_energy);
+	}
+
+	float GetCombinedDataLength() const{
+		return GET_ATOMIC_VALUE_CPU(combined_data_length);
+	}
+	float GetCombinedLevelSetLength() const{
+		return GET_ATOMIC_VALUE_CPU(combined_level_set_length);
+	}
+	float GetCombinedSmoothingLength() const{
+		return GET_ATOMIC_VALUE_CPU(combined_smoothing_length);
 	}
 };
 

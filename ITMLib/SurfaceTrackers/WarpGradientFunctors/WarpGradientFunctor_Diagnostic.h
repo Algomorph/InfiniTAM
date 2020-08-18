@@ -36,7 +36,7 @@
 namespace ITMLib {
 
 // region ========================== CALCULATE WARP GRADIENT ===========================================================
-template<typename TWarp, bool hasDebugInformation>
+template<typename TWarp, bool THasDebugInformation>
 struct SetGradientFunctor;
 
 template<typename TWarp>
@@ -122,7 +122,7 @@ public:
 			focus_coordinates(configuration::Get().focus_coordinates),
 			sdf_unity(voxel_size / truncation_distance),
 			verbosity_level(configuration::Get().logging_settings.verbosity_level),
-			iteration_index(iteration_index){}
+			iteration_index(iteration_index) {}
 
 	// endregion =======================================================================================================
 
@@ -150,9 +150,22 @@ public:
 		// term gradient results are stored here before being added up
 		Vector3f local_smoothing_energy_gradient(0.0f), local_data_energy_gradient(0.0f), local_level_set_energy_gradient(0.0f);
 
-
 		Vector3f live_sdf_gradient;
+
+//      Different strategies for computing gradient of live TSDF.
+//      Observation: the only strategy that currently yields a gradual shrinking of overall energy and gradient lengths is "ZERO_IF_TRUNCATED"
+//#define LIVE_GRADIENT_STRATEGY_NAIVE
+#define LIVE_GRADIENT_STRATEGY_ZERO_IF_TRUNCATED
+//#define LIVE_GRADIENT_STRATEGY_CHOOSE_IF_TRUNCATED
+
+#if defined(LIVE_GRADIENT_STRATEGY_NAIVE)
+		ComputeGradient_CentralDifferences(live_sdf_gradient, voxel_position, live_voxels, live_index_data, live_cache);
+#elif defined(LIVE_GRADIENT_STRATEGY_ZERO_IF_TRUNCATED)
 		ComputeGradient_CentralDifferences_ZeroIfTruncated(live_sdf_gradient, voxel_position, live_voxels, live_index_data, live_cache);
+#elif defined(LIVE_GRADIENT_STRATEGY_CHOOSE_IF_TRUNCATED)
+		ComputeGradient_ChooseStrategyOnTruncation(live_sdf_gradient, voxel_position, live_voxels, live_index_data, live_cache);
+#endif
+
 		// live sdf jacobian is denoted in the text as live gradient ∇φ_proj(Ψ)
 		// region =============================== DATA TERM ================================================
 		if (compute_data_term && switches.enable_data_term && iteration_index < iteration_bound) {
@@ -180,23 +193,29 @@ public:
 				printf("local data energy: %s%E%s\n",
 				       yellow, local_data_energy, reset);
 			}
+			ATOMIC_ADD(energies.combined_data_length, ORUtils::length(local_data_energy_gradient));
 		}
 		// endregion
 		// region =============================== LEVEL SET TERM ===========================================
 
-		if (switches.enable_level_set_term) {
+		if (switches.enable_level_set_term && live_voxel.flags == VOXEL_NONTRUNCATED) {
 			Matrix3f live_sdf_2nd_derivative;
 			ComputeSdf2ndDerivative(live_sdf_2nd_derivative, voxel_position, live_sdf, live_voxels, live_index_data, live_cache);
-
+			// TODO: not enough CUDA resources to execute this one, fix and try out instead of above strategy
+			// ComputeSdf2ndDerivative_ZeroIfTruncated(live_sdf_2nd_derivative, voxel_position, live_sdf, live_voxels, live_index_data, live_cache);
 
 			// |∇φ_{proj}(Ψ)|
 			float live_sdf_gradient_norm = ORUtils::length(live_sdf_gradient);
 			// ~ |∇φ_{proj}(Ψ)| - 1
 			float live_sdf_gradient_norm_minus_unity = live_sdf_gradient_norm - sdf_unity;
-			// (|∇φ_{proj}(Ψ)| - 1) / |∇φ_{proj}(Ψ)|_{E}  *  ()
-			local_level_set_energy_gradient = parameters.weight_level_set_term *
-			                                  live_sdf_gradient_norm_minus_unity * (live_sdf_2nd_derivative * live_sdf_gradient) /
-			                                  (live_sdf_gradient_norm + parameters.epsilon);
+			//                        ┏                                                          ┓
+			// (|∇φ_{proj}(Ψ)| - 1)   ┃  ∇_{xx}φ_{proj}(Ψ)  ∇_{xy}φ_{proj}(Ψ)  ∇_{xz}φ_{proj}(Ψ) ┃
+			// --------------------   ┃  ∇_{yx}φ_{proj}(Ψ)  ∇_{yy}φ_{proj}(Ψ)  ∇_{yz}φ_{proj}(Ψ) ┃ ∇φ_{proj}(Ψ
+			//  |∇φ_{proj}(Ψ)|_{E}    ┃  ∇_{zx}φ_{proj}(Ψ)  ∇_{zy}φ_{proj}(Ψ)  ∇_{zz}φ_{proj}(Ψ) ┃
+			//                        ┗                                                          ┛
+			local_level_set_energy_gradient =
+					(parameters.weight_level_set_term * live_sdf_gradient_norm_minus_unity / (live_sdf_gradient_norm + parameters.epsilon))
+					* (live_sdf_2nd_derivative * live_sdf_gradient);
 			ATOMIC_ADD(aggregates.level_set_voxel_count, 1u);
 			// E_{level_set}(Ψ) = 1/2 Σ_{Ψ} (|∇φ_{proj}(Ψ)| - 1)^2
 			float local_level_set_energy = parameters.weight_level_set_term *
@@ -207,6 +226,7 @@ public:
 				printf("local level set energy: %s%E%s\n",
 				       yellow, local_level_set_energy, reset);
 			}
+			ATOMIC_ADD(energies.combined_level_set_length, ORUtils::length(local_level_set_energy_gradient));
 		}
 		// endregion =======================================================================================
 
@@ -241,9 +261,8 @@ public:
 				                                      warp_update_Hessian);
 
 				if (print_voxel_result) {
-					//__DEBUG
-//					PrintKillingTermInformation(neighbor_warp_updates, neighbors_known, neighbors_truncated,
-//					                            warp_update_Jacobian, warp_update_Hessian);
+					PrintKillingTermInformation(neighbor_warp_updates, neighbors_known, neighbors_truncated,
+					                            warp_update_Jacobian, warp_update_Hessian);
 				}
 
 				float gamma = parameters.weight_killing_term;
@@ -293,24 +312,26 @@ public:
 				}
 				ATOMIC_ADD(energies.total_Tikhonov_energy, local_Tikhonov_energy);
 				ATOMIC_ADD(energies.total_Killing_energy, local_Killing_energy);
+				ATOMIC_ADD(energies.combined_smoothing_length, ORUtils::length(local_smoothing_energy_gradient));
 			} else {
-				Matrix3f warp_updateJacobian(0.0f);
-				Vector3f warp_updateLaplacian;
-				ComputeWarpLaplacianAndJacobian(warp_updateLaplacian, warp_updateJacobian, warp_update,
+				Matrix3f warp_update_Jacobian(0.0f);
+				Vector3f warp_update_Laplacian;
+				ComputeWarpLaplacianAndJacobian(warp_update_Laplacian, warp_update_Jacobian, warp_update,
 				                                neighbor_warp_updates);
 
 
 				if (print_voxel_result) {
-					PrintTikhonovTermInformation(neighbor_warp_updates, warp_updateLaplacian);
+					PrintTikhonovTermInformation(neighbor_warp_updates, warp_update_Laplacian);
 				}
 
-				//∇E_{reg}(Ψ) = −[∆U ∆V ∆W]' ,
-				local_smoothing_energy_gradient = -parameters.weight_smoothing_term * warp_updateLaplacian;
+				//∇E_{reg}(Ψ) = −[∆U ∆V ∆W]^T
+				local_smoothing_energy_gradient = -parameters.weight_smoothing_term * warp_update_Laplacian;
 				float local_Tikhonov_energy = parameters.weight_smoothing_term *
-				                              dot(warp_updateJacobian.getColumn(0), warp_updateJacobian.getColumn(0)) +
-				                              dot(warp_updateJacobian.getColumn(1), warp_updateJacobian.getColumn(1)) +
-				                              dot(warp_updateJacobian.getColumn(2), warp_updateJacobian.getColumn(2));
+				                              dot(warp_update_Jacobian.getColumn(0), warp_update_Jacobian.getColumn(0)) +
+				                              dot(warp_update_Jacobian.getColumn(1), warp_update_Jacobian.getColumn(1)) +
+				                              dot(warp_update_Jacobian.getColumn(2), warp_update_Jacobian.getColumn(2));
 				ATOMIC_ADD(energies.total_Tikhonov_energy, local_Tikhonov_energy);
+				ATOMIC_ADD(energies.combined_smoothing_length, ORUtils::length(local_smoothing_energy_gradient));
 			}
 		}
 		// endregion
@@ -356,17 +377,19 @@ public:
 
 	void SaveStatistics() {
 		auto& recorder = TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::GetDefaultInstance();
-		recorder.RecordSurfaceTrackingEnergies(energies);
-		recorder.RecordSurfaceTrackingStatistics(aggregates);
+		recorder.RecordSurfaceTrackingEnergies(energies, iteration_index);
+		recorder.RecordSurfaceTrackingStatistics(aggregates, iteration_index);
 	}
 
 
 private:
 
 	const float sdf_unity;
-	//__DEBUG
+	// iteration_index and iteration_bound are used in the diagnostic-execution-mode warp gradient functor ONLY
+	// iteration_index is used for logging per-iteration data, as well as, in combination with
+	// iteration_bound to halt computation of certain terms for debugging purposes
 	const int iteration_index;
-	const int iteration_bound = 2000;
+	const int iteration_bound = 20000;
 
 	// *** data structure accessors
 	const TVoxel* live_voxels;
