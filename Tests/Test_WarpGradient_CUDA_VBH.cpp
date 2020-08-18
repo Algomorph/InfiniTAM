@@ -77,7 +77,7 @@ BOOST_FIXTURE_TEST_CASE(testUpdateWarps_CUDA_VBH, DataFixture) {
 
 	float average_warp_update = motion_tracker_VBH_CUDA->UpdateWarps(&warp_field_copy, canonical_volume, live_volume);
 
-	BOOST_REQUIRE_CLOSE(average_warp_update, warp_update_average_length_iter0, 1e-7f);
+	BOOST_REQUIRE_CLOSE(average_warp_update, warp_update_average_length_iter0, 1e-2f);
 
 	float tolerance = 1e-8;
 	BOOST_REQUIRE(contentAlmostEqual_CUDA(&warp_field_copy, warp_field_iter0, tolerance));
