@@ -92,11 +92,12 @@
         "log_benchmarks": true,
         "log_volume_statistics": false,
         "log_trajectory_quaternions": false,
-        "log_surface_tracking_procedure_names": false,
+        "log_iteration_number": false,
+        "log_surface_tracking_procedure_names": true,
         "log_average_warp_update": false,
         "log_surface_tracking_optimization_energies": false,
         "log_additional_surface_tracking_stats": false,
-        "log_voxel_hash_block_usage": true
+        "log_voxel_hash_block_usage": false
     },
     "paths": {
         "output_path": "<CONFIGURATION_DIRECTORY>",
@@ -126,6 +127,7 @@
     "telemetry_settings": {
         "record_volume_memory_usage": false,
         "record_surface_tracking_optimization_energies": false,
+        "record_surface_tracking_additional_statistics": false,
         "record_frame_meshes": false,
         "use_CPU_for_mesh_recording": false,
         "record_camera_matrices": false
