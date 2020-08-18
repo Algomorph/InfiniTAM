@@ -41,10 +41,10 @@ public:
 
 		dim3 cuda_block_size(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
 		dim3 cuda_grid_size(volume->index.GetVolumeSize().x / cuda_block_size.x,
-		              volume->index.GetVolumeSize().y / cuda_block_size.y,
-		              volume->index.GetVolumeSize().z / cuda_block_size.z);
+		                    volume->index.GetVolumeSize().y / cuda_block_size.y,
+		                    volume->index.GetVolumeSize().z / cuda_block_size.z);
 
-		TraverseAll_device<TStaticFunctor, TVoxel> <<< cuda_grid_size, cuda_block_size >>> (voxels, array_info);
+		TraverseAll_device<TStaticFunctor, TVoxel> <<< cuda_grid_size, cuda_block_size >>>(voxels, array_info);
 		ORcudaKernelCheck;
 	}
 
@@ -63,16 +63,15 @@ public:
 
 		dim3 cuda_block_size(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
 		dim3 cuda_grid_size(volume->index.GetVolumeSize().x / cuda_block_size.x,
-		              volume->index.GetVolumeSize().y / cuda_block_size.y,
-		              volume->index.GetVolumeSize().z / cuda_block_size.z);
+		                    volume->index.GetVolumeSize().y / cuda_block_size.y,
+		                    volume->index.GetVolumeSize().z / cuda_block_size.z);
 
 		// transfer functor from RAM to VRAM
 		TFunctor* functor_device = nullptr;
 		ORcudaSafeCall(cudaMalloc((void**) &functor_device, sizeof(TFunctor)));
 		ORcudaSafeCall(cudaMemcpy(functor_device, &functor, sizeof(TFunctor), cudaMemcpyHostToDevice));
 
-		traverseAll_device < TFunctor, TVoxel > <<< cuda_grid_size, cuda_block_size >>>
-		                                                    (voxels, array_info, functor_device);
+		traverseAll_device<TFunctor, TVoxel> <<< cuda_grid_size, cuda_block_size >>>(voxels, array_info, functor_device);
 		ORcudaKernelCheck;
 
 		// transfer functor from VRAM back to RAM
@@ -94,16 +93,15 @@ public:
 
 		dim3 cuda_block_size(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
 		dim3 cuda_grid_size(volume->index.GetVolumeSize().x / cuda_block_size.x,
-		              volume->index.GetVolumeSize().y / cuda_block_size.y,
-		              volume->index.GetVolumeSize().z / cuda_block_size.z);
+		                    volume->index.GetVolumeSize().y / cuda_block_size.y,
+		                    volume->index.GetVolumeSize().z / cuda_block_size.z);
 
 		// transfer functor from RAM to VRAM
 		TFunctor* functor_device = nullptr;
 		ORcudaSafeCall(cudaMalloc((void**) &functor_device, sizeof(TFunctor)));
 		ORcudaSafeCall(cudaMemcpy(functor_device, &functor, sizeof(TFunctor), cudaMemcpyHostToDevice));
 
-		traverseAllWithPosition_device < TFunctor, TVoxel > <<< cuda_grid_size, cuda_block_size >>>
-		                                                                (voxels, array_info, functor_device);
+		traverseAllWithPosition_device<TFunctor, TVoxel> <<< cuda_grid_size, cuda_block_size >>>(voxels, array_info, functor_device);
 		ORcudaKernelCheck;
 
 		// transfer functor from VRAM back to RAM

@@ -44,7 +44,8 @@ SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode>::Surfac
 		termination(this->parameters.termination),
 		warping_engine(WarpingEngineFactory::Build<TVoxel, TWarp, TIndex>()),
 		mean_vector_update_threshold_in_voxels(termination.mean_update_length_threshold /
-		                                       configuration::Get().general_voxel_volume_parameters.voxel_size) {}
+		                                       configuration::Get().general_voxel_volume_parameters.voxel_size),
+		iteration(0) {}
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
 SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode>::SurfaceTracker(const LevelSetEvolutionSwitches& switches):
@@ -57,7 +58,8 @@ SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode>::Surfac
 		termination(this->parameters.termination),
 		warping_engine(WarpingEngineFactory::Build<TVoxel, TWarp, TIndex>()),
 		mean_vector_update_threshold_in_voxels(termination.mean_update_length_threshold /
-		                                       configuration::Get().general_voxel_volume_parameters.voxel_size) {}
+		                                       configuration::Get().general_voxel_volume_parameters.voxel_size),
+		iteration(0) {}
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
 SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode>::~SurfaceTracker() {
@@ -146,7 +148,7 @@ SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode>::TrackN
 	int source_live_volume_index = 0;
 	int target_live_volume_index = 1;
 	for (iteration = 0; iteration < min_iteration_count || (max_vector_update_length_in_voxels > this->mean_vector_update_threshold_in_voxels
-	                    && iteration < termination.max_iteration_count); iteration++) {
+	                                                        && iteration < termination.max_iteration_count); iteration++) {
 		PerformSingleOptimizationStep(canonical_volume, live_volume_pair[source_live_volume_index],
 		                              live_volume_pair[target_live_volume_index], warp_field,
 		                              max_vector_update_length_in_voxels, iteration);
@@ -155,7 +157,7 @@ SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode>::TrackN
 	}
 
 	if (TExecutionMode == DIAGNOSTIC) {
-		LOG4CPLUS_PER_FRAME(logging::get_logger(),  "Level set evolution iteration count: " << yellow << iteration << reset);
+		LOG4CPLUS_PER_FRAME(logging::get_logger(), "Level set evolution iteration count: " << yellow << iteration << reset);
 	}
 
 

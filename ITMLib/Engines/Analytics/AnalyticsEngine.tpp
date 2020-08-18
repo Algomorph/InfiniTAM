@@ -22,6 +22,8 @@
 using namespace ITMLib;
 
 
+//TODO: replace all functors that use atomics with reduction-type functors when PVA reduction is implemented
+
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 Vector6i
 AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::ComputeVoxelBounds(
@@ -125,7 +127,21 @@ template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 unsigned int
 AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::CountAlteredVoxels(
 		VoxelVolume<TVoxel, TIndex>* volume) {
-	CountAlteredVoxelsFunctor<TVoxel> functor;
+	CountAlteredVoxelsFunctor<TVoxel, TMemoryDeviceType> functor;
+	VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseUtilized(volume, functor);
+	return functor.GetCount();
+}
+
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+unsigned int AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::CountAlteredGradients(VoxelVolume<TVoxel, TIndex>* volume) {
+	CountAlteredGradientsFunctor<TVoxel, TMemoryDeviceType, TVoxel::hasWarpUpdate> functor;
+	VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseUtilized(volume, functor);
+	return functor.GetCount();
+}
+
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+unsigned int AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::CountAlteredWarpUpdates(VoxelVolume<TVoxel, TIndex>* volume){
+	CountAlteredWarpUpdatesFunctor<TVoxel, TMemoryDeviceType, TVoxel::hasWarpUpdate> functor;
 	VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseUtilized(volume, functor);
 	return functor.GetCount();
 }
@@ -250,6 +266,7 @@ AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::GetDifferenceBetweenAllocate
 		const VoxelVolume<TVoxel, TIndex>* volume) {
 	return HashOnlyAnalysisFunctor<TVoxel, TIndex, TMemoryDeviceType>::GetDifferenceBetweenAllocatedAndUtilizedHashBlockPositionSets(volume);
 }
+
 
 
 

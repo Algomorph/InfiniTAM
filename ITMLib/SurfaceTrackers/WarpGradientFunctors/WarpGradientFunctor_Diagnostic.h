@@ -174,14 +174,12 @@ public:
 			// (φ_n(Ψ)−φ_{global}) ∇φ_n(Ψ) - also denoted as - (φ_{proj}(Ψ)−φ_{model}) ∇φ_{proj}(Ψ)
 			// φ_{proj}(Ψ) = φ_{proj}(x+u, y+v, z+w), where u = u(x,y,z), v = v(x,y,z), w = w(x,y,z)
 			// φ_{global} = φ_{global}(x, y, z)
-			local_data_energy_gradient =
-					parameters.weight_data_term * sdf_difference_between_live_and_canonical * live_sdf_gradient;
+			local_data_energy_gradient = parameters.weight_data_term * sdf_difference_between_live_and_canonical * live_sdf_gradient;
 
 			ATOMIC_ADD(aggregates.data_voxel_count, 1u);
 
 			float local_data_energy = parameters.weight_data_term * 0.5f *
 			                          (sdf_difference_between_live_and_canonical * sdf_difference_between_live_and_canonical);
-
 
 			ATOMIC_ADD(energies.total_data_energy, local_data_energy);
 
@@ -197,7 +195,6 @@ public:
 		}
 		// endregion
 		// region =============================== LEVEL SET TERM ===========================================
-
 		if (switches.enable_level_set_term && live_voxel.flags == VOXEL_NONTRUNCATED) {
 			Matrix3f live_sdf_2nd_derivative;
 			ComputeSdf2ndDerivative(live_sdf_2nd_derivative, voxel_position, live_sdf, live_voxels, live_index_data, live_cache);
@@ -240,8 +237,8 @@ public:
 			Vector3f neighbor_warp_updates[neighborhood_size];
 			bool neighbors_known[neighborhood_size], neighbors_truncated[neighborhood_size], neighbors_allocated[neighborhood_size];
 
-			//    0        1        2          3         4         5           6         7         8
-			//(-1,0,0) (0,-1,0) (0,0,-1)   (1, 0, 0) (0, 1, 0) (0, 0, 1)   (1, 1, 0) (0, 1, 1) (1, 0, 1)
+			// neighbor index:       0        1        2          3         4         5           6         7         8
+			// neighbor position: (-1,0,0) (0,-1,0) (0,0,-1)   (1, 0, 0) (0, 1, 0) (0, 0, 1)   (1, 1, 0) (0, 1, 1) (1, 0, 1)
 			findPoint2ndDerivativeNeighborhoodFramewiseWarp(
 					neighbor_warp_updates/*x9*/, neighbors_known, neighbors_truncated, neighbors_allocated, voxel_position,
 					warp_voxels, warp_index_data, warp_cache, canonical_voxels, canonical_index_data, canonical_cache);
@@ -257,12 +254,11 @@ public:
 			if (switches.enable_killing_rigidity_enforcement_term) {
 				Matrix3f warp_update_Jacobian(0.0f);
 				Matrix3f warp_update_Hessian[3] = {Matrix3f(0.0f), Matrix3f(0.0f), Matrix3f(0.0f)};
-				ComputePerVoxelWarpJacobianAndHessian(warp_update, neighbor_warp_updates, warp_update_Jacobian,
-				                                      warp_update_Hessian);
+				ComputePerVoxelWarpJacobianAndHessian(warp_update, neighbor_warp_updates, warp_update_Jacobian, warp_update_Hessian);
 
 				if (print_voxel_result) {
-					PrintKillingTermInformation(neighbor_warp_updates, neighbors_known, neighbors_truncated,
-					                            warp_update_Jacobian, warp_update_Hessian);
+					PrintKillingTermInformation(neighbor_warp_updates, neighbors_known, neighbors_truncated, warp_update_Jacobian,
+					                            warp_update_Hessian);
 				}
 
 				float gamma = parameters.weight_killing_term;
@@ -274,19 +270,13 @@ public:
 				Matrix3f& H_v = warp_update_Hessian[1];
 				Matrix3f& H_w = warp_update_Hessian[2];
 
-
-				float Killing_delta_E_u = -2.0f *
-				                          ((one_plus_gamma) * H_u.xx + (H_u.yy) + (H_u.zz) + gamma * H_v.xy +
-				                           gamma * H_w.xz);
-				float Killing_delta_E_v = -2.0f *
-				                          ((one_plus_gamma) * H_v.yy + (H_v.zz) + (H_v.xx) + gamma * H_u.xy +
-				                           gamma * H_w.yz);
-				float killing_delta_E_w = -2.0f *
-				                          ((one_plus_gamma) * H_w.zz + (H_w.xx) + (H_w.yy) + gamma * H_v.yz +
-				                           gamma * H_u.xz);
+				float Killing_delta_E_u = -2.0f * ((one_plus_gamma) * H_u.xx + (H_u.yy) + (H_u.zz) + gamma * H_v.xy + gamma * H_w.xz);
+				float Killing_delta_E_v = -2.0f * ((one_plus_gamma) * H_v.yy + (H_v.zz) + (H_v.xx) + gamma * H_u.xy + gamma * H_w.yz);
+				float killing_delta_E_w = -2.0f * ((one_plus_gamma) * H_w.zz + (H_w.xx) + (H_w.yy) + gamma * H_v.yz + gamma * H_u.xz);
 
 				local_smoothing_energy_gradient =
 						parameters.weight_smoothing_term * Vector3f(Killing_delta_E_u, Killing_delta_E_v, killing_delta_E_w);
+
 				//=================================== ENERGY ===============================================
 				//dampened approximately-Killing energy
 				Matrix3f warp_Jacobian_transpose = warp_update_Jacobian.t();
@@ -316,16 +306,14 @@ public:
 			} else {
 				Matrix3f warp_update_Jacobian(0.0f);
 				Vector3f warp_update_Laplacian;
-				ComputeWarpLaplacianAndJacobian(warp_update_Laplacian, warp_update_Jacobian, warp_update,
-				                                neighbor_warp_updates);
-
+				ComputeWarpLaplacianAndJacobian(warp_update_Laplacian, warp_update_Jacobian, warp_update, neighbor_warp_updates);
+				//∇E_{reg}(Ψ) = −[∆U ∆V ∆W]^T
+				local_smoothing_energy_gradient = -parameters.weight_smoothing_term * warp_update_Laplacian;
 
 				if (print_voxel_result) {
 					PrintTikhonovTermInformation(neighbor_warp_updates, warp_update_Laplacian);
 				}
 
-				//∇E_{reg}(Ψ) = −[∆U ∆V ∆W]^T
-				local_smoothing_energy_gradient = -parameters.weight_smoothing_term * warp_update_Laplacian;
 				float local_Tikhonov_energy = parameters.weight_smoothing_term *
 				                              dot(warp_update_Jacobian.getColumn(0), warp_update_Jacobian.getColumn(0)) +
 				                              dot(warp_update_Jacobian.getColumn(1), warp_update_Jacobian.getColumn(1)) +
