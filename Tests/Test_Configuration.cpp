@@ -58,7 +58,7 @@ struct DeferrableStructCollection {
 			indexing_settings(BuildDeferrableFromParentIfPresent<IndexingSettings>(source_configuration)),
 			rendering_settings(BuildDeferrableFromParentIfPresent<RenderingSettings>(source_configuration)),
 			automatic_run_settings(BuildDeferrableFromParentIfPresent<AutomaticRunSettings>(source_configuration)),
-			level_set_evolution_parameters(BuildDeferrableFromParentIfPresent<LevelSetEvolutionParameters>(source_configuration)){}
+			level_set_evolution_parameters(BuildDeferrableFromParentIfPresent<LevelSetEvolutionParameters>(source_configuration)) {}
 
 	friend void RequireEqualDeferrables(const DeferrableStructCollection& l, const DeferrableStructCollection& r) {
 		BOOST_REQUIRE_EQUAL(l.main_engine_settings, r.main_engine_settings);
@@ -133,7 +133,7 @@ static std::string GetCLI_optionsSubtestExecutablePath() {
 #else
 	return std::string(GENERATED_TEST_DATA_PREFIX "Debug/cli_options_subtest");
 #endif
-#else 
+#else
 	return std::string(GENERATED_TEST_DATA_PREFIX "cli_options_subtest");
 #endif
 }
@@ -217,21 +217,26 @@ BOOST_AUTO_TEST_CASE(ConfigurationTestLong_CLI_Only) {
 	                      " --level_set_evolution.termination.max_iteration_count=300"
 	                      " --level_set_evolution.termination.mean_update_length_threshold=0.0002"
 
-					      " --logging_settings.verbosity_level=warning"
+	                      " --logging_settings.verbosity_level=warning"
 	                      " --logging_settings.log_to_disk=true"
 	                      " --logging_settings.log_to_stdout=false"
 	                      " --logging_settings.log_benchmarks=true"
 	                      " --logging_settings.log_volume_statistics=true"
 	                      " --logging_settings.log_trajectory_quaternions=true"
+	                      " --logging_settings.log_iteration_number=true"
+	                      " --logging_settings.log_surface_tracking_procedure_names=true"
+	                      " --logging_settings.log_average_warp_update=true"
 	                      " --logging_settings.log_surface_tracking_optimization_energies=true"
+	                      " --logging_settings.log_additional_surface_tracking_stats=true"
+	                      " --logging_settings.log_voxel_hash_block_usage=true"
 
-					      " --paths.output_path=" GENERATED_TEST_DATA_PREFIX "TestData/output"
+	                      " --paths.output_path=" GENERATED_TEST_DATA_PREFIX "TestData/output"
 	                      " --paths.calibration_file_path=" STATIC_TEST_DATA_PREFIX "TestData/calibration/snoopy_calib.txt"
 	                      " --paths.rgb_image_path_mask=" STATIC_TEST_DATA_PREFIX "TestData/frames/frame_color_%%06i.png"
 	                      " --paths.depth_image_path_mask=" STATIC_TEST_DATA_PREFIX "TestData/frames/frame_depth_%%06i.png"
 	                      " --paths.mask_image_path_mask=" STATIC_TEST_DATA_PREFIX "TestData/frames/frame_mask_%%06i.png"
 
-		                  " --create_meshing_engine=true"
+	                      " --create_meshing_engine=true"
 	                      " --device_type=cpu"
 	                      " --use_approximate_raycast=true"
 	                      " --use_threshold_filter=true"
@@ -240,18 +245,19 @@ BOOST_AUTO_TEST_CASE(ConfigurationTestLong_CLI_Only) {
 	                      " --swapping_mode=enabled"
 	                      " --tracker_configuration=\"type=rgb,levels=rrbb\""
 
-					      " --main_engine_settings.draw_frame_index_labels=true"
+	                      " --main_engine_settings.draw_frame_index_labels=true"
 	                      " --main_engine_settings.library_mode=basic"
 	                      " --main_engine_settings.indexing_method=array"
 	                      " --main_engine_settings.enable_rigid_alignment=false"
 
 	                      " --telemetry_settings.record_volume_memory_usage=true"
 	                      " --telemetry_settings.record_surface_tracking_optimization_energies=true"
+	                      " --telemetry_settings.record_surface_tracking_additional_statistics=true"
 	                      " --telemetry_settings.record_frame_meshes=true"
 	                      " --telemetry_settings.use_CPU_for_mesh_recording=true"
 	                      " --telemetry_settings.record_camera_matrices=true"
 
-					      " --indexing_settings.execution_mode=diagnostic"
+	                      " --indexing_settings.execution_mode=diagnostic"
 
 	                      " --rendering_settings.skip_points=true"
 
@@ -260,8 +266,7 @@ BOOST_AUTO_TEST_CASE(ConfigurationTestLong_CLI_Only) {
 	                      " --automatic_run_settings.load_volume_and_camera_matrix_before_processing=true"
 	                      " --automatic_run_settings.save_volumes_and_camera_matrix_after_processing=true"
 	                      " --automatic_run_settings.save_meshes_after_processing=true"
-	                      " --automatic_run_settings.exit_after_automatic_processing=true"
-	                      ;
+	                      " --automatic_run_settings.exit_after_automatic_processing=true";
 
 	std::cout << "Executing command: " << std::endl;
 	std::cout << command << std::endl;
@@ -415,16 +420,15 @@ BOOST_AUTO_TEST_CASE(ConfigurationFileAnd_CLI_Test) {
 
 	config_destination = GENERATED_TEST_DATA_PREFIX "TestData/configuration/file_and_cli_test_output.json";
 	std::string command = GetCLI_optionsSubtestExecutablePath() + " --config_output=" + config_destination +
-			" --config=" + input_config_path +
-			" --general_voxel_volume_parameters.voxel_size=0.008"
-			" --general_voxel_volume_parameters.near_clipping_distance=0.16"
-			" --general_voxel_volume_parameters.far_clipping_distance=4.14"
-			" --automatic_run_settings.index_of_frame_to_end_before=54"
-			" --automatic_run_settings.index_of_frame_to_start_at=12"
-			" --automatic_run_settings.load_volume_and_camera_matrix_before_processing=false"
-			" --device_type=cuda"
-			" --use_approximate_raycast=false"
-			;
+	                      " --config=" + input_config_path +
+	                      " --general_voxel_volume_parameters.voxel_size=0.008"
+	                      " --general_voxel_volume_parameters.near_clipping_distance=0.16"
+	                      " --general_voxel_volume_parameters.far_clipping_distance=4.14"
+	                      " --automatic_run_settings.index_of_frame_to_end_before=54"
+	                      " --automatic_run_settings.index_of_frame_to_start_at=12"
+	                      " --automatic_run_settings.load_volume_and_camera_matrix_before_processing=false"
+	                      " --device_type=cuda"
+	                      " --use_approximate_raycast=false";
 	std::cout << "Executing command: " << std::endl;
 	std::cout << command << std::endl;
 	std::thread thread(execute_external_process, command);
