@@ -63,9 +63,9 @@ for:
 
     # Ubuntu
 
-#install:
-#  - sh : |
-#        export CUDACXX=/usr/local/cuda/bin/nvcc
+install:
+  - sh : |
+        export CUDACXX=/usr/local/cuda/bin/nvcc
 
 # scripts that run after install scripts finish and services are started
 build_script:
