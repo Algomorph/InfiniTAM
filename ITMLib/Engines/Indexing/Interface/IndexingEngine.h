@@ -17,15 +17,15 @@
 
 //local
 #include "../../../Objects/Volume/VoxelVolume.h"
-#include "../../../Utils/HashBlockProperties.h"
+#include "../../../Utils/Enums/HashBlockProperties.h"
 #include "../../../Objects/Views/View.h"
 #include "../../../Objects/Tracking/CameraTrackingState.h"
 #include "../../../Objects/RenderStates/RenderState.h"
-#include "../../../Utils/WarpType.h"
+#include "../../../Utils/Enums/WarpType.h"
 #include "../../../../ORUtils/MemoryDeviceType.h"
 #include "../../../GlobalTemplateDefines.h"
 #include "../../../Objects/Volume/VoxelBlockHash.h"
-#include "../../../Utils/ExecutionMode.h"
+#include "../../../Utils/Enums/ExecutionMode.h"
 #include "../../Common/Configurable.h"
 #include "../IndexingSettings.h"
 

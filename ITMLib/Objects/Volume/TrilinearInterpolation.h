@@ -18,12 +18,11 @@
 //TODO: Clean out unused versions -Greg (GitHub: Algomorph)
 
 #include <cfloat>
-#include "../../Utils/CPPPrintHelpers.h"
-#include "../../Utils/CPrintHelpers.h"
-#include "../../Utils/VoxelFlags.h"
+#include "../../Utils/Logging/ConsolePrintColors.h"
+#include "../../Utils/Enums/VoxelFlags.h"
 #include "RepresentationAccess.h"
 
-
+namespace ITMLib {
 template<typename TVoxel, typename TCache, typename TIndexData>
 _CPU_AND_GPU_CODE_
 inline float ProcessTrilinearNeighbor(const CONSTPTR(TVoxel)* voxelData,
@@ -112,7 +111,7 @@ inline float _DEBUG_InterpolateTrilinearly_StruckKnown(const CONSTPTR(TVoxel)* v
 
 	if (verbose) {
 		printf("%s*** Printing interpolation data for point (%f, %f, %f) ***%s)\nTruncated position: (%d, %d, %d).\n",
-		       c_bright_cyan, point.x, point.y, point.z, c_reset, pos.x, pos.y, pos.z);
+		       bright_cyan, point.x, point.y, point.z, reset, pos.x, pos.y, pos.z);
 	}
 
 	struckKnownVoxels = false;
@@ -1371,3 +1370,5 @@ inline float InterpolateTrilinearly_Alternative(const CONSTPTR(TVoxel)* voxelDat
 //	}
 	return sdf;
 }
+
+} // namespace ITMLib

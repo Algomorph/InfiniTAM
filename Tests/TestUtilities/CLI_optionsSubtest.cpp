@@ -18,6 +18,7 @@
 
 // local
 #include "../../ITMLib/Utils/Configuration/Configuration.h"
+#include "../../ITMLib/Utils/Configuration/AutomaticRunSettings.h"
 
 
 namespace po = boost::program_options;

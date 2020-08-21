@@ -17,7 +17,7 @@
 
 #include "../../../ORUtils/MemoryDeviceType.h"
 #include "../../Objects/Volume/VoxelVolume.h"
-#include "../../Utils/WarpType.h"
+#include "../../Utils/Enums/WarpType.h"
 
 namespace ITMLib{
 template<typename TVoxel, typename TWarp, typename TIndex>

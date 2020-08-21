@@ -16,7 +16,7 @@
 #pragma once
 
 #include "../../../../ORUtils/MemoryDeviceType.h"
-#include "../../../Utils/ExecutionMode.h"
+#include "../../../Utils/Enums/ExecutionMode.h"
 
 namespace ITMLib {
 namespace internal {

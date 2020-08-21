@@ -16,7 +16,7 @@
 #pragma once
 
 #include "../../../ORUtils/PlatformIndependence.h"
-#include "../VoxelFlags.h"
+#include "../Enums/VoxelFlags.h"
 #include "../Math.h"
 #include "../Geometry/SpatialIndexConversions.h"
 

@@ -24,11 +24,12 @@
 #include "../../ITMLib/Utils/Configuration/Configuration.h"
 #include "../../ITMLib/Utils/Geometry/CardinalAxesAndPlanes.h"
 #include "../../ITMLib/Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
+#include "../../ITMLib/Engines/Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
 #include "../../ITMLib/Engines/Telemetry/VolumeSequenceRecorder.h"
 #include "../../ITMLib/Engines/Analytics/AnalyticsEngine.h"
 #include "../../ITMLib/Engines/ViewBuilding/Interface/ViewBuilder.h"
 #include "../../ITMLib/Engines/ViewBuilding/ViewBuilderFactory.h"
-#include "../../ITMLib/Utils/Configuration/TelemetrySettings.h"
+#include "../../ITMLib/Engines/Telemetry/TelemetrySettings.h"
 #include "../../ITMLib/Utils/Quaternions/Quaternion.h"
 #include "../../ITMLib/Utils/Configuration/AutomaticRunSettings.h"
 #include "../../ITMLib/Engines/Main/MainEngineSettings.h"
@@ -78,6 +79,9 @@ template void GenerateSimpleSurfaceTestVolume<MEMORYDEVICE_CPU, TSDFVoxel, Voxel
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume);
 template void GenerateSimpleSurfaceTestVolume<MEMORYDEVICE_CPU, TSDFVoxel, PlainVoxelArray>(
 		VoxelVolume<TSDFVoxel, PlainVoxelArray>* volume);
+template void GenerateRandomDepthWeightSubVolume<MEMORYDEVICE_CPU, TSDFVoxel, VoxelBlockHash>(
+		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume, const Extent3Di& bounds, const Extent2Di&
+weight_range);
 
 template void SimulateVoxelAlteration<TSDFVoxel>(TSDFVoxel& voxel, float newSdfValue);
 template void SimulateRandomVoxelAlteration<TSDFVoxel>(TSDFVoxel& voxel);
@@ -393,9 +397,19 @@ configuration::Configuration GenerateChangedUpConfiguration(){
 							VoxelBlockHashParameters(0x20000, 0x20000)
 					)
 			),
-			SlavchevaSurfaceTracker::Parameters(0.11f, 0.09f, 2.0f, 0.3f, 0.1f, 1e-6f),
-			SlavchevaSurfaceTracker::Switches(false, true, false, true, false),
-			LoggingSettings(VERBOSITY_WARNING, true, false, true, true, true, true),
+			LoggingSettings(
+					VERBOSITY_WARNING,
+					true,
+					false,
+					true,
+					true,
+					true,
+					true,
+					true,
+					true,
+					true,
+					true,
+					true),
 			Paths(GENERATED_TEST_DATA_PREFIX "TestData/output",
 			      STATIC_TEST_DATA_PREFIX "TestData/calibration/snoopy_calib.txt",
 			      "", "", "",
@@ -403,7 +417,6 @@ configuration::Configuration GenerateChangedUpConfiguration(){
 			      STATIC_TEST_DATA_PREFIX "TestData/frames/frame_depth_%%06i.png",
 			      STATIC_TEST_DATA_PREFIX "TestData/frames/frame_mask_%%06i.png",
 			      ""),
-			NonRigidTrackingParameters(ITMLib::TRACKER_SLAVCHEVA_DIAGNOSTIC, 300, 0.0002f, 0.4f),
 			true,
 			MEMORYDEVICE_CPU,
 			true,
@@ -414,31 +427,31 @@ configuration::Configuration GenerateChangedUpConfiguration(){
 			"type=rgb,levels=rrbb"
 	);
 	changed_up_configuration.source_tree = changed_up_configuration.ToPTree();
+
 	TelemetrySettings changed_up_telemetry_settings(
 			true,
 			true,
 			true,
 			true,
 			true,
-			PLANE_XY,
-			true,
-			4,
-			true,
-			true,
-			true,
-			true,
 			true);
-
 	MainEngineSettings changed_up_main_engine_settings(true, LIBMODE_BASIC, INDEX_ARRAY, false);
 	IndexingSettings changed_up_indexing_settings(DIAGNOSTIC);
 	RenderingSettings changed_up_rendering_settings(true);
 	AutomaticRunSettings changed_up_automatic_run_settings(50, 16, true, true, true, true);
+	LevelSetEvolutionParameters changed_up_level_set_evolution_parameters(
+		ExecutionMode::DIAGNOSTIC,
+		LevelSetEvolutionWeights(0.11f, 0.09f, 2.0f, 0.3f, 0.1f, 1e-6f, 0.4f),
+		LevelSetEvolutionSwitches(false, true, false, true, false),
+		LevelSetEvolutionTerminationConditions(300, 0.0002f)
+	);
 
 	AddDeferrableToSourceTree(changed_up_configuration, changed_up_main_engine_settings);
 	AddDeferrableToSourceTree(changed_up_configuration, changed_up_telemetry_settings);
 	AddDeferrableToSourceTree(changed_up_configuration, changed_up_indexing_settings);
 	AddDeferrableToSourceTree(changed_up_configuration, changed_up_rendering_settings);
 	AddDeferrableToSourceTree(changed_up_configuration, changed_up_automatic_run_settings);
+	AddDeferrableToSourceTree(changed_up_configuration, changed_up_level_set_evolution_parameters);
 	return changed_up_configuration;
 }
 
@@ -496,5 +509,8 @@ std::vector<ORUtils::SE3Pose> GenerateCameraTrajectoryAroundPoint(const Vector3f
 	}
 	return poses;
 }
+
+
+
 
 } // namespace test_utilities

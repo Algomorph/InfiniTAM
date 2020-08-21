@@ -86,7 +86,7 @@ Vector3f computeDataTerm(ComponentEnergies& energies, float liveSdf, float canon
 	                                            liveCache);
 
 	float localDataEnergy = computeDataEnergy(weight, sdfDifferenceBetweenLiveAndCanonical);
-	ATOMIC_ADD(energies.totalDataEnergy, localDataEnergy);
+	ATOMIC_ADD(energies.total_data_energy, localDataEnergy);
 	return dataTermGradient;
 }
 
@@ -104,9 +104,9 @@ computeDataTerm(ComponentEnergies& energies, AdditionalGradientAggregates& aggre
 	                                            liveCache);
 
 	float localDataEnergy = computeDataEnergy(weight, sdfDifferenceBetweenLiveAndCanonical);
-	ATOMIC_ADD(energies.totalDataEnergy, localDataEnergy);
-	ATOMIC_ADD(aggregates.dataVoxelCount, 1u);
-	ATOMIC_ADD(aggregates.cumulativeSdfDiff, std::abs(sdfDifferenceBetweenLiveAndCanonical));
+	ATOMIC_ADD(energies.total_data_energy, localDataEnergy);
+	ATOMIC_ADD(aggregates.data_voxel_count, 1u);
+	ATOMIC_ADD(aggregates.cumulative_sdf_diff, std::abs(sdfDifferenceBetweenLiveAndCanonical));
 	return dataTermGradient;
 }
 
@@ -122,9 +122,9 @@ computeDataTerm(ComponentEnergies& energies, AdditionalGradientAggregates& aggre
 	                                            liveCache);
 
 	float localDataEnergy = computeDataEnergy(weight, sdfDifferenceBetweenLiveAndCanonical);
-	ATOMIC_ADD(energies.totalDataEnergy, localDataEnergy);
-	ATOMIC_ADD(aggregates.dataVoxelCount, 1u);
-	ATOMIC_ADD(aggregates.cumulativeSdfDiff, std::abs(sdfDifferenceBetweenLiveAndCanonical));
+	ATOMIC_ADD(energies.total_data_energy, localDataEnergy);
+	ATOMIC_ADD(aggregates.data_voxel_count, 1u);
+	ATOMIC_ADD(aggregates.cumulative_sdf_diff, std::abs(sdfDifferenceBetweenLiveAndCanonical));
 	return dataTermGradient;
 }
 

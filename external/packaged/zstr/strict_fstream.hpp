@@ -39,8 +39,9 @@ static std::string strerror()
     std::string tmp(p, std::strlen(p));
     std::swap(buff, tmp);
 #endif
-    buff.resize(buff.find('\0'));
-    return buff;
+    // Basic fix of zstring bug, see: https://github.com/mateidavid/zstr/issues/20
+    //buff.resize(buff.find('\0'));
+    return std::string(buff.c_str());
 }
 
 /// Exception class thrown by failed operations.

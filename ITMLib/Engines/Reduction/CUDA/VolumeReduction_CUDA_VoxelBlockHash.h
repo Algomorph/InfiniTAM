@@ -39,9 +39,12 @@ public:
 	 * TRetrieveSingleStaticFunctor is used to retrieve initial values from individual voxels.
 	 * TReduceBlockLevelStaticFunctor is used to reduce the result on a block level (until there is 1 result per block).
 	 * TReduceResultLevelStaticFunctor is used to further reduce the block level results until there is only a single,
+	 * aggregate result of the whole function.
+	 *
 	 * \tparam TOutput type of the output value, e.g. float when computing minimum of some voxel float field
 	 * \tparam TRetrieveSingleStaticFunctor a function object with a static function which accepts a single TVoxel as an argument and returns a TOutput value based on this TVoxel.
 	 * \tparam TReduceBlockLevelStaticFunctor a function object with a static function which accepts two ReductionResult<TOutput> objects and returns a single ReductionResult<TOutput> object
+	 *
 	 * \param position the position of the voxel based on the indices produced by TReduceBlockLevelStaticFunctor when comparing each ReductionResult pair.
 	 * \param volume the volume to run the reduction over
 	 * \param ignored_value this is a sample value-index-hash triplet that will be ignored / won't skew result of the operation when issued
@@ -74,11 +77,13 @@ public:
 	 * TReduceBlockLevelStaticFunctor is used to reduce the result on a block level (until there is 1 result per block).
 	 * TReduceResultLevelStaticFunctor is used to further reduce the block level results until there is only a single,
 	 * aggregate result of the whole function.
+	 *
 	 * \tparam TOutput type of the output value, e.g. float when computing minimum of some voxel float field
 	 * \tparam TRetrieveSingleDynamicFunctor a function object with a retrieve public member function which accepts a
 	 *  single TVoxel as an argument and returns a TOutput value based on this TVoxel.
 	 * \tparam TReduceBlockLevelStaticFunctor a function object with a static function which accepts two ReductionResult<TOutput> objects and returns a single ReductionResult<TOutput> object
 	 * \tparam TReduceResultLevelStaticFunctor a function object with a static function which accepts two ReductionResult<TOutput> objects and returns a single ReductionResult<TOutput> object
+	 *
 	 * \param position the position of the voxel based on the indices produced by TReduceBlockLevelStaticFunctor when comparing each ReductionResult pair.
 	 * \param volume the volume to run the reduction over
 	 * \param retrieve_functor functor object to retrieve initial TOutput value from individual voxels
@@ -127,11 +132,11 @@ private:
 
 		const int half_block_voxel_count = (VOXEL_BLOCK_SIZE3 / 2);
 
-		auto getNormalizedCount = [](int count) {
+		auto get_normalized_count = [](int count) {
 			return ceil_of_integer_quotient(count, VOXEL_BLOCK_SIZE3) * VOXEL_BLOCK_SIZE3;
 		};
 
-		const int normalized_entry_count = getNormalizedCount(utilized_entry_count);
+		const int normalized_entry_count = get_normalized_count(utilized_entry_count);
 		int tail_length = normalized_entry_count - utilized_entry_count;
 
 		ORUtils::MemoryBlock<ReductionResult<TOutput, VoxelBlockHash>> result_buffer1(normalized_entry_count,
@@ -160,7 +165,7 @@ private:
 
 
 		ORUtils::MemoryBlock<ReductionResult<TOutput, VoxelBlockHash>> result_buffer2(
-				getNormalizedCount(normalized_entry_count / half_block_voxel_count),MEMORYDEVICE_CUDA);
+				get_normalized_count(normalized_entry_count / half_block_voxel_count), MEMORYDEVICE_CUDA);
 		/* input & output are swapped in the beginning of the loop code as opposed to the end,
 		 so that output_buffer points to the final buffer after the loop finishes*/
 		ORUtils::MemoryBlock<ReductionResult<TOutput, VoxelBlockHash>>* input_buffer = &result_buffer2;
@@ -169,7 +174,7 @@ private:
 		while (output_count > 1) {
 			std::swap(input_buffer, output_buffer);
 			output_count = normalized_output_count / VOXEL_BLOCK_SIZE3;
-			normalized_output_count = getNormalizedCount(output_count);
+			normalized_output_count = get_normalized_count(output_count);
 			tail_length = normalized_output_count - output_count;
 			if(tail_length > 0) {
 				cuda_tail_grid_size.x = ceil_of_integer_quotient(tail_length, VOXEL_BLOCK_SIZE3);

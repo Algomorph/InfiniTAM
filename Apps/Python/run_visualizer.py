@@ -14,7 +14,7 @@ PROGRAM_EXIT_FAILURE = -1
 def main():
     parser = argparse.ArgumentParser("App for visualizing block allocation and generated mesh alignment.")
     parser.add_argument("--output", "-o", type=str, help="Path to InfiniTAM output_folder",
-                        default="/mnt/Data/Reconstruction/experiment_output/2020-07-10/snoopy_recording_thresholded")
+                        default="/mnt/Data/Reconstruction/experiment_output/2020-08-13/recording_snoopy")
     parser.add_argument("--initial_frame", "-i", type=int, help="Index of the first frame to process",
                         default=16)
     args = parser.parse_args()

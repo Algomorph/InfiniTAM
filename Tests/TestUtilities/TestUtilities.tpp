@@ -42,6 +42,18 @@ void GenerateRandomDepthWeightSubVolume(VoxelVolume<TVoxel, TIndex>* volume, con
 	VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseUtilizedWithPosition(volume, functor);
 }
 
+//__DEBUG
+template<MemoryDeviceType TMemoryDeviceType, typename TVoxel, typename TIndex>
+void FindAllVoxelsNotInDepthWeightRange(VoxelVolume<TVoxel, TIndex>* volume, const Extent2Di& weight_range){
+	DepthOutsideRangeFinder<TVoxel, TMemoryDeviceType> functor(weight_range);
+	VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseUtilizedWithPosition(volume, functor);
+}
+template<MemoryDeviceType TMemoryDeviceType, typename TVoxel, typename TIndex>
+void FindAllVoxelsNotInDepthWeightRange(VoxelVolume<TVoxel, TIndex>* volume, const Extent3Di& bounds, const Extent2Di& weight_range){
+	DepthOutsideRangeInExtentFinder<TVoxel, TMemoryDeviceType> functor(weight_range, bounds);
+	VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseUtilizedWithPosition(volume, functor);
+}
+
 
 template<MemoryDeviceType TMemoryDeviceType, class TVoxel, class TIndex>
 void GenerateSimpleSurfaceTestVolume(VoxelVolume<TVoxel, TIndex>* volume) {
@@ -183,12 +195,12 @@ void SimulateRandomVoxelAlteration(TVoxel& voxel) {
 //};
 
 template<typename TVoxel, typename TIndex>
-void LoadVolume(VoxelVolume<TVoxel, TIndex>** volume, const std::string& path, MemoryDeviceType memoryDeviceType,
-                typename TIndex::InitializationParameters initializationParameters,
-                configuration::SwappingMode swappingMode) {
+void LoadVolume(VoxelVolume<TVoxel, TIndex>** volume, const std::string& path, MemoryDeviceType memory_device_type,
+                typename TIndex::InitializationParameters initialization_parameters,
+                configuration::SwappingMode swapping_mode) {
 	configuration::Configuration& settings = configuration::Get();
-	(*volume) = new VoxelVolume<TVoxel, TIndex>(settings.general_voxel_volume_parameters, swappingMode,
-	                                            memoryDeviceType, initializationParameters);
+	(*volume) = new VoxelVolume<TVoxel, TIndex>(settings.general_voxel_volume_parameters, swapping_mode,
+	                                            memory_device_type, initialization_parameters);
 	PrepareVoxelVolumeForLoading(*volume);
 	(*volume)->LoadFromDisk(path);
 }

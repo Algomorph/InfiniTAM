@@ -33,7 +33,7 @@
 #include "../Traversal/Interface/HashTableTraversal.h"
 #include "../Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
 #include "../Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
-#include "../../Utils/WarpType.h"
+#include "../../Utils/Enums/WarpType.h"
 #include "../../Utils/Analytics/Statistics.h"
 #include "../../Utils/Collections/MemoryBlock_StdContainer_Convertions.h"
 #include "../../Utils/Configuration/Configuration.h"
@@ -422,7 +422,7 @@ struct CountVoxelsWithSpecificFlagsFunctor<false, TVoxel, TIndex, TMemoryDeviceT
 //endregion
 //region ================================== COUNT ALTERED VOXELS =======================================================
 
-template<typename TVoxel>
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
 struct CountAlteredVoxelsFunctor {
 	CountAlteredVoxelsFunctor() {
 		INITIALIZE_ATOMIC(unsigned int, count, 0u);
@@ -445,6 +445,95 @@ struct CountAlteredVoxelsFunctor {
 
 	DECLARE_ATOMIC(unsigned int, count);
 };
+
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, bool THasWarpUpdate>
+struct CountAlteredGradientsFunctor;
+
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
+struct CountAlteredGradientsFunctor<TVoxel, TMemoryDeviceType, true>{
+	CountAlteredGradientsFunctor() {
+		INITIALIZE_ATOMIC(unsigned int, count, 0u);
+	};
+
+	~CountAlteredGradientsFunctor() {
+		CLEAN_UP_ATOMIC(count);
+	}
+
+	_DEVICE_WHEN_AVAILABLE_
+	void operator()(const TVoxel& voxel) {
+		if (voxel.gradient0 != Vector3f(0.0f)) {
+			ATOMIC_ADD(count, 1u);
+		}
+	}
+
+	unsigned int GetCount() {
+		return GET_ATOMIC_VALUE_CPU(count);
+	}
+
+	DECLARE_ATOMIC(unsigned int, count);
+};
+
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
+struct CountAlteredGradientsFunctor<TVoxel, TMemoryDeviceType, false>{
+	CountAlteredGradientsFunctor() {
+		DIEWITHEXCEPTION_REPORTLOCATION("Trying to count altered gradients on voxel type that has no warp updates (and, hence, no gradients). Aborting.");
+	};
+	~CountAlteredGradientsFunctor() {
+
+	}
+	_DEVICE_WHEN_AVAILABLE_
+	void operator()(const TVoxel& voxel) {
+	}
+	unsigned int GetCount() {
+		return 0;
+	}
+};
+
+
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, bool THasWarpUpdate>
+struct CountAlteredWarpUpdatesFunctor;
+
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
+struct CountAlteredWarpUpdatesFunctor<TVoxel, TMemoryDeviceType, true>{
+	CountAlteredWarpUpdatesFunctor() {
+		INITIALIZE_ATOMIC(unsigned int, count, 0u);
+	};
+
+	~CountAlteredWarpUpdatesFunctor() {
+		CLEAN_UP_ATOMIC(count);
+	}
+
+	_DEVICE_WHEN_AVAILABLE_
+	void operator()(const TVoxel& voxel) {
+		if (voxel.warp_update != Vector3f(0.0f)) {
+			ATOMIC_ADD(count, 1u);
+		}
+	}
+
+	unsigned int GetCount() {
+		return GET_ATOMIC_VALUE_CPU(count);
+	}
+
+	DECLARE_ATOMIC(unsigned int, count);
+};
+
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
+struct CountAlteredWarpUpdatesFunctor<TVoxel, TMemoryDeviceType, false>{
+	CountAlteredWarpUpdatesFunctor() {
+		DIEWITHEXCEPTION_REPORTLOCATION("Trying to count altered warp updates on voxel type that has no warp updates. Aborting.");
+	};
+	~CountAlteredWarpUpdatesFunctor() {
+
+	}
+	_DEVICE_WHEN_AVAILABLE_
+	void operator()(const TVoxel& voxel) {
+	}
+	unsigned int GetCount() {
+		return 0;
+	}
+};
+
+
 //endregion
 
 //endregion

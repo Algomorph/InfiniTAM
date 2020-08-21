@@ -61,7 +61,7 @@ namespace snoopy = snoopy_test_utilities;
 
 //#define GENERATE_TEST_DATA
 BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_DataTermOnly_CPU) {
-	SlavchevaSurfaceTracker::Switches switches(true, false, false, false, false);
+	LevelSetEvolutionSwitches switches(true, false, false, false, false);
 #ifdef GENERATE_TEST_DATA
 	GenericWarpTest<MEMORYDEVICE_CPU>(switches, 10, SAVE_SUCCESSIVE_ITERATIONS);
 #else
@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_DataTermOnly_CPU) {
 }
 
 BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_DataAndTikhonov_CPU) {
-	SlavchevaSurfaceTracker::Switches switches(true, false, true, false, false);
+	LevelSetEvolutionSwitches switches(true, false, true, false, false);
 #ifdef GENERATE_TEST_DATA
 	GenericWarpTest<MEMORYDEVICE_CPU>(switches, 5, SAVE_SUCCESSIVE_ITERATIONS);
 #else
@@ -79,65 +79,65 @@ BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_DataAndTikhonov_CPU) {
 }
 
 BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_DataAndTikhonovAndSobolevSmoothing_CPU) {
-	SlavchevaSurfaceTracker::Switches switches(true, false, true, false, true);
+	LevelSetEvolutionSwitches switches(true, false, true, false, true);
 #ifdef GENERATE_TEST_DATA
 	GenericWarpTest<MEMORYDEVICE_CPU>(switches, 5, SAVE_SUCCESSIVE_ITERATIONS);
 #else
-	GenericWarpTest<MEMORYDEVICE_CPU>(switches, 5, TEST_SUCCESSIVE_ITERATIONS, 1e-7);
+	GenericWarpTest<MEMORYDEVICE_CPU>(switches, 5, TEST_SUCCESSIVE_ITERATIONS, 1e-5);
 #endif
 }
 
 BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_DataAndTikhonovAndSobolevSmoothing_Fusion_CPU) {
 #ifdef GENERATE_TEST_DATA
-	GenericWarpTest<MEMORYDEVICE_CPU>(SlavchevaSurfaceTracker::Switches(true, false, true, false, true),
+	GenericWarpTest<MEMORYDEVICE_CPU>(LevelSetEvolutionSwitches(true, false, true, false, true),
 									  5,GenericWarpTestMode::SAVE_FINAL_ITERATION_AND_FUSION);
 #else
-	GenericWarpTest<MEMORYDEVICE_CPU>(SlavchevaSurfaceTracker::Switches(true, false, true, false, true),
+	GenericWarpTest<MEMORYDEVICE_CPU>(LevelSetEvolutionSwitches(true, false, true, false, true),
 	                                  5, GenericWarpTestMode::TEST_FINAL_ITERATION_AND_FUSION);
 #endif
 }
 
 #ifndef COMPILE_WITHOUT_CUDA
 BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_DataTermOnly_CUDA) {
-	SlavchevaSurfaceTracker::Switches switches(true, false, false, false, false);
+	LevelSetEvolutionSwitches switches(true, false, false, false, false);
 	GenericWarpTest<MEMORYDEVICE_CUDA>(switches, 10, TEST_SUCCESSIVE_ITERATIONS, 1e-5);
 }
 
 BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_DataAndTikhonov_CUDA) {
-	SlavchevaSurfaceTracker::Switches switches(true, false, true, false, false);
+	LevelSetEvolutionSwitches switches(true, false, true, false, false);
 	GenericWarpTest<MEMORYDEVICE_CUDA>(switches, 5, TEST_SUCCESSIVE_ITERATIONS, 1e-5);
 }
 
 BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_DataAndTikhonovAndSobolevSmoothing_CUDA) {
-	SlavchevaSurfaceTracker::Switches switches(true, false, true, false, true);
+	LevelSetEvolutionSwitches switches(true, false, true, false, true);
 	GenericWarpTest<MEMORYDEVICE_CUDA>(switches, 3, TEST_SUCCESSIVE_ITERATIONS, 1e-5);
 }
 
 BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_DataAndTikhonovAndSobolevSmoothing_Fusion_CUDA) {
-	GenericWarpTest<MEMORYDEVICE_CUDA>(SlavchevaSurfaceTracker::Switches(true, false, true, false, true),
+	GenericWarpTest<MEMORYDEVICE_CUDA>(LevelSetEvolutionSwitches(true, false, true, false, true),
 	                                   5, GenericWarpTestMode::TEST_FINAL_ITERATION_AND_FUSION, 1e-5);
 }
 
 #endif
 
 BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_simple_CPU_data_only) {
-	SlavchevaSurfaceTracker::Switches switches(true, false, false, false, false);
+	LevelSetEvolutionSwitches switches(true, false, false, false, false);
 	Warp_PVA_VBH_simple_subtest<MEMORYDEVICE_CPU>(0, switches);
 }
 
 BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_simple_CPU_data_and_tikhonov) {
-	SlavchevaSurfaceTracker::Switches switches(true, false, true, false, false);
+	LevelSetEvolutionSwitches switches(true, false, true, false, false);
 	Warp_PVA_VBH_simple_subtest<MEMORYDEVICE_CPU>(1, switches);
 }
 
 #ifndef COMPILE_WITHOUT_CUDA
 BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_simple_CUDA_data_only) {
-	SlavchevaSurfaceTracker::Switches switches(true, false, false, false, false);
+	LevelSetEvolutionSwitches switches(true, false, false, false, false);
 	Warp_PVA_VBH_simple_subtest<MEMORYDEVICE_CUDA>(0, switches);
 }
 
 BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_simple_CUDA_data_and_tikhonov) {
-	SlavchevaSurfaceTracker::Switches switches(true, false, true, false, false);
+	LevelSetEvolutionSwitches switches(true, false, true, false, false);
 	Warp_PVA_VBH_simple_subtest<MEMORYDEVICE_CUDA>(0, switches);
 }
 
@@ -261,7 +261,7 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CPU) {
 
 
 
-	SlavchevaSurfaceTracker::Switches switches(true, false, true, false, true);
+	LevelSetEvolutionSwitches switches(true, false, true, false, true);
 
 	SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_OPTIMIZED> motion_tracker(switches);
 	WarpingEngineInterface<TSDFVoxel, WarpVoxel, VoxelBlockHash>* warping_engine =
@@ -382,7 +382,7 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CUDA) {
 	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance().AllocateUsingOtherVolume(&warp_field,
 																									  live_volumes[live_index_to_start_from]);
 
-	SlavchevaSurfaceTracker::Switches switches(true, false, true, false, true);
+	LevelSetEvolutionSwitches switches(true, false, true, false, true);
 
 	SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA, TRACKER_SLAVCHEVA_OPTIMIZED> motion_tracker(switches);
 	WarpingEngineInterface<TSDFVoxel, WarpVoxel, VoxelBlockHash>* warping_engine =

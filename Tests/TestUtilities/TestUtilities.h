@@ -60,6 +60,12 @@ template<MemoryDeviceType TMemoryDeviceType, typename TVoxel, typename TIndex>
 void GenerateRandomDepthWeightSubVolume(VoxelVolume<TVoxel, TIndex>* volume, const Extent3Di& bounds,
                                         const Extent2Di& weight_range);
 
+// for debugging / analysis purposes
+template<MemoryDeviceType TMemoryDeviceType, typename TVoxel, typename TIndex>
+void FindAllVoxelsNotInDepthWeightRange(VoxelVolume<TVoxel, TIndex>* volume, const Extent2Di& weight_range);
+template<MemoryDeviceType TMemoryDeviceType, typename TVoxel, typename TIndex>
+void FindAllVoxelsNotInDepthWeightRange(VoxelVolume<TVoxel, TIndex>* volume, const Extent3Di& bounds, const Extent2Di& weight_range);
+
 
 template<typename TVoxel>
 void SimulateVoxelAlteration(TVoxel& voxel, float newSdfValue);
@@ -102,9 +108,9 @@ typename TIndex::InitializationParameters GetStandard128IndexParameters();
 
 struct Frame16And17Utilities;
 template<typename TVoxel, typename TIndex>
-void LoadVolume(VoxelVolume<TVoxel, TIndex>** volume, const std::string& path, MemoryDeviceType memoryDeviceType,
-                typename TIndex::InitializationParameters initializationParameters = GetStandard512IndexParameters<TIndex>(),
-                configuration::SwappingMode swappingMode = configuration::SWAPPINGMODE_DISABLED);
+void LoadVolume(VoxelVolume<TVoxel, TIndex>** volume, const std::string& path, MemoryDeviceType memory_device_type,
+                typename TIndex::InitializationParameters initialization_parameters = GetStandard512IndexParameters<TIndex>(),
+                configuration::SwappingMode swapping_mode = configuration::SWAPPINGMODE_DISABLED);
 
 void
 UpdateView(View** view, const std::string& depth_path, const std::string& color_path,

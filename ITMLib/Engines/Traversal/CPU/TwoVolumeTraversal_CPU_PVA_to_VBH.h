@@ -25,7 +25,7 @@
 #include "../../../Utils/Analytics/IsAltered.h"
 #include "../../../Objects/Volume/RepresentationAccess.h"
 #include "../../../Utils/Geometry/GeometryBooleanOperations.h"
-#include "../../../Utils/ExecutionMode.h"
+#include "../../../Utils/Enums/ExecutionMode.h"
 
 namespace ITMLib {
 

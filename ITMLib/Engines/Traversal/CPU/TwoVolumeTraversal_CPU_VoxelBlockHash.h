@@ -21,7 +21,7 @@
 #include "../../../Objects/Volume/VoxelBlockHash.h"
 #include "../Shared/VolumeTraversal_Shared.h"
 #include "../../../Utils/Analytics/IsAltered.h"
-#include "../../../Utils/ExecutionMode.h"
+#include "../../../Utils/Enums/ExecutionMode.h"
 
 //TODO: work on reducing DRY violations
 

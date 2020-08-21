@@ -23,6 +23,24 @@
 #endif
 
 namespace ITMLib {
+
+namespace internal{
+template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+static SurfaceTrackerInterface<TVoxel, TWarp, TIndex>* BuildSurfaceTrackerAux(const ExecutionMode& execution_mode){
+	switch (execution_mode){
+		case OPTIMIZED:
+			return new SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, OPTIMIZED>();
+			break;
+		case DIAGNOSTIC:
+			return new SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, DIAGNOSTIC>();
+			break;
+	}
+	return nullptr;
+}
+}// namespace internal
+
+
+
 class SurfaceTrackerFactory {
 public:
 /**
@@ -31,33 +49,23 @@ public:
 * \param settings  settings to use
 */
 	template<typename TVoxel, typename TWarp, typename TIndex>
-	static SurfaceTrackerInterface<TVoxel, TWarp, TIndex>*
-	Build() {
+	static SurfaceTrackerInterface<TVoxel, TWarp, TIndex>* Build() {
 		SurfaceTrackerInterface<TVoxel, TWarp, TIndex>* surface_tracker = nullptr;
 		auto& settings = configuration::Get();
+		auto level_set_evolution_parameters = ExtractDeferrableSerializableStructFromPtreeIfPresent<LevelSetEvolutionParameters>(
+				configuration::Get().source_tree,
+				configuration::Get().origin
+		);
+
 		switch (settings.device_type) {
 			case MEMORYDEVICE_CPU:
-				switch (settings.non_rigid_tracking_parameters.functor_type){
-					case TRACKER_SLAVCHEVA_OPTIMIZED:
-						surface_tracker = new SurfaceTracker<TVoxel, TWarp, TIndex, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_OPTIMIZED>();
-						break;
-					case TRACKER_SLAVCHEVA_DIAGNOSTIC:
-						surface_tracker = new SurfaceTracker<TVoxel, TWarp, TIndex, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_DIAGNOSTIC>();
-						break;
-				}
+				surface_tracker = internal::BuildSurfaceTrackerAux<TVoxel, TWarp, TIndex, MEMORYDEVICE_CPU>(level_set_evolution_parameters.execution_mode);
 				break;
 			case MEMORYDEVICE_CUDA:
 #ifndef COMPILE_WITHOUT_CUDA
-				switch (settings.non_rigid_tracking_parameters.functor_type) {
-					case TRACKER_SLAVCHEVA_OPTIMIZED:
-						surface_tracker = new SurfaceTracker<TVoxel, TWarp, TIndex, MEMORYDEVICE_CUDA, TRACKER_SLAVCHEVA_OPTIMIZED>();
-						break;
-					case TRACKER_SLAVCHEVA_DIAGNOSTIC:
-						surface_tracker = new SurfaceTracker<TVoxel, TWarp, TIndex, MEMORYDEVICE_CUDA, TRACKER_SLAVCHEVA_DIAGNOSTIC>();
-						break;
-				}
+				surface_tracker = internal::BuildSurfaceTrackerAux<TVoxel, TWarp, TIndex, MEMORYDEVICE_CUDA>(level_set_evolution_parameters.execution_mode);
 #else
-				DIEWITHEXCEPTION_REPORTLOCATION("Not built with CUDA but CUDA type requested, aborting!");
+				DIEWITHEXCEPTION_REPORTLOCATION("Libary not built with CUDA, but construction of CUDA-based surface tracker requested, aborting!");
 #endif
 				break;
 			case MEMORYDEVICE_METAL:

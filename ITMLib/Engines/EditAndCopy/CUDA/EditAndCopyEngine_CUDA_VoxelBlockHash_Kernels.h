@@ -16,7 +16,7 @@
 #pragma once
 
 #include "../Shared/EditAndCopyEngine_Shared.h"
-#include "../../../Utils/HashBlockProperties.h"
+#include "../../../Utils/Enums/HashBlockProperties.h"
 #include "../../../Utils/Geometry/GeometryBooleanOperations.h"
 
 using namespace ITMLib;

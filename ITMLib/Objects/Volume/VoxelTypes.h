@@ -3,7 +3,7 @@
 #pragma once
 
 #include "../../Utils/Math.h"
-#include "../../Utils/VoxelFlags.h"
+#include "../../Utils/Enums/VoxelFlags.h"
 
 /** \brief
     Stores the information of a single voxel in the volume

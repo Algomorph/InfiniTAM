@@ -36,8 +36,10 @@
 #include "../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_VoxelBlockHash_CPU.h"
 //(CUDA)
 #ifndef COMPILE_WITHOUT_CUDA
+
 #include "../ITMLib/Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
 #include "../ITMLib/Engines/Indexing/VBH/CUDA/IndexingEngine_VoxelBlockHash_CUDA.h"
+
 #endif
 //(misc)
 #include "../ITMLib/SurfaceTrackers/Interface/SurfaceTracker.h"
@@ -55,10 +57,11 @@
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
 #include "../ITMLib/Engines/Meshing/MeshingEngineFactory.h"
 #include "../ITMLib/Objects/Meshing/Mesh.h"
-#include "../ITMLib/Utils/Configuration/TelemetrySettings.h"
+#include "../ITMLib/Engines/Telemetry/TelemetrySettings.h"
 #include "../ITMLib/Engines/Rendering/RenderingEngineFactory.h"
 #include "../ITMLib/Utils/Configuration/AutomaticRunSettings.h"
 #include "../ITMLib/Engines/Main/MainEngineSettings.h"
+#include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
 
 
 using namespace ITMLib;
@@ -208,7 +211,7 @@ void ConstructStripesTestVolumes() {
 	auto depth_fusion_engine_VBH = DepthFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, VoxelBlockHash>(
 			MEMORYDEVICE_CPU);
 	depth_fusion_engine_VBH->IntegrateDepthImageIntoTsdfVolume(&volume4, view, &tracking_state);
-	std::string path =  STATIC_TEST_DATA_PREFIX "TestData/volumes/VBH/stripes.dat";
+	std::string path = STATIC_TEST_DATA_PREFIX "TestData/volumes/VBH/stripes.dat";
 
 	test_utilities::ConstructGeneratedVolumeSubdirectoriesIfMissing();
 	volume4.SaveToDisk(path);
@@ -221,35 +224,39 @@ void ConstructStripesTestVolumes() {
 template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void GenerateWarpGradientTestData() {
 	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(),
-	                "Generating warp field data from snoopy masked partial volumes 16 & 17 "
-			                << IndexString<TIndex>() << "...");
+	               "Generating warp field data from snoopy masked partial volumes 16 & 17 "
+			               << IndexString<TIndex>() << "...");
 	test_utilities::ConstructGeneratedVolumeSubdirectoriesIfMissing();
-	std::string output_directory = GENERATED_TEST_DATA_PREFIX "TestData/volumes/" + IndexString<TIndex>() + "/";
+	std::string volume_output_directory = GENERATED_TEST_DATA_PREFIX "TestData/volumes/" + IndexString<TIndex>() + "/";
+	test_utilities::ConstructGeneratedArraysDirectoryIfMissing();
+	std::string array_output_directory = GENERATED_TEST_DATA_PREFIX "TestData/arrays/";
+
+	ORUtils::OStreamWrapper warp_stats_file(array_output_directory + "warp_gradient_stats_" + IndexString<TIndex>() + ".dat", false);
 
 	VoxelVolume<TSDFVoxel, TIndex>* canonical_volume;
 	VoxelVolume<TSDFVoxel, TIndex>* live_volume;
-	LoadVolume(&live_volume, output_directory + "snoopy_partial_frame_17.dat", TMemoryDeviceType,
+	LoadVolume(&live_volume, volume_output_directory + "snoopy_partial_frame_17.dat", TMemoryDeviceType,
 	           snoopy::InitializationParameters_Fr16andFr17<TIndex>());
-	LoadVolume(&canonical_volume, output_directory + "snoopy_partial_frame_16.dat", TMemoryDeviceType,
+	LoadVolume(&canonical_volume, volume_output_directory + "snoopy_partial_frame_16.dat", TMemoryDeviceType,
 	           snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 
-	SlavchevaSurfaceTracker::Switches data_only_switches(true, false, false, false, false);
+	LevelSetEvolutionSwitches data_only_switches(true, false, false, false, false);
 	std::string data_only_filename = "warp_field_0_data.dat";
-	SlavchevaSurfaceTracker::Switches data_smoothed_switches(false, false, false, false, true);
+	LevelSetEvolutionSwitches data_smoothed_switches(false, false, false, false, true);
 	std::string data_smoothed_filename = "warp_field_0_smoothed.dat";
 	std::string framewise_warps_filename = "warp_field_0_data_framewise_warps.dat";
-	SlavchevaSurfaceTracker::Switches warp_complete_switches(true, false, true, false, true);
+	LevelSetEvolutionSwitches warp_complete_switches(true, false, true, false, true);
 	std::string warp_complete_filename = "warp_field_0_complete.dat";
 
-	std::vector<std::tuple<std::string, SlavchevaSurfaceTracker::Switches>> configuration_pairs = {
+	std::vector<std::tuple<std::string, LevelSetEvolutionSwitches>> configuration_pairs = {
 			std::make_tuple(std::string("warp_field_1_tikhonov.dat"),
-			                SlavchevaSurfaceTracker::Switches(false, false, true, false, false)),
+			                LevelSetEvolutionSwitches(false, false, true, false, false)),
 			std::make_tuple(std::string("warp_field_1_data_and_tikhonov.dat"),
-			                SlavchevaSurfaceTracker::Switches(true, false, true, false, false)),
+			                LevelSetEvolutionSwitches(true, false, true, false, false)),
 			std::make_tuple(std::string("warp_field_1_data_and_killing.dat"),
-			                SlavchevaSurfaceTracker::Switches(true, false, true, true, false)),
+			                LevelSetEvolutionSwitches(true, false, true, true, false)),
 			std::make_tuple(std::string("warp_field_1_data_and_level_set.dat"),
-			                SlavchevaSurfaceTracker::Switches(true, true, false, false, false))
+			                LevelSetEvolutionSwitches(true, true, false, false, false))
 	};
 
 	VoxelVolume<WarpVoxel, TIndex> warp_field(TMemoryDeviceType,
@@ -258,41 +265,61 @@ void GenerateWarpGradientTestData() {
 	AllocateUsingOtherVolume(&warp_field, live_volume, MEMORYDEVICE_CPU);
 	AllocateUsingOtherVolume(canonical_volume, live_volume, MEMORYDEVICE_CPU);
 
-	SurfaceTracker<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, TRACKER_SLAVCHEVA_DIAGNOSTIC> dataOnlyMotionTracker(
+	SurfaceTracker<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, OPTIMIZED> data_only_motion_tracker(
 			data_only_switches);
 
-	dataOnlyMotionTracker.CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
-	warp_field.SaveToDisk(output_directory + data_only_filename);
+	data_only_motion_tracker.CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
+	warp_field.SaveToDisk(volume_output_directory + data_only_filename);
 
-	SurfaceTracker<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, TRACKER_SLAVCHEVA_DIAGNOSTIC> dataSmoothedMotionTracker(
+	unsigned int altered_gradient_count__data_only = AnalyticsEngine<WarpVoxel, TIndex, TMemoryDeviceType>::Instance().CountAlteredGradients(
+			&warp_field);
+	warp_stats_file.OStream().write(reinterpret_cast<const char*>(&altered_gradient_count__data_only), sizeof(unsigned int));
+
+	SurfaceTracker<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, OPTIMIZED> data_smoothed_motion_tracker(
 			data_smoothed_switches);
-	dataSmoothedMotionTracker.SmoothWarpGradient(&warp_field, canonical_volume, live_volume);
-	warp_field.SaveToDisk(output_directory + data_smoothed_filename);
+	data_smoothed_motion_tracker.SmoothWarpGradient(&warp_field, canonical_volume, live_volume);
+	warp_field.SaveToDisk(volume_output_directory + data_smoothed_filename);
+
+	unsigned int altered_gradient_count__data_smoothed = AnalyticsEngine<WarpVoxel, TIndex, TMemoryDeviceType>::Instance().CountAlteredGradients(
+			&warp_field);
+	warp_stats_file.OStream().write(reinterpret_cast<const char*>(&altered_gradient_count__data_smoothed), sizeof(unsigned int));
 
 	warp_field.Reset();
 	AllocateUsingOtherVolume(&warp_field, live_volume, TMemoryDeviceType);
-	SurfaceTracker<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, TRACKER_SLAVCHEVA_DIAGNOSTIC> completeMotionTracker(
+	SurfaceTracker<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, OPTIMIZED> complete_motion_tracker(
 			warp_complete_switches);
-	completeMotionTracker.CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
-	completeMotionTracker.SmoothWarpGradient(&warp_field, canonical_volume, live_volume);
-	completeMotionTracker.UpdateWarps(&warp_field, canonical_volume, live_volume);
-	warp_field.SaveToDisk(output_directory + warp_complete_filename);
+	complete_motion_tracker.CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
+	complete_motion_tracker.SmoothWarpGradient(&warp_field, canonical_volume, live_volume);
+	complete_motion_tracker.UpdateWarps(&warp_field, canonical_volume, live_volume);
+
+	warp_field.SaveToDisk(volume_output_directory + warp_complete_filename);
+
+	unsigned int altered_gradient_count__complete = AnalyticsEngine<WarpVoxel, TIndex, TMemoryDeviceType>::Instance().CountAlteredGradients(
+			&warp_field);
+	warp_stats_file.OStream().write(reinterpret_cast<const char*>(&altered_gradient_count__complete), sizeof(unsigned int));
 
 	warp_field.Reset();
 	AllocateUsingOtherVolume(&warp_field, live_volume, TMemoryDeviceType);
-	warp_field.LoadFromDisk(output_directory + data_only_filename);
+	warp_field.LoadFromDisk(volume_output_directory + data_only_filename);
 
-	dataOnlyMotionTracker.UpdateWarps(&warp_field, canonical_volume, live_volume);
-	warp_field.SaveToDisk(output_directory + framewise_warps_filename);
+	float average_warp_update_length = data_only_motion_tracker.UpdateWarps(&warp_field, canonical_volume, live_volume);
+	warp_field.SaveToDisk(volume_output_directory + framewise_warps_filename);
+
+	warp_stats_file.OStream().write(reinterpret_cast<const char*>(&average_warp_update_length), sizeof(float));
+	unsigned int altered_warp_update_count__data_only = AnalyticsEngine<WarpVoxel, TIndex, TMemoryDeviceType>::Instance().CountAlteredGradients(
+			&warp_field);
+	warp_stats_file.OStream().write(reinterpret_cast<const char*>(&altered_warp_update_count__data_only), sizeof(unsigned int));
 
 	for (auto& pair : configuration_pairs) {
 		EditAndCopyEngineFactory::Instance<WarpVoxel, TIndex, TMemoryDeviceType>().ResetVolume(&warp_field);
-		warp_field.LoadFromDisk(output_directory + framewise_warps_filename);
+		warp_field.LoadFromDisk(volume_output_directory + framewise_warps_filename);
 		std::string filename = std::get<0>(pair);
-		SurfaceTracker<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, TRACKER_SLAVCHEVA_DIAGNOSTIC> tracker(
+		SurfaceTracker<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, OPTIMIZED> tracker(
 				std::get<1>(pair));
 		tracker.CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
-		warp_field.SaveToDisk(output_directory + filename);
+		warp_field.SaveToDisk(volume_output_directory + filename);
+		unsigned int altered_gradient_count = AnalyticsEngine<WarpVoxel, TIndex, TMemoryDeviceType>::Instance().CountAlteredGradients(&warp_field);
+		warp_stats_file.OStream().write(reinterpret_cast<const char*>(&altered_gradient_count), sizeof(unsigned int));
 	}
 
 	delete canonical_volume;
@@ -301,14 +328,14 @@ void GenerateWarpGradientTestData() {
 
 void GenerateWarpGradient_PVA_to_VBH_TestData() {
 	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(),
-	                "Generating multi-iteration warp field data from snoopy masked partial volumes 16 & 17 (PVA & VBH)... ");
-	SlavchevaSurfaceTracker::Switches switches_data_only(true, false, false, false, false);
+	               "Generating multi-iteration warp field data from snoopy masked partial volumes 16 & 17 (PVA & VBH)... ");
+	LevelSetEvolutionSwitches switches_data_only(true, false, false, false, false);
 	GenericWarpTest<MEMORYDEVICE_CPU>(switches_data_only, 10, SAVE_SUCCESSIVE_ITERATIONS);
-	SlavchevaSurfaceTracker::Switches switches_data_and_tikhonov(true, false, true, false, false);
+	LevelSetEvolutionSwitches switches_data_and_tikhonov(true, false, true, false, false);
 	GenericWarpTest<MEMORYDEVICE_CPU>(switches_data_and_tikhonov, 5, SAVE_SUCCESSIVE_ITERATIONS);
-	SlavchevaSurfaceTracker::Switches switches_data_and_tikhonov_and_sobolev_smoothing(true, false, true, false, true);
+	LevelSetEvolutionSwitches switches_data_and_tikhonov_and_sobolev_smoothing(true, false, true, false, true);
 	GenericWarpTest<MEMORYDEVICE_CPU>(switches_data_and_tikhonov_and_sobolev_smoothing, 5, SAVE_SUCCESSIVE_ITERATIONS);
-	GenericWarpTest<MEMORYDEVICE_CPU>(SlavchevaSurfaceTracker::Switches(true, false, true, false, true),
+	GenericWarpTest<MEMORYDEVICE_CPU>(LevelSetEvolutionSwitches(true, false, true, false, true),
 	                                  5, GenericWarpTestMode::SAVE_FINAL_ITERATION_AND_FUSION);
 }
 
@@ -316,10 +343,10 @@ template<typename TIndex>
 void GenerateFusedVolumeTestData() {
 	const int iteration = 4;
 	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(),
-	                "Generating fused volume data from snoopy masked partial volume 16 & 17 warps ("
-			                << IndexString<TIndex>() << ") ... ");
+	               "Generating fused volume data from snoopy masked partial volume 16 & 17 warps ("
+			               << IndexString<TIndex>() << ") ... ");
 	VoxelVolume<TSDFVoxel, TIndex>* warped_live_volume;
-	SlavchevaSurfaceTracker::Switches data_tikhonov_sobolev_switches(true, false, true, false, true);
+	LevelSetEvolutionSwitches data_tikhonov_sobolev_switches(true, false, true, false, true);
 	LoadVolume(&warped_live_volume,
 	           GetWarpedLivePath<TIndex>(SwitchesToPrefix(data_tikhonov_sobolev_switches), iteration),
 	           MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
@@ -345,8 +372,8 @@ void GenerateFusedVolumeTestData() {
 template<typename TIndex>
 void GenerateWarpedVolumeTestData() {
 	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(),
-	                "Generating warped volume data from snoopy masked partial volume 16 & 17 warps ("
-			                << IndexString<TIndex>() << ") ... ");
+	               "Generating warped volume data from snoopy masked partial volume 16 & 17 warps ("
+			               << IndexString<TIndex>() << ") ... ");
 	VoxelVolume<WarpVoxel, TIndex>* warps;
 	LoadVolume(&warps,
 	           GENERATED_TEST_DATA_PREFIX "TestData/volumes/" + IndexString<TIndex>() + "/warp_field_0_complete.dat",
@@ -392,18 +419,15 @@ configuration::Configuration GenerateDefaultSnoopyConfiguration() {
 							VoxelBlockHashParameters(0x20000, 0x20000)
 					)
 			),
-			SlavchevaSurfaceTracker::Parameters(
-					0.2f,
-					0.1f,
-					2.0f,
-					0.2f,
-					0.2f,
-					1e-5f),
-			SlavchevaSurfaceTracker::Switches(true, false, true, false, true),
 			LoggingSettings(VERBOSITY_WARNING,
 			                true,
 			                true,
 			                true,
+			                false,
+			                false,
+			                false,
+			                true,
+			                false,
 			                false,
 			                false,
 			                false),
@@ -414,11 +438,6 @@ configuration::Configuration GenerateDefaultSnoopyConfiguration() {
 			      "<CONFIGURATION_DIRECTORY>/frames/depth_%06i.png",
 			      "<CONFIGURATION_DIRECTORY>/frames/mask_%06i.png",
 			      ""),
-			NonRigidTrackingParameters(
-					ITMLib::TRACKER_SLAVCHEVA_OPTIMIZED,
-					300,
-					1e-06,
-					0.5f),
 			true,
 			MEMORYDEVICE_CUDA,
 			false,
@@ -434,12 +453,28 @@ configuration::Configuration GenerateDefaultSnoopyConfiguration() {
 	IndexingSettings default_snoopy_indexing_settings;
 	RenderingSettings default_snoopy_rendering_settings;
 	AutomaticRunSettings default_snoopy_automatic_run_settings(716, 16, false, false, false, false);
+	LevelSetEvolutionParameters default_snoopy_level_set_evolution_parameters(
+			ExecutionMode::OPTIMIZED,
+			LevelSetEvolutionWeights(
+					0.2f,
+					0.1f,
+					2.0f,
+					0.2f,
+					0.2f,
+					1e-5f,
+					0.5f),
+			LevelSetEvolutionSwitches(
+					true, false, true, false, true
+			),
+			LevelSetEvolutionTerminationConditions(300, 1e-06)
+	);
 
 	AddDeferrableToSourceTree(default_snoopy_configuration, default_snoopy_main_engine_settings);
 	AddDeferrableToSourceTree(default_snoopy_configuration, default_snoopy_telemetry_settings);
 	AddDeferrableToSourceTree(default_snoopy_configuration, default_snoopy_indexing_settings);
 	AddDeferrableToSourceTree(default_snoopy_configuration, default_snoopy_rendering_settings);
 	AddDeferrableToSourceTree(default_snoopy_configuration, default_snoopy_automatic_run_settings);
+	AddDeferrableToSourceTree(default_snoopy_configuration, default_snoopy_level_set_evolution_parameters);
 	return default_snoopy_configuration;
 }
 
@@ -447,7 +482,7 @@ void GenerateConfigurationTestData() {
 	using namespace configuration;
 	configuration::Configuration changed_up_configuration = GenerateChangedUpConfiguration();
 	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(),
-	                "Generating configuration test data ... ");
+	               "Generating configuration test data ... ");
 	configuration::Configuration default_snoopy_configuration = GenerateDefaultSnoopyConfiguration();
 	test_utilities::ConstructGeneratedConfigurationDirectoryIfMissing();
 	configuration::SaveConfigurationToJSONFile(STATIC_TEST_DATA_PREFIX
@@ -469,7 +504,7 @@ void GenerateConfigurationTestData() {
 template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void GenerateMeshingTestData() {
 	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(),
-	                "Generating meshing test data (" << IndexString<TIndex>() << ") ...");
+	               "Generating meshing test data (" << IndexString<TIndex>() << ") ...");
 	VoxelVolume<TSDFVoxel, TIndex>* canonical_volume;
 	LoadVolume(&canonical_volume, snoopy::PartialVolume16Path<TIndex>(),
 	           TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
@@ -487,7 +522,7 @@ void GenerateMeshingTestData() {
 template<MemoryDeviceType TMemoryDeviceType>
 void GenerateRenderingTestData_VoxelBlockHash() {
 	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(),
-	                "Generating VBH rendering test data ... ");
+	               "Generating VBH rendering test data ... ");
 	test_utilities::ConstructGeneratedArraysDirectoryIfMissing();
 
 	CameraPoseAndRenderingEngineFixture<TMemoryDeviceType> fixture;
@@ -585,7 +620,8 @@ void GenerateRenderingTestData_VoxelBlockHash() {
 			ORUtils::MemoryBlockPersistence::SaveImage(ICP_images_file, *tracking_state->pointCloud->colours);
 		}
 
-		LOG4CPLUS_INFO(log4cplus::Logger::getRoot(), "Generating 'forward-rendering' test data ('forward-rendering' is rendering a new point cloud from a different camera vantage point while reusing previous data as much as possible) ... ");
+		LOG4CPLUS_INFO(log4cplus::Logger::getRoot(),
+		               "Generating 'forward-rendering' test data ('forward-rendering' is rendering a new point cloud from a different camera vantage point while reusing previous data as much as possible) ... ");
 		//forward-render
 		{
 			std::shared_ptr<RenderState> render_state_forward_render = fixture.MakeRenderState();
@@ -612,7 +648,8 @@ void GenerateRenderingTestData_VoxelBlockHash() {
 			ORUtils::MemoryBlockPersistence::SaveImage(forward_render_images_file, *render_state_forward_render->forwardProjection);
 		}
 
-		LOG4CPLUS_INFO(log4cplus::Logger::getRoot(), "Generating test data for render actual images based on raycasting in the TSDF (with various settings)...");
+		LOG4CPLUS_INFO(log4cplus::Logger::getRoot(),
+		               "Generating test data for render actual images based on raycasting in the TSDF (with various settings)...");
 		// render image
 		{
 			std::shared_ptr<RenderState> render_state_render_image = fixture.MakeRenderState();
@@ -657,7 +694,7 @@ void GenerateRenderingTestData_VoxelBlockHash() {
     (SNOOPY_UNMASKED_VOLUMES,    "SNOOPY_UNMASKED_VOLUMES", "snoopy_unmasked_volumes", "unmasked_volumes", "unmasked", "u", "su", "suv"), \
     (MASKED_VOLUMES,             "SNOOPY_MASKED_VOLUMES", "snoopy_masked_volumes", "masked_volumes", "masked", "sm", "smv", "mv"), \
     (PVA_WARP_GRADIENTS,         "PVA_WARP_GRADIENTS", "pva_warp_gradients", "pva_warps", "pw", "pva_w", "pva_wg"), \
-    (VBH_WARP_GRADIENTS,         "VBH_WARP_GRADIENTS", "vbh_warp_gradients", "vbh_warps", "vw", "vbh_w", "pva_wg"), \
+    (VBH_WARP_GRADIENTS,         "VBH_WARP_GRADIENTS", "vbh_warp_gradients", "vbh_warps", "vw", "vbh_w", "vbh_wg"), \
     (COMPARATIVE_WARP_GRADIENTS, "COMPARATIVE_WARP_GRADIENTS", "comparative_warp_gradients", "warps", "comparative_warps", "w", "cw"), \
     (PVA_WARPED_VOLUMES,         "PVA_WARPED_VOLUMES", "pva_warped_volumes", "pva_wv"), \
     (VBH_WARPED_VOLUMES,         "VBH_WARPED_VOLUMES", "vbh_warped_volumes", "vbh_wv"), \
@@ -698,7 +735,7 @@ int main(int argc, char* argv[]) {
 	} else {
 		std::string generated_data_type_argument = argv[1];
 		if (generated_data_type_argument == "h" || generated_data_type_argument == "help" || generated_data_type_argument == "-h" ||
-		    generated_data_type_argument == "-help") {
+		    generated_data_type_argument == "-help" || generated_data_type_argument == "--help") {
 			std::cout << "Generates derived data used for testing the library. " << std::endl;
 			std::cout << "Usage:" << std::endl << "generate_derived_test_data " << std::endl << "(runs all modes)  -- OR -- "
 			          << std::endl << "generate_derived_test_data <mode>" << std::endl <<

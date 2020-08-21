@@ -27,48 +27,48 @@ template std::string GetFusedPath<VoxelBlockHash>(std::string prefix, int iterat
 
 template
 void
-GenericWarpConsistencySubtest<PlainVoxelArray, MEMORYDEVICE_CPU>(const SlavchevaSurfaceTracker::Switches& switches,
+GenericWarpConsistencySubtest<PlainVoxelArray, MEMORYDEVICE_CPU>(const LevelSetEvolutionSwitches& switches,
                                                                  int iteration_limit,
                                                                  GenericWarpTestMode mode,
                                                                  float absolute_tolerance);
 template
 void
-GenericWarpConsistencySubtest<VoxelBlockHash, MEMORYDEVICE_CPU>(const SlavchevaSurfaceTracker::Switches& switches,
+GenericWarpConsistencySubtest<VoxelBlockHash, MEMORYDEVICE_CPU>(const LevelSetEvolutionSwitches& switches,
                                                                 int iteration_limit,
                                                                 GenericWarpTestMode mode,
                                                                 float absolute_tolerance);
 template
-void Warp_PVA_VBH_simple_subtest<MEMORYDEVICE_CPU>(int iteration, SlavchevaSurfaceTracker::Switches trackerSwitches);
+void Warp_PVA_VBH_simple_subtest<MEMORYDEVICE_CPU>(int iteration, LevelSetEvolutionSwitches trackerSwitches);
 
 template
-void GenericWarpTest<MEMORYDEVICE_CPU>(const SlavchevaSurfaceTracker::Switches& switches, int iteration_limit,
+void GenericWarpTest<MEMORYDEVICE_CPU>(const LevelSetEvolutionSwitches& switches, int iteration_limit,
                                        GenericWarpTestMode mode, float absolute_tolerance);
 
 #ifndef COMPILE_WITHOUT_CUDA
 template
 void
-GenericWarpConsistencySubtest<PlainVoxelArray, MEMORYDEVICE_CUDA>(const SlavchevaSurfaceTracker::Switches& switches,
+GenericWarpConsistencySubtest<PlainVoxelArray, MEMORYDEVICE_CUDA>(const LevelSetEvolutionSwitches& switches,
                                                                   int iteration_limit,
                                                                   GenericWarpTestMode mode,
                                                                   float absolute_tolerance);
 
 template
 void
-GenericWarpConsistencySubtest<VoxelBlockHash, MEMORYDEVICE_CUDA>(const SlavchevaSurfaceTracker::Switches& switches,
+GenericWarpConsistencySubtest<VoxelBlockHash, MEMORYDEVICE_CUDA>(const LevelSetEvolutionSwitches& switches,
                                                                  int iteration_limit,
                                                                  GenericWarpTestMode mode,
                                                                  float absolute_tolerance);
 
 template
-void Warp_PVA_VBH_simple_subtest<MEMORYDEVICE_CUDA>(int iteration, SlavchevaSurfaceTracker::Switches trackerSwitches);
+void Warp_PVA_VBH_simple_subtest<MEMORYDEVICE_CUDA>(int iteration, LevelSetEvolutionSwitches trackerSwitches);
 
 template
-void GenericWarpTest<MEMORYDEVICE_CUDA>(const SlavchevaSurfaceTracker::Switches& switches, int iteration_limit,
+void GenericWarpTest<MEMORYDEVICE_CUDA>(const LevelSetEvolutionSwitches& switches, int iteration_limit,
                                         GenericWarpTestMode mode, float absolute_tolerance);
 #endif
 
 
-unsigned int SwitchesToIntCode(const SlavchevaSurfaceTracker::Switches& switches) {
+unsigned int SwitchesToIntCode(const LevelSetEvolutionSwitches& switches) {
 	unsigned int code = 0;
 	code |= static_cast<unsigned int>(switches.enable_data_term) << 0u;
 	code |= static_cast<unsigned int>(switches.enable_level_set_term) << 1u;
@@ -78,15 +78,15 @@ unsigned int SwitchesToIntCode(const SlavchevaSurfaceTracker::Switches& switches
 	return code;
 }
 
-std::string SwitchesToPrefix(const SlavchevaSurfaceTracker::Switches& switches) {
+std::string SwitchesToPrefix(const LevelSetEvolutionSwitches& switches) {
 	static std::unordered_map<unsigned int, std::string> prefix_by_switches_map = {
-			{SwitchesToIntCode(SlavchevaSurfaceTracker::Switches(true, false, false, false, false)),
+			{SwitchesToIntCode(LevelSetEvolutionSwitches(true, false, false, false, false)),
 					                                                         "data_only"},
-			{SwitchesToIntCode(SlavchevaSurfaceTracker::Switches(false, false, true, false, false)),
+			{SwitchesToIntCode(LevelSetEvolutionSwitches(false, false, true, false, false)),
 					                                                         "tikhonov_only"},
-			{SwitchesToIntCode(SlavchevaSurfaceTracker::Switches(true, false, true, false,
+			{SwitchesToIntCode(LevelSetEvolutionSwitches(true, false, true, false,
 			                                                     false)), "data_tikhonov"},
-			{SwitchesToIntCode(SlavchevaSurfaceTracker::Switches(true, false, true, false, true)),
+			{SwitchesToIntCode(LevelSetEvolutionSwitches(true, false, true, false, true)),
 					                                                         "data_tikhonov_sobolev"}
 	};
 	return prefix_by_switches_map[SwitchesToIntCode(switches)];

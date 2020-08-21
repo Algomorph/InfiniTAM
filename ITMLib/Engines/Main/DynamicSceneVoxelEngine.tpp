@@ -311,69 +311,45 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(UChar4Image* rgb_im
 	telemetry::SetGlobalFrameIndex(FrameIndex());
 	if ((last_tracking_result == CameraTrackingState::TRACKING_GOOD || !tracking_initialised) &&
 	    (fusion_active) && (relocalization_count == 0)) {
-		if (frames_processed > 0) {
-			camera_tracking_controller->Prepare(tracking_state, canonical_volume, view, rendering_engine, canonical_render_state);
-			LOG4CPLUS_PER_FRAME(logging::get_logger(), bright_cyan << "Generating raw live TSDF from view..." << reset);
-			benchmarking::start_timer("GenerateRawLiveVolume");
-			live_volumes[0]->Reset();
-			live_volumes[1]->Reset();
-			warp_field->Reset();
 
-			indexing_engine->AllocateNearAndBetweenTwoSurfaces(live_volumes[0], view, tracking_state);
-			AllocateUsingOtherVolume(live_volumes[1], live_volumes[0], this->config.device_type);
-			AllocateUsingOtherVolume(canonical_volume, live_volumes[0], this->config.device_type);
-			AllocateUsingOtherVolume(warp_field, live_volumes[0], this->config.device_type);
-			depth_fusion_engine->IntegrateDepthImageIntoTsdfVolume(live_volumes[0], view, tracking_state);
-			benchmarking::stop_timer("GenerateRawLiveVolume");
+		camera_tracking_controller->Prepare(tracking_state, canonical_volume, view, rendering_engine, canonical_render_state);
+		LOG4CPLUS_PER_FRAME(logging::get_logger(), bright_cyan << "*** Generating raw live TSDF from view... ***" << reset);
+		benchmarking::start_timer("GenerateRawLiveVolume");
+		live_volumes[0]->Reset();
+		live_volumes[1]->Reset();
+		warp_field->Reset();
 
-			//pre-tracking recording
-			LogTSDFVolumeStatistics(live_volumes[0], "[[live TSDF before tracking]]");
-			telemetry_recorder.RecordPreSurfaceTrackingData(*live_volumes[0], tracking_state->pose_d->GetM(), FrameIndex());
+		indexing_engine->AllocateNearAndBetweenTwoSurfaces(live_volumes[0], view, tracking_state);
+		AllocateUsingOtherVolume(live_volumes[1], live_volumes[0], this->config.device_type);
+		AllocateUsingOtherVolume(canonical_volume, live_volumes[0], this->config.device_type);
+		AllocateUsingOtherVolume(warp_field, live_volumes[0], this->config.device_type);
+		depth_fusion_engine->IntegrateDepthImageIntoTsdfVolume(live_volumes[0], view, tracking_state);
+		benchmarking::stop_timer("GenerateRawLiveVolume");
 
-			benchmarking::start_timer("TrackMotion");
-			LOG4CPLUS_PER_FRAME(logging::get_logger(), bright_cyan
-					<< "*** Optimizing warp based on difference between canonical and live SDF. ***" << reset);
-			target_warped_live_volume = surface_tracker->TrackNonRigidMotion(canonical_volume, live_volumes, warp_field);
-			LOG4CPLUS_PER_FRAME(logging::get_logger(),
-			                    bright_cyan << "*** Warping optimization finished for current frame. ***" << reset);
-			benchmarking::stop_timer("TrackMotion");
+		//pre-tracking recording
+		LogTSDFVolumeStatistics(live_volumes[0], "[[live TSDF before tracking]]", this->parameters.indexing_method);
+		telemetry_recorder.RecordPreSurfaceTrackingData(*live_volumes[0], tracking_state->pose_d->GetM(), FrameIndex());
 
-			//post-tracking recording
-			LogTSDFVolumeStatistics(target_warped_live_volume, "[[live TSDF after tracking]]");
-			telemetry_recorder.RecordPostSurfaceTrackingData(*target_warped_live_volume, FrameIndex());
+		benchmarking::start_timer("TrackMotion");
+		LOG4CPLUS_PER_FRAME(logging::get_logger(), bright_cyan << "*** Optimizing warp based on difference between canonical and live SDF. ***" << reset);
+		target_warped_live_volume = surface_tracker->TrackNonRigidMotion(canonical_volume, live_volumes, warp_field);
+		LOG4CPLUS_PER_FRAME(logging::get_logger(), bright_cyan << "*** Warping optimization finished for current frame. ***" << reset);
+		benchmarking::stop_timer("TrackMotion");
 
-			//fuse warped live into canonical
-			benchmarking::start_timer("FuseOneTsdfVolumeIntoAnother");
-			volume_fusion_engine->FuseOneTsdfVolumeIntoAnother(canonical_volume, target_warped_live_volume, frames_processed);
-			benchmarking::stop_timer("FuseOneTsdfVolumeIntoAnother");
-			LogTSDFVolumeStatistics(canonical_volume, "[[canonical TSDF after fusion]]");
+		//post-tracking recording
+		LogTSDFVolumeStatistics(target_warped_live_volume, "[[live TSDF after tracking]]", this->parameters.indexing_method);
+		telemetry_recorder.RecordPostSurfaceTrackingData(*target_warped_live_volume, FrameIndex());
 
-			//post-fusion recording
-			telemetry_recorder.RecordPostFusionData(*canonical_volume, FrameIndex());
-		} else {
-			LOG4CPLUS_PER_FRAME(logging::get_logger(),
-			                    bright_cyan << "Generating raw live frame from view..." << reset);
-			benchmarking::start_timer("GenerateRawLiveVolume");
-			indexing_engine->AllocateNearSurface(live_volumes[0], view, tracking_state);
-			depth_fusion_engine->IntegrateDepthImageIntoTsdfVolume(live_volumes[0], view, tracking_state);
-			benchmarking::stop_timer("GenerateRawLiveVolume");
+		//fuse warped live into canonical
+		benchmarking::start_timer("FuseOneTsdfVolumeIntoAnother");
+		volume_fusion_engine->FuseOneTsdfVolumeIntoAnother(canonical_volume, target_warped_live_volume, frames_processed);
+		benchmarking::stop_timer("FuseOneTsdfVolumeIntoAnother");
+		LogTSDFVolumeStatistics(canonical_volume, "[[canonical TSDF after fusion]]", this->parameters.indexing_method);
 
-			//post-tracking recording
-			telemetry_recorder.RecordPreSurfaceTrackingData(*live_volumes[0], tracking_state->pose_d->GetM(), FrameIndex());
-			telemetry_recorder.RecordPostSurfaceTrackingData(*live_volumes[0], FrameIndex());
+		//post-fusion recording
+		telemetry_recorder.RecordPostFusionData(*canonical_volume, FrameIndex());
+		LogVoxelHashBlockUsage(canonical_volume, target_warped_live_volume, warp_field, this->parameters.indexing_method);
 
-			//** prepare canonical for new frame
-			LOG4CPLUS_PER_FRAME(logging::get_logger(),
-			                    bright_cyan << "Fusing data from live frame into canonical frame..." << reset);
-			//** fuse the live into canonical directly
-			benchmarking::start_timer("FuseOneTsdfVolumeIntoAnother");
-			AllocateUsingOtherVolume(canonical_volume, live_volumes[0], config.device_type);
-			volume_fusion_engine->FuseOneTsdfVolumeIntoAnother(canonical_volume, live_volumes[0], frames_processed);
-			benchmarking::stop_timer("FuseOneTsdfVolumeIntoAnother");
-
-			//post-fusion recording
-			telemetry_recorder.RecordPostFusionData(*canonical_volume, FrameIndex());
-		}
 		fusion_succeeded = true;
 		if (frames_processed > 50) tracking_initialised = true;
 		frames_processed++;
@@ -392,6 +368,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(UChar4Image* rgb_im
 
 
 	LogCameraTrajectoryQuaternion(tracking_state->pose_d);
+
 
 	return last_tracking_result;
 }

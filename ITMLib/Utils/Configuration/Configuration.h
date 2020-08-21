@@ -31,9 +31,8 @@
 #include "../SurfelVolumeParameters.h"
 #include "../../../ORUtils/MemoryDeviceType.h"
 #include "../Math.h"
-#include "../../SurfaceTrackers/Interface/SlavchevaSurfaceTracker.h"
+#include "../../SurfaceTrackers/Interface/LevelSetEvolutionParameters.h"
 #include "../../SurfaceTrackers/WarpGradientFunctors/WarpGradientFunctor.h"
-#include "../../Engines/Main/NonRigidTrackingParameters.h"
 #include "../../Objects/Volume/VoxelBlockHash.h"
 #include "../../Objects/Volume/PlainVoxelArray.h"
 #include "LoggingSettings.h"
@@ -88,10 +87,6 @@ DECLARE_SERIALIZABLE_ENUM(VOLUME_ROLE_ENUM_DESCRIPTION);
 
 DECLARE_SERIALIZABLE_STRUCT(PATHS_STRUCT_DESCRIPTION);
 
-
-
-
-
 struct TrackerConfigurationStringPresets {
 	static const std::string default_ICP_tracker_configuration;
 	static const std::string default_ICP_tracker_configuration_loop_closure;
@@ -144,11 +139,8 @@ DECLARE_SERIALIZABLE_STRUCT(SPECIFIC_VOLUME_PARAMETERS_STRUCT_DESCRIPTION);
     (VoxelVolumeParameters, general_voxel_volume_parameters, VoxelVolumeParameters(), STRUCT, "Voxel volume parameters, such as voxel size."),\
     (SurfelVolumeParameters, general_surfel_volume_parameters, SurfelVolumeParameters(), STRUCT, "Surfel volume parameters, such as surfel radius."),\
     (SpecificVolumeParameters, specific_volume_parameters, SpecificVolumeParameters(), STRUCT, "Parameters for specific volumes (multiple volumes are used in dynamic mode), may include information for different indexing methods."), \
-    (SlavchevaSurfaceTracker::Parameters, slavcheva_parameters, SlavchevaSurfaceTracker::Parameters(), STRUCT,"Parameters pertaining to energy tuning for dynamic surface tracking."),\
-    (SlavchevaSurfaceTracker::Switches, slavcheva_switches, SlavchevaSurfaceTracker::Switches(), STRUCT,"Switches pertaining to optimization for dynamic surface tracking."),\
     (LoggingSettings, logging_settings, LoggingSettings(), STRUCT, "Logging settings"),\
     (Paths, paths, Paths(), STRUCT,"Input / output paths"),\
-    (NonRigidTrackingParameters, non_rigid_tracking_parameters, NonRigidTrackingParameters(), STRUCT,"Parameters pertaining to stopping conditions, gradient functor type, and momentum weight that are used for dynamic surface tracking."),\
     (bool, create_meshing_engine, true, PRIMITIVE, "Create all the things required for marching cubes and mesh extraction (uses lots of additional memory)"),\
     (MemoryDeviceType, device_type, DEFAULT_DEVICE, ENUM, "Type of device to use, i.e. CPU/GPU/Metal"),\
     (bool, use_approximate_raycast, false, PRIMITIVE, "Enables or disables approximate raycast."),\

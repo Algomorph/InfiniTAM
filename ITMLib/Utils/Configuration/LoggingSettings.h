@@ -42,9 +42,21 @@ DECLARE_SERIALIZABLE_ENUM(VERBOSITY_LEVEL_ENUM_DESCRIPTION);
     (bool, log_volume_statistics, false, PRIMITIVE, "Whether to output various volume statistics after some operations" \
     " (used only when verbosity_level is set at or above PER_FRAME)."),\
     (bool, log_trajectory_quaternions, false, PRIMITIVE, "Whether to log estimated camera trajectory quaternions"), \
+	(bool, log_iteration_number, false, PRIMITIVE, "Whether to log iteration number " \
+	"(per-iteration verbosity only, diagnostic level_set_evolution.execution_mode only)."), \
+    (bool, log_surface_tracking_procedure_names, false, PRIMITIVE,                    \
+    "Whether to log names of surface tracking procedures as they are triggered " \
+	"(per-iteration verbosity only, diagnostic level_set_evolution.execution_mode only)."), \
+    (bool, log_average_warp_update, false, PRIMITIVE, \
+    "Whether to log average warp update length (per-iteration verbosity only, diagnostic level_set_evolution.execution_mode only)."), \
     (bool, log_surface_tracking_optimization_energies, false, PRIMITIVE, "Whether to log optimization energies " \
-    "for each iteration of the surface tracking optimization. Only works when non_rigid_tracking_parameters.functor_type " \
-    "parameter is set to \"slavcheva_diagnostic\"")
+    "for each iteration of the surface tracking optimization. Only works when level_set_evolution.execution_mode " \
+    "parameter is set to \"diagnostic\""),                   \
+    (bool, log_additional_surface_tracking_stats, false, PRIMITIVE, "Whether to log additional statistics " \
+    "accumulated during each surface tracking iteration. Only works when level_set_evolution.execution_mode " \
+    "parameter is set to \"diagnostic\""),\
+    (bool, log_voxel_hash_block_usage, false, PRIMITIVE, \
+    "Whether to log counts of utilized voxel hash blocks for all volumes involved (along with upper bounds).")
 
 DECLARE_SERIALIZABLE_STRUCT(LOGGING_SETTINGS_STRUCT_DESCRIPTION);
 

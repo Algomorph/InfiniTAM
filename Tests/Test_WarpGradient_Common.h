@@ -78,6 +78,18 @@ struct WarpGradientDataFixture {
 		loadWarpVolume(&warp_field_data_and_tikhonov_term, "warp_field_1_data_and_tikhonov.dat");
 		loadWarpVolume(&warp_field_data_and_killing_term, "warp_field_1_data_and_killing.dat");
 		loadWarpVolume(&warp_field_data_and_level_set_term, "warp_field_1_data_and_level_set.dat");
+
+		std::string array_output_directory = GENERATED_TEST_DATA_PREFIX "TestData/arrays/";
+		ORUtils::IStreamWrapper warp_stats_file(array_output_directory + "warp_gradient_stats_" + IndexString<TIndex>() + ".dat", false);
+		warp_stats_file.IStream().read(reinterpret_cast<char*>(&gradient_count_data_term), sizeof(unsigned int));
+		warp_stats_file.IStream().read(reinterpret_cast<char*>(&gradient_count_data_smoothed), sizeof(unsigned int));
+		warp_stats_file.IStream().read(reinterpret_cast<char*>(&gradient_count_complete), sizeof(unsigned int));
+		warp_stats_file.IStream().read(reinterpret_cast<char*>(&warp_update_average_length_iter0), sizeof(float));
+		warp_stats_file.IStream().read(reinterpret_cast<char*>(&warp_update_count_iter0), sizeof(unsigned int));
+		warp_stats_file.IStream().read(reinterpret_cast<char*>(&gradient_count_tikhonov_term), sizeof(unsigned int));
+		warp_stats_file.IStream().read(reinterpret_cast<char*>(&gradient_count_data_and_tikhonov_term), sizeof(unsigned int));
+		warp_stats_file.IStream().read(reinterpret_cast<char*>(&gradient_count_data_and_killing_term), sizeof(unsigned int));
+		warp_stats_file.IStream().read(reinterpret_cast<char*>(&gradient_count_data_and_level_set_term), sizeof(unsigned int));
 	}
 
 	~WarpGradientDataFixture() {
@@ -95,12 +107,21 @@ struct WarpGradientDataFixture {
 
 	configuration::Configuration* settings;
 	VoxelVolume<WarpVoxel, TIndex>* warp_field_data_term;
+	unsigned int gradient_count_data_term;
 	VoxelVolume<WarpVoxel, TIndex>* warp_field_data_term_smoothed;
+	unsigned int gradient_count_data_smoothed;
+	unsigned int gradient_count_complete;
 	VoxelVolume<WarpVoxel, TIndex>* warp_field_iter0;
+	float warp_update_average_length_iter0;
+	unsigned int warp_update_count_iter0;
 	VoxelVolume<WarpVoxel, TIndex>* warp_field_tikhonov_term;
+	unsigned int gradient_count_tikhonov_term;
 	VoxelVolume<WarpVoxel, TIndex>* warp_field_data_and_tikhonov_term;
+	unsigned int gradient_count_data_and_tikhonov_term;
 	VoxelVolume<WarpVoxel, TIndex>* warp_field_data_and_killing_term;
+	unsigned int gradient_count_data_and_killing_term;
 	VoxelVolume<WarpVoxel, TIndex>* warp_field_data_and_level_set_term;
+	unsigned int gradient_count_data_and_level_set_term;
 	VoxelVolume<TSDFVoxel, TIndex>* canonical_volume;
 	VoxelVolume<TSDFVoxel, TIndex>* live_volume;
 	const std::string path_to_data;

@@ -25,7 +25,7 @@
 // local
 #include "../../../ORUtils/PlatformIndependence.h"
 #include "BenchmarkUtilities.h"
-#include "../CPPPrintHelpers.h"
+#include "../Logging/ConsolePrintColors.h"
 #include "../Configuration/Configuration.h"
 #include "../Logging/Logging.h"
 

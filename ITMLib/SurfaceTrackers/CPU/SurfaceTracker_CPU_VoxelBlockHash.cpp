@@ -18,14 +18,14 @@
 #include "../../Engines/Traversal/CPU/ThreeVolumeTraversal_CPU_VoxelBlockHash.h"
 #include "../../Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 #include "../../Engines/Analytics/AnalyticsEngine.h"
-#include "../WarpGradientFunctors/WarpGradientFunctor_SlavchevaOptimized.h"
-#include "../WarpGradientFunctors/WarpGradientFunctor_SlavchevaDiagnostic.h"
+#include "../WarpGradientFunctors/WarpGradientFunctor_Optimized.h"
+#include "../WarpGradientFunctors/WarpGradientFunctor_Diagnostic.h"
 #include "../../GlobalTemplateDefines.h"
 #include "../Interface/SurfaceTracker.tpp"
 
 namespace ITMLib {
 template
-class SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_OPTIMIZED>;
+class SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU, OPTIMIZED>;
 template
-class SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU, TRACKER_SLAVCHEVA_DIAGNOSTIC>;
+class SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU, DIAGNOSTIC>;
 } // namespace ITMLib

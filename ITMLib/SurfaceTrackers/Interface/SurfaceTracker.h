@@ -15,20 +15,21 @@
 //  ================================================================
 #pragma once
 
+//temporary
+#include "../Interface/LevelSetEvolutionParameters.h"
+
 #include "SurfaceTrackerInterface.h"
 #include "../WarpGradientFunctors/WarpGradientFunctor.h"
 #include "../../Engines/Warping/WarpingEngine.h"
-#include "../../Engines/Main/NonRigidTrackingParameters.h"
 #include "../../Utils/Configuration/Configuration.h"
-#include "../../Utils/WarpType.h"
+#include "../../Utils/Enums/WarpType.h"
 
 
 namespace ITMLib {
 
 
-template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, GradientFunctorType TGradientFunctorType>
-class SurfaceTracker :
-		public SurfaceTrackerInterface<TVoxel, TWarp, TIndex>, public SlavchevaSurfaceTracker {
+template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
+class SurfaceTracker : public SurfaceTrackerInterface<TVoxel, TWarp, TIndex> {
 public: // instance variables
 #ifndef __CUDACC__
 	bool const histograms_enabled = configuration::Get().logging_settings.verbosity_level >= VERBOSITY_PER_ITERATION;
@@ -37,16 +38,21 @@ public: // instance variables
 #endif
 
 private: // instance variables
+	//TODO: for auto-completion in Clion, remove when CLion is fixed and this is no longer necessary
+	const LevelSetEvolutionWeights& weights;
+	const LevelSetEvolutionSwitches& switches;
+	const LevelSetEvolutionTerminationConditions& termination;
+	int iteration;
 
 	WarpingEngineInterface<TVoxel, TWarp, TIndex>* warping_engine;
-	const NonRigidTrackingParameters parameters_nr;
 	// needs to be declared after "parameters", derives value from it during initialization
-	const float max_vector_update_threshold_in_voxels;
+	const float mean_vector_update_threshold_in_voxels;
 	const bool log_settings = false;
 
 public: // instance functions
-	SurfaceTracker(Switches switches, Parameters parameters = Parameters());
+
 	SurfaceTracker();
+	SurfaceTracker(const LevelSetEvolutionSwitches& switches);
 	virtual ~SurfaceTracker();
 
 
@@ -70,14 +76,31 @@ public: // instance functions
 	                  VoxelVolume <TVoxel, TIndex>* canonical_volume,
 	                  VoxelVolume <TVoxel, TIndex>* live_volume) override;
 
+	void ComputeWarpHistogram(VoxelVolume <TWarp, TIndex>* warp_field);
+
 private: // instance functions
 	void PerformSingleOptimizationStep(
 			VoxelVolume<TVoxel, TIndex>* canonical_volume,
 			VoxelVolume<TVoxel, TIndex>* source_live_volume,
 			VoxelVolume<TVoxel, TIndex>* target_live_volume,
 			VoxelVolume<TWarp, TIndex>* warp_field,
-			float& max_update_vector_length,
+			float& average_update_vector_length,
 			int iteration);
+
+	void PerformSingleOptimizationStep_Diagnostic(
+			VoxelVolume<TVoxel, TIndex>* canonical_volume,
+			VoxelVolume<TVoxel, TIndex>* source_live_volume,
+			VoxelVolume<TVoxel, TIndex>* target_live_volume,
+			VoxelVolume<TWarp, TIndex>* warp_field,
+			float& average_update_vector_length,
+			int iteration);
+
+	void PerformSingleOptimizationStep_Optimized(
+			VoxelVolume<TVoxel, TIndex>* canonical_volume,
+			VoxelVolume<TVoxel, TIndex>* source_live_volume,
+			VoxelVolume<TVoxel, TIndex>* target_live_volume,
+			VoxelVolume<TWarp, TIndex>* warp_field,
+			float& average_update_vector_length);
 
 	template<WarpType TWarpType>
 	void ClearOutWarps(VoxelVolume <TWarp, TIndex>* warp_field);

@@ -47,6 +47,8 @@ public:
 	unsigned int CountVoxelsWithSpecifiedFlags(VoxelVolume <TVoxel, TIndex>* volume, VoxelFlags flags) override;
 	unsigned int CountNonTruncatedVoxels(VoxelVolume <TVoxel, TIndex>* volume) override;
 	unsigned int CountAlteredVoxels(VoxelVolume <TVoxel, TIndex>* volume) override;
+	unsigned int CountAlteredGradients(VoxelVolume<TVoxel, TIndex>* volume) override;
+	unsigned int CountAlteredWarpUpdates(VoxelVolume<TVoxel, TIndex>* volume) override;
 	unsigned int CountVoxelsWithSpecificSdfValue(VoxelVolume <TVoxel, TIndex>* volume, float value) override;
 
 	double SumNonTruncatedVoxelAbsSdf(VoxelVolume <TVoxel, TIndex>* volume) override;

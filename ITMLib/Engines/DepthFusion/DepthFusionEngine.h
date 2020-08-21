@@ -22,7 +22,7 @@
 #include "../../Objects/Tracking/CameraTrackingState.h"
 #include "../../Objects/Views/View.h"
 #include "../Common/WarpAccessFunctors.h"
-#include "../../Utils/WarpType.h"
+#include "../../Utils/Enums/WarpType.h"
 
 namespace ITMLib {
 

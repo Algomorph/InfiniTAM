@@ -44,129 +44,141 @@ using namespace ITMLib;
 typedef WarpGradientDataFixture<MemoryDeviceType::MEMORYDEVICE_CUDA, PlainVoxelArray> DataFixture;
 BOOST_FIXTURE_TEST_CASE(testDataTerm_CUDA_PVA, DataFixture) {
 
-	VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field_CUDA1(MEMORYDEVICE_CUDA, index_parameters);
-	ManipulationEngine_CUDA_PVA_Warp::Inst().ResetVolume(&warp_field_CUDA1);
+	VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field(MEMORYDEVICE_CUDA, index_parameters);
+	ManipulationEngine_CUDA_PVA_Warp::Inst().ResetVolume(&warp_field);
 
 
-	auto motionTracker_PVA_CUDA = new SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA , TRACKER_SLAVCHEVA_DIAGNOSTIC>(
-			SlavchevaSurfaceTracker::Switches(true, false, false, false, false));
-
+	auto motion_tracker_PVA_CUDA = new SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA , DIAGNOSTIC>(
+			LevelSetEvolutionSwitches(true, false, false, false, false));
 
 	TimeIt([&]() {
-		motionTracker_PVA_CUDA->CalculateWarpGradient(&warp_field_CUDA1, canonical_volume, live_volume);
-	}, "Calculate Warping Gradient - PVA CPU data term");
+		motion_tracker_PVA_CUDA->CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
+	}, "Calculate Warping Gradient - PVA CUDA data term");
+
+	unsigned int altered_gradient_count = Analytics_CUDA_PVA_Warp::Instance().CountAlteredGradients(&warp_field);
+	BOOST_REQUIRE_EQUAL(altered_gradient_count, gradient_count_data_term);
 
 	float tolerance = 1e-5;
-	BOOST_REQUIRE(contentAlmostEqual_CUDA(&warp_field_CUDA1, warp_field_data_term, tolerance));
+	BOOST_REQUIRE(contentAlmostEqual_CUDA(&warp_field, warp_field_data_term, tolerance));
 }
 
 BOOST_FIXTURE_TEST_CASE(testUpdateWarps_CUDA_PVA, DataFixture) {
-	auto motionTracker_PVA_CUDA = new SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA , TRACKER_SLAVCHEVA_DIAGNOSTIC>(
-			SlavchevaSurfaceTracker::Switches(false, false, false, false, false));
+	auto motionTracker_PVA_CUDA = new SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA , DIAGNOSTIC>(
+			LevelSetEvolutionSwitches(false, false, false, false, false));
 	VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field_copy(*warp_field_data_term,
 	                                                        MemoryDeviceType::MEMORYDEVICE_CUDA);
 
-	float maxWarp = motionTracker_PVA_CUDA->UpdateWarps(&warp_field_copy, canonical_volume, live_volume);
+	float average_warp = motionTracker_PVA_CUDA->UpdateWarps(&warp_field_copy, canonical_volume, live_volume);
 
-	BOOST_REQUIRE_CLOSE(maxWarp, 0.121243507f, 1e-7);
+	BOOST_REQUIRE_CLOSE(average_warp, warp_update_average_length_iter0, 1e-2);
+	unsigned int altered_warp_update_count = Analytics_CUDA_PVA_Warp::Instance().CountAlteredWarpUpdates(&warp_field_copy);
+	BOOST_REQUIRE_EQUAL(altered_warp_update_count, warp_update_count_iter0);
 
 	float tolerance = 1e-8;
 	BOOST_REQUIRE(contentAlmostEqual_CUDA(&warp_field_copy, warp_field_iter0, tolerance));
 }
 
 BOOST_FIXTURE_TEST_CASE(testSmoothWarpGradient_CUDA_PVA, DataFixture) {
-	VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field_CUDA1(*warp_field_data_term, MEMORYDEVICE_CUDA);
-	auto motionTracker_PVA_CUDA = new SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA , TRACKER_SLAVCHEVA_DIAGNOSTIC>(
-			SlavchevaSurfaceTracker::Switches(false, false, false, false, true)
+	VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field(*warp_field_data_term, MEMORYDEVICE_CUDA);
+	auto motionTracker_PVA_CUDA = new SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA , DIAGNOSTIC>(
+			LevelSetEvolutionSwitches(false, false, false, false, true)
 			);
 
 	TimeIt([&]() {
-		motionTracker_PVA_CUDA->SmoothWarpGradient(&warp_field_CUDA1, canonical_volume, live_volume);
+		motionTracker_PVA_CUDA->SmoothWarpGradient(&warp_field, canonical_volume, live_volume);
 	}, "Smooth Warping Gradient - PVA CUDA");
 
+	unsigned int altered_gradient_count = Analytics_CUDA_PVA_Warp::Instance().CountAlteredGradients(&warp_field);
+	BOOST_REQUIRE_EQUAL(altered_gradient_count, gradient_count_data_smoothed);
+
 	float tolerance = 1e-6;
-	BOOST_REQUIRE(contentAlmostEqual_CUDA(&warp_field_CUDA1, warp_field_data_term_smoothed, tolerance));
+	BOOST_REQUIRE(contentAlmostEqual_CUDA(&warp_field, warp_field_data_term_smoothed, tolerance));
 }
 
 BOOST_FIXTURE_TEST_CASE(testTikhonovTerm_CUDA_PVA, DataFixture) {
-	VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field_CUDA1(*warp_field_iter0, MEMORYDEVICE_CUDA);
+	VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field(*warp_field_iter0, MEMORYDEVICE_CUDA);
 
 
-	auto motionTracker_PVA_CUDA = new SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA , TRACKER_SLAVCHEVA_DIAGNOSTIC>(
-			SlavchevaSurfaceTracker::Switches(false, false, true, false, false));
+	auto motionTracker_PVA_CUDA = new SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA , DIAGNOSTIC>(
+			LevelSetEvolutionSwitches(false, false, true, false, false));
 
 
 	TimeIt([&]() {
-		motionTracker_PVA_CUDA->CalculateWarpGradient(&warp_field_CUDA1, canonical_volume, live_volume);
+		motionTracker_PVA_CUDA->CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
 	}, "Calculate Warping Gradient - PVA CUDA tikhonov term");
 
-	BOOST_REQUIRE(true);
+	unsigned int altered_gradient_count = Analytics_CUDA_PVA_Warp::Instance().CountAlteredGradients(&warp_field);
+	BOOST_REQUIRE_EQUAL(altered_gradient_count, gradient_count_data_and_tikhonov_term);
 
 	Vector3i test_voxel_position(-29, 17, 195);
-	WarpVoxel warp1 = warp_field_CUDA1.GetValueAt(test_voxel_position);
+	WarpVoxel warp1 = warp_field.GetValueAt(test_voxel_position);
 	WarpVoxel warp2 = warp_field_tikhonov_term->GetValueAt(test_voxel_position);
 	float tolerance = 1e-6;
 	BOOST_REQUIRE_CLOSE(warp1.gradient0.x, warp2.gradient0.x, tolerance);
 	BOOST_REQUIRE_CLOSE(warp1.gradient0.y, warp2.gradient0.y, tolerance);
 	BOOST_REQUIRE_CLOSE(warp1.gradient0.z, warp2.gradient0.z, tolerance);
 
-	BOOST_REQUIRE(contentAlmostEqual_CUDA(&warp_field_CUDA1, warp_field_tikhonov_term, tolerance));
+	BOOST_REQUIRE(contentAlmostEqual_CUDA(&warp_field, warp_field_tikhonov_term, tolerance));
 }
 
 BOOST_FIXTURE_TEST_CASE(testDataAndTikhonovTerm_CUDA, DataFixture) {
-	VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field_CUDA1(*warp_field_iter0, MEMORYDEVICE_CUDA);
+	VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field(*warp_field_iter0, MEMORYDEVICE_CUDA);
 
-	auto motionTracker_PVA_CUDA = new SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA , TRACKER_SLAVCHEVA_DIAGNOSTIC>(
-			SlavchevaSurfaceTracker::Switches(true, false, true, false, false)
+	auto motionTracker_PVA_CUDA = new SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA , DIAGNOSTIC>(
+			LevelSetEvolutionSwitches(true, false, true, false, false)
 			);
 
 
 	TimeIt([&]() {
-		motionTracker_PVA_CUDA->CalculateWarpGradient(&warp_field_CUDA1, canonical_volume, live_volume);
-	}, "Calculate Warping Gradient - PVA CPU data term + Tikhonov term");
+		motionTracker_PVA_CUDA->CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
+	}, "Calculate Warping Gradient - PVA CUDA data term + Tikhonov term");
+
+	unsigned int altered_gradient_count = Analytics_CUDA_PVA_Warp::Instance().CountAlteredGradients(&warp_field);
+	BOOST_REQUIRE_EQUAL(altered_gradient_count, gradient_count_data_and_tikhonov_term);
 
 
 	float tolerance = 1e-6;
-	BOOST_REQUIRE(contentAlmostEqual_CUDA(&warp_field_CUDA1, warp_field_data_and_tikhonov_term, tolerance));
+	BOOST_REQUIRE(contentAlmostEqual_CUDA(&warp_field, warp_field_data_and_tikhonov_term, tolerance));
 }
 
 
 BOOST_FIXTURE_TEST_CASE(testDataAndKillingTerm_CUDA, DataFixture) {
-	VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field_CUDA1(*warp_field_iter0, MEMORYDEVICE_CUDA);
+	VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field(*warp_field_iter0, MEMORYDEVICE_CUDA);
 
-	auto motionTracker_PVA_CUDA = new SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA , TRACKER_SLAVCHEVA_DIAGNOSTIC>(
-			SlavchevaSurfaceTracker::Switches(true, false, true, true, false)
+	auto motionTracker_PVA_CUDA = new SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA , DIAGNOSTIC>(
+			LevelSetEvolutionSwitches(true, false, true, true, false)
 			);
 
-
 	TimeIt([&]() {
-		motionTracker_PVA_CUDA->CalculateWarpGradient(&warp_field_CUDA1, canonical_volume, live_volume);
-	}, "Calculate Warping Gradient - PVA CPU data term + Killing term");
+		motionTracker_PVA_CUDA->CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
+	}, "Calculate Warping Gradient - PVA CUDA data term + Killing term");
+
+	unsigned int altered_gradient_count = Analytics_CUDA_PVA_Warp::Instance().CountAlteredGradients(&warp_field);
+	BOOST_REQUIRE_EQUAL(altered_gradient_count, gradient_count_data_and_killing_term);
 
 
 	float tolerance = 1e-6;
-	BOOST_REQUIRE(contentAlmostEqual_CUDA(&warp_field_CUDA1, warp_field_data_and_killing_term, tolerance));
+	BOOST_REQUIRE(contentAlmostEqual_CUDA(&warp_field, warp_field_data_and_killing_term, tolerance));
 }
 
 
 BOOST_FIXTURE_TEST_CASE(testDataAndLevelSetTerm_CUDA, DataFixture) {
-	VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field_CUDA1(*warp_field_iter0, MEMORYDEVICE_CUDA);
+	VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field(*warp_field_iter0, MEMORYDEVICE_CUDA);
 
-	auto motionTracker_PVA_CUDA = new SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA , TRACKER_SLAVCHEVA_DIAGNOSTIC>(
-			SlavchevaSurfaceTracker::Switches(true, true, false, false, false));
+	auto motionTracker_PVA_CUDA = new SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA , DIAGNOSTIC>(
+			LevelSetEvolutionSwitches(true, true, false, false, false));
 
 
 	TimeIt([&]() {
-		motionTracker_PVA_CUDA->CalculateWarpGradient(&warp_field_CUDA1, canonical_volume, live_volume);
-	}, "Calculate Warping Gradient - PVA CPU data term + level set term");
+		motionTracker_PVA_CUDA->CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
+	}, "Calculate Warping Gradient - PVA CUDA data term + level set term");
+
+	unsigned int altered_gradient_count = Analytics_CUDA_PVA_Warp::Instance().CountAlteredGradients(&warp_field);
+
+	// due to CUDA float computations being a tad off, we may get a few more or a few less modified gradients than for CPU here
+	BOOST_REQUIRE(std::abs<int>(altered_gradient_count - gradient_count_data_and_level_set_term) < 50);
 
 
 	float tolerance = 1e-6;
-	BOOST_REQUIRE(contentAlmostEqual_CUDA(&warp_field_CUDA1, warp_field_data_and_level_set_term, tolerance));
+	BOOST_REQUIRE(contentAlmostEqual_CUDA(&warp_field, warp_field_data_and_level_set_term, tolerance));
 }
-
-#ifdef GENERATE_DATA
-BOOST_AUTO_TEST_CASE(Test_WarpGradient_CUDA_PVA_GenerateTestData){
-	GenerateTestData<PlainVoxelArray,MEMORYDEVICE_CUDA>();
-}
-#endif

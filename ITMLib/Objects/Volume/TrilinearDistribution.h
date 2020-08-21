@@ -19,7 +19,7 @@
 #include "VoxelBlockHash.h"
 #include "RepresentationAccess.h"
 #include "../../../ORUtils/PlatformIndependence.h"
-#include "../../Utils/VoxelFlags.h"
+#include "../../Utils/Enums/VoxelFlags.h"
 
 template<class TVoxel>
 _CPU_AND_GPU_CODE_ inline TVoxel&

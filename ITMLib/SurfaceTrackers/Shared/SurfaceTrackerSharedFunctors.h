@@ -48,24 +48,24 @@ struct ClearOutGradientStaticFunctor {
 };
 
 
-template<typename TTSDFVoxel, typename TWarpVoxel, MemoryDeviceType TMemoryDeviceType>
+template<typename TVoxel, typename TWarp, MemoryDeviceType TMemoryDeviceType>
 struct WarpUpdateFunctor {
-	WarpUpdateFunctor(float learningRate, float momentumWeight, bool gradientSmoothingEnabled) :
-			gradient_weight(learningRate * (1.0f - momentumWeight)), momentum_weight(momentumWeight),
-			gradient_smoothing_enabled(gradientSmoothingEnabled),
-			max_warp_update_position(0) {
-		INITIALIZE_ATOMIC(float, max_framewise_warp_length, 0.0f);
-		INITIALIZE_ATOMIC(float, max_warp_update_length, 0.0f);
+	WarpUpdateFunctor(float learning_rate, float momentum_weight, bool gradient_smoothing_enabled) :
+			gradient_weight(learning_rate * (1.0f - momentum_weight)), momentum_weight(momentum_weight),
+			gradient_smoothing_enabled(gradient_smoothing_enabled) {
+		INITIALIZE_ATOMIC(float, aggregate_warp_update_length, 0.0f);
+		INITIALIZE_ATOMIC(unsigned int, affected_voxel_count, 0u);
 	}
 
 	~WarpUpdateFunctor() {
-		CLEAN_UP_ATOMIC(max_framewise_warp_length);CLEAN_UP_ATOMIC(max_warp_update_length);
+		CLEAN_UP_ATOMIC(aggregate_warp_update_length);CLEAN_UP_ATOMIC(affected_voxel_count);
 	}
 
 	_DEVICE_WHEN_AVAILABLE_
 	void
-	operator()(TWarpVoxel& warp_voxel, TTSDFVoxel& canonical_voxel, TTSDFVoxel& live_voxel, const Vector3i& position) {
+	operator()(TWarp& warp_voxel, TVoxel& canonical_voxel, TVoxel& live_voxel, const Vector3i& position) {
 		if (!VoxelIsConsideredForTracking(canonical_voxel, live_voxel)) return;
+
 		Vector3f warp_update = -gradient_weight * (gradient_smoothing_enabled ?
 		                                           warp_voxel.gradient1 : warp_voxel.gradient0);
 
@@ -74,99 +74,85 @@ struct WarpUpdateFunctor {
 		// update stats
 		float warp_update_length = ORUtils::length(warp_update);
 
-#if !defined(__CUDACC__) && !defined(WITH_OPENMP)
-		//single-threaded CPU version (for debugging max warp_voxel position)
-		if (warp_update_length > max_warp_update_length.load()) {
-			max_warp_update_length.store(warp_update_length);
-			max_warp_update_position = position;
-		}
-#else
-		ATOMIC_MAX(max_warp_update_length, warp_update_length);
-#endif
+		ATOMIC_ADD(aggregate_warp_update_length, warp_update_length);
+		ATOMIC_ADD(affected_voxel_count, 1u);
 	}
 
-	float GetMaxWarpUpdateLength() {
-		return GET_ATOMIC_VALUE_CPU(max_warp_update_length);
-	}
-
-	Vector3i max_warp_update_position;
-
-	_DEVICE_WHEN_AVAILABLE_
-	void PrintWarp() {
-#if !defined(__CUDACC__) && !defined(WITH_OPENMP)
-		std::cout << ITMLib::green << " Max update: [" << max_warp_update_length << " at " << max_warp_update_position << "]."
-				  << ITMLib::reset<< std::endl;
-#else
-#endif
+	float GetAverageWarpUpdateLength() {
+		return GET_ATOMIC_VALUE_CPU(aggregate_warp_update_length) / GET_ATOMIC_VALUE_CPU(affected_voxel_count);
 	}
 
 
 private:
-	DECLARE_ATOMIC_FLOAT(max_framewise_warp_length);
-	DECLARE_ATOMIC_FLOAT(max_warp_update_length);
+	DECLARE_ATOMIC_FLOAT(aggregate_warp_update_length);
+	DECLARE_ATOMIC(unsigned int, affected_voxel_count);
 	const float gradient_weight;
 	const float momentum_weight;
 	const bool gradient_smoothing_enabled;
 };
 
 
-//TODO: clean out dead code, potentially make versions for warps w/ framewise warp separately
-
-template<typename TVoxel, typename TWarpVoxel>
+template<typename TWarp, MemoryDeviceType TMemoryDeviceType>
 struct WarpHistogramFunctor {
-	WarpHistogramFunctor(/*float max_framewise_warp_length, */float max_warp_update_length) :
-	/*maxFramewiseWarpLength(max_framewise_warp_length),*/ max_warp_update_length(max_warp_update_length) {
+	WarpHistogramFunctor(float max_warp_update_length, unsigned int warp_count, int bin_count) :
+			max_warp_update_length(max_warp_update_length), warp_count(warp_count), histogram_bin_count(bin_count),
+			warp_update_bins(bin_count, TMemoryDeviceType),
+			warp_update_bins_device(warp_update_bins.GetData(TMemoryDeviceType)) {
+		warp_update_bins.Clear();
 	}
 
-	static const int histogram_bin_count = 10;
+	const int histogram_bin_count;
+	const unsigned int warp_count;
 
-	void operator()(TWarpVoxel& warp, TVoxel& canonicalVoxel, TVoxel& liveVoxel) {
-		if (!VoxelIsConsideredForTracking(canonicalVoxel, liveVoxel)) return;
-//		float framewiseWarpLength = ORUtils::length(warp.framewise_warp);
+	_DEVICE_WHEN_AVAILABLE_
+	void operator()(TWarp& warp) {
 		float warp_update_length = ORUtils::length(warp.warp_update);
-		const int histogram_bin_count = WarpHistogramFunctor<TVoxel, TWarpVoxel>::histogram_bin_count;
 		int bin_index = 0;
-//		if (maxFramewiseWarpLength > 0) {
-//			bin_index = ORUTILS_MIN(histogram_bin_count - 1, (int) (framewiseWarpLength * histogram_bin_count / maxFramewiseWarpLength));
-//		}
-//		framewiseWarpBins[bin_index]++;
+
 		if (max_warp_update_length > 0) {
 			bin_index = ORUTILS_MIN(histogram_bin_count - 1,
 			                        (int) (warp_update_length * histogram_bin_count / max_warp_update_length));
 		}
-		warp_update_bins[bin_index]++;
+		warp_update_bins_device[bin_index]++;
 	}
 
 	void PrintHistogram() {
-//		std::cout << "FW warp length histogram: ";
-//		for (int iBin = 0; iBin < histogram_bin_count; iBin++) {
-//			std::cout << std::setfill(' ') << std::setw(7) << framewiseWarpBins[iBin] << "  ";
-//		}
-//		std::cout << std::endl;
-		std::cout << "Update length histogram: ";
-		for (int iBin = 0; iBin < histogram_bin_count; iBin++) {
-			std::cout << std::setfill(' ') << std::setw(7) << warp_update_bins[iBin] << "  ";
+		ORUtils::MemoryBlock<int>* warp_update_bins_to_read;
+		if (TMemoryDeviceType == MEMORYDEVICE_CUDA) {
+			warp_update_bins_to_read = new ORUtils::MemoryBlock<int>(warp_update_bins, MEMORYDEVICE_CPU);
+		} else {
+			warp_update_bins_to_read = &warp_update_bins;
 		}
-		std::cout << std::endl;
+		int* bin_data = warp_update_bins_to_read->GetData(MEMORYDEVICE_CPU);
+
+		std::cout << "Update length histogram: " << std::endl;
+		float warp_count_float = static_cast<float>(warp_count);
+
+		for (int i_bin = 0; i_bin < histogram_bin_count; i_bin++) {
+			std::cout << std::setw(7) << std::setfill(' ') << std::setprecision(3)
+			          << 100.0f * static_cast<float>(bin_data[i_bin]) / warp_count_float << "%";
+		}
+		printf("\n");
+		if (TMemoryDeviceType == MEMORYDEVICE_CUDA) {
+			delete warp_update_bins_to_read;
+		}
 	}
 
 
 private:
-//	const float maxFramewiseWarpLength;
 	const float max_warp_update_length;
 
-	// <20%, 40%, 60%, 80%, 100%
-//	int framewiseWarpBins[histogram_bin_count] = {0};
-	int warp_update_bins[histogram_bin_count] = {0};
+	ORUtils::MemoryBlock<int> warp_update_bins;
+	int* warp_update_bins_device;
 };
 
 enum TraversalDirection : int {
 	X = 0, Y = 1, Z = 2
 };
 
-template<typename TTSDFVoxel, typename TWarpVoxel, typename TIndex, TraversalDirection TDirection>
+template<typename TVoxel, typename TWarp, typename TIndex, TraversalDirection TDirection>
 struct GradientSmoothingPassFunctor {
-	GradientSmoothingPassFunctor(ITMLib::VoxelVolume<TWarpVoxel, TIndex>* warp_field) :
+	GradientSmoothingPassFunctor(ITMLib::VoxelVolume<TWarp, TIndex>* warp_field) :
 			warp_field(warp_field),
 			warp_voxels(warp_field->GetVoxels()),
 			warp_index_data(warp_field->index.GetIndexData()),
@@ -174,7 +160,7 @@ struct GradientSmoothingPassFunctor {
 
 	_CPU_AND_GPU_CODE_
 	void
-	operator()(TWarpVoxel& warp_voxel, TTSDFVoxel& canonical_voxel, TTSDFVoxel& live_voxel, Vector3i voxel_position) {
+	operator()(TWarp& warp_voxel, TVoxel& canonical_voxel, TVoxel& live_voxel, Vector3i voxel_position) {
 		const int sobolev_filter_size = 7;
 		const float sobolev_filter1D[sobolev_filter_size] = {
 				2.995861099047703036e-04f,
@@ -197,10 +183,10 @@ struct GradientSmoothingPassFunctor {
 
 		for (int iVoxel = 0; iVoxel < sobolev_filter_size; iVoxel++, receptive_voxel_position[directionIndex]++) {
 #if !defined(__CUDACC__) && !defined(WITH_OPENMP)
-			const TWarpVoxel& receptiveVoxel = readVoxel(warp_voxels, warp_index_data,
+			const TWarp& receptiveVoxel = readVoxel(warp_voxels, warp_index_data,
 													receptive_voxel_position, vmIndex, warp_field_cache);
 #else
-			const TWarpVoxel& receptiveVoxel = readVoxel(warp_voxels, warp_index_data,
+			const TWarp& receptiveVoxel = readVoxel(warp_voxels, warp_index_data,
 			                                             receptive_voxel_position, vmIndex);
 #endif
 			smoothed_gradient += sobolev_filter1D[iVoxel] * GetGradient(receptiveVoxel);
@@ -210,7 +196,7 @@ struct GradientSmoothingPassFunctor {
 
 private:
 	_CPU_AND_GPU_CODE_
-	static inline Vector3f GetGradient(const TWarpVoxel& warp_voxel) {
+	static inline Vector3f GetGradient(const TWarp& warp_voxel) {
 		switch (TDirection) {
 			case X:
 				return warp_voxel.gradient0;
@@ -224,7 +210,7 @@ private:
 	}
 
 	_CPU_AND_GPU_CODE_
-	static inline void SetGradient(TWarpVoxel& warp_voxel, const Vector3f gradient) {
+	static inline void SetGradient(TWarp& warp_voxel, const Vector3f gradient) {
 		switch (TDirection) {
 			case X:
 				warp_voxel.gradient1 = gradient;
@@ -238,45 +224,45 @@ private:
 		}
 	}
 
-	ITMLib::VoxelVolume<TWarpVoxel, TIndex>* warp_field;
-	TWarpVoxel* warp_voxels;
+	ITMLib::VoxelVolume<TWarp, TIndex>* warp_field;
+	TWarp* warp_voxels;
 	typename TIndex::IndexData* warp_index_data;
 	typename TIndex::IndexCache warp_field_cache;
 
 };
 
-template<typename TWarpVoxel, bool hasCumulativeWarp>
+template<typename TWarp, bool hasCumulativeWarp>
 struct AddFramewiseWarpToWarpWithClearStaticFunctor;
 
-template<typename TWarpVoxel>
-struct AddFramewiseWarpToWarpWithClearStaticFunctor<TWarpVoxel, true> {
+template<typename TWarp>
+struct AddFramewiseWarpToWarpWithClearStaticFunctor<TWarp, true> {
 	_CPU_AND_GPU_CODE_
-	static inline void run(TWarpVoxel& warp) {
+	static inline void run(TWarp& warp) {
 		warp.warp += warp.framewise_warp;
 		warp.framewise_warp = Vector3f(0.0f);
 	}
 };
 
-template<typename TWarpVoxel>
-struct AddFramewiseWarpToWarpWithClearStaticFunctor<TWarpVoxel, false> {
+template<typename TWarp>
+struct AddFramewiseWarpToWarpWithClearStaticFunctor<TWarp, false> {
 	_CPU_AND_GPU_CODE_
-	static inline void run(TWarpVoxel& warp) {
+	static inline void run(TWarp& warp) {
 	}
 };
-template<typename TWarpVoxel, bool hasCumulativeWarp>
+template<typename TWarpVoxel, bool THasCumulativeWarp>
 struct AddFramewiseWarpToWarpStaticFunctor;
 
-template<typename TWarpVoxel>
-struct AddFramewiseWarpToWarpStaticFunctor<TWarpVoxel, true> {
+template<typename TWarp>
+struct AddFramewiseWarpToWarpStaticFunctor<TWarp, true> {
 	_CPU_AND_GPU_CODE_
-	static inline void run(TWarpVoxel& warp) {
+	static inline void run(TWarp& warp) {
 		warp.warp += warp.framewise_warp;
 	}
 };
 
-template<typename TVoxelCanonical>
-struct AddFramewiseWarpToWarpStaticFunctor<TVoxelCanonical, false> {
+template<typename TWarp>
+struct AddFramewiseWarpToWarpStaticFunctor<TWarp, false> {
 	_CPU_AND_GPU_CODE_
-	static inline void run(TVoxelCanonical& voxel) {
+	static inline void run(TWarp& voxel) {
 	}
 };

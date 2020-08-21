@@ -27,10 +27,11 @@
 //ITMLib
 #include "../../ITMLib/Utils/Analytics/BenchmarkUtilities.h"
 #include "../../ITMLib/Utils/Logging/Logging.h"
-#include "../../ITMLib/Engines/Telemetry/TelemetryRecorderLegacy.h"
 #include "../../ORUtils/FileUtils.h"
 #include "../../ORUtils/ImageCombination.h"
 #include "../../ITMLib/Engines/ImageProcessing/ImageProcessingEngineFactory.h"
+#include "../../ITMLib/Utils/Logging/ConsolePrintColors.h"
+#include "../../ITMLib/Utils/Telemetry/TelemetryUtilities.h"
 
 
 //TODO: we should never have to downcast the main engine to some other engine type, architecture needs to be altered
@@ -198,9 +199,9 @@ void UIEngine::SkipFrames(int number_of_frames_to_skip) {
 
 
 void UIEngine::ProcessFrame() {
-	LOG4CPLUS_TOP_LEVEL(logging::get_logger(),
-	                    yellow << "***" << bright_cyan << "PROCESSING FRAME " << current_frame_index << yellow
-	                           << "***" << reset);
+	LOG4CPLUS_PER_FRAME(logging::get_logger(),
+	                    yellow << "***" << bright_cyan << " PROCESSING FRAME " << current_frame_index << yellow
+	                           << " ***" << reset);
 
 	if (!image_source_engine->HasMoreImages()) return;
 	image_source_engine->GetImages(*input_RGB_image, *input_raw_depth_image);

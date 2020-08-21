@@ -72,8 +72,19 @@ build_script:
       - sh: |
           echo "Build Script for Ubuntu, Image: $APPVEYOR_BUILD_WORKER_IMAGE, Configuration: $CONFIGURATION"
           mkdir build && cd build
-          cmake -DCMAKE_BUILD_TYPE=$CONFIGURATION -DBUILD_TESTS=ON -DWITH_PNG=ON -DWITH_CUDA=ON -DWITH_OPENMP=OFF -DWITH_FFMPEG=ON ..
-          make -j8
+      - sh: >
+          cmake
+          -DCMAKE_BUILD_TYPE=$CONFIGURATION
+          -DBUILD_TESTS=ON
+          -DWITH_CUDA=ON
+          -DWITH_OPENMP=ON
+          -DWITH_FFMPEG=ON
+          -DCMAKE_CXX_COMPILER=/usr/bin/g++-9
+          -DCMAKE_C_COMPILER=/usr/bin/gcc-9
+          -DCMAKE_C_COMPILER_LAUNCHER=ccache
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          ..
+      - sh: make -j8
 
 test_script:
     - sh: |

@@ -17,9 +17,10 @@
 
 //local
 #include "../../Objects/Volume/VoxelVolume.h"
-#include "../../Utils/CPPPrintHelpers.h"
-#include "../../Utils/VoxelFlags.h"
-#include "SlavchevaSurfaceTracker.h"
+#include "../../Utils/Logging/ConsolePrintColors.h"
+#include "../../Utils/Enums/VoxelFlags.h"
+#include "LevelSetEvolutionParameters.h"
+#include "../../Engines/Common/Configurable.h"
 
 namespace ITMLib {
 /**
@@ -29,9 +30,10 @@ namespace ITMLib {
  * \tparam TIndex Indexing structure type used for voxel volumes
  */
 template<typename TVoxel, typename TWarp, typename TIndex>
-class SurfaceTrackerInterface {
+class SurfaceTrackerInterface : public Configurable<LevelSetEvolutionParameters> {
 
 public:
+	using Configurable<LevelSetEvolutionParameters>::Configurable;
 
 	virtual ~SurfaceTrackerInterface() = default;
 	virtual VoxelVolume<TVoxel, TIndex>* TrackNonRigidMotion(
@@ -50,6 +52,7 @@ public:
 	virtual float UpdateWarps(VoxelVolume<TWarp, TIndex>* warpField,
 	                          VoxelVolume<TVoxel, TIndex>* canonicalScene,
 	                          VoxelVolume<TVoxel, TIndex>* liveScene) = 0;
+
 	virtual void ClearOutFramewiseWarps(VoxelVolume<TWarp, TIndex>* warpField) = 0;
 	virtual void ClearOutCumulativeWarps(VoxelVolume<TWarp, TIndex>* warpField) = 0;
 	virtual void ClearOutWarpUpdates(VoxelVolume<TWarp, TIndex>* warpField) = 0;

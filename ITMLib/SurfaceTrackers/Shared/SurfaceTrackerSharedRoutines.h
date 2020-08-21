@@ -15,44 +15,46 @@
 //  ================================================================
 #pragma once
 
-#include "../../Utils/VoxelFlags.h"
+#include "../../Utils/Enums/VoxelFlags.h"
 #include "../../Objects/Volume/RepresentationAccess.h"
 #include "../../../ORUtils/PlatformIndependence.h"
-#include "../../Utils/CPPPrintHelpers.h"
+#include "../../Utils/Logging/ConsolePrintColors.h"
 
-//_DEBUG preprocessor options
-#ifdef TRACK_LIVE_NONTRUNCATED
-template<typename TVoxelA>
-_CPU_AND_GPU_CODE_ inline
-bool VoxelIsConsideredForTracking(const TVoxelA& voxelCanonical, const TVoxelA& voxelLive){
-	return voxelLive.flags == ITMLib::VOXEL_NONTRUNCATED;
-};
-#else
+
+#define TRACKING_CONDITION_LIVE_KNOWN
+//#define TRACKING_CONDITION_LIVE_NONTRUNCATED
+
 template<typename TVoxel>
 _CPU_AND_GPU_CODE_ inline
-bool VoxelIsConsideredForTracking(const TVoxel& voxelCanonical, const TVoxel& voxelLive) {
-	return voxelCanonical.flags == ITMLib::VOXEL_NONTRUNCATED ||
-	       voxelLive.flags == ITMLib::VOXEL_NONTRUNCATED;
-};
+bool VoxelIsConsideredForTracking(const TVoxel& voxel_canonical, const TVoxel& voxel_live) {
+#if defined(TRACKING_CONDITION_LIVE_KNOWN)
+	return voxel_live.flags != ITMLib::VOXEL_UNKNOWN;
+#elif defined(TRACKING_CONDITION_LIVE_NONTRUNCATED)
+	return voxel_live.flags == ITMLib::VOXEL_NONTRUNCATED;
 #endif
+};
 
 
-#define DATA_CONDITION_IGNORE_ANY_UNKNOWN
+//#define DATA_CONDITION_IGNORE_ANY_UNKNOWN
+#define DATA_CONDITION_LIVE_NONTRUNCATED_CANONICAL_KNOWN
+
 template<typename TVoxel>
 _CPU_AND_GPU_CODE_ inline
-bool VoxelIsConsideredForDataTerm(const TVoxel& canonicalVoxel, const TVoxel& liveVoxel) {
+bool VoxelIsConsideredForDataTerm(const TVoxel& canonical_voxel, const TVoxel& live_voxel) {
 //_DEBUG preprocessor options
 #if defined(DATA_CONDITION_ALWAYS)
 	return true;
 #elif defined(DATA_CONDITION_IGNORE_ANY_UNKNOWN)
-	return canonicalVoxel.flags != ITMLib::VOXEL_UNKNOWN && liveVoxel.flags != ITMLib::VOXEL_UNKNOWN;
+	return canonical_voxel.flags != ITMLib::VOXEL_UNKNOWN && live_voxel.flags != ITMLib::VOXEL_UNKNOWN;
+#elif defined(DATA_CONDITION_LIVE_NONTRUNCATED_CANONICAL_KNOWN)
+	return canonical_voxel.flags != ITMLib::VOXEL_UNKNOWN && live_voxel.flags == ITMLib::VOXEL_NONTRUNCATED;
 #elif defined(DATA_CONDITION_ONLY_NONTRUNCATED)
-	return liveVoxel.flags == ITMLib::VOXEL_NONTRUNCATED
-                         && canonicalVoxel.flags == ITMLib::VOXEL_NONTRUNCATED;
+	return live_voxel.flags == ITMLib::VOXEL_NONTRUNCATED
+						 && canonical_voxel.flags == ITMLib::VOXEL_NONTRUNCATED;
 #elif defined(DATA_CONDITION_IGNORE_BOTH_UNKNOWN)
-	return canonicalVoxel.flags != ITMLib::VOXEL_UNKNOWN || liveVoxel.flags != ITMLib::VOXEL_UNKNOWN;
+	return canonical_voxel.flags != ITMLib::VOXEL_UNKNOWN || live_voxel.flags != ITMLib::VOXEL_UNKNOWN;
 #elif defined(DATA_CONDITION_IGNORE_CANONICAL_UNKNOWN)
-	return canonicalVoxel.flags != ITMLib::VOXEL_UNKNOWN;
+	return canonical_voxel.flags != ITMLib::VOXEL_UNKNOWN;
 #else
 	//Same as data condition DATA_CONDITION_ALWAYS
 	return true;
@@ -90,22 +92,22 @@ inline void findPoint2ndDerivativeNeighborhoodFramewiseWarp(THREADPTR(Vector3f)*
                                                             THREADPTR(TCache)& warp_cache,
                                                             const CONSTPTR(TVoxel)* voxels,
                                                             const CONSTPTR(TIndexData)* voxel_index_data,
-                                                            THREADPTR(TCache)& voxelCache) {
-	int vmIndex = 0;
+                                                            THREADPTR(TCache)& voxel_cache) {
+	int vm_index = 0;
 
 	TVoxel voxel;
 	TWarp warp;
 
-	auto process_voxel = [&](Vector3i location, int index){
+	auto process_voxel = [&](Vector3i location, int index) {
 #if !defined(__CUDACC__) && !defined(WITH_OPENMP)
-		warp = readVoxel(warps, warp_index_data, voxel_position + (location), vmIndex, warp_cache);
-	    voxel = readVoxel(voxels, voxel_index_data, voxel_position + (location), vmIndex, voxelCache);
+		warp = readVoxel(warps, warp_index_data, voxel_position + (location), vm_index, warp_cache);
+		voxel = readVoxel(voxels, voxel_index_data, voxel_position + (location), vm_index, voxel_cache);
 #else //don't use cache for multithreading
-		warp = readVoxel(warps, warp_index_data, voxel_position + (location), vmIndex);
-	    voxel = readVoxel(voxels, voxel_index_data, voxel_position + (location), vmIndex);
+		warp = readVoxel(warps, warp_index_data, voxel_position + (location), vm_index);
+		voxel = readVoxel(voxels, voxel_index_data, voxel_position + (location), vm_index);
 #endif
 		neighbor_warp_updates[index] = warp.warp_update;
-		neighbor_allocated[index] = vmIndex != 0;
+		neighbor_allocated[index] = vm_index != 0;
 		neighbor_known[index] = voxel.flags != ITMLib::VOXEL_UNKNOWN;
 		neighbor_truncated[index] = voxel.flags == ITMLib::VOXEL_TRUNCATED;
 	};
@@ -263,155 +265,359 @@ inline void findPoint2ndDerivativeNeighborhoodWarp(THREADPTR(Vector3f)* neighbor
 
 
 
-//region ================================= SDF JACOBIAN ================================================================
+//region ================================= SDF GRADIENT ================================================================
 
 template<typename TVoxel, typename TIndexData, typename TCache>
 _CPU_AND_GPU_CODE_
-void ComputeLiveJacobianForwardDifferences(THREADPTR(Vector3f)& jacobian,
-                                           const CONSTPTR(Vector3i)& position,
-                                           const CONSTPTR(float)& sdfAtPosition,
-                                           const CONSTPTR(TVoxel)* voxels,
-                                           const CONSTPTR(TIndexData)* indexData,
-                                           THREADPTR(TCache) cache) {
-	int vmIndex = 0;
-#define sdf_at(offset) (TVoxel::valueToFloat(readVoxel(voxels, indexData, position + (offset), vmIndex, cache).sdf))
-	float sdfAtXplusOne = sdf_at(Vector3i(1, 0, 0));
-	float sdfAtYplusOne = sdf_at(Vector3i(0, 1, 0));
-	float sdfAtZplusOne = sdf_at(Vector3i(0, 0, 1));
-#undef sdf_at
-
-	jacobian[0] = sdfAtXplusOne - sdfAtPosition;
-	jacobian[1] = sdfAtYplusOne - sdfAtPosition;
-	jacobian[2] = sdfAtZplusOne - sdfAtPosition;
-};
-
-template<typename TVoxel, typename TIndexData, typename TCache>
-_CPU_AND_GPU_CODE_
-void ComputeLiveJacobian_ForwardDifferences(THREADPTR(Vector3f)& jacobian,
-                                            const CONSTPTR(Vector3i)& position,
-                                            const CONSTPTR(TVoxel)* voxels,
-                                            const CONSTPTR(TIndexData)* indexData,
-                                            THREADPTR(TCache)& cache) {
-	int vmIndex = 0;
-#define sdf_at(offset) (TVoxel::valueToFloat(readVoxel(voxels, indexData, position + (offset), vmIndex, cache).sdf))
-	float sdfAtXplusOne = sdf_at(Vector3i(1, 0, 0));
-	float sdfAtYplusOne = sdf_at(Vector3i(0, 1, 0));
-	float sdfAtZplusOne = sdf_at(Vector3i(0, 0, 1));
-
-	float sdfAtPosition = sdf_at(Vector3i(0, 0, 0));
-#undef sdf_at
-	jacobian[0] = sdfAtXplusOne - sdfAtPosition;
-	jacobian[1] = sdfAtYplusOne - sdfAtPosition;
-	jacobian[2] = sdfAtZplusOne - sdfAtPosition;
-};
-
-
-template<typename TVoxel, typename TIndexData, typename TCache>
-_CPU_AND_GPU_CODE_
-void ComputeLiveJacobian_CentralDifferences(THREADPTR(Vector3f)& jacobian,
-                                            const CONSTPTR(Vector3i)& voxelPosition,
-                                            const CONSTPTR(TVoxel)* voxels,
-                                            const CONSTPTR(TIndexData)* index_data,
-                                            THREADPTR(TCache)& cache) {
-
-
-	int vmIndex = 0;
-    auto sdf_at = [&](Vector3i offset) {
+inline void ComputeGradient_ForwardDifferences(THREADPTR(Vector3f)& gradient,
+                                               const CONSTPTR(Vector3i)& position,
+                                               const CONSTPTR(float)& sdf_at_position,
+                                               const CONSTPTR(TVoxel)* voxels,
+                                               const CONSTPTR(TIndexData)* index_data,
+                                               THREADPTR(TCache) cache) {
+	int vm_index = 0;
+	auto sdf_at = [&](Vector3i offset) {
 #if !defined(__CUDACC__) && !defined(WITH_OPENMP)
-	    return TVoxel::valueToFloat(readVoxel(voxels, index_data, voxelPosition + (offset), vmIndex, cache).sdf);
+		return TVoxel::valueToFloat(readVoxel(voxels, index_data, position + (offset), vm_index, cache).sdf);
 #else
-	    return TVoxel::valueToFloat(readVoxel(voxels, index_data, voxelPosition + (offset), vmIndex).sdf);
+		return TVoxel::valueToFloat(readVoxel(voxels, index_data, position + (offset), vm_index).sdf);
 #endif
-    };
+	};
 
-	float sdfAtXplusOne = sdf_at(Vector3i(1, 0, 0));
-	float sdfAtYplusOne = sdf_at(Vector3i(0, 1, 0));
-	float sdfAtZplusOne = sdf_at(Vector3i(0, 0, 1));
-	float sdfAtXminusOne = sdf_at(Vector3i(-1, 0, 0));
-	float sdfAtYminusOne = sdf_at(Vector3i(0, -1, 0));
-	float sdfAtZminusOne = sdf_at(Vector3i(0, 0, -1));
+	float sdf_at_x_plus_one = sdf_at(Vector3i(1, 0, 0));
+	float sdf_at_y_plus_one = sdf_at(Vector3i(0, 1, 0));
+	float sdf_at_z_plus_one = sdf_at(Vector3i(0, 0, 1));
 
-	jacobian[0] = 0.5f * (sdfAtXplusOne - sdfAtXminusOne);
-	jacobian[1] = 0.5f * (sdfAtYplusOne - sdfAtYminusOne);
-	jacobian[2] = 0.5f * (sdfAtZplusOne - sdfAtZminusOne);
+	gradient[0] = sdf_at_x_plus_one - sdf_at_position;
+	gradient[1] = sdf_at_y_plus_one - sdf_at_position;
+	gradient[2] = sdf_at_z_plus_one - sdf_at_position;
 };
 
 template<typename TVoxel, typename TIndexData, typename TCache>
 _CPU_AND_GPU_CODE_
-void ComputeLiveJacobian_CentralDifferences(Vector3f& jacobian,
-                                            const Vector3f& voxelPosition,
-                                            const TVoxel* voxels,
-                                            const TIndexData* indexData,
-                                            THREADPTR(TCache)& cache) {
-	int vmIndex = 0;
-#define sdf_at(offset) (_DEBUG_InterpolateTrilinearly(voxels, indexData, voxelPosition + (offset),  cache))
+inline void ComputeGradient_ForwardDifferences(THREADPTR(Vector3f)& gradient,
+                                               const CONSTPTR(Vector3i)& position,
+                                               const CONSTPTR(TVoxel)* voxels,
+                                               const CONSTPTR(TIndexData)* index_data,
+                                               THREADPTR(TCache)& cache) {
 
-	float sdfAtXplusOne = sdf_at(Vector3f(1, 0, 0));
-	float sdfAtYplusOne = sdf_at(Vector3f(0, 1, 0));
-	float sdfAtZplusOne = sdf_at(Vector3f(0, 0, 1));
-	float sdfAtXminusOne = sdf_at(Vector3f(-1, 0, 0));
-	float sdfAtYminusOne = sdf_at(Vector3f(0, -1, 0));
-	float sdfAtZminusOne = sdf_at(Vector3f(0, 0, -1));
+	int vm_index = 0;
+#if !defined(__CUDACC__) && !defined(WITH_OPENMP)
+	float sdf_at_position = TVoxel::valueToFloat(readVoxel(voxels, index_data, position, vm_index, cache).sdf);
+#else
+	float sdf_at_position = TVoxel::valueToFloat(readVoxel(voxels, index_data, position, vm_index).sdf);
+#endif
+	ComputeGradient_ForwardDifferences(gradient, position, sdf_at_position, voxels, index_data, cache);
 
-#undef sdf_at
-	jacobian[0] = 0.5f * (sdfAtXplusOne - sdfAtXminusOne);
-	jacobian[1] = 0.5f * (sdfAtYplusOne - sdfAtYminusOne);
-	jacobian[2] = 0.5f * (sdfAtZplusOne - sdfAtZminusOne);
 };
+
+template<typename TVoxel, typename TIndexData, typename TCache>
+_CPU_AND_GPU_CODE_
+inline void ComputeGradient_CentralDifferences(THREADPTR(Vector3f)& gradient,
+                                               const CONSTPTR(Vector3i)& voxel_position,
+                                               const CONSTPTR(TVoxel)* voxels,
+                                               const CONSTPTR(TIndexData)* index_data,
+                                               THREADPTR(TCache)& cache) {
+
+
+	int vmIndex = 0;
+	auto sdf_at = [&](Vector3i offset) {
+#if !defined(__CUDACC__) && !defined(WITH_OPENMP)
+		return TVoxel::valueToFloat(readVoxel(voxels, index_data, voxel_position + (offset), vmIndex, cache).sdf);
+#else
+		return TVoxel::valueToFloat(readVoxel(voxels, index_data, voxel_position + (offset), vmIndex).sdf);
+#endif
+	};
+
+	float sdf_at_position = sdf_at(Vector3i(0, 0, 0));
+
+	float sdf_at_x_plus_one = sdf_at(Vector3i(1, 0, 0));
+	float sdf_at_y_plus_one = sdf_at(Vector3i(0, 1, 0));
+	float sdf_at_z_plus_one = sdf_at(Vector3i(0, 0, 1));
+	float sdf_at_x_minus_one = sdf_at(Vector3i(-1, 0, 0));
+	float sdf_at_y_minus_one = sdf_at(Vector3i(0, -1, 0));
+	float sdf_at_z_minus_one = sdf_at(Vector3i(0, 0, -1));
+
+	gradient[0] = 0.5f * (sdf_at_x_plus_one - sdf_at_x_minus_one);
+	gradient[1] = 0.5f * (sdf_at_y_plus_one - sdf_at_y_minus_one);
+	gradient[2] = 0.5f * (sdf_at_z_plus_one - sdf_at_z_minus_one);
+};
+
+
+template<typename TVoxel, typename TIndexData, typename TCache>
+_CPU_AND_GPU_CODE_
+inline void ComputeGradient_CentralDifferences_ZeroIfTruncated(THREADPTR(Vector3f)& gradient,
+                                                               const CONSTPTR(Vector3i)& voxel_position,
+                                                               const CONSTPTR(TVoxel)* voxels,
+                                                               const CONSTPTR(TIndexData)* index_data,
+                                                               THREADPTR(TCache)& cache) {
+
+
+	int vmIndex = 0;
+	auto sdf_at = [&](Vector3i offset, bool& nontruncated) {
+#if !defined(__CUDACC__) && !defined(WITH_OPENMP)
+		TVoxel voxel = readVoxel(voxels, index_data, voxel_position + (offset), vmIndex, cache);
+		nontruncated &= voxel.flags == ITMLib::VOXEL_NONTRUNCATED;
+		return TVoxel::valueToFloat(voxel.sdf);
+#else
+		TVoxel voxel = readVoxel(voxels, index_data, voxel_position + (offset), vmIndex);
+		nontruncated &= voxel.flags == ITMLib::VOXEL_NONTRUNCATED;
+		return TVoxel::valueToFloat(voxel.sdf);
+#endif
+	};
+
+	bool both_x_nontruncated = true;
+	float sdf_at_x_plus_one = sdf_at(Vector3i(1, 0, 0), both_x_nontruncated);
+	float sdf_at_x_minus_one = sdf_at(Vector3i(-1, 0, 0), both_x_nontruncated);
+
+	bool both_y_nontruncated = true;
+	float sdf_at_y_plus_one = sdf_at(Vector3i(0, 1, 0), both_y_nontruncated);
+	float sdf_at_y_minus_one = sdf_at(Vector3i(0, -1, 0), both_y_nontruncated);
+
+	bool both_z_nontruncated = true;
+	float sdf_at_z_plus_one = sdf_at(Vector3i(0, 0, 1), both_z_nontruncated);
+	float sdf_at_z_minus_one = sdf_at(Vector3i(0, 0, -1), both_z_nontruncated);
+
+	gradient[0] = both_x_nontruncated * 0.5f * (sdf_at_x_plus_one - sdf_at_x_minus_one);
+	gradient[1] = both_y_nontruncated * 0.5f * (sdf_at_y_plus_one - sdf_at_y_minus_one);
+	gradient[2] = both_z_nontruncated * 0.5f * (sdf_at_z_plus_one - sdf_at_z_minus_one);
+};
+
+
+template<typename TVoxel, typename TIndexData, typename TCache>
+_CPU_AND_GPU_CODE_
+inline void ComputeGradient_ChooseStrategyOnTruncation(THREADPTR(Vector3f)& gradient,
+                                                       const CONSTPTR(Vector3i)& voxel_position,
+                                                       const CONSTPTR(TVoxel)* voxels,
+                                                       const CONSTPTR(TIndexData)* index_data,
+                                                       THREADPTR(TCache)& cache) {
+
+
+	int vmIndex = 0;
+	auto sdf_at = [&](Vector3i offset, bool& nontruncated) {
+#if !defined(__CUDACC__) && !defined(WITH_OPENMP)
+		TVoxel voxel = readVoxel(voxels, index_data, voxel_position + (offset), vmIndex, cache);
+		nontruncated = voxel.flags == ITMLib::VOXEL_NONTRUNCATED;
+		return TVoxel::valueToFloat(voxel.sdf);
+#else
+		TVoxel voxel = readVoxel(voxels, index_data, voxel_position + (offset), vmIndex);
+		nontruncated = voxel.flags == ITMLib::VOXEL_NONTRUNCATED;
+		return TVoxel::valueToFloat(voxel.sdf);
+#endif
+	};
+
+	bool dummy;
+	float sdf_at_position = sdf_at(Vector3i(0, 0, 0), dummy);
+
+	bool x_plus_one_nontruncated;
+	float sdf_at_x_plus_one = sdf_at(Vector3i(1, 0, 0), x_plus_one_nontruncated);
+	bool y_plus_one_nontruncated;
+	float sdf_at_y_plus_one = sdf_at(Vector3i(0, 1, 0), y_plus_one_nontruncated);
+	bool z_plus_one_nontruncated;
+	float sdf_at_z_plus_one = sdf_at(Vector3i(0, 0, 1), z_plus_one_nontruncated);
+	bool x_minus_one_nontruncated;
+	float sdf_at_x_minus_one = sdf_at(Vector3i(-1, 0, 0), x_minus_one_nontruncated);
+	bool y_minus_one_nontruncated;
+	float sdf_at_y_minus_one = sdf_at(Vector3i(0, -1, 0), y_minus_one_nontruncated);
+	bool z_minus_one_nontruncated;
+	float sdf_at_z_minus_one = sdf_at(Vector3i(0, 0, -1), z_minus_one_nontruncated);
+
+	if (x_plus_one_nontruncated) {
+		if (x_minus_one_nontruncated) {
+			gradient[0] = 0.5f * (sdf_at_x_plus_one - sdf_at_x_minus_one);
+		} else {
+			gradient[0] = sdf_at_x_plus_one - sdf_at_position;
+		}
+	} else {
+		if (x_minus_one_nontruncated) {
+			gradient[0] = sdf_at_position - sdf_at_x_minus_one;
+		}
+	}
+
+	if (y_plus_one_nontruncated) {
+		if (y_minus_one_nontruncated) {
+			gradient[1] = 0.5f * (sdf_at_y_plus_one - sdf_at_y_minus_one);
+		} else {
+			gradient[1] = sdf_at_y_plus_one - sdf_at_position;
+		}
+	} else {
+		if (y_minus_one_nontruncated) {
+			gradient[1] = sdf_at_position - sdf_at_y_minus_one;
+		}
+	}
+
+	if (z_plus_one_nontruncated) {
+		if (z_minus_one_nontruncated) {
+			gradient[2] = 0.5f * (sdf_at_z_plus_one - sdf_at_z_minus_one);
+		} else {
+			gradient[2] = sdf_at_z_plus_one - sdf_at_position;
+		}
+	} else {
+		if (z_minus_one_nontruncated) {
+			gradient[2] = sdf_at_position - sdf_at_z_minus_one;
+		}
+	}
+
+//	bool both_x_nontruncated = x_plus_one_nontruncated && x_minus_one_nontruncated;
+//	bool both_y_nontruncated = y_plus_one_nontruncated && y_minus_one_nontruncated;
+//	bool both_z_nontruncated = z_plus_one_nontruncated && z_minus_one_nontruncated;
+
+//	gradient[0] = both_x_nontruncated * 0.5f * (sdf_at_x_plus_one - sdf_at_x_minus_one)
+//	              + (!both_x_nontruncated && x_plus_one_nontruncated) * (sdf_at_x_plus_one - sdf_at_position)
+//	              + (!both_x_nontruncated && x_minus_one_nontruncated) * (sdf_at_position - sdf_at_x_minus_one);
+//	gradient[1] = both_y_nontruncated * 0.5f * (sdf_at_y_plus_one - sdf_at_y_minus_one)
+//	              + (!both_y_nontruncated && y_plus_one_nontruncated) * (sdf_at_y_plus_one - sdf_at_position)
+//	              + (!both_y_nontruncated && y_minus_one_nontruncated) * (sdf_at_position - sdf_at_y_minus_one);
+//	gradient[2] = both_z_nontruncated * 0.5f * (sdf_at_z_plus_one - sdf_at_z_minus_one)
+//	              + (!both_z_nontruncated && z_plus_one_nontruncated) * (sdf_at_z_plus_one - sdf_at_position)
+//	              + (!both_z_nontruncated && z_minus_one_nontruncated) * (sdf_at_position - sdf_at_z_minus_one);
+};
+
 // endregion
 
-// region ================================= SDF HESSIAN ================================================================
+// region ================================= SDF 2ND DERIVATIVE ================================================================
 
 template<typename TVoxel, typename TIndexData, typename TCache>
 _CPU_AND_GPU_CODE_
-inline void ComputeSdfHessian(THREADPTR(Matrix3f)& hessian,
-                              const CONSTPTR(Vector3i &) position,
-                              const CONSTPTR(float)& sdfAtPosition,
+inline void ComputeSdf2ndDerivative(THREADPTR(Matrix3f)& hessian,
+                                    const CONSTPTR(Vector3i &) position,
+                                    const CONSTPTR(float)& sdf_at_position,
 		//const CONSTPTR(Vector3f&) jacobianAtPosition,
-		                      const CONSTPTR(TVoxel)* voxels,
-		                      const CONSTPTR(TIndexData)* index_data,
-		                      THREADPTR(TCache)& cache) {
-	int vmIndex = 0;
+		                            const CONSTPTR(TVoxel)* voxels,
+		                            const CONSTPTR(TIndexData)* index_data,
+		                            THREADPTR(TCache)& cache) {
+	int vm_index = 0;
 
-	auto sdf_at = [&](Vector3i offset){
+	auto sdf_at = [&](Vector3i offset) {
 #if !defined(__CUDACC__) && !defined(WITH_OPENMP)
-		return TVoxel::valueToFloat(readVoxel(voxels, index_data, position + (offset), vmIndex, cache).sdf);
+		return TVoxel::valueToFloat(readVoxel(voxels, index_data, position + (offset), vm_index, cache).sdf);
 #else //don't use cache when multithreading
-		return TVoxel::valueToFloat(readVoxel(voxels, index_data, position + (offset), vmIndex).sdf);
+		return TVoxel::valueToFloat(readVoxel(voxels, index_data, position + (offset), vm_index).sdf);
 #endif
 	};
 
 	//for xx, yy, zz
-	float sdfAtXplusOne = sdf_at(Vector3i(1, 0, 0));
-	float sdfAtYplusOne = sdf_at(Vector3i(0, 1, 0));
-	float sdfAtZplusOne = sdf_at(Vector3i(0, 0, 1));
-	float sdfAtXminusOne = sdf_at(Vector3i(-1, 0, 0));
-	float sdfAtYminusOne = sdf_at(Vector3i(0, -1, 0));
-	float sdfAtZminusOne = sdf_at(Vector3i(0, 0, -1));
+	float sdf_at_x_plus_one = sdf_at(Vector3i(1, 0, 0));
+	float sdf_at_y_plus_one = sdf_at(Vector3i(0, 1, 0));
+	float sdf_at_z_plus_one = sdf_at(Vector3i(0, 0, 1));
+	float sdf_at_x_minus_one = sdf_at(Vector3i(-1, 0, 0));
+	float sdf_at_y_minus_one = sdf_at(Vector3i(0, -1, 0));
+	float sdf_at_z_minus_one = sdf_at(Vector3i(0, 0, -1));
 
 	//for xy, xz, yz
-	float sdfAtXplusOneYplusOne = sdf_at(Vector3i(1, 1, 0));
-	float sdfAtXminusOneYminusOne = sdf_at(Vector3i(-1, -1, 0));
-	float sdfAtYplusOneZplusOne = sdf_at(Vector3i(0, 1, 1));
-	float sdfAtYminusOneZminusOne = sdf_at(Vector3i(0, -1, -1));
-	float sdfAtXplusOneZplusOne = sdf_at(Vector3i(1, 0, 1));
-	float sdfAtXminusOneZminusOne = sdf_at(Vector3i(-1, 0, -1));
+	//@formatter:off
+	float sdf_at_x_plus_one_y_plus_one   = sdf_at(Vector3i( 1,  1,  0));
+	float sdf_at_x_minus_one_y_minus_one = sdf_at(Vector3i(-1, -1,  0));
+	float sdf_at_y_plus_one_z_plus_one   = sdf_at(Vector3i( 0,  1,  1));
+	float sdf_at_y_minus_one_z_minus_one = sdf_at(Vector3i( 0, -1, -1));
+	float sdf_at_x_plus_one_z_plus_one   = sdf_at(Vector3i( 1,  0,  1));
+	float sdf_at_x_minus_one_z_minus_one = sdf_at(Vector3i(-1,  0, -1));
+	//@formatter:on
 
-	float delta_xx = sdfAtXplusOne - 2 * sdfAtPosition + sdfAtXminusOne;
-	float delta_yy = sdfAtYplusOne - 2 * sdfAtPosition + sdfAtYminusOne;
-	float delta_zz = sdfAtZplusOne - 2 * sdfAtPosition + sdfAtZminusOne;
+	float delta_xx = sdf_at_x_plus_one - 2 * sdf_at_position + sdf_at_x_minus_one;
+	float delta_yy = sdf_at_y_plus_one - 2 * sdf_at_position + sdf_at_y_minus_one;
+	float delta_zz = sdf_at_z_plus_one - 2 * sdf_at_position + sdf_at_z_minus_one;
 
-	float delta_xy = 0.5f * (sdfAtXplusOneYplusOne - sdfAtXplusOne - sdfAtYplusOne
-	                         + 2 * sdfAtPosition
-	                         - sdfAtXminusOne - sdfAtYminusOne + sdfAtXminusOneYminusOne);
+	// Alternative formula for 2nd-order derivatives in multiple variables.
+	// See https://en.wikipedia.org/wiki/Finite_difference#Finite_difference_in_several_variables
+	float delta_xy = 0.5f * (sdf_at_x_plus_one_y_plus_one - sdf_at_x_plus_one - sdf_at_y_plus_one
+	                         + 2 * sdf_at_position
+	                         - sdf_at_x_minus_one - sdf_at_y_minus_one + sdf_at_x_minus_one_y_minus_one);
 
-	float delta_yz = 0.5f * (sdfAtYplusOneZplusOne - sdfAtYplusOne - sdfAtZplusOne
-	                         + 2 * sdfAtPosition
-	                         - sdfAtYminusOne - sdfAtZminusOne + sdfAtYminusOneZminusOne);
+	float delta_yz = 0.5f * (sdf_at_y_plus_one_z_plus_one - sdf_at_y_plus_one - sdf_at_z_plus_one
+	                         + 2 * sdf_at_position
+	                         - sdf_at_y_minus_one - sdf_at_z_minus_one + sdf_at_y_minus_one_z_minus_one);
 
-	float delta_xz = 0.5f * (sdfAtXplusOneZplusOne - sdfAtXplusOne - sdfAtZplusOne
-	                         + 2 * sdfAtPosition
-	                         - sdfAtXminusOne - sdfAtZminusOne + sdfAtXminusOneZminusOne);
+	float delta_xz = 0.5f * (sdf_at_x_plus_one_z_plus_one - sdf_at_x_plus_one - sdf_at_z_plus_one
+	                         + 2 * sdf_at_position
+	                         - sdf_at_x_minus_one - sdf_at_z_minus_one + sdf_at_x_minus_one_z_minus_one);
+
+	float vals[9] = {delta_xx, delta_xy, delta_xz,
+	                 delta_xy, delta_yy, delta_yz,
+	                 delta_xz, delta_yz, delta_zz};
+
+	hessian.setValues(vals);
+};
+
+
+template<typename TVoxel, typename TIndexData, typename TCache>
+_CPU_AND_GPU_CODE_
+inline void ComputeSdf2ndDerivative_ZeroIfTruncated(THREADPTR(Matrix3f)& hessian,
+                                                    const CONSTPTR(Vector3i &) position,
+                                                    const CONSTPTR(float)& sdf_at_position,
+                                                    const CONSTPTR(TVoxel)* voxels,
+                                                    const CONSTPTR(TIndexData)* index_data,
+                                                    THREADPTR(TCache)& cache) {
+	int vm_index = 0;
+
+	auto sdf_at = [&](Vector3i offset) {
+#if !defined(__CUDACC__) && !defined(WITH_OPENMP)
+		return TVoxel::valueToFloat(readVoxel(voxels, index_data, position + (offset), vm_index, cache).sdf);
+#else //don't use cache when multithreading
+		return TVoxel::valueToFloat(readVoxel(voxels, index_data, position + (offset), vm_index).sdf);
+#endif
+	};
+
+	//for xx, yy, zz
+	float sdf_at_x_plus_one = sdf_at(Vector3i(1, 0, 0));
+	float sdf_at_y_plus_one = sdf_at(Vector3i(0, 1, 0));
+	float sdf_at_z_plus_one = sdf_at(Vector3i(0, 0, 1));
+	float sdf_at_x_minus_one = sdf_at(Vector3i(-1, 0, 0));
+	float sdf_at_y_minus_one = sdf_at(Vector3i(0, -1, 0));
+	float sdf_at_z_minus_one = sdf_at(Vector3i(0, 0, -1));
+
+	bool x_plus_one_nontruncated = 1.0 - abs(sdf_at_x_plus_one) > 1e-5;
+	bool x_minus_one_nontruncated = 1.0 - abs(sdf_at_x_minus_one) > 1e-5;
+	bool x_neighbors_nontruncated = x_plus_one_nontruncated && x_minus_one_nontruncated;
+	bool y_plus_one_nontruncated = 1.0 - abs(sdf_at_y_plus_one) > 1e-5;
+	bool y_minus_one_nontruncated = 1.0 - abs(sdf_at_y_minus_one) > 1e-5;
+	bool y_neighbors_nontruncated = y_plus_one_nontruncated && y_minus_one_nontruncated;
+	bool z_plus_one_nontruncated = 1.0 - abs(sdf_at_z_plus_one) > 1e-5;
+	bool z_minus_one_nontruncated = 1.0 - abs(sdf_at_z_minus_one) > 1e-5;
+	bool z_neighbors_nontruncated = z_plus_one_nontruncated && z_minus_one_nontruncated;
+
+	//for xy, xz, yz
+	//@formatter:off
+	float sdf_at_x_plus_one_y_plus_one   = sdf_at(Vector3i( 1,  1,  0));
+	float sdf_at_x_minus_one_y_minus_one = sdf_at(Vector3i(-1, -1,  0));
+	float sdf_at_y_plus_one_z_plus_one   = sdf_at(Vector3i( 0,  1,  1));
+	float sdf_at_y_minus_one_z_minus_one = sdf_at(Vector3i( 0, -1, -1));
+	float sdf_at_x_plus_one_z_plus_one   = sdf_at(Vector3i( 1,  0,  1));
+	float sdf_at_x_minus_one_z_minus_one = sdf_at(Vector3i(-1,  0, -1));
+	//@formatter:on
+
+	bool x_plus_one_y_plus_one_nontruncated = 1.0 - abs(sdf_at_x_plus_one_y_plus_one) > 1e-5;
+	bool x_minus_one_y_minus_one_nontruncated = 1.0 - abs(sdf_at_x_minus_one_y_minus_one) > 1e-5;
+	bool xy_neighbors_nontruncated = x_plus_one_y_plus_one_nontruncated && x_minus_one_y_minus_one_nontruncated;
+
+	bool y_plus_one_z_plus_one_nontruncated = 1.0 - abs(sdf_at_y_plus_one_z_plus_one) > 1e-5;
+	bool y_minus_one_z_minus_one_nontruncated = 1.0 - abs(sdf_at_y_minus_one_z_minus_one) > 1e-5;
+	bool yz_neighbors_nontruncated = y_plus_one_z_plus_one_nontruncated && y_minus_one_z_minus_one_nontruncated;
+
+	bool x_plus_one_z_plus_one_nontruncated = 1.0 - abs(sdf_at_x_plus_one_z_plus_one) > 1e-5;
+	bool x_minus_one_z_minus_one_nontruncated = 1.0 - abs(sdf_at_x_minus_one_z_minus_one) > 1e-5;
+	bool xz_neighbors_nontruncated = x_plus_one_z_plus_one_nontruncated && x_minus_one_z_minus_one_nontruncated;
+
+	float delta_xx = x_neighbors_nontruncated * sdf_at_x_plus_one - 2 * sdf_at_position + sdf_at_x_minus_one;
+	float delta_yy = y_neighbors_nontruncated * sdf_at_y_plus_one - 2 * sdf_at_position + sdf_at_y_minus_one;
+	float delta_zz = z_neighbors_nontruncated * sdf_at_z_plus_one - 2 * sdf_at_position + sdf_at_z_minus_one;
+
+	// Alternative formula for 2nd-order derivatives in multiple variables.
+	// See https://en.wikipedia.org/wiki/Finite_difference#Finite_difference_in_several_variables
+	float delta_xy = (x_neighbors_nontruncated && y_neighbors_nontruncated && xy_neighbors_nontruncated) *
+	                 0.5f * (sdf_at_x_plus_one_y_plus_one - sdf_at_x_plus_one - sdf_at_y_plus_one
+	                         + 2 * sdf_at_position
+	                         - sdf_at_x_minus_one - sdf_at_y_minus_one + sdf_at_x_minus_one_y_minus_one);
+
+	float delta_yz = (y_neighbors_nontruncated && z_neighbors_nontruncated && yz_neighbors_nontruncated) *
+	                 0.5f * (sdf_at_y_plus_one_z_plus_one - sdf_at_y_plus_one - sdf_at_z_plus_one
+	                         + 2 * sdf_at_position
+	                         - sdf_at_y_minus_one - sdf_at_z_minus_one + sdf_at_y_minus_one_z_minus_one);
+
+	float delta_xz = (x_neighbors_nontruncated && z_neighbors_nontruncated && xz_neighbors_nontruncated) *
+	                 0.5f * (sdf_at_x_plus_one_z_plus_one - sdf_at_x_plus_one - sdf_at_z_plus_one
+	                         + 2 * sdf_at_position
+	                         - sdf_at_x_minus_one - sdf_at_z_minus_one + sdf_at_x_minus_one_z_minus_one);
 
 	float vals[9] = {delta_xx, delta_xy, delta_xz,
 	                 delta_xy, delta_yy, delta_yz,
@@ -426,7 +632,7 @@ inline void ComputeSdfHessian(THREADPTR(Matrix3f)& hessian,
 // region ================================ WARP LAPLACIAN (SMOOTHING/TIKHONOV TERM) ====================================
 _CPU_AND_GPU_CODE_
 inline void ComputeWarpLaplacian(THREADPTR(Vector3f)& laplacian,
-                                 const CONSTPTR(Vector3f)& voxelWarp,
+                                 const CONSTPTR(Vector3f)& voxel_warp,
                                  const CONSTPTR(Vector3f*) neighborWarps) {//in, x6-9
 	//    0        1        2          3         4         5
 	//(-1,0,0) (0,-1,0) (0,0,-1)   (1, 0, 0) (0, 1, 0) (0, 0, 1)
@@ -435,26 +641,26 @@ inline void ComputeWarpLaplacian(THREADPTR(Vector3f)& laplacian,
 	for (int iSixConnectedNeighbor = 0; iSixConnectedNeighbor < 6; iSixConnectedNeighbor++) {
 		laplacian += neighborWarps[iSixConnectedNeighbor];
 	}
-	laplacian -= 6 * voxelWarp;
+	laplacian -= 6 * voxel_warp;
 }
 
 _CPU_AND_GPU_CODE_
 inline void ComputeWarpLaplacianAndJacobian(THREADPTR(Vector3f)& laplacian,
                                             THREADPTR(Matrix3f)& jacobian,
                                             const CONSTPTR(Vector3f)& voxelWarp,
-                                            const CONSTPTR(Vector3f*) neighborWarps) {//in, x6-9
+                                            const CONSTPTR(Vector3f*) neighbor_warps) {//in, x6-9
 	//    0        1        2          3         4         5
 	//(-1,0,0) (0,-1,0) (0,0,-1)   (1, 0, 0) (0, 1, 0) (0, 0, 1)
 	laplacian = Vector3f(0.0f);
 	//3D discrete Laplacian filter based on https://en.wikipedia.org/wiki/Discrete_Laplace_operator
 	for (int iSixConnectedNeighbor = 0; iSixConnectedNeighbor < 6; iSixConnectedNeighbor++) {
-		laplacian += neighborWarps[iSixConnectedNeighbor];
+		laplacian += neighbor_warps[iSixConnectedNeighbor];
 	}
 	laplacian -= 6 * voxelWarp;
 	//use first-order differences for jacobian
-	jacobian.setColumn(0, 0.5 * (neighborWarps[3] - neighborWarps[0]));//1st derivative in x
-	jacobian.setColumn(1, 0.5 * (neighborWarps[4] - neighborWarps[1]));//1st derivative in y
-	jacobian.setColumn(2, 0.5 * (neighborWarps[5] - neighborWarps[2]));//1st derivative in z
+	jacobian.setColumn(0, 0.5 * (neighbor_warps[3] - neighbor_warps[0]));//1st derivative in x
+	jacobian.setColumn(1, 0.5 * (neighbor_warps[4] - neighbor_warps[1]));//1st derivative in y
+	jacobian.setColumn(2, 0.5 * (neighbor_warps[5] - neighbor_warps[2]));//1st derivative in z
 }
 
 // endregion
@@ -462,8 +668,8 @@ inline void ComputeWarpLaplacianAndJacobian(THREADPTR(Vector3f)& laplacian,
 // region =================================== WARP JACOBIAN AND HESSIAN (SMOOTHING/KILLING TERM) =======================
 //Computes the jacobian and hessian approximation for the warp vectors themselves in a given neighborhood
 _CPU_AND_GPU_CODE_
-inline void ComputePerVoxelWarpJacobianAndHessian(const CONSTPTR(Vector3f)& voxelFramewiseWarp,
-                                                  const CONSTPTR(Vector3f*) neighborFramewiseWarps, //in, x9
+inline void ComputePerVoxelWarpJacobianAndHessian(const CONSTPTR(Vector3f)& voxel_framewise_warp,
+                                                  const CONSTPTR(Vector3f*) neighbor_framewise_warps, //in, x9
                                                   THREADPTR(Matrix3f)& jacobian, //out
                                                   THREADPTR(Matrix3f)* hessian //out, x3
 ) {
@@ -473,28 +679,28 @@ inline void ComputePerVoxelWarpJacobianAndHessian(const CONSTPTR(Vector3f)& voxe
 	// |u_x, u_y, u_z|       |m00, m10, m20|
 	// |v_x, v_y, v_z|       |m01, m11, m21|
 	// |w_x, w_y, w_z|       |m02, m12, m22|
-	jacobian.setColumn(0, neighborFramewiseWarps[3] - voxelFramewiseWarp);//1st derivative in x
-	jacobian.setColumn(1, neighborFramewiseWarps[4] - voxelFramewiseWarp);//1st derivative in y
-	jacobian.setColumn(2, neighborFramewiseWarps[5] - voxelFramewiseWarp);//1st derivative in z
+	jacobian.setColumn(0, neighbor_framewise_warps[3] - voxel_framewise_warp);//1st derivative in x
+	jacobian.setColumn(1, neighbor_framewise_warps[4] - voxel_framewise_warp);//1st derivative in y
+	jacobian.setColumn(2, neighbor_framewise_warps[5] - voxel_framewise_warp);//1st derivative in z
 
-	Matrix3f backwardDifferences;
+	Matrix3f backward_differences;
 	// |u_x, u_y, u_z|
 	// |v_x, v_y, v_z|
 	// |w_x, w_y, w_z|
-	backwardDifferences.setColumn(0, voxelFramewiseWarp - neighborFramewiseWarps[0]);//1st derivative in x
-	backwardDifferences.setColumn(1, voxelFramewiseWarp - neighborFramewiseWarps[1]);//1st derivative in y
-	backwardDifferences.setColumn(2, voxelFramewiseWarp - neighborFramewiseWarps[2]);//1st derivative in z
+	backward_differences.setColumn(0, voxel_framewise_warp - neighbor_framewise_warps[0]);//1st derivative in x
+	backward_differences.setColumn(1, voxel_framewise_warp - neighbor_framewise_warps[1]);//1st derivative in y
+	backward_differences.setColumn(2, voxel_framewise_warp - neighbor_framewise_warps[2]);//1st derivative in z
 
 	//second derivatives in same direction
 	// |u_xx, u_yy, u_zz|       |m00, m10, m20|
 	// |v_xx, v_yy, v_zz|       |m01, m11, m21|
 	// |w_xx, w_yy, w_zz|       |m02, m12, m22|
-	Matrix3f dd_XX_YY_ZZ = jacobian - backwardDifferences;
+	Matrix3f dd_XX_YY_ZZ = jacobian - backward_differences;
 
 	Matrix3f neighborDifferences;
-	neighborDifferences.setColumn(0, neighborFramewiseWarps[6] - neighborFramewiseWarps[4]);//(0,1,0)->(1,1,0)
-	neighborDifferences.setColumn(1, neighborFramewiseWarps[7] - neighborFramewiseWarps[5]);//(0,0,1)->(0,1,1)
-	neighborDifferences.setColumn(2, neighborFramewiseWarps[8] - neighborFramewiseWarps[3]);//(1,0,0)->(1,0,1)
+	neighborDifferences.setColumn(0, neighbor_framewise_warps[6] - neighbor_framewise_warps[4]);//(0,1,0)->(1,1,0)
+	neighborDifferences.setColumn(1, neighbor_framewise_warps[7] - neighbor_framewise_warps[5]);//(0,0,1)->(0,1,1)
+	neighborDifferences.setColumn(2, neighbor_framewise_warps[8] - neighbor_framewise_warps[3]);//(1,0,0)->(1,0,1)
 
 	//second derivatives in different directions
 	// |u_xy, u_yz, u_zx|      |m00, m10, m20|

@@ -19,14 +19,14 @@
 #include "../../Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
 #include "../../Engines/Analytics/AnalyticsEngine.h"
 #include "../../Engines/Indexing/VBH/CUDA/IndexingEngine_VoxelBlockHash_CUDA.h"
-#include "../WarpGradientFunctors/WarpGradientFunctor_SlavchevaOptimized.h"
-#include "../WarpGradientFunctors/WarpGradientFunctor_SlavchevaDiagnostic.h"
+#include "../WarpGradientFunctors/WarpGradientFunctor_Optimized.h"
+#include "../WarpGradientFunctors/WarpGradientFunctor_Diagnostic.h"
 #include "../../GlobalTemplateDefines.h"
 #include "../Interface/SurfaceTracker.tpp"
 
 namespace ITMLib {
 template
-class SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA, TRACKER_SLAVCHEVA_OPTIMIZED>;
+class SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA, OPTIMIZED>;
 template
-class SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA, TRACKER_SLAVCHEVA_DIAGNOSTIC>;
+class SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA, DIAGNOSTIC>;
 } // namespace ITMLib

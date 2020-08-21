@@ -20,19 +20,18 @@
 #include <regex>
 
 //boost
-#include <boost/filesystem.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/preprocessor/stringize.hpp>
 
 //local
 #include "../Metacoding/DeferrableStructUtilities.h"
 #include "Configuration.h"
-#include "../FileIO/JSON_Utilities.h"
-#include "TelemetrySettings.h"
+#include "../../Engines/Telemetry/TelemetrySettings.h"
 #include "../../Engines/Indexing/IndexingSettings.h"
 #include "../../Engines/Rendering/RenderingSettings.h"
 #include "AutomaticRunSettings.h"
 #include "../../Engines/Main/MainEngineSettings.h"
+#include "../../SurfaceTrackers/Interface/LevelSetEvolutionParameters.h"
 
 using namespace ITMLib::configuration;
 
@@ -51,8 +50,7 @@ DEFINE_SERIALIZABLE_ENUM(MemoryDeviceType,
 
 DEFINE_SERIALIZABLE_ENUM(VOLUME_ROLE_ENUM_DESCRIPTION);
 
-namespace ITMLib {
-namespace configuration {
+namespace ITMLib::configuration {
 
 // =====
 // *** serializable struct definitions ***
@@ -70,6 +68,7 @@ DEFINE_SERIALIZABLE_STRUCT(CONFIGURATION_STRUCT_DESCRIPTION);
 
 // region ===================================== TRACKING PRESET DEFINITIONS ============================================
 
+//TODO: hide statics behind getter namespace-scope functions to avoid cert-err58-check warnings and defer initialization
 const std::string TrackerConfigurationStringPresets::default_ICP_tracker_configuration =
 		"type=icp,levels=rrrbb,minstep=1e-3,"
 		"outlierC=0.01,outlierF=0.002,"
@@ -147,6 +146,7 @@ void CompileOptionDescription(po::options_description& od){
 	IndexingSettings::AddDeferredToOptionsDescription(od);
 	RenderingSettings::AddDeferredToOptionsDescription(od);
 	AutomaticRunSettings::AddDeferredToOptionsDescription(od);
+	LevelSetEvolutionParameters::AddDeferredToOptionsDescription(od);
 }
 
 static void AddAllDeferrableStructsFromVariablesMap(const po::variables_map& vm) {
@@ -155,6 +155,7 @@ static void AddAllDeferrableStructsFromVariablesMap(const po::variables_map& vm)
 	IndexingSettings::BuildDeferredFromVariablesMap(instance.source_tree, vm);
 	RenderingSettings::BuildDeferredFromVariablesMap(instance.source_tree, vm);
 	AutomaticRunSettings::BuildDeferredFromVariablesMap(instance.source_tree, vm);
+	LevelSetEvolutionParameters::BuildDeferredFromVariablesMap(instance.source_tree, vm);
 }
 
 void LoadConfigurationFromVariableMap(const po::variables_map& vm) {
@@ -180,6 +181,7 @@ static void UpdateAllDeferrableStructsFromVariablesMap(const po::variables_map& 
 	IndexingSettings::UpdateDeferredFromVariablesMap(instance.source_tree, vm, instance.origin);
 	RenderingSettings::UpdateDeferredFromVariablesMap(instance.source_tree, vm, instance.origin);
 	AutomaticRunSettings::UpdateDeferredFromVariablesMap(instance.source_tree, vm, instance.origin);
+	LevelSetEvolutionParameters::UpdateDeferredFromVariablesMap(instance.source_tree, vm, instance.origin);
 }
 
 void UpdateConfigurationFromVariableMap(const po::variables_map& vm) {
@@ -187,12 +189,13 @@ void UpdateConfigurationFromVariableMap(const po::variables_map& vm) {
 	instance.UpdateFromVariablesMap(vm);
 }
 
-static void AddAllDeferrableStructsFromSourceToTargetRootConfiguration(pt::ptree& target_tree, const pt::ptree& origin_tree, std::string origin) {
+static void AddAllDeferrableStructsFromSourceToTargetRootConfiguration(pt::ptree& target_tree, const pt::ptree& origin_tree, const std::string& origin) {
 	AddDeferrableFromSourceToTargetTree<MainEngineSettings>(target_tree, origin_tree, origin);
 	AddDeferrableFromSourceToTargetTree<TelemetrySettings>(target_tree, origin_tree, origin);
 	AddDeferrableFromSourceToTargetTree<IndexingSettings>(target_tree, origin_tree, origin);
 	AddDeferrableFromSourceToTargetTree<RenderingSettings>(target_tree, origin_tree, origin);
 	AddDeferrableFromSourceToTargetTree<AutomaticRunSettings>(target_tree, origin_tree, origin);
+	AddDeferrableFromSourceToTargetTree<LevelSetEvolutionParameters>(target_tree, origin_tree, origin);
 }
 
 void SaveConfigurationToJSONFile(const std::string& path) {
@@ -212,5 +215,4 @@ void SaveConfigurationToJSONFile(const std::string& path, const Configuration& c
 	pt::write_json_no_quotes(path, target_tree, true);
 }
 // endregion ===========================================================================================================
-} // namespace ITMLib::configuration
 } // namespace ITMLib

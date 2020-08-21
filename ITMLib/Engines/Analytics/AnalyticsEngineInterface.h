@@ -18,8 +18,8 @@
 
 #include <vector>
 #include "../../Objects/Volume/VoxelVolume.h"
-#include "../../Utils/WarpType.h"
-#include "../../Utils/VoxelFlags.h"
+#include "../../Utils/Enums/WarpType.h"
+#include "../../Utils/Enums/VoxelFlags.h"
 
 namespace ITMLib {
 template<typename TVoxel, typename TIndex>
@@ -35,6 +35,8 @@ public:
 	virtual unsigned int CountVoxelsWithSpecifiedFlags(VoxelVolume<TVoxel, TIndex>* volume, VoxelFlags flags) = 0;
 	virtual unsigned int CountNonTruncatedVoxels(VoxelVolume<TVoxel, TIndex>* volume) = 0;
 	virtual unsigned int CountAlteredVoxels(VoxelVolume<TVoxel, TIndex>* volume) = 0;
+	virtual unsigned int CountAlteredGradients(VoxelVolume<TVoxel, TIndex>* volume) = 0;
+	virtual unsigned int CountAlteredWarpUpdates(VoxelVolume<TVoxel, TIndex>* volume) = 0;
 	virtual unsigned int CountVoxelsWithSpecificSdfValue(VoxelVolume<TVoxel, TIndex>* volume, float value) = 0;
 	virtual double SumNonTruncatedVoxelAbsSdf(VoxelVolume<TVoxel, TIndex>* volume) = 0;
 	virtual double SumTruncatedVoxelAbsSdf(VoxelVolume<TVoxel, TIndex>* volume) = 0;

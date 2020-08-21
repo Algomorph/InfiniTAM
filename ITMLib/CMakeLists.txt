@@ -41,7 +41,6 @@ set(ITMLIB_ENGINES_MAIN_SOURCES
     Engines/Main/MultiEngine_PlainVoxelArray.cpp
     Engines/Main/MultiEngine_VoxelBlockHash.cpp
 
-    Engines/Main/NonRigidTrackingParameters.h
     Engines/Main/DynamicSceneVoxelEngine.tpp
     Engines/Main/DynamicSceneVoxelEngine_PlainVoxelArray.cpp
     Engines/Main/DynamicSceneVoxelEngine_VoxelBlockHash.cpp
@@ -855,19 +854,19 @@ set(ITMLIB_SCENE_MOTION_TRACKERS_CUDA_HEADERS
 ##
 
 set(ITMLIB_SCENE_MOTION_TRACKERS_INTERFACE_SOURCES
-    SurfaceTrackers/Interface/SlavchevaSurfaceTracker.cpp
+    SurfaceTrackers/Interface/LevelSetEvolutionParameters.cpp
     SurfaceTrackers/Interface/SurfaceTracker.tpp
     )
 set(ITMLIB_SCENE_MOTION_TRACKERS_INTERFACE_HEADERS
     SurfaceTrackers/WarpGradientFunctors/WarpGradientFunctor.h
     SurfaceTrackers/Interface/SurfaceTrackerInterface.h
-    SurfaceTrackers/Interface/SlavchevaSurfaceTracker.h
+    SurfaceTrackers/Interface/LevelSetEvolutionParameters.h
     SurfaceTrackers/Interface/SurfaceTracker.h
     )
 ##
 set(ITMLIB_SCENE_MOTION_TRACKERS_SHARED_HEADERS
-    SurfaceTrackers/WarpGradientFunctors/WarpGradientFunctor_SlavchevaDiagnostic.h
-    SurfaceTrackers/WarpGradientFunctors/WarpGradientFunctor_SlavchevaOptimized.h
+    SurfaceTrackers/WarpGradientFunctors/WarpGradientFunctor_Diagnostic.h
+    SurfaceTrackers/WarpGradientFunctors/WarpGradientFunctor_Optimized.h
 
     SurfaceTrackers/Shared/WarpGradientCommon.h
     SurfaceTrackers/Shared/SurfaceTrackerSharedRoutines.h
@@ -899,11 +898,12 @@ set(
         Utils/Collections/OperationsOnSTLContainers.cpp
 
         Utils/Enums/IndexingMethod.cpp
+        Utils/Enums/ExecutionMode.cpp
 
         Utils/Configuration/AutomaticRunSettings.cpp
         Utils/Configuration/Configuration.cpp
         Utils/Configuration/LoggingSettings.cpp
-        Utils/Configuration/TelemetrySettings.cpp
+        Engines/Telemetry/TelemetrySettings.cpp
 
         Utils/FileIO/JSON_Utilities.cpp
         Utils/FileIO/CSV_Utilities.cpp
@@ -920,9 +920,6 @@ set(
         Utils/Quaternions/QuaternionFromMatrix.cpp
 
         Utils/Telemetry/TelemetryUtilities.cpp
-
-        Utils/CPPPrintHelpers.cpp
-        Utils/ExecutionMode.cpp
 
         Utils/Math.cpp
 
@@ -948,9 +945,13 @@ set(
         Utils/Configuration/AutomaticRunSettings.h
         Utils/Configuration/Configuration.h
         Utils/Configuration/LoggingSettings.h
-        Utils/Configuration/TelemetrySettings.h
+        Engines/Telemetry/TelemetrySettings.h
 
         Utils/Enums/IndexingMethod.h
+        Utils/Enums/ExecutionMode.h
+        Utils/Enums/HashBlockProperties.h
+        Utils/Enums/VoxelFlags.h
+        Utils/Enums/WarpType.h
 
         Utils/FileIO/JSON_Utilities.h
         Utils/FileIO/CSV_Utilities.h
@@ -987,19 +988,16 @@ set(
 
         Utils/Telemetry/TelemetryUtilities.h
 
+        Utils/Logging/ConsolePrintColors.h
         Utils/Logging/Logging.cpp
         Utils/Logging/LoggingUtilities.h
         Utils/Logging/Logger.h
+        Utils/Logging/PrettyPrinters.h
+        Utils/Logging/PrettyPrinters.cpp
 
-        Utils/CPPPrintHelpers.h
-        Utils/CPrintHelpers.h
         Utils/CUDAUtils.h
-        Utils/ExecutionMode.h
-        Utils/ValuePosition.h
         Utils/ImageTypes.h
-        Utils/HashBlockProperties.h
-        Utils/VoxelFlags.h
-        Utils/WarpType.h
+
         Utils/Math.h
         Utils/Collections/MemoryBlock_StdContainer_Convertions.h
         Utils/MemoryBlockTypes.h
@@ -1015,46 +1013,6 @@ set(
         Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_Functors.h
 )
 
-
-## ================================================ UTILS - VISUALIZATION ==============================================
-
-
-set(ITMLIB_UTILS_VISUALIZATION_SOURCES
-    # TODO: FIXME
-    #Utils/Rendering/VolumeSliceVisualizer2D.tpp
-    #Utils/Rendering/SceneSliceVisualizer2D_PlainVoxelArray.cpp
-    #Utils/Rendering/SceneSliceVisualizer2D_VoxelBlockHash.cpp
-    )
-
-if (WITH_VTK)
-    list(APPEND ITMLIB_UTILS_VISUALIZATION_SOURCES
-         #TODO: fixme
-         #         Utils/Rendering/VoxelValueGrapher.cpp
-         #         Utils/Rendering/SceneSliceVisualizer1D.tpp
-         Utils/Visualization/SceneSliceVisualizer3D.tpp
-         Utils/Visualization/SceneSliceVisualizer3DInteractorStyle.tpp
-         Utils/Visualization/SceneSliceVisualizer3DCommon.cpp
-         Utils/Visualization/SceneSliceVisualizer3D_PlainVoxelArray.cpp
-         Utils/Visualization/SceneSliceVisualizer3D_VoxelBlockHash.cpp
-         Utils/Visualization/SceneTrackingEnergyPlotter.cpp
-         Utils/Visualization/VisualizationWindowManager.cpp
-         )
-endif ()
-
-set(ITMLIB_UTILS_VISUALIZATION_HEADERS
-    Utils/Visualization/SceneSliceVisualizerCommon.h
-    #    Utils/Rendering/VolumeSliceVisualizer2D.h
-    )
-if (WITH_VTK)
-    list(APPEND ITMLIB_UTILS_VISUALIZATION_HEADERS
-         #         Utils/Rendering/VoxelValueGrapher.h
-         Utils/Visualization/SceneSliceVisualizer3D.h
-         Utils/Visualization/SceneSliceVisualizer3DInteractorStyle.h
-         Utils/Visualization/SceneSliceVisualizer3DCommon.h
-         Utils/Visualization/SceneTrackingEnergyPlotter.h
-         Utils/Visualization/VisualizationWindowManager.h
-         )
-endif ()
 #################################################################
 # Collect the project files into sources, headers and templates #
 #################################################################
@@ -1096,7 +1054,6 @@ set(sources
     ${ITMLIB_SCENE_MOTION_TRACKERS_INTERFACE_SOURCES}
     ${ITMLIB_SCENE_MOTION_TRACKERS_SHARED_SOURCES}
     ${ITMLIB_UTILS_SOURCES}
-    ${ITMLIB_UTILS_VISUALIZATION_SOURCES}
     )
 
 set(headers
@@ -1160,7 +1117,6 @@ set(headers
     ${ITMLIB_SCENE_MOTION_TRACKERS_INTERFACE_HEADERS}
     ${ITMLIB_SCENE_MOTION_TRACKERS_SHARED_HEADERS}
     ${ITMLIB_UTILS_HEADERS}
-    ${ITMLIB_UTILS_VISUALIZATION_HEADERS}
     )
 
 #############################
@@ -1184,7 +1140,7 @@ if (WITH_VTK)
     target_compile_definitions(${targetname} PUBLIC -DWITH_VTK)
 endif ()
 target_include_directories(${targetname} PUBLIC ${OpenCV_INCLUDE_DIRS})
-target_link_libraries(${targetname} PUBLIC ${OpenCV_LIBS} ${VTK_LIBRARIES} log4cplus tinyply MiniSlamGraphLib FernRelocLib ORUtils)
+target_link_libraries(${targetname} PUBLIC threadpool11 ${OpenCV_LIBS} ${VTK_LIBRARIES} log4cplus tinyply MiniSlamGraphLib FernRelocLib ORUtils)
 include(${PROJECT_SOURCE_DIR}/cmake/LinkBoost.cmake)
 
 
