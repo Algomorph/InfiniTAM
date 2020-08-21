@@ -79,8 +79,8 @@ build_script:
           -DWITH_CUDA=ON
           -DWITH_OPENMP=ON
           -DWITH_FFMPEG=ON
-          -DCMAKE_CXX_COMPILER=/usr/bin/g++-8
-          -DCMAKE_C_COMPILER=/usr/bin/gcc-8
+          -DCMAKE_CXX_COMPILER=/usr/bin/g++-9
+          -DCMAKE_C_COMPILER=/usr/bin/gcc-9
           -DCMAKE_C_COMPILER_LAUNCHER=ccache
           -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
           ..
