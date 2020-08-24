@@ -58,6 +58,14 @@ std::string Frame17MaskPath() {
 	return STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_omask_000017.png";
 }
 
+std::string Frame18ColorPath() {
+	return STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_color_000018.png";
+}
+
+std::string VideoFrames16to18Path() {
+	return STATIC_TEST_DATA_PREFIX "TestData/videos/snoopy_color16-18.mp4";
+}
+
 template std::string PartialVolume00Path<PlainVoxelArray>();
 template std::string PartialVolume00Path<VoxelBlockHash>();
 template std::string PartialVolume16Path<PlainVoxelArray>();
