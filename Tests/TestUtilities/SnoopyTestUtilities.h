@@ -46,8 +46,14 @@ std::string Frame17DepthPath();
 std::string Frame17ColorPath();
 std::string Frame17MaskPath();
 
+std::string Frame18DepthPath();
 std::string Frame18ColorPath();
-std::string VideoFrames16to18Path();
+std::string Frame18MaskPath();
+
+std::string VideoFrames16to18DepthPath();
+std::string VideoFrames16to18ColorPath();
+std::string VideoFrames16to18Color_YUV422P_Path();
+std::string VideoFrames16to18Depth_GRAY16LE_Path();
 
 template<typename TIndex>
 std::string PartialVolume00Path() {

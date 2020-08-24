@@ -127,6 +127,7 @@ if (BUILD_TESTS)
     itm_add_test(NAME EnumSerialization SOURCES Test_EnumSerialization.cpp)
     itm_add_test(NAME RenderingEngine SOURCES Test_RenderingEngine.cpp)
     itm_add_test(NAME ImageProcessingEngine SOURCES Test_ImageProcessingEngine.cpp)
+    itm_add_test(NAME FFmpegReadWrite SOURCES Test_FFmpegReadWrite.cpp)
 
     # *** tests that require CUDA
     if(WITH_CUDA)

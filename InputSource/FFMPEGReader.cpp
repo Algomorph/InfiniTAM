@@ -164,7 +164,8 @@ int FFMPEGReader::PrivateData::open_input_file(const char* filename) {
 			if (codec_ctx->pix_fmt == AV_PIX_FMT_GRAY16LE) depthStreamIdx = i;
 			if ((codec_ctx->pix_fmt == AV_PIX_FMT_YUV422P) ||
 			    (codec_ctx->pix_fmt == AV_PIX_FMT_RGB24) ||
-			    (codec_ctx->pix_fmt == AV_PIX_FMT_RGBA))
+			    (codec_ctx->pix_fmt == AV_PIX_FMT_RGBA) ||
+			    (codec_ctx->pix_fmt == AV_PIX_FMT_BGR0))
 				colorStreamIdx = i;
 		}
 	}
