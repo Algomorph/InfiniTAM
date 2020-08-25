@@ -127,22 +127,23 @@ BOOST_AUTO_TEST_CASE(TestFFmpegWrite) {
 	reader.GetImages(color, depth);
 	reader_gt.GetImages(color_gt, depth_gt);
 
-	BOOST_REQUIRE(depth == depth_gt);
 	BOOST_REQUIRE(color == color_gt);
+	BOOST_REQUIRE(depth == depth_gt);
 
 	// *** Test Frame 17 ***
 	reader.GetImages(color, depth);
 	reader_gt.GetImages(color_gt, depth_gt);
 
-	BOOST_REQUIRE(depth == depth_gt);
 	BOOST_REQUIRE(color == color_gt);
+	BOOST_REQUIRE(depth == depth_gt);
 
 	// *** Test Frame 18 ***
 	reader.GetImages(color, depth);
 	reader_gt.GetImages(color_gt, depth_gt);
 
-	BOOST_REQUIRE(depth == depth_gt);
 	BOOST_REQUIRE(color == color_gt);
+	BOOST_REQUIRE(depth == depth_gt);
+
 
 	BOOST_REQUIRE(reader.HasMoreImages() == false);
 }
