@@ -19,7 +19,6 @@ include(${PROJECT_SOURCE_DIR}/cmake/UseOpenMP.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/UseOpenNI.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/UseRealSense.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/UseUVC.cmake)
-include(${PROJECT_SOURCE_DIR}/cmake/UseVTK.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/UseBoost.cmake)
 
 #############################

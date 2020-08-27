@@ -52,6 +52,7 @@ private:
 
 	int* needed_hash_codes_host;
 	int* needed_hash_codes_device;
+
 public:
 	GlobalCache();
 	explicit GlobalCache(const int hash_entry_count);
@@ -123,5 +124,6 @@ public:
 
 		fclose(f);
 	}
+
 };
 } // namespace ITMLib

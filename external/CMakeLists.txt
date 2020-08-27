@@ -226,9 +226,17 @@ target_link_libraries(wft freetype)
 #threadpool11 (https://github.com/tghosgor/threadpool11) fast thread pooling for C++
 # 39fcc1fc51671989d4f3c02903f9d39c6323b685
 find_package(Threads REQUIRED)
+find_package(Boost REQUIRED)
 add_library(threadpool11 STATIC
             packaged/threadpool11/pool.cpp
             packaged/threadpool11/pool.hpp
             packaged/threadpool11/threadpool11.hpp
             packaged/threadpool11/work.hpp)
-target_link_libraries(threadpool11 Threads::Threads)
+
+if(CMAKE_VERSION VERSION_LESS 3.15)
+    set(BOOST_TARGET Boost::boost)
+else()
+    set(BOOST_TARGET Boost::headers)
+endif()
+
+target_link_libraries(threadpool11 Threads::Threads ${BOOST_TARGET})

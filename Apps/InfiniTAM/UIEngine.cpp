@@ -17,13 +17,6 @@
 #endif
 #endif
 
-#ifdef WITH_VTK
-//VTK
-#include <vtkCommand.h>
-#include <vtkRenderWindowInteractor.h>
-
-#endif
-
 //ITMLib
 #include "../../ITMLib/Utils/Analytics/BenchmarkUtilities.h"
 #include "../../ITMLib/Utils/Logging/Logging.h"

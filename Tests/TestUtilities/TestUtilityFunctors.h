@@ -23,6 +23,7 @@
 #include "../../ITMLib/Objects/Volume/VoxelBlockHash.h"
 #include "../../ORUtils/MemoryDeviceType.h"
 #include "../../ITMLib/Utils/Geometry/GeometryBooleanOperations.h"
+#include <limits>
 
 #ifdef __CUDACC__
 #include "TestUtilityKernels.h"
@@ -126,12 +127,19 @@ template<typename TVoxel>
 struct AssignRandomDepthWeightsInRangeFunctor<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU> {
 
 	AssignRandomDepthWeightsInRangeFunctor(const Extent2Di& range, const Extent3Di& bounds) :
-			range(range), bounds(bounds), generator(random_device()), distribution(range.from, range.to-1) {}
+			range(range), bounds(bounds), generator(random_device()), distribution(range.from, range.to-1) {
+		if(range.from < 0 || range.to < 0 || range.to > std::numeric_limits<unsigned char>::max() + 1 || range.from > std::numeric_limits<unsigned char>::max() + 1){
+			DIEWITHEXCEPTION_REPORTLOCATION("Range bound outside of limits for depth weight.");
+		}
+		if(range.to <= range.from){
+			DIEWITHEXCEPTION_REPORTLOCATION("Invalid range.");
+		}
+	}
 
 	inline void operator()(TVoxel& voxel, const Vector3i& position) {
 		if (IsPointInBounds(position, bounds)) {
 			const std::lock_guard<std::mutex> lock(mutex);
-			voxel.w_depth = distribution(generator);
+			voxel.w_depth = static_cast<unsigned char>(distribution(generator));
 		}
 	}
 
@@ -140,7 +148,7 @@ private:
 	std::mt19937 generator;
 	const Extent2Di range;
 	const Extent3Di bounds;
-	std::uniform_int_distribution<unsigned char> distribution;
+	std::uniform_int_distribution<unsigned int> distribution;
 	std::mutex mutex;
 
 };
