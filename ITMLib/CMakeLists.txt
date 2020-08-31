@@ -829,13 +829,13 @@ set(ITMLIB_CAMERA_TRACKERS_SHARED_HEADERS
     )
 # ============================================== SCENE MOTION TRACKERS =================================================
 set(ITMLIB_SCENE_MOTION_TRACKERS_HEADERS
-    SurfaceTrackers/SurfaceTrackerFactory.h
+    Engines/LevelSetAlignment/LevelSetAlignmentEngineFactory.h
     )
 
 set(ITMLIB_SCENE_MOTION_TRACKERS_CPU_SOURCES
 
-    SurfaceTrackers/CPU/SurfaceTracker_CPU_PlainVoxelArray.cpp
-    SurfaceTrackers/CPU/SurfaceTracker_CPU_VoxelBlockHash.cpp
+    Engines/LevelSetAlignment/CPU/LevelSetAlignmentEngine_CPU_PlainVoxelArray.cpp
+    Engines/LevelSetAlignment/CPU/LevelSetAlignmentEngine_CPU_VoxelBlockHash.cpp
     )
 
 set(ITMLIB_SCENE_MOTION_TRACKERS_CPU_HEADERS
@@ -843,8 +843,8 @@ set(ITMLIB_SCENE_MOTION_TRACKERS_CPU_HEADERS
 ##
 
 set(ITMLIB_SCENE_MOTION_TRACKERS_CUDA_SOURCES
-    SurfaceTrackers/CUDA/SurfaceTracker_CUDA_PlainVoxelArray.cu
-    SurfaceTrackers/CUDA/SurfaceTracker_CUDA_VoxelBlockHash.cu
+    Engines/LevelSetAlignment/CUDA/LevelSetAlignmentEngine_CUDA_PlainVoxelArray.cu
+    Engines/LevelSetAlignment/CUDA/LevelSetAlignmentEngine_CUDA_VoxelBlockHash.cu
     )
 set(ITMLIB_SCENE_MOTION_TRACKERS_CUDA_HEADERS
 
@@ -852,27 +852,26 @@ set(ITMLIB_SCENE_MOTION_TRACKERS_CUDA_HEADERS
 ##
 
 set(ITMLIB_SCENE_MOTION_TRACKERS_INTERFACE_SOURCES
-    SurfaceTrackers/Interface/LevelSetEvolutionParameters.cpp
-    SurfaceTrackers/Interface/SurfaceTracker.tpp
+    Engines/LevelSetAlignment/Interface/LevelSetAlignmentParameters.cpp
+    Engines/LevelSetAlignment/Interface/LevelSetAlignmentEngine.tpp
     )
 set(ITMLIB_SCENE_MOTION_TRACKERS_INTERFACE_HEADERS
-    SurfaceTrackers/WarpGradientFunctors/WarpGradientFunctor.h
-    SurfaceTrackers/Interface/SurfaceTrackerInterface.h
-    SurfaceTrackers/Interface/LevelSetEvolutionParameters.h
-    SurfaceTrackers/Interface/SurfaceTracker.h
+    Engines/LevelSetAlignment/WarpGradientFunctors/WarpGradientFunctor.h
+    Engines/LevelSetAlignment/Interface/LevelSetAlignmentEngineInterface.h
+    Engines/LevelSetAlignment/Interface/LevelSetAlignmentParameters.h
+    Engines/LevelSetAlignment/Interface/LevelSetAlignmentEngine.h
     )
 ##
 set(ITMLIB_SCENE_MOTION_TRACKERS_SHARED_HEADERS
-    SurfaceTrackers/WarpGradientFunctors/WarpGradientFunctor_Diagnostic.h
-    SurfaceTrackers/WarpGradientFunctors/WarpGradientFunctor_Optimized.h
+    Engines/LevelSetAlignment/WarpGradientFunctors/WarpGradientFunctor_Diagnostic.h
+    Engines/LevelSetAlignment/WarpGradientFunctors/WarpGradientFunctor_Optimized.h
 
-    SurfaceTrackers/Shared/WarpGradientCommon.h
-    SurfaceTrackers/Shared/SurfaceTrackerSharedRoutines.h
-    SurfaceTrackers/Shared/SurfaceTrackerDiagnosticRoutines.h
-    SurfaceTrackers/Shared/SurfaceTrackerSharedFunctors.h
-    SurfaceTrackers/Shared/SurfaceTrackerOptimizationParameters.h
-    SurfaceTrackers/Shared/WarpGradientRoutines.h
-    SurfaceTrackers/Shared/WarpGradientAggregates.h
+    Engines/LevelSetAlignment/Shared/WarpGradientCommon.h
+    Engines/LevelSetAlignment/Shared/LevelSetAlignmentSharedRoutines.h
+    Engines/LevelSetAlignment/Shared/LevelSetAlignmentDiagnosticRoutines.h
+    Engines/LevelSetAlignment/Shared/LevelSetAlignmentSharedFunctors.h
+    Engines/LevelSetAlignment/Shared/WarpGradientRoutines.h
+    Engines/LevelSetAlignment/Shared/WarpGradientAggregates.h
     )
 
 # ======================================================================================================================
@@ -905,6 +904,7 @@ set(
 
         Utils/FileIO/JSON_Utilities.cpp
         Utils/FileIO/CSV_Utilities.cpp
+        Utils/FileIO/RecordHandling.cpp
 
         Utils/Geometry/CardinalAxesAndPlanes.cpp
         Utils/Geometry/Rodrigues.cpp
@@ -953,6 +953,7 @@ set(
 
         Utils/FileIO/JSON_Utilities.h
         Utils/FileIO/CSV_Utilities.h
+        Utils/FileIO/RecordHandling.h
 
         Utils/Geometry/CardinalAxesAndPlanes.h
         Utils/Geometry/CheckBlockVisibility.h

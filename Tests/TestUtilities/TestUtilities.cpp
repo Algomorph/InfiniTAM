@@ -33,6 +33,7 @@
 #include "../../ITMLib/Utils/Quaternions/Quaternion.h"
 #include "../../ITMLib/Utils/Configuration/AutomaticRunSettings.h"
 #include "../../ITMLib/Engines/Main/MainEngineSettings.h"
+#include "../../ITMLib/Engines/LevelSetAlignment/Interface/LevelSetAlignmentParameters.h"
 
 using namespace ITMLib;
 
@@ -438,16 +439,19 @@ configuration::Configuration GenerateChangedUpConfiguration(){
 			true,
 			true,
 			true,
+			true,
+			0.0001,
+			true,
 			true);
 	MainEngineSettings changed_up_main_engine_settings(true, LIBMODE_BASIC, INDEX_ARRAY, false);
 	IndexingSettings changed_up_indexing_settings(DIAGNOSTIC);
 	RenderingSettings changed_up_rendering_settings(true);
 	AutomaticRunSettings changed_up_automatic_run_settings(50, 16, true, true, true, true);
-	LevelSetEvolutionParameters changed_up_level_set_evolution_parameters(
+	LevelSetAlignmentParameters changed_up_level_set_evolution_parameters(
 		ExecutionMode::DIAGNOSTIC,
-		LevelSetEvolutionWeights(0.11f, 0.09f, 2.0f, 0.3f, 0.1f, 1e-6f, 0.4f),
-		LevelSetEvolutionSwitches(false, true, false, true, false),
-		LevelSetEvolutionTerminationConditions(300, 0.0002f)
+		LevelSetAlignmentWeights(0.11f, 0.09f, 2.0f, 0.3f, 0.1f, 1e-6f, 0.4f),
+		LevelSetAlignmentSwitches(false, true, false, true, false),
+		LevelSetAlignmentTerminationConditions(300, 0.0002f)
 	);
 
 	AddDeferrableToSourceTree(changed_up_configuration, changed_up_main_engine_settings);

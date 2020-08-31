@@ -16,11 +16,11 @@
 #pragma once
 
 //local
-#include "../../Objects/Volume/VoxelVolume.h"
-#include "../../Utils/Logging/ConsolePrintColors.h"
-#include "../../Utils/Enums/VoxelFlags.h"
-#include "LevelSetEvolutionParameters.h"
-#include "../../Engines/Common/Configurable.h"
+#include "../../../Objects/Volume/VoxelVolume.h"
+#include "../../../Utils/Logging/ConsolePrintColors.h"
+#include "../../../Utils/Enums/VoxelFlags.h"
+#include "LevelSetAlignmentParameters.h"
+#include "../../Common/Configurable.h"
 
 namespace ITMLib {
 /**
@@ -30,12 +30,12 @@ namespace ITMLib {
  * \tparam TIndex Indexing structure type used for voxel volumes
  */
 template<typename TVoxel, typename TWarp, typename TIndex>
-class SurfaceTrackerInterface : public Configurable<LevelSetEvolutionParameters> {
+class LevelSetAlignmentEngineInterface : public Configurable<LevelSetAlignmentParameters> {
 
 public:
-	using Configurable<LevelSetEvolutionParameters>::Configurable;
+	using Configurable<LevelSetAlignmentParameters>::Configurable;
 
-	virtual ~SurfaceTrackerInterface() = default;
+	virtual ~LevelSetAlignmentEngineInterface() = default;
 	virtual VoxelVolume<TVoxel, TIndex>* TrackNonRigidMotion(
 			VoxelVolume<TVoxel, TIndex>* canonical_volume,
 			VoxelVolume<TVoxel, TIndex>** live_volume_pair,

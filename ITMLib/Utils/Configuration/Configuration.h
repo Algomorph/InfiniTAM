@@ -31,8 +31,6 @@
 #include "../SurfelVolumeParameters.h"
 #include "../../../ORUtils/MemoryDeviceType.h"
 #include "../Math.h"
-#include "../../SurfaceTrackers/Interface/LevelSetEvolutionParameters.h"
-#include "../../SurfaceTrackers/WarpGradientFunctors/WarpGradientFunctor.h"
 #include "../../Objects/Volume/VoxelBlockHash.h"
 #include "../../Objects/Volume/PlainVoxelArray.h"
 #include "LoggingSettings.h"

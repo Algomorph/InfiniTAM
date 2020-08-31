@@ -42,23 +42,16 @@
 
 #endif
 //(misc)
-#include "../ITMLib/SurfaceTrackers/Interface/SurfaceTracker.h"
+
 #include "../ITMLib/Engines/VolumeFusion/VolumeFusionEngine.h"
 #include "../ITMLib/Engines/Indexing/IndexingEngineFactory.h"
 #include "../ITMLib/Engines/VolumeFusion/VolumeFusionEngineFactory.h"
 #include "../ITMLib/Engines/Warping/WarpingEngineFactory.h"
 #include "../ITMLib/Engines/Meshing/MeshingEngineFactory.h"
 #include "../ITMLib/Engines/EditAndCopy/EditAndCopyEngineFactory.h"
-#include "../ITMLib/Utils/Configuration/Configuration.h"
-#include "../ITMLib/Utils/Metacoding/SerializableEnum.h"
-#include "../ITMLib/Objects/Camera/CalibIO.h"
-#include "../ITMLib/Utils/Quaternions/Quaternion.h"
 #include "../ITMLib/Engines/ViewBuilding/ViewBuilderFactory.h"
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
-#include "../ITMLib/Engines/Meshing/MeshingEngineFactory.h"
-#include "../ITMLib/Objects/Meshing/Mesh.h"
 #include "../ITMLib/Engines/Telemetry/TelemetrySettings.h"
-#include "../ITMLib/Engines/Rendering/RenderingEngineFactory.h"
 #include "../ITMLib/Utils/Configuration/AutomaticRunSettings.h"
 #include "../ITMLib/Engines/Main/MainEngineSettings.h"
 #include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
@@ -240,23 +233,23 @@ void GenerateWarpGradientTestData() {
 	LoadVolume(&canonical_volume, volume_output_directory + "snoopy_partial_frame_16.dat", TMemoryDeviceType,
 	           snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 
-	LevelSetEvolutionSwitches data_only_switches(true, false, false, false, false);
+	LevelSetAlignmentSwitches data_only_switches(true, false, false, false, false);
 	std::string data_only_filename = "warp_field_0_data.dat";
-	LevelSetEvolutionSwitches data_smoothed_switches(false, false, false, false, true);
+	LevelSetAlignmentSwitches data_smoothed_switches(false, false, false, false, true);
 	std::string data_smoothed_filename = "warp_field_0_smoothed.dat";
 	std::string framewise_warps_filename = "warp_field_0_data_framewise_warps.dat";
-	LevelSetEvolutionSwitches warp_complete_switches(true, false, true, false, true);
+	LevelSetAlignmentSwitches warp_complete_switches(true, false, true, false, true);
 	std::string warp_complete_filename = "warp_field_0_complete.dat";
 
-	std::vector<std::tuple<std::string, LevelSetEvolutionSwitches>> configuration_pairs = {
+	std::vector<std::tuple<std::string, LevelSetAlignmentSwitches>> configuration_pairs = {
 			std::make_tuple(std::string("warp_field_1_tikhonov.dat"),
-			                LevelSetEvolutionSwitches(false, false, true, false, false)),
+			                LevelSetAlignmentSwitches(false, false, true, false, false)),
 			std::make_tuple(std::string("warp_field_1_data_and_tikhonov.dat"),
-			                LevelSetEvolutionSwitches(true, false, true, false, false)),
+			                LevelSetAlignmentSwitches(true, false, true, false, false)),
 			std::make_tuple(std::string("warp_field_1_data_and_killing.dat"),
-			                LevelSetEvolutionSwitches(true, false, true, true, false)),
+			                LevelSetAlignmentSwitches(true, false, true, true, false)),
 			std::make_tuple(std::string("warp_field_1_data_and_level_set.dat"),
-			                LevelSetEvolutionSwitches(true, true, false, false, false))
+			                LevelSetAlignmentSwitches(true, true, false, false, false))
 	};
 
 	VoxelVolume<WarpVoxel, TIndex> warp_field(TMemoryDeviceType,
@@ -265,7 +258,7 @@ void GenerateWarpGradientTestData() {
 	AllocateUsingOtherVolume(&warp_field, live_volume, MEMORYDEVICE_CPU);
 	AllocateUsingOtherVolume(canonical_volume, live_volume, MEMORYDEVICE_CPU);
 
-	SurfaceTracker<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, OPTIMIZED> data_only_motion_tracker(
+	LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, OPTIMIZED> data_only_motion_tracker(
 			data_only_switches);
 
 	data_only_motion_tracker.CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
@@ -275,7 +268,7 @@ void GenerateWarpGradientTestData() {
 			&warp_field);
 	warp_stats_file.OStream().write(reinterpret_cast<const char*>(&altered_gradient_count__data_only), sizeof(unsigned int));
 
-	SurfaceTracker<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, OPTIMIZED> data_smoothed_motion_tracker(
+	LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, OPTIMIZED> data_smoothed_motion_tracker(
 			data_smoothed_switches);
 	data_smoothed_motion_tracker.SmoothWarpGradient(&warp_field, canonical_volume, live_volume);
 	warp_field.SaveToDisk(volume_output_directory + data_smoothed_filename);
@@ -286,7 +279,7 @@ void GenerateWarpGradientTestData() {
 
 	warp_field.Reset();
 	AllocateUsingOtherVolume(&warp_field, live_volume, TMemoryDeviceType);
-	SurfaceTracker<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, OPTIMIZED> complete_motion_tracker(
+	LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, OPTIMIZED> complete_motion_tracker(
 			warp_complete_switches);
 	complete_motion_tracker.CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
 	complete_motion_tracker.SmoothWarpGradient(&warp_field, canonical_volume, live_volume);
@@ -314,7 +307,7 @@ void GenerateWarpGradientTestData() {
 		EditAndCopyEngineFactory::Instance<WarpVoxel, TIndex, TMemoryDeviceType>().ResetVolume(&warp_field);
 		warp_field.LoadFromDisk(volume_output_directory + framewise_warps_filename);
 		std::string filename = std::get<0>(pair);
-		SurfaceTracker<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, OPTIMIZED> tracker(
+		LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, OPTIMIZED> tracker(
 				std::get<1>(pair));
 		tracker.CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
 		warp_field.SaveToDisk(volume_output_directory + filename);
@@ -329,13 +322,13 @@ void GenerateWarpGradientTestData() {
 void GenerateWarpGradient_PVA_to_VBH_TestData() {
 	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(),
 	               "Generating multi-iteration warp field data from snoopy masked partial volumes 16 & 17 (PVA & VBH)... ");
-	LevelSetEvolutionSwitches switches_data_only(true, false, false, false, false);
+	LevelSetAlignmentSwitches switches_data_only(true, false, false, false, false);
 	GenericWarpTest<MEMORYDEVICE_CPU>(switches_data_only, 10, SAVE_SUCCESSIVE_ITERATIONS);
-	LevelSetEvolutionSwitches switches_data_and_tikhonov(true, false, true, false, false);
+	LevelSetAlignmentSwitches switches_data_and_tikhonov(true, false, true, false, false);
 	GenericWarpTest<MEMORYDEVICE_CPU>(switches_data_and_tikhonov, 5, SAVE_SUCCESSIVE_ITERATIONS);
-	LevelSetEvolutionSwitches switches_data_and_tikhonov_and_sobolev_smoothing(true, false, true, false, true);
+	LevelSetAlignmentSwitches switches_data_and_tikhonov_and_sobolev_smoothing(true, false, true, false, true);
 	GenericWarpTest<MEMORYDEVICE_CPU>(switches_data_and_tikhonov_and_sobolev_smoothing, 5, SAVE_SUCCESSIVE_ITERATIONS);
-	GenericWarpTest<MEMORYDEVICE_CPU>(LevelSetEvolutionSwitches(true, false, true, false, true),
+	GenericWarpTest<MEMORYDEVICE_CPU>(LevelSetAlignmentSwitches(true, false, true, false, true),
 	                                  5, GenericWarpTestMode::SAVE_FINAL_ITERATION_AND_FUSION);
 }
 
@@ -346,7 +339,7 @@ void GenerateFusedVolumeTestData() {
 	               "Generating fused volume data from snoopy masked partial volume 16 & 17 warps ("
 			               << IndexString<TIndex>() << ") ... ");
 	VoxelVolume<TSDFVoxel, TIndex>* warped_live_volume;
-	LevelSetEvolutionSwitches data_tikhonov_sobolev_switches(true, false, true, false, true);
+	LevelSetAlignmentSwitches data_tikhonov_sobolev_switches(true, false, true, false, true);
 	LoadVolume(&warped_live_volume,
 	           GetWarpedLivePath<TIndex>(SwitchesToPrefix(data_tikhonov_sobolev_switches), iteration),
 	           MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
@@ -453,9 +446,9 @@ configuration::Configuration GenerateDefaultSnoopyConfiguration() {
 	IndexingSettings default_snoopy_indexing_settings;
 	RenderingSettings default_snoopy_rendering_settings;
 	AutomaticRunSettings default_snoopy_automatic_run_settings(716, 16, false, false, false, false);
-	LevelSetEvolutionParameters default_snoopy_level_set_evolution_parameters(
+	LevelSetAlignmentParameters default_snoopy_level_set_evolution_parameters(
 			ExecutionMode::OPTIMIZED,
-			LevelSetEvolutionWeights(
+			LevelSetAlignmentWeights(
 					0.2f,
 					0.1f,
 					2.0f,
@@ -463,10 +456,10 @@ configuration::Configuration GenerateDefaultSnoopyConfiguration() {
 					0.2f,
 					1e-5f,
 					0.5f),
-			LevelSetEvolutionSwitches(
+			LevelSetAlignmentSwitches(
 					true, false, true, false, true
 			),
-			LevelSetEvolutionTerminationConditions(300, 1e-06)
+			LevelSetAlignmentTerminationConditions(300, 1e-06)
 	);
 
 	AddDeferrableToSourceTree(default_snoopy_configuration, default_snoopy_main_engine_settings);

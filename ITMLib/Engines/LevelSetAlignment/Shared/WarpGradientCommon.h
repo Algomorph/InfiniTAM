@@ -17,10 +17,10 @@
 
 
 #include <iostream>
-#include "../../Utils/Logging/ConsolePrintColors.h"
+#include "../../../Utils/Logging/ConsolePrintColors.h"
 #include "WarpGradientAggregates.h"
-#include "../../Utils/Logging/Logging.h"
-#include "../../../ORUtils/MemoryDeviceType.h"
+#include "../../../Utils/Logging/Logging.h"
+#include "../../../../ORUtils/MemoryDeviceType.h"
 
 namespace ITMLib {
 // region ==================================== STATIC PRINTING / STATISTICS FUNCTIONS ==================================

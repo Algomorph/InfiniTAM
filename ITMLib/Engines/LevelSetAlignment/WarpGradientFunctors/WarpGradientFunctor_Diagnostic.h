@@ -21,17 +21,17 @@
 
 //local
 #include "WarpGradientFunctor.h"
-#include "../../../ORUtils/PlatformIndependentAtomics.h"
-#include "../../../ORUtils/CrossPlatformMacros.h"
-#include "../Shared/SurfaceTrackerSharedRoutines.h"
-#include "../Shared/SurfaceTrackerDiagnosticRoutines.h"
+#include "../../../../ORUtils/PlatformIndependentAtomics.h"
+#include "../../../../ORUtils/CrossPlatformMacros.h"
+#include "../Shared/LevelSetAlignmentSharedRoutines.h"
+#include "../Shared/LevelSetAlignmentDiagnosticRoutines.h"
 #include "../Shared/WarpGradientAggregates.h"
 #include "../Shared/WarpGradientCommon.h"
-#include "../../Utils/Enums/VoxelFlags.h"
-#include "../../Utils/Logging/ConsolePrintColors.h"
-#include "../../Utils/Configuration/Configuration.h"
-#include "../../Engines/EditAndCopy/Shared/EditAndCopyEngine_Shared.h"
-#include "../../Engines/Telemetry/TelemetryRecorder.h"
+#include "../../../Utils/Enums/VoxelFlags.h"
+#include "../../../Utils/Logging/ConsolePrintColors.h"
+#include "../../../Utils/Configuration/Configuration.h"
+#include "../../EditAndCopy/Shared/EditAndCopyEngine_Shared.h"
+#include "../../Telemetry/TelemetryRecorder.h"
 
 namespace ITMLib {
 
@@ -107,8 +107,8 @@ private:
 public:
 
 	// region ========================================= CONSTRUCTOR ====================================================
-	WarpGradientFunctor(LevelSetEvolutionWeights parameters,
-	                    LevelSetEvolutionSwitches switches,
+	WarpGradientFunctor(LevelSetAlignmentWeights parameters,
+	                    LevelSetAlignmentSwitches switches,
 	                    VoxelVolume<TWarp, TIndex>* warp_field,
 	                    VoxelVolume<TVoxel, TIndex>* canonical_volume,
 	                    VoxelVolume<TVoxel, TIndex>* live_volume,
@@ -399,8 +399,8 @@ private:
 	bool use_focus_coordinates{};
 	Vector3i focus_coordinates;
 
-	const LevelSetEvolutionWeights parameters;
-	const LevelSetEvolutionSwitches switches;
+	const LevelSetAlignmentWeights parameters;
+	const LevelSetAlignmentSwitches switches;
 
 	const VerbosityLevel verbosity_level;
 };

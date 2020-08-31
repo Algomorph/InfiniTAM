@@ -15,9 +15,9 @@
 //  ================================================================
 #pragma once
 
-#include "../../Utils/Metacoding/Metacoding.h"
-#include "../../../ORUtils/MemoryDeviceType.h"
-#include "../../Utils/Enums/ExecutionMode.h"
+#include "../../../Utils/Metacoding/Metacoding.h"
+#include "../../../../ORUtils/MemoryDeviceType.h"
+#include "../../../Utils/Enums/ExecutionMode.h"
 
 namespace ITMLib {
 

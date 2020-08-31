@@ -15,9 +15,9 @@
 //  ================================================================
 #pragma once
 
-#include "../../Utils/Math.h"
-#include "../../../ORUtils/PlatformIndependence.h"
-#include "../../../ORUtils/PlatformIndependentAtomics.h"
+#include "../../../Utils/Math.h"
+#include "../../../../ORUtils/PlatformIndependence.h"
+#include "../../../../ORUtils/PlatformIndependentAtomics.h"
 #include "WarpGradientAggregates.h"
 
 _CPU_AND_GPU_CODE_

@@ -1,6 +1,6 @@
 //  ================================================================
-//  Created by Gregory Kramida on 11/8/19.
-//  Copyright (c)  2019 Gregory Kramida
+//  Created by Gregory Kramida (https://github.com/Algomorph) on 8/31/20.
+//  Copyright (c) 2020 Gregory Kramida
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
 //  You may obtain a copy of the License at
@@ -13,22 +13,13 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
+#pragma once
 
-//stdlib
-#include <unordered_map>
 #include <string>
-
-//local
-#include "LevelSetEvolutionParameters.h"
-#include "../../Utils/Configuration/Configuration.h"
-#include "../../Utils/FileIO/JSON_Utilities.h"
-#include "../../Utils/Logging/ConsolePrintColors.h"
 
 namespace ITMLib{
 
-DEFINE_SERIALIZABLE_STRUCT(WEIGHTS_STRUCT_DESCRIPTION);
-DEFINE_SERIALIZABLE_STRUCT(SWITCHES_STRUCT_DESCRIPTION);
-DEFINE_SERIALIZABLE_STRUCT(TERMINATION_CONDITIONS_STRUCT_DESCRIPTION);
-DEFINE_DEFERRABLE_SERIALIZABLE_STRUCT(LEVEL_SET_EVOLUTION_PARAMETERS_STRUCT_DESCRIPTION);
+void ArchivePossibleExistingRecords(const std::string& record_path, const std::string& record_archive_folder);
+
 
 } // namespace ITMLib

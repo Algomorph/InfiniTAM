@@ -85,7 +85,7 @@ private:
 
 };
 
-//__DEBUG
+// use for debugging ranges in reduction tests
 template<typename TVoxel>
 struct DepthOutsideRangeFinder<TVoxel, MEMORYDEVICE_CUDA>{
 

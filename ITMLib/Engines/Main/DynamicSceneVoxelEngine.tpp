@@ -40,7 +40,7 @@ namespace fs = std::filesystem;
 #include "../Analytics/AnalyticsLogging.h"
 #include "../Telemetry/TelemetryRecorderFactory.h"
 #include "../../CameraTrackers/CameraTrackerFactory.h"
-#include "../../SurfaceTrackers/SurfaceTrackerFactory.h"
+#include "../LevelSetAlignment/LevelSetAlignmentEngineFactory.h"
 #include "../../Utils/Analytics/BenchmarkUtilities.h"
 #include "../../Utils/Logging/Logging.h"
 #include "../../Utils/Quaternions/QuaternionFromMatrix.h"
@@ -68,7 +68,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(
 				  DepthFusionEngineFactory::Build<TVoxel, TWarp, TIndex>
 						  (configuration::Get().device_type)),
 		  volume_fusion_engine(VolumeFusionEngineFactory::Build<TVoxel, TIndex>(configuration::Get().device_type)),
-		  surface_tracker(SurfaceTrackerFactory::Build<TVoxel, TWarp, TIndex>()),
+		  surface_tracker(LevelSetAlignmentEngineFactory::Build<TVoxel, TWarp, TIndex>()),
 		  swapping_engine(configuration::Get().swapping_mode != configuration::SWAPPINGMODE_DISABLED ?
 		                  SwappingEngineFactory::Build<TVoxel, TIndex>(
 				                  configuration::Get().device_type,

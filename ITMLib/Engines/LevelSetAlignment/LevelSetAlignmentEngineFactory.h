@@ -15,8 +15,8 @@
 //  ================================================================
 #pragma once
 
-#include "Interface/SurfaceTrackerInterface.h"
-#include "Interface/SurfaceTracker.h"
+#include "Interface/LevelSetAlignmentEngineInterface.h"
+#include "Interface/LevelSetAlignmentEngine.h"
 
 #ifdef COMPILE_WITH_METAL
 #error "NOT CURRENTLY SUPPORTED"
@@ -26,13 +26,13 @@ namespace ITMLib {
 
 namespace internal{
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-static SurfaceTrackerInterface<TVoxel, TWarp, TIndex>* BuildSurfaceTrackerAux(const ExecutionMode& execution_mode){
+static LevelSetAlignmentEngineInterface<TVoxel, TWarp, TIndex>* BuildSurfaceTrackerAux(const ExecutionMode& execution_mode){
 	switch (execution_mode){
 		case OPTIMIZED:
-			return new SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, OPTIMIZED>();
+			return new LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, OPTIMIZED>();
 			break;
 		case DIAGNOSTIC:
-			return new SurfaceTracker<TVoxel, TWarp, TIndex, TMemoryDeviceType, DIAGNOSTIC>();
+			return new LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, DIAGNOSTIC>();
 			break;
 	}
 	return nullptr;
@@ -41,7 +41,7 @@ static SurfaceTrackerInterface<TVoxel, TWarp, TIndex>* BuildSurfaceTrackerAux(co
 
 
 
-class SurfaceTrackerFactory {
+class LevelSetAlignmentEngineFactory {
 public:
 /**
 * \brief Makes a scene motion tracker.
@@ -49,10 +49,10 @@ public:
 * \param settings  settings to use
 */
 	template<typename TVoxel, typename TWarp, typename TIndex>
-	static SurfaceTrackerInterface<TVoxel, TWarp, TIndex>* Build() {
-		SurfaceTrackerInterface<TVoxel, TWarp, TIndex>* surface_tracker = nullptr;
+	static LevelSetAlignmentEngineInterface<TVoxel, TWarp, TIndex>* Build() {
+		LevelSetAlignmentEngineInterface<TVoxel, TWarp, TIndex>* surface_tracker = nullptr;
 		auto& settings = configuration::Get();
-		auto level_set_evolution_parameters = ExtractDeferrableSerializableStructFromPtreeIfPresent<LevelSetEvolutionParameters>(
+		auto level_set_evolution_parameters = ExtractDeferrableSerializableStructFromPtreeIfPresent<LevelSetAlignmentParameters>(
 				configuration::Get().source_tree,
 				configuration::Get().origin
 		);
@@ -75,7 +75,7 @@ public:
 #endif
 				break;
 			case MEMORYDEVICE_NONE:
-				DIEWITHEXCEPTION_REPORTLOCATION("For construction of a SurfaceTracker instance, device_type cannot be MEMORYDEVICE_NONE.");
+				DIEWITHEXCEPTION_REPORTLOCATION("For construction of a LevelSetAlignmentEngine instance, device_type cannot be MEMORYDEVICE_NONE.");
 				break;
 		}
 

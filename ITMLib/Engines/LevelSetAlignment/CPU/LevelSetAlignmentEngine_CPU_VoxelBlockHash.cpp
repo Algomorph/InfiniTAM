@@ -13,19 +13,19 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "../../Engines/Indexing/VBH/CPU/IndexingEngine_VoxelBlockHash_CPU.h"
-#include "../../Engines/Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
-#include "../../Engines/Traversal/CPU/ThreeVolumeTraversal_CPU_VoxelBlockHash.h"
-#include "../../Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
-#include "../../Engines/Analytics/AnalyticsEngine.h"
+#include "../../Indexing/VBH/CPU/IndexingEngine_VoxelBlockHash_CPU.h"
+#include "../../Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
+#include "../../Traversal/CPU/ThreeVolumeTraversal_CPU_VoxelBlockHash.h"
+#include "../../EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
+#include "../../Analytics/AnalyticsEngine.h"
 #include "../WarpGradientFunctors/WarpGradientFunctor_Optimized.h"
 #include "../WarpGradientFunctors/WarpGradientFunctor_Diagnostic.h"
-#include "../../GlobalTemplateDefines.h"
-#include "../Interface/SurfaceTracker.tpp"
+#include "../../../GlobalTemplateDefines.h"
+#include "../Interface/LevelSetAlignmentEngine.tpp"
 
 namespace ITMLib {
 template
-class SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU, OPTIMIZED>;
+class LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU, OPTIMIZED>;
 template
-class SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU, DIAGNOSTIC>;
+class LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU, DIAGNOSTIC>;
 } // namespace ITMLib

@@ -31,7 +31,7 @@
 #include "../../Engines/Rendering/RenderingSettings.h"
 #include "AutomaticRunSettings.h"
 #include "../../Engines/Main/MainEngineSettings.h"
-#include "../../SurfaceTrackers/Interface/LevelSetEvolutionParameters.h"
+#include "../../Engines/LevelSetAlignment/Interface/LevelSetAlignmentParameters.h"
 
 using namespace ITMLib::configuration;
 
@@ -146,7 +146,7 @@ void CompileOptionDescription(po::options_description& od){
 	IndexingSettings::AddDeferredToOptionsDescription(od);
 	RenderingSettings::AddDeferredToOptionsDescription(od);
 	AutomaticRunSettings::AddDeferredToOptionsDescription(od);
-	LevelSetEvolutionParameters::AddDeferredToOptionsDescription(od);
+	LevelSetAlignmentParameters::AddDeferredToOptionsDescription(od);
 }
 
 static void AddAllDeferrableStructsFromVariablesMap(const po::variables_map& vm) {
@@ -155,7 +155,7 @@ static void AddAllDeferrableStructsFromVariablesMap(const po::variables_map& vm)
 	IndexingSettings::BuildDeferredFromVariablesMap(instance.source_tree, vm);
 	RenderingSettings::BuildDeferredFromVariablesMap(instance.source_tree, vm);
 	AutomaticRunSettings::BuildDeferredFromVariablesMap(instance.source_tree, vm);
-	LevelSetEvolutionParameters::BuildDeferredFromVariablesMap(instance.source_tree, vm);
+	LevelSetAlignmentParameters::BuildDeferredFromVariablesMap(instance.source_tree, vm);
 }
 
 void LoadConfigurationFromVariableMap(const po::variables_map& vm) {
@@ -181,7 +181,7 @@ static void UpdateAllDeferrableStructsFromVariablesMap(const po::variables_map& 
 	IndexingSettings::UpdateDeferredFromVariablesMap(instance.source_tree, vm, instance.origin);
 	RenderingSettings::UpdateDeferredFromVariablesMap(instance.source_tree, vm, instance.origin);
 	AutomaticRunSettings::UpdateDeferredFromVariablesMap(instance.source_tree, vm, instance.origin);
-	LevelSetEvolutionParameters::UpdateDeferredFromVariablesMap(instance.source_tree, vm, instance.origin);
+	LevelSetAlignmentParameters::UpdateDeferredFromVariablesMap(instance.source_tree, vm, instance.origin);
 }
 
 void UpdateConfigurationFromVariableMap(const po::variables_map& vm) {
@@ -195,7 +195,7 @@ static void AddAllDeferrableStructsFromSourceToTargetRootConfiguration(pt::ptree
 	AddDeferrableFromSourceToTargetTree<IndexingSettings>(target_tree, origin_tree, origin);
 	AddDeferrableFromSourceToTargetTree<RenderingSettings>(target_tree, origin_tree, origin);
 	AddDeferrableFromSourceToTargetTree<AutomaticRunSettings>(target_tree, origin_tree, origin);
-	AddDeferrableFromSourceToTargetTree<LevelSetEvolutionParameters>(target_tree, origin_tree, origin);
+	AddDeferrableFromSourceToTargetTree<LevelSetAlignmentParameters>(target_tree, origin_tree, origin);
 }
 
 void SaveConfigurationToJSONFile(const std::string& path) {

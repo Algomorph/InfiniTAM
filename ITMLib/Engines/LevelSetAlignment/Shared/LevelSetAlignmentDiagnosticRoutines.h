@@ -15,13 +15,13 @@
 //  ================================================================
 #pragma once
 
-#include "../../Objects/Volume/RepresentationAccess.h"
-#include "../../Utils/Enums/HashBlockProperties.h"
-#include "../../Utils/Analytics/NeighborVoxelIterationInfo.h"
-#include "../../Utils/Logging/ConsolePrintColors.h"
-#include "../../Utils/Logging/ConsolePrintColors.h"
-#include "../../Objects/Volume/TrilinearInterpolation.h"
-#include "../../Utils/Geometry/SpatialIndexConversions.h"
+#include "../../../Objects/Volume/RepresentationAccess.h"
+#include "../../../Utils/Enums/HashBlockProperties.h"
+#include "../../../Utils/Analytics/NeighborVoxelIterationInfo.h"
+#include "../../../Utils/Logging/ConsolePrintColors.h"
+#include "../../../Utils/Logging/ConsolePrintColors.h"
+#include "../../../Objects/Volume/TrilinearInterpolation.h"
+#include "../../../Utils/Geometry/SpatialIndexConversions.h"
 
 using namespace ITMLib;
 

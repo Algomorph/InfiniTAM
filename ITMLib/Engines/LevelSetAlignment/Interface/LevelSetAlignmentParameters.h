@@ -20,13 +20,13 @@
 #include <boost/property_tree/ptree.hpp>
 
 //local
-#include "../../Utils/Metacoding/DeferrableSerializableStruct.h"
-#include "../../Utils/Metacoding/SerializableStruct.h"
-#include "../../Utils/Enums/ExecutionMode.h"
+#include "../../../Utils/Metacoding/DeferrableSerializableStruct.h"
+#include "../../../Utils/Metacoding/SerializableStruct.h"
+#include "../../../Utils/Enums/ExecutionMode.h"
 
 namespace ITMLib {
 
-#define WEIGHTS_STRUCT_DESCRIPTION LevelSetEvolutionWeights, \
+#define WEIGHTS_STRUCT_DESCRIPTION LevelSetAlignmentWeights, \
         (float, learning_rate, 0.1f, PRIMITIVE, "Used in dynamic surface tracking optimization. Gradient descent step magnitude / learning rate."), \
         (float, weight_killing_term, 0.1f, PRIMITIVE, "Used in dynamic surface tracking optimization when the Killing regularization term is enabled."), \
         (float, weight_data_term, 1.0f, PRIMITIVE, "Used in dynamic surface tracking optimization when the data term is enabled."), \
@@ -39,7 +39,7 @@ namespace ITMLib {
 
 DECLARE_SERIALIZABLE_STRUCT(WEIGHTS_STRUCT_DESCRIPTION);
 
-#define SWITCHES_STRUCT_DESCRIPTION LevelSetEvolutionSwitches, \
+#define SWITCHES_STRUCT_DESCRIPTION LevelSetAlignmentSwitches, \
         (bool, enable_data_term, true, PRIMITIVE, "Whether to enable or disable data term of Slavcheva-based dynamic surface tracking energy."), \
         (bool, enable_level_set_term, false, PRIMITIVE, "Whether to enable or disable level-set of Slavcheva-based dynamic surface tracking energy. (see KillingFusion by Slavcheva et. all.)"), \
         (bool, enable_smoothing_term, true, PRIMITIVE, \
@@ -52,7 +52,7 @@ DECLARE_SERIALIZABLE_STRUCT(WEIGHTS_STRUCT_DESCRIPTION);
 DECLARE_SERIALIZABLE_STRUCT(SWITCHES_STRUCT_DESCRIPTION);
 
 
-#define TERMINATION_CONDITIONS_STRUCT_DESCRIPTION LevelSetEvolutionTerminationConditions, \
+#define TERMINATION_CONDITIONS_STRUCT_DESCRIPTION LevelSetAlignmentTerminationConditions, \
 		(int, max_iteration_count, 200, PRIMITIVE, "Maximum iteration count, after which the non-rigid alignment is cut off."),\
         (float, mean_update_length_threshold, 1e-6f, PRIMITIVE, "Mean update length threshold, in meters. When the mean"\
                                  " vector update in calculating voxel motion doesn't exceed this threshold, the non-rigid alignment optimization is terminated.")\
@@ -60,14 +60,14 @@ DECLARE_SERIALIZABLE_STRUCT(SWITCHES_STRUCT_DESCRIPTION);
 
 DECLARE_SERIALIZABLE_STRUCT(TERMINATION_CONDITIONS_STRUCT_DESCRIPTION);
 
-#define LEVEL_SET_EVOLUTION_PARAMETERS_STRUCT_DESCRIPTION LevelSetEvolutionParameters, "level_set_evolution", \
+#define LEVEL_SET_EVOLUTION_PARAMETERS_STRUCT_DESCRIPTION LevelSetAlignmentParameters, "level_set_evolution", \
 	(ExecutionMode, execution_mode, ExecutionMode::OPTIMIZED, ENUM, "Whether to use optimized or diagnostic mode."), \
-	(LevelSetEvolutionWeights, weights, LevelSetEvolutionWeights(), STRUCT, "Level set evolution weights / rates / factors"), \
-	(LevelSetEvolutionSwitches, switches, LevelSetEvolutionSwitches(), STRUCT, "Level set evolution switches for turning different terms on and off."), \
-	(LevelSetEvolutionTerminationConditions, termination, LevelSetEvolutionTerminationConditions(), STRUCT, "Level set evolution termination parameters.") \
+	(LevelSetAlignmentWeights, weights, LevelSetAlignmentWeights(), STRUCT, "Level set evolution weights / rates / factors"), \
+	(LevelSetAlignmentSwitches, switches, LevelSetAlignmentSwitches(), STRUCT, "Level set evolution switches for turning different terms on and off."), \
+	(LevelSetAlignmentTerminationConditions, termination, LevelSetAlignmentTerminationConditions(), STRUCT, "Level set evolution termination parameters.") \
 
 DECLARE_DEFERRABLE_SERIALIZABLE_STRUCT(LEVEL_SET_EVOLUTION_PARAMETERS_STRUCT_DESCRIPTION);
 
-std::ostream& operator <<(std::ostream& stream, const LevelSetEvolutionParameters& parameters);
+std::ostream& operator <<(std::ostream& stream, const LevelSetAlignmentParameters& parameters);
 
 }//namespace ITMLib

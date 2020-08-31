@@ -15,10 +15,10 @@
 //  ================================================================
 #pragma once
 
-#include "../../Utils/Enums/VoxelFlags.h"
-#include "../../Objects/Volume/RepresentationAccess.h"
-#include "../../../ORUtils/PlatformIndependence.h"
-#include "../../Utils/Logging/ConsolePrintColors.h"
+#include "../../../Utils/Enums/VoxelFlags.h"
+#include "../../../Objects/Volume/RepresentationAccess.h"
+#include "../../../../ORUtils/PlatformIndependence.h"
+#include "../../../Utils/Logging/ConsolePrintColors.h"
 
 
 #define TRACKING_CONDITION_LIVE_KNOWN

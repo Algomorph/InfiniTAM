@@ -26,7 +26,7 @@
 //ITMLib
 #include "../ITMLib/GlobalTemplateDefines.h"
 #include "../ITMLib/Objects/Volume/VoxelVolume.h"
-#include "../ITMLib/SurfaceTrackers/Interface/SurfaceTracker.h"
+#include "../ITMLib/Engines/LevelSetAlignment/Interface/LevelSetAlignmentEngine.h"
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CPU.h"
 
 //test_utilities
@@ -42,7 +42,7 @@ namespace snoopy = snoopy_test_utilities;
 BOOST_AUTO_TEST_CASE(testSmoothWarpGradient_PVA){
 	const int iteration = 0;
 
-	LevelSetEvolutionSwitches data_only_switches(true, false, false, false, false);
+	LevelSetAlignmentSwitches data_only_switches(true, false, false, false, false);
 	std::string path_warps = GetWarpsPath<PlainVoxelArray>(SwitchesToPrefix(data_only_switches), iteration);
 	std::string path_frame_16_PVA = snoopy::PartialVolume16Path<PlainVoxelArray>();
 	std::string path_frame_17_PVA = snoopy::PartialVolume17Path<PlainVoxelArray>();
@@ -68,10 +68,10 @@ BOOST_AUTO_TEST_CASE(testSmoothWarpGradient_PVA){
 	           snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 
 
-	auto motion_tracker_PVA_CPU = new SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU, DIAGNOSTIC>(
-			LevelSetEvolutionSwitches(false, false, false, false, true));
-	auto motion_tracker_PVA_CUDA = new SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA , DIAGNOSTIC>(
-			LevelSetEvolutionSwitches(false, false, false, false, true)
+	auto motion_tracker_PVA_CPU = new LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU, DIAGNOSTIC>(
+			LevelSetAlignmentSwitches(false, false, false, false, true));
+	auto motion_tracker_PVA_CUDA = new LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA , DIAGNOSTIC>(
+			LevelSetAlignmentSwitches(false, false, false, false, true)
 	);
 
 	motion_tracker_PVA_CPU->SmoothWarpGradient(warp_field_CPU, canonical_volume_CPU, live_volume_CPU);

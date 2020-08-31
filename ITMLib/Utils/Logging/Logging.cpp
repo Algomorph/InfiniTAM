@@ -26,6 +26,7 @@
 //local
 #include "Logging.h"
 #include "../Configuration/Configuration.h"
+#include "../FileIO/RecordHandling.h"
 
 
 using namespace log4cplus;
@@ -33,26 +34,7 @@ namespace fs = boost::filesystem;
 
 namespace ITMLib::logging {
 
-static void handle_possible_existing_logs(const std::string& log_path) {
-	fs::path fs_log_path(log_path);
-	if (fs::exists(fs_log_path)) {
-		if (!fs::is_regular_file(fs_log_path)) {
-			auto root = log4cplus::Logger::getRoot();
-			LOG4CPLUS_FATAL(root, "Log file path," << log_path
-			                                       << ", occupied by a non-file, i.e. directory or symlink! Aborting.");
-			DIEWITHEXCEPTION_REPORTLOCATION(
-					"Log file path occupied by a non-file, i.e. directory or symlink! Aborting. ");
-		} else {
-			auto write_time = fs::last_write_time(fs_log_path);
-			std::stringstream buffer;
-			buffer << std::put_time(std::localtime(&write_time), "%y%m%d%H%M%S");
-			fs::path backup_directory = fs::path(configuration::Get().paths.output_path) / fs::path("older_logs");
-			fs::create_directories(backup_directory);
-			fs::path move_destination = backup_directory / fs::path(std::string("log_") + buffer.str() + ".ans");
-			fs::rename(fs_log_path, move_destination);
-		}
-	}
-}
+
 
 void initialize_logging() {
 	log4cplus::initialize();
@@ -111,8 +93,8 @@ void initialize_logging() {
 	}
 
 	if (configuration::Get().logging_settings.log_to_disk) {
-		std::string log_path = (fs::path(configuration::Get().paths.output_path) / fs::path("log.ans")).string();
-		handle_possible_existing_logs(log_path);
+		std::string log_path = (fs::path(configuration::Get().paths.output_path) / "log.ans").string();
+		ArchivePossibleExistingRecords(log_path, "older_logs");
 		log4cplus::SharedFileAppenderPtr file_appender(new RollingFileAppender(
 				LOG4CPLUS_TEXT(log_path), 50 * 1024 * 1024, 5, false, true));
 		root.addAppender(SharedAppenderPtr(file_appender.get()));

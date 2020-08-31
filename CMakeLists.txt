@@ -87,6 +87,8 @@ file(GLOB_RECURSE CMAKE_SOURCES "cmake/*")
 add_custom_target(cmake SOURCES ${CMAKE_SOURCES})
 source_group(CMake FILES ${CMAKE_SOURCES})
 
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
 ######################
 # Add subdirectories #
 ######################
