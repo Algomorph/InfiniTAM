@@ -27,7 +27,7 @@ typedef char tchar;
 
 namespace ITMLib{
 namespace logging {
-	//TODO: rework definitions of constants to the CPP file
+	//TODO: rework definitions of constants to the CPU file
 	const int FOCUS_SPOTS_LOG_LEVEL = 5000;
 	const int PER_ITERATION_LOG_LEVEL = 5001;
 	const int PER_FRAME_LOG_LEVEL = 5002;

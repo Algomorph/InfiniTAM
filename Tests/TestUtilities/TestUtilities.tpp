@@ -42,7 +42,7 @@ void GenerateRandomDepthWeightSubVolume(VoxelVolume<TVoxel, TIndex>* volume, con
 	VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseUtilizedWithPosition(volume, functor);
 }
 
-//__DEBUG
+
 template<MemoryDeviceType TMemoryDeviceType, typename TVoxel, typename TIndex>
 void FindAllVoxelsNotInDepthWeightRange(VoxelVolume<TVoxel, TIndex>* volume, const Extent2Di& weight_range){
 	DepthOutsideRangeFinder<TVoxel, TMemoryDeviceType> functor(weight_range);

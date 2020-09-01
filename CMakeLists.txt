@@ -1,7 +1,7 @@
 ##########################################
 # Top-level CMakeLists.txt               #
 ##########################################
-cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.18.2 FATAL_ERROR)
 
 #################################
 # CMake policies                #
@@ -32,7 +32,17 @@ list(APPEND CMAKE_MODULE_PATH
 # Handle CUDA option            #
 #################################
 
-include(UseCUDA)
+# Use the new CMake CUDA mechanism which enables full Nsight support
+include(CheckLanguage)
+check_language(CUDA)
+if(CMAKE_CUDA_COMPILER_ID)
+    option(WITH_CUDA "Build with CUDA support?" ${CMAKE_CUDA_COMPILER})
+endif()
+# for all CMake versions (possibly revisions needed later)
+if (NOT WITH_CUDA)
+    add_definitions(-DCOMPILE_WITHOUT_CUDA)
+endif ()
+
 if(WITH_CUDA)
     project(Reco LANGUAGES CXX C CUDA)
 else()
@@ -45,8 +55,11 @@ endif()
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
-set(CMAKE_CUDA_STANDARD 14)
-set(CMAKE_CUDA_STANDARD_REQUIRED TRUE)
+if(WITH_CUDA)
+    set(CMAKE_CUDA_STANDARD 17)
+    set(CMAKE_CUDA_STANDARD_REQUIRED TRUE)
+endif()
+
 
 #################################
 # Add additional compiler flags #

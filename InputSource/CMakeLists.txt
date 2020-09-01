@@ -12,13 +12,12 @@ SET(targetname InputSource)
 # Offer support for input mirroring #
 #####################################
 
-INCLUDE(${PROJECT_SOURCE_DIR}/cmake/OfferInputMirroring.cmake)
+include(${PROJECT_SOURCE_DIR}/cmake/OfferInputMirroring.cmake)
 
 ################################
 # Specify the libraries to use #
 ################################
 
-include(${PROJECT_SOURCE_DIR}/cmake/UseCUDA.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/UseKinect2.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/UseLibRoyale.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/UseOpenGL.cmake)

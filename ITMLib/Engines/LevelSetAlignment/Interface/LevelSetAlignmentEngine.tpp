@@ -280,30 +280,12 @@ void SurfaceTracker_ExecutionModeSpecific<TVoxel, TWarp, TIndex, TMemoryDeviceTy
 	parent.warping_engine->WarpVolume_WarpUpdates(warp_field, source_live_volume, target_live_volume);
 }
 
+
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, typename TSurfaceTracker>
-void SurfaceTracker_ExecutionModeSpecific<TVoxel, TWarp, TIndex, TMemoryDeviceType, DIAGNOSTIC, TSurfaceTracker>::ComputeWarpHistogram(
-		VoxelVolume<TWarp, TIndex>* warp_field) {
-	if (histograms_enabled) {
-		auto& analytics_engine = AnalyticsEngine<TWarp, TIndex, TMemoryDeviceType>::Instance();
-		float max_update;
+SurfaceTracker_ExecutionModeSpecific<TVoxel, TWarp, TIndex, TMemoryDeviceType, DIAGNOSTIC, TSurfaceTracker>::SurfaceTracker_ExecutionModeSpecific(
+		TSurfaceTracker& parent) :
+		parent(parent) {}
 
-		auto& config = configuration::Get();
-
-		Vector3i max_update_position;
-		unsigned int utilized_voxel_count = analytics_engine.CountUtilizedVoxels(warp_field);
-		analytics_engine.ComputeWarpUpdateMaxAndPosition(max_update, max_update_position, warp_field);
-
-		WarpHistogramFunctor<TWarp, TMemoryDeviceType> warp_histogram_functor(max_update, utilized_voxel_count, 32);
-		VolumeTraversalEngine<TWarp, TIndex, TMemoryDeviceType>::
-		TraverseUtilized(warp_field, warp_histogram_functor);
-
-		warp_histogram_functor.PrintHistogram();
-
-		std::cout << ITMLib::green << " Max update: [" << max_update << " at " << max_update_position << "]."
-		          << ITMLib::reset << std::endl;
-
-	}
-}
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, typename TSurfaceTracker>
 void SurfaceTracker_ExecutionModeSpecific<TVoxel, TWarp, TIndex, TMemoryDeviceType, DIAGNOSTIC, TSurfaceTracker>::PerformSingleOptimizationStep(
@@ -359,7 +341,8 @@ void SurfaceTracker_ExecutionModeSpecific<TVoxel, TWarp, TIndex, TMemoryDeviceTy
 	parent.warping_engine->WarpVolume_WarpUpdates(warp_field, source_live_volume, target_live_volume);
 	bench::stop_timer("TrackMotion_4_WarpLiveScene");
 
-	ComputeWarpHistogram(warp_field);
+	//TODO
+	//ComputeWarpHistogram(warp_field);
 }
 } // namespace internal
 } // namespace ITMLib

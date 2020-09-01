@@ -12,7 +12,6 @@ set(targetname FernRelocLib)
 # Specify the libraries to use #
 ################################
 
-include(${PROJECT_SOURCE_DIR}/cmake/UseCUDA.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/UseOpenMP.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/UseBoost.cmake)
 

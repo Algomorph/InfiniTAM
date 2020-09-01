@@ -7,7 +7,6 @@ set(targetname ITMLib)
 # Dependencies                 #
 ################################
 
-include(${PROJECT_SOURCE_DIR}/cmake/UseCUDA.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/UseOpenMP.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/UseBoost.cmake)
 
@@ -649,28 +648,18 @@ set(ITMLIB_ENGINES_ANALYTICS_SOURCES
 
 set(ITMLIB_ENGINES_TELEMETRY_SOURCES
     Engines/Telemetry/TelemetryRecorder.tpp
-    Engines/Telemetry/TelemetryRecorder_PlainVoxelArray.cpp
-    Engines/Telemetry/TelemetryRecorder_VoxelBlockHash.cpp
-    #TODO: fixme
-    #    Engines/Telemetry/TelemetryRecorder_PlainVoxelArray.cpp
-    #    Engines/Telemetry/TelemetryRecorder_VoxelBlockHash.cpp
-    #    Engines/Telemetry/VolumeSequenceRecorder.tpp
-    #    Engines/Telemetry/VolumeSequenceRecorder_PlainVoxelArray.cpp
-    #    Engines/Telemetry/VolumeSequenceRecorder_VoxelBlockHash.cpp
-    #    Engines/Telemetry/TelemetryRecorder.tpp
-    #    Engines/Telemetry/VolumeSequenceRecorder_VolumeSlice.tpp
-    #    Engines/Telemetry/WarpFieldSequenceRecorder.tpp
-    #    Engines/Telemetry/WarpFieldSequenceRecorder_PlainVoxelArray.cpp
-    #    Engines/Telemetry/WarpFieldSequenceRecorder_VoxelBlockHash.cpp
+
+    Engines/Telemetry/CPU/TelemetryRecorder_CPU_PlainVoxelArray.cpp
+    Engines/Telemetry/CPU/TelemetryRecorder_CPU_VoxelBlockHash.cpp
+    Engines/Telemetry/CUDA/TelemetryRecorder_CUDA_PlainVoxelArray.cu
+    Engines/Telemetry/CUDA/TelemetryRecorder_CUDA_VoxelBlockHash.cu
+
     )
 set(ITMLIB_ENGINES_TELEMETRY_HEADERS
     Engines/Indexing/Shared/IndexingEngine_DiagnosticData.h
     Engines/Telemetry/TelemetryRecorder.h
     Engines/Telemetry/TelemetryRecorderFactory.h
-    #    Engines/Telemetry/WriteAndReadFunctors.h
-    #    Engines/Telemetry/VolumeSequenceRecorder.h
-    #    Engines/Telemetry/TelemetryRecorder.h
-    #    Engines/Telemetry/WarpFieldSequenceRecorder.h
+    Engines/Telemetry/TelemetryFunctors.h
     )
 
 ## ================================================== OBJECTS ==========================================================

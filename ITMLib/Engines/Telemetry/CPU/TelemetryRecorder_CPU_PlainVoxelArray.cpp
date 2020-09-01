@@ -14,12 +14,11 @@
 //  limitations under the License.
 //  ================================================================
 
-#include "../../GlobalTemplateDefines.h"
-#include "TelemetryRecorder.tpp"
+#include "../../../GlobalTemplateDefines.h"
+#include "../TelemetryRecorder.tpp"
+#include "../../Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
 
 namespace ITMLib {
 template
 class TelemetryRecorder<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU>;
-template
-class TelemetryRecorder<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA>;
 } // namespace ITMLib

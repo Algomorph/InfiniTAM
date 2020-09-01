@@ -62,6 +62,9 @@ public: // instance functions
 	void RecordSurfaceTrackingEnergies(const ComponentEnergies<TMemoryDeviceType>& energies, int iteration_index);
 	void RecordSurfaceTrackingStatistics(const AdditionalGradientAggregates<TMemoryDeviceType>& aggregates, int iteration_index);
 	void RecordSurfaceTrackingMeanUpdate(float mean_update);
+	void ComputeWarpHistogram(VoxelVolume<TWarp, TIndex>* warp_field);
+
+
 private: // instance functions
 	void RecordVolumeMemoryUsageInfo(const VoxelVolume <TVoxel, TIndex>& canonical_volume);
 	void RecordFrameMeshFromVolume(const VoxelVolume <TVoxel, TIndex>& volume, const std::string& filename, int frame_index);

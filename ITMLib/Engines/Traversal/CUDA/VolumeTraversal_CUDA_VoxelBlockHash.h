@@ -98,9 +98,7 @@ public:
 		dim3 voxel_per_thread_cuda_block_size(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
 		dim3 hash_per_block_cuda_grid_size(hash_entry_count);
 
-		traverseAll_StaticFunctor_device<TStaticFunctor, TVoxel>
-				<<< hash_per_block_cuda_grid_size, voxel_per_thread_cuda_block_size >>> (voxels, hash_table);
-		ORcudaKernelCheck;
+		traverseAll_StaticFunctor_device<TStaticFunctor, TVoxel><<<hash_per_block_cuda_grid_size, voxel_per_thread_cuda_block_size>>>(voxels, hash_table);		ORcudaKernelCheck;
 	}
 
 	template<typename TStaticFunctor>
@@ -113,8 +111,7 @@ public:
 		dim3 voxel_per_thread_cuda_block_size(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
 		dim3 hash_per_block_cuda_grid_size(utilized_block_count);
 
-		traverseUtilized_StaticFunctor_device<TStaticFunctor, TVoxel>
-				<<< hash_per_block_cuda_grid_size, voxel_per_thread_cuda_block_size >>> (voxels, hash_table, utilized_hash_codes);
+		traverseUtilized_StaticFunctor_device<TStaticFunctor, TVoxel><<<hash_per_block_cuda_grid_size, voxel_per_thread_cuda_block_size>>>(voxels, hash_table, utilized_hash_codes);
 		ORcudaKernelCheck;
 	}
 

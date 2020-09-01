@@ -16,6 +16,10 @@
 //stdlib
 #include <filesystem>
 
+#ifdef __CUDACC__
+#pragma message( __cplusplus )
+#endif
+
 namespace fs = std::filesystem;
 
 //local
@@ -27,6 +31,10 @@ namespace fs = std::filesystem;
 #include "../../GlobalTemplateDefines.h"
 #include "../../Utils/Telemetry/TelemetryUtilities.h"
 #include "../Meshing/MeshingEngineFactory.h"
+#include "../Analytics/AnalyticsEngine.h"
+#include "TelemetryFunctors.h"
+#include "../../Utils/Logging/ConsolePrintColors.h"
+#include "../Traversal/Interface/VolumeTraversal.h"
 
 using namespace ITMLib;
 
@@ -149,6 +157,28 @@ template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMem
 void TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::RecordSurfaceTrackingMeanUpdate(float mean_update) {
 	if(parameters.record_surface_tracking_additional_statistics){
 		surface_tracking_statistics_file.OStream().write(reinterpret_cast<const char*>(&mean_update), sizeof(float));
+	}
+}
+
+template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+void TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::ComputeWarpHistogram(
+		VoxelVolume<TWarp, TIndex>* warp_field) {
+	if (parameters.record_warp_update_length_histograms) {
+		auto& analytics_engine = AnalyticsEngine<TWarp, TIndex, TMemoryDeviceType>::Instance();
+		float max_update;
+
+		Vector3i max_update_position;
+		unsigned int utilized_voxel_count = analytics_engine.CountUtilizedVoxels(warp_field);
+		analytics_engine.ComputeWarpUpdateMaxAndPosition(max_update, max_update_position, warp_field);
+
+		WarpHistogramFunctor<TWarp, TMemoryDeviceType> warp_histogram_functor(max_update, utilized_voxel_count, 32);
+		VolumeTraversalEngine<TWarp, TIndex, TMemoryDeviceType>::TraverseUtilized(warp_field, warp_histogram_functor);
+
+		warp_histogram_functor.PrintHistogram();
+
+		std::cout << ITMLib::green << " Max update: [" << max_update << " at " << max_update_position << "]."
+		          << ITMLib::reset << std::endl;
+
 	}
 }
 

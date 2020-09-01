@@ -17,7 +17,6 @@
 
 //temporary
 #include "LevelSetAlignmentParameters.h"
-
 #include "LevelSetAlignmentEngineInterface.h"
 #include "../WarpGradientFunctors/WarpGradientFunctor.h"
 #include "../../Warping/WarpingEngine.h"
@@ -35,7 +34,7 @@ class SurfaceTracker_ExecutionModeSpecific<TVoxel, TWarp, TIndex, TMemoryDeviceT
 private: // instance variables
 	TSurfaceTracker& parent;
 public: // instance methods
-	explicit SurfaceTracker_ExecutionModeSpecific(TSurfaceTracker& parent) : parent(parent){};
+	explicit SurfaceTracker_ExecutionModeSpecific(TSurfaceTracker& parent) : parent(parent) {};
 	void PerformSingleOptimizationStep(
 			VoxelVolume<TVoxel, TIndex>* canonical_volume,
 			VoxelVolume<TVoxel, TIndex>* source_live_volume,
@@ -44,18 +43,15 @@ public: // instance methods
 			float& average_update_vector_length,
 			int iteration);
 };
-
-
 
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, typename TSurfaceTracker>
 class SurfaceTracker_ExecutionModeSpecific<TVoxel, TWarp, TIndex, TMemoryDeviceType, DIAGNOSTIC, TSurfaceTracker> {
 private: // instance variables
-	bool histograms_enabled = configuration::Get().logging_settings.verbosity_level >= VERBOSITY_PER_ITERATION;
+
 	TSurfaceTracker& parent;
 public: // instance methods
-	explicit SurfaceTracker_ExecutionModeSpecific(TSurfaceTracker& parent) : parent(parent){};
-	void ComputeWarpHistogram(VoxelVolume<TWarp, TIndex>* warp_field);
+	explicit SurfaceTracker_ExecutionModeSpecific(TSurfaceTracker& parent);
 	void PerformSingleOptimizationStep(
 			VoxelVolume<TVoxel, TIndex>* canonical_volume,
 			VoxelVolume<TVoxel, TIndex>* source_live_volume,
@@ -64,7 +60,6 @@ public: // instance methods
 			float& average_update_vector_length,
 			int iteration);
 };
-
 
 
 } // namespace internal
@@ -72,8 +67,8 @@ public: // instance methods
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
 class LevelSetAlignmentEngine : public LevelSetAlignmentEngineInterface<TVoxel, TWarp, TIndex> {
-	friend class internal::SurfaceTracker_ExecutionModeSpecific <TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode,
-			LevelSetAlignmentEngine<TVoxel,TWarp,TIndex,TMemoryDeviceType,TExecutionMode>>;
+	friend class internal::SurfaceTracker_ExecutionModeSpecific<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode,
+			LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode>>;
 private: // instance variables
 	//TODO: for auto-completion in Clion, remove when CLion is fixed and this is no longer necessary
 	const LevelSetAlignmentWeights& weights;
@@ -86,8 +81,8 @@ private: // instance variables
 	const float mean_vector_update_threshold_in_voxels;
 	const bool log_settings = false;
 
-	internal::SurfaceTracker_ExecutionModeSpecific <TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode,
-			LevelSetAlignmentEngine<TVoxel,TWarp,TIndex,TMemoryDeviceType,TExecutionMode>> execution_mode_specific;
+	internal::SurfaceTracker_ExecutionModeSpecific<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode,
+			LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode>> execution_mode_specific;
 
 public: // instance functions
 
@@ -115,7 +110,6 @@ public: // instance functions
 	float UpdateWarps(VoxelVolume<TWarp, TIndex>* warp_field,
 	                  VoxelVolume<TVoxel, TIndex>* canonical_volume,
 	                  VoxelVolume<TVoxel, TIndex>* live_volume) override;
-
 
 
 private: // instance functions
