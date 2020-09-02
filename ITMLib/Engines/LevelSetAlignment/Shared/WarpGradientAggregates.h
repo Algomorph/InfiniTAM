@@ -75,6 +75,24 @@ struct AdditionalGradientAggregates{
 	unsigned int GetLevelSetVoxelCount() const{
 		return GET_ATOMIC_VALUE_CPU(level_set_voxel_count);
 	}
+	
+	friend ORUtils::OStreamWrapper& operator << (ORUtils::OStreamWrapper& ostream_wrapper, const AdditionalGradientAggregates& aggregates){
+		float average_canonical_sdf = aggregates.GetAverageCanonicalSdf();
+		ostream_wrapper.OStream().write(reinterpret_cast<const char*>(&average_canonical_sdf), sizeof(float));
+		float average_live_sdf = aggregates.GetAverageLiveSdf();
+		ostream_wrapper.OStream().write(reinterpret_cast<const char*>(&average_live_sdf), sizeof(float));
+		float average_sdf_difference = aggregates.GetAverageSdfDifference();
+		ostream_wrapper.OStream().write(reinterpret_cast<const char*>(&average_sdf_difference), sizeof(float));
+		float average_warp_distance = aggregates.GetAverageWarpDistance();
+		ostream_wrapper.OStream().write(reinterpret_cast<const char*>(&average_warp_distance), sizeof(float));
+		unsigned int considered_voxel_count_CPU = aggregates.GetConsideredVoxelCount();
+		ostream_wrapper.OStream().write(reinterpret_cast<const char*>(&considered_voxel_count_CPU), sizeof(unsigned int));
+		unsigned int data_voxel_count_CPU = aggregates.GetDataVoxelCount();
+		ostream_wrapper.OStream().write(reinterpret_cast<const char*>(&data_voxel_count_CPU), sizeof(unsigned int));
+		unsigned int level_set_voxel_count_CPU = aggregates.GetLevelSetVoxelCount();
+		ostream_wrapper.OStream().write(reinterpret_cast<const char*>(&level_set_voxel_count_CPU), sizeof(unsigned int));
+		return ostream_wrapper;
+	}
 
 };
 
@@ -130,6 +148,18 @@ struct ComponentEnergies{
 	}
 	float GetCombinedSmoothingLength() const{
 		return GET_ATOMIC_VALUE_CPU(combined_smoothing_length);
+	}
+	
+	friend ORUtils::OStreamWrapper& operator<<(ORUtils::OStreamWrapper& ostream_wrapper, const ComponentEnergies& energies){
+		float total_data_energy_CPU = energies.GetTotalDataEnergy();
+		ostream_wrapper.OStream().write(reinterpret_cast<const char*>(&total_data_energy_CPU), sizeof(float));
+		float total_level_set_energy_CPU = energies.GetTotalLevelSetEnergy();
+		ostream_wrapper.OStream().write(reinterpret_cast<const char*>(&total_level_set_energy_CPU), sizeof(float));
+		float total_Tikhonov_energy_CPU = energies.GetTotalTikhonovEnergy();
+		ostream_wrapper.OStream().write(reinterpret_cast<const char*>(&total_Tikhonov_energy_CPU), sizeof(float));
+		float total_Killing_energy_CPU = energies.GetTotalKillingEnergy();
+		ostream_wrapper.OStream().write(reinterpret_cast<const char*>(&total_Killing_energy_CPU), sizeof(float));
+		return ostream_wrapper;
 	}
 };
 

@@ -63,7 +63,7 @@ public:
 	virtual std::vector<Vector3s> GetUtilizedHashBlockPositions(const VoxelVolume <TVoxel, TIndex>* volume) = 0;
 	virtual std::vector<Vector3s> GetDifferenceBetweenAllocatedAndUtilizedHashBlockPositionSets(const VoxelVolume<TVoxel,TIndex>* volume) = 0;
 
-	virtual Histogram ComputeWarpUpdateLengthHistogram_VolumeMax(const VoxelVolume<TVoxel, TIndex>* volume, int bin_count) = 0;
+	virtual Histogram ComputeWarpUpdateLengthHistogram_VolumeMax(const VoxelVolume<TVoxel, TIndex>* volume, int bin_count, float& maximum) = 0;
 	virtual Histogram ComputeWarpUpdateLengthHistogram_ManualMax(const VoxelVolume<TVoxel, TIndex>* volume, int bin_count, float maximum) = 0;
 };
 

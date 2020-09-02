@@ -74,12 +74,12 @@ public:
 	std::vector<Vector3s> GetUtilizedHashBlockPositions(const VoxelVolume<TVoxel, TIndex>* volume) override;
 	std::vector<Vector3s> GetDifferenceBetweenAllocatedAndUtilizedHashBlockPositionSets(const VoxelVolume<TVoxel, TIndex>* volume) override;
 
-	Histogram ComputeWarpUpdateLengthHistogram_VolumeMax(const VoxelVolume<TVoxel, TIndex>* volume, int bin_count) override;
+	Histogram ComputeWarpUpdateLengthHistogram_VolumeMax(const VoxelVolume<TVoxel, TIndex>* volume, int bin_count, float& maximum) override;
 	Histogram ComputeWarpUpdateLengthHistogram_ManualMax(const VoxelVolume<TVoxel, TIndex>* volume, int bin_count, float maximum) override;
 
 private:
 	Histogram
-	ComputeWarpUpdateLengthHistogram(const VoxelVolume<TVoxel, TIndex>* volume, int bin_count, float manually_set_maximum, bool use_manual_max);
+	ComputeWarpUpdateLengthHistogram(const VoxelVolume<TVoxel, TIndex>* volume, int bin_count, float& maximum, bool use_manual_max);
 
 	AnalyticsEngine() = default;
 	~AnalyticsEngine() = default;

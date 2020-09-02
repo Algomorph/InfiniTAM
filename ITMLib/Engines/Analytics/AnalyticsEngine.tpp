@@ -266,8 +266,8 @@ AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::GetDifferenceBetweenAllocate
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 Histogram
 AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::ComputeWarpUpdateLengthHistogram_VolumeMax(const VoxelVolume<TVoxel, TIndex>* volume,
-                                                                                               int bin_count) {
-	return this->ComputeWarpUpdateLengthHistogram(volume, bin_count, 0.0f, false);
+                                                                                               int bin_count, float& maximum) {
+	return this->ComputeWarpUpdateLengthHistogram(volume, bin_count, maximum, false);
 }
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
@@ -280,23 +280,19 @@ AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::ComputeWarpUpdateLengthHisto
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 Histogram
 AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::ComputeWarpUpdateLengthHistogram(
-		const VoxelVolume<TVoxel, TIndex>* volume, int bin_count, float manually_set_maximum, bool use_manual_max) {
+		const VoxelVolume<TVoxel, TIndex>* volume, int bin_count, float& maximum, bool use_manual_max) {
 
 	auto& analytics_engine = AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::Instance();
 	unsigned int utilized_voxel_count = analytics_engine.CountUtilizedVoxels(volume);
 
-	float maximum_length_to_use;
-
-	if (use_manual_max) {
-		maximum_length_to_use = manually_set_maximum;
-	} else {
+	if (!use_manual_max) {
 		Vector3i max_update_position;
-		analytics_engine.ComputeWarpUpdateMaxAndPosition(maximum_length_to_use, max_update_position, volume);
+		analytics_engine.ComputeWarpUpdateMaxAndPosition(maximum, max_update_position, volume);
 	}
 
 	Histogram histogram("Warp update length histogram", bin_count, utilized_voxel_count, TMemoryDeviceType);
 
-	WarpHistogramFunctor<TVoxel, TMemoryDeviceType, TVoxel::hasWarpUpdate> warp_histogram_functor(histogram, maximum_length_to_use);
+	WarpHistogramFunctor<TVoxel, TMemoryDeviceType, TVoxel::hasWarpUpdate> warp_histogram_functor(histogram, maximum);
 	VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseUtilized(volume, warp_histogram_functor);
 
 	return histogram;

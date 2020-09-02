@@ -64,12 +64,11 @@ public: // instance functions
 	void RecordSurfaceTrackingEnergies(const ComponentEnergies<TMemoryDeviceType>& energies, int iteration_index);
 	void RecordSurfaceTrackingStatistics(const AdditionalGradientAggregates<TMemoryDeviceType>& aggregates, int iteration_index);
 	void RecordSurfaceTrackingMeanUpdate(float mean_update);
-	void RecordAndLogWarpUpdateLengthHistogram(const VoxelVolume<TWarp, TIndex>& warp_field);
+	void RecordAndLogWarpUpdateLengthHistogram(const VoxelVolume<TWarp, TIndex>& warp_field, int iteration_index);
 
 
 
 private: // instance functions
-	void RecordWarpUpdateLengthHistogram(const Histogram& histogram, int iteration_index);
 	void RecordVolumeMemoryUsageInfo(const VoxelVolume <TVoxel, TIndex>& canonical_volume);
 	void RecordFrameMeshFromVolume(const VoxelVolume <TVoxel, TIndex>& volume, const std::string& filename, int frame_index);
 	void RecordCameraPose(const Matrix4f& camera_pose);
