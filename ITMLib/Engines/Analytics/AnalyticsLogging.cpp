@@ -18,6 +18,7 @@
 
 namespace ITMLib {
 
+
 template<>
 void GetMaxBlockCounts<PlainVoxelArray>(int& canonical_max_block_count, int& live_max_block_count, int& warp_max_block_count) {
 	canonical_max_block_count = live_max_block_count = warp_max_block_count = 1;

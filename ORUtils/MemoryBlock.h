@@ -308,19 +308,19 @@ public:
 	 * Essentially any previously allocated data is
 	 * released, new memory is allocated.
 	 * */
-	void Resize(size_t newDataSize, bool forceReallocation = true) {
-		if (newDataSize == element_count) return;
+	void Resize(size_t new_element_count, bool force_reallocation = true) {
+		if (new_element_count == element_count) return;
 
-		if (newDataSize > element_count || forceReallocation) {
+		if (new_element_count > element_count || force_reallocation) {
 			bool allocate_CPU = this->is_allocated_for_CPU;
 			bool allocate_CUDA = this->is_allocated_for_CUDA;
 			bool metalCompatible = this->is_metal_compatible;
 
 			this->Free();
-			this->Allocate(newDataSize, allocate_CPU, allocate_CUDA, metalCompatible);
+			this->Allocate(new_element_count, allocate_CPU, allocate_CUDA, metalCompatible);
 		}
 
-		this->element_count = newDataSize;
+		this->element_count = new_element_count;
 	}
 
 	/** Transfer data from CPU to GPU, if possible. */

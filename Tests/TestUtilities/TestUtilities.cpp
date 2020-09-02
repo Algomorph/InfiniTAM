@@ -442,6 +442,7 @@ configuration::Configuration GenerateChangedUpConfiguration() {
 			true,
 			true,
 			0.0001,
+			32,
 			true,
 			true);
 	MainEngineSettings changed_up_main_engine_settings(true, LIBMODE_BASIC, INDEX_ARRAY, false);

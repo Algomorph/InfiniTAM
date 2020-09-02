@@ -19,6 +19,7 @@
 #include <string>
 #include <vector>
 #include <unordered_set>
+#include <ostream>
 
 //log4cplus
 #include <log4cplus/loggingmacros.h>

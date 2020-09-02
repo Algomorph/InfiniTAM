@@ -258,6 +258,7 @@ BOOST_AUTO_TEST_CASE(ConfigurationTestLong_CLI_Only) {
 	                      " --telemetry_settings.record_warp_update_length_histograms=true"
 	                      " --telemetry_settings.use_warp_update_length_histogram_manual_max=true"
 	                      " --telemetry_settings.warp_update_length_histogram_max=0.0001"
+					      " --telemetry_settings.warp_update_length_histogram_bin_count=32"
 	                      " --telemetry_settings.use_CPU_for_mesh_recording=true"
 	                      " --telemetry_settings.record_camera_matrices=true"
 

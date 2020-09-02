@@ -18,12 +18,11 @@
 #include <vector>
 #include "AnalyticsEngineInterface.h"
 #include "../../Utils/Math.h"
+#include "../../Utils/Logging/Histogram.h"
 #include "../../Objects/Volume/VoxelVolume.h"
 #include "../../GlobalTemplateDefines.h"
 
 namespace ITMLib {
-
-
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 class AnalyticsEngine :
@@ -37,45 +36,51 @@ public:
 	AnalyticsEngine(AnalyticsEngine const&) = delete;
 	void operator=(AnalyticsEngine const&) = delete;
 
-	Vector6i ComputeVoxelBounds(const VoxelVolume <TVoxel, TIndex>* volume) override;
-	Vector6i ComputeAlteredVoxelBounds(VoxelVolume <TVoxel, TIndex>* volume) override;
+	Vector6i ComputeVoxelBounds(const VoxelVolume<TVoxel, TIndex>* volume) override;
+	Vector6i ComputeAlteredVoxelBounds(const VoxelVolume <TVoxel, TIndex>* volume) override;
 
-	unsigned int CountAllocatedVoxels(VoxelVolume <TVoxel, TIndex>* volume) override;
-	unsigned int CountUtilizedVoxels(VoxelVolume <TVoxel, TIndex>* volume) override;
-	unsigned int CountHashBlocksWithDepthWeightInRange(VoxelVolume <TVoxel, TIndex>* volume, Extent2Di range) override;
-	unsigned int CountVoxelsWithDepthWeightInRange(VoxelVolume <TVoxel, TIndex>* volume, Extent2Di range) override;
-	unsigned int CountVoxelsWithSpecifiedFlags(VoxelVolume <TVoxel, TIndex>* volume, VoxelFlags flags) override;
-	unsigned int CountNonTruncatedVoxels(VoxelVolume <TVoxel, TIndex>* volume) override;
-	unsigned int CountAlteredVoxels(VoxelVolume <TVoxel, TIndex>* volume) override;
-	unsigned int CountAlteredGradients(VoxelVolume<TVoxel, TIndex>* volume) override;
-	unsigned int CountAlteredWarpUpdates(VoxelVolume<TVoxel, TIndex>* volume) override;
-	unsigned int CountVoxelsWithSpecificSdfValue(VoxelVolume <TVoxel, TIndex>* volume, float value) override;
+	unsigned int CountAllocatedVoxels(const VoxelVolume<TVoxel, TIndex>* volume) override;
+	unsigned int CountUtilizedVoxels(const VoxelVolume<TVoxel, TIndex>* volume) override;
+	unsigned int CountHashBlocksWithDepthWeightInRange(const VoxelVolume <TVoxel, TIndex>* volume, Extent2Di range) override;
+	unsigned int CountVoxelsWithDepthWeightInRange(const VoxelVolume<TVoxel, TIndex>* volume, Extent2Di range) override;
+	unsigned int CountVoxelsWithSpecifiedFlags(const VoxelVolume <TVoxel, TIndex>* volume, VoxelFlags flags) override;
+	unsigned int CountNonTruncatedVoxels(const VoxelVolume <TVoxel, TIndex>* volume) override;
+	unsigned int CountAlteredVoxels(const VoxelVolume <TVoxel, TIndex>* volume) override;
+	unsigned int CountAlteredGradients(const VoxelVolume <TVoxel, TIndex>* volume) override;
+	unsigned int CountAlteredWarpUpdates(const VoxelVolume<TVoxel, TIndex>* volume) override;
+	unsigned int CountVoxelsWithSpecificSdfValue(const VoxelVolume<TVoxel, TIndex>* volume, float value) override;
 
-	double SumNonTruncatedVoxelAbsSdf(VoxelVolume <TVoxel, TIndex>* volume) override;
-	double SumTruncatedVoxelAbsSdf(VoxelVolume <TVoxel, TIndex>* volume) override;
+	double SumNonTruncatedVoxelAbsSdf(const VoxelVolume <TVoxel, TIndex>* volume) override;
+	double SumTruncatedVoxelAbsSdf(const VoxelVolume<TVoxel, TIndex>* volume) override;
 
-	double ComputeWarpUpdateMin(VoxelVolume <TVoxel, TIndex>* volume) override;
-	double ComputeWarpUpdateMax(VoxelVolume <TVoxel, TIndex>* volume) override;
-	double ComputeWarpUpdateMean(VoxelVolume <TVoxel, TIndex>* volume) override;
+	double ComputeWarpUpdateMin(const VoxelVolume<TVoxel, TIndex>* volume) override;
+	double ComputeWarpUpdateMax(const VoxelVolume <TVoxel, TIndex>* volume) override;
+	double ComputeWarpUpdateMean(const VoxelVolume <TVoxel, TIndex>* volume) override;
 
-	double ComputeFramewiseWarpMin(VoxelVolume <TVoxel, TIndex>* volume) override;
-	double ComputeFramewiseWarpMax(VoxelVolume <TVoxel, TIndex>* volume) override;
-	double ComputeFramewiseWarpMean(VoxelVolume <TVoxel, TIndex>* volume) override;
+	double ComputeFramewiseWarpMin(const VoxelVolume <TVoxel, TIndex>* volume) override;
+	double ComputeFramewiseWarpMax(const VoxelVolume<TVoxel, TIndex>* volume) override;
+	double ComputeFramewiseWarpMean(const VoxelVolume<TVoxel, TIndex>* volume) override;
 
-	void ComputeWarpUpdateMaxAndPosition(float& value, Vector3i& position, const VoxelVolume<TVoxel,TIndex>* volume);
+	void ComputeWarpUpdateMaxAndPosition(float& value, Vector3i& position, const VoxelVolume<TVoxel, TIndex>* volume) override;
 
-	Vector6i FindMinimumNonTruncatedBoundingBox(VoxelVolume <TVoxel, TIndex>* volume) override;
+	Vector6i FindMinimumNonTruncatedBoundingBox(const VoxelVolume <TVoxel, TIndex>* volume) override;
 
-	unsigned int CountAllocatedHashBlocks(const VoxelVolume <TVoxel, TIndex>* volume) override;
-	unsigned int CountUtilizedHashBlocks(const VoxelVolume <TVoxel, TIndex>* volume) override;
+	unsigned int CountAllocatedHashBlocks(const VoxelVolume<TVoxel, TIndex>* volume) override;
+	unsigned int CountUtilizedHashBlocks(const VoxelVolume<TVoxel, TIndex>* volume) override;
 
-	std::vector<int> GetAllocatedHashCodes(const VoxelVolume <TVoxel, TIndex>* volume) override;
-	std::vector<Vector3s> GetAllocatedHashBlockPositions(const VoxelVolume <TVoxel, TIndex>* volume) override;
-	std::vector<int> GetUtilizedHashCodes(const VoxelVolume <TVoxel, TIndex>* volume) override;
-	std::vector<Vector3s> GetUtilizedHashBlockPositions(const VoxelVolume <TVoxel, TIndex>* volume) override;
-	std::vector<Vector3s> GetDifferenceBetweenAllocatedAndUtilizedHashBlockPositionSets(const VoxelVolume<TVoxel,TIndex>* volume) override;
+	std::vector<int> GetAllocatedHashCodes(const VoxelVolume<TVoxel, TIndex>* volume) override;
+	std::vector<Vector3s> GetAllocatedHashBlockPositions(const VoxelVolume<TVoxel, TIndex>* volume) override;
+	std::vector<int> GetUtilizedHashCodes(const VoxelVolume<TVoxel, TIndex>* volume) override;
+	std::vector<Vector3s> GetUtilizedHashBlockPositions(const VoxelVolume<TVoxel, TIndex>* volume) override;
+	std::vector<Vector3s> GetDifferenceBetweenAllocatedAndUtilizedHashBlockPositionSets(const VoxelVolume<TVoxel, TIndex>* volume) override;
+
+	Histogram ComputeWarpUpdateLengthHistogram_VolumeMax(const VoxelVolume<TVoxel, TIndex>* volume, int bin_count) override;
+	Histogram ComputeWarpUpdateLengthHistogram_ManualMax(const VoxelVolume<TVoxel, TIndex>* volume, int bin_count, float maximum) override;
 
 private:
+	Histogram
+	ComputeWarpUpdateLengthHistogram(const VoxelVolume<TVoxel, TIndex>* volume, int bin_count, float manually_set_maximum, bool use_manual_max);
+
 	AnalyticsEngine() = default;
 	~AnalyticsEngine() = default;
 };

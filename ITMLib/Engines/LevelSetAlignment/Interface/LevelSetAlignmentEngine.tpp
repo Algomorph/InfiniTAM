@@ -341,8 +341,8 @@ void SurfaceTracker_ExecutionModeSpecific<TVoxel, TWarp, TIndex, TMemoryDeviceTy
 	parent.warping_engine->WarpVolume_WarpUpdates(warp_field, source_live_volume, target_live_volume);
 	bench::stop_timer("TrackMotion_4_WarpLiveScene");
 
-	//TODO
-	//ComputeWarpHistogram(warp_field);
+	auto& telemetry_recorder = TelemetryRecorder<TVoxel,TWarp, TIndex,TMemoryDeviceType>::GetDefaultInstance();
+	telemetry_recorder.RecordAndLogWarpUpdateLengthHistogram(*warp_field);
 }
 } // namespace internal
 } // namespace ITMLib

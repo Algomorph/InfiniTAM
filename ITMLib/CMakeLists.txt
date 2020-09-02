@@ -659,7 +659,6 @@ set(ITMLIB_ENGINES_TELEMETRY_HEADERS
     Engines/Indexing/Shared/IndexingEngine_DiagnosticData.h
     Engines/Telemetry/TelemetryRecorder.h
     Engines/Telemetry/TelemetryRecorderFactory.h
-    Engines/Telemetry/TelemetryFunctors.h
     )
 
 ## ================================================== OBJECTS ==========================================================
@@ -977,6 +976,7 @@ set(
         Utils/Telemetry/TelemetryUtilities.h
 
         Utils/Logging/ConsolePrintColors.h
+        Utils/Logging/Histogram.h
         Utils/Logging/Logging.cpp
         Utils/Logging/LoggingUtilities.h
         Utils/Logging/Logger.h

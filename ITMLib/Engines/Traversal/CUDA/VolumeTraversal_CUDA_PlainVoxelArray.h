@@ -23,6 +23,7 @@
 #include "../../../Objects/Volume/VoxelVolume.h"
 #include "../../../Objects/Volume/PlainVoxelArray.h"
 #include "../../../Utils/Configuration/Configuration.h"
+#include "../Shared/CudaCallWrappers.cuh"
 #include "VolumeTraversal_CUDA_PlainVoxelArray_Kernels.h"
 
 namespace ITMLib {
@@ -32,11 +33,11 @@ namespace ITMLib {
 
 template<typename TVoxel>
 class VolumeTraversalEngine<TVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA> {
-public:
-// region ================================ STATIC SINGLE-SCENE TRAVERSAL ===============================================
-	template<typename TStaticFunctor>
-	inline static void TraverseAll(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
-		TVoxel* voxels = volume->GetVoxels();
+private: // static functions
+	// using functor as second template here because it does not auto-resolve and has to be manually specified
+	template<typename TVoxel_Modifiers, typename TStaticFunctor, typename TVolume>
+	inline static void TraverseAll_Generic(TVolume* volume) {
+		TVoxel_Modifiers* voxels = volume->GetVoxels();
 		const GridAlignedBox* array_info = volume->index.GetIndexData();
 
 		dim3 cuda_block_size(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
@@ -44,12 +45,65 @@ public:
 		                    volume->index.GetVolumeSize().y / cuda_block_size.y,
 		                    volume->index.GetVolumeSize().z / cuda_block_size.z);
 
-		TraverseAll_device<TStaticFunctor, TVoxel> <<< cuda_grid_size, cuda_block_size >>>(voxels, array_info);
+		TraverseAll_device<TStaticFunctor, TVoxel_Modifiers> <<< cuda_grid_size, cuda_block_size >>>(voxels, array_info);
 		ORcudaKernelCheck;
+	}
+
+	template<typename TVoxel_Modifiers, typename TVolume, typename TFunctor>
+	inline static void
+	TraverseAll_Generic(TVolume* volume, TFunctor& functor) {
+		TVoxel_Modifiers* voxels = volume->GetVoxels();
+		const GridAlignedBox* array_info = volume->index.GetIndexData();
+		const Vector3i volume_size = volume->index.GetVolumeSize();
+		internal::CallCUDAonUploadedFunctor(
+				functor,
+				[&voxels, &array_info, &volume_size](TFunctor* functor_device) {
+					dim3 cuda_block_size(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
+					dim3 cuda_grid_size(volume_size.x / cuda_block_size.x,
+					                    volume_size.y / cuda_block_size.y,
+					                    volume_size.z / cuda_block_size.z);
+					traverseAll_device<TFunctor, TVoxel_Modifiers> <<< cuda_grid_size, cuda_block_size >>>(voxels, array_info, functor_device);
+				}
+		);
+	}
+
+	template<typename TVoxel_Modifiers, typename TVolume, typename TFunctor>
+	inline static void
+	TraverseAllWithPosition_Generic(TVolume* volume, TFunctor& functor) {
+		TVoxel_Modifiers* voxels = volume->GetVoxels();
+		const GridAlignedBox* array_info = volume->index.GetIndexData();
+		const Vector3i volume_size = volume->index.GetVolumeSize();
+		internal::CallCUDAonUploadedFunctor(
+				functor,
+				[&voxels, &array_info, &volume_size](TFunctor* functor_device){
+					dim3 cuda_block_size(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
+					dim3 cuda_grid_size(volume_size.x / cuda_block_size.x,
+					                    volume_size.y / cuda_block_size.y,
+					                    volume_size.z / cuda_block_size.z);
+					traverseAllWithPosition_device<TFunctor, TVoxel_Modifiers> <<< cuda_grid_size, cuda_block_size >>>(voxels, array_info, functor_device);
+				}
+		);
+	}
+
+public: // static functions
+// region ================================ STATIC SINGLE-SCENE TRAVERSAL ===============================================
+	template<typename TStaticFunctor>
+	inline static void TraverseAll(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
+		TraverseAll_Generic<TVoxel, TStaticFunctor>(volume);
+	}
+
+	template<typename TStaticFunctor>
+	inline static void TraverseAll(const VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
+		TraverseAll_Generic<const TVoxel, TStaticFunctor>(volume);
 	}
 
 	template<typename TStaticFunctor>
 	inline static void TraverseUtilized(VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
+		TraverseAll<TStaticFunctor>(volume);
+	}
+
+	template<typename TStaticFunctor>
+	inline static void TraverseUtilized(const VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
 		TraverseAll<TStaticFunctor>(volume);
 	}
 
@@ -58,25 +112,13 @@ public:
 	template<typename TFunctor>
 	inline static void
 	TraverseAll(VoxelVolume<TVoxel, PlainVoxelArray>* volume, TFunctor& functor) {
-		TVoxel* voxels = volume->GetVoxels();
-		const GridAlignedBox* array_info = volume->index.GetIndexData();
+		TraverseAll_Generic<TVoxel>(volume, functor);
+	}
 
-		dim3 cuda_block_size(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
-		dim3 cuda_grid_size(volume->index.GetVolumeSize().x / cuda_block_size.x,
-		                    volume->index.GetVolumeSize().y / cuda_block_size.y,
-		                    volume->index.GetVolumeSize().z / cuda_block_size.z);
-
-		// transfer functor from RAM to VRAM
-		TFunctor* functor_device = nullptr;
-		ORcudaSafeCall(cudaMalloc((void**) &functor_device, sizeof(TFunctor)));
-		ORcudaSafeCall(cudaMemcpy(functor_device, &functor, sizeof(TFunctor), cudaMemcpyHostToDevice));
-
-		traverseAll_device<TFunctor, TVoxel> <<< cuda_grid_size, cuda_block_size >>>(voxels, array_info, functor_device);
-		ORcudaKernelCheck;
-
-		// transfer functor from VRAM back to RAM
-		ORcudaSafeCall(cudaMemcpy(&functor, functor_device, sizeof(TFunctor), cudaMemcpyDeviceToHost));
-		ORcudaSafeCall(cudaFree(functor_device));
+	template<typename TFunctor>
+	inline static void
+	TraverseAll(const VoxelVolume<TVoxel, PlainVoxelArray>* volume, TFunctor& functor) {
+		TraverseAll_Generic<const TVoxel>(volume, functor);
 	}
 
 	template<typename TFunctor>
@@ -87,31 +129,31 @@ public:
 
 	template<typename TFunctor>
 	inline static void
+	TraverseUtilized(const VoxelVolume<TVoxel, PlainVoxelArray>* volume, TFunctor& functor) {
+		TraverseAll(volume, functor);
+	}
+
+	template<typename TFunctor>
+	inline static void
 	TraverseAllWithPosition(VoxelVolume<TVoxel, PlainVoxelArray>* volume, TFunctor& functor) {
-		TVoxel* voxels = volume->GetVoxels();
-		const GridAlignedBox* array_info = volume->index.GetIndexData();
+		TraverseAllWithPosition_Generic<TVoxel>(volume, functor);
+	}
 
-		dim3 cuda_block_size(VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE, VOXEL_BLOCK_SIZE);
-		dim3 cuda_grid_size(volume->index.GetVolumeSize().x / cuda_block_size.x,
-		                    volume->index.GetVolumeSize().y / cuda_block_size.y,
-		                    volume->index.GetVolumeSize().z / cuda_block_size.z);
-
-		// transfer functor from RAM to VRAM
-		TFunctor* functor_device = nullptr;
-		ORcudaSafeCall(cudaMalloc((void**) &functor_device, sizeof(TFunctor)));
-		ORcudaSafeCall(cudaMemcpy(functor_device, &functor, sizeof(TFunctor), cudaMemcpyHostToDevice));
-
-		traverseAllWithPosition_device<TFunctor, TVoxel> <<< cuda_grid_size, cuda_block_size >>>(voxels, array_info, functor_device);
-		ORcudaKernelCheck;
-
-		// transfer functor from VRAM back to RAM
-		ORcudaSafeCall(cudaMemcpy(&functor, functor_device, sizeof(TFunctor), cudaMemcpyDeviceToHost));
-		ORcudaSafeCall(cudaFree(functor_device));
+	template<typename TFunctor>
+	inline static void
+	TraverseAllWithPosition(const VoxelVolume<TVoxel, PlainVoxelArray>* volume, TFunctor& functor) {
+		TraverseAllWithPosition_Generic<const TVoxel>(volume, functor);
 	}
 
 	template<typename TFunctor>
 	inline static void
 	TraverseUtilizedWithPosition(VoxelVolume<TVoxel, PlainVoxelArray>* volume, TFunctor& functor) {
+		TraverseAllWithPosition(volume, functor);
+	}
+
+	template<typename TFunctor>
+	inline static void
+	TraverseUtilizedWithPosition(const VoxelVolume<TVoxel, PlainVoxelArray>* volume, TFunctor& functor) {
 		TraverseAllWithPosition(volume, functor);
 	}
 // endregion ===========================================================================================================

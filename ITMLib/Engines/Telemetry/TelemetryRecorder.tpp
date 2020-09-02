@@ -16,10 +16,6 @@
 //stdlib
 #include <filesystem>
 
-#ifdef __CUDACC__
-#pragma message( __cplusplus )
-#endif
-
 namespace fs = std::filesystem;
 
 //local
@@ -32,7 +28,6 @@ namespace fs = std::filesystem;
 #include "../../Utils/Telemetry/TelemetryUtilities.h"
 #include "../Meshing/MeshingEngineFactory.h"
 #include "../Analytics/AnalyticsEngine.h"
-#include "TelemetryFunctors.h"
 #include "../../Utils/Logging/ConsolePrintColors.h"
 #include "../Traversal/Interface/VolumeTraversal.h"
 
@@ -116,7 +111,8 @@ void TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::RecordPostFusi
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void
-TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::RecordSurfaceTrackingEnergies(const ComponentEnergies<TMemoryDeviceType>& energies, int iteration_index) {
+TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::RecordSurfaceTrackingEnergies(const ComponentEnergies<TMemoryDeviceType>& energies,
+                                                                                           int iteration_index) {
 	if (parameters.record_surface_tracking_optimization_energies) {
 		surface_tracking_energy_file.OStream().write(reinterpret_cast<const char*>(&iteration_index), sizeof(int));
 		float total_data_energy = energies.GetTotalDataEnergy();
@@ -133,7 +129,7 @@ TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::RecordSurfaceTracki
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::RecordSurfaceTrackingStatistics(
 		const AdditionalGradientAggregates<TMemoryDeviceType>& aggregates, int iteration_index) {
-	if(parameters.record_surface_tracking_additional_statistics){
+	if (parameters.record_surface_tracking_additional_statistics) {
 		surface_tracking_statistics_file.OStream().write(reinterpret_cast<const char*>(&iteration_index), sizeof(int));
 		float average_canonical_sdf = aggregates.GetAverageCanonicalSdf();
 		surface_tracking_statistics_file.OStream().write(reinterpret_cast<const char*>(&average_canonical_sdf), sizeof(float));
@@ -155,32 +151,35 @@ void TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::RecordSurfaceT
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::RecordSurfaceTrackingMeanUpdate(float mean_update) {
-	if(parameters.record_surface_tracking_additional_statistics){
+	if (parameters.record_surface_tracking_additional_statistics) {
 		surface_tracking_statistics_file.OStream().write(reinterpret_cast<const char*>(&mean_update), sizeof(float));
 	}
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-void TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::ComputeWarpHistogram(
-		VoxelVolume<TWarp, TIndex>* warp_field) {
+void TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::RecordWarpUpdateLengthHistogram(
+		const Histogram& histogram, int iteration_index) {
 	if (parameters.record_warp_update_length_histograms) {
+		warp_update_length_histogram_file.OStream().write(reinterpret_cast<const char*>(&iteration_index), sizeof(int));
+		warp_update_length_histogram_file.OStream() << histogram;
+	}
+}
+
+template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+void
+TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::RecordAndLogWarpUpdateLengthHistogram(const VoxelVolume<TWarp, TIndex>& warp_field) {
+	if (parameters.record_warp_update_length_histograms || configuration::Get().logging_settings.log_warp_update_length_histograms) {
 		auto& analytics_engine = AnalyticsEngine<TWarp, TIndex, TMemoryDeviceType>::Instance();
-		float max_update;
-
-		Vector3i max_update_position;
-		unsigned int utilized_voxel_count = analytics_engine.CountUtilizedVoxels(warp_field);
-		analytics_engine.ComputeWarpUpdateMaxAndPosition(max_update, max_update_position, warp_field);
-
-		WarpHistogramFunctor<TWarp, TMemoryDeviceType> warp_histogram_functor(max_update, utilized_voxel_count, 32);
-		VolumeTraversalEngine<TWarp, TIndex, TMemoryDeviceType>::TraverseUtilized(warp_field, warp_histogram_functor);
-
-		warp_histogram_functor.PrintHistogram();
-
-		std::cout << ITMLib::green << " Max update: [" << max_update << " at " << max_update_position << "]."
-		          << ITMLib::reset << std::endl;
+		Histogram histogram;
+		if(parameters.use_warp_update_length_histogram_manual_max){
+			histogram = analytics_engine.ComputeWarpUpdateLengthHistogram_ManualMax(&warp_field, parameters.warp_update_length_histogram_bin_count, parameters.warp_update_length_histogram_max);
+		}else{
+			histogram = analytics_engine.ComputeWarpUpdateLengthHistogram_VolumeMax(&warp_field, parameters.warp_update_length_histogram_bin_count);
+		}
 
 	}
 }
+
 
 
 

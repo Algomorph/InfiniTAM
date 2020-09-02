@@ -35,9 +35,12 @@ namespace ITMLib {
     "canonical volume after fusion."), \
     (bool, record_warp_update_length_histograms, false, PRIMITIVE, "Whether record a histogram of warp lengths at every iteration."), \
     (bool, use_warp_update_length_histogram_manual_max, false, PRIMITIVE, "Enables setting an upper bound manually for warp update length "\
-	"histograms via -warp_update_length_histogram_max."), \
+	"histograms via -telemetry_settings.warp_update_length_histogram_max."), \
     (float, warp_update_length_histogram_max, 0.00005, PRIMITIVE, "A manual bound for warp update length histogram (in meters). "\
-    "Has effect only when -use_warp_update_length_histogram_manual_max is set to true."), \
+    "Has effect only when -telemetry_settings.use_warp_update_length_histogram_manual_max is set to true."),                         \
+    (int, warp_update_length_histogram_bin_count, 16, PRIMITIVE, \
+    "Bin count for warp update length histogram when -telemetry_settings.record_warp_update_length_histograms "\
+    "or -logging_settings.log_warp_update_length_histograms or both are used."),\
     (bool, use_CPU_for_mesh_recording, false, PRIMITIVE, "Whether to ALWAYS use CPU & regular RAM when recording mesh telemetry. For CUDA runs, this will reduce GPU memory usage."), \
     (bool, record_camera_matrices, false, PRIMITIVE, "Whether to record estimated camera trajectory matrices in world space.")
 

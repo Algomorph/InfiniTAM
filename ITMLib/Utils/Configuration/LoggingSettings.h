@@ -55,6 +55,10 @@ DECLARE_SERIALIZABLE_ENUM(VERBOSITY_LEVEL_ENUM_DESCRIPTION);
     (bool, log_additional_surface_tracking_stats, false, PRIMITIVE, "Whether to log additional statistics " \
     "accumulated during each surface tracking iteration. Only works when level_set_evolution.execution_mode " \
     "parameter is set to \"diagnostic\""),\
+    (bool, log_warp_update_length_histograms, false, PRIMITIVE, \
+    "Whether to log warp update length histograms (per-iteration verbosity only, diagnostic level_set_evolution.execution_mode only). "\
+	"The number of bins is controlled by -telemetry_settings.warp_update_length_histogram_bin_count. " \
+	"A manual histogram maximum (if any) can also be set through telemetry_settings."), \
     (bool, log_voxel_hash_block_usage, false, PRIMITIVE, \
     "Whether to log counts of utilized voxel hash blocks for all volumes involved (along with upper bounds).")
 

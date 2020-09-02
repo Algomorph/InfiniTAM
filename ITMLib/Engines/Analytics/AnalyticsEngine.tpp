@@ -33,7 +33,7 @@ AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::ComputeVoxelBounds(
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 Vector6i AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::ComputeAlteredVoxelBounds(
-		VoxelVolume<TVoxel, TIndex>* volume) {
+		const VoxelVolume<TVoxel, TIndex>* volume) {
 	ComputeConditionalVoxelBoundsFunctor<TVoxel, TMemoryDeviceType, IsAlteredStaticFunctor<TVoxel>> bounds_functor;
 	VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseUtilizedWithPosition(volume, bounds_functor);
 	return bounds_functor.GetBounds();
@@ -44,21 +44,21 @@ Vector6i AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::ComputeAlteredVoxel
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 unsigned int
 AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::CountAllocatedVoxels(
-		VoxelVolume<TVoxel, TIndex>* volume) {
+		const VoxelVolume<TVoxel, TIndex>* volume) {
 	return ComputeVoxelCountFunctor<TVoxel, TIndex, TMemoryDeviceType>::compute_allocated(volume);
 }
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 unsigned int
 AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::CountUtilizedVoxels(
-		VoxelVolume<TVoxel, TIndex>* volume) {
+		const VoxelVolume<TVoxel, TIndex>* volume) {
 	return ComputeVoxelCountFunctor<TVoxel, TIndex, TMemoryDeviceType>::compute_utilized(volume);
 }
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 unsigned int
 AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::CountVoxelsWithSpecifiedFlags(
-		VoxelVolume<TVoxel, TIndex>* volume,
+		const VoxelVolume<TVoxel, TIndex>* volume,
 		VoxelFlags flags) {
 	return CountVoxelsWithSpecificFlagsFunctor<TVoxel::hasSDFInformation, TVoxel, TIndex, TMemoryDeviceType>
 	::compute(volume, flags);
@@ -66,7 +66,7 @@ AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::CountVoxelsWithSpecifiedFlag
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 unsigned int AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::CountNonTruncatedVoxels(
-		VoxelVolume<TVoxel, TIndex>* volume) {
+		const VoxelVolume<TVoxel, TIndex>* volume) {
 	return CountVoxelsWithSpecifiedFlags(volume, VoxelFlags::VOXEL_NONTRUNCATED);
 }
 
@@ -74,7 +74,7 @@ unsigned int AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::CountNonTruncat
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 double
 AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::SumNonTruncatedVoxelAbsSdf(
-		VoxelVolume<TVoxel, TIndex>* volume) {
+		const VoxelVolume<TVoxel, TIndex>* volume) {
 	return SumSDFFunctor<TVoxel::hasSemanticInformation, TVoxel, TIndex, TMemoryDeviceType>::compute(
 			volume, VoxelFlags::VOXEL_NONTRUNCATED);
 
@@ -83,14 +83,14 @@ AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::SumNonTruncatedVoxelAbsSdf(
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 double
 AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::SumTruncatedVoxelAbsSdf(
-		VoxelVolume<TVoxel, TIndex>* volume) {
+		const VoxelVolume<TVoxel, TIndex>* volume) {
 	return SumSDFFunctor<TVoxel::hasSemanticInformation, TVoxel, TIndex, TMemoryDeviceType>::
 	compute(volume, VoxelFlags::VOXEL_TRUNCATED);
 }
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 unsigned int AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::CountVoxelsWithDepthWeightInRange(
-		VoxelVolume<TVoxel, TIndex>* volume, Extent2Di range) {
+		const VoxelVolume<TVoxel, TIndex>* volume, Extent2Di range) {
 	typedef RetrieveIsVoxelInDepthWeightRange<TVoxel, unsigned int, TVoxel::hasWeightInformation> RetrievalFunctorType;
 	typedef ReduceSumFunctor<TVoxel, TIndex, unsigned int> ReduceFunctorType;
 	RetrievalFunctorType functor{range};
@@ -102,7 +102,7 @@ unsigned int AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::CountVoxelsWith
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 unsigned int AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::CountHashBlocksWithDepthWeightInRange(
-		VoxelVolume<TVoxel, TIndex>* volume, Extent2Di range) {
+		const VoxelVolume<TVoxel, TIndex>* volume, Extent2Di range) {
 	typedef RetrieveIsVoxelInDepthWeightRange<TVoxel, unsigned int, TVoxel::hasWeightInformation> RetrievalFunctorType;
 	typedef ReduceBinAndFunctor<TVoxel, TIndex, unsigned int> BlockReduceFunctorType;
 	typedef ReduceSumFunctor<TVoxel, TIndex, unsigned int> ResultReduceFunctorType;
@@ -117,30 +117,29 @@ unsigned int AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::CountHashBlocks
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 unsigned int
 AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::CountVoxelsWithSpecificSdfValue(
-		VoxelVolume<TVoxel, TIndex>* volume,
+		const VoxelVolume<TVoxel, TIndex>* volume,
 		float value) {
-	return CountVoxelsWithSpecificValueFunctor<TVoxel::hasSDFInformation, TVoxel, TIndex, TMemoryDeviceType>::compute(
-			volume, value);
+	return CountVoxelsWithSpecificValueFunctor<TVoxel::hasSDFInformation, TVoxel, TIndex, TMemoryDeviceType>::compute(volume, value);
 }
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 unsigned int
 AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::CountAlteredVoxels(
-		VoxelVolume<TVoxel, TIndex>* volume) {
+		const VoxelVolume<TVoxel, TIndex>* volume) {
 	CountAlteredVoxelsFunctor<TVoxel, TMemoryDeviceType> functor;
 	VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseUtilized(volume, functor);
 	return functor.GetCount();
 }
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-unsigned int AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::CountAlteredGradients(VoxelVolume<TVoxel, TIndex>* volume) {
+unsigned int AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::CountAlteredGradients(const VoxelVolume<TVoxel, TIndex>* volume) {
 	CountAlteredGradientsFunctor<TVoxel, TMemoryDeviceType, TVoxel::hasWarpUpdate> functor;
 	VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseUtilized(volume, functor);
 	return functor.GetCount();
 }
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-unsigned int AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::CountAlteredWarpUpdates(VoxelVolume<TVoxel, TIndex>* volume){
+unsigned int AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::CountAlteredWarpUpdates(const VoxelVolume<TVoxel, TIndex>* volume) {
 	CountAlteredWarpUpdatesFunctor<TVoxel, TMemoryDeviceType, TVoxel::hasWarpUpdate> functor;
 	VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseUtilized(volume, functor);
 	return functor.GetCount();
@@ -155,62 +154,53 @@ void AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::ComputeWarpUpdateMaxAnd
 	ignored_value.value = FLT_MIN;
 	value = VolumeReductionEngine<TVoxel, TIndex, TMemoryDeviceType>::
 	template ReduceUtilized<RetreiveWarpLengthFunctor<TVoxel, ITMLib::WARP_UPDATE>,
-			ReduceFunctorType,ReduceFunctorType, float>
+			ReduceFunctorType, ReduceFunctorType, float>
 			(position, volume, ignored_value);
 }
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 double AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::ComputeWarpUpdateMin(
-		VoxelVolume<TVoxel, TIndex>* volume) {
-	return ComputeWarpLengthStatisticFunctor<TVoxel::hasWarpUpdate, TVoxel, TIndex, TMemoryDeviceType, MINIMUM, WARP_UPDATE>::compute(
-			volume);
+		const VoxelVolume<TVoxel, TIndex>* volume) {
+	return ComputeWarpLengthStatisticFunctor<TVoxel::hasWarpUpdate, TVoxel, TIndex, TMemoryDeviceType, MINIMUM, WARP_UPDATE>::compute(volume);
 }
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 double AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::ComputeWarpUpdateMax(
-		VoxelVolume<TVoxel, TIndex>* volume) {
-	return ComputeWarpLengthStatisticFunctor<TVoxel::hasWarpUpdate, TVoxel, TIndex, TMemoryDeviceType, MAXIMUM, WARP_UPDATE>::compute(
-			volume);
+		const VoxelVolume<TVoxel, TIndex>* volume) {
+	return ComputeWarpLengthStatisticFunctor<TVoxel::hasWarpUpdate, TVoxel, TIndex, TMemoryDeviceType, MAXIMUM, WARP_UPDATE>::compute(volume);
 }
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 double AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::ComputeWarpUpdateMean(
-		VoxelVolume<TVoxel, TIndex>* volume) {
-	return ComputeWarpLengthStatisticFunctor<TVoxel::hasWarpUpdate, TVoxel, TIndex, TMemoryDeviceType, MEAN, WARP_UPDATE>::compute(
-			volume);
+		const VoxelVolume<TVoxel, TIndex>* volume) {
+	return ComputeWarpLengthStatisticFunctor<TVoxel::hasWarpUpdate, TVoxel, TIndex, TMemoryDeviceType, MEAN, WARP_UPDATE>::compute(volume);
 }
 
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 double AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::ComputeFramewiseWarpMin(
-		VoxelVolume<TVoxel, TIndex>* volume) {
-	return ComputeWarpLengthStatisticFunctor<TVoxel::hasFramewiseWarp, TVoxel, TIndex, TMemoryDeviceType, MINIMUM, WARP_FRAMEWISE>::compute(
-			volume);
+		const VoxelVolume<TVoxel, TIndex>* volume) {
+	return ComputeWarpLengthStatisticFunctor<TVoxel::hasFramewiseWarp, TVoxel, TIndex, TMemoryDeviceType, MINIMUM, WARP_FRAMEWISE>::compute(volume);
 }
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 double AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::ComputeFramewiseWarpMax(
-		VoxelVolume<TVoxel, TIndex>* volume) {
-	return ComputeWarpLengthStatisticFunctor<TVoxel::hasFramewiseWarp, TVoxel, TIndex, TMemoryDeviceType, MAXIMUM, WARP_FRAMEWISE>::compute(
-			volume);
+		const VoxelVolume<TVoxel, TIndex>* volume) {
+	return ComputeWarpLengthStatisticFunctor<TVoxel::hasFramewiseWarp, TVoxel, TIndex, TMemoryDeviceType, MAXIMUM, WARP_FRAMEWISE>::compute(volume);
 }
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 double AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::ComputeFramewiseWarpMean(
-		VoxelVolume<TVoxel, TIndex>* volume) {
-	return ComputeWarpLengthStatisticFunctor<TVoxel::hasFramewiseWarp, TVoxel, TIndex, TMemoryDeviceType, MEAN, WARP_FRAMEWISE>::compute(
-			volume);
+		const VoxelVolume<TVoxel, TIndex>* volume) {
+	return ComputeWarpLengthStatisticFunctor<TVoxel::hasFramewiseWarp, TVoxel, TIndex, TMemoryDeviceType, MEAN, WARP_FRAMEWISE>::compute(volume);
 }
-
-
 
 // endregion ===========================================================================================================
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 Vector6i AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::FindMinimumNonTruncatedBoundingBox(
-		VoxelVolume<TVoxel, TIndex>* volume) {
-	return FlagMatchBBoxFunctor<TVoxel::hasSemanticInformation, TVoxel, TIndex, TMemoryDeviceType>::
-	compute(volume, VoxelFlags::VOXEL_NONTRUNCATED);
+		const VoxelVolume<TVoxel, TIndex>* volume) {
+	return FlagMatchBBoxFunctor<TVoxel::hasSemanticInformation, TVoxel, TIndex, TMemoryDeviceType>::compute(volume, VoxelFlags::VOXEL_NONTRUNCATED);
 }
 
 
@@ -271,3 +261,45 @@ AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::GetDifferenceBetweenAllocate
 
 
 // endregion ===========================================================================================================
+// region ================================ HISTOGRAMS ==================================================================
+
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+Histogram
+AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::ComputeWarpUpdateLengthHistogram_VolumeMax(const VoxelVolume<TVoxel, TIndex>* volume,
+                                                                                               int bin_count) {
+	return this->ComputeWarpUpdateLengthHistogram(volume, bin_count, 0.0f, false);
+}
+
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+Histogram
+AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::ComputeWarpUpdateLengthHistogram_ManualMax(const VoxelVolume<TVoxel, TIndex>* volume,
+                                                                                               int bin_count, float maximum) {
+	return this->ComputeWarpUpdateLengthHistogram(volume, bin_count, maximum, true);
+}
+
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+Histogram
+AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::ComputeWarpUpdateLengthHistogram(
+		const VoxelVolume<TVoxel, TIndex>* volume, int bin_count, float manually_set_maximum, bool use_manual_max) {
+
+	auto& analytics_engine = AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::Instance();
+	unsigned int utilized_voxel_count = analytics_engine.CountUtilizedVoxels(volume);
+
+	float maximum_length_to_use;
+
+	if (use_manual_max) {
+		maximum_length_to_use = manually_set_maximum;
+	} else {
+		Vector3i max_update_position;
+		analytics_engine.ComputeWarpUpdateMaxAndPosition(maximum_length_to_use, max_update_position, volume);
+	}
+
+	Histogram histogram("Warp update length histogram", bin_count, utilized_voxel_count, TMemoryDeviceType);
+
+	WarpHistogramFunctor<TVoxel, TMemoryDeviceType, TVoxel::hasWarpUpdate> warp_histogram_functor(histogram, maximum_length_to_use);
+	VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseUtilized(volume, warp_histogram_functor);
+
+	return histogram;
+}
+
+// endregion ===============================================================================================================
