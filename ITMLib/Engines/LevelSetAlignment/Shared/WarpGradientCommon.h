@@ -57,7 +57,7 @@ void PrintEnergyStatistics(const bool& enable_data_term,
 		total_energy += total_smoothing_energy;
 	}
 	stringstream << green << " Total: " << total_energy << reset;
-	LOG4CPLUS_PER_ITERATION(logging::get_logger(), stringstream.str());
+	LOG4CPLUS_PER_ITERATION(logging::GetLogger(), stringstream.str());
 
 
 }
@@ -86,7 +86,7 @@ void PrintEnergyStatistics(const bool& enable_data_term,
 	if(enable_smoothing_term){
 		stringstream << cyan << " Smoothing term: " << energies.GetCombinedSmoothingLength();
 	}
-	LOG4CPLUS_PER_ITERATION(logging::get_logger(), stringstream.str());
+	LOG4CPLUS_PER_ITERATION(logging::GetLogger(), stringstream.str());
 }
 
 

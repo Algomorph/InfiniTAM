@@ -18,7 +18,7 @@
 #include <vector>
 #include "AnalyticsEngineInterface.h"
 #include "../../Utils/Math.h"
-#include "../../Utils/Logging/Histogram.h"
+#include "../../Utils/Analytics/Histogram.h"
 #include "../../Objects/Volume/VoxelVolume.h"
 #include "../../GlobalTemplateDefines.h"
 

@@ -899,7 +899,6 @@ set(
 
         Utils/Logging/LoggingUtilities.cpp
         Utils/Logging/Logging.cpp
-        Utils/Logging/Logger.cpp
 
         Utils/Metacoding/SerializableStruct_Impl.cpp
         Utils/Metacoding/DeferrableSerializableStruct_Impl.cpp
@@ -976,10 +975,9 @@ set(
         Utils/Telemetry/TelemetryUtilities.h
 
         Utils/Logging/ConsolePrintColors.h
-        Utils/Logging/Histogram.h
+        Utils/Analytics/Histogram.h
         Utils/Logging/Logging.cpp
         Utils/Logging/LoggingUtilities.h
-        Utils/Logging/Logger.h
         Utils/Logging/PrettyPrinters.h
         Utils/Logging/PrettyPrinters.cpp
 

@@ -20,7 +20,7 @@
 #include "../../Objects/Volume/VoxelVolume.h"
 #include "../../Utils/Enums/WarpType.h"
 #include "../../Utils/Enums/VoxelFlags.h"
-#include "../../Utils/Logging/Histogram.h"
+#include "../../Utils/Analytics/Histogram.h"
 
 namespace ITMLib {
 template<typename TVoxel, typename TIndex>

@@ -71,13 +71,13 @@ LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
 void LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode>::LogSettings() {
 	if (this->log_settings) {
-		LOG4CPLUS_TOP_LEVEL(logging::get_logger(), bright_cyan << "*** NonRigidTrackingParameters ***" << reset);
-		LOG4CPLUS_TOP_LEVEL(logging::get_logger(), "Max iteration count: " << this->termination.max_iteration_count)
-		LOG4CPLUS_TOP_LEVEL(logging::get_logger(),
+		LOG4CPLUS_TOP_LEVEL(logging::GetLogger(), bright_cyan << "*** NonRigidTrackingParameters ***" << reset);
+		LOG4CPLUS_TOP_LEVEL(logging::GetLogger(), "Max iteration count: " << this->termination.max_iteration_count)
+		LOG4CPLUS_TOP_LEVEL(logging::GetLogger(),
 		                    "Warping vector update threshold: " << this->termination.mean_update_length_threshold
 		                                                        << " m, " << this->mean_vector_update_threshold_in_voxels
 		                                                        << " voxels");
-		LOG4CPLUS_TOP_LEVEL(logging::get_logger(),
+		LOG4CPLUS_TOP_LEVEL(logging::GetLogger(),
 		                    bright_cyan << "*** *********************************** ***" << reset);
 	}
 }
@@ -158,7 +158,7 @@ LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode
 	}
 
 	if (TExecutionMode == DIAGNOSTIC) {
-		LOG4CPLUS_PER_FRAME(logging::get_logger(), "Level set evolution iteration count: " << yellow << iteration << reset);
+		LOG4CPLUS_PER_FRAME(logging::GetLogger(), "Level set evolution iteration count: " << yellow << iteration << reset);
 	}
 
 
@@ -294,12 +294,12 @@ void SurfaceTracker_ExecutionModeSpecific<TVoxel, TWarp, TIndex, TMemoryDeviceTy
 	auto& config = configuration::Get();
 
 	if (config.logging_settings.log_iteration_number) {
-		LOG4CPLUS_PER_ITERATION(logging::get_logger(), red << "Iteration: " << iteration << reset);
+		LOG4CPLUS_PER_ITERATION(logging::GetLogger(), red << "Iteration: " << iteration << reset);
 	}
 
 
 	if (config.logging_settings.log_surface_tracking_procedure_names) {
-		LOG4CPLUS_PER_ITERATION(logging::get_logger(), bright_cyan << "Calculating warp energy gradient..." << reset);
+		LOG4CPLUS_PER_ITERATION(logging::GetLogger(), bright_cyan << "Calculating warp energy gradient..." << reset);
 	}
 
 	bench::start_timer("TrackMotion_1_CalculateWarpUpdate");
@@ -307,7 +307,7 @@ void SurfaceTracker_ExecutionModeSpecific<TVoxel, TWarp, TIndex, TMemoryDeviceTy
 	bench::stop_timer("TrackMotion_1_CalculateWarpUpdate");
 
 	if (parent.parameters.switches.enable_sobolev_gradient_smoothing && config.logging_settings.log_surface_tracking_procedure_names) {
-		LOG4CPLUS_PER_ITERATION(logging::get_logger(),
+		LOG4CPLUS_PER_ITERATION(logging::GetLogger(),
 		                        bright_cyan << "Applying Sobolev smoothing to energy gradient..." << reset);
 	}
 
@@ -316,7 +316,7 @@ void SurfaceTracker_ExecutionModeSpecific<TVoxel, TWarp, TIndex, TMemoryDeviceTy
 	bench::stop_timer("TrackMotion_2_ApplySmoothingToGradient");
 
 	if (config.logging_settings.log_surface_tracking_procedure_names) {
-		LOG4CPLUS_PER_ITERATION(logging::get_logger(),
+		LOG4CPLUS_PER_ITERATION(logging::GetLogger(),
 		                        bright_cyan << "Applying warp update (based on energy gradient) to the cumulative warp..."
 		                                    << reset);
 	}
@@ -329,11 +329,11 @@ void SurfaceTracker_ExecutionModeSpecific<TVoxel, TWarp, TIndex, TMemoryDeviceTy
 			.RecordSurfaceTrackingMeanUpdate(average_update_vector_length);
 
 	if (config.logging_settings.log_average_warp_update) {
-		LOG4CPLUS_PER_ITERATION(logging::get_logger(), "Average update vector length:" << yellow << average_update_vector_length << reset);
+		LOG4CPLUS_PER_ITERATION(logging::GetLogger(), "Average update vector length:" << yellow << average_update_vector_length << reset);
 	}
 
 	if (config.logging_settings.log_surface_tracking_procedure_names) {
-		LOG4CPLUS_PER_ITERATION(logging::get_logger(),
+		LOG4CPLUS_PER_ITERATION(logging::GetLogger(),
 		                        bright_cyan << "Updating live frame SDF by mapping from raw live SDF "
 		                                       "to new warped SDF based on latest warp..." << reset);
 	}

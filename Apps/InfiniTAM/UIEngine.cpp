@@ -146,7 +146,7 @@ void UIEngine::Initialize(int& argc, char** argv,
 	sdkResetTimer(&timer_average);
 	current_frame_index = 0;
 	if (automatic_run_settings.index_of_frame_to_start_at > 0) {
-		LOG4CPLUS_TOP_LEVEL(logging::get_logger(),
+		LOG4CPLUS_TOP_LEVEL(logging::GetLogger(),
 		                    "Skipping the first " << automatic_run_settings.index_of_frame_to_start_at << " frames.");
 		SkipFrames(automatic_run_settings.index_of_frame_to_start_at);
 	}
@@ -168,7 +168,7 @@ void UIEngine::Initialize(int& argc, char** argv,
 		main_engine->LoadFromFile(frame_path);
 		SkipFrames(1);
 	}
-	LOG4CPLUS_TOP_LEVEL(logging::get_logger(), "initialised.");
+	LOG4CPLUS_TOP_LEVEL(logging::GetLogger(), "initialised.");
 }
 
 void UIEngine::SaveScreenshot(const char* filename) const {
@@ -191,7 +191,7 @@ void UIEngine::SkipFrames(int number_of_frames_to_skip) {
 
 
 void UIEngine::ProcessFrame() {
-	LOG4CPLUS_PER_FRAME(logging::get_logger(),
+	LOG4CPLUS_PER_FRAME(logging::GetLogger(),
 	                    yellow << "***" << bright_cyan << " PROCESSING FRAME " << current_frame_index << yellow
 	                           << " ***" << reset);
 
@@ -351,7 +351,7 @@ void UIEngine::RecordDepthAndRGBInputToImages() {
 }
 
 void UIEngine::PrintProcessingFrameHeader() const {
-	LOG4CPLUS_PER_FRAME(logging::get_logger(),
+	LOG4CPLUS_PER_FRAME(logging::GetLogger(),
 	                    bright_cyan << "PROCESSING FRAME " << current_frame_index + 1 << reset);
 }
 

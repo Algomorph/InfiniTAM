@@ -36,7 +36,7 @@ namespace ITMLib::logging {
 
 
 
-void initialize_logging() {
+void InitializeLogging() {
 	log4cplus::initialize();
 #define HAVE_CONSOLE_SUPPORT_FOR_256_COLORS
 #ifdef HAVE_CONSOLE_SUPPORT_FOR_256_COLORS
@@ -103,7 +103,7 @@ void initialize_logging() {
 
 }
 
-Logger get_logger() {
+Logger GetLogger() {
 	return Logger::getRoot();
 }
 

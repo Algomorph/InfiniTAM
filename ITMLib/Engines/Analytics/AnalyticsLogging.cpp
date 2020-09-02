@@ -55,7 +55,7 @@ void LogCameraTrajectoryQuaternion(const ORUtils::SE3Pose* p) {
 			for (int c = 0; c < 3; ++c)
 				R[r * 3 + c] = p->GetM().m[c * 4 + r];
 		QuaternionFromRotationMatrix(R, q);
-		LOG4CPLUS_PER_FRAME(logging::get_logger(),
+		LOG4CPLUS_PER_FRAME(logging::GetLogger(),
 		                    "Camera quaternion: " << t[0] << " " << t[1] << " " << t[2] << " "
 		                                          << q[1] << " " << q[2] << " " << q[3] << " " << q[0]);
 	}

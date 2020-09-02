@@ -20,7 +20,7 @@
 #include "../../Objects/Volume/VoxelVolume.h"
 #include "TelemetrySettings.h"
 #include "../../../ORUtils/PlatformIndependentAtomics.h"
-#include "../../Utils/Logging/Histogram.h"
+#include "../../Utils/Analytics/Histogram.h"
 #include "../LevelSetAlignment/Shared/WarpGradientAggregates.h"
 
 namespace ITMLib {
