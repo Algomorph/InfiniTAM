@@ -13,8 +13,6 @@ SET(targetname InfiniTAM_cli)
 ################################
 
 include(${PROJECT_SOURCE_DIR}/cmake/UseLibRoyale.cmake)
-include(${PROJECT_SOURCE_DIR}/cmake/UseOpenGL.cmake)
-include(${PROJECT_SOURCE_DIR}/cmake/UseOpenMP.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/UseOpenNI.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/UseRealSense.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/UseUVC.cmake)
@@ -44,20 +42,15 @@ source_group("" FILES ${sources} ${headers})
 ##########################################
 # Specify the target and where to put it #
 ##########################################
-
-include(${PROJECT_SOURCE_DIR}/cmake/SetCUDAAppTarget.cmake)
-
+add_library(${targetname} ${sources} ${headers})
 #################################
 # Specify the libraries to link #
 #################################
 
-target_link_libraries(${targetname} PRIVATE MiniSlamGraphLib ORUtils FernRelocLib ITMLib InputSource)
+target_link_libraries(${targetname} PRIVATE MiniSlamGraphLib ORUtils FernRelocLib ITMLib InputSource OpenGL::GL)
 
 include(${PROJECT_SOURCE_DIR}/cmake/LinkLibRoyale.cmake)
-include(${PROJECT_SOURCE_DIR}/cmake/LinkOpenGL.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/LinkOpenNI.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/LinkRealSense.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/LinkUVC.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/LinkBoost.cmake)
-
-target_link_libraries(${targetname} PRIVATE ${VTK_LIBRARIES})

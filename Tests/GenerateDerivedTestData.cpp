@@ -423,6 +423,7 @@ configuration::Configuration GenerateDefaultSnoopyConfiguration() {
 			                false,
 			                false,
 			                false,
+			                false,
 			                false),
 			Paths("<CONFIGURATION_DIRECTORY>",
 			      "<CONFIGURATION_DIRECTORY>/snoopy_calib.txt",

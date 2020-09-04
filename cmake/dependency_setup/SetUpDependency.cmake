@@ -65,7 +65,7 @@ function(set_up_dependency)
                                             GIT_TAG ${SUD_GIT_TAG}
                                             INSTALL_DIR ${${SUD_UC_NAME}_PREFIX}
                                             SOURCE_SUBDIR ${SUD_SOURCE_SUBDIR}
-                                            CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${${SUD_UC_NAME}_PREFIX}
+                                            CMAKE_ARGS -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -DCMAKE_INSTALL_PREFIX=${${SUD_UC_NAME}_PREFIX}
                                             ${SUD_CMAKE_ARGS}
                                             -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
                                             -DCMAKE_C_FLAGS_RELEASE=${CMAKE_C_FLAGS_RELEASE}
@@ -84,7 +84,7 @@ function(set_up_dependency)
                                             PREFIX ${${SUD_UC_NAME}_PREFIX}
                                             PREFERRED_SOURCE_DIR ${CMAKE_CURRENT_PREFERRED_SOURCE_DIR}/packaged/${SUD_NAME}
                                             INSTALL_DIR ${${SUD_UC_NAME}_PREFIX}
-                                            CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${${SUD_UC_NAME}_PREFIX}
+                                            CMAKE_ARGS -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -DCMAKE_INSTALL_PREFIX=${${SUD_UC_NAME}_PREFIX}
                                             ${SUD_CMAKE_ARGS}
                                             -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
                                             -DCMAKE_C_FLAGS_RELEASE=${CMAKE_C_FLAGS_RELEASE}

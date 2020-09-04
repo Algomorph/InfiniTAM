@@ -41,6 +41,8 @@ endif()
 # for all CMake versions (possibly revisions needed later)
 if (NOT WITH_CUDA)
     add_definitions(-DCOMPILE_WITHOUT_CUDA)
+else()
+    enable_language(CUDA)
 endif ()
 
 if(WITH_CUDA)
@@ -74,10 +76,45 @@ if (NOT MSVC_IDE)
     set(CFLAGS_WARN "-Wall -Wextra -Wno-unused-parameter -Wno-strict-aliasing")
     set(CMAKE_C_FLAGS_RELEASE "-O3 -march=native ${CFLAGS_WARN} ${CMAKE_C_FLAGS_RELEASE}")
     set(CMAKE_C_FLAGS_DEBUG "-g -march=native ${CFLAGS_WARN} ${CMAKE_C_FLAGS_DEBUG}")
-    #SET(CMAKE_CXX_FLAGS "-g ${CFLAGS_WARN} ${CMAKE_CXX_FLAGS}")
 endif ()
 
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+# If on Mac OS X:
+if (${CMAKE_SYSTEM} MATCHES "Darwin")
+    # Make sure that C++11 warnings are disabled.
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-c++11-extensions")
+
+    # Make sure that the template depth is sufficient.
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ftemplate-depth=512")
+
+    if (${CMAKE_SYSTEM} MATCHES "Darwin-13.")
+        # If on Mac OS X 10.9 (Mavericks), use the libstdc++ implementation of the C++ Standard Library and prevent C++11 code from being compiled.
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libstdc++")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libstdc++")
+        add_definitions(-DNO_CPP11)
+    else ()
+        # Otherwise, use the libc++ implementation of the C++ Standard Library, and enable C++11 support.
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -std=c++11")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -std=c++11")
+    endif ()
+endif ()
+
+# If on Windows and using Visual Studio:
+if (MSVC_IDE)
+    # Disable the annoying warnings about using secure CRT functions (they're Microsoft-specific, so we can't use them portably).
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+
+    # Prevent the definitions of min and max when including windows.h.
+    add_definitions(-DNOMINMAX)
+
+    # Make sure that the maths constants are defined.
+    add_definitions(-D_USE_MATH_DEFINES)
+endif ()
+
+# CUDA-specific
+if (WITH_CUDA)
+    set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --extended-lambda")
+endif ()
 
 ##########################
 # Some compiler fixes    #
@@ -89,7 +126,6 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" AND ${CMAKE_CXX_STANDARD} STREQUAL "1
 endif()
 
 # Suppress auto-linking
-
 if (MSVC_IDE)
     add_definitions(-DUSING_CMAKE=1)
     add_compile_options($<$<COMPILE_LANGUAGE:CXX>:/MP>)
@@ -101,6 +137,11 @@ add_custom_target(cmake SOURCES ${CMAKE_SOURCES})
 source_group(CMake FILES ${CMAKE_SOURCES})
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
+###########################
+# Add system dependencies #
+###########################
+include(SystemDependencies)
 
 ######################
 # Add subdirectories #

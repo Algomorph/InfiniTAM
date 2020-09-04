@@ -7,7 +7,6 @@ set(targetname ITMLib)
 # Dependencies                 #
 ################################
 
-include(${PROJECT_SOURCE_DIR}/cmake/UseOpenMP.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/UseBoost.cmake)
 
 #############################
@@ -1105,24 +1104,17 @@ set(headers
     ${ITMLIB_UTILS_HEADERS}
     )
 
-#############################
-# Specify the source groups #
-#############################
+
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${sources} ${headers})
 
-##########################################
-# Specify the target and where to put it #
-##########################################
-
-include(${PROJECT_SOURCE_DIR}/cmake/SetCUDALibTarget.cmake)
-
-
-#TODO: make these optional and consistent with the overal CMake package usage in the project -Greg (GitHub: Algomorph)
-##########################################
-# Find and link extra packages #
-##########################################
+add_library(${targetname} STATIC ${sources} ${headers})
 
 target_link_libraries(${targetname} PUBLIC threadpool11 log4cplus tinyply MiniSlamGraphLib FernRelocLib ORUtils)
+if(WITH_OPENMP)
+    target_link_libraries(${targetname} PUBLIC OpenMP::OpenMP_CXX)
+endif()
+target_include_directories(${targetname} PUBLIC ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+
 include(${PROJECT_SOURCE_DIR}/cmake/LinkBoost.cmake)
 
 

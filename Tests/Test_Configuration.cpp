@@ -229,6 +229,7 @@ BOOST_AUTO_TEST_CASE(ConfigurationTestLong_CLI_Only) {
 	                      " --logging_settings.log_average_warp_update=true"
 	                      " --logging_settings.log_surface_tracking_optimization_energies=true"
 	                      " --logging_settings.log_additional_surface_tracking_stats=true"
+	                      " --logging_settings.log_warp_update_length_histograms=true"
 	                      " --logging_settings.log_voxel_hash_block_usage=true"
 
 	                      " --paths.output_path=" GENERATED_TEST_DATA_PREFIX "TestData/output"

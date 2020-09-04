@@ -415,6 +415,7 @@ configuration::Configuration GenerateChangedUpConfiguration() {
 					true,
 					true,
 					true,
+					true,
 					true),
 			Paths(GENERATED_TEST_DATA_PREFIX "TestData/output",
 			      STATIC_TEST_DATA_PREFIX "TestData/calibration/snoopy_calib.txt",

@@ -6,8 +6,6 @@ option(BUILD_TESTS "Build automated tests with the project (Boost-test required)
 
 macro(load_use_includes)
     include(${PROJECT_SOURCE_DIR}/cmake/UseLibRoyale.cmake)
-    include(${PROJECT_SOURCE_DIR}/cmake/UseOpenGL.cmake)
-    include(${PROJECT_SOURCE_DIR}/cmake/UseOpenMP.cmake)
     include(${PROJECT_SOURCE_DIR}/cmake/UseOpenNI.cmake)
     include(${PROJECT_SOURCE_DIR}/cmake/UseRealSense.cmake)
     include(${PROJECT_SOURCE_DIR}/cmake/UseUVC.cmake)
@@ -15,7 +13,6 @@ endmacro()
 
 macro(load_target_link_includes)
     include(${PROJECT_SOURCE_DIR}/cmake/LinkLibRoyale.cmake)
-    include(${PROJECT_SOURCE_DIR}/cmake/LinkOpenGL.cmake)
     include(${PROJECT_SOURCE_DIR}/cmake/LinkOpenNI.cmake)
     include(${PROJECT_SOURCE_DIR}/cmake/LinkRealSense.cmake)
     include(${PROJECT_SOURCE_DIR}/cmake/LinkUVC.cmake)
@@ -34,12 +31,17 @@ macro(itm_add_test)
     ##########################################
     # Specify the target and where to put it #
     ##########################################
-    include(${PROJECT_SOURCE_DIR}/cmake/SetCUDAAppTarget.cmake)
+    add_executable(${targetname} ${sources})
 
-    target_link_libraries(${targetname} PRIVATE
-                           MiniSlamGraphLib ORUtils FernRelocLib test_utilities
-                          ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} InputSource ITMLib
-                          )
+    target_link_libraries(
+            ${targetname} PRIVATE
+            MiniSlamGraphLib ORUtils FernRelocLib test_utilities
+            ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} InputSource ITMLib
+            OpenGL::GL
+    )
+    if (WITH_OPENMP)
+        target_link_libraries(${targetname} PRIVATE OpenMP::OpenMP_CXX)
+    endif ()
 
     load_target_link_includes()
 
@@ -76,7 +78,7 @@ if (BUILD_TESTS)
         TestUtilities/TestUtilitiesConfig.h.in
         TestUtilities/CameraPoseAndRenderingEngineFixture.h
         ${CMAKE_CURRENT_BINARY_DIR}/TestUtilities/TestUtilitiesConfig.h)
-    
+
     find_package(Boost COMPONENTS unit_test_framework REQUIRED)
 
     set(targetname test_utilities)
@@ -94,8 +96,9 @@ if (BUILD_TESTS)
     #######################################################
     set(targetname generate_derived_test_data)
     load_use_includes()
-    set(sources GenerateDerivedTestData.cpp ../ITMLib/Utils/Analytics/Histogram.h)
+    set(sources GenerateDerivedTestData.cpp)
     add_executable(${targetname} ${sources})
+
     target_link_libraries(${targetname} PRIVATE InputSource ITMLib MiniSlamGraphLib ORUtils FernRelocLib test_utilities)
     load_target_link_includes()
 
@@ -129,7 +132,7 @@ if (BUILD_TESTS)
     itm_add_test(NAME FFmpegReadWrite SOURCES Test_FFmpegReadWrite.cpp)
 
     # *** tests that require CUDA
-    if(WITH_CUDA)
+    if (WITH_CUDA)
         itm_add_test(NAME SetCopyCompare_CUDA SOURCES Test_SetCopyCompare_CUDA.cpp)
         itm_add_test(NAME ConstructVolumeFromImage_CUDA SOURCES Test_ConstructVolumeFromImage_CUDA.cpp)
         itm_add_test(NAME ConstructVolumeFromImage_CPU_to_CUDA SOURCES
@@ -141,7 +144,7 @@ if (BUILD_TESTS)
                      CUDAAtomicTesting.cu TemporaryCUDA_Atomics.h)
         itm_add_test(NAME SmoothWarpGradient SOURCES Test_SmoothWarpGradient_CPU_CUDA.cpp)
 
-    endif()
+    endif ()
 
     # *** special executable for CLI testing
     add_executable(cli_options_subtest TestUtilities/CLI_optionsSubtest.cpp)
@@ -150,6 +153,8 @@ if (BUILD_TESTS)
     #######################################################
     # Recursively transfer test data to build directories #
     #######################################################
+
+    # TODO: this is probably not necessary anymore
 
     file(GLOB_RECURSE TEST_DATA_FILES
          "${CMAKE_CURRENT_SOURCE_DIR}/TestData/*.csv"
@@ -160,17 +165,6 @@ if (BUILD_TESTS)
          "${CMAKE_CURRENT_SOURCE_DIR}/TestData/*.json"
          )
     set(TEST_DATA_DIRS)
-    #TODO: remove or revive
-#    if(MSVC_IDE)
-#        foreach (CONFIGURATION_TYPE ${CMAKE_CONFIGURATION_TYPES})
-#            file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${CONFIGURATION_TYPE}")
-#            file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${CONFIGURATION_TYPE}/TestData")
-#            list(APPEND TEST_DATA_DIRS "${CMAKE_CURRENT_BINARY_DIR}/${CONFIGURATION_TYPE}/TestData")
-#        endforeach (CONFIGURATION_TYPE)
-#    else()
-#        file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/TestData")
-#        list(APPEND TEST_DATA_DIRS "${CMAKE_CURRENT_BINARY_DIR}/TestData")
-#    endif()
 
     file(MAKE_DIRECTORY "${GENERATED_TEST_DATA_PREFIX}/TestData")
     list(APPEND TEST_DATA_DIRS "${GENERATED_TEST_DATA_PREFIX}/TestData")

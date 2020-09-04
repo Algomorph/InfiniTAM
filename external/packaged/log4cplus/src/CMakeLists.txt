@@ -80,7 +80,7 @@ if (WIN32)
   list(APPEND log4cplus_sources ${CMAKE_CURRENT_BINARY_DIR}/log4cplus.rc)
 endif (WIN32)
 
-add_library (${log4cplus} ${log4cplus_sources})
+add_library (${log4cplus} STATIC ${log4cplus_sources})
 
 if (UNICODE)
   target_compile_definitions (${log4cplus} PUBLIC UNICODE)

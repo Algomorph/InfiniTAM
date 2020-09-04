@@ -2,7 +2,6 @@
 # SetCUDAAppTarget.cmake #
 ##########################
 
-include(${PROJECT_SOURCE_DIR}/cmake/Flags.cmake)
 
 # TODO: test that with MSVC, the desired effect is achieved with CMake v. <3.9 (CMake boolean/if syntax is kind-of obscure)
 if (${CMAKE_VERSION} VERSION_LESS 3.8 OR (MSVC_IDE AND ${CMAKE_VERSION} VERSION_LESS 3.9))

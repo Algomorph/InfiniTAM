@@ -210,17 +210,17 @@ endif ()
 
 
 # tinyply (for .ply mesh input/output)
-add_library(tinyply packaged/tinyply/tinyply.h packaged/tinyply/tinyply.cpp)
+add_library(tinyply STATIC packaged/tinyply/tinyply.h packaged/tinyply/tinyply.cpp)
 target_include_directories(tinyply INTERFACE packaged)
 
 # zstr (for compressed input/output file streams)
-add_library(zstr packaged/zstr/zstr.hpp packaged/zstr/strict_fstream.hpp
+add_library(zstr STATIC packaged/zstr/zstr.hpp packaged/zstr/strict_fstream.hpp
             packaged/zstr/zstr.cpp)
 target_link_libraries(zstr zlib)
 target_include_directories(zstr INTERFACE packaged)
 
 # wft (freetype C++ wrapper, modified by yours truly)
-add_library(wft packaged/wft/wft.hpp packaged/wft/wft.cpp)
+add_library(wft STATIC packaged/wft/wft.hpp packaged/wft/wft.cpp)
 target_link_libraries(wft freetype)
 
 #threadpool11 (https://github.com/tghosgor/threadpool11) fast thread pooling for C++
