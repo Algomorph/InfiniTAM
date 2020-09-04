@@ -82,10 +82,9 @@ if (BUILD_TESTS)
     find_package(Boost COMPONENTS unit_test_framework REQUIRED)
 
     set(targetname test_utilities)
-    set(sources ${TEST_UTILITIES_SOURCES} ${TEST_UTILITIES_HEADERS})
 
     load_use_includes()
-    include(${PROJECT_SOURCE_DIR}/cmake/SetCUDALibTarget.cmake)
+    add_library(${targetname} ${TEST_UTILITIES_SOURCES} ${TEST_UTILITIES_HEADERS})
 
     target_link_libraries(${targetname} ITMLib ORUtils
                           ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})

@@ -18,33 +18,26 @@ include(${PROJECT_SOURCE_DIR}/cmake/UseBoost.cmake)
 # Specify the project files #
 #############################
 
-set(sources
-FernConservatory.cpp
-PoseDatabase.cpp
-RelocDatabase.cpp
+set(
+        sources
+
+        FernConservatory.cpp
+        PoseDatabase.cpp
+        RelocDatabase.cpp
 )
 
-set(headers
-FernConservatory.h
-PixelUtils.h
-PoseDatabase.h
-RelocDatabase.h
-Relocaliser.h
-)
+set(
+        headers
 
-#############################
-# Specify the source groups #
-#############################
+        FernConservatory.h
+        PixelUtils.h
+        PoseDatabase.h
+        RelocDatabase.h
+        Relocaliser.h
+)
 
 source_group("" FILES ${sources} ${headers})
-
-##########################################
-# Specify the target and where to put it #
-##########################################
-include(${PROJECT_SOURCE_DIR}/cmake/SetCUDALibTarget.cmake)
-
-##########################################
-# Link external dependency libraries     #
-##########################################
+add_library(${targetname} ${sources} ${headers})
+target_include_directories(${targetname} PRIVATE ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 
 include(${PROJECT_SOURCE_DIR}/cmake/LinkBoost.cmake)

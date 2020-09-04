@@ -1113,7 +1113,7 @@ target_link_libraries(${targetname} PUBLIC threadpool11 log4cplus tinyply MiniSl
 if(WITH_OPENMP)
     target_link_libraries(${targetname} PUBLIC OpenMP::OpenMP_CXX)
 endif()
-target_include_directories(${targetname} PUBLIC ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+target_include_directories(${targetname} PRIVATE ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 
 include(${PROJECT_SOURCE_DIR}/cmake/LinkBoost.cmake)
 

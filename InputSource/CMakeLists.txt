@@ -6,13 +6,7 @@
 # Specify the target name #
 ###########################
 
-SET(targetname InputSource)
-
-#####################################
-# Offer support for input mirroring #
-#####################################
-
-include(${PROJECT_SOURCE_DIR}/cmake/OfferInputMirroring.cmake)
+set(targetname InputSource)
 
 ################################
 # Specify the libraries to use #
@@ -29,48 +23,41 @@ include(${PROJECT_SOURCE_DIR}/cmake/UseBoost.cmake)
 # Specify the project files #
 #############################
 
-set(sources
-CompositeImageSourceEngine.cpp
-FFMPEGReader.cpp
-FFMPEGWriter.cpp
-ImageSourceEngine.cpp
-IMUSourceEngine.cpp
-Kinect2Engine.cpp
-LibUVCEngine.cpp
-OpenNIEngine.cpp
-PicoFlexxEngine.cpp
-RealSenseEngine.cpp
+set(
+        sources
+
+        CompositeImageSourceEngine.cpp
+        FFMPEGReader.cpp
+        FFMPEGWriter.cpp
+        ImageSourceEngine.cpp
+        IMUSourceEngine.cpp
+        Kinect2Engine.cpp
+        LibUVCEngine.cpp
+        OpenNIEngine.cpp
+        PicoFlexxEngine.cpp
+        RealSenseEngine.cpp
 )
 
-SET(headers
-CompositeImageSourceEngine.h
-FFMPEGReader.h
-FFMPEGWriter.h
-ImageSourceEngine.h
-IMUSourceEngine.h
-Kinect2Engine.h
-LibUVCEngine.h
-OpenNIEngine.h
-PicoFlexxEngine.h
-RealSenseEngine.h
-)
+set(
+        headers
 
-#############################
-# Specify the source groups #
-#############################
+        CompositeImageSourceEngine.h
+        FFMPEGReader.h
+        FFMPEGWriter.h
+        ImageSourceEngine.h
+        IMUSourceEngine.h
+        Kinect2Engine.h
+        LibUVCEngine.h
+        OpenNIEngine.h
+        PicoFlexxEngine.h
+        RealSenseEngine.h
+)
 
 source_group("" FILES ${sources} ${headers})
 
-##########################################
-# Specify the target and where to put it #
-##########################################
 
-include(${PROJECT_SOURCE_DIR}/cmake/SetCUDALibTarget.cmake)
+add_library(${targetname} ${sources} ${headers})
 
-
-##########################################
-# Link external dependency libraries     #
-##########################################
 target_link_libraries(InputSource PUBLIC ffmpeg)
-
+target_include_directories(${targetname} PRIVATE ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 include(${PROJECT_SOURCE_DIR}/cmake/LinkBoost.cmake)

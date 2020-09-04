@@ -310,6 +310,8 @@ void OpenNIEngine::GetImages(UChar4Image *rgbImage, ITMShortImage *rawDepthImage
 	}
 	else memset(depth, 0, rawDepthImage->element_count * sizeof(short));
 
+	//TODO: provide a state variable in the class that allows to configure input mirroring
+	// dynamically instead of using preprocessor defines (or CMake)
 #if USE_INPUT_MIRRORING
 	// Mirror the input images horizontally (this is sometimes required when using a Kinect).
 	if (colorAvailable) mirrorHorizontally(rgbImage);
