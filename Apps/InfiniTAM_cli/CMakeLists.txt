@@ -16,7 +16,6 @@ include(${PROJECT_SOURCE_DIR}/cmake/UseLibRoyale.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/UseOpenNI.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/UseRealSense.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/UseUVC.cmake)
-include(${PROJECT_SOURCE_DIR}/cmake/UseBoost.cmake)
 
 #############################
 # Specify the project files #
@@ -47,10 +46,9 @@ add_library(${targetname} ${sources} ${headers})
 # Specify the libraries to link #
 #################################
 
-target_link_libraries(${targetname} PRIVATE MiniSlamGraphLib ORUtils FernRelocLib ITMLib InputSource OpenGL::GL)
+target_link_libraries(${targetname} PRIVATE MiniSlamGraphLib ORUtils FernRelocLib ITMLib InputSource OpenGL::GL Boost::program_options)
 
 include(${PROJECT_SOURCE_DIR}/cmake/LinkLibRoyale.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/LinkOpenNI.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/LinkRealSense.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/LinkUVC.cmake)
-include(${PROJECT_SOURCE_DIR}/cmake/LinkBoost.cmake)

@@ -17,7 +17,6 @@ include(${PROJECT_SOURCE_DIR}/cmake/UseLibRoyale.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/UseOpenNI.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/UseRealSense.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/UseUVC.cmake)
-include(${PROJECT_SOURCE_DIR}/cmake/UseBoost.cmake)
 
 #############################
 # Specify the project files #
@@ -60,4 +59,4 @@ add_library(${targetname} ${sources} ${headers})
 
 target_link_libraries(InputSource PUBLIC ffmpeg)
 target_include_directories(${targetname} PRIVATE ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
-include(${PROJECT_SOURCE_DIR}/cmake/LinkBoost.cmake)
+

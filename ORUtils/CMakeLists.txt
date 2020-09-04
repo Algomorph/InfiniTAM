@@ -2,21 +2,10 @@
 # CMakeLists.txt for ORUtils #
 ##############################
 
-###########################
-# Specify the target name #
-###########################
-
 set(targetname ORUtils)
 
-################################
-# Specify the libraries to use #
-################################
+# *** handle resource files & config file ***
 
-include(${PROJECT_SOURCE_DIR}/cmake/UseBoost.cmake)
-
-###############################
-# Handle resources            #
-###############################
 set(RESOURCE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
 file(GLOB_RECURSE RESOURCE_FILES
@@ -36,14 +25,8 @@ foreach (RESOURCE_FILE ${RESOURCE_FILES})
     )
 endforeach (RESOURCE_FILE)
 
-###############################
-# Compile config file         #
-###############################
 configure_file(ORUtilsConfig.h.in ORUtilsConfig.h @ONLY)
-
-#############################
-# Specify the project files #
-#############################
+# ***
 
 set(
         sources
@@ -100,7 +83,6 @@ add_library(${targetname} STATIC ${sources} ${headers})
 if(WITH_OPENMP)
     target_link_libraries(${targetname} PUBLIC OpenMP::OpenMP_CXX)
 endif()
-include(${PROJECT_SOURCE_DIR}/cmake/LinkBoost.cmake)
-target_link_libraries(${targetname} PUBLIC zstr png )
+target_link_libraries(${targetname} PUBLIC zstr png Boost::filesystem)
 target_link_libraries(${targetname} PRIVATE wft freetype)
 target_include_directories(${targetname} PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})

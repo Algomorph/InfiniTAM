@@ -55,10 +55,9 @@ add_executable(${targetname} ${sources} ${headers})
 # Specify the libraries to link #
 #################################
 
-target_link_libraries(${targetname} PUBLIC glut InputSource ITMLib OpenGL::GL)
+target_link_libraries(${targetname} PUBLIC glut InputSource ITMLib OpenGL::GL Boost::program_options)
 
 include(${PROJECT_SOURCE_DIR}/cmake/LinkLibRoyale.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/LinkOpenNI.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/LinkRealSense.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/LinkUVC.cmake)
-include(${PROJECT_SOURCE_DIR}/cmake/LinkBoost.cmake)
