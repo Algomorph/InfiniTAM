@@ -74,8 +74,8 @@ void CreateDefaultImageSource(ImageSourceEngine*& imageSource, IMUSourceEngine*&
 		printf("trying OpenNI device: %s - calibration: %s\n",
 		       inputPaths.openni_file_path.empty() ? "<OpenNI default device>" : inputPaths.openni_file_path.c_str(),
 		       useInternalCalibration ? "internal" : "from file");
-		imageSource = new OpenNIEngine(calibFile, inputPaths.openni_file_path.empty() ? nullptr : inputPaths.openni_file_path.c_str(),
-		                               useInternalCalibration);
+		imageSource = new OpenNI2Engine(calibFile, inputPaths.openni_file_path.empty() ? nullptr : inputPaths.openni_file_path.c_str(),
+		                                useInternalCalibration);
 		if (imageSource->GetDepthImageSize().x == 0) {
 			delete imageSource;
 			imageSource = nullptr;

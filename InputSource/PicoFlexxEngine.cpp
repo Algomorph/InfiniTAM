@@ -2,7 +2,7 @@
 
 #include "PicoFlexxEngine.h"
 
-#ifdef COMPILE_WITH_LibRoyale
+#ifdef COMPILE_WITH_LIBROYALE
 
 #include <cstdio>
 #include <stdexcept>

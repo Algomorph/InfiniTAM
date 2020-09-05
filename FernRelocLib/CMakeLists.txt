@@ -1,9 +1,6 @@
 ###################################
 # CMakeLists.txt for FernRelocLib #
 ###################################
-
-set(targetname FernRelocLib)
-
 set(
         sources
 
@@ -23,5 +20,5 @@ set(
 )
 
 source_group("" FILES ${sources} ${headers})
-add_library(${targetname} ${sources} ${headers})
-target_include_directories(${targetname} PRIVATE ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+add_library(FernRelocLib ${sources} ${headers})
+target_include_directories(FernRelocLib PRIVATE ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})

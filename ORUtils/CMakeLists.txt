@@ -2,8 +2,6 @@
 # CMakeLists.txt for ORUtils #
 ##############################
 
-set(targetname ORUtils)
-
 # *** handle resource files & config file ***
 
 set(RESOURCE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
@@ -77,12 +75,12 @@ set(
 )
 
 source_group("" FILES ${sources} ${headers})
-add_library(${targetname} STATIC ${sources} ${headers})
+add_library(ORUtils STATIC ${sources} ${headers})
 
 # *** dependencies ***
 if(WITH_OPENMP)
-    target_link_libraries(${targetname} PUBLIC OpenMP::OpenMP_CXX)
+    target_link_libraries(ORUtils PUBLIC OpenMP::OpenMP_CXX)
 endif()
-target_link_libraries(${targetname} PUBLIC zstr png Boost::filesystem)
-target_link_libraries(${targetname} PRIVATE wft freetype)
-target_include_directories(${targetname} PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+target_link_libraries(ORUtils PUBLIC zstr png Boost::filesystem)
+target_link_libraries(ORUtils PRIVATE wft freetype)
+target_include_directories(ORUtils PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})

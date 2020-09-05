@@ -4,10 +4,6 @@
 
 #include "ImageSourceEngine.h"
 
-/*#if (!defined USING_CMAKE) && (defined _MSC_VER)
-#pragma comment(lib, "OpenNI2")
-#endif*/
-
 namespace InputSource {
 
 class LibUVCEngine : public BaseImageSourceEngine
@@ -23,7 +19,7 @@ public:
 	~LibUVCEngine();
 
 	bool HasMoreImages() const override;
-	void GetImages(UChar4Image& rgb, ShortImage& rawDepth);
+	void GetImages(UChar4Image& rgb_image, ShortImage& raw_depth_image);
 	Vector2i GetDepthImageSize() const override;
 	Vector2i GetRGBImageSize() const override;
 };

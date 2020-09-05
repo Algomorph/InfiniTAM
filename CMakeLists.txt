@@ -72,7 +72,7 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
 endif ()
 
 
-if (NOT MSVC_IDE)
+if (NOT MSVC)
     set(CFLAGS_WARN "-Wall -Wextra -Wno-unused-parameter -Wno-strict-aliasing")
     set(CMAKE_C_FLAGS_RELEASE "-O3 -march=native ${CFLAGS_WARN} ${CMAKE_C_FLAGS_RELEASE}")
     set(CMAKE_C_FLAGS_DEBUG "-g -march=native ${CFLAGS_WARN} ${CMAKE_C_FLAGS_DEBUG}")
@@ -100,7 +100,7 @@ if (${CMAKE_SYSTEM} MATCHES "Darwin")
 endif ()
 
 # If on Windows and using Visual Studio:
-if (MSVC_IDE)
+if (MSVC)
     # Disable the annoying warnings about using secure CRT functions (they're Microsoft-specific, so we can't use them portably).
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 
@@ -126,7 +126,7 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" AND ${CMAKE_CXX_STANDARD} STREQUAL "1
 endif()
 
 # Suppress auto-linking
-if (MSVC_IDE)
+if (MSVC)
     add_definitions(-DUSING_CMAKE=1)
     add_compile_options($<$<COMPILE_LANGUAGE:CXX>:/MP>)
 endif ()

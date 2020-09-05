@@ -1,10 +1,6 @@
-# - Find CSparse
-# This module defines
-#  CSparse_INCLUDE_DIR, where to find CSparse include files
-#  CSparse_LIBRARIES, the libraries needed to use CSparse
-#  CSparse_FOUND, If false, do not try to use CSparse.
-# also defined, but not for general use are
-#  CSparse_LIBRARY, where to find the CSparse library.
+# FindCSparse.cmake
+# This module defines target CSparse::CSparce
+# based on CSparse_LIBRARY and CSparse_INCLUDE_DIR variables.
 
 set(CSparse_ROOT "/usr" CACHE FILEPATH "Root directory of CSparse")
 
@@ -12,11 +8,21 @@ find_library(CSparse_LIBRARY NAMES cxsparse csparse PATHS "${CSparse_ROOT}/Lib" 
 
 find_path(CSparse_INCLUDE_DIR cs.h PATH "${CSparse_ROOT}/include/suitesparse" "${CSparse_ROOT}/include")
 
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(CSparse DEFAULT_MSG CSparse_LIBRARY CSparse_INCLUDE_DIR)
 
-if(CSPARSE_FOUND)
+if(CSparse_FOUND)
   set(CSparse_LIBRARIES ${CSparse_LIBRARY})
+  if (NOT TARGET CSparse::CSparse)
+    add_library(CSparse::CSparse UNKNOWN IMPORTED)
+  endif ()
+  set_target_properties(
+          CSparse::CSparse PROPERTIES
+          IMPORTED_LOCATION "${CSparse_LIBRARY}"
+          INTERFACE_INCLUDE_DIRECTORIES "${CSparse_INCLUDE_DIR}"
+  )
 endif()
 
-mark_as_advanced(CSparse_LIBRARY CSparse_INCLUDE_DIR)
+mark_as_advanced(CSparse_LIBRARY
+                 CSparse_INCLUDE_DIR)
 

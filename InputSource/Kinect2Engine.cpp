@@ -6,10 +6,8 @@
 
 #include <stdio.h>
 
-#ifndef COMPILE_WITHOUT_Kinect2
+#ifdef WITH_KINECTSDK2
 #include <Kinect.h>
-
-#pragma comment(lib, "kinect20.lib")
 
 using namespace InputSource;
 
@@ -85,43 +83,43 @@ Kinect2Engine::~Kinect2Engine()
 	SafeRelease(data->kinectSensor);
 }
 
-void Kinect2Engine::GetImages(ITMUChar4Image *rgbImage, ShortImage *rawDepthImage)
+void Kinect2Engine::GetImages(ITMUChar4Image& rgbImage, ShortImage& rawDepthImage)
 {
-	//Vector4u *rgb = rgbImage->GetData(MEMORYDEVICE_CPU);
-	//if (colorAvailable)
-	//{
-	//}
-	//else memset(rgb, 0, rgbImage->dataSize * sizeof(Vector4u));
+	Vector4u *rgb = rgbImage.GetData(MEMORYDEVICE_CPU);
+	if (colorAvailable)
+	{
+	}
+	else memset(rgb, 0, rgbImage.size() * sizeof(Vector4u));
 
-	//float *depth = out->depth->GetData(MEMORYDEVICE_CPU);
-	//if (depthAvailable)
-	//{
-	//	IDepthFrame* pDepthFrame = NULL;
-	//	UINT16 *pBuffer = NULL;
-	//	UINT nBufferSize = 0;
+	float *depth = out->depth->GetData(MEMORYDEVICE_CPU);
+	if (depthAvailable)
+	{
+		IDepthFrame* pDepthFrame = NULL;
+		UINT16 *pBuffer = NULL;
+		UINT nBufferSize = 0;
 
-	//	HRESULT hr = data->depthFrameReader->AcquireLatestFrame(&pDepthFrame);
+		HRESULT hr = data->depthFrameReader->AcquireLatestFrame(&pDepthFrame);
 
-	//	if (SUCCEEDED(hr))
-	//	{
-	//		if (SUCCEEDED(hr))
-	//			hr = pDepthFrame->AccessUnderlyingBuffer(&nBufferSize, &pBuffer);
+		if (SUCCEEDED(hr))
+		{
+			if (SUCCEEDED(hr))
+				hr = pDepthFrame->AccessUnderlyingBuffer(&nBufferSize, &pBuffer);
 
-	//		if (SUCCEEDED(hr))
-	//		{
-	//			for (int i = 0; i < imageSize_d.x * imageSize_d.y; i++)
-	//			{
-	//				ushort depthPix = pBuffer[i];
-	//				depth[i] = depthPix == 0 ? -1.0f : (float)depthPix / 1000.0f;
-	//			}
-	//		}
-	//	}
+			if (SUCCEEDED(hr))
+			{
+				for (int i = 0; i < imageSize_d.x * imageSize_d.y; i++)
+				{
+					ushort depthPix = pBuffer[i];
+					depth[i] = depthPix == 0 ? -1.0f : (float)depthPix / 1000.0f;
+				}
+			}
+		}
 
-	//	SafeRelease(pDepthFrame);
-	//}
-	//else memset(depth, 0, out->depth->dataSize * sizeof(short));
+		SafeRelease(pDepthFrame);
+	}
+	else memset(depth, 0, out->depth->dataSize * sizeof(short));
 
-	//out->inputImageType = View::InfiniTAM_FLOAT_DEPTH_IMAGE;
+	out->inputImageType = View::InfiniTAM_FLOAT_DEPTH_IMAGE;
 
 	return /*true*/;
 }

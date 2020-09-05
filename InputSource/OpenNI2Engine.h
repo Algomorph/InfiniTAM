@@ -10,17 +10,17 @@
 
 namespace InputSource {
 
-class OpenNIEngine : public BaseImageSourceEngine
+class OpenNI2Engine : public BaseImageSourceEngine
 {
 private:
 	class PrivateData;
 	PrivateData *data;
 	Vector2i imageSize_rgb, imageSize_d;
-	bool colorAvailable, depthAvailable;
+	bool color_available, depth_available;
 public:
-	OpenNIEngine(const char *calibFilename, const char *deviceURI = NULL, const bool useInternalCalibration = false,
-		Vector2i imageSize_rgb = Vector2i(640, 480), Vector2i imageSize_d = Vector2i(640, 480));
-	~OpenNIEngine();
+	OpenNI2Engine(const char *calibFilename, const char *deviceURI = NULL, const bool useInternalCalibration = false,
+	              Vector2i imageSize_rgb = Vector2i(640, 480), Vector2i imageSize_d = Vector2i(640, 480));
+	~OpenNI2Engine();
 
 	bool HasMoreImages() const override;
 	void GetImages(UChar4Image& rgb, ShortImage& rawDepth);

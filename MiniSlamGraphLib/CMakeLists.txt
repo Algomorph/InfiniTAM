@@ -2,11 +2,16 @@
 # CMakeLists.txt for MiniSlamGraphLib #
 #######################################
 
-set(targetname MiniSlamGraphLib)
+set(MiniSlamGraphLib_DEPENDENCIES ORUtils)
+
+option(WITH_CSPARSE "Compile with Suite Sparse (CSparse) support?" OFF)
 
 if (WITH_CSPARSE)
-    include_directories(${CSPARSE_INCLUDE_DIRS})
-    add_definitions(-DCOMPILE_WITH_CSPARSE)
+    find_package(CSparse REQUIRED)
+    if(CSparce_FOUND)
+        target_compile_definitions(CSparse::CSparse INTERFACE COMPILE_WITH_CSPARSE)
+        list(APPEND MiniSlamGraphLib_DEPENDENCIES CSparse::CSparse)
+    endif()
 endif ()
 
 set(
@@ -43,5 +48,5 @@ set(
 )
 
 source_group("" FILES ${sources} ${headers})
-add_library(${targetname} ${sources} ${headers})
-target_link_libraries(${targetname} ORUtils ${CSparse_LIBRARIES})
+add_library(MiniSlamGraphLib ${sources} ${headers})
+target_link_libraries(MiniSlamGraphLib PUBLIC ${MiniSlamGraphLib_DEPENDENCIES})

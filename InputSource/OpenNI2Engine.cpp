@@ -1,6 +1,6 @@
 // Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
 
-#include "OpenNIEngine.h"
+#include "OpenNI2Engine.h"
 
 #include "../ORUtils/FileUtils.h"
 
@@ -9,7 +9,7 @@
 #include <stdexcept>
 #include <string>
 
-#ifndef COMPILE_WITHOUT_OpenNI
+#ifdef WITH_OPENNI2
 #include <OpenNI.h>
 
 using namespace InputSource;
@@ -34,7 +34,7 @@ class EOFListener : public openni::OpenNI::DeviceStateChangedListener
 	bool eofReached;
 };
 
-class OpenNIEngine::PrivateData {
+class OpenNI2Engine::PrivateData {
 	public:
 	PrivateData() : streams(NULL) {}
 	openni::Device device;
@@ -106,8 +106,8 @@ void mirrorHorizontally(ORUtils::Image<T> *img)
 	}
 }
 
-OpenNIEngine::OpenNIEngine(const char *calibFilename, const char *deviceURI, const bool useInternalCalibration,
-	Vector2i requested_imageSize_rgb, Vector2i requested_imageSize_d)
+OpenNI2Engine::OpenNI2Engine(const char *calibFilename, const char *deviceURI, const bool useInternalCalibration,
+                             Vector2i requested_imageSize_rgb, Vector2i requested_imageSize_d)
 	: BaseImageSourceEngine(calibFilename)
 {
 	// images from openni always come in millimeters...
@@ -174,12 +174,12 @@ OpenNIEngine::OpenNIEngine(const char *calibFilename, const char *deviceURI, con
 
 		printf("Initialised OpenNI depth camera with resolution: %d x %d\n", imageSize_d.x, imageSize_d.y);
 
-		depthAvailable = true;
+		depth_available = true;
 	}
 	else
 	{
 		printf("OpenNI: Couldn't find depthStream stream:\n%s\n", openni::OpenNI::getExtendedError());
-		depthAvailable = false;
+		depth_available = false;
 	}
 
 	rc = data->colorStream.create(data->device, openni::SENSOR_COLOR);
@@ -205,15 +205,15 @@ OpenNIEngine::OpenNIEngine(const char *calibFilename, const char *deviceURI, con
 
 		printf("Initialised OpenNI color camera with resolution: %d x %d\n", imageSize_rgb.x, imageSize_rgb.y);
 
-		colorAvailable = true;
+		color_available = true;
 	}
 	else
 	{
 		printf("OpenNI: Couldn't find colorStream stream:\n%s\n", openni::OpenNI::getExtendedError());
-		colorAvailable = false;
+		color_available = false;
 	}
 
-	if (!depthAvailable)
+	if (!depth_available)
 	{
 		openni::OpenNI::shutdown();
 		delete data;
@@ -223,12 +223,12 @@ OpenNIEngine::OpenNIEngine(const char *calibFilename, const char *deviceURI, con
 	}
 	
 	data->streams = new openni::VideoStream*[2];
-	if (depthAvailable) data->streams[0] = &data->depthStream;
-	if (colorAvailable) data->streams[1] = &data->colorStream;
+	if (depth_available) data->streams[0] = &data->depthStream;
+	if (color_available) data->streams[1] = &data->colorStream;
 
 	if (useInternalCalibration) {
-		this->calib.trafo_rgb_to_depth = ITMLib::ITMExtrinsics();
-		if (depthAvailable) {
+		this->calib.trafo_rgb_to_depth = ITMLib::Extrinsics();
+		if (depth_available) {
 			float h_fov = data->depthStream.getHorizontalFieldOfView();
 			float v_fov = data->depthStream.getVerticalFieldOfView();
 			this->calib.intrinsics_d.SetFrom(
@@ -237,7 +237,7 @@ OpenNIEngine::OpenNIEngine(const char *calibFilename, const char *deviceURI, con
 				(float)imageSize_d.x / 2.0f,
 				(float)imageSize_d.y / 2.0f);
 		}
-		if (colorAvailable) {
+		if (color_available) {
 			float h_fov = data->colorStream.getHorizontalFieldOfView();
 			float v_fov = data->colorStream.getVerticalFieldOfView();
 			this->calib.intrinsics_rgb.SetFrom(
@@ -249,16 +249,16 @@ OpenNIEngine::OpenNIEngine(const char *calibFilename, const char *deviceURI, con
 	}
 }
 
-OpenNIEngine::~OpenNIEngine()
+OpenNI2Engine::~OpenNI2Engine()
 {
 	if (data)
 	{
-		if (depthAvailable)
+		if (depth_available)
 		{
 			data->depthStream.stop();
 			data->depthStream.destroy();
 		}
-		if (colorAvailable)
+		if (color_available)
 		{
 			data->colorStream.stop();
 			data->colorStream.destroy();
@@ -274,76 +274,71 @@ OpenNIEngine::~OpenNIEngine()
 	openni::OpenNI::shutdown();
 }
 
-void OpenNIEngine::GetImages(UChar4Image *rgbImage, ITMShortImage *rawDepthImage)
+void OpenNI2Engine::GetImages(UChar4Image& rgbImage, ShortImage& rawDepthImage)
 {
 	int changedIndex, waitStreamCount;
-	if (depthAvailable && colorAvailable) waitStreamCount = 2;
+	if (depth_available && color_available) waitStreamCount = 2;
 	else waitStreamCount = 1;
 
 	openni::Status rc = openni::OpenNI::waitForAnyStream(data->streams, waitStreamCount, &changedIndex);
 	if (rc != openni::STATUS_OK) { printf("OpenNI: Wait failed\n"); return /*false*/; }
 
-	if(depthAvailable) data->depthStream.readFrame(&data->depthFrame);
-	if(colorAvailable) data->colorStream.readFrame(&data->colorFrame);
+	if(depth_available) data->depthStream.readFrame(&data->depthFrame);
+	if(color_available) data->colorStream.readFrame(&data->colorFrame);
 
-	if (depthAvailable && !data->depthFrame.is_valid()) return;
-	if (colorAvailable && !data->colorFrame.is_valid()) return;
+	if (depth_available && !data->depthFrame.isValid()) return;
+	if (color_available && !data->colorFrame.isValid()) return;
 
-	Vector4u *rgb = rgbImage->GetData(MEMORYDEVICE_CPU);
-	if (colorAvailable)
-	{
-		const openni::RGB888Pixel* colorImagePix = (const openni::RGB888Pixel*)data->colorFrame.getData();
-		for (int i = 0; i < rgbImage->dimensions.x * rgbImage->dimensions.y; i++)
-		{
+	Vector4u *rgb = rgbImage.GetData(MEMORYDEVICE_CPU);
+	if (color_available){
+		const auto* colorImagePix = (const openni::RGB888Pixel*)data->colorFrame.getData();
+		for (int i = 0; i < rgbImage.dimensions.x * rgbImage.dimensions.y; i++){
 			Vector4u newPix; openni::RGB888Pixel oldPix = colorImagePix[i];
 			newPix.x = oldPix.r; newPix.y = oldPix.g; newPix.z = oldPix.b; newPix.w = 255;
 			rgb[i] = newPix;
 		}
 	}
-	else memset(rgb, 0, rgbImage->element_count * sizeof(Vector4u));
+	else memset(rgb, 0, rgbImage.size() * sizeof(Vector4u));
 
-	short *depth = rawDepthImage->GetData(MEMORYDEVICE_CPU);
-	if (depthAvailable)
-	{
-		const openni::DepthPixel* depthImagePix = (const openni::DepthPixel*)data->depthFrame.getData();
-		memcpy(depth, depthImagePix, rawDepthImage->element_count * sizeof(short));
+	short *depth = rawDepthImage.GetData(MEMORYDEVICE_CPU);
+	if (depth_available){
+		const auto* depthImagePix = (const openni::DepthPixel*)data->depthFrame.getData();
+		memcpy(depth, depthImagePix, rawDepthImage.size() * sizeof(short));
 	}
-	else memset(depth, 0, rawDepthImage->element_count * sizeof(short));
+	else memset(depth, 0, rawDepthImage.size() * sizeof(short));
 
 	//TODO: provide a state variable in the class that allows to configure input mirroring
 	// dynamically instead of using preprocessor defines (or CMake)
 #if USE_INPUT_MIRRORING
 	// Mirror the input images horizontally (this is sometimes required when using a Kinect).
-	if (colorAvailable) mirrorHorizontally(rgbImage);
-	if (depthAvailable) mirrorHorizontally(rawDepthImage);
+	if (color_available) mirrorHorizontally(rgbImage);
+	if (depth_available) mirrorHorizontally(rawDepthImage);
 #endif
-
-	return /*true*/;
 }
 
-bool OpenNIEngine::HasMoreImages() const { return data && !data->eofListener.reachedEOF(); }
-Vector2i OpenNIEngine::GetDepthImageSize() const { return data ? imageSize_d : Vector2i(0,0); }
-Vector2i OpenNIEngine::GetRGBImageSize() const { return data ? imageSize_rgb : Vector2i(0,0); }
+bool OpenNI2Engine::HasMoreImages() const { return data && !data->eofListener.reachedEOF(); }
+Vector2i OpenNI2Engine::GetDepthImageSize() const { return data ? imageSize_d : Vector2i(0, 0); }
+Vector2i OpenNI2Engine::GetRGBImageSize() const { return data ? imageSize_rgb : Vector2i(0, 0); }
 
 #else
 
 using namespace InputSource;
 
-OpenNIEngine::OpenNIEngine(const char* calibFilename, const char* deviceURI, const bool useInternalCalibration,
+OpenNI2Engine::OpenNI2Engine(const char* calibFilename, const char* deviceURI, const bool useInternalCalibration,
                            Vector2i requested_imageSize_rgb, Vector2i requested_imageSize_d)
 		: BaseImageSourceEngine(calibFilename) {
 	printf("compiled without OpenNI support\n");
 }
 
-OpenNIEngine::~OpenNIEngine() {}
+OpenNI2Engine::~OpenNI2Engine() {}
 
-void OpenNIEngine::GetImages(UChar4Image& rgbImage, ShortImage& rawDepthImage) { return; }
+void OpenNI2Engine::GetImages(UChar4Image& rgbImage, ShortImage& rawDepthImage) { return; }
 
-bool OpenNIEngine::HasMoreImages() const { return false; }
+bool OpenNI2Engine::HasMoreImages() const { return false; }
 
-Vector2i OpenNIEngine::GetDepthImageSize() const { return Vector2i(0, 0); }
+Vector2i OpenNI2Engine::GetDepthImageSize() const { return Vector2i(0, 0); }
 
-Vector2i OpenNIEngine::GetRGBImageSize() const { return Vector2i(0, 0); }
+Vector2i OpenNI2Engine::GetRGBImageSize() const { return Vector2i(0, 0); }
 
-#endif // #ifndef COMPILE_WITHOUT_OpenNI
+#endif // #ifdef WITH_OPENNI
 

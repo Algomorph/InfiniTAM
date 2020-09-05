@@ -14,7 +14,7 @@
 #include "CreateDefaultImageSource.h"
 
 //InputSource
-#include "../../InputSource/OpenNIEngine.h"
+#include "../../InputSource/OpenNI2Engine.h"
 #include "../../InputSource/Kinect2Engine.h"
 
 //ITMLib

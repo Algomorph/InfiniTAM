@@ -2,7 +2,7 @@
 
 #pragma once
 
-#ifdef COMPILE_WITH_RealSense
+#ifdef COMPILE_WITH_REALSENSE2
 #include "librealsense/rs.hpp"
 #endif
 
@@ -26,7 +26,7 @@ private:
 
 	Vector2i imageSize_rgb, imageSize_d;
 
-#ifdef COMPILE_WITH_RealSense
+#ifdef COMPILE_WITH_REALSENSE2
 	rs::stream colourStream;
 #endif
 

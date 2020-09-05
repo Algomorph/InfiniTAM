@@ -1,6 +1,5 @@
 # CMakeLists.txt for ITMLib #
 #############################
-set(targetname ITMLib)
 
 set(ITMLIB_TOPLEVEL_HEADERS
     GlobalTemplateDefines.h
@@ -1096,15 +1095,15 @@ set(headers
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${sources} ${headers})
 
-add_library(${targetname} STATIC ${sources} ${headers})
+add_library(ITMLib STATIC ${sources} ${headers})
 
-target_link_libraries(${targetname} PUBLIC threadpool11 log4cplus tinyply MiniSlamGraphLib FernRelocLib ORUtils Boost::program_options Boost::filesystem)
+target_link_libraries(ITMLib PUBLIC threadpool11 log4cplus tinyply MiniSlamGraphLib FernRelocLib ORUtils Boost::program_options Boost::filesystem)
 
 if(WITH_OPENMP)
-    target_link_libraries(${targetname} PUBLIC OpenMP::OpenMP_CXX)
+    target_link_libraries(ITMLib PUBLIC OpenMP::OpenMP_CXX)
 endif()
 
-target_include_directories(${targetname} PRIVATE ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+target_include_directories(ITMLib PRIVATE ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 
 
 
