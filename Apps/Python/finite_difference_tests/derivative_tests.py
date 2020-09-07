@@ -34,7 +34,7 @@ def generate_3d_subplot(ax, subplot_title, x_grid, y_grid, values_surface, label
 def root_mean_squared_error(analytical_solution, finite_difference_solution):
     cropped_fd = finite_difference_solution[1:-1, 1:-1]
     cropped_analytical = analytical_solution[1:-1, 1:-1]
-    return math.sqrt(np.mean((cropped_analytical - cropped_fd)**2))
+    return math.sqrt(np.mean((cropped_analytical - cropped_fd) ** 2)) / np.mean(np.abs(analytical_solution))
 
 
 def main():
@@ -49,7 +49,7 @@ def main():
     x_grid, y_grid = np.meshgrid(x, y)
 
     # choose 3D function for all subsequent computations
-    function3d = af.sigmoid_3d
+    # function3d = af.sigmoid_3d
     # function3d = af.sin_sqrt_3d
 
     # *** configure figure & subplots
@@ -141,7 +141,8 @@ def main():
     # *** compute and print mean errors ***
     error_separable = root_mean_squared_error(hessian_analytical, hessian_separable)
     error_kernel = root_mean_squared_error(hessian_analytical, hessian_kernel)
-    fig.suptitle("RMSE for separable FD (1): {:06f}. RMSE for 2D kernel FD (2): {:06f}. (2) / (1): {:.3%}".format(error_separable, error_kernel, error_kernel / error_separable))
+    fig.suptitle("RMSE for separable FD (1): {:.3%}. RMSE for 2D kernel FD (2): {:.3%}. (2) / (1): {:.3%}"
+                 .format(error_separable, error_kernel, error_kernel / error_separable))
 
     manager = plt.get_current_fig_manager()
     manager.window.showMaximized()
