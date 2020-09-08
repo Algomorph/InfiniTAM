@@ -1,6 +1,3 @@
-#include "TestUtilities.h"
-#include "TestUtilities.h"
-#include "TestUtilities.h"
 //  ================================================================
 //  Created by Gregory Kramida on 11/3/17.
 //  Copyright (c) 2017-2000 Gregory Kramida
@@ -16,25 +13,30 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
+
+// stdlib
+#include <filesystem>
+// boost
 #include <boost/test/test_tools.hpp>
+
+// test utilities
 #include "TestUtilities.h"
 #include "TestUtilities.tpp"
 
-
-#include "../../ITMLib/Utils/Configuration/Configuration.h"
-#include "../../ITMLib/Utils/Geometry/CardinalAxesAndPlanes.h"
-#include "../../ITMLib/Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
-#include "../../ITMLib/Engines/Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
-#include "../../ITMLib/Engines/Telemetry/VolumeSequenceRecorder.h"
+// reco
+#include "../../ITMLib/Utils/Quaternions/Quaternion.h"
+#include "../../ITMLib/Utils/Configuration/AutomaticRunSettings.h"
 #include "../../ITMLib/Engines/Analytics/AnalyticsEngine.h"
 #include "../../ITMLib/Engines/ViewBuilding/Interface/ViewBuilder.h"
 #include "../../ITMLib/Engines/ViewBuilding/ViewBuilderFactory.h"
 #include "../../ITMLib/Engines/Telemetry/TelemetrySettings.h"
-#include "../../ITMLib/Utils/Quaternions/Quaternion.h"
-#include "../../ITMLib/Utils/Configuration/AutomaticRunSettings.h"
+#include "../../ITMLib/Engines/Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
+#include "../../ITMLib/Engines/Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
 #include "../../ITMLib/Engines/Main/MainEngineSettings.h"
+#include "../../ITMLib/Engines/LevelSetAlignment/Interface/LevelSetAlignmentParameters.h"
 
 using namespace ITMLib;
+namespace fs = std::filesystem;
 
 namespace test_utilities {
 
@@ -63,16 +65,20 @@ void ConstructGeneratedVolumeSubdirectoriesIfMissing() {
 	fs::create_directories(test_utilities::GeneratedVolumeDirectory + IndexString<PlainVoxelArray>());
 }
 
-void ConstructGeneratedConfigurationDirectoryIfMissing(){
+void ConstructGeneratedConfigurationDirectoryIfMissing() {
 	fs::create_directories(test_utilities::GeneratedConfigurationDirectory);
 }
 
-void ConstructGeneratedMeshDirectoryIfMissing(){
+void ConstructGeneratedMeshDirectoryIfMissing() {
 	fs::create_directories(test_utilities::GeneratedMeshDirectory);
 }
 
-void ConstructGeneratedArraysDirectoryIfMissing(){
+void ConstructGeneratedArraysDirectoryIfMissing() {
 	fs::create_directories(test_utilities::GeneratedArraysDirectory);
+}
+
+void ConstructGeneratedVideosDirectoryIfMissing() {
+	fs::create_directories(test_utilities::GeneratedVideosDirectory);
 }
 
 template void GenerateSimpleSurfaceTestVolume<MEMORYDEVICE_CPU, TSDFVoxel, VoxelBlockHash>(
@@ -380,7 +386,7 @@ void initializeVolume<WarpVoxel, PlainVoxelArray>(VoxelVolume<WarpVoxel, PlainVo
                                                   MemoryDeviceType memoryDevice,
                                                   configuration::SwappingMode swappingMode);
 
-configuration::Configuration GenerateChangedUpConfiguration(){
+configuration::Configuration GenerateChangedUpConfiguration() {
 	using namespace configuration;
 	configuration::Configuration changed_up_configuration(
 			Vector3i(20, 23, 0),
@@ -401,6 +407,7 @@ configuration::Configuration GenerateChangedUpConfiguration(){
 					VERBOSITY_WARNING,
 					true,
 					false,
+					true,
 					true,
 					true,
 					true,
@@ -434,16 +441,20 @@ configuration::Configuration GenerateChangedUpConfiguration(){
 			true,
 			true,
 			true,
+			true,
+			0.0001,
+			32,
+			true,
 			true);
 	MainEngineSettings changed_up_main_engine_settings(true, LIBMODE_BASIC, INDEX_ARRAY, false);
 	IndexingSettings changed_up_indexing_settings(DIAGNOSTIC);
 	RenderingSettings changed_up_rendering_settings(true);
 	AutomaticRunSettings changed_up_automatic_run_settings(50, 16, true, true, true, true);
-	LevelSetEvolutionParameters changed_up_level_set_evolution_parameters(
-		ExecutionMode::DIAGNOSTIC,
-		LevelSetEvolutionWeights(0.11f, 0.09f, 2.0f, 0.3f, 0.1f, 1e-6f, 0.4f),
-		LevelSetEvolutionSwitches(false, true, false, true, false),
-		LevelSetEvolutionTerminationConditions(300, 0.0002f)
+	LevelSetAlignmentParameters changed_up_level_set_evolution_parameters(
+			ExecutionMode::DIAGNOSTIC,
+			LevelSetAlignmentWeights(0.11f, 0.09f, 2.0f, 0.3f, 0.1f, 1e-6f, 0.4f),
+			LevelSetAlignmentSwitches(false, true, false, true, false),
+			LevelSetAlignmentTerminationConditions(300, 0.0002f)
 	);
 
 	AddDeferrableToSourceTree(changed_up_configuration, changed_up_main_engine_settings);
@@ -455,7 +466,7 @@ configuration::Configuration GenerateChangedUpConfiguration(){
 	return changed_up_configuration;
 }
 
-std::vector<ORUtils::SE3Pose> GenerateCameraTrajectoryAroundPoint(const Vector3f& original_viewpoint, const Vector3f& target, int degree_increment){
+std::vector<ORUtils::SE3Pose> GenerateCameraTrajectoryAroundPoint(const Vector3f& original_viewpoint, const Vector3f& target, int degree_increment) {
 	using namespace quaternion;
 	Vector3f x_axis_unit(1.0f, 0.0f, 0.0f);
 	Vector3f rotation_axis = ORUtils::normalize(ORUtils::cross(target, x_axis_unit));
@@ -509,8 +520,6 @@ std::vector<ORUtils::SE3Pose> GenerateCameraTrajectoryAroundPoint(const Vector3f
 	}
 	return poses;
 }
-
-
 
 
 } // namespace test_utilities

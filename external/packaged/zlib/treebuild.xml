@@ -109,7 +109,7 @@ CFLAGS=-O
 # to use the asm code: make OBJA=match.o
 #
 match.o: match.S
-	$(CPP) match.S > _match.s
+	$(CPU) match.S > _match.s
 	$(CC) -c _match.s
 	mv _match.o match.o
 	rm -f _match.s

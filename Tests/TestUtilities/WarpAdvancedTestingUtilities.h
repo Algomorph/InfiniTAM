@@ -20,7 +20,7 @@
 #include <unordered_map>
 
 //ITMLib
-#include "../../ITMLib/SurfaceTrackers/Interface/SurfaceTracker.h"
+#include "../../ITMLib/Engines/LevelSetAlignment/Interface/LevelSetAlignmentEngine.h"
 
 //local
 #include "TestUtilities.h"
@@ -46,8 +46,8 @@ std::string GetWarpedLivePath(std::string prefix, int iteration);
 template<typename TIndex>
 std::string GetFusedPath(std::string prefix, int iteration);
 
-unsigned int SwitchesToIntCode(const LevelSetEvolutionSwitches& switches);
-std::string SwitchesToPrefix(const LevelSetEvolutionSwitches& switches);
+unsigned int SwitchesToIntCode(const LevelSetAlignmentSwitches& switches);
+std::string SwitchesToPrefix(const LevelSetAlignmentSwitches& switches);
 
 
 template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
@@ -57,18 +57,18 @@ GenerateRawLiveAndCanonicalVolumes(VoxelVolume<TSDFVoxel, TIndex>** canonical_vo
 
 template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void
-GenericWarpConsistencySubtest(const LevelSetEvolutionSwitches& switches,
+GenericWarpConsistencySubtest(const LevelSetAlignmentSwitches& switches,
                               int iteration_limit = 10,
                               GenericWarpTestMode mode = TEST_SUCCESSIVE_ITERATIONS,
                               float absolute_tolerance = 1e-7);
 
 template<MemoryDeviceType TMemoryDeviceType>
-void Warp_PVA_VBH_simple_subtest(int iteration, LevelSetEvolutionSwitches trackerSwitches);
+void Warp_PVA_VBH_simple_subtest(int iteration, LevelSetAlignmentSwitches trackerSwitches);
 
 
 template<MemoryDeviceType TMemoryDeviceType>
 void
-GenericWarpTest(const LevelSetEvolutionSwitches& switches, int iteration_limit = 10,
+GenericWarpTest(const LevelSetAlignmentSwitches& switches, int iteration_limit = 10,
                 GenericWarpTestMode mode = TEST_SUCCESSIVE_ITERATIONS, float absolute_tolerance = 1e-7);
 
 } // namespace test_utilities

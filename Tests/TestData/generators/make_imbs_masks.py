@@ -166,7 +166,8 @@ def main() -> int:
     video_writer = None
     if args.output_as_video:
         color_frame = cv2.imread(color_frame_paths[0], cv2.IMREAD_UNCHANGED)
-        # cv2.VideoWriter_fourcc('X', '2', '6', '4'), <-- for manually-compiled OpenCV w/ FFMPEG+x264
+        # Note: for manually-compiled OpenCV w/ FFMPEG+x264, use
+        # cv2.VideoWriter_fourcc('X', '2', '6', '4')
         video_writer = cv2.VideoWriter(args.output,
                                        cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'),
                                        args.fps, (color_frame.shape[1], color_frame.shape[0]), False)

@@ -20,38 +20,40 @@
 #include "../../Objects/Volume/VoxelVolume.h"
 #include "../../Utils/Enums/WarpType.h"
 #include "../../Utils/Enums/VoxelFlags.h"
+#include "../../Utils/Analytics/Histogram.h"
 
 namespace ITMLib {
 template<typename TVoxel, typename TIndex>
 class AnalyticsEngineInterface {
 public:
 	virtual Vector6i ComputeVoxelBounds(const VoxelVolume<TVoxel, TIndex>* volume) = 0;
-	virtual Vector6i ComputeAlteredVoxelBounds(VoxelVolume<TVoxel, TIndex>* volume) = 0;
+	virtual Vector6i ComputeAlteredVoxelBounds(const VoxelVolume<TVoxel, TIndex>* volume) = 0;
 
-	virtual unsigned int CountUtilizedVoxels(VoxelVolume<TVoxel, TIndex>* volume) = 0;
-	virtual unsigned int CountAllocatedVoxels(VoxelVolume<TVoxel, TIndex>* volume) = 0;
-	virtual unsigned int CountVoxelsWithDepthWeightInRange(VoxelVolume <TVoxel, TIndex>* volume, Extent2Di range) = 0;
-	virtual unsigned int CountHashBlocksWithDepthWeightInRange(VoxelVolume <TVoxel, TIndex>* volume, Extent2Di range) = 0;
-	virtual unsigned int CountVoxelsWithSpecifiedFlags(VoxelVolume<TVoxel, TIndex>* volume, VoxelFlags flags) = 0;
-	virtual unsigned int CountNonTruncatedVoxels(VoxelVolume<TVoxel, TIndex>* volume) = 0;
-	virtual unsigned int CountAlteredVoxels(VoxelVolume<TVoxel, TIndex>* volume) = 0;
-	virtual unsigned int CountAlteredGradients(VoxelVolume<TVoxel, TIndex>* volume) = 0;
-	virtual unsigned int CountAlteredWarpUpdates(VoxelVolume<TVoxel, TIndex>* volume) = 0;
-	virtual unsigned int CountVoxelsWithSpecificSdfValue(VoxelVolume<TVoxel, TIndex>* volume, float value) = 0;
-	virtual double SumNonTruncatedVoxelAbsSdf(VoxelVolume<TVoxel, TIndex>* volume) = 0;
-	virtual double SumTruncatedVoxelAbsSdf(VoxelVolume<TVoxel, TIndex>* volume) = 0;
+	virtual unsigned int CountUtilizedVoxels(const VoxelVolume<TVoxel, TIndex>* volume) = 0;
+	virtual unsigned int CountAllocatedVoxels(const VoxelVolume<TVoxel, TIndex>* volume) = 0;
+	virtual unsigned int CountVoxelsWithDepthWeightInRange(const VoxelVolume <TVoxel, TIndex>* volume, Extent2Di range) = 0;
+	virtual unsigned int CountHashBlocksWithDepthWeightInRange(const VoxelVolume <TVoxel, TIndex>* volume, Extent2Di range) = 0;
+	virtual unsigned int CountVoxelsWithSpecifiedFlags(const VoxelVolume<TVoxel, TIndex>* volume, VoxelFlags flags) = 0;
+	virtual unsigned int CountNonTruncatedVoxels(const VoxelVolume<TVoxel, TIndex>* volume) = 0;
+	virtual unsigned int CountAlteredVoxels(const VoxelVolume<TVoxel, TIndex>* volume) = 0;
+	virtual unsigned int CountAlteredGradients(const VoxelVolume<TVoxel, TIndex>* volume) = 0;
+	virtual unsigned int CountAlteredWarpUpdates(const VoxelVolume<TVoxel, TIndex>* volume) = 0;
+	virtual unsigned int CountVoxelsWithSpecificSdfValue(const VoxelVolume<TVoxel, TIndex>* volume, float value) = 0;
 
-	virtual double ComputeWarpUpdateMin(VoxelVolume<TVoxel,TIndex>* volume) = 0;
-	virtual double ComputeWarpUpdateMax(VoxelVolume<TVoxel,TIndex>* volume) = 0;
-	virtual double ComputeWarpUpdateMean(VoxelVolume<TVoxel,TIndex>* volume) = 0;
+	virtual double SumNonTruncatedVoxelAbsSdf(const VoxelVolume<TVoxel, TIndex>* volume) = 0;
+	virtual double SumTruncatedVoxelAbsSdf(const VoxelVolume<TVoxel, TIndex>* volume) = 0;
 
-	virtual double ComputeFramewiseWarpMin(VoxelVolume<TVoxel,TIndex>* volume) = 0;
-	virtual double ComputeFramewiseWarpMax(VoxelVolume<TVoxel,TIndex>* volume) = 0;
-	virtual double ComputeFramewiseWarpMean(VoxelVolume<TVoxel,TIndex>* volume) = 0;
+	virtual double ComputeWarpUpdateMin(const VoxelVolume<TVoxel,TIndex>* volume) = 0;
+	virtual double ComputeWarpUpdateMax(const VoxelVolume<TVoxel,TIndex>* volume) = 0;
+	virtual double ComputeWarpUpdateMean(const VoxelVolume<TVoxel,TIndex>* volume) = 0;
+
+	virtual double ComputeFramewiseWarpMin(const VoxelVolume<TVoxel,TIndex>* volume) = 0;
+	virtual double ComputeFramewiseWarpMax(const VoxelVolume<TVoxel,TIndex>* volume) = 0;
+	virtual double ComputeFramewiseWarpMean(const VoxelVolume<TVoxel,TIndex>* volume) = 0;
 
 	virtual void ComputeWarpUpdateMaxAndPosition(float& value, Vector3i& position, const VoxelVolume<TVoxel,TIndex>* volume) = 0;
 
-	virtual Extent3Di FindMinimumNonTruncatedBoundingBox(VoxelVolume <TVoxel, TIndex>* volume) = 0;
+	virtual Extent3Di FindMinimumNonTruncatedBoundingBox(const VoxelVolume <TVoxel, TIndex>* volume) = 0;
 
 	virtual unsigned int CountAllocatedHashBlocks(const VoxelVolume<TVoxel, TIndex>* volume) = 0;
 	virtual unsigned int CountUtilizedHashBlocks(const VoxelVolume<TVoxel, TIndex>* volume) = 0;
@@ -60,6 +62,9 @@ public:
 	virtual std::vector<int> GetUtilizedHashCodes(const VoxelVolume <TVoxel, TIndex>* volume) = 0;
 	virtual std::vector<Vector3s> GetUtilizedHashBlockPositions(const VoxelVolume <TVoxel, TIndex>* volume) = 0;
 	virtual std::vector<Vector3s> GetDifferenceBetweenAllocatedAndUtilizedHashBlockPositionSets(const VoxelVolume<TVoxel,TIndex>* volume) = 0;
+
+	virtual Histogram ComputeWarpUpdateLengthHistogram_VolumeMax(const VoxelVolume<TVoxel, TIndex>* volume, int bin_count, float& maximum) = 0;
+	virtual Histogram ComputeWarpUpdateLengthHistogram_ManualMax(const VoxelVolume<TVoxel, TIndex>* volume, int bin_count, float maximum) = 0;
 };
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>

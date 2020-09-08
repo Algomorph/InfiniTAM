@@ -14,20 +14,11 @@
 //  limitations under the License.
 //  ================================================================
 #pragma once
-
-
-//TODO: stop using Logger and use log4cplus::Logger directly when C++17 support becomes available for CUDA compilers
-#include "Logger.h"
-
-#if defined (UNICODE)
-typedef wchar_t tchar;
-#else
-typedef char tchar;
-#endif
+#include <log4cplus/logger.h>
 
 namespace ITMLib{
 namespace logging {
-	//TODO: rework definitions of constants to the CPP file
+	//TODO: rework definitions of constants to the CPU file
 	const int FOCUS_SPOTS_LOG_LEVEL = 5000;
 	const int PER_ITERATION_LOG_LEVEL = 5001;
 	const int PER_FRAME_LOG_LEVEL = 5002;
@@ -35,32 +26,32 @@ namespace logging {
 
 	#define LOG4CPLUS_FOCUS_SPOTS(logger, logEvent) \
 	if(logger.isEnabledFor(ITMLib::logging::FOCUS_SPOTS_LOG_LEVEL)) { \
-	std::basic_ostringstream<tchar> _log4cplus_buf; \
+	std::basic_ostringstream<log4cplus::tchar> _log4cplus_buf; \
 	_log4cplus_buf << logEvent; \
 	logger.forcedLog(ITMLib::logging::FOCUS_SPOTS_LOG_LEVEL, _log4cplus_buf.str(), __FILE__, __LINE__); \
 	}
 	#define LOG4CPLUS_PER_ITERATION(logger, logEvent) \
 	if(logger.isEnabledFor(ITMLib::logging::PER_ITERATION_LOG_LEVEL)) { \
-	std::basic_ostringstream<tchar> _log4cplus_buf; \
+	std::basic_ostringstream<log4cplus::tchar> _log4cplus_buf; \
 	_log4cplus_buf << logEvent; \
 	logger.forcedLog(ITMLib::logging::PER_ITERATION_LOG_LEVEL, _log4cplus_buf.str(), __FILE__, __LINE__); \
 	}
 	#define LOG4CPLUS_PER_FRAME(logger, logEvent) \
 	if(logger.isEnabledFor(ITMLib::logging::PER_FRAME_LOG_LEVEL)) { \
-	std::basic_ostringstream<tchar> _log4cplus_buf; \
+	std::basic_ostringstream<log4cplus::tchar> _log4cplus_buf; \
 	_log4cplus_buf << logEvent; \
 	logger.forcedLog(ITMLib::logging::PER_FRAME_LOG_LEVEL, _log4cplus_buf.str(), __FILE__, __LINE__); \
 	}
 	#define LOG4CPLUS_TOP_LEVEL(logger, logEvent) \
 	if(logger.isEnabledFor(ITMLib::logging::TOP_LOG_LEVEL)) { \
-	std::basic_ostringstream<tchar> _log4cplus_buf; \
+	std::basic_ostringstream<log4cplus::tchar> _log4cplus_buf; \
 	_log4cplus_buf << logEvent; \
 	logger.forcedLog(ITMLib::logging::TOP_LOG_LEVEL, _log4cplus_buf.str(), __FILE__, __LINE__); \
 	}
 
-	void initialize_logging();
+	void InitializeLogging();
 
-	Logger get_logger();
+	log4cplus::Logger GetLogger();
 
 
 

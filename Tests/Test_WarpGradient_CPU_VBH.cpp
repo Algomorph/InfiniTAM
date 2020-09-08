@@ -31,14 +31,10 @@
 //local
 #include "TestUtilities/TestUtilities.h"
 #include "Test_WarpGradient_Common.h"
-#include "../ITMLib/Utils/Configuration/Configuration.h"
-#include "../ITMLib/Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
-#include "../ITMLib/SurfaceTrackers/Interface/SurfaceTrackerInterface.h"
-#include "../ITMLib/SurfaceTrackers/Interface/SurfaceTracker.h"
+#include "../ITMLib/Engines/LevelSetAlignment/Interface/LevelSetAlignmentEngineInterface.h"
+#include "../ITMLib/Engines/LevelSetAlignment/Interface/LevelSetAlignmentEngine.h"
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CPU.h"
 #include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
-#include "../ITMLib/Engines/Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
-#include "../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_VoxelBlockHash_CPU.h"
 
 //test_utils
 #include "TestUtilities/SnoopyTestUtilities.h"
@@ -60,8 +56,8 @@ BOOST_FIXTURE_TEST_CASE(testDataTerm_CPU_VBH, DataFixture) {
 
 	BOOST_REQUIRE_EQUAL(Analytics_CPU_VBH_Warp::Instance().CountAllocatedHashBlocks(&warp_field), 633);
 
-	auto motion_tracker_VBH_CPU = new SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU, DIAGNOSTIC>(
-			LevelSetEvolutionSwitches(true, false, false, false, false));
+	auto motion_tracker_VBH_CPU = new LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU, DIAGNOSTIC>(
+			LevelSetAlignmentSwitches(true, false, false, false, false));
 
 	TimeIt([&]() {
 		motion_tracker_VBH_CPU->CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
@@ -77,8 +73,8 @@ BOOST_FIXTURE_TEST_CASE(testDataTerm_CPU_VBH, DataFixture) {
 
 BOOST_FIXTURE_TEST_CASE(testUpdateWarps_CPU_VBH, DataFixture) {
 
-	auto motionTracker_VBH_CPU = new SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU, DIAGNOSTIC>(
-			LevelSetEvolutionSwitches(false, false, false, false, false));
+	auto motionTracker_VBH_CPU = new LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU, DIAGNOSTIC>(
+			LevelSetAlignmentSwitches(false, false, false, false, false));
 	VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field_copy(*warp_field_data_term,
 	                                                       MemoryDeviceType::MEMORYDEVICE_CPU);
 
@@ -103,8 +99,8 @@ BOOST_FIXTURE_TEST_CASE(testSmoothWarpGradient_CPU_VBH, DataFixture) {
 	AllocateUsingOtherVolume(canonical_volume, live_volume, MEMORYDEVICE_CPU);
 
 
-	auto motionTracker_VBH_CPU = new SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU, DIAGNOSTIC>(
-			LevelSetEvolutionSwitches(false, false, false, false, true)
+	auto motionTracker_VBH_CPU = new LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU, DIAGNOSTIC>(
+			LevelSetAlignmentSwitches(false, false, false, false, true)
 	);
 
 	TimeIt([&]() {
@@ -122,8 +118,8 @@ BOOST_FIXTURE_TEST_CASE(testTikhonovTerm_CPU_VBH, DataFixture) {
 	AllocateUsingOtherVolume(canonical_volume, live_volume, MEMORYDEVICE_CPU);
 
 
-	auto motionTracker_VBH_CPU = new SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU, DIAGNOSTIC>(
-			LevelSetEvolutionSwitches(false, false, true, false, false)
+	auto motionTracker_VBH_CPU = new LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU, DIAGNOSTIC>(
+			LevelSetAlignmentSwitches(false, false, true, false, false)
 	);
 	Vector3i testPosition(-40, 60, 200);
 
@@ -150,8 +146,8 @@ BOOST_FIXTURE_TEST_CASE(testDataAndTikhonovTerm_CPU_VBH, DataFixture) {
 	VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field(*warp_field_iter0, MEMORYDEVICE_CPU);
 	AllocateUsingOtherVolume(canonical_volume, live_volume, MEMORYDEVICE_CPU);
 
-	auto motionTracker_VBH_CPU = new SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU, DIAGNOSTIC>(
-			LevelSetEvolutionSwitches(true, false, true, false, false));
+	auto motionTracker_VBH_CPU = new LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU, DIAGNOSTIC>(
+			LevelSetAlignmentSwitches(true, false, true, false, false));
 
 	TimeIt([&]() {
 		motionTracker_VBH_CPU->CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
@@ -181,8 +177,8 @@ BOOST_FIXTURE_TEST_CASE(testDataAndKillingTerm_CPU_VBH, DataFixture) {
 
 	AllocateUsingOtherVolume(canonical_volume, live_volume, MEMORYDEVICE_CPU);
 
-	auto motionTracker_VBH_CPU = new SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU, DIAGNOSTIC>(
-			LevelSetEvolutionSwitches(true, false, true, true, false));
+	auto motionTracker_VBH_CPU = new LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU, DIAGNOSTIC>(
+			LevelSetAlignmentSwitches(true, false, true, true, false));
 
 
 	TimeIt([&]() {
@@ -202,8 +198,8 @@ BOOST_FIXTURE_TEST_CASE(testDataAndLevelSetTerm_CPU_VBH, DataFixture) {
 
 	AllocateUsingOtherVolume(canonical_volume, live_volume, MEMORYDEVICE_CPU);
 
-	auto motionTracker_VBH_CPU = new SurfaceTracker<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU, DIAGNOSTIC>(
-			LevelSetEvolutionSwitches(true, true, false, false, false));
+	auto motionTracker_VBH_CPU = new LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU, DIAGNOSTIC>(
+			LevelSetAlignmentSwitches(true, true, false, false, false));
 
 	TimeIt([&]() {
 		motionTracker_VBH_CPU->CalculateWarpGradient(&warp_field, canonical_volume, live_volume);

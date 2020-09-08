@@ -12,10 +12,10 @@ class LibUVCEngine::PrivateData {
 	public:
 	PrivateData()
 	{
-		ctx = NULL;
-		dev = NULL; devh_d = NULL; devh_rgb = NULL;
-		//ctrl_rgb = NULL; ctrl_d = NULL;
-		framebuffer_rgb = NULL; framebuffer_depth = NULL;
+		ctx = nullptr;
+		dev = nullptr; devh_d = nullptr; devh_rgb = nullptr;
+		//ctrl_rgb = nullptr; ctrl_d = nullptr;
+		framebuffer_rgb = nullptr; framebuffer_depth = nullptr;
 		got_depth = got_color = 0;
 	}
 
@@ -37,7 +37,7 @@ void callback_rgb(uvc_frame_t *frame, void *_data)
 {
 	LibUVCEngine::PrivateData *data = (LibUVCEngine::PrivateData*)_data;
 
-	if (data->framebuffer_rgb == NULL) {
+	if (data->framebuffer_rgb == nullptr) {
 		data->framebuffer_rgb = uvc_allocate_frame(frame->width * frame->height * 3);
 	}
 
@@ -49,7 +49,7 @@ void callback_depth(uvc_frame_t *frame, void *_data)
 {
 	LibUVCEngine::PrivateData *data = (LibUVCEngine::PrivateData*)_data;
 
-	if (data->framebuffer_depth == NULL) {
+	if (data->framebuffer_depth == nullptr) {
 		data->framebuffer_depth = uvc_allocate_frame(frame->width * frame->height * 2);
 	}
 
@@ -73,16 +73,16 @@ bool formatIdentical(const uint8_t *guidFormat, const char *charFormat)
 	return false;
 }
 
-struct FormatSpec findSuitableFormat(uvc_device_handle_t *dev, int requiredResolutionX = -1, int requiredResolutionY = -1, const char *requiredFormat = NULL)
+struct FormatSpec findSuitableFormat(uvc_device_handle_t *dev, int requiredResolutionX = -1, int requiredResolutionY = -1, const char *requiredFormat = nullptr)
 {
 	FormatSpec ret;
-	ret.frame_desc = NULL; ret.interval = 0;
+	ret.frame_desc = nullptr; ret.interval = 0;
 
 	const uvc_format_desc_t *formats = uvc_get_format_descs(dev);
 
-	if (requiredFormat != NULL) {
+	if (requiredFormat != nullptr) {
 		const uvc_format_desc_t *format_it = formats;
-		while (format_it != NULL) {
+		while (format_it != nullptr) {
 			//fprintf(stderr, "%c%c%c%c\n", format_it->guidFormat[0], format_it->guidFormat[1], format_it->guidFormat[2], format_it->guidFormat[3]);
 			if (formatIdentical(format_it->guidFormat, requiredFormat)) {
 				formats = format_it;
@@ -93,7 +93,7 @@ struct FormatSpec findSuitableFormat(uvc_device_handle_t *dev, int requiredResol
 		}
 	}
 
-	for (struct uvc_frame_desc *frame_desc = formats->frame_descs; frame_desc != NULL; frame_desc = frame_desc->next) {
+	for (struct uvc_frame_desc *frame_desc = formats->frame_descs; frame_desc != nullptr; frame_desc = frame_desc->next) {
 		//fprintf(stderr, "%i %i\n", frame_desc->wWidth, frame_desc->wHeight);
 		uint32_t mininterval = frame_desc->intervals[0];
 		for (int j = 0; frame_desc->intervals[j] != 0; ++j) {
@@ -101,7 +101,7 @@ struct FormatSpec findSuitableFormat(uvc_device_handle_t *dev, int requiredResol
 		}
 
 		bool acceptAsBest = false;
-		if (ret.frame_desc == NULL) acceptAsBest = true;
+		if (ret.frame_desc == nullptr) acceptAsBest = true;
 		else if ((frame_desc->wWidth == ret.frame_desc->wWidth) &&
 			(frame_desc->wHeight == ret.frame_desc->wHeight) &&
 			(mininterval < ret.interval)) {
@@ -144,20 +144,20 @@ enum {
 	CAMERA_RGB
 };
 
-int findTypeOfCamera(uvc_device_handle_t *dev, const char **formatID = NULL)
+int findTypeOfCamera(uvc_device_handle_t *dev, const char **formatID = nullptr)
 {
 	const uvc_format_desc_t *formats = uvc_get_format_descs(dev);
 	const uvc_format_desc_t *format_it = formats;
 
 	bool reportsColourMode = false;
 	int numReportedFormats = 0;
-	if (formatID!=NULL) *formatID = NULL;
-	while (format_it != NULL) {
+	if (formatID!=nullptr) *formatID = nullptr;
+	while (format_it != nullptr) {
 		if (formatIdentical(format_it->guidFormat, "Z16 ")) {
-			if (formatID!=NULL) *formatID = "Z16 ";
+			if (formatID!=nullptr) *formatID = "Z16 ";
 			return CAMERA_DEPTH;
 		} else if (formatIdentical(format_it->guidFormat, "INVI")) {
-			if (formatID!=NULL) *formatID = NULL;
+			if (formatID!=nullptr) *formatID = nullptr;
 			return CAMERA_DEPTH;
 		} else if (formatIdentical(format_it->guidFormat, "RW10")) {
 			return CAMERA_RGB;
@@ -193,7 +193,7 @@ LibUVCEngine::LibUVCEngine(const char *calibFilename, Vector2i requested_imageSi
 
 	do {
 		uvc_error_t res;
-		res = uvc_init(&(data->ctx), NULL);
+		res = uvc_init(&(data->ctx), nullptr);
 		if (res < 0) {
 			uvc_perror(res, "LibUVCEngine");
 			break;
@@ -204,7 +204,7 @@ LibUVCEngine::LibUVCEngine(const char *calibFilename, Vector2i requested_imageSi
 		for (; deviceID < sizeof(knownDeviceIDs)/sizeof(struct DeviceID); ++deviceID) {
 			//fprintf(stderr, "scanning for devices %x %x\n", knownDeviceIDs[deviceID].vid, knownDeviceIDs[deviceID].pid);
 			res = uvc_find_device(data->ctx, &(data->dev),
-				knownDeviceIDs[deviceID].vid, knownDeviceIDs[deviceID].pid, NULL); /* filter devices: vendor_id, product_id, "serial_num" */
+				knownDeviceIDs[deviceID].vid, knownDeviceIDs[deviceID].pid, nullptr); /* filter devices: vendor_id, product_id, "serial_num" */
 			if (res == 0) break;
 		}
 
@@ -216,12 +216,12 @@ LibUVCEngine::LibUVCEngine(const char *calibFilename, Vector2i requested_imageSi
 
 		bool providesTwoStreams = knownDeviceIDs[deviceID].providesTwoStreams;
 		this->calib.disparityCalib.SetFrom(knownDeviceIDs[deviceID].depthScaleFactor,
-			0.0f, ITMLib::ITMDisparityCalib::TRAFO_AFFINE);
+			0.0f, ITMLib::DisparityCalib::TRAFO_AFFINE);
 
 		// Step 2: find depth and rgb sub devices
-		const char *depthFormatID = NULL;
+		const char *depthFormatID = nullptr;
 		for (int cameraID = 0; ; cameraID++) {
-			uvc_device_handle_t *devh_tmp = NULL;
+			uvc_device_handle_t *devh_tmp = nullptr;
 			res = uvc_open2(data->dev, &devh_tmp, cameraID);
 			if (res < 0) break;
 
@@ -229,13 +229,13 @@ LibUVCEngine::LibUVCEngine(const char *calibFilename, Vector2i requested_imageSi
 			int type = findTypeOfCamera(devh_tmp, &tmpFormatID);
 			switch (type) {
 			case CAMERA_DEPTH:
-				if (data->devh_d == NULL) {
+				if (data->devh_d == nullptr) {
 					data->devh_d = devh_tmp;
 					depthFormatID = tmpFormatID;
 				}
 				break;
 			case CAMERA_RGB:
-				if (data->devh_rgb == NULL) data->devh_rgb = devh_tmp;
+				if (data->devh_rgb == nullptr) data->devh_rgb = devh_tmp;
 				break;
 			case CAMERA_UNKNOWN:
 				//uvc_close(devh_tmp);
@@ -243,9 +243,9 @@ LibUVCEngine::LibUVCEngine(const char *calibFilename, Vector2i requested_imageSi
 			}
 		}
 
-		if (data->devh_d == NULL) {
+		if (data->devh_d == nullptr) {
 			fprintf(stderr, "could not identify camera, trying hardcoded defaults\n");
-			depthFormatID = NULL;
+			depthFormatID = nullptr;
 
 			/* Try to open the device: requires exclusive access */
 			res = uvc_open2(data->dev, &(data->devh_rgb), 0);
@@ -263,7 +263,7 @@ LibUVCEngine::LibUVCEngine(const char *calibFilename, Vector2i requested_imageSi
 
 		// R200 appears to provide only either depth or colour
 		if (!providesTwoStreams) {
-			data->devh_rgb = NULL;
+			data->devh_rgb = nullptr;
 			data->hasColour = false;
 		}
 
@@ -275,7 +275,7 @@ LibUVCEngine::LibUVCEngine(const char *calibFilename, Vector2i requested_imageSi
 		// Step 3: Find video formats
 		FormatSpec format_rgb, format_d;
 		if (data->hasColour) format_rgb = findSuitableFormat(data->devh_rgb, requested_imageSize_rgb.x, requested_imageSize_rgb.y);
-		else format_rgb.frame_desc = NULL;
+		else format_rgb.frame_desc = nullptr;
 		format_d = findSuitableFormat(data->devh_d, requested_imageSize_rgb.x, requested_imageSize_rgb.y, depthFormatID);
 
 		if (data->hasColour) {
@@ -316,9 +316,9 @@ LibUVCEngine::LibUVCEngine(const char *calibFilename, Vector2i requested_imageSi
 			uvc_perror(res, "start_streaming depth");
 			break;
 		}
-//		uvc_print_diag(data->devh_rgb, NULL);
+//		uvc_print_diag(data->devh_rgb, nullptr);
 
-		if (format_rgb.frame_desc != NULL) {
+		if (format_rgb.frame_desc != nullptr) {
 			this->imageSize_rgb = Vector2i(format_rgb.frame_desc->wWidth, format_rgb.frame_desc->wHeight);
 		}
 		this->imageSize_d = Vector2i(format_d.frame_desc->wWidth, format_d.frame_desc->wHeight);
@@ -328,47 +328,45 @@ LibUVCEngine::LibUVCEngine(const char *calibFilename, Vector2i requested_imageSi
 LibUVCEngine::~LibUVCEngine()
 {
 	/* End the stream. Blocks until last callback is serviced */
-	if (data->devh_rgb != NULL) {
+	if (data->devh_rgb != nullptr) {
 		uvc_stop_streaming(data->devh_rgb);
 	}
-	if (data->devh_d != NULL) {
+	if (data->devh_d != nullptr) {
 		uvc_stop_streaming(data->devh_d);
 	}
-	if (data->devh_rgb != NULL) {
+	if (data->devh_rgb != nullptr) {
 		uvc_close(data->devh_rgb);
 	}
-	if (data->devh_d != NULL) {
+	if (data->devh_d != nullptr) {
 		uvc_close(data->devh_d);
 	}
 
 	/* Release the device descriptor */
-	if (data->dev != NULL) uvc_unref_device(data->dev);
-	if (data->ctx != NULL) uvc_exit(data->ctx);
+	if (data->dev != nullptr) uvc_unref_device(data->dev);
+	if (data->ctx != nullptr) uvc_exit(data->ctx);
 }
 
-void LibUVCEngine::GetImages(UChar4Image *rgbImage, ShortImage *rawDepthImage)
+void LibUVCEngine::GetImages(UChar4Image& rgb_image, ShortImage& raw_depth_image)
 {
 	int counter = 0;
 	while ((data->hasColour&&(data->got_color == 0)) || (data->got_depth == 0)) {
-		struct timespec sleeptime;
-		sleeptime.tv_sec = 0;
-		sleeptime.tv_nsec = 10000000;
-		nanosleep(&sleeptime, NULL);
+		struct timespec sleep_time{0, 10000000};
+		nanosleep(&sleep_time, nullptr);
 		if (counter++ > 100) {
 			fprintf(stderr, "timeout waiting for images\n");
 			return;
 		}
 	}
 
-	Vector4u *rgb = rgbImage->GetData(MEMORYDEVICE_CPU);
-	for (int i = 0; i < rgbImage->dimensions.x * rgbImage->dimensions.y; i++) {
+	Vector4u *rgb = rgb_image.GetData(MEMORYDEVICE_CPU);
+	for (int i = 0; i < rgb_image.dimensions.x * rgb_image.dimensions.y; i++) {
 		Vector4u newPix; char *oldPix = &(((char*)(data->framebuffer_rgb->data))[i*3]);
 		newPix.x = oldPix[0]; newPix.y = oldPix[1]; newPix.z = oldPix[2]; newPix.w = 255;
 		rgb[i] = newPix;
 	}
 
-	short *depth = rawDepthImage->GetData(MEMORYDEVICE_CPU);
-	memcpy(depth, data->framebuffer_depth->data, rawDepthImage->element_count * sizeof(short));
+	short *depth = raw_depth_image.GetData(MEMORYDEVICE_CPU);
+	memcpy(depth, data->framebuffer_depth->data, raw_depth_image.size() * sizeof(short));
 
 	data->got_color = data->got_depth = 0;
 }

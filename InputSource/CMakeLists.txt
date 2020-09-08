@@ -2,78 +2,117 @@
 # CMakeLists.txt for InputSource #
 ##################################
 
-###########################
-# Specify the target name #
-###########################
+# *** locate dependency packages ***
+set(InputSource_DEPENDENCIES)
+if(WITH_FFMPEG)
+    list(APPEND InputSource_DEPENDENCIES ffmpeg)
+endif()
 
-SET(targetname InputSource)
+# ** UVC **
+option(WITH_UVC "Build with libuvc support?" OFF)
 
-#####################################
-# Offer support for input mirroring #
-#####################################
+if(WITH_UVC)
+    find_package(libuvc REQUIRED)
+    if (libuvc_FOUND)
+        if (NOT TARGET libuvc::libuvc)
+            add_library(libuvc::libuvc UNKNOWN IMPORTED)
+        endif ()
+        set_target_properties(
+                libuvc::libuvc PROPERTIES
+                IMPORTED_LOCATION "${libuvc_LIBRARIES}"
+                INTERFACE_INCLUDE_DIRECTORIES "${libuvc_INCLUDE_DIRS}"
+                INTERFACE_COMPILE_DEFINITIONS "COMPILE_WITH_LibUVC"
+        )
+        list(APPEND InputSource_DEPENDENCIES libuvc::libuvc)
+    endif()
+endif()
 
-INCLUDE(${PROJECT_SOURCE_DIR}/cmake/OfferInputMirroring.cmake)
+# ** OpenNI **
+option(WITH_OPENNI "Build with OpenNI support?" OFF)
+if(WITH_OPENNI)
+    find_package(OpenNI REQUIRED)
+    if(OpenNI_FOUND)
+        target_compile_definitions(OpenNI::OpenNI INTERFACE WITH_OPENNI)
+        list(APPEND InputSource_DEPENDENCIES OpenNI::OpenNI)
+    endif()
+endif()
 
-################################
-# Specify the libraries to use #
-################################
+# ** OpenNI2 **
+option(WITH_OPENNI2 "Build with OpenNI 2 support?" OFF)
+if(WITH_OPENNI2)
+    find_package(OpenNI2 REQUIRED)
+    if(OpenNI2_FOUND)
+        target_compile_definitions(OpenNI2::OpenNI2 INTERFACE WITH_OPENNI2)
+        list(APPEND InputSource_DEPENDENCIES OpenNI2::OpenNI2)
+    endif()
+endif()
 
-include(${PROJECT_SOURCE_DIR}/cmake/UseCUDA.cmake)
-include(${PROJECT_SOURCE_DIR}/cmake/UseKinect2.cmake)
-include(${PROJECT_SOURCE_DIR}/cmake/UseLibRoyale.cmake)
-include(${PROJECT_SOURCE_DIR}/cmake/UseOpenGL.cmake)
-include(${PROJECT_SOURCE_DIR}/cmake/UseOpenMP.cmake)
-include(${PROJECT_SOURCE_DIR}/cmake/UseOpenNI.cmake)
-include(${PROJECT_SOURCE_DIR}/cmake/UseRealSense.cmake)
-include(${PROJECT_SOURCE_DIR}/cmake/UseUVC.cmake)
-include(${PROJECT_SOURCE_DIR}/cmake/UseBoost.cmake)
+# ** Kinect SDK v2 **
+option(WITH_KINECTSDK2 "Build with Kinect SDK v2 support?" OFF)
+if(WITH_KINECTSDK2)
+    find_package(KinectSDK2 REQUIRED)
+    if(KinectSDK2_FOUND)
+        target_compile_definitions(KinectSDK2::KinectSDK2 INTERFACE WITH_KINECTSDK2)
+        list(APPEND InputSource_DEPENDENCIES KinectSDK2::KinectSDK2)
+    endif()
+endif()
 
-#############################
-# Specify the project files #
-#############################
+# ** LibRoyale **
+option(WITH_LIBROYALE "Build with LibRoyale support?" OFF)
+if(WITH_LIBROYALE)
+    find_package(LibRoyale REQUIRED)
+    if(LibRoyale_FOUND)
+        target_compile_definitions(LibRoyale::LibRoyale INTERFACE COMPILE_WITH_LIBROYALE)
+        list(APPEND InputSource_DEPENDENCIES LibRoyale::LibRoyale)
+    endif()
+endif()
 
-set(sources
-CompositeImageSourceEngine.cpp
-FFMPEGReader.cpp
-FFMPEGWriter.cpp
-ImageSourceEngine.cpp
-IMUSourceEngine.cpp
-Kinect2Engine.cpp
-LibUVCEngine.cpp
-OpenNIEngine.cpp
-PicoFlexxEngine.cpp
-RealSenseEngine.cpp
+# ** Realsense **
+option(WITH_REALSENSE2 "Build with RealSense2 support?" OFF)
+if(WITH_REALSENSE2)
+    find_package(realsense2 REQUIRED)
+    if(realsense2_FOUND)
+        target_compile_definitions(realsense2::realsense2 INTERFACE COMPILE_WITH_REALSENSE22)
+        list(APPEND InputSource_DEPENDENCIES realsense2::realsense2)
+    endif()
+endif()
+
+
+# *** set up sources & target ***
+
+set(
+        sources
+
+        CompositeImageSourceEngine.cpp
+        FFMPEGReader.cpp
+        FFMPEGWriter.cpp
+        ImageSourceEngine.cpp
+        IMUSourceEngine.cpp
+        Kinect2Engine.cpp
+        LibUVCEngine.cpp
+        OpenNI2Engine.cpp
+        PicoFlexxEngine.cpp
+        RealSenseEngine.cpp
 )
+set(
+        headers
 
-SET(headers
-CompositeImageSourceEngine.h
-FFMPEGReader.h
-FFMPEGWriter.h
-ImageSourceEngine.h
-IMUSourceEngine.h
-Kinect2Engine.h
-LibUVCEngine.h
-OpenNIEngine.h
-PicoFlexxEngine.h
-RealSenseEngine.h
+        CompositeImageSourceEngine.h
+        FFMPEGReader.h
+        FFMPEGWriter.h
+        ImageSourceEngine.h
+        IMUSourceEngine.h
+        Kinect2Engine.h
+        LibUVCEngine.h
+        OpenNI2Engine.h
+        PicoFlexxEngine.h
+        RealSenseEngine.h
 )
-
-#############################
-# Specify the source groups #
-#############################
-
 source_group("" FILES ${sources} ${headers})
 
-##########################################
-# Specify the target and where to put it #
-##########################################
+add_library(InputSource ${sources} ${headers})
+target_link_libraries(InputSource ${InputSource_DEPENDENCIES})
 
-include(${PROJECT_SOURCE_DIR}/cmake/SetCUDALibTarget.cmake)
+target_include_directories(InputSource PRIVATE ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 
 
-##########################################
-# Link external dependency libraries     #
-##########################################
-target_link_libraries(InputSource PUBLIC ffmpeg)
-
-include(${PROJECT_SOURCE_DIR}/cmake/LinkBoost.cmake)

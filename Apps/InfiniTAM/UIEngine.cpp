@@ -1,4 +1,6 @@
-// Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "hicpp-signed-bitwise"
+
 
 #include "UIEngine.h"
 
@@ -17,13 +19,6 @@
 #endif
 #endif
 
-#ifdef WITH_VTK
-//VTK
-#include <vtkCommand.h>
-#include <vtkRenderWindowInteractor.h>
-
-#endif
-
 //ITMLib
 #include "../../ITMLib/Utils/Analytics/BenchmarkUtilities.h"
 #include "../../ITMLib/Utils/Logging/Logging.h"
@@ -32,6 +27,7 @@
 #include "../../ITMLib/Engines/ImageProcessing/ImageProcessingEngineFactory.h"
 #include "../../ITMLib/Utils/Logging/ConsolePrintColors.h"
 #include "../../ITMLib/Utils/Telemetry/TelemetryUtilities.h"
+#include "../../ITMLib/Utils/FileIO/RecordHandling.h"
 
 
 //TODO: we should never have to downcast the main engine to some other engine type, architecture needs to be altered
@@ -52,12 +48,7 @@ namespace bench = ITMLib::benchmarking;
  * \param imageSource source for images
  * \param imuSource source for IMU data
  * \param main_engine main engine to process the frames
- * \param outFolder output folder for saving results
- * \param deviceType type of device to use for some tasks
- * \param number_of_frames_to_process_after_launch automatically process this number of frames after launching the UIEngine,
- * \param index_of_first_frame skip this number of frames before beginning to process
- * \param recordReconstructionResult start recording the reconstruction result into a video files as soon as the next frame is processed
- * set interval to this number of frames
+ * \param configuration remaining configuration settings already pre-assessed from command line or configuration file
  */
 void UIEngine::Initialize(int& argc, char** argv,
                           InputSource::ImageSourceEngine* imageSource,
@@ -91,11 +82,11 @@ void UIEngine::Initialize(int& argc, char** argv,
 	this->main_engine = main_engine;
 	this->output_path = configuration.paths.output_path;
 
-	int textHeight = 60; // Height of text area, 2 lines
+	int text_height = 60; // Height of text area, 2 lines
 
 	window_size.x = (int) (1.5f * (float) (imageSource->GetDepthImageSize().x));
-	window_size.y = imageSource->GetDepthImageSize().y + textHeight;
-	float h1 = textHeight / (float) window_size.y, h2 = (1.f + h1) / 2;
+	window_size.y = imageSource->GetDepthImageSize().y + text_height;
+	float h1 = static_cast<float>(text_height) / (float) window_size.y, h2 = (1.f + h1) / 2;
 	window_corners[0] = Vector4f(0.0f, h1, 0.665f, 1.0f);   // Main render
 	window_corners[1] = Vector4f(0.665f, h2, 1.0f, 1.0f);   // Side sub window 0
 	window_corners[2] = Vector4f(0.665f, h1, 1.0f, h2);     // Side sub window 2
@@ -124,8 +115,8 @@ void UIEngine::Initialize(int& argc, char** argv,
 
 	bool allocate_GPU = configuration.device_type == MEMORYDEVICE_CUDA;
 
-	for (int w = 0; w < NUM_WIN; w++) {
-		output_images[w] = new UChar4Image(imageSource->GetDepthImageSize(), true, allocate_GPU);
+	for (auto& output_image : output_images) {
+		output_image = new UChar4Image(imageSource->GetDepthImageSize(), true, allocate_GPU);
 	}
 
 	input_RGB_image = new UChar4Image(imageSource->GetRGBImageSize(), true, allocate_GPU);
@@ -155,7 +146,8 @@ void UIEngine::Initialize(int& argc, char** argv,
 	sdkResetTimer(&timer_average);
 	current_frame_index = 0;
 	if (automatic_run_settings.index_of_frame_to_start_at > 0) {
-		printf("Skipping the first %d frames.\n", automatic_run_settings.index_of_frame_to_start_at);
+		LOG4CPLUS_TOP_LEVEL(logging::GetLogger(),
+		                    "Skipping the first " << automatic_run_settings.index_of_frame_to_start_at << " frames.");
 		SkipFrames(automatic_run_settings.index_of_frame_to_start_at);
 	}
 
@@ -176,7 +168,7 @@ void UIEngine::Initialize(int& argc, char** argv,
 		main_engine->LoadFromFile(frame_path);
 		SkipFrames(1);
 	}
-	printf("initialised.\n");
+	LOG4CPLUS_TOP_LEVEL(logging::GetLogger(), "initialised.");
 }
 
 void UIEngine::SaveScreenshot(const char* filename) const {
@@ -199,7 +191,7 @@ void UIEngine::SkipFrames(int number_of_frames_to_skip) {
 
 
 void UIEngine::ProcessFrame() {
-	LOG4CPLUS_PER_FRAME(logging::get_logger(),
+	LOG4CPLUS_PER_FRAME(logging::GetLogger(),
 	                    yellow << "***" << bright_cyan << " PROCESSING FRAME " << current_frame_index << yellow
 	                           << " ***" << reset);
 
@@ -249,8 +241,8 @@ void UIEngine::Shutdown() {
 	delete depth_video_writer;
 	delete reconstruction_video_writer;
 
-	for (int w = 0; w < NUM_WIN; w++)
-		delete output_images[w];
+	for (auto& output_image : output_images)
+		delete output_image;
 
 	delete input_RGB_image;
 	delete input_raw_depth_image;
@@ -305,19 +297,23 @@ void UIEngine::RecordCurrentReconstructionFrameToVideo() {
 				image_processing_engine->FilterSubsample(reduced_RGB, *output_images[2]);
 
 				assert(reduced_dims_RGB.y + reduced_dims_depth.y == output_images[0]->dimensions.y);
-				UChar4Image rgb_and_depth = ORUtils::ConcatenateImages(std::vector<std::reference_wrapper<UChar4Image>>{reduced_depth, reduced_RGB}, 0);
-				UChar4Image video_output_image = ORUtils::ConcatenateImages(std::vector<std::reference_wrapper<UChar4Image>>{*output_images[0], rgb_and_depth}, 1);
+				UChar4Image rgb_and_depth = ORUtils::ConcatenateImages(std::vector<std::reference_wrapper<UChar4Image>>{reduced_depth, reduced_RGB},
+				                                                       0);
+				UChar4Image video_output_image = ORUtils::ConcatenateImages(
+						std::vector<std::reference_wrapper<UChar4Image>>{*output_images[0], rgb_and_depth}, 1);
 				if (!reconstruction_video_writer->isOpen()) {
-					reconstruction_video_writer->open((std::string(this->output_path) + "/out_reconstruction.avi").c_str(),
-					                                  video_output_image.dimensions.x, video_output_image.dimensions.y,
+					std::string video_path = std::string(this->output_path) + "/out_reconstruction.avi";
+					ArchivePossibleExistingRecords(video_path, "older_reconstruction_videos");
+					reconstruction_video_writer->open(video_path.c_str(), video_output_image.dimensions.x, video_output_image.dimensions.y,
 					                                  false, 30);
 				}
 				reconstruction_video_writer->writeFrame(&video_output_image);
 			} else {
 				if (!reconstruction_video_writer->isOpen()) {
-					reconstruction_video_writer->open((std::string(this->output_path) + "/out_reconstruction.avi").c_str(),
-					                                  output_images[0]->dimensions.x, output_images[0]->dimensions.y,
-					                                  false, 30);
+					std::string video_path = std::string(this->output_path) + "/out_reconstruction.avi";
+					ArchivePossibleExistingRecords(video_path, "older_reconstruction_videos");
+					reconstruction_video_writer->open(video_path.c_str(), output_images[0]->dimensions.x,
+					                                  output_images[0]->dimensions.y, false, 30);
 				}
 				reconstruction_video_writer->writeFrame(output_images[0]);
 			}
@@ -355,7 +351,9 @@ void UIEngine::RecordDepthAndRGBInputToImages() {
 }
 
 void UIEngine::PrintProcessingFrameHeader() const {
-	LOG4CPLUS_PER_FRAME(logging::get_logger(),
+	LOG4CPLUS_PER_FRAME(logging::GetLogger(),
 	                    bright_cyan << "PROCESSING FRAME " << current_frame_index + 1 << reset);
 }
 
+
+#pragma clang diagnostic pop

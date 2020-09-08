@@ -16,7 +16,7 @@
 #pragma once
 
 
-#include "../../InputSource/OpenNIEngine.h"
+#include "../../InputSource/OpenNI2Engine.h"
 #include "../../InputSource/Kinect2Engine.h"
 #include "../../InputSource/LibUVCEngine.h"
 #include "../../InputSource/PicoFlexxEngine.h"

@@ -2,7 +2,9 @@
 
 #pragma once
 
+#ifndef NDEBUG
 #define CUDA_DEBUG
+#endif
 
 #ifndef COMPILE_WITHOUT_CUDA
 

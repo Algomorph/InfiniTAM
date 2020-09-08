@@ -15,6 +15,7 @@ namespace ITMLib
 		//TODO: implement meshing for PVA (for completeness / consistency)
 		Mesh MeshVolume(const VoxelVolume<TVoxel, TIndex> *volume) {
 			DIEWITHEXCEPTION_REPORTLOCATION("Not implemented");
+			return Mesh();
 		}
 	};
 

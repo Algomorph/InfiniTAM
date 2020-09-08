@@ -519,7 +519,7 @@ fi
 as_test_x='test -x'
 as_executable_p=as_fn_executable_p
 
-# Sed expression to map a string onto a valid CPP name.
+# Sed expression to map a string onto a valid CPU name.
 as_tr_cpp="eval sed 'y%*$as_cr_letters%P$as_cr_LETTERS%;s%[^_$as_cr_alnum]%_%g'"
 
 # Sed expression to map a string onto a valid variable name.

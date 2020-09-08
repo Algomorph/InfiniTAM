@@ -18,9 +18,6 @@
 #define BOOST_TEST_DYN_LINK
 #endif
 
-//stdlib
-#include <filesystem>
-
 //boost
 #include <boost/test/unit_test.hpp>
 
@@ -38,7 +35,6 @@
 using namespace ITMLib;
 using namespace test_utilities;
 namespace snoopy = snoopy_test_utilities;
-namespace fs = std::filesystem;
 
 template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void GenericMeshSavingTest() {
@@ -48,8 +44,8 @@ void GenericMeshSavingTest() {
 	MeshingEngine<TSDFVoxel, TIndex>* meshing_engine =
 			MeshingEngineFactory::Build<TSDFVoxel, TIndex>(TMemoryDeviceType);
 	Mesh mesh = meshing_engine->MeshVolume( volume);
-	fs::create_directories(GENERATED_TEST_DATA_PREFIX "TestData/meshes");
-	mesh.WriteOBJ(GENERATED_TEST_DATA_PREFIX "TestData/meshes/mesh_partial_16_" + DeviceString<TMemoryDeviceType>() + ".obj");
+	ConstructGeneratedMeshDirectoryIfMissing();
+	mesh.WriteOBJ(std::string(test_utilities::GeneratedMeshDirectory) + "mesh_partial_16_" + DeviceString<TMemoryDeviceType>() + ".obj");
 	
 	delete volume;
 	delete meshing_engine;

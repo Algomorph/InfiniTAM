@@ -1,22 +1,6 @@
 # CMakeLists.txt for ITMLib #
 #############################
 
-set(targetname ITMLib)
-
-################################
-# Dependencies                 #
-################################
-
-include(${PROJECT_SOURCE_DIR}/cmake/UseCUDA.cmake)
-include(${PROJECT_SOURCE_DIR}/cmake/UseOpenMP.cmake)
-include(${PROJECT_SOURCE_DIR}/cmake/UseVTK.cmake)
-include(${PROJECT_SOURCE_DIR}/cmake/UseOpenCV.cmake)
-include(${PROJECT_SOURCE_DIR}/cmake/UseBoost.cmake)
-
-#############################
-# Project files             #
-#############################
-
 set(ITMLIB_TOPLEVEL_HEADERS
     GlobalTemplateDefines.h
     )
@@ -651,28 +635,17 @@ set(ITMLIB_ENGINES_ANALYTICS_SOURCES
 
 set(ITMLIB_ENGINES_TELEMETRY_SOURCES
     Engines/Telemetry/TelemetryRecorder.tpp
-    Engines/Telemetry/TelemetryRecorder_PlainVoxelArray.cpp
-    Engines/Telemetry/TelemetryRecorder_VoxelBlockHash.cpp
-    #TODO: fixme
-    #    Engines/Telemetry/TelemetryRecorder_PlainVoxelArray.cpp
-    #    Engines/Telemetry/TelemetryRecorder_VoxelBlockHash.cpp
-    #    Engines/Telemetry/VolumeSequenceRecorder.tpp
-    #    Engines/Telemetry/VolumeSequenceRecorder_PlainVoxelArray.cpp
-    #    Engines/Telemetry/VolumeSequenceRecorder_VoxelBlockHash.cpp
-    #    Engines/Telemetry/TelemetryRecorder.tpp
-    #    Engines/Telemetry/VolumeSequenceRecorder_VolumeSlice.tpp
-    #    Engines/Telemetry/WarpFieldSequenceRecorder.tpp
-    #    Engines/Telemetry/WarpFieldSequenceRecorder_PlainVoxelArray.cpp
-    #    Engines/Telemetry/WarpFieldSequenceRecorder_VoxelBlockHash.cpp
+
+    Engines/Telemetry/CPU/TelemetryRecorder_CPU_PlainVoxelArray.cpp
+    Engines/Telemetry/CPU/TelemetryRecorder_CPU_VoxelBlockHash.cpp
+    Engines/Telemetry/CUDA/TelemetryRecorder_CUDA_PlainVoxelArray.cu
+    Engines/Telemetry/CUDA/TelemetryRecorder_CUDA_VoxelBlockHash.cu
+
     )
 set(ITMLIB_ENGINES_TELEMETRY_HEADERS
     Engines/Indexing/Shared/IndexingEngine_DiagnosticData.h
     Engines/Telemetry/TelemetryRecorder.h
     Engines/Telemetry/TelemetryRecorderFactory.h
-    #    Engines/Telemetry/WriteAndReadFunctors.h
-    #    Engines/Telemetry/VolumeSequenceRecorder.h
-    #    Engines/Telemetry/TelemetryRecorder.h
-    #    Engines/Telemetry/WarpFieldSequenceRecorder.h
     )
 
 ## ================================================== OBJECTS ==========================================================
@@ -831,13 +804,13 @@ set(ITMLIB_CAMERA_TRACKERS_SHARED_HEADERS
     )
 # ============================================== SCENE MOTION TRACKERS =================================================
 set(ITMLIB_SCENE_MOTION_TRACKERS_HEADERS
-    SurfaceTrackers/SurfaceTrackerFactory.h
+    Engines/LevelSetAlignment/LevelSetAlignmentEngineFactory.h
     )
 
 set(ITMLIB_SCENE_MOTION_TRACKERS_CPU_SOURCES
 
-    SurfaceTrackers/CPU/SurfaceTracker_CPU_PlainVoxelArray.cpp
-    SurfaceTrackers/CPU/SurfaceTracker_CPU_VoxelBlockHash.cpp
+    Engines/LevelSetAlignment/CPU/LevelSetAlignmentEngine_CPU_PlainVoxelArray.cpp
+    Engines/LevelSetAlignment/CPU/LevelSetAlignmentEngine_CPU_VoxelBlockHash.cpp
     )
 
 set(ITMLIB_SCENE_MOTION_TRACKERS_CPU_HEADERS
@@ -845,8 +818,8 @@ set(ITMLIB_SCENE_MOTION_TRACKERS_CPU_HEADERS
 ##
 
 set(ITMLIB_SCENE_MOTION_TRACKERS_CUDA_SOURCES
-    SurfaceTrackers/CUDA/SurfaceTracker_CUDA_PlainVoxelArray.cu
-    SurfaceTrackers/CUDA/SurfaceTracker_CUDA_VoxelBlockHash.cu
+    Engines/LevelSetAlignment/CUDA/LevelSetAlignmentEngine_CUDA_PlainVoxelArray.cu
+    Engines/LevelSetAlignment/CUDA/LevelSetAlignmentEngine_CUDA_VoxelBlockHash.cu
     )
 set(ITMLIB_SCENE_MOTION_TRACKERS_CUDA_HEADERS
 
@@ -854,27 +827,26 @@ set(ITMLIB_SCENE_MOTION_TRACKERS_CUDA_HEADERS
 ##
 
 set(ITMLIB_SCENE_MOTION_TRACKERS_INTERFACE_SOURCES
-    SurfaceTrackers/Interface/LevelSetEvolutionParameters.cpp
-    SurfaceTrackers/Interface/SurfaceTracker.tpp
+    Engines/LevelSetAlignment/Interface/LevelSetAlignmentParameters.cpp
+    Engines/LevelSetAlignment/Interface/LevelSetAlignmentEngine.tpp
     )
 set(ITMLIB_SCENE_MOTION_TRACKERS_INTERFACE_HEADERS
-    SurfaceTrackers/WarpGradientFunctors/WarpGradientFunctor.h
-    SurfaceTrackers/Interface/SurfaceTrackerInterface.h
-    SurfaceTrackers/Interface/LevelSetEvolutionParameters.h
-    SurfaceTrackers/Interface/SurfaceTracker.h
+    Engines/LevelSetAlignment/WarpGradientFunctors/WarpGradientFunctor.h
+    Engines/LevelSetAlignment/Interface/LevelSetAlignmentEngineInterface.h
+    Engines/LevelSetAlignment/Interface/LevelSetAlignmentParameters.h
+    Engines/LevelSetAlignment/Interface/LevelSetAlignmentEngine.h
     )
 ##
 set(ITMLIB_SCENE_MOTION_TRACKERS_SHARED_HEADERS
-    SurfaceTrackers/WarpGradientFunctors/WarpGradientFunctor_Diagnostic.h
-    SurfaceTrackers/WarpGradientFunctors/WarpGradientFunctor_Optimized.h
+    Engines/LevelSetAlignment/WarpGradientFunctors/WarpGradientFunctor_Diagnostic.h
+    Engines/LevelSetAlignment/WarpGradientFunctors/WarpGradientFunctor_Optimized.h
 
-    SurfaceTrackers/Shared/WarpGradientCommon.h
-    SurfaceTrackers/Shared/SurfaceTrackerSharedRoutines.h
-    SurfaceTrackers/Shared/SurfaceTrackerDiagnosticRoutines.h
-    SurfaceTrackers/Shared/SurfaceTrackerSharedFunctors.h
-    SurfaceTrackers/Shared/SurfaceTrackerOptimizationParameters.h
-    SurfaceTrackers/Shared/WarpGradientRoutines.h
-    SurfaceTrackers/Shared/WarpGradientAggregates.h
+    Engines/LevelSetAlignment/Shared/WarpGradientCommon.h
+    Engines/LevelSetAlignment/Shared/LevelSetAlignmentSharedRoutines.h
+    Engines/LevelSetAlignment/Shared/LevelSetAlignmentDiagnosticRoutines.h
+    Engines/LevelSetAlignment/Shared/LevelSetAlignmentSharedFunctors.h
+    Engines/LevelSetAlignment/Shared/WarpGradientRoutines.h
+    Engines/LevelSetAlignment/Shared/WarpGradientAggregates.h
     )
 
 # ======================================================================================================================
@@ -907,13 +879,13 @@ set(
 
         Utils/FileIO/JSON_Utilities.cpp
         Utils/FileIO/CSV_Utilities.cpp
+        Utils/FileIO/RecordHandling.cpp
 
         Utils/Geometry/CardinalAxesAndPlanes.cpp
         Utils/Geometry/Rodrigues.cpp
 
         Utils/Logging/LoggingUtilities.cpp
         Utils/Logging/Logging.cpp
-        Utils/Logging/Logger.cpp
 
         Utils/Metacoding/SerializableStruct_Impl.cpp
         Utils/Metacoding/DeferrableSerializableStruct_Impl.cpp
@@ -955,6 +927,7 @@ set(
 
         Utils/FileIO/JSON_Utilities.h
         Utils/FileIO/CSV_Utilities.h
+        Utils/FileIO/RecordHandling.h
 
         Utils/Geometry/CardinalAxesAndPlanes.h
         Utils/Geometry/CheckBlockVisibility.h
@@ -989,9 +962,9 @@ set(
         Utils/Telemetry/TelemetryUtilities.h
 
         Utils/Logging/ConsolePrintColors.h
+        Utils/Analytics/Histogram.h
         Utils/Logging/Logging.cpp
         Utils/Logging/LoggingUtilities.h
-        Utils/Logging/Logger.h
         Utils/Logging/PrettyPrinters.h
         Utils/Logging/PrettyPrinters.cpp
 
@@ -1119,38 +1092,18 @@ set(headers
     ${ITMLIB_UTILS_HEADERS}
     )
 
-#############################
-# Specify the source groups #
-#############################
+
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${sources} ${headers})
 
-##########################################
-# Specify the target and where to put it #
-##########################################
+add_library(ITMLib STATIC ${sources} ${headers})
 
-include(${PROJECT_SOURCE_DIR}/cmake/SetCUDALibTarget.cmake)
+target_link_libraries(ITMLib PUBLIC threadpool11 log4cplus tinyply MiniSlamGraphLib FernRelocLib ORUtils Boost::program_options Boost::filesystem)
 
+if(WITH_OPENMP)
+    target_link_libraries(ITMLib PUBLIC OpenMP::OpenMP_CXX)
+endif()
 
-#TODO: make these optional and consistent with the overal CMake package usage in the project -Greg (GitHub: Algomorph)
-##########################################
-# Find and link extra packages #
-##########################################
-
-if (WITH_VTK)
-    target_compile_definitions(${targetname} PUBLIC -DWITH_VTK)
-endif ()
-target_include_directories(${targetname} PUBLIC ${OpenCV_INCLUDE_DIRS})
-target_link_libraries(${targetname} PUBLIC threadpool11 ${OpenCV_LIBS} ${VTK_LIBRARIES} log4cplus tinyply MiniSlamGraphLib FernRelocLib ORUtils)
-include(${PROJECT_SOURCE_DIR}/cmake/LinkBoost.cmake)
+target_include_directories(ITMLib PRIVATE ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 
 
-#fix potential warning causing from error in VTK compile definitions
-# "<command-line>:0:20: warning: ISO C++11 requires whitespace after the macro name"
-get_property(COMPILE_DEFINITIONS_PROPERTY DIRECTORY PROPERTY COMPILE_DEFINITIONS)
-list(FIND COMPILE_DEFINITIONS_PROPERTY "vtkRenderingCore_AUTOINIT=3(vtkInteractionStyle,vtkRenderingFreeType,vtkRenderingOpenGL2)" INDEX)
-if (NOT INDEX EQUAL -1)
-    list(REMOVE_AT COMPILE_DEFINITIONS_PROPERTY ${INDEX})
-    list(APPEND COMPILE_DEFINITIONS_PROPERTY "vtkRenderingCore_AUTOINIT=3(vtkInteractionStyle ,vtkRenderingFreeType ,vtkRenderingOpenGL2 )")
-    #replace with the same properties with spaces after the macro name
-    set_property(DIRECTORY PROPERTY COMPILE_DEFINITIONS ${COMPILE_DEFINITIONS_PROPERTY})
-endif ()
+

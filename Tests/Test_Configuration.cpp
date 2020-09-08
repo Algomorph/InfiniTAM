@@ -37,6 +37,7 @@
 #include "../ITMLib/Engines/Rendering/RenderingSettings.h"
 #include "../ITMLib/Utils/Configuration/AutomaticRunSettings.h"
 #include "../ITMLib/Engines/Main/MainEngineSettings.h"
+#include "../ITMLib/Engines/LevelSetAlignment/Interface/LevelSetAlignmentParameters.h"
 
 namespace pt = boost::property_tree;
 
@@ -50,7 +51,7 @@ struct DeferrableStructCollection {
 	IndexingSettings indexing_settings;
 	RenderingSettings rendering_settings;
 	AutomaticRunSettings automatic_run_settings;
-	LevelSetEvolutionParameters level_set_evolution_parameters;
+	LevelSetAlignmentParameters level_set_evolution_parameters;
 
 	DeferrableStructCollection(const configuration::Configuration& source_configuration = configuration::Get()) :
 			main_engine_settings(BuildDeferrableFromParentIfPresent<MainEngineSettings>(source_configuration)),
@@ -58,7 +59,7 @@ struct DeferrableStructCollection {
 			indexing_settings(BuildDeferrableFromParentIfPresent<IndexingSettings>(source_configuration)),
 			rendering_settings(BuildDeferrableFromParentIfPresent<RenderingSettings>(source_configuration)),
 			automatic_run_settings(BuildDeferrableFromParentIfPresent<AutomaticRunSettings>(source_configuration)),
-			level_set_evolution_parameters(BuildDeferrableFromParentIfPresent<LevelSetEvolutionParameters>(source_configuration)) {}
+			level_set_evolution_parameters(BuildDeferrableFromParentIfPresent<LevelSetAlignmentParameters>(source_configuration)) {}
 
 	friend void RequireEqualDeferrables(const DeferrableStructCollection& l, const DeferrableStructCollection& r) {
 		BOOST_REQUIRE_EQUAL(l.main_engine_settings, r.main_engine_settings);
@@ -228,6 +229,7 @@ BOOST_AUTO_TEST_CASE(ConfigurationTestLong_CLI_Only) {
 	                      " --logging_settings.log_average_warp_update=true"
 	                      " --logging_settings.log_surface_tracking_optimization_energies=true"
 	                      " --logging_settings.log_additional_surface_tracking_stats=true"
+	                      " --logging_settings.log_warp_update_length_histograms=true"
 	                      " --logging_settings.log_voxel_hash_block_usage=true"
 
 	                      " --paths.output_path=" GENERATED_TEST_DATA_PREFIX "TestData/output"
@@ -254,6 +256,10 @@ BOOST_AUTO_TEST_CASE(ConfigurationTestLong_CLI_Only) {
 	                      " --telemetry_settings.record_surface_tracking_optimization_energies=true"
 	                      " --telemetry_settings.record_surface_tracking_additional_statistics=true"
 	                      " --telemetry_settings.record_frame_meshes=true"
+	                      " --telemetry_settings.record_warp_update_length_histograms=true"
+	                      " --telemetry_settings.use_warp_update_length_histogram_manual_max=true"
+	                      " --telemetry_settings.warp_update_length_histogram_max=0.0001"
+					      " --telemetry_settings.warp_update_length_histogram_bin_count=32"
 	                      " --telemetry_settings.use_CPU_for_mesh_recording=true"
 	                      " --telemetry_settings.record_camera_matrices=true"
 

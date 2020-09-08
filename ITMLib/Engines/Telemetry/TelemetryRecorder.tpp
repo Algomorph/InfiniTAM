@@ -19,14 +19,19 @@
 namespace fs = std::filesystem;
 
 //local
-#include "../../../ORUtils/VectorAndMatrixPersistence.h"
 #include "TelemetryRecorder.h"
-#include "../VolumeFileIO/VolumeFileIOEngine.h"
-#include "../../Objects/Volume/VoxelVolume.h"
+#include "../../../ORUtils/VectorAndMatrixPersistence.h"
 #include "../../Utils/Configuration/Configuration.h"
-#include "../../GlobalTemplateDefines.h"
+#include "../../Utils/Logging/ConsolePrintColors.h"
 #include "../../Utils/Telemetry/TelemetryUtilities.h"
+#include "../../Utils/Logging/Logging.h"
+#include "../../Objects/Volume/VoxelVolume.h"
+#include "../../GlobalTemplateDefines.h"
+#include "../Analytics/AnalyticsEngine.h"
+#include "../Traversal/Interface/VolumeTraversal.h"
 #include "../Meshing/MeshingEngineFactory.h"
+#include "../VolumeFileIO/VolumeFileIOEngine.h"
+
 
 using namespace ITMLib;
 
@@ -48,7 +53,11 @@ TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::TelemetryRecorder()
 		 surface_tracking_statistics_file(parameters.record_surface_tracking_additional_statistics ?
 		                                  ORUtils::OStreamWrapper((fs::path(configuration::Get().paths.output_path)
 		                                                           / fs::path("surface_tracking_statistics.dat")).string(), true)
-		                                                                                           : ORUtils::OStreamWrapper()) {}
+		                                                                                           : ORUtils::OStreamWrapper()),
+		 warp_update_length_histogram_file(parameters.record_warp_update_length_histograms ?
+		                                   ORUtils::OStreamWrapper((fs::path(configuration::Get().paths.output_path) /
+		                                                            fs::path("warp_update_length_histograms.dat")).string(), true)
+		                                                                                   : ORUtils::OStreamWrapper()) {}
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::RecordVolumeMemoryUsageInfo(
@@ -108,49 +117,61 @@ void TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::RecordPostFusi
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void
-TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::RecordSurfaceTrackingEnergies(const ComponentEnergies<TMemoryDeviceType>& energies, int iteration_index) {
+TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::RecordSurfaceTrackingEnergies(const ComponentEnergies<TMemoryDeviceType>& energies,
+                                                                                           int iteration_index) {
 	if (parameters.record_surface_tracking_optimization_energies) {
 		surface_tracking_energy_file.OStream().write(reinterpret_cast<const char*>(&iteration_index), sizeof(int));
-		float total_data_energy = energies.GetTotalDataEnergy();
-		surface_tracking_energy_file.OStream().write(reinterpret_cast<const char*>(&total_data_energy), sizeof(float));
-		float total_level_set_energy = energies.GetTotalLevelSetEnergy();
-		surface_tracking_energy_file.OStream().write(reinterpret_cast<const char*>(&total_level_set_energy), sizeof(float));
-		float total_Tikhonov_energy = energies.GetTotalTikhonovEnergy();
-		surface_tracking_energy_file.OStream().write(reinterpret_cast<const char*>(&total_Tikhonov_energy), sizeof(float));
-		float total_Killing_energy = energies.GetTotalKillingEnergy();
-		surface_tracking_energy_file.OStream().write(reinterpret_cast<const char*>(&total_Killing_energy), sizeof(float));
+		surface_tracking_energy_file << energies;
 	}
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::RecordSurfaceTrackingStatistics(
 		const AdditionalGradientAggregates<TMemoryDeviceType>& aggregates, int iteration_index) {
-	if(parameters.record_surface_tracking_additional_statistics){
+	if (parameters.record_surface_tracking_additional_statistics) {
 		surface_tracking_statistics_file.OStream().write(reinterpret_cast<const char*>(&iteration_index), sizeof(int));
-		float average_canonical_sdf = aggregates.GetAverageCanonicalSdf();
-		surface_tracking_statistics_file.OStream().write(reinterpret_cast<const char*>(&average_canonical_sdf), sizeof(float));
-		float average_live_sdf = aggregates.GetAverageLiveSdf();
-		surface_tracking_statistics_file.OStream().write(reinterpret_cast<const char*>(&average_live_sdf), sizeof(float));
-		float average_sdf_difference = aggregates.GetAverageSdfDifference();
-		surface_tracking_statistics_file.OStream().write(reinterpret_cast<const char*>(&average_sdf_difference), sizeof(float));
-		float average_warp_distance = aggregates.GetAverageWarpDistance();
-		surface_tracking_statistics_file.OStream().write(reinterpret_cast<const char*>(&average_warp_distance), sizeof(float));
-		unsigned int considered_voxel_count = aggregates.GetConsideredVoxelCount();
-		surface_tracking_statistics_file.OStream().write(reinterpret_cast<const char*>(&considered_voxel_count), sizeof(unsigned int));
-		unsigned int data_voxel_count = aggregates.GetDataVoxelCount();
-		surface_tracking_statistics_file.OStream().write(reinterpret_cast<const char*>(&data_voxel_count), sizeof(unsigned int));
-		unsigned int level_set_voxel_count = aggregates.GetLevelSetVoxelCount();
-		surface_tracking_statistics_file.OStream().write(reinterpret_cast<const char*>(&level_set_voxel_count), sizeof(unsigned int));
-
+		surface_tracking_statistics_file << aggregates;
 	}
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::RecordSurfaceTrackingMeanUpdate(float mean_update) {
-	if(parameters.record_surface_tracking_additional_statistics){
+	if (parameters.record_surface_tracking_additional_statistics) {
 		surface_tracking_statistics_file.OStream().write(reinterpret_cast<const char*>(&mean_update), sizeof(float));
 	}
 }
+
+template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+void
+TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::RecordAndLogWarpUpdateLengthHistogram(const VoxelVolume<TWarp, TIndex>& warp_field,
+                                                                                                   int iteration_index) {
+	bool log_histograms = configuration::Get().logging_settings.log_warp_update_length_histograms &&
+	                      configuration::Get().logging_settings.verbosity_level >= VERBOSITY_PER_ITERATION;
+	if (parameters.record_warp_update_length_histograms || log_histograms) {
+		auto& analytics_engine = AnalyticsEngine<TWarp, TIndex, TMemoryDeviceType>::Instance();
+		Histogram histogram;
+		float maximum;
+		if (parameters.use_warp_update_length_histogram_manual_max) {
+			maximum = parameters.warp_update_length_histogram_max;
+			histogram = analytics_engine.ComputeWarpUpdateLengthHistogram_ManualMax(
+					&warp_field, parameters.warp_update_length_histogram_bin_count, maximum);
+		} else {
+			histogram = analytics_engine.ComputeWarpUpdateLengthHistogram_VolumeMax(
+					&warp_field, parameters.warp_update_length_histogram_bin_count, maximum);
+		}
+		if (parameters.record_warp_update_length_histograms) {
+			warp_update_length_histogram_file.OStream().write(reinterpret_cast<const char*>(&iteration_index), sizeof(int));
+			warp_update_length_histogram_file << histogram;
+		}
+		if (log_histograms) {
+			std::stringstream ss;
+			ss << histogram;
+			LOG4CPLUS_PER_ITERATION(logging::GetLogger(), ss.str());
+			LOG4CPLUS_PER_ITERATION(logging::GetLogger(), "Histogram maximum (voxels): " << maximum);
+		}
+	}
+}
+
 
 
 

@@ -32,7 +32,7 @@
 #include "../Telemetry/TelemetryRecorder.h"
 #include "../../Objects/Misc/IMUCalibrator.h"
 #include "../../CameraTrackers/Interface/CameraTracker.h"
-#include "../../SurfaceTrackers/Interface/SurfaceTracker.h"
+#include "../LevelSetAlignment/Interface/LevelSetAlignmentEngine.h"
 #include "../../../FernRelocLib/Relocaliser.h"
 #include "../../Utils/Configuration/AutomaticRunSettings.h"
 
@@ -65,7 +65,7 @@ private: // instance variables
 
 	CameraTracker* camera_tracker;
 	IMUCalibrator* imu_calibrator;
-	SurfaceTrackerInterface<TVoxel, TWarp, TIndex>* surface_tracker;
+	LevelSetAlignmentEngineInterface<TVoxel, TWarp, TIndex>* surface_tracker;
 
 	VoxelVolume<TVoxel, TIndex>* canonical_volume;
 	VoxelVolume<TVoxel, TIndex>** live_volumes;

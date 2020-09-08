@@ -7,7 +7,7 @@
 #include <cstdio>
 #include <stdexcept>
 
-#ifdef COMPILE_WITH_RealSense
+#ifdef COMPILE_WITH_REALSENSE2
 
 using namespace InputSource;
 using namespace ITMLib;

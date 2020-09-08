@@ -4,58 +4,33 @@
 
 option(BUILD_TESTS "Build automated tests with the project (Boost-test required)." OFF)
 
-macro(load_use_includes)
-    include(${PROJECT_SOURCE_DIR}/cmake/UseCUDA.cmake)
-    include(${PROJECT_SOURCE_DIR}/cmake/UseLibRoyale.cmake)
-    include(${PROJECT_SOURCE_DIR}/cmake/UseOpenGL.cmake)
-    include(${PROJECT_SOURCE_DIR}/cmake/UseOpenMP.cmake)
-    include(${PROJECT_SOURCE_DIR}/cmake/UseOpenNI.cmake)
-    include(${PROJECT_SOURCE_DIR}/cmake/UseRealSense.cmake)
-    include(${PROJECT_SOURCE_DIR}/cmake/UseUVC.cmake)
-endmacro()
-
-macro(load_target_link_includes)
-    include(${PROJECT_SOURCE_DIR}/cmake/LinkLibRoyale.cmake)
-    include(${PROJECT_SOURCE_DIR}/cmake/LinkOpenGL.cmake)
-    include(${PROJECT_SOURCE_DIR}/cmake/LinkOpenNI.cmake)
-    include(${PROJECT_SOURCE_DIR}/cmake/LinkRealSense.cmake)
-    include(${PROJECT_SOURCE_DIR}/cmake/LinkUVC.cmake)
-endmacro()
-
 macro(itm_add_test)
     set(options)
     set(oneValueArgs NAME)
     set(multiValueArgs SOURCES)
     cmake_parse_arguments(ITM_ADD_TEST "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-    set(targetname test_${ITM_ADD_TEST_NAME})
+    set(target test_${ITM_ADD_TEST_NAME})
     set(sources ${ITM_ADD_TEST_SOURCES})
 
-    load_use_includes()
+    add_executable(${target} ${sources})
 
-    ##########################################
-    # Specify the target and where to put it #
-    ##########################################
-    include(${PROJECT_SOURCE_DIR}/cmake/SetCUDAAppTarget.cmake)
+    target_link_libraries(
+            ${target} PRIVATE
+            MiniSlamGraphLib ORUtils FernRelocLib test_utilities
+            ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} InputSource ITMLib
+            OpenGL::GL
+    )
+    if (WITH_OPENMP)
+        target_link_libraries(${target} PRIVATE OpenMP::OpenMP_CXX)
+    endif ()
 
-    target_link_libraries(${targetname} PRIVATE
-                           MiniSlamGraphLib ORUtils FernRelocLib test_utilities
-                          ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} InputSource ITMLib
-                          )
-
-    load_target_link_includes()
-
-    ##########################################
-    # Add the target as a CMake CTest        #
-    ##########################################
     add_test(NAME ${ITM_ADD_TEST_NAME} COMMAND test_${ITM_ADD_TEST_NAME})
 endmacro()
 
 if (BUILD_TESTS)
     enable_testing()
 
-    ###########################
-    # test_utilities library  #
-    ###########################
+    # ======== test_utilities library ========
     set(STATIC_TEST_DATA_PREFIX ${CMAKE_CURRENT_SOURCE_DIR})
     set(GENERATED_TEST_DATA_PREFIX ${CMAKE_CURRENT_BINARY_DIR})
     configure_file(TestUtilities/TestUtilitiesConfig.h.in TestUtilities/TestUtilitiesConfig.h @ONLY)
@@ -77,35 +52,23 @@ if (BUILD_TESTS)
         TestUtilities/TestUtilitiesConfig.h.in
         TestUtilities/CameraPoseAndRenderingEngineFixture.h
         ${CMAKE_CURRENT_BINARY_DIR}/TestUtilities/TestUtilitiesConfig.h)
-    
+
     find_package(Boost COMPONENTS unit_test_framework REQUIRED)
 
-    set(targetname test_utilities)
-    set(sources ${TEST_UTILITIES_SOURCES} ${TEST_UTILITIES_HEADERS})
-
-    load_use_includes()
-    include(${PROJECT_SOURCE_DIR}/cmake/SetCUDALibTarget.cmake)
-
-    target_link_libraries(${targetname} ITMLib ORUtils
+    add_library(test_utilities ${TEST_UTILITIES_SOURCES} ${TEST_UTILITIES_HEADERS})
+    target_link_libraries(test_utilities ITMLib ORUtils
                           ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
-    target_include_directories(${targetname} PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/TestUtilities)
+    target_include_directories(test_utilities PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/TestUtilities)
 
-    #######################################################
-    # generator executable for derived test data library  #
-    #######################################################
-    set(targetname generate_derived_test_data)
-    load_use_includes()
+    # ======== generator executable for derived test data library ========
+
     set(sources GenerateDerivedTestData.cpp)
-    add_executable(${targetname} ${sources})
-    target_link_libraries(${targetname} PRIVATE InputSource ITMLib MiniSlamGraphLib ORUtils FernRelocLib test_utilities)
-    load_target_link_includes()
+    add_executable(generate_derived_test_data ${sources})
+    target_link_libraries(generate_derived_test_data PRIVATE InputSource ITMLib MiniSlamGraphLib ORUtils FernRelocLib test_utilities)
 
+    # ======== test suite executables =======
 
-    ##########################
-    # test suite executables #
-    ##########################
-
-    # *** CPU-only tests
+    # *** CPU/CUDA tests with CUDA preprocessor guards
     itm_add_test(NAME SetCopyCompare_CPU SOURCES Test_SetCopyCompare_CPU.cpp)
     itm_add_test(NAME ConstructVolumeFromImage_CPU SOURCES Test_ConstructVolumeFromImage_CPU.cpp)
     itm_add_test(NAME VolumeReduction SOURCES Test_VolumeReduction.cpp)
@@ -127,9 +90,10 @@ if (BUILD_TESTS)
     itm_add_test(NAME EnumSerialization SOURCES Test_EnumSerialization.cpp)
     itm_add_test(NAME RenderingEngine SOURCES Test_RenderingEngine.cpp)
     itm_add_test(NAME ImageProcessingEngine SOURCES Test_ImageProcessingEngine.cpp)
+    itm_add_test(NAME FFmpegReadWrite SOURCES Test_FFmpegReadWrite.cpp)
 
-    # *** tests that require CUDA
-    if(WITH_CUDA)
+    # *** tests that always require CUDA ***
+    if (WITH_CUDA)
         itm_add_test(NAME SetCopyCompare_CUDA SOURCES Test_SetCopyCompare_CUDA.cpp)
         itm_add_test(NAME ConstructVolumeFromImage_CUDA SOURCES Test_ConstructVolumeFromImage_CUDA.cpp)
         itm_add_test(NAME ConstructVolumeFromImage_CPU_to_CUDA SOURCES
@@ -141,49 +105,10 @@ if (BUILD_TESTS)
                      CUDAAtomicTesting.cu TemporaryCUDA_Atomics.h)
         itm_add_test(NAME SmoothWarpGradient SOURCES Test_SmoothWarpGradient_CPU_CUDA.cpp)
 
-    endif()
+    endif ()
 
     # *** special executable for CLI testing
     add_executable(cli_options_subtest TestUtilities/CLI_optionsSubtest.cpp)
     target_link_libraries(cli_options_subtest PRIVATE ITMLib)
 
-    #######################################################
-    # Recursively transfer test data to build directories #
-    #######################################################
-
-    file(GLOB_RECURSE TEST_DATA_FILES
-         "${CMAKE_CURRENT_SOURCE_DIR}/TestData/*.csv"
-         "${CMAKE_CURRENT_SOURCE_DIR}/TestData/*.png"
-         "${CMAKE_CURRENT_SOURCE_DIR}/TestData/*.pnm"
-         "${CMAKE_CURRENT_SOURCE_DIR}/TestData/*.txt"
-         "${CMAKE_CURRENT_SOURCE_DIR}/TestData/*.dat"
-         "${CMAKE_CURRENT_SOURCE_DIR}/TestData/*.json"
-         )
-    set(TEST_DATA_DIRS)
-    #TODO: remove or revive
-#    if(MSVC_IDE)
-#        foreach (CONFIGURATION_TYPE ${CMAKE_CONFIGURATION_TYPES})
-#            file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${CONFIGURATION_TYPE}")
-#            file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${CONFIGURATION_TYPE}/TestData")
-#            list(APPEND TEST_DATA_DIRS "${CMAKE_CURRENT_BINARY_DIR}/${CONFIGURATION_TYPE}/TestData")
-#        endforeach (CONFIGURATION_TYPE)
-#    else()
-#        file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/TestData")
-#        list(APPEND TEST_DATA_DIRS "${CMAKE_CURRENT_BINARY_DIR}/TestData")
-#    endif()
-
-    file(MAKE_DIRECTORY "${GENERATED_TEST_DATA_PREFIX}/TestData")
-    list(APPEND TEST_DATA_DIRS "${GENERATED_TEST_DATA_PREFIX}/TestData")
-    foreach (TEST_DATA_DIR ${TEST_DATA_DIRS})
-        foreach (TEST_DATA_FILE ${TEST_DATA_FILES})
-            string(REPLACE ${CMAKE_CURRENT_SOURCE_DIR}/TestData ${TEST_DATA_DIR} NEW_FILE ${TEST_DATA_FILE})
-            get_filename_component(TARGET_DIR ${NEW_FILE} DIRECTORY)
-            file(MAKE_DIRECTORY ${TARGET_DIR})
-            configure_file(
-                    ${TEST_DATA_FILE}
-                    ${NEW_FILE}
-                    COPYONLY
-            )
-        endforeach (TEST_DATA_FILE)
-    endforeach (TEST_DATA_DIR)
 endif ()

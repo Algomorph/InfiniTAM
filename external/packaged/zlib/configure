@@ -434,7 +434,7 @@ else
 fi
 
 # check for underscores in external names for use by assembler code
-CPP=${CPP-"$CC -E"}
+CPP=${CPU-"$CC -E"}
 case $CFLAGS in
   *ASMV*)
     echo >> configure.log

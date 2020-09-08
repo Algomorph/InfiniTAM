@@ -174,7 +174,7 @@ void log_all_timers() {
 	std::stringstream out;
 	all_cumulative_times_to_stream(out, true);
 	all_average_times_to_stream(out, true);
-	LOG4CPLUS_TOP_LEVEL(logging::get_logger(), out.str());
+	LOG4CPLUS_TOP_LEVEL(logging::GetLogger(), out.str());
 }
 
 }//namespace ITMLib::bench

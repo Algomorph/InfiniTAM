@@ -1,4 +1,7 @@
+This file contains some future plans for online testing. For now, only a single Linux build configuration is tested.
+
 Not all matrix branches need to be tested.
+
 For instance, for dependency source options, if no other 3rd-party package B depends on a certain package A,
 then I don't care about trying out every single option for B with every single option for A. Just going through the
 configurations for A is enough to test it. However, if some package B depends on A, then all those options must be tested.

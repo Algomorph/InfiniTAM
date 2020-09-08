@@ -46,7 +46,7 @@
  * necessary machinery. But this poses another problem, caused by the ugly
  * original definition of the font constants in "classic" GLUT: They are defined
  * as void* externally, so we move them temporarily out of the way by AN EXTREME
- * CPP HACK.
+ * CPU HACK.
  */
 
 #define glutStrokeRoman glutStrokeRomanIGNOREME

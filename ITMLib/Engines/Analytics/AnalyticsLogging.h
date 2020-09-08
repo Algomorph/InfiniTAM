@@ -19,6 +19,7 @@
 #include <string>
 #include <vector>
 #include <unordered_set>
+#include <ostream>
 
 //log4cplus
 #include <log4cplus/loggingmacros.h>
@@ -59,7 +60,7 @@ void LogVoxelHashBlockUsage(VoxelVolume<TVoxel, TIndex>* canonical_volume,
 			case INDEX_HASH:
 				int canonical_max_block_count, live_max_block_count, warp_max_block_count;
 				GetMaxBlockCounts<TIndex>(canonical_max_block_count, live_max_block_count, warp_max_block_count);
-				LOG4CPLUS_PER_FRAME(logging::get_logger(),
+				LOG4CPLUS_PER_FRAME(logging::GetLogger(),
 				                    green << "[Used voxel hash blocks blocks]" << reset
 				                          << "Canonical: " << yellow << utilized_canonical_hash_block_count << "/" << canonical_max_block_count
 				                          << reset
@@ -76,7 +77,7 @@ void LogTSDFVolumeStatistics(VoxelVolume<TVoxel, TIndex>* volume, const std::str
 	if (configuration::Get().logging_settings.log_volume_statistics) {
 		AnalyticsEngineInterface<TVoxel, TIndex>& calculator =
 				AnalyticsEngineFactory::Get<TVoxel, TIndex>(volume->index.memory_type);
-		LOG4CPLUS_PER_FRAME(logging::get_logger(),
+		LOG4CPLUS_PER_FRAME(logging::GetLogger(),
 		                    green << "=== Stats for volume '" << volume_description << "' ===" << reset);
 //#define GET_VOXEL_ALLOCATION_STATISTICS
 #ifdef GET_VOXEL_ALLOCATION_STATISTICS
@@ -90,8 +91,8 @@ void LogTSDFVolumeStatistics(VoxelVolume<TVoxel, TIndex>* volume, const std::str
 #ifdef GET_UTILIZED_COUNTS
 		unsigned int utilized_voxel_count = calculator.CountUtilizedVoxels(volume);
 		unsigned int utilized_hash_block_count = calculator.CountUtilizedHashBlocks(volume);
-		LOG4CPLUS_PER_FRAME(logging::get_logger(), "    Utilized voxel count: " << utilized_voxel_count);
-		LOG4CPLUS_PER_FRAME(logging::get_logger(), "    Utilized block count: " << utilized_hash_block_count);
+		LOG4CPLUS_PER_FRAME(logging::GetLogger(), "    Utilized voxel count: " << utilized_voxel_count);
+		LOG4CPLUS_PER_FRAME(logging::GetLogger(), "    Utilized block count: " << utilized_hash_block_count);
 #endif
 
 //#define DEBUG_ALLOCATION
@@ -148,7 +149,7 @@ void LogTSDFVolumeStatistics(VoxelVolume<TVoxel, TIndex>* volume, const std::str
 					calculator.CountVoxelsWithDepthWeightInRange(volume, low_weight_range0);
 			unsigned int low_weight_range_hb_count0 =
 					calculator.CountHashBlocksWithDepthWeightInRange(volume, low_weight_range0);
-			LOG4CPLUS_PER_FRAME(logging::get_logger(), "    [w_depth in [0, 50)] % voxels: "
+			LOG4CPLUS_PER_FRAME(logging::GetLogger(), "    [w_depth in [0, 50)] % voxels: "
 					<< 100.0 * static_cast<double>(low_weight_range_count0) / static_cast<double>(utilized_voxel_count)
 					<< "; % hash blocks: "
 					<< 100.0 * static_cast<double>(low_weight_range_hb_count0) /
@@ -159,7 +160,7 @@ void LogTSDFVolumeStatistics(VoxelVolume<TVoxel, TIndex>* volume, const std::str
 					calculator.CountVoxelsWithDepthWeightInRange(volume, low_weight_range1);
 			unsigned int low_weight_range_hb_count1 =
 					calculator.CountHashBlocksWithDepthWeightInRange(volume, low_weight_range1);
-			LOG4CPLUS_PER_FRAME(logging::get_logger(), "    [w_depth in [0, 20)] % voxels: "
+			LOG4CPLUS_PER_FRAME(logging::GetLogger(), "    [w_depth in [0, 20)] % voxels: "
 					<< 100.0 * static_cast<double>(low_weight_range_count1) / static_cast<double>(utilized_voxel_count)
 					<< "; % hash blocks: "
 					<< 100.0 * static_cast<double>(low_weight_range_hb_count1) /
@@ -170,7 +171,7 @@ void LogTSDFVolumeStatistics(VoxelVolume<TVoxel, TIndex>* volume, const std::str
 					calculator.CountVoxelsWithDepthWeightInRange(volume, low_weight_range2);
 			unsigned int low_weight_range_hb_count2 =
 					calculator.CountHashBlocksWithDepthWeightInRange(volume, low_weight_range2);
-			LOG4CPLUS_PER_FRAME(logging::get_logger(), "    [w_depth in [0, 10)] % voxels: "
+			LOG4CPLUS_PER_FRAME(logging::GetLogger(), "    [w_depth in [0, 10)] % voxels: "
 					<< 100.0 * static_cast<double>(low_weight_range_count2) / static_cast<double>(utilized_voxel_count)
 					<< "; % hash blocks: "
 					<< 100.0 * static_cast<double>(low_weight_range_hb_count2) /

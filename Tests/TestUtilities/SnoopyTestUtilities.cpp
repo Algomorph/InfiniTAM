@@ -58,6 +58,34 @@ std::string Frame17MaskPath() {
 	return STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_omask_000017.png";
 }
 
+std::string Frame18DepthPath() {
+	return STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_depth_000018.png";
+}
+
+std::string Frame18ColorPath() {
+	return STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_color_000018.png";
+}
+
+std::string Frame18MaskPath() {
+	return STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_omask_000018.png";
+}
+
+std::string VideoFrames16to18DepthPath() {
+	return STATIC_TEST_DATA_PREFIX "TestData/videos/snoopy_depth_16-18.avi";
+}
+
+std::string VideoFrames16to18ColorPath() {
+	return STATIC_TEST_DATA_PREFIX "TestData/videos/snoopy_color_16-18.avi";
+}
+
+std::string VideoFrames16to18Color_YUV422P_Path() {
+	return STATIC_TEST_DATA_PREFIX "TestData/videos/snoopy_color_16-18_yuv422p.avi";
+}
+
+std::string VideoFrames16to18Depth_GRAY16LE_Path() {
+	return STATIC_TEST_DATA_PREFIX "TestData/videos/snoopy_depth_16-18_gray16le.avi";
+}
+
 template std::string PartialVolume00Path<PlainVoxelArray>();
 template std::string PartialVolume00Path<VoxelBlockHash>();
 template std::string PartialVolume16Path<PlainVoxelArray>();

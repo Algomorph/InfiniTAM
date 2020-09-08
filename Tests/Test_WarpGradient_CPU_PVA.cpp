@@ -27,7 +27,7 @@
 
 //local
 #include "../ITMLib/Utils/Configuration/Configuration.h"
-#include "../ITMLib/SurfaceTrackers/Interface/SurfaceTracker.h"
+#include "../ITMLib/Engines/LevelSetAlignment/Interface/LevelSetAlignmentEngine.h"
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CPU.h"
 #include "../ITMLib/Engines/Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
 
@@ -48,8 +48,8 @@ BOOST_FIXTURE_TEST_CASE(testDataTerm_CPU_PVA, DataFixture) {
 	ManipulationEngine_CPU_PVA_Warp::Inst().ResetVolume(&warp_field);
 
 
-	auto motion_tracker_PVA_CPU = new SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU, DIAGNOSTIC>(
-			LevelSetEvolutionSwitches(true, false, false, false, false));
+	auto motion_tracker_PVA_CPU = new LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU, DIAGNOSTIC>(
+			LevelSetAlignmentSwitches(true, false, false, false, false));
 
 	TimeIt([&]() {
 		motion_tracker_PVA_CPU->CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
@@ -63,8 +63,8 @@ BOOST_FIXTURE_TEST_CASE(testDataTerm_CPU_PVA, DataFixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(testUpdateWarps_CPU_PVA, DataFixture) {
-	auto motion_tracker_PVA_CPU = new SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU, DIAGNOSTIC>(
-			LevelSetEvolutionSwitches(true, false, false, false, false));
+	auto motion_tracker_PVA_CPU = new LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU, DIAGNOSTIC>(
+			LevelSetAlignmentSwitches(true, false, false, false, false));
 	VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field_copy(*warp_field_data_term,
 	                                                        MemoryDeviceType::MEMORYDEVICE_CPU);
 
@@ -82,8 +82,8 @@ BOOST_FIXTURE_TEST_CASE(testSmoothWarpGradient_CPU_PVA, DataFixture) {
 	VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field_CPU1(*warp_field_data_term, MEMORYDEVICE_CPU);
 
 
-	auto motion_tracker_PVA_CPU = new SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU, DIAGNOSTIC>(
-			LevelSetEvolutionSwitches(false, false, false, false, true));
+	auto motion_tracker_PVA_CPU = new LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU, DIAGNOSTIC>(
+			LevelSetAlignmentSwitches(false, false, false, false, true));
 
 	TimeIt([&]() {
 		motion_tracker_PVA_CPU->SmoothWarpGradient(&warp_field_CPU1, canonical_volume, live_volume);
@@ -96,8 +96,8 @@ BOOST_FIXTURE_TEST_CASE(testSmoothWarpGradient_CPU_PVA, DataFixture) {
 BOOST_FIXTURE_TEST_CASE(testDataAndTikhonovTerm_CPU_PVA, DataFixture) {
 	VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field(*warp_field_iter0, MEMORYDEVICE_CPU);
 
-	auto motion_tracker_PVA_CPU = new SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU, DIAGNOSTIC>(
-			LevelSetEvolutionSwitches(true, false, true, false, false)
+	auto motion_tracker_PVA_CPU = new LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU, DIAGNOSTIC>(
+			LevelSetAlignmentSwitches(true, false, true, false, false)
 	);
 
 	TimeIt([&]() {
@@ -117,8 +117,8 @@ BOOST_FIXTURE_TEST_CASE(testDataAndKillingTerm_CPU_PVA, DataFixture) {
 	VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field(*warp_field_iter0, MEMORYDEVICE_CPU);
 
 
-	auto motion_tracker_PVA_CPU = new SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU, DIAGNOSTIC>(
-			LevelSetEvolutionSwitches(true, false, true, true, false)
+	auto motion_tracker_PVA_CPU = new LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU, DIAGNOSTIC>(
+			LevelSetAlignmentSwitches(true, false, true, true, false)
 	);
 
 
@@ -139,8 +139,8 @@ BOOST_FIXTURE_TEST_CASE(testDataAndLevelSetTerm_CPU_PVA, DataFixture) {
 	VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field(*warp_field_iter0, MEMORYDEVICE_CPU);
 
 
-	auto motion_tracker_PVA_CPU = new SurfaceTracker<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU, DIAGNOSTIC>(
-			LevelSetEvolutionSwitches(true, true, false, false, false)
+	auto motion_tracker_PVA_CPU = new LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU, DIAGNOSTIC>(
+			LevelSetAlignmentSwitches(true, true, false, false, false)
 	);
 
 

@@ -20,7 +20,8 @@
 #include "../../Objects/Volume/VoxelVolume.h"
 #include "TelemetrySettings.h"
 #include "../../../ORUtils/PlatformIndependentAtomics.h"
-#include "../../SurfaceTrackers/Shared/WarpGradientAggregates.h"
+#include "../../Utils/Analytics/Histogram.h"
+#include "../LevelSetAlignment/Shared/WarpGradientAggregates.h"
 
 namespace ITMLib {
 
@@ -45,6 +46,7 @@ private: // instance variables
 	ORUtils::OStreamWrapper camera_trajectory_file;
 	ORUtils::OStreamWrapper surface_tracking_energy_file;
 	ORUtils::OStreamWrapper surface_tracking_statistics_file;
+	ORUtils::OStreamWrapper warp_update_length_histogram_file;
 protected: // instance variables
 	using TelemetryRecorderInterface<TVoxel,TWarp,TIndex>::parameters;
 public: // instance functions
@@ -62,10 +64,15 @@ public: // instance functions
 	void RecordSurfaceTrackingEnergies(const ComponentEnergies<TMemoryDeviceType>& energies, int iteration_index);
 	void RecordSurfaceTrackingStatistics(const AdditionalGradientAggregates<TMemoryDeviceType>& aggregates, int iteration_index);
 	void RecordSurfaceTrackingMeanUpdate(float mean_update);
+	void RecordAndLogWarpUpdateLengthHistogram(const VoxelVolume<TWarp, TIndex>& warp_field, int iteration_index);
+
+
+
 private: // instance functions
 	void RecordVolumeMemoryUsageInfo(const VoxelVolume <TVoxel, TIndex>& canonical_volume);
 	void RecordFrameMeshFromVolume(const VoxelVolume <TVoxel, TIndex>& volume, const std::string& filename, int frame_index);
 	void RecordCameraPose(const Matrix4f& camera_pose);
+
 };
 
 

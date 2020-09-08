@@ -97,6 +97,7 @@
         "log_average_warp_update": false,
         "log_surface_tracking_optimization_energies": false,
         "log_additional_surface_tracking_stats": false,
+        "log_warp_update_length_histograms": false,
         "log_voxel_hash_block_usage": false
     },
     "paths": {
@@ -129,6 +130,10 @@
         "record_surface_tracking_optimization_energies": false,
         "record_surface_tracking_additional_statistics": false,
         "record_frame_meshes": false,
+        "record_warp_update_length_histograms": false,
+        "use_warp_update_length_histogram_manual_max": false,
+        "warp_update_length_histogram_max": "4.99999987e-05",
+        "warp_update_length_histogram_bin_count": 16,
         "use_CPU_for_mesh_recording": false,
         "record_camera_matrices": false
     },

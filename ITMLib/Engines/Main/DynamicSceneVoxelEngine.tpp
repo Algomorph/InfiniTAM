@@ -40,7 +40,7 @@ namespace fs = std::filesystem;
 #include "../Analytics/AnalyticsLogging.h"
 #include "../Telemetry/TelemetryRecorderFactory.h"
 #include "../../CameraTrackers/CameraTrackerFactory.h"
-#include "../../SurfaceTrackers/SurfaceTrackerFactory.h"
+#include "../LevelSetAlignment/LevelSetAlignmentEngineFactory.h"
 #include "../../Utils/Analytics/BenchmarkUtilities.h"
 #include "../../Utils/Logging/Logging.h"
 #include "../../Utils/Quaternions/QuaternionFromMatrix.h"
@@ -68,7 +68,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(
 				  DepthFusionEngineFactory::Build<TVoxel, TWarp, TIndex>
 						  (configuration::Get().device_type)),
 		  volume_fusion_engine(VolumeFusionEngineFactory::Build<TVoxel, TIndex>(configuration::Get().device_type)),
-		  surface_tracker(SurfaceTrackerFactory::Build<TVoxel, TWarp, TIndex>()),
+		  surface_tracker(LevelSetAlignmentEngineFactory::Build<TVoxel, TWarp, TIndex>()),
 		  swapping_engine(configuration::Get().swapping_mode != configuration::SWAPPINGMODE_DISABLED ?
 		                  SwappingEngineFactory::Build<TVoxel, TIndex>(
 				                  configuration::Get().device_type,
@@ -81,7 +81,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(
 				  configuration::Get().device_type)),
 		  meshing_engine(config.create_meshing_engine ? MeshingEngineFactory::Build<TVoxel, TIndex>(
 				  configuration::Get().device_type) : nullptr) {
-	logging::initialize_logging();
+	logging::InitializeLogging();
 
 
 	this->InitializeScenes();
@@ -313,7 +313,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(UChar4Image* rgb_im
 	    (fusion_active) && (relocalization_count == 0)) {
 
 		camera_tracking_controller->Prepare(tracking_state, canonical_volume, view, rendering_engine, canonical_render_state);
-		LOG4CPLUS_PER_FRAME(logging::get_logger(), bright_cyan << "*** Generating raw live TSDF from view... ***" << reset);
+		LOG4CPLUS_PER_FRAME(logging::GetLogger(), bright_cyan << "*** Generating raw live TSDF from view... ***" << reset);
 		benchmarking::start_timer("GenerateRawLiveVolume");
 		live_volumes[0]->Reset();
 		live_volumes[1]->Reset();
@@ -331,9 +331,9 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(UChar4Image* rgb_im
 		telemetry_recorder.RecordPreSurfaceTrackingData(*live_volumes[0], tracking_state->pose_d->GetM(), FrameIndex());
 
 		benchmarking::start_timer("TrackMotion");
-		LOG4CPLUS_PER_FRAME(logging::get_logger(), bright_cyan << "*** Optimizing warp based on difference between canonical and live SDF. ***" << reset);
+		LOG4CPLUS_PER_FRAME(logging::GetLogger(), bright_cyan << "*** Optimizing warp based on difference between canonical and live SDF. ***" << reset);
 		target_warped_live_volume = surface_tracker->TrackNonRigidMotion(canonical_volume, live_volumes, warp_field);
-		LOG4CPLUS_PER_FRAME(logging::get_logger(), bright_cyan << "*** Warping optimization finished for current frame. ***" << reset);
+		LOG4CPLUS_PER_FRAME(logging::GetLogger(), bright_cyan << "*** Warping optimization finished for current frame. ***" << reset);
 		benchmarking::stop_timer("TrackMotion");
 
 		//post-tracking recording
