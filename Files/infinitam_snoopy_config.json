@@ -173,5 +173,13 @@
             "max_iteration_count": 300,
             "mean_update_length_threshold": "9.99999997e-07"
         }
+    },
+    "volume_fusion_settings": {
+        "use_surface_thickness_cutoff": true,
+        "surface_thickness": 0.0120000001
+    },
+    "depth_fusion_settings": {
+        "use_surface_thickness_cutoff": false,
+        "surface_thickness": 0.0120000001
     }
 }

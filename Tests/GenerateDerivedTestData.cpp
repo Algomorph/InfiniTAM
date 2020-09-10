@@ -462,6 +462,8 @@ configuration::Configuration GenerateDefaultSnoopyConfiguration() {
 			),
 			LevelSetAlignmentTerminationConditions(300, 1e-06)
 	);
+	VolumeFusionSettings default_snoopy_volume_fusion_settings;
+	DepthFusionSettings default_snoopy_depth_fusion_settings;
 
 	AddDeferrableToSourceTree(default_snoopy_configuration, default_snoopy_main_engine_settings);
 	AddDeferrableToSourceTree(default_snoopy_configuration, default_snoopy_telemetry_settings);
@@ -469,6 +471,9 @@ configuration::Configuration GenerateDefaultSnoopyConfiguration() {
 	AddDeferrableToSourceTree(default_snoopy_configuration, default_snoopy_rendering_settings);
 	AddDeferrableToSourceTree(default_snoopy_configuration, default_snoopy_automatic_run_settings);
 	AddDeferrableToSourceTree(default_snoopy_configuration, default_snoopy_level_set_evolution_parameters);
+	AddDeferrableToSourceTree(default_snoopy_configuration, default_snoopy_volume_fusion_settings);
+	AddDeferrableToSourceTree(default_snoopy_configuration, default_snoopy_depth_fusion_settings);
+
 	return default_snoopy_configuration;
 }
 

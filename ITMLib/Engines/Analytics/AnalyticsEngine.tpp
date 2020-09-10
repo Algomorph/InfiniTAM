@@ -283,14 +283,13 @@ AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::ComputeWarpUpdateLengthHisto
 		const VoxelVolume<TVoxel, TIndex>* volume, int bin_count, float& maximum, bool use_manual_max) {
 
 	auto& analytics_engine = AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::Instance();
-	unsigned int utilized_voxel_count = analytics_engine.CountUtilizedVoxels(volume);
 
 	if (!use_manual_max) {
 		Vector3i max_update_position;
 		analytics_engine.ComputeWarpUpdateMaxAndPosition(maximum, max_update_position, volume);
 	}
 
-	Histogram histogram("Warp update length histogram", bin_count, utilized_voxel_count, TMemoryDeviceType);
+	Histogram histogram("Warp update length histogram", bin_count, TMemoryDeviceType);
 
 	WarpHistogramFunctor<TVoxel, TMemoryDeviceType, TVoxel::hasWarpUpdate> warp_histogram_functor(histogram, maximum);
 	VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseUtilized(volume, warp_histogram_functor);

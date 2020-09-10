@@ -38,8 +38,8 @@ for:
           sudo DEBIAN_FRONTEND=noninteractive apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub
           sudo DEBIAN_FRONTEND=noninteractive add-apt-repository "deb http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/ /" -y
           sudo DEBIAN_FRONTEND=noninteractive apt-get update
-          sudo DEBIAN_FRONTEND=noninteractive apt-get -y install cuda-10-1
-          sudo ln -s /usr/local/cuda-10.1 /usr/local/cuda
+          sudo DEBIAN_FRONTEND=noninteractive apt-get -y install cuda
+          sudo ln -s /usr/local/cuda-11.0 /usr/local/cuda
 
 
 #         clone_folder: ~/InfiniTAM

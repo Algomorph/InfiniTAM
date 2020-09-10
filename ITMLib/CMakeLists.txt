@@ -432,13 +432,13 @@ set(ITMLIB_ENGINES_DEPTH_FUSION_SOURCES
     Engines/DepthFusion/DepthFusionEngine_CPU_PlainVoxelArray.cpp
     Engines/DepthFusion/DepthFusionEngine_CUDA_PlainVoxelArray.cu
     Engines/DepthFusion/DepthFusionEngine_CUDA_VoxelBlockHash.cu
-    )
+    Engines/DepthFusion/DepthFusionSettings.cpp)
 
 set(ITMLIB_ENGINES_DEPTH_FUSION_HEADERS
     Engines/DepthFusion/DepthFusionEngineFactory.h
     Engines/DepthFusion/DepthFusionEngine_Shared.h
     Engines/DepthFusion/DepthFusionEngine.h
-    )
+    Engines/DepthFusion/DepthFusionSettings.h)
 
 ## ======================================= VOLUME FUSION ENGINE ========================================================
 set(ITMLIB_ENGINES_VOLUME_FUSION_SOURCES
@@ -447,12 +447,14 @@ set(ITMLIB_ENGINES_VOLUME_FUSION_SOURCES
     Engines/VolumeFusion/VolumeFusionEngine_CPU_VoxelBlockHash.cpp
     Engines/VolumeFusion/VolumeFusionEngine_CUDA_PlainVoxelArray.cu
     Engines/VolumeFusion/VolumeFusionEngine_CUDA_VoxelBlockHash.cu
+    Engines/VolumeFusion/VolumeFusionSettings.cpp
     )
 
 set(ITMLIB_ENGINES_VOLUME_FUSION_HEADERS
     Engines/VolumeFusion/VolumeFusionEngine.h
     Engines/VolumeFusion/VolumeFusionFunctors.h
     Engines/VolumeFusion/VolumeFusionEngineFactory.h
+    Engines/VolumeFusion/VolumeFusionSettings.h
     )
 
 ## ======================================= VOLUME WARP ENGINE ==========================================================
@@ -648,6 +650,41 @@ set(ITMLIB_ENGINES_TELEMETRY_HEADERS
     Engines/Telemetry/TelemetryRecorderFactory.h
     )
 
+# ============================================== LEVEL SET ALIGNMENT ENGINES =================================================
+set(
+        ITMLIB_ENGINES_LEVEL_SET_ALIGNMENT_HEADERS
+        ##
+        Engines/LevelSetAlignment/LevelSetAlignmentEngineFactory.h
+        ##
+        Engines/LevelSetAlignment/WarpGradientFunctors/WarpGradientFunctor.h
+        Engines/LevelSetAlignment/WarpGradientFunctors/WarpGradientFunctor_Diagnostic.h
+        Engines/LevelSetAlignment/WarpGradientFunctors/WarpGradientFunctor_Optimized.h
+        ##
+        Engines/LevelSetAlignment/Interface/LevelSetAlignmentEngineInterface.h
+        Engines/LevelSetAlignment/Interface/LevelSetAlignmentParameters.h
+        Engines/LevelSetAlignment/Interface/LevelSetAlignmentEngine.h
+        ##
+        Engines/LevelSetAlignment/Shared/WarpHessian.h
+        Engines/LevelSetAlignment/Shared/WarpGradientCommon.h
+        Engines/LevelSetAlignment/Shared/LevelSetAlignmentSharedRoutines.h
+        Engines/LevelSetAlignment/Shared/LevelSetAlignmentDiagnosticRoutines.h
+        Engines/LevelSetAlignment/Shared/LevelSetAlignmentSharedFunctors.h
+        Engines/LevelSetAlignment/Shared/WarpGradientRoutines.h
+        Engines/LevelSetAlignment/Shared/WarpGradientAggregates.h
+)
+
+set(
+        ITMLIB_ENGINES_LEVEL_SET_ALIGNMENT_SOURCES
+        ##
+        Engines/LevelSetAlignment/CPU/LevelSetAlignmentEngine_CPU_PlainVoxelArray.cpp
+        Engines/LevelSetAlignment/CPU/LevelSetAlignmentEngine_CPU_VoxelBlockHash.cpp
+        Engines/LevelSetAlignment/CUDA/LevelSetAlignmentEngine_CUDA_PlainVoxelArray.cu
+        Engines/LevelSetAlignment/CUDA/LevelSetAlignmentEngine_CUDA_VoxelBlockHash.cu
+        ##
+        Engines/LevelSetAlignment/Interface/LevelSetAlignmentEngine.tpp
+        Engines/LevelSetAlignment/Interface/LevelSetAlignmentParameters.cpp
+)
+
 ## ================================================== OBJECTS ==========================================================
 set(ITMLIB_OBJECTS_CAMERA_SOURCES
     Objects/Camera/CalibIO.cpp
@@ -802,54 +839,7 @@ set(ITMLIB_CAMERA_TRACKERS_SHARED_HEADERS
     CameraTrackers/Shared/DepthTracker_Shared.h
     CameraTrackers/Shared/ExtendedTracker_Shared.h
     )
-# ============================================== SCENE MOTION TRACKERS =================================================
-set(ITMLIB_SCENE_MOTION_TRACKERS_HEADERS
-    Engines/LevelSetAlignment/LevelSetAlignmentEngineFactory.h
-    )
 
-set(ITMLIB_SCENE_MOTION_TRACKERS_CPU_SOURCES
-
-    Engines/LevelSetAlignment/CPU/LevelSetAlignmentEngine_CPU_PlainVoxelArray.cpp
-    Engines/LevelSetAlignment/CPU/LevelSetAlignmentEngine_CPU_VoxelBlockHash.cpp
-    )
-
-set(ITMLIB_SCENE_MOTION_TRACKERS_CPU_HEADERS
-    )
-##
-
-set(ITMLIB_SCENE_MOTION_TRACKERS_CUDA_SOURCES
-    Engines/LevelSetAlignment/CUDA/LevelSetAlignmentEngine_CUDA_PlainVoxelArray.cu
-    Engines/LevelSetAlignment/CUDA/LevelSetAlignmentEngine_CUDA_VoxelBlockHash.cu
-    )
-set(ITMLIB_SCENE_MOTION_TRACKERS_CUDA_HEADERS
-
-    )
-##
-
-set(ITMLIB_SCENE_MOTION_TRACKERS_INTERFACE_SOURCES
-    Engines/LevelSetAlignment/Interface/LevelSetAlignmentParameters.cpp
-    Engines/LevelSetAlignment/Interface/LevelSetAlignmentEngine.tpp
-    )
-set(ITMLIB_SCENE_MOTION_TRACKERS_INTERFACE_HEADERS
-    Engines/LevelSetAlignment/WarpGradientFunctors/WarpGradientFunctor.h
-    Engines/LevelSetAlignment/Interface/LevelSetAlignmentEngineInterface.h
-    Engines/LevelSetAlignment/Interface/LevelSetAlignmentParameters.h
-    Engines/LevelSetAlignment/Interface/LevelSetAlignmentEngine.h
-    )
-##
-set(ITMLIB_SCENE_MOTION_TRACKERS_SHARED_HEADERS
-    Engines/LevelSetAlignment/WarpGradientFunctors/WarpGradientFunctor_Diagnostic.h
-    Engines/LevelSetAlignment/WarpGradientFunctors/WarpGradientFunctor_Optimized.h
-
-    Engines/LevelSetAlignment/Shared/WarpGradientCommon.h
-    Engines/LevelSetAlignment/Shared/LevelSetAlignmentSharedRoutines.h
-    Engines/LevelSetAlignment/Shared/LevelSetAlignmentDiagnosticRoutines.h
-    Engines/LevelSetAlignment/Shared/LevelSetAlignmentSharedFunctors.h
-    Engines/LevelSetAlignment/Shared/WarpGradientRoutines.h
-    Engines/LevelSetAlignment/Shared/WarpGradientAggregates.h
-    )
-
-# ======================================================================================================================
 # =================================================== UTILITIES (MISC) =================================================
 set(
         ITMLIB_UTILS_SOURCES
@@ -896,7 +886,7 @@ set(
         Utils/Math.cpp
 
         Utils/VoxelVolumeParameters.cpp
-)
+        Utils/Analytics/Histogram.cpp)
 
 set(
         ITMLIB_UTILS_HEADERS
@@ -1015,17 +1005,13 @@ set(sources
     ${ITMLIB_ENGINES_RENDERING_SOURCES}
     ${ITMLIB_ENGINES_ANALYTICS_SOURCES}
     ${ITMLIB_ENGINES_TELEMETRY_SOURCES}
+    ${ITMLIB_ENGINES_LEVEL_SET_ALIGNMENT_SOURCES}
     ${ITMLIB_OBJECTS_CAMERA_SOURCES}
     ${ITMLIB_OBJECTS_MESHING_SOURCES}
     ${ITMLIB_OBJECTS_RENDERSTATES_SOURCES}
     ${ITMLIB_CAMERA_TRACKERS_CPU_SOURCES}
     ${ITMLIB_CAMERA_TRACKERS_CUDA_SOURCES}
     ${ITMLIB_CAMERA_TRACKERS_INTERFACE_SOURCES}
-    ${ITMLIB_SCENE_MOTION_TRACKERS_SOURCES}
-    ${ITMLIB_SCENE_MOTION_TRACKERS_CPU_SOURCES}
-    ${ITMLIB_SCENE_MOTION_TRACKERS_CUDA_SOURCES}
-    ${ITMLIB_SCENE_MOTION_TRACKERS_INTERFACE_SOURCES}
-    ${ITMLIB_SCENE_MOTION_TRACKERS_SHARED_SOURCES}
     ${ITMLIB_UTILS_SOURCES}
     )
 
@@ -1070,6 +1056,7 @@ set(headers
     ${ITMLIB_ENGINES_RENDERING_HEADERS}
     ${ITMLIB_ENGINES_ANALYTICS_HEADERS}
     ${ITMLIB_ENGINES_TELEMETRY_HEADERS}
+    ${ITMLIB_ENGINES_LEVEL_SET_ALIGNMENT_HEADERS}
     ${ITMLIB_OBJECTS_CAMERA_HEADERS}
     ${ITMLIB_OBJECTS_MESHING_HEADERS}
     ${ITMLIB_OBJECTS_MISC_HEADERS}
@@ -1083,14 +1070,7 @@ set(headers
     ${ITMLIB_CAMERA_TRACKERS_CPU_HEADERS}
     ${ITMLIB_CAMERA_TRACKERS_CUDA_HEADERS}
     ${ITMLIB_CAMERA_TRACKERS_INTERFACE_HEADERS}
-    ${ITMLIB_CAMERA_TRACKERS_SHARED_HEADERS}
-    ${ITMLIB_SCENE_MOTION_TRACKERS_HEADERS}
-    ${ITMLIB_SCENE_MOTION_TRACKERS_CPU_HEADERS}
-    ${ITMLIB_SCENE_MOTION_TRACKERS_CUDA_HEADERS}
-    ${ITMLIB_SCENE_MOTION_TRACKERS_INTERFACE_HEADERS}
-    ${ITMLIB_SCENE_MOTION_TRACKERS_SHARED_HEADERS}
-    ${ITMLIB_UTILS_HEADERS}
-    )
+    ${ITMLIB_CAMERA_TRACKERS_SHARED_HEADERS})
 
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${sources} ${headers})
@@ -1099,9 +1079,9 @@ add_library(ITMLib STATIC ${sources} ${headers})
 
 target_link_libraries(ITMLib PUBLIC threadpool11 log4cplus tinyply MiniSlamGraphLib FernRelocLib ORUtils Boost::program_options Boost::filesystem)
 
-if(WITH_OPENMP)
+if (WITH_OPENMP)
     target_link_libraries(ITMLib PUBLIC OpenMP::OpenMP_CXX)
-endif()
+endif ()
 
 target_include_directories(ITMLib PRIVATE ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 

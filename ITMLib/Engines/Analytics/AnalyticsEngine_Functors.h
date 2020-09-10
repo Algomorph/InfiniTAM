@@ -1030,7 +1030,8 @@ struct WarpHistogramFunctor<TWarp, TMemoryDeviceType, true> {
 	explicit WarpHistogramFunctor(Histogram& histogram, float maximum) :
 			max_warp_update_length(maximum),
 			histogram_bin_count(histogram.GetBinCount()),
-			bins_device(histogram.GetBinData()) {
+			bins_device(histogram.GetBinData()),
+			unit_count_device(histogram.GetUnitCountData()){
 	}
 
 	const int histogram_bin_count;
@@ -1041,20 +1042,23 @@ struct WarpHistogramFunctor<TWarp, TMemoryDeviceType, true> {
 		float warp_update_length = ORUtils::length(warp.warp_update);
 		int bin_index = 0;
 
-		if (max_warp_update_length > 0) {
+		if (max_warp_update_length > 0.0f) {
 			bin_index = ORUTILS_MIN(histogram_bin_count - 1, (int) (warp_update_length * histogram_bin_count / max_warp_update_length));
 		}
 #ifdef __CUDACC__
 		atomicAdd(bins_device + bin_index, 1);
+		atomicAdd(unit_count_device, 1u);
 #else
 #pragma omp critical
 		{
 			bins_device[bin_index]++;
+			(*unit_count_device)++;
 		}
 #endif
 	}
 
 private:
 	unsigned int* bins_device;
+	unsigned long long int* unit_count_device;
 };
 // endregion ==============================================================================================

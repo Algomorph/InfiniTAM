@@ -38,6 +38,7 @@
 #include "../ITMLib/Utils/Configuration/AutomaticRunSettings.h"
 #include "../ITMLib/Engines/Main/MainEngineSettings.h"
 #include "../ITMLib/Engines/LevelSetAlignment/Interface/LevelSetAlignmentParameters.h"
+#include "../ITMLib/Engines/VolumeFusion/VolumeFusionSettings.h"
 
 namespace pt = boost::property_tree;
 
@@ -52,6 +53,8 @@ struct DeferrableStructCollection {
 	RenderingSettings rendering_settings;
 	AutomaticRunSettings automatic_run_settings;
 	LevelSetAlignmentParameters level_set_evolution_parameters;
+	VolumeFusionSettings volume_fusion_settings;
+
 
 	DeferrableStructCollection(const configuration::Configuration& source_configuration = configuration::Get()) :
 			main_engine_settings(BuildDeferrableFromParentIfPresent<MainEngineSettings>(source_configuration)),
@@ -59,7 +62,8 @@ struct DeferrableStructCollection {
 			indexing_settings(BuildDeferrableFromParentIfPresent<IndexingSettings>(source_configuration)),
 			rendering_settings(BuildDeferrableFromParentIfPresent<RenderingSettings>(source_configuration)),
 			automatic_run_settings(BuildDeferrableFromParentIfPresent<AutomaticRunSettings>(source_configuration)),
-			level_set_evolution_parameters(BuildDeferrableFromParentIfPresent<LevelSetAlignmentParameters>(source_configuration)) {}
+			level_set_evolution_parameters(BuildDeferrableFromParentIfPresent<LevelSetAlignmentParameters>(source_configuration)),
+			volume_fusion_settings(BuildDeferrableFromParentIfPresent<VolumeFusionSettings>(source_configuration)){}
 
 	friend void RequireEqualDeferrables(const DeferrableStructCollection& l, const DeferrableStructCollection& r) {
 		BOOST_REQUIRE_EQUAL(l.main_engine_settings, r.main_engine_settings);
@@ -68,6 +72,7 @@ struct DeferrableStructCollection {
 		BOOST_REQUIRE_EQUAL(l.rendering_settings, r.rendering_settings);
 		BOOST_REQUIRE_EQUAL(l.automatic_run_settings, r.automatic_run_settings);
 		BOOST_REQUIRE_EQUAL(l.level_set_evolution_parameters, r.level_set_evolution_parameters);
+		BOOST_REQUIRE_EQUAL(l.volume_fusion_settings, r.volume_fusion_settings);
 	}
 
 };

@@ -23,6 +23,7 @@
 //local
 #include "../../../ORUtils/MemoryDeviceType.h"
 #include "../../../ORUtils/MemoryBlock.h"
+#include "../../../ORUtils/OStreamWrapper.h"
 
 namespace ITMLib {
 
@@ -30,14 +31,16 @@ class Histogram {
 private: // instance variables
 	std::string name;
 	ORUtils::MemoryBlock<unsigned int> histogram_bins;
-	unsigned long int unit_count;
-public:
-	Histogram() : name(""), histogram_bins(), unit_count(0){};
-	Histogram(std::string name, unsigned int bin_count, unsigned long int unit_count, MemoryDeviceType memory_device_type) :
+	ORUtils::MemoryBlock<unsigned long long int> unit_count;
+public: // instance functions
+	Histogram() : name(""), histogram_bins(), unit_count(){};
+	Histogram(std::string name, unsigned int bin_count, MemoryDeviceType memory_device_type) :
 			name(std::move(name)),
 			histogram_bins(bin_count, memory_device_type),
-			unit_count(unit_count) {
+			unit_count(1, true, memory_device_type == MEMORYDEVICE_CUDA) {
 		histogram_bins.Clear();
+		unit_count.GetData(MEMORYDEVICE_CPU)[0] = 0u;
+		unit_count.UpdateDeviceFromHost();
 	}
 
 	ORUtils::MemoryBlock<unsigned int>::size_type GetBinCount() {
@@ -49,55 +52,22 @@ public:
 	}
 
 	unsigned long int GetUnitCount() {
-		return unit_count;
+		unit_count.UpdateHostFromDevice();
+		return unit_count.GetData(MEMORYDEVICE_CPU)[0];
+	}
+
+	unsigned long long int* GetUnitCountData(){
+		return unit_count.GetData(histogram_bins.GetAccessMode());
 	}
 
 	std::string GetName() {
 		return name;
 	}
 
-	friend std::ostream& operator<<(std::ostream& ostream, const Histogram& histogram) {
-		const ORUtils::MemoryBlock<unsigned int>* warp_update_bins_to_read;
-		if (histogram.histogram_bins.GetAccessMode() == MEMORYDEVICE_CUDA) {
-			warp_update_bins_to_read = new ORUtils::MemoryBlock<unsigned int>(histogram.histogram_bins.size(), MEMORYDEVICE_CPU);
-		} else {
-			warp_update_bins_to_read = &histogram.histogram_bins;
-		}
-		const unsigned int* bin_data = warp_update_bins_to_read->GetData(MEMORYDEVICE_CPU);
 
-		ostream << histogram.name << ":" << std::endl;
-		auto unit_count_float = static_cast<float>(histogram.unit_count);
+	friend std::ostream& operator<<(std::ostream& ostream, const Histogram& histogram);
 
-		for (int i_bin = 0; i_bin < histogram.histogram_bins.size(); i_bin++) {
-			ostream << std::setw(7) << std::setfill(' ') << std::setprecision(3)
-			        << 100.0f * static_cast<float>(bin_data[i_bin]) / unit_count_float << "%";
-		}
-		if (histogram.histogram_bins.GetAccessMode() == MEMORYDEVICE_CUDA) {
-			delete warp_update_bins_to_read;
-		}
-		return ostream;
-	}
-
-	friend ORUtils::OStreamWrapper& operator<<(ORUtils::OStreamWrapper& wrapper, const Histogram& histogram) {
-		const ORUtils::MemoryBlock<unsigned int>* warp_update_bins_to_read;
-		if (histogram.histogram_bins.GetAccessMode() == MEMORYDEVICE_CUDA) {
-			warp_update_bins_to_read = new ORUtils::MemoryBlock<unsigned int>(histogram.histogram_bins.size(), MEMORYDEVICE_CPU);
-		} else {
-			warp_update_bins_to_read = &histogram.histogram_bins;
-		}
-		const unsigned int* bin_data = warp_update_bins_to_read->GetData(MEMORYDEVICE_CPU);
-
-		wrapper.OStream().write(reinterpret_cast<const char*>(histogram.histogram_bins.size()),
-		                        sizeof(ORUtils::MemoryBlock<unsigned int>::size_type));
-		for (int i_bin = 0; i_bin < histogram.histogram_bins.size(); i_bin++) {
-			wrapper.OStream().write(reinterpret_cast<const char*>(bin_data + i_bin), sizeof(unsigned int));
-		}
-
-		if (histogram.histogram_bins.GetAccessMode() == MEMORYDEVICE_CUDA) {
-			delete warp_update_bins_to_read;
-		}
-		return wrapper;
-	}
+	friend ORUtils::OStreamWrapper& operator<<(ORUtils::OStreamWrapper& wrapper, const Histogram& histogram);
 };
 
 

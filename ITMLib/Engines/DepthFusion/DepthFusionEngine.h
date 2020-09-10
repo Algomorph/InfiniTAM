@@ -21,8 +21,10 @@
 #include "../../Objects/Volume/VoxelVolume.h"
 #include "../../Objects/Tracking/CameraTrackingState.h"
 #include "../../Objects/Views/View.h"
-#include "../Common/WarpAccessFunctors.h"
 #include "../../Utils/Enums/WarpType.h"
+#include "../Common/WarpAccessFunctors.h"
+#include "../Common/Configurable.h"
+#include "DepthFusionSettings.h"
 
 namespace ITMLib {
 
@@ -35,17 +37,15 @@ namespace ITMLib {
 	into them.
 */
 template<typename TVoxel, typename TWarp, typename TIndex>
-class DepthFusionEngineInterface {
-
+class DepthFusionEngineInterface : public Configurable<DepthFusionSettings> {
+protected:
+	using Configurable<DepthFusionSettings>::parameters;
 public:
+	using Configurable<DepthFusionSettings>::Configurable;
+	using Configurable<DepthFusionSettings>::GetParameters;
 
 	DepthFusionEngineInterface() = default;
 	virtual ~DepthFusionEngineInterface() = default;
-
-
-	virtual void
-	UpdateVisibleList(VoxelVolume<TVoxel, TIndex>* volume, const View* view, const CameraTrackingState* trackingState,
-	                  const RenderState* renderState, bool resetVisibleList) = 0;
 
 	/**
 	 * \brief Update the voxel blocks by integrating depth and possibly color information from the given view. Assume
@@ -67,10 +67,6 @@ class DepthFusionEngine :
 public:
 	DepthFusionEngine() = default;
 	~DepthFusionEngine() = default;
-
-	void UpdateVisibleList(VoxelVolume<TVoxel, TIndex>* scene, const View* view,
-	                       const CameraTrackingState* trackingState, const RenderState* renderState,
-	                       bool resetVisibleList) override;
 
 	void IntegrateDepthImageIntoTsdfVolume(VoxelVolume<TVoxel, TIndex>* volume, const View* view);
 	void IntegrateDepthImageIntoTsdfVolume(VoxelVolume<TVoxel, TIndex>* volume, const View* view,

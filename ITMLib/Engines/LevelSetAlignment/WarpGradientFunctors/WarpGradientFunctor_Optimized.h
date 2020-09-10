@@ -52,13 +52,13 @@ public:
 	                    VoxelVolume<TWarp, TIndex>* warp_field,
 	                    VoxelVolume<TVoxel, TIndex>* canonical_volume,
 	                    VoxelVolume<TVoxel, TIndex>* live_volume,
-	                    float voxelSize, float narrowBandHalfWidth, int iteration_index) :
+	                    float voxelSize, float truncation_distance, int iteration_index) :
 			parameters(parameters), switches(switches),
 			live_voxels(live_volume->GetVoxels()), live_index_data(live_volume->index.GetIndexData()),
 			warp_voxels(warp_field->GetVoxels()), warp_index_data(warp_field->index.GetIndexData()),
 			canonical_voxels(canonical_volume->GetVoxels()), canonical_index_data(canonical_volume->index.GetIndexData()),
 			live_cache(), canonical_cache(),
-			sdf_unity(voxelSize / narrowBandHalfWidth), iteration_index(iteration_index) {}
+			sdf_unity(voxelSize / truncation_distance), iteration_index(iteration_index) {}
 
 	// endregion =======================================================================================================
 
@@ -77,7 +77,10 @@ public:
 		// endregion
 
 		Vector3f live_sdf_gradient;
-		ComputeGradient_CentralDifferences_ZeroIfTruncated(live_sdf_gradient, voxel_position, live_voxels, live_index_data, live_cache);
+		//__DEBUG
+		// ComputeGradient_CentralDifferences_ZeroIfTruncated(live_sdf_gradient, voxel_position, live_voxels, live_index_data, live_cache);
+		ComputeGradient_CentralDifferences_ZeroIfTruncated_Factors(live_sdf_gradient, voxel_position, live_voxels, live_index_data, live_cache);
+
 		// region =============================== DATA TERM ================================================
 		if (VoxelIsConsideredForDataTerm(canonical_voxel, live_voxel) && switches.enable_data_term) {
 			// Compute data term error / energy
@@ -92,7 +95,9 @@ public:
 		// region =============================== LEVEL SET TERM ===========================================
 		if (switches.enable_level_set_term && live_voxel.flags == VOXEL_NONTRUNCATED) {
 			Matrix3f live_sdf_2nd_derivative;
-			ComputeSdf2ndDerivative(live_sdf_2nd_derivative, voxel_position, live_sdf, live_voxels, live_index_data, live_cache);
+			//__DEBUG
+			//ComputeSdf2ndDerivative(live_sdf_2nd_derivative, voxel_position, live_sdf, live_voxels, live_index_data, live_cache);
+			ComputeSdf2ndDerivative_Factors(live_sdf_2nd_derivative, voxel_position, live_sdf, live_voxels, live_index_data, live_cache);
 
 			float live_sdf_gradient_norm = ORUtils::length(live_sdf_gradient);
 			float live_sdf_gradient_norm_minus_unity = live_sdf_gradient_norm - sdf_unity;

@@ -19,10 +19,16 @@
 #include "../../../Objects/Volume/RepresentationAccess.h"
 #include "../../../../ORUtils/PlatformIndependence.h"
 #include "../../../Utils/Logging/ConsolePrintColors.h"
+#include "WarpHessian.h"
+
+
+namespace ITMLib {
 
 
 #define TRACKING_CONDITION_LIVE_KNOWN
 //#define TRACKING_CONDITION_LIVE_NONTRUNCATED
+
+
 
 template<typename TVoxel>
 _CPU_AND_GPU_CODE_ inline
@@ -383,6 +389,45 @@ inline void ComputeGradient_CentralDifferences_ZeroIfTruncated(THREADPTR(Vector3
 	gradient[2] = both_z_nontruncated * 0.5f * (sdf_at_z_plus_one - sdf_at_z_minus_one);
 };
 
+template<typename TVoxel, typename TIndexData, typename TCache>
+_CPU_AND_GPU_CODE_
+inline void ComputeGradient_CentralDifferences_ZeroIfTruncated_Factors(THREADPTR(Vector3f)& gradient,
+                                                                       const CONSTPTR(Vector3i)& voxel_position,
+                                                                       const CONSTPTR(TVoxel)* voxels,
+                                                                       const CONSTPTR(TIndexData)* index_data,
+                                                                       THREADPTR(TCache)& cache) {
+
+
+	int vmIndex = 0;
+	auto sdf_at = [&](Vector3i offset, bool& nontruncated) {
+#if !defined(__CUDACC__) && !defined(WITH_OPENMP)
+		TVoxel voxel = readVoxel(voxels, index_data, voxel_position + (offset), vmIndex, cache);
+		nontruncated &= voxel.flags == ITMLib::VOXEL_NONTRUNCATED;
+		return TVoxel::valueToFloat(voxel.sdf);
+#else
+		TVoxel voxel = readVoxel(voxels, index_data, voxel_position + (offset), vmIndex);
+		nontruncated &= voxel.flags == ITMLib::VOXEL_NONTRUNCATED;
+		return TVoxel::valueToFloat(voxel.sdf);
+#endif
+	};
+
+	bool both_x_nontruncated = true;
+	float sdf_at_x_plus_one = sdf_at(Vector3i(1, 0, 0), both_x_nontruncated);
+	float sdf_at_x_minus_one = sdf_at(Vector3i(-1, 0, 0), both_x_nontruncated);
+
+	bool both_y_nontruncated = true;
+	float sdf_at_y_plus_one = sdf_at(Vector3i(0, 1, 0), both_y_nontruncated);
+	float sdf_at_y_minus_one = sdf_at(Vector3i(0, -1, 0), both_y_nontruncated);
+
+	bool both_z_nontruncated = true;
+	float sdf_at_z_plus_one = sdf_at(Vector3i(0, 0, 1), both_z_nontruncated);
+	float sdf_at_z_minus_one = sdf_at(Vector3i(0, 0, -1), both_z_nontruncated);
+
+	gradient[0] = both_x_nontruncated * 5.0f * (sdf_at_x_plus_one - sdf_at_x_minus_one);
+	gradient[1] = both_y_nontruncated * 5.0f * (sdf_at_y_plus_one - sdf_at_y_minus_one);
+	gradient[2] = both_z_nontruncated * 5.0f * (sdf_at_z_plus_one - sdf_at_z_minus_one);
+};
+
 
 template<typename TVoxel, typename TIndexData, typename TCache>
 _CPU_AND_GPU_CODE_
@@ -542,6 +587,69 @@ inline void ComputeSdf2ndDerivative(THREADPTR(Matrix3f)& hessian,
 
 template<typename TVoxel, typename TIndexData, typename TCache>
 _CPU_AND_GPU_CODE_
+inline void ComputeSdf2ndDerivative_Factors(THREADPTR(Matrix3f)& hessian,
+                                            const CONSTPTR(Vector3i &) position,
+                                            const CONSTPTR(float)& sdf_at_position,
+		//const CONSTPTR(Vector3f&) jacobianAtPosition,
+		                                    const CONSTPTR(TVoxel)* voxels,
+		                                    const CONSTPTR(TIndexData)* index_data,
+		                                    THREADPTR(TCache)& cache) {
+	int vm_index = 0;
+
+	auto sdf_at = [&](Vector3i offset) {
+#if !defined(__CUDACC__) && !defined(WITH_OPENMP)
+		return TVoxel::valueToFloat(readVoxel(voxels, index_data, position + (offset), vm_index, cache).sdf);
+#else //don't use cache when multithreading
+		return TVoxel::valueToFloat(readVoxel(voxels, index_data, position + (offset), vm_index).sdf);
+#endif
+	};
+
+	//for xx, yy, zz
+	float sdf_at_x_plus_one = sdf_at(Vector3i(1, 0, 0));
+	float sdf_at_y_plus_one = sdf_at(Vector3i(0, 1, 0));
+	float sdf_at_z_plus_one = sdf_at(Vector3i(0, 0, 1));
+	float sdf_at_x_minus_one = sdf_at(Vector3i(-1, 0, 0));
+	float sdf_at_y_minus_one = sdf_at(Vector3i(0, -1, 0));
+	float sdf_at_z_minus_one = sdf_at(Vector3i(0, 0, -1));
+
+	//for xy, xz, yz
+	//@formatter:off
+	float sdf_at_x_plus_one_y_plus_one   = sdf_at(Vector3i( 1,  1,  0));
+	float sdf_at_x_minus_one_y_minus_one = sdf_at(Vector3i(-1, -1,  0));
+	float sdf_at_y_plus_one_z_plus_one   = sdf_at(Vector3i( 0,  1,  1));
+	float sdf_at_y_minus_one_z_minus_one = sdf_at(Vector3i( 0, -1, -1));
+	float sdf_at_x_plus_one_z_plus_one   = sdf_at(Vector3i( 1,  0,  1));
+	float sdf_at_x_minus_one_z_minus_one = sdf_at(Vector3i(-1,  0, -1));
+	//@formatter:on
+
+	float delta_xx = 100.0f * (sdf_at_x_plus_one - 2 * sdf_at_position + sdf_at_x_minus_one);
+	float delta_yy = 100.0f * (sdf_at_y_plus_one - 2 * sdf_at_position + sdf_at_y_minus_one);
+	float delta_zz = 100.0f * (sdf_at_z_plus_one - 2 * sdf_at_position + sdf_at_z_minus_one);
+
+	// Alternative formula for 2nd-order derivatives in multiple variables.
+	// See https://en.wikipedia.org/wiki/Finite_difference#Finite_difference_in_several_variables
+	float delta_xy = 50.0f * (sdf_at_x_plus_one_y_plus_one - sdf_at_x_plus_one - sdf_at_y_plus_one
+	                          + 2 * sdf_at_position
+	                          - sdf_at_x_minus_one - sdf_at_y_minus_one + sdf_at_x_minus_one_y_minus_one);
+
+	float delta_yz = 50.0f * (sdf_at_y_plus_one_z_plus_one - sdf_at_y_plus_one - sdf_at_z_plus_one
+	                          + 2 * sdf_at_position
+	                          - sdf_at_y_minus_one - sdf_at_z_minus_one + sdf_at_y_minus_one_z_minus_one);
+
+	float delta_xz = 50.0f * (sdf_at_x_plus_one_z_plus_one - sdf_at_x_plus_one - sdf_at_z_plus_one
+	                          + 2 * sdf_at_position
+	                          - sdf_at_x_minus_one - sdf_at_z_minus_one + sdf_at_x_minus_one_z_minus_one);
+
+	float vals[9] = {delta_xx, delta_xy, delta_xz,
+	                 delta_xy, delta_yy, delta_yz,
+	                 delta_xz, delta_yz, delta_zz};
+
+	hessian.setValues(vals);
+};
+
+
+template<typename TVoxel, typename TIndexData, typename TCache>
+_CPU_AND_GPU_CODE_
 inline void ComputeSdf2ndDerivative_ZeroIfTruncated(THREADPTR(Matrix3f)& hessian,
                                                     const CONSTPTR(Vector3i &) position,
                                                     const CONSTPTR(float)& sdf_at_position,
@@ -629,49 +737,172 @@ inline void ComputeSdf2ndDerivative_ZeroIfTruncated(THREADPTR(Matrix3f)& hessian
 
 //endregion
 
-// region ================================ WARP LAPLACIAN (SMOOTHING/TIKHONOV TERM) ====================================
+// region ================================ WARP LAPLACIAN, JACOBIAN, DIVERGENCE (SMOOTHING/TIKHONOV/KILLING TERMS) ====================================
 _CPU_AND_GPU_CODE_
-inline void ComputeWarpLaplacian(THREADPTR(Vector3f)& laplacian,
-                                 const CONSTPTR(Vector3f)& voxel_warp,
-                                 const CONSTPTR(Vector3f*) neighborWarps) {//in, x6-9
+inline void ComputeVectorLaplacian(THREADPTR(Vector3f)& laplacian,
+                                   const CONSTPTR(Vector3f)& local_vector,
+                                   const CONSTPTR(Vector3f*) neighbor_vecotrs) {//in, x6-9
 	//    0        1        2          3         4         5
 	//(-1,0,0) (0,-1,0) (0,0,-1)   (1, 0, 0) (0, 1, 0) (0, 0, 1)
 	laplacian = Vector3f(0.0f);
 	//3D discrete Laplacian filter based on https://en.wikipedia.org/wiki/Discrete_Laplace_operator
-	for (int iSixConnectedNeighbor = 0; iSixConnectedNeighbor < 6; iSixConnectedNeighbor++) {
-		laplacian += neighborWarps[iSixConnectedNeighbor];
+	for (int i_six_connected_neighbor = 0; i_six_connected_neighbor < 6; i_six_connected_neighbor++) {
+		laplacian += neighbor_vecotrs[i_six_connected_neighbor];
 	}
-	laplacian -= 6 * voxel_warp;
+	laplacian -= 6 * local_vector;
 }
 
 _CPU_AND_GPU_CODE_
-inline void ComputeWarpLaplacianAndJacobian(THREADPTR(Vector3f)& laplacian,
-                                            THREADPTR(Matrix3f)& jacobian,
-                                            const CONSTPTR(Vector3f)& voxelWarp,
-                                            const CONSTPTR(Vector3f*) neighbor_warps) {//in, x6-9
-	//    0        1        2          3         4         5
-	//(-1,0,0) (0,-1,0) (0,0,-1)   (1, 0, 0) (0, 1, 0) (0, 0, 1)
-	laplacian = Vector3f(0.0f);
-	//3D discrete Laplacian filter based on https://en.wikipedia.org/wiki/Discrete_Laplace_operator
-	for (int iSixConnectedNeighbor = 0; iSixConnectedNeighbor < 6; iSixConnectedNeighbor++) {
-		laplacian += neighbor_warps[iSixConnectedNeighbor];
-	}
-	laplacian -= 6 * voxelWarp;
-	//use first-order differences for jacobian
-	jacobian.setColumn(0, 0.5 * (neighbor_warps[3] - neighbor_warps[0]));//1st derivative in x
-	jacobian.setColumn(1, 0.5 * (neighbor_warps[4] - neighbor_warps[1]));//1st derivative in y
-	jacobian.setColumn(2, 0.5 * (neighbor_warps[5] - neighbor_warps[2]));//1st derivative in z
+inline void ComputeVectorJacobian(THREADPTR(Matrix3f)& jacobian,
+                                  const CONSTPTR(Vector3f*) neighbor_vectors //in, x6
+) {
+	const Vector3f& vector_at_x_minus_one = neighbor_vectors[0];
+	const Vector3f& vector_at_y_minus_one = neighbor_vectors[1];
+	const Vector3f& vector_at_z_minus_one = neighbor_vectors[2];
+
+	const Vector3f& vector_at_x_plus_one = neighbor_vectors[3];
+	const Vector3f& vector_at_y_plus_one = neighbor_vectors[4];
+	const Vector3f& vector_at_z_plus_one = neighbor_vectors[5];
+
+	jacobian.setColumn(0, 0.5 * (vector_at_x_plus_one - vector_at_x_minus_one));//1st derivative in x
+	jacobian.setColumn(1, 0.5 * (vector_at_y_plus_one - vector_at_y_minus_one));//1st derivative in y
+	jacobian.setColumn(2, 0.5 * (vector_at_z_plus_one - vector_at_z_minus_one));//1st derivative in z
 }
 
-// endregion
 
-// region =================================== WARP JACOBIAN AND HESSIAN (SMOOTHING/KILLING TERM) =======================
+/**
+ * \brief Computes the jacobian and hessian approximation for the warp vectors themselves in a given neighborhood of a
+ * specific (local) voxel
+ * \details
+ * Index in \p neighbor_vectors array on top / voxel coordinate relative to local voxel below:
+ *     0        1        2          3         4         5           6         7         8            9          10          11
+ * (-1,0,0) (0,-1,0) (0,0,-1)   (1, 0, 0) (0, 1, 0) (0, 0, 1)   (1, 1, 0) (0, 1, 1) (1, 0, 1)   (-1, -1, 0) (0, -1,- 1) (-1, 0,-1)
+ *
+ *  Spatial representation:
+ *          *** XY plane ***                  ***   XZ plane ***                 ***   YZ plane ***
+ *               4 (y+1)                            5 (z+1)                            5 (z+1)
+ *      0 (x-1)  <local>   3 (x+1)        0 (x-1)   <local>   3 (x+1)        1 (y-1)   <local>   4 (y+1)
+ *               1 (y-1)                            2 (z-1)                            2 (z-1)
+ *
+ * \param[out] jacobian - approximation of the warp's Jacobian matrix, i.e. gradient (row) estimates for each vector component (column)
+ * \param[out] hessian - approximation of the warp's Hessian matrix, i.e. one 2D 3x3 matrix of second derivative estimates for each vector component.
+ * \param[in] local_vector - vectors from local/current voxel
+ * \param[in] neighbor_vectors - vectors from neighboring voxels (pointer to the first element of a consecutive in-memory array of size 12,
+ * see detailed description.)
+ */
+_CPU_AND_GPU_CODE_
+inline void ComputeVectorLaplacianAndDivergenceDerivative(THREADPTR(Vector3f)& divergence_derivative,
+                                                          THREADPTR(Vector3f)& laplacian,
+                                                          const CONSTPTR(Vector3f)& local_vector,
+                                                          const CONSTPTR(Vector3f*) neighbor_vectors //in, x12
+) {
+	const Vector3f& vector_at_x_minus_one = neighbor_vectors[0];
+	const Vector3f& vector_at_y_minus_one = neighbor_vectors[1];
+	const Vector3f& vector_at_z_minus_one = neighbor_vectors[2];
+
+	const Vector3f& vector_at_x_plus_one = neighbor_vectors[3];
+	const Vector3f& vector_at_y_plus_one = neighbor_vectors[4];
+	const Vector3f& vector_at_z_plus_one = neighbor_vectors[5];
+
+	const Vector3f& vector_at_x_plus_one_y_plus_one = neighbor_vectors[6];
+	const Vector3f& vector_at_y_plus_one_z_plus_one = neighbor_vectors[7];
+	const Vector3f& vector_at_x_plus_one_z_plus_one = neighbor_vectors[8];
+
+	const Vector3f& vector_at_x_minus_one_y_minus_one = neighbor_vectors[9];
+	const Vector3f& vector_at_y_minus_one_z_minus_one = neighbor_vectors[10];
+	const Vector3f& vector_at_x_minus_one_z_minus_one = neighbor_vectors[11];
+
+	Vector3f xx = vector_at_x_plus_one - 2.0f * local_vector + vector_at_x_minus_one;
+	Vector3f yy = vector_at_y_plus_one - 2.0f * local_vector + vector_at_y_minus_one;
+	Vector3f zz = vector_at_z_plus_one - 2.0f * local_vector + vector_at_z_minus_one;
+
+	//TODO: optimize
+	Vector3f xy = vector_at_x_plus_one_y_plus_one - vector_at_x_plus_one - vector_at_y_plus_one +
+	              2.0f * local_vector -
+	              vector_at_x_minus_one - vector_at_y_minus_one + vector_at_x_minus_one_y_minus_one;
+	Vector3f yz = vector_at_y_plus_one_z_plus_one - vector_at_y_plus_one - vector_at_z_plus_one +
+	              2.0f * local_vector -
+	              vector_at_y_minus_one - vector_at_z_minus_one + vector_at_y_minus_one_z_minus_one;
+	Vector3f xz = vector_at_x_plus_one_z_plus_one - vector_at_x_plus_one - vector_at_z_plus_one +
+	              2.0f * local_vector -
+	              vector_at_x_minus_one - vector_at_z_minus_one + vector_at_x_minus_one_z_minus_one;
+
+	laplacian = xx + yy + zz;
+	divergence_derivative = {
+			xx.u + xy.v + xz.w,
+			xy.u + yy.v + yz.w,
+			xz.u + yz.v + zz.w
+	};
+
+};
+
+/**
+ * \brief Computes the jacobian and hessian approximation for the warp vectors themselves in a given neighborhood of a
+ * specific (local) voxel
+ * \details
+ * Index in \p neighbor_vectors array on top / voxel coordinate relative to local voxel below:
+ *     0        1        2          3         4         5           6         7         8            9          10          11
+ * (-1,0,0) (0,-1,0) (0,0,-1)   (1, 0, 0) (0, 1, 0) (0, 0, 1)   (1, 1, 0) (0, 1, 1) (1, 0, 1)   (-1, -1, 0) (0, -1,- 1) (-1, 0,-1)
+ *
+ *  Spatial representation:
+ *          *** XY plane ***                  ***   XZ plane ***                 ***   YZ plane ***
+ *               4 (y+1)                            5 (z+1)                            5 (z+1)
+ *      0 (x-1)  <local>   3 (x+1)        0 (x-1)   <local>   3 (x+1)        1 (y-1)   <local>   4 (y+1)
+ *               1 (y-1)                            2 (z-1)                            2 (z-1)
+ *
+ * \param[out] jacobian - approximation of the warp's Jacobian matrix, i.e. gradient (row) estimates for each vector component (column)
+ * \param[out] hessian - approximation of the warp's Hessian matrix, i.e. one 2D 3x3 matrix of second derivative estimates for each vector component.
+ * \param[in] local_vector - vectors from local/current voxel
+ * \param[in] neighbor_vectors - vectors from neighboring voxels (pointer to the first element of a consecutive in-memory array of size 12,
+ * see detailed description.)
+ */
+_CPU_AND_GPU_CODE_
+inline void ComputePerVoxelWarpJacobianAndHessian(THREADPTR(Matrix3f)& jacobian,
+                                                  THREADPTR(WarpHessian)& hessian,
+                                                  const CONSTPTR(Vector3f)& local_vector,
+                                                  const CONSTPTR(Vector3f*) neighbor_vectors //in, x12
+) {
+	const Vector3f& vector_at_x_minus_one = neighbor_vectors[0];
+	const Vector3f& vector_at_y_minus_one = neighbor_vectors[1];
+	const Vector3f& vector_at_z_minus_one = neighbor_vectors[2];
+
+	const Vector3f& vector_at_x_plus_one = neighbor_vectors[3];
+	const Vector3f& vector_at_y_plus_one = neighbor_vectors[4];
+	const Vector3f& vector_at_z_plus_one = neighbor_vectors[5];
+
+	const Vector3f& vector_at_x_plus_one_y_plus_one = neighbor_vectors[6];
+	const Vector3f& vector_at_y_plus_one_z_plus_one = neighbor_vectors[7];
+	const Vector3f& vector_at_x_plus_one_z_plus_one = neighbor_vectors[8];
+
+	const Vector3f& vector_at_x_minus_one_y_minus_one = neighbor_vectors[9];
+	const Vector3f& vector_at_y_minus_one_z_minus_one = neighbor_vectors[10];
+	const Vector3f& vector_at_x_minus_one_z_minus_one = neighbor_vectors[11];
+
+	jacobian.setColumn(0, 0.5 * (vector_at_x_plus_one - vector_at_x_minus_one));//1st derivative in x
+	jacobian.setColumn(1, 0.5 * (vector_at_y_plus_one - vector_at_y_minus_one));//1st derivative in y
+	jacobian.setColumn(2, 0.5 * (vector_at_z_plus_one - vector_at_z_minus_one));//1st derivative in z
+
+	hessian.xx = vector_at_x_plus_one - 2.0f * local_vector + vector_at_x_minus_one;
+	hessian.yy = vector_at_y_plus_one - 2.0f * local_vector + vector_at_y_minus_one;
+	hessian.zz = vector_at_z_plus_one - 2.0f * local_vector + vector_at_z_minus_one;
+
+	hessian.xy = vector_at_x_plus_one_y_plus_one - vector_at_x_plus_one - vector_at_y_plus_one +
+	             2.0f * local_vector -
+	             vector_at_x_minus_one - vector_at_y_minus_one + vector_at_x_minus_one_y_minus_one;
+	hessian.yz = vector_at_y_plus_one_z_plus_one - vector_at_y_plus_one - vector_at_z_plus_one +
+	             2.0f * local_vector -
+	             vector_at_y_minus_one - vector_at_z_minus_one + vector_at_y_minus_one_z_minus_one;
+	hessian.xz = vector_at_x_plus_one_z_plus_one - vector_at_x_plus_one - vector_at_z_plus_one +
+	             2.0f * local_vector -
+	             vector_at_x_minus_one - vector_at_z_minus_one + vector_at_x_minus_one_z_minus_one;
+
+};
 //Computes the jacobian and hessian approximation for the warp vectors themselves in a given neighborhood
 _CPU_AND_GPU_CODE_
-inline void ComputePerVoxelWarpJacobianAndHessian(const CONSTPTR(Vector3f)& voxel_framewise_warp,
-                                                  const CONSTPTR(Vector3f*) neighbor_framewise_warps, //in, x9
-                                                  THREADPTR(Matrix3f)& jacobian, //out
-                                                  THREADPTR(Matrix3f)* hessian //out, x3
+inline void ComputePerVoxelWarpJacobianAndHessian_Old(const CONSTPTR(Vector3f)& voxel_warp,
+                                                      const CONSTPTR(Vector3f*) neighbor_warps, //in, x9
+                                                      THREADPTR(Matrix3f)& jacobian, //out
+                                                      THREADPTR(Matrix3f)* hessian //out, x3
 ) {
 	//    0        1        2          3         4         5           6         7         8
 	//(-1,0,0) (0,-1,0) (0,0,-1)   (1, 0, 0) (0, 1, 0) (0, 0, 1)   (1, 1, 0) (0, 1, 1) (1, 0, 1)
@@ -679,17 +910,17 @@ inline void ComputePerVoxelWarpJacobianAndHessian(const CONSTPTR(Vector3f)& voxe
 	// |u_x, u_y, u_z|       |m00, m10, m20|
 	// |v_x, v_y, v_z|       |m01, m11, m21|
 	// |w_x, w_y, w_z|       |m02, m12, m22|
-	jacobian.setColumn(0, neighbor_framewise_warps[3] - voxel_framewise_warp);//1st derivative in x
-	jacobian.setColumn(1, neighbor_framewise_warps[4] - voxel_framewise_warp);//1st derivative in y
-	jacobian.setColumn(2, neighbor_framewise_warps[5] - voxel_framewise_warp);//1st derivative in z
+	jacobian.setColumn(0, neighbor_warps[3] - voxel_warp);//1st derivative in x
+	jacobian.setColumn(1, neighbor_warps[4] - voxel_warp);//1st derivative in y
+	jacobian.setColumn(2, neighbor_warps[5] - voxel_warp);//1st derivative in z
 
 	Matrix3f backward_differences;
 	// |u_x, u_y, u_z|
 	// |v_x, v_y, v_z|
 	// |w_x, w_y, w_z|
-	backward_differences.setColumn(0, voxel_framewise_warp - neighbor_framewise_warps[0]);//1st derivative in x
-	backward_differences.setColumn(1, voxel_framewise_warp - neighbor_framewise_warps[1]);//1st derivative in y
-	backward_differences.setColumn(2, voxel_framewise_warp - neighbor_framewise_warps[2]);//1st derivative in z
+	backward_differences.setColumn(0, voxel_warp - neighbor_warps[0]);//1st derivative in x
+	backward_differences.setColumn(1, voxel_warp - neighbor_warps[1]);//1st derivative in y
+	backward_differences.setColumn(2, voxel_warp - neighbor_warps[2]);//1st derivative in z
 
 	//second derivatives in same direction
 	// |u_xx, u_yy, u_zz|       |m00, m10, m20|
@@ -697,16 +928,16 @@ inline void ComputePerVoxelWarpJacobianAndHessian(const CONSTPTR(Vector3f)& voxe
 	// |w_xx, w_yy, w_zz|       |m02, m12, m22|
 	Matrix3f dd_XX_YY_ZZ = jacobian - backward_differences;
 
-	Matrix3f neighborDifferences;
-	neighborDifferences.setColumn(0, neighbor_framewise_warps[6] - neighbor_framewise_warps[4]);//(0,1,0)->(1,1,0)
-	neighborDifferences.setColumn(1, neighbor_framewise_warps[7] - neighbor_framewise_warps[5]);//(0,0,1)->(0,1,1)
-	neighborDifferences.setColumn(2, neighbor_framewise_warps[8] - neighbor_framewise_warps[3]);//(1,0,0)->(1,0,1)
+	Matrix3f neighbor_differences;
+	neighbor_differences.setColumn(0, neighbor_warps[6] - neighbor_warps[4]);//(0,1,0)->(1,1,0)
+	neighbor_differences.setColumn(1, neighbor_warps[7] - neighbor_warps[5]);//(0,0,1)->(0,1,1)
+	neighbor_differences.setColumn(2, neighbor_warps[8] - neighbor_warps[3]);//(1,0,0)->(1,0,1)
 
 	//second derivatives in different directions
 	// |u_xy, u_yz, u_zx|      |m00, m10, m20|
 	// |v_xy, v_yz, v_zx|      |m01, m11, m21|
 	// |w_xy, w_yz, w_zx|      |m02, m12, m22|
-	Matrix3f dd_XY_YZ_ZX = neighborDifferences - jacobian;
+	Matrix3f dd_XY_YZ_ZX = neighbor_differences - jacobian;
 
 	//NOTE: Hessian matrices are symmetric in this case
 	// |0, 3, 6|     |m00, m10, m20|      |u_xx, u_xy, u_xz|
@@ -737,3 +968,4 @@ inline void ComputePerVoxelWarpJacobianAndHessian(const CONSTPTR(Vector3f)& voxe
 
 // endregion
 
+} // namespace ITMLib

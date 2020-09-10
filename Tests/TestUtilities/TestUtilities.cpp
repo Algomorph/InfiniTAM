@@ -23,7 +23,7 @@
 #include "TestUtilities.h"
 #include "TestUtilities.tpp"
 
-// reco
+// OpenReco
 #include "../../ITMLib/Utils/Quaternions/Quaternion.h"
 #include "../../ITMLib/Utils/Configuration/AutomaticRunSettings.h"
 #include "../../ITMLib/Engines/Analytics/AnalyticsEngine.h"
@@ -34,6 +34,7 @@
 #include "../../ITMLib/Engines/Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
 #include "../../ITMLib/Engines/Main/MainEngineSettings.h"
 #include "../../ITMLib/Engines/LevelSetAlignment/Interface/LevelSetAlignmentParameters.h"
+#include "../../ITMLib/Engines/VolumeFusion/VolumeFusionSettings.h"
 
 using namespace ITMLib;
 namespace fs = std::filesystem;
@@ -456,13 +457,16 @@ configuration::Configuration GenerateChangedUpConfiguration() {
 			LevelSetAlignmentSwitches(false, true, false, true, false),
 			LevelSetAlignmentTerminationConditions(300, 0.0002f)
 	);
-
+	VolumeFusionSettings changed_up_volume_fusion_settings(true, 0.008);
+	DepthFusionSettings changed_up_depth_fusion_settings(true, 0.008);
 	AddDeferrableToSourceTree(changed_up_configuration, changed_up_main_engine_settings);
 	AddDeferrableToSourceTree(changed_up_configuration, changed_up_telemetry_settings);
 	AddDeferrableToSourceTree(changed_up_configuration, changed_up_indexing_settings);
 	AddDeferrableToSourceTree(changed_up_configuration, changed_up_rendering_settings);
 	AddDeferrableToSourceTree(changed_up_configuration, changed_up_automatic_run_settings);
 	AddDeferrableToSourceTree(changed_up_configuration, changed_up_level_set_evolution_parameters);
+	AddDeferrableToSourceTree(changed_up_configuration, changed_up_volume_fusion_settings);
+	AddDeferrableToSourceTree(changed_up_configuration, changed_up_depth_fusion_settings);
 	return changed_up_configuration;
 }
 

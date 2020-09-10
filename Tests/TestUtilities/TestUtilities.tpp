@@ -58,13 +58,13 @@ void FindAllVoxelsNotInDepthWeightRange(VoxelVolume<TVoxel, TIndex>* volume, con
 template<MemoryDeviceType TMemoryDeviceType, class TVoxel, class TIndex>
 void GenerateSimpleSurfaceTestVolume(VoxelVolume<TVoxel, TIndex>* volume) {
 	volume->Reset();
-	const int narrowBandThicknessVoxels = 10;
+	const int truncation_distance_voxels = 10;
 	int xOffset = 8;
 	int surfaceSizeVoxelsZ = 16;
 	int surfaceSizeVoxelsY = 64;
 
-	for (int iVoxelAcrossBand = 0; iVoxelAcrossBand < narrowBandThicknessVoxels + 1; iVoxelAcrossBand++) {
-		float sdfMagnitude = 0.0f + static_cast<float>(iVoxelAcrossBand) * (1.0f / narrowBandThicknessVoxels);
+	for (int iVoxelAcrossBand = 0; iVoxelAcrossBand < truncation_distance_voxels + 1; iVoxelAcrossBand++) {
+		float sdfMagnitude = 0.0f + static_cast<float>(iVoxelAcrossBand) * (1.0f / truncation_distance_voxels);
 		int xPos = xOffset + iVoxelAcrossBand;
 		int xNeg = xOffset - iVoxelAcrossBand;
 		TVoxel voxelPos, voxelNeg;
