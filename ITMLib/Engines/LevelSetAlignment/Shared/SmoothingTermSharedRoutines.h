@@ -219,8 +219,8 @@ inline void ComputeVectorJacobian(THREADPTR(Matrix3f)& jacobian,
  *      0 (x-1)  <local>   3 (x+1)        0 (x-1)   <local>   3 (x+1)        1 (y-1)   <local>   4 (y+1)
  *               1 (y-1)                            2 (z-1)                            2 (z-1)
  *
- * \param[out] jacobian - approximation of the warp's Jacobian matrix, i.e. gradient (row) estimates for each vector component (column)
- * \param[out] hessian - approximation of the warp's Hessian matrix, i.e. one 2D 3x3 matrix of second derivative estimates for each vector component.
+ * \param[out] divergence_derivative - approximation of the local vectors' divergence derivative, i.e. [∂(divΨ)/∂x ∂(divΨ)/∂y ∂(divΨ)/∂z]^T
+ * \param[out] laplacian - approximation of the local vectors' laplacian, i.e. [∆U ∆V ∆W]^T
  * \param[in] local_vector - vectors from local/current voxel
  * \param[in] neighbor_vectors - vectors from neighboring voxels (pointer to the first element of a consecutive in-memory array of size 12,
  * see detailed description.)

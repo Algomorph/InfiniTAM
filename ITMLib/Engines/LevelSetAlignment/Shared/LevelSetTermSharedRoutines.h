@@ -154,58 +154,47 @@ inline void ComputeSdfHessian_ZeroIfTruncated(THREADPTR(Matrix3f)& hessian,
                                               const CONSTPTR(TIndexData)* index_data,
                                               THREADPTR(TCache)& cache) {
 	int vm_index = 0;
-
-	auto sdf_at = [&](Vector3i offset) {
+	auto sdf_at = [&](Vector3i offset, bool& nontruncated) {
 #if !defined(__CUDACC__) && !defined(WITH_OPENMP)
-		return TVoxel::valueToFloat(readVoxel(voxels, index_data, position + (offset), vm_index, cache).sdf);
-#else //don't use cache when multithreading
-		return TVoxel::valueToFloat(readVoxel(voxels, index_data, position + (offset), vm_index).sdf);
+		TVoxel voxel = readVoxel(voxels, index_data, voxel_position + (offset), vm_index, cache);
+		nontruncated &= voxel.flags == ITMLib::VOXEL_NONTRUNCATED;
+		return TVoxel::valueToFloat(voxel.sdf) * sdf_to_voxels_factor;
+#else
+		TVoxel voxel = readVoxel(voxels, index_data, position + (offset), vm_index);
+		nontruncated &= voxel.flags == ITMLib::VOXEL_NONTRUNCATED;
+		return TVoxel::valueToFloat(voxel.sdf);
 #endif
 	};
 
-	//for xx, yy, zz
-	float sdf_at_x_plus_one = sdf_at(Vector3i(1, 0, 0));
-	float sdf_at_y_plus_one = sdf_at(Vector3i(0, 1, 0));
-	float sdf_at_z_plus_one = sdf_at(Vector3i(0, 0, 1));
-	float sdf_at_x_minus_one = sdf_at(Vector3i(-1, 0, 0));
-	float sdf_at_y_minus_one = sdf_at(Vector3i(0, -1, 0));
-	float sdf_at_z_minus_one = sdf_at(Vector3i(0, 0, -1));
+	bool x_neighbors_nontruncated = true;
+	float sdf_at_x_plus_one = sdf_at(Vector3i(1, 0, 0), x_neighbors_nontruncated);
+	float sdf_at_x_minus_one = sdf_at(Vector3i(-1, 0, 0), x_neighbors_nontruncated);
 
-	bool x_plus_one_nontruncated = 1.0 - abs(sdf_at_x_plus_one) > 1e-5;
-	bool x_minus_one_nontruncated = 1.0 - abs(sdf_at_x_minus_one) > 1e-5;
-	bool x_neighbors_nontruncated = x_plus_one_nontruncated && x_minus_one_nontruncated;
-	bool y_plus_one_nontruncated = 1.0 - abs(sdf_at_y_plus_one) > 1e-5;
-	bool y_minus_one_nontruncated = 1.0 - abs(sdf_at_y_minus_one) > 1e-5;
-	bool y_neighbors_nontruncated = y_plus_one_nontruncated && y_minus_one_nontruncated;
-	bool z_plus_one_nontruncated = 1.0 - abs(sdf_at_z_plus_one) > 1e-5;
-	bool z_minus_one_nontruncated = 1.0 - abs(sdf_at_z_minus_one) > 1e-5;
-	bool z_neighbors_nontruncated = z_plus_one_nontruncated && z_minus_one_nontruncated;
+	bool y_neighbors_nontruncated = true;
+	float sdf_at_y_plus_one = sdf_at(Vector3i(0, 1, 0), y_neighbors_nontruncated);
+	float sdf_at_y_minus_one = sdf_at(Vector3i(0, -1, 0), y_neighbors_nontruncated);
+
+	bool z_neighbors_nontruncated = true;
+	float sdf_at_z_plus_one = sdf_at(Vector3i(0, 0, 1), z_neighbors_nontruncated);
+	float sdf_at_z_minus_one = sdf_at(Vector3i(0, 0, -1), z_neighbors_nontruncated);
 
 	//for xy, xz, yz
 	//@formatter:off
-	float sdf_at_x_plus_one_y_plus_one   = sdf_at(Vector3i( 1,  1,  0));
-	float sdf_at_x_minus_one_y_minus_one = sdf_at(Vector3i(-1, -1,  0));
-	float sdf_at_y_plus_one_z_plus_one   = sdf_at(Vector3i( 0,  1,  1));
-	float sdf_at_y_minus_one_z_minus_one = sdf_at(Vector3i( 0, -1, -1));
-	float sdf_at_x_plus_one_z_plus_one   = sdf_at(Vector3i( 1,  0,  1));
-	float sdf_at_x_minus_one_z_minus_one = sdf_at(Vector3i(-1,  0, -1));
+	bool xy_neighbors_nontruncated = true;
+	float sdf_at_x_plus_one_y_plus_one   = sdf_at(Vector3i( 1,  1,  0), xy_neighbors_nontruncated);
+	float sdf_at_x_minus_one_y_minus_one = sdf_at(Vector3i(-1, -1,  0), xy_neighbors_nontruncated);
+	bool yz_neighbors_nontruncated = true;
+	float sdf_at_y_plus_one_z_plus_one   = sdf_at(Vector3i( 0,  1,  1), yz_neighbors_nontruncated);
+	float sdf_at_y_minus_one_z_minus_one = sdf_at(Vector3i( 0, -1, -1), yz_neighbors_nontruncated);
+	bool xz_neighbors_nontruncated = true;
+	float sdf_at_x_plus_one_z_plus_one   = sdf_at(Vector3i( 1,  0,  1), xz_neighbors_nontruncated);
+	float sdf_at_x_minus_one_z_minus_one = sdf_at(Vector3i(-1,  0, -1), xz_neighbors_nontruncated);
 	//@formatter:on
 
-	bool x_plus_one_y_plus_one_nontruncated = 1.0 - abs(sdf_at_x_plus_one_y_plus_one) > 1e-5;
-	bool x_minus_one_y_minus_one_nontruncated = 1.0 - abs(sdf_at_x_minus_one_y_minus_one) > 1e-5;
-	bool xy_neighbors_nontruncated = x_plus_one_y_plus_one_nontruncated && x_minus_one_y_minus_one_nontruncated;
 
-	bool y_plus_one_z_plus_one_nontruncated = 1.0 - abs(sdf_at_y_plus_one_z_plus_one) > 1e-5;
-	bool y_minus_one_z_minus_one_nontruncated = 1.0 - abs(sdf_at_y_minus_one_z_minus_one) > 1e-5;
-	bool yz_neighbors_nontruncated = y_plus_one_z_plus_one_nontruncated && y_minus_one_z_minus_one_nontruncated;
-
-	bool x_plus_one_z_plus_one_nontruncated = 1.0 - abs(sdf_at_x_plus_one_z_plus_one) > 1e-5;
-	bool x_minus_one_z_minus_one_nontruncated = 1.0 - abs(sdf_at_x_minus_one_z_minus_one) > 1e-5;
-	bool xz_neighbors_nontruncated = x_plus_one_z_plus_one_nontruncated && x_minus_one_z_minus_one_nontruncated;
-
-	float delta_xx = x_neighbors_nontruncated * sdf_at_x_plus_one - 2 * sdf_at_position + sdf_at_x_minus_one;
-	float delta_yy = y_neighbors_nontruncated * sdf_at_y_plus_one - 2 * sdf_at_position + sdf_at_y_minus_one;
-	float delta_zz = z_neighbors_nontruncated * sdf_at_z_plus_one - 2 * sdf_at_position + sdf_at_z_minus_one;
+	float delta_xx = x_neighbors_nontruncated * (sdf_at_x_plus_one - 2 * sdf_at_position + sdf_at_x_minus_one);
+	float delta_yy = y_neighbors_nontruncated * (sdf_at_y_plus_one - 2 * sdf_at_position + sdf_at_y_minus_one);
+	float delta_zz = z_neighbors_nontruncated * (sdf_at_z_plus_one - 2 * sdf_at_position + sdf_at_z_minus_one);
 
 	// Alternative formula for 2nd-order derivatives in multiple variables.
 	// See https://en.wikipedia.org/wiki/Finite_difference#Finite_difference_in_several_variables

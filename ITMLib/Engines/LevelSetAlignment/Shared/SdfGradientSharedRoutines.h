@@ -132,47 +132,6 @@ inline void ComputeSdfGradient_CentralDifferences_ZeroIfTruncated(THREADPTR(Vect
 	gradient[2] = both_z_nontruncated * 0.5f * (sdf_at_z_plus_one - sdf_at_z_minus_one);
 };
 
-
-template<typename TVoxel, typename TIndexData, typename TCache>
-_CPU_AND_GPU_CODE_
-inline void ComputeSdfGradient_CentralDifferences_ZeroIfTruncated_Factors(THREADPTR(Vector3f)& gradient,
-                                                                          const CONSTPTR(Vector3i)& voxel_position,
-                                                                          const CONSTPTR(TVoxel)* voxels,
-                                                                          const CONSTPTR(TIndexData)* index_data,
-                                                                          THREADPTR(TCache)& cache) {
-
-
-	int vmIndex = 0;
-	auto sdf_at = [&](Vector3i offset, bool& nontruncated) {
-#if !defined(__CUDACC__) && !defined(WITH_OPENMP)
-		TVoxel voxel = readVoxel(voxels, index_data, voxel_position + (offset), vmIndex, cache);
-		nontruncated &= voxel.flags == ITMLib::VOXEL_NONTRUNCATED;
-		return TVoxel::valueToFloat(voxel.sdf);
-#else
-		TVoxel voxel = readVoxel(voxels, index_data, voxel_position + (offset), vmIndex);
-		nontruncated &= voxel.flags == ITMLib::VOXEL_NONTRUNCATED;
-		return TVoxel::valueToFloat(voxel.sdf);
-#endif
-	};
-
-	bool both_x_nontruncated = true;
-	float sdf_at_x_plus_one = sdf_at(Vector3i(1, 0, 0), both_x_nontruncated);
-	float sdf_at_x_minus_one = sdf_at(Vector3i(-1, 0, 0), both_x_nontruncated);
-
-	bool both_y_nontruncated = true;
-	float sdf_at_y_plus_one = sdf_at(Vector3i(0, 1, 0), both_y_nontruncated);
-	float sdf_at_y_minus_one = sdf_at(Vector3i(0, -1, 0), both_y_nontruncated);
-
-	bool both_z_nontruncated = true;
-	float sdf_at_z_plus_one = sdf_at(Vector3i(0, 0, 1), both_z_nontruncated);
-	float sdf_at_z_minus_one = sdf_at(Vector3i(0, 0, -1), both_z_nontruncated);
-
-	gradient[0] = both_x_nontruncated * 5.0f * (sdf_at_x_plus_one - sdf_at_x_minus_one);
-	gradient[1] = both_y_nontruncated * 5.0f * (sdf_at_y_plus_one - sdf_at_y_minus_one);
-	gradient[2] = both_z_nontruncated * 5.0f * (sdf_at_z_plus_one - sdf_at_z_minus_one);
-};
-
-
 template<typename TVoxel, typename TIndexData, typename TCache>
 _CPU_AND_GPU_CODE_
 inline void ComputeSdfGradient_ChooseStrategyOnTruncation(THREADPTR(Vector3f)& gradient,
