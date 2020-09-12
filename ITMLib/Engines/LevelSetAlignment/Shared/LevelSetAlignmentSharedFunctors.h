@@ -64,7 +64,7 @@ struct WarpUpdateFunctor {
 	_DEVICE_WHEN_AVAILABLE_
 	void
 	operator()(TWarp& warp_voxel, TVoxel& canonical_voxel, TVoxel& live_voxel, const Vector3i& position) {
-		if (!VoxelIsConsideredForTracking(canonical_voxel, live_voxel)) return;
+		if (!VoxelIsConsideredForAlignment(canonical_voxel, live_voxel)) return;
 
 		Vector3f warp_update = -gradient_weight * (gradient_smoothing_enabled ?
 		                                           warp_voxel.gradient1 : warp_voxel.gradient0);
@@ -119,7 +119,7 @@ struct GradientSmoothingPassFunctor {
 		};
 
 		int vmIndex = 0;
-		if (!VoxelIsConsideredForTracking(canonical_voxel, live_voxel)) return;
+		if (!VoxelIsConsideredForAlignment(canonical_voxel, live_voxel)) return;
 
 		const auto directionIndex = (int) TDirection;
 

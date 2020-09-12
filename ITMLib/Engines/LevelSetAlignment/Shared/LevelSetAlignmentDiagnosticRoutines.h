@@ -64,8 +64,6 @@ ReadVoxelAndLinearIndex(const CONSTPTR(TVoxel)* voxelData,
 }
 
 
-
-
 template<class TVoxel>
 _CPU_AND_GPU_CODE_ inline TVoxel
 ReadVoxelAndLinearIndex(const CONSTPTR(TVoxel)* voxel_data,
@@ -126,9 +124,11 @@ inline void FindHighlightNeighborInfo(std::array<ITMLib::NeighborVoxelIterationI
 //======================================================================================================================
 
 _CPU_AND_GPU_CODE_
-inline void PrintDataTermInformation(const CONSTPTR(Vector3f)& live_sdf_gradient) {
-	printf("Gradient of live SDF at current warp: %s%E,%E,%E%s\n",
-	       cyan, live_sdf_gradient.x, live_sdf_gradient.y, live_sdf_gradient.z, reset);
+inline void PrintDataTermInformation(const CONSTPTR(Vector3f)& live_sdf_gradient, const CONSTPTR(float)& local_data_energy) {
+	printf("Gradient of live SDF at current warp: %s%E,%E,%E%s\n"
+	       "local data energy: %s%E%s\n",
+	       cyan, live_sdf_gradient.x, live_sdf_gradient.y, live_sdf_gradient.z, reset,
+	       yellow, local_data_energy, reset);
 }
 
 _CPU_AND_GPU_CODE_
@@ -148,18 +148,23 @@ inline void PrintLevelSetTermInformation(const CONSTPTR(Vector3f)& live_sdf_grad
 }
 
 _CPU_AND_GPU_CODE_
-inline void PrintKillingTermInformation(const CONSTPTR(Vector3f*) neighbor_warps,
-                                        const CONSTPTR(bool*) neighbor_allocated,
-                                        const CONSTPTR(bool*) neighbor_truncated,
-                                        THREADPTR(Matrix3f)& warp_update_Jacobian, //in
-                                        THREADPTR(Matrix3f)* warp_update_Hessian //in, x3
+inline void PrintDampened_AKVF_TermInformation(const CONSTPTR(Vector3f)* neighbor_warps,
+                                               const CONSTPTR(bool)* neighbor_allocated,
+                                               const CONSTPTR(bool)* neighbor_truncated,
+                                               const CONSTPTR(Vector3f)& warp_update_laplacian,
+                                               const CONSTPTR(Vector3f)& warp_update_divergence_derivative,
+                                               const CONSTPTR(float) local_Tikhonov_energy,
+                                               const CONSTPTR(float) local_Killing_energy
 ) {
-
-	const int neighborhood_size = 9;
-	//(-1,0,0) (0,-1,0) (0,0,-1)   (1, 0, 0) (0, 1, 0) (0, 0, 1)   (1, 1, 0) (0, 1, 1) (1, 0, 1)
-	Vector3i neighbor_positions[] = {Vector3i(-1, 0, 0), Vector3i(0, -1, 0), Vector3i(0, 0, -1), Vector3i(1, 0, 0),
-	                                 Vector3i(0, 1, 0), Vector3i(0, 0, 1), Vector3i(1, 1, 0), Vector3i(0, 1, 1),
-	                                 Vector3i(1, 0, 1),};
+	const int neighborhood_size = 12;
+	// neighbor index:       0         1       2           3         4         5           6         7         8            9          10          11
+	// neighbor position: (-1,0,0) (0,-1,0) (0,0,-1)   (1, 0, 0) (0, 1, 0) (0, 0, 1)   (1, 1, 0) (0, 1, 1) (1, 0, 1)   (-1, -1, 0) (0, -1, -1) (-1, 0, -1)
+	Vector3i neighbor_positions[] = {
+			Vector3i(-1, 0, 0), Vector3i(0, -1, 0), Vector3i(0, 0, -1),
+			Vector3i(1, 0, 0), Vector3i(0, 1, 0), Vector3i(0, 0, 1),
+			Vector3i(1, 1, 0), Vector3i(0, 1, 1), Vector3i(1, 0, 1),
+			Vector3i(-1, -1, 0), Vector3i(0, -1, -1), Vector3i(-1, 0, -1)
+	};
 	printf("%sNeighbors' warps: \n", green);
 
 	for (int i_neighbor = 0; i_neighbor < neighborhood_size; i_neighbor++) {
@@ -193,65 +198,23 @@ inline void PrintKillingTermInformation(const CONSTPTR(Vector3f*) neighbor_warps
 	}
 	printf("\n\n");
 
-//TODO: figure out how to properly print this on CUDA & remove header guards
-#ifdef __CUDACC__
-	printf("Cannot print warp update Jacobian & Hessian from CUDA device. Set device to 'cpu' for more info here.\n\n");
-	printf("Jacobian of warp updates at current warp (U-component only): %s\n"
+	printf("Laplacian of warp updates at current warp, i.e. [∆U ∆V ∆W]^T: %s\n"
 	       "%E %E %E\n"
 	       "%s\n",
 	       yellow,
-	       warp_update_Jacobian.xx, warp_update_Jacobian.xy, warp_update_Jacobian.xz,
-	       reset);
-#else
-	printf("Jacobian of warp updates at current warp: %s\n"
-	       "%E %E %E\n"
-	       "%E %E %E\n"
-	       "%E %E %E\n"
-	       "%s\n",
-	       yellow,
-	       warp_update_Jacobian.xx, warp_update_Jacobian.xy, warp_update_Jacobian.xz,
-	       warp_update_Jacobian.yx, warp_update_Jacobian.yy, warp_update_Jacobian.yz,
-	       warp_update_Jacobian.zx, warp_update_Jacobian.zy, warp_update_Jacobian.zz,
+	       warp_update_laplacian.x, warp_update_laplacian.y, warp_update_laplacian.z,
 	       reset);
 
-	Matrix3f& H_u = warp_update_Hessian[0];
-	Matrix3f& H_v = warp_update_Hessian[1];
-	Matrix3f& H_w = warp_update_Hessian[2];
 
-	printf("*** Hessian of warp updates at current warp *** \n"
-	       "U-component:\n%s"
-	       "%E %E %E\n"
-	       "%E %E %E\n"
+	printf("*** Derivative(s) of the divergence, i.e. [d(div(Ψ))/dx d(div(Ψ))/dy d(div(Ψ))/dz]^T: %s\n"
 	       "%E %E %E\n"
 	       "%s",
 	       cyan,
-	       H_u.xx, H_u.xy, H_u.xz,
-	       H_u.yx, H_u.yy, H_u.yz,
-	       H_u.zx, H_u.zy, H_u.zz,
+	       warp_update_divergence_derivative.x, warp_update_divergence_derivative.y, warp_update_divergence_derivative.z,
 	       reset);
 
-	printf("V-component:\n%s"
-	       "%E %E %E\n"
-	       "%E %E %E\n"
-	       "%E %E %E\n"
-	       "%s",
-	       cyan,
-	       H_v.xx, H_v.xy, H_v.xz,
-	       H_v.yx, H_v.yy, H_v.yz,
-	       H_v.zx, H_v.zy, H_v.zz,
-	       reset);
-
-	printf("W-component:\n%s"
-	       "%E %E %E\n"
-	       "%E %E %E\n"
-	       "%E %E %E\n"
-	       "%s\n",
-	       cyan,
-	       H_w.xx, H_w.xy, H_w.xz,
-	       H_w.yx, H_w.yy, H_w.yz,
-	       H_w.zx, H_w.zy, H_w.zz,
-	       reset);
-#endif
+	printf("local Tikhonov energy: %s%E%s\nlocal Killing energy: %s%E%s\n",
+	       yellow, local_Tikhonov_energy, reset, yellow, local_Killing_energy, reset);
 };
 
 _CPU_AND_GPU_CODE_

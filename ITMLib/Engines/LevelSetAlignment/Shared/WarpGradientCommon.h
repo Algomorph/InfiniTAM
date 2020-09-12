@@ -30,7 +30,7 @@ void PrintEnergyStatistics(const bool& enable_data_term,
                            const bool& enable_level_set_term,
                            const bool& enable_smoothing_term,
                            const bool& enable_Killing_term,
-                           const float& gamma,
+                           const float& Killing_dampening_factor,
                            float total_data_energy,
                            float total_level_set_energy,
                            float total_tikhonov_energy,
@@ -48,7 +48,7 @@ void PrintEnergyStatistics(const bool& enable_data_term,
 		total_energy += total_level_set_energy;
 	}
 	if (enable_smoothing_term) {
-		if (enable_Killing_term) {
+		if (enable_Killing_term && Killing_dampening_factor) {
 			stringstream << yellow << " Tikhonov sub-term: " << total_tikhonov_energy;
 			stringstream << yellow << " Killing sub-term: " << total_killing_energy;
 		}

@@ -27,6 +27,10 @@
 #include "../../../../ORUtils/PlatformIndependentAtomics.h"
 #include "../../../../ORUtils/CrossPlatformMacros.h"
 #include "../Shared/LevelSetAlignmentSharedRoutines.h"
+#include "../Shared/SdfGradientSharedRoutines.h"
+#include "../Shared/DataTermSharedRoutines.h"
+#include "../Shared/LevelSetTermSharedRoutines.h"
+#include "../Shared/SmoothingTermSharedRoutines.h"
 #include "../Shared/LevelSetAlignmentDiagnosticRoutines.h"
 #include "../Shared/WarpGradientAggregates.h"
 #include "../Shared/WarpGradientCommon.h"
@@ -65,109 +69,69 @@ public:
 	_DEVICE_WHEN_AVAILABLE_
 	void operator()(TWarp& warp_voxel, TVoxel& canonical_voxel, TVoxel& live_voxel, const Vector3i& voxel_position) {
 
-		if (!VoxelIsConsideredForTracking(canonical_voxel, live_voxel)) return;
+		if (!VoxelIsConsideredForAlignment(canonical_voxel, live_voxel)) return;
 
 		Vector3f& warp_update = warp_voxel.warp_update;
 		float live_sdf = TVoxel::valueToFloat(live_voxel.sdf);
 		float canonical_sdf = TVoxel::valueToFloat(canonical_voxel.sdf);
 
-		// region =============================== DECLARATIONS & DEFAULTS FOR ALL TERMS ====================
-
 		Vector3f local_smoothing_energy_gradient(0.0f), local_data_energy_gradient(0.0f), local_level_set_energy_gradient(0.0f);
-		// endregion
 
 		Vector3f live_sdf_gradient;
-		//__DEBUG
-		// ComputeGradient_CentralDifferences_ZeroIfTruncated(live_sdf_gradient, voxel_position, live_voxels, live_index_data, live_cache);
-		ComputeGradient_CentralDifferences_ZeroIfTruncated_Factors(live_sdf_gradient, voxel_position, live_voxels, live_index_data, live_cache);
+		ComputeSdfGradient(live_sdf_gradient, voxel_position, live_sdf, live_voxels, live_index_data, live_cache);
 
-		// region =============================== DATA TERM ================================================
+		// region =============================== DATA TERM ==========================================================================================
 		if (VoxelIsConsideredForDataTerm(canonical_voxel, live_voxel) && switches.enable_data_term) {
-			// Compute data term error / energy
-			float sdf_difference_between_live_and_canonical = live_sdf - canonical_sdf;
-			// (φ_n(Ψ)−φ_{global}) ∇φ_n(Ψ) - also denoted as - (φ_{proj}(Ψ)−φ_{model}) ∇φ_{proj}(Ψ)
-			// φ_n(Ψ) = φ_n(x+u, y+v, z+w), where u = u(x,y,z), v = v(x,y,z), w = w(x,y,z)
-			// φ_{global} = φ_{global}(x, y, z)
-			local_data_energy_gradient = parameters.weight_data_term * sdf_difference_between_live_and_canonical * live_sdf_gradient;
+			ComputeDataEnergyGradient(local_data_energy_gradient, live_sdf, canonical_sdf, parameters.weight_data_term, live_sdf_gradient);
 		}
 
-		// endregion =======================================================================================
-		// region =============================== LEVEL SET TERM ===========================================
+		// endregion =================================================================================================================================
+		// region =============================== LEVEL SET TERM =====================================================================================
 		if (switches.enable_level_set_term && live_voxel.flags == VOXEL_NONTRUNCATED) {
-			Matrix3f live_sdf_2nd_derivative;
-			//__DEBUG
-			//ComputeSdf2ndDerivative(live_sdf_2nd_derivative, voxel_position, live_sdf, live_voxels, live_index_data, live_cache);
-			ComputeSdf2ndDerivative_Factors(live_sdf_2nd_derivative, voxel_position, live_sdf, live_voxels, live_index_data, live_cache);
-
-			float live_sdf_gradient_norm = ORUtils::length(live_sdf_gradient);
-			float live_sdf_gradient_norm_minus_unity = live_sdf_gradient_norm - sdf_unity;
-//			local_level_set_energy_gradient = parameters.weight_level_set_term * live_sdf_gradient_norm_minus_unity *
-//			                                  (live_sdf_2nd_derivative * live_sdf_gradient) /
-//			                                  (live_sdf_gradient_norm + parameters.epsilon);
-			local_level_set_energy_gradient =
-					(parameters.weight_level_set_term * live_sdf_gradient_norm_minus_unity / (live_sdf_gradient_norm + parameters.epsilon))
-					* (live_sdf_2nd_derivative * live_sdf_gradient);
+			ComputeLevelSetEnergyGradient(local_level_set_energy_gradient, voxel_position, live_sdf, live_voxels, live_index_data, live_cache,
+			                              live_sdf_gradient, parameters.weight_level_set_term, sdf_unity, parameters.epsilon);
 		}
-		// endregion =======================================================================================
+		// endregion =================================================================================================================================
 
-		// region =============================== SMOOTHING TERM (TIKHONOV & KILLING) ======================
+		// region =============================== SMOOTHING TERM (TIKHONOV & KILLING) ================================================================
 
 		if (switches.enable_smoothing_term) {
-			// region ============================== RETRIEVE NEIGHBOR'S WARPS =========================================
+			if (switches.enable_dampened_AKVF_term) {
+				// region ============================== RETRIEVE & PROCESS NEIGHBOR'S WARPS =========================================================
+				constexpr int neighborhood_size = 12;
+				Vector3f neighbor_warp_updates[neighborhood_size];
+				bool neighbors_known[neighborhood_size], neighbors_truncated[neighborhood_size], neighbors_allocated[neighborhood_size];
 
-			const int neighborhood_size = 9;
-			Vector3f neighbor_warp_updates[neighborhood_size];
-			bool neighbors_known[neighborhood_size], neighbors_truncated[neighborhood_size], neighbors_allocated[neighborhood_size];
-
-			// neighbor index:       0        1        2          3         4         5           6         7         8
-			// neighbor position: (-1,0,0) (0,-1,0) (0,0,-1)   (1, 0, 0) (0, 1, 0) (0, 0, 1)   (1, 1, 0) (0, 1, 1) (1, 0, 1)
-			findPoint2ndDerivativeNeighborhoodFramewiseWarp(
-					neighbor_warp_updates/*x9*/, neighbors_known, neighbors_truncated, neighbors_allocated, voxel_position,
-					warp_voxels, warp_index_data, warp_cache, canonical_voxels, canonical_index_data, canonical_cache);
-
-			for (int iNeighbor = 0; iNeighbor < neighborhood_size; iNeighbor++) {
-				if (!neighbors_known[iNeighbor]) {
-					//assign current warp to neighbor warp if the neighbor is not known
-					neighbor_warp_updates[iNeighbor] = warp_update;
-				}
-			}
-			//endregion=================================================================================================
-
-			if (switches.enable_killing_rigidity_enforcement_term) {
-				Matrix3f warp_update_Jacobian(0.0f);
-				Matrix3f warp_update_Hessian[3] = {Matrix3f(0.0f), Matrix3f(0.0f), Matrix3f(0.0f)};
-				ComputePerVoxelWarpJacobianAndHessian(warp_update, neighbor_warp_updates, warp_update_Jacobian, warp_update_Hessian);
-
-				float gamma = parameters.weight_killing_term;
-				float one_plus_gamma = 1.0f + gamma;
-				// |0, 3, 6|     |m00, m10, m20|      |u_xx, u_xy, u_xz|
-				// |1, 4, 7|     |m01, m11, m21|      |u_xy, u_yy, u_yz|
-				// |2, 5, 8|     |m02, m12, m22|      |u_xz, u_yz, u_zz|
-				Matrix3f& H_u = warp_update_Hessian[0];
-				Matrix3f& H_v = warp_update_Hessian[1];
-				Matrix3f& H_w = warp_update_Hessian[2];
-
-				float Killing_delta_E_u = -2.0f * ((one_plus_gamma) * H_u.xx + (H_u.yy) + (H_u.zz) + gamma * H_v.xy + gamma * H_w.xz);
-				float Killing_delta_E_v = -2.0f * ((one_plus_gamma) * H_v.yy + (H_v.zz) + (H_v.xx) + gamma * H_u.xy + gamma * H_w.yz);
-				float Killing_delta_E_w = -2.0f * ((one_plus_gamma) * H_w.zz + (H_w.xx) + (H_w.yy) + gamma * H_v.yz + gamma * H_u.xz);
-
-				local_smoothing_energy_gradient =
-						parameters.weight_smoothing_term * Vector3f(Killing_delta_E_u, Killing_delta_E_v, Killing_delta_E_w);
+				// neighbor index:       0         1       2           3         4         5           6         7         8            9          10          11
+				// neighbor position: (-1,0,0) (0,-1,0) (0,0,-1)   (1, 0, 0) (0, 1, 0) (0, 0, 1)   (1, 1, 0) (0, 1, 1) (1, 0, 1)   (-1, -1, 0) (0, -1, -1) (-1, 0, -1)
+				FindLocal2ndDerivativeNeighborhoodWarpUpdate(
+						neighbor_warp_updates/*x12*/, neighbors_known, neighbors_truncated, neighbors_allocated, voxel_position,
+						warp_voxels, warp_index_data, warp_cache, canonical_voxels, canonical_index_data, canonical_cache);
+				SetUnknownNeighborToCentralWarpUpdate<neighborhood_size>(neighbor_warp_updates, neighbors_known, warp_update);
+				// endregion
+				//================================= COMPUTE GRADIENT =================================================================================
+				ComputeDampened_AKVF_EnergyGradient(local_smoothing_energy_gradient, neighbor_warp_updates, warp_update,
+				                                    parameters.Killing_dampening_factor, parameters.weight_smoothing_term);
 			} else {
-				Matrix3f warp_update_Jacobian(0.0f);
-				Vector3f warp_update_Laplacian;
-				ComputeWarpLaplacianAndJacobian(warp_update_Laplacian, warp_update_Jacobian, warp_update, neighbor_warp_updates);
-				//∇E_{reg}(Ψ) = −[∆U ∆V ∆W]' ,
-				local_smoothing_energy_gradient = -parameters.weight_smoothing_term * warp_update_Laplacian;
+				// region ============================== RETRIEVE & PROCESS NEIGHBOR'S WARPS =========================================================
+				constexpr int neighborhood_size = 6;
+				Vector3f neighbor_warp_updates[neighborhood_size];
+				bool neighbors_known[neighborhood_size], neighbors_truncated[neighborhood_size], neighbors_allocated[neighborhood_size];
+
+				// neighbor index:       0         1       2           3         4         5
+				// neighbor position: (-1,0,0) (0,-1,0) (0,0,-1)   (1, 0, 0) (0, 1, 0) (0, 0, 1)
+				FindLocal1stDerivativeNeighborhoodWarpUpdate(
+						neighbor_warp_updates/*x12*/, neighbors_known, neighbors_truncated, neighbors_allocated, voxel_position,
+						warp_voxels, warp_index_data, warp_cache, canonical_voxels, canonical_index_data, canonical_cache);
+				SetUnknownNeighborToCentralWarpUpdate<neighborhood_size>(neighbor_warp_updates, neighbors_known, warp_update);
+				// endregion
+				//================================= COMPUTE GRADIENT =================================================================================
+				ComputeTikhonovEnergyGradient(local_smoothing_energy_gradient, neighbor_warp_updates, warp_update, parameters.weight_smoothing_term);
 			}
 		}
 		// endregion
-		// region =============================== COMPUTE ENERGY GRADIENT ==================================
-		Vector3f local_energy_gradient =
-				local_data_energy_gradient +
-				local_level_set_energy_gradient +
-				local_smoothing_energy_gradient;
-
+		// region =============================== COMPUTE ENERGY GRADIENT ============================================================================
+		Vector3f local_energy_gradient = local_data_energy_gradient + local_level_set_energy_gradient + local_smoothing_energy_gradient;
 		warp_voxel.gradient0 = local_energy_gradient;
 	}
 

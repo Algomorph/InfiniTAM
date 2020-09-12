@@ -24,6 +24,10 @@
 #include "../../../../ORUtils/PlatformIndependentAtomics.h"
 #include "../../../../ORUtils/CrossPlatformMacros.h"
 #include "../Shared/LevelSetAlignmentSharedRoutines.h"
+#include "../Shared/SdfGradientSharedRoutines.h"
+#include "../Shared/DataTermSharedRoutines.h"
+#include "../Shared/LevelSetTermSharedRoutines.h"
+#include "../Shared/SmoothingTermSharedRoutines.h"
 #include "../Shared/LevelSetAlignmentDiagnosticRoutines.h"
 #include "../Shared/WarpGradientAggregates.h"
 #include "../Shared/WarpGradientCommon.h"
@@ -106,7 +110,7 @@ private:
 
 public:
 
-	// region ========================================= CONSTRUCTOR ====================================================
+	// region ========================================= CONSTRUCTOR ==================================================================================
 	WarpGradientFunctor(LevelSetAlignmentWeights parameters,
 	                    LevelSetAlignmentSwitches switches,
 	                    VoxelVolume<TWarp, TIndex>* warp_field,
@@ -124,12 +128,10 @@ public:
 			verbosity_level(configuration::Get().logging_settings.verbosity_level),
 			iteration_index(iteration_index) {}
 
-	// endregion =======================================================================================================
+	// endregion =====================================================================================================================================
 
 	_DEVICE_WHEN_AVAILABLE_
 	void operator()(TWarp& warp_voxel, TVoxel& canonical_voxel, TVoxel& live_voxel, const Vector3i& voxel_position) {
-
-
 		Vector3f& warp_update = warp_voxel.warp_update;
 
 		bool compute_data_term = VoxelIsConsideredForDataTerm(canonical_voxel, live_voxel);
@@ -142,7 +144,7 @@ public:
 			Print6ConnectedNeighborInfo(voxel_position, live_voxels, live_index_data, live_cache);
 		}
 
-		if (!VoxelIsConsideredForTracking(canonical_voxel, live_voxel)) return;
+		if (!VoxelIsConsideredForAlignment(canonical_voxel, live_voxel)) return;
 
 		float live_sdf = TVoxel::valueToFloat(live_voxel.sdf);
 		float canonical_sdf = TVoxel::valueToFloat(canonical_voxel.sdf);
@@ -151,120 +153,71 @@ public:
 		Vector3f local_smoothing_energy_gradient(0.0f), local_data_energy_gradient(0.0f), local_level_set_energy_gradient(0.0f);
 
 		Vector3f live_sdf_gradient;
-
-//      Different strategies for computing gradient of live TSDF.
-//      Observation: the only strategy that currently yields a gradual shrinking of overall energy and gradient lengths is "ZERO_IF_TRUNCATED"
-//#define LIVE_GRADIENT_STRATEGY_NAIVE
-#define LIVE_GRADIENT_STRATEGY_ZERO_IF_TRUNCATED
-//#define LIVE_GRADIENT_STRATEGY_CHOOSE_IF_TRUNCATED
-
-#if defined(LIVE_GRADIENT_STRATEGY_NAIVE)
-		ComputeGradient_CentralDifferences(live_sdf_gradient, voxel_position, live_voxels, live_index_data, live_cache);
-#elif defined(LIVE_GRADIENT_STRATEGY_ZERO_IF_TRUNCATED)
-		ComputeGradient_CentralDifferences_ZeroIfTruncated(live_sdf_gradient, voxel_position, live_voxels, live_index_data, live_cache);
-#elif defined(LIVE_GRADIENT_STRATEGY_CHOOSE_IF_TRUNCATED)
-		ComputeGradient_ChooseStrategyOnTruncation(live_sdf_gradient, voxel_position, live_voxels, live_index_data, live_cache);
-#endif
+		ComputeSdfGradient(live_sdf_gradient, voxel_position, live_sdf, live_voxels, live_index_data, live_cache);
 
 		// live sdf jacobian is denoted in the text as live gradient ∇φ_proj(Ψ)
-		// region =============================== DATA TERM ================================================
+		// region =============================== DATA TERM ==========================================================================================
 		if (compute_data_term && switches.enable_data_term && iteration_index < iteration_bound) {
-			// Compute data term error / energy
-			float sdf_difference_between_live_and_canonical = live_sdf - canonical_sdf;
-			// (φ_n(Ψ)−φ_{global}) ∇φ_n(Ψ) - also denoted as - (φ_{proj}(Ψ)−φ_{model}) ∇φ_{proj}(Ψ)
-			// φ_{proj}(Ψ) = φ_{proj}(x+u, y+v, z+w), where u = u(x,y,z), v = v(x,y,z), w = w(x,y,z)
-			// φ_{global} = φ_{global}(x, y, z)
-			local_data_energy_gradient = parameters.weight_data_term * sdf_difference_between_live_and_canonical * live_sdf_gradient;
-
-			ATOMIC_ADD(aggregates.data_voxel_count, 1u);
-
+			float sdf_difference_between_live_and_canonical;
+			ComputeDataEnergyGradient(local_data_energy_gradient, sdf_difference_between_live_and_canonical, live_sdf, canonical_sdf,
+			                          parameters.weight_data_term, live_sdf_gradient);
+			//=================================== ENERGY =============================================================================================
 			float local_data_energy = parameters.weight_data_term * 0.5f *
 			                          (sdf_difference_between_live_and_canonical * sdf_difference_between_live_and_canonical);
-
+			ATOMIC_ADD(aggregates.data_voxel_count, 1u);
 			ATOMIC_ADD(energies.total_data_energy, local_data_energy);
-
 			ATOMIC_ADD(aggregates.data_voxel_count, 1u);
 			ATOMIC_ADD(aggregates.cumulative_sdf_diff, sdf_difference_between_live_and_canonical);
-
-			if (print_voxel_result) {
-				PrintDataTermInformation(live_sdf_gradient);
-				printf("local data energy: %s%E%s\n",
-				       yellow, local_data_energy, reset);
-			}
 			ATOMIC_ADD(energies.combined_data_length, ORUtils::length(local_data_energy_gradient));
+			if (print_voxel_result) {
+				PrintDataTermInformation(live_sdf_gradient, local_data_energy);
+			}
 		}
 		// endregion
-		// region =============================== LEVEL SET TERM ===========================================
+		// region =============================== LEVEL SET TERM =====================================================================================
 		if (switches.enable_level_set_term && live_voxel.flags == VOXEL_NONTRUNCATED) {
-			Matrix3f live_sdf_2nd_derivative;
-			ComputeSdf2ndDerivative(live_sdf_2nd_derivative, voxel_position, live_sdf, live_voxels, live_index_data, live_cache);
-			// TODO: not enough CUDA resources to execute this one, fix and try out instead of above strategy
-			// ComputeSdf2ndDerivative_ZeroIfTruncated(live_sdf_2nd_derivative, voxel_position, live_sdf, live_voxels, live_index_data, live_cache);
+			float live_sdf_gradient_norm_minus_unity;
+			Matrix3f live_sdf_hessian;
+			ComputeLevelSetEnergyGradient(local_level_set_energy_gradient, live_sdf_hessian, live_sdf_gradient_norm_minus_unity,
+			                              voxel_position, live_sdf, live_voxels, live_index_data, live_cache, live_sdf_gradient,
+			                              parameters.weight_level_set_term, sdf_unity, parameters.epsilon);
+			//=================================== ENERGY =============================================================================================
 
-			// |∇φ_{proj}(Ψ)|
-			float live_sdf_gradient_norm = ORUtils::length(live_sdf_gradient);
-			// ~ |∇φ_{proj}(Ψ)| - 1
-			float live_sdf_gradient_norm_minus_unity = live_sdf_gradient_norm - sdf_unity;
-			//                        ┏                                                          ┓
-			// (|∇φ_{proj}(Ψ)| - 1)   ┃  ∇_{xx}φ_{proj}(Ψ)  ∇_{xy}φ_{proj}(Ψ)  ∇_{xz}φ_{proj}(Ψ) ┃
-			// --------------------   ┃  ∇_{yx}φ_{proj}(Ψ)  ∇_{yy}φ_{proj}(Ψ)  ∇_{yz}φ_{proj}(Ψ) ┃ ∇φ_{proj}(Ψ
-			//  |∇φ_{proj}(Ψ)|_{E}    ┃  ∇_{zx}φ_{proj}(Ψ)  ∇_{zy}φ_{proj}(Ψ)  ∇_{zz}φ_{proj}(Ψ) ┃
-			//                        ┗                                                          ┛
-			local_level_set_energy_gradient =
-					(parameters.weight_level_set_term * live_sdf_gradient_norm_minus_unity / (live_sdf_gradient_norm + parameters.epsilon))
-					* (live_sdf_2nd_derivative * live_sdf_gradient);
 			ATOMIC_ADD(aggregates.level_set_voxel_count, 1u);
 			// E_{level_set}(Ψ) = 1/2 Σ_{Ψ} (|∇φ_{proj}(Ψ)| - 1)^2
 			float local_level_set_energy = parameters.weight_level_set_term *
 			                               0.5f * (live_sdf_gradient_norm_minus_unity * live_sdf_gradient_norm_minus_unity);
 			ATOMIC_ADD(energies.total_level_set_energy, local_level_set_energy);
 			if (print_voxel_result) {
-				PrintLevelSetTermInformation(live_sdf_gradient, live_sdf_2nd_derivative, live_sdf_gradient_norm_minus_unity);
+				PrintLevelSetTermInformation(live_sdf_gradient, live_sdf_hessian, live_sdf_gradient_norm_minus_unity);
 				printf("local level set energy: %s%E%s\n",
 				       yellow, local_level_set_energy, reset);
 			}
 			ATOMIC_ADD(energies.combined_level_set_length, ORUtils::length(local_level_set_energy_gradient));
 		}
-		// endregion =======================================================================================
+		// endregion =================================================================================================================================
 
-
-		// region =============================== SMOOTHING TERM (TIKHONOV & KILLING) ======================
+		// region =============================== SMOOTHING TERM (TIKHONOV & KILLING) ================================================================
 
 		if (switches.enable_smoothing_term && iteration_index < iteration_bound) {
-			// region ============================== RETRIEVE NEIGHBOR'S WARPS =========================================
+			if (switches.enable_dampened_AKVF_term) {
+				// region ============================== RETRIEVE & PROCESS NEIGHBOR'S WARPS =========================================================
+				constexpr int neighborhood_size = 12;
+				Vector3f neighbor_warp_updates[neighborhood_size];
+				bool neighbors_known[neighborhood_size], neighbors_truncated[neighborhood_size], neighbors_allocated[neighborhood_size];
 
-			const int neighborhood_size = 9;
-			Vector3f neighbor_warp_updates[neighborhood_size];
-			bool neighbors_known[neighborhood_size], neighbors_truncated[neighborhood_size], neighbors_allocated[neighborhood_size];
-
-			// neighbor index:       0        1        2          3         4         5           6         7         8
-			// neighbor position: (-1,0,0) (0,-1,0) (0,0,-1)   (1, 0, 0) (0, 1, 0) (0, 0, 1)   (1, 1, 0) (0, 1, 1) (1, 0, 1)
-			findPoint2ndDerivativeNeighborhoodFramewiseWarp(
-					neighbor_warp_updates/*x9*/, neighbors_known, neighbors_truncated, neighbors_allocated, voxel_position,
-					warp_voxels, warp_index_data, warp_cache, canonical_voxels, canonical_index_data, canonical_cache);
-
-			for (int i_neighbor = 0; i_neighbor < neighborhood_size; i_neighbor++) {
-				if (!neighbors_known[i_neighbor]) {
-					//assign current warp to neighbor warp if the neighbor is not known
-					neighbor_warp_updates[i_neighbor] = warp_update;
-				}
-			}
-			//endregion=================================================================================================
-
-			if (switches.enable_killing_rigidity_enforcement_term) {
+				// neighbor index:       0         1       2           3         4         5           6         7         8            9          10          11
+				// neighbor position: (-1,0,0) (0,-1,0) (0,0,-1)   (1, 0, 0) (0, 1, 0) (0, 0, 1)   (1, 1, 0) (0, 1, 1) (1, 0, 1)   (-1, -1, 0) (0, -1, -1) (-1, 0, -1)
+				FindLocal2ndDerivativeNeighborhoodWarpUpdate(
+						neighbor_warp_updates/*x12*/, neighbors_known, neighbors_truncated, neighbors_allocated, voxel_position,
+						warp_voxels, warp_index_data, warp_cache, canonical_voxels, canonical_index_data, canonical_cache);
+				SetUnknownNeighborToCentralWarpUpdate<neighborhood_size>(neighbor_warp_updates, neighbors_known, warp_update);
+				// endregion
+				//================================= COMPUTE GRADIENT =================================================================================
 				Vector3f laplacian, divergence_derivative;
-				ComputeVectorLaplacianAndDivergenceDerivative(divergence_derivative, laplacian, warp_update, neighbor_warp_updates);
-				if (print_voxel_result) {
-					//TODO
-					PrintKillingTermInformation(neighbor_warp_updates, neighbors_known, neighbors_truncated, laplacian, divergence_derivative);
-				}
-
-				const float& gamma = parameters.weight_killing_term;
-
-				local_smoothing_energy_gradient = -2.0f * parameters.weight_smoothing_term *
-				                                  (laplacian - gamma * divergence_derivative);
-
-				//=================================== ENERGY ===============================================
+				ComputeDampened_AKVF_EnergyGradient(local_smoothing_energy_gradient, laplacian, divergence_derivative, neighbor_warp_updates,
+				                                    warp_update, parameters.Killing_dampening_factor, parameters.weight_smoothing_term);
+				//=================================== ENERGY =========================================================================================
 				// (dampened approximately-Killing energy)
 				Matrix3f warp_update_Jacobian(0.0f);
 				ComputeVectorJacobian(warp_update_Jacobian, neighbor_warp_updates);
@@ -278,7 +231,7 @@ public:
 				                              dot(warp_update_Jacobian.getColumn(2),
 				                                  warp_update_Jacobian.getColumn(2));
 
-				float local_Killing_energy = gamma * parameters.weight_smoothing_term *
+				float local_Killing_energy = parameters.Killing_dampening_factor * parameters.weight_smoothing_term *
 				                             (dot(warp_Jacobian_transpose.getColumn(0),
 				                                  warp_update_Jacobian.getColumn(0)) +
 				                              dot(warp_Jacobian_transpose.getColumn(1),
@@ -286,20 +239,30 @@ public:
 				                              dot(warp_Jacobian_transpose.getColumn(2),
 				                                  warp_update_Jacobian.getColumn(2)));
 				if (print_voxel_result) {
-					printf("local Tikhonov energy: %s%E%s\nlocal Killing energy: %s%E%s\n",
-					       yellow, local_Tikhonov_energy, reset, yellow, local_Killing_energy, reset);
+					PrintDampened_AKVF_TermInformation(neighbor_warp_updates, neighbors_known, neighbors_truncated, laplacian, divergence_derivative,
+					                                   local_Tikhonov_energy, local_Killing_energy);
 				}
 				ATOMIC_ADD(energies.total_Tikhonov_energy, local_Tikhonov_energy);
 				ATOMIC_ADD(energies.total_Killing_energy, local_Killing_energy);
 				ATOMIC_ADD(energies.combined_smoothing_length, ORUtils::length(local_smoothing_energy_gradient));
 			} else {
+				// region ============================== RETRIEVE & PROCESS NEIGHBOR'S WARPS =========================================================
+				constexpr int neighborhood_size = 6;
+				Vector3f neighbor_warp_updates[neighborhood_size];
+				bool neighbors_known[neighborhood_size], neighbors_truncated[neighborhood_size], neighbors_allocated[neighborhood_size];
+
+				// neighbor index:        0        1       2           3         4         5           6         7         8             9         10          11
+				// neighbor position: (-1,0,0) (0,-1,0) (0,0,-1)   (1, 0, 0) (0, 1, 0) (0, 0, 1)   (1, 1, 0) (0, 1, 1) (1, 0, 1)   (-1, -1, 0) (0, -1, -1) (-1, 0, -1)
+				FindLocal1stDerivativeNeighborhoodWarpUpdate(
+						neighbor_warp_updates/*x12*/, neighbors_known, neighbors_truncated, neighbors_allocated, voxel_position,
+						warp_voxels, warp_index_data, warp_cache, canonical_voxels, canonical_index_data, canonical_cache);
+				SetUnknownNeighborToCentralWarpUpdate<neighborhood_size>(neighbor_warp_updates, neighbors_known, warp_update);
+				// endregion
+				//================================= COMPUTE GRADIENT =================================================================================
 				Vector3f warp_update_Laplacian;
-				ComputeVectorLaplacian(warp_update_Laplacian, warp_update, neighbor_warp_updates);
-
-				//∇E_{reg}(Ψ) = −[∆U ∆V ∆W]^T
-				local_smoothing_energy_gradient = -parameters.weight_smoothing_term * warp_update_Laplacian;
-
-				// Compute actual energy
+				ComputeTikhonovEnergyGradient(local_smoothing_energy_gradient, warp_update_Laplacian, neighbor_warp_updates, warp_update,
+				                              parameters.weight_smoothing_term);
+				//=================================== ENERGY =========================================================================================
 				Matrix3f warp_update_Jacobian(0.0f);
 				ComputeVectorJacobian(warp_update_Jacobian, neighbor_warp_updates);
 				if (print_voxel_result) {
@@ -315,13 +278,12 @@ public:
 			}
 		}
 		// endregion
-		// region =============================== COMPUTE ENERGY GRADIENT ==================================
+		// region =============================== COMPUTE ENERGY GRADIENT ============================================================================
 		SetGradientFunctor<TWarp, TWarp::hasDebugInformation>::SetGradient(
 				warp_voxel, local_data_energy_gradient, local_level_set_energy_gradient, local_smoothing_energy_gradient);
 
 		// endregion
-		// region =============================== AGGREGATE VOXEL STATISTICS ===============================
-
+		// region =============================== AGGREGATE VOXEL STATISTICS =========================================================================
 
 		float warp_length = ORUtils::length(warp_voxel.warp_update);
 
@@ -331,14 +293,14 @@ public:
 		ATOMIC_ADD(aggregates.considered_voxel_count, 1u);
 		// endregion
 
-		// region ======================== FINALIZE RESULT PRINTING / RECORDING ========================================
+		// region ======================== FINALIZE RESULT PRINTING / RECORDING ======================================================================
 
 		if (print_voxel_result) {
 			float energy_gradient_length = ORUtils::length(warp_voxel.gradient0);
 			PrintLocalEnergyGradients(local_data_energy_gradient, local_level_set_energy_gradient,
 			                          local_smoothing_energy_gradient, warp_voxel.gradient0, energy_gradient_length);
 		}
-		// endregion ===================================================================================================
+		// endregion =================================================================================================================================
 	}
 
 
@@ -346,8 +308,8 @@ public:
 		if (verbosity_level < VERBOSITY_PER_ITERATION) return;
 		if (configuration::Get().logging_settings.log_surface_tracking_optimization_energies) {
 			PrintEnergyStatistics(this->switches.enable_data_term, this->switches.enable_level_set_term,
-			                      this->switches.enable_smoothing_term, this->switches.enable_killing_rigidity_enforcement_term,
-			                      this->parameters.weight_killing_term, energies);
+			                      this->switches.enable_smoothing_term, this->switches.enable_dampened_AKVF_term,
+			                      this->parameters.Killing_dampening_factor, energies);
 		}
 		if (configuration::Get().logging_settings.log_additional_surface_tracking_stats) {
 			CalculateAndPrintAdditionalStatistics(

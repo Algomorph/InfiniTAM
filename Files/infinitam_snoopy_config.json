@@ -155,7 +155,7 @@
         "execution_mode": "optimized",
         "weights": {
             "learning_rate": 0.200000003,
-            "weight_killing_term": 0.100000001,
+            "Killing_dampening_factor": 0.100000001,
             "weight_data_term": 2,
             "weight_smoothing_term": 0.200000003,
             "weight_level_set_term": 0.200000003,
@@ -166,7 +166,7 @@
             "enable_data_term": true,
             "enable_level_set_term": false,
             "enable_smoothing_term": true,
-            "enable_killing_rigidity_enforcement_term": false,
+            "enable_dampened_AKVF_term": false,
             "enable_sobolev_gradient_smoothing": true
         },
         "termination": {

@@ -671,7 +671,7 @@ set(
         Engines/LevelSetAlignment/Shared/LevelSetAlignmentSharedFunctors.h
         Engines/LevelSetAlignment/Shared/WarpGradientRoutines.h
         Engines/LevelSetAlignment/Shared/WarpGradientAggregates.h
-)
+        Engines/LevelSetAlignment/Shared/DataTermSharedRoutines.h Engines/LevelSetAlignment/Shared/LevelSetTermSharedRoutines.h Engines/LevelSetAlignment/Shared/SmoothingTermSharedRoutines.h Engines/LevelSetAlignment/Shared/SdfGradientSharedRoutines.h)
 
 set(
         ITMLIB_ENGINES_LEVEL_SET_ALIGNMENT_SOURCES

@@ -207,7 +207,7 @@ BOOST_AUTO_TEST_CASE(ConfigurationTestLong_CLI_Only) {
 	                      " --level_set_evolution.execution_mode=diagnostic"
 
 	                      " --level_set_evolution.weights.learning_rate=0.11"
-	                      " --level_set_evolution.weights.weight_killing_term=0.09"
+	                      " --level_set_evolution.weights.Killing_dampening_factor=0.09"
 	                      " --level_set_evolution.weights.weight_data_term=2"
 	                      " --level_set_evolution.weights.weight_smoothing_term=0.3"
 	                      " --level_set_evolution.weights.weight_level_set_term=0.1"
@@ -217,7 +217,7 @@ BOOST_AUTO_TEST_CASE(ConfigurationTestLong_CLI_Only) {
 	                      " --level_set_evolution.switches.enable_data_term=false"
 	                      " --level_set_evolution.switches.enable_level_set_term=true"
 	                      " --level_set_evolution.switches.enable_smoothing_term=false"
-	                      " --level_set_evolution.switches.enable_killing_rigidity_enforcement_term=true"
+	                      " --level_set_evolution.switches.enable_dampened_AKVF_term=true"
 	                      " --level_set_evolution.switches.enable_sobolev_gradient_smoothing=false"
 
 	                      " --level_set_evolution.termination.max_iteration_count=300"

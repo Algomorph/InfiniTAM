@@ -28,7 +28,7 @@ namespace ITMLib {
 
 #define WEIGHTS_STRUCT_DESCRIPTION LevelSetAlignmentWeights, \
         (float, learning_rate, 0.1f, PRIMITIVE, "Used in dynamic surface tracking optimization. Gradient descent step magnitude / learning rate."), \
-        (float, weight_killing_term, 0.1f, PRIMITIVE, "Used in dynamic surface tracking optimization when the Killing regularization term is enabled."), \
+        (float, Killing_dampening_factor, 0.1f, PRIMITIVE, "Used in dynamic surface tracking optimization when the Killing regularization term is enabled."), \
         (float, weight_data_term, 1.0f, PRIMITIVE, "Used in dynamic surface tracking optimization when the data term is enabled."), \
         (float, weight_smoothing_term, 0.2f, PRIMITIVE, "Used in dynamic surface tracking optimization when the smoothness regularization term is enabled."), \
         (float, weight_level_set_term, 0.2f, PRIMITIVE, \
@@ -46,7 +46,7 @@ DECLARE_SERIALIZABLE_STRUCT(WEIGHTS_STRUCT_DESCRIPTION);
         		"Whether to enable or disable smoothing regularization term of Slavcheva-based dynamic surface " \
 		        "tracking energy. When rigidity-enforcement factor is enabled, acts as Killing term in KillingFusion,"\
 		        " when it is not, acts as Tikhonov term in SobolevFusion (both articles by Slavcheva et al.)"), \
-        (bool, enable_killing_rigidity_enforcement_term, false, PRIMITIVE, "Whether to enable or disable the non-isometric motion penalizing portion of the Killing term of Slavcheva-based dynamic surface tracking energy (see KillingFusion by Slavcheva et. all."), \
+        (bool, enable_dampened_AKVF_term, false, PRIMITIVE, "Whether to enable or disable the non-isometric motion penalizing portion of the Killing term of Slavcheva-based dynamic surface tracking energy (see KillingFusion by Slavcheva et. all."), \
         (bool, enable_sobolev_gradient_smoothing, true, PRIMITIVE, "Whether to enable or disable Sobolev-space gradient smoothing of Slavcheva-based dynamic surface tracking (see SobolevFusion article by Slavcheva et al.).")
 
 DECLARE_SERIALIZABLE_STRUCT(SWITCHES_STRUCT_DESCRIPTION);
