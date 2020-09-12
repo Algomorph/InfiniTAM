@@ -73,7 +73,7 @@ unsigned int SwitchesToIntCode(const LevelSetAlignmentSwitches& switches) {
 	code |= static_cast<unsigned int>(switches.enable_data_term) << 0u;
 	code |= static_cast<unsigned int>(switches.enable_level_set_term) << 1u;
 	code |= static_cast<unsigned int>(switches.enable_smoothing_term) << 2u;
-	code |= static_cast<unsigned int>(switches.enable_dampened_AKVF_term) << 3u;
+	code |= static_cast<unsigned int>(switches.enable_Killing_field) << 3u;
 	code |= static_cast<unsigned int>(switches.enable_sobolev_gradient_smoothing) << 4u;
 	return code;
 }

@@ -26,49 +26,9 @@
 
 namespace ITMLib {
 
-namespace internal {
-template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode, typename TSurfaceTracker>
-class SurfaceTracker_ExecutionModeSpecific;
-template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, typename TSurfaceTracker>
-class SurfaceTracker_ExecutionModeSpecific<TVoxel, TWarp, TIndex, TMemoryDeviceType, OPTIMIZED, TSurfaceTracker> {
-private: // instance variables
-	TSurfaceTracker& parent;
-public: // instance methods
-	explicit SurfaceTracker_ExecutionModeSpecific(TSurfaceTracker& parent) : parent(parent) {};
-	void PerformSingleOptimizationStep(
-			VoxelVolume<TVoxel, TIndex>* canonical_volume,
-			VoxelVolume<TVoxel, TIndex>* source_live_volume,
-			VoxelVolume<TVoxel, TIndex>* target_live_volume,
-			VoxelVolume<TWarp, TIndex>* warp_field,
-			float& average_update_vector_length,
-			int iteration);
-};
-
-
-template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, typename TSurfaceTracker>
-class SurfaceTracker_ExecutionModeSpecific<TVoxel, TWarp, TIndex, TMemoryDeviceType, DIAGNOSTIC, TSurfaceTracker> {
-private: // instance variables
-
-	TSurfaceTracker& parent;
-public: // instance methods
-	explicit SurfaceTracker_ExecutionModeSpecific(TSurfaceTracker& parent);
-	void PerformSingleOptimizationStep(
-			VoxelVolume<TVoxel, TIndex>* canonical_volume,
-			VoxelVolume<TVoxel, TIndex>* source_live_volume,
-			VoxelVolume<TVoxel, TIndex>* target_live_volume,
-			VoxelVolume<TWarp, TIndex>* warp_field,
-			float& average_update_vector_length,
-			int iteration);
-};
-
-
-} // namespace internal
-
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
 class LevelSetAlignmentEngine : public LevelSetAlignmentEngineInterface<TVoxel, TWarp, TIndex> {
-	friend class internal::SurfaceTracker_ExecutionModeSpecific<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode,
-			LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode>>;
 private: // instance variables
 	//TODO: for auto-completion in Clion, remove when CLion is fixed and this is no longer necessary
 	const LevelSetAlignmentWeights& weights;
@@ -81,9 +41,6 @@ private: // instance variables
 	const float mean_vector_update_threshold_in_voxels;
 	const bool log_settings = false;
 
-	internal::SurfaceTracker_ExecutionModeSpecific<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode,
-			LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode>> execution_mode_specific;
-
 public: // instance functions
 
 	LevelSetAlignmentEngine();
@@ -91,11 +48,11 @@ public: // instance functions
 	virtual ~LevelSetAlignmentEngine();
 
 
-	VoxelVolume<TVoxel, TIndex>* TrackNonRigidMotion(
+	VoxelVolume<TVoxel, TIndex>* Align(
 			VoxelVolume<TVoxel, TIndex>* canonical_volume,
 			VoxelVolume<TVoxel, TIndex>** live_volume_pair,
 			VoxelVolume<TWarp, TIndex>* warp_field) override;
-
+protected:
 	void ClearOutFramewiseWarps(VoxelVolume<TWarp, TIndex>* warp_field) override;
 	void ClearOutCumulativeWarps(VoxelVolume<TWarp, TIndex>* warp_field) override;
 	void ClearOutWarpUpdates(VoxelVolume<TWarp, TIndex>* warp_field) override;
@@ -110,10 +67,22 @@ public: // instance functions
 	float UpdateWarps(VoxelVolume<TWarp, TIndex>* warp_field,
 	                  VoxelVolume<TVoxel, TIndex>* canonical_volume,
 	                  VoxelVolume<TVoxel, TIndex>* live_volume) override;
-
+	void PerformSingleOptimizationStep(
+			VoxelVolume<TVoxel, TIndex>* canonical_volume,
+			VoxelVolume<TVoxel, TIndex>* source_live_volume,
+			VoxelVolume<TVoxel, TIndex>* target_live_volume,
+			VoxelVolume<TWarp, TIndex>* warp_field,
+			float& average_update_vector_length);
 
 private: // instance functions
-	void PerformSingleOptimizationStep(
+	void PerformSingleOptimizationStep_Diagnostic(
+			VoxelVolume<TVoxel, TIndex>* canonical_volume,
+			VoxelVolume<TVoxel, TIndex>* source_live_volume,
+			VoxelVolume<TVoxel, TIndex>* target_live_volume,
+			VoxelVolume<TWarp, TIndex>* warp_field,
+			float& average_update_vector_length);
+
+	void PerformSingleOptimizationStep_Optimized(
 			VoxelVolume<TVoxel, TIndex>* canonical_volume,
 			VoxelVolume<TVoxel, TIndex>* source_live_volume,
 			VoxelVolume<TVoxel, TIndex>* target_live_volume,

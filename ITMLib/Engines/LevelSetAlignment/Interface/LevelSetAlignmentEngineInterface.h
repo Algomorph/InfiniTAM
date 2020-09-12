@@ -36,11 +36,12 @@ public:
 	using Configurable<LevelSetAlignmentParameters>::Configurable;
 
 	virtual ~LevelSetAlignmentEngineInterface() = default;
-	virtual VoxelVolume<TVoxel, TIndex>* TrackNonRigidMotion(
+	virtual VoxelVolume<TVoxel, TIndex>* Align(
 			VoxelVolume<TVoxel, TIndex>* canonical_volume,
 			VoxelVolume<TVoxel, TIndex>** live_volume_pair,
 			VoxelVolume<TWarp, TIndex>* warp_field) = 0;
 
+protected:
 	virtual void
 	CalculateWarpGradient(VoxelVolume<TWarp, TIndex>* warpField,
 	                      VoxelVolume<TVoxel, TIndex>* canonicalScene,

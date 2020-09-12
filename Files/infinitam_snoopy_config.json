@@ -166,7 +166,7 @@
             "enable_data_term": true,
             "enable_level_set_term": false,
             "enable_smoothing_term": true,
-            "enable_dampened_AKVF_term": false,
+            "enable_Killing_field": false,
             "enable_sobolev_gradient_smoothing": true
         },
         "termination": {

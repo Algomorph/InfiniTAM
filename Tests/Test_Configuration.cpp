@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE(ConfigurationFileTest) {
 	BOOST_REQUIRE_EQUAL(configuration1, configuration::Get());
 }
 
-void execute_external_process(const std::string& command) {
+void ExecuteExternalProcess(const std::string& command) {
 	system(command.c_str());
 }
 
@@ -150,7 +150,7 @@ BOOST_AUTO_TEST_CASE(Configuration_CLI_Test_Defaults_Unchanged) {
 
 	config_destination = GENERATED_TEST_DATA_PREFIX "TestData/configuration/cli_test_defaults.json";
 	std::string command = GetCLI_optionsSubtestExecutablePath() + " --config_output=" + config_destination;
-	std::thread thread(execute_external_process, command);
+	std::thread thread(ExecuteExternalProcess, command);
 	thread.join();
 	configuration::LoadConfigurationFromJSONFile(config_destination);
 	loaded_deferrables = DeferrableStructCollection();
@@ -217,7 +217,7 @@ BOOST_AUTO_TEST_CASE(ConfigurationTestLong_CLI_Only) {
 	                      " --level_set_evolution.switches.enable_data_term=false"
 	                      " --level_set_evolution.switches.enable_level_set_term=true"
 	                      " --level_set_evolution.switches.enable_smoothing_term=false"
-	                      " --level_set_evolution.switches.enable_dampened_AKVF_term=true"
+	                      " --level_set_evolution.switches.enable_Killing_field=true"
 	                      " --level_set_evolution.switches.enable_sobolev_gradient_smoothing=false"
 
 	                      " --level_set_evolution.termination.max_iteration_count=300"
@@ -281,7 +281,7 @@ BOOST_AUTO_TEST_CASE(ConfigurationTestLong_CLI_Only) {
 
 	std::cout << "Executing command: " << std::endl;
 	std::cout << command << std::endl;
-	std::thread thread(execute_external_process, command);
+	std::thread thread(ExecuteExternalProcess, command);
 	thread.join();
 	configuration::LoadConfigurationFromJSONFile(config_destination);
 	loaded_deferrables = DeferrableStructCollection();
@@ -402,7 +402,7 @@ BOOST_AUTO_TEST_CASE(ConfigurationTestLong_CLI_Only) {
 //
 //	std::cout << "Executing command: " << std::endl;
 //	std::cout << command << std::endl;
-//	std::thread thread(execute_external_process, command);
+//	std::thread thread(ExecuteExternalProcess, command);
 //	thread.join();
 //	configuration::LoadConfigurationFromJSONFile(config_destination);
 //	loaded_deferrables = DeferrableStructCollection();
@@ -442,7 +442,7 @@ BOOST_AUTO_TEST_CASE(ConfigurationFileAnd_CLI_Test) {
 	                      " --use_approximate_raycast=false";
 	std::cout << "Executing command: " << std::endl;
 	std::cout << command << std::endl;
-	std::thread thread(execute_external_process, command);
+	std::thread thread(ExecuteExternalProcess, command);
 	thread.join();
 
 	configuration::LoadConfigurationFromJSONFile(config_destination);

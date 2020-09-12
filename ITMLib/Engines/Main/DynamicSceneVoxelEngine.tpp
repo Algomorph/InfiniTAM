@@ -332,7 +332,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(UChar4Image* rgb_im
 
 		benchmarking::start_timer("TrackMotion");
 		LOG4CPLUS_PER_FRAME(logging::GetLogger(), bright_cyan << "*** Optimizing warp based on difference between canonical and live SDF. ***" << reset);
-		target_warped_live_volume = surface_tracker->TrackNonRigidMotion(canonical_volume, live_volumes, warp_field);
+		target_warped_live_volume = surface_tracker->Align(canonical_volume, live_volumes, warp_field);
 		LOG4CPLUS_PER_FRAME(logging::GetLogger(), bright_cyan << "*** Warping optimization finished for current frame. ***" << reset);
 		benchmarking::stop_timer("TrackMotion");
 

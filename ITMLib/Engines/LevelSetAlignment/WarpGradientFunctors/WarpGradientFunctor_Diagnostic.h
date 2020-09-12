@@ -146,6 +146,7 @@ public:
 
 		if (!VoxelIsConsideredForAlignment(canonical_voxel, live_voxel)) return;
 
+
 		float live_sdf = TVoxel::valueToFloat(live_voxel.sdf);
 		float canonical_sdf = TVoxel::valueToFloat(canonical_voxel.sdf);
 
@@ -200,7 +201,7 @@ public:
 		// region =============================== SMOOTHING TERM (TIKHONOV & KILLING) ================================================================
 
 		if (switches.enable_smoothing_term && iteration_index < iteration_bound) {
-			if (switches.enable_dampened_AKVF_term) {
+			if (switches.enable_Killing_field) {
 				// region ============================== RETRIEVE & PROCESS NEIGHBOR'S WARPS =========================================================
 				constexpr int neighborhood_size = 12;
 				Vector3f neighbor_warp_updates[neighborhood_size];
@@ -308,7 +309,7 @@ public:
 		if (verbosity_level < VERBOSITY_PER_ITERATION) return;
 		if (configuration::Get().logging_settings.log_surface_tracking_optimization_energies) {
 			PrintEnergyStatistics(this->switches.enable_data_term, this->switches.enable_level_set_term,
-			                      this->switches.enable_smoothing_term, this->switches.enable_dampened_AKVF_term,
+			                      this->switches.enable_smoothing_term, this->switches.enable_Killing_field,
 			                      this->parameters.Killing_dampening_factor, energies);
 		}
 		if (configuration::Get().logging_settings.log_additional_surface_tracking_stats) {

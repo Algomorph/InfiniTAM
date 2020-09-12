@@ -49,7 +49,6 @@ private:
 
 
 public:
-
 	// region ========================================= CONSTRUCTOR ====================================================
 	WarpGradientFunctor(LevelSetAlignmentWeights parameters,
 	                    LevelSetAlignmentSwitches switches,
@@ -96,7 +95,7 @@ public:
 		// region =============================== SMOOTHING TERM (TIKHONOV & KILLING) ================================================================
 
 		if (switches.enable_smoothing_term) {
-			if (switches.enable_dampened_AKVF_term) {
+			if (switches.enable_Killing_field) {
 				// region ============================== RETRIEVE & PROCESS NEIGHBOR'S WARPS =========================================================
 				constexpr int neighborhood_size = 12;
 				Vector3f neighbor_warp_updates[neighborhood_size];

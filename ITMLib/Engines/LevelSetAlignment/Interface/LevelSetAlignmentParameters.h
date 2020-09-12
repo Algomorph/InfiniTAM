@@ -27,27 +27,27 @@
 namespace ITMLib {
 
 #define WEIGHTS_STRUCT_DESCRIPTION LevelSetAlignmentWeights, \
-        (float, learning_rate, 0.1f, PRIMITIVE, "Used in dynamic surface tracking optimization. Gradient descent step magnitude / learning rate."), \
-        (float, Killing_dampening_factor, 0.1f, PRIMITIVE, "Used in dynamic surface tracking optimization when the Killing regularization term is enabled."), \
-        (float, weight_data_term, 1.0f, PRIMITIVE, "Used in dynamic surface tracking optimization when the data term is enabled."), \
-        (float, weight_smoothing_term, 0.2f, PRIMITIVE, "Used in dynamic surface tracking optimization when the smoothness regularization term is enabled."), \
+        (float, learning_rate, 0.1f, PRIMITIVE, "Used in level set alignment optimization. Gradient descent step magnitude / learning rate."), \
+        (float, Killing_dampening_factor, 0.1f, PRIMITIVE, "Used in level set alignment optimization when the Killing regularization term is enabled."), \
+        (float, weight_data_term, 1.0f, PRIMITIVE, "Used in level set alignment optimization when the data term is enabled."), \
+        (float, weight_smoothing_term, 0.2f, PRIMITIVE, "Used in level set alignment optimization when the smoothness regularization term is enabled."), \
         (float, weight_level_set_term, 0.2f, PRIMITIVE, \
-        	"Used in dynamic surface tracking optimization when the level set regularization term is enabled." \
+        	"Used in level set alignment optimization when the level set regularization term is enabled." \
 			" Greater values penalize deformations resulting in non-SDF-like voxel grid."), \
-        (float, epsilon, 1e-5f, PRIMITIVE, "Small value to avoid division by zero when computing level set term in dynamic surface tracking optimization."), \
+        (float, epsilon, 1e-5f, PRIMITIVE, "Small value to avoid division by zero when computing level set term in level set alignment optimization."), \
 		(float, momentum_weight, 0.5f, PRIMITIVE, "Vector fields are computed like this: Ψ(t) = pΨ(t-1) - qα∇E, where weights p+q = 1.0. Momentum weight is weight p.")
 
 DECLARE_SERIALIZABLE_STRUCT(WEIGHTS_STRUCT_DESCRIPTION);
 
 #define SWITCHES_STRUCT_DESCRIPTION LevelSetAlignmentSwitches, \
-        (bool, enable_data_term, true, PRIMITIVE, "Whether to enable or disable data term of Slavcheva-based dynamic surface tracking energy."), \
-        (bool, enable_level_set_term, false, PRIMITIVE, "Whether to enable or disable level-set of Slavcheva-based dynamic surface tracking energy. (see KillingFusion by Slavcheva et. all.)"), \
+        (bool, enable_data_term, true, PRIMITIVE, "Whether to enable or disable data term of Slavcheva-based level set alignment energy."), \
+        (bool, enable_level_set_term, false, PRIMITIVE, "Whether to enable or disable level-set of Slavcheva-based level set alignment energy. (see KillingFusion by Slavcheva et. all.)"), \
         (bool, enable_smoothing_term, true, PRIMITIVE, \
         		"Whether to enable or disable smoothing regularization term of Slavcheva-based dynamic surface " \
 		        "tracking energy. When rigidity-enforcement factor is enabled, acts as Killing term in KillingFusion,"\
 		        " when it is not, acts as Tikhonov term in SobolevFusion (both articles by Slavcheva et al.)"), \
-        (bool, enable_dampened_AKVF_term, false, PRIMITIVE, "Whether to enable or disable the non-isometric motion penalizing portion of the Killing term of Slavcheva-based dynamic surface tracking energy (see KillingFusion by Slavcheva et. all."), \
-        (bool, enable_sobolev_gradient_smoothing, true, PRIMITIVE, "Whether to enable or disable Sobolev-space gradient smoothing of Slavcheva-based dynamic surface tracking (see SobolevFusion article by Slavcheva et al.).")
+        (bool, enable_Killing_field, false, PRIMITIVE, "Whether to enable or disable the non-isometric-motion-penalizing Killing field portion of the smoothing term of Slavcheva-based level-set alignment energy (see KillingFusion by Slavcheva et. all."), \
+        (bool, enable_sobolev_gradient_smoothing, true, PRIMITIVE, "Whether to enable or disable Sobolev-space gradient smoothing of Slavcheva-based level set alignment (see SobolevFusion article by Slavcheva et al.).")
 
 DECLARE_SERIALIZABLE_STRUCT(SWITCHES_STRUCT_DESCRIPTION);
 

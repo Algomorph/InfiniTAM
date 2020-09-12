@@ -165,13 +165,15 @@ inline void PrintDampened_AKVF_TermInformation(const CONSTPTR(Vector3f)* neighbo
 			Vector3i(1, 1, 0), Vector3i(0, 1, 1), Vector3i(1, 0, 1),
 			Vector3i(-1, -1, 0), Vector3i(0, -1, -1), Vector3i(-1, 0, -1)
 	};
+#ifndef __CUDACC__
 	printf("%sNeighbors' warps: \n", green);
 
 	for (int i_neighbor = 0; i_neighbor < neighborhood_size; i_neighbor++) {
-		printf("%s%d, %d, %d (Neighbor %d): %s%E, %E, %E\n",
+		printf("%s%d, %d, %d (Neighbor %d): %s%E, %E, %E \n",
 		       reset, neighbor_positions[i_neighbor].x, neighbor_positions[i_neighbor].y, neighbor_positions[i_neighbor].z, i_neighbor, green,
 		       neighbor_warps[i_neighbor].x, neighbor_warps[i_neighbor].y, neighbor_warps[i_neighbor].z);
 	}
+#endif
 	printf("%sUnallocated neighbors: ", reset);
 	bool first = true;
 	for (int i_neighbor = 0; i_neighbor < neighborhood_size; i_neighbor++) {
@@ -198,23 +200,18 @@ inline void PrintDampened_AKVF_TermInformation(const CONSTPTR(Vector3f)* neighbo
 	}
 	printf("\n\n");
 
-	printf("Laplacian of warp updates at current warp, i.e. [∆U ∆V ∆W]^T: %s\n"
-	       "%E %E %E\n"
-	       "%s\n",
+	printf("Laplacian of warp updates at current warp: %s\n"
+	       "%E %E %E%s\n"
+	       "Derivative(s) of the divergence: %s\n"
+	       "%E %E %E%s\n"
+	       "Local Tikhonov energy: %s%E%s\n"
+	       "Local Killing energy: %s%E%s\n",
 	       yellow,
-	       warp_update_laplacian.x, warp_update_laplacian.y, warp_update_laplacian.z,
-	       reset);
-
-
-	printf("*** Derivative(s) of the divergence, i.e. [d(div(Ψ))/dx d(div(Ψ))/dy d(div(Ψ))/dz]^T: %s\n"
-	       "%E %E %E\n"
-	       "%s",
+	       warp_update_laplacian.x, warp_update_laplacian.y, warp_update_laplacian.z, reset,
 	       cyan,
-	       warp_update_divergence_derivative.x, warp_update_divergence_derivative.y, warp_update_divergence_derivative.z,
-	       reset);
+	       warp_update_divergence_derivative.x, warp_update_divergence_derivative.y, warp_update_divergence_derivative.z, reset, yellow,
+	       local_Tikhonov_energy, reset, yellow, local_Killing_energy, reset);
 
-	printf("local Tikhonov energy: %s%E%s\nlocal Killing energy: %s%E%s\n",
-	       yellow, local_Tikhonov_energy, reset, yellow, local_Killing_energy, reset);
 };
 
 _CPU_AND_GPU_CODE_
