@@ -66,6 +66,8 @@ VoxelVolume<TVoxel, TIndex>::VoxelVolume(const VoxelVolume& other, MemoryDeviceT
 	voxels.SetFrom(other.voxels, memory_copy_direction);
 }
 
+
+
 template<class TVoxel, class TIndex>
 void VoxelVolume<TVoxel, TIndex>::Reset() {
 	switch (this->index.memory_type) {
@@ -102,6 +104,12 @@ void VoxelVolume<TVoxel, TIndex>::LoadFromDisk(const std::string& path) {
 }
 
 template<class TVoxel, class TIndex>
+TVoxel VoxelVolume<TVoxel, TIndex>::GetValueAt(int x, int y, int z) {
+	Vector3i pos(x, y, z);
+	return GetValueAt(pos);
+}
+
+template<class TVoxel, class TIndex>
 TVoxel VoxelVolume<TVoxel, TIndex>::GetValueAt(const Vector3i& pos) {
 	switch (this->index.memory_type) {
 		case MEMORYDEVICE_CPU:
@@ -113,6 +121,29 @@ TVoxel VoxelVolume<TVoxel, TIndex>::GetValueAt(const Vector3i& pos) {
 		default:
 			DIEWITHEXCEPTION_REPORTLOCATION("Unsupported device type.");
 	}
+}
+
+
+template<class TVoxel, class TIndex>
+void VoxelVolume<TVoxel, TIndex>::SetValueAt(const Vector3i& position, TVoxel value) {
+	switch (this->index.memory_type) {
+		case MEMORYDEVICE_CPU:
+			EditAndCopyEngine_CPU<TVoxel, TIndex>::Inst().SetVoxel(this, position, value);
+			break;
+#ifndef COMPILE_WITHOUT_CUDA
+		case MEMORYDEVICE_CUDA:
+			EditAndCopyEngine_CUDA<TVoxel, TIndex>::Inst().SetVoxel(this, position, value);
+			break;
+#endif
+		default:
+			DIEWITHEXCEPTION_REPORTLOCATION("Unsupported device type.");
+	}
+}
+
+template<class TVoxel, class TIndex>
+void VoxelVolume<TVoxel, TIndex>::SetValueAt(int x, int y, int z, TVoxel value) {
+	Vector3i pos(x, y, z);
+	return SetValueAt(pos, value);
 }
 
 template<class TVoxel, class TIndex>
@@ -139,6 +170,5 @@ template<class TVoxel, class TIndex>
 MemoryDeviceType VoxelVolume<TVoxel, TIndex>::GetMemoryType() const {
 	return index.memory_type;
 }
-
 
 }  // namespace ITMLib

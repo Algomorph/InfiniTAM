@@ -61,6 +61,22 @@ LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode
 		                                       configuration::Get().general_voxel_volume_parameters.voxel_size),
 		iteration(0) {}
 
+
+template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
+LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode>::LevelSetAlignmentEngine(
+		const LevelSetAlignmentSwitches& switches, const LevelSetAlignmentTerminationConditions& termination_conditions) :
+		LevelSetAlignmentEngineInterface<TVoxel, TWarp, TIndex>(
+				LevelSetAlignmentParameters(LevelSetAlignmentParameters().execution_mode, LevelSetAlignmentWeights(), switches,
+				                            termination_conditions, "")
+		),
+		weights(this->parameters.weights),
+		switches(this->parameters.switches),
+		termination(this->parameters.termination),
+		warping_engine(WarpingEngineFactory::Build<TVoxel, TWarp, TIndex>()),
+		mean_vector_update_threshold_in_voxels(termination.mean_update_length_threshold /
+		                                       configuration::Get().general_voxel_volume_parameters.voxel_size),
+		iteration(0) {}
+
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
 LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode>::~LevelSetAlignmentEngine() {
 	delete warping_engine;
@@ -125,11 +141,10 @@ LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode
 		VoxelVolume<TWarp, TIndex>* warp_field) {
 
 	float average_vector_update_length_in_voxels = std::numeric_limits<float>::infinity();
-	const int min_iteration_count = 10;
 
 	int source_live_volume_index = 0;
 	int target_live_volume_index = 1;
-	for (iteration = 0; iteration < min_iteration_count || (average_vector_update_length_in_voxels > this->mean_vector_update_threshold_in_voxels
+	for (iteration = 0; iteration < termination.min_iteration_count || (average_vector_update_length_in_voxels > this->mean_vector_update_threshold_in_voxels
 	                                                        && iteration < termination.max_iteration_count); iteration++) {
 		PerformSingleOptimizationStep(canonical_volume, live_volume_pair[source_live_volume_index],
 		                              live_volume_pair[target_live_volume_index], warp_field, average_vector_update_length_in_voxels);
@@ -311,7 +326,10 @@ void LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutio
 		                                       "to new warped SDF based on latest warp..." << reset);
 	}
 	bench::start_timer("TrackMotion_4_WarpLiveScene");
-	warping_engine->WarpVolume_WarpUpdates(warp_field, source_live_volume, target_live_volume);
+	// special case for testing
+	if(target_live_volume != nullptr){
+		warping_engine->WarpVolume_WarpUpdates(warp_field, source_live_volume, target_live_volume);
+	}
 	bench::stop_timer("TrackMotion_4_WarpLiveScene");
 
 	auto& telemetry_recorder = TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::GetDefaultInstance();
@@ -328,6 +346,11 @@ void LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutio
 	CalculateWarpGradient(warp_field, canonical_volume, source_live_volume);
 	SmoothWarpGradient(warp_field, canonical_volume, source_live_volume);
 	average_update_vector_length = UpdateWarps(warp_field, canonical_volume, source_live_volume);
-	warping_engine->WarpVolume_WarpUpdates(warp_field, source_live_volume, target_live_volume);
+	// special case for testing
+	if(target_live_volume != nullptr) {
+		warping_engine->WarpVolume_WarpUpdates(warp_field, source_live_volume, target_live_volume);
+	}
 }
+
+
 //endregion ============================================================================================================

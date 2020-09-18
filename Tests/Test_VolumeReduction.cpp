@@ -29,54 +29,12 @@
 #include "TestUtilities/TestUtilities.h"
 #include "TestUtilities/SnoopyTestUtilities.h"
 #include "TestUtilities/WarpAdvancedTestingUtilities.h"
+#include "../ITMLib/Engines/Indexing/IndexingEngineFactory.h"
 
 using namespace ITMLib;
 using namespace test_utilities;
 namespace snoopy = snoopy_test_utilities;
 
-
-BOOST_AUTO_TEST_CASE(Test_VolumeReduction_MaxWarpUpdate_VBH_CUDA) {
-	const int iteration = 1;
-
-	// *** load warps
-	LevelSetAlignmentSwitches data_tikhonov_sobolev_switches(true, false, true, false, true);
-	std::string path_warps = GetWarpsPath<VoxelBlockHash>(SwitchesToPrefix(data_tikhonov_sobolev_switches),
-	                                                      iteration);
-	VoxelVolume<WarpVoxel, VoxelBlockHash>* warps;
-	LoadVolume(&warps, path_warps, MEMORYDEVICE_CUDA, snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
-
-	float value_gt =
-			AnalyticsEngine<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance().ComputeWarpUpdateMax(warps);
-
-	float max_value;
-	Vector3i position;
-	AnalyticsEngine<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance().ComputeWarpUpdateMaxAndPosition(
-			max_value, position, warps);
-
-	BOOST_REQUIRE_EQUAL(value_gt, max_value);
-
-	WarpVoxel voxel = warps->GetValueAt(position);
-
-	BOOST_REQUIRE_EQUAL(ORUtils::length(voxel.warp_update), max_value);
-
-#ifdef TEST_PERFORMANCE
-	TimeIt(
-			[&]() {
-				VolumeStatisticsCalculator<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance().ComputeWarpUpdateMax(
-						warps);
-			}, "Warp Update Max (Atomics)", 10
-	);
-
-	TimeIt(
-			[&]() {
-				VolumeStatisticsCalculator<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance().ComputeWarpUpdateMax(
-						warps);
-			}, "Warp Update Max (Reduciton)", 10
-	);
-#endif
-
-	delete warps;
-}
 
 template<typename TIndex>
 typename TIndex::InitializationParameters GetTestSpecificInitializationParameters();
@@ -142,8 +100,6 @@ void GenericVolumeReductionCountWeightRangeTest1() {
 
 	BOOST_REQUIRE_EQUAL(sub_volume_voxel_count, voxels_in_range);
 }
-
-
 
 
 template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
@@ -233,12 +189,60 @@ void GenericVolumeReductionCountWeightRangeTest2() {
 	BOOST_REQUIRE_EQUAL(sub_volume_hash_block_count - 3u, blocks_in_range);
 }
 
+
+template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
+void GenericTestVolumeReductionMaxWarpUpdate() {
+	const int iteration = 1;
+
+	// *** load warps
+	LevelSetAlignmentSwitches data_tikhonov_sobolev_switches(true, false, true, false, true);
+	std::string path_warps = GetWarpsPath<TIndex>(SwitchesToPrefix(data_tikhonov_sobolev_switches), iteration);
+
+	VoxelVolume<WarpVoxel, TIndex>* warps;
+	LoadVolume(&warps, path_warps, TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+
+	float value_gt = AnalyticsEngine<WarpVoxel, TIndex, TMemoryDeviceType>::Instance().ComputeWarpUpdateMax(warps);
+
+	float max_value;
+	Vector3i position;
+	AnalyticsEngine<WarpVoxel, TIndex, TMemoryDeviceType>::Instance().ComputeWarpUpdateMaxAndPosition(max_value, position, warps);
+
+	BOOST_REQUIRE_EQUAL(value_gt, max_value);
+
+	WarpVoxel voxel = warps->GetValueAt(position);
+
+	BOOST_REQUIRE_EQUAL(ORUtils::length(voxel.warp_update), max_value);
+
+// #define TEST_PERFORMANCE
+#ifdef TEST_PERFORMANCE
+	TimeIt(
+		[&]() {
+			AnalyticsEngine<WarpVoxel, TIndex, TMemoryDeviceType>::Instance().ComputeWarpUpdateMax(warps);
+		}, "Warp Update Max (Atomics)", 100
+	);
+
+	TimeIt(
+		[&]() {
+			AnalyticsEngine<WarpVoxel, TIndex, TMemoryDeviceType>::Instance().ComputeWarpUpdateMaxAndPosition(max_value, position, warps);
+		}, "Warp Update Max (Reduciton)", 100
+	);
+#endif
+
+	delete warps;
+}
+
+
+
 BOOST_AUTO_TEST_CASE(Test_VolumeReduction_CountWeightRange1_VBH_CPU) {
 	GenericVolumeReductionCountWeightRangeTest1<VoxelBlockHash, MEMORYDEVICE_CPU>();
 }
 
 BOOST_AUTO_TEST_CASE(Test_VolumeReduction_CountWeightRange2_VBH_CPU) {
 	GenericVolumeReductionCountWeightRangeTest2<VoxelBlockHash, MEMORYDEVICE_CPU>();
+}
+
+BOOST_AUTO_TEST_CASE(Test_VolumeReduction_MaxWarpUpdate_VBH_CPU) {
+	GenericTestVolumeReductionMaxWarpUpdate<VoxelBlockHash, MEMORYDEVICE_CPU>();
 }
 
 #ifndef COMPILE_WITHOUT_CUDA
@@ -251,4 +255,45 @@ BOOST_AUTO_TEST_CASE(Test_VolumeReduction_CountWeightRange2_VBH_CUDA) {
 	GenericVolumeReductionCountWeightRangeTest2<VoxelBlockHash, MEMORYDEVICE_CUDA>();
 }
 
+BOOST_AUTO_TEST_CASE(Test_VolumeReduction_MaxWarpUpdate_VBH_CUDA) {
+	GenericTestVolumeReductionMaxWarpUpdate<VoxelBlockHash, MEMORYDEVICE_CUDA>();
+}
+
 #endif
+
+template<typename TIndex>
+typename TIndex::InitializationParameters GetTestLargeVolumeInitializationParameters();
+
+template<>
+VoxelBlockHash::InitializationParameters GetTestLargeVolumeInitializationParameters<VoxelBlockHash>() {
+	return {0x40000, 0x20000};
+}
+
+template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
+void GenericTestVolumeReductionPerformance() {
+	VoxelVolume<WarpVoxel, TIndex> volume(TMemoryDeviceType, GetTestLargeVolumeInitializationParameters<TIndex>());
+	volume.Reset();
+	Extent3Di bounds{-256,-256,0,256,256,512};
+	IndexingEngineFactory::GetDefault<WarpVoxel, TIndex>(TMemoryDeviceType).AllocateGridAlignedBox(&volume, bounds);
+	WarpVoxel voxel;
+	float max_value_gt = 100.0f;
+	voxel.warp_update = Vector3f(100.0f, 0, 0.0);
+	Vector3i position_gt{0, 0, 256};
+	volume.SetValueAt(position_gt, voxel);
+
+	Vector3i position;
+	float max_value;
+
+	TimeIt(
+			[&]() {
+				AnalyticsEngine<WarpVoxel, TIndex, TMemoryDeviceType>::Instance().ComputeWarpUpdateMaxAndPosition(max_value, position, &volume);
+			}, "Warp Update Max (Atomics)", 10
+	);
+	BOOST_REQUIRE_EQUAL(max_value_gt, max_value);
+	BOOST_REQUIRE_EQUAL(position, position_gt);
+
+}
+
+BOOST_AUTO_TEST_CASE(Test_VolumeReduction_Performance_VBH_CUDA) {
+	GenericTestVolumeReductionPerformance<VoxelBlockHash, MEMORYDEVICE_CUDA>();
+}

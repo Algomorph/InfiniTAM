@@ -53,7 +53,8 @@ DECLARE_SERIALIZABLE_STRUCT(SWITCHES_STRUCT_DESCRIPTION);
 
 
 #define TERMINATION_CONDITIONS_STRUCT_DESCRIPTION LevelSetAlignmentTerminationConditions, \
-		(int, max_iteration_count, 200, PRIMITIVE, "Maximum iteration count, after which the non-rigid alignment is cut off."),\
+		(int, max_iteration_count, 200, PRIMITIVE, "Maximum iteration count, after which the non-rigid alignment is cut off."), \
+        (int, min_iteration_count, 10, PRIMITIVE, "Minimum iteration count, after which all other termination conditions are enabled."), \
         (float, mean_update_length_threshold, 1e-6f, PRIMITIVE, "Mean update length threshold, in meters. When the mean"\
                                  " vector update in calculating voxel motion doesn't exceed this threshold, the non-rigid alignment optimization is terminated.")\
 

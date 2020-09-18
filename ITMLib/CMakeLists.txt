@@ -211,7 +211,7 @@ set(
         ${ITMLIB_ENGINES_REDUCTION_SHARED_HEADERS}
         ${ITMLIB_ENGINES_REDUCTION_CPU_HEADERS}
         ${ITMLIB_ENGINES_REDUCTION_CUDA_HEADERS}
-)
+        Engines/Reduction/Interface/BlockVolumeReduction.h)
 
 
 #====================================== SCENE MANIPULATION ENGINES =====================================================

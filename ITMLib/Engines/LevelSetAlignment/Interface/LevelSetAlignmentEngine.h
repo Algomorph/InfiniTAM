@@ -29,6 +29,7 @@ namespace ITMLib {
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
 class LevelSetAlignmentEngine : public LevelSetAlignmentEngineInterface<TVoxel, TWarp, TIndex> {
+
 private: // instance variables
 	//TODO: for auto-completion in Clion, remove when CLion is fixed and this is no longer necessary
 	const LevelSetAlignmentWeights& weights;
@@ -45,6 +46,7 @@ public: // instance functions
 
 	LevelSetAlignmentEngine();
 	LevelSetAlignmentEngine(const LevelSetAlignmentSwitches& switches);
+	LevelSetAlignmentEngine(const LevelSetAlignmentSwitches& switches, const LevelSetAlignmentTerminationConditions& termination_conditions);
 	virtual ~LevelSetAlignmentEngine();
 
 

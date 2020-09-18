@@ -32,7 +32,7 @@ public:
 	virtual unsigned int CountUtilizedVoxels(const VoxelVolume<TVoxel, TIndex>* volume) = 0;
 	virtual unsigned int CountAllocatedVoxels(const VoxelVolume<TVoxel, TIndex>* volume) = 0;
 	virtual unsigned int CountVoxelsWithDepthWeightInRange(const VoxelVolume <TVoxel, TIndex>* volume, Extent2Di range) = 0;
-	virtual unsigned int CountHashBlocksWithDepthWeightInRange(const VoxelVolume <TVoxel, TIndex>* volume, Extent2Di range) = 0;
+
 	virtual unsigned int CountVoxelsWithSpecifiedFlags(const VoxelVolume<TVoxel, TIndex>* volume, VoxelFlags flags) = 0;
 	virtual unsigned int CountNonTruncatedVoxels(const VoxelVolume<TVoxel, TIndex>* volume) = 0;
 	virtual unsigned int CountAlteredVoxels(const VoxelVolume<TVoxel, TIndex>* volume) = 0;
@@ -57,11 +57,13 @@ public:
 
 	virtual unsigned int CountAllocatedHashBlocks(const VoxelVolume<TVoxel, TIndex>* volume) = 0;
 	virtual unsigned int CountUtilizedHashBlocks(const VoxelVolume<TVoxel, TIndex>* volume) = 0;
+	virtual unsigned int CountHashBlocksWithDepthWeightInRange(const VoxelVolume <TVoxel, TIndex>* volume, Extent2Di range) = 0;
 	virtual std::vector<int> GetAllocatedHashCodes(const VoxelVolume<TVoxel, TIndex>* volume) = 0;
 	virtual std::vector<Vector3s> GetAllocatedHashBlockPositions(const VoxelVolume<TVoxel, TIndex>* volume) = 0;
 	virtual std::vector<int> GetUtilizedHashCodes(const VoxelVolume <TVoxel, TIndex>* volume) = 0;
 	virtual std::vector<Vector3s> GetUtilizedHashBlockPositions(const VoxelVolume <TVoxel, TIndex>* volume) = 0;
 	virtual std::vector<Vector3s> GetDifferenceBetweenAllocatedAndUtilizedHashBlockPositionSets(const VoxelVolume<TVoxel,TIndex>* volume) = 0;
+
 
 	virtual Histogram ComputeWarpUpdateLengthHistogram_VolumeMax(const VoxelVolume<TVoxel, TIndex>* volume, int bin_count, float& maximum) = 0;
 	virtual Histogram ComputeWarpUpdateLengthHistogram_ManualMax(const VoxelVolume<TVoxel, TIndex>* volume, int bin_count, float maximum) = 0;

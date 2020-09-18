@@ -29,7 +29,13 @@ struct ReductionResult<TValue, VoxelBlockHash> {
 	TValue value;
 	unsigned int index_within_block;
 	int hash_code;
-	friend inline std::ostream& operator << (std::ostream& stream, const ReductionResult<TValue, VoxelBlockHash>& result){
+
+	// ReductionResult() : value(0), index_within_block(0u), hash_code(0) {}
+	//
+	// ReductionResult(TValue value, unsigned int index_within_block, int hash_code) :
+	// 		value(std::move(value)), index_within_block(index_within_block), hash_code(hash_code) {}
+
+	friend inline std::ostream& operator<<(std::ostream& stream, const ReductionResult<TValue, VoxelBlockHash>& result) {
 		stream << result.hash_code << " / " << result.index_within_block << ": " << result.value;
 		return stream;
 	}
@@ -40,9 +46,32 @@ template<typename TValue>
 struct ReductionResult<TValue, PlainVoxelArray> {
 	TValue value;
 	unsigned int index_within_array;
-	friend inline std::ostream& operator << (std::ostream& stream, const ReductionResult<TValue, PlainVoxelArray>& result){
+
+	// ReductionResult() : value(0), index_within_array(0u) {}
+	//
+	// ReductionResult(TValue value, unsigned int index_within_array) :
+	// 		value(std::move(value)), index_within_array(index_within_array) {}
+
+	friend inline std::ostream& operator<<(std::ostream& stream, const ReductionResult<TValue, PlainVoxelArray>& result) {
 		stream << result.index_within_array << ": " << result.value;
 		return stream;
+	}
+};
+
+template<typename TValue, typename TIndex>
+struct ReductionResultInitializer;
+
+template<typename TValue>
+struct ReductionResultInitializer<TValue, VoxelBlockHash>{
+	static ReductionResult<TValue, VoxelBlockHash> Default(){
+		return {TValue(0), 0u, 0};
+	}
+};
+
+template<typename TValue>
+struct ReductionResultInitializer<TValue, PlainVoxelArray>{
+	static ReductionResult<TValue, PlainVoxelArray> Default(){
+		return {TValue(0), 0u};
 	}
 };
 

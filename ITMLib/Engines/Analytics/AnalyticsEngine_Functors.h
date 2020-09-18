@@ -31,6 +31,7 @@
 #include "../../../ORUtils/CrossPlatformMacros.h"
 #include "../../Objects/Volume/VoxelVolume.h"
 #include "../Reduction/Interface/VolumeReduction.h"
+#include "../Reduction/Interface/BlockVolumeReduction.h"
 #include "../Traversal/Interface/HashTableTraversal.h"
 #include "../Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
 #include "../Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
@@ -779,6 +780,11 @@ struct HashOnlyAnalysisFunctor<TVoxel, PlainVoxelArray, TMemoryDeviceType> {
 	static int ComputeUtilizedHashBlockCount(const VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
 		return 1;
 	}
+
+	static unsigned int CountHashBlocksWithDepthWeightInRange(const VoxelVolume<TVoxel, PlainVoxelArray>* volume, Extent2Di range) {
+		DIEWITHEXCEPTION_REPORTLOCATION("Cannot count hash blocks with a specific property within a volume indexed by a plain voxel array.");
+		return 0;
+	}
 };
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
 struct HashOnlyAnalysisFunctor<TVoxel, VoxelBlockHash, TMemoryDeviceType> {
@@ -832,6 +838,18 @@ struct HashOnlyAnalysisFunctor<TVoxel, VoxelBlockHash, TMemoryDeviceType> {
 
 	static unsigned int ComputeUtilizedHashBlockCount(const VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 		return volume->index.GetUtilizedBlockCount();
+	}
+
+	static unsigned int CountHashBlocksWithDepthWeightInRange(const VoxelVolume<TVoxel, VoxelBlockHash>* volume, Extent2Di range) {
+		typedef RetrieveIsVoxelInDepthWeightRange<TVoxel, unsigned int, TVoxel::hasWeightInformation> RetrievalFunctorType;
+		typedef ReduceBinAndFunctor<TVoxel, VoxelBlockHash, unsigned int> BlockReduceFunctorType;
+		typedef ReduceSumFunctor<TVoxel, VoxelBlockHash, unsigned int> ResultReduceFunctorType;
+		RetrievalFunctorType functor{range};
+		Vector3i position;
+
+		return BlockVolumeReductionEngine<TVoxel, TMemoryDeviceType>::
+		template ReduceUtilizedBlocks<BlockReduceFunctorType, ResultReduceFunctorType, RetrievalFunctorType, unsigned int>
+				(position, volume, functor);
 	}
 };
 //endregion
@@ -1031,7 +1049,7 @@ struct WarpHistogramFunctor<TWarp, TMemoryDeviceType, true> {
 			max_warp_update_length(maximum),
 			histogram_bin_count(histogram.GetBinCount()),
 			bins_device(histogram.GetBinData()),
-			unit_count_device(histogram.GetUnitCountData()){
+			unit_count_device(histogram.GetUnitCountData()) {
 	}
 
 	const int histogram_bin_count;

@@ -107,4 +107,10 @@ template void GenerateRawLiveAndCanonicalVolumes<PlainVoxelArray, MEMORYDEVICE_C
 		VoxelVolume<TSDFVoxel, PlainVoxelArray>** live_volume);
 #endif
 
+
+const LevelSetAlignmentTerminationConditions& SingleIterationTerminationConditions() {
+	static LevelSetAlignmentTerminationConditions single_iteration_termination_conditions{1,0,1e-6f};
+	return single_iteration_termination_conditions;
+}
+
 } // namespace test_utilities

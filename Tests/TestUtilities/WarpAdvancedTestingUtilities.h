@@ -71,4 +71,6 @@ void
 GenericWarpTest(const LevelSetAlignmentSwitches& switches, int iteration_limit = 10,
                 GenericWarpTestMode mode = TEST_SUCCESSIVE_ITERATIONS, float absolute_tolerance = 1e-7);
 
+const LevelSetAlignmentTerminationConditions& SingleIterationTerminationConditions();
+
 } // namespace test_utilities

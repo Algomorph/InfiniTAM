@@ -141,16 +141,17 @@ void GenericWarpConsistencySubtest(const LevelSetAlignmentSwitches& switches, in
 	live_volumes[0]->Reset();
 	live_volumes[1]->Reset();
 
-	const int live_index_to_start_from = 0;
-	GenerateRawLiveAndCanonicalVolumes<TIndex, TMemoryDeviceType>(&canonical_volume,
-	                                                              &live_volumes[live_index_to_start_from]);
-	AllocateUsingOtherVolume(live_volumes[(live_index_to_start_from + 1) % 2], live_volumes[live_index_to_start_from],
-	                         TMemoryDeviceType);
-	AllocateUsingOtherVolume(&warp_field, live_volumes[live_index_to_start_from], TMemoryDeviceType);
-	AllocateUsingOtherVolume(canonical_volume, live_volumes[live_index_to_start_from], TMemoryDeviceType);
+	const int source_warped_field_ix = 0;
+	const int target_warped_field_ix = 1;
 
+	GenerateRawLiveAndCanonicalVolumes<TIndex, TMemoryDeviceType>(&canonical_volume, &live_volumes[source_warped_field_ix]);
 
-	LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, DIAGNOSTIC> motion_tracker(switches);
+	AllocateUsingOtherVolume(live_volumes[target_warped_field_ix], live_volumes[source_warped_field_ix], TMemoryDeviceType);
+	AllocateUsingOtherVolume(&warp_field, live_volumes[source_warped_field_ix], TMemoryDeviceType);
+	AllocateUsingOtherVolume(canonical_volume, live_volumes[source_warped_field_ix], TMemoryDeviceType);
+
+	LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, DIAGNOSTIC> motion_tracker(switches,
+	                                                                                                    SingleIterationTerminationConditions());
 
 	VoxelVolume<WarpVoxel, TIndex> ground_truth_warp_field(TMemoryDeviceType,
 	                                                       snoopy::InitializationParameters_Fr16andFr17<TIndex>());
@@ -166,18 +167,17 @@ void GenericWarpConsistencySubtest(const LevelSetAlignmentSwitches& switches, in
 	VolumeFusionEngineInterface<TSDFVoxel, TIndex>* volume_fusion_engine =
 			VolumeFusionEngineFactory::Build<TSDFVoxel, TIndex>(TMemoryDeviceType);
 
-	//note: will be swapped before first iteration
-
-	int source_warped_field_ix = (live_index_to_start_from + 1) % 2;
-	int target_warped_field_ix = live_index_to_start_from;
 	for (int iteration = 0; iteration < iteration_limit; iteration++) {
-		std::swap(source_warped_field_ix, target_warped_field_ix);
+
 		std::cout << "Subtest " << IndexString<TIndex>() << " iteration " << std::to_string(iteration) << std::endl;
-		motion_tracker.CalculateWarpGradient(&warp_field, canonical_volume, live_volumes[source_warped_field_ix]);
-		motion_tracker.SmoothWarpGradient(&warp_field, canonical_volume, live_volumes[source_warped_field_ix]);
-		motion_tracker.UpdateWarps(&warp_field, canonical_volume, live_volumes[source_warped_field_ix]);
-		warping_engine->WarpVolume_WarpUpdates(&warp_field, live_volumes[source_warped_field_ix],
-		                                       live_volumes[target_warped_field_ix]);
+
+		motion_tracker.Align(canonical_volume, live_volumes, &warp_field);
+
+		if (iteration < iteration_limit - 1) {
+			// prepare for next iteration by swapping source & target (live) TSDF fields
+			std::swap(live_volumes[source_warped_field_ix], live_volumes[target_warped_field_ix]);
+		}
+
 		std::string path = GetWarpsPath<TIndex>(volume_filename_prefix, iteration);
 		std::string path_warped_live = GetWarpedLivePath<TIndex>(volume_filename_prefix, iteration);
 		switch (mode) {
@@ -273,7 +273,9 @@ void Warp_PVA_VBH_simple_subtest(int iteration, LevelSetAlignmentSwitches tracke
 
 	// *** load warped live scene
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* warped_live_PVA;
+	VoxelVolume<TSDFVoxel, PlainVoxelArray>* warped_pair_PVA[2];
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* warped_live_VBH;
+	VoxelVolume<TSDFVoxel, VoxelBlockHash>* warped_pair_VBH[2];
 
 	std::string path_live_VBH, path_live_PVA;
 	if (iteration > 0) {
@@ -291,6 +293,11 @@ void Warp_PVA_VBH_simple_subtest(int iteration, LevelSetAlignmentSwitches tracke
 		AllocateUsingOtherVolume(warps_VBH, warped_live_VBH, TMemoryDeviceType);
 	}
 
+	warped_pair_PVA[0] = warped_live_PVA;
+	warped_pair_PVA[1] = nullptr;
+	warped_pair_VBH[0] = warped_live_VBH;
+	warped_pair_VBH[1] = nullptr;
+
 	// *** load canonical volume as the two different data structures
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* volume_16_PVA;
 	LoadVolume(&volume_16_PVA, path_frame_16_PVA, TMemoryDeviceType,
@@ -301,20 +308,17 @@ void Warp_PVA_VBH_simple_subtest(int iteration, LevelSetAlignmentSwitches tracke
 	AllocateUsingOtherVolume(volume_16_VBH, warped_live_VBH, TMemoryDeviceType);
 
 	// *** perform the warp gradient computation and warp updates
-	LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray, TMemoryDeviceType, DIAGNOSTIC> motionTracker_PVA(trackerSwitches);
+	LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray, TMemoryDeviceType, DIAGNOSTIC> motionTracker_PVA(trackerSwitches,
+	                                                                                                                SingleIterationTerminationConditions());
 
 	std::cout << "==== CALCULATE PVA WARPS === " << std::endl;
-	motionTracker_PVA.CalculateWarpGradient(warps_PVA, volume_16_PVA, warped_live_PVA);
-	motionTracker_PVA.SmoothWarpGradient(warps_PVA, volume_16_PVA, warped_live_PVA);
-	motionTracker_PVA.UpdateWarps(warps_PVA, volume_16_PVA, warped_live_PVA);
+	motionTracker_PVA.Align(volume_16_PVA, warped_pair_PVA, warps_PVA);
 
-	LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash, TMemoryDeviceType, DIAGNOSTIC> motionTracker_VBH(trackerSwitches);
-
+	LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash, TMemoryDeviceType, DIAGNOSTIC> motionTracker_VBH(trackerSwitches,
+	                                                                                                               SingleIterationTerminationConditions());
 
 	std::cout << "==== CALCULATE VBH WARPS === " << std::endl;
-	motionTracker_VBH.CalculateWarpGradient(warps_VBH, volume_16_VBH, warped_live_VBH);
-	motionTracker_VBH.SmoothWarpGradient(warps_VBH, volume_16_VBH, warped_live_VBH);
-	motionTracker_VBH.UpdateWarps(warps_VBH, volume_16_VBH, warped_live_VBH);
+	motionTracker_VBH.Align(volume_16_VBH, warped_pair_VBH, warps_VBH);
 
 	BOOST_REQUIRE(allocatedContentAlmostEqual_Verbose(warps_PVA, warps_VBH, absolute_tolerance, TMemoryDeviceType));
 
@@ -397,5 +401,6 @@ void GenericWarpTest(const LevelSetAlignmentSwitches& switches, int iteration_li
 			break;
 	}
 }
+
 
 } // namespace test_utilities

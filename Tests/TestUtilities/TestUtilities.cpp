@@ -455,7 +455,7 @@ configuration::Configuration GenerateChangedUpConfiguration() {
 			ExecutionMode::DIAGNOSTIC,
 			LevelSetAlignmentWeights(0.11f, 0.09f, 2.0f, 0.3f, 0.1f, 1e-6f, 0.4f),
 			LevelSetAlignmentSwitches(false, true, false, true, false),
-			LevelSetAlignmentTerminationConditions(300, 0.0002f)
+			LevelSetAlignmentTerminationConditions(300, 5, 0.0002f)
 	);
 	VolumeFusionSettings changed_up_volume_fusion_settings(true, 0.008);
 	DepthFusionSettings changed_up_depth_fusion_settings(true, 0.008);

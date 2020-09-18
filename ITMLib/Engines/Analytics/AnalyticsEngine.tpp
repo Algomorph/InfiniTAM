@@ -96,22 +96,9 @@ unsigned int AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::CountVoxelsWith
 	RetrievalFunctorType functor{range};
 	Vector3i position;
 	return VolumeReductionEngine<TVoxel, TIndex, TMemoryDeviceType>::
-	template ReduceUtilized<RetrievalFunctorType, ReduceFunctorType, ReduceFunctorType, unsigned int>
-			(position, volume, functor);
+	template ReduceUtilized<ReduceFunctorType, RetrievalFunctorType, unsigned int>(position, volume, functor);
 }
 
-template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-unsigned int AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::CountHashBlocksWithDepthWeightInRange(
-		const VoxelVolume<TVoxel, TIndex>* volume, Extent2Di range) {
-	typedef RetrieveIsVoxelInDepthWeightRange<TVoxel, unsigned int, TVoxel::hasWeightInformation> RetrievalFunctorType;
-	typedef ReduceBinAndFunctor<TVoxel, TIndex, unsigned int> BlockReduceFunctorType;
-	typedef ReduceSumFunctor<TVoxel, TIndex, unsigned int> ResultReduceFunctorType;
-	RetrievalFunctorType functor{range};
-	Vector3i position;
-	return VolumeReductionEngine<TVoxel, TIndex, TMemoryDeviceType>::
-	template ReduceUtilized<RetrievalFunctorType, BlockReduceFunctorType, ResultReduceFunctorType, unsigned int>
-			(position, volume, functor);
-}
 
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
@@ -153,9 +140,7 @@ void AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::ComputeWarpUpdateMaxAnd
 	typedef ReduceStatisticFunctor<TVoxel, TIndex, float, ITMLib::MAXIMUM> ReduceFunctorType;
 	ignored_value.value = FLT_MIN;
 	value = VolumeReductionEngine<TVoxel, TIndex, TMemoryDeviceType>::
-	template ReduceUtilized<RetreiveWarpLengthFunctor<TVoxel, ITMLib::WARP_UPDATE>,
-			ReduceFunctorType, ReduceFunctorType, float>
-			(position, volume, ignored_value);
+	template ReduceUtilized<ReduceFunctorType, RetreiveWarpLengthFunctor<TVoxel, ITMLib::WARP_UPDATE>, float> (position, volume, ignored_value);
 }
 
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
@@ -255,6 +240,13 @@ std::vector<Vector3s>
 AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::GetDifferenceBetweenAllocatedAndUtilizedHashBlockPositionSets(
 		const VoxelVolume<TVoxel, TIndex>* volume) {
 	return HashOnlyAnalysisFunctor<TVoxel, TIndex, TMemoryDeviceType>::GetDifferenceBetweenAllocatedAndUtilizedHashBlockPositionSets(volume);
+}
+
+
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+unsigned int AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::CountHashBlocksWithDepthWeightInRange(
+		const VoxelVolume<TVoxel, TIndex>* volume, Extent2Di range) {
+	return HashOnlyAnalysisFunctor<TVoxel, TIndex, TMemoryDeviceType>::CountHashBlocksWithDepthWeightInRange(volume, range);
 }
 
 

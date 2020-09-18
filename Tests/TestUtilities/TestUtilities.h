@@ -86,7 +86,7 @@ void TimeIt(std::function<void()> function, const std::string& description = "Ti
 		std::chrono::duration<double> elapsed = finish - start;
 		cumulative += elapsed.count();
 	}
-	std::cout << "Elapsed average time for " << run_count << " runs: " << cumulative / run_count << " s" << std::endl;
+	std::cout << "Average elapsed (wall) time over " << run_count << " runs: " << cumulative / run_count << " s" << std::endl;
 }
 
 
