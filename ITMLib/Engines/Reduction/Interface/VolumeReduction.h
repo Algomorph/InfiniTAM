@@ -42,10 +42,10 @@ public:
 	 * TRetrieveSingleStaticFunctor is used to retrieve initial values from individual voxels.
 	 * TReduceStaticFunctor is used to reduce the results over all initial values.
 	 *
-	 * \tparam TReduceStaticFunctor a function object with a static function which accepts two ReductionResult<TOutput> objects and returns a single
-	 * ReductionResult<TOutput> object
-	 * \tparam TRetrieveSingleStaticFunctor a function object with a static function which accepts a single TVoxel as an argument and returns a
-	 * TOutput value based on this TVoxel.
+	 * \tparam TReduceStaticFunctor a function object with a public static "reduce" function which accepts two ReductionResult<TOutput> objects and
+	 * returns a single ReductionResult<TOutput> object
+	 * \tparam TRetrieveSingleStaticFunctor a function object with a static "retrieve" function which accepts a single TVoxel as an argument and
+	 * returns a TOutput value based on this TVoxel.
 	 * \tparam TOutput type of the output value, e.g. float when computing minimum of some voxel float field
 	 *
 	 * \param position the position of the voxel based on the indices produced by TReduceBlockLevelStaticFunctor when comparing each ReductionResult pair.
@@ -79,9 +79,9 @@ public:
 	 * TRetrieveSingleDynamicFunctor is used to retrieve initial values from individual voxels.
 	 * TReduceStaticFunctor is used to reduce the results over all initial values.
 	 *
-	 * \tparam TReduceStaticFunctor a function object with a static function which accepts two ReductionResult<TOutput> objects and returns a single
-	 * ReductionResult<TOutput> object.
-	 * \tparam TRetrieveSingleDynamicFunctor a function object with a retrieve public member function which accepts a
+	 * \tparam TReduceStaticFunctor a function object with a public static function "reduce" which accepts two ReductionResult<TOutput> objects and
+	 * returns a single ReductionResult<TOutput> object.
+	 * \tparam TRetrieveSingleDynamicFunctor a function object with a public instance function "retrieve" which accepts a
 	 *  single TVoxel as an argument and returns a TOutput value based on this TVoxel.
 	 * \tparam TOutput type of the output value, e.g. float when computing minimum of some voxel float field
 	 *

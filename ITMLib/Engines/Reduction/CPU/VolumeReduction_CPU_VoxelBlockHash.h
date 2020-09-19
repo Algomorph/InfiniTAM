@@ -138,8 +138,6 @@ public:
 		position = ComputePositionVectorFromLinearIndex_VoxelBlockHash(entry_with_result.pos, static_cast<int> (final_result.index_within_block));
 
 		return final_result.value;
-
-
 	}
 
 };

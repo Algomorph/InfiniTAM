@@ -43,13 +43,28 @@ public:
 
 		const TVoxel* voxels = volume->GetVoxels();
 		const unsigned int voxel_count = volume->index.GetMaxVoxelCount();
-		if (voxel_count % VOXEL_BLOCK_SIZE3 != 0) {
-			DIEWITHEXCEPTION_REPORTLOCATION("Voxel count should be a multiple of VOXEL_BLOCK_SIZE3, please check voxel array dimensions.");
-		}
-
 		const int count_of_whole_blocks = voxel_count / VOXEL_BLOCK_SIZE3;
-
 		const int half_block_voxel_count = (VOXEL_BLOCK_SIZE3 / 2);
+		dim3 cuda_block_size(half_block_voxel_count);
+
+		ReductionResult<TOutput, PlainVoxelArray> extra_result_CPU = ignored_value;
+		bool use_extra_result = false;
+		if (voxel_count % VOXEL_BLOCK_SIZE3 != 0) {
+			const unsigned int remainder_voxels = voxel_count % VOXEL_BLOCK_SIZE3;
+			ORUtils::MemoryBlock<TVoxel> extra_voxels(VOXEL_BLOCK_SIZE3, MEMORYDEVICE_CUDA);
+			extra_voxels.Clear();
+			cudaMemcpy(extra_voxels.GetData(), voxels + (count_of_whole_blocks * VOXEL_BLOCK_SIZE3), sizeof(TVoxel) * remainder_voxels,
+			           cudaMemcpyDeviceToDevice);
+			ORUtils::MemoryBlock<ReductionResult<TOutput, PlainVoxelArray>> extra_result(1, true, true);
+			dim3 cuda_single_grid_size(1);
+			computeVoxelHashReduction_BlockLevel<TReduceBlockLevelStaticFunctor, TVoxel, TOutput><<<cuda_single_grid_size, cuda_block_size>>>
+					(extra_result.GetData(MEMORYDEVICE_CUDA), extra_voxels.GetData(), retrieval_function);
+			ORcudaKernelCheck;
+			extra_result.UpdateHostFromDevice();
+			extra_result_CPU = *extra_result.GetData(MEMORYDEVICE_CPU);
+			extra_result_CPU.index_within_array += count_of_whole_blocks * VOXEL_BLOCK_SIZE3;
+			use_extra_result = true;
+		}
 
 		auto get_normalized_count = [](int count) {
 			return ceil_of_integer_quotient(count, VOXEL_BLOCK_SIZE3) * VOXEL_BLOCK_SIZE3;
@@ -60,7 +75,6 @@ public:
 
 		ORUtils::MemoryBlock<ReductionResult<TOutput, PlainVoxelArray>> result_buffer1(normalized_entry_count, MEMORYDEVICE_CUDA);
 
-		dim3 cuda_block_size(half_block_voxel_count);
 		dim3 cuda_tail_grid_size(ceil_of_integer_quotient(tail_length, VOXEL_BLOCK_SIZE3));
 
 		if (tail_length > 0) {
@@ -112,9 +126,11 @@ public:
 		ReductionResult<TOutput, PlainVoxelArray> final_result;
 		ORcudaSafeCall(cudaMemcpyAsync(&final_result, output_buffer->GetData(MEMORYDEVICE_CUDA),
 		                               sizeof(ReductionResult<TOutput, PlainVoxelArray>), cudaMemcpyDeviceToHost));
+		if (use_extra_result) {
+			final_result = TReduceResultLevelStaticFunctor::reduce(final_result, ignored_value);
+		}
 		GridAlignedBox array_bounds(volume->index.GetVolumeSize(), volume->index.GetVolumeOffset());
-		position = ComputePositionVectorFromLinearIndex_PlainVoxelArray(&array_bounds,
-		                                                                static_cast<int> (final_result.index_within_array));
+		position = ComputePositionVectorFromLinearIndex_PlainVoxelArray(&array_bounds, static_cast<int> (final_result.index_within_array));
 		return final_result.value;
 	}
 };

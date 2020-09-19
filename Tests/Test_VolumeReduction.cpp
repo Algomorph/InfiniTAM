@@ -213,20 +213,6 @@ void GenericTestVolumeReductionMaxWarpUpdate() {
 
 	BOOST_REQUIRE_EQUAL(ORUtils::length(voxel.warp_update), max_value);
 
-// #define TEST_PERFORMANCE
-#ifdef TEST_PERFORMANCE
-	TimeIt(
-		[&]() {
-			AnalyticsEngine<WarpVoxel, TIndex, TMemoryDeviceType>::Instance().ComputeWarpUpdateMax(warps);
-		}, "Warp Update Max (Atomics)", 100
-	);
-
-	TimeIt(
-		[&]() {
-			AnalyticsEngine<WarpVoxel, TIndex, TMemoryDeviceType>::Instance().ComputeWarpUpdateMaxAndPosition(max_value, position, warps);
-		}, "Warp Update Max (Reduciton)", 100
-	);
-#endif
 
 	delete warps;
 }
@@ -245,6 +231,10 @@ BOOST_AUTO_TEST_CASE(Test_VolumeReduction_MaxWarpUpdate_VBH_CPU) {
 	GenericTestVolumeReductionMaxWarpUpdate<VoxelBlockHash, MEMORYDEVICE_CPU>();
 }
 
+BOOST_AUTO_TEST_CASE(Test_VolumeReduction_MaxWarpUpdate_PVA_CPU) {
+	GenericTestVolumeReductionMaxWarpUpdate<PlainVoxelArray, MEMORYDEVICE_CPU>();
+}
+
 #ifndef COMPILE_WITHOUT_CUDA
 
 BOOST_AUTO_TEST_CASE(Test_VolumeReduction_CountWeightRange1_VBH_CUDA) {
@@ -257,6 +247,10 @@ BOOST_AUTO_TEST_CASE(Test_VolumeReduction_CountWeightRange2_VBH_CUDA) {
 
 BOOST_AUTO_TEST_CASE(Test_VolumeReduction_MaxWarpUpdate_VBH_CUDA) {
 	GenericTestVolumeReductionMaxWarpUpdate<VoxelBlockHash, MEMORYDEVICE_CUDA>();
+}
+
+BOOST_AUTO_TEST_CASE(Test_VolumeReduction_MaxWarpUpdate_PVA_CUDA) {
+	GenericTestVolumeReductionMaxWarpUpdate<PlainVoxelArray, MEMORYDEVICE_CUDA>();
 }
 
 #endif
@@ -292,13 +286,24 @@ void GenericTestVolumeReductionPerformance() {
 	TimeIt(
 			[&]() {
 				AnalyticsEngine<WarpVoxel, TIndex, TMemoryDeviceType>::Instance().ComputeWarpUpdateMaxAndPosition(max_value, position, &volume);
-			}, "Warp Update Max (Atomics)", 10
+			}, "Warp Update Max (Reduction)", 1
 	);
 	BOOST_REQUIRE_EQUAL(max_value_gt, max_value);
 	BOOST_REQUIRE_EQUAL(position, position_gt);
 
 }
 
+// #define TEST_PERFORMANCE
+#ifdef TEST_PERFORMANCE
+BOOST_AUTO_TEST_CASE(Test_VolumeReduction_Performance_VBH_CPU) {
+	GenericTestVolumeReductionPerformance<VoxelBlockHash, MEMORYDEVICE_CPU>();
+}
+
+BOOST_AUTO_TEST_CASE(Test_VolumeReduction_Performance_PVA_CPU) {
+	GenericTestVolumeReductionPerformance<PlainVoxelArray, MEMORYDEVICE_CPU>();
+}
+
+#ifndef COMPILE_WITHOUT_CUDA
 BOOST_AUTO_TEST_CASE(Test_VolumeReduction_Performance_VBH_CUDA) {
 	GenericTestVolumeReductionPerformance<VoxelBlockHash, MEMORYDEVICE_CUDA>();
 }
@@ -306,3 +311,6 @@ BOOST_AUTO_TEST_CASE(Test_VolumeReduction_Performance_VBH_CUDA) {
 BOOST_AUTO_TEST_CASE(Test_VolumeReduction_Performance_PVA_CUDA) {
 	GenericTestVolumeReductionPerformance<PlainVoxelArray, MEMORYDEVICE_CUDA>();
 }
+#endif
+#endif
+
