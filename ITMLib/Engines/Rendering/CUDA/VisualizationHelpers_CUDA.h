@@ -7,7 +7,7 @@
 
 #include "../Shared/RenderingEngine_Shared.h"
 #include "../../Reconstruction/Shared/SceneReconstructionEngine_Shared.h"
-#include "../../../Utils/CUDAUtils.h"
+#include "../../../Utils/CUDA/CUDAUtils.h"
 #include "../../../../ORUtils/PlatformIndependedParallelSum.h"
 
 namespace ITMLib {

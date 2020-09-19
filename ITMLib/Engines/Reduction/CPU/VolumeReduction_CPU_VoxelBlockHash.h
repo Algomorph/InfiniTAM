@@ -35,59 +35,6 @@ namespace internal {
 template<typename TVoxel>
 class VolumeReductionEngine_IndexSpecialized<TVoxel, VoxelBlockHash, MEMORYDEVICE_CPU> {
 public:
-
-	template<typename TReduceBlockLevelStaticFunctor, typename TReduceResultLevelStaticFunctor, typename TRetrieveSingleStaticFunctor, typename TOutput>
-	static TOutput ReduceUtilizedBlocks(Vector3i& position, const VoxelVolume<TVoxel, VoxelBlockHash>* volume,
-	                                    ReductionResult<TOutput, VoxelBlockHash> ignored_value) {
-		return ReduceUtilizedBlocks_Generic<TReduceBlockLevelStaticFunctor, TReduceResultLevelStaticFunctor>(
-				position, volume,
-				[](const TVoxel* block_voxels, int index_within_block) {
-					return TRetrieveSingleStaticFunctor::retrieve(block_voxels[index_within_block]);
-				}, ignored_value
-		);
-	}
-
-	template<typename TReduceBlockLevelStaticFunctor, typename TReduceResultLevelStaticFunctor, typename TRetrieveSingleDynamicFunctor, typename TOutput>
-	static TOutput ReduceUtilizedBlocks(Vector3i& position, const VoxelVolume<TVoxel, VoxelBlockHash>* volume,
-	                                    const TRetrieveSingleDynamicFunctor& retrieve_functor,
-	                                    ReductionResult<TOutput, VoxelBlockHash> ignored_value) {
-		return ReduceUtilizedBlocks_Generic<TReduceBlockLevelStaticFunctor, TReduceResultLevelStaticFunctor>(
-				position, volume,
-				[&retrieve_functor](const TVoxel* block_voxels, int index_within_block) {
-					return retrieve_functor.retrieve(block_voxels[index_within_block]);
-				}, ignored_value
-		);
-	}
-
-	template<typename TReduceStaticFunctor, typename TRetrieveSingleStaticFunctor, typename TOutput>
-	static TOutput ReduceUtilized(Vector3i& position, const VoxelVolume<TVoxel, VoxelBlockHash>* volume,
-	                              ReductionResult<TOutput, VoxelBlockHash> ignored_value) {
-		return ReduceUtilizedBlocks<TReduceStaticFunctor, TReduceStaticFunctor, TRetrieveSingleStaticFunctor>(position, volume, ignored_value);
-	}
-
-	template<typename TReduceStaticFunctor, typename TRetrieveSingleDynamicFunctor, typename TOutput>
-	static TOutput ReduceUtilized(Vector3i& position, const VoxelVolume<TVoxel, VoxelBlockHash>* volume,
-	                              const TRetrieveSingleDynamicFunctor& retrieve_functor,
-	                              ReductionResult<TOutput, VoxelBlockHash> ignored_value) {
-		return ReduceUtilizedBlocks<TReduceStaticFunctor, TReduceStaticFunctor>(position, volume, retrieve_functor, ignored_value);
-	}
-
-	template<typename TReduceStaticFunctor, typename TOutput, typename TRetrieveFunction>
-	static TOutput ReduceUtilized2(Vector3i& position, const VoxelVolume<TVoxel, VoxelBlockHash>* volume,
-	                               TRetrieveFunction&& retrieve_function,
-	                               ReductionResult<TOutput, VoxelBlockHash> ignored_value) {
-		return ReduceUtilizedBlocks_Generic<TReduceStaticFunctor,TReduceStaticFunctor>(
-				position, volume, retrieve_function, ignored_value);
-	}
-
-	template<typename TReduceBlockLevelStaticFunctor, typename TReduceResultLevelStaticFunctor, typename TOutput, typename RetrievalFunction>
-	static TOutput ReduceUtilizedBlocks2(Vector3i& position, const VoxelVolume<TVoxel, VoxelBlockHash>* volume,
-	                                     RetrievalFunction&& retrieval_function, ReductionResult<TOutput, VoxelBlockHash> ignored_value) {
-		return ReduceUtilizedBlocks_Generic<TReduceBlockLevelStaticFunctor, TReduceResultLevelStaticFunctor>(
-				position, volume, retrieval_function, ignored_value);
-	}
-
-private:
 	template<typename TReduceStaticFunctor, typename TOutput, typename TRetrieveFunction>
 	static TOutput ReduceUtilized_Generic(Vector3i& position, const VoxelVolume<TVoxel, VoxelBlockHash>* volume,
 	                                      TRetrieveFunction&& retrieve_function,

@@ -269,6 +269,11 @@ VoxelBlockHash::InitializationParameters GetTestLargeVolumeInitializationParamet
 	return {0x40000, 0x20000};
 }
 
+template<>
+PlainVoxelArray::InitializationParameters GetTestLargeVolumeInitializationParameters<PlainVoxelArray>() {
+	return {{512,512,512,},{-256, -256, 0}};
+}
+
 template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void GenericTestVolumeReductionPerformance() {
 	VoxelVolume<WarpVoxel, TIndex> volume(TMemoryDeviceType, GetTestLargeVolumeInitializationParameters<TIndex>());
@@ -296,4 +301,8 @@ void GenericTestVolumeReductionPerformance() {
 
 BOOST_AUTO_TEST_CASE(Test_VolumeReduction_Performance_VBH_CUDA) {
 	GenericTestVolumeReductionPerformance<VoxelBlockHash, MEMORYDEVICE_CUDA>();
+}
+
+BOOST_AUTO_TEST_CASE(Test_VolumeReduction_Performance_PVA_CUDA) {
+	GenericTestVolumeReductionPerformance<PlainVoxelArray, MEMORYDEVICE_CUDA>();
 }

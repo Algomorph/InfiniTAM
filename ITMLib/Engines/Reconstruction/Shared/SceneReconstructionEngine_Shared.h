@@ -8,7 +8,7 @@
 #include "../../../Utils/Geometry/IntersectionChecks.h"
 
 #if defined(__CUDACC__) && defined(__CUDA_ARCH__)
-#include "../../../Utils/CUDAUtils.h"
+#include "../../../Utils/CUDA/CUDAUtils.h"
 #endif
 
 _CPU_AND_GPU_CODE_ inline void

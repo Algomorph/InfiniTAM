@@ -1,7 +1,7 @@
 // Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
 
 #include "ColorTracker_CUDA.h"
-#include "../../Utils/CUDAUtils.h"
+#include "../../Utils/CUDA/CUDAUtils.h"
 #include "../Shared/ColorTracker_Shared.h"
 #include "../../Utils/PixelUtils.h"
 

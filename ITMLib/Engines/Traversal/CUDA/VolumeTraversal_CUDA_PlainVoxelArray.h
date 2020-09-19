@@ -23,7 +23,7 @@
 #include "../../../Objects/Volume/VoxelVolume.h"
 #include "../../../Objects/Volume/PlainVoxelArray.h"
 #include "../../../Utils/Configuration/Configuration.h"
-#include "../Shared/CudaCallWrappers.cuh"
+#include "../../../Utils/CUDA/CudaCallWrappers.cuh"
 #include "VolumeTraversal_CUDA_PlainVoxelArray_Kernels.h"
 
 namespace ITMLib {

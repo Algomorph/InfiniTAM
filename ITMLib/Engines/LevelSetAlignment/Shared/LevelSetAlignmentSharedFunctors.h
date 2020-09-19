@@ -26,7 +26,7 @@
 #include "../../Common/WarpAccessFunctors.h"
 
 #ifdef __CUDACC__
-#include "../../../Utils/CUDAUtils.h"
+#include "../../../Utils/CUDA/CUDAUtils.h"
 #endif
 
 

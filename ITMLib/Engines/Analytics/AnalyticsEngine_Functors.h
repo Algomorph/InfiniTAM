@@ -20,7 +20,7 @@
 
 //local
 #ifdef __CUDACC__
-#include "../../Utils/CUDAUtils.h"
+#include "../../Utils/CUDA/CUDAUtils.h"
 #include "../Traversal/CUDA/VolumeTraversal_CUDA_PlainVoxelArray.h"
 #include "../Traversal/CUDA/VolumeTraversal_CUDA_VoxelBlockHash.h"
 #endif
@@ -277,7 +277,9 @@ public:
 	_CPU_AND_GPU_CODE_
 	inline static ReductionResult<TOutput, TIndex> reduce(
 			const ReductionResult<TOutput, TIndex>& item1, const ReductionResult<TOutput, TIndex>& item2) {
-		return {item1.value + item2.value, 0u, 0};
+		ReductionResult<TOutput, TIndex> output;
+		output.value = item1.value + item2.value;
+		return output;
 	}
 };
 
@@ -287,7 +289,9 @@ public:
 	_CPU_AND_GPU_CODE_
 	inline static ReductionResult<TOutput, TIndex> reduce(
 			const ReductionResult<TOutput, TIndex>& item1, const ReductionResult<TOutput, TIndex>& item2) {
-		return {item1.value | item2.value, 0u, 0};
+		ReductionResult<TOutput, TIndex> output;
+		output.value = item1.value | item2.value;
+		return output;
 	}
 };
 
@@ -297,7 +301,9 @@ public:
 	_CPU_AND_GPU_CODE_
 	inline static ReductionResult<TOutput, TIndex> reduce(
 			const ReductionResult<TOutput, TIndex>& item1, const ReductionResult<TOutput, TIndex>& item2) {
-		return {item1.value & item2.value, 0u, 0};
+		ReductionResult<TOutput, TIndex> output;
+		output.value = item1.value & item2.value;
+		return output;
 	}
 };
 

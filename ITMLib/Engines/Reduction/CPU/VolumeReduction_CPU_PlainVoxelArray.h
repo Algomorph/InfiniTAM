@@ -29,22 +29,8 @@ namespace internal {
 template<typename TVoxel>
 class VolumeReductionEngine_IndexSpecialized<TVoxel, PlainVoxelArray, MEMORYDEVICE_CPU> {
 public:
-	template<typename TReduceStaticFunctor, typename TRetrieveSingleStaticFunctor, typename TOutput>
-	static TOutput ReduceUtilized(Vector3i& position, const VoxelVolume<TVoxel, PlainVoxelArray>* volume,
-	                              ReductionResult<TOutput, PlainVoxelArray> ignored_value) {
-		DIEWITHEXCEPTION_REPORTLOCATION("Not yet implemented.");
-		return TOutput();
-	}
-
-	template<typename TReduceStaticFunctor, typename TRetrieveSingleDynamicFunctor, typename TOutput>
-	static TOutput ReduceUtilized(Vector3i& position, const VoxelVolume<TVoxel, PlainVoxelArray>* volume,
-	                              const TRetrieveSingleDynamicFunctor& retrieve_functor,
-	                              ReductionResult<TOutput, PlainVoxelArray> ignored_value) {
-		DIEWITHEXCEPTION_REPORTLOCATION("Not yet implemented.");
-		return TOutput();
-	}
 	template<typename TReduceStaticFunctor, typename TOutput, typename TRetrieveFunction>
-	static TOutput ReduceUtilized2(Vector3i& position, const VoxelVolume<TVoxel, PlainVoxelArray>* volume,
+	static TOutput ReduceUtilized_Generic(Vector3i& position, const VoxelVolume<TVoxel, PlainVoxelArray>* volume,
 	                                      TRetrieveFunction&& retrieve_function,
 	                                      ReductionResult<TOutput, PlainVoxelArray> ignored_value) {
 		DIEWITHEXCEPTION_REPORTLOCATION("Not yet implemented.");

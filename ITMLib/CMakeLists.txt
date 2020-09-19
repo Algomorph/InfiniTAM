@@ -106,7 +106,7 @@ set(ITMLIB_ENGINES_TRAVERSAL_INTERFACE_HEADERS
 ##
 set(ITMLIB_ENGINES_TRAVERSAL_SHARED_HEADERS
     Engines/Traversal/Shared/ContiguousCollectionTraversal_Shared.h
-    Engines/Traversal/Shared/CudaCallWrappers.cuh
+    Utils/CUDA/CudaCallWrappers.cuh
     Engines/Traversal/Shared/JobCountPolicy.h
     Engines/Traversal/Shared/TraversalMethod.h
     Engines/Traversal/Shared/VolumeTraversal_Shared.h
@@ -958,7 +958,7 @@ set(
         Utils/Logging/PrettyPrinters.h
         Utils/Logging/PrettyPrinters.cpp
 
-        Utils/CUDAUtils.h
+        Utils/CUDA/CUDAUtils.h
         Utils/ImageTypes.h
 
         Utils/Math.h

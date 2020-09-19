@@ -3,7 +3,7 @@
 #include "SceneReconstructionEngine_CUDA.h"
 
 #include "../Shared/SceneReconstructionEngine_Shared.h"
-#include "../../../Utils/CUDAUtils.h"
+#include "../../../Utils/CUDA/CUDAUtils.h"
 #include "../../../Utils/Geometry/CheckBlockVisibility.h"
 #include "../../Common/AllocationTempData.h"
 #include "../../../Utils/Configuration/Configuration.h"

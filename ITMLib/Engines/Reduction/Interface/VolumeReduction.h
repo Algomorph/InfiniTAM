@@ -19,6 +19,7 @@
 #include "../Shared/ReductionResult.h"
 #include "../../../Objects/Volume/VoxelVolume.h"
 #include "../../../../ORUtils/CrossPlatformMacros.h"
+#include "../../../Utils/CUDA/CudaCallWrappers.cuh"
 
 namespace ITMLib {
 
@@ -28,7 +29,7 @@ class VolumeReductionEngine_IndexSpecialized;
 } // namespace internal
 
 
-template<typename TVoxel, typename TIndex, MemoryDeviceType TDeviceType>
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 class VolumeReductionEngine {
 public:
 	/**
@@ -57,18 +58,11 @@ public:
 	template<typename TReduceStaticFunctor, typename TRetrieveSingleStaticFunctor, typename TOutput>
 	static TOutput ReduceUtilized(Vector3i& position, const VoxelVolume<TVoxel, TIndex>* volume,
 	                              ReductionResult<TOutput, TIndex> ignored_value = ReductionResultInitializer<TOutput, TIndex>::Default()) {
-		return internal::VolumeReductionEngine_IndexSpecialized<TVoxel, TIndex, TDeviceType>
-		::template ReduceUtilized<TReduceStaticFunctor, TRetrieveSingleStaticFunctor>(position, volume, ignored_value);
-	}
-
-	template<typename TReduceStaticFunctor, typename TRetrieveSingleStaticFunctor, typename TOutput>
-	static TOutput ReduceUtilized2(Vector3i& position, const VoxelVolume<TVoxel, TIndex>* volume,
-	                              ReductionResult<TOutput, TIndex> ignored_value = ReductionResultInitializer<TOutput, TIndex>::Default()) {
-		return internal::VolumeReductionEngine_IndexSpecialized<TVoxel, TIndex, TDeviceType>
-		::template ReduceUtilized2<TReduceStaticFunctor>(
+		return internal::VolumeReductionEngine_IndexSpecialized<TVoxel, TIndex, TMemoryDeviceType>
+		::template ReduceUtilized_Generic<TReduceStaticFunctor>(
 				position, volume,
-				CPU_AND_GPU_CAPTURE_LAMBDA()(const TVoxel* block_voxels, int index_within_block) {
-					return TRetrieveSingleStaticFunctor::retrieve(block_voxels[index_within_block]);
+				CPU_AND_GPU_CAPTURE_LAMBDA()(const TVoxel* voxels, unsigned int index) {
+					return TRetrieveSingleStaticFunctor::retrieve(voxels[index]);
 				}, ignored_value
 		);
 	}
@@ -103,21 +97,20 @@ public:
 	static TOutput ReduceUtilized(Vector3i& position, const VoxelVolume<TVoxel, TIndex>* volume,
 	                              const TRetrieveSingleDynamicFunctor& retrieve_functor,
 	                              ReductionResult<TOutput, TIndex> ignored_value = ReductionResultInitializer<TOutput, TIndex>::Default()) {
-		return internal::VolumeReductionEngine_IndexSpecialized<TVoxel, TIndex, TDeviceType>
-		::template ReduceUtilized<TReduceStaticFunctor>(position, volume, retrieve_functor, ignored_value);
-	}
-
-	template<typename TReduceStaticFunctor, typename TRetrieveSingleDynamicFunctor, typename TOutput>
-	static TOutput ReduceUtilized2(Vector3i& position, const VoxelVolume<TVoxel, TIndex>* volume,
-	                              const TRetrieveSingleDynamicFunctor& retrieve_functor,
-	                              ReductionResult<TOutput, TIndex> ignored_value = ReductionResultInitializer<TOutput, TIndex>::Default()) {
-		return internal::VolumeReductionEngine_IndexSpecialized<TVoxel, TIndex, TDeviceType>
-		::template ReduceUtilized2<TReduceStaticFunctor>(
-				position, volume,
-				CPU_AND_GPU_CAPTURE_LAMBDA(&retrieve_functor)(const TVoxel* block_voxels, int index_within_block) {
-					return retrieve_functor.retrieve(block_voxels[index_within_block]);
-				}, ignored_value
+		TOutput result;
+		internal::UploadConstFunctorIfNecessaryAndCall<TMemoryDeviceType>(
+				retrieve_functor,
+				[&result, &position, &volume, &ignored_value](const TRetrieveSingleDynamicFunctor* functor_prepared) {
+					result = internal::VolumeReductionEngine_IndexSpecialized<TVoxel, TIndex, TMemoryDeviceType>::
+					template ReduceUtilized_Generic<TReduceStaticFunctor>(
+							position, volume,
+							CPU_AND_GPU_CAPTURE_LAMBDA(&functor_prepared)(const TVoxel* voxels, unsigned int index) {
+								return functor_prepared->retrieve(voxels[index]);
+							}, ignored_value
+					);
+				}
 		);
+		return result;
 	}
 
 };

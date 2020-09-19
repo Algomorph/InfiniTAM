@@ -16,7 +16,7 @@
 #pragma once
 
 #include "../Interface/VolumeTraversal.h"
-#include "../Shared/CudaCallWrappers.cuh"
+#include "../../../Utils/CUDA/CudaCallWrappers.cuh"
 #include "../../../Objects/Volume/VoxelBlockHash.h"
 #include "../../../Objects/Volume/PlainVoxelArray.h"
 #include "../../../Objects/Volume/VoxelVolume.h"
