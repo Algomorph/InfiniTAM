@@ -49,7 +49,7 @@
 #include "../ITMLib/Engines/Warping/WarpingEngineFactory.h"
 #include "../ITMLib/Engines/Meshing/MeshingEngineFactory.h"
 #include "../ITMLib/Engines/EditAndCopy/EditAndCopyEngineFactory.h"
-#include "../ITMLib/Engines/ViewBuilding/ViewBuilderFactory.h"
+#include "../ITMLib/Engines/ViewBuilder/ViewBuilderFactory.h"
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
 #include "../ITMLib/Engines/Telemetry/TelemetrySettings.h"
 #include "../ITMLib/Utils/Configuration/AutomaticRunSettings.h"

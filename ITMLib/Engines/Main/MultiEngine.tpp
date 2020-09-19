@@ -3,7 +3,7 @@
 #include "MultiEngine.h"
 
 #include "../ImageProcessing/ImageProcessingEngineFactory.h"
-#include "../ViewBuilding/ViewBuilderFactory.h"
+#include "../ViewBuilder/ViewBuilderFactory.h"
 #include "../Rendering/RenderingEngineFactory.h"
 #include "../Rendering/MultiVisualizationEngineFactory.h"
 #include "../../CameraTrackers/CameraTrackerFactory.h"

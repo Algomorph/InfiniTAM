@@ -28,7 +28,7 @@ namespace fs = std::filesystem;
 #include "DynamicSceneVoxelEngine.h"
 #include "../ImageProcessing/ImageProcessingEngineFactory.h"
 #include "../Meshing/MeshingEngineFactory.h"
-#include "../ViewBuilding/ViewBuilderFactory.h"
+#include "../ViewBuilder/ViewBuilderFactory.h"
 #include "../Rendering/RenderingEngineFactory.h"
 #include "../VolumeFileIO/VolumeFileIOEngine.h"
 #include "../VolumeFusion/VolumeFusionEngineFactory.h"

@@ -5,7 +5,7 @@
 #include "FusionAlgorithm.h"
 #include "CameraTrackingController.h"
 #include "../ImageProcessing/Interface/ImageProcessingEngineInterface.h"
-#include "../ViewBuilding/Interface/ViewBuilder.h"
+#include "../ViewBuilder/Interface/ViewBuilder.h"
 #include "../../Objects/Misc/IMUCalibrator.h"
 #include "../../../FernRelocLib/Relocaliser.h"
 

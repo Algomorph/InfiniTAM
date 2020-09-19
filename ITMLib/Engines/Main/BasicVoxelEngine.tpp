@@ -2,7 +2,7 @@
 #include "BasicVoxelEngine.h"
 #include "../ImageProcessing/ImageProcessingEngineFactory.h"
 #include "../Meshing/MeshingEngineFactory.h"
-#include "../ViewBuilding/ViewBuilderFactory.h"
+#include "../ViewBuilder/ViewBuilderFactory.h"
 #include "../Rendering/RenderingEngineFactory.h"
 #include "../../CameraTrackers/CameraTrackerFactory.h"
 

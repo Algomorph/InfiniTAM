@@ -3,7 +3,7 @@
 #include "BasicSurfelEngine.h"
 
 #include "../ImageProcessing/ImageProcessingEngineFactory.h"
-#include "../ViewBuilding/ViewBuilderFactory.h"
+#include "../ViewBuilder/ViewBuilderFactory.h"
 #include "../Rendering/SurfelVisualizationEngineFactory.h"
 #include "../../CameraTrackers/CameraTrackerFactory.h"
 

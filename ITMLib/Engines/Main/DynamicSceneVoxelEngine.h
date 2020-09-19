@@ -23,7 +23,7 @@
 #include "CameraTrackingController.h"
 #include "../ImageProcessing/Interface/ImageProcessingEngineInterface.h"
 #include "../Meshing/Interface/MeshingEngine.h"
-#include "../ViewBuilding/Interface/ViewBuilder.h"
+#include "../ViewBuilder/Interface/ViewBuilder.h"
 #include "../Rendering/Interface/RenderingEngineInterface.h"
 #include "../Indexing/Interface/IndexingEngine.h"
 #include "../DepthFusion/DepthFusionEngine.h"
