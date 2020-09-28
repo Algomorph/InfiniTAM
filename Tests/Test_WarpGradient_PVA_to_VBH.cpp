@@ -277,18 +277,18 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CPU) {
 	int target_warped_field_ix = live_index_to_start_from;
 	for (int iteration = 0; iteration < iteration_limit; iteration++) {
 		std::swap(source_warped_field_ix, target_warped_field_ix);
-		bench::StartTimer("1_CalculateWarpGradient");
-		motion_tracker.CalculateWarpGradient(&warp_field, canonical_volume, live_volumes[source_warped_field_ix]);
+		bench::StartTimer("1_CalculateEnergyGradient");
+		motion_tracker.CalculateEnergyGradient(&warp_field, canonical_volume, live_volumes[source_warped_field_ix]);
 		std::cout << "Warp allocated hash count: " << warp_calculator.ComputeAllocatedHashBlockCount(&warp_field) << std::endl;
-		bench::StopTimer("1_CalculateWarpGradient");
-		bench::StartTimer("2_SmoothWarpGradient");
-		motion_tracker.SmoothWarpGradient(&warp_field, canonical_volume, live_volumes[source_warped_field_ix]);
-		bench::StopTimer("2_SmoothWarpGradient");
-		bench::StartTimer("3_UpdateWarps");
-		motion_tracker.UpdateWarps(&warp_field, canonical_volume, live_volumes[source_warped_field_ix]);
-		bench::StopTimer("3_UpdateWarps");
+		bench::StopTimer("1_CalculateEnergyGradient");
+		bench::StartTimer("2_SmoothEnergyGradient");
+		motion_tracker.SmoothEnergyGradient(&warp_field, canonical_volume, live_volumes[source_warped_field_ix]);
+		bench::StopTimer("2_SmoothEnergyGradient");
+		bench::StartTimer("3_UpdateDeformationFieldUsingGradient");
+		motion_tracker.UpdateDeformationFieldUsingGradient(&warp_field, canonical_volume, live_volumes[source_warped_field_ix]);
+		bench::StopTimer("3_UpdateDeformationFieldUsingGradient");
 		bench::StartTimer("4_WarpVolume");
-		motion_tracker.CalculateWarpGradient(&warp_field, canonical_volume, live_volumes[source_warped_field_ix]);
+		motion_tracker.CalculateEnergyGradient(&warp_field, canonical_volume, live_volumes[source_warped_field_ix]);
 		std::cout << "Warp allocated hash count (2): " << warp_calculator.ComputeAllocatedHashBlockCount(&warp_field) << std::endl;
 		PrintVolumeStatistics<TSDFVoxel,VoxelBlockHash,MEMORYDEVICE_CPU>(live_volumes[target_warped_field_ix], "[target live before warp]");
 		std::cout << "Utilized (target) hash count: " << live_volumes[target_warped_field_ix]->index.GetUtilizedBlockCount() << std::endl;
@@ -399,15 +399,15 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CUDA) {
 
 	for (int iteration = 0; iteration < iteration_limit; iteration++) {
 		std::swap(source_warped_field_ix, target_warped_field_ix);
-		bench::StartTimer("1_CalculateWarpGradient");
-		motion_tracker.CalculateWarpGradient(&warp_field, canonical_volume, live_volumes[source_warped_field_ix]);
-		bench::StopTimer("1_CalculateWarpGradient");
-		bench::StartTimer("2_SmoothWarpGradient");
-		motion_tracker.SmoothWarpGradient(&warp_field, canonical_volume, live_volumes[source_warped_field_ix]);
-		bench::StopTimer("2_SmoothWarpGradient");
-		bench::StartTimer("3_UpdateWarps");
-		motion_tracker.UpdateWarps(&warp_field, canonical_volume, live_volumes[source_warped_field_ix]);
-		bench::StopTimer("3_UpdateWarps");
+		bench::StartTimer("1_CalculateEnergyGradient");
+		motion_tracker.CalculateEnergyGradient(&warp_field, canonical_volume, live_volumes[source_warped_field_ix]);
+		bench::StopTimer("1_CalculateEnergyGradient");
+		bench::StartTimer("2_SmoothEnergyGradient");
+		motion_tracker.SmoothEnergyGradient(&warp_field, canonical_volume, live_volumes[source_warped_field_ix]);
+		bench::StopTimer("2_SmoothEnergyGradient");
+		bench::StartTimer("3_UpdateDeformationFieldUsingGradient");
+		motion_tracker.UpdateDeformationFieldUsingGradient(&warp_field, canonical_volume, live_volumes[source_warped_field_ix]);
+		bench::StopTimer("3_UpdateDeformationFieldUsingGradient");
 		bench::StartTimer("4_WarpVolume");
 		warping_engine->WarpVolume_WarpUpdates(&warp_field, live_volumes[source_warped_field_ix],
 											   live_volumes[target_warped_field_ix]);

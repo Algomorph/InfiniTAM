@@ -55,7 +55,7 @@ BOOST_FIXTURE_TEST_CASE(testDataTerm_CUDA_VBH, DataFixture) {
 			LevelSetAlignmentSwitches(true, false, false, false, false));
 
 	TimeIt([&]() {
-		motionTracker_VBH_CUDA->CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
+		motionTracker_VBH_CUDA->CalculateEnergyGradient(&warp_field, canonical_volume, live_volume);
 	}, "Calculate Warping Gradient - VBH CUDA data term");
 
 	BOOST_REQUIRE_EQUAL(Analytics_CUDA_VBH_Warp::Instance().CountAllocatedHashBlocks(&warp_field), 633);
@@ -64,7 +64,7 @@ BOOST_FIXTURE_TEST_CASE(testDataTerm_CUDA_VBH, DataFixture) {
 	BOOST_REQUIRE(contentAlmostEqual_CUDA_Verbose(&warp_field, warp_field_data_term, tolerance));
 }
 
-BOOST_FIXTURE_TEST_CASE(testUpdateWarps_CUDA_VBH, DataFixture) {
+BOOST_FIXTURE_TEST_CASE(testUpdateDeformationFieldUsingGradient_CUDA_VBH, DataFixture) {
 	auto motion_tracker_VBH_CUDA = new LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA, DIAGNOSTIC>(
 			LevelSetAlignmentSwitches(false, false, false, false, false));
 	VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field_copy(*warp_field_data_term,
@@ -75,7 +75,7 @@ BOOST_FIXTURE_TEST_CASE(testUpdateWarps_CUDA_VBH, DataFixture) {
 
 	AllocateUsingOtherVolume(canonical_volume, live_volume, MEMORYDEVICE_CUDA);
 
-	float average_warp_update = motion_tracker_VBH_CUDA->UpdateWarps(&warp_field_copy, canonical_volume, live_volume);
+	float average_warp_update = motion_tracker_VBH_CUDA->UpdateDeformationFieldUsingGradient(&warp_field_copy, canonical_volume, live_volume);
 
 	BOOST_REQUIRE_CLOSE(average_warp_update, warp_update_average_length_iter0, 1e-2f);
 
@@ -84,7 +84,7 @@ BOOST_FIXTURE_TEST_CASE(testUpdateWarps_CUDA_VBH, DataFixture) {
 }
 
 
-BOOST_FIXTURE_TEST_CASE(testSmoothWarpGradient_CUDA_VBH, DataFixture) {
+BOOST_FIXTURE_TEST_CASE(testSmoothEnergyGradient_CUDA_VBH, DataFixture) {
 	VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field(*warp_field_data_term, MEMORYDEVICE_CUDA);
 	AllocateUsingOtherVolume(&warp_field, live_volume, MEMORYDEVICE_CUDA);
 	AllocateUsingOtherVolume(canonical_volume, live_volume, MEMORYDEVICE_CUDA);
@@ -93,7 +93,7 @@ BOOST_FIXTURE_TEST_CASE(testSmoothWarpGradient_CUDA_VBH, DataFixture) {
 
 
 	TimeIt([&]() {
-		motionTracker_VBH_CUDA->SmoothWarpGradient(&warp_field, canonical_volume, live_volume);
+		motionTracker_VBH_CUDA->SmoothEnergyGradient(&warp_field, canonical_volume, live_volume);
 	}, "Smooth Warping Gradient - VBH CUDA");
 
 	float tolerance = 1e-8;
@@ -111,7 +111,7 @@ BOOST_FIXTURE_TEST_CASE(testTikhonovTerm_CUDA_VBH, DataFixture) {
 	Vector3i testPosition(-40, 60, 200);
 
 	TimeIt([&]() {
-		motionTracker_VBH_CUDA->CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
+		motionTracker_VBH_CUDA->CalculateEnergyGradient(&warp_field, canonical_volume, live_volume);
 	}, "Calculate Warping Gradient - VBH CUDA tikhonov term");
 	BOOST_REQUIRE_EQUAL(Analytics_CUDA_VBH_Warp::Instance().CountAllocatedHashBlocks(&warp_field), 633);
 
@@ -138,7 +138,7 @@ BOOST_FIXTURE_TEST_CASE(testDataAndTikhonovTerm_CUDA_VBH, DataFixture) {
 	Vector3i testPosition(-40, 60, 200);
 
 	TimeIt([&]() {
-		motionTracker_VBH_CUDA->CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
+		motionTracker_VBH_CUDA->CalculateEnergyGradient(&warp_field, canonical_volume, live_volume);
 	}, "Calculate Warping Gradient - VBH CUDA data term + tikhonov term");
 	BOOST_REQUIRE_EQUAL(Analytics_CUDA_VBH_Warp::Instance().CountAllocatedHashBlocks(&warp_field), 633);
 
@@ -162,7 +162,7 @@ BOOST_FIXTURE_TEST_CASE(testDataAndKillingTerm_CUDA_VBH, DataFixture) {
 			LevelSetAlignmentSwitches(true, false, true, true, false));
 
 	TimeIt([&]() {
-		motionTracker_VBH_CUDA->CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
+		motionTracker_VBH_CUDA->CalculateEnergyGradient(&warp_field, canonical_volume, live_volume);
 	}, "Calculate Warping Gradient - VBH CUDA data term + killing term");
 
 	unsigned int altered_gradient_count = Analytics_CUDA_VBH_Warp::Instance().CountAlteredGradients(&warp_field);
@@ -183,7 +183,7 @@ BOOST_FIXTURE_TEST_CASE(testDataAndLevelSetTerm_CUDA_VBH, DataFixture) {
 	);
 
 	TimeIt([&]() {
-		motion_tracker_VBH_CUDA->CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
+		motion_tracker_VBH_CUDA->CalculateEnergyGradient(&warp_field, canonical_volume, live_volume);
 	}, "Calculate Warping Gradient - VBH CUDA data term + level set term");
 
 	unsigned int altered_gradient_count = Analytics_CUDA_VBH_Warp::Instance().CountAlteredGradients(&warp_field);

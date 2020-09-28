@@ -16,10 +16,11 @@
 #include "../../Indexing/VBH/CPU/IndexingEngine_VoxelBlockHash_CPU.h"
 #include "../../Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
 #include "../../Traversal/CPU/ThreeVolumeTraversal_CPU_VoxelBlockHash.h"
+#include "../../Reduction/CPU/VolumeReduction_CPU_VoxelBlockHash.h"
 #include "../../EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 #include "../../Analytics/AnalyticsEngine.h"
-#include "../WarpGradientFunctors/WarpGradientFunctor_Optimized.h"
-#include "../WarpGradientFunctors/WarpGradientFunctor_Diagnostic.h"
+#include "../Functors/WarpGradientFunctor_Optimized.h"
+#include "../Functors/WarpGradientFunctor_Diagnostic.h"
 #include "../../../GlobalTemplateDefines.h"
 #include "../Interface/LevelSetAlignmentEngine.tpp"
 

@@ -14,7 +14,7 @@
 //  limitations under the License.
 //  ================================================================
 
-#define BOOST_TEST_MODULE SmoothWarpGradient_CPU_CUDA
+#define BOOST_TEST_MODULE SmoothEnergyGradient
 #ifndef WIN32
 #define BOOST_TEST_DYN_LINK
 #endif
@@ -39,7 +39,7 @@ using namespace test_utilities;
 namespace snoopy = snoopy_test_utilities;
 
 
-BOOST_AUTO_TEST_CASE(testSmoothWarpGradient_PVA){
+BOOST_AUTO_TEST_CASE(testSmoothEnergyGradient_PVA){
 	const int iteration = 0;
 
 	LevelSetAlignmentSwitches data_only_switches(true, false, false, false, false);
@@ -74,8 +74,8 @@ BOOST_AUTO_TEST_CASE(testSmoothWarpGradient_PVA){
 			LevelSetAlignmentSwitches(false, false, false, false, true)
 	);
 
-	motion_tracker_PVA_CPU->SmoothWarpGradient(warp_field_CPU, canonical_volume_CPU, live_volume_CPU);
-	motion_tracker_PVA_CUDA->SmoothWarpGradient(warp_field_CUDA, canonical_volume_CUDA, live_volume_CUDA);
+	motion_tracker_PVA_CPU->SmoothEnergyGradient(warp_field_CPU, canonical_volume_CPU, live_volume_CPU);
+	motion_tracker_PVA_CUDA->SmoothEnergyGradient(warp_field_CUDA, canonical_volume_CUDA, live_volume_CUDA);
 
 	VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field_CUDA_copy(*warp_field_CUDA, MEMORYDEVICE_CPU);
 

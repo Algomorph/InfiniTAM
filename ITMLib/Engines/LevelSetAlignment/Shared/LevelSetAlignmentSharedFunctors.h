@@ -48,47 +48,25 @@ struct ClearOutGradientStaticFunctor {
 };
 
 
-template<typename TVoxel, typename TWarp, MemoryDeviceType TMemoryDeviceType>
+template<typename TVoxel, typename TWarp, MemoryDeviceType TMemoryDeviceType, bool TUseGradient1>
 struct WarpUpdateFunctor {
-	WarpUpdateFunctor(float learning_rate, float momentum_weight, bool gradient_smoothing_enabled) :
-			gradient_weight(learning_rate * (1.0f - momentum_weight)), momentum_weight(momentum_weight),
-			gradient_smoothing_enabled(gradient_smoothing_enabled) {
-		INITIALIZE_ATOMIC(float, aggregate_warp_update_length, 0.0f);
-		INITIALIZE_ATOMIC(unsigned int, affected_voxel_count, 0u);
-	}
-
-	~WarpUpdateFunctor() {
-		CLEAN_UP_ATOMIC(aggregate_warp_update_length);CLEAN_UP_ATOMIC(affected_voxel_count);
-	}
+	WarpUpdateFunctor(float learning_rate) :
+			learning_rate(learning_rate) {}
 
 	_DEVICE_WHEN_AVAILABLE_
 	void
 	operator()(TWarp& warp_voxel, TVoxel& canonical_voxel, TVoxel& live_voxel, const Vector3i& position) {
 		if (!VoxelIsConsideredForAlignment(canonical_voxel, live_voxel)) return;
-
-		Vector3f warp_update = -gradient_weight * (gradient_smoothing_enabled ?
-		                                           warp_voxel.gradient1 : warp_voxel.gradient0);
-
-		warp_voxel.warp_update = warp_update + momentum_weight * warp_voxel.warp_update;
-
-		// update stats
-		float warp_update_length = ORUtils::length(warp_update);
-
-		ATOMIC_ADD(aggregate_warp_update_length, warp_update_length);
-		ATOMIC_ADD(affected_voxel_count, 1u);
-	}
-
-	float GetAverageWarpUpdateLength() {
-		return GET_ATOMIC_VALUE_CPU(aggregate_warp_update_length) / GET_ATOMIC_VALUE_CPU(affected_voxel_count);
+		if (TUseGradient1) {
+			warp_voxel.warp_update = warp_voxel.warp_update - learning_rate * warp_voxel.gradient1;
+		} else {
+			warp_voxel.warp_update = warp_voxel.warp_update - learning_rate * warp_voxel.gradient0;
+		}
 	}
 
 
 private:
-	DECLARE_ATOMIC_FLOAT(aggregate_warp_update_length);
-	DECLARE_ATOMIC(unsigned int, affected_voxel_count);
-	const float gradient_weight;
-	const float momentum_weight;
-	const bool gradient_smoothing_enabled;
+	const float learning_rate;
 };
 
 
@@ -133,7 +111,7 @@ struct GradientSmoothingPassFunctor {
 													receptive_voxel_position, vmIndex, warp_field_cache);
 #else
 			const TWarp& receptiveVoxel = readVoxel(warp_voxels, warp_index_data,
-			                                             receptive_voxel_position, vmIndex);
+			                                        receptive_voxel_position, vmIndex);
 #endif
 			smoothed_gradient += sobolev_filter1D[iVoxel] * GetGradient(receptiveVoxel);
 		}

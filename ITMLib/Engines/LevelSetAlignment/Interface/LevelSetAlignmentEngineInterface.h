@@ -41,27 +41,6 @@ public:
 			VoxelVolume<TVoxel, TIndex>** live_volume_pair,
 			VoxelVolume<TWarp, TIndex>* warp_field) = 0;
 
-protected:
-	virtual void
-	CalculateWarpGradient(VoxelVolume<TWarp, TIndex>* warpField,
-	                      VoxelVolume<TVoxel, TIndex>* canonicalScene,
-	                      VoxelVolume<TVoxel, TIndex>* liveScene) = 0;
-	virtual void SmoothWarpGradient(
-			VoxelVolume<TWarp, TIndex>* warpField,
-			VoxelVolume<TVoxel, TIndex>* canonicalScene,
-			VoxelVolume<TVoxel, TIndex>* liveScene) = 0;
-	virtual float UpdateWarps(VoxelVolume<TWarp, TIndex>* warpField,
-	                          VoxelVolume<TVoxel, TIndex>* canonicalScene,
-	                          VoxelVolume<TVoxel, TIndex>* liveScene) = 0;
-
-	virtual void ClearOutFramewiseWarps(VoxelVolume<TWarp, TIndex>* warpField) = 0;
-	virtual void ClearOutCumulativeWarps(VoxelVolume<TWarp, TIndex>* warpField) = 0;
-	virtual void ClearOutWarpUpdates(VoxelVolume<TWarp, TIndex>* warpField) = 0;
-	virtual void AddFramewiseWarpToWarp(
-			VoxelVolume<TWarp, TIndex>* warpField, bool clearFramewiseWarp) = 0;
-
-
-
 };
 
 

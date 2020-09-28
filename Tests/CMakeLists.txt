@@ -103,7 +103,7 @@ if (BUILD_TESTS)
         itm_add_test(NAME WarpGradient_CUDA_VBH SOURCES Test_WarpGradient_CUDA_VBH.cpp Test_WarpGradient_Common.h)
         itm_add_test(NAME CUDA_Atomics SOURCES Test_CUDA_Atomics.cpp CUDAAtomicTesting.h
                      CUDAAtomicTesting.cu TemporaryCUDA_Atomics.h)
-        itm_add_test(NAME SmoothWarpGradient SOURCES Test_SmoothWarpGradient_CPU_CUDA.cpp)
+        itm_add_test(NAME SmoothEnergyGradient SOURCES Test_SmoothEnergyGradient.cpp)
 
     endif ()
 

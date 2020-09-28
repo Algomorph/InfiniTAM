@@ -15,10 +15,11 @@
 //  ================================================================
 #include "../../Traversal/CUDA/VolumeTraversal_CUDA_PlainVoxelArray.h"
 #include "../../Traversal/CUDA/ThreeVolumeTraversal_CUDA_PlainVoxelArray.h"
+#include "../../Reduction/CUDA/VolumeReduction_CUDA_PlainVoxelArray.h"
 #include "../../EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
 #include "../../Analytics/AnalyticsEngine.h"
-#include "../WarpGradientFunctors/WarpGradientFunctor_Optimized.h"
-#include "../WarpGradientFunctors/WarpGradientFunctor_Diagnostic.h"
+#include "../Functors/WarpGradientFunctor_Optimized.h"
+#include "../Functors/WarpGradientFunctor_Diagnostic.h"
 #include "../../../GlobalTemplateDefines.h"
 #include "../Interface/LevelSetAlignmentEngine.tpp"
 

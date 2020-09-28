@@ -617,10 +617,10 @@ set(
         Engines/LevelSetAlignment/Interface/LevelSetAlignmentEngineInterface.h
         Engines/LevelSetAlignment/Interface/LevelSetAlignmentParameters.h
         Engines/LevelSetAlignment/Interface/LevelSetAlignmentEngine.h
-        ## WarpGradientFunctors
-        Engines/LevelSetAlignment/WarpGradientFunctors/WarpGradientFunctor.h
-        Engines/LevelSetAlignment/WarpGradientFunctors/WarpGradientFunctor_Diagnostic.h
-        Engines/LevelSetAlignment/WarpGradientFunctors/WarpGradientFunctor_Optimized.h
+        ## Functors
+        Engines/LevelSetAlignment/Functors/WarpGradientFunctor.h
+        Engines/LevelSetAlignment/Functors/WarpGradientFunctor_Diagnostic.h
+        Engines/LevelSetAlignment/Functors/WarpGradientFunctor_Optimized.h
         ## Shared
         Engines/LevelSetAlignment/Shared/WarpHessian.h
         Engines/LevelSetAlignment/Shared/WarpGradientCommon.h
@@ -632,7 +632,7 @@ set(
         Engines/LevelSetAlignment/Shared/DataTermSharedRoutines.h
         Engines/LevelSetAlignment/Shared/LevelSetTermSharedRoutines.h
         Engines/LevelSetAlignment/Shared/SmoothingTermSharedRoutines.h
-        Engines/LevelSetAlignment/Shared/SdfGradientSharedRoutines.h)
+        Engines/LevelSetAlignment/Shared/SdfGradientSharedRoutines.h Engines/LevelSetAlignment/Functors/WarpStatisticFunctors.h)
 
 set(
         ITMLIB_ENGINES_LEVEL_SET_ALIGNMENT_SOURCES

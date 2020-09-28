@@ -60,7 +60,7 @@ BOOST_FIXTURE_TEST_CASE(testDataTerm_CPU_VBH, DataFixture) {
 			LevelSetAlignmentSwitches(true, false, false, false, false));
 
 	TimeIt([&]() {
-		motion_tracker_VBH_CPU->CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
+		motion_tracker_VBH_CPU->CalculateEnergyGradient(&warp_field, canonical_volume, live_volume);
 	}, "Calculate Warping Gradient - VBH CPU data term");
 
 
@@ -71,7 +71,7 @@ BOOST_FIXTURE_TEST_CASE(testDataTerm_CPU_VBH, DataFixture) {
 	BOOST_REQUIRE(contentAlmostEqual_CPU(&warp_field, warp_field_data_term, tolerance));
 }
 
-BOOST_FIXTURE_TEST_CASE(testUpdateWarps_CPU_VBH, DataFixture) {
+BOOST_FIXTURE_TEST_CASE(testUpdateDeformationFieldUsingGradient_CPU_VBH, DataFixture) {
 
 	auto motionTracker_VBH_CPU = new LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU, DIAGNOSTIC>(
 			LevelSetAlignmentSwitches(false, false, false, false, false));
@@ -80,7 +80,7 @@ BOOST_FIXTURE_TEST_CASE(testUpdateWarps_CPU_VBH, DataFixture) {
 
 	AllocateUsingOtherVolume(canonical_volume, live_volume, MEMORYDEVICE_CPU);
 
-	float max_warp = motionTracker_VBH_CPU->UpdateWarps(&warp_field_copy, canonical_volume, live_volume);
+	float max_warp = motionTracker_VBH_CPU->UpdateDeformationFieldUsingGradient(&warp_field_copy, canonical_volume, live_volume);
 	BOOST_REQUIRE_CLOSE(max_warp, warp_update_average_length_iter0, 1e-2f);
 
 
@@ -92,7 +92,7 @@ BOOST_FIXTURE_TEST_CASE(testUpdateWarps_CPU_VBH, DataFixture) {
 }
 
 
-BOOST_FIXTURE_TEST_CASE(testSmoothWarpGradient_CPU_VBH, DataFixture) {
+BOOST_FIXTURE_TEST_CASE(testSmoothEnergyGradient_CPU_VBH, DataFixture) {
 
 	VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field(*warp_field_data_term, MEMORYDEVICE_CPU);
 
@@ -104,7 +104,7 @@ BOOST_FIXTURE_TEST_CASE(testSmoothWarpGradient_CPU_VBH, DataFixture) {
 	);
 
 	TimeIt([&]() {
-		motionTracker_VBH_CPU->SmoothWarpGradient(&warp_field, canonical_volume, live_volume);
+		motionTracker_VBH_CPU->SmoothEnergyGradient(&warp_field, canonical_volume, live_volume);
 	}, "Smooth Warping Gradient - VBH CPU");
 
 	float tolerance = 1e-8;
@@ -124,7 +124,7 @@ BOOST_FIXTURE_TEST_CASE(testTikhonovTerm_CPU_VBH, DataFixture) {
 	Vector3i testPosition(-40, 60, 200);
 
 	TimeIt([&]() {
-		motionTracker_VBH_CPU->CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
+		motionTracker_VBH_CPU->CalculateEnergyGradient(&warp_field, canonical_volume, live_volume);
 	}, "Calculate Warping Gradient - VBH CPU data term + tikhonov term");
 	BOOST_REQUIRE_EQUAL(Analytics_CPU_VBH_Warp::Instance().CountAllocatedHashBlocks(&warp_field), 633);
 
@@ -150,7 +150,7 @@ BOOST_FIXTURE_TEST_CASE(testDataAndTikhonovTerm_CPU_VBH, DataFixture) {
 			LevelSetAlignmentSwitches(true, false, true, false, false));
 
 	TimeIt([&]() {
-		motionTracker_VBH_CPU->CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
+		motionTracker_VBH_CPU->CalculateEnergyGradient(&warp_field, canonical_volume, live_volume);
 	}, "Calculate Warping Gradient - VBH CPU data term + tikhonov term");
 	BOOST_REQUIRE_EQUAL(Analytics_CPU_VBH_Warp::Instance().CountAllocatedHashBlocks(&warp_field), 633);
 
@@ -182,7 +182,7 @@ BOOST_FIXTURE_TEST_CASE(testDataAndKillingTerm_CPU_VBH, DataFixture) {
 
 
 	TimeIt([&]() {
-		motionTracker_VBH_CPU->CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
+		motionTracker_VBH_CPU->CalculateEnergyGradient(&warp_field, canonical_volume, live_volume);
 	}, "Calculate Warping Gradient - VBH CPU data term + tikhonov term");
 
 	unsigned int altered_gradient_count = Analytics_CPU_VBH_Warp::Instance().CountAlteredGradients(&warp_field);
@@ -202,7 +202,7 @@ BOOST_FIXTURE_TEST_CASE(testDataAndLevelSetTerm_CPU_VBH, DataFixture) {
 			LevelSetAlignmentSwitches(true, true, false, false, false));
 
 	TimeIt([&]() {
-		motionTracker_VBH_CPU->CalculateWarpGradient(&warp_field, canonical_volume, live_volume);
+		motionTracker_VBH_CPU->CalculateEnergyGradient(&warp_field, canonical_volume, live_volume);
 	}, "Calculate Warping Gradient - VBH CPU data term + level set term");
 
 	unsigned int altered_gradient_count = Analytics_CPU_VBH_Warp::Instance().CountAlteredGradients(&warp_field);

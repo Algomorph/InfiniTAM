@@ -34,8 +34,7 @@ namespace ITMLib {
         (float, weight_level_set_term, 0.2f, PRIMITIVE, \
         	"Used in level set alignment optimization when the level set regularization term is enabled." \
 			" Greater values penalize deformations resulting in non-SDF-like voxel grid."), \
-        (float, epsilon, 1e-5f, PRIMITIVE, "Small value to avoid division by zero when computing level set term in level set alignment optimization."), \
-		(float, momentum_weight, 0.5f, PRIMITIVE, "Vector fields are computed like this: Ψ(t) = pΨ(t-1) - qα∇E, where weights p+q = 1.0. Momentum weight is weight p.")
+        (float, epsilon, 1e-5f, PRIMITIVE, "Small value to avoid division by zero when computing level set term in level set alignment optimization.")
 
 DECLARE_SERIALIZABLE_STRUCT(WEIGHTS_STRUCT_DESCRIPTION);
 
