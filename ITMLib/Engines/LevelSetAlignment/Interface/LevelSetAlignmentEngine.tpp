@@ -138,9 +138,9 @@ void LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutio
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
 VoxelVolume<TVoxel, TIndex>*
 LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode>::Align(
-		VoxelVolume<TVoxel, TIndex>* canonical_volume,
+		VoxelVolume<TWarp, TIndex>* warp_field,
 		VoxelVolume<TVoxel, TIndex>** live_volume_pair,
-		VoxelVolume<TWarp, TIndex>* warp_field) {
+		VoxelVolume<TVoxel, TIndex>* canonical_volume) {
 
 	float average_vector_update_length_in_voxels = std::numeric_limits<float>::infinity();
 
@@ -351,10 +351,7 @@ void LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutio
 	SmoothEnergyGradient(warp_field, canonical_volume, source_live_volume);
 	UpdateDeformationFieldUsingGradient(warp_field, canonical_volume, source_live_volume);
 	this->FindAverageWarpLength(average_update_vector_length, warp_field);
-	// special case for testing
-	if (target_live_volume != nullptr) {
-		warping_engine->WarpVolume_WarpUpdates(warp_field, source_live_volume, target_live_volume);
-	}
+	warping_engine->WarpVolume_WarpUpdates(warp_field, source_live_volume, target_live_volume);
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>

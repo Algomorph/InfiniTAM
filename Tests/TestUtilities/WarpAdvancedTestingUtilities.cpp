@@ -38,7 +38,7 @@ GenericWarpConsistencySubtest<VoxelBlockHash, MEMORYDEVICE_CPU>(const LevelSetAl
                                                                 GenericWarpTestMode mode,
                                                                 float absolute_tolerance);
 template
-void Warp_PVA_VBH_simple_subtest<MEMORYDEVICE_CPU>(int iteration, LevelSetAlignmentSwitches trackerSwitches);
+void PVA_to_VBH_WarpComparisonSubtest<MEMORYDEVICE_CPU>(int iteration, LevelSetAlignmentSwitches trackerSwitches);
 
 template
 void GenericWarpTest<MEMORYDEVICE_CPU>(const LevelSetAlignmentSwitches& switches, int iteration_limit,
@@ -60,7 +60,7 @@ GenericWarpConsistencySubtest<VoxelBlockHash, MEMORYDEVICE_CUDA>(const LevelSetA
                                                                  float absolute_tolerance);
 
 template
-void Warp_PVA_VBH_simple_subtest<MEMORYDEVICE_CUDA>(int iteration, LevelSetAlignmentSwitches trackerSwitches);
+void PVA_to_VBH_WarpComparisonSubtest<MEMORYDEVICE_CUDA>(int iteration, LevelSetAlignmentSwitches trackerSwitches);
 
 template
 void GenericWarpTest<MEMORYDEVICE_CUDA>(const LevelSetAlignmentSwitches& switches, int iteration_limit,

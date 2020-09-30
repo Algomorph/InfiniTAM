@@ -13,7 +13,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#define BOOST_TEST_MODULE depth_to_tsdf_CPU_vs_CUDA
+#define BOOST_TEST_MODULE DepthFusion_CPU_to_CUDA
 #ifndef WIN32
 #define BOOST_TEST_DYN_LINK
 #endif

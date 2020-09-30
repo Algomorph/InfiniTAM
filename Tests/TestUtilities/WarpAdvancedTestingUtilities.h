@@ -63,7 +63,7 @@ GenericWarpConsistencySubtest(const LevelSetAlignmentSwitches& switches,
                               float absolute_tolerance = 1e-7);
 
 template<MemoryDeviceType TMemoryDeviceType>
-void Warp_PVA_VBH_simple_subtest(int iteration, LevelSetAlignmentSwitches trackerSwitches);
+void PVA_to_VBH_WarpComparisonSubtest(int iteration, LevelSetAlignmentSwitches trackerSwitches);
 
 
 template<MemoryDeviceType TMemoryDeviceType>

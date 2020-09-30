@@ -13,7 +13,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#define BOOST_TEST_MODULE VolumeFromImageConstruction_CUDA
+#define BOOST_TEST_MODULE DepthFusion_CUDA
 #ifndef WIN32
 #define BOOST_TEST_DYN_LINK
 #endif

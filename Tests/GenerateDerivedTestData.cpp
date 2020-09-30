@@ -232,14 +232,16 @@ void GenerateWarpGradientTestData() {
 	           snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 	LoadVolume(&canonical_volume, volume_output_directory + "snoopy_partial_frame_16.dat", TMemoryDeviceType,
 	           snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	VoxelVolume<TSDFVoxel, TIndex>* live_volumes[] = {live_volume, nullptr};
 
+
+	// *** set up level set switches and their associated output filenames
 	LevelSetAlignmentSwitches data_only_switches(true, false, false, false, false);
-	std::string data_only_filename = "warp_field_0_data.dat";
-	LevelSetAlignmentSwitches data_smoothed_switches(false, false, false, false, true);
-	std::string data_smoothed_filename = "warp_field_0_smoothed.dat";
-	std::string framewise_warps_filename = "warp_field_0_data_framewise_warps.dat";
-	LevelSetAlignmentSwitches warp_complete_switches(true, false, true, false, true);
-	std::string warp_complete_filename = "warp_field_0_complete.dat";
+	std::string warp_0_data_filename = "warp_field_0_data.dat";
+	LevelSetAlignmentSwitches data_sobolev_smoothed_switches(true, false, false, false, true);
+	std::string warp_0_data_sobolev_smoothed_filename = "warp_field_0_data_sobolev_smoothed.dat";
+	LevelSetAlignmentSwitches data_and_tikhonov_sobolev_smoothed_switches(true, false, true, false, true);
+	std::string warp_0_data_and_tikhonov_sobolev_smoothed_filename = "warp_field_0_data_and_tikhonov_sobolev_smoothed.dat";
 
 	std::vector<std::tuple<std::string, LevelSetAlignmentSwitches>> configuration_pairs = {
 			std::make_tuple(std::string("warp_field_1_tikhonov.dat"),
@@ -251,54 +253,43 @@ void GenerateWarpGradientTestData() {
 			std::make_tuple(std::string("warp_field_1_data_and_level_set.dat"),
 			                LevelSetAlignmentSwitches(true, true, false, false, false))
 	};
+	// ========================================================================
 
-	VoxelVolume<WarpVoxel, TIndex> warp_field(TMemoryDeviceType,
-	                                          snoopy::InitializationParameters_Fr16andFr17<TIndex>());
-	warp_field.Reset();
-	AllocateUsingOtherVolume(&warp_field, live_volume, MEMORYDEVICE_CPU);
+	VoxelVolume<WarpVoxel, TIndex> warp_field(TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	auto reset_warp_field = [&](){
+		warp_field.Reset();
+		AllocateUsingOtherVolume(&warp_field, live_volume, MEMORYDEVICE_CPU);
+	} ;
+
+
 	AllocateUsingOtherVolume(canonical_volume, live_volume, MEMORYDEVICE_CPU);
 
-	LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, OPTIMIZED> data_only_motion_tracker(
-			data_only_switches);
+	auto generate_warp_field_with_parameters = [&](const LevelSetAlignmentSwitches& switches, const std::string& filename){
+		reset_warp_field();
 
-	data_only_motion_tracker.CalculateEnergyGradient(&warp_field, canonical_volume, live_volume);
-	warp_field.SaveToDisk(volume_output_directory + data_only_filename);
+		LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, DIAGNOSTIC> data_only_motion_tracker(
+				switches, SingleIterationTerminationConditions());
 
-	unsigned int altered_gradient_count__data_only = AnalyticsEngine<WarpVoxel, TIndex, TMemoryDeviceType>::Instance().CountAlteredGradients(
-			&warp_field);
-	warp_stats_file.OStream().write(reinterpret_cast<const char*>(&altered_gradient_count__data_only), sizeof(unsigned int));
+		data_only_motion_tracker.Align(&warp_field, live_volumes, canonical_volume);
+		warp_field.SaveToDisk(volume_output_directory + filename);
 
-	LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, OPTIMIZED> data_smoothed_motion_tracker(
-			data_smoothed_switches);
-	data_smoothed_motion_tracker.SmoothEnergyGradient(&warp_field, canonical_volume, live_volume);
-	warp_field.SaveToDisk(volume_output_directory + data_smoothed_filename);
+		unsigned int altered_warp_update_count =
+				AnalyticsEngine<WarpVoxel, TIndex, TMemoryDeviceType>::Instance().CountAlteredWarpUpdates(&warp_field);
 
-	unsigned int altered_gradient_count__data_smoothed = AnalyticsEngine<WarpVoxel, TIndex, TMemoryDeviceType>::Instance().CountAlteredGradients(
-			&warp_field);
-	warp_stats_file.OStream().write(reinterpret_cast<const char*>(&altered_gradient_count__data_smoothed), sizeof(unsigned int));
+		warp_stats_file.OStream().write(reinterpret_cast<const char*>(&altered_warp_update_count), sizeof(unsigned int));
+	};
 
-	warp_field.Reset();
-	AllocateUsingOtherVolume(&warp_field, live_volume, TMemoryDeviceType);
-	LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, OPTIMIZED> complete_motion_tracker(
-			warp_complete_switches);
-	complete_motion_tracker.CalculateEnergyGradient(&warp_field, canonical_volume, live_volume);
-	complete_motion_tracker.SmoothEnergyGradient(&warp_field, canonical_volume, live_volume);
-	complete_motion_tracker.UpdateDeformationFieldUsingGradient(&warp_field, canonical_volume, live_volume);
+	generate_warp_field_with_parameters(data_only_switches, warp_0_data_filename);
+	generate_warp_field_with_parameters(data_sobolev_smoothed_switches, warp_0_data_sobolev_smoothed_filename);
+	generate_warp_field_with_parameters(data_and_tikhonov_sobolev_smoothed_switches, warp_0_data_and_tikhonov_sobolev_smoothed_filename);
 
-	warp_field.SaveToDisk(volume_output_directory + warp_complete_filename);
+	reset_warp_field();
 
-	unsigned int altered_gradient_count__complete = AnalyticsEngine<WarpVoxel, TIndex, TMemoryDeviceType>::Instance().CountAlteredGradients(
-			&warp_field);
-	warp_stats_file.OStream().write(reinterpret_cast<const char*>(&altered_gradient_count__complete), sizeof(unsigned int));
+	warp_field.LoadFromDisk(volume_output_directory + warp_0_data_and_tikhonov_sobolev_smoothed_filename);
 
-	warp_field.Reset();
-	AllocateUsingOtherVolume(&warp_field, live_volume, TMemoryDeviceType);
-	warp_field.LoadFromDisk(volume_output_directory + data_only_filename);
-
-	float average_warp_update_length = data_only_motion_tracker.UpdateDeformationFieldUsingGradient(&warp_field, canonical_volume, live_volume);
-	warp_field.SaveToDisk(volume_output_directory + framewise_warps_filename);
-
+	float average_warp_update_length = AnalyticsEngine<WarpVoxel, TIndex, TMemoryDeviceType>::Instance().ComputeWarpUpdateMean(&warp_field);
 	warp_stats_file.OStream().write(reinterpret_cast<const char*>(&average_warp_update_length), sizeof(float));
+
 	unsigned int altered_warp_update_count__data_only = AnalyticsEngine<WarpVoxel, TIndex, TMemoryDeviceType>::Instance().CountAlteredGradients(
 			&warp_field);
 	warp_stats_file.OStream().write(reinterpret_cast<const char*>(&altered_warp_update_count__data_only), sizeof(unsigned int));
@@ -307,9 +298,9 @@ void GenerateWarpGradientTestData() {
 		EditAndCopyEngineFactory::Instance<WarpVoxel, TIndex, TMemoryDeviceType>().ResetVolume(&warp_field);
 		warp_field.LoadFromDisk(volume_output_directory + framewise_warps_filename);
 		std::string filename = std::get<0>(pair);
-		LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, OPTIMIZED> tracker(
-				std::get<1>(pair));
-		tracker.CalculateEnergyGradient(&warp_field, canonical_volume, live_volume);
+		LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, DIAGNOSTIC> tracker(
+				std::get<1>(pair), SingleIterationTerminationConditions());
+		tracker.Align(&warp_field, live_volumes, canonical_volume);
 		warp_field.SaveToDisk(volume_output_directory + filename);
 		unsigned int altered_gradient_count = AnalyticsEngine<WarpVoxel, TIndex, TMemoryDeviceType>::Instance().CountAlteredGradients(&warp_field);
 		warp_stats_file.OStream().write(reinterpret_cast<const char*>(&altered_gradient_count), sizeof(unsigned int));

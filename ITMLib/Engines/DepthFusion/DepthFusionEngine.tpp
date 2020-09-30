@@ -46,6 +46,32 @@ void DepthFusionEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::IntegrateDepth
 		}
 	}
 
+	// if (volume->GetParameters().stop_integration_at_max_weight) {
+	// 	if (this->parameters.use_surface_thickness_cutoff) {
+	// 		VoxelDepthIntegrationFunctor<TVoxel, TMemoryDeviceType, true, true,
+	// 				TVoxel::hasColorInformation, TVoxel::hasConfidenceInformation, TVoxel::hasSemanticInformation>
+	// 				integration_functor(volume->GetParameters(), view, depth_camera_matrix, this->parameters.surface_thickness);
+	// 		VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseAllWithPosition(volume, integration_functor);
+	// 	} else {
+	// 		VoxelDepthIntegrationFunctor<TVoxel, TMemoryDeviceType, true, false,
+	// 				TVoxel::hasColorInformation, TVoxel::hasConfidenceInformation, TVoxel::hasSemanticInformation>
+	// 				integration_functor(volume->GetParameters(), view, depth_camera_matrix, this->parameters.surface_thickness);
+	// 		VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseAllWithPosition(volume, integration_functor);
+	// 	}
+	// } else {
+	// 	if (this->parameters.use_surface_thickness_cutoff) {
+	// 		VoxelDepthIntegrationFunctor<TVoxel, TMemoryDeviceType, false, true,
+	// 				TVoxel::hasColorInformation, TVoxel::hasConfidenceInformation, TVoxel::hasSemanticInformation>
+	// 				integration_functor(volume->GetParameters(), view, depth_camera_matrix, this->parameters.surface_thickness);
+	// 		VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseAllWithPosition(volume, integration_functor);
+	// 	} else {
+	// 		VoxelDepthIntegrationFunctor<TVoxel, TMemoryDeviceType, false, false,
+	// 				TVoxel::hasColorInformation, TVoxel::hasConfidenceInformation, TVoxel::hasSemanticInformation>
+	// 				integration_functor(volume->GetParameters(), view, depth_camera_matrix, this->parameters.surface_thickness);
+	// 		VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseAllWithPosition(volume, integration_functor);
+	// 	}
+	// }
+
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>

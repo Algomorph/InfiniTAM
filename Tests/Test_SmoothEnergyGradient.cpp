@@ -39,56 +39,69 @@ using namespace test_utilities;
 namespace snoopy = snoopy_test_utilities;
 
 
-BOOST_AUTO_TEST_CASE(testSmoothEnergyGradient_PVA){
-	const int iteration = 0;
+template <typename TIndex>
+void GenericTestCompareSmoothEnergyGradient_CPU_to_CUDA() {
+		const int iteration = 0;
 
-	LevelSetAlignmentSwitches data_only_switches(true, false, false, false, false);
-	std::string path_warps = GetWarpsPath<PlainVoxelArray>(SwitchesToPrefix(data_only_switches), iteration);
-	std::string path_frame_16_PVA = snoopy::PartialVolume16Path<PlainVoxelArray>();
-	std::string path_frame_17_PVA = snoopy::PartialVolume17Path<PlainVoxelArray>();
+		LevelSetAlignmentSwitches data_only_switches(true, false, false, false, false);
+		std::string path_warps = GetWarpsPath<TIndex>(SwitchesToPrefix(data_only_switches), iteration);
+		std::string path_frame_16 = snoopy::PartialVolume16Path<TIndex>();
+		std::string path_frame_17 = snoopy::PartialVolume17Path<TIndex>();
 
-	VoxelVolume<WarpVoxel, PlainVoxelArray>* warp_field_CPU;
-	LoadVolume(&warp_field_CPU, path_warps, MEMORYDEVICE_CPU,
-	           snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
-	VoxelVolume<TSDFVoxel, PlainVoxelArray>* canonical_volume_CPU;
-	LoadVolume(&canonical_volume_CPU, path_frame_17_PVA, MEMORYDEVICE_CPU,
-	           snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
-	VoxelVolume<TSDFVoxel, PlainVoxelArray>* live_volume_CPU;
-	LoadVolume(&live_volume_CPU, path_frame_16_PVA, MEMORYDEVICE_CPU,
-	           snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
+		VoxelVolume<WarpVoxel, TIndex>* warp_field_CPU;
+		LoadVolume(&warp_field_CPU, path_warps, MEMORYDEVICE_CPU,
+		snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+		VoxelVolume<TSDFVoxel, TIndex>* canonical_volume_CPU;
+		LoadVolume(&canonical_volume_CPU, path_frame_17, MEMORYDEVICE_CPU,
+		snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+		VoxelVolume<TSDFVoxel, TIndex>* live_volume_CPU;
+		LoadVolume(&live_volume_CPU, path_frame_16, MEMORYDEVICE_CPU,
+		snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 
-	VoxelVolume<WarpVoxel, PlainVoxelArray>* warp_field_CUDA;
-	LoadVolume(&warp_field_CUDA, path_warps, MEMORYDEVICE_CUDA,
-	           snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
-	VoxelVolume<TSDFVoxel, PlainVoxelArray>* canonical_volume_CUDA;
-	LoadVolume(&canonical_volume_CUDA, path_frame_17_PVA, MEMORYDEVICE_CUDA,
-	           snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
-	VoxelVolume<TSDFVoxel, PlainVoxelArray>* live_volume_CUDA;
-	LoadVolume(&live_volume_CUDA, path_frame_16_PVA, MEMORYDEVICE_CUDA,
-	           snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
+		VoxelVolume<WarpVoxel, TIndex>* warp_field_CUDA;
+		LoadVolume(&warp_field_CUDA, path_warps, MEMORYDEVICE_CUDA,
+		snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+		VoxelVolume<TSDFVoxel, TIndex>* canonical_volume_CUDA;
+		LoadVolume(&canonical_volume_CUDA, path_frame_17, MEMORYDEVICE_CUDA,
+		snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+		VoxelVolume<TSDFVoxel, TIndex>* live_volume_CUDA;
+		LoadVolume(&live_volume_CUDA, path_frame_16, MEMORYDEVICE_CUDA,
+		snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 
 
-	auto motion_tracker_PVA_CPU = new LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU, DIAGNOSTIC>(
-			LevelSetAlignmentSwitches(false, false, false, false, true));
-	auto motion_tracker_PVA_CUDA = new LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA , DIAGNOSTIC>(
-			LevelSetAlignmentSwitches(false, false, false, false, true)
-	);
+		auto motion_tracker_CPU = new LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, TIndex, MEMORYDEVICE_CPU, DIAGNOSTIC>(
+		LevelSetAlignmentSwitches(false, false, false, false, true));
+		auto motion_tracker_CUDA = new LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, TIndex, MEMORYDEVICE_CUDA , DIAGNOSTIC>(
+		LevelSetAlignmentSwitches(false, false, false, false, true)
+		);
 
-	motion_tracker_PVA_CPU->SmoothEnergyGradient(warp_field_CPU, canonical_volume_CPU, live_volume_CPU);
-	motion_tracker_PVA_CUDA->SmoothEnergyGradient(warp_field_CUDA, canonical_volume_CUDA, live_volume_CUDA);
+		VoxelVolume<TSDFVoxel, TIndex>* live_volumes_CPU[2] = {live_volume_CPU, nullptr};
+		VoxelVolume<TSDFVoxel, TIndex>* live_volumes_CUDA[2] = {live_volume_CUDA, nullptr};
 
-	VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field_CUDA_copy(*warp_field_CUDA, MEMORYDEVICE_CPU);
+		motion_tracker_CPU->Align(warp_field_CPU, live_volumes_CPU, canonical_volume_CPU);
+		motion_tracker_CUDA->Align(warp_field_CUDA, live_volumes_CUDA, canonical_volume_CUDA);
 
-	float tolerance = 1e-6;
-	BOOST_REQUIRE(contentAlmostEqual_CPU(&warp_field_CUDA_copy, warp_field_CPU, tolerance));
+		// generate a CPU version of the CUDA output for comparison with the CPU output
+		VoxelVolume<WarpVoxel, TIndex> warp_field_CUDA_copy(*warp_field_CUDA, MEMORYDEVICE_CPU);
 
-	delete motion_tracker_PVA_CPU;
-	delete motion_tracker_PVA_CUDA;
+		float tolerance = 1e-6;
+		BOOST_REQUIRE(contentAlmostEqual_CPU(&warp_field_CUDA_copy, warp_field_CPU, tolerance));
 
-	delete warp_field_CPU;
-	delete warp_field_CUDA;
-	delete canonical_volume_CPU;
-	delete canonical_volume_CUDA;
-	delete live_volume_CPU;
-	delete live_volume_CUDA;
+		delete motion_tracker_CPU;
+		delete motion_tracker_CUDA;
+
+		delete warp_field_CPU;
+		delete warp_field_CUDA;
+		delete canonical_volume_CPU;
+		delete canonical_volume_CUDA;
+		delete live_volume_CPU;
+		delete live_volume_CUDA;
+};
+
+BOOST_AUTO_TEST_CASE(CompareSmoothEnergyGradient_CPU_to_CUDA_PVA){
+	GenericTestCompareSmoothEnergyGradient_CPU_to_CUDA<PlainVoxelArray>();
+}
+
+BOOST_AUTO_TEST_CASE(CompareSmoothEnergyGradient_CPU_to_CUDA_VBH){
+	GenericTestCompareSmoothEnergyGradient_CPU_to_CUDA<VoxelBlockHash>();
 }

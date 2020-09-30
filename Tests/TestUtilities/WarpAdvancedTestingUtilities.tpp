@@ -171,7 +171,7 @@ void GenericWarpConsistencySubtest(const LevelSetAlignmentSwitches& switches, in
 
 		std::cout << "Subtest " << IndexString<TIndex>() << " iteration " << std::to_string(iteration) << std::endl;
 
-		motion_tracker.Align(canonical_volume, live_volumes, &warp_field);
+		motion_tracker.Align(&warp_field, live_volumes, canonical_volume);
 
 		if (iteration < iteration_limit - 1) {
 			// prepare for next iteration by swapping source & target (live) TSDF fields
@@ -239,7 +239,7 @@ void GenericWarpConsistencySubtest(const LevelSetAlignmentSwitches& switches, in
 
 
 template<MemoryDeviceType TMemoryDeviceType>
-void Warp_PVA_VBH_simple_subtest(int iteration, LevelSetAlignmentSwitches trackerSwitches) {
+void PVA_to_VBH_WarpComparisonSubtest(int iteration, LevelSetAlignmentSwitches trackerSwitches) {
 
 	if (iteration < 0) {
 		DIEWITHEXCEPTION_REPORTLOCATION("Expecting iteration >= 0, got less than that, aborting.");
@@ -312,13 +312,13 @@ void Warp_PVA_VBH_simple_subtest(int iteration, LevelSetAlignmentSwitches tracke
 	                                                                                                                SingleIterationTerminationConditions());
 
 	std::cout << "==== CALCULATE PVA WARPS === " << std::endl;
-	motionTracker_PVA.Align(volume_16_PVA, warped_pair_PVA, warps_PVA);
+	motionTracker_PVA.Align( warps_PVA, warped_pair_PVA, volume_16_PVA);
 
 	LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash, TMemoryDeviceType, DIAGNOSTIC> motionTracker_VBH(trackerSwitches,
 	                                                                                                               SingleIterationTerminationConditions());
 
 	std::cout << "==== CALCULATE VBH WARPS === " << std::endl;
-	motionTracker_VBH.Align(volume_16_VBH, warped_pair_VBH, warps_VBH);
+	motionTracker_VBH.Align(warps_VBH, warped_pair_VBH, volume_16_VBH);
 
 	BOOST_REQUIRE(allocatedContentAlmostEqual_Verbose(warps_PVA, warps_VBH, absolute_tolerance, TMemoryDeviceType));
 

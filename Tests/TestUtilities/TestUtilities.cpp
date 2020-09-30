@@ -453,7 +453,7 @@ configuration::Configuration GenerateChangedUpConfiguration() {
 	AutomaticRunSettings changed_up_automatic_run_settings(50, 16, true, true, true, true);
 	LevelSetAlignmentParameters changed_up_level_set_evolution_parameters(
 			ExecutionMode::DIAGNOSTIC,
-			LevelSetAlignmentWeights(0.11f, 0.09f, 2.0f, 0.3f, 0.1f, 1e-6f, 0.4f),
+			LevelSetAlignmentWeights(0.11f, 0.09f, 2.0f, 0.3f, 0.1f, 1e-6f),
 			LevelSetAlignmentSwitches(false, true, false, true, false),
 			LevelSetAlignmentTerminationConditions(300, 5, 0.0002f)
 	);

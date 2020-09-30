@@ -22,7 +22,7 @@ namespace ITMLib {
 
 #define DEPTH_FUSION_SETTINGS_STRUCT_DESCRIPTION DepthFusionSettings, "depth_fusion_settings", \
     (bool, use_surface_thickness_cutoff, false, PRIMITIVE, "When set to false, surface_thickness parameter is ignored."), \
-    (float, surface_thickness, 0.012, PRIMITIVE, "Estimated surface thickness (in meters). "\
+    (float, surface_thickness, 0.012, PRIMITIVE, "Estimated surface_thickness (in meters). "\
     "The value can be used to compute parameter eta from 'SDF-2-SDF Registration for Real-Time 3D Reconstruction from RGB-D Data " \
 	"Sec. 3.2, and SobolevFusion, Sec. 3.1, as well as 'mu' from original KinectFusion(2011). " \
 	"Note that this parameter is only active during depth-to-TSDF fusion, not TSDF-to-TSDF (volume) fusion. " \

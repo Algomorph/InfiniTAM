@@ -41,41 +41,35 @@ using namespace test_utilities;
 
 
 typedef WarpGradientDataFixture<MemoryDeviceType::MEMORYDEVICE_CPU, PlainVoxelArray> DataFixture;
-BOOST_FIXTURE_TEST_CASE(testDataTerm_CPU_PVA, DataFixture) {
 
-	VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field(MEMORYDEVICE_CPU,
-	                                                   index_parameters);
-	ManipulationEngine_CPU_PVA_Warp::Inst().ResetVolume(&warp_field);
+template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
+struct GenericLevelSetEvolutionDataTermConsistencyTest : public WarpGradientDataFixture<MemoryDeviceType::MEMORYDEVICE_CPU, PlainVoxelArray>{
+public:
+	static void Run(){
+		VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field(MEMORYDEVICE_CPU, index_parameters);
+		ManipulationEngine_CPU_PVA_Warp::Inst().ResetVolume(&warp_field);
 
 
-	auto motion_tracker_PVA_CPU = new LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU, DIAGNOSTIC>(
-			LevelSetAlignmentSwitches(true, false, false, false, false));
+		auto motion_tracker_PVA_CPU = new LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU, DIAGNOSTIC>(
+				LevelSetAlignmentSwitches(true, false, false, false, false));
 
-	TimeIt([&]() {
-		motion_tracker_PVA_CPU->CalculateEnergyGradient(&warp_field, canonical_volume, live_volume);
-	}, "Calculate Warping Gradient - PVA CPU data term");
+		VoxelVolume<TSDFVoxel, TIndex>* live_volumes[2]
 
-	unsigned int altered_gradient_count = Analytics_CPU_PVA_Warp::Instance().CountAlteredGradients(&warp_field);
-	BOOST_REQUIRE_EQUAL(altered_gradient_count, gradient_count_data_term);
+		TimeIt([&]() {
+			motion_tracker_PVA_CPU->CalculateEnergyGradient(&warp_field, canonical_volume, live_volume);
+		}, "Calculate Warping Gradient - PVA CPU data term");
 
-	float tolerance = 1e-5;
-	BOOST_REQUIRE(contentAlmostEqual_CPU(&warp_field, warp_field_data_term, tolerance));
+		unsigned int altered_gradient_count = Analytics_CPU_PVA_Warp::Instance().CountAlteredGradients(&warp_field);
+		BOOST_REQUIRE_EQUAL(altered_gradient_count, gradient_count_data_term);
+
+		float tolerance = 1e-5;
+		BOOST_REQUIRE(contentAlmostEqual_CPU(&warp_field, warp_field_data_term, tolerance));
+	}
 }
 
-BOOST_FIXTURE_TEST_CASE(testUpdateDeformationFieldUsingGradient_CPU_PVA, DataFixture) {
-	auto motion_tracker_PVA_CPU = new LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU, DIAGNOSTIC>(
-			LevelSetAlignmentSwitches(true, false, false, false, false));
-	VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field_copy(*warp_field_data_term,
-	                                                        MemoryDeviceType::MEMORYDEVICE_CPU);
 
-	float average_warp = motion_tracker_PVA_CPU->UpdateDeformationFieldUsingGradient(&warp_field_copy, canonical_volume, live_volume);
-	BOOST_REQUIRE_CLOSE(average_warp, warp_update_average_length_iter0, 1e-2);
+BOOST_FIXTURE_TEST_CASE(testDataTerm_CPU_PVA, DataFixture) {
 
-	unsigned int altered_warp_update_count = Analytics_CPU_PVA_Warp::Instance().CountAlteredWarpUpdates(&warp_field_copy);
-	BOOST_REQUIRE_EQUAL(altered_warp_update_count, warp_update_count_iter0);
-
-	float tolerance = 1e-8;
-	BOOST_REQUIRE(contentAlmostEqual_CPU(&warp_field_copy, warp_field_iter0, tolerance));
 }
 
 BOOST_FIXTURE_TEST_CASE(testSmoothEnergyGradient_CPU_PVA, DataFixture) {

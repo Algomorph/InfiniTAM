@@ -20,13 +20,15 @@
 #include "../../Utils/PixelUtils.h"
 #include "../../Utils/Enums/VoxelFlags.h"
 
+
+// region ============================== UPDATE SDF/COLOR IN VOXEL USING DEPTH PIXEL ===================================
 template<bool THasSemanticInformation, bool TUseSurfaceThickness>
 struct VoxelTsdfSetter;
 
 template<bool TUseSurfaceThickness>
 struct VoxelTsdfSetter<true, TUseSurfaceThickness> {
 	template<typename TVoxel>
-	_CPU_AND_GPU_CODE_ static inline void SetSdf(
+	_CPU_AND_GPU_CODE_ static inline void Set(
 			DEVICEPTR(TVoxel)& voxel, float signed_distance_surface_to_voxel_along_camera_ray, float truncation_distance,
 			float final_distance_cutoff, float surface_thickness) {
 		if (signed_distance_surface_to_voxel_along_camera_ray < -truncation_distance + 4e-07) {
@@ -63,7 +65,7 @@ struct VoxelTsdfSetter<true, TUseSurfaceThickness> {
 template<bool TUseSurfaceThickness>
 struct VoxelTsdfSetter<false, TUseSurfaceThickness> {
 	template<typename TVoxel>
-	_CPU_AND_GPU_CODE_ static inline void SetSdf(
+	_CPU_AND_GPU_CODE_ static inline void Set(
 			DEVICEPTR(TVoxel)& voxel, float signed_distance_surface_to_voxel_along_camera_ray, float truncation_distance,
 			float final_distance_cutoff, float surface_thickness) {
 		if (signed_distance_surface_to_voxel_along_camera_ray < (TUseSurfaceThickness ? -surface_thickness : -final_distance_cutoff)) {
@@ -174,8 +176,8 @@ _CPU_AND_GPU_CODE_ inline float ComputeUpdatedLiveVoxelDepthInfo(
 	// [distance from surface to camera, i.e. depth_image] - [distance from voxel to camera]
 	// effectively, eta is the distance between measured surface & voxel point
 	float signed_distance_surface_to_voxel_along_camera_ray = depth_measure - voxel_in_camera_coordinates.z;
-	VoxelTsdfSetter<THasSemanticInformation, TUseSurfaceThickness>::SetSdf(voxel, signed_distance_surface_to_voxel_along_camera_ray,
-	                                                                       truncation_distance, effective_range_cutoff, surface_thickness);
+	VoxelTsdfSetter<THasSemanticInformation, TUseSurfaceThickness>::Set(voxel, signed_distance_surface_to_voxel_along_camera_ray,
+	                                                                    truncation_distance, effective_range_cutoff, surface_thickness);
 	return signed_distance_surface_to_voxel_along_camera_ray;
 }
 
@@ -226,8 +228,8 @@ _CPU_AND_GPU_CODE_ inline float ComputeUpdatedLiveVoxelDepthInfo(
 	// effectively, eta is the distance between measured surface & voxel point
 	float signed_surface_to_voxel_along_camera_ray = depth_measure - voxel_in_camera_coordinates.z;
 	voxel.confidence = TVoxel::floatToValue(confidences_at_pixels[pixel_index]);
-	VoxelTsdfSetter<THasSemanticInformation, TUseSurfaceThickness>::SetSdf(voxel, signed_surface_to_voxel_along_camera_ray, truncation_distance,
-	                                                                       effective_range_cutoff, surface_thickness);
+	VoxelTsdfSetter<THasSemanticInformation, TUseSurfaceThickness>::Set(voxel, signed_surface_to_voxel_along_camera_ray, truncation_distance,
+	                                                                    effective_range_cutoff, surface_thickness);
 	return signed_surface_to_voxel_along_camera_ray;
 }
 
@@ -258,69 +260,102 @@ _CPU_AND_GPU_CODE_ inline void ComputeUpdatedLiveVoxelColorInfo(
 
 	voxel.clr = TO_UCHAR3(TO_VECTOR3(interpolateBilinear(rgb_image, voxel_projected_to_image, rgb_image_size)));
 }
-
 // endregion ===========================================================================================================
-template<bool THasColor, bool THasConfidence, bool THasSemanticInformation, bool TUseSurfaceThickness, typename TVoxel>
-struct ComputeUpdatedLiveVoxelInfo;
-// region ========= VOXEL UPDATES FOR VOXELS WITH NO SEMANTIC INFORMATION ==============================================
-//arguments to the "compute_allocated" member function should always be the same
-#define COMPUTE_VOXEL_UPDATE_PARAMETERS \
-DEVICEPTR(TVoxel) & voxel, const THREADPTR(Vector4f) & voxel_in_volume_coordinates,\
-const CONSTPTR(Matrix4f) & depth_camera_pose, const CONSTPTR(Vector4f) & depth_camera_projection_parameters,\
-const CONSTPTR(Matrix4f) & rgb_camera_pose, const CONSTPTR(Vector4f) & rgb_camera_projection_parameters,\
-const float truncation_distance,\
-const CONSTPTR(float)* depth_image, const CONSTPTR(float) *confidence, const CONSTPTR(Vector2i) &depth_image_size,\
-const CONSTPTR(Vector4u)* rgb_image, const CONSTPTR(Vector2i) & rgb_image_size,  \
-const CONSTPTR(float) effective_range_cutoff, const CONSTPTR(float) surface_thickness
 
-// no color, no confidence
-template<bool THasSemanticInformation, bool TUseSurfaceThickness, class TVoxel>
-struct ComputeUpdatedLiveVoxelInfo<false, false, THasSemanticInformation, TUseSurfaceThickness, TVoxel> {
-	_CPU_AND_GPU_CODE_ static void compute(COMPUTE_VOXEL_UPDATE_PARAMETERS) {
+
+
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, bool TStopIntegrationAtMaxIntegrationWeight,
+		bool TUseSurfaceThickness, bool THasColor, bool THasConfidence, bool THasSemanticInformation,
+		typename TVoxelDepthIntegrationFunctorBase>
+struct VoxelDepthIntegrationFunctorCRTP;
+
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, bool TStopIntegrationAtMaxIntegrationWeight, bool TUseSurfaceThickness,
+		bool THasSemanticInformation, typename TVoxelDepthIntegrationFunctorBase>
+struct VoxelDepthIntegrationFunctorCRTP<TVoxel, TMemoryDeviceType, TStopIntegrationAtMaxIntegrationWeight,
+		TUseSurfaceThickness, false, false, THasSemanticInformation, TVoxelDepthIntegrationFunctorBase> {
+	_CPU_AND_GPU_CODE_
+	inline void operator()(TVoxel& voxel, const Vector3i& voxel_position) {
+		auto& underlying = static_cast<TVoxelDepthIntegrationFunctorBase&>(*this);
+
+		if (TStopIntegrationAtMaxIntegrationWeight) if (voxel.w_depth == underlying.max_integration_weight) return;
+		Vector4f voxel_in_volume_coordinates = underlying.NormalizeVoxelPosition(voxel_position);
 		ComputeUpdatedLiveVoxelDepthInfo<THasSemanticInformation, TUseSurfaceThickness>(
-				voxel, voxel_in_volume_coordinates, depth_camera_pose, depth_camera_projection_parameters, truncation_distance, depth_image,
-				depth_image_size, effective_range_cutoff, surface_thickness);
+				voxel, voxel_in_volume_coordinates, underlying.depth_camera_pose, underlying.depth_camera_projection_parameters,
+				underlying.truncation_distance, underlying.depth_image, underlying.depth_image_size, underlying.effective_range_cutoff,
+				underlying.surface_thickness);
+
 	}
 };
-// with color, no confidence
-template<bool THasSemanticInformation, bool TUseSurfaceThickness, class TVoxel>
-struct ComputeUpdatedLiveVoxelInfo<true, false, THasSemanticInformation, TUseSurfaceThickness, TVoxel> {
-	_CPU_AND_GPU_CODE_ static void compute(COMPUTE_VOXEL_UPDATE_PARAMETERS) {
+
+
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, bool TStopIntegrationAtMaxIntegrationWeight, bool TUseSurfaceThickness,
+		bool THasSemanticInformation, typename TVoxelDepthIntegrationFunctorBase>
+struct VoxelDepthIntegrationFunctorCRTP<TVoxel, TMemoryDeviceType, TStopIntegrationAtMaxIntegrationWeight,
+		TUseSurfaceThickness,  true, false, THasSemanticInformation, TVoxelDepthIntegrationFunctorBase> {
+	_CPU_AND_GPU_CODE_
+	inline void operator()(TVoxel& voxel, const Vector3i& voxel_position) {
+		auto& underlying = static_cast<TVoxelDepthIntegrationFunctorBase&>(*this);
+
+		if (TStopIntegrationAtMaxIntegrationWeight) if (voxel.w_depth == underlying.max_integration_weight) return;
+		Vector4f voxel_in_volume_coordinates = underlying.NormalizeVoxelPosition(voxel_position);
 		float eta = ComputeUpdatedLiveVoxelDepthInfo<THasSemanticInformation, TUseSurfaceThickness>(
-				voxel, voxel_in_volume_coordinates, depth_camera_pose, depth_camera_projection_parameters, truncation_distance, depth_image,
-				depth_image_size, effective_range_cutoff, surface_thickness);
-		ComputeUpdatedLiveVoxelColorInfo(voxel, voxel_in_volume_coordinates, rgb_camera_pose, rgb_camera_projection_parameters, truncation_distance, eta, rgb_image,
-		                                 rgb_image_size);
+				voxel, voxel_in_volume_coordinates, underlying.depth_camera_pose, underlying.depth_camera_projection_parameters,
+				underlying.truncation_distance, underlying.depth_image, underlying.depth_image_size, underlying.effective_range_cutoff,
+				underlying.surface_thickness);
+		ComputeUpdatedLiveVoxelColorInfo(voxel, voxel_in_volume_coordinates, underlying.rgb_camera_pose,
+		                                 underlying.rgb_camera_projection_parameters, underlying.truncation_distance, eta,
+		                                 underlying.rgb_image, underlying.rgb_image_size);
+
 	}
 };
-// no color, with confidence
-template<bool THasSemanticInformation, bool TUseSurfaceThickness, class TVoxel>
-struct ComputeUpdatedLiveVoxelInfo<false, true, THasSemanticInformation, TUseSurfaceThickness, TVoxel> {
-	_CPU_AND_GPU_CODE_ static void compute(COMPUTE_VOXEL_UPDATE_PARAMETERS) {
+
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, bool TStopIntegrationAtMaxIntegrationWeight, bool TUseSurfaceThickness,
+		bool THasSemanticInformation, typename TVoxelDepthIntegrationFunctorBase>
+struct VoxelDepthIntegrationFunctorCRTP<TVoxel, TMemoryDeviceType, TStopIntegrationAtMaxIntegrationWeight,
+		TUseSurfaceThickness, false, true, THasSemanticInformation, TVoxelDepthIntegrationFunctorBase> {
+	_CPU_AND_GPU_CODE_
+	inline void operator()(TVoxel& voxel, const Vector3i& voxel_position) {
+		auto& underlying = static_cast<TVoxelDepthIntegrationFunctorBase&>(*this);
+
+		if (TStopIntegrationAtMaxIntegrationWeight) if (voxel.w_depth == underlying.max_integration_weight) return;
+		Vector4f voxel_in_volume_coordinates = underlying.NormalizeVoxelPosition(voxel_position);
 		ComputeUpdatedLiveVoxelDepthInfo<THasSemanticInformation, TUseSurfaceThickness>(
-				voxel, voxel_in_volume_coordinates, depth_camera_pose, depth_camera_projection_parameters, truncation_distance, depth_image,
-				confidence, depth_image_size, effective_range_cutoff, surface_thickness);
+				voxel, voxel_in_volume_coordinates, underlying.depth_camera_pose, underlying.depth_camera_projection_parameters,
+				underlying.truncation_distance, underlying.depth_image, underlying.confidence_image, underlying.depth_image_size,
+				underlying.effective_range_cutoff, underlying.surface_thickness);
+
 	}
 };
-// with color, with confidence
-template<bool THasSemanticInformation, bool TUseSurfaceThickness, class TVoxel>
-struct ComputeUpdatedLiveVoxelInfo<true, true, THasSemanticInformation, TUseSurfaceThickness, TVoxel> {
-	_CPU_AND_GPU_CODE_ static void compute(COMPUTE_VOXEL_UPDATE_PARAMETERS) {
+
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, bool TStopIntegrationAtMaxIntegrationWeight, bool TUseSurfaceThickness,
+		bool THasSemanticInformation, typename TVoxelDepthIntegrationFunctorBase>
+struct VoxelDepthIntegrationFunctorCRTP<TVoxel, TMemoryDeviceType, TStopIntegrationAtMaxIntegrationWeight,
+		TUseSurfaceThickness, true, true, THasSemanticInformation, TVoxelDepthIntegrationFunctorBase> {
+	_CPU_AND_GPU_CODE_
+	inline void operator()(TVoxel& voxel, const Vector3i& voxel_position) {
+		auto& underlying = static_cast<TVoxelDepthIntegrationFunctorBase&>(*this);
+
+		if (TStopIntegrationAtMaxIntegrationWeight) if (voxel.w_depth == underlying.max_integration_weight) return;
+		Vector4f voxel_in_volume_coordinates = underlying.NormalizeVoxelPosition(voxel_position);
 		float eta = ComputeUpdatedLiveVoxelDepthInfo<THasSemanticInformation, TUseSurfaceThickness>(
-				voxel, voxel_in_volume_coordinates, depth_camera_pose, depth_camera_projection_parameters, truncation_distance, depth_image,
-				confidence, depth_image_size, effective_range_cutoff, surface_thickness);
-		ComputeUpdatedLiveVoxelColorInfo(voxel, voxel_in_volume_coordinates, rgb_camera_pose, rgb_camera_projection_parameters, truncation_distance, eta, rgb_image,
-		                                 rgb_image_size);
+				voxel, voxel_in_volume_coordinates, underlying.depth_camera_pose, underlying.depth_camera_projection_parameters,
+				underlying.truncation_distance, underlying.depth_image, underlying.confidence_image, underlying.depth_image_size,
+				underlying.effective_range_cutoff, underlying.surface_thickness);
+		ComputeUpdatedLiveVoxelColorInfo(voxel, voxel_in_volume_coordinates, underlying.rgb_camera_pose,
+		                                 underlying.rgb_camera_projection_parameters, underlying.truncation_distance, eta,
+		                                 underlying.rgb_image, underlying.rgb_image_size);
 	}
 };
 
+// region ======================================== VOXEL UPDATE FUNCTOR CRTP BASE ======================================
 
-#undef COMPUTE_VOXEL_UPDATE_PARAMETERS
-// endregion ===========================================================================================================
-// region ======================================== VOXEL UPDATE FUNCTOR ================================================
-
-template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, bool TStopIntegrationAtMaxIntegrationWeight, bool TUseSurfaceThickness>
-struct VoxelDepthIntegrationFunctor {
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, bool TStopIntegrationAtMaxIntegrationWeight,
+		bool TUseSurfaceThickness, bool THasColor, bool THasConfidence, bool THasSemanticInformation>
+struct VoxelDepthIntegrationFunctor :
+		VoxelDepthIntegrationFunctorCRTP<TVoxel, TMemoryDeviceType, TStopIntegrationAtMaxIntegrationWeight,
+				TUseSurfaceThickness, THasColor, THasConfidence, THasSemanticInformation,
+				VoxelDepthIntegrationFunctor<TVoxel, TMemoryDeviceType, TStopIntegrationAtMaxIntegrationWeight,
+						TUseSurfaceThickness, THasColor, THasConfidence, THasSemanticInformation>> {
 public:
 	VoxelDepthIntegrationFunctor(
 			const ITMLib::VoxelVolumeParameters& volume_parameters,
@@ -331,34 +366,28 @@ public:
 			depth_camera_pose(depth_camera_pose),
 			rgb_image_size(view->rgb.dimensions),
 			rgb_camera_projection_parameters(view->calibration_information.intrinsics_rgb.projectionParamsSimple.all),
-			rgb_camera_pose(
-					TVoxel::hasColorInformation ? view->calibration_information.trafo_rgb_to_depth.calib_inv * depth_camera_pose
-					                            : Matrix4f()),
-
+			rgb_camera_pose(TVoxel::hasColorInformation ?
+			                view->calibration_information.trafo_rgb_to_depth.calib_inv
+			                * depth_camera_pose : Matrix4f()),
 			surface_thickness(surface_thickness),
 			truncation_distance(volume_parameters.truncation_distance),
 			max_integration_weight(volume_parameters.max_integration_weight),
 			effective_range_cutoff(volume_parameters.truncation_distance * volume_parameters.block_allocation_band_factor),
 			voxel_size(volume_parameters.voxel_size),
 
-			depth(view->depth.GetData(TMemoryDeviceType)),
-			rgb(view->rgb.GetData(TMemoryDeviceType)),
-			confidence(view->depth_confidence.GetData(TMemoryDeviceType)) {}
+			depth_image(view->depth.GetData(TMemoryDeviceType)),
+			rgb_image(view->rgb.GetData(TMemoryDeviceType)),
+			confidence_image(view->depth_confidence.GetData(TMemoryDeviceType)) {}
 
 	_CPU_AND_GPU_CODE_
-	inline void operator()(TVoxel& voxel, const Vector3i& voxel_position) {
-		if (TStopIntegrationAtMaxIntegrationWeight) if (voxel.w_depth == max_integration_weight) return;
-		Vector4f voxel_volume_coordinates{static_cast<float>(voxel_position.x * voxel_size),
-		                                  static_cast<float>(voxel_position.y * voxel_size),
-		                                  static_cast<float>(voxel_position.z * voxel_size), 1.0f};
-		ComputeUpdatedLiveVoxelInfo<TVoxel::hasColorInformation, TVoxel::hasConfidenceInformation,
-				TVoxel::hasSemanticInformation, TUseSurfaceThickness, TVoxel>::compute(
-				voxel, voxel_volume_coordinates, depth_camera_pose,
-				depth_camera_projection_parameters, rgb_camera_pose, rgb_camera_projection_parameters, truncation_distance,
-				depth, confidence, depth_image_size, rgb, rgb_image_size, effective_range_cutoff, surface_thickness);
+	inline
+	Vector4f NormalizeVoxelPosition(const Vector3i& voxel_position) {
+		return {static_cast<float>(voxel_position.x * voxel_size),
+		        static_cast<float>(voxel_position.y * voxel_size),
+		        static_cast<float>(voxel_position.z * voxel_size), 1.0f};
 	}
 
-private:
+public:
 	const Vector2i depth_image_size;
 	Vector4f depth_camera_projection_parameters;
 	Matrix4f depth_camera_pose;
@@ -372,11 +401,8 @@ private:
 	const float voxel_size;
 	const float effective_range_cutoff;
 
-	const float* depth;
-	const Vector4u* rgb;
-	const float* confidence;
-
-
+	const float* depth_image;
+	const Vector4u* rgb_image;
+	const float* confidence_image;
 };
-
 // endregion

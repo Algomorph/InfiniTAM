@@ -36,10 +36,27 @@ public:
 	using Configurable<LevelSetAlignmentParameters>::Configurable;
 
 	virtual ~LevelSetAlignmentEngineInterface() = default;
+
+	/**
+	 * \brief Iteratively align TSDF values initially inside the volume live_volume_pair[0] with
+	 *  values in the canonical_volume, estimating a vector field inside the warp_field and using
+	 *  trilinear interpolation to update the live volume at each iteration.
+	 *
+	 *  \details Bounces back-and-forth between the volumes in the live_volume_pair, i.e.
+	 *  the result of live volume from the previous iteration is used as the source live volume
+	 *  in the next iteration.
+	 *
+	 *  Expects all volumes to be properly allocated.
+	 *
+	 * \param warp_field
+	 * \param live_volume_pair
+	 * \param canonical_volume
+	 * \return pointer to the volume in the live_volume_pair that contains the final (aligned) result.
+	 */
 	virtual VoxelVolume<TVoxel, TIndex>* Align(
-			VoxelVolume<TVoxel, TIndex>* canonical_volume,
+			VoxelVolume<TWarp, TIndex>* warp_field,
 			VoxelVolume<TVoxel, TIndex>** live_volume_pair,
-			VoxelVolume<TWarp, TIndex>* warp_field) = 0;
+			VoxelVolume<TVoxel, TIndex>* canonical_volume) = 0;
 
 };
 
