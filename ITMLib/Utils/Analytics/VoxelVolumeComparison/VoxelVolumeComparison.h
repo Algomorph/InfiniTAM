@@ -38,7 +38,7 @@ namespace ITMLib {
  * \return true if scene content matches (to within specified tolerance), false otherwise
  */
 template<typename TVoxel, typename TIndexA, typename TIndexB, typename ToleranceType>
-bool contentAlmostEqual(VoxelVolume<TVoxel, TIndexA>* a, VoxelVolume<TVoxel, TIndexB>* b, ToleranceType tolerance,
+bool ContentAlmostEqual(VoxelVolume<TVoxel, TIndexA>* a, VoxelVolume<TVoxel, TIndexB>* b, ToleranceType tolerance,
                         MemoryDeviceType memory_type) {
 	switch (memory_type) {
 		case MEMORYDEVICE_CPU:
@@ -69,7 +69,7 @@ bool contentAlmostEqual(VoxelVolume<TVoxel, TIndexA>* a, VoxelVolume<TVoxel, TIn
 }
 
 template<typename TVoxel, typename TIndexA, typename TIndexB, typename ToleranceType>
-bool contentAlmostEqual_Verbose(VoxelVolume<TVoxel, TIndexA>* a, VoxelVolume<TVoxel, TIndexB>* b,
+bool ContentAlmostEqual_Verbose(VoxelVolume<TVoxel, TIndexA>* a, VoxelVolume<TVoxel, TIndexB>* b,
                                 ToleranceType tolerance, MemoryDeviceType memory_type){
 	switch (memory_type) {
 		case MEMORYDEVICE_CPU:
@@ -100,7 +100,7 @@ bool contentAlmostEqual_Verbose(VoxelVolume<TVoxel, TIndexA>* a, VoxelVolume<TVo
 
 template<typename TVoxel, typename TIndexA, typename TIndexB, typename ToleranceType>
 bool
-contentForFlagsAlmostEqual(VoxelVolume<TVoxel, TIndexA>* a, VoxelVolume<TVoxel, TIndexB>* b, VoxelFlags flags,
+ContentForFlagsAlmostEqual(VoxelVolume<TVoxel, TIndexA>* a, VoxelVolume<TVoxel, TIndexB>* b, VoxelFlags flags,
                            ToleranceType tolerance, MemoryDeviceType memory_type){
 	switch (memory_type) {
 		case MEMORYDEVICE_CPU:
@@ -130,7 +130,7 @@ contentForFlagsAlmostEqual(VoxelVolume<TVoxel, TIndexA>* a, VoxelVolume<TVoxel, 
 }
 
 template<typename TVoxel, typename TIndexA, typename TIndexB, typename ToleranceType>
-bool contentForFlagsAlmostEqual_Verbose(VoxelVolume<TVoxel, TIndexA>* a, VoxelVolume<TVoxel, TIndexB>* b,
+bool ContentForFlagsAlmostEqual_Verbose(VoxelVolume<TVoxel, TIndexA>* a, VoxelVolume<TVoxel, TIndexB>* b,
                                         VoxelFlags flags, ToleranceType tolerance, MemoryDeviceType memory_type){
 	switch (memory_type) {
 		case MEMORYDEVICE_CPU:
@@ -177,7 +177,7 @@ bool contentForFlagsAlmostEqual_Verbose(VoxelVolume<TVoxel, TIndexA>* a, VoxelVo
  * \return true if scene content for allocated areas in both volumes matches (to within specified tolerance), false otherwise
  */
 template<typename TVoxel, typename TIndexA, typename TIndexB, typename ToleranceType>
-bool allocatedContentAlmostEqual(VoxelVolume<TVoxel, TIndexA>* a, VoxelVolume<TVoxel, TIndexB>* b,
+bool AllocatedContentAlmostEqual(VoxelVolume<TVoxel, TIndexA>* a, VoxelVolume<TVoxel, TIndexB>* b,
                                  ToleranceType tolerance, MemoryDeviceType memory_type){
 	switch (memory_type) {
 		case MEMORYDEVICE_CPU:
@@ -205,7 +205,7 @@ bool allocatedContentAlmostEqual(VoxelVolume<TVoxel, TIndexA>* a, VoxelVolume<TV
 	}
 }
 template<typename TVoxel, typename TIndexA, typename TIndexB, typename ToleranceType>
-bool allocatedContentAlmostEqual_Verbose(VoxelVolume<TVoxel, TIndexA>* a, VoxelVolume<TVoxel, TIndexB>* b,
+bool AllocatedContentAlmostEqual_Verbose(VoxelVolume<TVoxel, TIndexA>* a, VoxelVolume<TVoxel, TIndexB>* b,
                                          ToleranceType tolerance, MemoryDeviceType memory_type){
 	switch (memory_type) {
 		case MEMORYDEVICE_CPU:

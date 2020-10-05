@@ -186,16 +186,14 @@ void GenericWarpConsistencySubtest(const LevelSetAlignmentSwitches& switches, in
 				warp_field.SaveToDisk(path);
 				break;
 			case TEST_SUCCESSIVE_ITERATIONS:
-				EditAndCopyEngineFactory::Instance<WarpVoxel, TIndex, TMemoryDeviceType>().ResetVolume(
-						&ground_truth_warp_field);
+				ground_truth_warp_field.Reset();
 				ground_truth_warp_field.LoadFromDisk(path);
 
-				BOOST_REQUIRE(contentAlmostEqual_Verbose(&warp_field, &ground_truth_warp_field, absolute_tolerance,
+				BOOST_REQUIRE(ContentAlmostEqual_Verbose(&warp_field, &ground_truth_warp_field, absolute_tolerance,
 				                                         TMemoryDeviceType));
-				EditAndCopyEngineFactory::Instance<TSDFVoxel, TIndex, TMemoryDeviceType>().ResetVolume(
-						&ground_truth_sdf_volume);
+				ground_truth_sdf_volume.Reset();
 				ground_truth_sdf_volume.LoadFromDisk(path_warped_live);
-				BOOST_REQUIRE(contentAlmostEqual_Verbose(live_volumes[target_warped_field_ix], &ground_truth_sdf_volume,
+				BOOST_REQUIRE(ContentAlmostEqual_Verbose(live_volumes[target_warped_field_ix], &ground_truth_sdf_volume,
 				                                         absolute_tolerance, TMemoryDeviceType));
 				break;
 			default:
@@ -215,14 +213,14 @@ void GenericWarpConsistencySubtest(const LevelSetAlignmentSwitches& switches, in
 					&ground_truth_warp_field);
 			ground_truth_warp_field.LoadFromDisk(GetWarpsPath<TIndex>(volume_filename_prefix, iteration_limit - 1));
 			BOOST_REQUIRE(
-					contentAlmostEqual(&warp_field, &ground_truth_warp_field, absolute_tolerance, TMemoryDeviceType));
+					ContentAlmostEqual(&warp_field, &ground_truth_warp_field, absolute_tolerance, TMemoryDeviceType));
 			ground_truth_sdf_volume.LoadFromDisk(
 					GetWarpedLivePath<TIndex>(volume_filename_prefix, iteration_limit - 1));
-			BOOST_REQUIRE(contentAlmostEqual_Verbose(live_volumes[target_warped_field_ix], &ground_truth_sdf_volume,
+			BOOST_REQUIRE(ContentAlmostEqual_Verbose(live_volumes[target_warped_field_ix], &ground_truth_sdf_volume,
 			                                         absolute_tolerance, TMemoryDeviceType));
 			volume_fusion_engine->FuseOneTsdfVolumeIntoAnother(canonical_volume, live_volumes[target_warped_field_ix], 0);
 			ground_truth_sdf_volume.LoadFromDisk(GetFusedPath<TIndex>(volume_filename_prefix, iteration_limit - 1));
-			BOOST_REQUIRE(contentAlmostEqual(canonical_volume, &ground_truth_sdf_volume, absolute_tolerance,
+			BOOST_REQUIRE(ContentAlmostEqual(canonical_volume, &ground_truth_sdf_volume, absolute_tolerance,
 			                                 TMemoryDeviceType));
 			break;
 		default:
@@ -262,13 +260,13 @@ void PVA_to_VBH_WarpComparisonSubtest(int iteration, LevelSetAlignmentSwitches t
 		std::string path_warps_VBH = GetWarpsPath<VoxelBlockHash>(prefix, iteration - 1);
 		LoadVolume(&warps_VBH, path_warps_VBH, TMemoryDeviceType,
 		           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
-		BOOST_REQUIRE(allocatedContentAlmostEqual(warps_PVA, warps_VBH, absolute_tolerance, TMemoryDeviceType));
+		BOOST_REQUIRE(AllocatedContentAlmostEqual(warps_PVA, warps_VBH, absolute_tolerance, TMemoryDeviceType));
 	} else {
 		initializeVolume(&warps_PVA, snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>(),
 		                 TMemoryDeviceType);
 		initializeVolume(&warps_VBH, snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>(), TMemoryDeviceType);
 
-		BOOST_REQUIRE(allocatedContentAlmostEqual(warps_PVA, warps_VBH, absolute_tolerance, TMemoryDeviceType));
+		BOOST_REQUIRE(AllocatedContentAlmostEqual(warps_PVA, warps_VBH, absolute_tolerance, TMemoryDeviceType));
 	}
 
 	// *** load warped live scene
@@ -320,7 +318,7 @@ void PVA_to_VBH_WarpComparisonSubtest(int iteration, LevelSetAlignmentSwitches t
 	std::cout << "==== CALCULATE VBH WARPS === " << std::endl;
 	motionTracker_VBH.Align(warps_VBH, warped_pair_VBH, volume_16_VBH);
 
-	BOOST_REQUIRE(allocatedContentAlmostEqual_Verbose(warps_PVA, warps_VBH, absolute_tolerance, TMemoryDeviceType));
+	BOOST_REQUIRE(AllocatedContentAlmostEqual_Verbose(warps_PVA, warps_VBH, absolute_tolerance, TMemoryDeviceType));
 
 
 	delete volume_16_PVA;
@@ -336,8 +334,8 @@ void PVA_to_VBH_WarpComparisonSubtest(int iteration, LevelSetAlignmentSwitches t
 	           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
 
-	BOOST_REQUIRE(contentAlmostEqual_Verbose(warps_PVA, loaded_warps_PVA, absolute_tolerance, TMemoryDeviceType));
-	BOOST_REQUIRE(contentAlmostEqual_Verbose(warps_VBH, loaded_warps_VBH, absolute_tolerance, TMemoryDeviceType));
+	BOOST_REQUIRE(ContentAlmostEqual_Verbose(warps_PVA, loaded_warps_PVA, absolute_tolerance, TMemoryDeviceType));
+	BOOST_REQUIRE(ContentAlmostEqual_Verbose(warps_VBH, loaded_warps_VBH, absolute_tolerance, TMemoryDeviceType));
 
 	delete warps_PVA;
 	delete warps_VBH;
@@ -372,12 +370,12 @@ void GenericWarpTest(const LevelSetAlignmentSwitches& switches, int iteration_li
 				warp_field_PVA.LoadFromDisk(GetWarpsPath<PlainVoxelArray>(prefix, iteration));
 				warp_field_VBH.Reset();
 				warp_field_VBH.LoadFromDisk(GetWarpsPath<VoxelBlockHash>(prefix, iteration));
-				BOOST_REQUIRE(allocatedContentAlmostEqual_Verbose(&warp_field_PVA, &warp_field_VBH,
+				BOOST_REQUIRE(AllocatedContentAlmostEqual_Verbose(&warp_field_PVA, &warp_field_VBH,
 				                                                  absolute_tolerance, TMemoryDeviceType));
 				volume_PVA.LoadFromDisk(GetWarpedLivePath<PlainVoxelArray>(prefix, iteration));
 				volume_VBH.Reset();
 				volume_VBH.LoadFromDisk(GetWarpedLivePath<VoxelBlockHash>(prefix, iteration));
-				BOOST_REQUIRE(contentForFlagsAlmostEqual_Verbose(&volume_PVA, &volume_VBH, VOXEL_NONTRUNCATED,
+				BOOST_REQUIRE(ContentForFlagsAlmostEqual_Verbose(&volume_PVA, &volume_VBH, VOXEL_NONTRUNCATED,
 				                                                 absolute_tolerance, TMemoryDeviceType));
 			}
 		}
@@ -387,13 +385,13 @@ void GenericWarpTest(const LevelSetAlignmentSwitches& switches, int iteration_li
 			volume_VBH.Reset();
 			volume_VBH.LoadFromDisk(GetWarpedLivePath<VoxelBlockHash>(prefix, iteration_limit - 1));
 			BOOST_REQUIRE(
-					contentForFlagsAlmostEqual(&volume_PVA, &volume_VBH, VOXEL_NONTRUNCATED, absolute_tolerance,
+					ContentForFlagsAlmostEqual(&volume_PVA, &volume_VBH, VOXEL_NONTRUNCATED, absolute_tolerance,
 					                           TMemoryDeviceType));
 			volume_PVA.LoadFromDisk(GetFusedPath<PlainVoxelArray>(prefix, iteration_limit - 1));
 			volume_VBH.Reset();
 			volume_VBH.LoadFromDisk(GetFusedPath<VoxelBlockHash>(prefix, iteration_limit - 1));
 			BOOST_REQUIRE(
-					contentForFlagsAlmostEqual(&volume_PVA, &volume_VBH, VOXEL_NONTRUNCATED, absolute_tolerance,
+					ContentForFlagsAlmostEqual(&volume_PVA, &volume_VBH, VOXEL_NONTRUNCATED, absolute_tolerance,
 					                           TMemoryDeviceType));
 		}
 			break;

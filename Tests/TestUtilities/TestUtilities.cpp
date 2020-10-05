@@ -174,18 +174,18 @@ void
 UpdateView(View** view, const std::string& depth_path, const std::string& color_path,
            const std::string& calibration_path, MemoryDeviceType memoryDevice) {
 
-	ViewBuilder* viewBuilderToUse;
+	ViewBuilder* view_builder_to_use;
 	switch (memoryDevice) {
 		case MEMORYDEVICE_CPU:
 			if (viewBuilder_CPU == nullptr)
 				viewBuilder_CPU = ViewBuilderFactory::Build(calibration_path, memoryDevice);
-			viewBuilderToUse = viewBuilder_CPU;
+			view_builder_to_use = viewBuilder_CPU;
 			break;
 		case MEMORYDEVICE_CUDA:
 #ifndef COMPILE_WITHOUT_CUDA
 			if (viewBuilder_CUDA == nullptr)
 				viewBuilder_CUDA = ViewBuilderFactory::Build(calibration_path, memoryDevice);
-			viewBuilderToUse = viewBuilder_CUDA;
+			view_builder_to_use = viewBuilder_CUDA;
 #else
 			DIEWITHEXCEPTION_REPORTLOCATION("Attmpted to update CUDA view while build without CUDA support, aborting.");
 #endif
@@ -199,7 +199,7 @@ UpdateView(View** view, const std::string& depth_path, const std::string& color_
 	auto* mask = new UCharImage(true, false);
 	ReadImageFromFile(*rgb, color_path.c_str());
 	ReadImageFromFile(*depth, depth_path.c_str());
-	viewBuilderToUse->UpdateView(view, rgb, depth, false, false, false, true);
+	view_builder_to_use->UpdateView(view, rgb, depth, false, false, false, true);
 	delete rgb;
 	delete depth;
 	delete mask;

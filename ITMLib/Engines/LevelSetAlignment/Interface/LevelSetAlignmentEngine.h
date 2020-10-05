@@ -39,7 +39,7 @@ private: // instance variables
 
 	WarpingEngineInterface<TVoxel, TWarp, TIndex>* warping_engine;
 	// needs to be declared after "parameters", derives value from it during initialization
-	const float mean_vector_update_threshold_in_voxels;
+	const float vector_update_threshold_in_voxels;
 	const bool log_settings = false;
 
 public: // instance functions
@@ -54,6 +54,7 @@ public: // instance functions
 			VoxelVolume<TWarp, TIndex>* warp_field,
 			VoxelVolume<TVoxel, TIndex>** live_volume_pair,
 			VoxelVolume<TVoxel, TIndex>* canonical_volume) override;
+
 protected:
 	void ClearOutFramewiseWarps(VoxelVolume<TWarp, TIndex>* warp_field);
 	void ClearOutCumulativeWarps(VoxelVolume<TWarp, TIndex>* warp_field);

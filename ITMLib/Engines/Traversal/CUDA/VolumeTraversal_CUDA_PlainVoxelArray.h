@@ -29,8 +29,6 @@
 namespace ITMLib {
 
 
-//TODO: many DRY violations within this file -- figure out how to reduce them
-
 template<typename TVoxel>
 class VolumeTraversalEngine<TVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA> {
 private: // static functions

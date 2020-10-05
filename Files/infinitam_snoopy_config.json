@@ -159,8 +159,7 @@
             "weight_data_term": 2,
             "weight_smoothing_term": 0.200000003,
             "weight_level_set_term": 0.200000003,
-            "epsilon": "9.99999975e-06",
-            "momentum_weight": 0.5
+            "epsilon": "9.99999975e-06"
         },
         "switches": {
             "enable_data_term": true,
@@ -171,7 +170,8 @@
         },
         "termination": {
             "max_iteration_count": 300,
-            "mean_update_length_threshold": "9.99999997e-07"
+            "min_iteration_count": 10,
+            "update_length_threshold": "9.99999997e-07"
         }
     },
     "volume_fusion_settings": {

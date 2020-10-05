@@ -36,6 +36,7 @@
 //test_utilities
 #include "TestUtilities/TestUtilities.h"
 #include "Test_WarpGradient_Common.h"
+#include "TestUtilities/WarpAdvancedTestingUtilities.h"
 
 
 using namespace ITMLib;
@@ -52,22 +53,23 @@ BOOST_FIXTURE_TEST_CASE(testDataTerm_CUDA_VBH, DataFixture) {
 
 
 	auto motionTracker_VBH_CUDA = new LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA, DIAGNOSTIC>(
-			LevelSetAlignmentSwitches(true, false, false, false, false));
+			LevelSetAlignmentSwitches(true, false, false, false, false),
+			SingleIterationTerminationConditions());
 
 	TimeIt([&]() {
-		motionTracker_VBH_CUDA->CalculateEnergyGradient(&warp_field, canonical_volume, live_volume);
+		motionTracker_VBH_CUDA->Align(&warp_field, canonical_volume, live_volume);
 	}, "Calculate Warping Gradient - VBH CUDA data term");
 
 	BOOST_REQUIRE_EQUAL(Analytics_CUDA_VBH_Warp::Instance().CountAllocatedHashBlocks(&warp_field), 633);
 
 	float tolerance = 1e-7;
-	BOOST_REQUIRE(contentAlmostEqual_CUDA_Verbose(&warp_field, warp_field_data_term, tolerance));
+	BOOST_REQUIRE(contentAlmostEqual_CUDA_Verbose(&warp_field, warp_field_0_data, tolerance));
 }
 
 BOOST_FIXTURE_TEST_CASE(testUpdateDeformationFieldUsingGradient_CUDA_VBH, DataFixture) {
 	auto motion_tracker_VBH_CUDA = new LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA, DIAGNOSTIC>(
 			LevelSetAlignmentSwitches(false, false, false, false, false));
-	VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field_copy(*warp_field_data_term,
+	VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field_copy(*warp_field_0_data,
 	                                                       MemoryDeviceType::MEMORYDEVICE_CUDA);
 	AllocateUsingOtherVolume(canonical_volume, live_volume, MEMORYDEVICE_CUDA);
 
@@ -77,7 +79,7 @@ BOOST_FIXTURE_TEST_CASE(testUpdateDeformationFieldUsingGradient_CUDA_VBH, DataFi
 
 	float average_warp_update = motion_tracker_VBH_CUDA->UpdateDeformationFieldUsingGradient(&warp_field_copy, canonical_volume, live_volume);
 
-	BOOST_REQUIRE_CLOSE(average_warp_update, warp_update_average_length_iter0, 1e-2f);
+	BOOST_REQUIRE_CLOSE(average_warp_update, update_0_average_length, 1e-2f);
 
 	float tolerance = 1e-8;
 	BOOST_REQUIRE(contentAlmostEqual_CUDA(&warp_field_copy, warp_field_iter0, tolerance));
@@ -85,7 +87,7 @@ BOOST_FIXTURE_TEST_CASE(testUpdateDeformationFieldUsingGradient_CUDA_VBH, DataFi
 
 
 BOOST_FIXTURE_TEST_CASE(testSmoothEnergyGradient_CUDA_VBH, DataFixture) {
-	VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field(*warp_field_data_term, MEMORYDEVICE_CUDA);
+	VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field(*warp_field_0_data, MEMORYDEVICE_CUDA);
 	AllocateUsingOtherVolume(&warp_field, live_volume, MEMORYDEVICE_CUDA);
 	AllocateUsingOtherVolume(canonical_volume, live_volume, MEMORYDEVICE_CUDA);
 	auto motionTracker_VBH_CUDA = new LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA, DIAGNOSTIC>(
@@ -97,7 +99,7 @@ BOOST_FIXTURE_TEST_CASE(testSmoothEnergyGradient_CUDA_VBH, DataFixture) {
 	}, "Smooth Warping Gradient - VBH CUDA");
 
 	float tolerance = 1e-8;
-	BOOST_REQUIRE(contentAlmostEqual_CUDA(&warp_field, warp_field_data_term_smoothed, tolerance));
+	BOOST_REQUIRE(contentAlmostEqual_CUDA(&warp_field, warp_field_0_data_sobolev_smoothed, tolerance));
 }
 
 BOOST_FIXTURE_TEST_CASE(testTikhonovTerm_CUDA_VBH, DataFixture) {
@@ -116,7 +118,7 @@ BOOST_FIXTURE_TEST_CASE(testTikhonovTerm_CUDA_VBH, DataFixture) {
 	BOOST_REQUIRE_EQUAL(Analytics_CUDA_VBH_Warp::Instance().CountAllocatedHashBlocks(&warp_field), 633);
 
 	WarpVoxel warp1 = ManipulationEngine_CUDA_VBH_Warp::Inst().ReadVoxel(&warp_field, testPosition);
-	WarpVoxel warp2 = ManipulationEngine_CUDA_VBH_Warp::Inst().ReadVoxel(warp_field_tikhonov_term, testPosition);
+	WarpVoxel warp2 = ManipulationEngine_CUDA_VBH_Warp::Inst().ReadVoxel(warp_field_1_tikhonov, testPosition);
 
 	float relative_tolerance = 1.0f; //percent
 	BOOST_REQUIRE_CLOSE(warp1.gradient0.x, warp2.gradient0.x, relative_tolerance);
@@ -124,7 +126,7 @@ BOOST_FIXTURE_TEST_CASE(testTikhonovTerm_CUDA_VBH, DataFixture) {
 	BOOST_REQUIRE_CLOSE(warp1.gradient0.z, warp2.gradient0.z, relative_tolerance);
 
 	float absolute_tolerance = 1e-6;
-	BOOST_REQUIRE(contentAlmostEqual_CUDA(&warp_field, warp_field_tikhonov_term, absolute_tolerance));
+	BOOST_REQUIRE(contentAlmostEqual_CUDA(&warp_field, warp_field_1_tikhonov, absolute_tolerance));
 }
 
 BOOST_FIXTURE_TEST_CASE(testDataAndTikhonovTerm_CUDA_VBH, DataFixture) {
@@ -137,19 +139,21 @@ BOOST_FIXTURE_TEST_CASE(testDataAndTikhonovTerm_CUDA_VBH, DataFixture) {
 
 	Vector3i testPosition(-40, 60, 200);
 
+	live_volumes
+
 	TimeIt([&]() {
-		motionTracker_VBH_CUDA->CalculateEnergyGradient(&warp_field, canonical_volume, live_volume);
+		motionTracker_VBH_CUDA->CalculateEnergyGradient(&warp_field, live_volume, canonical_volume);
 	}, "Calculate Warping Gradient - VBH CUDA data term + tikhonov term");
 	BOOST_REQUIRE_EQUAL(Analytics_CUDA_VBH_Warp::Instance().CountAllocatedHashBlocks(&warp_field), 633);
 
 	WarpVoxel warp1 = ManipulationEngine_CUDA_VBH_Warp::Inst().ReadVoxel(&warp_field, testPosition);
-	WarpVoxel warp2 = ManipulationEngine_CUDA_VBH_Warp::Inst().ReadVoxel(warp_field_data_and_tikhonov_term, testPosition);
+	WarpVoxel warp2 = ManipulationEngine_CUDA_VBH_Warp::Inst().ReadVoxel(warp_field_1_data_and_tikhonov, testPosition);
 	float tolerance = 1e-6;
 	BOOST_REQUIRE_CLOSE(warp1.gradient0.x, warp2.gradient0.x, tolerance);
 	BOOST_REQUIRE_CLOSE(warp1.gradient0.y, warp2.gradient0.y, tolerance);
 	BOOST_REQUIRE_CLOSE(warp1.gradient0.z, warp2.gradient0.z, tolerance);
 
-	BOOST_REQUIRE(contentAlmostEqual_CUDA_Verbose(&warp_field, warp_field_data_and_tikhonov_term, tolerance));
+	BOOST_REQUIRE(contentAlmostEqual_CUDA_Verbose(&warp_field, warp_field_1_data_and_tikhonov, tolerance));
 }
 
 
@@ -166,10 +170,10 @@ BOOST_FIXTURE_TEST_CASE(testDataAndKillingTerm_CUDA_VBH, DataFixture) {
 	}, "Calculate Warping Gradient - VBH CUDA data term + killing term");
 
 	unsigned int altered_gradient_count = Analytics_CUDA_VBH_Warp::Instance().CountAlteredGradients(&warp_field);
-	BOOST_REQUIRE_EQUAL(altered_gradient_count, gradient_count_data_and_killing_term);
+	BOOST_REQUIRE_EQUAL(altered_gradient_count, update_1_count_data_and_killing);
 
 	float tolerance = 1e-6;
-	BOOST_REQUIRE(contentAlmostEqual_CUDA(&warp_field, warp_field_data_and_killing_term, tolerance));
+	BOOST_REQUIRE(contentAlmostEqual_CUDA(&warp_field, warp_field_1_data_and_killing, tolerance));
 }
 
 
@@ -189,9 +193,9 @@ BOOST_FIXTURE_TEST_CASE(testDataAndLevelSetTerm_CUDA_VBH, DataFixture) {
 	unsigned int altered_gradient_count = Analytics_CUDA_VBH_Warp::Instance().CountAlteredGradients(&warp_field);
 
 	// due to CUDA float computations being a tad off, we may get a few more or a few less modified gradients than for CPU here
-	BOOST_REQUIRE(std::abs<int>(static_cast<int>(altered_gradient_count) - static_cast<int>(gradient_count_data_and_level_set_term)) < 50);
+	BOOST_REQUIRE(std::abs<int>(static_cast<int>(altered_gradient_count) - static_cast<int>(update_1_count_data_and_level_set)) < 50);
 //	BOOST_REQUIRE_EQUAL(altered_gradient_count, gradient_count_data_and_level_set_term);
 
 	float tolerance = 1e-6;
-	BOOST_REQUIRE(contentAlmostEqual_CUDA_Verbose(&warp_field, warp_field_data_and_level_set_term, tolerance));
+	BOOST_REQUIRE(contentAlmostEqual_CUDA_Verbose(&warp_field, warp_field_1_data_and_level_set, tolerance));
 }

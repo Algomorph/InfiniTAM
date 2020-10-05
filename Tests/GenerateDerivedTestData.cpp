@@ -220,11 +220,10 @@ void GenerateWarpGradientTestData() {
 	               "Generating warp field data from snoopy masked partial volumes 16 & 17 "
 			               << IndexString<TIndex>() << "...");
 	test_utilities::ConstructGeneratedVolumeSubdirectoriesIfMissing();
-	std::string volume_output_directory = GENERATED_TEST_DATA_PREFIX "TestData/volumes/" + IndexString<TIndex>() + "/";
+	std::string volume_output_directory = std::string(test_utilities::GeneratedVolumeDirectory) + IndexString<TIndex>() + "/";
 	test_utilities::ConstructGeneratedArraysDirectoryIfMissing();
-	std::string array_output_directory = GENERATED_TEST_DATA_PREFIX "TestData/arrays/";
 
-	ORUtils::OStreamWrapper warp_stats_file(array_output_directory + "warp_gradient_stats_" + IndexString<TIndex>() + ".dat", false);
+	ORUtils::OStreamWrapper warp_stats_file(std::string(test_utilities::GeneratedArraysDirectory) + "warp_gradient_stats_" + IndexString<TIndex>() + ".dat", false);
 
 	VoxelVolume<TSDFVoxel, TIndex>* canonical_volume;
 	VoxelVolume<TSDFVoxel, TIndex>* live_volume;
@@ -232,78 +231,69 @@ void GenerateWarpGradientTestData() {
 	           snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 	LoadVolume(&canonical_volume, volume_output_directory + "snoopy_partial_frame_16.dat", TMemoryDeviceType,
 	           snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+
 	VoxelVolume<TSDFVoxel, TIndex>* live_volumes[] = {live_volume, nullptr};
 
+	// *** set up level set switches for both iterations
 
-	// *** set up level set switches and their associated output filenames
-	LevelSetAlignmentSwitches data_only_switches(true, false, false, false, false);
-	std::string warp_0_data_filename = "warp_field_0_data.dat";
-	LevelSetAlignmentSwitches data_sobolev_smoothed_switches(true, false, false, false, true);
-	std::string warp_0_data_sobolev_smoothed_filename = "warp_field_0_data_sobolev_smoothed.dat";
-	LevelSetAlignmentSwitches data_and_tikhonov_sobolev_smoothed_switches(true, false, true, false, true);
-	std::string warp_0_data_and_tikhonov_sobolev_smoothed_filename = "warp_field_0_data_and_tikhonov_sobolev_smoothed.dat";
+	std::array<LevelSetAlignmentSwitches, 3> switches_iteration_0 = {
+			LevelSetAlignmentSwitches(true, false, false, false, false),
+			LevelSetAlignmentSwitches(true, false, false, false, true),
+			LevelSetAlignmentSwitches(true, false, true, false, true)
+	};
 
-	std::vector<std::tuple<std::string, LevelSetAlignmentSwitches>> configuration_pairs = {
-			std::make_tuple(std::string("warp_field_1_tikhonov.dat"),
-			                LevelSetAlignmentSwitches(false, false, true, false, false)),
-			std::make_tuple(std::string("warp_field_1_data_and_tikhonov.dat"),
-			                LevelSetAlignmentSwitches(true, false, true, false, false)),
-			std::make_tuple(std::string("warp_field_1_data_and_killing.dat"),
-			                LevelSetAlignmentSwitches(true, false, true, true, false)),
-			std::make_tuple(std::string("warp_field_1_data_and_level_set.dat"),
-			                LevelSetAlignmentSwitches(true, true, false, false, false))
+	std::array<LevelSetAlignmentSwitches, 4> switches_iteration_1 = {
+			LevelSetAlignmentSwitches(false, false, true, false, false),
+			LevelSetAlignmentSwitches(true, false, true, false, false),
+			LevelSetAlignmentSwitches(true, false, true, true, false),
+			LevelSetAlignmentSwitches(true, true, false, false, false)
 	};
 	// ========================================================================
 
 	VoxelVolume<WarpVoxel, TIndex> warp_field(TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
-	auto reset_warp_field = [&](){
+	auto reset_warp_field = [&]() {
 		warp_field.Reset();
 		AllocateUsingOtherVolume(&warp_field, live_volume, MEMORYDEVICE_CPU);
-	} ;
-
+	};
 
 	AllocateUsingOtherVolume(canonical_volume, live_volume, MEMORYDEVICE_CPU);
 
-	auto generate_warp_field_with_parameters = [&](const LevelSetAlignmentSwitches& switches, const std::string& filename){
-		reset_warp_field();
+	std::string warp_field_iteration_0_prefix = "warp_field_0_";
+	std::string warp_field_iteration_1_prefix = "warp_field_1_";
+	std::string warp_field_file_extension = ".dat";
 
+	// iteration 0
+	for (auto& switches : switches_iteration_0) {
+		reset_warp_field();
 		LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, DIAGNOSTIC> data_only_motion_tracker(
 				switches, SingleIterationTerminationConditions());
 
 		data_only_motion_tracker.Align(&warp_field, live_volumes, canonical_volume);
-		warp_field.SaveToDisk(volume_output_directory + filename);
+
+		warp_field.SaveToDisk(volume_output_directory + warp_field_iteration_0_prefix + SwitchesToPrefix(switches) + warp_field_file_extension);
 
 		unsigned int altered_warp_update_count =
 				AnalyticsEngine<WarpVoxel, TIndex, TMemoryDeviceType>::Instance().CountAlteredWarpUpdates(&warp_field);
-
 		warp_stats_file.OStream().write(reinterpret_cast<const char*>(&altered_warp_update_count), sizeof(unsigned int));
-	};
-
-	generate_warp_field_with_parameters(data_only_switches, warp_0_data_filename);
-	generate_warp_field_with_parameters(data_sobolev_smoothed_switches, warp_0_data_sobolev_smoothed_filename);
-	generate_warp_field_with_parameters(data_and_tikhonov_sobolev_smoothed_switches, warp_0_data_and_tikhonov_sobolev_smoothed_filename);
+		float average_warp_update_length = AnalyticsEngine<WarpVoxel, TIndex, TMemoryDeviceType>::Instance().ComputeWarpUpdateMean(&warp_field);
+		warp_stats_file.OStream().write(reinterpret_cast<const char*>(&average_warp_update_length), sizeof(float));
+	}
 
 	reset_warp_field();
+	std::string warp_0_data_and_tikhonov_sobolev_smoothed_filename =
+			warp_field_iteration_0_prefix + SwitchesToPrefix(switches_iteration_0[switches_iteration_0.size() - 1]) + warp_field_file_extension;
 
-	warp_field.LoadFromDisk(volume_output_directory + warp_0_data_and_tikhonov_sobolev_smoothed_filename);
-
-	float average_warp_update_length = AnalyticsEngine<WarpVoxel, TIndex, TMemoryDeviceType>::Instance().ComputeWarpUpdateMean(&warp_field);
-	warp_stats_file.OStream().write(reinterpret_cast<const char*>(&average_warp_update_length), sizeof(float));
-
-	unsigned int altered_warp_update_count__data_only = AnalyticsEngine<WarpVoxel, TIndex, TMemoryDeviceType>::Instance().CountAlteredGradients(
-			&warp_field);
-	warp_stats_file.OStream().write(reinterpret_cast<const char*>(&altered_warp_update_count__data_only), sizeof(unsigned int));
-
-	for (auto& pair : configuration_pairs) {
-		EditAndCopyEngineFactory::Instance<WarpVoxel, TIndex, TMemoryDeviceType>().ResetVolume(&warp_field);
-		warp_field.LoadFromDisk(volume_output_directory + framewise_warps_filename);
-		std::string filename = std::get<0>(pair);
-		LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, DIAGNOSTIC> tracker(
-				std::get<1>(pair), SingleIterationTerminationConditions());
+	// iteration 1
+	for (auto& switches : switches_iteration_1) {
+		warp_field.Reset();
+		warp_field.LoadFromDisk(volume_output_directory + warp_0_data_and_tikhonov_sobolev_smoothed_filename);
+		LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, DIAGNOSTIC> tracker(switches, SingleIterationTerminationConditions());
 		tracker.Align(&warp_field, live_volumes, canonical_volume);
-		warp_field.SaveToDisk(volume_output_directory + filename);
+		warp_field.SaveToDisk(volume_output_directory + warp_field_iteration_1_prefix + SwitchesToPrefix(switches) + warp_field_file_extension);
 		unsigned int altered_gradient_count = AnalyticsEngine<WarpVoxel, TIndex, TMemoryDeviceType>::Instance().CountAlteredGradients(&warp_field);
 		warp_stats_file.OStream().write(reinterpret_cast<const char*>(&altered_gradient_count), sizeof(unsigned int));
+		float average_warp_update_length = AnalyticsEngine<WarpVoxel, TIndex, TMemoryDeviceType>::Instance().ComputeWarpUpdateMean(&warp_field);
+		warp_stats_file.OStream().write(reinterpret_cast<const char*>(&average_warp_update_length), sizeof(float));
 	}
 
 	delete canonical_volume;
@@ -446,12 +436,11 @@ configuration::Configuration GenerateDefaultSnoopyConfiguration() {
 					2.0f,
 					0.2f,
 					0.2f,
-					1e-5f,
-					0.5f),
+					1e-5f),
 			LevelSetAlignmentSwitches(
 					true, false, true, false, true
 			),
-			LevelSetAlignmentTerminationConditions(300, 1e-06)
+			LevelSetAlignmentTerminationConditions(300, 10, 1e-06)
 	);
 	VolumeFusionSettings default_snoopy_volume_fusion_settings;
 	DepthFusionSettings default_snoopy_depth_fusion_settings;
@@ -724,11 +713,12 @@ int main(int argc, char* argv[]) {
 		}
 	} else {
 		std::string generated_data_type_argument = argv[1];
+		bool wrong_second_argument = argc >= 3 && strcmp(argv[2], "-c") != 0;
 		if (generated_data_type_argument == "h" || generated_data_type_argument == "help" || generated_data_type_argument == "-h" ||
-		    generated_data_type_argument == "-help" || generated_data_type_argument == "--help") {
+		    generated_data_type_argument == "-help" || generated_data_type_argument == "--help" || wrong_second_argument) {
 			std::cout << "Generates derived data used for testing the library. " << std::endl;
 			std::cout << "Usage:" << std::endl << "generate_derived_test_data " << std::endl << "(runs all modes)  -- OR -- "
-			          << std::endl << "generate_derived_test_data <mode>" << std::endl <<
+			          << std::endl << "generate_derived_test_data <mode> [-c]" << std::endl <<
 			          ", where <mode> can be one of: " << std::endl;
 			int i_pair = 0;
 			for (auto& pair : generator_by_string) {
@@ -743,11 +733,21 @@ int main(int argc, char* argv[]) {
 			std::cout << "For any of these, shorthands can be used, which are typically acronyms with some words omitted"
 			             ", e.g. \"suv\" can be used instead of \"SNOOPY_UNMASKED_VOLUMES\" and \"pva_wv\" instead of \"PVA_WARPED_VOLUMES\". "
 			             "Don't be afraid to experiment." << std::endl;
-		} else {
+			std::cout << "If -c (\"continue\") flag is passed, all generators including and after the specified one in the sequence are called in order." << std::endl;
+		} else if(argc < 3){
 			GeneratedTestDataType chosen = string_to_enumerator<GeneratedTestDataType>(generated_data_type_argument);
 			std::cout << "current path: " << std::filesystem::current_path() << std::endl;
 			std::cout << "Generating data using the " << enumerator_to_string(chosen) << " generator." << std::endl;
 			generator_by_string[chosen]();
+		} else {
+			bool hit_start_generator = false;
+			GeneratedTestDataType chosen = string_to_enumerator<GeneratedTestDataType>(generated_data_type_argument);
+			for (const auto& iter : generator_by_string) {
+				if(iter.first == chosen || hit_start_generator){
+					(iter.second)();
+					hit_start_generator = true;
+				}
+			}
 		}
 	}
 	return 0;

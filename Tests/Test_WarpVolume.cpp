@@ -74,8 +74,8 @@ void GenericWarpVolumeTest() {
 	           TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 
 	float absolute_tolerance = 1e-6;
-	BOOST_REQUIRE(!contentAlmostEqual(warped_live_volume, live_volume, absolute_tolerance, TMemoryDeviceType));
-	BOOST_REQUIRE(contentAlmostEqual_Verbose(warped_live_volume, warped_live_volume_gt, absolute_tolerance,
+	BOOST_REQUIRE(!ContentAlmostEqual(warped_live_volume, live_volume, absolute_tolerance, TMemoryDeviceType));
+	BOOST_REQUIRE(ContentAlmostEqual_Verbose(warped_live_volume, warped_live_volume_gt, absolute_tolerance,
 	                                         TMemoryDeviceType));
 
 	delete warping_engine;
@@ -140,7 +140,7 @@ void GenericWarpVolume_VBH_to_PVA_Test(const int iteration = 0) {
 	// *** test content
 	float absolute_tolerance = 1e-7;
 	BOOST_REQUIRE(
-			contentForFlagsAlmostEqual_Verbose(
+			ContentForFlagsAlmostEqual_Verbose(
 					target_PVA, target_VBH,
 					VOXEL_NONTRUNCATED, absolute_tolerance, TMemoryDeviceType
 			)

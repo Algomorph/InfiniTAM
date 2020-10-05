@@ -221,7 +221,7 @@ BOOST_AUTO_TEST_CASE(ConfigurationTestLong_CLI_Only) {
 	                      " --level_set_evolution.switches.enable_sobolev_gradient_smoothing=false"
 
 	                      " --level_set_evolution.termination.max_iteration_count=300"
-	                      " --level_set_evolution.termination.mean_update_length_threshold=0.0002"
+	                      " --level_set_evolution.termination.update_length_threshold=0.0002"
 
 	                      " --logging_settings.verbosity_level=warning"
 	                      " --logging_settings.log_to_disk=true"

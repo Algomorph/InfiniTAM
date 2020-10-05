@@ -72,7 +72,7 @@ void GenericFusionTest(const int iteration = 4) {
 	float absolute_tolerance = 1e-7;
 
 	BOOST_REQUIRE(
-			contentAlmostEqual(fused_canonical_volume_gt, canonical_volume, absolute_tolerance, TMemoryDeviceType));
+			ContentAlmostEqual(fused_canonical_volume_gt, canonical_volume, absolute_tolerance, TMemoryDeviceType));
 
 	delete warped_live_volume;
 	delete canonical_volume;
@@ -130,8 +130,8 @@ AllocateUsingOtherVolume(canonical_volume_VBH,  warped_live_volume_VBH, TMemoryD
 	volume_fusion_engine_VBH->FuseOneTsdfVolumeIntoAnother(canonical_volume_VBH, warped_live_volume_VBH, 0);
 	float absolute_tolerance = 1e-7;
 	//(uncomment for a less rigorous test)
-	//BOOST_REQUIRE( allocatedContentAlmostEqual_Verbose(canonical_volume_PVA, canonical_volume_VBH, absoluteTolerance, TMemoryDeviceType));
-	BOOST_REQUIRE(contentForFlagsAlmostEqual(canonical_volume_PVA, canonical_volume_VBH, VOXEL_NONTRUNCATED,
+	//BOOST_REQUIRE( AllocatedContentAlmostEqual_Verbose(canonical_volume_PVA, canonical_volume_VBH, absoluteTolerance, TMemoryDeviceType));
+	BOOST_REQUIRE(ContentForFlagsAlmostEqual(canonical_volume_PVA, canonical_volume_VBH, VOXEL_NONTRUNCATED,
 	                                         absolute_tolerance, TMemoryDeviceType));
 
 	delete warped_live_volume_PVA;

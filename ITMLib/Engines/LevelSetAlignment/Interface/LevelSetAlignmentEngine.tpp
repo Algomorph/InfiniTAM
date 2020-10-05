@@ -44,9 +44,9 @@ LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode
 		weights(this->parameters.weights),
 		switches(this->parameters.switches),
 		termination(this->parameters.termination),
-		warping_engine(WarpingEngineFactory::Build<TVoxel, TWarp, TIndex>()),
-		mean_vector_update_threshold_in_voxels(termination.mean_update_length_threshold /
-		                                       configuration::Get().general_voxel_volume_parameters.voxel_size),
+		warping_engine(WarpingEngineFactory::Build<TVoxel, TWarp, TIndex>(TMemoryDeviceType)),
+		vector_update_threshold_in_voxels(termination.update_length_threshold /
+		                                  configuration::Get().general_voxel_volume_parameters.voxel_size),
 		iteration(0) {}
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
@@ -58,9 +58,9 @@ LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode
 		weights(this->parameters.weights),
 		switches(this->parameters.switches),
 		termination(this->parameters.termination),
-		warping_engine(WarpingEngineFactory::Build<TVoxel, TWarp, TIndex>()),
-		mean_vector_update_threshold_in_voxels(termination.mean_update_length_threshold /
-		                                       configuration::Get().general_voxel_volume_parameters.voxel_size),
+		warping_engine(WarpingEngineFactory::Build<TVoxel, TWarp, TIndex>(TMemoryDeviceType)),
+		vector_update_threshold_in_voxels(termination.update_length_threshold /
+		                                  configuration::Get().general_voxel_volume_parameters.voxel_size),
 		iteration(0) {}
 
 
@@ -74,9 +74,9 @@ LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode
 		weights(this->parameters.weights),
 		switches(this->parameters.switches),
 		termination(this->parameters.termination),
-		warping_engine(WarpingEngineFactory::Build<TVoxel, TWarp, TIndex>()),
-		mean_vector_update_threshold_in_voxels(termination.mean_update_length_threshold /
-		                                       configuration::Get().general_voxel_volume_parameters.voxel_size),
+		warping_engine(WarpingEngineFactory::Build<TVoxel, TWarp, TIndex>(TMemoryDeviceType)),
+		vector_update_threshold_in_voxels(termination.update_length_threshold /
+		                                  configuration::Get().general_voxel_volume_parameters.voxel_size),
 		iteration(0) {}
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
@@ -90,8 +90,8 @@ void LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutio
 		LOG4CPLUS_TOP_LEVEL(logging::GetLogger(), bright_cyan << "*** NonRigidTrackingParameters ***" << reset);
 		LOG4CPLUS_TOP_LEVEL(logging::GetLogger(), "Max iteration count: " << this->termination.max_iteration_count)
 		LOG4CPLUS_TOP_LEVEL(logging::GetLogger(),
-		                    "Warping vector update threshold: " << this->termination.mean_update_length_threshold
-		                                                        << " m, " << this->mean_vector_update_threshold_in_voxels
+		                    "Warping vector update threshold: " << this->termination.update_length_threshold
+		                                                        << " m, " << this->vector_update_threshold_in_voxels
 		                                                        << " voxels");
 		LOG4CPLUS_TOP_LEVEL(logging::GetLogger(),
 		                    bright_cyan << "*** *********************************** ***" << reset);
@@ -142,23 +142,22 @@ LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode
 		VoxelVolume<TVoxel, TIndex>** live_volume_pair,
 		VoxelVolume<TVoxel, TIndex>* canonical_volume) {
 
-	float average_vector_update_length_in_voxels = std::numeric_limits<float>::infinity();
+	float update_length_statistic_in_voxels = std::numeric_limits<float>::infinity();
 
 	int source_live_volume_index = 0;
 	int target_live_volume_index = 1;
 	for (iteration = 0;
-	     iteration < termination.min_iteration_count || (average_vector_update_length_in_voxels > this->mean_vector_update_threshold_in_voxels
+	     iteration < termination.min_iteration_count || (update_length_statistic_in_voxels > this->vector_update_threshold_in_voxels
 	                                                     && iteration < termination.max_iteration_count); iteration++) {
 		PerformSingleOptimizationStep(canonical_volume, live_volume_pair[source_live_volume_index],
-		                              live_volume_pair[target_live_volume_index], warp_field, average_vector_update_length_in_voxels);
+		                              live_volume_pair[target_live_volume_index], warp_field, update_length_statistic_in_voxels);
 
 		std::swap(source_live_volume_index, target_live_volume_index);
 	}
 	configuration::Configuration& config = configuration::Get();
 	if (config.logging_settings.log_average_warp_update) {
-		LOG4CPLUS_PER_FRAME(logging::GetLogger(), "Frame-final level set evolution average update vector length (voxels): " << yellow
-		                                                                                                                    << average_vector_update_length_in_voxels
-		                                                                                                                    << reset);
+		LOG4CPLUS_PER_FRAME(logging::GetLogger(), "Frame-final level set evolution average update vector length (voxels): "
+		<< yellow << update_length_statistic_in_voxels << reset);
 	}
 
 	if (config.logging_settings.log_iteration_number) {

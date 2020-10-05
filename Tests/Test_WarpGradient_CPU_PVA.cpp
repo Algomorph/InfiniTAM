@@ -13,7 +13,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#define BOOST_TEST_MODULE WarpGradient_CPU_PVA
+#define BOOST_TEST_MODULE LevelSetAlignmentConsistency
 #ifndef WIN32
 #define BOOST_TEST_DYN_LINK
 #endif
@@ -34,117 +34,217 @@
 //test_utils
 #include "Test_WarpGradient_Common.h"
 #include "../ITMLib/Engines/Analytics/AnalyticsEngineFactory.h"
+#include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison.h"
+#include "TestUtilities/WarpAdvancedTestingUtilities.h"
 
 using namespace ITMLib;
 using namespace test_utilities;
 
 
-
-typedef WarpGradientDataFixture<MemoryDeviceType::MEMORYDEVICE_CPU, PlainVoxelArray> DataFixture;
+typedef WarpGradientDataFixture<MemoryDeviceType::MEMORYDEVICE_CPU, PlainVoxelArray> DataFixture_CPU_PVA;
+typedef WarpGradientDataFixture<MemoryDeviceType::MEMORYDEVICE_CPU, VoxelBlockHash> DataFixture_CPU_VBH;
+#ifndef COMPILE_WITH_CUDA
+typedef WarpGradientDataFixture<MemoryDeviceType::MEMORYDEVICE_CUDA, PlainVoxelArray> DataFixture_CUDA_PVA;
+typedef WarpGradientDataFixture<MemoryDeviceType::MEMORYDEVICE_CUDA, VoxelBlockHash> DataFixture_CUDA_VBH;
+#endif
 
 template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
-struct GenericLevelSetEvolutionDataTermConsistencyTest : public WarpGradientDataFixture<MemoryDeviceType::MEMORYDEVICE_CPU, PlainVoxelArray>{
-public:
-	static void Run(){
-		VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field(MEMORYDEVICE_CPU, index_parameters);
-		ManipulationEngine_CPU_PVA_Warp::Inst().ResetVolume(&warp_field);
-
-
-		auto motion_tracker_PVA_CPU = new LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU, DIAGNOSTIC>(
-				LevelSetAlignmentSwitches(true, false, false, false, false));
-
-		VoxelVolume<TSDFVoxel, TIndex>* live_volumes[2]
-
-		TimeIt([&]() {
-			motion_tracker_PVA_CPU->CalculateEnergyGradient(&warp_field, canonical_volume, live_volume);
-		}, "Calculate Warping Gradient - PVA CPU data term");
-
-		unsigned int altered_gradient_count = Analytics_CPU_PVA_Warp::Instance().CountAlteredGradients(&warp_field);
-		BOOST_REQUIRE_EQUAL(altered_gradient_count, gradient_count_data_term);
-
-		float tolerance = 1e-5;
-		BOOST_REQUIRE(contentAlmostEqual_CPU(&warp_field, warp_field_data_term, tolerance));
+void GenericLevelSetEvolutionConsistencyTest(int iteration, const LevelSetAlignmentSwitches& switches,
+                                             WarpGradientDataFixture<TMemoryDeviceType, TIndex>& fixture) {
+	if (iteration < 0 || iteration > 1) {
+		DIEWITHEXCEPTION_REPORTLOCATION("Iteration number should be 0 or 1!");
 	}
-}
+	VoxelVolume<WarpVoxel, TIndex>* warp_field;
 
+	if (iteration == 0) {
+		warp_field = new VoxelVolume<WarpVoxel, TIndex>(TMemoryDeviceType, fixture.index_parameters);
+		warp_field->Reset();
+	} else {
+		warp_field = fixture.GetIteration1StartingWarpField();
+	}
 
-BOOST_FIXTURE_TEST_CASE(testDataTerm_CPU_PVA, DataFixture) {
+	auto motion_tracker = new LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, DIAGNOSTIC>(
+			switches, SingleIterationTerminationConditions());
 
-}
-
-BOOST_FIXTURE_TEST_CASE(testSmoothEnergyGradient_CPU_PVA, DataFixture) {
-	VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field_CPU1(*warp_field_data_term, MEMORYDEVICE_CPU);
-
-
-	auto motion_tracker_PVA_CPU = new LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU, DIAGNOSTIC>(
-			LevelSetAlignmentSwitches(false, false, false, false, true));
-
+	VoxelVolume<TSDFVoxel, TIndex>* live_volumes[2] = {fixture.live_volume, nullptr};
 	TimeIt([&]() {
-		motion_tracker_PVA_CPU->SmoothEnergyGradient(&warp_field_CPU1, canonical_volume, live_volume);
-	}, "Smooth Warping Gradient - PVA CPU");
+		motion_tracker->Align(warp_field, live_volumes, fixture.canonical_volume);
+	}, "Calculate Warping Gradient - data term");
 
-	float tolerance = 1e-8;
-	BOOST_REQUIRE(contentAlmostEqual_CPU(&warp_field_CPU1, warp_field_data_term_smoothed, tolerance));
+	unsigned int altered_gradient_count = AnalyticsEngine<WarpVoxel, TIndex, TMemoryDeviceType>::Instance().CountAlteredGradients(warp_field);
+	BOOST_REQUIRE_EQUAL(altered_gradient_count, fixture.GetUpdateCount(iteration, switches));
+
+	float average_warp = AnalyticsEngine<WarpVoxel, TIndex, TMemoryDeviceType>::Instance().ComputeWarpUpdateMean(warp_field);
+	BOOST_REQUIRE_CLOSE(average_warp, fixture.GetAverageUpdateLength(iteration, switches), 1e-4);
+
+
+	float tolerance = 1e-5;
+	BOOST_REQUIRE(ContentAlmostEqual(warp_field, fixture.GetWarpField(iteration, switches), tolerance, TMemoryDeviceType));
+	delete warp_field;
+};
+
+// Iteration 0: Data term only
+
+BOOST_FIXTURE_TEST_CASE(testDataTerm_CPU_PVA, DataFixture_CPU_PVA) {
+	LevelSetAlignmentSwitches switches(true, false, false, false, false);
+	GenericLevelSetEvolutionConsistencyTest<PlainVoxelArray, MEMORYDEVICE_CPU>(0, switches, *this);
 }
 
-BOOST_FIXTURE_TEST_CASE(testDataAndTikhonovTerm_CPU_PVA, DataFixture) {
-	VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field(*warp_field_iter0, MEMORYDEVICE_CPU);
-
-	auto motion_tracker_PVA_CPU = new LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU, DIAGNOSTIC>(
-			LevelSetAlignmentSwitches(true, false, true, false, false)
-	);
-
-	TimeIt([&]() {
-		motion_tracker_PVA_CPU->CalculateEnergyGradient(&warp_field, canonical_volume, live_volume);
-	}, "Calculate Warping Gradient - PVA CPU data + tikhonov term");
-
-
-	unsigned int altered_gradient_count = Analytics_CPU_PVA_Warp::Instance().CountAlteredGradients(&warp_field);
-	BOOST_REQUIRE_EQUAL(altered_gradient_count, gradient_count_data_and_tikhonov_term);
-
-	float tolerance = 1e-8;
-	BOOST_REQUIRE(contentAlmostEqual_CPU_Verbose(&warp_field, warp_field_data_and_tikhonov_term, tolerance));
+BOOST_FIXTURE_TEST_CASE(testDataTerm_CPU_VBH, DataFixture_CPU_VBH) {
+	LevelSetAlignmentSwitches switches(true, false, false, false, false);
+	GenericLevelSetEvolutionConsistencyTest<VoxelBlockHash, MEMORYDEVICE_CPU>(0, switches, *this);
 }
 
-
-BOOST_FIXTURE_TEST_CASE(testDataAndKillingTerm_CPU_PVA, DataFixture) {
-	VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field(*warp_field_iter0, MEMORYDEVICE_CPU);
-
-
-	auto motion_tracker_PVA_CPU = new LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU, DIAGNOSTIC>(
-			LevelSetAlignmentSwitches(true, false, true, true, false)
-	);
-
-
-	TimeIt([&]() {
-		motion_tracker_PVA_CPU->CalculateEnergyGradient(&warp_field, canonical_volume, live_volume);
-	}, "Calculate Warping Gradient - PVA CPU data term + tikhonov term");
-
-	unsigned int altered_gradient_count = Analytics_CPU_PVA_Warp::Instance().CountAlteredGradients(&warp_field);
-	BOOST_REQUIRE_EQUAL(altered_gradient_count, gradient_count_data_and_killing_term);
-
-	float tolerance = 1e-8;
-	BOOST_REQUIRE(contentAlmostEqual_CPU(&warp_field, warp_field_data_and_killing_term, tolerance));
+#ifndef COMPILE_WITHOUT_CUDA
+BOOST_FIXTURE_TEST_CASE(testDataTerm_CUDA_PVA, DataFixture_CUDA_PVA) {
+	LevelSetAlignmentSwitches switches(true, false, false, false, false);
+	GenericLevelSetEvolutionConsistencyTest<PlainVoxelArray, MEMORYDEVICE_CUDA>(0, switches, *this);
 }
 
-
-BOOST_FIXTURE_TEST_CASE(testDataAndLevelSetTerm_CPU_PVA, DataFixture) {
-
-	VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field(*warp_field_iter0, MEMORYDEVICE_CPU);
-
-
-	auto motion_tracker_PVA_CPU = new LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU, DIAGNOSTIC>(
-			LevelSetAlignmentSwitches(true, true, false, false, false)
-	);
-
-
-	TimeIt([&]() {
-		motion_tracker_PVA_CPU->CalculateEnergyGradient(&warp_field, canonical_volume, live_volume);
-	}, "Calculate Warping Gradient - PVA CPU data term + level set term");
-
-	unsigned int altered_gradient_count = Analytics_CPU_PVA_Warp::Instance().CountAlteredGradients(&warp_field);
-	BOOST_REQUIRE_EQUAL(altered_gradient_count, gradient_count_data_and_level_set_term);
-
-	float tolerance = 1e-7;
-	BOOST_REQUIRE(contentAlmostEqual_CPU_Verbose(&warp_field, warp_field_data_and_level_set_term, tolerance));
+BOOST_FIXTURE_TEST_CASE(testDataTerm_CUDA_VBH, DataFixture_CUDA_VBH) {
+	LevelSetAlignmentSwitches switches(true, false, false, false, false);
+	GenericLevelSetEvolutionConsistencyTest<VoxelBlockHash, MEMORYDEVICE_CUDA>(0, switches, *this);
 }
+#endif
+
+// Iteration 0: Data term, sobolev-smoothed
+
+BOOST_FIXTURE_TEST_CASE(testDataTermSobolevSmoothed_CPU_PVA, DataFixture_CPU_PVA) {
+	LevelSetAlignmentSwitches switches(true, false, false, false, true);
+	GenericLevelSetEvolutionConsistencyTest<PlainVoxelArray, MEMORYDEVICE_CPU>(0, switches, *this);
+}
+
+BOOST_FIXTURE_TEST_CASE(testDataTermSobolevSmoothed_CPU_VBH, DataFixture_CPU_VBH) {
+	LevelSetAlignmentSwitches switches(true, false, false, false, true);
+	GenericLevelSetEvolutionConsistencyTest<VoxelBlockHash, MEMORYDEVICE_CPU>(0, switches, *this);
+}
+
+#ifndef COMPILE_WITHOUT_CUDA
+BOOST_FIXTURE_TEST_CASE(testDataTermSobolevSmoothed_CUDA_PVA, DataFixture_CUDA_PVA) {
+	LevelSetAlignmentSwitches switches(true, false, false, false, true);
+	GenericLevelSetEvolutionConsistencyTest<PlainVoxelArray, MEMORYDEVICE_CUDA>(0, switches, *this);
+}
+
+BOOST_FIXTURE_TEST_CASE(testDataTermSobolevSmoothed_CUDA_VBH, DataFixture_CUDA_VBH) {
+	LevelSetAlignmentSwitches switches(true, false, false, false, true);
+	GenericLevelSetEvolutionConsistencyTest<VoxelBlockHash, MEMORYDEVICE_CUDA>(0, switches, *this);
+}
+#endif
+
+
+// Iteration 0: Data term and tikhonov terms, sobolev-smoothed
+BOOST_FIXTURE_TEST_CASE(testDataAndTikhonovTermsSobolevSmoothed_CPU_PVA, DataFixture_CPU_PVA) {
+	LevelSetAlignmentSwitches switches(true, false, true, false, true);
+	GenericLevelSetEvolutionConsistencyTest<PlainVoxelArray, MEMORYDEVICE_CPU>(0, switches, *this);
+}
+
+BOOST_FIXTURE_TEST_CASE(testDataAndTikhonovTermsSobolevSmoothed_CPU_VBH, DataFixture_CPU_VBH) {
+	LevelSetAlignmentSwitches switches(true, false, true, false, true);
+	GenericLevelSetEvolutionConsistencyTest<VoxelBlockHash, MEMORYDEVICE_CPU>(0, switches, *this);
+}
+
+#ifndef COMPILE_WITHOUT_CUDA
+BOOST_FIXTURE_TEST_CASE(testDataDataAndTikhonovTermsSobolevSmoothed_CUDA_PVA, DataFixture_CUDA_PVA) {
+	LevelSetAlignmentSwitches switches(true, false, true, false, true);
+	GenericLevelSetEvolutionConsistencyTest<PlainVoxelArray, MEMORYDEVICE_CUDA>(0, switches, *this);
+}
+
+BOOST_FIXTURE_TEST_CASE(testDataDataAndTikhonovTermsSobolevSmoothed_CUDA_VBH, DataFixture_CUDA_VBH) {
+	LevelSetAlignmentSwitches switches(true, false, true, false, true);
+	GenericLevelSetEvolutionConsistencyTest<VoxelBlockHash, MEMORYDEVICE_CUDA>(0, switches, *this);
+}
+#endif
+
+
+// Iteration 1: Tikhonov term only
+BOOST_FIXTURE_TEST_CASE(testTikhonovTerm_CPU_PVA, DataFixture_CPU_PVA) {
+	LevelSetAlignmentSwitches switches(false, false, true, false, false);
+	GenericLevelSetEvolutionConsistencyTest<PlainVoxelArray, MEMORYDEVICE_CPU>(1, switches, *this);
+}
+
+BOOST_FIXTURE_TEST_CASE(testTikhonovTerm_CPU_VBH, DataFixture_CPU_VBH) {
+	LevelSetAlignmentSwitches switches(false, false, true, false, false);
+	GenericLevelSetEvolutionConsistencyTest<VoxelBlockHash, MEMORYDEVICE_CPU>(1, switches, *this);
+}
+
+#ifndef COMPILE_WITHOUT_CUDA
+BOOST_FIXTURE_TEST_CASE(testTikhonovTerm_CUDA_PVA, DataFixture_CUDA_PVA) {
+	LevelSetAlignmentSwitches switches(false, false, true, false, false);
+	GenericLevelSetEvolutionConsistencyTest<PlainVoxelArray, MEMORYDEVICE_CUDA>(1, switches, *this);
+}
+
+BOOST_FIXTURE_TEST_CASE(testTikhonovTerm_CUDA_VBH, DataFixture_CUDA_VBH) {
+	LevelSetAlignmentSwitches switches(false, false, true, false, false);
+	GenericLevelSetEvolutionConsistencyTest<VoxelBlockHash, MEMORYDEVICE_CUDA>(1, switches, *this);
+}
+#endif
+
+// Iteration 1: Data & Tikhonov term
+BOOST_FIXTURE_TEST_CASE(testDataAndTikhonovTerms_CPU_PVA, DataFixture_CPU_PVA) {
+	LevelSetAlignmentSwitches switches(true, false, true, false, false);
+	GenericLevelSetEvolutionConsistencyTest<PlainVoxelArray, MEMORYDEVICE_CPU>(1, switches, *this);
+}
+
+BOOST_FIXTURE_TEST_CASE(testDataAndTikhonovTerms_CPU_VBH, DataFixture_CPU_VBH) {
+	LevelSetAlignmentSwitches switches(true, false, true, false, false);
+	GenericLevelSetEvolutionConsistencyTest<VoxelBlockHash, MEMORYDEVICE_CPU>(1, switches, *this);
+}
+
+#ifndef COMPILE_WITHOUT_CUDA
+BOOST_FIXTURE_TEST_CASE(testDataAndTikhonovTerms_CUDA_PVA, DataFixture_CUDA_PVA) {
+	LevelSetAlignmentSwitches switches(true, false, true, false, false);
+	GenericLevelSetEvolutionConsistencyTest<PlainVoxelArray, MEMORYDEVICE_CUDA>(1, switches, *this);
+}
+
+BOOST_FIXTURE_TEST_CASE(testDataAndTikhonovTerms_CUDA_VBH, DataFixture_CUDA_VBH) {
+	LevelSetAlignmentSwitches switches(true, false, true, false, false);
+	GenericLevelSetEvolutionConsistencyTest<VoxelBlockHash, MEMORYDEVICE_CUDA>(1, switches, *this);
+}
+#endif
+
+
+// Iteration 1: Data & dampened Approximately-Killing-Vector-Field terms
+BOOST_FIXTURE_TEST_CASE(testDataAndAKVFTerms_CPU_PVA, DataFixture_CPU_PVA) {
+	LevelSetAlignmentSwitches switches(true, false, true, true, false);
+	GenericLevelSetEvolutionConsistencyTest<PlainVoxelArray, MEMORYDEVICE_CPU>(1, switches, *this);
+}
+
+BOOST_FIXTURE_TEST_CASE(testDataAndAKVFTerms_CPU_VBH, DataFixture_CPU_VBH) {
+	LevelSetAlignmentSwitches switches(true, false, true, true, false);
+	GenericLevelSetEvolutionConsistencyTest<VoxelBlockHash, MEMORYDEVICE_CPU>(1, switches, *this);
+}
+
+#ifndef COMPILE_WITHOUT_CUDA
+BOOST_FIXTURE_TEST_CASE(testDataAndAKVFTerms_CUDA_PVA, DataFixture_CUDA_PVA) {
+	LevelSetAlignmentSwitches switches(true, false, true, true, false);
+	GenericLevelSetEvolutionConsistencyTest<PlainVoxelArray, MEMORYDEVICE_CUDA>(1, switches, *this);
+}
+
+BOOST_FIXTURE_TEST_CASE(testDataAndAKVFTerms_CUDA_VBH, DataFixture_CUDA_VBH) {
+	LevelSetAlignmentSwitches switches(true, false, true, true, false);
+	GenericLevelSetEvolutionConsistencyTest<VoxelBlockHash, MEMORYDEVICE_CUDA>(1, switches, *this);
+}
+#endif
+
+// Iteration 1: Data & level set terms
+BOOST_FIXTURE_TEST_CASE(testDataAndLevelSetTerms_CPU_PVA, DataFixture_CPU_PVA) {
+	LevelSetAlignmentSwitches switches(true, true, false, false, false);
+	GenericLevelSetEvolutionConsistencyTest<PlainVoxelArray, MEMORYDEVICE_CPU>(1, switches, *this);
+}
+
+BOOST_FIXTURE_TEST_CASE(testDataAndLevelSetTerms_CPU_VBH, DataFixture_CPU_VBH) {
+	LevelSetAlignmentSwitches switches(true, true, false, false, false);
+	GenericLevelSetEvolutionConsistencyTest<VoxelBlockHash, MEMORYDEVICE_CPU>(1, switches, *this);
+}
+
+#ifndef COMPILE_WITHOUT_CUDA
+BOOST_FIXTURE_TEST_CASE(testDataAndLevelSetTerms_CUDA_PVA, DataFixture_CUDA_PVA) {
+	LevelSetAlignmentSwitches switches(true, true, false, false, false);
+	GenericLevelSetEvolutionConsistencyTest<PlainVoxelArray, MEMORYDEVICE_CUDA>(1, switches, *this);
+}
+
+BOOST_FIXTURE_TEST_CASE(testDataAndLevelSetTerms_CUDA_VBH, DataFixture_CUDA_VBH) {
+	LevelSetAlignmentSwitches switches(true, true, false, false, false);
+	GenericLevelSetEvolutionConsistencyTest<VoxelBlockHash, MEMORYDEVICE_CUDA>(1, switches, *this);
+}
+#endif

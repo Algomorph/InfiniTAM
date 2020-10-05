@@ -81,13 +81,21 @@ unsigned int SwitchesToIntCode(const LevelSetAlignmentSwitches& switches) {
 std::string SwitchesToPrefix(const LevelSetAlignmentSwitches& switches) {
 	static std::unordered_map<unsigned int, std::string> prefix_by_switches_map = {
 			{SwitchesToIntCode(LevelSetAlignmentSwitches(true, false, false, false, false)),
-					                                                         "data_only"},
+			 "data"},
+			{SwitchesToIntCode(LevelSetAlignmentSwitches(true, false, false, false, true)),
+					"data_sobolev"},
 			{SwitchesToIntCode(LevelSetAlignmentSwitches(false, false, true, false, false)),
-					                                                         "tikhonov_only"},
+			 "tikhonov"},
 			{SwitchesToIntCode(LevelSetAlignmentSwitches(true, false, true, false,
-			                                                     false)), "data_tikhonov"},
+			                                             false)), "data_tikhonov"},
 			{SwitchesToIntCode(LevelSetAlignmentSwitches(true, false, true, false, true)),
-					                                                         "data_tikhonov_sobolev"}
+			 "data_tikhonov_sobolev"},
+			{SwitchesToIntCode(LevelSetAlignmentSwitches(true, false, true, true, false)),
+					"data_killing"},
+			{SwitchesToIntCode(LevelSetAlignmentSwitches(true, true, false, false, false)),
+						"data_level_set"},
+			{SwitchesToIntCode(LevelSetAlignmentSwitches(true, true, true, true, false)),
+					"data_killing_level_set"}
 	};
 	return prefix_by_switches_map[SwitchesToIntCode(switches)];
 }
@@ -109,7 +117,7 @@ template void GenerateRawLiveAndCanonicalVolumes<PlainVoxelArray, MEMORYDEVICE_C
 
 
 const LevelSetAlignmentTerminationConditions& SingleIterationTerminationConditions() {
-	static LevelSetAlignmentTerminationConditions single_iteration_termination_conditions{1,0,1e-6f};
+	static LevelSetAlignmentTerminationConditions single_iteration_termination_conditions{1, 0, 1e-6f};
 	return single_iteration_termination_conditions;
 }
 
