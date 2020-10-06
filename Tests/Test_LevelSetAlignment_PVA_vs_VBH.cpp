@@ -14,7 +14,7 @@
 //  limitations under the License.
 //  ================================================================
 
-#define BOOST_TEST_MODULE WarpGradient_VBH_to_PVA
+#define BOOST_TEST_MODULE LevelSetAlignment_VBH_vs_PVA
 #ifndef WIN32
 #define BOOST_TEST_DYN_LINK
 #endif
@@ -52,7 +52,7 @@
 
 //test_utils
 #include "TestUtilities/WarpAdvancedTestingUtilities.h"
-#include "Test_WarpGradient_Common.h"
+#include "Test_LevelSetAlignment_CPU_vs_CUDA_Aux.h"
 
 using namespace ITMLib;
 using namespace test_utilities;

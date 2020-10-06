@@ -121,8 +121,6 @@ public:
 			iteration_0_outputs[SwitchesToIntCode(switches)] = load_warp_outputs(switches, 0);
 		}
 
-		warp_stats_file.IStream().read(reinterpret_cast<char*>(&update_0_average_length), sizeof(float));
-
 		for (auto& switches : switches_iteration_1) {
 			iteration_1_outputs[SwitchesToIntCode(switches)] = load_warp_outputs(switches, 1);
 		}

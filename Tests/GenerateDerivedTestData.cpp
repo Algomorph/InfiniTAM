@@ -291,7 +291,7 @@ void GenerateWarpGradientTestData() {
 		LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, DIAGNOSTIC> tracker(switches, SingleIterationTerminationConditions());
 		tracker.Align(&warp_field, live_volumes, canonical_volume);
 		warp_field.SaveToDisk(volume_output_directory + warp_field_iteration_1_prefix + SwitchesToPrefix(switches) + warp_field_file_extension);
-		unsigned int altered_gradient_count = AnalyticsEngine<WarpVoxel, TIndex, TMemoryDeviceType>::Instance().CountAlteredGradients(&warp_field);
+		unsigned int altered_gradient_count = AnalyticsEngine<WarpVoxel, TIndex, TMemoryDeviceType>::Instance().CountAlteredWarpUpdates(&warp_field);
 		warp_stats_file.OStream().write(reinterpret_cast<const char*>(&altered_gradient_count), sizeof(unsigned int));
 		float average_warp_update_length = AnalyticsEngine<WarpVoxel, TIndex, TMemoryDeviceType>::Instance().ComputeWarpUpdateMean(&warp_field);
 		warp_stats_file.OStream().write(reinterpret_cast<const char*>(&average_warp_update_length), sizeof(float));

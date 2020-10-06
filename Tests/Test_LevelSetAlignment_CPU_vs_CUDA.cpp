@@ -13,7 +13,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#define BOOST_TEST_MODULE LevelSetAlignmentConsistency
+#define BOOST_TEST_MODULE LevelSetAlignment_CPU_vs_CUDA
 #ifndef WIN32
 #define BOOST_TEST_DYN_LINK
 #endif
@@ -32,7 +32,7 @@
 #include "../ITMLib/Engines/Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
 
 //test_utils
-#include "Test_WarpGradient_Common.h"
+#include "Test_LevelSetAlignment_CPU_vs_CUDA_Aux.h"
 #include "../ITMLib/Engines/Analytics/AnalyticsEngineFactory.h"
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison.h"
 #include "TestUtilities/WarpAdvancedTestingUtilities.h"
@@ -61,7 +61,7 @@ void GenericLevelSetEvolutionConsistencyTest(int iteration, const LevelSetAlignm
 		warp_field->Reset();
 		AllocateUsingOtherVolume(warp_field, fixture.live_volume, TMemoryDeviceType);
 	} else {
-		warp_field = new VoxelVolume<WarpVoxel, TIndex>(*fixture.GetIteration1StartingWarpField(), TMemoryDeviceType);
+		warp_field = new VoxelVolume<WarpVoxel, TIndex>(*(fixture.GetIteration1StartingWarpField()), TMemoryDeviceType);
 	}
 
 	auto motion_tracker = new LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, DIAGNOSTIC>(
@@ -85,7 +85,6 @@ void GenericLevelSetEvolutionConsistencyTest(int iteration, const LevelSetAlignm
 };
 
 // Iteration 0: Data term only
-
 BOOST_FIXTURE_TEST_CASE(testDataTerm_CPU_PVA, DataFixture_CPU_PVA) {
 	LevelSetAlignmentSwitches switches(true, false, false, false, false);
 	GenericLevelSetEvolutionConsistencyTest<PlainVoxelArray, MEMORYDEVICE_CPU>(0, switches, *this);
