@@ -59,8 +59,9 @@ void GenericLevelSetEvolutionConsistencyTest(int iteration, const LevelSetAlignm
 	if (iteration == 0) {
 		warp_field = new VoxelVolume<WarpVoxel, TIndex>(TMemoryDeviceType, fixture.index_parameters);
 		warp_field->Reset();
+		AllocateUsingOtherVolume(warp_field, fixture.live_volume, TMemoryDeviceType);
 	} else {
-		warp_field = fixture.GetIteration1StartingWarpField();
+		warp_field = new VoxelVolume<WarpVoxel, TIndex>(*fixture.GetIteration1StartingWarpField(), TMemoryDeviceType);
 	}
 
 	auto motion_tracker = new LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, DIAGNOSTIC>(
@@ -71,8 +72,8 @@ void GenericLevelSetEvolutionConsistencyTest(int iteration, const LevelSetAlignm
 		motion_tracker->Align(warp_field, live_volumes, fixture.canonical_volume);
 	}, "Calculate Warping Gradient - data term");
 
-	unsigned int altered_gradient_count = AnalyticsEngine<WarpVoxel, TIndex, TMemoryDeviceType>::Instance().CountAlteredGradients(warp_field);
-	BOOST_REQUIRE_EQUAL(altered_gradient_count, fixture.GetUpdateCount(iteration, switches));
+	unsigned int altered_update_count = AnalyticsEngine<WarpVoxel, TIndex, TMemoryDeviceType>::Instance().CountAlteredWarpUpdates(warp_field);
+	BOOST_REQUIRE_EQUAL(altered_update_count, fixture.GetUpdateCount(iteration, switches));
 
 	float average_warp = AnalyticsEngine<WarpVoxel, TIndex, TMemoryDeviceType>::Instance().ComputeWarpUpdateMean(warp_field);
 	BOOST_REQUIRE_CLOSE(average_warp, fixture.GetAverageUpdateLength(iteration, switches), 1e-4);

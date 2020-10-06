@@ -93,6 +93,11 @@ void TimeIt(std::function<void()> function, const std::string& description = "Ti
 template<typename TVoxel, typename TIndex>
 void PrepareVoxelVolumeForLoading(VoxelVolume<TVoxel, TIndex>* volume);
 
+template<typename TVoxel, typename TIndex>
+void PrepareVoxelVolumeForLoading(std::shared_ptr<VoxelVolume<TVoxel, TIndex>> volume){
+	PrepareVoxelVolumeForLoading(volume.get());
+}
+
 
 template<typename TIndex>
 typename TIndex::InitializationParameters GetStandard512IndexParameters();

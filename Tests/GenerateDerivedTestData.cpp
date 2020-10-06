@@ -265,6 +265,7 @@ void GenerateWarpGradientTestData() {
 	// iteration 0
 	for (auto& switches : switches_iteration_0) {
 		reset_warp_field();
+
 		LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, DIAGNOSTIC> data_only_motion_tracker(
 				switches, SingleIterationTerminationConditions());
 

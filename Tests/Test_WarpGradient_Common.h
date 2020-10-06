@@ -17,6 +17,7 @@
 
 //stdlib
 #include <unordered_map>
+#include <boost/test/test_tools.hpp>
 
 //ITMLib
 #include "../ORUtils/MemoryDeviceType.h"
@@ -51,13 +52,9 @@ template<MemoryDeviceType TMemoryDeviceType, typename TIndex>
 struct WarpGradientDataFixture {
 private:
 	struct WarpOutputs {
-		VoxelVolume<WarpVoxel, TIndex>* volume;
+		std::shared_ptr<VoxelVolume<WarpVoxel, TIndex>> volume;
 		unsigned int update_count;
 		float average_update_warp_length;
-
-		~WarpOutputs() {
-			delete volume;
-		}
 	};
 	std::unordered_map<int, WarpOutputs> iteration_0_outputs;
 	std::unordered_map<int, WarpOutputs> iteration_1_outputs;
@@ -74,28 +71,25 @@ public:
 		configuration::LoadDefault();
 		settings = &configuration::Get();
 
-
-		BOOST_TEST_MESSAGE("setup fixture");
 		auto load_sdf_volume = [&](VoxelVolume<TSDFVoxel, TIndex>** volume, const std::string& path_suffix) {
 			*volume = new VoxelVolume<TSDFVoxel, TIndex>(TMemoryDeviceType,
 			                                             index_parameters);
 			PrepareVoxelVolumeForLoading(*volume);
 			(*volume)->LoadFromDisk(path_to_data + path_suffix);
 		};
-		auto load_warp_volume = [&](VoxelVolume<WarpVoxel, TIndex>** volume, const std::string& path_suffix) {
-			*volume = new VoxelVolume<WarpVoxel, TIndex>(TMemoryDeviceType,
-			                                             index_parameters);
-			PrepareVoxelVolumeForLoading(*volume);
-			(*volume)->LoadFromDisk(path_to_data + path_suffix);
+		auto load_warp_volume = [&](const std::string& path_suffix) {
+			auto volume = std::make_shared<VoxelVolume<WarpVoxel, TIndex>>(TMemoryDeviceType,index_parameters);
+			PrepareVoxelVolumeForLoading(volume);
+			volume->LoadFromDisk(path_to_data + path_suffix);
+			return volume;
 		};
 
 		ORUtils::IStreamWrapper warp_stats_file(
 				std::string(test_utilities::GeneratedArraysDirectory) + "warp_gradient_stats_" + IndexString<TIndex>() + ".dat", false);
 
 		auto load_warp_outputs = [&](const LevelSetAlignmentSwitches& switches, int iteration) {
-			VoxelVolume<WarpVoxel, TIndex>* warp_field;
 			std::string file_suffix = "warp_field_" + std::to_string(iteration) + "_" + SwitchesToPrefix(switches) + ".dat";
-			load_warp_volume(&warp_field, file_suffix);
+			auto warp_field = load_warp_volume(file_suffix);
 			unsigned int update_count;
 			warp_stats_file.IStream().read(reinterpret_cast<char*>(&update_count), sizeof(unsigned int));
 			float average_update_warp_length;
@@ -135,15 +129,15 @@ public:
 	}
 
 	VoxelVolume<WarpVoxel, TIndex>* GetIteration1StartingWarpField() {
-		return iteration_0_outputs[SwitchesToIntCode(iteration_0_complete_Sobolev_switches)].volume;
+		return iteration_0_outputs[SwitchesToIntCode(iteration_0_complete_Sobolev_switches)].volume.get();
 	}
 
 	VoxelVolume<WarpVoxel, TIndex>* GetWarpField(int iteration, const LevelSetAlignmentSwitches& switches) {
 		switch (iteration) {
 			case 0:
-				return iteration_0_outputs[SwitchesToIntCode(switches)].volume;
+				return iteration_0_outputs[SwitchesToIntCode(switches)].volume.get();
 			case 1:
-				return iteration_1_outputs[SwitchesToIntCode(switches)].volume;
+				return iteration_1_outputs[SwitchesToIntCode(switches)].volume.get();
 			default:
 				DIEWITHEXCEPTION_REPORTLOCATION("Iteration can only be 0 or 1 here.");
 		}
