@@ -457,7 +457,7 @@ configuration::Configuration GenerateChangedUpConfiguration() {
 			LevelSetAlignmentSwitches(false, true, false, true, false),
 			LevelSetAlignmentTerminationConditions(300, 5, 0.0002f)
 	);
-	VolumeFusionSettings changed_up_volume_fusion_settings(true, 0.008);
+	VolumeFusionSettings changed_up_volume_fusion_settings(false, 0.008);
 	DepthFusionSettings changed_up_depth_fusion_settings(true, 0.008);
 	AddDeferrableToSourceTree(changed_up_configuration, changed_up_main_engine_settings);
 	AddDeferrableToSourceTree(changed_up_configuration, changed_up_telemetry_settings);

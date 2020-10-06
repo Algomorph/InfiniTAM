@@ -35,7 +35,7 @@
 #include "Test_LevelSetAlignment_CPU_vs_CUDA_Aux.h"
 #include "../ITMLib/Engines/Analytics/AnalyticsEngineFactory.h"
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison.h"
-#include "TestUtilities/WarpAdvancedTestingUtilities.h"
+#include "TestUtilities/LevelSetAlignmentTestUtilities.h"
 
 using namespace ITMLib;
 using namespace test_utilities;
@@ -108,7 +108,6 @@ BOOST_FIXTURE_TEST_CASE(testDataTerm_CUDA_VBH, DataFixture_CUDA_VBH) {
 #endif
 
 // Iteration 0: Data term, sobolev-smoothed
-
 BOOST_FIXTURE_TEST_CASE(testDataTermSobolevSmoothed_CPU_PVA, DataFixture_CPU_PVA) {
 	LevelSetAlignmentSwitches switches(true, false, false, false, true);
 	GenericLevelSetEvolutionConsistencyTest<PlainVoxelArray, MEMORYDEVICE_CPU>(0, switches, *this);

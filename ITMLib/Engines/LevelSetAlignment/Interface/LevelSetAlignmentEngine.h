@@ -55,10 +55,12 @@ public: // instance functions
 			VoxelVolume<TVoxel, TIndex>** live_volume_pair,
 			VoxelVolume<TVoxel, TIndex>* canonical_volume) override;
 
+	void ClearOutWarpUpdates(VoxelVolume<TWarp, TIndex>* warp_field) const;
+
 protected:
-	void ClearOutFramewiseWarps(VoxelVolume<TWarp, TIndex>* warp_field);
-	void ClearOutCumulativeWarps(VoxelVolume<TWarp, TIndex>* warp_field);
-	void ClearOutWarpUpdates(VoxelVolume<TWarp, TIndex>* warp_field);
+	void ClearOutFramewiseWarps(VoxelVolume<TWarp, TIndex>* warp_field) const;
+	void ClearOutCumulativeWarps(VoxelVolume<TWarp, TIndex>* warp_field) const;
+
 
 	void AddFramewiseWarpToWarp(
 			VoxelVolume<TWarp, TIndex>* warp_field, bool clear_framewise_warps);
@@ -95,7 +97,7 @@ private: // instance functions
 	                                             float& average_update_vector_length);
 
 	template<WarpType TWarpType>
-	void ClearOutWarps(VoxelVolume<TWarp, TIndex>* warp_field);
+	void ClearOutWarps(VoxelVolume<TWarp, TIndex>* warp_field) const;
 	void LogSettings();
 
 

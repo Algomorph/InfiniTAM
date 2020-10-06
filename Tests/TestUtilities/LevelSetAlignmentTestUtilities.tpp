@@ -42,7 +42,7 @@
 #include "TestUtilities.h"
 #include "SnoopyTestUtilities.h"
 
-#include "WarpAdvancedTestingUtilities.h"
+#include "LevelSetAlignmentTestUtilities.h"
 
 using namespace ITMLib;
 using namespace test_utilities;
@@ -248,7 +248,7 @@ void PVA_to_VBH_WarpComparisonSubtest(int iteration, LevelSetAlignmentSwitches t
 	std::string path_frame_17_VBH = snoopy::PartialVolume17Path<VoxelBlockHash>();
 
 	std::string prefix = SwitchesToPrefix(trackerSwitches);
-	float absolute_tolerance = 1e-7f;
+	float absolute_tolerance = 1e-6f;
 
 	// *** initialize/load warps
 	VoxelVolume<WarpVoxel, PlainVoxelArray>* warps_PVA;
@@ -309,13 +309,13 @@ void PVA_to_VBH_WarpComparisonSubtest(int iteration, LevelSetAlignmentSwitches t
 	LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray, TMemoryDeviceType, DIAGNOSTIC> motionTracker_PVA(trackerSwitches,
 	                                                                                                                SingleIterationTerminationConditions());
 
-	std::cout << "==== CALCULATE PVA WARPS === " << std::endl;
+	BOOST_TEST_MESSAGE("==== CALCULATE PVA WARPS === ");
 	motionTracker_PVA.Align( warps_PVA, warped_pair_PVA, volume_16_PVA);
 
 	LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash, TMemoryDeviceType, DIAGNOSTIC> motionTracker_VBH(trackerSwitches,
 	                                                                                                               SingleIterationTerminationConditions());
 
-	std::cout << "==== CALCULATE VBH WARPS === " << std::endl;
+	BOOST_TEST_MESSAGE( "==== CALCULATE VBH WARPS === ");
 	motionTracker_VBH.Align(warps_VBH, warped_pair_VBH, volume_16_VBH);
 
 	BOOST_REQUIRE(AllocatedContentAlmostEqual_Verbose(warps_PVA, warps_VBH, absolute_tolerance, TMemoryDeviceType));

@@ -33,15 +33,15 @@ class VolumeReductionEngine_IndexSpecialized<TVoxel, VoxelBlockHash, MEMORYDEVIC
 public:
 	template<typename TReduceStaticFunctor, typename TOutput, typename TRetrieveFunction>
 	static TOutput ReduceUtilized_Generic(Vector3i& position, const VoxelVolume<TVoxel, VoxelBlockHash>* volume,
-	                               TRetrieveFunction&& retrieval_function,
-	                               ReductionResult<TOutput, VoxelBlockHash> ignored_value) {
+	                                      TRetrieveFunction&& retrieval_function,
+	                                      ReductionResult<TOutput, VoxelBlockHash> ignored_value) {
 		return ReduceUtilizedBlocks_Generic<TReduceStaticFunctor, TReduceStaticFunctor>(
 				position, volume, retrieval_function, ignored_value);
 	}
 
 	template<typename TReduceBlockLevelStaticFunctor, typename TReduceResultLevelStaticFunctor, typename TOutput, typename TRetrievalFunction>
 	static TOutput ReduceUtilizedBlocks_Generic(Vector3i& position, const VoxelVolume<TVoxel, VoxelBlockHash>* volume,
-	                                             TRetrievalFunction&& retrieval_function, ReductionResult<TOutput, VoxelBlockHash> ignored_value) {
+	                                            TRetrievalFunction&& retrieval_function, ReductionResult<TOutput, VoxelBlockHash> ignored_value) {
 		const int utilized_entry_count = volume->index.GetUtilizedBlockCount();
 		const int* utilized_hash_codes = volume->index.GetUtilizedBlockHashCodes();
 		const HashEntry* hash_entries = volume->index.GetEntries();
@@ -112,8 +112,10 @@ public:
 		ORcudaSafeCall(cudaMemcpyAsync(&final_result, output_buffer->GetData(MEMORYDEVICE_CUDA),
 		                               sizeof(ReductionResult<TOutput, VoxelBlockHash>), cudaMemcpyDeviceToHost));
 		HashEntry entry_with_result = volume->index.GetHashEntry(final_result.hash_code);
-		position = ComputePositionVectorFromLinearIndex_VoxelBlockHash(entry_with_result.pos,
-		                                                               static_cast<int> (final_result.index_within_block));
+		if (entry_with_result.ptr != -2) {
+			position = ComputePositionVectorFromLinearIndex_VoxelBlockHash(entry_with_result.pos,
+			                                                               static_cast<int> (final_result.index_within_block));
+		}
 		return final_result.value;
 	}
 };

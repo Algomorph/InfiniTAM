@@ -44,7 +44,7 @@
 //test_utilities
 #include "TestUtilities/TestUtilities.h"
 #include "TestUtilities/SnoopyTestUtilities.h"
-#include "TestUtilities/WarpAdvancedTestingUtilities.h"
+#include "TestUtilities/LevelSetAlignmentTestUtilities.h"
 
 using namespace ITMLib;
 using namespace test_utilities;

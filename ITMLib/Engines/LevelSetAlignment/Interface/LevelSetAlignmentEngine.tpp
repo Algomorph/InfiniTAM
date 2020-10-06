@@ -102,26 +102,26 @@ void LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutio
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
 template<WarpType TWarpType>
 void LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode>::ClearOutWarps(
-		VoxelVolume<TWarp, TIndex>* warp_field) {
+		VoxelVolume<TWarp, TIndex>* warp_field) const {
 	VolumeTraversalEngine<TWarp, TIndex, TMemoryDeviceType>::
 	template TraverseUtilized<ClearOutWarpStaticFunctor<TWarp, TWarpType>>(warp_field);
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
 void LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode>::ClearOutCumulativeWarps(
-		VoxelVolume<TWarp, TIndex>* warp_field) {
+		VoxelVolume<TWarp, TIndex>* warp_field) const {
 	ClearOutWarps<WARP_CUMULATIVE>(warp_field);
 };
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
 void LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode>::ClearOutFramewiseWarps(
-		VoxelVolume<TWarp, TIndex>* warp_field) {
+		VoxelVolume<TWarp, TIndex>* warp_field) const {
 	ClearOutWarps<WARP_FRAMEWISE>(warp_field);
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
 void LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode>::ClearOutWarpUpdates(
-		VoxelVolume<TWarp, TIndex>* warp_field) {
+		VoxelVolume<TWarp, TIndex>* warp_field) const {
 	ClearOutWarps<WARP_UPDATE>(warp_field);
 }
 

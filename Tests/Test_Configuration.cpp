@@ -212,7 +212,6 @@ BOOST_AUTO_TEST_CASE(ConfigurationTestLong_CLI_Only) {
 	                      " --level_set_evolution.weights.weight_smoothing_term=0.3"
 	                      " --level_set_evolution.weights.weight_level_set_term=0.1"
 	                      " --level_set_evolution.weights.epsilon=1e-06"
-	                      " --level_set_evolution.weights.momentum_weight=0.4"
 
 	                      " --level_set_evolution.switches.enable_data_term=false"
 	                      " --level_set_evolution.switches.enable_level_set_term=true"
@@ -221,6 +220,7 @@ BOOST_AUTO_TEST_CASE(ConfigurationTestLong_CLI_Only) {
 	                      " --level_set_evolution.switches.enable_sobolev_gradient_smoothing=false"
 
 	                      " --level_set_evolution.termination.max_iteration_count=300"
+					      " --level_set_evolution.termination.min_iteration_count=5"
 	                      " --level_set_evolution.termination.update_length_threshold=0.0002"
 
 	                      " --logging_settings.verbosity_level=warning"
@@ -277,7 +277,14 @@ BOOST_AUTO_TEST_CASE(ConfigurationTestLong_CLI_Only) {
 	                      " --automatic_run_settings.load_volume_and_camera_matrix_before_processing=true"
 	                      " --automatic_run_settings.save_volumes_and_camera_matrix_after_processing=true"
 	                      " --automatic_run_settings.save_meshes_after_processing=true"
-	                      " --automatic_run_settings.exit_after_automatic_processing=true";
+	                      " --automatic_run_settings.exit_after_automatic_processing=true"
+
+					      " --volume_fusion_settings.use_surface_thickness_cutoff=false"
+	                      " --volume_fusion_settings.surface_thickness=0.008"
+
+	                      " --depth_fusion_settings.use_surface_thickness_cutoff=true"
+	                      " --depth_fusion_settings.surface_thickness=0.008"
+	                      ;
 
 	std::cout << "Executing command: " << std::endl;
 	std::cout << command << std::endl;

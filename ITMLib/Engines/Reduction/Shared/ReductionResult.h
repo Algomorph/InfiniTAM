@@ -54,7 +54,7 @@ struct ReductionResultInitializer;
 template<typename TValue>
 struct ReductionResultInitializer<TValue, VoxelBlockHash>{
 	static ReductionResult<TValue, VoxelBlockHash> Default(){
-		return {TValue(0), 0u, 0};
+		return {TValue(0), 0u, -1};
 	}
 
 };

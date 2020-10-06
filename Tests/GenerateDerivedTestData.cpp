@@ -24,7 +24,7 @@
 //test_utilities
 #include "TestUtilities/TestUtilities.h"
 #include "TestUtilities/SnoopyTestUtilities.h"
-#include "TestUtilities/WarpAdvancedTestingUtilities.h"
+#include "TestUtilities/LevelSetAlignmentTestUtilities.h"
 #include "TestUtilities/CameraPoseAndRenderingEngineFixture.h"
 
 //ORUtils
@@ -223,7 +223,8 @@ void GenerateWarpGradientTestData() {
 	std::string volume_output_directory = std::string(test_utilities::GeneratedVolumeDirectory) + IndexString<TIndex>() + "/";
 	test_utilities::ConstructGeneratedArraysDirectoryIfMissing();
 
-	ORUtils::OStreamWrapper warp_stats_file(std::string(test_utilities::GeneratedArraysDirectory) + "warp_gradient_stats_" + IndexString<TIndex>() + ".dat", false);
+	ORUtils::OStreamWrapper warp_stats_file(
+			std::string(test_utilities::GeneratedArraysDirectory) + "warp_gradient_stats_" + IndexString<TIndex>() + ".dat", false);
 
 	VoxelVolume<TSDFVoxel, TIndex>* canonical_volume;
 	VoxelVolume<TSDFVoxel, TIndex>* live_volume;
@@ -288,7 +289,8 @@ void GenerateWarpGradientTestData() {
 	for (auto& switches : switches_iteration_1) {
 		warp_field.Reset();
 		warp_field.LoadFromDisk(volume_output_directory + warp_0_data_and_tikhonov_sobolev_smoothed_filename);
-		LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, DIAGNOSTIC> tracker(switches, SingleIterationTerminationConditions());
+		LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, DIAGNOSTIC> tracker(switches,
+		                                                                                             SingleIterationTerminationConditions());
 		tracker.Align(&warp_field, live_volumes, canonical_volume);
 		warp_field.SaveToDisk(volume_output_directory + warp_field_iteration_1_prefix + SwitchesToPrefix(switches) + warp_field_file_extension);
 		unsigned int altered_gradient_count = AnalyticsEngine<WarpVoxel, TIndex, TMemoryDeviceType>::Instance().CountAlteredWarpUpdates(&warp_field);
@@ -301,7 +303,12 @@ void GenerateWarpGradientTestData() {
 	delete live_volume;
 }
 
-void GenerateWarpGradient_PVA_to_VBH_TestData() {
+void GenerateLevelSetAlignment_CPU_vs_CUDA_TestData() {
+	GenerateWarpGradientTestData<PlainVoxelArray, MEMORYDEVICE_CPU>();
+	GenerateWarpGradientTestData<VoxelBlockHash, MEMORYDEVICE_CPU>();
+}
+
+void GenerateLevelSetAlignment_PVA_vs_VBH_TestData() {
 	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(),
 	               "Generating multi-iteration warp field data from snoopy masked partial volumes 16 & 17 (PVA & VBH)... ");
 	LevelSetAlignmentSwitches switches_data_only(true, false, false, false, false);
@@ -671,18 +678,17 @@ void GenerateRenderingTestData_VoxelBlockHash() {
 
 
 #define GENERATED_TEST_DATA_TYPE_ENUM_DESCRIPTION GeneratedTestDataType, \
-    (SNOOPY_UNMASKED_VOLUMES,    "SNOOPY_UNMASKED_VOLUMES", "snoopy_unmasked_volumes", "unmasked_volumes", "unmasked", "u", "su", "suv"), \
-    (MASKED_VOLUMES,             "SNOOPY_MASKED_VOLUMES", "snoopy_masked_volumes", "masked_volumes", "masked", "sm", "smv", "mv"), \
-    (PVA_WARP_GRADIENTS,         "PVA_WARP_GRADIENTS", "pva_warp_gradients", "pva_warps", "pw", "pva_w", "pva_wg"), \
-    (VBH_WARP_GRADIENTS,         "VBH_WARP_GRADIENTS", "vbh_warp_gradients", "vbh_warps", "vw", "vbh_w", "vbh_wg"), \
-    (COMPARATIVE_WARP_GRADIENTS, "COMPARATIVE_WARP_GRADIENTS", "comparative_warp_gradients", "warps", "comparative_warps", "w", "cw"), \
-    (PVA_WARPED_VOLUMES,         "PVA_WARPED_VOLUMES", "pva_warped_volumes", "pva_wv"), \
-    (VBH_WARPED_VOLUMES,         "VBH_WARPED_VOLUMES", "vbh_warped_volumes", "vbh_wv"), \
-    (PVA_FUSED_VOLUMES,          "PVA_FUSED_VOLUMES", "pva_fused_volumes", "pva_fv"), \
-    (VBH_FUSED_VOLUMES,          "VBH_FUSED_VOLUMES", "vbh_fused_volumes", "vbh_fv"), \
-    (CONFUGRATIONS,              "CONFIGURATIONS", "configurations", "config", "c"), \
-    (MESHES,                     "MESHES", "meshes", "m"), \
-    (RENDERING,                  "RENDERING", "rendering", "r")
+    (SNOOPY_UNMASKED_VOLUMES,                "SNOOPY_UNMASKED_VOLUMES", "snoopy_unmasked_volumes", "unmasked_volumes", "unmasked", "u", "su", "suv"), \
+    (MASKED_VOLUMES,                         "SNOOPY_MASKED_VOLUMES", "snoopy_masked_volumes", "masked_volumes", "masked", "sm", "smv", "mv"), \
+    (LEVEL_SET_ALIGNMENT_DEVICE_COMPARISON,  "LEVEL_SET_ALIGNMENT_DEVICE_COMPARISON", "lsa_device_comparison", "lsa_d"), \
+    (LEVEL_SET_ALIGNMENT_INDEX_COMPARISON,   "LEVEL_SET_ALIGNMENT_INDEX_COMPARISON", "lsa_index_comparison", "lsa_i"), \
+    (PVA_WARPED_VOLUMES,                     "PVA_WARPED_VOLUMES", "pva_warped_volumes", "pva_wv"), \
+    (VBH_WARPED_VOLUMES,                     "VBH_WARPED_VOLUMES", "vbh_warped_volumes", "vbh_wv"), \
+    (PVA_FUSED_VOLUMES,                      "PVA_FUSED_VOLUMES", "pva_fused_volumes", "pva_fv"), \
+    (VBH_FUSED_VOLUMES,                      "VBH_FUSED_VOLUMES", "vbh_fused_volumes", "vbh_fv"), \
+    (CONFUGRATIONS,                          "CONFIGURATIONS", "configurations", "config", "c"), \
+    (MESHES,                                 "MESHES", "meshes", "m"), \
+    (RENDERING,                              "RENDERING", "rendering", "r")
 
 GENERATE_SERIALIZABLE_ENUM(GENERATED_TEST_DATA_TYPE_ENUM_DESCRIPTION);
 
@@ -694,18 +700,17 @@ int main(int argc, char* argv[]) {
 
 	std::map<GeneratedTestDataType, std::function<void()>> generator_by_string(
 			{
-					{SNOOPY_UNMASKED_VOLUMES,    ConstructSnoopyUnmaskedVolumes00},
-					{MASKED_VOLUMES,             ConstructSnoopyMaskedVolumes16and17},
-					{PVA_WARP_GRADIENTS,         GenerateWarpGradientTestData<PlainVoxelArray, MEMORYDEVICE_CPU>},
-					{VBH_WARP_GRADIENTS,         GenerateWarpGradientTestData<VoxelBlockHash, MEMORYDEVICE_CPU>},
-					{COMPARATIVE_WARP_GRADIENTS, GenerateWarpGradient_PVA_to_VBH_TestData},
-					{PVA_WARPED_VOLUMES,         GenerateWarpedVolumeTestData<PlainVoxelArray>},
-					{VBH_WARPED_VOLUMES,         GenerateWarpedVolumeTestData<VoxelBlockHash>},
-					{PVA_FUSED_VOLUMES,          GenerateFusedVolumeTestData<PlainVoxelArray>},
-					{VBH_FUSED_VOLUMES,          GenerateFusedVolumeTestData<VoxelBlockHash>},
-					{CONFUGRATIONS,              GenerateConfigurationTestData},
-					{MESHES,                     GenerateMeshingTestData<VoxelBlockHash, MEMORYDEVICE_CPU>},
-					{RENDERING,                  GenerateRenderingTestData_VoxelBlockHash<MEMORYDEVICE_CPU>}
+					{SNOOPY_UNMASKED_VOLUMES,               ConstructSnoopyUnmaskedVolumes00},
+					{MASKED_VOLUMES,                        ConstructSnoopyMaskedVolumes16and17},
+					{LEVEL_SET_ALIGNMENT_DEVICE_COMPARISON, GenerateLevelSetAlignment_CPU_vs_CUDA_TestData},
+					{LEVEL_SET_ALIGNMENT_INDEX_COMPARISON,  GenerateLevelSetAlignment_PVA_vs_VBH_TestData},
+					{PVA_WARPED_VOLUMES,                    GenerateWarpedVolumeTestData<PlainVoxelArray>},
+					{VBH_WARPED_VOLUMES,                    GenerateWarpedVolumeTestData<VoxelBlockHash>},
+					{PVA_FUSED_VOLUMES,                     GenerateFusedVolumeTestData<PlainVoxelArray>},
+					{VBH_FUSED_VOLUMES,                     GenerateFusedVolumeTestData<VoxelBlockHash>},
+					{CONFUGRATIONS,                         GenerateConfigurationTestData},
+					{MESHES,                                GenerateMeshingTestData<VoxelBlockHash, MEMORYDEVICE_CPU>},
+					{RENDERING,                             GenerateRenderingTestData_VoxelBlockHash<MEMORYDEVICE_CPU>}
 			});
 	if (argc < 2) {
 		// calls every generator iteratively
@@ -734,8 +739,10 @@ int main(int argc, char* argv[]) {
 			std::cout << "For any of these, shorthands can be used, which are typically acronyms with some words omitted"
 			             ", e.g. \"suv\" can be used instead of \"SNOOPY_UNMASKED_VOLUMES\" and \"pva_wv\" instead of \"PVA_WARPED_VOLUMES\". "
 			             "Don't be afraid to experiment." << std::endl;
-			std::cout << "If -c (\"continue\") flag is passed, all generators including and after the specified one in the sequence are called in order." << std::endl;
-		} else if(argc < 3){
+			std::cout
+					<< "If -c (\"continue\") flag is passed, all generators including and after the specified one in the sequence are called in order."
+					<< std::endl;
+		} else if (argc < 3) {
 			GeneratedTestDataType chosen = string_to_enumerator<GeneratedTestDataType>(generated_data_type_argument);
 			std::cout << "current path: " << std::filesystem::current_path() << std::endl;
 			std::cout << "Generating data using the " << enumerator_to_string(chosen) << " generator." << std::endl;
@@ -744,7 +751,7 @@ int main(int argc, char* argv[]) {
 			bool hit_start_generator = false;
 			GeneratedTestDataType chosen = string_to_enumerator<GeneratedTestDataType>(generated_data_type_argument);
 			for (const auto& iter : generator_by_string) {
-				if(iter.first == chosen || hit_start_generator){
+				if (iter.first == chosen || hit_start_generator) {
 					(iter.second)();
 					hit_start_generator = true;
 				}

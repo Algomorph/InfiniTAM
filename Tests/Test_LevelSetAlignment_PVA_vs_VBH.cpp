@@ -51,7 +51,7 @@
 
 
 //test_utils
-#include "TestUtilities/WarpAdvancedTestingUtilities.h"
+#include "TestUtilities/LevelSetAlignmentTestUtilities.h"
 #include "Test_LevelSetAlignment_CPU_vs_CUDA_Aux.h"
 
 using namespace ITMLib;

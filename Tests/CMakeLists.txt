@@ -40,15 +40,15 @@ if (BUILD_TESTS)
         TestUtilities/TestUtilities.cu
         TestUtilities/TestUtilities.tpp
         TestUtilities/SnoopyTestUtilities.cpp
-        TestUtilities/WarpAdvancedTestingUtilities.tpp
-        TestUtilities/WarpAdvancedTestingUtilities.cpp
+        TestUtilities/LevelSetAlignmentTestUtilities.tpp
+        TestUtilities/LevelSetAlignmentTestUtilities.cpp
         )
     set(TEST_UTILITIES_HEADERS
         TestUtilities/TestUtilityKernels.h
         TestUtilities/TestUtilityFunctors.h
         TestUtilities/TestUtilities.h
         TestUtilities/SnoopyTestUtilities.h
-        TestUtilities/WarpAdvancedTestingUtilities.h
+        TestUtilities/LevelSetAlignmentTestUtilities.h
         TestUtilities/TestUtilitiesConfig.h.in
         TestUtilities/CameraPoseAndRenderingEngineFixture.h
         ${CMAKE_CURRENT_BINARY_DIR}/TestUtilities/TestUtilitiesConfig.h)

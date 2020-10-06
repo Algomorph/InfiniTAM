@@ -135,8 +135,9 @@ public:
 
 		ReductionResult<TOutput, VoxelBlockHash> final_result = output_buffer.get()[0];
 		HashEntry entry_with_result = volume->index.GetHashEntry(final_result.hash_code);
-		position = ComputePositionVectorFromLinearIndex_VoxelBlockHash(entry_with_result.pos, static_cast<int> (final_result.index_within_block));
-
+		if (entry_with_result.ptr != -2) {
+			position = ComputePositionVectorFromLinearIndex_VoxelBlockHash(entry_with_result.pos, static_cast<int> (final_result.index_within_block));
+		}
 		return final_result.value;
 	}
 

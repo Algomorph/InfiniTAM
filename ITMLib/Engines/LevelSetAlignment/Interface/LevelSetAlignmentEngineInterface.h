@@ -48,15 +48,21 @@ public:
 	 *
 	 *  Expects all volumes to be properly allocated.
 	 *
-	 * \param warp_field
-	 * \param live_volume_pair
-	 * \param canonical_volume
+	 * \param warp_field warp field used to store updates at each iteration
+	 * \param live_volume_pair volume pair, with the original source volume being in the first index
+	 * \param canonical_volume target volume to warp towards
 	 * \return pointer to the volume in the live_volume_pair that contains the final (aligned) result.
 	 */
 	virtual VoxelVolume<TVoxel, TIndex>* Align(
 			VoxelVolume<TWarp, TIndex>* warp_field,
 			VoxelVolume<TVoxel, TIndex>** live_volume_pair,
 			VoxelVolume<TVoxel, TIndex>* canonical_volume) = 0;
+
+	/**
+	 * \brief Clear out the warp_update field of all voxels in the provided warp_field.
+	 * \param warp_field the volume whose warp updates to clear out.
+	 */
+	virtual void ClearOutWarpUpdates(VoxelVolume<TWarp, TIndex>* warp_field) const = 0;
 
 };
 

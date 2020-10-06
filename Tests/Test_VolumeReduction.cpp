@@ -28,7 +28,7 @@
 //test_utilities
 #include "TestUtilities/TestUtilities.h"
 #include "TestUtilities/SnoopyTestUtilities.h"
-#include "TestUtilities/WarpAdvancedTestingUtilities.h"
+#include "TestUtilities/LevelSetAlignmentTestUtilities.h"
 #include "../ITMLib/Engines/Indexing/IndexingEngineFactory.h"
 
 using namespace ITMLib;
@@ -53,12 +53,12 @@ void GenericVolumeReductionCountWeightRangeTest1() {
 	Extent3Di filled_voxel_bounds(0, 0, 0, 48, 48, 48);
 	Extent2Di general_range(0, 50);
 	GenerateRandomDepthWeightSubVolume<TMemoryDeviceType>(&volume, filled_voxel_bounds, general_range);
-
 	const unsigned int voxel_count = filled_voxel_bounds.max_x * filled_voxel_bounds.max_y * filled_voxel_bounds.max_z;
 
 	unsigned int voxels_in_range;
 	voxels_in_range = AnalyticsEngine<TSDFVoxel, TIndex, TMemoryDeviceType>::Instance()
 			.CountVoxelsWithDepthWeightInRange(&volume, general_range);
+
 	BOOST_REQUIRE_EQUAL(voxel_count, voxels_in_range);
 
 	Extent2Di different_range1(50, 56);
