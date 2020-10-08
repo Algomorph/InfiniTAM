@@ -29,7 +29,7 @@ namespace ITMLib {
 
 template<typename TVoxelPrimary, typename TVoxelSecondary>
 class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, VoxelBlockHash, MEMORYDEVICE_CUDA> {
-	//TODO: combine TraverseAndCompareMatchingFlags_Generic with TraversalAndCompareAll_Generic the same
+	//TODO: combine TraverseAndCompareMatchingFlags_Generic with TraverseAndCompareAll_Generic the same
 	// way as done in the the CPU version to avoid DRY violations
 	template<typename TBooleanFunctor, typename TDeviceFunction>
 	inline static bool
@@ -219,7 +219,7 @@ class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, 
 
 	template<typename TBooleanFunctor, typename TDeviceFunction>
 	inline static bool
-	TravereAndCompareAllocated_Generic(
+	TraverseAndCompareAllocated_Generic(
 			VoxelVolume<TVoxelPrimary, PlainVoxelArray>* volume1,
 			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* volume2,
 			TBooleanFunctor& functor, TDeviceFunction&& deviceFunction) {
@@ -408,14 +408,14 @@ public:
 			VoxelVolume<TVoxelPrimary, PlainVoxelArray>* volume1,
 			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* volume2,
 			TBooleanFunctor& functor) {
-		return TravereAndCompareAllocated_Generic(volume1, volume2, functor, []
+		return TraverseAndCompareAllocated_Generic(volume1, volume2, functor, []
 				(dim3 gridSize_HashPerBlock, dim3 cudaBlockSize_BlockVoxelPerThread, TVoxelPrimary* arrayVoxels,
 				 TVoxelSecondary* hashVoxels, const HashEntry* hash_table,
 				 int hash_entry_count, Vector6i arrayBounds, Vector3i array_size,
 				 TBooleanFunctor* functor_device, bool* falseEncountered_device) {
 			checkIfAllocatedHashBlocksYieldTrue <<< gridSize_HashPerBlock, cudaBlockSize_BlockVoxelPerThread >>>
-			                                                                (arrayVoxels, hashVoxels, hash_table, hash_entry_count, arrayBounds,
-					                                                                array_size, functor_device, falseEncountered_device);
+					(arrayVoxels, hashVoxels, hash_table, hash_entry_count, arrayBounds,
+					 array_size, functor_device, falseEncountered_device);
 		});
 	}
 
@@ -425,15 +425,15 @@ public:
 			VoxelVolume<TVoxelPrimary, PlainVoxelArray>* volume1,
 			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* volume2,
 			TBooleanFunctor& functor) {
-		return TravereAndCompareAllocated_Generic(volume1, volume2, functor, []
+		return TraverseAndCompareAllocated_Generic(volume1, volume2, functor, []
 				(dim3 gridSize_HashPerBlock, dim3 cudaBlockSize_BlockVoxelPerThread, TVoxelPrimary* arrayVoxels,
 				 TVoxelSecondary* hashVoxels, const HashEntry* hash_table,
 				 int hash_entry_count, Vector6i arrayBounds, Vector3i array_size,
 				 TBooleanFunctor* functor_device, bool* falseEncountered_device) {
 			checkIfAllocatedHashBlocksYieldTrue_Position <<< gridSize_HashPerBlock,
-					cudaBlockSize_BlockVoxelPerThread >>>
+			cudaBlockSize_BlockVoxelPerThread >>>
 					(arrayVoxels, hashVoxels, hash_table, hash_entry_count, arrayBounds,
-							array_size, functor_device, falseEncountered_device);
+					 array_size, functor_device, falseEncountered_device);
 		});
 	}
 

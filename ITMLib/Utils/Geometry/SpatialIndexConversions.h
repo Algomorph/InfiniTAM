@@ -18,14 +18,27 @@
 
 #include "../../../ORUtils/PlatformIndependence.h"
 #include "../../Objects/Volume/PlainVoxelArray.h"
+#include "../../Objects/Volume/RepresentationAccess.h"
 
 _CPU_AND_GPU_CODE_
 inline static int
 ComputeLinearIndexFromPosition_PlainVoxelArray(const ITMLib::PlainVoxelArray::IndexData* data, const Vector3i& position) {
-	Vector3i positionIn3DArray = position - data->offset;
-	return positionIn3DArray.z * (data->size.y * data->size.x)
-	       + positionIn3DArray.y * data->size.x + positionIn3DArray.x;
+	Vector3i position_in_3d_array = position - data->offset;
+	return position_in_3d_array.z * (data->size.y * data->size.x)
+	       + position_in_3d_array.y * data->size.x + position_in_3d_array.x;
 };
+
+_CPU_AND_GPU_CODE_
+inline static int
+ComputeLinearIndexFromPosition_VoxelBlockHash(const ITMLib::VoxelBlockHash::IndexData* data, const Vector3i& position) {
+	Vector3i block_position;
+	pointToVoxelBlockPos(position, block_position);
+	Vector3i position_in_voxel_hash_block(position.x - block_position.x * VOXEL_BLOCK_SIZE,
+	                                      position.y - block_position.y * VOXEL_BLOCK_SIZE,
+	                                      position.z - block_position.z * VOXEL_BLOCK_SIZE);
+	return position_in_voxel_hash_block.z * (VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE)
+	       + position_in_voxel_hash_block.y * VOXEL_BLOCK_SIZE + position_in_voxel_hash_block.x;
+}
 
 _CPU_AND_GPU_CODE_
 inline static void
@@ -55,8 +68,8 @@ ComputePositionVectorFromLinearIndex_PlainVoxelArray(const ITMLib::PlainVoxelArr
 
 _CPU_AND_GPU_CODE_
 inline static Vector3i
-ComputePositionVectorFromLinearIndex_VoxelBlockHash( Vector3s block_position_in_blocks,
-                                                     int linear_index_in_block) {
+ComputePositionVectorFromLinearIndex_VoxelBlockHash(Vector3s block_position_in_blocks,
+                                                    int linear_index_in_block) {
 	int z = linear_index_in_block / (VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE);
 	int tmp = linear_index_in_block - z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
 	int y = tmp / VOXEL_BLOCK_SIZE;

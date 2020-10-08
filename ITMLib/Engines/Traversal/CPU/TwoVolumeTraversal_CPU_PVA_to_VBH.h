@@ -353,13 +353,13 @@ private:
 
 	template<ExecutionMode TExecutionMode = ExecutionMode::OPTIMIZED, typename TTwoVoxelBooleanFunctor, typename TTwoVoxelAndPositionPredicate,
 			typename TArrayVoxelPredicate, typename THashVoxelPredicate>
-	inline static bool TraversalAndCompareAll_Generic(VoxelVolume<TArrayVoxel, PlainVoxelArray>* array_volume,
-	                                                  VoxelVolume<THashVoxel, VoxelBlockHash>* hash_volume,
-	                                                  TTwoVoxelBooleanFunctor& voxels_match_functor,
-	                                                  TTwoVoxelAndPositionPredicate&& voxels_at_position_are_significant,
-	                                                  TArrayVoxelPredicate&& array_voxel_is_significant_if_altered,
-	                                                  THashVoxelPredicate&& hash_voxel_is_significant_if_altered,
-	                                                  bool verbose) {
+	inline static bool TraverseAndCompareAll_Generic(VoxelVolume<TArrayVoxel, PlainVoxelArray>* array_volume,
+	                                                 VoxelVolume<THashVoxel, VoxelBlockHash>* hash_volume,
+	                                                 TTwoVoxelBooleanFunctor& voxels_match_functor,
+	                                                 TTwoVoxelAndPositionPredicate&& voxels_at_position_are_significant,
+	                                                 TArrayVoxelPredicate&& array_voxel_is_significant_if_altered,
+	                                                 THashVoxelPredicate&& hash_voxel_is_significant_if_altered,
+	                                                 bool verbose) {
 		switch (TExecutionMode) {
 			case ExecutionMode::DIAGNOSTIC:
 				return TraversalAndCompareAll_Generic_Diagnostic(array_volume, hash_volume, voxels_match_functor,
@@ -376,23 +376,24 @@ private:
 
 	template<typename TFunctor, typename TFunctionCall>
 	inline static bool
-	TravereAndCompareAllocated_Generic(
+	TraverseAndCompareAllocated_Generic(
 			VoxelVolume<TArrayVoxel, PlainVoxelArray>* array_volume,
 			VoxelVolume<THashVoxel, VoxelBlockHash>* hash_volume,
 			TFunctor& functor, TFunctionCall&& functionCall) {
 		volatile bool mismatch_found = false;
-		int hash_entry_count = hash_volume->index.hash_entry_count;
+		const int hash_entry_count = hash_volume->index.hash_entry_count;
 		THashVoxel* hash_voxels = hash_volume->GetVoxels();
 		TArrayVoxel* array_voxels = array_volume->GetVoxels();
 		const VoxelBlockHash::IndexData* hash_table = hash_volume->index.GetIndexData();
 		const PlainVoxelArray::IndexData* array_info = array_volume->index.GetIndexData();
-		Vector3i start_voxel = array_info->offset;
-		Vector3i array_size = array_info->size;
-		Vector3i end_voxel = start_voxel + array_size; // open last traversal bound (this voxel doesn't get processed)
-		Vector6i array_bounds(start_voxel.x, start_voxel.y, start_voxel.z, end_voxel.x, end_voxel.y, end_voxel.z);
+		const Vector3i start_voxel = array_info->offset;
+		const Vector3i array_size = array_info->size;
+		const Vector3i end_voxel = start_voxel + array_size; // open last traversal bound (this voxel doesn't get processed)
+		const Vector6i array_bounds(start_voxel.x, start_voxel.y, start_voxel.z, end_voxel.x, end_voxel.y, end_voxel.z);
 
 #ifdef WITH_OPENMP
-#pragma omp parallel for default(shared)
+#pragma omp parallel for default(none) shared(hash_table, mismatch_found, functionCall, functor, hash_voxels, array_voxels)\
+firstprivate(hash_entry_count, array_bounds, start_voxel, array_size)
 #endif
 		for (int hash = 0; hash < hash_entry_count; hash++) {
 			if (mismatch_found) continue;
@@ -408,17 +409,27 @@ private:
 			for (int z = local_bounds.min_z; z < local_bounds.max_z; z++) {
 				for (int y = local_bounds.min_y; y < local_bounds.max_y; y++) {
 					for (int x = local_bounds.min_x; x < local_bounds.max_x; x++) {
-						int locId = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
+						int loc_id = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
 						Vector3i voxel_coordinate_within_block = Vector3i(x, y, z);
 						Vector3i voxel_absolute_position = voxel_block_min_point + voxel_coordinate_within_block;
-						Vector3i voxel_positionSansOffset = voxel_absolute_position - start_voxel;
-						int linear_index = voxel_positionSansOffset.x + voxel_positionSansOffset.y * array_size.x +
-						                   voxel_positionSansOffset.z * array_size.x * array_size.y;
-						THashVoxel& hash_voxel = hash_voxel_block[locId];
-						TArrayVoxel& array_voxel = array_voxels[linear_index];
+						Vector3i voxel_position_sans_offset = voxel_absolute_position - start_voxel;
+						int linear_index_in_array =
+								voxel_position_sans_offset.x + voxel_position_sans_offset.y * array_size.x +
+								voxel_position_sans_offset.z * array_size.x * array_size.y;
+						THashVoxel& hash_voxel = hash_voxel_block[loc_id];
+						TArrayVoxel& array_voxel = array_voxels[linear_index_in_array];
+
+						//__DEBUG
+						if(linear_index_in_array == 94571){
+							int i = 10;
+						}
 
 						if (!std::forward<TFunctionCall>(functionCall)(functor, array_voxel, hash_voxel,
 						                                               voxel_absolute_position)) {
+							//__DEBUG
+							if(linear_index_in_array == 94571){
+								int i = 10;
+							}
 							mismatch_found = true;
 							break;
 						}
@@ -531,7 +542,7 @@ public: // static functions
 			VoxelVolume<TArrayVoxel, PlainVoxelArray>* array_volume,
 			VoxelVolume<THashVoxel, VoxelBlockHash>* hash_volume,
 			TFunctor& functor, bool verbose) {
-		return TraversalAndCompareAll_Generic<TExecutionMode>(array_volume, hash_volume, functor, []
+		return TraverseAndCompareAll_Generic<TExecutionMode>(array_volume, hash_volume, functor, []
 				(TFunctor& functor1, TArrayVoxel& array_voxel,
 				 THashVoxel& hash_voxel, const Vector3i& voxel_position) {
 			return functor1(array_voxel, hash_voxel);
@@ -539,27 +550,27 @@ public: // static functions
 	}
 
 
-	template<ExecutionMode TExecutionMode = ExecutionMode::OPTIMIZED,typename TFunctor>
+	template<ExecutionMode TExecutionMode = ExecutionMode::OPTIMIZED, typename TFunctor>
 	inline static bool
 	TraverseAndCompareAllWithPosition(
 			VoxelVolume<TArrayVoxel, PlainVoxelArray>* array_volume,
 			VoxelVolume<THashVoxel, VoxelBlockHash>* hash_volume,
 			TFunctor& functor, bool verbose) {
-		return TraversalAndCompareAll_Generic<TExecutionMode>(array_volume, hash_volume, functor, []
+		return TraverseAndCompareAll_Generic<TExecutionMode>(array_volume, hash_volume, functor, []
 				(TFunctor& functor, TArrayVoxel& array_voxel, THashVoxel& hash_voxel,
 				 const Vector3i& voxel_position) {
 			return functor(array_voxel, hash_voxel, voxel_position);
 		}, [](TArrayVoxel& array_voxel) { return true; }, [](THashVoxel& hash_voxel) { return true; }, verbose);
 	}
 
-	template<ExecutionMode TExecutionMode = ExecutionMode::OPTIMIZED,typename TFunctor>
+	template<ExecutionMode TExecutionMode = ExecutionMode::OPTIMIZED, typename TFunctor>
 	inline static bool
 	TraverseAndCompareMatchingFlags(
 			VoxelVolume<TArrayVoxel, PlainVoxelArray>* array_volume,
 			VoxelVolume<THashVoxel, VoxelBlockHash>* hash_volume,
 			VoxelFlags flags,
 			TFunctor& functor, bool verbose) {
-		return TraversalAndCompareAll_Generic<TExecutionMode>(
+		return TraverseAndCompareAll_Generic<TExecutionMode>(
 				array_volume, hash_volume, functor,
 				[&flags](TFunctor& functor1,
 				         TArrayVoxel& array_voxel, THashVoxel& hash_voxel, const Vector3i& voxel_position) {
@@ -577,7 +588,7 @@ public: // static functions
 			VoxelVolume<TArrayVoxel, PlainVoxelArray>* array_volume,
 			VoxelVolume<THashVoxel, VoxelBlockHash>* hash_volume,
 			VoxelFlags flags, TFunctor& functor, bool verbose) {
-		return TraversalAndCompareAll_Generic<TExecutionMode>(
+		return TraverseAndCompareAll_Generic<TExecutionMode>(
 				array_volume, hash_volume, functor,
 				[&flags](TFunctor& functor,
 				         TArrayVoxel& array_voxel, THashVoxel& hash_voxel, const Vector3i& voxel_position) {
@@ -607,7 +618,7 @@ public: // static functions
 			VoxelVolume<TArrayVoxel, PlainVoxelArray>* array_volume,
 			VoxelVolume<THashVoxel, VoxelBlockHash>* hash_volume,
 			TFunctor& functor) {
-		return TravereAndCompareAllocated_Generic(array_volume, hash_volume, functor, []
+		return TraverseAndCompareAllocated_Generic(array_volume, hash_volume, functor, []
 				(TFunctor& functor, TArrayVoxel& voxelPrimary, THashVoxel& voxelSecondary,
 				 const Vector3i& voxel_position) {
 			return functor(voxelPrimary, voxelSecondary);
@@ -634,7 +645,7 @@ public: // static functions
 			VoxelVolume<TArrayVoxel, PlainVoxelArray>* array_volume,
 			VoxelVolume<THashVoxel, VoxelBlockHash>* hash_volume,
 			TFunctor& functor) {
-		return TravereAndCompareAllocated_Generic(array_volume, hash_volume, functor, []
+		return TraverseAndCompareAllocated_Generic(array_volume, hash_volume, functor, []
 				(TFunctor& functor, TArrayVoxel& voxelPrimary, THashVoxel& voxelSecondary,
 				 Vector3i& voxel_position) {
 			return functor(voxelPrimary, voxelSecondary, voxel_position);

@@ -23,6 +23,8 @@
 #endif
 
 namespace ITMLib {
+
+//TODO: remove DRY violation on CUDA/CPU selection by using an auxiliary function templated on the comparison operation to preform.
 /**
  * \brief Determine if every pair of corresponding voxels within the two voxel volumes is within the provided tolerance
  * of each other.

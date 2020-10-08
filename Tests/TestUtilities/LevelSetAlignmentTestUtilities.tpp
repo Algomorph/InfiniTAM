@@ -43,6 +43,7 @@
 #include "SnoopyTestUtilities.h"
 
 #include "LevelSetAlignmentTestUtilities.h"
+#include "../../ITMLib/Utils/Geometry/SpatialIndexConversions.h"
 
 using namespace ITMLib;
 using namespace test_utilities;
@@ -150,8 +151,8 @@ void GenericWarpConsistencySubtest(const LevelSetAlignmentSwitches& switches, in
 	AllocateUsingOtherVolume(&warp_field, live_volumes[source_warped_field_ix], TMemoryDeviceType);
 	AllocateUsingOtherVolume(canonical_volume, live_volumes[source_warped_field_ix], TMemoryDeviceType);
 
-	LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, DIAGNOSTIC> motion_tracker(switches,
-	                                                                                                    SingleIterationTerminationConditions());
+	LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, DIAGNOSTIC>
+	        level_set_alignment_engine(switches, SingleIterationTerminationConditions());
 
 	VoxelVolume<WarpVoxel, TIndex> ground_truth_warp_field(TMemoryDeviceType,
 	                                                       snoopy::InitializationParameters_Fr16andFr17<TIndex>());
@@ -171,7 +172,7 @@ void GenericWarpConsistencySubtest(const LevelSetAlignmentSwitches& switches, in
 
 		std::cout << "Subtest " << IndexString<TIndex>() << " iteration " << std::to_string(iteration) << std::endl;
 
-		motion_tracker.Align(&warp_field, live_volumes, canonical_volume);
+		level_set_alignment_engine.Align(&warp_field, live_volumes, canonical_volume);
 
 		if (iteration < iteration_limit - 1) {
 			// prepare for next iteration by swapping source & target (live) TSDF fields
@@ -306,17 +307,44 @@ void PVA_to_VBH_WarpComparisonSubtest(int iteration, LevelSetAlignmentSwitches t
 	AllocateUsingOtherVolume(volume_16_VBH, warped_live_VBH, TMemoryDeviceType);
 
 	// *** perform the warp gradient computation and warp updates
-	LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray, TMemoryDeviceType, DIAGNOSTIC> motionTracker_PVA(trackerSwitches,
-	                                                                                                                SingleIterationTerminationConditions());
+	LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray, TMemoryDeviceType, DIAGNOSTIC>
+	        level_set_aligner_PVA(trackerSwitches, SingleIterationTerminationConditions());
+
+	//__DEBUG
+	// printf("Live & canonical PVA values:\n");
+	// Vector3i pos(-26,-21,200);
+	// warped_live_PVA->GetValueAt(pos).print_self();
+	// volume_16_PVA->GetValueAt(pos).print_self();
+	// printf("Live & canonical VBH values:\n");
+	// warped_live_VBH->GetValueAt(pos).print_self();
+	// volume_16_VBH->GetValueAt(pos).print_self();
+
 
 	BOOST_TEST_MESSAGE("==== CALCULATE PVA WARPS === ");
-	motionTracker_PVA.Align( warps_PVA, warped_pair_PVA, volume_16_PVA);
+	level_set_aligner_PVA.Align(warps_PVA, warped_pair_PVA, volume_16_PVA);
 
-	LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash, TMemoryDeviceType, DIAGNOSTIC> motionTracker_VBH(trackerSwitches,
-	                                                                                                               SingleIterationTerminationConditions());
+	LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash, TMemoryDeviceType, DIAGNOSTIC>
+	        level_set_aligner_VBH(trackerSwitches, SingleIterationTerminationConditions());
 
 	BOOST_TEST_MESSAGE( "==== CALCULATE VBH WARPS === ");
-	motionTracker_VBH.Align(warps_VBH, warped_pair_VBH, volume_16_VBH);
+	level_set_aligner_VBH.Align(warps_VBH, warped_pair_VBH, volume_16_VBH);
+
+	//__DEBUG
+	printf("Warp PVA - warp VBH (warp_update, gradient0, gradient1):\n");
+	Vector3i pos(-13, 10, 170);
+	std::cout.precision(std::numeric_limits<float>::max_digits10);
+	std::cout << std::fixed << warps_PVA->GetValueAt(pos).warp_update - warps_VBH->GetValueAt(pos).warp_update << std::endl;
+	std::cout << std::fixed << warps_PVA->GetValueAt(pos).gradient0 - warps_VBH->GetValueAt(pos).gradient0 << std::endl;
+	std::cout << std::fixed << warps_PVA->GetValueAt(pos).gradient1 - warps_VBH->GetValueAt(pos).gradient1 << std::endl;
+	//__DEBUG
+	printf("Voxel hash index details:\n");
+	Vector3s hash_pos;
+	pointToVoxelBlockPos(pos, hash_pos);
+	std::cout << warps_VBH->index.GetHashEntryAt(hash_pos) << std::endl;
+	std::cout << ComputeLinearIndexFromPosition_VoxelBlockHash(warps_VBH->index.GetIndexData(), pos) << std::endl;
+	printf("PVA index details:\n");
+	std::cout << ComputeLinearIndexFromPosition_PlainVoxelArray(warps_PVA->index.GetIndexData(), pos) << std::endl;
+
 
 	BOOST_REQUIRE(AllocatedContentAlmostEqual_Verbose(warps_PVA, warps_VBH, absolute_tolerance, TMemoryDeviceType));
 
@@ -328,6 +356,10 @@ void PVA_to_VBH_WarpComparisonSubtest(int iteration, LevelSetAlignmentSwitches t
 
 	VoxelVolume<WarpVoxel, PlainVoxelArray>* loaded_warps_PVA;
 	VoxelVolume<WarpVoxel, VoxelBlockHash>* loaded_warps_VBH;
+
+	//__DEBUG
+	std::cout << GetWarpsPath<PlainVoxelArray>(prefix, iteration) << std::endl;
+
 	LoadVolume(&loaded_warps_PVA, GetWarpsPath<PlainVoxelArray>(prefix, iteration), TMemoryDeviceType,
 	           snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 	LoadVolume(&loaded_warps_VBH, GetWarpsPath<VoxelBlockHash>(prefix, iteration), TMemoryDeviceType,

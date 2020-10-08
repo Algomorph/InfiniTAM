@@ -156,9 +156,9 @@ inline void ComputeSdfHessian_ZeroIfTruncated(THREADPTR(Matrix3f)& hessian,
 	int vm_index = 0;
 	auto sdf_at = [&](Vector3i offset, bool& nontruncated) {
 #if !defined(__CUDACC__) && !defined(WITH_OPENMP)
-		TVoxel voxel = readVoxel(voxels, index_data, voxel_position + (offset), vm_index, cache);
+		TVoxel voxel = readVoxel(voxels, index_data, position + (offset), vm_index);
 		nontruncated &= voxel.flags == ITMLib::VOXEL_NONTRUNCATED;
-		return TVoxel::valueToFloat(voxel.sdf) * sdf_to_voxels_factor;
+		return TVoxel::valueToFloat(voxel.sdf);
 #else
 		TVoxel voxel = readVoxel(voxels, index_data, position + (offset), vm_index);
 		nontruncated &= voxel.flags == ITMLib::VOXEL_NONTRUNCATED;
