@@ -132,6 +132,46 @@ inline void ComputeSdfGradient_CentralDifferences_ZeroIfTruncated(THREADPTR(Vect
 	gradient[2] = both_z_nontruncated * 0.5f * (sdf_at_z_plus_one - sdf_at_z_minus_one);
 };
 
+
+template<typename TVoxel, typename TIndexData, typename TCache>
+_CPU_AND_GPU_CODE_
+inline void ComputeSdfGradient_CentralDifferences_ZeroIfUnknown(THREADPTR(Vector3f)& gradient,
+                                                                  const CONSTPTR(Vector3i)& voxel_position,
+                                                                  const CONSTPTR(TVoxel)* voxels,
+                                                                  const CONSTPTR(TIndexData)* index_data,
+                                                                  THREADPTR(TCache)& cache) {
+
+
+	int vmIndex = 0;
+	auto sdf_at = [&](Vector3i offset, bool& known) {
+#if !defined(__CUDACC__) && !defined(WITH_OPENMP)
+		TVoxel voxel = readVoxel(voxels, index_data, voxel_position + (offset), vmIndex, cache);
+		known &= voxel.flags != ITMLib::VOXEL_UNKNOWN;
+		return TVoxel::valueToFloat(voxel.sdf);
+#else
+		TVoxel voxel = readVoxel(voxels, index_data, voxel_position + (offset), vmIndex);
+		known &= voxel.flags != ITMLib::VOXEL_UNKNOWN;
+		return TVoxel::valueToFloat(voxel.sdf);
+#endif
+	};
+
+	bool both_x_known = true;
+	float sdf_at_x_plus_one = sdf_at(Vector3i(1, 0, 0), both_x_known);
+	float sdf_at_x_minus_one = sdf_at(Vector3i(-1, 0, 0), both_x_known);
+
+	bool both_y_known = true;
+	float sdf_at_y_plus_one = sdf_at(Vector3i(0, 1, 0), both_y_known);
+	float sdf_at_y_minus_one = sdf_at(Vector3i(0, -1, 0), both_y_known);
+
+	bool both_z_known = true;
+	float sdf_at_z_plus_one = sdf_at(Vector3i(0, 0, 1), both_z_known);
+	float sdf_at_z_minus_one = sdf_at(Vector3i(0, 0, -1), both_z_known);
+
+	gradient[0] = both_x_known * 0.5f * (sdf_at_x_plus_one - sdf_at_x_minus_one);
+	gradient[1] = both_y_known * 0.5f * (sdf_at_y_plus_one - sdf_at_y_minus_one);
+	gradient[2] = both_z_known * 0.5f * (sdf_at_z_plus_one - sdf_at_z_minus_one);
+};
+
 template<typename TVoxel, typename TIndexData, typename TCache>
 _CPU_AND_GPU_CODE_
 inline void ComputeSdfGradient_ChooseStrategyOnTruncation(THREADPTR(Vector3f)& gradient,
@@ -217,17 +257,19 @@ inline void ComputeSdfGradient(THREADPTR(Vector3f)& gradient,
                                const CONSTPTR(TIndexData)* index_data,
                                THREADPTR(TCache)& cache) {
 	//      Different strategies for computing gradient of live TSDF.
-	//      Observation: the only strategy that currently yields a gradual shrinking of overall energy and gradient lengths is "ZERO_IF_TRUNCATED"
 //#define LIVE_GRADIENT_STRATEGY_NAIVE
-#define LIVE_GRADIENT_STRATEGY_ZERO_IF_TRUNCATED
+//#define LIVE_GRADIENT_STRATEGY_ZERO_IF_TRUNCATED
+#define LIVE_GRADIENT_STRATEGY_ZERO_IF_UNKNOWN
 //#define LIVE_GRADIENT_STRATEGY_CHOOSE_IF_TRUNCATED
 
 #if defined(LIVE_GRADIENT_STRATEGY_NAIVE)
-	ComputeSdfGradient_CentralDifferences(live_sdf_gradient, voxel_position, live_voxels, live_index_data, live_cache);
+	ComputeSdfGradient_CentralDifferences(gradient, voxel_position, voxels, index_data, cache);
 #elif defined(LIVE_GRADIENT_STRATEGY_ZERO_IF_TRUNCATED)
 	ComputeSdfGradient_CentralDifferences_ZeroIfTruncated(gradient, voxel_position, voxels, index_data, cache);
+#elif defined(LIVE_GRADIENT_STRATEGY_ZERO_IF_UNKNOWN)
+	ComputeSdfGradient_CentralDifferences_ZeroIfUnknown(gradient, voxel_position, voxels, index_data, cache);
 #elif defined(LIVE_GRADIENT_STRATEGY_CHOOSE_IF_TRUNCATED)
-	ComputeSdfGradient_ChooseStrategyOnTruncation(live_sdf_gradient, voxel_position, live_voxels, live_index_data, live_cache);
+	ComputeSdfGradient_ChooseStrategyOnTruncation(gradient, voxel_position, voxels, index_data, cache);
 #endif
 }
 

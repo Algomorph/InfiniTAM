@@ -356,7 +356,7 @@ _CPU_AND_GPU_CODE_
 inline
 bool AlmostEqual<float, float>(Matrix3f a, Matrix3f b, float tolerance) {
 	for (int i_entry = 0; i_entry < 9; i_entry++) {
-		if (!FloatingPointAlmostEqualAbsolute(a.m[i_entry], b.m[i_entry], tolerance)) return false;
+		if (!FloatingPointAlmostEqualAbsolute(a.values[i_entry], b.values[i_entry], tolerance)) return false;
 	}
 	return true;
 }
@@ -366,7 +366,7 @@ _CPU_AND_GPU_CODE_
 inline
 bool AlmostEqual<float, float>(Matrix4f a, Matrix4f b, float tolerance) {
 	for (int i_entry = 0; i_entry < 16; i_entry++) {
-		if (!FloatingPointAlmostEqualAbsolute(a.m[i_entry], b.m[i_entry], tolerance)) return false;
+		if (!FloatingPointAlmostEqualAbsolute(a.values[i_entry], b.values[i_entry], tolerance)) return false;
 	}
 	return true;
 }
@@ -461,7 +461,7 @@ inline
 bool AlmostEqual<float, double>(Matrix3f a, Matrix3f b, double tolerance) {
 	auto tolerance_float = static_cast<float>(tolerance);
 	for (int i_entry = 0; i_entry < 9; i_entry++) {
-		if (!FloatingPointAlmostEqualAbsolute(a.m[i_entry], b.m[i_entry], tolerance_float)) return false;
+		if (!FloatingPointAlmostEqualAbsolute(a.values[i_entry], b.values[i_entry], tolerance_float)) return false;
 	}
 	return true;
 }
@@ -472,7 +472,7 @@ inline
 bool AlmostEqual<float, double>(Matrix4f a, Matrix4f b, double tolerance) {
 	auto tolerance_float = static_cast<float>(tolerance);
 	for (int i_entry = 0; i_entry < 9; i_entry++) {
-		if (!FloatingPointAlmostEqualAbsolute(a.m[i_entry], b.m[i_entry], tolerance_float)) return false;
+		if (!FloatingPointAlmostEqualAbsolute(a.values[i_entry], b.values[i_entry], tolerance_float)) return false;
 	}
 	return true;
 }
@@ -525,7 +525,7 @@ inline
 bool AlmostEqual<float, unsigned int>(Matrix3f a, Matrix3f b, unsigned int tolerance) {
 	const float tolerance_float = 1.0f / (10.0f * static_cast<float>(tolerance));
 	for (int i_entry = 0; i_entry < 9; i_entry++) {
-		if (!FloatingPointAlmostEqualAbsolute(a.m[i_entry], b.m[i_entry], tolerance_float)) return false;
+		if (!FloatingPointAlmostEqualAbsolute(a.values[i_entry], b.values[i_entry], tolerance_float)) return false;
 	}
 	return true;
 }
@@ -537,7 +537,7 @@ inline
 bool AlmostEqual<float, unsigned int>(Matrix4f a, Matrix4f b, unsigned int tolerance) {
 	const float tolerance_float = 1.0f / (10.0f * static_cast<float>(tolerance));
 	for (int i_entry = 0; i_entry < 16; i_entry++) {
-		if (!FloatingPointAlmostEqualAbsolute(a.m[i_entry], b.m[i_entry], tolerance_float)) return false;
+		if (!FloatingPointAlmostEqualAbsolute(a.values[i_entry], b.values[i_entry], tolerance_float)) return false;
 	}
 	return true;
 }

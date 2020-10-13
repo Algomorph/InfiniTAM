@@ -44,7 +44,8 @@
 //test_utilities
 #include "TestUtilities/TestUtilities.h"
 #include "TestUtilities/SnoopyTestUtilities.h"
-#include "TestUtilities/LevelSetAlignmentTestUtilities.h"
+#include "TestUtilities/LevelSetAlignment/LevelSetAlignmentTestUtilities.h"
+#include "TestUtilities/LevelSetAlignment/TestCaseOrganizationBySwitches.h"
 
 using namespace ITMLib;
 using namespace test_utilities;
@@ -122,8 +123,8 @@ void GenericWarpVolume_VBH_to_PVA_Test(const int iteration = 0) {
 	// *** initialize target scenes
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* target_PVA;
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* target_VBH;
-	initializeVolume(&target_PVA, snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>(), TMemoryDeviceType);
-	initializeVolume(&target_VBH, snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>(), TMemoryDeviceType);
+	InitializeVolume(&target_PVA, snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>(), TMemoryDeviceType);
+	InitializeVolume(&target_VBH, snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>(), TMemoryDeviceType);
 
 	// *** perform the warping
 	auto warping_engine_PVA =

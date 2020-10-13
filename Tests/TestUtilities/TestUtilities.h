@@ -128,7 +128,7 @@ UpdateView(View** view, const std::string& depth_path, const std::string& color_
            const std::string& calibration_path, MemoryDeviceType memoryDevice);
 
 template<typename TVoxel, typename TIndex>
-void initializeVolume(VoxelVolume<TVoxel, TIndex>** volume,
+void InitializeVolume(VoxelVolume<TVoxel, TIndex>** volume,
                       typename TIndex::InitializationParameters initializationParameters = GetStandard512IndexParameters<TIndex>(),
                       MemoryDeviceType memory_device = MEMORYDEVICE_CUDA,
                       configuration::SwappingMode swapping_mode = configuration::SWAPPINGMODE_DISABLED);

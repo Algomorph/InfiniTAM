@@ -23,20 +23,14 @@
 
 // *** ITMLib ***
 #include "TestUtilities/SnoopyTestUtilities.h"
-#include "../ITMLib/GlobalTemplateDefines.h"
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngine.h"
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
-#include "../ITMLib/Engines/EditAndCopy/EditAndCopyEngineFactory.h"
 #include "../ITMLib/Engines/Indexing/Interface/IndexingEngine.h"
 #include "../ITMLib/Utils/Analytics/AlmostEqual.h"
-#include "../ITMLib/Objects/Tracking/CameraTrackingState.h"
-//(cpu)
-#include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
+//(CPU)
 #include "../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_VoxelBlockHash_CPU.h"
 //(CUDA)
 #ifndef COMPILE_WITHOUT_CUDA
-#include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
-#include "../ITMLib/Engines/Indexing/VBH/CUDA/IndexingEngine_VoxelBlockHash_CUDA.h"
 #include "../ITMLib/Engines/Rendering/Interface/RenderingEngineInterface.h"
 #include "../ITMLib/Engines/Rendering/RenderingEngineFactory.h"
 #endif

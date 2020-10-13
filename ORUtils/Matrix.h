@@ -30,7 +30,7 @@ namespace ORUtils {
 				T m20, m21, m22, m23;	// |2, 6, 10, 14|    |m02, m12, m22, m32|
 				T m30, m31, m32, m33;	// |3, 7, 11, 15|    |m03, m13, m23, m33|
 			};
-			T m[16];
+			T values[16];
 		};
 	};
 
@@ -51,14 +51,14 @@ namespace ORUtils {
 				T yx, yy, yz; // |1, 4, 7|    |xy, yy, zy|
 				T zx, zy, zz; // |2, 5, 8|    |xz, yz, zz|
 			};
-			T m[9];
+			T values[9];
 		};
 	};
 
 	template<class T, int s> struct MatrixSQX_{
 		int dim;
 		int sq;
-		T m[s*s];
+		T values[s * s];
 	};
 
 	//////////////////////////////////////////////////////////////////////////
@@ -87,8 +87,8 @@ namespace ORUtils {
 		            (T)0, (T)0, (T)0, (T)1};
 		}
 
-		_CPU_AND_GPU_CODE_ inline void getValues(T *mp) const	{ memcpy(mp, this->m, sizeof(T) * 16); }
-		_CPU_AND_GPU_CODE_ inline const T *getValues() const { return this->m; }
+		_CPU_AND_GPU_CODE_ inline void getValues(T *mp) const	{ memcpy(mp, this->values, sizeof(T) * 16); }
+		_CPU_AND_GPU_CODE_ inline const T *getValues() const { return this->values; }
 		_CPU_AND_GPU_CODE_ inline Vector3<T> getScale() const { return Vector3<T>(this->m00, this->m11, this->m22); }
 
 		// Element access
@@ -96,23 +96,23 @@ namespace ORUtils {
 		_CPU_AND_GPU_CODE_ inline const T &operator()(int x, int y) const	{ return at(x, y); }
 		_CPU_AND_GPU_CODE_ inline T &operator()(Vector2<int> pnt)	{ return at(pnt.x, pnt.y); }
 		_CPU_AND_GPU_CODE_ inline const T &operator()(Vector2<int> pnt) const	{ return at(pnt.x, pnt.y); }
-		_CPU_AND_GPU_CODE_ inline T &at(int x, int y) { return this->m[y | (x << 2)]; }
-		_CPU_AND_GPU_CODE_ inline const T &at(int x, int y) const { return this->m[y | (x << 2)]; }
+		_CPU_AND_GPU_CODE_ inline T &at(int x, int y) { return this->values[y | (x << 2)]; }
+		_CPU_AND_GPU_CODE_ inline const T &at(int x, int y) const { return this->values[y | (x << 2)]; }
 
 		// set values
-		_CPU_AND_GPU_CODE_ inline void setValues(const T *mp) { memcpy(this->m, mp, sizeof(T) * 16); }
-		_CPU_AND_GPU_CODE_ inline void setValues(T r)	{ for (int i = 0; i < 16; i++)	this->m[i] = r; }
-		_CPU_AND_GPU_CODE_ inline void setZeros() { memset(this->m, 0, sizeof(T) * 16); }
+		_CPU_AND_GPU_CODE_ inline void setValues(const T *mp) { memcpy(this->values, mp, sizeof(T) * 16); }
+		_CPU_AND_GPU_CODE_ inline void setValues(T r)	{ for (int i = 0; i < 16; i++)	this->values[i] = r; }
+		_CPU_AND_GPU_CODE_ inline void setZeros() { memset(this->values, 0, sizeof(T) * 16); }
 		_CPU_AND_GPU_CODE_ inline void setIdentity() { setZeros(); this->m00 = this->m11 = this->m22 = this->m33 = 1; }
 		_CPU_AND_GPU_CODE_ inline void setScale(T s) { this->m00 = this->m11 = this->m22 = s; }
 		_CPU_AND_GPU_CODE_ inline void setScale(const Vector3_<T> &s) { this->m00 = s[0]; this->m11 = s[1]; this->m22 = s[2]; }
 		_CPU_AND_GPU_CODE_ inline void setTranslate(const Vector3_<T> &t) { for (int y = 0; y < 3; y++) at(3, y) = t[y]; }
 		_CPU_AND_GPU_CODE_ inline void setRow(int r, const Vector4_<T> &t){ for (int x = 0; x < 4; x++) at(x, r) = t[x]; }
-		_CPU_AND_GPU_CODE_ inline void setColumn(int c, const Vector4_<T> &t) { memcpy(this->m + 4 * c, t.values, sizeof(T) * 4); }
+		_CPU_AND_GPU_CODE_ inline void setColumn(int c, const Vector4_<T> &t) { memcpy(this->values + 4 * c, t.values, sizeof(T) * 4); }
 
 		// get values
 		_CPU_AND_GPU_CODE_ inline Vector4<T> getRow(int r) const { Vector4<T> v; for (int x = 0; x < 4; x++) v[x] = at(x, r); return v; }
-		_CPU_AND_GPU_CODE_ inline Vector4<T> getColumn(int c) const { Vector4<T> v; memcpy(v.values, this->m + 4 * c, sizeof(T) * 4); return v; }
+		_CPU_AND_GPU_CODE_ inline Vector4<T> getColumn(int c) const { Vector4<T> v; memcpy(v.values, this->values + 4 * c, sizeof(T) * 4); return v; }
 		_CPU_AND_GPU_CODE_ inline Matrix4 t() { // transpose
 			Matrix4 mtrans;
 			for (int x = 0; x < 4; x++)	for (int y = 0; y < 4; y++)
@@ -122,13 +122,13 @@ namespace ORUtils {
 
 		_CPU_AND_GPU_CODE_ inline friend Matrix4 operator * (const Matrix4 &lhs, const T &rhs)	{ 
 			Matrix4 r;
-			for (int i = 0; i < 16; i++) r.m[i] = lhs.m[i] * rhs;
+			for (int i = 0; i < 16; i++) r.values[i] = lhs.values[i] * rhs;
 			return r;
 		}
 
 		_CPU_AND_GPU_CODE_ inline friend Matrix4 operator / (const Matrix4 &lhs, const T &rhs)	{ 
 			Matrix4 r;
-			for (int i = 0; i < 16; i++) r.m[i] = lhs.m[i] / rhs;
+			for (int i = 0; i < 16; i++) r.values[i] = lhs.values[i] / rhs;
 			return r;
 		}
 
@@ -141,25 +141,25 @@ namespace ORUtils {
 		}
 
 		_CPU_AND_GPU_CODE_ inline friend Matrix4 operator + (const Matrix4 &lhs, const Matrix4 &rhs) {
-			Matrix4 res(lhs.m);
+			Matrix4 res(lhs.values);
 			return res += rhs;
 		}
 
 		_CPU_AND_GPU_CODE_ inline Vector4<T> operator *(const Vector4<T> &rhs) const {
 			Vector4<T> r;
-			r[0] = this->m[0] * rhs[0] + this->m[4] * rhs[1] + this->m[8] * rhs[2] + this->m[12] * rhs[3];
-			r[1] = this->m[1] * rhs[0] + this->m[5] * rhs[1] + this->m[9] * rhs[2] + this->m[13] * rhs[3];
-			r[2] = this->m[2] * rhs[0] + this->m[6] * rhs[1] + this->m[10] * rhs[2] + this->m[14] * rhs[3];
-			r[3] = this->m[3] * rhs[0] + this->m[7] * rhs[1] + this->m[11] * rhs[2] + this->m[15] * rhs[3];
+			r[0] = this->values[0] * rhs[0] + this->values[4] * rhs[1] + this->values[8] * rhs[2] + this->values[12] * rhs[3];
+			r[1] = this->values[1] * rhs[0] + this->values[5] * rhs[1] + this->values[9] * rhs[2] + this->values[13] * rhs[3];
+			r[2] = this->values[2] * rhs[0] + this->values[6] * rhs[1] + this->values[10] * rhs[2] + this->values[14] * rhs[3];
+			r[3] = this->values[3] * rhs[0] + this->values[7] * rhs[1] + this->values[11] * rhs[2] + this->values[15] * rhs[3];
 			return r;
 		}
 
 		// Used as a projection matrix to multiply with the Vector3
 		_CPU_AND_GPU_CODE_ inline Vector3<T> operator *(const Vector3<T> &rhs) const {
 			Vector3<T> r;
-			r[0] = this->m[0] * rhs[0] + this->m[4] * rhs[1] + this->m[8] * rhs[2] + this->m[12];
-			r[1] = this->m[1] * rhs[0] + this->m[5] * rhs[1] + this->m[9] * rhs[2] + this->m[13];
-			r[2] = this->m[2] * rhs[0] + this->m[6] * rhs[1] + this->m[10] * rhs[2] + this->m[14];
+			r[0] = this->values[0] * rhs[0] + this->values[4] * rhs[1] + this->values[8] * rhs[2] + this->values[12];
+			r[1] = this->values[1] * rhs[0] + this->values[5] * rhs[1] + this->values[9] * rhs[2] + this->values[13];
+			r[2] = this->values[2] * rhs[0] + this->values[6] * rhs[1] + this->values[10] * rhs[2] + this->values[14];
 			return r;
 		}
 
@@ -170,22 +170,22 @@ namespace ORUtils {
 			return r;
 		}
 
-		_CPU_AND_GPU_CODE_ inline Matrix4& operator += (const T &r) { for (int i = 0; i < 16; ++i) this->m[i] += r; return *this; }
-		_CPU_AND_GPU_CODE_ inline Matrix4& operator -= (const T &r) { for (int i = 0; i < 16; ++i) this->m[i] -= r; return *this; }
-		_CPU_AND_GPU_CODE_ inline Matrix4& operator *= (const T &r) { for (int i = 0; i < 16; ++i) this->m[i] *= r; return *this; }
-		_CPU_AND_GPU_CODE_ inline Matrix4& operator /= (const T &r) { for (int i = 0; i < 16; ++i) this->m[i] /= r; return *this; }
-		_CPU_AND_GPU_CODE_ inline Matrix4 &operator += (const Matrix4 &mat) { for (int i = 0; i < 16; ++i) this->m[i] += mat.m[i]; return *this; }
-		_CPU_AND_GPU_CODE_ inline Matrix4 &operator -= (const Matrix4 &mat) { for (int i = 0; i < 16; ++i) this->m[i] -= mat.m[i]; return *this; }
+		_CPU_AND_GPU_CODE_ inline Matrix4& operator += (const T &r) { for (int i = 0; i < 16; ++i) this->values[i] += r; return *this; }
+		_CPU_AND_GPU_CODE_ inline Matrix4& operator -= (const T &r) { for (int i = 0; i < 16; ++i) this->values[i] -= r; return *this; }
+		_CPU_AND_GPU_CODE_ inline Matrix4& operator *= (const T &r) { for (int i = 0; i < 16; ++i) this->values[i] *= r; return *this; }
+		_CPU_AND_GPU_CODE_ inline Matrix4& operator /= (const T &r) { for (int i = 0; i < 16; ++i) this->values[i] /= r; return *this; }
+		_CPU_AND_GPU_CODE_ inline Matrix4 &operator += (const Matrix4 &mat) { for (int i = 0; i < 16; ++i) this->values[i] += mat.values[i]; return *this; }
+		_CPU_AND_GPU_CODE_ inline Matrix4 &operator -= (const Matrix4 &mat) { for (int i = 0; i < 16; ++i) this->values[i] -= mat.values[i]; return *this; }
 
 		// The inverse matrix for float/double type
 		_CPU_AND_GPU_CODE_ inline bool inv(Matrix4 &out) const {
 			T tmp[12], src[16], det;
-			T *dst = out.m;
+			T *dst = out.values;
 			for (int i = 0; i < 4; i++) {
-				src[i] = this->m[i * 4];
-				src[i + 4] = this->m[i * 4 + 1];
-				src[i + 8] = this->m[i * 4 + 2];
-				src[i + 12] = this->m[i * 4 + 3];
+				src[i] = this->values[i * 4];
+				src[i + 4] = this->values[i * 4 + 1];
+				src[i + 8] = this->values[i * 4 + 2];
+				src[i + 12] = this->values[i * 4 + 3];
 			}
 
 			tmp[0] = src[10] * src[15];
@@ -246,23 +246,23 @@ namespace ORUtils {
 		////////////////////////////////////////////////////////
 
 		_CPU_AND_GPU_CODE_ inline friend bool operator == (const Matrix4 &lhs, const Matrix4 &rhs) {
-			bool r = lhs.m[0] == rhs.m[0];
+			bool r = lhs.values[0] == rhs.values[0];
 			for (int i = 1; i < 16; i++)
-				r &= lhs.m[i] == rhs.m[i];
+				r &= lhs.values[i] == rhs.values[i];
 			return r;
 		}
 
 		_CPU_AND_GPU_CODE_ inline friend bool operator != (const Matrix4 &lhs, const Matrix4 &rhs) {
-			bool r = lhs.m[0] != rhs.m[0];
+			bool r = lhs.values[0] != rhs.values[0];
 			for (int i = 1; i < 16; i++)
-				r |= lhs.m[i] != rhs.m[i];
+				r |= lhs.values[i] != rhs.values[i];
 			return r;
 		}
 
 		_CPU_AND_GPU_CODE_ inline friend bool operator < (const Matrix4 &lhs, const Matrix4 &rhs) {
 			for(int index = 15; index >= 0; index--){
-				if(lhs.m[index] < rhs.m[index]) return true;
-				if(lhs.m[index] > rhs.m[index]) return false;
+				if(lhs.values[index] < rhs.values[index]) return true;
+				if(lhs.values[index] > rhs.values[index]) return false;
 			}
 			return true;
 		}
@@ -293,32 +293,32 @@ namespace ORUtils {
 			this->m20 = a20; this->m21 = a21; this->m22 = a22;
 		}
 
-		_CPU_AND_GPU_CODE_ inline void getValues(T *mp) const	{ memcpy(mp, this->m, sizeof(T) * 9); }
-		_CPU_AND_GPU_CODE_ inline const T *getValues() const { return this->m; }
+		_CPU_AND_GPU_CODE_ inline void getValues(T *mp) const	{ memcpy(mp, this->values, sizeof(T) * 9); }
+		_CPU_AND_GPU_CODE_ inline const T *getValues() const { return this->values; }
 		_CPU_AND_GPU_CODE_ inline Vector3<T> getScale() const { return Vector3<T>(this->m00, this->m11, this->m22); }
-		_CPU_AND_GPU_CODE_ inline T sum() const { return std::accumulate(this->m, this->m+9, 0); }
+		_CPU_AND_GPU_CODE_ inline T sum() const { return std::accumulate(this->values, this->values + 9, 0); }
 
 		// Element access
 		_CPU_AND_GPU_CODE_ inline T &operator()(int x, int y)	{ return at(x, y); }
 		_CPU_AND_GPU_CODE_ inline const T &operator()(int x, int y) const	{ return at(x, y); }
 		_CPU_AND_GPU_CODE_ inline T &operator()(Vector2<int> pnt)	{ return at(pnt.x, pnt.y); }
 		_CPU_AND_GPU_CODE_ inline const T &operator()(Vector2<int> pnt) const	{ return at(pnt.x, pnt.y); }
-		_CPU_AND_GPU_CODE_ inline T &at(int x, int y) { return this->m[x * 3 + y]; }
-		_CPU_AND_GPU_CODE_ inline const T &at(int x, int y) const { return this->m[x * 3 + y]; }
+		_CPU_AND_GPU_CODE_ inline T &at(int x, int y) { return this->values[x * 3 + y]; }
+		_CPU_AND_GPU_CODE_ inline const T &at(int x, int y) const { return this->values[x * 3 + y]; }
 
 		// set values
-		_CPU_AND_GPU_CODE_ inline void setValues(const T *mp) { memcpy(this->m, mp, sizeof(T) * 9); }
-		_CPU_AND_GPU_CODE_ inline void setValues(const T r)	{ for (int i = 0; i < 9; i++)	this->m[i] = r; }
-		_CPU_AND_GPU_CODE_ inline void setZeros() { memset(this->m, 0, sizeof(T) * 9); }
+		_CPU_AND_GPU_CODE_ inline void setValues(const T *mp) { memcpy(this->values, mp, sizeof(T) * 9); }
+		_CPU_AND_GPU_CODE_ inline void setValues(const T r)	{ for (int i = 0; i < 9; i++)	this->values[i] = r; }
+		_CPU_AND_GPU_CODE_ inline void setZeros() { memset(this->values, 0, sizeof(T) * 9); }
 		_CPU_AND_GPU_CODE_ inline void setIdentity() { setZeros(); this->m00 = this->m11 = this->m22 = 1; }
 		_CPU_AND_GPU_CODE_ inline void setScale(T s) { this->m00 = this->m11 = this->m22 = s; }
 		_CPU_AND_GPU_CODE_ inline void setScale(const Vector3_<T> &s) { this->m00 = s[0]; this->m11 = s[1]; this->m22 = s[2]; }
 		_CPU_AND_GPU_CODE_ inline void setRow(int r, const Vector3_<T> &t){ for (int x = 0; x < 3; x++) at(x, r) = t[x]; }
-		_CPU_AND_GPU_CODE_ inline void setColumn(int c, const Vector3_<T> &t) { memcpy(this->m + 3 * c, t.values, sizeof(T) * 3); }
+		_CPU_AND_GPU_CODE_ inline void setColumn(int c, const Vector3_<T> &t) { memcpy(this->values + 3 * c, t.values, sizeof(T) * 3); }
 
 		// get values
 		_CPU_AND_GPU_CODE_ inline Vector3<T> getRow(int r) const { Vector3<T> v; for (int x = 0; x < 3; x++) v[x] = at(x, r); return v; }
-		_CPU_AND_GPU_CODE_ inline Vector3<T> getColumn(int c) const { Vector3<T> v; memcpy(v.values, this->m + 3 * c, sizeof(T) * 3); return v; }
+		_CPU_AND_GPU_CODE_ inline Vector3<T> getColumn(int c) const { Vector3<T> v; memcpy(v.values, this->values + 3 * c, sizeof(T) * 3); return v; }
 		_CPU_AND_GPU_CODE_ inline Matrix3 t() { // transpose
 			Matrix3 mtrans;
 			for (int x = 0; x < 3; x++)	for (int y = 0; y < 3; y++)
@@ -335,25 +335,25 @@ namespace ORUtils {
 		}
 
 		_CPU_AND_GPU_CODE_ inline friend Matrix3 operator + (const Matrix3 &lhs, const Matrix3 &rhs) {
-			Matrix3 res(lhs.m);
+			Matrix3 res(lhs.values);
 			return res += rhs;
 		}
 
 		_CPU_AND_GPU_CODE_ inline friend Matrix3 operator - (const Matrix3 &lhs, const Matrix3 &rhs) {
-			Matrix3 res(lhs.m);
+			Matrix3 res(lhs.values);
 			return res -= rhs;
 		}
 
 		_CPU_AND_GPU_CODE_ inline Vector3<T> operator *(const Vector3<T> &rhs) const {
 			Vector3<T> r;
-			r[0] = this->m[0] * rhs[0] + this->m[3] * rhs[1] + this->m[6] * rhs[2];
-			r[1] = this->m[1] * rhs[0] + this->m[4] * rhs[1] + this->m[7] * rhs[2];
-			r[2] = this->m[2] * rhs[0] + this->m[5] * rhs[1] + this->m[8] * rhs[2];
+			r[0] = this->values[0] * rhs[0] + this->values[3] * rhs[1] + this->values[6] * rhs[2];
+			r[1] = this->values[1] * rhs[0] + this->values[4] * rhs[1] + this->values[7] * rhs[2];
+			r[2] = this->values[2] * rhs[0] + this->values[5] * rhs[1] + this->values[8] * rhs[2];
 			return r;
 		}
 
 		_CPU_AND_GPU_CODE_ inline Matrix3 operator *(const T &r) const {
-			Matrix3 res(this->m);
+			Matrix3 res(this->values);
 			return res *= r;
 		}
 
@@ -364,12 +364,12 @@ namespace ORUtils {
 			return r;
 		}
 
-		_CPU_AND_GPU_CODE_ inline Matrix3& operator += (const T &r) { for (int i = 0; i < 9; ++i) this->m[i] += r; return *this; }
-		_CPU_AND_GPU_CODE_ inline Matrix3& operator -= (const T &r) { for (int i = 0; i < 9; ++i) this->m[i] -= r; return *this; }
-		_CPU_AND_GPU_CODE_ inline Matrix3& operator *= (const T &r) { for (int i = 0; i < 9; ++i) this->m[i] *= r; return *this; }
-		_CPU_AND_GPU_CODE_ inline Matrix3& operator /= (const T &r) { for (int i = 0; i < 9; ++i) this->m[i] /= r; return *this; }
-		_CPU_AND_GPU_CODE_ inline Matrix3& operator += (const Matrix3 &mat) { for (int i = 0; i < 9; ++i) this->m[i] += mat.m[i]; return *this; }
-		_CPU_AND_GPU_CODE_ inline Matrix3& operator -= (const Matrix3 &mat) { for (int i = 0; i < 9; ++i) this->m[i] -= mat.m[i]; return *this; }
+		_CPU_AND_GPU_CODE_ inline Matrix3& operator += (const T &r) { for (int i = 0; i < 9; ++i) this->values[i] += r; return *this; }
+		_CPU_AND_GPU_CODE_ inline Matrix3& operator -= (const T &r) { for (int i = 0; i < 9; ++i) this->values[i] -= r; return *this; }
+		_CPU_AND_GPU_CODE_ inline Matrix3& operator *= (const T &r) { for (int i = 0; i < 9; ++i) this->values[i] *= r; return *this; }
+		_CPU_AND_GPU_CODE_ inline Matrix3& operator /= (const T &r) { for (int i = 0; i < 9; ++i) this->values[i] /= r; return *this; }
+		_CPU_AND_GPU_CODE_ inline Matrix3& operator += (const Matrix3 &mat) { for (int i = 0; i < 9; ++i) this->values[i] += mat.values[i]; return *this; }
+		_CPU_AND_GPU_CODE_ inline Matrix3& operator -= (const Matrix3 &mat) { for (int i = 0; i < 9; ++i) this->values[i] -= mat.values[i]; return *this; }
 
 		// Matrix determinant
 		_CPU_AND_GPU_CODE_ inline T det() const {
@@ -399,23 +399,23 @@ namespace ORUtils {
 		//  Comparison operators
 		////////////////////////////////////////////////////////
 		_CPU_AND_GPU_CODE_ inline friend bool operator == (const Matrix3 &lhs, const Matrix3 &rhs) {
-			bool r = lhs.m[0] == rhs.m[0];
+			bool r = lhs.values[0] == rhs.values[0];
 			for (int i = 1; i < 9; i++)
-				r &= lhs.m[i] == rhs.m[i];
+				r &= lhs.values[i] == rhs.values[i];
 			return r;
 		}
 
 		_CPU_AND_GPU_CODE_ inline friend bool operator != (const Matrix3 &lhs, const Matrix3 &rhs) {
-			bool r = lhs.m[0] != rhs.m[0];
+			bool r = lhs.values[0] != rhs.values[0];
 			for (int i = 1; i < 9; i++)
-				r |= lhs.m[i] != rhs.m[i];
+				r |= lhs.values[i] != rhs.values[i];
 			return r;
 		}
 
 		_CPU_AND_GPU_CODE_ inline friend bool operator < (const Matrix3 &lhs, const Matrix3 &rhs) {
 			for(int index = 9; index >= 0; index--){
-				if(lhs.m[index] < rhs.m[index]) return true;
-				if(lhs.m[index] > rhs.m[index]) return false;
+				if(lhs.values[index] < rhs.values[index]) return true;
+				if(lhs.values[index] > rhs.values[index]) return false;
 			}
 			return true;
 		}
@@ -438,22 +438,22 @@ namespace ORUtils {
 		_CPU_AND_GPU_CODE_ MatrixSQX(T t) { this->dim = s; this->sq = s*s; setValues(t); }
 		_CPU_AND_GPU_CODE_ MatrixSQX(const T *m)	{ this->dim = s; this->sq = s*s; setValues(m); }
 
-		_CPU_AND_GPU_CODE_ inline void getValues(T *mp) const	{ memcpy(mp, this->m, sizeof(T) * 16); }
-		_CPU_AND_GPU_CODE_ inline const T *getValues() const { return this->m; }
+		_CPU_AND_GPU_CODE_ inline void getValues(T *mp) const	{ memcpy(mp, this->values, sizeof(T) * 16); }
+		_CPU_AND_GPU_CODE_ inline const T *getValues() const { return this->values; }
 
 		// Element access
 		_CPU_AND_GPU_CODE_ inline T &operator()(int x, int y)	{ return at(x, y); }
 		_CPU_AND_GPU_CODE_ inline const T &operator()(int x, int y) const	{ return at(x, y); }
 		_CPU_AND_GPU_CODE_ inline T &operator()(Vector2<int> pnt)	{ return at(pnt.x, pnt.y); }
 		_CPU_AND_GPU_CODE_ inline const T &operator()(Vector2<int> pnt) const	{ return at(pnt.x, pnt.y); }
-		_CPU_AND_GPU_CODE_ inline T &at(int x, int y) { return this->m[y * s + x]; }
-		_CPU_AND_GPU_CODE_ inline const T &at(int x, int y) const { return this->m[y * s + x]; }
+		_CPU_AND_GPU_CODE_ inline T &at(int x, int y) { return this->values[y * s + x]; }
+		_CPU_AND_GPU_CODE_ inline const T &at(int x, int y) const { return this->values[y * s + x]; }
 
 		// set values
-		_CPU_AND_GPU_CODE_ inline void setValues(const T *mp) { for (int i = 0; i < s*s; i++) this->m[i] = mp[i]; }
-		_CPU_AND_GPU_CODE_ inline void setValues(T r)	{ for (int i = 0; i < s*s; i++)	this->m[i] = r; }
-		_CPU_AND_GPU_CODE_ inline void setZeros() { for (int i = 0; i < s*s; i++)	this->m[i] = 0; }
-		_CPU_AND_GPU_CODE_ inline void setIdentity() { setZeros(); for (int i = 0; i < s*s; i++) this->m[i + i*s] = 1; }
+		_CPU_AND_GPU_CODE_ inline void setValues(const T *mp) { for (int i = 0; i < s*s; i++) this->values[i] = mp[i]; }
+		_CPU_AND_GPU_CODE_ inline void setValues(T r)	{ for (int i = 0; i < s*s; i++)	this->values[i] = r; }
+		_CPU_AND_GPU_CODE_ inline void setZeros() { for (int i = 0; i < s*s; i++)	this->values[i] = 0; }
+		_CPU_AND_GPU_CODE_ inline void setIdentity() { setZeros(); for (int i = 0; i < s*s; i++) this->values[i + i * s] = 1; }
 
 		// get values
 		_CPU_AND_GPU_CODE_ inline VectorX<T, s> getRow(int r) const { VectorX<T, s> v; for (int x = 0; x < s; x++) v[x] = at(x, r); return v; }
@@ -475,28 +475,28 @@ namespace ORUtils {
 		}
 
 		_CPU_AND_GPU_CODE_ inline friend MatrixSQX<T, s> operator + (const MatrixSQX<T, s> &lhs, const MatrixSQX<T, s> &rhs) {
-			MatrixSQX<T, s> res(lhs.m);
+			MatrixSQX<T, s> res(lhs.values);
 			return res += rhs;
 		}
 
-		_CPU_AND_GPU_CODE_ inline MatrixSQX<T, s>& operator += (const T &r) { for (int i = 0; i < s*s; ++i) this->m[i] += r; return *this; }
-		_CPU_AND_GPU_CODE_ inline MatrixSQX<T, s>& operator -= (const T &r) { for (int i = 0; i < s*s; ++i) this->m[i] -= r; return *this; }
-		_CPU_AND_GPU_CODE_ inline MatrixSQX<T, s>& operator *= (const T &r) { for (int i = 0; i < s*s; ++i) this->m[i] *= r; return *this; }
-		_CPU_AND_GPU_CODE_ inline MatrixSQX<T, s>& operator /= (const T &r) { for (int i = 0; i < s*s; ++i) this->m[i] /= r; return *this; }
-		_CPU_AND_GPU_CODE_ inline MatrixSQX<T, s> &operator += (const MatrixSQX<T, s> &mat) { for (int i = 0; i < s*s; ++i) this->m[i] += mat.m[i]; return *this; }
-		_CPU_AND_GPU_CODE_ inline MatrixSQX<T, s> &operator -= (const MatrixSQX<T, s> &mat) { for (int i = 0; i < s*s; ++i) this->m[i] -= mat.m[i]; return *this; }
+		_CPU_AND_GPU_CODE_ inline MatrixSQX<T, s>& operator += (const T &r) { for (int i = 0; i < s*s; ++i) this->values[i] += r; return *this; }
+		_CPU_AND_GPU_CODE_ inline MatrixSQX<T, s>& operator -= (const T &r) { for (int i = 0; i < s*s; ++i) this->values[i] -= r; return *this; }
+		_CPU_AND_GPU_CODE_ inline MatrixSQX<T, s>& operator *= (const T &r) { for (int i = 0; i < s*s; ++i) this->values[i] *= r; return *this; }
+		_CPU_AND_GPU_CODE_ inline MatrixSQX<T, s>& operator /= (const T &r) { for (int i = 0; i < s*s; ++i) this->values[i] /= r; return *this; }
+		_CPU_AND_GPU_CODE_ inline MatrixSQX<T, s> &operator += (const MatrixSQX<T, s> &mat) { for (int i = 0; i < s*s; ++i) this->values[i] += mat.values[i]; return *this; }
+		_CPU_AND_GPU_CODE_ inline MatrixSQX<T, s> &operator -= (const MatrixSQX<T, s> &mat) { for (int i = 0; i < s*s; ++i) this->values[i] -= mat.values[i]; return *this; }
 
 		_CPU_AND_GPU_CODE_ inline friend bool operator == (const MatrixSQX<T, s> &lhs, const MatrixSQX<T, s> &rhs) {
-			bool r = lhs.m[0] == rhs.m[0];
+			bool r = lhs.values[0] == rhs.values[0];
 			for (int i = 1; i < s*s; i++)
-				r &= lhs.m[i] == rhs.m[i];
+				r &= lhs.values[i] == rhs.values[i];
 			return r;
 		}
 
 		_CPU_AND_GPU_CODE_ inline friend bool operator != (const MatrixSQX<T, s> &lhs, const MatrixSQX<T, s> &rhs) {
-			bool r = lhs.m[0] != rhs.m[0];
+			bool r = lhs.values[0] != rhs.values[0];
 			for (int i = 1; i < s*s; i++)
-				r |= lhs.m[i] != rhs.m[i];
+				r |= lhs.values[i] != rhs.values[i];
 			return r;
 		}
 

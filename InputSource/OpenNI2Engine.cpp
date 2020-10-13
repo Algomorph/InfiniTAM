@@ -51,9 +51,9 @@ static openni::VideoMode findBestMode(const openni::SensorInfo *sensorInfo, int 
 {
 	const openni::Array<openni::VideoMode> & modes = sensorInfo->getSupportedVideoModes();
 	openni::VideoMode bestMode = modes[0];
-	for (int m = 0; m < modes.getSize(); ++m) {
-		//fprintf(stderr, "mode %i: %ix%i, %i %i\n", m, modes[m].getResolutionX(), modes[m].getResolutionY(), modes[m].getFps(), modes[m].getPixelFormat());
-		const openni::VideoMode & curMode = modes[m];
+	for (int i_mode = 0; i_mode < modes.getSize(); ++i_mode) {
+		//fprintf(stderr, "mode %i: %ix%i, %i %i\n", i_mode, modes[i_mode].getResolutionX(), modes[i_mode].getResolutionY(), modes[i_mode].getFps(), modes[i_mode].getPixelFormat());
+		const openni::VideoMode & curMode = modes[i_modem];
 		if ((requiredPixelFormat != (openni::PixelFormat)-1)&&(curMode.getPixelFormat() != requiredPixelFormat)) continue;
 
 		bool acceptAsBest = false;

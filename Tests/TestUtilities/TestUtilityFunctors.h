@@ -33,7 +33,6 @@
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 struct AssignRandomDepthWeightsInRangeFunctor;
 
-//__DEBUG
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
 struct DepthOutsideRangeFinder;
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>

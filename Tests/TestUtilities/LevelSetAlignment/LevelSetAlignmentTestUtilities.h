@@ -20,47 +20,19 @@
 #include <unordered_map>
 
 //ITMLib
-#include "../../ITMLib/Engines/LevelSetAlignment/Interface/LevelSetAlignmentEngine.h"
+#include "../../../ITMLib/Engines/LevelSetAlignment/Interface/LevelSetAlignmentEngine.h"
 
 //local
-#include "TestUtilities.h"
+#include "../TestUtilities.h"
+#include "LevelSetAlignmentTestMode.h"
 
 
 using namespace ITMLib;
 
 namespace test_utilities {
 
-enum GenericWarpTestMode {
-	SAVE_SUCCESSIVE_ITERATIONS,
-	SAVE_FINAL_ITERATION_AND_FUSION,
-	TEST_SUCCESSIVE_ITERATIONS,
-	TEST_FINAL_ITERATION_AND_FUSION
-};
-
-template<typename TIndex>
-std::string GetWarpsPath(std::string prefix, int iteration);
-
-template<typename TIndex>
-std::string GetWarpedLivePath(std::string prefix, int iteration);
-
-template<typename TIndex>
-std::string GetFusedPath(std::string prefix, int iteration);
-
-unsigned int SwitchesToIntCode(const LevelSetAlignmentSwitches& switches);
-std::string SwitchesToPrefix(const LevelSetAlignmentSwitches& switches);
 
 
-template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
-void
-GenerateRawLiveAndCanonicalVolumes(VoxelVolume<TSDFVoxel, TIndex>** canonical_volume,
-                                   VoxelVolume<TSDFVoxel, TIndex>** live_volume);
-
-template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
-void
-GenericWarpConsistencySubtest(const LevelSetAlignmentSwitches& switches,
-                              int iteration_limit = 10,
-                              GenericWarpTestMode mode = TEST_SUCCESSIVE_ITERATIONS,
-                              float absolute_tolerance = 1e-7);
 
 template<MemoryDeviceType TMemoryDeviceType>
 void PVA_to_VBH_WarpComparisonSubtest(int iteration, LevelSetAlignmentSwitches trackerSwitches);
@@ -69,8 +41,7 @@ void PVA_to_VBH_WarpComparisonSubtest(int iteration, LevelSetAlignmentSwitches t
 template<MemoryDeviceType TMemoryDeviceType>
 void
 GenericWarpTest(const LevelSetAlignmentSwitches& switches, int iteration_limit = 10,
-                GenericWarpTestMode mode = TEST_SUCCESSIVE_ITERATIONS, float absolute_tolerance = 1e-7);
+                LevelSetAlignmentTestMode mode = TEST_SUCCESSIVE_ITERATIONS, float absolute_tolerance = 1e-7);
 
-const LevelSetAlignmentTerminationConditions& SingleIterationTerminationConditions();
 
 } // namespace test_utilities

@@ -367,22 +367,22 @@ void BuildSdfVolumeFromImage_SurfaceSpanAllocation<TSDFVoxel, VoxelBlockHash>(
 
 
 template
-void initializeVolume<TSDFVoxel, VoxelBlockHash>(VoxelVolume<TSDFVoxel, VoxelBlockHash>** volume,
+void InitializeVolume<TSDFVoxel, VoxelBlockHash>(VoxelVolume<TSDFVoxel, VoxelBlockHash>** volume,
                                                  VoxelBlockHash::InitializationParameters initializationParameters,
                                                  MemoryDeviceType memoryDevice,
                                                  configuration::SwappingMode swappingMode);
 template
-void initializeVolume<TSDFVoxel, PlainVoxelArray>(VoxelVolume<TSDFVoxel, PlainVoxelArray>** volume,
+void InitializeVolume<TSDFVoxel, PlainVoxelArray>(VoxelVolume<TSDFVoxel, PlainVoxelArray>** volume,
                                                   PlainVoxelArray::InitializationParameters initializationParameters,
                                                   MemoryDeviceType memoryDevice,
                                                   configuration::SwappingMode swappingMode);
 template
-void initializeVolume<WarpVoxel, VoxelBlockHash>(VoxelVolume<WarpVoxel, VoxelBlockHash>** volume,
+void InitializeVolume<WarpVoxel, VoxelBlockHash>(VoxelVolume<WarpVoxel, VoxelBlockHash>** volume,
                                                  VoxelBlockHash::InitializationParameters initializationParameters,
                                                  MemoryDeviceType memoryDevice,
                                                  configuration::SwappingMode swappingMode);
 template
-void initializeVolume<WarpVoxel, PlainVoxelArray>(VoxelVolume<WarpVoxel, PlainVoxelArray>** volume,
+void InitializeVolume<WarpVoxel, PlainVoxelArray>(VoxelVolume<WarpVoxel, PlainVoxelArray>** volume,
                                                   PlainVoxelArray::InitializationParameters initializationParameters,
                                                   MemoryDeviceType memoryDevice,
                                                   configuration::SwappingMode swappingMode);
@@ -455,7 +455,7 @@ configuration::Configuration GenerateChangedUpConfiguration() {
 			ExecutionMode::DIAGNOSTIC,
 			LevelSetAlignmentWeights(0.11f, 0.09f, 2.0f, 0.3f, 0.1f, 1e-6f),
 			LevelSetAlignmentSwitches(false, true, false, true, false),
-			LevelSetAlignmentTerminationConditions(300, 5, 0.0002f)
+			LevelSetAlignmentTerminationConditions(AVERAGE, 300, 5, 0.0002f)
 	);
 	VolumeFusionSettings changed_up_volume_fusion_settings(false, 0.008);
 	DepthFusionSettings changed_up_depth_fusion_settings(true, 0.008);

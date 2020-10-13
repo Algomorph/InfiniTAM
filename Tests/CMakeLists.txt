@@ -35,23 +35,38 @@ if (BUILD_TESTS)
     set(GENERATED_TEST_DATA_PREFIX ${CMAKE_CURRENT_BINARY_DIR})
     configure_file(TestUtilities/TestUtilitiesConfig.h.in TestUtilities/TestUtilitiesConfig.h @ONLY)
 
-    set(TEST_UTILITIES_SOURCES
-        TestUtilities/TestUtilities.cpp
-        TestUtilities/TestUtilities.cu
-        TestUtilities/TestUtilities.tpp
-        TestUtilities/SnoopyTestUtilities.cpp
-        TestUtilities/LevelSetAlignmentTestUtilities.tpp
-        TestUtilities/LevelSetAlignmentTestUtilities.cpp
-        )
-    set(TEST_UTILITIES_HEADERS
-        TestUtilities/TestUtilityKernels.h
-        TestUtilities/TestUtilityFunctors.h
-        TestUtilities/TestUtilities.h
-        TestUtilities/SnoopyTestUtilities.h
-        TestUtilities/LevelSetAlignmentTestUtilities.h
-        TestUtilities/TestUtilitiesConfig.h.in
-        TestUtilities/CameraPoseAndRenderingEngineFixture.h
-        ${CMAKE_CURRENT_BINARY_DIR}/TestUtilities/TestUtilitiesConfig.h)
+    set(
+            TEST_UTILITIES_SOURCES
+
+            TestUtilities/TestUtilities.cpp
+            TestUtilities/TestUtilities.cu
+            TestUtilities/TestUtilities.tpp
+            TestUtilities/SnoopyTestUtilities.cpp
+            TestUtilities/LevelSetAlignment/LevelSetAlignmentTestUtilities.tpp
+            TestUtilities/LevelSetAlignment/LevelSetAlignmentTestUtilities.cpp
+            TestUtilities/LevelSetAlignment/GenericWarpConsistencySubtest.tpp
+            TestUtilities/LevelSetAlignment/GenericWarpConsistencySubtest.cpp
+            TestUtilities/LevelSetAlignment/TestCaseOrganizationBySwitches.tpp
+            TestUtilities/LevelSetAlignment/TestCaseOrganizationBySwitches.cpp
+            TestUtilities/LevelSetAlignment/SingleIterationTestConditions.cpp
+    )
+
+    set(
+            TEST_UTILITIES_HEADERS
+
+            ${CMAKE_CURRENT_BINARY_DIR}/TestUtilities/TestUtilitiesConfig.h
+            TestUtilities/TestUtilityKernels.h
+            TestUtilities/TestUtilityFunctors.h
+            TestUtilities/TestUtilities.h
+            TestUtilities/SnoopyTestUtilities.h
+            TestUtilities/LevelSetAlignment/LevelSetAlignmentTestUtilities.h
+            TestUtilities/TestUtilitiesConfig.h.in
+            TestUtilities/CameraPoseAndRenderingEngineFixture.h
+            TestUtilities/LevelSetAlignment/GenericWarpConsistencySubtest.h
+            TestUtilities/LevelSetAlignment/LevelSetAlignmentTestMode.h
+            TestUtilities/LevelSetAlignment/TestCaseOrganizationBySwitches.h
+            TestUtilities/LevelSetAlignment/SingleIterationTestConditions.h
+    )
 
     find_package(Boost COMPONENTS unit_test_framework REQUIRED)
 
@@ -94,9 +109,9 @@ if (BUILD_TESTS)
     # *** tests that always require CUDA ***
     if (WITH_CUDA)
         itm_add_test(NAME SetCopyCompare_CUDA SOURCES Test_SetCopyCompare_CUDA.cpp)
-        itm_add_test(NAME ConstructVolumeFromImage_CUDA SOURCES Test_ConstructVolumeFromImage_CUDA.cpp)
+        itm_add_test(NAME ConstructVolumeFromImage_CUDA SOURCES Test_DepthFusion_CUDA.cpp)
         itm_add_test(NAME ConstructVolumeFromImage_CPU_to_CUDA SOURCES
-                     Test_ConstructVolumeFromImage_CPU_to_CUDA.cpp)
+                     Test_DepthFusion_CPU_vs_CUDA.cpp)
         itm_add_test(NAME VolumeSaveLoadCompact_CUDA SOURCES Test_VolumeSaveLoadCompact_CUDA.cpp)
         itm_add_test(NAME CUDA_Atomics SOURCES Test_CUDA_Atomics.cpp CUDAAtomicTesting.h
                      CUDAAtomicTesting.cu TemporaryCUDA_Atomics.h)

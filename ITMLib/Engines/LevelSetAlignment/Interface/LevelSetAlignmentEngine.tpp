@@ -91,7 +91,7 @@ void LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutio
 		LOG4CPLUS_TOP_LEVEL(logging::GetLogger(), "Max iteration count: " << this->termination.max_iteration_count)
 		LOG4CPLUS_TOP_LEVEL(logging::GetLogger(),
 		                    "Warping vector update threshold: " << this->termination.update_length_threshold
-		                                                        << " m, " << this->vector_update_threshold_in_voxels
+		                                                        << " meters, " << this->vector_update_threshold_in_voxels
 		                                                        << " voxels");
 		LOG4CPLUS_TOP_LEVEL(logging::GetLogger(),
 		                    bright_cyan << "*** *********************************** ***" << reset);
@@ -142,22 +142,26 @@ LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode
 		VoxelVolume<TVoxel, TIndex>** live_volume_pair,
 		VoxelVolume<TVoxel, TIndex>* canonical_volume) {
 
-	float update_length_statistic_in_voxels = std::numeric_limits<float>::infinity();
+	const float voxel_size = configuration::Get().general_voxel_volume_parameters.voxel_size;
+
+	float gradient_length_statistic_in_voxels = std::numeric_limits<float>::infinity();
 
 	int source_live_volume_index = 0;
 	int target_live_volume_index = 1;
 	for (iteration = 0;
-	     iteration < termination.min_iteration_count || (update_length_statistic_in_voxels > this->vector_update_threshold_in_voxels
-	                                                     && iteration < termination.max_iteration_count); iteration++) {
+	     iteration < termination.min_iteration_count ||
+	     (this->weights.learning_rate * gradient_length_statistic_in_voxels > this->vector_update_threshold_in_voxels &&
+	      iteration < termination.max_iteration_count);
+	     iteration++) {
 		PerformSingleOptimizationStep(canonical_volume, live_volume_pair[source_live_volume_index],
-		                              live_volume_pair[target_live_volume_index], warp_field, update_length_statistic_in_voxels);
+		                              live_volume_pair[target_live_volume_index], warp_field, gradient_length_statistic_in_voxels);
 
 		std::swap(source_live_volume_index, target_live_volume_index);
 	}
 	configuration::Configuration& config = configuration::Get();
-	if (config.logging_settings.log_average_warp_update) {
-		LOG4CPLUS_PER_FRAME(logging::GetLogger(), "Frame-final level set evolution average update vector length (voxels): "
-		<< yellow << update_length_statistic_in_voxels << reset);
+	if (config.logging_settings.log_gradient_length_statistic) {
+		LOG4CPLUS_PER_FRAME(logging::GetLogger(), "Frame-final level set evolution gradient length statistic (meters): "
+				<< yellow << gradient_length_statistic_in_voxels * voxel_size << reset);
 	}
 
 	if (config.logging_settings.log_iteration_number) {
@@ -175,16 +179,16 @@ void LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutio
 		VoxelVolume<TVoxel, TIndex>* source_live_volume,
 		VoxelVolume<TVoxel, TIndex>* target_live_volume,
 		VoxelVolume<TWarp, TIndex>* warp_field,
-		float& average_update_vector_length) {
+		float& gradient_length_statistic_in_voxels) {
 
 	switch (TExecutionMode) {
 		case DIAGNOSTIC:
 			PerformSingleOptimizationStep_Diagnostic(canonical_volume, source_live_volume, target_live_volume, warp_field,
-			                                         average_update_vector_length);
+			                                         gradient_length_statistic_in_voxels);
 			break;
 		case OPTIMIZED:
 			PerformSingleOptimizationStep_Optimized(canonical_volume, source_live_volume, target_live_volume, warp_field,
-			                                        average_update_vector_length);
+			                                        gradient_length_statistic_in_voxels);
 			break;
 	}
 }
@@ -226,7 +230,7 @@ void LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutio
 		VoxelVolume<TVoxel, TIndex>* canonical_volume,
 		VoxelVolume<TVoxel, TIndex>* live_volume) {
 
-	if (this->switches.enable_sobolev_gradient_smoothing) {
+	if (this->switches.enable_Sobolev_gradient_smoothing) {
 		GradientSmoothingPassFunctor<TVoxel, TWarp, TIndex, X> smoothing_pass_functor_X(warp_field);
 		GradientSmoothingPassFunctor<TVoxel, TWarp, TIndex, Y> smoothing_pass_functor_Y(warp_field);
 		GradientSmoothingPassFunctor<TVoxel, TWarp, TIndex, Z> smoothing_pass_functor_Z(warp_field);
@@ -248,7 +252,7 @@ void LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutio
 		VoxelVolume<TWarp, TIndex>* warp_field,
 		VoxelVolume<TVoxel, TIndex>* canonical_volume,
 		VoxelVolume<TVoxel, TIndex>* live_volume) {
-	if (this->switches.enable_sobolev_gradient_smoothing) {
+	if (this->switches.enable_Sobolev_gradient_smoothing) {
 		// if Sobolev smoothing has been enabled, .gradient1 field of each TWarp voxel has to be used,
 		// since that's where the final result ends up after ping-ponging three times between .gradient0 and .gradient1
 		WarpUpdateFunctor<TVoxel, TWarp, TMemoryDeviceType, true> warp_update_functor(this->weights.learning_rate);
@@ -281,7 +285,7 @@ void LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutio
 		VoxelVolume<TVoxel, TIndex>* source_live_volume,
 		VoxelVolume<TVoxel, TIndex>* target_live_volume,
 		VoxelVolume<TWarp, TIndex>* warp_field,
-		float& average_update_vector_length) {
+		float& gradient_length_statistic_in_voxels) {
 	auto& config = configuration::Get();
 
 	if (config.logging_settings.log_iteration_number) {
@@ -293,34 +297,39 @@ void LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutio
 		LOG4CPLUS_PER_ITERATION(logging::GetLogger(), bright_cyan << "Calculating warp energy gradient..." << reset);
 	}
 
-	bench::start_timer("TrackMotion_1_CalculateWarpUpdate");
+	bench::start_timer("TrackMotion_1_CalculateEnergyGradient");
 	CalculateEnergyGradient(warp_field, canonical_volume, source_live_volume);
-	bench::stop_timer("TrackMotion_1_CalculateWarpUpdate");
+	bench::stop_timer("TrackMotion_1_CalculateEnergyGradient");
 
-	if (this->parameters.switches.enable_sobolev_gradient_smoothing && config.logging_settings.log_surface_tracking_procedure_names) {
+	if (this->parameters.switches.enable_Sobolev_gradient_smoothing && config.logging_settings.log_surface_tracking_procedure_names) {
 		LOG4CPLUS_PER_ITERATION(logging::GetLogger(),
 		                        bright_cyan << "Applying Sobolev smoothing to energy gradient..." << reset);
 	}
-	bench::start_timer("TrackMotion_2_ApplySmoothingToGradient");
+	bench::start_timer("TrackMotion_2_SmoothEnergyGradient");
 	SmoothEnergyGradient(warp_field, canonical_volume, source_live_volume);
-	bench::stop_timer("TrackMotion_2_ApplySmoothingToGradient");
+	bench::stop_timer("TrackMotion_2_SmoothEnergyGradient");
 
 	if (config.logging_settings.log_surface_tracking_procedure_names) {
 		LOG4CPLUS_PER_ITERATION(logging::GetLogger(),
-		                        bright_cyan << "Applying warp update (based on energy gradient) to the cumulative warp..."
-		                                    << reset);
+		                        bright_cyan << "Applying warp update (based on energy gradient) to the cumulative warp..." << reset);
 	}
 
-	bench::start_timer("TrackMotion_3_UpdateDeformationFieldUsingGradient");
+	bench::start_timer("TrackMotion_3_UpdateGradientLengthStatistic");
+	UpdateGradientLengthStatistic(gradient_length_statistic_in_voxels, warp_field);
+	bench::stop_timer("TrackMotion_3_UpdateGradientLengthStatistic");
+
+	bench::start_timer("TrackMotion_4_UpdateDeformationFieldUsingGradient");
 	UpdateDeformationFieldUsingGradient(warp_field, canonical_volume, source_live_volume);
-	this->FindAverageWarpLength(average_update_vector_length, warp_field);
-	bench::stop_timer("TrackMotion_3_UpdateDeformationFieldUsingGradient");
+	bench::stop_timer("TrackMotion_4_UpdateDeformationFieldUsingGradient");
 
 	TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::GetDefaultInstance()
-			.RecordSurfaceTrackingMeanUpdate(average_update_vector_length);
+			.RecordSurfaceTrackingMeanUpdate(gradient_length_statistic_in_voxels);
 
-	if (config.logging_settings.log_average_warp_update) {
-		LOG4CPLUS_PER_ITERATION(logging::GetLogger(), "Average update vector length (voxels): " << yellow << average_update_vector_length << reset);
+	if (config.logging_settings.log_gradient_length_statistic) {
+		LOG4CPLUS_PER_ITERATION(logging::GetLogger(), "[Gradient length statistic (meters)] * learning_rate vs. threshold: ");
+		LOG4CPLUS_PER_ITERATION(logging::GetLogger(), "   "
+				<< yellow << gradient_length_statistic_in_voxels * configuration::Get().general_voxel_volume_parameters.voxel_size
+				* this->weights.learning_rate  << " vs. " << this->termination.update_length_threshold << reset);
 	}
 
 	if (config.logging_settings.log_surface_tracking_procedure_names) {
@@ -345,40 +354,73 @@ void LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutio
 		VoxelVolume<TVoxel, TIndex>* source_live_volume,
 		VoxelVolume<TVoxel, TIndex>* target_live_volume,
 		VoxelVolume<TWarp, TIndex>* warp_field,
-		float& average_update_vector_length) {
+		float& gradient_length_statistic_in_voxels) {
+
 	CalculateEnergyGradient(warp_field, canonical_volume, source_live_volume);
 	SmoothEnergyGradient(warp_field, canonical_volume, source_live_volume);
+	UpdateGradientLengthStatistic(gradient_length_statistic_in_voxels, warp_field);
 	UpdateDeformationFieldUsingGradient(warp_field, canonical_volume, source_live_volume);
-	this->FindAverageWarpLength(average_update_vector_length, warp_field);
 	warping_engine->WarpVolume_WarpUpdates(warp_field, source_live_volume, target_live_volume);
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
-void LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode>::FindMaximumWarpLength(
+void LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode>::UpdateGradientLengthStatistic(
+		float& gradient_length_statistic_in_voxels, VoxelVolume<TWarp, TIndex>* warp_field) {
+	Vector3i maximum_warp_length_position;
+	switch (this->termination.warp_length_termination_threshold_type) {
+		case AVERAGE:
+			this->FindAverageGradientLength(gradient_length_statistic_in_voxels, warp_field);
+			break;
+		case MAXIMUM:
+			this->FindMaximumGradientLength(gradient_length_statistic_in_voxels, maximum_warp_length_position, warp_field);
+			break;
+		default:
+			DIEWITHEXCEPTION_REPORTLOCATION("Unsupported warp termination threshold type, aborting.");
+	}
+}
+
+template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
+void LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode>::FindMaximumGradientLength(
 		float& maximum_warp_length, Vector3i& position,
 		VoxelVolume<TWarp, TIndex>* warp_field) {
 	ReductionResult<float, TIndex> ignored_value;
 	typedef ReduceMaximumFunctor<TIndex, TMemoryDeviceType> ReduceFunctorType;
-	typedef RetrieveWarpLengthFunctor<TWarp, TMemoryDeviceType> RetrieveFunctorType;
 	ignored_value.value = FLT_MIN;
-	maximum_warp_length = VolumeReductionEngine<TWarp, TIndex, TMemoryDeviceType>::
-	template ReduceUtilized<ReduceFunctorType, RetrieveFunctorType>(position, warp_field, ignored_value);
+	if (this->switches.enable_Sobolev_gradient_smoothing) {
+		typedef RetrieveGradientLengthFunctor<TWarp, TMemoryDeviceType, true> RetrieveFunctorType;
+		maximum_warp_length = VolumeReductionEngine<TWarp, TIndex, TMemoryDeviceType>::
+		template ReduceUtilized<ReduceFunctorType, RetrieveFunctorType>(position, warp_field, ignored_value);
+	} else {
+		typedef RetrieveGradientLengthFunctor<TWarp, TMemoryDeviceType, false> RetrieveFunctorType;
+		maximum_warp_length = VolumeReductionEngine<TWarp, TIndex, TMemoryDeviceType>::
+		template ReduceUtilized<ReduceFunctorType, RetrieveFunctorType>(position, warp_field, ignored_value);
+	}
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
-void LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode>::FindAverageWarpLength(
+void LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode>::FindAverageGradientLength(
 		float& average_warp_length,
 		VoxelVolume<TWarp, TIndex>* warp_field) {
 	ReductionResult<SumAndCount, TIndex> ignored_value;
 	ignored_value.value.sum = 0.0f;
 	ignored_value.value.count = 0u;
 	typedef ReduceSumAndCountFunctor<TIndex, TMemoryDeviceType> ReduceFunctorType;
-	typedef RetrieveWarpLengthAndCountFunctor<TWarp, TMemoryDeviceType> RetrieveFunctorType;
+
 	Vector3i position;
-	SumAndCount final_sum_and_count = VolumeReductionEngine<TWarp, TIndex, TMemoryDeviceType>::
-	template ReduceUtilized<ReduceFunctorType, RetrieveFunctorType>(position, warp_field, ignored_value);
+	SumAndCount final_sum_and_count;
+	if (this->switches.enable_Sobolev_gradient_smoothing) {
+		typedef RetrieveGradientLengthAndCountFunctor<TWarp, TMemoryDeviceType, true> RetrieveFunctorType;
+		final_sum_and_count = VolumeReductionEngine<TWarp, TIndex, TMemoryDeviceType>::
+		template ReduceUtilized<ReduceFunctorType, RetrieveFunctorType>(position, warp_field, ignored_value);
+	} else {
+		typedef RetrieveGradientLengthAndCountFunctor<TWarp, TMemoryDeviceType, false> RetrieveFunctorType;
+		final_sum_and_count = VolumeReductionEngine<TWarp, TIndex, TMemoryDeviceType>::
+		template ReduceUtilized<ReduceFunctorType, RetrieveFunctorType>(position, warp_field, ignored_value);
+	}
 	average_warp_length = final_sum_and_count.sum / final_sum_and_count.count;
 }
+
+
 
 
 

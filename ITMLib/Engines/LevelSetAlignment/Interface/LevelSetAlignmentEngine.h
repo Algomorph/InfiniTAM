@@ -57,44 +57,47 @@ public: // instance functions
 
 	void ClearOutWarpUpdates(VoxelVolume<TWarp, TIndex>* warp_field) const;
 
-protected:
+protected: // instance functions
 	void ClearOutFramewiseWarps(VoxelVolume<TWarp, TIndex>* warp_field) const;
 	void ClearOutCumulativeWarps(VoxelVolume<TWarp, TIndex>* warp_field) const;
 
+	void AddFramewiseWarpToWarp(VoxelVolume<TWarp, TIndex>* warp_field, bool clear_framewise_warps);
 
-	void AddFramewiseWarpToWarp(
-			VoxelVolume<TWarp, TIndex>* warp_field, bool clear_framewise_warps);
 	void CalculateEnergyGradient(VoxelVolume<TWarp, TIndex>* warp_field, VoxelVolume<TVoxel, TIndex>* canonical_volume,
 	                             VoxelVolume<TVoxel, TIndex>* live_volume);
+
 	void SmoothEnergyGradient(VoxelVolume<TWarp, TIndex>* warp_field,
 	                          VoxelVolume<TVoxel, TIndex>* canonical_volume,
 	                          VoxelVolume<TVoxel, TIndex>* live_volume);
+
 	void UpdateDeformationFieldUsingGradient(VoxelVolume<TWarp, TIndex>* warp_field,
 	                                         VoxelVolume<TVoxel, TIndex>* canonical_volume,
 	                                         VoxelVolume<TVoxel, TIndex>* live_volume);
-	void FindMaximumWarpLength(float& maximum_warp_length, Vector3i& position,
-	                           VoxelVolume<TWarp, TIndex>* warp_field);
-	void FindAverageWarpLength(float& average_warp_length,
-	                           VoxelVolume<TWarp, TIndex>* warp_field);
 
 	void PerformSingleOptimizationStep(VoxelVolume<TVoxel, TIndex>* canonical_volume,
 	                                   VoxelVolume<TVoxel, TIndex>* source_live_volume,
 	                                   VoxelVolume<TVoxel, TIndex>* target_live_volume,
 	                                   VoxelVolume<TWarp, TIndex>* warp_field,
-	                                   float& average_update_vector_length);
+	                                   float& gradient_length_statistic_in_voxels);
+
+	void UpdateGradientLengthStatistic(float& average_warp_length, VoxelVolume<TWarp, TIndex>* warp_field);
 
 private: // instance functions
+
+	void FindMaximumGradientLength(float& maximum_warp_length, Vector3i& position, VoxelVolume<TWarp, TIndex>* warp_field);
+	void FindAverageGradientLength(float& average_warp_length, VoxelVolume<TWarp, TIndex>* warp_field);
+
 	void PerformSingleOptimizationStep_Diagnostic(VoxelVolume<TVoxel, TIndex>* canonical_volume,
 	                                              VoxelVolume<TVoxel, TIndex>* source_live_volume,
 	                                              VoxelVolume<TVoxel, TIndex>* target_live_volume,
 	                                              VoxelVolume<TWarp, TIndex>* warp_field,
-	                                              float& average_update_vector_length);
+	                                              float& gradient_length_statistic_in_voxels);
 
 	void PerformSingleOptimizationStep_Optimized(VoxelVolume<TVoxel, TIndex>* canonical_volume,
 	                                             VoxelVolume<TVoxel, TIndex>* source_live_volume,
 	                                             VoxelVolume<TVoxel, TIndex>* target_live_volume,
 	                                             VoxelVolume<TWarp, TIndex>* warp_field,
-	                                             float& average_update_vector_length);
+	                                             float& gradient_length_statistic_in_voxels);
 
 	template<WarpType TWarpType>
 	void ClearOutWarps(VoxelVolume<TWarp, TIndex>* warp_field) const;

@@ -14,3 +14,11 @@
 //  limitations under the License.
 //  ================================================================
 #pragma once
+
+#include "../../../ITMLib/Engines/LevelSetAlignment/Interface/LevelSetAlignmentParameters.h"
+
+namespace test_utilities{
+
+const ITMLib::LevelSetAlignmentTerminationConditions& SingleIterationTerminationConditions();
+
+} // end namespace test_utilities

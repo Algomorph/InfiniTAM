@@ -332,7 +332,7 @@ private:
 	// iteration_index is used for logging per-iteration data, as well as, in combination with
 	// iteration_bound to halt computation of certain terms for debugging purposes
 	const int iteration_index;
-	const int iteration_bound = 20000;
+	const int iteration_bound = 99999;
 
 	// *** data structure accessors
 	const TVoxel* live_voxels;

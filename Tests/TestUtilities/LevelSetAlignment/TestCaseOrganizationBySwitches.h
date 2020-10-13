@@ -14,3 +14,21 @@
 //  limitations under the License.
 //  ================================================================
 #pragma once
+
+#include "../../../ITMLib/Engines/LevelSetAlignment/Interface/LevelSetAlignmentParameters.h"
+
+namespace test_utilities {
+
+template<typename TIndex>
+std::string GetWarpsPath(std::string prefix, int iteration);
+
+template<typename TIndex>
+std::string GetWarpedLivePath(std::string prefix, int iteration);
+
+template<typename TIndex>
+std::string GetFusedPath(std::string prefix, int iteration);
+
+unsigned int SwitchesToIntCode(const ITMLib::LevelSetAlignmentSwitches& switches);
+std::string SwitchesToPrefix(const ITMLib::LevelSetAlignmentSwitches& switches);
+
+} // namespace test_utilities

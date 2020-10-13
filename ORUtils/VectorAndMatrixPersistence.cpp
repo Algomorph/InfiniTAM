@@ -16,6 +16,8 @@
 #include "VectorAndMatrixPersistence.h"
 
 namespace ORUtils {
+
+// Matrix4
 template void SaveMatrix<Matrix4<float>>(OStreamWrapper& file, const Matrix4<float>& matrix);
 template void SaveMatrix<Matrix4<double>>(OStreamWrapper& file, const Matrix4<double>& matrix);
 template void SaveMatrix<Matrix4<int>>(OStreamWrapper& file, const Matrix4<int>& matrix);
@@ -32,4 +34,9 @@ template Matrix4<short> LoadMatrix<Matrix4<short>>(IStreamWrapper& file);
 template Matrix4<unsigned short> LoadMatrix<Matrix4<unsigned short>>(IStreamWrapper& file);
 template Matrix4<char> LoadMatrix<Matrix4<char>>(IStreamWrapper& file);
 template Matrix4<unsigned char> LoadMatrix<Matrix4<unsigned char>>(IStreamWrapper& file);
+
+// Vector6
+template void SaveMatrix<Vector6<int>>(OStreamWrapper& file, const Vector6<int>& vector_6);
+template Vector6<int> LoadMatrix<Vector6<int>>(IStreamWrapper& file);
+
 } // namespace ORUtils

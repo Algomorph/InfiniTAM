@@ -419,17 +419,8 @@ firstprivate(hash_entry_count, array_bounds, start_voxel, array_size)
 						THashVoxel& hash_voxel = hash_voxel_block[loc_id];
 						TArrayVoxel& array_voxel = array_voxels[linear_index_in_array];
 
-						//__DEBUG
-						if(linear_index_in_array == 94571){
-							int i = 10;
-						}
-
 						if (!std::forward<TFunctionCall>(functionCall)(functor, array_voxel, hash_voxel,
 						                                               voxel_absolute_position)) {
-							//__DEBUG
-							if(linear_index_in_array == 94571){
-								int i = 10;
-							}
 							mismatch_found = true;
 							break;
 						}

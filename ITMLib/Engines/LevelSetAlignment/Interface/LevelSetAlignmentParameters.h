@@ -22,9 +22,16 @@
 //local
 #include "../../../Utils/Metacoding/DeferrableSerializableStruct.h"
 #include "../../../Utils/Metacoding/SerializableStruct.h"
+#include "../../../Utils/Metacoding/SerializableEnum.h"
 #include "../../../Utils/Enums/ExecutionMode.h"
 
 namespace ITMLib {
+
+#define WARP_LENGTH_TERMINATION_THRESHOLD_TYPE_DESCRIPTION WarpLengthTerminationThresholdType, \
+		(MAXIMUM, "maximum", "MAXIMUM", "maximum_warp_length", "MAXIMUM_WARP_LENGTH"), \
+		(AVERAGE, "average", "AVERAGE", "average_warp_length",  "AVERAGE_WARP_LENGTH")
+
+DECLARE_SERIALIZABLE_ENUM(WARP_LENGTH_TERMINATION_THRESHOLD_TYPE_DESCRIPTION);
 
 #define WEIGHTS_STRUCT_DESCRIPTION LevelSetAlignmentWeights, \
         (float, learning_rate, 0.1f, PRIMITIVE, "Used in level set alignment optimization. Gradient descent step magnitude / learning rate."), \
@@ -46,12 +53,14 @@ DECLARE_SERIALIZABLE_STRUCT(WEIGHTS_STRUCT_DESCRIPTION);
                 "tracking energy. When rigidity-enforcement factor is enabled, acts as Killing term in KillingFusion,"\
                 " when it is not, acts as Tikhonov term in SobolevFusion (both articles by Slavcheva et al.)"), \
         (bool, enable_Killing_field, false, PRIMITIVE, "Whether to enable or disable the non-isometric-motion-penalizing Killing field portion of the smoothing term of Slavcheva-based level-set alignment energy (see KillingFusion by Slavcheva et. all."), \
-        (bool, enable_sobolev_gradient_smoothing, true, PRIMITIVE, "Whether to enable or disable Sobolev-space gradient smoothing of Slavcheva-based level set alignment (see SobolevFusion article by Slavcheva et al.).")
+        (bool, enable_Sobolev_gradient_smoothing, true, PRIMITIVE, "Whether to enable or disable Sobolev-space gradient smoothing of Slavcheva-based level set alignment (see SobolevFusion article by Slavcheva et al.).")
 
 DECLARE_SERIALIZABLE_STRUCT(SWITCHES_STRUCT_DESCRIPTION);
 
 
 #define TERMINATION_CONDITIONS_STRUCT_DESCRIPTION LevelSetAlignmentTerminationConditions, \
+        (WarpLengthTerminationThresholdType, warp_length_termination_threshold_type, MAXIMUM, ENUM, \
+        "Type of the warp length termination threshold to use: maximum or average."), \
         (int, max_iteration_count, 200, PRIMITIVE, "Maximum iteration count, after which the non-rigid alignment is cut off."), \
         (int, min_iteration_count, 10, PRIMITIVE, "Minimum iteration count, after which all other termination conditions are enabled."), \
         (float, update_length_threshold, 1e-6f, PRIMITIVE, "Update length threshold factor, in voxels ('1/[voxel size] * factor'). Depending on settings, can be" \
@@ -61,6 +70,8 @@ DECLARE_SERIALIZABLE_STRUCT(SWITCHES_STRUCT_DESCRIPTION);
 
 DECLARE_SERIALIZABLE_STRUCT(TERMINATION_CONDITIONS_STRUCT_DESCRIPTION);
 
+
+
 #define LEVEL_SET_EVOLUTION_PARAMETERS_STRUCT_DESCRIPTION LevelSetAlignmentParameters, "level_set_evolution", \
     (ExecutionMode, execution_mode, ExecutionMode::OPTIMIZED, ENUM, "Whether to use optimized or diagnostic mode."), \
     (LevelSetAlignmentWeights, weights, LevelSetAlignmentWeights(), STRUCT, "Level set evolution weights / rates / factors"), \
@@ -68,6 +79,8 @@ DECLARE_SERIALIZABLE_STRUCT(TERMINATION_CONDITIONS_STRUCT_DESCRIPTION);
     (LevelSetAlignmentTerminationConditions, termination, LevelSetAlignmentTerminationConditions(), STRUCT, "Level set evolution termination parameters.") \
 
 DECLARE_DEFERRABLE_SERIALIZABLE_STRUCT(LEVEL_SET_EVOLUTION_PARAMETERS_STRUCT_DESCRIPTION);
+
+
 
 std::ostream& operator<<(std::ostream& stream, const LevelSetAlignmentParameters& parameters);
 

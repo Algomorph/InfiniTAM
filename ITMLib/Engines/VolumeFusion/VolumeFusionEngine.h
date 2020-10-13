@@ -51,7 +51,7 @@ class VolumeFusionEngine :
 private:
 	// Negated "mu" from KinectFusion, negative "eta" from Killing- & SobolevFusion,
 	// expressed in sdf distance units, i.e.:
-	// negative_surface_thickness_sdf_scale = -surface_thickness (m) / (truncation distance (voxels) * voxel size (m))
+	// negative_surface_thickness_sdf_scale = -surface_thickness (meters) / [truncation distance (voxels) * voxel size (meters)]
 	float negative_surface_thickness_sdf_scale;
 public:
 	VolumeFusionEngine();

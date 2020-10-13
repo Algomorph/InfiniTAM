@@ -12,12 +12,12 @@ using namespace MiniSlamGraph;
 static void MatrixToMQT(const ORUtils::Matrix4<float> & m, double *qt)
 {
 	double R[9];
-	for (int r = 0; r < 3; ++r) for (int c = 0; c < 3; ++c) R[r * 3 + c] = m.m[c * 4 + r];
+	for (int r = 0; r < 3; ++r) for (int c = 0; c < 3; ++c) R[r * 3 + c] = m.values[c * 4 + r];
 	double qtmp[4];
 	QuaternionHelpers::QuaternionFromRotationMatrix(R, qtmp);
 
 	for (int i = 0; i < 3; ++i) qt[i] = qtmp[i + 1];
-	for (int i = 0; i < 3; ++i) qt[3 + i] = m.m[3 * 4 + i];
+	for (int i = 0; i < 3; ++i) qt[3 + i] = m.values[3 * 4 + i];
 }
 
 static void MQTToMatrix(const double *qt, ORUtils::Matrix4<float> & m)
@@ -28,10 +28,10 @@ static void MQTToMatrix(const double *qt, ORUtils::Matrix4<float> & m)
 
 	double R[9];
 	QuaternionHelpers::RotationMatrixFromQuaternion(qtmp, R);
-	for (int r = 0; r < 3; ++r) for (int c = 0; c < 3; ++c) m.m[c * 4 + r] = (float)R[r * 3 + c];
-	for (int i = 0; i < 3; ++i) m.m[3 * 4 + i] = (float)qt[3 + i];
-	m.m[0 * 4 + 3] = m.m[1 * 4 + 3] = m.m[2 * 4 + 3] = 0.0f;
-	m.m[3 * 4 + 3] = 1.0f;
+	for (int r = 0; r < 3; ++r) for (int c = 0; c < 3; ++c) m.values[c * 4 + r] = (float)R[r * 3 + c];
+	for (int i = 0; i < 3; ++i) m.values[3 * 4 + i] = (float)qt[3 + i];
+	m.values[0 * 4 + 3] = m.values[1 * 4 + 3] = m.values[2 * 4 + 3] = 0.0f;
+	m.values[3 * 4 + 3] = 1.0f;
 }
 
 static ORUtils::Matrix4<float> se3_generator(int idx)
@@ -39,13 +39,13 @@ static ORUtils::Matrix4<float> se3_generator(int idx)
 	ORUtils::Matrix4<float> ret;
 	ret.setZeros();
 	if (idx < 3) {
-		ret.m[3 * 4 + idx] = 1.0f;
+		ret.values[3 * 4 + idx] = 1.0f;
 	}
 	else {
 		int r = (idx + 1) % 3;
 		int c = (idx + 2) % 3;
-		ret.m[c * 4 + r] = -1.0f;
-		ret.m[r * 4 + c] = 1.0f;
+		ret.values[c * 4 + r] = -1.0f;
+		ret.values[r * 4 + c] = 1.0f;
 	}
 	return ret;
 }
@@ -106,17 +106,17 @@ bool GraphEdgeSE3::computeJacobian(const NodeIndex & nodes, int id, double *jaco
 	{
 		ORUtils::Matrix4<float> ABm = AB * m;
 		double ABm_array[9];
-		for (int r = 0; r < 3; ++r) for (int c = 0; c < 3; ++c) ABm_array[r * 3 + c] = ABm.m[c * 4 + r];
+		for (int r = 0; r < 3; ++r) for (int c = 0; c < 3; ++c) ABm_array[r * 3 + c] = ABm.values[c * 4 + r];
 		QuaternionHelpers::dQuaternion_dRotationMatrix(ABm_array, dQ_dR);
 	}
 	for (int gi = 0; gi < 6; ++gi) {
 		ORUtils::Matrix4<float> d_inner_dx = dAB_dx[gi] * m;
 		for (int qi = 0; qi < 3; ++qi) {
 			jacobian[qi * 6 + gi] = 0.0f;
-			for (int r = 0; r < 3; ++r) for (int c = 0; c < 3; ++c) jacobian[qi * 6 + gi] += dQ_dR[(qi + 1) * 9 + (r * 3 + c)] * d_inner_dx.m[c * 4 + r];
+			for (int r = 0; r < 3; ++r) for (int c = 0; c < 3; ++c) jacobian[qi * 6 + gi] += dQ_dR[(qi + 1) * 9 + (r * 3 + c)] * d_inner_dx.values[c * 4 + r];
 		}
 		for (int ti = 0; ti < 3; ++ti) {
-			jacobian[(ti + 3) * 6 + gi] = d_inner_dx.m[3 * 4 + ti];
+			jacobian[(ti + 3) * 6 + gi] = d_inner_dx.values[3 * 4 + ti];
 		}
 	}
 	return true;

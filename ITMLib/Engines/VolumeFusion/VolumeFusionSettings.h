@@ -25,7 +25,7 @@ namespace ITMLib {
     (float, surface_thickness, 0.012, PRIMITIVE, "Estimated surface thickness (in meters). "\
     "The value is used to compute parameter eta from 'SDF-2-SDF Registration for Real-Time 3D Reconstruction from RGB-D Data " \
 	"Sec. 3.2, and SobolevFusion, Sec. 3.1, as well as 'mu' from original KinectFusion(2011). " \
-	"The parameter value is computed as: surface_thickness (m) / (truncation distance (voxels) * voxel size (m))" \
+	"The parameter value is computed as: surface_thickness (meters) / (truncation distance (voxels) * voxel size (meters))" \
 	"Note that this parameter is only active during volume fusion, not depth-to-TSDF fusion. "\
 	"There is a separate parameter for depth fusion.")
 

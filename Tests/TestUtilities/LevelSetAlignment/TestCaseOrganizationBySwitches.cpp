@@ -13,3 +13,52 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
+
+#include "TestCaseOrganizationBySwitches.tpp"
+#include "../../../ITMLib/Objects/Volume/PlainVoxelArray.h"
+#include "../../../ITMLib/Objects/Volume/VoxelBlockHash.h"
+
+namespace test_utilities {
+
+template std::string GetWarpsPath<PlainVoxelArray>(std::string prefix, int iteration);
+template std::string GetWarpsPath<VoxelBlockHash>(std::string prefix, int iteration);
+template std::string GetWarpedLivePath<PlainVoxelArray>(std::string prefix, int iteration);
+template std::string GetWarpedLivePath<VoxelBlockHash>(std::string prefix, int iteration);
+template std::string GetFusedPath<PlainVoxelArray>(std::string prefix, int iteration);
+template std::string GetFusedPath<VoxelBlockHash>(std::string prefix, int iteration);
+
+std::string SwitchesToPrefix(const LevelSetAlignmentSwitches& switches) {
+	static std::unordered_map<unsigned int, std::string> prefix_by_switches_map = {
+			{SwitchesToIntCode(LevelSetAlignmentSwitches(true, false, false, false, false)),
+					                                              "data"},
+			{SwitchesToIntCode(LevelSetAlignmentSwitches(true, false, false, false, true)),
+					                                              "data_sobolev"},
+			{SwitchesToIntCode(LevelSetAlignmentSwitches(false, false, true, false, false)),
+					                                              "tikhonov"},
+			{SwitchesToIntCode(LevelSetAlignmentSwitches(true, false, true, false,
+			                                             false)), "data_tikhonov"},
+			{SwitchesToIntCode(LevelSetAlignmentSwitches(true, false, true, false, true)),
+					                                              "data_tikhonov_sobolev"},
+			{SwitchesToIntCode(LevelSetAlignmentSwitches(true, false, true, true, false)),
+					                                              "data_killing"},
+			{SwitchesToIntCode(LevelSetAlignmentSwitches(true, true, false, false, false)),
+					                                              "data_level_set"},
+			{SwitchesToIntCode(LevelSetAlignmentSwitches(true, true, true, true, false)),
+					                                              "data_killing_level_set"}
+	};
+	return prefix_by_switches_map[SwitchesToIntCode(switches)];
+}
+
+
+unsigned int SwitchesToIntCode(const LevelSetAlignmentSwitches& switches) {
+	unsigned int code = 0;
+	code |= static_cast<unsigned int>(switches.enable_data_term) << 0u;
+	code |= static_cast<unsigned int>(switches.enable_level_set_term) << 1u;
+	code |= static_cast<unsigned int>(switches.enable_smoothing_term) << 2u;
+	code |= static_cast<unsigned int>(switches.enable_Killing_field) << 3u;
+	code |= static_cast<unsigned int>(switches.enable_Sobolev_gradient_smoothing) << 4u;
+	return code;
+}
+
+
+} // namespace test_utilities

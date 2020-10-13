@@ -14,3 +14,34 @@
 //  limitations under the License.
 //  ================================================================
 #pragma once
+
+#include "TestCaseOrganizationBySwitches.h"
+#include "../../../cmake-build-debug-distcc/Tests/TestUtilities/TestUtilitiesConfig.h"
+#include "../TestUtilities.h"
+
+using namespace ITMLib;
+
+namespace test_utilities {
+
+
+template<typename TIndex>
+std::string GetPathBase(std::string prefix, int iteration) {
+	return GENERATED_TEST_DATA_PREFIX "TestData/volumes/" + IndexString<TIndex>() + "/" + prefix + "_iter_" + std::to_string(iteration) + "_";
+}
+
+template<typename TIndex>
+std::string GetWarpsPath(std::string prefix, int iteration) {
+	return GetPathBase<TIndex>(prefix, iteration) + "warps.dat";
+}
+
+template<typename TIndex>
+std::string GetWarpedLivePath(std::string prefix, int iteration) {
+	return GetPathBase<TIndex>(prefix, iteration) + "warped_live.dat";
+}
+
+template<typename TIndex>
+std::string GetFusedPath(std::string prefix, int iteration) {
+	return GetPathBase<TIndex>(prefix, iteration) + "fused.dat";
+}
+
+} // end namespace test_utilities

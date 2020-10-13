@@ -14,3 +14,14 @@
 //  limitations under the License.
 //  ================================================================
 #pragma once
+
+namespace test_utilities {
+
+enum LevelSetAlignmentTestMode {
+	SAVE_SUCCESSIVE_ITERATIONS,
+	SAVE_FINAL_ITERATION_AND_FUSION,
+	TEST_SUCCESSIVE_ITERATIONS,
+	TEST_FINAL_ITERATION_AND_FUSION
+};
+
+} // namespace test_utilities

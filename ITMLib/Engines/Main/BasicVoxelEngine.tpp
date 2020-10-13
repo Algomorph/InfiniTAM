@@ -330,9 +330,9 @@ CameraTrackingState::TrackingResult BasicVoxelEngine<TVoxel,TIndex>::ProcessFram
 	double t[3];
 	double R[9];
 	double q[4];
-	for (int i = 0; i < 3; ++i) t[i] = p->GetInvM().m[3 * 4 + i];
+	for (int i = 0; i < 3; ++i) t[i] = p->GetInvM().values[3 * 4 + i];
 	for (int r = 0; r < 3; ++r) for (int c = 0; c < 3; ++c)
-		R[r * 3 + c] = p->GetM().m[c * 4 + r];
+		R[r * 3 + c] = p->GetM().values[c * 4 + r];
 	QuaternionFromRotationMatrix(R, q);
 	fprintf(stderr, "%f %f %f %f %f %f %f\n", t[0], t[1], t[2], q[1], q[2], q[3], q[0]);
 #endif

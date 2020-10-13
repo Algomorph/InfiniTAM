@@ -51,15 +51,13 @@
 
 
 //test_utils
-#include "TestUtilities/LevelSetAlignmentTestUtilities.h"
+#include "TestUtilities/LevelSetAlignment/LevelSetAlignmentTestUtilities.h"
 #include "Test_LevelSetAlignment_CPU_vs_CUDA_Aux.h"
 
 using namespace ITMLib;
 using namespace test_utilities;
 namespace snoopy = snoopy_test_utilities;
 
-
-//#define GENERATE_TEST_DATA
 BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_DataTermOnly_CPU) {
 	LevelSetAlignmentSwitches switches(true, false, false, false, false);
 #ifdef GENERATE_TEST_DATA
@@ -83,17 +81,17 @@ BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_DataAndTikhonovAndSobolevSmoothing_CPU) {
 #ifdef GENERATE_TEST_DATA
 	GenericWarpTest<MEMORYDEVICE_CPU>(switches, 5, SAVE_SUCCESSIVE_ITERATIONS);
 #else
-	GenericWarpTest<MEMORYDEVICE_CPU>(switches, 5, TEST_SUCCESSIVE_ITERATIONS, 1e-5);
+	GenericWarpTest<MEMORYDEVICE_CPU>(switches, 5, TEST_SUCCESSIVE_ITERATIONS, 25e-6);
 #endif
 }
 
 BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_DataAndTikhonovAndSobolevSmoothing_Fusion_CPU) {
 #ifdef GENERATE_TEST_DATA
 	GenericWarpTest<MEMORYDEVICE_CPU>(LevelSetAlignmentSwitches(true, false, true, false, true),
-									  5,GenericWarpTestMode::SAVE_FINAL_ITERATION_AND_FUSION);
+									  5,LevelSetAlignmentTestMode::SAVE_FINAL_ITERATION_AND_FUSION);
 #else
 	GenericWarpTest<MEMORYDEVICE_CPU>(LevelSetAlignmentSwitches(true, false, true, false, true),
-	                                  5, GenericWarpTestMode::TEST_FINAL_ITERATION_AND_FUSION);
+	                                  5, LevelSetAlignmentTestMode::TEST_FINAL_ITERATION_AND_FUSION);
 #endif
 }
 
@@ -115,7 +113,7 @@ BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_DataAndTikhonovAndSobolevSmoothing_CUDA) 
 
 BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_DataAndTikhonovAndSobolevSmoothing_Fusion_CUDA) {
 	GenericWarpTest<MEMORYDEVICE_CUDA>(LevelSetAlignmentSwitches(true, false, true, false, true),
-	                                   5, GenericWarpTestMode::TEST_FINAL_ITERATION_AND_FUSION, 1e-5);
+	                                   5, LevelSetAlignmentTestMode::TEST_FINAL_ITERATION_AND_FUSION, 1e-5);
 }
 
 #endif

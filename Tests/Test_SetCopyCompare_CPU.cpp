@@ -318,7 +318,7 @@ BOOST_AUTO_TEST_CASE(testCompareVoxelVolumes_CPU_ITMWarp) {
 	single_voxel_tests();
 
 //	generate only in the positive coordinates' volume, to make sure that the unneeded voxel hash blocks are properly dismissed
-	for (int iWarp = 0; iWarp < modified_warp_count; iWarp++) {
+	for (int i_warp = 0; i_warp < modified_warp_count; i_warp++) {
 		WarpVoxel warp;
 		Vector3f framewise_warp(warp_distribution(generator), warp_distribution(generator), warp_distribution(generator));
 		warp.warp_update = framewise_warp;

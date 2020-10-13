@@ -19,222 +19,39 @@
 #include <boost/test/test_tools.hpp>
 
 //ITMLib
-#include "../../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
-#include "../../ITMLib/Engines/VolumeFusion/VolumeFusionEngineFactory.h"
-#include "../../ITMLib/Engines/Warping/WarpingEngineFactory.h"
-#include "../../ITMLib/Engines/EditAndCopy/EditAndCopyEngineFactory.h"
-#include "../../ITMLib/Engines/Indexing/Interface/IndexingEngine.h"
-#include "../../ITMLib/Engines/Indexing/IndexingEngineFactory.h"
-#include "../../ITMLib/Engines/Rendering/RenderingEngineFactory.h"
-#include "../../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison.h"
+#include "../../../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
+#include "../../../ITMLib/Engines/VolumeFusion/VolumeFusionEngineFactory.h"
+#include "../../../ITMLib/Engines/Warping/WarpingEngineFactory.h"
+#include "../../../ITMLib/Engines/EditAndCopy/EditAndCopyEngineFactory.h"
+#include "../../../ITMLib/Engines/Indexing/Interface/IndexingEngine.h"
+#include "../../../ITMLib/Engines/Indexing/IndexingEngineFactory.h"
+#include "../../../ITMLib/Engines/Rendering/RenderingEngineFactory.h"
+#include "../../../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison.h"
+#include "../../../ITMLib/Utils/Geometry/SpatialIndexConversions.h"
 //(CPU)
-#include "../../ITMLib/Engines/Analytics/AnalyticsEngine.h"
+#include "../../../ITMLib/Engines/Analytics/AnalyticsEngine.h"
 //(CUDA)
 #ifndef COMPILE_WITHOUT_CUDA
 
-#include "../../ITMLib/Engines/Analytics/AnalyticsEngine.h"
-#include "../../ITMLib/Engines/Indexing/VBH/CUDA/IndexingEngine_VoxelBlockHash_CUDA.h"
+#include "../../../ITMLib/Engines/Analytics/AnalyticsEngine.h"
+#include "../../../ITMLib/Engines/Indexing/VBH/CUDA/IndexingEngine_VoxelBlockHash_CUDA.h"
 
 #endif
 
 
 //test_utilities
-#include "TestUtilities.h"
-#include "SnoopyTestUtilities.h"
-
+#include "../TestUtilities.h"
+#include "../SnoopyTestUtilities.h"
+#include "GenericWarpConsistencySubtest.h"
 #include "LevelSetAlignmentTestUtilities.h"
-#include "../../ITMLib/Utils/Geometry/SpatialIndexConversions.h"
+#include "TestCaseOrganizationBySwitches.h"
+#include "SingleIterationTestConditions.h"
 
 using namespace ITMLib;
 using namespace test_utilities;
 namespace snoopy = snoopy_test_utilities;
 
 namespace test_utilities {
-
-template<typename TIndex>
-std::string GetPathBase(std::string prefix, int iteration) {
-	return GENERATED_TEST_DATA_PREFIX "TestData/volumes/" + IndexString<TIndex>() + "/" + prefix + "_iter_" + std::to_string(iteration) + "_";
-}
-
-template<typename TIndex>
-std::string GetWarpsPath(std::string prefix, int iteration) {
-	return GetPathBase<TIndex>(prefix, iteration) + "warps.dat";
-}
-
-template<typename TIndex>
-std::string GetWarpedLivePath(std::string prefix, int iteration) {
-	return GetPathBase<TIndex>(prefix, iteration) + "warped_live.dat";
-}
-
-template<typename TIndex>
-std::string GetFusedPath(std::string prefix, int iteration) {
-	return GetPathBase<TIndex>(prefix, iteration) + "fused.dat";
-}
-
-template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
-void GenerateRawLiveAndCanonicalVolumes(VoxelVolume<TSDFVoxel, TIndex>** canonical_volume,
-                                        VoxelVolume<TSDFVoxel, TIndex>** live_volume) {
-	View* view = nullptr;
-	BuildSdfVolumeFromImage_NearSurfaceAllocation(canonical_volume,
-	                                              &view,
-	                                              snoopy::Frame16DepthPath(),
-	                                              snoopy::Frame16ColorPath(),
-	                                              snoopy::Frame16MaskPath(),
-	                                              snoopy::SnoopyCalibrationPath(),
-	                                              TMemoryDeviceType,
-	                                              snoopy::InitializationParameters_Fr16andFr17<TIndex>());
-
-	Vector2i image_size = view->depth.dimensions;
-
-	CameraTrackingState tracking_state(image_size, TMemoryDeviceType);
-
-	RenderingEngineBase<TSDFVoxel, TIndex>* visualization_engine =
-			RenderingEngineFactory::Build<TSDFVoxel, TIndex>(TMemoryDeviceType);
-
-	RenderState render_state(image_size, configuration::Get().general_voxel_volume_parameters.near_clipping_distance,
-	                         configuration::Get().general_voxel_volume_parameters.far_clipping_distance,
-	                         TMemoryDeviceType);
-
-	visualization_engine->CreateICPMaps(*canonical_volume, view, &tracking_state, &render_state);
-
-	UpdateView(&view,
-	           snoopy::Frame17DepthPath(),
-	           snoopy::Frame17ColorPath(),
-	           snoopy::Frame17MaskPath(),
-	           snoopy::SnoopyCalibrationPath(),
-	           TMemoryDeviceType);
-
-	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, TIndex>* depth_fusion_engine =
-			DepthFusionEngineFactory
-			::Build<TSDFVoxel, WarpVoxel, TIndex>(TMemoryDeviceType);
-
-	IndexingEngine<TSDFVoxel, TIndex, TMemoryDeviceType>::Instance()
-			.AllocateNearAndBetweenTwoSurfaces(*live_volume, view, &tracking_state);
-	depth_fusion_engine->IntegrateDepthImageIntoTsdfVolume(*live_volume, view);
-
-
-	delete visualization_engine;
-	delete view;
-}
-
-
-template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
-void GenericWarpConsistencySubtest(const LevelSetAlignmentSwitches& switches, int iteration_limit,
-                                   GenericWarpTestMode mode, float absolute_tolerance) {
-
-
-	std::string volume_filename_prefix = SwitchesToPrefix(switches);
-	if (iteration_limit < 2) {
-		DIEWITHEXCEPTION_REPORTLOCATION("Iteration limit must be at least 2");
-	}
-
-	VoxelVolume<WarpVoxel, TIndex> warp_field(TMemoryDeviceType,
-	                                          snoopy::InitializationParameters_Fr16andFr17<TIndex>());
-	warp_field.Reset();
-
-	VoxelVolume<TSDFVoxel, TIndex>* canonical_volume;
-	VoxelVolume<TSDFVoxel, TIndex>* live_volumes[2] = {
-			new VoxelVolume<TSDFVoxel, TIndex>(TMemoryDeviceType,
-			                                   snoopy::InitializationParameters_Fr16andFr17<TIndex>()),
-			new VoxelVolume<TSDFVoxel, TIndex>(TMemoryDeviceType,
-			                                   snoopy::InitializationParameters_Fr16andFr17<TIndex>())
-	};
-	live_volumes[0]->Reset();
-	live_volumes[1]->Reset();
-
-	const int source_warped_field_ix = 0;
-	const int target_warped_field_ix = 1;
-
-	GenerateRawLiveAndCanonicalVolumes<TIndex, TMemoryDeviceType>(&canonical_volume, &live_volumes[source_warped_field_ix]);
-
-	AllocateUsingOtherVolume(live_volumes[target_warped_field_ix], live_volumes[source_warped_field_ix], TMemoryDeviceType);
-	AllocateUsingOtherVolume(&warp_field, live_volumes[source_warped_field_ix], TMemoryDeviceType);
-	AllocateUsingOtherVolume(canonical_volume, live_volumes[source_warped_field_ix], TMemoryDeviceType);
-
-	LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, DIAGNOSTIC>
-	        level_set_alignment_engine(switches, SingleIterationTerminationConditions());
-
-	VoxelVolume<WarpVoxel, TIndex> ground_truth_warp_field(TMemoryDeviceType,
-	                                                       snoopy::InitializationParameters_Fr16andFr17<TIndex>());
-	VoxelVolume<TSDFVoxel, TIndex> ground_truth_sdf_volume(TMemoryDeviceType,
-	                                                       snoopy::InitializationParameters_Fr16andFr17<TIndex>());
-
-	ground_truth_warp_field.Reset();
-
-	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, TIndex>* reconstruction_engine =
-			DepthFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, TIndex>(TMemoryDeviceType);
-	WarpingEngineInterface<TSDFVoxel, WarpVoxel, TIndex>* warping_engine =
-			WarpingEngineFactory::Build<TSDFVoxel, WarpVoxel, TIndex>(TMemoryDeviceType);
-	VolumeFusionEngineInterface<TSDFVoxel, TIndex>* volume_fusion_engine =
-			VolumeFusionEngineFactory::Build<TSDFVoxel, TIndex>(TMemoryDeviceType);
-
-	for (int iteration = 0; iteration < iteration_limit; iteration++) {
-
-		std::cout << "Subtest " << IndexString<TIndex>() << " iteration " << std::to_string(iteration) << std::endl;
-
-		level_set_alignment_engine.Align(&warp_field, live_volumes, canonical_volume);
-
-		if (iteration < iteration_limit - 1) {
-			// prepare for next iteration by swapping source & target (live) TSDF fields
-			std::swap(live_volumes[source_warped_field_ix], live_volumes[target_warped_field_ix]);
-		}
-
-		std::string path = GetWarpsPath<TIndex>(volume_filename_prefix, iteration);
-		std::string path_warped_live = GetWarpedLivePath<TIndex>(volume_filename_prefix, iteration);
-		switch (mode) {
-			case SAVE_SUCCESSIVE_ITERATIONS:
-				live_volumes[target_warped_field_ix]->SaveToDisk(path_warped_live);
-				warp_field.SaveToDisk(path);
-				break;
-			case TEST_SUCCESSIVE_ITERATIONS:
-				ground_truth_warp_field.Reset();
-				ground_truth_warp_field.LoadFromDisk(path);
-
-				BOOST_REQUIRE(ContentAlmostEqual_Verbose(&warp_field, &ground_truth_warp_field, absolute_tolerance,
-				                                         TMemoryDeviceType));
-				ground_truth_sdf_volume.Reset();
-				ground_truth_sdf_volume.LoadFromDisk(path_warped_live);
-				BOOST_REQUIRE(ContentAlmostEqual_Verbose(live_volumes[target_warped_field_ix], &ground_truth_sdf_volume,
-				                                         absolute_tolerance, TMemoryDeviceType));
-				break;
-			default:
-				break;
-		}
-	}
-	std::cout << IndexString<TIndex>() << " fusion test" << std::endl;
-	switch (mode) {
-		case SAVE_FINAL_ITERATION_AND_FUSION:
-			warp_field.SaveToDisk(GetWarpsPath<TIndex>(volume_filename_prefix, iteration_limit - 1));
-			live_volumes[target_warped_field_ix]->SaveToDisk(GetWarpedLivePath<TIndex>(volume_filename_prefix, iteration_limit - 1));
-			volume_fusion_engine->FuseOneTsdfVolumeIntoAnother(canonical_volume, live_volumes[target_warped_field_ix], 0);
-			canonical_volume->SaveToDisk(GetFusedPath<TIndex>(volume_filename_prefix, iteration_limit - 1));
-			break;
-		case TEST_FINAL_ITERATION_AND_FUSION:
-			EditAndCopyEngineFactory::Instance<WarpVoxel, TIndex, TMemoryDeviceType>().ResetVolume(
-					&ground_truth_warp_field);
-			ground_truth_warp_field.LoadFromDisk(GetWarpsPath<TIndex>(volume_filename_prefix, iteration_limit - 1));
-			BOOST_REQUIRE(
-					ContentAlmostEqual(&warp_field, &ground_truth_warp_field, absolute_tolerance, TMemoryDeviceType));
-			ground_truth_sdf_volume.LoadFromDisk(
-					GetWarpedLivePath<TIndex>(volume_filename_prefix, iteration_limit - 1));
-			BOOST_REQUIRE(ContentAlmostEqual_Verbose(live_volumes[target_warped_field_ix], &ground_truth_sdf_volume,
-			                                         absolute_tolerance, TMemoryDeviceType));
-			volume_fusion_engine->FuseOneTsdfVolumeIntoAnother(canonical_volume, live_volumes[target_warped_field_ix], 0);
-			ground_truth_sdf_volume.LoadFromDisk(GetFusedPath<TIndex>(volume_filename_prefix, iteration_limit - 1));
-			BOOST_REQUIRE(ContentAlmostEqual(canonical_volume, &ground_truth_sdf_volume, absolute_tolerance,
-			                                 TMemoryDeviceType));
-			break;
-		default:
-			break;
-	}
-
-	delete canonical_volume;
-	delete live_volumes[0];
-	delete live_volumes[1];
-	delete reconstruction_engine;
-	delete warping_engine;
-	delete volume_fusion_engine;
-}
 
 
 template<MemoryDeviceType TMemoryDeviceType>
@@ -243,10 +60,6 @@ void PVA_to_VBH_WarpComparisonSubtest(int iteration, LevelSetAlignmentSwitches t
 	if (iteration < 0) {
 		DIEWITHEXCEPTION_REPORTLOCATION("Expecting iteration >= 0, got less than that, aborting.");
 	}
-	std::string path_frame_16_PVA = snoopy::PartialVolume16Path<PlainVoxelArray>();
-	std::string path_frame_16_VBH = snoopy::PartialVolume16Path<VoxelBlockHash>();
-	std::string path_frame_17_PVA = snoopy::PartialVolume17Path<PlainVoxelArray>();
-	std::string path_frame_17_VBH = snoopy::PartialVolume17Path<VoxelBlockHash>();
 
 	std::string prefix = SwitchesToPrefix(trackerSwitches);
 	float absolute_tolerance = 1e-6f;
@@ -263,9 +76,9 @@ void PVA_to_VBH_WarpComparisonSubtest(int iteration, LevelSetAlignmentSwitches t
 		           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 		BOOST_REQUIRE(AllocatedContentAlmostEqual(warps_PVA, warps_VBH, absolute_tolerance, TMemoryDeviceType));
 	} else {
-		initializeVolume(&warps_PVA, snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>(),
+		InitializeVolume(&warps_PVA, snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>(),
 		                 TMemoryDeviceType);
-		initializeVolume(&warps_VBH, snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>(), TMemoryDeviceType);
+		InitializeVolume(&warps_VBH, snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>(), TMemoryDeviceType);
 
 		BOOST_REQUIRE(AllocatedContentAlmostEqual(warps_PVA, warps_VBH, absolute_tolerance, TMemoryDeviceType));
 	}
@@ -281,13 +94,11 @@ void PVA_to_VBH_WarpComparisonSubtest(int iteration, LevelSetAlignmentSwitches t
 		path_live_PVA = GetWarpedLivePath<PlainVoxelArray>(prefix, iteration - 1);
 		path_live_VBH = GetWarpedLivePath<VoxelBlockHash>(prefix, iteration - 1);
 	} else {
-		path_live_PVA = path_frame_17_PVA;
-		path_live_VBH = path_frame_17_VBH;
+		path_live_PVA = snoopy::PartialVolume17Path<PlainVoxelArray>();
+		path_live_VBH =  snoopy::PartialVolume17Path<VoxelBlockHash>();
 	}
-	LoadVolume(&warped_live_PVA, path_live_PVA, TMemoryDeviceType,
-	           snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
-	LoadVolume(&warped_live_VBH, path_live_VBH, TMemoryDeviceType,
-	           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
+	LoadVolume(&warped_live_PVA, path_live_PVA, TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
+	LoadVolume(&warped_live_VBH, path_live_VBH, TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 	if (iteration == 0) {
 		AllocateUsingOtherVolume(warps_VBH, warped_live_VBH, TMemoryDeviceType);
 	}
@@ -299,55 +110,29 @@ void PVA_to_VBH_WarpComparisonSubtest(int iteration, LevelSetAlignmentSwitches t
 
 	// *** load canonical volume as the two different data structures
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* volume_16_PVA;
-	LoadVolume(&volume_16_PVA, path_frame_16_PVA, TMemoryDeviceType,
+	LoadVolume(&volume_16_PVA, snoopy::PartialVolume16Path<PlainVoxelArray>(), TMemoryDeviceType,
 	           snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
+	AllocateUsingOtherVolume(volume_16_PVA, warped_live_PVA, TMemoryDeviceType);
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume_16_VBH;
-	LoadVolume(&volume_16_VBH, path_frame_16_VBH, TMemoryDeviceType,
+	LoadVolume(&volume_16_VBH, snoopy::PartialVolume16Path<VoxelBlockHash>(), TMemoryDeviceType,
 	           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 	AllocateUsingOtherVolume(volume_16_VBH, warped_live_VBH, TMemoryDeviceType);
 
 	// *** perform the warp gradient computation and warp updates
 	LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray, TMemoryDeviceType, DIAGNOSTIC>
-	        level_set_aligner_PVA(trackerSwitches, SingleIterationTerminationConditions());
-
-	//__DEBUG
-	// printf("Live & canonical PVA values:\n");
-	// Vector3i pos(-26,-21,200);
-	// warped_live_PVA->GetValueAt(pos).print_self();
-	// volume_16_PVA->GetValueAt(pos).print_self();
-	// printf("Live & canonical VBH values:\n");
-	// warped_live_VBH->GetValueAt(pos).print_self();
-	// volume_16_VBH->GetValueAt(pos).print_self();
+			level_set_aligner_PVA(trackerSwitches, SingleIterationTerminationConditions());
 
 
 	BOOST_TEST_MESSAGE("==== CALCULATE PVA WARPS === ");
 	level_set_aligner_PVA.Align(warps_PVA, warped_pair_PVA, volume_16_PVA);
 
 	LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash, TMemoryDeviceType, DIAGNOSTIC>
-	        level_set_aligner_VBH(trackerSwitches, SingleIterationTerminationConditions());
+			level_set_aligner_VBH(trackerSwitches, SingleIterationTerminationConditions());
 
-	BOOST_TEST_MESSAGE( "==== CALCULATE VBH WARPS === ");
+	BOOST_TEST_MESSAGE("==== CALCULATE VBH WARPS === ");
 	level_set_aligner_VBH.Align(warps_VBH, warped_pair_VBH, volume_16_VBH);
 
-	//__DEBUG
-	printf("Warp PVA - warp VBH (warp_update, gradient0, gradient1):\n");
-	Vector3i pos(-13, 10, 170);
-	std::cout.precision(std::numeric_limits<float>::max_digits10);
-	std::cout << std::fixed << warps_PVA->GetValueAt(pos).warp_update - warps_VBH->GetValueAt(pos).warp_update << std::endl;
-	std::cout << std::fixed << warps_PVA->GetValueAt(pos).gradient0 - warps_VBH->GetValueAt(pos).gradient0 << std::endl;
-	std::cout << std::fixed << warps_PVA->GetValueAt(pos).gradient1 - warps_VBH->GetValueAt(pos).gradient1 << std::endl;
-	//__DEBUG
-	printf("Voxel hash index details:\n");
-	Vector3s hash_pos;
-	pointToVoxelBlockPos(pos, hash_pos);
-	std::cout << warps_VBH->index.GetHashEntryAt(hash_pos) << std::endl;
-	std::cout << ComputeLinearIndexFromPosition_VoxelBlockHash(warps_VBH->index.GetIndexData(), pos) << std::endl;
-	printf("PVA index details:\n");
-	std::cout << ComputeLinearIndexFromPosition_PlainVoxelArray(warps_PVA->index.GetIndexData(), pos) << std::endl;
-
-
 	BOOST_REQUIRE(AllocatedContentAlmostEqual_Verbose(warps_PVA, warps_VBH, absolute_tolerance, TMemoryDeviceType));
-
 
 	delete volume_16_PVA;
 	delete volume_16_VBH;
@@ -356,9 +141,6 @@ void PVA_to_VBH_WarpComparisonSubtest(int iteration, LevelSetAlignmentSwitches t
 
 	VoxelVolume<WarpVoxel, PlainVoxelArray>* loaded_warps_PVA;
 	VoxelVolume<WarpVoxel, VoxelBlockHash>* loaded_warps_VBH;
-
-	//__DEBUG
-	std::cout << GetWarpsPath<PlainVoxelArray>(prefix, iteration) << std::endl;
 
 	LoadVolume(&loaded_warps_PVA, GetWarpsPath<PlainVoxelArray>(prefix, iteration), TMemoryDeviceType,
 	           snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
@@ -377,7 +159,7 @@ void PVA_to_VBH_WarpComparisonSubtest(int iteration, LevelSetAlignmentSwitches t
 
 template<MemoryDeviceType TMemoryDeviceType>
 void GenericWarpTest(const LevelSetAlignmentSwitches& switches, int iteration_limit,
-                     GenericWarpTestMode mode, float absolute_tolerance) {
+                     LevelSetAlignmentTestMode mode, float absolute_tolerance) {
 
 	std::string prefix = SwitchesToPrefix(switches);
 	GenericWarpConsistencySubtest<PlainVoxelArray, TMemoryDeviceType>(switches, iteration_limit, mode,

@@ -20,6 +20,8 @@
 #include "../Math.h"
 #include "GeometryConversionOperations.h"
 
+namespace ITMLib {
+
 _CPU_AND_GPU_CODE_
 inline
 bool IsPointInBounds(const Vector3i& point, const ITMLib::GridAlignedBox& box) {
@@ -109,3 +111,4 @@ Extent3Di IntersectionExtent(const ITMLib::GridAlignedBox& extent1,
 	return IntersectionExtent(PVA_InfoToExtent(extent1), PVA_InfoToExtent(extent2));
 }
 
+} // namespace ITMLib

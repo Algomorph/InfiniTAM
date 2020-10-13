@@ -42,7 +42,8 @@
 //test_utilities
 #include "TestUtilities/TestUtilities.h"
 #include "TestUtilities/SnoopyTestUtilities.h"
-#include "TestUtilities/LevelSetAlignmentTestUtilities.h"
+#include "TestUtilities/LevelSetAlignment/LevelSetAlignmentTestUtilities.h"
+#include "TestUtilities/LevelSetAlignment/TestCaseOrganizationBySwitches.h"
 
 using namespace ITMLib;
 using namespace test_utilities;

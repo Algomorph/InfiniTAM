@@ -99,21 +99,19 @@ struct GradientSmoothingPassFunctor {
 		int vmIndex = 0;
 		if (!VoxelIsConsideredForAlignment(canonical_voxel, live_voxel)) return;
 
-		const auto directionIndex = (int) TDirection;
+		const auto direction_index = (int) TDirection;
 
 		Vector3i receptive_voxel_position = voxel_position;
-		receptive_voxel_position[directionIndex] -= (sobolev_filter_size / 2);
+		receptive_voxel_position[direction_index] -= (sobolev_filter_size / 2);
 		Vector3f smoothed_gradient(0.0f);
 
-		for (int iVoxel = 0; iVoxel < sobolev_filter_size; iVoxel++, receptive_voxel_position[directionIndex]++) {
+		for (int iVoxel = 0; iVoxel < sobolev_filter_size; iVoxel++, receptive_voxel_position[direction_index]++) {
 #if !defined(__CUDACC__) && !defined(WITH_OPENMP)
-			const TWarp& receptiveVoxel = readVoxel(warp_voxels, warp_index_data,
-													receptive_voxel_position, vmIndex, warp_field_cache);
+			const TWarp& destination_voxel = readVoxel(warp_voxels, warp_index_data, receptive_voxel_position, vmIndex, warp_field_cache);
 #else
-			const TWarp& receptiveVoxel = readVoxel(warp_voxels, warp_index_data,
-			                                        receptive_voxel_position, vmIndex);
+			const TWarp& destination_voxel = readVoxel(warp_voxels, warp_index_data, receptive_voxel_position, vmIndex);
 #endif
-			smoothed_gradient += sobolev_filter1D[iVoxel] * GetGradient(receptiveVoxel);
+			smoothed_gradient += sobolev_filter1D[iVoxel] * GetGradient(destination_voxel);
 		}
 		SetGradient(warp_voxel, smoothed_gradient);
 	}

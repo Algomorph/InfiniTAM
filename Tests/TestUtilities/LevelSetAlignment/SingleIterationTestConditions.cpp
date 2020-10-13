@@ -14,3 +14,14 @@
 //  limitations under the License.
 //  ================================================================
 #include "SingleIterationTestConditions.h"
+
+using namespace ITMLib;
+
+namespace test_utilities{
+
+const LevelSetAlignmentTerminationConditions& SingleIterationTerminationConditions() {
+	static LevelSetAlignmentTerminationConditions single_iteration_termination_conditions{MAXIMUM, 1, 0, 1e-6f};
+	return single_iteration_termination_conditions;
+}
+
+} // namespace test_utilities

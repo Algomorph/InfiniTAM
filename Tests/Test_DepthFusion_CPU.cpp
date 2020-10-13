@@ -52,10 +52,6 @@ using namespace test_utilities;
 
 namespace snoopy = snoopy_test_utilities;
 
-typedef VolumeFileIOEngine<TSDFVoxel, PlainVoxelArray> SceneFileIOEngine_PVA;
-typedef VolumeFileIOEngine<TSDFVoxel, VoxelBlockHash> SceneFileIOEngine_VBH;
-
-//#define SAVE_TEST_DATA
 BOOST_AUTO_TEST_CASE(Test_SceneConstruct16_PVA_VBH_Near_CPU) {
 
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* volume_PVA_16;
@@ -76,13 +72,6 @@ BOOST_AUTO_TEST_CASE(Test_SceneConstruct16_PVA_VBH_Near_CPU) {
 	                                              snoopy::SnoopyCalibrationPath(),
 	                                              MEMORYDEVICE_CPU,
 	                                              snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
-
-#ifdef SAVE_TEST_DATA
-	std::string path_PVA = GENERATED_TEST_DATA_PREFIX "TestData/snoopy_result_fr16-17_partial_PVA/snoopy_partial_frame_16_near.dat";
-	volume_PVA_16->SaveToDisk(path_PVA);
-	std::string path_VBH = GENERATED_TEST_DATA_PREFIX "TestData/snoopy_result_fr16-17_partial_VBH/snoopy_partial_frame_16_near.dat";
-	volume_VBH_16->SaveToDisk(path_VBH);
-#endif
 
 	float absoluteTolerance = 1e-7;
 	BOOST_REQUIRE(allocatedContentAlmostEqual_CPU(volume_PVA_16, volume_VBH_16, absoluteTolerance));
@@ -201,7 +190,6 @@ BOOST_AUTO_TEST_CASE(Test_SceneConstruct17_VBH_CPU_NearVsSpan) {
 	delete depth_fusion_engine_VBH;
 }
 
-//#define SAVE_TEST_DATA
 BOOST_AUTO_TEST_CASE(Test_SceneConstruct17_PVA_VBH_Span_CPU) {
 
 	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>& indexer_VBH =
@@ -240,11 +228,6 @@ BOOST_AUTO_TEST_CASE(Test_SceneConstruct17_PVA_VBH_Span_CPU) {
 	std::vector<Vector3s> difference_set = Analytics_CPU_VBH_Voxel::Instance()
 			.GetDifferenceBetweenAllocatedAndUtilizedHashBlockPositionSets(&volume_VBH_17_Span);
 
-//	std::cout << difference_set << std::endl;
-//	int hash_code;
-//	indexer_VBH.FindHashEntry(volume_VBH_17_Span.index, difference_set[0], hash_code);
-//	std::cout << hash_code << std::endl;
-
 	BOOST_REQUIRE(difference_set.empty());
 
 	int vbh_span_nontruncated_voxel_count =
@@ -255,8 +238,7 @@ BOOST_AUTO_TEST_CASE(Test_SceneConstruct17_PVA_VBH_Span_CPU) {
 
 	float absolute_tolerance = 1e-7;
 	BOOST_REQUIRE(allocatedContentAlmostEqual_CPU(&volume_PVA_17, &volume_VBH_17_Span, absolute_tolerance));
-	BOOST_REQUIRE(
-			contentForFlagsAlmostEqual_CPU_Verbose(&volume_PVA_17, &volume_VBH_17_Span, VoxelFlags::VOXEL_NONTRUNCATED,
+	BOOST_REQUIRE(contentForFlagsAlmostEqual_CPU_Verbose(&volume_PVA_17, &volume_VBH_17_Span, VoxelFlags::VOXEL_NONTRUNCATED,
 			                                       absolute_tolerance, OPTIMIZED));
 }
 
