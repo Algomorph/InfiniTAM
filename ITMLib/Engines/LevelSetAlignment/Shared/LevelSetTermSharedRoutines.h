@@ -74,11 +74,11 @@ inline void ComputeSdfHessian_Basic(THREADPTR(Matrix3f)& hessian,
 	                         + 2 * sdf_at_position
 	                         - sdf_at_x_minus_one - sdf_at_z_minus_one + sdf_at_x_minus_one_z_minus_one);
 
-	float vals[9] = {delta_xx, delta_xy, delta_xz,
-	                 delta_xy, delta_yy, delta_yz,
-	                 delta_xz, delta_yz, delta_zz};
+	float values[9] = {delta_xx, delta_xy, delta_xz,
+	                   delta_xy, delta_yy, delta_yz,
+	                   delta_xz, delta_yz, delta_zz};
 
-	hessian.setValues(vals);
+	hessian.setValues(values);
 };
 
 template<typename TVoxel, typename TIndexData, typename TCache>
@@ -149,11 +149,11 @@ inline void ComputeSdfHessian_ZeroIfTruncated(THREADPTR(Matrix3f)& hessian,
 	                         + 2 * sdf_at_position
 	                         - sdf_at_x_minus_one - sdf_at_z_minus_one + sdf_at_x_minus_one_z_minus_one);
 
-	float vals[9] = {delta_xx, delta_xy, delta_xz,
-	                 delta_xy, delta_yy, delta_yz,
-	                 delta_xz, delta_yz, delta_zz};
+	float values[9] = {delta_xx, delta_xy, delta_xz,
+	                   delta_xy, delta_yy, delta_yz,
+	                   delta_xz, delta_yz, delta_zz};
 
-	hessian.setValues(vals);
+	hessian.setValues(values);
 };
 
 //// Actual function used everywhere:
@@ -189,15 +189,16 @@ inline void ComputeLevelSetEnergyGradient(THREADPTR(Vector3f)& level_set_energy_
 	// |∇φ_{proj}(Ψ)|
 	float live_sdf_gradient_norm = ORUtils::length(live_sdf_gradient);
 	// ~ |∇φ_{proj}(Ψ)| - '1'
-	// Note: unity constant is actually not 1, so '1' here means 1/[truncation distance in voxels]
+	// Note: because of the sdf-to-voxel scaling factor,
+	// unity constant is actually not 1, so '1' here means 1/[truncation distance in voxels]
 	live_sdf_gradient_norm_minus_unity = live_sdf_gradient_norm - sdf_unity;
 	//                        ┏                                                          ┓
 	// (|∇φ_{proj}(Ψ)| - 1)   ┃  ∇_{xx}φ_{proj}(Ψ)  ∇_{xy}φ_{proj}(Ψ)  ∇_{xz}φ_{proj}(Ψ) ┃
-	// --------------------   ┃  ∇_{yx}φ_{proj}(Ψ)  ∇_{yy}φ_{proj}(Ψ)  ∇_{yz}φ_{proj}(Ψ) ┃ ∇φ_{proj}(Ψ
+	// --------------------   ┃  ∇_{yx}φ_{proj}(Ψ)  ∇_{yy}φ_{proj}(Ψ)  ∇_{yz}φ_{proj}(Ψ) ┃ ∇φ_{proj}(Ψ)
 	//  |∇φ_{proj}(Ψ)|_{E}    ┃  ∇_{zx}φ_{proj}(Ψ)  ∇_{zy}φ_{proj}(Ψ)  ∇_{zz}φ_{proj}(Ψ) ┃
 	//                        ┗                                                          ┛
 	level_set_energy_gradient =
-			(weight_level_set_term * live_sdf_gradient_norm_minus_unity / (live_sdf_gradient_norm + epsilon))
+			-(weight_level_set_term * live_sdf_gradient_norm_minus_unity / (live_sdf_gradient_norm + epsilon))
 			* (live_sdf_hessian * live_sdf_gradient);
 }
 

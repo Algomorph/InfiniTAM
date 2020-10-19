@@ -34,6 +34,7 @@ DECLARE_SERIALIZABLE_ENUM(LIBMODE_ENUM_DESCRIPTION);
     (bool, draw_frame_index_labels, false, PRIMITIVE, "Draw index labels on top of output frame images"), \
     (LibMode, library_mode, LIBMODE_DYNAMIC, ENUM, "Switch between various library modes - basic, with loop closure, etc."), \
     (IndexingMethod, indexing_method, INDEX_HASH, ENUM, "Indexing method to use in the 3D volumes, i.e. array or hash."),    \
+    (bool, halt_on_non_rigid_alignment_convergence_faulture, false, PRIMITIVE, "Whether to halt on non-rigid alignment optimization convergence failure"), \
     (bool, enable_rigid_alignment, true, PRIMITIVE, "Enables or disables rigid (camera) tracking/alignment.")
 
 

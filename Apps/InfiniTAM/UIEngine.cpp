@@ -215,6 +215,10 @@ void UIEngine::ProcessFrame() {
 		this->tracking_result = main_engine->ProcessFrame(input_RGB_image, input_raw_depth_image, input_IMU_measurement);
 	else tracking_result = main_engine->ProcessFrame(input_RGB_image, input_raw_depth_image);
 
+	if(main_engine->GetMainProcessingOn() == false && this->automatic_run_settings.exit_if_main_processing_turns_off){
+		this->main_loop_action = EXIT;
+	}
+
 #ifndef COMPILE_WITHOUT_CUDA
 	ORcudaSafeCall(cudaDeviceSynchronize());
 #endif

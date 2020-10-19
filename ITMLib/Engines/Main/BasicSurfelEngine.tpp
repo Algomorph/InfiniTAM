@@ -394,3 +394,8 @@ void BasicSurfelEngine<TSurfel>::TurnOnMainProcessing() { mainProcessingActive =
 
 template<typename TSurfel>
 void BasicSurfelEngine<TSurfel>::TurnOffMainProcessing() { mainProcessingActive = false; }
+
+template<typename TSurfel>
+bool BasicSurfelEngine<TSurfel>::GetMainProcessingOn() const {
+	return mainProcessingActive;
+}

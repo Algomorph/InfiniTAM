@@ -59,6 +59,16 @@ public:
 			VoxelVolume<TVoxel, TIndex>* canonical_volume) = 0;
 
 	/**
+	 * @overload
+	 * \param optimizationConverged whether the optimization converged
+	 */
+	virtual VoxelVolume<TVoxel, TIndex>* Align(
+			VoxelVolume<TWarp, TIndex>* warp_field,
+			VoxelVolume<TVoxel, TIndex>** live_volume_pair,
+			VoxelVolume<TVoxel, TIndex>* canonical_volume,
+			bool& optimizationConverged) = 0;
+
+	/**
 	 * \brief Clear out the warp_update field of all voxels in the provided warp_field.
 	 * \param warp_field the volume whose warp updates to clear out.
 	 */

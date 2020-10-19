@@ -126,6 +126,8 @@ public: // instance functions
 	void TurnOnMainProcessing() override;
 	void TurnOffMainProcessing() override;
 
+	virtual bool GetMainProcessingOn() const override;
+
 private: // instance functions
 	void Reset();
 	void InitializeScenes();

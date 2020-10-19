@@ -455,3 +455,8 @@ void BasicVoxelEngine<TVoxel,TIndex>::TurnOnMainProcessing() { main_processing_a
 
 template <typename TVoxel, typename TIndex>
 void BasicVoxelEngine<TVoxel,TIndex>::TurnOffMainProcessing() { main_processing_active = false; }
+
+template<typename TVoxel, typename TIndex>
+bool BasicVoxelEngine<TVoxel, TIndex>::GetMainProcessingOn() const {
+	return main_processing_active;
+}

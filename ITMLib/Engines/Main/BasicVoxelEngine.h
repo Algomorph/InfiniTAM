@@ -87,6 +87,8 @@ public: // instance functions
 	void TurnOnMainProcessing() override;
 	void TurnOffMainProcessing() override;
 
+	virtual bool GetMainProcessingOn() const override;
+
 	/// resets the scene and the tracker
 	void ResetAll();
 

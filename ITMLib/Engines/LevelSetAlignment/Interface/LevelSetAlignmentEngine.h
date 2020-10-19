@@ -55,6 +55,12 @@ public: // instance functions
 			VoxelVolume<TVoxel, TIndex>** live_volume_pair,
 			VoxelVolume<TVoxel, TIndex>* canonical_volume) override;
 
+	VoxelVolume<TVoxel, TIndex>* Align(
+			VoxelVolume<TWarp, TIndex>* warp_field,
+			VoxelVolume<TVoxel, TIndex>** live_volume_pair,
+			VoxelVolume<TVoxel, TIndex>* canonical_volume,
+			bool& optimizationConverged) override;
+
 	void ClearOutWarpUpdates(VoxelVolume<TWarp, TIndex>* warp_field) const;
 
 protected: // instance functions

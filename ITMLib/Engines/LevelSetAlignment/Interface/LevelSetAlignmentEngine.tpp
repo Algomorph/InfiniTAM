@@ -128,13 +128,6 @@ void LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutio
 // endregion ====================================== LOGGING ============================================================
 
 // region ==================================== MOTION TRACKING LOOP ====================================================
-/**
- * \brief Tracks motion of voxels (around surface) from canonical frame to live frame.
- * \details The warp field representing motion of voxels in the canonical frame is updated such that the live frame maps
- * as closely as possible back to the canonical using the warp.
- * \param canonical_volume the canonical voxel grid
- * \param liveScene the live voxel grid (typically obtained by integrating a single depth image into an empty TSDF grid)
- */
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
 VoxelVolume<TVoxel, TIndex>*
 LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode>::Align(
@@ -142,6 +135,17 @@ LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode
 		VoxelVolume<TVoxel, TIndex>** live_volume_pair,
 		VoxelVolume<TVoxel, TIndex>* canonical_volume) {
 
+	bool optimizationConverged = true;
+	return this->Align(warp_field, live_volume_pair, canonical_volume, optimizationConverged);
+}
+
+
+template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
+VoxelVolume<TVoxel, TIndex>*
+LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode>::Align(VoxelVolume<TWarp, TIndex>* warp_field,
+                                                                                         VoxelVolume<TVoxel, TIndex>** live_volume_pair,
+                                                                                         VoxelVolume<TVoxel, TIndex>* canonical_volume,
+                                                                                         bool& optimizationConverged) {
 	const float voxel_size = configuration::Get().general_voxel_volume_parameters.voxel_size;
 
 	float gradient_length_statistic_in_voxels = std::numeric_limits<float>::infinity();
@@ -158,6 +162,9 @@ LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutionMode
 
 		std::swap(source_live_volume_index, target_live_volume_index);
 	}
+
+	optimizationConverged = iteration < termination.max_iteration_count;
+
 	configuration::Configuration& config = configuration::Get();
 	if (config.logging_settings.log_gradient_length_statistic) {
 		LOG4CPLUS_PER_FRAME(logging::GetLogger(), "Frame-final level set evolution gradient length statistic (meters): "
@@ -292,7 +299,6 @@ void LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutio
 		LOG4CPLUS_PER_ITERATION(logging::GetLogger(), red << "Iteration: " << iteration << reset);
 	}
 
-
 	if (config.logging_settings.log_surface_tracking_procedure_names) {
 		LOG4CPLUS_PER_ITERATION(logging::GetLogger(), bright_cyan << "Calculating warp energy gradient..." << reset);
 	}
@@ -329,7 +335,7 @@ void LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutio
 		LOG4CPLUS_PER_ITERATION(logging::GetLogger(), "[Gradient length statistic (meters)] * learning_rate vs. threshold: ");
 		LOG4CPLUS_PER_ITERATION(logging::GetLogger(), "   "
 				<< yellow << gradient_length_statistic_in_voxels * configuration::Get().general_voxel_volume_parameters.voxel_size
-				* this->weights.learning_rate  << " vs. " << this->termination.update_length_threshold << reset);
+				             * this->weights.learning_rate << " vs. " << this->termination.update_length_threshold << reset);
 	}
 
 	if (config.logging_settings.log_surface_tracking_procedure_names) {
@@ -419,6 +425,7 @@ void LevelSetAlignmentEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType, TExecutio
 	}
 	average_warp_length = final_sum_and_count.sum / final_sum_and_count.count;
 }
+
 
 
 

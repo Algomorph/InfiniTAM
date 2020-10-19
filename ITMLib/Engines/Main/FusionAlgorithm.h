@@ -102,6 +102,8 @@ public:
 	virtual void TurnOnMainProcessing() = 0;
 	virtual void TurnOffMainProcessing() = 0;
 
+	virtual bool GetMainProcessingOn() const = 0;
+
 
 	virtual ~FusionAlgorithm() {}
 };

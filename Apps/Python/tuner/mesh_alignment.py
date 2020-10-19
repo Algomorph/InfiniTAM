@@ -9,10 +9,9 @@ import sys
 from mako.template import Template
 
 
-
 # Requires Ubuntu for easy snap installations.
-# Other platforms will require source code modifications, so that paths of meshlab.meshlabserver and CloudCompare
-# point to correct executables.
+# Other platforms will require source code modifications, i.e. make sure that paths of
+# meshlab.meshlabserver and CloudCompare below point to correct executables.
 #
 # Requires mako
 # Requires Meshlab (Ubuntu: sudo snap install meshlab)
@@ -25,6 +24,7 @@ def roughly_align_and_prepare(input_mesh_path: str, output_mesh_path: str) -> in
     f = open(os.devnull, 'w')
     command_string = "/snap/bin/meshlab.meshlabserver -s " + mlx_path + " -i " + input_mesh_path + \
                      " -o " + output_mesh_path + " -m vn"
+    print(command_string)
     output = subprocess.check_output(command_string.split(" "), stderr=f).decode()
     pattern = re.compile(r'\((\d+)\svn\s\d+\sfn\)')
     vertex_count = int(re.findall(pattern, output)[0])
@@ -56,10 +56,12 @@ def string_to_file(text, file_path):
 
 def finely_align(roughly_aligned_mesh_path: str, output_mesh_path: str, fine_registration_matrix: np.ndarray) -> None:
     script_directory = os.path.dirname(os.path.abspath(__file__))
+    templates_directory = "./templates"
     output_mesh_directory = os.path.dirname(output_mesh_path)
     output_mesh_name = os.path.splitext(os.path.basename(output_mesh_path))[0]
-    transformation_filter_template_path = os.path.join(script_directory, "meshlab_transformation_filter_mako_template.mlx")
-    transformation_filter_template = Template(filename=transformation_filter_template_path, module_directory=script_directory)
+    # transformation_filter_template_path = os.path.join(script_directory, "meshlab_transformation_filter_mako_template.mlx")
+    transformation_filter_template_path = "./meshlab_transformation_filter_mako_template.mlx"
+    transformation_filter_template = Template(filename=transformation_filter_template_path, module_directory=templates_directory)
     transformation_filter_path = os.path.join(output_mesh_directory, output_mesh_name + "_meshlab_transformation_filter.mlx")
 
     string_to_file(transformation_filter_template.render(
@@ -106,7 +108,7 @@ def compute_fine_registration_matrix_using_icp(target_mesh_path: str, reference_
     return parse_registration_matrix(target_mesh_path)
 
 
-def align_two_meshes(input_mesh_path:str, reference_mesh_path:str, output_mesh_path: str) -> None:
+def align_two_meshes(input_mesh_path: str, reference_mesh_path: str, output_mesh_path: str) -> None:
     vertex_count = roughly_align_and_prepare(input_mesh_path, output_mesh_path)
     fine_transformation_matrix = compute_fine_registration_matrix_using_icp(output_mesh_path, reference_mesh_path, vertex_count)
     finely_align(output_mesh_path, output_mesh_path, fine_transformation_matrix)
@@ -115,13 +117,14 @@ def align_two_meshes(input_mesh_path:str, reference_mesh_path:str, output_mesh_p
 PROGRAM_SUCCESS = 0
 PROGRAM_FAIL = -1
 
+
 def main() -> int:
     parser = argparse.ArgumentParser(description='Align Reco Snoopy output with Snoopy canonical mesh.')
     parser.add_argument('input_mesh_path', metavar='N', type=str,
                         help='mesh to transform')
 
     parser.add_argument('output_mesh_path', metavar='N', type=str,
-                        help='mesh to transform')
+                        help='path to output mesh, e.g. input mesh aligned to the reference mesh')
 
     parser.add_argument('reference_mesh_path', metavar='N', type=str,
                         help='mesh to transform')

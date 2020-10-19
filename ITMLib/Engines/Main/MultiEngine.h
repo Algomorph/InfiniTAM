@@ -101,6 +101,8 @@ namespace ITMLib
 		void TurnOnMainProcessing() override;
 		void TurnOffMainProcessing() override;
 
+		bool GetMainProcessingOn() const override;
+
 		/** \brief Constructor
 			Ommitting a separate image size for the depth images
 			will assume same resolution as for the RGB images.

@@ -468,3 +468,9 @@ template<typename TVoxel, typename TIndex>
 void MultiEngine<TVoxel, TIndex>::ResetAll() {
 	DIEWITHEXCEPTION_REPORTLOCATION("Not implemented");
 }
+
+template<typename TVoxel, typename TIndex>
+bool MultiEngine<TVoxel, TIndex>::GetMainProcessingOn() const{
+	std::cerr << "Main processing on/off switch not available in " __FILE__ "." << std::endl;
+	return true;
+}

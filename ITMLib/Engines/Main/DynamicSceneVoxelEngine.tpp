@@ -304,10 +304,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(UChar4Image* rgb_im
 
 	HandlePotentialCameraTrackingFailure();
 
-	// surface tracking & fusion
-	if (!main_processing_active) return CameraTrackingState::TRACKING_FAILED;
 	bool fusion_succeeded = false;
-
 	telemetry::SetGlobalFrameIndex(FrameIndex());
 	if ((last_tracking_result == CameraTrackingState::TRACKING_GOOD || !tracking_initialised) &&
 	    (fusion_active) && (relocalization_count == 0)) {
@@ -332,7 +329,13 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(UChar4Image* rgb_im
 
 		benchmarking::start_timer("TrackMotion");
 		LOG4CPLUS_PER_FRAME(logging::GetLogger(), bright_cyan << "*** Optimizing warp based on difference between canonical and live SDF. ***" << reset);
-		target_warped_live_volume = surface_tracker->Align(warp_field, live_volumes, canonical_volume);
+		bool optimizationConverged;
+		target_warped_live_volume = surface_tracker->Align(warp_field, live_volumes, canonical_volume, optimizationConverged);
+		if(this->parameters.halt_on_non_rigid_alignment_convergence_faulture && !optimizationConverged){
+			main_processing_active = false;
+			LOG4CPLUS_TOP_LEVEL(logging::GetLogger(), bright_cyan << "Non-rigid TSDF alignment optimization did not converge. Switching off main processing." << reset);
+		}
+
 		LOG4CPLUS_PER_FRAME(logging::GetLogger(), bright_cyan << "*** Warping optimization finished for current frame. ***" << reset);
 		benchmarking::stop_timer("TrackMotion");
 
@@ -618,6 +621,11 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::AddFrameIndexToImage(UChar4
 	std::stringstream ss;
 	ss << std::setw(6) << std::setfill(' ') << frame_index;
 	ORUtils::DrawTextOnImage(out, ss.str(), 15, 20, 20, true);
+}
+
+template<typename TVoxel, typename TWarp, typename TIndex>
+bool DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetMainProcessingOn() const {
+	return this->main_processing_active;
 }
 
 // endregion ===========================================================================================================

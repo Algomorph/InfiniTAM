@@ -9,20 +9,21 @@ import re
 
 from collections import namedtuple
 
-HausdorffDistance = namedtuple('HausdorffDistance', ['fileA', 'fileB', 'nptsA', 'dmin', 'dmax', 'dmean', 'dRMS'], verbose=False)
+HausdorffDistance = namedtuple('HausdorffDistance', ['fileA', 'fileB', 'nptsA', 'dmin', 'dmax', 'dmean', 'dRMS'],
+                               verbose=False)
 
 
-# Requires Ubuntu for easy snap installations.
-# Other platforms will require source code modifications, so that paths of meshlab.meshlabserver points to the correct executable.
-# Requires Meshlab (Ubuntu: sudo snap install meshlab)
+# Requires Ubuntu for easy snap installations. Other platforms will require source code modifications, i.e. ensure
+# that path of meshlab.meshlabserver points to the correct executable. Requires Meshlab (Ubuntu: sudo snap install
+# meshlab)
 
 def hausdorff_distance_one_direction(mesh1_filepath, mesh2_filepath):
     script_path = os.path.abspath(__file__)
     mlx_path = os.path.join(os.path.dirname(script_path), "distance.mlx")
 
     f = open(os.devnull, 'w')
-    cmd_str = "/snap/bin/meshlab.meshlabserver -s " + mlx_path + " -i " + mesh1_filepath + " " + mesh2_filepath
-    output = subprocess.check_output(cmd_str.split(" "), stderr=f)
+    command_string = "/snap/bin/meshlab.meshlabserver -s " + mlx_path + " -i " + mesh1_filepath + " " + mesh2_filepath
+    output = subprocess.check_output(command_string.split(" "), stderr=f)
     result = output.decode().split("\n")
     # parse result to get values                                                                                                                                                                         
     data = ""
@@ -80,8 +81,11 @@ PROGRAM_FAIL = -1
 
 def main() -> int:
     parser = argparse.ArgumentParser(description='Compute Hausdorff Distance Between Two Meshes')
-    parser.add_argument('mesh_filepaths', metavar='N', type=str, nargs='+',
-                        help='meshes to compare')
+    parser.add_argument('input_mesh_path', metavar='N', type=str,
+                        help='mesh to transform')
+
+    parser.add_argument('output_mesh_path', metavar='N', type=str,
+                        help='path to output mesh, e.g. input mesh aligned to the reference mesh')
 
     args = parser.parse_args()
 
@@ -92,7 +96,6 @@ def main() -> int:
 
     dist = hausdorff_distance_bi(mesh_files[0], mesh_files[1])
 
-    print(dist)
     return PROGRAM_SUCCESS
 
 
