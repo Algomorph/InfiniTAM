@@ -17,7 +17,7 @@ from mako.template import Template
 # Requires Meshlab (Ubuntu: sudo snap install meshlab)
 # Requires CloudCompare (Ubuntu: sudo snap install cloudcompare)
 
-def roughly_align_and_prepare(input_mesh_path: str, output_mesh_path: str) -> int:
+def roughly_align_and_prepare(input_mesh_path: str, output_mesh_path: str, verbose: bool = False) -> int:
     script_path = os.path.abspath(__file__)
     mlx_path = os.path.join(os.path.dirname(script_path), "rough_alignment_and_normals_Snoopy.mlx")
 
@@ -28,7 +28,8 @@ def roughly_align_and_prepare(input_mesh_path: str, output_mesh_path: str) -> in
     output = subprocess.check_output(command_string.split(" "), stderr=f).decode()
     pattern = re.compile(r'\((\d+)\svn\s\d+\sfn\)')
     vertex_count = int(re.findall(pattern, output)[0])
-    print(output)
+    if verbose:
+        print(output)
     f.close()
     return vertex_count
 
@@ -37,9 +38,11 @@ def parse_registration_matrix(target_mesh_path: str) -> np.ndarray:
     target_mesh_directory = os.path.dirname(target_mesh_path)
     target_mesh_name = os.path.splitext(os.path.basename(target_mesh_path))[0]
     registration_matrix_prefix = target_mesh_name + "_" + "REGISTRATION_MATRIX"
-    registration_matrix_files = [filename for filename in os.listdir(target_mesh_directory) if filename.startswith(registration_matrix_prefix)]
+    registration_matrix_files = [filename for filename in os.listdir(target_mesh_directory) if
+                                 filename.startswith(registration_matrix_prefix)]
     if len(registration_matrix_files) == 0:
-        raise ValueError("Target mesh directory, \"{:s}\", contains no registration matrix files.".format(target_mesh_directory))
+        raise ValueError(
+            "Target mesh directory, \"{:s}\", contains no registration matrix files.".format(target_mesh_directory))
 
     registration_matrix_files.sort(reverse=True)
     latest_registration_matrix_path = os.path.join(target_mesh_directory, registration_matrix_files[0])
@@ -54,15 +57,16 @@ def string_to_file(text, file_path):
     output.close()
 
 
-def finely_align(roughly_aligned_mesh_path: str, output_mesh_path: str, fine_registration_matrix: np.ndarray) -> None:
-    script_directory = os.path.dirname(os.path.abspath(__file__))
+def finely_align(roughly_aligned_mesh_path: str, output_mesh_path: str, fine_registration_matrix: np.ndarray,
+                 verbose: bool = False) -> None:
     templates_directory = "./templates"
     output_mesh_directory = os.path.dirname(output_mesh_path)
     output_mesh_name = os.path.splitext(os.path.basename(output_mesh_path))[0]
-    # transformation_filter_template_path = os.path.join(script_directory, "meshlab_transformation_filter_mako_template.mlx")
     transformation_filter_template_path = "./meshlab_transformation_filter_mako_template.mlx"
-    transformation_filter_template = Template(filename=transformation_filter_template_path, module_directory=templates_directory)
-    transformation_filter_path = os.path.join(output_mesh_directory, output_mesh_name + "_meshlab_transformation_filter.mlx")
+    transformation_filter_template = Template(filename=transformation_filter_template_path,
+                                              module_directory=templates_directory)
+    transformation_filter_path = os.path.join(output_mesh_directory,
+                                              output_mesh_name + "_meshlab_transformation_filter.mlx")
 
     string_to_file(transformation_filter_template.render(
         val0=fine_registration_matrix[0, 0],
@@ -91,27 +95,34 @@ def finely_align(roughly_aligned_mesh_path: str, output_mesh_path: str, fine_reg
     f = open(os.devnull, 'w')
     output = subprocess.check_output(command_string.split(" "), stderr=f).decode()
     f.close()
-    print(output)
+    if verbose:
+        print(output)
 
 
-def compute_fine_registration_matrix_using_icp(target_mesh_path: str, reference_mesh_path: str, vertex_count: int) -> np.ndarray:
+def compute_fine_registration_matrix_using_icp(target_mesh_path: str, reference_mesh_path: str, vertex_count: int,
+                                               verbose: bool = False) -> np.ndarray:
     cloud_compare_environment = os.environ.copy()
-    cloud_compare_environment["LD_LIBRARY_PATH"] = "/snap/cloudcompare/current/lib/cloudcompare"
-    command_string = "/snap/cloudcompare/current/bin/CloudCompare -SILENT -AUTO_SAVE OFF " \
+    cloud_compare_environment["BAMF_DESKTOP_FILE_HINT"] = "/var/lib/snapd/desktop/applications" \
+                                                          "/cloudcompare_cloudcompare.desktop "
+    command_string = "/snap/bin/cloudcompare.CloudCompare -SILENT -AUTO_SAVE OFF " \
                      "-COMPUTE_NORMALS -o {:s} -o " \
                      "{:s} -ICP -MIN_ERROR_DIFF 1e-7 " \
                      "-RANDOM_SAMPLING_LIMIT {:d}".format(target_mesh_path, reference_mesh_path, vertex_count)
-    f = open(os.devnull, 'w')
-    output = subprocess.check_output(command_string.split(" "), stderr=f, env=cloud_compare_environment).decode()
-    f.close()
-    print(output)
+    dummy_error_file = open(os.devnull, 'w')
+    # dummy_error_file = open("cc.log", 'w')
+    output = subprocess.check_output(command_string.split(" "), stderr=dummy_error_file,
+                                     env=cloud_compare_environment).decode()
+    dummy_error_file.close()
+    if verbose:
+        print(output)
     return parse_registration_matrix(target_mesh_path)
 
 
-def align_two_meshes(input_mesh_path: str, reference_mesh_path: str, output_mesh_path: str) -> None:
-    vertex_count = roughly_align_and_prepare(input_mesh_path, output_mesh_path)
-    fine_transformation_matrix = compute_fine_registration_matrix_using_icp(output_mesh_path, reference_mesh_path, vertex_count)
-    finely_align(output_mesh_path, output_mesh_path, fine_transformation_matrix)
+def align_two_meshes(input_mesh_path: str, reference_mesh_path: str, output_mesh_path: str, verbose: bool = False) -> None:
+    vertex_count = roughly_align_and_prepare(input_mesh_path, output_mesh_path, verbose)
+    fine_transformation_matrix = compute_fine_registration_matrix_using_icp(output_mesh_path, reference_mesh_path,
+                                                                            vertex_count, verbose)
+    finely_align(output_mesh_path, output_mesh_path, fine_transformation_matrix, verbose)
 
 
 PROGRAM_SUCCESS = 0
