@@ -24,7 +24,8 @@ def roughly_align_and_prepare(input_mesh_path: str, output_mesh_path: str, verbo
     f = open(os.devnull, 'w')
     command_string = "/snap/bin/meshlab.meshlabserver -s " + mlx_path + " -i " + input_mesh_path + \
                      " -o " + output_mesh_path + " -m vn"
-    print(command_string)
+    if verbose:
+        print(command_string)
     output = subprocess.check_output(command_string.split(" "), stderr=f).decode()
     pattern = re.compile(r'\((\d+)\svn\s\d+\sfn\)')
     vertex_count = int(re.findall(pattern, output)[0])
@@ -109,7 +110,6 @@ def compute_fine_registration_matrix_using_icp(target_mesh_path: str, reference_
                      "{:s} -ICP -MIN_ERROR_DIFF 1e-7 " \
                      "-RANDOM_SAMPLING_LIMIT {:d}".format(target_mesh_path, reference_mesh_path, vertex_count)
     dummy_error_file = open(os.devnull, 'w')
-    # dummy_error_file = open("cc.log", 'w')
     output = subprocess.check_output(command_string.split(" "), stderr=dummy_error_file,
                                      env=cloud_compare_environment).decode()
     dummy_error_file.close()
@@ -118,7 +118,8 @@ def compute_fine_registration_matrix_using_icp(target_mesh_path: str, reference_
     return parse_registration_matrix(target_mesh_path)
 
 
-def align_two_meshes(input_mesh_path: str, reference_mesh_path: str, output_mesh_path: str, verbose: bool = False) -> None:
+def align_two_meshes(input_mesh_path: str, reference_mesh_path: str, output_mesh_path: str,
+                     verbose: bool = False) -> None:
     vertex_count = roughly_align_and_prepare(input_mesh_path, output_mesh_path, verbose)
     fine_transformation_matrix = compute_fine_registration_matrix_using_icp(output_mesh_path, reference_mesh_path,
                                                                             vertex_count, verbose)

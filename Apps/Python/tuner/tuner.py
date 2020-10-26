@@ -21,12 +21,13 @@ from hyperopt import hp
 from hausdorff_distance import hausdorff_distance_bidirectional, HausdorffDistance
 from mesh_alignment import align_two_meshes
 
-switch_sets = {
-    "Killing": switch_sets.level_set_evolution_switches_killing,
-    "Killing_level_set": switch_sets.level_set_evolution_switches_killing_level_set,
-    "Sobolev": switch_sets.level_set_evolution_switches_sobolev,
-    "Tikhonov": switch_sets.level_set_evolution_switches_tikhonov
-}
+
+# switch_sets = {
+#     "Killing": switch_sets.level_set_evolution_switches_killing,
+#     "Killing_level_set": switch_sets.level_set_evolution_switches_killing_level_set,
+#     "Sobolev": switch_sets.level_set_evolution_switches_sobolev,
+#     "Tikhonov": switch_sets.level_set_evolution_switches_tikhonov
+# }
 
 
 class TunableParameter:
@@ -53,7 +54,13 @@ def endpoint_loguniform(label, low, high):
 
 
 tunable_parameters = {
-    'learning_rate': TunableParameter(expression=endpoint_loguniform('learning_rate', 0.01, 0.5),
+    'voxel_size': TunableParameter(expression=hp.choice('voxel_size', [0.003, 0.004, 0.005, 0.006]),
+                                   command_line_parameter="general_voxel_volume_parameters.voxel_size"),
+    'truncation_distance_factor': TunableParameter(expression=hp.choice('truncation_distance_factor', [8, 10]),
+                                                   command_line_parameter=None),
+    'truncation_distance':
+        TunableParameter(None, "general_voxel_volume_parameters.truncation_distance"),
+    'learning_rate': TunableParameter(expression=endpoint_loguniform('learning_rate', 0.005, 0.5),
                                       command_line_parameter="level_set_evolution.weights.learning_rate"),
     'warp_length_termination_threshold': TunableParameter(
         expression=hp.choice(
@@ -76,13 +83,44 @@ tunable_parameters = {
         TunableParameter(None, "level_set_evolution.termination.update_length_threshold"),
     'warp_length_termination_threshold_type':
         TunableParameter(None, "level_set_evolution.termination.warp_length_termination_threshold_type"),
+    'switch_set':
+        TunableParameter(
+            expression=hp.choice(
+                "switch_set",
+                [
+                    {
+                        "switches": switch_sets.level_set_evolution_switches_killing,
+                        "Killing_dampening_factor": hp.uniform("Killing.Killing_dampening_factor", 0.05, 0.8),
+                        "weight_smoothing_term": hp.uniform("Killing.weight_smoothing_term", 0.05, 1.0)
+                    },
+                    {
+                        "switches": switch_sets.level_set_evolution_switches_killing_level_set,
+                        "Killing_dampening_factor": hp.uniform("Killing_level_set.Killing_dampening_factor", 0.05, 0.8),
+                        "weight_smoothing_term": hp.uniform("Killing_level_set.weight_smoothing_term", 0.05, 1.0),
+                        "weight_level_set_term": hp.uniform("Killing_level_set.weight_level_set_term", 0.05, 0.4)
+                    },
+                    {
+                        "switches": switch_sets.level_set_evolution_switches_tikhonov,
+                        "weight_smoothing_term": hp.uniform("Tikhonov.weight_smoothing_term", 0.05, 1.0)
+                    },
+                    {
+                        "switches": switch_sets.level_set_evolution_switches_sobolev,
+                        "weight_smoothing_term": hp.uniform("Sobolev.weight_smoothing_term", 0.05, 1.0)
+                    },
+                ]
+            ),
+            command_line_parameter=None),
+    'Killing_dampening_factor': TunableParameter(None, "level_set_evolution.weights.Killing_dampening_factor"),
+    'weight_smoothing_term': TunableParameter(None, "level_set_evolution.weights.weight_smoothing_term"),
+    'weight_level_set_term': TunableParameter(None, "level_set_evolution.weights.weight_level_set_term"),
 
 }
 
 
 class Tuner:
 
-    def __init__(self, reco_path, configuration_path, until_frame_index):
+    def __init__(self, reco_path: str, configuration_path: str, until_frame_index: int, loss_function: LossFunction,
+                 trials_step: int):
         self.reco_path = reco_path
         self.configuration_path = configuration_path
         self.configuration_json = self.get_configuration_as_json()
@@ -90,6 +128,8 @@ class Tuner:
         self.until_frame_index = until_frame_index
         self.last_frame_index = until_frame_index - 1
         self.base_command_string = self.compile_base_command_string()
+        self.loss_function = loss_function
+        self.trials_step = trials_step
 
     def compile_base_command_string(self):
         return self.reco_path + " --config=" + self.configuration_path + \
@@ -144,31 +184,31 @@ class Tuner:
     def __compile_command_line_representation(command, args):
         for name, value in args.items():
             if name in tunable_parameters and tunable_parameters[name].command_line_parameter is not None:
-                return command + " " + tunable_parameters[name].cmd(value)
-            elif value is None:
-                return command
-            else:
-                return command + Tuner.__compile_command_line_representation(command, value)
+                command += " " + tunable_parameters[name].cmd(value)
+            elif type(value) is dict:
+                command += Tuner.__compile_command_line_representation(command, value)
+        return command
 
     def compile_command_string(self, args):
+
         command = self.base_command_string
+
+        switches = args["switch_set"]["switches"]
+        command += switches.parameters.to_command_line_string()
+
         for name, value in args.items():
-            if name == "switch_set":
-                switch_set_name, switches = args["switch_set"]
-                command += switches.parameters.to_command_line_string()
-            else:
-                if name in tunable_parameters and tunable_parameters[name].command_line_parameter is not None:
-                    command + " " + tunable_parameters[name].cmd(value)
-                elif value is not None:
-                    command = Tuner.__compile_command_line_representation(command, value)
+            if name in tunable_parameters and tunable_parameters[name].command_line_parameter is not None:
+                command += " " + tunable_parameters[name].cmd(value)
+            elif type(value) is dict:
+                command = Tuner.__compile_command_line_representation(command, value)
+
+        narrow_band_half_width = args["truncation_distance_factor"] * args["voxel_size"]
+        command += " " + tunable_parameters["truncation_distance"].cmd(narrow_band_half_width)
 
         return command
 
     def tune(self):
-
-        parameter_space = {
-            'switch_set': hp.choice('switch_set', [(name, switch_set) for name, switch_set in switch_sets.items()])
-        }
+        parameter_space = {}
 
         for name, tunable_parameter in tunable_parameters.items():
             if tunable_parameter.expression is not None: \
@@ -193,8 +233,26 @@ class Tuner:
                 'attachments': {} if output_distance is None else dict(output_distance._asdict())
             }
 
-        best_result = hyperopt.fmin(objective_function, parameter_space, algo=hyperopt.tpe.suggest, max_evals=1)
-        print(best_result)
+        trials_step = self.trials_step
+
+        try:  # try to load an already saved trials object, and increase the max
+            trials = pickle.load(open("tuning_table.hyperopt", "rb"))
+            print("Found saved Trials! Loading...")
+        except:  # create a new trials object and start searching
+            trials = hyperopt.Trials()
+
+        max_trials = len(trials.trials) + trials_step
+        print("Rerunning from {} trials to {} (+{}) trials".format(len(trials.trials), max_trials, trials_step))
+
+        best_result = hyperopt.fmin(objective_function, parameter_space, algo=hyperopt.tpe.suggest,
+                                    max_evals=max_trials, trials=trials)
+
+        print("Best tuning result:", best_result)
+
+        # save the trials object
+        with open("tuning_table.hyperopt", "wb") as f:
+            pickle.dump(trials, f)
+
         return best_result
 
 
@@ -209,15 +267,14 @@ def main() -> int:
                         help='Default configuration file path')
     parser.add_argument('until_frame', metavar='<until_frame>', type=int,
                         help='Run Reco until this frame (exclusive)')
+    parser.add_argument('trials_step', metavar='<trials_step>', type=int,
+                        help='How many new trials to do during this specific run.')
 
     args = parser.parse_args()
 
-    tuner = Tuner(args.reco_path, args.configuration_path, args.until_frame)
+    tuner = Tuner(args.reco_path, args.configuration_path, args.until_frame, LossFunction.RMS_DISTANCE,
+                  args.trials_step)
     tuner.tune()
-
-    result_table = pd.DataFrame(None, columns=["level_set_term", "smoothing_term", "killing_field",
-                                               "sobolev_gradient_smoothing", "learning_rate",
-                                               "update_length_threshold"])
 
     return PROGRAM_SUCCESS
 
