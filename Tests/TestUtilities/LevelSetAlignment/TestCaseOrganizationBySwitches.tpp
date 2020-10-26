@@ -16,7 +16,7 @@
 #pragma once
 
 #include "TestCaseOrganizationBySwitches.h"
-#include "../../../cmake-build-debug-distcc/Tests/TestUtilities/TestUtilitiesConfig.h"
+#include <TestUtilitiesConfig.h>
 #include "../TestUtilities.h"
 
 using namespace ITMLib;
