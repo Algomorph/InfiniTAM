@@ -417,6 +417,7 @@ configuration::Configuration GenerateChangedUpConfiguration() {
 					true,
 					true,
 					true,
+					true,
 					true),
 			Paths(GENERATED_TEST_DATA_PREFIX "TestData/output",
 			      STATIC_TEST_DATA_PREFIX "TestData/calibration/snoopy_calib.txt",
@@ -447,10 +448,16 @@ configuration::Configuration GenerateChangedUpConfiguration() {
 			32,
 			true,
 			true);
-	MainEngineSettings changed_up_main_engine_settings(true, LIBMODE_BASIC, INDEX_ARRAY, false);
+	MainEngineSettings changed_up_main_engine_settings(
+			true, LIBMODE_BASIC,
+			INDEX_ARRAY,
+			true, false);
 	IndexingSettings changed_up_indexing_settings(DIAGNOSTIC);
 	RenderingSettings changed_up_rendering_settings(true);
-	AutomaticRunSettings changed_up_automatic_run_settings(50, 16, true, true, true, true);
+	AutomaticRunSettings changed_up_automatic_run_settings(
+			50, 16,
+			true, true,
+			true, true, true);
 	LevelSetAlignmentParameters changed_up_level_set_evolution_parameters(
 			ExecutionMode::DIAGNOSTIC,
 			LevelSetAlignmentWeights(0.11f, 0.09f, 2.0f, 0.3f, 0.1f, 1e-6f),

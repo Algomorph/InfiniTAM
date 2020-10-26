@@ -438,6 +438,7 @@ configuration::Configuration GenerateDefaultSnoopyConfiguration() {
 			                false,
 			                false,
 			                false,
+			                false,
 			                false),
 			Paths("<CONFIGURATION_DIRECTORY>",
 			      "<CONFIGURATION_DIRECTORY>/snoopy_calib.txt",
@@ -456,11 +457,11 @@ configuration::Configuration GenerateDefaultSnoopyConfiguration() {
 			configuration::TrackerConfigurationStringPresets::default_intensity_depth_extended_tracker_configuration
 	);
 	default_snoopy_configuration.source_tree = default_snoopy_configuration.ToPTree();
-	MainEngineSettings default_snoopy_main_engine_settings(true, LIBMODE_DYNAMIC, INDEX_HASH, true);
+	MainEngineSettings default_snoopy_main_engine_settings(true, LIBMODE_DYNAMIC, INDEX_HASH, false, true);
 	TelemetrySettings default_snoopy_telemetry_settings;
 	IndexingSettings default_snoopy_indexing_settings;
 	RenderingSettings default_snoopy_rendering_settings;
-	AutomaticRunSettings default_snoopy_automatic_run_settings(716, 16, false, false, false, false);
+	AutomaticRunSettings default_snoopy_automatic_run_settings(716, 16, false, false, false, false, false);
 	LevelSetAlignmentParameters default_snoopy_level_set_evolution_parameters(
 			ExecutionMode::OPTIMIZED,
 			LevelSetAlignmentWeights(
