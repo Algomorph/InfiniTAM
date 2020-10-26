@@ -28,9 +28,17 @@ switch_sets = {
     "Tikhonov": switch_sets.level_set_evolution_switches_tikhonov
 }
 
-TunableParameter = namedtuple('TunableParameter',
-                              ['expression', 'command_line_parameter'],
-                              verbose=False)
+
+class TunableParameter:
+    def __init__(self, expression, command_line_parameter):
+        self.expression = expression
+        self.command_line_parameter = command_line_parameter
+
+    def cmd(self, value):
+        if self.command_line_parameter is None:
+            return ""
+        else:
+            return "--" + self.command_line_parameter + "=" + str(value)
 
 
 class LossFunction(Enum):
@@ -42,6 +50,34 @@ def endpoint_loguniform(label, low, high):
     start_power = math.log(low)
     end_power = math.log(high)
     return hp.loguniform(label, start_power, end_power)
+
+
+tunable_parameters = {
+    'learning_rate': TunableParameter(expression=endpoint_loguniform('learning_rate', 0.01, 0.5),
+                                      command_line_parameter="level_set_evolution.weights.learning_rate"),
+    'warp_length_termination_threshold': TunableParameter(
+        expression=hp.choice(
+            'warp_length_termination_threshold_type',
+            [
+                {
+                    'warp_length_termination_threshold_type': 'maximum',
+                    'update_length_threshold': endpoint_loguniform('maximum.update_length_threshold', 0.000010,
+                                                                   0.000100)
+                },
+                {
+                    'warp_length_termination_threshold_type': 'average',
+                    'update_length_threshold': endpoint_loguniform('average.update_length_threshold', 0.000001,
+                                                                   0.000010)
+                }
+            ]
+        ),
+        command_line_parameter=None),
+    'update_length_threshold':
+        TunableParameter(None, "level_set_evolution.termination.update_length_threshold"),
+    'warp_length_termination_threshold_type':
+        TunableParameter(None, "level_set_evolution.termination.warp_length_termination_threshold_type"),
+
+}
 
 
 class Tuner:
@@ -89,51 +125,49 @@ class Tuner:
         print("Running Reco with command: ")
         print(command_string)
         print("")
-        output_log = subprocess.check_output(command_string.split(" "), stderr=dummy_error_file)
-
-        if Tuner.non_rigid_alignment_converged(output_log):
-            last_frame_folder = self.get_frame_folder(self.last_frame_index)
-            canonical_mesh_path = os.path.join(last_frame_folder, "mesh.ply")
-            aligned_mesh_path = os.path.join(last_frame_folder, "mesh_aligned.ply")
-            reference_mesh_path = "SnoopyCanonical.ply"
-            align_two_meshes(canonical_mesh_path, reference_mesh_path, aligned_mesh_path)
-            dist = hausdorff_distance_bidirectional(aligned_mesh_path, reference_mesh_path)
-            return dist
+        try:
+            output_log = subprocess.check_output(command_string.split(" "), stderr=dummy_error_file)
+            if Tuner.non_rigid_alignment_converged(output_log):
+                last_frame_folder = self.get_frame_folder(self.last_frame_index)
+                canonical_mesh_path = os.path.join(last_frame_folder, "mesh.ply")
+                aligned_mesh_path = os.path.join(last_frame_folder, "mesh_aligned.ply")
+                reference_mesh_path = "SnoopyCanonical.ply"
+                align_two_meshes(canonical_mesh_path, reference_mesh_path, aligned_mesh_path)
+                dist = hausdorff_distance_bidirectional(aligned_mesh_path, reference_mesh_path)
+                return dist
+        except subprocess.CalledProcessError as e:
+            print(e.output.decode())
+            print(e)
         return None
 
-    def compile_command_string(self):
-        return self.base_command_string
+    @staticmethod
+    def __compile_command_line_representation(command, args):
+        for name, value in args.items():
+            if name in tunable_parameters and tunable_parameters[name].command_line_parameter is not None:
+                return command + " " + tunable_parameters[name].cmd(value)
+            elif value is None:
+                return command
+            else:
+                return command + Tuner.__compile_command_line_representation(command, value)
+
+    def compile_command_string(self, args):
+        command = self.base_command_string
+        for name, value in args.items():
+            if name == "switch_set":
+                switch_set_name, switches = args["switch_set"]
+                command += switches.parameters.to_command_line_string()
+            else:
+                if name in tunable_parameters and tunable_parameters[name].command_line_parameter is not None:
+                    command + " " + tunable_parameters[name].cmd(value)
+                elif value is not None:
+                    command = Tuner.__compile_command_line_representation(command, value)
+
+        return command
 
     def tune(self):
-        tunable_parameters = {
-            'learning_rate': TunableParameter(expression=endpoint_loguniform('learning_rate', 0.01, 0.5),
-                                              command_line_parameter="--level_set_evolution.weights.learning_rate"),
-            'warp_length_termination_threshold': TunableParameter(
-                expression=hp.choice(
-                    'warp_length_termination_threshold_type',
-                    [
-                        {
-                            'warp_length_termination_threshold_type': 'maximum',
-                            'update_length_threshold': endpoint_loguniform('maximum.update_length_threshold', 0.000010,
-                                                                           0.000100)
-                        },
-                        {
-                            'warp_length_termination_threshold_type': 'average',
-                            'update_length_threshold': endpoint_loguniform('average.update_length_threshold', 0.000001,
-                                                                           0.000010)
-                        }
-                    ]
-                ),
-                command_line_parameter=None),
-            'update_length_threshold':
-                TunableParameter(None, " --level_set_evolution.termination.update_length_threshold"),
-            'warp_length_termination_threshold_type':
-                TunableParameter(None, " --level_set_evolution.termination.warp_length_termination_threshold_type"),
-
-        }
 
         parameter_space = {
-            'switch_set': hp.choice('switch_set', [list(switch_sets.values())])
+            'switch_set': hp.choice('switch_set', [(name, switch_set) for name, switch_set in switch_sets.items()])
         }
 
         for name, tunable_parameter in tunable_parameters.items():
@@ -141,10 +175,8 @@ class Tuner:
                     parameter_space[name] = tunable_parameter.expression
 
         def objective_function(args):
-            print(args)
-
             start_time = time.time()
-            command_string = self.compile_base_command_string()
+            command_string = self.compile_command_string(args)
             end_time = time.time()
             output_distance = self.run_command_and_process_output(command_string)
             loss = math.inf
@@ -158,7 +190,7 @@ class Tuner:
                 'loss': loss,
                 'eval_time': end_time - start_time,
                 'status': status,
-                'attachments': dict(output_distance._asdict())
+                'attachments': {} if output_distance is None else dict(output_distance._asdict())
             }
 
         best_result = hyperopt.fmin(objective_function, parameter_space, algo=hyperopt.tpe.suggest, max_evals=1)
