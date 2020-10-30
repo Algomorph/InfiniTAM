@@ -22,14 +22,6 @@ from hausdorff_distance import hausdorff_distance_bidirectional, HausdorffDistan
 from mesh_alignment import align_two_meshes
 
 
-# switch_sets = {
-#     "Killing": switch_sets.level_set_evolution_switches_killing,
-#     "Killing_level_set": switch_sets.level_set_evolution_switches_killing_level_set,
-#     "Sobolev": switch_sets.level_set_evolution_switches_sobolev,
-#     "Tikhonov": switch_sets.level_set_evolution_switches_tikhonov
-# }
-
-
 class TunableParameter:
     def __init__(self, expression, command_line_parameter):
         self.expression = expression
@@ -53,11 +45,17 @@ def endpoint_loguniform(label, low, high):
     return hp.loguniform(label, start_power, end_power)
 
 
+voxel_size_list = [0.003, 0.004, 0.005, 0.006]
+truncation_distance_factor_list = [8, 10]
+switch_set_names = ["Killing", "Killing_level_set", "Sobolev", "Tikhonov"]
+warp_length_termination_threshold_type_names = ['maximum', 'average']
+
 tunable_parameters = {
-    'voxel_size': TunableParameter(expression=hp.choice('voxel_size', [0.003, 0.004, 0.005, 0.006]),
+    'voxel_size': TunableParameter(expression=hp.choice('voxel_size', voxel_size_list),
                                    command_line_parameter="general_voxel_volume_parameters.voxel_size"),
-    'truncation_distance_factor': TunableParameter(expression=hp.choice('truncation_distance_factor', [8, 10]),
-                                                   command_line_parameter=None),
+    'truncation_distance_factor': TunableParameter(
+        expression=hp.choice('truncation_distance_factor', truncation_distance_factor_list),
+        command_line_parameter=None),
     'truncation_distance':
         TunableParameter(None, "general_voxel_volume_parameters.truncation_distance"),
     'learning_rate': TunableParameter(expression=endpoint_loguniform('learning_rate', 0.005, 0.5),
@@ -116,11 +114,16 @@ tunable_parameters = {
 
 }
 
+tunable_parameter_test_subset = {
+    "learning_rate": tunable_parameters["learning_rate"],
+    "update_length_threshold": endpoint_loguniform('maximum.update_length_threshold', 0.000010, 0.000100)
+}
+
 
 class Tuner:
 
     def __init__(self, reco_path: str, configuration_path: str, until_frame_index: int, loss_function: LossFunction,
-                 trials_step: int):
+                 trials_step: int, verbose: bool, test_mode: bool):
         self.reco_path = reco_path
         self.configuration_path = configuration_path
         self.configuration_json = self.get_configuration_as_json()
@@ -130,6 +133,8 @@ class Tuner:
         self.base_command_string = self.compile_base_command_string()
         self.loss_function = loss_function
         self.trials_step = trials_step
+        self.verbose = verbose
+        self.test_mode = test_mode
 
     def compile_base_command_string(self):
         return self.reco_path + " --config=" + self.configuration_path + \
@@ -172,9 +177,9 @@ class Tuner:
                 canonical_mesh_path = os.path.join(last_frame_folder, "mesh.ply")
                 aligned_mesh_path = os.path.join(last_frame_folder, "mesh_aligned.ply")
                 reference_mesh_path = "SnoopyCanonical.ply"
-                align_two_meshes(canonical_mesh_path, reference_mesh_path, aligned_mesh_path)
-                dist = hausdorff_distance_bidirectional(aligned_mesh_path, reference_mesh_path)
-                return dist
+                align_two_meshes(canonical_mesh_path, reference_mesh_path, aligned_mesh_path, self.verbose)
+                distance = hausdorff_distance_bidirectional(aligned_mesh_path, reference_mesh_path)
+                return distance
         except subprocess.CalledProcessError as e:
             print(e.output.decode())
             print(e)
@@ -210,9 +215,14 @@ class Tuner:
     def tune(self):
         parameter_space = {}
 
-        for name, tunable_parameter in tunable_parameters.items():
-            if tunable_parameter.expression is not None: \
-                    parameter_space[name] = tunable_parameter.expression
+        if self.test_mode:
+            parameters_to_tune = tunable_parameter_test_subset
+        else:
+            parameters_to_tune = tunable_parameters
+
+        for name, tunable_parameter in parameters_to_tune.items():
+            if tunable_parameter.expression is not None:
+                parameter_space[name] = tunable_parameter.expression
 
         def objective_function(args):
             start_time = time.time()
@@ -262,18 +272,20 @@ PROGRAM_FAILURE = -1
 
 def main() -> int:
     parser = argparse.ArgumentParser(description='Tune Reco parameters')
-    parser.add_argument('reco_path', metavar='<reco_path>', type=str, help='Path to Reco executable')
+    parser.add_argument('reco_path', metavar='<reco_path>', type=str, help='Path to Reco executable.')
     parser.add_argument('configuration_path', metavar='<configuration_path>', type=str,
-                        help='Default configuration file path')
+                        help='Default configuration file path.')
     parser.add_argument('until_frame', metavar='<until_frame>', type=int,
-                        help='Run Reco until this frame (exclusive)')
+                        help='Run Reco until this frame (exclusive).')
     parser.add_argument('trials_step', metavar='<trials_step>', type=int,
                         help='How many new trials to do during this specific run.')
-
+    parser.add_argument('--verbose', '-v', action='store_true', help="Produce verbose output.")
+    parser.add_argument('--test', '-t', action='store_true',
+                        help="Run in test mode (tune learning rate and warp length threshold only).")
     args = parser.parse_args()
 
     tuner = Tuner(args.reco_path, args.configuration_path, args.until_frame, LossFunction.RMS_DISTANCE,
-                  args.trials_step)
+                  args.trials_step, args.verbose, args.test)
     tuner.tune()
 
     return PROGRAM_SUCCESS
