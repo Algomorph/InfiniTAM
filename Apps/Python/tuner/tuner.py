@@ -127,8 +127,13 @@ two_parameter_test_subset = {
                          "level_set_evolution.termination.update_length_threshold")
 }
 
+# one_parameter_test_subset = {
+#     "learning_rate": tunable_parameters["learning_rate"]
+# }
+
 one_parameter_test_subset = {
-    "learning_rate": tunable_parameters["learning_rate"]
+    'learning_rate': TunableParameter(expression=hp.uniform(0.05, 0.5),
+                                      command_line_parameter="level_set_evolution.weights.learning_rate")
 }
 
 
