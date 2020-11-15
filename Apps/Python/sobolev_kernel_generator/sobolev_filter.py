@@ -17,8 +17,7 @@
 
 from __future__ import print_function
 import sys
-from sktensor import dtensor
-from math_utils import tenmat, tucker
+import tensorly.decomposition as t_decomp
 
 import numpy as np
 import argparse as ap
@@ -174,7 +173,6 @@ def args_to_parameters():
                         action='store_true')
     parser.add_argument("-dlm", '--default_laplacian_method', dest='alternative_laplacian_method', action='store_false')
     parser.set_defaults(alternative_laplacian_method=False)
-    parser.add_argument("-sar", "--use_s_as_rank", dest='use_s_as_rank', action='store_true')
     parser.set_defaults(use_s_as_rank=False)
 
     parameters = parser.parse_args()
@@ -206,7 +204,7 @@ def args_to_parameters():
 
 
 def generate_1d_sobolev_kernel(size=7, strength=0.1, precision=np.float32,
-                               alternative_laplacian_method=False, use_size_as_rank=False, return_u_matrices=False):
+                               alternative_laplacian_method=False, verbose=True):
     s_cubed = size ** 3
     # For documentation / reference only
     # laplacian_3d_operator = np.array([[[0, 0, 0],
@@ -222,7 +220,7 @@ def generate_1d_sobolev_kernel(size=7, strength=0.1, precision=np.float32,
     # (Id - l*delta)S = v
 
     identity_matrix = np.identity(s_cubed, precision)
-    # stencil_laplacian_operator  = delta
+    # stencil_laplacian_operator  = delta, or ∆, in supplementary material by Slavcheva et al.
     # Each row & represents one of the s*s*s voxels composing the Sobolev kernel.
     # Each column represents another voxel in the kernel.
     # Ordering is assumed to be by x, y, and then z axis, in that order.
@@ -230,26 +228,56 @@ def generate_1d_sobolev_kernel(size=7, strength=0.1, precision=np.float32,
         stencil_laplacian_operator = generate_7pt_stencil_finite_difference_laplacian_matrix(size, precision)
     else:
         stencil_laplacian_operator = generate_7pt_stencil_finite_difference_laplacian_matrix2(size, precision)
-    # one_hot_vector = v
+    # one_hot_vector = v in supplementary material
+    # corresponds to a discretized dirac impulse of size s x s x s
     one_hot_vector = np.zeros((s_cubed, 1), precision)
     one_hot_vector[s_cubed // 2] = 1.0
 
     # solve the system for S
-    sobolev_kernel_flat = np.linalg.solve((identity_matrix - strength * stencil_laplacian_operator),
-                                          one_hot_vector)
-    u, v, vh = np.linalg.svd(sobolev_kernel_flat)
+    sobolev_kernel_flat = np.linalg.solve((identity_matrix - strength * stencil_laplacian_operator), one_hot_vector)
+
+    if verbose:
+        inverse_solution = np.dot((identity_matrix - strength * stencil_laplacian_operator), sobolev_kernel_flat)
+        middle_value = float(inverse_solution[s_cubed // 2])
+        inverse_solution[s_cubed // 2] = 0.0
+        if np.abs(inverse_solution.max()) > 5e-8 or not np.allclose(middle_value, 1.0):
+            print("Linear equation system solution check: failed")
+        else:
+            print("Linear equation system solution check: succeeded")
+
     sobolev_kernel = sobolev_kernel_flat.reshape((size, size, size))
-    sobolev_kernel_tensor = dtensor(sobolev_kernel)
 
-    if use_size_as_rank:
-        core, u_matrices = tucker.hooi(sobolev_kernel_tensor, size)
-    else:
-        core, u_matrices = tucker.hooi(sobolev_kernel_tensor)
+    core, factor_matrices = t_decomp.tucker(sobolev_kernel, ranks=(size, size, size))
 
-    if return_u_matrices:
-        return u_matrices
-    else:
-        return -u_matrices[1][:, 0]
+    print()
+
+    u1, u2, u3 = factor_matrices
+    if verbose:
+        print("=====================================")
+        print("3D Filter HOSVD Factor matrices for x, y, and z direction:")
+        print("=====================================")
+        print("U1:")
+        print(u1)
+        print("U2:")
+        print(u2)
+        print("U3:")
+        print(u3)
+        print()
+        print("% average difference between U1 and U2: ", np.abs(u1 - u2).mean() * 100)
+        print("% average difference between U2 and U3: ", np.abs(u2 - u3).mean() * 100)
+        print("% average difference between U1 and U3: ", np.abs(u1 - u3).mean() * 100)
+
+    filters = []
+    for u in factor_matrices:
+        filters.append((u[:, 0]).reshape((-1, 1)))
+
+    if verbose:
+        print("=====================================")
+        print("1D Filters (columns):")
+        print("=====================================")
+        print(np.hstack(filters))
+
+    return filters
 
 
 def main():
@@ -260,33 +288,7 @@ def main():
     s = parameters.size
     l = parameters.lambda_
     precision = parameters.precision
-    u_matrices = generate_1d_sobolev_kernel(s, l, precision, parameters.alternative_laplacian_method,
-                                            parameters.use_s_as_rank, return_u_matrices=True)
-    [u1, u2, u3] = u_matrices
-
-    # scipy.io.savemat("sob.mat", dict(sob=sobolev_kernel))
-    print("=====================================")
-    print("U matrices for x, y, and z direction:")
-    print("=====================================")
-    print("U1:")
-    print(u1)
-    print("U2:")
-    print(u2)
-    print("U3:")
-    print(u3)
-    print()
-    print("% average difference between U1 and U2: ", np.abs(u1 - u2).mean() * 100)
-    print("% average difference between U2 and U3: ", np.abs(u2 - u3).mean() * 100)
-    print("% average difference between U1 and U3: ", np.abs(u1 - u3).mean() * 100)
-
-    filters = []
-    for u in u_matrices:
-        filters.append((u[:, 0]).reshape((-1, 1)))
-
-    print("=====================================")
-    print("1D Filters (columns):")
-    print("=====================================")
-    print(np.hstack(filters))
+    filters = generate_1d_sobolev_kernel(s, l, precision, parameters.alternative_laplacian_method)
 
     np.savetxt("filter.csv", -filters[0], delimiter=",")
 

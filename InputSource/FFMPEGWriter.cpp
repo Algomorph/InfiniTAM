@@ -159,7 +159,7 @@ int FFMPEGWriter::PrivateData::open(const char* filename, int size_x, int size_y
 	output_format_context->video_codec = encoder;
 
 	if ( output_format_context->oformat->flags & AVFMT_GLOBALHEADER )
-		output_format_context->flags |= CODEC_FLAG_GLOBAL_HEADER;
+		output_format_context->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
 
 	ret = avformat_write_header(output_format_context, &dict);
 	if (ret < 0) {

@@ -12,8 +12,7 @@ from collections import namedtuple
 HausdorffDistance = namedtuple('HausdorffDistance',
                                ['mesh1_path', 'mesh2_path', 'point_count_1', 'point_count_2',
                                 'min_distance', 'max_distance',
-                                'mean_distance', 'rms_distance'],
-                               verbose=False)
+                                'mean_distance', 'rms_distance'])
 
 
 # Requires Ubuntu for easy snap installations. Other platforms will require source code modifications, i.e. ensure
@@ -87,19 +86,14 @@ PROGRAM_FAIL = -1
 def main() -> int:
     parser = argparse.ArgumentParser(description='Compute Hausdorff Distance Between Two Meshes')
     parser.add_argument('input_mesh_path', metavar='N', type=str,
-                        help='mesh to transform')
-
-    parser.add_argument('output_mesh_path', metavar='N', type=str,
                         help='path to output mesh, e.g. input mesh aligned to the reference mesh')
+
+    parser.add_argument('reference_mesh_path', metavar='N', type=str,
+                        help='reference mesh')
 
     args = parser.parse_args()
 
-    mesh_files = args.mesh_filepaths
-
-    if len(mesh_files) != 2:
-        print("wrong number of mesh files: wanted 2, got: " + str(len(mesh_files)))
-
-    dist = hausdorff_distance_bidirectional(mesh_files[0], mesh_files[1])
+    dist = hausdorff_distance_bidirectional(args.input_mesh_path, args.reference_mesh_path)
 
     print(dist)
 

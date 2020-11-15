@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import argparse
 import pandas as pd
 import numpy as np
@@ -52,7 +53,7 @@ def remove_key_hierarchy(dict_with_key_hierarchy, required_keys):
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description='Convert a pickled hyperopt trials object from the tuner to Excel spreadsheet')
+        description='Convert a pickled hyperopt trials object from the tuner to Excel spreadsheet and plot the data')
     parser.add_argument('-to', '--trials_object', default="tuning_table.hyperopt", type=str,
                         help='Path to the pickled trials object resulting from the tuner.')
     parser.add_argument('-o', '--output', default="tuning_table.xlsx", type=str,
@@ -67,13 +68,19 @@ def main() -> int:
                for trial in trials.trials]
 
     df = pd.DataFrame(to_save)
-    df["voxel_size"] = np.array(voxel_size_list)[df["voxel_size"].to_numpy()]
-    df["truncation_distance"] = np.array(truncation_distance_factor_list)[df["truncation_distance_factor"].to_numpy()] \
+
+    if "voxel_size" in df.columns:
+        df["voxel_size"] = np.array(voxel_size_list)[df["voxel_size"].to_numpy()]
+    if "truncation_distance_factor" in df.columns:
+        df["truncation_distance"] = np.array(truncation_distance_factor_list)[df["truncation_distance_factor"].to_numpy()] \
                                 * df["voxel_size"]
-    df = df.drop(columns=["truncation_distance_factor"])
-    df["switch_set"] = np.array(switch_set_names)[df["switch_set"].to_numpy()]
-    df["warp_length_termination_threshold_type"] = np.array(warp_length_termination_threshold_type_names)[
-        df["warp_length_termination_threshold_type"].to_numpy()]
+        df = df.drop(columns=["truncation_distance_factor"])
+
+    if "switch_set" in df.columns:
+        df["switch_set"] = np.array(switch_set_names)[df["switch_set"].to_numpy()]
+    if "warp_length_termination_threshold_type" in df.columns:
+        df["warp_length_termination_threshold_type"] = np.array(warp_length_termination_threshold_type_names)[
+            df["warp_length_termination_threshold_type"].to_numpy()]
 
     writer = pd.ExcelWriter(args.output)
 

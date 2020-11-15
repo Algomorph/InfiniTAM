@@ -34,6 +34,12 @@ class TunableParameter:
             return "--" + self.command_line_parameter + "=" + str(value)
 
 
+class Mode(Enum):
+    NORMAL = 1
+    TEST_2_PARAMETERS = 2
+    TEST_1_PARAMETER = 3
+
+
 class LossFunction(Enum):
     RMS_DISTANCE = 0
     MAX_DISTANCE = 1
@@ -114,16 +120,22 @@ tunable_parameters = {
 
 }
 
-tunable_parameter_test_subset = {
+two_parameter_test_subset = {
     "learning_rate": tunable_parameters["learning_rate"],
-    "update_length_threshold": endpoint_loguniform('maximum.update_length_threshold', 0.000010, 0.000100)
+    "update_length_threshold":
+        TunableParameter(endpoint_loguniform('maximum.update_length_threshold', 0.000010, 0.000100),
+                         "level_set_evolution.termination.update_length_threshold")
+}
+
+one_parameter_test_subset = {
+    "learning_rate": tunable_parameters["learning_rate"]
 }
 
 
 class Tuner:
 
     def __init__(self, reco_path: str, configuration_path: str, until_frame_index: int, loss_function: LossFunction,
-                 trials_step: int, verbose: bool, test_mode: bool):
+                 trials_step: int, verbose: bool, mode: Mode):
         self.reco_path = reco_path
         self.configuration_path = configuration_path
         self.configuration_json = self.get_configuration_as_json()
@@ -134,7 +146,7 @@ class Tuner:
         self.loss_function = loss_function
         self.trials_step = trials_step
         self.verbose = verbose
-        self.test_mode = test_mode
+        self.mode = mode
 
     def compile_base_command_string(self):
         return self.reco_path + " --config=" + self.configuration_path + \
@@ -157,22 +169,20 @@ class Tuner:
 
     @staticmethod
     def non_rigid_alignment_converged(output_log_lines: List[str]) -> bool:
-        output_log_lines = str(output_log_lines).split("\\n")
-        did_not_converge = len(output_log_lines) >= 3 and "did not converge" in output_log_lines[-3]
+        did_not_converge = len(output_log_lines) >= 3 and "did not converge" in output_log_lines[-2]
         return not did_not_converge
 
     def get_frame_folder(self, frame_index):
         return os.path.join(self.output_path, "Frame_{:03d}".format(frame_index))
 
     def run_command_and_process_output(self, command_string) -> Optional[HausdorffDistance]:
-        dummy_error_file = open(os.devnull, 'w')
         print("")
         print("Running Reco with command: ")
         print(command_string)
         print("")
         try:
-            output_log = subprocess.check_output(command_string.split(" "), stderr=dummy_error_file)
-            if Tuner.non_rigid_alignment_converged(output_log):
+            output_log_lines = subprocess.check_output(command_string.split(" "), encoding='ASCII').split("\n")
+            if Tuner.non_rigid_alignment_converged(output_log_lines):
                 last_frame_folder = self.get_frame_folder(self.last_frame_index)
                 canonical_mesh_path = os.path.join(last_frame_folder, "mesh.ply")
                 aligned_mesh_path = os.path.join(last_frame_folder, "mesh_aligned.ply")
@@ -181,7 +191,7 @@ class Tuner:
                 distance = hausdorff_distance_bidirectional(aligned_mesh_path, reference_mesh_path)
                 return distance
         except subprocess.CalledProcessError as e:
-            print(e.output.decode())
+            print(e.output)
             print(e)
         return None
 
@@ -198,8 +208,9 @@ class Tuner:
 
         command = self.base_command_string
 
-        switches = args["switch_set"]["switches"]
-        command += switches.parameters.to_command_line_string()
+        if "switch_set" in args:
+            switches = args["switch_set"]["switches"]
+            command += switches.parameters.to_command_line_string()
 
         for name, value in args.items():
             if name in tunable_parameters and tunable_parameters[name].command_line_parameter is not None:
@@ -207,18 +218,23 @@ class Tuner:
             elif type(value) is dict:
                 command = Tuner.__compile_command_line_representation(command, value)
 
-        narrow_band_half_width = args["truncation_distance_factor"] * args["voxel_size"]
-        command += " " + tunable_parameters["truncation_distance"].cmd(narrow_band_half_width)
+        if "truncation_distance_factor" in args:
+            narrow_band_half_width = args["truncation_distance_factor"] * args["voxel_size"]
+            command += " " + tunable_parameters["truncation_distance"].cmd(narrow_band_half_width)
 
         return command
 
     def tune(self):
         parameter_space = {}
 
-        if self.test_mode:
-            parameters_to_tune = tunable_parameter_test_subset
-        else:
+        if self.mode == Mode.NORMAL:
             parameters_to_tune = tunable_parameters
+        elif self.mode == Mode.TEST_1_PARAMETER:
+            parameters_to_tune = one_parameter_test_subset
+        elif self.mode == Mode.TEST_2_PARAMETERS:
+            parameters_to_tune = two_parameter_test_subset
+        else:
+            raise ValueError("Unsupported mode: " + str(self.mode))
 
         for name, tunable_parameter in parameters_to_tune.items():
             if tunable_parameter.expression is not None:
@@ -280,12 +296,23 @@ def main() -> int:
     parser.add_argument('trials_step', metavar='<trials_step>', type=int,
                         help='How many new trials to do during this specific run.')
     parser.add_argument('--verbose', '-v', action='store_true', help="Produce verbose output.")
-    parser.add_argument('--test', '-t', action='store_true',
-                        help="Run in test mode (tune learning rate and warp length threshold only).")
+    parser.add_argument('--test2', '-t2', action='store_true',
+                        help="Run in two-parameter test mode (tune learning rate and warp length threshold only).")
+    parser.add_argument('--test1', '-t1', action='store_true',
+                        help="Run in one-parameter test mode (tune learning rate and warp length threshold only).")
     args = parser.parse_args()
 
+    if args.test1 and args.test2:
+        raise ValueError("--test2 (-t2) and --test1 (-t1) arguments cannot be used at once.")
+
+    mode = Mode.NORMAL
+    if args.test1:
+        mode = Mode.TEST_1_PARAMETER
+    elif args.test2:
+        mode = Mode.TEST_2_PARAMETERS
+
     tuner = Tuner(args.reco_path, args.configuration_path, args.until_frame, LossFunction.RMS_DISTANCE,
-                  args.trials_step, args.verbose, args.test)
+                  args.trials_step, args.verbose, mode)
     tuner.tune()
 
     return PROGRAM_SUCCESS
