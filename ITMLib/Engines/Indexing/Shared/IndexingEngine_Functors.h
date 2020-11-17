@@ -143,8 +143,7 @@ public: // instance functions
 	}
 
 	virtual ~HashEntryStateBasedAllocationFunctor_Base() {
-		CLEAN_UP_ATOMIC(last_free_voxel_block_id);CLEAN_UP_ATOMIC(last_free_excess_list_id);CLEAN_UP_ATOMIC(
-				utilized_block_count);
+		CLEAN_UP_ATOMIC(last_free_voxel_block_id);CLEAN_UP_ATOMIC(last_free_excess_list_id);CLEAN_UP_ATOMIC(utilized_block_count);
 	}
 
 	void UpdateIndexCounters(VoxelBlockHash& index) {

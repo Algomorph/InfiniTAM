@@ -1,4 +1,5 @@
 import numpy as np
+import math
 from typing import Mapping, Tuple
 
 
@@ -9,6 +10,9 @@ class Segment:
         self.direction = self.end - self.start
         self.inverse_direction = 1 / self.direction
         self.sign = self.inverse_direction < 0.0
+
+    def length(self):
+        return np.linalg.norm(self.direction)
 
     def __str__(self):
         return "start: " + str(self.start) + ", end: " + str(self.end)
@@ -70,3 +74,16 @@ def segment_intersects_grid_aligned_box(segment: Segment, box: GridAlignedBox):
     if t_z_max < t_max:
         t_max = t_z_max
     return not (t_max < 0.0 or t_min > 1.0)
+
+
+def generate_march_points(segment):
+    step_count = math.ceil(2.0 * segment.length())
+    stride_vector = segment.direction / (step_count - 1)
+
+    checked_position = segment.start
+    march_points = []
+    for i_step in range(0, step_count):
+        march_points.append(checked_position.copy())
+        checked_position += stride_vector
+
+    return march_points

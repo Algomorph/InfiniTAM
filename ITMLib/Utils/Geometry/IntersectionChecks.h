@@ -65,14 +65,14 @@ bool SegmentIntersectsGridAlignedBox3D(Segment segment, Vector3f boxMin, Vector3
 /**
  * \brief Determine whether a segment along a given ray intersects grid-aligned cube in 3 dimensions
  * \param segment a segment, with the direction vector from the origin to the end point
- * \param cubeMin
- * \param cubeSideLength
+ * \param cube_min
+ * \param cube_side_length
  * \return true if any part of the segment intersects the cube (a segment endpoint on the face of the cube counts as an intersection)
  */
 _CPU_AND_GPU_CODE_ inline
-bool SegmentIntersectsGridAlignedCube3D(Segment segment, Vector3f cubeMin, float cubeSideLength){
-	Vector3f cubeMax = cubeMin + Vector3f(cubeSideLength);
-	return SegmentIntersectsGridAlignedBox3D(segment, cubeMin, cubeMax);
+bool SegmentIntersectsGridAlignedCube3D(Segment segment, Vector3f cube_min, float cube_side_length){
+	Vector3f cube_max = cube_min + Vector3f(cube_side_length);
+	return SegmentIntersectsGridAlignedBox3D(segment, cube_min, cube_max);
 }
 
 } // namespace ITMLib
