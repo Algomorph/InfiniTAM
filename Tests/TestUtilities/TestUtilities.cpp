@@ -391,6 +391,7 @@ configuration::Configuration GenerateChangedUpConfiguration() {
 	using namespace configuration;
 	configuration::Configuration changed_up_configuration(
 			Vector3i(20, 23, 0),
+			Vector2i(10, 10),
 			true,
 			true,
 			VoxelVolumeParameters(0.005, 0.12, 4.12, 0.05, 200, true, 1.2f),
@@ -465,7 +466,7 @@ configuration::Configuration GenerateChangedUpConfiguration() {
 			LevelSetAlignmentTerminationConditions(AVERAGE, 300, 5, 0.0002f)
 	);
 	VolumeFusionSettings changed_up_volume_fusion_settings(false, 0.008);
-	DepthFusionSettings changed_up_depth_fusion_settings(true, 0.008);
+	DepthFusionSettings changed_up_depth_fusion_settings(DIAGNOSTIC, true, 0.008);
 	AddDeferrableToSourceTree(changed_up_configuration, changed_up_main_engine_settings);
 	AddDeferrableToSourceTree(changed_up_configuration, changed_up_telemetry_settings);
 	AddDeferrableToSourceTree(changed_up_configuration, changed_up_indexing_settings);

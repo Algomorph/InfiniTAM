@@ -18,8 +18,7 @@
 #include "IndexingEngine_VoxelBlockHash_Internal.h"
 #include "../Shared/IndexingEngine_DiagnosticData.h"
 
-namespace ITMLib{
-namespace internal{
+namespace ITMLib::internal{
 
 template<MemoryDeviceType TMemoryDeviceType>
 struct IndexingEngine_VoxelBlockHash_ExecutionModeSpecialized<TMemoryDeviceType, DIAGNOSTIC>{
@@ -28,5 +27,4 @@ public: // instance variables
 };
 
 
-} // namespace internal
 } // namespace ITMLib

@@ -54,6 +54,9 @@ namespace snoopy = snoopy_test_utilities;
 
 BOOST_AUTO_TEST_CASE(Test_SceneConstruct16_PVA_VBH_Near_CPU) {
 
+	configuration::Get().logging_settings.verbosity_level = VerbosityLevel::VERBOSITY_FOCUS_SPOTS;
+	configuration::Get().focus_voxel = Vector3i(-24, 55, 187);
+
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* volume_PVA_16;
 	BuildSdfVolumeFromImage_NearSurfaceAllocation(&volume_PVA_16,
 	                                              snoopy::Frame16DepthPath(),
@@ -76,6 +79,8 @@ BOOST_AUTO_TEST_CASE(Test_SceneConstruct16_PVA_VBH_Near_CPU) {
 	float absoluteTolerance = 1e-7;
 	BOOST_REQUIRE(allocatedContentAlmostEqual_CPU(volume_PVA_16, volume_VBH_16, absoluteTolerance));
 	BOOST_REQUIRE(contentForFlagsAlmostEqual_CPU_Verbose(volume_PVA_16, volume_VBH_16, VoxelFlags::VOXEL_NONTRUNCATED,
+	                                                     absoluteTolerance));
+	BOOST_REQUIRE(contentForFlagsAlmostEqual_CPU_Verbose(volume_PVA_16, volume_VBH_16, VoxelFlags::VOXEL_TRUNCATED,
 	                                                     absoluteTolerance));
 
 	delete volume_VBH_16;

@@ -42,21 +42,20 @@ struct IndexingEngineFactory {
 	template<typename TVoxel, typename TIndex>
 	static IndexingEngineInterface<TVoxel, TIndex>*
 	Build(MemoryDeviceType device_type = configuration::Get().device_type,
-			IndexingSettings settings = BuildDeferrableFromParentIfPresent<IndexingSettings>(configuration::Get())) {
+			const IndexingSettings& settings = BuildDeferrableFromParentIfPresent<IndexingSettings>(configuration::Get())) {
 		IndexingEngineInterface<TVoxel, TIndex>* indexing_engine = nullptr;
 
 		switch (device_type) {
 			case MEMORYDEVICE_CPU:
 				switch(settings.execution_mode){
 					case OPTIMIZED:
-						indexing_engine = new IndexingEngine<TVoxel, TIndex, MEMORYDEVICE_CPU, OPTIMIZED>();
+						indexing_engine = new IndexingEngine<TVoxel, TIndex, MEMORYDEVICE_CPU, OPTIMIZED>(settings);
 						break;
 					case DIAGNOSTIC:
-						indexing_engine = new IndexingEngine<TVoxel, TIndex, MEMORYDEVICE_CPU, DIAGNOSTIC>();
+						indexing_engine = new IndexingEngine<TVoxel, TIndex, MEMORYDEVICE_CPU, DIAGNOSTIC>(settings);
 			            break;
 					default:
 						DIEWITHEXCEPTION_REPORTLOCATION("Unsupported execution mode.");
-						break;
 				}
 				break;
 			case MEMORYDEVICE_CUDA:
@@ -65,14 +64,13 @@ struct IndexingEngineFactory {
 #else
 				switch(settings.execution_mode){
 					case OPTIMIZED:
-						indexing_engine = new IndexingEngine<TVoxel, TIndex, MEMORYDEVICE_CUDA, OPTIMIZED>();
+						indexing_engine = new IndexingEngine<TVoxel, TIndex, MEMORYDEVICE_CUDA, OPTIMIZED>(settings);
 						break;
 					case DIAGNOSTIC:
-						indexing_engine = new IndexingEngine<TVoxel, TIndex, MEMORYDEVICE_CUDA, DIAGNOSTIC>();
+						indexing_engine = new IndexingEngine<TVoxel, TIndex, MEMORYDEVICE_CUDA, DIAGNOSTIC>(settings);
 						break;
 					default:
 						DIEWITHEXCEPTION_REPORTLOCATION("Unsupported execution mode.");
-						break;
 				}
 #endif
 				break;
@@ -81,6 +79,8 @@ struct IndexingEngineFactory {
 				DIEWITHEXCEPTION_REPORTLOCATION("Metal support not implemented.");
 #endif
 				break;
+			default:
+				DIEWITHEXCEPTION_REPORTLOCATION("Unsupported device.");
 		}
 
 		return indexing_engine;
@@ -89,7 +89,7 @@ struct IndexingEngineFactory {
 	template<typename TVoxel, typename TIndex>
 	static IndexingEngineInterface<TVoxel, TIndex>&
 	GetDefault(MemoryDeviceType device_type = configuration::Get().device_type,
-	           IndexingSettings settings = BuildDeferrableFromParentIfPresent<IndexingSettings>(configuration::Get())) {
+	           const IndexingSettings& settings = BuildDeferrableFromParentIfPresent<IndexingSettings>(configuration::Get())) {
 		switch (device_type) {
 			case MEMORYDEVICE_CPU:
 				switch(settings.execution_mode){
@@ -130,6 +130,7 @@ struct IndexingEngineFactory {
 				return IndexingEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance();
 #endif
 			default:
+				DIEWITHEXCEPTION_REPORTLOCATION("Unsupported device.");
 				return IndexingEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>::Instance();
 		}
 	}

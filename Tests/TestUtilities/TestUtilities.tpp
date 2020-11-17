@@ -224,16 +224,19 @@ void BuildSdfVolumeFromImage_NearSurfaceAllocation_Common(VoxelVolume<TVoxel, TI
 	(*volume) = new VoxelVolume<TVoxel, TIndex>(configuration::Get().general_voxel_volume_parameters, swapping_mode,
 	                                            memory_device, initialization_parameters);
 	(*volume)->Reset();
-	RenderState renderState(imageSize, configuration::Get().general_voxel_volume_parameters.near_clipping_distance,
-	                        configuration::Get().general_voxel_volume_parameters.far_clipping_distance, memory_device);
 	CameraTrackingState tracking_state(imageSize, memory_device);
+
+	DepthFusionSettings depth_fusion_settings(DIAGNOSTIC, true, 0.012);
 
 	DepthFusionEngineInterface<TVoxel, WarpVoxel, TIndex>* depth_fusion_engine =
 			DepthFusionEngineFactory
-			::Build<TVoxel, WarpVoxel, TIndex>(memory_device);
+			::Build<TVoxel, WarpVoxel, TIndex>(memory_device, depth_fusion_settings);
+
+	IndexingSettings indexing_settings(DIAGNOSTIC);
 
 	IndexingEngineInterface<TSDFVoxel, TIndex>* indexing_engine = IndexingEngineFactory::Build<TVoxel, TIndex>(
-			memory_device);
+			memory_device, indexing_settings);
+
 	indexing_engine->AllocateNearSurface(*volume, *view, &tracking_state);
 	depth_fusion_engine->IntegrateDepthImageIntoTsdfVolume(*volume, *view, &tracking_state);
 

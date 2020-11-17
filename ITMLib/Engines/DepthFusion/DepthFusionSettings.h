@@ -17,11 +17,13 @@
 
 //local
 #include "../../Utils/Metacoding/DeferrableSerializableStruct.h"
+#include "../../Utils/Enums/ExecutionMode.h"
 
 namespace ITMLib {
 
 #define DEPTH_FUSION_SETTINGS_STRUCT_DESCRIPTION DepthFusionSettings, "depth_fusion_settings", \
-    (bool, use_surface_thickness_cutoff, false, PRIMITIVE, "When set to false, surface_thickness parameter is ignored."), \
+    (ExecutionMode, execution_mode, ExecutionMode::OPTIMIZED, ENUM, "Whether to use optimized or diagnostic mode."), \
+    (bool, use_surface_thickness_cutoff, true, PRIMITIVE, "When set to false, surface_thickness parameter is ignored."), \
     (float, surface_thickness, 0.012, PRIMITIVE, "Estimated surface_thickness (in meters). "\
     "The value can be used to compute parameter eta from 'SDF-2-SDF Registration for Real-Time 3D Reconstruction from RGB-D Data " \
 	"Sec. 3.2, and SobolevFusion, Sec. 3.1, as well as 'mu' from original KinectFusion(2011). " \

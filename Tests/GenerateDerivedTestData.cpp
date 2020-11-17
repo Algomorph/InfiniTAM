@@ -416,6 +416,7 @@ configuration::Configuration GenerateDefaultSnoopyConfiguration() {
 	configuration::Configuration
 			default_snoopy_configuration(
 			Vector3i(0, 0, 0),
+			Vector2i(0,0),
 			true,
 			true,
 			VoxelVolumeParameters(0.004, 0.2, 1.0, 0.04, 100, false, 1.0f),
@@ -753,13 +754,13 @@ int main(int argc, char* argv[]) {
 			std::cout << "Generates derived data used for testing the library. " << std::endl;
 			std::cout << "Usage:" << std::endl << "generate_derived_test_data " << std::endl << "(runs all modes)  -- OR -- "
 			          << std::endl << "generate_derived_test_data <mode> [-c]" << std::endl <<
-			          ", where <mode> can be one of: " << std::endl;
+			          ", where <mode> can be one of: " << std::endl << std::endl;
 			int i_pair = 0;
 			for (auto& pair : generator_by_string) {
 				if (i_pair < generator_by_string.size() - 1) {
-					std::cout << enumerator_to_string_token_list(pair.first) << ", " << std::endl;
+					std::cout << enumerator_to_string(pair.first) << "( alternative tokens: " << enumerator_to_string_token_list(pair.first) << "), " << std::endl;
 				} else {
-					std::cout << "or " << enumerator_to_string_token_list(pair.first) << ".";
+					std::cout << "or " << enumerator_to_string(pair.first) << "( alternative tokens: " << enumerator_to_string_token_list(pair.first) << ").";
 				}
 				i_pair++;
 			}

@@ -86,7 +86,7 @@ private:
 	void SetUpFocusVoxelPrinting(bool& print_voxel_result, const Vector3i& voxel_position,
 	                             const Vector3f& warp_update, const TVoxel& canonical_voxel, const TVoxel& live_voxel,
 	                             bool compute_data_term) {
-		if (use_focus_coordinates && voxel_position == focus_coordinates) {
+		if (use_focus_voxel && voxel_position == focus_voxel) {
 			int x = 0, y = 0, z = 0, vmIndex = 0, locId = 0;
 			GetVoxelHashLocals(vmIndex, locId, x, y, z, live_index_data, live_cache, voxel_position);
 
@@ -122,8 +122,8 @@ public:
 			warp_voxels(warp_field->GetVoxels()), warp_index_data(warp_field->index.GetIndexData()),
 			canonical_voxels(canonical_volume->GetVoxels()), canonical_index_data(canonical_volume->index.GetIndexData()),
 			live_cache(), canonical_cache(),
-			use_focus_coordinates(configuration::Get().logging_settings.verbosity_level >= VERBOSITY_FOCUS_SPOTS),
-			focus_coordinates(configuration::Get().focus_coordinates),
+			use_focus_voxel(configuration::Get().logging_settings.verbosity_level >= VERBOSITY_FOCUS_SPOTS),
+			focus_voxel(configuration::Get().focus_voxel),
 			sdf_unity(voxel_size / truncation_distance),
 			verbosity_level(configuration::Get().logging_settings.verbosity_level),
 			iteration_index(iteration_index) {}
@@ -351,8 +351,8 @@ private:
 	ComponentEnergies<TMemoryDeviceType> energies;
 
 	// *** debugging / analysis variables
-	bool use_focus_coordinates{};
-	Vector3i focus_coordinates;
+	bool use_focus_voxel{};
+	Vector3i focus_voxel;
 
 	const LevelSetAlignmentWeights parameters;
 	const LevelSetAlignmentSwitches switches;

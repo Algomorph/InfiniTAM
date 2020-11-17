@@ -1,5 +1,5 @@
 {
-    "focus_coordinates": [
+    "focus_voxel": [
         0,
         0,
         0
@@ -124,7 +124,7 @@
         "draw_frame_index_labels": true,
         "library_mode": "dynamic",
         "indexing_method": "hash",
-        "halt_on_non_rigid_alignment_convergence_failure": false,
+        "halt_on_non_rigid_alignment_convergence_faulture": false,
         "enable_rigid_alignment": true
     },
     "telemetry_settings": {

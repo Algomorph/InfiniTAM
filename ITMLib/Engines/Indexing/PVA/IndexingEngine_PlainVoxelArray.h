@@ -23,7 +23,7 @@ class IndexingEngine<TVoxel, PlainVoxelArray, TMemoryDeviceType, TExecutionMode>
 		public IndexingEngineInterface<TVoxel, PlainVoxelArray> {
 
 public: // instance functions
-	IndexingEngine() = default;
+	using IndexingEngineInterface<TVoxel, PlainVoxelArray>::IndexingEngineInterface;
 	static IndexingEngine& Instance() {
 		static IndexingEngine instance;
 		return instance;

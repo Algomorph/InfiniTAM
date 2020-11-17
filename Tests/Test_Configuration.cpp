@@ -168,7 +168,8 @@ BOOST_AUTO_TEST_CASE(ConfigurationTestLong_CLI_Only) {
 
 	config_destination = GENERATED_TEST_DATA_PREFIX "TestData/configuration/cli_test_long.json";
 	std::string command = GetCLI_optionsSubtestExecutablePath() + " --config_output=" + config_destination +
-	                      " --focus_coordinates=20 23 0"
+	                      " --focus_voxel=20 23 0"
+					      " --focus_pixel=10 10"
 	                      " --record_reconstruction_video=true"
 	                      " --record_inputs_in_reconstruction_video=true"
 
@@ -286,6 +287,7 @@ BOOST_AUTO_TEST_CASE(ConfigurationTestLong_CLI_Only) {
 					      " --volume_fusion_settings.use_surface_thickness_cutoff=false"
 	                      " --volume_fusion_settings.surface_thickness=0.008"
 
+					      " --depth_fusion_settings.execution_mode=diagnostic"
 	                      " --depth_fusion_settings.use_surface_thickness_cutoff=true"
 	                      " --depth_fusion_settings.surface_thickness=0.008"
 	                      ;

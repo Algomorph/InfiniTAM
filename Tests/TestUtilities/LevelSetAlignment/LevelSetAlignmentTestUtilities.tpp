@@ -55,13 +55,13 @@ namespace test_utilities {
 
 
 template<MemoryDeviceType TMemoryDeviceType>
-void PVA_to_VBH_WarpComparisonSubtest(int iteration, LevelSetAlignmentSwitches trackerSwitches, float absolute_tolerance) {
+void PVA_to_VBH_WarpComparisonSubtest(int iteration, LevelSetAlignmentSwitches tracker_switches, float absolute_tolerance) {
 
 	if (iteration < 0) {
 		DIEWITHEXCEPTION_REPORTLOCATION("Expecting iteration >= 0, got less than that, aborting.");
 	}
 
-	std::string prefix = SwitchesToPrefix(trackerSwitches);
+	std::string prefix = SwitchesToPrefix(tracker_switches);
 
 	// *** initialize/load warps
 	VoxelVolume<WarpVoxel, PlainVoxelArray>* warps_PVA;
@@ -119,14 +119,17 @@ void PVA_to_VBH_WarpComparisonSubtest(int iteration, LevelSetAlignmentSwitches t
 
 	// *** perform the warp gradient computation and warp updates
 	LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, PlainVoxelArray, TMemoryDeviceType, DIAGNOSTIC>
-			level_set_aligner_PVA(trackerSwitches, SingleIterationTerminationConditions());
+			level_set_aligner_PVA(tracker_switches, SingleIterationTerminationConditions());
 
 
 	BOOST_TEST_MESSAGE("==== CALCULATE PVA WARPS === ");
+	configuration::Get().logging_settings.verbosity_level = VerbosityLevel::VERBOSITY_FOCUS_SPOTS;
+	auto focus_spot = Vector3i(-17, 47, 223);
+	configuration::Get().focus_voxel = focus_spot;
 	level_set_aligner_PVA.Align(warps_PVA, warped_pair_PVA, volume_16_PVA);
 
 	LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash, TMemoryDeviceType, DIAGNOSTIC>
-			level_set_aligner_VBH(trackerSwitches, SingleIterationTerminationConditions());
+			level_set_aligner_VBH(tracker_switches, SingleIterationTerminationConditions());
 
 	BOOST_TEST_MESSAGE("==== CALCULATE VBH WARPS === ");
 	level_set_aligner_VBH.Align(warps_VBH, warped_pair_VBH, volume_16_VBH);

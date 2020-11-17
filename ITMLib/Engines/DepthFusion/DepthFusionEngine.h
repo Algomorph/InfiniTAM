@@ -65,7 +65,7 @@ template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMem
 class DepthFusionEngine :
 		public DepthFusionEngineInterface<TVoxel, TWarp, TIndex> {
 public:
-	DepthFusionEngine() = default;
+	using DepthFusionEngineInterface<TVoxel, TWarp, TIndex>::DepthFusionEngineInterface;
 	~DepthFusionEngine() = default;
 
 	void IntegrateDepthImageIntoTsdfVolume(VoxelVolume<TVoxel, TIndex>* volume, const View* view);
