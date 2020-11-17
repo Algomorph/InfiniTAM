@@ -212,7 +212,7 @@ void GenericTestVolumeReductionMaxWarpUpdate() {
 
 	WarpVoxel voxel = warps->GetValueAt(position);
 
-	BOOST_REQUIRE_EQUAL(ORUtils::length(voxel.warp_update), max_value);
+	BOOST_REQUIRE(abs(ORUtils::length(voxel.warp_update) - max_value) < 1e-6);
 
 
 	delete warps;

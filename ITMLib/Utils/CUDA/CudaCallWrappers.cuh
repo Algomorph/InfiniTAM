@@ -42,7 +42,7 @@ inline static void CallCUDAonUploadedFunctor(TFunctor& functor, TCudaCall&& cuda
 template<MemoryDeviceType TMemoryDeviceType, typename TFunctor, typename TFunctionAcceptingFunctorPtr>
 inline static void UploadFunctorIfNecessaryAndCall(TFunctor& functor, TFunctionAcceptingFunctorPtr&& function) {
 #ifdef COMPILE_WITHOUT_CUDA
-	function(&functor_device)
+	function(&functor)
 #else
 	if (TMemoryDeviceType == MEMORYDEVICE_CUDA) {
 		TFunctor* functor_prepared;
@@ -63,7 +63,7 @@ inline static void UploadFunctorIfNecessaryAndCall(TFunctor& functor, TFunctionA
 template<MemoryDeviceType TMemoryDeviceType, typename TFunctor, typename TFunctionAcceptingFunctorPtr>
 inline static void UploadConstFunctorIfNecessaryAndCall(const TFunctor& functor, TFunctionAcceptingFunctorPtr&& function) {
 #ifdef COMPILE_WITHOUT_CUDA
-	function(&functor_device)
+	function(&functor)
 #else
 	if (TMemoryDeviceType == MEMORYDEVICE_CUDA) {
 		TFunctor* functor_prepared;

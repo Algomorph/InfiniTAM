@@ -94,6 +94,7 @@
         "log_trajectory_quaternions": false,
         "log_iteration_number": false,
         "log_surface_tracking_procedure_names": true,
+        "log_max_gradient_length_position": false,
         "log_gradient_length_statistic": false,
         "log_surface_tracking_optimization_energies": false,
         "log_additional_surface_tracking_stats": false,
@@ -123,6 +124,7 @@
         "draw_frame_index_labels": true,
         "library_mode": "dynamic",
         "indexing_method": "hash",
+        "halt_on_non_rigid_alignment_convergence_faulture": false,
         "enable_rigid_alignment": true
     },
     "telemetry_settings": {
@@ -149,6 +151,7 @@
         "load_volume_and_camera_matrix_before_processing": false,
         "save_volumes_and_camera_matrix_after_processing": false,
         "save_meshes_after_processing": false,
+        "exit_if_main_processing_turns_off": false,
         "exit_after_automatic_processing": false
     },
     "level_set_evolution": {
@@ -169,6 +172,7 @@
             "enable_Sobolev_gradient_smoothing": true
         },
         "termination": {
+            "warp_length_termination_threshold_type": "maximum",
             "max_iteration_count": 300,
             "min_iteration_count": 10,
             "update_length_threshold": "9.99999997e-07"
