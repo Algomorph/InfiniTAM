@@ -45,6 +45,9 @@ template<typename TEnum>
 std::string enumerator_bracketed_list();
 
 template<typename TEnum>
+std::vector<std::string> enumerator_to_string_token_list(const TEnum& enum_value);
+
+template<typename TEnum>
 TEnum variables_map_to_enumerator(const boost::program_options::variables_map& vm, const std::string& argument) {
 	return string_to_enumerator<TEnum>(vm[argument].as<std::string>());
 }
@@ -61,10 +64,11 @@ boost::optional<TEnum> ptree_to_optional_enumerator(const boost::property_tree::
 
 // endregion
 
-// region ================== SERIALIZABLE ENUM PER-ENUMERATOR MACROS ===================================================
+// region ================== SERIALIZABLE ENUM PER-TOKEN AND PER-ENUMERATOR MACROS ======================================
 
-// this top one is per-token, not per-enumerator
+// these top ones are per-token, not per-enumerator
 #define SERIALIZABLE_ENUM_IMPL_GEN_TOKEN_MAPPINGS(qualified_enumerator, token) { token , qualified_enumerator }
+#define SERIALIZABLE_ENUM_IMPL_LIST_STRING_TOKEN(_, token, ...) token
 
 #define SERIALIZABLE_ENUM_IMPL_LIST_ENUMERATOR(_, enumerator, ...) enumerator
 #define SERIALIZABLE_ENUM_IMPL_STRING_MAPPINGS(enum_name, enumerator, ...) \
@@ -75,10 +79,16 @@ boost::optional<TEnum> ptree_to_optional_enumerator(const boost::property_tree::
 #define SERIALIZABLE_ENUM_IMPL_STRING_MAPPINGS_3(enum_name, enumerator, loop, ...) \
     ITM_METACODING_IMPL_EXPAND2(loop(SERIALIZABLE_ENUM_IMPL_GEN_TOKEN_MAPPINGS, enum_name::enumerator, ITM_METACODING_IMPL_COMMA,__VA_ARGS__))
 
-//#define SERIALIZABLE_ENUM_IMPL_STRING_SWITCH_CASE(A, B ) \
-//	case A : token = #B; break;
 #define SERIALIZABLE_ENUM_IMPL_STRING_SWITCH_CASE(enum_name, enumerator, first_token, ...) \
     case enum_name::enumerator : token = first_token; break;
+
+#define SERIALIZABLE_ENUM_IMPL_GENERATE_TOKEN_LIST(...) \
+    ITM_METACODING_IMPL_CAT(ITM_METACODING_IMPL_LOOP2_, ITM_METACODING_IMPL_NARG(__VA_ARGS__)) \
+                (SERIALIZABLE_ENUM_IMPL_LIST_STRING_TOKEN, _, ITM_METACODING_IMPL_COMMA, __VA_ARGS__)
+
+#define SERIALIZABLE_ENUM_IMPL_TOKEN_LIST_SWITCH_CASE(enum_name, enumerator, ...) \
+    case enum_name::enumerator : return { SERIALIZABLE_ENUM_IMPL_GENERATE_TOKEN_LIST(__VA_ARGS__) };
+
 // endregion
 // region ================== SERIALIZABLE ENUM TOP-LEVEL MACROS ========================================================
 
@@ -125,6 +135,14 @@ boost::optional<TEnum> ptree_to_optional_enumerator(const boost::property_tree::
     template<> \
     INLINE std::string enumerator_bracketed_list< enum_name >(){ \
         return "[" BOOST_PP_STRINGIZE(BOOST_PP_CAT2(SERIALIZABLE_ENUM_IMPL_LIST_ENUMERATORS(__VA_ARGS__))) "]"; \
+    } \
+    template<> \
+    INLINE std::vector<std::string> enumerator_to_string_token_list< enum_name >(const enum_name & value){ \
+        switch(value) { \
+            ITM_METACODING_IMPL_EXPAND(loop(SERIALIZABLE_ENUM_IMPL_TOKEN_LIST_SWITCH_CASE, enum_name, \
+            	                               ITM_METACODING_IMPL_NOTHING, __VA_ARGS__)) \
+        } \
+        return {};                                                                             \
     }
 
 

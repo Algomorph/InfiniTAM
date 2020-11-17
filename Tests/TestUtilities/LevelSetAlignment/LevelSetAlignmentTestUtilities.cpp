@@ -20,7 +20,7 @@ namespace test_utilities {
 
 
 template
-void PVA_to_VBH_WarpComparisonSubtest<MEMORYDEVICE_CPU>(int iteration, LevelSetAlignmentSwitches trackerSwitches);
+void PVA_to_VBH_WarpComparisonSubtest<MEMORYDEVICE_CPU>(int iteration, LevelSetAlignmentSwitches trackerSwitches, float absolute_tolerance);
 
 template
 void GenericWarpTest<MEMORYDEVICE_CPU>(const LevelSetAlignmentSwitches& switches, int iteration_limit,
@@ -30,7 +30,7 @@ void GenericWarpTest<MEMORYDEVICE_CPU>(const LevelSetAlignmentSwitches& switches
 #ifndef COMPILE_WITHOUT_CUDA
 
 template
-void PVA_to_VBH_WarpComparisonSubtest<MEMORYDEVICE_CUDA>(int iteration, LevelSetAlignmentSwitches trackerSwitches);
+void PVA_to_VBH_WarpComparisonSubtest<MEMORYDEVICE_CUDA>(int iteration, LevelSetAlignmentSwitches trackerSwitches, float absolute_tolerance);
 
 template
 void GenericWarpTest<MEMORYDEVICE_CUDA>(const LevelSetAlignmentSwitches& switches, int iteration_limit,

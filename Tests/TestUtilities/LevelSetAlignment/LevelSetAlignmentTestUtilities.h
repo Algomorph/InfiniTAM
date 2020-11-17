@@ -35,7 +35,7 @@ namespace test_utilities {
 
 
 template<MemoryDeviceType TMemoryDeviceType>
-void PVA_to_VBH_WarpComparisonSubtest(int iteration, LevelSetAlignmentSwitches trackerSwitches);
+void PVA_to_VBH_WarpComparisonSubtest(int iteration, LevelSetAlignmentSwitches trackerSwitches, float absolute_tolerance = 1e-7);
 
 
 template<MemoryDeviceType TMemoryDeviceType>

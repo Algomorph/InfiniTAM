@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_DataAndTikhonov_CPU) {
 #ifdef GENERATE_TEST_DATA
 	GenericWarpTest<MEMORYDEVICE_CPU>(switches, 5, SAVE_SUCCESSIVE_ITERATIONS);
 #else
-	GenericWarpTest<MEMORYDEVICE_CPU>(switches, 5, TEST_SUCCESSIVE_ITERATIONS, 1e-7);
+	GenericWarpTest<MEMORYDEVICE_CPU>(switches, 5, TEST_SUCCESSIVE_ITERATIONS, 25e-6);
 #endif
 }
 
@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_DataAndTikhonovAndSobolevSmoothing_CPU) {
 #ifdef GENERATE_TEST_DATA
 	GenericWarpTest<MEMORYDEVICE_CPU>(switches, 5, SAVE_SUCCESSIVE_ITERATIONS);
 #else
-	GenericWarpTest<MEMORYDEVICE_CPU>(switches, 5, TEST_SUCCESSIVE_ITERATIONS, 25e-6);
+	GenericWarpTest<MEMORYDEVICE_CPU>(switches, 5, TEST_SUCCESSIVE_ITERATIONS, 1e-5);
 #endif
 }
 
@@ -126,6 +126,11 @@ BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_simple_CPU_data_only) {
 BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_simple_CPU_data_and_tikhonov) {
 	LevelSetAlignmentSwitches switches(true, false, true, false, false);
 	PVA_to_VBH_WarpComparisonSubtest<MEMORYDEVICE_CPU>(1, switches);
+}
+
+BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_simple_CPU_data_and_tikhonov_and_sobolev_smoothing) {
+	LevelSetAlignmentSwitches switches(true, false, true, false, true);
+	PVA_to_VBH_WarpComparisonSubtest<MEMORYDEVICE_CPU>(0, switches, 25e-6);
 }
 
 #ifndef COMPILE_WITHOUT_CUDA

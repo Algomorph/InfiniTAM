@@ -51,12 +51,14 @@
 #include "../ITMLib/Engines/ViewBuilder/ViewBuilderFactory.h"
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
 #include "../ITMLib/Engines/Telemetry/TelemetrySettings.h"
+#include "../ITMLib/Utils/Geometry/GeometryBooleanOperations.h"
 #include "../ITMLib/Utils/Configuration/AutomaticRunSettings.h"
+#include "../ITMLib/Utils/Logging/PrettyPrinters.h"
 #include "../ITMLib/Engines/Main/MainEngineSettings.h"
 #include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
 #include "TestUtilities/LevelSetAlignment/SingleIterationTestConditions.h"
 #include "TestUtilities/LevelSetAlignment/TestCaseOrganizationBySwitches.h"
-#include "../ITMLib/Utils/Geometry/GeometryBooleanOperations.h"
+
 #include "../ORUtils/VectorAndMatrixPersistence.h"
 
 
@@ -755,13 +757,14 @@ int main(int argc, char* argv[]) {
 			int i_pair = 0;
 			for (auto& pair : generator_by_string) {
 				if (i_pair < generator_by_string.size() - 1) {
-					std::cout << enumerator_to_string(pair.first) << ", " << std::endl;
+					std::cout << enumerator_to_string_token_list(pair.first) << ", " << std::endl;
 				} else {
-					std::cout << "or " << enumerator_to_string(pair.first) << ".";
+					std::cout << "or " << enumerator_to_string_token_list(pair.first) << ".";
 				}
 				i_pair++;
 			}
 			std::cout << std::endl;
+
 			std::cout << "For any of these, shorthands can be used, which are typically acronyms with some words omitted"
 			             ", e.g. \"suv\" can be used instead of \"SNOOPY_UNMASKED_VOLUMES\" and \"pva_wv\" instead of \"PVA_WARPED_VOLUMES\". "
 			             "Don't be afraid to experiment." << std::endl;

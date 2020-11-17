@@ -55,14 +55,13 @@ namespace test_utilities {
 
 
 template<MemoryDeviceType TMemoryDeviceType>
-void PVA_to_VBH_WarpComparisonSubtest(int iteration, LevelSetAlignmentSwitches trackerSwitches) {
+void PVA_to_VBH_WarpComparisonSubtest(int iteration, LevelSetAlignmentSwitches trackerSwitches, float absolute_tolerance) {
 
 	if (iteration < 0) {
 		DIEWITHEXCEPTION_REPORTLOCATION("Expecting iteration >= 0, got less than that, aborting.");
 	}
 
 	std::string prefix = SwitchesToPrefix(trackerSwitches);
-	float absolute_tolerance = 1e-6f;
 
 	// *** initialize/load warps
 	VoxelVolume<WarpVoxel, PlainVoxelArray>* warps_PVA;
