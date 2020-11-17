@@ -232,6 +232,7 @@ BOOST_AUTO_TEST_CASE(ConfigurationTestLong_CLI_Only) {
 	                      " --logging_settings.log_trajectory_quaternions=true"
 	                      " --logging_settings.log_iteration_number=true"
 	                      " --logging_settings.log_surface_tracking_procedure_names=true"
+					      " --logging_settings.log_max_gradient_length_position=true"
 	                      " --logging_settings.log_gradient_length_statistic=true"
 	                      " --logging_settings.log_surface_tracking_optimization_energies=true"
 	                      " --logging_settings.log_additional_surface_tracking_stats=true"
@@ -256,6 +257,7 @@ BOOST_AUTO_TEST_CASE(ConfigurationTestLong_CLI_Only) {
 	                      " --main_engine_settings.draw_frame_index_labels=true"
 	                      " --main_engine_settings.library_mode=basic"
 	                      " --main_engine_settings.indexing_method=array"
+					      " --main_engine_settings.halt_on_non_rigid_alignment_convergence_failure=true"
 	                      " --main_engine_settings.enable_rigid_alignment=false"
 
 	                      " --telemetry_settings.record_volume_memory_usage=true"
@@ -278,6 +280,7 @@ BOOST_AUTO_TEST_CASE(ConfigurationTestLong_CLI_Only) {
 	                      " --automatic_run_settings.load_volume_and_camera_matrix_before_processing=true"
 	                      " --automatic_run_settings.save_volumes_and_camera_matrix_after_processing=true"
 	                      " --automatic_run_settings.save_meshes_after_processing=true"
+					      " --automatic_run_settings.exit_if_main_processing_turns_off=true"
 	                      " --automatic_run_settings.exit_after_automatic_processing=true"
 
 					      " --volume_fusion_settings.use_surface_thickness_cutoff=false"
@@ -294,16 +297,16 @@ BOOST_AUTO_TEST_CASE(ConfigurationTestLong_CLI_Only) {
 	configuration::LoadConfigurationFromJSONFile(config_destination);
 	loaded_deferrables = DeferrableStructCollection();
 
-	configuration::Configuration configuration1 = GenerateChangedUpConfiguration();
-	DeferrableStructCollection deferrables1(configuration1);
+	configuration::Configuration changed_up_configuration = GenerateChangedUpConfiguration();
+	DeferrableStructCollection changed_up_deferrables(changed_up_configuration);
 
-	BOOST_REQUIRE_EQUAL(configuration1.general_voxel_volume_parameters, configuration::Get().general_voxel_volume_parameters);
-	BOOST_REQUIRE_EQUAL(configuration1.general_surfel_volume_parameters, configuration::Get().general_surfel_volume_parameters);
-	BOOST_REQUIRE_EQUAL(configuration1.specific_volume_parameters, configuration::Get().specific_volume_parameters);
-	BOOST_REQUIRE_EQUAL(configuration1.logging_settings, configuration::Get().logging_settings);
-	BOOST_REQUIRE_EQUAL(configuration1.paths, configuration::Get().paths);
-	BOOST_REQUIRE_EQUAL(configuration1, configuration::Get());
-	RequireEqualDeferrables(deferrables1, loaded_deferrables);
+	BOOST_REQUIRE_EQUAL(changed_up_configuration.general_voxel_volume_parameters, configuration::Get().general_voxel_volume_parameters);
+	BOOST_REQUIRE_EQUAL(changed_up_configuration.general_surfel_volume_parameters, configuration::Get().general_surfel_volume_parameters);
+	BOOST_REQUIRE_EQUAL(changed_up_configuration.specific_volume_parameters, configuration::Get().specific_volume_parameters);
+	BOOST_REQUIRE_EQUAL(changed_up_configuration.logging_settings, configuration::Get().logging_settings);
+	BOOST_REQUIRE_EQUAL(changed_up_configuration.paths, configuration::Get().paths);
+	BOOST_REQUIRE_EQUAL(changed_up_configuration, configuration::Get());
+	RequireEqualDeferrables(changed_up_deferrables, loaded_deferrables);
 }
 
 //TODO: Restore support for short options when Boost program_options is replaced by CLI11

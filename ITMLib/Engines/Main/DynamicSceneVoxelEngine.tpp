@@ -331,7 +331,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(UChar4Image* rgb_im
 		LOG4CPLUS_PER_FRAME(logging::GetLogger(), bright_cyan << "*** Optimizing warp based on difference between canonical and live SDF. ***" << reset);
 		bool optimizationConverged;
 		target_warped_live_volume = surface_tracker->Align(warp_field, live_volumes, canonical_volume, optimizationConverged);
-		if(this->parameters.halt_on_non_rigid_alignment_convergence_faulture && !optimizationConverged){
+		if(this->parameters.halt_on_non_rigid_alignment_convergence_failure && !optimizationConverged){
 			main_processing_active = false;
 			LOG4CPLUS_TOP_LEVEL(logging::GetLogger(), bright_cyan << "Non-rigid TSDF alignment optimization did not converge. Switching off main processing." << reset);
 		}
