@@ -44,12 +44,13 @@ void GenerateRandomDepthWeightSubVolume(VoxelVolume<TVoxel, TIndex>* volume, con
 
 
 template<MemoryDeviceType TMemoryDeviceType, typename TVoxel, typename TIndex>
-void FindAllVoxelsNotInDepthWeightRange(VoxelVolume<TVoxel, TIndex>* volume, const Extent2Di& weight_range){
+void FindAllVoxelsNotInDepthWeightRange(VoxelVolume<TVoxel, TIndex>* volume, const Extent2Di& weight_range) {
 	DepthOutsideRangeFinder<TVoxel, TMemoryDeviceType> functor(weight_range);
 	VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseUtilizedWithPosition(volume, functor);
 }
+
 template<MemoryDeviceType TMemoryDeviceType, typename TVoxel, typename TIndex>
-void FindAllVoxelsNotInDepthWeightRange(VoxelVolume<TVoxel, TIndex>* volume, const Extent3Di& bounds, const Extent2Di& weight_range){
+void FindAllVoxelsNotInDepthWeightRange(VoxelVolume<TVoxel, TIndex>* volume, const Extent3Di& bounds, const Extent2Di& weight_range) {
 	DepthOutsideRangeInExtentFinder<TVoxel, TMemoryDeviceType> functor(weight_range, bounds);
 	VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseUtilizedWithPosition(volume, functor);
 }
@@ -217,9 +218,9 @@ void InitializeVolume(VoxelVolume<TVoxel, TIndex>** volume,
 
 template<typename TVoxel, typename TIndex>
 void BuildSdfVolumeFromImage_NearSurfaceAllocation_Common(VoxelVolume<TVoxel, TIndex>** volume,
-                                                          View** view,MemoryDeviceType memory_device,
+                                                          View** view, MemoryDeviceType memory_device,
                                                           typename TIndex::InitializationParameters initialization_parameters,
-                                                          configuration::SwappingMode swapping_mode){
+                                                          configuration::SwappingMode swapping_mode) {
 	Vector2i imageSize(640, 480);
 	(*volume) = new VoxelVolume<TVoxel, TIndex>(configuration::Get().general_voxel_volume_parameters, swapping_mode,
 	                                            memory_device, initialization_parameters);

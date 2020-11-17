@@ -56,6 +56,7 @@ BOOST_AUTO_TEST_CASE(Test_SceneConstruct16_PVA_VBH_Near_CPU) {
 
 	configuration::Get().logging_settings.verbosity_level = VerbosityLevel::VERBOSITY_FOCUS_SPOTS;
 	configuration::Get().focus_voxel = Vector3i(-24, 55, 187);
+	configuration::Get().focus_pixel = Vector2i(254, 392);
 
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* volume_PVA_16;
 	BuildSdfVolumeFromImage_NearSurfaceAllocation(&volume_PVA_16,

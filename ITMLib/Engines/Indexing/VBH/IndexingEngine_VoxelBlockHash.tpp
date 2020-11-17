@@ -90,9 +90,12 @@ void IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType, TExecutionMode>::
 	Matrix4f inverse_depth_camera_matrix;
 	depth_camera_matrix.inv(inverse_depth_camera_matrix);
 
-	DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType> depth_based_allocator(
+	DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType, TExecutionMode> depth_based_allocator(
 			volume->index, volume->GetParameters(), view, inverse_depth_camera_matrix, surface_distance_cutoff);
-
+	if(TExecutionMode == DIAGNOSTIC){
+		depth_based_allocator.verbosity = configuration::Get().logging_settings.verbosity_level;
+		depth_based_allocator.focus_pixel = configuration::Get().focus_pixel;
+	}
 	do {
 		volume->index.ClearHashEntryAllocationStates();
 		depth_based_allocator.ResetFlagsAndCounters();
@@ -120,6 +123,10 @@ void IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType, TExecutionMode>::
 
 	TwoSurfaceBasedAllocationStateMarkerFunctor<TMemoryDeviceType, TExecutionMode> depth_based_allocator(
 			volume->index, volume->GetParameters(), view, tracking_state, surface_distance_cutoff, execution_mode_specialized_engine);
+	if(TExecutionMode == DIAGNOSTIC){
+		depth_based_allocator.verbosity = configuration::Get().logging_settings.verbosity_level;
+		depth_based_allocator.focus_pixel = configuration::Get().focus_pixel;
+	}
 	do {
 		volume->index.ClearHashEntryAllocationStates();
 		depth_based_allocator.ResetFlagsAndCounters();
