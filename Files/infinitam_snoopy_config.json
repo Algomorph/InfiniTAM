@@ -4,6 +4,10 @@
         0,
         0
     ],
+    "focus_pixel": [
+        0,
+        0
+    ],
     "record_reconstruction_video": true,
     "record_inputs_in_reconstruction_video": true,
     "general_voxel_volume_parameters": {
@@ -124,7 +128,7 @@
         "draw_frame_index_labels": true,
         "library_mode": "dynamic",
         "indexing_method": "hash",
-        "halt_on_non_rigid_alignment_convergence_faulture": false,
+        "halt_on_non_rigid_alignment_convergence_failure": false,
         "enable_rigid_alignment": true
     },
     "telemetry_settings": {
@@ -183,7 +187,8 @@
         "surface_thickness": 0.0120000001
     },
     "depth_fusion_settings": {
-        "use_surface_thickness_cutoff": false,
+        "execution_mode": "optimized",
+        "use_surface_thickness_cutoff": true,
         "surface_thickness": 0.0120000001
     }
 }

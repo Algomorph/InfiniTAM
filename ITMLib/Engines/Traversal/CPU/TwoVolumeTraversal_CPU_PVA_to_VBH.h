@@ -348,6 +348,12 @@ private:
 		std::vector<Extent3Di> border_extents = ComputeBoxSetOfHashAlignedCenterAndNonHashBlockAlignedArrayMargins(
 				*array_info, central_extent);
 
+		for(auto& extent : border_extents){
+			if(margin_extent_has_mismatch(extent)){
+				return false;
+			}
+		}
+
 		return !central_extent_has_mismatch(central_extent);
 	}
 
@@ -471,7 +477,7 @@ public: // static functions
 			if (margin_far < 0) {
 				margin_far += VOXEL_BLOCK_SIZE;
 			}
-			per_direction_margin_lengths[i_direction].width_margin_far = margin_near;
+			per_direction_margin_lengths[i_direction].width_margin_far = margin_far;
 		}
 
 		// use the margin thicknesses to construct the 6 blocks, one for each face. The boxes should not overlap.
@@ -479,8 +485,8 @@ public: // static functions
 		int margin_far_x_start = array_bounds_max.x - direction_x.width_margin_far;
 		int margin_near_y_end = array_bounds_min.y + direction_y.width_margin_near;
 		int margin_far_y_start = array_bounds_max.y - direction_y.width_margin_far;
-		int margin_near_z_end = array_bounds_min.z + direction_x.width_margin_near;
-		int margin_far_z_start = array_bounds_max.z - direction_y.width_margin_far;
+		int margin_near_z_end = array_bounds_min.z + direction_z.width_margin_near;
+		int margin_far_z_start = array_bounds_max.z - direction_z.width_margin_far;
 
 		std::vector<Extent3Di> allExtents = {
 				Extent3Di{array_bounds_min.x, array_bounds_min.y, array_bounds_min.z,

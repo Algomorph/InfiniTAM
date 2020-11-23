@@ -39,6 +39,11 @@ def get_voxel_block_extent_metric(block_coordinates: np.ndarray, voxel_size=0.00
                           (np.array(block_coordinates, dtype=np.float) + np.array([1, 1, 1])) * voxel_size * voxel_block_size - voxel_size / 2)
 
 
+def get_voxel_extent_metric(voxel_coordinates: np.ndarray, voxel_size=0.004):
+    return GridAlignedBox(np.array(voxel_coordinates, dtype=np.float) * voxel_size - voxel_size / 2,
+                          (np.array(voxel_coordinates, dtype=np.float) + np.array([1, 1, 1])) * voxel_size - voxel_size / 2)
+
+
 def convert_point_blocks(point: np.ndarray, voxel_size=0.004, voxel_block_size=8):
     return point / (voxel_size * voxel_block_size) + 1 / (2 * voxel_block_size)
 

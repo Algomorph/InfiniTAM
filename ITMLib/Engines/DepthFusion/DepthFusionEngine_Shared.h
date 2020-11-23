@@ -32,8 +32,11 @@ struct VoxelTsdfSetter<true, TUseSurfaceThickness> {
 	_CPU_AND_GPU_CODE_ static inline void SetSdf(
 			DEVICEPTR(TVoxel)& voxel, float signed_distance_surface_to_voxel_along_camera_ray, float truncation_distance,
 			float final_distance_cutoff, float surface_thickness) {
-		if (signed_distance_surface_to_voxel_along_camera_ray < -truncation_distance + 4e-07) {
-			if (signed_distance_surface_to_voxel_along_camera_ray < (TUseSurfaceThickness ? -surface_thickness : -final_distance_cutoff)) {
+		// Note: the small constant (1e+6) nudge is necessary to avoid PVA/VBH discrepancies in voxels
+		// marked as truncated. Without it, some voxels whose volumes are mostly outside of the
+		// final_distance_cutoff may not get allocated in the VBH index due to limited floating point precision.
+		if (signed_distance_surface_to_voxel_along_camera_ray < -truncation_distance) {
+			if (signed_distance_surface_to_voxel_along_camera_ray < (TUseSurfaceThickness ? -surface_thickness : -final_distance_cutoff + 1e+6)) {
 				//the voxel is beyond the narrow band, on the other side of the surface, but also really far away.
 				//exclude from computation.
 				voxel.sdf = TVoxel::floatToValue(-1.0);
@@ -43,8 +46,8 @@ struct VoxelTsdfSetter<true, TUseSurfaceThickness> {
 				voxel.sdf = TVoxel::floatToValue(-1.0);
 				voxel.flags = ITMLib::VOXEL_TRUNCATED;
 			}
-		} else if (signed_distance_surface_to_voxel_along_camera_ray > truncation_distance - 4e-07) {
-			if (signed_distance_surface_to_voxel_along_camera_ray > final_distance_cutoff) {
+		} else if (signed_distance_surface_to_voxel_along_camera_ray > truncation_distance) {
+			if (signed_distance_surface_to_voxel_along_camera_ray > final_distance_cutoff - 1e+6) {
 				//the voxel is in front of the narrow band, between the surface and the camera, but also really far away.
 				//exclude from computation.
 				voxel.sdf = TVoxel::floatToValue(1.0);
@@ -71,7 +74,7 @@ struct VoxelTsdfSetter<false, TUseSurfaceThickness> {
 			float final_distance_cutoff, float surface_thickness) {
 		if (signed_distance_surface_to_voxel_along_camera_ray < (TUseSurfaceThickness ? -surface_thickness : -final_distance_cutoff)) {
 			voxel.sdf = TVoxel::floatToValue(-1.0);
-		} else if (signed_distance_surface_to_voxel_along_camera_ray > truncation_distance - 4e-07) {
+		} else if (signed_distance_surface_to_voxel_along_camera_ray > truncation_distance) {
 			voxel.sdf = TVoxel::floatToValue(1.0);
 		} else {
 			// The voxel lies within the narrow band, between truncation boundaries.
@@ -177,7 +180,7 @@ _CPU_AND_GPU_CODE_ inline float FuseDepthIntoVoxel(
 	float signed_distance_surface_to_voxel_along_camera_ray = depth_measure - voxel_in_camera_coordinates.z;
 
 	if (TExecutionMode == DIAGNOSTIC && verbose) {
-		printf("Projective signed distance from surface to voxel: %f\n", signed_distance_surface_to_voxel_along_camera_ray);
+		printf("Projective signed distance from surface to voxel: %f, depth to surface: %f\n", signed_distance_surface_to_voxel_along_camera_ray, depth_measure);
 	}
 
 	VoxelTsdfSetter<THasSemanticInformation, TUseSurfaceThickness>::SetSdf(voxel, signed_distance_surface_to_voxel_along_camera_ray,
@@ -359,12 +362,14 @@ public:
 			verbosity_level(configuration::Get().logging_settings.verbosity_level),
 			focus_voxel(configuration::Get().focus_voxel) {}
 
-	_CPU_AND_GPU_CODE_
+	//TODO: after clangd EndlessLoop FP bug is solved , remove the diagnostic push/pop here
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "EndlessLoop"
-
+	_CPU_AND_GPU_CODE_
 	inline void operator()(TVoxel& voxel, const Vector3i& voxel_position) {
+
 		if (TStopIntegrationAtMaxIntegrationWeight) if (voxel.w_depth == max_integration_weight) return;
+
 		Vector4f voxel_volume_coordinates{static_cast<float>(voxel_position.x * voxel_size),
 		                                  static_cast<float>(voxel_position.y * voxel_size),
 		                                  static_cast<float>(voxel_position.z * voxel_size), 1.0f};

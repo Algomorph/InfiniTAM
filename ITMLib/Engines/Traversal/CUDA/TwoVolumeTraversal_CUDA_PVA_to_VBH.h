@@ -50,11 +50,11 @@ class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, 
 		dim3 gridSize_MultipleHashBlocks(static_cast<int>(ceil(static_cast<float>(hash_entry_count) /
 		                                                       static_cast<float>(cudaBlockSize_HashPerThread.x))));
 		findBlocksNotSpannedByArray <<< gridSize_MultipleHashBlocks, cudaBlockSize_HashPerThread >>>
-		                                                              (array_index_data, hash_table, hash_entry_count,
-				                                                              hash_blocks_outside_array.GetData(
-						                                                              MEMORYDEVICE_CUDA),
-				                                                              count_hash_blocks_outside_array.GetData(
-						                                                              MEMORYDEVICE_CUDA));
+				(array_index_data, hash_table, hash_entry_count,
+				 hash_blocks_outside_array.GetData(
+						 MEMORYDEVICE_CUDA),
+				 count_hash_blocks_outside_array.GetData(
+						 MEMORYDEVICE_CUDA));
 		ORcudaKernelCheck;
 		count_hash_blocks_outside_array.UpdateHostFromDevice();
 		int count_hash_blocks_outside_array_host = *count_hash_blocks_outside_array.GetData(MEMORYDEVICE_CPU);
@@ -72,12 +72,12 @@ class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, 
 			dim3 gridSize_UnspannedHashBlocks(static_cast<int>(ceil(static_cast<float>(count_hash_blocks_outside_array_host) /
 			                                                        static_cast<float>(cudaBlockSize_HashPerThread.x))));
 			checkIfHashVoxelBlocksHaveAlteredVoxelsWithSpecificFlags
-					<<< gridSize_UnspannedHashBlocks, cudaBlockSize_BlockVoxelPerThread >>>
-			                                           (voxels_hash, hash_table, hash_blocks_outside_array.GetData(
-					                                           MEMORYDEVICE_CUDA),
-					                                           count_hash_blocks_outside_array_host,
-					                                           falseOrAlteredUnmatchedEncountered.GetData(
-							                                           MEMORYDEVICE_CUDA), semanticFlags);
+			<<< gridSize_UnspannedHashBlocks, cudaBlockSize_BlockVoxelPerThread >>>
+					(voxels_hash, hash_table, hash_blocks_outside_array.GetData(
+							MEMORYDEVICE_CUDA),
+					 count_hash_blocks_outside_array_host,
+					 falseOrAlteredUnmatchedEncountered.GetData(
+							 MEMORYDEVICE_CUDA), semanticFlags);
 			ORcudaKernelCheck;
 		}
 		falseOrAlteredUnmatchedEncountered.UpdateHostFromDevice();
@@ -144,10 +144,10 @@ class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, 
 		dim3 gridSize_MultipleHashBlocks(static_cast<int>(ceil(static_cast<float>(hash_entry_count) /
 		                                                       static_cast<float>(cudaBlockSize_HashPerThread.x))));
 		findBlocksNotSpannedByArray
-				<<< gridSize_MultipleHashBlocks, cudaBlockSize_HashPerThread >>>
-		                                          (array_index_data, hash_table, hash_entry_count,
-		                                          		hashCodesNotSpanned.GetData(MEMORYDEVICE_CUDA),
-				                                          countBlocksNotSpanned.GetData(MEMORYDEVICE_CUDA));
+		<<< gridSize_MultipleHashBlocks, cudaBlockSize_HashPerThread >>>
+				(array_index_data, hash_table, hash_entry_count,
+				 hashCodesNotSpanned.GetData(MEMORYDEVICE_CUDA),
+				 countBlocksNotSpanned.GetData(MEMORYDEVICE_CUDA));
 		ORcudaKernelCheck;
 		countBlocksNotSpanned.UpdateHostFromDevice();
 		int count_hash_blocks_outside_array_host = *countBlocksNotSpanned.GetData(MEMORYDEVICE_CPU);
@@ -165,12 +165,12 @@ class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, 
 			dim3 gridSize_UnspannedHashBlocks(static_cast<int>(ceil(static_cast<float>(count_hash_blocks_outside_array_host) /
 			                                                        static_cast<float>(cudaBlockSize_HashPerThread.x))));
 			checkIfHashVoxelBlocksAreAltered
-					<<< gridSize_UnspannedHashBlocks, cudaBlockSize_BlockVoxelPerThread >>>
-			                                           (voxels_hash, hash_table, hashCodesNotSpanned.GetData(
-					                                           MEMORYDEVICE_CUDA),
-					                                           count_hash_blocks_outside_array_host,
-					                                           falseOrAlteredEncountered.GetData(
-							                                           MEMORYDEVICE_CUDA));
+			<<< gridSize_UnspannedHashBlocks, cudaBlockSize_BlockVoxelPerThread >>>
+					(voxels_hash, hash_table, hashCodesNotSpanned.GetData(
+							MEMORYDEVICE_CUDA),
+					 count_hash_blocks_outside_array_host,
+					 falseOrAlteredEncountered.GetData(
+							 MEMORYDEVICE_CUDA));
 			ORcudaKernelCheck;
 		}
 		falseOrAlteredEncountered.UpdateHostFromDevice();
@@ -182,14 +182,14 @@ class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, 
 		Vector3i array_offset = volume1->index.GetVolumeOffset();
 		Vector3i array_size = volume1->index.GetVolumeSize();
 
-		Vector3s minBlockPos(
+		Vector3s min_block_position(
 				static_cast<int>(floor(static_cast<float>(array_offset.x) / VOXEL_BLOCK_SIZE)),
 				static_cast<int>(floor(static_cast<float>(array_offset.y) / VOXEL_BLOCK_SIZE)),
 				static_cast<int>(floor(static_cast<float>(array_offset.z) / VOXEL_BLOCK_SIZE)));
-		Vector3i minIndexCoord(minBlockPos.x * VOXEL_BLOCK_SIZE,
-		                       minBlockPos.y * VOXEL_BLOCK_SIZE,
-		                       minBlockPos.z * VOXEL_BLOCK_SIZE);
-		Vector3i minArrayCoord = array_offset - minIndexCoord; // inclusive
+		Vector3i min_coord_with_index(min_block_position.x * VOXEL_BLOCK_SIZE,
+		                              min_block_position.y * VOXEL_BLOCK_SIZE,
+		                              min_block_position.z * VOXEL_BLOCK_SIZE);
+		Vector3i minArrayCoord = array_offset - min_coord_with_index; // inclusive
 		Vector3i maxArrayCoord = minArrayCoord + array_size; // exclusive
 
 		// transfer functor from RAM to VRAM (has to be done manually, i.e. without MemoryBlock at this point)
@@ -205,7 +205,7 @@ class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, 
 
 		std::forward<TDeviceFunction>(deviceFunction)(
 				gridSize_ArrayBlockEnvelope, cudaBlockSize_BlockVoxelPerThread, voxels_array, array_index_data, voxels_hash,
-				hash_table, minArrayCoord, maxArrayCoord, minBlockPos, functor_device,
+				hash_table, minArrayCoord, maxArrayCoord, min_block_position, functor_device,
 				falseOrAlteredEncountered.GetData(MEMORYDEVICE_CUDA));
 		ORcudaKernelCheck;
 
@@ -231,8 +231,8 @@ class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, 
 		const PlainVoxelArray::IndexData* array_index_data = volume1->index.GetIndexData();
 		Vector3i startVoxel = volume1->index.GetVolumeOffset();
 		Vector3i array_size = volume1->index.GetVolumeSize();
-		Vector3i endVoxel = startVoxel + array_size; // open last traversal bound (this voxel doesn't get processed)
-		Vector6i arrayBounds(startVoxel.x, startVoxel.y, startVoxel.z, endVoxel.x, endVoxel.y, endVoxel.z);
+		Vector3i end_voxel = startVoxel + array_size; // open last traversal bound (this voxel doesn't get processed)
+		Vector6i array_bounds(startVoxel.x, startVoxel.y, startVoxel.z, end_voxel.x, end_voxel.y, end_voxel.z);
 
 		// for result storage
 		ORUtils::MemoryBlock<bool> falseEncountered(1, true, true);
@@ -248,7 +248,7 @@ class TwoVolumeTraversalEngine<TVoxelPrimary, TVoxelSecondary, PlainVoxelArray, 
 
 		std::forward<TDeviceFunction>(deviceFunction)(
 				gridSize_HashPerBlock, cudaBlockSize_BlockVoxelPerThread, arrayVoxels, hashVoxels,
-				hash_table, hash_entry_count, arrayBounds,
+				hash_table, hash_entry_count, array_bounds,
 				array_size, functor_device, falseEncountered.GetData(MEMORYDEVICE_CUDA));
 		ORcudaKernelCheck;
 // transfer functor from VRAM back to RAM (in case there was any alteration to the functor object)
@@ -285,10 +285,10 @@ public:
 				 Vector3i maxArrayCoord, Vector3s minBlockPos, TBooleanFunctor* functor_device,
 				 bool* falseOrAlteredEncountered_device) {
 			checkIfArrayContentIsUnalteredOrYieldsTrue
-					<<< gridSize_ArrayBlockEnvelope, cudaBlockSize_BlockVoxelPerThread >>>
-			                                          (voxels_array, array_index_data, voxels_hash, hash_table,
-					                                          minArrayCoord, maxArrayCoord, minBlockPos, functor_device,
-					                                          falseOrAlteredEncountered_device);
+			<<< gridSize_ArrayBlockEnvelope, cudaBlockSize_BlockVoxelPerThread >>>
+					(voxels_array, array_index_data, voxels_hash, hash_table,
+					 minArrayCoord, maxArrayCoord, minBlockPos, functor_device,
+					 falseOrAlteredEncountered_device);
 		});
 	}
 
@@ -331,11 +331,11 @@ public:
 				                                                VoxelFlags semanticFlags,
 				                                                bool* falseOrAlteredEncountered_device) {
 			                                               checkIfArrayContentIsUnalteredOrYieldsTrue_SemanticFlags
-					                                               <<< gridSize_ArrayBlockEnvelope,
-					                                               cudaBlockSize_BlockVoxelPerThread >>>
+			                                               <<< gridSize_ArrayBlockEnvelope,
+			                                               cudaBlockSize_BlockVoxelPerThread >>>
 					                                               (voxels_array, array_index_data, voxels_hash, hash_table,
-							                                               minArrayCoord, maxArrayCoord, minBlockPos, functor_device,
-							                                               semanticFlags, falseOrAlteredEncountered_device);
+					                                                minArrayCoord, maxArrayCoord, minBlockPos, functor_device,
+					                                                semanticFlags, falseOrAlteredEncountered_device);
 		                                               });
 	}
 
@@ -360,11 +360,11 @@ public:
 				                                                VoxelFlags semanticFlags,
 				                                                bool* falseOrAlteredEncountered_device) {
 			                                               checkIfArrayContentIsUnalteredOrYieldsTrue_SemanticFlags_Position_Verbose
-					                                               <<< gridSize_ArrayBlockEnvelope,
-					                                               cudaBlockSize_BlockVoxelPerThread >>>
+			                                               <<< gridSize_ArrayBlockEnvelope,
+			                                               cudaBlockSize_BlockVoxelPerThread >>>
 					                                               (voxels_array, array_index_data, voxels_hash, hash_table,
-							                                               minArrayCoord, maxArrayCoord, minBlockPos, functor_device,
-							                                               semanticFlags, falseOrAlteredEncountered_device);
+					                                                minArrayCoord, maxArrayCoord, minBlockPos, functor_device,
+					                                                semanticFlags, falseOrAlteredEncountered_device);
 		                                               });
 	}
 
@@ -395,10 +395,10 @@ public:
 				 Vector3i maxArrayCoord, Vector3s minBlockPos, TBooleanFunctor* functor_device,
 				 bool* falseOrAlteredEncountered_device) {
 			checkIfArrayContentIsUnalteredOrYieldsTrue_Position_Verbose
-					<<< gridSize_ArrayBlockEnvelope, cudaBlockSize_BlockVoxelPerThread >>>
-			                                          (voxels_array, array_index_data, voxels_hash, hash_table,
-					                                          minArrayCoord, maxArrayCoord, minBlockPos, functor_device,
-					                                          falseOrAlteredEncountered_device);
+			<<< gridSize_ArrayBlockEnvelope, cudaBlockSize_BlockVoxelPerThread >>>
+					(voxels_array, array_index_data, voxels_hash, hash_table,
+					 minArrayCoord, maxArrayCoord, minBlockPos, functor_device,
+					 falseOrAlteredEncountered_device);
 		});
 	}
 

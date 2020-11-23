@@ -109,7 +109,7 @@ VoxelBlockHash::InitializationParameters InitializationParameters_Fr00<VoxelBloc
 
 template<>
 PlainVoxelArray::InitializationParameters InitializationParameters_Fr16andFr17<PlainVoxelArray>() {
-	return {Vector3i(88, 104, 160), Vector3i(-72, -24, 160)};
+	return {Vector3i(88, 104, 176), Vector3i(-72, -24, 152)};
 }
 template<>
 VoxelBlockHash::InitializationParameters InitializationParameters_Fr16andFr17<VoxelBlockHash>() {

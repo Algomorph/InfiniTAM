@@ -146,6 +146,7 @@ void ConstructSnoopyMaskedVolumes16and17() {
 
 	ORUtils::OStreamWrapper bounds_file(std::string(test_utilities::GeneratedArraysDirectory) + "snoopy_16_and_17_partial_volume_bounds.dat", false);
 	ORUtils::SaveMatrix(bounds_file, union_bounds);
+	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(), "Voxel bounds for partial volumes are: " << union_bounds);
 
 	bounds_file.OStream().write(reinterpret_cast<const char*>(&union_bounds.min_x), sizeof(int));
 	bounds_file.OStream().write(reinterpret_cast<const char*>(&union_bounds.min_y), sizeof(int));
@@ -385,7 +386,7 @@ void GenerateWarpedVolumeTestData() {
 			               << IndexString<TIndex>() << ") ... ");
 	VoxelVolume<WarpVoxel, TIndex>* warps;
 	LoadVolume(&warps,
-	           GENERATED_TEST_DATA_PREFIX "TestData/volumes/" + IndexString<TIndex>() + "/warp_field_0_complete.dat",
+	           GENERATED_TEST_DATA_PREFIX "TestData/volumes/" + IndexString<TIndex>() + "/warp_field_0_data_tikhonov_sobolev.dat",
 	           MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 	VoxelVolume<TSDFVoxel, TIndex>* live_volume;
 	LoadVolume(&live_volume, snoopy::PartialVolume17Path<TIndex>(),

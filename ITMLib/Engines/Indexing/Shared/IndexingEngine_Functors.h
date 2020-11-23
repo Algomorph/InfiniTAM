@@ -157,7 +157,7 @@ template<MemoryDeviceType TMemoryDeviceType>
 struct HashEntryStateBasedAllocationFunctor
 		: public HashEntryStateBasedAllocationFunctor_Base<TMemoryDeviceType> {
 public: // instance functions
-	HashEntryStateBasedAllocationFunctor(VoxelBlockHash& index)
+	explicit HashEntryStateBasedAllocationFunctor(VoxelBlockHash& index)
 			: HashEntryStateBasedAllocationFunctor_Base<TMemoryDeviceType>(index) {}
 
 	_DEVICE_WHEN_AVAILABLE_
@@ -175,7 +175,7 @@ struct HashEntryStateBasedAllocationFunctor_SetVisibility
 protected: // instance variables
 	HashBlockVisibility* block_visibility_types;
 public: // instance functions
-	HashEntryStateBasedAllocationFunctor_SetVisibility(VoxelBlockHash& index)
+	explicit HashEntryStateBasedAllocationFunctor_SetVisibility(VoxelBlockHash& index)
 			: HashEntryStateBasedAllocationFunctor_Base<TMemoryDeviceType>(index),
 			  block_visibility_types(index.GetBlockVisibilityTypes()) {}
 
@@ -229,15 +229,16 @@ public: // instance functions
 inline
 _DEVICE_WHEN_AVAILABLE_
 void PrintPixelBlocks(const int x, const int y, int pixel_block_count, const internal::PixelBlockAllocationRecord& pixel_blocks) {
-
-	printf("Pixel blocks for pixel %d, %d: %s", x, y, red);
-	int i_block;
-	for (i_block = 0; i_block < pixel_block_count - 1; i_block++) {
+	if (pixel_block_count > 0) {
+		printf("Pixel blocks for pixel %d, %d: %s", x, y, red);
+		int i_block;
+		for (i_block = 0; i_block < pixel_block_count - 1; i_block++) {
+			const Vector3s& block = pixel_blocks.values[i_block];
+			printf("[%d, %d, %d], ", block.x, block.y, block.z);
+		}
 		const Vector3s& block = pixel_blocks.values[i_block];
-		printf("[%d, %d, %d], ", block.x, block.y, block.z);
+		printf("[%d, %d, %d]%s", block.x, block.y, block.z, reset);
 	}
-	const Vector3s& block = pixel_blocks.values[i_block];
-	printf("[%d, %d, %d]%s", block.x, block.y, block.z, reset);
 }
 
 template<MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
@@ -273,12 +274,16 @@ public: // instance functions
 			near_clipping_distance(volume_parameters.near_clipping_distance),
 			far_clipping_distance(volume_parameters.far_clipping_distance),
 			inverted_camera_pose(inverted_depth_camera_pose),
+			//TODO: remove push/pop when clangd FP bug is fixed
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "EndlessLoop"
 			inverted_projection_parameters([&view]() {
 				Vector4f params = view->calibration_information.intrinsics_d.projectionParamsSimple.all;
 				params.fx = 1.0f / params.fx;
 				params.fy = 1.0f / params.fy;
 				return params;
 			}()),
+#pragma clang diagnostic pop
 			surface_distance_cutoff(surface_distance_cutoff),
 			hash_block_size_reciprocal(1.0f / (volume_parameters.voxel_size * VOXEL_BLOCK_SIZE)),
 			hash_entry_allocation_states(index.GetHashEntryAllocationStates()),
@@ -301,6 +306,7 @@ public: // instance functions
 
 	_DEVICE_WHEN_AVAILABLE_
 	void operator()(const float& depth_measure, int x, int y) {
+
 		if (depth_measure <= 0 || (depth_measure - surface_distance_cutoff) < 0 ||
 		    (depth_measure - surface_distance_cutoff) < near_clipping_distance ||
 		    (depth_measure + surface_distance_cutoff) > far_clipping_distance)
@@ -336,9 +342,10 @@ public: // instance functions
 					pixel_blocks,
 					pixel_block_count);
 			if (this->verbosity >= VerbosityLevel::VERBOSITY_FOCUS_SPOTS && x == this->focus_pixel.x && y == this->focus_pixel.y) {
-				printf("March segment for pixel %d, %d: %s[%f, %f, %f],  [%f, %f, %f]%s\n", x, y, yellow,
+				printf("March segment for pixel %d, %d: %s[%f, %f, %f],  [%f, %f, %f]%s\nBlock count: %d\n", x, y, yellow,
 				       march_segment.origin.x, march_segment.origin.y, march_segment.origin.z,
-				       march_segment.destination().x, march_segment.destination().y, march_segment.destination().z, reset);
+				       march_segment.destination().x, march_segment.destination().y, march_segment.destination().z, reset, pixel_block_count);
+
 				PrintPixelBlocks(x, y, pixel_block_count, pixel_blocks);
 			}
 		}

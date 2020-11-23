@@ -72,7 +72,7 @@ class LevelSetEvolutionSwitches:
     enable_level_set_term = parameters(" --level_set_evolution.switches.enable_level_set_term")
     enable_smoothing_term = parameters(" --level_set_evolution.switches.enable_smoothing_term")
     enable_Killing_field = parameters(" --level_set_evolution.switches.enable_Killing_field")
-    enable_sobolev_gradient_smoothing = \
+    enable_Sobolev_gradient_smoothing = \
         parameters(" --level_set_evolution.switches.enable_Sobolev_gradient_smoothing")
 
     def __init__(self, enable_data_term, enable_level_set_term, enable_smoothing_term, enable_killing_field,
@@ -81,7 +81,7 @@ class LevelSetEvolutionSwitches:
         self.enable_level_set_term = enable_level_set_term
         self.enable_smoothing_term = enable_smoothing_term
         self.enable_Killing_field = enable_killing_field
-        self.enable_sobolev_gradient_smoothing = enable_Sobolev_gradient_smoothing
+        self.enable_Sobolev_gradient_smoothing = enable_Sobolev_gradient_smoothing
 
 
 PROGRAM_SUCCESS = 0

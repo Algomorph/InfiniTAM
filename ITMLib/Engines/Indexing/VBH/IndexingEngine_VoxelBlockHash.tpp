@@ -96,6 +96,9 @@ void IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType, TExecutionMode>::
 		depth_based_allocator.verbosity = configuration::Get().logging_settings.verbosity_level;
 		depth_based_allocator.focus_pixel = configuration::Get().focus_pixel;
 	}
+	//TODO: remove push/pop when Clang D FP bug is fixed
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "LoopDoesntUseConditionVariableInspection"
 	do {
 		volume->index.ClearHashEntryAllocationStates();
 		depth_based_allocator.ResetFlagsAndCounters();
@@ -104,6 +107,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType, TExecutionMode>::
 		this->AllocateBlockList(volume, depth_based_allocator.colliding_block_positions,
 		                        depth_based_allocator.GetCollidingBlockCount());
 	} while (depth_based_allocator.EncounteredUnresolvableCollision());
+#pragma clang diagnostic pop
 }
 
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
@@ -127,6 +131,9 @@ void IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType, TExecutionMode>::
 		depth_based_allocator.verbosity = configuration::Get().logging_settings.verbosity_level;
 		depth_based_allocator.focus_pixel = configuration::Get().focus_pixel;
 	}
+	//TODO: remove push/pop when Clang D FP bug is fixed
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "LoopDoesntUseConditionVariableInspection"
 	do {
 		volume->index.ClearHashEntryAllocationStates();
 		depth_based_allocator.ResetFlagsAndCounters();
@@ -136,6 +143,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType, TExecutionMode>::
 		this->AllocateBlockList(volume, depth_based_allocator.colliding_block_positions,
 		                        depth_based_allocator.GetCollidingBlockCount());
 	} while (depth_based_allocator.EncounteredUnresolvableCollision());
+#pragma clang diagnostic pop
 	depth_based_allocator.SaveDataToDisk();
 }
 
