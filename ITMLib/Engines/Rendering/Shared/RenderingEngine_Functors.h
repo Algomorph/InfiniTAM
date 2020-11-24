@@ -159,14 +159,14 @@ public: // instance functions
 			                                        ceil_of_integer_quotient(lower_right.y - upper_left.y + 1, rendering_block_size_y));
 
 			new_rendering_block_count = new_rendering_block_dimensions.x * new_rendering_block_dimensions.y;
-			if(GET_ATOMIC_VALUE(total_rendering_block_count) + new_rendering_block_count >= ITMLib::MAX_RENDERING_BLOCKS){
+			if (GET_ATOMIC_VALUE(total_rendering_block_count) + new_rendering_block_count >= ITMLib::MAX_RENDERING_BLOCKS) {
 				//TODO: not sure if this check is worth the performance improvement from skipped work... test...
 				new_rendering_block_count = 0;
 			}
 		}
 		int current_rendering_block_count = ORUtils::ParallelSum<TMemoryDeviceType>::template Add1D<unsigned int>(new_rendering_block_count,
 		                                                                                                          total_rendering_block_count);
-		if (new_rendering_block_count != 0 && current_rendering_block_count + new_rendering_block_count <= ITMLib::MAX_RENDERING_BLOCKS){
+		if (new_rendering_block_count != 0 && current_rendering_block_count + new_rendering_block_count <= ITMLib::MAX_RENDERING_BLOCKS) {
 			//counters need to be re-checked here (second condition above), because parallel sum will still work for all thread blocks
 			// that reach it before the total exceeds the bound in previous check
 			CreateRenderingBlocks2(rendering_blocks, current_rendering_block_count, upper_left, lower_right, z_range);
@@ -267,7 +267,7 @@ public: // instance functions
 //#ifdef SINGLE_THREADED
 //				, cache
 //#endif
-				);
+		);
 	}
 };
 
@@ -290,7 +290,7 @@ public: // instance functions
 			  voxels(volume.GetVoxels()),
 			  index_data(volume.index.GetIndexData()),
 			  voxel_size(volume.GetParameters().voxel_size),
-			  colors(point_cloud.colours->GetData(TMemoryDeviceType)),
+			  colors(point_cloud.colors->GetData(TMemoryDeviceType)),
 			  locations(point_cloud.locations->GetData(TMemoryDeviceType)),
 			  light_source(light_source) {
 		INITIALIZE_ATOMIC(unsigned int, point_count, 0u);
@@ -300,7 +300,6 @@ public: // instance functions
 
 	_DEVICE_WHEN_AVAILABLE_
 	inline void operator()(const Vector4f& raycast_point, const int x, const int y) {
-
 		bool found_point = raycast_point.w > 0;
 		Vector3f point = raycast_point.toVector3();
 		Vector3f normal;
@@ -313,22 +312,22 @@ public: // instance functions
 		int offset = ORUtils::ParallelSum<TMemoryDeviceType>::template Add2D<uint>(found_point, point_count);
 
 		if (found_point && offset != -1) {
-			Vector4f tmp;
-			tmp = VoxelColorReader<TVoxel::hasColorInformation, TVoxel, TIndex>::interpolate(voxels, index_data, point);
-			if (tmp.w > 0.0f) {
-				tmp.x /= tmp.w;
-				tmp.y /= tmp.w;
-				tmp.z /= tmp.w;
-				tmp.w = 1.0f;
+			Vector4f weighted_color;
+			weighted_color = VoxelColorReader<TVoxel::hasColorInformation, TVoxel, TIndex>::interpolate(voxels, index_data, point);
+			if (weighted_color.w > 0.0f) {
+				weighted_color.x /= weighted_color.w;
+				weighted_color.y /= weighted_color.w;
+				weighted_color.z /= weighted_color.w;
+				weighted_color.w = 1.0f;
 			}
-			colors[offset] = tmp;
+			colors[offset] = weighted_color;
 
-			Vector4f pt_ray_out;
-			pt_ray_out.x = point.x * voxel_size;
-			pt_ray_out.y = point.y * voxel_size;
-			pt_ray_out.z = point.z * voxel_size;
-			pt_ray_out.w = 1.0f;
-			locations[offset] = pt_ray_out;
+			Vector4f ray_point;
+			ray_point.x = point.x * voxel_size;
+			ray_point.y = point.y * voxel_size;
+			ray_point.z = point.z * voxel_size;
+			ray_point.w = 1.0f;
+			locations[offset] = ray_point;
 		}
 	}
 
@@ -350,8 +349,8 @@ private: // instance variables
 public: // instance functions
 	ICPMapRenderFunctor(CameraTrackingState& camera_tracking_state, const float voxel_size, const RenderState& render_state,
 	                    const Vector3f light_source)
-			: locations(camera_tracking_state.pointCloud->locations->GetData(TMemoryDeviceType)),
-			  normals(camera_tracking_state.pointCloud->colours->GetData(TMemoryDeviceType)),
+			: locations(camera_tracking_state.point_cloud->locations->GetData(TMemoryDeviceType)),
+			  normals(camera_tracking_state.point_cloud->colors->GetData(TMemoryDeviceType)),
 			  voxel_size(voxel_size),
 			  map_dimensions(render_state.raycastResult->dimensions),
 			  raycast_points(render_state.raycastResult->GetData(TMemoryDeviceType)),
@@ -429,12 +428,12 @@ public: // instance functions
 	FindMissingProjectionPointsFunctor(ORUtils::Image<int>& projection_missing_point_indices,
 	                                   const ORUtils::Image<Vector4f>& forward_projection,
 	                                   const ORUtils::Image<Vector2f>& pixel_ray_depth_range_image,
-									   const ORUtils::Image<float>& depth_image)
+	                                   const ORUtils::Image<float>& depth_image)
 			: projection_missing_point_indices(projection_missing_point_indices.GetData(TMemoryDeviceType)),
 			  forward_projection(forward_projection.GetData(TMemoryDeviceType)),
 			  pixel_ray_depth_range_data(pixel_ray_depth_range_image.GetData(TMemoryDeviceType)),
 			  ray_depth_range_image_width(pixel_ray_depth_range_image.dimensions.x),
-			  depth(depth_image.GetData(TMemoryDeviceType)){
+			  depth(depth_image.GetData(TMemoryDeviceType)) {
 		INITIALIZE_ATOMIC(unsigned int, missing_point_count, 0u);
 	}
 
@@ -610,7 +609,8 @@ struct RenderFromRaycastFunctor<TMemoryDeviceType, TFlipNormals, IRenderingEngin
 	using RenderFromRaycastFunctor_Base<TMemoryDeviceType, TFlipNormals>::RenderFromRaycastFunctor_Base;
 	_DEVICE_WHEN_AVAILABLE_
 	inline void operator()(const int pixel_index, const int x, const int y) {
-		processPixelGrey_ImageNormals<true, TFlipNormals>(this->pixels, this->raycast_points, this->image_dimensions, x, y, this->voxel_size, this->light_source);
+		processPixelGrey_ImageNormals<true, TFlipNormals>(this->pixels, this->raycast_points, this->image_dimensions, x, y, this->voxel_size,
+		                                                  this->light_source);
 	}
 };
 

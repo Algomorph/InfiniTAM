@@ -143,7 +143,7 @@ void UIEngine::GlutDisplayFunction() {
 
 	//Draw keyboard shortcut legend
 	sprintf(str, "n: one frame \t b: continuous \t q/e/esc: exit \t r: reset \t s: save scene \t l: load scene\t"
-	             " f: %s \t c: colours (currently %s) \t t: turn fusion %s", followOrFreeview, modeName,
+	             " f: %s \t c: colors (currently %s) \t t: turn fusion %s", followOrFreeview, modeName,
 	        ui_engine.integration_active ? "off" : "on");
 	Safe_GlutBitmapString(GLUT_BITMAP_HELVETICA_12, (const char*) str);
 	glRasterPos2f(-0.98f, -0.95f);

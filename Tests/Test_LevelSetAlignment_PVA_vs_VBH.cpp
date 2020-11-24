@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_DataTermOnly_CPU) {
 #ifdef GENERATE_TEST_DATA
 	GenericWarpTest<MEMORYDEVICE_CPU>(switches, 10, SAVE_SUCCESSIVE_ITERATIONS);
 #else
-	GenericWarpTest<MEMORYDEVICE_CPU>(switches, 10, TEST_SUCCESSIVE_ITERATIONS);
+	GenericMultiIterationAlignmentTest<MEMORYDEVICE_CPU>(switches, 10, TEST_SUCCESSIVE_ITERATIONS);
 #endif
 }
 
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_DataAndTikhonov_CPU) {
 #ifdef GENERATE_TEST_DATA
 	GenericWarpTest<MEMORYDEVICE_CPU>(switches, 5, SAVE_SUCCESSIVE_ITERATIONS);
 #else
-	GenericWarpTest<MEMORYDEVICE_CPU>(switches, 5, TEST_SUCCESSIVE_ITERATIONS, 25e-6);
+	GenericMultiIterationAlignmentTest<MEMORYDEVICE_CPU>(switches, 5, TEST_SUCCESSIVE_ITERATIONS, 25e-6);
 #endif
 }
 
@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_DataAndTikhonovAndSobolevSmoothing_CPU) {
 #ifdef GENERATE_TEST_DATA
 	GenericWarpTest<MEMORYDEVICE_CPU>(switches, 5, SAVE_SUCCESSIVE_ITERATIONS);
 #else
-	GenericWarpTest<MEMORYDEVICE_CPU>(switches, 5, TEST_SUCCESSIVE_ITERATIONS, 25e-6);
+	GenericMultiIterationAlignmentTest<MEMORYDEVICE_CPU>(switches, 5, TEST_SUCCESSIVE_ITERATIONS, 25e-6);
 #endif
 }
 
@@ -90,30 +90,30 @@ BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_DataAndTikhonovAndSobolevSmoothing_Fusion
 	GenericWarpTest<MEMORYDEVICE_CPU>(LevelSetAlignmentSwitches(true, false, true, false, true),
 									  5,LevelSetAlignmentTestMode::SAVE_FINAL_ITERATION_AND_FUSION);
 #else
-	GenericWarpTest<MEMORYDEVICE_CPU>(LevelSetAlignmentSwitches(true, false, true, false, true),
-	                                  5, LevelSetAlignmentTestMode::TEST_FINAL_ITERATION_AND_FUSION);
+	GenericMultiIterationAlignmentTest<MEMORYDEVICE_CPU>(LevelSetAlignmentSwitches(true, false, true, false, true),
+	                                                     5, LevelSetAlignmentTestMode::TEST_FINAL_ITERATION_AND_FUSION);
 #endif
 }
 
 #ifndef COMPILE_WITHOUT_CUDA
 BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_DataTermOnly_CUDA) {
 	LevelSetAlignmentSwitches switches(true, false, false, false, false);
-	GenericWarpTest<MEMORYDEVICE_CUDA>(switches, 10, TEST_SUCCESSIVE_ITERATIONS, 1e-5);
+	GenericMultiIterationAlignmentTest<MEMORYDEVICE_CUDA>(switches, 10, TEST_SUCCESSIVE_ITERATIONS, 1e-5);
 }
 
 BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_DataAndTikhonov_CUDA) {
 	LevelSetAlignmentSwitches switches(true, false, true, false, false);
-	GenericWarpTest<MEMORYDEVICE_CUDA>(switches, 5, TEST_SUCCESSIVE_ITERATIONS, 1e-5);
+	GenericMultiIterationAlignmentTest<MEMORYDEVICE_CUDA>(switches, 5, TEST_SUCCESSIVE_ITERATIONS, 1e-5);
 }
 
 BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_DataAndTikhonovAndSobolevSmoothing_CUDA) {
 	LevelSetAlignmentSwitches switches(true, false, true, false, true);
-	GenericWarpTest<MEMORYDEVICE_CUDA>(switches, 3, TEST_SUCCESSIVE_ITERATIONS, 1e-5);
+	GenericMultiIterationAlignmentTest<MEMORYDEVICE_CUDA>(switches, 3, TEST_SUCCESSIVE_ITERATIONS, 1e-5);
 }
 
 BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_DataAndTikhonovAndSobolevSmoothing_Fusion_CUDA) {
-	GenericWarpTest<MEMORYDEVICE_CUDA>(LevelSetAlignmentSwitches(true, false, true, false, true),
-	                                   5, LevelSetAlignmentTestMode::TEST_FINAL_ITERATION_AND_FUSION, 1e-5);
+	GenericMultiIterationAlignmentTest<MEMORYDEVICE_CUDA>(LevelSetAlignmentSwitches(true, false, true, false, true),
+	                                                      5, LevelSetAlignmentTestMode::TEST_FINAL_ITERATION_AND_FUSION, 1e-5);
 }
 
 #endif

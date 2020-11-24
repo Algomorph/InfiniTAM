@@ -166,7 +166,7 @@ inline TSurfel merge_surfels(const TSurfel& target, const TSurfel& source, float
     // Ensure that the radius of the combined surfel does not exceed the maximum permitted radius.
     if(result.radius > maxSurfelRadius) result.radius = maxSurfelRadius;
 
-    // Compute a confidence-weighted average of the colours of the input surfels.
+    // Compute a confidence-weighted average of the colors of the input surfels.
     Vector3u resultColour = SurfelColourManipulator<TSurfel::hasColourInformation>::read(result);
     Vector3u sourceColour = SurfelColourManipulator<TSurfel::hasColourInformation>::read(source);
     Vector3u colour = ((result.confidence * resultColour.toFloat() + source.confidence * sourceColour.toFloat()) / confidence).toUChar();

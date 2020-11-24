@@ -64,13 +64,13 @@ void UIEngine::Initialize(int& argc, char** argv,
 	this->current_colour_mode = 0;
 
 	this->colourModes_main.emplace_back("shaded greyscale", FusionAlgorithm::InfiniTAM_IMAGE_SCENERAYCAST);
-	this->colourModes_main.emplace_back("integrated colours", FusionAlgorithm::InfiniTAM_IMAGE_COLOUR_FROM_VOLUME);
+	this->colourModes_main.emplace_back("integrated colors", FusionAlgorithm::InfiniTAM_IMAGE_COLOUR_FROM_VOLUME);
 	this->colourModes_main.emplace_back("surface normals", FusionAlgorithm::InfiniTAM_IMAGE_COLOUR_FROM_NORMAL);
 	this->colourModes_main.emplace_back("confidence", FusionAlgorithm::InfiniTAM_IMAGE_COLOUR_FROM_CONFIDENCE);
 
 	this->colourModes_freeview.emplace_back("canonical", FusionAlgorithm::InfiniTAM_IMAGE_FREECAMERA_CANONICAL);
 	this->colourModes_freeview.emplace_back("shaded greyscale", FusionAlgorithm::InfiniTAM_IMAGE_FREECAMERA_SHADED);
-	this->colourModes_freeview.emplace_back("integrated colours",
+	this->colourModes_freeview.emplace_back("integrated colors",
 	                                        FusionAlgorithm::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_VOLUME);
 	this->colourModes_freeview.emplace_back("surface normals",
 	                                        FusionAlgorithm::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_NORMAL);

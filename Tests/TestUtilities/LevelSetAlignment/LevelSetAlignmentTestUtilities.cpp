@@ -23,8 +23,8 @@ template
 void PVA_to_VBH_WarpComparisonSubtest<MEMORYDEVICE_CPU>(int iteration, LevelSetAlignmentSwitches tracker_switches, float absolute_tolerance);
 
 template
-void GenericWarpTest<MEMORYDEVICE_CPU>(const LevelSetAlignmentSwitches& switches, int iteration_limit,
-                                       LevelSetAlignmentTestMode mode, float absolute_tolerance);
+void GenericMultiIterationAlignmentTest<MEMORYDEVICE_CPU>(const LevelSetAlignmentSwitches& switches, int iteration_limit,
+                                                          LevelSetAlignmentTestMode mode, float absolute_tolerance);
 
 
 #ifndef COMPILE_WITHOUT_CUDA
@@ -33,8 +33,8 @@ template
 void PVA_to_VBH_WarpComparisonSubtest<MEMORYDEVICE_CUDA>(int iteration, LevelSetAlignmentSwitches tracker_switches, float absolute_tolerance);
 
 template
-void GenericWarpTest<MEMORYDEVICE_CUDA>(const LevelSetAlignmentSwitches& switches, int iteration_limit,
-                                        LevelSetAlignmentTestMode mode, float absolute_tolerance);
+void GenericMultiIterationAlignmentTest<MEMORYDEVICE_CUDA>(const LevelSetAlignmentSwitches& switches, int iteration_limit,
+                                                           LevelSetAlignmentTestMode mode, float absolute_tolerance);
 #endif
 
 

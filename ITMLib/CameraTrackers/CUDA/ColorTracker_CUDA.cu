@@ -45,7 +45,7 @@ ColorTracker_CUDA::~ColorTracker_CUDA()
 
 int ColorTracker_CUDA::F_oneLevel(float *f, ORUtils::SE3Pose *pose)
 {
-	int noTotalPoints = trackingState->pointCloud->noTotalPoints;
+	int noTotalPoints = trackingState->point_cloud->point_count;
 
 	Vector4f projParams = view->calibration_information.intrinsics_rgb.projectionParamsSimple.all;
 	projParams.x /= 1 << levelId; projParams.y /= 1 << levelId;
@@ -57,8 +57,8 @@ int ColorTracker_CUDA::F_oneLevel(float *f, ORUtils::SE3Pose *pose)
 
 	float scaleForOcclusions, final_f;
 
-	Vector4f *locations = trackingState->pointCloud->locations->GetData(MEMORYDEVICE_CUDA);
-	Vector4f *colours = trackingState->pointCloud->colours->GetData(MEMORYDEVICE_CUDA);
+	Vector4f *locations = trackingState->point_cloud->locations->GetData(MEMORYDEVICE_CUDA);
+	Vector4f *colours = trackingState->point_cloud->colors->GetData(MEMORYDEVICE_CUDA);
 	Vector4u *rgb = viewHierarchy->GetLevel(levelId)->rgb->GetData(MEMORYDEVICE_CUDA);
 
 	dim3 blockSize(128, 1);
@@ -87,7 +87,7 @@ int ColorTracker_CUDA::F_oneLevel(float *f, ORUtils::SE3Pose *pose)
 
 void ColorTracker_CUDA::G_oneLevel(float *gradient, float *hessian, ORUtils::SE3Pose *pose) const
 {
-	int noTotalPoints = trackingState->pointCloud->noTotalPoints;
+	int noTotalPoints = trackingState->point_cloud->point_count;
 
 	Vector4f projParams = view->calibration_information.intrinsics_rgb.projectionParamsSimple.all;
 	projParams.x /= 1 << levelId; projParams.y /= 1 << levelId;
@@ -106,8 +106,8 @@ void ColorTracker_CUDA::G_oneLevel(float *gradient, float *hessian, ORUtils::SE3
 	for (int i = 0; i < numPara; i++) globalGradient[i] = 0.0f;
 	for (int i = 0; i < numParaSQ; i++) globalHessian[i] = 0.0f;
 
-	Vector4f *locations = trackingState->pointCloud->locations->GetData(MEMORYDEVICE_CUDA);
-	Vector4f *colours = trackingState->pointCloud->colours->GetData(MEMORYDEVICE_CUDA);
+	Vector4f *locations = trackingState->point_cloud->locations->GetData(MEMORYDEVICE_CUDA);
+	Vector4f *colours = trackingState->point_cloud->colors->GetData(MEMORYDEVICE_CUDA);
 	Vector4u *rgb = viewHierarchy->GetLevel(levelId)->rgb->GetData(MEMORYDEVICE_CUDA);
 	Vector4s *gx = viewHierarchy->GetLevel(levelId)->gradientX_rgb->GetData(MEMORYDEVICE_CUDA);
 	Vector4s *gy = viewHierarchy->GetLevel(levelId)->gradientY_rgb->GetData(MEMORYDEVICE_CUDA);

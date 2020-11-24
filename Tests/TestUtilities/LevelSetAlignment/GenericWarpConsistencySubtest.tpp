@@ -44,8 +44,8 @@ namespace test_utilities{
 
 
 template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
-void GenericWarpConsistencySubtest(const LevelSetAlignmentSwitches& switches, int iteration_limit,
-                                   LevelSetAlignmentTestMode mode, float absolute_tolerance) {
+void GenericMultiIterationAlignmentSubtest(const LevelSetAlignmentSwitches& switches, int iteration_limit,
+                                           LevelSetAlignmentTestMode mode, float absolute_tolerance) {
 
 
 	std::string volume_filename_prefix = SwitchesToPrefix(switches);

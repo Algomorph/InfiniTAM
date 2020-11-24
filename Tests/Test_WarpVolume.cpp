@@ -51,38 +51,51 @@ using namespace ITMLib;
 using namespace test_utilities;
 namespace snoopy = snoopy_test_utilities;
 
+/*
+ * These tests exists mostly to debug issues with the warping, i.e.
+ * if Test_LevelSetAlignment_PVA_vs_VBH succeed, these are also guaranteed to succeed.
+ * However, if the former tests fail and the issue is with the warping, these tests provide a window
+ * into what happens during the warping over a single iteration.
+*/
 
 template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void GenericWarpVolumeTest() {
+	// load warps
+	LevelSetAlignmentSwitches data_tikhonov_sobolev_switches(true, false, true, false, true);
+	std::string warps_path = GetWarpsPath<TIndex>(SwitchesToPrefix(data_tikhonov_sobolev_switches), 0);
 	VoxelVolume<WarpVoxel, TIndex>* warps;
-	LoadVolume(&warps, GENERATED_TEST_DATA_PREFIX "TestData/volumes/" + IndexString<TIndex>() + "/warp_field_0_complete.dat",
-	           TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
-	VoxelVolume<TSDFVoxel, TIndex>* live_volume;
-	LoadVolume(&live_volume, snoopy::PartialVolume17Path<TIndex>(),
-	           TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
-	auto warped_live_volume = new VoxelVolume<TSDFVoxel, TIndex>(TMemoryDeviceType,
-	                                                             snoopy::InitializationParameters_Fr16andFr17<TIndex>());
-	warped_live_volume->Reset();
+	LoadVolume(&warps, warps_path, TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+
+	// load original volume
+	VoxelVolume<TSDFVoxel, TIndex>* source_volume;
+	LoadVolume(&source_volume, snoopy::PartialVolume17Path<TIndex>(), TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+
+	// warp the volume
+	auto target_volume = new VoxelVolume<TSDFVoxel, TIndex>(TMemoryDeviceType,
+	                                                        snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	target_volume->Reset();
 
 	auto warping_engine =
 			WarpingEngineFactory::Build<TSDFVoxel, WarpVoxel, TIndex>(TMemoryDeviceType);
 
-	AllocateUsingOtherVolume(warped_live_volume, live_volume, TMemoryDeviceType);
-	warping_engine->WarpVolume_WarpUpdates(warps, live_volume, warped_live_volume);
+	AllocateUsingOtherVolume(target_volume, source_volume, TMemoryDeviceType);
+	warping_engine->WarpVolume_WarpUpdates(warps, source_volume, target_volume);
 
+	// load the ground truth warped volume
 	VoxelVolume<TSDFVoxel, TIndex>* warped_live_volume_gt;
-	LoadVolume(&warped_live_volume_gt, GENERATED_TEST_DATA_PREFIX "TestData/volumes/" + IndexString<TIndex>() + "/warped_live.dat",
-	           TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	std::string warped_live_path = GetWarpedLivePath<TIndex>(SwitchesToPrefix(data_tikhonov_sobolev_switches), 0);
+	LoadVolume(&warped_live_volume_gt, warped_live_path, TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 
+	// compare warped volume with ground truth
 	float absolute_tolerance = 1e-6;
-	BOOST_REQUIRE(!ContentAlmostEqual(warped_live_volume, live_volume, absolute_tolerance, TMemoryDeviceType));
-	BOOST_REQUIRE(ContentAlmostEqual_Verbose(warped_live_volume, warped_live_volume_gt, absolute_tolerance,
+	BOOST_REQUIRE(!ContentAlmostEqual(target_volume, source_volume, absolute_tolerance, TMemoryDeviceType));
+	BOOST_REQUIRE(ContentAlmostEqual_Verbose(target_volume, warped_live_volume_gt, absolute_tolerance,
 	                                         TMemoryDeviceType));
 
 	delete warping_engine;
 	delete warps;
-	delete live_volume;
-	delete warped_live_volume;
+	delete source_volume;
+	delete target_volume;
 }
 
 template<MemoryDeviceType TMemoryDeviceType>

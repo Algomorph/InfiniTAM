@@ -160,14 +160,14 @@ void PVA_to_VBH_WarpComparisonSubtest(int iteration, LevelSetAlignmentSwitches t
 }
 
 template<MemoryDeviceType TMemoryDeviceType>
-void GenericWarpTest(const LevelSetAlignmentSwitches& switches, int iteration_limit,
-                     LevelSetAlignmentTestMode mode, float absolute_tolerance) {
+void GenericMultiIterationAlignmentTest(const LevelSetAlignmentSwitches& switches, int iteration_limit,
+                                        LevelSetAlignmentTestMode mode, float absolute_tolerance) {
 
 	std::string prefix = SwitchesToPrefix(switches);
-	GenericWarpConsistencySubtest<PlainVoxelArray, TMemoryDeviceType>(switches, iteration_limit, mode,
-	                                                                  absolute_tolerance);
-	GenericWarpConsistencySubtest<VoxelBlockHash, TMemoryDeviceType>(switches, iteration_limit, mode,
-	                                                                 absolute_tolerance);
+	GenericMultiIterationAlignmentSubtest<PlainVoxelArray, TMemoryDeviceType>(switches, iteration_limit, mode,
+	                                                                          absolute_tolerance);
+	GenericMultiIterationAlignmentSubtest<VoxelBlockHash, TMemoryDeviceType>(switches, iteration_limit, mode,
+	                                                                         absolute_tolerance);
 
 	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_PVA(TMemoryDeviceType,
 	                                                   snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());

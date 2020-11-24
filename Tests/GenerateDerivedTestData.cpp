@@ -340,13 +340,13 @@ void GenerateLevelSetAlignment_PVA_vs_VBH_TestData() {
 	               "Generating multi-iteration warp field data from snoopy masked partial volumes 16 & 17 (PVA & VBH)... ");
 	LevelSetAlignmentSwitches switches_data_only(true, false, false, false, false);
 
-	GenericWarpTest<MEMORYDEVICE_CPU>(switches_data_only, 10, SAVE_SUCCESSIVE_ITERATIONS);
+	GenericMultiIterationAlignmentTest<MEMORYDEVICE_CPU>(switches_data_only, 10, SAVE_SUCCESSIVE_ITERATIONS);
 	LevelSetAlignmentSwitches switches_data_and_tikhonov(true, false, true, false, false);
-	GenericWarpTest<MEMORYDEVICE_CPU>(switches_data_and_tikhonov, 5, SAVE_SUCCESSIVE_ITERATIONS);
+	GenericMultiIterationAlignmentTest<MEMORYDEVICE_CPU>(switches_data_and_tikhonov, 5, SAVE_SUCCESSIVE_ITERATIONS);
 	LevelSetAlignmentSwitches switches_data_and_tikhonov_and_sobolev_smoothing(true, false, true, false, true);
-	GenericWarpTest<MEMORYDEVICE_CPU>(switches_data_and_tikhonov_and_sobolev_smoothing, 5, SAVE_SUCCESSIVE_ITERATIONS);
-	GenericWarpTest<MEMORYDEVICE_CPU>(LevelSetAlignmentSwitches(true, false, true, false, true),
-	                                  5, LevelSetAlignmentTestMode::SAVE_FINAL_ITERATION_AND_FUSION);
+	GenericMultiIterationAlignmentTest<MEMORYDEVICE_CPU>(switches_data_and_tikhonov_and_sobolev_smoothing, 5, SAVE_SUCCESSIVE_ITERATIONS);
+	GenericMultiIterationAlignmentTest<MEMORYDEVICE_CPU>(LevelSetAlignmentSwitches(true, false, true, false, true),
+	                                                     5, LevelSetAlignmentTestMode::SAVE_FINAL_ITERATION_AND_FUSION);
 }
 
 template<typename TIndex>
@@ -619,22 +619,22 @@ void GenerateRenderingTestData_VoxelBlockHash() {
 			                                               render_state_create_point_cloud.get());
 			fixture.rendering_engine->CreatePointCloud(volume, fixture.view_17, tracking_state.get(), render_state_create_point_cloud.get());
 
-			point_cloud_images_file.OStream().write(reinterpret_cast<const char*>(&(tracking_state->pointCloud->noTotalPoints)),
+			point_cloud_images_file.OStream().write(reinterpret_cast<const char*>(&(tracking_state->point_cloud->point_count)),
 			                                        sizeof(unsigned int));
-			ORUtils::MemoryBlockPersistence::SaveImage(point_cloud_images_file, *tracking_state->pointCloud->locations);
-			ORUtils::MemoryBlockPersistence::SaveImage(point_cloud_images_file, *tracking_state->pointCloud->colours);
+			ORUtils::MemoryBlockPersistence::SaveImage(point_cloud_images_file, *tracking_state->point_cloud->locations);
+			ORUtils::MemoryBlockPersistence::SaveImage(point_cloud_images_file, *tracking_state->point_cloud->colors);
 		}
 
 		LOG4CPLUS_INFO(log4cplus::Logger::getRoot(), "Generating raycast-to-ICP-map (projected point cloud) conversion test data ... ");
-		// create icp maps (in legacy InfiniTAM, fills "raycastResult" of "render state", locations and "normals" of pointCloud)
+		// create icp maps (in legacy InfiniTAM, fills "raycastResult" of "render state", locations and "normals" of point_cloud)
 		{
 			// colors -- interpreted as normals -- honestly, WTF, Oxford? Yeah, I'm blaming you, Oxford, you heard me! -- of the point cloud in the "tracking state")
 			std::shared_ptr<RenderState> render_state_create_ICP_maps = fixture.MakeRenderState();
 			fixture.rendering_engine->CreateExpectedDepths(volume, &pose, &fixture.calibration_data.intrinsics_d,
 			                                               render_state_create_ICP_maps.get());
 			fixture.rendering_engine->CreateICPMaps(volume, fixture.view_17, tracking_state.get(), render_state_create_ICP_maps.get());
-			ORUtils::MemoryBlockPersistence::SaveImage(ICP_images_file, *tracking_state->pointCloud->locations);
-			ORUtils::MemoryBlockPersistence::SaveImage(ICP_images_file, *tracking_state->pointCloud->colours);
+			ORUtils::MemoryBlockPersistence::SaveImage(ICP_images_file, *tracking_state->point_cloud->locations);
+			ORUtils::MemoryBlockPersistence::SaveImage(ICP_images_file, *tracking_state->point_cloud->colors);
 		}
 
 		LOG4CPLUS_INFO(log4cplus::Logger::getRoot(),

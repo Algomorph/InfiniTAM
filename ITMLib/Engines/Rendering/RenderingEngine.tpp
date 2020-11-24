@@ -125,10 +125,10 @@ void RenderingEngine<TVoxel, TIndex, TMemoryDeviceType>::CreatePointCloud(
 	GenericRaycast(volume, render_state->raycastResult->dimensions, inverted_rgb_camera_matrix, view->calibration_information.intrinsics_rgb.projectionParamsSimple.all,
 	               render_state, true);
 	const Vector3f light_source = -Vector3f(inverted_rgb_camera_matrix.getColumn(2));
-	RenderPointCloudFunctor<TVoxel, TIndex, TMemoryDeviceType> functor(*camera_tracking_state->pointCloud, *volume, light_source,
+	RenderPointCloudFunctor<TVoxel, TIndex, TMemoryDeviceType> functor(*camera_tracking_state->point_cloud, *volume, light_source,
 	                                                                   this->parameters.skip_points);
 	ImageTraversalEngine<TMemoryDeviceType>::template TraverseWithPosition(render_state->raycastResult, functor);
-	camera_tracking_state->pointCloud->noTotalPoints = functor.GetPointCount();
+	camera_tracking_state->point_cloud->point_count = functor.GetPointCount();
 }
 
 template<class TVoxel, class TIndex, MemoryDeviceType TMemoryDeviceType>

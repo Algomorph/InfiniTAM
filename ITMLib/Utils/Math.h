@@ -185,5 +185,22 @@ struct hash<Vector3s> {
 		                           static_cast<size_t>(vector.z));
 	}
 };
+
+template<>
+struct hash<Vector4s> {
+	size_t operator()(const Vector4s& vector) const {
+		return std::hash<size_t>()(static_cast<size_t>(vector.x) << 24u | static_cast<size_t>(vector.y) << 16u |
+		                           static_cast<size_t>(vector.z) << 8u | static_cast<size_t>(vector.w));
+	}
+};
+
+
+template<>
+struct hash<Vector4f> {
+	size_t operator()(const Vector4f& vector) const {
+		return std::hash<size_t>()(static_cast<size_t>(vector.x) << 24u | (0xffffffu & static_cast<size_t>(vector.y)) << 16u |
+				                           (0xffffffu & static_cast<size_t>(vector.z)) << 8u | (0xffffffu & static_cast<size_t>(vector.w)));
+	}
+};
 } // namespace std
 // endregion

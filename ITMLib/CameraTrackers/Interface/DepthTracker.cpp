@@ -85,8 +85,8 @@ void DepthTracker::SetEvaluationData(CameraTrackingState *trackingState, const V
 	// the image hierarchy allows pointers to external data at level 0
 	// TODO: somehow fix this cast that removes const modifier... TRAVESTY!
 	viewHierarchy->GetLevel(0)->data = (FloatImage*)&view->depth;
-	sceneHierarchy->GetLevel(0)->pointsMap = trackingState->pointCloud->locations;
-	sceneHierarchy->GetLevel(0)->normalsMap = trackingState->pointCloud->colours;
+	sceneHierarchy->GetLevel(0)->pointsMap = trackingState->point_cloud->locations;
+	sceneHierarchy->GetLevel(0)->normalsMap = trackingState->point_cloud->colors;
 
 	scenePose = trackingState->pose_pointCloud->GetM();
 }

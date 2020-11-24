@@ -13,14 +13,14 @@
 namespace ITMLib {
 // declaration of device functions
 
-__global__ void checkProjectAndSplitBlocks_device(const HashEntry* hashEntries, int noHashEntries,
+__global__ void checkProjectAndSplitBlocks_device(const HashEntry* hash_entries, int noHashEntries,
                                                   const Matrix4f pose_M, const Vector4f intrinsics,
                                                   const Vector2i imgSize, float voxelSize,
                                                   RenderingBlock* renderingBlocks,
                                                   uint* noTotalBlocks);
 
-__global__ void fillBlocks_device(uint noTotalBlocks, const RenderingBlock* renderingBlocks,
-                                  Vector2i imgSize, Vector2f* minmaxData);
+__global__ void fillBlocks_device(uint block_count, const RenderingBlock* rendering_blocks,
+                                  Vector2i image_size, Vector2f* pixel_ray_data_ranges);
 
 template<class TVoxel, class TIndex, bool modifyVisibleEntries>
 __global__ void genericRaycast_device(Vector4f* out_ptsRay, HashBlockVisibility* block_visibility_types, const TVoxel* voxels,

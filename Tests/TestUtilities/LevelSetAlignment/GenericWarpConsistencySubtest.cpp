@@ -19,31 +19,31 @@ namespace test_utilities{
 
 template
 void
-GenericWarpConsistencySubtest<PlainVoxelArray, MEMORYDEVICE_CPU>(const LevelSetAlignmentSwitches& switches,
-                                                                 int iteration_limit,
-                                                                 LevelSetAlignmentTestMode mode,
-                                                                 float absolute_tolerance);
+GenericMultiIterationAlignmentSubtest<PlainVoxelArray, MEMORYDEVICE_CPU>(const LevelSetAlignmentSwitches& switches,
+                                                                         int iteration_limit,
+                                                                         LevelSetAlignmentTestMode mode,
+                                                                         float absolute_tolerance);
 template
 void
-GenericWarpConsistencySubtest<VoxelBlockHash, MEMORYDEVICE_CPU>(const LevelSetAlignmentSwitches& switches,
-                                                                int iteration_limit,
-                                                                LevelSetAlignmentTestMode mode,
-                                                                float absolute_tolerance);
+GenericMultiIterationAlignmentSubtest<VoxelBlockHash, MEMORYDEVICE_CPU>(const LevelSetAlignmentSwitches& switches,
+                                                                        int iteration_limit,
+                                                                        LevelSetAlignmentTestMode mode,
+                                                                        float absolute_tolerance);
 
 #ifndef COMPILE_WITHOUT_CUDA
 template
 void
-GenericWarpConsistencySubtest<PlainVoxelArray, MEMORYDEVICE_CUDA>(const LevelSetAlignmentSwitches& switches,
-                                                                  int iteration_limit,
-                                                                  LevelSetAlignmentTestMode mode,
-                                                                  float absolute_tolerance);
+GenericMultiIterationAlignmentSubtest<PlainVoxelArray, MEMORYDEVICE_CUDA>(const LevelSetAlignmentSwitches& switches,
+                                                                          int iteration_limit,
+                                                                          LevelSetAlignmentTestMode mode,
+                                                                          float absolute_tolerance);
 
 template
 void
-GenericWarpConsistencySubtest<VoxelBlockHash, MEMORYDEVICE_CUDA>(const LevelSetAlignmentSwitches& switches,
-                                                                 int iteration_limit,
-                                                                 LevelSetAlignmentTestMode mode,
-                                                                 float absolute_tolerance);
+GenericMultiIterationAlignmentSubtest<VoxelBlockHash, MEMORYDEVICE_CUDA>(const LevelSetAlignmentSwitches& switches,
+                                                                         int iteration_limit,
+                                                                         LevelSetAlignmentTestMode mode,
+                                                                         float absolute_tolerance);
 #endif
 
 } // namespace test_utilities
