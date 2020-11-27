@@ -35,47 +35,47 @@ enum Frame {
 };
 
 // calibration
-static constexpr const std::string_view snoopy_calibration_file_name = "snoopy_calib.txt";
-static constexpr const std::string_view snoopy_calibration_path = ORUtils::join_v<static_calibration_directory, snoopy_calibration_file_name>;
+static constexpr const std::string_view calibration_file_name = "snoopy_calib.txt";
+static constexpr const std::string_view calibration_path = ORUtils::join_v<static_calibration_directory, calibration_file_name>;
 
 // frames
-static constexpr const std::string_view snoopy_frame_00_depth_file_name = "snoopy_depth_000000.png";
-static constexpr const std::string_view snoopy_frame_00_depth_path = ORUtils::join_v<static_frames_directory, snoopy_frame_00_depth_file_name>;
-static constexpr const std::string_view snoopy_frame_00_color_file_name = "snoopy_color_000000.png";
-static constexpr const std::string_view snoopy_frame_00_color_path = ORUtils::join_v<static_frames_directory, snoopy_frame_00_color_file_name>;
-static constexpr const std::string_view snoopy_frame_00_mask_file_name = "snoopy_omask_000000.png";
-static constexpr const std::string_view snoopy_frame_00_mask_path = ORUtils::join_v<static_frames_directory, snoopy_frame_00_mask_file_name>;
+static constexpr const std::string_view frame_00_depth_file_name = "snoopy_depth_000000.png";
+static constexpr const std::string_view frame_00_depth_path = ORUtils::join_v<static_frames_directory, frame_00_depth_file_name>;
+static constexpr const std::string_view frame_00_color_file_name = "snoopy_color_000000.png";
+static constexpr const std::string_view frame_00_color_path = ORUtils::join_v<static_frames_directory, frame_00_color_file_name>;
+static constexpr const std::string_view frame_00_mask_file_name = "snoopy_omask_000000.png";
+static constexpr const std::string_view frame_00_mask_path = ORUtils::join_v<static_frames_directory, frame_00_mask_file_name>;
 
-static constexpr const std::string_view snoopy_frame_16_depth_file_name = "snoopy_depth_000016.png";
-static constexpr const std::string_view snoopy_frame_16_depth_path = ORUtils::join_v<static_frames_directory, snoopy_frame_16_depth_file_name>;
-static constexpr const std::string_view snoopy_frame_16_color_file_name = "snoopy_color_000016.png";
-static constexpr const std::string_view snoopy_frame_16_color_path = ORUtils::join_v<static_frames_directory, snoopy_frame_16_color_file_name>;
-static constexpr const std::string_view snoopy_frame_16_mask_file_name = "snoopy_omask_000016.png";
-static constexpr const std::string_view snoopy_frame_16_mask_path = ORUtils::join_v<static_frames_directory, snoopy_frame_16_mask_file_name>;
+static constexpr const std::string_view frame_16_depth_file_name = "snoopy_depth_000016.png";
+static constexpr const std::string_view frame_16_depth_path = ORUtils::join_v<static_frames_directory, frame_16_depth_file_name>;
+static constexpr const std::string_view frame_16_color_file_name = "snoopy_color_000016.png";
+static constexpr const std::string_view frame_16_color_path = ORUtils::join_v<static_frames_directory, frame_16_color_file_name>;
+static constexpr const std::string_view frame_16_mask_file_name = "snoopy_omask_000016.png";
+static constexpr const std::string_view frame_16_mask_path = ORUtils::join_v<static_frames_directory, frame_16_mask_file_name>;
 
-static constexpr const std::string_view snoopy_frame_17_depth_file_name = "snoopy_depth_000017.png";
-static constexpr const std::string_view snoopy_frame_17_depth_path = ORUtils::join_v<static_frames_directory, snoopy_frame_17_depth_file_name>;
-static constexpr const std::string_view snoopy_frame_17_color_file_name = "snoopy_color_000017.png";
-static constexpr const std::string_view snoopy_frame_17_color_path = ORUtils::join_v<static_frames_directory, snoopy_frame_17_color_file_name>;
-static constexpr const std::string_view snoopy_frame_17_mask_file_name = "snoopy_omask_000017.png";
-static constexpr const std::string_view snoopy_frame_17_mask_path = ORUtils::join_v<static_frames_directory, snoopy_frame_17_mask_file_name>;
+static constexpr const std::string_view frame_17_depth_file_name = "snoopy_depth_000017.png";
+static constexpr const std::string_view frame_17_depth_path = ORUtils::join_v<static_frames_directory, frame_17_depth_file_name>;
+static constexpr const std::string_view frame_17_color_file_name = "snoopy_color_000017.png";
+static constexpr const std::string_view frame_17_color_path = ORUtils::join_v<static_frames_directory, frame_17_color_file_name>;
+static constexpr const std::string_view frame_17_mask_file_name = "snoopy_omask_000017.png";
+static constexpr const std::string_view frame_17_mask_path = ORUtils::join_v<static_frames_directory, frame_17_mask_file_name>;
 
-static constexpr const std::string_view snoopy_frame_18_depth_file_name = "snoopy_depth_000018.png";
-static constexpr const std::string_view snoopy_frame_18_depth_path = ORUtils::join_v<static_frames_directory, snoopy_frame_18_depth_file_name>;
-static constexpr const std::string_view snoopy_frame_18_color_file_name = "snoopy_color_000018.png";
-static constexpr const std::string_view snoopy_frame_18_color_path = ORUtils::join_v<static_frames_directory, snoopy_frame_18_color_file_name>;
-static constexpr const std::string_view snoopy_frame_18_mask_file_name = "snoopy_omask_000018.png";
-static constexpr const std::string_view snoopy_frame_18_mask_path = ORUtils::join_v<static_frames_directory, snoopy_frame_18_mask_file_name>;
+static constexpr const std::string_view frame_18_depth_file_name = "snoopy_depth_000018.png";
+static constexpr const std::string_view frame_18_depth_path = ORUtils::join_v<static_frames_directory, frame_18_depth_file_name>;
+static constexpr const std::string_view frame_18_color_file_name = "snoopy_color_000018.png";
+static constexpr const std::string_view frame_18_color_path = ORUtils::join_v<static_frames_directory, frame_18_color_file_name>;
+static constexpr const std::string_view frame_18_mask_file_name = "snoopy_omask_000018.png";
+static constexpr const std::string_view frame_18_mask_path = ORUtils::join_v<static_frames_directory, frame_18_mask_file_name>;
 
 // videos
-static constexpr const std::string_view video_frames_16_to_18_depth_file_name = "snoopy_depth_16-18.png";
-static constexpr const std::string_view video_frames_16_to_18_depth_path = ORUtils::join_v<static_videos_directory, video_frames_16_to_18_depth_file_name>;
-static constexpr const std::string_view video_frames_16_to_18_color_file_name = "snoopy_color_16-18.png";
-static constexpr const std::string_view video_frames_16_to_18_color_path = ORUtils::join_v<static_videos_directory, video_frames_16_to_18_color_file_name>;
-static constexpr const std::string_view video_frames_16_to_18_color_YUV422P_file_name = "snoopy_color_16-18_yuv422p.png";
-static constexpr const std::string_view video_frames_16_to_18_color_YUV422P_path = ORUtils::join_v<static_videos_directory, video_frames_16_to_18_color_YUV422P_file_name>;
-static constexpr const std::string_view video_frames_16_to_18_depth_GRAY16LE_file_name = "snoopy_depth_16-18_gray16le.png";
-static constexpr const std::string_view video_frames_16_to_18_depth_GRAY16LE_path = ORUtils::join_v<static_videos_directory, video_frames_16_to_18_depth_GRAY16LE_file_name>;
+static constexpr const std::string_view frames_16_to_18_depth_file_name = "snoopy_depth_16-18.png";
+static constexpr const std::string_view frames_16_to_18_depth_path = ORUtils::join_v<static_videos_directory, frames_16_to_18_depth_file_name>;
+static constexpr const std::string_view frames_16_to_18_color_file_name = "snoopy_color_16-18.png";
+static constexpr const std::string_view frames_16_to_18_color_path = ORUtils::join_v<static_videos_directory, frames_16_to_18_color_file_name>;
+static constexpr const std::string_view frames_16_to_18_color_YUV422P_file_name = "snoopy_color_16-18_yuv422p.png";
+static constexpr const std::string_view frames_16_to_18_color_YUV422P_path = ORUtils::join_v<static_videos_directory, frames_16_to_18_color_YUV422P_file_name>;
+static constexpr const std::string_view frames_16_to_18_depth_GRAY16LE_file_name = "snoopy_depth_16-18_gray16le.png";
+static constexpr const std::string_view frames_16_to_18_depth_GRAY16LE_path = ORUtils::join_v<static_videos_directory, frames_16_to_18_depth_GRAY16LE_file_name>;
 
 
 template<typename TIndex>
@@ -165,12 +165,25 @@ Load<VoxelBlockHash>(VoxelVolume<TSDFVoxel, VoxelBlockHash>** volume, Frame fram
                      configuration::SwappingMode swapping_mode);
 } // namespace snoopy
 
-namespace teddy{
-	std::string Frame115DepthPath();
-	std::string Frame115ColorPath();
+namespace teddy {
 
-	std::string Frame116DepthPath();
-	std::string Frame116ColorPath();
+static const Vector2i frame_image_size = Vector2i(640, 480);
+
+static constexpr const std::string_view calibration_file_name = "teddy_calib.txt";
+static constexpr const std::string_view calibration_path = ORUtils::join_v<static_calibration_directory, calibration_file_name>;
+
+static constexpr const std::string_view frame_115_depth_file_name = "teddy_depth_000115.png";
+static constexpr const std::string_view frame_115_depth_path = ORUtils::join_v<static_frames_directory, frame_115_depth_file_name>;
+static constexpr const std::string_view frame_115_color_file_name = "teddy_color_000115.png";
+static constexpr const std::string_view frame_115_color_path = ORUtils::join_v<static_frames_directory, frame_115_color_file_name>;
+
+static constexpr const std::string_view frame_116_depth_file_name = "teddy_depth_000116.png";
+static constexpr const std::string_view frame_116_depth_path = ORUtils::join_v<static_frames_directory, frame_116_depth_file_name>;
+static constexpr const std::string_view frame_116_color_file_name = "teddy_color_000116.png";
+static constexpr const std::string_view frame_116_color_path = ORUtils::join_v<static_frames_directory, frame_116_color_file_name>;
+
+
+
 } // namespace teddy
 
 } // namespace test

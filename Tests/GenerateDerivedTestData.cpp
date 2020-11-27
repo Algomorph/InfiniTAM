@@ -74,15 +74,15 @@ void ConstructSnoopyUnmaskedVolumes00() {
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume_VBH_00;
 
 	BuildSdfVolumeFromImage_NearSurfaceAllocation(&volume_PVA_00,
-	                                              std::string(test::snoopy::snoopy_frame_00_depth_path),
-	                                              std::string(test::snoopy::snoopy_frame_00_color_path),
-	                                              std::string(test::snoopy::snoopy_calibration_path),
+	                                              std::string(test::snoopy::frame_00_depth_path),
+	                                              std::string(test::snoopy::frame_00_color_path),
+	                                              std::string(test::snoopy::calibration_path),
 	                                              MEMORYDEVICE_CPU,
 	                                              test::snoopy::InitializationParameters_Fr00<PlainVoxelArray>());
 	BuildSdfVolumeFromImage_NearSurfaceAllocation(&volume_VBH_00,
-	                                              std::string(test::snoopy::snoopy_frame_00_depth_path),
-	                                              std::string(test::snoopy::snoopy_frame_00_color_path),
-	                                              std::string(test::snoopy::snoopy_calibration_path),
+	                                              std::string(test::snoopy::frame_00_depth_path),
+	                                              std::string(test::snoopy::frame_00_color_path),
+	                                              std::string(test::snoopy::calibration_path),
 	                                              MEMORYDEVICE_CPU,
 	                                              test::snoopy::InitializationParameters_Fr00<VoxelBlockHash>());
 	test::ConstructGeneratedVolumeSubdirectoriesIfMissing();
@@ -105,26 +105,26 @@ void ConstructSnoopyMaskedVolumes16and17() {
 
 	BuildSdfVolumeFromImage_SurfaceSpanAllocation(&volume_PVA_16,
 	                                              &volume_PVA_17,
-	                                              std::string(test::snoopy::snoopy_frame_16_depth_path),
-	                                              std::string(test::snoopy::snoopy_frame_16_color_path),
-	                                              std::string(test::snoopy::snoopy_frame_16_mask_path),
-	                                              std::string(test::snoopy::snoopy_frame_17_depth_path),
-	                                              std::string(test::snoopy::snoopy_frame_17_color_path),
-	                                              std::string(test::snoopy::snoopy_frame_17_mask_path),
-	                                              std::string(test::snoopy::snoopy_calibration_path),
+	                                              std::string(test::snoopy::frame_16_depth_path),
+	                                              std::string(test::snoopy::frame_16_color_path),
+	                                              std::string(test::snoopy::frame_16_mask_path),
+	                                              std::string(test::snoopy::frame_17_depth_path),
+	                                              std::string(test::snoopy::frame_17_color_path),
+	                                              std::string(test::snoopy::frame_17_mask_path),
+	                                              std::string(test::snoopy::calibration_path),
 	                                              MEMORYDEVICE_CPU);
 
 	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(), "Constructing snoopy masked full volumes 16 & 17 VBH...");
 
 	BuildSdfVolumeFromImage_SurfaceSpanAllocation(&volume_VBH_16,
 	                                              &volume_VBH_17,
-	                                              std::string(test::snoopy::snoopy_frame_16_depth_path),
-	                                              std::string(test::snoopy::snoopy_frame_16_color_path),
-	                                              std::string(test::snoopy::snoopy_frame_16_mask_path),
-	                                              std::string(test::snoopy::snoopy_frame_17_depth_path),
-	                                              std::string(test::snoopy::snoopy_frame_17_color_path),
-	                                              std::string(test::snoopy::snoopy_frame_17_mask_path),
-	                                              std::string(test::snoopy::snoopy_calibration_path),
+	                                              std::string(test::snoopy::frame_16_depth_path),
+	                                              std::string(test::snoopy::frame_16_color_path),
+	                                              std::string(test::snoopy::frame_16_mask_path),
+	                                              std::string(test::snoopy::frame_17_depth_path),
+	                                              std::string(test::snoopy::frame_17_color_path),
+	                                              std::string(test::snoopy::frame_17_mask_path),
+	                                              std::string(test::snoopy::calibration_path),
 	                                              MEMORYDEVICE_CPU);
 
 	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(), "Saving snoopy masked full volume 16 PVA...");
@@ -162,26 +162,26 @@ void ConstructSnoopyMaskedVolumes16and17() {
 
 	BuildSdfVolumeFromImage_SurfaceSpanAllocation(&volume_PVA_16,
 	                                              &volume_PVA_17,
-	                                              std::string(test::snoopy::snoopy_frame_16_depth_path),
-	                                              std::string(test::snoopy::snoopy_frame_16_color_path),
-	                                              std::string(test::snoopy::snoopy_frame_16_mask_path),
-	                                              std::string(test::snoopy::snoopy_frame_17_depth_path),
-	                                              std::string(test::snoopy::snoopy_frame_17_color_path),
-	                                              std::string(test::snoopy::snoopy_frame_17_mask_path),
-	                                              std::string(test::snoopy::snoopy_calibration_path),
+	                                              std::string(test::snoopy::frame_16_depth_path),
+	                                              std::string(test::snoopy::frame_16_color_path),
+	                                              std::string(test::snoopy::frame_16_mask_path),
+	                                              std::string(test::snoopy::frame_17_depth_path),
+	                                              std::string(test::snoopy::frame_17_color_path),
+	                                              std::string(test::snoopy::frame_17_mask_path),
+	                                              std::string(test::snoopy::calibration_path),
 	                                              MEMORYDEVICE_CPU,
 	                                              test::snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 
 
 	BuildSdfVolumeFromImage_SurfaceSpanAllocation(&volume_VBH_16,
 	                                              &volume_VBH_17,
-	                                              std::string(test::snoopy::snoopy_frame_16_depth_path),
-	                                              std::string(test::snoopy::snoopy_frame_16_color_path),
-	                                              std::string(test::snoopy::snoopy_frame_16_mask_path),
-	                                              std::string(test::snoopy::snoopy_frame_17_depth_path),
-	                                              std::string(test::snoopy::snoopy_frame_17_color_path),
-	                                              std::string(test::snoopy::snoopy_frame_17_mask_path),
-	                                              std::string(test::snoopy::snoopy_calibration_path),
+	                                              std::string(test::snoopy::frame_16_depth_path),
+	                                              std::string(test::snoopy::frame_16_color_path),
+	                                              std::string(test::snoopy::frame_16_mask_path),
+	                                              std::string(test::snoopy::frame_17_depth_path),
+	                                              std::string(test::snoopy::frame_17_color_path),
+	                                              std::string(test::snoopy::frame_17_mask_path),
+	                                              std::string(test::snoopy::calibration_path),
 	                                              MEMORYDEVICE_CPU,
 	                                              test::snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
@@ -206,7 +206,7 @@ void ConstructStripesTestVolumes() {
 	// region ================================= CONSTRUCT VIEW =========================================================
 
 	RGBD_CalibrationInformation calibration_data;
-	readRGBDCalib(std::string(test::snoopy::snoopy_calibration_path).c_str(), calibration_data);
+	readRGBDCalib(std::string(test::snoopy::calibration_path).c_str(), calibration_data);
 
 	auto view_builder = ViewBuilderFactory::Build(calibration_data, MEMORYDEVICE_CPU);
 	Vector2i image_size(640, 480);

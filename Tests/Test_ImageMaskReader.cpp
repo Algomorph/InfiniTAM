@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(testImageMaskReader) {
 			STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_omask_%06i.png");
 	InputSource::ImageSourceEngine* image_source =
 			new InputSource::ImageFileReader<InputSource::ImageMaskPathGenerator>(
-					std::string(test::snoopy::snoopy_calibration_path).c_str(), pathGenerator);
+					std::string(test::snoopy::calibration_path).c_str(), pathGenerator);
 	image_source->GetImages(rgb, depth);
 
 #ifdef GENERATE_GT_MASKED_IMAGES

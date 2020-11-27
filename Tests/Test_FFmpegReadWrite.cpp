@@ -36,9 +36,9 @@ using namespace InputSource;
 using namespace test;
 
 BOOST_AUTO_TEST_CASE(TestFFmpegRead) {
-	FFMPEGReader reader(std::string(test::snoopy::snoopy_calibration_path).c_str(),
-	                    std::string(test::snoopy::video_frames_16_to_18_color_path).c_str(),
-	                    std::string(test::snoopy::video_frames_16_to_18_depth_path).c_str());
+	FFMPEGReader reader(std::string(test::snoopy::calibration_path).c_str(),
+	                    std::string(test::snoopy::frames_16_to_18_color_path).c_str(),
+	                    std::string(test::snoopy::frames_16_to_18_depth_path).c_str());
 	UChar4Image color(reader.GetRGBImageSize(), MEMORYDEVICE_CPU);
 	ShortImage depth(reader.GetDepthImageSize(), MEMORYDEVICE_CPU);
 
@@ -47,9 +47,9 @@ BOOST_AUTO_TEST_CASE(TestFFmpegRead) {
 	reader.GetImages(color, depth);
 
 	UChar4Image frame_16_color(test::snoopy::frame_image_size, MEMORYDEVICE_CPU);
-	ReadImageFromFile(frame_16_color, std::string(test::snoopy::snoopy_frame_16_color_path).c_str());
+	ReadImageFromFile(frame_16_color, std::string(test::snoopy::frame_16_color_path).c_str());
 	ShortImage frame_16_depth(test::snoopy::frame_image_size, MEMORYDEVICE_CPU);
-	ReadImageFromFile(frame_16_depth, std::string(test::snoopy::snoopy_frame_16_depth_path).c_str());
+	ReadImageFromFile(frame_16_depth, std::string(test::snoopy::frame_16_depth_path).c_str());
 
 	BOOST_REQUIRE(depth == frame_16_depth);
 	BOOST_REQUIRE(color == frame_16_color);
@@ -59,9 +59,9 @@ BOOST_AUTO_TEST_CASE(TestFFmpegRead) {
 	reader.GetImages(color, depth);
 
 	UChar4Image frame_17_color(test::snoopy::frame_image_size, MEMORYDEVICE_CPU);
-	ReadImageFromFile(frame_17_color, std::string(test::snoopy::snoopy_frame_17_color_path).c_str());
+	ReadImageFromFile(frame_17_color, std::string(test::snoopy::frame_17_color_path).c_str());
 	ShortImage frame_17_depth(test::snoopy::frame_image_size, MEMORYDEVICE_CPU);
-	ReadImageFromFile(frame_17_depth, std::string(test::snoopy::snoopy_frame_17_depth_path).c_str());
+	ReadImageFromFile(frame_17_depth, std::string(test::snoopy::frame_17_depth_path).c_str());
 
 	BOOST_REQUIRE(depth == frame_17_depth);
 	BOOST_REQUIRE(color == frame_17_color);
@@ -72,9 +72,9 @@ BOOST_AUTO_TEST_CASE(TestFFmpegRead) {
 
 
 	UChar4Image frame_18_color(test::snoopy::frame_image_size, MEMORYDEVICE_CPU);
-	ReadImageFromFile(frame_18_color, std::string(test::snoopy::snoopy_frame_18_color_path).c_str());
+	ReadImageFromFile(frame_18_color, std::string(test::snoopy::frame_18_color_path).c_str());
 	ShortImage frame_18_depth(test::snoopy::frame_image_size, MEMORYDEVICE_CPU);
-	ReadImageFromFile(frame_18_depth, std::string(test::snoopy::snoopy_frame_18_depth_path).c_str());
+	ReadImageFromFile(frame_18_depth, std::string(test::snoopy::frame_18_depth_path).c_str());
 
 	BOOST_REQUIRE(depth == frame_18_depth);
 	BOOST_REQUIRE(color == frame_18_color);
@@ -96,30 +96,30 @@ BOOST_AUTO_TEST_CASE(TestFFmpegWrite) {
 	ShortImage depth(test::snoopy::frame_image_size, MEMORYDEVICE_CPU);
 
 	// *** write all frames ***
-	ReadImageFromFile(color, std::string(test::snoopy::snoopy_frame_16_color_path).c_str());
-	ReadImageFromFile(depth, std::string(test::snoopy::snoopy_frame_16_depth_path).c_str());
+	ReadImageFromFile(color, std::string(test::snoopy::frame_16_color_path).c_str());
+	ReadImageFromFile(depth, std::string(test::snoopy::frame_16_depth_path).c_str());
 	writer_color.writeFrame(&color);
 	writer_depth.writeFrame(&depth);
 
-	ReadImageFromFile(color, std::string(test::snoopy::snoopy_frame_17_color_path).c_str());
-	ReadImageFromFile(depth, std::string(test::snoopy::snoopy_frame_17_depth_path).c_str());
+	ReadImageFromFile(color, std::string(test::snoopy::frame_17_color_path).c_str());
+	ReadImageFromFile(depth, std::string(test::snoopy::frame_17_depth_path).c_str());
 	writer_color.writeFrame(&color);
 	writer_depth.writeFrame(&depth);
 
-	ReadImageFromFile(color, std::string(test::snoopy::snoopy_frame_18_color_path).c_str());
-	ReadImageFromFile(depth, std::string(test::snoopy::snoopy_frame_18_depth_path).c_str());
+	ReadImageFromFile(color, std::string(test::snoopy::frame_18_color_path).c_str());
+	ReadImageFromFile(depth, std::string(test::snoopy::frame_18_depth_path).c_str());
 	writer_color.writeFrame(&color);
 	writer_depth.writeFrame(&depth);
 
 	writer_color.close();
 	writer_depth.close();
 
-	FFMPEGReader reader(std::string(test::snoopy::snoopy_calibration_path).c_str(),
+	FFMPEGReader reader(std::string(test::snoopy::calibration_path).c_str(),
 	                    (std::string(test::generated_videos_directory) + "snoopy_color_16-18_test.avi").c_str(),
 	                    (std::string(test::generated_videos_directory) + "snoopy_depth_16-18_test.avi").c_str());
-	FFMPEGReader reader_gt(std::string(test::snoopy::snoopy_calibration_path).c_str(),
-	                       std::string(test::snoopy::video_frames_16_to_18_color_YUV422P_path).c_str(),
-	                       std::string(test::snoopy::video_frames_16_to_18_depth_GRAY16LE_path).c_str());
+	FFMPEGReader reader_gt(std::string(test::snoopy::calibration_path).c_str(),
+	                       std::string(test::snoopy::frames_16_to_18_color_YUV422P_path).c_str(),
+	                       std::string(test::snoopy::frames_16_to_18_depth_GRAY16LE_path).c_str());
 	UChar4Image color_gt(test::snoopy::frame_image_size, MEMORYDEVICE_CPU);
 	ShortImage depth_gt(test::snoopy::frame_image_size, MEMORYDEVICE_CPU);
 

@@ -55,12 +55,12 @@ public: // instance functions
 			  }()),
 			  rendering_engine(new RenderingEngine<TSDFVoxel,VoxelBlockHash,TMemoryDeviceType>()),
 			  view_17(nullptr) {
-		readRGBDCalib(std::string(test::snoopy::snoopy_calibration_path).c_str(), calibration_data);
+		readRGBDCalib(std::string(test::snoopy::calibration_path).c_str(), calibration_data);
 		UpdateView(&view_17,
-		           std::string(test::snoopy::snoopy_frame_17_depth_path),
-		           std::string(test::snoopy::snoopy_frame_17_color_path),
-		           std::string(test::snoopy::snoopy_frame_17_mask_path),
-		           std::string(test::snoopy::snoopy_calibration_path),
+		           std::string(test::snoopy::frame_17_depth_path),
+		           std::string(test::snoopy::frame_17_color_path),
+		           std::string(test::snoopy::frame_17_mask_path),
+		           std::string(test::snoopy::calibration_path),
 		           MEMORYDEVICE_CPU);
 	}
 

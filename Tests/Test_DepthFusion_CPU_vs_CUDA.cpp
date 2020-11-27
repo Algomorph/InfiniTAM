@@ -47,18 +47,18 @@ BOOST_AUTO_TEST_CASE(Test_SceneConstruct17_VBH_CPU_CUDA_NearSurface){
 		
 	View* view_17_CPU = nullptr;
 	UpdateView(&view_17_CPU,
-	           std::string(test::snoopy::snoopy_frame_17_depth_path),
-	           std::string(test::snoopy::snoopy_frame_17_color_path),
-	           std::string(test::snoopy::snoopy_frame_17_mask_path),
-	           std::string(test::snoopy::snoopy_calibration_path),
+	           std::string(test::snoopy::frame_17_depth_path),
+	           std::string(test::snoopy::frame_17_color_path),
+	           std::string(test::snoopy::frame_17_mask_path),
+	           std::string(test::snoopy::calibration_path),
 	           MEMORYDEVICE_CPU);
 
 	View* view_17_CUDA = nullptr;
 	UpdateView(&view_17_CUDA,
-	           std::string(test::snoopy::snoopy_frame_17_depth_path),
-	           std::string(test::snoopy::snoopy_frame_17_color_path),
-	           std::string(test::snoopy::snoopy_frame_17_mask_path),
-	           std::string(test::snoopy::snoopy_calibration_path),
+	           std::string(test::snoopy::frame_17_depth_path),
+	           std::string(test::snoopy::frame_17_color_path),
+	           std::string(test::snoopy::frame_17_mask_path),
+	           std::string(test::snoopy::calibration_path),
 	           MEMORYDEVICE_CUDA);
 
 
@@ -122,18 +122,18 @@ BOOST_AUTO_TEST_CASE(Test_SceneConstruct17_VBH_CPU_CUDA_SurfaceSpan){
 
 	View* view_16_CPU = nullptr;
 	UpdateView(&view_16_CPU,
-	           std::string(test::snoopy::snoopy_frame_16_depth_path),
-	           std::string(test::snoopy::snoopy_frame_16_color_path),
-	           std::string(test::snoopy::snoopy_frame_16_mask_path),
-	           std::string(test::snoopy::snoopy_calibration_path),
+	           std::string(test::snoopy::frame_16_depth_path),
+	           std::string(test::snoopy::frame_16_color_path),
+	           std::string(test::snoopy::frame_16_mask_path),
+	           std::string(test::snoopy::calibration_path),
 	           MEMORYDEVICE_CPU);
 
 	View* view_16_CUDA = nullptr;
 	UpdateView(&view_16_CUDA,
-	           std::string(test::snoopy::snoopy_frame_16_depth_path),
-	           std::string(test::snoopy::snoopy_frame_16_color_path),
-	           std::string(test::snoopy::snoopy_frame_16_mask_path),
-	           std::string(test::snoopy::snoopy_calibration_path),
+	           std::string(test::snoopy::frame_16_depth_path),
+	           std::string(test::snoopy::frame_16_color_path),
+	           std::string(test::snoopy::frame_16_mask_path),
+	           std::string(test::snoopy::calibration_path),
 	           MEMORYDEVICE_CUDA);
 	
 	//*** prep engines and tracking states ***
@@ -188,18 +188,18 @@ BOOST_AUTO_TEST_CASE(Test_SceneConstruct17_VBH_CPU_CUDA_SurfaceSpan){
 
 	View* view_17_CPU = nullptr;
 	UpdateView(&view_17_CPU,
-	           std::string(test::snoopy::snoopy_frame_17_depth_path),
-	           std::string(test::snoopy::snoopy_frame_17_color_path),
-	           std::string(test::snoopy::snoopy_frame_17_mask_path),
-	           std::string(test::snoopy::snoopy_calibration_path),
+	           std::string(test::snoopy::frame_17_depth_path),
+	           std::string(test::snoopy::frame_17_color_path),
+	           std::string(test::snoopy::frame_17_mask_path),
+	           std::string(test::snoopy::calibration_path),
 	           MEMORYDEVICE_CPU);
 
 	View* view_17_CUDA = nullptr;
 	UpdateView(&view_17_CUDA,
-	           std::string(test::snoopy::snoopy_frame_17_depth_path),
-	           std::string(test::snoopy::snoopy_frame_17_color_path),
-	           std::string(test::snoopy::snoopy_frame_17_mask_path),
-	           std::string(test::snoopy::snoopy_calibration_path),
+	           std::string(test::snoopy::frame_17_depth_path),
+	           std::string(test::snoopy::frame_17_color_path),
+	           std::string(test::snoopy::frame_17_mask_path),
+	           std::string(test::snoopy::calibration_path),
 	           MEMORYDEVICE_CUDA);
 
 // *** initialize volumes ***

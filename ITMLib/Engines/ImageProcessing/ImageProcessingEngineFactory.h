@@ -18,7 +18,7 @@ struct ImageProcessingEngineFactory
    *
    * \param device_type  The device on which the low-level engine should operate.
    */
-  static ImageProcessingEngineInterface *Build(MemoryDeviceType device_type);
+  static ImageProcessingEngineInterface* Build(MemoryDeviceType device_type);
 };
 
 } // namespace ITMLib

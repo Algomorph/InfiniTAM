@@ -16,39 +16,64 @@
 #define BOOST_TEST_MODULE RigidAlignment
 
 #include "TestUtilities/GenericTestModuleHeader.h"
+#include "../ITMLib/CameraTrackers/CameraTrackerFactory.h"
+#include "../ITMLib/Engines/ImageProcessing/ImageProcessingEngineFactory.h"
+#include "../ITMLib/Objects/Misc/IMUCalibrator.h"
 
-template <MemoryDeviceType TMemoryDeviceType>
-void GenericRgbTrackerTest(){
+template<MemoryDeviceType TMemoryDeviceType>
+void GenericRgbTrackerTest() {
+	constexpr const char* preset_rrbb = "type=rgb,levels=rrbb";
+	constexpr const char* preset_rrrbb = "type=rgb,levels=rrrbb";
+	constexpr const char* preset_rrbrb = "type=rgb,levels=rrbrb";
+
+	ImageProcessingEngineInterface* image_processing_engine = ImageProcessingEngineFactory::Build(TMemoryDeviceType);
+
+	IMUCalibrator* imu_calibrator = new ITMIMUCalibrator_iPad();
+
+	CameraTracker* tracker = CameraTrackerFactory::Instance().Make(TMemoryDeviceType, preset_rrbb, teddy::frame_image_size, teddy::frame_image_size,
+	                                                               image_processing_engine, imu_calibrator,
+	                                                               configuration::Get().general_voxel_volume_parameters);
+
+	View* view;
+	UpdateView(&view,
+	           std::string(teddy::frame_115_depth_path),
+	           std::string(teddy::frame_115_color_path),
+	           std::string(teddy::calibration_path),
+	           TMemoryDeviceType);
+
+
+
+	delete image_processing_engine;
+	delete imu_calibrator;
+}
+
+template<MemoryDeviceType TMemoryDeviceType>
+void GenericIcpTrackerTest() {
 
 }
 
-template <MemoryDeviceType TMemoryDeviceType>
-void GenericIcpTrackerTest(){
+template<MemoryDeviceType TMemoryDeviceType>
+void GenericExtendedTrackerTest() {
 
 }
 
-template <MemoryDeviceType TMemoryDeviceType>
-void GenericExtendedTrackerTest(){
+template<MemoryDeviceType TMemoryDeviceType>
+void GenericFileTrackerTest() {
 
 }
 
-template <MemoryDeviceType TMemoryDeviceType>
-void GenericFileTrackerTest(){
+template<MemoryDeviceType TMemoryDeviceType>
+void GenericImuIcpTrackerTest() {
 
 }
 
-template <MemoryDeviceType TMemoryDeviceType>
-void GenericImuIcpTrackerTest(){
+template<MemoryDeviceType TMemoryDeviceType>
+void GenericImuExtendedTrackerTest() {
 
 }
 
-template <MemoryDeviceType TMemoryDeviceType>
-void GenericImuExtendedTrackerTest(){
-
-}
-
-template <MemoryDeviceType TMemoryDeviceType>
-void GenericForceFailTrackerTest(){
+template<MemoryDeviceType TMemoryDeviceType>
+void GenericForceFailTrackerTest() {
 
 }
 

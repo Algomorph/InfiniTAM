@@ -777,7 +777,6 @@ set(ITMLIB_CAMERA_TRACKERS_INTERFACE_SOURCES
     CameraTrackers/Interface/FileBasedTracker.cpp
     CameraTrackers/Interface/ForceFailTracker.cpp
     CameraTrackers/Interface/IMUTracker.cpp
-    CameraTrackers/Interface/DynamicCameraTracker.cpp
     )
 
 set(ITMLIB_CAMERA_TRACKERS_INTERFACE_HEADERS
@@ -789,7 +788,6 @@ set(ITMLIB_CAMERA_TRACKERS_INTERFACE_HEADERS
     CameraTrackers/Interface/ForceFailTracker.h
     CameraTrackers/Interface/IMUTracker.h
     CameraTrackers/Interface/CameraTracker.h
-    CameraTrackers/Interface/DynamicCameraTracker.h
     )
 
 ##
