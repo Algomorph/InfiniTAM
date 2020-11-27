@@ -44,9 +44,7 @@
 #endif
 
 //test_utilities
-#include "TestUtilities/SnoopyTestUtilities.h"
-
-namespace snoopy = snoopy_test_utilities;
+#include "TestUtilities/TestDataUtilities.h"
 
 using namespace ITMLib;
 
@@ -79,7 +77,7 @@ struct TestData {
 		delete render_state;
 	}
 
-	const std::string calibration_path = snoopy::SnoopyCalibrationPath();
+	const std::string calibration_path = std::string(test::snoopy::snoopy_calibration_path);
 	const std::string square_1_depth_path = STATIC_TEST_DATA_PREFIX "TestData/frames/square1_depth.png";
 	const std::string square_2_depth_path = STATIC_TEST_DATA_PREFIX "TestData/frames/square2_depth.png";
 	const std::string square_1_color_path = STATIC_TEST_DATA_PREFIX "TestData/frames/square1_color.png";

@@ -55,8 +55,7 @@
 #include "Test_LevelSetAlignment_CPU_vs_CUDA_Aux.h"
 
 using namespace ITMLib;
-using namespace test_utilities;
-namespace snoopy = snoopy_test_utilities;
+using namespace test;
 
 BOOST_AUTO_TEST_CASE(Test_Warp_PVA_VBH_DataTermOnly_CPU) {
 	LevelSetAlignmentSwitches switches(true, false, false, false, false);
@@ -169,7 +168,7 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CPU) {
 													  configuration::get().swapping_mode ==
 													  configuration::SWAPPINGMODE_ENABLED,
 													  MEMORYDEVICE_CPU,
-													  snoopy::InitializationParameters<VoxelBlockHash>());
+													  test::snoopy::InitializationParameters<VoxelBlockHash>());
 	warp_field.Reset();
 
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* canonical_volume;
@@ -178,12 +177,12 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CPU) {
 													   configuration::get().swapping_mode ==
 													   configuration::SWAPPINGMODE_ENABLED,
 													   MEMORYDEVICE_CPU,
-													   snoopy::InitializationParameters<VoxelBlockHash>()),
+													   test::snoopy::InitializationParameters<VoxelBlockHash>()),
 			new VoxelVolume<TSDFVoxel, VoxelBlockHash>(&configuration::get().general_voxel_volume_parameters,
 													   configuration::get().swapping_mode ==
 													   configuration::SWAPPINGMODE_ENABLED,
 													   MEMORYDEVICE_CPU,
-													   snoopy::InitializationParameters<VoxelBlockHash>())
+													   test::snoopy::InitializationParameters<VoxelBlockHash>())
 	};
 	live_volumes[0]->Reset();
 	live_volumes[1]->Reset();
@@ -196,7 +195,7 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CPU) {
 												  GENERATED_TEST_DATA_PREFIX "TestData/snoopy_omask_000016.png",
 												  GENERATED_TEST_DATA_PREFIX "TestData/snoopy_calib.txt",
 												  MEMORYDEVICE_CPU,
-												  snoopy::InitializationParameters<VoxelBlockHash>());
+												  test::snoopy::InitializationParameters<VoxelBlockHash>());
 
 	Vector2i image_size = view->depth.dimensions;
 
@@ -320,7 +319,7 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CUDA) {
 													  configuration::get().swapping_mode ==
 													  configuration::SWAPPINGMODE_ENABLED,
 													  MEMORYDEVICE_CUDA,
-													  snoopy::InitializationParameters<VoxelBlockHash>());
+													  test::snoopy::InitializationParameters<VoxelBlockHash>());
 	warp_field.Reset();
 
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* canonical_volume;
@@ -329,12 +328,12 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CUDA) {
 													   configuration::get().swapping_mode ==
 													   configuration::SWAPPINGMODE_ENABLED,
 													   MEMORYDEVICE_CUDA,
-													   snoopy::InitializationParameters<VoxelBlockHash>()),
+													   test::snoopy::InitializationParameters<VoxelBlockHash>()),
 			new VoxelVolume<TSDFVoxel, VoxelBlockHash>(&configuration::get().general_voxel_volume_parameters,
 													   configuration::get().swapping_mode ==
 													   configuration::SWAPPINGMODE_ENABLED,
 													   MEMORYDEVICE_CUDA,
-													   snoopy::InitializationParameters<VoxelBlockHash>())
+													   test::snoopy::InitializationParameters<VoxelBlockHash>())
 	};
 	live_volumes[0]->Reset();
 	live_volumes[1]->Reset();
@@ -347,7 +346,7 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CUDA) {
 												  GENERATED_TEST_DATA_PREFIX "TestData/snoopy_omask_000016.png",
 												  GENERATED_TEST_DATA_PREFIX "TestData/snoopy_calib.txt",
 												  MEMORYDEVICE_CUDA,
-												  snoopy::InitializationParameters<VoxelBlockHash>());
+												  test::snoopy::InitializationParameters<VoxelBlockHash>());
 
 	Vector2i image_size = view->depth.dimensions;
 

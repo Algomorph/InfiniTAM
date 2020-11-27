@@ -17,7 +17,7 @@
 
 #include "../../../ITMLib/Engines/LevelSetAlignment/Interface/LevelSetAlignmentParameters.h"
 
-namespace test_utilities{
+namespace test{
 
 const ITMLib::LevelSetAlignmentTerminationConditions& SingleIterationTerminationConditions();
 

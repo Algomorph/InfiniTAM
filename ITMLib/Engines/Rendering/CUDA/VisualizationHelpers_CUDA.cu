@@ -2,7 +2,7 @@
 
 #include "VisualizationHelpers_CUDA.h"
 #include "../../../Utils/Geometry/CheckBlockVisibility.h"
-#include "../../../../ORUtils/PlatformIndependedParallelSum.h"
+#include "../../../../ORUtils/PlatformIndependentParallelSum.h"
 
 using namespace ITMLib;
 

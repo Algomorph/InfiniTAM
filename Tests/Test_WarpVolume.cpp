@@ -43,13 +43,12 @@
 
 //test_utilities
 #include "TestUtilities/TestUtilities.h"
-#include "TestUtilities/SnoopyTestUtilities.h"
+#include "TestUtilities/TestDataUtilities.h"
 #include "TestUtilities/LevelSetAlignment/LevelSetAlignmentTestUtilities.h"
 #include "TestUtilities/LevelSetAlignment/TestCaseOrganizationBySwitches.h"
 
 using namespace ITMLib;
-using namespace test_utilities;
-namespace snoopy = snoopy_test_utilities;
+using namespace test;
 
 /*
  * These tests exists mostly to debug issues with the warping, i.e.
@@ -64,15 +63,15 @@ void GenericWarpVolumeTest() {
 	LevelSetAlignmentSwitches data_tikhonov_sobolev_switches(true, false, true, false, true);
 	std::string warps_path = GetWarpsPath<TIndex>(SwitchesToPrefix(data_tikhonov_sobolev_switches), 0);
 	VoxelVolume<WarpVoxel, TIndex>* warps;
-	LoadVolume(&warps, warps_path, TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	LoadVolume(&warps, warps_path, TMemoryDeviceType, test::snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 
 	// load original volume
 	VoxelVolume<TSDFVoxel, TIndex>* source_volume;
-	LoadVolume(&source_volume, snoopy::PartialVolume17Path<TIndex>(), TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	LoadVolume(&source_volume, test::snoopy::PartialVolume17Path<TIndex>(), TMemoryDeviceType, test::snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 
 	// warp the volume
 	auto target_volume = new VoxelVolume<TSDFVoxel, TIndex>(TMemoryDeviceType,
-	                                                        snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	                                                        test::snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 	target_volume->Reset();
 
 	auto warping_engine =
@@ -84,7 +83,7 @@ void GenericWarpVolumeTest() {
 	// load the ground truth warped volume
 	VoxelVolume<TSDFVoxel, TIndex>* warped_live_volume_gt;
 	std::string warped_live_path = GetWarpedLivePath<TIndex>(SwitchesToPrefix(data_tikhonov_sobolev_switches), 0);
-	LoadVolume(&warped_live_volume_gt, warped_live_path, TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	LoadVolume(&warped_live_volume_gt, warped_live_path, TMemoryDeviceType, test::snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 
 	// compare warped volume with ground truth
 	float absolute_tolerance = 1e-6;
@@ -107,13 +106,13 @@ void GenericWarpVolume_VBH_to_PVA_Test(const int iteration = 0) {
 
 	VoxelVolume<WarpVoxel, PlainVoxelArray>* warps_PVA;
 	LoadVolume(&warps_PVA, path_warps_PVA, TMemoryDeviceType,
-	           snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
+	           test::snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 	VoxelVolume<WarpVoxel, VoxelBlockHash>* warps_VBH;
 	LoadVolume(&warps_VBH, path_warps_VBH, TMemoryDeviceType,
-	           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
+	           test::snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
-	std::string path_frame_17_PVA = snoopy::PartialVolume17Path<PlainVoxelArray>();
-	std::string path_frame_17_VBH = snoopy::PartialVolume17Path<VoxelBlockHash>();
+	std::string path_frame_17_PVA = test::snoopy::PartialVolume17Path<PlainVoxelArray>();
+	std::string path_frame_17_VBH = test::snoopy::PartialVolume17Path<VoxelBlockHash>();
 
 	std::string source_path_PVA;
 	std::string source_path_VBH;
@@ -128,16 +127,16 @@ void GenericWarpVolume_VBH_to_PVA_Test(const int iteration = 0) {
 	// *** load same frame scene as the two different data structures
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* source_volume_PVA;
 	LoadVolume(&source_volume_PVA, source_path_PVA, TMemoryDeviceType,
-	           snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
+	           test::snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* source_volume_VBH;
 	LoadVolume(&source_volume_VBH, source_path_VBH, TMemoryDeviceType,
-	           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
+	           test::snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
 	// *** initialize target scenes
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* target_PVA;
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* target_VBH;
-	InitializeVolume(&target_PVA, snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>(), TMemoryDeviceType);
-	InitializeVolume(&target_VBH, snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>(), TMemoryDeviceType);
+	InitializeVolume(&target_PVA, test::snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>(), TMemoryDeviceType);
+	InitializeVolume(&target_VBH, test::snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>(), TMemoryDeviceType);
 
 	// *** perform the warping
 	auto warping_engine_PVA =

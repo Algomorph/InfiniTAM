@@ -16,19 +16,13 @@
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "cert-err58-cpp"
 #define BOOST_TEST_MODULE RenderingEngine
-#ifndef WIN32
-#define BOOST_TEST_DYN_LINK
-#endif
+
+// test utilities
+#include "TestUtilities/GenericTestModuleHeader.h"
 
 //stdlib
 #include <algorithm>
 
-//boost
-#include <boost/test/unit_test.hpp>
-
-//test_utilities
-#include "TestUtilities/TestUtilities.h"
-#include "TestUtilities/SnoopyTestUtilities.h"
 #include "TestUtilities/CameraPoseAndRenderingEngineFixture.h"
 
 //ORUtils
@@ -40,10 +34,6 @@
 #include "../ITMLib/Utils/Collections/OperationsOnSTLContainers.h"
 #include "../ITMLib/Utils/Collections/MemoryBlock_StdContainer_Convertions.h"
 
-
-using namespace ITMLib;
-using namespace test_utilities;
-namespace snoopy = snoopy_test_utilities;
 
 template<MemoryDeviceType TMemoryDeviceType>
 void GenericFindAndCountVisibleBlocksTest() {
@@ -59,8 +49,8 @@ void GenericFindAndCountVisibleBlocksTest() {
 
 	for (auto& tracking_state : fixture.tracking_states) {
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume;
-		LoadVolume(&volume, snoopy::PartialVolume17Path<VoxelBlockHash>(), TMemoryDeviceType,
-		           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
+		LoadVolume(&volume, test::snoopy::PartialVolume17Path<VoxelBlockHash>(), TMemoryDeviceType,
+		           test::snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
 		ORUtils::SE3Pose& pose = *tracking_state->pose_d;
 
@@ -112,8 +102,8 @@ void GenericCreateExpectedDepthsTest() {
 
 	for (auto& tracking_state : fixture.tracking_states) {
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume;
-		LoadVolume(&volume, snoopy::PartialVolume17Path<VoxelBlockHash>(), TMemoryDeviceType,
-		           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
+		LoadVolume(&volume, test::snoopy::PartialVolume17Path<VoxelBlockHash>(), TMemoryDeviceType,
+		           test::snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
 		ORUtils::SE3Pose& pose = *tracking_state->pose_d;
 
@@ -140,8 +130,8 @@ void GenericFindSurfaceTest() {
 
 	for (auto& tracking_state : fixture.tracking_states) {
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume;
-		LoadVolume(&volume, snoopy::PartialVolume17Path<VoxelBlockHash>(), TMemoryDeviceType,
-		           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
+		LoadVolume(&volume, test::snoopy::PartialVolume17Path<VoxelBlockHash>(), TMemoryDeviceType,
+		           test::snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
 		ORUtils::SE3Pose& pose = *tracking_state->pose_d;
 
@@ -170,8 +160,8 @@ void GenericCreatePointCloudTest() {
 
 	for (auto& tracking_state : fixture.tracking_states) {
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume;
-		LoadVolume(&volume, snoopy::PartialVolume17Path<VoxelBlockHash>(), TMemoryDeviceType,
-		           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
+		LoadVolume(&volume, test::snoopy::PartialVolume17Path<VoxelBlockHash>(), TMemoryDeviceType,
+		           test::snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
 		ORUtils::SE3Pose& pose = *tracking_state->pose_d;
 
@@ -281,8 +271,8 @@ void GenericCreateICPMapsTest() {
 
 	for (auto& tracking_state : fixture.tracking_states) {
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume;
-		LoadVolume(&volume, snoopy::PartialVolume17Path<VoxelBlockHash>(), TMemoryDeviceType,
-		           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
+		LoadVolume(&volume, test::snoopy::PartialVolume17Path<VoxelBlockHash>(), TMemoryDeviceType,
+		           test::snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 		ORUtils::SE3Pose& pose = *tracking_state->pose_d;
 
 		fixture.rendering_engine->FindVisibleBlocks(volume, &pose, &fixture.calibration_data.intrinsics_d, fixture.render_state);
@@ -313,8 +303,8 @@ void GenericForwardRenderTest() {
 
 	for (auto& tracking_state : fixture.tracking_states) {
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume;
-		LoadVolume(&volume, snoopy::PartialVolume17Path<VoxelBlockHash>(), TMemoryDeviceType,
-		           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
+		LoadVolume(&volume, test::snoopy::PartialVolume17Path<VoxelBlockHash>(), TMemoryDeviceType,
+		           test::snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
 		ORUtils::SE3Pose& pose = *tracking_state->pose_d;
 
@@ -362,8 +352,8 @@ void GenericRenderImageTest() {
 
 	for (auto& tracking_state : fixture.tracking_states) {
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume;
-		LoadVolume(&volume, snoopy::PartialVolume17Path<VoxelBlockHash>(), TMemoryDeviceType,
-		           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
+		LoadVolume(&volume, test::snoopy::PartialVolume17Path<VoxelBlockHash>(), TMemoryDeviceType,
+		           test::snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 		ORUtils::SE3Pose& pose = *tracking_state->pose_d;
 
 		fixture.rendering_engine->FindVisibleBlocks(volume, &pose, &fixture.calibration_data.intrinsics_d, fixture.render_state);
@@ -374,7 +364,7 @@ void GenericRenderImageTest() {
 		fixture.rendering_engine->CreateExpectedDepths(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get());
 		fixture.rendering_engine->FindSurface(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get());
 
-		UChar4Image output_image(snoopy::frame_image_size, TMemoryDeviceType);
+		UChar4Image output_image(test::snoopy::frame_image_size, TMemoryDeviceType);
 		fixture.rendering_engine->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get(),
 		                                      &output_image, IRenderingEngine::RenderImageType::RENDER_COLOUR_FROM_VOLUME,
 		                                      IRenderingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);

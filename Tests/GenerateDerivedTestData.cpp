@@ -23,7 +23,7 @@
 
 //test_utilities
 #include "TestUtilities/TestUtilities.h"
-#include "TestUtilities/SnoopyTestUtilities.h"
+#include "TestUtilities/TestDataUtilities.h"
 #include "TestUtilities/LevelSetAlignment/LevelSetAlignmentTestUtilities.h"
 #include "TestUtilities/CameraPoseAndRenderingEngineFixture.h"
 
@@ -63,8 +63,7 @@
 
 
 using namespace ITMLib;
-using namespace test_utilities;
-namespace snoopy = snoopy_test_utilities;
+using namespace test;
 
 namespace fs = std::filesystem;
 
@@ -75,27 +74,27 @@ void ConstructSnoopyUnmaskedVolumes00() {
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume_VBH_00;
 
 	BuildSdfVolumeFromImage_NearSurfaceAllocation(&volume_PVA_00,
-	                                              snoopy::Frame00DepthPath(),
-	                                              snoopy::Frame00ColorPath(),
-	                                              snoopy::SnoopyCalibrationPath(),
+	                                              std::string(test::snoopy::snoopy_frame_00_depth_path),
+	                                              std::string(test::snoopy::snoopy_frame_00_color_path),
+	                                              std::string(test::snoopy::snoopy_calibration_path),
 	                                              MEMORYDEVICE_CPU,
-	                                              snoopy::InitializationParameters_Fr00<PlainVoxelArray>());
+	                                              test::snoopy::InitializationParameters_Fr00<PlainVoxelArray>());
 	BuildSdfVolumeFromImage_NearSurfaceAllocation(&volume_VBH_00,
-	                                              snoopy::Frame00DepthPath(),
-	                                              snoopy::Frame00ColorPath(),
-	                                              snoopy::SnoopyCalibrationPath(),
+	                                              std::string(test::snoopy::snoopy_frame_00_depth_path),
+	                                              std::string(test::snoopy::snoopy_frame_00_color_path),
+	                                              std::string(test::snoopy::snoopy_calibration_path),
 	                                              MEMORYDEVICE_CPU,
-	                                              snoopy::InitializationParameters_Fr00<VoxelBlockHash>());
-	test_utilities::ConstructGeneratedVolumeSubdirectoriesIfMissing();
-	volume_PVA_00->SaveToDisk(snoopy::PartialVolume00Path<PlainVoxelArray>());
-	volume_VBH_00->SaveToDisk(snoopy::PartialVolume00Path<VoxelBlockHash>());
+	                                              test::snoopy::InitializationParameters_Fr00<VoxelBlockHash>());
+	test::ConstructGeneratedVolumeSubdirectoriesIfMissing();
+	volume_PVA_00->SaveToDisk(test::snoopy::PartialVolume00Path<PlainVoxelArray>());
+	volume_VBH_00->SaveToDisk(test::snoopy::PartialVolume00Path<VoxelBlockHash>());
 
 	delete volume_PVA_00;
 	delete volume_VBH_00;
 }
 
 void ConstructSnoopyMaskedVolumes16and17() {
-	test_utilities::ConstructGeneratedVolumeSubdirectoriesIfMissing();
+	test::ConstructGeneratedVolumeSubdirectoriesIfMissing();
 
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* volume_PVA_16;
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* volume_PVA_17;
@@ -106,45 +105,45 @@ void ConstructSnoopyMaskedVolumes16and17() {
 
 	BuildSdfVolumeFromImage_SurfaceSpanAllocation(&volume_PVA_16,
 	                                              &volume_PVA_17,
-	                                              snoopy::Frame16DepthPath(),
-	                                              snoopy::Frame16ColorPath(),
-	                                              snoopy::Frame16MaskPath(),
-	                                              snoopy::Frame17DepthPath(),
-	                                              snoopy::Frame17ColorPath(),
-	                                              snoopy::Frame17MaskPath(),
-	                                              snoopy::SnoopyCalibrationPath(),
+	                                              std::string(test::snoopy::snoopy_frame_16_depth_path),
+	                                              std::string(test::snoopy::snoopy_frame_16_color_path),
+	                                              std::string(test::snoopy::snoopy_frame_16_mask_path),
+	                                              std::string(test::snoopy::snoopy_frame_17_depth_path),
+	                                              std::string(test::snoopy::snoopy_frame_17_color_path),
+	                                              std::string(test::snoopy::snoopy_frame_17_mask_path),
+	                                              std::string(test::snoopy::snoopy_calibration_path),
 	                                              MEMORYDEVICE_CPU);
 
 	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(), "Constructing snoopy masked full volumes 16 & 17 VBH...");
 
 	BuildSdfVolumeFromImage_SurfaceSpanAllocation(&volume_VBH_16,
 	                                              &volume_VBH_17,
-	                                              snoopy::Frame16DepthPath(),
-	                                              snoopy::Frame16ColorPath(),
-	                                              snoopy::Frame16MaskPath(),
-	                                              snoopy::Frame17DepthPath(),
-	                                              snoopy::Frame17ColorPath(),
-	                                              snoopy::Frame17MaskPath(),
-	                                              snoopy::SnoopyCalibrationPath(),
+	                                              std::string(test::snoopy::snoopy_frame_16_depth_path),
+	                                              std::string(test::snoopy::snoopy_frame_16_color_path),
+	                                              std::string(test::snoopy::snoopy_frame_16_mask_path),
+	                                              std::string(test::snoopy::snoopy_frame_17_depth_path),
+	                                              std::string(test::snoopy::snoopy_frame_17_color_path),
+	                                              std::string(test::snoopy::snoopy_frame_17_mask_path),
+	                                              std::string(test::snoopy::snoopy_calibration_path),
 	                                              MEMORYDEVICE_CPU);
 
 	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(), "Saving snoopy masked full volume 16 PVA...");
-	volume_PVA_16->SaveToDisk(snoopy::FullVolume16Path<PlainVoxelArray>());
+	volume_PVA_16->SaveToDisk(test::snoopy::FullVolume16Path<PlainVoxelArray>());
 	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(), "Saving snoopy masked full volume 16 VBH...");
-	volume_VBH_16->SaveToDisk(snoopy::FullVolume16Path<VoxelBlockHash>());
+	volume_VBH_16->SaveToDisk(test::snoopy::FullVolume16Path<VoxelBlockHash>());
 	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(), "Saving snoopy masked full volume 17 PVA...");
-	volume_PVA_17->SaveToDisk(snoopy::FullVolume17Path<PlainVoxelArray>());
+	volume_PVA_17->SaveToDisk(test::snoopy::FullVolume17Path<PlainVoxelArray>());
 	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(), "Saving snoopy masked full volume 17 VBH...");
-	volume_VBH_17->SaveToDisk(snoopy::FullVolume17Path<VoxelBlockHash>());
+	volume_VBH_17->SaveToDisk(test::snoopy::FullVolume17Path<VoxelBlockHash>());
 
 	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(), "Computing voxel bounds for partial volumes...");
 	Extent3Di bounds_16 = Analytics_CPU_VBH_Voxel::Instance().ComputeVoxelBounds(volume_VBH_16);
 	Extent3Di bounds_17 = Analytics_CPU_VBH_Voxel::Instance().ComputeVoxelBounds(volume_VBH_17);
 	Extent3Di union_bounds = UnionExtent(bounds_16, bounds_17);
 
-	test_utilities::ConstructGeneratedArraysDirectoryIfMissing();
+	test::ConstructGeneratedArraysDirectoryIfMissing();
 
-	ORUtils::OStreamWrapper bounds_file(std::string(test_utilities::GeneratedArraysDirectory) + "snoopy_16_and_17_partial_volume_bounds.dat", false);
+	ORUtils::OStreamWrapper bounds_file(std::string(test::generated_arrays_directory) + "snoopy_16_and_17_partial_volume_bounds.dat", false);
 	ORUtils::SaveMatrix(bounds_file, union_bounds);
 	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(), "Voxel bounds for partial volumes are: " << union_bounds);
 
@@ -163,37 +162,37 @@ void ConstructSnoopyMaskedVolumes16and17() {
 
 	BuildSdfVolumeFromImage_SurfaceSpanAllocation(&volume_PVA_16,
 	                                              &volume_PVA_17,
-	                                              snoopy::Frame16DepthPath(),
-	                                              snoopy::Frame16ColorPath(),
-	                                              snoopy::Frame16MaskPath(),
-	                                              snoopy::Frame17DepthPath(),
-	                                              snoopy::Frame17ColorPath(),
-	                                              snoopy::Frame17MaskPath(),
-	                                              snoopy::SnoopyCalibrationPath(),
+	                                              std::string(test::snoopy::snoopy_frame_16_depth_path),
+	                                              std::string(test::snoopy::snoopy_frame_16_color_path),
+	                                              std::string(test::snoopy::snoopy_frame_16_mask_path),
+	                                              std::string(test::snoopy::snoopy_frame_17_depth_path),
+	                                              std::string(test::snoopy::snoopy_frame_17_color_path),
+	                                              std::string(test::snoopy::snoopy_frame_17_mask_path),
+	                                              std::string(test::snoopy::snoopy_calibration_path),
 	                                              MEMORYDEVICE_CPU,
-	                                              snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
+	                                              test::snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 
 
 	BuildSdfVolumeFromImage_SurfaceSpanAllocation(&volume_VBH_16,
 	                                              &volume_VBH_17,
-	                                              snoopy::Frame16DepthPath(),
-	                                              snoopy::Frame16ColorPath(),
-	                                              snoopy::Frame16MaskPath(),
-	                                              snoopy::Frame17DepthPath(),
-	                                              snoopy::Frame17ColorPath(),
-	                                              snoopy::Frame17MaskPath(),
-	                                              snoopy::SnoopyCalibrationPath(),
+	                                              std::string(test::snoopy::snoopy_frame_16_depth_path),
+	                                              std::string(test::snoopy::snoopy_frame_16_color_path),
+	                                              std::string(test::snoopy::snoopy_frame_16_mask_path),
+	                                              std::string(test::snoopy::snoopy_frame_17_depth_path),
+	                                              std::string(test::snoopy::snoopy_frame_17_color_path),
+	                                              std::string(test::snoopy::snoopy_frame_17_mask_path),
+	                                              std::string(test::snoopy::snoopy_calibration_path),
 	                                              MEMORYDEVICE_CPU,
-	                                              snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
+	                                              test::snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
 	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(), "Saving snoopy masked partial volumes 16 & 17...");
 
-	test_utilities::ConstructGeneratedVolumeSubdirectoriesIfMissing();
+	test::ConstructGeneratedVolumeSubdirectoriesIfMissing();
 
-	volume_PVA_16->SaveToDisk(snoopy::PartialVolume16Path<PlainVoxelArray>());
-	volume_VBH_16->SaveToDisk(snoopy::PartialVolume16Path<VoxelBlockHash>());
-	volume_PVA_17->SaveToDisk(snoopy::PartialVolume17Path<PlainVoxelArray>());
-	volume_VBH_17->SaveToDisk(snoopy::PartialVolume17Path<VoxelBlockHash>());
+	volume_PVA_16->SaveToDisk(test::snoopy::PartialVolume16Path<PlainVoxelArray>());
+	volume_VBH_16->SaveToDisk(test::snoopy::PartialVolume16Path<VoxelBlockHash>());
+	volume_PVA_17->SaveToDisk(test::snoopy::PartialVolume17Path<PlainVoxelArray>());
+	volume_VBH_17->SaveToDisk(test::snoopy::PartialVolume17Path<VoxelBlockHash>());
 
 
 	delete volume_PVA_16;
@@ -207,7 +206,7 @@ void ConstructStripesTestVolumes() {
 	// region ================================= CONSTRUCT VIEW =========================================================
 
 	RGBD_CalibrationInformation calibration_data;
-	readRGBDCalib(snoopy::SnoopyCalibrationPath().c_str(), calibration_data);
+	readRGBDCalib(std::string(test::snoopy::snoopy_calibration_path).c_str(), calibration_data);
 
 	auto view_builder = ViewBuilderFactory::Build(calibration_data, MEMORYDEVICE_CPU);
 	Vector2i image_size(640, 480);
@@ -233,7 +232,7 @@ void ConstructStripesTestVolumes() {
 	depth_fusion_engine_VBH->IntegrateDepthImageIntoTsdfVolume(&volume4, view, &tracking_state);
 	std::string path = STATIC_TEST_DATA_PREFIX "TestData/volumes/VBH/stripes.dat";
 
-	test_utilities::ConstructGeneratedVolumeSubdirectoriesIfMissing();
+	test::ConstructGeneratedVolumeSubdirectoriesIfMissing();
 	volume4.SaveToDisk(path);
 
 	delete depth_fusion_engine_VBH;
@@ -246,19 +245,19 @@ void GenerateWarpGradientTestData() {
 	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(),
 	               "Generating warp field data from snoopy masked partial volumes 16 & 17 "
 			               << IndexString<TIndex>() << "...");
-	test_utilities::ConstructGeneratedVolumeSubdirectoriesIfMissing();
-	std::string volume_output_directory = std::string(test_utilities::GeneratedVolumeDirectory) + IndexString<TIndex>() + "/";
-	test_utilities::ConstructGeneratedArraysDirectoryIfMissing();
+	test::ConstructGeneratedVolumeSubdirectoriesIfMissing();
+	std::string volume_output_directory = std::string(test::generated_volume_directory) + IndexString<TIndex>() + "/";
+	test::ConstructGeneratedArraysDirectoryIfMissing();
 
 	ORUtils::OStreamWrapper warp_stats_file(
-			std::string(test_utilities::GeneratedArraysDirectory) + "warp_gradient_stats_" + IndexString<TIndex>() + ".dat", false);
+			std::string(test::generated_arrays_directory) + "warp_gradient_stats_" + IndexString<TIndex>() + ".dat", false);
 
 	VoxelVolume<TSDFVoxel, TIndex>* canonical_volume;
 	VoxelVolume<TSDFVoxel, TIndex>* live_volume;
 	LoadVolume(&live_volume, volume_output_directory + "snoopy_partial_frame_17.dat", TMemoryDeviceType,
-	           snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	           test::snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 	LoadVolume(&canonical_volume, volume_output_directory + "snoopy_partial_frame_16.dat", TMemoryDeviceType,
-	           snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	           test::snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 
 	VoxelVolume<TSDFVoxel, TIndex>* live_volumes[] = {live_volume, nullptr};
 
@@ -278,7 +277,7 @@ void GenerateWarpGradientTestData() {
 	};
 	// ========================================================================
 
-	VoxelVolume<WarpVoxel, TIndex> warp_field(TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	VoxelVolume<WarpVoxel, TIndex> warp_field(TMemoryDeviceType, test::snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 	auto reset_warp_field = [&]() {
 		warp_field.Reset();
 		AllocateUsingOtherVolume(&warp_field, live_volume, MEMORYDEVICE_CPU);
@@ -359,10 +358,10 @@ void GenerateFusedVolumeTestData() {
 	LevelSetAlignmentSwitches data_tikhonov_sobolev_switches(true, false, true, false, true);
 	LoadVolume(&warped_live_volume,
 	           GetWarpedLivePath<TIndex>(SwitchesToPrefix(data_tikhonov_sobolev_switches), iteration),
-	           MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	           MEMORYDEVICE_CPU, test::snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 	VoxelVolume<TSDFVoxel, TIndex>* canonical_volume;
-	LoadVolume(&canonical_volume, snoopy::PartialVolume16Path<TIndex>(),
-	           MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	LoadVolume(&canonical_volume, test::snoopy::PartialVolume16Path<TIndex>(),
+	           MEMORYDEVICE_CPU, test::snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 	AllocateUsingOtherVolume(canonical_volume, warped_live_volume, MEMORYDEVICE_CPU);
 
 
@@ -370,7 +369,7 @@ void GenerateFusedVolumeTestData() {
 			VolumeFusionEngineFactory::Build<TSDFVoxel, TIndex>(MEMORYDEVICE_CPU);
 	volume_fusion_engine->FuseOneTsdfVolumeIntoAnother(canonical_volume, warped_live_volume, 0);
 
-	test_utilities::ConstructGeneratedVolumeSubdirectoriesIfMissing();
+	test::ConstructGeneratedVolumeSubdirectoriesIfMissing();
 	canonical_volume->SaveToDisk(GENERATED_TEST_DATA_PREFIX
 	                             "TestData/volumes/" + IndexString<TIndex>() + "/fused.dat");
 
@@ -387,12 +386,12 @@ void GenerateWarpedVolumeTestData() {
 	VoxelVolume<WarpVoxel, TIndex>* warps;
 	LoadVolume(&warps,
 	           GENERATED_TEST_DATA_PREFIX "TestData/volumes/" + IndexString<TIndex>() + "/warp_field_0_data_tikhonov_sobolev.dat",
-	           MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	           MEMORYDEVICE_CPU, test::snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 	VoxelVolume<TSDFVoxel, TIndex>* live_volume;
-	LoadVolume(&live_volume, snoopy::PartialVolume17Path<TIndex>(),
-	           MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	LoadVolume(&live_volume, test::snoopy::PartialVolume17Path<TIndex>(),
+	           MEMORYDEVICE_CPU, test::snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 	auto warped_live_volume = new VoxelVolume<TSDFVoxel, TIndex>(MEMORYDEVICE_CPU,
-	                                                             snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	                                                             test::snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 	warped_live_volume->Reset();
 
 	auto warping_engine =
@@ -401,7 +400,7 @@ void GenerateWarpedVolumeTestData() {
 	AllocateUsingOtherVolume(warped_live_volume, live_volume, MEMORYDEVICE_CPU);
 	warping_engine->WarpVolume_WarpUpdates(warps, live_volume, warped_live_volume);
 
-	test_utilities::ConstructGeneratedVolumeSubdirectoriesIfMissing();
+	test::ConstructGeneratedVolumeSubdirectoriesIfMissing();
 	warped_live_volume->SaveToDisk(
 			GENERATED_TEST_DATA_PREFIX "TestData/volumes/" + IndexString<TIndex>() + "/warped_live.dat");
 
@@ -501,7 +500,7 @@ void GenerateConfigurationTestData() {
 	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(),
 	               "Generating configuration test data ... ");
 	configuration::Configuration default_snoopy_configuration = GenerateDefaultSnoopyConfiguration();
-	test_utilities::ConstructGeneratedConfigurationDirectoryIfMissing();
+	test::ConstructGeneratedConfigurationDirectoryIfMissing();
 	configuration::SaveConfigurationToJSONFile(STATIC_TEST_DATA_PREFIX
 	                                           "../Files/infinitam_snoopy_config.json",
 	                                           default_snoopy_configuration);
@@ -523,8 +522,8 @@ void GenerateMeshingTestData() {
 	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(),
 	               "Generating meshing test data (" << IndexString<TIndex>() << ") ...");
 	VoxelVolume<TSDFVoxel, TIndex>* canonical_volume;
-	LoadVolume(&canonical_volume, snoopy::PartialVolume16Path<TIndex>(),
-	           TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	LoadVolume(&canonical_volume, test::snoopy::PartialVolume16Path<TIndex>(),
+	           TMemoryDeviceType, test::snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 	MeshingEngine<TSDFVoxel, TIndex>* meshing_engine =
 			MeshingEngineFactory::Build<TSDFVoxel, TIndex>(TMemoryDeviceType);
 	Mesh mesh = meshing_engine->MeshVolume(canonical_volume);
@@ -540,7 +539,7 @@ template<MemoryDeviceType TMemoryDeviceType>
 void GenerateRenderingTestData_VoxelBlockHash() {
 	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(),
 	               "Generating VBH rendering test data ... ");
-	test_utilities::ConstructGeneratedArraysDirectoryIfMissing();
+	test::ConstructGeneratedArraysDirectoryIfMissing();
 
 	CameraPoseAndRenderingEngineFixture<TMemoryDeviceType> fixture;
 
@@ -568,8 +567,8 @@ void GenerateRenderingTestData_VoxelBlockHash() {
 		i_pose++;
 
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume;
-		LoadVolume(&volume, snoopy::PartialVolume17Path<VoxelBlockHash>(), TMemoryDeviceType,
-		           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
+		LoadVolume(&volume, test::snoopy::PartialVolume17Path<VoxelBlockHash>(), TMemoryDeviceType,
+		           test::snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
 		ORUtils::SE3Pose& pose = *tracking_state->pose_d;
 		LOG4CPLUS_INFO(log4cplus::Logger::getRoot(), "Generating raycast/TSDF-surface-finding test data ... ");
@@ -675,7 +674,7 @@ void GenerateRenderingTestData_VoxelBlockHash() {
 			fixture.rendering_engine->FindSurface(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state_render_image.get());
 
 
-			UChar4Image output_image(snoopy::frame_image_size, TMemoryDeviceType);
+			UChar4Image output_image(test::snoopy::frame_image_size, TMemoryDeviceType);
 			fixture.rendering_engine->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state_render_image.get(),
 			                                      &output_image, IRenderingEngine::RenderImageType::RENDER_COLOUR_FROM_VOLUME,
 			                                      IRenderingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
@@ -753,8 +752,8 @@ int main(int argc, char* argv[]) {
 		if (generated_data_type_argument == "h" || generated_data_type_argument == "help" || generated_data_type_argument == "-h" ||
 		    generated_data_type_argument == "-help" || generated_data_type_argument == "--help" || wrong_second_argument) {
 			std::cout << "Generates derived data used for testing the library. " << std::endl;
-			std::cout << "Usage:" << std::endl << "generate_derived_test_data " << std::endl << "(runs all modes)  -- OR -- "
-			          << std::endl << "generate_derived_test_data <mode> [-c]" << std::endl <<
+			std::cout << "Usage:" << std::endl << "generate_derived_test::snoopy " << std::endl << "(runs all modes)  -- OR -- "
+			          << std::endl << "generate_derived_test::snoopy <mode> [-c]" << std::endl <<
 			          ", where <mode> can be one of: " << std::endl << std::endl;
 			int i_pair = 0;
 			for (auto& pair : generator_by_string) {

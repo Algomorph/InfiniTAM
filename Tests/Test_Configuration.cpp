@@ -44,7 +44,7 @@ namespace pt = boost::property_tree;
 
 using namespace ITMLib;
 using namespace ITMLib::configuration;
-using namespace test_utilities;
+using namespace test;
 
 struct DeferrableStructCollection {
 	MainEngineSettings main_engine_settings;

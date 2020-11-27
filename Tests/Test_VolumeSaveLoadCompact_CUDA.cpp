@@ -31,11 +31,10 @@
 
 //test_utilities
 #include "TestUtilities/TestUtilities.h"
-#include "TestUtilities/SnoopyTestUtilities.h"
+#include "TestUtilities/TestDataUtilities.h"
 
 using namespace ITMLib;
-using namespace test_utilities;
-namespace snoopy = snoopy_test_utilities;
+using namespace test;
 
 typedef VolumeFileIOEngine<TSDFVoxel, PlainVoxelArray> SceneFileIOEngine_PVA;
 typedef VolumeFileIOEngine<TSDFVoxel, VoxelBlockHash> SceneFileIOEngine_VBH;

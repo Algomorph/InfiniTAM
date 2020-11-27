@@ -18,7 +18,7 @@
 #include "../../../ITMLib/Objects/Volume/PlainVoxelArray.h"
 #include "../../../ITMLib/Objects/Volume/VoxelBlockHash.h"
 
-namespace test_utilities {
+namespace test {
 
 template std::string GetWarpsPath<PlainVoxelArray>(std::string prefix, int iteration);
 template std::string GetWarpsPath<VoxelBlockHash>(std::string prefix, int iteration);

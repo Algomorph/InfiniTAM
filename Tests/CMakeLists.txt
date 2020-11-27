@@ -41,7 +41,7 @@ if (BUILD_TESTS)
             TestUtilities/TestUtilities.cpp
             TestUtilities/TestUtilities.cu
             TestUtilities/TestUtilities.tpp
-            TestUtilities/SnoopyTestUtilities.cpp
+            TestUtilities/TestDataUtilities.cpp
             TestUtilities/LevelSetAlignment/LevelSetAlignmentTestUtilities.tpp
             TestUtilities/LevelSetAlignment/LevelSetAlignmentTestUtilities.cpp
             TestUtilities/LevelSetAlignment/GenericWarpConsistencySubtest.tpp
@@ -58,7 +58,7 @@ if (BUILD_TESTS)
             TestUtilities/TestUtilityKernels.h
             TestUtilities/TestUtilityFunctors.h
             TestUtilities/TestUtilities.h
-            TestUtilities/SnoopyTestUtilities.h
+            TestUtilities/TestDataUtilities.h
             TestUtilities/LevelSetAlignment/LevelSetAlignmentTestUtilities.h
             TestUtilities/TestUtilitiesConfig.h.in
             TestUtilities/CameraPoseAndRenderingEngineFixture.h
@@ -66,7 +66,7 @@ if (BUILD_TESTS)
             TestUtilities/LevelSetAlignment/LevelSetAlignmentTestMode.h
             TestUtilities/LevelSetAlignment/TestCaseOrganizationBySwitches.h
             TestUtilities/LevelSetAlignment/SingleIterationTestConditions.h
-    )
+            TestUtilities/GenericTestModuleHeader.h)
 
     find_package(Boost COMPONENTS unit_test_framework REQUIRED)
 
@@ -105,6 +105,7 @@ if (BUILD_TESTS)
     itm_add_test(NAME RenderingEngine SOURCES Test_RenderingEngine.cpp)
     itm_add_test(NAME ImageProcessingEngine SOURCES Test_ImageProcessingEngine.cpp)
     itm_add_test(NAME FFmpegReadWrite SOURCES Test_FFmpegReadWrite.cpp)
+    itm_add_test(NAME RigidAlignment SOURCES Test_RigidAlignment.cpp)
 
     # *** tests that always require CUDA ***
     if (WITH_CUDA)

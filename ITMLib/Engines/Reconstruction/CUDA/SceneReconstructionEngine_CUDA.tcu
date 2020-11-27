@@ -7,7 +7,7 @@
 #include "../../../Utils/Geometry/CheckBlockVisibility.h"
 #include "../../Common/AllocationTempData.h"
 #include "../../../Utils/Configuration/Configuration.h"
-#include "../../../../ORUtils/PlatformIndependedParallelSum.h"
+#include "../../../../ORUtils/PlatformIndependentParallelSum.h"
 
 
 using namespace ITMLib;

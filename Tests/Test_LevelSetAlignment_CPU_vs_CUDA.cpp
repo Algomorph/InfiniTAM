@@ -39,7 +39,7 @@
 #include "TestUtilities/LevelSetAlignment/SingleIterationTestConditions.h"
 
 using namespace ITMLib;
-using namespace test_utilities;
+using namespace test;
 
 
 typedef WarpGradientDataFixture<MemoryDeviceType::MEMORYDEVICE_CPU, PlainVoxelArray> DataFixture_CPU_PVA;

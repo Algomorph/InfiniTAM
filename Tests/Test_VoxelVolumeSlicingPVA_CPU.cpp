@@ -36,18 +36,17 @@
 
 //test_utilities
 #include "TestUtilities/TestUtilities.h"
-#include "TestUtilities/SnoopyTestUtilities.h"
+#include "TestUtilities/TestDataUtilities.h"
 
 using namespace ITMLib;
-using namespace test_utilities;
-namespace snoopy = snoopy_test_utilities;
+using namespace test;
 
 BOOST_AUTO_TEST_CASE(testPVASceneSlice_CPU) {
 	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_CPU(MEMORYDEVICE_CPU);
 	volume_CPU.Reset();
 
 	const int expected_non_truncated_voxel_count = 58785;
-	volume_CPU.LoadFromDisk(snoopy::FullVolume16Path<PlainVoxelArray>());
+	volume_CPU.LoadFromDisk(test::snoopy::FullVolume16Path<PlainVoxelArray>());
 
 	BOOST_REQUIRE_EQUAL(Analytics_CPU_PVA_Voxel::Instance().CountNonTruncatedVoxels(&volume_CPU),
 	                    expected_non_truncated_voxel_count);
@@ -71,7 +70,7 @@ BOOST_AUTO_TEST_CASE(testPVASceneSlice_CPU) {
 	BOOST_REQUIRE(allocatedContentAlmostEqual_CPU_Verbose(
 			&volume_CPU, &volume_slice_same_dimensions_CPU, tolerance));
 
-	auto partial_volume_info = snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>();
+	auto partial_volume_info = test::snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>();
 
 	bounds = Vector6i(
 			partial_volume_info.offset.x,
@@ -101,7 +100,7 @@ BOOST_AUTO_TEST_CASE(testPVASceneSlice_CPU) {
 	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_slice_from_disk_CPU(MEMORYDEVICE_CPU, partial_volume_info);
 	volume_slice_from_disk_CPU.Reset();
 
-	volume_slice_from_disk_CPU.LoadFromDisk(snoopy::PartialVolume16Path<PlainVoxelArray>());
+	volume_slice_from_disk_CPU.LoadFromDisk(test::snoopy::PartialVolume16Path<PlainVoxelArray>());
 
 	BOOST_REQUIRE(contentAlmostEqual_CPU(&volume_slice_different_dimensions_CPU,
 	                                     &volume_slice_from_disk_CPU, tolerance));

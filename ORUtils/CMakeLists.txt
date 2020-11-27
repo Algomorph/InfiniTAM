@@ -66,13 +66,13 @@ set(
         OStreamWrapper.h
         PlatformIndependence.h
         PlatformIndependentAtomics.h
-        PlatformIndependedParallelSum.h
+        PlatformIndependentParallelSum.h
         CrossPlatformMacros.h
         SE3Pose.h
         SVMClassifier.h
         Vector.h
         TypeTraits.h
-)
+        CompileTimeStringConcatenation.h)
 
 source_group("" FILES ${sources} ${headers})
 add_library(ORUtils STATIC ${sources} ${headers})

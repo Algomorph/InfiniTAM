@@ -27,14 +27,13 @@
 
 //test_utilities
 #include "TestUtilities/TestUtilities.h"
-#include "TestUtilities/SnoopyTestUtilities.h"
+#include "TestUtilities/TestDataUtilities.h"
 #include "TestUtilities/LevelSetAlignment/LevelSetAlignmentTestUtilities.h"
 #include "../ITMLib/Engines/Indexing/IndexingEngineFactory.h"
 #include "TestUtilities/LevelSetAlignment/TestCaseOrganizationBySwitches.h"
 
 using namespace ITMLib;
-using namespace test_utilities;
-namespace snoopy = snoopy_test_utilities;
+using namespace test;
 
 
 template<typename TIndex>
@@ -200,7 +199,7 @@ void GenericTestVolumeReductionMaxWarpUpdate() {
 	std::string path_warps = GetWarpsPath<TIndex>(SwitchesToPrefix(data_tikhonov_sobolev_switches), iteration);
 
 	VoxelVolume<WarpVoxel, TIndex>* warps;
-	LoadVolume(&warps, path_warps, TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	LoadVolume(&warps, path_warps, TMemoryDeviceType, test::snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 
 	float value_gt = AnalyticsEngine<WarpVoxel, TIndex, TMemoryDeviceType>::Instance().ComputeWarpUpdateMax(warps);
 

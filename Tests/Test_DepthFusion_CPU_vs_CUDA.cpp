@@ -22,7 +22,7 @@
 #include <boost/test/unit_test.hpp>
 
 // *** ITMLib ***
-#include "TestUtilities/SnoopyTestUtilities.h"
+#include "TestUtilities/TestDataUtilities.h"
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngine.h"
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
 #include "../ITMLib/Engines/Indexing/Interface/IndexingEngine.h"
@@ -40,41 +40,40 @@
 
 
 using namespace ITMLib;
-using namespace test_utilities;
-namespace snoopy = snoopy_test_utilities;
+using namespace test;
 
 BOOST_AUTO_TEST_CASE(Test_SceneConstruct17_VBH_CPU_CUDA_NearSurface){
 	
 		
 	View* view_17_CPU = nullptr;
 	UpdateView(&view_17_CPU,
-	           snoopy::Frame17DepthPath(),
-	           snoopy::Frame17ColorPath(),
-	           snoopy::Frame17MaskPath(),
-	           snoopy::SnoopyCalibrationPath(),
+	           std::string(test::snoopy::snoopy_frame_17_depth_path),
+	           std::string(test::snoopy::snoopy_frame_17_color_path),
+	           std::string(test::snoopy::snoopy_frame_17_mask_path),
+	           std::string(test::snoopy::snoopy_calibration_path),
 	           MEMORYDEVICE_CPU);
 
 	View* view_17_CUDA = nullptr;
 	UpdateView(&view_17_CUDA,
-	           snoopy::Frame17DepthPath(),
-	           snoopy::Frame17ColorPath(),
-	           snoopy::Frame17MaskPath(),
-	           snoopy::SnoopyCalibrationPath(),
+	           std::string(test::snoopy::snoopy_frame_17_depth_path),
+	           std::string(test::snoopy::snoopy_frame_17_color_path),
+	           std::string(test::snoopy::snoopy_frame_17_mask_path),
+	           std::string(test::snoopy::snoopy_calibration_path),
 	           MEMORYDEVICE_CUDA);
 
 
 // *** initialize volumes ***
 	// CPU
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_17_CPU(MEMORYDEVICE_CPU,
-	                                                         snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
+	                                                         test::snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 	volume_VBH_17_CPU.Reset();
 	// CUDA
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_17_CUDA(MEMORYDEVICE_CUDA,
-	                                                          snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
+	                                                          test::snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 	volume_VBH_17_CUDA.Reset();
 	// comparison volume
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_CUDA_to_CPU(MEMORYDEVICE_CPU,
-	                                                          snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
+	                                                          test::snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 	volume_CUDA_to_CPU.Reset();
 
 	CameraTrackingState tracking_state_CPU(view_17_CPU->depth.dimensions, MEMORYDEVICE_CPU);
@@ -123,18 +122,18 @@ BOOST_AUTO_TEST_CASE(Test_SceneConstruct17_VBH_CPU_CUDA_SurfaceSpan){
 
 	View* view_16_CPU = nullptr;
 	UpdateView(&view_16_CPU,
-	           snoopy::Frame16DepthPath(),
-	           snoopy::Frame16ColorPath(),
-	           snoopy::Frame16MaskPath(),
-	           snoopy::SnoopyCalibrationPath(),
+	           std::string(test::snoopy::snoopy_frame_16_depth_path),
+	           std::string(test::snoopy::snoopy_frame_16_color_path),
+	           std::string(test::snoopy::snoopy_frame_16_mask_path),
+	           std::string(test::snoopy::snoopy_calibration_path),
 	           MEMORYDEVICE_CPU);
 
 	View* view_16_CUDA = nullptr;
 	UpdateView(&view_16_CUDA,
-	           snoopy::Frame16DepthPath(),
-	           snoopy::Frame16ColorPath(),
-	           snoopy::Frame16MaskPath(),
-	           snoopy::SnoopyCalibrationPath(),
+	           std::string(test::snoopy::snoopy_frame_16_depth_path),
+	           std::string(test::snoopy::snoopy_frame_16_color_path),
+	           std::string(test::snoopy::snoopy_frame_16_mask_path),
+	           std::string(test::snoopy::snoopy_calibration_path),
 	           MEMORYDEVICE_CUDA);
 	
 	//*** prep engines and tracking states ***
@@ -159,13 +158,13 @@ BOOST_AUTO_TEST_CASE(Test_SceneConstruct17_VBH_CPU_CUDA_SurfaceSpan){
 		RenderState render_state_CPU(view_16_CPU->depth.dimensions, configuration::Get().general_voxel_volume_parameters.near_clipping_distance,
 		                             configuration::Get().general_voxel_volume_parameters.far_clipping_distance, MEMORYDEVICE_CPU);
 		VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_16_CPU(MEMORYDEVICE_CPU,
-		                                                         snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
+		                                                         test::snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 		volume_VBH_16_CPU.Reset();
 		// CUDA
 		RenderState render_state_CUDA(view_16_CUDA->depth.dimensions, configuration::Get().general_voxel_volume_parameters.near_clipping_distance,
 		                              configuration::Get().general_voxel_volume_parameters.far_clipping_distance, MEMORYDEVICE_CUDA);
 		VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_16_CUDA(MEMORYDEVICE_CUDA,
-		                                                          snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
+		                                                          test::snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 		volume_VBH_16_CUDA.Reset();
 
 		indexer_CPU.AllocateNearSurface(&volume_VBH_16_CPU, view_16_CPU);
@@ -189,32 +188,32 @@ BOOST_AUTO_TEST_CASE(Test_SceneConstruct17_VBH_CPU_CUDA_SurfaceSpan){
 
 	View* view_17_CPU = nullptr;
 	UpdateView(&view_17_CPU,
-	           snoopy::Frame17DepthPath(),
-	           snoopy::Frame17ColorPath(),
-	           snoopy::Frame17MaskPath(),
-	           snoopy::SnoopyCalibrationPath(),
+	           std::string(test::snoopy::snoopy_frame_17_depth_path),
+	           std::string(test::snoopy::snoopy_frame_17_color_path),
+	           std::string(test::snoopy::snoopy_frame_17_mask_path),
+	           std::string(test::snoopy::snoopy_calibration_path),
 	           MEMORYDEVICE_CPU);
 
 	View* view_17_CUDA = nullptr;
 	UpdateView(&view_17_CUDA,
-	           snoopy::Frame17DepthPath(),
-	           snoopy::Frame17ColorPath(),
-	           snoopy::Frame17MaskPath(),
-	           snoopy::SnoopyCalibrationPath(),
+	           std::string(test::snoopy::snoopy_frame_17_depth_path),
+	           std::string(test::snoopy::snoopy_frame_17_color_path),
+	           std::string(test::snoopy::snoopy_frame_17_mask_path),
+	           std::string(test::snoopy::snoopy_calibration_path),
 	           MEMORYDEVICE_CUDA);
 
 // *** initialize volumes ***
 	// CPU
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_17_CPU(MEMORYDEVICE_CPU,
-	                                                         snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
+	                                                         test::snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 	volume_VBH_17_CPU.Reset();
 	// CUDA
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_17_CUDA(MEMORYDEVICE_CUDA,
-	                                                          snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
+	                                                          test::snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 	volume_VBH_17_CUDA.Reset();
 	// comparison volume
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_CUDA_to_CPU(MEMORYDEVICE_CPU,
-	                                                          snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
+	                                                          test::snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 	volume_CUDA_to_CPU.Reset();
 
 // *** allocate hash blocks ***

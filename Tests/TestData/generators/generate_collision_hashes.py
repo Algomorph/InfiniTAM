@@ -100,7 +100,7 @@ def compile_hash_data_file(test_size):
         coord_table[index] = [key] + coord_by_hash[key]
 
     df = pd.DataFrame(data=coord_table)
-    df.to_csv(path_or_buf="test_data.csv", columns=None, index=False)
+    df.to_csv(path_or_buf="test::snoopy.csv", columns=None, index=False)
 
 
 def main():

@@ -17,11 +17,11 @@
 
 #include "../../ITMLib/Objects/RenderStates/RenderState.h"
 #include "../../ITMLib/Engines/Rendering/RenderingEngine.h"
-#include "SnoopyTestUtilities.h"
+#include "TestDataUtilities.h"
 
 using namespace ITMLib;
 
-namespace test_utilities {
+namespace test {
 template<MemoryDeviceType TMemoryDeviceType>
 struct CameraPoseAndRenderingEngineFixture {
 public: // instance variables
@@ -36,7 +36,7 @@ public: // instance variables
 
 public: // instance functions
 	CameraPoseAndRenderingEngineFixture()
-			: render_state(new RenderState(Vector2i(snoopy_test_utilities::frame_image_size),
+			: render_state(new RenderState(Vector2i(test::snoopy::frame_image_size),
 			                               configuration::Get().general_voxel_volume_parameters.near_clipping_distance,
 			                               configuration::Get().general_voxel_volume_parameters.far_clipping_distance,
 			                               TMemoryDeviceType)),
@@ -48,31 +48,31 @@ public: // instance functions
 				  std::vector<std::shared_ptr<CameraTrackingState>> camera_tracking_states(camera_poses.size());
 				  int i_pose = 0;
 				  for(auto& pose: camera_poses){
-					  camera_tracking_states[i_pose] = std::make_shared<CameraTrackingState>(snoopy_test_utilities::frame_image_size, TMemoryDeviceType);
+					  camera_tracking_states[i_pose] = std::make_shared<CameraTrackingState>(test::snoopy::frame_image_size, TMemoryDeviceType);
 					  i_pose++;
 				  }
 				  return camera_tracking_states;
 			  }()),
 			  rendering_engine(new RenderingEngine<TSDFVoxel,VoxelBlockHash,TMemoryDeviceType>()),
 			  view_17(nullptr) {
-		readRGBDCalib(snoopy_test_utilities::SnoopyCalibrationPath().c_str(), calibration_data);
+		readRGBDCalib(std::string(test::snoopy::snoopy_calibration_path).c_str(), calibration_data);
 		UpdateView(&view_17,
-		           snoopy_test_utilities::Frame17DepthPath(),
-		           snoopy_test_utilities::Frame17ColorPath(),
-		           snoopy_test_utilities::Frame17MaskPath(),
-		           snoopy_test_utilities::SnoopyCalibrationPath(),
+		           std::string(test::snoopy::snoopy_frame_17_depth_path),
+		           std::string(test::snoopy::snoopy_frame_17_color_path),
+		           std::string(test::snoopy::snoopy_frame_17_mask_path),
+		           std::string(test::snoopy::snoopy_calibration_path),
 		           MEMORYDEVICE_CPU);
 	}
 
 	std::shared_ptr<RenderState> MakeRenderState() {
-		return std::make_shared<RenderState>(snoopy_test_utilities::frame_image_size,
+		return std::make_shared<RenderState>(test::snoopy::frame_image_size,
 		                                     configuration::Get().general_voxel_volume_parameters.near_clipping_distance,
 		                                     configuration::Get().general_voxel_volume_parameters.far_clipping_distance,
 		                                     TMemoryDeviceType);
 	}
 
 	std::shared_ptr<CameraTrackingState> MakeCameraTrackingState() {
-		return std::make_shared<CameraTrackingState>(snoopy_test_utilities::frame_image_size, TMemoryDeviceType);
+		return std::make_shared<CameraTrackingState>(test::snoopy::frame_image_size, TMemoryDeviceType);
 	}
 
 	~CameraPoseAndRenderingEngineFixture() {

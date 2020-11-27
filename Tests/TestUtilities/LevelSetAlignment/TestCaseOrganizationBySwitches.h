@@ -17,7 +17,7 @@
 
 #include "../../../ITMLib/Engines/LevelSetAlignment/Interface/LevelSetAlignmentParameters.h"
 
-namespace test_utilities {
+namespace test {
 
 template<typename TIndex>
 std::string GetWarpsPath(std::string prefix, int iteration);

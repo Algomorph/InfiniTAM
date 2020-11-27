@@ -1,5 +1,5 @@
 //  ================================================================
-//  Created by Gregory Kramida (https://github.com/Algomorph) on 10/8/20.
+//  Created by Gregory Kramida (https://github.com/Algomorph) on 11/27/20.
 //  Copyright (c) 2020 Gregory Kramida
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -13,15 +13,20 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "SingleIterationTestConditions.h"
+#pragma once
+
+#ifndef WIN32
+#define BOOST_TEST_DYN_LINK
+#endif
+
+//boost
+#include <boost/test/unit_test.hpp>
+
+//test_utilities
+#include "TestUtilities.h"
+#include "TestDataUtilities.h"
 
 using namespace ITMLib;
-
-namespace test{
-
-const LevelSetAlignmentTerminationConditions& SingleIterationTerminationConditions() {
-	static LevelSetAlignmentTerminationConditions single_iteration_termination_conditions{MAXIMUM, 1, 0, 1e-6f};
-	return single_iteration_termination_conditions;
-}
-
-} // namespace test_utilities
+using namespace test;
+namespace snoopy = test::snoopy;
+namespace teddy = test::teddy;

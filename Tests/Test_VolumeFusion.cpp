@@ -41,13 +41,12 @@
 
 //test_utilities
 #include "TestUtilities/TestUtilities.h"
-#include "TestUtilities/SnoopyTestUtilities.h"
+#include "TestUtilities/TestDataUtilities.h"
 #include "TestUtilities/LevelSetAlignment/LevelSetAlignmentTestUtilities.h"
 #include "TestUtilities/LevelSetAlignment/TestCaseOrganizationBySwitches.h"
 
 using namespace ITMLib;
-using namespace test_utilities;
-namespace snoopy = snoopy_test_utilities;
+using namespace test;
 
 template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void GenericFusionTest(const int iteration = 4) {
@@ -55,10 +54,10 @@ void GenericFusionTest(const int iteration = 4) {
 	LevelSetAlignmentSwitches data_tikhonov_sobolev_switches(true, false, true, false, true);
 	LoadVolume(&warped_live_volume,
 	           GetWarpedLivePath<TIndex>(SwitchesToPrefix(data_tikhonov_sobolev_switches), iteration),
-	           TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	           TMemoryDeviceType, test::snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 	VoxelVolume<TSDFVoxel, TIndex>* canonical_volume;
-	LoadVolume(&canonical_volume, snoopy::PartialVolume16Path<TIndex>(),
-	           TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	LoadVolume(&canonical_volume, test::snoopy::PartialVolume16Path<TIndex>(),
+	           TMemoryDeviceType, test::snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 	AllocateUsingOtherVolume(canonical_volume, warped_live_volume, MEMORYDEVICE_CPU);
 
 	VolumeFusionEngineInterface<TSDFVoxel, TIndex>* volume_fusion_engine = VolumeFusionEngineFactory::Build<TSDFVoxel, TIndex>(
@@ -68,7 +67,7 @@ void GenericFusionTest(const int iteration = 4) {
 	VoxelVolume<TSDFVoxel, TIndex>* fused_canonical_volume_gt;
 	LoadVolume(&fused_canonical_volume_gt,
 	           GENERATED_TEST_DATA_PREFIX "TestData/volumes/" + IndexString<TIndex>() + "/fused.dat",
-	           TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	           TMemoryDeviceType, test::snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 
 	float absolute_tolerance = 1e-7;
 
@@ -107,18 +106,18 @@ void GenericFusion_PVA_to_VBH_Test(const int iteration = 4) {
 	// *** load PVA stuff
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* warped_live_volume_PVA;
 	LoadVolume(&warped_live_volume_PVA, GetWarpedLivePath<PlainVoxelArray>(SwitchesToPrefix(data_tikhonov_sobolev_switches), iteration),
-	           TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
+	           TMemoryDeviceType, test::snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* canonical_volume_PVA;
-	LoadVolume(&canonical_volume_PVA, snoopy::PartialVolume16Path<PlainVoxelArray>(),
-	           TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
+	LoadVolume(&canonical_volume_PVA, test::snoopy::PartialVolume16Path<PlainVoxelArray>(),
+	           TMemoryDeviceType, test::snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 
 	// *** load VBH stuff
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* warped_live_volume_VBH;
 	LoadVolume(&warped_live_volume_VBH, GetWarpedLivePath<VoxelBlockHash>(SwitchesToPrefix(data_tikhonov_sobolev_switches), iteration),
-	           TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
+	           TMemoryDeviceType, test::snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* canonical_volume_VBH;
-	LoadVolume(&canonical_volume_VBH, snoopy::PartialVolume16Path<VoxelBlockHash>(),
-	           TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
+	LoadVolume(&canonical_volume_VBH, test::snoopy::PartialVolume16Path<VoxelBlockHash>(),
+	           TMemoryDeviceType, test::snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
 AllocateUsingOtherVolume(canonical_volume_VBH,  warped_live_volume_VBH, TMemoryDeviceType);
 

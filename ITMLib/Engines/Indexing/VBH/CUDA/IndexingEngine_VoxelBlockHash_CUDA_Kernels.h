@@ -15,7 +15,7 @@
 //  ================================================================
 #pragma once
 
-#include "../../../../../ORUtils/PlatformIndependedParallelSum.h"
+#include "../../../../../ORUtils/PlatformIndependentParallelSum.h"
 #include "../../../../Utils/CUDA/CUDAUtils.h"
 #include "../../../../Objects/Volume/GlobalCache.h"
 #include "../../../EditAndCopy/Shared/EditAndCopyEngine_Shared.h"

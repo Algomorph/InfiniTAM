@@ -16,7 +16,7 @@
 //local
 #include "LevelSetAlignmentTestUtilities.tpp"
 
-namespace test_utilities {
+namespace test {
 
 
 template

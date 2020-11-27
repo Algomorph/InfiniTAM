@@ -41,17 +41,16 @@
 
 //test_utilities
 #include "../TestUtilities.h"
-#include "../SnoopyTestUtilities.h"
+#include "../TestDataUtilities.h"
 #include "GenericWarpConsistencySubtest.h"
 #include "LevelSetAlignmentTestUtilities.h"
 #include "TestCaseOrganizationBySwitches.h"
 #include "SingleIterationTestConditions.h"
 
 using namespace ITMLib;
-using namespace test_utilities;
-namespace snoopy = snoopy_test_utilities;
+using namespace test;
 
-namespace test_utilities {
+namespace test {
 
 
 template<MemoryDeviceType TMemoryDeviceType>
@@ -69,15 +68,15 @@ void PVA_to_VBH_WarpComparisonSubtest(int iteration, LevelSetAlignmentSwitches t
 	if (iteration > 0) {
 		std::string path_warps_PVA = GetWarpsPath<PlainVoxelArray>(prefix, iteration - 1);
 		LoadVolume(&warps_PVA, path_warps_PVA, TMemoryDeviceType,
-		           snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
+		           test::snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 		std::string path_warps_VBH = GetWarpsPath<VoxelBlockHash>(prefix, iteration - 1);
 		LoadVolume(&warps_VBH, path_warps_VBH, TMemoryDeviceType,
-		           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
+		           test::snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 		BOOST_REQUIRE(AllocatedContentAlmostEqual(warps_PVA, warps_VBH, absolute_tolerance, TMemoryDeviceType));
 	} else {
-		InitializeVolume(&warps_PVA, snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>(),
+		InitializeVolume(&warps_PVA, test::snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>(),
 		                 TMemoryDeviceType);
-		InitializeVolume(&warps_VBH, snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>(), TMemoryDeviceType);
+		InitializeVolume(&warps_VBH, test::snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>(), TMemoryDeviceType);
 
 		BOOST_REQUIRE(AllocatedContentAlmostEqual(warps_PVA, warps_VBH, absolute_tolerance, TMemoryDeviceType));
 	}
@@ -93,11 +92,11 @@ void PVA_to_VBH_WarpComparisonSubtest(int iteration, LevelSetAlignmentSwitches t
 		path_live_PVA = GetWarpedLivePath<PlainVoxelArray>(prefix, iteration - 1);
 		path_live_VBH = GetWarpedLivePath<VoxelBlockHash>(prefix, iteration - 1);
 	} else {
-		path_live_PVA = snoopy::PartialVolume17Path<PlainVoxelArray>();
-		path_live_VBH =  snoopy::PartialVolume17Path<VoxelBlockHash>();
+		path_live_PVA = test::snoopy::PartialVolume17Path<PlainVoxelArray>();
+		path_live_VBH =  test::snoopy::PartialVolume17Path<VoxelBlockHash>();
 	}
-	LoadVolume(&warped_live_PVA, path_live_PVA, TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
-	LoadVolume(&warped_live_VBH, path_live_VBH, TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
+	LoadVolume(&warped_live_PVA, path_live_PVA, TMemoryDeviceType, test::snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
+	LoadVolume(&warped_live_VBH, path_live_VBH, TMemoryDeviceType, test::snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 	if (iteration == 0) {
 		AllocateUsingOtherVolume(warps_VBH, warped_live_VBH, TMemoryDeviceType);
 	}
@@ -109,12 +108,12 @@ void PVA_to_VBH_WarpComparisonSubtest(int iteration, LevelSetAlignmentSwitches t
 
 	// *** load canonical volume as the two different data structures
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* volume_16_PVA;
-	LoadVolume(&volume_16_PVA, snoopy::PartialVolume16Path<PlainVoxelArray>(), TMemoryDeviceType,
-	           snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
+	LoadVolume(&volume_16_PVA, test::snoopy::PartialVolume16Path<PlainVoxelArray>(), TMemoryDeviceType,
+	           test::snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 	AllocateUsingOtherVolume(volume_16_PVA, warped_live_PVA, TMemoryDeviceType);
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume_16_VBH;
-	LoadVolume(&volume_16_VBH, snoopy::PartialVolume16Path<VoxelBlockHash>(), TMemoryDeviceType,
-	           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
+	LoadVolume(&volume_16_VBH, test::snoopy::PartialVolume16Path<VoxelBlockHash>(), TMemoryDeviceType,
+	           test::snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 	AllocateUsingOtherVolume(volume_16_VBH, warped_live_VBH, TMemoryDeviceType);
 
 	// *** perform the warp gradient computation and warp updates
@@ -145,9 +144,9 @@ void PVA_to_VBH_WarpComparisonSubtest(int iteration, LevelSetAlignmentSwitches t
 	VoxelVolume<WarpVoxel, VoxelBlockHash>* loaded_warps_VBH;
 
 	LoadVolume(&loaded_warps_PVA, GetWarpsPath<PlainVoxelArray>(prefix, iteration), TMemoryDeviceType,
-	           snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
+	           test::snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 	LoadVolume(&loaded_warps_VBH, GetWarpsPath<VoxelBlockHash>(prefix, iteration), TMemoryDeviceType,
-	           snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
+	           test::snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
 
 	BOOST_REQUIRE(ContentAlmostEqual_Verbose(warps_PVA, loaded_warps_PVA, absolute_tolerance, TMemoryDeviceType));
@@ -170,16 +169,16 @@ void GenericMultiIterationAlignmentTest(const LevelSetAlignmentSwitches& switche
 	                                                                         absolute_tolerance);
 
 	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_PVA(TMemoryDeviceType,
-	                                                   snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
+	                                                   test::snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH(TMemoryDeviceType,
-	                                                  snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
+	                                                  test::snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 	switch (mode) {
 		case TEST_SUCCESSIVE_ITERATIONS: {
 
 			VoxelVolume<WarpVoxel, PlainVoxelArray> warp_field_PVA(TMemoryDeviceType,
-			                                                       snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
+			                                                       test::snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 			VoxelVolume<WarpVoxel, VoxelBlockHash> warp_field_VBH(TMemoryDeviceType,
-			                                                      snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
+			                                                      test::snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
 			for (int iteration = 0; iteration < iteration_limit; iteration++) {
 				std::cout << "Testing iteration " << iteration << std::endl;

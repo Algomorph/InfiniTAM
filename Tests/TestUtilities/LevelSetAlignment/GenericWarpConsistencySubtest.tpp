@@ -21,7 +21,7 @@
 #include "GenericWarpConsistencySubtest.h"
 #include "SingleIterationTestConditions.h"
 #include "TestCaseOrganizationBySwitches.h"
-#include "../SnoopyTestUtilities.h"
+#include "../TestDataUtilities.h"
 #include "../../../ORUtils/MemoryDeviceType.h"
 #include "../../../ITMLib/Engines/LevelSetAlignment/Interface/LevelSetAlignmentEngine.h"
 #include "../../../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
@@ -36,11 +36,9 @@
 #include "../../../ITMLib/Engines/Indexing/VBH/CUDA/IndexingEngine_VoxelBlockHash_CUDA.h"
 #endif
 
-namespace snoopy = snoopy_test_utilities;
-
 using namespace ITMLib;
 
-namespace test_utilities{
+namespace test{
 
 
 template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
@@ -53,20 +51,20 @@ void GenericMultiIterationAlignmentSubtest(const LevelSetAlignmentSwitches& swit
 		DIEWITHEXCEPTION_REPORTLOCATION("Iteration limit must be at least 2");
 	}
 
-	VoxelVolume<WarpVoxel, TIndex> warp_field(TMemoryDeviceType,snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	VoxelVolume<WarpVoxel, TIndex> warp_field(TMemoryDeviceType,test::snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 	warp_field.Reset();
 
 	VoxelVolume<TSDFVoxel, TIndex>* canonical_volume;
 	VoxelVolume<TSDFVoxel, TIndex>* raw_live_volume;
-	LoadVolume(&canonical_volume,  snoopy::PartialVolume16Path<TIndex>(), TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
-	LoadVolume(&raw_live_volume, snoopy::PartialVolume17Path<TIndex>(), TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	LoadVolume(&canonical_volume,  test::snoopy::PartialVolume16Path<TIndex>(), TMemoryDeviceType, test::snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	LoadVolume(&raw_live_volume, test::snoopy::PartialVolume17Path<TIndex>(), TMemoryDeviceType, test::snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 
 	const int source_warped_field_ix = 0;
 	const int target_warped_field_ix = 1;
 
 	VoxelVolume<TSDFVoxel, TIndex>* live_volumes[2] = {
 			raw_live_volume,
-			new VoxelVolume<TSDFVoxel, TIndex>(TMemoryDeviceType,snoopy::InitializationParameters_Fr16andFr17<TIndex>())
+			new VoxelVolume<TSDFVoxel, TIndex>(TMemoryDeviceType,test::snoopy::InitializationParameters_Fr16andFr17<TIndex>())
 	};
 	live_volumes[target_warped_field_ix]->Reset();
 
@@ -78,9 +76,9 @@ void GenericMultiIterationAlignmentSubtest(const LevelSetAlignmentSwitches& swit
 			level_set_alignment_engine(switches, SingleIterationTerminationConditions());
 
 	VoxelVolume<WarpVoxel, TIndex> ground_truth_warp_field(TMemoryDeviceType,
-	                                                       snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	                                                       test::snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 	VoxelVolume<TSDFVoxel, TIndex> ground_truth_sdf_volume(TMemoryDeviceType,
-	                                                       snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	                                                       test::snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 
 	ground_truth_warp_field.Reset();
 

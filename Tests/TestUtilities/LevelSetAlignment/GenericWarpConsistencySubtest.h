@@ -22,7 +22,7 @@
 #include "../../../ITMLib/Engines/LevelSetAlignment/Interface/LevelSetAlignmentParameters.h"
 #include "LevelSetAlignmentTestMode.h"
 
-namespace test_utilities{
+namespace test{
 
 
 template<typename TIndex, MemoryDeviceType TMemoryDeviceType>

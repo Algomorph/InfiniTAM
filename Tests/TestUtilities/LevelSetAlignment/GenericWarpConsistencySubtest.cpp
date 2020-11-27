@@ -15,7 +15,7 @@
 //  ================================================================
 #include "GenericWarpConsistencySubtest.tpp"
 
-namespace test_utilities{
+namespace test{
 
 template
 void

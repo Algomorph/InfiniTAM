@@ -31,7 +31,7 @@
 
 using namespace ITMLib;
 
-namespace test_utilities {
+namespace test {
 
 
 template<MemoryDeviceType TMemoryDeviceType, typename TVoxel, typename TIndex>

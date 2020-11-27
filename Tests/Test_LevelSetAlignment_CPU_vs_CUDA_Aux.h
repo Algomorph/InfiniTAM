@@ -39,13 +39,12 @@
 #endif
 
 //test_utils
-#include "TestUtilities/SnoopyTestUtilities.h"
+#include "TestUtilities/TestDataUtilities.h"
 #include "TestUtilities/TestUtilities.h"
 #include "TestUtilities/LevelSetAlignment/TestCaseOrganizationBySwitches.h"
 
 using namespace ITMLib;
-using namespace test_utilities;
-namespace snoopy = snoopy_test_utilities;
+using namespace test;
 
 
 template<MemoryDeviceType TMemoryDeviceType, typename TIndex>
@@ -64,7 +63,7 @@ public:
 			settings(nullptr),
 			canonical_volume(nullptr), live_volume(nullptr),
 			path_to_data(GENERATED_TEST_DATA_PREFIX "TestData/volumes/" + IndexString<TIndex>() + "/"),
-			index_parameters(snoopy::InitializationParameters_Fr16andFr17<TIndex>()),
+			index_parameters(test::snoopy::InitializationParameters_Fr16andFr17<TIndex>()),
 			indexing_engine(IndexingEngine<TSDFVoxel, TIndex, TMemoryDeviceType>::Instance()),
 			iteration_0_outputs(),
 			iteration_1_outputs() {
@@ -85,7 +84,7 @@ public:
 		};
 
 		ORUtils::IStreamWrapper warp_stats_file(
-				std::string(test_utilities::GeneratedArraysDirectory) + "warp_gradient_stats_" + IndexString<TIndex>() + ".dat", false);
+				std::string(test::generated_arrays_directory) + "warp_gradient_stats_" + IndexString<TIndex>() + ".dat", false);
 
 		auto load_warp_outputs = [&](const LevelSetAlignmentSwitches& switches, int iteration) {
 			std::string file_suffix = "warp_field_" + std::to_string(iteration) + "_" + SwitchesToPrefix(switches) + ".dat";

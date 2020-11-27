@@ -35,13 +35,17 @@
 
 using namespace ITMLib;
 
-namespace test_utilities {
+namespace test {
 
-static constexpr const char* GeneratedVolumeDirectory = GENERATED_TEST_DATA_PREFIX "TestData/volumes/";
-static constexpr const char* GeneratedConfigurationDirectory = GENERATED_TEST_DATA_PREFIX "TestData/configuration/";
-static constexpr const char* GeneratedMeshDirectory = GENERATED_TEST_DATA_PREFIX "TestData/meshes/";
-static constexpr const char* GeneratedArraysDirectory = GENERATED_TEST_DATA_PREFIX "TestData/arrays/";
-static constexpr const char* GeneratedVideosDirectory = GENERATED_TEST_DATA_PREFIX "TestData/videos/";
+static constexpr std::string_view static_calibration_directory = STATIC_TEST_DATA_PREFIX "TestData/calibration/";
+static constexpr std::string_view static_frames_directory = STATIC_TEST_DATA_PREFIX "TestData/frames/";
+static constexpr std::string_view static_videos_directory = STATIC_TEST_DATA_PREFIX "TestData/videos/";
+
+static constexpr std::string_view generated_volume_directory = GENERATED_TEST_DATA_PREFIX "TestData/volumes/";
+static constexpr std::string_view generated_configuration_directory = GENERATED_TEST_DATA_PREFIX "TestData/configuration/";
+static constexpr std::string_view generated_mesh_directory = GENERATED_TEST_DATA_PREFIX "TestData/meshes/";
+static constexpr std::string_view generated_arrays_directory = GENERATED_TEST_DATA_PREFIX "TestData/arrays/";
+static constexpr std::string_view generated_videos_directory = GENERATED_TEST_DATA_PREFIX "TestData/videos/";
 
 void ConstructGeneratedVolumeSubdirectoriesIfMissing();
 void ConstructGeneratedConfigurationDirectoryIfMissing();

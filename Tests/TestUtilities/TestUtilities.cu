@@ -18,7 +18,7 @@
 
 using namespace ITMLib;
 
-namespace test_utilities {
+namespace test {
 
 template void GenerateSimpleSurfaceTestVolume<MEMORYDEVICE_CUDA, TSDFVoxel, VoxelBlockHash>(
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume);

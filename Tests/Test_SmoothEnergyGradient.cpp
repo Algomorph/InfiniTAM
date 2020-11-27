@@ -31,7 +31,7 @@
 
 //test_utilities
 #include "TestUtilities/TestUtilities.h"
-#include "TestUtilities/SnoopyTestUtilities.h"
+#include "TestUtilities/TestDataUtilities.h"
 #include "TestUtilities/LevelSetAlignment/LevelSetAlignmentTestUtilities.h"
 #include "TestUtilities/LevelSetAlignment/TestCaseOrganizationBySwitches.h"
 #include "TestUtilities/LevelSetAlignment/SingleIterationTestConditions.h"
@@ -46,8 +46,7 @@
 #endif
 
 using namespace ITMLib;
-using namespace test_utilities;
-namespace snoopy = snoopy_test_utilities;
+using namespace test;
 
 template<typename TIndex>
 void GenericTestCompareSmoothEnergyGradient_CPU_to_CUDA() {
@@ -58,23 +57,23 @@ void GenericTestCompareSmoothEnergyGradient_CPU_to_CUDA() {
 
 
 	VoxelVolume<TSDFVoxel, TIndex>* canonical_volume_CPU;
-	LoadVolume(&canonical_volume_CPU, snoopy::PartialVolume16Path<TIndex>(), MEMORYDEVICE_CPU,
-	           snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	LoadVolume(&canonical_volume_CPU, test::snoopy::PartialVolume16Path<TIndex>(), MEMORYDEVICE_CPU,
+	           test::snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 	VoxelVolume<TSDFVoxel, TIndex>* live_volume_CPU;
-	LoadVolume(&live_volume_CPU, snoopy::PartialVolume17Path<TIndex>(), MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	LoadVolume(&live_volume_CPU, test::snoopy::PartialVolume17Path<TIndex>(), MEMORYDEVICE_CPU, test::snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 	VoxelVolume<WarpVoxel, TIndex>* warp_field_CPU;
-	LoadVolume(&warp_field_CPU, path_warps, MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	LoadVolume(&warp_field_CPU, path_warps, MEMORYDEVICE_CPU, test::snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 	AllocateUsingOtherVolume(canonical_volume_CPU, live_volume_CPU, MEMORYDEVICE_CPU);
 	AllocateUsingOtherVolume(warp_field_CPU, live_volume_CPU, MEMORYDEVICE_CPU);
 
 
 	VoxelVolume<TSDFVoxel, TIndex>* canonical_volume_CUDA;
-	LoadVolume(&canonical_volume_CUDA, snoopy::PartialVolume16Path<TIndex>(), MEMORYDEVICE_CUDA,
-	           snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	LoadVolume(&canonical_volume_CUDA, test::snoopy::PartialVolume16Path<TIndex>(), MEMORYDEVICE_CUDA,
+	           test::snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 	VoxelVolume<TSDFVoxel, TIndex>* live_volume_CUDA;
-	LoadVolume(&live_volume_CUDA, snoopy::PartialVolume17Path<TIndex>(), MEMORYDEVICE_CUDA, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	LoadVolume(&live_volume_CUDA, test::snoopy::PartialVolume17Path<TIndex>(), MEMORYDEVICE_CUDA, test::snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 	VoxelVolume<WarpVoxel, TIndex>* warp_field_CUDA;
-	LoadVolume(&warp_field_CUDA, path_warps, MEMORYDEVICE_CUDA, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	LoadVolume(&warp_field_CUDA, path_warps, MEMORYDEVICE_CUDA, test::snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 	AllocateUsingOtherVolume(canonical_volume_CUDA, live_volume_CUDA, MEMORYDEVICE_CUDA);
 	AllocateUsingOtherVolume(warp_field_CUDA, live_volume_CUDA, MEMORYDEVICE_CUDA);
 

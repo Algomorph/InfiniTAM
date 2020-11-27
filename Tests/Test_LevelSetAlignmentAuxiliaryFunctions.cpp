@@ -29,17 +29,16 @@
 
 //test_utilities
 #include "TestUtilities/TestUtilities.h"
-#include "TestUtilities/SnoopyTestUtilities.h"
+#include "TestUtilities/TestDataUtilities.h"
 
 using namespace ITMLib;
-using namespace test_utilities;
-namespace snoopy = snoopy_test_utilities;
+using namespace test;
 
 template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void GenericClearOutWarpUpdateTest(){
 	VoxelVolume<WarpVoxel, TIndex>* warp_field;
-	LoadVolume(&warp_field, test_utilities::GeneratedVolumeDirectory + test_utilities::IndexString<TIndex>() + "/warp_field_1_data_tikhonov.dat",
-	           TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	LoadVolume(&warp_field, std::string(test::generated_volume_directory) + test::IndexString<TIndex>() + "/warp_field_1_data_tikhonov.dat",
+	           TMemoryDeviceType, test::snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 	float relative_tolerance = 0.1f;//percent
 	auto& analytics_engine = AnalyticsEngine<WarpVoxel,TIndex,TMemoryDeviceType>::Instance();
 	BOOST_REQUIRE_CLOSE(analytics_engine.ComputeWarpUpdateMax(warp_field), 0.42794984579086304f, relative_tolerance);

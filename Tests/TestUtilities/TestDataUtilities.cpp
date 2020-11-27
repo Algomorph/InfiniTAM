@@ -13,78 +13,12 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "SnoopyTestUtilities.h"
+#include "TestDataUtilities.h"
 #include "TestUtilities.h"
 
-namespace snoopy_test_utilities {
+namespace test::snoopy {
 
-std::string SnoopyCalibrationPath() {
-	return STATIC_TEST_DATA_PREFIX "TestData/calibration/snoopy_calib.txt";
-}
 
-std::string Frame00DepthPath() {
-	return STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_depth_000000.png";
-}
-
-std::string Frame00ColorPath() {
-	return STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_color_000000.png";
-}
-
-std::string Frame00MaskPath() {
-	return STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_omask_000000.png";
-}
-
-std::string Frame16DepthPath() {
-	return STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_depth_000016.png";
-}
-
-std::string Frame16ColorPath() {
-	return STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_color_000016.png";
-}
-
-std::string Frame16MaskPath() {
-	return STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_omask_000016.png";
-}
-
-std::string Frame17DepthPath() {
-	return STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_depth_000017.png";
-}
-
-std::string Frame17ColorPath() {
-	return STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_color_000017.png";
-}
-
-std::string Frame17MaskPath() {
-	return STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_omask_000017.png";
-}
-
-std::string Frame18DepthPath() {
-	return STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_depth_000018.png";
-}
-
-std::string Frame18ColorPath() {
-	return STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_color_000018.png";
-}
-
-std::string Frame18MaskPath() {
-	return STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_omask_000018.png";
-}
-
-std::string VideoFrames16to18DepthPath() {
-	return STATIC_TEST_DATA_PREFIX "TestData/videos/snoopy_depth_16-18.avi";
-}
-
-std::string VideoFrames16to18ColorPath() {
-	return STATIC_TEST_DATA_PREFIX "TestData/videos/snoopy_color_16-18.avi";
-}
-
-std::string VideoFrames16to18Color_YUV422P_Path() {
-	return STATIC_TEST_DATA_PREFIX "TestData/videos/snoopy_color_16-18_yuv422p.avi";
-}
-
-std::string VideoFrames16to18Depth_GRAY16LE_Path() {
-	return STATIC_TEST_DATA_PREFIX "TestData/videos/snoopy_depth_16-18_gray16le.avi";
-}
 
 template std::string PartialVolume00Path<PlainVoxelArray>();
 template std::string PartialVolume00Path<VoxelBlockHash>();

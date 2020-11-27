@@ -54,7 +54,7 @@
 
 
 using namespace ITMLib;
-using namespace test_utilities;
+using namespace test;
 
 
 BOOST_AUTO_TEST_CASE(testSetVoxelAndCopy_PlainVoxelArray_CUDA) {

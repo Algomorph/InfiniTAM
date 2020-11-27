@@ -402,7 +402,7 @@ class RGBDCameraEmulatorApplication:
         if save_numpy_converted:
             np.savez_compressed("converted_poses.npz", poses=np.array(converted_poses))
         if save_numpy_originals:
-            np.savez_compressed("/home/algomorph/Factory/priors/test_data/coffee_cup/camera_poses.npz", poses=poses)
+            np.savez_compressed("/home/algomorph/Factory/priors/test::snoopy/coffee_cup/camera_poses.npz", poses=poses)
         return True
 
     @staticmethod

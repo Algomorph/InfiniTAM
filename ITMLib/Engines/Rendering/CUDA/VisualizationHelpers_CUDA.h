@@ -8,7 +8,7 @@
 #include "../Shared/RenderingEngine_Shared.h"
 #include "../../Reconstruction/Shared/SceneReconstructionEngine_Shared.h"
 #include "../../../Utils/CUDA/CUDAUtils.h"
-#include "../../../../ORUtils/PlatformIndependedParallelSum.h"
+#include "../../../../ORUtils/PlatformIndependentParallelSum.h"
 
 namespace ITMLib {
 // declaration of device functions

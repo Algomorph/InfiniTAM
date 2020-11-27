@@ -20,7 +20,7 @@
 #include "../../../../ORUtils/CrossPlatformMacros.h"
 #include "../../../Objects/Volume/VoxelBlockHash.h"
 #include "../../../Utils/Geometry/CheckBlockVisibility.h"
-#include "../../../../ORUtils/PlatformIndependedParallelSum.h"
+#include "../../../../ORUtils/PlatformIndependentParallelSum.h"
 #include "RenderingEngine_Shared.h"
 
 #ifdef __CUDACC__

@@ -39,7 +39,7 @@
 using namespace ITMLib;
 namespace fs = std::filesystem;
 
-namespace test_utilities {
+namespace test {
 
 template<>
 std::string IndexString<VoxelBlockHash>() {
@@ -62,24 +62,24 @@ std::string DeviceString<MEMORYDEVICE_CUDA>() {
 }
 
 void ConstructGeneratedVolumeSubdirectoriesIfMissing() {
-	fs::create_directories(test_utilities::GeneratedVolumeDirectory + IndexString<VoxelBlockHash>());
-	fs::create_directories(test_utilities::GeneratedVolumeDirectory + IndexString<PlainVoxelArray>());
+	fs::create_directories(std::string(test::generated_volume_directory) + IndexString<VoxelBlockHash>());
+	fs::create_directories(std::string(test::generated_volume_directory) + IndexString<PlainVoxelArray>());
 }
 
 void ConstructGeneratedConfigurationDirectoryIfMissing() {
-	fs::create_directories(test_utilities::GeneratedConfigurationDirectory);
+	fs::create_directories(test::generated_configuration_directory);
 }
 
 void ConstructGeneratedMeshDirectoryIfMissing() {
-	fs::create_directories(test_utilities::GeneratedMeshDirectory);
+	fs::create_directories(test::generated_mesh_directory);
 }
 
 void ConstructGeneratedArraysDirectoryIfMissing() {
-	fs::create_directories(test_utilities::GeneratedArraysDirectory);
+	fs::create_directories(test::generated_arrays_directory);
 }
 
 void ConstructGeneratedVideosDirectoryIfMissing() {
-	fs::create_directories(test_utilities::GeneratedVideosDirectory);
+	fs::create_directories(test::generated_videos_directory);
 }
 
 template void GenerateSimpleSurfaceTestVolume<MEMORYDEVICE_CPU, TSDFVoxel, VoxelBlockHash>(

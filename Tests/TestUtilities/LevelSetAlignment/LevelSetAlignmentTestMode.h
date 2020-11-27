@@ -15,7 +15,7 @@
 //  ================================================================
 #pragma once
 
-namespace test_utilities {
+namespace test {
 
 enum LevelSetAlignmentTestMode {
 	SAVE_SUCCESSIVE_ITERATIONS,
