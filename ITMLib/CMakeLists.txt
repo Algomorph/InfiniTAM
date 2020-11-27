@@ -748,14 +748,12 @@ set(ITMLIB_CAMERA_TRACKERS_CPU_SOURCES
     CameraTrackers/CPU/ColorTracker_CPU.cpp
     CameraTrackers/CPU/DepthTracker_CPU.cpp
     CameraTrackers/CPU/ExtendedTracker_CPU.cpp
-    CameraTrackers/CPU/SDF2SDFCameraTracker_CPU.cpp
     )
 
 set(ITMLIB_CAMERA_TRACKERS_CPU_HEADERS
     CameraTrackers/CPU/ColorTracker_CPU.h
     CameraTrackers/CPU/DepthTracker_CPU.h
     CameraTrackers/CPU/ExtendedTracker_CPU.h
-    CameraTrackers/CPU/SDF2SDFCameraTracker_CPU.h
     )
 
 ##
@@ -763,14 +761,12 @@ set(ITMLIB_CAMERA_TRACKERS_CUDA_SOURCES
     CameraTrackers/CUDA/ColorTracker_CUDA.cu
     CameraTrackers/CUDA/DepthTracker_CUDA.cu
     CameraTrackers/CUDA/ExtendedTracker_CUDA.cu
-    CameraTrackers/CUDA/DynamicCameraTracker_CUDA.cu
     )
 
 set(ITMLIB_CAMERA_TRACKERS_CUDA_HEADERS
     CameraTrackers/CUDA/ColorTracker_CUDA.h
     CameraTrackers/CUDA/DepthTracker_CUDA.h
     CameraTrackers/CUDA/ExtendedTracker_CUDA.h
-    CameraTrackers/CUDA/DynamicCameraTracker_CUDA.h
     )
 
 ##
