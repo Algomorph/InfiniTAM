@@ -227,8 +227,7 @@ void ConstructStripesTestVolumes() {
 			= IndexingEngineFactory::GetDefault<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CPU);
 	CameraTrackingState tracking_state(image_size, MEMORYDEVICE_CPU);
 	indexer_VBH.AllocateNearAndBetweenTwoSurfaces(&volume4, view, &tracking_state);
-	auto depth_fusion_engine_VBH = DepthFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, VoxelBlockHash>(
-			MEMORYDEVICE_CPU);
+	auto depth_fusion_engine_VBH = DepthFusionEngineFactory::Build<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CPU);
 	depth_fusion_engine_VBH->IntegrateDepthImageIntoTsdfVolume(&volume4, view, &tracking_state);
 	std::string path = STATIC_TEST_DATA_PREFIX "TestData/volumes/VBH/stripes.dat";
 
@@ -703,6 +702,27 @@ void GenerateRenderingTestData_VoxelBlockHash() {
 	SaveRawDataToFile<int>(visible_blocks_file, pose_range_visible_block_counts1.data(), pose_count, MEMORYDEVICE_CPU);
 	SaveRawDataToFile<int>(visible_blocks_file, pose_range_visible_block_counts2.data(), pose_count, MEMORYDEVICE_CPU);
 	SaveRawDataToFile<int>(visible_blocks_file, pose_range_visible_block_counts3.data(), pose_count, MEMORYDEVICE_CPU);
+}
+
+template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
+void GenerateRigidAlignmentTestData(){
+	View* view;
+
+	UpdateView(&view,
+	           std::string(teddy::frame_115_depth_path),
+	           std::string(teddy::frame_115_color_path),
+	           std::string(teddy::calibration_path),
+	           TMemoryDeviceType);
+
+	VoxelVolume<TSDFVoxel_f_rgb, TIndex> volume;
+	IndexingEngineInterface<TSDFVoxel_f_rgb, TIndex>* indexing_engine = IndexingEngineFactory::Build<TSDFVoxel_f_rgb, TIndex>(TMemoryDeviceType);
+	CameraTrackingState camera_tracking_state(teddy::frame_image_size, TMemoryDeviceType);
+	indexing_engine->AllocateNearSurface(&volume, view, &camera_tracking_state);
+	DepthFusionEngineInterface<TSDFVoxel_f_rgb, TIndex>* depth_fusion_engine = DepthFusionEngineFactory::Build<TSDFVoxel_f_rgb, TIndex>(TMemoryDeviceType);
+
+	delete indexing_engine;
+	delete
+	delete view;
 }
 
 

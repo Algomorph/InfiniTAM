@@ -133,7 +133,7 @@ static void RenderImage_common(const ORUtils::SE3Pose *pose, const Intrinsics *i
 		typedef MultiIndex<TIndex> ID;
 		genericRaycast_device<VD, ID, false> <<<gridSize, cudaBlockSize >>> (
 				renderState->raycastResult->GetData(MEMORYDEVICE_CUDA),
-						NULL,
+						nullptr,
 						renderState->voxelData_device,
 						renderState->indexData_device,
 						imgSize,

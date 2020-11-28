@@ -82,8 +82,8 @@ void GenericMultiIterationAlignmentSubtest(const LevelSetAlignmentSwitches& swit
 
 	ground_truth_warp_field.Reset();
 
-	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, TIndex>* reconstruction_engine =
-			DepthFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, TIndex>(TMemoryDeviceType);
+	DepthFusionEngineInterface<TSDFVoxel, TIndex>* depth_fusion_engine =
+			DepthFusionEngineFactory::Build<TSDFVoxel, TIndex>(TMemoryDeviceType);
 	VolumeFusionEngineInterface<TSDFVoxel, TIndex>* volume_fusion_engine =
 			VolumeFusionEngineFactory::Build<TSDFVoxel, TIndex>(TMemoryDeviceType);
 
@@ -150,7 +150,7 @@ void GenericMultiIterationAlignmentSubtest(const LevelSetAlignmentSwitches& swit
 	delete canonical_volume;
 	delete live_volumes[0];
 	delete live_volumes[1];
-	delete reconstruction_engine;
+	delete depth_fusion_engine;
 	delete volume_fusion_engine;
 }
 

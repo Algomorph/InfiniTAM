@@ -33,32 +33,32 @@ struct GlobalAdjustmentEngine::PrivateData
 GlobalAdjustmentEngine::GlobalAdjustmentEngine()
 {
 	privateData = new PrivateData();
-	workingData = NULL;
-	processedData = NULL;
+	workingData = nullptr;
+	processedData = nullptr;
 }
 
 GlobalAdjustmentEngine::~GlobalAdjustmentEngine()
 {
 	stopSeparateThread();
-	if (workingData != NULL) delete workingData;
-	if (processedData != NULL) delete processedData;
+	if (workingData != nullptr) delete workingData;
+	if (processedData != nullptr) delete processedData;
 	delete privateData;
 }
 
 bool GlobalAdjustmentEngine::hasNewEstimates() const
 {
-	return (processedData != NULL);
+	return (processedData != nullptr);
 }
 
 bool GlobalAdjustmentEngine::retrieveNewEstimates(MapGraphManager & dest)
 {
 #ifndef NO_CPP11
-	if (processedData == NULL) return false;
+	if (processedData == nullptr) return false;
 
 	privateData->processedData_mutex.lock();
 	PoseGraphToMultiScene(*processedData, dest);
 	delete processedData;
-	processedData = NULL;
+	processedData = nullptr;
 	privateData->processedData_mutex.unlock();
 #endif
 	return true;
@@ -83,7 +83,7 @@ bool GlobalAdjustmentEngine::updateMeasurements(const MapGraphManager & src)
 	// busy, can't accept new measurements at the moment
 	if (!privateData->workingData_mutex.try_lock()) return false;
 
-	if (workingData == NULL) workingData = new MiniSlamGraph::PoseGraph;
+	if (workingData == nullptr) workingData = new MiniSlamGraph::PoseGraph;
 	MultiSceneToPoseGraph(src, *workingData);
 	privateData->workingData_mutex.unlock();
 #endif
@@ -94,7 +94,7 @@ bool GlobalAdjustmentEngine::runGlobalAdjustment(bool blockingWait)
 {
 #ifndef NO_CPP11
 	// first make sure there is new data and we have exclusive access to it
-	if (workingData == NULL) return false;
+	if (workingData == nullptr) return false;
 
 	if (blockingWait) privateData->workingData_mutex.lock();
 	else if (!privateData->workingData_mutex.try_lock()) return false;
@@ -108,9 +108,9 @@ bool GlobalAdjustmentEngine::runGlobalAdjustment(bool blockingWait)
 
 	// copy data to output buffer
 	privateData->processedData_mutex.lock();
-	if (processedData != NULL) delete processedData;
+	if (processedData != nullptr) delete processedData;
 	processedData = workingData;
-	workingData = NULL;
+	workingData = nullptr;
 	privateData->processedData_mutex.unlock();
 
 	privateData->workingData_mutex.unlock();

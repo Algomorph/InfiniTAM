@@ -67,12 +67,12 @@ public:
 
 	/// Process a frame with rgb and depth images and optionally a corresponding imu measurement
 	virtual CameraTrackingState::TrackingResult
-	ProcessFrame(UChar4Image* rgbImage, ShortImage* rawDepthImage, IMUMeasurement* imuMeasurement = NULL) = 0;
+	ProcessFrame(UChar4Image* rgbImage, ShortImage* rawDepthImage, IMUMeasurement* imuMeasurement = nullptr) = 0;
 
 	/// Get a result image as output
 	virtual Vector2i GetImageSize() const = 0;
 
-	virtual void GetImage(UChar4Image* out, GetImageType getImageType, ORUtils::SE3Pose* pose = NULL, Intrinsics* intrinsics = NULL) = 0;
+	virtual void GetImage(UChar4Image* out, GetImageType getImageType, ORUtils::SE3Pose* pose = nullptr, Intrinsics* intrinsics = nullptr) = 0;
 
 	/// Extracts a mesh from the current volume and saves it to the model file specified by the file name
 	virtual void SaveVolumeToMesh(const std::string& path) {};

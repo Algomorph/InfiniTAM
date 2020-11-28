@@ -36,7 +36,7 @@ namespace ITMLib {
 	an ITMLib::Objects::ITMScene and fuse new image information
 	into them.
 */
-template<typename TVoxel, typename TWarp, typename TIndex>
+template<typename TVoxel, typename TIndex>
 class DepthFusionEngineInterface : public Configurable<DepthFusionSettings> {
 protected:
 	using Configurable<DepthFusionSettings>::parameters;
@@ -61,11 +61,11 @@ public:
 };
 
 
-template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 class DepthFusionEngine :
-		public DepthFusionEngineInterface<TVoxel, TWarp, TIndex> {
+		public DepthFusionEngineInterface<TVoxel, TIndex> {
 public:
-	using DepthFusionEngineInterface<TVoxel, TWarp, TIndex>::DepthFusionEngineInterface;
+	using DepthFusionEngineInterface<TVoxel, TIndex>::DepthFusionEngineInterface;
 	~DepthFusionEngine() = default;
 
 	void IntegrateDepthImageIntoTsdfVolume(VoxelVolume<TVoxel, TIndex>* volume, const View* view);

@@ -4,9 +4,6 @@
 
 #include "../../ORUtils/MathUtils.h"
 
-#ifndef NULL
-#define NULL 0
-#endif
 
 #ifndef FLOAT_TO_SHORT_CONVERSION_FACTOR
 #define FLOAT_TO_SHORT_CONVERSION_FACTOR 32767.0f

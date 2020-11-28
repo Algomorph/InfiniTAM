@@ -353,8 +353,8 @@ int ActiveMapManager::CheckSuccess_newlink(int dataID, int primaryDataID, int *i
 
 	int inliers_local;
 	ORUtils::SE3Pose inlierPose_local;
-	if (inliers == NULL) inliers = &inliers_local;
-	if (inlierPose == NULL) inlierPose = &inlierPose_local;
+	if (inliers == nullptr) inliers = &inliers_local;
+	if (inlierPose == nullptr) inlierPose = &inlierPose_local;
 
 	estimateRelativePose(link.constraints, previousEstimate, (float)previousEstimate_weight, inliers, inlierPose);
 

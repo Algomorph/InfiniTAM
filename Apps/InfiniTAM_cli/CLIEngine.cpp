@@ -73,7 +73,7 @@ bool CLIEngine::ProcessFrame()
 	if (!image_source->HasMoreImages()) return false;
 	image_source->GetImages(*input_RGB_image, *input_raw_depth_image);
 
-	if (imu_source != NULL) {
+	if (imu_source != nullptr) {
 		if (!imu_source->hasMoreMeasurements()) return false;
 		else imu_source->getMeasurement(input_IMU_measurement);
 	}
@@ -82,7 +82,7 @@ bool CLIEngine::ProcessFrame()
 	sdkStartTimer(&timer_instant); sdkStartTimer(&timer_average);
 
 	//actual processing on the mailEngine
-	if (imu_source != NULL) main_engine->ProcessFrame(input_RGB_image, input_raw_depth_image, input_IMU_measurement);
+	if (imu_source != nullptr) main_engine->ProcessFrame(input_RGB_image, input_raw_depth_image, input_IMU_measurement);
 	else main_engine->ProcessFrame(input_RGB_image, input_raw_depth_image);
 
 #ifndef COMPILE_WITHOUT_CUDA

@@ -42,7 +42,7 @@ kernel void integrateIntoScene_vh_device(DEVICEPTR(ITMVoxel) *localVBA          
     
     ComputeUpdatedVoxelInfo<ITMVoxel::hasColorInformation,false, ITMVoxel>::compute(localVoxelBlock[locId], pt_model,
                                                                          params->M_d, params->projParams_d, params->M_rgb,
-                                                                         params->projParams_rgb, params->others.y, params->others.z, depth, NULL,
+                                                                         params->projParams_rgb, params->others.y, params->others.z, depth, nullptr,
                                                                          params->depthImgSize, rgb, params->rgbImgSize);
 }
 

@@ -55,7 +55,7 @@ private: // instance variables
 	RenderingEngineBase<TVoxel, TIndex>* rendering_engine;
 	MeshingEngine<TVoxel, TIndex>* meshing_engine;
 	IndexingEngineInterface<TVoxel, TIndex>* indexing_engine;
-	DepthFusionEngineInterface<TVoxel, TWarp, TIndex>* depth_fusion_engine;
+	DepthFusionEngineInterface<TVoxel, TIndex>* depth_fusion_engine;
 	VolumeFusionEngineInterface<TVoxel, TIndex>* volume_fusion_engine;
 	SwappingEngine<TVoxel, TIndex>* swapping_engine;
 

@@ -61,7 +61,7 @@ public: // instance functions
 	/// Gives access to the internal world representation
 	VoxelVolume<TVoxel, TIndex>* GetScene() { return volume; }
 
-	CameraTrackingState::TrackingResult ProcessFrame(UChar4Image* rgbImage, ShortImage* rawDepthImage, IMUMeasurement* imuMeasurement = NULL);
+	CameraTrackingState::TrackingResult ProcessFrame(UChar4Image* rgbImage, ShortImage* rawDepthImage, IMUMeasurement* imuMeasurement = nullptr);
 
 	/// Extracts a mesh from the current scene and saves it to the model file specified by the file name
 	void SaveVolumeToMesh(const std::string& path);
@@ -73,7 +73,7 @@ public: // instance functions
 	/// Get a result image as output
 	Vector2i GetImageSize() const;
 
-	void GetImage(UChar4Image* out, GetImageType getImageType, ORUtils::SE3Pose* pose = NULL, Intrinsics* intrinsics = NULL);
+	void GetImage(UChar4Image* out, GetImageType getImageType, ORUtils::SE3Pose* pose = nullptr, Intrinsics* intrinsics = nullptr);
 
 	/// switch for turning tracking on/off
 	void TurnOnTracking() override;

@@ -28,7 +28,7 @@ namespace ITMLib
 		template <typename TVoxel, typename TIndex>
 		static MultiVisualizationEngine<TVoxel, TIndex> *MakeVisualizationEngine(MemoryDeviceType deviceType)
 		{
-			MultiVisualizationEngine<TVoxel, TIndex> *visualization_engine = NULL;
+			MultiVisualizationEngine<TVoxel, TIndex> *visualization_engine = nullptr;
 
 			switch (deviceType)
 			{

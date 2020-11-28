@@ -388,7 +388,7 @@ sdkCreateTimer(StopWatchInterface **timer_interface)
 #else
     *timer_interface = (StopWatchInterface *)new StopWatchLinux();
 #endif
-    return (*timer_interface != NULL) ? true : false;
+    return (*timer_interface != nullptr) ? true : false;
 }
 
 
@@ -404,7 +404,7 @@ sdkDeleteTimer(StopWatchInterface **timer_interface)
     if (*timer_interface)
     {
         delete *timer_interface;
-        *timer_interface = NULL;
+        *timer_interface = nullptr;
     }
 
     return true;

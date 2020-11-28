@@ -48,7 +48,7 @@ namespace ITMLib{
 		View* GetView() { return view; }
 		CameraTrackingState* GetTrackingState() { return trackingState; }
 
-		CameraTrackingState::TrackingResult ProcessFrame(UChar4Image *rgbImage, ShortImage *rawDepthImage, IMUMeasurement *imuMeasurement = NULL);
+		CameraTrackingState::TrackingResult ProcessFrame(UChar4Image *rgbImage, ShortImage *rawDepthImage, IMUMeasurement *imuMeasurement = nullptr);
 
 		/// Extracts a mesh from the current scene and saves it to the model file specified by the file name
 		void SaveVolumeToMesh(const std::string& path);
@@ -60,7 +60,7 @@ namespace ITMLib{
 		/// Get a result image as output
 		Vector2i GetImageSize() const;
 
-		void GetImage(UChar4Image *out, GetImageType getImageType, ORUtils::SE3Pose *pose = NULL, Intrinsics *intrinsics = NULL);
+		void GetImage(UChar4Image *out, GetImageType getImageType, ORUtils::SE3Pose *pose = nullptr, Intrinsics *intrinsics = nullptr);
 
 		/// switch for turning tracking on/off
 		void TurnOnTracking() override;

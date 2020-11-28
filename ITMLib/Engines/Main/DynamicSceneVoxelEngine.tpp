@@ -65,7 +65,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(
 		                                                                                           configuration::Get().origin)),
 		  indexing_engine(IndexingEngineFactory::Build<TVoxel, TIndex>(configuration::Get().device_type)),
 		  depth_fusion_engine(
-				  DepthFusionEngineFactory::Build<TVoxel, TWarp, TIndex>
+				  DepthFusionEngineFactory::Build<TVoxel, TIndex>
 						  (configuration::Get().device_type)),
 		  volume_fusion_engine(VolumeFusionEngineFactory::Build<TVoxel, TIndex>(configuration::Get().device_type)),
 		  surface_tracker(LevelSetAlignmentEngineFactory::Build<TVoxel, TWarp, TIndex>()),

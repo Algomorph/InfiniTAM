@@ -61,9 +61,9 @@ ExtendedTracker::ExtendedTracker(Vector2i imgSize_d,
 	}
 	else
 	{
-		viewHierarchy_Intensity = NULL;
-		reprojectedPointsHierarchy = NULL;
-		projectedIntensityHierarchy = NULL;
+		viewHierarchy_Intensity = nullptr;
+		reprojectedPointsHierarchy = nullptr;
+		projectedIntensityHierarchy = nullptr;
 	}
 
 	// We need the scene hierarchy (ICP and Normal raycasts) only if depth is used for tracking.

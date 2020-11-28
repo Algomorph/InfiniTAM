@@ -196,9 +196,9 @@ void PicoFlexxEngine::GetImages(UChar4Image *rgbImage, ShortImage *rawDepthImage
 	else memset(depth, 0, rawDepthImage->element_count * sizeof(short));
 }
 
-bool PicoFlexxEngine::HasMoreImages() const { return data != NULL; }
-Vector2i PicoFlexxEngine::GetDepthImageSize() const { return data != NULL ? imageSize_d : Vector2i(0, 0); }
-Vector2i PicoFlexxEngine::GetRGBImageSize() const { return data != NULL ? imageSize_rgb : Vector2i(0, 0); }
+bool PicoFlexxEngine::HasMoreImages() const { return data != nullptr; }
+Vector2i PicoFlexxEngine::GetDepthImageSize() const { return data != nullptr ? imageSize_d : Vector2i(0, 0); }
+Vector2i PicoFlexxEngine::GetRGBImageSize() const { return data != nullptr ? imageSize_rgb : Vector2i(0, 0); }
 
 #else
 

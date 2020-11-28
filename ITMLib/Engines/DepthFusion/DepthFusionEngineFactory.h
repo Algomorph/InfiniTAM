@@ -31,20 +31,20 @@ struct DepthFusionEngineFactory {
 	 *
 	 * \param device_type  The device on which the scene reconstruction engine should operate.
 	 */
-	template<typename TVoxel, typename TWarp, typename TIndex>
-	static DepthFusionEngineInterface<TVoxel, TWarp, TIndex>*
+	template<typename TVoxel, typename TIndex>
+	static DepthFusionEngineInterface<TVoxel, TIndex>*
 	Build(MemoryDeviceType device_type) {
-		DepthFusionEngineInterface<TVoxel, TWarp, TIndex>* depth_fusion_engine = nullptr;
+		DepthFusionEngineInterface<TVoxel, TIndex>* depth_fusion_engine = nullptr;
 
 		switch (device_type) {
 			case MEMORYDEVICE_CPU:
-				depth_fusion_engine = new DepthFusionEngine<TVoxel, TWarp, TIndex, MEMORYDEVICE_CPU>;
+				depth_fusion_engine = new DepthFusionEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>;
 				break;
 			case MEMORYDEVICE_CUDA:
 #ifdef COMPILE_WITHOUT_CUDA
 				DIEWITHEXCEPTION_REPORTLOCATION("Requested instantiation of a CUDA-based specialization, but code was compiled without CUDA. Aborting.");
 #else
-				depth_fusion_engine = new DepthFusionEngine<TVoxel, TWarp, TIndex, MEMORYDEVICE_CUDA>;
+				depth_fusion_engine = new DepthFusionEngine<TVoxel, TIndex, MEMORYDEVICE_CUDA>;
 #endif
 				break;
 			case MEMORYDEVICE_METAL:
@@ -59,20 +59,20 @@ struct DepthFusionEngineFactory {
 		return depth_fusion_engine;
 	}
 
-	template<typename TVoxel, typename TWarp, typename TIndex>
-	static DepthFusionEngineInterface<TVoxel, TWarp, TIndex>*
+	template<typename TVoxel, typename TIndex>
+	static DepthFusionEngineInterface<TVoxel, TIndex>*
 	Build(MemoryDeviceType device_type, DepthFusionSettings settings) {
-		DepthFusionEngineInterface<TVoxel, TWarp, TIndex>* depth_fusion_engine = nullptr;
+		DepthFusionEngineInterface<TVoxel, TIndex>* depth_fusion_engine = nullptr;
 
 		switch (device_type) {
 			case MEMORYDEVICE_CPU:
-				depth_fusion_engine = new DepthFusionEngine<TVoxel, TWarp, TIndex, MEMORYDEVICE_CPU>(settings);
+				depth_fusion_engine = new DepthFusionEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>(settings);
 				break;
 			case MEMORYDEVICE_CUDA:
 #ifdef COMPILE_WITHOUT_CUDA
 				DIEWITHEXCEPTION_REPORTLOCATION("Requested instantiation of a CUDA-based specialization, but code was compiled without CUDA. Aborting.");
 #else
-				depth_fusion_engine = new DepthFusionEngine<TVoxel, TWarp, TIndex, MEMORYDEVICE_CUDA>(settings);
+				depth_fusion_engine = new DepthFusionEngine<TVoxel, TIndex, MEMORYDEVICE_CUDA>(settings);
 #endif
 				break;
 			case MEMORYDEVICE_METAL:

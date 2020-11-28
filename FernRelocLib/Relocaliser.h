@@ -62,8 +62,8 @@ namespace FernRelocLib
 
 			// prepare outputs
 			int ret = -1;
-			bool releaseDistances = (distances == NULL);
-			if (distances == NULL) distances = new float[k];
+			bool releaseDistances = (distances == nullptr);
+			if (distances == nullptr) distances = new float[k];
 
 			// find similar frames
 			int similarFound = relocDatabase->findMostSimilar(code, nearestNeighbours, distances, k);

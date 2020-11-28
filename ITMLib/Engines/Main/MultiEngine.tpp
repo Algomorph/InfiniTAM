@@ -48,17 +48,17 @@ MultiEngine<TVoxel, TIndex>::MultiEngine(const RGBD_CalibrationInformation& cali
 	mActiveDataManager->initiateNewLocalMap(true);
 	denseMapper = new DenseMapper<TVoxel, TIndex>();
 
-	meshingEngine = NULL;
+	meshingEngine = nullptr;
 	if (settings.create_meshing_engine)
 		meshingEngine = MultiMeshingEngineFactory::MakeMeshingEngine<TVoxel, TIndex>(deviceType, mapManager->getLocalMap(0)->volume->index);
 
-	renderState_freeview = NULL; //will be created by the Rendering engine
+	renderState_freeview = nullptr; //will be created by the Rendering engine
 	imuCalibrator = new ITMIMUCalibrator_iPad();
 	freeviewLocalMapIdx = 0;
 
 	//TODO	tracker->UpdateInitialPose(allData[0]->trackingState);
 
-	view = NULL; // will be allocated by the view builder
+	view = nullptr; // will be allocated by the view builder
 
 	relocaliser = new FernRelocLib::Relocaliser<float>(imgSize_d, Vector2f(settings.general_voxel_volume_parameters.near_clipping_distance, settings.general_voxel_volume_parameters.far_clipping_distance), 0.1f, 1000, 4);
 
@@ -67,19 +67,19 @@ MultiEngine<TVoxel, TIndex>::MultiEngine(const RGBD_CalibrationInformation& cali
 	if (separateThreadGlobalAdjustment) mGlobalAdjustmentEngine->startSeparateThread();
 
 	multiVisualizationEngine = MultiVisualizationEngineFactory::MakeVisualizationEngine<TVoxel,TIndex>(deviceType);
-	renderState_multiscene = NULL;
+	renderState_multiscene = nullptr;
 }
 
 template <typename TVoxel, typename TIndex>
 MultiEngine<TVoxel, TIndex>::~MultiEngine()
 {
-	if (renderState_multiscene != NULL) delete renderState_multiscene;
+	if (renderState_multiscene != nullptr) delete renderState_multiscene;
 
 	delete mGlobalAdjustmentEngine;
 	delete mActiveDataManager;
 	delete mapManager;
 
-	if (renderState_freeview != NULL) delete renderState_freeview;
+	if (renderState_freeview != nullptr) delete renderState_freeview;
 
 	delete denseMapper;
 	delete trackingController;
@@ -90,7 +90,7 @@ MultiEngine<TVoxel, TIndex>::~MultiEngine()
 	delete lowLevelEngine;
 	delete viewBuilder;
 
-	if (view != NULL) delete view;
+	if (view != nullptr) delete view;
 
 	delete visualization_engine;
 
@@ -151,7 +151,7 @@ CameraTrackingState::TrackingResult MultiEngine<TVoxel, TIndex>::ProcessFrame(UC
 	CameraTrackingState::TrackingResult primaryLocalMapTrackingResult = CameraTrackingState::TrackingResult::TRACKING_FAILED;
 
 	// prepare image and turn it into a depth image
-	if (imuMeasurement == NULL)
+	if (imuMeasurement == nullptr)
 		viewBuilder->UpdateView(&view, rgbImage, rawDepthImage, settings.use_threshold_filter,
 		                        settings.use_bilateral_filter, false, true);
 	else
@@ -201,7 +201,7 @@ CameraTrackingState::TrackingResult MultiEngine<TVoxel, TIndex>::ProcessFrame(UC
 			if (primaryDataIdx >= 0) primaryLocalMapIdx = mActiveDataManager->getLocalMapIndex(primaryDataIdx);
 
 			//check if relocaliser has fired
-			ORUtils::SE3Pose *pose = primaryLocalMapIdx >= 0 ? mapManager->getLocalMap(primaryLocalMapIdx)->trackingState->pose_d : NULL;
+			ORUtils::SE3Pose *pose = primaryLocalMapIdx >= 0 ? mapManager->getLocalMap(primaryLocalMapIdx)->trackingState->pose_d : nullptr;
 			bool hasAddedKeyframe = relocaliser->ProcessFrame(view->depth, pose, primaryLocalMapIdx, k_loopcloseneighbours, NN, distances, primaryTrackingSuccess);
 
 			//frame not added and tracking failed -> we need to relocalise
@@ -224,7 +224,7 @@ CameraTrackingState::TrackingResult MultiEngine<TVoxel, TIndex>::ProcessFrame(UC
 			continue;
 		}
 
-		LocalMap<TVoxel, TIndex> *currentLocalMap = NULL;
+		LocalMap<TVoxel, TIndex> *currentLocalMap = nullptr;
 		int currentLocalMapIdx = mActiveDataManager->getLocalMapIndex(todoList[i].dataId);
 		currentLocalMap = mapManager->getLocalMap(currentLocalMapIdx);
 
@@ -309,7 +309,7 @@ CameraTrackingState::TrackingResult MultiEngine<TVoxel, TIndex>::ProcessFrame(UC
 template <typename TVoxel, typename TIndex>
 void MultiEngine<TVoxel, TIndex>::SaveVolumeToMesh(const std::string& path)
 {
-	if (meshingEngine == NULL) return;
+	if (meshingEngine == nullptr) return;
 	Mesh mesh = meshingEngine->MeshVolume(*mapManager);
 	mesh.WritePLY(path);
 }
@@ -335,7 +335,7 @@ Vector2i MultiEngine<TVoxel, TIndex>::GetImageSize() const
 template <typename TVoxel, typename TIndex>
 void MultiEngine<TVoxel, TIndex>::GetImage(UChar4Image *out, GetImageType getImageType, ORUtils::SE3Pose *pose, Intrinsics *intrinsics)
 {
-	if (view == NULL) return;
+	if (view == nullptr) return;
 	auto& settings = configuration::Get();
 
 	out->Clear();
@@ -401,7 +401,7 @@ void MultiEngine<TVoxel, TIndex>::GetImage(UChar4Image *out, GetImageType getIma
 
 		if (freeviewLocalMapIdx >= 0){
 			LocalMap<TVoxel, TIndex> *activeData = mapManager->getLocalMap(freeviewLocalMapIdx);
-			if (renderState_freeview == NULL) renderState_freeview =
+			if (renderState_freeview == nullptr) renderState_freeview =
 					new RenderStateMultiScene<TVoxel,TIndex>(out->dimensions, activeData->volume->GetParameters().near_clipping_distance,
 					                                         activeData->volume->GetParameters().far_clipping_distance, settings.device_type);
 

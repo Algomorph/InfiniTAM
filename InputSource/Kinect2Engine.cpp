@@ -15,10 +15,10 @@ using namespace InputSource;
 template<class Interface>
 inline void SafeRelease(Interface *& pInterfaceToRelease)
 {
-	if (pInterfaceToRelease != NULL)
+	if (pInterfaceToRelease != nullptr)
 	{
 		pInterfaceToRelease->Release();
-		pInterfaceToRelease = NULL;
+		pInterfaceToRelease = nullptr;
 	}
 }
 
@@ -53,7 +53,7 @@ Kinect2Engine::Kinect2Engine(const char *calibFilename) : BaseImageSourceEngine(
 
 	if (data->kinectSensor)
 	{
-		IDepthFrameSource* pDepthFrameSource = NULL;
+		IDepthFrameSource* pDepthFrameSource = nullptr;
 
 		hr = data->kinectSensor->Open();
 
@@ -94,8 +94,8 @@ void Kinect2Engine::GetImages(ITMUChar4Image& rgbImage, ShortImage& rawDepthImag
 	float *depth = out->depth->GetData(MEMORYDEVICE_CPU);
 	if (depthAvailable)
 	{
-		IDepthFrame* pDepthFrame = NULL;
-		UINT16 *pBuffer = NULL;
+		IDepthFrame* pDepthFrame = nullptr;
+		UINT16 *pBuffer = nullptr;
 		UINT nBufferSize = 0;
 
 		HRESULT hr = data->depthFrameReader->AcquireLatestFrame(&pDepthFrame);

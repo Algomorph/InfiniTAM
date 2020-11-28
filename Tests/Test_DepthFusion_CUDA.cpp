@@ -145,9 +145,8 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CUDA) {
 	ManipulationEngine_CUDA_PVA_Voxel::Inst().ResetVolume(&volume1);
 	CameraTrackingState trackingState(imageSize, settings->device_type);
 
-	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, PlainVoxelArray>* depth_fusion_engine_PVA =
-			DepthFusionEngineFactory
-			::Build<TSDFVoxel, WarpVoxel, PlainVoxelArray>(MEMORYDEVICE_CUDA);
+	DepthFusionEngineInterface<TSDFVoxel, PlainVoxelArray>* depth_fusion_engine_PVA =
+			DepthFusionEngineFactory::Build<TSDFVoxel, PlainVoxelArray>(MEMORYDEVICE_CUDA);
 	IndexingEngineInterface<TSDFVoxel, PlainVoxelArray>& indexer_PVA
 			= IndexingEngineFactory::GetDefault<TSDFVoxel, PlainVoxelArray>(MEMORYDEVICE_CUDA);
 	indexer_PVA.AllocateNearAndBetweenTwoSurfaces(&volume1, view, &trackingState);
@@ -236,13 +235,11 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CUDA) {
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume2(MEMORYDEVICE_CUDA, {0x800, 0x20000});
 	ManipulationEngine_CUDA_VBH_Voxel::Inst().ResetVolume(&volume2);
 
-	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, VoxelBlockHash>* depth_fusion_engine_VBH =
-			DepthFusionEngineFactory
-			::Build<TSDFVoxel, WarpVoxel, VoxelBlockHash>(MEMORYDEVICE_CUDA);
+	DepthFusionEngineInterface<TSDFVoxel, VoxelBlockHash>* depth_fusion_engine_VBH =
+			DepthFusionEngineFactory::Build<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CUDA);
 
 	RenderState renderState(imageSize, configuration::Get().general_voxel_volume_parameters.near_clipping_distance,
-	                        configuration::Get().general_voxel_volume_parameters.far_clipping_distance,
-	                        settings->device_type);
+	                        configuration::Get().general_voxel_volume_parameters.far_clipping_distance, settings->device_type);
 	IndexingEngineInterface<TSDFVoxel, VoxelBlockHash>& indexer_VBH
 			= IndexingEngineFactory::GetDefault<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CUDA);
 	indexer_VBH.AllocateNearAndBetweenTwoSurfaces(&volume2, view, &trackingState);
@@ -321,9 +318,8 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CUDA) {
 		ManipulationEngine_CUDA_PVA_Voxel::Inst().ResetVolume(&volume1);
 
 
-		DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, PlainVoxelArray>* depth_fusion_engine_PVA =
-				DepthFusionEngineFactory
-				::Build<TSDFVoxel, WarpVoxel, PlainVoxelArray>(MEMORYDEVICE_CUDA);
+		DepthFusionEngineInterface<TSDFVoxel, PlainVoxelArray>* depth_fusion_engine_PVA =
+				DepthFusionEngineFactory::Build<TSDFVoxel, PlainVoxelArray>(MEMORYDEVICE_CUDA);
 		IndexingEngineInterface<TSDFVoxel, PlainVoxelArray>& indexer_PVA
 				= IndexingEngineFactory::GetDefault<TSDFVoxel, PlainVoxelArray>(MEMORYDEVICE_CUDA);
 		indexer_PVA.AllocateNearAndBetweenTwoSurfaces(&volume1, view, &trackingState);
@@ -336,8 +332,8 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CUDA) {
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume3(settings->device_type);
 	volume3.Reset();
 
-	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, VoxelBlockHash>* depth_fusion_engine_VBH =
-			DepthFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, VoxelBlockHash>(MEMORYDEVICE_CUDA);
+	DepthFusionEngineInterface<TSDFVoxel, VoxelBlockHash>* depth_fusion_engine_VBH =
+			DepthFusionEngineFactory::Build<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CUDA);
 
 	IndexingEngineInterface<TSDFVoxel, VoxelBlockHash>& indexer_VBH
 			= IndexingEngineFactory::GetDefault<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CUDA);

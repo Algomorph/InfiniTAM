@@ -21,10 +21,10 @@ namespace MiniSlamGraph
 			return new GraphNodeSE3(*this);
 		}
 
-		void applyDelta(const double *delta, const GraphNode *startingPoint = NULL)
+		void applyDelta(const double *delta, const GraphNode *startingPoint = nullptr)
 		{
 			SE3 startingPose;
-			if (startingPoint == NULL) startingPose.SetFrom(&mPose);
+			if (startingPoint == nullptr) startingPose.SetFrom(&mPose);
 			else startingPose.SetFrom(&(((const GraphNodeSE3*)startingPoint)->mPose));
 
 			SE3 deltaPose((float)delta[0], (float)delta[1], (float)delta[2], (float)delta[3], (float)delta[4], (float)delta[5]);

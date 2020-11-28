@@ -36,7 +36,7 @@ namespace ITMLib
 
 		TLevelType * GetLevel(int level) const
 		{
-			return level >= 0 && level < noLevels ? levels[level] : NULL;
+			return level >= 0 && level < noLevels ? levels[level] : nullptr;
 		}
 
 		~ImageHierarchy()

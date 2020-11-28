@@ -12,33 +12,35 @@ ColorTracker_CPU::~ColorTracker_CPU() { }
 
 int ColorTracker_CPU::F_oneLevel(float *f, ORUtils::SE3Pose *pose)
 {
-	int noTotalPoints = trackingState->point_cloud->point_count;
+	int point_count = trackingState->point_cloud->point_count;
 
-	Vector4f projParams = view->calibration_information.intrinsics_rgb.projectionParamsSimple.all;
-	projParams.x /= 1 << levelId; projParams.y /= 1 << levelId;
-	projParams.z /= 1 << levelId; projParams.w /= 1 << levelId;
+	Vector4f rgb_camera_projection_parameters = view->calibration_information.intrinsics_rgb.projectionParamsSimple.all;
+	rgb_camera_projection_parameters.x /= static_cast<float>(1u << levelId);
+	rgb_camera_projection_parameters.y /= static_cast<float>(1u << levelId);
+	rgb_camera_projection_parameters.z /= static_cast<float>(1u << levelId);
+	rgb_camera_projection_parameters.w /= static_cast<float>(1u << levelId);
 
 	Matrix4f M = pose->GetM();
 
-	Vector2i imgSize = viewHierarchy->GetLevel(levelId)->rgb->dimensions;
+	Vector2i rgb_image_size = viewHierarchy->GetLevel(levelId)->rgb->dimensions;
 
-	float scaleForOcclusions, final_f;
+	float scale_for_occlusions, final_f;
 
 	Vector4f *locations = trackingState->point_cloud->locations->GetData(MEMORYDEVICE_CPU);
 	Vector4f *colours = trackingState->point_cloud->colors->GetData(MEMORYDEVICE_CPU);
 	Vector4u *rgb = viewHierarchy->GetLevel(levelId)->rgb->GetData(MEMORYDEVICE_CPU);
 
 	final_f = 0; countedPoints_valid = 0;
-	for (int locId = 0; locId < noTotalPoints; locId++)
+	for (int locId = 0; locId < point_count; locId++)
 	{
-		float colorDiffSq = getColorDifferenceSq(locations, colours, rgb, imgSize, locId, projParams, M);
-		if (colorDiffSq >= 0) { final_f += colorDiffSq; countedPoints_valid++; }
+		float color_difference_squared = getColorDifferenceSq(locations, colours, rgb, rgb_image_size, locId, rgb_camera_projection_parameters, M);
+		if (color_difference_squared >= 0) { final_f += color_difference_squared; countedPoints_valid++; }
 	}
 
-	if (countedPoints_valid == 0) { final_f = 1e10; scaleForOcclusions = 1.0; }
-	else { scaleForOcclusions = (float)noTotalPoints / countedPoints_valid; }
+	if (countedPoints_valid == 0) { final_f = 1e10; scale_for_occlusions = 1.0; }
+	else { scale_for_occlusions = (float)point_count / countedPoints_valid; }
 
-	f[0] = final_f * scaleForOcclusions;
+	f[0] = final_f * scale_for_occlusions;
 
 	return countedPoints_valid;
 }

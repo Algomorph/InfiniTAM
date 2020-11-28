@@ -28,7 +28,7 @@ namespace ITMLib
      */
     template <typename TSurfel>
     static SurfelSceneReconstructionEngine<TSurfel>* Build(const Vector2i& depthImageSize, MemoryDeviceType deviceType){
-	    SurfelSceneReconstructionEngine<TSurfel>* reconstruction_engine = NULL;
+	    SurfelSceneReconstructionEngine<TSurfel>* reconstruction_engine = nullptr;
 
 	    if (deviceType == MEMORYDEVICE_CUDA) {
 #ifdef COMPILE_WITHOUT_CUDA

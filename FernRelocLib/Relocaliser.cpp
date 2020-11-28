@@ -46,8 +46,8 @@ int Relocaliser::ProcessFrame(const ORUtils::Image<float> *img, const ORUtils::S
 
 	// prepare outputs
 	int ret = -1;
-	bool releaseDistances = (distances == NULL);
-	if (distances == NULL) distances = new float[k];
+	bool releaseDistances = (distances == nullptr);
+	if (distances == nullptr) distances = new float[k];
 
 	// find similar frames
 	int similarFound = relocDatabase->findMostSimilar(code, nearestNeighbours, distances, k);

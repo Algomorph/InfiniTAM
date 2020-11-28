@@ -21,8 +21,8 @@
 
 using namespace ITMLib;
 
-template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-void DepthFusionEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::IntegrateDepthImageIntoTsdfVolume_Helper(
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+void DepthFusionEngine<TVoxel, TIndex, TMemoryDeviceType>::IntegrateDepthImageIntoTsdfVolume_Helper(
 		VoxelVolume<TVoxel, TIndex>* volume, const View* view, Matrix4f depth_camera_matrix) {
 	switch(this->parameters.execution_mode){
 		case OPTIMIZED:
@@ -77,14 +77,14 @@ void DepthFusionEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::IntegrateDepth
 	}
 }
 
-template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-void DepthFusionEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::IntegrateDepthImageIntoTsdfVolume(
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+void DepthFusionEngine<TVoxel, TIndex, TMemoryDeviceType>::IntegrateDepthImageIntoTsdfVolume(
 		VoxelVolume<TVoxel, TIndex>* volume, const View* view, const CameraTrackingState* trackingState) {
 	IntegrateDepthImageIntoTsdfVolume_Helper(volume, view, trackingState->pose_d->GetM());
 }
 
-template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-void DepthFusionEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::IntegrateDepthImageIntoTsdfVolume(
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+void DepthFusionEngine<TVoxel, TIndex, TMemoryDeviceType>::IntegrateDepthImageIntoTsdfVolume(
 		VoxelVolume<TVoxel, TIndex>* volume, const View* view) {
 	IntegrateDepthImageIntoTsdfVolume_Helper(volume, view);
 }

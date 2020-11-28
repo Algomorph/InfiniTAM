@@ -176,7 +176,7 @@ namespace ORUtils
 		~HomkerMap()
 		{
 			delete table;
-			table = NULL;
+			table = nullptr;
 		}
 	};
 }

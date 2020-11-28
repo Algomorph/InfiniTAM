@@ -36,8 +36,8 @@ namespace ITMLib
 			}
 			else
 			{
-				this->intensity_current = NULL;
-				this->intensity_prev = NULL;
+				this->intensity_current = nullptr;
+				this->intensity_prev = nullptr;
 			}
 
 			this->gradients = new ORUtils::Image<Vector2f>(imgSize, memoryType);

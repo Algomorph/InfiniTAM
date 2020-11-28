@@ -77,7 +77,7 @@ namespace ITMLib
      */
     TSurfel *AllocateSurfels(size_t newSurfelCount)
     {
-      if(m_surfelCount + newSurfelCount > m_surfelsMB->size()) return NULL;
+      if(m_surfelCount + newSurfelCount > m_surfelsMB->size()) return nullptr;
       TSurfel *newSurfels = m_surfelsMB->GetData(m_memoryType) + m_surfelCount;
       m_surfelCount += newSurfelCount;
       return newSurfels;

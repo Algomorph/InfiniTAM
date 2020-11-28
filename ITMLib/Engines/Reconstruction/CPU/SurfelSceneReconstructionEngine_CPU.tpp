@@ -33,7 +33,7 @@ void SurfelSceneReconstructionEngine_CPU<TSurfel>::AddNewSurfels(SurfelScene<TSu
   // Add the new surfels to the scene.
   const size_t newSurfelCount = static_cast<size_t>(newPointsPrefixSum[pixelCount]);
   TSurfel *newSurfels = scene->AllocateSurfels(newSurfelCount);
-  if(newSurfels == NULL) return;
+  if(newSurfels == nullptr) return;
 
   const Vector4u *colourMap = view->rgb.GetData(MEMORYDEVICE_CPU);
   const Matrix4f& depthToRGB = view->calibration_information.trafo_rgb_to_depth.calib_inv;

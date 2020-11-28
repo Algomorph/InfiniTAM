@@ -182,7 +182,10 @@ static constexpr const std::string_view frame_116_depth_path = ORUtils::join_v<s
 static constexpr const std::string_view frame_116_color_file_name = "teddy_color_000116.png";
 static constexpr const std::string_view frame_116_color_path = ORUtils::join_v<static_frames_directory, frame_116_color_file_name>;
 
-
+static constexpr const std::string_view frame_200_depth_file_name = "teddy_depth_000200.png";
+static constexpr const std::string_view frame_200_depth_path = ORUtils::join_v<static_frames_directory, frame_200_depth_file_name>;
+static constexpr const std::string_view frame_200_color_file_name = "teddy_color_000200.png";
+static constexpr const std::string_view frame_200_color_path = ORUtils::join_v<static_frames_directory, frame_200_color_file_name>;
 
 } // namespace teddy
 

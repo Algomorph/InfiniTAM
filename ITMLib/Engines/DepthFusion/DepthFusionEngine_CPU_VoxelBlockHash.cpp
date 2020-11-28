@@ -22,5 +22,5 @@
 namespace ITMLib {
 
 template
-class DepthFusionEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>;
+class DepthFusionEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>;
 }

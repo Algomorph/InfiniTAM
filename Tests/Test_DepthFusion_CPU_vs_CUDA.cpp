@@ -97,14 +97,12 @@ BOOST_AUTO_TEST_CASE(Test_SceneConstruct17_VBH_CPU_CUDA_NearSurface){
 
 // *** integrate depth ***
 	// CPU
-	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, VoxelBlockHash>* reconstructionEngine_VBH_CPU =
-			DepthFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, VoxelBlockHash>(
-					MEMORYDEVICE_CPU);
+	DepthFusionEngineInterface<TSDFVoxel, VoxelBlockHash>* reconstructionEngine_VBH_CPU =
+			DepthFusionEngineFactory::Build<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CPU);
 	reconstructionEngine_VBH_CPU->IntegrateDepthImageIntoTsdfVolume(&volume_VBH_17_CPU, view_17_CPU);
 	// CUDA
-	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, VoxelBlockHash>* reconstructionEngine_VBH_CUDA =
-			DepthFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, VoxelBlockHash>(
-					MEMORYDEVICE_CUDA);
+	DepthFusionEngineInterface<TSDFVoxel, VoxelBlockHash>* reconstructionEngine_VBH_CUDA =
+			DepthFusionEngineFactory::Build<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CUDA);
 	reconstructionEngine_VBH_CUDA->IntegrateDepthImageIntoTsdfVolume(&volume_VBH_17_CUDA, view_17_CUDA);
 
 // *** compare after depth integration ***
@@ -141,16 +139,14 @@ BOOST_AUTO_TEST_CASE(Test_SceneConstruct17_VBH_CPU_CUDA_SurfaceSpan){
 	CameraTrackingState tracking_state_CPU(view_16_CPU->depth.dimensions, MEMORYDEVICE_CPU);
 	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>& indexer_CPU =
 			IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance();
-	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, VoxelBlockHash>* depth_fusion_engine_VBH_CPU =
-			DepthFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, VoxelBlockHash>(
-					MEMORYDEVICE_CPU);
+	DepthFusionEngineInterface<TSDFVoxel, VoxelBlockHash>* depth_fusion_engine_VBH_CPU =
+			DepthFusionEngineFactory::Build<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CPU);
 	// CUDA
 	CameraTrackingState tracking_state_CUDA(view_16_CUDA->depth.dimensions, MEMORYDEVICE_CUDA);
 	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>& indexer_CUDA =
 			IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance();
-	DepthFusionEngineInterface<TSDFVoxel, WarpVoxel, VoxelBlockHash>* depth_fusion_engine_VBH_CUDA =
-			DepthFusionEngineFactory::Build<TSDFVoxel, WarpVoxel, VoxelBlockHash>(
-					MEMORYDEVICE_CUDA);
+	DepthFusionEngineInterface<TSDFVoxel, VoxelBlockHash>* depth_fusion_engine_VBH_CUDA =
+			DepthFusionEngineFactory::Build<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CUDA);
 	// ** generate point cloud for previous frame **
 	{
 		// ** scenes & render states

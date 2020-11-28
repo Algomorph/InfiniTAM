@@ -7,10 +7,10 @@
 
 +(MetalContext*) instance
 {
-    static MetalContext *gInstance = NULL;
+    static MetalContext *gInstance = nullptr;
     @synchronized(self)
     {
-        if (gInstance == NULL) gInstance = [[self alloc]initWithDevice:nil];
+        if (gInstance == nullptr) gInstance = [[self alloc]initWithDevice:nil];
         return gInstance;
     }
 }
