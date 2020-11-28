@@ -17,8 +17,8 @@ namespace ITMLib
 		void DepthFiltering(FloatImage& image_out, const FloatImage& image_in);
 		void ComputeNormalAndWeights(Float4Image& normal_out, FloatImage& sigma_z_out, const FloatImage& depth_in, Vector4f camera_projection_parameters);
 
-		void UpdateView(View** view, UChar4Image* rgbImage, ShortImage* rawDepthImage, bool useThresholdFilter,
-		                bool useBilateralFilter, bool modelSensorNoise, bool storePreviousImage);
+		void UpdateView(View** view, UChar4Image* rgb_image, ShortImage* raw_depth_image, bool use_threshold_filter,
+		                bool use_bilateral_filter, bool model_sensor_noise, bool store_previous_image);
 		void UpdateView(View** view, UChar4Image* rgbImage, ShortImage* depthImage, bool useThresholdFilter,
 		                bool useBilateralFilter, IMUMeasurement* imuMeasurement, bool modelSensorNoise,
 		                bool storePreviousImage);

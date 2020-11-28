@@ -709,7 +709,7 @@ void GenerateRigidAlignmentTestData(){
 	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(),
 	               "Generating rigid alignment test data (" << IndexString<TIndex>() << ", "
 	                       << DeviceString<TMemoryDeviceType>() << ") ...");
-	View* view;
+	View* view = nullptr;
 
 	UpdateView(&view,
 	           std::string(teddy::frame_115_depth_path),

@@ -12,24 +12,24 @@ ViewBuilder_CPU::ViewBuilder_CPU(const RGBD_CalibrationInformation& calib) : Vie
 
 ViewBuilder_CPU::~ViewBuilder_CPU() {}
 
-void ViewBuilder_CPU::UpdateView(View** view_ptr, UChar4Image* rgbImage, ShortImage* rawDepthImage, bool useThresholdFilter,
-                                 bool useBilateralFilter, bool modelSensorNoise, bool storePreviousImage) {
+void ViewBuilder_CPU::UpdateView(View** view_ptr, UChar4Image* rgb_image, ShortImage* raw_depth_image, bool use_threshold_filter,
+                                 bool use_bilateral_filter, bool model_sensor_noise, bool store_previous_image) {
 	if (*view_ptr == nullptr) {
-		*view_ptr = new View(calibration_information, rgbImage->dimensions, rawDepthImage->dimensions, false);
-		if (modelSensorNoise) {
-			(*view_ptr)->depth_normal = new Float4Image(rawDepthImage->dimensions, true, false);
-			(*view_ptr)->depth_uncertainty = new FloatImage(rawDepthImage->dimensions, true, false);
+		*view_ptr = new View(calibration_information, rgb_image->dimensions, raw_depth_image->dimensions, false);
+		if (model_sensor_noise) {
+			(*view_ptr)->depth_normal = new Float4Image(raw_depth_image->dimensions, true, false);
+			(*view_ptr)->depth_uncertainty = new FloatImage(raw_depth_image->dimensions, true, false);
 		}
 	}
 	View* view = *view_ptr;
 
-	if (storePreviousImage) {
-		if (!view->rgb_prev) view->rgb_prev = new UChar4Image(rgbImage->dimensions, true, false);
+	if (store_previous_image) {
+		if (!view->rgb_prev) view->rgb_prev = new UChar4Image(rgb_image->dimensions, true, false);
 		else view->rgb_prev->SetFrom(view->rgb, MemoryCopyDirection::CPU_TO_CPU);
 	}
 
-	view->rgb.SetFrom(*rgbImage, MemoryCopyDirection::CPU_TO_CPU);
-	view->short_raw_disparity_image.SetFrom(*rawDepthImage, MemoryCopyDirection::CPU_TO_CPU);
+	view->rgb.SetFrom(*rgb_image, MemoryCopyDirection::CPU_TO_CPU);
+	view->short_raw_disparity_image.SetFrom(*raw_depth_image, MemoryCopyDirection::CPU_TO_CPU);
 
 	switch (view->calibration_information.disparityCalib.GetType()) {
 		case DisparityCalib::TRAFO_KINECT:
@@ -43,12 +43,12 @@ void ViewBuilder_CPU::UpdateView(View** view_ptr, UChar4Image* rgbImage, ShortIm
 			break;
 	}
 
-	if (useThresholdFilter) {
+	if (use_threshold_filter) {
 		this->ThresholdFiltering(view->float_raw_disparity_image, view->depth);
 		view->depth.SetFrom(view->float_raw_disparity_image, MemoryCopyDirection::CPU_TO_CPU);
 	}
 
-	if (useBilateralFilter) {
+	if (use_bilateral_filter) {
 		//5 steps of bilateral filtering
 		this->DepthFiltering(view->float_raw_disparity_image, view->depth);
 		this->DepthFiltering(view->depth, view->float_raw_disparity_image);
@@ -58,12 +58,12 @@ void ViewBuilder_CPU::UpdateView(View** view_ptr, UChar4Image* rgbImage, ShortIm
 		view->depth.SetFrom(view->float_raw_disparity_image, MemoryCopyDirection::CPU_TO_CPU);
 	}
 
-	if (useThresholdFilter) {
+	if (use_threshold_filter) {
 		this->ThresholdFiltering(view->float_raw_disparity_image, view->depth);
 		view->depth.SetFrom(view->float_raw_disparity_image, MemoryCopyDirection::CPU_TO_CPU);
 	}
 
-	if (modelSensorNoise) {
+	if (model_sensor_noise) {
 		this->ComputeNormalAndWeights(*view->depth_normal, *view->depth_uncertainty, view->depth,
 		                              view->calibration_information.intrinsics_d.projectionParamsSimple.all);
 	}
