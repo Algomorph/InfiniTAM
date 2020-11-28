@@ -706,6 +706,9 @@ void GenerateRenderingTestData_VoxelBlockHash() {
 
 template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void GenerateRigidAlignmentTestData(){
+	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(),
+	               "Generating rigid alignment test data (" << IndexString<TIndex>() << ", "
+	                       << DeviceString<TMemoryDeviceType>() << ") ...");
 	View* view;
 
 	UpdateView(&view,
@@ -714,14 +717,20 @@ void GenerateRigidAlignmentTestData(){
 	           std::string(teddy::calibration_path),
 	           TMemoryDeviceType);
 
-	VoxelVolume<TSDFVoxel_f_rgb, TIndex> volume;
+	VoxelVolume<TSDFVoxel_f_rgb, TIndex> volume(TMemoryDeviceType,
+											 VoxelBlockHashParameters(0x40000,0x20000));
 	IndexingEngineInterface<TSDFVoxel_f_rgb, TIndex>* indexing_engine = IndexingEngineFactory::Build<TSDFVoxel_f_rgb, TIndex>(TMemoryDeviceType);
 	CameraTrackingState camera_tracking_state(teddy::frame_image_size, TMemoryDeviceType);
 	indexing_engine->AllocateNearSurface(&volume, view, &camera_tracking_state);
 	DepthFusionEngineInterface<TSDFVoxel_f_rgb, TIndex>* depth_fusion_engine = DepthFusionEngineFactory::Build<TSDFVoxel_f_rgb, TIndex>(TMemoryDeviceType);
+	depth_fusion_engine->IntegrateDepthImageIntoTsdfVolume(&volume, view);
+
+	ConstructGeneratedVolumeSubdirectoriesIfMissing();
+	volume.SaveToDisk(teddy::Volume115Path<TIndex>());
+
 
 	delete indexing_engine;
-	delete
+	delete depth_fusion_engine;
 	delete view;
 }
 
@@ -737,7 +746,8 @@ void GenerateRigidAlignmentTestData(){
     (VBH_FUSED_VOLUMES,                      "VBH_FUSED_VOLUMES", "vbh_fused_volumes", "vbh_fv"), \
     (CONFUGRATIONS,                          "CONFIGURATIONS", "configurations", "config", "c"), \
     (MESHES,                                 "MESHES", "meshes", "m"), \
-    (RENDERING,                              "RENDERING", "rendering", "r")
+    (RENDERING,                              "RENDERING", "rendering", "r"), \
+    (RIGID_ALIGNMENT,                        "RIGID_ALIGNMENT", "rigid_alignment", "ra")
 
 GENERATE_SERIALIZABLE_ENUM(GENERATED_TEST_DATA_TYPE_ENUM_DESCRIPTION);
 
@@ -759,7 +769,8 @@ int main(int argc, char* argv[]) {
 					{VBH_FUSED_VOLUMES,                     GenerateFusedVolumeTestData<VoxelBlockHash>},
 					{CONFUGRATIONS,                         GenerateConfigurationTestData},
 					{MESHES,                                GenerateMeshingTestData<VoxelBlockHash, MEMORYDEVICE_CPU>},
-					{RENDERING,                             GenerateRenderingTestData_VoxelBlockHash<MEMORYDEVICE_CPU>}
+					{RENDERING,                             GenerateRenderingTestData_VoxelBlockHash<MEMORYDEVICE_CPU>},
+					{RIGID_ALIGNMENT,                       GenerateRigidAlignmentTestData<VoxelBlockHash, MEMORYDEVICE_CPU>}
 			});
 	if (argc < 2) {
 		// calls every generator iteratively

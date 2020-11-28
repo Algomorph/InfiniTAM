@@ -13,15 +13,13 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "../Traversal/CUDA/VolumeTraversal_CUDA_VoxelBlockHash.h"
-#include "../Reduction/CUDA/VolumeReduction_CUDA_VoxelBlockHash.h"
-#include "../Traversal/CUDA/HashTableTraversal_CUDA.cuh"
-#include "../../GlobalTemplateDefines.h"
-#include "AnalyticsEngine.tpp"
+#include "../../Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
+#include "../../Reduction/CPU/VolumeReduction_CPU_VoxelBlockHash.h"
+#include "../../Traversal/CPU/HashTableTraversal_CPU.h"
+#include "../../../Objects/Volume/VoxelTypes.h"
+#include "../AnalyticsEngine.tpp"
 
 namespace ITMLib {
 template
-class AnalyticsEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>;
-template
-class AnalyticsEngine<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>;
+class AnalyticsEngine<TSDFVoxel_f_flags, VoxelBlockHash, MEMORYDEVICE_CPU>;
 } // namespace ITMLib

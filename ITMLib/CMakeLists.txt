@@ -202,17 +202,24 @@ set(
         ITMLIB_ENGINES_EDIT_AND_COPY_SOURCES
 
         ## CPU
-        Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.cpp
         Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU_VoxelBlockHash.tpp
         Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU_PlainVoxelArray.tpp
-        Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU_VoxelBlockHash.cpp
-        Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU_PlainVoxelArray.cpp
+        Engines/EditAndCopy/CPU/Instantiations/EditAndCopyEngine_CPU_VoxelBlockHash_TSDFVoxel_f_flags.cpp
+        Engines/EditAndCopy/CPU/Instantiations/EditAndCopyEngine_CPU_VoxelBlockHash_TSDFVoxel_f_rgb.cpp
+        Engines/EditAndCopy/CPU/Instantiations/EditAndCopyEngine_CPU_VoxelBlockHash_WarpVoxel.cpp
+        Engines/EditAndCopy/CPU/Instantiations/EditAndCopyEngine_CPU_PlainVoxelArray_TSDFVoxel_f_flags.cpp
+        Engines/EditAndCopy/CPU/Instantiations/EditAndCopyEngine_CPU_PlainVoxelArray_TSDFVoxel_f_rgb.cpp
+        Engines/EditAndCopy/CPU/Instantiations/EditAndCopyEngine_CPU_PlainVoxelArray_WarpVoxel.cpp
 
         ## CUDA
         Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA_VoxelBlockHash.tcu
         Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA_PlainVoxelArray.tcu
-        Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA_VoxelBlockHash.cu
-        Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA_PlainVoxelArray.cu
+        Engines/EditAndCopy/CUDA/Instantiations/EditAndCopyEngine_CUDA_VoxelBlockHash_TSDFVoxel_f_flags.cu
+        Engines/EditAndCopy/CUDA/Instantiations/EditAndCopyEngine_CUDA_VoxelBlockHash_TSDFVoxel_f_rgb.cu
+        Engines/EditAndCopy/CUDA/Instantiations/EditAndCopyEngine_CUDA_VoxelBlockHash_WarpVoxel.cu
+        Engines/EditAndCopy/CUDA/Instantiations/EditAndCopyEngine_CUDA_PlainVoxelArray_TSDFVoxel_f_flags.cu
+        Engines/EditAndCopy/CUDA/Instantiations/EditAndCopyEngine_CUDA_PlainVoxelArray_TSDFVoxel_f_rgb.cu
+        Engines/EditAndCopy/CUDA/Instantiations/EditAndCopyEngine_CUDA_PlainVoxelArray_WarpVoxel.cu
 )
 
 #====================================== MESHING ENGINES ================================================================
@@ -304,8 +311,8 @@ set(
         ## Interface
         Engines/Indexing/Interface/IndexingEngine.h
         ## PVA
-        Engines/Indexing/PVA/IndexingEngine_CUDA_PlainVoxelArray.cu
-        Engines/Indexing/PVA/IndexingEngine_CPU_PlainVoxelArray.cpp
+        Engines/Indexing/PVA/IndexingEngine_PlainVoxelArray_CUDA.cu
+        Engines/Indexing/PVA/IndexingEngine_PlainVoxelArray_CPU.cpp
         Engines/Indexing/PVA/IndexingEngine_PlainVoxelArray.tpp
         ## VBH
         Engines/Indexing/VBH/IndexingEngine_VoxelBlockHash.tpp
@@ -314,7 +321,7 @@ set(
         ## CPU/CUDA VBH
         Engines/Indexing/VBH/CPU/IndexingEngine_VoxelBlockHash_CPU.tpp
         Engines/Indexing/VBH/CUDA/IndexingEngine_VoxelBlockHash_CUDA.tcu
-)
+        Engines/Indexing/PVA/AllocateUsingOtherVolume_PlainVoxelArray_CPU.cpp Engines/Indexing/PVA/AllocateUsingOtherVolume_PlainVoxelArray_CUDA.cu Engines/Indexing/VBH/AllocateUsingOtherVolume_VoxelBlockHash_CPU.cpp Engines/Indexing/VBH/AllocateUsingOtherVolume_VoxelBlockHash_CUDA.cu)
 
 
 #====================================== RECONSTRUCTION (SDF GENERATION) ENGINES ========================================
@@ -381,19 +388,29 @@ set(
 )
 ## ======================================= DEPTH FUSION ENGINE =========================================================
 # (replaces former "reconstruction" engine for dynamic-scene fusion)
-set(ITMLIB_ENGINES_DEPTH_FUSION_SOURCES
-    Engines/DepthFusion/DepthFusionEngine.tpp
-    Engines/DepthFusion/DepthFusionEngine_CPU_VoxelBlockHash.cpp
-    Engines/DepthFusion/DepthFusionEngine_CPU_PlainVoxelArray.cpp
-    Engines/DepthFusion/DepthFusionEngine_CUDA_PlainVoxelArray.cu
-    Engines/DepthFusion/DepthFusionEngine_CUDA_VoxelBlockHash.cu
-    Engines/DepthFusion/DepthFusionSettings.cpp)
+set(
+        ITMLIB_ENGINES_DEPTH_FUSION_SOURCES
 
-set(ITMLIB_ENGINES_DEPTH_FUSION_HEADERS
-    Engines/DepthFusion/DepthFusionEngineFactory.h
-    Engines/DepthFusion/DepthFusionEngine_Shared.h
-    Engines/DepthFusion/DepthFusionEngine.h
-    Engines/DepthFusion/DepthFusionSettings.h)
+        Engines/DepthFusion/DepthFusionEngine.tpp
+        Engines/DepthFusion/DepthFusionSettings.cpp
+        Engines/DepthFusion/Instantiations/DepthFusionEngine_CPU_VoxelBlockHash_TSDFVoxel_f_flags.cpp
+        Engines/DepthFusion/Instantiations/DepthFusionEngine_CPU_PlainVoxelArray_TSDFVoxel_f_flags.cpp
+        Engines/DepthFusion/Instantiations/DepthFusionEngine_CUDA_PlainVoxelArray_TSDFVoxel_f_flags.cu
+        Engines/DepthFusion/Instantiations/DepthFusionEngine_CUDA_VoxelBlockHash_TSDFVoxel_f_flags.cu
+        Engines/DepthFusion/Instantiations/DepthFusionEngine_CPU_VoxelBlockHash_TSDFVoxel_f_rgb.cpp
+        Engines/DepthFusion/Instantiations/DepthFusionEngine_CPU_PlainVoxelArray_TSDFVoxel_f_rgb.cpp
+        Engines/DepthFusion/Instantiations/DepthFusionEngine_CUDA_PlainVoxelArray_TSDFVoxel_f_rgb.cu
+        Engines/DepthFusion/Instantiations/DepthFusionEngine_CUDA_VoxelBlockHash_TSDFVoxel_f_rgb.cu
+)
+
+set(
+        ITMLIB_ENGINES_DEPTH_FUSION_HEADERS
+
+        Engines/DepthFusion/DepthFusionEngineFactory.h
+        Engines/DepthFusion/DepthFusionEngine_Shared.h
+        Engines/DepthFusion/DepthFusionEngine.h
+        Engines/DepthFusion/DepthFusionSettings.h
+)
 
 ## ======================================= VOLUME FUSION ENGINE ========================================================
 set(ITMLIB_ENGINES_VOLUME_FUSION_SOURCES
@@ -433,8 +450,12 @@ set(ITMLIB_ENGINES_VOLUME_FILE_IO_HEADERS
 set(ITMLIB_ENGINES_VOLUME_FILE_IO_SOURCES
     Engines/VolumeFileIO/VolumeFileIOEngine.tpp
     Engines/VolumeFileIO/VolumeFileIOEngine.cpp
-    Engines/VolumeFileIO/VolumeFileIOEngine_PlainVoxelArray.cpp
-    Engines/VolumeFileIO/VolumeFileIOEngine_VoxelBlockHash.cpp
+    Engines/VolumeFileIO/Instantiations/VolumeFileIOEngine_PlainVoxelArray_TSDFVoxel_f_flags.cpp
+    Engines/VolumeFileIO/Instantiations/VolumeFileIOEngine_PlainVoxelArray_TSDFVoxel_f_rgb.cpp
+    Engines/VolumeFileIO/Instantiations/VolumeFileIOEngine_PlainVoxelArray_WarpVoxel.cpp
+    Engines/VolumeFileIO/Instantiations/VolumeFileIOEngine_VoxelBlockHash_TSDFVoxel_f_flags.cpp
+    Engines/VolumeFileIO/Instantiations/VolumeFileIOEngine_VoxelBlockHash_TSDFVoxel_f_rgb.cpp
+    Engines/VolumeFileIO/Instantiations/VolumeFileIOEngine_VoxelBlockHash_WarpVoxel.cpp
     )
 ## ======================================= SWAPPING ENGINES ============================================================
 set(ITMLIB_ENGINES_SWAPPING_HEADERS
@@ -578,11 +599,20 @@ set(
         ITMLIB_ENGINES_ANALYTICS_SOURCES
 
         Engines/Analytics/AnalyticsEngine.tpp
-        Engines/Analytics/AnalyticsEngine_CPU_PlainVoxelArray.cpp
-        Engines/Analytics/AnalyticsEngine_CPU_VoxelBlockHash.cpp
-        Engines/Analytics/AnalyticsEngine_CUDA_PlainVoxelArray.cu
-        Engines/Analytics/AnalyticsEngine_CUDA_VoxelBlockHash.cu
         Engines/Analytics/AnalyticsLogging.cpp
+        Engines/Analytics/Instantiations/AnalyticsEngine_CPU_PlainVoxelArray_TSDFVoxel_f_flags.cpp
+        Engines/Analytics/Instantiations/AnalyticsEngine_CPU_PlainVoxelArray_TSDFVoxel_f_rgb.cpp
+        Engines/Analytics/Instantiations/AnalyticsEngine_CPU_PlainVoxelArray_WarpVoxel.cpp
+        Engines/Analytics/Instantiations/AnalyticsEngine_CPU_VoxelBlockHash_TSDFVoxel_f_flags.cpp
+        Engines/Analytics/Instantiations/AnalyticsEngine_CPU_VoxelBlockHash_TSDFVoxel_f_rgb.cpp
+        Engines/Analytics/Instantiations/AnalyticsEngine_CPU_VoxelBlockHash_WarpVoxel.cpp
+        Engines/Analytics/Instantiations/AnalyticsEngine_CUDA_PlainVoxelArray_TSDFVoxel_f_flags.cu
+        Engines/Analytics/Instantiations/AnalyticsEngine_CUDA_PlainVoxelArray_TSDFVoxel_f_rgb.cu
+        Engines/Analytics/Instantiations/AnalyticsEngine_CUDA_PlainVoxelArray_WarpVoxel.cu
+        Engines/Analytics/Instantiations/AnalyticsEngine_CUDA_VoxelBlockHash_TSDFVoxel_f_flags.cu
+        Engines/Analytics/Instantiations/AnalyticsEngine_CUDA_VoxelBlockHash_TSDFVoxel_f_rgb.cu
+        Engines/Analytics/Instantiations/AnalyticsEngine_CUDA_VoxelBlockHash_WarpVoxel.cu
+
 )
 
 ## ================================================== TELEMETRY ENGINES ================================================

@@ -1,6 +1,6 @@
 //  ================================================================
-//  Created by Gregory Kramida (https://github.com/Algomorph) on 4/16/20.
-//  Copyright (c) 2020 Gregory Kramida
+//  Created by Gregory Kramida on 5/22/18.
+//  Copyright (c) 2018-2000 Gregory Kramida
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
 //  You may obtain a copy of the License at
@@ -14,12 +14,12 @@
 //  limitations under the License.
 //  ================================================================
 
-#include "GlobalCache.tpp"
-#include "../../GlobalTemplateDefines.h"
+#include "../../../../Objects/Volume/VoxelTypes.h"
 
-namespace ITMLib {
-template class GlobalCache<TSDFVoxel_f_flags, PlainVoxelArray>;
-template class GlobalCache<TSDFVoxel_f_rgb, PlainVoxelArray>;
-template class GlobalCache<WarpVoxel, PlainVoxelArray>;
-}  // namespace ITMLib
+//Note: ".tpp" files have to be included for all explicit instantiations in order to link properly
+#include "../EditAndCopyEngine_CUDA_VoxelBlockHash.tcu"
+#include "../../../../Objects/Volume/VoxelVolume.h"
 
+namespace ITMLib{
+template class EditAndCopyEngine_CUDA<TSDFVoxel_f_flags,VoxelBlockHash>;
+}

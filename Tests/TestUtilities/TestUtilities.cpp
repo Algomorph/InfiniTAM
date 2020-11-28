@@ -505,7 +505,7 @@ std::vector<ORUtils::SE3Pose> GenerateCameraTrajectoryAroundPoint(const Vector3f
 		Vector3f viewpoint = target + rotated_target_to_viewpoint;
 
 		Vector3f viewpoint_to_target_normalized = ORUtils::normalize(-rotated_target_to_viewpoint);
-		/* InfiniTAM's default (unconventional) axis system is as follows:
+		/* Original InfiniTAM's default (unconventional) axis system is as follows:
 		 *               ◢ ----------▶ +x
 		 *             ╱ |
 		 *           ╱   |

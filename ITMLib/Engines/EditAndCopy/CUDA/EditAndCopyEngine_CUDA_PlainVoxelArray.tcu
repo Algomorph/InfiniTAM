@@ -171,7 +171,7 @@ bool EditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::CopyVolumeSlice(
 		              source_volume->index.GetVolumeSize().y / cudaBlockSize.y,
 		              source_volume->index.GetVolumeSize().z / cudaBlockSize.z);
 
-		directCopy_device<TVoxel> <<< gridSize, cudaBlockSize >>> (destinationVoxels, sourceVoxels, indexData);
+		directCopy_device<TVoxel><<<gridSize, cudaBlockSize>>> (destinationVoxels, sourceVoxels, indexData);
 		ORcudaKernelCheck;
 
 	} else {

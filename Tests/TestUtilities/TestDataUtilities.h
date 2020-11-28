@@ -187,6 +187,14 @@ static constexpr const std::string_view frame_200_depth_path = ORUtils::join_v<s
 static constexpr const std::string_view frame_200_color_file_name = "teddy_color_000200.png";
 static constexpr const std::string_view frame_200_color_path = ORUtils::join_v<static_frames_directory, frame_200_color_file_name>;
 
+template<typename TIndex>
+std::string Volume115Path() {
+	return std::string(test::generated_volume_directory) + test::IndexString<TIndex>() + "/teddy_frame_115.dat";
+}
+
+extern template std::string Volume115Path<PlainVoxelArray>();
+extern template std::string Volume115Path<VoxelBlockHash>();
+
 } // namespace teddy
 
 } // namespace test

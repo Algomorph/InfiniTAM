@@ -16,8 +16,8 @@
 #include "TestDataUtilities.h"
 #include "TestUtilities.h"
 
-namespace test::snoopy {
-
+namespace test {
+namespace snoopy {
 
 
 template std::string PartialVolume00Path<PlainVoxelArray>();
@@ -36,6 +36,7 @@ template<>
 PlainVoxelArray::InitializationParameters InitializationParameters_Fr00<PlainVoxelArray>() {
 	return {Vector3i(512, 112, 360), Vector3i(-512, -24, 152)};
 }
+
 template<>
 VoxelBlockHash::InitializationParameters InitializationParameters_Fr00<VoxelBlockHash>() {
 	return {0x0800, 0x20000};
@@ -45,11 +46,11 @@ template<>
 PlainVoxelArray::InitializationParameters InitializationParameters_Fr16andFr17<PlainVoxelArray>() {
 	return {Vector3i(88, 104, 176), Vector3i(-72, -24, 152)};
 }
+
 template<>
 VoxelBlockHash::InitializationParameters InitializationParameters_Fr16andFr17<VoxelBlockHash>() {
 	return {0x0800, 0x20000};
 }
-
 
 
 template void
@@ -65,4 +66,11 @@ Load<VoxelBlockHash>(VoxelVolume<TSDFVoxel, VoxelBlockHash>** volume, Frame fram
                      configuration::SwappingMode swapping_mode = configuration::SWAPPINGMODE_DISABLED);
 
 
-} // namespace snoopy16and17utilities
+} // namespace snoopy
+namespace teddy{
+
+template std::string Volume115Path<PlainVoxelArray>();
+template std::string Volume115Path<VoxelBlockHash>();
+
+} // namespace teddy
+} // namespace test

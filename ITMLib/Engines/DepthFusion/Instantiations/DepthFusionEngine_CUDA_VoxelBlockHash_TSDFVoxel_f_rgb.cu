@@ -13,12 +13,12 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "../Traversal/CUDA/VolumeTraversal_CUDA_VoxelBlockHash.h"
-#include "../Indexing/VBH/CUDA/IndexingEngine_VoxelBlockHash_CUDA.h"
-#include "DepthFusionEngine.tpp"
-#include "../../GlobalTemplateDefines.h"
+#include "../../Traversal/CUDA/VolumeTraversal_CUDA_VoxelBlockHash.h"
+#include "../../Indexing/VBH/CUDA/IndexingEngine_VoxelBlockHash_CUDA.h"
+#include "../DepthFusionEngine.tpp"
+#include "../../../Objects/Volume/VoxelTypes.h"
 
 namespace ITMLib {
 template
-class DepthFusionEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>;
+class DepthFusionEngine<TSDFVoxel_f_rgb, VoxelBlockHash, MEMORYDEVICE_CUDA>;
 }

@@ -48,7 +48,7 @@ void EditAndCopyEngine_CPU<TVoxel, VoxelBlockHash>::ResetVolume(
 
 	volume->index.SetLastFreeBlockListId(block_count - 1);
 
-	const HashEntry default_entry = [](){
+	const HashEntry default_entry = []() {
 		HashEntry default_entry;
 		memset(&default_entry, 0, sizeof(HashEntry));
 		default_entry.ptr = -2;
@@ -292,7 +292,8 @@ firstprivate(hash_entry_count)
 				for (int y = 0; y < VOXEL_BLOCK_SIZE; y++) {
 					for (int x = 0; x < VOXEL_BLOCK_SIZE; x++) {
 						int voxel_index_in_block;
-						Vector3i source_point(source_block_position_voxels.x + x, source_block_position_voxels.y + y, source_block_position_voxels.z + z);
+						Vector3i source_point(source_block_position_voxels.x + x, source_block_position_voxels.y + y,
+						                      source_block_position_voxels.z + z);
 						Vector3i destination_point = source_point + offset;
 						voxel_index_in_block = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
 						TVoxel source_voxel = voxel_block[voxel_index_in_block];

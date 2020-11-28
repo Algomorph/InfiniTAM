@@ -1,6 +1,6 @@
 //  ================================================================
-//  Created by Gregory Kramida (https://github.com/Algomorph) on 4/16/20.
-//  Copyright (c) 2020 Gregory Kramida
+//  Created by Gregory Kramida on 6/19/18.
+//  Copyright (c) 2018-2000 Gregory Kramida
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
 //  You may obtain a copy of the License at
@@ -13,13 +13,12 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-
-#include "GlobalCache.tpp"
-#include "../../GlobalTemplateDefines.h"
+#include "../../Traversal/CUDA/VolumeTraversal_CUDA_VoxelBlockHash.h"
+#include "../../Indexing/VBH/CUDA/IndexingEngine_VoxelBlockHash_CUDA.h"
+#include "../DepthFusionEngine.tpp"
+#include "../../../Objects/Volume/VoxelTypes.h"
 
 namespace ITMLib {
-template class GlobalCache<TSDFVoxel_f_flags, PlainVoxelArray>;
-template class GlobalCache<TSDFVoxel_f_rgb, PlainVoxelArray>;
-template class GlobalCache<WarpVoxel, PlainVoxelArray>;
-}  // namespace ITMLib
-
+template
+class DepthFusionEngine<TSDFVoxel_f_flags, VoxelBlockHash, MEMORYDEVICE_CUDA>;
+}

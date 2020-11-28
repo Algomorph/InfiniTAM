@@ -1,6 +1,6 @@
 //  ================================================================
-//  Created by Gregory Kramida on 8/27/19.
-//  Copyright (c) 2019 Gregory Kramida
+//  Created by Gregory Kramida on 6/19/18.
+//  Copyright (c) 2018-2000 Gregory Kramida
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
 //  You may obtain a copy of the License at
@@ -13,12 +13,12 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "../../GlobalTemplateDefines.h"
-#include "VolumeFileIOEngine.tpp"
+#include "../../Traversal/CUDA/VolumeTraversal_CUDA_PlainVoxelArray.h"
+#include "../../Indexing/PVA/IndexingEngine_PlainVoxelArray.tpp"
+#include "../DepthFusionEngine.tpp"
+#include "../../../Objects/Volume/VoxelTypes.h"
 
 namespace ITMLib {
 template
-class VolumeFileIOEngine<TSDFVoxel, PlainVoxelArray>;
-template
-class VolumeFileIOEngine<WarpVoxel, PlainVoxelArray>;
-} // namespace ITMLib
+class DepthFusionEngine<TSDFVoxel_f_rgb, PlainVoxelArray, MEMORYDEVICE_CUDA>;
+}

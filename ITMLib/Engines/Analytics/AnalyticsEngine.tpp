@@ -60,7 +60,7 @@ unsigned int
 AnalyticsEngine<TVoxel, TIndex, TMemoryDeviceType>::CountVoxelsWithSpecifiedFlags(
 		const VoxelVolume<TVoxel, TIndex>* volume,
 		VoxelFlags flags) {
-	return CountVoxelsWithSpecificFlagsFunctor<TVoxel::hasSDFInformation, TVoxel, TIndex, TMemoryDeviceType>
+	return CountVoxelsWithSpecificFlagsFunctor<TVoxel::hasSemanticInformation, TVoxel, TIndex, TMemoryDeviceType>
 	::compute(volume, flags);
 }
 

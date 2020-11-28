@@ -1,5 +1,5 @@
 //  ================================================================
-//  Created by Gregory Kramida on 5/8/19.
+//  Created by Gregory Kramida on 11/15/19.
 //  Copyright (c) 2019 Gregory Kramida
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -14,20 +14,21 @@
 //  limitations under the License.
 //  ================================================================
 
-#include "VoxelVolume.tpp"
-#include "../../Objects/Volume/VoxelTypes.h"
+#include "IndexingEngine_PlainVoxelArray.tpp"
+#include "../../../GlobalTemplateDefines.h"
 
 namespace ITMLib {
 template
-class VoxelVolume<TSDFVoxel_f_flags, PlainVoxelArray>;
+class IndexingEngine<TSDFVoxel_f_flags, PlainVoxelArray, MEMORYDEVICE_CPU, OPTIMIZED>;
 template
-class VoxelVolume<TSDFVoxel_f_flags, VoxelBlockHash>;
+class IndexingEngine<TSDFVoxel_f_flags, PlainVoxelArray, MEMORYDEVICE_CPU, DIAGNOSTIC>;
 template
-class VoxelVolume<TSDFVoxel_f_rgb, PlainVoxelArray>;
+class IndexingEngine<WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU, OPTIMIZED>;
 template
-class VoxelVolume<TSDFVoxel_f_rgb, VoxelBlockHash>;
+class IndexingEngine<WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CPU, DIAGNOSTIC>;
 template
-class VoxelVolume<WarpVoxel, PlainVoxelArray>;
+class IndexingEngine<TSDFVoxel_f_rgb, PlainVoxelArray, MEMORYDEVICE_CPU, OPTIMIZED>;
 template
-class VoxelVolume<WarpVoxel, VoxelBlockHash>;
-}  // namespace ITMLib
+class IndexingEngine<TSDFVoxel_f_rgb, PlainVoxelArray, MEMORYDEVICE_CPU, DIAGNOSTIC>;
+
+} //namespace ITMLib

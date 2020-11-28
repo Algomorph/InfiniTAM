@@ -1,6 +1,6 @@
 //  ================================================================
-//  Created by Gregory Kramida on 5/22/18.
-//  Copyright (c) 2018-2000 Gregory Kramida
+//  Created by Gregory Kramida on 10/1/19.
+//  Copyright (c) 2019 Gregory Kramida
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
 //  You may obtain a copy of the License at
@@ -13,18 +13,13 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-
 #include "../../../GlobalTemplateDefines.h"
-
-//Note: ".tpp" files have to be included for all explicit instantiations in order to link properly
-#include "EditAndCopyEngine_CPU_PlainVoxelArray.tpp"
-#include "../../../Objects/Volume/VoxelVolume.h"
-
-using namespace ITMLib;
+#include "../../Reduction/CUDA/VolumeReduction_CUDA_PlainVoxelArray.h"
+#include "../../Traversal/CUDA/VolumeTraversal_CUDA_PlainVoxelArray.h"
+#include "../../Traversal/CUDA/HashTableTraversal_CUDA.cuh"
+#include "../AnalyticsEngine.tpp"
 
 namespace ITMLib {
 template
-class EditAndCopyEngine_CPU<TSDFVoxel, PlainVoxelArray>;
-template
-class EditAndCopyEngine_CPU<WarpVoxel, PlainVoxelArray>;
+class AnalyticsEngine<WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA>;
 } // namespace ITMLib

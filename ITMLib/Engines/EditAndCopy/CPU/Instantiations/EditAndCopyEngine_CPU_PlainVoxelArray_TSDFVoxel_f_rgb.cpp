@@ -1,6 +1,6 @@
 //  ================================================================
-//  Created by Gregory Kramida on 8/27/19.
-//  Copyright (c) 2019 Gregory Kramida
+//  Created by Gregory Kramida on 5/22/18.
+//  Copyright (c) 2018-2000 Gregory Kramida
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
 //  You may obtain a copy of the License at
@@ -13,15 +13,16 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "../Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
-#include "../Reduction/CPU/VolumeReduction_CPU_VoxelBlockHash.h"
-#include "../Traversal/CPU/HashTableTraversal_CPU.h"
-#include "../../GlobalTemplateDefines.h"
-#include "AnalyticsEngine.tpp"
+
+#include "../../../../Objects/Volume/VoxelTypes.h"
+
+//Note: ".tpp" files have to be included for all explicit instantiations in order to link properly
+#include "../EditAndCopyEngine_CPU_PlainVoxelArray.tpp"
+#include "../../../../Objects/Volume/VoxelVolume.h"
+
+using namespace ITMLib;
 
 namespace ITMLib {
 template
-class AnalyticsEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>;
-template
-class AnalyticsEngine<WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>;
+class EditAndCopyEngine_CPU<TSDFVoxel_f_rgb, PlainVoxelArray>;
 } // namespace ITMLib

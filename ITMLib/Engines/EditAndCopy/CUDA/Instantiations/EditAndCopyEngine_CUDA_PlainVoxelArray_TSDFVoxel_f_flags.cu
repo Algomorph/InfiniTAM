@@ -1,5 +1,5 @@
 //  ================================================================
-//  Created by Gregory Kramida on 6/19/18.
+//  Created by Gregory Kramida on 5/22/18.
 //  Copyright (c) 2018-2000 Gregory Kramida
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -13,12 +13,14 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "../Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
-#include "../Indexing/PVA/IndexingEngine_PlainVoxelArray.tpp"
-#include "DepthFusionEngine.tpp"
-#include "../../GlobalTemplateDefines.h"
+
+#include "../../../../Objects/Volume/VoxelTypes.h"
+
+//Note: ".tpp" files have to be included for all explicit instantiations in order to link properly
+#include "../EditAndCopyEngine_CUDA_PlainVoxelArray.tcu"
+#include "../../../../Objects/Volume/VoxelVolume.h"
 
 namespace ITMLib {
 template
-class DepthFusionEngine<TSDFVoxel, PlainVoxelArray, MEMORYDEVICE_CPU>;
-}
+class EditAndCopyEngine_CUDA<TSDFVoxel_f_flags, PlainVoxelArray>;
+} //namespace ITMLib
