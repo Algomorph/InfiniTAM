@@ -195,6 +195,20 @@ std::string Volume115Path() {
 extern template std::string Volume115Path<PlainVoxelArray>();
 extern template std::string Volume115Path<VoxelBlockHash>();
 
+template<typename TIndex>
+typename TIndex::InitializationParameters InitializationParameters();
+
+template<>
+typename VoxelBlockHash::InitializationParameters InitializationParameters<VoxelBlockHash>();
+extern template VoxelBlockHash::InitializationParameters InitializationParameters<VoxelBlockHash>();
+template<>
+typename PlainVoxelArray::InitializationParameters InitializationParameters<PlainVoxelArray>();
+extern template PlainVoxelArray::InitializationParameters InitializationParameters<PlainVoxelArray>();
+
+
+VoxelVolumeParameters DefaultVolumeParameters();
+
+
 } // namespace teddy
 
 } // namespace test

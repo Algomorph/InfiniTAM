@@ -13,15 +13,13 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "../Traversal/CUDA/HashTableTraversal_CUDA.cuh"
-#include "../Traversal/CUDA/ImageTraversal_CUDA.cuh"
-#include "../Traversal/CUDA/Regular2DSubGridArrayTraversal_CUDA.cuh"
-#include "RenderingEngine.tpp"
-#include "../../GlobalTemplateDefines.h"
+#include "../../Traversal/CPU/HashTableTraversal_CPU.h"
+#include "../../Traversal/CPU/ImageTraversal_CPU.h"
+#include "../../Traversal/CPU/Regular2DSubGridArrayTraversal_CPU.h"
+#include "../RenderingEngine.tpp"
+#include "../../../Objects/Volume/VoxelTypes.h"
 
 namespace ITMLib {
 template
-class RenderingEngine<TSDFVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA>;
-template
-class RenderingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>;
+class RenderingEngine<TSDFVoxel_f_rgb, VoxelBlockHash, MEMORYDEVICE_CPU>;
 } // namespace ITMLib

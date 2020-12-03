@@ -559,10 +559,17 @@ set(
 
         ## Top-level
         Engines/Rendering/RenderingEngine.tpp
-        Engines/Rendering/RenderingEngine.cpp
-        Engines/Rendering/RenderingEngine.cu
         Engines/Rendering/RenderingEngine_Specialized.tpp
         Engines/Rendering/RenderingSettings.cpp
+        # Instantiations
+        Engines/Rendering/Instantiations/RenderingEngine_PlainVoxelArray_TSDFVoxel_f_flags.cpp
+        Engines/Rendering/Instantiations/RenderingEngine_VoxelBlockHash_TSDFVoxel_f_flags.cpp
+        Engines/Rendering/Instantiations/RenderingEngine_PlainVoxelArray_TSDFVoxel_f_flags.cu
+        Engines/Rendering/Instantiations/RenderingEngine_VoxelBlockHash_TSDFVoxel_f_flags.cu
+        Engines/Rendering/Instantiations/RenderingEngine_PlainVoxelArray_TSDFVoxel_f_rgb.cpp
+        Engines/Rendering/Instantiations/RenderingEngine_VoxelBlockHash_TSDFVoxel_f_rgb.cpp
+        Engines/Rendering/Instantiations/RenderingEngine_PlainVoxelArray_TSDFVoxel_f_rgb.cu
+        Engines/Rendering/Instantiations/RenderingEngine_VoxelBlockHash_TSDFVoxel_f_rgb.cu
         ## Interface
         Engines/Rendering/Interface/SurfelVisualizationEngine.tpp
         Engines/Rendering/Interface/SurfelVisualizationEngine.cpp

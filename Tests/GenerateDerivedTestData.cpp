@@ -415,7 +415,7 @@ configuration::Configuration GenerateDefaultSnoopyConfiguration() {
 	configuration::Configuration
 			default_snoopy_configuration(
 			Vector3i(0, 0, 0),
-			Vector2i(0,0),
+			Vector2i(0, 0),
 			true,
 			true,
 			VoxelVolumeParameters(0.004, 0.2, 1.0, 0.04, 100, false, 1.0f),
@@ -705,10 +705,10 @@ void GenerateRenderingTestData_VoxelBlockHash() {
 }
 
 template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
-void GenerateRigidAlignmentTestData(){
+void GenerateRigidAlignmentTestData() {
 	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(),
 	               "Generating rigid alignment test data (" << IndexString<TIndex>() << ", "
-	                       << DeviceString<TMemoryDeviceType>() << ") ...");
+	                                                        << DeviceString<TMemoryDeviceType>() << ") ...");
 	View* view = nullptr;
 
 	UpdateView(&view,
@@ -717,12 +717,13 @@ void GenerateRigidAlignmentTestData(){
 	           std::string(teddy::calibration_path),
 	           TMemoryDeviceType);
 
-	VoxelVolume<TSDFVoxel_f_rgb, TIndex> volume(TMemoryDeviceType,
-											 VoxelBlockHashParameters(0x40000,0x20000));
+	VoxelVolume<TSDFVoxel_f_rgb, TIndex> volume(teddy::DefaultVolumeParameters(), false, TMemoryDeviceType,
+	                                            teddy::InitializationParameters<TIndex>());
 	IndexingEngineInterface<TSDFVoxel_f_rgb, TIndex>* indexing_engine = IndexingEngineFactory::Build<TSDFVoxel_f_rgb, TIndex>(TMemoryDeviceType);
 	CameraTrackingState camera_tracking_state(teddy::frame_image_size, TMemoryDeviceType);
 	indexing_engine->AllocateNearSurface(&volume, view, &camera_tracking_state);
-	DepthFusionEngineInterface<TSDFVoxel_f_rgb, TIndex>* depth_fusion_engine = DepthFusionEngineFactory::Build<TSDFVoxel_f_rgb, TIndex>(TMemoryDeviceType);
+	DepthFusionEngineInterface<TSDFVoxel_f_rgb, TIndex>* depth_fusion_engine = DepthFusionEngineFactory::Build<TSDFVoxel_f_rgb, TIndex>(
+			TMemoryDeviceType);
 	depth_fusion_engine->IntegrateDepthImageIntoTsdfVolume(&volume, view);
 
 	ConstructGeneratedVolumeSubdirectoriesIfMissing();
@@ -789,9 +790,11 @@ int main(int argc, char* argv[]) {
 			int i_pair = 0;
 			for (auto& pair : generator_by_string) {
 				if (i_pair < generator_by_string.size() - 1) {
-					std::cout << enumerator_to_string(pair.first) << "( alternative tokens: " << enumerator_to_string_token_list(pair.first) << "), " << std::endl;
+					std::cout << enumerator_to_string(pair.first) << "( alternative tokens: " << enumerator_to_string_token_list(pair.first) << "), "
+					          << std::endl;
 				} else {
-					std::cout << "or " << enumerator_to_string(pair.first) << "( alternative tokens: " << enumerator_to_string_token_list(pair.first) << ").";
+					std::cout << "or " << enumerator_to_string(pair.first) << "( alternative tokens: " << enumerator_to_string_token_list(pair.first)
+					          << ").";
 				}
 				i_pair++;
 			}

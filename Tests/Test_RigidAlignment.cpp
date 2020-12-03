@@ -19,8 +19,9 @@
 #include "../ITMLib/CameraTrackers/CameraTrackerFactory.h"
 #include "../ITMLib/Engines/ImageProcessing/ImageProcessingEngineFactory.h"
 #include "../ITMLib/Objects/Misc/IMUCalibrator.h"
+#include "../ITMLib/Engines/Rendering/RenderingEngineFactory.h"
 
-template<MemoryDeviceType TMemoryDeviceType>
+template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void GenericRgbTrackerTest() {
 	// constexpr const char* preset_rrbb = "type=extended,levels=bbb,useDepth=1,useColour=1,"
 	//                                     "colourWeight=0.3,minstep=1e-4,"
@@ -40,11 +41,11 @@ void GenericRgbTrackerTest() {
 	                                                               image_processing_engine, imu_calibrator,
 	                                                               configuration::Get().general_voxel_volume_parameters);
 
+	// tracking state initialized with identity for camera matrix
 	CameraTrackingState tracking_state(teddy::frame_image_size, TMemoryDeviceType);
 
-	std::cout << tracking_state.pose_d->GetM() << std::endl;
-
-	View* view;
+	// Generate view for frame 115
+	View* view = nullptr;
 
 	UpdateView(&view,
 	           std::string(teddy::frame_115_depth_path),
@@ -52,14 +53,23 @@ void GenericRgbTrackerTest() {
 	           std::string(teddy::calibration_path),
 	           TMemoryDeviceType);
 
-	tracker->TrackCamera(&tracking_state, view);
+	// we need the volume of the frame 115 to generate the point cloud for the tracker
+	VoxelVolume<TSDFVoxel_f_rgb, TIndex> volume(teddy::DefaultVolumeParameters(), false, TMemoryDeviceType,
+	                                            teddy::InitializationParameters<TIndex>());
+	volume.LoadFromDisk(teddy::Volume115Path<TIndex>());
 
-	std::cout << tracking_state.pose_d->GetM() << std::endl;
-	std::cout << (tracking_state.trackerResult == CameraTrackingState::TrackingResult::TRACKING_POOR ?
-	              " poor " : "didn't poor") << std::endl;
-	std::cout << (tracking_state.trackerResult == CameraTrackingState::TrackingResult::TRACKING_FAILED ?
-	              " failed " : "didn't fail") << std::endl;
 
+	// the rendering engine will generate the point cloud
+	auto rendering_engine = ITMLib::RenderingEngineFactory::Build<TSDFVoxel_f_rgb, VoxelBlockHash>(TMemoryDeviceType);
+
+	// we need a dud rendering state also for the point cloud
+	RenderState render_state(teddy::frame_image_size,
+	                         teddy::DefaultVolumeParameters().near_clipping_distance, teddy::DefaultVolumeParameters().far_clipping_distance,
+	                         TMemoryDeviceType);
+
+	rendering_engine->CreatePointCloud(&volume, view, &tracking_state, &render_state);
+
+	// now, go to the next frame for the view
 	UpdateView(&view,
 	           std::string(teddy::frame_116_depth_path),
 	           std::string(teddy::frame_116_color_path),
@@ -70,7 +80,7 @@ void GenericRgbTrackerTest() {
 
 	std::cout << tracking_state.pose_d->GetM() << std::endl;
 	std::cout << (tracking_state.trackerResult == CameraTrackingState::TrackingResult::TRACKING_POOR ?
-	              " poor " : "didn't poor") << std::endl;
+	              " poor " : "not poor") << std::endl;
 	std::cout << (tracking_state.trackerResult == CameraTrackingState::TrackingResult::TRACKING_FAILED ?
 	              " failed " : "didn't fail") << std::endl;
 
@@ -109,6 +119,6 @@ void GenericForceFailTrackerTest() {
 
 }
 
-BOOST_AUTO_TEST_CASE(Test_RgbTracker_CPU) {
-	GenericRgbTrackerTest<MEMORYDEVICE_CPU>();
+BOOST_AUTO_TEST_CASE(Test_RgbTracker_CPU_VBH) {
+	GenericRgbTrackerTest<VoxelBlockHash, MEMORYDEVICE_CPU>();
 }

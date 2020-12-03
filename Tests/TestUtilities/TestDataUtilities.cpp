@@ -72,5 +72,23 @@ namespace teddy{
 template std::string Volume115Path<PlainVoxelArray>();
 template std::string Volume115Path<VoxelBlockHash>();
 
+
+template<>
+typename VoxelBlockHash::InitializationParameters InitializationParameters<VoxelBlockHash>(){
+	return {0x40000,0x20000};
+}
+
+template<>
+typename PlainVoxelArray::InitializationParameters InitializationParameters<PlainVoxelArray>(){
+	return {Vector3i(512), Vector3i(-256,-256,0)};
+}
+
+
+
+VoxelVolumeParameters DefaultVolumeParameters() {
+	VoxelVolumeParameters parameters(0.02, 0.2f, 3.0f, 0.005f, 100, false, 2.0);
+	return parameters;
+}
+
 } // namespace teddy
 } // namespace test
