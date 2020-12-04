@@ -33,7 +33,6 @@ struct VoxelTsdfUpdater<false, TUseSurfaceThickness> {
 			DEVICEPTR(TVoxel)& voxel, float& new_sdf, float signed_distance_surface_to_voxel_along_camera_ray,
 			float truncation_distance, float surface_thickness, int max_weight) {
 		float sdf_update_value;
-		VoxelFlags sdf_update_flags;
 		// Note: the small constant (1e+6) nudge is necessary to avoid PVA/VBH discrepancies in voxels
 		// marked as truncated. Without it, some voxels whose volumes are mostly outside of the
 		// final_distance_cutoff may not get allocated in the VBH index due to limited floating point precision.
@@ -268,8 +267,10 @@ _CPU_AND_GPU_CODE_ inline float FuseDepthIntoVoxel(
 	}
 
 	if (TUpdate) {
+		//TODO: pass in max_weight properly (from configuration of the DepthFusionEngine/VoxelVolumeParameters)
 		VoxelTsdfUpdater<THasSemanticInformation, TUseSurfaceThickness>::UpdateSdf(voxel, signed_distance_surface_to_voxel_along_camera_ray,
-		                                                                           truncation_distance, effective_range_cutoff, surface_thickness);
+		                                                                           truncation_distance, effective_range_cutoff,
+		                                                                           surface_thickness, 100);
 	} else {
 		VoxelTsdfSetter<THasSemanticInformation, TUseSurfaceThickness>::SetSdf(voxel, signed_distance_surface_to_voxel_along_camera_ray,
 		                                                                       truncation_distance, effective_range_cutoff, surface_thickness);
@@ -335,8 +336,10 @@ _CPU_AND_GPU_CODE_ inline float FuseDepthIntoVoxel(
 	}
 
 	if (TUpdate) {
+		//TODO: pass in max_weight properly (from configuration of the DepthFusionEngine/VoxelVolumeParameters)
 		VoxelTsdfUpdater<THasSemanticInformation, TUseSurfaceThickness>::UpdateSdf(voxel, signed_distance_surface_to_voxel_along_camera_ray,
-		                                                                           truncation_distance, effective_range_cutoff, surface_thickness);
+		                                                                           truncation_distance, effective_range_cutoff, surface_thickness,
+		                                                                           100);
 		voxel.confidence += TVoxel::floatToValue(confidences_at_pixels[pixel_index]);
 	} else {
 		VoxelTsdfSetter<THasSemanticInformation, TUseSurfaceThickness>::SetSdf(voxel, signed_distance_surface_to_voxel_along_camera_ray,
@@ -347,7 +350,7 @@ _CPU_AND_GPU_CODE_ inline float FuseDepthIntoVoxel(
 	return signed_distance_surface_to_voxel_along_camera_ray;
 }
 
-template<typename TVoxel, typename TUpdate>
+template<typename TVoxel>
 _CPU_AND_GPU_CODE_ inline void FuseColorIntoVoxel(
 		DEVICEPTR(TVoxel)& voxel,
 		const THREADPTR(Vector4f)& voxel_in_volume_coordinates,
@@ -372,6 +375,7 @@ _CPU_AND_GPU_CODE_ inline void FuseColorIntoVoxel(
 		return;
 	}
 
+	//TODO: provide update capability via TUpdate template
 	voxel.clr = TO_UCHAR3(TO_VECTOR3(interpolateBilinear(rgb_image, voxel_projected_to_image, rgb_image_size)));
 }
 
@@ -393,7 +397,7 @@ bool verbose
 template<bool THasSemanticInformation, bool TUseSurfaceThickness, class TVoxel, ExecutionMode TExecutionMode>
 struct UpdateVoxelInfoFromImages<false, false, THasSemanticInformation, TUseSurfaceThickness, TVoxel, TExecutionMode> {
 	_CPU_AND_GPU_CODE_ static void compute(COMPUTE_VOXEL_UPDATE_PARAMETERS) {
-		FuseDepthIntoVoxel<THasSemanticInformation, TUseSurfaceThickness, TExecutionMode>(
+		FuseDepthIntoVoxel<THasSemanticInformation, TUseSurfaceThickness, false, TExecutionMode>(
 				voxel, voxel_in_volume_coordinates, depth_camera_pose, depth_camera_projection_parameters, truncation_distance, depth_image,
 				depth_image_size, effective_range_cutoff, surface_thickness, verbose);
 	}
@@ -402,7 +406,7 @@ struct UpdateVoxelInfoFromImages<false, false, THasSemanticInformation, TUseSurf
 template<bool THasSemanticInformation, bool TUseSurfaceThickness, class TVoxel, ExecutionMode TExecutionMode>
 struct UpdateVoxelInfoFromImages<true, false, THasSemanticInformation, TUseSurfaceThickness, TVoxel, TExecutionMode> {
 	_CPU_AND_GPU_CODE_ static void compute(COMPUTE_VOXEL_UPDATE_PARAMETERS) {
-		float eta = FuseDepthIntoVoxel<THasSemanticInformation, TUseSurfaceThickness, TExecutionMode>(
+		float eta = FuseDepthIntoVoxel<THasSemanticInformation, TUseSurfaceThickness, false, TExecutionMode>(
 				voxel, voxel_in_volume_coordinates, depth_camera_pose, depth_camera_projection_parameters, truncation_distance, depth_image,
 				depth_image_size, effective_range_cutoff, surface_thickness, verbose);
 		FuseColorIntoVoxel(voxel, voxel_in_volume_coordinates, rgb_camera_pose, rgb_camera_projection_parameters, truncation_distance, eta,
@@ -413,7 +417,7 @@ struct UpdateVoxelInfoFromImages<true, false, THasSemanticInformation, TUseSurfa
 template<bool THasSemanticInformation, bool TUseSurfaceThickness, class TVoxel, ExecutionMode TExecutionMode>
 struct UpdateVoxelInfoFromImages<false, true, THasSemanticInformation, TUseSurfaceThickness, TVoxel, TExecutionMode> {
 	_CPU_AND_GPU_CODE_ static void compute(COMPUTE_VOXEL_UPDATE_PARAMETERS) {
-		FuseDepthIntoVoxel<THasSemanticInformation, TUseSurfaceThickness, TExecutionMode>(
+		FuseDepthIntoVoxel<THasSemanticInformation, TUseSurfaceThickness, false, TExecutionMode>(
 				voxel, voxel_in_volume_coordinates, depth_camera_pose, depth_camera_projection_parameters, truncation_distance, depth_image,
 				confidence, depth_image_size, effective_range_cutoff, surface_thickness, verbose);
 	}
@@ -422,7 +426,7 @@ struct UpdateVoxelInfoFromImages<false, true, THasSemanticInformation, TUseSurfa
 template<bool THasSemanticInformation, bool TUseSurfaceThickness, class TVoxel, ExecutionMode TExecutionMode>
 struct UpdateVoxelInfoFromImages<true, true, THasSemanticInformation, TUseSurfaceThickness, TVoxel, TExecutionMode> {
 	_CPU_AND_GPU_CODE_ static void compute(COMPUTE_VOXEL_UPDATE_PARAMETERS) {
-		float eta = FuseDepthIntoVoxel<THasSemanticInformation, TUseSurfaceThickness, TExecutionMode>(
+		float eta = FuseDepthIntoVoxel<THasSemanticInformation, TUseSurfaceThickness, false, TExecutionMode>(
 				voxel, voxel_in_volume_coordinates, depth_camera_pose, depth_camera_projection_parameters, truncation_distance, depth_image,
 				confidence, depth_image_size, effective_range_cutoff, surface_thickness, verbose);
 		FuseColorIntoVoxel(voxel, voxel_in_volume_coordinates, rgb_camera_pose, rgb_camera_projection_parameters, truncation_distance, eta,
