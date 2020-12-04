@@ -78,7 +78,7 @@ test_script:
     - sh: |
           echo "Generating test data..." 
           cd $APPVEYOR_BUILD_FOLDER/build/Tests
-          ./generate_derived_test
+          ./generate_derived_test_data
           cd ..
           cmake ..
           cd Tests
