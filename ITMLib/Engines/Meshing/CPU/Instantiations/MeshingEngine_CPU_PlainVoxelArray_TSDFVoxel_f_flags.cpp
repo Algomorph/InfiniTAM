@@ -14,11 +14,11 @@
 //  limitations under the License.
 //  ================================================================
 //local
-#include "../../../GlobalTemplateDefines.h"
-#include "../../../Objects/Volume/VoxelBlockHash.h"
-#include "MeshingEngine_CUDA.tcu"
+#include "../../../../Objects/Volume/VoxelTypes.h"
+#include "../../../../Objects/Volume/PlainVoxelArray.h"
+#include "../MeshingEngine_CPU.tpp"
 
 namespace ITMLib {
 template
-class MeshingEngine_CUDA<TSDFVoxel, VoxelBlockHash>;
+class MeshingEngine_CPU<TSDFVoxel_f_flags, PlainVoxelArray>;
 } // namespace ITMLib

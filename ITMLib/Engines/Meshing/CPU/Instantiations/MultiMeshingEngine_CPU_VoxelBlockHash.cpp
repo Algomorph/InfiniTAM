@@ -14,11 +14,11 @@
 //  limitations under the License.
 //  ================================================================
 //local
-#include "../../../GlobalTemplateDefines.h"
-#include "../../../Objects/Volume/VoxelBlockHash.h"
-#include "MeshingEngine_CPU.tpp"
+#include "../../../../GlobalTemplateDefines.h"
+#include "../../../../Objects/Volume/VoxelBlockHash.h"
+#include "../MultiMeshingEngine_CPU.tpp"
 
 namespace ITMLib {
 template
-class MeshingEngine_CPU<TSDFVoxel, VoxelBlockHash>;
+class MultiMeshingEngine_CPU<TSDFVoxel, VoxelBlockHash>;
 } // namespace ITMLib

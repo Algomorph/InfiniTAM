@@ -14,9 +14,9 @@
 //  limitations under the License.
 //  ================================================================
 //local
-#include "../../../GlobalTemplateDefines.h"
-#include "../../../Objects/Volume/VoxelBlockHash.h"
-#include "MultiMeshingEngine_CUDA.tcu"
+#include "../../../../GlobalTemplateDefines.h"
+#include "../../../../Objects/Volume/VoxelBlockHash.h"
+#include "../MultiMeshingEngine_CUDA.tcu"
 
 namespace ITMLib {
 template

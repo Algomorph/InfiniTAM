@@ -86,7 +86,12 @@ typename PlainVoxelArray::InitializationParameters InitializationParameters<Plai
 
 
 VoxelVolumeParameters DefaultVolumeParameters() {
-	VoxelVolumeParameters parameters(0.02, 0.2f, 3.0f, 0.005f, 100, false, 2.0);
+	VoxelVolumeParameters parameters(0.005f,
+								  0.2f,
+								  3.0f,
+								  0.02f,
+								  100, false,
+								  2.0);
 	return parameters;
 }
 

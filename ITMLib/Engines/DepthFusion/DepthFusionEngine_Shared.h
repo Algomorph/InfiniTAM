@@ -24,6 +24,88 @@
 namespace ITMLib {
 
 template<bool THasSemanticInformation, bool TUseSurfaceThickness>
+struct VoxelTsdfUpdater;
+
+template<bool TUseSurfaceThickness>
+struct VoxelTsdfUpdater<false, TUseSurfaceThickness> {
+	template<typename TVoxel>
+	_CPU_AND_GPU_CODE_ static inline void UpdateSdfAux(
+			DEVICEPTR(TVoxel)& voxel, float& new_sdf, float signed_distance_surface_to_voxel_along_camera_ray,
+			float truncation_distance, float surface_thickness, int max_weight) {
+		float sdf_update_value;
+		VoxelFlags sdf_update_flags;
+		// Note: the small constant (1e+6) nudge is necessary to avoid PVA/VBH discrepancies in voxels
+		// marked as truncated. Without it, some voxels whose volumes are mostly outside of the
+		// final_distance_cutoff may not get allocated in the VBH index due to limited floating point precision.
+		if (signed_distance_surface_to_voxel_along_camera_ray < TUseSurfaceThickness ?
+		    -surface_thickness : -truncation_distance) {
+			sdf_update_value = TVoxel::floatToValue(-1.0);
+		} else if (signed_distance_surface_to_voxel_along_camera_ray > truncation_distance) {
+			sdf_update_value = TVoxel::floatToValue(1.0);
+		} else {
+			sdf_update_value = signed_distance_surface_to_voxel_along_camera_ray / truncation_distance;
+		}
+
+		// The voxel lies within the narrow band of the surface in the new image, between truncation boundaries.
+		// Update SDF with weights, in proportion to the distance from surface.
+		// compute_allocated updated SDF value and reliability
+		float old_tsdf_value = TVoxel::valueToFloat(voxel.sdf);
+		float old_weight = voxel.w_depth;
+		new_sdf = ORUTILS_MIN(1.0f, sdf_update_value);
+		float new_weight = 1;
+
+		new_sdf = old_weight * old_tsdf_value + new_weight * new_sdf;
+		new_weight = old_weight + new_weight;
+		new_sdf /= new_weight;
+		new_weight = ORUTILS_MIN(new_weight, max_weight);
+
+		// write back^
+		voxel.sdf = TVoxel::floatToValue(new_sdf);
+		voxel.w_depth = new_weight;
+	}
+
+	template<typename TVoxel>
+	_CPU_AND_GPU_CODE_ static inline void UpdateSdf(
+			DEVICEPTR(TVoxel)& voxel, float signed_distance_surface_to_voxel_along_camera_ray, float truncation_distance,
+			float final_distance_cutoff, float surface_thickness, int max_weight) {
+		float new_sdf;
+		UpdateSdfAux(voxel, new_sdf, signed_distance_surface_to_voxel_along_camera_ray, truncation_distance,
+		             surface_thickness, max_weight);
+
+	}
+};
+
+template<bool TUseSurfaceThickness>
+struct VoxelTsdfUpdater<true, TUseSurfaceThickness> {
+	template<typename TVoxel>
+	_CPU_AND_GPU_CODE_ static inline void UpdateSdf(
+			DEVICEPTR(TVoxel)& voxel, float signed_distance_surface_to_voxel_along_camera_ray, float truncation_distance,
+			float final_distance_cutoff, float surface_thickness, int max_weight) {
+
+		float new_sdf;
+		VoxelTsdfUpdater<false, TUseSurfaceThickness>::UpdateSdfAux(voxel, new_sdf, signed_distance_surface_to_voxel_along_camera_ray,
+		                                                            truncation_distance, surface_thickness, max_weight);
+
+		if (new_sdf < TUseSurfaceThickness ? -surface_thickness / truncation_distance : 1.0) {
+			if (new_sdf < (-final_distance_cutoff + 1e+6) / truncation_distance) {
+				voxel.flags = ITMLib::VOXEL_UNKNOWN;
+			} else {
+				voxel.flags = ITMLib::VOXEL_TRUNCATED;
+			}
+		} else if (new_sdf > 1.0) {
+			if (new_sdf > (final_distance_cutoff - 1e+6) / truncation_distance) {
+				voxel.flags = ITMLib::VOXEL_UNKNOWN;
+			} else {
+				voxel.flags = ITMLib::VOXEL_TRUNCATED;
+			}
+		} else {
+			voxel.flags = ITMLib::VOXEL_NONTRUNCATED;
+		}
+	}
+};
+
+
+template<bool THasSemanticInformation, bool TUseSurfaceThickness>
 struct VoxelTsdfSetter;
 
 template<bool TUseSurfaceThickness>
@@ -35,8 +117,9 @@ struct VoxelTsdfSetter<true, TUseSurfaceThickness> {
 		// Note: the small constant (1e+6) nudge is necessary to avoid PVA/VBH discrepancies in voxels
 		// marked as truncated. Without it, some voxels whose volumes are mostly outside of the
 		// final_distance_cutoff may not get allocated in the VBH index due to limited floating point precision.
-		if (signed_distance_surface_to_voxel_along_camera_ray < -truncation_distance) {
-			if (signed_distance_surface_to_voxel_along_camera_ray < (TUseSurfaceThickness ? -surface_thickness : -final_distance_cutoff + 1e+6)) {
+		if (signed_distance_surface_to_voxel_along_camera_ray < TUseSurfaceThickness ?
+		    -surface_thickness : -truncation_distance) {
+			if (signed_distance_surface_to_voxel_along_camera_ray < -final_distance_cutoff + 1e+6) {
 				//the voxel is beyond the narrow band, on the other side of the surface, but also really far away.
 				//exclude from computation.
 				voxel.sdf = TVoxel::floatToValue(-1.0);
@@ -72,7 +155,7 @@ struct VoxelTsdfSetter<false, TUseSurfaceThickness> {
 	_CPU_AND_GPU_CODE_ static inline void SetSdf(
 			DEVICEPTR(TVoxel)& voxel, float signed_distance_surface_to_voxel_along_camera_ray, float truncation_distance,
 			float final_distance_cutoff, float surface_thickness) {
-		if (signed_distance_surface_to_voxel_along_camera_ray < (TUseSurfaceThickness ? -surface_thickness : -final_distance_cutoff)) {
+		if (signed_distance_surface_to_voxel_along_camera_ray < (TUseSurfaceThickness ? -surface_thickness : -truncation_distance)) {
 			voxel.sdf = TVoxel::floatToValue(-1.0);
 		} else if (signed_distance_surface_to_voxel_along_camera_ray > truncation_distance) {
 			voxel.sdf = TVoxel::floatToValue(1.0);
@@ -136,7 +219,7 @@ _CPU_AND_GPU_CODE_ inline bool ProjectVoxelToImage(THREADPTR(int)& pixel_index,
  * \return -1 if voxel point is behind camera or depth value is invalid (0.0f),
  * distance between voxel point & measured surface depth along camera ray otherwise
  */
-template<bool THasSemanticInformation, bool TUseSurfaceThickness, ExecutionMode TExecutionMode, typename TVoxel>
+template<bool THasSemanticInformation, bool TUseSurfaceThickness, bool TUpdate, ExecutionMode TExecutionMode, typename TVoxel>
 _CPU_AND_GPU_CODE_ inline float FuseDepthIntoVoxel(
 		DEVICEPTR(TVoxel)& voxel,
 		const THREADPTR(Vector4f)& voxel_in_volume_coordinates,
@@ -180,11 +263,18 @@ _CPU_AND_GPU_CODE_ inline float FuseDepthIntoVoxel(
 	float signed_distance_surface_to_voxel_along_camera_ray = depth_measure - voxel_in_camera_coordinates.z;
 
 	if (TExecutionMode == DIAGNOSTIC && verbose) {
-		printf("Projective signed distance from surface to voxel: %f, depth to surface: %f\n", signed_distance_surface_to_voxel_along_camera_ray, depth_measure);
+		printf("Projective signed distance from surface to voxel: %f, depth to surface: %f\n", signed_distance_surface_to_voxel_along_camera_ray,
+		       depth_measure);
 	}
 
-	VoxelTsdfSetter<THasSemanticInformation, TUseSurfaceThickness>::SetSdf(voxel, signed_distance_surface_to_voxel_along_camera_ray,
-	                                                                       truncation_distance, effective_range_cutoff, surface_thickness);
+	if (TUpdate) {
+		VoxelTsdfUpdater<THasSemanticInformation, TUseSurfaceThickness>::UpdateSdf(voxel, signed_distance_surface_to_voxel_along_camera_ray,
+		                                                                           truncation_distance, effective_range_cutoff, surface_thickness);
+	} else {
+		VoxelTsdfSetter<THasSemanticInformation, TUseSurfaceThickness>::SetSdf(voxel, signed_distance_surface_to_voxel_along_camera_ray,
+		                                                                       truncation_distance, effective_range_cutoff, surface_thickness);
+	}
+
 	return signed_distance_surface_to_voxel_along_camera_ray;
 }
 
@@ -203,7 +293,7 @@ _CPU_AND_GPU_CODE_ inline float FuseDepthIntoVoxel(
  * \return -1 if voxel point is behind camera or depth value is invalid (0.0f),
  * distance between voxel point & measured surface depth along camera ray otherwise
  */
-template<bool THasSemanticInformation, bool TUseSurfaceThickness, ExecutionMode TExecutionMode, typename TVoxel>
+template<bool THasSemanticInformation, bool TUseSurfaceThickness, bool TUpdate, ExecutionMode TExecutionMode, typename TVoxel>
 _CPU_AND_GPU_CODE_ inline float FuseDepthIntoVoxel(
 		DEVICEPTR(TVoxel)& voxel,
 		const THREADPTR(Vector4f)& voxel_in_volume_coordinates,
@@ -237,14 +327,27 @@ _CPU_AND_GPU_CODE_ inline float FuseDepthIntoVoxel(
 	// "delta" (δ) in Slavcheva's publications) =
 	// [distance from surface to camera, i.e. depth_image] - [distance from voxel to camera]
 	// effectively, eta is the distance between measured surface & voxel point
-	float signed_surface_to_voxel_along_camera_ray = depth_measure - voxel_in_camera_coordinates.z;
-	voxel.confidence = TVoxel::floatToValue(confidences_at_pixels[pixel_index]);
-	VoxelTsdfSetter<THasSemanticInformation, TUseSurfaceThickness>::SetSdf(voxel, signed_surface_to_voxel_along_camera_ray, truncation_distance,
-	                                                                       effective_range_cutoff, surface_thickness);
-	return signed_surface_to_voxel_along_camera_ray;
+	float signed_distance_surface_to_voxel_along_camera_ray = depth_measure - voxel_in_camera_coordinates.z;
+
+	if (TExecutionMode == DIAGNOSTIC && verbose) {
+		printf("Projective signed distance from surface to voxel: %f, depth to surface: %f\n", signed_distance_surface_to_voxel_along_camera_ray,
+		       depth_measure);
+	}
+
+	if (TUpdate) {
+		VoxelTsdfUpdater<THasSemanticInformation, TUseSurfaceThickness>::UpdateSdf(voxel, signed_distance_surface_to_voxel_along_camera_ray,
+		                                                                           truncation_distance, effective_range_cutoff, surface_thickness);
+		voxel.confidence += TVoxel::floatToValue(confidences_at_pixels[pixel_index]);
+	} else {
+		VoxelTsdfSetter<THasSemanticInformation, TUseSurfaceThickness>::SetSdf(voxel, signed_distance_surface_to_voxel_along_camera_ray,
+		                                                                       truncation_distance, effective_range_cutoff, surface_thickness);
+		voxel.confidence = TVoxel::floatToValue(confidences_at_pixels[pixel_index]);
+	}
+
+	return signed_distance_surface_to_voxel_along_camera_ray;
 }
 
-template<class TVoxel>
+template<typename TVoxel, typename TUpdate>
 _CPU_AND_GPU_CODE_ inline void FuseColorIntoVoxel(
 		DEVICEPTR(TVoxel)& voxel,
 		const THREADPTR(Vector4f)& voxel_in_volume_coordinates,
@@ -274,7 +377,7 @@ _CPU_AND_GPU_CODE_ inline void FuseColorIntoVoxel(
 
 // endregion ===========================================================================================================
 template<bool THasColor, bool THasConfidence, bool THasSemanticInformation, bool TUseSurfaceThickness, typename TVoxel, ExecutionMode TExecutionMode>
-struct ComputeUpdatedLiveVoxelInfo;
+struct UpdateVoxelInfoFromImages;
 // region ========= VOXEL UPDATES FOR VOXELS WITH NO SEMANTIC INFORMATION ==============================================
 //arguments to the "compute_allocated" member function should always be the same
 #define COMPUTE_VOXEL_UPDATE_PARAMETERS \
@@ -288,7 +391,7 @@ const CONSTPTR(float) effective_range_cutoff, const CONSTPTR(float) surface_thic
 bool verbose
 // no color, no confidence
 template<bool THasSemanticInformation, bool TUseSurfaceThickness, class TVoxel, ExecutionMode TExecutionMode>
-struct ComputeUpdatedLiveVoxelInfo<false, false, THasSemanticInformation, TUseSurfaceThickness, TVoxel, TExecutionMode> {
+struct UpdateVoxelInfoFromImages<false, false, THasSemanticInformation, TUseSurfaceThickness, TVoxel, TExecutionMode> {
 	_CPU_AND_GPU_CODE_ static void compute(COMPUTE_VOXEL_UPDATE_PARAMETERS) {
 		FuseDepthIntoVoxel<THasSemanticInformation, TUseSurfaceThickness, TExecutionMode>(
 				voxel, voxel_in_volume_coordinates, depth_camera_pose, depth_camera_projection_parameters, truncation_distance, depth_image,
@@ -297,7 +400,7 @@ struct ComputeUpdatedLiveVoxelInfo<false, false, THasSemanticInformation, TUseSu
 };
 // with color, no confidence
 template<bool THasSemanticInformation, bool TUseSurfaceThickness, class TVoxel, ExecutionMode TExecutionMode>
-struct ComputeUpdatedLiveVoxelInfo<true, false, THasSemanticInformation, TUseSurfaceThickness, TVoxel, TExecutionMode> {
+struct UpdateVoxelInfoFromImages<true, false, THasSemanticInformation, TUseSurfaceThickness, TVoxel, TExecutionMode> {
 	_CPU_AND_GPU_CODE_ static void compute(COMPUTE_VOXEL_UPDATE_PARAMETERS) {
 		float eta = FuseDepthIntoVoxel<THasSemanticInformation, TUseSurfaceThickness, TExecutionMode>(
 				voxel, voxel_in_volume_coordinates, depth_camera_pose, depth_camera_projection_parameters, truncation_distance, depth_image,
@@ -308,7 +411,7 @@ struct ComputeUpdatedLiveVoxelInfo<true, false, THasSemanticInformation, TUseSur
 };
 // no color, with confidence
 template<bool THasSemanticInformation, bool TUseSurfaceThickness, class TVoxel, ExecutionMode TExecutionMode>
-struct ComputeUpdatedLiveVoxelInfo<false, true, THasSemanticInformation, TUseSurfaceThickness, TVoxel, TExecutionMode> {
+struct UpdateVoxelInfoFromImages<false, true, THasSemanticInformation, TUseSurfaceThickness, TVoxel, TExecutionMode> {
 	_CPU_AND_GPU_CODE_ static void compute(COMPUTE_VOXEL_UPDATE_PARAMETERS) {
 		FuseDepthIntoVoxel<THasSemanticInformation, TUseSurfaceThickness, TExecutionMode>(
 				voxel, voxel_in_volume_coordinates, depth_camera_pose, depth_camera_projection_parameters, truncation_distance, depth_image,
@@ -317,7 +420,7 @@ struct ComputeUpdatedLiveVoxelInfo<false, true, THasSemanticInformation, TUseSur
 };
 // with color, with confidence
 template<bool THasSemanticInformation, bool TUseSurfaceThickness, class TVoxel, ExecutionMode TExecutionMode>
-struct ComputeUpdatedLiveVoxelInfo<true, true, THasSemanticInformation, TUseSurfaceThickness, TVoxel, TExecutionMode> {
+struct UpdateVoxelInfoFromImages<true, true, THasSemanticInformation, TUseSurfaceThickness, TVoxel, TExecutionMode> {
 	_CPU_AND_GPU_CODE_ static void compute(COMPUTE_VOXEL_UPDATE_PARAMETERS) {
 		float eta = FuseDepthIntoVoxel<THasSemanticInformation, TUseSurfaceThickness, TExecutionMode>(
 				voxel, voxel_in_volume_coordinates, depth_camera_pose, depth_camera_projection_parameters, truncation_distance, depth_image,
@@ -332,7 +435,8 @@ struct ComputeUpdatedLiveVoxelInfo<true, true, THasSemanticInformation, TUseSurf
 // endregion ===========================================================================================================
 // region ======================================== VOXEL UPDATE FUNCTOR ================================================
 
-template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, bool TStopIntegrationAtMaxIntegrationWeight,
+template<typename TVoxel, MemoryDeviceType TMemoryDeviceType,
+		bool TStopIntegrationAtMaxIntegrationWeight,
 		bool TUseSurfaceThickness, ExecutionMode TExecutionMode>
 struct VoxelDepthIntegrationFunctor {
 public:
@@ -376,7 +480,7 @@ public:
 		bool verbose =
 				TExecutionMode == DIAGNOSTIC && verbosity_level >= VerbosityLevel::VERBOSITY_FOCUS_SPOTS && focus_voxel == voxel_position;
 
-		ComputeUpdatedLiveVoxelInfo<TVoxel::hasColorInformation, TVoxel::hasConfidenceInformation,
+		UpdateVoxelInfoFromImages<TVoxel::hasColorInformation, TVoxel::hasConfidenceInformation,
 				TVoxel::hasSemanticInformation, TUseSurfaceThickness, TVoxel, TExecutionMode>::compute(
 				voxel, voxel_volume_coordinates, depth_camera_pose,
 				depth_camera_projection_parameters, rgb_camera_pose, rgb_camera_projection_parameters, truncation_distance,

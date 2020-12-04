@@ -719,12 +719,20 @@ void GenerateRigidAlignmentTestData() {
 
 	VoxelVolume<TSDFVoxel_f_rgb, TIndex> volume(teddy::DefaultVolumeParameters(), false, TMemoryDeviceType,
 	                                            teddy::InitializationParameters<TIndex>());
+	volume.Reset();
 	IndexingEngineInterface<TSDFVoxel_f_rgb, TIndex>* indexing_engine = IndexingEngineFactory::Build<TSDFVoxel_f_rgb, TIndex>(TMemoryDeviceType);
 	CameraTrackingState camera_tracking_state(teddy::frame_image_size, TMemoryDeviceType);
 	indexing_engine->AllocateNearSurface(&volume, view, &camera_tracking_state);
 	DepthFusionEngineInterface<TSDFVoxel_f_rgb, TIndex>* depth_fusion_engine = DepthFusionEngineFactory::Build<TSDFVoxel_f_rgb, TIndex>(
 			TMemoryDeviceType);
 	depth_fusion_engine->IntegrateDepthImageIntoTsdfVolume(&volume, view);
+
+	std::cout << AnalyticsEngine<TSDFVoxel_f_rgb, TIndex, TMemoryDeviceType>::Instance().ComputeAlteredVoxelBounds(&volume) << std::endl;
+	// std::cout << AnalyticsEngine<TSDFVoxel_f_rgb, TIndex, TMemoryDeviceType>::Instance().GetUtilizedHashBlockPositions(&volume) << std::endl;
+
+	auto meshing_engine = MeshingEngineFactory::Build<TSDFVoxel_f_rgb, TIndex>(TMemoryDeviceType);
+	auto mesh = meshing_engine->MeshVolume(&volume);
+	mesh.WritePLY(std::string(test::generated_mesh_directory) + "teddy_000115.ply");
 
 	ConstructGeneratedVolumeSubdirectoriesIfMissing();
 	volume.SaveToDisk(teddy::Volume115Path<TIndex>());

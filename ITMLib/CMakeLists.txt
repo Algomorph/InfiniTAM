@@ -254,19 +254,23 @@ set(
 
         ## CPU
         Engines/Meshing/CPU/MeshingEngine_CPU.tpp
-        Engines/Meshing/CPU/MeshingEngine_CPU_PlainVoxelArray.cpp
-        Engines/Meshing/CPU/MeshingEngine_CPU_VoxelBlockHash.cpp
-        Engines/Meshing/CPU/MultiMeshingEngine_CPU_PlainVoxelArray.cpp
-        Engines/Meshing/CPU/MultiMeshingEngine_CPU_VoxelBlockHash.cpp
         Engines/Meshing/CPU/MultiMeshingEngine_CPU.tpp
+        Engines/Meshing/CPU/Instantiations/MeshingEngine_CPU_PlainVoxelArray_TSDFVoxel_f_flags.cpp
+        Engines/Meshing/CPU/Instantiations/MeshingEngine_CPU_VoxelBlockHash_TSDFVoxel_f_flags.cpp
+        Engines/Meshing/CPU/Instantiations/MeshingEngine_CPU_PlainVoxelArray_TSDFVoxel_f_rgb.cpp
+        Engines/Meshing/CPU/Instantiations/MeshingEngine_CPU_VoxelBlockHash_TSDFVoxel_f_rgb.cpp
+        Engines/Meshing/CPU/Instantiations/MultiMeshingEngine_CPU_PlainVoxelArray.cpp
+        Engines/Meshing/CPU/Instantiations/MultiMeshingEngine_CPU_VoxelBlockHash.cpp
 
         ## CUDA
         Engines/Meshing/CUDA/MeshingEngine_CUDA.tcu
-        Engines/Meshing/CUDA/MeshingEngine_CUDA_PlainVoxelArray.cu
-        Engines/Meshing/CUDA/MeshingEngine_CUDA_VoxelBlockHash.cu
         Engines/Meshing/CUDA/MultiMeshingEngine_CUDA.tcu
-        Engines/Meshing/CUDA/MultiMeshingEngine_CUDA_PlainVoxelArray.cu
-        Engines/Meshing/CUDA/MultiMeshingEngine_CUDA_VoxelBlockHash.cu
+        Engines/Meshing/CUDA/Instantiations/MeshingEngine_CUDA_PlainVoxelArray_TSDFVoxel_f_flags.cu
+        Engines/Meshing/CUDA/Instantiations/MeshingEngine_CUDA_VoxelBlockHash_TSDFVoxel_f_flags.cu
+        Engines/Meshing/CUDA/Instantiations/MeshingEngine_CUDA_PlainVoxelArray_TSDFVoxel_f_rgb.cu
+        Engines/Meshing/CUDA/Instantiations/MeshingEngine_CUDA_VoxelBlockHash_TSDFVoxel_f_rgb.cu
+        Engines/Meshing/CUDA/Instantiations/MultiMeshingEngine_CUDA_PlainVoxelArray.cu
+        Engines/Meshing/CUDA/Instantiations/MultiMeshingEngine_CUDA_VoxelBlockHash.cu
 
         # Multi-Scene
         Engines/MultiScene/ActiveMapManager.cpp
