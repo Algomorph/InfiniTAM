@@ -1,5 +1,5 @@
-build: on
-test: on
+#build: on
+#test: on
 
 build_cloud: Juggernaut
 image:
@@ -12,7 +12,7 @@ configuration:
   - Release
 
 matrix:
-  fast_finish: true
+  fast_finish: false
 
 for:
   -
@@ -52,27 +52,41 @@ for:
     # Ubuntu
 
 install:
-  - sh : |
+    - sh : |
         export CUDACXX=/usr/local/cuda/bin/nvcc
 
 # scripts that run after install scripts finish and services are started
 build_script:
-      - sh: |
-          echo "Build Script for Ubuntu, Image: $APPVEYOR_BUILD_WORKER_IMAGE, Configuration: $CONFIGURATION"
-          mkdir build && cd build
-      - sh: >
-          cmake
-          -DCMAKE_BUILD_TYPE=$CONFIGURATION
-          -DBUILD_TESTS=ON
-          -DWITH_CUDA=ON
-          -DWITH_OPENMP=ON
-          -DWITH_FFMPEG=ON
-          -DCMAKE_CXX_COMPILER=/usr/bin/g++-9
-          -DCMAKE_C_COMPILER=/usr/bin/gcc-9
-          -DCMAKE_C_COMPILER_LAUNCHER=ccache
-          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
-          ..
-      - sh: make -j8
+    - sh: |
+        echo "Build Script for Ubuntu, Image: $APPVEYOR_BUILD_WORKER_IMAGE, Configuration: $CONFIGURATION"
+        mkdir build && cd build
+    - sh: >
+        cmake
+        -DCMAKE_BUILD_TYPE=$CONFIGURATION
+        -DBUILD_TESTS=ON
+        -DWITH_CUDA=ON
+        -DWITH_OPENMP=ON
+        -DWITH_FFMPEG=ON
+        -DCMAKE_CXX_COMPILER=/usr/bin/g++-9
+        -DCMAKE_C_COMPILER=/usr/bin/gcc-9
+        -DCMAKE_C_COMPILER_LAUNCHER=ccache
+        -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+        ..
+    - sh: make -j8
+
+after_build:
+    - sh: |
+        echo "Build finished."
+        echo "Build folder listing: "
+        ls "$APPVEYOR_BUILD_FOLDER/build/Tests"
+
+
+before_test:
+    - sh: |
+        echo "Now to the tests..."
+        echo "Build folder listing: "
+        ls "$APPVEYOR_BUILD_FOLDER/build/Tests"
+
 
 test_script:
     - sh: |
