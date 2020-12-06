@@ -51,15 +51,6 @@ using namespace ITMLib;
 using namespace test;
 
 BOOST_AUTO_TEST_CASE(Test_SceneConstruct16_PVA_VBH_Near_CPU) {
-	VoxelVolume<TSDFVoxel, PlainVoxelArray>* volume_PVA_16;
-	BuildSdfVolumeFromImage_NearSurfaceAllocation(&volume_PVA_16,
-	                                              std::string(test::snoopy::frame_16_depth_path),
-	                                              std::string(test::snoopy::frame_16_color_path),
-	                                              std::string(test::snoopy::frame_16_mask_path),
-	                                              std::string(test::snoopy::calibration_path),
-	                                              MEMORYDEVICE_CPU,
-	                                              test::snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
-
 
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume_VBH_16;
 	BuildSdfVolumeFromImage_NearSurfaceAllocation(&volume_VBH_16,
@@ -69,6 +60,15 @@ BOOST_AUTO_TEST_CASE(Test_SceneConstruct16_PVA_VBH_Near_CPU) {
 	                                              std::string(test::snoopy::calibration_path),
 	                                              MEMORYDEVICE_CPU,
 	                                              test::snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
+
+	VoxelVolume<TSDFVoxel, PlainVoxelArray>* volume_PVA_16;
+	BuildSdfVolumeFromImage_NearSurfaceAllocation(&volume_PVA_16,
+	                                              std::string(test::snoopy::frame_16_depth_path),
+	                                              std::string(test::snoopy::frame_16_color_path),
+	                                              std::string(test::snoopy::frame_16_mask_path),
+	                                              std::string(test::snoopy::calibration_path),
+	                                              MEMORYDEVICE_CPU,
+	                                              test::snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 
 	float absoluteTolerance = 1e-7;
 	BOOST_REQUIRE(allocatedContentAlmostEqual_CPU(volume_PVA_16, volume_VBH_16, absoluteTolerance));

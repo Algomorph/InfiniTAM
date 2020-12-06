@@ -116,8 +116,8 @@ struct VoxelTsdfSetter<true, TUseSurfaceThickness> {
 		// Note: the small constant (1e+6) nudge is necessary to avoid PVA/VBH discrepancies in voxels
 		// marked as truncated. Without it, some voxels whose volumes are mostly outside of the
 		// final_distance_cutoff may not get allocated in the VBH index due to limited floating point precision.
-		if (signed_distance_surface_to_voxel_along_camera_ray < TUseSurfaceThickness ?
-		    -surface_thickness : -truncation_distance) {
+		if (signed_distance_surface_to_voxel_along_camera_ray < (TUseSurfaceThickness ?
+		    -surface_thickness : -truncation_distance)) {
 			if (signed_distance_surface_to_voxel_along_camera_ray < -final_distance_cutoff + 1e+6) {
 				//the voxel is beyond the narrow band, on the other side of the surface, but also really far away.
 				//exclude from computation.
