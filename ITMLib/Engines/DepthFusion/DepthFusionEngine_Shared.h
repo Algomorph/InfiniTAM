@@ -86,13 +86,13 @@ struct VoxelTsdfUpdater<true, TUseSurfaceThickness> {
 		                                                            truncation_distance, surface_thickness, max_weight);
 
 		if (new_sdf < TUseSurfaceThickness ? -surface_thickness / truncation_distance : 1.0) {
-			if (new_sdf < (-final_distance_cutoff + 1e+6) / truncation_distance) {
+			if (new_sdf < (-final_distance_cutoff + 1e-6) / truncation_distance) {
 				voxel.flags = ITMLib::VOXEL_UNKNOWN;
 			} else {
 				voxel.flags = ITMLib::VOXEL_TRUNCATED;
 			}
 		} else if (new_sdf > 1.0) {
-			if (new_sdf > (final_distance_cutoff - 1e+6) / truncation_distance) {
+			if (new_sdf > (final_distance_cutoff - 1e-6) / truncation_distance) {
 				voxel.flags = ITMLib::VOXEL_UNKNOWN;
 			} else {
 				voxel.flags = ITMLib::VOXEL_TRUNCATED;
@@ -113,12 +113,13 @@ struct VoxelTsdfSetter<true, TUseSurfaceThickness> {
 	_CPU_AND_GPU_CODE_ static inline void SetSdf(
 			DEVICEPTR(TVoxel)& voxel, float signed_distance_surface_to_voxel_along_camera_ray, float truncation_distance,
 			float final_distance_cutoff, float surface_thickness) {
-		// Note: the small constant (1e+6) nudge is necessary to avoid PVA/VBH discrepancies in voxels
+		//__DEBUG
+		// Note: the small constant (1e-6) nudge is necessary to avoid PVA/VBH discrepancies in voxels
 		// marked as truncated. Without it, some voxels whose volumes are mostly outside of the
 		// final_distance_cutoff may not get allocated in the VBH index due to limited floating point precision.
 		if (signed_distance_surface_to_voxel_along_camera_ray < (TUseSurfaceThickness ?
 		    -surface_thickness : -truncation_distance)) {
-			if (signed_distance_surface_to_voxel_along_camera_ray < -final_distance_cutoff + 1e+6) {
+			if (signed_distance_surface_to_voxel_along_camera_ray < -final_distance_cutoff + 1e-6) {
 				//the voxel is beyond the narrow band, on the other side of the surface, but also really far away.
 				//exclude from computation.
 				voxel.sdf = TVoxel::floatToValue(-1.0);
@@ -129,7 +130,7 @@ struct VoxelTsdfSetter<true, TUseSurfaceThickness> {
 				voxel.flags = ITMLib::VOXEL_TRUNCATED;
 			}
 		} else if (signed_distance_surface_to_voxel_along_camera_ray > truncation_distance) {
-			if (signed_distance_surface_to_voxel_along_camera_ray > final_distance_cutoff - 1e+6) {
+			if (signed_distance_surface_to_voxel_along_camera_ray > final_distance_cutoff - 1e-6) {
 				//the voxel is in front of the narrow band, between the surface and the camera, but also really far away.
 				//exclude from computation.
 				voxel.sdf = TVoxel::floatToValue(1.0);
@@ -140,6 +141,7 @@ struct VoxelTsdfSetter<true, TUseSurfaceThickness> {
 				voxel.flags = ITMLib::VOXEL_TRUNCATED;
 			}
 		} else {
+
 			// The voxel lies within the narrow band, between truncation boundaries.
 			// Update SDF in proportion to the distance from surface.
 			voxel.sdf = TVoxel::floatToValue(signed_distance_surface_to_voxel_along_camera_ray / truncation_distance);
