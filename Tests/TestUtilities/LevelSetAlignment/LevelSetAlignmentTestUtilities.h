@@ -41,7 +41,7 @@ void PVA_to_VBH_WarpComparisonSubtest(int iteration, LevelSetAlignmentSwitches t
 template<MemoryDeviceType TMemoryDeviceType>
 void
 GenericMultiIterationAlignmentTest(const LevelSetAlignmentSwitches& switches, int iteration_limit, LevelSetAlignmentTestMode mode,
-                                   float absolute_tolerance, float tolerance_divergence_factor = 1.05f);
+                                   float absolute_tolerance, float tolerance_divergence_factor = 1.00f);
 
 
 } // namespace test_utilities
