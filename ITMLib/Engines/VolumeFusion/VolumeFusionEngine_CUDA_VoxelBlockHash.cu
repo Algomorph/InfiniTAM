@@ -13,7 +13,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "../Traversal/CUDA/TwoVolumeTraversal_CUDA_VoxelBlockHash.h"
+#include "../Traversal/CUDA/TwoVolumeTraversal_CUDA_VoxelBlockHash.cuh"
 #include "../Indexing/VBH/CUDA/IndexingEngine_VoxelBlockHash_CUDA.h"
 #include "VolumeFusionEngine.tpp"
 #include "../../GlobalTemplateDefines.h"

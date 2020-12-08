@@ -41,7 +41,7 @@ void GenericClearOutWarpUpdateTest(){
 	           TMemoryDeviceType, test::snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 	float relative_tolerance = 0.1f;//percent
 	auto& analytics_engine = AnalyticsEngine<WarpVoxel,TIndex,TMemoryDeviceType>::Instance();
-	BOOST_REQUIRE_CLOSE(analytics_engine.ComputeWarpUpdateMax(warp_field), 0.42794984579086304f, relative_tolerance);
+	BOOST_REQUIRE_CLOSE(analytics_engine.ComputeWarpUpdateMax(warp_field), 0.49605023860931396f, relative_tolerance);
 	BOOST_REQUIRE_CLOSE(analytics_engine.ComputeWarpUpdateMin(warp_field), 0.0f, relative_tolerance);
 
 	auto alignment_engine = new LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, TIndex, TMemoryDeviceType, DIAGNOSTIC>();

@@ -126,7 +126,7 @@ public:
 		CameraTracker* ret = (*(maker->make))(imgSize_rgb, imgSize_d, deviceType, cfg, lowLevelEngine, imuCalibrator,
 		                                      sceneParams);
 		if (ret->requiresColourRendering()) {
-			printf("Assuming a voxel type with colour information!");
+			printf("Assuming a voxel type with colour information!\n");
 		}
 
 		return ret;

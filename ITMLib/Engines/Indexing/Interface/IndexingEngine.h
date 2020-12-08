@@ -47,6 +47,7 @@ protected: // instance variables
 public:
 	using Configurable<IndexingSettings>::Configurable;
 	using Configurable<IndexingSettings>::GetParameters;
+	virtual ~IndexingEngineInterface() = default;
 	/**
 	 * \brief Given a view with a new depth image, compute_allocated the
 		visible blocks, allocate them and update the hash

@@ -29,8 +29,8 @@ struct HashPair {
 };
 
 struct UnmatchedHash {
-	int hash_code;
-	bool primary;
+	int hash_index;
+	bool exists_in_hash_table1;
 };
 
 struct HashMatchInfo {
@@ -167,141 +167,192 @@ traverseUtilizedWithPosition_device(TVoxel1* voxels1, TVoxel2* voxels2,
 
 __global__ void matchUpHashEntriesByPosition(const ITMLib::HashEntry* hash_table1,
                                              const ITMLib::HashEntry* hash_table2,
-                                             int hashEntryCount,
-                                             HashPair* matchedHashPairs,
-                                             UnmatchedHash* unmatchedHashes,
-                                             HashMatchInfo* hashMatchInfo) {
+                                             int hash_entry_count,
+                                             HashPair* matched_hash_pairs,
+                                             UnmatchedHash* unmatched_hash_codes,
+                                             HashMatchInfo* match_info) {
 
 	int hash = blockIdx.x * blockDim.x + threadIdx.x;
-	if (hash > hashEntryCount) return;
+	if (hash > hash_entry_count) return;
 
 	const ITMLib::HashEntry& hash_entry1 = hash_table1[hash];
 	const ITMLib::HashEntry hash_entry2 = hash_table2[hash];
-	int secondaryHash = hash;
+	int hash_code2 = hash;
 	if (hash_entry1.ptr < 0) {
 		if (hash_entry2.ptr < 0) {
-			// neither primary nor secondary hash blocks allocated for this hash
+			// neither hash table 1 nor hash table 2 blocks are allocated for this hash
 			return;
 		} else {
-			int alternativePrimaryHash;
-			// found no primary at hash index, but did find secondary. Ensure we have a matching primary.
-			if (!FindHashAtPosition(alternativePrimaryHash, hash_entry2.pos, hash_table1)) {
-				int unmatchedHashIdx = atomicAdd(&hashMatchInfo->unmatched_hash_count, 1);
-				unmatchedHashes[unmatchedHashIdx].hash_code = hash;
-				unmatchedHashes[unmatchedHashIdx].primary = false;
+			int alternative_hash_code1;
+			// found no block in table 1 at specified hash index, but did find one in table 2.
+			// Ensure we have a matching block in table 1 by position.
+			if (!FindHashAtPosition(alternative_hash_code1, hash_entry2.pos, hash_table1)) {
+				int unmatched_hash_idx = atomicAdd(&match_info->unmatched_hash_count, 1);
+				unmatched_hash_codes[unmatched_hash_idx].hash_index = hash;
+				unmatched_hash_codes[unmatched_hash_idx].exists_in_hash_table1 = false;
 				return;
 			} else {
-				// found a matching primary, meaning secondary hash will be processed by a different thread
+				// found a matching table 1 block, table 2 will be inspected for this hash index by a different thread
 				return;
 			}
 		}
 	}
 
-	// the rare case where we have different positions for primary & secondary voxel block with the same index:
+	// the rare case where we have different positions for table-1 & table-2 voxel block with the same index:
 	// we have a hash bucket miss, find the secondary voxel block with the matching coordinates
 	if (hash_entry2.pos != hash_entry1.pos) {
 		if (hash_entry2.ptr >= 0) {
-			int alternativePrimaryHash;
-			if (!FindHashAtPosition(alternativePrimaryHash, hash_entry2.pos, hash_table1)) {
-				int unmatchedHashIdx = atomicAdd(&hashMatchInfo->unmatched_hash_count, 1);
-				unmatchedHashes[unmatchedHashIdx].hash_code = hash;
-				unmatchedHashes[unmatchedHashIdx].primary = false;
+			int alternative_hash_code1;
+			if (!FindHashAtPosition(alternative_hash_code1, hash_entry2.pos, hash_table1)) {
+				int unmatched_hash_idx = atomicAdd(&match_info->unmatched_hash_count, 1);
+				unmatched_hash_codes[unmatched_hash_idx].hash_index = hash;
+				unmatched_hash_codes[unmatched_hash_idx].exists_in_hash_table1 = false;
 				return;
 			}
 		}
 
-		if (!FindHashAtPosition(secondaryHash, hash_entry1.pos, hash_table2)) {
-			// If we cannot find the matching secondary hash, we will check whether the primary voxel block has been altered later
-			int unmatchedHashIdx = atomicAdd(&hashMatchInfo->unmatched_hash_count, 1);
-			unmatchedHashes[unmatchedHashIdx].hash_code = hash;
-			unmatchedHashes[unmatchedHashIdx].primary = true;
+		if (!FindHashAtPosition(hash_code2, hash_entry1.pos, hash_table2)) {
+			// If we cannot find the matching secondary hash, we will check whether the table-1 voxel block has been altered later
+			int unmatched_hash_idx = atomicAdd(&match_info->unmatched_hash_count, 1);
+			unmatched_hash_codes[unmatched_hash_idx].hash_index = hash;
+			unmatched_hash_codes[unmatched_hash_idx].exists_in_hash_table1 = true;
 			return;
 		}
 	}
 
-	int matchedPairIdx = atomicAdd(&hashMatchInfo->matched_hash_count, 1);
-	matchedHashPairs[matchedPairIdx].hash_code1 = hash;
-	matchedHashPairs[matchedPairIdx].hash_code2 = secondaryHash;
+	int matched_pair_idx = atomicAdd(&match_info->matched_hash_count, 1);
+	matched_hash_pairs[matched_pair_idx].hash_code1 = hash;
+	matched_hash_pairs[matched_pair_idx].hash_code2 = hash_code2;
 }
 
 // region ========================= ALL-TRUE CHECK KERNELS =============================================================
 
-template<typename TVoxel1, typename TVoxel2>
+template<typename TVoxel1, typename TVoxel2,
+		typename TVoxelPredicate1Functor,
+		typename TVoxelPredicate2Functor>
 __global__ void checkIfUnmatchedVoxelBlocksAreAltered(
 		const TVoxel1* voxels1, const TVoxel2* voxels2,
 		const ITMLib::HashEntry* hash_table1, const ITMLib::HashEntry* hash_table2,
-		const UnmatchedHash* unmatchedHashes, const HashMatchInfo* hashMatchInfo,
-		bool* alteredVoxelEncountered) {
+		const UnmatchedHash* unmatched_hash_codes, const HashMatchInfo* match_info,
+		bool* altered_voxel_encountered,
+		TVoxelPredicate1Functor voxel1_qualifies_for_comparison,
+		TVoxelPredicate2Functor voxel2_qualifies_for_comparison) {
 
-	if (*alteredVoxelEncountered) return;
+	if (*altered_voxel_encountered) return;
 
-	// assume one thread block per hash block
-	int hashIdx = blockIdx.x;
-	if (hashIdx > hashMatchInfo->unmatched_hash_count) return;
-	int hash = unmatchedHashes[hashIdx].hash_code;
+	// assume one thread block per hash_index block
+	int block_index = blockIdx.x;
+	if (block_index > match_info->unmatched_hash_count) return;
+	int hash_index = unmatched_hash_codes[block_index].hash_index;
 
 	int x = threadIdx.x, y = threadIdx.y, z = threadIdx.z;
-	int locId = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
+	int voxel_index_in_block = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
 
-	bool voxelAltered;
-	if (unmatchedHashes[hashIdx].primary) {
-		voxelAltered = isAltered(voxels1[hash_table1[hash].ptr * VOXEL_BLOCK_SIZE3 + locId]);
+	bool voxel_altered;
+	if (unmatched_hash_codes[block_index].exists_in_hash_table1) {
+		auto& voxel1 = voxels1[hash_table1[hash_index].ptr * VOXEL_BLOCK_SIZE3 + voxel_index_in_block];
+		voxel_altered = voxel1_qualifies_for_comparison(voxel1) && isAltered(voxel1);
 	} else {
-		voxelAltered = isAltered(voxels2[hash_table2[hash].ptr * VOXEL_BLOCK_SIZE3 + locId]);
+		auto& voxel2 = voxels2[hash_table2[hash_index].ptr * VOXEL_BLOCK_SIZE3 + voxel_index_in_block];
+		voxel_altered = voxel2_qualifies_for_comparison(voxel2) && isAltered(voxel2);
 	}
-	if (voxelAltered) *alteredVoxelEncountered = true;
+	if (voxel_altered) *altered_voxel_encountered = true;
 }
 
+// ============ super-templated CUDA kernel in struct ====
 
-template<typename TBooleanFunctor, typename TVoxel1, typename TVoxel2>
-__global__ void checkIfMatchingHashBlockVoxelsYieldTrue(
+template<bool PassPositionToFunctor>
+struct HashBlockEqualityChecker;
+
+template<>
+struct HashBlockEqualityChecker<false> {
+	template<typename TBooleanFunctor,
+			typename TVoxel1,
+			typename TVoxel2,
+			typename TVoxelPredicate1Functor,
+			typename TVoxelPredicate2Functor>
+	__device__ static void check(
+			TVoxel1* voxels1, TVoxel2* voxels2,
+			const ITMLib::HashEntry* hash_table1, const ITMLib::HashEntry* hash_table2,
+			const HashPair* matched_hashes, const HashMatchInfo* match_info, TBooleanFunctor* functor,
+			bool* false_encountered,
+			TVoxelPredicate1Functor&& voxel1_qualifies_for_comparison,
+			TVoxelPredicate2Functor&& voxel2_qualifies_for_comparison) {
+		if (*false_encountered) return;
+
+		int hash_pair_idx = blockIdx.x;
+		if (hash_pair_idx > match_info->matched_hash_count) return;
+		int hash_code1 = matched_hashes[hash_pair_idx].hash_code1;
+		int hash_code2 = matched_hashes[hash_pair_idx].hash_code2;
+
+		int x = threadIdx.x, y = threadIdx.y, z = threadIdx.z;
+		int voxel_index_in_block = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
+
+		auto& voxel1 = voxels1[hash_table1[hash_code1].ptr * VOXEL_BLOCK_SIZE3 + voxel_index_in_block];
+		auto& voxel2 = voxels2[hash_table2[hash_code2].ptr * VOXEL_BLOCK_SIZE3 + voxel_index_in_block];
+
+		if (voxel1_qualifies_for_comparison(voxel1) &&
+		    voxel2_qualifies_for_comparison(voxel2) &&
+		    !(*functor)(voxel1, voxel2)) {
+			*false_encountered = true;
+		}
+	}
+};
+
+template<>
+struct HashBlockEqualityChecker<true> {
+	template<typename TBooleanFunctor,
+			typename TVoxel1,
+			typename TVoxel2,
+			typename TVoxelPredicate1Functor,
+			typename TVoxelPredicate2Functor>
+	__device__ static void check(
+			TVoxel1* voxels1, TVoxel2* voxels2,
+			const ITMLib::HashEntry* hash_table1, const ITMLib::HashEntry* hash_table2,
+			const HashPair* matched_hash_codes, const HashMatchInfo* match_info, TBooleanFunctor* functor,
+			bool* false_encountered,
+			TVoxelPredicate1Functor&& voxel1_qualifies_for_comparison,
+			TVoxelPredicate2Functor&& voxel2_qualifies_for_comparison) {
+		if (*false_encountered) return;
+
+		int hashPairIdx = blockIdx.x;
+		if (hashPairIdx > match_info->matched_hash_count) return;
+		int hash_code1 = matched_hash_codes[hashPairIdx].hash_code1;
+		int hash_code2 = matched_hash_codes[hashPairIdx].hash_code2;
+
+		int x = threadIdx.x, y = threadIdx.y, z = threadIdx.z;
+		int voxel_index_in_block = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
+
+		const ITMLib::HashEntry& hash_entry1 = hash_table1[hash_code1];
+		// position of the current entry in 3D space in voxel units
+		Vector3i hash_block_position = hash_entry1.pos.toInt() * VOXEL_BLOCK_SIZE;
+		Vector3i voxel_position = hash_block_position + Vector3i(x, y, z);
+
+		auto& voxel1 = voxels1[hash_entry1.ptr * VOXEL_BLOCK_SIZE3 + voxel_index_in_block];
+		auto& voxel2 = voxels2[hash_table2[hash_code2].ptr * VOXEL_BLOCK_SIZE3 + voxel_index_in_block];
+
+		if (voxel1_qualifies_for_comparison(voxel1) &&
+		    voxel2_qualifies_for_comparison(voxel2) &&
+		    !(*functor)(voxel1, voxel2, voxel_position)) {
+			*false_encountered = true;
+		}
+	}
+};
+
+
+template<bool PassPositionToFunctor,
+		typename TBooleanFunctor, typename TVoxel1, typename TVoxel2,
+		typename TVoxelPredicate1Functor, typename TVoxelPredicate2Functor>
+__global__ void checkCorrespondingHashBlocks(
 		TVoxel1* voxels1, TVoxel2* voxels2,
 		const ITMLib::HashEntry* hash_table1, const ITMLib::HashEntry* hash_table2,
-		const HashPair* matchedHashes, const HashMatchInfo* matchInfo, TBooleanFunctor* functor,
-		bool* falseEncountered) {
-	if (*falseEncountered) return;
-
-	int hashPairIdx = blockIdx.x;
-	if (hashPairIdx > matchInfo->matched_hash_count) return;
-	int primaryHash = matchedHashes[hashPairIdx].hash_code1;
-	int secondaryHash = matchedHashes[hashPairIdx].hash_code2;
-
-	int x = threadIdx.x, y = threadIdx.y, z = threadIdx.z;
-	int locId = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
-
-	if (!(*functor)(voxels1[hash_table1[primaryHash].ptr * VOXEL_BLOCK_SIZE3 + locId],
-	                voxels2[hash_table2[secondaryHash].ptr * VOXEL_BLOCK_SIZE3 + locId])) {
-		*falseEncountered = true;
-	}
-}
-
-
-template<typename TBooleanFunctor, typename TVoxel1, typename TVoxel2>
-__global__ void checkIfMatchingHashBlockVoxelsYieldTrue_Position(
-		TVoxel1* voxels1, TVoxel2* voxels2,
-		const ITMLib::HashEntry* hash_table1, const ITMLib::HashEntry* hash_table2,
-		const HashPair* matchedHashes, const HashMatchInfo* matchInfo, TBooleanFunctor* functor,
-		bool* falseEncountered) {
-	if (*falseEncountered) return;
-
-	int hashPairIdx = blockIdx.x;
-	if (hashPairIdx > matchInfo->matched_hash_count) return;
-	int primaryHash = matchedHashes[hashPairIdx].hash_code1;
-	int secondaryHash = matchedHashes[hashPairIdx].hash_code2;
-
-	int x = threadIdx.x, y = threadIdx.y, z = threadIdx.z;
-	int locId = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
-
-	const ITMLib::HashEntry& hash_entry1 = hash_table1[primaryHash];
-	// position of the current entry in 3D space in voxel units
-	Vector3i hashBlockPosition = hash_entry1.pos.toInt() * VOXEL_BLOCK_SIZE;
-	Vector3i voxel_position = hashBlockPosition + Vector3i(x, y, z);
-
-	if (!(*functor)(voxels1[hash_entry1.ptr * VOXEL_BLOCK_SIZE3 + locId],
-	                voxels2[hash_table2[secondaryHash].ptr * VOXEL_BLOCK_SIZE3 + locId],
-	                voxel_position)) {
-		*falseEncountered = true;
-	}
+		const HashPair* matched_hashes, const HashMatchInfo* match_info, TBooleanFunctor* functor,
+		bool* false_encountered,
+		TVoxelPredicate1Functor voxel1_qualifies_for_comparison,
+		TVoxelPredicate2Functor voxel2_qualifies_for_comparison) {
+	HashBlockEqualityChecker<PassPositionToFunctor>::check(voxels1, voxels2, hash_table1, hash_table2, matched_hashes, match_info,
+	                                                       functor, false_encountered, voxel1_qualifies_for_comparison,
+	                                                       voxel2_qualifies_for_comparison);
 }
 
 // endregion ===========================================================================================================

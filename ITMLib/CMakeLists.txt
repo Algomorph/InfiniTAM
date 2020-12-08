@@ -140,8 +140,8 @@ set(
 
         Engines/Traversal/CUDA/TwoVolumeTraversal_CUDA_PlainVoxelArray.h
         Engines/Traversal/CUDA/TwoVolumeTraversal_CUDA_PlainVoxelArray_Kernels.h
-        Engines/Traversal/CUDA/TwoVolumeTraversal_CUDA_VoxelBlockHash.h
-        Engines/Traversal/CUDA/TwoVolumeTraversal_CUDA_VoxelBlockHash_Kernels.h
+        Engines/Traversal/CUDA/TwoVolumeTraversal_CUDA_VoxelBlockHash.cuh
+        Engines/Traversal/CUDA/TwoVolumeTraversal_CUDA_VoxelBlockHash_Kernels.cuh
         Engines/Traversal/CUDA/TwoVolumeTraversal_CUDA_PVA_to_VBH.h
         Engines/Traversal/CUDA/TwoVolumeTraversal_CUDA_PVA_to_VBH_Kernels.h
 

@@ -96,7 +96,17 @@ void GenericIcpTrackerTest() {
 
 template<MemoryDeviceType TMemoryDeviceType>
 void GenericExtendedTrackerTest() {
+	constexpr const char* preset = "type=extended,levels=bbb,useDepth=1,useColour=1,colourWeight=0.3,minstep=1e-4,outlierColourC=0.175,outlierColourF=0.005,outlierSpaceC=0.1,outlierSpaceF=0.004,numiterC=20,numiterF=50,tukeyCutOff=8,framesToSkip=20,framesToWeight=50,failureDec=20.0";
+	IMUCalibrator* imu_calibrator = new ITMIMUCalibrator_iPad();
 
+	ImageProcessingEngineInterface* image_processing_engine = ImageProcessingEngineFactory::Build(TMemoryDeviceType);
+
+	CameraTracker* tracker = CameraTrackerFactory::Instance().Make(TMemoryDeviceType, preset, teddy::frame_image_size, teddy::frame_image_size,
+	                                                               image_processing_engine, imu_calibrator,
+	                                                               configuration::Get().general_voxel_volume_parameters);
+
+	// tracking state initialized with identity for camera matrix
+	CameraTrackingState tracking_state(teddy::frame_image_size, TMemoryDeviceType);
 }
 
 template<MemoryDeviceType TMemoryDeviceType>
@@ -121,4 +131,5 @@ void GenericForceFailTrackerTest() {
 
 BOOST_AUTO_TEST_CASE(Test_RgbTracker_CPU_VBH) {
 	GenericRgbTrackerTest<VoxelBlockHash, MEMORYDEVICE_CPU>();
+
 }

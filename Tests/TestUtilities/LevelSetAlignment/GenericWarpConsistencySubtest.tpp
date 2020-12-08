@@ -34,6 +34,9 @@
 #include "../../../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison.h"
 #ifndef COMPILE_WITHOUT_CUDA
 #include "../../../ITMLib/Engines/Indexing/VBH/CUDA/IndexingEngine_VoxelBlockHash_CUDA.h"
+
+#include "../../../ITMLib/Utils/Logging/Logging.h"
+
 #endif
 
 using namespace ITMLib;
@@ -42,8 +45,8 @@ namespace test{
 
 
 template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
-void GenericMultiIterationAlignmentSubtest(const LevelSetAlignmentSwitches& switches, int iteration_limit,
-                                           LevelSetAlignmentTestMode mode, float absolute_tolerance) {
+void GenericMultiIterationAlignmentSubtest(const LevelSetAlignmentSwitches& switches, int iteration_limit, LevelSetAlignmentTestMode mode,
+                                           float absolute_tolerance, float tolerance_divergence_factor) {
 
 
 	std::string volume_filename_prefix = SwitchesToPrefix(switches);
@@ -87,9 +90,11 @@ void GenericMultiIterationAlignmentSubtest(const LevelSetAlignmentSwitches& swit
 	VolumeFusionEngineInterface<TSDFVoxel, TIndex>* volume_fusion_engine =
 			VolumeFusionEngineFactory::Build<TSDFVoxel, TIndex>(TMemoryDeviceType);
 
+	float iteration_tolerance = absolute_tolerance;
+
 	for (int iteration = 0; iteration < iteration_limit; iteration++) {
 
-		std::cout << "Subtest " << IndexString<TIndex>() << " iteration " << std::to_string(iteration) << std::endl;
+		LOG4CPLUS_INFO(log4cplus::Logger::getRoot(), "Subtest " << IndexString<TIndex>() << " iteration " << std::to_string(iteration));
 
 		level_set_alignment_engine.Align(&warp_field, live_volumes, canonical_volume);
 
@@ -105,12 +110,12 @@ void GenericMultiIterationAlignmentSubtest(const LevelSetAlignmentSwitches& swit
 				ground_truth_warp_field.Reset();
 				ground_truth_warp_field.LoadFromDisk(path);
 
-				BOOST_REQUIRE(ContentAlmostEqual_Verbose(&warp_field, &ground_truth_warp_field, absolute_tolerance,
+				BOOST_REQUIRE(ContentAlmostEqual_Verbose(&warp_field, &ground_truth_warp_field, iteration_tolerance,
 				                                         TMemoryDeviceType));
 				ground_truth_sdf_volume.Reset();
 				ground_truth_sdf_volume.LoadFromDisk(path_warped_live);
 				BOOST_REQUIRE(ContentAlmostEqual_Verbose(live_volumes[target_warped_field_ix], &ground_truth_sdf_volume,
-				                                         absolute_tolerance, TMemoryDeviceType));
+				                                         iteration_tolerance, TMemoryDeviceType));
 				break;
 			default:
 				break;
@@ -119,9 +124,14 @@ void GenericMultiIterationAlignmentSubtest(const LevelSetAlignmentSwitches& swit
 		if (iteration < iteration_limit - 1) {
 			// prepare for next iteration by swapping source & target (live) TSDF fields
 			std::swap(live_volumes[source_warped_field_ix], live_volumes[target_warped_field_ix]);
+			// we expect the numeric values to diverge slightly at each iteration, grow the tolerance to
+			// account for the expected discrepancy
+			iteration_tolerance = tolerance_divergence_factor * iteration_tolerance;
 		}
 	}
-	std::cout << IndexString<TIndex>() << " fusion test" << std::endl;
+
+	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(), IndexString<TIndex>() << " fusion test");
+
 	switch (mode) {
 		case SAVE_FINAL_ITERATION_AND_FUSION:
 			warp_field.SaveToDisk(GetWarpsPath<TIndex>(volume_filename_prefix, iteration_limit - 1));
@@ -137,10 +147,10 @@ void GenericMultiIterationAlignmentSubtest(const LevelSetAlignmentSwitches& swit
 			ground_truth_sdf_volume.LoadFromDisk(
 					GetWarpedLivePath<TIndex>(volume_filename_prefix, iteration_limit - 1));
 			BOOST_REQUIRE(ContentAlmostEqual_Verbose(live_volumes[target_warped_field_ix], &ground_truth_sdf_volume,
-			                                         absolute_tolerance, TMemoryDeviceType));
+			                                         iteration_tolerance, TMemoryDeviceType));
 			volume_fusion_engine->FuseOneTsdfVolumeIntoAnother(canonical_volume, live_volumes[target_warped_field_ix], 0);
 			ground_truth_sdf_volume.LoadFromDisk(GetFusedPath<TIndex>(volume_filename_prefix, iteration_limit - 1));
-			BOOST_REQUIRE(ContentAlmostEqual(canonical_volume, &ground_truth_sdf_volume, absolute_tolerance,
+			BOOST_REQUIRE(ContentAlmostEqual(canonical_volume, &ground_truth_sdf_volume, iteration_tolerance,
 			                                 TMemoryDeviceType));
 			break;
 		default:

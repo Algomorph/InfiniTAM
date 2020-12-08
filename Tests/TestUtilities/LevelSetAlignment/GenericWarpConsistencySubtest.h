@@ -27,9 +27,7 @@ namespace test{
 
 template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void
-GenericMultiIterationAlignmentSubtest(const ITMLib::LevelSetAlignmentSwitches& switches,
-                                      int iteration_limit = 10,
-                                      LevelSetAlignmentTestMode mode = TEST_SUCCESSIVE_ITERATIONS,
-                                      float absolute_tolerance = 1e-7);
+GenericMultiIterationAlignmentSubtest(const LevelSetAlignmentSwitches& switches, int iteration_limit, LevelSetAlignmentTestMode mode,
+                                      float absolute_tolerance, float tolerance_divergence_factor = 1.05f);
 
 } // namespace test_utilities

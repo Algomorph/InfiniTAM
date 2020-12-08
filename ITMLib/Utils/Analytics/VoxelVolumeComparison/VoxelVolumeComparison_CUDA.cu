@@ -15,7 +15,7 @@
 //  ================================================================
 
 #include "../../../Engines/Traversal/CUDA/TwoVolumeTraversal_CUDA_PlainVoxelArray.h"
-#include "../../../Engines/Traversal/CUDA/TwoVolumeTraversal_CUDA_VoxelBlockHash.h"
+#include "../../../Engines/Traversal/CUDA/TwoVolumeTraversal_CUDA_VoxelBlockHash.cuh"
 #include "../../../Engines/Traversal/CUDA/TwoVolumeTraversal_CUDA_PVA_to_VBH.h"
 #include "VoxelVolumeComparison_CUDA.tcu"
 #include "../../../GlobalTemplateDefines.h"
@@ -69,6 +69,11 @@ bool contentAlmostEqual_CUDA<TSDFVoxel, VoxelBlockHash, PlainVoxelArray, float>(
 template
 bool contentForFlagsAlmostEqual_CUDA<TSDFVoxel, PlainVoxelArray, VoxelBlockHash, float>(
 		VoxelVolume<TSDFVoxel, PlainVoxelArray>* a, VoxelVolume<TSDFVoxel, VoxelBlockHash>* b,
+		VoxelFlags flags, float tolerance);
+
+template
+bool contentForFlagsAlmostEqual_CUDA_Verbose<TSDFVoxel, VoxelBlockHash, VoxelBlockHash, float>(
+		VoxelVolume<TSDFVoxel, VoxelBlockHash>* a, VoxelVolume<TSDFVoxel, VoxelBlockHash>* b,
 		VoxelFlags flags, float tolerance);
 
 template

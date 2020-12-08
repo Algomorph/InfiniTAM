@@ -338,13 +338,13 @@ void GenerateLevelSetAlignment_PVA_vs_VBH_TestData() {
 	               "Generating multi-iteration warp field data from snoopy masked partial volumes 16 & 17 (PVA & VBH)... ");
 	LevelSetAlignmentSwitches switches_data_only(true, false, false, false, false);
 
-	GenericMultiIterationAlignmentTest<MEMORYDEVICE_CPU>(switches_data_only, 10, SAVE_SUCCESSIVE_ITERATIONS);
+	GenericMultiIterationAlignmentTest<MEMORYDEVICE_CPU>(switches_data_only, 10, SAVE_SUCCESSIVE_ITERATIONS, 0, 1.1f);
 	LevelSetAlignmentSwitches switches_data_and_tikhonov(true, false, true, false, false);
-	GenericMultiIterationAlignmentTest<MEMORYDEVICE_CPU>(switches_data_and_tikhonov, 5, SAVE_SUCCESSIVE_ITERATIONS);
+	GenericMultiIterationAlignmentTest<MEMORYDEVICE_CPU>(switches_data_and_tikhonov, 5, SAVE_SUCCESSIVE_ITERATIONS, 0, 1.1f);
 	LevelSetAlignmentSwitches switches_data_and_tikhonov_and_sobolev_smoothing(true, false, true, false, true);
-	GenericMultiIterationAlignmentTest<MEMORYDEVICE_CPU>(switches_data_and_tikhonov_and_sobolev_smoothing, 5, SAVE_SUCCESSIVE_ITERATIONS);
+	GenericMultiIterationAlignmentTest<MEMORYDEVICE_CPU>(switches_data_and_tikhonov_and_sobolev_smoothing, 5, SAVE_SUCCESSIVE_ITERATIONS, 0, 1.1f);
 	GenericMultiIterationAlignmentTest<MEMORYDEVICE_CPU>(LevelSetAlignmentSwitches(true, false, true, false, true),
-	                                                     5, LevelSetAlignmentTestMode::SAVE_FINAL_ITERATION_AND_FUSION);
+	                                                     3, LevelSetAlignmentTestMode::SAVE_FINAL_ITERATION_AND_FUSION, 0, 1.1f);
 }
 
 template<typename TIndex>
@@ -727,8 +727,6 @@ void GenerateRigidAlignmentTestData() {
 			TMemoryDeviceType);
 	depth_fusion_engine->IntegrateDepthImageIntoTsdfVolume(&volume, view);
 
-	std::cout << AnalyticsEngine<TSDFVoxel_f_rgb, TIndex, TMemoryDeviceType>::Instance().ComputeAlteredVoxelBounds(&volume) << std::endl;
-	// std::cout << AnalyticsEngine<TSDFVoxel_f_rgb, TIndex, TMemoryDeviceType>::Instance().GetUtilizedHashBlockPositions(&volume) << std::endl;
 
 	auto meshing_engine = MeshingEngineFactory::Build<TSDFVoxel_f_rgb, TIndex>(TMemoryDeviceType);
 	auto mesh = meshing_engine->MeshVolume(&volume);
@@ -761,6 +759,7 @@ void GenerateRigidAlignmentTestData() {
 GENERATE_SERIALIZABLE_ENUM(GENERATED_TEST_DATA_TYPE_ENUM_DESCRIPTION);
 
 int main(int argc, char* argv[]) {
+
 	log4cplus::initialize();
 	log4cplus::SharedAppenderPtr console_appender(new log4cplus::ConsoleAppender(false, true));
 	log4cplus::Logger::getRoot().addAppender(console_appender);

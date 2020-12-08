@@ -16,6 +16,7 @@
 #include "TestDataUtilities.h"
 #include "TestUtilities.h"
 
+
 namespace test {
 namespace snoopy {
 
@@ -39,7 +40,7 @@ PlainVoxelArray::InitializationParameters InitializationParameters_Fr00<PlainVox
 
 template<>
 VoxelBlockHash::InitializationParameters InitializationParameters_Fr00<VoxelBlockHash>() {
-	return {0x0800, 0x20000};
+	return {0x8000, 0x4000};
 }
 
 template<>
@@ -65,6 +66,16 @@ Load<VoxelBlockHash>(VoxelVolume<TSDFVoxel, VoxelBlockHash>** volume, Frame fram
                      VoxelBlockHash::InitializationParameters initialization_parameters = InitializationParameters_Fr16andFr17<VoxelBlockHash>(),
                      configuration::SwappingMode swapping_mode = configuration::SWAPPINGMODE_DISABLED);
 
+VoxelVolumeParameters DefaultVolumeParameters() {
+	VoxelVolumeParameters parameters(0.004f,
+	                                 0.2f,
+	                                 1.0f,
+	                                 0.04f,
+	                                 100,
+	                                 false,
+	                                 2.0);
+	return parameters;
+}
 
 } // namespace snoopy
 namespace teddy{
@@ -90,7 +101,8 @@ VoxelVolumeParameters DefaultVolumeParameters() {
 								  0.2f,
 								  3.0f,
 								  0.02f,
-								  100, false,
+								  100,
+								  false,
 								  2.0);
 	return parameters;
 }

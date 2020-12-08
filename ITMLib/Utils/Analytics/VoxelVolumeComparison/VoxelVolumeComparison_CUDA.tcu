@@ -53,7 +53,7 @@ struct FlaggedVoxelComparisonUtility<true, TVoxel, TIndexA, TIndexB, ToleranceTy
 	             ToleranceType tolerance) {
 		VoxelEqualFunctor<TVoxel, ToleranceType> functor(tolerance);
 		return TwoVolumeTraversalEngine<TVoxel, TVoxel, TIndexA, TIndexB, MEMORYDEVICE_CUDA>
-		::template TraverseAndCompareMatchingFlags(a, b, flags, functor);
+		::template TraverseAndCompareMatchingFlags(a, b, flags, functor, false);
 	}
 
 	static
@@ -61,7 +61,7 @@ struct FlaggedVoxelComparisonUtility<true, TVoxel, TIndexA, TIndexB, ToleranceTy
 	                     ToleranceType tolerance) {
 		VoxelEqualVerboseFunctor<TVoxel, ToleranceType> functor(tolerance);
 		return TwoVolumeTraversalEngine<TVoxel, TVoxel, TIndexA, TIndexB, MEMORYDEVICE_CUDA>
-		::template TraverseAndCompareMatchingFlagsWithPosition(a, b, flags, functor);
+		::template TraverseAndCompareMatchingFlagsWithPosition(a, b, flags, functor, false);
 	}
 };
 

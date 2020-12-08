@@ -262,11 +262,11 @@ public:
 	/**
 	 * \brief Routine allowing some kind of comparison function call on voxel pairs from the two scenes where both
 	 * voxels share the same spatial location.
-	 * \details voxels that are not modified / have default value (see isModified for how that works) in the primary
+	 * \details voxels that are not modified / have default value (see isModified for how that works) in the exists_in_hash_table1
 	 * voxel volume are ignored if the voxel hash block at this location at the secondary voxel volume has not been
 	 * allocated.
 	 * \tparam TFunctor type of the function object (see parameter description)
-	 * \param volume1 the primary volume -- indexed using plain voxel array (PVA)
+	 * \param volume1 the exists_in_hash_table1 volume -- indexed using plain voxel array (PVA)
 	 * \param volume2 the secondary volume -- indexed using voxel block hash table (VBH)
 	 * \param functor a function object accepting two voxels by reference as arguments and returning true/false
 	 * \return true if the matching functor returns "true" for all allocated voxels, false otherwise.
@@ -297,26 +297,29 @@ public:
 	 * voxels share the same spatial location and the same semantic flags.
 	 *
 	 * \details voxels that are not modified / have default value (see isModified for how that works) or don't have
-	 * the specified semantic flags in the primary voxel volume are ignored if the voxel hash block at this location at
+	 * the specified semantic flags in the exists_in_hash_table1 voxel volume are ignored if the voxel hash block at this location at
 	 * the secondary voxel volume has not been allocated. Likewise, if hash blocks in the secondary volume fall outside
-	 * the dense 3D array of the primary volume, their voxels are checked for alterations and flags. If they are not
+	 * the dense 3D array of the exists_in_hash_table1 volume, their voxels are checked for alterations and flags. If they are not
 	 * altered or their flags don't match the specified flags, they are ignored.
 	 * \note works only for voxels that have semantic flags defined.
 	 *
 	 * \tparam TFunctor type of the function object (see parameter description)
-	 * \param volume1 the primary volume -- indexed using plain voxel array (PVA)
+	 * \param volume1 the exists_in_hash_table1 volume -- indexed using plain voxel array (PVA)
 	 * \param volume2 the secondary volume -- indexed using voxel block hash table (VBH)
 	 * \param semanticFlags semantic flags to match
 	 * \param functor a function object accepting two voxels by reference as arguments and returning true/false
 	 * \return true if the matching functor returns "true" for all allocated voxels, false otherwise.
 	 */
-	template<typename TBooleanFunctor>
+	template<ExecutionMode TExecutionMode = ExecutionMode::OPTIMIZED, typename TBooleanFunctor>
 	inline static bool
 	TraverseAndCompareMatchingFlags(
 			VoxelVolume<TVoxelPrimary, PlainVoxelArray>* volume1,
 			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* volume2,
-			VoxelFlags semanticFlags, TBooleanFunctor& functor) {
-
+			VoxelFlags semanticFlags, TBooleanFunctor& functor, bool verbose) {
+		//TODO: implement verbose functionality
+		if(verbose == true){
+			DIEWITHEXCEPTION_REPORTLOCATION("Verbose functionality not implemented!");
+		}
 		return TraverseAndCompareMatchingFlags_Generic(volume1, volume2, semanticFlags, functor,
 		                                               []
 				                                               (dim3 gridSize_ArrayBlockEnvelope,
@@ -339,13 +342,16 @@ public:
 		                                               });
 	}
 
-	template<typename TBooleanFunctor>
+	template<ExecutionMode TExecutionMode = ExecutionMode::OPTIMIZED, typename TBooleanFunctor>
 	inline static bool
 	TraverseAndCompareMatchingFlagsWithPosition(
 			VoxelVolume<TVoxelPrimary, PlainVoxelArray>* volume1,
 			VoxelVolume<TVoxelSecondary, VoxelBlockHash>* volume2,
-			VoxelFlags semanticFlags, TBooleanFunctor& functor) {
-
+			VoxelFlags semanticFlags, TBooleanFunctor& functor, bool verbose) {
+		//TODO: implement verbose functionality
+		if(verbose == true){
+			DIEWITHEXCEPTION_REPORTLOCATION("Verbose functionality not implemented!");
+		}
 		return TraverseAndCompareMatchingFlags_Generic(volume1, volume2, semanticFlags, functor,
 		                                               []
 				                                               (dim3 gridSize_ArrayBlockEnvelope,
@@ -371,11 +377,11 @@ public:
 	/**
 	 * \brief Routine allowing some kind of comparison function call on voxel pairs from the two scenes where both
 	 * voxels share the same spatial location (variant with functor accepting voxel position).
-	 * \details voxels that are not modified / have default value (see isModified for how that works) in the primary
+	 * \details voxels that are not modified / have default value (see isModified for how that works) in the exists_in_hash_table1
 	 * voxel volume are ignored if the voxel hash block at this location at the secondary voxel volume has not been
 	 * allocated.
 	 * \tparam TFunctor type of the function object (see parameter description)
-	 * \param volume1 the primary volume -- indexed using plain voxel array (PVA)
+	 * \param volume1 the exists_in_hash_table1 volume -- indexed using plain voxel array (PVA)
 	 * \param volume2 the secondary volume -- indexed using voxel block hash table (VBH)
 	 * \param functor a function object accepting two voxels by reference as arguments and their mutual spatial coordinate,
 	 *  and returning true/false
@@ -446,11 +452,11 @@ public:
 	/**
 	 * \brief Routine allowing some kind of comparison function call on voxel pairs from the two scenes where both
 	 * voxels share the same spatial location.
-	 * \details voxels that are not modified / have default value (see isModified for how that works) in the primary
+	 * \details voxels that are not modified / have default value (see isModified for how that works) in the exists_in_hash_table1
 	 * voxel volume are ignored if the voxel hash block at this location at the secondary voxel volume has not been
 	 * allocated.
 	 * \tparam TFunctor type of the function object (see parameter description)
-	 * \param volume1 the primary volume -- indexed using plain voxel array (PVA)
+	 * \param volume1 the exists_in_hash_table1 volume -- indexed using plain voxel array (PVA)
 	 * \param volume2 the secondary volume -- indexed using voxel block hash table (VBH)
 	 * \param functor a function object accepting two voxels by reference as arguments and returning true/false
 	 * \return true if the matching functor returns "true" for all allocated voxels, false otherwise.

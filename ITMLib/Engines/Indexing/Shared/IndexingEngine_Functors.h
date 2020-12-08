@@ -274,16 +274,13 @@ public: // instance functions
 			near_clipping_distance(volume_parameters.near_clipping_distance),
 			far_clipping_distance(volume_parameters.far_clipping_distance),
 			inverted_camera_pose(inverted_depth_camera_pose),
-			//TODO: remove push/pop when clangd FP bug is fixed
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "EndlessLoop"
 			inverted_projection_parameters([&view]() {
 				Vector4f params = view->calibration_information.intrinsics_d.projectionParamsSimple.all;
 				params.fx = 1.0f / params.fx;
 				params.fy = 1.0f / params.fy;
 				return params;
 			}()),
-#pragma clang diagnostic pop
+
 			surface_distance_cutoff(surface_distance_cutoff),
 			hash_block_size_reciprocal(1.0f / (volume_parameters.voxel_size * VOXEL_BLOCK_SIZE)),
 			hash_entry_allocation_states(index.GetHashEntryAllocationStates()),

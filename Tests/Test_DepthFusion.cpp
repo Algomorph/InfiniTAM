@@ -13,7 +13,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#define BOOST_TEST_MODULE DepthFusion_CPU
+#define BOOST_TEST_MODULE DepthFusion
 #ifndef WIN32
 #define BOOST_TEST_DYN_LINK
 #endif
@@ -33,15 +33,17 @@
 #include "../ITMLib/Engines/EditAndCopy/EditAndCopyEngineFactory.h"
 #include "../ITMLib/Engines/Indexing/Interface/IndexingEngine.h"
 #include "../ITMLib/Engines/Indexing/IndexingEngineFactory.h"
-#include "../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_VoxelBlockHash_CPU.h"
-#include "../ITMLib/Utils/Configuration/Configuration.h"
-#include "../ITMLib/Utils/Analytics/AlmostEqual.h"
-#include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CPU.h"
-#include "../ORUtils/FileUtils.h"
 #include "../ITMLib/Engines/VolumeFileIO/VolumeFileIOEngine.h"
 #include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
 #include "../ITMLib/Engines/Rendering/RenderingEngineFactory.h"
+#include "../ITMLib/Utils/Configuration/Configuration.h"
+#include "../ITMLib/Utils/Analytics/AlmostEqual.h"
+#include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison.h"
+#include "../ORUtils/FileUtils.h"
+#ifndef COMPILE_WITHOUT_CUDA
+#include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CUDA.h"
+#endif
 
 //test_utilities
 #include "TestUtilities/TestUtilities.h"
@@ -50,15 +52,16 @@
 using namespace ITMLib;
 using namespace test;
 
-BOOST_AUTO_TEST_CASE(Test_SceneConstruct16_PVA_VBH_Near_CPU) {
 
+template<MemoryDeviceType TMemoryDeviceType>
+void GenericTestBuildSnoopyVolumeFromFrame16_PVA_vs_VBH_Near() {
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume_VBH_16;
 	BuildSdfVolumeFromImage_NearSurfaceAllocation(&volume_VBH_16,
 	                                              std::string(test::snoopy::frame_16_depth_path),
 	                                              std::string(test::snoopy::frame_16_color_path),
 	                                              std::string(test::snoopy::frame_16_mask_path),
 	                                              std::string(test::snoopy::calibration_path),
-	                                              MEMORYDEVICE_CPU,
+	                                              TMemoryDeviceType,
 	                                              test::snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* volume_PVA_16;
@@ -67,21 +70,22 @@ BOOST_AUTO_TEST_CASE(Test_SceneConstruct16_PVA_VBH_Near_CPU) {
 	                                              std::string(test::snoopy::frame_16_color_path),
 	                                              std::string(test::snoopy::frame_16_mask_path),
 	                                              std::string(test::snoopy::calibration_path),
-	                                              MEMORYDEVICE_CPU,
+	                                              TMemoryDeviceType,
 	                                              test::snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 
 	float absoluteTolerance = 1e-7;
-	BOOST_REQUIRE(allocatedContentAlmostEqual_CPU(volume_PVA_16, volume_VBH_16, absoluteTolerance));
-	BOOST_REQUIRE(contentForFlagsAlmostEqual_CPU_Verbose(volume_PVA_16, volume_VBH_16, VoxelFlags::VOXEL_NONTRUNCATED,
-	                                                     absoluteTolerance));
-	BOOST_REQUIRE(contentForFlagsAlmostEqual_CPU_Verbose(volume_PVA_16, volume_VBH_16, VoxelFlags::VOXEL_TRUNCATED,
-	                                                     absoluteTolerance));
+	BOOST_REQUIRE(AllocatedContentAlmostEqual(volume_PVA_16, volume_VBH_16, absoluteTolerance, TMemoryDeviceType));
+	BOOST_REQUIRE(ContentForFlagsAlmostEqual_Verbose(volume_PVA_16, volume_VBH_16, VoxelFlags::VOXEL_NONTRUNCATED,
+	                                                     absoluteTolerance, TMemoryDeviceType));
+	BOOST_REQUIRE(ContentForFlagsAlmostEqual_Verbose(volume_PVA_16, volume_VBH_16, VoxelFlags::VOXEL_TRUNCATED,
+	                                                     absoluteTolerance, TMemoryDeviceType));
 
 	delete volume_VBH_16;
 	delete volume_PVA_16;
-}
+};
 
-BOOST_AUTO_TEST_CASE(Test_SceneConstruct17_PVA_VBH_Near_CPU) {
+template<MemoryDeviceType TMemoryDeviceType>
+void GenericTestBuildSnoopyVolumeFromFrame17_PVA_vs_VBH_Near() {
 
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* volume_PVA_17;
 	BuildSdfVolumeFromImage_NearSurfaceAllocation(&volume_PVA_17,
@@ -89,7 +93,7 @@ BOOST_AUTO_TEST_CASE(Test_SceneConstruct17_PVA_VBH_Near_CPU) {
 	                                              std::string(test::snoopy::frame_17_color_path),
 	                                              std::string(test::snoopy::frame_17_mask_path),
 	                                              std::string(test::snoopy::calibration_path),
-	                                              MEMORYDEVICE_CPU,
+	                                              TMemoryDeviceType,
 	                                              test::snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume_VBH_17;
@@ -98,22 +102,23 @@ BOOST_AUTO_TEST_CASE(Test_SceneConstruct17_PVA_VBH_Near_CPU) {
 	                                              std::string(test::snoopy::frame_17_color_path),
 	                                              std::string(test::snoopy::frame_17_mask_path),
 	                                              std::string(test::snoopy::calibration_path),
-	                                              MEMORYDEVICE_CPU,
+	                                              TMemoryDeviceType,
 	                                              test::snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
 	float absoluteTolerance = 1e-7;
-	BOOST_REQUIRE(allocatedContentAlmostEqual_CPU(volume_PVA_17, volume_VBH_17, absoluteTolerance));
-	BOOST_REQUIRE(contentForFlagsAlmostEqual_CPU(volume_PVA_17, volume_VBH_17, VoxelFlags::VOXEL_NONTRUNCATED,
-	                                             absoluteTolerance));
-	BOOST_REQUIRE(contentForFlagsAlmostEqual_CPU_Verbose(volume_PVA_17, volume_VBH_17, VoxelFlags::VOXEL_TRUNCATED,
-	                                                     absoluteTolerance));
+	BOOST_REQUIRE(AllocatedContentAlmostEqual(volume_PVA_17, volume_VBH_17, absoluteTolerance, TMemoryDeviceType));
+	BOOST_REQUIRE(ContentForFlagsAlmostEqual_Verbose(volume_PVA_17, volume_VBH_17, VoxelFlags::VOXEL_NONTRUNCATED,
+	                                             absoluteTolerance, TMemoryDeviceType));
+	BOOST_REQUIRE(ContentForFlagsAlmostEqual_Verbose(volume_PVA_17, volume_VBH_17, VoxelFlags::VOXEL_TRUNCATED,
+	                                                     absoluteTolerance, TMemoryDeviceType));
 
 	delete volume_VBH_17;
 	delete volume_PVA_17;
 }
 
+template<MemoryDeviceType TMemoryDeviceType>
 static void SetUpTrackingState16(CameraTrackingState& tracking_state,
-                                 IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>& indexer_VBH,
+                                 IndexingEngine<TSDFVoxel, VoxelBlockHash, TMemoryDeviceType>& indexer_VBH,
                                  DepthFusionEngineInterface<TSDFVoxel, VoxelBlockHash>* depth_fusion_engine_VBH) {
 	View* view_16 = nullptr;
 	UpdateView(&view_16,
@@ -121,33 +126,33 @@ static void SetUpTrackingState16(CameraTrackingState& tracking_state,
 	           std::string(test::snoopy::frame_16_color_path),
 	           std::string(test::snoopy::frame_16_mask_path),
 	           std::string(test::snoopy::calibration_path),
-	           MEMORYDEVICE_CPU);
+	           TMemoryDeviceType);
 	RenderState render_state(view_16->depth.dimensions,
 	                         configuration::Get().general_voxel_volume_parameters.near_clipping_distance,
 	                         configuration::Get().general_voxel_volume_parameters.far_clipping_distance,
-	                         MEMORYDEVICE_CPU);
-	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_16(MEMORYDEVICE_CPU,
+	                         TMemoryDeviceType);
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_16(TMemoryDeviceType,
 	                                                     test::snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 	volume_VBH_16.Reset();
 	indexer_VBH.AllocateNearSurface(&volume_VBH_16, view_16);
 	depth_fusion_engine_VBH->IntegrateDepthImageIntoTsdfVolume(&volume_VBH_16, view_16);
 	RenderingEngineBase<TSDFVoxel, VoxelBlockHash>* visualization_engine =
-			RenderingEngineFactory::Build<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CPU);
+			RenderingEngineFactory::Build<TSDFVoxel, VoxelBlockHash>(TMemoryDeviceType);
 	visualization_engine->CreateICPMaps(&volume_VBH_16, view_16, &tracking_state, &render_state);
 	delete visualization_engine;
 	delete view_16;
 }
 
-BOOST_AUTO_TEST_CASE(Test_SceneConstruct17_VBH_CPU_NearVsSpan) {
-
-	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>& indexer =
-			IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance();
+template<MemoryDeviceType TMemoryDeviceType>
+void GenericTestBuildVolumeFromImage_VBH_Near_vs_Span() {
+	IndexingEngine<TSDFVoxel, VoxelBlockHash, TMemoryDeviceType>& indexer =
+			IndexingEngine<TSDFVoxel, VoxelBlockHash, TMemoryDeviceType>::Instance();
 	DepthFusionEngineInterface<TSDFVoxel, VoxelBlockHash>* depth_fusion_engine_VBH =
-			DepthFusionEngineFactory::Build<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CPU);
+			DepthFusionEngineFactory::Build<TSDFVoxel, VoxelBlockHash>(TMemoryDeviceType);
 	Vector2i resolution(640, 480);
-	CameraTrackingState tracking_state(resolution, MEMORYDEVICE_CPU);
+	CameraTrackingState tracking_state(resolution, TMemoryDeviceType);
 
-	SetUpTrackingState16(tracking_state, indexer, depth_fusion_engine_VBH);
+	SetUpTrackingState16<TMemoryDeviceType>(tracking_state, indexer, depth_fusion_engine_VBH);
 
 	View* view_17 = nullptr;
 	UpdateView(&view_17,
@@ -155,13 +160,13 @@ BOOST_AUTO_TEST_CASE(Test_SceneConstruct17_VBH_CPU_NearVsSpan) {
 	           std::string(test::snoopy::frame_17_color_path),
 	           std::string(test::snoopy::frame_17_mask_path),
 	           std::string(test::snoopy::calibration_path),
-	           MEMORYDEVICE_CPU);
+	           TMemoryDeviceType);
 
-	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_17_Span(MEMORYDEVICE_CPU,
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_17_Span(TMemoryDeviceType,
 	                                                          test::snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 	volume_VBH_17_Span.Reset();
 	// CPU
-	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_17_Near(MEMORYDEVICE_CPU,
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_17_Near(TMemoryDeviceType,
 	                                                          test::snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 	volume_VBH_17_Near.Reset();
 
@@ -174,34 +179,32 @@ BOOST_AUTO_TEST_CASE(Test_SceneConstruct17_VBH_CPU_NearVsSpan) {
 	depth_fusion_engine_VBH->IntegrateDepthImageIntoTsdfVolume(&volume_VBH_17_Near, view_17);
 
 	int span_nontruncated_voxel_count =
-			Analytics_CPU_VBH_Voxel::Instance().CountNonTruncatedVoxels(&volume_VBH_17_Span);
+			AnalyticsEngine<TSDFVoxel, VoxelBlockHash, TMemoryDeviceType>::Instance().CountNonTruncatedVoxels(&volume_VBH_17_Span);
 	int near_nontruncated_voxel_count =
-			Analytics_CPU_VBH_Voxel::Instance().CountNonTruncatedVoxels(&volume_VBH_17_Near);
+			AnalyticsEngine<TSDFVoxel, VoxelBlockHash, TMemoryDeviceType>::Instance().CountNonTruncatedVoxels(&volume_VBH_17_Near);
 
 	BOOST_REQUIRE_EQUAL(span_nontruncated_voxel_count, near_nontruncated_voxel_count);
 
 	float absolute_tolerance = 1e-7;
-	BOOST_REQUIRE(
-			contentForFlagsAlmostEqual_CPU_Verbose(&volume_VBH_17_Span, &volume_VBH_17_Near,
-			                                                  VoxelFlags::VOXEL_NONTRUNCATED,
-			                                                  absolute_tolerance));
-
+	BOOST_REQUIRE(ContentForFlagsAlmostEqual_Verbose(&volume_VBH_17_Span, &volume_VBH_17_Near,
+	                                                     VoxelFlags::VOXEL_NONTRUNCATED, absolute_tolerance,
+	                                                     TMemoryDeviceType));
 
 	delete view_17;
 	delete depth_fusion_engine_VBH;
 }
 
-BOOST_AUTO_TEST_CASE(Test_SceneConstruct17_PVA_VBH_Span_CPU) {
-
-	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>& indexer_VBH =
-			IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance();
+template<MemoryDeviceType TMemoryDeviceType>
+void GenericTestBuildSnoopyVolumeFromFrame17_PVA_vs_VBH_Span() {
+	IndexingEngine<TSDFVoxel, VoxelBlockHash, TMemoryDeviceType>& indexer_VBH =
+			IndexingEngine<TSDFVoxel, VoxelBlockHash, TMemoryDeviceType>::Instance();
 	DepthFusionEngineInterface<TSDFVoxel, VoxelBlockHash>* depth_fusion_engine_VBH =
-			DepthFusionEngineFactory::Build<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CPU);
+			DepthFusionEngineFactory::Build<TSDFVoxel, VoxelBlockHash>(TMemoryDeviceType);
 	DepthFusionEngineInterface<TSDFVoxel, PlainVoxelArray>* depth_fusion_engine_PVA =
-			DepthFusionEngineFactory::Build<TSDFVoxel, PlainVoxelArray>(MEMORYDEVICE_CPU);
+			DepthFusionEngineFactory::Build<TSDFVoxel, PlainVoxelArray>(TMemoryDeviceType);
 	Vector2i resolution(640, 480);
-	CameraTrackingState tracking_state(resolution, MEMORYDEVICE_CPU);
-	SetUpTrackingState16(tracking_state, indexer_VBH, depth_fusion_engine_VBH);
+	CameraTrackingState tracking_state(resolution, TMemoryDeviceType);
+	SetUpTrackingState16<TMemoryDeviceType>(tracking_state, indexer_VBH, depth_fusion_engine_VBH);
 
 	View* view_17 = nullptr;
 	UpdateView(&view_17,
@@ -209,13 +212,13 @@ BOOST_AUTO_TEST_CASE(Test_SceneConstruct17_PVA_VBH_Span_CPU) {
 	           std::string(test::snoopy::frame_17_color_path),
 	           std::string(test::snoopy::frame_17_mask_path),
 	           std::string(test::snoopy::calibration_path),
-	           MEMORYDEVICE_CPU);
+	           TMemoryDeviceType);
 
-	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_17_Span(MEMORYDEVICE_CPU,
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_17_Span(TMemoryDeviceType,
 	                                                          test::snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 	volume_VBH_17_Span.Reset();
 	// CPU
-	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_PVA_17(MEMORYDEVICE_CPU,
+	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_PVA_17(TMemoryDeviceType,
 	                                                      test::snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 	volume_PVA_17.Reset();
 
@@ -226,31 +229,31 @@ BOOST_AUTO_TEST_CASE(Test_SceneConstruct17_PVA_VBH_Span_CPU) {
 	depth_fusion_engine_VBH->IntegrateDepthImageIntoTsdfVolume(&volume_VBH_17_Span, view_17);
 	depth_fusion_engine_PVA->IntegrateDepthImageIntoTsdfVolume(&volume_PVA_17, view_17);
 
-	std::vector<Vector3s> difference_set = Analytics_CPU_VBH_Voxel::Instance()
+	std::vector<Vector3s> difference_set = AnalyticsEngine<TSDFVoxel, VoxelBlockHash, TMemoryDeviceType>::Instance()
 			.GetDifferenceBetweenAllocatedAndUtilizedHashBlockPositionSets(&volume_VBH_17_Span);
 
 	BOOST_REQUIRE(difference_set.empty());
 
 	int vbh_span_nontruncated_voxel_count =
-			Analytics_CPU_VBH_Voxel::Instance().CountNonTruncatedVoxels(&volume_VBH_17_Span);
+			AnalyticsEngine<TSDFVoxel, VoxelBlockHash, TMemoryDeviceType>::Instance().CountNonTruncatedVoxels(&volume_VBH_17_Span);
 	int pva_nontruncated_voxel_count =
-			Analytics_CPU_PVA_Voxel::Instance().CountNonTruncatedVoxels(&volume_PVA_17);
+			AnalyticsEngine<TSDFVoxel, PlainVoxelArray, TMemoryDeviceType>::Instance().CountNonTruncatedVoxels(&volume_PVA_17);
 	BOOST_REQUIRE_EQUAL(vbh_span_nontruncated_voxel_count, pva_nontruncated_voxel_count);
 
 	float absolute_tolerance = 1e-7;
-	BOOST_REQUIRE(allocatedContentAlmostEqual_CPU(&volume_PVA_17, &volume_VBH_17_Span, absolute_tolerance));
-	BOOST_REQUIRE(contentForFlagsAlmostEqual_CPU_Verbose(&volume_PVA_17, &volume_VBH_17_Span, VoxelFlags::VOXEL_NONTRUNCATED,
-			                                       absolute_tolerance, OPTIMIZED));
+	BOOST_REQUIRE(AllocatedContentAlmostEqual(&volume_PVA_17, &volume_VBH_17_Span, absolute_tolerance, TMemoryDeviceType));
+	BOOST_REQUIRE(ContentForFlagsAlmostEqual_Verbose(&volume_PVA_17, &volume_VBH_17_Span, VoxelFlags::VOXEL_NONTRUNCATED,
+	                                                     absolute_tolerance, TMemoryDeviceType));
 }
 
-
-BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
+template<MemoryDeviceType TMemoryDeviceType>
+void GenericTestSimpleVolumeFromStripeImage() {
 	// region ================================= CONSTRUCT VIEW =========================================================
 
 	RGBD_CalibrationInformation calibration_data;
 	readRGBDCalib(std::string(test::snoopy::calibration_path).c_str(), calibration_data);
 
-	ViewBuilder* view_builder = ViewBuilderFactory::Build(calibration_data, MEMORYDEVICE_CPU);
+	ViewBuilder* view_builder = ViewBuilderFactory::Build(calibration_data, TMemoryDeviceType);
 	Vector2i image_size(640, 480);
 	View* view = nullptr;
 
@@ -265,16 +268,20 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
 
 	Vector3i volume_size(1024, 32, 1024), volume_offset(-volume_size.x / 2, -volume_size.y / 2, 0);
 
-	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume1(MEMORYDEVICE_CPU, {volume_size, volume_offset});
-	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetVolume(&volume1);
-	CameraTrackingState tracking_state(image_size, MEMORYDEVICE_CPU);
+	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume1(TMemoryDeviceType, {volume_size, volume_offset});
+	volume1.Reset();
+	CameraTrackingState tracking_state(image_size, TMemoryDeviceType);
 
-	DepthFusionEngineInterface<TSDFVoxel, PlainVoxelArray>* depth_fusion_engine =
-			DepthFusionEngineFactory::Build<TSDFVoxel, PlainVoxelArray>(MEMORYDEVICE_CPU);
+	DepthFusionSettings settings;
+	settings.use_surface_thickness_cutoff = false;
+
+	DepthFusionEngineInterface<TSDFVoxel, PlainVoxelArray>* depth_fusion_engine_PVA =
+			DepthFusionEngineFactory::Build<TSDFVoxel, PlainVoxelArray>(TMemoryDeviceType, settings);
+
 	IndexingEngineInterface<TSDFVoxel, PlainVoxelArray>& indexer_PVA
-			= IndexingEngineFactory::GetDefault<TSDFVoxel, PlainVoxelArray>(MEMORYDEVICE_CPU);
+			= IndexingEngineFactory::GetDefault<TSDFVoxel, PlainVoxelArray>(TMemoryDeviceType);
 	indexer_PVA.AllocateNearAndBetweenTwoSurfaces(&volume1, view, &tracking_state);
-	depth_fusion_engine->IntegrateDepthImageIntoTsdfVolume(&volume1, view, &tracking_state);
+	depth_fusion_engine_PVA->IntegrateDepthImageIntoTsdfVolume(&volume1, view, &tracking_state);
 
 	const int num_stripes = 62;
 
@@ -320,7 +327,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
 	for (int i_coordinate = 0; i_coordinate < zero_level_set_coordinates.size(); i_coordinate++) {
 		if (unexpected_sdf_at_level_set) break;
 		Vector3i coord = zero_level_set_coordinates[i_coordinate];
-		TSDFVoxel voxel = ManipulationEngine_CPU_PVA_Voxel::Inst().ReadVoxel(&volume1, coord);
+		TSDFVoxel voxel = volume1.GetValueAt(coord);
 		float sdf = TSDFVoxel::valueToFloat(voxel.sdf);
 		if (!AlmostEqual(sdf, 0.0f, tolerance)) {
 			unexpected_sdf_at_level_set = true;
@@ -340,7 +347,7 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
 			     i_level_set < (truncation_distance_voxels / 2); i_level_set++) {
 				Vector3i augmented_coord(coord.x, coord.y, coord.z + i_level_set);
 				float expected_sdf = -static_cast<float>(i_level_set) * max_SDF_step;
-				voxel = ManipulationEngine_CPU_PVA_Voxel::Inst().ReadVoxel(&volume1, augmented_coord);
+				voxel = volume1.GetValueAt(augmented_coord);
 				sdf = TSDFVoxel::valueToFloat(voxel.sdf);
 				if (!AlmostEqual(sdf, expected_sdf, tolerance)) {
 					unexpected_sdf_at_level_set = true;
@@ -356,63 +363,63 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage_CPU) {
 	BOOST_REQUIRE_MESSAGE(!unexpected_sdf_at_level_set, "Expected sdf " << bad_expected_sdf << " for voxel " \
  << bad_coordinate << " at level set " << i_bad_level_set << ", got: " << bad_sdf);
 
-	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume2(MEMORYDEVICE_CPU);
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume2(TMemoryDeviceType);
 	volume2.Reset();
 
 	DepthFusionEngineInterface<TSDFVoxel, VoxelBlockHash>* depth_fusion_engine_VBH =
-			DepthFusionEngineFactory::Build<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CPU);
+			DepthFusionEngineFactory::Build<TSDFVoxel, VoxelBlockHash>(TMemoryDeviceType, settings);
 
 	IndexingEngineInterface<TSDFVoxel, VoxelBlockHash>& indexer_VBH
-			= IndexingEngineFactory::GetDefault<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CPU);
+			= IndexingEngineFactory::GetDefault<TSDFVoxel, VoxelBlockHash>(TMemoryDeviceType);
 	indexer_VBH.AllocateNearAndBetweenTwoSurfaces(&volume2, view, &tracking_state);
 	depth_fusion_engine_VBH->IntegrateDepthImageIntoTsdfVolume(&volume2, view, &tracking_state);
 
 	tolerance = 1e-5;
-	BOOST_REQUIRE(allocatedContentAlmostEqual_CPU(&volume1, &volume2, tolerance));
-	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume3(MEMORYDEVICE_CPU, {volume_size, volume_offset});
-	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetVolume(&volume3);
+	BOOST_REQUIRE(AllocatedContentAlmostEqual(&volume1, &volume2, tolerance, TMemoryDeviceType));
+	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume3(TMemoryDeviceType, {volume_size, volume_offset});
+	volume3.Reset();
 	indexer_PVA.AllocateNearAndBetweenTwoSurfaces(&volume3, view, &tracking_state);
-	depth_fusion_engine->IntegrateDepthImageIntoTsdfVolume(&volume3, view, &tracking_state);
-	BOOST_REQUIRE(contentAlmostEqual_CPU(&volume1, &volume3, tolerance));
-	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume4(MEMORYDEVICE_CPU, {0x800, 0x20000});
+	depth_fusion_engine_PVA->IntegrateDepthImageIntoTsdfVolume(&volume3, view, &tracking_state);
+	BOOST_REQUIRE(ContentAlmostEqual(&volume1, &volume3, tolerance, TMemoryDeviceType));
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume4(TMemoryDeviceType, {0x800, 0x20000});
 	volume4.Reset();
 	indexer_VBH.AllocateNearAndBetweenTwoSurfaces(&volume4, view, &tracking_state);
 	depth_fusion_engine_VBH->IntegrateDepthImageIntoTsdfVolume(&volume4, view, &tracking_state);
-	BOOST_REQUIRE(contentAlmostEqual_CPU(&volume2, &volume4, tolerance));
+	BOOST_REQUIRE(ContentAlmostEqual(&volume2, &volume4, tolerance, TMemoryDeviceType));
 
 	Vector3i coordinate = zero_level_set_coordinates[0];
-	TSDFVoxel voxel = ManipulationEngine_CPU_PVA_Voxel::Inst().ReadVoxel(&volume3, coordinate);
+	TSDFVoxel voxel = volume3.GetValueAt(coordinate);
 	voxel.sdf = TSDFVoxel::floatToValue(TSDFVoxel::valueToFloat(voxel.sdf) + 0.05f);
-	ManipulationEngine_CPU_PVA_Voxel::Inst().SetVoxel(&volume3, coordinate, voxel);
-	ManipulationEngine_CPU_VBH_Voxel::Inst().SetVoxel(&volume2, coordinate, voxel);
+	volume3.SetValueAt(coordinate, voxel);
+	volume2.SetValueAt(coordinate, voxel);
 
-	BOOST_REQUIRE(!contentAlmostEqual_CPU(&volume1, &volume3, tolerance));
-	BOOST_REQUIRE(!contentAlmostEqual_CPU(&volume2, &volume4, tolerance));
-	BOOST_REQUIRE(!allocatedContentAlmostEqual_CPU(&volume1, &volume2, tolerance));
+	BOOST_REQUIRE(!ContentAlmostEqual(&volume1, &volume3, tolerance, TMemoryDeviceType));
+	BOOST_REQUIRE(!ContentAlmostEqual(&volume2, &volume4, tolerance, TMemoryDeviceType));
+	BOOST_REQUIRE(!AllocatedContentAlmostEqual(&volume1, &volume2, tolerance, TMemoryDeviceType));
 
-	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume5(
-			MEMORYDEVICE_CPU);
-	ManipulationEngine_CPU_VBH_Voxel::Inst().ResetVolume(&volume5);
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume5(TMemoryDeviceType);
+	volume5.Reset();
 	std::string path = GENERATED_TEST_DATA_PREFIX "TestData/volumes/VBH/stripes_CPU.dat";
 	volume4.SaveToDisk(path);
 	volume5.LoadFromDisk(path);
-	BOOST_REQUIRE(allocatedContentAlmostEqual_CPU(&volume1, &volume5, tolerance));
-	BOOST_REQUIRE(contentAlmostEqual_CPU(&volume4, &volume5, tolerance));
+	BOOST_REQUIRE(AllocatedContentAlmostEqual(&volume1, &volume5, tolerance, TMemoryDeviceType));
+	BOOST_REQUIRE(ContentAlmostEqual(&volume4, &volume5, tolerance, TMemoryDeviceType));
 
 	delete view;
-	delete depth_fusion_engine;
+	delete depth_fusion_engine_PVA;
 	delete depth_fusion_engine_VBH;
 	delete view_builder;
 }
 
-BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CPU) {
+template<MemoryDeviceType TMemoryDeviceType>
+void GenericTestBuildSnoopyVolumeFromFrame00_PVA_vs_VBH() {
 	// region ================================= CONSTRUCT VIEW =========================================================
 
 	RGBD_CalibrationInformation calibration_data;
 	readRGBDCalib(std::string(test::snoopy::calibration_path).c_str(), calibration_data);
 
-	ViewBuilder* viewBuilder = ViewBuilderFactory::Build(calibration_data, MEMORYDEVICE_CPU);
-	Vector2i imageSize(640, 480);
+	ViewBuilder* view_builder = ViewBuilderFactory::Build(calibration_data, TMemoryDeviceType);
+	Vector2i image_size(640, 480);
 	View* view = nullptr;
 
 	UChar4Image rgb(true, false);
@@ -420,47 +427,100 @@ BOOST_AUTO_TEST_CASE(testConstructVoxelVolumeFromImage2_CPU) {
 	BOOST_REQUIRE(ReadImageFromFile(rgb, std::string(test::snoopy::frame_00_color_path).c_str()));
 	BOOST_REQUIRE(ReadImageFromFile(depth, std::string(test::snoopy::frame_00_depth_path).c_str()));
 
-	viewBuilder->UpdateView(&view, &rgb, &depth, false, false, false, true);
+	view_builder->UpdateView(&view, &rgb, &depth, false, false, false, true);
 
 	// endregion =======================================================================================================
 
-	VoxelVolume<TSDFVoxel, PlainVoxelArray> generated_volume(MEMORYDEVICE_CPU,
+	VoxelVolume<TSDFVoxel, PlainVoxelArray> generated_volume(TMemoryDeviceType,
 	                                                         test::snoopy::InitializationParameters_Fr00<PlainVoxelArray>());
 
-	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetVolume(&generated_volume);
-	CameraTrackingState trackingState(imageSize, MEMORYDEVICE_CPU);
+	generated_volume.Reset();
+	CameraTrackingState tracking_state(image_size, TMemoryDeviceType);
 
 	DepthFusionEngineInterface<TSDFVoxel, PlainVoxelArray>* depth_fusion_engine_PVA =
-			DepthFusionEngineFactory::Build<TSDFVoxel, PlainVoxelArray>(MEMORYDEVICE_CPU);
+			DepthFusionEngineFactory::Build<TSDFVoxel, PlainVoxelArray>(TMemoryDeviceType);
 	IndexingEngineInterface<TSDFVoxel, PlainVoxelArray>& indexer_PVA
-			= IndexingEngineFactory::GetDefault<TSDFVoxel, PlainVoxelArray>(MEMORYDEVICE_CPU);
-	indexer_PVA.AllocateNearAndBetweenTwoSurfaces(&generated_volume, view, &trackingState);
-	depth_fusion_engine_PVA->IntegrateDepthImageIntoTsdfVolume(&generated_volume, view, &trackingState);
+			= IndexingEngineFactory::GetDefault<TSDFVoxel, PlainVoxelArray>(TMemoryDeviceType);
+	indexer_PVA.AllocateNearAndBetweenTwoSurfaces(&generated_volume, view, &tracking_state);
+	depth_fusion_engine_PVA->IntegrateDepthImageIntoTsdfVolume(&generated_volume, view, &tracking_state);
 
 
-	VoxelVolume<TSDFVoxel, PlainVoxelArray> loaded_volume(MEMORYDEVICE_CPU,
-	                                                      test::snoopy::InitializationParameters_Fr00<PlainVoxelArray>());
+	VoxelVolume<TSDFVoxel, PlainVoxelArray> loaded_volume(TMemoryDeviceType, test::snoopy::InitializationParameters_Fr00<PlainVoxelArray>());
 
 	std::string path = test::snoopy::PartialVolume00Path<PlainVoxelArray>();
 	loaded_volume.Reset();
 	loaded_volume.LoadFromDisk(path);
 
 	float tolerance = 1e-5;
-	BOOST_REQUIRE(contentAlmostEqual_CPU_Verbose(&generated_volume, &loaded_volume, tolerance));
+	BOOST_REQUIRE(ContentAlmostEqual_Verbose(&generated_volume, &loaded_volume, tolerance, TMemoryDeviceType));
 
-	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume3(MEMORYDEVICE_CPU,
+	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume3(TMemoryDeviceType,
 	                                               test::snoopy::InitializationParameters_Fr00<VoxelBlockHash>());
 	volume3.Reset();
 
 	DepthFusionEngineInterface<TSDFVoxel, VoxelBlockHash>* depth_fusion_engine_VBH =
-			DepthFusionEngineFactory::Build<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CPU);
+			DepthFusionEngineFactory::Build<TSDFVoxel, VoxelBlockHash>(TMemoryDeviceType);
 	IndexingEngineInterface<TSDFVoxel, VoxelBlockHash>& indexer_VBH
-			= IndexingEngineFactory::GetDefault<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CPU);
+			= IndexingEngineFactory::GetDefault<TSDFVoxel, VoxelBlockHash>(TMemoryDeviceType);
 
-	indexer_VBH.AllocateNearAndBetweenTwoSurfaces(&volume3, view, &trackingState);
-	depth_fusion_engine_VBH->IntegrateDepthImageIntoTsdfVolume(&volume3, view, &trackingState);
 
-	BOOST_REQUIRE(allocatedContentAlmostEqual_CPU(&loaded_volume, &volume3, tolerance));
+	indexer_VBH.AllocateNearAndBetweenTwoSurfaces(&volume3, view, &tracking_state);
+	depth_fusion_engine_VBH->IntegrateDepthImageIntoTsdfVolume(&volume3, view, &tracking_state);
+
+	BOOST_REQUIRE(AllocatedContentAlmostEqual(&loaded_volume, &volume3, tolerance, TMemoryDeviceType));
 	delete depth_fusion_engine_VBH;
 	delete depth_fusion_engine_PVA;
 }
+
+BOOST_AUTO_TEST_CASE(TestBuildSnoopyVolumeFromFrame16_PVA_vs_VBH_Near_CPU) {
+	GenericTestBuildSnoopyVolumeFromFrame16_PVA_vs_VBH_Near<MEMORYDEVICE_CPU>();
+}
+
+BOOST_AUTO_TEST_CASE(TestBuildSnoopyVolumeFromFrame17_PVA_vs_VBH_Near_CPU) {
+	GenericTestBuildSnoopyVolumeFromFrame17_PVA_vs_VBH_Near<MEMORYDEVICE_CPU>();
+}
+
+BOOST_AUTO_TEST_CASE(TestBuildVolumeFromImage_VBH_Near_vs_Span_CPU) {
+	GenericTestBuildVolumeFromImage_VBH_Near_vs_Span<MEMORYDEVICE_CPU>();
+}
+
+BOOST_AUTO_TEST_CASE(TestBuildSnoopyVolumeFromFrame17_PVA_vs_VBH_Span_CPU) {
+	GenericTestBuildSnoopyVolumeFromFrame17_PVA_vs_VBH_Span<MEMORYDEVICE_CPU>();
+}
+
+
+BOOST_AUTO_TEST_CASE(TestSimpleVolumeFromStripeImage_CPU) {
+	GenericTestSimpleVolumeFromStripeImage<MEMORYDEVICE_CPU>();
+}
+
+BOOST_AUTO_TEST_CASE(TestBuildSnoopyVolumeFromFrame00_PVA_vs_VBH_CPU) {
+	GenericTestBuildSnoopyVolumeFromFrame00_PVA_vs_VBH<MEMORYDEVICE_CPU>();
+}
+
+#ifndef COMPILE_WITHOUT_CUDA
+
+BOOST_AUTO_TEST_CASE(TestBuildSnoopyVolumeFromFrame16_PVA_vs_VBH_Near_CUDA) {
+	GenericTestBuildSnoopyVolumeFromFrame16_PVA_vs_VBH_Near<MEMORYDEVICE_CUDA>();
+}
+
+BOOST_AUTO_TEST_CASE(TestBuildSnoopyVolumeFromFrame17_PVA_vs_VBH_Near_CUDA) {
+	GenericTestBuildSnoopyVolumeFromFrame17_PVA_vs_VBH_Near<MEMORYDEVICE_CUDA>();
+}
+
+BOOST_AUTO_TEST_CASE(TestBuildVolumeFromImage_VBH_Near_vs_Span_CUDA) {
+	GenericTestBuildVolumeFromImage_VBH_Near_vs_Span<MEMORYDEVICE_CUDA>();
+}
+
+BOOST_AUTO_TEST_CASE(TestBuildSnoopyVolumeFromFrame17_PVA_vs_VBH_Span_CUDA) {
+	GenericTestBuildSnoopyVolumeFromFrame17_PVA_vs_VBH_Span<MEMORYDEVICE_CUDA>();
+}
+
+
+BOOST_AUTO_TEST_CASE(TestSimpleVolumeFromStripeImage_CUDA) {
+	GenericTestSimpleVolumeFromStripeImage<MEMORYDEVICE_CUDA>();
+}
+
+BOOST_AUTO_TEST_CASE(TestBuildSnoopyVolumeFromFrame00_PVA_vs_VBH_CUDA) {
+	GenericTestBuildSnoopyVolumeFromFrame00_PVA_vs_VBH<MEMORYDEVICE_CUDA>();
+}
+#endif

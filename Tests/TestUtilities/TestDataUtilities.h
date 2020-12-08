@@ -68,13 +68,13 @@ static constexpr const std::string_view frame_18_mask_file_name = "snoopy_omask_
 static constexpr const std::string_view frame_18_mask_path = ORUtils::join_v<static_frames_directory, frame_18_mask_file_name>;
 
 // videos
-static constexpr const std::string_view frames_16_to_18_depth_file_name = "snoopy_depth_16-18.png";
+static constexpr const std::string_view frames_16_to_18_depth_file_name = "snoopy_depth_16-18.avi";
 static constexpr const std::string_view frames_16_to_18_depth_path = ORUtils::join_v<static_videos_directory, frames_16_to_18_depth_file_name>;
-static constexpr const std::string_view frames_16_to_18_color_file_name = "snoopy_color_16-18.png";
+static constexpr const std::string_view frames_16_to_18_color_file_name = "snoopy_color_16-18.avi";
 static constexpr const std::string_view frames_16_to_18_color_path = ORUtils::join_v<static_videos_directory, frames_16_to_18_color_file_name>;
-static constexpr const std::string_view frames_16_to_18_color_YUV422P_file_name = "snoopy_color_16-18_yuv422p.png";
+static constexpr const std::string_view frames_16_to_18_color_YUV422P_file_name = "snoopy_color_16-18_yuv422p.avi";
 static constexpr const std::string_view frames_16_to_18_color_YUV422P_path = ORUtils::join_v<static_videos_directory, frames_16_to_18_color_YUV422P_file_name>;
-static constexpr const std::string_view frames_16_to_18_depth_GRAY16LE_file_name = "snoopy_depth_16-18_gray16le.png";
+static constexpr const std::string_view frames_16_to_18_depth_GRAY16LE_file_name = "snoopy_depth_16-18_gray16le.avi";
 static constexpr const std::string_view frames_16_to_18_depth_GRAY16LE_path = ORUtils::join_v<static_videos_directory, frames_16_to_18_depth_GRAY16LE_file_name>;
 
 
@@ -163,6 +163,10 @@ Load<VoxelBlockHash>(VoxelVolume<TSDFVoxel, VoxelBlockHash>** volume, Frame fram
                      MemoryDeviceType device_type,
                      VoxelBlockHash::InitializationParameters initialization_parameters,
                      configuration::SwappingMode swapping_mode);
+
+VoxelVolumeParameters DefaultVolumeParameters();
+
+
 } // namespace snoopy
 
 namespace teddy {

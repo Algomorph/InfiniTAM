@@ -28,6 +28,7 @@
 #include "../../../ITMLib/Engines/Rendering/RenderingEngineFactory.h"
 #include "../../../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison.h"
 #include "../../../ITMLib/Utils/Geometry/SpatialIndexConversions.h"
+#include "../../../ITMLib/Utils/Logging/Logging.h"
 //(CPU)
 #include "../../../ITMLib/Engines/Analytics/AnalyticsEngine.h"
 //(CUDA)
@@ -122,9 +123,6 @@ void PVA_to_VBH_WarpComparisonSubtest(int iteration, LevelSetAlignmentSwitches t
 
 
 	BOOST_TEST_MESSAGE("==== CALCULATE PVA WARPS === ");
-	configuration::Get().logging_settings.verbosity_level = VerbosityLevel::VERBOSITY_FOCUS_SPOTS;
-	auto focus_spot = Vector3i(-17, 47, 223);
-	configuration::Get().focus_voxel = focus_spot;
 	level_set_aligner_PVA.Align(warps_PVA, warped_pair_PVA, volume_16_PVA);
 
 	LevelSetAlignmentEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash, TMemoryDeviceType, DIAGNOSTIC>
@@ -159,14 +157,16 @@ void PVA_to_VBH_WarpComparisonSubtest(int iteration, LevelSetAlignmentSwitches t
 }
 
 template<MemoryDeviceType TMemoryDeviceType>
-void GenericMultiIterationAlignmentTest(const LevelSetAlignmentSwitches& switches, int iteration_limit,
-                                        LevelSetAlignmentTestMode mode, float absolute_tolerance) {
+void GenericMultiIterationAlignmentTest(const LevelSetAlignmentSwitches& switches, int iteration_limit, LevelSetAlignmentTestMode mode,
+                                        float absolute_tolerance, float tolerance_divergence_factor) {
+
+	ITMLib::logging::InitializeLogging();
 
 	std::string prefix = SwitchesToPrefix(switches);
 	GenericMultiIterationAlignmentSubtest<PlainVoxelArray, TMemoryDeviceType>(switches, iteration_limit, mode,
-	                                                                          absolute_tolerance);
+	                                                                          absolute_tolerance, tolerance_divergence_factor);
 	GenericMultiIterationAlignmentSubtest<VoxelBlockHash, TMemoryDeviceType>(switches, iteration_limit, mode,
-	                                                                         absolute_tolerance);
+	                                                                         absolute_tolerance, tolerance_divergence_factor);
 
 	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_PVA(TMemoryDeviceType,
 	                                                   test::snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());

@@ -19,31 +19,27 @@ namespace test{
 
 template
 void
-GenericMultiIterationAlignmentSubtest<PlainVoxelArray, MEMORYDEVICE_CPU>(const LevelSetAlignmentSwitches& switches,
-                                                                         int iteration_limit,
+GenericMultiIterationAlignmentSubtest<PlainVoxelArray, MEMORYDEVICE_CPU>(const LevelSetAlignmentSwitches& switches, int iteration_limit,
                                                                          LevelSetAlignmentTestMode mode,
-                                                                         float absolute_tolerance);
+                                                                         float absolute_tolerance, float tolerance_divergence_factor);
 template
 void
-GenericMultiIterationAlignmentSubtest<VoxelBlockHash, MEMORYDEVICE_CPU>(const LevelSetAlignmentSwitches& switches,
-                                                                        int iteration_limit,
+GenericMultiIterationAlignmentSubtest<VoxelBlockHash, MEMORYDEVICE_CPU>(const LevelSetAlignmentSwitches& switches, int iteration_limit,
                                                                         LevelSetAlignmentTestMode mode,
-                                                                        float absolute_tolerance);
+                                                                        float absolute_tolerance, float tolerance_divergence_factor);
 
 #ifndef COMPILE_WITHOUT_CUDA
 template
 void
-GenericMultiIterationAlignmentSubtest<PlainVoxelArray, MEMORYDEVICE_CUDA>(const LevelSetAlignmentSwitches& switches,
-                                                                          int iteration_limit,
+GenericMultiIterationAlignmentSubtest<PlainVoxelArray, MEMORYDEVICE_CUDA>(const LevelSetAlignmentSwitches& switches, int iteration_limit,
                                                                           LevelSetAlignmentTestMode mode,
-                                                                          float absolute_tolerance);
+                                                                          float absolute_tolerance, float tolerance_divergence_factor);
 
 template
 void
-GenericMultiIterationAlignmentSubtest<VoxelBlockHash, MEMORYDEVICE_CUDA>(const LevelSetAlignmentSwitches& switches,
-                                                                         int iteration_limit,
+GenericMultiIterationAlignmentSubtest<VoxelBlockHash, MEMORYDEVICE_CUDA>(const LevelSetAlignmentSwitches& switches, int iteration_limit,
                                                                          LevelSetAlignmentTestMode mode,
-                                                                         float absolute_tolerance);
+                                                                         float absolute_tolerance, float tolerance_divergence_factor);
 #endif
 
 } // namespace test_utilities

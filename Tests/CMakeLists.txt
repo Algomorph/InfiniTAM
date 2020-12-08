@@ -85,7 +85,7 @@ if (BUILD_TESTS)
 
     # *** CPU/CUDA tests with CUDA preprocessor guards
     itm_add_test(NAME SetCopyCompare_CPU SOURCES Test_SetCopyCompare_CPU.cpp)
-    itm_add_test(NAME ConstructVolumeFromImage_CPU SOURCES Test_DepthFusion_CPU.cpp)
+    itm_add_test(NAME DepthFusion SOURCES Test_DepthFusion.cpp)
     itm_add_test(NAME VolumeReduction SOURCES Test_VolumeReduction.cpp)
     itm_add_test(NAME VolumeSaveLoadCompact_CPU SOURCES Test_VolumeSaveLoadCompact_CPU.cpp)
     itm_add_test(NAME IntArrayMap3D SOURCES Test_IntArrayMap3D.cpp)
@@ -110,7 +110,6 @@ if (BUILD_TESTS)
     # *** tests that always require CUDA ***
     if (WITH_CUDA)
         itm_add_test(NAME SetCopyCompare_CUDA SOURCES Test_SetCopyCompare_CUDA.cpp)
-        itm_add_test(NAME ConstructVolumeFromImage_CUDA SOURCES Test_DepthFusion_CUDA.cpp)
         itm_add_test(NAME ConstructVolumeFromImage_CPU_to_CUDA SOURCES
                      Test_DepthFusion_CPU_vs_CUDA.cpp)
         itm_add_test(NAME VolumeSaveLoadCompact_CUDA SOURCES Test_VolumeSaveLoadCompact_CUDA.cpp)

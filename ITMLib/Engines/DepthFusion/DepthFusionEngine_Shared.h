@@ -473,8 +473,7 @@ public:
 			focus_voxel(configuration::Get().focus_voxel) {}
 
 	//TODO: after clangd EndlessLoop FP bug is solved , remove the diagnostic push/pop here
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "EndlessLoop"
+
 	_CPU_AND_GPU_CODE_
 	inline void operator()(TVoxel& voxel, const Vector3i& voxel_position) {
 
@@ -492,8 +491,6 @@ public:
 				depth_camera_projection_parameters, rgb_camera_pose, rgb_camera_projection_parameters, truncation_distance,
 				depth, confidence, depth_image_size, rgb, rgb_image_size, effective_range_cutoff, surface_thickness, verbose);
 	}
-
-#pragma clang diagnostic pop
 
 private:
 	const Vector2i depth_image_size;

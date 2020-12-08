@@ -34,9 +34,15 @@ namespace fs = boost::filesystem;
 
 namespace ITMLib::logging {
 
-
+static bool logging_initialized = false;
 
 void InitializeLogging() {
+	if(logging_initialized){
+		return;
+	}else{
+		logging_initialized = true;
+	}
+
 	log4cplus::initialize();
 #define HAVE_CONSOLE_SUPPORT_FOR_256_COLORS
 #ifdef HAVE_CONSOLE_SUPPORT_FOR_256_COLORS

@@ -159,13 +159,13 @@ CameraTrackingState::TrackingResult MultiEngine<TVoxel, TIndex>::ProcessFrame(UC
 		                        settings.use_bilateral_filter, imuMeasurement,
 		                        false, true);
 
-	// find primary data, if available
+	// find exists_in_hash_table1 data, if available
 	int primaryDataIdx = mActiveDataManager->findPrimaryDataIdx();
 
-	// if there is a "primary data index", process it
+	// if there is a "exists_in_hash_table1 data index", process it
 	if (primaryDataIdx >= 0) todoList.push_back(TodoListEntry(primaryDataIdx, true, true, true));
 
-	// after primary local map, make sure to process all relocalizations, new scenes and loop closures
+	// after exists_in_hash_table1 local map, make sure to process all relocalizations, new scenes and loop closures
 	for (int i = 0; i < mActiveDataManager->numActiveLocalMaps(); ++i)
 	{
 		switch (mActiveDataManager->getLocalMapType(i))
@@ -183,7 +183,7 @@ CameraTrackingState::TrackingResult MultiEngine<TVoxel, TIndex>::ProcessFrame(UC
 	bool primaryTrackingSuccess = false;
 	for (size_t i = 0; i < todoList.size(); ++i)
 	{
-		// - first pass of the todo list is for primary local map and ongoing relocalization and loop closure attempts
+		// - first pass of the todo list is for exists_in_hash_table1 local map and ongoing relocalization and loop closure attempts
 		// - an element with id -1 marks the end of the first pass, a request to call the loop closure detection engine, and
 		//   the start of the second pass
 		// - second tracking pass will be about newly detected loop closures, relocalizations, etc.
@@ -196,7 +196,7 @@ CameraTrackingState::TrackingResult MultiEngine<TVoxel, TIndex>::ProcessFrame(UC
 			int NN[k_loopcloseneighbours]; float distances[k_loopcloseneighbours];
 			view->depth.UpdateHostFromDevice();
 
-			//primary map index
+			//exists_in_hash_table1 map index
 			int primaryLocalMapIdx = -1;
 			if (primaryDataIdx >= 0) primaryLocalMapIdx = mActiveDataManager->getLocalMapIndex(primaryDataIdx);
 
@@ -248,7 +248,7 @@ CameraTrackingState::TrackingResult MultiEngine<TVoxel, TIndex>::ProcessFrame(UC
 			ORUtils::SE3Pose oldPose(*(currentLocalMap->trackingState->pose_d));
 			trackingController->Track(currentLocalMap->trackingState, view);
 
-			// tracking is allowed to be poor only in the primary scenes. 
+			// tracking is allowed to be poor only in the exists_in_hash_table1 scenes.
 			CameraTrackingState::TrackingResult trackingResult = currentLocalMap->trackingState->trackerResult;
 			if (mActiveDataManager->getLocalMapType(dataId) != ActiveMapManager::PRIMARY_LOCAL_MAP)
 				if (trackingResult == CameraTrackingState::TRACKING_POOR) trackingResult = CameraTrackingState::TRACKING_FAILED;
@@ -262,14 +262,14 @@ CameraTrackingState::TrackingResult MultiEngine<TVoxel, TIndex>::ProcessFrame(UC
 				*(currentLocalMap->trackingState->pose_d) = oldPose;
 			}
 
-			// actions on tracking result for primary local map
+			// actions on tracking result for exists_in_hash_table1 local map
 			if (mActiveDataManager->getLocalMapType(dataId) == ActiveMapManager::PRIMARY_LOCAL_MAP)
 			{
 				primaryLocalMapTrackingResult = trackingResult;
 
 				if (trackingResult == CameraTrackingState::TRACKING_GOOD) primaryTrackingSuccess = true;
 
-				// we need to relocalise in the primary local map
+				// we need to relocalise in the exists_in_hash_table1 local map
 				else if (trackingResult == CameraTrackingState::TRACKING_FAILED)
 				{
 					primaryDataIdx = -1;
