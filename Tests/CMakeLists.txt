@@ -66,7 +66,7 @@ if (BUILD_TESTS)
             TestUtilities/LevelSetAlignment/LevelSetAlignmentTestMode.h
             TestUtilities/LevelSetAlignment/TestCaseOrganizationBySwitches.h
             TestUtilities/LevelSetAlignment/SingleIterationTestConditions.h
-            TestUtilities/GenericTestModuleHeader.h)
+            TestUtilities/GenericTestModuleHeader.h TestUtilities/RigidTrackerPresets.h)
 
     find_package(Boost COMPONENTS unit_test_framework REQUIRED)
 

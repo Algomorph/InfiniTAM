@@ -81,7 +81,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(
 				  configuration::Get().device_type)),
 		  meshing_engine(config.create_meshing_engine ? MeshingEngineFactory::Build<TVoxel, TIndex>(
 				  configuration::Get().device_type) : nullptr) {
-	logging::InitializeLogging();
+	logging::InitializeRuntimeLogging();
 
 
 	this->InitializeScenes();

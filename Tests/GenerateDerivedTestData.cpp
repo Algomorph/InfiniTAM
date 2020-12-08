@@ -13,37 +13,40 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-//stdlib
+// === stdlib ===
 #include <filesystem>
 #include <map>
 
-//log4cplus
+// === log4cplus ===
 #include <log4cplus/loggingmacros.h>
 #include <log4cplus/consoleappender.h>
 
-//test_utilities
+// === test_utilities ===
 #include "TestUtilities/TestUtilities.h"
 #include "TestUtilities/TestDataUtilities.h"
 #include "TestUtilities/LevelSetAlignment/LevelSetAlignmentTestUtilities.h"
 #include "TestUtilities/CameraPoseAndRenderingEngineFixture.h"
+#include "TestUtilities/LevelSetAlignment/SingleIterationTestConditions.h"
+#include "TestUtilities/LevelSetAlignment/TestCaseOrganizationBySwitches.h"
+#include "TestUtilities/RigidTrackerPresets.h"
 
-//ORUtils
+// === ORUtils ===
 #include "../ORUtils/FileUtils.h"
+#include "../ORUtils/VectorAndMatrixPersistence.h"
 
-//ITMLib
+// === ITMLib ===
 //(CPU)
 #include "../ITMLib/Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 #include "../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_VoxelBlockHash_CPU.h"
 //(CUDA)
 #ifndef COMPILE_WITHOUT_CUDA
-
 #include "../ITMLib/Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
 #include "../ITMLib/Engines/Indexing/VBH/CUDA/IndexingEngine_VoxelBlockHash_CUDA.h"
-
 #endif
 //(misc)
-
+#include "../ITMLib/Engines/Rendering/RenderingEngineFactory.h"
 #include "../ITMLib/Engines/VolumeFusion/VolumeFusionEngine.h"
+#include "../ITMLib/Engines/ImageProcessing/ImageProcessingEngineFactory.h"
 #include "../ITMLib/Engines/Indexing/IndexingEngineFactory.h"
 #include "../ITMLib/Engines/VolumeFusion/VolumeFusionEngineFactory.h"
 #include "../ITMLib/Engines/Warping/WarpingEngineFactory.h"
@@ -51,16 +54,13 @@
 #include "../ITMLib/Engines/ViewBuilder/ViewBuilderFactory.h"
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
 #include "../ITMLib/Engines/Telemetry/TelemetrySettings.h"
+#include "../ITMLib/Engines/Main/MainEngineSettings.h"
+#include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
 #include "../ITMLib/Utils/Geometry/GeometryBooleanOperations.h"
 #include "../ITMLib/Utils/Configuration/AutomaticRunSettings.h"
 #include "../ITMLib/Utils/Logging/PrettyPrinters.h"
-#include "../ITMLib/Engines/Main/MainEngineSettings.h"
-#include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
-#include "TestUtilities/LevelSetAlignment/SingleIterationTestConditions.h"
-#include "TestUtilities/LevelSetAlignment/TestCaseOrganizationBySwitches.h"
-
-#include "../ORUtils/VectorAndMatrixPersistence.h"
-
+#include "../ITMLib/Utils/Logging/Logging.h"
+#include "../ITMLib/CameraTrackers/CameraTrackerFactory.h"
 
 using namespace ITMLib;
 using namespace test;
@@ -711,6 +711,7 @@ void GenerateRigidAlignmentTestData() {
 	                                                        << DeviceString<TMemoryDeviceType>() << ") ...");
 	View* view = nullptr;
 
+	// generate volume for teddy scene frame 115
 	UpdateView(&view,
 	           std::string(teddy::frame_115_depth_path),
 	           std::string(teddy::frame_115_color_path),
@@ -735,7 +736,46 @@ void GenerateRigidAlignmentTestData() {
 	ConstructGeneratedVolumeSubdirectoriesIfMissing();
 	volume.SaveToDisk(teddy::Volume115Path<TIndex>());
 
+	// generate rigid tracker outputs for next frame in the sequence
 
+	UpdateView(&view,
+	           std::string(teddy::frame_116_depth_path),
+	           std::string(teddy::frame_116_color_path),
+	           std::string(teddy::calibration_path),
+	           TMemoryDeviceType);
+
+	IMUCalibrator* imu_calibrator = new ITMIMUCalibrator_iPad();
+	ImageProcessingEngineInterface* image_processing_engine = ImageProcessingEngineFactory::Build(TMemoryDeviceType);
+
+	ConstructGeneratedMatrixDirectoryIfMissing();
+
+	// the rendering engine will generate the point cloud
+	auto rendering_engine = ITMLib::RenderingEngineFactory::Build<TSDFVoxel_f_rgb, VoxelBlockHash>(TMemoryDeviceType);
+	// we need a dud rendering state also for the point cloud
+	RenderState render_state(teddy::frame_image_size,
+	                         teddy::DefaultVolumeParameters().near_clipping_distance, teddy::DefaultVolumeParameters().far_clipping_distance,
+	                         TMemoryDeviceType);
+
+	for (auto& pair : test::matrix_file_name_by_preset) {
+		CameraTrackingState tracking_state(teddy::frame_image_size, TMemoryDeviceType);
+		rendering_engine->CreatePointCloud(&volume, view, &tracking_state, &render_state);
+		const char* const& preset = pair.first;
+		const std::string& matrix_filename = pair.second;
+		CameraTracker* tracker = CameraTrackerFactory::Instance().Make(
+				TMemoryDeviceType, preset, teddy::frame_image_size, teddy::frame_image_size,
+				image_processing_engine, imu_calibrator,
+				teddy::DefaultVolumeParameters());
+		tracker->TrackCamera(&tracking_state, view);
+		std::string matrix_path = std::string(test::generated_matrix_directory) + "/" + matrix_filename;
+		ORUtils::OStreamWrapper matrix_writer(matrix_path, false);
+		ORUtils::SaveMatrix(matrix_writer, tracking_state.pose_d->GetM());
+		//__DEBUG
+		std::cout << preset << ": " << tracking_state.pose_d->GetM() << std::endl;
+		delete tracker;
+	}
+
+	delete imu_calibrator;
+	delete image_processing_engine;
 	delete indexing_engine;
 	delete depth_fusion_engine;
 	delete view;
@@ -759,11 +799,7 @@ void GenerateRigidAlignmentTestData() {
 GENERATE_SERIALIZABLE_ENUM(GENERATED_TEST_DATA_TYPE_ENUM_DESCRIPTION);
 
 int main(int argc, char* argv[]) {
-
-	log4cplus::initialize();
-	log4cplus::SharedAppenderPtr console_appender(new log4cplus::ConsoleAppender(false, true));
-	log4cplus::Logger::getRoot().addAppender(console_appender);
-	log4cplus::Logger::getRoot().setLogLevel(log4cplus::DEBUG_LOG_LEVEL);
+	ITMLib::logging::InitializeTestLogging();
 
 	std::map<GeneratedTestDataType, std::function<void()>> generator_by_string(
 			{

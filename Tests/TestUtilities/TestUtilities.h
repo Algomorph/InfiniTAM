@@ -46,12 +46,14 @@ static constexpr std::string_view generated_configuration_directory = GENERATED_
 static constexpr std::string_view generated_mesh_directory = GENERATED_TEST_DATA_PREFIX "TestData/meshes/";
 static constexpr std::string_view generated_arrays_directory = GENERATED_TEST_DATA_PREFIX "TestData/arrays/";
 static constexpr std::string_view generated_videos_directory = GENERATED_TEST_DATA_PREFIX "TestData/videos/";
+static constexpr std::string_view generated_matrix_directory = GENERATED_TEST_DATA_PREFIX "TestData/matrices/";
 
 void ConstructGeneratedVolumeSubdirectoriesIfMissing();
 void ConstructGeneratedConfigurationDirectoryIfMissing();
 void ConstructGeneratedMeshDirectoryIfMissing();
 void ConstructGeneratedArraysDirectoryIfMissing();
 void ConstructGeneratedVideosDirectoryIfMissing();
+void ConstructGeneratedMatrixDirectoryIfMissing();
 
 template<typename TIndex>
 std::string IndexString();

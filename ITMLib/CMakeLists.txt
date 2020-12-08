@@ -92,7 +92,7 @@ set(
 
         ## Shared
         Engines/Traversal/Shared/ContiguousCollectionTraversal_Shared.h
-        Utils/CUDA/CudaCallWrappers.cuh
+
         Engines/Traversal/Shared/JobCountPolicy.h
         Engines/Traversal/Shared/TraversalMethod.h
         Engines/Traversal/Shared/VolumeTraversal_Shared.h
@@ -633,6 +633,7 @@ set(
 
         Engines/Telemetry/TelemetryRecorder.h
         Engines/Telemetry/TelemetryRecorderFactory.h
+        Engines/Telemetry/TelemetrySettings.h
 )
 set(
         ITMLIB_ENGINES_TELEMETRY_SOURCES
@@ -851,6 +852,7 @@ set(
         Utils/Analytics/RawArrayComparison.cu
         Utils/Analytics/BenchmarkUtilities.cpp
 
+
         Utils/Collections/NestedMap3DOfArrays.tpp
         Utils/Collections/NestedMap3DOfArrays.cpp
         Utils/Collections/NestedMap3D.tpp
@@ -905,7 +907,8 @@ set(
         Utils/Configuration/AutomaticRunSettings.h
         Utils/Configuration/Configuration.h
         Utils/Configuration/LoggingSettings.h
-        Engines/Telemetry/TelemetrySettings.h
+
+        Utils/CUDA/CudaCallWrappers.cuh
 
         Utils/Enums/IndexingMethod.h
         Utils/Enums/ExecutionMode.h
@@ -926,6 +929,8 @@ set(
         Utils/Geometry/Rodrigues.h
         Utils/Geometry/Segment.h
         Utils/Geometry/SpatialIndexConversions.h
+
+        Utils/LanguageExtensions/static_block.hpp
 
         Utils/Metacoding/DeferrableStructUtilities.h
         Utils/Metacoding/DeferrableSerializableStruct.h

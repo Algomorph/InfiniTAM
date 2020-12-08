@@ -160,7 +160,7 @@ template<MemoryDeviceType TMemoryDeviceType>
 void GenericMultiIterationAlignmentTest(const LevelSetAlignmentSwitches& switches, int iteration_limit, LevelSetAlignmentTestMode mode,
                                         float absolute_tolerance, float tolerance_divergence_factor) {
 
-	ITMLib::logging::InitializeLogging();
+	ITMLib::logging::InitializeTestLogging();
 
 	std::string prefix = SwitchesToPrefix(switches);
 	GenericMultiIterationAlignmentSubtest<PlainVoxelArray, TMemoryDeviceType>(switches, iteration_limit, mode,

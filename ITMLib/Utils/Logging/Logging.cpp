@@ -34,15 +34,13 @@ namespace fs = boost::filesystem;
 
 namespace ITMLib::logging {
 
-static bool logging_initialized = false;
+static bool test_logging_initialized = false;
 
-void InitializeLogging() {
-	if(logging_initialized){
-		return;
-	}else{
-		logging_initialized = true;
-	}
 
+
+static bool runtime_logging_initialized = false;
+
+static inline void InitializeLogging(){
 	log4cplus::initialize();
 #define HAVE_CONSOLE_SUPPORT_FOR_256_COLORS
 #ifdef HAVE_CONSOLE_SUPPORT_FOR_256_COLORS
@@ -92,6 +90,36 @@ void InitializeLogging() {
 			root.setLogLevel(DEBUG_LOG_LEVEL);
 			break;
 	}
+}
+
+void InitializeTestLogging(){
+	if(runtime_logging_initialized){
+		DIEWITHEXCEPTION_REPORTLOCATION("Runtime logging cannot be initialized at the same time as test logging. Check for unwanted calls to InitializeRuntimeLogging().");
+	}
+	if(test_logging_initialized){
+		return;
+	}else{
+		test_logging_initialized = true;
+	}
+
+	log4cplus::SharedAppenderPtr console_appender(new log4cplus::ConsoleAppender(false, true));
+	auto root = log4cplus::Logger::getRoot();
+	root.addAppender(console_appender);
+	root.setLogLevel(log4cplus::DEBUG_LOG_LEVEL);
+}
+
+void InitializeRuntimeLogging() {
+	if(test_logging_initialized){
+		DIEWITHEXCEPTION_REPORTLOCATION("Runtime logging cannot be initialized at the same time as test logging. Check for unwanted calls to InitializeTestLogging().");
+	}
+	if(runtime_logging_initialized){
+		return;
+	}else{
+		runtime_logging_initialized = true;
+	}
+
+	InitializeLogging();
+	auto root = log4cplus::Logger::getRoot();
 
 	if (configuration::Get().logging_settings.log_to_stdout) {
 		log4cplus::SharedAppenderPtr console_appender(new log4cplus::ConsoleAppender(false, true));

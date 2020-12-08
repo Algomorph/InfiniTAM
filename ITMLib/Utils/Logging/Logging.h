@@ -50,7 +50,8 @@ namespace logging {
 	logger.forcedLog(ITMLib::logging::TOP_LOG_LEVEL, _log4cplus_buf.str(), __FILE__, __LINE__); \
 	}
 
-	void InitializeLogging();
+	void InitializeRuntimeLogging();
+	void InitializeTestLogging();
 
 	log4cplus::Logger GetLogger();
 

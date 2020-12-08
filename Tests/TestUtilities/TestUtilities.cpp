@@ -82,6 +82,10 @@ void ConstructGeneratedVideosDirectoryIfMissing() {
 	fs::create_directories(test::generated_videos_directory);
 }
 
+void ConstructGeneratedMatrixDirectoryIfMissing(){
+	fs::create_directories(test::generated_matrix_directory);
+}
+
 template void GenerateSimpleSurfaceTestVolume<MEMORYDEVICE_CPU, TSDFVoxel, VoxelBlockHash>(
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume);
 template void GenerateSimpleSurfaceTestVolume<MEMORYDEVICE_CPU, TSDFVoxel, PlainVoxelArray>(

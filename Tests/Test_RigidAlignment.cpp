@@ -16,120 +16,116 @@
 #define BOOST_TEST_MODULE RigidAlignment
 
 #include "TestUtilities/GenericTestModuleHeader.h"
+#include "TestUtilities/RigidTrackerPresets.h"
 #include "../ITMLib/CameraTrackers/CameraTrackerFactory.h"
 #include "../ITMLib/Engines/ImageProcessing/ImageProcessingEngineFactory.h"
 #include "../ITMLib/Objects/Misc/IMUCalibrator.h"
 #include "../ITMLib/Engines/Rendering/RenderingEngineFactory.h"
+#include "../ORUtils/VectorAndMatrixPersistence.h"
+#include "../ITMLib/Utils/Analytics/AlmostEqual.h"
 
 template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
-void GenericRgbTrackerTest() {
-	// constexpr const char* preset_rrbb = "type=extended,levels=bbb,useDepth=1,useColour=1,"
-	//                                     "colourWeight=0.3,minstep=1e-4,"
-	//                                     "outlierColourC=0.175,outlierColourF=0.005,"
-	//                                     "outlierSpaceC=0.1,outlierSpaceF=0.004,"
-	//                                     "numiterC=20,numiterF=50,tukeyCutOff=8,"
-	//                                     "framesToSkip=20,framesToWeight=50,failureDec=20.0";
-	constexpr const char* preset_rrbb = "type=rgb,levels=rrbb";
-	constexpr const char* preset_rrrbb = "type=rgb,levels=rrrbb";
-	constexpr const char* preset_rrbrb = "type=rgb,levels=rrbrb";
+struct TestEnvironment {
+public:
+	View* view_teddy_frame116;
+	CameraTrackingState tracking_state;
+	IMUCalibrator* imu_calibrator;
+	ImageProcessingEngineInterface* image_processing_engine;
+private:
+	View* view_teddy_frame115;
+	VoxelVolume<TSDFVoxel_f_rgb, TIndex> volume_teddy_frame115;
+	RenderingEngineBase<TSDFVoxel_f_rgb, TIndex>* rendering_engine;
+public:
+	TestEnvironment() :
 
-	ImageProcessingEngineInterface* image_processing_engine = ImageProcessingEngineFactory::Build(TMemoryDeviceType);
+			view_teddy_frame116(nullptr),
+			// tracking state initialized with identity for camera matrix
+			tracking_state(teddy::frame_image_size, TMemoryDeviceType),
+			imu_calibrator(new ITMIMUCalibrator_iPad()),
+			image_processing_engine(ImageProcessingEngineFactory::Build(TMemoryDeviceType)),
+			view_teddy_frame115(nullptr),
+			volume_teddy_frame115(teddy::DefaultVolumeParameters(), false, TMemoryDeviceType,
+			                      teddy::InitializationParameters<TIndex>()),
+			// the rendering engine will generate the point cloud inside tracking_state
+			rendering_engine(ITMLib::RenderingEngineFactory::Build<TSDFVoxel_f_rgb, VoxelBlockHash>(TMemoryDeviceType)) {
 
-	IMUCalibrator* imu_calibrator = new ITMIMUCalibrator_iPad();
+		UpdateView(&view_teddy_frame115,
+		           std::string(teddy::frame_115_depth_path),
+		           std::string(teddy::frame_115_color_path),
+		           std::string(teddy::calibration_path),
+		           TMemoryDeviceType);
+		UpdateView(&view_teddy_frame116,
+		           std::string(teddy::frame_116_depth_path),
+		           std::string(teddy::frame_116_color_path),
+		           std::string(teddy::calibration_path),
+		           TMemoryDeviceType);
 
-	CameraTracker* tracker = CameraTrackerFactory::Instance().Make(TMemoryDeviceType, preset_rrbb, teddy::frame_image_size, teddy::frame_image_size,
-	                                                               image_processing_engine, imu_calibrator,
-	                                                               configuration::Get().general_voxel_volume_parameters);
+		// the rendering engine will generate the point cloud
+		rendering_engine = ITMLib::RenderingEngineFactory::Build<TSDFVoxel_f_rgb, VoxelBlockHash>(TMemoryDeviceType);
 
-	// tracking state initialized with identity for camera matrix
-	CameraTrackingState tracking_state(teddy::frame_image_size, TMemoryDeviceType);
-
-	// Generate view for frame 115
-	View* view = nullptr;
-
-	UpdateView(&view,
-	           std::string(teddy::frame_115_depth_path),
-	           std::string(teddy::frame_115_color_path),
-	           std::string(teddy::calibration_path),
-	           TMemoryDeviceType);
-
-	// we need the volume of the frame 115 to generate the point cloud for the tracker
-	VoxelVolume<TSDFVoxel_f_rgb, TIndex> volume(teddy::DefaultVolumeParameters(), false, TMemoryDeviceType,
-	                                            teddy::InitializationParameters<TIndex>());
-	volume.LoadFromDisk(teddy::Volume115Path<TIndex>());
-
-
-	// the rendering engine will generate the point cloud
-	auto rendering_engine = ITMLib::RenderingEngineFactory::Build<TSDFVoxel_f_rgb, VoxelBlockHash>(TMemoryDeviceType);
-
-	// we need a dud rendering state also for the point cloud
-	RenderState render_state(teddy::frame_image_size,
-	                         teddy::DefaultVolumeParameters().near_clipping_distance, teddy::DefaultVolumeParameters().far_clipping_distance,
-	                         TMemoryDeviceType);
-
-	rendering_engine->CreatePointCloud(&volume, view, &tracking_state, &render_state);
-
-	// now, go to the next frame for the view
-	UpdateView(&view,
-	           std::string(teddy::frame_116_depth_path),
-	           std::string(teddy::frame_116_color_path),
-	           std::string(teddy::calibration_path),
-	           TMemoryDeviceType);
-
-	tracker->TrackCamera(&tracking_state, view);
-
-	std::cout << tracking_state.pose_d->GetM() << std::endl;
-	std::cout << (tracking_state.trackerResult == CameraTrackingState::TrackingResult::TRACKING_POOR ?
-	              " poor " : "not poor") << std::endl;
-	std::cout << (tracking_state.trackerResult == CameraTrackingState::TrackingResult::TRACKING_FAILED ?
-	              " failed " : "didn't fail") << std::endl;
+		// we need the volume of the frame 115 to generate the point cloud for the tracker
+		volume_teddy_frame115.Reset();
+		volume_teddy_frame115.LoadFromDisk(teddy::Volume115Path<TIndex>());
 
 
-	delete image_processing_engine;
-	delete imu_calibrator;
+		// we need a dud rendering state also for the point cloud
+		RenderState render_state(teddy::frame_image_size,
+		                         teddy::DefaultVolumeParameters().near_clipping_distance,
+		                         teddy::DefaultVolumeParameters().far_clipping_distance,
+		                         TMemoryDeviceType);
+
+		rendering_engine->CreatePointCloud(&volume_teddy_frame115, view_teddy_frame115, &tracking_state, &render_state);
+	}
+
+	void ResetTrackingState() {
+		this->tracking_state.pose_d->SetM(Matrix4f::Identity());
+	}
+
+	~TestEnvironment() {
+		delete view_teddy_frame115;
+		delete view_teddy_frame116;
+		delete rendering_engine;
+		delete image_processing_engine;
+		delete imu_calibrator;
+	}
+};
+
+
+template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
+void GenericRigidTrackerTest(const char* preset, TestEnvironment<TIndex, TMemoryDeviceType>& environment) {
+	BOOST_TEST_MESSAGE("Using preset: " << preset);
+
+
+	CameraTracker* tracker = CameraTrackerFactory::Instance().Make(
+			TMemoryDeviceType, preset, teddy::frame_image_size, teddy::frame_image_size,
+			environment.image_processing_engine, environment.imu_calibrator,
+			teddy::DefaultVolumeParameters()
+	);
+	tracker->TrackCamera(&environment.tracking_state, environment.view_teddy_frame116);
+
+	const std::string& matrix_filename = test::matrix_file_name_by_preset.at(preset);
+	std::string matrix_path = std::string(test::generated_matrix_directory) + "/" + matrix_filename;
+	ORUtils::IStreamWrapper matrix_reader(matrix_path);
+	auto depth_matrix_gt = ORUtils::LoadMatrix<Matrix4f>(matrix_reader);
+
+	std::cout << depth_matrix_gt << std::endl;
+	std::cout << environment.tracking_state.pose_d->GetM() << std::endl;
+
+	BOOST_REQUIRE(AlmostEqual(depth_matrix_gt, environment.tracking_state.pose_d->GetM(), 1.0e-6));
+	environment.ResetTrackingState();
+
+	delete tracker;
 }
 
-template<MemoryDeviceType TMemoryDeviceType>
-void GenericIcpTrackerTest() {
-
-}
-
-template<MemoryDeviceType TMemoryDeviceType>
-void GenericExtendedTrackerTest() {
-	constexpr const char* preset = "type=extended,levels=bbb,useDepth=1,useColour=1,colourWeight=0.3,minstep=1e-4,outlierColourC=0.175,outlierColourF=0.005,outlierSpaceC=0.1,outlierSpaceF=0.004,numiterC=20,numiterF=50,tukeyCutOff=8,framesToSkip=20,framesToWeight=50,failureDec=20.0";
-	IMUCalibrator* imu_calibrator = new ITMIMUCalibrator_iPad();
-
-	ImageProcessingEngineInterface* image_processing_engine = ImageProcessingEngineFactory::Build(TMemoryDeviceType);
-
-	CameraTracker* tracker = CameraTrackerFactory::Instance().Make(TMemoryDeviceType, preset, teddy::frame_image_size, teddy::frame_image_size,
-	                                                               image_processing_engine, imu_calibrator,
-	                                                               configuration::Get().general_voxel_volume_parameters);
-
-	// tracking state initialized with identity for camera matrix
-	CameraTrackingState tracking_state(teddy::frame_image_size, TMemoryDeviceType);
-}
-
-template<MemoryDeviceType TMemoryDeviceType>
-void GenericFileTrackerTest() {
-
-}
-
-template<MemoryDeviceType TMemoryDeviceType>
-void GenericImuIcpTrackerTest() {
-
-}
-
-template<MemoryDeviceType TMemoryDeviceType>
-void GenericImuExtendedTrackerTest() {
-
-}
-
-template<MemoryDeviceType TMemoryDeviceType>
-void GenericForceFailTrackerTest() {
-
-}
 
 BOOST_AUTO_TEST_CASE(Test_RgbTracker_CPU_VBH) {
-	GenericRgbTrackerTest<VoxelBlockHash, MEMORYDEVICE_CPU>();
+	TestEnvironment<VoxelBlockHash, MEMORYDEVICE_CPU> environment;
+	GenericRigidTrackerTest<VoxelBlockHash, MEMORYDEVICE_CPU>(test::rgb_tracker_preset_rrbb, environment);
+	GenericRigidTrackerTest<VoxelBlockHash, MEMORYDEVICE_CPU>(test::rgb_tracker_preset_rrbrb, environment);
+	GenericRigidTrackerTest<VoxelBlockHash, MEMORYDEVICE_CPU>(test::rgb_tracker_preset_rrrbb, environment);
+}
 
+BOOST_AUTO_TEST_CASE(Test_ExtendedTracker_CPU_VBH) {
+	TestEnvironment<VoxelBlockHash, MEMORYDEVICE_CPU> environment;
+	GenericRigidTrackerTest<VoxelBlockHash, MEMORYDEVICE_CPU>(test::extended_tracker_preset1, environment);
 }
