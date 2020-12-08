@@ -524,11 +524,11 @@ public: // static functions
 	/**
 	 * \brief Routine allowing some kind of comparison function call on voxel pairs from the two scenes where both
 	 * voxels share the same spatial location.
-	 * \details voxels that are not modified / have default value (see isModified for how that works) in the exists_in_hash_table1
+	 * \details voxels that are not modified / have default value (see isModified for how that works) in the primary
 	 * voxel volume are ignored if the voxel hash block at this location at the secondary voxel volume has not been
 	 * allocated.
 	 * \tparam TFunctor type of the function object (see parameter description)
-	 * \param array_volume the exists_in_hash_table1 volume -- indexed using plain voxel array (PVA)
+	 * \param array_volume the primary volume -- indexed using plain voxel array (PVA)
 	 * \param hash_volume the secondary volume -- indexed using voxel block hash table (VBH)
 	 * \param functor a function object accepting two voxels by reference as arguments and returning true/false
 	 * \return true if the matching functor returns "true" for all allocated voxels, false otherwise.
@@ -602,12 +602,12 @@ public: // static functions
 	/**
 	 * \brief Routine allowing some kind of comparison function call on voxel pairs from the two scenes where both
 	 * voxels share the same spatial location, which ignores unallocated spaces in either scene.
-	 * \details voxels that are not modified / have default value (see isModified for how that works) in the exists_in_hash_table1
+	 * \details voxels that are not modified / have default value (see isModified for how that works) in the primary
 	 * voxel volume are ignored if the voxel hash block at this location at the secondary voxel volume has not been
 	 * allocated. Areas where either or both of the scenes don't have allocated voxels are
 	 * ignored, even if only one of the volumes does, in fact, have potentially-altered voxels there.
 	 * \tparam TFunctor type of the function object (see parameter description)
-	 * \param array_volume the exists_in_hash_table1 volume -- indexed using plain voxel array (PVA)
+	 * \param array_volume the primary volume -- indexed using plain voxel array (PVA)
 	 * \param hash_volume the secondary volume -- indexed using voxel block hash table (VBH)
 	 * \param functor a function object accepting two voxels by reference as arguments and returning true/false
 	 * \return true if the matching functor returns "true" for all allocated voxels, false otherwise.
@@ -628,12 +628,12 @@ public: // static functions
 	/**
 	 * \brief Routine allowing some kind of comparison function call on voxel pairs from the two scenes where both
 	 * voxels share the same spatial location, which ignores unallocated spaces in either scene.
-	 * \details voxels that are not modified / have default value (see isModified for how that works) in the exists_in_hash_table1
+	 * \details voxels that are not modified / have default value (see isModified for how that works) in the primary
 	 * voxel volume are ignored if the voxel hash block at this location at the secondary voxel volume has not been
 	 * allocated. Areas where either or both of the scenes don't have allocated voxels are
 	 * ignored, even if only one of the volumes does, in fact, have potentially-altered voxels there.
 	 * \tparam TFunctor type of the function object (see parameter description)
-	 * \param array_volume the exists_in_hash_table1 volume -- indexed using plain voxel array (PVA)
+	 * \param array_volume the primary volume -- indexed using plain voxel array (PVA)
 	 * \param hash_volume the secondary volume -- indexed using voxel block hash table (VBH)
 	 * \param functor a function object accepting two voxels and their mutually shared position by reference as arguments
 	 * and returning true/false
@@ -662,11 +662,11 @@ public:
 	/**
 	 * \brief Routine allowing some kind of comparison function call on voxel pairs from the two scenes where both
 	 * voxels share the same spatial location.
-	 * \details voxels that are not modified / have default value (see isModified for how that works) in the exists_in_hash_table1
+	 * \details voxels that are not modified / have default value (see isModified for how that works) in the primary
 	 * voxel volume are ignored if the voxel hash block at this location at the secondary voxel volume has not been
 	 * allocated.
 	 * \tparam TFunctor type of the function object (see parameter description)
-	 * \param hash_volume the exists_in_hash_table1 volume -- indexed using voxel block hash table (VBH)
+	 * \param hash_volume the primary volume -- indexed using voxel block hash table (VBH)
 	 * \param array_volume the secondary volume -- indexed using plain voxel array (PVA)
 	 * \param functor a function object accepting two voxels by reference as arguments and returning true/false
 	 * \return true if the matching functor returns "true" for all allocated voxels, false otherwise.

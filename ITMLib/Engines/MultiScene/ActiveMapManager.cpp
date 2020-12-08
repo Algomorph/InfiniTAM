@@ -139,7 +139,7 @@ bool ActiveMapManager::shouldMovePrimaryLocalMap(int newDataId, int bestDataId, 
 		return true;
 	}
 
-	// step 1: is "new" better than "exists_in_hash_table1" ?
+	// step 1: is "new" better than "primary" ?
 
 	// don't continue a local map that is already full
 /*	if (blocksInUse_new >= N_maxblocknum) return false;
@@ -452,7 +452,7 @@ bool ActiveMapManager::maintainActiveData()
 
 		if (link.type == PRIMARY_LOCAL_MAP)
 		{
-			if (primaryDataIdx >= 0) fprintf(stderr, "OOOPS, two or more exists_in_hash_table1 localMaps...\n");
+			if (primaryDataIdx >= 0) fprintf(stderr, "OOOPS, two or more primary localMaps...\n");
 			primaryDataIdx = i;
 		}
 	}

@@ -30,7 +30,7 @@ struct HashPair {
 
 struct UnmatchedHash {
 	int hash_index;
-	bool exists_in_hash_table1;
+	bool primary;
 };
 
 struct HashMatchInfo {
@@ -189,7 +189,7 @@ __global__ void matchUpHashEntriesByPosition(const ITMLib::HashEntry* hash_table
 			if (!FindHashAtPosition(alternative_hash_code1, hash_entry2.pos, hash_table1)) {
 				int unmatched_hash_idx = atomicAdd(&match_info->unmatched_hash_count, 1);
 				unmatched_hash_codes[unmatched_hash_idx].hash_index = hash;
-				unmatched_hash_codes[unmatched_hash_idx].exists_in_hash_table1 = false;
+				unmatched_hash_codes[unmatched_hash_idx].primary = false;
 				return;
 			} else {
 				// found a matching table 1 block, table 2 will be inspected for this hash index by a different thread
@@ -206,7 +206,7 @@ __global__ void matchUpHashEntriesByPosition(const ITMLib::HashEntry* hash_table
 			if (!FindHashAtPosition(alternative_hash_code1, hash_entry2.pos, hash_table1)) {
 				int unmatched_hash_idx = atomicAdd(&match_info->unmatched_hash_count, 1);
 				unmatched_hash_codes[unmatched_hash_idx].hash_index = hash;
-				unmatched_hash_codes[unmatched_hash_idx].exists_in_hash_table1 = false;
+				unmatched_hash_codes[unmatched_hash_idx].primary = false;
 				return;
 			}
 		}
@@ -215,7 +215,7 @@ __global__ void matchUpHashEntriesByPosition(const ITMLib::HashEntry* hash_table
 			// If we cannot find the matching secondary hash, we will check whether the table-1 voxel block has been altered later
 			int unmatched_hash_idx = atomicAdd(&match_info->unmatched_hash_count, 1);
 			unmatched_hash_codes[unmatched_hash_idx].hash_index = hash;
-			unmatched_hash_codes[unmatched_hash_idx].exists_in_hash_table1 = true;
+			unmatched_hash_codes[unmatched_hash_idx].primary = true;
 			return;
 		}
 	}
@@ -249,7 +249,7 @@ __global__ void checkIfUnmatchedVoxelBlocksAreAltered(
 	int voxel_index_in_block = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
 
 	bool voxel_altered;
-	if (unmatched_hash_codes[block_index].exists_in_hash_table1) {
+	if (unmatched_hash_codes[block_index].primary) {
 		auto& voxel1 = voxels1[hash_table1[hash_index].ptr * VOXEL_BLOCK_SIZE3 + voxel_index_in_block];
 		voxel_altered = voxel1_qualifies_for_comparison(voxel1) && isAltered(voxel1);
 	} else {
