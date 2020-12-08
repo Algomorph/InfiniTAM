@@ -62,7 +62,7 @@ utilized_hash_codes, voxels1, voxels2, block_traverser)
 			if (hash_entry1.ptr < 0) continue;
 			HashEntry hash_entry2 = hash_table2[hash_code];
 
-			// the rare case where we have different positions for exists_in_hash_table1 & secondary voxel block with the same index:
+			// the rare case where we have different positions for primary & secondary voxel block with the same index:
 			// we have a hash bucket miss, find the secondary voxel with the matching coordinates
 			if (hash_entry2.pos != hash_entry1.pos) {
 				int hash_code2;
@@ -101,7 +101,7 @@ voxels1, voxels2, block_traverser)
 			if (hash_entry1.ptr < 0) continue;
 			HashEntry hash_entry2 = hash_table2[hash_code];
 
-			// the rare case where we have different positions for exists_in_hash_table1 & secondary voxel block with the same index:
+			// the rare case where we have different positions for primary & secondary voxel block with the same index:
 			// we have a hash bucket miss, find the secondary voxel with the matching coordinates
 			if (hash_entry2.pos != hash_entry1.pos) {
 				int hash_code2;
@@ -188,7 +188,7 @@ mismatch_found)
 			auto block_2_has_matching_block_1 = [&](int hash_code2) {
 				int alternative_hash_code1;
 				if (!FindHashAtPosition(alternative_hash_code1, hash_entry2.pos, hash_table1)) {
-					// could not find exists_in_hash_table1 block corresponding to the secondary hash
+					// could not find primary block corresponding to the secondary hash
 					TVoxel2* voxel_block2 = &(voxels2[hash_entry2.ptr *
 					                                  (VOXEL_BLOCK_SIZE3)]);
 					// if the secondary block is unaltered anyway, so no need to match and we're good, so return "true"
@@ -198,8 +198,8 @@ mismatch_found)
 						return false;
 					}
 				}
-				// alternative exists_in_hash_table1 hash found, skip this exists_in_hash_table1 hash since the corresponding secondary
-				// block will be (or has been) processed with the alternative exists_in_hash_table1 hash.
+				// alternative primary hash found, skip this primary hash since the corresponding secondary
+				// block will be (or has been) processed with the alternative primary hash.
 				return true;
 			};
 
@@ -216,7 +216,7 @@ mismatch_found)
 				}
 			}
 
-			// the rare case where we have different positions for exists_in_hash_table1 & secondary voxel block with the same index:
+			// the rare case where we have different positions for primary & secondary voxel block with the same index:
 			// we have a hash bucket miss, find the secondary voxel block with the matching coordinates
 			if (hash_entry2.pos != hash_entry1.pos) {
 				if (hash_entry2.ptr >= 0) {
@@ -228,9 +228,9 @@ mismatch_found)
 
 				int hash_code2;
 				if (!FindHashAtPosition(hash_code2, hash_entry1.pos, hash_table2)) {
-					// If we cannot find this block, we check whether the exists_in_hash_table1 voxel block has been altered, and
+					// If we cannot find this block, we check whether the primary voxel block has been altered, and
 					// return "false" if it is -- i.e. the secondary voxel volume does not have a match.
-					// If the exists_in_hash_table1 voxel block has not been altered, we assume the allocation mismatch is benign and
+					// If the primary voxel block has not been altered, we assume the allocation mismatch is benign and
 					// continue to the next hash block.
 					TVoxel1* voxel_block1 = &(voxels1[hash_entry1.ptr *
 					                                  (VOXEL_BLOCK_SIZE3)]);
@@ -616,7 +616,7 @@ public:
 			if (primaryHashEntry.ptr < 0) continue;
 			HashEntry hash_code2Entry = hash_table2[hash];
 
-			// the rare case where we have different positions for exists_in_hash_table1 & secondary voxel block with the same index:
+			// the rare case where we have different positions for primary & secondary voxel block with the same index:
 			// we have a hash bucket miss, find the secondary voxel with the matching coordinates
 			if (hash_code2Entry.pos != primaryHashEntry.pos) {
 				int hash_code2;
@@ -680,7 +680,7 @@ public:
 			if (hash_entry1.ptr < 0) continue;
 			HashEntry hash_entry2 = hash_table2[hash];
 
-			// the rare case where we have different positions for exists_in_hash_table1 & secondary voxel block with the same index:
+			// the rare case where we have different positions for primary & secondary voxel block with the same index:
 			// we have a hash bucket miss, find the secondary voxel with the matching coordinates
 			if (hash_entry2.pos != hash_entry1.pos) {
 				int hash_code2;
