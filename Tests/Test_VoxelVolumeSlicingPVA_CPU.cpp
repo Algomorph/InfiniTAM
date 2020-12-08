@@ -45,7 +45,11 @@ BOOST_AUTO_TEST_CASE(testPVASceneSlice_CPU) {
 	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_CPU(MEMORYDEVICE_CPU);
 	volume_CPU.Reset();
 
-	const int expected_non_truncated_voxel_count = 58785;
+	//TODO: add a CUDA test via making this code generic
+	//TODO: generate these values in "generate_derived_test_data", read them in instead
+	const int expected_non_truncated_voxel_count = 36798;
+	const double expected_non_truncated_voxel_absolute_sdf_sum = 14979.376292228699;
+
 	volume_CPU.LoadFromDisk(test::snoopy::FullVolume16Path<PlainVoxelArray>());
 
 	BOOST_REQUIRE_EQUAL(Analytics_CPU_PVA_Voxel::Instance().CountNonTruncatedVoxels(&volume_CPU),
@@ -53,7 +57,7 @@ BOOST_AUTO_TEST_CASE(testPVASceneSlice_CPU) {
 
 
 	BOOST_REQUIRE_CLOSE(Analytics_CPU_PVA_Voxel::Instance().SumNonTruncatedVoxelAbsSdf(&volume_CPU),
-	                    29304.876607656479, 0.001);
+	                    expected_non_truncated_voxel_absolute_sdf_sum, 0.001);
 
 	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_slice_same_dimensions_CPU(
 			MEMORYDEVICE_CPU);
@@ -91,9 +95,9 @@ BOOST_AUTO_TEST_CASE(testPVASceneSlice_CPU) {
 	BOOST_REQUIRE_EQUAL(Analytics_CPU_PVA_Voxel::Instance().CountNonTruncatedVoxels(
 			&volume_slice_different_dimensions_CPU), expected_non_truncated_voxel_count);
 	BOOST_REQUIRE_CLOSE(Analytics_CPU_PVA_Voxel::Instance().SumNonTruncatedVoxelAbsSdf(
-			&volume_slice_different_dimensions_CPU), 29304.876607656479, 0.001);
+			&volume_slice_different_dimensions_CPU), expected_non_truncated_voxel_absolute_sdf_sum, 0.001);
 	BOOST_REQUIRE_CLOSE(Analytics_CPU_PVA_Voxel::Instance().SumNonTruncatedVoxelAbsSdf(
-			&volume_CPU), 29304.876607656479, 0.001);
+			&volume_CPU), expected_non_truncated_voxel_absolute_sdf_sum, 0.001);
 	BOOST_REQUIRE(allocatedContentAlmostEqual_CPU_Verbose(&volume_CPU,
 	                                                      &volume_slice_different_dimensions_CPU, tolerance));
 
