@@ -16,7 +16,7 @@
 
 #include "EditAndCopyEngine_CUDA.h"
 #include "../Shared/EditAndCopyEngine_Shared.h"
-#include "../../../Utils/CUDAUtils.h"
+#include "../../../Utils/CUDA/CUDAUtils.h"
 #include "../../../../ORUtils/PlatformIndependence.h"
 #include "../../../Objects/Volume/RepresentationAccess.h"
 #include "../../../Utils/Geometry/GeometryBooleanOperations.h"
@@ -226,8 +226,7 @@ bool EditAndCopyEngine_CUDA<TVoxel, VoxelBlockHash>::CopyVolume(
 	HashEntry* target_hash_table = target_volume->index.GetEntries();
 
 // dummy bounds, to avoid writing yet another function for copying
-	Vector6i bounds = AnalyticsEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance().ComputeVoxelBounds(
-			source_volume);
+	Vector6i bounds = AnalyticsEngine<TVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance().ComputeVoxelBounds(source_volume);
 	int* target_utilized_hash_entries = target_volume->index.GetUtilizedBlockHashCodes();
 
 	if (offset == Vector3i(0)) {

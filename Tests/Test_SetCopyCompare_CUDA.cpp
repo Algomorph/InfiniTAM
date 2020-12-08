@@ -41,7 +41,7 @@
 
 #include "../ITMLib/Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 #include "../ITMLib/Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
-#include "../ITMLib/Engines/ViewBuilding/ViewBuilderFactory.h"
+#include "../ITMLib/Engines/ViewBuilder/ViewBuilderFactory.h"
 #include "../ITMLib/Engines/VolumeFileIO/VolumeFileIOEngine.h"
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngine.h"
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
@@ -54,7 +54,7 @@
 
 
 using namespace ITMLib;
-using namespace test_utilities;
+using namespace test;
 
 
 BOOST_AUTO_TEST_CASE(testSetVoxelAndCopy_PlainVoxelArray_CUDA) {
@@ -260,11 +260,11 @@ BOOST_AUTO_TEST_CASE(testCompareVoxelVolumes_CUDA_and_CPU_ITMVoxel) {
 BOOST_AUTO_TEST_CASE(testCompareVoxelVolumes_CUDA_ITMWarp) {
 	float tolerance = 1e-6;
 
-	Vector3i volumeSize(40);
-	Vector3i volumeOffset(-20, -20, 0);
-	PlainVoxelArray::InitializationParameters indexParametersPVA(volumeSize, volumeOffset);
+	Vector3i volume_size(40);
+	Vector3i volume_offset(-20, -20, 0);
+	PlainVoxelArray::InitializationParameters indexParametersPVA(volume_size, volume_offset);
 	VoxelBlockHash::InitializationParameters indexParametersVBH(0x800, 0x20000);
-	Vector3i extentEndVoxel = volumeOffset + volumeSize;
+	Vector3i extent_end_voxel = volume_offset + volume_size;
 
 	VoxelVolume<WarpVoxel, PlainVoxelArray> scene1(MEMORYDEVICE_CUDA, indexParametersPVA);
 	ManipulationEngine_CUDA_PVA_Warp::Inst().ResetVolume(&scene1);
@@ -279,7 +279,7 @@ BOOST_AUTO_TEST_CASE(testCompareVoxelVolumes_CUDA_ITMWarp) {
 	std::mt19937 generator(random_device());
 
 	auto singleVoxelTests = [&]() {
-		std::uniform_int_distribution<int> coordinate_distribution2(volumeOffset.x, 0);
+		std::uniform_int_distribution<int> coordinate_distribution2(volume_offset.x, 0);
 		WarpVoxel warp;
 		warp.warp_update = Vector3f(-0.1);
 
@@ -297,7 +297,7 @@ BOOST_AUTO_TEST_CASE(testCompareVoxelVolumes_CUDA_ITMWarp) {
 		BOOST_REQUIRE(contentAlmostEqual_CUDA(&scene1, &scene2, tolerance));
 		BOOST_REQUIRE(contentAlmostEqual_CUDA(&scene3, &scene4, tolerance));
 
-		coordinate = volumeOffset + volumeSize - Vector3i(1);
+		coordinate = volume_offset + volume_size - Vector3i(1);
 		warp = ManipulationEngine_CUDA_PVA_Warp::Inst().ReadVoxel(&scene2, coordinate);
 		warp.warp_update += Vector3f(0.1);
 		ManipulationEngine_CUDA_PVA_Warp::Inst().SetVoxel(&scene2, coordinate, warp);
@@ -311,14 +311,14 @@ BOOST_AUTO_TEST_CASE(testCompareVoxelVolumes_CUDA_ITMWarp) {
 	};
 
 	std::uniform_real_distribution<float> warp_distribution(-1.0f, 1.0f);
-	std::uniform_int_distribution<int> coordinate_distribution(0, extentEndVoxel.x - 1);
+	std::uniform_int_distribution<int> coordinate_distribution(0, extent_end_voxel.x - 1);
 
-	const int modifiedWarpCount = 120;
+	const int modified_warp_count = 120;
 
 	singleVoxelTests();
 
 //	generate only in the positive coordinates' volume, to make sure that the unneeded voxel hash blocks are properly dismissed
-	for (int iWarp = 0; iWarp < modifiedWarpCount; iWarp++) {
+	for (int i_warp = 0; i_warp < modified_warp_count; i_warp++) {
 		WarpVoxel warp;
 		Vector3f framewise_warp(warp_distribution(generator), warp_distribution(generator), warp_distribution(generator));
 		warp.warp_update = framewise_warp;

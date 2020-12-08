@@ -18,7 +18,7 @@
 
 using namespace ITMLib;
 
-namespace test_utilities {
+namespace test {
 
 template void GenerateSimpleSurfaceTestVolume<MEMORYDEVICE_CUDA, TSDFVoxel, VoxelBlockHash>(
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume);
@@ -28,7 +28,7 @@ template void GenerateRandomDepthWeightSubVolume<MEMORYDEVICE_CUDA, TSDFVoxel, V
 		VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume, const Extent3Di& bounds, const Extent2Di&
 weight_range);
 
-//__DEBUG
+
 template
 void FindAllVoxelsNotInDepthWeightRange<MEMORYDEVICE_CUDA, TSDFVoxel, VoxelBlockHash>(VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume,
                                                                                       const Extent2Di& weight_range);

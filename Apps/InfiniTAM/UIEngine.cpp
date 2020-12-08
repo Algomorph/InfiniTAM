@@ -64,13 +64,13 @@ void UIEngine::Initialize(int& argc, char** argv,
 	this->current_colour_mode = 0;
 
 	this->colourModes_main.emplace_back("shaded greyscale", FusionAlgorithm::InfiniTAM_IMAGE_SCENERAYCAST);
-	this->colourModes_main.emplace_back("integrated colours", FusionAlgorithm::InfiniTAM_IMAGE_COLOUR_FROM_VOLUME);
+	this->colourModes_main.emplace_back("integrated colors", FusionAlgorithm::InfiniTAM_IMAGE_COLOUR_FROM_VOLUME);
 	this->colourModes_main.emplace_back("surface normals", FusionAlgorithm::InfiniTAM_IMAGE_COLOUR_FROM_NORMAL);
 	this->colourModes_main.emplace_back("confidence", FusionAlgorithm::InfiniTAM_IMAGE_COLOUR_FROM_CONFIDENCE);
 
 	this->colourModes_freeview.emplace_back("canonical", FusionAlgorithm::InfiniTAM_IMAGE_FREECAMERA_CANONICAL);
 	this->colourModes_freeview.emplace_back("shaded greyscale", FusionAlgorithm::InfiniTAM_IMAGE_FREECAMERA_SHADED);
-	this->colourModes_freeview.emplace_back("integrated colours",
+	this->colourModes_freeview.emplace_back("integrated colors",
 	                                        FusionAlgorithm::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_VOLUME);
 	this->colourModes_freeview.emplace_back("surface normals",
 	                                        FusionAlgorithm::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_NORMAL);
@@ -214,6 +214,10 @@ void UIEngine::ProcessFrame() {
 	if (imu_source_engine != nullptr)
 		this->tracking_result = main_engine->ProcessFrame(input_RGB_image, input_raw_depth_image, input_IMU_measurement);
 	else tracking_result = main_engine->ProcessFrame(input_RGB_image, input_raw_depth_image);
+
+	if(main_engine->GetMainProcessingOn() == false && this->automatic_run_settings.exit_if_main_processing_turns_off){
+		this->main_loop_action = EXIT;
+	}
 
 #ifndef COMPILE_WITHOUT_CUDA
 	ORcudaSafeCall(cudaDeviceSynchronize());

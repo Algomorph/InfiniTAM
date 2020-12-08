@@ -23,7 +23,7 @@
 
 //test_utilities
 #include "TestUtilities/TestUtilities.h"
-#include "TestUtilities/SnoopyTestUtilities.h"
+#include "TestUtilities/TestDataUtilities.h"
 
 //ITMLib/ORUtils
 #include "../ORUtils/MemoryDeviceType.h"
@@ -33,19 +33,18 @@
 #include "../ITMLib/Engines/Meshing/MeshingEngineFactory.h"
 
 using namespace ITMLib;
-using namespace test_utilities;
-namespace snoopy = snoopy_test_utilities;
+using namespace test;
 
 template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void GenericMeshSavingTest() {
 	VoxelVolume<TSDFVoxel, TIndex>* volume;
-	LoadVolume(&volume, snoopy::PartialVolume16Path<TIndex>(),
-	           TMemoryDeviceType, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	LoadVolume(&volume, test::snoopy::PartialVolume16Path<TIndex>(),
+	           TMemoryDeviceType, test::snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 	MeshingEngine<TSDFVoxel, TIndex>* meshing_engine =
 			MeshingEngineFactory::Build<TSDFVoxel, TIndex>(TMemoryDeviceType);
 	Mesh mesh = meshing_engine->MeshVolume( volume);
 	ConstructGeneratedMeshDirectoryIfMissing();
-	mesh.WriteOBJ(std::string(test_utilities::GeneratedMeshDirectory) + "mesh_partial_16_" + DeviceString<TMemoryDeviceType>() + ".obj");
+	mesh.WriteOBJ(std::string(test::generated_mesh_directory) + "mesh_partial_16_" + DeviceString<TMemoryDeviceType>() + ".obj");
 	
 	delete volume;
 	delete meshing_engine;
@@ -61,24 +60,24 @@ void GenericMeshGenerationAndComparisonTest_CUDA_to_CPU() {
 
 	//(CPU meshes)
 	VoxelVolume<TSDFVoxel, TIndex>* volume_16_CPU;
-	LoadVolume(&volume_16_CPU, snoopy::PartialVolume16Path<TIndex>(),
-	           MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	LoadVolume(&volume_16_CPU, test::snoopy::PartialVolume16Path<TIndex>(),
+	           MEMORYDEVICE_CPU, test::snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 	Mesh mesh_16_CPU = meshing_engine_CPU->MeshVolume(volume_16_CPU);
 
 	VoxelVolume<TSDFVoxel, TIndex>* volume_17_CPU;
-	LoadVolume(&volume_17_CPU, snoopy::PartialVolume17Path<TIndex>(),
-	           MEMORYDEVICE_CPU, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	LoadVolume(&volume_17_CPU, test::snoopy::PartialVolume17Path<TIndex>(),
+	           MEMORYDEVICE_CPU, test::snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 	Mesh mesh_17_CPU = meshing_engine_CPU->MeshVolume(volume_17_CPU);
 
 	//(CUDA meshes)
 	VoxelVolume<TSDFVoxel, TIndex>* volume_16_CUDA;
-	LoadVolume(&volume_16_CUDA, snoopy::PartialVolume16Path<TIndex>(),
-	           MEMORYDEVICE_CUDA, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	LoadVolume(&volume_16_CUDA, test::snoopy::PartialVolume16Path<TIndex>(),
+	           MEMORYDEVICE_CUDA, test::snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 	Mesh mesh_16_CUDA = meshing_engine_CUDA->MeshVolume(volume_16_CUDA);
 
 	VoxelVolume<TSDFVoxel, TIndex>* volume_17_CUDA;
-	LoadVolume(&volume_17_CUDA, snoopy::PartialVolume17Path<TIndex>(),
-	           MEMORYDEVICE_CUDA, snoopy::InitializationParameters_Fr16andFr17<TIndex>());
+	LoadVolume(&volume_17_CUDA, test::snoopy::PartialVolume17Path<TIndex>(),
+	           MEMORYDEVICE_CUDA, test::snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 	Mesh mesh_17_CUDA = meshing_engine_CUDA->MeshVolume(volume_17_CUDA);
 
 	float absolute_tolerance = 1e-7;

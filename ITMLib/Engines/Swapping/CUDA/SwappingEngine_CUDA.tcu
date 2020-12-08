@@ -3,8 +3,8 @@
 #include "SwappingEngine_CUDA.h"
 
 #include "../Shared/SwappingEngine_Shared.h"
-#include "../../../Utils/CUDAUtils.h"
-#include "../../../../ORUtils/PlatformIndependedParallelSum.h"
+#include "../../../Utils/CUDA/CUDAUtils.h"
+#include "../../../../ORUtils/PlatformIndependentParallelSum.h"
 
 using namespace ITMLib;
 

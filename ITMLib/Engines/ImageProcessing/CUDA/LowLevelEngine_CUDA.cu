@@ -3,7 +3,7 @@
 #include "LowLevelEngine_CUDA.h"
 
 #include "../Shared/LowLevelEngine_Shared.h"
-#include "../../../Utils/CUDAUtils.h"
+#include "../../../Utils/CUDA/CUDAUtils.h"
 #include "../../../../ORUtils/CUDADefines.h"
 
 using namespace ITMLib;

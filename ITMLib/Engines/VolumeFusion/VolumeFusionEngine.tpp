@@ -26,7 +26,21 @@ template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void VolumeFusionEngine<TVoxel, TIndex, TMemoryDeviceType>::FuseOneTsdfVolumeIntoAnother(
 		VoxelVolume<TVoxel, TIndex>* target_volume, VoxelVolume<TVoxel, TIndex>* source_volume,
 		unsigned short timestamp) {
-	TSDFFusionFunctor<TVoxel, TMemoryDeviceType> fusion_functor(target_volume->GetParameters().max_integration_weight, timestamp);
-	TwoVolumeTraversalEngine<TVoxel, TVoxel, TIndex, TIndex, TMemoryDeviceType>::
-	TraverseUtilized(source_volume, target_volume, fusion_functor);
+	if (this->parameters.use_surface_thickness_cutoff) {
+		TSDFFusionFunctor<TVoxel, TMemoryDeviceType, true> fusion_functor(target_volume->GetParameters().max_integration_weight, timestamp,
+		                                                                  negative_surface_thickness_sdf_scale);
+		TwoVolumeTraversalEngine<TVoxel, TVoxel, TIndex, TIndex, TMemoryDeviceType>::
+		TraverseUtilized(source_volume, target_volume, fusion_functor);
+	} else {
+		TSDFFusionFunctor<TVoxel, TMemoryDeviceType, false> fusion_functor(target_volume->GetParameters().max_integration_weight, timestamp,
+		                                                                   negative_surface_thickness_sdf_scale);
+		TwoVolumeTraversalEngine<TVoxel, TVoxel, TIndex, TIndex, TMemoryDeviceType>::
+		TraverseUtilized(source_volume, target_volume, fusion_functor);
+	}
 }
+
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+VolumeFusionEngine<TVoxel, TIndex, TMemoryDeviceType>::VolumeFusionEngine()
+		: negative_surface_thickness_sdf_scale(-this->parameters.surface_thickness /
+		                                       (configuration::Get().general_voxel_volume_parameters.truncation_distance *
+		                                        configuration::Get().general_voxel_volume_parameters.voxel_size)) {}

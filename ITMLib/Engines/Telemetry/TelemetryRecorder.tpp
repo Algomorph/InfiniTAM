@@ -167,7 +167,7 @@ TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::RecordAndLogWarpUpd
 			std::stringstream ss;
 			ss << histogram;
 			LOG4CPLUS_PER_ITERATION(logging::GetLogger(), ss.str());
-			LOG4CPLUS_PER_ITERATION(logging::GetLogger(), "Histogram maximum (voxels): " << maximum);
+			LOG4CPLUS_PER_ITERATION(logging::GetLogger(), "Histogram maximum (voxels): " << maximum << " Total non-zero warp count: " << histogram.GetUnitCount());
 		}
 	}
 }

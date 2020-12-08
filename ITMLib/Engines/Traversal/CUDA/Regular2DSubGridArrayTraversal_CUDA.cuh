@@ -17,7 +17,7 @@
 
 #include "../Interface/Regular2DSubGridArrayTraversal.h"
 #include "RawArrayTraversal_CUDA.cuh"
-#include "../Shared/CudaCallWrappers.cuh"
+#include "../../../Utils/CUDA/CudaCallWrappers.cuh"
 #include "Regular2DSubGridArrayTraversal_CUDA_Kernels.cuh"
 
 namespace ITMLib {

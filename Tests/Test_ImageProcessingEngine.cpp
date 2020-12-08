@@ -23,7 +23,7 @@
 
 //test_utilities
 #include "TestUtilities/TestUtilities.h"
-#include "TestUtilities/SnoopyTestUtilities.h"
+#include "TestUtilities/TestDataUtilities.h"
 
 //ORUtils
 #include "../ORUtils/IStreamWrapper.h"
@@ -35,8 +35,7 @@
 #include "../ITMLib/Utils/Collections/MemoryBlock_StdContainer_Convertions.h"
 
 using namespace ITMLib;
-using namespace test_utilities;
-namespace snoopy = snoopy_test_utilities;
+using namespace test;
 
 template<MemoryDeviceType TMemoryDeviceType>
 void GenericFilterSubsampleTest() {

@@ -18,7 +18,7 @@
 #include "../Interface/RawArrayTraversal.h"
 #include "../../../../ORUtils/MemoryBlock.h"
 #include "RawArrayTraversal_CUDA_Kernels.cuh"
-#include "../Shared/CudaCallWrappers.cuh"
+#include "../../../Utils/CUDA/CudaCallWrappers.cuh"
 
 namespace ITMLib {
 

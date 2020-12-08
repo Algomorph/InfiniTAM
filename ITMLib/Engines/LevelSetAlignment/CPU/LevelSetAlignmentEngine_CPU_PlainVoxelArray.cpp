@@ -15,10 +15,11 @@
 //  ================================================================
 #include "../../Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
 #include "../../Traversal/CPU/ThreeVolumeTraversal_CPU_PlainVoxelArray.h"
+#include "../../Reduction/CPU/VolumeReduction_CPU_PlainVoxelArray.h"
 #include "../../EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 #include "../../Analytics/AnalyticsEngine.h"
-#include "../WarpGradientFunctors/WarpGradientFunctor_Optimized.h"
-#include "../WarpGradientFunctors/WarpGradientFunctor_Diagnostic.h"
+#include "../Functors/WarpGradientFunctor_Optimized.h"
+#include "../Functors/WarpGradientFunctor_Diagnostic.h"
 #include "../../../GlobalTemplateDefines.h"
 #include "../Interface/LevelSetAlignmentEngine.tpp"
 

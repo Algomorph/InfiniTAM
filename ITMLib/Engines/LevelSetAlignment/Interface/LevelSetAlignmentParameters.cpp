@@ -21,8 +21,10 @@
 //local
 #include "LevelSetAlignmentParameters.h"
 #include "../../../Utils/Configuration/Configuration.h"
-#include "../../../Utils/FileIO/JSON_Utilities.h"
-#include "../../../Utils/Logging/ConsolePrintColors.h"
+
+using namespace ITMLib;
+
+DEFINE_SERIALIZABLE_ENUM(WARP_LENGTH_TERMINATION_THRESHOLD_TYPE_DESCRIPTION);
 
 namespace ITMLib{
 
@@ -32,3 +34,4 @@ DEFINE_SERIALIZABLE_STRUCT(TERMINATION_CONDITIONS_STRUCT_DESCRIPTION);
 DEFINE_DEFERRABLE_SERIALIZABLE_STRUCT(LEVEL_SET_EVOLUTION_PARAMETERS_STRUCT_DESCRIPTION);
 
 } // namespace ITMLib
+

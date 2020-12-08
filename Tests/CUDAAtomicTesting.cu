@@ -24,7 +24,7 @@
 #include "CUDAAtomicTesting.h"
 #include "../ORUtils/CUDADefines.h"
 #include "../ORUtils/MemoryBlock.h"
-#include "../ITMLib/Utils/CUDAUtils.h"
+#include "../ITMLib/Utils/CUDA/CUDAUtils.h"
 #include "TemporaryCUDA_Atomics.h"
 
 

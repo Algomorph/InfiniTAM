@@ -59,7 +59,7 @@ namespace ITMLib
      * \param scene     The scene.
      * \param positions A buffer into which to write the surfels' positions.
      * \param normals   A buffer into which to write the surfels' normals.
-     * \param colours   A buffer into which to write the surfels' colours.
+     * \param colours   A buffer into which to write the surfels' colors.
      */
     virtual void CopySceneToBuffers(const SurfelScene<TSurfel> *scene, float *positions, unsigned char *normals, unsigned char *colours) const = 0;
 

@@ -26,7 +26,7 @@ namespace MiniSlamGraph {
 		Matrix_CSparse(const SparseBlockMatrix & src, Pattern * &sparsityPattern)
 		{
 			mData = createData(src);
-			if (sparsityPattern == NULL) sparsityPattern = computePattern();
+			if (sparsityPattern == nullptr) sparsityPattern = computePattern();
 			mPattern = sparsityPattern;
 		}
 		Matrix_CSparse(const Matrix_CSparse & src)
@@ -76,7 +76,7 @@ namespace MiniSlamGraph {
 		{
 			bool localPattern = false;
 			Pattern *S = mPattern;
-			if (S == NULL) {
+			if (S == nullptr) {
 				S = computePattern();
 				localPattern = true;
 			}

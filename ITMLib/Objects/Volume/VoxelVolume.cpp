@@ -15,11 +15,19 @@
 //  ================================================================
 
 #include "VoxelVolume.tpp"
-#include "../../GlobalTemplateDefines.h"
+#include "../../Objects/Volume/VoxelTypes.h"
 
 namespace ITMLib {
-	template class VoxelVolume<TSDFVoxel, PlainVoxelArray>;
-	template class VoxelVolume<TSDFVoxel, VoxelBlockHash>;
-	template class VoxelVolume<WarpVoxel, PlainVoxelArray>;
-	template class VoxelVolume<WarpVoxel, VoxelBlockHash>;
+template
+class VoxelVolume<TSDFVoxel_f_flags, PlainVoxelArray>;
+template
+class VoxelVolume<TSDFVoxel_f_flags, VoxelBlockHash>;
+template
+class VoxelVolume<TSDFVoxel_f_rgb, PlainVoxelArray>;
+template
+class VoxelVolume<TSDFVoxel_f_rgb, VoxelBlockHash>;
+template
+class VoxelVolume<WarpVoxel, PlainVoxelArray>;
+template
+class VoxelVolume<WarpVoxel, VoxelBlockHash>;
 }  // namespace ITMLib

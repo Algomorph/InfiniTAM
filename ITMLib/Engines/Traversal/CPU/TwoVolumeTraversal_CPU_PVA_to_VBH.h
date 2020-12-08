@@ -348,18 +348,24 @@ private:
 		std::vector<Extent3Di> border_extents = ComputeBoxSetOfHashAlignedCenterAndNonHashBlockAlignedArrayMargins(
 				*array_info, central_extent);
 
+		for(auto& extent : border_extents){
+			if(margin_extent_has_mismatch(extent)){
+				return false;
+			}
+		}
+
 		return !central_extent_has_mismatch(central_extent);
 	}
 
 	template<ExecutionMode TExecutionMode = ExecutionMode::OPTIMIZED, typename TTwoVoxelBooleanFunctor, typename TTwoVoxelAndPositionPredicate,
 			typename TArrayVoxelPredicate, typename THashVoxelPredicate>
-	inline static bool TraversalAndCompareAll_Generic(VoxelVolume<TArrayVoxel, PlainVoxelArray>* array_volume,
-	                                                  VoxelVolume<THashVoxel, VoxelBlockHash>* hash_volume,
-	                                                  TTwoVoxelBooleanFunctor& voxels_match_functor,
-	                                                  TTwoVoxelAndPositionPredicate&& voxels_at_position_are_significant,
-	                                                  TArrayVoxelPredicate&& array_voxel_is_significant_if_altered,
-	                                                  THashVoxelPredicate&& hash_voxel_is_significant_if_altered,
-	                                                  bool verbose) {
+	inline static bool TraverseAndCompareAll_Generic(VoxelVolume<TArrayVoxel, PlainVoxelArray>* array_volume,
+	                                                 VoxelVolume<THashVoxel, VoxelBlockHash>* hash_volume,
+	                                                 TTwoVoxelBooleanFunctor& voxels_match_functor,
+	                                                 TTwoVoxelAndPositionPredicate&& voxels_at_position_are_significant,
+	                                                 TArrayVoxelPredicate&& array_voxel_is_significant_if_altered,
+	                                                 THashVoxelPredicate&& hash_voxel_is_significant_if_altered,
+	                                                 bool verbose) {
 		switch (TExecutionMode) {
 			case ExecutionMode::DIAGNOSTIC:
 				return TraversalAndCompareAll_Generic_Diagnostic(array_volume, hash_volume, voxels_match_functor,
@@ -376,23 +382,24 @@ private:
 
 	template<typename TFunctor, typename TFunctionCall>
 	inline static bool
-	TravereAndCompareAllocated_Generic(
+	TraverseAndCompareAllocated_Generic(
 			VoxelVolume<TArrayVoxel, PlainVoxelArray>* array_volume,
 			VoxelVolume<THashVoxel, VoxelBlockHash>* hash_volume,
 			TFunctor& functor, TFunctionCall&& functionCall) {
 		volatile bool mismatch_found = false;
-		int hash_entry_count = hash_volume->index.hash_entry_count;
+		const int hash_entry_count = hash_volume->index.hash_entry_count;
 		THashVoxel* hash_voxels = hash_volume->GetVoxels();
 		TArrayVoxel* array_voxels = array_volume->GetVoxels();
 		const VoxelBlockHash::IndexData* hash_table = hash_volume->index.GetIndexData();
 		const PlainVoxelArray::IndexData* array_info = array_volume->index.GetIndexData();
-		Vector3i start_voxel = array_info->offset;
-		Vector3i array_size = array_info->size;
-		Vector3i end_voxel = start_voxel + array_size; // open last traversal bound (this voxel doesn't get processed)
-		Vector6i array_bounds(start_voxel.x, start_voxel.y, start_voxel.z, end_voxel.x, end_voxel.y, end_voxel.z);
+		const Vector3i start_voxel = array_info->offset;
+		const Vector3i array_size = array_info->size;
+		const Vector3i end_voxel = start_voxel + array_size; // open last traversal bound (this voxel doesn't get processed)
+		const Vector6i array_bounds(start_voxel.x, start_voxel.y, start_voxel.z, end_voxel.x, end_voxel.y, end_voxel.z);
 
 #ifdef WITH_OPENMP
-#pragma omp parallel for default(shared)
+#pragma omp parallel for default(none) shared(hash_table, mismatch_found, functionCall, functor, hash_voxels, array_voxels)\
+firstprivate(hash_entry_count, array_bounds, start_voxel, array_size)
 #endif
 		for (int hash = 0; hash < hash_entry_count; hash++) {
 			if (mismatch_found) continue;
@@ -408,14 +415,15 @@ private:
 			for (int z = local_bounds.min_z; z < local_bounds.max_z; z++) {
 				for (int y = local_bounds.min_y; y < local_bounds.max_y; y++) {
 					for (int x = local_bounds.min_x; x < local_bounds.max_x; x++) {
-						int locId = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
+						int loc_id = x + y * VOXEL_BLOCK_SIZE + z * VOXEL_BLOCK_SIZE * VOXEL_BLOCK_SIZE;
 						Vector3i voxel_coordinate_within_block = Vector3i(x, y, z);
 						Vector3i voxel_absolute_position = voxel_block_min_point + voxel_coordinate_within_block;
-						Vector3i voxel_positionSansOffset = voxel_absolute_position - start_voxel;
-						int linear_index = voxel_positionSansOffset.x + voxel_positionSansOffset.y * array_size.x +
-						                   voxel_positionSansOffset.z * array_size.x * array_size.y;
-						THashVoxel& hash_voxel = hash_voxel_block[locId];
-						TArrayVoxel& array_voxel = array_voxels[linear_index];
+						Vector3i voxel_position_sans_offset = voxel_absolute_position - start_voxel;
+						int linear_index_in_array =
+								voxel_position_sans_offset.x + voxel_position_sans_offset.y * array_size.x +
+								voxel_position_sans_offset.z * array_size.x * array_size.y;
+						THashVoxel& hash_voxel = hash_voxel_block[loc_id];
+						TArrayVoxel& array_voxel = array_voxels[linear_index_in_array];
 
 						if (!std::forward<TFunctionCall>(functionCall)(functor, array_voxel, hash_voxel,
 						                                               voxel_absolute_position)) {
@@ -469,7 +477,7 @@ public: // static functions
 			if (margin_far < 0) {
 				margin_far += VOXEL_BLOCK_SIZE;
 			}
-			per_direction_margin_lengths[i_direction].width_margin_far = margin_near;
+			per_direction_margin_lengths[i_direction].width_margin_far = margin_far;
 		}
 
 		// use the margin thicknesses to construct the 6 blocks, one for each face. The boxes should not overlap.
@@ -477,8 +485,8 @@ public: // static functions
 		int margin_far_x_start = array_bounds_max.x - direction_x.width_margin_far;
 		int margin_near_y_end = array_bounds_min.y + direction_y.width_margin_near;
 		int margin_far_y_start = array_bounds_max.y - direction_y.width_margin_far;
-		int margin_near_z_end = array_bounds_min.z + direction_x.width_margin_near;
-		int margin_far_z_start = array_bounds_max.z - direction_y.width_margin_far;
+		int margin_near_z_end = array_bounds_min.z + direction_z.width_margin_near;
+		int margin_far_z_start = array_bounds_max.z - direction_z.width_margin_far;
 
 		std::vector<Extent3Di> allExtents = {
 				Extent3Di{array_bounds_min.x, array_bounds_min.y, array_bounds_min.z,
@@ -516,11 +524,11 @@ public: // static functions
 	/**
 	 * \brief Routine allowing some kind of comparison function call on voxel pairs from the two scenes where both
 	 * voxels share the same spatial location.
-	 * \details voxels that are not modified / have default value (see isModified for how that works) in the primary
+	 * \details voxels that are not modified / have default value (see isModified for how that works) in the exists_in_hash_table1
 	 * voxel volume are ignored if the voxel hash block at this location at the secondary voxel volume has not been
 	 * allocated.
 	 * \tparam TFunctor type of the function object (see parameter description)
-	 * \param array_volume the primary volume -- indexed using plain voxel array (PVA)
+	 * \param array_volume the exists_in_hash_table1 volume -- indexed using plain voxel array (PVA)
 	 * \param hash_volume the secondary volume -- indexed using voxel block hash table (VBH)
 	 * \param functor a function object accepting two voxels by reference as arguments and returning true/false
 	 * \return true if the matching functor returns "true" for all allocated voxels, false otherwise.
@@ -531,7 +539,7 @@ public: // static functions
 			VoxelVolume<TArrayVoxel, PlainVoxelArray>* array_volume,
 			VoxelVolume<THashVoxel, VoxelBlockHash>* hash_volume,
 			TFunctor& functor, bool verbose) {
-		return TraversalAndCompareAll_Generic<TExecutionMode>(array_volume, hash_volume, functor, []
+		return TraverseAndCompareAll_Generic<TExecutionMode>(array_volume, hash_volume, functor, []
 				(TFunctor& functor1, TArrayVoxel& array_voxel,
 				 THashVoxel& hash_voxel, const Vector3i& voxel_position) {
 			return functor1(array_voxel, hash_voxel);
@@ -539,27 +547,28 @@ public: // static functions
 	}
 
 
-	template<ExecutionMode TExecutionMode = ExecutionMode::OPTIMIZED,typename TFunctor>
+	template<ExecutionMode TExecutionMode = ExecutionMode::OPTIMIZED, typename TFunctor>
 	inline static bool
 	TraverseAndCompareAllWithPosition(
 			VoxelVolume<TArrayVoxel, PlainVoxelArray>* array_volume,
 			VoxelVolume<THashVoxel, VoxelBlockHash>* hash_volume,
 			TFunctor& functor, bool verbose) {
-		return TraversalAndCompareAll_Generic<TExecutionMode>(array_volume, hash_volume, functor, []
+		return TraverseAndCompareAll_Generic<TExecutionMode>(array_volume, hash_volume, functor, []
 				(TFunctor& functor, TArrayVoxel& array_voxel, THashVoxel& hash_voxel,
 				 const Vector3i& voxel_position) {
 			return functor(array_voxel, hash_voxel, voxel_position);
 		}, [](TArrayVoxel& array_voxel) { return true; }, [](THashVoxel& hash_voxel) { return true; }, verbose);
 	}
 
-	template<ExecutionMode TExecutionMode = ExecutionMode::OPTIMIZED,typename TFunctor>
+	template<ExecutionMode TExecutionMode = ExecutionMode::OPTIMIZED, typename TFunctor>
 	inline static bool
 	TraverseAndCompareMatchingFlags(
 			VoxelVolume<TArrayVoxel, PlainVoxelArray>* array_volume,
 			VoxelVolume<THashVoxel, VoxelBlockHash>* hash_volume,
 			VoxelFlags flags,
-			TFunctor& functor, bool verbose) {
-		return TraversalAndCompareAll_Generic<TExecutionMode>(
+			TFunctor& functor,
+			bool verbose) {
+		return TraverseAndCompareAll_Generic<TExecutionMode>(
 				array_volume, hash_volume, functor,
 				[&flags](TFunctor& functor1,
 				         TArrayVoxel& array_voxel, THashVoxel& hash_voxel, const Vector3i& voxel_position) {
@@ -576,8 +585,10 @@ public: // static functions
 	TraverseAndCompareMatchingFlagsWithPosition(
 			VoxelVolume<TArrayVoxel, PlainVoxelArray>* array_volume,
 			VoxelVolume<THashVoxel, VoxelBlockHash>* hash_volume,
-			VoxelFlags flags, TFunctor& functor, bool verbose) {
-		return TraversalAndCompareAll_Generic<TExecutionMode>(
+			VoxelFlags flags,
+			TFunctor& functor,
+			bool verbose) {
+		return TraverseAndCompareAll_Generic<TExecutionMode>(
 				array_volume, hash_volume, functor,
 				[&flags](TFunctor& functor,
 				         TArrayVoxel& array_voxel, THashVoxel& hash_voxel, const Vector3i& voxel_position) {
@@ -591,12 +602,12 @@ public: // static functions
 	/**
 	 * \brief Routine allowing some kind of comparison function call on voxel pairs from the two scenes where both
 	 * voxels share the same spatial location, which ignores unallocated spaces in either scene.
-	 * \details voxels that are not modified / have default value (see isModified for how that works) in the primary
+	 * \details voxels that are not modified / have default value (see isModified for how that works) in the exists_in_hash_table1
 	 * voxel volume are ignored if the voxel hash block at this location at the secondary voxel volume has not been
 	 * allocated. Areas where either or both of the scenes don't have allocated voxels are
 	 * ignored, even if only one of the volumes does, in fact, have potentially-altered voxels there.
 	 * \tparam TFunctor type of the function object (see parameter description)
-	 * \param array_volume the primary volume -- indexed using plain voxel array (PVA)
+	 * \param array_volume the exists_in_hash_table1 volume -- indexed using plain voxel array (PVA)
 	 * \param hash_volume the secondary volume -- indexed using voxel block hash table (VBH)
 	 * \param functor a function object accepting two voxels by reference as arguments and returning true/false
 	 * \return true if the matching functor returns "true" for all allocated voxels, false otherwise.
@@ -607,7 +618,7 @@ public: // static functions
 			VoxelVolume<TArrayVoxel, PlainVoxelArray>* array_volume,
 			VoxelVolume<THashVoxel, VoxelBlockHash>* hash_volume,
 			TFunctor& functor) {
-		return TravereAndCompareAllocated_Generic(array_volume, hash_volume, functor, []
+		return TraverseAndCompareAllocated_Generic(array_volume, hash_volume, functor, []
 				(TFunctor& functor, TArrayVoxel& voxelPrimary, THashVoxel& voxelSecondary,
 				 const Vector3i& voxel_position) {
 			return functor(voxelPrimary, voxelSecondary);
@@ -617,12 +628,12 @@ public: // static functions
 	/**
 	 * \brief Routine allowing some kind of comparison function call on voxel pairs from the two scenes where both
 	 * voxels share the same spatial location, which ignores unallocated spaces in either scene.
-	 * \details voxels that are not modified / have default value (see isModified for how that works) in the primary
+	 * \details voxels that are not modified / have default value (see isModified for how that works) in the exists_in_hash_table1
 	 * voxel volume are ignored if the voxel hash block at this location at the secondary voxel volume has not been
 	 * allocated. Areas where either or both of the scenes don't have allocated voxels are
 	 * ignored, even if only one of the volumes does, in fact, have potentially-altered voxels there.
 	 * \tparam TFunctor type of the function object (see parameter description)
-	 * \param array_volume the primary volume -- indexed using plain voxel array (PVA)
+	 * \param array_volume the exists_in_hash_table1 volume -- indexed using plain voxel array (PVA)
 	 * \param hash_volume the secondary volume -- indexed using voxel block hash table (VBH)
 	 * \param functor a function object accepting two voxels and their mutually shared position by reference as arguments
 	 * and returning true/false
@@ -634,7 +645,7 @@ public: // static functions
 			VoxelVolume<TArrayVoxel, PlainVoxelArray>* array_volume,
 			VoxelVolume<THashVoxel, VoxelBlockHash>* hash_volume,
 			TFunctor& functor) {
-		return TravereAndCompareAllocated_Generic(array_volume, hash_volume, functor, []
+		return TraverseAndCompareAllocated_Generic(array_volume, hash_volume, functor, []
 				(TFunctor& functor, TArrayVoxel& voxelPrimary, THashVoxel& voxelSecondary,
 				 Vector3i& voxel_position) {
 			return functor(voxelPrimary, voxelSecondary, voxel_position);
@@ -651,11 +662,11 @@ public:
 	/**
 	 * \brief Routine allowing some kind of comparison function call on voxel pairs from the two scenes where both
 	 * voxels share the same spatial location.
-	 * \details voxels that are not modified / have default value (see isModified for how that works) in the primary
+	 * \details voxels that are not modified / have default value (see isModified for how that works) in the exists_in_hash_table1
 	 * voxel volume are ignored if the voxel hash block at this location at the secondary voxel volume has not been
 	 * allocated.
 	 * \tparam TFunctor type of the function object (see parameter description)
-	 * \param hash_volume the primary volume -- indexed using voxel block hash table (VBH)
+	 * \param hash_volume the exists_in_hash_table1 volume -- indexed using voxel block hash table (VBH)
 	 * \param array_volume the secondary volume -- indexed using plain voxel array (PVA)
 	 * \param functor a function object accepting two voxels by reference as arguments and returning true/false
 	 * \return true if the matching functor returns "true" for all allocated voxels, false otherwise.

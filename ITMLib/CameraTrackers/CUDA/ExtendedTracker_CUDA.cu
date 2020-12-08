@@ -1,7 +1,7 @@
 // Copyright 2014-2017 Oxford University Innovation Limited and the authors of InfiniTAM
 
 #include "ExtendedTracker_CUDA.h"
-#include "../../Utils/CUDAUtils.h"
+#include "../../Utils/CUDA/CUDAUtils.h"
 #include "../Shared/ExtendedTracker_Shared.h"
 #include "../../../ORUtils/CUDADefines.h"
 

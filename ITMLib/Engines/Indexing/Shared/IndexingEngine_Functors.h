@@ -143,8 +143,7 @@ public: // instance functions
 	}
 
 	virtual ~HashEntryStateBasedAllocationFunctor_Base() {
-		CLEAN_UP_ATOMIC(last_free_voxel_block_id);CLEAN_UP_ATOMIC(last_free_excess_list_id);CLEAN_UP_ATOMIC(
-				utilized_block_count);
+		CLEAN_UP_ATOMIC(last_free_voxel_block_id);CLEAN_UP_ATOMIC(last_free_excess_list_id);CLEAN_UP_ATOMIC(utilized_block_count);
 	}
 
 	void UpdateIndexCounters(VoxelBlockHash& index) {
@@ -158,7 +157,7 @@ template<MemoryDeviceType TMemoryDeviceType>
 struct HashEntryStateBasedAllocationFunctor
 		: public HashEntryStateBasedAllocationFunctor_Base<TMemoryDeviceType> {
 public: // instance functions
-	HashEntryStateBasedAllocationFunctor(VoxelBlockHash& index)
+	explicit HashEntryStateBasedAllocationFunctor(VoxelBlockHash& index)
 			: HashEntryStateBasedAllocationFunctor_Base<TMemoryDeviceType>(index) {}
 
 	_DEVICE_WHEN_AVAILABLE_
@@ -176,7 +175,7 @@ struct HashEntryStateBasedAllocationFunctor_SetVisibility
 protected: // instance variables
 	HashBlockVisibility* block_visibility_types;
 public: // instance functions
-	HashEntryStateBasedAllocationFunctor_SetVisibility(VoxelBlockHash& index)
+	explicit HashEntryStateBasedAllocationFunctor_SetVisibility(VoxelBlockHash& index)
 			: HashEntryStateBasedAllocationFunctor_Base<TMemoryDeviceType>(index),
 			  block_visibility_types(index.GetBlockVisibilityTypes()) {}
 
@@ -227,10 +226,27 @@ public: // instance functions
 	}
 };
 
-template<MemoryDeviceType TMemoryDeviceType>
+inline
+_DEVICE_WHEN_AVAILABLE_
+void PrintPixelBlocks(const int x, const int y, int pixel_block_count, const internal::PixelBlockAllocationRecord& pixel_blocks) {
+	if (pixel_block_count > 0) {
+		printf("Pixel blocks for pixel %d, %d: %s", x, y, red);
+		int i_block;
+		for (i_block = 0; i_block < pixel_block_count - 1; i_block++) {
+			const Vector3s& block = pixel_blocks.values[i_block];
+			printf("[%d, %d, %d], ", block.x, block.y, block.z);
+		}
+		const Vector3s& block = pixel_blocks.values[i_block];
+		printf("[%d, %d, %d]%s", block.x, block.y, block.z, reset);
+	}
+}
+
+template<MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
 struct DepthBasedAllocationStateMarkerFunctor {
 public: // instance variables
 	ORUtils::MemoryBlock<Vector3s> colliding_block_positions;
+	VerbosityLevel verbosity;
+	Vector2i focus_pixel;
 protected: // instance variables
 
 	const float near_clipping_distance;
@@ -264,6 +280,7 @@ public: // instance functions
 				params.fy = 1.0f / params.fy;
 				return params;
 			}()),
+
 			surface_distance_cutoff(surface_distance_cutoff),
 			hash_block_size_reciprocal(1.0f / (volume_parameters.voxel_size * VOXEL_BLOCK_SIZE)),
 			hash_entry_allocation_states(index.GetHashEntryAllocationStates()),
@@ -286,6 +303,7 @@ public: // instance functions
 
 	_DEVICE_WHEN_AVAILABLE_
 	void operator()(const float& depth_measure, int x, int y) {
+
 		if (depth_measure <= 0 || (depth_measure - surface_distance_cutoff) < 0 ||
 		    (depth_measure - surface_distance_cutoff) < near_clipping_distance ||
 		    (depth_measure + surface_distance_cutoff) > far_clipping_distance)
@@ -303,10 +321,32 @@ public: // instance functions
 		                                                                                       hash_block_size_reciprocal);
 
 
-		MarkVoxelHashBlocksAlongSegment(hash_entry_allocation_states, hash_block_coordinates,
-		                                *unresolvable_collision_encountered_device,
-		                                hash_table, march_segment, colliding_block_positions_device,
-		                                colliding_block_count);
+		if (TExecutionMode == OPTIMIZED) {
+			MarkVoxelHashBlocksAlongSegment(hash_entry_allocation_states, hash_block_coordinates,
+			                                *unresolvable_collision_encountered_device,
+			                                hash_table, march_segment, colliding_block_positions_device,
+			                                colliding_block_count);
+		} else {
+			// assume DIAGNOSTIC
+			int pixel_block_count = 0;
+			internal::PixelBlockAllocationRecord pixel_blocks;
+			MarkVoxelHashBlocksAlongSegment_RecordPixelBlocks(
+					this->hash_entry_allocation_states, this->hash_block_coordinates,
+					*this->unresolvable_collision_encountered_device, this->hash_table,
+					march_segment,
+					this->colliding_block_positions_device, this->colliding_block_count,
+
+					pixel_blocks,
+					pixel_block_count);
+			if (this->verbosity >= VerbosityLevel::VERBOSITY_FOCUS_SPOTS && x == this->focus_pixel.x && y == this->focus_pixel.y) {
+				printf("March segment for pixel %d, %d: %s[%f, %f, %f],  [%f, %f, %f]%s\nBlock count: %d\n", x, y, yellow,
+				       march_segment.origin.x, march_segment.origin.y, march_segment.origin.z,
+				       march_segment.destination().x, march_segment.destination().y, march_segment.destination().z, reset, pixel_block_count);
+
+				PrintPixelBlocks(x, y, pixel_block_count, pixel_blocks);
+			}
+		}
+
 	}
 
 	void ResetFlagsAndCounters() {
@@ -325,9 +365,9 @@ public: // instance functions
 	}
 };
 
-template<MemoryDeviceType TMemoryDeviceType>
+template<MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
 struct TwoSurfaceBasedAllocationStateMarkerFunctor_Base
-		: public DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType> {
+		: public DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType, TExecutionMode> {
 protected: // instance variables
 	const Matrix4f depth_camera_pose;
 public: // instance functions
@@ -336,9 +376,9 @@ public: // instance functions
 	                                                 const ITMLib::View* view,
 	                                                 const CameraTrackingState* tracking_state,
 	                                                 float surface_distance_cutoff) :
-			DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType>(index, volume_parameters, view,
-			                                                          tracking_state->pose_d->GetInvM(),
-			                                                          surface_distance_cutoff),
+			DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType, TExecutionMode>(index, volume_parameters, view,
+			                                                                          tracking_state->pose_d->GetInvM(),
+			                                                                          surface_distance_cutoff),
 			depth_camera_pose(tracking_state->pose_d->GetM()) {}
 
 protected: // instance functions
@@ -405,7 +445,7 @@ struct TwoSurfaceBasedAllocationStateMarkerFunctor;
 
 template<MemoryDeviceType TMemoryDeviceType>
 struct TwoSurfaceBasedAllocationStateMarkerFunctor<TMemoryDeviceType, OPTIMIZED>
-		: public TwoSurfaceBasedAllocationStateMarkerFunctor_Base<TMemoryDeviceType> {
+		: public TwoSurfaceBasedAllocationStateMarkerFunctor_Base<TMemoryDeviceType, OPTIMIZED> {
 public: // instance functions
 	TwoSurfaceBasedAllocationStateMarkerFunctor(VoxelBlockHash& index,
 	                                            const VoxelVolumeParameters& volume_parameters,
@@ -414,11 +454,11 @@ public: // instance functions
 	                                            float surface_distance_cutoff,
 	                                            internal::IndexingEngine_VoxelBlockHash_ExecutionModeSpecialized<TMemoryDeviceType, OPTIMIZED>& specialized_engine)
 			:
-			TwoSurfaceBasedAllocationStateMarkerFunctor_Base<TMemoryDeviceType>(index, volume_parameters, view,
-			                                                                    tracking_state,
-			                                                                    surface_distance_cutoff) {}
+			TwoSurfaceBasedAllocationStateMarkerFunctor_Base<TMemoryDeviceType, OPTIMIZED>(index, volume_parameters, view,
+			                                                                               tracking_state,
+			                                                                               surface_distance_cutoff) {}
 
-	using TwoSurfaceBasedAllocationStateMarkerFunctor_Base<TMemoryDeviceType>::TwoSurfaceBasedAllocationStateMarkerFunctor_Base;
+	using TwoSurfaceBasedAllocationStateMarkerFunctor_Base<TMemoryDeviceType, OPTIMIZED>::TwoSurfaceBasedAllocationStateMarkerFunctor_Base;
 
 	void SaveDataToDisk() {}
 
@@ -436,12 +476,12 @@ public: // instance functions
 		                                this->colliding_block_positions_device, this->colliding_block_count);
 	}
 
-	using DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::colliding_block_positions;
+	using DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType, OPTIMIZED>::colliding_block_positions;
 };
 
 template<MemoryDeviceType TMemoryDeviceType>
 struct TwoSurfaceBasedAllocationStateMarkerFunctor<TMemoryDeviceType, DIAGNOSTIC>
-		: public TwoSurfaceBasedAllocationStateMarkerFunctor_Base<TMemoryDeviceType> {
+		: public TwoSurfaceBasedAllocationStateMarkerFunctor_Base<TMemoryDeviceType, DIAGNOSTIC> {
 private: // instance variables
 	IndexingDiagnosticData<VoxelBlockHash, TMemoryDeviceType>& diagnostic_data;
 	typename IndexingDiagnosticData<VoxelBlockHash, TMemoryDeviceType>::DataDevice* device_diagnostic_data;
@@ -454,9 +494,9 @@ public: // instance functions
 	                                            float surface_distance_cutoff,
 	                                            internal::IndexingEngine_VoxelBlockHash_ExecutionModeSpecialized<TMemoryDeviceType, DIAGNOSTIC>& specialized_engine)
 			:
-			TwoSurfaceBasedAllocationStateMarkerFunctor_Base<TMemoryDeviceType>(index, volume_parameters, view,
-			                                                                    tracking_state,
-			                                                                    surface_distance_cutoff),
+			TwoSurfaceBasedAllocationStateMarkerFunctor_Base<TMemoryDeviceType, DIAGNOSTIC>(index, volume_parameters, view,
+			                                                                                tracking_state,
+			                                                                                surface_distance_cutoff),
 			diagnostic_data(specialized_engine.diagnostic_data),
 			device_diagnostic_data(diagnostic_data.data_device.GetData(TMemoryDeviceType)) {
 		if (diagnostic_data.PrepareForFrame(view->depth.dimensions)) {
@@ -475,13 +515,17 @@ public: // instance functions
 		Vector4f surface1_point_camera_space(0.0f), surface2_point_camera_space(0.0f);
 		bool has_surface1, has_surface2;
 
-		int pixel_block_count; internal::PixelBlockAllocationRecord pixel_blocks;
-		device_diagnostic_data->GetBlockRecordForPixel(x,y, pixel_block_count, pixel_blocks);
+		int pixel_block_count = 0;
+		internal::PixelBlockAllocationRecord pixel_blocks;
+		device_diagnostic_data->GetBlockRecordForPixel(x, y, pixel_block_count, pixel_blocks);
 
 		if (!this->ComputeMarchSegment(march_segment, surface1_point_camera_space, surface2_point_camera_space,
 		                               has_surface1, has_surface2, surface1_depth, surface2_point_world_space, x, y)) {
 			device_diagnostic_data->SetPixelData(x, y, has_surface1, has_surface2, surface1_point_camera_space,
 			                                     surface2_point_world_space, march_segment, pixel_blocks, pixel_block_count);
+			if (this->verbosity >= VerbosityLevel::VERBOSITY_FOCUS_SPOTS && x == this->focus_pixel.x && y == this->focus_pixel.y) {
+				printf("Pixel blocks for pixel %d, %d: %sNone%s", x, y, red, red);
+			}
 			return;
 		}
 
@@ -494,12 +538,17 @@ public: // instance functions
 				pixel_blocks,
 				pixel_block_count);
 
+
 		device_diagnostic_data->SetPixelData(x, y, has_surface1, has_surface2, surface1_point_camera_space,
 		                                     surface2_point_camera_space, march_segment, pixel_blocks, pixel_block_count);
 
+		if (this->verbosity >= VerbosityLevel::VERBOSITY_FOCUS_SPOTS && x == this->focus_pixel.x && y == this->focus_pixel.y) {
+			PrintPixelBlocks(x, y, pixel_block_count, pixel_blocks);
+		}
+
 	}
 
-	using DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType>::colliding_block_positions;
+	using DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType, DIAGNOSTIC>::colliding_block_positions;
 };
 
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>

@@ -21,8 +21,10 @@
 #include "../../Objects/Volume/VoxelVolume.h"
 #include "../../Objects/Tracking/CameraTrackingState.h"
 #include "../../Objects/Views/View.h"
-#include "../Common/WarpAccessFunctors.h"
 #include "../../Utils/Enums/WarpType.h"
+#include "../Common/WarpAccessFunctors.h"
+#include "../Common/Configurable.h"
+#include "DepthFusionSettings.h"
 
 namespace ITMLib {
 
@@ -34,18 +36,16 @@ namespace ITMLib {
 	an ITMLib::Objects::ITMScene and fuse new image information
 	into them.
 */
-template<typename TVoxel, typename TWarp, typename TIndex>
-class DepthFusionEngineInterface {
-
+template<typename TVoxel, typename TIndex>
+class DepthFusionEngineInterface : public Configurable<DepthFusionSettings> {
+protected:
+	using Configurable<DepthFusionSettings>::parameters;
 public:
+	using Configurable<DepthFusionSettings>::Configurable;
+	using Configurable<DepthFusionSettings>::GetParameters;
 
 	DepthFusionEngineInterface() = default;
 	virtual ~DepthFusionEngineInterface() = default;
-
-
-	virtual void
-	UpdateVisibleList(VoxelVolume<TVoxel, TIndex>* volume, const View* view, const CameraTrackingState* trackingState,
-	                  const RenderState* renderState, bool resetVisibleList) = 0;
 
 	/**
 	 * \brief Update the voxel blocks by integrating depth and possibly color information from the given view. Assume
@@ -61,16 +61,12 @@ public:
 };
 
 
-template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 class DepthFusionEngine :
-		public DepthFusionEngineInterface<TVoxel, TWarp, TIndex> {
+		public DepthFusionEngineInterface<TVoxel, TIndex> {
 public:
-	DepthFusionEngine() = default;
+	using DepthFusionEngineInterface<TVoxel, TIndex>::DepthFusionEngineInterface;
 	~DepthFusionEngine() = default;
-
-	void UpdateVisibleList(VoxelVolume<TVoxel, TIndex>* scene, const View* view,
-	                       const CameraTrackingState* trackingState, const RenderState* renderState,
-	                       bool resetVisibleList) override;
 
 	void IntegrateDepthImageIntoTsdfVolume(VoxelVolume<TVoxel, TIndex>* volume, const View* view);
 	void IntegrateDepthImageIntoTsdfVolume(VoxelVolume<TVoxel, TIndex>* volume, const View* view,

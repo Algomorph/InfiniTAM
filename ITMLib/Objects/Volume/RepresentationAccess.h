@@ -780,14 +780,14 @@ _CPU_AND_GPU_CODE_ inline TVoxel readVoxel(const CONSTPTR(TVoxel) *voxelData, co
 }
 
 /**
-* \brief The specialisations of this struct template can be used to write/read colours to/from surfels.
+* \brief The specialisations of this struct template can be used to write/read colors to/from surfels.
 *
 * \tparam hasColour  Whether or not the surfel type can store colour information.
 */
 template <bool hasColour> struct SurfelColourManipulator;
 
 /**
-* \brief This template specialisation can be used to write/read dummy colours to/from surfels.
+* \brief This template specialisation can be used to write/read dummy colors to/from surfels.
 *
 * It is intended for use with surfel types that cannot store colour information.
 */
@@ -824,7 +824,7 @@ struct SurfelColourManipulator<false>
 };
 
 /**
-* \brief This template specialisation can be used to write/read actual colours to/from surfels.
+* \brief This template specialisation can be used to write/read actual colors to/from surfels.
 *
 * It is intended for use with surfel types that can store colour information.
 */

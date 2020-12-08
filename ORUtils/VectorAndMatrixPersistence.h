@@ -33,16 +33,18 @@ template<typename TMatrix>
 TMatrix LoadMatrix(IStreamWrapper& file) {
 	TMatrix matrix;
 	for (int i_value = 0; i_value < TMatrix::element_count; i_value++) {
-		file.IStream().read(reinterpret_cast<char*>(matrix.m + i_value), sizeof(typename TMatrix::value_type));
+		file.IStream().read(reinterpret_cast<char*>(matrix.values + i_value), sizeof(typename TMatrix::value_type));
 	}
 	return matrix;
 }
 
 template<typename TVector>
 const auto SaveVector = SaveMatrix<TVector>;
+
 template<typename TVector>
 const auto LoadVector = LoadMatrix<TVector>;
 
+// Matrix4
 extern template void SaveMatrix<Matrix4<float>>(OStreamWrapper& file, const Matrix4<float>& matrix);
 extern template void SaveMatrix<Matrix4<double>>(OStreamWrapper& file, const Matrix4<double>& matrix);
 extern template void SaveMatrix<Matrix4<int>>(OStreamWrapper& file, const Matrix4<int>& matrix);
@@ -60,5 +62,10 @@ extern template Matrix4<short> LoadMatrix<Matrix4<short>>(IStreamWrapper& file);
 extern template Matrix4<unsigned short> LoadMatrix<Matrix4<unsigned short>>(IStreamWrapper& file);
 extern template Matrix4<char> LoadMatrix<Matrix4<char>>(IStreamWrapper& file);
 extern template Matrix4<unsigned char> LoadMatrix<Matrix4<unsigned char>>(IStreamWrapper& file);
+
+// Vector6
+extern template void SaveMatrix<Vector6<int>>(OStreamWrapper& file, const Vector6<int>& vector_6);
+extern template Vector6<int> LoadMatrix<Vector6<int>>(IStreamWrapper& file);
+
 
 } // namespace ORUtils

@@ -21,63 +21,117 @@
 #include "../../../Objects/Volume/VoxelVolume.h"
 #include "../Shared/ReductionResult.h"
 #include "../../../GlobalTemplateDefines.h"
+#include "VolumeReduction_CUDA_PlainVoxelArray_Kernels.h"
+#include "../../../Utils/Geometry/SpatialIndexConversions.h"
 
-//TODO: implement public static functions that currently throw the "Not yet implemented" exception
-
-namespace ITMLib {
-
+namespace ITMLib::internal {
 template<typename TVoxel>
-class VolumeReductionEngine<TVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA> {
+class VolumeReductionEngine_IndexSpecialized<TVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA> {
 public:
+	template<typename TReduceStaticFunctor, typename TOutput, typename TRetrieveFunction>
+	static TOutput ReduceUtilized_Generic(Vector3i& position, const VoxelVolume<TVoxel, PlainVoxelArray>* volume,
+	                                      TRetrieveFunction&& retrieval_function,
+	                                      ReductionResult<TOutput, PlainVoxelArray> ignored_value) {
 
-	/**
-	 * \brief Computes reduction on some value from every voxel in the volume, e.g. minimum of some voxel field
-	 * \details The position output is not always relevant, i.e. in case of accumulator reductions like the sum of some field.
-	 * However, it is extremely useful when trying to either locate a particular value or choose the voxel that best satisfies some criterion,
-	 * e.g. minimum or maximum value of some voxel field can be found along with its location.
-	 * \tparam TOutput type of the output value, e.g. float when computing minimum of some voxel float field
-	 * \tparam TRetrieveSingleFunctor a function object with a static function which accepts a single TVoxel as an argument and returns a TOutput value based on this TVoxel.
-	 * \tparam TReduceBlockLevelStaticFunctor a function object with a static function which accepts two ReductionResult<TOutput> objects and returns a single ReductionResult<TOutput> object
-	 * \param position the position of the voxel based on the indices produced by TReduceBlockLevelStaticFunctor when comparing each ReductionResult pair.
-	 * \param volume the volume to run the reduction over
-	 * \param ignored_value this is a sample value-index-hash triplet that will be ignored / won't skew result of the operation when issued
-	 * to the reduction algorithm. For instance, when seeking a minimum of a float field, it makes sense to set this to {FLT_MAX, UINT_MAX}.
-	 * This is necessary to normalize input sizes.
-	 * \return end result based on all voxels in the volume.
-	 */
-	template <typename TRetrieveSingleFunctor, typename TReduceBlockLevelStaticFunctor, typename TReduceResultLevelStaticFunctor, typename TOutput>
-	static TOutput ReduceUtilized(Vector3i& position, const VoxelVolume<TVoxel, PlainVoxelArray>* volume,
-			ReductionResult<TOutput, PlainVoxelArray> ignored_value = {TOutput(0), 0u}){
-		DIEWITHEXCEPTION_REPORTLOCATION("Not yet implemented.");
-		return TOutput();
+		return ReduceUtilizedBlocks_Generic<TReduceStaticFunctor, TReduceStaticFunctor>(
+				position, volume, retrieval_function, ignored_value);
 	}
 
-	/**
-	 * \brief Computes reduction on some value from every voxel in the volume, e.g. minimum of some voxel field
-	 * \details The position output is not always relevant, i.e. in case of accumulator reductions like the sum of some field.
-	 * However, it is extremely useful when trying to either locate a particular value or choose the voxel that best satisfies some criterion,
-	 * e.g. minimum or maximum value of some voxel field can be found along with its location.
-	 * \tparam TOutput type of the output value, e.g. float when computing minimum of some voxel float field
-	 * \tparam TRetrieveSingleDynamicFunctor a function object with a retrieve public member function which accepts a
-	 *  single TVoxel as an argument and returns a TOutput value based on this TVoxel.
-	 * \tparam TReduceBlockLevelStaticFunctor a function object with a static function which accepts two ReductionResult<TOutput> objects and returns a single ReductionResult<TOutput> object
-	 * \param position the position of the voxel based on the indices produced by TReduceBlockLevelStaticFunctor when comparing each ReductionResult pair.
-	 * \param volume the volume to run the reduction over
-	 * \param retrieve_functor functor object to retrieve initial TOutput value from individual voxels
-	 * \param ignored_value this is a sample value-index-hash triplet that will be ignored / won't skew result of the operation when issued
-	 * to the reduction algorithm. For instance, when seeking a minimum of a float field, it makes sense to set this to {FLT_MAX, UINT_MAX}.
-	 * This is necessary to normalize input sizes.
-	 * \return end result based on all voxels in the volume.
-	 */
-	template<typename TRetrieveSingleDynamicFunctor, typename TReduceBlockLevelStaticFunctor, typename TReduceResultLevelStaticFunctor, typename TOutput>
-	static TOutput ReduceUtilized(Vector3i& position, const VoxelVolume<TVoxel, PlainVoxelArray>* volume,
-	                              const TRetrieveSingleDynamicFunctor& retrieve_functor,
-	                              ReductionResult<TOutput, PlainVoxelArray> ignored_value = {TOutput(0), 0u}
-	) {
-		DIEWITHEXCEPTION_REPORTLOCATION("Not yet implemented.");
-		return TOutput();
-	}
+	template<typename TReduceBlockLevelStaticFunctor, typename TReduceResultLevelStaticFunctor, typename TOutput, typename TRetrievalFunction>
+	static TOutput ReduceUtilizedBlocks_Generic(Vector3i& position, const VoxelVolume<TVoxel, PlainVoxelArray>* volume,
+	                                            TRetrievalFunction&& retrieval_function, ReductionResult<TOutput, PlainVoxelArray> ignored_value) {
 
+		const TVoxel* voxels = volume->GetVoxels();
+		const unsigned int voxel_count = volume->index.GetMaxVoxelCount();
+		const int count_of_whole_blocks = voxel_count / VOXEL_BLOCK_SIZE3;
+		const int half_block_voxel_count = (VOXEL_BLOCK_SIZE3 / 2);
+		dim3 cuda_block_size(half_block_voxel_count);
+
+		ReductionResult<TOutput, PlainVoxelArray> extra_result_CPU = ignored_value;
+		bool use_extra_result = false;
+		if (voxel_count % VOXEL_BLOCK_SIZE3 != 0) {
+			const unsigned int remainder_voxels = voxel_count % VOXEL_BLOCK_SIZE3;
+			ORUtils::MemoryBlock<TVoxel> extra_voxels(VOXEL_BLOCK_SIZE3, MEMORYDEVICE_CUDA);
+			extra_voxels.Clear();
+			cudaMemcpy(extra_voxels.GetData(), voxels + (count_of_whole_blocks * VOXEL_BLOCK_SIZE3), sizeof(TVoxel) * remainder_voxels,
+			           cudaMemcpyDeviceToDevice);
+			ORUtils::MemoryBlock<ReductionResult<TOutput, PlainVoxelArray>> extra_result(1, true, true);
+			dim3 cuda_single_grid_size(1);
+			computeVoxelHashReduction_BlockLevel<TReduceBlockLevelStaticFunctor, TVoxel, TOutput><<<cuda_single_grid_size, cuda_block_size>>>
+					(extra_result.GetData(MEMORYDEVICE_CUDA), extra_voxels.GetData(), retrieval_function);
+			ORcudaKernelCheck;
+			extra_result.UpdateHostFromDevice();
+			extra_result_CPU = *extra_result.GetData(MEMORYDEVICE_CPU);
+			extra_result_CPU.index_within_array += count_of_whole_blocks * VOXEL_BLOCK_SIZE3;
+			use_extra_result = true;
+		}
+
+		auto get_normalized_count = [](int count) {
+			return ceil_of_integer_quotient(count, VOXEL_BLOCK_SIZE3) * VOXEL_BLOCK_SIZE3;
+		};
+
+		const int normalized_entry_count = get_normalized_count(count_of_whole_blocks);
+		int tail_length = normalized_entry_count - count_of_whole_blocks;
+
+		ORUtils::MemoryBlock<ReductionResult<TOutput, PlainVoxelArray>> result_buffer1(normalized_entry_count, MEMORYDEVICE_CUDA);
+
+		dim3 cuda_tail_grid_size(ceil_of_integer_quotient(tail_length, VOXEL_BLOCK_SIZE3));
+
+		if (tail_length > 0) {
+			setTailToIgnored<TOutput><<< cuda_tail_grid_size, cuda_block_size >>>
+					(result_buffer1.GetData(MEMORYDEVICE_CUDA), count_of_whole_blocks, normalized_entry_count, ignored_value);
+			ORcudaKernelCheck;
+		}
+
+		dim3 cuda_utilized_grid_size(count_of_whole_blocks);
+
+		computeVoxelHashReduction_BlockLevel<TReduceBlockLevelStaticFunctor, TVoxel, TOutput><<<cuda_utilized_grid_size, cuda_block_size>>>
+				(result_buffer1.GetData(MEMORYDEVICE_CUDA), voxels, retrieval_function);
+		ORcudaKernelCheck;
+
+
+		int output_count = count_of_whole_blocks;
+		int normalized_output_count = normalized_entry_count;
+
+
+		ORUtils::MemoryBlock<ReductionResult<TOutput, PlainVoxelArray>> result_buffer2(
+				get_normalized_count(normalized_entry_count / half_block_voxel_count), MEMORYDEVICE_CUDA);
+		/* input & output are swapped in the beginning of the loop code as opposed to the end,
+		 so that output_buffer points to the final buffer after the loop finishes*/
+		ORUtils::MemoryBlock<ReductionResult<TOutput, PlainVoxelArray>>* input_buffer = &result_buffer2;
+		ORUtils::MemoryBlock<ReductionResult<TOutput, PlainVoxelArray>>* output_buffer = &result_buffer1;
+
+		while (output_count > 1) {
+			std::swap(input_buffer, output_buffer);
+			output_count = normalized_output_count / VOXEL_BLOCK_SIZE3;
+			normalized_output_count = get_normalized_count(output_count);
+			tail_length = normalized_output_count - output_count;
+			if (tail_length > 0) {
+				cuda_tail_grid_size.x = ceil_of_integer_quotient(tail_length, VOXEL_BLOCK_SIZE3);
+				setTailToIgnored<TOutput>
+				<<< cuda_tail_grid_size, cuda_block_size >>>
+						(output_buffer->GetData(
+								MEMORYDEVICE_CUDA), output_count, normalized_output_count, ignored_value);
+				ORcudaKernelCheck;
+			}
+
+			dim3 cuda_grid_size(output_count);
+			computeVoxelHashReduction_ResultLevel<TReduceResultLevelStaticFunctor, TOutput>
+			<<< cuda_grid_size, cuda_block_size >>>
+					(output_buffer->GetData(MEMORYDEVICE_CUDA), input_buffer->GetData(
+							MEMORYDEVICE_CUDA));
+			ORcudaKernelCheck;
+		}
+
+		ReductionResult<TOutput, PlainVoxelArray> final_result;
+		ORcudaSafeCall(cudaMemcpyAsync(&final_result, output_buffer->GetData(MEMORYDEVICE_CUDA),
+		                               sizeof(ReductionResult<TOutput, PlainVoxelArray>), cudaMemcpyDeviceToHost));
+		if (use_extra_result) {
+			final_result = TReduceResultLevelStaticFunctor::reduce(final_result, ignored_value);
+		}
+		GridAlignedBox array_bounds(volume->index.GetVolumeSize(), volume->index.GetVolumeOffset());
+		position = ComputePositionVectorFromLinearIndex_PlainVoxelArray(&array_bounds, static_cast<int> (final_result.index_within_array));
+		return final_result.value;
+	}
 };
-
 } // namespace ITMLib

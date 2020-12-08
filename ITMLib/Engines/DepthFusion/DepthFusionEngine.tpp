@@ -21,38 +21,70 @@
 
 using namespace ITMLib;
 
-template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-void DepthFusionEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::UpdateVisibleList(
-		VoxelVolume<TVoxel, TIndex>* scene, const View* view, const CameraTrackingState* trackingState,
-		const RenderState* renderState, bool resetVisibleList) {
-	//TODO: fixme
-	IndexingEngine<TVoxel, TIndex, TMemoryDeviceType>::Instance()
-			.AllocateNearSurface(scene, view, trackingState);
-}
-
-template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-void DepthFusionEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::IntegrateDepthImageIntoTsdfVolume_Helper(
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+void DepthFusionEngine<TVoxel, TIndex, TMemoryDeviceType>::IntegrateDepthImageIntoTsdfVolume_Helper(
 		VoxelVolume<TVoxel, TIndex>* volume, const View* view, Matrix4f depth_camera_matrix) {
-	if (volume->GetParameters().stop_integration_at_max_weight) {
-		VoxelDepthIntegrationFunctor<TVoxel, TMemoryDeviceType, true> integration_functor(volume->GetParameters(), view,
-		                                                                                  depth_camera_matrix);
-		VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseAllWithPosition(volume, integration_functor);
-	} else {
-		VoxelDepthIntegrationFunctor<TVoxel, TMemoryDeviceType, false> integration_functor(volume->GetParameters(), view,
-		                                                                                   depth_camera_matrix);
-		VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseAllWithPosition(volume, integration_functor);
+	switch(this->parameters.execution_mode){
+		case OPTIMIZED:
+			if (volume->GetParameters().stop_integration_at_max_weight) {
+				if (this->parameters.use_surface_thickness_cutoff) {
+					VoxelDepthIntegrationFunctor<TVoxel, TMemoryDeviceType, true, true, ExecutionMode::OPTIMIZED>
+							integration_functor(volume->GetParameters(), view, depth_camera_matrix, this->parameters.surface_thickness);
+					VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseAllWithPosition(volume, integration_functor);
+				} else {
+					VoxelDepthIntegrationFunctor<TVoxel, TMemoryDeviceType, true, false, ExecutionMode::OPTIMIZED>
+							integration_functor(volume->GetParameters(), view, depth_camera_matrix, this->parameters.surface_thickness);
+					VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseAllWithPosition(volume, integration_functor);
+				}
+			} else {
+				if (this->parameters.use_surface_thickness_cutoff) {
+					VoxelDepthIntegrationFunctor<TVoxel, TMemoryDeviceType, false, true, ExecutionMode::OPTIMIZED>
+							integration_functor(volume->GetParameters(), view, depth_camera_matrix, this->parameters.surface_thickness);
+					VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseAllWithPosition(volume, integration_functor);
+				} else {
+					VoxelDepthIntegrationFunctor<TVoxel, TMemoryDeviceType, false, false, ExecutionMode::OPTIMIZED>
+							integration_functor(volume->GetParameters(), view, depth_camera_matrix, this->parameters.surface_thickness);
+					VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseAllWithPosition(volume, integration_functor);
+				}
+			}
+			break;
+		case DIAGNOSTIC:
+			if (volume->GetParameters().stop_integration_at_max_weight) {
+				if (this->parameters.use_surface_thickness_cutoff) {
+					VoxelDepthIntegrationFunctor<TVoxel, TMemoryDeviceType, true, true, ExecutionMode::DIAGNOSTIC>
+							integration_functor(volume->GetParameters(), view, depth_camera_matrix, this->parameters.surface_thickness);
+					VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseAllWithPosition(volume, integration_functor);
+				} else {
+					VoxelDepthIntegrationFunctor<TVoxel, TMemoryDeviceType, true, false, ExecutionMode::DIAGNOSTIC>
+							integration_functor(volume->GetParameters(), view, depth_camera_matrix, this->parameters.surface_thickness);
+					VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseAllWithPosition(volume, integration_functor);
+				}
+			} else {
+				if (this->parameters.use_surface_thickness_cutoff) {
+					VoxelDepthIntegrationFunctor<TVoxel, TMemoryDeviceType, false, true, ExecutionMode::DIAGNOSTIC>
+							integration_functor(volume->GetParameters(), view, depth_camera_matrix, this->parameters.surface_thickness);
+					VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseAllWithPosition(volume, integration_functor);
+				} else {
+					VoxelDepthIntegrationFunctor<TVoxel, TMemoryDeviceType, false, false, ExecutionMode::DIAGNOSTIC>
+							integration_functor(volume->GetParameters(), view, depth_camera_matrix, this->parameters.surface_thickness);
+					VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseAllWithPosition(volume, integration_functor);
+				}
+			}
+			break;
+		default:
+			DIEWITHEXCEPTION_REPORTLOCATION("Unsupported execution mode.");
+			break;
 	}
-
 }
 
-template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-void DepthFusionEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::IntegrateDepthImageIntoTsdfVolume(
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+void DepthFusionEngine<TVoxel, TIndex, TMemoryDeviceType>::IntegrateDepthImageIntoTsdfVolume(
 		VoxelVolume<TVoxel, TIndex>* volume, const View* view, const CameraTrackingState* trackingState) {
 	IntegrateDepthImageIntoTsdfVolume_Helper(volume, view, trackingState->pose_d->GetM());
 }
 
-template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
-void DepthFusionEngine<TVoxel, TWarp, TIndex, TMemoryDeviceType>::IntegrateDepthImageIntoTsdfVolume(
+template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
+void DepthFusionEngine<TVoxel, TIndex, TMemoryDeviceType>::IntegrateDepthImageIntoTsdfVolume(
 		VoxelVolume<TVoxel, TIndex>* volume, const View* view) {
 	IntegrateDepthImageIntoTsdfVolume_Helper(volume, view);
 }

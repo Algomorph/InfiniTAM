@@ -15,8 +15,8 @@ using namespace ITMLib;
 class RealSenseEngine::PrivateData
 {
 	public:
-	PrivateData() : dev(NULL){}
-	rs::device *dev = NULL;
+	PrivateData() : dev(nullptr){}
+	rs::device *dev = nullptr;
 	rs::context ctx;
 };
 
@@ -37,7 +37,7 @@ RealSenseEngine::RealSenseEngine(const char *calibFilename, bool alignColourWith
 	if (data->ctx.get_device_count() == 0) {
 		dataAvailable = false;
 		delete data;
-		data = NULL;
+		data = nullptr;
 		return;
 	}
 
@@ -82,7 +82,7 @@ RealSenseEngine::RealSenseEngine(const char *calibFilename, bool alignColourWith
 
 RealSenseEngine::~RealSenseEngine()
 {
-	if (data != NULL)
+	if (data != nullptr)
 	{
 		data->dev->stop();
 		delete data;
@@ -119,9 +119,9 @@ void RealSenseEngine::GetImages(UChar4Image *rgbImage, ShortImage *rawDepthImage
 	dataAvailable = true;
 }
 
-bool RealSenseEngine::HasMoreImages() const { return (data!=NULL); }
-Vector2i RealSenseEngine::GetDepthImageSize() const { return (data!=NULL)?imageSize_d:Vector2i(0,0); }
-Vector2i RealSenseEngine::GetRGBImageSize() const { return (data!=NULL)?imageSize_rgb:Vector2i(0,0); }
+bool RealSenseEngine::HasMoreImages() const { return (data!=nullptr); }
+Vector2i RealSenseEngine::GetDepthImageSize() const { return (data!=nullptr)?imageSize_d:Vector2i(0,0); }
+Vector2i RealSenseEngine::GetRGBImageSize() const { return (data!=nullptr)?imageSize_rgb:Vector2i(0,0); }
 
 #else
 

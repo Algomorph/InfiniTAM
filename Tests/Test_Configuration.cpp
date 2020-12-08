@@ -38,12 +38,13 @@
 #include "../ITMLib/Utils/Configuration/AutomaticRunSettings.h"
 #include "../ITMLib/Engines/Main/MainEngineSettings.h"
 #include "../ITMLib/Engines/LevelSetAlignment/Interface/LevelSetAlignmentParameters.h"
+#include "../ITMLib/Engines/VolumeFusion/VolumeFusionSettings.h"
 
 namespace pt = boost::property_tree;
 
 using namespace ITMLib;
 using namespace ITMLib::configuration;
-using namespace test_utilities;
+using namespace test;
 
 struct DeferrableStructCollection {
 	MainEngineSettings main_engine_settings;
@@ -52,6 +53,8 @@ struct DeferrableStructCollection {
 	RenderingSettings rendering_settings;
 	AutomaticRunSettings automatic_run_settings;
 	LevelSetAlignmentParameters level_set_evolution_parameters;
+	VolumeFusionSettings volume_fusion_settings;
+
 
 	DeferrableStructCollection(const configuration::Configuration& source_configuration = configuration::Get()) :
 			main_engine_settings(BuildDeferrableFromParentIfPresent<MainEngineSettings>(source_configuration)),
@@ -59,7 +62,8 @@ struct DeferrableStructCollection {
 			indexing_settings(BuildDeferrableFromParentIfPresent<IndexingSettings>(source_configuration)),
 			rendering_settings(BuildDeferrableFromParentIfPresent<RenderingSettings>(source_configuration)),
 			automatic_run_settings(BuildDeferrableFromParentIfPresent<AutomaticRunSettings>(source_configuration)),
-			level_set_evolution_parameters(BuildDeferrableFromParentIfPresent<LevelSetAlignmentParameters>(source_configuration)) {}
+			level_set_evolution_parameters(BuildDeferrableFromParentIfPresent<LevelSetAlignmentParameters>(source_configuration)),
+			volume_fusion_settings(BuildDeferrableFromParentIfPresent<VolumeFusionSettings>(source_configuration)){}
 
 	friend void RequireEqualDeferrables(const DeferrableStructCollection& l, const DeferrableStructCollection& r) {
 		BOOST_REQUIRE_EQUAL(l.main_engine_settings, r.main_engine_settings);
@@ -68,6 +72,7 @@ struct DeferrableStructCollection {
 		BOOST_REQUIRE_EQUAL(l.rendering_settings, r.rendering_settings);
 		BOOST_REQUIRE_EQUAL(l.automatic_run_settings, r.automatic_run_settings);
 		BOOST_REQUIRE_EQUAL(l.level_set_evolution_parameters, r.level_set_evolution_parameters);
+		BOOST_REQUIRE_EQUAL(l.volume_fusion_settings, r.volume_fusion_settings);
 	}
 
 };
@@ -123,7 +128,7 @@ BOOST_AUTO_TEST_CASE(ConfigurationFileTest) {
 	BOOST_REQUIRE_EQUAL(configuration1, configuration::Get());
 }
 
-void execute_external_process(const std::string& command) {
+void ExecuteExternalProcess(const std::string& command) {
 	system(command.c_str());
 }
 
@@ -145,7 +150,7 @@ BOOST_AUTO_TEST_CASE(Configuration_CLI_Test_Defaults_Unchanged) {
 
 	config_destination = GENERATED_TEST_DATA_PREFIX "TestData/configuration/cli_test_defaults.json";
 	std::string command = GetCLI_optionsSubtestExecutablePath() + " --config_output=" + config_destination;
-	std::thread thread(execute_external_process, command);
+	std::thread thread(ExecuteExternalProcess, command);
 	thread.join();
 	configuration::LoadConfigurationFromJSONFile(config_destination);
 	loaded_deferrables = DeferrableStructCollection();
@@ -163,7 +168,8 @@ BOOST_AUTO_TEST_CASE(ConfigurationTestLong_CLI_Only) {
 
 	config_destination = GENERATED_TEST_DATA_PREFIX "TestData/configuration/cli_test_long.json";
 	std::string command = GetCLI_optionsSubtestExecutablePath() + " --config_output=" + config_destination +
-	                      " --focus_coordinates=20 23 0"
+	                      " --focus_voxel=20 23 0"
+					      " --focus_pixel=10 10"
 	                      " --record_reconstruction_video=true"
 	                      " --record_inputs_in_reconstruction_video=true"
 
@@ -202,21 +208,22 @@ BOOST_AUTO_TEST_CASE(ConfigurationTestLong_CLI_Only) {
 	                      " --level_set_evolution.execution_mode=diagnostic"
 
 	                      " --level_set_evolution.weights.learning_rate=0.11"
-	                      " --level_set_evolution.weights.weight_killing_term=0.09"
+	                      " --level_set_evolution.weights.Killing_dampening_factor=0.09"
 	                      " --level_set_evolution.weights.weight_data_term=2"
 	                      " --level_set_evolution.weights.weight_smoothing_term=0.3"
 	                      " --level_set_evolution.weights.weight_level_set_term=0.1"
 	                      " --level_set_evolution.weights.epsilon=1e-06"
-	                      " --level_set_evolution.weights.momentum_weight=0.4"
 
 	                      " --level_set_evolution.switches.enable_data_term=false"
 	                      " --level_set_evolution.switches.enable_level_set_term=true"
 	                      " --level_set_evolution.switches.enable_smoothing_term=false"
-	                      " --level_set_evolution.switches.enable_killing_rigidity_enforcement_term=true"
-	                      " --level_set_evolution.switches.enable_sobolev_gradient_smoothing=false"
+	                      " --level_set_evolution.switches.enable_Killing_field=true"
+	                      " --level_set_evolution.switches.enable_Sobolev_gradient_smoothing=false"
 
+					      " --level_set_evolution.termination.warp_length_termination_threshold_type=average"
 	                      " --level_set_evolution.termination.max_iteration_count=300"
-	                      " --level_set_evolution.termination.mean_update_length_threshold=0.0002"
+					      " --level_set_evolution.termination.min_iteration_count=5"
+	                      " --level_set_evolution.termination.update_length_threshold=0.0002"
 
 	                      " --logging_settings.verbosity_level=warning"
 	                      " --logging_settings.log_to_disk=true"
@@ -226,7 +233,8 @@ BOOST_AUTO_TEST_CASE(ConfigurationTestLong_CLI_Only) {
 	                      " --logging_settings.log_trajectory_quaternions=true"
 	                      " --logging_settings.log_iteration_number=true"
 	                      " --logging_settings.log_surface_tracking_procedure_names=true"
-	                      " --logging_settings.log_average_warp_update=true"
+					      " --logging_settings.log_max_gradient_length_position=true"
+	                      " --logging_settings.log_gradient_length_statistic=true"
 	                      " --logging_settings.log_surface_tracking_optimization_energies=true"
 	                      " --logging_settings.log_additional_surface_tracking_stats=true"
 	                      " --logging_settings.log_warp_update_length_histograms=true"
@@ -250,6 +258,7 @@ BOOST_AUTO_TEST_CASE(ConfigurationTestLong_CLI_Only) {
 	                      " --main_engine_settings.draw_frame_index_labels=true"
 	                      " --main_engine_settings.library_mode=basic"
 	                      " --main_engine_settings.indexing_method=array"
+					      " --main_engine_settings.halt_on_non_rigid_alignment_convergence_failure=true"
 	                      " --main_engine_settings.enable_rigid_alignment=false"
 
 	                      " --telemetry_settings.record_volume_memory_usage=true"
@@ -272,25 +281,34 @@ BOOST_AUTO_TEST_CASE(ConfigurationTestLong_CLI_Only) {
 	                      " --automatic_run_settings.load_volume_and_camera_matrix_before_processing=true"
 	                      " --automatic_run_settings.save_volumes_and_camera_matrix_after_processing=true"
 	                      " --automatic_run_settings.save_meshes_after_processing=true"
-	                      " --automatic_run_settings.exit_after_automatic_processing=true";
+					      " --automatic_run_settings.exit_if_main_processing_turns_off=true"
+	                      " --automatic_run_settings.exit_after_automatic_processing=true"
+
+					      " --volume_fusion_settings.use_surface_thickness_cutoff=false"
+	                      " --volume_fusion_settings.surface_thickness=0.008"
+
+					      " --depth_fusion_settings.execution_mode=diagnostic"
+	                      " --depth_fusion_settings.use_surface_thickness_cutoff=true"
+	                      " --depth_fusion_settings.surface_thickness=0.008"
+	                      ;
 
 	std::cout << "Executing command: " << std::endl;
 	std::cout << command << std::endl;
-	std::thread thread(execute_external_process, command);
+	std::thread thread(ExecuteExternalProcess, command);
 	thread.join();
 	configuration::LoadConfigurationFromJSONFile(config_destination);
 	loaded_deferrables = DeferrableStructCollection();
 
-	configuration::Configuration configuration1 = GenerateChangedUpConfiguration();
-	DeferrableStructCollection deferrables1(configuration1);
+	configuration::Configuration changed_up_configuration = GenerateChangedUpConfiguration();
+	DeferrableStructCollection changed_up_deferrables(changed_up_configuration);
 
-	BOOST_REQUIRE_EQUAL(configuration1.general_voxel_volume_parameters, configuration::Get().general_voxel_volume_parameters);
-	BOOST_REQUIRE_EQUAL(configuration1.general_surfel_volume_parameters, configuration::Get().general_surfel_volume_parameters);
-	BOOST_REQUIRE_EQUAL(configuration1.specific_volume_parameters, configuration::Get().specific_volume_parameters);
-	BOOST_REQUIRE_EQUAL(configuration1.logging_settings, configuration::Get().logging_settings);
-	BOOST_REQUIRE_EQUAL(configuration1.paths, configuration::Get().paths);
-	BOOST_REQUIRE_EQUAL(configuration1, configuration::Get());
-	RequireEqualDeferrables(deferrables1, loaded_deferrables);
+	BOOST_REQUIRE_EQUAL(changed_up_configuration.general_voxel_volume_parameters, configuration::Get().general_voxel_volume_parameters);
+	BOOST_REQUIRE_EQUAL(changed_up_configuration.general_surfel_volume_parameters, configuration::Get().general_surfel_volume_parameters);
+	BOOST_REQUIRE_EQUAL(changed_up_configuration.specific_volume_parameters, configuration::Get().specific_volume_parameters);
+	BOOST_REQUIRE_EQUAL(changed_up_configuration.logging_settings, configuration::Get().logging_settings);
+	BOOST_REQUIRE_EQUAL(changed_up_configuration.paths, configuration::Get().paths);
+	BOOST_REQUIRE_EQUAL(changed_up_configuration, configuration::Get());
+	RequireEqualDeferrables(changed_up_deferrables, loaded_deferrables);
 }
 
 //TODO: Restore support for short options when Boost program_options is replaced by CLI11
@@ -397,7 +415,7 @@ BOOST_AUTO_TEST_CASE(ConfigurationTestLong_CLI_Only) {
 //
 //	std::cout << "Executing command: " << std::endl;
 //	std::cout << command << std::endl;
-//	std::thread thread(execute_external_process, command);
+//	std::thread thread(ExecuteExternalProcess, command);
 //	thread.join();
 //	configuration::LoadConfigurationFromJSONFile(config_destination);
 //	loaded_deferrables = DeferrableStructCollection();
@@ -437,7 +455,7 @@ BOOST_AUTO_TEST_CASE(ConfigurationFileAnd_CLI_Test) {
 	                      " --use_approximate_raycast=false";
 	std::cout << "Executing command: " << std::endl;
 	std::cout << command << std::endl;
-	std::thread thread(execute_external_process, command);
+	std::thread thread(ExecuteExternalProcess, command);
 	thread.join();
 
 	configuration::LoadConfigurationFromJSONFile(config_destination);

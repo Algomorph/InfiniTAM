@@ -23,22 +23,23 @@
 #include "TestUtilities.h"
 #include "TestUtilities.tpp"
 
-// reco
+// OpenReco
 #include "../../ITMLib/Utils/Quaternions/Quaternion.h"
 #include "../../ITMLib/Utils/Configuration/AutomaticRunSettings.h"
 #include "../../ITMLib/Engines/Analytics/AnalyticsEngine.h"
-#include "../../ITMLib/Engines/ViewBuilding/Interface/ViewBuilder.h"
-#include "../../ITMLib/Engines/ViewBuilding/ViewBuilderFactory.h"
+#include "../../ITMLib/Engines/ViewBuilder/Interface/ViewBuilder.h"
+#include "../../ITMLib/Engines/ViewBuilder/ViewBuilderFactory.h"
 #include "../../ITMLib/Engines/Telemetry/TelemetrySettings.h"
 #include "../../ITMLib/Engines/Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
 #include "../../ITMLib/Engines/Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
 #include "../../ITMLib/Engines/Main/MainEngineSettings.h"
 #include "../../ITMLib/Engines/LevelSetAlignment/Interface/LevelSetAlignmentParameters.h"
+#include "../../ITMLib/Engines/VolumeFusion/VolumeFusionSettings.h"
 
 using namespace ITMLib;
 namespace fs = std::filesystem;
 
-namespace test_utilities {
+namespace test {
 
 template<>
 std::string IndexString<VoxelBlockHash>() {
@@ -61,24 +62,24 @@ std::string DeviceString<MEMORYDEVICE_CUDA>() {
 }
 
 void ConstructGeneratedVolumeSubdirectoriesIfMissing() {
-	fs::create_directories(test_utilities::GeneratedVolumeDirectory + IndexString<VoxelBlockHash>());
-	fs::create_directories(test_utilities::GeneratedVolumeDirectory + IndexString<PlainVoxelArray>());
+	fs::create_directories(std::string(test::generated_volume_directory) + IndexString<VoxelBlockHash>());
+	fs::create_directories(std::string(test::generated_volume_directory) + IndexString<PlainVoxelArray>());
 }
 
 void ConstructGeneratedConfigurationDirectoryIfMissing() {
-	fs::create_directories(test_utilities::GeneratedConfigurationDirectory);
+	fs::create_directories(test::generated_configuration_directory);
 }
 
 void ConstructGeneratedMeshDirectoryIfMissing() {
-	fs::create_directories(test_utilities::GeneratedMeshDirectory);
+	fs::create_directories(test::generated_mesh_directory);
 }
 
 void ConstructGeneratedArraysDirectoryIfMissing() {
-	fs::create_directories(test_utilities::GeneratedArraysDirectory);
+	fs::create_directories(test::generated_arrays_directory);
 }
 
 void ConstructGeneratedVideosDirectoryIfMissing() {
-	fs::create_directories(test_utilities::GeneratedVideosDirectory);
+	fs::create_directories(test::generated_videos_directory);
 }
 
 template void GenerateSimpleSurfaceTestVolume<MEMORYDEVICE_CPU, TSDFVoxel, VoxelBlockHash>(
@@ -173,18 +174,18 @@ void
 UpdateView(View** view, const std::string& depth_path, const std::string& color_path,
            const std::string& calibration_path, MemoryDeviceType memoryDevice) {
 
-	ViewBuilder* viewBuilderToUse;
+	ViewBuilder* view_builder_to_use;
 	switch (memoryDevice) {
 		case MEMORYDEVICE_CPU:
 			if (viewBuilder_CPU == nullptr)
 				viewBuilder_CPU = ViewBuilderFactory::Build(calibration_path, memoryDevice);
-			viewBuilderToUse = viewBuilder_CPU;
+			view_builder_to_use = viewBuilder_CPU;
 			break;
 		case MEMORYDEVICE_CUDA:
 #ifndef COMPILE_WITHOUT_CUDA
 			if (viewBuilder_CUDA == nullptr)
 				viewBuilder_CUDA = ViewBuilderFactory::Build(calibration_path, memoryDevice);
-			viewBuilderToUse = viewBuilder_CUDA;
+			view_builder_to_use = viewBuilder_CUDA;
 #else
 			DIEWITHEXCEPTION_REPORTLOCATION("Attmpted to update CUDA view while build without CUDA support, aborting.");
 #endif
@@ -198,7 +199,7 @@ UpdateView(View** view, const std::string& depth_path, const std::string& color_
 	auto* mask = new UCharImage(true, false);
 	ReadImageFromFile(*rgb, color_path.c_str());
 	ReadImageFromFile(*depth, depth_path.c_str());
-	viewBuilderToUse->UpdateView(view, rgb, depth, false, false, false, true);
+	view_builder_to_use->UpdateView(view, rgb, depth, false, false, false, true);
 	delete rgb;
 	delete depth;
 	delete mask;
@@ -366,22 +367,22 @@ void BuildSdfVolumeFromImage_SurfaceSpanAllocation<TSDFVoxel, VoxelBlockHash>(
 
 
 template
-void initializeVolume<TSDFVoxel, VoxelBlockHash>(VoxelVolume<TSDFVoxel, VoxelBlockHash>** volume,
+void InitializeVolume<TSDFVoxel, VoxelBlockHash>(VoxelVolume<TSDFVoxel, VoxelBlockHash>** volume,
                                                  VoxelBlockHash::InitializationParameters initializationParameters,
                                                  MemoryDeviceType memoryDevice,
                                                  configuration::SwappingMode swappingMode);
 template
-void initializeVolume<TSDFVoxel, PlainVoxelArray>(VoxelVolume<TSDFVoxel, PlainVoxelArray>** volume,
+void InitializeVolume<TSDFVoxel, PlainVoxelArray>(VoxelVolume<TSDFVoxel, PlainVoxelArray>** volume,
                                                   PlainVoxelArray::InitializationParameters initializationParameters,
                                                   MemoryDeviceType memoryDevice,
                                                   configuration::SwappingMode swappingMode);
 template
-void initializeVolume<WarpVoxel, VoxelBlockHash>(VoxelVolume<WarpVoxel, VoxelBlockHash>** volume,
+void InitializeVolume<WarpVoxel, VoxelBlockHash>(VoxelVolume<WarpVoxel, VoxelBlockHash>** volume,
                                                  VoxelBlockHash::InitializationParameters initializationParameters,
                                                  MemoryDeviceType memoryDevice,
                                                  configuration::SwappingMode swappingMode);
 template
-void initializeVolume<WarpVoxel, PlainVoxelArray>(VoxelVolume<WarpVoxel, PlainVoxelArray>** volume,
+void InitializeVolume<WarpVoxel, PlainVoxelArray>(VoxelVolume<WarpVoxel, PlainVoxelArray>** volume,
                                                   PlainVoxelArray::InitializationParameters initializationParameters,
                                                   MemoryDeviceType memoryDevice,
                                                   configuration::SwappingMode swappingMode);
@@ -390,6 +391,7 @@ configuration::Configuration GenerateChangedUpConfiguration() {
 	using namespace configuration;
 	configuration::Configuration changed_up_configuration(
 			Vector3i(20, 23, 0),
+			Vector2i(10, 10),
 			true,
 			true,
 			VoxelVolumeParameters(0.005, 0.12, 4.12, 0.05, 200, true, 1.2f),
@@ -407,6 +409,7 @@ configuration::Configuration GenerateChangedUpConfiguration() {
 					VERBOSITY_WARNING,
 					true,
 					false,
+					true,
 					true,
 					true,
 					true,
@@ -446,23 +449,32 @@ configuration::Configuration GenerateChangedUpConfiguration() {
 			32,
 			true,
 			true);
-	MainEngineSettings changed_up_main_engine_settings(true, LIBMODE_BASIC, INDEX_ARRAY, false);
+	MainEngineSettings changed_up_main_engine_settings(
+			true, LIBMODE_BASIC,
+			INDEX_ARRAY,
+			true, false);
 	IndexingSettings changed_up_indexing_settings(DIAGNOSTIC);
 	RenderingSettings changed_up_rendering_settings(true);
-	AutomaticRunSettings changed_up_automatic_run_settings(50, 16, true, true, true, true);
+	AutomaticRunSettings changed_up_automatic_run_settings(
+			50, 16,
+			true, true,
+			true, true, true);
 	LevelSetAlignmentParameters changed_up_level_set_evolution_parameters(
 			ExecutionMode::DIAGNOSTIC,
-			LevelSetAlignmentWeights(0.11f, 0.09f, 2.0f, 0.3f, 0.1f, 1e-6f, 0.4f),
+			LevelSetAlignmentWeights(0.11f, 0.09f, 2.0f, 0.3f, 0.1f, 1e-6f),
 			LevelSetAlignmentSwitches(false, true, false, true, false),
-			LevelSetAlignmentTerminationConditions(300, 0.0002f)
+			LevelSetAlignmentTerminationConditions(AVERAGE, 300, 5, 0.0002f)
 	);
-
+	VolumeFusionSettings changed_up_volume_fusion_settings(false, 0.008);
+	DepthFusionSettings changed_up_depth_fusion_settings(DIAGNOSTIC, true, 0.008);
 	AddDeferrableToSourceTree(changed_up_configuration, changed_up_main_engine_settings);
 	AddDeferrableToSourceTree(changed_up_configuration, changed_up_telemetry_settings);
 	AddDeferrableToSourceTree(changed_up_configuration, changed_up_indexing_settings);
 	AddDeferrableToSourceTree(changed_up_configuration, changed_up_rendering_settings);
 	AddDeferrableToSourceTree(changed_up_configuration, changed_up_automatic_run_settings);
 	AddDeferrableToSourceTree(changed_up_configuration, changed_up_level_set_evolution_parameters);
+	AddDeferrableToSourceTree(changed_up_configuration, changed_up_volume_fusion_settings);
+	AddDeferrableToSourceTree(changed_up_configuration, changed_up_depth_fusion_settings);
 	return changed_up_configuration;
 }
 
@@ -493,7 +505,7 @@ std::vector<ORUtils::SE3Pose> GenerateCameraTrajectoryAroundPoint(const Vector3f
 		Vector3f viewpoint = target + rotated_target_to_viewpoint;
 
 		Vector3f viewpoint_to_target_normalized = ORUtils::normalize(-rotated_target_to_viewpoint);
-		/* InfiniTAM's default (unconventional) axis system is as follows:
+		/* Original InfiniTAM's default (unconventional) axis system is as follows:
 		 *               ◢ ----------▶ +x
 		 *             ╱ |
 		 *           ╱   |

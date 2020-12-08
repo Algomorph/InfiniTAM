@@ -111,7 +111,7 @@ ColorTracker::EvaluationPoint::EvaluationPoint(ORUtils::SE3Pose *pos, const Colo
 
 	cacheF = localF[0];
 
-	cacheHessian = NULL; cacheNabla = NULL;
+	cacheHessian = nullptr; cacheNabla = nullptr;
 }
 
 // LM optimisation
@@ -149,7 +149,7 @@ static inline bool minimizeLM(const ColorTracker & tracker, ORUtils::SE3Pose & i
 	int step_counter = 0;
 
 	ColorTracker::EvaluationPoint *x = tracker.evaluateAt(new ORUtils::SE3Pose(initialization));
-	ColorTracker::EvaluationPoint *x2 = NULL;
+	ColorTracker::EvaluationPoint *x2 = nullptr;
 
 	if (x->getNumValidPoints()<100) { delete[] d; delete x; return false; }
 
@@ -204,7 +204,7 @@ static inline bool minimizeLM(const ColorTracker & tracker, ORUtils::SE3Pose & i
 		}
 		else
 		{
-			x2 = NULL;
+			x2 = nullptr;
 			// can't compute_allocated a step quality here...
 			lambda = lambda / TR_REGION_DECREASE;
 		}
@@ -220,7 +220,7 @@ static inline bool minimizeLM(const ColorTracker & tracker, ORUtils::SE3Pose & i
 
 			if (!continueIteration) break;
 		}
-		else if (x2 != NULL) delete x2;
+		else if (x2 != nullptr) delete x2;
 		if (step_counter++ >= MAX_STEPS - 1) break;
 	} while (true);
 

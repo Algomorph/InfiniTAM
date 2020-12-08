@@ -54,7 +54,7 @@ void SlamGraph::prepareEvaluations()
 
 double SlamGraph::evaluateF(const NodeIndex *nodes) const
 {
-	if (nodes == NULL) nodes = &mNodes;
+	if (nodes == nullptr) nodes = &mNodes;
 
 	double ret = 0.0f;
 	for (EdgeList::const_iterator it = mEdges.begin(); it != mEdges.end(); ++it) {
@@ -65,7 +65,7 @@ double SlamGraph::evaluateF(const NodeIndex *nodes) const
 
 void SlamGraph::evaluateGradientAndHessian(VariableLengthVector* & g, SparseBlockMatrix* & H, const NodeIndex *nodes) const
 {
-	if (nodes == NULL) nodes = &mNodes;
+	if (nodes == nullptr) nodes = &mNodes;
 
 	allocateGradientAndHessian(g, H);
 

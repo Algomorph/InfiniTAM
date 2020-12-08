@@ -35,13 +35,17 @@
 
 using namespace ITMLib;
 
-namespace test_utilities {
+namespace test {
 
-static constexpr const char* GeneratedVolumeDirectory = GENERATED_TEST_DATA_PREFIX "TestData/volumes/";
-static constexpr const char* GeneratedConfigurationDirectory = GENERATED_TEST_DATA_PREFIX "TestData/configuration/";
-static constexpr const char* GeneratedMeshDirectory = GENERATED_TEST_DATA_PREFIX "TestData/meshes/";
-static constexpr const char* GeneratedArraysDirectory = GENERATED_TEST_DATA_PREFIX "TestData/arrays/";
-static constexpr const char* GeneratedVideosDirectory = GENERATED_TEST_DATA_PREFIX "TestData/videos/";
+static constexpr std::string_view static_calibration_directory = STATIC_TEST_DATA_PREFIX "TestData/calibration/";
+static constexpr std::string_view static_frames_directory = STATIC_TEST_DATA_PREFIX "TestData/frames/";
+static constexpr std::string_view static_videos_directory = STATIC_TEST_DATA_PREFIX "TestData/videos/";
+
+static constexpr std::string_view generated_volume_directory = GENERATED_TEST_DATA_PREFIX "TestData/volumes/";
+static constexpr std::string_view generated_configuration_directory = GENERATED_TEST_DATA_PREFIX "TestData/configuration/";
+static constexpr std::string_view generated_mesh_directory = GENERATED_TEST_DATA_PREFIX "TestData/meshes/";
+static constexpr std::string_view generated_arrays_directory = GENERATED_TEST_DATA_PREFIX "TestData/arrays/";
+static constexpr std::string_view generated_videos_directory = GENERATED_TEST_DATA_PREFIX "TestData/videos/";
 
 void ConstructGeneratedVolumeSubdirectoriesIfMissing();
 void ConstructGeneratedConfigurationDirectoryIfMissing();
@@ -86,12 +90,17 @@ void TimeIt(std::function<void()> function, const std::string& description = "Ti
 		std::chrono::duration<double> elapsed = finish - start;
 		cumulative += elapsed.count();
 	}
-	std::cout << "Elapsed average time for " << run_count << " runs: " << cumulative / run_count << " s" << std::endl;
+	std::cout << "Average elapsed (wall) time over " << run_count << " runs: " << cumulative / run_count << " s" << std::endl;
 }
 
 
 template<typename TVoxel, typename TIndex>
 void PrepareVoxelVolumeForLoading(VoxelVolume<TVoxel, TIndex>* volume);
+
+template<typename TVoxel, typename TIndex>
+void PrepareVoxelVolumeForLoading(std::shared_ptr<VoxelVolume<TVoxel, TIndex>> volume){
+	PrepareVoxelVolumeForLoading(volume.get());
+}
 
 
 template<typename TIndex>
@@ -123,7 +132,7 @@ UpdateView(View** view, const std::string& depth_path, const std::string& color_
            const std::string& calibration_path, MemoryDeviceType memoryDevice);
 
 template<typename TVoxel, typename TIndex>
-void initializeVolume(VoxelVolume<TVoxel, TIndex>** volume,
+void InitializeVolume(VoxelVolume<TVoxel, TIndex>** volume,
                       typename TIndex::InitializationParameters initializationParameters = GetStandard512IndexParameters<TIndex>(),
                       MemoryDeviceType memory_device = MEMORYDEVICE_CUDA,
                       configuration::SwappingMode swapping_mode = configuration::SWAPPINGMODE_DISABLED);

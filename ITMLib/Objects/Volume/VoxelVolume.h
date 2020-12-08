@@ -56,14 +56,15 @@ public:
 	TVoxel* GetVoxels();
 	const TVoxel* GetVoxels() const;
 
-	TVoxel GetValueAt(const Vector3i& pos);
+	TVoxel GetValueAt(const Vector3i& position);
 
-	TVoxel GetValueAt(int x, int y, int z) {
-		Vector3i pos(x, y, z);
-		return GetValueAt(pos);
-	}
+	TVoxel GetValueAt(int x, int y, int z);
+
+	void SetValueAt(const Vector3i& position, TVoxel value);
+
+	void SetValueAt(int x, int y, int z, TVoxel value);
+
 	MemoryDeviceType GetMemoryType() const;
-
 	/**
 	 * @return Whether this scene is using swapping mechanism or not.
 	 **/

@@ -22,9 +22,9 @@ namespace ITMLib
 		/**
 		 * \brief Runs MarchingCubes on the voxel grid to generate the triangle mesh
 		 * \param mesh[out] mesh that is generated
-		 * \param scene[in] voxel grid with SDF values
+		 * \param volume[in] voxel grid with SDF values
 		 */
-		virtual Mesh MeshVolume(const VoxelVolume<TVoxel,TIndex>* scene) = 0;
+		virtual Mesh MeshVolume(const VoxelVolume<TVoxel,TIndex>* volume) = 0;
 
 		virtual ~MeshingEngine() = default;
 	};

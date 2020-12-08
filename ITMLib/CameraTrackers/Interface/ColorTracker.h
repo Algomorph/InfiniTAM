@@ -34,17 +34,17 @@ namespace ITMLib
 		{
 		public:
 			float f() { return cacheF; }
-			const float* nabla_f() { if (cacheNabla == NULL) computeGradients(false); return cacheNabla; }
+			const float* nabla_f() { if (cacheNabla == nullptr) computeGradients(false); return cacheNabla; }
 
-			const float* hessian_GN() { if (cacheHessian == NULL) computeGradients(true); return cacheHessian; }
+			const float* hessian_GN() { if (cacheHessian == nullptr) computeGradients(true); return cacheHessian; }
 			const ORUtils::SE3Pose & getParameter() const { return *mPara; }
 
 			EvaluationPoint(ORUtils::SE3Pose *pos, const ColorTracker *f_parent);
 			~EvaluationPoint()
 			{
 				delete mPara;
-				if (cacheNabla != NULL) delete[] cacheNabla;
-				if (cacheHessian != NULL) delete[] cacheHessian;
+				if (cacheNabla != nullptr) delete[] cacheNabla;
+				if (cacheHessian != nullptr) delete[] cacheHessian;
 			}
 
 			int getNumValidPoints() const { return mValidPoints; }

@@ -145,7 +145,8 @@ private:
 		const int utilized_entry_count = volume1->index.GetUtilizedBlockCount();
 		const int* utilized_hash_codes = volume1->index.GetUtilizedBlockHashCodes();
 #ifdef WITH_OPENMP
-#pragma omp parallel for
+#pragma omp parallel for default(none) shared(block_traverser, utilized_hash_codes, hash_table1, hash_table2, hash_table3, voxels1, voxels2, voxels3)\
+firstprivate(utilized_entry_count)
 #endif
 		for (int hash_code_index = 0; hash_code_index < utilized_entry_count; hash_code_index++) {
 			int hash_code1 = utilized_hash_codes[hash_code_index];

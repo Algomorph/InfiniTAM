@@ -3,7 +3,7 @@
 #include "BasicSurfelEngine.h"
 
 #include "../ImageProcessing/ImageProcessingEngineFactory.h"
-#include "../ViewBuilding/ViewBuilderFactory.h"
+#include "../ViewBuilder/ViewBuilderFactory.h"
 #include "../Rendering/SurfelVisualizationEngineFactory.h"
 #include "../../CameraTrackers/CameraTrackerFactory.h"
 
@@ -291,9 +291,9 @@ BasicSurfelEngine<TSurfel>::ProcessFrame(UChar4Image* rgbImage, ShortImage* rawD
 	double t[3];
 	double R[9];
 	double q[4];
-	for (int i = 0; i < 3; ++i) t[i] = p->GetInvM().m[3 * 4 + i];
+	for (int i = 0; i < 3; ++i) t[i] = p->GetInvM().values[3 * 4 + i];
 	for (int r = 0; r < 3; ++r) for (int c = 0; c < 3; ++c)
-		R[r * 3 + c] = p->GetM().m[c * 4 + r];
+		R[r * 3 + c] = p->GetM().values[c * 4 + r];
 	QuaternionFromRotationMatrix(R, q);
 	fprintf(stderr, "%f %f %f %f %f %f %f\n", t[0], t[1], t[2], q[1], q[2], q[3], q[0]);
 #endif
@@ -394,3 +394,8 @@ void BasicSurfelEngine<TSurfel>::TurnOnMainProcessing() { mainProcessingActive =
 
 template<typename TSurfel>
 void BasicSurfelEngine<TSurfel>::TurnOffMainProcessing() { mainProcessingActive = false; }
+
+template<typename TSurfel>
+bool BasicSurfelEngine<TSurfel>::GetMainProcessingOn() const {
+	return mainProcessingActive;
+}

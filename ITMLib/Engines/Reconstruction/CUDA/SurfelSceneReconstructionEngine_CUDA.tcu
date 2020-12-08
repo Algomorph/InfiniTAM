@@ -195,7 +195,7 @@ void SurfelSceneReconstructionEngine_CUDA<TSurfel>::AddNewSurfels(SurfelScene<TS
   const size_t newSurfelCount = static_cast<size_t>(this->m_newPointsPrefixSumMB->GetElement(pixelCount, MEMORYDEVICE_CUDA));
   TSurfel *newSurfels = scene->AllocateSurfels(newSurfelCount);
   const SurfelVolumeParameters& sceneParams = scene->GetParams();
-  if(newSurfels == NULL) return;
+  if(newSurfels == nullptr) return;
 
   int threadsPerBlock = 256;
   int numBlocks = (pixelCount + threadsPerBlock - 1) / threadsPerBlock;

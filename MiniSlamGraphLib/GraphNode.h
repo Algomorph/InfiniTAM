@@ -14,7 +14,7 @@ namespace MiniSlamGraph
 		virtual ~GraphNode() {}
 
 		virtual GraphNode* clone() const = 0;
-		virtual void applyDelta(const double *delta, const GraphNode *startingPoint = NULL) = 0;
+		virtual void applyDelta(const double *delta, const GraphNode *startingPoint = nullptr) = 0;
 
 		virtual int numParameters() const = 0;
 

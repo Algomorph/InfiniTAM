@@ -114,5 +114,13 @@ void VoxelBlockHash::SetFrom(const VoxelBlockHash& other) {
 	this->utilized_block_count = other.utilized_block_count;
 }
 
+HashEntry VoxelBlockHash::GetHashEntry(int hash_code) const {
+	if(hash_code < 0 || hash_code >= hash_entries.size()){
+		return {Vector3s(0, 0, 0), 0, -2};
+	}
+	return hash_entries.GetElement(hash_code, memory_type);
+}
+
+
 
 }// namespace ITMLib

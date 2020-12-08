@@ -139,7 +139,7 @@ bool ActiveMapManager::shouldMovePrimaryLocalMap(int newDataId, int bestDataId, 
 		return true;
 	}
 
-	// step 1: is "new" better than "primary" ?
+	// step 1: is "new" better than "exists_in_hash_table1" ?
 
 	// don't continue a local map that is already full
 /*	if (blocksInUse_new >= N_maxblocknum) return false;
@@ -353,8 +353,8 @@ int ActiveMapManager::CheckSuccess_newlink(int dataID, int primaryDataID, int *i
 
 	int inliers_local;
 	ORUtils::SE3Pose inlierPose_local;
-	if (inliers == NULL) inliers = &inliers_local;
-	if (inlierPose == NULL) inlierPose = &inlierPose_local;
+	if (inliers == nullptr) inliers = &inliers_local;
+	if (inlierPose == nullptr) inlierPose = &inlierPose_local;
 
 	estimateRelativePose(link.constraints, previousEstimate, (float)previousEstimate_weight, inliers, inlierPose);
 
@@ -452,7 +452,7 @@ bool ActiveMapManager::maintainActiveData()
 
 		if (link.type == PRIMARY_LOCAL_MAP)
 		{
-			if (primaryDataIdx >= 0) fprintf(stderr, "OOOPS, two or more primary localMaps...\n");
+			if (primaryDataIdx >= 0) fprintf(stderr, "OOOPS, two or more exists_in_hash_table1 localMaps...\n");
 			primaryDataIdx = i;
 		}
 	}

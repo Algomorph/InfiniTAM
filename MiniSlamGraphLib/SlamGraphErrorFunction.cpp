@@ -79,15 +79,15 @@ SlamGraphErrorFunction::EvaluationPoint::EvaluationPoint(const SlamGraphErrorFun
 	mParent = parent;
 	mPara = para;
 	cacheF = parent->getGraph()->evaluateF(&(mPara->getNodes()));
-	cacheG = NULL;
-	cacheH = NULL;
+	cacheG = nullptr;
+	cacheH = nullptr;
 }
 
 SlamGraphErrorFunction::EvaluationPoint::~EvaluationPoint()
 {
 	delete mPara;
-	if (cacheG != NULL) delete cacheG;
-	if (cacheH != NULL) delete cacheH;
+	if (cacheG != nullptr) delete cacheG;
+	if (cacheH != nullptr) delete cacheH;
 }
 
 double SlamGraphErrorFunction::EvaluationPoint::f()
@@ -109,8 +109,8 @@ const Matrix* SlamGraphErrorFunction::EvaluationPoint::hessian_GN()
 
 void SlamGraphErrorFunction::EvaluationPoint::cacheGH()
 {
-	if (cacheG != NULL) return;
-	SparseBlockMatrix *H_tmp = NULL;
+	if (cacheG != nullptr) return;
+	SparseBlockMatrix *H_tmp = nullptr;
 	mParent->getGraph()->evaluateGradientAndHessian(cacheG, H_tmp, &(mPara->getNodes()));
 
 #ifdef COMPILE_WITH_CSPARSE
@@ -141,7 +141,7 @@ void SlamGraphErrorFunction::EvaluationPoint::cacheGH()
 SlamGraphErrorFunction::SlamGraphErrorFunction(const SlamGraph & graph)
 {
 	mGraph = &graph;
-	mSparsityPattern = NULL;
+	mSparsityPattern = nullptr;
 }
 
 SlamGraphErrorFunction::~SlamGraphErrorFunction()

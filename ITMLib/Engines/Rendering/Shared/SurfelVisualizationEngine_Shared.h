@@ -260,7 +260,7 @@ inline void copy_surfel_to_buffers(int surfelId, const TSurfel* surfels, float* 
 	normals[offset + 1] = n.y;
 	normals[offset + 2] = n.z;
 
-	if (colours != NULL) {
+	if (colours != nullptr) {
 		Vector3u c = SurfelColourManipulator<TSurfel::hasColourInformation>::read(surfel);
 		colours[offset] = c.r;
 		colours[offset + 1] = c.g;

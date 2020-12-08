@@ -29,8 +29,8 @@
 #include "../ITMLib/GlobalTemplateDefines.h"
 #include "../ITMLib/Objects/Volume/VoxelVolume.h"
 #include "TestUtilities/TestUtilities.h"
-#include "../ITMLib/Engines/ViewBuilding/Interface/ViewBuilder.h"
-#include "../ITMLib/Engines/ViewBuilding/ViewBuilderFactory.h"
+#include "../ITMLib/Engines/ViewBuilder/Interface/ViewBuilder.h"
+#include "../ITMLib/Engines/ViewBuilder/ViewBuilderFactory.h"
 #include "../ORUtils/FileUtils.h"
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngine.h"
 #include "../ITMLib/Engines/Rendering/RenderingEngineFactory.h"
@@ -44,9 +44,7 @@
 #endif
 
 //test_utilities
-#include "TestUtilities/SnoopyTestUtilities.h"
-
-namespace snoopy = snoopy_test_utilities;
+#include "TestUtilities/TestDataUtilities.h"
 
 using namespace ITMLib;
 
@@ -79,7 +77,7 @@ struct TestData {
 		delete render_state;
 	}
 
-	const std::string calibration_path = snoopy::SnoopyCalibrationPath();
+	const std::string calibration_path = std::string(test::snoopy::calibration_path);
 	const std::string square_1_depth_path = STATIC_TEST_DATA_PREFIX "TestData/frames/square1_depth.png";
 	const std::string square_2_depth_path = STATIC_TEST_DATA_PREFIX "TestData/frames/square2_depth.png";
 	const std::string square_1_color_path = STATIC_TEST_DATA_PREFIX "TestData/frames/square1_color.png";
@@ -164,7 +162,7 @@ BOOST_FIXTURE_TEST_CASE(Test_TwoSurfaceAllocation_CPU, TestData_CPU) {
 
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> square_volume(MEMORYDEVICE_CPU, {0x8000, 0x20000});
 	square_volume.Reset();
-	DepthFusionEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CPU> depth_fusion_engine;
+	DepthFusionEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU> depth_fusion_engine;
 
 	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>& indexer = IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance();
 	indexer.AllocateNearSurface(&square_volume, view_square_1, tracking_state);
@@ -222,7 +220,7 @@ BOOST_FIXTURE_TEST_CASE(Test_TwoSurfaceAllocation_CUDA, TestData_CUDA) {
 
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> square_volume(MEMORYDEVICE_CUDA, {0x8000, 0x20000});
 	square_volume.Reset();
-	DepthFusionEngine<TSDFVoxel, WarpVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA> depth_fusion_engine;
+	DepthFusionEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA> depth_fusion_engine;
 
 	IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>& indexer = IndexingEngine<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance();
 	indexer.AllocateNearSurface(&square_volume, view_square_1, tracking_state);

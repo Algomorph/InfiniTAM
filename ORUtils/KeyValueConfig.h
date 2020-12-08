@@ -37,20 +37,20 @@ class KeyValueConfig {
 		    the corresponding value. If the choice is not available,
 		    -1 is returned and success is set to false (if provided).
 		*/
-		int getValueForChoice(const char *choice, bool *success = NULL) const
+		int getValueForChoice(const char *choice, bool *success = nullptr) const
 		{
 			List::const_iterator search = choices.find(choice);
 			if (search!=choices.end()) {
-				if (success!=NULL) *success = true;
+				if (success!=nullptr) *success = true;
 				return search->second;
 			} else {
-				if (success!=NULL) *success = false;
+				if (success!=nullptr) *success = false;
 				return -1;
 			}
 		}
 
 		/** This inverse search returns the textual description for
-		    a given value. If the value is invalid, NULL is returned.
+		    a given value. If the value is invalid, nullptr is returned.
 		*/
 		const char* getChoiceForValue(int choice) const
 		{
@@ -59,7 +59,7 @@ class KeyValueConfig {
 					return it->first;
 				}
 			}
-			return NULL;
+			return nullptr;
 		}
 
 		/** This method lists the textual choices available in the list.
@@ -98,7 +98,7 @@ class KeyValueConfig {
 	/** Remove all properties from the config. */
 	void unsetAllProperties();
 
-	/** Retrieve the value of a property or NULL, if the key is not used. */
+	/** Retrieve the value of a property or nullptr, if the key is not used. */
 	const char* getProperty(const char *key, bool toLower = true) const;
 
 	/** Parse a string in the form of "key1=value1,key2=value2,..." */

@@ -22,30 +22,29 @@
 namespace ITMLib {
 
 /**
- * \brief This struct provides functions that can be used to construct scene reconstruction engines.
+ * \brief This struct provides functions that can be used to construct depth fusion engines.
  */
 struct DepthFusionEngineFactory {
-	//#################### PUBLIC STATIC MEMBER FUNCTIONS ####################
 
 	/**
-	 * \brief Makes a scene reconstruction engine.
+	 * \brief Makes a depth fusion engine.
 	 *
-	 * \param deviceType  The device on which the scene reconstruction engine should operate.
+	 * \param device_type  The device on which the scene reconstruction engine should operate.
 	 */
-	template<typename TVoxel, typename TWarp, typename TIndex>
-	static DepthFusionEngineInterface<TVoxel, TWarp, TIndex>*
-	Build(MemoryDeviceType deviceType) {
-		DepthFusionEngineInterface<TVoxel, TWarp, TIndex>* depth_fusion_engine = nullptr;
+	template<typename TVoxel, typename TIndex>
+	static DepthFusionEngineInterface<TVoxel, TIndex>*
+	Build(MemoryDeviceType device_type) {
+		DepthFusionEngineInterface<TVoxel, TIndex>* depth_fusion_engine = nullptr;
 
-		switch (deviceType) {
+		switch (device_type) {
 			case MEMORYDEVICE_CPU:
-				depth_fusion_engine = new DepthFusionEngine<TVoxel, TWarp, TIndex, MEMORYDEVICE_CPU>;
+				depth_fusion_engine = new DepthFusionEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>;
 				break;
 			case MEMORYDEVICE_CUDA:
 #ifdef COMPILE_WITHOUT_CUDA
 				DIEWITHEXCEPTION_REPORTLOCATION("Requested instantiation of a CUDA-based specialization, but code was compiled without CUDA. Aborting.");
 #else
-				depth_fusion_engine = new DepthFusionEngine<TVoxel, TWarp, TIndex, MEMORYDEVICE_CUDA>;
+				depth_fusion_engine = new DepthFusionEngine<TVoxel, TIndex, MEMORYDEVICE_CUDA>;
 #endif
 				break;
 			case MEMORYDEVICE_METAL:
@@ -53,10 +52,40 @@ struct DepthFusionEngineFactory {
 				depth_fusion_engine = new DepthFusionEngine_Metal<TVoxelA,TIndex>;
 #endif
 				break;
+			default:
+				DIEWITHEXCEPTION_REPORTLOCATION("Unsupported device.");
+		}
+
+		return depth_fusion_engine;
+	}
+
+	template<typename TVoxel, typename TIndex>
+	static DepthFusionEngineInterface<TVoxel, TIndex>*
+	Build(MemoryDeviceType device_type, DepthFusionSettings settings) {
+		DepthFusionEngineInterface<TVoxel, TIndex>* depth_fusion_engine = nullptr;
+
+		switch (device_type) {
+			case MEMORYDEVICE_CPU:
+				depth_fusion_engine = new DepthFusionEngine<TVoxel, TIndex, MEMORYDEVICE_CPU>(settings);
+				break;
+			case MEMORYDEVICE_CUDA:
+#ifdef COMPILE_WITHOUT_CUDA
+				DIEWITHEXCEPTION_REPORTLOCATION("Requested instantiation of a CUDA-based specialization, but code was compiled without CUDA. Aborting.");
+#else
+				depth_fusion_engine = new DepthFusionEngine<TVoxel, TIndex, MEMORYDEVICE_CUDA>(settings);
+#endif
+				break;
+			case MEMORYDEVICE_METAL:
+#ifdef COMPILE_WITH_METAL
+				depth_fusion_engine = new DepthFusionEngine_Metal<TVoxelA,TIndex>;
+#endif
+				break;
+			default:
+				DIEWITHEXCEPTION_REPORTLOCATION("Unsupported device.");
 		}
 
 		return depth_fusion_engine;
 	}
 };
 
-}
+} // namespace ITMLib

@@ -18,7 +18,8 @@
 #include "../../GlobalTemplateDefines.h"
 
 namespace ITMLib {
-template class GlobalCache<TSDFVoxel, VoxelBlockHash>;
+template class GlobalCache<TSDFVoxel_f_flags, VoxelBlockHash>;
+template class GlobalCache<TSDFVoxel_f_rgb, VoxelBlockHash>;
 template class GlobalCache<WarpVoxel, VoxelBlockHash>;
 }  // namespace ITMLib
 

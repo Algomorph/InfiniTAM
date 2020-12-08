@@ -18,7 +18,6 @@
 
 //local
 #include "UIEngine.h"
-#include "prettyprint.hpp"
 #include "CreateDefaultImageSource.h"
 
 // *** namespaces ***

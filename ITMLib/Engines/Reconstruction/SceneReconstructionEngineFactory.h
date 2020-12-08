@@ -29,7 +29,7 @@ struct SceneReconstructionEngineFactory
   template <typename TVoxel, typename TIndex>
   static SceneReconstructionEngine<TVoxel,TIndex> *MakeSceneReconstructionEngine(MemoryDeviceType deviceType)
   {
-    SceneReconstructionEngine<TVoxel,TIndex> *sceneRecoEngine = NULL;
+    SceneReconstructionEngine<TVoxel,TIndex> *sceneRecoEngine = nullptr;
 
     switch(deviceType)
     {

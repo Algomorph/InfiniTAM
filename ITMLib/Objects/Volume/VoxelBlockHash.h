@@ -148,9 +148,7 @@ public:
 
 	IndexData* GetIndexData() { return hash_entries.GetData(memory_type); }
 
-	HashEntry GetHashEntry(int hash_code) const {
-		return hash_entries.GetElement(hash_code, memory_type);
-	}
+	HashEntry GetHashEntry(int hash_code) const;
 
 	HashEntry GetHashEntryAt(const Vector3s& pos) const;
 	HashEntry GetHashEntryAt(const Vector3s& pos, int& hash_code) const;

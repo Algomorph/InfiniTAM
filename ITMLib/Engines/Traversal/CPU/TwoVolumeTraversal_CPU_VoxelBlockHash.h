@@ -53,7 +53,8 @@ private:
 		const int* utilized_hash_codes = volume1->index.GetUtilizedBlockHashCodes();
 
 #ifdef WITH_OPENMP
-#pragma omp parallel for
+#pragma omp parallel for default(none) firstprivate(utilized_entry_count) shared(hash_table1, hash_table2, \
+utilized_hash_codes, voxels1, voxels2, block_traverser)
 #endif
 		for (int hash_code_index = 0; hash_code_index < utilized_entry_count; hash_code_index++) {
 			int hash_code = utilized_hash_codes[hash_code_index];
@@ -61,7 +62,7 @@ private:
 			if (hash_entry1.ptr < 0) continue;
 			HashEntry hash_entry2 = hash_table2[hash_code];
 
-			// the rare case where we have different positions for primary & secondary voxel block with the same index:
+			// the rare case where we have different positions for exists_in_hash_table1 & secondary voxel block with the same index:
 			// we have a hash bucket miss, find the secondary voxel with the matching coordinates
 			if (hash_entry2.pos != hash_entry1.pos) {
 				int hash_code2;
@@ -89,17 +90,18 @@ private:
 		HashEntry* hash_table1 = volume1->index.GetEntries();
 		TVoxel2* voxels2 = volume2->GetVoxels();
 		HashEntry* hash_table2 = volume2->index.GetEntries();
-		int hash_entry_count = volume1->index.hash_entry_count;
+		const int hash_entry_count = volume1->index.hash_entry_count;
 
 #ifdef WITH_OPENMP
-#pragma omp parallel for
+#pragma omp parallel for default(none) firstprivate(hash_entry_count) shared(hash_table1, hash_table2, \
+voxels1, voxels2, block_traverser)
 #endif
 		for (int hash_code = 0; hash_code < hash_entry_count; hash_code++) {
 			const HashEntry& hash_entry1 = hash_table1[hash_code];
 			if (hash_entry1.ptr < 0) continue;
 			HashEntry hash_entry2 = hash_table2[hash_code];
 
-			// the rare case where we have different positions for primary & secondary voxel block with the same index:
+			// the rare case where we have different positions for exists_in_hash_table1 & secondary voxel block with the same index:
 			// we have a hash bucket miss, find the secondary voxel with the matching coordinates
 			if (hash_entry2.pos != hash_entry1.pos) {
 				int hash_code2;
@@ -174,7 +176,9 @@ private:
 		bool mismatch_found = false;
 
 #ifdef WITH_OPENMP
-#pragma omp parallel for
+#pragma omp parallel for default(none) firstprivate(hash_entry_count, verbose) shared(hash_table1, hash_table2, \
+voxels1, voxels2, check_if_unmatched_block2_is_significant, check_if_unmatched_block1_is_significant, traverse_matched_block_function, \
+mismatch_found)
 #endif
 		for (int hash_code1 = 0; hash_code1 < hash_entry_count; hash_code1++) {
 			if (mismatch_found) continue;
@@ -184,18 +188,18 @@ private:
 			auto block_2_has_matching_block_1 = [&](int hash_code2) {
 				int alternative_hash_code1;
 				if (!FindHashAtPosition(alternative_hash_code1, hash_entry2.pos, hash_table1)) {
-					// could not find primary block corresponding to the secondary hash
+					// could not find exists_in_hash_table1 block corresponding to the secondary hash
 					TVoxel2* voxel_block2 = &(voxels2[hash_entry2.ptr *
 					                                  (VOXEL_BLOCK_SIZE3)]);
 					// if the secondary block is unaltered anyway, so no need to match and we're good, so return "true"
-					if(std::forward<TCheckIfUnmatchedBlock2IsSignificantFunction>(check_if_unmatched_block2_is_significant)
+					if (std::forward<TCheckIfUnmatchedBlock2IsSignificantFunction>(check_if_unmatched_block2_is_significant)
 							(voxel_block2, verbose, "Second-hash voxel block unmatched in first hash: ",
-							 hash_entry2.pos, hash_code2)){
+							 hash_entry2.pos, hash_code2)) {
 						return false;
 					}
 				}
-				// alternative primary hash found, skip this primary hash since the corresponding secondary
-				// block will be (or has been) processed with the alternative primary hash.
+				// alternative exists_in_hash_table1 hash found, skip this exists_in_hash_table1 hash since the corresponding secondary
+				// block will be (or has been) processed with the alternative exists_in_hash_table1 hash.
 				return true;
 			};
 
@@ -212,7 +216,7 @@ private:
 				}
 			}
 
-			// the rare case where we have different positions for primary & secondary voxel block with the same index:
+			// the rare case where we have different positions for exists_in_hash_table1 & secondary voxel block with the same index:
 			// we have a hash bucket miss, find the secondary voxel block with the matching coordinates
 			if (hash_entry2.pos != hash_entry1.pos) {
 				if (hash_entry2.ptr >= 0) {
@@ -224,9 +228,9 @@ private:
 
 				int hash_code2;
 				if (!FindHashAtPosition(hash_code2, hash_entry1.pos, hash_table2)) {
-					// If we cannot find this block, we check whether the primary voxel block has been altered, and
+					// If we cannot find this block, we check whether the exists_in_hash_table1 voxel block has been altered, and
 					// return "false" if it is -- i.e. the secondary voxel volume does not have a match.
-					// If the primary voxel block has not been altered, we assume the allocation mismatch is benign and
+					// If the exists_in_hash_table1 voxel block has not been altered, we assume the allocation mismatch is benign and
 					// continue to the next hash block.
 					TVoxel1* voxel_block1 = &(voxels1[hash_entry1.ptr *
 					                                  (VOXEL_BLOCK_SIZE3)]);
@@ -490,16 +494,16 @@ public:
 				         Vector3s block_spatial_position = Vector3s((short) 0),
 				         int hash_code = 0) {
 					return isVoxelBlockAlteredPredicate(voxel_block,
-					                             [&flags](TVoxel1& voxel) { return voxel.flags == flags; }, verbose,
-					                             message, block_spatial_position, hash_code);
+					                                    [&flags](TVoxel1& voxel) { return voxel.flags == flags; }, verbose,
+					                                    message, block_spatial_position, hash_code);
 				},
 				[&flags](TVoxel2* voxel_block, bool verbose = false,
 				         std::string message = "",
 				         Vector3s block_spatial_position = Vector3s((short) 0),
 				         int hash_code = 0) {
 					return isVoxelBlockAlteredPredicate(voxel_block,
-					                             [&flags](TVoxel2& voxel) { return voxel.flags == flags; }, verbose,
-					                             message, block_spatial_position, hash_code);
+					                                    [&flags](TVoxel2& voxel) { return voxel.flags == flags; }, verbose,
+					                                    message, block_spatial_position, hash_code);
 				},
 				verbose
 		);
@@ -532,16 +536,16 @@ public:
 				         Vector3s block_spatial_position = Vector3s((short) 0),
 				         int hash_code = 0) {
 					return isVoxelBlockAlteredPredicate(voxel_block,
-					                             [&flags](TVoxel1& voxel) { return voxel.flags == flags; }, verbose,
-					                             message, block_spatial_position, hash_code);
+					                                    [&flags](TVoxel1& voxel) { return voxel.flags == flags; }, verbose,
+					                                    message, block_spatial_position, hash_code);
 				},
 				[&flags](TVoxel2* voxel_block, bool verbose = false,
 				         std::string message = "",
 				         Vector3s block_spatial_position = Vector3s((short) 0),
 				         int hash_code = 0) {
 					return isVoxelBlockAlteredPredicate(voxel_block,
-					                             [&flags](TVoxel2& voxel) { return voxel.flags == flags; }, verbose,
-					                             message, block_spatial_position, hash_code);
+					                                    [&flags](TVoxel2& voxel) { return voxel.flags == flags; }, verbose,
+					                                    message, block_spatial_position, hash_code);
 				},
 				verbose
 		);
@@ -612,7 +616,7 @@ public:
 			if (primaryHashEntry.ptr < 0) continue;
 			HashEntry hash_code2Entry = hash_table2[hash];
 
-			// the rare case where we have different positions for primary & secondary voxel block with the same index:
+			// the rare case where we have different positions for exists_in_hash_table1 & secondary voxel block with the same index:
 			// we have a hash bucket miss, find the secondary voxel with the matching coordinates
 			if (hash_code2Entry.pos != primaryHashEntry.pos) {
 				int hash_code2;
@@ -676,7 +680,7 @@ public:
 			if (hash_entry1.ptr < 0) continue;
 			HashEntry hash_entry2 = hash_table2[hash];
 
-			// the rare case where we have different positions for primary & secondary voxel block with the same index:
+			// the rare case where we have different positions for exists_in_hash_table1 & secondary voxel block with the same index:
 			// we have a hash bucket miss, find the secondary voxel with the matching coordinates
 			if (hash_entry2.pos != hash_entry1.pos) {
 				int hash_code2;

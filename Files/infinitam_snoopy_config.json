@@ -1,6 +1,10 @@
 {
-    "focus_coordinates": [
+    "focus_voxel": [
         0,
+        0,
+        0
+    ],
+    "focus_pixel": [
         0,
         0
     ],
@@ -94,7 +98,8 @@
         "log_trajectory_quaternions": false,
         "log_iteration_number": false,
         "log_surface_tracking_procedure_names": true,
-        "log_average_warp_update": false,
+        "log_max_gradient_length_position": false,
+        "log_gradient_length_statistic": false,
         "log_surface_tracking_optimization_energies": false,
         "log_additional_surface_tracking_stats": false,
         "log_warp_update_length_histograms": false,
@@ -123,6 +128,7 @@
         "draw_frame_index_labels": true,
         "library_mode": "dynamic",
         "indexing_method": "hash",
+        "halt_on_non_rigid_alignment_convergence_failure": false,
         "enable_rigid_alignment": true
     },
     "telemetry_settings": {
@@ -149,29 +155,40 @@
         "load_volume_and_camera_matrix_before_processing": false,
         "save_volumes_and_camera_matrix_after_processing": false,
         "save_meshes_after_processing": false,
+        "exit_if_main_processing_turns_off": false,
         "exit_after_automatic_processing": false
     },
     "level_set_evolution": {
         "execution_mode": "optimized",
         "weights": {
             "learning_rate": 0.200000003,
-            "weight_killing_term": 0.100000001,
+            "Killing_dampening_factor": 0.100000001,
             "weight_data_term": 2,
             "weight_smoothing_term": 0.200000003,
             "weight_level_set_term": 0.200000003,
-            "epsilon": "9.99999975e-06",
-            "momentum_weight": 0.5
+            "epsilon": "9.99999975e-06"
         },
         "switches": {
             "enable_data_term": true,
             "enable_level_set_term": false,
             "enable_smoothing_term": true,
-            "enable_killing_rigidity_enforcement_term": false,
-            "enable_sobolev_gradient_smoothing": true
+            "enable_Killing_field": false,
+            "enable_Sobolev_gradient_smoothing": true
         },
         "termination": {
+            "warp_length_termination_threshold_type": "maximum",
             "max_iteration_count": 300,
-            "mean_update_length_threshold": "9.99999997e-07"
+            "min_iteration_count": 10,
+            "update_length_threshold": "9.99999997e-07"
         }
+    },
+    "volume_fusion_settings": {
+        "use_surface_thickness_cutoff": true,
+        "surface_thickness": 0.0120000001
+    },
+    "depth_fusion_settings": {
+        "execution_mode": "optimized",
+        "use_surface_thickness_cutoff": true,
+        "surface_thickness": 0.0120000001
     }
 }

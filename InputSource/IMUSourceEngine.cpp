@@ -4,7 +4,7 @@
 
 #include "../ORUtils/FileUtils.h"
 
-#include <stdio.h>
+#include <cstdio>
 
 using namespace InputSource;
 using namespace ITMLib;
@@ -16,7 +16,7 @@ IMUSourceEngine::IMUSourceEngine(const char *imuMask)
 	currentFrameNo = 0;
 	cachedFrameNo = -1;
 
-	cached_imu = NULL;
+	cached_imu = nullptr;
 }
 
 void IMUSourceEngine::loadIMUIntoCache()
@@ -40,7 +40,7 @@ void IMUSourceEngine::loadIMUIntoCache()
 	}
 
 	if (!success) {
-		delete cached_imu; cached_imu = NULL;
+		delete cached_imu; cached_imu = nullptr;
 		printf("error reading file '%s'\n", str);
 	}
 }
@@ -49,18 +49,18 @@ bool IMUSourceEngine::hasMoreMeasurements()
 {
 	loadIMUIntoCache();
 
-	return (cached_imu != NULL);
+	return (cached_imu != nullptr);
 }
 
 void IMUSourceEngine::getMeasurement(IMUMeasurement *imu)
 {
 	bool bUsedCache = false;
 	
-	if (cached_imu != NULL)
+	if (cached_imu != nullptr)
 	{
 		imu->R = cached_imu->R;
 		delete cached_imu;
-		cached_imu = NULL;
+		cached_imu = nullptr;
 		bUsedCache = true;
 	}
 

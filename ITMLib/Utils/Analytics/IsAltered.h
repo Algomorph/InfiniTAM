@@ -35,7 +35,7 @@ struct IsAlteredUtility<true, false, false, false, TVoxel> {
 	_CPU_AND_GPU_CODE_
 	static inline
 	bool evaluate(const TVoxel& voxel) {
-		return voxel.w_depth != 0;
+		return voxel.sdf != TVoxel::SDF_initialValue();
 	}
 };
 

@@ -35,23 +35,38 @@ if (BUILD_TESTS)
     set(GENERATED_TEST_DATA_PREFIX ${CMAKE_CURRENT_BINARY_DIR})
     configure_file(TestUtilities/TestUtilitiesConfig.h.in TestUtilities/TestUtilitiesConfig.h @ONLY)
 
-    set(TEST_UTILITIES_SOURCES
-        TestUtilities/TestUtilities.cpp
-        TestUtilities/TestUtilities.cu
-        TestUtilities/TestUtilities.tpp
-        TestUtilities/SnoopyTestUtilities.cpp
-        TestUtilities/WarpAdvancedTestingUtilities.tpp
-        TestUtilities/WarpAdvancedTestingUtilities.cpp
-        )
-    set(TEST_UTILITIES_HEADERS
-        TestUtilities/TestUtilityKernels.h
-        TestUtilities/TestUtilityFunctors.h
-        TestUtilities/TestUtilities.h
-        TestUtilities/SnoopyTestUtilities.h
-        TestUtilities/WarpAdvancedTestingUtilities.h
-        TestUtilities/TestUtilitiesConfig.h.in
-        TestUtilities/CameraPoseAndRenderingEngineFixture.h
-        ${CMAKE_CURRENT_BINARY_DIR}/TestUtilities/TestUtilitiesConfig.h)
+    set(
+            TEST_UTILITIES_SOURCES
+
+            TestUtilities/TestUtilities.cpp
+            TestUtilities/TestUtilities.cu
+            TestUtilities/TestUtilities.tpp
+            TestUtilities/TestDataUtilities.cpp
+            TestUtilities/LevelSetAlignment/LevelSetAlignmentTestUtilities.tpp
+            TestUtilities/LevelSetAlignment/LevelSetAlignmentTestUtilities.cpp
+            TestUtilities/LevelSetAlignment/GenericWarpConsistencySubtest.tpp
+            TestUtilities/LevelSetAlignment/GenericWarpConsistencySubtest.cpp
+            TestUtilities/LevelSetAlignment/TestCaseOrganizationBySwitches.tpp
+            TestUtilities/LevelSetAlignment/TestCaseOrganizationBySwitches.cpp
+            TestUtilities/LevelSetAlignment/SingleIterationTestConditions.cpp
+    )
+
+    set(
+            TEST_UTILITIES_HEADERS
+
+            ${CMAKE_CURRENT_BINARY_DIR}/TestUtilities/TestUtilitiesConfig.h
+            TestUtilities/TestUtilityKernels.h
+            TestUtilities/TestUtilityFunctors.h
+            TestUtilities/TestUtilities.h
+            TestUtilities/TestDataUtilities.h
+            TestUtilities/LevelSetAlignment/LevelSetAlignmentTestUtilities.h
+            TestUtilities/TestUtilitiesConfig.h.in
+            TestUtilities/CameraPoseAndRenderingEngineFixture.h
+            TestUtilities/LevelSetAlignment/GenericWarpConsistencySubtest.h
+            TestUtilities/LevelSetAlignment/LevelSetAlignmentTestMode.h
+            TestUtilities/LevelSetAlignment/TestCaseOrganizationBySwitches.h
+            TestUtilities/LevelSetAlignment/SingleIterationTestConditions.h
+            TestUtilities/GenericTestModuleHeader.h)
 
     find_package(Boost COMPONENTS unit_test_framework REQUIRED)
 
@@ -70,18 +85,17 @@ if (BUILD_TESTS)
 
     # *** CPU/CUDA tests with CUDA preprocessor guards
     itm_add_test(NAME SetCopyCompare_CPU SOURCES Test_SetCopyCompare_CPU.cpp)
-    itm_add_test(NAME ConstructVolumeFromImage_CPU SOURCES Test_ConstructVolumeFromImage_CPU.cpp)
+    itm_add_test(NAME DepthFusion SOURCES Test_DepthFusion.cpp)
     itm_add_test(NAME VolumeReduction SOURCES Test_VolumeReduction.cpp)
     itm_add_test(NAME VolumeSaveLoadCompact_CPU SOURCES Test_VolumeSaveLoadCompact_CPU.cpp)
     itm_add_test(NAME IntArrayMap3D SOURCES Test_IntArrayMap3D.cpp)
     itm_add_test(NAME ImageMaskReader SOURCES Test_ImageMaskReader.cpp)
-    itm_add_test(NAME WarpGradient_CPU_PVA SOURCES Test_WarpGradient_CPU_PVA.cpp Test_WarpGradient_Common.h)
-    itm_add_test(NAME WarpGradient_CPU_VBH SOURCES Test_WarpGradient_CPU_VBH.cpp Test_WarpGradient_Common.h)
+    itm_add_test(NAME LevelSetAlignment_CPU_vs_CUDA SOURCES Test_LevelSetAlignment_CPU_vs_CUDA.cpp Test_LevelSetAlignment_CPU_vs_CUDA_Aux.h)
+    itm_add_test(NAME LevelSetAlignment_PVA_vs_VBH SOURCES Test_LevelSetAlignment_PVA_vs_VBH.cpp)
     itm_add_test(NAME VolumeSlicingPVA_CPU SOURCES Test_VoxelVolumeSlicingPVA_CPU.cpp)
-    itm_add_test(NAME SurfaceTrackingAuxiliaryFunctions SOURCES Test_SurfaceTrackingAuxiliaryFunctions.cpp)
+    itm_add_test(NAME LevelSetAlignmentAuxiliaryFunctions SOURCES Test_LevelSetAlignmentAuxiliaryFunctions.cpp)
     itm_add_test(NAME WarpVolume SOURCES Test_WarpVolume.cpp)
-    itm_add_test(NAME FuseLifeIntoCanonical SOURCES Test_FuseLifeIntoCanonical.cpp)
-    itm_add_test(NAME WarpGradient_PVA_to_VBH SOURCES Test_WarpGradient_PVA_to_VBH.cpp)
+    itm_add_test(NAME FuseLifeIntoCanonical SOURCES Test_VolumeFusion.cpp)
     itm_add_test(NAME Configuration SOURCES Test_Configuration.cpp)
     itm_add_test(NAME GeometryUtilities SOURCES Test_GeometryUtilities.cpp)
     itm_add_test(NAME HashAllocationThreadSafety SOURCES Test_HashAllocationThreadSafety.cpp)
@@ -91,19 +105,17 @@ if (BUILD_TESTS)
     itm_add_test(NAME RenderingEngine SOURCES Test_RenderingEngine.cpp)
     itm_add_test(NAME ImageProcessingEngine SOURCES Test_ImageProcessingEngine.cpp)
     itm_add_test(NAME FFmpegReadWrite SOURCES Test_FFmpegReadWrite.cpp)
+    itm_add_test(NAME RigidAlignment SOURCES Test_RigidAlignment.cpp)
 
     # *** tests that always require CUDA ***
     if (WITH_CUDA)
         itm_add_test(NAME SetCopyCompare_CUDA SOURCES Test_SetCopyCompare_CUDA.cpp)
-        itm_add_test(NAME ConstructVolumeFromImage_CUDA SOURCES Test_ConstructVolumeFromImage_CUDA.cpp)
         itm_add_test(NAME ConstructVolumeFromImage_CPU_to_CUDA SOURCES
-                     Test_ConstructVolumeFromImage_CPU_to_CUDA.cpp)
+                     Test_DepthFusion_CPU_vs_CUDA.cpp)
         itm_add_test(NAME VolumeSaveLoadCompact_CUDA SOURCES Test_VolumeSaveLoadCompact_CUDA.cpp)
-        itm_add_test(NAME WarpGradient_CUDA_PVA SOURCES Test_WarpGradient_CUDA_PVA.cpp Test_WarpGradient_Common.h)
-        itm_add_test(NAME WarpGradient_CUDA_VBH SOURCES Test_WarpGradient_CUDA_VBH.cpp Test_WarpGradient_Common.h)
         itm_add_test(NAME CUDA_Atomics SOURCES Test_CUDA_Atomics.cpp CUDAAtomicTesting.h
                      CUDAAtomicTesting.cu TemporaryCUDA_Atomics.h)
-        itm_add_test(NAME SmoothWarpGradient SOURCES Test_SmoothWarpGradient_CPU_CUDA.cpp)
+        itm_add_test(NAME SmoothEnergyGradient SOURCES Test_SmoothEnergyGradient.cpp)
 
     endif ()
 

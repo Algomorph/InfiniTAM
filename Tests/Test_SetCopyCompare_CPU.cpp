@@ -38,7 +38,7 @@
 #include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
 #include "../ITMLib/Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 #include "../ITMLib/Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
-#include "../ITMLib/Engines/ViewBuilding/ViewBuilderFactory.h"
+#include "../ITMLib/Engines/ViewBuilder/ViewBuilderFactory.h"
 #include "../ITMLib/Engines/VolumeFileIO/VolumeFileIOEngine.h"
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngine.h"
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
@@ -47,11 +47,10 @@
 
 //test_utilities
 #include "TestUtilities/TestUtilities.h"
-#include "TestUtilities/SnoopyTestUtilities.h"
+#include "TestUtilities/TestDataUtilities.h"
 
 using namespace ITMLib;
-using namespace test_utilities;
-namespace snoopy = snoopy_test_utilities;
+using namespace test;
 
 BOOST_AUTO_TEST_CASE(testSetVoxelAndCopy_PlainVoxelArray_CPU) {
 	Vector3i volumeSize(20);
@@ -148,14 +147,14 @@ BOOST_AUTO_TEST_CASE(testSetVoxelAndCopy_VoxelBlockHash_CPU) {
 
 BOOST_AUTO_TEST_CASE(testCopyToDifferentlyInitializedVolume_VBH_CPU){
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume(MEMORYDEVICE_CPU,
-	                                              snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
+	                                              test::snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 	volume.Reset();
-	std::string path = snoopy::PartialVolume17Path<VoxelBlockHash>();
+	std::string path = test::snoopy::PartialVolume17Path<VoxelBlockHash>();
 
 	volume.LoadFromDisk(path);
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_copy(MEMORYDEVICE_CPU,
-	                                                   {snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>().voxel_block_count * 2,
-	                                                    snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>().excess_list_size});
+	                                                   {test::snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>().voxel_block_count * 2,
+	                                                    test::snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>().excess_list_size});
 	volume_copy.Reset();
 	ManipulationEngine_CPU_VBH_Voxel::Inst().CopyVolume(&volume_copy, &volume);
 	float tolerance = 1e-8;
@@ -318,7 +317,7 @@ BOOST_AUTO_TEST_CASE(testCompareVoxelVolumes_CPU_ITMWarp) {
 	single_voxel_tests();
 
 //	generate only in the positive coordinates' volume, to make sure that the unneeded voxel hash blocks are properly dismissed
-	for (int iWarp = 0; iWarp < modified_warp_count; iWarp++) {
+	for (int i_warp = 0; i_warp < modified_warp_count; i_warp++) {
 		WarpVoxel warp;
 		Vector3f framewise_warp(warp_distribution(generator), warp_distribution(generator), warp_distribution(generator));
 		warp.warp_update = framewise_warp;

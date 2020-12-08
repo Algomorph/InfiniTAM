@@ -25,6 +25,7 @@ namespace ITMLib {
     (bool, load_volume_and_camera_matrix_before_processing, false, PRIMITIVE, "When this is set to true, the program will attempt to load the volume for the index_of_frame_to_start_with from the corresponding subfolder within output_folder."), \
     (bool, save_volumes_and_camera_matrix_after_processing, false, PRIMITIVE, "Whether to save volume(s) after automatic processing"), \
     (bool, save_meshes_after_processing, false, PRIMITIVE, "Whether to save result mesh(es) after automatic processing"), \
+    (bool, exit_if_main_processing_turns_off, false, PRIMITIVE, "Whether to save result mesh(es) after automatic processing"), \
     (bool, exit_after_automatic_processing, false, PRIMITIVE, "Whether to exit the program after the automatic run.")
 
 DECLARE_DEFERRABLE_SERIALIZABLE_STRUCT(AUTOMATIC_RUN_SETTINGS_STRUCT_DESCRIPTION);

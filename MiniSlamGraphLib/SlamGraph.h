@@ -41,8 +41,8 @@ namespace MiniSlamGraph
 			return mParameterIndex;
 		}
 
-		virtual double evaluateF(const NodeIndex *override_nodes = NULL) const;
-		virtual void evaluateGradientAndHessian(VariableLengthVector* & g, SparseBlockMatrix* & H, const NodeIndex *override_nodes = NULL) const;
+		virtual double evaluateF(const NodeIndex *override_nodes = nullptr) const;
+		virtual void evaluateGradientAndHessian(VariableLengthVector* & g, SparseBlockMatrix* & H, const NodeIndex *override_nodes = nullptr) const;
 
 	protected:
 		/** This function is internally called by evaluateGradientAndHessian()

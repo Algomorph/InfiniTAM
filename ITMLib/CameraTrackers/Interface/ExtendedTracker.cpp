@@ -61,9 +61,9 @@ ExtendedTracker::ExtendedTracker(Vector2i imgSize_d,
 	}
 	else
 	{
-		viewHierarchy_Intensity = NULL;
-		reprojectedPointsHierarchy = NULL;
-		projectedIntensityHierarchy = NULL;
+		viewHierarchy_Intensity = nullptr;
+		reprojectedPointsHierarchy = nullptr;
+		projectedIntensityHierarchy = nullptr;
 	}
 
 	// We need the scene hierarchy (ICP and Normal raycasts) only if depth is used for tracking.
@@ -196,8 +196,8 @@ void ExtendedTracker::SetEvaluationData(CameraTrackingState *trackingState, cons
 	if (useDepth)
 	{
 		sceneHierarchy->GetLevel(0)->intrinsics = view->calibration_information.intrinsics_d.projectionParamsSimple.all;
-		sceneHierarchy->GetLevel(0)->pointsMap = trackingState->pointCloud->locations;
-		sceneHierarchy->GetLevel(0)->normalsMap = trackingState->pointCloud->colours;
+		sceneHierarchy->GetLevel(0)->pointsMap = trackingState->point_cloud->locations;
+		sceneHierarchy->GetLevel(0)->normalsMap = trackingState->point_cloud->colors;
 	}
 
 	scenePose = trackingState->pose_pointCloud->GetM();

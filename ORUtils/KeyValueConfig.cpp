@@ -10,7 +10,7 @@ using namespace ORUtils;
 
 static inline char* strLower(const char *input)
 {
-	if (input == NULL) return NULL;
+	if (input == nullptr) return nullptr;
 	size_t len = strlen(input);
 	char *ret = (char*)malloc(len + 1);
 	for (size_t i = 0; i < len; i++) ret[i] = tolower(input[i]);
@@ -32,8 +32,8 @@ KeyValueConfig::~KeyValueConfig()
 
 void KeyValueConfig::setProperty(const char *key, const char *value, bool toLower)
 {
-	if (key == NULL) return;
-	if (value == NULL) { unsetProperty(key, toLower); return; }
+	if (key == nullptr) return;
+	if (value == nullptr) { unsetProperty(key, toLower); return; }
 	char *new_key;
 	if (toLower) new_key = strLower(key);
 	else
@@ -84,21 +84,21 @@ const char* KeyValueConfig::getProperty(const char *key, bool toLower) const
 	if (toLower) get_key = strLower(key);
 	PropertyList::const_iterator search = property.find(get_key);
 	if (toLower) free(get_key);
-	if (search == property.end()) return NULL;
+	if (search == property.end()) return nullptr;
 	return search->second;
 }
 
 bool KeyValueConfig::parseString(const char *string, bool toLower)
 {
-	if (string == NULL) return false;
+	if (string == nullptr) return false;
 
 	enum { WAIT_FOR_KEY, PARSE_KEY, WAIT_FOR_VALUE, PARSE_VALUE };
 	int mode = WAIT_FOR_KEY;
 	size_t len = strlen(string);
 	const char *cur = string;
-	const char *cur_begin = NULL;
-	char *cur_key = NULL;
-	char *cur_value = NULL;
+	const char *cur_begin = nullptr;
+	char *cur_key = nullptr;
+	char *cur_value = nullptr;
 
 	for (size_t i = 0; i < len; i++) {
 		//fprintf(stderr, "parsing '%c' mode %i\n", *cur, mode);
@@ -124,14 +124,14 @@ bool KeyValueConfig::parseString(const char *string, bool toLower)
 			}
 			if ((*cur == ',') || (*cur == ';')) {
 				setProperty(cur_key, "", toLower);
-				free(cur_key); cur_key = NULL;
+				free(cur_key); cur_key = nullptr;
 				mode = WAIT_FOR_KEY;
 			}
 			break;
 		case WAIT_FOR_VALUE:
 			if ((*cur == ',') || (*cur == ';')) {
 				setProperty(cur_key, "", toLower);
-				free(cur_key); cur_key = NULL;
+				free(cur_key); cur_key = nullptr;
 				mode = WAIT_FOR_KEY;
 			}
 			else if ((*cur != ',') && (*cur != ';')) {
@@ -146,8 +146,8 @@ bool KeyValueConfig::parseString(const char *string, bool toLower)
 				strncpy(cur_value, cur_begin, cur_len);
 				cur_value[cur_len] = 0;
 				setProperty(cur_key, cur_value, toLower);
-				free(cur_key); cur_key = NULL;
-				free(cur_value); cur_value = NULL;
+				free(cur_key); cur_key = nullptr;
+				free(cur_value); cur_value = nullptr;
 				mode = WAIT_FOR_KEY;
 			}
 			break;
@@ -163,7 +163,7 @@ bool KeyValueConfig::parseString(const char *string, bool toLower)
 	}
 	if (mode == WAIT_FOR_VALUE) {
 		setProperty(cur_key, "", toLower);
-		free(cur_key); cur_key = NULL;
+		free(cur_key); cur_key = nullptr;
 		mode = WAIT_FOR_KEY;
 	}
 	if (mode == PARSE_VALUE) {
@@ -172,8 +172,8 @@ bool KeyValueConfig::parseString(const char *string, bool toLower)
 		strncpy(cur_value, cur_begin, cur_len);
 		cur_value[cur_len] = 0;
 		setProperty(cur_key, cur_value, toLower);
-		free(cur_key); cur_key = NULL;
-		free(cur_value); cur_value = NULL;
+		free(cur_key); cur_key = nullptr;
+		free(cur_value); cur_value = nullptr;
 		mode = WAIT_FOR_KEY;
 	}
 	return (mode == WAIT_FOR_KEY);
@@ -184,7 +184,7 @@ void KeyValueConfig::parseChoiceProperty(const char *key, const char *descriptio
 	const char *val = getProperty(key);
 	int val_i;
 
-	if (val != NULL)
+	if (val != nullptr)
 	{
 		bool success = false;
 		val_i = choices.getValueForChoice(val, &success);
@@ -205,7 +205,7 @@ void KeyValueConfig::parseBoolProperty(const char *key, const char *description,
 {
 	const char *val = getProperty(key);
 
-	if (val != NULL)
+	if (val != nullptr)
 	{
 		if (strlen(val) == 0) opt_value = true;
 		else opt_value = (atoi(val) == 1);
@@ -219,7 +219,7 @@ void KeyValueConfig::parseIntProperty(const char *key, const char *description, 
 {
 	const char *val = getProperty(key);
 
-	if (val != NULL)
+	if (val != nullptr)
 	{
 		int val_i = atoi(val);
 		opt_value = val_i;
@@ -233,7 +233,7 @@ void KeyValueConfig::parseFltProperty(const char *key, const char *description, 
 {
 	const char *val = getProperty(key);
 	double val_f;
-	if (val != NULL) 
+	if (val != nullptr)
 	{
 		val_f = atof(val);
 		opt_value = val_f;
@@ -253,7 +253,7 @@ void KeyValueConfig::parseFltProperty(const char *key, const char *description, 
 void KeyValueConfig::parseStrProperty(const char *key, const char *description, const char* & opt_value, int verbose) const
 {
 	const char *val = getProperty(key);
-	if (val != NULL) opt_value = val;
+	if (val != nullptr) opt_value = val;
 	else if (verbose >= 1) fprintf(stderr, "no %s provided (use '%s=<x>')\n", description, key);
 
 	if (verbose >= 10) fprintf(stderr, "%s: %s\n", description, opt_value);

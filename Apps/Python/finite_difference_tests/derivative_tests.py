@@ -50,7 +50,7 @@ def main():
 
     # choose 3D function for all subsequent computations
     # function3d = af.sigmoid_3d
-    # function3d = af.sin_sqrt_3d
+    function3d = af.sin_sqrt_3d
 
     # *** configure figure & subplots
     fig = plt.figure()
@@ -81,16 +81,18 @@ def main():
 
     # *** plot gradient
 
-    gradient_analytical = function3d.analytical_first_derivative(x_grid, y_grid)[:, :, 0]
+    gradient_analytical = function3d.analytical_first_derivative(x_grid, y_grid)
+    gradient_analytical_x = gradient_analytical[:, :, 0]
+    gradient_analytical_y = gradient_analytical[:, :, 1]
     gradient_central_differences_x = fd.grad_central_differences_x(z_values, grid_spacing)
     gradient_central_differences_y = fd.grad_central_differences_y(z_values, grid_spacing)
 
     generate_3d_subplot(ax2, "Gradient by Central Differences (x)", x_grid, y_grid,
-                        gradient_analytical, "analytical",
+                        gradient_analytical_x, "analytical",
                         gradient_central_differences_x, "FD")
 
     generate_3d_subplot(ax3, "Gradient by Central Differences (y)", x_grid, y_grid,
-                        gradient_analytical, "analytical",
+                        gradient_analytical_y, "analytical",
                         gradient_central_differences_y, "FD")
 
     # *** plot Hessian based on separable finite differences

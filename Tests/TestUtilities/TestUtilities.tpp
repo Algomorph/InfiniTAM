@@ -31,7 +31,7 @@
 
 using namespace ITMLib;
 
-namespace test_utilities {
+namespace test {
 
 
 template<MemoryDeviceType TMemoryDeviceType, typename TVoxel, typename TIndex>
@@ -44,12 +44,13 @@ void GenerateRandomDepthWeightSubVolume(VoxelVolume<TVoxel, TIndex>* volume, con
 
 
 template<MemoryDeviceType TMemoryDeviceType, typename TVoxel, typename TIndex>
-void FindAllVoxelsNotInDepthWeightRange(VoxelVolume<TVoxel, TIndex>* volume, const Extent2Di& weight_range){
+void FindAllVoxelsNotInDepthWeightRange(VoxelVolume<TVoxel, TIndex>* volume, const Extent2Di& weight_range) {
 	DepthOutsideRangeFinder<TVoxel, TMemoryDeviceType> functor(weight_range);
 	VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseUtilizedWithPosition(volume, functor);
 }
+
 template<MemoryDeviceType TMemoryDeviceType, typename TVoxel, typename TIndex>
-void FindAllVoxelsNotInDepthWeightRange(VoxelVolume<TVoxel, TIndex>* volume, const Extent3Di& bounds, const Extent2Di& weight_range){
+void FindAllVoxelsNotInDepthWeightRange(VoxelVolume<TVoxel, TIndex>* volume, const Extent3Di& bounds, const Extent2Di& weight_range) {
 	DepthOutsideRangeInExtentFinder<TVoxel, TMemoryDeviceType> functor(weight_range, bounds);
 	VolumeTraversalEngine<TVoxel, TIndex, TMemoryDeviceType>::TraverseUtilizedWithPosition(volume, functor);
 }
@@ -58,13 +59,13 @@ void FindAllVoxelsNotInDepthWeightRange(VoxelVolume<TVoxel, TIndex>* volume, con
 template<MemoryDeviceType TMemoryDeviceType, class TVoxel, class TIndex>
 void GenerateSimpleSurfaceTestVolume(VoxelVolume<TVoxel, TIndex>* volume) {
 	volume->Reset();
-	const int narrowBandThicknessVoxels = 10;
+	const int truncation_distance_voxels = 10;
 	int xOffset = 8;
 	int surfaceSizeVoxelsZ = 16;
 	int surfaceSizeVoxelsY = 64;
 
-	for (int iVoxelAcrossBand = 0; iVoxelAcrossBand < narrowBandThicknessVoxels + 1; iVoxelAcrossBand++) {
-		float sdfMagnitude = 0.0f + static_cast<float>(iVoxelAcrossBand) * (1.0f / narrowBandThicknessVoxels);
+	for (int iVoxelAcrossBand = 0; iVoxelAcrossBand < truncation_distance_voxels + 1; iVoxelAcrossBand++) {
+		float sdfMagnitude = 0.0f + static_cast<float>(iVoxelAcrossBand) * (1.0f / truncation_distance_voxels);
 		int xPos = xOffset + iVoxelAcrossBand;
 		int xNeg = xOffset - iVoxelAcrossBand;
 		TVoxel voxelPos, voxelNeg;
@@ -207,7 +208,7 @@ void LoadVolume(VoxelVolume<TVoxel, TIndex>** volume, const std::string& path, M
 
 
 template<typename TVoxel, typename TIndex>
-void initializeVolume(VoxelVolume<TVoxel, TIndex>** volume,
+void InitializeVolume(VoxelVolume<TVoxel, TIndex>** volume,
                       typename TIndex::InitializationParameters initializationParameters, MemoryDeviceType memory_device,
                       configuration::SwappingMode swapping_mode) {
 	(*volume) = new VoxelVolume<TVoxel, TIndex>(memory_device, initializationParameters);
@@ -217,23 +218,26 @@ void initializeVolume(VoxelVolume<TVoxel, TIndex>** volume,
 
 template<typename TVoxel, typename TIndex>
 void BuildSdfVolumeFromImage_NearSurfaceAllocation_Common(VoxelVolume<TVoxel, TIndex>** volume,
-                                                          View** view,MemoryDeviceType memory_device,
+                                                          View** view, MemoryDeviceType memory_device,
                                                           typename TIndex::InitializationParameters initialization_parameters,
-                                                          configuration::SwappingMode swapping_mode){
+                                                          configuration::SwappingMode swapping_mode) {
 	Vector2i imageSize(640, 480);
 	(*volume) = new VoxelVolume<TVoxel, TIndex>(configuration::Get().general_voxel_volume_parameters, swapping_mode,
 	                                            memory_device, initialization_parameters);
 	(*volume)->Reset();
-	RenderState renderState(imageSize, configuration::Get().general_voxel_volume_parameters.near_clipping_distance,
-	                        configuration::Get().general_voxel_volume_parameters.far_clipping_distance, memory_device);
 	CameraTrackingState tracking_state(imageSize, memory_device);
 
-	DepthFusionEngineInterface<TVoxel, WarpVoxel, TIndex>* depth_fusion_engine =
+	DepthFusionSettings depth_fusion_settings(DIAGNOSTIC, true, 0.012);
+
+	DepthFusionEngineInterface<TVoxel, TIndex>* depth_fusion_engine =
 			DepthFusionEngineFactory
-			::Build<TVoxel, WarpVoxel, TIndex>(memory_device);
+			::Build<TVoxel, TIndex>(memory_device, depth_fusion_settings);
+
+	IndexingSettings indexing_settings(DIAGNOSTIC);
 
 	IndexingEngineInterface<TSDFVoxel, TIndex>* indexing_engine = IndexingEngineFactory::Build<TVoxel, TIndex>(
-			memory_device);
+			memory_device, indexing_settings);
+
 	indexing_engine->AllocateNearSurface(*volume, *view, &tracking_state);
 	depth_fusion_engine->IntegrateDepthImageIntoTsdfVolume(*volume, *view, &tracking_state);
 
@@ -256,7 +260,7 @@ void BuildSdfVolumeFromImage_NearSurfaceAllocation(VoxelVolume<TVoxel, TIndex>**
 	// region ================================= CONSTRUCT VIEW =========================================================
 
 	UpdateView(view, depth_path, color_path, calibration_path, memory_device);
-	initializeVolume(volume, initialization_parameters, memory_device, swapping_mode);
+	InitializeVolume(volume, initialization_parameters, memory_device, swapping_mode);
 	BuildSdfVolumeFromImage_NearSurfaceAllocation_Common(volume, view, memory_device, initialization_parameters, swapping_mode);
 }
 
@@ -296,7 +300,7 @@ void BuildSdfVolumeFromImage_NearSurfaceAllocation(VoxelVolume<TVoxel, TIndex>**
 	// region ================================= CONSTRUCT VIEW =========================================================
 	Vector2i imageSize(640, 480);
 	UpdateView(view, depth_path, color_path, mask_path, calibration_path, memory_device);
-	initializeVolume(volume, initialization_parameters, memory_device, swapping_mode);
+	InitializeVolume(volume, initialization_parameters, memory_device, swapping_mode);
 	BuildSdfVolumeFromImage_NearSurfaceAllocation_Common(volume, view, memory_device, initialization_parameters, swapping_mode);
 }
 
@@ -340,7 +344,8 @@ void BuildSdfVolumeFromImage_SurfaceSpanAllocation(VoxelVolume<TVoxel, TIndex>**
 
 	// region ================================= CONSTRUCT VIEW =========================================================
 	UpdateView(view, depth1_path, color1_path, mask1_path, calibration_path, memory_device);
-	initializeVolume(volume1, initialization_parameters, memory_device, swapping_mode);
+	InitializeVolume(volume1, initialization_parameters, memory_device, swapping_mode);
+
 	(*volume1) = new VoxelVolume<TVoxel, TIndex>(memory_device, initialization_parameters);
 	(*volume1)->Reset();
 	(*volume2) = new VoxelVolume<TVoxel, TIndex>(memory_device, initialization_parameters);
@@ -349,12 +354,13 @@ void BuildSdfVolumeFromImage_SurfaceSpanAllocation(VoxelVolume<TVoxel, TIndex>**
 	RenderState render_state((*view)->depth.dimensions,
 	                         configuration::Get().general_voxel_volume_parameters.near_clipping_distance,
 	                         configuration::Get().general_voxel_volume_parameters.far_clipping_distance, memory_device);
+
 	CameraTrackingState tracking_state((*view)->depth.dimensions, memory_device);
-	IndexingEngineInterface<TSDFVoxel, TIndex>* indexing_engine = IndexingEngineFactory::Build<TVoxel, TIndex>(
-			memory_device);
-	DepthFusionEngineInterface<TVoxel, WarpVoxel, TIndex>* depth_fusion_engine =
+	IndexingEngineInterface<TSDFVoxel, TIndex>* indexing_engine = IndexingEngineFactory::Build<TVoxel, TIndex>(memory_device);
+
+	DepthFusionEngineInterface<TVoxel, TIndex>* depth_fusion_engine =
 			DepthFusionEngineFactory
-			::Build<TVoxel, WarpVoxel, TIndex>(memory_device);
+			::Build<TVoxel, TIndex>(memory_device);
 
 	indexing_engine->AllocateNearSurface(*volume1, *view, &tracking_state);
 	depth_fusion_engine->IntegrateDepthImageIntoTsdfVolume(*volume1, *view, &tracking_state);

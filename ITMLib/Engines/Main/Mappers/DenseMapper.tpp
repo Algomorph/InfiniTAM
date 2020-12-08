@@ -35,7 +35,7 @@ void DenseMapper<TVoxel,TIndex>::ProcessFrame(const View *view, const CameraTrac
 	// integration
 	sceneRecoEngine->IntegrateIntoScene(scene, view, trackingState, renderState);
 
-	if (swappingEngine != NULL) {
+	if (swappingEngine != nullptr) {
 		// swapping: CPU -> CUDA
 		if (swappingMode == configuration::SWAPPINGMODE_ENABLED) swappingEngine->IntegrateGlobalIntoLocal(scene, renderState);
 

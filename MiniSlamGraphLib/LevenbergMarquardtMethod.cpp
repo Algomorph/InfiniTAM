@@ -57,7 +57,7 @@ int LevenbergMarquardtMethod::minimize(const SlamGraphErrorFunction & f, SlamGra
 	int step_counter = 0;
 
 	SlamGraphErrorFunction::EvaluationPoint *x = f.evaluateAt(initialization.clone());
-	SlamGraphErrorFunction::EvaluationPoint *x2 = NULL;
+	SlamGraphErrorFunction::EvaluationPoint *x2 = nullptr;
 	initialization.clear();
 
 	if (!portable_finite((float)x->f())) {
@@ -119,7 +119,7 @@ int LevenbergMarquardtMethod::minimize(const SlamGraphErrorFunction & f, SlamGra
 			}
 		}
 		else {
-			x2 = NULL;
+			x2 = nullptr;
 			// can't compute_allocated a step quality here...
 			lambda = lambda / TR_REGION_DECREASE;
 		}
@@ -141,10 +141,10 @@ int LevenbergMarquardtMethod::minimize(const SlamGraphErrorFunction & f, SlamGra
 		}
 		else {
 #ifdef DEBUG
-			if (x2 != NULL) fprintf(stderr, "reject %p (function value would increase to: %f)\n", (void*)x2, x2->f());
+			if (x2 != nullptr) fprintf(stderr, "reject %p (function value would increase to: %f)\n", (void*)x2, x2->f());
 			else fprintf(stderr, "reject (could not solve for new parameters)\n");
 #endif
-			if (x2 != NULL) delete x2;
+			if (x2 != nullptr) delete x2;
 		}
 		// C allows a nice syntax with ->, --> and even ++>
 		// ...just mentioned to make bored programmers happy

@@ -7,7 +7,7 @@
 #include "CameraTrackingController.h"
 #include "../ImageProcessing/Interface/ImageProcessingEngineInterface.h"
 #include "../Meshing/Interface/MeshingEngine.h"
-#include "../ViewBuilding/Interface/ViewBuilder.h"
+#include "../ViewBuilder/Interface/ViewBuilder.h"
 #include "../Rendering/Interface/RenderingEngineInterface.h"
 #include "../../Objects/Misc/IMUCalibrator.h"
 
@@ -61,7 +61,7 @@ public: // instance functions
 	/// Gives access to the internal world representation
 	VoxelVolume<TVoxel, TIndex>* GetScene() { return volume; }
 
-	CameraTrackingState::TrackingResult ProcessFrame(UChar4Image* rgbImage, ShortImage* rawDepthImage, IMUMeasurement* imuMeasurement = NULL);
+	CameraTrackingState::TrackingResult ProcessFrame(UChar4Image* rgbImage, ShortImage* rawDepthImage, IMUMeasurement* imuMeasurement = nullptr);
 
 	/// Extracts a mesh from the current scene and saves it to the model file specified by the file name
 	void SaveVolumeToMesh(const std::string& path);
@@ -73,7 +73,7 @@ public: // instance functions
 	/// Get a result image as output
 	Vector2i GetImageSize() const;
 
-	void GetImage(UChar4Image* out, GetImageType getImageType, ORUtils::SE3Pose* pose = NULL, Intrinsics* intrinsics = NULL);
+	void GetImage(UChar4Image* out, GetImageType getImageType, ORUtils::SE3Pose* pose = nullptr, Intrinsics* intrinsics = nullptr);
 
 	/// switch for turning tracking on/off
 	void TurnOnTracking() override;
@@ -86,6 +86,8 @@ public: // instance functions
 	/// switch for turning main processing on/off
 	void TurnOnMainProcessing() override;
 	void TurnOffMainProcessing() override;
+
+	virtual bool GetMainProcessingOn() const override;
 
 	/// resets the scene and the tracker
 	void ResetAll();

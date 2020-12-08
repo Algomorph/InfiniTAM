@@ -17,7 +17,7 @@
 #include "MeshingEngine_CUDA.h"
 
 #include "../Shared/MeshingEngine_Shared.h"
-#include "../../../Utils/CUDAUtils.h"
+#include "../../../Utils/CUDA/CUDAUtils.h"
 #include "../../../../ORUtils/CUDADefines.h"
 #include "MeshingEngine_CUDA_Kernels.h"
 

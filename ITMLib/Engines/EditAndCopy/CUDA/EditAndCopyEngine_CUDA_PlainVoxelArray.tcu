@@ -17,7 +17,7 @@
 #include "EditAndCopyEngine_CUDA.h"
 #include "EditAndCopyEngine_CUDA_PlainVoxelArray_Kernels.h"
 #include "../../../../ORUtils/PlatformIndependence.h"
-#include "../../../Utils/CUDAUtils.h"
+#include "../../../Utils/CUDA/CUDAUtils.h"
 #include "../../../Objects/Volume/RepresentationAccess.h"
 #include "../Shared/EditAndCopyEngine_Shared.h"
 
@@ -171,7 +171,7 @@ bool EditAndCopyEngine_CUDA<TVoxel, PlainVoxelArray>::CopyVolumeSlice(
 		              source_volume->index.GetVolumeSize().y / cudaBlockSize.y,
 		              source_volume->index.GetVolumeSize().z / cudaBlockSize.z);
 
-		directCopy_device<TVoxel> <<< gridSize, cudaBlockSize >>> (destinationVoxels, sourceVoxels, indexData);
+		directCopy_device<TVoxel><<<gridSize, cudaBlockSize>>> (destinationVoxels, sourceVoxels, indexData);
 		ORcudaKernelCheck;
 
 	} else {

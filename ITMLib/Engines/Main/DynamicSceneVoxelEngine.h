@@ -23,7 +23,7 @@
 #include "CameraTrackingController.h"
 #include "../ImageProcessing/Interface/ImageProcessingEngineInterface.h"
 #include "../Meshing/Interface/MeshingEngine.h"
-#include "../ViewBuilding/Interface/ViewBuilder.h"
+#include "../ViewBuilder/Interface/ViewBuilder.h"
 #include "../Rendering/Interface/RenderingEngineInterface.h"
 #include "../Indexing/Interface/IndexingEngine.h"
 #include "../DepthFusion/DepthFusionEngine.h"
@@ -55,7 +55,7 @@ private: // instance variables
 	RenderingEngineBase<TVoxel, TIndex>* rendering_engine;
 	MeshingEngine<TVoxel, TIndex>* meshing_engine;
 	IndexingEngineInterface<TVoxel, TIndex>* indexing_engine;
-	DepthFusionEngineInterface<TVoxel, TWarp, TIndex>* depth_fusion_engine;
+	DepthFusionEngineInterface<TVoxel, TIndex>* depth_fusion_engine;
 	VolumeFusionEngineInterface<TVoxel, TIndex>* volume_fusion_engine;
 	SwappingEngine<TVoxel, TIndex>* swapping_engine;
 
@@ -125,6 +125,8 @@ public: // instance functions
 
 	void TurnOnMainProcessing() override;
 	void TurnOffMainProcessing() override;
+
+	virtual bool GetMainProcessingOn() const override;
 
 private: // instance functions
 	void Reset();

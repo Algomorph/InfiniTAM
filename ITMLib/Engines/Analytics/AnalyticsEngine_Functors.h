@@ -20,7 +20,7 @@
 
 //local
 #ifdef __CUDACC__
-#include "../../Utils/CUDAUtils.h"
+#include "../../Utils/CUDA/CUDAUtils.h"
 #include "../Traversal/CUDA/VolumeTraversal_CUDA_PlainVoxelArray.h"
 #include "../Traversal/CUDA/VolumeTraversal_CUDA_VoxelBlockHash.h"
 #endif
@@ -31,6 +31,7 @@
 #include "../../../ORUtils/CrossPlatformMacros.h"
 #include "../../Objects/Volume/VoxelVolume.h"
 #include "../Reduction/Interface/VolumeReduction.h"
+#include "../Reduction/Interface/BlockVolumeReduction.h"
 #include "../Traversal/Interface/HashTableTraversal.h"
 #include "../Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
 #include "../Traversal/CPU/VolumeTraversal_CPU_VoxelBlockHash.h"
@@ -276,7 +277,9 @@ public:
 	_CPU_AND_GPU_CODE_
 	inline static ReductionResult<TOutput, TIndex> reduce(
 			const ReductionResult<TOutput, TIndex>& item1, const ReductionResult<TOutput, TIndex>& item2) {
-		return {item1.value + item2.value, 0u, 0};
+		ReductionResult<TOutput, TIndex> output;
+		output.value = item1.value + item2.value;
+		return output;
 	}
 };
 
@@ -286,7 +289,9 @@ public:
 	_CPU_AND_GPU_CODE_
 	inline static ReductionResult<TOutput, TIndex> reduce(
 			const ReductionResult<TOutput, TIndex>& item1, const ReductionResult<TOutput, TIndex>& item2) {
-		return {item1.value | item2.value, 0u, 0};
+		ReductionResult<TOutput, TIndex> output;
+		output.value = item1.value | item2.value;
+		return output;
 	}
 };
 
@@ -296,7 +301,9 @@ public:
 	_CPU_AND_GPU_CODE_
 	inline static ReductionResult<TOutput, TIndex> reduce(
 			const ReductionResult<TOutput, TIndex>& item1, const ReductionResult<TOutput, TIndex>& item2) {
-		return {item1.value & item2.value, 0u, 0};
+		ReductionResult<TOutput, TIndex> output;
+		output.value = item1.value & item2.value;
+		return output;
 	}
 };
 
@@ -779,6 +786,11 @@ struct HashOnlyAnalysisFunctor<TVoxel, PlainVoxelArray, TMemoryDeviceType> {
 	static int ComputeUtilizedHashBlockCount(const VoxelVolume<TVoxel, PlainVoxelArray>* volume) {
 		return 1;
 	}
+
+	static unsigned int CountHashBlocksWithDepthWeightInRange(const VoxelVolume<TVoxel, PlainVoxelArray>* volume, Extent2Di range) {
+		DIEWITHEXCEPTION_REPORTLOCATION("Cannot count hash blocks with a specific property within a volume indexed by a plain voxel array.");
+		return 0;
+	}
 };
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType>
 struct HashOnlyAnalysisFunctor<TVoxel, VoxelBlockHash, TMemoryDeviceType> {
@@ -832,6 +844,18 @@ struct HashOnlyAnalysisFunctor<TVoxel, VoxelBlockHash, TMemoryDeviceType> {
 
 	static unsigned int ComputeUtilizedHashBlockCount(const VoxelVolume<TVoxel, VoxelBlockHash>* volume) {
 		return volume->index.GetUtilizedBlockCount();
+	}
+
+	static unsigned int CountHashBlocksWithDepthWeightInRange(const VoxelVolume<TVoxel, VoxelBlockHash>* volume, Extent2Di range) {
+		typedef RetrieveIsVoxelInDepthWeightRange<TVoxel, unsigned int, TVoxel::hasWeightInformation> RetrievalFunctorType;
+		typedef ReduceBinAndFunctor<TVoxel, VoxelBlockHash, unsigned int> BlockReduceFunctorType;
+		typedef ReduceSumFunctor<TVoxel, VoxelBlockHash, unsigned int> ResultReduceFunctorType;
+		RetrievalFunctorType functor{range};
+		Vector3i position;
+
+		return BlockVolumeReductionEngine<TVoxel, TMemoryDeviceType>::
+		template ReduceUtilizedBlocks<BlockReduceFunctorType, ResultReduceFunctorType, RetrievalFunctorType, unsigned int>
+				(position, volume, functor);
 	}
 };
 //endregion
@@ -1030,7 +1054,8 @@ struct WarpHistogramFunctor<TWarp, TMemoryDeviceType, true> {
 	explicit WarpHistogramFunctor(Histogram& histogram, float maximum) :
 			max_warp_update_length(maximum),
 			histogram_bin_count(histogram.GetBinCount()),
-			bins_device(histogram.GetBinData()) {
+			bins_device(histogram.GetBinData()),
+			unit_count_device(histogram.GetUnitCountData()) {
 	}
 
 	const int histogram_bin_count;
@@ -1041,20 +1066,23 @@ struct WarpHistogramFunctor<TWarp, TMemoryDeviceType, true> {
 		float warp_update_length = ORUtils::length(warp.warp_update);
 		int bin_index = 0;
 
-		if (max_warp_update_length > 0) {
+		if (max_warp_update_length > 0.0f) {
 			bin_index = ORUTILS_MIN(histogram_bin_count - 1, (int) (warp_update_length * histogram_bin_count / max_warp_update_length));
 		}
 #ifdef __CUDACC__
 		atomicAdd(bins_device + bin_index, 1);
+		atomicAdd(unit_count_device, 1u);
 #else
 #pragma omp critical
 		{
 			bins_device[bin_index]++;
+			(*unit_count_device)++;
 		}
 #endif
 	}
 
 private:
 	unsigned int* bins_device;
+	unsigned long long int* unit_count_device;
 };
 // endregion ==============================================================================================

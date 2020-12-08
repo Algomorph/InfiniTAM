@@ -33,7 +33,7 @@
 #include "TestUtilities/TestUtilities.h"
 
 using namespace ITMLib;
-using namespace test_utilities;
+using namespace test;
 
 typedef VolumeFileIOEngine<TSDFVoxel, PlainVoxelArray> SceneFileIOEngine_PVA;
 typedef VolumeFileIOEngine<TSDFVoxel, VoxelBlockHash> SceneFileIOEngine_VBH;

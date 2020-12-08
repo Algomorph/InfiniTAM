@@ -29,9 +29,6 @@
 #endif
 
 #include "../../ORUtils/KeyValueConfig.h"
-#include "CPU/SDF2SDFCameraTracker_CPU.h"
-#include "CUDA/DynamicCameraTracker_CUDA.h"
-
 namespace ITMLib {
 /**
  * \brief An instance of this class can be used to construct trackers.
@@ -58,9 +55,7 @@ private:
 		//! Identifies a tracker based on depth and colour images and IMU measurement
 				TRACKER_EXTENDEDIMU,
 		//! Identifies a tracker that forces tracking to fail
-				TRACKER_FORCEFAIL,
-		//! Identifies a tracker based on depth and color images that tracks dynamic scenes using a softened Killing constraint
-				TRACKER_KILLING
+				TRACKER_FORCEFAIL
 	} TrackerType;
 
 	struct Maker {
@@ -90,8 +85,6 @@ private:
 		makers.push_back(Maker("extendedimu", "Combined IMU and depth + colour ICP tracker", TRACKER_EXTENDEDIMU,
 		                       &MakeExtendedIMUTracker));
 		makers.push_back(Maker("forcefail", "Force fail tracker", TRACKER_FORCEFAIL, &MakeForceFailTracker));
-		makers.push_back(Maker("dynamic", "Dynamic scene camera tracker", TRACKER_KILLING,
-		                       &MakeKillingTracker));
 	}
 
 public:
@@ -133,7 +126,7 @@ public:
 		CameraTracker* ret = (*(maker->make))(imgSize_rgb, imgSize_d, deviceType, cfg, lowLevelEngine, imuCalibrator,
 		                                      sceneParams);
 		if (ret->requiresColourRendering()) {
-			printf("Assuming a voxel type with colour information!");
+			printf("Assuming a voxel type with colour information!\n");
 		}
 
 		return ret;
@@ -420,25 +413,6 @@ public:
 				>(imgSize_rgb, imgSize_d, deviceType, cfg, lowLevelEngine, imuCalibrator, sceneParams);
 
 
-	}
-
-	/**
-	 * \brief Makes a KillingFusion dynamic-scene tracker.
-	 */
-	static CameraTracker* MakeKillingTracker(const Vector2i& imgSize_rgb, const Vector2i& imgSize_d,
-	                                         MemoryDeviceType deviceType,
-	                                         const ORUtils::KeyValueConfig& cfg,
-	                                         const ImageProcessingEngineInterface* lowLevelEngine, IMUCalibrator* imuCalibrator,
-	                                         const VoxelVolumeParameters& sceneParams) {
-		return MakeExtendedLikeTracker<
-				SDF2SDFCameraTracker_CPU
-#ifndef COMPILE_WITHOUT_CUDA
-				, DynamicCameraTracker_CUDA
-#endif
-#ifdef COMPILE_WITH_METAL
-				, KillingTracker_Metal //TODO
-#endif
-		>(imgSize_rgb, imgSize_d, deviceType, cfg, lowLevelEngine, imuCalibrator, sceneParams);
 	}
 
 	/**

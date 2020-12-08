@@ -29,11 +29,11 @@ namespace ITMLib
 		{
 			this->calib = src;
 			this->calib_inv.setIdentity();
-			for (int r = 0; r < 3; ++r) for (int c = 0; c < 3; ++c) this->calib_inv.m[r+4*c] = this->calib.m[c+4*r];
+			for (int r = 0; r < 3; ++r) for (int c = 0; c < 3; ++c) this->calib_inv.values[r + 4 * c] = this->calib.values[c + 4 * r];
 			for (int r = 0; r < 3; ++r) {
-				float & dest = this->calib_inv.m[r+4*3];
+				float & dest = this->calib_inv.values[r + 4 * 3];
 				dest = 0.0f;
-				for (int c = 0; c < 3; ++c) dest -= this->calib.m[c+4*r] * this->calib.m[c+4*3];
+				for (int c = 0; c < 3; ++c) dest -= this->calib.values[c + 4 * r] * this->calib.values[c + 4 * 3];
 			}
 		}
 

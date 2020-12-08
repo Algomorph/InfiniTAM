@@ -90,9 +90,15 @@ void IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType, TExecutionMode>::
 	Matrix4f inverse_depth_camera_matrix;
 	depth_camera_matrix.inv(inverse_depth_camera_matrix);
 
-	DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType> depth_based_allocator(
+	DepthBasedAllocationStateMarkerFunctor<TMemoryDeviceType, TExecutionMode> depth_based_allocator(
 			volume->index, volume->GetParameters(), view, inverse_depth_camera_matrix, surface_distance_cutoff);
-
+	if(TExecutionMode == DIAGNOSTIC){
+		depth_based_allocator.verbosity = configuration::Get().logging_settings.verbosity_level;
+		depth_based_allocator.focus_pixel = configuration::Get().focus_pixel;
+	}
+	//TODO: remove push/pop when Clang D FP bug is fixed
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "LoopDoesntUseConditionVariableInspection"
 	do {
 		volume->index.ClearHashEntryAllocationStates();
 		depth_based_allocator.ResetFlagsAndCounters();
@@ -101,6 +107,7 @@ void IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType, TExecutionMode>::
 		this->AllocateBlockList(volume, depth_based_allocator.colliding_block_positions,
 		                        depth_based_allocator.GetCollidingBlockCount());
 	} while (depth_based_allocator.EncounteredUnresolvableCollision());
+#pragma clang diagnostic pop
 }
 
 template<typename TVoxel, MemoryDeviceType TMemoryDeviceType, ExecutionMode TExecutionMode>
@@ -120,15 +127,23 @@ void IndexingEngine<TVoxel, VoxelBlockHash, TMemoryDeviceType, TExecutionMode>::
 
 	TwoSurfaceBasedAllocationStateMarkerFunctor<TMemoryDeviceType, TExecutionMode> depth_based_allocator(
 			volume->index, volume->GetParameters(), view, tracking_state, surface_distance_cutoff, execution_mode_specialized_engine);
+	if(TExecutionMode == DIAGNOSTIC){
+		depth_based_allocator.verbosity = configuration::Get().logging_settings.verbosity_level;
+		depth_based_allocator.focus_pixel = configuration::Get().focus_pixel;
+	}
+	//TODO: remove push/pop when Clang D FP bug is fixed
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "LoopDoesntUseConditionVariableInspection"
 	do {
 		volume->index.ClearHashEntryAllocationStates();
 		depth_based_allocator.ResetFlagsAndCounters();
 		TwoImageTraversalEngine<float, Vector4f, TMemoryDeviceType>::TraverseWithPosition(
-				view->depth, *(tracking_state->pointCloud->locations), depth_based_allocator);
+				view->depth, *(tracking_state->point_cloud->locations), depth_based_allocator);
 		this->AllocateHashEntriesUsingAllocationStateList(volume);
 		this->AllocateBlockList(volume, depth_based_allocator.colliding_block_positions,
 		                        depth_based_allocator.GetCollidingBlockCount());
 	} while (depth_based_allocator.EncounteredUnresolvableCollision());
+#pragma clang diagnostic pop
 	depth_based_allocator.SaveDataToDisk();
 }
 

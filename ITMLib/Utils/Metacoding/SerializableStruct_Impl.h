@@ -33,20 +33,21 @@
 #include "PreprocessorNargs.h"
 #include "MetacodingAuxiliaryUtilities.h"
 #include "../FileIO/JSON_Utilities.h"
+#include "../Logging/PrettyPrinters.h"
 #include "../../../ORUtils/PlatformIndependence.h"
 
 
 // region ==== OPTIONS_DESCRIPTION HELPER FUNCTIONS ============================
-namespace std {
-//definition required by boost::program_options to output default values of vector types
-template<typename T>
-std::ostream& operator<<(std::ostream& os, const std::vector<T>& vec) {
-	for (auto item : vec) {
-		os << item << " ";
-	}
-	return os;
-}
-}//namespace std
+// namespace std {
+// //definition required by boost::program_options to output default values of vector types
+// template<typename T>
+// std::ostream& operator<<(std::ostream& os, const std::vector<T>& vec) {
+// 	for (auto item : vec) {
+// 		os << item << " ";
+// 	}
+// 	return os;
+// }
+// }//namespace std
 
 std::string find_snake_case_lowercase_acronym(const std::string& snake_case_identifier);
 void generate_cli_argument_identifiers_snake_case(const boost::program_options::options_description& options_description,

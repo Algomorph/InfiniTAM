@@ -36,7 +36,7 @@ class EOFListener : public openni::OpenNI::DeviceStateChangedListener
 
 class OpenNI2Engine::PrivateData {
 	public:
-	PrivateData() : streams(NULL) {}
+	PrivateData() : streams(nullptr) {}
 	openni::Device device;
 	openni::VideoStream depthStream, colorStream;
 
@@ -51,9 +51,9 @@ static openni::VideoMode findBestMode(const openni::SensorInfo *sensorInfo, int 
 {
 	const openni::Array<openni::VideoMode> & modes = sensorInfo->getSupportedVideoModes();
 	openni::VideoMode bestMode = modes[0];
-	for (int m = 0; m < modes.getSize(); ++m) {
-		//fprintf(stderr, "mode %i: %ix%i, %i %i\n", m, modes[m].getResolutionX(), modes[m].getResolutionY(), modes[m].getFps(), modes[m].getPixelFormat());
-		const openni::VideoMode & curMode = modes[m];
+	for (int i_mode = 0; i_mode < modes.getSize(); ++i_mode) {
+		//fprintf(stderr, "mode %i: %ix%i, %i %i\n", i_mode, modes[i_mode].getResolutionX(), modes[i_mode].getResolutionY(), modes[i_mode].getFps(), modes[i_mode].getPixelFormat());
+		const openni::VideoMode & curMode = modes[i_mode];
 		if ((requiredPixelFormat != (openni::PixelFormat)-1)&&(curMode.getPixelFormat() != requiredPixelFormat)) continue;
 
 		bool acceptAsBest = false;
@@ -116,7 +116,7 @@ OpenNI2Engine::OpenNI2Engine(const char *calibFilename, const char *deviceURI, c
 	this->imageSize_d = Vector2i(0,0);
 	this->imageSize_rgb = Vector2i(0,0);
 
-	if (deviceURI==NULL) deviceURI = openni::ANY_DEVICE;
+	if (deviceURI==nullptr) deviceURI = openni::ANY_DEVICE;
 
 	data = new PrivateData();
 
@@ -132,7 +132,7 @@ OpenNI2Engine::OpenNI2Engine(const char *calibFilename, const char *deviceURI, c
 		message += openni::OpenNI::getExtendedError();
 		openni::OpenNI::shutdown();
 		delete data;
-		data = NULL;
+		data = nullptr;
 		std::cout << message;
 		return;
 	}
@@ -141,7 +141,7 @@ OpenNI2Engine::OpenNI2Engine(const char *calibFilename, const char *deviceURI, c
 	openni::OpenNI::addDeviceStateChangedListener(&data->eofListener);
 
 	openni::PlaybackControl *control = data->device.getPlaybackControl();
-	if (control != NULL) {
+	if (control != nullptr) {
 		// this is a file! make sure we get every frame
 		control->setSpeed(-1.0f);
 		control->setRepeatEnabled(false);
@@ -217,7 +217,7 @@ OpenNI2Engine::OpenNI2Engine(const char *calibFilename, const char *deviceURI, c
 	{
 		openni::OpenNI::shutdown();
 		delete data;
-		data = NULL;
+		data = nullptr;
 		std::cout << "OpenNI: No valid streams. Exiting." << std::endl;
 		return;
 	}

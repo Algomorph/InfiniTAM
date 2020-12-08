@@ -26,12 +26,14 @@
 //local
 #include "../Metacoding/DeferrableStructUtilities.h"
 #include "Configuration.h"
+#include "AutomaticRunSettings.h"
 #include "../../Engines/Telemetry/TelemetrySettings.h"
 #include "../../Engines/Indexing/IndexingSettings.h"
 #include "../../Engines/Rendering/RenderingSettings.h"
-#include "AutomaticRunSettings.h"
 #include "../../Engines/Main/MainEngineSettings.h"
 #include "../../Engines/LevelSetAlignment/Interface/LevelSetAlignmentParameters.h"
+#include "../../Engines/VolumeFusion/VolumeFusionSettings.h"
+#include "../../Engines/DepthFusion/DepthFusionSettings.h"
 
 using namespace ITMLib::configuration;
 
@@ -141,12 +143,15 @@ typename PlainVoxelArray::InitializationParameters ForVolumeRole<PlainVoxelArray
 
 void CompileOptionDescription(po::options_description& od){
 	Configuration::AddToOptionsDescription(od);
+
 	MainEngineSettings::AddDeferredToOptionsDescription(od);
 	TelemetrySettings::AddDeferredToOptionsDescription(od);
 	IndexingSettings::AddDeferredToOptionsDescription(od);
 	RenderingSettings::AddDeferredToOptionsDescription(od);
 	AutomaticRunSettings::AddDeferredToOptionsDescription(od);
 	LevelSetAlignmentParameters::AddDeferredToOptionsDescription(od);
+	VolumeFusionSettings::AddDeferredToOptionsDescription(od);
+	DepthFusionSettings::AddDeferredToOptionsDescription(od);
 }
 
 static void AddAllDeferrableStructsFromVariablesMap(const po::variables_map& vm) {
@@ -156,6 +161,8 @@ static void AddAllDeferrableStructsFromVariablesMap(const po::variables_map& vm)
 	RenderingSettings::BuildDeferredFromVariablesMap(instance.source_tree, vm);
 	AutomaticRunSettings::BuildDeferredFromVariablesMap(instance.source_tree, vm);
 	LevelSetAlignmentParameters::BuildDeferredFromVariablesMap(instance.source_tree, vm);
+	VolumeFusionSettings::BuildDeferredFromVariablesMap(instance.source_tree, vm);
+	DepthFusionSettings::BuildDeferredFromVariablesMap(instance.source_tree, vm);
 }
 
 void LoadConfigurationFromVariableMap(const po::variables_map& vm) {
@@ -182,6 +189,8 @@ static void UpdateAllDeferrableStructsFromVariablesMap(const po::variables_map& 
 	RenderingSettings::UpdateDeferredFromVariablesMap(instance.source_tree, vm, instance.origin);
 	AutomaticRunSettings::UpdateDeferredFromVariablesMap(instance.source_tree, vm, instance.origin);
 	LevelSetAlignmentParameters::UpdateDeferredFromVariablesMap(instance.source_tree, vm, instance.origin);
+	VolumeFusionSettings::UpdateDeferredFromVariablesMap(instance.source_tree, vm, instance.origin);
+	DepthFusionSettings::UpdateDeferredFromVariablesMap(instance.source_tree, vm, instance.origin);
 }
 
 void UpdateConfigurationFromVariableMap(const po::variables_map& vm) {
@@ -196,6 +205,8 @@ static void AddAllDeferrableStructsFromSourceToTargetRootConfiguration(pt::ptree
 	AddDeferrableFromSourceToTargetTree<RenderingSettings>(target_tree, origin_tree, origin);
 	AddDeferrableFromSourceToTargetTree<AutomaticRunSettings>(target_tree, origin_tree, origin);
 	AddDeferrableFromSourceToTargetTree<LevelSetAlignmentParameters>(target_tree, origin_tree, origin);
+	AddDeferrableFromSourceToTargetTree<VolumeFusionSettings>(target_tree, origin_tree, origin);
+	AddDeferrableFromSourceToTargetTree<DepthFusionSettings>(target_tree, origin_tree, origin);
 }
 
 void SaveConfigurationToJSONFile(const std::string& path) {

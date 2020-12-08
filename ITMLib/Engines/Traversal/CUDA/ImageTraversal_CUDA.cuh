@@ -17,7 +17,7 @@
 #include "ImageTraversal_CUDA_Kernels.cuh"
 #include "RawArrayTraversal_CUDA.cuh"
 #include "../Interface/ImageTraversal.h"
-#include "../Shared/CudaCallWrappers.cuh"
+#include "../../../Utils/CUDA/CudaCallWrappers.cuh"
 #include "../../../Utils/Math.h"
 #include "../../../../ORUtils/Image.h"
 

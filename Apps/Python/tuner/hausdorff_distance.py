@@ -9,20 +9,23 @@ import re
 
 from collections import namedtuple
 
-HausdorffDistance = namedtuple('HausdorffDistance', ['fileA', 'fileB', 'nptsA', 'dmin', 'dmax', 'dmean', 'dRMS'], verbose=False)
+HausdorffDistance = namedtuple('HausdorffDistance',
+                               ['mesh1_path', 'mesh2_path', 'point_count_1', 'point_count_2',
+                                'min_distance', 'max_distance',
+                                'mean_distance', 'rms_distance'])
 
 
-# Requires Ubuntu for easy snap installations.
-# Other platforms will require source code modifications, so that paths of meshlab.meshlabserver points to the correct executable.
-# Requires Meshlab (Ubuntu: sudo snap install meshlab)
+# Requires Ubuntu for easy snap installations. Other platforms will require source code modifications, i.e. ensure
+# that path of meshlab.meshlabserver points to the correct executable. Requires Meshlab (Ubuntu: sudo snap install
+# meshlab)
 
-def hausdorff_distance_one_direction(mesh1_filepath, mesh2_filepath):
+def hausdorff_distance_unidirectional(mesh1_path: str, mesh2_path: str) -> HausdorffDistance:
     script_path = os.path.abspath(__file__)
     mlx_path = os.path.join(os.path.dirname(script_path), "distance.mlx")
 
     f = open(os.devnull, 'w')
-    cmd_str = "/snap/bin/meshlab.meshlabserver -s " + mlx_path + " -i " + mesh1_filepath + " " + mesh2_filepath
-    output = subprocess.check_output(cmd_str.split(" "), stderr=f)
+    command_string = "/snap/bin/meshlab.meshlabserver -s " + mlx_path + " -i " + mesh1_path + " " + mesh2_path
+    output = subprocess.check_output(command_string.split(" "), stderr=f)
     result = output.decode().split("\n")
     # parse result to get values                                                                                                                                                                         
     data = ""
@@ -42,36 +45,38 @@ def hausdorff_distance_one_direction(mesh1_filepath, mesh2_filepath):
 
     f.close()
 
-    return HausdorffDistance(fileA=mesh1_filepath,
-                             fileB=mesh2_filepath,
-                             nptsA=point_count,
-                             dmin=min_distance,
-                             dmax=max_distance,
-                             dmean=mean_distance,
-                             dRMS=rms_distance)
+    return HausdorffDistance(mesh1_path=mesh1_path,
+                             mesh2_path=mesh2_path,
+                             point_count_1=point_count,
+                             point_count_2=-1,
+                             min_distance=min_distance,
+                             max_distance=max_distance,
+                             mean_distance=mean_distance,
+                             rms_distance=rms_distance)
 
 
-def hausdorff_distance_bi(mesh1_filepath, mesh2_filepath):
+def hausdorff_distance_bidirectional(mesh1_filepath, mesh2_filepath) -> HausdorffDistance:
     # get hausdorff dist from meshlab server                                                                                                                                                                
-    hd_ab = hausdorff_distance_one_direction(mesh1_filepath, mesh2_filepath)
-    hd_ba = hausdorff_distance_one_direction(mesh2_filepath, mesh1_filepath)
+    hd_ab = hausdorff_distance_unidirectional(mesh1_filepath, mesh2_filepath)
+    hd_ba = hausdorff_distance_unidirectional(mesh2_filepath, mesh1_filepath)
 
-    min_bi = min(hd_ab.dmin, hd_ba.dmin)
-    max_bi = max(hd_ab.dmax, hd_ba.dmax)
+    min_bi = min(hd_ab.min_distance, hd_ba.min_distance)
+    max_bi = max(hd_ab.max_distance, hd_ba.max_distance)
 
-    sm = hd_ab.dmean * hd_ab.nptsA + hd_ba.dmean * hd_ba.nptsA
-    mean_bi = sm / (hd_ab.nptsA + hd_ba.nptsA)
+    sm = hd_ab.mean_distance * hd_ab.point_count_1 + hd_ba.mean_distance * hd_ba.point_count_1
+    mean_bi = sm / (hd_ab.point_count_1 + hd_ba.point_count_1)
 
-    ms = (hd_ab.dRMS ** 2) * hd_ab.nptsA + (hd_ba.dRMS ** 2) * hd_ba.nptsA
-    rms_bi = math.sqrt(ms / (hd_ab.nptsA + hd_ba.nptsA))
+    ms = (hd_ab.rms_distance ** 2) * hd_ab.point_count_1 + (hd_ba.rms_distance ** 2) * hd_ba.point_count_1
+    rms_bi = math.sqrt(ms / (hd_ab.point_count_1 + hd_ba.point_count_1))
 
-    return HausdorffDistance(fileA=mesh1_filepath,
-                             fileB=mesh2_filepath,
-                             nptsA=hd_ab.nptsA,
-                             dmin=min_bi,
-                             dmax=max_bi,
-                             dmean=mean_bi,
-                             dRMS=rms_bi)
+    return HausdorffDistance(mesh1_path=mesh1_filepath,
+                             mesh2_path=mesh2_filepath,
+                             point_count_1=hd_ab.point_count_1,
+                             point_count_2=hd_ba.point_count_1,
+                             min_distance=min_bi,
+                             max_distance=max_bi,
+                             mean_distance=mean_bi,
+                             rms_distance=rms_bi)
 
 
 PROGRAM_SUCCESS = 0
@@ -80,19 +85,18 @@ PROGRAM_FAIL = -1
 
 def main() -> int:
     parser = argparse.ArgumentParser(description='Compute Hausdorff Distance Between Two Meshes')
-    parser.add_argument('mesh_filepaths', metavar='N', type=str, nargs='+',
-                        help='meshes to compare')
+    parser.add_argument('input_mesh_path', metavar='N', type=str,
+                        help='path to output mesh, e.g. input mesh aligned to the reference mesh')
+
+    parser.add_argument('reference_mesh_path', metavar='N', type=str,
+                        help='reference mesh')
 
     args = parser.parse_args()
 
-    mesh_files = args.mesh_filepaths
-
-    if len(mesh_files) != 2:
-        print("wrong number of mesh files: wanted 2, got: " + str(len(mesh_files)))
-
-    dist = hausdorff_distance_bi(mesh_files[0], mesh_files[1])
+    dist = hausdorff_distance_bidirectional(args.input_mesh_path, args.reference_mesh_path)
 
     print(dist)
+
     return PROGRAM_SUCCESS
 
 

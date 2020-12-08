@@ -45,9 +45,9 @@ template <typename TSurfel>
 void SurfelVisualizationEngine_CPU<TSurfel>::CreateICPMaps(const SurfelScene<TSurfel> *scene, const SurfelRenderState *renderState, CameraTrackingState *trackingState) const
 {
   const Matrix4f& invT = trackingState->pose_d->GetM();
-  Vector4f *normalsMap = trackingState->pointCloud->colours->GetData(MEMORYDEVICE_CPU);
+  Vector4f *normalsMap = trackingState->point_cloud->colors->GetData(MEMORYDEVICE_CPU);
   const int pixelCount = static_cast<int>(renderState->GetIndexImage()->size());
-  Vector4f *pointsMap = trackingState->pointCloud->locations->GetData(MEMORYDEVICE_CPU);
+  Vector4f *pointsMap = trackingState->point_cloud->locations->GetData(MEMORYDEVICE_CPU);
   const SurfelVolumeParameters& sceneParams = scene->GetParams();
   const unsigned int *surfelIndexImage = renderState->GetIndexImage()->GetData(MEMORYDEVICE_CPU);
   const TSurfel *surfels = scene->GetSurfels()->GetData(MEMORYDEVICE_CPU);

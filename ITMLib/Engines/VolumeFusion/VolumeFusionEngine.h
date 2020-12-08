@@ -15,16 +15,22 @@
 //  ================================================================
 #pragma once
 
-//#include
-
+//local
 #include "../../../ORUtils/MemoryDeviceType.h"
 #include "../../Objects/Volume/VoxelVolume.h"
+#include "../Common/Configurable.h"
+#include "VolumeFusionSettings.h"
 
 namespace ITMLib {
 
 template<typename TVoxel, typename TIndex>
-class VolumeFusionEngineInterface {
+class VolumeFusionEngineInterface : public Configurable<VolumeFusionSettings> {
+protected:
+	using Configurable<VolumeFusionSettings>::parameters;
 public:
+	using Configurable<VolumeFusionSettings>::Configurable;
+	using Configurable<VolumeFusionSettings>::GetParameters;
+
 	virtual ~VolumeFusionEngineInterface() = default;
 	/**
 	 * \brief Fuses the live scene into the canonical scene
@@ -42,7 +48,13 @@ public:
 template<typename TVoxel, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 class VolumeFusionEngine :
 		public VolumeFusionEngineInterface<TVoxel, TIndex> {
+private:
+	// Negated "mu" from KinectFusion, negative "eta" from Killing- & SobolevFusion,
+	// expressed in sdf distance units, i.e.:
+	// negative_surface_thickness_sdf_scale = -surface_thickness (meters) / [truncation distance (voxels) * voxel size (meters)]
+	float negative_surface_thickness_sdf_scale;
 public:
+	VolumeFusionEngine();
 	void FuseOneTsdfVolumeIntoAnother(VoxelVolume <TVoxel, TIndex>* target_volume,
 	                                  VoxelVolume <TVoxel, TIndex>* source_volume,
 	                                  unsigned short timestamp) override;

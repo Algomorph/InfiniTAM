@@ -46,22 +46,22 @@ Matrix3f Rodrigues(Vector3f euler_rotation_vector){
 	}
 
 	float wx2 = w.x * w.x, wy2 = w.y * w.y, wz2 = w.z * w.z;
-	R.m[0 + 3 * 0] = 1.0f - B*(wy2 + wz2);
-	R.m[1 + 3 * 1] = 1.0f - B*(wx2 + wz2);
-	R.m[2 + 3 * 2] = 1.0f - B*(wx2 + wy2);
+	R.values[0 + 3 * 0] = 1.0f - B * (wy2 + wz2);
+	R.values[1 + 3 * 1] = 1.0f - B * (wx2 + wz2);
+	R.values[2 + 3 * 2] = 1.0f - B * (wx2 + wy2);
 
 	float a, b;
 	a = A * w.z, b = B * (w.x * w.y);
-	R.m[0 + 3 * 1] = b - a;
-	R.m[1 + 3 * 0] = b + a;
+	R.values[0 + 3 * 1] = b - a;
+	R.values[1 + 3 * 0] = b + a;
 
 	a = A * w.y, b = B * (w.x * w.z);
-	R.m[0 + 3 * 2] = b + a;
-	R.m[2 + 3 * 0] = b - a;
+	R.values[0 + 3 * 2] = b + a;
+	R.values[2 + 3 * 0] = b - a;
 
 	a = A * w.x, b = B * (w.y * w.z);
-	R.m[1 + 3 * 2] = b - a;
-	R.m[2 + 3 * 1] = b + a;
+	R.values[1 + 3 * 2] = b - a;
+	R.values[2 + 3 * 1] = b + a;
 
 	return rotation_matrix;
 }

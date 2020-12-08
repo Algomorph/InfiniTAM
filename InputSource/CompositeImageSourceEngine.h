@@ -75,7 +75,7 @@ private:
   /**
    * \brief Advances to the sub-engine (if any) that can provide the next images.
    *
-   * \return  The sub-engine, if any, that can provide the next images, or NULL if there are no more images to provide.
+   * \return  The sub-engine, if any, that can provide the next images, or nullptr if there are no more images to provide.
    */
   const ImageSourceEngine *AdvanceToNextImages() const;
 };

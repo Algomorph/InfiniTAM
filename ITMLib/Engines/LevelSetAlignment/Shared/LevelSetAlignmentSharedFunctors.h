@@ -26,7 +26,7 @@
 #include "../../Common/WarpAccessFunctors.h"
 
 #ifdef __CUDACC__
-#include "../../../Utils/CUDAUtils.h"
+#include "../../../Utils/CUDA/CUDAUtils.h"
 #endif
 
 
@@ -48,47 +48,25 @@ struct ClearOutGradientStaticFunctor {
 };
 
 
-template<typename TVoxel, typename TWarp, MemoryDeviceType TMemoryDeviceType>
+template<typename TVoxel, typename TWarp, MemoryDeviceType TMemoryDeviceType, bool TUseGradient1>
 struct WarpUpdateFunctor {
-	WarpUpdateFunctor(float learning_rate, float momentum_weight, bool gradient_smoothing_enabled) :
-			gradient_weight(learning_rate * (1.0f - momentum_weight)), momentum_weight(momentum_weight),
-			gradient_smoothing_enabled(gradient_smoothing_enabled) {
-		INITIALIZE_ATOMIC(float, aggregate_warp_update_length, 0.0f);
-		INITIALIZE_ATOMIC(unsigned int, affected_voxel_count, 0u);
-	}
-
-	~WarpUpdateFunctor() {
-		CLEAN_UP_ATOMIC(aggregate_warp_update_length);CLEAN_UP_ATOMIC(affected_voxel_count);
-	}
+	WarpUpdateFunctor(float learning_rate) :
+			learning_rate(learning_rate) {}
 
 	_DEVICE_WHEN_AVAILABLE_
 	void
 	operator()(TWarp& warp_voxel, TVoxel& canonical_voxel, TVoxel& live_voxel, const Vector3i& position) {
-		if (!VoxelIsConsideredForTracking(canonical_voxel, live_voxel)) return;
-
-		Vector3f warp_update = -gradient_weight * (gradient_smoothing_enabled ?
-		                                           warp_voxel.gradient1 : warp_voxel.gradient0);
-
-		warp_voxel.warp_update = warp_update + momentum_weight * warp_voxel.warp_update;
-
-		// update stats
-		float warp_update_length = ORUtils::length(warp_update);
-
-		ATOMIC_ADD(aggregate_warp_update_length, warp_update_length);
-		ATOMIC_ADD(affected_voxel_count, 1u);
-	}
-
-	float GetAverageWarpUpdateLength() {
-		return GET_ATOMIC_VALUE_CPU(aggregate_warp_update_length) / GET_ATOMIC_VALUE_CPU(affected_voxel_count);
+		if (!VoxelIsConsideredForAlignment(canonical_voxel, live_voxel)) return;
+		if (TUseGradient1) {
+			warp_voxel.warp_update = warp_voxel.warp_update - learning_rate * warp_voxel.gradient1;
+		} else {
+			warp_voxel.warp_update = warp_voxel.warp_update - learning_rate * warp_voxel.gradient0;
+		}
 	}
 
 
 private:
-	DECLARE_ATOMIC_FLOAT(aggregate_warp_update_length);
-	DECLARE_ATOMIC(unsigned int, affected_voxel_count);
-	const float gradient_weight;
-	const float momentum_weight;
-	const bool gradient_smoothing_enabled;
+	const float learning_rate;
 };
 
 
@@ -119,23 +97,21 @@ struct GradientSmoothingPassFunctor {
 		};
 
 		int vmIndex = 0;
-		if (!VoxelIsConsideredForTracking(canonical_voxel, live_voxel)) return;
+		if (!VoxelIsConsideredForAlignment(canonical_voxel, live_voxel)) return;
 
-		const auto directionIndex = (int) TDirection;
+		const auto direction_index = (int) TDirection;
 
 		Vector3i receptive_voxel_position = voxel_position;
-		receptive_voxel_position[directionIndex] -= (sobolev_filter_size / 2);
+		receptive_voxel_position[direction_index] -= (sobolev_filter_size / 2);
 		Vector3f smoothed_gradient(0.0f);
 
-		for (int iVoxel = 0; iVoxel < sobolev_filter_size; iVoxel++, receptive_voxel_position[directionIndex]++) {
+		for (int iVoxel = 0; iVoxel < sobolev_filter_size; iVoxel++, receptive_voxel_position[direction_index]++) {
 #if !defined(__CUDACC__) && !defined(WITH_OPENMP)
-			const TWarp& receptiveVoxel = readVoxel(warp_voxels, warp_index_data,
-													receptive_voxel_position, vmIndex, warp_field_cache);
+			const TWarp& destination_voxel = readVoxel(warp_voxels, warp_index_data, receptive_voxel_position, vmIndex, warp_field_cache);
 #else
-			const TWarp& receptiveVoxel = readVoxel(warp_voxels, warp_index_data,
-			                                             receptive_voxel_position, vmIndex);
+			const TWarp& destination_voxel = readVoxel(warp_voxels, warp_index_data, receptive_voxel_position, vmIndex);
 #endif
-			smoothed_gradient += sobolev_filter1D[iVoxel] * GetGradient(receptiveVoxel);
+			smoothed_gradient += sobolev_filter1D[iVoxel] * GetGradient(destination_voxel);
 		}
 		SetGradient(warp_voxel, smoothed_gradient);
 	}

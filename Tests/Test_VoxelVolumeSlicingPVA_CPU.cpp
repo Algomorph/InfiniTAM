@@ -27,56 +27,37 @@
 #include "../ITMLib/Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CPU.h"
 #include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
+
 #ifndef COMPILE_WITHOUT_CUDA
+
 #include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
+
 #endif
 
 //test_utilities
 #include "TestUtilities/TestUtilities.h"
-#include "TestUtilities/SnoopyTestUtilities.h"
+#include "TestUtilities/TestDataUtilities.h"
 
 using namespace ITMLib;
-using namespace test_utilities;
-namespace snoopy = snoopy_test_utilities;
-
-//#define GET_SCENE_BOUNDS
-//TODO: turn into full-fledged test case (in a separate test suite, run before other tests), which tests bounds against
-// real numeric values. Values can be hard-coded, I think.
-#ifdef GET_SCENE_BOUNDS
-BOOST_AUTO_TEST_CASE(GetSceneBounds){
-	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_vbh_CPU(MEMORYDEVICE_CPU);
-	volume_vbh_CPU.Reset();
-	volume_vbh_CPU.LoadFromDirectory(GENERATED_TEST_DATA_PREFIX "TestData/snoopy_result_fr16-17_full/snoopy_full_frame_16_");
-	std::cout << "BOUNDS(16/VBH):  " << Analytics_CPU_VBH_Voxel::Instance().ComputeVoxelBounds(&volume_vbh_CPU) << std::endl;
-	volume_vbh_CPU.Reset();
-	volume_vbh_CPU.LoadFromDirectory(GENERATED_TEST_DATA_PREFIX "TestData/snoopy_result_fr16-17_full/snoopy_full_frame_17_");
-	std::cout << "BOUNDS(17/VBH):  " << Analytics_CPU_VBH_Voxel::Instance().ComputeVoxelBounds(&volume_vbh_CPU) << std::endl;
-	#ifndef COMPILE_WITHOUT_CUDA
-	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_pva_CUDA(MEMORYDEVICE_CUDA);
-	volume_pva_CUDA.Reset();
-	volume_pva_CUDA.LoadFromDirectory(GENERATED_TEST_DATA_PREFIX "TestData/snoopy_result_fr16-17_full/snoopy_full_frame_16_");
-	std::cout << "ALTERED BOUNDS(16/PVA): " << Analytics_CUDA_PVA_Voxel::Instance().ComputeAlteredVoxelBounds(&volume_pva_CUDA) << std::endl;
-	#else
-	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_pva_CPU(MEMORYDEVICE_CPU);
-	volume_pva_CPU.Reset();
-	volume_pva_CPU.LoadFromDirectory(GENERATED_TEST_DATA_PREFIX "TestData/snoopy_result_fr16-17_full/snoopy_full_frame_16_");
-	std::cout << "ALTERED BOUNDS(16/PVA): " << Analytics_CPU_PVA_Voxel::Instance().ComputeAlteredVoxelBounds(&volume_pva_CPU) << std::endl;
-	#endif
-}
-#endif
+using namespace test;
 
 BOOST_AUTO_TEST_CASE(testPVASceneSlice_CPU) {
 	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_CPU(MEMORYDEVICE_CPU);
 	volume_CPU.Reset();
 
-	const int expected_non_truncated_voxel_count = 58368;
-	volume_CPU.LoadFromDisk(snoopy::FullVolume16Path<PlainVoxelArray>());
+	//TODO: add a CUDA test via making this code generic
+	//TODO: generate these values in "generate_derived_test_data", read them in instead
+	const int expected_non_truncated_voxel_count = 36798;
+	const double expected_non_truncated_voxel_absolute_sdf_sum = 14979.376292228699;
+
+	volume_CPU.LoadFromDisk(test::snoopy::FullVolume16Path<PlainVoxelArray>());
 
 	BOOST_REQUIRE_EQUAL(Analytics_CPU_PVA_Voxel::Instance().CountNonTruncatedVoxels(&volume_CPU),
 	                    expected_non_truncated_voxel_count);
 
+
 	BOOST_REQUIRE_CLOSE(Analytics_CPU_PVA_Voxel::Instance().SumNonTruncatedVoxelAbsSdf(&volume_CPU),
-	                    28887.87700, 0.001);
+	                    expected_non_truncated_voxel_absolute_sdf_sum, 0.001);
 
 	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_slice_same_dimensions_CPU(
 			MEMORYDEVICE_CPU);
@@ -93,12 +74,20 @@ BOOST_AUTO_TEST_CASE(testPVASceneSlice_CPU) {
 	BOOST_REQUIRE(allocatedContentAlmostEqual_CPU_Verbose(
 			&volume_CPU, &volume_slice_same_dimensions_CPU, tolerance));
 
-	bounds = Vector6i(-72, -24, 160, 16, 80, 320);
-	Vector3i offsetSlice(bounds.min_x, bounds.min_y, bounds.min_z);
-	Vector3i sizeSlice(bounds.max_x - bounds.min_x, bounds.max_y - bounds.min_y, bounds.max_z - bounds.min_z);
+	auto partial_volume_info = test::snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>();
+
+	bounds = Vector6i(
+			partial_volume_info.offset.x,
+			partial_volume_info.offset.y,
+			partial_volume_info.offset.z,
+			partial_volume_info.offset.x + partial_volume_info.size.x,
+			partial_volume_info.offset.y + partial_volume_info.size.y,
+			partial_volume_info.offset.z + partial_volume_info.size.z
+	);
+
 
 	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_slice_different_dimensions_CPU(
-			MEMORYDEVICE_CPU, {sizeSlice, offsetSlice});
+			MEMORYDEVICE_CPU, partial_volume_info);
 	ManipulationEngine_CPU_PVA_Voxel::Inst().ResetVolume(&volume_slice_different_dimensions_CPU);
 
 	ManipulationEngine_CPU_PVA_Voxel::Inst().CopyVolumeSlice(&volume_slice_different_dimensions_CPU,
@@ -106,17 +95,16 @@ BOOST_AUTO_TEST_CASE(testPVASceneSlice_CPU) {
 	BOOST_REQUIRE_EQUAL(Analytics_CPU_PVA_Voxel::Instance().CountNonTruncatedVoxels(
 			&volume_slice_different_dimensions_CPU), expected_non_truncated_voxel_count);
 	BOOST_REQUIRE_CLOSE(Analytics_CPU_PVA_Voxel::Instance().SumNonTruncatedVoxelAbsSdf(
-			&volume_slice_different_dimensions_CPU), 28887.877, 0.001);
+			&volume_slice_different_dimensions_CPU), expected_non_truncated_voxel_absolute_sdf_sum, 0.001);
 	BOOST_REQUIRE_CLOSE(Analytics_CPU_PVA_Voxel::Instance().SumNonTruncatedVoxelAbsSdf(
-			&volume_CPU), 28887.877, 0.001);
+			&volume_CPU), expected_non_truncated_voxel_absolute_sdf_sum, 0.001);
 	BOOST_REQUIRE(allocatedContentAlmostEqual_CPU_Verbose(&volume_CPU,
 	                                                      &volume_slice_different_dimensions_CPU, tolerance));
 
-	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_slice_from_disk_CPU(
-			MEMORYDEVICE_CPU, {sizeSlice, offsetSlice});
+	VoxelVolume<TSDFVoxel, PlainVoxelArray> volume_slice_from_disk_CPU(MEMORYDEVICE_CPU, partial_volume_info);
 	volume_slice_from_disk_CPU.Reset();
 
-	volume_slice_from_disk_CPU.LoadFromDisk(snoopy::PartialVolume16Path<PlainVoxelArray>());
+	volume_slice_from_disk_CPU.LoadFromDisk(test::snoopy::PartialVolume16Path<PlainVoxelArray>());
 
 	BOOST_REQUIRE(contentAlmostEqual_CPU(&volume_slice_different_dimensions_CPU,
 	                                     &volume_slice_from_disk_CPU, tolerance));

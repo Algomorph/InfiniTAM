@@ -41,7 +41,7 @@ public:
 
 	unsigned int CountAllocatedVoxels(const VoxelVolume<TVoxel, TIndex>* volume) override;
 	unsigned int CountUtilizedVoxels(const VoxelVolume<TVoxel, TIndex>* volume) override;
-	unsigned int CountHashBlocksWithDepthWeightInRange(const VoxelVolume <TVoxel, TIndex>* volume, Extent2Di range) override;
+
 	unsigned int CountVoxelsWithDepthWeightInRange(const VoxelVolume<TVoxel, TIndex>* volume, Extent2Di range) override;
 	unsigned int CountVoxelsWithSpecifiedFlags(const VoxelVolume <TVoxel, TIndex>* volume, VoxelFlags flags) override;
 	unsigned int CountNonTruncatedVoxels(const VoxelVolume <TVoxel, TIndex>* volume) override;
@@ -67,7 +67,7 @@ public:
 
 	unsigned int CountAllocatedHashBlocks(const VoxelVolume<TVoxel, TIndex>* volume) override;
 	unsigned int CountUtilizedHashBlocks(const VoxelVolume<TVoxel, TIndex>* volume) override;
-
+	unsigned int CountHashBlocksWithDepthWeightInRange(const VoxelVolume <TVoxel, TIndex>* volume, Extent2Di range) override;
 	std::vector<int> GetAllocatedHashCodes(const VoxelVolume<TVoxel, TIndex>* volume) override;
 	std::vector<Vector3s> GetAllocatedHashBlockPositions(const VoxelVolume<TVoxel, TIndex>* volume) override;
 	std::vector<int> GetUtilizedHashCodes(const VoxelVolume<TVoxel, TIndex>* volume) override;

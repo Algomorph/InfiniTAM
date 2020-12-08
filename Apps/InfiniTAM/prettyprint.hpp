@@ -125,7 +125,7 @@ struct print_container_helper
 
 					if (++it == the_end) break;
 
-					if (delimiters_type::values.delimiter != NULL)
+					if (delimiters_type::values.delimiter != nullptr)
 						stream << delimiters_type::values.delimiter;
 				}
 			}
@@ -138,12 +138,12 @@ struct print_container_helper
 
 	inline void operator()(ostream_type & stream) const
 	{
-		if (delimiters_type::values.prefix != NULL)
+		if (delimiters_type::values.prefix != nullptr)
 			stream << delimiters_type::values.prefix;
 
 		printer<T>::print_body(container_, stream);
 
-		if (delimiters_type::values.postfix != NULL)
+		if (delimiters_type::values.postfix != nullptr)
 			stream << delimiters_type::values.postfix;
 	}
 
@@ -162,7 +162,7 @@ struct print_container_helper<T, TChar, TCharTraits, TDelimiters>::printer<std::
 	static void print_body(const std::pair<T1, T2> & c, ostream_type & stream)
 	{
 		stream << c.first;
-		if (print_container_helper<T, TChar, TCharTraits, TDelimiters>::delimiters_type::values.delimiter != NULL)
+		if (print_container_helper<T, TChar, TCharTraits, TDelimiters>::delimiters_type::values.delimiter != nullptr)
 			stream << print_container_helper<T, TChar, TCharTraits, TDelimiters>::delimiters_type::values.delimiter;
 		stream << c.second;
 	}
@@ -198,7 +198,7 @@ struct print_container_helper<T, TChar, TCharTraits, TDelimiters>::printer<std::
 	template <std::size_t N>
 	static void tuple_print(const element_type & c, ostream_type & stream, Int<N>)
 	{
-		if (print_container_helper<T, TChar, TCharTraits, TDelimiters>::delimiters_type::values.delimiter != NULL)
+		if (print_container_helper<T, TChar, TCharTraits, TDelimiters>::delimiters_type::values.delimiter != nullptr)
 			stream << print_container_helper<T, TChar, TCharTraits, TDelimiters>::delimiters_type::values.delimiter;
 
 		stream << std::get<N>(c);
