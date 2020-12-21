@@ -38,7 +38,7 @@ void SurfelSceneReconstructionEngine_CPU<TSurfel>::AddNewSurfels(SurfelScene<TSu
   const Vector4u *colourMap = view->rgb.GetData(MEMORYDEVICE_CPU);
   const Matrix4f& depthToRGB = view->calibration_information.trafo_rgb_to_depth.calib_inv;
   const Vector3f *normalMap = this->m_normalMapMB->GetData(MEMORYDEVICE_CPU);
-  const Vector4f& projParamsRGB = view->calibration_information.intrinsics_rgb.projectionParamsSimple.all;
+  const Vector4f& projParamsRGB = view->calibration_information.intrinsics_rgb.projection_params_simple.all;
   const float *radiusMap = this->m_radiusMapMB->GetData(MEMORYDEVICE_CPU);
   const SurfelVolumeParameters& sceneParams = scene->GetParams();
   const Matrix4f T = trackingState->pose_d->GetInvM();
@@ -94,7 +94,7 @@ void SurfelSceneReconstructionEngine_CPU<TSurfel>::FuseMatchedPoints(SurfelScene
   const Matrix4f& depthToRGB = view->calibration_information.trafo_rgb_to_depth.calib_inv;
   const Vector3f *normalMap = this->m_normalMapMB->GetData(MEMORYDEVICE_CPU);
   const int pixelCount = static_cast<int>(view->depth.size());
-  const Vector4f& projParamsRGB = view->calibration_information.intrinsics_rgb.projectionParamsSimple.all;
+  const Vector4f& projParamsRGB = view->calibration_information.intrinsics_rgb.projection_params_simple.all;
   const float *radiusMap = this->m_radiusMapMB->GetData(MEMORYDEVICE_CPU);
   const SurfelVolumeParameters& sceneParams = scene->GetParams();
   TSurfel *surfels = scene->GetSurfels()->GetData(MEMORYDEVICE_CPU);

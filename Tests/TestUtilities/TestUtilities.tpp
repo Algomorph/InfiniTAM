@@ -404,4 +404,4 @@ void BuildSdfVolumeFromImage_SurfaceSpanAllocation(VoxelVolume<TVoxel, TIndex>**
 	                                              memory_device,
 	                                              initialization_parameters, swapping_mode);
 }
-} // namespace test_utilities
+} // namespace test

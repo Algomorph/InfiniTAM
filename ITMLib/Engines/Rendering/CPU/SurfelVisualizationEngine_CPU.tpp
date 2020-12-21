@@ -45,9 +45,9 @@ template <typename TSurfel>
 void SurfelVisualizationEngine_CPU<TSurfel>::CreateICPMaps(const SurfelScene<TSurfel> *scene, const SurfelRenderState *renderState, CameraTrackingState *trackingState) const
 {
   const Matrix4f& invT = trackingState->pose_d->GetM();
-  Vector4f *normalsMap = trackingState->point_cloud->colors->GetData(MEMORYDEVICE_CPU);
+  Vector4f *normals_map = trackingState->point_cloud->colors.GetData(MEMORYDEVICE_CPU);
   const int pixelCount = static_cast<int>(renderState->GetIndexImage()->size());
-  Vector4f *pointsMap = trackingState->point_cloud->locations->GetData(MEMORYDEVICE_CPU);
+  Vector4f *points_map = trackingState->point_cloud->locations.GetData(MEMORYDEVICE_CPU);
   const SurfelVolumeParameters& sceneParams = scene->GetParams();
   const unsigned int *surfelIndexImage = renderState->GetIndexImage()->GetData(MEMORYDEVICE_CPU);
   const TSurfel *surfels = scene->GetSurfels()->GetData(MEMORYDEVICE_CPU);
@@ -57,7 +57,7 @@ void SurfelVisualizationEngine_CPU<TSurfel>::CreateICPMaps(const SurfelScene<TSu
 #endif
   for(int locId = 0; locId < pixelCount; ++locId)
   {
-    copy_surfel_data_to_icp_maps(locId, surfels, surfelIndexImage, invT, sceneParams.tracking_surfel_max_depth, sceneParams.tracking_surfel_min_confidence, pointsMap, normalsMap);
+    copy_surfel_data_to_icp_maps(locId, surfels, surfelIndexImage, invT, sceneParams.tracking_surfel_max_depth, sceneParams.tracking_surfel_min_confidence, points_map, normals_map);
   }
 }
 

@@ -15,6 +15,9 @@
 //  ================================================================
 
 #include "View.h"
+#include "../../../ORUtils/MemoryBlockPersistence/MemoryBlockPersistenceOperators.h"
+#include "../../../ORUtils/MathTypePersistence/MathTypePersistence.h"
+
 
 using namespace ITMLib;
 
@@ -24,13 +27,12 @@ View::View(const RGBD_CalibrationInformation& calibration_information, Vector2i 
 		  float_raw_disparity_image(depth_image_size, true, use_GPU),
 		  rgb(rgb_image_size, true, use_GPU),
 		  depth(depth_image_size, true, use_GPU),
-		  depth_confidence(depth_image_size, true, use_GPU) {
-	this->rgb_prev = nullptr;
-	this->depth_normal = nullptr;
-	this->depth_uncertainty = nullptr;
-}
+		  depth_confidence(depth_image_size, true, use_GPU),
+		  rgb_prev(nullptr),
+		  depth_normal(nullptr),
+		  depth_uncertainty(nullptr) {}
 
-View::View(View&& other) noexcept :
+View::View(View&& other) noexcept:
 		calibration_information(other.calibration_information),
 		short_raw_disparity_image(other.short_raw_disparity_image),
 		float_raw_disparity_image(other.float_raw_disparity_image),
@@ -39,13 +41,9 @@ View::View(View&& other) noexcept :
 		depth_confidence(other.depth_confidence),
 		rgb_prev(other.rgb_prev),
 		depth_normal(other.depth_normal),
-		depth_uncertainty(other.depth_uncertainty){
-	other.rgb_prev = nullptr;
-	other.depth_normal = nullptr;
-	other.depth_uncertainty = nullptr;
-}
+		depth_uncertainty(other.depth_uncertainty) {}
 
-View::View(const View& other) noexcept :
+View::View(const View& other) noexcept:
 		calibration_information(other.calibration_information),
 		short_raw_disparity_image(other.short_raw_disparity_image),
 		float_raw_disparity_image(other.float_raw_disparity_image),
@@ -54,19 +52,19 @@ View::View(const View& other) noexcept :
 		depth_confidence(other.depth_confidence),
 		rgb_prev(nullptr),
 		depth_normal(nullptr),
-		depth_uncertainty(nullptr){
-	if(other.rgb_prev){
+		depth_uncertainty(nullptr) {
+	if (other.rgb_prev) {
 		this->rgb_prev = new UChar4Image(*other.rgb_prev);
 	}
-	if(other.depth_normal){
+	if (other.depth_normal) {
 		this->depth_normal = new Float4Image(*other.depth_normal);
 	}
-	if(other.depth_uncertainty){
+	if (other.depth_uncertainty) {
 		this->depth_uncertainty = new FloatImage(*other.depth_uncertainty);
 	}
 }
 
-View& View::operator=(View other){
+View& View::operator=(View other) {
 	swap(*this, other);
 	return *this;
 }
@@ -77,7 +75,7 @@ View::~View() {
 	delete depth_uncertainty;
 }
 
-void View::Swap(View& other){
+void View::Swap(View& other) {
 	using std::swap;
 	swap(this->calibration_information, other.calibration_information);
 	swap(this->short_raw_disparity_image, other.short_raw_disparity_image);
@@ -85,7 +83,70 @@ void View::Swap(View& other){
 	swap(this->rgb, other.rgb);
 	swap(this->depth, other.depth);
 	swap(this->depth_confidence, other.depth_confidence);
-	swap(this->rgb_prev,other.rgb_prev);
-	swap(this->depth_normal,other.depth_normal);
-	swap(this->depth_uncertainty,other.depth_uncertainty);
+	swap(this->rgb_prev, other.rgb_prev);
+	swap(this->depth_normal, other.depth_normal);
+	swap(this->depth_uncertainty, other.depth_uncertainty);
 }
+
+namespace ITMLib {
+bool operator==(const View& lhs, const View& rhs) {
+	return lhs.calibration_information == rhs.calibration_information &&
+	       lhs.short_raw_disparity_image == rhs.short_raw_disparity_image &&
+	       lhs.rgb == rhs.rgb &&
+	       lhs.depth == rhs.depth &&
+	       lhs.depth_confidence == rhs.depth_confidence &&
+	       *lhs.depth_uncertainty == *rhs.depth_uncertainty &&
+	       *lhs.rgb_prev == *rhs.rgb_prev &&
+	       *lhs.depth_normal == *rhs.depth_normal;
+}
+
+ORUtils::IStreamWrapper& operator>>(ORUtils::IStreamWrapper& source, View& view) {
+	source >> view.calibration_information;
+	source >> view.short_raw_disparity_image;
+	source >> view.rgb;
+	source >> view.depth;
+	source >> view.depth_confidence;
+	bool has_depth_uncertainty, has_rgb_prev, has_depth_normal;
+	source.IStream().read(reinterpret_cast<char*>(&has_depth_uncertainty), sizeof(bool));
+	source.IStream().read(reinterpret_cast<char*>(&has_rgb_prev), sizeof(bool));
+	source.IStream().read(reinterpret_cast<char*>(&has_depth_normal), sizeof(bool));
+	if (has_depth_uncertainty) {
+		view.depth_uncertainty = new FloatImage(Vector2i(0), true, view.rgb.IsAllocatedForCUDA());
+		source >> *view.depth_uncertainty;
+	}
+	if (has_rgb_prev) {
+		view.rgb_prev = new UChar4Image(Vector2i(0), true, view.rgb.IsAllocatedForCUDA());
+		source >> *view.rgb_prev;
+	}
+	if (has_depth_normal) {
+		view.depth_normal = new Float4Image(Vector2i(0), true, view.rgb.IsAllocatedForCUDA());
+		source >> *view.depth_normal;
+	}
+	return source;
+}
+
+ORUtils::OStreamWrapper& operator<<(ORUtils::OStreamWrapper& destination, const View& view) {
+	destination << view.calibration_information;
+	destination << view.short_raw_disparity_image;
+	destination << view.rgb;
+	destination << view.depth;
+	destination << view.depth_confidence;
+	bool has_depth_uncertainty = view.depth_uncertainty != nullptr;
+	bool has_rgb_prev = view.rgb_prev != nullptr;
+	bool has_depth_normal = view.depth_normal != nullptr;
+	destination.OStream().write(reinterpret_cast<char*>(&has_depth_uncertainty), sizeof(bool));
+	destination.OStream().write(reinterpret_cast<char*>(&has_rgb_prev), sizeof(bool));
+	destination.OStream().write(reinterpret_cast<char*>(&has_depth_normal), sizeof(bool));
+	if (has_depth_uncertainty) {
+		destination << *view.depth_uncertainty;
+	}
+	if (has_rgb_prev) {
+		destination << *view.rgb_prev;
+	}
+	if (has_depth_normal) {
+		destination << *view.depth_normal;
+	}
+	return destination;
+}
+
+} // namespace ITMLib

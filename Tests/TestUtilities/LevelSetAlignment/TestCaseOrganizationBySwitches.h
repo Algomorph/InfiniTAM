@@ -31,4 +31,4 @@ std::string GetFusedPath(std::string prefix, int iteration);
 unsigned int SwitchesToIntCode(const ITMLib::LevelSetAlignmentSwitches& switches);
 std::string SwitchesToPrefix(const ITMLib::LevelSetAlignmentSwitches& switches);
 
-} // namespace test_utilities
+} // namespace test

@@ -43,4 +43,4 @@ GenericMultiIterationAlignmentTest<MEMORYDEVICE_CUDA>(const LevelSetAlignmentSwi
 
 
 
-} // namespace test_utilities
+} // namespace test

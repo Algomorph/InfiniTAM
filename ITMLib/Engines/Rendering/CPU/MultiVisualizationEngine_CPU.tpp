@@ -67,7 +67,7 @@ void MultiVisualizationEngine_CPU<TVoxel, VoxelBlockHash>::CreateExpectedDepths(
 			Vector2f zRange;
 			bool validProjection = false;
 			if (blockData.ptr >= 0) {
-				validProjection = ProjectSingleBlock(blockData.pos, localPose, intrinsics->projectionParamsSimple.all, imgSize, voxelSize, upperLeft, lowerRight, zRange);
+				validProjection = ProjectSingleBlock(blockData.pos, localPose, intrinsics->projection_params_simple.all, imgSize, voxelSize, upperLeft, lowerRight, zRange);
 			}
 			if (!validProjection) continue;
 
@@ -114,7 +114,7 @@ static void RenderImage_common(const ORUtils::SE3Pose *pose, const Intrinsics *i
 	// Generic Raycast
 	float voxelSize = renderState->voxelSize;
 	{
-		Vector4f projParams = intrinsics->projectionParamsSimple.all;
+		Vector4f projParams = intrinsics->projection_params_simple.all;
 		Vector4f invProjParams = InvertProjectionParams(projParams);
 
 		const Vector2f *minmaximg = renderState->renderingRangeImage->GetData(MEMORYDEVICE_CPU);

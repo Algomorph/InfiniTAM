@@ -103,7 +103,7 @@ void IndexingEngine_VoxelBlockHash_MemoryDeviceTypeSpecialized<MEMORYDEVICE_CUDA
 	HashSwapState* swapStates = volume->SwappingEnabled() ? volume->global_cache.GetSwapStates(false) : 0;
 
 	// ** view data **
-	Vector4f depthCameraProjectionParameters = view->calibration_information.intrinsics_d.projectionParamsSimple.all;
+	Vector4f depthCameraProjectionParameters = view->calibration_information.intrinsics_d.projection_params_simple.all;
 	Vector2i depthImgSize = view->depth.dimensions;
 	float voxelSize = volume->GetParameters().voxel_size;
 

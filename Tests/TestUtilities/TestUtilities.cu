@@ -37,4 +37,4 @@ void FindAllVoxelsNotInDepthWeightRange<MEMORYDEVICE_CUDA, TSDFVoxel, VoxelBlock
                                                                                       const Extent3Di& bounds,
                                                                                       const Extent2Di& weight_range);
 
-} // namespace test_utilities
+} // namespace test

@@ -61,4 +61,4 @@ unsigned int SwitchesToIntCode(const LevelSetAlignmentSwitches& switches) {
 }
 
 
-} // namespace test_utilities
+} // namespace test

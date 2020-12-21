@@ -14,7 +14,7 @@ int ColorTracker_CPU::F_oneLevel(float *f, ORUtils::SE3Pose *pose)
 {
 	int point_count = trackingState->point_cloud->point_count;
 
-	Vector4f rgb_camera_projection_parameters = view->calibration_information.intrinsics_rgb.projectionParamsSimple.all;
+	Vector4f rgb_camera_projection_parameters = view->calibration_information.intrinsics_rgb.projection_params_simple.all;
 	rgb_camera_projection_parameters.x /= static_cast<float>(1u << levelId);
 	rgb_camera_projection_parameters.y /= static_cast<float>(1u << levelId);
 	rgb_camera_projection_parameters.z /= static_cast<float>(1u << levelId);
@@ -26,8 +26,8 @@ int ColorTracker_CPU::F_oneLevel(float *f, ORUtils::SE3Pose *pose)
 
 	float scale_for_occlusions, final_f;
 
-	Vector4f *locations = trackingState->point_cloud->locations->GetData(MEMORYDEVICE_CPU);
-	Vector4f *colours = trackingState->point_cloud->colors->GetData(MEMORYDEVICE_CPU);
+	Vector4f *locations = trackingState->point_cloud->locations.GetData(MEMORYDEVICE_CPU);
+	Vector4f *colours = trackingState->point_cloud->colors.GetData(MEMORYDEVICE_CPU);
 	Vector4u *rgb = viewHierarchy->GetLevel(levelId)->rgb->GetData(MEMORYDEVICE_CPU);
 
 	final_f = 0; countedPoints_valid = 0;
@@ -49,7 +49,7 @@ void ColorTracker_CPU::G_oneLevel(float *gradient, float *hessian, ORUtils::SE3P
 {
 	int noTotalPoints = trackingState->point_cloud->point_count;
 
-	Vector4f projParams = view->calibration_information.intrinsics_rgb.projectionParamsSimple.all;
+	Vector4f projParams = view->calibration_information.intrinsics_rgb.projection_params_simple.all;
 	projParams.x /= 1 << levelId; projParams.y /= 1 << levelId;
 	projParams.z /= 1 << levelId; projParams.w /= 1 << levelId;
 
@@ -66,8 +66,8 @@ void ColorTracker_CPU::G_oneLevel(float *gradient, float *hessian, ORUtils::SE3P
 	for (int i = 0; i < numPara; i++) globalGradient[i] = 0.0f;
 	for (int i = 0; i < numParaSQ; i++) globalHessian[i] = 0.0f;
 
-	Vector4f *locations = trackingState->point_cloud->locations->GetData(MEMORYDEVICE_CPU);
-	Vector4f *colours = trackingState->point_cloud->colors->GetData(MEMORYDEVICE_CPU);
+	Vector4f *locations = trackingState->point_cloud->locations.GetData(MEMORYDEVICE_CPU);
+	Vector4f *colours = trackingState->point_cloud->colors.GetData(MEMORYDEVICE_CPU);
 	Vector4u *rgb = viewHierarchy->GetLevel(levelId)->rgb->GetData(MEMORYDEVICE_CPU);
 	Vector4s *gx = viewHierarchy->GetLevel(levelId)->gradientX_rgb->GetData(MEMORYDEVICE_CPU);
 	Vector4s *gy = viewHierarchy->GetLevel(levelId)->gradientY_rgb->GetData(MEMORYDEVICE_CPU);

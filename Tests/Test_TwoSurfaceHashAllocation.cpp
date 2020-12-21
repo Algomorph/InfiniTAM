@@ -106,10 +106,10 @@ private:
 		                                                          volume_parameters.block_allocation_band_factor) /
 		                                                         voxel_block_size));
 		auto horizontal_block_span = static_cast<int>(std::ceil(((square_size_px / 2.0f) * distance_to_first_square /
-		                                                         view_square_1->calibration_information.intrinsics_d.projectionParamsSimple.fx) /
+		                                                         view_square_1->calibration_information.intrinsics_d.projection_params_simple.fx) /
 		                                                        voxel_block_size)) * 2;
 		auto vertical_block_span = static_cast<int>(std::ceil(((square_size_px / 2.0f) * distance_to_first_square /
-		                                                       view_square_1->calibration_information.intrinsics_d.projectionParamsSimple.fy) /
+		                                                       view_square_1->calibration_information.intrinsics_d.projection_params_simple.fy) /
 		                                                      voxel_block_size)) * 2;
 		auto depth_block_span = last_line_of_blocks_z + 1 - first_line_of_blocks_z;
 

@@ -79,14 +79,14 @@ void DepthTracker::SetEvaluationData(CameraTrackingState *trackingState, const V
 	this->trackingState = trackingState;
 	this->view = view;
 
-	sceneHierarchy->GetLevel(0)->intrinsics = view->calibration_information.intrinsics_d.projectionParamsSimple.all;
-	viewHierarchy->GetLevel(0)->intrinsics = view->calibration_information.intrinsics_d.projectionParamsSimple.all;
+	sceneHierarchy->GetLevel(0)->intrinsics = view->calibration_information.intrinsics_d.projection_params_simple.all;
+	viewHierarchy->GetLevel(0)->intrinsics = view->calibration_information.intrinsics_d.projection_params_simple.all;
 
 	// the image hierarchy allows pointers to external data at level 0
 	// TODO: somehow fix this cast that removes const modifier... TRAVESTY!
 	viewHierarchy->GetLevel(0)->data = (FloatImage*)&view->depth;
-	sceneHierarchy->GetLevel(0)->pointsMap = trackingState->point_cloud->locations;
-	sceneHierarchy->GetLevel(0)->normalsMap = trackingState->point_cloud->colors;
+	sceneHierarchy->GetLevel(0)->pointsMap = &trackingState->point_cloud->locations;
+	sceneHierarchy->GetLevel(0)->normalsMap = &trackingState->point_cloud->colors;
 
 	scenePose = trackingState->pose_pointCloud->GetM();
 }

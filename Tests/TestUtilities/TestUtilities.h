@@ -244,4 +244,4 @@ void SaveRawDataToFile(TOStreamWrapper& file, const TElement* data, size_t eleme
 std::vector<ORUtils::SE3Pose> GenerateCameraTrajectoryAroundPoint(const Vector3f& original_viewpoint, const Vector3f& target, int degree_increment);
 
 
-} // namespace test_utilities
+} // namespace test

@@ -451,10 +451,10 @@ public:
 			const ITMLib::View* view, Matrix4f depth_camera_pose,
 			float surface_thickness) :
 			depth_image_size(view->depth.dimensions),
-			depth_camera_projection_parameters(view->calibration_information.intrinsics_d.projectionParamsSimple.all),
+			depth_camera_projection_parameters(view->calibration_information.intrinsics_d.projection_params_simple.all),
 			depth_camera_pose(depth_camera_pose),
 			rgb_image_size(view->rgb.dimensions),
-			rgb_camera_projection_parameters(view->calibration_information.intrinsics_rgb.projectionParamsSimple.all),
+			rgb_camera_projection_parameters(view->calibration_information.intrinsics_rgb.projection_params_simple.all),
 			rgb_camera_pose(
 					TVoxel::hasColorInformation ? view->calibration_information.trafo_rgb_to_depth.calib_inv * depth_camera_pose
 					                            : Matrix4f()),

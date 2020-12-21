@@ -47,9 +47,13 @@ public: // instance functions
 	using MemoryBlock<T>::UpdateDeviceFromHost;
 	using MemoryBlock<T>::UpdateHostFromDevice;
 
-	bool IsAllocated_CPU() const {
+	bool IsAllocatedForCPU() const {
 		return this->is_allocated_for_CPU;
-	};
+	}
+
+	bool IsAllocatedForCUDA() const {
+		return this->is_allocated_for_CUDA;
+	}
 
 	/** Image width & height, in pixels. */
 	Vector2<int> dimensions;
@@ -95,38 +99,38 @@ public: // instance functions
 		MemoryBlock<T>::SetFrom(source, memory_copy_direction);
 	}
 
-	void Swap(Image<T>& rhs) {
+	void Swap(Image<T>& other) {
 		using std::swap;
-		MemoryBlock<T>::Swap(rhs);
-		swap(this->dimensions, rhs.dimensions);
+		MemoryBlock<T>::Swap(other);
+		swap(this->dimensions, other.dimensions);
 	}
 
-	friend void swap(Image<T>& lhs, Image<T>& rhs) { // nothrow
-		lhs.Swap(rhs);
+	friend void swap(Image<T>& image1, Image<T>& image2) { // nothrow
+		image1.Swap(image2);
 	}
 
 	template<typename TMask>
 	void ApplyMask(const Image<TMask>& mask_image, T blank_element);
 
-	friend bool operator==(const Image<T>& rhs, const Image<T>& lhs) {
-		if (rhs.dimensions != lhs.dimensions || rhs.is_allocated_for_CPU != lhs.is_allocated_for_CPU ||
-		    rhs.is_allocated_for_CUDA != lhs.is_allocated_for_CUDA) {
+	friend bool operator==(const Image<T>& image1, const Image<T>& image2) {
+		if (image1.dimensions != image2.dimensions || image1.is_allocated_for_CPU != image2.is_allocated_for_CPU ||
+		    image1.is_allocated_for_CUDA != image2.is_allocated_for_CUDA) {
 			return false;
 		}
-		if (rhs.is_allocated_for_CPU) {
-			for (int iElement = 0; iElement < rhs.element_count; iElement++) {
-				T rhsElement = rhs.GetElement(iElement, MEMORYDEVICE_CPU);
-				T lhsElement = lhs.GetElement(iElement, MEMORYDEVICE_CPU);
-				if (rhsElement != lhsElement) {
+		if (image1.is_allocated_for_CPU) {
+			for (int i_element = 0; i_element < image1.element_count; i_element++) {
+				T image1_element = image1.GetElement(i_element, MEMORYDEVICE_CPU);
+				T image2_element = image2.GetElement(i_element, MEMORYDEVICE_CPU);
+				if (image1_element != image2_element) {
 					return false;
 				}
 			}
 		}
-		if (rhs.is_allocated_for_CUDA) {
-			for (int iElement = 0; iElement < rhs.element_count; iElement++) {
-				T rhsElement = rhs.GetElement(iElement, MEMORYDEVICE_CUDA);
-				T lhsElement = lhs.GetElement(iElement, MEMORYDEVICE_CUDA);
-				if (rhsElement != lhsElement) {
+		if (image1.is_allocated_for_CUDA) {
+			for (int i_element = 0; i_element < image1.element_count; i_element++) {
+				T image1_element = image1.GetElement(i_element, MEMORYDEVICE_CUDA);
+				T image2_element = image2.GetElement(i_element, MEMORYDEVICE_CUDA);
+				if (image1_element != image2_element) {
 					return false;
 				}
 			}
@@ -134,8 +138,8 @@ public: // instance functions
 		return true;
 	}
 
-	friend bool operator!=(const Image<T>& rhs, const Image<T>& lhs) {
-		return !(rhs == lhs);
+	friend bool operator!=(const Image<T>& image1, const Image<T>& image2) {
+		return !(image1 == image2);
 	}
 
 	Image& operator=(Image other) {
@@ -148,7 +152,7 @@ public: // instance functions
 template<typename T>
 template<typename TMask>
 void Image<T>::ApplyMask(const Image<TMask>& mask_image, T blank_element) {
-	if (!this->is_allocated_for_CPU || !mask_image.IsAllocated_CPU()) {
+	if (!this->is_allocated_for_CPU || !mask_image.IsAllocatedForCPU()) {
 		DIEWITHEXCEPTION("Cannot apply mask, either mask or source image or both are not allocated for CPU.");
 	}
 	if (this->dimensions != mask_image.dimensions) {

@@ -44,4 +44,4 @@ std::string GetFusedPath(std::string prefix, int iteration) {
 	return GetPathBase<TIndex>(prefix, iteration) + "fused.dat";
 }
 
-} // end namespace test_utilities
+} // end namespace test

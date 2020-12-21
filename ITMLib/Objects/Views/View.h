@@ -20,6 +20,8 @@
 
 #include "../Camera/CalibIO.h"
 #include "../../Utils/ImageTypes.h"
+#include "../../../ORUtils/IStreamWrapper.h"
+#include "../../../ORUtils/OStreamWrapper.h"
 
 namespace ITMLib {
 /**
@@ -67,7 +69,10 @@ public: // instance functions
 	void Swap(View& other);
 
 public: // friend functions
-
 	friend void swap(View& lhs, View& rhs) { lhs.Swap(rhs); }
+	friend bool operator==(const View& lhs, const View& rhs);
+	friend ORUtils::IStreamWrapper& operator>>(ORUtils::IStreamWrapper& source, View& view);
+	friend ORUtils::OStreamWrapper& operator<<(ORUtils::OStreamWrapper& destination, const View& view);
+
 };
-}
+}// namespace ITMLib

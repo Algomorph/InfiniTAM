@@ -20,7 +20,7 @@
 #include "../../../../ORUtils/PlatformIndependentAtomics.h"
 #include "../../../../ORUtils/CrossPlatformMacros.h"
 #include "../../../Utils/Geometry/Segment.h"
-#include "../../../../ORUtils/MemoryBlockPersistence.h"
+#include "../../../../ORUtils/MemoryBlockPersistence/MemoryBlockPersistence.h"
 
 namespace ITMLib {
 

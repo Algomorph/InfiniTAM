@@ -4,16 +4,16 @@
 #pragma once
 
 //stdlib
-#include <string>
-#include <fstream>
-#include <sstream>
+#include "../../../../../../usr/include/c++/9/string"
+#include "../../../../../../usr/include/c++/9/fstream"
+#include "../../../../../../usr/include/c++/9/sstream"
 
 //local
-#include "MemoryBlock.h"
-#include "Image.h"
-#include "OStreamWrapper.h"
-#include "IStreamWrapper.h"
-#include "TypeTraits.h"
+#include "../MemoryBlock.h"
+#include "../Image.h"
+#include "../OStreamWrapper.h"
+#include "../IStreamWrapper.h"
+#include "../TypeTraits.h"
 
 namespace ORUtils {
 
@@ -90,6 +90,40 @@ public: // static functions
 	}
 
 	/**
+	 * \brief Loads image from an input stream. Image will be resized to accommodate the size of the recorded image
+	 * if sizes don't match.
+	 *
+	 * \param file          	Successfully-opened handle to the file.
+	 * \param memory_type       The type of memory device to which to load the data.
+	 * \return 				    A new memory block with the input stream contents at the give stream position.
+	 */
+	template<typename T>
+	static void
+	LoadImage(ORUtils::IStreamWrapper& file, ORUtils::Image<T>& image, MemoryDeviceType memory_type = MEMORYDEVICE_CPU) {
+		Vector2<int> dimensions = ReadImageDimensions(file.IStream());
+		int channel_count = ReadImageChannelCount(file.IStream());
+		if(TypeTraits<T>::element_count != channel_count){
+			std::stringstream ss;
+			ss << "Read-in channel count (" << channel_count << ") doesn't match expected channel count (" << TypeTraits<T>::element_count << ").";
+			throw std::runtime_error(ss.str());
+		}
+		int pixel_count = dimensions.width * dimensions.height;
+		if(image.dimensions != dimensions){
+			image.ChangeDims(dimensions);
+		}
+		if (memory_type == MEMORYDEVICE_CUDA) {
+			// If we're loading into a block on the CUDA, first try and read the data into a temporary block on the CPU.
+			ORUtils::Image<T> cpu_image(dimensions, MEMORYDEVICE_CPU);
+			ReadArray<T,ORUtils::Image<T>>(file.IStream(), cpu_image, pixel_count);
+			// Then copy the data across to the CUDA.
+			image.SetFrom(cpu_image, MemoryCopyDirection::CPU_TO_CUDA);
+		} else {
+			// If we're loading into a block on the CPU, read the data directly into the block.
+			ReadArray<T,ORUtils::Image<T>>(file.IStream(), image, pixel_count);
+		}
+	}
+
+	/**
 	 * \brief Loads image from an input stream.
 	 *
 	 * \param file          	Successfully-opened handle to the file.
@@ -115,6 +149,7 @@ public: // static functions
 			return cpu_image;
 		}
 	}
+
 
 	/**
 	 * \brief Loads data from a file on disk into a memory block newly-allocated on the CPU with the appropriate size.

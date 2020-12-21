@@ -4,44 +4,28 @@
 
 #include "../../Utils/Math.h"
 #include "../../../ORUtils/Image.h"
+#include "../../../ORUtils/OStreamWrapper.h"
+#include "../../../ORUtils/IStreamWrapper.h"
 
-namespace ITMLib
-{
-	class PointCloud
-	{
-	public:
-		uint point_count;
+namespace ITMLib {
+class PointCloud {
+public:
+	uint point_count;
 
-		ORUtils::Image<Vector4f> *locations, *colors;
+	ORUtils::Image<Vector4f> locations, colors;
+private:
+	MemoryDeviceType memory_type;
+public:
+	explicit PointCloud(Vector2i image_size, MemoryDeviceType memory_type);
 
-		explicit PointCloud(Vector2i imgSize, MemoryDeviceType memoryType)
-		{
-			this->point_count = 0;
+	void UpdateHostFromDevice();
 
-			locations = new ORUtils::Image<Vector4f>(imgSize, memoryType);
-			colors = new ORUtils::Image<Vector4f>(imgSize, memoryType);
-		}
+	void UpdateDeviceFromHost();
 
-		void UpdateHostFromDevice()
-		{
-			this->locations->UpdateHostFromDevice();
-			this->colors->UpdateHostFromDevice();
-		}
+	friend bool operator==(const PointCloud& rhs, const PointCloud& lhs);
+	friend ORUtils::OStreamWrapper& operator<<(ORUtils::OStreamWrapper& o_stream_wrapper, const PointCloud& point_cloud);
+	friend ORUtils::IStreamWrapper& operator>>(ORUtils::IStreamWrapper& i_stream_wrapper, PointCloud& point_cloud);
 
-		void UpdateDeviceFromHost()
-		{
-			this->locations->UpdateDeviceFromHost();
-			this->colors->UpdateDeviceFromHost();
-		}
+};
 
-		~PointCloud()
-		{
-			delete locations;
-			delete colors;
-		}
-
-		// Suppress the default copy constructor and assignment operator
-		PointCloud(const PointCloud&);
-		PointCloud& operator=(const PointCloud&);
-	};
-}
+} // namespace ITMLib

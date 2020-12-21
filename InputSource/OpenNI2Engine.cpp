@@ -111,7 +111,7 @@ OpenNI2Engine::OpenNI2Engine(const char *calibFilename, const char *deviceURI, c
 	: BaseImageSourceEngine(calibFilename)
 {
 	// images from openni always come in millimeters...
-	this->calib.disparityCalib.SetStandard();
+	this->calib.disparity_calibration_coefficients.SetStandard();
 
 	this->imageSize_d = Vector2i(0,0);
 	this->imageSize_rgb = Vector2i(0,0);

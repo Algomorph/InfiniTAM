@@ -45,7 +45,7 @@ void RenderingEngine_Specialized<TVoxel, VoxelBlockHash, TMemoryDeviceType>::Fin
 			volume->GetParameters().voxel_size,
 			render_state->renderingRangeImage->dimensions,
 			pose->GetM(),
-			intrinsics->projectionParamsSimple.all
+			intrinsics->projection_params_simple.all
 	);
 
 	HashTableTraversalEngine<TMemoryDeviceType>::template TraverseUtilized_Padded(volume->index, functor);
@@ -74,7 +74,7 @@ void RenderingEngine_Specialized<TVoxel, VoxelBlockHash, TMemoryDeviceType>::Cre
 	//TODO: optimize by making rendering_blocks a member variable to avoid repeated allocations & deallocations (requires converting it to raw pointer or removing const-ness from the function)
 	ORUtils::MemoryBlock<RenderingBlock> rendering_blocks(ITMLib::MAX_RENDERING_BLOCKS, TMemoryDeviceType);
 	ProjectAndSplitBlocksFunctor<TMemoryDeviceType> project_and_split_blocks_functor(
-			rendering_blocks, pose->GetM(), intrinsics->projectionParamsSimple.all, depth_image_size, voxel_size);
+			rendering_blocks, pose->GetM(), intrinsics->projection_params_simple.all, depth_image_size, voxel_size);
 
 	//TODO: (potential optimization) figure out whether using the "Visible" list instead of the "Utilized" list makes more sense here (and how to account for visible
 	// list staying up-to-date in canonical.

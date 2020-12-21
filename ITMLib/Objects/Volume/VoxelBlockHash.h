@@ -12,7 +12,7 @@
 //ITMLib
 #include "../../Utils/Math.h"
 #include "../../../ORUtils/MemoryBlock.h"
-#include "../../../ORUtils/MemoryBlockPersistence.h"
+#include "../../../ORUtils/MemoryBlockPersistence/MemoryBlockPersistence.h"
 #include "../../Utils/Enums/HashBlockProperties.h"
 #include "../../Utils/Metacoding/PathlessSerializableStruct.h"
 

@@ -26,7 +26,7 @@
 #include "Mesh.h"
 #include "../../Utils/Analytics/AlmostEqual.h"
 #include "../../Utils/Collections/MemoryBlock_StdContainer_Convertions.h"
-#include "../../../ORUtils/MemoryBlockPersistence.h"
+#include "../../../ORUtils/MemoryBlockPersistence/MemoryBlockPersistence.h"
 #include "../../Utils/Collections/OperationsOnSTLContainers.h"
 
 using namespace ITMLib;

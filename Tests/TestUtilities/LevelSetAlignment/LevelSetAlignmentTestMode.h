@@ -24,4 +24,4 @@ enum LevelSetAlignmentTestMode {
 	TEST_FINAL_ITERATION_AND_FUSION
 };
 
-} // namespace test_utilities
+} // namespace test

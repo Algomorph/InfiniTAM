@@ -34,11 +34,22 @@ set(
         ImageCombination.cpp
         IStreamWrapper.cpp
         KeyValueConfig.cpp
-        VectorAndMatrixPersistence.cpp
-        MemoryBlockPersistence.cpp
+
         OStreamWrapper.cpp
         SE3Pose.cpp
         TypeTraits.cpp
+
+        MathTypePersistence/MathTypePersistence_Matrix4.cpp
+        MathTypePersistence/MathTypePersistence_Matrix3.cpp
+        MathTypePersistence/MathTypePersistence_Vector4.cpp
+        MathTypePersistence/MathTypePersistence_Vector6.cpp
+        MathTypePersistence/MathTypePersistence_Vector3.cpp
+        MathTypePersistence/MathTypePersistence_Vector2.cpp
+
+        MemoryBlockPersistence/MemoryBlockPersistence.cpp
+        MemoryBlockPersistence/MemoryBlockPersistenceOperators.cpp
+        MemoryBlockPersistence/ImagePersistenceOperators.cpp
+        MemoryBlockPersistence/MemoryBlockPersistenceOperators.tpp
 )
 
 set(
@@ -57,9 +68,11 @@ set(
         LexicalCast.h
         MathUtils.h
         Matrix.h
-        VectorAndMatrixPersistence.h
+        MathTypePersistence/MathTypePersistence.h
+        MathTypePersistence/MathTypePersistence_Internal.h
+        MemoryBlockPersistence/MemoryBlockPersistence.h
+        MemoryBlockPersistence/MemoryBlockPersistenceOperators.h
         MemoryBlock.h
-        MemoryBlockPersistence.h
         MemoryBlockComparison.h
         MemoryDeviceType.h
         NVTimer.h
@@ -72,15 +85,16 @@ set(
         SVMClassifier.h
         Vector.h
         TypeTraits.h
-        CompileTimeStringConcatenation.h)
+        CompileTimeStringConcatenation.h
+        )
 
 source_group("" FILES ${sources} ${headers})
 add_library(ORUtils STATIC ${sources} ${headers})
 
 # *** dependencies ***
-if(WITH_OPENMP)
+if (WITH_OPENMP)
     target_link_libraries(ORUtils PUBLIC OpenMP::OpenMP_CXX)
-endif()
+endif ()
 target_link_libraries(ORUtils PUBLIC zstr png Boost::filesystem)
 target_link_libraries(ORUtils PRIVATE wft freetype)
 target_include_directories(ORUtils PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})

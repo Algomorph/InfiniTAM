@@ -60,7 +60,7 @@ void RenderingEngine<TVoxel, TIndex, TMemoryDeviceType>::RenderImage(
 			raycast_image = render_state->forwardProjection;
 			break;
 		case IRenderingEngine::RENDER_FROM_NEW_RAYCAST:
-			GenericRaycast(volume, output_image_size, inverted_camera_pose, intrinsics->projectionParamsSimple.all, render_state, false);
+			GenericRaycast(volume, output_image_size, inverted_camera_pose, intrinsics->projection_params_simple.all, render_state, false);
 			raycast_image = render_state->raycastResult;
 			break;
 	}
@@ -114,7 +114,7 @@ void RenderingEngine<TVoxel, TIndex, TMemoryDeviceType>::RenderImage(
 template<class TVoxel, class TIndex, MemoryDeviceType TMemoryDeviceType>
 void RenderingEngine<TVoxel, TIndex, TMemoryDeviceType>::FindSurface(
 		VoxelVolume<TVoxel, TIndex>* volume, const ORUtils::SE3Pose* pose, const Intrinsics* intrinsics, const RenderState* render_state) const {
-	GenericRaycast(volume, render_state->raycastResult->dimensions, pose->GetInvM(), intrinsics->projectionParamsSimple.all, render_state, false);
+	GenericRaycast(volume, render_state->raycastResult->dimensions, pose->GetInvM(), intrinsics->projection_params_simple.all, render_state, false);
 }
 
 template<class TVoxel, class TIndex, MemoryDeviceType TMemoryDeviceType>
@@ -122,7 +122,7 @@ void RenderingEngine<TVoxel, TIndex, TMemoryDeviceType>::CreatePointCloud(
 		VoxelVolume<TVoxel, TIndex>* volume, const View* view, CameraTrackingState* camera_tracking_state, RenderState* render_state) const {
 
 	Matrix4f inverted_rgb_camera_matrix = camera_tracking_state->pose_d->GetInvM() * view->calibration_information.trafo_rgb_to_depth.calib;
-	GenericRaycast(volume, render_state->raycastResult->dimensions, inverted_rgb_camera_matrix, view->calibration_information.intrinsics_rgb.projectionParamsSimple.all,
+	GenericRaycast(volume, render_state->raycastResult->dimensions, inverted_rgb_camera_matrix, view->calibration_information.intrinsics_rgb.projection_params_simple.all,
 	               render_state, true);
 	const Vector3f light_source = -Vector3f(inverted_rgb_camera_matrix.getColumn(2));
 	RenderPointCloudFunctor<TVoxel, TIndex, TMemoryDeviceType> functor(*camera_tracking_state->point_cloud, *volume, light_source,
@@ -137,7 +137,7 @@ void RenderingEngine<TVoxel, TIndex, TMemoryDeviceType>::CreateICPMaps(
 	Vector2i map_dimensions = render_state->raycastResult->dimensions;
 	Matrix4f inverted_depth_camera_pose = camera_tracking_state->pose_d->GetInvM();
 
-	GenericRaycast(volume, map_dimensions, inverted_depth_camera_pose, view->calibration_information.intrinsics_d.projectionParamsSimple.all, render_state, true);
+	GenericRaycast(volume, map_dimensions, inverted_depth_camera_pose, view->calibration_information.intrinsics_d.projection_params_simple.all, render_state, true);
 	camera_tracking_state->pose_pointCloud->SetFrom(camera_tracking_state->pose_d);
 	Vector3f light_source = -Vector3f(inverted_depth_camera_pose.getColumn(2));
 	if (view->calibration_information.intrinsics_d.FocalLengthSignsDiffer()) {
@@ -156,7 +156,7 @@ void RenderingEngine<TVoxel, TIndex, TMemoryDeviceType>::ForwardRender(
 		const VoxelVolume<TVoxel, TIndex>* volume, const View* view, CameraTrackingState* camera_tracking_state, RenderState* render_state) const {
 
 	const Matrix4f depth_camera_pose = camera_tracking_state->pose_d->GetM();
-	const Vector4f& depth_camera_projection_parameters = view->calibration_information.intrinsics_d.projectionParamsSimple.all;
+	const Vector4f& depth_camera_projection_parameters = view->calibration_information.intrinsics_d.projection_params_simple.all;
 	int* missing_point_indices = render_state->fwdProjMissingPoints->GetData(TMemoryDeviceType);
 	render_state->forwardProjection->Clear();
 
@@ -174,7 +174,7 @@ void RenderingEngine<TVoxel, TIndex, TMemoryDeviceType>::ForwardRender(
 	render_state->noFwdProjMissingPoints = find_missing_points_functor.GetMissingPointCount();
 
 	RaycastMissingPointsFunctor<TVoxel, TIndex, TMemoryDeviceType> raycast_missing_points_functor(
-			*volume, view->calibration_information.intrinsics_d.projectionParamsSimple.all, camera_tracking_state->pose_d->GetInvM(),
+			*volume, view->calibration_information.intrinsics_d.projection_params_simple.all, camera_tracking_state->pose_d->GetInvM(),
 			*render_state->renderingRangeImage);
 
 	ImageTraversalEngine<TMemoryDeviceType>::template TraverseSampleWithPixelCoordinates(

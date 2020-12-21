@@ -175,13 +175,13 @@ void ExtendedTracker::SetEvaluationData(CameraTrackingState *trackingState, cons
 	// 		 - sceneHierarchy allows pointers to external data at level 0
 
 	// Depth image hierarchy is always used
-	viewHierarchy_Depth->GetLevel(0)->intrinsics = view->calibration_information.intrinsics_d.projectionParamsSimple.all;
+	viewHierarchy_Depth->GetLevel(0)->intrinsics = view->calibration_information.intrinsics_d.projection_params_simple.all;
 	// TODO: somehow fix this cast that removes const modifier... TRAVESTY!
 	viewHierarchy_Depth->GetLevel(0)->depth = (ORUtils::Image<float>*)&view->depth;
 
 	if (useColour)
 	{
-		viewHierarchy_Intensity->GetLevel(0)->intrinsics = view->calibration_information.intrinsics_rgb.projectionParamsSimple.all;
+		viewHierarchy_Intensity->GetLevel(0)->intrinsics = view->calibration_information.intrinsics_rgb.projection_params_simple.all;
 
 		// Convert RGB to intensity
 		lowLevelEngine->ConvertColourToIntensity(*viewHierarchy_Intensity->GetLevel(0)->intensity_current, view->rgb);
@@ -195,9 +195,9 @@ void ExtendedTracker::SetEvaluationData(CameraTrackingState *trackingState, cons
 	// Pointclouds are needed only when the depth tracker is enabled
 	if (useDepth)
 	{
-		sceneHierarchy->GetLevel(0)->intrinsics = view->calibration_information.intrinsics_d.projectionParamsSimple.all;
-		sceneHierarchy->GetLevel(0)->pointsMap = trackingState->point_cloud->locations;
-		sceneHierarchy->GetLevel(0)->normalsMap = trackingState->point_cloud->colors;
+		sceneHierarchy->GetLevel(0)->intrinsics = view->calibration_information.intrinsics_d.projection_params_simple.all;
+		sceneHierarchy->GetLevel(0)->pointsMap = &trackingState->point_cloud->locations;
+		sceneHierarchy->GetLevel(0)->normalsMap = &trackingState->point_cloud->colors;
 	}
 
 	scenePose = trackingState->pose_pointCloud->GetM();

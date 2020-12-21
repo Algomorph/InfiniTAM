@@ -173,8 +173,8 @@ void GenericCreatePointCloudTest() {
 		fixture.rendering_engine->CreateExpectedDepths(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get());
 		fixture.rendering_engine->CreatePointCloud(volume, fixture.view_17, tracking_state.get(), render_state.get());
 
-		ORUtils::Image<Vector4f>& locations = *tracking_state->point_cloud->locations;
-		ORUtils::Image<Vector4f>& colors = *tracking_state->point_cloud->colors;
+		ORUtils::Image<Vector4f>& locations = tracking_state->point_cloud->locations;
+		ORUtils::Image<Vector4f>& colors = tracking_state->point_cloud->colors;
 		unsigned int point_count = tracking_state->point_cloud->point_count;
 
 		unsigned int point_count_ground_truth;
@@ -282,8 +282,8 @@ void GenericCreateICPMapsTest() {
 		std::shared_ptr<RenderState> render_state = fixture.MakeRenderState();
 		fixture.rendering_engine->CreateExpectedDepths(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state.get());
 		fixture.rendering_engine->CreateICPMaps(volume, fixture.view_17, tracking_state.get(), render_state.get());
-		ORUtils::Image<Vector4f>& locations = *tracking_state->point_cloud->locations;
-		ORUtils::Image<Vector4f>& normals = *tracking_state->point_cloud->colors;
+		ORUtils::Image<Vector4f>& locations = tracking_state->point_cloud->locations;
+		ORUtils::Image<Vector4f>& normals = tracking_state->point_cloud->colors;
 		ORUtils::Image<Vector4f> locations_ground_truth = ORUtils::MemoryBlockPersistence::LoadImage<Vector4f>(ICP_images_file, MEMORYDEVICE_CPU);
 		ORUtils::Image<Vector4f> normals_ground_truth = ORUtils::MemoryBlockPersistence::LoadImage<Vector4f>(ICP_images_file, MEMORYDEVICE_CPU);
 		BOOST_REQUIRE(RawArraysAlmostEqual_Verbose(locations_ground_truth.GetData(MEMORYDEVICE_CPU), MEMORYDEVICE_CPU,

@@ -28,18 +28,9 @@ constexpr const char* extended_tracker_preset1 = "type=extended,levels=bbb,useDe
                                                  "outlierSpaceC=0.1,outlierSpaceF=0.004,numiterC=20,numiterF=50,"
                                                  "tukeyCutOff=8,framesToSkip=20,framesToWeight=50,failureDec=20.0";
 
-inline const std::unordered_map<const char*, std::string> matrix_file_name_by_preset = [] {
-	std::unordered_map<const char*, std::string> map(
-			{
-					{rgb_tracker_preset_rrbb,  "rgb_rrbb.mat"},
-					{rgb_tracker_preset_rrrbb, "rgb_rrrbb.mat"},
-					{rgb_tracker_preset_rrbrb, "rgb_rrbrb.mat"},
-					{extended_tracker_preset1, "extended1.mat"}
-			});
-	return map;
-}();
+extern const std::unordered_map<std::string, std::string> matrix_file_name_by_preset;
 
-} // namespace test_utilities
+} // namespace test
 
 
 

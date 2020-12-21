@@ -693,7 +693,7 @@ set(
 ## ================================================== OBJECTS ==========================================================
 set(ITMLIB_OBJECTS_CAMERA_SOURCES
     Objects/Camera/CalibIO.cpp
-    )
+    Objects/Camera/RGBD_CalibrationInformation.cpp Objects/Camera/Intrinsics.cpp Objects/Camera/Extrinsics.cpp Objects/Camera/DisparityCalib.cpp)
 
 set(ITMLIB_OBJECTS_CAMERA_HEADERS
     Objects/Camera/CalibIO.h
@@ -717,6 +717,10 @@ set(ITMLIB_OBJECTS_MISC_HEADERS
     Objects/Misc/IMUCalibrator.h
     Objects/Misc/IMUMeasurement.h
     Objects/Misc/PointCloud.h
+    )
+
+set(ITMLIB_OBJECTS_MISC_SOURCES
+    Objects/Misc/PointCloud.cpp
     )
 
 ##
@@ -984,7 +988,6 @@ set(
 #################################################################
 
 set(sources
-    ${ITMLIB_OBJECTS_VOLUME_SOURCES}
     ${ITMLIB_ENGINES_MAIN_SOURCES}
     ${ITMLIB_ENGINES_LOW_LEVEL_SOURCES}
     ${ITMLIB_ENGINES_EDIT_AND_COPY_SOURCES}
@@ -1002,6 +1005,9 @@ set(sources
     ${ITMLIB_ENGINES_ANALYTICS_SOURCES}
     ${ITMLIB_ENGINES_TELEMETRY_SOURCES}
     ${ITMLIB_ENGINES_LEVEL_SET_ALIGNMENT_SOURCES}
+    ${ITMLIB_OBJECTS_VOLUME_SOURCES}
+    ${ITMLIB_OBJECTS_VIEWS_SOURCES}
+    ${ITMLIB_OBJECTS_MISC_SOURCES}
     ${ITMLIB_OBJECTS_CAMERA_SOURCES}
     ${ITMLIB_OBJECTS_MESHING_SOURCES}
     ${ITMLIB_OBJECTS_RENDER_STATE_SOURCES}
@@ -1040,11 +1046,9 @@ set(headers
     ${ITMLIB_OBJECTS_MESHING_HEADERS}
     ${ITMLIB_OBJECTS_MISC_HEADERS}
     ${ITMLIB_OBJECTS_RENDER_STATE_HEADERS}
-    ${ITMLIB_OBJECTS_VOLUME_SOURCES}
     ${ITMLIB_OBJECTS_VOLUME_HEADERS}
     ${ITMLIB_OBJECTS_TRACKING_HEADERS}
     ${ITMLIB_OBJECTS_VIEWS_HEADERS}
-    ${ITMLIB_OBJECTS_VIEWS_SOURCES}
     ${ITMLIB_CAMERA_TRACKERS_HEADERS}
     ${ITMLIB_CAMERA_TRACKERS_CPU_HEADERS}
     ${ITMLIB_CAMERA_TRACKERS_CUDA_HEADERS}

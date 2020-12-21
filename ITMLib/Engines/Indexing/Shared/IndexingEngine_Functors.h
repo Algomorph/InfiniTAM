@@ -275,7 +275,7 @@ public: // instance functions
 			far_clipping_distance(volume_parameters.far_clipping_distance),
 			inverted_camera_pose(inverted_depth_camera_pose),
 			inverted_projection_parameters([&view]() {
-				Vector4f params = view->calibration_information.intrinsics_d.projectionParamsSimple.all;
+				Vector4f params = view->calibration_information.intrinsics_d.projection_params_simple.all;
 				params.fx = 1.0f / params.fx;
 				params.fy = 1.0f / params.fy;
 				return params;

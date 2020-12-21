@@ -7,7 +7,7 @@
 #include "../../Utils/Math.h"
 #include "../../Utils/Metacoding/PathlessSerializableStruct.h"
 #include "../../../ORUtils/MemoryBlock.h"
-#include "../../../ORUtils/MemoryBlockPersistence.h"
+#include "../../../ORUtils/MemoryBlockPersistence/MemoryBlockPersistence.h"
 
 namespace ITMLib {
 

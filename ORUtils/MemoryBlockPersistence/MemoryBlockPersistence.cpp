@@ -15,9 +15,12 @@
 //  ================================================================
 //local
 #include "MemoryBlockPersistence.h"
-#include "Vector.h"
+#include "../Vector.h"
 
 namespace ORUtils {
+
+//TODO: internalize the Save/Load functions, leave only operators >> and << in the ORUtils namespace (this will involve massive refactoring
+// of ITMLib code).
 
 template void MemoryBlockPersistence::SaveImage<bool>(OStreamWrapper& file, const ORUtils::Image<bool>& image);
 template void MemoryBlockPersistence::SaveImage<char>(OStreamWrapper& file, const ORUtils::Image<char>& image);

@@ -290,8 +290,8 @@ public: // instance functions
 			  voxels(volume.GetVoxels()),
 			  index_data(volume.index.GetIndexData()),
 			  voxel_size(volume.GetParameters().voxel_size),
-			  colors(point_cloud.colors->GetData(TMemoryDeviceType)),
-			  locations(point_cloud.locations->GetData(TMemoryDeviceType)),
+			  colors(point_cloud.colors.GetData(TMemoryDeviceType)),
+			  locations(point_cloud.locations.GetData(TMemoryDeviceType)),
 			  light_source(light_source) {
 		INITIALIZE_ATOMIC(unsigned int, point_count, 0u);
 	}
@@ -349,8 +349,8 @@ private: // instance variables
 public: // instance functions
 	ICPMapRenderFunctor(CameraTrackingState& camera_tracking_state, const float voxel_size, const RenderState& render_state,
 	                    const Vector3f light_source)
-			: locations(camera_tracking_state.point_cloud->locations->GetData(TMemoryDeviceType)),
-			  normals(camera_tracking_state.point_cloud->colors->GetData(TMemoryDeviceType)),
+			: locations(camera_tracking_state.point_cloud->locations.GetData(TMemoryDeviceType)),
+			  normals(camera_tracking_state.point_cloud->colors.GetData(TMemoryDeviceType)),
 			  voxel_size(voxel_size),
 			  map_dimensions(render_state.raycastResult->dimensions),
 			  raycast_points(render_state.raycastResult->GetData(TMemoryDeviceType)),

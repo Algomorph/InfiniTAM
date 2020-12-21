@@ -49,7 +49,7 @@ if (BUILD_TESTS)
             TestUtilities/LevelSetAlignment/TestCaseOrganizationBySwitches.tpp
             TestUtilities/LevelSetAlignment/TestCaseOrganizationBySwitches.cpp
             TestUtilities/LevelSetAlignment/SingleIterationTestConditions.cpp
-    )
+            TestUtilities/RigidTrackerPresets.cpp)
 
     set(
             TEST_UTILITIES_HEADERS

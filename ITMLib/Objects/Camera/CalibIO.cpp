@@ -22,6 +22,7 @@ bool ITMLib::readIntrinsics(std::istream & src, Intrinsics & dest)
 	return true;
 }
 
+
 bool ITMLib::readIntrinsics(const char *fileName, Intrinsics & dest)
 {
 	std::ifstream f(fileName);
@@ -41,6 +42,7 @@ bool ITMLib::readExtrinsics(std::istream & src, Extrinsics & dest)
 	return true;
 }
 
+
 bool ITMLib::readExtrinsics(const char *fileName, Extrinsics & dest)
 {
 	std::ifstream f(fileName);
@@ -53,14 +55,14 @@ bool ITMLib::readDisparityCalib(std::istream & src, DisparityCalib & dest)
 	src >> word;
 	if (src.fail()) return false;
 
-	DisparityCalib::TrafoType type = DisparityCalib::TRAFO_KINECT;
+	DisparityCalib::TrafoType type = DisparityCalib::TrafoType::TRAFO_KINECT;
 	float a,b;
 
 	if (word.compare("kinect") == 0) {
-		type = DisparityCalib::TRAFO_KINECT;
+		type = DisparityCalib::TrafoType::TRAFO_KINECT;
 		src >> a;
 	} else if (word.compare("affine") == 0) {
-		type = DisparityCalib::TRAFO_AFFINE;
+		type = DisparityCalib::TrafoType::TRAFO_AFFINE;
 		src >> a;
 	} else {
 		std::stringstream wordstream(word);
@@ -72,13 +74,15 @@ bool ITMLib::readDisparityCalib(std::istream & src, DisparityCalib & dest)
 	if (src.fail()) return false;
 
 	if ((a == 0.0f) && (b == 0.0f)) {
-		type = DisparityCalib::TRAFO_AFFINE;
+		type = DisparityCalib::TrafoType::TRAFO_AFFINE;
 		a = 1.0f/1000.0f; b = 0.0f;
 	}
 
 	dest.SetFrom(a, b, type);
 	return true;
 }
+
+
 
 bool ITMLib::readDisparityCalib(const char *fileName, DisparityCalib & dest)
 {
@@ -91,7 +95,7 @@ bool ITMLib::readRGBDCalib(std::istream & src, RGBD_CalibrationInformation & des
 	if (!ITMLib::readIntrinsics(src, dest.intrinsics_rgb)) return false;
 	if (!ITMLib::readIntrinsics(src, dest.intrinsics_d)) return false;
 	if (!ITMLib::readExtrinsics(src, dest.trafo_rgb_to_depth)) return false;
-	if (!ITMLib::readDisparityCalib(src, dest.disparityCalib)) return false;
+	if (!ITMLib::readDisparityCalib(src, dest.disparity_calibration_coefficients)) return false;
 	return true;
 }
 
@@ -107,7 +111,7 @@ bool ITMLib::readRGBDCalib(const char *rgbIntrinsicsFile, const char *depthIntri
 	ret &= ITMLib::readIntrinsics(rgbIntrinsicsFile, dest.intrinsics_rgb);
 	ret &= ITMLib::readIntrinsics(depthIntrinsicsFile, dest.intrinsics_d);
 	ret &= ITMLib::readExtrinsics(extrinsicsFile, dest.trafo_rgb_to_depth);
-	ret &= ITMLib::readDisparityCalib(disparityCalibFile, dest.disparityCalib);
+	ret &= ITMLib::readDisparityCalib(disparityCalibFile, dest.disparity_calibration_coefficients);
 	return ret;
 }
 
@@ -117,8 +121,8 @@ void ITMLib::writeIntrinsics(std::ostream & dest, const Intrinsics & src)
 	const float dummySizeX = 640, dummySizeY = 480;
 
 	dest << dummySizeX << ' ' << dummySizeY << '\n';
-	dest << src.projectionParamsSimple.fx << ' ' << src.projectionParamsSimple.fy << '\n';
-	dest << src.projectionParamsSimple.px << ' ' << src.projectionParamsSimple.py << '\n';
+	dest << src.projection_params_simple.fx << ' ' << src.projection_params_simple.fy << '\n';
+	dest << src.projection_params_simple.cx << ' ' << src.projection_params_simple.cy << '\n';
 }
 
 void ITMLib::writeExtrinsics(std::ostream & dest, const Extrinsics & src)
@@ -133,10 +137,10 @@ void ITMLib::writeDisparityCalib(std::ostream & dest, const DisparityCalib & src
 {
 	switch(src.GetType())
 	{
-		case DisparityCalib::TRAFO_AFFINE:
+		case DisparityCalib::TrafoType::TRAFO_AFFINE:
 			dest << "affine " << src.GetParams().x << ' ' << src.GetParams().y << '\n';
 			break;
-		case DisparityCalib::TRAFO_KINECT:
+		case DisparityCalib::TrafoType::TRAFO_KINECT:
 			dest << src.GetParams().x << ' ' << src.GetParams().y << '\n';
 			break;
 		default:
@@ -152,7 +156,7 @@ void ITMLib::writeRGBDCalib(std::ostream & dest, const RGBD_CalibrationInformati
 	dest << '\n';
 	writeExtrinsics(dest, src.trafo_rgb_to_depth);
 	dest << '\n';
-	writeDisparityCalib(dest, src.disparityCalib);
+	writeDisparityCalib(dest, src.disparity_calibration_coefficients);
 }
 
 void ITMLib::writeRGBDCalib(const char *fileName, const RGBD_CalibrationInformation & src)

@@ -25,7 +25,7 @@ RealSenseEngine::RealSenseEngine(const char *calibFilename, bool alignColourWith
 : BaseImageSourceEngine(calibFilename),
   colourStream(alignColourWithDepth ? rs::stream::color_aligned_to_depth : rs::stream::color)
 {
-	this->calib.disparityCalib.SetStandard();
+	this->calib.disparity_calibration_coefficients.SetStandard();
 	this->calib.trafo_rgb_to_depth = ITMExtrinsics();
 	this->calib.intrinsics_d = this->calib.intrinsics_rgb;
 
@@ -49,15 +49,15 @@ RealSenseEngine::RealSenseEngine(const char *calibFilename, bool alignColourWith
 	rs::intrinsics intrinsics_depth = data->dev->get_stream_intrinsics(rs::stream::depth);
 	rs::intrinsics intrinsics_rgb = data->dev->get_stream_intrinsics(colourStream);
 
-	this->calib.intrinsics_d.projectionParamsSimple.fx = intrinsics_depth.fx;
-	this->calib.intrinsics_d.projectionParamsSimple.fy = intrinsics_depth.fy;
-	this->calib.intrinsics_d.projectionParamsSimple.px = intrinsics_depth.ppx;
-	this->calib.intrinsics_d.projectionParamsSimple.py = intrinsics_depth.ppy;
+	this->calib.intrinsics_d.projection_params_simple.fx = intrinsics_depth.fx;
+	this->calib.intrinsics_d.projection_params_simple.fy = intrinsics_depth.fy;
+	this->calib.intrinsics_d.projection_params_simple.cx = intrinsics_depth.ppx;
+	this->calib.intrinsics_d.projection_params_simple.py = intrinsics_depth.ppy;
 
-	this->calib.intrinsics_rgb.projectionParamsSimple.fx = intrinsics_rgb.fx;
-	this->calib.intrinsics_rgb.projectionParamsSimple.fy = intrinsics_rgb.fy;
-	this->calib.intrinsics_rgb.projectionParamsSimple.px = intrinsics_rgb.ppx;
-	this->calib.intrinsics_rgb.projectionParamsSimple.py = intrinsics_rgb.ppy;
+	this->calib.intrinsics_rgb.projection_params_simple.fx = intrinsics_rgb.fx;
+	this->calib.intrinsics_rgb.projection_params_simple.fy = intrinsics_rgb.fy;
+	this->calib.intrinsics_rgb.projection_params_simple.cx = intrinsics_rgb.ppx;
+	this->calib.intrinsics_rgb.projection_params_simple.py = intrinsics_rgb.ppy;
 
 	rs::extrinsics rs_extrinsics = data->dev->get_extrinsics(colourStream, rs::stream::depth);
 
@@ -74,7 +74,7 @@ RealSenseEngine::RealSenseEngine(const char *calibFilename, bool alignColourWith
 
 	this->calib.trafo_rgb_to_depth.SetFrom(extrinsics);
 
-	this->calib.disparityCalib.SetFrom(data->dev->get_depth_scale(), 0.0f,
+	this->calib.disparity_calibration_coefficients.SetFrom(data->dev->get_depth_scale(), 0.0f,
 		ITMDisparityCalib::TRAFO_AFFINE);
 
 	data->dev->start();

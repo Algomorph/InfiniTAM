@@ -58,7 +58,7 @@ calculate_projected_surfel_bounds(int locId, int indexImageWidth, int indexImage
 	cx = locId % indexImageWidth, cy = locId / indexImageWidth;
 
 	// Calculate the square of the radius of the circle to use to represent the projected surfel in the index image.
-	float f = 0.5f * (intrinsics.projectionParamsSimple.fx + intrinsics.projectionParamsSimple.fy);
+	float f = 0.5f * (intrinsics.projection_params_simple.fx + intrinsics.projection_params_simple.fy);
 	int projectedRadius = static_cast<int>(radius * f / z + 0.5f);
 	projectedRadiusSquared = projectedRadius * projectedRadius;
 
@@ -119,8 +119,8 @@ inline bool project_surfel_to_index_image(const TSurfel& surfel, const Matrix4f&
 	if (z <= 0.0f) return false;
 
 	// Project the point onto the image plane of the current frame.
-	float ux = intrinsics.projectionParamsSimple.fx * v.x / z + intrinsics.projectionParamsSimple.px;
-	float uy = intrinsics.projectionParamsSimple.fy * v.y / z + intrinsics.projectionParamsSimple.py;
+	float ux = intrinsics.projection_params_simple.fx * v.x / z + intrinsics.projection_params_simple.cx;
+	float uy = intrinsics.projection_params_simple.fy * v.y / z + intrinsics.projection_params_simple.cy;
 
 	// Convert the projected point into index image coordinates.
 	int x = static_cast<int>(ux * scaleFactor + 0.5f);

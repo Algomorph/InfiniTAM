@@ -32,7 +32,7 @@
 
 // === ORUtils ===
 #include "../ORUtils/FileUtils.h"
-#include "../ORUtils/VectorAndMatrixPersistence.h"
+#include "../ORUtils/MathTypePersistence/MathTypePersistence.h"
 
 // === ITMLib ===
 //(CPU)
@@ -40,8 +40,10 @@
 #include "../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_VoxelBlockHash_CPU.h"
 //(CUDA)
 #ifndef COMPILE_WITHOUT_CUDA
+
 #include "../ITMLib/Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
 #include "../ITMLib/Engines/Indexing/VBH/CUDA/IndexingEngine_VoxelBlockHash_CUDA.h"
+
 #endif
 //(misc)
 #include "../ITMLib/Engines/Rendering/RenderingEngineFactory.h"
@@ -144,7 +146,7 @@ void ConstructSnoopyMaskedVolumes16and17() {
 	test::ConstructGeneratedArraysDirectoryIfMissing();
 
 	ORUtils::OStreamWrapper bounds_file(std::string(test::generated_arrays_directory) + "snoopy_16_and_17_partial_volume_bounds.dat", false);
-	ORUtils::SaveMatrix(bounds_file, union_bounds);
+	bounds_file << union_bounds;
 	LOG4CPLUS_INFO(log4cplus::Logger::getRoot(), "Voxel bounds for partial volumes are: " << union_bounds);
 
 	bounds_file.OStream().write(reinterpret_cast<const char*>(&union_bounds.min_x), sizeof(int));
@@ -619,8 +621,8 @@ void GenerateRenderingTestData_VoxelBlockHash() {
 
 			point_cloud_images_file.OStream().write(reinterpret_cast<const char*>(&(tracking_state->point_cloud->point_count)),
 			                                        sizeof(unsigned int));
-			ORUtils::MemoryBlockPersistence::SaveImage(point_cloud_images_file, *tracking_state->point_cloud->locations);
-			ORUtils::MemoryBlockPersistence::SaveImage(point_cloud_images_file, *tracking_state->point_cloud->colors);
+			ORUtils::MemoryBlockPersistence::SaveImage(point_cloud_images_file, tracking_state->point_cloud->locations);
+			ORUtils::MemoryBlockPersistence::SaveImage(point_cloud_images_file, tracking_state->point_cloud->colors);
 		}
 
 		LOG4CPLUS_INFO(log4cplus::Logger::getRoot(), "Generating raycast-to-ICP-map (projected point cloud) conversion test data ... ");
@@ -628,11 +630,10 @@ void GenerateRenderingTestData_VoxelBlockHash() {
 		{
 			// colors -- interpreted as normals -- honestly, WTF, Oxford? Yeah, I'm blaming you, Oxford, you heard me! -- of the point cloud in the "tracking state")
 			std::shared_ptr<RenderState> render_state_create_ICP_maps = fixture.MakeRenderState();
-			fixture.rendering_engine->CreateExpectedDepths(volume, &pose, &fixture.calibration_data.intrinsics_d,
-			                                               render_state_create_ICP_maps.get());
+			fixture.rendering_engine->CreateExpectedDepths(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state_create_ICP_maps.get());
 			fixture.rendering_engine->CreateICPMaps(volume, fixture.view_17, tracking_state.get(), render_state_create_ICP_maps.get());
-			ORUtils::MemoryBlockPersistence::SaveImage(ICP_images_file, *tracking_state->point_cloud->locations);
-			ORUtils::MemoryBlockPersistence::SaveImage(ICP_images_file, *tracking_state->point_cloud->colors);
+			ORUtils::MemoryBlockPersistence::SaveImage(ICP_images_file, tracking_state->point_cloud->locations);
+			ORUtils::MemoryBlockPersistence::SaveImage(ICP_images_file, tracking_state->point_cloud->colors);
 		}
 
 		LOG4CPLUS_INFO(log4cplus::Logger::getRoot(),
@@ -711,30 +712,26 @@ void GenerateRigidAlignmentTestData() {
 	                                                        << DeviceString<TMemoryDeviceType>() << ") ...");
 	View* view = nullptr;
 
-	// generate volume for teddy scene frame 115
+	// generate teddy_volume_115 for teddy scene frame 115
 	UpdateView(&view,
 	           std::string(teddy::frame_115_depth_path),
 	           std::string(teddy::frame_115_color_path),
 	           std::string(teddy::calibration_path),
 	           TMemoryDeviceType);
 
-	VoxelVolume<TSDFVoxel_f_rgb, TIndex> volume(teddy::DefaultVolumeParameters(), false, TMemoryDeviceType,
-	                                            teddy::InitializationParameters<TIndex>());
-	volume.Reset();
+	VoxelVolume<TSDFVoxel_f_rgb, TIndex> teddy_volume_115(teddy::DefaultVolumeParameters(), false, TMemoryDeviceType,
+	                                                      teddy::InitializationParameters<TIndex>());
+	teddy_volume_115.Reset();
 	IndexingEngineInterface<TSDFVoxel_f_rgb, TIndex>* indexing_engine = IndexingEngineFactory::Build<TSDFVoxel_f_rgb, TIndex>(TMemoryDeviceType);
 	CameraTrackingState camera_tracking_state(teddy::frame_image_size, TMemoryDeviceType);
-	indexing_engine->AllocateNearSurface(&volume, view, &camera_tracking_state);
+	indexing_engine->AllocateNearSurface(&teddy_volume_115, view, &camera_tracking_state);
 	DepthFusionEngineInterface<TSDFVoxel_f_rgb, TIndex>* depth_fusion_engine = DepthFusionEngineFactory::Build<TSDFVoxel_f_rgb, TIndex>(
 			TMemoryDeviceType);
-	depth_fusion_engine->IntegrateDepthImageIntoTsdfVolume(&volume, view);
+	depth_fusion_engine->IntegrateDepthImageIntoTsdfVolume(&teddy_volume_115, view);
 
-
-	auto meshing_engine = MeshingEngineFactory::Build<TSDFVoxel_f_rgb, TIndex>(TMemoryDeviceType);
-	auto mesh = meshing_engine->MeshVolume(&volume);
-	mesh.WritePLY(std::string(test::generated_mesh_directory) + "teddy_000115.ply");
 
 	ConstructGeneratedVolumeSubdirectoriesIfMissing();
-	volume.SaveToDisk(teddy::Volume115Path<TIndex>());
+	teddy_volume_115.SaveToDisk(teddy::Volume115Path<TIndex>());
 
 	// generate rigid tracker outputs for next frame in the sequence
 
@@ -757,20 +754,32 @@ void GenerateRigidAlignmentTestData() {
 	                         TMemoryDeviceType);
 
 	for (auto& pair : test::matrix_file_name_by_preset) {
+		//__DEBUG
+		if (std::string(pair.first) != test::extended_tracker_preset1) {
+			continue;
+		}
 		CameraTrackingState tracking_state(teddy::frame_image_size, TMemoryDeviceType);
-		rendering_engine->CreatePointCloud(&volume, view, &tracking_state, &render_state);
-		const char* const& preset = pair.first;
+		rendering_engine->CreatePointCloud(&teddy_volume_115, view, &tracking_state, &render_state);
+		const std::string& preset = pair.first;
 		const std::string& matrix_filename = pair.second;
 		CameraTracker* tracker = CameraTrackerFactory::Instance().Make(
-				TMemoryDeviceType, preset, teddy::frame_image_size, teddy::frame_image_size,
+				TMemoryDeviceType, preset.c_str(), teddy::frame_image_size, teddy::frame_image_size,
 				image_processing_engine, imu_calibrator,
 				teddy::DefaultVolumeParameters());
+
+		//__DEBUG
+		ORUtils::OStreamWrapper point_cloud_writer(std::string(test::generated_arrays_directory) + "/point_cloud.dat");
+		point_cloud_writer << *tracking_state.point_cloud;
+
 		tracker->TrackCamera(&tracking_state, view);
 		std::string matrix_path = std::string(test::generated_matrix_directory) + "/" + matrix_filename;
 		ORUtils::OStreamWrapper matrix_writer(matrix_path, false);
-		ORUtils::SaveMatrix(matrix_writer, tracking_state.pose_d->GetM());
+		matrix_writer << tracking_state.pose_d->GetM();
+
 		//__DEBUG
-		std::cout << preset << ": " << tracking_state.pose_d->GetM() << std::endl;
+		std::cout << preset << ": " << std::endl << tracking_state.pose_d->GetM() << std::endl;
+
+		tracking_state.pose_d->SetM(Matrix4f::Identity());
 		delete tracker;
 	}
 

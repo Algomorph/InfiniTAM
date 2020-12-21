@@ -80,4 +80,4 @@ public: // instance functions
 		delete render_state;
 	}
 };
-} // namespace test_utilities
+} // namespace test

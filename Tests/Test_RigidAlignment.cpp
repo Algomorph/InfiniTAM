@@ -21,7 +21,7 @@
 #include "../ITMLib/Engines/ImageProcessing/ImageProcessingEngineFactory.h"
 #include "../ITMLib/Objects/Misc/IMUCalibrator.h"
 #include "../ITMLib/Engines/Rendering/RenderingEngineFactory.h"
-#include "../ORUtils/VectorAndMatrixPersistence.h"
+#include "../ORUtils/MathTypePersistence/MathTypePersistence.h"
 #include "../ITMLib/Utils/Analytics/AlmostEqual.h"
 
 template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
@@ -92,26 +92,38 @@ public:
 
 
 template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
-void GenericRigidTrackerTest(const char* preset, TestEnvironment<TIndex, TMemoryDeviceType>& environment) {
+void GenericRigidTrackerTest(const std::string& preset, TestEnvironment<TIndex, TMemoryDeviceType>& environment) {
 	BOOST_TEST_MESSAGE("Using preset: " << preset);
 
 
 	CameraTracker* tracker = CameraTrackerFactory::Instance().Make(
-			TMemoryDeviceType, preset, teddy::frame_image_size, teddy::frame_image_size,
+			TMemoryDeviceType, preset.c_str(), teddy::frame_image_size, teddy::frame_image_size,
 			environment.image_processing_engine, environment.imu_calibrator,
 			teddy::DefaultVolumeParameters()
 	);
+
+
+	//__DEBUG
+	PointCloud point_cloud_gt(teddy::frame_image_size, TMemoryDeviceType);
+	ORUtils::IStreamWrapper point_cloud_reader(std::string(test::generated_arrays_directory) + "/point_cloud.dat");
+	point_cloud_reader >> point_cloud_gt;
+	BOOST_REQUIRE(point_cloud_gt == *environment.tracking_state.point_cloud);
+
+
 	tracker->TrackCamera(&environment.tracking_state, environment.view_teddy_frame116);
 
 	const std::string& matrix_filename = test::matrix_file_name_by_preset.at(preset);
 	std::string matrix_path = std::string(test::generated_matrix_directory) + "/" + matrix_filename;
 	ORUtils::IStreamWrapper matrix_reader(matrix_path);
-	auto depth_matrix_gt = ORUtils::LoadMatrix<Matrix4f>(matrix_reader);
+	Matrix4f depth_matrix_gt;
+	matrix_reader >> depth_matrix_gt;
 
+	//__DEBUG
+	std::cout << matrix_filename << std::endl << std::endl;
 	std::cout << depth_matrix_gt << std::endl;
 	std::cout << environment.tracking_state.pose_d->GetM() << std::endl;
 
-	BOOST_REQUIRE(AlmostEqual(depth_matrix_gt, environment.tracking_state.pose_d->GetM(), 1.0e-6));
+	BOOST_REQUIRE(AlmostEqual(depth_matrix_gt, environment.tracking_state.pose_d->GetM(), 1.0e-3));
 	environment.ResetTrackingState();
 
 	delete tracker;

@@ -344,7 +344,7 @@ inline void calculate_radius(int locId, const float *depthMap, const Vector3f *n
     // radius by f / d, hence its unprojected radius should be sqrt(2) / (f / d) = sqrt(2) * d / f. Note that this is the radius calculation used
     // in the "Dense Planar SLAM" paper, rather than the one used in the original Keller paper.
     float d = depthMap[locId];
-    float f = 0.5f * (intrinsics.projectionParamsSimple.fx + intrinsics.projectionParamsSimple.fy);
+    float f = 0.5f * (intrinsics.projection_params_simple.fx + intrinsics.projection_params_simple.fy);
     r = sqrt(2.0f) * d / f;
   }
 
@@ -365,7 +365,7 @@ inline void calculate_vertex_position(int locId, int width, const Intrinsics& in
 {
   /*
   v(~u~) = D(~u~) K^{-1} (~u~^T,1)^T
-         = D(~u~) (fx 0 px)^{-1} (ux) = D(~u~) ((ux - px) / fx)
+         = D(~u~) (fx 0 cx)^{-1} (ux) = D(~u~) ((ux - cx) / fx)
                   (0 fy py)      (uy)          ((uy - py) / fy)
                   (0  0  1)      ( 1)          (             1)
   */
@@ -377,8 +377,8 @@ inline void calculate_vertex_position(int locId, int width, const Intrinsics& in
   if(fabs(depth + 1) > EPSILON) // i.e. if(depth != -1)
   {
     value = Vector4f(
-      depth * (ux - intrinsics.projectionParamsSimple.px) / intrinsics.projectionParamsSimple.fx,
-      depth * (uy - intrinsics.projectionParamsSimple.py) / intrinsics.projectionParamsSimple.fy,
+		    depth * (ux - intrinsics.projection_params_simple.cx) / intrinsics.projection_params_simple.fx,
+		    depth * (uy - intrinsics.projection_params_simple.cy) / intrinsics.projection_params_simple.fy,
       depth,
       1.0f
     );

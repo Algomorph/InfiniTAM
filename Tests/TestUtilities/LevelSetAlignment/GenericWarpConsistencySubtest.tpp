@@ -164,4 +164,4 @@ void GenericMultiIterationAlignmentSubtest(const LevelSetAlignmentSwitches& swit
 	delete volume_fusion_engine;
 }
 
-} // namespace test_utilities
+} // namespace test

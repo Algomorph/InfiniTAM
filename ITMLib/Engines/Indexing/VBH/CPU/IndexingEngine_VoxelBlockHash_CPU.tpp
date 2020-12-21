@@ -84,7 +84,7 @@ void IndexingEngine_VoxelBlockHash_MemoryDeviceTypeSpecialized<MEMORYDEVICE_CPU,
 	HashSwapState* swapStates = volume->SwappingEnabled() ? volume->global_cache.GetSwapStates(false) : 0;
 
 	// ** view data **
-	Vector4f depth_camera_projection_parameters = view->calibration_information.intrinsics_d.projectionParamsSimple.all;
+	Vector4f depth_camera_projection_parameters = view->calibration_information.intrinsics_d.projection_params_simple.all;
 	Vector2i depth_image_size = view->depth.dimensions;
 	float voxel_size = volume->GetParameters().voxel_size;
 

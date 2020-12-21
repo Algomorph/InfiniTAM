@@ -24,4 +24,4 @@ const LevelSetAlignmentTerminationConditions& SingleIterationTerminationConditio
 	return single_iteration_termination_conditions;
 }
 
-} // namespace test_utilities
+} // namespace test

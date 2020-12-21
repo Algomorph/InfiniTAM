@@ -185,7 +185,7 @@ LibUVCEngine::LibUVCEngine(const char *calibFilename, Vector2i requested_imageSi
 	: BaseImageSourceEngine(calibFilename)
 {
 	// default values to be returned if nothing else works
-	this->calib.disparityCalib.SetStandard();
+	this->calib.disparity_calibration_coefficients.SetStandard();
 	this->imageSize_rgb = Vector2i(0,0);
 	this->imageSize_d = Vector2i(0,0);
 
@@ -215,7 +215,7 @@ LibUVCEngine::LibUVCEngine(const char *calibFilename, Vector2i requested_imageSi
 		}
 
 		bool providesTwoStreams = knownDeviceIDs[deviceID].providesTwoStreams;
-		this->calib.disparityCalib.SetFrom(knownDeviceIDs[deviceID].depthScaleFactor,
+		this->calib.disparity_calibration_coefficients.SetFrom(knownDeviceIDs[deviceID].depthScaleFactor,
 			0.0f, ITMLib::DisparityCalib::TRAFO_AFFINE);
 
 		// Step 2: find depth and rgb sub devices

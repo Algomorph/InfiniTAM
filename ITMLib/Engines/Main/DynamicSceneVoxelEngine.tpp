@@ -48,7 +48,7 @@ namespace fs = std::filesystem;
 #include "../../../ORUtils/FileUtils.h"
 #include "../../../ORUtils/FileUtils.h"
 #include "../../Utils/Telemetry/TelemetryUtilities.h"
-#include "../../../ORUtils/VectorAndMatrixPersistence.h"
+#include "../../../ORUtils/MathTypePersistence/MathTypePersistence.h"
 #include "../../../ORUtils/DrawText.h"
 
 using namespace ITMLib;
@@ -211,7 +211,7 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::SaveToFile(const std::strin
 	canonical_volume->SaveToDisk(path + "/canonical_volume.dat");
 	live_volumes[0]->SaveToDisk(path + "/live_volume.dat");
 	ORUtils::OStreamWrapper camera_matrix_file(path + "/camera_matrix.dat");
-	ORUtils::SaveMatrix(camera_matrix_file, tracking_state->pose_d->GetM());
+	camera_matrix_file << tracking_state->pose_d->GetM();
 }
 
 template<typename TVoxel, typename TWarp, typename TIndex>
@@ -248,7 +248,9 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::LoadFromFile(const std::str
 	}
 
 	ORUtils::IStreamWrapper camera_matrix_file(path + "/camera_matrix.dat");
-	tracking_state->pose_d->SetM(ORUtils::LoadMatrix<Matrix4f>(camera_matrix_file));
+	Matrix4f camera_matrix;
+	camera_matrix_file >> camera_matrix;
+	tracking_state->pose_d->SetM(camera_matrix);
 
 	try // load scene
 	{

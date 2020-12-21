@@ -20,7 +20,7 @@ namespace fs = std::filesystem;
 
 //local
 #include "TelemetryRecorder.h"
-#include "../../../ORUtils/VectorAndMatrixPersistence.h"
+#include "../../../ORUtils/MathTypePersistence/MathTypePersistence.h"
 #include "../../Utils/Configuration/Configuration.h"
 #include "../../Utils/Logging/ConsolePrintColors.h"
 #include "../../Utils/Telemetry/TelemetryUtilities.h"
@@ -72,7 +72,7 @@ void TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::RecordVolumeMe
 template<typename TVoxel, typename TWarp, typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void TelemetryRecorder<TVoxel, TWarp, TIndex, TMemoryDeviceType>::RecordCameraPose(const Matrix4f& camera_pose) {
 	if (parameters.record_camera_matrices) {
-		ORUtils::SaveMatrix(camera_trajectory_file, camera_pose);
+		camera_trajectory_file << camera_pose;
 	}
 }
 

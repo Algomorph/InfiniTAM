@@ -44,4 +44,4 @@ GenericMultiIterationAlignmentTest(const LevelSetAlignmentSwitches& switches, in
                                    float absolute_tolerance, float tolerance_divergence_factor = 1.00f);
 
 
-} // namespace test_utilities
+} // namespace test

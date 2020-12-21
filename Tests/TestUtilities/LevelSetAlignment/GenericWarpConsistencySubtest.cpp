@@ -42,4 +42,4 @@ GenericMultiIterationAlignmentSubtest<VoxelBlockHash, MEMORYDEVICE_CUDA>(const L
                                                                          float absolute_tolerance, float tolerance_divergence_factor);
 #endif
 
-} // namespace test_utilities
+} // namespace test

@@ -193,11 +193,11 @@ CalibSource::CalibSource(const char *calibFilename, Vector2i setImageSize, float
 
 void CalibSource::ResizeIntrinsics(Intrinsics &intrinsics, float ratio)
 {
-	intrinsics.projectionParamsSimple.fx *= ratio;
-	intrinsics.projectionParamsSimple.fy *= ratio;
-	intrinsics.projectionParamsSimple.px *= ratio;
-	intrinsics.projectionParamsSimple.py *= ratio;
-	intrinsics.projectionParamsSimple.all *= ratio;
+	intrinsics.projection_params_simple.fx *= ratio;
+	intrinsics.projection_params_simple.fy *= ratio;
+	intrinsics.projection_params_simple.cx *= ratio;
+	intrinsics.projection_params_simple.cy *= ratio;
+	intrinsics.projection_params_simple.all *= ratio;
 }
 
 RawFileReader::RawFileReader(const char *calibration_file_name, const char *rgb_image_filename_mask, const char *depth_image_filename_mask, Vector2i image_size, float ratio)
@@ -219,11 +219,11 @@ RawFileReader::RawFileReader(const char *calibration_file_name, const char *rgb_
 
 void RawFileReader::ResizeIntrinsics(Intrinsics &intrinsics, float ratio)
 {
-	intrinsics.projectionParamsSimple.fx *= ratio;
-	intrinsics.projectionParamsSimple.fy *= ratio;
-	intrinsics.projectionParamsSimple.px *= ratio;
-	intrinsics.projectionParamsSimple.py *= ratio;
-	intrinsics.projectionParamsSimple.all *= ratio;
+	intrinsics.projection_params_simple.fx *= ratio;
+	intrinsics.projection_params_simple.fy *= ratio;
+	intrinsics.projection_params_simple.cx *= ratio;
+	intrinsics.projection_params_simple.cy *= ratio;
+	intrinsics.projection_params_simple.all *= ratio;
 }
 
 bool RawFileReader::LoadIntoCache()

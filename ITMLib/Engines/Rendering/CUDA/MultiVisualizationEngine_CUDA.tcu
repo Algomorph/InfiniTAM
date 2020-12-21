@@ -97,7 +97,7 @@ void MultiVisualizationEngine_CUDA<TVoxel, VoxelBlockHash>::CreateExpectedDepths
 		dim3 blockSize(256);
 		dim3 gridSize((int)ceil((float)hashEntryCount / (float)blockSize.x));
 		ORcudaSafeCall(cudaMemset(noTotalBlocks_device, 0, sizeof(uint)));
-		checkProjectAndSplitBlocks_device <<<gridSize, blockSize >>> (indexData, hashEntryCount, localPose, intrinsics->projectionParamsSimple.all, imgSize, voxelSize, renderingBlockList_device, noTotalBlocks_device);
+		checkProjectAndSplitBlocks_device <<<gridSize, blockSize >>> (indexData, hashEntryCount, localPose, intrinsics->projection_params_simple.all, imgSize, voxelSize, renderingBlockList_device, noTotalBlocks_device);
 		ORcudaKernelCheck;
 
 		uint noTotalBlocks;
@@ -122,7 +122,7 @@ static void RenderImage_common(const ORUtils::SE3Pose *pose, const Intrinsics *i
 
 	// Generic Raycast
 	{
-		Vector4f projParams = intrinsics->projectionParamsSimple.all;
+		Vector4f projParams = intrinsics->projection_params_simple.all;
 		float voxelSize = renderState->voxelSize;
 		float oneOverVoxelSize = 1.0f / voxelSize;
 		float mu = renderState->mu;

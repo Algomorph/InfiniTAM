@@ -31,13 +31,13 @@ void ViewBuilder_CPU::UpdateView(View** view_ptr, UChar4Image* rgb_image, ShortI
 	view->rgb.SetFrom(*rgb_image, MemoryCopyDirection::CPU_TO_CPU);
 	view->short_raw_disparity_image.SetFrom(*raw_depth_image, MemoryCopyDirection::CPU_TO_CPU);
 
-	switch (view->calibration_information.disparityCalib.GetType()) {
-		case DisparityCalib::TRAFO_KINECT:
+	switch (view->calibration_information.disparity_calibration_coefficients.GetType()) {
+		case DisparityCalib::TrafoType::TRAFO_KINECT:
 			this->ConvertDisparityToDepth(view->depth, view->short_raw_disparity_image, view->calibration_information.intrinsics_d,
-			                              view->calibration_information.disparityCalib.GetParams());
+			                              view->calibration_information.disparity_calibration_coefficients.GetParams());
 			break;
-		case DisparityCalib::TRAFO_AFFINE:
-			this->ConvertDepthAffineToFloat(view->depth, view->short_raw_disparity_image, view->calibration_information.disparityCalib.GetParams());
+		case DisparityCalib::TrafoType::TRAFO_AFFINE:
+			this->ConvertDepthAffineToFloat(view->depth, view->short_raw_disparity_image, view->calibration_information.disparity_calibration_coefficients.GetParams());
 			break;
 		default:
 			break;
@@ -65,7 +65,7 @@ void ViewBuilder_CPU::UpdateView(View** view_ptr, UChar4Image* rgb_image, ShortI
 
 	if (model_sensor_noise) {
 		this->ComputeNormalAndWeights(*view->depth_normal, *view->depth_uncertainty, view->depth,
-		                              view->calibration_information.intrinsics_d.projectionParamsSimple.all);
+		                              view->calibration_information.intrinsics_d.projection_params_simple.all);
 	}
 }
 
@@ -94,7 +94,7 @@ void ViewBuilder_CPU::ConvertDisparityToDepth(FloatImage& depth_out, const Short
 	const short* d_in = depth_in.GetData(MEMORYDEVICE_CPU);
 	float* d_out = depth_out.GetData(MEMORYDEVICE_CPU);
 
-	float fx_depth = depthIntrinsics.projectionParamsSimple.fx;
+	float fx_depth = depthIntrinsics.projection_params_simple.fx;
 
 	for (int y = 0; y < image_dimensions.y; y++)
 		for (int x = 0; x < image_dimensions.x; x++)

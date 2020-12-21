@@ -21,4 +21,4 @@ namespace test{
 
 const ITMLib::LevelSetAlignmentTerminationConditions& SingleIterationTerminationConditions();
 
-} // end namespace test_utilities
+} // end namespace test

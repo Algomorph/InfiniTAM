@@ -538,4 +538,4 @@ std::vector<ORUtils::SE3Pose> GenerateCameraTrajectoryAroundPoint(const Vector3f
 }
 
 
-} // namespace test_utilities
+} // namespace test

@@ -188,8 +188,8 @@ void SurfelVisualizationEngine_CUDA<TSurfel>::CreateICPMaps(const SurfelScene<TS
     invT,
     sceneParams.tracking_surfel_max_depth,
     sceneParams.tracking_surfel_min_confidence,
-    trackingState->point_cloud->locations->GetData(MEMORYDEVICE_CUDA),
-    trackingState->point_cloud->colors->GetData(MEMORYDEVICE_CUDA)
+    trackingState->point_cloud->locations.GetData(MEMORYDEVICE_CUDA),
+    trackingState->point_cloud->colors.GetData(MEMORYDEVICE_CUDA)
   );
   ORcudaKernelCheck;
 }
