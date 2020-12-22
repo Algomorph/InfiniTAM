@@ -22,6 +22,7 @@
 #include "../ITMLib/Objects/Misc/IMUCalibrator.h"
 #include "../ITMLib/Engines/Rendering/RenderingEngineFactory.h"
 #include "../ORUtils/MathTypePersistence/MathTypePersistence.h"
+#include "../ORUtils/MemoryBlockPersistence/MemoryBlockPersistence.h"
 #include "../ITMLib/Utils/Analytics/AlmostEqual.h"
 
 template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
@@ -32,7 +33,6 @@ public:
 	IMUCalibrator* imu_calibrator;
 	ImageProcessingEngineInterface* image_processing_engine;
 private:
-	View* view_teddy_frame115;
 	VoxelVolume<TSDFVoxel_f_rgb, TIndex> volume_teddy_frame115;
 	RenderingEngineBase<TSDFVoxel_f_rgb, TIndex>* rendering_engine;
 public:
@@ -43,20 +43,14 @@ public:
 			tracking_state(teddy::frame_image_size, TMemoryDeviceType),
 			imu_calibrator(new ITMIMUCalibrator_iPad()),
 			image_processing_engine(ImageProcessingEngineFactory::Build(TMemoryDeviceType)),
-			view_teddy_frame115(nullptr),
 			volume_teddy_frame115(teddy::DefaultVolumeParameters(), false, TMemoryDeviceType,
 			                      teddy::InitializationParameters<TIndex>()),
 			// the rendering engine will generate the point cloud inside tracking_state
 			rendering_engine(ITMLib::RenderingEngineFactory::Build<TSDFVoxel_f_rgb, VoxelBlockHash>(TMemoryDeviceType)) {
 
-		UpdateView(&view_teddy_frame115,
+		UpdateView(&view_teddy_frame116,
 		           std::string(teddy::frame_115_depth_path),
 		           std::string(teddy::frame_115_color_path),
-		           std::string(teddy::calibration_path),
-		           TMemoryDeviceType);
-		UpdateView(&view_teddy_frame116,
-		           std::string(teddy::frame_116_depth_path),
-		           std::string(teddy::frame_116_color_path),
 		           std::string(teddy::calibration_path),
 		           TMemoryDeviceType);
 
@@ -74,7 +68,12 @@ public:
 		                         teddy::DefaultVolumeParameters().far_clipping_distance,
 		                         TMemoryDeviceType);
 
-		rendering_engine->CreatePointCloud(&volume_teddy_frame115, view_teddy_frame115, &tracking_state, &render_state);
+		rendering_engine->CreatePointCloud(&volume_teddy_frame115, view_teddy_frame116, &tracking_state, &render_state);
+		UpdateView(&view_teddy_frame116,
+		           std::string(teddy::frame_116_depth_path),
+		           std::string(teddy::frame_116_color_path),
+		           std::string(teddy::calibration_path),
+		           TMemoryDeviceType);
 	}
 
 	void ResetTrackingState() {
@@ -82,7 +81,6 @@ public:
 	}
 
 	~TestEnvironment() {
-		delete view_teddy_frame115;
 		delete view_teddy_frame116;
 		delete rendering_engine;
 		delete image_processing_engine;
@@ -104,10 +102,14 @@ void GenericRigidTrackerTest(const std::string& preset, TestEnvironment<TIndex, 
 
 
 	//__DEBUG
-	PointCloud point_cloud_gt(teddy::frame_image_size, TMemoryDeviceType);
-	ORUtils::IStreamWrapper point_cloud_reader(std::string(test::generated_arrays_directory) + "/point_cloud.dat");
-	point_cloud_reader >> point_cloud_gt;
-	BOOST_REQUIRE(point_cloud_gt == *environment.tracking_state.point_cloud);
+	// PointCloud point_cloud_gt(teddy::frame_image_size, TMemoryDeviceType);
+	// View view_gt(environment.view_teddy_frame116->calibration_information, teddy::frame_image_size, teddy::frame_image_size,
+	//              TMemoryDeviceType == MEMORYDEVICE_CUDA);
+	// ORUtils::IStreamWrapper debug_reader(std::string(test::generated_arrays_directory) + "/debug.dat");
+	// debug_reader >> point_cloud_gt;
+	// debug_reader >> view_gt;
+	// BOOST_REQUIRE(point_cloud_gt == *environment.tracking_state.point_cloud);
+	// BOOST_REQUIRE(view_gt == *environment.view_teddy_frame116);
 
 
 	tracker->TrackCamera(&environment.tracking_state, environment.view_teddy_frame116);

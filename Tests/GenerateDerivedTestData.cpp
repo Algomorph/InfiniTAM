@@ -755,9 +755,9 @@ void GenerateRigidAlignmentTestData() {
 
 	for (auto& pair : test::matrix_file_name_by_preset) {
 		//__DEBUG
-		if (std::string(pair.first) != test::extended_tracker_preset1) {
-			continue;
-		}
+		// if (std::string(pair.first) != test::extended_tracker_preset1) {
+		// 	continue;
+		// }
 		CameraTrackingState tracking_state(teddy::frame_image_size, TMemoryDeviceType);
 		rendering_engine->CreatePointCloud(&teddy_volume_115, view, &tracking_state, &render_state);
 		const std::string& preset = pair.first;
@@ -768,8 +768,10 @@ void GenerateRigidAlignmentTestData() {
 				teddy::DefaultVolumeParameters());
 
 		//__DEBUG
-		ORUtils::OStreamWrapper point_cloud_writer(std::string(test::generated_arrays_directory) + "/point_cloud.dat");
-		point_cloud_writer << *tracking_state.point_cloud;
+		// ORUtils::OStreamWrapper debug_writer(std::string(test::generated_arrays_directory) + "/debug.dat");
+		// debug_writer << *tracking_state.point_cloud;
+		// debug_writer << *view;
+
 
 		tracker->TrackCamera(&tracking_state, view);
 		std::string matrix_path = std::string(test::generated_matrix_directory) + "/" + matrix_filename;
@@ -777,7 +779,7 @@ void GenerateRigidAlignmentTestData() {
 		matrix_writer << tracking_state.pose_d->GetM();
 
 		//__DEBUG
-		std::cout << preset << ": " << std::endl << tracking_state.pose_d->GetM() << std::endl;
+		// std::cout << preset << ": " << std::endl << tracking_state.pose_d->GetM() << std::endl;
 
 		tracking_state.pose_d->SetM(Matrix4f::Identity());
 		delete tracker;

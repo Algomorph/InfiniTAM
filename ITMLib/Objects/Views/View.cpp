@@ -95,9 +95,18 @@ bool operator==(const View& lhs, const View& rhs) {
 	       lhs.rgb == rhs.rgb &&
 	       lhs.depth == rhs.depth &&
 	       lhs.depth_confidence == rhs.depth_confidence &&
-	       *lhs.depth_uncertainty == *rhs.depth_uncertainty &&
-	       *lhs.rgb_prev == *rhs.rgb_prev &&
-	       *lhs.depth_normal == *rhs.depth_normal;
+	        !(lhs.depth_uncertainty == nullptr && rhs.depth_uncertainty != nullptr) &&
+			!(lhs.depth_uncertainty != nullptr && rhs.depth_uncertainty == nullptr) &&
+			((lhs.depth_uncertainty == nullptr && rhs.depth_uncertainty == nullptr) || 
+			*lhs.depth_uncertainty == *rhs.depth_uncertainty) &&
+			!(lhs.rgb_prev == nullptr && rhs.rgb_prev != nullptr) &&
+			!(lhs.rgb_prev != nullptr && rhs.rgb_prev == nullptr) &&
+			((lhs.rgb_prev == nullptr && rhs.rgb_prev == nullptr) ||
+			 *lhs.rgb_prev == *rhs.rgb_prev) &&
+			!(lhs.depth_normal == nullptr && rhs.depth_normal != nullptr) &&
+			!(lhs.depth_normal != nullptr && rhs.depth_normal == nullptr) &&
+			((lhs.depth_normal == nullptr && rhs.depth_normal == nullptr) ||
+			 *lhs.depth_normal == *rhs.depth_normal);
 }
 
 ORUtils::IStreamWrapper& operator>>(ORUtils::IStreamWrapper& source, View& view) {

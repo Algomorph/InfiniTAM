@@ -127,11 +127,11 @@ void LoadVolume(VoxelVolume<TVoxel, TIndex>** volume, const std::string& path, M
 
 void
 UpdateView(View** view, const std::string& depth_path, const std::string& color_path,
-           const std::string& calibration_path, MemoryDeviceType memoryDevice);
+           const std::string& calibration_path, MemoryDeviceType memory_device);
 
 void
 UpdateView(View** view, const std::string& depth_path, const std::string& color_path, const std::string& mask_path,
-           const std::string& calibration_path, MemoryDeviceType memoryDevice);
+           const std::string& calibration_path, MemoryDeviceType memory_device);
 
 template<typename TVoxel, typename TIndex>
 void InitializeVolume(VoxelVolume<TVoxel, TIndex>** volume,

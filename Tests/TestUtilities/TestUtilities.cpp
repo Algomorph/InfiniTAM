@@ -176,19 +176,19 @@ static ViewBuilder* viewBuilder_CUDA = nullptr;
 
 void
 UpdateView(View** view, const std::string& depth_path, const std::string& color_path,
-           const std::string& calibration_path, MemoryDeviceType memoryDevice) {
+           const std::string& calibration_path, MemoryDeviceType memory_device) {
 
 	ViewBuilder* view_builder_to_use;
-	switch (memoryDevice) {
+	switch (memory_device) {
 		case MEMORYDEVICE_CPU:
 			if (viewBuilder_CPU == nullptr)
-				viewBuilder_CPU = ViewBuilderFactory::Build(calibration_path, memoryDevice);
+				viewBuilder_CPU = ViewBuilderFactory::Build(calibration_path, memory_device);
 			view_builder_to_use = viewBuilder_CPU;
 			break;
 		case MEMORYDEVICE_CUDA:
 #ifndef COMPILE_WITHOUT_CUDA
 			if (viewBuilder_CUDA == nullptr)
-				viewBuilder_CUDA = ViewBuilderFactory::Build(calibration_path, memoryDevice);
+				viewBuilder_CUDA = ViewBuilderFactory::Build(calibration_path, memory_device);
 			view_builder_to_use = viewBuilder_CUDA;
 #else
 			DIEWITHEXCEPTION_REPORTLOCATION("Attmpted to update CUDA view while build without CUDA support, aborting.");
@@ -211,19 +211,19 @@ UpdateView(View** view, const std::string& depth_path, const std::string& color_
 
 void
 UpdateView(View** view, const std::string& depth_path, const std::string& color_path, const std::string& mask_path,
-           const std::string& calibration_path, MemoryDeviceType memoryDevice) {
+           const std::string& calibration_path, MemoryDeviceType memory_device) {
 
 	ViewBuilder* viewBuilderToUse;
-	switch (memoryDevice) {
+	switch (memory_device) {
 		case MEMORYDEVICE_CPU:
 			if (viewBuilder_CPU == nullptr)
-				viewBuilder_CPU = ViewBuilderFactory::Build(calibration_path, memoryDevice);
+				viewBuilder_CPU = ViewBuilderFactory::Build(calibration_path, memory_device);
 			viewBuilderToUse = viewBuilder_CPU;
 			break;
 		case MEMORYDEVICE_CUDA:
 #ifndef COMPILE_WITHOUT_CUDA
 			if (viewBuilder_CUDA == nullptr)
-				viewBuilder_CUDA = ViewBuilderFactory::Build(calibration_path, memoryDevice);
+				viewBuilder_CUDA = ViewBuilderFactory::Build(calibration_path, memory_device);
 			viewBuilderToUse = viewBuilder_CUDA;
 #else
 			DIEWITHEXCEPTION_REPORTLOCATION("Attmpted to update CUDA view while build without CUDA support, aborting.");
