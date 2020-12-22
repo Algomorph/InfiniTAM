@@ -20,11 +20,31 @@ namespace test {
 const std::unordered_map<std::string, std::string> matrix_file_name_by_preset = [] {
 	std::unordered_map<std::string, std::string> map(
 			{
-					{rgb_tracker_preset_rrbb,  "rgb_rrbb.mat"},
-					{rgb_tracker_preset_rrrbb, "rgb_rrrbb.mat"},
-					{rgb_tracker_preset_rrbrb, "rgb_rrbrb.mat"},
-					{extended_tracker_preset1, "extended1.mat"}
+					{rgb_tracker_preset_rrbb,               "rgb_rrbb.mat"},
+					{rgb_tracker_preset_rrrbb,              "rgb_rrrbb.mat"},
+					{rgb_tracker_preset_rrbrb,              "rgb_rrbrb.mat"},
+					{extended_tracker_preset1,              "extended1.mat"},
+					{extended_tracker_preset2,              "extended2.mat"},
+					{depth_tracker_preset_default,          "depth_default.mat"},
+					{depth_tracker_preset_loop_closure,     "depth_loop_closure.mat"},
+					{depth_tracker_preset_rrbrb,            "depth_rrbrb.mat"},
+					{depth_tracker_preset_rr,               "depth_rr.mat"},
+					{depth_tracker_preset_b,                "depth_b.mat"},
+					{depth_tracker_preset_b_bigger_minstep, "depth_b_bigger_minstep.mat"},
+					{depth_tracker_preset_b_more_iters,     "depth_b_more_iters.mat"}
 			});
 	return map;
 }();
+
+const std::array<std::string, 7> depth_tracker_presets = {
+		depth_tracker_preset_default,
+		depth_tracker_preset_loop_closure,
+		depth_tracker_preset_rrbrb,
+		depth_tracker_preset_rr,
+		depth_tracker_preset_b,
+		depth_tracker_preset_b_bigger_minstep,
+		depth_tracker_preset_b_more_iters
+};
+
+
 } // namespace test

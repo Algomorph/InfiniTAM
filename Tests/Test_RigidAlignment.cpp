@@ -131,15 +131,21 @@ void GenericRigidTrackerTest(const std::string& preset, TestEnvironment<TIndex, 
 	delete tracker;
 }
 
+typedef TestEnvironment<VoxelBlockHash, MEMORYDEVICE_CPU> environment_VBH_CPU;
 
-BOOST_AUTO_TEST_CASE(Test_RgbTracker_CPU_VBH) {
-	TestEnvironment<VoxelBlockHash, MEMORYDEVICE_CPU> environment;
-	GenericRigidTrackerTest<VoxelBlockHash, MEMORYDEVICE_CPU>(test::rgb_tracker_preset_rrbb, environment);
-	GenericRigidTrackerTest<VoxelBlockHash, MEMORYDEVICE_CPU>(test::rgb_tracker_preset_rrbrb, environment);
-	GenericRigidTrackerTest<VoxelBlockHash, MEMORYDEVICE_CPU>(test::rgb_tracker_preset_rrrbb, environment);
+BOOST_FIXTURE_TEST_CASE(Test_RgbTracker_CPU_VBH, environment_VBH_CPU) {
+	GenericRigidTrackerTest<VoxelBlockHash, MEMORYDEVICE_CPU>(test::rgb_tracker_preset_rrbb, *this);
+	GenericRigidTrackerTest<VoxelBlockHash, MEMORYDEVICE_CPU>(test::rgb_tracker_preset_rrbrb, *this);
+	GenericRigidTrackerTest<VoxelBlockHash, MEMORYDEVICE_CPU>(test::rgb_tracker_preset_rrrbb, *this);
 }
 
-BOOST_AUTO_TEST_CASE(Test_ExtendedTracker_CPU_VBH) {
-	TestEnvironment<VoxelBlockHash, MEMORYDEVICE_CPU> environment;
-	GenericRigidTrackerTest<VoxelBlockHash, MEMORYDEVICE_CPU>(test::extended_tracker_preset1, environment);
+BOOST_FIXTURE_TEST_CASE(Test_ExtendedTracker_CPU_VBH, environment_VBH_CPU) {
+	GenericRigidTrackerTest<VoxelBlockHash, MEMORYDEVICE_CPU>(test::extended_tracker_preset1, *this);
+	GenericRigidTrackerTest<VoxelBlockHash, MEMORYDEVICE_CPU>(test::extended_tracker_preset2, *this);
+}
+
+BOOST_FIXTURE_TEST_CASE(Test_DepthTracker_CPU_VBH, environment_VBH_CPU){
+	for(auto& preset : test::depth_tracker_presets){
+		GenericRigidTrackerTest<VoxelBlockHash, MEMORYDEVICE_CPU>(preset, *this);
+	}
 }

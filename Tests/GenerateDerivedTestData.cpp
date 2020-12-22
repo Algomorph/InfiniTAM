@@ -755,7 +755,11 @@ void GenerateRigidAlignmentTestData() {
 
 	for (auto& pair : test::matrix_file_name_by_preset) {
 		//__DEBUG
-		// if (std::string(pair.first) != test::extended_tracker_preset1) {
+		// auto it = std::find(test::depth_tracker_presets.begin(), test::depth_tracker_presets.end(), pair.first);
+		// if (it == test::depth_tracker_presets.end()) {
+		// 	continue;
+		// }
+		// if (std::string(pair.first) != test::depth_tracker_preset_loop_closure) {
 		// 	continue;
 		// }
 		CameraTrackingState tracking_state(teddy::frame_image_size, TMemoryDeviceType);
