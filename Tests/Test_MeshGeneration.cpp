@@ -44,7 +44,7 @@ void GenericMeshSavingTest() {
 			MeshingEngineFactory::Build<TSDFVoxel, TIndex>(TMemoryDeviceType);
 	Mesh mesh = meshing_engine->MeshVolume( volume);
 	ConstructGeneratedMeshDirectoryIfMissing();
-	mesh.WriteOBJ(std::string(test::generated_mesh_directory) + "mesh_partial_16_" + DeviceString<TMemoryDeviceType>() + ".obj");
+	mesh.WriteOBJ(test::generated_mesh_directory.ToString() + "mesh_partial_16_" + DeviceString<TMemoryDeviceType>() + ".obj");
 	
 	delete volume;
 	delete meshing_engine;

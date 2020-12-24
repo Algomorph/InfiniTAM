@@ -77,7 +77,7 @@ struct TestData {
 		delete render_state;
 	}
 
-	const std::string calibration_path = std::string(test::snoopy::calibration_path);
+	const std::string calibration_path = test::snoopy::calibration_path.ToString();
 	const std::string square_1_depth_path = STATIC_TEST_DATA_PREFIX "TestData/frames/square1_depth.png";
 	const std::string square_2_depth_path = STATIC_TEST_DATA_PREFIX "TestData/frames/square2_depth.png";
 	const std::string square_1_color_path = STATIC_TEST_DATA_PREFIX "TestData/frames/square1_color.png";

@@ -57,19 +57,19 @@ template<MemoryDeviceType TMemoryDeviceType>
 void GenericTestBuildSnoopyVolumeFromFrame16_PVA_vs_VBH_Near() {
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume_VBH_16;
 	BuildSdfVolumeFromImage_NearSurfaceAllocation(&volume_VBH_16,
-	                                              std::string(test::snoopy::frame_16_depth_path),
-	                                              std::string(test::snoopy::frame_16_color_path),
-	                                              std::string(test::snoopy::frame_16_mask_path),
-	                                              std::string(test::snoopy::calibration_path),
+	                                              test::snoopy::frame_16_depth_path.ToString(),
+	                                              test::snoopy::frame_16_color_path.ToString(),
+	                                              test::snoopy::frame_16_mask_path.ToString(),
+	                                              test::snoopy::calibration_path.ToString(),
 	                                              TMemoryDeviceType,
 	                                              test::snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* volume_PVA_16;
 	BuildSdfVolumeFromImage_NearSurfaceAllocation(&volume_PVA_16,
-	                                              std::string(test::snoopy::frame_16_depth_path),
-	                                              std::string(test::snoopy::frame_16_color_path),
-	                                              std::string(test::snoopy::frame_16_mask_path),
-	                                              std::string(test::snoopy::calibration_path),
+	                                              test::snoopy::frame_16_depth_path.ToString(),
+	                                              test::snoopy::frame_16_color_path.ToString(),
+	                                              test::snoopy::frame_16_mask_path.ToString(),
+	                                              test::snoopy::calibration_path.ToString(),
 	                                              TMemoryDeviceType,
 	                                              test::snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 
@@ -89,19 +89,19 @@ void GenericTestBuildSnoopyVolumeFromFrame17_PVA_vs_VBH_Near() {
 
 	VoxelVolume<TSDFVoxel, PlainVoxelArray>* volume_PVA_17;
 	BuildSdfVolumeFromImage_NearSurfaceAllocation(&volume_PVA_17,
-	                                              std::string(test::snoopy::frame_17_depth_path),
-	                                              std::string(test::snoopy::frame_17_color_path),
-	                                              std::string(test::snoopy::frame_17_mask_path),
-	                                              std::string(test::snoopy::calibration_path),
+	                                              test::snoopy::frame_17_depth_path.ToString(),
+	                                              test::snoopy::frame_17_color_path.ToString(),
+	                                              test::snoopy::frame_17_mask_path.ToString(),
+	                                              test::snoopy::calibration_path.ToString(),
 	                                              TMemoryDeviceType,
 	                                              test::snoopy::InitializationParameters_Fr16andFr17<PlainVoxelArray>());
 
 	VoxelVolume<TSDFVoxel, VoxelBlockHash>* volume_VBH_17;
 	BuildSdfVolumeFromImage_NearSurfaceAllocation(&volume_VBH_17,
-	                                              std::string(test::snoopy::frame_17_depth_path),
-	                                              std::string(test::snoopy::frame_17_color_path),
-	                                              std::string(test::snoopy::frame_17_mask_path),
-	                                              std::string(test::snoopy::calibration_path),
+	                                              test::snoopy::frame_17_depth_path.ToString(),
+	                                              test::snoopy::frame_17_color_path.ToString(),
+	                                              test::snoopy::frame_17_mask_path.ToString(),
+	                                              test::snoopy::calibration_path.ToString(),
 	                                              TMemoryDeviceType,
 	                                              test::snoopy::InitializationParameters_Fr16andFr17<VoxelBlockHash>());
 
@@ -122,10 +122,10 @@ static void SetUpTrackingState16(CameraTrackingState& tracking_state,
                                  DepthFusionEngineInterface<TSDFVoxel, VoxelBlockHash>* depth_fusion_engine_VBH) {
 	View* view_16 = nullptr;
 	UpdateView(&view_16,
-	           std::string(test::snoopy::frame_16_depth_path),
-	           std::string(test::snoopy::frame_16_color_path),
-	           std::string(test::snoopy::frame_16_mask_path),
-	           std::string(test::snoopy::calibration_path),
+	           test::snoopy::frame_16_depth_path.ToString(),
+	           test::snoopy::frame_16_color_path.ToString(),
+	           test::snoopy::frame_16_mask_path.ToString(),
+	           test::snoopy::calibration_path.ToString(),
 	           TMemoryDeviceType);
 	RenderState render_state(view_16->depth.dimensions,
 	                         configuration::Get().general_voxel_volume_parameters.near_clipping_distance,
@@ -156,10 +156,10 @@ void GenericTestBuildVolumeFromImage_VBH_Near_vs_Span() {
 
 	View* view_17 = nullptr;
 	UpdateView(&view_17,
-	           std::string(test::snoopy::frame_17_depth_path),
-	           std::string(test::snoopy::frame_17_color_path),
-	           std::string(test::snoopy::frame_17_mask_path),
-	           std::string(test::snoopy::calibration_path),
+	           test::snoopy::frame_17_depth_path.ToString(),
+	           test::snoopy::frame_17_color_path.ToString(),
+	           test::snoopy::frame_17_mask_path.ToString(),
+	           test::snoopy::calibration_path.ToString(),
 	           TMemoryDeviceType);
 
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_17_Span(TMemoryDeviceType,
@@ -208,10 +208,10 @@ void GenericTestBuildSnoopyVolumeFromFrame17_PVA_vs_VBH_Span() {
 
 	View* view_17 = nullptr;
 	UpdateView(&view_17,
-	           std::string(test::snoopy::frame_17_depth_path),
-	           std::string(test::snoopy::frame_17_color_path),
-	           std::string(test::snoopy::frame_17_mask_path),
-	           std::string(test::snoopy::calibration_path),
+	           test::snoopy::frame_17_depth_path.ToString(),
+	           test::snoopy::frame_17_color_path.ToString(),
+	           test::snoopy::frame_17_mask_path.ToString(),
+	           test::snoopy::calibration_path.ToString(),
 	           TMemoryDeviceType);
 
 	VoxelVolume<TSDFVoxel, VoxelBlockHash> volume_VBH_17_Span(TMemoryDeviceType,
@@ -251,7 +251,7 @@ void GenericTestSimpleVolumeFromStripeImage() {
 	// region ================================= CONSTRUCT VIEW =========================================================
 
 	RGBD_CalibrationInformation calibration_data;
-	readRGBDCalib(std::string(test::snoopy::calibration_path).c_str(), calibration_data);
+	readRGBDCalib(test::snoopy::calibration_path.Get(), calibration_data);
 
 	ViewBuilder* view_builder = ViewBuilderFactory::Build(calibration_data, TMemoryDeviceType);
 	Vector2i image_size(640, 480);
@@ -416,7 +416,7 @@ void GenericTestBuildSnoopyVolumeFromFrame00_PVA_vs_VBH() {
 	// region ================================= CONSTRUCT VIEW =========================================================
 
 	RGBD_CalibrationInformation calibration_data;
-	readRGBDCalib(std::string(test::snoopy::calibration_path).c_str(), calibration_data);
+	readRGBDCalib(test::snoopy::calibration_path.Get(), calibration_data);
 
 	ViewBuilder* view_builder = ViewBuilderFactory::Build(calibration_data, TMemoryDeviceType);
 	Vector2i image_size(640, 480);
@@ -424,8 +424,8 @@ void GenericTestBuildSnoopyVolumeFromFrame00_PVA_vs_VBH() {
 
 	UChar4Image rgb(true, false);
 	ShortImage depth(true, false);
-	BOOST_REQUIRE(ReadImageFromFile(rgb, std::string(test::snoopy::frame_00_color_path).c_str()));
-	BOOST_REQUIRE(ReadImageFromFile(depth, std::string(test::snoopy::frame_00_depth_path).c_str()));
+	BOOST_REQUIRE(ReadImageFromFile(rgb, test::snoopy::frame_00_color_path.Get()));
+	BOOST_REQUIRE(ReadImageFromFile(depth, test::snoopy::frame_00_depth_path.Get()));
 
 	view_builder->UpdateView(&view, &rgb, &depth, false, false, false, true);
 

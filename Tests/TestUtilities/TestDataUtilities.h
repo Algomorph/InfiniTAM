@@ -22,6 +22,7 @@
 #include "../../../ORUtils/CompileTimeStringConcatenation.h"
 
 using namespace ITMLib;
+using namespace ORUtils;
 
 namespace test {
 namespace snoopy {
@@ -35,52 +36,52 @@ enum Frame {
 };
 
 // calibration
-static constexpr const std::string_view calibration_file_name = "snoopy_calib.txt";
-static constexpr const std::string_view calibration_path = ORUtils::join_v<static_calibration_directory, calibration_file_name>;
+static constexpr auto calibration_file_name = StringFactory("snoopy_calib.txt");
+static constexpr auto calibration_path = static_calibration_directory + calibration_file_name;
 
 // frames
-static constexpr const std::string_view frame_00_depth_file_name = "snoopy_depth_000000.png";
-static constexpr const std::string_view frame_00_depth_path = ORUtils::join_v<static_frames_directory, frame_00_depth_file_name>;
-static constexpr const std::string_view frame_00_color_file_name = "snoopy_color_000000.png";
-static constexpr const std::string_view frame_00_color_path = ORUtils::join_v<static_frames_directory, frame_00_color_file_name>;
-static constexpr const std::string_view frame_00_mask_file_name = "snoopy_omask_000000.png";
-static constexpr const std::string_view frame_00_mask_path = ORUtils::join_v<static_frames_directory, frame_00_mask_file_name>;
+static constexpr auto frame_00_depth_file_name = StringFactory("snoopy_depth_000000.png");
+static constexpr auto frame_00_depth_path = static_frames_directory + frame_00_depth_file_name;
+static constexpr auto frame_00_color_file_name = StringFactory("snoopy_color_000000.png");
+static constexpr auto frame_00_color_path = static_frames_directory + frame_00_color_file_name;
+static constexpr auto frame_00_mask_file_name = StringFactory("snoopy_omask_000000.png");
+static constexpr auto frame_00_mask_path = static_frames_directory + frame_00_mask_file_name;
 
-static constexpr const std::string_view frame_16_depth_file_name = "snoopy_depth_000016.png";
-static constexpr const std::string_view frame_16_depth_path = ORUtils::join_v<static_frames_directory, frame_16_depth_file_name>;
-static constexpr const std::string_view frame_16_color_file_name = "snoopy_color_000016.png";
-static constexpr const std::string_view frame_16_color_path = ORUtils::join_v<static_frames_directory, frame_16_color_file_name>;
-static constexpr const std::string_view frame_16_mask_file_name = "snoopy_omask_000016.png";
-static constexpr const std::string_view frame_16_mask_path = ORUtils::join_v<static_frames_directory, frame_16_mask_file_name>;
+static constexpr auto frame_16_depth_file_name = StringFactory("snoopy_depth_000016.png");
+static constexpr auto frame_16_depth_path = static_frames_directory + frame_16_depth_file_name;
+static constexpr auto frame_16_color_file_name = StringFactory("snoopy_color_000016.png");
+static constexpr auto frame_16_color_path = static_frames_directory + frame_16_color_file_name;
+static constexpr auto frame_16_mask_file_name = StringFactory("snoopy_omask_000016.png");
+static constexpr auto frame_16_mask_path = static_frames_directory + frame_16_mask_file_name;
 
-static constexpr const std::string_view frame_17_depth_file_name = "snoopy_depth_000017.png";
-static constexpr const std::string_view frame_17_depth_path = ORUtils::join_v<static_frames_directory, frame_17_depth_file_name>;
-static constexpr const std::string_view frame_17_color_file_name = "snoopy_color_000017.png";
-static constexpr const std::string_view frame_17_color_path = ORUtils::join_v<static_frames_directory, frame_17_color_file_name>;
-static constexpr const std::string_view frame_17_mask_file_name = "snoopy_omask_000017.png";
-static constexpr const std::string_view frame_17_mask_path = ORUtils::join_v<static_frames_directory, frame_17_mask_file_name>;
+static constexpr auto frame_17_depth_file_name = StringFactory("snoopy_depth_000017.png");
+static constexpr auto frame_17_depth_path = static_frames_directory + frame_17_depth_file_name;
+static constexpr auto frame_17_color_file_name = StringFactory("snoopy_color_000017.png");
+static constexpr auto frame_17_color_path = static_frames_directory + frame_17_color_file_name;
+static constexpr auto frame_17_mask_file_name = StringFactory("snoopy_omask_000017.png");
+static constexpr auto frame_17_mask_path = static_frames_directory + frame_17_mask_file_name;
 
-static constexpr const std::string_view frame_18_depth_file_name = "snoopy_depth_000018.png";
-static constexpr const std::string_view frame_18_depth_path = ORUtils::join_v<static_frames_directory, frame_18_depth_file_name>;
-static constexpr const std::string_view frame_18_color_file_name = "snoopy_color_000018.png";
-static constexpr const std::string_view frame_18_color_path = ORUtils::join_v<static_frames_directory, frame_18_color_file_name>;
-static constexpr const std::string_view frame_18_mask_file_name = "snoopy_omask_000018.png";
-static constexpr const std::string_view frame_18_mask_path = ORUtils::join_v<static_frames_directory, frame_18_mask_file_name>;
+static constexpr auto frame_18_depth_file_name = StringFactory("snoopy_depth_000018.png");
+static constexpr auto frame_18_depth_path = static_frames_directory + frame_18_depth_file_name;
+static constexpr auto frame_18_color_file_name = StringFactory("snoopy_color_000018.png");
+static constexpr auto frame_18_color_path = static_frames_directory + frame_18_color_file_name;
+static constexpr auto frame_18_mask_file_name = StringFactory("snoopy_omask_000018.png");
+static constexpr auto frame_18_mask_path = static_frames_directory + frame_18_mask_file_name;
 
 // videos
-static constexpr const std::string_view frames_16_to_18_depth_file_name = "snoopy_depth_16-18.avi";
-static constexpr const std::string_view frames_16_to_18_depth_path = ORUtils::join_v<static_videos_directory, frames_16_to_18_depth_file_name>;
-static constexpr const std::string_view frames_16_to_18_color_file_name = "snoopy_color_16-18.avi";
-static constexpr const std::string_view frames_16_to_18_color_path = ORUtils::join_v<static_videos_directory, frames_16_to_18_color_file_name>;
-static constexpr const std::string_view frames_16_to_18_color_YUV422P_file_name = "snoopy_color_16-18_yuv422p.avi";
-static constexpr const std::string_view frames_16_to_18_color_YUV422P_path = ORUtils::join_v<static_videos_directory, frames_16_to_18_color_YUV422P_file_name>;
-static constexpr const std::string_view frames_16_to_18_depth_GRAY16LE_file_name = "snoopy_depth_16-18_gray16le.avi";
-static constexpr const std::string_view frames_16_to_18_depth_GRAY16LE_path = ORUtils::join_v<static_videos_directory, frames_16_to_18_depth_GRAY16LE_file_name>;
+static constexpr auto frames_16_to_18_depth_file_name = StringFactory("snoopy_depth_16-18.avi");
+static constexpr auto frames_16_to_18_depth_path = static_videos_directory + frames_16_to_18_depth_file_name;
+static constexpr auto frames_16_to_18_color_file_name = StringFactory("snoopy_color_16-18.avi");
+static constexpr auto frames_16_to_18_color_path = static_videos_directory + frames_16_to_18_color_file_name;
+static constexpr auto frames_16_to_18_color_YUV422P_file_name = StringFactory("snoopy_color_16-18_yuv422p.avi");
+static constexpr auto frames_16_to_18_color_YUV422P_path = static_videos_directory + frames_16_to_18_color_YUV422P_file_name;
+static constexpr auto frames_16_to_18_depth_GRAY16LE_file_name = StringFactory("snoopy_depth_16-18_gray16le.avi");
+static constexpr auto frames_16_to_18_depth_GRAY16LE_path = static_videos_directory + frames_16_to_18_depth_GRAY16LE_file_name;
 
 
 template<typename TIndex>
 std::string PartialVolume00Path() {
-	return std::string(test::generated_volume_directory) + test::IndexString<TIndex>() + "/snoopy_partial_frame_00.dat";
+	return test::generated_volume_directory.ToString() + test::IndexString<TIndex>() + "/snoopy_partial_frame_00.dat";
 }
 
 extern template std::string PartialVolume00Path<PlainVoxelArray>();
@@ -88,7 +89,7 @@ extern template std::string PartialVolume00Path<VoxelBlockHash>();
 
 template<typename TIndex>
 std::string PartialVolume16Path() {
-	return std::string(test::generated_volume_directory) + test::IndexString<TIndex>() + "/snoopy_partial_frame_16.dat";
+	return test::generated_volume_directory.ToString() + test::IndexString<TIndex>() + "/snoopy_partial_frame_16.dat";
 }
 
 extern template std::string PartialVolume16Path<PlainVoxelArray>();
@@ -96,7 +97,7 @@ extern template std::string PartialVolume16Path<VoxelBlockHash>();
 
 template<typename TIndex>
 std::string PartialVolume17Path() {
-	return std::string(test::generated_volume_directory) + test::IndexString<TIndex>() + "/snoopy_partial_frame_17.dat";
+	return test::generated_volume_directory.ToString() + test::IndexString<TIndex>() + "/snoopy_partial_frame_17.dat";
 }
 
 extern template std::string PartialVolume17Path<PlainVoxelArray>();
@@ -105,7 +106,7 @@ extern template std::string PartialVolume17Path<VoxelBlockHash>();
 
 template<typename TIndex>
 std::string FullVolume16Path() {
-	return std::string(test::generated_volume_directory) + test::IndexString<TIndex>() + "/snoopy_full_frame_16.dat";
+	return test::generated_volume_directory.ToString() + test::IndexString<TIndex>() + "/snoopy_full_frame_16.dat";
 }
 
 extern template std::string FullVolume16Path<PlainVoxelArray>();
@@ -113,7 +114,7 @@ extern template std::string FullVolume16Path<VoxelBlockHash>();
 
 template<typename TIndex>
 std::string FullVolume17Path() {
-	return std::string(test::generated_volume_directory) + test::IndexString<TIndex>() + "/snoopy_full_frame_17.dat";
+	return test::generated_volume_directory.ToString() + test::IndexString<TIndex>() + "/snoopy_full_frame_17.dat";
 }
 
 extern template std::string FullVolume17Path<PlainVoxelArray>();
@@ -173,27 +174,27 @@ namespace teddy {
 
 static const Vector2i frame_image_size = Vector2i(640, 480);
 
-static constexpr const std::string_view calibration_file_name = "teddy_calib.txt";
-static constexpr const std::string_view calibration_path = ORUtils::join_v<static_calibration_directory, calibration_file_name>;
+static constexpr const auto calibration_file_name = StringFactory("teddy_calib.txt");
+static constexpr const auto calibration_path = static_calibration_directory + calibration_file_name;
 
-static constexpr const std::string_view frame_115_depth_file_name = "teddy_depth_000115.png";
-static constexpr const std::string_view frame_115_depth_path = ORUtils::join_v<static_frames_directory, frame_115_depth_file_name>;
-static constexpr const std::string_view frame_115_color_file_name = "teddy_color_000115.png";
-static constexpr const std::string_view frame_115_color_path = ORUtils::join_v<static_frames_directory, frame_115_color_file_name>;
+static constexpr const auto frame_115_depth_file_name = StringFactory("teddy_depth_000115.png");
+static constexpr const auto frame_115_depth_path = static_frames_directory + frame_115_depth_file_name;
+static constexpr const auto frame_115_color_file_name = StringFactory("teddy_color_000115.png");
+static constexpr const auto frame_115_color_path = static_frames_directory + frame_115_color_file_name;
 
-static constexpr const std::string_view frame_116_depth_file_name = "teddy_depth_000116.png";
-static constexpr const std::string_view frame_116_depth_path = ORUtils::join_v<static_frames_directory, frame_116_depth_file_name>;
-static constexpr const std::string_view frame_116_color_file_name = "teddy_color_000116.png";
-static constexpr const std::string_view frame_116_color_path = ORUtils::join_v<static_frames_directory, frame_116_color_file_name>;
+static constexpr const auto frame_116_depth_file_name = StringFactory("teddy_depth_000116.png");
+static constexpr const auto frame_116_depth_path = static_frames_directory + frame_116_depth_file_name;
+static constexpr const auto frame_116_color_file_name = StringFactory("teddy_color_000116.png");
+static constexpr const auto frame_116_color_path = static_frames_directory + frame_116_color_file_name;
 
-static constexpr const std::string_view frame_200_depth_file_name = "teddy_depth_000200.png";
-static constexpr const std::string_view frame_200_depth_path = ORUtils::join_v<static_frames_directory, frame_200_depth_file_name>;
-static constexpr const std::string_view frame_200_color_file_name = "teddy_color_000200.png";
-static constexpr const std::string_view frame_200_color_path = ORUtils::join_v<static_frames_directory, frame_200_color_file_name>;
+static constexpr const auto frame_200_depth_file_name = StringFactory("teddy_depth_000200.png");
+static constexpr const auto frame_200_depth_path = static_frames_directory + frame_200_depth_file_name;
+static constexpr const auto frame_200_color_file_name = StringFactory("teddy_color_000200.png");
+static constexpr const auto frame_200_color_path = static_frames_directory + frame_200_color_file_name;
 
 template<typename TIndex>
 std::string Volume115Path() {
-	return std::string(test::generated_volume_directory) + test::IndexString<TIndex>() + "/teddy_frame_115.dat";
+	return test::generated_volume_directory.ToString() + test::IndexString<TIndex>() + "/teddy_frame_115.dat";
 }
 
 extern template std::string Volume115Path<PlainVoxelArray>();

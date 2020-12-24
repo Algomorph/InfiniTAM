@@ -66,7 +66,8 @@ if (BUILD_TESTS)
             TestUtilities/LevelSetAlignment/LevelSetAlignmentTestMode.h
             TestUtilities/LevelSetAlignment/TestCaseOrganizationBySwitches.h
             TestUtilities/LevelSetAlignment/SingleIterationTestConditions.h
-            TestUtilities/GenericTestModuleHeader.h TestUtilities/RigidTrackerPresets.h)
+            TestUtilities/GenericTestModuleHeader.h
+            TestUtilities/RigidTrackerPresets.h)
 
     find_package(Boost COMPONENTS unit_test_framework REQUIRED)
 
@@ -77,7 +78,34 @@ if (BUILD_TESTS)
 
     # ======== generator executable for derived test data library ========
 
-    set(sources GenerateDerivedTestData.cpp)
+    set(sources GenerateDerivedTestData.cpp
+        TestDataGeneration/GenerateSnoopyVolumes.cpp
+        TestDataGeneration/GenerateSnoopyVolumes.h
+        TestDataGeneration/GenerateLevelSetAlignmentDeviceComparisonData.cpp
+        TestDataGeneration/GenerateLevelSetAlignmentDeviceComparisonData.h
+        TestDataGeneration/GenerateLevelSetAlignmentIndexComparisonTestData.cpp
+        TestDataGeneration/GenerateLevelSetAlignmentIndexComparisonTestData.h
+        TestDataGeneration/GenerateVolumeWarpingConsistencyData.cpp
+        TestDataGeneration/GenerateVolumeWarpingConsistencyData.tpp
+        TestDataGeneration/GenerateVolumeWarpingConsistencyData.h
+        TestDataGeneration/GenerateVolumeFusionConsistencyData.cpp
+        TestDataGeneration/GenerateVolumeFusionConsistencyData.tpp
+        TestDataGeneration/GenerateVolumeFusionConsistencyData.h
+        TestDataGeneration/GenerateTestConfigurations.cpp
+        TestDataGeneration/GenerateTestConfigurations.h
+        TestDataGeneration/GenerateSnoopyMeshes.cpp
+        TestDataGeneration/GenerateSnoopyMeshes.cu
+        TestDataGeneration/GenerateSnoopyMeshes.tpp
+        TestDataGeneration/GenerateSnoopyMeshes.h
+        TestDataGeneration/GenerateRaycastingTestData.cpp
+        TestDataGeneration/GenerateRaycastingTestData.cu
+        TestDataGeneration/GenerateRaycastingTestData.tpp
+        TestDataGeneration/GenerateRaycastingTestData.h
+        TestDataGeneration/GenerateRigidAlignmentTestData.cpp
+        TestDataGeneration/GenerateRigidAlignmentTestData.cu
+        TestDataGeneration/GenerateRigidAlignmentTestData.tpp
+        TestDataGeneration/GenerateRigidAlignmentTestData.h
+        )
     add_executable(generate_derived_test_data ${sources})
     target_link_libraries(generate_derived_test_data PRIVATE InputSource ITMLib MiniSlamGraphLib ORUtils FernRelocLib test_utilities)
 
@@ -90,7 +118,11 @@ if (BUILD_TESTS)
     itm_add_test(NAME VolumeSaveLoadCompact_CPU SOURCES Test_VolumeSaveLoadCompact_CPU.cpp)
     itm_add_test(NAME IntArrayMap3D SOURCES Test_IntArrayMap3D.cpp)
     itm_add_test(NAME ImageMaskReader SOURCES Test_ImageMaskReader.cpp)
-    itm_add_test(NAME LevelSetAlignment_CPU_vs_CUDA SOURCES Test_LevelSetAlignment_CPU_vs_CUDA.cpp Test_LevelSetAlignment_CPU_vs_CUDA_Aux.h)
+    itm_add_test(NAME LevelSetAlignment_CPU_vs_CUDA SOURCES
+                 Test_LevelSetAlignment_CPU_vs_CUDA.cpp
+                 Test_LevelSetAlignment_WarpGradientDataFixture.h
+                 Test_LevelSetAlignment_WarpGradientDataFixture.tpp
+                 Test_LevelSetAlignment_WarpGradientDataFixture.cpp)
     itm_add_test(NAME LevelSetAlignment_PVA_vs_VBH SOURCES Test_LevelSetAlignment_PVA_vs_VBH.cpp)
     itm_add_test(NAME VolumeSlicingPVA_CPU SOURCES Test_VoxelVolumeSlicingPVA_CPU.cpp)
     itm_add_test(NAME LevelSetAlignmentAuxiliaryFunctions SOURCES Test_LevelSetAlignmentAuxiliaryFunctions.cpp)

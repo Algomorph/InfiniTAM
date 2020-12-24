@@ -48,10 +48,12 @@ public:
 			// the rendering engine will generate the point cloud inside tracking_state
 			rendering_engine(ITMLib::RenderingEngineFactory::Build<TSDFVoxel_f_rgb, VoxelBlockHash>(TMemoryDeviceType)) {
 
+		// A little counter-intuitive, but we'll use the same view for frame_115 at first
+		// because of the weird way view memory is currently managed.
 		UpdateView(&view_teddy_frame116,
-		           std::string(teddy::frame_115_depth_path),
-		           std::string(teddy::frame_115_color_path),
-		           std::string(teddy::calibration_path),
+		           teddy::frame_115_depth_path.ToString(),
+		           teddy::frame_115_color_path.ToString(),
+		           teddy::calibration_path.ToString(),
 		           TMemoryDeviceType);
 
 		// the rendering engine will generate the point cloud
@@ -70,9 +72,9 @@ public:
 
 		rendering_engine->CreatePointCloud(&volume_teddy_frame115, view_teddy_frame116, &tracking_state, &render_state);
 		UpdateView(&view_teddy_frame116,
-		           std::string(teddy::frame_116_depth_path),
-		           std::string(teddy::frame_116_color_path),
-		           std::string(teddy::calibration_path),
+		           teddy::frame_116_depth_path.ToString(),
+		           teddy::frame_116_color_path.ToString(),
+		           teddy::calibration_path.ToString(),
 		           TMemoryDeviceType);
 	}
 
@@ -91,7 +93,7 @@ public:
 
 template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void GenericRigidTrackerTest(const std::string& preset, TestEnvironment<TIndex, TMemoryDeviceType>& environment) {
-	BOOST_TEST_MESSAGE("Using preset: " << preset);
+	BOOST_TEST_MESSAGE("Using preset: \n" << preset);
 
 
 	CameraTracker* tracker = CameraTrackerFactory::Instance().Make(
@@ -115,12 +117,12 @@ void GenericRigidTrackerTest(const std::string& preset, TestEnvironment<TIndex, 
 	tracker->TrackCamera(&environment.tracking_state, environment.view_teddy_frame116);
 
 	const std::string& matrix_filename = test::matrix_file_name_by_preset.at(preset);
-	std::string matrix_path = std::string(test::generated_matrix_directory) + "/" + matrix_filename;
+	std::string matrix_path = test::generated_matrix_directory.ToString() + "/" + matrix_filename;
 	ORUtils::IStreamWrapper matrix_reader(matrix_path);
 	Matrix4f depth_matrix_gt;
 	matrix_reader >> depth_matrix_gt;
 
-	//__DEBUG
+	// __DEBUG
 	std::cout << matrix_filename << std::endl << std::endl;
 	std::cout << depth_matrix_gt << std::endl;
 	std::cout << environment.tracking_state.pose_d->GetM() << std::endl;

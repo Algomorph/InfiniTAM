@@ -37,7 +37,7 @@ using namespace test;
 template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
 void GenericClearOutWarpUpdateTest(){
 	VoxelVolume<WarpVoxel, TIndex>* warp_field;
-	LoadVolume(&warp_field, std::string(test::generated_volume_directory) + test::IndexString<TIndex>() + "/warp_field_1_data_tikhonov.dat",
+	LoadVolume(&warp_field, test::generated_volume_directory.ToString() + test::IndexString<TIndex>() + "/warp_field_1_data_tikhonov.dat",
 	           TMemoryDeviceType, test::snoopy::InitializationParameters_Fr16andFr17<TIndex>());
 	float relative_tolerance = 0.1f;//percent
 	auto& analytics_engine = AnalyticsEngine<WarpVoxel,TIndex,TMemoryDeviceType>::Instance();

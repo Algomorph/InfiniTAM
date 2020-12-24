@@ -32,27 +32,34 @@ constexpr const char* extended_tracker_preset2 = "type=extended,levels=rrrb,useD
                                                  "outlierSpaceC=0.2,outlierSpaceF=0.005,numiterC=22,numiterF=52,"
                                                  "tukeyCutOff=9,framesToSkip=10,framesToWeight=50,failureDec=20.0";
 
-constexpr const char* depth_tracker_preset_default = "type=icp,levels=rrrbb,minstep=1e-3,"
-                                              "outlierC=0.03,outlierF=0.006,"
-                                              "numiterC=10,numiterF=2,failureDec=5.0";
-constexpr const char* depth_tracker_preset_loop_closure = "type=icp,levels=rrrbb,minstep=1e-3,"
-                                              "outlierC=0.03,outlierF=0.006,"
-                                              "numiterC=10,numiterF=2,failureDec=20.0";
-constexpr const char* depth_tracker_preset_rrbrb = "type=icp,levels=rrbrb,minstep=1e-3,"
-                                              "outlierC=0.03,outlierF=0.006,"
-                                              "numiterC=10,numiterF=2,failureDec=5.0";
-constexpr const char* depth_tracker_preset_rr = "type=icp,levels=rr,minstep=1e-3,"
-                                              "outlierC=0.01,outlierF=0.002,"
-                                              "numiterC=10,numiterF=2,failureDec=5.0";
-constexpr const char* depth_tracker_preset_b = "type=icp,levels=b,minstep=1e-3,"
-                                              "outlierC=0.01,outlierF=0.002,"
-                                              "numiterC=10,numiterF=2,failureDec=5.0";
-constexpr const char* depth_tracker_preset_b_bigger_minstep = "type=icp,levels=b,minstep=2e-3,"
-                                              "outlierC=0.01,outlierF=0.002,"
-                                              "numiterC=10,numiterF=2,failureDec=5.0";
-constexpr const char* depth_tracker_preset_b_more_iters = "type=icp,levels=b,minstep=1e-3,"
-                                                          "outlierC=0.01,outlierF=0.002,"
-                                                          "numiterC=20,numiterF=5,failureDec=5.0";
+constexpr const char* depth_tracker_preset_default =
+		"type=icp,levels=rrrbbb,minstep=1e-3,"
+		"outlierC=0.02,outlierF=0.004,"
+		"numiterC=300,numiterF=50,failureDec=5.0";
+constexpr const char* depth_tracker_preset_loop_closure =
+		"type=icp,levels=rrrbb,minstep=1e-3,"
+		"outlierC=0.03,outlierF=0.006,"
+		"numiterC=10,numiterF=2,failureDec=20.0";
+constexpr const char* depth_tracker_preset_rrbrb =
+		"type=icp,levels=rrbrb,minstep=1e-3,"
+		"outlierC=0.03,outlierF=0.006,"
+		"numiterC=10,numiterF=2,failureDec=5.0";
+constexpr const char* depth_tracker_preset_rr =
+		"type=icp,levels=rr,minstep=1e-3,"
+		"outlierC=0.01,outlierF=0.002,"
+		"numiterC=10,numiterF=2,failureDec=5.0";
+constexpr const char* depth_tracker_preset_b =
+		"type=icp,levels=b,minstep=1e-3,"
+		"outlierC=0.01,outlierF=0.002,"
+		"numiterC=10,numiterF=2,failureDec=5.0";
+constexpr const char* depth_tracker_preset_b_bigger_minstep =
+		"type=icp,levels=b,minstep=2e-3,"
+		"outlierC=0.01,outlierF=0.002,"
+		"numiterC=10,numiterF=2,failureDec=5.0";
+constexpr const char* depth_tracker_preset_b_more_iters =
+		"type=icp,levels=b,minstep=1e-3,"
+		"outlierC=0.01,outlierF=0.002,"
+		"numiterC=20,numiterF=5,failureDec=5.0";
 
 
 extern const std::unordered_map<std::string, std::string> matrix_file_name_by_preset;

@@ -46,13 +46,13 @@ BOOST_AUTO_TEST_CASE(testImageMaskReader) {
 	ShortImage masked_depth_ground_truth(true, false);
 	UCharImage mask(true, false);
 
-	InputSource::ImageMaskPathGenerator pathGenerator(
+	InputSource::ImageMaskPathGenerator path_generator(
 			STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_color_%06i.png",
 			STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_depth_%06i.png",
 			STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_omask_%06i.png");
 	InputSource::ImageSourceEngine* image_source =
 			new InputSource::ImageFileReader<InputSource::ImageMaskPathGenerator>(
-					std::string(test::snoopy::calibration_path).c_str(), pathGenerator);
+					test::snoopy::calibration_path.Get(), path_generator);
 	image_source->GetImages(rgb, depth);
 
 #ifdef GENERATE_GT_MASKED_IMAGES
@@ -61,15 +61,15 @@ BOOST_AUTO_TEST_CASE(testImageMaskReader) {
 #endif
 	BOOST_REQUIRE(ReadImageFromFile(mask, STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_omask_000000.png"));
 
-	rgb.ApplyMask(mask,Vector4u((unsigned char)0));
-	depth.ApplyMask(mask,0);
+	rgb.ApplyMask(mask, Vector4u((unsigned char) 0));
+	depth.ApplyMask(mask, 0);
 
 #ifdef GENERATE_GT_MASKED_IMAGES
 	ORUtils::SaveImageToFile(rgb, STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_color_000000_masked.pnm");
 	ORUtils::SaveImageToFile(depth, STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_depth_000000_masked.pnm");
 #endif
 
-BOOST_REQUIRE(ReadImageFromFile(masked_rgb_ground_truth, STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_color_000000.png"));
+	BOOST_REQUIRE(ReadImageFromFile(masked_rgb_ground_truth, STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_color_000000.png"));
 	masked_rgb_ground_truth.ApplyMask(mask, Vector4u((unsigned char) 0));
 	BOOST_REQUIRE(ReadImageFromFile(masked_depth_ground_truth, STATIC_TEST_DATA_PREFIX "TestData/frames/snoopy_depth_000000_masked.pnm"));
 

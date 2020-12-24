@@ -62,28 +62,28 @@ std::string DeviceString<MEMORYDEVICE_CUDA>() {
 }
 
 void ConstructGeneratedVolumeSubdirectoriesIfMissing() {
-	fs::create_directories(std::string(test::generated_volume_directory) + IndexString<VoxelBlockHash>());
-	fs::create_directories(std::string(test::generated_volume_directory) + IndexString<PlainVoxelArray>());
+	fs::create_directories(test::generated_volume_directory.ToString() + IndexString<VoxelBlockHash>());
+	fs::create_directories(test::generated_volume_directory.ToString() + IndexString<PlainVoxelArray>());
 }
 
 void ConstructGeneratedConfigurationDirectoryIfMissing() {
-	fs::create_directories(test::generated_configuration_directory);
+	fs::create_directories(test::generated_configuration_directory.ToString());
 }
 
 void ConstructGeneratedMeshDirectoryIfMissing() {
-	fs::create_directories(test::generated_mesh_directory);
+	fs::create_directories(test::generated_mesh_directory.ToString());
 }
 
 void ConstructGeneratedArraysDirectoryIfMissing() {
-	fs::create_directories(test::generated_arrays_directory);
+	fs::create_directories(test::generated_arrays_directory.ToString());
 }
 
 void ConstructGeneratedVideosDirectoryIfMissing() {
-	fs::create_directories(test::generated_videos_directory);
+	fs::create_directories(test::generated_videos_directory.ToString());
 }
 
 void ConstructGeneratedMatrixDirectoryIfMissing(){
-	fs::create_directories(test::generated_matrix_directory);
+	fs::create_directories(test::generated_matrix_directory.ToString());
 }
 
 template void GenerateSimpleSurfaceTestVolume<MEMORYDEVICE_CPU, TSDFVoxel, VoxelBlockHash>(

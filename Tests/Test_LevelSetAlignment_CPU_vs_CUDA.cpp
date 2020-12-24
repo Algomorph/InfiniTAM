@@ -32,7 +32,7 @@
 #include "../ITMLib/Engines/Traversal/CPU/VolumeTraversal_CPU_PlainVoxelArray.h"
 
 //test_utils
-#include "Test_LevelSetAlignment_CPU_vs_CUDA_Aux.h"
+#include "Test_LevelSetAlignment_WarpGradientDataFixture.h"
 #include "../ITMLib/Engines/Analytics/AnalyticsEngineFactory.h"
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison.h"
 #include "TestUtilities/LevelSetAlignment/LevelSetAlignmentTestUtilities.h"

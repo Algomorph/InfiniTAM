@@ -20,6 +20,7 @@
 
 //ORUtils
 #include "../../ORUtils/SE3Pose.h"
+#include "../../../ORUtils/CompileTimeStringConcatenation.h"
 
 //ITMLib
 #include "../../ITMLib/GlobalTemplateDefines.h"
@@ -30,23 +31,25 @@
 #include "../../ITMLib/Utils/Math.h"
 
 
+
 //local
 #include <TestUtilitiesConfig.h>
 
 using namespace ITMLib;
+using namespace ORUtils;
 
 namespace test {
 
-static constexpr std::string_view static_calibration_directory = STATIC_TEST_DATA_PREFIX "TestData/calibration/";
-static constexpr std::string_view static_frames_directory = STATIC_TEST_DATA_PREFIX "TestData/frames/";
-static constexpr std::string_view static_videos_directory = STATIC_TEST_DATA_PREFIX "TestData/videos/";
+static constexpr auto static_calibration_directory = StringFactory(STATIC_TEST_DATA_PREFIX "TestData/calibration/");
+static constexpr auto static_frames_directory = StringFactory(STATIC_TEST_DATA_PREFIX "TestData/frames/");
+static constexpr auto static_videos_directory = StringFactory(STATIC_TEST_DATA_PREFIX "TestData/videos/");
 
-static constexpr std::string_view generated_volume_directory = GENERATED_TEST_DATA_PREFIX "TestData/volumes/";
-static constexpr std::string_view generated_configuration_directory = GENERATED_TEST_DATA_PREFIX "TestData/configuration/";
-static constexpr std::string_view generated_mesh_directory = GENERATED_TEST_DATA_PREFIX "TestData/meshes/";
-static constexpr std::string_view generated_arrays_directory = GENERATED_TEST_DATA_PREFIX "TestData/arrays/";
-static constexpr std::string_view generated_videos_directory = GENERATED_TEST_DATA_PREFIX "TestData/videos/";
-static constexpr std::string_view generated_matrix_directory = GENERATED_TEST_DATA_PREFIX "TestData/matrices/";
+static constexpr auto generated_volume_directory = StringFactory(GENERATED_TEST_DATA_PREFIX "TestData/volumes/");
+static constexpr auto generated_configuration_directory = StringFactory(GENERATED_TEST_DATA_PREFIX "TestData/configuration/");
+static constexpr auto generated_mesh_directory = StringFactory(GENERATED_TEST_DATA_PREFIX "TestData/meshes/");
+static constexpr auto generated_arrays_directory = StringFactory(GENERATED_TEST_DATA_PREFIX "TestData/arrays/");
+static constexpr auto generated_videos_directory = StringFactory(GENERATED_TEST_DATA_PREFIX "TestData/videos/");
+static constexpr auto generated_matrix_directory = StringFactory(GENERATED_TEST_DATA_PREFIX "TestData/matrices/");
 
 void ConstructGeneratedVolumeSubdirectoriesIfMissing();
 void ConstructGeneratedConfigurationDirectoryIfMissing();
