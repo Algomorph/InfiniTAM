@@ -26,4 +26,8 @@ template
 class IndexingEngine<TSDFVoxel_f_flags, PlainVoxelArray, MEMORYDEVICE_CUDA, DIAGNOSTIC>;
 template
 class IndexingEngine<WarpVoxel, PlainVoxelArray, MEMORYDEVICE_CUDA, DIAGNOSTIC>;
+template
+class IndexingEngine<TSDFVoxel_f_rgb, PlainVoxelArray, MEMORYDEVICE_CUDA, OPTIMIZED>;
+template
+class IndexingEngine<TSDFVoxel_f_rgb, PlainVoxelArray, MEMORYDEVICE_CUDA, DIAGNOSTIC>;
 } //namespace ITMLib

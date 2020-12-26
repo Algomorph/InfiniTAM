@@ -30,6 +30,10 @@ namespace ITMLib::internal {
 template void AllocateUsingOtherVolume<MEMORYDEVICE_CUDA, WarpVoxel, TSDFVoxel_f_flags>(
 		ITMLib::VoxelVolume<WarpVoxel, VoxelBlockHash>* target_volume,
 		ITMLib::VoxelVolume<TSDFVoxel_f_flags, VoxelBlockHash>* source_volume);
+template void AllocateUsingOtherVolume<MEMORYDEVICE_CUDA, WarpVoxel, TSDFVoxel_f_rgb>(
+		ITMLib::VoxelVolume<WarpVoxel, VoxelBlockHash>* target_volume,
+		ITMLib::VoxelVolume<TSDFVoxel_f_rgb, VoxelBlockHash>* source_volume);
+
 template void AllocateUsingOtherVolume<MEMORYDEVICE_CUDA, TSDFVoxel_f_flags, TSDFVoxel_f_flags>(
 		ITMLib::VoxelVolume<TSDFVoxel_f_flags, VoxelBlockHash>* target_volume,
 		ITMLib::VoxelVolume<TSDFVoxel_f_flags, VoxelBlockHash>* source_volume);
@@ -60,12 +64,19 @@ template void AllocateUsingOtherVolume_Bounded<MEMORYDEVICE_CUDA, WarpVoxel, War
 template
 struct AllocateUsingOtherVolume_OffsetAndBounded_Executor<MEMORYDEVICE_CUDA, TSDFVoxel_f_flags, TSDFVoxel_f_flags>;
 template
+struct AllocateUsingOtherVolume_OffsetAndBounded_Executor<MEMORYDEVICE_CUDA, TSDFVoxel_f_rgb, TSDFVoxel_f_rgb>;
+template
 struct AllocateUsingOtherVolume_OffsetAndBounded_Executor<MEMORYDEVICE_CUDA, WarpVoxel, TSDFVoxel_f_flags>;
 
 template void AllocateUsingOtherVolume_OffsetAndBounded<MEMORYDEVICE_CUDA, WarpVoxel, TSDFVoxel_f_flags>(
 		ITMLib::VoxelVolume<WarpVoxel, VoxelBlockHash>* targetVolume,
 		ITMLib::VoxelVolume<TSDFVoxel_f_flags, VoxelBlockHash>* sourceVolume,
 		const Extent3Di& source_bounds, const Vector3i& target_offset);
+template void AllocateUsingOtherVolume_OffsetAndBounded<MEMORYDEVICE_CUDA, WarpVoxel, TSDFVoxel_f_rgb>(
+		ITMLib::VoxelVolume<WarpVoxel, VoxelBlockHash>* targetVolume,
+		ITMLib::VoxelVolume<TSDFVoxel_f_rgb, VoxelBlockHash>* sourceVolume,
+		const Extent3Di& source_bounds, const Vector3i& target_offset);
+
 template void AllocateUsingOtherVolume_OffsetAndBounded<MEMORYDEVICE_CUDA, TSDFVoxel_f_flags, TSDFVoxel_f_flags>(
 		ITMLib::VoxelVolume<TSDFVoxel_f_flags, VoxelBlockHash>* targetVolume,
 		ITMLib::VoxelVolume<TSDFVoxel_f_flags, VoxelBlockHash>* sourceVolume,

@@ -75,6 +75,8 @@ template void AllocateUsingOtherVolume_Bounded<MEMORYDEVICE_CPU, WarpVoxel, Warp
 template
 struct AllocateUsingOtherVolume_OffsetAndBounded_Executor<MEMORYDEVICE_CPU, TSDFVoxel_f_flags, TSDFVoxel_f_flags>;
 template
+struct AllocateUsingOtherVolume_OffsetAndBounded_Executor<MEMORYDEVICE_CPU, TSDFVoxel_f_rgb, TSDFVoxel_f_flags>;
+template
 struct AllocateUsingOtherVolume_OffsetAndBounded_Executor<MEMORYDEVICE_CPU, WarpVoxel, TSDFVoxel_f_flags>;
 
 template void AllocateUsingOtherVolume_OffsetAndBounded<MEMORYDEVICE_CPU, WarpVoxel, TSDFVoxel_f_flags>(

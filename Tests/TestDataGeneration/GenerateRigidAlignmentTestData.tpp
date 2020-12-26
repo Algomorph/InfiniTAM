@@ -55,7 +55,7 @@ void GenerateRigidAlignmentTestData() {
 	VoxelVolume<TSDFVoxel_f_rgb, TIndex> teddy_volume_115(teddy::DefaultVolumeParameters(), false, TMemoryDeviceType,
 	                                                      teddy::InitializationParameters<TIndex>());
 	teddy_volume_115.Reset();
-	IndexingEngineInterface<TSDFVoxel_f_rgb, TIndex>* indexing_engine = IndexingEngineFactory::Build<TSDFVoxel_f_rgb, TIndex>(TMemoryDeviceType);
+	auto* indexing_engine = IndexingEngineFactory::Build<TSDFVoxel_f_rgb, TIndex>(TMemoryDeviceType);
 	CameraTrackingState camera_tracking_state(teddy::frame_image_size, TMemoryDeviceType);
 	indexing_engine->AllocateNearSurface(&teddy_volume_115, view, &camera_tracking_state);
 	DepthFusionEngineInterface<TSDFVoxel_f_rgb, TIndex>* depth_fusion_engine = DepthFusionEngineFactory::Build<TSDFVoxel_f_rgb, TIndex>(
