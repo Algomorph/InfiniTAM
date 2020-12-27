@@ -34,7 +34,6 @@
 #include "../TestUtilities/RigidTrackerPresets.h"
 
 
-
 using namespace ITMLib;
 using namespace test;
 
@@ -45,10 +44,42 @@ void GenerateRigidAlignmentTestData() {
 	                                                        << DeviceString<TMemoryDeviceType>() << ") ...");
 	View* view = nullptr;
 
+	//__DEBUG
+	// std::string frame1_depth_path = "/mnt/Data/Reconstruction/real_data/teddy/frames/depth_000062.png";
+	// std::string frame1_color_path = "/mnt/Data/Reconstruction/real_data/teddy/frames/color_000062.png";
+	// std::string frame2_depth_path = "/mnt/Data/Reconstruction/real_data/teddy/frames/depth_000063.png";
+	// std::string frame2_color_path = "/mnt/Data/Reconstruction/real_data/teddy/frames/color_000063.png";
+
+	// std::string frame1_depth_path = "/mnt/Data/Reconstruction/real_data/teddy/frames/depth_000206.png";
+	// std::string frame1_color_path = "/mnt/Data/Reconstruction/real_data/teddy/frames/color_000206.png";
+	// std::string frame2_depth_path = "/mnt/Data/Reconstruction/real_data/teddy/frames/depth_000207.png";
+	// std::string frame2_color_path = "/mnt/Data/Reconstruction/real_data/teddy/frames/color_000207.png";
+
+	// std::string frame1_depth_path = "/mnt/Data/Reconstruction/real_data/teddy/frames/depth_000244.png";
+	// std::string frame1_color_path = "/mnt/Data/Reconstruction/real_data/teddy/frames/color_000244.png";
+	// std::string frame2_depth_path = "/mnt/Data/Reconstruction/real_data/teddy/frames/depth_000246.png";
+	// std::string frame2_color_path = "/mnt/Data/Reconstruction/real_data/teddy/frames/color_000246.png";
+
+	// std::string frame1_depth_path = "/mnt/Data/Reconstruction/real_data/teddy/frames/depth_000310.png";
+	// std::string frame1_color_path = "/mnt/Data/Reconstruction/real_data/teddy/frames/color_000310.png";
+	// std::string frame2_depth_path = "/mnt/Data/Reconstruction/real_data/teddy/frames/depth_000312.png";
+	// std::string frame2_color_path = "/mnt/Data/Reconstruction/real_data/teddy/frames/color_000312.png";
+
+	// std::string frame1_depth_path = "/mnt/Data/Reconstruction/real_data/teddy/frames/depth_000369.png";
+	// std::string frame1_color_path = "/mnt/Data/Reconstruction/real_data/teddy/frames/color_000369.png";
+	// std::string frame2_depth_path = "/mnt/Data/Reconstruction/real_data/teddy/frames/depth_000370.png";
+	// std::string frame2_color_path = "/mnt/Data/Reconstruction/real_data/teddy/frames/color_000370.png";
+
+	//__DEBUG(uncomment)
+	std::string frame1_depth_path = teddy::frame_115_depth_path.ToString();
+	std::string frame1_color_path = teddy::frame_115_color_path.ToString();
+	std::string frame2_depth_path = teddy::frame_116_depth_path.ToString();
+	std::string frame2_color_path = teddy::frame_116_color_path.ToString();
+
 	// generate teddy_volume_115 for teddy scene frame 115
 	UpdateView(&view,
-	           teddy::frame_115_depth_path.ToString(),
-	           teddy::frame_115_color_path.ToString(),
+	           frame1_depth_path,
+	           frame1_color_path,
 	           teddy::calibration_path.ToString(),
 	           TMemoryDeviceType);
 
@@ -69,8 +100,8 @@ void GenerateRigidAlignmentTestData() {
 	// generate rigid tracker outputs for next frame in the sequence
 
 	UpdateView(&view,
-	           teddy::frame_116_depth_path.ToString(),
-	           teddy::frame_116_color_path.ToString(),
+	           frame2_depth_path,
+	           frame2_color_path,
 	           teddy::calibration_path.ToString(),
 	           TMemoryDeviceType);
 
@@ -80,7 +111,7 @@ void GenerateRigidAlignmentTestData() {
 	ConstructGeneratedMatrixDirectoryIfMissing();
 
 	// the rendering engine will generate the point cloud
-	auto rendering_engine = ITMLib::RenderingEngineFactory::Build<TSDFVoxel_f_rgb, TIndex>(TMemoryDeviceType);
+	auto raycasting_engine = ITMLib::RenderingEngineFactory::Build<TSDFVoxel_f_rgb, TIndex>(TMemoryDeviceType);
 	// we need a dud rendering state also for the point cloud
 	RenderState render_state(teddy::frame_image_size,
 	                         teddy::DefaultVolumeParameters().near_clipping_distance, teddy::DefaultVolumeParameters().far_clipping_distance,
@@ -95,15 +126,27 @@ void GenerateRigidAlignmentTestData() {
 		if (std::string(pair.first) != test::depth_tracker_preset_default) {
 			continue;
 		}
-		CameraTrackingState tracking_state(teddy::frame_image_size, TMemoryDeviceType);
-		rendering_engine->CreatePointCloud(&teddy_volume_115, view, &tracking_state, &render_state);
 		const std::string& preset = pair.first;
 		const std::string& matrix_filename = pair.second;
+		CameraTrackingState tracking_state(teddy::frame_image_size, TMemoryDeviceType);
 		CameraTracker* tracker = CameraTrackerFactory::Instance().Make(
 				TMemoryDeviceType, preset.c_str(), teddy::frame_image_size, teddy::frame_image_size,
 				image_processing_engine, imu_calibrator,
 				teddy::DefaultVolumeParameters());
-
+		bool requires_color_rendering = tracker->requiresColourRendering();
+		if (requires_color_rendering) {
+			ORUtils::SE3Pose pose_rgb(view->calibration_information.trafo_rgb_to_depth.calib_inv * tracking_state.pose_d->GetM());
+			raycasting_engine->CreateExpectedDepths(&teddy_volume_115, &pose_rgb, &(view->calibration_information.intrinsics_rgb), &render_state);
+			raycasting_engine->CreatePointCloud(&teddy_volume_115, view, &tracking_state, &render_state);
+			tracking_state.point_cloud_age = 0;
+		} else {
+			raycasting_engine->CreateExpectedDepths(&teddy_volume_115, tracking_state.pose_d,
+										   &(view->calibration_information.intrinsics_d), &render_state);
+			raycasting_engine->CreateICPMaps(&teddy_volume_115, view, &tracking_state, &render_state);
+			tracking_state.pose_pointCloud->SetFrom(tracking_state.pose_d);
+			if (tracking_state.point_cloud_age == -1) tracking_state.point_cloud_age = -2;
+			else tracking_state.point_cloud_age = 0;
+		}
 		//__DEBUG
 		// ORUtils::OStreamWrapper debug_writer(test::generated_arrays_directory.ToString() + "/debug.dat");
 		// debug_writer << *tracking_state.point_cloud;

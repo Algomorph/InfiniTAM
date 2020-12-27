@@ -64,18 +64,18 @@ namespace ITMLib
 		}
 
 		/**
-		 * \brief Do whatever the hell this does, great job on the docs and procedure naming / coupling, InfiniTAM team
+		 * \brief Do whatever the hell this does, great job on the docs and procedure naming and coupling, InfiniTAM authors
 		 * \tparam TVoxel
 		 * \tparam TIndex
 		 * \param tracking_state
 		 * \param volume
 		 * \param view
-		 * \param visualization_engine
+		 * \param raycasting_engine
 		 * \param render_state
 		 */
 		template <typename TVoxel, typename TIndex>
 		void Prepare(CameraTrackingState *tracking_state, VoxelVolume<TVoxel,TIndex> *volume, const View *view,
-		             const RenderingEngineBase<TVoxel,TIndex> *visualization_engine, RenderState *render_state)
+		             const RenderingEngineBase<TVoxel,TIndex> *raycasting_engine, RenderState *render_state)
 		{
 			if (!tracker->requiresPointCloudRendering())
 				return;
@@ -87,24 +87,24 @@ namespace ITMLib
 			if (requiresColourRendering)
 			{
 				ORUtils::SE3Pose pose_rgb(view->calibration_information.trafo_rgb_to_depth.calib_inv * tracking_state->pose_d->GetM());
-				visualization_engine->CreateExpectedDepths(volume, &pose_rgb, &(view->calibration_information.intrinsics_rgb), render_state);
-				visualization_engine->CreatePointCloud(volume, view, tracking_state, render_state);
+				raycasting_engine->CreateExpectedDepths(volume, &pose_rgb, &(view->calibration_information.intrinsics_rgb), render_state);
+				raycasting_engine->CreatePointCloud(volume, view, tracking_state, render_state);
 				tracking_state->point_cloud_age = 0;
 			}
 			else
 			{
-				visualization_engine->CreateExpectedDepths(volume, tracking_state->pose_d, &(view->calibration_information.intrinsics_d), render_state);
+				raycasting_engine->CreateExpectedDepths(volume, tracking_state->pose_d, &(view->calibration_information.intrinsics_d), render_state);
 
 				if (requiresFullRendering)
 				{
-					visualization_engine->CreateICPMaps(volume, view, tracking_state, render_state);
+					raycasting_engine->CreateICPMaps(volume, view, tracking_state, render_state);
 					tracking_state->pose_pointCloud->SetFrom(tracking_state->pose_d);
 					if (tracking_state->point_cloud_age == -1) tracking_state->point_cloud_age=-2;
 					else tracking_state->point_cloud_age = 0;
 				}
 				else
 				{
-					visualization_engine->ForwardRender(volume, view, tracking_state, render_state);
+					raycasting_engine->ForwardRender(volume, view, tracking_state, render_state);
 					tracking_state->point_cloud_age++;
 				}
 			}

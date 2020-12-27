@@ -33,7 +33,7 @@ constexpr const char* extended_tracker_preset2 = "type=extended,levels=rrrb,useD
                                                  "tukeyCutOff=9,framesToSkip=10,framesToWeight=50,failureDec=20.0";
 
 constexpr const char* depth_tracker_preset_default =
-		"type=icp,levels=rrrbbb,minstep=1e-3,"
+		"type=icp,levels=rrrbb,minstep=1e-3,"
 		"outlierC=0.02,outlierF=0.004,"
 		"numiterC=300,numiterF=50,failureDec=5.0";
 constexpr const char* depth_tracker_preset_loop_closure =

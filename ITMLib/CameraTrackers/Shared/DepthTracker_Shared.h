@@ -16,8 +16,8 @@ _CPU_AND_GPU_CODE_ inline bool computePerPointGH_Depth_Ab(THREADPTR(float) *A, T
 	Vector4f tmp3Dpoint, tmp3Dpoint_reproj; Vector3f ptDiff;
 	Vector4f curr3Dpoint, corr3Dnormal; Vector2f tmp2Dpoint;
 
-	tmp3Dpoint.x = depth * ((float(x) - viewIntrinsics.z) / viewIntrinsics.x);
-	tmp3Dpoint.y = depth * ((float(y) - viewIntrinsics.w) / viewIntrinsics.y);
+	tmp3Dpoint.x = depth * ((float(x) - viewIntrinsics.cx) / viewIntrinsics.fx);
+	tmp3Dpoint.y = depth * ((float(y) - viewIntrinsics.cy) / viewIntrinsics.fy);
 	tmp3Dpoint.z = depth;
 	tmp3Dpoint.w = 1.0f;
     
