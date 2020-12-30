@@ -20,6 +20,9 @@
 
 namespace test {
 
+constexpr const char* rgb_tracker_preset_t = "type=rgb,levels=t";
+constexpr const char* rgb_tracker_preset_r = "type=rgb,levels=r";
+constexpr const char* rgb_tracker_preset_b = "type=rgb,levels=b";
 constexpr const char* rgb_tracker_preset_rrbb = "type=rgb,levels=rrbb";
 constexpr const char* rgb_tracker_preset_rrrbb = "type=rgb,levels=rrrbb";
 constexpr const char* rgb_tracker_preset_rrrbrb = "type=rgb,levels=rrrbrb";
@@ -64,7 +67,7 @@ constexpr const char* depth_tracker_preset_b_more_iters =
 
 extern const std::unordered_map<std::string, std::string> matrix_file_name_by_preset;
 extern const std::array<std::string, 7> depth_tracker_presets;
-extern const std::array<std::string, 3> color_tracker_presets;
+extern const std::array<std::string, 6> color_tracker_presets;
 
 } // namespace test
 

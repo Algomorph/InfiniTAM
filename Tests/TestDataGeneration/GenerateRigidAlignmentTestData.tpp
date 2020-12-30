@@ -125,9 +125,9 @@ void GenerateRigidAlignmentTestData() {
 		// if (it == test::color_tracker_presets.end()) {
 		// 	continue;
 		// }
-		if (std::string(pair.first) != test::rgb_tracker_preset_rrrbrb) {
-			continue;
-		}
+		// if (std::string(pair.first) != test::rgb_tracker_preset_rrbb) {
+		// 	continue;
+		// }
 		const std::string& preset = pair.first;
 		const std::string& matrix_filename = pair.second;
 		CameraTrackingState tracking_state(teddy::frame_image_size, TMemoryDeviceType);
@@ -162,7 +162,7 @@ void GenerateRigidAlignmentTestData() {
 		matrix_writer << tracking_state.pose_d->GetM();
 
 		//__DEBUG
-		std::cout << preset << ": " << std::endl << tracking_state.pose_d->GetM() << std::endl;
+		// std::cout << preset << ": " << std::endl << tracking_state.pose_d->GetM() << std::endl;
 
 		tracking_state.pose_d->SetM(Matrix4f::Identity());
 		delete tracker;

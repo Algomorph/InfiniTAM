@@ -20,6 +20,9 @@ namespace test {
 const std::unordered_map<std::string, std::string> matrix_file_name_by_preset = [] {
 	std::unordered_map<std::string, std::string> map(
 			{
+					{rgb_tracker_preset_t,                  "rgb_t.mat"},
+					{rgb_tracker_preset_r,                  "rgb_r.mat"},
+					{rgb_tracker_preset_b,                  "rgb_b.mat"},
 					{rgb_tracker_preset_rrbb,               "rgb_rrbb.mat"},
 					{rgb_tracker_preset_rrrbb,              "rgb_rrrbb.mat"},
 					{rgb_tracker_preset_rrrbrb,             "rgb_rrrbrb.mat"},
@@ -46,10 +49,13 @@ const std::array<std::string, 7> depth_tracker_presets = {
 		depth_tracker_preset_b_more_iters
 };
 
-const std::array<std::string, 3> color_tracker_presets = {
+const std::array<std::string, 6> color_tracker_presets = {
+		rgb_tracker_preset_t,
+		rgb_tracker_preset_r,
+		rgb_tracker_preset_b,
 		rgb_tracker_preset_rrbb,
 		rgb_tracker_preset_rrrbb,
-		rgb_tracker_preset_rrrbrb
+		rgb_tracker_preset_rrrbrb,
 };
 
 
