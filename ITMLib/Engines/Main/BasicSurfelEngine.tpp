@@ -4,7 +4,7 @@
 
 #include "../ImageProcessing/ImageProcessingEngineFactory.h"
 #include "../ViewBuilder/ViewBuilderFactory.h"
-#include "../Rendering/SurfelVisualizationEngineFactory.h"
+#include "../Raycasting/SurfelVisualizationEngineFactory.h"
 #include "../../CameraTrackers/CameraTrackerFactory.h"
 
 #include "../../../ORUtils/NVTimer.h"
@@ -343,7 +343,7 @@ void BasicSurfelEngine<TSurfel>::GetImage(UChar4Image* out, GetImageType getImag
 		case BasicSurfelEngine::InfiniTAM_IMAGE_ORIGINAL_DEPTH:
 			out->ChangeDims(view->depth.dimensions);
 			if (settings.device_type == MEMORYDEVICE_CUDA) view->depth.UpdateHostFromDevice();
-			IRenderingEngine::DepthToUchar4(out, view->depth);
+			IRaycastingEngine::DepthToUchar4(out, view->depth);
 			break;
 		case BasicSurfelEngine::InfiniTAM_IMAGE_SCENERAYCAST:
 		case BasicSurfelEngine::InfiniTAM_IMAGE_COLOUR_FROM_VOLUME:

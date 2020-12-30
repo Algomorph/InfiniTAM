@@ -61,7 +61,7 @@ if (BUILD_TESTS)
             TestUtilities/TestDataUtilities.h
             TestUtilities/LevelSetAlignment/LevelSetAlignmentTestUtilities.h
             TestUtilities/TestUtilitiesConfig.h.in
-            TestUtilities/CameraPoseAndRenderingEngineFixture.h
+            TestUtilities/CameraPoseAndRaycastingEngineFixture.h
             TestUtilities/LevelSetAlignment/GenericWarpConsistencySubtest.h
             TestUtilities/LevelSetAlignment/LevelSetAlignmentTestMode.h
             TestUtilities/LevelSetAlignment/TestCaseOrganizationBySwitches.h
@@ -134,7 +134,7 @@ if (BUILD_TESTS)
     itm_add_test(NAME TwoSurfaceHashAllocation SOURCES Test_TwoSurfaceHashAllocation.cpp)
     itm_add_test(NAME MeshGeneration SOURCES Test_MeshGeneration.cpp)
     itm_add_test(NAME EnumSerialization SOURCES Test_EnumSerialization.cpp)
-    itm_add_test(NAME RenderingEngine SOURCES Test_RenderingEngine.cpp)
+    itm_add_test(NAME RaycastingEngine SOURCES Test_RaycastingEngine.cpp)
     itm_add_test(NAME ImageProcessingEngine SOURCES Test_ImageProcessingEngine.cpp)
     itm_add_test(NAME FFmpegReadWrite SOURCES Test_FFmpegReadWrite.cpp)
     itm_add_test(NAME RigidAlignment SOURCES Test_RigidAlignment.cpp)

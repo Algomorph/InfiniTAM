@@ -42,7 +42,7 @@
 //(CUDA)
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison_CUDA.h"
 #include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
-#include "../ITMLib/Engines/Rendering/RenderingEngineFactory.h"
+#include "../ITMLib/Engines/Raycasting/RaycastingEngineFactory.h"
 #include "../ITMLib/Engines/Warping/WarpingEngineFactory.h"
 #include "../ITMLib/Engines/VolumeFusion/VolumeFusionEngineFactory.h"
 #include "../ITMLib/Utils/Analytics/BenchmarkUtilities.h"
@@ -204,16 +204,16 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CPU) {
 
 	Vector2i image_size = view->depth.dimensions;
 
-	CameraTrackingState tracking_state(image_size, MEMORYDEVICE_CPU);
+	CameraTrackingState tracking_state_color_and_depth(image_size, MEMORYDEVICE_CPU);
 
-	RenderingEngineBase <TSDFVoxel, VoxelBlockHash>* visualization_engine_legacy =
+	RaycastingEngineBase <TSDFVoxel, VoxelBlockHash>* visualization_engine_legacy =
 			VisualizationEngineFactory::MakeVisualizationEngine<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CPU);
 
 	RenderState render_state(image_size, configuration::get().general_voxel_volume_parameters.near_clipping_distance,
 							 configuration::get().general_voxel_volume_parameters.far_clipping_distance,
 							 MEMORYDEVICE_CPU);
 
-	visualization_engine_legacy->CreateICPMaps(canonical_volume, view, &tracking_state, &render_state);
+	visualization_engine_legacy->CreateICPMaps(canonical_volume, view, &tracking_state_color_and_depth, &render_state);
 
 	updateView(&view, GENERATED_TEST_DATA_PREFIX "TestData/snoopy_depth_000017.png",
 			   GENERATED_TEST_DATA_PREFIX "TestData/snoopy_color_000017.png", GENERATED_TEST_DATA_PREFIX "TestData/snoopy_omask_000017.png",
@@ -225,7 +225,7 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CPU) {
 
 	const int live_index_to_start_from = 0;
 	reconstructionEngine->GenerateTsdfVolumeFromTwoSurfaces(live_volumes[live_index_to_start_from], view,
-															&tracking_state);
+															&tracking_state_color_and_depth);
 
 	VolumeStatisticsCalculator<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>& tsdf_calculator =
 			VolumeStatisticsCalculator<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CPU>::Instance();
@@ -355,16 +355,16 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CUDA) {
 
 	Vector2i image_size = view->depth.dimensions;
 
-	CameraTrackingState tracking_state(image_size, MEMORYDEVICE_CUDA);
+	CameraTrackingState tracking_state_color_and_depth(image_size, MEMORYDEVICE_CUDA);
 
-	RenderingEngineBase <TSDFVoxel, VoxelBlockHash>* visualization_engine_legacy =
+	RaycastingEngineBase <TSDFVoxel, VoxelBlockHash>* visualization_engine_legacy =
 			VisualizationEngineFactory::MakeVisualizationEngine<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CUDA);
 
 	RenderState render_state(image_size, configuration::get().general_voxel_volume_parameters.near_clipping_distance,
 							 configuration::get().general_voxel_volume_parameters.far_clipping_distance,
 							 MEMORYDEVICE_CUDA);
 
-	visualization_engine_legacy->CreateICPMaps(canonical_volume, view, &tracking_state, &render_state);
+	visualization_engine_legacy->CreateICPMaps(canonical_volume, view, &tracking_state_color_and_depth, &render_state);
 
 	updateView(&view, GENERATED_TEST_DATA_PREFIX "TestData/snoopy_depth_000017.png",
 			   GENERATED_TEST_DATA_PREFIX "TestData/snoopy_color_000017.png", GENERATED_TEST_DATA_PREFIX "TestData/snoopy_omask_000017.png",
@@ -376,7 +376,7 @@ BOOST_AUTO_TEST_CASE(Test_Warp_Performance_CUDA) {
 
 	const int live_index_to_start_from = 0;
 	reconstructionEngine->GenerateTsdfVolumeFromTwoSurfaces(live_volumes[live_index_to_start_from], view,
-															&tracking_state);
+															&tracking_state_color_and_depth);
 
 	VolumeStatisticsCalculator<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>& tsdf_calculator =
 			VolumeStatisticsCalculator<TSDFVoxel, VoxelBlockHash, MEMORYDEVICE_CUDA>::Instance();

@@ -24,7 +24,7 @@
 
 // === Test Utilities ===
 #include "../TestUtilities/TestUtilities.h"
-#include "../TestUtilities/CameraPoseAndRenderingEngineFixture.h"
+#include "../TestUtilities/CameraPoseAndRaycastingEngineFixture.h"
 
 using namespace ITMLib;
 using namespace test;
@@ -35,7 +35,7 @@ void GenerateRenderingTestData_VoxelBlockHash() {
 	               "Generating VBH rendering test data ... ");
 	test::ConstructGeneratedArraysDirectoryIfMissing();
 
-	CameraPoseAndRenderingEngineFixture<TMemoryDeviceType> fixture;
+	CameraPoseAndRaycastingEngineFixture<TMemoryDeviceType> fixture;
 
 	ORUtils::OStreamWrapper visible_blocks_file(GENERATED_TEST_DATA_PREFIX "TestData/arrays/visible_blocks.dat", true);
 	ORUtils::OStreamWrapper range_images_file(GENERATED_TEST_DATA_PREFIX "TestData/arrays/range_images.dat", true);
@@ -169,24 +169,24 @@ void GenerateRenderingTestData_VoxelBlockHash() {
 
 			UChar4Image output_image(test::snoopy::frame_image_size, TMemoryDeviceType);
 			fixture.rendering_engine->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state_render_image.get(),
-			                                      &output_image, IRenderingEngine::RenderImageType::RENDER_COLOUR_FROM_VOLUME,
-			                                      IRenderingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
+			                                      &output_image, IRaycastingEngine::RenderImageType::RENDER_COLOUR_FROM_VOLUME,
+			                                      IRaycastingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
 			ORUtils::MemoryBlockPersistence::SaveImage(rendered_images_file, output_image);
 			fixture.rendering_engine->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state_render_image.get(),
-			                                      &output_image, IRenderingEngine::RenderImageType::RENDER_COLOUR_FROM_NORMAL,
-			                                      IRenderingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
+			                                      &output_image, IRaycastingEngine::RenderImageType::RENDER_COLOUR_FROM_NORMAL,
+			                                      IRaycastingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
 			ORUtils::MemoryBlockPersistence::SaveImage(rendered_images_file, output_image);
 			fixture.rendering_engine->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state_render_image.get(),
-			                                      &output_image, IRenderingEngine::RenderImageType::RENDER_SHADED_GREYSCALE_IMAGENORMALS,
-			                                      IRenderingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
+			                                      &output_image, IRaycastingEngine::RenderImageType::RENDER_SHADED_GREYSCALE_IMAGENORMALS,
+			                                      IRaycastingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
 			ORUtils::MemoryBlockPersistence::SaveImage(rendered_images_file, output_image);
 			fixture.rendering_engine->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state_render_image.get(),
-			                                      &output_image, IRenderingEngine::RenderImageType::RENDER_SHADED_GREEN,
-			                                      IRenderingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
+			                                      &output_image, IRaycastingEngine::RenderImageType::RENDER_SHADED_GREEN,
+			                                      IRaycastingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
 			ORUtils::MemoryBlockPersistence::SaveImage(rendered_images_file, output_image);
 			fixture.rendering_engine->RenderImage(volume, &pose, &fixture.calibration_data.intrinsics_d, render_state_render_image.get(),
-			                                      &output_image, IRenderingEngine::RenderImageType::RENDER_SHADED_OVERLAY,
-			                                      IRenderingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
+			                                      &output_image, IRaycastingEngine::RenderImageType::RENDER_SHADED_OVERLAY,
+			                                      IRaycastingEngine::RenderRaycastSelection::RENDER_FROM_OLD_RAYCAST);
 			ORUtils::MemoryBlockPersistence::SaveImage(rendered_images_file, output_image);
 		}
 

@@ -15,9 +15,11 @@
 //  ================================================================
 // === local ===
 #include "GenerateRigidAlignmentTestData.h"
+
 // === ORUtils ===
 #include "../../ORUtils/MemoryDeviceType.h"
 #include "../../ORUtils/MathTypePersistence/MathTypePersistence.h"
+
 // === ITMLib ===
 #include "../../ITMLib/Utils/Logging/Logging.h"
 #include "../../ITMLib/Objects/Views/View.h"
@@ -25,7 +27,7 @@
 #include "../../ITMLib/Engines/ImageProcessing/ImageProcessingEngineFactory.h"
 #include "../../ITMLib/Engines/Indexing/IndexingEngineFactory.h"
 #include "../../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
-#include "../../ITMLib/Engines/Rendering/RenderingEngineFactory.h"
+#include "../../ITMLib/Engines/Raycasting/RaycastingEngineFactory.h"
 #include "../../ITMLib/CameraTrackers/CameraTrackerFactory.h"
 #include "../../ITMLib/Engines/Indexing/Interface/IndexingEngine.h"
 
@@ -70,7 +72,7 @@ void GenerateRigidAlignmentTestData() {
 	// std::string frame2_depth_path = "/mnt/Data/Reconstruction/real_data/teddy/frames/depth_000370.png";
 	// std::string frame2_color_path = "/mnt/Data/Reconstruction/real_data/teddy/frames/color_000370.png";
 
-	//__DEBUG(uncomment)
+	//__DEBUG_U (uncomment if commented)
 	std::string frame1_depth_path = teddy::frame_115_depth_path.ToString();
 	std::string frame1_color_path = teddy::frame_115_color_path.ToString();
 	std::string frame2_depth_path = teddy::frame_116_depth_path.ToString();
@@ -111,19 +113,19 @@ void GenerateRigidAlignmentTestData() {
 	ConstructGeneratedMatrixDirectoryIfMissing();
 
 	// the rendering engine will generate the point cloud
-	auto raycasting_engine = ITMLib::RenderingEngineFactory::Build<TSDFVoxel_f_rgb, TIndex>(TMemoryDeviceType);
+	auto raycasting_engine = ITMLib::RaycastingEngineFactory::Build<TSDFVoxel_f_rgb, TIndex>(TMemoryDeviceType);
 	// we need a dud rendering state also for the point cloud
 	RenderState render_state(teddy::frame_image_size,
 	                         teddy::DefaultVolumeParameters().near_clipping_distance, teddy::DefaultVolumeParameters().far_clipping_distance,
 	                         TMemoryDeviceType);
 
 	for (auto& pair : test::matrix_file_name_by_preset) {
-		//__DEBUG
-		// auto it = std::find(test::depth_tracker_presets.begin(), test::depth_tracker_presets.end(), pair.first);
-		// if (it == test::depth_tracker_presets.end()) {
+		// __DEBUG
+		// auto it = std::find(test::color_tracker_presets.begin(), test::color_tracker_presets.end(), pair.first);
+		// if (it == test::color_tracker_presets.end()) {
 		// 	continue;
 		// }
-		if (std::string(pair.first) != test::depth_tracker_preset_default) {
+		if (std::string(pair.first) != test::rgb_tracker_preset_rrrbrb) {
 			continue;
 		}
 		const std::string& preset = pair.first;
@@ -147,9 +149,10 @@ void GenerateRigidAlignmentTestData() {
 			if (tracking_state.point_cloud_age == -1) tracking_state.point_cloud_age = -2;
 			else tracking_state.point_cloud_age = 0;
 		}
+
 		//__DEBUG
 		// ORUtils::OStreamWrapper debug_writer(test::generated_arrays_directory.ToString() + "/debug.dat");
-		// debug_writer << *tracking_state.point_cloud;
+		// debug_writer << *tracking_state_color_and_depth.point_cloud;
 		// debug_writer << *view;
 
 

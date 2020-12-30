@@ -4,7 +4,7 @@
 
 #include <map>
 
-#include "../../Engines/Rendering/Interface/RenderingEngineInterface.h"
+#include "../../Engines/Raycasting/Interface/RaycastingEngineInterface.h"
 #include "../RenderStates/RenderState.h"
 #include "VoxelVolume.h"
 #include "../Tracking/CameraTrackingState.h"

@@ -36,7 +36,7 @@
 #include "../ITMLib/Engines/VolumeFileIO/VolumeFileIOEngine.h"
 #include "../ITMLib/Engines/Analytics/AnalyticsEngine.h"
 #include "../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
-#include "../ITMLib/Engines/Rendering/RenderingEngineFactory.h"
+#include "../ITMLib/Engines/Raycasting/RaycastingEngineFactory.h"
 #include "../ITMLib/Utils/Configuration/Configuration.h"
 #include "../ITMLib/Utils/Analytics/AlmostEqual.h"
 #include "../ITMLib/Utils/Analytics/VoxelVolumeComparison/VoxelVolumeComparison.h"
@@ -136,8 +136,8 @@ static void SetUpTrackingState16(CameraTrackingState& tracking_state,
 	volume_VBH_16.Reset();
 	indexer_VBH.AllocateNearSurface(&volume_VBH_16, view_16);
 	depth_fusion_engine_VBH->IntegrateDepthImageIntoTsdfVolume(&volume_VBH_16, view_16);
-	RenderingEngineBase<TSDFVoxel, VoxelBlockHash>* visualization_engine =
-			RenderingEngineFactory::Build<TSDFVoxel, VoxelBlockHash>(TMemoryDeviceType);
+	RaycastingEngineBase<TSDFVoxel, VoxelBlockHash>* visualization_engine =
+			RaycastingEngineFactory::Build<TSDFVoxel, VoxelBlockHash>(TMemoryDeviceType);
 	visualization_engine->CreateICPMaps(&volume_VBH_16, view_16, &tracking_state, &render_state);
 	delete visualization_engine;
 	delete view_16;

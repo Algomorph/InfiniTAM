@@ -3,7 +3,7 @@
 #include "../ImageProcessing/ImageProcessingEngineFactory.h"
 #include "../Meshing/MeshingEngineFactory.h"
 #include "../ViewBuilder/ViewBuilderFactory.h"
-#include "../Rendering/RenderingEngineFactory.h"
+#include "../Raycasting/RaycastingEngineFactory.h"
 #include "../../CameraTrackers/CameraTrackerFactory.h"
 
 #include "../../../ORUtils/NVTimer.h"
@@ -27,7 +27,7 @@ BasicVoxelEngine<TVoxel,TIndex>::BasicVoxelEngine(const RGBD_CalibrationInformat
 
 	image_processing_engine = ImageProcessingEngineFactory::Build(deviceType);
 	viewBuilder = ViewBuilderFactory::Build(calib, deviceType);
-	visualization_engine = RenderingEngineFactory::Build<TVoxel, TIndex>(deviceType);
+	visualization_engine = RaycastingEngineFactory::Build<TVoxel, TIndex>(deviceType);
 
 	meshing_engine = nullptr;
 	if (settings.create_meshing_engine)
@@ -366,7 +366,7 @@ void BasicVoxelEngine<TVoxel,TIndex>::GetImage(UChar4Image *out, GetImageType ge
 	case BasicVoxelEngine::InfiniTAM_IMAGE_ORIGINAL_DEPTH:
 		out->ChangeDims(view->depth.dimensions);
 		if (settings.device_type == MEMORYDEVICE_CUDA) view->depth.UpdateHostFromDevice();
-		RenderingEngineBase<TVoxel, TIndex>::DepthToUchar4(out, view->depth);
+		RaycastingEngineBase<TVoxel, TIndex>::DepthToUchar4(out, view->depth);
 
 		break;
 	case BasicVoxelEngine::InfiniTAM_IMAGE_SCENERAYCAST:
@@ -375,24 +375,24 @@ void BasicVoxelEngine<TVoxel,TIndex>::GetImage(UChar4Image *out, GetImageType ge
 	case BasicVoxelEngine::InfiniTAM_IMAGE_COLOUR_FROM_CONFIDENCE:
 		{
 		// use current raycast or forward projection?
-		IRenderingEngine::RenderRaycastSelection raycastType;
-		if (trackingState->point_cloud_age <= 0) raycastType = IRenderingEngine::RENDER_FROM_OLD_RAYCAST;
-		else raycastType = IRenderingEngine::RENDER_FROM_OLD_FORWARDPROJ;
+		IRaycastingEngine::RenderRaycastSelection raycastType;
+		if (trackingState->point_cloud_age <= 0) raycastType = IRaycastingEngine::RENDER_FROM_OLD_RAYCAST;
+		else raycastType = IRaycastingEngine::RENDER_FROM_OLD_FORWARDPROJ;
 
 		// what sort of image is it?
-		IRenderingEngine::RenderImageType imageType;
+		IRaycastingEngine::RenderImageType imageType;
 		switch (getImageType) {
 		case BasicVoxelEngine::InfiniTAM_IMAGE_COLOUR_FROM_CONFIDENCE:
-			imageType = IRenderingEngine::RENDER_COLOUR_FROM_CONFIDENCE;
+			imageType = IRaycastingEngine::RENDER_COLOUR_FROM_CONFIDENCE;
 			break;
 		case BasicVoxelEngine::InfiniTAM_IMAGE_COLOUR_FROM_NORMAL:
-			imageType = IRenderingEngine::RENDER_COLOUR_FROM_NORMAL;
+			imageType = IRaycastingEngine::RENDER_COLOUR_FROM_NORMAL;
 			break;
 		case BasicVoxelEngine::InfiniTAM_IMAGE_COLOUR_FROM_VOLUME:
-			imageType = IRenderingEngine::RENDER_COLOUR_FROM_VOLUME;
+			imageType = IRaycastingEngine::RENDER_COLOUR_FROM_VOLUME;
 			break;
 		default:
-			imageType = IRenderingEngine::RENDER_SHADED_GREYSCALE_IMAGENORMALS;
+			imageType = IRaycastingEngine::RENDER_SHADED_GREYSCALE_IMAGENORMALS;
 		}
 
 		visualization_engine->RenderImage(volume, trackingState->pose_d, &view->calibration_information.intrinsics_d, render_state, render_state->raycastImage, imageType, raycastType);
@@ -413,10 +413,10 @@ void BasicVoxelEngine<TVoxel,TIndex>::GetImage(UChar4Image *out, GetImageType ge
 	case BasicVoxelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_NORMAL:
 	case BasicVoxelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_CONFIDENCE:
 	{
-		IRenderingEngine::RenderImageType type = IRenderingEngine::RENDER_SHADED_GREYSCALE;
-		if (getImageType == BasicVoxelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_VOLUME) type = IRenderingEngine::RENDER_COLOUR_FROM_VOLUME;
-		else if (getImageType == BasicVoxelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_NORMAL) type = IRenderingEngine::RENDER_COLOUR_FROM_NORMAL;
-		else if (getImageType == BasicVoxelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_CONFIDENCE) type = IRenderingEngine::RENDER_COLOUR_FROM_CONFIDENCE;
+		IRaycastingEngine::RenderImageType type = IRaycastingEngine::RENDER_SHADED_GREYSCALE;
+		if (getImageType == BasicVoxelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_VOLUME) type = IRaycastingEngine::RENDER_COLOUR_FROM_VOLUME;
+		else if (getImageType == BasicVoxelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_NORMAL) type = IRaycastingEngine::RENDER_COLOUR_FROM_NORMAL;
+		else if (getImageType == BasicVoxelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_CONFIDENCE) type = IRaycastingEngine::RENDER_COLOUR_FROM_CONFIDENCE;
 
 		if (render_state_freeview == nullptr)
 		{

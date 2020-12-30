@@ -27,7 +27,7 @@
 #include "../../../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
 #include "../../../ITMLib/Engines/Warping/WarpingEngineFactory.h"
 #include "../../../ITMLib/Engines/VolumeFusion/VolumeFusionEngineFactory.h"
-#include "../../../ITMLib/Engines/Rendering/RenderingEngineFactory.h"
+#include "../../../ITMLib/Engines/Raycasting/RaycastingEngineFactory.h"
 #include "../../../ITMLib/Engines/Indexing/Interface/IndexingEngine.h"
 #include "../../../ITMLib/Engines/Indexing/IndexingEngineFactory.h"
 #include "../../../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_VoxelBlockHash_CPU.h"

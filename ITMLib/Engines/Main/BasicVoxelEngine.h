@@ -8,7 +8,7 @@
 #include "../ImageProcessing/Interface/ImageProcessingEngineInterface.h"
 #include "../Meshing/Interface/MeshingEngine.h"
 #include "../ViewBuilder/Interface/ViewBuilder.h"
-#include "../Rendering/Interface/RenderingEngineInterface.h"
+#include "../Raycasting/Interface/RaycastingEngineInterface.h"
 #include "../../Objects/Misc/IMUCalibrator.h"
 
 #include "../../../FernRelocLib/Relocaliser.h"
@@ -21,7 +21,7 @@ private: // instance variables
 	int processed_frame_count, relocalization_count;
 
 	ImageProcessingEngineInterface* image_processing_engine;
-	RenderingEngineBase<TVoxel, TIndex>* visualization_engine;
+	RaycastingEngineBase<TVoxel, TIndex>* visualization_engine;
 
 	MeshingEngine<TVoxel, TIndex>* meshing_engine;
 

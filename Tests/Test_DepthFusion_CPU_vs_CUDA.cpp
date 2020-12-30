@@ -31,8 +31,8 @@
 #include "../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_VoxelBlockHash_CPU.h"
 //(CUDA)
 #ifndef COMPILE_WITHOUT_CUDA
-#include "../ITMLib/Engines/Rendering/Interface/RenderingEngineInterface.h"
-#include "../ITMLib/Engines/Rendering/RenderingEngineFactory.h"
+#include "../ITMLib/Engines/Raycasting/Interface/RaycastingEngineInterface.h"
+#include "../ITMLib/Engines/Raycasting/RaycastingEngineFactory.h"
 #endif
 
 // *** test_utils ***
@@ -169,10 +169,10 @@ BOOST_AUTO_TEST_CASE(Test_SceneConstruct17_VBH_CPU_CUDA_SurfaceSpan){
 		depth_fusion_engine_VBH_CPU->IntegrateDepthImageIntoTsdfVolume(&volume_VBH_16_CPU, view_16_CPU);
 		depth_fusion_engine_VBH_CUDA->IntegrateDepthImageIntoTsdfVolume(&volume_VBH_16_CUDA, view_16_CUDA);
 		
-		RenderingEngineBase<TSDFVoxel, VoxelBlockHash>* visualization_engine_CPU =
-				RenderingEngineFactory::Build<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CPU);
-		RenderingEngineBase<TSDFVoxel, VoxelBlockHash>* visualization_engine_CUDA =
-				RenderingEngineFactory::Build<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CUDA);
+		RaycastingEngineBase<TSDFVoxel, VoxelBlockHash>* visualization_engine_CPU =
+				RaycastingEngineFactory::Build<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CPU);
+		RaycastingEngineBase<TSDFVoxel, VoxelBlockHash>* visualization_engine_CUDA =
+				RaycastingEngineFactory::Build<TSDFVoxel, VoxelBlockHash>(MEMORYDEVICE_CUDA);
 		
 		visualization_engine_CPU->CreateICPMaps(&volume_VBH_16_CPU, view_16_CPU, &tracking_state_CPU, &render_state_CPU);
 		visualization_engine_CUDA->CreateICPMaps(&volume_VBH_16_CUDA, view_16_CUDA, &tracking_state_CUDA, &render_state_CUDA);

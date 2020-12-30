@@ -34,7 +34,7 @@
 #include "../ITMLib/Utils/Configuration/Configuration.h"
 #include "../ITMLib/Engines/Indexing/IndexingSettings.h"
 #include "../ITMLib/Utils/Metacoding/DeferrableStructUtilities.h"
-#include "../ITMLib/Engines/Rendering/RenderingSettings.h"
+#include "../ITMLib/Engines/Raycasting/RaycastingSettings.h"
 #include "../ITMLib/Utils/Configuration/AutomaticRunSettings.h"
 #include "../ITMLib/Engines/Main/MainEngineSettings.h"
 #include "../ITMLib/Engines/LevelSetAlignment/Interface/LevelSetAlignmentParameters.h"
@@ -50,7 +50,7 @@ struct DeferrableStructCollection {
 	MainEngineSettings main_engine_settings;
 	TelemetrySettings telemetry_settings;
 	IndexingSettings indexing_settings;
-	RenderingSettings rendering_settings;
+	RaycastingSettings raycasting_settings;
 	AutomaticRunSettings automatic_run_settings;
 	LevelSetAlignmentParameters level_set_evolution_parameters;
 	VolumeFusionSettings volume_fusion_settings;
@@ -60,7 +60,7 @@ struct DeferrableStructCollection {
 			main_engine_settings(BuildDeferrableFromParentIfPresent<MainEngineSettings>(source_configuration)),
 			telemetry_settings(BuildDeferrableFromParentIfPresent<TelemetrySettings>(source_configuration)),
 			indexing_settings(BuildDeferrableFromParentIfPresent<IndexingSettings>(source_configuration)),
-			rendering_settings(BuildDeferrableFromParentIfPresent<RenderingSettings>(source_configuration)),
+			raycasting_settings(BuildDeferrableFromParentIfPresent<RaycastingSettings>(source_configuration)),
 			automatic_run_settings(BuildDeferrableFromParentIfPresent<AutomaticRunSettings>(source_configuration)),
 			level_set_evolution_parameters(BuildDeferrableFromParentIfPresent<LevelSetAlignmentParameters>(source_configuration)),
 			volume_fusion_settings(BuildDeferrableFromParentIfPresent<VolumeFusionSettings>(source_configuration)){}
@@ -69,7 +69,7 @@ struct DeferrableStructCollection {
 		BOOST_REQUIRE_EQUAL(l.main_engine_settings, r.main_engine_settings);
 		BOOST_REQUIRE_EQUAL(l.telemetry_settings, r.telemetry_settings);
 		BOOST_REQUIRE_EQUAL(l.indexing_settings, r.indexing_settings);
-		BOOST_REQUIRE_EQUAL(l.rendering_settings, r.rendering_settings);
+		BOOST_REQUIRE_EQUAL(l.raycasting_settings, r.raycasting_settings);
 		BOOST_REQUIRE_EQUAL(l.automatic_run_settings, r.automatic_run_settings);
 		BOOST_REQUIRE_EQUAL(l.level_set_evolution_parameters, r.level_set_evolution_parameters);
 		BOOST_REQUIRE_EQUAL(l.volume_fusion_settings, r.volume_fusion_settings);
@@ -274,7 +274,7 @@ BOOST_AUTO_TEST_CASE(ConfigurationTestLong_CLI_Only) {
 
 	                      " --indexing_settings.execution_mode=diagnostic"
 
-	                      " --rendering_settings.skip_points=true"
+	                      " --raycasting_settings.skip_points=true"
 
 	                      " --automatic_run_settings.index_of_frame_to_end_before=50"
 	                      " --automatic_run_settings.index_of_frame_to_start_at=16"

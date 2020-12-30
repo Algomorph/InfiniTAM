@@ -18,48 +18,8 @@
 #include <map>
 #include <iostream>
 
-// === log4cplus ===
-// #include <log4cplus/loggingmacros.h>
-// #include <log4cplus/consoleappender.h>
-//
-// // === test_utilities ===
-// #include "TestUtilities/TestUtilities.h"
-// #include "TestUtilities/TestDataUtilities.h"
-// #include "TestUtilities/LevelSetAlignment/LevelSetAlignmentTestUtilities.h"
-// #include "TestUtilities/LevelSetAlignment/SingleIterationTestConditions.h"
-// #include "TestUtilities/LevelSetAlignment/TestCaseOrganizationBySwitches.h"
-// #include "TestUtilities/CameraPoseAndRenderingEngineFixture.h"
-// #include "TestUtilities/RigidTrackerPresets.h"
-//
 // // === ORUtils ===
 #include "../ORUtils/MemoryDeviceType.h"
-// #include "../ORUtils/MathTypePersistence/MathTypePersistence.h"
-//
-// // === ITMLib ===
-// //(CPU)
-// #include "../ITMLib/Engines/EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
-// #include "../ITMLib/Engines/Indexing/VBH/CPU/IndexingEngine_VoxelBlockHash_CPU.h"
-// //(CUDA)
-// #ifndef COMPILE_WITHOUT_CUDA
-// #include "../ITMLib/Engines/EditAndCopy/CUDA/EditAndCopyEngine_CUDA.h"
-// #include "../ITMLib/Engines/Indexing/VBH/CUDA/IndexingEngine_VoxelBlockHash_CUDA.h"
-// #endif
-// //(misc)
-// #include "../ITMLib/Engines/Rendering/RenderingEngineFactory.h"
-// #include "../ITMLib/Engines/VolumeFusion/VolumeFusionEngine.h"
-// #include "../ITMLib/Engines/ImageProcessing/ImageProcessingEngineFactory.h"
-// #include "../ITMLib/Engines/Indexing/IndexingEngineFactory.h"
-// #include "../ITMLib/Engines/VolumeFusion/VolumeFusionEngineFactory.h"
-// #include "../ITMLib/Engines/Warping/WarpingEngineFactory.h"
-// #include "../ITMLib/Engines/Meshing/MeshingEngineFactory.h"
-// #include "../ITMLib/Engines/ViewBuilder/ViewBuilderFactory.h"
-// #include "../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
-// #include "../ITMLib/Engines/Telemetry/TelemetrySettings.h"
-// #include "../ITMLib/Engines/Main/MainEngineSettings.h"
-//
-// #include "../ITMLib/Utils/Geometry/GeometryBooleanOperations.h"
-// #include "../ITMLib/Utils/Configuration/AutomaticRunSettings.h"
-// #include "../ITMLib/Utils/Logging/PrettyPrinters.h"
 #include "../ITMLib/Utils/Logging/Logging.h"
 #include "../ITMLib/Utils/Metacoding/SerializableEnum.h"
 #include "../ITMLib/Objects/Volume/PlainVoxelArray.h"
@@ -73,8 +33,6 @@
 #include "TestDataGeneration/GenerateSnoopyMeshes.h"
 #include "TestDataGeneration/GenerateRaycastingTestData.h"
 #include "TestDataGeneration/GenerateRigidAlignmentTestData.h"
-// #include "../ITMLib/CameraTrackers/CameraTrackerFactory.h"
-// #include "TestDataGeneration/GenerateSnoopyVolumes.h"
 
 using namespace ITMLib;
 

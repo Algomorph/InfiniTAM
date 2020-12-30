@@ -22,7 +22,7 @@ const std::unordered_map<std::string, std::string> matrix_file_name_by_preset = 
 			{
 					{rgb_tracker_preset_rrbb,               "rgb_rrbb.mat"},
 					{rgb_tracker_preset_rrrbb,              "rgb_rrrbb.mat"},
-					{rgb_tracker_preset_rrbrb,              "rgb_rrbrb.mat"},
+					{rgb_tracker_preset_rrrbrb,             "rgb_rrrbrb.mat"},
 					{extended_tracker_preset1,              "extended1.mat"},
 					{extended_tracker_preset2,              "extended2.mat"},
 					{depth_tracker_preset_default,          "depth_default.mat"},
@@ -44,6 +44,12 @@ const std::array<std::string, 7> depth_tracker_presets = {
 		depth_tracker_preset_b,
 		depth_tracker_preset_b_bigger_minstep,
 		depth_tracker_preset_b_more_iters
+};
+
+const std::array<std::string, 3> color_tracker_presets = {
+		rgb_tracker_preset_rrbb,
+		rgb_tracker_preset_rrrbb,
+		rgb_tracker_preset_rrrbrb
 };
 
 

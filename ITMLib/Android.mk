@@ -11,7 +11,7 @@ NVCC=$(CUDA_TOOLKIT_ROOT)/bin/nvcc -ccbin $(GCC) -target-cpu-arch=ARM -m32 -arch
 MY_FILE_LIST := $(wildcard *.cpp *.cu Core/*.cpp Core/MultiScene/*.cpp) \
 	$(wildcard Engines/Preprocessing*.cpp Engines/PreprocessingCPU/*.cpp Engines/PreprocessingCUDA/*.cu) \
 	$(wildcard Engines/ViewBuilder/*.cpp Engines/ViewBuilder/CPU/*.cpp Engines/ViewBuilder/CUDA/*.cu) \
-	$(wildcard Engines/Rendering/Interface/*.cpp) \
+	$(wildcard Engines/Raycasting/Interface/*.cpp) \
 	$(wildcard Objects/Camera/*.cpp Objects/RenderStates/*.cpp Utils/*.cpp) \
 	$(wildcard Trackers/CPU/*.cpp Trackers/CUDA/*.cu Trackers/Interface/*.cpp)
 MY_OBJ_LIST := $(MY_FILE_LIST:%.cu=%.o)

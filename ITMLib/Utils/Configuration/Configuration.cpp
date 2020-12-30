@@ -29,7 +29,7 @@
 #include "AutomaticRunSettings.h"
 #include "../../Engines/Telemetry/TelemetrySettings.h"
 #include "../../Engines/Indexing/IndexingSettings.h"
-#include "../../Engines/Rendering/RenderingSettings.h"
+#include "../../Engines/Raycasting/RaycastingSettings.h"
 #include "../../Engines/Main/MainEngineSettings.h"
 #include "../../Engines/LevelSetAlignment/Interface/LevelSetAlignmentParameters.h"
 #include "../../Engines/VolumeFusion/VolumeFusionSettings.h"
@@ -147,7 +147,7 @@ void CompileOptionDescription(po::options_description& od){
 	MainEngineSettings::AddDeferredToOptionsDescription(od);
 	TelemetrySettings::AddDeferredToOptionsDescription(od);
 	IndexingSettings::AddDeferredToOptionsDescription(od);
-	RenderingSettings::AddDeferredToOptionsDescription(od);
+	RaycastingSettings::AddDeferredToOptionsDescription(od);
 	AutomaticRunSettings::AddDeferredToOptionsDescription(od);
 	LevelSetAlignmentParameters::AddDeferredToOptionsDescription(od);
 	VolumeFusionSettings::AddDeferredToOptionsDescription(od);
@@ -158,7 +158,7 @@ static void AddAllDeferrableStructsFromVariablesMap(const po::variables_map& vm)
 	MainEngineSettings::BuildDeferredFromVariablesMap(instance.source_tree, vm);
 	TelemetrySettings::BuildDeferredFromVariablesMap(instance.source_tree, vm);
 	IndexingSettings::BuildDeferredFromVariablesMap(instance.source_tree, vm);
-	RenderingSettings::BuildDeferredFromVariablesMap(instance.source_tree, vm);
+	RaycastingSettings::BuildDeferredFromVariablesMap(instance.source_tree, vm);
 	AutomaticRunSettings::BuildDeferredFromVariablesMap(instance.source_tree, vm);
 	LevelSetAlignmentParameters::BuildDeferredFromVariablesMap(instance.source_tree, vm);
 	VolumeFusionSettings::BuildDeferredFromVariablesMap(instance.source_tree, vm);
@@ -186,7 +186,7 @@ static void UpdateAllDeferrableStructsFromVariablesMap(const po::variables_map& 
 	MainEngineSettings::UpdateDeferredFromVariablesMap(instance.source_tree, vm, instance.origin);
 	TelemetrySettings::UpdateDeferredFromVariablesMap(instance.source_tree, vm, instance.origin);
 	IndexingSettings::UpdateDeferredFromVariablesMap(instance.source_tree, vm, instance.origin);
-	RenderingSettings::UpdateDeferredFromVariablesMap(instance.source_tree, vm, instance.origin);
+	RaycastingSettings::UpdateDeferredFromVariablesMap(instance.source_tree, vm, instance.origin);
 	AutomaticRunSettings::UpdateDeferredFromVariablesMap(instance.source_tree, vm, instance.origin);
 	LevelSetAlignmentParameters::UpdateDeferredFromVariablesMap(instance.source_tree, vm, instance.origin);
 	VolumeFusionSettings::UpdateDeferredFromVariablesMap(instance.source_tree, vm, instance.origin);
@@ -202,7 +202,7 @@ static void AddAllDeferrableStructsFromSourceToTargetRootConfiguration(pt::ptree
 	AddDeferrableFromSourceToTargetTree<MainEngineSettings>(target_tree, origin_tree, origin);
 	AddDeferrableFromSourceToTargetTree<TelemetrySettings>(target_tree, origin_tree, origin);
 	AddDeferrableFromSourceToTargetTree<IndexingSettings>(target_tree, origin_tree, origin);
-	AddDeferrableFromSourceToTargetTree<RenderingSettings>(target_tree, origin_tree, origin);
+	AddDeferrableFromSourceToTargetTree<RaycastingSettings>(target_tree, origin_tree, origin);
 	AddDeferrableFromSourceToTargetTree<AutomaticRunSettings>(target_tree, origin_tree, origin);
 	AddDeferrableFromSourceToTargetTree<LevelSetAlignmentParameters>(target_tree, origin_tree, origin);
 	AddDeferrableFromSourceToTargetTree<VolumeFusionSettings>(target_tree, origin_tree, origin);

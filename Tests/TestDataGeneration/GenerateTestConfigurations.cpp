@@ -24,7 +24,7 @@
 #include "../../ITMLib/Engines/Telemetry/TelemetrySettings.h"
 #include "../../ITMLib/Engines/DepthFusion/DepthFusionSettings.h"
 #include "../../ITMLib/Engines/VolumeFusion/VolumeFusionSettings.h"
-#include "../../ITMLib/Engines/Rendering/RenderingSettings.h"
+#include "../../ITMLib/Engines/Raycasting/RaycastingSettings.h"
 #include "../../ITMLib/Engines/Indexing/IndexingSettings.h"
 #include "../../ITMLib/Engines/LevelSetAlignment/Interface/LevelSetAlignmentParameters.h"
 
@@ -86,7 +86,7 @@ configuration::Configuration GenerateDefaultSnoopyConfiguration() {
 	MainEngineSettings default_snoopy_main_engine_settings(true, LIBMODE_DYNAMIC, INDEX_HASH, false, true);
 	TelemetrySettings default_snoopy_telemetry_settings;
 	IndexingSettings default_snoopy_indexing_settings;
-	RenderingSettings default_snoopy_rendering_settings;
+	RaycastingSettings default_snoopy_raycasting_settings;
 	AutomaticRunSettings default_snoopy_automatic_run_settings(716, 16, false, false, false, false, false);
 	LevelSetAlignmentParameters default_snoopy_level_set_evolution_parameters(
 			ExecutionMode::OPTIMIZED,
@@ -108,7 +108,7 @@ configuration::Configuration GenerateDefaultSnoopyConfiguration() {
 	AddDeferrableToSourceTree(default_snoopy_configuration, default_snoopy_main_engine_settings);
 	AddDeferrableToSourceTree(default_snoopy_configuration, default_snoopy_telemetry_settings);
 	AddDeferrableToSourceTree(default_snoopy_configuration, default_snoopy_indexing_settings);
-	AddDeferrableToSourceTree(default_snoopy_configuration, default_snoopy_rendering_settings);
+	AddDeferrableToSourceTree(default_snoopy_configuration, default_snoopy_raycasting_settings);
 	AddDeferrableToSourceTree(default_snoopy_configuration, default_snoopy_automatic_run_settings);
 	AddDeferrableToSourceTree(default_snoopy_configuration, default_snoopy_level_set_evolution_parameters);
 	AddDeferrableToSourceTree(default_snoopy_configuration, default_snoopy_volume_fusion_settings);

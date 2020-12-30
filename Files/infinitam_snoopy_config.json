@@ -146,7 +146,7 @@
     "indexing_settings": {
         "execution_mode": "optimized"
     },
-    "rendering_settings": {
+    "raycasting_settings": {
         "skip_points": false
     },
     "automatic_run_settings": {

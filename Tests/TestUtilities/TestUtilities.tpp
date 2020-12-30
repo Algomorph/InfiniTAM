@@ -23,7 +23,7 @@
 #include "../../ITMLib/Utils/Configuration/Configuration.h"
 #include "../../ITMLib/Engines/DepthFusion/DepthFusionEngineFactory.h"
 #include "../../ITMLib/Engines/Indexing/IndexingEngineFactory.h"
-#include "../../ITMLib/Engines/Rendering/RenderingEngineFactory.h"
+#include "../../ITMLib/Engines/Raycasting/RaycastingEngineFactory.h"
 #include "../../ORUtils/FileUtils.h"
 #include "../../ITMLib/Engines/EditAndCopy/EditAndCopyEngineFactory.h"
 #include "../../ITMLib/Engines/Traversal/Interface/VolumeTraversal.h"
@@ -365,8 +365,8 @@ void BuildSdfVolumeFromImage_SurfaceSpanAllocation(VoxelVolume<TVoxel, TIndex>**
 	indexing_engine->AllocateNearSurface(*volume1, *view, &tracking_state);
 	depth_fusion_engine->IntegrateDepthImageIntoTsdfVolume(*volume1, *view, &tracking_state);
 
-	RenderingEngineBase<TSDFVoxel, TIndex>* visualization_engine =
-			RenderingEngineFactory::Build<TSDFVoxel, TIndex>(memory_device);
+	RaycastingEngineBase<TSDFVoxel, TIndex>* visualization_engine =
+			RaycastingEngineFactory::Build<TSDFVoxel, TIndex>(memory_device);
 	visualization_engine->CreateICPMaps(*volume1, *view, &tracking_state, &render_state);
 
 	UpdateView(view, depth2_path, color2_path, mask2_path, calibration_path, memory_device);

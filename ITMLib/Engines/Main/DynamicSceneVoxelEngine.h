@@ -24,7 +24,7 @@
 #include "../ImageProcessing/Interface/ImageProcessingEngineInterface.h"
 #include "../Meshing/Interface/MeshingEngine.h"
 #include "../ViewBuilder/Interface/ViewBuilder.h"
-#include "../Rendering/Interface/RenderingEngineInterface.h"
+#include "../Raycasting/Interface/RaycastingEngineInterface.h"
 #include "../Indexing/Interface/IndexingEngine.h"
 #include "../DepthFusion/DepthFusionEngine.h"
 #include "../VolumeFusion/VolumeFusionEngine.h"
@@ -52,7 +52,7 @@ private: // instance variables
 
 	// engines
 	ImageProcessingEngineInterface* image_processing_engine;
-	RenderingEngineBase<TVoxel, TIndex>* rendering_engine;
+	RaycastingEngineBase<TVoxel, TIndex>* rendering_engine;
 	MeshingEngine<TVoxel, TIndex>* meshing_engine;
 	IndexingEngineInterface<TVoxel, TIndex>* indexing_engine;
 	DepthFusionEngineInterface<TVoxel, TIndex>* depth_fusion_engine;

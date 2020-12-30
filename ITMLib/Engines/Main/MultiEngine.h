@@ -11,7 +11,7 @@
 
 #include "../MultiScene/ActiveMapManager.h"
 #include "../MultiScene/GlobalAdjustmentEngine.h"
-#include "../Rendering/Interface/MultiVisualizationEngine.h"
+#include "../Raycasting/Interface/MultiVisualizationEngine.h"
 #include "../Meshing/MultiMeshingEngineFactory.h"
 #include "../../CameraTrackers/Interface/CameraTracker.h"
 
@@ -27,7 +27,7 @@ namespace ITMLib
 	private:
 
 		ImageProcessingEngineInterface *lowLevelEngine;
-		RenderingEngineBase<TVoxel, TIndex>* visualization_engine;
+		RaycastingEngineBase<TVoxel, TIndex>* visualization_engine;
 		MultiVisualizationEngine<TVoxel, TIndex> *multiVisualizationEngine;
 
 		MultiMeshingEngine<TVoxel, TIndex> *meshingEngine;

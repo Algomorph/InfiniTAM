@@ -29,7 +29,7 @@ namespace fs = std::filesystem;
 #include "../ImageProcessing/ImageProcessingEngineFactory.h"
 #include "../Meshing/MeshingEngineFactory.h"
 #include "../ViewBuilder/ViewBuilderFactory.h"
-#include "../Rendering/RenderingEngineFactory.h"
+#include "../Raycasting/RaycastingEngineFactory.h"
 #include "../VolumeFileIO/VolumeFileIOEngine.h"
 #include "../VolumeFusion/VolumeFusionEngineFactory.h"
 #include "../EditAndCopy/CPU/EditAndCopyEngine_CPU.h"
@@ -77,7 +77,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(
 		  image_processing_engine(ImageProcessingEngineFactory::Build(configuration::Get().device_type)),
 		  telemetry_recorder(TelemetryRecorderFactory::GetDefault<TVoxel, TWarp, TIndex>(configuration::Get().device_type)),
 		  view_builder(ViewBuilderFactory::Build(calibration_info, configuration::Get().device_type)),
-		  rendering_engine(RenderingEngineFactory::Build<TVoxel, TIndex>(
+		  rendering_engine(RaycastingEngineFactory::Build<TVoxel, TIndex>(
 				  configuration::Get().device_type)),
 		  meshing_engine(config.create_meshing_engine ? MeshingEngineFactory::Build<TVoxel, TIndex>(
 				  configuration::Get().device_type) : nullptr) {
@@ -364,7 +364,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::ProcessFrame(UChar4Image* rgb_im
 	if (last_tracking_result == CameraTrackingState::TRACKING_GOOD ||
 	    last_tracking_result == CameraTrackingState::TRACKING_POOR) {
 		//TODO: FIXME (See issue #214 at https://github.com/Algomorph/InfiniTAM/issues/214)
-		//if (!fusion_succeeded) indexing_engine->UpdateVisibleList(view, tracking_state, canonical_volume, canonical_render_state);
+		//if (!fusion_succeeded) indexing_engine->UpdateVisibleList(view, tracking_state_color_and_depth, canonical_volume, canonical_render_state);
 
 		// raycast to renderState_canonical for tracking and "freeview" rendering
 		camera_tracking_controller->Prepare(tracking_state, canonical_volume, view, rendering_engine,
@@ -411,7 +411,7 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(UChar4Image* out, 
 		case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_ORIGINAL_DEPTH:
 			out->ChangeDims(view->depth.dimensions);
 			if (settings.device_type == MEMORYDEVICE_CUDA) view->depth.UpdateHostFromDevice();
-			RenderingEngineBase<TVoxel, TIndex>::DepthToUchar4(out, view->depth);
+			RaycastingEngineBase<TVoxel, TIndex>::DepthToUchar4(out, view->depth);
 			might_need_frame_label_index = false;
 			break;
 		case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_SCENERAYCAST:
@@ -419,24 +419,24 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(UChar4Image* out, 
 		case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_COLOUR_FROM_NORMAL:
 		case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_COLOUR_FROM_CONFIDENCE: {
 			// use current raycast or forward projection?
-			IRenderingEngine::RenderRaycastSelection raycastType;
-			if (tracking_state->point_cloud_age <= 0) raycastType = IRenderingEngine::RENDER_FROM_OLD_RAYCAST;
-			else raycastType = IRenderingEngine::RENDER_FROM_OLD_FORWARDPROJ;
+			IRaycastingEngine::RenderRaycastSelection raycastType;
+			if (tracking_state->point_cloud_age <= 0) raycastType = IRaycastingEngine::RENDER_FROM_OLD_RAYCAST;
+			else raycastType = IRaycastingEngine::RENDER_FROM_OLD_FORWARDPROJ;
 
 			// what sort of image is it?
-			IRenderingEngine::RenderImageType render_type;
+			IRaycastingEngine::RenderImageType render_type;
 			switch (type) {
 				case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_COLOUR_FROM_CONFIDENCE:
-					render_type = IRenderingEngine::RENDER_COLOUR_FROM_CONFIDENCE;
+					render_type = IRaycastingEngine::RENDER_COLOUR_FROM_CONFIDENCE;
 					break;
 				case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_COLOUR_FROM_NORMAL:
-					render_type = IRenderingEngine::RENDER_COLOUR_FROM_NORMAL;
+					render_type = IRaycastingEngine::RENDER_COLOUR_FROM_NORMAL;
 					break;
 				case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_COLOUR_FROM_VOLUME:
-					render_type = IRenderingEngine::RENDER_COLOUR_FROM_VOLUME;
+					render_type = IRaycastingEngine::RENDER_COLOUR_FROM_VOLUME;
 					break;
 				default:
-					render_type = IRenderingEngine::RENDER_SHADED_GREYSCALE_IMAGENORMALS;
+					render_type = IRaycastingEngine::RENDER_SHADED_GREYSCALE_IMAGENORMALS;
 			}
 
 			rendering_engine->RenderImage(live_volumes[0], tracking_state->pose_d, &view->calibration_information.intrinsics_d,
@@ -454,16 +454,16 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(UChar4Image* out, 
 		case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_VOLUME:
 		case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_NORMAL:
 		case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_CONFIDENCE: {
-			IRenderingEngine::RenderImageType render_type = IRenderingEngine::RENDER_SHADED_GREYSCALE;
+			IRaycastingEngine::RenderImageType render_type = IRaycastingEngine::RENDER_SHADED_GREYSCALE;
 			switch (type) {
 				case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_VOLUME:
-					render_type = IRenderingEngine::RENDER_COLOUR_FROM_VOLUME;
+					render_type = IRaycastingEngine::RENDER_COLOUR_FROM_VOLUME;
 					break;
 				case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_NORMAL:
-					render_type = IRenderingEngine::RENDER_COLOUR_FROM_NORMAL;
+					render_type = IRaycastingEngine::RENDER_COLOUR_FROM_NORMAL;
 					break;
 				case DynamicSceneVoxelEngine::InfiniTAM_IMAGE_FREECAMERA_COLOUR_FROM_CONFIDENCE:
-					render_type = IRenderingEngine::RENDER_COLOUR_FROM_CONFIDENCE;
+					render_type = IRaycastingEngine::RENDER_COLOUR_FROM_CONFIDENCE;
 					break;
 				default:
 					assert(false);
@@ -484,7 +484,7 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::GetImage(UChar4Image* out, 
 			break;
 		}
 		case FusionAlgorithm::InfiniTAM_IMAGE_FREECAMERA_CANONICAL: {
-			IRenderingEngine::RenderImageType render_image_type = IRenderingEngine::RENDER_SHADED_GREYSCALE;
+			IRaycastingEngine::RenderImageType render_image_type = IRaycastingEngine::RENDER_SHADED_GREYSCALE;
 
 			if (freeview_render_state == nullptr) {
 				freeview_render_state = new RenderState(out->dimensions,
@@ -567,7 +567,7 @@ void DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::HandlePotentialCameraTracki
 					tracking_state->pose_d->SetFrom(&keyframe.pose);
 
 					//TODO: FIXME (See issue #214 at https://github.com/Algomorph/InfiniTAM/issues/214)
-					//indexing_engine->UpdateVisibleList(view, tracking_state, live_volumes[0], canonical_render_state, true);
+					//indexing_engine->UpdateVisibleList(view, tracking_state_color_and_depth, live_volumes[0], canonical_render_state, true);
 
 					camera_tracking_controller->Prepare(tracking_state, live_volumes[0], view, rendering_engine,
 					                                    canonical_render_state);

@@ -532,29 +532,29 @@ set(
         ITMLIB_ENGINES_RENDERING_HEADERS
 
         ## Top-level
-        Engines/Rendering/RenderingEngine.h
-        Engines/Rendering/RenderingEngine_Specialized.h
-        Engines/Rendering/RenderingEngineFactory.h
-        Engines/Rendering/RenderingSettings.h
-        Engines/Rendering/MultiVisualizationEngineFactory.h
-        Engines/Rendering/SurfelVisualizationEngineFactory.h
+        Engines/Raycasting/RaycastingEngine.h
+        Engines/Raycasting/RaycastingEngine_Specialized.h
+        Engines/Raycasting/RaycastingEngineFactory.h
+        Engines/Raycasting/RaycastingSettings.h
+        Engines/Raycasting/MultiVisualizationEngineFactory.h
+        Engines/Raycasting/SurfelVisualizationEngineFactory.h
         ## Interface
-        Engines/Rendering/Interface/MultiVisualizationEngine.h
-        Engines/Rendering/Interface/SurfelVisualizationEngine.h
-        Engines/Rendering/Interface/RenderingEngineInterface.h
+        Engines/Raycasting/Interface/MultiVisualizationEngine.h
+        Engines/Raycasting/Interface/SurfelVisualizationEngine.h
+        Engines/Raycasting/Interface/RaycastingEngineInterface.h
         ## Shared
-        Engines/Rendering/Shared/RenderingBlock.h
-        Engines/Rendering/Shared/RenderingEngine_Functors.h
-        Engines/Rendering/Shared/SurfelVisualizationEngine_Settings.h
-        Engines/Rendering/Shared/SurfelVisualizationEngine_Shared.h
-        Engines/Rendering/Shared/RenderingEngine_Shared.h
+        Engines/Raycasting/Shared/RaycastingBlock.h
+        Engines/Raycasting/Shared/RaycastingEngine_Functors.h
+        Engines/Raycasting/Shared/SurfelVisualizationEngine_Settings.h
+        Engines/Raycasting/Shared/SurfelVisualizationEngine_Shared.h
+        Engines/Raycasting/Shared/RaycastingEngine_Shared.h
         ## CPU
-        Engines/Rendering/CPU/MultiVisualizationEngine_CPU.h
-        Engines/Rendering/CPU/SurfelVisualizationEngine_CPU.h
+        Engines/Raycasting/CPU/MultiVisualizationEngine_CPU.h
+        Engines/Raycasting/CPU/SurfelVisualizationEngine_CPU.h
         ## CUDA
-        Engines/Rendering/CUDA/MultiVisualizationEngine_CUDA.h
-        Engines/Rendering/CUDA/SurfelVisualizationEngine_CUDA.h
-        Engines/Rendering/CUDA/VisualizationHelpers_CUDA.h
+        Engines/Raycasting/CUDA/MultiVisualizationEngine_CUDA.h
+        Engines/Raycasting/CUDA/SurfelVisualizationEngine_CUDA.h
+        Engines/Raycasting/CUDA/VisualizationHelpers_CUDA.h
 )
 
 ##
@@ -562,35 +562,35 @@ set(
         ITMLIB_ENGINES_RENDERING_SOURCES
 
         ## Top-level
-        Engines/Rendering/RenderingEngine.tpp
-        Engines/Rendering/RenderingEngine_Specialized.tpp
-        Engines/Rendering/RenderingSettings.cpp
+        Engines/Raycasting/RaycastingEngine.tpp
+        Engines/Raycasting/RaycastingEngine_Specialized.tpp
+        Engines/Raycasting/RaycastingSettings.cpp
         # Instantiations
-        Engines/Rendering/Instantiations/RenderingEngine_PlainVoxelArray_TSDFVoxel_f_flags.cpp
-        Engines/Rendering/Instantiations/RenderingEngine_VoxelBlockHash_TSDFVoxel_f_flags.cpp
-        Engines/Rendering/Instantiations/RenderingEngine_PlainVoxelArray_TSDFVoxel_f_flags.cu
-        Engines/Rendering/Instantiations/RenderingEngine_VoxelBlockHash_TSDFVoxel_f_flags.cu
-        Engines/Rendering/Instantiations/RenderingEngine_PlainVoxelArray_TSDFVoxel_f_rgb.cpp
-        Engines/Rendering/Instantiations/RenderingEngine_VoxelBlockHash_TSDFVoxel_f_rgb.cpp
-        Engines/Rendering/Instantiations/RenderingEngine_PlainVoxelArray_TSDFVoxel_f_rgb.cu
-        Engines/Rendering/Instantiations/RenderingEngine_VoxelBlockHash_TSDFVoxel_f_rgb.cu
+        Engines/Raycasting/Instantiations/RaycastingEngine_PlainVoxelArray_TSDFVoxel_f_flags.cpp
+        Engines/Raycasting/Instantiations/RaycastingEngine_VoxelBlockHash_TSDFVoxel_f_flags.cpp
+        Engines/Raycasting/Instantiations/RaycastingEngine_PlainVoxelArray_TSDFVoxel_f_flags.cu
+        Engines/Raycasting/Instantiations/RaycastingEngine_VoxelBlockHash_TSDFVoxel_f_flags.cu
+        Engines/Raycasting/Instantiations/RaycastingEngine_PlainVoxelArray_TSDFVoxel_f_rgb.cpp
+        Engines/Raycasting/Instantiations/RaycastingEngine_VoxelBlockHash_TSDFVoxel_f_rgb.cpp
+        Engines/Raycasting/Instantiations/RaycastingEngine_PlainVoxelArray_TSDFVoxel_f_rgb.cu
+        Engines/Raycasting/Instantiations/RaycastingEngine_VoxelBlockHash_TSDFVoxel_f_rgb.cu
         ## Interface
-        Engines/Rendering/Interface/SurfelVisualizationEngine.tpp
-        Engines/Rendering/Interface/SurfelVisualizationEngine.cpp
-        Engines/Rendering/Interface/IRenderingEngine.cpp
+        Engines/Raycasting/Interface/SurfelVisualizationEngine.tpp
+        Engines/Raycasting/Interface/SurfelVisualizationEngine.cpp
+        Engines/Raycasting/Interface/RaycastingEngineInterface.cpp
         ## CPU
-        Engines/Rendering/CPU/MultiVisualizationEngine_CPU.tpp
-        Engines/Rendering/CPU/MultiVisualizationEngine_CPU_PlainVoxelArray.cpp
-        Engines/Rendering/CPU/MultiVisualizationEngine_CPU_VoxelBlockHash.cpp
-        Engines/Rendering/CPU/SurfelVisualizationEngine_CPU.tpp
-        Engines/Rendering/CPU/SurfelVisualizationEngine_CPU.cpp
+        Engines/Raycasting/CPU/MultiVisualizationEngine_CPU.tpp
+        Engines/Raycasting/CPU/MultiVisualizationEngine_CPU_PlainVoxelArray.cpp
+        Engines/Raycasting/CPU/MultiVisualizationEngine_CPU_VoxelBlockHash.cpp
+        Engines/Raycasting/CPU/SurfelVisualizationEngine_CPU.tpp
+        Engines/Raycasting/CPU/SurfelVisualizationEngine_CPU.cpp
         ## CUDA
-        Engines/Rendering/CUDA/MultiVisualizationEngine_CUDA.tcu
-        Engines/Rendering/CUDA/MultiVisualizationEngine_CUDA_PlainVoxelArray.cu
-        Engines/Rendering/CUDA/MultiVisualizationEngine_CUDA_VoxelBlockHash.cu
-        Engines/Rendering/CUDA/SurfelVisualizationEngine_CUDA.tcu
-        Engines/Rendering/CUDA/SurfelVisualizationEngine_CUDA.cu
-        Engines/Rendering/CUDA/VisualizationHelpers_CUDA.cu
+        Engines/Raycasting/CUDA/MultiVisualizationEngine_CUDA.tcu
+        Engines/Raycasting/CUDA/MultiVisualizationEngine_CUDA_PlainVoxelArray.cu
+        Engines/Raycasting/CUDA/MultiVisualizationEngine_CUDA_VoxelBlockHash.cu
+        Engines/Raycasting/CUDA/SurfelVisualizationEngine_CUDA.tcu
+        Engines/Raycasting/CUDA/SurfelVisualizationEngine_CUDA.cu
+        Engines/Raycasting/CUDA/VisualizationHelpers_CUDA.cu
 )
 
 

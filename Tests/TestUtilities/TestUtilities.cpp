@@ -458,7 +458,7 @@ configuration::Configuration GenerateChangedUpConfiguration() {
 			INDEX_ARRAY,
 			true, false);
 	IndexingSettings changed_up_indexing_settings(DIAGNOSTIC);
-	RenderingSettings changed_up_rendering_settings(true);
+	RaycastingSettings changed_up_raycasting_settings(true);
 	AutomaticRunSettings changed_up_automatic_run_settings(
 			50, 16,
 			true, true,
@@ -474,7 +474,7 @@ configuration::Configuration GenerateChangedUpConfiguration() {
 	AddDeferrableToSourceTree(changed_up_configuration, changed_up_main_engine_settings);
 	AddDeferrableToSourceTree(changed_up_configuration, changed_up_telemetry_settings);
 	AddDeferrableToSourceTree(changed_up_configuration, changed_up_indexing_settings);
-	AddDeferrableToSourceTree(changed_up_configuration, changed_up_rendering_settings);
+	AddDeferrableToSourceTree(changed_up_configuration, changed_up_raycasting_settings);
 	AddDeferrableToSourceTree(changed_up_configuration, changed_up_automatic_run_settings);
 	AddDeferrableToSourceTree(changed_up_configuration, changed_up_level_set_evolution_parameters);
 	AddDeferrableToSourceTree(changed_up_configuration, changed_up_volume_fusion_settings);
