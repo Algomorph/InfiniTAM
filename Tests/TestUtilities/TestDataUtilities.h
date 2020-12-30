@@ -193,22 +193,38 @@ static constexpr const auto frame_200_color_file_name = StringFactory("teddy_col
 static constexpr const auto frame_200_color_path = static_frames_directory + frame_200_color_file_name;
 
 template<typename TIndex>
-std::string Volume115Path() {
-	return test::generated_volume_directory.ToString() + test::IndexString<TIndex>() + "/teddy_frame_115.dat";
+std::string FullVolume115Path() {
+	return test::generated_volume_directory.ToString() + test::IndexString<TIndex>() + "/teddy_frame_115_full.dat";
 }
-
-extern template std::string Volume115Path<PlainVoxelArray>();
-extern template std::string Volume115Path<VoxelBlockHash>();
+extern template std::string FullVolume115Path<PlainVoxelArray>();
+extern template std::string FullVolume115Path<VoxelBlockHash>();
 
 template<typename TIndex>
-typename TIndex::InitializationParameters InitializationParameters();
+std::string PartialVolume115Path() {
+	return test::generated_volume_directory.ToString() + test::IndexString<TIndex>() + "/teddy_frame_115_partial.dat";
+}
+extern template std::string PartialVolume115Path<PlainVoxelArray>();
+extern template std::string PartialVolume115Path<VoxelBlockHash>();
+
+
+template<typename TIndex>
+typename TIndex::InitializationParameters FullInitializationParameters();
+template<typename TIndex>
+typename TIndex::InitializationParameters PartialInitializationParameters();
 
 template<>
-typename VoxelBlockHash::InitializationParameters InitializationParameters<VoxelBlockHash>();
-extern template VoxelBlockHash::InitializationParameters InitializationParameters<VoxelBlockHash>();
+typename VoxelBlockHash::InitializationParameters FullInitializationParameters<VoxelBlockHash>();
+extern template VoxelBlockHash::InitializationParameters FullInitializationParameters<VoxelBlockHash>();
 template<>
-typename PlainVoxelArray::InitializationParameters InitializationParameters<PlainVoxelArray>();
-extern template PlainVoxelArray::InitializationParameters InitializationParameters<PlainVoxelArray>();
+typename VoxelBlockHash::InitializationParameters PartialInitializationParameters<VoxelBlockHash>();
+extern template VoxelBlockHash::InitializationParameters PartialInitializationParameters<VoxelBlockHash>();
+
+template<>
+typename PlainVoxelArray::InitializationParameters FullInitializationParameters<PlainVoxelArray>();
+extern template PlainVoxelArray::InitializationParameters FullInitializationParameters<PlainVoxelArray>();
+template<>
+typename PlainVoxelArray::InitializationParameters PartialInitializationParameters<PlainVoxelArray>();
+extern template PlainVoxelArray::InitializationParameters PartialInitializationParameters<PlainVoxelArray>();
 
 
 VoxelVolumeParameters DefaultVolumeParameters();

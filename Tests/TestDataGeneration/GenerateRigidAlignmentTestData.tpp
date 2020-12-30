@@ -75,6 +75,7 @@ void GenerateRigidAlignmentTestData() {
 	//__DEBUG_U (uncomment if commented)
 	std::string frame1_depth_path = teddy::frame_115_depth_path.ToString();
 	std::string frame1_color_path = teddy::frame_115_color_path.ToString();
+
 	std::string frame2_depth_path = teddy::frame_116_depth_path.ToString();
 	std::string frame2_color_path = teddy::frame_116_color_path.ToString();
 
@@ -84,28 +85,24 @@ void GenerateRigidAlignmentTestData() {
 	           frame1_color_path,
 	           teddy::calibration_path.ToString(),
 	           TMemoryDeviceType);
-
-	VoxelVolume<TSDFVoxel_f_rgb, TIndex> teddy_volume_115(teddy::DefaultVolumeParameters(), false, TMemoryDeviceType,
-	                                                      teddy::InitializationParameters<TIndex>());
-	teddy_volume_115.Reset();
-	auto* indexing_engine = IndexingEngineFactory::Build<TSDFVoxel_f_rgb, TIndex>(TMemoryDeviceType);
-	CameraTrackingState camera_tracking_state(teddy::frame_image_size, TMemoryDeviceType);
-	indexing_engine->AllocateNearSurface(&teddy_volume_115, view, &camera_tracking_state);
-	DepthFusionEngineInterface<TSDFVoxel_f_rgb, TIndex>* depth_fusion_engine = DepthFusionEngineFactory::Build<TSDFVoxel_f_rgb, TIndex>(
-			TMemoryDeviceType);
-	depth_fusion_engine->IntegrateDepthImageIntoTsdfVolume(&teddy_volume_115, view);
-
-
-	ConstructGeneratedVolumeSubdirectoriesIfMissing();
-	teddy_volume_115.SaveToDisk(teddy::Volume115Path<TIndex>());
-
 	// generate rigid tracker outputs for next frame in the sequence
-
 	UpdateView(&view,
 	           frame2_depth_path,
 	           frame2_color_path,
 	           teddy::calibration_path.ToString(),
 	           TMemoryDeviceType);
+
+	// load volume (assumed present) for frame 115
+	VoxelVolume<TSDFVoxel_f_rgb, TIndex> teddy_volume_115(teddy::DefaultVolumeParameters(), false, TMemoryDeviceType,
+	                                                      teddy::PartialInitializationParameters<TIndex>());
+
+	teddy_volume_115.Reset();
+	// assumes GenerateTeddyVolumes functions were run already
+	teddy_volume_115.LoadFromDisk(teddy::PartialVolume115Path<TIndex>());
+
+	CameraTrackingState camera_tracking_state(teddy::frame_image_size, TMemoryDeviceType);
+
+
 
 	IMUCalibrator* imu_calibrator = new ITMIMUCalibrator_iPad();
 	ImageProcessingEngineInterface* image_processing_engine = ImageProcessingEngineFactory::Build(TMemoryDeviceType);
@@ -170,7 +167,5 @@ void GenerateRigidAlignmentTestData() {
 
 	delete imu_calibrator;
 	delete image_processing_engine;
-	delete indexing_engine;
-	delete depth_fusion_engine;
 	delete view;
 }

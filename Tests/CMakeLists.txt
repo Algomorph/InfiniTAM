@@ -79,8 +79,8 @@ if (BUILD_TESTS)
     # ======== generator executable for derived test data library ========
 
     set(sources GenerateDerivedTestData.cpp
-        TestDataGeneration/GenerateSnoopyVolumes.cpp
-        TestDataGeneration/GenerateSnoopyVolumes.h
+        TestDataGeneration/ConstructSnoopyVolumes.cpp
+        TestDataGeneration/ConstructSnoopyVolumes.h
         TestDataGeneration/GenerateLevelSetAlignmentDeviceComparisonData.cpp
         TestDataGeneration/GenerateLevelSetAlignmentDeviceComparisonData.h
         TestDataGeneration/GenerateLevelSetAlignmentIndexComparisonTestData.cpp
@@ -105,7 +105,8 @@ if (BUILD_TESTS)
         TestDataGeneration/GenerateRigidAlignmentTestData.cu
         TestDataGeneration/GenerateRigidAlignmentTestData.tpp
         TestDataGeneration/GenerateRigidAlignmentTestData.h
-        )
+        TestDataGeneration/ConstructTeddyVolumes.cpp
+        TestDataGeneration/ConstructTeddyVolumes.h)
     add_executable(generate_derived_test_data ${sources})
     target_link_libraries(generate_derived_test_data PRIVATE InputSource ITMLib MiniSlamGraphLib ORUtils FernRelocLib test_utilities)
 

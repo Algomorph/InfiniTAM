@@ -18,13 +18,16 @@
 #include <map>
 #include <iostream>
 
-// // === ORUtils ===
+// === ORUtils ===
 #include "../ORUtils/MemoryDeviceType.h"
+// === ITMLib ===
 #include "../ITMLib/Utils/Logging/Logging.h"
 #include "../ITMLib/Utils/Metacoding/SerializableEnum.h"
 #include "../ITMLib/Objects/Volume/PlainVoxelArray.h"
 #include "../ITMLib/Objects/Volume/VoxelBlockHash.h"
-#include "TestDataGeneration/GenerateSnoopyVolumes.h"
+// === TestDataGeneration ===
+#include "TestDataGeneration/ConstructSnoopyVolumes.h"
+#include "TestDataGeneration/ConstructTeddyVolumes.h"
 #include "TestDataGeneration/GenerateLevelSetAlignmentDeviceComparisonData.h"
 #include "TestDataGeneration/GenerateVolumeWarpingConsistencyData.h"
 #include "TestDataGeneration/GenerateLevelSetAlignmentIndexComparisonTestData.h"
@@ -45,6 +48,7 @@ namespace fs = std::filesystem;
 #define GENERATED_TEST_DATA_TYPE_ENUM_DESCRIPTION GeneratedTestDataType, \
     (SNOOPY_UNMASKED_VOLUMES,                "SNOOPY_UNMASKED_VOLUMES", "snoopy_unmasked_volumes", "unmasked_volumes", "unmasked", "u", "su", "suv"), \
     (SNOOPY_MASKED_VOLUMES,                  "SNOOPY_MASKED_VOLUMES", "snoopy_masked_volumes", "masked_volumes", "masked", "sm", "smv", "mv"), \
+    (TEDDY_VOLUMES,                          "TEDDY_VOLUMES", "teddy_volumes", "Teddy_Volumes", "tv"),\
     (LEVEL_SET_ALIGNMENT_DEVICE_COMPARISON,  "LEVEL_SET_ALIGNMENT_DEVICE_COMPARISON", "lsa_device_comparison", "lsa_d"), \
     (LEVEL_SET_ALIGNMENT_INDEX_COMPARISON,   "LEVEL_SET_ALIGNMENT_INDEX_COMPARISON", "lsa_index_comparison", "lsa_i"), \
     (PVA_WARPED_VOLUMES,                     "PVA_WARPED_VOLUMES", "pva_warped_volumes", "pva_wv"), \
@@ -65,6 +69,7 @@ int main(int argc, char* argv[]) {
 			{
 					{SNOOPY_UNMASKED_VOLUMES,               ConstructSnoopyUnmaskedVolumes00},
 					{SNOOPY_MASKED_VOLUMES,                 ConstructSnoopyMaskedVolumes16and17},
+					{TEDDY_VOLUMES,                         ConstructTeddyVolumes115_Partial},
 					{LEVEL_SET_ALIGNMENT_DEVICE_COMPARISON, GenerateLevelSetAlignment_CPU_vs_CUDA_TestData},
 					{LEVEL_SET_ALIGNMENT_INDEX_COMPARISON,  GenerateLevelSetAlignment_PVA_vs_VBH_TestData},
 					{PVA_WARPED_VOLUMES,                    GenerateWarpedVolumeTestData<PlainVoxelArray>},
@@ -80,6 +85,7 @@ int main(int argc, char* argv[]) {
 	if (argc < 2) {
 		// calls every generator iteratively
 		for (const auto& iter : generator_by_string) {
+			std::cout << "Generating data using the " << enumerator_to_string(iter.first) << " generator." << std::endl;
 			(iter.second)();
 		}
 	} else {
@@ -120,6 +126,7 @@ int main(int argc, char* argv[]) {
 			GeneratedTestDataType chosen = string_to_enumerator<GeneratedTestDataType>(generated_data_type_argument);
 			for (const auto& iter : generator_by_string) {
 				if (iter.first == chosen || hit_start_generator) {
+					std::cout << "Generating data using the " << enumerator_to_string(iter.first) << " generator." << std::endl;
 					(iter.second)();
 					hit_start_generator = true;
 				}

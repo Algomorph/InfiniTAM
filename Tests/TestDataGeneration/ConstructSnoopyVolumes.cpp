@@ -14,7 +14,7 @@
 //  limitations under the License.
 //  ================================================================
 // === local ===
-#include "GenerateSnoopyVolumes.h"
+#include "ConstructSnoopyVolumes.h"
 // === ORUtils ===
 #include "../../ORUtils/FileUtils.h"
 #include "../../ORUtils/MathTypePersistence/MathTypePersistence.h"

@@ -80,19 +80,32 @@ VoxelVolumeParameters DefaultVolumeParameters() {
 } // namespace snoopy
 namespace teddy{
 
-template std::string Volume115Path<PlainVoxelArray>();
-template std::string Volume115Path<VoxelBlockHash>();
+template std::string FullVolume115Path<PlainVoxelArray>();
+template std::string FullVolume115Path<VoxelBlockHash>();
+template std::string PartialVolume115Path<PlainVoxelArray>();
+template std::string PartialVolume115Path<VoxelBlockHash>();
 
 
 template<>
-typename VoxelBlockHash::InitializationParameters InitializationParameters<VoxelBlockHash>(){
+typename VoxelBlockHash::InitializationParameters FullInitializationParameters<VoxelBlockHash>(){
 	return {0x40000,0x20000};
 }
 
 template<>
-typename PlainVoxelArray::InitializationParameters InitializationParameters<PlainVoxelArray>(){
+typename PlainVoxelArray::InitializationParameters FullInitializationParameters<PlainVoxelArray>(){
 	return {Vector3i(512), Vector3i(-256,-256,0)};
 }
+
+template<>
+typename VoxelBlockHash::InitializationParameters PartialInitializationParameters<VoxelBlockHash>(){
+	return {0x20000,0x10000};
+}
+
+template<>
+typename PlainVoxelArray::InitializationParameters PartialInitializationParameters<PlainVoxelArray>(){
+	return {Vector3i(296, 264, 432), Vector3i(-208, -216, 88)};
+}
+
 
 
 

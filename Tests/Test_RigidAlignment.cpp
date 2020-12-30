@@ -46,7 +46,7 @@ public:
 			imu_calibrator(new ITMIMUCalibrator_iPad()),
 			image_processing_engine(ImageProcessingEngineFactory::Build(TMemoryDeviceType)),
 			volume_teddy_frame115(teddy::DefaultVolumeParameters(), false, TMemoryDeviceType,
-			                      teddy::InitializationParameters<TIndex>()),
+			                      teddy::PartialInitializationParameters<TIndex>()),
 			// the rendering engine will generate the point cloud inside tracking_state_color_and_depth
 			raycasting_engine(ITMLib::RaycastingEngineFactory::Build<TSDFVoxel_f_rgb, VoxelBlockHash>(TMemoryDeviceType)) {
 
@@ -63,7 +63,7 @@ public:
 
 		// we need the volume of the frame 115 to generate the point cloud for the tracker
 		volume_teddy_frame115.Reset();
-		volume_teddy_frame115.LoadFromDisk(teddy::Volume115Path<TIndex>());
+		volume_teddy_frame115.LoadFromDisk(teddy::PartialVolume115Path<TIndex>());
 
 
 		// we need a dud rendering state also for the point cloud
@@ -141,9 +141,9 @@ void GenericRigidTrackerTest(const std::string& preset, TestEnvironment<TIndex, 
 	matrix_reader >> depth_matrix_gt;
 
 	// __DEBUG
-	// std::cout << matrix_filename << std::endl << std::endl;
-	// std::cout << depth_matrix_gt << std::endl;
-	// std::cout << tracking_state_to_use->pose_d->GetM() << std::endl;
+	std::cout << matrix_filename << std::endl << std::endl;
+	std::cout << depth_matrix_gt << std::endl;
+	std::cout << tracking_state_to_use->pose_d->GetM() << std::endl;
 
 	BOOST_REQUIRE(AlmostEqual(depth_matrix_gt, tracking_state_to_use->pose_d->GetM(), absolute_tolerance));
 	environment.ResetTrackingState();
@@ -156,7 +156,7 @@ typedef TestEnvironment<VoxelBlockHash, MEMORYDEVICE_CPU> environment_VBH_CPU;
 BOOST_FIXTURE_TEST_CASE(Test_RgbTracker_CPU_VBH, environment_VBH_CPU) {
 	float absolute_tolerance = 1.0e-3;
 
-	GenericRigidTrackerTest<VoxelBlockHash, MEMORYDEVICE_CPU>(test::rgb_tracker_preset_t, *this, absolute_tolerance);
+	GenericRigidTrackerTest<VoxelBlockHash, MEMORYDEVICE_CPU>(test::rgb_tracker_preset_t, *this, 2.0e-3);
 	GenericRigidTrackerTest<VoxelBlockHash, MEMORYDEVICE_CPU>(test::rgb_tracker_preset_r, *this, absolute_tolerance);
 	GenericRigidTrackerTest<VoxelBlockHash, MEMORYDEVICE_CPU>(test::rgb_tracker_preset_b, *this, absolute_tolerance);
 	GenericRigidTrackerTest<VoxelBlockHash, MEMORYDEVICE_CPU>(test::rgb_tracker_preset_rrbb, *this, absolute_tolerance);
@@ -187,7 +187,7 @@ BOOST_FIXTURE_TEST_CASE(Test_RgbTracker_CUDA_VBH, environment_VBH_CUDA) {
 	GenericRigidTrackerTest<VoxelBlockHash, MEMORYDEVICE_CUDA>(test::rgb_tracker_preset_t, *this, 0.05);
 	GenericRigidTrackerTest<VoxelBlockHash, MEMORYDEVICE_CUDA>(test::rgb_tracker_preset_r, *this, 0.02);
 	GenericRigidTrackerTest<VoxelBlockHash, MEMORYDEVICE_CUDA>(test::rgb_tracker_preset_b, *this, 0.10);
-	GenericRigidTrackerTest<VoxelBlockHash, MEMORYDEVICE_CUDA>(test::rgb_tracker_preset_rrbb, *this, 0.14);
+	GenericRigidTrackerTest<VoxelBlockHash, MEMORYDEVICE_CUDA>(test::rgb_tracker_preset_rrbb, *this, 0.16);
 	// The standard deviation for the GPU implementation with rrrbb is only about 0.014, but the difference from CPU is dramatic
 	GenericRigidTrackerTest<VoxelBlockHash, MEMORYDEVICE_CUDA>(test::rgb_tracker_preset_rrrbb, *this, 0.16);
 
