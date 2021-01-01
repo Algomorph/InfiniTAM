@@ -117,6 +117,7 @@ endif ()
 # CUDA-specific
 if (WITH_CUDA)
     set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --extended-lambda")
+    add_compile_options($<$<AND:$<COMPILE_LANGUAGE:CUDA>,$<CUDA_COMPILER_ID:NVIDIA>>:-Wno-deprecated-gpu-targets>)
 endif ()
 
 ##########################

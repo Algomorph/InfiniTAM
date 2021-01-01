@@ -48,10 +48,8 @@ shared(locations, colours, rgb, final_f)
 #pragma omp critical
 #endif
 			{
-
 				final_f += color_difference_squared;
 				countedPoints_valid++;
-
 			}
 		}
 	}
@@ -71,7 +69,7 @@ shared(locations, colours, rgb, final_f)
 }
 
 void ColorTracker_CPU::G_oneLevel(float* gradient, float* hessian, ORUtils::SE3Pose* pose) const {
-	int noTotalPoints = trackingState->point_cloud->point_count;
+	const int noTotalPoints = trackingState->point_cloud->point_count;
 
 	Vector4f projParams = view->calibration_information.intrinsics_rgb.projection_params_simple.all;
 	projParams.x /= 1 << levelId;
@@ -79,14 +77,14 @@ void ColorTracker_CPU::G_oneLevel(float* gradient, float* hessian, ORUtils::SE3P
 	projParams.z /= 1 << levelId;
 	projParams.w /= 1 << levelId;
 
-	Matrix4f M = pose->GetM();
+	const Matrix4f M = pose->GetM();
 
-	Vector2i imgSize = viewHierarchy->GetLevel(levelId)->rgb->dimensions;
+	const Vector2i imgSize = viewHierarchy->GetLevel(levelId)->rgb->dimensions;
 
 	float scaleForOcclusions;
 
-	bool rotationOnly = iterationType == TRACKER_ITERATION_ROTATION;
-	int numPara = rotationOnly ? 3 : 6, startPara = rotationOnly ? 3 : 0, numParaSQ = rotationOnly ? 3 + 2 + 1 : 6 + 5 + 4 + 3 + 2 + 1;
+	const bool rotationOnly = iterationType == TRACKER_ITERATION_ROTATION;
+	const int numPara = rotationOnly ? 3 : 6, startPara = rotationOnly ? 3 : 0, numParaSQ = rotationOnly ? 3 + 2 + 1 : 6 + 5 + 4 + 3 + 2 + 1;
 
 	float globalGradient[6], globalHessian[21];
 	for (int i = 0; i < numPara; i++) globalGradient[i] = 0.0f;
@@ -97,7 +95,10 @@ void ColorTracker_CPU::G_oneLevel(float* gradient, float* hessian, ORUtils::SE3P
 	Vector4u* rgb = viewHierarchy->GetLevel(levelId)->rgb->GetData(MEMORYDEVICE_CPU);
 	Vector4s* gx = viewHierarchy->GetLevel(levelId)->gradientX_rgb->GetData(MEMORYDEVICE_CPU);
 	Vector4s* gy = viewHierarchy->GetLevel(levelId)->gradientY_rgb->GetData(MEMORYDEVICE_CPU);
-
+#ifdef WITH_OPENMP
+#pragma omp parallel for default(none) firstprivate(noTotalPoints, imgSize, projParams, M, rotationOnly, numPara, startPara, numParaSQ)\
+shared(locations, colours, rgb, gx, gy, globalGradient, globalHessian)
+#endif
 	for (int locId = 0; locId < noTotalPoints; locId++) {
 		float localGradient[6], localHessian[21];
 
@@ -108,8 +109,13 @@ void ColorTracker_CPU::G_oneLevel(float* gradient, float* hessian, ORUtils::SE3P
 		                                               projParams, M, gx, gy, numPara, startPara);
 
 		if (isValidPoint) {
-			for (int i = 0; i < numPara; i++) globalGradient[i] += localGradient[i];
-			for (int i = 0; i < numParaSQ; i++) globalHessian[i] += localHessian[i];
+#ifdef WITH_OPENMP
+#pragma omp critical
+#endif
+			{
+				for (int i = 0; i < numPara; i++) globalGradient[i] += localGradient[i];
+				for (int i = 0; i < numParaSQ; i++) globalHessian[i] += localHessian[i];
+			}
 		}
 	}
 

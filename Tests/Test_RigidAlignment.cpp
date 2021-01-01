@@ -154,9 +154,9 @@ void GenericRigidTrackerTest(const std::string& preset, TestEnvironment<TIndex, 
 typedef TestEnvironment<VoxelBlockHash, MEMORYDEVICE_CPU> environment_VBH_CPU;
 
 BOOST_FIXTURE_TEST_CASE(Test_RgbTracker_CPU_VBH, environment_VBH_CPU) {
-	float absolute_tolerance = 1.0e-3;
+	float absolute_tolerance = 1.0e-2;
 
-	GenericRigidTrackerTest<VoxelBlockHash, MEMORYDEVICE_CPU>(test::rgb_tracker_preset_t, *this, 2.0e-3);
+	GenericRigidTrackerTest<VoxelBlockHash, MEMORYDEVICE_CPU>(test::rgb_tracker_preset_t, *this, absolute_tolerance);
 	GenericRigidTrackerTest<VoxelBlockHash, MEMORYDEVICE_CPU>(test::rgb_tracker_preset_r, *this, absolute_tolerance);
 	GenericRigidTrackerTest<VoxelBlockHash, MEMORYDEVICE_CPU>(test::rgb_tracker_preset_b, *this, absolute_tolerance);
 	GenericRigidTrackerTest<VoxelBlockHash, MEMORYDEVICE_CPU>(test::rgb_tracker_preset_rrbb, *this, absolute_tolerance);
