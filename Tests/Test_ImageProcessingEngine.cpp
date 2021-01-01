@@ -63,17 +63,17 @@ void GenericFilterSubsampleTest(){
 }
 
 template<MemoryDeviceType TMemoryDeviceType>
-void GenericGraidentXTest(){
+void GenericGradientXTest(){
 
 }
 
 template<MemoryDeviceType TMemoryDeviceType>
-void GenericGraidentYTest(){
+void GenericGradientYTest(){
 
 }
 
 template<MemoryDeviceType TMemoryDeviceType>
-void GenericGraidentXYTest(){
+void GenericGradientXYTest(){
 
 }
 
