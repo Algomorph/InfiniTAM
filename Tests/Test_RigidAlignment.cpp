@@ -48,7 +48,7 @@ public:
 			volume_teddy_frame115(teddy::DefaultVolumeParameters(), false, TMemoryDeviceType,
 			                      teddy::PartialInitializationParameters<TIndex>()),
 			// the rendering engine will generate the point cloud inside tracking_state_color_and_depth
-			raycasting_engine(ITMLib::RaycastingEngineFactory::Build<TSDFVoxel_f_rgb, VoxelBlockHash>(TMemoryDeviceType)) {
+			raycasting_engine(ITMLib::RaycastingEngineFactory::Build<TSDFVoxel_f_rgb, TIndex>(TMemoryDeviceType)) {
 
 		// A little counter-intuitive, but we'll use the same view for frame_115 at first
 		// because of the weird way view memory is currently managed.
@@ -59,7 +59,7 @@ public:
 		           TMemoryDeviceType);
 
 		// the rendering engine will generate the point cloud
-		raycasting_engine = ITMLib::RaycastingEngineFactory::Build<TSDFVoxel_f_rgb, VoxelBlockHash>(TMemoryDeviceType);
+		raycasting_engine = ITMLib::RaycastingEngineFactory::Build<TSDFVoxel_f_rgb, TIndex>(TMemoryDeviceType);
 
 		// we need the volume of the frame 115 to generate the point cloud for the tracker
 		volume_teddy_frame115.Reset();
@@ -177,6 +177,32 @@ BOOST_FIXTURE_TEST_CASE(Test_DepthTracker_CPU_VBH, environment_VBH_CPU) {
 	}
 }
 
+typedef TestEnvironment<PlainVoxelArray, MEMORYDEVICE_CPU> environment_PVA_CPU;
+
+BOOST_FIXTURE_TEST_CASE(Test_RgbTracker_CPU_PVA, environment_PVA_CPU) {
+	float absolute_tolerance = 1.0e-2;
+
+	GenericRigidTrackerTest<PlainVoxelArray, MEMORYDEVICE_CPU>(test::rgb_tracker_preset_t, *this, absolute_tolerance);
+	GenericRigidTrackerTest<PlainVoxelArray, MEMORYDEVICE_CPU>(test::rgb_tracker_preset_r, *this, absolute_tolerance);
+	GenericRigidTrackerTest<PlainVoxelArray, MEMORYDEVICE_CPU>(test::rgb_tracker_preset_b, *this, absolute_tolerance);
+	GenericRigidTrackerTest<PlainVoxelArray, MEMORYDEVICE_CPU>(test::rgb_tracker_preset_rrbb, *this, absolute_tolerance);
+	GenericRigidTrackerTest<PlainVoxelArray, MEMORYDEVICE_CPU>(test::rgb_tracker_preset_rrrbb, *this, absolute_tolerance);
+	GenericRigidTrackerTest<PlainVoxelArray, MEMORYDEVICE_CPU>(test::rgb_tracker_preset_rrrbrb, *this, absolute_tolerance);
+}
+
+BOOST_FIXTURE_TEST_CASE(Test_ExtendedTracker_CPU_PVA, environment_PVA_CPU) {
+	float absolute_tolerance = 1.0e-3;
+	GenericRigidTrackerTest<PlainVoxelArray, MEMORYDEVICE_CPU>(test::extended_tracker_preset1, *this, absolute_tolerance);
+	GenericRigidTrackerTest<PlainVoxelArray, MEMORYDEVICE_CPU>(test::extended_tracker_preset2, *this, absolute_tolerance);
+}
+
+BOOST_FIXTURE_TEST_CASE(Test_DepthTracker_CPU_PVA, environment_PVA_CPU) {
+	float absolute_tolerance = 1.0e-3;
+	for (auto& preset : test::depth_tracker_presets) {
+		GenericRigidTrackerTest<PlainVoxelArray, MEMORYDEVICE_CPU>(preset, *this, absolute_tolerance);
+	}
+}
+
 #ifndef COMPILE_WITHOUT_CUDA
 typedef TestEnvironment<VoxelBlockHash, MEMORYDEVICE_CUDA> environment_VBH_CUDA;
 
@@ -203,6 +229,33 @@ BOOST_FIXTURE_TEST_CASE(Test_DepthTracker_CUDA_VBH, environment_VBH_CUDA) {
 	float absolute_tolerance = 1.0e-3;
 	for (auto& preset : test::depth_tracker_presets) {
 		GenericRigidTrackerTest<VoxelBlockHash, MEMORYDEVICE_CUDA>(preset, *this, absolute_tolerance);
+	}
+}
+
+
+typedef TestEnvironment<PlainVoxelArray, MEMORYDEVICE_CUDA> environment_PVA_CUDA;
+
+BOOST_FIXTURE_TEST_CASE(Test_RgbTracker_CUDA_PVA, environment_PVA_CUDA) {
+	float absolute_tolerance = 1.0e-2;
+
+	GenericRigidTrackerTest<PlainVoxelArray, MEMORYDEVICE_CUDA>(test::rgb_tracker_preset_t, *this, absolute_tolerance);
+	GenericRigidTrackerTest<PlainVoxelArray, MEMORYDEVICE_CUDA>(test::rgb_tracker_preset_r, *this, absolute_tolerance);
+	GenericRigidTrackerTest<PlainVoxelArray, MEMORYDEVICE_CUDA>(test::rgb_tracker_preset_b, *this, absolute_tolerance);
+	GenericRigidTrackerTest<PlainVoxelArray, MEMORYDEVICE_CUDA>(test::rgb_tracker_preset_rrbb, *this, absolute_tolerance);
+	GenericRigidTrackerTest<PlainVoxelArray, MEMORYDEVICE_CUDA>(test::rgb_tracker_preset_rrrbb, *this, absolute_tolerance);
+	GenericRigidTrackerTest<PlainVoxelArray, MEMORYDEVICE_CUDA>(test::rgb_tracker_preset_rrrbrb, *this, absolute_tolerance);
+}
+
+BOOST_FIXTURE_TEST_CASE(Test_ExtendedTracker_CUDA_PVA, environment_PVA_CUDA) {
+	float absolute_tolerance = 1.0e-3;
+	GenericRigidTrackerTest<PlainVoxelArray, MEMORYDEVICE_CUDA>(test::extended_tracker_preset1, *this, absolute_tolerance);
+	GenericRigidTrackerTest<PlainVoxelArray, MEMORYDEVICE_CUDA>(test::extended_tracker_preset2, *this, absolute_tolerance);
+}
+
+BOOST_FIXTURE_TEST_CASE(Test_DepthTracker_CUDA_PVA, environment_PVA_CUDA) {
+	float absolute_tolerance = 1.0e-3;
+	for (auto& preset : test::depth_tracker_presets) {
+		GenericRigidTrackerTest<PlainVoxelArray, MEMORYDEVICE_CUDA>(preset, *this, absolute_tolerance);
 	}
 }
 #endif
