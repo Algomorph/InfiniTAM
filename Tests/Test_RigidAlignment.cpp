@@ -19,10 +19,8 @@
 #include "TestUtilities/RigidTrackerPresets.h"
 #include "../ITMLib/CameraTrackers/CameraTrackerFactory.h"
 #include "../ITMLib/Engines/ImageProcessing/ImageProcessingEngineFactory.h"
-#include "../ITMLib/Objects/Misc/IMUCalibrator.h"
 #include "../ITMLib/Engines/Raycasting/RaycastingEngineFactory.h"
 #include "../ORUtils/MathTypePersistence/MathTypePersistence.h"
-#include "../ORUtils/MemoryBlockPersistence/MemoryBlockPersistence.h"
 #include "../ITMLib/Utils/Analytics/AlmostEqual.h"
 
 template<typename TIndex, MemoryDeviceType TMemoryDeviceType>
@@ -141,9 +139,9 @@ void GenericRigidTrackerTest(const std::string& preset, TestEnvironment<TIndex, 
 	matrix_reader >> depth_matrix_gt;
 
 	// __DEBUG
-	std::cout << matrix_filename << std::endl << std::endl;
-	std::cout << depth_matrix_gt << std::endl;
-	std::cout << tracking_state_to_use->pose_d->GetM() << std::endl;
+	// std::cout << matrix_filename << std::endl << std::endl;
+	// std::cout << depth_matrix_gt << std::endl;
+	// std::cout << tracking_state_to_use->pose_d->GetM() << std::endl;
 
 	BOOST_REQUIRE(AlmostEqual(depth_matrix_gt, tracking_state_to_use->pose_d->GetM(), absolute_tolerance));
 	environment.ResetTrackingState();
@@ -151,7 +149,37 @@ void GenericRigidTrackerTest(const std::string& preset, TestEnvironment<TIndex, 
 	delete tracker;
 }
 
+
 typedef TestEnvironment<VoxelBlockHash, MEMORYDEVICE_CPU> environment_VBH_CPU;
+
+BOOST_FIXTURE_TEST_CASE(Test_ForceFailTracker_CPU_VBH, environment_VBH_CPU){
+	MemoryDeviceType TMemoryDeviceType = MEMORYDEVICE_CPU;
+	const std::string preset = std::string(test::force_fail_tracker_preset);
+
+	BOOST_TEST_MESSAGE("Using preset: \n" << preset);
+
+
+	CameraTracker* tracker = CameraTrackerFactory::Instance().Make(
+			TMemoryDeviceType, preset.c_str(), teddy::frame_image_size, teddy::frame_image_size,
+			this->image_processing_engine, this->imu_calibrator,
+			teddy::DefaultVolumeParameters()
+	);
+
+	CameraTrackingState* tracking_state_to_use = nullptr;
+	if (tracker->requiresColourRendering()) {
+		tracking_state_to_use = &this->tracking_state_color_and_depth;
+	} else {
+		tracking_state_to_use = &this->tracking_state_depth_only;
+	}
+
+	tracker->TrackCamera(tracking_state_to_use, this->view_teddy_frame116);
+
+	BOOST_REQUIRE( tracking_state_to_use->trackerResult == ITMLib::CameraTrackingState::TRACKING_FAILED);
+	this->ResetTrackingState();
+
+	delete tracker;
+}
+
 
 BOOST_FIXTURE_TEST_CASE(Test_RgbTracker_CPU_VBH, environment_VBH_CPU) {
 	float absolute_tolerance = 1.0e-2;

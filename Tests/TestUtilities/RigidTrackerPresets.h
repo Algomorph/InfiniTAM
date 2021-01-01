@@ -26,14 +26,6 @@ constexpr const char* rgb_tracker_preset_b = "type=rgb,levels=b";
 constexpr const char* rgb_tracker_preset_rrbb = "type=rgb,levels=rrbb";
 constexpr const char* rgb_tracker_preset_rrrbb = "type=rgb,levels=rrrbb";
 constexpr const char* rgb_tracker_preset_rrrbrb = "type=rgb,levels=rrrbrb";
-constexpr const char* extended_tracker_preset1 = "type=extended,levels=bbb,useDepth=1,useColour=1,colourWeight=0.3,"
-                                                 "minstep=1e-4,outlierColourC=0.175,outlierColourF=0.005,"
-                                                 "outlierSpaceC=0.1,outlierSpaceF=0.004,numiterC=20,numiterF=50,"
-                                                 "tukeyCutOff=8,framesToSkip=20,framesToWeight=50,failureDec=20.0";
-constexpr const char* extended_tracker_preset2 = "type=extended,levels=rrrb,useDepth=1,useColour=1,colourWeight=0.1,"
-                                                 "minstep=2e-4,outlierColourC=0.125,outlierColourF=0.01,"
-                                                 "outlierSpaceC=0.2,outlierSpaceF=0.005,numiterC=22,numiterF=52,"
-                                                 "tukeyCutOff=9,framesToSkip=10,framesToWeight=50,failureDec=20.0";
 
 constexpr const char* depth_tracker_preset_default =
 		"type=icp,levels=rrrbb,minstep=1e-3,"
@@ -63,6 +55,17 @@ constexpr const char* depth_tracker_preset_b_more_iters =
 		"type=icp,levels=b,minstep=1e-3,"
 		"outlierC=0.005,outlierF=0.001,"
 		"numiterC=40,numiterF=8,failureDec=5.0";
+
+constexpr const char* extended_tracker_preset1 = "type=extended,levels=bbb,useDepth=1,useColour=1,colourWeight=0.3,"
+"minstep=1e-4,outlierColourC=0.175,outlierColourF=0.005,"
+"outlierSpaceC=0.1,outlierSpaceF=0.004,numiterC=20,numiterF=50,"
+"tukeyCutOff=8,framesToSkip=20,framesToWeight=50,failureDec=20.0";
+constexpr const char* extended_tracker_preset2 = "type=extended,levels=rrrb,useDepth=1,useColour=1,colourWeight=0.1,"
+"minstep=2e-4,outlierColourC=0.125,outlierColourF=0.01,"
+"outlierSpaceC=0.2,outlierSpaceF=0.005,numiterC=22,numiterF=52,"
+"tukeyCutOff=9,framesToSkip=10,framesToWeight=50,failureDec=20.0";
+
+constexpr const char* force_fail_tracker_preset = "type=forcefail";
 
 
 extern const std::unordered_map<std::string, std::string> matrix_file_name_by_preset;
