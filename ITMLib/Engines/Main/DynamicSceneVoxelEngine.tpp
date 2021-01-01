@@ -74,7 +74,7 @@ DynamicSceneVoxelEngine<TVoxel, TWarp, TIndex>::DynamicSceneVoxelEngine(
 				                  configuration::Get().device_type,
 				                  configuration::ForVolumeRole<TIndex>(configuration::VOLUME_CANONICAL)
 		                  ) : nullptr),
-		  image_processing_engine(ImageProcessingEngineFactory::Build(configuration::Get().device_type)),
+		  image_processing_engine(ImageProcessingEngineFactory::BuildLegacy(configuration::Get().device_type)),
 		  telemetry_recorder(TelemetryRecorderFactory::GetDefault<TVoxel, TWarp, TIndex>(configuration::Get().device_type)),
 		  view_builder(ViewBuilderFactory::Build(calibration_info, configuration::Get().device_type)),
 		  rendering_engine(RaycastingEngineFactory::Build<TVoxel, TIndex>(

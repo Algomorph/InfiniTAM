@@ -42,7 +42,7 @@ public:
 			tracking_state_color_and_depth(teddy::frame_image_size, TMemoryDeviceType),
 			tracking_state_depth_only(teddy::frame_image_size, TMemoryDeviceType),
 			imu_calibrator(new ITMIMUCalibrator_iPad()),
-			image_processing_engine(ImageProcessingEngineFactory::Build(TMemoryDeviceType)),
+			image_processing_engine(ImageProcessingEngineFactory::BuildLegacy(TMemoryDeviceType)),
 			volume_teddy_frame115(teddy::DefaultVolumeParameters(), false, TMemoryDeviceType,
 			                      teddy::PartialInitializationParameters<TIndex>()),
 			// the rendering engine will generate the point cloud inside tracking_state_color_and_depth

@@ -105,7 +105,7 @@ void GenerateRigidAlignmentTestData() {
 
 
 	IMUCalibrator* imu_calibrator = new ITMIMUCalibrator_iPad();
-	ImageProcessingEngineInterface* image_processing_engine = ImageProcessingEngineFactory::Build(TMemoryDeviceType);
+	ImageProcessingEngineInterface* image_processing_engine = ImageProcessingEngineFactory::BuildLegacy(TMemoryDeviceType);
 
 	ConstructGeneratedMatrixDirectoryIfMissing();
 

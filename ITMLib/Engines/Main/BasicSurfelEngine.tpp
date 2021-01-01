@@ -26,7 +26,7 @@ BasicSurfelEngine<TSurfel>::BasicSurfelEngine(const RGBD_CalibrationInformation&
 
 	const MemoryDeviceType deviceType = settings.device_type;
 
-	lowLevelEngine = ImageProcessingEngineFactory::Build(deviceType);
+	lowLevelEngine = ImageProcessingEngineFactory::BuildLegacy(deviceType);
 	viewBuilder = ViewBuilderFactory::Build(calib, deviceType);
 	surfelVisualizationEngine = SurfelVisualizationEngineFactory::Build<TSurfel>(deviceType);
 

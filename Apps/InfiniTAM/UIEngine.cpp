@@ -159,7 +159,7 @@ void UIEngine::Initialize(int& argc, char** argv,
 		this->reconstruction_video_writer = new FFMPEGWriter();
 		if (configuration.record_inputs_in_reconstruction_video) {
 			this->add_input_to_reconstruction_video = true;
-			image_processing_engine = ImageProcessingEngineFactory::Build(MEMORYDEVICE_CPU);
+			image_processing_engine = ImageProcessingEngineFactory::BuildLegacy(MEMORYDEVICE_CPU);
 		}
 	}
 

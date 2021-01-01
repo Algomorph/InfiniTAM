@@ -37,10 +37,51 @@
 using namespace ITMLib;
 using namespace test;
 
+template<MemoryDeviceType TMemoryDeviceType, typename TImageType>
+void GenericTestCopyImage(){
+
+}
+
 template<MemoryDeviceType TMemoryDeviceType>
 void GenericFilterSubsampleTest() {
 
 }
+
+template<MemoryDeviceType TMemoryDeviceType>
+void GenericConvertColorToIntensityTest(){
+
+}
+
+template<MemoryDeviceType TMemoryDeviceType>
+void GenericFilterIntensityTest(){
+
+}
+
+template<MemoryDeviceType TMemoryDeviceType, typename TImageType, bool TWithHoles>
+void GenericFilterSubsampleTest(){
+
+}
+
+template<MemoryDeviceType TMemoryDeviceType>
+void GenericGraidentXTest(){
+
+}
+
+template<MemoryDeviceType TMemoryDeviceType>
+void GenericGraidentYTest(){
+
+}
+
+template<MemoryDeviceType TMemoryDeviceType>
+void GenericGraidentXYTest(){
+
+}
+
+template<MemoryDeviceType TMemoryDeviceType>
+void CountValidDepthsTest(){
+
+}
+
 
 BOOST_AUTO_TEST_CASE(Test_GenericFilterSubsampleTest_CPU) {
 	GenericFilterSubsampleTest<MEMORYDEVICE_CPU>();

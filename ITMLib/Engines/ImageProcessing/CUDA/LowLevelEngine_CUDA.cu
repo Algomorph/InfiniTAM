@@ -62,7 +62,7 @@ void LowLevelEngine_CUDA::CopyImage(Float4Image& image_out, const Float4Image& i
 	ORcudaSafeCall(cudaMemcpy(dest, src, image_in.size() * sizeof(Vector4f), cudaMemcpyDeviceToDevice));
 }
 
-void LowLevelEngine_CUDA::ConvertColourToIntensity(FloatImage& image_out, const UChar4Image& image_in) const
+void LowLevelEngine_CUDA::ConvertColorToIntensity(FloatImage& image_out, const UChar4Image& image_in) const
 {
 	const Vector2i dims = image_in.dimensions;
 	image_out.ChangeDims(dims);

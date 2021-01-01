@@ -7,7 +7,7 @@
 
 namespace ITMLib{
 
-ImageProcessingEngineInterface* ImageProcessingEngineFactory::Build(MemoryDeviceType device_type){
+ImageProcessingEngineInterface* ImageProcessingEngineFactory::BuildLegacy(MemoryDeviceType device_type){
   ImageProcessingEngineInterface* preprocessing_engine = nullptr;
 
   switch(device_type){

@@ -184,8 +184,8 @@ void ExtendedTracker::SetEvaluationData(CameraTrackingState *trackingState, cons
 		viewHierarchy_Intensity->GetLevel(0)->intrinsics = view->calibration_information.intrinsics_rgb.projection_params_simple.all;
 
 		// Convert RGB to intensity
-		lowLevelEngine->ConvertColourToIntensity(*viewHierarchy_Intensity->GetLevel(0)->intensity_current, view->rgb);
-		lowLevelEngine->ConvertColourToIntensity(*viewHierarchy_Intensity->GetLevel(0)->intensity_prev, *view->rgb_prev);
+		lowLevelEngine->ConvertColorToIntensity(*viewHierarchy_Intensity->GetLevel(0)->intensity_current, view->rgb);
+		lowLevelEngine->ConvertColorToIntensity(*viewHierarchy_Intensity->GetLevel(0)->intensity_prev, *view->rgb_prev);
 
 		// Compute first level gradients
 		lowLevelEngine->GradientXY(*viewHierarchy_Intensity->GetLevel(0)->gradients,

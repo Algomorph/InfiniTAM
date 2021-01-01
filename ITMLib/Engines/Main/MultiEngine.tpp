@@ -34,7 +34,7 @@ MultiEngine<TVoxel, TIndex>::MultiEngine(const RGBD_CalibrationInformation& cali
 	auto& settings = configuration::Get();
 
 	const MemoryDeviceType deviceType = settings.device_type;
-	lowLevelEngine = ImageProcessingEngineFactory::Build(deviceType);
+	lowLevelEngine = ImageProcessingEngineFactory::BuildLegacy(deviceType);
 	viewBuilder = ViewBuilderFactory::Build(calib, deviceType);
 	visualization_engine = RaycastingEngineFactory::Build<TVoxel, TIndex>(deviceType);
 

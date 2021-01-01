@@ -25,7 +25,7 @@ BasicVoxelEngine<TVoxel,TIndex>::BasicVoxelEngine(const RGBD_CalibrationInformat
 
 	const MemoryDeviceType deviceType = settings.device_type;
 
-	image_processing_engine = ImageProcessingEngineFactory::Build(deviceType);
+	image_processing_engine = ImageProcessingEngineFactory::BuildLegacy(deviceType);
 	viewBuilder = ViewBuilderFactory::Build(calib, deviceType);
 	visualization_engine = RaycastingEngineFactory::Build<TVoxel, TIndex>(deviceType);
 
