@@ -86,12 +86,19 @@ public: // instance functions
 		other.dimensions = Vector2<int>();
 	}
 
+
+
 	/**
 	 * Resize the image, losing all old image data if force_reallocation is set to true.
 	 */
 	void ChangeDims(Vector2<int> dimensions, bool force_reallocation = true) {
 		this->Resize(dimensions.x * dimensions.y, force_reallocation);
 		this->dimensions = dimensions;
+	}
+
+	/** Copy data */
+	void SetFrom(const Image& source) {
+		SetFrom(source);
 	}
 
 	void SetFrom(const Image<T>& source, MemoryCopyDirection memory_copy_direction) {

@@ -15,4 +15,4 @@
 //  ================================================================
 #pragma once
 
-void GenerateImageProcessingTestData();
+void GenerateImageProcessingTestData_Legacy();

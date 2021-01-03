@@ -26,7 +26,8 @@
 #include "TestUtilities/TestDataUtilities.h"
 
 //ORUtils
-#include "../ORUtils/IStreamWrapper.h"
+#include "../ORUtils/MemoryBlockPersistence/MemoryBlockPersistenceOperators.h"
+#include "../ORUtils/FileUtils.h"
 
 //ITMLib
 #include "../ITMLib/Engines/ImageProcessing/ImageProcessingEngineFactory.h"
@@ -37,52 +38,92 @@
 using namespace ITMLib;
 using namespace test;
 
-template<MemoryDeviceType TMemoryDeviceType, typename TImageType>
-void GenericTestCopyImage(){
-
-}
-
-template<MemoryDeviceType TMemoryDeviceType>
-void GenericFilterSubsampleTest() {
-
-}
-
 template<MemoryDeviceType TMemoryDeviceType>
 void GenericConvertColorToIntensityTest(){
+	auto image_processing_engine = ImageProcessingEngineFactory::BuildLegacy(TMemoryDeviceType);
 
+	// load original image
+	UChar4Image frame_115(teddy::frame_image_size, TMemoryDeviceType);
+	ReadImageFromFile(frame_115, teddy::frame_115_color_file_name.Get());
+
+	// perform the operation
+	FloatImage frame_115_float_intensity(Vector2(0), TMemoryDeviceType);
+	image_processing_engine->ConvertColorToIntensity(frame_115_float_intensity, frame_115);
+
+	// load ground truth
+	std::string float_intensity_path = test::generated_arrays_directory.ToString() + "TeddyFrame115_FloatIntensityImage.dat";
+	ORUtils::IStreamWrapper file(float_intensity_path, true);
+	FloatImage frame_115_float_intensity_gt(Vector2(0), TMemoryDeviceType);
+	file >> frame_115_float_intensity_gt;
+
+	// compare output and ground truth
+	BOOST_REQUIRE(frame_115_float_intensity == frame_115_float_intensity_gt);
+
+
+	delete image_processing_engine;
 }
 
 template<MemoryDeviceType TMemoryDeviceType>
 void GenericFilterIntensityTest(){
+	auto image_processing_engine = ImageProcessingEngineFactory::BuildLegacy(TMemoryDeviceType);
 
+	// load original image
+	FloatImage frame_115_float_intensity(teddy::frame_image_size, TMemoryDeviceType);
+	std::string float_intensity_path = test::generated_arrays_directory.ToString() + "TeddyFrame115_FloatIntensityImage.dat";
+	ORUtils::IStreamWrapper input_file(float_intensity_path, true);
+	input_file >> frame_115_float_intensity;
+
+	// perform the operation
+	FloatImage frame_115_filtered_intensity(Vector2(0), TMemoryDeviceType);
+	image_processing_engine->FilterIntensity(frame_115_filtered_intensity, frame_115_float_intensity);
+
+	// load ground truth
+	std::string filtered_intensity_path = test::generated_arrays_directory.ToString() + "TeddyFrame115_FilteredIntensityImage.dat";
+	ORUtils::IStreamWrapper ground_truth_file(filtered_intensity_path, true);
+	FloatImage frame_115_filtered_intensity_gt(Vector2(0), TMemoryDeviceType);
+	ground_truth_file >> frame_115_filtered_intensity_gt;
+
+	// compare output and ground truth
+	BOOST_REQUIRE(frame_115_filtered_intensity == frame_115_filtered_intensity_gt);
+
+	delete image_processing_engine;
 }
 
 template<MemoryDeviceType TMemoryDeviceType, typename TImageType, bool TWithHoles>
 void GenericFilterSubsampleTest(){
-
+	auto image_processing_engine = ImageProcessingEngineFactory::BuildLegacy(TMemoryDeviceType);
+	delete image_processing_engine;
 }
 
 template<MemoryDeviceType TMemoryDeviceType>
 void GenericGradientXTest(){
-
+	auto image_processing_engine = ImageProcessingEngineFactory::BuildLegacy(TMemoryDeviceType);
+	delete image_processing_engine;
 }
 
 template<MemoryDeviceType TMemoryDeviceType>
 void GenericGradientYTest(){
-
+	auto image_processing_engine = ImageProcessingEngineFactory::BuildLegacy(TMemoryDeviceType);
+	delete image_processing_engine;
 }
 
 template<MemoryDeviceType TMemoryDeviceType>
 void GenericGradientXYTest(){
-
+	auto image_processing_engine = ImageProcessingEngineFactory::BuildLegacy(TMemoryDeviceType);
+	delete image_processing_engine;
 }
 
 template<MemoryDeviceType TMemoryDeviceType>
 void CountValidDepthsTest(){
-
+	auto image_processing_engine = ImageProcessingEngineFactory::BuildLegacy(TMemoryDeviceType);
+	delete image_processing_engine;
 }
 
 
-BOOST_AUTO_TEST_CASE(Test_GenericFilterSubsampleTest_CPU) {
-	GenericFilterSubsampleTest<MEMORYDEVICE_CPU>();
+BOOST_AUTO_TEST_CASE(Test_ConvertColorToIntensityTest_CPU) {
+	GenericConvertColorToIntensityTest<MEMORYDEVICE_CPU>();
+}
+
+BOOST_AUTO_TEST_CASE(Test_ConvertColorToIntensityTest_CPU) {
+	GenericConvertColorToIntensityTest<MEMORYDEVICE_CPU>();
 }

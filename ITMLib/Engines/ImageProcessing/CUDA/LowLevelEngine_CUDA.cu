@@ -37,31 +37,6 @@ __global__ void gradientXY_device(Vector2f *grad, const float *image, Vector2i i
 __global__ void countValidDepths_device(const float *imageData_in, int imgSizeTotal, int *counterTempData_device);
 
 // host methods
-
-void LowLevelEngine_CUDA::CopyImage(UChar4Image& image_out, const UChar4Image& image_in) const
-{
-	Vector4u *dest = image_out.GetData(MEMORYDEVICE_CUDA);
-	const Vector4u *src = image_in.GetData(MEMORYDEVICE_CUDA);
-
-	ORcudaSafeCall(cudaMemcpy(dest, src, image_in.size() * sizeof(Vector4u), cudaMemcpyDeviceToDevice));
-}
-
-void LowLevelEngine_CUDA::CopyImage(FloatImage& image_out, const FloatImage& image_in) const
-{
-	float *dest = image_out.GetData(MEMORYDEVICE_CUDA);
-	const float *src = image_in.GetData(MEMORYDEVICE_CUDA);
-
-	ORcudaSafeCall(cudaMemcpy(dest, src, image_in.size() * sizeof(float), cudaMemcpyDeviceToDevice));
-}
-
-void LowLevelEngine_CUDA::CopyImage(Float4Image& image_out, const Float4Image& image_in) const
-{
-	Vector4f *dest = image_out.GetData(MEMORYDEVICE_CUDA);
-	const Vector4f *src = image_in.GetData(MEMORYDEVICE_CUDA);
-
-	ORcudaSafeCall(cudaMemcpy(dest, src, image_in.size() * sizeof(Vector4f), cudaMemcpyDeviceToDevice));
-}
-
 void LowLevelEngine_CUDA::ConvertColorToIntensity(FloatImage& image_out, const UChar4Image& image_in) const
 {
 	const Vector2i dims = image_in.dimensions;

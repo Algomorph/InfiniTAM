@@ -46,7 +46,7 @@ void ColorTracker::TrackCamera(CameraTrackingState *trackingState, const View *v
 
 void ColorTracker::PrepareForEvaluation(const View *view)
 {
-	lowLevelEngine->CopyImage(*viewHierarchy->GetLevel(0)->rgb, view->rgb);
+	viewHierarchy->GetLevel(0)->rgb->SetFrom(view->rgb);
 
 	ImageHierarchy<ViewHierarchyLevel> *hierarchy = viewHierarchy;
 

@@ -36,6 +36,7 @@
 #include "TestDataGeneration/GenerateSnoopyMeshes.h"
 #include "TestDataGeneration/GenerateRaycastingTestData.h"
 #include "TestDataGeneration/GenerateRigidAlignmentTestData.h"
+#include "TestDataGeneration/GenerateImageProcessingTestData.h"
 
 using namespace ITMLib;
 
@@ -58,7 +59,8 @@ namespace fs = std::filesystem;
     (CONFUGRATION,                           "CONFIGURATION", "configuration", "config", "c"), \
     (MESHES,                                 "MESHES", "meshes", "m"), \
     (RENDERING,                              "RENDERING", "rendering", "r"), \
-    (RIGID_ALIGNMENT,                        "RIGID_ALIGNMENT", "rigid_alignment", "ra")
+    (RIGID_ALIGNMENT,                        "RIGID_ALIGNMENT", "rigid_alignment", "ra"),                                                             \
+    (IMAGE_PROCESSING,                       "IMAGE_PROCESSING", "image_processing", "improc", "i")
 
 GENERATE_SERIALIZABLE_ENUM(GENERATED_TEST_DATA_TYPE_ENUM_DESCRIPTION);
 
@@ -79,7 +81,8 @@ int main(int argc, char* argv[]) {
 					{CONFUGRATION,                          GenerateConfigurationTestData},
 					{MESHES,                                GenerateMeshingTestData<VoxelBlockHash, MEMORYDEVICE_CPU>},
 					{RENDERING,                             GenerateRenderingTestData_VoxelBlockHash<MEMORYDEVICE_CPU>},
-					{RIGID_ALIGNMENT,                       GenerateRigidAlignmentTestData<VoxelBlockHash, MEMORYDEVICE_CPU>}
+					{RIGID_ALIGNMENT,                       GenerateRigidAlignmentTestData<VoxelBlockHash, MEMORYDEVICE_CPU>},
+					{IMAGE_PROCESSING,                      GenerateImageProcessingTestData_Legacy}
 			}
 	);
 	if (argc < 2) {

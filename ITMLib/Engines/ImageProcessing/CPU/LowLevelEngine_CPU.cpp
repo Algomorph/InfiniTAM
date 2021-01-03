@@ -9,30 +9,6 @@ using namespace ITMLib;
 LowLevelEngine_CPU::LowLevelEngine_CPU() { }
 LowLevelEngine_CPU::~LowLevelEngine_CPU() { }
 
-void LowLevelEngine_CPU::CopyImage(UChar4Image& image_out, const UChar4Image& image_in) const
-{
-	Vector4u *dest = image_out.GetData(MEMORYDEVICE_CPU);
-	const Vector4u *src = image_in.GetData(MEMORYDEVICE_CPU);
-
-	memcpy(dest, src, image_in.size() * sizeof(Vector4u));
-}
-
-void LowLevelEngine_CPU::CopyImage(FloatImage& image_out, const FloatImage& image_in) const
-{
-	float *dest = image_out.GetData(MEMORYDEVICE_CPU);
-	const float *src = image_in.GetData(MEMORYDEVICE_CPU);
-
-	memcpy(dest, src, image_in.size() * sizeof(float));
-}
-
-void LowLevelEngine_CPU::CopyImage(Float4Image& image_out, const Float4Image& image_in) const
-{
-	Vector4f *dest = image_out.GetData(MEMORYDEVICE_CPU);
-	const Vector4f *src = image_in.GetData(MEMORYDEVICE_CPU);
-
-	memcpy(dest, src, image_in.size() * sizeof(Vector4f));
-}
-
 void LowLevelEngine_CPU::ConvertColorToIntensity(FloatImage& image_out, const UChar4Image& image_in) const
 {
 	const Vector2i dims = image_in.dimensions;
@@ -116,6 +92,7 @@ void LowLevelEngine_CPU::FilterSubsampleWithHoles(Float4Image& image_out, const 
 		filterSubsampleWithHoles(imageData_out, x, y, newDims, imageData_in, oldDims);
 }
 
+//TODO: rename to PerChannelGradientX
 void LowLevelEngine_CPU::GradientX(Short4Image& grad_out, const UChar4Image& image_in) const
 {
 	grad_out.ChangeDims(image_in.dimensions);
@@ -130,6 +107,7 @@ void LowLevelEngine_CPU::GradientX(Short4Image& grad_out, const UChar4Image& ima
 		gradientX(grad, x, y, image, imgSize);
 }
 
+//TODO: rename to PerChannelGradientY
 void LowLevelEngine_CPU::GradientY(Short4Image& grad_out, const UChar4Image& image_in) const
 {
 	grad_out.ChangeDims(image_in.dimensions);

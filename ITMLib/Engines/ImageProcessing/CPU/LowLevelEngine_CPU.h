@@ -9,10 +9,6 @@ namespace ITMLib
 	class LowLevelEngine_CPU : public ImageProcessingEngineInterface
 	{
 	public:
-		void CopyImage(UChar4Image& image_out, const UChar4Image& image_in) const;
-		void CopyImage(FloatImage& image_out, const FloatImage& image_in) const;
-		void CopyImage(Float4Image& image_out, const Float4Image& image_in) const;
-
 		void ConvertColorToIntensity(FloatImage& image_out, const UChar4Image& image_in) const;
 
 		void FilterIntensity(FloatImage& image_out, const FloatImage& image_in) const;
