@@ -13,7 +13,7 @@
 #include "Interface/FileBasedTracker.h"
 #include "Interface/ForceFailTracker.h"
 #include "Interface/CameraTracker.h"
-#include "../Engines/ImageProcessing/Interface/ImageProcessingEngineInterface.h"
+#include "../Engines/ImageProcessing/ImageProcessingEngineInterface.h"
 #include "../Utils/Configuration/Configuration.h"
 
 #ifndef COMPILE_WITHOUT_CUDA

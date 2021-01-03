@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Interface/ImageProcessingEngineInterface.h"
+#include "ImageProcessingEngineInterface.h"
 #include "../../Utils/Configuration/Configuration.h"
 #include "../../../ORUtils/MemoryDeviceType.h"
 

@@ -5,7 +5,7 @@
 #include "Mappers/DenseMapper.h"
 #include "FusionAlgorithm.h"
 #include "CameraTrackingController.h"
-#include "../ImageProcessing/Interface/ImageProcessingEngineInterface.h"
+#include "../ImageProcessing/ImageProcessingEngineInterface.h"
 #include "../Meshing/Interface/MeshingEngine.h"
 #include "../ViewBuilder/Interface/ViewBuilder.h"
 #include "../Raycasting/Interface/RaycastingEngineInterface.h"

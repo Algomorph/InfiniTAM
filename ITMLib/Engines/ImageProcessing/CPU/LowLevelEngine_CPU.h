@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "../Interface/ImageProcessingEngineInterface.h"
+#include "../ImageProcessingEngineInterface.h"
 
 namespace ITMLib
 {

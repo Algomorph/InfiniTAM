@@ -5,7 +5,7 @@
 #include "Mappers/DenseSurfelMapper.h"
 #include "FusionAlgorithm.h"
 #include "CameraTrackingController.h"
-#include "../ImageProcessing/Interface/ImageProcessingEngineInterface.h"
+#include "../ImageProcessing/ImageProcessingEngineInterface.h"
 #include "../ViewBuilder/Interface/ViewBuilder.h"
 #include "../Raycasting/Interface/SurfelVisualizationEngine.h"
 #include "../../Objects/Misc/IMUCalibrator.h"

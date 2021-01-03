@@ -54,21 +54,21 @@ set(ITMLIB_ENGINES_COMMON_HEADERS
 #======================================= LOW-LEVEL ENGINES =============================================================
 ##
 set(
-        ITMLIB_ENGINES_LOW_LEVEL_SOURCES
+        ITMLIB_ENGINES_IMAGE_PROCESSING_SOURCES
 
         Engines/ImageProcessing/ImageProcessingEngineFactory.cpp
+        Engines/ImageProcessing/ImageProcessingEngine.tpp
 
         Engines/ImageProcessing/CPU/LowLevelEngine_CPU.cpp
         Engines/ImageProcessing/CUDA/LowLevelEngine_CUDA.cu
-)
+        Engines/ImageProcessing/ImageProcessingEngine_CPU.cpp Engines/ImageProcessing/ImageProcessingEngine_CUDA.cu)
 
 set(
-        ITMLIB_ENGINES_LOW_LEVEL_HEADERS
+        ITMLIB_ENGINES_IMAGE_PROCESSING_HEADERS
 
         Engines/ImageProcessing/ImageProcessingEngineFactory.h
-
-        Engines/ImageProcessing/Interface/ImageProcessingEngineInterface.h
-
+        Engines/ImageProcessing/ImageProcessingEngineInterface.h
+        Engines/ImageProcessing/ImageProcessingEngine.h
         Engines/ImageProcessing/Shared/LowLevelEngine_Shared.h
 
         Engines/ImageProcessing/CPU/LowLevelEngine_CPU.h
@@ -989,7 +989,7 @@ set(
 
 set(sources
     ${ITMLIB_ENGINES_MAIN_SOURCES}
-    ${ITMLIB_ENGINES_LOW_LEVEL_SOURCES}
+    ${ITMLIB_ENGINES_IMAGE_PROCESSING_SOURCES}
     ${ITMLIB_ENGINES_EDIT_AND_COPY_SOURCES}
     ${ITMLIB_ENGINES_MESHING_SOURCES}
     ${ITMLIB_ENGINES_INDEXING_SOURCES}
@@ -1021,7 +1021,7 @@ set(headers
     ${ITMLIB_TOPLEVEL_HEADERS}
     ${ITMLIB_ENGINES_MAIN_HEADERS}
     ${ITMLIB_ENGINES_COMMON_HEADERS}
-    ${ITMLIB_ENGINES_LOW_LEVEL_HEADERS}
+    ${ITMLIB_ENGINES_IMAGE_PROCESSING_HEADERS}
     ${ITMLIB_ENGINES_EDIT_AND_COPY_HEADERS}
     ${ITMLIB_ENGINES_TRAVERSAL_HEADERS}
     ${ITMLIB_ENGINES_REDUCTION_HEADERS}
@@ -1054,7 +1054,7 @@ set(headers
     ${ITMLIB_CAMERA_TRACKERS_CUDA_HEADERS}
     ${ITMLIB_CAMERA_TRACKERS_INTERFACE_HEADERS}
     ${ITMLIB_CAMERA_TRACKERS_SHARED_HEADERS}
-    ${ITMLIB_UTILS_HEADERS})
+    ${ITMLIB_UTILS_HEADERS} Engines/ImageProcessing/ImageProcessingEngine.tpp Engines/ImageProcessing/ImageProcessingEngine.h)
 
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${sources} ${headers})

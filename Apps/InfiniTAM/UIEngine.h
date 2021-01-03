@@ -18,7 +18,7 @@
 #include "../../ORUtils/FileUtils.h"
 #include "../../ORUtils/NVTimer.h"
 #include "../../ITMLib/Utils/Configuration/AutomaticRunSettings.h"
-#include "../../ITMLib/Engines/ImageProcessing/Interface/ImageProcessingEngineInterface.h"
+#include "../../ITMLib/Engines/ImageProcessing/ImageProcessingEngineInterface.h"
 
 namespace InfiniTAM {
 namespace Engine { //TODO: retching from the overuse of the word "Engine"
