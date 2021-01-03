@@ -14,6 +14,7 @@
 //  limitations under the License.
 //  ================================================================
 #include "ImageProcessingEngine.tpp"
+#include "../Traversal/CPU/TwoImageTraversal_CPU.h"
 
 namespace ITMLib {
 

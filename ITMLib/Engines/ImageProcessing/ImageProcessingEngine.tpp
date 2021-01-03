@@ -13,8 +13,10 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
+// local
 #include "ImageProcessingEngine.h"
 #include "ImageProcessingEngine_Functors.h"
+#include "../Traversal/Interface/TwoImageTraversal.h"
 
 using namespace ITMLib;
 
@@ -25,9 +27,12 @@ ImageProcessingEngine<TMemoryDeviceType>::ImageProcessingEngine() {}
 template<MemoryDeviceType TMemoryDeviceType>
 ImageProcessingEngine<TMemoryDeviceType>::~ImageProcessingEngine() {}
 
+
+
 template<MemoryDeviceType TMemoryDeviceType>
 void ImageProcessingEngine<TMemoryDeviceType>::ConvertColorToIntensity(FloatImage& image_out, const UChar4Image& image_in) const {
-	DIEWITHEXCEPTION_REPORTLOCATION("Not implemented.");
+	ConvertColorToIntensityFunctor<TMemoryDeviceType> functor;
+	TwoImageTraversalEngine<TMemoryDeviceType>::Traverse(image_out, image_in, functor);
 }
 
 template<MemoryDeviceType TMemoryDeviceType>

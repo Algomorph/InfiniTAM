@@ -25,14 +25,8 @@ namespace ITMLib {
 
 template<MemoryDeviceType TMemoryDeviceType>
 struct ConvertColorToIntensityFunctor {
-private: // instance variables
-	const Vector2i dimensions;
-public: // instance functions
-	explicit ConvertColorToIntensityFunctor(const Vector2i& dimensions) :
-	                                        dimensions(dimensions){}
-
 	_DEVICE_WHEN_AVAILABLE_
-	void operator()(float& pixel_value_out, const Vector4u& pixel_value_in, int x, int y) {
+	void operator()(float& pixel_value_out, const Vector4u& pixel_value_in) {
 		// typical NTSC/PAL standard coefficients, see https://en.wikipedia.org/wiki/Grayscale
 		pixel_value_out = (0.299f * pixel_value_in.r + 0.587f * pixel_value_in.g + 0.114f * pixel_value_in.b) / 255.f;
 	}

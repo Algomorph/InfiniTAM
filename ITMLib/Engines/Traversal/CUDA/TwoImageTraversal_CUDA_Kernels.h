@@ -29,13 +29,13 @@ __device__ inline static void TraverseTwoArrays_Generic_device(const unsigned in
 template<typename TData1, typename TData2, typename TFunctor>
 __global__ static void
 TraverseTwoArraysWithoutItemIndex_device(TData1* data_1, TData2* data_2, const unsigned int element_count, TFunctor* functor_device) {
-	Traverse_Generic_device(element_count,
+	TraverseTwoArrays_Generic_device(element_count,
 	                        [&data_1, &data_2, &functor_device](const int i_item) { (*functor_device)(data_1[i_item], data_2[i_item]); });
 }
 
 template<typename TData1, typename TData2, typename TFunctor>
 __global__ static void TraverseTwoArraysWithIndex_device(TData1* data_1, TData2* data_2, const unsigned int element_count, TFunctor* functor_device) {
-	Traverse_Generic_device(element_count,
+	TraverseTwoArrays_Generic_device(element_count,
 	                        [&data_1, &data_2, &functor_device](const int i_item) { (*functor_device)(data_1[i_item], data_2[i_item], i_item); });
 }
 

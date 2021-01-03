@@ -16,6 +16,7 @@
 #pragma once
 
 #include "../../../../ORUtils/MemoryDeviceType.h"
+#include "../Shared/JobCountPolicy.h"
 
 namespace ITMLib {
 namespace internal {
@@ -41,21 +42,22 @@ public: // static functions
 	inline static void
 	Traverse(ORUtils::Image<TImageElement1>& image1, const ORUtils::Image<TImageElement2>& image2, TFunctor& functor) {
 		internal::TwoImageTraversalEngine_Internal<TMemoryDeviceType, EXACT>::
-		template TraverseWithoutPixelCoordinate_Generic<TImageElement1, const TImageElement2>(image1, functor);
+		template TraverseWithoutPixelCoordinate_Generic<TImageElement1, const TImageElement2>(image1, image2, functor);
 	}
 
 	template<typename TImageElement1, typename TImageElement2, typename TFunctor>
 	inline static void
 	Traverse(const ORUtils::Image<TImageElement1>& image1, const ORUtils::Image<TImageElement2>& image2, TFunctor& functor) {
 		internal::TwoImageTraversalEngine_Internal<TMemoryDeviceType, EXACT>::
-		template TraverseWithoutPixelCoordinate_Generic<const TImageElement1, const TImageElement2>(image1, functor);
+		template TraverseWithoutPixelCoordinate_Generic<const TImageElement1, const TImageElement2>(image1, image2, functor);
 	}
 
 	template<typename TImageElement1, typename TImageElement2, typename TFunctor, int TCudaBlockSizeX = 16, int TCudaBlockSizeY = 16>
 	inline static void
 	TraverseWithPixelCoordinates(ORUtils::Image<TImageElement1>& image1, ORUtils::Image<TImageElement2>& image2, TFunctor& functor) {
 		internal::TwoImageTraversalEngine_Internal<TMemoryDeviceType, EXACT>::
-		template TraverseWithPixelCoordinate_Generic<TImageElement1, TImageElement2, TCudaBlockSizeX, TCudaBlockSizeY>(image1, image2, functor);
+		template TraverseWithPixelCoordinate_Generic<TImageElement1, TImageElement2,
+				TCudaBlockSizeX, TCudaBlockSizeY>(image1, image2, functor);
 	}
 
 	template<typename TImageElement1, typename TImageElement2, typename TFunctor, int TCudaBlockSizeX = 16, int TCudaBlockSizeY = 16>

@@ -17,6 +17,7 @@
 #include "TwoImageTraversal_CUDA_Kernels.h"
 #include "../Interface/TwoImageTraversal.h"
 #include "../../../Utils/Math.h"
+#include "../../../Utils/CUDA/CudaCallWrappers.cuh"
 #include "../../../../ORUtils/Image.h"
 
 namespace ITMLib {
@@ -25,26 +26,26 @@ namespace internal {
 template<>
 class RawTwoArrayTraversalEngine_Internal<MEMORYDEVICE_CUDA, JobCountPolicy::EXACT> {
 protected: // static functions
-	template<typename TData, typename TFunctor>
-	inline static void TraverseWithoutIndex_Generic(TData* data, TFunctor& functor, const int element_count) {
+	template<typename TData1, typename TData2, typename TFunctor>
+	inline static void TraverseWithoutIndex_Generic(TData1* data_1, TData2* data_2, TFunctor& functor, const int element_count) {
 		CallCUDAonUploadedFunctor(
 				functor,
-				[&element_count, &data](TFunctor* functor_device) {
+				[&element_count, &data_1, &data_2](TFunctor* functor_device) {
 					dim3 cuda_block_size(256);
 					dim3 cuda_grid_size(ceil_of_integer_quotient(element_count, cuda_block_size.x));
-					TraverseTwoArraysWithoutItemIndex_device<<<cuda_grid_size, cuda_block_size >>>(data, element_count, functor_device);
+					TraverseTwoArraysWithoutItemIndex_device<<<cuda_grid_size, cuda_block_size >>>(data_1, data_2, element_count, functor_device);
 				}
 		);
 	}
 
-	template<typename TData, typename TFunctor>
-	inline static void TraverseWithIndex_Generic(TData* data, TFunctor& functor, const int element_count) {
+	template<typename TData1, typename TData2, typename TFunctor>
+	inline static void TraverseWithIndex_Generic(TData1* data_1, TData2* data_2, TFunctor& functor, const int element_count) {
 		CallCUDAonUploadedFunctor(
 				functor,
-				[&element_count, &data](TFunctor* functor_device) {
+				[&element_count, &data_1, &data_2](TFunctor* functor_device) {
 					dim3 cuda_block_size(256);
 					dim3 cuda_grid_size(ceil_of_integer_quotient(element_count, cuda_block_size.x));
-					TraverseTwoArraysWithIndex_device<<<cuda_grid_size, cuda_block_size >>>(data, element_count, functor_device);
+					TraverseTwoArraysWithIndex_device<<<cuda_grid_size, cuda_block_size >>>(data_1, data_2, element_count, functor_device);
 				}
 		);
 	}

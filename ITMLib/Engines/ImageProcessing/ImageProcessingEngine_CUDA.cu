@@ -14,6 +14,7 @@
 //  limitations under the License.
 //  ================================================================
 #include "ImageProcessingEngine.tpp"
+#include "../Traversal/CUDA/TwoImageTraversal_CUDA.cuh"
 
 namespace ITMLib {
 
