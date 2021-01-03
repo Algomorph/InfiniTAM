@@ -92,6 +92,16 @@ void GenerateImageProcessingTestData_Legacy() {
 		file << frame_115_depth;
 	}
 
+	// CountValidDepths
+	int valid_depths = image_processing_engine->CountValidDepths(frame_115_depth);
+	std::string valid_depth_path = test::generated_arrays_directory.ToString() + "TeddyFrame115_ValidDepthCount.txt";
+	{
+		std::ofstream file;
+		file.open(valid_depth_path);
+		file << valid_depths;
+		file.close();
+	}
+
 	// FilterSubsampleWithHoles float --> float
 	FloatImage frame_115_depth_subsampled_with_holes(Vector2(0), TMemoryDeviceType);
 	image_processing_engine->FilterSubsampleWithHoles(frame_115_depth_subsampled_with_holes, frame_115_depth);
@@ -166,15 +176,7 @@ void GenerateImageProcessingTestData_Legacy() {
 		file << frame_115_gradient_xy;
 	}
 
-	// CountValidDepths
-	int valid_depths = image_processing_engine->CountValidDepths(frame_115_depth);
-	std::string valid_depth_path = test::generated_arrays_directory.ToString() + "TeddyFrame115_ValidDepthCount.txt";
-	{
-		std::ofstream file;
-		file.open(valid_depth_path);
-		file << valid_depths;
-		file.close();
-	}
+
 
 	delete raycasting_engine;
 	delete image_processing_engine;
