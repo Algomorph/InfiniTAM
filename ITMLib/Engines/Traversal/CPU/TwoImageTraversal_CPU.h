@@ -36,7 +36,14 @@ protected: // static functions
 			apply_function(i_item);
 		}
 	}
+	// ================================== static-functor traversal =====================================
+	template<typename TData1, typename TData2>
+	inline static void TraverseWithIndex_Generic(TData1* data_1, TData2* data_2, const int element_count) {
+		//TODO
+		//Traverse_Generic(element_count, [&functor, &data_1, &data_2](int i_item) { functor(data_1[i_item], data_2[i_item], i_item); });
+	}
 
+	// ================================== dynamic-functor traversal ====================================
 	template<typename TData1, typename TData2, typename TFunctor>
 	inline static void TraverseWithIndex_Generic(TData1* data_1, TData2* data_2, TFunctor& functor, const int element_count) {
 		Traverse_Generic(element_count, [&functor, &data_1, &data_2](int i_item) { functor(data_1[i_item], data_2[i_item], i_item); });

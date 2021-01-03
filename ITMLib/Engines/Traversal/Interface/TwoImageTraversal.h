@@ -31,6 +31,25 @@ class TwoImageTraversalEngine_Internal;
 template<MemoryDeviceType TMemoryDeviceType>
 class TwoImageTraversalEngine {
 public: // static functions
+	// region =============================== Static-functor traversal ================================================
+	template<typename TImageElement1, typename TImageElement2, typename TStaticFunctor>
+	inline static void
+	Traverse(ORUtils::Image<TImageElement1>& image1, ORUtils::Image<TImageElement2>& image2) {
+		//TODO
+		// internal::TwoImageTraversalEngine_Internal<TMemoryDeviceType, EXACT>::
+		// template TraverseWithoutPixelCoordinate_Generic<TImageElement1, TImageElement2>(image1, image2);
+	}
+
+	template<typename TImageElement1, typename TImageElement2, typename TStaticFunctor>
+	inline static void
+	Traverse(ORUtils::Image<TImageElement1>& image1, const ORUtils::Image<TImageElement2>& image2) {
+		//TODO
+		// internal::TwoImageTraversalEngine_Internal<TMemoryDeviceType, EXACT>::
+		// template TraverseWithoutPixelCoordinate_Generic<TImageElement1, const TImageElement2>(image1, image2);
+	}
+
+	// endregion ======================================================================================================
+	// region =============================== Dynamic-functor traversal ===============================================
 	template<typename TImageElement1, typename TImageElement2, typename TFunctor>
 	inline static void
 	Traverse(ORUtils::Image<TImageElement1>& image1, ORUtils::Image<TImageElement2>& image2, TFunctor& functor) {
@@ -75,6 +94,6 @@ public: // static functions
 		template TraverseWithPixelCoordinate_Generic<const TImageElement1, const TImageElement2,
 				TCudaBlockSizeX, TCudaBlockSizeY>(image1, image2, functor);
 	}
-
+	// endregion ======================================================================================================
 };
 } // namespace ITMLib
