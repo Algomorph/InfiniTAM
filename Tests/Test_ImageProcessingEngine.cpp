@@ -40,7 +40,7 @@ using namespace ITMLib;
 using namespace test;
 
 template<MemoryDeviceType TMemoryDeviceType>
-void GenericConvertColorToIntensityTest(){
+void GenericConvertColorToIntensityTest() {
 	auto image_processing_engine = ImageProcessingEngineFactory::BuildLegacy(TMemoryDeviceType);
 
 	// load original image
@@ -65,7 +65,7 @@ void GenericConvertColorToIntensityTest(){
 }
 
 template<MemoryDeviceType TMemoryDeviceType>
-void GenericFilterIntensityTest(){
+void GenericFilterIntensityTest() {
 	auto image_processing_engine = ImageProcessingEngineFactory::BuildLegacy(TMemoryDeviceType);
 
 	// load original image
@@ -91,9 +91,8 @@ void GenericFilterIntensityTest(){
 }
 
 
-
 template<MemoryDeviceType TMemoryDeviceType>
-void GenericFilterSubsampleUchar4Test(){
+void GenericFilterSubsampleUchar4Test() {
 	auto image_processing_engine = ImageProcessingEngineFactory::BuildLegacy(TMemoryDeviceType);
 
 	// load original image
@@ -117,7 +116,7 @@ void GenericFilterSubsampleUchar4Test(){
 }
 
 template<MemoryDeviceType TMemoryDeviceType>
-void GenericFilterSubsampleFloatTest(){
+void GenericFilterSubsampleFloatTest() {
 	auto image_processing_engine = ImageProcessingEngineFactory::BuildLegacy(TMemoryDeviceType);
 
 	// load original image
@@ -143,7 +142,7 @@ void GenericFilterSubsampleFloatTest(){
 }
 
 template<MemoryDeviceType TMemoryDeviceType>
-void GenericFilterSubsampleWithHolesFloatTest(){
+void GenericFilterSubsampleWithHolesFloatTest() {
 	auto image_processing_engine = ImageProcessingEngineFactory::BuildLegacy(TMemoryDeviceType);
 
 	// load original image
@@ -170,11 +169,11 @@ void GenericFilterSubsampleWithHolesFloatTest(){
 
 
 template<MemoryDeviceType TMemoryDeviceType>
-void GenericFilterSubsampleWithHolesFloat4Test(){
+void GenericFilterSubsampleWithHolesFloat4Test() {
 	auto image_processing_engine = ImageProcessingEngineFactory::BuildLegacy(TMemoryDeviceType);
 
 	// load original point cloud
-	PointCloud point_cloud(teddy::frame_image_size,TMemoryDeviceType);
+	PointCloud point_cloud(teddy::frame_image_size, TMemoryDeviceType);
 	std::string icp_point_cloud_path = test::generated_arrays_directory.ToString() + "TeddyFrame115_PointCloud.dat";
 	ORUtils::IStreamWrapper input_file(icp_point_cloud_path, true);
 	input_file >> point_cloud;
@@ -196,9 +195,9 @@ void GenericFilterSubsampleWithHolesFloat4Test(){
 }
 
 template<MemoryDeviceType TMemoryDeviceType>
-void GenericGradientXTest(){
+void GenericGradientXTest() {
 	auto image_processing_engine = ImageProcessingEngineFactory::BuildLegacy(TMemoryDeviceType);
-	
+
 	// load original image
 	UChar4Image frame_115(teddy::frame_image_size, TMemoryDeviceType);
 	ReadImageFromFile(frame_115, teddy::frame_115_color_file_name.Get());
@@ -221,7 +220,7 @@ void GenericGradientXTest(){
 
 
 template<MemoryDeviceType TMemoryDeviceType>
-void GenericGradientYTest(){
+void GenericGradientYTest() {
 	auto image_processing_engine = ImageProcessingEngineFactory::BuildLegacy(TMemoryDeviceType);
 
 	// load original image
@@ -245,7 +244,7 @@ void GenericGradientYTest(){
 }
 
 template<MemoryDeviceType TMemoryDeviceType>
-void GenericGradientXYTest(){
+void GenericGradientXYTest() {
 	auto image_processing_engine = ImageProcessingEngineFactory::BuildLegacy(TMemoryDeviceType);
 
 	// load original image
@@ -271,7 +270,7 @@ void GenericGradientXYTest(){
 }
 
 template<MemoryDeviceType TMemoryDeviceType>
-void CountValidDepthsTest(){
+void CountValidDepthsTest() {
 	auto image_processing_engine = ImageProcessingEngineFactory::BuildLegacy(TMemoryDeviceType);
 
 	FloatImage depth(teddy::frame_image_size, TMemoryDeviceType);
@@ -331,3 +330,47 @@ BOOST_AUTO_TEST_CASE(Test_GradientXY_CPU) {
 BOOST_AUTO_TEST_CASE(Test_CountValidDepths_CPU) {
 	CountValidDepthsTest<MEMORYDEVICE_CPU>();
 }
+
+#ifndef COMPILE_WITHOUT_CUDA
+
+BOOST_AUTO_TEST_CASE(Test_ConvertColorToIntensity_CUDA) {
+	GenericConvertColorToIntensityTest<MEMORYDEVICE_CUDA>();
+}
+
+BOOST_AUTO_TEST_CASE(Test_FilterIntensity_CUDA) {
+	GenericFilterIntensityTest<MEMORYDEVICE_CUDA>();
+}
+
+BOOST_AUTO_TEST_CASE(Test_FilterSubsampleUchar4_CUDA) {
+	GenericFilterSubsampleUchar4Test<MEMORYDEVICE_CUDA>();
+}
+
+BOOST_AUTO_TEST_CASE(Test_FilterSubsampleFloat_CUDA) {
+	GenericFilterSubsampleFloatTest<MEMORYDEVICE_CUDA>();
+}
+
+BOOST_AUTO_TEST_CASE(Test_FilterSubsampleWithHolesFloat_CUDA) {
+	GenericFilterSubsampleWithHolesFloatTest<MEMORYDEVICE_CUDA>();
+}
+
+BOOST_AUTO_TEST_CASE(Test_FilterSubsampleWithHolesFloat4_CUDA) {
+	GenericFilterSubsampleWithHolesFloat4Test<MEMORYDEVICE_CUDA>();
+}
+
+BOOST_AUTO_TEST_CASE(Test_GradientX_CUDA) {
+	GenericGradientXTest<MEMORYDEVICE_CUDA>();
+}
+
+BOOST_AUTO_TEST_CASE(Test_GradientY_CUDA) {
+	GenericGradientYTest<MEMORYDEVICE_CUDA>();
+}
+
+BOOST_AUTO_TEST_CASE(Test_GradientXY_CUDA) {
+	GenericGradientXYTest<MEMORYDEVICE_CUDA>();
+}
+
+BOOST_AUTO_TEST_CASE(Test_CountValidDepths_CUDA) {
+	CountValidDepthsTest<MEMORYDEVICE_CUDA>();
+}
+
+#endif

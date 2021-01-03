@@ -98,7 +98,7 @@ public: // instance functions
 
 	/** Copy data */
 	void SetFrom(const Image& source) {
-		SetFrom(source);
+		SetFrom(source, DetermineMemoryCopyDirection(this->access_mode, source.access_mode));
 	}
 
 	void SetFrom(const Image<T>& source, MemoryCopyDirection memory_copy_direction) {
