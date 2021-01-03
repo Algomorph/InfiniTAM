@@ -2,7 +2,7 @@
 
 #include "../../../Utils/Math.h"
 
-_CPU_AND_GPU_CODE_ inline void convertColourToIntensity(DEVICEPTR(float) *imageData_out, int x, int y, Vector2i dims,
+_CPU_AND_GPU_CODE_ inline void convertColourToIntensity(DEVICEPTR(float) *imageData_out, int x, int y, const Vector2i& dims,
 		const CONSTPTR(Vector4u) *imageData_in){
 	const int linear_pos = y * dims.x + x;
 	const Vector4u colour = imageData_in[linear_pos];

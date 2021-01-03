@@ -37,11 +37,7 @@ protected: // static functions
 	TraverseWithoutPosition_Generic(TImage* image, TFunctor& functor) {
 		TImageElement* image_data = image->GetData(MEMORYDEVICE_CPU);
 		const int element_count = static_cast<int>(image->size());
-		BasicMemoryTraversalEngine<TJobCountPolicy, CONTIGUOUS>::Traverse_Generic(
-				element_count,
-				[&functor, &image_data](const int i_element) {
-					functor(image_data[i_element]);
-				});
+		BasicMemoryTraversalEngine<TJobCountPolicy, CONTIGUOUS>::TraverseWithoutIndex_Generic(image_data, functor, element_count);
 	}
 
 	template<int TCudaBlockSizeX = 16, int TCudaBlockSizeY = 16, typename TImageElement, typename TImage, typename TFunctor>

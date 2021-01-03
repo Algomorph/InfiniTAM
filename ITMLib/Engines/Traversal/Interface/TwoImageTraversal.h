@@ -18,6 +18,61 @@
 #include "../../../../ORUtils/MemoryDeviceType.h"
 
 namespace ITMLib {
-template<typename TImage1Element, typename TImage2Element, MemoryDeviceType TDeviceType>
-class TwoImageTraversalEngine;
+namespace internal {
+//TODO: split out the RawTwoArrayTraversalEngine into its own set of files
+template<MemoryDeviceType TDeviceType, JobCountPolicy TJobCountPolicy>
+class RawTwoArrayTraversalEngine_Internal;
+
+template<MemoryDeviceType TMemoryDeviceType, JobCountPolicy TJobCountPoicy>
+class TwoImageTraversalEngine_Internal;
+} // namespace internal
+
+template<MemoryDeviceType TMemoryDeviceType>
+class TwoImageTraversalEngine {
+public: // static functions
+	template<typename TImageElement1, typename TImageElement2, typename TFunctor>
+	inline static void
+	Traverse(ORUtils::Image<TImageElement1>& image1, ORUtils::Image<TImageElement2>& image2, TFunctor& functor) {
+		internal::TwoImageTraversalEngine_Internal<TMemoryDeviceType, EXACT>::
+		template TraverseWithoutPixelCoordinate_Generic<TImageElement1, TImageElement2>(image1, image2, functor);
+	}
+
+	template<typename TImageElement1, typename TImageElement2, typename TFunctor>
+	inline static void
+	Traverse(ORUtils::Image<TImageElement1>& image1, const ORUtils::Image<TImageElement2>& image2, TFunctor& functor) {
+		internal::TwoImageTraversalEngine_Internal<TMemoryDeviceType, EXACT>::
+		template TraverseWithoutPixelCoordinate_Generic<TImageElement1, const TImageElement2>(image1, functor);
+	}
+
+	template<typename TImageElement1, typename TImageElement2, typename TFunctor>
+	inline static void
+	Traverse(const ORUtils::Image<TImageElement1>& image1, const ORUtils::Image<TImageElement2>& image2, TFunctor& functor) {
+		internal::TwoImageTraversalEngine_Internal<TMemoryDeviceType, EXACT>::
+		template TraverseWithoutPixelCoordinate_Generic<const TImageElement1, const TImageElement2>(image1, functor);
+	}
+
+	template<typename TImageElement1, typename TImageElement2, typename TFunctor, int TCudaBlockSizeX = 16, int TCudaBlockSizeY = 16>
+	inline static void
+	TraverseWithPixelCoordinates(ORUtils::Image<TImageElement1>& image1, ORUtils::Image<TImageElement2>& image2, TFunctor& functor) {
+		internal::TwoImageTraversalEngine_Internal<TMemoryDeviceType, EXACT>::
+		template TraverseWithPixelCoordinate_Generic<TImageElement1, TImageElement2, TCudaBlockSizeX, TCudaBlockSizeY>(image1, image2, functor);
+	}
+
+	template<typename TImageElement1, typename TImageElement2, typename TFunctor, int TCudaBlockSizeX = 16, int TCudaBlockSizeY = 16>
+	inline static void
+	TraverseWithPixelCoordinates(ORUtils::Image<TImageElement1>& image1, const ORUtils::Image<TImageElement2>& image2, TFunctor& functor) {
+		internal::TwoImageTraversalEngine_Internal<TMemoryDeviceType, EXACT>::
+		template TraverseWithPixelCoordinate_Generic<TImageElement1, const TImageElement2,
+				TCudaBlockSizeX, TCudaBlockSizeY>(image1, image2, functor);
+	}
+
+	template<typename TImageElement1, typename TImageElement2, typename TFunctor, int TCudaBlockSizeX = 16, int TCudaBlockSizeY = 16>
+	inline static void
+	TraverseWithPixelCoordinates(const ORUtils::Image<TImageElement1>& image1, const ORUtils::Image<TImageElement2>& image2, TFunctor& functor) {
+		internal::TwoImageTraversalEngine_Internal<TMemoryDeviceType, EXACT>::
+		template TraverseWithPixelCoordinate_Generic<const TImageElement1, const TImageElement2,
+				TCudaBlockSizeX, TCudaBlockSizeY>(image1, image2, functor);
+	}
+
+};
 } // namespace ITMLib

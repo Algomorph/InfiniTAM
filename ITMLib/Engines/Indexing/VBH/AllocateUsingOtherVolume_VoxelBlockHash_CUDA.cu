@@ -17,7 +17,7 @@
 //local
 #include "../../../GlobalTemplateDefines.h"
 #include "../../Traversal/CUDA/ImageTraversal_CUDA.cuh"
-#include "../../Traversal/CUDA/TwoImageTraversal_CUDA.h"
+#include "../../Traversal/CUDA/TwoImageTraversal_CUDA.cuh"
 #include "../../Traversal/CUDA/RawArrayTraversal_CUDA.cuh"
 #include "../../Traversal/CUDA/MemoryBlockTraversal_CUDA.cuh"
 #include "../../Traversal/CUDA/HashTableTraversal_CUDA.cuh"

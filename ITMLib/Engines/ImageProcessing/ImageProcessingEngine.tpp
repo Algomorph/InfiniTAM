@@ -14,6 +14,7 @@
 //  limitations under the License.
 //  ================================================================
 #include "ImageProcessingEngine.h"
+#include "ImageProcessingEngine_Functors.h"
 
 using namespace ITMLib;
 
