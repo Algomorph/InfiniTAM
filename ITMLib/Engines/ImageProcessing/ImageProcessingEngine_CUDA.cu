@@ -15,6 +15,7 @@
 //  ================================================================
 #include "ImageProcessingEngine.tpp"
 #include "../Traversal/CUDA/TwoImageTraversal_CUDA.cuh"
+#include "../Traversal/CUDA/ImageTraversal_CUDA.cuh"
 
 namespace ITMLib {
 

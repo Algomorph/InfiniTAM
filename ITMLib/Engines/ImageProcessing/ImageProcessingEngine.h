@@ -29,8 +29,8 @@ public: // instance functions
 
 	void FilterIntensity(FloatImage& image_out, const FloatImage& image_in) const override;
 
-	void FilterSubsample(UChar4Image& image_out, const UChar4Image& image_in) const override;
-	void FilterSubsample(FloatImage& image_out, const FloatImage& image_in) const override;
+	void FilterSubsample(UChar4Image& image_out, const UChar4Image& x) const override;
+	void FilterSubsample(FloatImage& image_out, const FloatImage& x) const override;
 	void FilterSubsampleWithHoles(FloatImage& image_out, const FloatImage& image_in) const override;
 	void FilterSubsampleWithHoles(Float4Image& image_out, const Float4Image& image_in) const override;
 

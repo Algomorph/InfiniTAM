@@ -38,7 +38,14 @@ void GenerateImageProcessingTestData_Legacy() {
 	test::ConstructGeneratedArraysDirectoryIfMissing();
 
 	UChar4Image frame_115(teddy::frame_image_size, TMemoryDeviceType);
-	ReadImageFromFile(frame_115, teddy::frame_115_color_file_name.Get());
+
+	if (TMemoryDeviceType == MEMORYDEVICE_CPU) {
+		ReadImageFromFile(frame_115, teddy::frame_115_color_path.Get());
+	} else {
+		UChar4Image frame_115_CPU(teddy::frame_image_size, MEMORYDEVICE_CPU);
+		ReadImageFromFile(frame_115_CPU, teddy::frame_115_color_path.Get());
+		frame_115.SetFrom(frame_115_CPU);
+	}
 
 
 	// ConvertColorToIntensity

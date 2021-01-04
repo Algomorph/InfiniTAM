@@ -28,6 +28,17 @@ class ImageTraversalEngine_Internal;
 template<MemoryDeviceType TMemoryDeviceType>
 class ImageTraversalEngine {
 public: // static functions
+	// region ====================================== lambda-based traversal ============================================================
+	template<int TCudaBlockSizeX = 16, int TCudaBlockSizeY = 16, typename TImageElement, typename TLambda>
+	inline static void
+	TraversePositionOnly(TLambda&& lambda, const ORUtils::Image<TImageElement>& image) {
+		internal::ImageTraversalEngine_Internal<TMemoryDeviceType, EXACT, CONTIGUOUS>::
+		        template TraversePositionOnly_Lambda_Generic<TCudaBlockSizeX, TCudaBlockSizeY, const TImageElement>(image, lambda);
+	}
+
+	// endregion =======================================================================================================================
+	// region ====================================== dynamic-functor traversal =========================================================
+
 	template<typename TImageElement, typename TFunctor>
 	inline static void
 	Traverse(ORUtils::Image<TImageElement>* image, TFunctor& functor) {
@@ -90,6 +101,6 @@ public: // static functions
 		internal::ImageTraversalEngine_Internal<TMemoryDeviceType, EXACT, INDEX_SAMPLE>::template
 		TraversePositionOnly_Generic<const TImageElement>(sample_size, sample_pixel_indices, image, functor);
 	}
-
+	// endregion =======================================================================================================================
 };
 } // namespace ITMLib

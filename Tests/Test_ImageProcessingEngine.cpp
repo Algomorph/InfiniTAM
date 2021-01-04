@@ -31,21 +31,29 @@
 
 //ITMLib
 #include "../ITMLib/Engines/ImageProcessing/ImageProcessingEngineFactory.h"
-#include "../ITMLib/Utils/Analytics/RawArrayComparison.h"
-#include "../ITMLib/Utils/Collections/OperationsOnSTLContainers.h"
 #include "../ITMLib/Utils/Collections/MemoryBlock_StdContainer_Convertions.h"
 #include "../ITMLib/Objects/Misc/PointCloud.h"
 
 using namespace ITMLib;
 using namespace test;
 
+static void ReadTeddyFrame115FromFile(UChar4Image& frame_115){
+	if (frame_115.GetAccessMode() == MEMORYDEVICE_CPU) {
+		ReadImageFromFile(frame_115, teddy::frame_115_color_path.Get());
+	} else {
+		UChar4Image frame_115_CPU(teddy::frame_image_size, MEMORYDEVICE_CPU);
+		ReadImageFromFile(frame_115_CPU, teddy::frame_115_color_path.Get());
+		frame_115.SetFrom(frame_115_CPU);
+	}
+}
+
 template<MemoryDeviceType TMemoryDeviceType>
 void GenericConvertColorToIntensityTest() {
-	auto image_processing_engine = ImageProcessingEngineFactory::BuildLegacy(TMemoryDeviceType);
+	auto image_processing_engine = ImageProcessingEngineFactory::Build(TMemoryDeviceType);
 
 	// load original image
 	UChar4Image frame_115(teddy::frame_image_size, TMemoryDeviceType);
-	ReadImageFromFile(frame_115, teddy::frame_115_color_file_name.Get());
+	ReadTeddyFrame115FromFile(frame_115);
 
 	// perform the operation
 	FloatImage frame_115_float_intensity(Vector2(0), TMemoryDeviceType);
@@ -66,7 +74,7 @@ void GenericConvertColorToIntensityTest() {
 
 template<MemoryDeviceType TMemoryDeviceType>
 void GenericFilterIntensityTest() {
-	auto image_processing_engine = ImageProcessingEngineFactory::BuildLegacy(TMemoryDeviceType);
+	auto image_processing_engine = ImageProcessingEngineFactory::Build(TMemoryDeviceType);
 
 	// load original image
 	FloatImage frame_115_float_intensity(teddy::frame_image_size, TMemoryDeviceType);
@@ -93,11 +101,11 @@ void GenericFilterIntensityTest() {
 
 template<MemoryDeviceType TMemoryDeviceType>
 void GenericFilterSubsampleUchar4Test() {
-	auto image_processing_engine = ImageProcessingEngineFactory::BuildLegacy(TMemoryDeviceType);
+	auto image_processing_engine = ImageProcessingEngineFactory::Build(TMemoryDeviceType);
 
 	// load original image
 	UChar4Image frame_115(teddy::frame_image_size, TMemoryDeviceType);
-	ReadImageFromFile(frame_115, teddy::frame_115_color_file_name.Get());
+	ReadTeddyFrame115FromFile(frame_115);
 
 	// perform the operation
 	UChar4Image frame_115_subsampled(Vector2(0), TMemoryDeviceType);
@@ -117,7 +125,7 @@ void GenericFilterSubsampleUchar4Test() {
 
 template<MemoryDeviceType TMemoryDeviceType>
 void GenericFilterSubsampleFloatTest() {
-	auto image_processing_engine = ImageProcessingEngineFactory::BuildLegacy(TMemoryDeviceType);
+	auto image_processing_engine = ImageProcessingEngineFactory::Build(TMemoryDeviceType);
 
 	// load original image
 	FloatImage frame_115_float_intensity(teddy::frame_image_size, TMemoryDeviceType);
@@ -143,7 +151,7 @@ void GenericFilterSubsampleFloatTest() {
 
 template<MemoryDeviceType TMemoryDeviceType>
 void GenericFilterSubsampleWithHolesFloatTest() {
-	auto image_processing_engine = ImageProcessingEngineFactory::BuildLegacy(TMemoryDeviceType);
+	auto image_processing_engine = ImageProcessingEngineFactory::Build(TMemoryDeviceType);
 
 	// load original image
 	FloatImage depth(teddy::frame_image_size, TMemoryDeviceType);
@@ -200,7 +208,7 @@ void GenericGradientXTest() {
 
 	// load original image
 	UChar4Image frame_115(teddy::frame_image_size, TMemoryDeviceType);
-	ReadImageFromFile(frame_115, teddy::frame_115_color_file_name.Get());
+	ReadTeddyFrame115FromFile(frame_115);
 
 	// perform the operation
 	Short4Image frame_115_gradient_x(Vector2(0), TMemoryDeviceType);
@@ -225,7 +233,7 @@ void GenericGradientYTest() {
 
 	// load original image
 	UChar4Image frame_115(teddy::frame_image_size, TMemoryDeviceType);
-	ReadImageFromFile(frame_115, teddy::frame_115_color_file_name.Get());
+	ReadTeddyFrame115FromFile(frame_115);
 
 	// perform the operation
 	Short4Image frame_115_gradient_y(Vector2(0), TMemoryDeviceType);

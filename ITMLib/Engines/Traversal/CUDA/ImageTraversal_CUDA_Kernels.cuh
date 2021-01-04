@@ -35,6 +35,14 @@ __global__ static void TraversePositionOnly_device(const Vector2i resolution, TF
 	if (x >= resolution.x || y >= resolution.y) return;
 	(*functor_device)(x + y * resolution.x, x, y);
 }
+
+template<typename TLambda>
+__global__ static void TraversePositionOnly_Lambda_device(const Vector2i resolution, TLambda lambda) {
+	int x = threadIdx.x + blockIdx.x * blockDim.x, y = threadIdx.y + blockIdx.y * blockDim.y;
+	if (x >= resolution.x || y >= resolution.y) return;
+	lambda(x + y * resolution.x, x, y);
+}
+
 template<typename TImageElement, typename TFunctor>
 __global__ static void TraverseWithPosition_device(TImageElement* image_data, const int* sample_pixel_indices, const int sample_size,
                                                    const int image_width, TFunctor* functor_device) {

@@ -32,6 +32,24 @@ class ImageTraversalEngine_Internal<MEMORYDEVICE_CPU, TJobCountPolicy, CONTIGUOU
 		: private BasicMemoryTraversalEngine<TJobCountPolicy, CONTIGUOUS> {
 	friend class ImageTraversalEngine<MEMORYDEVICE_CPU>;
 protected: // static functions
+
+	// =========================================== lambda-based traversal =========================================================
+	template<int TCudaBlockSizeX = 16, int TCudaBlockSizeY = 16, typename TImageElement, typename TImage, typename TLambda>
+	inline static void
+	TraversePositionOnly_Lambda_Generic(TImage& image, TLambda&& lambda) {
+		const int element_count = static_cast<int>(image.size());
+		const int image_width = image.dimensions.width;
+		BasicMemoryTraversalEngine<TJobCountPolicy, CONTIGUOUS>::Traverse_Generic(
+				element_count,
+				[&lambda, &image_width](const int i_element) {
+					int y = i_element / image_width;
+					int x = i_element % image_width;
+					lambda(i_element, x, y);
+				});
+	}
+
+
+	// =========================================== dynamic-functor traversal ====================================================
 	template<typename TImageElement, typename TImage, typename TFunctor>
 	inline static void
 	TraverseWithoutPosition_Generic(TImage* image, TFunctor& functor) {

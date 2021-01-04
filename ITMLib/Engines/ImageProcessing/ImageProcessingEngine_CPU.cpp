@@ -15,6 +15,7 @@
 //  ================================================================
 #include "ImageProcessingEngine.tpp"
 #include "../Traversal/CPU/TwoImageTraversal_CPU.h"
+#include "../Traversal/CPU/ImageTraversal_CPU.h"
 
 namespace ITMLib {
 

@@ -31,7 +31,18 @@ class ImageTraversalEngine_Internal<MEMORYDEVICE_CUDA, EXACT, CONTIGUOUS>
 		: private BasicMemoryTraversalEngine<EXACT, CONTIGUOUS> {
 	friend class ImageTraversalEngine<MEMORYDEVICE_CUDA>;
 protected: // static functions
+	// =========================================== lambda-based traversal =========================================================
+	template<int TCudaBlockSizeX = 16, int TCudaBlockSizeY = 16, typename TImageElement, typename TImage, typename TLambda>
+	inline static void
+	TraversePositionOnly_Lambda_Generic(TImage& image, TLambda&& lambda) {
+		const Vector2i resolution = image.dimensions;
+		dim3 cuda_block_size(TCudaBlockSizeX, TCudaBlockSizeY);
+		dim3 cuda_grid_size(ceil_of_integer_quotient(resolution.x, cuda_block_size.x),
+		                    ceil_of_integer_quotient(resolution.y, cuda_block_size.y));
+		TraversePositionOnly_Lambda_device <<< cuda_grid_size, cuda_block_size >>>(resolution, lambda);
+	}
 
+	// =========================================== dynamic-functor traversal ====================================================
 	template<typename TImageElement, typename TImage, typename TFunctor>
 	inline static void
 	TraverseWithoutPosition_Generic(TImage* image, TFunctor& functor) {
