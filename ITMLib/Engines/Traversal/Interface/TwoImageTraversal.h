@@ -31,21 +31,26 @@ class TwoImageTraversalEngine_Internal;
 template<MemoryDeviceType TMemoryDeviceType>
 class TwoImageTraversalEngine {
 public: // static functions
-	// region =============================== Static-functor traversal ================================================
-	template<typename TImageElement1, typename TImageElement2, typename TStaticFunctor>
+	// region =============================== Lambda traversal ================================================
+	template<typename TImageElement1, typename TImageElement2, typename TLambda>
 	inline static void
-	Traverse(ORUtils::Image<TImageElement1>& image1, ORUtils::Image<TImageElement2>& image2) {
-		//TODO
-		// internal::TwoImageTraversalEngine_Internal<TMemoryDeviceType, EXACT>::
-		// template TraverseWithoutPixelCoordinate_Generic<TImageElement1, TImageElement2>(image1, image2);
+	Traverse(TLambda&& lambda, ORUtils::Image<TImageElement1>& image1, ORUtils::Image<TImageElement2>& image2) {
+		internal::TwoImageTraversalEngine_Internal<TMemoryDeviceType, EXACT>::
+		template TraverseWithoutPixelCoordinate_Lambda_Generic<TImageElement1, TImageElement2>(image1, image2, lambda);
 	}
 
-	template<typename TImageElement1, typename TImageElement2, typename TStaticFunctor>
+	template<typename TImageElement1, typename TImageElement2, typename TLambda>
 	inline static void
-	Traverse(ORUtils::Image<TImageElement1>& image1, const ORUtils::Image<TImageElement2>& image2) {
-		//TODO
-		// internal::TwoImageTraversalEngine_Internal<TMemoryDeviceType, EXACT>::
-		// template TraverseWithoutPixelCoordinate_Generic<TImageElement1, const TImageElement2>(image1, image2);
+	Traverse(TLambda&& lambda, ORUtils::Image<TImageElement1>& image1, const ORUtils::Image<TImageElement2>& image2) {
+		internal::TwoImageTraversalEngine_Internal<TMemoryDeviceType, EXACT>::
+		template TraverseWithoutPixelCoordinate_Lambda_Generic<TImageElement1, const TImageElement2>(image1, image2, lambda);
+	}
+
+	template<typename TImageElement1, typename TImageElement2, typename TLambda>
+	inline static void
+	TraverseWithPixelCoordinate(TLambda&& lambda, ORUtils::Image<TImageElement1>& image1, const ORUtils::Image<TImageElement2>& image2) {
+		internal::TwoImageTraversalEngine_Internal<TMemoryDeviceType, EXACT>::
+		template TraverseWithPixelCoordinate_Lambda_Generic<TImageElement1, const TImageElement2>(image1, image2, lambda);
 	}
 
 	// endregion ======================================================================================================

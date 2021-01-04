@@ -28,11 +28,15 @@ template<MemoryDeviceType TMemoryDeviceType>
 ImageProcessingEngine<TMemoryDeviceType>::~ImageProcessingEngine() {}
 
 
-
 template<MemoryDeviceType TMemoryDeviceType>
 void ImageProcessingEngine<TMemoryDeviceType>::ConvertColorToIntensity(FloatImage& image_out, const UChar4Image& image_in) const {
-	ConvertColorToIntensityFunctor<TMemoryDeviceType> functor;
-	TwoImageTraversalEngine<TMemoryDeviceType>::Traverse(image_out, image_in, functor);
+	TwoImageTraversalEngine<TMemoryDeviceType>::Traverse(
+			[=]_DEVICE_WHEN_AVAILABLE_(float& pixel_value_out, const Vector4u& pixel_value_in) {
+				pixel_value_out = (0.299f * pixel_value_in.r + 0.587f * pixel_value_in.g +
+				                   0.114f * pixel_value_in.b) / 255.f;
+			},
+			image_out, image_in
+	);
 }
 
 template<MemoryDeviceType TMemoryDeviceType>

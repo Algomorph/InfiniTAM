@@ -26,6 +26,23 @@ namespace internal {
 template<>
 class RawTwoArrayTraversalEngine_Internal<MEMORYDEVICE_CUDA, JobCountPolicy::EXACT> {
 protected: // static functions
+
+	// ================================== lambda traversal =====================================================================
+	template<typename TData1, typename TData2, typename TLambda>
+	inline static void TraverseWithoutIndex_Lambda_Generic(TData1* data_1, TData2* data_2, TLambda&& lambda, const int element_count) {
+		dim3 cuda_block_size(256);
+		dim3 cuda_grid_size(ceil_of_integer_quotient(element_count, cuda_block_size.x));
+		TraverseTwoArraysWithoutItemIndex_Lambda_device<<<cuda_grid_size, cuda_block_size >>>(data_1, data_2, lambda, element_count);
+	}
+
+	template<typename TData1, typename TData2, typename TLambda>
+	inline static void TraverseWithIndex_Lambda_Generic(TData1* data_1, TData2* data_2, TLambda&& lambda, const int element_count) {
+		dim3 cuda_block_size(256);
+		dim3 cuda_grid_size(ceil_of_integer_quotient(element_count, cuda_block_size.x));
+		TraverseTwoArraysWithIndex_Lambda_device<<<cuda_grid_size, cuda_block_size >>>(data_1, data_2, lambda, element_count);
+	}
+
+	// =========================== Dynamic-functor traversal ==================================================================
 	template<typename TData1, typename TData2, typename TFunctor>
 	inline static void TraverseWithoutIndex_Generic(TData1* data_1, TData2* data_2, TFunctor& functor, const int element_count) {
 		CallCUDAonUploadedFunctor(
@@ -56,6 +73,35 @@ class TwoImageTraversalEngine_Internal<MEMORYDEVICE_CUDA, EXACT> :
 		RawTwoArrayTraversalEngine_Internal<MEMORYDEVICE_CUDA, EXACT> {
 	friend class TwoImageTraversalEngine<MEMORYDEVICE_CUDA>;
 protected:// static functions
+	// ================================== lambda traversal =====================================================================
+	template<typename TImageElement1, typename TImageElement2, typename TImage1, typename TImage2, typename TLambda>
+	inline static void
+	TraverseWithoutPixelCoordinate_Lambda_Generic(TImage1& image_1, TImage2& image_2, TLambda&& lambda) {
+		TImageElement1* image_data1 = image_1.GetData(MEMORYDEVICE_CUDA);
+		TImageElement2* image_data2 = image_2.GetData(MEMORYDEVICE_CUDA);
+		assert(image_1.size() == image_2.size());
+		const int pixel_count = static_cast<int>(image_1.size());
+		RawTwoArrayTraversalEngine_Internal<MEMORYDEVICE_CUDA, EXACT>::
+		TraverseWithoutIndex_Lambda_Generic(image_data1, image_data2, lambda, pixel_count);
+	}
+
+	template<typename TImageElement1, typename TImageElement2,
+			int TCudaBlockSizeX = 16, int TCudaBlockSizeY = 16,
+			typename TImage1, typename TImage2, typename TLambda>
+	inline static void
+	TraverseWithPixelCoordinate_Lambda_Generic(TImage1& image_1, TImage2& image_2, TLambda&& lambda) {
+		TImageElement1* image_data1 = image_1.GetData(MEMORYDEVICE_CUDA);
+		TImageElement2* image_data2 = image_2.GetData(MEMORYDEVICE_CUDA);
+		const int element_count = static_cast<int>(image_1.size());
+		assert(image_1.dimensions == image_2.dimensions);
+		const Vector2i resolution = image_1.dimensions;
+		dim3 cuda_block_size(TCudaBlockSizeX, TCudaBlockSizeY);
+		dim3 cuda_grid_size(ceil_of_integer_quotient(resolution.x, cuda_block_size.x),
+		                    ceil_of_integer_quotient(resolution.y, cuda_block_size.y));
+		TraverseWithPixelCoordinate_Lambda_device <<< cuda_grid_size, cuda_block_size >>>(image_data1, image_data2, lambda, resolution);
+	}
+
+	// =========================== Dynamic-functor traversal ==================================================================
 	template<typename TImageElement1, typename TImageElement2, typename TImage1, typename TImage2, typename TFunctor>
 	inline static void
 	TraverseWithoutPixelCoordinate_Generic(TImage1& image_1, TImage2& image_2, TFunctor& functor) {
@@ -64,8 +110,9 @@ protected:// static functions
 		assert(image_1.size() == image_2.size());
 		const int pixel_count = static_cast<int>(image_1.size());
 		RawTwoArrayTraversalEngine_Internal<MEMORYDEVICE_CUDA, EXACT>::
-		        TraverseWithoutIndex_Generic(image_data1, image_data2, functor, pixel_count);
+		TraverseWithoutIndex_Generic(image_data1, image_data2, functor, pixel_count);
 	}
+
 	template<typename TImageElement1, typename TImageElement2,
 			int TCudaBlockSizeX = 16, int TCudaBlockSizeY = 16,
 			typename TImage1, typename TImage2, typename TFunctor>

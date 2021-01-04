@@ -36,11 +36,15 @@ protected: // static functions
 			apply_function(i_item);
 		}
 	}
-	// ================================== static-functor traversal =====================================
-	template<typename TData1, typename TData2>
-	inline static void TraverseWithIndex_Generic(TData1* data_1, TData2* data_2, const int element_count) {
-		//TODO
-		//Traverse_Generic(element_count, [&functor, &data_1, &data_2](int i_item) { functor(data_1[i_item], data_2[i_item], i_item); });
+	// ================================== lambda traversal =============================================
+	template<typename TData1, typename TData2, typename TLambda>
+	inline static void TraverseWithIndex_Lambda_Generic(TData1* data_1, TData2* data_2, TLambda&& lambda, const int element_count) {
+		Traverse_Generic(element_count, [&lambda, &data_1, &data_2](int i_item) { lambda(data_1[i_item], data_2[i_item], i_item); });
+	}
+
+	template<typename TData1, typename TData2, typename TLambda>
+	inline static void TraverseWithoutIndex_Lambda_Generic(TData1* data_1, TData2* data_2, TLambda&& lambda, const int element_count) {
+		Traverse_Generic(element_count, [&lambda, &data_1, &data_2](int i_item) { lambda(data_1[i_item], data_2[i_item]); });
 	}
 
 	// ================================== dynamic-functor traversal ====================================
@@ -60,6 +64,38 @@ class TwoImageTraversalEngine_Internal<MEMORYDEVICE_CPU, TJobCountPolicy> :
 		RawTwoArrayTraversalEngine_Internal<MEMORYDEVICE_CPU, TJobCountPolicy> {
 	friend class TwoImageTraversalEngine<MEMORYDEVICE_CPU>;
 protected:// static functions
+
+	// ================================= lambda traversal ===================================================
+	template<typename TImageElement1, typename TImageElement2, typename TImage1, typename TImage2, typename TLambda>
+	inline static void
+	TraverseWithoutPixelCoordinate_Lambda_Generic(TImage1& image_1, TImage2& image_2, TLambda&& lambda) {
+		TImageElement1* image_data1 = image_1.GetData(MEMORYDEVICE_CPU);
+		TImageElement2* image_data2 = image_2.GetData(MEMORYDEVICE_CPU);
+		assert(image_1.size() == image_2.size());
+		const int element_count = static_cast<int>(image_1.size());
+		RawTwoArrayTraversalEngine_Internal<MEMORYDEVICE_CPU, TJobCountPolicy>::TraverseWithoutIndex_Lambda_Generic(
+				image_data1, image_data2, lambda, element_count);
+	}
+
+	template<typename TImageElement1, typename TImageElement2, int TCudaBlockSizeX = 16, int TCudaBlockSizeY = 16,
+			typename TImage1, typename TImage2, typename TLambda>
+	inline static void
+	TraverseWithPixelCoordinate_Lambda_Generic(TImage1& image_1, TImage2& image_2, TLambda&& lambda) {
+		TImageElement1* image_data1 = image_1.GetData(MEMORYDEVICE_CPU);
+		TImageElement2* image_data2 = image_2.GetData(MEMORYDEVICE_CPU);
+		const int element_count = static_cast<int>(image_1.size());
+		const int image_width = image_1.dimensions.width;
+		assert(image_1.dimensions == image_2.dimensions);
+		RawTwoArrayTraversalEngine_Internal<MEMORYDEVICE_CPU, TJobCountPolicy>::Traverse_Generic(
+				element_count,
+				[&lambda, &image_data1, &image_data2, &image_width](const int i_element) {
+					const int y = i_element / image_width;
+					const int x = i_element % image_width;
+					lambda(image_data1[i_element], image_data2[i_element], x, y);
+				});
+	}
+
+	// ================================= dynamic-functor traversal ==========================================
 	template<typename TImageElement1, typename TImageElement2, typename TImage1, typename TImage2, typename TFunctor>
 	inline static void
 	TraverseWithoutPixelCoordinate_Generic(TImage1& image_1, TImage2& image_2, TFunctor& functor) {
