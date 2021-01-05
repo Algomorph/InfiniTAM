@@ -1,6 +1,6 @@
 //  ================================================================
-//  Created by Gregory Kramida (https://github.com/Algomorph) on 5/22/20.
-//  Copyright (c) 2020 Gregory Kramida
+//  Created by Gregory Kramida (https://github.com/Algomorph) on 1/5/21.
+//  Copyright (c) 2021 Gregory Kramida
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
 //  You may obtain a copy of the License at
@@ -13,9 +13,18 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "RawArrayComparison.h"
+#include "CountValidDepths.h"
 
-#ifndef COMPILE_WITHOUT_CUDA
-#include "RawArrayComparison.cuh"
-#include "RawArrayComparisonTemplateInstantiations.h"
-#endif // #ifndef COMPILE_WITHOUT_CUDA
+namespace ITMLib::internal{
+
+template<>
+int CountValidDepths<MEMORYDEVICE_CPU>(const FloatImage& image_in){
+	int valid_point_count = 0;
+	const float *image_data = image_in.GetData(MEMORYDEVICE_CPU);
+
+	for (int i = 0; i < image_in.size(); ++i) if (image_data[i] > 0.0) valid_point_count++;
+
+	return valid_point_count;
+};
+
+} // namespace ITMLib::internal

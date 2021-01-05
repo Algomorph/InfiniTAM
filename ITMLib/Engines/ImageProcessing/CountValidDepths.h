@@ -1,6 +1,6 @@
 //  ================================================================
-//  Created by Gregory Kramida (https://github.com/Algomorph) on 5/22/20.
-//  Copyright (c) 2020 Gregory Kramida
+//  Created by Gregory Kramida (https://github.com/Algomorph) on 1/5/21.
+//  Copyright (c) 2021 Gregory Kramida
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
 //  You may obtain a copy of the License at
@@ -13,9 +13,21 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "RawArrayComparison.h"
+#pragma once
 
-#ifndef COMPILE_WITHOUT_CUDA
-#include "RawArrayComparison.cuh"
-#include "RawArrayComparisonTemplateInstantiations.h"
-#endif // #ifndef COMPILE_WITHOUT_CUDA
+#include "../../../ORUtils/MemoryDeviceType.h"
+#include "../../Utils/ImageTypes.h"
+
+namespace ITMLib::internal {
+
+template<MemoryDeviceType TMemoryDeviceType>
+int CountValidDepths(const FloatImage& image_in);
+
+// extern template int CountValidDepths<MEMORYDEVICE_CPU>(const FloatImage& image_in);
+// extern template int CountValidDepths<MEMORYDEVICE_CUDA>(const FloatImage& image_in);
+
+} // namespace ITMLib::internal
+
+
+
+

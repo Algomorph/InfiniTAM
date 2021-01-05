@@ -33,11 +33,12 @@
 #include "../ITMLib/Engines/ImageProcessing/ImageProcessingEngineFactory.h"
 #include "../ITMLib/Utils/Collections/MemoryBlock_StdContainer_Convertions.h"
 #include "../ITMLib/Objects/Misc/PointCloud.h"
+#include "../ITMLib/Utils/Analytics/RawArrayComparison.h"
 
 using namespace ITMLib;
 using namespace test;
 
-static void ReadTeddyFrame115FromFile(UChar4Image& frame_115){
+static void ReadTeddyFrame115FromFile(UChar4Image& frame_115) {
 	if (frame_115.GetAccessMode() == MEMORYDEVICE_CPU) {
 		ReadImageFromFile(frame_115, teddy::frame_115_color_path.Get());
 	} else {
@@ -66,9 +67,13 @@ void GenericConvertColorToIntensityTest() {
 	file >> frame_115_float_intensity_gt;
 
 	// compare output and ground truth
-	BOOST_REQUIRE(frame_115_float_intensity == frame_115_float_intensity_gt);
-
-
+	BOOST_REQUIRE(
+			RawArraysAlmostEqual_Verbose(
+					frame_115_float_intensity.GetData(TMemoryDeviceType), TMemoryDeviceType,
+					frame_115_float_intensity_gt.GetData(TMemoryDeviceType), TMemoryDeviceType,
+					frame_115_float_intensity.size(), 1e-6, false
+			)
+	);
 	delete image_processing_engine;
 }
 
@@ -279,7 +284,7 @@ void GenericGradientXYTest() {
 
 template<MemoryDeviceType TMemoryDeviceType>
 void CountValidDepthsTest() {
-	auto image_processing_engine = ImageProcessingEngineFactory::BuildLegacy(TMemoryDeviceType);
+	auto image_processing_engine = ImageProcessingEngineFactory::Build(TMemoryDeviceType);
 
 	FloatImage depth(teddy::frame_image_size, TMemoryDeviceType);
 	std::string depth_path = test::generated_arrays_directory.ToString() + "TeddyFrame115_Depth.dat";

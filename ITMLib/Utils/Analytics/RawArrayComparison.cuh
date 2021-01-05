@@ -34,7 +34,7 @@ template<typename TElement, typename TComparisonFunction>
 __global__ void TwoRawArrayItemGenericComparison(RawArrayComparisonData<TElement>* output_data,
                                                        const TElement* l, const TElement* r,
                                                        const int element_count,
-                                                       TComparisonFunction&& compare_elements) {
+                                                       TComparisonFunction compare_elements) {
 	unsigned int i_element = threadIdx.x + blockIdx.x * blockDim.x;
 	if (i_element > element_count || output_data->mismatch_found) return;
 	if (!compare_elements(l[i_element], r[i_element])) {
@@ -70,7 +70,7 @@ bool CompareRawArrays_Generic_CUDA(const TElement* left, const TElement* right, 
 		std::forward<TReportMismatchFunction>(report_mismatch)(data_CPU.mismatched_element_l, data_CPU.mismatched_element_r,
 		                                                       data_CPU.i_mismatched_elements);
 	}
-	return mismatch_found;
+	return !mismatch_found;
 }
 
 } // end namespace internal

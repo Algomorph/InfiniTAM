@@ -19,10 +19,10 @@
 
 // local
 #include "ImageProcessingEngine.h"
+#include "CountValidDepths.h"
 #include "ImageProcessingEngine_Functors.h"
 #include "../Traversal/Interface/TwoImageTraversal.h"
 #include "../Traversal/Interface/ImageTraversal.h"
-
 
 using namespace ITMLib;
 
@@ -368,5 +368,5 @@ void ImageProcessingEngine<TMemoryDeviceType>::GradientXY(Float2Image& gradient_
 
 template<MemoryDeviceType TMemoryDeviceType>
 int ImageProcessingEngine<TMemoryDeviceType>::CountValidDepths(const FloatImage& image_in) const {
-	return 0;
+	return internal::CountValidDepths<TMemoryDeviceType>(image_in);
 }

@@ -59,10 +59,12 @@ set(
         Engines/ImageProcessing/ImageProcessingEngineFactory.cpp
         Engines/ImageProcessing/ImageProcessingEngine.tpp
 
+        Engines/ImageProcessing/CountValidDepths.cpp
+
         Engines/ImageProcessing/CPU/LowLevelEngine_CPU.cpp
         Engines/ImageProcessing/CUDA/LowLevelEngine_CUDA.cu
         Engines/ImageProcessing/ImageProcessingEngine_CPU.cpp
-        Engines/ImageProcessing/ImageProcessingEngine_CUDA.cu)
+        Engines/ImageProcessing/ImageProcessingEngine_CUDA.cu Engines/ImageProcessing/CountValidDepths.cu)
 
 set(
         ITMLIB_ENGINES_IMAGE_PROCESSING_HEADERS
@@ -72,9 +74,13 @@ set(
         Engines/ImageProcessing/ImageProcessingEngine.h
         Engines/ImageProcessing/Shared/LowLevelEngine_Shared.h
 
+        Engines/ImageProcessing/CountValidDepths.h
+
         Engines/ImageProcessing/CPU/LowLevelEngine_CPU.h
         Engines/ImageProcessing/CUDA/LowLevelEngine_CUDA.h
-        Engines/ImageProcessing/ImageProcessingEngine_Functors.h)
+        Engines/ImageProcessing/ImageProcessingEngine_Functors.h
+
+        )
 #====================================== TRAVERSAL ENGINES ======================================================
 
 set(

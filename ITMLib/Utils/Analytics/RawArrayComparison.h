@@ -129,26 +129,28 @@ bool CompareRawArrays_Generic(const TElement* left, MemoryDeviceType memory_devi
 #else
 			const TElement* left_prepared;
 			const TElement* right_prepared;
-			TElement* left_sorted;
-			TElement* right_sorted;
-			if (presort) {
-				ORcudaSafeCall(cudaMalloc((void**) &left_sorted, element_count * sizeof(TElement)));
-				ORcudaSafeCall(cudaMemcpy(left_sorted, left, element_count * sizeof(TElement), cudaMemcpyDeviceToDevice));
-				thrust::sort(thrust::device, left_sorted, left_sorted + element_count);
-				ORcudaSafeCall(cudaMalloc((void**) &right_sorted, element_count * sizeof(TElement)));
-				ORcudaSafeCall(cudaMemcpy(right_sorted, right, element_count * sizeof(TElement), cudaMemcpyDeviceToDevice));
-				thrust::sort(thrust::device, right_sorted, right_sorted + element_count);
-				left_prepared = left_sorted;
-				right_prepared = right_sorted;
-			} else {
+			// TElement* left_sorted;
+			// TElement* right_sorted;
+			// if (presort) {
+			// 	ORcudaSafeCall(cudaMalloc((void**) &left_sorted, element_count * sizeof(TElement)));
+			// 	ORcudaSafeCall(cudaMemcpy(left_sorted, left, element_count * sizeof(TElement), cudaMemcpyDeviceToDevice));
+			// 	thrust::sort(thrust::device, left_sorted, left_sorted + element_count);
+			// 	ORcudaSafeCall(cudaMalloc((void**) &right_sorted, element_count * sizeof(TElement)));
+			// 	ORcudaSafeCall(cudaMemcpy(right_sorted, right, element_count * sizeof(TElement), cudaMemcpyDeviceToDevice));
+			// 	thrust::sort(thrust::device, right_sorted, right_sorted + element_count);
+			// 	left_prepared = left_sorted;
+			// 	right_prepared = right_sorted;
+			// } else {
 				left_prepared = left;
 				right_prepared = right;
+			// }
+			if(!ITMLib::internal::CompareRawArrays_Generic_CUDA(left_prepared, right_prepared, element_count, compare_elements, report_mismatch)){
+				return false;
 			}
-			internal::CompareRawArrays_Generic_CUDA(left_prepared, right_prepared, element_count, compare_elements, report_mismatch);
-			if (presort) {
-				ORcudaSafeCall(cudaFree(left_sorted));
-				ORcudaSafeCall(cudaFree(right_sorted));
-			}
+			// if (presort) {
+			// 	ORcudaSafeCall(cudaFree(left_sorted));
+			// 	ORcudaSafeCall(cudaFree(right_sorted));
+			// }
 #endif
 			break;
 		default:
@@ -242,6 +244,9 @@ extern template bool
 RawArraysEqual<int>(const int* l, MemoryDeviceType memory_device_type_l, const int* r,
                           MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
 
+extern template bool
+RawArraysEqual<float>(const float* l, MemoryDeviceType memory_device_type_l, const float* r,
+                      MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
 
 // Vector specializations
 extern template bool
@@ -319,6 +324,10 @@ extern template bool
 RawArraysEqual_Verbose<int>(const int* l, MemoryDeviceType memory_device_type_l, const int* r,
                                   MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
 
+extern template bool
+RawArraysEqual_Verbose<float>(const float* l, MemoryDeviceType memory_device_type_l, const float* r,
+                              MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
+
 // Vector specializations
 extern template bool
 RawArraysEqual_Verbose<Vector3u>(const Vector3u* l, MemoryDeviceType memory_device_type_l, const Vector3u* r,
@@ -382,6 +391,11 @@ RawArraysEqual_Verbose<Matrix4f>(const Matrix4f* l, MemoryDeviceType memory_devi
                                        MemoryDeviceType memory_device_type_r, const int element_count, bool presort);
 
 // *** approximate comparisons *** 
+// Primitive types
+extern template bool
+RawArraysAlmostEqual<float>(const float* l, MemoryDeviceType memory_device_type_l, const float* r,
+                            MemoryDeviceType memory_device_type_r, const int element_count,
+                            const float absolute_tolerance, bool presort);
 
 // Vector specializations
 extern template bool
@@ -433,7 +447,12 @@ RawArraysAlmostEqual<Matrix4f>(const Matrix4f* l, MemoryDeviceType memory_device
                                      MemoryDeviceType memory_device_type_r, const int element_count,
                                      const float absolute_tolerance, bool presort);
 
-// *** verbose approximate comparisons *** 
+// *** verbose approximate comparisons ***
+// Primitive types
+extern template bool
+RawArraysAlmostEqual_Verbose<float>(const float* l, MemoryDeviceType memory_device_type_l, const float* r,
+                                    MemoryDeviceType memory_device_type_r, const int element_count,
+                                    const float absolute_tolerance, bool presort);
 
 // Vector specializations
 extern template bool
