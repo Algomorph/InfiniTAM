@@ -88,8 +88,9 @@ void LowLevelEngine_CPU::FilterSubsampleWithHoles(Float4Image& image_out, const 
 	const Vector4f *imageData_in = image_in.GetData(MEMORYDEVICE_CPU);
 	Vector4f *imageData_out = image_out.GetData(MEMORYDEVICE_CPU);
 
-	for (int y = 0; y < newDims.y; y++) for (int x = 0; x < newDims.x; x++)
+	for (int y = 0; y < newDims.y; y++) for (int x = 0; x < newDims.x; x++){
 		filterSubsampleWithHoles(imageData_out, x, y, newDims, imageData_in, oldDims);
+	}
 }
 
 //TODO: rename to PerChannelGradientX

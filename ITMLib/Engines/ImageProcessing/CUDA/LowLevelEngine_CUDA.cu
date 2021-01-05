@@ -292,7 +292,7 @@ __global__ void countValidDepths_device(const float *imageData_in, int imgSizeTo
 	int i = threadIdx.x + blockIdx.x * blockDim.x;
 	int locId_local = threadIdx.x;
 
-	__shared__ int dim_shared[256];
+	__shared__ int dim_shared[256]; // What the hell is "dim"? Who ever coded this was dim. Juuuuust kidding.
 	//__shared__ bool should_prefix;
 
 	//should_prefix = false;

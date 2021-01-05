@@ -34,9 +34,9 @@ public: // instance functions
 	void FilterSubsampleWithHoles(FloatImage& image_out, const FloatImage& image_in) const override;
 	void FilterSubsampleWithHoles(Float4Image& image_out, const Float4Image& image_in) const override;
 
-	void GradientX(Short4Image& grad_out, const UChar4Image& image_in) const override;
-	void GradientY(Short4Image& grad_out, const UChar4Image& image_in) const override;
-	void GradientXY(Float2Image& grad_out, const FloatImage& image_in) const override;
+	void GradientX(Short4Image& gradient_out, const UChar4Image& image_in) const override;
+	void GradientY(Short4Image& gradient_out, const UChar4Image& image_in) const override;
+	void GradientXY(Float2Image& gradient_out, const FloatImage& image_in) const override;
 
 	int CountValidDepths(const FloatImage& image_in) const override;
 

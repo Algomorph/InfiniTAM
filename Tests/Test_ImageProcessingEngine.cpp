@@ -178,7 +178,7 @@ void GenericFilterSubsampleWithHolesFloatTest() {
 
 template<MemoryDeviceType TMemoryDeviceType>
 void GenericFilterSubsampleWithHolesFloat4Test() {
-	auto image_processing_engine = ImageProcessingEngineFactory::BuildLegacy(TMemoryDeviceType);
+	auto image_processing_engine = ImageProcessingEngineFactory::Build(TMemoryDeviceType);
 
 	// load original point cloud
 	PointCloud point_cloud(teddy::frame_image_size, TMemoryDeviceType);
@@ -204,7 +204,7 @@ void GenericFilterSubsampleWithHolesFloat4Test() {
 
 template<MemoryDeviceType TMemoryDeviceType>
 void GenericGradientXTest() {
-	auto image_processing_engine = ImageProcessingEngineFactory::BuildLegacy(TMemoryDeviceType);
+	auto image_processing_engine = ImageProcessingEngineFactory::Build(TMemoryDeviceType);
 
 	// load original image
 	UChar4Image frame_115(teddy::frame_image_size, TMemoryDeviceType);
@@ -229,7 +229,7 @@ void GenericGradientXTest() {
 
 template<MemoryDeviceType TMemoryDeviceType>
 void GenericGradientYTest() {
-	auto image_processing_engine = ImageProcessingEngineFactory::BuildLegacy(TMemoryDeviceType);
+	auto image_processing_engine = ImageProcessingEngineFactory::Build(TMemoryDeviceType);
 
 	// load original image
 	UChar4Image frame_115(teddy::frame_image_size, TMemoryDeviceType);
@@ -253,7 +253,7 @@ void GenericGradientYTest() {
 
 template<MemoryDeviceType TMemoryDeviceType>
 void GenericGradientXYTest() {
-	auto image_processing_engine = ImageProcessingEngineFactory::BuildLegacy(TMemoryDeviceType);
+	auto image_processing_engine = ImageProcessingEngineFactory::Build(TMemoryDeviceType);
 
 	// load original image
 	FloatImage frame_115_float_intensity(teddy::frame_image_size, TMemoryDeviceType);
