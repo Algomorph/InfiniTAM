@@ -34,7 +34,7 @@ void GenerateImageProcessingTestData_Legacy() {
 
 	MemoryDeviceType TMemoryDeviceType = MEMORYDEVICE_CPU;
 
-	auto image_processing_engine = ImageProcessingEngineFactory::BuildLegacy(TMemoryDeviceType);
+	auto image_processing_engine = ImageProcessingEngineFactory::Build(TMemoryDeviceType);
 	test::ConstructGeneratedArraysDirectoryIfMissing();
 
 	UChar4Image frame_115(teddy::frame_image_size, TMemoryDeviceType);

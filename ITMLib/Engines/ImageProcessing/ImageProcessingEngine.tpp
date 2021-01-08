@@ -76,6 +76,7 @@ void ImageProcessingEngine<TMemoryDeviceType>::FilterSubsample(UChar4Image& imag
 	const Vector2i new_dimensions(old_dimensions.width / 2, old_dimensions.height / 2);
 	image_out.ChangeDims(new_dimensions);
 
+
 	const Vector4u* image_data_in = image_in.GetData(TMemoryDeviceType);
 	Vector4u * image_data_out = image_out.GetData(TMemoryDeviceType);
 	const int old_image_width = old_dimensions.width;
@@ -104,6 +105,7 @@ void ImageProcessingEngine<TMemoryDeviceType>::FilterSubsample(FloatImage& image
 	const Vector2i old_dimensions = image_in.dimensions;
 	const Vector2i new_dimensions(old_dimensions.width / 2, old_dimensions.height / 2);
 	image_out.ChangeDims(new_dimensions);
+	image_out.Clear();
 
 	const float* image_data_in = image_in.GetData(TMemoryDeviceType);
 	float* image_data_out = image_out.GetData(TMemoryDeviceType);
