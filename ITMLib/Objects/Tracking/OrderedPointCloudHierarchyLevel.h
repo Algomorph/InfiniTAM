@@ -8,7 +8,7 @@
 
 namespace ITMLib
 {
-	class VolumeHierarchyLevel
+	class OrderedPointCloudHierarchyLevel
 	{
 	public:
 		int levelId;
@@ -21,7 +21,7 @@ namespace ITMLib
 
 		bool manageData;
 
-		VolumeHierarchyLevel(Vector2i imgSize, int levelId, TrackerIterationType iterationType, MemoryDeviceType memoryType, bool skipAllocation = false)
+		OrderedPointCloudHierarchyLevel(Vector2i imgSize, int levelId, TrackerIterationType iterationType, MemoryDeviceType memoryType, bool skipAllocation = false)
 		{
 			this->manageData = !skipAllocation;
 			this->levelId = levelId;
@@ -45,7 +45,7 @@ namespace ITMLib
 			this->normalsMap->UpdateDeviceFromHost();
 		}
 
-		~VolumeHierarchyLevel()
+		~OrderedPointCloudHierarchyLevel()
 		{
 			if (manageData) {
 				delete pointsMap;
@@ -54,7 +54,7 @@ namespace ITMLib
 		}
 
 		// Suppress the default copy constructor and assignment operator
-		VolumeHierarchyLevel(const VolumeHierarchyLevel&);
-		VolumeHierarchyLevel& operator=(const VolumeHierarchyLevel&);
+		OrderedPointCloudHierarchyLevel(const OrderedPointCloudHierarchyLevel&);
+		OrderedPointCloudHierarchyLevel& operator=(const OrderedPointCloudHierarchyLevel&);
 	};
 }

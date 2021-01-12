@@ -69,7 +69,7 @@ ExtendedTracker::ExtendedTracker(Vector2i imgSize_d,
 	// We need the scene hierarchy (ICP and Normal raycasts) only if depth is used for tracking.
 	if (useDepth)
 	{
-		sceneHierarchy = new ImageHierarchy<VolumeHierarchyLevel>(imgSize_d, trackingRegime, noHierarchyLevels, memoryType, true);
+		sceneHierarchy = new ImageHierarchy<OrderedPointCloudHierarchyLevel>(imgSize_d, trackingRegime, noHierarchyLevels, memoryType, true);
 	}
 
 	this->noIterationsPerLevel = new int[noHierarchyLevels];
@@ -259,8 +259,8 @@ void ExtendedTracker::PrepareForEvaluation()
 	{
 		for (int i = 1; i < sceneHierarchy->GetNoLevels(); i++)
 		{
-			VolumeHierarchyLevel *currentLevel = sceneHierarchy->GetLevel(i);
-			VolumeHierarchyLevel *previousLevel = sceneHierarchy->GetLevel(i - 1);
+			OrderedPointCloudHierarchyLevel *currentLevel = sceneHierarchy->GetLevel(i);
+			OrderedPointCloudHierarchyLevel *previousLevel = sceneHierarchy->GetLevel(i - 1);
 
 			lowLevelEngine->FilterSubsampleWithHoles(*currentLevel->pointsMap, *previousLevel->pointsMap);
 			lowLevelEngine->FilterSubsampleWithHoles(*currentLevel->normalsMap, *previousLevel->normalsMap);

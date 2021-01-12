@@ -7,7 +7,7 @@
 #include "../../Objects/Tracking/ImageHierarchy.h"
 #include "../../Objects/Tracking/DepthHierarchyLevel.h"
 #include "../../Objects/Tracking/IntensityHierarchyLevel.h"
-#include "../../Objects/Tracking/VolumeHierarchyLevel.h"
+#include "../../Objects/Tracking/OrderedPointCloudHierarchyLevel.h"
 #include "../../Objects/Tracking/TemplatedHierarchyLevel.h"
 #include "../../Objects/Tracking/TrackerIterationType.h"
 
@@ -27,7 +27,7 @@ namespace ITMLib
 		static const int MIN_VALID_POINTS_RGB;
 
 		const ImageProcessingEngineInterface *lowLevelEngine;
-		ImageHierarchy<VolumeHierarchyLevel> *sceneHierarchy;
+		ImageHierarchy<OrderedPointCloudHierarchyLevel> *sceneHierarchy;
 		ImageHierarchy<DepthHierarchyLevel> *viewHierarchy_Depth;
 		ImageHierarchy<IntensityHierarchyLevel> *viewHierarchy_Intensity;
 		ImageHierarchy<TemplatedHierarchyLevel<Float4Image> > *reprojectedPointsHierarchy;
@@ -65,7 +65,7 @@ namespace ITMLib
 
 		Matrix4f scenePose;
 		Matrix4f depthToRGBTransform;
-		VolumeHierarchyLevel *sceneHierarchyLevel_Depth;
+		OrderedPointCloudHierarchyLevel *sceneHierarchyLevel_Depth;
 		DepthHierarchyLevel *viewHierarchyLevel_Depth;
 		IntensityHierarchyLevel *viewHierarchyLevel_Intensity;
 		TemplatedHierarchyLevel<Float4Image> *reprojectedPointsLevel;

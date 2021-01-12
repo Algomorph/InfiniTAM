@@ -189,14 +189,14 @@ set(
         ITMLIB_ENGINES_RIGID_ALIGNMENT_HEADERS
 
         Engines/RigidAlignment/RigidAlignmentSettings.h
-        Engines/RigidAlignment/RigidAlignmentIterationType.h
+        Engines/RigidAlignment/RigidAlignmentOptimizationType.h
 )
 
 set(
         ITMLIB_ENGINES_RIGID_ALIGNMENT_SOURCES
 
         Engines/RigidAlignment/RigidAlignmentSettings.cpp
-        Engines/RigidAlignment/RigidAlignmentIterationType.cpp
+        Engines/RigidAlignment/RigidAlignmentOptimizationType.cpp
 )
 
 
@@ -793,7 +793,7 @@ set(ITMLIB_OBJECTS_TRACKING_HEADERS
     Objects/Tracking/ImageHierarchy.h
     Objects/Tracking/IntensityHierarchyLevel.h
     Objects/Tracking/RGBHierarchyLevel.h
-    Objects/Tracking/VolumeHierarchyLevel.h
+    Objects/Tracking/OrderedPointCloudHierarchyLevel.h
     Objects/Tracking/TemplatedHierarchyLevel.h
     Objects/Tracking/CameraTrackingState.h
     Objects/Tracking/ViewHierarchyLevel.h

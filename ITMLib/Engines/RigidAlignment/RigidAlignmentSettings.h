@@ -15,25 +15,41 @@
 //  ================================================================
 #pragma once
 //local
-#include "RigidAlignmentIterationType.h"
+#include "RigidAlignmentOptimizationType.h"
 #include "../../Utils/Metacoding/DeferrableSerializableStruct.h"
 
 namespace ITMLib {
 
-extern const std::vector<RigidAlignmentIterationType> default_levels;
-
+extern const std::vector<RigidAlignmentOptimizationType> default_levels;
+//TODO: verify the stuff in descriptions below [that appears in square brackets with a question mark at the end?]
 #define RIGID_ALIGNMENT_SETTINGS_STRUCT_DESCRIPTION RigidAlignmentSettings, "rigid_alignment_settings", \
-    (std::vector<RigidAlignmentIterationType>, levels, default_levels, DYNAMIC_VECTOR, \
-    "2d coordinates (integer) that specify the pixel to log additional diagnostic information about (and " \
-    "where to focus telemetry information records). "\
-    "Only effective for logging when verbosity_level is set to focus_spots (alt. VERBOSITY_FOCUS_SPOTS) or above."), \
-    (bool, use_surface_thickness_cutoff, true, PRIMITIVE, "When set to false, surface_thickness parameter is ignored."), \
-    (float, surface_thickness, 0.012, PRIMITIVE, "Estimated surface_thickness (in meters). "\
-    "The value can be used to compute parameter eta from 'SDF-2-SDF Registration for Real-Time 3D Reconstruction from RGB-D Data " \
-	"Sec. 3.2, and SobolevFusion, Sec. 3.1, as well as 'mu' from original KinectFusion(2011). " \
-	"Note that this parameter is only active during depth-to-TSDF fusion, not TSDF-to-TSDF (volume) fusion. " \
-	"There is a separate parameter for volume fusion.")
+    (std::vector<RigidAlignmentOptimizationType>, levels, default_levels, DYNAMIC_VECTOR, \
+    "Optimization types for each resolution hierarchy level. The type for each level can be set to \"rotation\" (\"r\"),  "\
+    "\"translation\" (\"t\"), or \"both\" (\"b\"), which determines which part of the rigid transformation will be optimized at "\
+    "each level, with levels ordered from from fine/large to coarse/small."), \
+    (bool, use_depth, true, PRIMITIVE, "When set to false, pixel depth values will not be taken into account during optimization, and "\
+    "\"use_color\" must be set to true."), \
+    (bool, use_color, true, PRIMITIVE, "When set to false, pixel color values will not be taken into account during optimization, and "\
+    "\"use_depth\" must be set to true."),  \
+    (float, color_weight, 0.3f, PRIMITIVE, "When both depth and color pixel values are used during optimization, this weight will scale" \
+    " the contributions to the rigid transform (errors [which ones?] and jacobians) from the color-based optimization."), \
+    (float, min_update_threshold, 1e-4f, PRIMITIVE, "Update distance [between what and what?] threshold for convergence."), \
+    (float, distance_outlier_threshold_fine, 0.004f, PRIMITIVE, "Distance threshold that is used to designate outlier points on the finest level."), \
+    (float, distance_outlier_threshold_coarse, 0.1f, PRIMITIVE, "Distance threshold that is used to designate outlier points on the coarsest level."), \
+    (float, color_outlier_threshold_fine, 0.145f, PRIMITIVE, "Color distance [intensity difference ?] threshold that is used to designate outlier" \
+    " points on the finest level."), \
+    (float, color_outlier_threshold_coarse, 0.005f, PRIMITIVE, "Color distance [intensity difference ?] threshold that is used to designate outlier" \
+    " points on the coarsest level."), \
+    (float, min_color_gradient, 0.01f, PRIMITIVE, "Minimum color gradient [intensity gradient magnitude?] for a pixel to be used for alignment." \
+    " points on the coarsest level."), \
+    (int, iteration_count_fine, 20, PRIMITIVE, "Number of iterations to optimize on the finer level."), \
+    (int, iteration_count_coarse, 20, PRIMITIVE, "Number of iterations to optimize on the coarser level."), \
+    (float, tukey_cutoff, 8.0f, PRIMITIVE, "Coff for the Tukey m-estimator."), \
+    (int, frames_to_skip, 20, PRIMITIVE, "Number of frames to skip before a depth pixel is used for tracking -- [this is inaccurate!!?]."), \
+    (int, frames_to_weight, 50, PRIMITIVE, "Number of frames to accumulate each pixel's weight before it's used to the maximum extent -- [this is inaccurate!!?]."), \
+    (float, failure_detection_threshold, 3.0f, PRIMITIVE, "Threshold [of what?] for failure detection.")
 
 DECLARE_DEFERRABLE_SERIALIZABLE_STRUCT(RIGID_ALIGNMENT_SETTINGS_STRUCT_DESCRIPTION);
+
 
 } // namespace ITMLib

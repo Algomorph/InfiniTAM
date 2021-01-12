@@ -416,7 +416,7 @@ boost::property_tree::ptree static_vector_to_ptree(TStaticVector vector) {
 #define SERIALIZABLE_STRUCT_DECL_IMPL_3(struct_name, loop, ...) \
     struct struct_name { \
         SERIALIZABLE_STRUCT_DECL_IMPL_BODY(struct_name, loop, __VA_ARGS__) \
-    }
+    };
 
 #define ORIGIN_AND_SOURCE_TREE() \
     std::string origin = ""; \

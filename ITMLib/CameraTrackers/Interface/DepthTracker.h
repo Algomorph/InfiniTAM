@@ -6,7 +6,7 @@
 #include "../../Engines/ImageProcessing/ImageProcessingEngineInterface.h"
 #include "../../Objects/Tracking/ImageHierarchy.h"
 #include "../../Objects/Tracking/TemplatedHierarchyLevel.h"
-#include "../../Objects/Tracking/VolumeHierarchyLevel.h"
+#include "../../Objects/Tracking/OrderedPointCloudHierarchyLevel.h"
 #include "../../Objects/Tracking/TrackerIterationType.h"
 
 #include "../../../ORUtils/HomkerMap.h"
@@ -22,7 +22,7 @@ namespace ITMLib
 	{
 	private:
 		const ImageProcessingEngineInterface *lowLevelEngine;
-		ImageHierarchy<VolumeHierarchyLevel> *sceneHierarchy;
+		ImageHierarchy<OrderedPointCloudHierarchyLevel> *sceneHierarchy;
 		ImageHierarchy<TemplatedHierarchyLevel<FloatImage> > *viewHierarchy;
 
 		CameraTrackingState *trackingState; const View *view;
@@ -52,7 +52,7 @@ namespace ITMLib
 		TrackerIterationType iterationType;
 
 		Matrix4f scenePose;
-		VolumeHierarchyLevel *sceneHierarchyLevel;
+		OrderedPointCloudHierarchyLevel *sceneHierarchyLevel;
 		TemplatedHierarchyLevel<FloatImage> *viewHierarchyLevel;
 
 		virtual int ComputeGandH(float &f, float *nabla, float *hessian, Matrix4f approxInvPose) = 0;

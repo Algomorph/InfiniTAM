@@ -13,8 +13,19 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //  ================================================================
-#include "RigidAlignmentIterationType.h"
+#pragma once
 
-using namespace ITMLib;
+// local
+#include "../../Utils/Metacoding/SerializableEnum.h"
 
-DEFINE_SERIALIZABLE_ENUM(RIGID_ALIGNMENT_ITERATION_TYPE_ENUM_DESCRIPTION);
+namespace ITMLib {
+
+#define RIGID_ALIGNMENT_OPTIMIZATION_TYPE_ENUM_DESCRIPTION RigidAlignmentOptimizationType, \
+    (ROTATION,    "r", "rotation",    "ROTATION"), \
+    (TRANSLATION, "t", "translation", "TRANSLATION"), \
+    (BOTH,        "b", "both",        "BOTH"), \
+    (NONE,        "n", "none",        "NONE")
+
+DECLARE_SERIALIZABLE_ENUM(RIGID_ALIGNMENT_OPTIMIZATION_TYPE_ENUM_DESCRIPTION);
+
+} // namespace ITMLib

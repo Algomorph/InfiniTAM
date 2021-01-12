@@ -11,7 +11,7 @@ DepthTracker::DepthTracker(Vector2i imgSize, TrackerIterationType *trackingRegim
                            float terminationThreshold, float failureDetectorThreshold, const ImageProcessingEngineInterface *lowLevelEngine, MemoryDeviceType memoryType)
 {
 	viewHierarchy = new ImageHierarchy<TemplatedHierarchyLevel<FloatImage> >(imgSize, trackingRegime, noHierarchyLevels, memoryType, true);
-	sceneHierarchy = new ImageHierarchy<VolumeHierarchyLevel>(imgSize, trackingRegime, noHierarchyLevels, memoryType, true);
+	sceneHierarchy = new ImageHierarchy<OrderedPointCloudHierarchyLevel>(imgSize, trackingRegime, noHierarchyLevels, memoryType, true);
 
 	this->noIterationsPerLevel = new int[noHierarchyLevels];
 	this->distThresh = new float[noHierarchyLevels];
@@ -100,8 +100,8 @@ void DepthTracker::PrepareForEvaluation()
 		lowLevelEngine->FilterSubsampleWithHoles(*currentLevelView->data, *previousLevelView->data);
 		currentLevelView->intrinsics = previousLevelView->intrinsics * 0.5f;
 
-		VolumeHierarchyLevel *currentLevelScene = sceneHierarchy->GetLevel(i);
-		VolumeHierarchyLevel *previousLevelScene = sceneHierarchy->GetLevel(i - 1);
+		OrderedPointCloudHierarchyLevel *currentLevelScene = sceneHierarchy->GetLevel(i);
+		OrderedPointCloudHierarchyLevel *previousLevelScene = sceneHierarchy->GetLevel(i - 1);
 		//image_processing_engine->FilterSubsampleWithHoles(currentLevelScene->pointsMap, previousLevelScene->pointsMap);
 		//image_processing_engine->FilterSubsampleWithHoles(currentLevelScene->normalsMap, previousLevelScene->normalsMap);
 		currentLevelScene->intrinsics = previousLevelScene->intrinsics * 0.5f;

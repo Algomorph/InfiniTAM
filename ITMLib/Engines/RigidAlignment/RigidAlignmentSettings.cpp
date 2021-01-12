@@ -17,8 +17,9 @@
 
 namespace ITMLib {
 
-const std::vector<RigidAlignmentIterationType> default_levels = {ROTATION, ROTATION, TRANSLATION, TRANSLATION};
+const std::vector<RigidAlignmentOptimizationType> default_levels = {ROTATION, ROTATION, TRANSLATION, TRANSLATION};
 
 DEFINE_DEFERRABLE_SERIALIZABLE_STRUCT(RIGID_ALIGNMENT_SETTINGS_STRUCT_DESCRIPTION);
+
 
 } // namespace ITMLib
