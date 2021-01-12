@@ -1,6 +1,8 @@
 # CMakeLists.txt for ITMLib #
 #############################
 
+#TODO: reorder source/header category pairs alphabetically
+
 set(ITMLIB_TOPLEVEL_HEADERS
     GlobalTemplateDefines.h
     )
@@ -18,7 +20,7 @@ set(ITMLIB_ENGINES_MAIN_SOURCES
     Engines/Main/BasicVoxelEngine_VoxelBlockHash.cpp
 
     Engines/Main/BasicSurfelEngine.tpp
-    Engines/Main/BasicSufelEngine.cpp
+    Engines/Main/BasicSurfelEngine.cpp
 
     Engines/Main/MainEngineSettings.cpp
     Engines/Main/MultiEngine.tpp
@@ -179,6 +181,22 @@ set(
         Engines/Reduction/CUDA/VolumeReduction_CUDA_PlainVoxelArray_Kernels.h
         Engines/Reduction/CUDA/VolumeReduction_CUDA_VoxelBlockHash.h
         Engines/Reduction/CUDA/VolumeReduction_CUDA_VoxelBlockHash_Kernels.h
+)
+
+#====================================== RIGID ALIGNMENT ENGINES ===================================================
+
+set(
+        ITMLIB_ENGINES_RIGID_ALIGNMENT_HEADERS
+
+        Engines/RigidAlignment/RigidAlignmentSettings.h
+        Engines/RigidAlignment/RigidAlignmentIterationType.h
+)
+
+set(
+        ITMLIB_ENGINES_RIGID_ALIGNMENT_SOURCES
+
+        Engines/RigidAlignment/RigidAlignmentSettings.cpp
+        Engines/RigidAlignment/RigidAlignmentIterationType.cpp
 )
 
 
@@ -454,7 +472,7 @@ set(ITMLIB_ENGINES_WARP_VOLUME_HEADERS
     Engines/Warping/WarpingFunctors.h
     Engines/Warping/WarpingEngineFactory.h)
 
-## ======================================= SCENE FILE IO ENGINES =======================================================
+## ======================================= VOLUME FILE IO ENGINES =======================================================
 set(ITMLIB_ENGINES_VOLUME_FILE_IO_HEADERS
     Engines/VolumeFileIO/VolumeFileIOEngine.h
     )
@@ -994,6 +1012,7 @@ set(
 # Collect the project files into sources, headers and templates #
 #################################################################
 
+#TODO: reorder alphabetically
 set(sources
     ${ITMLIB_ENGINES_MAIN_SOURCES}
     ${ITMLIB_ENGINES_IMAGE_PROCESSING_SOURCES}
@@ -1009,6 +1028,7 @@ set(sources
     ${ITMLIB_ENGINES_SWAPPING_CUDA_SOURCES}
     ${ITMLIB_ENGINES_VIEW_BUILDER_SOURCES}
     ${ITMLIB_ENGINES_RENDERING_SOURCES}
+    ${ITMLIB_ENGINES_RIGID_ALIGNMENT_SOURCES}
     ${ITMLIB_ENGINES_ANALYTICS_SOURCES}
     ${ITMLIB_ENGINES_TELEMETRY_SOURCES}
     ${ITMLIB_ENGINES_LEVEL_SET_ALIGNMENT_SOURCES}
@@ -1023,7 +1043,7 @@ set(sources
     ${ITMLIB_CAMERA_TRACKERS_INTERFACE_SOURCES}
     ${ITMLIB_UTILS_SOURCES}
     )
-
+#TODO: reorder alphabetically
 set(headers
     ${ITMLIB_TOPLEVEL_HEADERS}
     ${ITMLIB_ENGINES_MAIN_HEADERS}
@@ -1032,6 +1052,7 @@ set(headers
     ${ITMLIB_ENGINES_EDIT_AND_COPY_HEADERS}
     ${ITMLIB_ENGINES_TRAVERSAL_HEADERS}
     ${ITMLIB_ENGINES_REDUCTION_HEADERS}
+    ${ITMLIB_ENGINES_RIGID_ALIGNMENT_HEADERS}
     ${ITMLIB_ENGINES_MESHING_HEADERS}
     ${ITMLIB_ENGINES_INDEXING_HEADERS}
     ${ITMLIB_ENGINES_RECONSTRUCTION_HEADERS}

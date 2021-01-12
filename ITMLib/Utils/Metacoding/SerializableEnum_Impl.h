@@ -34,12 +34,17 @@
 #include "../../../ORUtils/PlatformIndependence.h"
 
 // region ================== SERIALIZABLE ENUM TEMPLATED FUNCTION DEFINITIONS ==========================================
-
+#ifndef ITM_METACODING_STRING_TO_ENUMERATOR_DECLARATION
+#define ITM_METACODING_STRING_TO_ENUMERATOR_DECLARATION
 template<typename TEnum>
 TEnum string_to_enumerator(const std::string& string);
+#endif
 
+#ifndef ITM_METACODING_ENUMERATOR_TO_STRING_DECLARATION
+#define ITM_METACODING_ENUMERATOR_TO_STRING_DECLARATION
 template<typename TEnum>
 std::string enumerator_to_string(const TEnum& enum_value);
+#endif
 
 template<typename TEnum>
 std::string enumerator_bracketed_list();

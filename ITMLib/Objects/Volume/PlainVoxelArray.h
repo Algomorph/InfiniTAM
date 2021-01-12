@@ -12,8 +12,8 @@
 namespace ITMLib {
 
 #define GRID_ALIGNED_BOX_STRUCT_DESCRIPTION GridAlignedBox,\
-	(Vector3i, size, Vector3i(512), VECTOR, "Size, in voxels."),\
-	(Vector3i, offset, Vector3i(-256, -256, 0), VECTOR, "Offset of the lower left front corner of the volume, in voxels")
+	(Vector3i, size, Vector3i(512), STATIC_VECTOR, "Size, in voxels."),\
+	(Vector3i, offset, Vector3i(-256, -256, 0), STATIC_VECTOR, "Offset of the lower left front corner of the volume, in voxels")
 
 DECLARE_PATHLESS_SERIALIZABLE_STRUCT(GRID_ALIGNED_BOX_STRUCT_DESCRIPTION);
 

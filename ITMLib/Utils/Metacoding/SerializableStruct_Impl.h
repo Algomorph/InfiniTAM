@@ -19,6 +19,7 @@
 #include <string>
 #include <unordered_map>
 #include <regex>
+#include <type_traits>
 
 //boost
 #include <boost/algorithm/string/predicate.hpp>
@@ -37,17 +38,20 @@
 #include "../../../ORUtils/PlatformIndependence.h"
 
 
+#ifndef ITM_METACODING_STRING_TO_ENUMERATOR_DECLARATION
+#define ITM_METACODING_STRING_TO_ENUMERATOR_DECLARATION
+template<typename TEnum>
+TEnum string_to_enumerator(const std::string& string);
+#endif
+
+#ifndef ITM_METACODING_ENUMERATOR_TO_STRING_DECLARATION
+#define ITM_METACODING_ENUMERATOR_TO_STRING_DECLARATION
+template<typename TEnum>
+std::string enumerator_to_string(const TEnum& enum_value);
+#endif
+
 // region ==== OPTIONS_DESCRIPTION HELPER FUNCTIONS ============================
-// namespace std {
-// //definition required by boost::program_options to output default values of vector types
-// template<typename T>
-// std::ostream& operator<<(std::ostream& os, const std::vector<T>& vec) {
-// 	for (auto item : vec) {
-// 		os << item << " ";
-// 	}
-// 	return os;
-// }
-// }//namespace std
+
 
 std::string find_snake_case_lowercase_acronym(const std::string& snake_case_identifier);
 void generate_cli_argument_identifiers_snake_case(const boost::program_options::options_description& options_description,
@@ -92,51 +96,177 @@ ptree_to_optional_path(const boost::property_tree::ptree& tree, const pt::ptree:
                        const std::string& origin);
 
 // endregion
-// region ================== SERIALIZABLE VECTOR FUNCTION DEFINITIONS ==================================================
-template<typename TVector>
-std::vector<typename TVector::value_type> serializable_vector_to_std_vector(TVector vector) {
-	std::vector<typename TVector::value_type> std_vector;
-	for (int i_element = 0; i_element < TVector::size(); i_element++) {
+// region ================== SERIALIZABLE DYNAMIC_VECTOR FUNCTION DEFINITIONS ==================================================
+
+// ==== path resolution ====
+
+std::string compile_sub_struct_parse_path(const std::string& current_parse_path, const std::string& sub_struct_instance_name);
+
+// ==== dynamic vector (std:: vector) of primitives or of enum values ====
+template<typename TElementType, bool TElementsAreEnum>
+struct StdVectorConverter;
+
+template<typename TElementType>
+struct StdVectorConverter<TElementType, true>{
+    inline 
+    static std::vector<TElementType> from_variables_map(const boost::program_options::variables_map& vm, const std::string& argument){
+        std::vector<std::string> string_std_vector = vm[argument].as<std::vector<std::string>>();
+        std::vector<TElementType> enum_std_vector;
+        for(auto& string_enum_representation : string_std_vector){
+            enum_std_vector.push_back(string_to_enumerator<TElementType>(string_enum_representation));
+        }
+        return enum_std_vector;
+    }
+
+    inline
+    static void add_to_options_description(boost::program_options::options_description& od, const char* name, 
+        std::vector<TElementType>& default_value, const char* description){
+        std::vector<std::string> string_std_vector;
+        for(auto& value : default_value){
+            string_std_vector.push_back(enumerator_to_string<TElementType>(value));
+        }
+        od.add_options()(
+            name, 
+            boost::program_options::value<std::vector<std::string>>()->
+                multitoken()->default_value(string_std_vector), description
+        );
+    }
+
+    inline
+    static std::vector<TElementType> from_ptree(pt::ptree const& pt, pt::ptree::key_type const& key){
+        std::vector<TElementType> std_vector;
+        for (auto& item : pt.get_child(key)) {
+            std_vector.push_back(string_to_enumerator<TElementType>(item.second.get_value<std::string>()));
+        }
+        return std_vector;
+    }
+
+    inline 
+    static boost::property_tree::ptree to_ptree(std::vector<TElementType>& value){
+        boost::property_tree::ptree tree;
+        for (int i_element = 0; i_element < value.size(); i_element++) {
+            boost::property_tree::ptree child;
+            child.put("", enumerator_to_string<TElementType>(value[i_element]));
+            tree.push_back(std::make_pair("", child));
+        }
+        return tree;
+    }
+};
+
+template<typename TElementType>
+struct StdVectorConverter<TElementType, false>{
+    inline 
+    static std::vector<TElementType> from_variables_map(const boost::program_options::variables_map& vm, const std::string& argument){
+        std::vector<TElementType> std_vector = vm[argument].as<std::vector<TElementType>>();
+        return std_vector;
+    }
+
+    inline
+    static void add_to_options_description(boost::program_options::options_description& od, const char* name, 
+        std::vector<TElementType>& default_value, const char* description){
+        od.add_options()(
+            name, 
+            boost::program_options::value<std::vector<TElementType>>()->
+                multitoken()->default_value(default_value), description
+        );
+    }  
+
+    inline
+    static std::vector<TElementType> from_ptree(pt::ptree const& pt, pt::ptree::key_type const& key){
+        std::vector<TElementType> std_vector;
+        for (auto& item : pt.get_child(key)) {
+            std_vector.push_back(item.second.get_value<TElementType>());
+        }
+        return std_vector;
+    }
+
+    inline 
+    static boost::property_tree::ptree to_ptree(std::vector<TElementType>& value){
+        boost::property_tree::ptree tree;
+        for (int i_element = 0; i_element < value.size(); i_element++) {
+            boost::property_tree::ptree child;
+            child.put("", value[i_element]);
+            tree.push_back(std::make_pair("", child));
+        }
+        return tree;
+    }
+};
+
+template<typename TStdVector>
+TStdVector variables_map_to_std_vector(const boost::program_options::variables_map& vm, const std::string& argument) {
+    return StdVectorConverter<typename TStdVector::value_type, std::is_enum< typename TStdVector::value_type >::value>::
+        from_variables_map(vm, argument);
+}
+
+template<typename TStdVector>
+void add_std_vector_to_options_description(boost::program_options::options_description& od, const char* name, 
+    TStdVector& default_value, const char* description){
+    return StdVectorConverter<typename TStdVector::value_type, std::is_enum< typename TStdVector::value_type >::value>::
+        add_to_options_description(od, name, default_value, description);
+}
+
+template<typename TStdVector>
+boost::optional<TStdVector> ptree_to_optional_std_vector(pt::ptree const& pt, pt::ptree::key_type const& key) {
+    if (pt.count(key) == 0) {
+        return boost::optional<TStdVector>{};
+    }
+    return StdVectorConverter<typename TStdVector::value_type, std::is_enum< typename TStdVector::value_type >::value>::
+            from_ptree(pt, key);
+}
+
+template<typename TStdVector>
+boost::property_tree::ptree std_vector_to_ptree(TStdVector& vector) {
+    return StdVectorConverter<typename TStdVector::value_type, std::is_enum< typename TStdVector::value_type >::value>::
+            to_ptree(vector);
+}
+
+// endregion 
+// region ================== SERIALIZABLE STATIC_VECTOR FUNCTION DEFINITIONS ==================================================
+// ==== static vector types (Vector2, Vector3, etc... ) of primitives ==============================================
+
+template<typename TStaticVector>
+std::vector<typename TStaticVector::value_type> static_vector_to_std_vector(TStaticVector vector) {
+	std::vector<typename TStaticVector::value_type> std_vector;
+	for (int i_element = 0; i_element < TStaticVector::size(); i_element++) {
 		std_vector.push_back(vector.values[i_element]);
 	}
 	return std_vector;
 }
 
-template<typename TVector>
-TVector std_vector_to_serializable_vector(const std::vector<typename TVector::value_type>& std_vector) {
-	TVector vector;
-	if (std_vector.size() != TVector::size()) {
+template<typename TStaticVector>
+TStaticVector std_vector_to_static_vector(const std::vector<typename TStaticVector::value_type>& std_vector) {
+	TStaticVector vector;
+	if (std_vector.size() != TStaticVector::size()) {
 		DIEWITHEXCEPTION_REPORTLOCATION("Wrong number of elements in parsed vector.");
 	}
-	memcpy(vector.values, std_vector.data(), sizeof(typename TVector::value_type) * TVector::size());
+	memcpy(vector.values, std_vector.data(), sizeof(typename TStaticVector::value_type) * TStaticVector::size());
 	return vector;
 }
 
-std::string compile_sub_struct_parse_path(const std::string& current_parse_path, const std::string& sub_struct_instance_name);
 
-template<typename TVector>
-TVector variables_map_to_vector(const boost::program_options::variables_map& vm, const std::string& argument) {
-	std::vector<typename TVector::value_type> std_vector = vm[argument].as<std::vector<typename TVector::value_type>>();
-	return std_vector_to_serializable_vector<TVector>(std_vector);
+
+template<typename TStaticVector>
+TStaticVector variables_map_to_static_vector(const boost::program_options::variables_map& vm, const std::string& argument) {
+	std::vector<typename TStaticVector::value_type> std_vector = vm[argument].as<std::vector<typename TStaticVector::value_type>>();
+	return std_vector_to_static_vector<TStaticVector>(std_vector);
 }
 
-template<typename TVector>
-boost::optional<TVector> ptree_to_optional_serializable_vector(pt::ptree const& pt, pt::ptree::key_type const& key) {
-	TVector vector;
+template<typename TStaticVector>
+boost::optional<TStaticVector> ptree_to_optional_static_vector(pt::ptree const& pt, pt::ptree::key_type const& key) {
 	if (pt.count(key) == 0) {
-		return boost::optional<TVector>{};
+		return boost::optional<TStaticVector>{};
 	}
-	std::vector<typename TVector::value_type> std_vector;
+	std::vector<typename TStaticVector::value_type> std_vector;
 	for (auto& item : pt.get_child(key)) {
-		std_vector.push_back(item.second.get_value<typename TVector::value_type>());
+		std_vector.push_back(item.second.get_value<typename TStaticVector::value_type>());
 	}
-	return std_vector_to_serializable_vector<TVector>(std_vector);;
+	return std_vector_to_static_vector<TStaticVector>(std_vector);
 }
 
-template<typename TVector>
-boost::property_tree::ptree serializable_vector_to_ptree(TVector vector) {
+template<typename TStaticVector>
+boost::property_tree::ptree static_vector_to_ptree(TStaticVector vector) {
 	boost::property_tree::ptree tree;
-	for (int i_element = 0; i_element < TVector::size(); i_element++) {
+	for (int i_element = 0; i_element < TStaticVector::size(); i_element++) {
 		boost::property_tree::ptree child;
 		child.put("", vector.values[i_element]);
 		tree.push_back(std::make_pair("", child));
@@ -158,7 +288,8 @@ boost::property_tree::ptree serializable_vector_to_ptree(TVector vector) {
 #define SERIALIZABLE_STRUCT_IMPL_INIT_FIELD_ARG_PATH(type, field_name) field_name ( std::move(field_name) )
 #define SERIALIZABLE_STRUCT_IMPL_INIT_FIELD_ARG_ENUM(type, field_name) field_name ( field_name )
 #define SERIALIZABLE_STRUCT_IMPL_INIT_FIELD_ARG_STRUCT(type, field_name) field_name ( std::move(field_name) )
-#define SERIALIZABLE_STRUCT_IMPL_INIT_FIELD_ARG_VECTOR(type, field_name) field_name ( field_name )
+#define SERIALIZABLE_STRUCT_IMPL_INIT_FIELD_ARG_STATIC_VECTOR(type, field_name) field_name ( field_name )
+#define SERIALIZABLE_STRUCT_IMPL_INIT_FIELD_ARG_DYNAMIC_VECTOR(type, field_name) field_name ( field_name )
 
 #define SERIALIZABLE_STRUCT_IMPL_INIT_FIELD_ARG(_, type, field_name, default_value, serialization_type, ...) \
         ITM_METACODING_IMPL_CAT(SERIALIZABLE_STRUCT_IMPL_INIT_FIELD_ARG_, serialization_type)(type, field_name)
@@ -172,8 +303,10 @@ boost::property_tree::ptree serializable_vector_to_ptree(TVector vector) {
     field_name(string_to_enumerator< type >(vm[ compile_sub_struct_parse_path(parent_long_identifier, #field_name)  ].as<std::string>()))
 #define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_INIT_STRUCT(type, field_name, default_value) \
     field_name(vm, compile_sub_struct_parse_path(parent_long_identifier, #field_name))
-#define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_INIT_VECTOR(type, field_name, default_value) \
-    field_name(variables_map_to_vector <type> (vm, compile_sub_struct_parse_path(parent_long_identifier, #field_name) ))
+#define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_INIT_STATIC_VECTOR(type, field_name, default_value) \
+    field_name(variables_map_to_static_vector <type> (vm, compile_sub_struct_parse_path(parent_long_identifier, #field_name) ))
+#define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_INIT_DYNAMIC_VECTOR(type, field_name, default_value) \
+    field_name(variables_map_to_std_vector <type> (vm, compile_sub_struct_parse_path(parent_long_identifier, #field_name) ))
 
 #define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_INIT(struct_name, type, field_name, default_value, serialization_type, ...) \
     ITM_METACODING_IMPL_CAT(SERIALIZABLE_STRUCT_IMPL_FIELD_VM_INIT_, serialization_type)(type, field_name, default_value)
@@ -186,14 +319,16 @@ boost::property_tree::ptree serializable_vector_to_ptree(TVector vector) {
     if (!vm[long_identifier].defaulted())  this->field_name = string_to_enumerator< type >(vm[long_identifier].as<std::string>())
 #define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_UPDATE_STRUCT(type, field_name) \
     this->field_name.UpdateFromVariablesMap(vm, long_identifier )
-#define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_UPDATE_VECTOR(type, field_name) \
-    if (!vm[long_identifier].defaulted())  this->field_name = variables_map_to_vector <type> (vm, long_identifier)
+#define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_UPDATE_STATIC_VECTOR(type, field_name) \
+    if (!vm[long_identifier].defaulted())  this->field_name = variables_map_to_static_vector <type> (vm, long_identifier)
+#define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_UPDATE_DYNAMIC_VECTOR(type, field_name) \
+    if (!vm[long_identifier].defaulted())  this->field_name = variables_map_to_std_vector <type> (vm, long_identifier)
 
 #define SERIALIZABLE_STRUCT_IMPL_FIELD_VM_UPDATE(struct_name, type, field_name, default_value, serialization_type, ...) \
 	long_identifier = compile_sub_struct_parse_path(parent_long_identifier, #field_name); \
     ITM_METACODING_IMPL_CAT(SERIALIZABLE_STRUCT_IMPL_FIELD_VM_UPDATE_, serialization_type)(type, field_name)
 
-// *** value --> options_description ***
+// *** field & default value --> options_description ***
 
 #define SERIALIZABLE_STRUCT_IMPL_ADD_FIELD_TO_OPTIONS_DESCRIPTION_PRIMITIVE(type, field_name, default_value_in, description)\
     od.add_options()((field_long_identifier + "," + field_short_identifier).c_str(), \
@@ -211,10 +346,14 @@ boost::property_tree::ptree serializable_vector_to_ptree(TVector vector) {
 #define SERIALIZABLE_STRUCT_IMPL_ADD_FIELD_TO_OPTIONS_DESCRIPTION_STRUCT(type, field_name, default_value, description)\
     type :: AddToOptionsDescription(od, field_long_identifier, field_short_identifier);
 
-#define SERIALIZABLE_STRUCT_IMPL_ADD_FIELD_TO_OPTIONS_DESCRIPTION_VECTOR(type, field_name, default_value_in, description)\
+#define SERIALIZABLE_STRUCT_IMPL_ADD_FIELD_TO_OPTIONS_DESCRIPTION_STATIC_VECTOR(type, field_name, default_value_in, description)\
     od.add_options()((field_long_identifier + "," + field_short_identifier).c_str(), \
     boost::program_options::value< std::vector< type::value_type> >()-> \
-    multitoken()->default_value(serializable_vector_to_std_vector(default_value_in)), description);
+    multitoken()->default_value(static_vector_to_std_vector(default_value_in)), description);
+
+#define SERIALIZABLE_STRUCT_IMPL_ADD_FIELD_TO_OPTIONS_DESCRIPTION_DYNAMIC_VECTOR(type, field_name, default_value_in, description)\
+    add_std_vector_to_options_description(od, (field_long_identifier + "," + field_short_identifier).c_str(), default_value_in, description);
+
 
 #define SERIALIZABLE_STRUCT_IMPL_ADD_FIELD_TO_OPTIONS_DESCRIPTION(_, type, field_name, default_value, serialization_type, description) \
     generate_cli_argument_identifiers_snake_case(od, long_identifier, short_identifier, #field_name, field_long_identifier, field_short_identifier); \
@@ -230,8 +369,10 @@ boost::property_tree::ptree serializable_vector_to_ptree(TVector vector) {
     boost::optional< type > field_name = ptree_to_optional_enumerator< type >( tree, #field_name );
 #define SERIALIZABLE_STRUCT_IMPL_FIELD_OPTIONAL_FROM_TREE_STRUCT(type, field_name, default_value) \
     boost::optional< type > field_name = ptree_to_optional_serializable_struct< type >( tree, #field_name, origin );
-#define SERIALIZABLE_STRUCT_IMPL_FIELD_OPTIONAL_FROM_TREE_VECTOR(type, field_name, default_value) \
-    boost::optional< type > field_name = ptree_to_optional_serializable_vector< type >(tree, #field_name);
+#define SERIALIZABLE_STRUCT_IMPL_FIELD_OPTIONAL_FROM_TREE_STATIC_VECTOR(type, field_name, default_value) \
+    boost::optional< type > field_name = ptree_to_optional_static_vector< type >(tree, #field_name);
+#define SERIALIZABLE_STRUCT_IMPL_FIELD_OPTIONAL_FROM_TREE_DYNAMIC_VECTOR(type, field_name, default_value) \
+    boost::optional< type > field_name = ptree_to_optional_std_vector< type >(tree, #field_name);
 
 #define SERIALIZABLE_STRUCT_IMPL_FIELD_OPTIONAL_FROM_TREE(_, type, field_name, default_value, serialization_type, ...) \
     ITM_METACODING_IMPL_CAT(SERIALIZABLE_STRUCT_IMPL_FIELD_OPTIONAL_FROM_TREE_, serialization_type)(type, field_name, default_value)
@@ -249,8 +390,10 @@ boost::property_tree::ptree serializable_vector_to_ptree(TVector vector) {
     tree.add( #field_name , enumerator_to_string( field_name ));
 #define SERIALIZABLE_STRUCT_IMPL_ADD_FIELD_TO_TREE_STRUCT(type, field_name) \
     tree.add_child( #field_name , field_name .ToPTree(origin));
-#define SERIALIZABLE_STRUCT_IMPL_ADD_FIELD_TO_TREE_VECTOR(type, field_name) \
-    tree.add_child( #field_name , serializable_vector_to_ptree ( field_name ));
+#define SERIALIZABLE_STRUCT_IMPL_ADD_FIELD_TO_TREE_STATIC_VECTOR(type, field_name) \
+    tree.add_child( #field_name , static_vector_to_ptree ( field_name ));
+#define SERIALIZABLE_STRUCT_IMPL_ADD_FIELD_TO_TREE_DYNAMIC_VECTOR(type, field_name) \
+    tree.add_child( #field_name , std_vector_to_ptree ( field_name ));
 
 #define SERIALIZABLE_STRUCT_IMPL_ADD_FIELD_TO_TREE(_, type, field_name, default_value, serialization_type, ...) \
     ITM_METACODING_IMPL_CAT(SERIALIZABLE_STRUCT_IMPL_ADD_FIELD_TO_TREE_, serialization_type)(type, field_name)

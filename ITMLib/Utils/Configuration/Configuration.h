@@ -126,11 +126,11 @@ DECLARE_SERIALIZABLE_STRUCT(HASH_VOLUME_PARAMETERS_STRUCT_DESCRIPTION);
 DECLARE_SERIALIZABLE_STRUCT(SPECIFIC_VOLUME_PARAMETERS_STRUCT_DESCRIPTION);
 
 #define CONFIGURATION_STRUCT_DESCRIPTION Configuration, \
-    (Vector3i, focus_voxel, Vector3i(0), VECTOR, \
+    (Vector3i, focus_voxel, Vector3i(0), STATIC_VECTOR, \
     "3d coordinates (integer) that specify the voxel to log additional diagnostic information about (and " \
     "where to focus telemetry information records). "\
     "Only effective for logging when verbosity_level is set to focus_spots (alt. VERBOSITY_FOCUS_SPOTS) or above."), \
-    (Vector2i, focus_pixel, Vector2i(0), VECTOR, \
+    (Vector2i, focus_pixel, Vector2i(0), STATIC_VECTOR, \
     "2d coordinates (integer) that specify the pixel to log additional diagnostic information about (and " \
     "where to focus telemetry information records). "\
     "Only effective for logging when verbosity_level is set to focus_spots (alt. VERBOSITY_FOCUS_SPOTS) or above."), \

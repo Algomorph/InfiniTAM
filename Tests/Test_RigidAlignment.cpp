@@ -181,7 +181,7 @@ BOOST_FIXTURE_TEST_CASE(Test_ForceFailTracker_CPU_VBH, environment_VBH_CPU){
 }
 
 
-BOOST_FIXTURE_TEST_CASE(Test_RgbTracker_CPU_VBH, environment_VBH_CPU) {
+BOOST_FIXTURE_TEST_CASE(Test_ColorTracker_CPU_VBH, environment_VBH_CPU) {
 	float absolute_tolerance = 1.0e-2;
 
 	GenericRigidTrackerTest<VoxelBlockHash, MEMORYDEVICE_CPU>(test::rgb_tracker_preset_t, *this, absolute_tolerance);
@@ -207,7 +207,7 @@ BOOST_FIXTURE_TEST_CASE(Test_DepthTracker_CPU_VBH, environment_VBH_CPU) {
 
 typedef TestEnvironment<PlainVoxelArray, MEMORYDEVICE_CPU> environment_PVA_CPU;
 
-BOOST_FIXTURE_TEST_CASE(Test_RgbTracker_CPU_PVA, environment_PVA_CPU) {
+BOOST_FIXTURE_TEST_CASE(Test_ColorTracker_CPU_PVA, environment_PVA_CPU) {
 	float absolute_tolerance = 1.0e-2;
 
 	GenericRigidTrackerTest<PlainVoxelArray, MEMORYDEVICE_CPU>(test::rgb_tracker_preset_t, *this, absolute_tolerance);
@@ -234,7 +234,7 @@ BOOST_FIXTURE_TEST_CASE(Test_DepthTracker_CPU_PVA, environment_PVA_CPU) {
 #ifndef COMPILE_WITHOUT_CUDA
 typedef TestEnvironment<VoxelBlockHash, MEMORYDEVICE_CUDA> environment_VBH_CUDA;
 
-BOOST_FIXTURE_TEST_CASE(Test_RgbTracker_CUDA_VBH, environment_VBH_CUDA) {
+BOOST_FIXTURE_TEST_CASE(Test_ColorTracker_CUDA_VBH, environment_VBH_CUDA) {
 
 	// There is very high deviation for translation here -- may be related to z-motion,
 	// but somehow also related to GPU implementation vs. CPU impementation
@@ -263,7 +263,7 @@ BOOST_FIXTURE_TEST_CASE(Test_DepthTracker_CUDA_VBH, environment_VBH_CUDA) {
 
 typedef TestEnvironment<PlainVoxelArray, MEMORYDEVICE_CUDA> environment_PVA_CUDA;
 
-BOOST_FIXTURE_TEST_CASE(Test_RgbTracker_CUDA_PVA, environment_PVA_CUDA) {
+BOOST_FIXTURE_TEST_CASE(Test_ColorTracker_CUDA_PVA, environment_PVA_CUDA) {
 	float absolute_tolerance = 1.0e-2;
 
 	GenericRigidTrackerTest<PlainVoxelArray, MEMORYDEVICE_CUDA>(test::rgb_tracker_preset_t, *this, absolute_tolerance);
