@@ -120,7 +120,7 @@ struct StdVectorConverter<TElementType, true>{
 
     inline
     static void add_to_options_description(boost::program_options::options_description& od, const char* name, 
-        std::vector<TElementType>& default_value, const char* description){
+        const std::vector<TElementType>& default_value, const char* description){
         std::vector<std::string> string_std_vector;
         for(auto& value : default_value){
             string_std_vector.push_back(enumerator_to_string<TElementType>(value));
@@ -142,7 +142,7 @@ struct StdVectorConverter<TElementType, true>{
     }
 
     inline 
-    static boost::property_tree::ptree to_ptree(std::vector<TElementType>& value){
+    static boost::property_tree::ptree to_ptree(const std::vector<TElementType>& value){
         boost::property_tree::ptree tree;
         for (int i_element = 0; i_element < value.size(); i_element++) {
             boost::property_tree::ptree child;
@@ -163,7 +163,7 @@ struct StdVectorConverter<TElementType, false>{
 
     inline
     static void add_to_options_description(boost::program_options::options_description& od, const char* name, 
-        std::vector<TElementType>& default_value, const char* description){
+        const std::vector<TElementType>& default_value, const char* description){
         od.add_options()(
             name, 
             boost::program_options::value<std::vector<TElementType>>()->
@@ -181,7 +181,7 @@ struct StdVectorConverter<TElementType, false>{
     }
 
     inline 
-    static boost::property_tree::ptree to_ptree(std::vector<TElementType>& value){
+    static boost::property_tree::ptree to_ptree(const std::vector<TElementType>& value){
         boost::property_tree::ptree tree;
         for (int i_element = 0; i_element < value.size(); i_element++) {
             boost::property_tree::ptree child;
@@ -200,7 +200,7 @@ TStdVector variables_map_to_std_vector(const boost::program_options::variables_m
 
 template<typename TStdVector>
 void add_std_vector_to_options_description(boost::program_options::options_description& od, const char* name, 
-    TStdVector& default_value, const char* description){
+    const TStdVector& default_value, const char* description){
     return StdVectorConverter<typename TStdVector::value_type, std::is_enum< typename TStdVector::value_type >::value>::
         add_to_options_description(od, name, default_value, description);
 }
@@ -215,7 +215,7 @@ boost::optional<TStdVector> ptree_to_optional_std_vector(pt::ptree const& pt, pt
 }
 
 template<typename TStdVector>
-boost::property_tree::ptree std_vector_to_ptree(TStdVector& vector) {
+boost::property_tree::ptree std_vector_to_ptree(const TStdVector& vector) {
     return StdVectorConverter<typename TStdVector::value_type, std::is_enum< typename TStdVector::value_type >::value>::
             to_ptree(vector);
 }
@@ -289,7 +289,7 @@ boost::property_tree::ptree static_vector_to_ptree(TStaticVector vector) {
 #define SERIALIZABLE_STRUCT_IMPL_INIT_FIELD_ARG_ENUM(type, field_name) field_name ( field_name )
 #define SERIALIZABLE_STRUCT_IMPL_INIT_FIELD_ARG_STRUCT(type, field_name) field_name ( std::move(field_name) )
 #define SERIALIZABLE_STRUCT_IMPL_INIT_FIELD_ARG_STATIC_VECTOR(type, field_name) field_name ( field_name )
-#define SERIALIZABLE_STRUCT_IMPL_INIT_FIELD_ARG_DYNAMIC_VECTOR(type, field_name) field_name ( field_name )
+#define SERIALIZABLE_STRUCT_IMPL_INIT_FIELD_ARG_DYNAMIC_VECTOR(type, field_name) field_name ( std::move(field_name) )
 
 #define SERIALIZABLE_STRUCT_IMPL_INIT_FIELD_ARG(_, type, field_name, default_value, serialization_type, ...) \
         ITM_METACODING_IMPL_CAT(SERIALIZABLE_STRUCT_IMPL_INIT_FIELD_ARG_, serialization_type)(type, field_name)

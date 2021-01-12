@@ -15,10 +15,18 @@
 //  ================================================================
 #pragma once
 //local
+#include "RigidAlignmentIterationType.h"
 #include "../../Utils/Metacoding/DeferrableSerializableStruct.h"
 
 namespace ITMLib {
+
+extern const std::vector<RigidAlignmentIterationType> default_levels;
+
 #define RIGID_ALIGNMENT_SETTINGS_STRUCT_DESCRIPTION RigidAlignmentSettings, "rigid_alignment_settings", \
+    (std::vector<RigidAlignmentIterationType>, levels, default_levels, DYNAMIC_VECTOR, \
+    "2d coordinates (integer) that specify the pixel to log additional diagnostic information about (and " \
+    "where to focus telemetry information records). "\
+    "Only effective for logging when verbosity_level is set to focus_spots (alt. VERBOSITY_FOCUS_SPOTS) or above."), \
     (bool, use_surface_thickness_cutoff, true, PRIMITIVE, "When set to false, surface_thickness parameter is ignored."), \
     (float, surface_thickness, 0.012, PRIMITIVE, "Estimated surface_thickness (in meters). "\
     "The value can be used to compute parameter eta from 'SDF-2-SDF Registration for Real-Time 3D Reconstruction from RGB-D Data " \
@@ -27,4 +35,5 @@ namespace ITMLib {
 	"There is a separate parameter for volume fusion.")
 
 DECLARE_DEFERRABLE_SERIALIZABLE_STRUCT(RIGID_ALIGNMENT_SETTINGS_STRUCT_DESCRIPTION);
+
 } // namespace ITMLib
