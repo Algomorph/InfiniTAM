@@ -10,7 +10,8 @@ This is an ongoing project that aims to integrate voxel hashing techniques for r
 2. Capability to run the optimization in-reverse, in order to forward-animate the more-complete canonical mesh, is currently missing.
 3. Runtime performance is not sufficiently optimized. The code still achieves ~4 fps on a GTX 1080 GPU on the [original Snoopy sequence](http://campar.in.tum.de/personal/slavcheva/deformable-dataset/index.html) (see below for link to improved mask images for that sequence). I have identified a few code sections that can be made significantly faster.
 4. RGBD data from surfaces at large angles to the camera plane is typically unreliable from most off-the-shelf sensors. Noise from this data results in noise in the reconstructed scene, as well as increases the number of used voxel hash blocks (when those are used), thereby impacting runtime performance. A simple filter needs to be implemented to mitigate this.
-5. Non-rigid alignment seems to be currently substandard on widely-used datasets. There might be some qualitative algorithmic problems or it might be a matter of tuning parameters, but certain parts of the "live" surface being aligned to the "canonical" seem like they are pulled too much into surrounding areas, whereas others seem like they are not pulled enough. I'm currently setting up an experiment to run an automated parameter search and tune the optimization.
+5. *Biggest issue so far*: non-rigid alignment seems to be currently substandard on widely-used datasets. There might be some qualitative algorithmic problems or it might be a matter of tuning parameters, but certain parts of the "live" surface being aligned to the "canonical" seem like they are pulled too much into surrounding areas, whereas others seem like they are not pulled enough. 
+
 
 For a full list of issues & tasks, see the [Dynamic-Scene Project Board](https://github.com/Algomorph/InfiniTAM/projects/1) and the [Maintenance/Reengineering Project Board]( https://github.com/Algomorph/InfiniTAM/projects/2). There are both algorithmic and software engineering issues (the code I've started with is far from perfect).
 
@@ -27,7 +28,11 @@ For a full list of issues & tasks, see the [Dynamic-Scene Project Board](https:/
 
 ## Is this code being worked on / maintained?
 
-Yes, after a looong break, I'm officially switching to try to do something with it again, at least for awhile. Even if I'm not actively working on it, I do my best to respond to new issues or collaboration requests.
+~Yes, after a looong break, I'm officially switching to try to do something with it again, at least for awhile. Even if I'm not actively working on it, I do my best to respond to new issues or collaboration requests.~
+
+*[2021 UPDATE]* Having worked on this for over three years I have come to certain conclusions. Keep in mind: this comes after several corrections to the algorithm itself, some of them based on my correspondence with Mira Slavcheva herself. Also consider: the two other repositories I know of that even come remotely close to implementing her algorithms fully currently achieve much worse results (and in some cases, suffer from the same mistakes that I first made and then corrected here). These are: https://github.com/dgrzech/sobfu and https://github.com/al093/killingFusionCuda. *The bottom line* is that even though the code I have here still doesn't replicate Slavcheva's experiments one-to-one (the plain-voxel-array structure Slavcheva uses is populated densely with +1.0 and -1.0 values in the truncated region, not just the narrow band that InfiniTAM populates), it is clear to me that the algorithm doesn't work as described in the literature so far, i.e. either the tuning is completely off for the parameters or some details are omitted from the description. The former is unlikely since I've tried tuning the parameters with hyperopt (see python code) and so far haven't achieved any benefit.
+
+Hence, I've decided to abandon this experimentation, since it seems like trying to figure out the missing details is going to take longer than coming up with something of my own that works better. I'm now looking into neural-network-driven / differentiable optimization solutions.
 
 ## Will I merge this back into InfiniTAM?
 
